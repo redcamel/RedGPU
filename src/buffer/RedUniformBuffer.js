@@ -2,7 +2,7 @@
 export default class RedUniformBuffer {
 	#redGPU;
 	GPUBuffer;
-	uniformBufferDescriptor
+	uniformBufferDescriptor;
 	constructor(redGPU) {
 		this.#redGPU = redGPU;
 	}

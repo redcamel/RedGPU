@@ -18,13 +18,13 @@ export default class RedPlane {
 	}
 
 	#makeData = (function () {
-		var width_half, height_half;
-		var gridX, gridY;
-		var gridX1, gridY1;
-		var segment_width, segment_height;
-		var ix, iy;
-		var tX, tY;
-		var a, b, c, d;
+		let width_half, height_half;
+		let gridX, gridY;
+		let gridX1, gridY1;
+		let segment_width, segment_height;
+		let ix, iy;
+		let tX, tY;
+		let a, b, c, d;
 		return function (redGPU, typeKey, width, height, wSegments, hSegments, flipY) {
 			width_half = width / 2;
 			height_half = height / 2;
@@ -37,8 +37,8 @@ export default class RedPlane {
 			////////////////////////////////////////////////////////////////////////////
 			// 데이터 생성!
 			// buffers Datas
-			var interleaveData = [];
-			var indexData = [];
+			const interleaveData = [];
+			const indexData = [];
 			// interleaveData
 			for (iy = 0; iy < gridY1; iy++) {
 				tY = iy * segment_height - height_half;

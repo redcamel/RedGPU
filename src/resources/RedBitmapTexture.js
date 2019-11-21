@@ -2,7 +2,7 @@
 export default class RedBitmapTexture {
 	#updateList = [];
 	#GPUTexture;
-	#GPUTextureView
+	#GPUTextureView;
 	constructor(redGPU, src) {
 		// 귀찮아서 텍스쳐 맹그는 놈은 들고옴
 		let self= this;
@@ -11,12 +11,12 @@ export default class RedBitmapTexture {
 
 		} else {
 			const img = new Image();
-			img.src = src
+			img.src = src;
 			img.onerror = function(v){
 				console.log(v)
-			}
+			};
 			img.onload = async function () {
-				await img.decode()
+				await img.decode();
 				let imageCanvas;
 				let imageCanvasContext;
 					imageCanvas = document.createElement('canvas');
@@ -89,13 +89,13 @@ export default class RedBitmapTexture {
 		return this.#GPUTextureView
 	}
 	resolve(texture){
-		this.#GPUTexture = texture
-		this.#GPUTextureView = texture.createView()
-		console.log('this.#updateList',this.#updateList)
+		this.#GPUTexture = texture;
+		this.#GPUTextureView = texture.createView();
+		console.log('this.#updateList',this.#updateList);
 		this.#updateList.forEach(data=>{
-			console.log(data[1])
+			console.log(data[1]);
 			data[0][data[1]] = this
-		})
+		});
 		this.#updateList.length = 0
 	}
 	addUpdateTarget(target, key) {

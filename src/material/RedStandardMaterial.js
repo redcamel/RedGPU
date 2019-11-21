@@ -136,7 +136,7 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 			{offset: 0, valueName: 'matrix'},
 			{offset: RedTypeSize.mat4, valueName: 'normalMatrix'}
 		]
-	}
+	};
 	#redGPU;
 	#diffuseTexture;
 	#normalTexture;
@@ -145,21 +145,21 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 		super(redGPU, RedStandardMaterial, vertexShaderGLSL, fragmentShaderGLSL);
 		this.#redGPU = redGPU;
 
-		console.log(diffuseTexture, normalTexture)
+		console.log(diffuseTexture, normalTexture);
 		this.diffuseTexture = diffuseTexture;
 		this.normalTexture = normalTexture
 	}
 
 	checkTexture(texture, textureName) {
-		this.bindings = null
+		this.bindings = null;
 		if (texture) {
 			if(texture.GPUTexture){
 				switch (textureName) {
 					case 'diffuseTexture' :
-						this.#diffuseTexture = texture
-						break
+						this.#diffuseTexture = texture;
+						break;
 					case 'normalTexture' :
-						this.#normalTexture = texture
+						this.#normalTexture = texture;
 						break
 				}
 				console.log(textureName, texture.GPUTexture);
@@ -192,7 +192,7 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 	}
 
 	resetBindingInfo() {
-		this.bindings = null
+		this.bindings = null;
 		this.searchModules();
 		this.bindings = [
 			{

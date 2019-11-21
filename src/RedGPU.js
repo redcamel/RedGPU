@@ -6,9 +6,10 @@ let setGlobalResizeEvent = function () {
 	})
 };
 export default class RedGPU {
+
 	#width = 0;
 	#height = 0;
-	scene;
+	view;
 	#makeSystemUniformInfo = function (device) {
 		let uniformBufferSize = 4 * 4 * Float32Array.BYTES_PER_ELEMENT * 2;
 		const uniformBufferDescriptor = {
@@ -54,10 +55,17 @@ export default class RedGPU {
 
 	};
 
-	updateSystemUniform(passEncoder) {
+	updateSystemUniform(passEncoder, redView) {
+		//TODO 멀티뷰가 먹게되면 이놈은 뷰로 옮김.
+		let tX = typeof redView.x == 'number' ? redView.x : parseInt(redView.x) / 100 * this.canvas.width
+		let tY = typeof redView.y == 'number' ? redView.y : parseInt(redView.y) / 100 * this.canvas.height
+		let tW = typeof redView.width == 'number' ? redView.width : parseInt(redView.width) / 100 * this.canvas.width
+		let tH = typeof redView.height == 'number' ? redView.height : parseInt(redView.height) / 100 * this.canvas.height
+		// passEncoder.setViewport(tX, tY, this.canvas.width, this.canvas.height, 0, 1);
+		passEncoder.setScissorRect(tX, tY, tW, tH);
 		passEncoder.setBindGroup(0, this.systemUniformInfo.GPUBindGroup);
 		this.systemUniformInfo.GPUBuffer.setSubData(0, this.systemUniformInfo.data.projectionMatrix);
-		this.systemUniformInfo.GPUBuffer.setSubData(4 * 4 * Float32Array.BYTES_PER_ELEMENT, this.camera ? this.camera.matrix : mat4.create());
+		this.systemUniformInfo.GPUBuffer.setSubData(4 * 4 * Float32Array.BYTES_PER_ELEMENT, redView.camera.matrix);
 	}
 
 	constructor(canvas, glslang) {
@@ -110,9 +118,9 @@ export default class RedGPU {
 	}
 
 	setSize(w = this.#width, h = this.#height) {
-		console.log('setSize!!!!!!!!!!!!!!!!!!!!!!');
 		this.#width = w;
 		this.#height = h;
+		console.log('setSize!!!!!!!!!!!!!!!!!!!!!!');
 		console.log(w, h);
 		let tW, tH;
 		let rect = document.body.getBoundingClientRect();
@@ -124,7 +132,6 @@ export default class RedGPU {
 		this.canvas.height = tH;
 		this.canvas.style.width = tW + 'px';
 		this.canvas.style.height = tH + 'px';
-
 		this.depthTexture = this.device.createTexture({
 			size: {
 				width: tW,
@@ -138,6 +145,12 @@ export default class RedGPU {
 
 		let aspect = Math.abs(this.canvas.width / this.canvas.height);
 		mat4.perspective(this.systemUniformInfo.data.projectionMatrix, (Math.PI / 180) * 60, aspect, 0.01, 10000.0);
+
+		if (this.view) {
+			this.view.setSize()
+			this.view.setLocation()
+		}
+
 		requestAnimationFrame(_ => {
 			const swapChainTexture = this.swapChain.getCurrentTexture();
 			const commandEncoder = this.device.createCommandEncoder();
