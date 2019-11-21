@@ -3,8 +3,6 @@
 import RedUniformBuffer from "../buffer/RedUniformBuffer.js";
 
 export default class RedBaseObject3D {
-
-
 	#x = 0;
 	#y = 0;
 	#z = 0;
@@ -148,20 +146,25 @@ export default class RedBaseObject3D {
 	}
 
 	set useDepthTest(value) {
+		this.pipeline = null;
 		this.#useDepthTest = value;
 	}
+
 	get depthTestFunc() {
 		return this.#depthTestFunc;
 	}
 
 	set depthTestFunc(value) {
+		this.pipeline = null;
 		this.#depthTestFunc = value;
 	}
+
 	get cullMode() {
 		return this.#cullMode;
 	}
 
 	set cullMode(value) {
+		this.pipeline = null;
 		this.#cullMode = value;
 	}
 
@@ -170,6 +173,7 @@ export default class RedBaseObject3D {
 	}
 
 	set primitiveTopology(value) {
+		this.pipeline = null;
 		this.#primitiveTopology = value;
 	}
 
@@ -208,26 +212,21 @@ export default class RedBaseObject3D {
 					}
 				}
 			],
-			rasterizationState : {
-				frontFace : 'ccw',
-				cullMode  : this.#cullMode 
+			rasterizationState: {
+				frontFace: 'ccw',
+				cullMode: this.#cullMode
 			},
-			// 드로잉 방법을 결정함
 			primitiveTopology: this.#primitiveTopology,
 			depthStencilState: {
 				depthWriteEnabled: this.#useDepthTest,
 				depthCompare: this.#depthTestFunc,
 				format: "depth24plus-stencil8",
-			}
+			},
+			//alphaToCoverageEnabled : true // alphaToCoverageEnabled isn't supported (yet)
 		};
-		// console.log(table.get(this.#material))
-
 
 		let pipeline = device.createRenderPipeline(descriptor);
 		this.pipeline = pipeline;
-
-		// console.log('파이프라인생성');
-		// console.log('table', table);
 		return this.pipeline
 	}
 

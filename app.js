@@ -25,37 +25,24 @@ import RedBitmapTexture from "./src/resources/RedBitmapTexture.js";
 			new RedBitmapTexture(redGPU, 'assets/Brick03_col.jpg'),
 			new RedBitmapTexture(redGPU, 'assets/Brick03_nrm.jpg'),
 			new RedBitmapTexture(redGPU, 'assets/crate.png')
-		]
+		];
 
 		let tMat1 = new RedStandardMaterial(redGPU, testTextureList[1]);
 		let tMat2 = new RedStandardMaterial(redGPU, testTextureList[1], testTextureList[2]);
 		let tMat3 = new RedBitmapMaterial(redGPU, testTextureList[0]);
 		let tMat4 = new RedStandardMaterial(redGPU, testTextureList[0], testTextureList[2]);
-		// setTimeout(function(){
-		// 	tMat2.normalTexture = null
-		// },3000)
 
-		// setInterval(function () {
-		// 	i = MAX;
-		// 	if (i > 2000) i = 2000;
-		// 	while (i--) {
-		// 		let testMesh = redGPU.children[i];
-		// 		testMesh.material = Math.random() > 0.5 ? tMat : tMat2
-		//
-		// 	}
-		// }, 2000);
 		if (i > 2000) i = 2000;
 		while (i--) {
 			let testMesh = new RedMesh(
 				redGPU,
 				new RedSphere(redGPU, Math.random() > 0.5 ? 1 : 0.5, 16, 16, 16),
 				i > MAX / 2 ? tMat1 : Math.random() > 0.5 ? tMat2 : Math.random() > 0.5 ? tMat3 : tMat4
-
 			);
 			testMesh.x = Math.random() * 30 - 15;
 			testMesh.y = Math.random() * 30 - 15;
 			testMesh.z = Math.random() * 30 - 15;
-			testMesh.rotationX = testMesh.rotationY = testMesh.rotationZ = Math.random() * 360
+			testMesh.rotationX = testMesh.rotationY = testMesh.rotationZ = Math.random() * 360;
 			// testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = Math.random();
 			redGPU.addChild(testMesh)
 
@@ -63,7 +50,6 @@ import RedBitmapTexture from "./src/resources/RedBitmapTexture.js";
 
 		let renderer = new RedRender();
 		let render = function (time) {
-
 			redGPU.camera.x = Math.sin(time / 3000) * 20;
 			redGPU.camera.y = Math.cos(time / 4000) * 20;
 			redGPU.camera.z = Math.cos(time / 3000) * 20;
@@ -71,13 +57,49 @@ import RedBitmapTexture from "./src/resources/RedBitmapTexture.js";
 			renderer.render(time, redGPU);
 			let i = MAX / 5;
 			while (i--) {
-				redGPU.children[i].rotationX += 1
-				redGPU.children[i].rotationY += 1
-				redGPU.children[i].rotationZ += 1
+				redGPU.children[i].rotationX += 1;
+				redGPU.children[i].rotationY += 1;
+				redGPU.children[i].rotationZ += 1;
 			}
-			requestAnimationFrame(render)
+			requestAnimationFrame(render);
 		};
-		requestAnimationFrame(render)
-	}, 1000)
-
+		requestAnimationFrame(render);
+		setTestUI(redGPU)
+	}, 1000);
 })();
+let setTestUI = function (redGPU) {
+	let testUI = new dat.GUI({name: 'RedGL Test UI'});
+	let testData = {
+		useDepthTest: true,
+		depthTestFunc: "less-equal",
+		cullMode: "back",
+		primitiveTopology: "triangle-list"
+	};
+	testUI.add(testData, 'useDepthTest').onChange(v => redGPU.children.forEach(tMesh => tMesh.useDepthTest = v));
+
+	testUI.add(testData, 'depthTestFunc', [
+		"never",
+		"less",
+		"equal",
+		"less-equal",
+		"greater",
+		"not-equal",
+		"greater-equal",
+		"always"
+	]).onChange(v => redGPU.children.forEach(tMesh => tMesh.depthTestFunc = v));
+	testUI.add(testData, 'cullMode', [
+		"none",
+		"front",
+		"back"
+	]).onChange(v => redGPU.children.forEach(tMesh => tMesh.cullMode = v));
+
+	testUI.add(testData, 'primitiveTopology', [
+		"point-list",
+		"line-list",
+		"line-strip",
+		"triangle-list",
+		"triangle-strip"
+	]).onChange(v => redGPU.children.forEach(tMesh => tMesh.primitiveTopology = v));
+
+
+}
