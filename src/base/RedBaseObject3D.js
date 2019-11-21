@@ -3,13 +3,7 @@
 import RedUniformBuffer from "../buffer/RedUniformBuffer.js";
 
 export default class RedBaseObject3D {
-	get depthTestFunc() {
-		return this.#depthTestFunc;
-	}
 
-	set depthTestFunc(value) {
-		this.#depthTestFunc = value;
-	}
 
 	#x = 0;
 	#y = 0;
@@ -28,8 +22,9 @@ export default class RedBaseObject3D {
 	uniformBuffer;
 	//
 	#useDepthTest = true;
-	#depthTestFunc = 'less-equal'
-
+	#depthTestFunc = 'less-equal';
+	#cullMode = 'back';
+	#primitiveTopology = "triangle-list";
 
 	constructor(redGPU) {
 		this.#redGPU = redGPU;
@@ -155,6 +150,28 @@ export default class RedBaseObject3D {
 	set useDepthTest(value) {
 		this.#useDepthTest = value;
 	}
+	get depthTestFunc() {
+		return this.#depthTestFunc;
+	}
+
+	set depthTestFunc(value) {
+		this.#depthTestFunc = value;
+	}
+	get cullMode() {
+		return this.#cullMode;
+	}
+
+	set cullMode(value) {
+		this.#cullMode = value;
+	}
+
+	get primitiveTopology() {
+		return this.#primitiveTopology;
+	}
+
+	set primitiveTopology(value) {
+		this.#primitiveTopology = value;
+	}
 
 	createPipeline(redGPU) {
 		this.GPUBindGroup = null;
@@ -191,8 +208,12 @@ export default class RedBaseObject3D {
 					}
 				}
 			],
+			rasterizationState : {
+				frontFace : 'ccw',
+				cullMode  : this.#cullMode 
+			},
 			// 드로잉 방법을 결정함
-			primitiveTopology: 'triangle-list',
+			primitiveTopology: this.#primitiveTopology,
 			depthStencilState: {
 				depthWriteEnabled: this.#useDepthTest,
 				depthCompare: this.#depthTestFunc,
