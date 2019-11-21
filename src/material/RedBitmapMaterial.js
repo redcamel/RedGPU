@@ -70,12 +70,12 @@ export default class RedBitmapMaterial extends RedBaseMaterial {
 	}
 
 	checkTexture(texture, textureName) {
-		this.bindings = null
+		this.bindings = null;
 		if (texture) {
 			if (texture.GPUTexture) {
 				switch (textureName) {
 					case 'diffuseTexture' :
-						this.#diffuseTexture = texture
+						this.#diffuseTexture = texture;
 						break
 				}
 				console.log(textureName, texture);
@@ -99,7 +99,7 @@ export default class RedBitmapMaterial extends RedBaseMaterial {
 	}
 
 	resetBindingInfo() {
-		this.bindings = null
+		this.bindings = null;
 		this.searchModules();
 		this.bindings = [
 			{

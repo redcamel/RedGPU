@@ -10,6 +10,7 @@ import RedBox from "./src/primitives/RedBox.js";
 import RedCylinder from "./src/primitives/RedCylinder.js";
 import RedPlane from "./src/primitives/RedPlane.js";
 import RedScene from "./src/RedScene.js";
+import RedView from "./src/RedView.js";
 
 
 (async function () {
@@ -24,9 +25,11 @@ import RedScene from "./src/RedScene.js";
 	requestAnimationFrame(function () {
 		let MAX = 1000;
 		let i = MAX;
+		let tView;
 		let tScene = new RedScene();
-		redGPU.camera = new RedCamera();
-		redGPU.scene = tScene;
+		tView = new RedView(tScene, new RedCamera())
+
+		redGPU.view = tView
 		let testTextureList = [
 			new RedBitmapTexture(redGPU, 'assets/UV_Grid_Sm.jpg'),
 			new RedBitmapTexture(redGPU, 'assets/Brick03_col.jpg'),
@@ -65,24 +68,28 @@ import RedScene from "./src/RedScene.js";
 
 		let renderer = new RedRender();
 		let render = function (time) {
-			redGPU.camera.x = Math.sin(time / 3000) * 20;
-			redGPU.camera.y = Math.cos(time / 4000) * 20;
-			redGPU.camera.z = Math.cos(time / 3000) * 20;
-			redGPU.camera.lookAt(0, 0, 0);
-			renderer.render(time, redGPU);
-			let i = MAX / 5;
-			while (i--) {
-				tScene.children[i].rotationX += 1;
-				tScene.children[i].rotationY += 1;
-				tScene.children[i].rotationZ += 1;
-			}
+
+				tView.camera.x = Math.sin(time / 3000) * 20;
+				tView.camera.y = Math.cos(time / 4000) * 20;
+				tView.camera.z = Math.cos(time / 3000) * 20;
+				tView.camera.lookAt(0, 0, 0);
+				renderer.render(time, redGPU, tView);
+				let i = tView.scene.children.length;
+				let tChildren = tView.scene.children
+				while (i--) {
+					tChildren[i].rotationX += 1;
+					tChildren[i].rotationY += 1;
+					tChildren[i].rotationZ += 1;
+				}
+
+
 			requestAnimationFrame(render);
 		};
 		requestAnimationFrame(render);
 		setTestUI(redGPU, tScene)
 	}, 1000);
 })();
-let setTestUI = function (redGPU,tScene) {
+let setTestUI = function (redGPU, tScene) {
 	let testUI = new dat.GUI({});
 	let testData = {
 		useDepthTest: true,
@@ -90,7 +97,7 @@ let setTestUI = function (redGPU,tScene) {
 		cullMode: "back",
 		primitiveTopology: "triangle-list"
 	};
-	testUI.add(testData, 'useDepthTest').onChange(v => redGPU.children.forEach(tMesh => tMesh.useDepthTest = v));
+	testUI.add(testData, 'useDepthTest').onChange(v => tScene.children.forEach(tMesh => tMesh.useDepthTest = v));
 
 	testUI.add(testData, 'depthTestFunc', [
 		"never",
@@ -101,12 +108,12 @@ let setTestUI = function (redGPU,tScene) {
 		"not-equal",
 		"greater-equal",
 		"always"
-	]).onChange(v => redGPU.children.forEach(tMesh => tMesh.depthTestFunc = v));
+	]).onChange(v => tScene.children.forEach(tMesh => tMesh.depthTestFunc = v));
 	testUI.add(testData, 'cullMode', [
 		"none",
 		"front",
 		"back"
-	]).onChange(v => redGPU.children.forEach(tMesh => tMesh.cullMode = v));
+	]).onChange(v => tScene.children.forEach(tMesh => tMesh.cullMode = v));
 
 	testUI.add(testData, 'primitiveTopology', [
 		"point-list",
@@ -114,10 +121,10 @@ let setTestUI = function (redGPU,tScene) {
 		"line-strip",
 		"triangle-list",
 		"triangle-strip"
-	]).onChange(v => redGPU.children.forEach(tMesh => tMesh.primitiveTopology = v));
+	]).onChange(v => tScene.children.forEach(tMesh => tMesh.primitiveTopology = v));
 
 	let testSceneUI = new dat.GUI({});
 	testSceneUI.width = 350
-	testSceneUI.addColor(tScene,'backgroundColor')
-	testSceneUI.add(tScene,'backgroundColorAlpha',0,1,0.01)
+	testSceneUI.addColor(tScene, 'backgroundColor')
+	testSceneUI.add(tScene, 'backgroundColorAlpha', 0, 1, 0.01)
 }

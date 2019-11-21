@@ -26,10 +26,10 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 	#primitiveTopology = "triangle-list";
 
 	constructor(redGPU) {
-		super()
+		super();
 		this.#redGPU = redGPU;
-		this.uniformBuffer = new RedUniformBuffer(redGPU)
-		this.normalMatrix = mat4.create()
+		this.uniformBuffer = new RedUniformBuffer(redGPU);
+		this.normalMatrix = mat4.create();
 		this.matrix = mat4.create()
 	}
 
@@ -138,7 +138,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	set material(v) {
 		this.#material = v;
-		this.uniformBuffer.setBuffer(v.uniformBufferDescriptor)
+		this.uniformBuffer.setBuffer(v.uniformBufferDescriptor);
 		this.pipeline = null;
 		this.dirtyTransform = true
 	}
@@ -234,8 +234,8 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	getNormalTransform() {
 		let tLocalNormalMatrix = mat4.clone(this.matrix);
-		mat4.invert(tLocalNormalMatrix, tLocalNormalMatrix)
-		mat4.transpose(tLocalNormalMatrix, tLocalNormalMatrix)
+		mat4.invert(tLocalNormalMatrix, tLocalNormalMatrix);
+		mat4.transpose(tLocalNormalMatrix, tLocalNormalMatrix);
 		return this.normalMatrix = tLocalNormalMatrix;
 	}
 

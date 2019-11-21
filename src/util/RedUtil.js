@@ -1,12 +1,12 @@
-"use strict"
+"use strict";
 
 export default {
 	hexToRGB_ZeroToOne: hex => {
 		let t0, t1;
 		if (hex.indexOf('rgba') > -1) {
-			hex = hex.replace('rgba(', '')
-			hex = hex.replace(')', '')
-			hex = hex.split(',')
+			hex = hex.replace('rgba(', '');
+			hex = hex.replace(')', '');
+			hex = hex.split(',');
 			hex = RedGLUtil.rgb2hex(hex[0], hex[1], hex[2])
 		}
 		if (/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
@@ -19,5 +19,8 @@ export default {
 			t1[2] = (t0 & 255) / 255;
 			return t1
 		} else throw new Error(`must hex - input : ${hex}`)
+	},
+	throwFunc: function () {
+		throw 'Error : ' + Array.prototype.slice.call(arguments).join(' ')
 	}
 }
