@@ -56,14 +56,15 @@ export default class RedGPU {
 	};
 
 	updateSystemUniform(passEncoder, redView) {
-		//TODO 멀티뷰가 먹게되면 이놈은 뷰로 옮김.
-		let tX = typeof redView.x == 'number' ? redView.x : parseInt(redView.x) / 100 * this.canvas.width
-		let tY = typeof redView.y == 'number' ? redView.y : parseInt(redView.y) / 100 * this.canvas.height
-		let tW = typeof redView.width == 'number' ? redView.width : parseInt(redView.width) / 100 * this.canvas.width
-		let tH = typeof redView.height == 'number' ? redView.height : parseInt(redView.height) / 100 * this.canvas.height
+		let tView_viewRect = redView.getViewRect(this)
 		// passEncoder.setViewport(tX, tY, this.canvas.width, this.canvas.height, 0, 1);
-		passEncoder.setScissorRect(tX, tY, tW, tH);
+		passEncoder.setViewport(...tView_viewRect, 0, 1);
+		passEncoder.setScissorRect(...tView_viewRect);
 		passEncoder.setBindGroup(0, this.systemUniformInfo.GPUBindGroup);
+
+		let aspect = Math.abs(tView_viewRect[2] / tView_viewRect[3]);
+		mat4.perspective(this.systemUniformInfo.data.projectionMatrix, (Math.PI / 180) * 60, aspect, 0.01, 10000.0);
+
 		this.systemUniformInfo.GPUBuffer.setSubData(0, this.systemUniformInfo.data.projectionMatrix);
 		this.systemUniformInfo.GPUBuffer.setSubData(4 * 4 * Float32Array.BYTES_PER_ELEMENT, redView.camera.matrix);
 	}
@@ -143,8 +144,7 @@ export default class RedGPU {
 		});
 		this.depthTextureView = this.depthTexture.createView();
 
-		let aspect = Math.abs(this.canvas.width / this.canvas.height);
-		mat4.perspective(this.systemUniformInfo.data.projectionMatrix, (Math.PI / 180) * 60, aspect, 0.01, 10000.0);
+
 
 		if (this.view) {
 			this.view.setSize()

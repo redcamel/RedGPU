@@ -48,6 +48,15 @@ export default class RedView {
 		return this.#height;
 	}
 
+	getViewRect(redGPU) {
+		return [
+			typeof this.x == 'number' ? this.x : parseInt(this.x) / 100 * redGPU.canvas.width,
+			typeof this.y == 'number' ? this.y : parseInt(this.y) / 100 * redGPU.canvas.height,
+			typeof this.width == 'number' ? this.width : parseInt(this.width) / 100 * redGPU.canvas.width,
+			typeof this.height == 'number' ? this.height : parseInt(this.height) / 100 * redGPU.canvas.height
+		]
+	}
+
 	setSize(width = this.#width, height = this.#height) {
 		if (typeof width == 'number') this.#width = width < 0 ? 0 : parseInt(width);
 		else {
