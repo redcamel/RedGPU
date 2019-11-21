@@ -6,6 +6,9 @@ import RedBitmapMaterial from "./src/material/RedBitmapMaterial.js";
 import RedCamera from "./src/controller/RedCamera.js";
 import RedSphere from "./src/primitives/RedSphere.js";
 import RedBitmapTexture from "./src/resources/RedBitmapTexture.js";
+import RedBox from "./src/primitives/RedBox.js";
+import RedCylinder from "./src/primitives/RedCylinder.js";
+import RedPlane from "./src/primitives/RedPlane.js";
 
 
 (async function () {
@@ -27,16 +30,24 @@ import RedBitmapTexture from "./src/resources/RedBitmapTexture.js";
 			new RedBitmapTexture(redGPU, 'assets/crate.png')
 		];
 
-		let tMat1 = new RedStandardMaterial(redGPU, testTextureList[1]);
-		let tMat2 = new RedStandardMaterial(redGPU, testTextureList[1], testTextureList[2]);
-		let tMat3 = new RedBitmapMaterial(redGPU, testTextureList[0]);
+		let tMat1 = new RedBitmapMaterial(redGPU, testTextureList[0]);
+		let tMat2 = new RedStandardMaterial(redGPU, testTextureList[1]);
+		let tMat3 = new RedStandardMaterial(redGPU, testTextureList[1], testTextureList[2]);
 		let tMat4 = new RedStandardMaterial(redGPU, testTextureList[0], testTextureList[2]);
 
 		if (i > 2000) i = 2000;
+
+		let randomGeometry = function () {
+			return Math.random() > 0.5
+				? new RedSphere(redGPU, 1, 16, 16, 16) :
+				Math.random() > 0.5
+					? new RedCylinder(redGPU, 0, 1, 2, 16, 16) :
+					Math.random() > 0.5 ? new RedBox(redGPU) : new RedPlane(redGPU)
+		}
 		while (i--) {
 			let testMesh = new RedMesh(
 				redGPU,
-				new RedSphere(redGPU, Math.random() > 0.5 ? 1 : 0.5, 16, 16, 16),
+				randomGeometry(),
 				i > MAX / 2 ? tMat1 : Math.random() > 0.5 ? tMat2 : Math.random() > 0.5 ? tMat3 : tMat4
 			);
 			testMesh.x = Math.random() * 30 - 15;
