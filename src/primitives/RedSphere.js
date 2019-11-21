@@ -4,6 +4,21 @@ import RedGeometry from "../geometry/RedGeometry.js";
 import RedInterleaveInfo from "../geometry/RedInterleaveInfo.js";
 
 export default class RedSphere {
+	constructor(redGPU, radius = 1, widthSegments = 8, heightSegments = 6, phiStart = 0, phiLength = Math.PI * 2, thetaStart = 0, thetaLength = Math.PI) {
+		let typeKey;
+		widthSegments = Math.max(3, Math.floor(widthSegments));
+		heightSegments = Math.max(2, Math.floor(heightSegments));
+		// 유일키 생성
+		typeKey = [this.constructor.name, radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength].join('_');
+		if (redGPU.state.RedGeometry.has(typeKey)) return redGPU.state.RedGeometry.get(typeKey);
+		let tData = this.#makeData(redGPU, typeKey, radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength);
+		this.interleaveBuffer = tData['interleaveBuffer'];
+		this.indexBuffer = tData['indexBuffer'];
+		this.vertexState = tData['vertexState'];
+		redGPU.state.RedGeometry.set(typeKey, this);
+		console.log(this)
+	}
+
 	#makeData = (function () {
 		let thetaEnd;
 		let ix, iy;
@@ -80,19 +95,4 @@ export default class RedSphere {
 			)
 		}
 	})();
-
-	constructor(redGPU, radius = 1, widthSegments = 8, heightSegments = 6, phiStart = 0, phiLength = Math.PI * 2, thetaStart = 0, thetaLength = Math.PI) {
-		let typeKey;
-		widthSegments = Math.max(3, Math.floor(widthSegments));
-		heightSegments = Math.max(2, Math.floor(heightSegments));
-		// 유일키 생성
-		typeKey = [this.constructor.name, radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength].join('_');
-		if (redGPU.state.RedGeometry.has(typeKey)) return redGPU.state.RedGeometry.get(typeKey);
-		let tData = this.#makeData(redGPU, typeKey, radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength);
-		this['interleaveBuffer'] = tData['interleaveBuffer'];
-		this['indexBuffer'] = tData['indexBuffer'];
-		this['vertexState'] = tData['vertexState'];
-		redGPU.state.RedGeometry.set(typeKey, this);
-		console.log(this)
-	}
 }
