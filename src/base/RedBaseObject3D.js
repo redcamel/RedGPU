@@ -1,8 +1,9 @@
 "use strict";
 
 import RedUniformBuffer from "../buffer/RedUniformBuffer.js";
+import RedBaseObjectContainer from "./RedBaseObjectContainer.js";
 
-export default class RedBaseObject3D {
+export default class RedBaseObject3D extends RedBaseObjectContainer {
 	#x = 0;
 	#y = 0;
 	#z = 0;
@@ -25,6 +26,7 @@ export default class RedBaseObject3D {
 	#primitiveTopology = "triangle-list";
 
 	constructor(redGPU) {
+		super()
 		this.#redGPU = redGPU;
 		this.uniformBuffer = new RedUniformBuffer(redGPU)
 		this.normalMatrix = mat4.create()
