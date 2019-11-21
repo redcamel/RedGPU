@@ -1,9 +1,9 @@
 "use strict";
 
 import RedUniformBuffer from "../buffer/RedUniformBuffer.js";
-import RedBaseObjectContainer from "./RedBaseObjectContainer.js";
+import RedDisplayContainer from "./RedDisplayContainer.js";
 
-export default class RedBaseObject3D extends RedBaseObjectContainer {
+export default class RedBaseObject3D extends RedDisplayContainer {
 	#x = 0;
 	#y = 0;
 	#z = 0;

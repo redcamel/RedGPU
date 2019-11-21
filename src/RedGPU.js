@@ -1,15 +1,14 @@
 "use strict";
-import RedBaseObjectContainer from "./base/RedBaseObjectContainer.js";
-
 let redGPUList = new Set();
 let setGlobalResizeEvent = function () {
 	window.addEventListener('resize', _ => {
 		for (const redGPU of redGPUList) redGPU.setSize()
 	})
 };
-export default class RedGPU extends RedBaseObjectContainer {
+export default class RedGPU {
 	#width = 0;
 	#height = 0;
+	scene;
 	#makeSystemUniformInfo = function (device) {
 		let uniformBufferSize = 4 * 4 * Float32Array.BYTES_PER_ELEMENT * 2;
 		const uniformBufferDescriptor = {
@@ -62,7 +61,6 @@ export default class RedGPU extends RedBaseObjectContainer {
 	}
 
 	constructor(canvas, glslang) {
-		super();
 		navigator.gpu.requestAdapter().then(adapter => {
 			adapter.requestDevice().then(device => {
 				this.glslang = glslang;

@@ -1,10 +1,18 @@
 import RedTypeSize from "../resources/RedTypeSize.js";
 
 export default class RedRender {
-	constructor() {
-	}
-
 	render(time, redGPU) {
+		let prevPipeline;
+		let prevVertexBuffer;
+		let prevIndexBuffer;
+		let prevBindBuffer;
+		let tScene, tSceneBackgroundColor_rgba;
+		let tMaterial;
+		let tMesh;
+		let i;
+		tScene = redGPU.scene;
+		tSceneBackgroundColor_rgba = tScene.backgroundColorRGBA
+		i = tScene.children.length;
 		const swapChainTexture = redGPU.swapChain.getCurrentTexture();
 		const commandEncoder = redGPU.device.createCommandEncoder();
 		const textureView = swapChainTexture.createView();
@@ -12,7 +20,12 @@ export default class RedRender {
 		const renderPassDescriptor = {
 			colorAttachments: [{
 				attachment: textureView,
-				loadValue: {r: 0.0, g: 0.0, b: 0.0, a: 1.0}
+				loadValue: {
+					r: tSceneBackgroundColor_rgba[0],
+					g: tSceneBackgroundColor_rgba[1],
+					b: tSceneBackgroundColor_rgba[2],
+					a: tSceneBackgroundColor_rgba[3]
+				}
 			}],
 			depthStencilAttachment: {
 				attachment: redGPU.depthTextureView,
@@ -24,18 +37,12 @@ export default class RedRender {
 		};
 		const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
 
-		let i = redGPU.children.length;
-		let prevPipeline;
-		let prevVertexBuffer;
-		let prevIndexBuffer;
-		let prevBindBuffer;
-		let tMaterial;
-		let tMesh
+
 		// 시스템 유니폼 업데이트
 		redGPU.updateSystemUniform(passEncoder);
 
 		while (i--) {
-			tMesh = redGPU.children[i];
+			tMesh = tScene.children[i];
 			tMaterial = tMesh.material;
 			if (tMesh.dirtyTransform) {
 				tMesh.getTransform();

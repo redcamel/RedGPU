@@ -9,6 +9,7 @@ import RedBitmapTexture from "./src/resources/RedBitmapTexture.js";
 import RedBox from "./src/primitives/RedBox.js";
 import RedCylinder from "./src/primitives/RedCylinder.js";
 import RedPlane from "./src/primitives/RedPlane.js";
+import RedScene from "./src/RedScene.js";
 
 
 (async function () {
@@ -19,10 +20,13 @@ import RedPlane from "./src/primitives/RedPlane.js";
 	const glslang = await glslangModule.default();
 	console.log(glslang);
 	let redGPU = new RedGPU(cvs, glslang);
-	redGPU.camera = new RedCamera();
+
 	requestAnimationFrame(function () {
 		let MAX = 1000;
 		let i = MAX;
+		let tScene = new RedScene();
+		redGPU.camera = new RedCamera();
+		redGPU.scene = tScene;
 		let testTextureList = [
 			new RedBitmapTexture(redGPU, 'assets/UV_Grid_Sm.jpg'),
 			new RedBitmapTexture(redGPU, 'assets/Brick03_col.jpg'),
@@ -55,7 +59,7 @@ import RedPlane from "./src/primitives/RedPlane.js";
 			testMesh.z = Math.random() * 30 - 15;
 			testMesh.rotationX = testMesh.rotationY = testMesh.rotationZ = Math.random() * 360;
 			// testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = Math.random();
-			redGPU.addChild(testMesh)
+			tScene.addChild(testMesh)
 
 		}
 
@@ -68,18 +72,18 @@ import RedPlane from "./src/primitives/RedPlane.js";
 			renderer.render(time, redGPU);
 			let i = MAX / 5;
 			while (i--) {
-				redGPU.children[i].rotationX += 1;
-				redGPU.children[i].rotationY += 1;
-				redGPU.children[i].rotationZ += 1;
+				tScene.children[i].rotationX += 1;
+				tScene.children[i].rotationY += 1;
+				tScene.children[i].rotationZ += 1;
 			}
 			requestAnimationFrame(render);
 		};
 		requestAnimationFrame(render);
-		setTestUI(redGPU)
+		setTestUI(redGPU, tScene)
 	}, 1000);
 })();
-let setTestUI = function (redGPU) {
-	let testUI = new dat.GUI({name: 'RedGL Test UI'});
+let setTestUI = function (redGPU,tScene) {
+	let testUI = new dat.GUI({});
 	let testData = {
 		useDepthTest: true,
 		depthTestFunc: "less-equal",
@@ -112,5 +116,8 @@ let setTestUI = function (redGPU) {
 		"triangle-strip"
 	]).onChange(v => redGPU.children.forEach(tMesh => tMesh.primitiveTopology = v));
 
-
+	let testSceneUI = new dat.GUI({});
+	testSceneUI.width = 350
+	testSceneUI.addColor(tScene,'backgroundColor')
+	testSceneUI.add(tScene,'backgroundColorAlpha',0,1,0.01)
 }

@@ -1,6 +1,6 @@
 "use strict";
 
-export default class RedBaseObjectContainer {
+export default class RedDisplayContainer {
 	#children = [];
 
 	constructor() {
