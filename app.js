@@ -69,27 +69,80 @@ import RedView from "./src/RedView.js";
 		let renderer = new RedRender();
 		let render = function (time) {
 
-				tView.camera.x = Math.sin(time / 3000) * 20;
-				tView.camera.y = Math.cos(time / 4000) * 20;
-				tView.camera.z = Math.cos(time / 3000) * 20;
-				tView.camera.lookAt(0, 0, 0);
-				renderer.render(time, redGPU, tView);
-				let i = tView.scene.children.length;
-				let tChildren = tView.scene.children
-				while (i--) {
-					tChildren[i].rotationX += 1;
-					tChildren[i].rotationY += 1;
-					tChildren[i].rotationZ += 1;
-				}
+			tView.camera.x = Math.sin(time / 3000) * 30;
+			tView.camera.y = Math.cos(time / 4000) * 30;
+			tView.camera.z = Math.cos(time / 3000) * 30;
+			tView.camera.lookAt(0, 0, 0);
+			renderer.render(time, redGPU, tView);
+
+			let tChildren = tView.scene.children
+			let i = tChildren.length / 5;
+			while (i--) {
+				tChildren[i].rotationX += 1;
+				tChildren[i].rotationY += 1;
+				tChildren[i].rotationZ += 1;
+			}
 
 
 			requestAnimationFrame(render);
 		};
 		requestAnimationFrame(render);
-		setTestUI(redGPU, tScene)
+		setTestUI(redGPU, tView, tScene)
 	}, 1000);
 })();
-let setTestUI = function (redGPU, tScene) {
+let setTestUI = function (redGPU, tView, tScene) {
+
+	let tFolder;
+
+
+	let testSceneUI = new dat.GUI({});
+
+	testSceneUI.width = 350
+	tFolder = testSceneUI.addFolder('RedScene')
+	tFolder.open()
+	tFolder.addColor(tScene, 'backgroundColor')
+	tFolder.add(tScene, 'backgroundColorAlpha', 0, 1, 0.01)
+	tFolder = testSceneUI.addFolder('RedView')
+	tFolder.open()
+	let viewTestData = {
+		setLocationTest1: function () {
+			tView.setLocation(0, 0)
+		},
+		setLocationTest2: function () {
+			tView.setLocation(100, 100)
+		},
+		setLocationTest3: function () {
+			tView.setLocation('50%', 100)
+		},
+		setLocationTest4: function () {
+			tView.setLocation('40%', '40%')
+		},
+		setSizeTest1: function () {
+			tView.setSize(200, 200)
+		},
+		setSizeTest2: function () {
+			tView.setSize('50%', '100%')
+		},
+		setSizeTest3: function () {
+			tView.setSize('50%', '50%')
+		},
+		setSizeTest4: function () {
+			tView.setSize('20%', '20%')
+		},
+		setSizeTest5: function () {
+			tView.setSize('100%', '100%')
+		}
+	}
+	tFolder.add(viewTestData, 'setLocationTest1').name('setLocation(0,0)');
+	tFolder.add(viewTestData, 'setLocationTest2').name('setLocation(100,100)');
+	tFolder.add(viewTestData, 'setLocationTest3').name('setLocation(50%,100)');
+	tFolder.add(viewTestData, 'setLocationTest4').name('setLocation(40%,40%)');
+	tFolder.add(viewTestData, 'setSizeTest1').name('setSize(200,200)');
+	tFolder.add(viewTestData, 'setSizeTest2').name('setSize(50%,100%)');
+	tFolder.add(viewTestData, 'setSizeTest3').name('setSize(50%,50%)');
+	tFolder.add(viewTestData, 'setSizeTest4').name('setSize(20%,20%)');
+	tFolder.add(viewTestData, 'setSizeTest5').name('setSize(100%,100%)');
+
 	let testUI = new dat.GUI({});
 	let testData = {
 		useDepthTest: true,
@@ -97,9 +150,11 @@ let setTestUI = function (redGPU, tScene) {
 		cullMode: "back",
 		primitiveTopology: "triangle-list"
 	};
-	testUI.add(testData, 'useDepthTest').onChange(v => tScene.children.forEach(tMesh => tMesh.useDepthTest = v));
+	tFolder = testUI.addFolder('RedMesh')
+	tFolder.open()
+	tFolder.add(testData, 'useDepthTest').onChange(v => tScene.children.forEach(tMesh => tMesh.useDepthTest = v));
 
-	testUI.add(testData, 'depthTestFunc', [
+	tFolder.add(testData, 'depthTestFunc', [
 		"never",
 		"less",
 		"equal",
@@ -109,22 +164,17 @@ let setTestUI = function (redGPU, tScene) {
 		"greater-equal",
 		"always"
 	]).onChange(v => tScene.children.forEach(tMesh => tMesh.depthTestFunc = v));
-	testUI.add(testData, 'cullMode', [
+	tFolder.add(testData, 'cullMode', [
 		"none",
 		"front",
 		"back"
 	]).onChange(v => tScene.children.forEach(tMesh => tMesh.cullMode = v));
 
-	testUI.add(testData, 'primitiveTopology', [
+	tFolder.add(testData, 'primitiveTopology', [
 		"point-list",
 		"line-list",
 		"line-strip",
 		"triangle-list",
 		"triangle-strip"
 	]).onChange(v => tScene.children.forEach(tMesh => tMesh.primitiveTopology = v));
-
-	let testSceneUI = new dat.GUI({});
-	testSceneUI.width = 350
-	testSceneUI.addColor(tScene, 'backgroundColor')
-	testSceneUI.add(tScene, 'backgroundColorAlpha', 0, 1, 0.01)
 }
