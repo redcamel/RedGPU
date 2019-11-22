@@ -1,17 +1,14 @@
 "use strict";
 
 export default class RedDisplayContainer {
-	#children = [];
+	children = [];
 
 	constructor() {
 
 	}
 
 	addChild(v) {
-		this.#children.push(v)
+		this.children.push(v)
 	}
 
-	get children() {
-		return this.#children
-	}
 }
