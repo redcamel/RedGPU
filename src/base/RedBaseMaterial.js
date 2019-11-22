@@ -19,6 +19,7 @@ export default class RedBaseMaterial {
 	set redGPU(value) {
 		this.#redGPU = value;
 	}
+
 	static uniformBufferDescriptor_empty = {
 		size: 1,
 		usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
@@ -41,14 +42,17 @@ export default class RedBaseMaterial {
 	sampler;
 	bindings;
 	#redGPU;
+
 	constructor(redGPU) {
 		let vShaderModule, fShaderModule;
 		let materialClass = this.constructor;
 		let vertexGLSL = materialClass.vertexShaderGLSL
 		let fragmentGLSL = materialClass.fragmentShaderGLSL
 		let programOptionList = materialClass.PROGRAM_OPTION_LIST || [];
-		if (!(vShaderModule = TABLE.get(vertexGLSL))) TABLE.set(vertexGLSL, vShaderModule = new RedShaderModule_GLSL(redGPU, 'vertex', materialClass, vertexGLSL, programOptionList));
-		if (!(fShaderModule = TABLE.get(fragmentGLSL))) TABLE.set(fragmentGLSL, fShaderModule = new RedShaderModule_GLSL(redGPU, 'fragment', materialClass, fragmentGLSL, programOptionList));
+		let vKey = materialClass.name + '_vertex'
+		let fKey = materialClass.name + '_fragment'
+		if (!(vShaderModule = TABLE.get(vKey))) TABLE.set(vKey, vShaderModule = new RedShaderModule_GLSL(redGPU, 'vertex', materialClass, vertexGLSL, programOptionList));
+		if (!(fShaderModule = TABLE.get(fKey))) TABLE.set(fKey, fShaderModule = new RedShaderModule_GLSL(redGPU, 'fragment', materialClass, fragmentGLSL, programOptionList));
 
 		if (!materialClass.uniformBufferDescriptor_vertex) throw new Error(`${materialClass.name} : uniformBufferDescriptor_vertex 를 정의해야함`);
 		if (!materialClass.uniformBufferDescriptor_fragment) throw new Error(`${materialClass.name} : uniformBufferDescriptor_fragment 를 정의해야함`);
@@ -62,6 +66,7 @@ export default class RedBaseMaterial {
 
 		this.sampler = new RedSampler(redGPU);
 		this.#redGPU = redGPU;
+		console.log('TABLE', TABLE)
 	}
 
 	checkTexture(texture, textureName) {
@@ -74,6 +79,7 @@ export default class RedBaseMaterial {
 
 	searchModules() {
 		let tKey = [this.constructor.name];
+		console.log('뭘찾냐', tKey)
 		this.constructor.PROGRAM_OPTION_LIST.forEach(key => {
 			if (this[key]) tKey.push(key);
 		});

@@ -13,16 +13,16 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 	#scaleX = 1;
 	#scaleY = 1;
 	#scaleZ = 1;
-	#dirtyTransform = true;
+	_dirtyTransform = true;
 	//
-	#material;
-	#geometry;
+	_material;
+	_geometry;
 	#redGPU;
 	uniformBuffer_vertex;
 	uniformBuffer_fragment;
 	//
 	#useDepthTest = true;
-	#depthTestFunc = 'less-equal';
+	#depthTestFunc = 'less';
 	#cullMode = 'back';
 	#primitiveTopology = "triangle-list";
 
@@ -37,11 +37,11 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 	}
 
 	get dirtyTransform() {
-		return this.#dirtyTransform
+		return this._dirtyTransform
 	}
 
 	set dirtyTransform(v) {
-		this.#dirtyTransform = v
+		this._dirtyTransform = v
 	}
 
 	get x() {
@@ -50,7 +50,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	set x(v) {
 		this.#x = v;
-		this.#dirtyTransform = true;
+		this._dirtyTransform = true;
 	}
 
 	get y() {
@@ -59,7 +59,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	set y(v) {
 		this.#y = v;
-		this.#dirtyTransform = true;
+		this._dirtyTransform = true;
 	}
 
 	get z() {
@@ -68,7 +68,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	set z(v) {
 		this.#z = v;
-		this.#dirtyTransform = true;
+		this._dirtyTransform = true;
 	}
 
 	get rotationX() {
@@ -77,7 +77,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	set rotationX(v) {
 		this.#rotationX = v;
-		this.#dirtyTransform = true;
+		this._dirtyTransform = true;
 	}
 
 	get rotationY() {
@@ -86,7 +86,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	set rotationY(v) {
 		this.#rotationY = v;
-		this.#dirtyTransform = true;
+		this._dirtyTransform = true;
 	}
 
 	get rotationZ() {
@@ -95,7 +95,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	set rotationZ(v) {
 		this.#rotationZ = v;
-		this.#dirtyTransform = true;
+		this._dirtyTransform = true;
 	}
 
 	get scaleX() {
@@ -104,7 +104,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	set scaleX(v) {
 		this.#scaleX = v;
-		this.#dirtyTransform = true;
+		this._dirtyTransform = true;
 	}
 
 	get scaleY() {
@@ -113,7 +113,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	set scaleY(v) {
 		this.#scaleY = v;
-		this.#dirtyTransform = true;
+		this._dirtyTransform = true;
 	}
 
 	get scaleZ() {
@@ -122,25 +122,25 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	set scaleZ(v) {
 		this.#scaleZ = v;
-		this.#dirtyTransform = true;
+		this._dirtyTransform = true;
 	}
 
 	get geometry() {
-		return this.#geometry
+		return this._geometry
 	}
 
 	set geometry(v) {
-		this.#geometry = v;
+		this._geometry = v;
 		this.pipeline = null;
 		this.dirtyTransform = true
 	}
 
 	get material() {
-		return this.#material
+		return this._material
 	}
 
 	set material(v) {
-		this.#material = v;
+		this._material = v;
 		this.uniformBuffer_vertex.setBuffer(v.uniformBufferDescriptor_vertex);
 		this.uniformBuffer_fragment.setBuffer(v.uniformBufferDescriptor_fragment);
 		this.pipeline = null;
@@ -192,21 +192,21 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 				{
 					bindGroupLayouts: [
 						redGPU.systemUniformInfo.GPUBindGroupLayout,
-						this.#material.GPUBindGroupLayout
+						this._material.GPUBindGroupLayout
 					]
 				}
 			),
 			// 버텍스와 프레그먼트는 재질에서 들고온다.
 			vertexStage: {
-				module: this.#material.vShaderModule.GPUShaderModule,
+				module: this._material.vShaderModule.GPUShaderModule,
 				entryPoint: 'main'
 			},
 			fragmentStage: {
-				module: this.#material.fShaderModule.GPUShaderModule,
+				module: this._material.fShaderModule.GPUShaderModule,
 				entryPoint: 'main'
 			},
 			// 버텍스 상태는 지오메트리가 알고있음으로 들고옴
-			vertexState: this.#geometry.vertexState,
+			vertexState: this._geometry.vertexState,
 			// 컬러모드 지정하고
 			colorStates: [
 				{

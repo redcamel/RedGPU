@@ -1,9 +1,12 @@
 "use strict";
-export default class RedBuffer {
+import RedUUID from "../base/RedUUID.js";
+
+export default class RedBuffer extends RedUUID{
 	static TYPE_VERTEX = 'vertexBuffer';
 	static TYPE_INDEX = 'indexBuffer';
 
 	constructor(redGPU, typeKey, bufferType, data, interleaveInfo, usage) {
+		super()
 		if (redGPU.state.RedBuffer[bufferType].has(typeKey)) return redGPU.state.RedBuffer[bufferType].get(typeKey);
 		let tUsage;
 		this.type = bufferType;

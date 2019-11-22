@@ -4,7 +4,6 @@ import RedBaseMaterial from "../base/RedBaseMaterial.js";
 import RedColorMaterial from "./RedColorMaterial.js";
 
 export default class RedColorPhongMaterial extends RedColorMaterial {
-
 	static vertexShaderGLSL = `
 	#version 450
 	${RedBaseMaterial.GLSL_SystemUniforms}
@@ -67,9 +66,30 @@ export default class RedColorPhongMaterial extends RedColorMaterial {
 
 
 	constructor(redGPU, color = '#ff0000', alpha = 1) {
-		super(redGPU, color = '#ff0000', alpha = 1);
+		super(redGPU, color = '#ff0000', alpha);
 	}
 
-
-
+	resetBindingInfo() {
+		this.bindings = null;
+		this.searchModules();
+		this.bindings = [
+			{
+				binding: 0,
+				resource: {
+					buffer: null,
+					offset: 0,
+					size: this.uniformBufferDescriptor_vertex.size
+				}
+			},
+			{
+				binding: 1,
+				resource: {
+					buffer: null,
+					offset: 0,
+					size: this.uniformBufferDescriptor_fragment.size
+				}
+			}
+		];
+		this.setUniformBindGroupDescriptor();
+	}
 }

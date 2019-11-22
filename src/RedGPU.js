@@ -69,7 +69,7 @@ export default class RedGPU {
 		this.systemUniformInfo.GPUBuffer.setSubData(4 * 4 * Float32Array.BYTES_PER_ELEMENT, redView.camera.matrix);
 	}
 
-	constructor(canvas, glslang) {
+	constructor(canvas, glslang,initFunc) {
 		navigator.gpu.requestAdapter().then(adapter => {
 			adapter.requestDevice().then(device => {
 				this.glslang = glslang;
@@ -111,6 +111,7 @@ export default class RedGPU {
 				if (!redGPUList.size) setGlobalResizeEvent();
 				redGPUList.add(this);
 				console.log(redGPUList)
+				initFunc()
 			});
 		}).catch(error => {
 			alert(`WebGPU is unsupported, or no adapters or devices are available.`)

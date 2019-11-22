@@ -13,6 +13,7 @@ import RedScene from "./src/RedScene.js";
 import RedView from "./src/RedView.js";
 import RedColorMaterial from "./src/material/RedColorMaterial.js";
 import RedColorPhongMaterial from "./src/material/RedColorPhongMaterial.js";
+import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 
 
 (async function () {
@@ -22,98 +23,101 @@ import RedColorPhongMaterial from "./src/material/RedColorPhongMaterial.js";
 
 	const glslang = await glslangModule.default();
 	console.log(glslang);
-	let redGPU = new RedGPU(cvs, glslang);
+	let redGPU = new RedGPU(cvs, glslang,
+		function () {
+			let MAX = 2000;
+			let i = MAX;
+			let tView;
+			let tScene = new RedScene();
+			tView = new RedView(tScene, new RedCamera())
+			let tLight = new RedDirectionalLight()
+			tScene.addLight(tLight)
 
-	requestAnimationFrame(function () {
-		let MAX = 100;
-		let i = MAX;
-		let tView;
-		let tScene = new RedScene();
-		tView = new RedView(tScene, new RedCamera())
+			redGPU.view = tView
+			let testTextureList = [
+				new RedBitmapTexture(redGPU, 'assets/UV_Grid_Sm.jpg'),
+				new RedBitmapTexture(redGPU, 'assets/Brick03_col.jpg'),
+				new RedBitmapTexture(redGPU, 'assets/Brick03_nrm.jpg'),
+				new RedBitmapTexture(redGPU, 'assets/crate.png')
+			];
 
-		redGPU.view = tView
-		let testTextureList = [
-			new RedBitmapTexture(redGPU, 'assets/UV_Grid_Sm.jpg'),
-			new RedBitmapTexture(redGPU, 'assets/Brick03_col.jpg'),
-			new RedBitmapTexture(redGPU, 'assets/Brick03_nrm.jpg'),
-			new RedBitmapTexture(redGPU, 'assets/crate.png')
-		];
-
-		let tMat1 = new RedColorMaterial(redGPU, '#00ee22');
-		let tMat2 = new RedBitmapMaterial(redGPU, testTextureList[0]);
-		let tMat3 = new RedStandardMaterial(redGPU, testTextureList[1]);
-		let tMat4 = new RedStandardMaterial(redGPU, testTextureList[1], testTextureList[2]);
+			let tMat1 = new RedColorMaterial(redGPU, '#00ee22');
+			let tMat2 = new RedColorPhongMaterial(redGPU, '#ff0000');
+			let tMat3 = new RedBitmapMaterial(redGPU, testTextureList[0]);
+			let tMat4 = new RedStandardMaterial(redGPU, testTextureList[1]);
+			let tMat5 = new RedStandardMaterial(redGPU, testTextureList[1], testTextureList[2]);
 
 
-		if (i > 2000) i = 2000;
-
-		let randomGeometry = function () {
-			return Math.random() > 0.5
-				? new RedSphere(redGPU, 1, 16, 16, 16) :
-				Math.random() > 0.5
-					? new RedCylinder(redGPU, 0, 1, 2, 16, 16) :
-					Math.random() > 0.5 ? new RedBox(redGPU) : new RedPlane(redGPU)
-		}
-		while (i--) {
-			let testMesh = new RedMesh(
-				redGPU,
-				randomGeometry(),
-				i > MAX / 2 ? tMat1 : Math.random() > 0.5 ? tMat2 : Math.random() > 0.5 ? tMat3 : tMat4
-			);
-			testMesh.x = Math.random() * 30 - 15;
-			testMesh.y = Math.random() * 30 - 15;
-			testMesh.z = Math.random() * 30 - 15;
-			testMesh.rotationX = testMesh.rotationY = testMesh.rotationZ = Math.random() * 360;
-			// testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = Math.random();
-			tScene.addChild(testMesh)
-
-			let testMesh2 = new RedMesh(
-				redGPU,
-				new RedSphere(redGPU, 1, 16, 16, 16),
-				tMat2
-			);
-			testMesh2.x = 2
-			testMesh2.scaleX = testMesh2.scaleY = testMesh2.scaleZ = 0.5;
-			testMesh.addChild(testMesh2)
-
-			let testMesh3 = new RedMesh(
-				redGPU,
-				new RedSphere(redGPU),
-				tMat3
-			);
-			testMesh3.x = 2
-			testMesh3.scaleX = testMesh3.scaleY = testMesh3.scaleZ = 0.5;
-			testMesh2.addChild(testMesh3)
-
-		}
-
-		let renderer = new RedRender();
-		let render = function (time) {
-
-			tView.camera.x = Math.sin(time / 3000) * 30;
-			tView.camera.y = Math.cos(time / 4000) * 30;
-			tView.camera.z = Math.cos(time / 3000) * 30;
-			// tView.camera.x = 10;
-			// tView.camera.y =10;
-			// tView.camera.z = 10;
-			tView.camera.lookAt(0, 0, 0);
-			renderer.render(time, redGPU, tView);
-
-			let tChildren = tView.scene.children
-			let i = tChildren.length;
+			let randomGeometry = function () {
+				return Math.random() > 0.5
+					? new RedSphere(redGPU, 0.5, 16, 16, 16) :
+					Math.random() > 0.5
+						? new RedCylinder(redGPU, 0, 1, 2, 16, 16) :
+						Math.random() > 0.5 ? new RedBox(redGPU) : new RedPlane(redGPU)
+			}
 			while (i--) {
-				tChildren[i].rotationX += 1;
-				tChildren[i].rotationY += 1;
-				tChildren[i].rotationZ += 1;
-				tChildren[i].children[0].rotationY += 2
+				let testMesh = new RedMesh(
+					redGPU,
+					randomGeometry(),
+					i > MAX / 2 ? tMat1 : i > MAX / 4 ? tMat2 : i > MAX / 8 ? tMat3 : i > MAX / 16 ? tMat4 : tMat5
+				);
+				testMesh.x = Math.random() * 30 - 15;
+				testMesh.y = Math.random() * 30 - 15;
+				testMesh.z = Math.random() * 30 - 15;
+				testMesh.rotationX = testMesh.rotationY = testMesh.rotationZ = Math.random() * 360;
+				// testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = Math.random();
+				tScene.addChild(testMesh)
+				//
+				// let testMesh2 = new RedMesh(
+				// 	redGPU,
+				// 	new RedSphere(redGPU, 1, 16, 16, 16),
+				// 	tMat2
+				// );
+				// testMesh2.x = 2
+				// testMesh2.scaleX = testMesh2.scaleY = testMesh2.scaleZ = 0.5;
+				// testMesh.addChild(testMesh2)
+				//
+				// let testMesh3 = new RedMesh(
+				// 	redGPU,
+				// 	new RedSphere(redGPU),
+				// 	tMat3
+				// );
+				// testMesh3.x = 2
+				// testMesh3.scaleX = testMesh3.scaleY = testMesh3.scaleZ = 0.5;
+				// testMesh2.addChild(testMesh3)
+
 			}
 
+			let renderer = new RedRender();
+			let render = function (time) {
 
+				tView.camera.x = Math.sin(time / 3000) * 30;
+				tView.camera.y = Math.cos(time / 4000) * 30;
+				tView.camera.z = Math.cos(time / 3000) * 30;
+				// tView.camera.x = 10;
+				// tView.camera.y =10;
+				// tView.camera.z = 10;
+				tView.camera.lookAt(0, 0, 0);
+				renderer.render(time, redGPU, tView);
+
+				// let tChildren = tView.scene.children
+				// let i = tChildren.length;
+				// while (i--) {
+				// 	tChildren[i].rotationX += 1;
+				// 	tChildren[i].rotationY += 1;
+				// 	tChildren[i].rotationZ += 1;
+				// 	// tChildren[i].children[0].rotationY += 2
+				// }
+
+
+				requestAnimationFrame(render);
+			};
 			requestAnimationFrame(render);
-		};
-		requestAnimationFrame(render);
-		setTestUI(redGPU, tView, tScene)
-	}, 1000);
+			setTestUI(redGPU, tView, tScene)
+		}
+	);
+
+
 })();
 let setTestUI = function (redGPU, tView, tScene) {
 
@@ -171,7 +175,7 @@ let setTestUI = function (redGPU, tView, tScene) {
 	let testUI = new dat.GUI({});
 	let testData = {
 		useDepthTest: true,
-		depthTestFunc: "less-equal",
+		depthTestFunc: "less",
 		cullMode: "back",
 		primitiveTopology: "triangle-list"
 	};

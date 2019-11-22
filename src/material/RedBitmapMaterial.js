@@ -64,10 +64,9 @@ export default class RedBitmapMaterial extends RedBaseMaterial {
 
 	#diffuseTexture;
 
-	constructor(redGPU, diffuseSrc) {
+	constructor(redGPU, diffuseTexture) {
 		super(redGPU);
-
-		this.diffuseTexture = diffuseSrc
+		this.diffuseTexture = diffuseTexture
 	}
 
 	checkTexture(texture, textureName) {
