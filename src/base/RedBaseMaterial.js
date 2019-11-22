@@ -12,6 +12,13 @@ let makeUniformBindLayout = function (redGPU, uniformsBindGroupLayoutDescriptor)
 	return uniformsBindGroupLayout
 };
 export default class RedBaseMaterial {
+	get redGPU() {
+		return this.#redGPU;
+	}
+
+	set redGPU(value) {
+		this.#redGPU = value;
+	}
 	static uniformBufferDescriptor_empty = {
 		size: 1,
 		usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
@@ -33,9 +40,12 @@ export default class RedBaseMaterial {
 	fragmentStage;
 	sampler;
 	bindings;
-
-	constructor(redGPU, materialClass, vertexGLSL, fragmentGLSL) {
+	#redGPU;
+	constructor(redGPU) {
 		let vShaderModule, fShaderModule;
+		let materialClass = this.constructor;
+		let vertexGLSL = materialClass.vertexShaderGLSL
+		let fragmentGLSL = materialClass.fragmentShaderGLSL
 		let programOptionList = materialClass.PROGRAM_OPTION_LIST || [];
 		if (!(vShaderModule = TABLE.get(vertexGLSL))) TABLE.set(vertexGLSL, vShaderModule = new RedShaderModule_GLSL(redGPU, 'vertex', materialClass, vertexGLSL, programOptionList));
 		if (!(fShaderModule = TABLE.get(fragmentGLSL))) TABLE.set(fragmentGLSL, fShaderModule = new RedShaderModule_GLSL(redGPU, 'fragment', materialClass, fragmentGLSL, programOptionList));
@@ -51,6 +61,7 @@ export default class RedBaseMaterial {
 		this.fShaderModule = fShaderModule;
 
 		this.sampler = new RedSampler(redGPU);
+		this.#redGPU = redGPU;
 	}
 
 	checkTexture(texture, textureName) {

@@ -2,7 +2,8 @@
 import RedTypeSize from "../resources/RedTypeSize.js";
 import RedBaseMaterial from "../base/RedBaseMaterial.js";
 
-const vertexShaderGLSL = `
+export default class RedBitmapMaterial extends RedBaseMaterial {
+	static vertexShaderGLSL = `
 	#version 450
 	${RedBaseMaterial.GLSL_SystemUniforms}
     layout(set=1,binding = 0) uniform Uniforms {
@@ -19,7 +20,7 @@ const vertexShaderGLSL = `
 		vUV = uv;
 	}
 	`;
-const fragmentShaderGLSL = `
+	static fragmentShaderGLSL = `
 	#version 450
 	layout(location = 0) in vec3 vNormal;
 	layout(location = 1) in vec2 vUV;
@@ -32,7 +33,6 @@ const fragmentShaderGLSL = `
 		outColor = diffuseColor;
 	}
 `;
-export default class RedBitmapMaterial extends RedBaseMaterial {
 	static PROGRAM_OPTION_LIST = ['diffuseTexture'];
 	static uniformsBindGroupLayoutDescriptor = {
 		bindings: [
@@ -61,12 +61,12 @@ export default class RedBitmapMaterial extends RedBaseMaterial {
 		]
 	};
 	static uniformBufferDescriptor_fragment = RedBaseMaterial.uniformBufferDescriptor_empty
-	#redGPU;
+
 	#diffuseTexture;
 
 	constructor(redGPU, diffuseSrc) {
-		super(redGPU, RedBitmapMaterial, vertexShaderGLSL, fragmentShaderGLSL);
-		this.#redGPU = redGPU;
+		super(redGPU);
+
 		this.diffuseTexture = diffuseSrc
 	}
 
@@ -117,7 +117,7 @@ export default class RedBitmapMaterial extends RedBaseMaterial {
 			},
 			{
 				binding: 2,
-				resource: this.#diffuseTexture ? this.#diffuseTexture.GPUTextureView : this.#redGPU.state.emptyTextureView,
+				resource: this.#diffuseTexture ? this.#diffuseTexture.GPUTextureView : this.redGPU.state.emptyTextureView,
 			}
 		];
 		this.setUniformBindGroupDescriptor();

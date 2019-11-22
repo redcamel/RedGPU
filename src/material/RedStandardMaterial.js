@@ -3,7 +3,10 @@ import RedBitmapTexture from '../resources/RedBitmapTexture.js'
 import RedTypeSize from "../resources/RedTypeSize.js";
 import RedBaseMaterial from "../base/RedBaseMaterial.js";
 
-const vertexShaderGLSL = `
+
+export default class RedStandardMaterial extends RedBaseMaterial {
+
+	static vertexShaderGLSL = `
 	#version 450
     ${RedBaseMaterial.GLSL_SystemUniforms}
     layout(set=1,binding = 0) uniform Uniforms {
@@ -24,7 +27,7 @@ const vertexShaderGLSL = `
 		vUV = uv;
 	}
 	`;
-const fragmentShaderGLSL = `
+	static fragmentShaderGLSL = `
 	#version 450
 	layout(location = 0) in vec3 vNormal;
 	layout(location = 1) in vec2 vUV;
@@ -102,8 +105,6 @@ const fragmentShaderGLSL = `
 		outColor = finalColor;
 	}
 `;
-
-export default class RedStandardMaterial extends RedBaseMaterial {
 	static PROGRAM_OPTION_LIST = ['diffuseTexture', 'normalTexture'];
 	static uniformsBindGroupLayoutDescriptor = {
 		bindings: [
@@ -138,14 +139,12 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 		]
 	};
 	static uniformBufferDescriptor_fragment = RedBaseMaterial.uniformBufferDescriptor_empty;
-	#redGPU;
+
 	#diffuseTexture;
 	#normalTexture;
 
 	constructor(redGPU, diffuseTexture, normalTexture) {
-		super(redGPU, RedStandardMaterial, vertexShaderGLSL, fragmentShaderGLSL);
-		this.#redGPU = redGPU;
-
+		super(redGPU);
 		console.log(diffuseTexture, normalTexture);
 		this.diffuseTexture = diffuseTexture;
 		this.normalTexture = normalTexture
@@ -154,7 +153,7 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 	checkTexture(texture, textureName) {
 		this.bindings = null;
 		if (texture) {
-			if(texture.GPUTexture){
+			if (texture.GPUTexture) {
 				switch (textureName) {
 					case 'diffuseTexture' :
 						this.#diffuseTexture = texture;
@@ -165,7 +164,7 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 				}
 				console.log(textureName, texture.GPUTexture);
 				this.resetBindingInfo()
-			}else{
+			} else {
 				texture.addUpdateTarget(this, textureName)
 			}
 
@@ -210,11 +209,11 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 			},
 			{
 				binding: 2,
-				resource: this.#diffuseTexture ? this.#diffuseTexture.GPUTextureView : this.#redGPU.state.emptyTextureView,
+				resource: this.#diffuseTexture ? this.#diffuseTexture.GPUTextureView : this.redGPU.state.emptyTextureView,
 			},
 			{
 				binding: 3,
-				resource: this.#normalTexture ? this.#normalTexture.GPUTextureView : this.#redGPU.state.emptyTextureView,
+				resource: this.#normalTexture ? this.#normalTexture.GPUTextureView : this.redGPU.state.emptyTextureView,
 			}
 		];
 		this.setUniformBindGroupDescriptor()

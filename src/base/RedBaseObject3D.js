@@ -278,18 +278,13 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	updateUniformBuffer() {
 		let i;
-		let data, tData;
-		data = this.material.uniformBufferDescriptor_vertex.redStruct;
-		i = data.length;
+		let dataVertex, dataFragment, tData;
+		dataVertex = this.material.uniformBufferDescriptor_vertex.redStruct;
+		dataFragment = this.material.uniformBufferDescriptor_fragment.redStruct;
+		i = Math.max(dataVertex.length, dataFragment.length);
 		while (i--) {
-			tData = data[i];
-			this.uniformBuffer_vertex.GPUBuffer.setSubData(tData['offset'], tData.targetKey ? this[tData.targetKey][tData.valueName] : this[tData.valueName]);
-		}
-		data = this.material.uniformBufferDescriptor_fragment.redStruct;
-		i = data.length;
-		while (i--) {
-			tData = data[i];
-			this.uniformBuffer_fragment.GPUBuffer.setSubData(tData['offset'], tData.targetKey ? this[tData.targetKey][tData.valueName] : this[tData.valueName]);
+			if (tData = dataVertex[i]) this.uniformBuffer_vertex.GPUBuffer.setSubData(tData['offset'], tData.targetKey ? this[tData.targetKey][tData.valueName] : this[tData.valueName]);
+			if (tData = dataFragment[i]) this.uniformBuffer_fragment.GPUBuffer.setSubData(tData['offset'], tData.targetKey ? this[tData.targetKey][tData.valueName] : this[tData.valueName]);
 		}
 	}
 
