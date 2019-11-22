@@ -1,7 +1,9 @@
 "use strict"
-let UUID = 0
+let UUID = 1
 export default class RedUUID {
-
+	static makeUUID(){
+		return UUID++
+	}
 	constructor() {
 		this._UUID = UUID++;
 	}

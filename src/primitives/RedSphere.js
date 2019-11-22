@@ -83,7 +83,7 @@ export default class RedSphere {
 					[
 						new RedInterleaveInfo('vertexPosition', 'float3'),
 						new RedInterleaveInfo('vertexNormal', 'float3'),
-						new RedInterleaveInfo('texCord', 'float2')
+						new RedInterleaveInfo('texcoord', 'float2')
 					]
 				),
 				new RedBuffer(
