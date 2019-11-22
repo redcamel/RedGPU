@@ -72,7 +72,6 @@ export default class RedRender {
 
 				if (tMaterial.bindings) {
 					if (!tMesh.GPUBindGroup) {
-						console.log(tMesh)
 						tMaterial.bindings[0]['resource']['buffer'] = tMesh.uniformBuffer_vertex.GPUBuffer;
 						tMaterial.bindings[1]['resource']['buffer'] = tMesh.uniformBuffer_fragment.GPUBuffer;
 						tMesh.GPUBindGroup = this.#redGPU.device.createBindGroup(tMaterial.uniformBindGroupDescriptor);

@@ -40,6 +40,7 @@ export default class RedShaderModule_GLSL {
 			this.GPUShaderModule = this.shaderModuleMap.get(key);
 			return this.GPUShaderModule
 		} else {
+
 			this.shaderModuleDescriptor = {
 				key: key,
 				code: await this.#redGPU.glslang.compileGLSL(this.sourceMap.get(key), this.type),

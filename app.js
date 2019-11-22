@@ -25,7 +25,7 @@ import RedColorPhongMaterial from "./src/material/RedColorPhongMaterial.js";
 	let redGPU = new RedGPU(cvs, glslang);
 
 	requestAnimationFrame(function () {
-		let MAX = 100;
+		let MAX = 250;
 		let i = MAX;
 		let tView;
 		let tScene = new RedScene();
@@ -40,12 +40,11 @@ import RedColorPhongMaterial from "./src/material/RedColorPhongMaterial.js";
 		];
 
 		let tMat1 = new RedColorMaterial(redGPU, '#00ee22');
-		let tMat2 = new RedBitmapMaterial(redGPU, testTextureList[0]);
-		let tMat3 = new RedStandardMaterial(redGPU, testTextureList[1]);
-		let tMat4 = new RedStandardMaterial(redGPU, testTextureList[1], testTextureList[2]);
+		let tMat2 = new RedColorPhongMaterial(redGPU, '#ff0000');
+		let tMat3 = new RedBitmapMaterial(redGPU, testTextureList[0]);
+		let tMat4 = new RedStandardMaterial(redGPU, testTextureList[1]);
+		let tMat5 = new RedStandardMaterial(redGPU, testTextureList[1], testTextureList[2]);
 
-
-		if (i > 2000) i = 2000;
 
 		let randomGeometry = function () {
 			return Math.random() > 0.5
@@ -58,7 +57,7 @@ import RedColorPhongMaterial from "./src/material/RedColorPhongMaterial.js";
 			let testMesh = new RedMesh(
 				redGPU,
 				randomGeometry(),
-				i > MAX / 2 ? tMat1 : Math.random() > 0.5 ? tMat2 : Math.random() > 0.5 ? tMat3 : tMat4
+				i > MAX / 2 ? tMat1 : Math.random() > 0.5 ? tMat2 : Math.random() > 0.5 ? tMat3 : Math.random() > 0.5 ? tMat4 : tMat5
 			);
 			testMesh.x = Math.random() * 30 - 15;
 			testMesh.y = Math.random() * 30 - 15;
