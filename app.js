@@ -12,6 +12,7 @@ import RedPlane from "./src/primitives/RedPlane.js";
 import RedScene from "./src/RedScene.js";
 import RedView from "./src/RedView.js";
 import RedColorMaterial from "./src/material/RedColorMaterial.js";
+import RedColorPhongMaterial from "./src/material/RedColorPhongMaterial.js";
 
 
 (async function () {

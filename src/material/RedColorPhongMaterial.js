@@ -1,10 +1,9 @@
 "use strict";
 import RedTypeSize from "../resources/RedTypeSize.js";
 import RedBaseMaterial from "../base/RedBaseMaterial.js";
-import RedUtil from "../util/RedUtil.js";
+import RedColorMaterial from "./RedColorMaterial.js";
 
-
-export default class RedColorMaterial extends RedBaseMaterial {
+export default class RedColorPhongMaterial extends RedColorMaterial {
 
 	static vertexShaderGLSL = `
 	#version 450
@@ -35,7 +34,7 @@ export default class RedColorMaterial extends RedBaseMaterial {
 	void main() {
 		outColor = uniforms.color;
 	}
-	`;
+`;
 	static PROGRAM_OPTION_LIST = [];
 	static uniformsBindGroupLayoutDescriptor = {
 		bindings: [
@@ -66,64 +65,11 @@ export default class RedColorMaterial extends RedBaseMaterial {
 		]
 	};
 
-	#color = '#ff0000';
-	#alpha = 1;
-	#colorRGBA = new Float32Array([1, 0, 0, this.#alpha]);
 
 	constructor(redGPU, color = '#ff0000', alpha = 1) {
-		super(redGPU);
-		this.color = color;
-		this.alpha = alpha;
-		this.resetBindingInfo()
+		super(redGPU, color = '#ff0000', alpha = 1);
 	}
 
-	get color() {
-		return this.#color;
-	}
 
-	set color(hex) {
-		this.#color = hex;
-		let rgb = RedUtil.hexToRGB_ZeroToOne(hex);
-		this.#colorRGBA[0] = rgb[0];
-		this.#colorRGBA[1] = rgb[1];
-		this.#colorRGBA[2] = rgb[2];
-		this.#colorRGBA[3] = this.#alpha;
-	}
 
-	get alpha() {
-		return this.#alpha;
-	}
-
-	set alpha(value) {
-		this.#alpha = this.#colorRGBA[3] = value;
-	}
-
-	get colorRGBA() {
-		return this.#colorRGBA;
-	}
-
-	resetBindingInfo() {
-		this.bindings = null;
-		this.searchModules();
-		this.bindings = [
-			{
-				binding: 0,
-				resource: {
-					buffer: null,
-					offset: 0,
-					size: this.uniformBufferDescriptor_vertex.size
-				}
-			},
-			{
-				binding: 1,
-				resource: {
-					buffer: null,
-					offset: 0,
-					size: this.uniformBufferDescriptor_fragment.size
-				}
-			}
-		];
-		this.setUniformBindGroupDescriptor();
-		console.log(this.#colorRGBA);
-	}
 }
