@@ -11,6 +11,7 @@ import RedCylinder from "./src/primitives/RedCylinder.js";
 import RedPlane from "./src/primitives/RedPlane.js";
 import RedScene from "./src/RedScene.js";
 import RedView from "./src/RedView.js";
+import RedColorMaterial from "./src/material/RedColorMaterial.js";
 
 
 (async function () {
@@ -23,7 +24,7 @@ import RedView from "./src/RedView.js";
 	let redGPU = new RedGPU(cvs, glslang);
 
 	requestAnimationFrame(function () {
-		let MAX = 500;
+		let MAX = 100;
 		let i = MAX;
 		let tView;
 		let tScene = new RedScene();
@@ -37,10 +38,11 @@ import RedView from "./src/RedView.js";
 			new RedBitmapTexture(redGPU, 'assets/crate.png')
 		];
 
-		let tMat1 = new RedBitmapMaterial(redGPU, testTextureList[0]);
-		let tMat2 = new RedStandardMaterial(redGPU, testTextureList[1]);
-		let tMat3 = new RedStandardMaterial(redGPU, testTextureList[1], testTextureList[2]);
-		let tMat4 = new RedStandardMaterial(redGPU, testTextureList[0], testTextureList[2]);
+		let tMat1 = new RedColorMaterial(redGPU, '#00ee22');
+		let tMat2 = new RedBitmapMaterial(redGPU, testTextureList[0]);
+		let tMat3 = new RedStandardMaterial(redGPU, testTextureList[1]);
+		let tMat4 = new RedStandardMaterial(redGPU, testTextureList[1], testTextureList[2]);
+
 
 		if (i > 2000) i = 2000;
 
@@ -66,7 +68,7 @@ import RedView from "./src/RedView.js";
 
 			let testMesh2 = new RedMesh(
 				redGPU,
-				new RedSphere(redGPU,1, 16, 16, 16) ,
+				new RedSphere(redGPU, 1, 16, 16, 16),
 				tMat2
 			);
 			testMesh2.x = 2
@@ -102,7 +104,7 @@ import RedView from "./src/RedView.js";
 				tChildren[i].rotationX += 1;
 				tChildren[i].rotationY += 1;
 				tChildren[i].rotationZ += 1;
-				tChildren[i].children[0].rotationY +=2
+				tChildren[i].children[0].rotationY += 2
 			}
 
 

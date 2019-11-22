@@ -12,6 +12,11 @@ let makeUniformBindLayout = function (redGPU, uniformsBindGroupLayoutDescriptor)
 	return uniformsBindGroupLayout
 };
 export default class RedBaseMaterial {
+	static uniformBufferDescriptor_empty = {
+		size: 1,
+		usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+		redStruct: []
+	};
 	static GLSL_SystemUniforms = `
 	layout(set=0,binding = 0) uniform SystemUniforms {
         mat4 perspectiveMTX;
@@ -19,7 +24,8 @@ export default class RedBaseMaterial {
     } systemUniforms;
     `;
 
-	uniformBufferDescriptor;
+	uniformBufferDescriptor_vertex;
+	uniformBufferDescriptor_fragment;
 	GPUBindGroupLayout;
 	vShaderModule;
 	fShaderModule;
@@ -34,10 +40,12 @@ export default class RedBaseMaterial {
 		if (!(vShaderModule = TABLE.get(vertexGLSL))) TABLE.set(vertexGLSL, vShaderModule = new RedShaderModule_GLSL(redGPU, 'vertex', materialClass, vertexGLSL, programOptionList));
 		if (!(fShaderModule = TABLE.get(fragmentGLSL))) TABLE.set(fragmentGLSL, fShaderModule = new RedShaderModule_GLSL(redGPU, 'fragment', materialClass, fragmentGLSL, programOptionList));
 
-		if (!materialClass.uniformBufferDescriptor) throw new Error(`${materialClass.name} : uniformBufferDescriptor 를 정의해야함`);
+		if (!materialClass.uniformBufferDescriptor_vertex) throw new Error(`${materialClass.name} : uniformBufferDescriptor_vertex 를 정의해야함`);
+		if (!materialClass.uniformBufferDescriptor_fragment) throw new Error(`${materialClass.name} : uniformBufferDescriptor_fragment 를 정의해야함`);
 		if (!materialClass.uniformsBindGroupLayoutDescriptor) throw  new Error(`${materialClass.name} : uniformsBindGroupLayoutDescriptor 를  정의해야함`);
 
-		this.uniformBufferDescriptor = materialClass.uniformBufferDescriptor;
+		this.uniformBufferDescriptor_vertex = materialClass.uniformBufferDescriptor_vertex;
+		this.uniformBufferDescriptor_fragment = materialClass.uniformBufferDescriptor_fragment;
 		this.GPUBindGroupLayout = makeUniformBindLayout(redGPU, materialClass.uniformsBindGroupLayoutDescriptor);
 		this.vShaderModule = vShaderModule;
 		this.fShaderModule = fShaderModule;
