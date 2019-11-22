@@ -5,17 +5,10 @@ export default class RedRender {
 	#swapChainTexture;
 	#textureView;
 	#renderView = redView => {
-		let prevPipeline;
-		let prevVertexBuffer;
-		let prevIndexBuffer;
-		let prevBindBuffer;
 		let tScene, tSceneBackgroundColor_rgba;
-		let tMaterial;
-		let tMesh;
-		let i;
 		tScene = redView.scene;
 		tSceneBackgroundColor_rgba = tScene.backgroundColorRGBA;
-		i = tScene.children.length;
+
 
 		// console.log(swapChain.getCurrentTexture())
 		const renderPassDescriptor = {
@@ -42,45 +35,59 @@ export default class RedRender {
 
 		// 시스템 유니폼 업데이트
 		this.#redGPU.updateSystemUniform(passEncoder, redView); //TODO - 이놈을 뷰가 가져가야함
-
-		while (i--) {
-			tMesh = tScene.children[i];
-			tMaterial = tMesh.material;
-			if (tMesh.dirtyTransform) {
-				tMesh.getTransform();
-				tMesh.getNormalTransform();
-				// TODO 유니폼 버퍼를 동적생성하는 부분을 잘생각해야함
-				tMesh.updateUniformBuffer();
-				tMesh.dirtyTransform = false
-			}
-
-
-			if (!tMesh.pipeline || tMesh._prevBindings != tMaterial.bindings) tMesh.createPipeline(this.#redGPU);
-
-			if (prevPipeline != tMesh.pipeline) passEncoder.setPipeline(prevPipeline = tMesh.pipeline);
-			if (prevVertexBuffer != tMesh.geometry.interleaveBuffer) passEncoder.setVertexBuffer(0, prevVertexBuffer = tMesh.geometry.interleaveBuffer.GPUBuffer);
-			if (prevIndexBuffer != tMesh.geometry.indexBuffer) passEncoder.setIndexBuffer(prevIndexBuffer = tMesh.geometry.indexBuffer.GPUBuffer);
-
-			if (tMaterial.bindings) {
-				if (!tMesh.GPUBindGroup) {
-					tMaterial.bindings[0]['resource']['buffer'] = tMesh.uniformBuffer.GPUBuffer;
-					tMesh.GPUBindGroup = this.#redGPU.device.createBindGroup(tMaterial.uniformBindGroupDescriptor)
-				}
-				if (prevBindBuffer != tMesh.GPUBindGroup) passEncoder.setBindGroup(1, prevBindBuffer = tMesh.GPUBindGroup);
-				passEncoder.drawIndexed(tMesh.geometry.indexBuffer.indexNum, 1, 0, 0, 0);
-
-			} else {
-				tMesh.GPUBindGroup = null;
-				tMesh.pipeline = null
-			}
-			tMesh._prevBindings = tMaterial.bindings
-
-
-		}
+		this.#renderScene(passEncoder, tScene)
 		passEncoder.endPass();
 		this.#redGPU.device.defaultQueue.submit([commandEncoder.finish()]);
+	};
+	#renderScene = (_ => {
+		let prevPipeline;
+		let prevVertexBuffer;
+		let prevIndexBuffer;
+		let prevBindBuffer;
 
-	}
+
+		return (passEncoder, parent, parentDirty) => {
+			let i;
+			let targetList = parent.children
+			let tMaterial;
+			let tMesh;
+			let tDirty;
+			i = targetList.length;
+			while (i--) {
+				tMesh = targetList[i];
+				tMaterial = tMesh.material;
+				tDirty = tMesh.dirtyTransform;
+				if (tDirty || parentDirty) {
+					// TODO 매트릭스 계산부분을 여기로 나중에 다들고 오는게 성능에 좋음...
+					tMesh.calcTransform(parent);
+					tMesh.updateUniformBuffer();
+				}
+
+
+				if (!tMesh.pipeline || tMesh._prevBindings != tMaterial.bindings) tMesh.createPipeline(this.#redGPU);
+
+				if (prevPipeline != tMesh.pipeline) passEncoder.setPipeline(prevPipeline = tMesh.pipeline);
+				if (prevVertexBuffer != tMesh.geometry.interleaveBuffer) passEncoder.setVertexBuffer(0, prevVertexBuffer = tMesh.geometry.interleaveBuffer.GPUBuffer);
+				if (prevIndexBuffer != tMesh.geometry.indexBuffer) passEncoder.setIndexBuffer(prevIndexBuffer = tMesh.geometry.indexBuffer.GPUBuffer);
+
+				if (tMaterial.bindings) {
+					if (!tMesh.GPUBindGroup) {
+						tMaterial.bindings[0]['resource']['buffer'] = tMesh.uniformBuffer.GPUBuffer;
+						tMesh.GPUBindGroup = this.#redGPU.device.createBindGroup(tMaterial.uniformBindGroupDescriptor);
+					}
+					if (prevBindBuffer != tMesh.GPUBindGroup) passEncoder.setBindGroup(1, prevBindBuffer = tMesh.GPUBindGroup);
+					passEncoder.drawIndexed(tMesh.geometry.indexBuffer.indexNum, 1, 0, 0, 0);
+
+				} else {
+					tMesh.GPUBindGroup = null;
+					tMesh.pipeline = null;
+				}
+				tMesh._prevBindings = tMaterial.bindings;
+				if (tMesh.children.length) this.#renderScene(passEncoder, tMesh, parentDirty || tDirty);
+				tMesh.dirtyTransform = false;
+			}
+		}
+	})()
 
 	render(time, redGPU, redView) {
 		this.#redGPU = redGPU;

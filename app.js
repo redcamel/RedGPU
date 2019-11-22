@@ -1,5 +1,5 @@
 import RedGPU from "./src/RedGPU.js";
-import RedMesh from "./src/object/RedMesh.js";
+import RedMesh from "./src/object3D/RedMesh.js";
 import RedStandardMaterial from "./src/material/RedStandardMaterial.js";
 import RedRender from "./src/renderer/RedRender.js";
 import RedBitmapMaterial from "./src/material/RedBitmapMaterial.js";
@@ -23,7 +23,7 @@ import RedView from "./src/RedView.js";
 	let redGPU = new RedGPU(cvs, glslang);
 
 	requestAnimationFrame(function () {
-		let MAX = 1000;
+		let MAX = 500;
 		let i = MAX;
 		let tView;
 		let tScene = new RedScene();
@@ -64,6 +64,24 @@ import RedView from "./src/RedView.js";
 			// testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = Math.random();
 			tScene.addChild(testMesh)
 
+			let testMesh2 = new RedMesh(
+				redGPU,
+				new RedSphere(redGPU,1, 16, 16, 16) ,
+				tMat2
+			);
+			testMesh2.x = 2
+			testMesh2.scaleX = testMesh2.scaleY = testMesh2.scaleZ = 0.5;
+			testMesh.addChild(testMesh2)
+
+			let testMesh3 = new RedMesh(
+				redGPU,
+				new RedSphere(redGPU),
+				tMat3
+			);
+			testMesh3.x = 2
+			testMesh3.scaleX = testMesh3.scaleY = testMesh3.scaleZ = 0.5;
+			testMesh2.addChild(testMesh3)
+
 		}
 
 		let renderer = new RedRender();
@@ -72,15 +90,19 @@ import RedView from "./src/RedView.js";
 			tView.camera.x = Math.sin(time / 3000) * 30;
 			tView.camera.y = Math.cos(time / 4000) * 30;
 			tView.camera.z = Math.cos(time / 3000) * 30;
+			// tView.camera.x = 10;
+			// tView.camera.y =10;
+			// tView.camera.z = 10;
 			tView.camera.lookAt(0, 0, 0);
 			renderer.render(time, redGPU, tView);
 
 			let tChildren = tView.scene.children
-			let i = tChildren.length / 5;
+			let i = tChildren.length;
 			while (i--) {
 				tChildren[i].rotationX += 1;
 				tChildren[i].rotationY += 1;
 				tChildren[i].rotationZ += 1;
+				tChildren[i].children[0].rotationY +=2
 			}
 
 
