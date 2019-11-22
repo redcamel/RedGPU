@@ -2,6 +2,7 @@
 
 import RedUniformBuffer from "../buffer/RedUniformBuffer.js";
 import RedDisplayContainer from "./RedDisplayContainer.js";
+import RedUUID from "./RedUUID.js";
 
 export default class RedBaseObject3D extends RedDisplayContainer {
 	#x = 0;
@@ -238,6 +239,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 		let pipeline = device.createRenderPipeline(descriptor);
 		this.pipeline = pipeline;
+		this.pipeline._UUID = RedUUID.makeUUID()
 		return this.pipeline
 	}
 

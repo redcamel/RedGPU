@@ -1,7 +1,7 @@
 "use strict";
 import RedUUID from "../base/RedUUID.js";
 
-export default class RedBuffer extends RedUUID{
+export default class RedBuffer extends RedUUID {
 	static TYPE_VERTEX = 'vertexBuffer';
 	static TYPE_INDEX = 'indexBuffer';
 
@@ -26,9 +26,10 @@ export default class RedBuffer extends RedUUID{
 			usage: tUsage
 		};
 		this.originData = data;
-		this.GPUBuffer = redGPU.device.createBuffer(this.bufferDescriptor);
+		this.GPUBuffer =  redGPU.device.createBuffer(this.bufferDescriptor);
 		this.GPUBuffer.setSubData(0, data);
 		redGPU.state.RedBuffer[bufferType].set(typeKey, this);
+
 		console.log(this);
 	}
 }

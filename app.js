@@ -25,7 +25,7 @@ import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 	console.log(glslang);
 	let redGPU = new RedGPU(cvs, glslang,
 		function () {
-			let MAX = 2000;
+			let MAX = 5000;
 			let i = MAX;
 			let tView;
 			let tScene = new RedScene();
@@ -59,6 +59,7 @@ import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 				let testMesh = new RedMesh(
 					redGPU,
 					randomGeometry(),
+					// tMat1
 					i > MAX / 2 ? tMat1 : i > MAX / 4 ? tMat2 : i > MAX / 8 ? tMat3 : i > MAX / 16 ? tMat4 : tMat5
 				);
 				testMesh.x = Math.random() * 30 - 15;
