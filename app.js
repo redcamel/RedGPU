@@ -13,6 +13,7 @@ import RedScene from "./src/RedScene.js";
 import RedView from "./src/RedView.js";
 import RedColorMaterial from "./src/material/RedColorMaterial.js";
 import RedColorPhongMaterial from "./src/material/RedColorPhongMaterial.js";
+import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 
 
 (async function () {
@@ -30,6 +31,8 @@ import RedColorPhongMaterial from "./src/material/RedColorPhongMaterial.js";
 		let tView;
 		let tScene = new RedScene();
 		tView = new RedView(tScene, new RedCamera())
+		let tLight = new RedDirectionalLight()
+		tScene.addLight(tLight)
 
 		redGPU.view = tView
 		let testTextureList = [

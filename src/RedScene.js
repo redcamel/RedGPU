@@ -41,7 +41,7 @@ export default class RedScene extends RedDisplayContainer {
 	addLight(light) {
 		switch (light.constructor) {
 			case RedDirectionalLight:
-				this.#directionalLightList[light.constructor].add(light);
+				this.#directionalLightList.add(light);
 				break;
 			default:
 				RedUtil.throwFunc('addLight : RedBaseLight 인스턴스만 가능');
