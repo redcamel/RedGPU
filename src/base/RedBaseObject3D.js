@@ -18,7 +18,8 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 	#material;
 	#geometry;
 	#redGPU;
-	uniformBuffer;
+	uniformBuffer_vertex;
+	uniformBuffer_fragment;
 	//
 	#useDepthTest = true;
 	#depthTestFunc = 'less-equal';
@@ -28,7 +29,8 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 	constructor(redGPU) {
 		super();
 		this.#redGPU = redGPU;
-		this.uniformBuffer = new RedUniformBuffer(redGPU);
+		this.uniformBuffer_vertex = new RedUniformBuffer(redGPU);
+		this.uniformBuffer_fragment = new RedUniformBuffer(redGPU);
 		this.normalMatrix = mat4.create();
 		this.matrix = mat4.create()
 		this.localMatrix = mat4.create()
@@ -139,7 +141,8 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	set material(v) {
 		this.#material = v;
-		this.uniformBuffer.setBuffer(v.uniformBufferDescriptor);
+		this.uniformBuffer_vertex.setBuffer(v.uniformBufferDescriptor_vertex);
+		this.uniformBuffer_fragment.setBuffer(v.uniformBufferDescriptor_fragment);
 		this.pipeline = null;
 		this.dirtyTransform = true
 	}
@@ -212,6 +215,11 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 						srcFactor: "src-alpha",
 						dstFactor: "one-minus-src-alpha",
 						operation: "add"
+					},
+					colorBlend: {
+						srcFactor: "src-alpha",
+						dstFactor: "one-minus-src-alpha",
+						operation: "add"
 					}
 				}
 			],
@@ -269,8 +277,19 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 	}
 
 	updateUniformBuffer() {
-		for (const data of this.material.uniformBufferDescriptor.redStruct) {
-			this.uniformBuffer.GPUBuffer.setSubData(data['offset'], this[data.valueName]);
+		let i;
+		let data, tData;
+		data = this.material.uniformBufferDescriptor_vertex.redStruct;
+		i = data.length;
+		while (i--) {
+			tData = data[i];
+			this.uniformBuffer_vertex.GPUBuffer.setSubData(tData['offset'], tData.targetKey ? this[tData.targetKey][tData.valueName] : this[tData.valueName]);
+		}
+		data = this.material.uniformBufferDescriptor_fragment.redStruct;
+		i = data.length;
+		while (i--) {
+			tData = data[i];
+			this.uniformBuffer_fragment.GPUBuffer.setSubData(tData['offset'], tData.targetKey ? this[tData.targetKey][tData.valueName] : this[tData.valueName]);
 		}
 	}
 

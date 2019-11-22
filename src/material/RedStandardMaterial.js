@@ -129,7 +129,7 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 			}
 		]
 	};
-	static uniformBufferDescriptor = {
+	static uniformBufferDescriptor_vertex = {
 		size: RedTypeSize.mat4 * 2,
 		usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
 		redStruct: [
@@ -137,6 +137,7 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 			{offset: RedTypeSize.mat4, valueName: 'normalMatrix'}
 		]
 	};
+	static uniformBufferDescriptor_fragment = RedBaseMaterial.uniformBufferDescriptor_empty;
 	#redGPU;
 	#diffuseTexture;
 	#normalTexture;
@@ -200,7 +201,7 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 				resource: {
 					buffer: null,
 					offset: 0,
-					size: this.uniformBufferDescriptor.size
+					size: this.uniformBufferDescriptor_vertex.size
 				}
 			},
 			{

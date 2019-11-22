@@ -64,7 +64,7 @@ export default class RedRender {
 				}
 
 
-				if (!tMesh.pipeline || tMesh._prevBindings != tMaterial.bindings) tMesh.createPipeline(this.#redGPU);
+				if (!tMesh.pipeline || tMaterial.bindings && tMesh._prevBindings != tMaterial.bindings) tMesh.createPipeline(this.#redGPU);
 
 				if (prevPipeline != tMesh.pipeline) passEncoder.setPipeline(prevPipeline = tMesh.pipeline);
 				if (prevVertexBuffer != tMesh.geometry.interleaveBuffer) passEncoder.setVertexBuffer(0, prevVertexBuffer = tMesh.geometry.interleaveBuffer.GPUBuffer);
@@ -72,7 +72,9 @@ export default class RedRender {
 
 				if (tMaterial.bindings) {
 					if (!tMesh.GPUBindGroup) {
-						tMaterial.bindings[0]['resource']['buffer'] = tMesh.uniformBuffer.GPUBuffer;
+						console.log(tMesh)
+						tMaterial.bindings[0]['resource']['buffer'] = tMesh.uniformBuffer_vertex.GPUBuffer;
+						tMaterial.bindings[1]['resource']['buffer'] = tMesh.uniformBuffer_fragment.GPUBuffer;
 						tMesh.GPUBindGroup = this.#redGPU.device.createBindGroup(tMaterial.uniformBindGroupDescriptor);
 					}
 					if (prevBindBuffer != tMesh.GPUBindGroup) passEncoder.setBindGroup(1, prevBindBuffer = tMesh.GPUBindGroup);

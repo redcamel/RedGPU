@@ -27,7 +27,7 @@ export default class RedBitmapTexture {
 				imageCanvasContext.translate(0, img.height);
 				imageCanvasContext.scale(1, -1);
 				imageCanvasContext.drawImage(img, 0, 0, img.width, img.height);
-				const imageData = imageCanvasContext.getImageData(0, 0, img.width, img.height);
+				const imageData = await imageCanvasContext.getImageData(0, 0, img.width, img.height);
 
 				let data = null;
 
