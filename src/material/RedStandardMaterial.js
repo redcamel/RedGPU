@@ -8,8 +8,8 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 
 	static vertexShaderGLSL = `
 	#version 450
-    ${RedBaseMaterial.GLSL_SystemUniforms}
-    layout(set=1,binding = 0) uniform Uniforms {
+    ${RedBaseMaterial.GLSL_SystemUniforms_vertex}
+    layout(set = 2,binding = 0) uniform Uniforms {
         mat4 modelMTX;
         mat4 normalMTX;
     } uniforms;
@@ -29,12 +29,13 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 	`;
 	static fragmentShaderGLSL = `
 	#version 450
+	${RedBaseMaterial.GLSL_SystemUniforms_fragment}
 	layout(location = 0) in vec3 vNormal;
 	layout(location = 1) in vec2 vUV;
 	layout(location = 2) in vec4 vVertexPosition;
-	layout(set = 1, binding = 1) uniform sampler uSampler;
-	layout(set = 1, binding = 2) uniform texture2D uDiffuseTexture;
-	layout(set = 1, binding = 3) uniform texture2D uNormalTexture;
+	layout(set = 2, binding = 1) uniform sampler uSampler;
+	layout(set = 2, binding = 2) uniform texture2D uDiffuseTexture;
+	layout(set = 2, binding = 3) uniform texture2D uNormalTexture;
 	layout(location = 0) out vec4 outColor;
 	
 	mat3 cotangent_frame(vec3 N, vec3 p, vec2 uv)
@@ -77,9 +78,9 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 		vec4 la = vec4(0.0, 0.0, 0.0, 0.2);
 		vec4 ls = vec4(0.0, 0.0, 0.0, 1.0);
 		vec4 specularLightColor = vec4(1.0);
-		vec3 lightPosition = vec3( 5, 5, 5);
+		vec3 lightPosition = systemUniforms.directionalLightPosition;
 	    vec3 L = normalize(-lightPosition);	
-	    vec4 lightColor = vec4(1.0);
+	    vec4 lightColor = systemUniforms.directionalLightColor;
 	    float lambertTerm = dot(N,-L);
 	    float intensity = 1.0;
 	    float shininess = 16.0;

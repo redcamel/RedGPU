@@ -26,7 +26,7 @@ import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 	let redGPU = new RedGPU(cvs, glslang,
 		function () {
 
-			let MAX = 2000;
+			let MAX = 1000;
 			let i = MAX;
 			let tView;
 			let tScene = new RedScene();
@@ -42,8 +42,8 @@ import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 				new RedBitmapTexture(redGPU, 'assets/crate.png')
 			];
 
-			let tMat1 = new RedColorMaterial(redGPU, '#00ee22');
-			let tMat2 = new RedColorPhongMaterial(redGPU, '#ff0000');
+			let tMat1 = new RedColorMaterial(redGPU, '#ff0000');
+			let tMat2 = new RedColorPhongMaterial(redGPU, '#ffff00');
 			let tMat3 = new RedBitmapMaterial(redGPU, testTextureList[0]);
 			let tMat4 = new RedStandardMaterial(redGPU, testTextureList[1]);
 			let tMat5 = new RedStandardMaterial(redGPU, testTextureList[1], testTextureList[2]);
@@ -95,20 +95,28 @@ import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 				tView.camera.x = Math.sin(time / 3000) * 30;
 				tView.camera.y = Math.cos(time / 4000) * 30;
 				tView.camera.z = Math.cos(time / 3000) * 30;
+				// tView.camera.x = 30;
+				// tView.camera.y = 30;
+				// tView.camera.z = 30;
+
+				tLight.x = Math.cos(time / 1000) * 30;
+				tLight.y = Math.sin(time / 1000) * 30;
+				tLight.z = Math.cos(time / 1000) * 30;
+
 				// tView.camera.x = 10;
 				// tView.camera.y =10;
 				// tView.camera.z = 10;
 				tView.camera.lookAt(0, 0, 0);
 				renderer.render(time, redGPU, tView);
 
-				// let tChildren = tView.scene.children
-				// let i = tChildren.length;
-				// while (i--) {
-				// 	tChildren[i].rotationX += 1;
-				// 	tChildren[i].rotationY += 1;
-				// 	tChildren[i].rotationZ += 1;
-				// 	// tChildren[i].children[0].rotationY += 2
-				// }
+				let tChildren = tView.scene.children
+				let i = tChildren.length;
+				while (i--) {
+					tChildren[i].rotationX += 1;
+					tChildren[i].rotationY += 1;
+					tChildren[i].rotationZ += 1;
+					// tChildren[i].children[0].rotationY += 2
+				}
 
 
 				requestAnimationFrame(render);

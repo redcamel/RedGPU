@@ -6,8 +6,8 @@ import RedUUID from "../base/RedUUID.js";
 export default class RedBitmapMaterial extends RedBaseMaterial {
 	static vertexShaderGLSL = `
 	#version 450
-	${RedBaseMaterial.GLSL_SystemUniforms}
-    layout(set=1,binding = 0) uniform Uniforms {
+	${RedBaseMaterial.GLSL_SystemUniforms_vertex}
+    layout(set=2,binding = 0) uniform Uniforms {
         mat4 modelMatrix;
     } uniforms;
 	layout(location = 0) in vec3 position;
@@ -23,10 +23,11 @@ export default class RedBitmapMaterial extends RedBaseMaterial {
 	`;
 	static fragmentShaderGLSL = `
 	#version 450
+	${RedBaseMaterial.GLSL_SystemUniforms_fragment}
 	layout(location = 0) in vec3 vNormal;
 	layout(location = 1) in vec2 vUV;
-	layout(set = 1, binding = 1) uniform sampler uSampler;
-	layout(set = 1, binding = 2) uniform texture2D uDiffuseTexture;
+	layout(set = 2, binding = 1) uniform sampler uSampler;
+	layout(set = 2, binding = 2) uniform texture2D uDiffuseTexture;
 	layout(location = 0) out vec4 outColor;
 	void main() {
 		vec4 diffuseColor = vec4(0.0);

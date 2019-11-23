@@ -26,10 +26,18 @@ export default class RedBaseMaterial {
 		usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
 		redStruct: []
 	};
-	static GLSL_SystemUniforms = `
+	static GLSL_SystemUniforms_vertex = `
 	layout(set=0,binding = 0) uniform SystemUniforms {
         mat4 perspectiveMTX;
         mat4 cameraMTX;
+    } systemUniforms;
+    `;
+	static GLSL_SystemUniforms_fragment = `
+	layout(set=1,binding = 0) uniform SystemUniforms {
+        // float directionalLightCount;
+        // float directionalLightIntensity;
+        vec4 directionalLightColor;
+        vec3 directionalLightPosition;
     } systemUniforms;
     `;
 

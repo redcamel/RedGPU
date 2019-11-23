@@ -208,7 +208,8 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 			layout: device.createPipelineLayout(
 				{
 					bindGroupLayouts: [
-						redView.systemUniformInfo.GPUBindGroupLayout,
+						redView.systemUniformInfo_vertex.GPUBindGroupLayout,
+						redView.systemUniformInfo_fragment.GPUBindGroupLayout,
 						this._material.GPUBindGroupLayout
 					]
 				}

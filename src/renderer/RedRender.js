@@ -45,7 +45,7 @@ let renderScene = (redGPU, redView, passEncoder, parent, parentDirty) => {
 				passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
 				prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
 			}
-			passEncoder.setBindGroup(1, tMesh.uniformBindGroup.GPUBindGroup); // 바인드 그룹은 매 매쉬마다 다르므로 캐싱할 필요가 없음.
+			passEncoder.setBindGroup(2, tMesh.uniformBindGroup.GPUBindGroup); // 바인드 그룹은 매 매쉬마다 다르므로 캐싱할 필요가 없음.
 			passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
 
 		} else {
