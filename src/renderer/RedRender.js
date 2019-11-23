@@ -52,6 +52,7 @@ let renderScene = (redGPU, passEncoder, parent, parentDirty) => {
 			passEncoder.setBindGroup(1, tMesh.GPUBindGroup); // 바인드 그룹은 매 매쉬마다 다르므로 캐싱할 필요가 없음.
 			passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
 		} else {
+			if(tMesh.GPUBindGroup) tMesh.GPUBindGroup.destroy(); // TODO 리소스해제에 대해서 겁나 신경써야곘음
 			tMesh.GPUBindGroup = null;
 			tMesh.pipeline = null;
 		}
