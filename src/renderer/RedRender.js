@@ -1,7 +1,6 @@
 import RedUUID from "../base/RedUUID.js";
 
 
-
 let renderScene = (redGPU, passEncoder, parent, parentDirty) => {
 	let i;
 	let targetList = parent.children
@@ -27,15 +26,12 @@ let renderScene = (redGPU, passEncoder, parent, parentDirty) => {
 		tMaterialDirty = tMesh._prevMaterialUUID != tMaterial._UUID
 		if (!tMesh.pipeline || tMaterialDirty) {
 			tMesh.createPipeline(redGPU);
+
 		}
 
 		if (tMaterial.bindings) {
-			if (!tMesh.GPUBindGroup) {
-				tMaterial.bindings[0]['resource']['buffer'] = tMesh.uniformBuffer_vertex.GPUBuffer;
-				tMaterial.bindings[1]['resource']['buffer'] = tMesh.uniformBuffer_fragment.GPUBuffer;
-				tMesh.GPUBindGroup = redGPU.device.createBindGroup(tMaterial.uniformBindGroupDescriptor);
-				tMesh.GPUBindGroup._UUID = RedUUID.makeUUID()
-			}
+			if (!tMesh.uniformBindGroup.GPUBindGroup) tMesh.uniformBindGroup.setGPUBindGroup(tMesh, tMaterial)
+
 
 			if (prevPipeline_UUID != tMesh.pipeline._UUID) {
 				passEncoder.setPipeline(tMesh.pipeline);
@@ -49,15 +45,15 @@ let renderScene = (redGPU, passEncoder, parent, parentDirty) => {
 				passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
 				prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
 			}
-			passEncoder.setBindGroup(1, tMesh.GPUBindGroup); // 바인드 그룹은 매 매쉬마다 다르므로 캐싱할 필요가 없음.
+			passEncoder.setBindGroup(1, tMesh.uniformBindGroup.GPUBindGroup); // 바인드 그룹은 매 매쉬마다 다르므로 캐싱할 필요가 없음.
 			passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
+
 		} else {
-			if(tMesh.GPUBindGroup) tMesh.GPUBindGroup.destroy(); // TODO 리소스해제에 대해서 겁나 신경써야곘음
-			tMesh.GPUBindGroup = null;
+			tMesh.uniformBindGroup.clear()
 			tMesh.pipeline = null;
 		}
 		tMesh._prevMaterialUUID = tMaterial._UUID;
-		// if (tMesh.children.length) renderScene(redGPU, passEncoder, tMesh, parentDirty || tDirty);
+		if (tMesh.children.length) renderScene(redGPU, passEncoder, tMesh, parentDirty || tDirty);
 		tMesh._dirtyTransform = false;
 	}
 }

@@ -3,6 +3,7 @@
 import RedUniformBuffer from "../buffer/RedUniformBuffer.js";
 import RedDisplayContainer from "./RedDisplayContainer.js";
 import RedUUID from "./RedUUID.js";
+import RedBindGroup from "../buffer/RedBindGroup.js";
 
 export default class RedBaseObject3D extends RedDisplayContainer {
 	#x = 0;
@@ -21,22 +22,36 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 	#redGPU;
 	uniformBuffer_vertex;
 	uniformBuffer_fragment;
+	uniformBindGroup;
 	//
 	#useDepthTest = true;
 	#depthTestFunc = 'less';
 	#cullMode = 'back';
 	#primitiveTopology = "triangle-list";
 
+
 	constructor(redGPU) {
 		super();
 		this.#redGPU = redGPU;
 		this.uniformBuffer_vertex = new RedUniformBuffer(redGPU);
 		this.uniformBuffer_fragment = new RedUniformBuffer(redGPU);
+		this.uniformBindGroup = new RedBindGroup(redGPU);
 		this.normalMatrix = mat4.create();
 		this.matrix = mat4.create()
 		this.localMatrix = mat4.create()
 	}
-
+	updateUniformBuffer() {
+		//음 전체 속성 업데이트라고 봐야할까나..
+		let i;
+		let dataVertex, dataFragment, tData;
+		dataVertex = this.material.uniformBufferDescriptor_vertex.redStruct;
+		dataFragment = this.material.uniformBufferDescriptor_fragment.redStruct;
+		i = Math.max(dataVertex.length, dataFragment.length);
+		while (i--) {
+			if (tData = dataVertex[i]) this.uniformBuffer_vertex.GPUBuffer.setSubData(tData['offset'], tData.targetKey ? this[tData.targetKey][tData.valueName] : this[tData.valueName]);
+			if (tData = dataFragment[i]) this.uniformBuffer_fragment.GPUBuffer.setSubData(tData['offset'], tData.targetKey ? this[tData.targetKey][tData.valueName] : this[tData.valueName]);
+		}
+	}
 	get dirtyTransform() {
 		return this._dirtyTransform
 	}
@@ -144,6 +159,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 		this._material = v;
 		this.uniformBuffer_vertex.setBuffer(v.uniformBufferDescriptor_vertex);
 		this.uniformBuffer_fragment.setBuffer(v.uniformBufferDescriptor_fragment);
+		this.updateUniformBuffer();
 		this.pipeline = null;
 		this.dirtyTransform = true
 	}
@@ -185,7 +201,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 	}
 
 	createPipeline(redGPU) {
-		this.GPUBindGroup = null;
+		this.uniformBindGroup.clear();
 		const device = redGPU.device;
 		const descriptor = {
 			// 레이아웃은 재질이 알고있으니 들고옴
@@ -278,17 +294,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 			tNMatrix[15] = (a20 * b3 - a21 * b1 + a22 * a30) * b22;
 	}
 
-	updateUniformBuffer() {
-		let i;
-		let dataVertex, dataFragment, tData;
-		dataVertex = this.material.uniformBufferDescriptor_vertex.redStruct;
-		dataFragment = this.material.uniformBufferDescriptor_fragment.redStruct;
-		i = Math.max(dataVertex.length, dataFragment.length);
-		while (i--) {
-			if (tData = dataVertex[i]) this.uniformBuffer_vertex.GPUBuffer.setSubData(tData['offset'], tData.targetKey ? this[tData.targetKey][tData.valueName] : this[tData.valueName]);
-			if (tData = dataFragment[i]) this.uniformBuffer_fragment.GPUBuffer.setSubData(tData['offset'], tData.targetKey ? this[tData.targetKey][tData.valueName] : this[tData.valueName]);
-		}
-	}
+
 
 	calcTransform(parent) {
 		// 일단 로컬을 구함

@@ -25,7 +25,7 @@ import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 	console.log(glslang);
 	let redGPU = new RedGPU(cvs, glslang,
 		function () {
-			let MAX = 5000;
+			let MAX = 1500;
 			let i = MAX;
 			let tView;
 			let tScene = new RedScene();
@@ -67,7 +67,7 @@ import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 				testMesh.rotationX = testMesh.rotationY = testMesh.rotationZ = Math.random() * 360;
 				testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = Math.random() + 0.5;
 				tScene.addChild(testMesh)
-				//
+				// //
 				// let testMesh2 = new RedMesh(
 				// 	redGPU,
 				// 	new RedSphere(redGPU, 1, 16, 16, 16),
