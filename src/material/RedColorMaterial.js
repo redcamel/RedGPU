@@ -2,7 +2,7 @@
 import RedTypeSize from "../resources/RedTypeSize.js";
 import RedBaseMaterial from "../base/RedBaseMaterial.js";
 import RedUtil from "../util/RedUtil.js";
-
+import RedUUID from "../base/RedUUID.js";
 
 export default class RedColorMaterial extends RedBaseMaterial {
 
@@ -124,6 +124,7 @@ export default class RedColorMaterial extends RedBaseMaterial {
 			}
 		];
 		this.setUniformBindGroupDescriptor();
+		this._UUID = RedUUID.makeUUID()
 		console.log(this.#colorRGBA);
 	}
 }

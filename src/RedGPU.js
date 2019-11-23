@@ -96,16 +96,7 @@ export default class RedGPU {
 					}).createView()
 				};
 				/////
-				this.depthTexture = device.createTexture({
-					size: {
-						width: canvas.width,
-						height: canvas.height,
-						depth: 1
-					},
-					format: "depth24plus-stencil8",
-					usage: GPUTextureUsage.OUTPUT_ATTACHMENT
-				});
-				this.depthTextureView = this.depthTexture.createView();
+
 				///////
 				this.setSize('100%', '100%');
 				if (!redGPUList.size) setGlobalResizeEvent();
