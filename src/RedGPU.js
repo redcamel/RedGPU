@@ -6,12 +6,10 @@ let setGlobalResizeEvent = function () {
 	})
 };
 export default class RedGPU {
-
 	#width = 0;
 	#height = 0;
 	view;
-
-	constructor(canvas, glslang,initFunc) {
+	constructor(canvas, glslang, initFunc) {
 		navigator.gpu.requestAdapter().then(adapter => {
 			adapter.requestDevice().then(device => {
 				this.glslang = glslang;
@@ -77,7 +75,6 @@ export default class RedGPU {
 			usage: GPUTextureUsage.OUTPUT_ATTACHMENT
 		});
 		this.depthTextureView = this.depthTexture.createView();
-
 
 
 		if (this.view) {

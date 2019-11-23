@@ -1,9 +1,8 @@
 "use strict"
 import RedUtil from "./util/RedUtil.js"
+import RedTypeSize from "./resources/RedTypeSize.js";
 
 export default class RedView {
-
-
 	#scene;
 	#camera;
 	#x = 0;
@@ -11,15 +10,24 @@ export default class RedView {
 	#width = '100%';
 	#height = '100%';
 	systemUniformInfo;
+	projectionMatrix;
 
 	constructor(redGPU, scene, camera) {
 		this.camera = camera;
 		this.scene = scene;
 		this.systemUniformInfo = this.#makeSystemUniformInfo(redGPU.device);
+		this.projectionMatrix = mat4.create();
 	}
 
 	#makeSystemUniformInfo = function (device) {
-		let uniformBufferSize = 4 * 4 * Float32Array.BYTES_PER_ELEMENT * 2;
+		let uniformBufferSize =
+			RedTypeSize.mat4 + // projectionMatrix
+			RedTypeSize.mat4 + // camera
+			RedTypeSize.float + // directional count
+			RedTypeSize.float + // directional intensity
+			RedTypeSize.float4 +  // directional color
+			RedTypeSize.float3  // directional position
+		;
 		const uniformBufferDescriptor = {
 			size: uniformBufferSize,
 			usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
@@ -51,14 +59,10 @@ export default class RedView {
 			]
 		};
 		let uniformBindGroup = device.createBindGroup(bindGroupDescriptor);
-		let projectionMatrix = mat4.create();
 		return {
 			GPUBuffer: uniformBuffer,
 			GPUBindGroupLayout: uniformBindGroupLayout,
-			GPUBindGroup: uniformBindGroup,
-			data: {
-				projectionMatrix: projectionMatrix
-			}
+			GPUBindGroup: uniformBindGroup
 		}
 
 	};
@@ -72,11 +76,23 @@ export default class RedView {
 		passEncoder.setBindGroup(0, systemUniformInfo.GPUBindGroup);
 
 		let aspect = Math.abs(tView_viewRect[2] / tView_viewRect[3]);
-		mat4.perspective(systemUniformInfo.data.projectionMatrix, (Math.PI / 180) * 60, aspect, 0.01, 10000.0);
+		mat4.perspective(this.projectionMatrix, (Math.PI / 180) * 60, aspect, 0.01, 10000.0);
+		///
+		let offset = 0;
+		systemUniformInfo.GPUBuffer.setSubData(offset, this.projectionMatrix);
+		systemUniformInfo.GPUBuffer.setSubData(offset += RedTypeSize.mat4, this.camera.matrix);
+		let count = this.scene.directionalLightList.size;
+		let tLight;
+		systemUniformInfo.GPUBuffer.setSubData(offset += RedTypeSize.mat4, new Float32Array(count))
+		this.scene.directionalLightList.forEach(function (tLight) {
+			systemUniformInfo.GPUBuffer.setSubData(offset += RedTypeSize.float, new Float32Array(tLight.intensity))
+			systemUniformInfo.GPUBuffer.setSubData(offset += RedTypeSize.float, tLight.colorRGBA)
+			systemUniformInfo.GPUBuffer.setSubData(offset += RedTypeSize.float3, new Float32Array([tLight.x, tLight.y, tLight.z]))
+		})
 
-		systemUniformInfo.GPUBuffer.setSubData(0, systemUniformInfo.data.projectionMatrix);
-		systemUniformInfo.GPUBuffer.setSubData(4 * 4 * Float32Array.BYTES_PER_ELEMENT, this.camera.matrix);
+
 	}
+
 	get scene() {
 		return this.#scene;
 	}

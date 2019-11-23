@@ -26,7 +26,7 @@ import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 	let redGPU = new RedGPU(cvs, glslang,
 		function () {
 
-			let MAX = 1500;
+			let MAX = 2000;
 			let i = MAX;
 			let tView;
 			let tScene = new RedScene();

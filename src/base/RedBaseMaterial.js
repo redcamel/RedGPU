@@ -81,7 +81,6 @@ export default class RedBaseMaterial {
 
 	searchModules() {
 		let tKey = [this.constructor.name];
-		console.log('뭘찾냐', tKey)
 		this.constructor.PROGRAM_OPTION_LIST.forEach(key => {
 			if (this[key]) tKey.push(key);
 		});

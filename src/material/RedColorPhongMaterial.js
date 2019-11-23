@@ -3,12 +3,18 @@ import RedTypeSize from "../resources/RedTypeSize.js";
 import RedBaseMaterial from "../base/RedBaseMaterial.js";
 import RedColorMaterial from "./RedColorMaterial.js";
 import RedUUID from "../base/RedUUID.js";
+
 export default class RedColorPhongMaterial extends RedColorMaterial {
 	static vertexShaderGLSL = `
 	#version 450
 	${RedBaseMaterial.GLSL_SystemUniforms}
     layout(set=1,binding = 0) uniform Uniforms {
         mat4 modelMatrix;
+        float directionalLightCount;
+        float directionalLightIntensity;
+        vec4 directionalLightColor;
+        vec3 directionalLightPosition;
+        
     } uniforms;
 	layout(location = 0) in vec3 position;
 	layout(location = 1) in vec3 normal;
@@ -44,7 +50,7 @@ export default class RedColorPhongMaterial extends RedColorMaterial {
 		vec4 specularLightColor = vec4(1.0);
 		vec3 lightPosition = vec3( 5, 5, 5);
 	    vec3 L = normalize(-lightPosition);	
-	    vec4 lightColor = vec4(1.0);
+	    vec4 lightColor = vec4(1.0,0,0,1);
 	    float lambertTerm = dot(N,-L);
 	    float intensity = 1.0;
 	    float shininess = 16.0;
