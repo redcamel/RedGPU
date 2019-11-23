@@ -1,6 +1,7 @@
 "use strict";
 import RedTypeSize from "../resources/RedTypeSize.js";
 import RedBaseMaterial from "../base/RedBaseMaterial.js";
+import RedUUID from "../base/RedUUID.js";
 
 export default class RedBitmapMaterial extends RedBaseMaterial {
 	static vertexShaderGLSL = `
@@ -120,6 +121,7 @@ export default class RedBitmapMaterial extends RedBaseMaterial {
 			}
 		];
 		this.setUniformBindGroupDescriptor();
+		this._UUID = RedUUID.makeUUID()
 		console.log(this.#diffuseTexture);
 	}
 }

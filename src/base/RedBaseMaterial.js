@@ -1,6 +1,7 @@
 "use strict";
 import RedShaderModule_GLSL from "../resources/RedShaderModule_GLSL.js";
 import RedSampler from "../resources/RedSampler.js";
+import RedUUID from "./RedUUID.js";
 
 let TABLE = new Map();
 let makeUniformBindLayout = function (redGPU, uniformsBindGroupLayoutDescriptor) {
@@ -66,6 +67,7 @@ export default class RedBaseMaterial {
 
 		this.sampler = new RedSampler(redGPU);
 		this.#redGPU = redGPU;
+		this._UUID = RedUUID.makeUUID()
 		console.log('TABLE', TABLE)
 	}
 

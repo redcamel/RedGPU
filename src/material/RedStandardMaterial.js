@@ -2,7 +2,7 @@
 import RedBitmapTexture from '../resources/RedBitmapTexture.js'
 import RedTypeSize from "../resources/RedTypeSize.js";
 import RedBaseMaterial from "../base/RedBaseMaterial.js";
-
+import RedUUID from "../base/RedUUID.js";
 
 export default class RedStandardMaterial extends RedBaseMaterial {
 
@@ -91,15 +91,7 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 			ls +=  specularLightColor * specular * intensity ;
 	    }
 	    
-	    vec3 lightPosition2= vec3( -5, -5, -5);
-	    L = normalize(-lightPosition2);	
-	    vec4 lightColor2 = vec4(1.0,0.0,0.0,0.5);
-	    lambertTerm = dot(N,-L);
-	    if(lambertTerm > 0.0){
-			ld += lightColor2 * diffuseColor * lambertTerm * intensity;
-			specular = pow( max(dot(reflect(L, N), -L), 0.0), shininess) * specularPower ;
-			ls +=  specularLightColor * specular * intensity ;
-	    }
+	
 	    vec4 finalColor = la+ld+ls;
 		
 		outColor = finalColor;
@@ -217,5 +209,6 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 			}
 		];
 		this.setUniformBindGroupDescriptor()
+		this._UUID = RedUUID.makeUUID()
 	}
 }

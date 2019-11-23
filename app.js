@@ -59,14 +59,13 @@ import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 				let testMesh = new RedMesh(
 					redGPU,
 					randomGeometry(),
-					// tMat1
 					i > MAX / 2 ? tMat1 : i > MAX / 4 ? tMat2 : i > MAX / 8 ? tMat3 : i > MAX / 16 ? tMat4 : tMat5
 				);
-				testMesh.x = Math.random() * 30 - 15;
-				testMesh.y = Math.random() * 30 - 15;
-				testMesh.z = Math.random() * 30 - 15;
+				testMesh.x = Math.random() * 60 - 30;
+				testMesh.y = Math.random() * 60 - 30;
+				testMesh.z = Math.random() * 60 - 30;
 				testMesh.rotationX = testMesh.rotationY = testMesh.rotationZ = Math.random() * 360;
-				// testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = Math.random();
+				testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = Math.random() + 0.5;
 				tScene.addChild(testMesh)
 				//
 				// let testMesh2 = new RedMesh(
