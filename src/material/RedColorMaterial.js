@@ -8,8 +8,8 @@ export default class RedColorMaterial extends RedBaseMaterial {
 
 	static vertexShaderGLSL = `
 	#version 450
-	${RedBaseMaterial.GLSL_SystemUniforms}
-    layout(set=1,binding = 0) uniform Uniforms {
+	${RedBaseMaterial.GLSL_SystemUniforms_vertex}
+    layout(set=2,binding = 0) uniform Uniforms {
         mat4 modelMatrix;
     } uniforms;
 	layout(location = 0) in vec3 position;
@@ -26,7 +26,8 @@ export default class RedColorMaterial extends RedBaseMaterial {
 	`;
 	static fragmentShaderGLSL = `
 	#version 450
-	 layout(set=1,binding = 1) uniform Uniforms {
+	${RedBaseMaterial.GLSL_SystemUniforms_fragment}
+	 layout(set=2,binding = 1) uniform Uniforms {
         vec4 color;
     } uniforms;
 	layout(location = 0) in vec3 vNormal;

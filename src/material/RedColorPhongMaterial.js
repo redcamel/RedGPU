@@ -3,54 +3,49 @@ import RedTypeSize from "../resources/RedTypeSize.js";
 import RedBaseMaterial from "../base/RedBaseMaterial.js";
 import RedColorMaterial from "./RedColorMaterial.js";
 import RedUUID from "../base/RedUUID.js";
+
 export default class RedColorPhongMaterial extends RedColorMaterial {
 	static vertexShaderGLSL = `
 	#version 450
-	${RedBaseMaterial.GLSL_SystemUniforms}
-    layout(set=1,binding = 0) uniform Uniforms {
+	${RedBaseMaterial.GLSL_SystemUniforms_vertex}
+    layout(set=2,binding = 0) uniform Uniforms {
         mat4 modelMatrix;
+        mat4 normalMTX;
     } uniforms;
 	layout(location = 0) in vec3 position;
 	layout(location = 1) in vec3 normal;
 	layout(location = 2) in vec2 uv;
 	layout(location = 0) out vec3 vNormal;
 	layout(location = 1) out vec2 vUV;
-
 	void main() {
 		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * uniforms.modelMatrix* vec4(position,1.0);
-		vNormal = normal;
+		vNormal = (uniforms.normalMTX * vec4(normal,1.0)).xyz;
 		vUV = uv;
 	}
 	`;
 	static fragmentShaderGLSL = `
 	#version 450
-	 layout(set=1,binding = 1) uniform Uniforms {
+	${RedBaseMaterial.GLSL_SystemUniforms_fragment}
+	 layout(set=2,binding = 1) uniform Uniforms {
         vec4 color;
     } uniforms;
 	layout(location = 0) in vec3 vNormal;
 	layout(location = 1) in vec2 vUV;
 	layout(location = 0) out vec4 outColor;
 	void main() {
-		
-		vec4 normalColor = vec4(0.0);
-		//#RedGPU#normalTexture# normalColor = texture(sampler2D(uNormalTexture, uSampler), vUV) ;
-	    
-	    vec3 N = normalize(vNormal);
-		//#RedGPU#normalTexture# N = perturb_normal(N, vVertexPosition.xyz, vUV, normalColor.rgb) ;
-		
+		vec3 N = normalize(vNormal);
 		vec4 ld = vec4(0.0, 0.0, 0.0, 1.0);
 		vec4 la = vec4(0.0, 0.0, 0.0, 0.2);
 		vec4 ls = vec4(0.0, 0.0, 0.0, 1.0);
-		vec4 specularLightColor = vec4(1.0);
-		vec3 lightPosition = vec3( 5, 5, 5);
+		vec4 specularLightColor =vec4(1.0);
+		vec3 lightPosition = systemUniforms.directionalLightPosition;
 	    vec3 L = normalize(-lightPosition);	
-	    vec4 lightColor = vec4(1.0);
+	    vec4 lightColor = systemUniforms.directionalLightColor;
 	    float lambertTerm = dot(N,-L);
 	    float intensity = 1.0;
 	    float shininess = 16.0;
 	    float specular;
 	    float specularPower = 1.0;
-	    
 	    if(lambertTerm > 0.0){
 			ld += lightColor * uniforms.color * lambertTerm * intensity;
 			specular = pow( max(dot(reflect(L, N), -L), 0.0), shininess) * specularPower ;
@@ -79,23 +74,24 @@ export default class RedColorPhongMaterial extends RedColorMaterial {
 		]
 	};
 	static uniformBufferDescriptor_vertex = {
-		size: RedTypeSize.mat4,
+		size: RedTypeSize.mat4 * 2,
 		usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
 		redStruct: [
-			{offset: 0, valueName: 'matrix'}
+			{offset: 0, valueName: 'matrix'},
+			{offset: RedTypeSize.mat4, valueName: 'normalMatrix'}
 		]
 	};
 	static uniformBufferDescriptor_fragment = {
 		size: RedTypeSize.float4,
 		usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
 		redStruct: [
-			{offset: 0, valueName: 'colorRGBA', targetKey: 'material'}
+			{offset: 0, valueName: 'colorRGBA', targetKey: 'material'},
 		]
 	};
 
 
 	constructor(redGPU, color = '#ff0000', alpha = 1) {
-		super(redGPU, color = '#ff0000', alpha);
+		super(redGPU, color, alpha);
 	}
 
 	resetBindingInfo() {

@@ -2,10 +2,10 @@
 import RedBaseLight from "../base/RedBaseLight.js";
 
 export default class RedDirectionalLight extends RedBaseLight {
-	constructor() {
+	constructor(color ='#ffffff',alpha=1,intensity=1) {
 		super();
-		this.color = '#ffffff';
-		this.alpha = 1.0;
-		this.intensity = 1.0;
+		this.color = color;
+		this.alpha = alpha;
+		this.intensity = intensity;
 	}
 }

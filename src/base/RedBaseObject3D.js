@@ -200,7 +200,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 		this.#primitiveTopology = value;
 	}
 
-	createPipeline(redGPU) {
+	createPipeline(redGPU, redView) {
 		this.uniformBindGroup.clear();
 		const device = redGPU.device;
 		const descriptor = {
@@ -208,7 +208,8 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 			layout: device.createPipelineLayout(
 				{
 					bindGroupLayouts: [
-						redGPU.systemUniformInfo.GPUBindGroupLayout,
+						redView.systemUniformInfo_vertex.GPUBindGroupLayout,
+						redView.systemUniformInfo_fragment.GPUBindGroupLayout,
 						this._material.GPUBindGroupLayout
 					]
 				}

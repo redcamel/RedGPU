@@ -1,7 +1,7 @@
 import RedUUID from "../base/RedUUID.js";
 
 
-let renderScene = (redGPU, passEncoder, parent, parentDirty) => {
+let renderScene = (redGPU, redView, passEncoder, parent, parentDirty) => {
 	let i;
 	let targetList = parent.children
 	let tGeometry;
@@ -25,7 +25,7 @@ let renderScene = (redGPU, passEncoder, parent, parentDirty) => {
 		}
 		tMaterialDirty = tMesh._prevMaterialUUID != tMaterial._UUID
 		if (!tMesh.pipeline || tMaterialDirty) {
-			tMesh.createPipeline(redGPU);
+			tMesh.createPipeline(redGPU, redView);
 
 		}
 
@@ -45,7 +45,7 @@ let renderScene = (redGPU, passEncoder, parent, parentDirty) => {
 				passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
 				prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
 			}
-			passEncoder.setBindGroup(1, tMesh.uniformBindGroup.GPUBindGroup); // 바인드 그룹은 매 매쉬마다 다르므로 캐싱할 필요가 없음.
+			passEncoder.setBindGroup(2, tMesh.uniformBindGroup.GPUBindGroup); // 바인드 그룹은 매 매쉬마다 다르므로 캐싱할 필요가 없음.
 			passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
 
 		} else {
@@ -89,9 +89,9 @@ export default class RedRender {
 		const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
 
 		// 시스템 유니폼 업데이트
-		this.#redGPU.updateSystemUniform(passEncoder, redView); //TODO - 이놈을 뷰가 가져가야함
+		redView.updateSystemUniform(passEncoder, redGPU);
 
-		renderScene(redGPU, passEncoder, tScene)
+		renderScene(redGPU, redView, passEncoder, tScene)
 		passEncoder.endPass();
 		this.#redGPU.device.defaultQueue.submit([commandEncoder.finish()]);
 	};
