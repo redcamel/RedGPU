@@ -89,7 +89,7 @@ export default class RedRender {
 		const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
 
 		// 시스템 유니폼 업데이트
-		this.#redGPU.updateSystemUniform(passEncoder, redView); //TODO - 이놈을 뷰가 가져가야함
+		redView.updateSystemUniform(passEncoder,redGPU);
 
 		renderScene(redGPU, passEncoder, tScene)
 		passEncoder.endPass();

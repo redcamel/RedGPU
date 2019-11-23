@@ -83,4 +83,18 @@ export default class RedView {
 		}
 		console.log('setLocation', this.#x, this.#y)
 	}
+
+	updateSystemUniform(passEncoder, redGPU) {
+		let tView_viewRect = this.getViewRect(redGPU)
+		// passEncoder.setViewport(tX, tY, this.canvas.width, this.canvas.height, 0, 1);
+		passEncoder.setViewport(...tView_viewRect, 0, 1);
+		passEncoder.setScissorRect(...tView_viewRect);
+		passEncoder.setBindGroup(0, redGPU.systemUniformInfo.GPUBindGroup);
+
+		let aspect = Math.abs(tView_viewRect[2] / tView_viewRect[3]);
+		mat4.perspective(redGPU.systemUniformInfo.data.projectionMatrix, (Math.PI / 180) * 60, aspect, 0.01, 10000.0);
+
+		redGPU.systemUniformInfo.GPUBuffer.setSubData(0, redGPU.systemUniformInfo.data.projectionMatrix);
+		redGPU.systemUniformInfo.GPUBuffer.setSubData(4 * 4 * Float32Array.BYTES_PER_ELEMENT, this.camera.matrix);
+	}
 }

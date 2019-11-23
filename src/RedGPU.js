@@ -55,19 +55,7 @@ export default class RedGPU {
 
 	};
 
-	updateSystemUniform(passEncoder, redView) {
-		let tView_viewRect = redView.getViewRect(this)
-		// passEncoder.setViewport(tX, tY, this.canvas.width, this.canvas.height, 0, 1);
-		passEncoder.setViewport(...tView_viewRect, 0, 1);
-		passEncoder.setScissorRect(...tView_viewRect);
-		passEncoder.setBindGroup(0, this.systemUniformInfo.GPUBindGroup);
 
-		let aspect = Math.abs(tView_viewRect[2] / tView_viewRect[3]);
-		mat4.perspective(this.systemUniformInfo.data.projectionMatrix, (Math.PI / 180) * 60, aspect, 0.01, 10000.0);
-
-		this.systemUniformInfo.GPUBuffer.setSubData(0, this.systemUniformInfo.data.projectionMatrix);
-		this.systemUniformInfo.GPUBuffer.setSubData(4 * 4 * Float32Array.BYTES_PER_ELEMENT, redView.camera.matrix);
-	}
 
 	constructor(canvas, glslang,initFunc) {
 		navigator.gpu.requestAdapter().then(adapter => {
