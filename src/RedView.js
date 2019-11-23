@@ -10,12 +10,73 @@ export default class RedView {
 	#y = 0;
 	#width = '100%';
 	#height = '100%';
+	systemUniformInfo;
 
-	constructor(scene, camera) {
+	constructor(redGPU, scene, camera) {
 		this.camera = camera;
 		this.scene = scene;
+		this.systemUniformInfo = this.#makeSystemUniformInfo(redGPU.device);
 	}
 
+	#makeSystemUniformInfo = function (device) {
+		let uniformBufferSize = 4 * 4 * Float32Array.BYTES_PER_ELEMENT * 2;
+		const uniformBufferDescriptor = {
+			size: uniformBufferSize,
+			usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+			redStruct: [
+				{offset: 0, valueName: 'projectionMatrix'}
+			]
+		};
+		const bindGroupLayoutDescriptor = {
+			bindings: [
+				{
+					binding: 0,
+					visibility: GPUShaderStage.VERTEX,
+					type: "uniform-buffer"
+				}
+			]
+		};
+		let uniformBuffer, uniformBindGroupLayout;
+		const bindGroupDescriptor = {
+			layout: uniformBindGroupLayout = device.createBindGroupLayout(bindGroupLayoutDescriptor),
+			bindings: [
+				{
+					binding: 0,
+					resource: {
+						buffer: uniformBuffer = device.createBuffer(uniformBufferDescriptor),
+						offset: 0,
+						size: uniformBufferSize
+					}
+				}
+			]
+		};
+		let uniformBindGroup = device.createBindGroup(bindGroupDescriptor);
+		let projectionMatrix = mat4.create();
+		return {
+			GPUBuffer: uniformBuffer,
+			GPUBindGroupLayout: uniformBindGroupLayout,
+			GPUBindGroup: uniformBindGroup,
+			data: {
+				projectionMatrix: projectionMatrix
+			}
+		}
+
+	};
+
+	updateSystemUniform(passEncoder, redGPU) {
+		let systemUniformInfo = this.systemUniformInfo;
+		let tView_viewRect = this.getViewRect(redGPU)
+		// passEncoder.setViewport(tX, tY, this.canvas.width, this.canvas.height, 0, 1);
+		passEncoder.setViewport(...tView_viewRect, 0, 1);
+		passEncoder.setScissorRect(...tView_viewRect);
+		passEncoder.setBindGroup(0, systemUniformInfo.GPUBindGroup);
+
+		let aspect = Math.abs(tView_viewRect[2] / tView_viewRect[3]);
+		mat4.perspective(systemUniformInfo.data.projectionMatrix, (Math.PI / 180) * 60, aspect, 0.01, 10000.0);
+
+		systemUniformInfo.GPUBuffer.setSubData(0, systemUniformInfo.data.projectionMatrix);
+		systemUniformInfo.GPUBuffer.setSubData(4 * 4 * Float32Array.BYTES_PER_ELEMENT, this.camera.matrix);
+	}
 	get scene() {
 		return this.#scene;
 	}
@@ -84,17 +145,4 @@ export default class RedView {
 		console.log('setLocation', this.#x, this.#y)
 	}
 
-	updateSystemUniform(passEncoder, redGPU) {
-		let tView_viewRect = this.getViewRect(redGPU)
-		// passEncoder.setViewport(tX, tY, this.canvas.width, this.canvas.height, 0, 1);
-		passEncoder.setViewport(...tView_viewRect, 0, 1);
-		passEncoder.setScissorRect(...tView_viewRect);
-		passEncoder.setBindGroup(0, redGPU.systemUniformInfo.GPUBindGroup);
-
-		let aspect = Math.abs(tView_viewRect[2] / tView_viewRect[3]);
-		mat4.perspective(redGPU.systemUniformInfo.data.projectionMatrix, (Math.PI / 180) * 60, aspect, 0.01, 10000.0);
-
-		redGPU.systemUniformInfo.GPUBuffer.setSubData(0, redGPU.systemUniformInfo.data.projectionMatrix);
-		redGPU.systemUniformInfo.GPUBuffer.setSubData(4 * 4 * Float32Array.BYTES_PER_ELEMENT, this.camera.matrix);
-	}
 }

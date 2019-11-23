@@ -1,7 +1,7 @@
 import RedUUID from "../base/RedUUID.js";
 
 
-let renderScene = (redGPU, passEncoder, parent, parentDirty) => {
+let renderScene = (redGPU, redView, passEncoder, parent, parentDirty) => {
 	let i;
 	let targetList = parent.children
 	let tGeometry;
@@ -25,7 +25,7 @@ let renderScene = (redGPU, passEncoder, parent, parentDirty) => {
 		}
 		tMaterialDirty = tMesh._prevMaterialUUID != tMaterial._UUID
 		if (!tMesh.pipeline || tMaterialDirty) {
-			tMesh.createPipeline(redGPU);
+			tMesh.createPipeline(redGPU, redView);
 
 		}
 
@@ -89,9 +89,9 @@ export default class RedRender {
 		const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
 
 		// 시스템 유니폼 업데이트
-		redView.updateSystemUniform(passEncoder,redGPU);
+		redView.updateSystemUniform(passEncoder, redGPU);
 
-		renderScene(redGPU, passEncoder, tScene)
+		renderScene(redGPU, redView, passEncoder, tScene)
 		passEncoder.endPass();
 		this.#redGPU.device.defaultQueue.submit([commandEncoder.finish()]);
 	};
