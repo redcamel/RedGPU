@@ -230,9 +230,9 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 			},
 			primitiveTopology: this.#primitiveTopology,
 			depthStencilState: {
-				depthWriteEnabled: this.#useDepthTest,
-				depthCompare: this.#depthTestFunc,
 				format: "depth24plus-stencil8",
+				depthWriteEnabled: this.#useDepthTest,
+				depthCompare: this.#useDepthTest ? this.#depthTestFunc : 'always',
 			},
 			//alphaToCoverageEnabled : true // alphaToCoverageEnabled isn't supported (yet)
 		};

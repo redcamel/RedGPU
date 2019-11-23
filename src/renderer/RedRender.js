@@ -27,7 +27,6 @@ let renderScene = (redGPU, passEncoder, parent, parentDirty) => {
 		tMaterialDirty = tMesh._prevMaterialUUID != tMaterial._UUID
 		if (!tMesh.pipeline || tMaterialDirty) {
 			tMesh.createPipeline(redGPU);
-
 		}
 
 		if (tMaterial.bindings) {
