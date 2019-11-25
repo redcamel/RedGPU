@@ -26,12 +26,28 @@ import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 	let redGPU = new RedGPU(cvs, glslang,
 		function () {
 
-			let MAX = 1000;
+			let MAX = 4000;
 			let i = MAX;
 			let tView;
 			let tScene = new RedScene();
 			tView = new RedView(this, tScene, new RedCamera())
-			let tLight = new RedDirectionalLight()
+			let tLight
+			tLight = new RedDirectionalLight('#ff0000',1,0.5)
+			tLight.x = 10
+			tLight.y = 0
+			tLight.z = 0
+			tScene.addLight(tLight)
+
+			tLight = new RedDirectionalLight('#00ff00',1,0.4)
+			tLight.x = -10
+			tLight.y = 0
+			tLight.z = 0
+			tScene.addLight(tLight)
+
+			tLight = new RedDirectionalLight('#0000ff',1,1)
+			tLight.x = 0
+			tLight.y = 0
+			tLight.z = 10
 			tScene.addLight(tLight)
 
 			redGPU.view = tView
@@ -42,8 +58,8 @@ import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 				new RedBitmapTexture(redGPU, 'assets/crate.png')
 			];
 
-			let tMat1 = new RedColorMaterial(redGPU, '#ff0000');
-			let tMat2 = new RedColorPhongMaterial(redGPU, '#ffff00');
+			let tMat1 = new RedColorMaterial(redGPU, '#ffff00');
+			let tMat2 = new RedColorPhongMaterial(redGPU, '#ffffff');
 			let tMat3 = new RedBitmapMaterial(redGPU, testTextureList[0]);
 			let tMat4 = new RedStandardMaterial(redGPU, testTextureList[1]);
 			let tMat5 = new RedStandardMaterial(redGPU, testTextureList[1], testTextureList[2]);
@@ -60,11 +76,11 @@ import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 				let testMesh = new RedMesh(
 					redGPU,
 					randomGeometry(),
-					i > MAX / 2 ? tMat1 : i > MAX / 4 ? tMat2 : i > MAX / 8 ? tMat3 : i > MAX / 16 ? tMat4 : tMat5
+					i > MAX / 2 ? tMat2 : i > MAX / 4 ? tMat1 : i > MAX / 8 ? tMat3 : i > MAX / 16 ? tMat4 : tMat5
 				);
-				testMesh.x = Math.random() * 60 - 30;
-				testMesh.y = Math.random() * 60 - 30;
-				testMesh.z = Math.random() * 60 - 30;
+				testMesh.x = Math.random() * 80 - 40;
+				testMesh.y = Math.random() * 80 - 40;
+				testMesh.z = Math.random() * 80 - 40;
 				testMesh.rotationX = testMesh.rotationY = testMesh.rotationZ = Math.random() * 360;
 				testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = Math.random() + 0.5;
 				tScene.addChild(testMesh)
@@ -99,9 +115,6 @@ import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 				// tView.camera.y = 30;
 				// tView.camera.z = 30;
 
-				tLight.x = Math.cos(time / 1000) * 30;
-				tLight.y = Math.sin(time / 1000) * 30;
-				tLight.z = Math.cos(time / 1000) * 30;
 
 				// tView.camera.x = 10;
 				// tView.camera.y =10;
@@ -109,14 +122,14 @@ import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 				tView.camera.lookAt(0, 0, 0);
 				renderer.render(time, redGPU, tView);
 
-				let tChildren = tView.scene.children
-				let i = tChildren.length;
-				while (i--) {
-					tChildren[i].rotationX += 1;
-					tChildren[i].rotationY += 1;
-					tChildren[i].rotationZ += 1;
-					// tChildren[i].children[0].rotationY += 2
-				}
+				// let tChildren = tView.scene.children
+				// let i = tChildren.length;
+				// while (i--) {
+				// 	tChildren[i].rotationX += 1;
+				// 	tChildren[i].rotationY += 1;
+				// 	tChildren[i].rotationZ += 1;
+				// 	// tChildren[i].children[0].rotationY += 2
+				// }
 
 
 				requestAnimationFrame(render);

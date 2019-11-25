@@ -65,10 +65,8 @@ export default class RedView {
 	};
 	#makeSystemUniformInfo_fragment = function (device) {
 		let uniformBufferSize =
-			// RedTypeSize.float + // directional count
-			// RedTypeSize.float + // directional intensity
-			RedTypeSize.float4 +  // directional color
-			RedTypeSize.float3  // directional position
+			RedTypeSize.float4 +
+			RedTypeSize.float4 * 2 * 3
 		;
 		const uniformBufferDescriptor = {
 			size: uniformBufferSize,
@@ -129,15 +127,22 @@ export default class RedView {
 		let systemUniformInfo_fragment = this.systemUniformInfo_fragment;
 		passEncoder.setBindGroup(1, systemUniformInfo_fragment.GPUBindGroup);
 		offset = 0;
-		// let count = this.scene.directionalLightList.length;
-		// systemUniformInfo_fragment.GPUBuffer.setSubData(offset, new Float32Array(1))
-		// offset += RedTypeSize.float
-		let tLight = this.scene.directionalLightList[0]
-		// systemUniformInfo_fragment.GPUBuffer.setSubData(offset, new Float32Array(tLight.intensity))
-		// offset += RedTypeSize.float
-		systemUniformInfo_fragment.GPUBuffer.setSubData(offset , tLight.colorRGBA)
-		offset += RedTypeSize.float4
-		systemUniformInfo_fragment.GPUBuffer.setSubData(offset, tLight.position)
+		let count = this.scene.directionalLightList.length;
+		systemUniformInfo_fragment.GPUBuffer.setSubData(offset, new Float32Array([count]))
+		offset += RedTypeSize.float4 // TODO : 이걸와 4로 해야되는거지 -_-
+
+		let i = 0, len = this.scene.directionalLightList.length;
+		for (i; i < len; i++) {
+			let tLight = this.scene.directionalLightList[i]
+			if (tLight) {
+				systemUniformInfo_fragment.GPUBuffer.setSubData(offset, tLight.colorRGBA)
+				offset += RedTypeSize.float4
+				systemUniformInfo_fragment.GPUBuffer.setSubData(offset, new Float32Array([tLight.x,tLight.y,tLight.z]))
+				offset += RedTypeSize.float3
+				systemUniformInfo_fragment.GPUBuffer.setSubData(offset, new Float32Array([tLight.intensity]))
+				offset += RedTypeSize.float
+			}
+		}
 
 
 	}

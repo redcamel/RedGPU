@@ -34,22 +34,33 @@ export default class RedColorPhongMaterial extends RedColorMaterial {
 	layout(location = 0) out vec4 outColor;
 	void main() {
 		vec3 N = normalize(vNormal);
+		
+		
 		vec4 ld = vec4(0.0, 0.0, 0.0, 1.0);
 		vec4 la = vec4(0.0, 0.0, 0.0, 0.2);
 		vec4 ls = vec4(0.0, 0.0, 0.0, 1.0);
-		vec4 specularLightColor =vec4(1.0);
-		vec3 lightPosition = systemUniforms.directionalLightPosition;
-	    vec3 L = normalize(-lightPosition);	
-	    vec4 lightColor = systemUniforms.directionalLightColor;
-	    float lambertTerm = dot(N,-L);
+		vec4 specularLightColor = vec4(1.0);
+		vec3 lightPosition ;
+	    vec3 L;	
+	    vec4 lightColor;
+	    float lambertTerm;
 	    float intensity = 1.0;
 	    float shininess = 16.0;
 	    float specular;
 	    float specularPower = 1.0;
-	    if(lambertTerm > 0.0){
-			ld += lightColor * uniforms.color * lambertTerm * intensity;
-			specular = pow( max(dot(reflect(L, N), -L), 0.0), shininess) * specularPower ;
-			ls +=  specularLightColor * specular * intensity ;
+	    DirectionalLight dLight;
+	    for(int i = 0; i< systemUniforms.directionalLightCount; i++){
+	        dLight = systemUniforms.directionalLight[i];
+		    lightPosition = dLight.directionalLightPosition;
+		     L = normalize(-lightPosition);	
+		    lightColor = dLight.directionalLightColor;
+		    lambertTerm = dot(N,-L);
+		    intensity = dLight.directionalLightIntensity;
+		    if(lambertTerm > 0.0){
+				ld += lightColor * uniforms.color * lambertTerm * intensity;
+				specular = pow( max(dot(reflect(L, N), -L), 0.0), shininess) * specularPower ;
+				ls +=  specularLightColor * specular * intensity ;
+		    }
 	    }
 	    
 	
