@@ -33,11 +33,15 @@ export default class RedBaseMaterial {
     } systemUniforms;
     `;
 	static GLSL_SystemUniforms_fragment = `
-	layout(set=1,binding = 0) uniform SystemUniforms {
-        // float directionalLightCount;
-        // float directionalLightIntensity;
+	const int MAX_DIRECTIONAL_LIGHT = 3;
+	struct DirectionalLight {
         vec4 directionalLightColor;
         vec3 directionalLightPosition;
+        float directionalLightIntensity;
+	};
+	layout(set=1,binding = 0) uniform SystemUniforms {
+        float directionalLightCount;
+        DirectionalLight directionalLight[MAX_DIRECTIONAL_LIGHT];
     } systemUniforms;
     `;
 
