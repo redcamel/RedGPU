@@ -27,30 +27,30 @@ import RedGrid from "./src/object3D/RedGrid.js";
 	let redGPU = new RedGPU(cvs, glslang,
 		function () {
 
-			let MAX = 1000;
+			let MAX = 2500;
 			let i = MAX;
 			let tView;
 			let tScene = new RedScene();
 			let tGrid = new RedGrid(this)
 			tGrid.centerColor = '#ff0000'
 			tView = new RedView(this, tScene, new RedCamera())
-			
-			tScene.addChild(tGrid)
+
+			tScene.grid = tGrid
 			let tLight
 
-			tLight = new RedDirectionalLight('#ff0000',1,1)
+			tLight = new RedDirectionalLight('#ff0000', 1, 1)
 			tLight.x = 10
 			tLight.y = 0
 			tLight.z = 0
 			tScene.addLight(tLight)
 
-			tLight = new RedDirectionalLight('#00ff00',1,0.4)
+			tLight = new RedDirectionalLight('#00ff00', 1, 0.4)
 			tLight.x = -10
 			tLight.y = 0
 			tLight.z = 0
 			tScene.addLight(tLight)
 
-			tLight = new RedDirectionalLight('#0000ff',1,1)
+			tLight = new RedDirectionalLight('#0000ff', 1, 1)
 			tLight.x = 0
 			tLight.y = 0
 			tLight.z = 10
@@ -71,11 +71,10 @@ import RedGrid from "./src/object3D/RedGrid.js";
 			let tMat3 = new RedBitmapMaterial(redGPU, testTextureList[0]);
 			let tMat4 = new RedStandardMaterial(redGPU, testTextureList[1]);
 			let tMat5 = new RedStandardMaterial(redGPU, testTextureList[1], testTextureList[2]);
-			let tMat6 = new RedStandardMaterial(redGPU, testTextureList[1], testTextureList[2],testTextureList[4]);
+			let tMat6 = new RedStandardMaterial(redGPU, testTextureList[1], testTextureList[2], testTextureList[4]);
 			tMat6.displacementPower = 1
 			tMat6.displacementFlowSpeedX = 0.1
 			tMat6.displacementFlowSpeedY = 0.1
-
 
 
 			let randomGeometry = function () {
@@ -95,13 +94,13 @@ import RedGrid from "./src/object3D/RedGrid.js";
 				let testMesh = new RedMesh(
 					redGPU,
 					randomGeometry(),
-					i > MAX / 2 ? tMat2 : i > MAX / 3 ? tMat1 : i > MAX / 4 ? tMat3 : i > MAX / 5 ? tMat4 : i>MAX / 6 ? tMat5 : tMat6
+					i > MAX / 4 ? tMat2 : i > MAX / 8 ? tMat1 : i > MAX / 12 ? tMat3 : i > MAX / 16 ? tMat4 : i > MAX / 20 ? tMat5 : tMat6
 				);
-				testMesh.x = Math.random() * 80 - 40;
-				testMesh.y = Math.random() * 80 - 40;
-				testMesh.z = Math.random() * 80 - 40;
+				testMesh.x = Math.random() * 100 - 50;
+				testMesh.y = Math.random() * 100 - 50;
+				testMesh.z = Math.random() * 100 - 50;
 				testMesh.rotationX = testMesh.rotationY = testMesh.rotationZ = Math.random() * 360;
-				testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = 3// Math.random() + 0.5;
+				testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ =  Math.random()*2 + 1;
 				tScene.addChild(testMesh)
 				// //
 				// let testMesh2 = new RedMesh(

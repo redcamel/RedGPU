@@ -43,7 +43,7 @@ let renderScene = (redGPU, redView, passEncoder, parent, parentDirty) => {
 				prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
 			}
 			passEncoder.setBindGroup(2, tMesh.uniformBindGroup.GPUBindGroup); // 바인드 그룹은 매 매쉬마다 다르므로 캐싱할 필요가 없음.
-			if(tGeometry.indexBuffer) passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
+			if (tGeometry.indexBuffer) passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
 			else passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
 
 		} else {
@@ -68,7 +68,7 @@ export default class RedRender {
 		const renderPassDescriptor = {
 			colorAttachments: [{
 				attachment: this.#redGPU.baseTextureView,
-				resolveTarget : this.#textureView,
+				resolveTarget: this.#textureView,
 				loadValue: {
 					r: tSceneBackgroundColor_rgba[0],
 					g: tSceneBackgroundColor_rgba[1],
@@ -90,6 +90,7 @@ export default class RedRender {
 		// 시스템 유니폼 업데이트
 		redView.updateSystemUniform(passEncoder, redGPU);
 
+		if (tScene.grid) renderScene(redGPU, redView, passEncoder, {children: [tScene.grid]});
 		renderScene(redGPU, redView, passEncoder, tScene);
 		passEncoder.endPass();
 		this.#redGPU.device.defaultQueue.submit([commandEncoder.finish()]);
