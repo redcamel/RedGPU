@@ -3,7 +3,6 @@ import RedMesh from "./src/object3D/RedMesh.js";
 import RedStandardMaterial from "./src/material/RedStandardMaterial.js";
 import RedRender from "./src/renderer/RedRender.js";
 import RedBitmapMaterial from "./src/material/RedBitmapMaterial.js";
-import RedCamera from "./src/controller/RedCamera.js";
 import RedSphere from "./src/primitives/RedSphere.js";
 import RedBitmapTexture from "./src/resources/RedBitmapTexture.js";
 import RedBox from "./src/primitives/RedBox.js";
@@ -15,6 +14,7 @@ import RedColorMaterial from "./src/material/RedColorMaterial.js";
 import RedColorPhongMaterial from "./src/material/RedColorPhongMaterial.js";
 import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 import RedGrid from "./src/object3D/RedGrid.js";
+import RedObitController from "./src/controller/RedObitController.js";
 
 
 (async function () {
@@ -27,13 +27,17 @@ import RedGrid from "./src/object3D/RedGrid.js";
 	let redGPU = new RedGPU(cvs, glslang,
 		function () {
 
-			let MAX = 2500;
+			let MAX = 5000;
 			let i = MAX;
 			let tView;
 			let tScene = new RedScene();
 			let tGrid = new RedGrid(this)
+			let tCamera = new RedObitController(this)
 			tGrid.centerColor = '#ff0000'
-			tView = new RedView(this, tScene, new RedCamera())
+
+			tView = new RedView(this, tScene, tCamera)
+			tCamera.targetView = tView // optional
+			tCamera.distance = 80
 
 			tScene.grid = tGrid
 			let tLight
@@ -94,13 +98,13 @@ import RedGrid from "./src/object3D/RedGrid.js";
 				let testMesh = new RedMesh(
 					redGPU,
 					randomGeometry(),
-					i > MAX / 4 ? tMat2 : i > MAX / 8 ? tMat1 : i > MAX / 12 ? tMat3 : i > MAX / 16 ? tMat4 : i > MAX / 20 ? tMat5 : tMat6
+					i > MAX / 4 ? tMat2 : i > MAX / 8 ? tMat1 : i > MAX / 12 ? tMat6 : i > MAX / 16 ? tMat4 : i > MAX / 20 ? tMat5 : tMat3
 				);
 				testMesh.x = Math.random() * 100 - 50;
 				testMesh.y = Math.random() * 100 - 50;
 				testMesh.z = Math.random() * 100 - 50;
 				testMesh.rotationX = testMesh.rotationY = testMesh.rotationZ = Math.random() * 360;
-				testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ =  Math.random()*2 + 1;
+				testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = Math.random() * 2 + 1;
 				tScene.addChild(testMesh)
 				// //
 				// let testMesh2 = new RedMesh(
@@ -126,9 +130,9 @@ import RedGrid from "./src/object3D/RedGrid.js";
 			let renderer = new RedRender();
 			let render = function (time) {
 
-				tView.camera.x = Math.sin(time / 3000) * 80;
-				tView.camera.y = Math.cos(time / 4000) * 80;
-				tView.camera.z = Math.cos(time / 3000) * 80;
+				// tView.camera.x = Math.sin(time / 3000) * 80;
+				// tView.camera.y = Math.cos(time / 4000) * 80;
+				// tView.camera.z = Math.cos(time / 3000) * 80;
 				// tView.camera.x = 3;
 				// tView.camera.y = 3;
 				// tView.camera.z = 3;
@@ -137,7 +141,8 @@ import RedGrid from "./src/object3D/RedGrid.js";
 				// tView.camera.x = 10;
 				// tView.camera.y =10;
 				// tView.camera.z = 10;
-				tView.camera.lookAt(0, 0, 0);
+				// tView.camera.lookAt(0, 0, 0);
+
 				renderer.render(time, redGPU, tView);
 
 				// let tChildren = tView.scene.children

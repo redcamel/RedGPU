@@ -1,4 +1,4 @@
-"use strict"
+"use strict";
 import RedBaseObject3D from "../base/RedBaseObject3D.js";
 import RedUtil from "../util/RedUtil.js";
 import RedGeometry from "../geometry/RedGeometry.js";
@@ -15,14 +15,14 @@ export default class RedGrid extends RedBaseObject3D {
 	#redGPU;
 
 	constructor(redGPU, size = 100, divisions = 100, centerColor = '#cccccc', color = '#666666') {
-		super(redGPU)
+		super(redGPU);
 		this.#redGPU = redGPU;
 		this.size = size;
 		this.divisions = divisions;
 		this.centerColor = centerColor;
 		this.color = color;
 		this.makeGridGeometry();
-		this.material = new RedGridMaterial(redGPU)
+		this.material = new RedGridMaterial(redGPU);
 		this.primitiveTopology = 'line-list'
 	}
 
