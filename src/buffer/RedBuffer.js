@@ -4,16 +4,24 @@ import RedUUID from "../base/RedUUID.js";
 export default class RedBuffer extends RedUUID {
 	static TYPE_VERTEX = 'vertexBuffer';
 	static TYPE_INDEX = 'indexBuffer';
+	type;
+	vertexCount;
+	originData;
+	bufferDescriptor;
+	GPUBuffer;
 
 	constructor(redGPU, typeKey, bufferType, data, interleaveInfo, usage) {
 		super();
 		if (redGPU.state.RedBuffer[bufferType].has(typeKey)) return redGPU.state.RedBuffer[bufferType].get(typeKey);
 		let tUsage;
 		this.type = bufferType;
+		this.vertexCount = 0;
 		switch (bufferType) {
 			case RedBuffer.TYPE_VERTEX :
 				tUsage = usage || GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST;
 				this.interleaveInfo = interleaveInfo;
+				interleaveInfo.forEach(v => this.vertexCount += v['stride']/Float32Array.BYTES_PER_ELEMENT);
+				this.vertexCount = data.length/this.vertexCount;
 				break;
 			case RedBuffer.TYPE_INDEX :
 				tUsage = usage || GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST;
@@ -31,5 +39,10 @@ export default class RedBuffer extends RedUUID {
 		redGPU.state.RedBuffer[bufferType].set(typeKey, this);
 
 		console.log(this);
+	}
+
+	destroy() {
+		if (this.GPUBuffer) this.GPUBuffer.destroy();
+		this.GPUBuffer = null
 	}
 }

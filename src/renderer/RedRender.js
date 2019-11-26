@@ -44,7 +44,7 @@ let renderScene = (redGPU, redView, passEncoder, parent, parentDirty) => {
 			}
 			passEncoder.setBindGroup(2, tMesh.uniformBindGroup.GPUBindGroup); // 바인드 그룹은 매 매쉬마다 다르므로 캐싱할 필요가 없음.
 			if(tGeometry.indexBuffer) passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
-			else passEncoder.draw(tGeometry.interleaveBuffer.originData.length/7, 1, 0, 0, 0);
+			else passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
 
 		} else {
 			tMesh.uniformBindGroup.clear();
