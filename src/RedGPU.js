@@ -9,6 +9,7 @@ export default class RedGPU {
 	#width = 0;
 	#height = 0;
 	view;
+
 	constructor(canvas, glslang, initFunc) {
 		navigator.gpu.requestAdapter().then(adapter => {
 			adapter.requestDevice().then(device => {
@@ -31,7 +32,7 @@ export default class RedGPU {
 							height: 1,
 							depth: 1,
 						},
-						format: "rgba8unorm",
+						format: "bgra8unorm",
 						usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.SAMPLED,
 					}).createView()
 				};
@@ -41,7 +42,7 @@ export default class RedGPU {
 				this.setSize('100%', '100%');
 				if (!redGPUList.size) setGlobalResizeEvent();
 				redGPUList.add(this);
-				console.log(redGPUList)
+				console.log(redGPUList);
 				initFunc.call(this)
 			});
 		}).catch(error => {
@@ -71,14 +72,26 @@ export default class RedGPU {
 				height: tH,
 				depth: 1
 			},
+			sampleCount : 4,
 			format: "depth24plus-stencil8",
 			usage: GPUTextureUsage.OUTPUT_ATTACHMENT
 		});
 		this.depthTextureView = this.depthTexture.createView();
-
+		this.baseTexture = this.device.createTexture({
+			size: {
+				width: tW,
+				height: tH,
+				depth: 1
+			},
+			sampleCount : 4,
+			format: this.swapChainFormat,
+			usage: GPUTextureUsage.OUTPUT_ATTACHMENT
+		});
+		this.baseTextureView = this.baseTexture.createView();
+		console.log(this.baseTexture)
 
 		if (this.view) {
-			this.view.setSize()
+			this.view.setSize();
 			this.view.setLocation()
 		}
 

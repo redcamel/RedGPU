@@ -42,11 +42,11 @@ export default class RedBaseMaterial {
 	constructor(redGPU) {
 		let vShaderModule, fShaderModule;
 		let materialClass = this.constructor;
-		let vertexGLSL = materialClass.vertexShaderGLSL
-		let fragmentGLSL = materialClass.fragmentShaderGLSL
+		let vertexGLSL = materialClass.vertexShaderGLSL;
+		let fragmentGLSL = materialClass.fragmentShaderGLSL;
 		let programOptionList = materialClass.PROGRAM_OPTION_LIST || [];
-		let vKey = materialClass.name + '_vertex'
-		let fKey = materialClass.name + '_fragment'
+		let vKey = materialClass.name + '_vertex';
+		let fKey = materialClass.name + '_fragment';
 		if (!(vShaderModule = TABLE.get(vKey))) TABLE.set(vKey, vShaderModule = new RedShaderModule_GLSL(redGPU, 'vertex', materialClass, vertexGLSL, programOptionList));
 		if (!(fShaderModule = TABLE.get(fKey))) TABLE.set(fKey, fShaderModule = new RedShaderModule_GLSL(redGPU, 'fragment', materialClass, fragmentGLSL, programOptionList));
 
@@ -62,7 +62,7 @@ export default class RedBaseMaterial {
 
 		this.sampler = new RedSampler(redGPU);
 		this.#redGPU = redGPU;
-		this._UUID = RedUUID.makeUUID()
+		this._UUID = RedUUID.makeUUID();
 		console.log('TABLE', TABLE)
 	}
 

@@ -30,7 +30,6 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 	#primitiveTopology = "triangle-list";
 
 
-
 	constructor(redGPU) {
 		super();
 		this.#redGPU = redGPU;
@@ -38,12 +37,12 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 		this.uniformBuffer_fragment = new RedUniformBuffer(redGPU);
 		this.uniformBindGroup = new RedBindGroup(redGPU);
 		this.normalMatrix = mat4.create();
-		this.matrix = mat4.create()
+		this.matrix = mat4.create();
 		this.localMatrix = mat4.create()
 	}
 
 	updateUniformBuffer = (_ => {
-		let tempFloat32 = new Float32Array(1)
+		let tempFloat32 = new Float32Array(1);
 		return function () {
 			//음 전체 속성 업데이트라고 봐야할까나..
 			//TODO : 최적화...필요..
@@ -72,7 +71,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 				}
 			}
 		}
-	})()
+	})();
 
 	get dirtyTransform() {
 		return this._dirtyTransform
@@ -273,12 +272,12 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 				depthWriteEnabled: this.#useDepthTest,
 				depthCompare: this.#useDepthTest ? this.#depthTestFunc : 'always',
 			},
+			sampleCount : 4,
 			//alphaToCoverageEnabled : true // alphaToCoverageEnabled isn't supported (yet)
 		};
 
-		let pipeline = device.createRenderPipeline(descriptor);
-		this.pipeline = pipeline;
-		this.pipeline._UUID = RedUUID.makeUUID()
+		this.pipeline = device.createRenderPipeline(descriptor);
+		this.pipeline._UUID = RedUUID.makeUUID();
 		return this.pipeline
 	}
 

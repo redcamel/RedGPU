@@ -7,7 +7,8 @@ export default class RedScene extends RedDisplayContainer {
 	#backgroundColor = '#000';
 	#backgroundColorAlpha = 1;
 	#backgroundColorRGBA = [0, 0, 0, this.#backgroundColorAlpha];
-	#directionalLightList =[];
+	#directionalLightList = [];
+
 	constructor() {
 		super()
 	}
@@ -47,6 +48,7 @@ export default class RedScene extends RedDisplayContainer {
 				RedUtil.throwFunc('addLight : RedBaseLight 인스턴스만 가능');
 		}
 	}
+
 	removeLight(light) {
 		// TODO
 	}

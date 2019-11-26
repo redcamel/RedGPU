@@ -4,6 +4,7 @@ export default class RedShaderModule_GLSL {
 	sourceMap;
 	shaderModuleMap;
 	GPUShaderModule;
+
 	constructor(redGPU, type, materialClass, source, programOptionList = []) {
 		let tSourceMap = new Map();
 		programOptionList.sort();

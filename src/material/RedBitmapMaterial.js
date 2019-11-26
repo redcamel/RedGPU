@@ -3,11 +3,12 @@ import RedTypeSize from "../resources/RedTypeSize.js";
 import RedBaseMaterial from "../base/RedBaseMaterial.js";
 import RedUUID from "../base/RedUUID.js";
 import RedShareGLSL from "../base/RedShareGLSL.js";
+import RedUniformBufferDescriptor from "../buffer/RedUniformBufferDescriptor.js";
 
 export default class RedBitmapMaterial extends RedBaseMaterial {
 	static vertexShaderGLSL = `
 	#version 450
-	${RedShareGLSL.GLSL_SystemUniforms_vertex}
+	${RedShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
     layout(set=2,binding = 0) uniform Uniforms {
         mat4 modelMatrix;
     } uniforms;
@@ -55,14 +56,13 @@ export default class RedBitmapMaterial extends RedBaseMaterial {
 			},
 		]
 	};
-	static uniformBufferDescriptor_vertex = {
-		size: RedTypeSize.mat4,
-		usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-		redStruct: [
-			{offset: 0, valueName: 'matrix'}
+	static uniformBufferDescriptor_vertex = new RedUniformBufferDescriptor(
+		[
+			{size: RedTypeSize.mat4, valueName: 'matrix'},
+			{size: RedTypeSize.mat4, valueName: 'normalMatrix'}
 		]
-	};
-	static uniformBufferDescriptor_fragment = RedBaseMaterial.uniformBufferDescriptor_empty
+	);
+	static uniformBufferDescriptor_fragment = RedBaseMaterial.uniformBufferDescriptor_empty;
 
 	#diffuseTexture;
 
@@ -122,7 +122,7 @@ export default class RedBitmapMaterial extends RedBaseMaterial {
 			}
 		];
 		this.setUniformBindGroupDescriptor();
-		this._UUID = RedUUID.makeUUID()
+		this._UUID = RedUUID.makeUUID();
 		console.log(this.#diffuseTexture);
 	}
 }

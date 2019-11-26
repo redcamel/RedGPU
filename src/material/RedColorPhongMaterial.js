@@ -3,12 +3,13 @@ import RedTypeSize from "../resources/RedTypeSize.js";
 import RedColorMaterial from "./RedColorMaterial.js";
 import RedUUID from "../base/RedUUID.js";
 import RedShareGLSL from "../base/RedShareGLSL.js";
+import RedUniformBufferDescriptor from "../buffer/RedUniformBufferDescriptor.js";
 
 export default class RedColorPhongMaterial extends RedColorMaterial {
 
 	static vertexShaderGLSL = `
 	#version 450
-	${RedShareGLSL.GLSL_SystemUniforms_vertex}
+	${RedShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
     layout(set=2,binding = 0) uniform Uniforms {
         mat4 modelMatrix;
         mat4 normalMTX;
@@ -76,14 +77,12 @@ export default class RedColorPhongMaterial extends RedColorMaterial {
 			}
 		]
 	};
-	static uniformBufferDescriptor_vertex = {
-		size: RedTypeSize.mat4 * 2,
-		usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-		redStruct: [
-			{offset: 0, valueName: 'matrix'},
-			{offset: RedTypeSize.mat4, valueName: 'normalMatrix'}
+	static uniformBufferDescriptor_vertex = new RedUniformBufferDescriptor(
+		[
+			{size: RedTypeSize.mat4, valueName: 'matrix'},
+			{size: RedTypeSize.mat4, valueName: 'normalMatrix'}
 		]
-	};
+	);
 	static uniformBufferDescriptor_fragment = {
 		size: RedTypeSize.float4 * 3,
 		usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
@@ -101,7 +100,7 @@ export default class RedColorPhongMaterial extends RedColorMaterial {
 
 	#shininess = new Float32Array([32]);
 	#specularPower = new Float32Array([1]);
-	#specularColor = new Float32Array([1, 1, 1, 1])
+	#specularColor = new Float32Array([1, 1, 1, 1]);
 
 	constructor(redGPU, color = '#ff0000', alpha = 1) {
 		super(redGPU, color, alpha);

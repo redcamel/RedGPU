@@ -6,7 +6,7 @@ export default class RedBuffer extends RedUUID {
 	static TYPE_INDEX = 'indexBuffer';
 
 	constructor(redGPU, typeKey, bufferType, data, interleaveInfo, usage) {
-		super()
+		super();
 		if (redGPU.state.RedBuffer[bufferType].has(typeKey)) return redGPU.state.RedBuffer[bufferType].get(typeKey);
 		let tUsage;
 		this.type = bufferType;
@@ -26,7 +26,7 @@ export default class RedBuffer extends RedUUID {
 			usage: tUsage
 		};
 		this.originData = data;
-		this.GPUBuffer =  redGPU.device.createBuffer(this.bufferDescriptor);
+		this.GPUBuffer = redGPU.device.createBuffer(this.bufferDescriptor);
 		this.GPUBuffer.setSubData(0, data);
 		redGPU.state.RedBuffer[bufferType].set(typeKey, this);
 

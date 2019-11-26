@@ -1,4 +1,4 @@
-"use strict"
+"use strict";
 import RedUtil from "./util/RedUtil.js"
 import RedTypeSize from "./resources/RedTypeSize.js";
 
@@ -108,7 +108,7 @@ export default class RedView {
 
 	updateSystemUniform(passEncoder, redGPU) {
 		let systemUniformInfo_vertex = this.systemUniformInfo_vertex;
-		let tView_viewRect = this.getViewRect(redGPU)
+		let tView_viewRect = this.getViewRect(redGPU);
 		// passEncoder.setViewport(tX, tY, this.canvas.width, this.canvas.height, 0, 1);
 		passEncoder.setViewport(...tView_viewRect, 0, 1);
 		passEncoder.setScissorRect(...tView_viewRect);
@@ -119,27 +119,27 @@ export default class RedView {
 		mat4.perspective(this.projectionMatrix, (Math.PI / 180) * 60, aspect, 0.01, 10000.0);
 		let offset = 0;
 		systemUniformInfo_vertex.GPUBuffer.setSubData(offset, this.projectionMatrix);
-		offset += RedTypeSize.mat4
-		systemUniformInfo_vertex.GPUBuffer.setSubData(offset , this.camera.matrix);
-		offset += RedTypeSize.mat4
+		offset += RedTypeSize.mat4;
+		systemUniformInfo_vertex.GPUBuffer.setSubData(offset, this.camera.matrix);
+		offset += RedTypeSize.mat4;
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////
 		let systemUniformInfo_fragment = this.systemUniformInfo_fragment;
 		passEncoder.setBindGroup(1, systemUniformInfo_fragment.GPUBindGroup);
 		offset = 0;
 		let count = this.scene.directionalLightList.length;
-		systemUniformInfo_fragment.GPUBuffer.setSubData(offset, new Float32Array([count]))
-		offset += RedTypeSize.float4 // TODO : 이걸와 4로 해야되는거지 -_-
+		systemUniformInfo_fragment.GPUBuffer.setSubData(offset, new Float32Array([count]));
+		offset += RedTypeSize.float4; // TODO : 이걸와 4로 해야되는거지 -_-
 
 		let i = 0, len = this.scene.directionalLightList.length;
 		for (i; i < len; i++) {
-			let tLight = this.scene.directionalLightList[i]
+			let tLight = this.scene.directionalLightList[i];
 			if (tLight) {
-				systemUniformInfo_fragment.GPUBuffer.setSubData(offset, tLight.colorRGBA)
-				offset += RedTypeSize.float4
-				systemUniformInfo_fragment.GPUBuffer.setSubData(offset, new Float32Array([tLight.x,tLight.y,tLight.z]))
-				offset += RedTypeSize.float3
-				systemUniformInfo_fragment.GPUBuffer.setSubData(offset, new Float32Array([tLight.intensity]))
+				systemUniformInfo_fragment.GPUBuffer.setSubData(offset, tLight.colorRGBA);
+				offset += RedTypeSize.float4;
+				systemUniformInfo_fragment.GPUBuffer.setSubData(offset, new Float32Array([tLight.x, tLight.y, tLight.z]));
+				offset += RedTypeSize.float3;
+				systemUniformInfo_fragment.GPUBuffer.setSubData(offset, new Float32Array([tLight.intensity]));
 				offset += RedTypeSize.float
 			}
 		}
