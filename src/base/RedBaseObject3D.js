@@ -57,7 +57,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 					tValue = tData.targetKey ? this[tData.targetKey][tData.valueName] : this[tData.valueName];
 					if (typeof tValue == 'number') {
 						tempFloat32[0] = tValue;
-						tValue = tempFloat32[0]
+						tValue = tempFloat32
 					}
 					this.uniformBuffer_vertex.GPUBuffer.setSubData(tData['offset'], tValue);
 				}
@@ -65,7 +65,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 					tValue = tData.targetKey ? this[tData.targetKey][tData.valueName] : this[tData.valueName];
 					if (typeof tValue == 'number') {
 						tempFloat32[0] = tValue;
-						tValue = tempFloat32[0]
+						tValue = tempFloat32
 					}
 					this.uniformBuffer_fragment.GPUBuffer.setSubData(tData['offset'], tValue);
 				}

@@ -166,8 +166,8 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 	#diffuseTexture;
 	#normalTexture;
 
-	#shininess = new Float32Array([32]);
-	#specularPower = new Float32Array([1]);
+	#shininess = 32;
+	#specularPower = 1;
 	#specularColor = new Float32Array([1, 1, 1, 1]);
 
 	constructor(redGPU, diffuseTexture, normalTexture) {
