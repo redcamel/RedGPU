@@ -4,7 +4,7 @@ export default class RedSampler {
 		this.GPUSampler = redGPU.device.createSampler({
 			magFilter: "nearest",
 			minFilter: "nearest",
-			mipmapFilter: "linear",
+			mipmapFilter: "nearest",
 			addressModeU: "repeat",
 			addressModeV: "repeat",
 			addressModeW: "repeat"

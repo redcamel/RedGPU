@@ -24,7 +24,8 @@ export default class RedView {
 	#makeSystemUniformInfo_vertex = function (device) {
 		let uniformBufferSize =
 			RedTypeSize.mat4 + // projectionMatrix
-			RedTypeSize.mat4  // camera
+			RedTypeSize.mat4+  // camera
+			RedTypeSize.float // time
 		;
 		const uniformBufferDescriptor = {
 			size: uniformBufferSize,
@@ -122,6 +123,8 @@ export default class RedView {
 		offset += RedTypeSize.mat4;
 		systemUniformInfo_vertex.GPUBuffer.setSubData(offset, this.camera.matrix);
 		offset += RedTypeSize.mat4;
+		systemUniformInfo_vertex.GPUBuffer.setSubData(offset, new Float32Array([performance.now()]));
+		offset += RedTypeSize.float;
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////
 		let systemUniformInfo_fragment = this.systemUniformInfo_fragment;
