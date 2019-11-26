@@ -98,8 +98,8 @@ export default class RedColorPhongMaterial extends RedColorMaterial {
 		]
 	};
 
-	#shininess = new Float32Array([32]);
-	#specularPower = new Float32Array([1]);
+	#shininess = 32;
+	#specularPower = 1;
 	#specularColor = new Float32Array([1, 1, 1, 1]);
 
 	constructor(redGPU, color = '#ff0000', alpha = 1) {
