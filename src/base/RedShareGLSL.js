@@ -5,6 +5,7 @@ export default class RedShareGLSL {
 		layout(set=0,binding = 0) uniform SystemUniforms {
 	        mat4 perspectiveMTX;
 	        mat4 cameraMTX;
+	        float time;
 	    } systemUniforms;
 	    `
 	};

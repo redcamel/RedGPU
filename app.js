@@ -27,7 +27,7 @@ import RedGrid from "./src/object3D/RedGrid.js";
 	let redGPU = new RedGPU(cvs, glslang,
 		function () {
 
-			let MAX = 5000;
+			let MAX = 1000;
 			let i = MAX;
 			let tView;
 			let tScene = new RedScene();
@@ -37,7 +37,8 @@ import RedGrid from "./src/object3D/RedGrid.js";
 			
 			tScene.addChild(tGrid)
 			let tLight
-			tLight = new RedDirectionalLight('#ff0000',1,0.5)
+
+			tLight = new RedDirectionalLight('#ff0000',1,1)
 			tLight.x = 10
 			tLight.y = 0
 			tLight.z = 0
@@ -60,7 +61,9 @@ import RedGrid from "./src/object3D/RedGrid.js";
 				new RedBitmapTexture(redGPU, 'assets/UV_Grid_Sm.jpg'),
 				new RedBitmapTexture(redGPU, 'assets/Brick03_col.jpg'),
 				new RedBitmapTexture(redGPU, 'assets/Brick03_nrm.jpg'),
-				new RedBitmapTexture(redGPU, 'assets/crate.png')
+				new RedBitmapTexture(redGPU, 'assets/crate.png'),
+				new RedBitmapTexture(redGPU, 'assets/Brick03_disp.jpg')
+
 			];
 
 			let tMat1 = new RedColorMaterial(redGPU, '#ffff00');
@@ -68,6 +71,10 @@ import RedGrid from "./src/object3D/RedGrid.js";
 			let tMat3 = new RedBitmapMaterial(redGPU, testTextureList[0]);
 			let tMat4 = new RedStandardMaterial(redGPU, testTextureList[1]);
 			let tMat5 = new RedStandardMaterial(redGPU, testTextureList[1], testTextureList[2]);
+			let tMat6 = new RedStandardMaterial(redGPU, testTextureList[1], testTextureList[2],testTextureList[4]);
+			tMat6.displacementPower = 1
+			tMat6.displacementFlowSpeedX = 0.1
+			tMat6.displacementFlowSpeedY = 0.1
 
 
 
@@ -78,17 +85,23 @@ import RedGrid from "./src/object3D/RedGrid.js";
 						? new RedCylinder(redGPU, 0, 1, 2, 16, 16) :
 						Math.random() > 0.5 ? new RedBox(redGPU) : new RedPlane(redGPU)
 			}
+			let testMesh = new RedMesh(
+				redGPU,
+				new RedSphere(redGPU, 0.5, 32, 32, 32),
+				tMat6
+			);
+			tScene.addChild(testMesh)
 			while (i--) {
 				let testMesh = new RedMesh(
 					redGPU,
 					randomGeometry(),
-					i > MAX / 2 ? tMat2 : i > MAX / 4 ? tMat1 : i > MAX / 8 ? tMat3 : i > MAX / 16 ? tMat4 : tMat5
+					i > MAX / 2 ? tMat2 : i > MAX / 3 ? tMat1 : i > MAX / 4 ? tMat3 : i > MAX / 5 ? tMat4 : i>MAX / 6 ? tMat5 : tMat6
 				);
 				testMesh.x = Math.random() * 80 - 40;
 				testMesh.y = Math.random() * 80 - 40;
 				testMesh.z = Math.random() * 80 - 40;
 				testMesh.rotationX = testMesh.rotationY = testMesh.rotationZ = Math.random() * 360;
-				testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = Math.random() + 0.5;
+				testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = 3// Math.random() + 0.5;
 				tScene.addChild(testMesh)
 				// //
 				// let testMesh2 = new RedMesh(
@@ -114,12 +127,12 @@ import RedGrid from "./src/object3D/RedGrid.js";
 			let renderer = new RedRender();
 			let render = function (time) {
 
-				tView.camera.x = Math.sin(time / 3000) * 30;
-				tView.camera.y = Math.cos(time / 4000) * 30;
-				tView.camera.z = Math.cos(time / 3000) * 30;
-				// tView.camera.x = 30;
-				// tView.camera.y = 30;
-				// tView.camera.z = 30;
+				tView.camera.x = Math.sin(time / 3000) * 80;
+				tView.camera.y = Math.cos(time / 4000) * 80;
+				tView.camera.z = Math.cos(time / 3000) * 80;
+				// tView.camera.x = 3;
+				// tView.camera.y = 3;
+				// tView.camera.z = 3;
 
 
 				// tView.camera.x = 10;
