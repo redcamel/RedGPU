@@ -272,6 +272,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 				depthWriteEnabled: this.#useDepthTest,
 				depthCompare: this.#useDepthTest ? this.#depthTestFunc : 'always',
 			},
+			sampleCount : 4,
 			//alphaToCoverageEnabled : true // alphaToCoverageEnabled isn't supported (yet)
 		};
 

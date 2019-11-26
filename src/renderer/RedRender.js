@@ -66,7 +66,8 @@ export default class RedRender {
 		// console.log(swapChain.getCurrentTexture())
 		const renderPassDescriptor = {
 			colorAttachments: [{
-				attachment: this.#textureView,
+				attachment: this.#redGPU.baseTextureView,
+				resolveTarget : this.#textureView,
 				loadValue: {
 					r: tSceneBackgroundColor_rgba[0],
 					g: tSceneBackgroundColor_rgba[1],

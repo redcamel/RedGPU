@@ -72,11 +72,23 @@ export default class RedGPU {
 				height: tH,
 				depth: 1
 			},
+			sampleCount : 4,
 			format: "depth24plus-stencil8",
 			usage: GPUTextureUsage.OUTPUT_ATTACHMENT
 		});
 		this.depthTextureView = this.depthTexture.createView();
-
+		this.baseTexture = this.device.createTexture({
+			size: {
+				width: tW,
+				height: tH,
+				depth: 1
+			},
+			sampleCount : 4,
+			format: this.swapChainFormat,
+			usage: GPUTextureUsage.OUTPUT_ATTACHMENT
+		});
+		this.baseTextureView = this.baseTexture.createView();
+		console.log(this.baseTexture)
 
 		if (this.view) {
 			this.view.setSize();
