@@ -30,6 +30,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 	#primitiveTopology = "triangle-list";
 
 
+
 	constructor(redGPU) {
 		super();
 		this.#redGPU = redGPU;
@@ -40,18 +41,39 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 		this.matrix = mat4.create()
 		this.localMatrix = mat4.create()
 	}
-	updateUniformBuffer() {
-		//음 전체 속성 업데이트라고 봐야할까나..
-		let i;
-		let dataVertex, dataFragment, tData;
-		dataVertex = this.material.uniformBufferDescriptor_vertex.redStruct;
-		dataFragment = this.material.uniformBufferDescriptor_fragment.redStruct;
-		i = Math.max(dataVertex.length, dataFragment.length);
-		while (i--) {
-			if (tData = dataVertex[i]) this.uniformBuffer_vertex.GPUBuffer.setSubData(tData['offset'], tData.targetKey ? this[tData.targetKey][tData.valueName] : this[tData.valueName]);
-			if (tData = dataFragment[i]) this.uniformBuffer_fragment.GPUBuffer.setSubData(tData['offset'], tData.targetKey ? this[tData.targetKey][tData.valueName] : this[tData.valueName]);
+
+	updateUniformBuffer = (_ => {
+		let tempFloat32 = new Float32Array(1)
+		return function () {
+			//음 전체 속성 업데이트라고 봐야할까나..
+			//TODO : 최적화...필요..
+			let i;
+			let dataVertex, dataFragment, tData;
+			let tValue;
+			dataVertex = this.material.uniformBufferDescriptor_vertex.redStruct;
+			dataFragment = this.material.uniformBufferDescriptor_fragment.redStruct;
+			i = Math.max(dataVertex.length, dataFragment.length);
+			while (i--) {
+				if (tData = dataVertex[i]) {
+					tValue = tData.targetKey ? this[tData.targetKey][tData.valueName] : this[tData.valueName];
+					if (typeof tValue == 'number') {
+						tempFloat32[0] = tValue;
+						tValue = tempFloat32[0]
+					}
+					this.uniformBuffer_vertex.GPUBuffer.setSubData(tData['offset'], tValue);
+				}
+				if (tData = dataFragment[i]) {
+					tValue = tData.targetKey ? this[tData.targetKey][tData.valueName] : this[tData.valueName];
+					if (typeof tValue == 'number') {
+						tempFloat32[0] = tValue;
+						tValue = tempFloat32[0]
+					}
+					this.uniformBuffer_fragment.GPUBuffer.setSubData(tData['offset'], tValue);
+				}
+			}
 		}
-	}
+	})()
+
 	get dirtyTransform() {
 		return this._dirtyTransform
 	}
@@ -294,7 +316,6 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 			tNMatrix[11] = (-a31 * b3 + a32 * b1 - a33 * a30) * b22,
 			tNMatrix[15] = (a20 * b3 - a21 * b1 + a22 * a30) * b22;
 	}
-
 
 
 	calcTransform(parent) {

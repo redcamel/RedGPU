@@ -1,14 +1,14 @@
 "use strict";
-import RedBitmapTexture from '../resources/RedBitmapTexture.js'
 import RedTypeSize from "../resources/RedTypeSize.js";
 import RedBaseMaterial from "../base/RedBaseMaterial.js";
 import RedUUID from "../base/RedUUID.js";
+import RedShareGLSL from "../base/RedShareGLSL.js";
 
 export default class RedStandardMaterial extends RedBaseMaterial {
 
 	static vertexShaderGLSL = `
 	#version 450
-    ${RedBaseMaterial.GLSL_SystemUniforms_vertex}
+    ${RedShareGLSL.GLSL_SystemUniforms_vertex}
     layout(set = 2,binding = 0) uniform Uniforms {
         mat4 modelMTX;
         mat4 normalMTX;
@@ -29,13 +29,17 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 	`;
 	static fragmentShaderGLSL = `
 	#version 450
-	${RedBaseMaterial.GLSL_SystemUniforms_fragment}
+	${RedShareGLSL.GLSL_SystemUniforms_fragment.systemUniformsWithLight}
+	layout(set=2,binding = 1) uniform Uniforms {
+        float shininess; float specularPower;
+	    vec4 specularColor;
+    } uniforms;
 	layout(location = 0) in vec3 vNormal;
 	layout(location = 1) in vec2 vUV;
 	layout(location = 2) in vec4 vVertexPosition;
-	layout(set = 2, binding = 1) uniform sampler uSampler;
-	layout(set = 2, binding = 2) uniform texture2D uDiffuseTexture;
-	layout(set = 2, binding = 3) uniform texture2D uNormalTexture;
+	layout(set = 2, binding = 2) uniform sampler uSampler;
+	layout(set = 2, binding = 3) uniform texture2D uDiffuseTexture;
+	layout(set = 2, binding = 4) uniform texture2D uNormalTexture;
 	layout(location = 0) out vec4 outColor;
 	
 	mat3 cotangent_frame(vec3 N, vec3 p, vec2 uv)
@@ -77,31 +81,21 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 		vec4 ld = vec4(0.0, 0.0, 0.0, 1.0);
 		vec4 la = vec4(0.0, 0.0, 0.0, 0.2);
 		vec4 ls = vec4(0.0, 0.0, 0.0, 1.0);
-		vec4 specularLightColor = vec4(1.0);
-		vec3 lightPosition ;
-	    vec3 L;	
-	    vec4 lightColor;
-	    float lambertTerm;
-	    float intensity = 1.0;
-	    float shininess = 16.0;
-	    float specular;
-	    float specularPower = 1.0;
-	     DirectionalLight dLight;
-	    for(int i = 0; i< systemUniforms.directionalLightCount; i++){
-		     dLight = systemUniforms.directionalLight[i];
-		    lightPosition = dLight.directionalLightPosition;
-		     L = normalize(-lightPosition);	
-		    lightColor = dLight.directionalLightColor;
-		    lambertTerm = dot(N,-L);
-		    intensity = dLight.directionalLightIntensity;
-		    if(lambertTerm > 0.0){
-				ld += lightColor * diffuseColor * lambertTerm * intensity;
-				specular = pow( max(dot(reflect(L, N), -L), 0.0), shininess) * specularPower ;
-				ls +=  specularLightColor * specular * intensity ;
-		    }
-	    }
+		
+		vec4 calcColor = calcDirectionalLight(
+			diffuseColor,
+			N,
+			ld,
+			ls,
+			systemUniforms.directionalLightCount,
+			systemUniforms.directionalLight,
+			uniforms.shininess,
+			uniforms.specularPower,
+			uniforms.specularColor
+		);
+		    
 	
-	    vec4 finalColor = la+ld+ls;
+	    vec4 finalColor = la + calcColor;
 		
 		outColor = finalColor;
 	}
@@ -117,15 +111,20 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 			{
 				binding: 1,
 				visibility: GPUShaderStage.FRAGMENT,
-				type: "sampler"
+				type: "uniform-buffer"
 			},
 			{
 				binding: 2,
 				visibility: GPUShaderStage.FRAGMENT,
-				type: "sampled-texture"
+				type: "sampler"
 			},
 			{
 				binding: 3,
+				visibility: GPUShaderStage.FRAGMENT,
+				type: "sampled-texture"
+			},
+			{
+				binding: 4,
 				visibility: GPUShaderStage.FRAGMENT,
 				type: "sampled-texture"
 			}
@@ -139,10 +138,26 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 			{offset: RedTypeSize.mat4, valueName: 'normalMatrix'}
 		]
 	};
-	static uniformBufferDescriptor_fragment = RedBaseMaterial.uniformBufferDescriptor_empty;
+	static uniformBufferDescriptor_fragment = {
+		size: RedTypeSize.float4 * 2,
+		usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+		redStruct: [
+			{offset: 0, valueName: 'shininess', targetKey: 'material'},
+			{offset: RedTypeSize.float, valueName: 'specularPower', targetKey: 'material'},
+			{
+				offset: RedTypeSize.float4,
+				valueName: 'specularColor',
+				targetKey: 'material'
+			},
+		]
+	};
 
 	#diffuseTexture;
 	#normalTexture;
+
+	#shininess = new Float32Array([32]);
+	#specularPower = new Float32Array([1]);
+	#specularColor = new Float32Array([1, 1, 1, 1])
 
 	constructor(redGPU, diffuseTexture, normalTexture) {
 		super(redGPU);
@@ -192,6 +207,30 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 		return this.#normalTexture
 	}
 
+	get specularColor() {
+		return this.#specularColor;
+	}
+
+	set specularColor(value) {
+		this.#specularColor = value;
+	}
+
+	get specularPower() {
+		return this.#specularPower;
+	}
+
+	set specularPower(value) {
+		this.#specularPower = value;
+	}
+
+	get shininess() {
+		return this.#shininess;
+	}
+
+	set shininess(value) {
+		this.#shininess = value;
+	}
+
 	resetBindingInfo() {
 		this.bindings = null;
 		this.searchModules();
@@ -206,14 +245,22 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 			},
 			{
 				binding: 1,
-				resource: this.sampler.GPUSampler,
+				resource: {
+					buffer: null,
+					offset: 0,
+					size: this.uniformBufferDescriptor_fragment.size
+				}
 			},
 			{
 				binding: 2,
-				resource: this.#diffuseTexture ? this.#diffuseTexture.GPUTextureView : this.redGPU.state.emptyTextureView,
+				resource: this.sampler.GPUSampler,
 			},
 			{
 				binding: 3,
+				resource: this.#diffuseTexture ? this.#diffuseTexture.GPUTextureView : this.redGPU.state.emptyTextureView,
+			},
+			{
+				binding: 4,
 				resource: this.#normalTexture ? this.#normalTexture.GPUTextureView : this.redGPU.state.emptyTextureView,
 			}
 		];

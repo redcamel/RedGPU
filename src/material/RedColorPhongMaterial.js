@@ -1,13 +1,14 @@
 "use strict";
 import RedTypeSize from "../resources/RedTypeSize.js";
-import RedBaseMaterial from "../base/RedBaseMaterial.js";
 import RedColorMaterial from "./RedColorMaterial.js";
 import RedUUID from "../base/RedUUID.js";
+import RedShareGLSL from "../base/RedShareGLSL.js";
 
 export default class RedColorPhongMaterial extends RedColorMaterial {
+
 	static vertexShaderGLSL = `
 	#version 450
-	${RedBaseMaterial.GLSL_SystemUniforms_vertex}
+	${RedShareGLSL.GLSL_SystemUniforms_vertex}
     layout(set=2,binding = 0) uniform Uniforms {
         mat4 modelMatrix;
         mat4 normalMTX;
@@ -25,46 +26,37 @@ export default class RedColorPhongMaterial extends RedColorMaterial {
 	`;
 	static fragmentShaderGLSL = `
 	#version 450
-	${RedBaseMaterial.GLSL_SystemUniforms_fragment}
-	 layout(set=2,binding = 1) uniform Uniforms {
+	${RedShareGLSL.GLSL_SystemUniforms_fragment.systemUniformsWithLight}
+	layout(set=2,binding = 1) uniform Uniforms {
         vec4 color;
+        float shininess; float specularPower;
+	    vec4 specularColor;
     } uniforms;
 	layout(location = 0) in vec3 vNormal;
 	layout(location = 1) in vec2 vUV;
 	layout(location = 0) out vec4 outColor;
 	void main() {
+
 		vec3 N = normalize(vNormal);
-		
 		
 		vec4 ld = vec4(0.0, 0.0, 0.0, 1.0);
 		vec4 la = vec4(0.0, 0.0, 0.0, 0.2);
 		vec4 ls = vec4(0.0, 0.0, 0.0, 1.0);
-		vec4 specularLightColor = vec4(1.0);
-		vec3 lightPosition ;
-	    vec3 L;	
-	    vec4 lightColor;
-	    float lambertTerm;
-	    float intensity = 1.0;
-	    float shininess = 16.0;
-	    float specular;
-	    float specularPower = 1.0;
-	    DirectionalLight dLight;
-	    for(int i = 0; i< systemUniforms.directionalLightCount; i++){
-	        dLight = systemUniforms.directionalLight[i];
-		    lightPosition = dLight.directionalLightPosition;
-		     L = normalize(-lightPosition);	
-		    lightColor = dLight.directionalLightColor;
-		    lambertTerm = dot(N,-L);
-		    intensity = dLight.directionalLightIntensity;
-		    if(lambertTerm > 0.0){
-				ld += lightColor * uniforms.color * lambertTerm * intensity;
-				specular = pow( max(dot(reflect(L, N), -L), 0.0), shininess) * specularPower ;
-				ls +=  specularLightColor * specular * intensity ;
-		    }
-	    }
-	    
+		
+		vec4 calcColor = calcDirectionalLight(
+			uniforms.color,
+			N,
+			ld,
+			ls,
+			systemUniforms.directionalLightCount,
+			systemUniforms.directionalLight,
+			uniforms.shininess,
+			uniforms.specularPower,
+			uniforms.specularColor
+		);
+		    
 	
-	    vec4 finalColor = la+ld+ls;
+	    vec4 finalColor = la + calcColor;
 		
 		outColor = finalColor;
 	}
@@ -93,16 +85,50 @@ export default class RedColorPhongMaterial extends RedColorMaterial {
 		]
 	};
 	static uniformBufferDescriptor_fragment = {
-		size: RedTypeSize.float4,
+		size: RedTypeSize.float4 * 3,
 		usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
 		redStruct: [
 			{offset: 0, valueName: 'colorRGBA', targetKey: 'material'},
+			{offset: RedTypeSize.float4, valueName: 'shininess', targetKey: 'material'},
+			{offset: RedTypeSize.float4 + RedTypeSize.float, valueName: 'specularPower', targetKey: 'material'},
+			{
+				offset: RedTypeSize.float4 + RedTypeSize.float4,
+				valueName: 'specularColor',
+				targetKey: 'material'
+			},
 		]
 	};
 
+	#shininess = new Float32Array([32]);
+	#specularPower = new Float32Array([1]);
+	#specularColor = new Float32Array([1, 1, 1, 1])
 
 	constructor(redGPU, color = '#ff0000', alpha = 1) {
 		super(redGPU, color, alpha);
+	}
+
+	get specularColor() {
+		return this.#specularColor;
+	}
+
+	set specularColor(value) {
+		this.#specularColor = value;
+	}
+
+	get specularPower() {
+		return this.#specularPower;
+	}
+
+	set specularPower(value) {
+		this.#specularPower = value;
+	}
+
+	get shininess() {
+		return this.#shininess;
+	}
+
+	set shininess(value) {
+		this.#shininess = value;
 	}
 
 	resetBindingInfo() {

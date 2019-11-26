@@ -1,6 +1,3 @@
-import RedUUID from "../base/RedUUID.js";
-
-
 let renderScene = (redGPU, redView, passEncoder, parent, parentDirty) => {
 	let i;
 	let targetList = parent.children
