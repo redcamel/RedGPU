@@ -64,6 +64,7 @@ export default class RedRender {
 		tScene = redView.scene;
 		tSceneBackgroundColor_rgba = tScene.backgroundColorRGBA;
 
+		redView.camera.update();
 		// console.log(swapChain.getCurrentTexture())
 		const renderPassDescriptor = {
 			colorAttachments: [{

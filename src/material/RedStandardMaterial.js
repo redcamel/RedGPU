@@ -204,7 +204,7 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 		super(redGPU);
 		console.log(diffuseTexture, normalTexture);
 		this.diffuseTexture = diffuseTexture;
-		this.normalTexture = normalTexture
+		this.normalTexture = normalTexture;
 		this.displacementTexture = displacementTexture
 	}
 
@@ -218,7 +218,7 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 						break;
 					case 'normalTexture' :
 						this.#normalTexture = texture;
-						break
+						break;
 					case 'displacementTexture' :
 						this.#displacementTexture = texture;
 						break

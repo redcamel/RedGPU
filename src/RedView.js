@@ -3,12 +3,16 @@ import RedUtil from "./util/RedUtil.js"
 import RedTypeSize from "./resources/RedTypeSize.js";
 
 export default class RedView {
+	get viewRect() {
+		return this.#viewRect;
+	}
 	#scene;
 	#camera;
 	#x = 0;
 	#y = 0;
 	#width = '100%';
 	#height = '100%';
+	#viewRect = [];
 	systemUniformInfo_vertex;
 	systemUniformInfo_fragment;
 	projectionMatrix;
@@ -24,7 +28,7 @@ export default class RedView {
 	#makeSystemUniformInfo_vertex = function (device) {
 		let uniformBufferSize =
 			RedTypeSize.mat4 + // projectionMatrix
-			RedTypeSize.mat4+  // camera
+			RedTypeSize.mat4 +  // camera
 			RedTypeSize.float // time
 		;
 		const uniformBufferDescriptor = {
@@ -109,14 +113,14 @@ export default class RedView {
 
 	updateSystemUniform(passEncoder, redGPU) {
 		let systemUniformInfo_vertex = this.systemUniformInfo_vertex;
-		let tView_viewRect = this.getViewRect(redGPU);
+		this.#viewRect = this.getViewRect(redGPU);
 		// passEncoder.setViewport(tX, tY, this.canvas.width, this.canvas.height, 0, 1);
-		passEncoder.setViewport(...tView_viewRect, 0, 1);
-		passEncoder.setScissorRect(...tView_viewRect);
+		passEncoder.setViewport(...this.#viewRect, 0, 1);
+		passEncoder.setScissorRect(...this.#viewRect);
 		passEncoder.setBindGroup(0, systemUniformInfo_vertex.GPUBindGroup);
 
 
-		let aspect = Math.abs(tView_viewRect[2] / tView_viewRect[3]);
+		let aspect = Math.abs(this.#viewRect[2] / this.#viewRect[3]);
 		mat4.perspective(this.projectionMatrix, (Math.PI / 180) * 60, aspect, 0.01, 10000.0);
 		let offset = 0;
 		systemUniformInfo_vertex.GPUBuffer.setSubData(offset, this.projectionMatrix);
