@@ -1,3 +1,11 @@
+/*
+ *   RedGPU - MIT License
+ *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
+ *   issue : https://github.com/redcamel/RedGPU/issues
+ *   Last modification time of this file - 2019.11.26 19:46:12
+ *
+ */
+
 "use strict";
 import RedUUID from "../base/RedUUID.js";
 
@@ -20,8 +28,8 @@ export default class RedBuffer extends RedUUID {
 			case RedBuffer.TYPE_VERTEX :
 				tUsage = usage || GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST;
 				this.interleaveInfo = interleaveInfo;
-				interleaveInfo.forEach(v => this.vertexCount += v['stride']/Float32Array.BYTES_PER_ELEMENT);
-				this.vertexCount = data.length/this.vertexCount;
+				interleaveInfo.forEach(v => this.vertexCount += v['stride'] / Float32Array.BYTES_PER_ELEMENT);
+				this.vertexCount = data.length / this.vertexCount;
 				break;
 			case RedBuffer.TYPE_INDEX :
 				tUsage = usage || GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST;
