@@ -4,6 +4,7 @@ import RedBaseMaterial from "../base/RedBaseMaterial.js";
 import RedUUID from "../base/RedUUID.js";
 import RedShareGLSL from "../base/RedShareGLSL.js";
 import RedUniformBufferDescriptor from "../buffer/RedUniformBufferDescriptor.js";
+import RedUtil from "../util/RedUtil.js";
 
 export default class RedStandardMaterial extends RedBaseMaterial {
 
@@ -143,7 +144,7 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 			{size: RedTypeSize.float, valueName: 'specularPower', targetKey: 'material'},
 			{
 				size: RedTypeSize.float4,
-				valueName: 'specularColor',
+				valueName: 'specularColorRGBA',
 				targetKey: 'material'
 			}
 		]
@@ -166,9 +167,10 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 	#diffuseTexture;
 	#normalTexture;
 
-	#shininess = 32;
+	#shininess = 64;
 	#specularPower = 1;
-	#specularColor = new Float32Array([1, 1, 1, 1]);
+	#specularColor = '#ffffff';
+	#specularColorRGBA = new Float32Array([1, 1, 1, 1]);
 
 	constructor(redGPU, diffuseTexture, normalTexture) {
 		super(redGPU);
@@ -217,13 +219,20 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 	get normalTexture() {
 		return this.#normalTexture
 	}
-
+	get specularColorRGBA() {
+		return this.#specularColorRGBA;
+	}
 	get specularColor() {
 		return this.#specularColor;
 	}
 
 	set specularColor(value) {
-		this.#specularColor = value;
+		this.#specularColor = hex;
+		let rgb = RedUtil.hexToRGB_ZeroToOne(value);
+		this.#specularColorRGBA[0] = rgb[0];
+		this.#specularColorRGBA[1] = rgb[1];
+		this.#specularColorRGBA[2] = rgb[2];
+		this.#specularColorRGBA[3] = 1;
 	}
 
 	get specularPower() {
