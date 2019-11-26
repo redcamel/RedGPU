@@ -1,26 +1,26 @@
-
 export default class RedBitmapTexture {
 	#updateList = [];
 	#GPUTexture;
 	#GPUTextureView;
+
 	constructor(redGPU, src) {
 		// 귀찮아서 텍스쳐 맹그는 놈은 들고옴
-		let self= this;
+		let self = this;
 		if (!src) {
 			console.log('src')
 
 		} else {
 			const img = new Image();
 			img.src = src;
-			img.onerror = function(v){
+			img.onerror = function (v) {
 				console.log(v)
 			};
 			img.onload = async function () {
 				await img.decode();
 				let imageCanvas;
 				let imageCanvasContext;
-					imageCanvas = document.createElement('canvas');
-					imageCanvasContext = imageCanvas.getContext('2d');
+				imageCanvas = document.createElement('canvas');
+				imageCanvasContext = imageCanvas.getContext('2d');
 
 				imageCanvas.width = img.width;
 				imageCanvas.height = img.height;
@@ -52,8 +52,8 @@ export default class RedBitmapTexture {
 						height: img.height,
 						depth: 1,
 					},
-					format: "rgba8unorm",
-					usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.SAMPLED,
+					format: "bgra8unorm",
+					usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.SAMPLED
 				});
 
 				const textureDataBuffer = redGPU.device.createBuffer({
@@ -70,6 +70,7 @@ export default class RedBitmapTexture {
 					imageHeight: 0,
 				}, {
 					texture: texture,
+					mipLevel: 0
 				}, {
 					width: img.width,
 					height: img.height,
@@ -77,27 +78,32 @@ export default class RedBitmapTexture {
 				});
 				redGPU.device.defaultQueue.submit([commandEncoder.finish()]);
 
+
 				self.resolve(texture)
 
 			}
 		}
 	}
-	get GPUTexture(){
+
+	get GPUTexture() {
 		return this.#GPUTexture
 	}
-	get GPUTextureView(){
+
+	get GPUTextureView() {
 		return this.#GPUTextureView
 	}
-	resolve(texture){
+
+	resolve(texture) {
 		this.#GPUTexture = texture;
 		this.#GPUTextureView = texture.createView();
-		console.log('this.#updateList',this.#updateList);
-		this.#updateList.forEach(data=>{
+		console.log('this.#updateList', this.#updateList);
+		this.#updateList.forEach(data => {
 			console.log(data[1]);
 			data[0][data[1]] = this
 		});
 		this.#updateList.length = 0
 	}
+
 	addUpdateTarget(target, key) {
 		this.#updateList.push([
 			target, key

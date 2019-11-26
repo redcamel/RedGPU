@@ -1,4 +1,4 @@
-"use strict"
+"use strict";
 import RedUtil from "../util/RedUtil.js";
 
 export default class RedBaseLight {
@@ -9,11 +9,11 @@ export default class RedBaseLight {
 	x = 0;
 	y = 0;
 	z = 0;
-	#position = new Float32Array([0, 0, 0])
+	#position = new Float32Array([0, 0, 0]);
 	get position() {
-		this.#position[0] = this.x
-		this.#position[1] = this.y
-		this.#position[2] = this.z
+		this.#position[0] = this.x;
+		this.#position[1] = this.y;
+		this.#position[2] = this.z;
 		return this.#position
 	}
 

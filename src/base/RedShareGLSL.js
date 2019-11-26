@@ -1,11 +1,13 @@
-"use strict"
+"use strict";
 export default class RedShareGLSL {
-	static GLSL_SystemUniforms_vertex = `
-	layout(set=0,binding = 0) uniform SystemUniforms {
-        mat4 perspectiveMTX;
-        mat4 cameraMTX;
-    } systemUniforms;
-    `;
+	static GLSL_SystemUniforms_vertex = {
+		systemUniforms: `
+		layout(set=0,binding = 0) uniform SystemUniforms {
+	        mat4 perspectiveMTX;
+	        mat4 cameraMTX;
+	    } systemUniforms;
+	    `
+	};
 	static GLSL_SystemUniforms_fragment = {
 		systemUniformsWithLight: `
 		const int MAX_DIRECTIONAL_LIGHT = 3;

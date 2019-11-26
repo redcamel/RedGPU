@@ -1,6 +1,6 @@
 let renderScene = (redGPU, redView, passEncoder, parent, parentDirty) => {
 	let i;
-	let targetList = parent.children
+	let targetList = parent.children;
 	let tGeometry;
 	let tMaterial;
 	let tMesh;
@@ -20,14 +20,14 @@ let renderScene = (redGPU, redView, passEncoder, parent, parentDirty) => {
 			tMesh.calcTransform(parent);
 			tMesh.updateUniformBuffer();
 		}
-		tMaterialDirty = tMesh._prevMaterialUUID != tMaterial._UUID
+		tMaterialDirty = tMesh._prevMaterialUUID != tMaterial._UUID;
 		if (!tMesh.pipeline || tMaterialDirty) {
 			tMesh.createPipeline(redGPU, redView);
 
 		}
 
 		if (tMaterial.bindings) {
-			if (!tMesh.uniformBindGroup.GPUBindGroup) tMesh.uniformBindGroup.setGPUBindGroup(tMesh, tMaterial)
+			if (!tMesh.uniformBindGroup.GPUBindGroup) tMesh.uniformBindGroup.setGPUBindGroup(tMesh, tMaterial);
 
 
 			if (prevPipeline_UUID != tMesh.pipeline._UUID) {
@@ -46,14 +46,14 @@ let renderScene = (redGPU, redView, passEncoder, parent, parentDirty) => {
 			passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
 
 		} else {
-			tMesh.uniformBindGroup.clear()
+			tMesh.uniformBindGroup.clear();
 			tMesh.pipeline = null;
 		}
 		tMesh._prevMaterialUUID = tMaterial._UUID;
 		if (tMesh.children.length) renderScene(redGPU, passEncoder, tMesh, parentDirty || tDirty);
 		tMesh._dirtyTransform = false;
 	}
-}
+};
 export default class RedRender {
 	#redGPU;
 	#swapChainTexture;
@@ -88,7 +88,7 @@ export default class RedRender {
 		// 시스템 유니폼 업데이트
 		redView.updateSystemUniform(passEncoder, redGPU);
 
-		renderScene(redGPU, redView, passEncoder, tScene)
+		renderScene(redGPU, redView, passEncoder, tScene);
 		passEncoder.endPass();
 		this.#redGPU.device.defaultQueue.submit([commandEncoder.finish()]);
 	};

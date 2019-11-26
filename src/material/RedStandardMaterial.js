@@ -3,17 +3,18 @@ import RedTypeSize from "../resources/RedTypeSize.js";
 import RedBaseMaterial from "../base/RedBaseMaterial.js";
 import RedUUID from "../base/RedUUID.js";
 import RedShareGLSL from "../base/RedShareGLSL.js";
+import RedUniformBufferDescriptor from "../buffer/RedUniformBufferDescriptor.js";
 
 export default class RedStandardMaterial extends RedBaseMaterial {
 
 	static vertexShaderGLSL = `
 	#version 450
-    ${RedShareGLSL.GLSL_SystemUniforms_vertex}
+    ${RedShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
     layout(set = 2,binding = 0) uniform Uniforms {
         mat4 modelMTX;
         mat4 normalMTX;
     } uniforms;
-     
+         
 	layout(location = 0) in vec3 position;
 	layout(location = 1) in vec3 normal;
 	layout(location = 2) in vec2 uv;
@@ -130,34 +131,44 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 			}
 		]
 	};
-	static uniformBufferDescriptor_vertex = {
-		size: RedTypeSize.mat4 * 2,
-		usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-		redStruct: [
-			{offset: 0, valueName: 'matrix'},
-			{offset: RedTypeSize.mat4, valueName: 'normalMatrix'}
+	static uniformBufferDescriptor_vertex = new RedUniformBufferDescriptor(
+		[
+			{size: RedTypeSize.mat4, valueName: 'matrix'},
+			{size: RedTypeSize.mat4, valueName: 'normalMatrix'}
 		]
-	};
-	static uniformBufferDescriptor_fragment = {
-		size: RedTypeSize.float4 * 2,
-		usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-		redStruct: [
-			{offset: 0, valueName: 'shininess', targetKey: 'material'},
-			{offset: RedTypeSize.float, valueName: 'specularPower', targetKey: 'material'},
+	);
+	static uniformBufferDescriptor_fragment = new RedUniformBufferDescriptor(
+		[
+			{size: RedTypeSize.float, valueName: 'shininess', targetKey: 'material'},
+			{size: RedTypeSize.float, valueName: 'specularPower', targetKey: 'material'},
 			{
-				offset: RedTypeSize.float4,
+				size: RedTypeSize.float4,
 				valueName: 'specularColor',
 				targetKey: 'material'
-			},
+			}
 		]
-	};
+	);
+	// 	{
+	// 	size: RedTypeSize.float4 * 2,
+	// 	usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+	// 	redStruct: [
+	// 		{offset: 0, valueName: 'shininess', targetKey: 'material'},
+	// 		{offset: RedTypeSize.float, valueName: 'specularPower', targetKey: 'material'},
+	// 		{
+	// 			offset: RedTypeSize.float4,
+	// 			valueName: 'specularColor',
+	// 			targetKey: 'material'
+	// 		},
+	// 	]
+	// };
+
 
 	#diffuseTexture;
 	#normalTexture;
 
 	#shininess = new Float32Array([32]);
 	#specularPower = new Float32Array([1]);
-	#specularColor = new Float32Array([1, 1, 1, 1])
+	#specularColor = new Float32Array([1, 1, 1, 1]);
 
 	constructor(redGPU, diffuseTexture, normalTexture) {
 		super(redGPU);
@@ -264,7 +275,7 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 				resource: this.#normalTexture ? this.#normalTexture.GPUTextureView : this.redGPU.state.emptyTextureView,
 			}
 		];
-		this.setUniformBindGroupDescriptor()
+		this.setUniformBindGroupDescriptor();
 		this._UUID = RedUUID.makeUUID()
 	}
 }
