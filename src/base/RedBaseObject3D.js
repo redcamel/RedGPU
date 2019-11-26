@@ -53,7 +53,8 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 			dataFragment = this.material.uniformBufferDescriptor_fragment.redStruct;
 			i = Math.max(dataVertex.length, dataFragment.length);
 			while (i--) {
-				if (tData = dataVertex[i]) {
+				tData = dataVertex[i];
+				if (tData) {
 					tValue = tData.targetKey ? this[tData.targetKey][tData.valueName] : this[tData.valueName];
 					if (typeof tValue == 'number') {
 						tempFloat32[0] = tValue;
@@ -61,7 +62,8 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 					}
 					this.uniformBuffer_vertex.GPUBuffer.setSubData(tData['offset'], tValue);
 				}
-				if (tData = dataFragment[i]) {
+				tData = dataFragment[i];
+				if (tData) {
 					tValue = tData.targetKey ? this[tData.targetKey][tData.valueName] : this[tData.valueName];
 					if (typeof tValue == 'number') {
 						tempFloat32[0] = tValue;
@@ -272,7 +274,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 				depthWriteEnabled: this.#useDepthTest,
 				depthCompare: this.#useDepthTest ? this.#depthTestFunc : 'always',
 			},
-			sampleCount : 4,
+			sampleCount: 4,
 			//alphaToCoverageEnabled : true // alphaToCoverageEnabled isn't supported (yet)
 		};
 

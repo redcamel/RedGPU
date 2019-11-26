@@ -14,6 +14,7 @@ import RedView from "./src/RedView.js";
 import RedColorMaterial from "./src/material/RedColorMaterial.js";
 import RedColorPhongMaterial from "./src/material/RedColorPhongMaterial.js";
 import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
+import RedGrid from "./src/object3D/RedGrid.js";
 
 
 (async function () {
@@ -30,7 +31,11 @@ import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 			let i = MAX;
 			let tView;
 			let tScene = new RedScene();
+			let tGrid = new RedGrid(this)
+			tGrid.centerColor = '#ff0000'
 			tView = new RedView(this, tScene, new RedCamera())
+			
+			tScene.addChild(tGrid)
 			let tLight
 			tLight = new RedDirectionalLight('#ff0000',1,0.5)
 			tLight.x = 10
@@ -63,6 +68,7 @@ import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 			let tMat3 = new RedBitmapMaterial(redGPU, testTextureList[0]);
 			let tMat4 = new RedStandardMaterial(redGPU, testTextureList[1]);
 			let tMat5 = new RedStandardMaterial(redGPU, testTextureList[1], testTextureList[2]);
+
 
 
 			let randomGeometry = function () {

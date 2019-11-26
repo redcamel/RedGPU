@@ -88,7 +88,7 @@ export default class RedGPU {
 			usage: GPUTextureUsage.OUTPUT_ATTACHMENT
 		});
 		this.baseTextureView = this.baseTexture.createView();
-		console.log(this.baseTexture)
+		console.log(this.baseTexture);
 
 		if (this.view) {
 			this.view.setSize();
