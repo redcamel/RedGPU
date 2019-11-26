@@ -4,15 +4,22 @@ import RedUtil from "./util/RedUtil.js"
 import RedDirectionalLight from "./light/RedDirectionalLight.js";
 
 export default class RedScene extends RedDisplayContainer {
+
 	#backgroundColor = '#000';
 	#backgroundColorAlpha = 1;
 	#backgroundColorRGBA = [0, 0, 0, this.#backgroundColorAlpha];
 	#directionalLightList = [];
-
+	#grid;
 	constructor() {
 		super()
 	}
+	get grid() {
+		return this.#grid;
+	}
 
+	set grid(value) {
+		this.#grid = value;
+	}
 	get backgroundColor() {
 		return this.#backgroundColor;
 	}

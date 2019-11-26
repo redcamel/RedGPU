@@ -95,4 +95,5 @@ export default class RedGrid extends RedBaseObject3D {
 		this.#size = value;
 		this.makeGridGeometry()
 	}
+
 }
