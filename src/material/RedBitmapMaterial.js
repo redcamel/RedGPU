@@ -2,11 +2,12 @@
 import RedTypeSize from "../resources/RedTypeSize.js";
 import RedBaseMaterial from "../base/RedBaseMaterial.js";
 import RedUUID from "../base/RedUUID.js";
+import RedShareGLSL from "../base/RedShareGLSL.js";
 
 export default class RedBitmapMaterial extends RedBaseMaterial {
 	static vertexShaderGLSL = `
 	#version 450
-	${RedBaseMaterial.GLSL_SystemUniforms_vertex}
+	${RedShareGLSL.GLSL_SystemUniforms_vertex}
     layout(set=2,binding = 0) uniform Uniforms {
         mat4 modelMatrix;
     } uniforms;
@@ -16,14 +17,13 @@ export default class RedBitmapMaterial extends RedBaseMaterial {
 	layout(location = 0) out vec3 vNormal;
 	layout(location = 1) out vec2 vUV;
 	void main() {
-		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * uniforms.modelMatrix* vec4(position,1.0);
+		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * uniforms.modelMatrix * vec4(position,1.0);
 		vNormal = normal;
 		vUV = uv;
 	}
 	`;
 	static fragmentShaderGLSL = `
 	#version 450
-	${RedBaseMaterial.GLSL_SystemUniforms_fragment}
 	layout(location = 0) in vec3 vNormal;
 	layout(location = 1) in vec2 vUV;
 	layout(set = 2, binding = 1) uniform sampler uSampler;

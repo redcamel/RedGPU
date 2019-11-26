@@ -3,12 +3,13 @@ import RedTypeSize from "../resources/RedTypeSize.js";
 import RedBaseMaterial from "../base/RedBaseMaterial.js";
 import RedUtil from "../util/RedUtil.js";
 import RedUUID from "../base/RedUUID.js";
+import RedShareGLSL from "../base/RedShareGLSL.js";
 
 export default class RedColorMaterial extends RedBaseMaterial {
 
 	static vertexShaderGLSL = `
 	#version 450
-	${RedBaseMaterial.GLSL_SystemUniforms_vertex}
+	${RedShareGLSL.GLSL_SystemUniforms_vertex}
     layout(set=2,binding = 0) uniform Uniforms {
         mat4 modelMatrix;
     } uniforms;
@@ -26,7 +27,6 @@ export default class RedColorMaterial extends RedBaseMaterial {
 	`;
 	static fragmentShaderGLSL = `
 	#version 450
-	${RedBaseMaterial.GLSL_SystemUniforms_fragment}
 	 layout(set=2,binding = 1) uniform Uniforms {
         vec4 color;
     } uniforms;

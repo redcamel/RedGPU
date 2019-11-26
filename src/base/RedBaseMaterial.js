@@ -26,24 +26,7 @@ export default class RedBaseMaterial {
 		usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
 		redStruct: []
 	};
-	static GLSL_SystemUniforms_vertex = `
-	layout(set=0,binding = 0) uniform SystemUniforms {
-        mat4 perspectiveMTX;
-        mat4 cameraMTX;
-    } systemUniforms;
-    `;
-	static GLSL_SystemUniforms_fragment = `
-	const int MAX_DIRECTIONAL_LIGHT = 3;
-	struct DirectionalLight {
-        vec4 directionalLightColor;
-        vec3 directionalLightPosition;
-        float directionalLightIntensity;
-	};
-	layout(set=1,binding = 0) uniform SystemUniforms {
-        float directionalLightCount;
-        DirectionalLight directionalLight[MAX_DIRECTIONAL_LIGHT];
-    } systemUniforms;
-    `;
+
 
 	uniformBufferDescriptor_vertex;
 	uniformBufferDescriptor_fragment;
