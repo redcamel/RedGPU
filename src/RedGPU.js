@@ -1,3 +1,11 @@
+/*
+ *   RedGPU - MIT License
+ *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
+ *   issue : https://github.com/redcamel/RedGPU/issues
+ *   Last modification time of this file - 2019.11.26 19:46:12
+ *
+ */
+
 "use strict";
 let redGPUList = new Set();
 let setGlobalResizeEvent = function () {
@@ -72,7 +80,7 @@ export default class RedGPU {
 				height: tH,
 				depth: 1
 			},
-			sampleCount : 4,
+			sampleCount: 4,
 			format: "depth24plus-stencil8",
 			usage: GPUTextureUsage.OUTPUT_ATTACHMENT
 		});
@@ -83,7 +91,7 @@ export default class RedGPU {
 				height: tH,
 				depth: 1
 			},
-			sampleCount : 4,
+			sampleCount: 4,
 			format: this.swapChainFormat,
 			usage: GPUTextureUsage.OUTPUT_ATTACHMENT
 		});
