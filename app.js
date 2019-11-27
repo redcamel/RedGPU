@@ -43,34 +43,28 @@ import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 			tScene.grid = tGrid
 			let tLight
 
-			tLight = new RedDirectionalLight('#ffffff', 1, 0.7)
+			tLight = new RedDirectionalLight('#ff0000', 1, 0.5)
 			tLight.x = 10
 			tLight.y = 0
 			tLight.z = 0
 			tScene.addLight(tLight)
 
-			// tLight = new RedDirectionalLight('#ff0000', 1, 1)
-			// tLight.x = 10
-			// tLight.y = 0
-			// tLight.z = 0
-			// tScene.addLight(tLight)
-			//
-			// tLight = new RedDirectionalLight('#00ff00', 1, 0.4)
-			// tLight.x = -10
-			// tLight.y = 0
-			// tLight.z = 0
-			// tScene.addLight(tLight)
-			//
-			// tLight = new RedDirectionalLight('#0000ff', 1, 1)
-			// tLight.x = 0
-			// tLight.y = 0
-			// tLight.z = 10
-			// tScene.addLight(tLight)
+			tLight = new RedDirectionalLight('#00ff00', 1, 0.4)
+			tLight.x = -10
+			tLight.y = 0
+			tLight.z = 0
+			tScene.addLight(tLight)
 
-			let i2 = 50
+			tLight = new RedDirectionalLight('#0000ff', 1, 0.5)
+			tLight.x = 0
+			tLight.y = 0
+			tLight.z = 10
+			tScene.addLight(tLight)
+
+			let i2 = 10
 			let testColor = ['#ff0000', '#00ff00', '#0000ff', '#ffffff', '#ff2234']
 			while (i2--) {
-				let tLight = new RedPointLight(testColor[i2 % 5], 1, 1, parseInt(Math.random() * 15) + 10)
+				let tLight = new RedPointLight(testColor[i2 % 5], 1, 1, parseInt(Math.random() * 30) + 10)
 				tLight.x = Math.random() * 80 - 40
 				tLight.y = Math.random() * 80 - 40
 				tLight.z = Math.random() * 80 - 40
@@ -164,9 +158,9 @@ import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 				let tChildren = tView.scene.pointLightList
 				let i = tChildren.length;
 				while (i--) {
-					tChildren[i].x = Math.sin(time / 1000 + i) * 25+ Math.sin(time / 1200 + i) * 20
-					tChildren[i].y = Math.cos(time / 2000 + i) * 30 + Math.sin(time / 2000 + i) * 20
-					tChildren[i].z = Math.tan(time / 4000 + i) * 30 + Math.cos(time / 2000 + i) * 20
+					tChildren[i].x = Math.sin(time / 1000 + Math.PI*2/tChildren.length*i) * 25
+					tChildren[i].y = Math.tan(time / 2000 + Math.PI*2/tChildren.length*i) * 25
+					tChildren[i].z = Math.cos(time / 2000 + Math.PI*2/tChildren.length*i)* 25
 				}
 
 

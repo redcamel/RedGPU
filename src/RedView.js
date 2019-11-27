@@ -125,6 +125,7 @@ export default class RedView {
 	};
 
 	updateSystemUniform(passEncoder, redGPU) {
+		//TODO 여기도 오프셋 자동으로 계산하게 변경해야함
 		let systemUniformInfo_vertex = this.systemUniformInfo_vertex;
 		this.#viewRect = this.getViewRect(redGPU);
 		// passEncoder.setViewport(tX, tY, this.canvas.width, this.canvas.height, 0, 1);

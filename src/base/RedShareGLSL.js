@@ -28,13 +28,11 @@ export default class RedShareGLSL {
 		const int MAX_POINT_LIGHT =  ${RedShareGLSL.MAX_POINT_LIGHT};
 		struct DirectionalLight {
 	        vec4 color;
-	        vec3 position;
-	        float intensity;
+	        vec3 position; float intensity;
 		};
 		struct PointLight {
 	        vec4 color;
-	        vec3 position;
-	        float intensity;
+	        vec3 position; float intensity;
 	        float radius;
 		};
 		layout(set=1,binding = 0) uniform SystemUniforms {
@@ -105,7 +103,8 @@ export default class RedShareGLSL {
 				    lambertTerm = dot(N,-L);
 				    intensity = lightInfo.intensity;
 				    if(lambertTerm > 0.0){
-				        attenuation = 1.0 / (0.01 + 0.02 * distanceLength + 0.03 * distanceLength * distanceLength) * 0.5;
+				        attenuation = clamp(1.0 - distanceLength*distanceLength/(lightInfo.radius*lightInfo.radius), 0.0, 1.0); 
+				        attenuation *= attenuation;
 						LD += lightColor * diffuseColor * lambertTerm * intensity * attenuation;
 						specular = pow( max(dot(reflect(L, N), -L), 0.0), shininess) * specularPower;
 						LS +=  specularColor * specular * intensity * attenuation;
