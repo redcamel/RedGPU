@@ -15,6 +15,7 @@ import RedColorPhongMaterial from "./src/material/RedColorPhongMaterial.js";
 import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 import RedGrid from "./src/object3D/RedGrid.js";
 import RedObitController from "./src/controller/RedObitController.js";
+import RedDetectGPU from "./src/base/detect/RedDetectorGPU.js";
 
 
 (async function () {
@@ -126,7 +127,6 @@ import RedObitController from "./src/controller/RedObitController.js";
 				// testMesh2.addChild(testMesh3)
 
 			}
-
 			let renderer = new RedRender();
 			let render = function (time) {
 

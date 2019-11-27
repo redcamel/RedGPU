@@ -80,10 +80,9 @@ export default class RedObitController extends RedCamera {
 				}
 				return true
 			};
-			//TODO 디텍터 달아야함
-			tMove = 'mousemove';
-			tUp = 'mouseup';
-			tDown = 'mousedown';
+			tMove = redGPU.detector.move;
+			tUp = redGPU.detector.up;
+			tDown = redGPU.detector.down;
 			sX = 0;
 			sY = 0;
 			mX = 0;

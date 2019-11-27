@@ -7,6 +7,8 @@
  */
 
 "use strict";
+import RedDetectorGPU from "./base/detect/RedDetectorGPU.js";
+
 let redGPUList = new Set();
 let setGlobalResizeEvent = function () {
 	window.addEventListener('resize', _ => {
@@ -16,9 +18,11 @@ let setGlobalResizeEvent = function () {
 export default class RedGPU {
 	#width = 0;
 	#height = 0;
+	#detector;
 	view;
 
 	constructor(canvas, glslang, initFunc) {
+		this.#detector = new RedDetectorGPU(this)
 		navigator.gpu.requestAdapter().then(adapter => {
 			adapter.requestDevice().then(device => {
 				this.glslang = glslang;
@@ -27,7 +31,6 @@ export default class RedGPU {
 				this.device = device;
 				this.swapChainFormat = "bgra8unorm";
 				this.swapChain = configureSwapChain(this.device, this.swapChainFormat, this.context);
-
 				this.state = {
 					RedGeometry: new Map(),
 					RedBuffer: {
@@ -45,7 +48,7 @@ export default class RedGPU {
 					}).createView()
 				};
 				/////
-
+				this.#detector.detectGPU()
 				///////
 				this.setSize('100%', '100%');
 				if (!redGPUList.size) setGlobalResizeEvent();
@@ -58,7 +61,7 @@ export default class RedGPU {
 		});
 
 	}
-
+	get detector() {return this.#detector};
 	setSize(w = this.#width, h = this.#height) {
 		this.#width = w;
 		this.#height = h;
