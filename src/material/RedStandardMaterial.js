@@ -40,15 +40,12 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 		
 		vVertexPosition = uniforms.modelMTX * vec4(position, 1.0);
 		vNormal = (uniforms.normalMTX * vec4(normal,1.0)).xyz;
-		
-
-		
+				
 		//#RedGPU#displacementTexture# vVertexPosition.xyz += normalize(vNormal) * texture(sampler2D(uDisplacementTexture, uSampler), uv + vec2(
 		//#RedGPU#displacementTexture#    uniforms.displacementFlowSpeedX * (systemUniforms.time/1000.0),
 		//#RedGPU#displacementTexture#    uniforms.displacementFlowSpeedY * (systemUniforms.time/1000.0)
 		//#RedGPU#displacementTexture# )).x * uniforms.displacementPower ;
-	
-	
+		
 		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * vVertexPosition;
 	
 		vUV = uv;
@@ -84,24 +81,31 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 		//#RedGPU#normalTexture# normalColor = texture(sampler2D(uNormalTexture, uSampler), vUV) ;
 		//#RedGPU#normalTexture# N = perturb_normal(N, vVertexPosition.xyz, vUV, normalColor.rgb, uniforms.normalPower) ;
 
-		vec4 ld = vec4(0.0, 0.0, 0.0, 1.0);
-		vec4 la = vec4(0.0, 0.0, 0.0, 0.2);
-		vec4 ls = vec4(0.0, 0.0, 0.0, 1.0);
+	
 		
-		vec4 calcColor = calcDirectionalLight(
+		calcDirectionalLight(
 			diffuseColor,
-			N,
-			ld,
-			ls,
+			N,		
 			systemUniforms.directionalLightCount,
 			systemUniforms.directionalLight,
 			uniforms.shininess,
 			uniforms.specularPower,
 			uniforms.specularColor
 		);
+		
+		calcPointLight(
+			diffuseColor,
+			N,		
+			systemUniforms.pointLightCount,
+			systemUniforms.pointLight,
+			uniforms.shininess,
+			uniforms.specularPower,
+			uniforms.specularColor,
+			vVertexPosition.xyz
+		);
 		    
 	
-	    vec4 finalColor = la + calcColor;
+	    vec4 finalColor = la + ld + ls;
 		
 		outColor = finalColor;
 	}

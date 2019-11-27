@@ -10,6 +10,7 @@
 import RedDisplayContainer from "./base/RedDisplayContainer.js";
 import RedUtil from "./util/RedUtil.js"
 import RedDirectionalLight from "./light/RedDirectionalLight.js";
+import RedPointLight from "./light/RedPointLight.js";
 
 export default class RedScene extends RedDisplayContainer {
 
@@ -17,6 +18,7 @@ export default class RedScene extends RedDisplayContainer {
 	#backgroundColorAlpha = 1;
 	#backgroundColorRGBA = [0, 0, 0, this.#backgroundColorAlpha];
 	#directionalLightList = [];
+	#pointLightList = [];
 	#grid;
 	constructor() {
 		super()
@@ -53,11 +55,17 @@ export default class RedScene extends RedDisplayContainer {
 	get directionalLightList() {
 		return this.#directionalLightList
 	}
+	get pointLightList() {
+		return this.#pointLightList
+	}
 
 	addLight(light) {
 		switch (light.constructor) {
 			case RedDirectionalLight:
 				this.#directionalLightList.push(light);
+				break;
+			case RedPointLight:
+				this.#pointLightList.push(light);
 				break;
 			default:
 				RedUtil.throwFunc('addLight : RedBaseLight 인스턴스만 가능');

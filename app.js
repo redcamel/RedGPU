@@ -12,10 +12,10 @@ import RedScene from "./src/RedScene.js";
 import RedView from "./src/RedView.js";
 import RedColorMaterial from "./src/material/RedColorMaterial.js";
 import RedColorPhongMaterial from "./src/material/RedColorPhongMaterial.js";
-import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 import RedGrid from "./src/object3D/RedGrid.js";
 import RedObitController from "./src/controller/RedObitController.js";
-import RedDetectGPU from "./src/base/detect/RedDetectorGPU.js";
+import RedPointLight from "./src/light/RedPointLight.js";
+import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 
 
 (async function () {
@@ -28,7 +28,7 @@ import RedDetectGPU from "./src/base/detect/RedDetectorGPU.js";
 	let redGPU = new RedGPU(cvs, glslang,
 		function () {
 
-			let MAX = 5000;
+			let MAX = 3000;
 			let i = MAX;
 			let tView;
 			let tScene = new RedScene();
@@ -43,23 +43,39 @@ import RedDetectGPU from "./src/base/detect/RedDetectorGPU.js";
 			tScene.grid = tGrid
 			let tLight
 
-			tLight = new RedDirectionalLight('#ff0000', 1, 1)
+			tLight = new RedDirectionalLight('#ffffff', 1, 0.7)
 			tLight.x = 10
 			tLight.y = 0
 			tLight.z = 0
 			tScene.addLight(tLight)
 
-			tLight = new RedDirectionalLight('#00ff00', 1, 0.4)
-			tLight.x = -10
-			tLight.y = 0
-			tLight.z = 0
-			tScene.addLight(tLight)
+			// tLight = new RedDirectionalLight('#ff0000', 1, 1)
+			// tLight.x = 10
+			// tLight.y = 0
+			// tLight.z = 0
+			// tScene.addLight(tLight)
+			//
+			// tLight = new RedDirectionalLight('#00ff00', 1, 0.4)
+			// tLight.x = -10
+			// tLight.y = 0
+			// tLight.z = 0
+			// tScene.addLight(tLight)
+			//
+			// tLight = new RedDirectionalLight('#0000ff', 1, 1)
+			// tLight.x = 0
+			// tLight.y = 0
+			// tLight.z = 10
+			// tScene.addLight(tLight)
 
-			tLight = new RedDirectionalLight('#0000ff', 1, 1)
-			tLight.x = 0
-			tLight.y = 0
-			tLight.z = 10
-			tScene.addLight(tLight)
+			let i2 = 50
+			let testColor = ['#ff0000', '#00ff00', '#0000ff', '#ffffff', '#ff2234']
+			while (i2--) {
+				let tLight = new RedPointLight(testColor[i2 % 5], 1, 1, parseInt(Math.random() * 15) + 10)
+				tLight.x = Math.random() * 80 - 40
+				tLight.y = Math.random() * 80 - 40
+				tLight.z = Math.random() * 80 - 40
+				tScene.addLight(tLight)
+			}
 
 			redGPU.view = tView
 			let testTextureList = [
@@ -72,7 +88,7 @@ import RedDetectGPU from "./src/base/detect/RedDetectorGPU.js";
 			];
 
 			let tMat1 = new RedColorMaterial(redGPU, '#ffff00');
-			let tMat2 = new RedColorPhongMaterial(redGPU, '#ffffff');
+			let tMat2 = new RedColorPhongMaterial(redGPU, '#ff00ff');
 			let tMat3 = new RedBitmapMaterial(redGPU, testTextureList[0]);
 			let tMat4 = new RedStandardMaterial(redGPU, testTextureList[1]);
 			let tMat5 = new RedStandardMaterial(redGPU, testTextureList[1], testTextureList[2]);
@@ -99,13 +115,13 @@ import RedDetectGPU from "./src/base/detect/RedDetectorGPU.js";
 				let testMesh = new RedMesh(
 					redGPU,
 					randomGeometry(),
-					i > MAX / 4 ? tMat2 : i > MAX / 8 ? tMat1 : i > MAX / 12 ? tMat6 : i > MAX / 16 ? tMat4 : i > MAX / 20 ? tMat5 : tMat3
+					i > MAX / 4 ? tMat2 : i > MAX / 8 ? tMat6 : i > MAX / 12 ? tMat4 : i > MAX / 16 ? tMat1 : i > MAX / 20 ? tMat5 : tMat3
 				);
 				testMesh.x = Math.random() * 100 - 50;
 				testMesh.y = Math.random() * 100 - 50;
 				testMesh.z = Math.random() * 100 - 50;
 				testMesh.rotationX = testMesh.rotationY = testMesh.rotationZ = Math.random() * 360;
-				testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = Math.random() * 2 + 1;
+				testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = Math.random() * 3 + 1;
 				tScene.addChild(testMesh)
 				// //
 				// let testMesh2 = new RedMesh(
@@ -145,14 +161,13 @@ import RedDetectGPU from "./src/base/detect/RedDetectorGPU.js";
 
 				renderer.render(time, redGPU, tView);
 
-				// let tChildren = tView.scene.children
-				// let i = tChildren.length;
-				// while (i--) {
-				// 	tChildren[i].rotationX += 1;
-				// 	tChildren[i].rotationY += 1;
-				// 	tChildren[i].rotationZ += 1;
-				// 	// tChildren[i].children[0].rotationY += 2
-				// }
+				let tChildren = tView.scene.pointLightList
+				let i = tChildren.length;
+				while (i--) {
+					tChildren[i].x = Math.sin(time / 1000 + i) * 25+ Math.sin(time / 1200 + i) * 20
+					tChildren[i].y = Math.cos(time / 2000 + i) * 30 + Math.sin(time / 2000 + i) * 20
+					tChildren[i].z = Math.tan(time / 4000 + i) * 30 + Math.cos(time / 2000 + i) * 20
+				}
 
 
 				requestAnimationFrame(render);
