@@ -28,8 +28,11 @@ export default class RedColorPhongMaterial extends RedColorMaterial {
 	layout(location = 2) in vec2 uv;
 	layout(location = 0) out vec3 vNormal;
 	layout(location = 1) out vec2 vUV;
+	layout(location = 2) out vec4 vVertexPosition;
 	void main() {
-		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * uniforms.modelMatrix* vec4(position,1.0);
+		vVertexPosition = uniforms.modelMatrix* vec4(position,1.0);
+		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * vVertexPosition;
+		
 		vNormal = (uniforms.normalMTX * vec4(normal,1.0)).xyz;
 		vUV = uv;
 	}
@@ -44,29 +47,34 @@ export default class RedColorPhongMaterial extends RedColorMaterial {
     } uniforms;
 	layout(location = 0) in vec3 vNormal;
 	layout(location = 1) in vec2 vUV;
+	layout(location = 2) in vec4 vVertexPosition;
 	layout(location = 0) out vec4 outColor;
 	void main() {
 
 		vec3 N = normalize(vNormal);
 		
-		vec4 ld = vec4(0.0, 0.0, 0.0, 1.0);
-		vec4 la = vec4(0.0, 0.0, 0.0, 0.2);
-		vec4 ls = vec4(0.0, 0.0, 0.0, 1.0);
 		
-		vec4 calcColor = calcDirectionalLight(
+		calcDirectionalLight(
 			uniforms.color,
-			N,
-			ld,
-			ls,
+			N,		
 			systemUniforms.directionalLightCount,
 			systemUniforms.directionalLight,
 			uniforms.shininess,
 			uniforms.specularPower,
 			uniforms.specularColor
 		);
-		    
+	    calcPointLight(
+			uniforms.color,
+			N,		
+			systemUniforms.pointLightCount,
+			systemUniforms.pointLight,
+			uniforms.shininess,
+			uniforms.specularPower,
+			uniforms.specularColor,
+			vVertexPosition.xyz
+		);
 	
-	    vec4 finalColor = la + calcColor;
+	    vec4 finalColor = la + ld + ls;
 		
 		outColor = finalColor;
 	}

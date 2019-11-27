@@ -19,22 +19,32 @@ export default class RedShareGLSL {
 	};
 	static GLSL_SystemUniforms_fragment = {
 		systemUniformsWithLight: `
+		vec4 ld = vec4(0.0, 0.0, 0.0, 1.0);
+		vec4 la = vec4(0.0, 0.0, 0.0, 0.2);
+		vec4 ls = vec4(0.0, 0.0, 0.0, 1.0);
 		const int MAX_DIRECTIONAL_LIGHT = 3;
+		const int MAX_POINT_LIGHT = 100;
 		struct DirectionalLight {
-	        vec4 directionalLightColor;
-	        vec3 directionalLightPosition;
-	        float directionalLightIntensity;
+	        vec4 color;
+	        vec3 position;
+	        float intensity;
+		};
+		struct PointLight {
+	        vec4 color;
+	        vec3 position;
+	        float intensity;
+	        float radius;
 		};
 		layout(set=1,binding = 0) uniform SystemUniforms {
 	        float directionalLightCount;
+	        float pointLightCount;
 	        DirectionalLight directionalLight[MAX_DIRECTIONAL_LIGHT];
+	        PointLight pointLight[MAX_POINT_LIGHT];	        
         } systemUniforms;
         
-        vec4 calcDirectionalLight(
+        void calcDirectionalLight(
             vec4 diffuseColor,
-            vec3 N,
-			vec4 ld, 
-			vec4 ls,
+            vec3 N,		
 			float loopNum,
 			DirectionalLight[MAX_DIRECTIONAL_LIGHT] lightList,
 			float shininess,
@@ -51,17 +61,55 @@ export default class RedShareGLSL {
 		    DirectionalLight lightInfo;
 		    for(int i = 0; i< loopNum; i++){
 		        lightInfo = lightList[i];
-			    L = normalize(-lightInfo.directionalLightPosition);	
-			    lightColor = lightInfo.directionalLightColor;
+			    L = normalize(-lightInfo.position);	
+			    lightColor = lightInfo.color;
 			    lambertTerm = dot(N,-L);
-			    intensity = lightInfo.directionalLightIntensity;
+			    intensity = lightInfo.intensity;
 			    if(lambertTerm > 0.0){
 					ld += lightColor * diffuseColor * lambertTerm * intensity;
 					specular = pow( max(dot(reflect(L, N), -L), 0.0), shininess) * specularPower;
 					ls +=  specularColor * specular * intensity;
 			    }
 		    }
-			return ld + ls;
+		}
+		
+		void calcPointLight(
+            vec4 diffuseColor,
+            vec3 N,		
+			float loopNum,
+			PointLight[MAX_POINT_LIGHT] lightList,
+			float shininess,
+			float specularPower,
+			vec4 specularColor,
+			vec3 vVertexPosition
+		){
+		    vec3 L;	
+		    vec4 lightColor;
+		    
+		    float lambertTerm;
+		    float intensity;
+		    float specular;
+		  
+		    PointLight lightInfo;
+		    float distanceLength ;
+		    float attenuation;
+		    for(int i = 0; i< loopNum; i++){
+		        lightInfo = lightList[i];
+		        L = -lightInfo.position + vVertexPosition;
+			    distanceLength = abs(length(L));
+			    if(lightInfo.radius> distanceLength){
+			        L = normalize(L);	
+				    lightColor = lightInfo.color;
+				    lambertTerm = dot(N,-L);
+				    intensity = lightInfo.intensity;
+				    if(lambertTerm > 0.0){
+				        attenuation = 1.0 / (0.01 + 0.02 * distanceLength + 0.03 * distanceLength * distanceLength) * 0.5;
+						ld += lightColor * diffuseColor * lambertTerm * intensity * attenuation;
+						specular = pow( max(dot(reflect(L, N), -L), 0.0), shininess) * specularPower;
+						ls +=  specularColor * specular * intensity * attenuation;
+				    }
+			    }
+		    }
 		}
 		`,
 		perturb_normal: `

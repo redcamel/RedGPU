@@ -78,8 +78,12 @@ export default class RedView {
 	};
 	#makeSystemUniformInfo_fragment = function (device) {
 		let uniformBufferSize =
+			// directionalLight
 			RedTypeSize.float4 +
-			RedTypeSize.float4 * 2 * 3
+			RedTypeSize.float4 * 2 * 3 +
+			// pointLight
+			RedTypeSize.float4 +
+			RedTypeSize.float4 * 3 * 100
 		;
 		const uniformBufferDescriptor = {
 			size: uniformBufferSize,
@@ -142,8 +146,10 @@ export default class RedView {
 		let systemUniformInfo_fragment = this.systemUniformInfo_fragment;
 		passEncoder.setBindGroup(1, systemUniformInfo_fragment.GPUBindGroup);
 		offset = 0;
-		let count = this.scene.directionalLightList.length;
-		systemUniformInfo_fragment.GPUBuffer.setSubData(offset, new Float32Array([count]));
+		systemUniformInfo_fragment.GPUBuffer.setSubData(offset, new Float32Array([
+			this.scene.directionalLightList.length,
+			this.scene.pointLightList.length
+		]));
 		offset += RedTypeSize.float4; // TODO : 이걸와 4로 해야되는거지 -_-
 
 		let i = 0, len = this.scene.directionalLightList.length;
@@ -152,10 +158,21 @@ export default class RedView {
 			if (tLight) {
 				systemUniformInfo_fragment.GPUBuffer.setSubData(offset, tLight.colorRGBA);
 				offset += RedTypeSize.float4;
-				systemUniformInfo_fragment.GPUBuffer.setSubData(offset, new Float32Array([tLight.x, tLight.y, tLight.z]));
-				offset += RedTypeSize.float3;
-				systemUniformInfo_fragment.GPUBuffer.setSubData(offset, new Float32Array([tLight.intensity]));
-				offset += RedTypeSize.float
+				systemUniformInfo_fragment.GPUBuffer.setSubData(offset, new Float32Array([tLight.x, tLight.y, tLight.z, tLight.intensity]));
+				offset += RedTypeSize.float4;
+			}
+		}
+		offset = RedTypeSize.float4 + RedTypeSize.float4 * 2 * 3;
+		i = 0, len = this.scene.pointLightList.length;
+		for (i; i < len; i++) {
+			let tLight = this.scene.pointLightList[i];
+			if (tLight) {
+				systemUniformInfo_fragment.GPUBuffer.setSubData(offset, tLight.colorRGBA);
+				offset += RedTypeSize.float4;
+				systemUniformInfo_fragment.GPUBuffer.setSubData(offset, new Float32Array([tLight.x, tLight.y, tLight.z, tLight.intensity]));
+				offset += RedTypeSize.float4;
+				systemUniformInfo_fragment.GPUBuffer.setSubData(offset, new Float32Array([tLight.radius]));
+				offset += RedTypeSize.float4
 			}
 		}
 
