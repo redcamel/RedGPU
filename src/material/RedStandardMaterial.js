@@ -87,7 +87,7 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 			diffuseColor,
 			N,		
 			systemUniforms.directionalLightCount,
-			systemUniforms.directionalLight,
+			systemUniforms.directionalLightList,
 			uniforms.shininess,
 			uniforms.specularPower,
 			uniforms.specularColor
@@ -97,7 +97,7 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 			diffuseColor,
 			N,		
 			systemUniforms.pointLightCount,
-			systemUniforms.pointLight,
+			systemUniforms.pointLightList,
 			uniforms.shininess,
 			uniforms.specularPower,
 			uniforms.specularColor,
@@ -105,7 +105,7 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 		);
 		    
 	
-	    vec4 finalColor = la + ld + ls;
+	    vec4 finalColor = LA + LD + LS;
 		
 		outColor = finalColor;
 	}

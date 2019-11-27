@@ -9,6 +9,7 @@
 "use strict";
 import RedUtil from "./util/RedUtil.js"
 import RedTypeSize from "./resources/RedTypeSize.js";
+import RedShareGLSL from "./base/RedShareGLSL.js"
 
 export default class RedView {
 	get viewRect() {
@@ -80,10 +81,10 @@ export default class RedView {
 		let uniformBufferSize =
 			// directionalLight
 			RedTypeSize.float4 +
-			RedTypeSize.float4 * 2 * 3 +
+			RedTypeSize.float4 * 2 * RedShareGLSL.MAX_DIRECTIONAL_LIGHT +
 			// pointLight
 			RedTypeSize.float4 +
-			RedTypeSize.float4 * 3 * 100
+			RedTypeSize.float4 * 3 * RedShareGLSL.MAX_POINT_LIGHT
 		;
 		const uniformBufferDescriptor = {
 			size: uniformBufferSize,
@@ -162,7 +163,7 @@ export default class RedView {
 				offset += RedTypeSize.float4;
 			}
 		}
-		offset = RedTypeSize.float4 + RedTypeSize.float4 * 2 * 3;
+		offset = RedTypeSize.float4 + RedTypeSize.float4 * 2 * RedShareGLSL.MAX_DIRECTIONAL_LIGHT;
 		i = 0, len = this.scene.pointLightList.length;
 		for (i; i < len; i++) {
 			let tLight = this.scene.pointLightList[i];

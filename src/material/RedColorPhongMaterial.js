@@ -58,7 +58,7 @@ export default class RedColorPhongMaterial extends RedColorMaterial {
 			uniforms.color,
 			N,		
 			systemUniforms.directionalLightCount,
-			systemUniforms.directionalLight,
+			systemUniforms.directionalLightList,
 			uniforms.shininess,
 			uniforms.specularPower,
 			uniforms.specularColor
@@ -67,14 +67,14 @@ export default class RedColorPhongMaterial extends RedColorMaterial {
 			uniforms.color,
 			N,		
 			systemUniforms.pointLightCount,
-			systemUniforms.pointLight,
+			systemUniforms.pointLightList,
 			uniforms.shininess,
 			uniforms.specularPower,
 			uniforms.specularColor,
 			vVertexPosition.xyz
 		);
 	
-	    vec4 finalColor = la + ld + ls;
+	    vec4 finalColor = LA + LD + LS;
 		
 		outColor = finalColor;
 	}
