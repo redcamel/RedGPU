@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 10:21:10
+ *   Last modification time of this file - 2019.11.28 11:53:1
  *
  */
 
@@ -23,7 +23,8 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 	#scaleX = 1;
 	#scaleY = 1;
 	#scaleZ = 1;
-	_dirtyTransform = true;
+	dirtyTransform = true;
+	dirtyPipeline = true;
 	//
 	_material;
 	_geometry;
@@ -85,13 +86,6 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 		}
 	})();
 
-	get dirtyTransform() {
-		return this._dirtyTransform
-	}
-
-	set dirtyTransform(v) {
-		this._dirtyTransform = v
-	}
 
 	get x() {
 		return this.#x
@@ -99,7 +93,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	set x(v) {
 		this.#x = v;
-		this._dirtyTransform = true;
+		this.dirtyTransform = true;
 	}
 
 	get y() {
@@ -108,7 +102,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	set y(v) {
 		this.#y = v;
-		this._dirtyTransform = true;
+		this.dirtyTransform = true;
 	}
 
 	get z() {
@@ -117,7 +111,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	set z(v) {
 		this.#z = v;
-		this._dirtyTransform = true;
+		this.dirtyTransform = true;
 	}
 
 	get rotationX() {
@@ -126,7 +120,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	set rotationX(v) {
 		this.#rotationX = v;
-		this._dirtyTransform = true;
+		this.dirtyTransform = true;
 	}
 
 	get rotationY() {
@@ -135,7 +129,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	set rotationY(v) {
 		this.#rotationY = v;
-		this._dirtyTransform = true;
+		this.dirtyTransform = true;
 	}
 
 	get rotationZ() {
@@ -144,7 +138,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	set rotationZ(v) {
 		this.#rotationZ = v;
-		this._dirtyTransform = true;
+		this.dirtyTransform = true;
 	}
 
 	get scaleX() {
@@ -153,7 +147,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	set scaleX(v) {
 		this.#scaleX = v;
-		this._dirtyTransform = true;
+		this.dirtyTransform = true;
 	}
 
 	get scaleY() {
@@ -162,7 +156,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	set scaleY(v) {
 		this.#scaleY = v;
-		this._dirtyTransform = true;
+		this.dirtyTransform = true;
 	}
 
 	get scaleZ() {
@@ -171,7 +165,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	set scaleZ(v) {
 		this.#scaleZ = v;
-		this._dirtyTransform = true;
+		this.dirtyTransform = true;
 	}
 
 	get geometry() {
@@ -180,7 +174,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	set geometry(v) {
 		this._geometry = v;
-		this.pipeline.GPURenderPipeline = null;
+		this.dirtyPipeline = true;
 		this.dirtyTransform = true
 	}
 
@@ -193,7 +187,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 		this.uniformBuffer_vertex.setBuffer(v.uniformBufferDescriptor_vertex);
 		this.uniformBuffer_fragment.setBuffer(v.uniformBufferDescriptor_fragment);
 		this.updateUniformBuffer();
-		this.pipeline.GPURenderPipeline = null;
+		this.dirtyPipeline = true;
 		this.dirtyTransform = true
 	}
 
@@ -202,7 +196,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 	}
 
 	set useDepthTest(value) {
-		this.pipeline.GPURenderPipeline = null;
+		this.dirtyPipeline = true;
 		this._useDepthTest = value;
 	}
 
@@ -211,7 +205,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 	}
 
 	set depthTestFunc(value) {
-		this.pipeline.GPURenderPipeline = null;
+		this.dirtyPipeline = true;
 		this._depthTestFunc = value;
 	}
 
@@ -220,7 +214,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 	}
 
 	set cullMode(value) {
-		this.pipeline.GPURenderPipeline = null;
+		this.dirtyPipeline = true;
 		this._cullMode = value;
 	}
 
@@ -229,7 +223,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 	}
 
 	set primitiveTopology(value) {
-		this.pipeline.GPURenderPipeline = null;
+		this.dirtyPipeline = true;
 		this._primitiveTopology = value;
 	}
 

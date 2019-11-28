@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.26 19:46:12
+ *   Last modification time of this file - 2019.11.28 11:53:2
  *
  */
 
@@ -22,7 +22,7 @@ export default class RedGPU {
 	view;
 
 	constructor(canvas, glslang, initFunc) {
-		this.#detector = new RedDetectorGPU(this)
+		this.#detector = new RedDetectorGPU(this);
 		navigator.gpu.requestAdapter().then(adapter => {
 			adapter.requestDevice().then(device => {
 				this.glslang = glslang;
@@ -48,7 +48,7 @@ export default class RedGPU {
 					}).createView()
 				};
 				/////
-				this.#detector.detectGPU()
+				this.#detector.detectGPU();
 				///////
 				this.setSize('100%', '100%');
 				if (!redGPUList.size) setGlobalResizeEvent();

@@ -2,9 +2,11 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 10:21:10
+ *   Last modification time of this file - 2019.11.28 11:53:2
  *
  */
+
+import RedUniformBuffer from "../buffer/RedUniformBuffer.js";
 
 let renderScene = (redGPU, redView, passEncoder, parent, parentDirty) => {
 	let i;
@@ -12,7 +14,7 @@ let renderScene = (redGPU, redView, passEncoder, parent, parentDirty) => {
 	let tGeometry;
 	let tMaterial;
 	let tMesh;
-	let tDirty;
+	let tDirtyTransform, tDirtyPipeline;
 	let tMaterialDirty;
 	let tPipeline;
 	let prevPipeline_UUID;
@@ -23,21 +25,22 @@ let renderScene = (redGPU, redView, passEncoder, parent, parentDirty) => {
 		tMesh = targetList[i];
 		tMaterial = tMesh._material;
 		tGeometry = tMesh._geometry;
-		tDirty = tMesh._dirtyTransform;
-		tPipeline = tMesh.pipeline
-		if (tDirty || parentDirty) {
+		tDirtyTransform = tMesh.dirtyTransform;
+		tDirtyPipeline = tMesh.dirtyPipeline;
+		tPipeline = tMesh.pipeline;
+		if (tDirtyTransform || parentDirty) {
 			// TODO 매트릭스 계산부분을 여기로 나중에 다들고 오는게 성능에 좋음...
 			tMesh.calcTransform(parent);
 			tMesh.updateUniformBuffer();
 		}
 		tMaterialDirty = tMesh._prevMaterialUUID != tMaterial._UUID;
-		if (!tPipeline.GPURenderPipeline || tMaterialDirty) {
+		if (!tDirtyPipeline || tMaterialDirty) {
 			tPipeline.updatePipeline(redGPU, redView);
+			tMesh.tDirtyPipeline = false;
 		}
 
 		if (tMaterial.bindings) {
 			if (!tMesh.uniformBindGroup.GPUBindGroup) tMesh.uniformBindGroup.setGPUBindGroup(tMesh, tMaterial);
-
 			if (prevPipeline_UUID != tPipeline._UUID) {
 				passEncoder.setPipeline(tPipeline.GPURenderPipeline);
 				prevPipeline_UUID = tPipeline._UUID
@@ -56,11 +59,11 @@ let renderScene = (redGPU, redView, passEncoder, parent, parentDirty) => {
 
 		} else {
 			tMesh.uniformBindGroup.clear();
-			tPipeline.GPURenderPipeline = null;
+			tPipeline.tDirtyPipeline = true;
 		}
 		tMesh._prevMaterialUUID = tMaterial._UUID;
-		if (tMesh.children.length) renderScene(redGPU, passEncoder, tMesh, parentDirty || tDirty);
-		tMesh._dirtyTransform = false;
+		if (tMesh.children.length) renderScene(redGPU, passEncoder, tMesh, parentDirty || tDirtyTransform);
+		tMesh.dirtyTransform = false;
 	}
 };
 export default class RedRender {
@@ -71,7 +74,6 @@ export default class RedRender {
 		let tScene, tSceneBackgroundColor_rgba;
 		tScene = redView.scene;
 		tSceneBackgroundColor_rgba = tScene.backgroundColorRGBA;
-
 		redView.camera.update();
 		// console.log(swapChain.getCurrentTexture())
 		const renderPassDescriptor = {
@@ -98,7 +100,6 @@ export default class RedRender {
 
 		// 시스템 유니폼 업데이트
 		redView.updateSystemUniform(passEncoder, redGPU);
-
 		if (tScene.grid) renderScene(redGPU, redView, passEncoder, {children: [tScene.grid]});
 		renderScene(redGPU, redView, passEncoder, tScene);
 		passEncoder.endPass();
@@ -111,5 +112,6 @@ export default class RedRender {
 		this.#swapChainTexture = redGPU.swapChain.getCurrentTexture();
 		this.#textureView = this.#swapChainTexture.createView();
 		this.#renderView(redGPU, redView)
+
 	}
 }

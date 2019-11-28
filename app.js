@@ -1,3 +1,11 @@
+/*
+ *   RedGPU - MIT License
+ *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
+ *   issue : https://github.com/redcamel/RedGPU/issues
+ *   Last modification time of this file - 2019.11.28 11:53:2
+ *
+ */
+
 import RedGPU from "./src/RedGPU.js";
 import RedMesh from "./src/object3D/RedMesh.js";
 import RedStandardMaterial from "./src/material/RedStandardMaterial.js";
@@ -14,8 +22,8 @@ import RedColorMaterial from "./src/material/RedColorMaterial.js";
 import RedColorPhongMaterial from "./src/material/RedColorPhongMaterial.js";
 import RedGrid from "./src/object3D/RedGrid.js";
 import RedObitController from "./src/controller/RedObitController.js";
-import RedPointLight from "./src/light/RedPointLight.js";
 import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
+import RedPointLight from "./src/light/RedPointLight.js";
 
 
 (async function () {
@@ -28,7 +36,7 @@ import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 	let redGPU = new RedGPU(cvs, glslang,
 		function () {
 
-			let MAX = 3000;
+			let MAX = 5000;
 			let i = MAX;
 			let tView;
 			let tScene = new RedScene();
@@ -75,9 +83,9 @@ import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 			let testTextureList = [
 				new RedBitmapTexture(redGPU, 'assets/UV_Grid_Sm.jpg'),
 				new RedBitmapTexture(redGPU, 'assets/Brick03_col.jpg'),
-				new RedBitmapTexture(redGPU, 'assets/Brick03_nrm.jpg'),
+				new RedBitmapTexture(redGPU, 'assets/Brick03_col.jpg'),
 				new RedBitmapTexture(redGPU, 'assets/crate.png'),
-				new RedBitmapTexture(redGPU, 'assets/Brick03_disp.jpg')
+				new RedBitmapTexture(redGPU, 'assets/Brick03_col.jpg')
 
 			];
 
@@ -91,6 +99,19 @@ import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 			tMat6.displacementFlowSpeedX = 0.1
 			tMat6.displacementFlowSpeedY = 0.1
 
+			// let mats = [tMat1,tMat2,tMat3,tMat4,tMat5,tMat6]
+			// let changeNum = 0
+			// setTimeout(_ => {
+			// 	let tChildren = tView.scene.children
+			// 	let i = tChildren.length;
+			//
+			// 	console.log('안오냐')
+			//
+			// 	while (i--) {
+			//
+			// 		tChildren[i].material = tMat1
+			// 	}
+			// }, 3000)
 
 			let randomGeometry = function () {
 				return Math.random() > 0.5
@@ -158,9 +179,9 @@ import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 				let tChildren = tView.scene.pointLightList
 				let i = tChildren.length;
 				while (i--) {
-					tChildren[i].x = Math.sin(time / 1000 + Math.PI*2/tChildren.length*i) * 25
-					tChildren[i].y = Math.tan(time / 2000 + Math.PI*2/tChildren.length*i) * 25
-					tChildren[i].z = Math.cos(time / 2000 + Math.PI*2/tChildren.length*i)* 25
+					tChildren[i].x = Math.sin(time / 1000 + Math.PI * 2 / tChildren.length * i) * 25
+					tChildren[i].y = Math.tan(time / 2000 + Math.PI * 2 / tChildren.length * i) * 25
+					tChildren[i].z = Math.cos(time / 2000 + Math.PI * 2 / tChildren.length * i) * 25
 				}
 
 
