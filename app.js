@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 14:29:32
+ *   Last modification time of this file - 2019.11.28 14:48:2
  *
  */
 
@@ -36,7 +36,7 @@ import RedPointLight from "./src/light/RedPointLight.js";
 	let redGPU = new RedGPU(cvs, glslang,
 		function () {
 
-			let MAX = 5000;
+			let MAX = 3000;
 			let i = MAX;
 			let tView, tView2;
 			let tScene = new RedScene();
@@ -78,7 +78,7 @@ import RedPointLight from "./src/light/RedPointLight.js";
 			tLight.z = 10
 			tScene.addLight(tLight)
 
-			let i2 = 30
+			let i2 = 10
 			let testColor = ['#ff0000', '#00ff00', '#0000ff', '#ffffff', '#ff2234']
 			while (i2--) {
 				let tLight = new RedPointLight(testColor[i2 % 5], 1, 1, parseInt(Math.random() * 30) + 10)
