@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 17:31:6
+ *   Last modification time of this file - 2019.11.28 17:52:54
  *
  */
 
@@ -13,7 +13,7 @@ let renderScene = (redGPU, redView, passEncoder, parent, parentDirty) => {
 	let tMaterial;
 	let tMesh;
 	let tDirtyTransform, tDirtyPipeline;
-	let tMaterialDirty;
+	let tMaterialChanged;
 	let tPipeline;
 	let prevPipeline_UUID;
 	let prevVertexBuffer_UUID;
@@ -29,11 +29,12 @@ let renderScene = (redGPU, redView, passEncoder, parent, parentDirty) => {
 		if (tDirtyTransform || parentDirty) {
 			// TODO 매트릭스 계산부분을 여기로 나중에 다들고 오는게 성능에 좋음...
 			tMesh.calcTransform(parent);
-			tMesh.updateUniformBuffer(); // TODO - 이녀석도 개별적으로 업데이트 되도록 변경해야함
+			 // TODO - 이녀석도 개별적으로 업데이트 되도록 변경해야함
 		}
-		tMaterialDirty = tMesh._prevMaterialUUID != tMaterial._UUID;
-		if (tDirtyPipeline || tMaterialDirty) {
+		tMaterialChanged = tMesh._prevMaterialUUID != tMaterial._UUID;
+		if (tDirtyPipeline || tMaterialChanged) {
 			tPipeline.updatePipeline(redGPU, redView);
+			tMesh.updateUniformBuffer(); //TODO - #55 Material, Geomety의 BindGroup과 BindGroupLayout을 나눠야곘음.
 			// console.log('tMesh.dirtyPipeline',tMesh.dirtyPipeline)
 		}
 

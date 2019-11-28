@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 17:31:6
+ *   Last modification time of this file - 2019.11.28 17:52:54
  *
  */
 
@@ -60,7 +60,7 @@ import RedPointLight from "./src/light/RedPointLight.js";
 			tScene.grid = tGrid
 			let tLight
 
-			tLight = new RedDirectionalLight('#ffffff', 1, 1)
+			tLight = new RedDirectionalLight('#ff0000', 1, 1)
 			tLight.x = 10
 			tLight.y = 0
 			tLight.z = 0
@@ -108,6 +108,7 @@ import RedPointLight from "./src/light/RedPointLight.js";
 			tMat6.displacementPower = 1
 			tMat6.displacementFlowSpeedX = 0.1
 			tMat6.displacementFlowSpeedY = 0.1
+
 
 			let mats = [tMat1,tMat2,tMat3,tMat4,tMat5,tMat6]
 			let changeNum = 0
@@ -192,7 +193,7 @@ import RedPointLight from "./src/light/RedPointLight.js";
 				// tView.camera.lookAt(0, 0, 0);
 
 				renderer.render(time, redGPU);
-
+				tMat6.normalPower = Math.sin(time/100) * 10
 				let tChildren = tView.scene.pointLightList
 				let i = tChildren.length;
 				while (i--) {
