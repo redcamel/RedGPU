@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 14:20:42
+ *   Last modification time of this file - 2019.11.28 14:29:32
  *
  */
 
@@ -137,7 +137,8 @@ export default class RedView {
 		this.#viewRect = this.getViewRect(redGPU);
 		if (this.baseAttachment) {
 			this.baseAttachment.destroy();
-			this.baseDepthStencilAttachment.destroy()
+			this.baseDepthStencilAttachment.destroy();
+			this.baseResolveTarget.destroy();
 		}
 		console.log(this.#viewRect);
 		this.baseAttachment = redGPU.device.createTexture({
