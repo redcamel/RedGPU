@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 14:27:17
+ *   Last modification time of this file - 2019.11.28 14:43:22
  *
  */
 
@@ -32,9 +32,9 @@ let renderScene = (redGPU, redView, passEncoder, parent, parentDirty) => {
 			tMesh.updateUniformBuffer();
 		}
 		tMaterialDirty = tMesh._prevMaterialUUID != tMaterial._UUID;
-		if (!tDirtyPipeline || tMaterialDirty) {
+		if (tDirtyPipeline || tMaterialDirty) {
 			tPipeline.updatePipeline(redGPU, redView);
-			tMesh.tDirtyPipeline = false;
+			// console.log('tMesh.dirtyPipeline',tMesh.dirtyPipeline)
 		}
 
 		if (tMaterial.bindings) {
@@ -54,10 +54,9 @@ let renderScene = (redGPU, redView, passEncoder, parent, parentDirty) => {
 			passEncoder.setBindGroup(2, tMesh.uniformBindGroup.GPUBindGroup); // 바인드 그룹은 매 매쉬마다 다르므로 캐싱할 필요가 없음.
 			if (tGeometry.indexBuffer) passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
 			else passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
-
+			tMesh.dirtyPipeline = false;
 		} else {
 			tMesh.uniformBindGroup.clear();
-			tPipeline.tDirtyPipeline = true;
 		}
 		tMesh._prevMaterialUUID = tMaterial._UUID;
 		if (tMesh.children.length) renderScene(redGPU, passEncoder, tMesh, parentDirty || tDirtyTransform);
