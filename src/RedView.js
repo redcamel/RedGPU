@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.26 19:46:12
+ *   Last modification time of this file - 2019.11.28 14:20:42
  *
  */
 
@@ -15,6 +15,7 @@ export default class RedView {
 	get viewRect() {
 		return this.#viewRect;
 	}
+	#redGPU;
 	#scene;
 	#camera;
 	#x = 0;
@@ -25,13 +26,22 @@ export default class RedView {
 	systemUniformInfo_vertex;
 	systemUniformInfo_fragment;
 	projectionMatrix;
+	//
+	baseAttachment;
+	baseAttachmentView;
+	baseResolveTarget;
+	baseResolveTargetView;
+	baseDepthStencilAttachment;
+	baseDepthStencilAttachmentView;
 
 	constructor(redGPU, scene, camera) {
+		this.#redGPU = redGPU;
 		this.camera = camera;
 		this.scene = scene;
 		this.systemUniformInfo_vertex = this.#makeSystemUniformInfo_vertex(redGPU.device);
 		this.systemUniformInfo_fragment = this.#makeSystemUniformInfo_fragment(redGPU.device);
 		this.projectionMatrix = mat4.create();
+
 	}
 
 	#makeSystemUniformInfo_vertex = function (device) {
@@ -123,14 +133,56 @@ export default class RedView {
 			GPUBindGroup: uniformBindGroup
 		}
 	};
+	resetTexture(redGPU) {
+		this.#viewRect = this.getViewRect(redGPU);
+		if (this.baseAttachment) {
+			this.baseAttachment.destroy();
+			this.baseDepthStencilAttachment.destroy()
+		}
+		console.log(this.#viewRect);
+		this.baseAttachment = redGPU.device.createTexture({
+			size: {
+				width: this.#viewRect[2],
+				height: this.#viewRect[3],
+				depth: 1
+			},
+			sampleCount: 4,
+			format: redGPU.swapChainFormat,
+			usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC
+		});
+		this.baseAttachmentView = this.baseAttachment.createView();
+		this.baseResolveTarget = redGPU.device.createTexture({
+			size: {
+				width: this.#viewRect[2],
+				height: this.#viewRect[3],
+				depth: 1
+			},
+			sampleCount: 1,
+			format: redGPU.swapChainFormat,
+			usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC
+		});
+		this.baseResolveTargetView = this.baseResolveTarget.createView();
+		this.baseDepthStencilAttachment = redGPU.device.createTexture({
+			size: {
+				width: this.#viewRect[2],
+				height: this.#viewRect[3],
+				depth: 1
+			},
+			sampleCount: 4,
+			format: "depth24plus-stencil8",
+			usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC
+		});
+		this.baseDepthStencilAttachmentView = this.baseDepthStencilAttachment.createView();
+		console.log('this.baseAttachment', this.baseAttachment)
 
+	}
 	updateSystemUniform(passEncoder, redGPU) {
 		//TODO 여기도 오프셋 자동으로 계산하게 변경해야함
 		let systemUniformInfo_vertex = this.systemUniformInfo_vertex;
 		this.#viewRect = this.getViewRect(redGPU);
 		// passEncoder.setViewport(tX, tY, this.canvas.width, this.canvas.height, 0, 1);
-		passEncoder.setViewport(...this.#viewRect, 0, 1);
-		passEncoder.setScissorRect(...this.#viewRect);
+		passEncoder.setViewport(0, 0, this.#viewRect[2], this.#viewRect[3], 0, 1);
+		passEncoder.setScissorRect(0, 0, this.#viewRect[2], this.#viewRect[3]);
 		passEncoder.setBindGroup(0, systemUniformInfo_vertex.GPUBindGroup);
 
 
@@ -233,6 +285,8 @@ export default class RedView {
 			if (height.includes('%') && (+height.replace('%', '') >= 0)) this.#height = height;
 			else RedUtil.throwFunc('RedView setSize : height는 0이상의 숫자나 %만 허용.', height);
 		}
+		this.getViewRect(this.#redGPU);
+		this.resetTexture(this.#redGPU)
 	}
 
 	setLocation(x = this.#x, y = this.#y) {
@@ -246,7 +300,8 @@ export default class RedView {
 			if (y.includes('%') && (+y.replace('%', '') >= 0)) this.#y = y;
 			else RedUtil.throwFunc('RedView setLocation : y는 0이상의 숫자나 %만 허용.', y);
 		}
-		console.log('setLocation', this.#x, this.#y)
+		console.log('setLocation', this.#x, this.#y);
+		this.getViewRect(this.#redGPU)
 	}
 
 }

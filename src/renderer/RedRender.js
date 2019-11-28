@@ -2,11 +2,9 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 11:53:2
+ *   Last modification time of this file - 2019.11.28 14:20:42
  *
  */
-
-import RedUniformBuffer from "../buffer/RedUniformBuffer.js";
 
 let renderScene = (redGPU, redView, passEncoder, parent, parentDirty) => {
 	let i;
@@ -69,17 +67,21 @@ let renderScene = (redGPU, redView, passEncoder, parent, parentDirty) => {
 export default class RedRender {
 	#redGPU;
 	#swapChainTexture;
-	#textureView;
+	#swapChainTextureView;
 	#renderView = (redGPU, redView) => {
 		let tScene, tSceneBackgroundColor_rgba;
 		tScene = redView.scene;
 		tSceneBackgroundColor_rgba = tScene.backgroundColorRGBA;
 		redView.camera.update();
 		// console.log(swapChain.getCurrentTexture())
+
+		if (!redView.baseAttachmentView) {
+			redView.resetTexture(redGPU)
+		}
 		const renderPassDescriptor = {
 			colorAttachments: [{
-				attachment: this.#redGPU.baseTextureView,
-				resolveTarget: this.#textureView,
+				attachment: redView.baseAttachmentView,
+				resolveTarget: redView.baseResolveTargetView,
 				loadValue: {
 					r: tSceneBackgroundColor_rgba[0],
 					g: tSceneBackgroundColor_rgba[1],
@@ -88,7 +90,7 @@ export default class RedRender {
 				}
 			}],
 			depthStencilAttachment: {
-				attachment: this.#redGPU.depthTextureView,
+				attachment: redView.baseDepthStencilAttachmentView,
 				depthLoadValue: 1.0,
 				depthStoreOp: "store",
 				stencilLoadValue: 0,
@@ -103,15 +105,34 @@ export default class RedRender {
 		if (tScene.grid) renderScene(redGPU, redView, passEncoder, {children: [tScene.grid]});
 		renderScene(redGPU, redView, passEncoder, tScene);
 		passEncoder.endPass();
+		commandEncoder.copyTextureToTexture(
+			{
+				texture: redView.baseResolveTarget
+			},
+			{
+				texture: this.#swapChainTexture,
+				origin: {
+					x: redView.viewRect[0],
+					y: redView.viewRect[1],
+					z: 0
+				}
+			},
+			{
+				width: redView.viewRect[2] + redView.viewRect[0] > this.#redGPU.canvas.width ? redView.viewRect[2] - redView.viewRect[0] : redView.viewRect[2],
+				height: redView.viewRect[3] + redView.viewRect[1] > this.#redGPU.canvas.height ? redView.viewRect[3] - redView.viewRect[1] : redView.viewRect[3],
+				depth: 1
+			}
+		);
 		this.#redGPU.device.defaultQueue.submit([commandEncoder.finish()]);
 	};
 
 
-	render(time, redGPU, redView) {
+	render(time, redGPU) {
 		this.#redGPU = redGPU;
 		this.#swapChainTexture = redGPU.swapChain.getCurrentTexture();
-		this.#textureView = this.#swapChainTexture.createView();
-		this.#renderView(redGPU, redView)
+		this.#swapChainTextureView = this.#swapChainTexture.createView();
+		redGPU.viewList.forEach(redView => this.#renderView(redGPU, redView))
+
 
 	}
 }

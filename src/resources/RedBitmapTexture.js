@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 11:54:8
+ *   Last modification time of this file - 2019.11.28 14:20:42
  *
  */
 "use strict";
@@ -59,8 +59,8 @@ export default class RedBitmapTexture {
 		};
 
 		const textureExtent = {
-			width,
-			height,
+			width : width,
+			height : height,
 			depth: 1
 		};
 		const commandEncoder = device.createCommandEncoder({});
@@ -100,7 +100,6 @@ export default class RedBitmapTexture {
 					format: 'bgra8unorm',
 					arrayLayerCount: 1,
 					mipLevelCount: useMipmap ? this.mipMaps + 1 : 1,
-					sampleCount: 1,
 					usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.SAMPLED
 				};
 				const gpuTexture = redGPU.device.createTexture(textureDescriptor);

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 11:54:8
+ *   Last modification time of this file - 2019.11.28 14:20:42
  *
  */
 
@@ -38,14 +38,23 @@ import RedPointLight from "./src/light/RedPointLight.js";
 
 			let MAX = 3000;
 			let i = MAX;
-			let tView;
+			let tView, tView2;
 			let tScene = new RedScene();
+			let tScene2 = new RedScene();
 			let tGrid = new RedGrid(this)
 			let tCamera = new RedObitController(this)
+			let tCamera2 = new RedObitController(this)
 			tGrid.centerColor = '#ff0000'
+			tScene2.backgroundColor = '#ff0000'
 
 			tView = new RedView(this, tScene, tCamera)
+			tView2 = new RedView(this, tScene2, tCamera2)
+			tView2.setSize(300, 300)
+			tView2.setLocation(0, 500)
+
+
 			tCamera.targetView = tView // optional
+			tCamera2.targetView = tView2 // optional
 			tCamera.distance = 80
 
 			tScene.grid = tGrid
@@ -79,7 +88,8 @@ import RedPointLight from "./src/light/RedPointLight.js";
 				tScene.addLight(tLight)
 			}
 
-			redGPU.view = tView
+			redGPU.addView(tView)
+			redGPU.addView(tView2)
 			let testTextureList = [
 				new RedBitmapTexture(redGPU, 'assets/UV_Grid_Sm.jpg'),
 				new RedBitmapTexture(redGPU, 'assets/Brick03_col.jpg'),
@@ -120,12 +130,19 @@ import RedPointLight from "./src/light/RedPointLight.js";
 						? new RedCylinder(redGPU, 0, 1, 2, 16, 16) :
 						Math.random() > 0.5 ? new RedBox(redGPU) : new RedPlane(redGPU)
 			}
-			let testMesh = new RedMesh(
-				redGPU,
-				new RedSphere(redGPU, 0.5, 32, 32, 32),
-				tMat6
-			);
-			tScene.addChild(testMesh)
+			let i3 = 100
+			while (i3--) {
+				let testMesh = new RedMesh(
+					redGPU,
+					new RedSphere(redGPU, 0.5, 32, 32, 32),
+					tMat1
+				);
+				testMesh.x = Math.random() * 30 - 15
+				testMesh.y = Math.random() * 30 - 15
+				testMesh.z = Math.random() * 30 - 15
+				tScene2.addChild(testMesh)
+			}
+
 			while (i--) {
 				let testMesh = new RedMesh(
 					redGPU,
@@ -174,7 +191,7 @@ import RedPointLight from "./src/light/RedPointLight.js";
 				// tView.camera.z = 10;
 				// tView.camera.lookAt(0, 0, 0);
 
-				renderer.render(time, redGPU, tView);
+				renderer.render(time, redGPU);
 
 				let tChildren = tView.scene.pointLightList
 				let i = tChildren.length;
