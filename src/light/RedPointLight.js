@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.27 16:29:48
+ *   Last modification time of this file - 2019.11.28 17:31:6
  *
  */
 
@@ -10,7 +10,6 @@
 import RedBaseLight from "../base/RedBaseLight.js";
 
 export default class RedPointLight extends RedBaseLight {
-
 	#radius = 1;
 	constructor(color = '#ffffff', alpha = 1, intensity = 1, radius = 1) {
 		super();

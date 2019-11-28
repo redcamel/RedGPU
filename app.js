@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 14:48:2
+ *   Last modification time of this file - 2019.11.28 17:31:6
  *
  */
 
@@ -60,7 +60,7 @@ import RedPointLight from "./src/light/RedPointLight.js";
 			tScene.grid = tGrid
 			let tLight
 
-			tLight = new RedDirectionalLight('#ff0000', 1, 0.5)
+			tLight = new RedDirectionalLight('#ffffff', 1, 1)
 			tLight.x = 10
 			tLight.y = 0
 			tLight.z = 0
@@ -93,9 +93,9 @@ import RedPointLight from "./src/light/RedPointLight.js";
 			let testTextureList = [
 				new RedBitmapTexture(redGPU, 'assets/UV_Grid_Sm.jpg'),
 				new RedBitmapTexture(redGPU, 'assets/Brick03_col.jpg'),
-				new RedBitmapTexture(redGPU, 'assets/Brick03_col.jpg'),
+				new RedBitmapTexture(redGPU, 'assets/Brick03_nrm.jpg'),
 				new RedBitmapTexture(redGPU, 'assets/crate.png'),
-				new RedBitmapTexture(redGPU, 'assets/Brick03_col.jpg')
+				new RedBitmapTexture(redGPU, 'assets/Brick03_disp.jpg')
 
 			];
 
@@ -109,19 +109,19 @@ import RedPointLight from "./src/light/RedPointLight.js";
 			tMat6.displacementFlowSpeedX = 0.1
 			tMat6.displacementFlowSpeedY = 0.1
 
-			// let mats = [tMat1,tMat2,tMat3,tMat4,tMat5,tMat6]
-			// let changeNum = 0
-			// setTimeout(_ => {
+			let mats = [tMat1,tMat2,tMat3,tMat4,tMat5,tMat6]
+			let changeNum = 0
+			// setInterval(_ => {
 			// 	let tChildren = tView.scene.children
 			// 	let i = tChildren.length;
-			//
+			// 	changeNum++
 			// 	console.log('안오냐')
 			//
 			// 	while (i--) {
 			//
-			// 		tChildren[i].material = tMat1
+			// 		tChildren[i].material = mats[changeNum%5]
 			// 	}
-			// }, 3000)
+			// }, 500)
 
 			let randomGeometry = function () {
 				return Math.random() > 0.5
@@ -135,7 +135,7 @@ import RedPointLight from "./src/light/RedPointLight.js";
 				let testMesh = new RedMesh(
 					redGPU,
 					new RedSphere(redGPU, 0.5, 32, 32, 32),
-					tMat1
+					tMat3
 				);
 				testMesh.x = Math.random() * 30 - 15
 				testMesh.y = Math.random() * 30 - 15

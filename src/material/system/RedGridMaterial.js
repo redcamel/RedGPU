@@ -2,21 +2,20 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.26 19:46:12
+ *   Last modification time of this file - 2019.11.28 17:31:6
  *
  */
 
 "use strict";
 import RedTypeSize from "../../resources/RedTypeSize.js";
 import RedBaseMaterial from "../../base/RedBaseMaterial.js";
-import RedUUID from "../../base/RedUUID.js";
 import RedShareGLSL from "../../base/RedShareGLSL.js";
 import RedUniformBufferDescriptor from "../../buffer/RedUniformBufferDescriptor.js";
 
 export default class RedGridMaterial extends RedBaseMaterial {
 
 	static vertexShaderGLSL = `
-	#version 450
+	#version 460
 	${RedShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
     layout(set=2,binding = 0) uniform Uniforms {
         mat4 modelMatrix;
@@ -31,7 +30,7 @@ export default class RedGridMaterial extends RedBaseMaterial {
 	}
 	`;
 	static fragmentShaderGLSL = `
-	#version 450
+	#version 460
 	layout(location = 0) in vec4 vColor;
 	layout(location = 0) out vec4 outColor;
 	void main() {
@@ -87,6 +86,6 @@ export default class RedGridMaterial extends RedBaseMaterial {
 			}
 		];
 		this.setUniformBindGroupDescriptor();
-		this._UUID = RedUUID.makeUUID();
+		this.updateUUID()
 	}
 }

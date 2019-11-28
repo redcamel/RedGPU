@@ -2,23 +2,25 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.26 19:46:12
+ *   Last modification time of this file - 2019.11.28 17:31:6
  *
  */
 
 "use strict";
 import RedTypeSize from "../resources/RedTypeSize.js";
 import RedBaseMaterial from "../base/RedBaseMaterial.js";
-import RedUUID from "../base/RedUUID.js";
 import RedShareGLSL from "../base/RedShareGLSL.js";
 import RedUniformBufferDescriptor from "../buffer/RedUniformBufferDescriptor.js";
-import RedUtil from "../util/RedUtil.js";
+import RedMaterialPreset from "./RedMaterialPreset.js";
 
-export default class RedStandardMaterial extends RedBaseMaterial {
-
-
+export default class RedStandardMaterial extends RedMaterialPreset.mix(
+	RedBaseMaterial,
+	RedMaterialPreset.basicLightPropertys,
+	RedMaterialPreset.diffuseTexture,
+	RedMaterialPreset.normalTexture
+) {
 	static vertexShaderGLSL = `
-	#version 450
+	#version 460
     ${RedShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
     layout(set = 2,binding = 0) uniform Uniforms {
         mat4 modelMTX;
@@ -52,7 +54,7 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 	}
 	`;
 	static fragmentShaderGLSL = `
-	#version 450
+	#version 460
 	${RedShareGLSL.GLSL_SystemUniforms_fragment.systemUniformsWithLight}
 	layout(set=2,binding = 1) uniform Uniforms {
         float normalPower;
@@ -81,7 +83,6 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 		//#RedGPU#normalTexture# normalColor = texture(sampler2D(uNormalTexture, uSampler), vUV) ;
 		//#RedGPU#normalTexture# N = perturb_normal(N, vVertexPosition.xyz, vUV, normalColor.rgb, uniforms.normalPower) ;
 
-	
 		
 		calcDirectionalLight(
 			diffuseColor,
@@ -184,30 +185,8 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 
 		]
 	);
-	// 	{
-	// 	size: RedTypeSize.float4 * 2,
-	// 	usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-	// 	redStruct: [
-	// 		{offset: 0, valueName: 'shininess', targetKey: 'material'},
-	// 		{offset: RedTypeSize.float, valueName: 'specularPower', targetKey: 'material'},
-	// 		{
-	// 			offset: RedTypeSize.float4,
-	// 			valueName: 'specularColor',
-	// 			targetKey: 'material'
-	// 		},
-	// 	]
-	// };
 
-
-	#diffuseTexture;
-	#normalTexture;
 	#displacementTexture;
-
-	#normalPower = 1;
-	#shininess = 64;
-	#specularPower = 1;
-	#specularColor = '#ffffff';
-	#specularColorRGBA = new Float32Array([1, 1, 1, 1]);
 	#displacementFlowSpeedX = 0.0;
 	#displacementFlowSpeedY = 0.0;
 	#displacementPower = 0.1;
@@ -226,10 +205,10 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 			if (texture.GPUTexture) {
 				switch (textureName) {
 					case 'diffuseTexture' :
-						this.#diffuseTexture = texture;
+						this._diffuseTexture = texture;
 						break;
 					case 'normalTexture' :
-						this.#normalTexture = texture;
+						this._normalTexture = texture;
 						break;
 					case 'displacementTexture' :
 						this.#displacementTexture = texture;
@@ -244,24 +223,6 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 		} else {
 			this.resetBindingInfo()
 		}
-	}
-
-	set diffuseTexture(texture) {
-		this.#diffuseTexture = null;
-		this.checkTexture(texture, 'diffuseTexture')
-	}
-
-	get diffuseTexture() {
-		return this.#diffuseTexture
-	}
-
-	set normalTexture(texture) {
-		this.#normalTexture = null;
-		this.checkTexture(texture, 'normalTexture')
-	}
-
-	get normalTexture() {
-		return this.#normalTexture
 	}
 
 	set displacementTexture(texture) {
@@ -298,47 +259,6 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 		this.#displacementPower = value;
 	}
 
-	get normalPower() {
-		return this.#normalPower;
-	}
-
-	set normalPower(value) {
-		this.#normalPower = value;
-	}
-
-	get specularColorRGBA() {
-		return this.#specularColorRGBA;
-	}
-
-	get specularColor() {
-		return this.#specularColor;
-	}
-
-	set specularColor(value) {
-		this.#specularColor = hex;
-		let rgb = RedUtil.hexToRGB_ZeroToOne(value);
-		this.#specularColorRGBA[0] = rgb[0];
-		this.#specularColorRGBA[1] = rgb[1];
-		this.#specularColorRGBA[2] = rgb[2];
-		this.#specularColorRGBA[3] = 1;
-	}
-
-	get specularPower() {
-		return this.#specularPower;
-	}
-
-	set specularPower(value) {
-		this.#specularPower = value;
-	}
-
-	get shininess() {
-		return this.#shininess;
-	}
-
-	set shininess(value) {
-		this.#shininess = value;
-	}
-
 	resetBindingInfo() {
 		this.bindings = null;
 		this.searchModules();
@@ -369,11 +289,11 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 			},
 			{
 				binding: 4,
-				resource: this.#diffuseTexture ? this.#diffuseTexture.GPUTextureView : this.redGPU.state.emptyTextureView,
+				resource: this._diffuseTexture ? this._diffuseTexture.GPUTextureView : this.redGPU.state.emptyTextureView,
 			},
 			{
 				binding: 5,
-				resource: this.#normalTexture ? this.#normalTexture.GPUTextureView : this.redGPU.state.emptyTextureView,
+				resource: this._normalTexture ? this._normalTexture.GPUTextureView : this.redGPU.state.emptyTextureView,
 			},
 			{
 				binding: 6,
@@ -381,6 +301,6 @@ export default class RedStandardMaterial extends RedBaseMaterial {
 			}
 		];
 		this.setUniformBindGroupDescriptor();
-		this._UUID = RedUUID.makeUUID()
+		this.updateUUID()
 	}
 }
