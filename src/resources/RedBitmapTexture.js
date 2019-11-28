@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 11:53:2
+ *   Last modification time of this file - 2019.11.28 11:54:8
  *
  */
 "use strict";
@@ -76,9 +76,9 @@ export default class RedBitmapTexture {
 			console.log('src')
 		} else {
 			const mapKey = src + useMipmap;
-			console.log('mapKey',mapKey)
+			console.log('mapKey',mapKey);
 			if (TABLE.get(mapKey)) {
-				console.log('캐시된 녀석을 던집',mapKey, TABLE.get(mapKey))
+				console.log('캐시된 녀석을 던집',mapKey, TABLE.get(mapKey));
 				return TABLE.get(mapKey);
 			}
 			const img = new Image();
