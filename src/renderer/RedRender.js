@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 14:20:42
+ *   Last modification time of this file - 2019.11.28 14:27:17
  *
  */
 
@@ -105,6 +105,12 @@ export default class RedRender {
 		if (tScene.grid) renderScene(redGPU, redView, passEncoder, {children: [tScene.grid]});
 		renderScene(redGPU, redView, passEncoder, tScene);
 		passEncoder.endPass();
+		let tX = redView.viewRect[0];
+		let tY = redView.viewRect[1];
+		let tW = redView.viewRect[2] + redView.viewRect[0] > this.#redGPU.canvas.width ? redView.viewRect[2] - redView.viewRect[0] : redView.viewRect[2];
+		let tH = redView.viewRect[3] + redView.viewRect[1] > this.#redGPU.canvas.height ? redView.viewRect[3] - redView.viewRect[1] : redView.viewRect[3];
+		if (tW > this.#redGPU.canvas.width) tW = this.#redGPU.canvas.width - tX;
+		if (tH > this.#redGPU.canvas.height) tH = this.#redGPU.canvas.height - tX;
 		commandEncoder.copyTextureToTexture(
 			{
 				texture: redView.baseResolveTarget
@@ -112,14 +118,14 @@ export default class RedRender {
 			{
 				texture: this.#swapChainTexture,
 				origin: {
-					x: redView.viewRect[0],
-					y: redView.viewRect[1],
+					x: tX,
+					y: tY,
 					z: 0
 				}
 			},
 			{
-				width: redView.viewRect[2] + redView.viewRect[0] > this.#redGPU.canvas.width ? redView.viewRect[2] - redView.viewRect[0] : redView.viewRect[2],
-				height: redView.viewRect[3] + redView.viewRect[1] > this.#redGPU.canvas.height ? redView.viewRect[3] - redView.viewRect[1] : redView.viewRect[3],
+				width: tW,
+				height: tH,
 				depth: 1
 			}
 		);
