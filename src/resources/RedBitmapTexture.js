@@ -2,13 +2,13 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.26 19:46:12
+ *   Last modification time of this file - 2019.11.28 14:20:42
  *
  */
 "use strict";
 let imageCanvas;
 let imageCanvasContext;
-const TABLE = new Map()
+const TABLE = new Map();
 export default class RedBitmapTexture {
 	#updateList = [];
 	#GPUTexture;
@@ -59,8 +59,8 @@ export default class RedBitmapTexture {
 		};
 
 		const textureExtent = {
-			width,
-			height,
+			width : width,
+			height : height,
 			depth: 1
 		};
 		const commandEncoder = device.createCommandEncoder({});
@@ -68,15 +68,19 @@ export default class RedBitmapTexture {
 		device.defaultQueue.submit([commandEncoder.finish()]);
 
 		console.log('mip', mip, 'width', width, 'height', height)
-	}
+	};
 	constructor(redGPU, src, useMipmap = true) {
 		// 귀찮아서 텍스쳐 맹그는 놈은 들고옴
 		let self = this;
 		if (!src) {
 			console.log('src')
 		} else {
-			const mapKey = src + useMipmap
-			if (TABLE.get(mapKey)) return TABLE.get(mapKey)
+			const mapKey = src + useMipmap;
+			console.log('mapKey',mapKey);
+			if (TABLE.get(mapKey)) {
+				console.log('캐시된 녀석을 던집',mapKey, TABLE.get(mapKey));
+				return TABLE.get(mapKey);
+			}
 			const img = new Image();
 			img.src = src;
 			img.onerror = function (v) {
@@ -84,7 +88,7 @@ export default class RedBitmapTexture {
 			};
 
 			img.onload = async _ => {
-				if (useMipmap) this.mipMaps = Math.floor(Math.log2(Math.max(img.width, img.height)))
+				if (useMipmap) this.mipMaps = Math.floor(Math.log2(Math.max(img.width, img.height)));
 				await img.decode();
 				const textureDescriptor = {
 					size: {
@@ -96,15 +100,14 @@ export default class RedBitmapTexture {
 					format: 'bgra8unorm',
 					arrayLayerCount: 1,
 					mipLevelCount: useMipmap ? this.mipMaps + 1 : 1,
-					sampleCount: 1,
 					usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.SAMPLED
 				};
 				const gpuTexture = redGPU.device.createTexture(textureDescriptor);
-				let i = 1, len = this.mipMaps
-				let faceWidth = img.width
-				let faceHeight = img.height
+				let i = 1, len = this.mipMaps;
+				let faceWidth = img.width;
+				let faceHeight = img.height;
 
-				this.#updateTexture(redGPU.device, img, gpuTexture, faceWidth, faceHeight, 0)
+				this.#updateTexture(redGPU.device, img, gpuTexture, faceWidth, faceHeight, 0);
 				if (useMipmap) {
 					for (i; i <= len; i++) {
 						faceWidth = Math.max(Math.floor(faceWidth / 2), 1);
@@ -112,9 +115,9 @@ export default class RedBitmapTexture {
 						this.#updateTexture(redGPU.device, img, gpuTexture, faceWidth, faceHeight, i)
 					}
 				}
-				TABLE.set(mapKey, gpuTexture)
-				self.resolve(gpuTexture)
+				TABLE.set(mapKey, this);
 
+				self.resolve(gpuTexture)
 			}
 		}
 	}

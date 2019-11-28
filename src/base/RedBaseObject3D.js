@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.26 19:46:12
+ *   Last modification time of this file - 2019.11.28 11:53:1
  *
  */
 
@@ -10,8 +10,8 @@
 
 import RedUniformBuffer from "../buffer/RedUniformBuffer.js";
 import RedDisplayContainer from "./RedDisplayContainer.js";
-import RedUUID from "./RedUUID.js";
 import RedBindGroup from "../buffer/RedBindGroup.js";
+import RedPipeline from "./RedPipeline.js";
 
 export default class RedBaseObject3D extends RedDisplayContainer {
 	#x = 0;
@@ -23,7 +23,8 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 	#scaleX = 1;
 	#scaleY = 1;
 	#scaleZ = 1;
-	_dirtyTransform = true;
+	dirtyTransform = true;
+	dirtyPipeline = true;
 	//
 	_material;
 	_geometry;
@@ -32,10 +33,11 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 	uniformBuffer_fragment;
 	uniformBindGroup;
 	//
-	#useDepthTest = true;
-	#depthTestFunc = 'less';
-	#cullMode = 'back';
-	#primitiveTopology = "triangle-list";
+	_useDepthTest = true;
+	_depthTestFunc = 'less';
+	_cullMode = 'back';
+	_primitiveTopology = "triangle-list";
+	pipeline;
 
 
 	constructor(redGPU) {
@@ -44,6 +46,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 		this.uniformBuffer_vertex = new RedUniformBuffer(redGPU);
 		this.uniformBuffer_fragment = new RedUniformBuffer(redGPU);
 		this.uniformBindGroup = new RedBindGroup(redGPU);
+		this.pipeline = new RedPipeline(redGPU, this);
 		this.normalMatrix = mat4.create();
 		this.matrix = mat4.create();
 		this.localMatrix = mat4.create()
@@ -83,13 +86,6 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 		}
 	})();
 
-	get dirtyTransform() {
-		return this._dirtyTransform
-	}
-
-	set dirtyTransform(v) {
-		this._dirtyTransform = v
-	}
 
 	get x() {
 		return this.#x
@@ -97,7 +93,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	set x(v) {
 		this.#x = v;
-		this._dirtyTransform = true;
+		this.dirtyTransform = true;
 	}
 
 	get y() {
@@ -106,7 +102,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	set y(v) {
 		this.#y = v;
-		this._dirtyTransform = true;
+		this.dirtyTransform = true;
 	}
 
 	get z() {
@@ -115,7 +111,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	set z(v) {
 		this.#z = v;
-		this._dirtyTransform = true;
+		this.dirtyTransform = true;
 	}
 
 	get rotationX() {
@@ -124,7 +120,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	set rotationX(v) {
 		this.#rotationX = v;
-		this._dirtyTransform = true;
+		this.dirtyTransform = true;
 	}
 
 	get rotationY() {
@@ -133,7 +129,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	set rotationY(v) {
 		this.#rotationY = v;
-		this._dirtyTransform = true;
+		this.dirtyTransform = true;
 	}
 
 	get rotationZ() {
@@ -142,7 +138,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	set rotationZ(v) {
 		this.#rotationZ = v;
-		this._dirtyTransform = true;
+		this.dirtyTransform = true;
 	}
 
 	get scaleX() {
@@ -151,7 +147,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	set scaleX(v) {
 		this.#scaleX = v;
-		this._dirtyTransform = true;
+		this.dirtyTransform = true;
 	}
 
 	get scaleY() {
@@ -160,7 +156,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	set scaleY(v) {
 		this.#scaleY = v;
-		this._dirtyTransform = true;
+		this.dirtyTransform = true;
 	}
 
 	get scaleZ() {
@@ -169,7 +165,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	set scaleZ(v) {
 		this.#scaleZ = v;
-		this._dirtyTransform = true;
+		this.dirtyTransform = true;
 	}
 
 	get geometry() {
@@ -178,7 +174,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	set geometry(v) {
 		this._geometry = v;
-		this.pipeline = null;
+		this.dirtyPipeline = true;
 		this.dirtyTransform = true
 	}
 
@@ -191,104 +187,44 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 		this.uniformBuffer_vertex.setBuffer(v.uniformBufferDescriptor_vertex);
 		this.uniformBuffer_fragment.setBuffer(v.uniformBufferDescriptor_fragment);
 		this.updateUniformBuffer();
-		this.pipeline = null;
+		this.dirtyPipeline = true;
 		this.dirtyTransform = true
 	}
 
 	get useDepthTest() {
-		return this.#useDepthTest;
+		return this._useDepthTest;
 	}
 
 	set useDepthTest(value) {
-		this.pipeline = null;
-		this.#useDepthTest = value;
+		this.dirtyPipeline = true;
+		this._useDepthTest = value;
 	}
 
 	get depthTestFunc() {
-		return this.#depthTestFunc;
+		return this._depthTestFunc;
 	}
 
 	set depthTestFunc(value) {
-		this.pipeline = null;
-		this.#depthTestFunc = value;
+		this.dirtyPipeline = true;
+		this._depthTestFunc = value;
 	}
 
 	get cullMode() {
-		return this.#cullMode;
+		return this._cullMode;
 	}
 
 	set cullMode(value) {
-		this.pipeline = null;
-		this.#cullMode = value;
+		this.dirtyPipeline = true;
+		this._cullMode = value;
 	}
 
 	get primitiveTopology() {
-		return this.#primitiveTopology;
+		return this._primitiveTopology;
 	}
 
 	set primitiveTopology(value) {
-		this.pipeline = null;
-		this.#primitiveTopology = value;
-	}
-
-	createPipeline(redGPU, redView) {
-		this.uniformBindGroup.clear();
-		const device = redGPU.device;
-		const descriptor = {
-			// 레이아웃은 재질이 알고있으니 들고옴
-			layout: device.createPipelineLayout(
-				{
-					bindGroupLayouts: [
-						redView.systemUniformInfo_vertex.GPUBindGroupLayout,
-						redView.systemUniformInfo_fragment.GPUBindGroupLayout,
-						this._material.GPUBindGroupLayout
-					]
-				}
-			),
-			// 버텍스와 프레그먼트는 재질에서 들고온다.
-			vertexStage: {
-				module: this._material.vShaderModule.GPUShaderModule,
-				entryPoint: 'main'
-			},
-			fragmentStage: {
-				module: this._material.fShaderModule.GPUShaderModule,
-				entryPoint: 'main'
-			},
-			// 버텍스 상태는 지오메트리가 알고있음으로 들고옴
-			vertexState: this._geometry.vertexState,
-			// 컬러모드 지정하고
-			colorStates: [
-				{
-					format: redGPU.swapChainFormat,
-					alphaBlend: {
-						srcFactor: "src-alpha",
-						dstFactor: "one-minus-src-alpha",
-						operation: "add"
-					},
-					colorBlend: {
-						srcFactor: "src-alpha",
-						dstFactor: "one-minus-src-alpha",
-						operation: "add"
-					}
-				}
-			],
-			rasterizationState: {
-				frontFace: 'ccw',
-				cullMode: this.#cullMode
-			},
-			primitiveTopology: this.#primitiveTopology,
-			depthStencilState: {
-				format: "depth24plus-stencil8",
-				depthWriteEnabled: this.#useDepthTest,
-				depthCompare: this.#useDepthTest ? this.#depthTestFunc : 'always',
-			},
-			sampleCount: 4,
-			//alphaToCoverageEnabled : true // alphaToCoverageEnabled isn't supported (yet)
-		};
-
-		this.pipeline = device.createRenderPipeline(descriptor);
-		this.pipeline._UUID = RedUUID.makeUUID();
-		return this.pipeline
+		this.dirtyPipeline = true;
+		this._primitiveTopology = value;
 	}
 
 	calcNormalTransform() {

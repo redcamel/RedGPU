@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.26 19:46:12
+ *   Last modification time of this file - 2019.11.28 14:20:42
  *
  */
 
@@ -19,10 +19,10 @@ export default class RedGPU {
 	#width = 0;
 	#height = 0;
 	#detector;
-	view;
+	viewList = [];
 
 	constructor(canvas, glslang, initFunc) {
-		this.#detector = new RedDetectorGPU(this)
+		this.#detector = new RedDetectorGPU(this);
 		navigator.gpu.requestAdapter().then(adapter => {
 			adapter.requestDevice().then(device => {
 				this.glslang = glslang;
@@ -48,7 +48,7 @@ export default class RedGPU {
 					}).createView()
 				};
 				/////
-				this.#detector.detectGPU()
+				this.#detector.detectGPU();
 				///////
 				this.setSize('100%', '100%');
 				if (!redGPUList.size) setGlobalResizeEvent();
@@ -60,6 +60,12 @@ export default class RedGPU {
 			alert(`WebGPU is unsupported, or no adapters or devices are available.`)
 		});
 
+	}
+	addView(redView) {
+		this.viewList.push(redView)
+	}
+	removeView(redView) {
+		if(this.viewList.includes(redView)) this.viewList.splice(redView,1)
 	}
 	get detector() {return this.#detector};
 	setSize(w = this.#width, h = this.#height) {
@@ -77,34 +83,13 @@ export default class RedGPU {
 		this.canvas.height = tH;
 		this.canvas.style.width = tW + 'px';
 		this.canvas.style.height = tH + 'px';
-		this.depthTexture = this.device.createTexture({
-			size: {
-				width: tW,
-				height: tH,
-				depth: 1
-			},
-			sampleCount: 4,
-			format: "depth24plus-stencil8",
-			usage: GPUTextureUsage.OUTPUT_ATTACHMENT
-		});
-		this.depthTextureView = this.depthTexture.createView();
-		this.baseTexture = this.device.createTexture({
-			size: {
-				width: tW,
-				height: tH,
-				depth: 1
-			},
-			sampleCount: 4,
-			format: this.swapChainFormat,
-			usage: GPUTextureUsage.OUTPUT_ATTACHMENT
-		});
-		this.baseTextureView = this.baseTexture.createView();
-		console.log(this.baseTexture);
 
-		if (this.view) {
-			this.view.setSize();
-			this.view.setLocation()
-		}
+		console.log(this.baseAttachment);
+
+		this.viewList.forEach(redView => {
+			redView.setSize();
+			redView.setLocation()
+		});
 
 		requestAnimationFrame(_ => {
 			const swapChainTexture = this.swapChain.getCurrentTexture();
@@ -112,10 +97,12 @@ export default class RedGPU {
 			const textureView = swapChainTexture.createView();
 			console.log('textureView', textureView);
 			const passEncoder = commandEncoder.beginRenderPass({
-				colorAttachments: [{
-					attachment: textureView,
-					loadValue: {r: 0, g: 0, b: 0.0, a: 0.0}
-				}]
+				colorAttachments: [
+					{
+						attachment: textureView,
+						loadValue: {r: 1, g: 0, b: 0.0, a: 0.0}
+					}
+				]
 			});
 			console.log(`setSize - input : ${w},${h} / result : ${tW}, ${tH}`);
 			passEncoder.setViewport(0, 0, tW, tH, 0, 1);
@@ -132,6 +119,7 @@ function configureSwapChain(device, swapChainFormat, context) {
 	const swapChainDescriptor = {
 		device: device,
 		format: swapChainFormat,
+		usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC
 	};
 	console.log('swapChainDescriptor', swapChainDescriptor);
 	return context.configureSwapChain(swapChainDescriptor);

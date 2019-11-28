@@ -1,3 +1,11 @@
+/*
+ *   RedGPU - MIT License
+ *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
+ *   issue : https://github.com/redcamel/RedGPU/issues
+ *   Last modification time of this file - 2019.11.28 14:20:42
+ *
+ */
+
 import RedGPU from "./src/RedGPU.js";
 import RedMesh from "./src/object3D/RedMesh.js";
 import RedStandardMaterial from "./src/material/RedStandardMaterial.js";
@@ -14,8 +22,8 @@ import RedColorMaterial from "./src/material/RedColorMaterial.js";
 import RedColorPhongMaterial from "./src/material/RedColorPhongMaterial.js";
 import RedGrid from "./src/object3D/RedGrid.js";
 import RedObitController from "./src/controller/RedObitController.js";
-import RedPointLight from "./src/light/RedPointLight.js";
 import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
+import RedPointLight from "./src/light/RedPointLight.js";
 
 
 (async function () {
@@ -30,14 +38,23 @@ import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 
 			let MAX = 3000;
 			let i = MAX;
-			let tView;
+			let tView, tView2;
 			let tScene = new RedScene();
+			let tScene2 = new RedScene();
 			let tGrid = new RedGrid(this)
 			let tCamera = new RedObitController(this)
+			let tCamera2 = new RedObitController(this)
 			tGrid.centerColor = '#ff0000'
+			tScene2.backgroundColor = '#ff0000'
 
 			tView = new RedView(this, tScene, tCamera)
+			tView2 = new RedView(this, tScene2, tCamera2)
+			tView2.setSize(300, 300)
+			tView2.setLocation(0, 500)
+
+
 			tCamera.targetView = tView // optional
+			tCamera2.targetView = tView2 // optional
 			tCamera.distance = 80
 
 			tScene.grid = tGrid
@@ -61,7 +78,7 @@ import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 			tLight.z = 10
 			tScene.addLight(tLight)
 
-			let i2 = 10
+			let i2 = 30
 			let testColor = ['#ff0000', '#00ff00', '#0000ff', '#ffffff', '#ff2234']
 			while (i2--) {
 				let tLight = new RedPointLight(testColor[i2 % 5], 1, 1, parseInt(Math.random() * 30) + 10)
@@ -71,13 +88,14 @@ import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 				tScene.addLight(tLight)
 			}
 
-			redGPU.view = tView
+			redGPU.addView(tView)
+			redGPU.addView(tView2)
 			let testTextureList = [
 				new RedBitmapTexture(redGPU, 'assets/UV_Grid_Sm.jpg'),
 				new RedBitmapTexture(redGPU, 'assets/Brick03_col.jpg'),
-				new RedBitmapTexture(redGPU, 'assets/Brick03_nrm.jpg'),
+				new RedBitmapTexture(redGPU, 'assets/Brick03_col.jpg'),
 				new RedBitmapTexture(redGPU, 'assets/crate.png'),
-				new RedBitmapTexture(redGPU, 'assets/Brick03_disp.jpg')
+				new RedBitmapTexture(redGPU, 'assets/Brick03_col.jpg')
 
 			];
 
@@ -91,6 +109,19 @@ import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 			tMat6.displacementFlowSpeedX = 0.1
 			tMat6.displacementFlowSpeedY = 0.1
 
+			// let mats = [tMat1,tMat2,tMat3,tMat4,tMat5,tMat6]
+			// let changeNum = 0
+			// setTimeout(_ => {
+			// 	let tChildren = tView.scene.children
+			// 	let i = tChildren.length;
+			//
+			// 	console.log('안오냐')
+			//
+			// 	while (i--) {
+			//
+			// 		tChildren[i].material = tMat1
+			// 	}
+			// }, 3000)
 
 			let randomGeometry = function () {
 				return Math.random() > 0.5
@@ -99,12 +130,19 @@ import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 						? new RedCylinder(redGPU, 0, 1, 2, 16, 16) :
 						Math.random() > 0.5 ? new RedBox(redGPU) : new RedPlane(redGPU)
 			}
-			let testMesh = new RedMesh(
-				redGPU,
-				new RedSphere(redGPU, 0.5, 32, 32, 32),
-				tMat6
-			);
-			tScene.addChild(testMesh)
+			let i3 = 100
+			while (i3--) {
+				let testMesh = new RedMesh(
+					redGPU,
+					new RedSphere(redGPU, 0.5, 32, 32, 32),
+					tMat1
+				);
+				testMesh.x = Math.random() * 30 - 15
+				testMesh.y = Math.random() * 30 - 15
+				testMesh.z = Math.random() * 30 - 15
+				tScene2.addChild(testMesh)
+			}
+
 			while (i--) {
 				let testMesh = new RedMesh(
 					redGPU,
@@ -153,14 +191,14 @@ import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 				// tView.camera.z = 10;
 				// tView.camera.lookAt(0, 0, 0);
 
-				renderer.render(time, redGPU, tView);
+				renderer.render(time, redGPU);
 
 				let tChildren = tView.scene.pointLightList
 				let i = tChildren.length;
 				while (i--) {
-					tChildren[i].x = Math.sin(time / 1000 + Math.PI*2/tChildren.length*i) * 25
-					tChildren[i].y = Math.tan(time / 2000 + Math.PI*2/tChildren.length*i) * 25
-					tChildren[i].z = Math.cos(time / 2000 + Math.PI*2/tChildren.length*i)* 25
+					tChildren[i].x = Math.sin(time / 1000 + Math.PI * 2 / tChildren.length * i) * 25
+					tChildren[i].y = Math.tan(time / 2000 + Math.PI * 2 / tChildren.length * i) * 25
+					tChildren[i].z = Math.cos(time / 2000 + Math.PI * 2 / tChildren.length * i) * 25
 				}
 
 
