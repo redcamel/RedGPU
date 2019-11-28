@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 14:20:42
+ *   Last modification time of this file - 2019.11.28 14:43:22
  *
  */
 
@@ -75,8 +75,8 @@ export default class RedObitController extends RedCamera {
 					let tViewRect = targetView['viewRect'];
 					tX = e[tX_key];
 					tY = e[tY_key];
-					console.log(tViewRect);
-					console.log(tX,tY);
+					// console.log(tViewRect);
+					// console.log(tX,tY);
 					if (!(tViewRect[0] < tX && tX < tViewRect[0] + tViewRect[2])) return;
 					if (!(tViewRect[1] < tY && tY < tViewRect[1] + tViewRect[3])) return;
 				}
