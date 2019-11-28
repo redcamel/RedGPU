@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 14:20:42
+ *   Last modification time of this file - 2019.11.28 14:29:32
  *
  */
 
@@ -36,7 +36,7 @@ import RedPointLight from "./src/light/RedPointLight.js";
 	let redGPU = new RedGPU(cvs, glslang,
 		function () {
 
-			let MAX = 3000;
+			let MAX = 5000;
 			let i = MAX;
 			let tView, tView2;
 			let tScene = new RedScene();
