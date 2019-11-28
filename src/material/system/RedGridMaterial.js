@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 17:31:6
+ *   Last modification time of this file - 2019.11.28 23:2:58
  *
  */
 
@@ -10,14 +10,13 @@
 import RedTypeSize from "../../resources/RedTypeSize.js";
 import RedBaseMaterial from "../../base/RedBaseMaterial.js";
 import RedShareGLSL from "../../base/RedShareGLSL.js";
-import RedUniformBufferDescriptor from "../../buffer/RedUniformBufferDescriptor.js";
 
 export default class RedGridMaterial extends RedBaseMaterial {
 
 	static vertexShaderGLSL = `
-	#version 460
+	#version 450
 	${RedShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
-    layout(set=2,binding = 0) uniform Uniforms {
+    layout(set = 3,binding = 0) uniform Uniforms {
         mat4 modelMatrix;
     } uniforms;
 	layout(location = 0) in vec3 position;
@@ -30,7 +29,7 @@ export default class RedGridMaterial extends RedBaseMaterial {
 	}
 	`;
 	static fragmentShaderGLSL = `
-	#version 460
+	#version 450
 	layout(location = 0) in vec4 vColor;
 	layout(location = 0) out vec4 outColor;
 	void main() {
@@ -52,11 +51,9 @@ export default class RedGridMaterial extends RedBaseMaterial {
 			}
 		]
 	};
-	static uniformBufferDescriptor_vertex = new RedUniformBufferDescriptor(
-		[
-			{size: RedTypeSize.mat4, valueName: 'matrix'}
-		]
-	);
+	static uniformBufferDescriptor_vertex = [
+		{size: RedTypeSize.mat4, valueName: 'matrix'}
+	]
 	static uniformBufferDescriptor_fragment = RedBaseMaterial.uniformBufferDescriptor_empty;
 	constructor(redGPU) {
 		super(redGPU);

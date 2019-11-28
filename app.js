@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 17:52:54
+ *   Last modification time of this file - 2019.11.28 23:2:58
  *
  */
 
@@ -36,7 +36,7 @@ import RedPointLight from "./src/light/RedPointLight.js";
 	let redGPU = new RedGPU(cvs, glslang,
 		function () {
 
-			let MAX = 3000;
+			let MAX = 5000;
 			let i = MAX;
 			let tView, tView2;
 			let tScene = new RedScene();
@@ -59,8 +59,13 @@ import RedPointLight from "./src/light/RedPointLight.js";
 
 			tScene.grid = tGrid
 			let tLight
+			tLight = new RedDirectionalLight()
+			tLight.x = 10
+			tLight.y = 0
+			tLight.z = 0
+			tScene.addLight(tLight)
 
-			tLight = new RedDirectionalLight('#ff0000', 1, 1)
+			tLight = new RedDirectionalLight('#ff0000', 1, 0.4)
 			tLight.x = 10
 			tLight.y = 0
 			tLight.z = 0
@@ -72,13 +77,8 @@ import RedPointLight from "./src/light/RedPointLight.js";
 			tLight.z = 0
 			tScene.addLight(tLight)
 
-			tLight = new RedDirectionalLight('#0000ff', 1, 0.5)
-			tLight.x = 0
-			tLight.y = 0
-			tLight.z = 10
-			tScene.addLight(tLight)
 
-			let i2 = 10
+			let i2 = 0
 			let testColor = ['#ff0000', '#00ff00', '#0000ff', '#ffffff', '#ff2234']
 			while (i2--) {
 				let tLight = new RedPointLight(testColor[i2 % 5], 1, 1, parseInt(Math.random() * 30) + 10)
@@ -103,14 +103,14 @@ import RedPointLight from "./src/light/RedPointLight.js";
 			let tMat2 = new RedColorPhongMaterial(redGPU, '#ff00ff');
 			let tMat3 = new RedBitmapMaterial(redGPU, testTextureList[0]);
 			let tMat4 = new RedStandardMaterial(redGPU, testTextureList[1]);
-			let tMat5 = new RedStandardMaterial(redGPU, testTextureList[1], testTextureList[2]);
+			let tMat5 = new RedStandardMaterial(redGPU, testTextureList[0]);
 			let tMat6 = new RedStandardMaterial(redGPU, testTextureList[1], testTextureList[2], testTextureList[4]);
-			tMat6.displacementPower = 1
+			tMat6.displacementPower = 0.5
 			tMat6.displacementFlowSpeedX = 0.1
 			tMat6.displacementFlowSpeedY = 0.1
 
 
-			let mats = [tMat1,tMat2,tMat3,tMat4,tMat5,tMat6]
+			let mats = [tMat1, tMat2, tMat3, tMat4, tMat5, tMat6]
 			let changeNum = 0
 			// setInterval(_ => {
 			// 	let tChildren = tView.scene.children
@@ -148,13 +148,15 @@ import RedPointLight from "./src/light/RedPointLight.js";
 				let testMesh = new RedMesh(
 					redGPU,
 					randomGeometry(),
-					i > MAX / 4 ? tMat2 : i > MAX / 8 ? tMat6 : i > MAX / 12 ? tMat4 : i > MAX / 16 ? tMat1 : i > MAX / 20 ? tMat5 : tMat3
+					// tMat1
+					i > MAX / 4 ? tMat2 : i > MAX / 8 ? tMat3 : i > MAX / 9 ? tMat4 : i > MAX / 10 ? tMat1 : i > MAX / 13 ? tMat5 : tMat6
 				);
 				testMesh.x = Math.random() * 100 - 50;
 				testMesh.y = Math.random() * 100 - 50;
 				testMesh.z = Math.random() * 100 - 50;
 				testMesh.rotationX = testMesh.rotationY = testMesh.rotationZ = Math.random() * 360;
 				testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = Math.random() * 3 + 1;
+				if (testMesh.material == tMat6) testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = 3
 				tScene.addChild(testMesh)
 				// //
 				// let testMesh2 = new RedMesh(
@@ -193,7 +195,9 @@ import RedPointLight from "./src/light/RedPointLight.js";
 				// tView.camera.lookAt(0, 0, 0);
 
 				renderer.render(time, redGPU);
-				tMat6.normalPower = Math.sin(time/100) * 10
+				tMat4.normalPower = tMat5.normalPower = tMat6.normalPower = Math.abs(Math.sin(time / 1000)) + 1
+				tMat2.shininess = tMat4.shininess = tMat5.shininess = tMat6.shininess = Math.abs(Math.sin(time / 1000)) * 64 + 8
+
 				let tChildren = tView.scene.pointLightList
 				let i = tChildren.length;
 				while (i--) {

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 11:53:1
+ *   Last modification time of this file - 2019.11.28 23:2:58
  *
  */
 
@@ -10,6 +10,8 @@
 import RedShaderModule_GLSL from "../resources/RedShaderModule_GLSL.js";
 import RedSampler from "../resources/RedSampler.js";
 import RedUUID from "./RedUUID.js";
+import RedUniformBuffer from "../buffer/RedUniformBuffer.js";
+import RedUniformBufferDescriptor from "../buffer/RedUniformBufferDescriptor.js";
 
 let TABLE = new Map();
 let makeUniformBindLayout = function (redGPU, uniformsBindGroupLayoutDescriptor) {
@@ -20,7 +22,7 @@ let makeUniformBindLayout = function (redGPU, uniformsBindGroupLayoutDescriptor)
 	}
 	return uniformsBindGroupLayout
 };
-export default class RedBaseMaterial extends RedUUID{
+export default class RedBaseMaterial extends RedUUID {
 	get redGPU() {
 		return this.#redGPU;
 	}
@@ -29,11 +31,7 @@ export default class RedBaseMaterial extends RedUUID{
 		this.#redGPU = value;
 	}
 
-	static uniformBufferDescriptor_empty = {
-		size: 1,
-		usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-		redStruct: []
-	};
+	static uniformBufferDescriptor_empty = []
 
 
 	uniformBufferDescriptor_vertex;
@@ -46,6 +44,9 @@ export default class RedBaseMaterial extends RedUUID{
 	sampler;
 	bindings;
 	#redGPU;
+	//
+	uniformBuffer_vertex;
+	uniformBuffer_fragment;
 
 	constructor(redGPU) {
 		super();
@@ -63,12 +64,14 @@ export default class RedBaseMaterial extends RedUUID{
 		if (!materialClass.uniformBufferDescriptor_fragment) throw new Error(`${materialClass.name} : uniformBufferDescriptor_fragment 를 정의해야함`);
 		if (!materialClass.uniformsBindGroupLayoutDescriptor) throw  new Error(`${materialClass.name} : uniformsBindGroupLayoutDescriptor 를  정의해야함`);
 
-		this.uniformBufferDescriptor_vertex = materialClass.uniformBufferDescriptor_vertex;
-		this.uniformBufferDescriptor_fragment = materialClass.uniformBufferDescriptor_fragment;
+		this.uniformBufferDescriptor_vertex = new RedUniformBufferDescriptor(materialClass.uniformBufferDescriptor_vertex);
+		this.uniformBufferDescriptor_fragment = new RedUniformBufferDescriptor(materialClass.uniformBufferDescriptor_fragment);
 		this.GPUBindGroupLayout = makeUniformBindLayout(redGPU, materialClass.uniformsBindGroupLayoutDescriptor);
 		this.vShaderModule = vShaderModule;
 		this.fShaderModule = fShaderModule;
 
+		this.uniformBuffer_fragment = new RedUniformBuffer(redGPU);
+		this.uniformBuffer_vertex = new RedUniformBuffer(redGPU);
 		this.sampler = new RedSampler(redGPU);
 		this.#redGPU = redGPU;
 		console.log('TABLE', TABLE)
@@ -87,8 +90,10 @@ export default class RedBaseMaterial extends RedUUID{
 		this.constructor.PROGRAM_OPTION_LIST.forEach(key => {
 			if (this[key]) tKey.push(key);
 		});
-		this.vShaderModule.searchShaderModule(tKey.join('_'));
-		this.fShaderModule.searchShaderModule(tKey.join('_'));
+		tKey = tKey.join('_')
+		console.log('searchModules',tKey)
+		this.vShaderModule.searchShaderModule(tKey);
+		this.fShaderModule.searchShaderModule(tKey);
 		console.log(this.vShaderModule);
 		console.log(this.fShaderModule);
 	}

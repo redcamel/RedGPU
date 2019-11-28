@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 17:31:6
+ *   Last modification time of this file - 2019.11.28 23:2:58
  *
  */
 
@@ -37,7 +37,7 @@ export default class RedColorMaterial  extends RedMaterialPreset.mix(
 	`;
 	static fragmentShaderGLSL = `
 	#version 460
-	 layout(set=2,binding = 1) uniform Uniforms {
+	 layout(set=3,binding = 1) uniform Uniforms {
         vec4 color;
     } uniforms;
 	layout(location = 0) in vec3 vNormal;
@@ -62,19 +62,13 @@ export default class RedColorMaterial  extends RedMaterialPreset.mix(
 			}
 		]
 	};
-	static uniformBufferDescriptor_vertex = new RedUniformBufferDescriptor(
-		[
-			{size: RedTypeSize.mat4, valueName: 'matrix'},
-			{size: RedTypeSize.mat4, valueName: 'normalMatrix'}
-		]
-	);
-	static uniformBufferDescriptor_fragment = {
-		size: RedTypeSize.float4,
-		usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-		redStruct: [
-			{offset: 0, valueName: 'colorRGBA', targetKey: 'material'}
-		]
-	};
+	static uniformBufferDescriptor_vertex = [
+		{size: RedTypeSize.mat4, valueName: 'matrix'},
+		{size: RedTypeSize.mat4, valueName: 'normalMatrix'}
+	]
+	static uniformBufferDescriptor_fragment = [
+		{size: RedTypeSize.float4, valueName: 'colorRGBA', targetKey: 'material'}
+	]
 
 
 

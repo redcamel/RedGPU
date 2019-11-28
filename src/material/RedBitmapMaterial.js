@@ -2,43 +2,42 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 17:31:6
+ *   Last modification time of this file - 2019.11.28 23:2:58
  *
  */
 
 "use strict";
-import RedTypeSize from "../resources/RedTypeSize.js";
 import RedBaseMaterial from "../base/RedBaseMaterial.js";
 import RedShareGLSL from "../base/RedShareGLSL.js";
-import RedUniformBufferDescriptor from "../buffer/RedUniformBufferDescriptor.js";
 import RedMaterialPreset from "./RedMaterialPreset.js";
+
 export default class RedBitmapMaterial extends RedMaterialPreset.mix(
 	RedBaseMaterial,
 	RedMaterialPreset.diffuseTexture
 ) {
 	static vertexShaderGLSL = `
-	#version 460
+	#version 450
 	${RedShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
-    layout(set=2,binding = 0) uniform Uniforms {
+    layout(set = 2,binding = 0) uniform MeshUniforms {
         mat4 modelMatrix;
-    } uniforms;
+    } meshUniforms;
 	layout(location = 0) in vec3 position;
 	layout(location = 1) in vec3 normal;
 	layout(location = 2) in vec2 uv;
 	layout(location = 0) out vec3 vNormal;
 	layout(location = 1) out vec2 vUV;
 	void main() {
-		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * uniforms.modelMatrix * vec4(position,1.0);
+		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * meshUniforms.modelMatrix * vec4(position,1.0);
 		vNormal = normal;
 		vUV = uv;
 	}
 	`;
 	static fragmentShaderGLSL = `
-	#version 460
+	#version 450
 	layout(location = 0) in vec3 vNormal;
 	layout(location = 1) in vec2 vUV;
-	layout(set = 2, binding = 1) uniform sampler uSampler;
-	layout(set = 2, binding = 2) uniform texture2D uDiffuseTexture;
+	layout(set = 3, binding = 1) uniform sampler uSampler;
+	layout(set = 3, binding = 2) uniform texture2D uDiffuseTexture;
 	layout(location = 0) out vec4 outColor;
 	void main() {
 		vec4 diffuseColor = vec4(0.0);
@@ -66,12 +65,7 @@ export default class RedBitmapMaterial extends RedMaterialPreset.mix(
 			},
 		]
 	};
-	static uniformBufferDescriptor_vertex = new RedUniformBufferDescriptor(
-		[
-			{size: RedTypeSize.mat4, valueName: 'matrix'},
-			{size: RedTypeSize.mat4, valueName: 'normalMatrix'}
-		]
-	);
+	static uniformBufferDescriptor_vertex = RedBaseMaterial.uniformBufferDescriptor_empty;
 	static uniformBufferDescriptor_fragment = RedBaseMaterial.uniformBufferDescriptor_empty;
 
 
