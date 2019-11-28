@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.26 19:46:12
+ *   Last modification time of this file - 2019.11.28 10:21:10
  *
  */
 
@@ -14,6 +14,7 @@ let renderScene = (redGPU, redView, passEncoder, parent, parentDirty) => {
 	let tMesh;
 	let tDirty;
 	let tMaterialDirty;
+	let tPipeline;
 	let prevPipeline_UUID;
 	let prevVertexBuffer_UUID;
 	let prevIndexBuffer_UUID;
@@ -23,24 +24,23 @@ let renderScene = (redGPU, redView, passEncoder, parent, parentDirty) => {
 		tMaterial = tMesh._material;
 		tGeometry = tMesh._geometry;
 		tDirty = tMesh._dirtyTransform;
+		tPipeline = tMesh.pipeline
 		if (tDirty || parentDirty) {
 			// TODO 매트릭스 계산부분을 여기로 나중에 다들고 오는게 성능에 좋음...
 			tMesh.calcTransform(parent);
 			tMesh.updateUniformBuffer();
 		}
 		tMaterialDirty = tMesh._prevMaterialUUID != tMaterial._UUID;
-		if (!tMesh.pipeline || tMaterialDirty) {
-			tMesh.createPipeline(redGPU, redView);
-
+		if (!tPipeline.GPURenderPipeline || tMaterialDirty) {
+			tPipeline.updatePipeline(redGPU, redView);
 		}
 
 		if (tMaterial.bindings) {
 			if (!tMesh.uniformBindGroup.GPUBindGroup) tMesh.uniformBindGroup.setGPUBindGroup(tMesh, tMaterial);
 
-
-			if (prevPipeline_UUID != tMesh.pipeline._UUID) {
-				passEncoder.setPipeline(tMesh.pipeline);
-				prevPipeline_UUID = tMesh.pipeline._UUID
+			if (prevPipeline_UUID != tPipeline._UUID) {
+				passEncoder.setPipeline(tPipeline.GPURenderPipeline);
+				prevPipeline_UUID = tPipeline._UUID
 			}
 			if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
 				passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
@@ -56,7 +56,7 @@ let renderScene = (redGPU, redView, passEncoder, parent, parentDirty) => {
 
 		} else {
 			tMesh.uniformBindGroup.clear();
-			tMesh.pipeline = null;
+			tPipeline.GPURenderPipeline = null;
 		}
 		tMesh._prevMaterialUUID = tMaterial._UUID;
 		if (tMesh.children.length) renderScene(redGPU, passEncoder, tMesh, parentDirty || tDirty);

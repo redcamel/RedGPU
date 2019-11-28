@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.26 19:46:12
+ *   Last modification time of this file - 2019.11.28 10:21:10
  *
  */
 
@@ -15,5 +15,8 @@ export default class RedUUID {
 
 	constructor() {
 		this._UUID = UUID++;
+	}
+	updateUUID() {
+		this._UUID = RedUUID.makeUUID();
 	}
 }
