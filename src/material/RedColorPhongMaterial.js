@@ -2,22 +2,25 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.26 19:46:12
+ *   Last modification time of this file - 2019.11.28 17:31:6
  *
  */
 
 "use strict";
 import RedTypeSize from "../resources/RedTypeSize.js";
-import RedColorMaterial from "./RedColorMaterial.js";
-import RedUUID from "../base/RedUUID.js";
 import RedShareGLSL from "../base/RedShareGLSL.js";
 import RedUniformBufferDescriptor from "../buffer/RedUniformBufferDescriptor.js";
-import RedUtil from "../util/RedUtil.js";
 
-export default class RedColorPhongMaterial extends RedColorMaterial {
+import RedMaterialPreset from "./RedMaterialPreset.js";
+import RedColorMaterial from "./RedColorMaterial.js";
+
+export default class RedColorPhongMaterial extends RedMaterialPreset.mix(
+	RedColorMaterial,
+	RedMaterialPreset.basicLightPropertys
+) {
 
 	static vertexShaderGLSL = `
-	#version 450
+	#version 460
 	${RedShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
     layout(set=2,binding = 0) uniform Uniforms {
         mat4 modelMatrix;
@@ -38,7 +41,7 @@ export default class RedColorPhongMaterial extends RedColorMaterial {
 	}
 	`;
 	static fragmentShaderGLSL = `
-	#version 450
+	#version 460
 	${RedShareGLSL.GLSL_SystemUniforms_fragment.systemUniformsWithLight}
 	layout(set=2,binding = 1) uniform Uniforms {
         vec4 color;
@@ -50,10 +53,7 @@ export default class RedColorPhongMaterial extends RedColorMaterial {
 	layout(location = 2) in vec4 vVertexPosition;
 	layout(location = 0) out vec4 outColor;
 	void main() {
-
 		vec3 N = normalize(vNormal);
-		
-		
 		calcDirectionalLight(
 			uniforms.color,
 			N,		
@@ -115,44 +115,9 @@ export default class RedColorPhongMaterial extends RedColorMaterial {
 		]
 	};
 
-	#shininess = 64;
-	#specularPower = 1;
-	#specularColor = '#ffffff';
-	#specularColorRGBA = new Float32Array([1, 1, 1, 1]);
 
 	constructor(redGPU, color = '#ff0000', alpha = 1) {
 		super(redGPU, color, alpha);
-	}
-	get specularColorRGBA() {
-		return this.#specularColorRGBA;
-	}
-	get specularColor() {
-		return this.#specularColor;
-	}
-
-	set specularColor(hex) {
-		this.#specularColor = hex;
-		let rgb = RedUtil.hexToRGB_ZeroToOne(hex);
-		this.#specularColorRGBA[0] = rgb[0];
-		this.#specularColorRGBA[1] = rgb[1];
-		this.#specularColorRGBA[2] = rgb[2];
-		this.#specularColorRGBA[3] = 1;
-	}
-
-	get specularPower() {
-		return this.#specularPower;
-	}
-
-	set specularPower(value) {
-		this.#specularPower = value;
-	}
-
-	get shininess() {
-		return this.#shininess;
-	}
-
-	set shininess(value) {
-		this.#shininess = value;
 	}
 
 	resetBindingInfo() {
@@ -177,6 +142,6 @@ export default class RedColorPhongMaterial extends RedColorMaterial {
 			}
 		];
 		this.setUniformBindGroupDescriptor();
-		this._UUID = RedUUID.makeUUID()
+		this.updateUUID();
 	}
 }

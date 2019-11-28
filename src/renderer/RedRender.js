@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 14:43:22
+ *   Last modification time of this file - 2019.11.28 17:31:6
  *
  */
 
@@ -29,7 +29,7 @@ let renderScene = (redGPU, redView, passEncoder, parent, parentDirty) => {
 		if (tDirtyTransform || parentDirty) {
 			// TODO 매트릭스 계산부분을 여기로 나중에 다들고 오는게 성능에 좋음...
 			tMesh.calcTransform(parent);
-			tMesh.updateUniformBuffer();
+			tMesh.updateUniformBuffer(); // TODO - 이녀석도 개별적으로 업데이트 되도록 변경해야함
 		}
 		tMaterialDirty = tMesh._prevMaterialUUID != tMaterial._UUID;
 		if (tDirtyPipeline || tMaterialDirty) {
@@ -73,10 +73,10 @@ export default class RedRender {
 		tSceneBackgroundColor_rgba = tScene.backgroundColorRGBA;
 		redView.camera.update();
 		// console.log(swapChain.getCurrentTexture())
-
 		if (!redView.baseAttachmentView) {
 			redView.resetTexture(redGPU)
 		}
+
 		const renderPassDescriptor = {
 			colorAttachments: [{
 				attachment: redView.baseAttachmentView,
@@ -136,8 +136,7 @@ export default class RedRender {
 		this.#redGPU = redGPU;
 		this.#swapChainTexture = redGPU.swapChain.getCurrentTexture();
 		this.#swapChainTextureView = this.#swapChainTexture.createView();
-		redGPU.viewList.forEach(redView => this.#renderView(redGPU, redView))
-
-
+		let i =0,len = redGPU.viewList.length;
+		for(i;i<len;i++) this.#renderView(redGPU, redGPU.viewList[i])
 	}
 }

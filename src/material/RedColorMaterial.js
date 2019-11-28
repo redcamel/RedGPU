@@ -2,22 +2,23 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.26 19:46:12
+ *   Last modification time of this file - 2019.11.28 17:31:6
  *
  */
 
 "use strict";
 import RedTypeSize from "../resources/RedTypeSize.js";
 import RedBaseMaterial from "../base/RedBaseMaterial.js";
-import RedUtil from "../util/RedUtil.js";
-import RedUUID from "../base/RedUUID.js";
 import RedShareGLSL from "../base/RedShareGLSL.js";
 import RedUniformBufferDescriptor from "../buffer/RedUniformBufferDescriptor.js";
+import RedMaterialPreset from "./RedMaterialPreset.js";
 
-export default class RedColorMaterial extends RedBaseMaterial {
-
+export default class RedColorMaterial  extends RedMaterialPreset.mix(
+	RedBaseMaterial,
+	RedMaterialPreset.color
+) {
 	static vertexShaderGLSL = `
-	#version 450
+	#version 460
 	${RedShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
     layout(set=2,binding = 0) uniform Uniforms {
         mat4 modelMatrix;
@@ -35,7 +36,7 @@ export default class RedColorMaterial extends RedBaseMaterial {
 	}
 	`;
 	static fragmentShaderGLSL = `
-	#version 450
+	#version 460
 	 layout(set=2,binding = 1) uniform Uniforms {
         vec4 color;
     } uniforms;
@@ -75,9 +76,7 @@ export default class RedColorMaterial extends RedBaseMaterial {
 		]
 	};
 
-	#color = '#ff0000';
-	#alpha = 1;
-	#colorRGBA = new Float32Array([1, 0, 0, this.#alpha]);
+
 
 	constructor(redGPU, color = '#ff0000', alpha = 1) {
 		super(redGPU);
@@ -85,32 +84,6 @@ export default class RedColorMaterial extends RedBaseMaterial {
 		this.alpha = alpha;
 		this.resetBindingInfo()
 	}
-
-	get color() {
-		return this.#color;
-	}
-
-	set color(hex) {
-		this.#color = hex;
-		let rgb = RedUtil.hexToRGB_ZeroToOne(hex);
-		this.#colorRGBA[0] = rgb[0];
-		this.#colorRGBA[1] = rgb[1];
-		this.#colorRGBA[2] = rgb[2];
-		this.#colorRGBA[3] = this.#alpha;
-	}
-
-	get alpha() {
-		return this.#alpha;
-	}
-
-	set alpha(value) {
-		this.#alpha = this.#colorRGBA[3] = value;
-	}
-
-	get colorRGBA() {
-		return this.#colorRGBA;
-	}
-
 	resetBindingInfo() {
 		this.bindings = null;
 		this.searchModules();
@@ -133,7 +106,6 @@ export default class RedColorMaterial extends RedBaseMaterial {
 			}
 		];
 		this.setUniformBindGroupDescriptor();
-		this._UUID = RedUUID.makeUUID();
-		console.log(this.#colorRGBA);
+		this.updateUUID()
 	}
 }

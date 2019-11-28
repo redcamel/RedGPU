@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 11:53:2
+ *   Last modification time of this file - 2019.11.28 17:31:6
  *
  */
 
@@ -18,10 +18,7 @@ export default class RedUniformBuffer {
 	}
 
 	setBuffer(uniformBufferDescriptor) {
-		// if (this.GPUBuffer){
-		// 	console.log(this.GPUBuffer)
-		// 	this.GPUBuffer.destroy(); //TODO 이거 삭제하면 왜안되는지 알아내야함
-		// }
+		if (this.GPUBuffer) this.GPUBuffer.destroy();
 		this.GPUBuffer = this.#redGPU.device.createBuffer(uniformBufferDescriptor);
 		this.uniformBufferDescriptor = uniformBufferDescriptor;
 	};

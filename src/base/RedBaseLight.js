@@ -1,19 +1,18 @@
-
 /*
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.26 19:46:12
+ *   Last modification time of this file - 2019.11.28 17:31:6
  *
  */
 
 "use strict";
-import RedUtil from "../util/RedUtil.js";
+import RedMaterialPreset from "../material/RedMaterialPreset.js";
 
-export default class RedBaseLight {
-	#color = '#ffffff';
-	#alpha = 1;
-	#colorRGBA = new Float32Array([1, 1, 1, this.#alpha]);
+export default class RedBaseLight extends RedMaterialPreset.mix(
+	RedMaterialPreset.EmptyClass,
+	RedMaterialPreset.color
+) {
 	#intensity = 1;
 	x = 0;
 	y = 0;
@@ -26,19 +25,6 @@ export default class RedBaseLight {
 		return this.#position
 	}
 
-	get color() {
-		return this.#color;
-	}
-
-	set color(hex) {
-		this.#color = hex;
-		let rgb = RedUtil.hexToRGB_ZeroToOne(hex);
-		this.#colorRGBA[0] = rgb[0];
-		this.#colorRGBA[1] = rgb[1];
-		this.#colorRGBA[2] = rgb[2];
-		this.#colorRGBA[3] = this.#alpha;
-	}
-
 	get intensity() {
 		return this.#intensity;
 	}
@@ -47,15 +33,5 @@ export default class RedBaseLight {
 		this.#intensity = value;
 	}
 
-	get alpha() {
-		return this.#alpha;
-	}
 
-	set alpha(value) {
-		this.#alpha = this.#colorRGBA[3] = value;
-	}
-
-	get colorRGBA() {
-		return this.#colorRGBA;
-	}
 }

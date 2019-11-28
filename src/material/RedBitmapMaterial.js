@@ -2,20 +2,22 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.26 19:46:12
+ *   Last modification time of this file - 2019.11.28 17:31:6
  *
  */
 
 "use strict";
 import RedTypeSize from "../resources/RedTypeSize.js";
 import RedBaseMaterial from "../base/RedBaseMaterial.js";
-import RedUUID from "../base/RedUUID.js";
 import RedShareGLSL from "../base/RedShareGLSL.js";
 import RedUniformBufferDescriptor from "../buffer/RedUniformBufferDescriptor.js";
-
-export default class RedBitmapMaterial extends RedBaseMaterial {
+import RedMaterialPreset from "./RedMaterialPreset.js";
+export default class RedBitmapMaterial extends RedMaterialPreset.mix(
+	RedBaseMaterial,
+	RedMaterialPreset.diffuseTexture
+) {
 	static vertexShaderGLSL = `
-	#version 450
+	#version 460
 	${RedShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
     layout(set=2,binding = 0) uniform Uniforms {
         mat4 modelMatrix;
@@ -32,7 +34,7 @@ export default class RedBitmapMaterial extends RedBaseMaterial {
 	}
 	`;
 	static fragmentShaderGLSL = `
-	#version 450
+	#version 460
 	layout(location = 0) in vec3 vNormal;
 	layout(location = 1) in vec2 vUV;
 	layout(set = 2, binding = 1) uniform sampler uSampler;
@@ -72,7 +74,7 @@ export default class RedBitmapMaterial extends RedBaseMaterial {
 	);
 	static uniformBufferDescriptor_fragment = RedBaseMaterial.uniformBufferDescriptor_empty;
 
-	#diffuseTexture;
+
 
 	constructor(redGPU, diffuseTexture) {
 		super(redGPU);
@@ -85,7 +87,7 @@ export default class RedBitmapMaterial extends RedBaseMaterial {
 			if (texture.GPUTexture) {
 				switch (textureName) {
 					case 'diffuseTexture' :
-						this.#diffuseTexture = texture;
+						this._diffuseTexture = texture;
 						break
 				}
 				console.log(textureName, texture);
@@ -99,14 +101,6 @@ export default class RedBitmapMaterial extends RedBaseMaterial {
 		}
 	}
 
-	set diffuseTexture(texture) {
-		this.#diffuseTexture = null;
-		this.checkTexture(texture, 'diffuseTexture');
-	}
-
-	get diffuseTexture() {
-		return this.#diffuseTexture
-	}
 
 	resetBindingInfo() {
 		this.bindings = null;
@@ -126,11 +120,11 @@ export default class RedBitmapMaterial extends RedBaseMaterial {
 			},
 			{
 				binding: 2,
-				resource: this.#diffuseTexture ? this.#diffuseTexture.GPUTextureView : this.redGPU.state.emptyTextureView,
+				resource: this._diffuseTexture ? this._diffuseTexture.GPUTextureView : this.redGPU.state.emptyTextureView,
 			}
 		];
 		this.setUniformBindGroupDescriptor();
-		this._UUID = RedUUID.makeUUID();
-		console.log(this.#diffuseTexture);
+		this.updateUUID();
+		console.log(this._diffuseTexture);
 	}
 }
