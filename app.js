@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.29 12:46:41
+ *   Last modification time of this file - 2019.11.29 14:55:33
  *
  */
 
@@ -41,10 +41,10 @@ import RedPointLight from "./src/light/RedPointLight.js";
 			let tView, tView2;
 			let tScene = new RedScene();
 			let tScene2 = new RedScene();
-			// let tGrid = new RedGrid(this)
+			let tGrid = new RedGrid(this)
 			let tCamera = new RedObitController(this)
 			let tCamera2 = new RedObitController(this)
-			// tGrid.centerColor = '#ff0000'
+			tGrid.centerColor = '#ff0000'
 			tScene2.backgroundColor = '#ff0000'
 
 			tView = new RedView(this, tScene, tCamera)
@@ -57,7 +57,7 @@ import RedPointLight from "./src/light/RedPointLight.js";
 			tCamera2.targetView = tView2 // optional
 			tCamera.distance = 80
 
-			// tScene.grid = tGrid
+			tScene.grid = tGrid
 			let tLight
 			tLight = new RedDirectionalLight()
 			tLight.x = 10
@@ -65,28 +65,28 @@ import RedPointLight from "./src/light/RedPointLight.js";
 			tLight.z = 0
 			tScene.addLight(tLight)
 
-			// tLight = new RedDirectionalLight('#ff0000', 1, 0.4)
-			// tLight.x = 10
-			// tLight.y = 0
-			// tLight.z = 0
-			// tScene.addLight(tLight)
-			//
-			// tLight = new RedDirectionalLight('#00ff00', 1, 0.4)
-			// tLight.x = -10
-			// tLight.y = 0
-			// tLight.z = 0
-			// tScene.addLight(tLight)
+			tLight = new RedDirectionalLight('#ff0000', 1, 0.4)
+			tLight.x = 10
+			tLight.y = 0
+			tLight.z = 0
+			tScene.addLight(tLight)
+
+			tLight = new RedDirectionalLight('#00ff00', 1, 0.4)
+			tLight.x = -10
+			tLight.y = 0
+			tLight.z = 0
+			tScene.addLight(tLight)
 
 
-			let i2 = 0
-			// let testColor = ['#ff0000', '#00ff00', '#0000ff', '#ffffff', '#ff2234']
-			// while (i2--) {
-			// 	let tLight = new RedPointLight(testColor[i2 % 5], 1, 1, parseInt(Math.random() * 30) + 10)
-			// 	tLight.x = Math.random() * 80 - 40
-			// 	tLight.y = Math.random() * 80 - 40
-			// 	tLight.z = Math.random() * 80 - 40
-			// 	tScene.addLight(tLight)
-			// }
+			let i2 = 5
+			let testColor = ['#ff0000', '#00ff00', '#0000ff', '#ffffff', '#ff2234']
+			while (i2--) {
+				let tLight = new RedPointLight(testColor[i2 % 5], 1, 1, parseInt(Math.random() * 25) + 5)
+				tLight.x = Math.random() * 80 - 40
+				tLight.y = Math.random() * 80 - 40
+				tLight.z = Math.random() * 80 - 40
+				tScene.addLight(tLight)
+			}
 
 			redGPU.addView(tView)
 			redGPU.addView(tView2)
@@ -126,6 +126,7 @@ import RedPointLight from "./src/light/RedPointLight.js";
 			// }, 500)
 
 			let randomGeometry = function () {
+				return new RedSphere(redGPU, 0.5, 16, 16, 16)
 				return Math.random() > 0.5
 					? new RedSphere(redGPU, 0.5, 16, 16, 16) :
 					Math.random() > 0.5
@@ -149,6 +150,7 @@ import RedPointLight from "./src/light/RedPointLight.js";
 				let testMesh = new RedMesh(
 					redGPU,
 					randomGeometry(),
+
 					i > MAX / 4 ? tMat2 : i > MAX / 8 ? tMat3 : i > MAX / 9 ? tMat4 : i > MAX / 10 ? tMat1 : i > MAX / 13 ? tMat5 : tMat6
 				);
 				testMesh.x = Math.random() * 100 - 50;
@@ -202,10 +204,20 @@ import RedPointLight from "./src/light/RedPointLight.js";
 				let tChildren = tView.scene.pointLightList
 				let i = tChildren.length;
 				while (i--) {
-					tChildren[i].x = Math.sin(time / 1000 + Math.PI * 2 / tChildren.length * i) * 25
-					tChildren[i].y = Math.tan(time / 2000 + Math.PI * 2 / tChildren.length * i) * 25
-					tChildren[i].z = Math.cos(time / 2000 + Math.PI * 2 / tChildren.length * i) * 25
+					tChildren[i].x = Math.sin(time / 1000+i*10 + Math.PI * 2 / tChildren.length * i) * 40
+					tChildren[i].y = Math.tan(time / 2000+i*10 + Math.PI * 2 / tChildren.length * i) * 25
+					tChildren[i].z = Math.cos(time / 2000+i*10 + Math.PI * 2 / tChildren.length * i) * 40
 				}
+
+				//  tChildren = tView.scene.children
+				// i = tChildren.length;
+				//
+				// while (i--) {
+				// 	tChildren[i]._rotationX +=1
+				// 	tChildren[i]._rotationY +=1
+				// 	tChildren[i]._rotationZ +=1
+				// 	tChildren[i].dirtyTransform = 1
+				// }
 
 
 				requestAnimationFrame(render);

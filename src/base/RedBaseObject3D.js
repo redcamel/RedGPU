@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.29 12:46:41
+ *   Last modification time of this file - 2019.11.29 14:52:7
  *
  */
 
@@ -36,15 +36,15 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 			{size: RedTypeSize.mat4, valueName: 'normalMatrix'}
 		]
 	);
-	#x = 0;
-	#y = 0;
-	#z = 0;
-	#rotationX = 0;
-	#rotationY = 0;
-	#rotationZ = 0;
-	#scaleX = 1;
-	#scaleY = 1;
-	#scaleZ = 1;
+	_x = 0;
+	_y = 0;
+	_z = 0;
+	_rotationX = 0;
+	_rotationY = 0;
+	_rotationZ = 0;
+	_scaleX = 1;
+	_scaleY = 1;
+	_scaleZ = 1;
 	dirtyTransform = true;
 	dirtyPipeline = true;
 	//
@@ -114,83 +114,83 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 
 	get x() {
-		return this.#x
+		return this._x
 	}
 
 	set x(v) {
-		this.#x = v;
+		this._x = v;
 		this.dirtyTransform = true;
 	}
 
 	get y() {
-		return this.#y
+		return this._y
 	}
 
 	set y(v) {
-		this.#y = v;
+		this._y = v;
 		this.dirtyTransform = true;
 	}
 
 	get z() {
-		return this.#z;
+		return this._z;
 	}
 
 	set z(v) {
-		this.#z = v;
+		this._z = v;
 		this.dirtyTransform = true;
 	}
 
 	get rotationX() {
-		return this.#rotationX;
+		return this._rotationX;
 	}
 
 	set rotationX(v) {
-		this.#rotationX = v;
+		this._rotationX = v;
 		this.dirtyTransform = true;
 	}
 
 	get rotationY() {
-		return this.#rotationY;
+		return this._rotationY;
 	}
 
 	set rotationY(v) {
-		this.#rotationY = v;
+		this._rotationY = v;
 		this.dirtyTransform = true;
 	}
 
 	get rotationZ() {
-		return this.#rotationZ;
+		return this._rotationZ;
 	}
 
 	set rotationZ(v) {
-		this.#rotationZ = v;
+		this._rotationZ = v;
 		this.dirtyTransform = true;
 	}
 
 	get scaleX() {
-		return this.#scaleX;
+		return this._scaleX;
 	}
 
 	set scaleX(v) {
-		this.#scaleX = v;
+		this._scaleX = v;
 		this.dirtyTransform = true;
 	}
 
 	get scaleY() {
-		return this.#scaleY;
+		return this._scaleY;
 	}
 
 	set scaleY(v) {
-		this.#scaleY = v;
+		this._scaleY = v;
 		this.dirtyTransform = true;
 	}
 
 	get scaleZ() {
-		return this.#scaleZ;
+		return this._scaleZ;
 	}
 
 	set scaleZ(v) {
-		this.#scaleZ = v;
+		this._scaleZ = v;
 		this.dirtyTransform = true;
 	}
 
@@ -304,12 +304,12 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 			a10 = 0, a11 = 1, a12 = 0,
 			a20 = 0, a21 = 0, a22 = 1,
 			// tLocalMatrix translate
-			tLocalMatrix[12] = this.#x ,
-			tLocalMatrix[13] = this.#y,
-			tLocalMatrix[14] = this.#z,
+			tLocalMatrix[12] = this._x ,
+			tLocalMatrix[13] = this._y,
+			tLocalMatrix[14] = this._z,
 			tLocalMatrix[15] = 1,
 			// tLocalMatrix rotate
-			aX = this.#rotationX * CONVERT_RADIAN, aY = this.#rotationY * CONVERT_RADIAN, aZ = this.#rotationZ * CONVERT_RADIAN;
+			aX = this._rotationX * CONVERT_RADIAN, aY = this._rotationY * CONVERT_RADIAN, aZ = this._rotationZ * CONVERT_RADIAN;
 		/////////////////////////
 		tRadian = aX % CPI2,
 			tRadian < -CPI ? tRadian = tRadian + CPI2 : tRadian > CPI ? tRadian = tRadian - CPI2 : 0,
@@ -340,7 +340,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 			b10 = aCy * aSz, b11 = aSx * aSy * aSz + aCx * aCz, b12 = aCx * aSy * aSz - aSx * aCz,
 			b20 = -aSy, b21 = aSx * aCy, b22 = aCx * aCy,
 			// tLocalMatrix scale
-			aX = this.#scaleX, aY = this.#scaleY , aZ = this.#scaleZ,
+			aX = this._scaleX, aY = this._scaleY , aZ = this._scaleZ,
 			tLocalMatrix[0] = (a00 * b00 + a10 * b01 + a20 * b02) * aX,
 			tLocalMatrix[1] = (a01 * b00 + a11 * b01 + a21 * b02) * aX,
 			tLocalMatrix[2] = (a02 * b00 + a12 * b01 + a22 * b02) * aX,
