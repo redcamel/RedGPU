@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.29 12:46:41
+ *   Last modification time of this file - 2019.11.29 22:21:48
  *
  */
 
@@ -72,7 +72,6 @@ export default class RedColorMaterial extends RedMaterialPreset.mix(
 		this.color = color;
 		this.alpha = alpha;
 		this.resetBindingInfo()
-
 	}
 	resetBindingInfo() {
 		this.bindings = [
