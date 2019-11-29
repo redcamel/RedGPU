@@ -2,12 +2,12 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.29 12:46:41
+ *   Last modification time of this file - 2019.11.29 14:52:7
  *
  */
-let renderScene = (redGPU, redView, passEncoder, parent, parentDirty) => {
+let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty) => {
 	let i;
-	let targetList = parent.children;
+
 	let tGeometry;
 	let tMaterial;
 	let tMesh;
@@ -18,31 +18,49 @@ let renderScene = (redGPU, redView, passEncoder, parent, parentDirty) => {
 	let prevVertexBuffer_UUID;
 	let prevIndexBuffer_UUID;
 	let prevMaterial_UUID;
-	i = targetList.length;
+	let tMatrix
+	let tLocalMatrix
+	let parentMTX
+	let aSx, aSy, aSz, aCx, aCy, aCz, aX, aY, aZ,
+		a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23, a30, a31, a32, a33,
+		b0, b1, b2, b3,
+		b00, b01, b02, b10, b11, b12, b20, b21, b22;
+	// sin,cos 관련
+	let tRadian, CPI, CPI2, C225, C127, C045, C157;
+	let CONVERT_RADIAN = Math.PI / 180;
+	CPI = 3.141592653589793, CPI2 = 6.283185307179586, C225 = 0.225, C127 = 1.27323954, C045 = 0.405284735, C157 = 1.5707963267948966;
+	i = children.length;
 	while (i--) {
-		tMesh = targetList[i];
+		tMesh = children[i];
 		tMaterial = tMesh._material;
 		tGeometry = tMesh._geometry;
 		tDirtyTransform = tMesh.dirtyTransform;
 		tDirtyPipeline = tMesh.dirtyPipeline;
 		tPipeline = tMesh.pipeline;
-		if (tDirtyTransform || parentDirty) {
-			// TODO 매트릭스 계산부분을 여기로 나중에 다들고 오는게 성능에 좋음...
-			tMesh.calcTransform(parent);
-			// TODO - 이녀석도 개별적으로 업데이트 되도록 변경해야함
-		}
+
 		tMaterialChanged = tMesh._prevMaterialUUID != tMaterial._UUID;
 		if (tDirtyPipeline || tMaterialChanged) {
 			tPipeline.updatePipeline(redGPU, redView);
-			tMesh.updateUniformBuffer(); //TODO - #55 Material, Mesh의 BindGroup과  BindGroupLayout을 나눠야곘음.
-
-
-			// console.log('tMesh.dirtyPipeline',tMesh.dirtyPipeline)
+			// const renderBundleEncoder = redGPU.device.createRenderBundleEncoder({
+			// 	colorFormats: [redGPU.swapChainFormat],
+			// 	depthStencilFormat :["depth24plus-stencil8"],
+			// 	sampleCount:4
+			// });
+			// renderBundleEncoder.setPipeline(tPipeline.GPURenderPipeline);
+			// renderBundleEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
+			// if(tGeometry.indexBuffer) renderBundleEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
+			// renderBundleEncoder.setBindGroup(0, redView.systemUniformInfo_vertex.GPUBindGroup);
+			// renderBundleEncoder.setBindGroup(1, redView.systemUniformInfo_fragment.GPUBindGroup);
+			// renderBundleEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹
+			// renderBundleEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup); // 젲;ㄹ 빙;ㄴㄷ;ㅇ ㄱ,릅
+			// if (tGeometry.indexBuffer) renderBundleEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
+			// else renderBundleEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
+			//
+			// const renderBundle = renderBundleEncoder.finish();
+			// tMesh.renderBundle = renderBundle
 		}
 
-		// materialPropertyCheck
-		////////////////////////
-
+		// passEncoder.executeBundles([tMesh.renderBundle]);
 		if (prevPipeline_UUID != tPipeline._UUID) {
 			passEncoder.setPipeline(tPipeline.GPURenderPipeline);
 			prevPipeline_UUID = tPipeline._UUID
@@ -55,14 +73,122 @@ let renderScene = (redGPU, redView, passEncoder, parent, parentDirty) => {
 			passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
 			prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
 		}
-		passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹
-		if (prevMaterial_UUID != tMaterial._UUID) passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup); // 젲;ㄹ 빙;ㄴㄷ;ㅇ ㄱ,릅
+		passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹는 매그룹마다 다르니 또 업데이트 해줘야함 -_-
+		if (prevMaterial_UUID != tMaterial._UUID) passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
 		if (tGeometry.indexBuffer) passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
 		else passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
-		tMesh.dirtyPipeline = false;
+
+		// materialPropertyCheck
+		////////////////////////
+
 
 		prevMaterial_UUID = tMesh._prevMaterialUUID = tMaterial._UUID;
-		if (tMesh.children.length) renderScene(redGPU, passEncoder, tMesh, parentDirty || tDirtyTransform);
+		if (tMesh.children.length) renderScene(redGPU, passEncoder, tMesh, tMesh.children,parentDirty || tDirtyTransform);
+		if (tDirtyTransform || parentDirty) {
+			// TODO 매트릭스 계산부분을 여기로 나중에 다들고 오는게 성능에 좋음...
+
+			 tMatrix = tMesh.matrix;
+			 tLocalMatrix = tMesh.localMatrix;
+			 parentMTX = parent ? parent.matrix : null;
+
+			/////////////////////////////////////
+			a00 = 1, a01 = 0, a02 = 0,
+				a10 = 0, a11 = 1, a12 = 0,
+				a20 = 0, a21 = 0, a22 = 1,
+				// tLocalMatrix translate
+				tLocalMatrix[12] = tMesh._x ,
+				tLocalMatrix[13] = tMesh._y,
+				tLocalMatrix[14] = tMesh._z,
+				tLocalMatrix[15] = 1,
+				// tLocalMatrix rotate
+				aX = tMesh._rotationX * CONVERT_RADIAN, aY = tMesh._rotationY * CONVERT_RADIAN, aZ = tMesh._rotationZ * CONVERT_RADIAN;
+			/////////////////////////
+			tRadian = aX % CPI2,
+				tRadian < -CPI ? tRadian = tRadian + CPI2 : tRadian > CPI ? tRadian = tRadian - CPI2 : 0,
+				tRadian = tRadian < 0 ? C127 * tRadian + C045 * tRadian * tRadian : C127 * tRadian - C045 * tRadian * tRadian,
+				aSx = tRadian < 0 ? C225 * (tRadian * -tRadian - tRadian) + tRadian : C225 * (tRadian * tRadian - tRadian) + tRadian,
+				tRadian = (aX + C157) % CPI2,
+				tRadian < -CPI ? tRadian = tRadian + CPI2 : tRadian > CPI ? tRadian = tRadian - CPI2 : 0,
+				tRadian = tRadian < 0 ? C127 * tRadian + C045 * tRadian * tRadian : C127 * tRadian - C045 * tRadian * tRadian,
+				aCx = tRadian < 0 ? C225 * (tRadian * -tRadian - tRadian) + tRadian : C225 * (tRadian * tRadian - tRadian) + tRadian,
+				tRadian = aY % CPI2,
+				tRadian < -CPI ? tRadian = tRadian + CPI2 : tRadian > CPI ? tRadian = tRadian - CPI2 : 0,
+				tRadian = tRadian < 0 ? C127 * tRadian + C045 * tRadian * tRadian : C127 * tRadian - C045 * tRadian * tRadian,
+				aSy = tRadian < 0 ? C225 * (tRadian * -tRadian - tRadian) + tRadian : C225 * (tRadian * tRadian - tRadian) + tRadian,
+				tRadian = (aY + C157) % CPI2,
+				tRadian < -CPI ? tRadian = tRadian + CPI2 : tRadian > CPI ? tRadian = tRadian - CPI2 : 0,
+				tRadian = tRadian < 0 ? C127 * tRadian + C045 * tRadian * tRadian : C127 * tRadian - C045 * tRadian * tRadian,
+				aCy = tRadian < 0 ? C225 * (tRadian * -tRadian - tRadian) + tRadian : C225 * (tRadian * tRadian - tRadian) + tRadian,
+				tRadian = aZ % CPI2,
+				tRadian < -CPI ? tRadian = tRadian + CPI2 : tRadian > CPI ? tRadian = tRadian - CPI2 : 0,
+				tRadian = tRadian < 0 ? C127 * tRadian + C045 * tRadian * tRadian : C127 * tRadian - C045 * tRadian * tRadian,
+				aSz = tRadian < 0 ? C225 * (tRadian * -tRadian - tRadian) + tRadian : C225 * (tRadian * tRadian - tRadian) + tRadian,
+				tRadian = (aZ + C157) % CPI2,
+				tRadian < -CPI ? tRadian = tRadian + CPI2 : tRadian > CPI ? tRadian = tRadian - CPI2 : 0,
+				tRadian = tRadian < 0 ? C127 * tRadian + C045 * tRadian * tRadian : C127 * tRadian - C045 * tRadian * tRadian,
+				aCz = tRadian < 0 ? C225 * (tRadian * -tRadian - tRadian) + tRadian : C225 * (tRadian * tRadian - tRadian) + tRadian,
+				/////////////////////////
+				b00 = aCy * aCz, b01 = aSx * aSy * aCz - aCx * aSz, b02 = aCx * aSy * aCz + aSx * aSz,
+				b10 = aCy * aSz, b11 = aSx * aSy * aSz + aCx * aCz, b12 = aCx * aSy * aSz - aSx * aCz,
+				b20 = -aSy, b21 = aSx * aCy, b22 = aCx * aCy,
+				// tLocalMatrix scale
+				aX = tMesh._scaleX, aY = tMesh._scaleY , aZ = tMesh._scaleZ,
+				tLocalMatrix[0] = (a00 * b00 + a10 * b01 + a20 * b02) * aX,
+				tLocalMatrix[1] = (a01 * b00 + a11 * b01 + a21 * b02) * aX,
+				tLocalMatrix[2] = (a02 * b00 + a12 * b01 + a22 * b02) * aX,
+				tLocalMatrix[3] = tLocalMatrix[3] * aX,
+				tLocalMatrix[4] = (a00 * b10 + a10 * b11 + a20 * b12) * aY,
+				tLocalMatrix[5] = (a01 * b10 + a11 * b11 + a21 * b12) * aY,
+				tLocalMatrix[6] = (a02 * b10 + a12 * b11 + a22 * b12) * aY,
+				tLocalMatrix[7] = tLocalMatrix[7] * aY,
+				tLocalMatrix[8] = (a00 * b20 + a10 * b21 + a20 * b22) * aZ,
+				tLocalMatrix[9] = (a01 * b20 + a11 * b21 + a21 * b22) * aZ,
+				tLocalMatrix[10] = (a02 * b20 + a12 * b21 + a22 * b22) * aZ,
+				tLocalMatrix[11] = tLocalMatrix[11] * aZ;
+
+			// 부모가 있으면 곱처리함
+
+			parentMTX ?
+				(
+					// 부모매트릭스 복사
+					// 매트립스 곱
+					a00 = parentMTX[0], a01 = parentMTX[1], a02 = parentMTX[2], a03 = parentMTX[3],
+						a10 = parentMTX[4], a11 = parentMTX[5], a12 = parentMTX[6], a13 = parentMTX[7],
+						a20 = parentMTX[8], a21 = parentMTX[9], a22 = parentMTX[10], a23 = parentMTX[11],
+						a30 = parentMTX[12], a31 = parentMTX[13], a32 = parentMTX[14], a33 = parentMTX[15],
+						b0 = tLocalMatrix[0], b1 = tLocalMatrix[1], b2 = tLocalMatrix[2], b3 = tLocalMatrix[3],
+						tMatrix[0] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30,
+						tMatrix[1] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31,
+						tMatrix[2] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32,
+						tMatrix[3] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33,
+						b0 = tLocalMatrix[4], b1 = tLocalMatrix[5], b2 = tLocalMatrix[6], b3 = tLocalMatrix[7],
+						tMatrix[4] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30,
+						tMatrix[5] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31,
+						tMatrix[6] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32,
+						tMatrix[7] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33,
+						b0 = tLocalMatrix[8], b1 = tLocalMatrix[9], b2 = tLocalMatrix[10], b3 = tLocalMatrix[11],
+						tMatrix[8] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30,
+						tMatrix[9] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31,
+						tMatrix[10] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32,
+						tMatrix[11] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33,
+						b0 = tLocalMatrix[12], b1 = tLocalMatrix[13], b2 = tLocalMatrix[14], b3 = tLocalMatrix[15],
+						tMatrix[12] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30,
+						tMatrix[13] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31,
+						tMatrix[14] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32,
+						tMatrix[15] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33
+				)
+				: (
+					tMatrix[0] = tLocalMatrix[0], tMatrix[1] = tLocalMatrix[1], tMatrix[2] = tLocalMatrix[2], tMatrix[3] = tLocalMatrix[3],
+						tMatrix[4] = tLocalMatrix[4], tMatrix[5] = tLocalMatrix[5], tMatrix[6] = tLocalMatrix[6], tMatrix[7] = tLocalMatrix[7],
+						tMatrix[8] = tLocalMatrix[8], tMatrix[9] = tLocalMatrix[9] , tMatrix[10] = tLocalMatrix[10], tMatrix[11] = tLocalMatrix[11],
+						tMatrix[12] = tLocalMatrix[12], tMatrix[13] = tLocalMatrix[13], tMatrix[14] = tLocalMatrix[14], tMatrix[15] = tLocalMatrix[15]
+				);
+			// tMesh.calcTransform(parent);
+			// tMesh.updateUniformBuffer();
+			tMesh.uniformBuffer_mesh.GPUBuffer.setSubData(0, tMesh.matrix);
+			tMesh.uniformBuffer_mesh.GPUBuffer.setSubData(64, tMesh.normalMatrix);
+		}
+		tMesh.dirtyPipeline = false;
 		tMesh.dirtyTransform = false;
 	}
 };
@@ -104,8 +230,8 @@ export default class RedRender {
 
 		// 시스템 유니폼 업데이트
 		redView.updateSystemUniform(passEncoder, redGPU);
-		if (tScene.grid) renderScene(redGPU, redView, passEncoder, {children: [tScene.grid]});
-		renderScene(redGPU, redView, passEncoder, tScene);
+		if (tScene.grid) renderScene(redGPU, redView, passEncoder, null,[tScene.grid]);
+		renderScene(redGPU, redView, passEncoder, null,tScene.children);
 		passEncoder.endPass();
 		let tX = redView.viewRect[0];
 		let tY = redView.viewRect[1];

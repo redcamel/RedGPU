@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 23:2:58
+ *   Last modification time of this file - 2019.11.29 14:52:7
  *
  */
 
@@ -18,8 +18,8 @@ export default class RedView {
 	#redGPU;
 	#scene;
 	#camera;
-	#x = 0;
-	#y = 0;
+	_x = 0;
+	_y = 0;
 	#width = '100%';
 	#height = '100%';
 	#viewRect = [];
@@ -251,11 +251,11 @@ export default class RedView {
 	}
 
 	get y() {
-		return this.#y;
+		return this._y;
 	}
 
 	get x() {
-		return this.#x;
+		return this._x;
 	}
 
 	get width() {
@@ -290,18 +290,18 @@ export default class RedView {
 		this.resetTexture(this.#redGPU)
 	}
 
-	setLocation(x = this.#x, y = this.#y) {
-		if (typeof x == 'number') this.#x = x < 0 ? 0 : parseInt(x);
+	setLocation(x = this._x, y = this._y) {
+		if (typeof x == 'number') this._x = x < 0 ? 0 : parseInt(x);
 		else {
-			if (x.includes('%') && (+x.replace('%', '') >= 0)) this.#x = x;
+			if (x.includes('%') && (+x.replace('%', '') >= 0)) this._x = x;
 			else RedUtil.throwFunc('RedView setLocation : x는 0이상의 숫자나 %만 허용.', x);
 		}
-		if (typeof y == 'number') this.#y = y < 0 ? 0 : parseInt(y);
+		if (typeof y == 'number') this._y = y < 0 ? 0 : parseInt(y);
 		else {
-			if (y.includes('%') && (+y.replace('%', '') >= 0)) this.#y = y;
+			if (y.includes('%') && (+y.replace('%', '') >= 0)) this._y = y;
 			else RedUtil.throwFunc('RedView setLocation : y는 0이상의 숫자나 %만 허용.', y);
 		}
-		console.log('setLocation', this.#x, this.#y);
+		console.log('setLocation', this._x, this._y);
 		this.getViewRect(this.#redGPU)
 	}
 
