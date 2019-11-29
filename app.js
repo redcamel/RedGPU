@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.29 14:55:33
+ *   Last modification time of this file - 2019.11.29 18:29:5
  *
  */
 
@@ -24,6 +24,8 @@ import RedGrid from "./src/object3D/RedGrid.js";
 import RedObitController from "./src/controller/RedObitController.js";
 import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 import RedPointLight from "./src/light/RedPointLight.js";
+import RedSkyBox from "./src/object3D/RedSkyBox.js";
+import RedBitmapCubeTexture from "./src/resources/RedBitmapCubeTexture.js";
 
 
 (async function () {
@@ -58,6 +60,7 @@ import RedPointLight from "./src/light/RedPointLight.js";
 			tCamera.distance = 80
 
 			tScene.grid = tGrid
+			tScene.skyBox = new RedSkyBox(redGPU)
 			let tLight
 			tLight = new RedDirectionalLight()
 			tLight.x = 10
@@ -98,6 +101,18 @@ import RedPointLight from "./src/light/RedPointLight.js";
 				new RedBitmapTexture(redGPU, 'assets/Brick03_disp.jpg')
 
 			];
+
+			let testCubeTexture = new RedBitmapCubeTexture(redGPU, [
+				'./assets/cubemap/SwedishRoyalCastle/px.jpg',
+				'./assets/cubemap/SwedishRoyalCastle/nx.jpg',
+				'./assets/cubemap/SwedishRoyalCastle/py.jpg',
+				'./assets/cubemap/SwedishRoyalCastle/ny.jpg',
+				'./assets/cubemap/SwedishRoyalCastle/pz.jpg',
+				'./assets/cubemap/SwedishRoyalCastle/nz.jpg'
+			])
+			console.log('RedBitmapCubeTexture', testCubeTexture)
+
+			tScene.skyBox = new RedSkyBox(redGPU, testCubeTexture)
 
 			let tMat1 = new RedColorMaterial(redGPU, '#ffff00');
 			let tMat2 = new RedColorPhongMaterial(redGPU, '#00ff00');
@@ -198,15 +213,15 @@ import RedPointLight from "./src/light/RedPointLight.js";
 
 				renderer.render(time, redGPU);
 				tMat4.normalPower = tMat5.normalPower = tMat6.normalPower = Math.abs(Math.sin(time / 1000)) + 1
-				tMat2.shininess =  Math.abs(Math.sin(time / 1000)) * 64 + 8
-				tMat2.specularPower =  Math.abs(Math.sin(time/1000))
+				tMat2.shininess = Math.abs(Math.sin(time / 1000)) * 64 + 8
+				tMat2.specularPower = Math.abs(Math.sin(time / 1000))
 
 				let tChildren = tView.scene.pointLightList
 				let i = tChildren.length;
 				while (i--) {
-					tChildren[i].x = Math.sin(time / 1000+i*10 + Math.PI * 2 / tChildren.length * i) * 40
-					tChildren[i].y = Math.tan(time / 2000+i*10 + Math.PI * 2 / tChildren.length * i) * 25
-					tChildren[i].z = Math.cos(time / 2000+i*10 + Math.PI * 2 / tChildren.length * i) * 40
+					tChildren[i].x = Math.sin(time / 1000 + i * 10 + Math.PI * 2 / tChildren.length * i) * 40
+					tChildren[i].y = Math.tan(time / 2000 + i * 10 + Math.PI * 2 / tChildren.length * i) * 25
+					tChildren[i].z = Math.cos(time / 2000 + i * 10 + Math.PI * 2 / tChildren.length * i) * 40
 				}
 
 				//  tChildren = tView.scene.children

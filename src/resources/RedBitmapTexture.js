@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 23:2:58
+ *   Last modification time of this file - 2019.11.29 18:29:5
  *
  */
 "use strict";
@@ -77,10 +77,10 @@ export default class RedBitmapTexture {
 		} else {
 			const mapKey = src + useMipmap;
 			console.log('mapKey',mapKey);
-			// if (TABLE.get(mapKey)) {
-			// 	console.log('캐시된 녀석을 던집',mapKey, TABLE.get(mapKey));
-			// 	return TABLE.get(mapKey);
-			// }
+			if (TABLE.get(mapKey)) {
+				console.log('캐시된 녀석을 던집',mapKey, TABLE.get(mapKey));
+				return TABLE.get(mapKey);
+			}
 			const img = new Image();
 			img.src = src;
 			img.onerror = function (v) {
@@ -97,7 +97,7 @@ export default class RedBitmapTexture {
 						depth: 1,
 					},
 					dimension: '2d',
-					format: 'bgra8unorm',
+					format: 'rgba8unorm',
 					arrayLayerCount: 1,
 					mipLevelCount: useMipmap ? this.mipMaps + 1 : 1,
 					usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.SAMPLED
@@ -107,12 +107,12 @@ export default class RedBitmapTexture {
 				let faceWidth = img.width;
 				let faceHeight = img.height;
 
-				 this.#updateTexture(redGPU.device, img, gpuTexture, faceWidth, faceHeight, 0);
+				this.#updateTexture(redGPU.device, img, gpuTexture, faceWidth, faceHeight, 0);
 				if (useMipmap) {
 					for (i; i <= len; i++) {
 						faceWidth = Math.max(Math.floor(faceWidth / 2), 1);
 						faceHeight = Math.max(Math.floor(faceHeight / 2), 1);
-						 this.#updateTexture(redGPU.device, img, gpuTexture, faceWidth, faceHeight, i)
+						this.#updateTexture(redGPU.device, img, gpuTexture, faceWidth, faceHeight, i)
 					}
 				}
 				TABLE.set(mapKey, this);

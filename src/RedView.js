@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.29 14:52:7
+ *   Last modification time of this file - 2019.11.29 18:29:5
  *
  */
 
@@ -188,7 +188,7 @@ export default class RedView {
 
 
 		let aspect = Math.abs(this.#viewRect[2] / this.#viewRect[3]);
-		mat4.perspective(this.projectionMatrix, (Math.PI / 180) * 60, aspect, 0.01, 10000.0);
+		mat4.perspective(this.projectionMatrix, (Math.PI / 180) * this.camera.fov, aspect, this.camera.nearClipping, this.camera.farClipping);
 		let offset = 0;
 		systemUniformInfo_vertex.GPUBuffer.setSubData(offset, this.projectionMatrix);
 		offset += RedTypeSize.mat4;
