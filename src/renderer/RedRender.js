@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.29 14:52:7
+ *   Last modification time of this file - 2019.11.29 18:29:5
  *
  */
 let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty) => {
@@ -230,6 +230,10 @@ export default class RedRender {
 
 		// 시스템 유니폼 업데이트
 		redView.updateSystemUniform(passEncoder, redGPU);
+		if (tScene.skyBox) {
+			tScene.skyBox['scaleX'] = tScene.skyBox['scaleY'] = tScene.skyBox['scaleZ'] = redView.camera['farClipping'] * 0.6;
+			renderScene(redGPU, redView, passEncoder, null,[tScene.skyBox]);
+		}
 		if (tScene.grid) renderScene(redGPU, redView, passEncoder, null,[tScene.grid]);
 		renderScene(redGPU, redView, passEncoder, null,tScene.children);
 		passEncoder.endPass();

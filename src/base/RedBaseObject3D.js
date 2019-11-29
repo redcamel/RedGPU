@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.29 14:52:7
+ *   Last modification time of this file - 2019.11.29 18:29:5
  *
  */
 
@@ -85,6 +85,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 		this.normalMatrix = mat4.create();
 		this.matrix = mat4.create();
 		this.localMatrix = mat4.create()
+
 	}
 
 	updateUniformBuffer = (_ => {

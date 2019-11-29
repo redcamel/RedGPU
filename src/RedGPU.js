@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 23:2:58
+ *   Last modification time of this file - 2019.11.29 18:29:5
  *
  */
 
@@ -29,7 +29,7 @@ export default class RedGPU {
 				this.canvas = canvas;
 				this.context = canvas.getContext('gpupresent');
 				this.device = device;
-				this.swapChainFormat = "bgra8unorm";
+				this.swapChainFormat = "rgba8unorm";
 				this.swapChain = configureSwapChain(this.device, this.swapChainFormat, this.context);
 				this.state = {
 					RedGeometry: new Map(),
@@ -43,9 +43,30 @@ export default class RedGPU {
 							height: 1,
 							depth: 1,
 						},
-						format: "bgra8unorm",
+						format: this.swapChainFormat ,
 						usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.SAMPLED,
-					}).createView()
+					}).createView(),
+					emptyCubeTextureView: device.createTexture({
+						size: {
+							width: 1,
+							height: 1,
+							depth: 1,
+						},
+						dimension: '2d',
+						arrayLayerCount: 6,
+						mipLevelCount: 1,
+						sampleCount: 1,
+						format: this.swapChainFormat ,
+						usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.SAMPLED,
+					}).createView({
+						format: 'rgba8unorm',
+						dimension: 'cube',
+						aspect: 'all',
+						baseMipLevel: 0,
+						mipLevelCount: 1,
+						baseArrayLayer: 0,
+						arrayLayerCount: 6
+					})
 				};
 				/////
 				this.#detector.detectGPU();
@@ -65,7 +86,7 @@ export default class RedGPU {
 		this.viewList.push(redView)
 	}
 	removeView(redView) {
-		if(this.viewList.includes(redView)) this.viewList.splice(redView,1)
+		if (this.viewList.includes(redView)) this.viewList.splice(redView, 1)
 	}
 	get detector() {return this.#detector};
 	setSize(w = this.#width, h = this.#height) {
