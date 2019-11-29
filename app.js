@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.29 20:40:32
+ *   Last modification time of this file - 2019.11.29 20:44:25
  *
  */
 
@@ -65,19 +65,19 @@ import RedInterleaveInfo from "./src/geometry/RedInterleaveInfo.js";
 			tScene.grid = tGrid
 			tScene.skyBox = new RedSkyBox(redGPU)
 			let tLight
-			tLight = new RedDirectionalLight('#0000ff',0.5)
+			tLight = new RedDirectionalLight('#0000ff', 0.5)
 			tLight.x = 10
 			tLight.y = 10
 			tLight.z = 10
 			tScene.addLight(tLight)
 			//
-			tLight = new RedDirectionalLight('#ff0000',0.5)
+			tLight = new RedDirectionalLight('#ff0000', 0.5)
 			tLight.x = -10
 			tLight.y = 10
 			tLight.z = -10
 			tScene.addLight(tLight)
 
-			tLight = new RedDirectionalLight('#00ff00',0.5)
+			tLight = new RedDirectionalLight('#00ff00', 0.5)
 			tLight.x = -10
 			tLight.y = 20
 			tLight.z = 20
@@ -160,12 +160,12 @@ import RedInterleaveInfo from "./src/geometry/RedInterleaveInfo.js";
 
 					i > MAX / 4 ? tMat2 : i > MAX / 8 ? tMat3 : i > MAX / 9 ? tMat4 : i > MAX / 10 ? tMat1 : i > MAX / 13 ? tMat5 : tMat6
 				);
-				testMesh.x = Math.random() * 100 - 50;
-				testMesh.y = Math.random() * 100 - 50;
-				testMesh.z = Math.random() * 100 - 50;
+				testMesh.x = Math.random() * 300 - 150;
+				testMesh.y = Math.random() * 300 - 150;
+				testMesh.z = Math.random() * 300 - 150;
 				testMesh.rotationX = testMesh.rotationY = testMesh.rotationZ = Math.random() * 360;
-				testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = Math.random() * 3 + 1;
-				if (testMesh.material == tMat6) testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = 5
+				testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = Math.random() * 5 + 1;
+				if (testMesh.material == tMat6) testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = 10
 				tScene.addChild(testMesh)
 				// //
 				// let testMesh2 = new RedMesh(
@@ -261,14 +261,14 @@ import RedInterleaveInfo from "./src/geometry/RedInterleaveInfo.js";
 				renderer.render(time, redGPU);
 				tMat4.normalPower = tMat5.normalPower = tMat6.normalPower = Math.abs(Math.sin(time / 1000)) + 1
 				tMat2.shininess = tMat4.shininess = tMat5.shininess = Math.abs(Math.sin(time / 1000)) * 64 + 8
-				tMat2.specularPower = Math.abs(Math.sin(time / 1000))*5
+				tMat2.specularPower = Math.abs(Math.sin(time / 1000)) * 5
 
 				let tChildren = tView.scene.pointLightList
 				let i = tChildren.length;
 				while (i--) {
-					tChildren[i].x = Math.sin(time / 1000 + i * 10 + Math.PI * 2 / tChildren.length * i) * 40
-					tChildren[i].y = Math.tan(time / 2000 + i * 10 + Math.PI * 2 / tChildren.length * i) * 25
-					tChildren[i].z = Math.cos(time / 2000 + i * 10 + Math.PI * 2 / tChildren.length * i) * 40
+					tChildren[i].x = Math.sin(time / 1000 + i * 10 + Math.PI * 2 / tChildren.length * i) * 60
+					tChildren[i].y = Math.tan(time / 2000 + i * 10 + Math.PI * 2 / tChildren.length * i) * 60 +Math.cos(time / 500 + i * 10 + Math.PI * 2 / tChildren.length * i) * 12
+					tChildren[i].z = Math.cos(time / 2000 + i * 10 + Math.PI * 2 / tChildren.length * i) * 60
 				}
 
 				//  tChildren = tView.scene.children
