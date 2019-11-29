@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.29 14:52:7
+ *   Last modification time of this file - 2019.11.29 14:55:33
  *
  */
 
@@ -78,10 +78,10 @@ import RedPointLight from "./src/light/RedPointLight.js";
 			tScene.addLight(tLight)
 
 
-			let i2 = 20
+			let i2 = 5
 			let testColor = ['#ff0000', '#00ff00', '#0000ff', '#ffffff', '#ff2234']
 			while (i2--) {
-				let tLight = new RedPointLight(testColor[i2 % 5], 1, 1, parseInt(Math.random() * 25) + 10)
+				let tLight = new RedPointLight(testColor[i2 % 5], 1, 1, parseInt(Math.random() * 25) + 5)
 				tLight.x = Math.random() * 80 - 40
 				tLight.y = Math.random() * 80 - 40
 				tLight.z = Math.random() * 80 - 40
