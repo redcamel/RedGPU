@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.29 18:29:5
+ *   Last modification time of this file - 2019.11.29 20:40:32
  *
  */
 
@@ -26,6 +26,9 @@ import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 import RedPointLight from "./src/light/RedPointLight.js";
 import RedSkyBox from "./src/object3D/RedSkyBox.js";
 import RedBitmapCubeTexture from "./src/resources/RedBitmapCubeTexture.js";
+import RedBuffer from "./src/buffer/RedBuffer.js";
+import RedGeometry from "./src/geometry/RedGeometry.js";
+import RedInterleaveInfo from "./src/geometry/RedInterleaveInfo.js";
 
 
 (async function () {
@@ -57,34 +60,34 @@ import RedBitmapCubeTexture from "./src/resources/RedBitmapCubeTexture.js";
 
 			tCamera.targetView = tView // optional
 			tCamera2.targetView = tView2 // optional
-			tCamera.distance = 80
+			tCamera.distance = 200
 
 			tScene.grid = tGrid
 			tScene.skyBox = new RedSkyBox(redGPU)
 			let tLight
-			tLight = new RedDirectionalLight()
+			tLight = new RedDirectionalLight('#0000ff',0.5)
 			tLight.x = 10
-			tLight.y = 0
-			tLight.z = 0
+			tLight.y = 10
+			tLight.z = 10
 			tScene.addLight(tLight)
-
-			tLight = new RedDirectionalLight('#ff0000', 1, 0.4)
-			tLight.x = 10
-			tLight.y = 0
-			tLight.z = 0
-			tScene.addLight(tLight)
-
-			tLight = new RedDirectionalLight('#00ff00', 1, 0.4)
+			//
+			tLight = new RedDirectionalLight('#ff0000',0.5)
 			tLight.x = -10
-			tLight.y = 0
-			tLight.z = 0
+			tLight.y = 10
+			tLight.z = -10
+			tScene.addLight(tLight)
+
+			tLight = new RedDirectionalLight('#00ff00',0.5)
+			tLight.x = -10
+			tLight.y = 20
+			tLight.z = 20
 			tScene.addLight(tLight)
 
 
-			let i2 = 5
+			let i2 = 20
 			let testColor = ['#ff0000', '#00ff00', '#0000ff', '#ffffff', '#ff2234']
 			while (i2--) {
-				let tLight = new RedPointLight(testColor[i2 % 5], 1, 1, parseInt(Math.random() * 25) + 5)
+				let tLight = new RedPointLight(testColor[i2 % 5], 1, 1, parseInt(Math.random() * 35) + 35)
 				tLight.x = Math.random() * 80 - 40
 				tLight.y = Math.random() * 80 - 40
 				tLight.z = Math.random() * 80 - 40
@@ -102,17 +105,6 @@ import RedBitmapCubeTexture from "./src/resources/RedBitmapCubeTexture.js";
 
 			];
 
-			let testCubeTexture = new RedBitmapCubeTexture(redGPU, [
-				'./assets/cubemap/SwedishRoyalCastle/px.jpg',
-				'./assets/cubemap/SwedishRoyalCastle/nx.jpg',
-				'./assets/cubemap/SwedishRoyalCastle/py.jpg',
-				'./assets/cubemap/SwedishRoyalCastle/ny.jpg',
-				'./assets/cubemap/SwedishRoyalCastle/pz.jpg',
-				'./assets/cubemap/SwedishRoyalCastle/nz.jpg'
-			])
-			console.log('RedBitmapCubeTexture', testCubeTexture)
-
-			tScene.skyBox = new RedSkyBox(redGPU, testCubeTexture)
 
 			let tMat1 = new RedColorMaterial(redGPU, '#ffff00');
 			let tMat2 = new RedColorPhongMaterial(redGPU, '#00ff00');
@@ -195,6 +187,61 @@ import RedBitmapCubeTexture from "./src/resources/RedBitmapCubeTexture.js";
 				// testMesh2.addChild(testMesh3)
 
 			}
+			const pModel = new Promise((resolve) => {
+				OBJ.downloadMeshes({
+					'obj': './assets/WaltHead.obj'
+				}, resolve);
+			});
+			pModel.then(function (v) {
+				console.log('pModel', v)
+				let interleave = []
+				let vertexData = v.obj.vertices
+				let vertexNormals = v.obj.vertexNormals
+				let uvData = v.obj.textures
+
+
+				let i = 0, len = v.obj.indices.length
+				for (i; i < len; i++) {
+					let tIndex = v.obj.indices[i]
+					interleave[tIndex * 8 + 0] = vertexData[tIndex * 3 + 0]
+					interleave[tIndex * 8 + 1] = vertexData[tIndex * 3 + 1]
+					interleave[tIndex * 8 + 2] = vertexData[tIndex * 3 + 2]
+					interleave[tIndex * 8 + 3] = vertexNormals[tIndex * 3 + 0]
+					interleave[tIndex * 8 + 4] = vertexNormals[tIndex * 3 + 1]
+					interleave[tIndex * 8 + 5] = vertexNormals[tIndex * 3 + 2]
+					interleave[tIndex * 8 + 6] = uvData[tIndex * 2 + 0]
+					interleave[tIndex * 8 + 7] = uvData[tIndex * 2 + 1]
+				}
+				let testModelGeo = new RedGeometry(
+					redGPU,
+					new RedBuffer(
+						redGPU,
+						`testModelGeo_interleaveBuffer`,
+						RedBuffer.TYPE_VERTEX,
+						new Float32Array(interleave),
+						[
+							new RedInterleaveInfo('vertexPosition', 'float3'),
+							new RedInterleaveInfo('vertexNormal', 'float3'),
+							new RedInterleaveInfo('texcoord', 'float2')
+						]
+					),
+					new RedBuffer(
+						redGPU,
+						`testModelGeo_indexBuffer`,
+						RedBuffer.TYPE_INDEX,
+						new Uint32Array(v.obj.indices)
+					)
+				)
+				let testModelMesh = new RedMesh(redGPU, testModelGeo, new RedColorPhongMaterial(redGPU))
+				testModelMesh.x = -90
+				testModelMesh.rotationY = -90
+				tScene.addChild(testModelMesh)
+				testModelMesh = new RedMesh(redGPU, testModelGeo, new RedColorPhongMaterial(redGPU))
+				testModelMesh.x = 90
+				testModelMesh.rotationY = 90
+				tScene.addChild(testModelMesh)
+			});
+
 			let renderer = new RedRender();
 			let render = function (time) {
 
@@ -213,8 +260,8 @@ import RedBitmapCubeTexture from "./src/resources/RedBitmapCubeTexture.js";
 
 				renderer.render(time, redGPU);
 				tMat4.normalPower = tMat5.normalPower = tMat6.normalPower = Math.abs(Math.sin(time / 1000)) + 1
-				tMat2.shininess = Math.abs(Math.sin(time / 1000)) * 64 + 8
-				tMat2.specularPower = Math.abs(Math.sin(time / 1000))
+				tMat2.shininess = tMat4.shininess = tMat5.shininess = Math.abs(Math.sin(time / 1000)) * 64 + 8
+				tMat2.specularPower = Math.abs(Math.sin(time / 1000))*5
 
 				let tChildren = tView.scene.pointLightList
 				let i = tChildren.length;
@@ -248,12 +295,28 @@ let setTestUI = function (redGPU, tView, tScene) {
 
 	let tFolder;
 
+	let testCubeTexture = new RedBitmapCubeTexture(redGPU, [
+		'./assets/cubemap/SwedishRoyalCastle/px.jpg',
+		'./assets/cubemap/SwedishRoyalCastle/nx.jpg',
+		'./assets/cubemap/SwedishRoyalCastle/py.jpg',
+		'./assets/cubemap/SwedishRoyalCastle/ny.jpg',
+		'./assets/cubemap/SwedishRoyalCastle/pz.jpg',
+		'./assets/cubemap/SwedishRoyalCastle/nz.jpg'
+	])
+	console.log('RedBitmapCubeTexture', testCubeTexture)
 
+	let skyBox = new RedSkyBox(redGPU, testCubeTexture)
+	tScene.skyBox = skyBox
 	let testSceneUI = new dat.GUI({});
-
+	let testSceneData = {
+		useSkyBox: true,
+		useGrid: true,
+	}
 	testSceneUI.width = 350
 	tFolder = testSceneUI.addFolder('RedScene')
 	tFolder.open()
+	tFolder.add(testSceneData, 'useSkyBox').onChange(v => tScene.skyBox = v ? skyBox : null)
+	tFolder.add(testSceneData, 'useGrid').onChange(v => tScene.grid = v ? new RedGrid(redGPU) : null)
 	tFolder.addColor(tScene, 'backgroundColor')
 	tFolder.add(tScene, 'backgroundColorAlpha', 0, 1, 0.01)
 	tFolder = testSceneUI.addFolder('RedView')
@@ -299,6 +362,7 @@ let setTestUI = function (redGPU, tView, tScene) {
 
 	let testUI = new dat.GUI({});
 	let testData = {
+
 		useDepthTest: true,
 		depthTestFunc: "less",
 		cullMode: "back",

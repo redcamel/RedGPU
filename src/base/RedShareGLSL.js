@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.26 19:46:12
+ *   Last modification time of this file - 2019.11.29 20:40:32
  *
  */
 
@@ -21,14 +21,15 @@ export default class RedShareGLSL {
 	};
 	static GLSL_SystemUniforms_fragment = {
 		systemUniformsWithLight: `
-		vec4 LD = vec4(0.0, 0.0, 0.0, 1.0);
 		vec4 LA = vec4(0.0, 0.0, 0.0, 0.2);
+		vec4 LD = vec4(0.0, 0.0, 0.0, 1.0);
 		vec4 LS = vec4(0.0, 0.0, 0.0, 1.0);
 		const int MAX_DIRECTIONAL_LIGHT = ${RedShareGLSL.MAX_DIRECTIONAL_LIGHT};
 		const int MAX_POINT_LIGHT =  ${RedShareGLSL.MAX_POINT_LIGHT};
 		struct DirectionalLight {
 	        vec4 color;
-	        vec3 position; float intensity;
+	        vec3 position;
+	        float intensity;
 		};
 		struct PointLight {
 	        vec4 color;
