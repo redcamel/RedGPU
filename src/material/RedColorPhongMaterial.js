@@ -2,50 +2,53 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 17:31:6
+ *   Last modification time of this file - 2019.11.29 12:46:41
  *
  */
 
 "use strict";
 import RedTypeSize from "../resources/RedTypeSize.js";
 import RedShareGLSL from "../base/RedShareGLSL.js";
-import RedUniformBufferDescriptor from "../buffer/RedUniformBufferDescriptor.js";
 
 import RedMaterialPreset from "./RedMaterialPreset.js";
 import RedColorMaterial from "./RedColorMaterial.js";
+import RedBaseMaterial from "../base/RedBaseMaterial.js";
 
 export default class RedColorPhongMaterial extends RedMaterialPreset.mix(
-	RedColorMaterial,
+	RedBaseMaterial,
+	RedMaterialPreset.color,
 	RedMaterialPreset.basicLightPropertys
 ) {
 
 	static vertexShaderGLSL = `
-	#version 460
+	#version 450
 	${RedShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
-    layout(set=2,binding = 0) uniform Uniforms {
+    layout(set = 2,binding = 0) uniform MeshUniforms {
         mat4 modelMatrix;
-        mat4 normalMTX;
-    } uniforms;
+        mat4 normalMatrix;
+    } meshUniforms;
 	layout(location = 0) in vec3 position;
 	layout(location = 1) in vec3 normal;
 	layout(location = 2) in vec2 uv;
 	layout(location = 0) out vec3 vNormal;
 	layout(location = 1) out vec2 vUV;
 	layout(location = 2) out vec4 vVertexPosition;
+	
 	void main() {
-		vVertexPosition = uniforms.modelMatrix* vec4(position,1.0);
+		vVertexPosition = meshUniforms.modelMatrix* vec4(position,1.0);
 		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * vVertexPosition;
 		
-		vNormal = (uniforms.normalMTX * vec4(normal,1.0)).xyz;
+		vNormal = (meshUniforms.normalMatrix * vec4(normal,1.0)).xyz;
 		vUV = uv;
 	}
 	`;
 	static fragmentShaderGLSL = `
-	#version 460
+	#version 450
 	${RedShareGLSL.GLSL_SystemUniforms_fragment.systemUniformsWithLight}
-	layout(set=2,binding = 1) uniform Uniforms {
+	layout(set = 3,binding = 1) uniform Uniforms {
         vec4 color;
-        float shininess; float specularPower;
+        float shininess; 
+        float specularPower;
 	    vec4 specularColor;
     } uniforms;
 	layout(location = 0) in vec3 vNormal;
@@ -94,40 +97,36 @@ export default class RedColorPhongMaterial extends RedMaterialPreset.mix(
 			}
 		]
 	};
-	static uniformBufferDescriptor_vertex = new RedUniformBufferDescriptor(
-		[
-			{size: RedTypeSize.mat4, valueName: 'matrix'},
-			{size: RedTypeSize.mat4, valueName: 'normalMatrix'}
-		]
-	);
-	static uniformBufferDescriptor_fragment = {
-		size: RedTypeSize.float4 * 3,
-		usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-		redStruct: [
-			{offset: 0, valueName: 'colorRGBA', targetKey: 'material'},
-			{offset: RedTypeSize.float4, valueName: 'shininess', targetKey: 'material'},
-			{offset: RedTypeSize.float4 + RedTypeSize.float, valueName: 'specularPower', targetKey: 'material'},
-			{
-				offset: RedTypeSize.float4 + RedTypeSize.float4,
-				valueName: 'specularColorRGBA',
-				targetKey: 'material'
-			},
-		]
-	};
+	static uniformBufferDescriptor_vertex = RedBaseMaterial.uniformBufferDescriptor_empty;
+	static uniformBufferDescriptor_fragment = [
+		{size: RedTypeSize.float4, valueName: 'colorRGBA', },
+		{size: RedTypeSize.float, valueName: 'shininess', },
+		{size: RedTypeSize.float, valueName: 'specularPower', },
+		{
+			size: RedTypeSize.float4,
+			valueName: 'specularColorRGBA',
+
+		},
+	]
 
 
 	constructor(redGPU, color = '#ff0000', alpha = 1) {
-		super(redGPU, color, alpha);
-	}
+		super(redGPU);
+		this.color = color;
+		this.alpha = alpha;
+		this.shininess = 16
+		this.specularPower = 1
+		this.specularColor = '#ffffff'
 
+		this.resetBindingInfo()
+
+	}
 	resetBindingInfo() {
-		this.bindings = null;
-		this.searchModules();
 		this.bindings = [
 			{
 				binding: 0,
 				resource: {
-					buffer: null,
+					buffer: this.uniformBuffer_vertex.GPUBuffer,
 					offset: 0,
 					size: this.uniformBufferDescriptor_vertex.size
 				}
@@ -135,12 +134,19 @@ export default class RedColorPhongMaterial extends RedMaterialPreset.mix(
 			{
 				binding: 1,
 				resource: {
-					buffer: null,
+					buffer: this.uniformBuffer_fragment.GPUBuffer,
 					offset: 0,
 					size: this.uniformBufferDescriptor_fragment.size
 				}
 			}
 		];
+		this.uniformBindGroupDescriptor = {
+			layout: this.GPUBindGroupLayout,
+			bindings: this.bindings
+		};
+		this.uniformBindGroup_material.setGPUBindGroup(this.uniformBindGroupDescriptor)
+		this.updateUniformBuffer()
+		this.searchModules();
 		this.setUniformBindGroupDescriptor();
 		this.updateUUID();
 	}

@@ -2,10 +2,9 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 17:31:6
+ *   Last modification time of this file - 2019.11.29 12:46:41
  *
  */
-
 let renderScene = (redGPU, redView, passEncoder, parent, parentDirty) => {
 	let i;
 	let targetList = parent.children;
@@ -13,11 +12,12 @@ let renderScene = (redGPU, redView, passEncoder, parent, parentDirty) => {
 	let tMaterial;
 	let tMesh;
 	let tDirtyTransform, tDirtyPipeline;
-	let tMaterialDirty;
+	let tMaterialChanged;
 	let tPipeline;
 	let prevPipeline_UUID;
 	let prevVertexBuffer_UUID;
 	let prevIndexBuffer_UUID;
+	let prevMaterial_UUID;
 	i = targetList.length;
 	while (i--) {
 		tMesh = targetList[i];
@@ -29,36 +29,39 @@ let renderScene = (redGPU, redView, passEncoder, parent, parentDirty) => {
 		if (tDirtyTransform || parentDirty) {
 			// TODO 매트릭스 계산부분을 여기로 나중에 다들고 오는게 성능에 좋음...
 			tMesh.calcTransform(parent);
-			tMesh.updateUniformBuffer(); // TODO - 이녀석도 개별적으로 업데이트 되도록 변경해야함
+			// TODO - 이녀석도 개별적으로 업데이트 되도록 변경해야함
 		}
-		tMaterialDirty = tMesh._prevMaterialUUID != tMaterial._UUID;
-		if (tDirtyPipeline || tMaterialDirty) {
+		tMaterialChanged = tMesh._prevMaterialUUID != tMaterial._UUID;
+		if (tDirtyPipeline || tMaterialChanged) {
 			tPipeline.updatePipeline(redGPU, redView);
+			tMesh.updateUniformBuffer(); //TODO - #55 Material, Mesh의 BindGroup과  BindGroupLayout을 나눠야곘음.
+
+
 			// console.log('tMesh.dirtyPipeline',tMesh.dirtyPipeline)
 		}
 
-		if (tMaterial.bindings) {
-			if (!tMesh.uniformBindGroup.GPUBindGroup) tMesh.uniformBindGroup.setGPUBindGroup(tMesh, tMaterial);
-			if (prevPipeline_UUID != tPipeline._UUID) {
-				passEncoder.setPipeline(tPipeline.GPURenderPipeline);
-				prevPipeline_UUID = tPipeline._UUID
-			}
-			if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
-				passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
-				prevVertexBuffer_UUID = tGeometry.interleaveBuffer._UUID
-			}
-			if (tGeometry.indexBuffer && prevIndexBuffer_UUID != tGeometry.indexBuffer._UUID) {
-				passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
-				prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
-			}
-			passEncoder.setBindGroup(2, tMesh.uniformBindGroup.GPUBindGroup); // 바인드 그룹은 매 매쉬마다 다르므로 캐싱할 필요가 없음.
-			if (tGeometry.indexBuffer) passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
-			else passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
-			tMesh.dirtyPipeline = false;
-		} else {
-			tMesh.uniformBindGroup.clear();
+		// materialPropertyCheck
+		////////////////////////
+
+		if (prevPipeline_UUID != tPipeline._UUID) {
+			passEncoder.setPipeline(tPipeline.GPURenderPipeline);
+			prevPipeline_UUID = tPipeline._UUID
 		}
-		tMesh._prevMaterialUUID = tMaterial._UUID;
+		if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
+			passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
+			prevVertexBuffer_UUID = tGeometry.interleaveBuffer._UUID
+		}
+		if (tGeometry.indexBuffer && prevIndexBuffer_UUID != tGeometry.indexBuffer._UUID) {
+			passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
+			prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
+		}
+		passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹
+		if (prevMaterial_UUID != tMaterial._UUID) passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup); // 젲;ㄹ 빙;ㄴㄷ;ㅇ ㄱ,릅
+		if (tGeometry.indexBuffer) passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
+		else passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
+		tMesh.dirtyPipeline = false;
+
+		prevMaterial_UUID = tMesh._prevMaterialUUID = tMaterial._UUID;
 		if (tMesh.children.length) renderScene(redGPU, passEncoder, tMesh, parentDirty || tDirtyTransform);
 		tMesh.dirtyTransform = false;
 	}
@@ -136,7 +139,8 @@ export default class RedRender {
 		this.#redGPU = redGPU;
 		this.#swapChainTexture = redGPU.swapChain.getCurrentTexture();
 		this.#swapChainTextureView = this.#swapChainTexture.createView();
-		let i =0,len = redGPU.viewList.length;
-		for(i;i<len;i++) this.#renderView(redGPU, redGPU.viewList[i])
+		let i = 0, len = redGPU.viewList.length;
+		for (i; i < len; i++) this.#renderView(redGPU, redGPU.viewList[i])
+		// console.log(cacheTable)
 	}
 }

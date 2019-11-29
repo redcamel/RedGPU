@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 17:31:6
+ *   Last modification time of this file - 2019.11.29 12:46:41
  *
  */
 
@@ -10,10 +10,9 @@
 import RedTypeSize from "../resources/RedTypeSize.js";
 import RedBaseMaterial from "../base/RedBaseMaterial.js";
 import RedShareGLSL from "../base/RedShareGLSL.js";
-import RedUniformBufferDescriptor from "../buffer/RedUniformBufferDescriptor.js";
 import RedMaterialPreset from "./RedMaterialPreset.js";
 
-export default class RedColorMaterial  extends RedMaterialPreset.mix(
+export default class RedColorMaterial extends RedMaterialPreset.mix(
 	RedBaseMaterial,
 	RedMaterialPreset.color
 ) {
@@ -37,7 +36,7 @@ export default class RedColorMaterial  extends RedMaterialPreset.mix(
 	`;
 	static fragmentShaderGLSL = `
 	#version 460
-	 layout(set=2,binding = 1) uniform Uniforms {
+	 layout(set=3,binding = 1) uniform Uniforms {
         vec4 color;
     } uniforms;
 	layout(location = 0) in vec3 vNormal;
@@ -62,20 +61,10 @@ export default class RedColorMaterial  extends RedMaterialPreset.mix(
 			}
 		]
 	};
-	static uniformBufferDescriptor_vertex = new RedUniformBufferDescriptor(
-		[
-			{size: RedTypeSize.mat4, valueName: 'matrix'},
-			{size: RedTypeSize.mat4, valueName: 'normalMatrix'}
-		]
-	);
-	static uniformBufferDescriptor_fragment = {
-		size: RedTypeSize.float4,
-		usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-		redStruct: [
-			{offset: 0, valueName: 'colorRGBA', targetKey: 'material'}
-		]
-	};
-
+	static uniformBufferDescriptor_vertex = RedBaseMaterial.uniformBufferDescriptor_empty;
+	static uniformBufferDescriptor_fragment = [
+		{size: RedTypeSize.float4, valueName: 'colorRGBA' }
+	]
 
 
 	constructor(redGPU, color = '#ff0000', alpha = 1) {
@@ -83,15 +72,14 @@ export default class RedColorMaterial  extends RedMaterialPreset.mix(
 		this.color = color;
 		this.alpha = alpha;
 		this.resetBindingInfo()
+
 	}
 	resetBindingInfo() {
-		this.bindings = null;
-		this.searchModules();
 		this.bindings = [
 			{
 				binding: 0,
 				resource: {
-					buffer: null,
+					buffer: this.uniformBuffer_vertex.GPUBuffer,
 					offset: 0,
 					size: this.uniformBufferDescriptor_vertex.size
 				}
@@ -99,13 +87,20 @@ export default class RedColorMaterial  extends RedMaterialPreset.mix(
 			{
 				binding: 1,
 				resource: {
-					buffer: null,
+					buffer: this.uniformBuffer_fragment.GPUBuffer,
 					offset: 0,
 					size: this.uniformBufferDescriptor_fragment.size
 				}
 			}
 		];
+		this.uniformBindGroupDescriptor = {
+			layout: this.GPUBindGroupLayout,
+			bindings: this.bindings
+		};
+		this.uniformBindGroup_material.setGPUBindGroup(this.uniformBindGroupDescriptor)
+		this.searchModules();
 		this.setUniformBindGroupDescriptor();
+		this.updateUniformBuffer()
 		this.updateUUID()
 	}
 }
