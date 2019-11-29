@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 23:2:58
+ *   Last modification time of this file - 2019.11.29 20:40:32
  *
  */
 
@@ -52,7 +52,6 @@ export default class RedGrid extends RedBaseObject3D {
 				k, 0, halfSize, tColor[0], tColor[1], tColor[2], 1
 			);
 		}
-		if (this.geometry) this.geometry.interleaveBuffer.destroy();
 		this.geometry = new RedGeometry(
 			redGPU,
 			new RedBuffer(

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.29 12:46:41
+ *   Last modification time of this file - 2019.11.29 20:40:32
  *
  */
 
@@ -26,7 +26,7 @@ const color = Base => class extends Base {
 		this.#colorRGBA[2] = rgb[2];
 		this.#colorRGBA[3] = this.#alpha;
 		//TODO - 시스템 버퍼쪽도 같은 개념으로 바꿔야 if 비용을 줄일 수 있음
-		if (this.uniformBuffer_fragment) this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['colorRGBA'].offset, this.#colorRGBA)
+		if (this.uniformBuffer_fragment) this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['colorRGBA'], this.#colorRGBA)
 	}
 
 	get alpha() {
@@ -35,7 +35,7 @@ const color = Base => class extends Base {
 
 	set alpha(value) {
 		this.#alpha = this.#colorRGBA[3] = value;
-		if (this.uniformBuffer_fragment) this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['colorRGBA'].offset, this.#colorRGBA)
+		if (this.uniformBuffer_fragment) this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['colorRGBA'], this.#colorRGBA)
 	}
 
 	get colorRGBA() {
@@ -77,7 +77,7 @@ const basicLightPropertys = Base => class extends Base {
 	set normalPower(value) {
 		this.#normalPower = value;
 		float1_Float32Array[0] = this.#normalPower;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['normalPower'].offset, float1_Float32Array)
+		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['normalPower'], float1_Float32Array)
 	}
 
 	get shininess() {
@@ -87,7 +87,7 @@ const basicLightPropertys = Base => class extends Base {
 	set shininess(value) {
 		this.#shininess = value;
 		float1_Float32Array[0] = this.#shininess;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['shininess'].offset, float1_Float32Array)
+		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['shininess'], float1_Float32Array)
 
 	}
 	get specularPower() {
@@ -97,7 +97,7 @@ const basicLightPropertys = Base => class extends Base {
 	set specularPower(value) {
 		this.#specularPower = value;
 		float1_Float32Array[0] = this.#specularPower;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['specularPower'].offset, float1_Float32Array)
+		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['specularPower'], float1_Float32Array)
 	}
 	get specularColor() {
 		return this.#specularColor;
@@ -110,7 +110,7 @@ const basicLightPropertys = Base => class extends Base {
 		this.#specularColorRGBA[1] = rgb[1];
 		this.#specularColorRGBA[2] = rgb[2];
 		this.#specularColorRGBA[3] = 1;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['specularColorRGBA'].offset, this.#specularColorRGBA)
+		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['specularColorRGBA'], this.#specularColorRGBA)
 	}
 
 	get specularColorRGBA() {

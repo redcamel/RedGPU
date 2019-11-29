@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.29 18:29:5
+ *   Last modification time of this file - 2019.11.29 20:40:32
  *
  */
 let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty) => {
@@ -74,7 +74,7 @@ let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty) 
 			prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
 		}
 		passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹는 매그룹마다 다르니 또 업데이트 해줘야함 -_-
-		if (prevMaterial_UUID != tMaterial._UUID) passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
+		passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
 		if (tGeometry.indexBuffer) passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
 		else passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
 
