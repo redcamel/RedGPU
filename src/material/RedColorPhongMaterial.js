@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 23:2:58
+ *   Last modification time of this file - 2019.11.29 12:46:41
  *
  */
 
@@ -15,7 +15,8 @@ import RedColorMaterial from "./RedColorMaterial.js";
 import RedBaseMaterial from "../base/RedBaseMaterial.js";
 
 export default class RedColorPhongMaterial extends RedMaterialPreset.mix(
-	RedColorMaterial,
+	RedBaseMaterial,
+	RedMaterialPreset.color,
 	RedMaterialPreset.basicLightPropertys
 ) {
 
@@ -46,7 +47,8 @@ export default class RedColorPhongMaterial extends RedMaterialPreset.mix(
 	${RedShareGLSL.GLSL_SystemUniforms_fragment.systemUniformsWithLight}
 	layout(set = 3,binding = 1) uniform Uniforms {
         vec4 color;
-        float shininess; float specularPower;
+        float shininess; 
+        float specularPower;
 	    vec4 specularColor;
     } uniforms;
 	layout(location = 0) in vec3 vNormal;
@@ -97,29 +99,34 @@ export default class RedColorPhongMaterial extends RedMaterialPreset.mix(
 	};
 	static uniformBufferDescriptor_vertex = RedBaseMaterial.uniformBufferDescriptor_empty;
 	static uniformBufferDescriptor_fragment = [
-		{size: RedTypeSize.float4, valueName: 'colorRGBA', targetKey: 'material'},
-		{size: RedTypeSize.float, valueName: 'shininess', targetKey: 'material'},
-		{size: RedTypeSize.float, valueName: 'specularPower', targetKey: 'material'},
+		{size: RedTypeSize.float4, valueName: 'colorRGBA', },
+		{size: RedTypeSize.float, valueName: 'shininess', },
+		{size: RedTypeSize.float, valueName: 'specularPower', },
 		{
 			size: RedTypeSize.float4,
 			valueName: 'specularColorRGBA',
-			targetKey: 'material'
+
 		},
 	]
 
 
 	constructor(redGPU, color = '#ff0000', alpha = 1) {
-		super(redGPU, color, alpha);
-	}
+		super(redGPU);
+		this.color = color;
+		this.alpha = alpha;
+		this.shininess = 16
+		this.specularPower = 1
+		this.specularColor = '#ffffff'
 
+		this.resetBindingInfo()
+
+	}
 	resetBindingInfo() {
-		this.bindings = null;
-		this.searchModules();
 		this.bindings = [
 			{
 				binding: 0,
 				resource: {
-					buffer: null,
+					buffer: this.uniformBuffer_vertex.GPUBuffer,
 					offset: 0,
 					size: this.uniformBufferDescriptor_vertex.size
 				}
@@ -127,12 +134,19 @@ export default class RedColorPhongMaterial extends RedMaterialPreset.mix(
 			{
 				binding: 1,
 				resource: {
-					buffer: null,
+					buffer: this.uniformBuffer_fragment.GPUBuffer,
 					offset: 0,
 					size: this.uniformBufferDescriptor_fragment.size
 				}
 			}
 		];
+		this.uniformBindGroupDescriptor = {
+			layout: this.GPUBindGroupLayout,
+			bindings: this.bindings
+		};
+		this.uniformBindGroup_material.setGPUBindGroup(this.uniformBindGroupDescriptor)
+		this.updateUniformBuffer()
+		this.searchModules();
 		this.setUniformBindGroupDescriptor();
 		this.updateUUID();
 	}

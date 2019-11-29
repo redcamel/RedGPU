@@ -2,11 +2,9 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 23:2:58
+ *   Last modification time of this file - 2019.11.29 12:46:41
  *
  */
-let cacheTable = []
-let checkedMaterial = []
 let renderScene = (redGPU, redView, passEncoder, parent, parentDirty) => {
 	let i;
 	let targetList = parent.children;
@@ -19,6 +17,7 @@ let renderScene = (redGPU, redView, passEncoder, parent, parentDirty) => {
 	let prevPipeline_UUID;
 	let prevVertexBuffer_UUID;
 	let prevIndexBuffer_UUID;
+	let prevMaterial_UUID;
 	i = targetList.length;
 	while (i--) {
 		tMesh = targetList[i];
@@ -36,86 +35,33 @@ let renderScene = (redGPU, redView, passEncoder, parent, parentDirty) => {
 		if (tDirtyPipeline || tMaterialChanged) {
 			tPipeline.updatePipeline(redGPU, redView);
 			tMesh.updateUniformBuffer(); //TODO - #55 Material, Mesh의 BindGroup과  BindGroupLayout을 나눠야곘음.
+
+
 			// console.log('tMesh.dirtyPipeline',tMesh.dirtyPipeline)
 		}
 
+		// materialPropertyCheck
+		////////////////////////
 
-		if (tMaterial.bindings) {
-			// materialPropertyCheck
-			////////////////////////
-			let matUUID = tMaterial._UUID;
-			if (tMaterialChanged) checkedMaterial[matUUID] = 0;
-
-			if (!checkedMaterial[matUUID]) {
-				let tempFloat32 = new Float32Array(1);
-				//음 전체 속성 업데이트라고 봐야할까나..
-				//TODO : 최적화...필요..
-				let i2;
-				let dataVertex, dataFragment, tData;
-				let tValue;
-				let tValueUUID;
-				dataVertex = tMaterial.uniformBufferDescriptor_vertex.redStruct;
-
-				dataFragment = tMaterial.uniformBufferDescriptor_fragment.redStruct;
-				// console.log(dataVertex)
-				i2 = dataVertex.length > dataFragment.length ? dataVertex.length : dataFragment.length;
-				while (i2--) {
-					tData = dataVertex[i2];
-					if (tData) {
-						tValueUUID = tData._UUID;
-						tValue = tData.targetKey ? tMesh[tData.targetKey][tData.valueName] : tMesh[tData.valueName];
-						if (cacheTable[tValueUUID] != tValue) {
-							// console.log('변경!',tData.valueName)
-							cacheTable[tValueUUID] = tValue
-							if (typeof tValue == 'number') {
-								tempFloat32[0] = tValue;
-								tValue = tempFloat32
-							}
-							tMaterial.uniformBuffer_vertex.GPUBuffer.setSubData(tData['offset'], tValue);
-						}
-					}
-					tData = dataFragment[i2];
-					if (tData) {
-						tValueUUID = tData._UUID;
-						tValue = tData.targetKey ? tMesh[tData.targetKey][tData.valueName] : tMesh[tData.valueName];
-						if (cacheTable[tValueUUID] != tValue) {
-							// 	console.log('변경!',tData)
-							cacheTable[tValueUUID] = tValue
-							if (typeof tValue == 'number') {
-								tempFloat32[0] = tValue;
-								tValue = tempFloat32
-							}
-							tMaterial.uniformBuffer_fragment.GPUBuffer.setSubData(tData['offset'], tValue);
-						}
-					}
-				}
-			}
-			////////////////////////
-			checkedMaterial[matUUID] = 1
-
-
-			if (!tMesh.uniformBindGroup_material.GPUBindGroup) tMesh.uniformBindGroup_material.setGPUBindGroup(tMesh, tMaterial);
-			if (prevPipeline_UUID != tPipeline._UUID) {
-				passEncoder.setPipeline(tPipeline.GPURenderPipeline);
-				prevPipeline_UUID = tPipeline._UUID
-			}
-			if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
-				passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
-				prevVertexBuffer_UUID = tGeometry.interleaveBuffer._UUID
-			}
-			if (tGeometry.indexBuffer && prevIndexBuffer_UUID != tGeometry.indexBuffer._UUID) {
-				passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
-				prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
-			}
-			passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹
-			passEncoder.setBindGroup(3, tMesh.uniformBindGroup_material.GPUBindGroup); // 젲;ㄹ 빙;ㄴㄷ;ㅇ ㄱ,릅
-			if (tGeometry.indexBuffer) passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
-			else passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
-			tMesh.dirtyPipeline = false;
-		} else {
-			tMesh.uniformBindGroup_material.clear();
+		if (prevPipeline_UUID != tPipeline._UUID) {
+			passEncoder.setPipeline(tPipeline.GPURenderPipeline);
+			prevPipeline_UUID = tPipeline._UUID
 		}
-		tMesh._prevMaterialUUID = tMaterial._UUID;
+		if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
+			passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
+			prevVertexBuffer_UUID = tGeometry.interleaveBuffer._UUID
+		}
+		if (tGeometry.indexBuffer && prevIndexBuffer_UUID != tGeometry.indexBuffer._UUID) {
+			passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
+			prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
+		}
+		passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹
+		if (prevMaterial_UUID != tMaterial._UUID) passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup); // 젲;ㄹ 빙;ㄴㄷ;ㅇ ㄱ,릅
+		if (tGeometry.indexBuffer) passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
+		else passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
+		tMesh.dirtyPipeline = false;
+
+		prevMaterial_UUID = tMesh._prevMaterialUUID = tMaterial._UUID;
 		if (tMesh.children.length) renderScene(redGPU, passEncoder, tMesh, parentDirty || tDirtyTransform);
 		tMesh.dirtyTransform = false;
 	}
@@ -194,7 +140,6 @@ export default class RedRender {
 		this.#swapChainTexture = redGPU.swapChain.getCurrentTexture();
 		this.#swapChainTextureView = this.#swapChainTexture.createView();
 		let i = 0, len = redGPU.viewList.length;
-		checkedMaterial.length = 0
 		for (i; i < len; i++) this.#renderView(redGPU, redGPU.viewList[i])
 		// console.log(cacheTable)
 	}

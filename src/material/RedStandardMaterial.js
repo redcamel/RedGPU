@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 23:2:58
+ *   Last modification time of this file - 2019.11.29 12:46:41
  *
  */
 
@@ -14,9 +14,9 @@ import RedMaterialPreset from "./RedMaterialPreset.js";
 
 export default class RedStandardMaterial extends RedMaterialPreset.mix(
 	RedBaseMaterial,
-	RedMaterialPreset.basicLightPropertys,
 	RedMaterialPreset.diffuseTexture,
-	RedMaterialPreset.normalTexture
+	RedMaterialPreset.normalTexture,
+	RedMaterialPreset.basicLightPropertys
 ) {
 	static vertexShaderGLSL = `
 	#version 450
@@ -32,7 +32,7 @@ export default class RedStandardMaterial extends RedMaterialPreset.mix(
 	layout(location = 0) out vec3 vNormal;
 	layout(location = 1) out vec2 vUV;
 	layout(location = 2) out vec4 vVertexPosition;	
-	 layout(set = 3,binding = 0) uniform VertexUniforms {
+	layout(set = 3,binding = 0) uniform VertexUniforms {
         float displacementFlowSpeedX;
         float displacementFlowSpeedY;
         float displacementPower;
@@ -112,7 +112,7 @@ export default class RedStandardMaterial extends RedMaterialPreset.mix(
 		outColor = finalColor;
 	}
 `;
-	static PROGRAM_OPTION_LIST = ['diffuseTexture', 'displacementTexture','normalTexture'];
+	static PROGRAM_OPTION_LIST = ['diffuseTexture', 'displacementTexture', 'normalTexture'];
 	static uniformsBindGroupLayoutDescriptor = {
 		bindings: [
 			{
@@ -156,27 +156,27 @@ export default class RedStandardMaterial extends RedMaterialPreset.mix(
 		{
 			size: RedTypeSize.float,
 			valueName: 'displacementFlowSpeedX',
-			targetKey: 'material'
+
 		},
 		{
 			size: RedTypeSize.float,
 			valueName: 'displacementFlowSpeedY',
-			targetKey: 'material'
+
 		},
 		{
 			size: RedTypeSize.float,
 			valueName: 'displacementPower',
-			targetKey: 'material'
+
 		}
 	]
 	static uniformBufferDescriptor_fragment = [
-		{size: RedTypeSize.float, valueName: 'normalPower', targetKey: 'material'},
-		{size: RedTypeSize.float, valueName: 'shininess', targetKey: 'material'},
-		{size: RedTypeSize.float, valueName: 'specularPower', targetKey: 'material'},
+		{size: RedTypeSize.float, valueName: 'normalPower', },
+		{size: RedTypeSize.float, valueName: 'shininess', },
+		{size: RedTypeSize.float, valueName: 'specularPower', },
 		{
 			size: RedTypeSize.float4,
 			valueName: 'specularColorRGBA',
-			targetKey: 'material'
+
 		}
 	]
 
@@ -191,10 +191,11 @@ export default class RedStandardMaterial extends RedMaterialPreset.mix(
 		this.diffuseTexture = diffuseTexture;
 		this.normalTexture = normalTexture;
 		this.displacementTexture = displacementTexture;
+		this.resetBindingInfo()
+
 	}
 
 	checkTexture(texture, textureName) {
-		this.bindings = null;
 		if (texture) {
 			if (texture.GPUTexture) {
 				switch (textureName) {
@@ -208,7 +209,7 @@ export default class RedStandardMaterial extends RedMaterialPreset.mix(
 						this._displacementTexture = texture;
 						break
 				}
-				console.log("로디오안료됨 textureName",textureName, texture.GPUTexture);
+				console.log("로딩완료됨 textureName", textureName, texture.GPUTexture);
 				this.resetBindingInfo()
 			} else {
 				texture.addUpdateTarget(this, textureName)
@@ -235,6 +236,7 @@ export default class RedStandardMaterial extends RedMaterialPreset.mix(
 
 	set displacementFlowSpeedY(value) {
 		this.#displacementFlowSpeedY = value;
+		 this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['displacementFlowSpeedY'].offset, new Float32Array([this.#displacementFlowSpeedY]))
 	}
 
 	get displacementFlowSpeedX() {
@@ -243,6 +245,7 @@ export default class RedStandardMaterial extends RedMaterialPreset.mix(
 
 	set displacementFlowSpeedX(value) {
 		this.#displacementFlowSpeedX = value;
+		 this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['displacementFlowSpeedX'].offset, new Float32Array([this.#displacementFlowSpeedX]))
 	}
 
 	get displacementPower() {
@@ -251,16 +254,15 @@ export default class RedStandardMaterial extends RedMaterialPreset.mix(
 
 	set displacementPower(value) {
 		this.#displacementPower = value;
+		 this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['displacementPower'].offset, new Float32Array([this.#displacementPower]))
 	}
 
 	resetBindingInfo() {
-		this.bindings = null;
-		this.searchModules();
 		this.bindings = [
 			{
 				binding: 0,
 				resource: {
-					buffer: null,
+					buffer: this.uniformBuffer_vertex.GPUBuffer,
 					offset: 0,
 					size: this.uniformBufferDescriptor_vertex.size
 				}
@@ -268,7 +270,7 @@ export default class RedStandardMaterial extends RedMaterialPreset.mix(
 			{
 				binding: 1,
 				resource: {
-					buffer: null,
+					buffer: this.uniformBuffer_fragment.GPUBuffer,
 					offset: 0,
 					size: this.uniformBufferDescriptor_fragment.size
 				}
@@ -294,7 +296,14 @@ export default class RedStandardMaterial extends RedMaterialPreset.mix(
 				resource: this._displacementTexture ? this._displacementTexture.GPUTextureView : this.redGPU.state.emptyTextureView,
 			}
 		];
+		this.uniformBindGroupDescriptor = {
+			layout: this.GPUBindGroupLayout,
+			bindings: this.bindings
+		};
+		this.uniformBindGroup_material.setGPUBindGroup(this.uniformBindGroupDescriptor)
+		this.searchModules();
 		this.setUniformBindGroupDescriptor();
+		this.updateUniformBuffer()
 		this.updateUUID()
 	}
 }

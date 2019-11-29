@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.26 19:46:12
+ *   Last modification time of this file - 2019.11.29 12:46:41
  *
  */
 
@@ -43,7 +43,7 @@ export default class RedShaderModule_GLSL {
 		console.log(this);
 	}
 
-	async searchShaderModule(key) {
+	searchShaderModule(key) {
 		console.log('searchShaderModule', key);
 		if (this.shaderModuleMap.get(key)) {
 			this.GPUShaderModule = this.shaderModuleMap.get(key);
@@ -52,10 +52,10 @@ export default class RedShaderModule_GLSL {
 
 			this.shaderModuleDescriptor = {
 				key: key,
-				code: await this.#redGPU.glslang.compileGLSL(this.sourceMap.get(key), this.type),
+				code: this.#redGPU.glslang.compileGLSL(this.sourceMap.get(key), this.type),
 				source: this.sourceMap.get(key)
 			};
-			this.GPUShaderModule = await this.#redGPU.device.createShaderModule(this.shaderModuleDescriptor);
+			this.GPUShaderModule = this.#redGPU.device.createShaderModule(this.shaderModuleDescriptor);
 			this.shaderModuleMap.set(key, this.GPUShaderModule);
 			console.log(key, this.shaderModuleMap.get(key))
 		}

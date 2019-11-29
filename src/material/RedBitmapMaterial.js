@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 23:2:58
+ *   Last modification time of this file - 2019.11.29 12:46:41
  *
  */
 
@@ -69,14 +69,14 @@ export default class RedBitmapMaterial extends RedMaterialPreset.mix(
 	static uniformBufferDescriptor_fragment = RedBaseMaterial.uniformBufferDescriptor_empty;
 
 
-
 	constructor(redGPU, diffuseTexture) {
 		super(redGPU);
 		this.diffuseTexture = diffuseTexture
+		this.resetBindingInfo()
+		this.updateUniformBuffer()
 	}
 
 	checkTexture(texture, textureName) {
-		this.bindings = null;
 		if (texture) {
 			if (texture.GPUTexture) {
 				switch (textureName) {
@@ -94,16 +94,12 @@ export default class RedBitmapMaterial extends RedMaterialPreset.mix(
 			this.resetBindingInfo()
 		}
 	}
-
-
 	resetBindingInfo() {
-		this.bindings = null;
-		this.searchModules();
 		this.bindings = [
 			{
 				binding: 0,
 				resource: {
-					buffer: null,
+					buffer: this.uniformBuffer_vertex.GPUBuffer,
 					offset: 0,
 					size: this.uniformBufferDescriptor_vertex.size
 				}
@@ -117,6 +113,12 @@ export default class RedBitmapMaterial extends RedMaterialPreset.mix(
 				resource: this._diffuseTexture ? this._diffuseTexture.GPUTextureView : this.redGPU.state.emptyTextureView,
 			}
 		];
+		this.uniformBindGroupDescriptor = {
+			layout: this.GPUBindGroupLayout,
+			bindings: this.bindings
+		};
+		this.uniformBindGroup_material.setGPUBindGroup(this.uniformBindGroupDescriptor)
+		this.searchModules();
 		this.setUniformBindGroupDescriptor();
 		this.updateUUID();
 		console.log(this._diffuseTexture);

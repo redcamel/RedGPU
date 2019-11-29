@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 23:2:58
+ *   Last modification time of this file - 2019.11.29 12:46:41
  *
  */
 
@@ -14,6 +14,8 @@ import RedUUID from "../base/RedUUID.js";
 export default class RedUniformBufferDescriptor {
 	constructor(redStruct, usage = GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST) {
 		this.redStruct = JSON.parse(JSON.stringify(redStruct));
+		this.redStructOffsetMap = {};
+		let size = 0;
 		let offset = 0;
 		let FLOAT4_SIZE = RedTypeSize.float4;
 		this.redStruct.map((v) => {
@@ -34,9 +36,10 @@ export default class RedUniformBufferDescriptor {
 				offset += RedTypeSize.mat4
 			}
 			console.log(v)
-			v._UUID = v.valueName + RedUUID.makeUUID()
+			this.redStructOffsetMap[v['valueName']] = v.offset;
+			v._UUID = v.valueName +'_'+ RedUUID.makeUUID()
 		});
-		this.size = this.redStruct.length ? (offset + this.redStruct[this.redStruct.length - 1].size) : 1;
+		this.size = this.redStruct.length ? (offset + this.redStruct[this.redStruct.length - 1].size + (offset + this.redStruct[this.redStruct.length - 1].size)%4) : FLOAT4_SIZE;
 		this.usage = usage;
 		console.log(this)
 	}

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 23:2:58
+ *   Last modification time of this file - 2019.11.29 12:46:41
  *
  */
 
@@ -16,7 +16,7 @@ export default class RedGridMaterial extends RedBaseMaterial {
 	static vertexShaderGLSL = `
 	#version 450
 	${RedShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
-    layout(set = 3,binding = 0) uniform Uniforms {
+    layout(set = 2,binding = 0) uniform Uniforms {
         mat4 modelMatrix;
     } uniforms;
 	layout(location = 0) in vec3 position;
@@ -51,9 +51,7 @@ export default class RedGridMaterial extends RedBaseMaterial {
 			}
 		]
 	};
-	static uniformBufferDescriptor_vertex = [
-		{size: RedTypeSize.mat4, valueName: 'matrix'}
-	]
+	static uniformBufferDescriptor_vertex =  RedBaseMaterial.uniformBufferDescriptor_empty;
 	static uniformBufferDescriptor_fragment = RedBaseMaterial.uniformBufferDescriptor_empty;
 	constructor(redGPU) {
 		super(redGPU);
@@ -62,13 +60,11 @@ export default class RedGridMaterial extends RedBaseMaterial {
 
 
 	resetBindingInfo() {
-		this.bindings = null;
-		this.searchModules();
 		this.bindings = [
 			{
 				binding: 0,
 				resource: {
-					buffer: null,
+					buffer: this.uniformBuffer_vertex.GPUBuffer,
 					offset: 0,
 					size: this.uniformBufferDescriptor_vertex.size
 				}
@@ -76,12 +72,19 @@ export default class RedGridMaterial extends RedBaseMaterial {
 			{
 				binding: 1,
 				resource: {
-					buffer: null,
+					buffer: this.uniformBuffer_fragment.GPUBuffer,
 					offset: 0,
 					size: this.uniformBufferDescriptor_fragment.size
 				}
 			}
 		];
+		this.uniformBindGroupDescriptor = {
+			layout: this.GPUBindGroupLayout,
+			bindings: this.bindings
+		};
+		this.uniformBindGroup_material.setGPUBindGroup(this.uniformBindGroupDescriptor)
+		this.searchModules();
+
 		this.setUniformBindGroupDescriptor();
 		this.updateUUID()
 	}

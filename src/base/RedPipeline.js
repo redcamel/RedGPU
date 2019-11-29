@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 23:2:58
+ *   Last modification time of this file - 2019.11.29 12:46:41
  *
  */
 
@@ -22,7 +22,6 @@ export default class RedPipeline extends RedUUID {
 	}
 	updatePipeline(redGPU, redView) {
 		let targetMesh = this.#targetMesh;
-		targetMesh.uniformBindGroup_material.clear();
 		const device = redGPU.device;
 		const descriptor = {
 			// 레이아웃은 재질이 알고있으니 들고옴

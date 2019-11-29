@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 23:2:58
+ *   Last modification time of this file - 2019.11.29 12:46:41
  *
  */
 
@@ -51,7 +51,6 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 	_material;
 	_geometry;
 	#redGPU;
-	uniformBindGroup_material;
 	//
 	_useDepthTest = true;
 	_depthTestFunc = 'less';
@@ -82,7 +81,6 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 		});
 
 
-		this.uniformBindGroup_material = new RedBindGroup(redGPU);
 		this.pipeline = new RedPipeline(redGPU, this);
 		this.normalMatrix = mat4.create();
 		this.matrix = mat4.create();
@@ -212,8 +210,6 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	set material(v) {
 		this._material = v;
-		this._material.uniformBuffer_vertex.setBuffer(v.uniformBufferDescriptor_vertex);
-		this._material.uniformBuffer_fragment.setBuffer(v.uniformBufferDescriptor_fragment);
 		this.dirtyPipeline = true;
 		this.dirtyTransform = true
 	}
