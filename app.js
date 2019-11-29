@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.29 20:48:38
+ *   Last modification time of this file - 2019.11.29 22:21:48
  *
  */
 
@@ -26,9 +26,7 @@ import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 import RedPointLight from "./src/light/RedPointLight.js";
 import RedSkyBox from "./src/object3D/RedSkyBox.js";
 import RedBitmapCubeTexture from "./src/resources/RedBitmapCubeTexture.js";
-import RedBuffer from "./src/buffer/RedBuffer.js";
-import RedGeometry from "./src/geometry/RedGeometry.js";
-import RedInterleaveInfo from "./src/geometry/RedInterleaveInfo.js";
+import RedColorPhongTextureMaterial from "./src/material/RedColorPhongTextureMaterial.js";
 
 
 (async function () {
@@ -38,6 +36,7 @@ import RedInterleaveInfo from "./src/geometry/RedInterleaveInfo.js";
 
 	const glslang = await glslangModule.default();
 	console.log(glslang);
+	let tMat1, tMat2, tMat3, tMat4, tMat5, tMat6, tMat7, tMat8;
 	let redGPU = new RedGPU(cvs, glslang,
 		function () {
 
@@ -106,16 +105,22 @@ import RedInterleaveInfo from "./src/geometry/RedInterleaveInfo.js";
 			];
 
 
-			let tMat1 = new RedColorMaterial(redGPU, '#ffff00');
-			let tMat2 = new RedColorPhongMaterial(redGPU, '#00ff00');
+			tMat1 = new RedColorMaterial(redGPU, '#ffff00');
+			tMat2 = new RedColorPhongMaterial(redGPU, '#00ff00');
+			tMat7 = new RedColorPhongTextureMaterial(redGPU, '#ff0000', 1, testTextureList[2])
+			tMat8 = new RedColorPhongTextureMaterial(redGPU, '#ff0000', 1, testTextureList[2], testTextureList[4])
 			console.log(tMat2)
-			let tMat3 = new RedBitmapMaterial(redGPU, testTextureList[0]);
-			let tMat4 = new RedStandardMaterial(redGPU, testTextureList[1]);
-			let tMat5 = new RedStandardMaterial(redGPU, testTextureList[0]);
-			let tMat6 = new RedStandardMaterial(redGPU, testTextureList[1], testTextureList[2], testTextureList[4]);
+			tMat3 = new RedBitmapMaterial(redGPU, testTextureList[0]);
+			tMat4 = new RedStandardMaterial(redGPU, testTextureList[1]);
+			tMat5 = new RedStandardMaterial(redGPU, testTextureList[0]);
+			tMat6 = new RedStandardMaterial(redGPU, testTextureList[1], testTextureList[2], testTextureList[4]);
 			tMat6.displacementPower = 1
-			tMat6.displacementFlowSpeedX = 0.5
-			tMat6.displacementFlowSpeedY = 0.5
+			tMat6.displacementFlowSpeedX = 0.1
+			tMat6.displacementFlowSpeedY = 0.1
+
+			tMat8.displacementPower = 1
+			tMat8.displacementFlowSpeedX = 0.01
+			tMat8.displacementFlowSpeedY = 0.01
 
 
 			// let mats = [tMat1, tMat2, tMat3, tMat4, tMat5, tMat6]
@@ -153,12 +158,18 @@ import RedInterleaveInfo from "./src/geometry/RedInterleaveInfo.js";
 				tScene2.addChild(testMesh)
 			}
 
+			let division = MAX / 8
 			while (i--) {
 				let testMesh = new RedMesh(
 					redGPU,
 					randomGeometry(),
-
-					i > MAX / 4 ? tMat2 : i > MAX / 8 ? tMat3 : i > MAX / 9 ? tMat4 : i > MAX / 10 ? tMat1 : i > MAX / 13 ? tMat5 : tMat6
+					i > division * 7 ? tMat1
+						: i > division * 6 ? tMat2
+						: i > division * 5 ? tMat3
+							: i > division * 4 ? tMat4
+								: i > division * 3 ? tMat5
+									: i > division * 2 ? tMat6
+										: i > division * 1 ? tMat7 : tMat8
 				);
 				testMesh.x = Math.random() * 300 - 150;
 				testMesh.y = Math.random() * 300 - 150;
@@ -259,15 +270,17 @@ import RedInterleaveInfo from "./src/geometry/RedInterleaveInfo.js";
 				// tView.camera.lookAt(0, 0, 0);
 
 				renderer.render(time, redGPU);
+				tMat8.displacementPower = tMat6.displacementPower = Math.sin(time / 1000) * 5
 				tMat4.normalPower = tMat5.normalPower = tMat6.normalPower = Math.abs(Math.sin(time / 1000)) + 1
 				tMat2.shininess = tMat4.shininess = tMat5.shininess = Math.abs(Math.sin(time / 1000)) * 64 + 8
 				tMat2.specularPower = Math.abs(Math.sin(time / 1000)) * 5
+
 
 				let tChildren = tView.scene.pointLightList
 				let i = tChildren.length;
 				while (i--) {
 					tChildren[i].x = Math.sin(time / 1000 + i * 10 + Math.PI * 2 / tChildren.length * i) * 60
-					tChildren[i].y = Math.tan(time / 2000 + i * 10 + Math.PI * 2 / tChildren.length * i) * 60 +Math.cos(time / 500 + i * 10 + Math.PI * 2 / tChildren.length * i) * 12
+					tChildren[i].y = Math.tan(time / 2000 + i * 10 + Math.PI * 2 / tChildren.length * i) * 60 + Math.cos(time / 500 + i * 10 + Math.PI * 2 / tChildren.length * i) * 12
 					tChildren[i].z = Math.cos(time / 2000 + i * 10 + Math.PI * 2 / tChildren.length * i) * 60
 				}
 
@@ -289,110 +302,115 @@ import RedInterleaveInfo from "./src/geometry/RedInterleaveInfo.js";
 		}
 	);
 
+	let setTestUI = function (redGPU, tView, tScene) {
+
+		let tFolder;
+
+		let testCubeTexture = new RedBitmapCubeTexture(redGPU, [
+			'./assets/cubemap/SwedishRoyalCastle/px.jpg',
+			'./assets/cubemap/SwedishRoyalCastle/nx.jpg',
+			'./assets/cubemap/SwedishRoyalCastle/py.jpg',
+			'./assets/cubemap/SwedishRoyalCastle/ny.jpg',
+			'./assets/cubemap/SwedishRoyalCastle/pz.jpg',
+			'./assets/cubemap/SwedishRoyalCastle/nz.jpg'
+		])
+		console.log('RedBitmapCubeTexture', testCubeTexture)
+
+		let skyBox = new RedSkyBox(redGPU, testCubeTexture)
+		tScene.skyBox = skyBox
+		let testSceneUI = new dat.GUI({});
+		let testSceneData = {
+			useSkyBox: true,
+			useGrid: true,
+		}
+		testSceneUI.width = 350
+		tFolder = testSceneUI.addFolder('RedScene')
+		tFolder.open()
+		tFolder.add(testSceneData, 'useSkyBox').onChange(v => tScene.skyBox = v ? skyBox : null)
+		tFolder.add(testSceneData, 'useGrid').onChange(v => tScene.grid = v ? new RedGrid(redGPU) : null)
+		tFolder.addColor(tScene, 'backgroundColor')
+		tFolder.add(tScene, 'backgroundColorAlpha', 0, 1, 0.01)
+		tFolder = testSceneUI.addFolder('RedView')
+		tFolder.open()
+		let viewTestData = {
+			setLocationTest1: function () {
+				tView.setLocation(0, 0)
+			},
+			setLocationTest2: function () {
+				tView.setLocation(100, 100)
+			},
+			setLocationTest3: function () {
+				tView.setLocation('50%', 100)
+			},
+			setLocationTest4: function () {
+				tView.setLocation('40%', '40%')
+			},
+			setSizeTest1: function () {
+				tView.setSize(200, 200)
+			},
+			setSizeTest2: function () {
+				tView.setSize('50%', '100%')
+			},
+			setSizeTest3: function () {
+				tView.setSize('50%', '50%')
+			},
+			setSizeTest4: function () {
+				tView.setSize('20%', '20%')
+			},
+			setSizeTest5: function () {
+				tView.setSize('100%', '100%')
+			}
+		}
+		tFolder.add(viewTestData, 'setLocationTest1').name('setLocation(0,0)');
+		tFolder.add(viewTestData, 'setLocationTest2').name('setLocation(100,100)');
+		tFolder.add(viewTestData, 'setLocationTest3').name('setLocation(50%,100)');
+		tFolder.add(viewTestData, 'setLocationTest4').name('setLocation(40%,40%)');
+		tFolder.add(viewTestData, 'setSizeTest1').name('setSize(200,200)');
+		tFolder.add(viewTestData, 'setSizeTest2').name('setSize(50%,100%)');
+		tFolder.add(viewTestData, 'setSizeTest3').name('setSize(50%,50%)');
+		tFolder.add(viewTestData, 'setSizeTest4').name('setSize(20%,20%)');
+		tFolder.add(viewTestData, 'setSizeTest5').name('setSize(100%,100%)');
+
+		let testUI = new dat.GUI({});
+		let testData = {
+			useFloatMode: false,
+			useDepthTest: true,
+			depthTestFunc: "less",
+			cullMode: "back",
+			primitiveTopology: "triangle-list"
+		};
+		tFolder = testUI.addFolder('RedMesh')
+		tFolder.open()
+
+		tFolder.add(testData, 'useFloatMode').onChange(v => {
+			tMat2.useFlatMode = tMat6.useFlatMode = v
+		});
+		tFolder.add(testData, 'useDepthTest').onChange(v => tScene.children.forEach(tMesh => tMesh.useDepthTest = v));
+
+		tFolder.add(testData, 'depthTestFunc', [
+			"never",
+			"less",
+			"equal",
+			"less-equal",
+			"greater",
+			"not-equal",
+			"greater-equal",
+			"always"
+		]).onChange(v => tScene.children.forEach(tMesh => tMesh.depthTestFunc = v));
+		tFolder.add(testData, 'cullMode', [
+			"none",
+			"front",
+			"back"
+		]).onChange(v => tScene.children.forEach(tMesh => tMesh.cullMode = v));
+
+		tFolder.add(testData, 'primitiveTopology', [
+			"point-list",
+			"line-list",
+			"line-strip",
+			"triangle-list",
+			"triangle-strip"
+		]).onChange(v => tScene.children.forEach(tMesh => tMesh.primitiveTopology = v));
+	}
+
 
 })();
-let setTestUI = function (redGPU, tView, tScene) {
-
-	let tFolder;
-
-	let testCubeTexture = new RedBitmapCubeTexture(redGPU, [
-		'./assets/cubemap/SwedishRoyalCastle/px.jpg',
-		'./assets/cubemap/SwedishRoyalCastle/nx.jpg',
-		'./assets/cubemap/SwedishRoyalCastle/py.jpg',
-		'./assets/cubemap/SwedishRoyalCastle/ny.jpg',
-		'./assets/cubemap/SwedishRoyalCastle/pz.jpg',
-		'./assets/cubemap/SwedishRoyalCastle/nz.jpg'
-	])
-	console.log('RedBitmapCubeTexture', testCubeTexture)
-
-	let skyBox = new RedSkyBox(redGPU, testCubeTexture)
-	tScene.skyBox = skyBox
-	let testSceneUI = new dat.GUI({});
-	let testSceneData = {
-		useSkyBox: true,
-		useGrid: true,
-	}
-	testSceneUI.width = 350
-	tFolder = testSceneUI.addFolder('RedScene')
-	tFolder.open()
-	tFolder.add(testSceneData, 'useSkyBox').onChange(v => tScene.skyBox = v ? skyBox : null)
-	tFolder.add(testSceneData, 'useGrid').onChange(v => tScene.grid = v ? new RedGrid(redGPU) : null)
-	tFolder.addColor(tScene, 'backgroundColor')
-	tFolder.add(tScene, 'backgroundColorAlpha', 0, 1, 0.01)
-	tFolder = testSceneUI.addFolder('RedView')
-	tFolder.open()
-	let viewTestData = {
-		setLocationTest1: function () {
-			tView.setLocation(0, 0)
-		},
-		setLocationTest2: function () {
-			tView.setLocation(100, 100)
-		},
-		setLocationTest3: function () {
-			tView.setLocation('50%', 100)
-		},
-		setLocationTest4: function () {
-			tView.setLocation('40%', '40%')
-		},
-		setSizeTest1: function () {
-			tView.setSize(200, 200)
-		},
-		setSizeTest2: function () {
-			tView.setSize('50%', '100%')
-		},
-		setSizeTest3: function () {
-			tView.setSize('50%', '50%')
-		},
-		setSizeTest4: function () {
-			tView.setSize('20%', '20%')
-		},
-		setSizeTest5: function () {
-			tView.setSize('100%', '100%')
-		}
-	}
-	tFolder.add(viewTestData, 'setLocationTest1').name('setLocation(0,0)');
-	tFolder.add(viewTestData, 'setLocationTest2').name('setLocation(100,100)');
-	tFolder.add(viewTestData, 'setLocationTest3').name('setLocation(50%,100)');
-	tFolder.add(viewTestData, 'setLocationTest4').name('setLocation(40%,40%)');
-	tFolder.add(viewTestData, 'setSizeTest1').name('setSize(200,200)');
-	tFolder.add(viewTestData, 'setSizeTest2').name('setSize(50%,100%)');
-	tFolder.add(viewTestData, 'setSizeTest3').name('setSize(50%,50%)');
-	tFolder.add(viewTestData, 'setSizeTest4').name('setSize(20%,20%)');
-	tFolder.add(viewTestData, 'setSizeTest5').name('setSize(100%,100%)');
-
-	let testUI = new dat.GUI({});
-	let testData = {
-
-		useDepthTest: true,
-		depthTestFunc: "less",
-		cullMode: "back",
-		primitiveTopology: "triangle-list"
-	};
-	tFolder = testUI.addFolder('RedMesh')
-	tFolder.open()
-	tFolder.add(testData, 'useDepthTest').onChange(v => tScene.children.forEach(tMesh => tMesh.useDepthTest = v));
-
-	tFolder.add(testData, 'depthTestFunc', [
-		"never",
-		"less",
-		"equal",
-		"less-equal",
-		"greater",
-		"not-equal",
-		"greater-equal",
-		"always"
-	]).onChange(v => tScene.children.forEach(tMesh => tMesh.depthTestFunc = v));
-	tFolder.add(testData, 'cullMode', [
-		"none",
-		"front",
-		"back"
-	]).onChange(v => tScene.children.forEach(tMesh => tMesh.cullMode = v));
-
-	tFolder.add(testData, 'primitiveTopology', [
-		"point-list",
-		"line-list",
-		"line-strip",
-		"triangle-list",
-		"triangle-strip"
-	]).onChange(v => tScene.children.forEach(tMesh => tMesh.primitiveTopology = v));
-}

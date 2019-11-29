@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.29 20:40:32
+ *   Last modification time of this file - 2019.11.29 22:21:48
  *
  */
 
@@ -57,6 +57,8 @@ export default class RedColorPhongMaterial extends RedMaterialPreset.mix(
 	layout(location = 0) out vec4 outColor;
 	void main() {
 		vec3 N = normalize(vNormal);
+		//#RedGPU#useFlatMode# N = getFlatNormal(vVertexPosition.xyz);
+		
 		calcDirectionalLight(
 			uniforms.color,
 			N,		
@@ -82,7 +84,7 @@ export default class RedColorPhongMaterial extends RedMaterialPreset.mix(
 		outColor = finalColor;
 	}
 `;
-	static PROGRAM_OPTION_LIST = [];
+	static PROGRAM_OPTION_LIST = ['useFlatMode'];
 	static uniformsBindGroupLayoutDescriptor = {
 		bindings: [
 			{
@@ -142,10 +144,11 @@ export default class RedColorPhongMaterial extends RedMaterialPreset.mix(
 			bindings: this.bindings
 		};
 
-		this.updateUniformBuffer()
+
 		this.searchModules();
 		this.setUniformBindGroupDescriptor();
 		this.uniformBindGroup_material.setGPUBindGroup(this.uniformBindGroupDescriptor)
+		this.updateUniformBuffer()
 		this.updateUUID();
 	}
 }

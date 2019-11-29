@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.29 20:40:32
+ *   Last modification time of this file - 2019.11.29 22:21:48
  *
  */
 
@@ -53,6 +53,55 @@ const diffuseTexture = Base => class extends Base {
 		return this._diffuseTexture
 	}
 };
+const displacementTexture = Base => class extends Base {
+	_displacementTexture;
+	#displacementFlowSpeedX = 0.0;
+	#displacementFlowSpeedY = 0.0;
+	#displacementPower = 0.1;
+	set displacementTexture(texture) {
+		this._displacementTexture = null;
+		this.checkTexture(texture, 'displacementTexture')
+	}
+	get displacementTexture() {
+		return this._displacementTexture
+	}
+	set displacementTexture(texture) {
+		this._displacementTexture = null;
+		this.checkTexture(texture, 'displacementTexture')
+	}
+
+	get displacementTexture() {
+		return this._displacementTexture
+	}
+
+
+	get displacementFlowSpeedY() {
+		return this.#displacementFlowSpeedY;
+	}
+
+	set displacementFlowSpeedY(value) {
+		this.#displacementFlowSpeedY = value;
+		this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['displacementFlowSpeedY'], new Float32Array([this.#displacementFlowSpeedY]))
+	}
+
+	get displacementFlowSpeedX() {
+		return this.#displacementFlowSpeedX;
+	}
+
+	set displacementFlowSpeedX(value) {
+		this.#displacementFlowSpeedX = value;
+		this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['displacementFlowSpeedX'], new Float32Array([this.#displacementFlowSpeedX]))
+	}
+
+	get displacementPower() {
+		return this.#displacementPower;
+	}
+
+	set displacementPower(value) {
+		this.#displacementPower = value;
+		this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['displacementPower'], new Float32Array([this.#displacementPower]))
+	}
+};
 const normalTexture = Base => class extends Base {
 	_normalTexture;
 	set normalTexture(texture) {
@@ -70,6 +119,8 @@ const basicLightPropertys = Base => class extends Base {
 	#specularPower = 1;
 	#specularColor = '#ffffff';
 	#specularColorRGBA = new Float32Array([1, 1, 1, 1]);
+	//
+	#useFlatMode = false;
 	get normalPower() {
 		return this.#normalPower;
 	}
@@ -117,6 +168,15 @@ const basicLightPropertys = Base => class extends Base {
 		return this.#specularColorRGBA;
 	}
 
+	get useFlatMode() {
+		return this.#useFlatMode;
+	}
+
+	set useFlatMode(value) {
+		this.#useFlatMode = value;
+		this.resetBindingInfo()
+	}
+
 
 };
 
@@ -132,5 +192,6 @@ export default {
 	color: color,
 	diffuseTexture: diffuseTexture,
 	normalTexture: normalTexture,
+	displacementTexture: displacementTexture,
 	basicLightPropertys: basicLightPropertys
 }

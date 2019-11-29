@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.29 20:40:32
+ *   Last modification time of this file - 2019.11.29 22:21:48
  *
  */
 
@@ -17,7 +17,15 @@ export default class RedShareGLSL {
 	        mat4 cameraMTX;
 	        float time;
 	    } systemUniforms;
-	    `
+	    `,
+		calcDisplacement : `
+		//#RedGPU#displacementTexture# vec3 calcDisplacement(vec3 vNormal, float displacementFlowSpeedX, float displacementFlowSpeedY, float displacementPower, vec2 targetUV, texture2D targetDisplacementTexture, sampler targetSampler){
+		//#RedGPU#displacementTexture#    return normalize(vNormal) * texture(sampler2D(targetDisplacementTexture, targetSampler), targetUV + vec2(
+		//#RedGPU#displacementTexture#              displacementFlowSpeedX * (systemUniforms.time/1000.0),
+		//#RedGPU#displacementTexture#               displacementFlowSpeedY * (systemUniforms.time/1000.0)
+		//#RedGPU#displacementTexture#          )).x * displacementPower ;
+		//#RedGPU#displacementTexture# }
+		`
 	};
 	static GLSL_SystemUniforms_fragment = {
 		systemUniformsWithLight: `
@@ -42,7 +50,7 @@ export default class RedShareGLSL {
 	        DirectionalLight directionalLightList[MAX_DIRECTIONAL_LIGHT];
 	        PointLight pointLightList[MAX_POINT_LIGHT];	        
         } systemUniforms;
-        
+        /////////////////////////////////////////////////////////////////////////////
         void calcDirectionalLight(
             vec4 diffuseColor,
             vec3 N,		
@@ -73,7 +81,7 @@ export default class RedShareGLSL {
 			    }
 		    }
 		}
-		
+		/////////////////////////////////////////////////////////////////////////////
 		void calcPointLight(
             vec4 diffuseColor,
             vec3 N,		
@@ -112,6 +120,12 @@ export default class RedShareGLSL {
 				    }
 			    }
 		    }
+		}
+		/////////////////////////////////////////////////////////////////////////////
+		vec3 getFlatNormal(vec3 vertexPosition){
+			vec3 dx = dFdx(vertexPosition.xyz);
+			vec3 dy = dFdy(vertexPosition.xyz);
+			return normalize(cross(normalize(dx), normalize(dy)));
 		}
 		`,
 		perturb_normal: `
