@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 20:54:38
+ *   Last modification time of this file - 2019.11.30 22:24:1
  *
  */
 
@@ -28,6 +28,7 @@ import RedSkyBox from "./src/object3D/RedSkyBox.js";
 import RedBitmapCubeTexture from "./src/resources/RedBitmapCubeTexture.js";
 import RedColorPhongTextureMaterial from "./src/material/RedColorPhongTextureMaterial.js";
 import RedEnvironmentMaterial from "./src/material/RedEnvironmentMaterial.js";
+import RedAxis from "./src/object3D/RedAxis.js";
 
 
 (async function () {
@@ -50,6 +51,7 @@ import RedEnvironmentMaterial from "./src/material/RedEnvironmentMaterial.js";
 			let tScene = new RedScene();
 			let tScene2 = new RedScene();
 			let tGrid = new RedGrid(this)
+			let tAxis = new RedAxis(this)
 			let tCamera = new RedObitController(this)
 			let tCamera2 = new RedObitController(this)
 			tGrid.centerColor = '#ff0000'
@@ -65,7 +67,8 @@ import RedEnvironmentMaterial from "./src/material/RedEnvironmentMaterial.js";
 			tCamera2.targetView = tView2 // optional
 			tCamera.distance = 200
 
-			tScene.grid = tGrid
+			tScene.grid = tGrid;
+			tScene.axis = tAxis;
 			tScene.skyBox = new RedSkyBox(redGPU)
 			let tLight
 			tLight = new RedDirectionalLight('#0000ff', 0.5)
@@ -137,7 +140,7 @@ import RedEnvironmentMaterial from "./src/material/RedEnvironmentMaterial.js";
 
 
 			// let mats = [testMat_color, testMat_colorPhong, testMat_bitmap, testMat_standard_diffuse, testMat_standard_diffuse_normal, testMat_standard_diffuse_normal_displacement]
-			let changeNum = 0
+			// let changeNum = 0
 			// setInterval(_ => {
 			// 	let tChildren = tView.scene.children
 			// 	let i = tChildren.length;
@@ -148,7 +151,7 @@ import RedEnvironmentMaterial from "./src/material/RedEnvironmentMaterial.js";
 			//
 			// 		tChildren[i].material = mats[changeNum%5]
 			// 	}
-			// }, 500)
+			// }, 2500)
 
 			let randomGeometry = function () {
 				return new RedSphere(redGPU, 0.5, 16, 16, 16)
@@ -176,6 +179,7 @@ import RedEnvironmentMaterial from "./src/material/RedEnvironmentMaterial.js";
 				testMat_standard_diffuse
 			);
 			testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = 20
+			testMesh.x = -25
 			tScene.addChild(testMesh)
 
 			testMesh = new RedMesh(
@@ -417,9 +421,7 @@ import RedEnvironmentMaterial from "./src/material/RedEnvironmentMaterial.js";
 			cullMode: "back",
 			primitiveTopology: "triangle-list"
 		};
-		tFolder = testUI.addFolder('RedMesh')
-		tFolder.open()
-
+		tFolder = testUI.addFolder('Test Material option')
 		tFolder.add(testData, 'useFloatMode').onChange(v => {
 			testMat_color,
 				testMat_colorPhong.useFlatMode = v
@@ -430,6 +432,10 @@ import RedEnvironmentMaterial from "./src/material/RedEnvironmentMaterial.js";
 			testMat_colorPhongTexture_normal_displacement.useFlatMode = v
 
 		});
+		tFolder = testUI.addFolder('RedMesh')
+		tFolder.open()
+
+
 		tFolder.add(testData, 'useDepthTest').onChange(v => tScene.children.forEach(tMesh => tMesh.useDepthTest = v));
 
 		tFolder.add(testData, 'depthTestFunc', [

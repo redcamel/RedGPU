@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 18:40:19
+ *   Last modification time of this file - 2019.11.30 22:24:1
  *
  */
 
@@ -21,6 +21,7 @@ import RedBitmapCubeTexture from "./src/resources/RedBitmapCubeTexture.js";
 import RedColorPhongTextureMaterial from "./src/material/RedColorPhongTextureMaterial.js";
 import RedColorPhongMaterial from "./src/material/RedColorPhongMaterial.js";
 import RedStandardMaterial from "./src/material/RedStandardMaterial.js";
+import RedAxis from "./src/object3D/RedAxis.js";
 
 (async function () {
 	const cvs = document.createElement('canvas');
@@ -45,6 +46,7 @@ import RedStandardMaterial from "./src/material/RedStandardMaterial.js";
 			tCamera.targetView = tView // optional
 
 			tScene.grid = tGrid
+			tScene.axis = new RedAxis(redGPU)
 			let tLight
 			tLight = new RedDirectionalLight('#ff0000', 1)
 			tLight.x = 10
@@ -82,7 +84,7 @@ import RedStandardMaterial from "./src/material/RedStandardMaterial.js";
 				testMat
 			);
 
-			tScene.addChild(testMesh)
+			// tScene.addChild(testMesh)
 
 			let renderer = new RedRender();
 			let render = function (time) {

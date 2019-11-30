@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 16:32:22
+ *   Last modification time of this file - 2019.11.30 22:24:1
  *
  */
 
@@ -20,6 +20,7 @@ export default class RedScene extends RedDisplayContainer {
 	#directionalLightList = [];
 	#pointLightList = [];
 	#grid;
+	#axis;
 	constructor() {
 		super()
 	}
@@ -29,6 +30,13 @@ export default class RedScene extends RedDisplayContainer {
 
 	set grid(value) {
 		this.#grid = value;
+	}
+	get axis() {
+		return this.#axis;
+	}
+
+	set axis(value) {
+		this.#axis = value;
 	}
 	get backgroundColor() {
 		return this.#backgroundColor;
