@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 14:48:34
+ *   Last modification time of this file - 2019.11.30 14:53:53
  *
  */
 
@@ -148,7 +148,7 @@ class TestMaterial extends RedBaseMaterial {
 					[
 						// TODO: Investigate how to set the vertex color
 						new RedInterleaveInfo('vertexPosition', 'float3'),
-						new RedInterleaveInfo('vertexNormal', 'float3'),
+						new RedInterleaveInfo('vertexColor', 'float3'),
 						new RedInterleaveInfo('texcoord', 'float2')
 					]
 				),
