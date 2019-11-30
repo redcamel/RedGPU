@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 20:54:38
+ *   Last modification time of this file - 2019.11.30 22:24:1
  *
  */
 
@@ -153,7 +153,6 @@ export default class RedColorPhongTextureMaterial extends RedMaterialPreset.mix(
 		this.emissiveTexture = emissiveTexture;
 		this.displacementTexture = displacementTexture;
 		this.resetBindingInfo()
-		console.log(this)
 	}
 	checkTexture(texture, textureName) {
 		if (texture) {
