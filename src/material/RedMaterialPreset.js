@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 19:22:30
+ *   Last modification time of this file - 2019.11.30 20:54:38
  *
  */
 
@@ -118,6 +118,27 @@ const emissiveTexture = Base => class extends Base {
 
 	get emissiveTexture() {
 		return this._emissiveTexture
+	}
+};
+const environmentTexture = Base => class extends Base {
+	_environmentTexture;
+	_environmentPower =1;
+	get environmentPower() {
+		return this._environmentPower;
+	}
+
+	set environmentPower(value) {
+		this._environmentPower = value;
+		float1_Float32Array[0] = this._environmentPower;
+		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['environmentPower'], float1_Float32Array)
+	}
+	set environmentTexture(texture) {
+		this._environmentTexture = null;
+		this.checkTexture(texture, 'environmentTexture')
+	}
+
+	get environmentTexture() {
+		return this._environmentTexture
 	}
 };
 
@@ -255,6 +276,7 @@ export default {
 	normalTexture: normalTexture,
 	specularTexture: specularTexture,
 	emissiveTexture: emissiveTexture,
+	environmentTexture : environmentTexture,
 	displacementTexture: displacementTexture,
 	basicLightPropertys: basicLightPropertys
 }

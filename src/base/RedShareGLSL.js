@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 18:40:19
+ *   Last modification time of this file - 2019.11.30 20:54:38
  *
  */
 
@@ -10,17 +10,18 @@
 export default class RedShareGLSL {
 	static MAX_DIRECTIONAL_LIGHT = 3;
 	static MAX_POINT_LIGHT = 100;
-	static SET_INDEX_SystemUniforms = 0;
-	static SET_INDEX_LightUniforms = 1;
+	static SET_INDEX_SystemUniforms_vertex = 0;
+	static SET_INDEX_SystemUniforms_fragment = 1;
 	static SET_INDEX_MeshUniforms = 2;
 	static SET_INDEX_VertexUniforms = 3;
 	static SET_INDEX_FragmentUniforms = 3;
 	static GLSL_SystemUniforms_vertex = {
 		systemUniforms: `
-		layout( set =  ${RedShareGLSL.SET_INDEX_SystemUniforms}, binding = 0 ) uniform SystemUniforms {
+		layout( set =  ${RedShareGLSL.SET_INDEX_SystemUniforms_vertex}, binding = 0 ) uniform SystemUniforms {
 	        mat4 perspectiveMTX;
 	        mat4 cameraMTX;
 	        float time;
+	        vec3 cameraPosition;
 	    } systemUniforms;
 	    `,
 		calcDisplacement: `
@@ -46,12 +47,13 @@ export default class RedShareGLSL {
 	        vec3 position; float intensity;
 	        float radius;
 		};
-		layout( set =  ${RedShareGLSL.SET_INDEX_LightUniforms}, binding = 0 ) uniform LightUniforms {
+		layout( set =  ${RedShareGLSL.SET_INDEX_SystemUniforms_fragment}, binding = 0 ) uniform SystemUniforms {
 	        float directionalLightCount;
 	        float pointLightCount;
 	        DirectionalLight directionalLightList[MAX_DIRECTIONAL_LIGHT];
 	        PointLight pointLightList[MAX_POINT_LIGHT];	        
-        } lightUniforms;
+	        vec3 cameraPosition;
+        } systemUniforms;
         /////////////////////////////////////////////////////////////////////////////
         vec4 calcDirectionalLight(
             vec4 diffuseColor,

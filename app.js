@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 19:31:22
+ *   Last modification time of this file - 2019.11.30 20:54:38
  *
  */
 
@@ -27,6 +27,7 @@ import RedPointLight from "./src/light/RedPointLight.js";
 import RedSkyBox from "./src/object3D/RedSkyBox.js";
 import RedBitmapCubeTexture from "./src/resources/RedBitmapCubeTexture.js";
 import RedColorPhongTextureMaterial from "./src/material/RedColorPhongTextureMaterial.js";
+import RedEnvironmentMaterial from "./src/material/RedEnvironmentMaterial.js";
 
 
 (async function () {
@@ -38,7 +39,8 @@ import RedColorPhongTextureMaterial from "./src/material/RedColorPhongTextureMat
 	console.log(glslang);
 	let testMat_color, testMat_colorPhong, testMat_bitmap, testMat_standard_diffuse, testMat_standard_diffuse_normal,
 		testMat_standard_diffuse_normal_displacement, testMat_colorPhongTexture_normal,
-		testMat_colorPhongTexture_normal_displacement;
+		testMat_colorPhongTexture_normal_displacement,
+		testMat_environment;
 	let redGPU = new RedGPU(cvs, glslang,
 		function () {
 
@@ -96,7 +98,7 @@ import RedColorPhongTextureMaterial from "./src/material/RedColorPhongTextureMat
 			}
 
 			redGPU.addView(tView)
-			redGPU.addView(tView2)
+			// redGPU.addView(tView2)
 			let testTextureList = [
 				new RedBitmapTexture(redGPU, 'assets/UV_Grid_Sm.jpg'),
 				new RedBitmapTexture(redGPU, 'assets/Brick03_col.jpg'),
@@ -105,11 +107,17 @@ import RedColorPhongTextureMaterial from "./src/material/RedColorPhongTextureMat
 				new RedBitmapTexture(redGPU, 'assets/Brick03_disp.jpg'),
 				new RedBitmapTexture(redGPU, 'assets/specular.png'),
 				new RedBitmapTexture(redGPU, 'assets/emissive.jpg')
-
-
 			];
+			let testCubeTexture = new RedBitmapCubeTexture(redGPU, [
+				'./assets/cubemap/SwedishRoyalCastle/px.jpg',
+				'./assets/cubemap/SwedishRoyalCastle/nx.jpg',
+				'./assets/cubemap/SwedishRoyalCastle/py.jpg',
+				'./assets/cubemap/SwedishRoyalCastle/ny.jpg',
+				'./assets/cubemap/SwedishRoyalCastle/pz.jpg',
+				'./assets/cubemap/SwedishRoyalCastle/nz.jpg'
+			])
 
-
+			testMat_environment = new RedEnvironmentMaterial(redGPU, testTextureList[1],testCubeTexture)
 			testMat_color = new RedColorMaterial(redGPU, '#ffff12');
 			testMat_colorPhong = new RedColorPhongMaterial(redGPU, '#11ff23');
 			testMat_colorPhongTexture_normal = new RedColorPhongTextureMaterial(redGPU, '#fff253', 1, testTextureList[2])
@@ -167,7 +175,16 @@ import RedColorPhongTextureMaterial from "./src/material/RedColorPhongTextureMat
 				new RedSphere(redGPU, 0.5, 32, 32, 32),
 				testMat_standard_diffuse
 			);
-			testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = 10
+			testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = 20
+			tScene.addChild(testMesh)
+
+			testMesh = new RedMesh(
+				redGPU,
+				new RedSphere(redGPU, 0.5, 32, 32, 32),
+				testMat_environment
+			);
+			testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = 20
+			testMesh.x = 25
 			tScene.addChild(testMesh)
 
 			let division = MAX / 8

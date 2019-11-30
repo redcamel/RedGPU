@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 16:32:22
+ *   Last modification time of this file - 2019.11.30 20:54:38
  *
  */
 
@@ -49,13 +49,12 @@ export default class RedView {
 			RedTypeSize.mat4 + // projectionMatrix
 			RedTypeSize.mat4 +  // camera
 			RedTypeSize.float // time
+
 		;
 		const uniformBufferDescriptor = {
 			size: uniformBufferSize,
 			usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-			redStruct: [
-				{offset: 0, valueName: 'projectionMatrix'}
-			]
+
 		};
 		const bindGroupLayoutDescriptor = {
 			bindings: [
@@ -89,6 +88,7 @@ export default class RedView {
 	};
 	#makeSystemUniformInfo_fragment = function (device) {
 		let uniformBufferSize =
+			RedTypeSize.float4 + // cameraPosition
 			// directionalLight
 			RedTypeSize.float4 +
 			RedTypeSize.float4 * 2 * RedShareGLSL.MAX_DIRECTIONAL_LIGHT +
@@ -99,9 +99,7 @@ export default class RedView {
 		const uniformBufferDescriptor = {
 			size: uniformBufferSize,
 			usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-			redStruct: [
-				{offset: 0, valueName: 'projectionMatrix'}
-			]
+
 		};
 		const bindGroupLayoutDescriptor = {
 			bindings: [
@@ -185,8 +183,6 @@ export default class RedView {
 		passEncoder.setViewport(0, 0, this.#viewRect[2], this.#viewRect[3], 0, 1);
 		passEncoder.setScissorRect(0, 0, this.#viewRect[2], this.#viewRect[3]);
 		passEncoder.setBindGroup(0, systemUniformInfo_vertex.GPUBindGroup);
-
-
 		let aspect = Math.abs(this.#viewRect[2] / this.#viewRect[3]);
 		mat4.perspective(this.projectionMatrix, (Math.PI / 180) * this.camera.fov, aspect, this.camera.nearClipping, this.camera.farClipping);
 		let offset = 0;
@@ -196,11 +192,11 @@ export default class RedView {
 		offset += RedTypeSize.mat4;
 		systemUniformInfo_vertex.GPUBuffer.setSubData(offset, new Float32Array([performance.now()]));
 		offset += RedTypeSize.float;
-
 		///////////////////////////////////////////////////////////////////////////////////////////////////
 		let systemUniformInfo_fragment = this.systemUniformInfo_fragment;
 		passEncoder.setBindGroup(1, systemUniformInfo_fragment.GPUBindGroup);
 		offset = 0;
+
 		systemUniformInfo_fragment.GPUBuffer.setSubData(offset, new Float32Array([
 			this.scene.directionalLightList.length,
 			this.scene.pointLightList.length
@@ -217,7 +213,7 @@ export default class RedView {
 				offset += RedTypeSize.float4;
 			}
 		}
-		offset = RedTypeSize.float4 + RedTypeSize.float4 * 2 * RedShareGLSL.MAX_DIRECTIONAL_LIGHT;
+		offset =  RedTypeSize.float4 + RedTypeSize.float4 * 2 * RedShareGLSL.MAX_DIRECTIONAL_LIGHT;
 		i = 0, len = this.scene.pointLightList.length;
 		for (i; i < len; i++) {
 			let tLight = this.scene.pointLightList[i];
@@ -230,6 +226,9 @@ export default class RedView {
 				offset += RedTypeSize.float4
 			}
 		}
+		offset =  RedTypeSize.float4 + RedTypeSize.float4 * 2 * RedShareGLSL.MAX_DIRECTIONAL_LIGHT + RedTypeSize.float4 * 3 * RedShareGLSL.MAX_POINT_LIGHT;
+		systemUniformInfo_fragment.GPUBuffer.setSubData(offset, new Float32Array([this.camera.x, this.camera.y, this.camera.z,0]));
+		offset += RedTypeSize.float4;
 
 
 	}
