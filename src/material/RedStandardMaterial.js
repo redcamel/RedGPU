@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 16:32:22
+ *   Last modification time of this file - 2019.11.30 16:56:31
  *
  */
 
@@ -40,8 +40,8 @@ export default class RedStandardMaterial extends RedMaterialPreset.mix(
         float displacementPower;
     } vertexUniforms;
 	
-	layout( set = ${RedShareGLSL.SET_INDEX_VertexUniforms}, binding = 2 ) uniform sampler uSampler;
-	//#RedGPU#displacementTexture# layout( set = ${RedShareGLSL.SET_INDEX_VertexUniforms}, binding = 6 ) uniform texture2D uDisplacementTexture;
+	layout( set = ${RedShareGLSL.SET_INDEX_VertexUniforms}, binding = 1 ) uniform sampler uSampler;
+	//#RedGPU#displacementTexture# layout( set = ${RedShareGLSL.SET_INDEX_VertexUniforms}, binding = 2 ) uniform texture2D uDisplacementTexture;
 	void main() {		
 		vVertexPosition = meshUniforms.modelMatrix * vec4(position, 1.0);
 		vNormal = (meshUniforms.normalMatrix * vec4(normal,1.0)).xyz;
@@ -57,7 +57,7 @@ export default class RedStandardMaterial extends RedMaterialPreset.mix(
 	${RedShareGLSL.GLSL_SystemUniforms_fragment.systemUniformsWithLight}
 	${RedShareGLSL.GLSL_SystemUniforms_fragment.cotangent_frame}
 	${RedShareGLSL.GLSL_SystemUniforms_fragment.perturb_normal}
-	layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 1 ) uniform FragmentUniforms {
+	layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 3 ) uniform FragmentUniforms {
         float normalPower;
         float shininess; 
         float specularPower;
@@ -67,9 +67,9 @@ export default class RedStandardMaterial extends RedMaterialPreset.mix(
 	layout( location = 0 ) in vec3 vNormal;
 	layout( location = 1 ) in vec2 vUV;
 	layout( location = 2 ) in vec4 vVertexPosition;
-	layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 3 ) uniform sampler uSampler;
-	//#RedGPU#diffuseTexture# layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 4 ) uniform texture2D uDiffuseTexture;
-	//#RedGPU#normalTexture# layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 5 ) uniform texture2D uNormalTexture;
+	layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 4 ) uniform sampler uSampler;
+	//#RedGPU#diffuseTexture# layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 5 ) uniform texture2D uDiffuseTexture;
+	//#RedGPU#normalTexture# layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 6 ) uniform texture2D uNormalTexture;
 	layout( location = 0 ) out vec4 outColor;
 
 	void main() {
@@ -110,15 +110,15 @@ export default class RedStandardMaterial extends RedMaterialPreset.mix(
 	}
 `;
 	static PROGRAM_OPTION_LIST = ['diffuseTexture', 'displacementTexture', 'normalTexture', 'useFlatMode'];
-	static uniformsBindGroupLayoutDescriptor_material= {
+	static uniformsBindGroupLayoutDescriptor_material = {
 		bindings: [
 			{binding: 0, visibility: GPUShaderStage.VERTEX, type: "uniform-buffer"},
-			{binding: 1, visibility: GPUShaderStage.FRAGMENT, type: "uniform-buffer"},
-			{binding: 2, visibility: GPUShaderStage.VERTEX, type: "sampler"},
-			{binding: 3, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
-			{binding: 4, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"},
+			{binding: 1, visibility: GPUShaderStage.VERTEX, type: "sampler"},
+			{binding: 2, visibility: GPUShaderStage.VERTEX, type: "sampled-texture"},
+			{binding: 3, visibility: GPUShaderStage.FRAGMENT, type: "uniform-buffer"},
+			{binding: 4, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
 			{binding: 5, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"},
-			{binding: 6, visibility: GPUShaderStage.VERTEX, type: "sampled-texture"}
+			{binding: 6, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"}
 		]
 	};
 	static uniformBufferDescriptor_vertex = [
@@ -171,7 +171,6 @@ export default class RedStandardMaterial extends RedMaterialPreset.mix(
 		}
 	}
 
-
 	resetBindingInfo() {
 		this.bindings = [
 			{
@@ -182,28 +181,29 @@ export default class RedStandardMaterial extends RedMaterialPreset.mix(
 					size: this.uniformBufferDescriptor_vertex.size
 				}
 			},
+			{binding: 1, resource: this.sampler.GPUSampler},
 			{
-				binding: 1,
+				binding: 2,
+				resource: this._displacementTexture ? this._displacementTexture.GPUTextureView : this.redGPU.state.emptyTextureView
+			},
+			{
+				binding: 3,
 				resource: {
 					buffer: this.uniformBuffer_fragment.GPUBuffer,
 					offset: 0,
 					size: this.uniformBufferDescriptor_fragment.size
 				}
 			},
-			{binding: 2, resource: this.sampler.GPUSampler},
-			{binding: 3, resource: this.sampler.GPUSampler},
+			{binding: 4, resource: this.sampler.GPUSampler},
 			{
-				binding: 4,
+				binding: 5,
 				resource: this._diffuseTexture ? this._diffuseTexture.GPUTextureView : this.redGPU.state.emptyTextureView
 			},
 			{
-				binding: 5,
-				resource: this._normalTexture ? this._normalTexture.GPUTextureView : this.redGPU.state.emptyTextureView
-			},
-			{
 				binding: 6,
-				resource: this._displacementTexture ? this._displacementTexture.GPUTextureView : this.redGPU.state.emptyTextureView
+				resource: this._normalTexture ? this._normalTexture.GPUTextureView : this.redGPU.state.emptyTextureView
 			}
+
 		];
 		this._afterResetBindingInfo();
 	}

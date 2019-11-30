@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 16:32:22
+ *   Last modification time of this file - 2019.11.30 16:56:31
  *
  */
 
@@ -85,10 +85,10 @@ import RedColorPhongTextureMaterial from "./src/material/RedColorPhongTextureMat
 			tScene.addLight(tLight)
 
 
-			let i2 = 10
+			let i2 = 20
 			let testColor = ['#ff0000', '#00ff00', '#0000ff', '#ffffff', '#ff2234']
 			while (i2--) {
-				let tLight = new RedPointLight(testColor[i2 % 5], 1, 1, parseInt(Math.random() * 35) + 35)
+				let tLight = new RedPointLight(testColor[i2 % 5], 1, 2, parseInt(Math.random() * 35) + 35)
 				tLight.x = Math.random() * 80 - 40
 				tLight.y = Math.random() * 80 - 40
 				tLight.z = Math.random() * 80 - 40

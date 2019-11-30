@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 16:32:22
+ *   Last modification time of this file - 2019.11.30 16:56:31
  *
  */
 
@@ -36,8 +36,8 @@ export default class RedBitmapMaterial extends RedMaterialPreset.mix(
 	#version 450
 	layout( location = 0 ) in vec3 vNormal;
 	layout( location = 1 ) in vec2 vUV;
-	layout( set = ${RedShareGLSL.SET_INDEX_VertexUniforms}, binding = 1 ) uniform sampler uSampler;
-	layout( set = ${RedShareGLSL.SET_INDEX_VertexUniforms}, binding = 2 ) uniform texture2D uDiffuseTexture;
+	layout( set = ${RedShareGLSL.SET_INDEX_VertexUniforms}, binding = 0 ) uniform sampler uSampler;
+	layout( set = ${RedShareGLSL.SET_INDEX_VertexUniforms}, binding = 1 ) uniform texture2D uDiffuseTexture;
 	layout( location = 0 ) out vec4 outColor;
 	void main() {
 		vec4 diffuseColor = vec4(0.0);
@@ -48,9 +48,8 @@ export default class RedBitmapMaterial extends RedMaterialPreset.mix(
 	static PROGRAM_OPTION_LIST = ['diffuseTexture'];
 	static uniformsBindGroupLayoutDescriptor_material= {
 		bindings: [
-			{binding: 0, visibility: GPUShaderStage.VERTEX, type: "uniform-buffer"},
-			{binding: 1, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
-			{binding: 2, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"}
+			{binding: 0, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
+			{binding: 1, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"}
 		]
 	};
 	static uniformBufferDescriptor_vertex = RedBaseMaterial.uniformBufferDescriptor_empty;
@@ -82,17 +81,9 @@ export default class RedBitmapMaterial extends RedMaterialPreset.mix(
 	}
 	resetBindingInfo() {
 		this.bindings = [
+			{binding: 0, resource: this.sampler.GPUSampler},
 			{
-				binding: 0,
-				resource: {
-					buffer: this.uniformBuffer_vertex.GPUBuffer,
-					offset: 0,
-					size: this.uniformBufferDescriptor_vertex.size
-				}
-			},
-			{binding: 1, resource: this.sampler.GPUSampler},
-			{
-				binding: 2,
+				binding: 1,
 				resource: this._diffuseTexture ? this._diffuseTexture.GPUTextureView : this.redGPU.state.emptyTextureView
 			}
 		];

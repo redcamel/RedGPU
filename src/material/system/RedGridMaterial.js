@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 16:32:22
+ *   Last modification time of this file - 2019.11.30 16:56:31
  *
  */
 
@@ -36,12 +36,7 @@ export default class RedGridMaterial extends RedBaseMaterial {
 	}
 	`;
 	static PROGRAM_OPTION_LIST = [];
-	static uniformsBindGroupLayoutDescriptor_material= {
-		bindings: [
-			{binding: 0, visibility: GPUShaderStage.VERTEX, type: "uniform-buffer"},
-			{binding: 1, visibility: GPUShaderStage.FRAGMENT, type: "uniform-buffer"}
-		]
-	};
+	static uniformsBindGroupLayoutDescriptor_material = {bindings: []};
 	static uniformBufferDescriptor_vertex = RedBaseMaterial.uniformBufferDescriptor_empty;
 	static uniformBufferDescriptor_fragment = RedBaseMaterial.uniformBufferDescriptor_empty;
 	constructor(redGPU) {
@@ -49,24 +44,7 @@ export default class RedGridMaterial extends RedBaseMaterial {
 		this.resetBindingInfo()
 	}
 	resetBindingInfo() {
-		this.bindings = [
-			{
-				binding: 0,
-				resource: {
-					buffer: this.uniformBuffer_vertex.GPUBuffer,
-					offset: 0,
-					size: this.uniformBufferDescriptor_vertex.size
-				}
-			},
-			{
-				binding: 1,
-				resource: {
-					buffer: this.uniformBuffer_fragment.GPUBuffer,
-					offset: 0,
-					size: this.uniformBufferDescriptor_fragment.size
-				}
-			}
-		];
+		this.bindings = [];
 		this._afterResetBindingInfo();
 	}
 }
