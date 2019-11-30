@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 16:32:22
+ *   Last modification time of this file - 2019.11.30 17:10:18
  *
  */
 
@@ -58,16 +58,7 @@ class TestMaterial extends RedBaseMaterial {
 	static PROGRAM_OPTION_LIST = [];
 	static uniformsBindGroupLayoutDescriptor_material = {
 		bindings: [
-			{
-				binding: 0,
-				visibility: GPUShaderStage.VERTEX,
-				type: "uniform-buffer"
-			},
-			{
-				binding: 1,
-				visibility: GPUShaderStage.FRAGMENT,
-				type: "uniform-buffer"
-			}
+
 		]
 	};
 	static uniformBufferDescriptor_vertex = RedBaseMaterial.uniformBufferDescriptor_empty;
@@ -79,32 +70,9 @@ class TestMaterial extends RedBaseMaterial {
 	}
 	resetBindingInfo() {
 		this.bindings = [
-			{
-				binding: 0,
-				resource: {
-					buffer: this.uniformBuffer_vertex.GPUBuffer,
-					offset: 0,
-					size: this.uniformBufferDescriptor_vertex.size
-				}
-			},
-			{
-				binding: 1,
-				resource: {
-					buffer: this.uniformBuffer_fragment.GPUBuffer,
-					offset: 0,
-					size: this.uniformBufferDescriptor_fragment.size
-				}
-			}
+
 		];
-		this.uniformBindGroupDescriptor = {
-			layout: this.GPUBindGroupLayout,
-			bindings: this.bindings
-		};
-		this.uniformBindGroup_material.setGPUBindGroup(this.uniformBindGroupDescriptor)
-		this.searchModules();
-		this.setUniformBindGroupDescriptor();
-		this.updateUniformBuffer()
-		this.updateUUID()
+		this._afterResetBindingInfo();
 	}
 }
 
