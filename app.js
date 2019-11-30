@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 19:22:30
+ *   Last modification time of this file - 2019.11.30 19:31:22
  *
  */
 
@@ -300,7 +300,7 @@ import RedColorPhongTextureMaterial from "./src/material/RedColorPhongTextureMat
 				}
 
 				//  tChildren = tView.scene.children
-				// i = tChildren.length;
+				// i = 500
 				//
 				// while (i--) {
 				// 	tChildren[i]._rotationX +=1

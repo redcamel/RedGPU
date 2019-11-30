@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 19:22:30
+ *   Last modification time of this file - 2019.11.30 19:31:22
  *
  */
 
@@ -70,12 +70,14 @@ import RedStandardMaterial from "./src/material/RedStandardMaterial.js";
 				new RedBitmapTexture(redGPU, 'assets/Brick03_col.jpg'),
 				new RedBitmapTexture(redGPU, 'assets/Brick03_nrm.jpg'),
 				new RedBitmapTexture(redGPU, 'assets/specular.png'),
-				new RedBitmapTexture(redGPU, 'assets/emissive.jpg')
+				new RedBitmapTexture(redGPU, 'assets/emissive.jpg'),
+				new RedBitmapTexture(redGPU, 'assets/Brick03_disp.jpg')
 			];
 
 
 			// testMat = new RedColorPhongTextureMaterial(redGPU, '#ffffff', 1, testTextureList[1], testTextureList[2],testTextureList[3])
-			testMat = new RedStandardMaterial(redGPU, testTextureList[0], testTextureList[1], testTextureList[2],testTextureList[3])
+			testMat = new RedStandardMaterial(redGPU, testTextureList[0], testTextureList[1], testTextureList[2],testTextureList[3],testTextureList[4])
+			testMat.displacementPower = 1
 
 			let testMesh = new RedMesh(
 				redGPU,
