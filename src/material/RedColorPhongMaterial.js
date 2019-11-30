@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 16:56:31
+ *   Last modification time of this file - 2019.11.30 18:40:19
  *
  */
 
@@ -53,6 +53,9 @@ export default class RedColorPhongMaterial extends RedMaterialPreset.mix(
 		vec3 N = normalize(vNormal);
 		//#RedGPU#useFlatMode# N = getFlatNormal(vVertexPosition.xyz);
 		
+		float specularTextureValue = 1.0;
+		
+		vec4 finalColor = 
 		calcDirectionalLight(
 			fragmentUniforms.color,
 			N,		
@@ -60,8 +63,10 @@ export default class RedColorPhongMaterial extends RedMaterialPreset.mix(
 			lightUniforms.directionalLightList,
 			fragmentUniforms.shininess,
 			fragmentUniforms.specularPower,
-			fragmentUniforms.specularColor
-		);
+			fragmentUniforms.specularColor,
+			specularTextureValue
+		)
+		+
 	    calcPointLight(
 			fragmentUniforms.color,
 			N,		
@@ -70,11 +75,10 @@ export default class RedColorPhongMaterial extends RedMaterialPreset.mix(
 			fragmentUniforms.shininess,
 			fragmentUniforms.specularPower,
 			fragmentUniforms.specularColor,
+			specularTextureValue,
 			vVertexPosition.xyz
 		);
-	
-	    vec4 finalColor = LA + LD + LS;
-		
+			
 		outColor = finalColor;
 	}
 `;

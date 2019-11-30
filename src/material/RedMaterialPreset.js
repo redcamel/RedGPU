@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 16:32:22
+ *   Last modification time of this file - 2019.11.30 18:40:19
  *
  */
 
@@ -10,6 +10,8 @@
 import RedUtil from "../util/RedUtil.js";
 
 const float1_Float32Array = new Float32Array(1);
+
+
 const color = Base => class extends Base {
 	#color = '#ff0000';
 	#alpha = 1;
@@ -42,22 +44,68 @@ const color = Base => class extends Base {
 		return this.#colorRGBA;
 	}
 };
+// TODO - makeTextureClass 이개념을 쓰고싶은데 흠...
+// const makeTextureClass = function (name) {
+// 	let t0;
+// 	t0 = Base => class extends Base {
+// 		[`_${name}`];
+// 		set [name](texture) {
+// 			this[`_${name}`] = null;
+// 			this.checkTexture(texture, name);
+// 		}
+//
+// 		get [name]() {
+// 			return [`_${name}`]
+// 		}
+// 	};
+// 	return t0
+// }
+// const diffuseTexture = makeTextureClass('diffuseTexture');
+// const normalTexture = makeTextureClass('normalTexture');
+// const specularTexture = makeTextureClass('specularTexture');
+
+
 const diffuseTexture = Base => class extends Base {
 	_diffuseTexture;
 	set diffuseTexture(texture) {
 		this._diffuseTexture = null;
-		this.checkTexture(texture, 'diffuseTexture');
+		this.checkTexture(texture, 'diffuseTexture')
 	}
 
 	get diffuseTexture() {
 		return this._diffuseTexture
 	}
 };
+const normalTexture = Base => class extends Base {
+	_normalTexture;
+	set normalTexture(texture) {
+		this._normalTexture = null;
+		this.checkTexture(texture, 'normalTexture')
+	}
+
+	get normalTexture() {
+		return this._normalTexture
+	}
+};
+
+const specularTexture = Base => class extends Base {
+	_specularTexture;
+	set specularTexture(texture) {
+		this._specularTexture = null;
+		this.checkTexture(texture, 'specularTexture')
+	}
+
+	get specularTexture() {
+		return this._specularTexture
+	}
+};
+
+
 const displacementTexture = Base => class extends Base {
 	_displacementTexture;
-	#displacementFlowSpeedX = 0.0;
-	#displacementFlowSpeedY = 0.0;
-	#displacementPower = 0.1;
+	_displacementFlowSpeedX = 0.0;
+	_displacementFlowSpeedY = 0.0;
+	_displacementPower = 0.1;
 	set displacementTexture(texture) {
 		this._displacementTexture = null;
 		this.checkTexture(texture, 'displacementTexture')
@@ -76,104 +124,96 @@ const displacementTexture = Base => class extends Base {
 
 
 	get displacementFlowSpeedY() {
-		return this.#displacementFlowSpeedY;
+		return this._displacementFlowSpeedY;
 	}
 
 	set displacementFlowSpeedY(value) {
-		this.#displacementFlowSpeedY = value;
-		this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['displacementFlowSpeedY'], new Float32Array([this.#displacementFlowSpeedY]))
+		this._displacementFlowSpeedY = value;
+		float1_Float32Array[0] = this._displacementFlowSpeedY;
+		this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['displacementFlowSpeedY'], float1_Float32Array)
 	}
 
 	get displacementFlowSpeedX() {
-		return this.#displacementFlowSpeedX;
+		return this._displacementFlowSpeedX;
 	}
 
 	set displacementFlowSpeedX(value) {
-		this.#displacementFlowSpeedX = value;
-		this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['displacementFlowSpeedX'], new Float32Array([this.#displacementFlowSpeedX]))
+		this._displacementFlowSpeedX = value;
+		float1_Float32Array[0] = this._displacementFlowSpeedX;
+		this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['displacementFlowSpeedX'], float1_Float32Array)
 	}
 
 	get displacementPower() {
-		return this.#displacementPower;
+		return this._displacementPower;
 	}
 
 	set displacementPower(value) {
-		this.#displacementPower = value;
-		this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['displacementPower'], new Float32Array([this.#displacementPower]))
-	}
-};
-const normalTexture = Base => class extends Base {
-	_normalTexture;
-	set normalTexture(texture) {
-		this._normalTexture = null;
-		this.checkTexture(texture, 'normalTexture')
-	}
-
-	get normalTexture() {
-		return this._normalTexture
+		this._displacementPower = value;
+		float1_Float32Array[0] = this._displacementPower;
+		this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['displacementPower'], float1_Float32Array)
 	}
 };
 const basicLightPropertys = Base => class extends Base {
-	#normalPower = 1;
-	#shininess = 64;
-	#specularPower = 1;
-	#specularColor = '#ffffff';
-	#specularColorRGBA = new Float32Array([1, 1, 1, 1]);
+	_normalPower = 1;
+	_shininess = 64;
+	_specularPower = 1;
+	_specularColor = '#ffffff';
+	_specularColorRGBA = new Float32Array([1, 1, 1, 1]);
 	//
-	#useFlatMode = false;
+	_useFlatMode = false;
 	get normalPower() {
-		return this.#normalPower;
+		return this._normalPower;
 	}
 
 	set normalPower(value) {
-		this.#normalPower = value;
-		float1_Float32Array[0] = this.#normalPower;
+		this._normalPower = value;
+		float1_Float32Array[0] = this._normalPower;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['normalPower'], float1_Float32Array)
 	}
 
 	get shininess() {
-		return this.#shininess;
+		return this._shininess;
 	}
 
 	set shininess(value) {
-		this.#shininess = value;
-		float1_Float32Array[0] = this.#shininess;
+		this._shininess = value;
+		float1_Float32Array[0] = this._shininess;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['shininess'], float1_Float32Array)
 
 	}
 	get specularPower() {
-		return this.#specularPower;
+		return this._specularPower;
 	}
 
 	set specularPower(value) {
-		this.#specularPower = value;
-		float1_Float32Array[0] = this.#specularPower;
+		this._specularPower = value;
+		float1_Float32Array[0] = this._specularPower;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['specularPower'], float1_Float32Array)
 	}
 	get specularColor() {
-		return this.#specularColor;
+		return this._specularColor;
 	}
 
 	set specularColor(value) {
-		this.#specularColor = value;
+		this._specularColor = value;
 		let rgb = RedUtil.hexToRGB_ZeroToOne(value);
-		this.#specularColorRGBA[0] = rgb[0];
-		this.#specularColorRGBA[1] = rgb[1];
-		this.#specularColorRGBA[2] = rgb[2];
-		this.#specularColorRGBA[3] = 1;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['specularColorRGBA'], this.#specularColorRGBA)
+		this._specularColorRGBA[0] = rgb[0];
+		this._specularColorRGBA[1] = rgb[1];
+		this._specularColorRGBA[2] = rgb[2];
+		this._specularColorRGBA[3] = 1;
+		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['specularColorRGBA'], this._specularColorRGBA)
 	}
 
 	get specularColorRGBA() {
-		return this.#specularColorRGBA;
+		return this._specularColorRGBA;
 	}
 
 	get useFlatMode() {
-		return this.#useFlatMode;
+		return this._useFlatMode;
 	}
 
 	set useFlatMode(value) {
-		this.#useFlatMode = value;
+		this._useFlatMode = value;
 		this.resetBindingInfo()
 	}
 
@@ -192,6 +232,7 @@ export default {
 	color: color,
 	diffuseTexture: diffuseTexture,
 	normalTexture: normalTexture,
+	specularTexture: specularTexture,
 	displacementTexture: displacementTexture,
 	basicLightPropertys: basicLightPropertys
 }
