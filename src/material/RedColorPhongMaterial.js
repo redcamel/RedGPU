@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 14:51:39
+ *   Last modification time of this file - 2019.11.30 15:4:23
  *
  */
 
@@ -11,7 +11,6 @@ import RedTypeSize from "../resources/RedTypeSize.js";
 import RedShareGLSL from "../base/RedShareGLSL.js";
 
 import RedMaterialPreset from "./RedMaterialPreset.js";
-import RedColorMaterial from "./RedColorMaterial.js";
 import RedBaseMaterial from "../base/RedBaseMaterial.js";
 
 export default class RedColorPhongMaterial extends RedMaterialPreset.mix(
@@ -101,9 +100,9 @@ export default class RedColorPhongMaterial extends RedMaterialPreset.mix(
 	};
 	static uniformBufferDescriptor_vertex = RedBaseMaterial.uniformBufferDescriptor_empty;
 	static uniformBufferDescriptor_fragment = [
-		{size: RedTypeSize.float4, valueName: 'colorRGBA', },
-		{size: RedTypeSize.float, valueName: 'shininess', },
-		{size: RedTypeSize.float, valueName: 'specularPower', },
+		{size: RedTypeSize.float4, valueName: 'colorRGBA',},
+		{size: RedTypeSize.float, valueName: 'shininess',},
+		{size: RedTypeSize.float, valueName: 'specularPower',},
 		{
 			size: RedTypeSize.float4,
 			valueName: 'specularColorRGBA',
@@ -139,16 +138,6 @@ export default class RedColorPhongMaterial extends RedMaterialPreset.mix(
 				}
 			}
 		];
-		this.uniformBindGroupDescriptor = {
-			layout: this.GPUBindGroupLayout,
-			bindings: this.bindings
-		};
-
-
-		this.searchModules();
-		this.setUniformBindGroupDescriptor();
-		this.uniformBindGroup_material.setGPUBindGroup(this.uniformBindGroupDescriptor)
-		this.updateUniformBuffer()
-		this.updateUUID();
+		this._afterResetBindingInfo();
 	}
 }

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.29 18:29:5
+ *   Last modification time of this file - 2019.11.30 15:4:23
  *
  */
 
@@ -116,14 +116,6 @@ export default class RedSkyBoxMaterial extends RedMaterialPreset.mix(
 				resource: this._skyBoxTexture ? this._skyBoxTexture.GPUTextureView : this.redGPU.state.emptyCubeTextureView,
 			}
 		];
-		this.uniformBindGroupDescriptor = {
-			layout: this.GPUBindGroupLayout,
-			bindings: this.bindings
-		};
-		this.uniformBindGroup_material.setGPUBindGroup(this.uniformBindGroupDescriptor)
-		this.searchModules();
-		this.setUniformBindGroupDescriptor();
-		this.updateUUID();
-		console.log(this._skyBoxTexture);
+		this._afterResetBindingInfo();
 	}
 }

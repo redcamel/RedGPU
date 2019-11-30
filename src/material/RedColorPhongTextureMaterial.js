@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 14:51:39
+ *   Last modification time of this file - 2019.11.30 15:4:23
  *
  */
 
@@ -233,16 +233,6 @@ export default class RedColorPhongTextureMaterial extends RedMaterialPreset.mix(
 				resource: this._normalTexture ? this._normalTexture.GPUTextureView : this.redGPU.state.emptyTextureView,
 			}
 		];
-		this.uniformBindGroupDescriptor = {
-			layout: this.GPUBindGroupLayout,
-			bindings: this.bindings
-		};
-
-
-		this.searchModules();
-		this.setUniformBindGroupDescriptor();
-		this.uniformBindGroup_material.setGPUBindGroup(this.uniformBindGroupDescriptor)
-		this.updateUniformBuffer()
-		this.updateUUID();
+		this._afterResetBindingInfo();
 	}
 }

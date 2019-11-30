@@ -2,12 +2,11 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.29 12:46:41
+ *   Last modification time of this file - 2019.11.30 15:4:23
  *
  */
 
 "use strict";
-import RedTypeSize from "../../resources/RedTypeSize.js";
 import RedBaseMaterial from "../../base/RedBaseMaterial.js";
 import RedShareGLSL from "../../base/RedShareGLSL.js";
 
@@ -51,14 +50,12 @@ export default class RedGridMaterial extends RedBaseMaterial {
 			}
 		]
 	};
-	static uniformBufferDescriptor_vertex =  RedBaseMaterial.uniformBufferDescriptor_empty;
+	static uniformBufferDescriptor_vertex = RedBaseMaterial.uniformBufferDescriptor_empty;
 	static uniformBufferDescriptor_fragment = RedBaseMaterial.uniformBufferDescriptor_empty;
 	constructor(redGPU) {
 		super(redGPU);
 		this.resetBindingInfo()
 	}
-
-
 	resetBindingInfo() {
 		this.bindings = [
 			{
@@ -78,14 +75,6 @@ export default class RedGridMaterial extends RedBaseMaterial {
 				}
 			}
 		];
-		this.uniformBindGroupDescriptor = {
-			layout: this.GPUBindGroupLayout,
-			bindings: this.bindings
-		};
-		this.uniformBindGroup_material.setGPUBindGroup(this.uniformBindGroupDescriptor)
-		this.searchModules();
-
-		this.setUniformBindGroupDescriptor();
-		this.updateUUID()
+		this._afterResetBindingInfo();
 	}
 }
