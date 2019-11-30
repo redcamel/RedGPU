@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 16:32:22
+ *   Last modification time of this file - 2019.11.30 17:10:18
  *
  */
 
@@ -123,11 +123,11 @@ export default class RedBaseMaterial extends RedUUID {
 	}
 
 	checkTexture(texture, textureName) {
-		throw new Error(`${this.constructor.name} : must override!!!`)
+		throw new Error(`${this.constructor.name} : checkTexture must override!!!`)
 	}
 
 	resetBindingInfo() {
-		throw new Error(`${this.constructor.name} : must override!!!`)
+		throw new Error(`${this.constructor.name} : resetBindingInfo must override!!!`)
 	}
 	_afterResetBindingInfo() {
 		this.uniformBindGroupDescriptor = {

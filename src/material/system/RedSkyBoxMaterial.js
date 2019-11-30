@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 16:32:22
+ *   Last modification time of this file - 2019.11.30 16:56:31
  *
  */
 
@@ -30,8 +30,8 @@ export default class RedSkyBoxMaterial extends RedMaterialPreset.mix(
 	static fragmentShaderGLSL = `
 	#version 450
 	layout( location = 0 ) in vec3 vReflectionCubeCoord;
-	layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 1) uniform sampler uSampler;
-	layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 2) uniform textureCube uSkyBoxTexture;
+	layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 0) uniform sampler uSampler;
+	layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 1) uniform textureCube uSkyBoxTexture;
 	layout( location = 0 ) out vec4 outColor;
 	void main() {
 		vec4 diffuseColor = vec4(0.0);
@@ -42,9 +42,8 @@ export default class RedSkyBoxMaterial extends RedMaterialPreset.mix(
 	static PROGRAM_OPTION_LIST = ['skyBoxTexture'];
 	static uniformsBindGroupLayoutDescriptor_material= {
 		bindings: [
-			{binding: 0, visibility: GPUShaderStage.VERTEX, type: "uniform-buffer"},
-			{binding: 1, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
-			{binding: 2, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture", textureDimension: 'cube'}
+			{binding: 0, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
+			{binding: 1, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture", textureDimension: 'cube'}
 		]
 	};
 	static uniformBufferDescriptor_vertex = RedBaseMaterial.uniformBufferDescriptor_empty;
@@ -84,17 +83,9 @@ export default class RedSkyBoxMaterial extends RedMaterialPreset.mix(
 	}
 	resetBindingInfo() {
 		this.bindings = [
+			{binding: 0, resource: this.sampler.GPUSampler},
 			{
-				binding: 0,
-				resource: {
-					buffer: this.uniformBuffer_vertex.GPUBuffer,
-					offset: 0,
-					size: this.uniformBufferDescriptor_vertex.size
-				}
-			},
-			{binding: 1, resource: this.sampler.GPUSampler},
-			{
-				binding: 2,
+				binding: 1,
 				resource: this._skyBoxTexture ? this._skyBoxTexture.GPUTextureView : this.redGPU.state.emptyCubeTextureView
 			}
 		];
