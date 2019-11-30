@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 16:32:22
+ *   Last modification time of this file - 2019.11.30 19:22:30
  *
  */
 
@@ -21,8 +21,8 @@ export default class RedUniformBufferDescriptor {
 		this.redStruct.map((v) => {
 			v.offset = offset;
 			if (v.size <= FLOAT4_SIZE) {
-				let t0 = Math.floor(offset / FLOAT4_SIZE);
-				let t1 = Math.floor((offset + v.size) / FLOAT4_SIZE);
+				let t0 = Math.round(offset / FLOAT4_SIZE);
+				let t1 = Math.round((offset + v.size) / FLOAT4_SIZE);
 				if (t0 == t1) offset += v.size;
 				else {
 					offset += FLOAT4_SIZE - offset % FLOAT4_SIZE

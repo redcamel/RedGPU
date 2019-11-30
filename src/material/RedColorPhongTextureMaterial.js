@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 18:40:19
+ *   Last modification time of this file - 2019.11.30 19:22:30
  *
  */
 
@@ -18,6 +18,7 @@ export default class RedColorPhongTextureMaterial extends RedMaterialPreset.mix(
 	RedMaterialPreset.color,
 	RedMaterialPreset.normalTexture,
 	RedMaterialPreset.specularTexture,
+	RedMaterialPreset.emissiveTexture,
 	RedMaterialPreset.displacementTexture,
 	RedMaterialPreset.basicLightPropertys
 ) {
@@ -64,6 +65,7 @@ export default class RedColorPhongTextureMaterial extends RedMaterialPreset.mix(
         float shininess; 
         float specularPower;
 	    vec4 specularColor;
+	    float emissivePower;
     } fragmentUniforms;
 	layout( location = 0 ) in vec3 vNormal;
 	layout( location = 1 ) in vec2 vUV;
@@ -71,6 +73,7 @@ export default class RedColorPhongTextureMaterial extends RedMaterialPreset.mix(
 	layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 4 ) uniform sampler uSampler;
 	//#RedGPU#normalTexture# layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 5 ) uniform texture2D uNormalTexture;
 	//#RedGPU#specularTexture# layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 6 ) uniform texture2D uSpecularTexture;
+	//#RedGPU#emissiveTexture# layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 7 ) uniform texture2D uEmissiveTexture;
 	layout( location = 0 ) out vec4 outColor;
 	
 	void main() {
@@ -107,10 +110,13 @@ export default class RedColorPhongTextureMaterial extends RedMaterialPreset.mix(
 			vVertexPosition.xyz
 		);
 
+		//#RedGPU#emissiveTexture# vec4 emissiveColor = texture(sampler2D(uEmissiveTexture, uSampler), vUV);
+		//#RedGPU#emissiveTexture# finalColor.rgb += emissiveColor.rgb * fragmentUniforms.emissivePower;
+		
 		outColor = finalColor;
 	}
 `;
-	static PROGRAM_OPTION_LIST = ['displacementTexture', 'normalTexture', 'specularTexture', 'useFlatMode'];
+	static PROGRAM_OPTION_LIST = ['displacementTexture', 'emissiveTexture', 'normalTexture', 'specularTexture', 'useFlatMode'];
 	static uniformsBindGroupLayoutDescriptor_material = {
 		bindings: [
 			{binding: 0, visibility: GPUShaderStage.VERTEX, type: "uniform-buffer"},
@@ -119,7 +125,8 @@ export default class RedColorPhongTextureMaterial extends RedMaterialPreset.mix(
 			{binding: 3, visibility: GPUShaderStage.FRAGMENT, type: "uniform-buffer"},
 			{binding: 4, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
 			{binding: 5, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"},
-			{binding: 6, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"}
+			{binding: 6, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"},
+			{binding: 7, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"}
 		]
 	};
 	static uniformBufferDescriptor_vertex = [
@@ -132,16 +139,18 @@ export default class RedColorPhongTextureMaterial extends RedMaterialPreset.mix(
 		{size: RedTypeSize.float, valueName: 'normalPower'},
 		{size: RedTypeSize.float, valueName: 'shininess'},
 		{size: RedTypeSize.float, valueName: 'specularPower'},
-		{size: RedTypeSize.float4, valueName: 'specularColorRGBA'}
+		{size: RedTypeSize.float4, valueName: 'specularColorRGBA'},
+		{size: RedTypeSize.float, valueName: 'emissivePower'}
 	];
 
 
-	constructor(redGPU, color = '#ff0000', alpha = 1, normalTexture, specularTexture, displacementTexture) {
+	constructor(redGPU, color = '#ff0000', alpha = 1, normalTexture, specularTexture, emissiveTexture, displacementTexture) {
 		super(redGPU);
 		this.color = color;
 		this.alpha = alpha;
 		this.normalTexture = normalTexture;
 		this.specularTexture = specularTexture;
+		this.emissiveTexture = emissiveTexture;
 		this.displacementTexture = displacementTexture;
 		this.resetBindingInfo()
 		console.log(this)
@@ -153,12 +162,16 @@ export default class RedColorPhongTextureMaterial extends RedMaterialPreset.mix(
 					case 'normalTexture' :
 						this._normalTexture = texture;
 						break;
-					case 'displacementTexture' :
-						this._displacementTexture = texture;
-						break
 					case 'specularTexture' :
 						this._specularTexture = texture;
 						break;
+					case 'emissiveTexture' :
+						this._emissiveTexture = texture;
+						break;
+					case 'displacementTexture' :
+						this._displacementTexture = texture;
+						break
+
 				}
 				console.log("로딩완료됨 textureName", textureName, texture.GPUTexture);
 				this.resetBindingInfo()
@@ -201,6 +214,10 @@ export default class RedColorPhongTextureMaterial extends RedMaterialPreset.mix(
 			{
 				binding: 6,
 				resource: this._specularTexture ? this._specularTexture.GPUTextureView : this.redGPU.state.emptyTextureView
+			},
+			{
+				binding: 7,
+				resource: this._emissiveTexture ? this._emissiveTexture.GPUTextureView : this.redGPU.state.emptyTextureView
 			}
 		];
 		this._afterResetBindingInfo();
