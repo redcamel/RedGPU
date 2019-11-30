@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 16:32:22
+ *   Last modification time of this file - 2019.11.30 18:40:19
  *
  */
 
@@ -34,9 +34,6 @@ export default class RedShareGLSL {
 	};
 	static GLSL_SystemUniforms_fragment = {
 		systemUniformsWithLight: `
-		vec4 LA = vec4(0.0, 0.0, 0.0, 0.2);
-		vec4 LD = vec4(0.0, 0.0, 0.0, 1.0);
-		vec4 LS = vec4(0.0, 0.0, 0.0, 1.0);
 		const int MAX_DIRECTIONAL_LIGHT = ${RedShareGLSL.MAX_DIRECTIONAL_LIGHT};
 		const int MAX_POINT_LIGHT =  ${RedShareGLSL.MAX_POINT_LIGHT};
 		struct DirectionalLight {
@@ -56,22 +53,26 @@ export default class RedShareGLSL {
 	        PointLight pointLightList[MAX_POINT_LIGHT];	        
         } lightUniforms;
         /////////////////////////////////////////////////////////////////////////////
-        void calcDirectionalLight(
+        vec4 calcDirectionalLight(
             vec4 diffuseColor,
             vec3 N,		
 			float loopNum,
 			DirectionalLight[MAX_DIRECTIONAL_LIGHT] lightList,
 			float shininess,
 			float specularPower,
-			vec4 specularColor
+			vec4 specularColor,
+			float specularTextureValue
 		){
+		    vec4 ld = vec4(0.0, 0.0, 0.0, 1.0);
+		    vec4 ls = vec4(0.0, 0.0, 0.0, 1.0);
+		    
 		    vec3 L;	
 		    vec4 lightColor;
 		    
 		    float lambertTerm;
 		    float intensity;
 		    float specular;
-		  
+		    		    
 		    DirectionalLight lightInfo;
 		    for(int i = 0; i< loopNum; i++){
 		        lightInfo = lightList[i];
@@ -80,14 +81,15 @@ export default class RedShareGLSL {
 			    lambertTerm = dot(N,-L);
 			    intensity = lightInfo.intensity;
 			    if(lambertTerm > 0.0){
-					LD += lightColor * diffuseColor * lambertTerm * intensity;
-					specular = pow( max(dot(reflect(L, N), -L), 0.0), shininess) * specularPower;
-					LS +=  specularColor * specular * intensity;
+					ld += lightColor * diffuseColor * lambertTerm * intensity;
+					specular = pow( max(dot(reflect(L, N), -L), 0.0), shininess) * specularPower * specularTextureValue;
+					ls +=  specularColor * specular * intensity * lightColor.a;
 			    }
 		    }
+		    return ld + ls;
 		}
 		/////////////////////////////////////////////////////////////////////////////
-		void calcPointLight(
+		vec4 calcPointLight(
             vec4 diffuseColor,
             vec3 N,		
 			float loopNum,
@@ -95,8 +97,12 @@ export default class RedShareGLSL {
 			float shininess,
 			float specularPower,
 			vec4 specularColor,
+			float specularTextureValue,
 			vec3 vVertexPosition
 		){
+			vec4 ld = vec4(0.0, 0.0, 0.0, 1.0);
+		    vec4 ls = vec4(0.0, 0.0, 0.0, 1.0);
+		    
 		    vec3 L;	
 		    vec4 lightColor;
 		    
@@ -119,12 +125,13 @@ export default class RedShareGLSL {
 				    if(lambertTerm > 0.0){
 				        attenuation = clamp(1.0 - distanceLength*distanceLength/(lightInfo.radius*lightInfo.radius), 0.0, 1.0); 
 				        attenuation *= attenuation;
-						LD += lightColor * diffuseColor * lambertTerm * intensity * attenuation;
-						specular = pow( max(dot(reflect(L, N), -L), 0.0), shininess) * specularPower;
-						LS +=  specularColor * specular * intensity * attenuation;
+						ld += lightColor * diffuseColor * lambertTerm * intensity * attenuation;
+						specular = pow( max(dot(reflect(L, N), -L), 0.0), shininess) * specularPower * specularTextureValue;
+						ls +=  specularColor * specular * intensity * attenuation * lightColor.a;
 				    }
 			    }
 		    }
+		    return ld + ls;
 		}
 		/////////////////////////////////////////////////////////////////////////////
 		vec3 getFlatNormal(vec3 vertexPosition){

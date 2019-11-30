@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 16:56:31
+ *   Last modification time of this file - 2019.11.30 18:40:19
  *
  */
 
@@ -74,7 +74,7 @@ import RedColorPhongTextureMaterial from "./src/material/RedColorPhongTextureMat
 			//
 			tLight = new RedDirectionalLight('#ff0000', 0.5)
 			tLight.x = -10
-			tLight.y = 10
+			tLight.y = -10
 			tLight.z = -10
 			tScene.addLight(tLight)
 
@@ -85,7 +85,7 @@ import RedColorPhongTextureMaterial from "./src/material/RedColorPhongTextureMat
 			tScene.addLight(tLight)
 
 
-			let i2 = 20
+			let i2 = 10
 			let testColor = ['#ff0000', '#00ff00', '#0000ff', '#ffffff', '#ff2234']
 			while (i2--) {
 				let tLight = new RedPointLight(testColor[i2 % 5], 1, 2, parseInt(Math.random() * 35) + 35)
@@ -102,20 +102,21 @@ import RedColorPhongTextureMaterial from "./src/material/RedColorPhongTextureMat
 				new RedBitmapTexture(redGPU, 'assets/Brick03_col.jpg'),
 				new RedBitmapTexture(redGPU, 'assets/Brick03_nrm.jpg'),
 				new RedBitmapTexture(redGPU, 'assets/crate.png'),
-				new RedBitmapTexture(redGPU, 'assets/Brick03_disp.jpg')
+				new RedBitmapTexture(redGPU, 'assets/Brick03_disp.jpg'),
+				new RedBitmapTexture(redGPU, 'assets/specular.png')
 
 			];
 
 
-			testMat_color = new RedColorMaterial(redGPU, '#ffff00');
-			testMat_colorPhong = new RedColorPhongMaterial(redGPU, '#00ff00');
-			testMat_colorPhongTexture_normal = new RedColorPhongTextureMaterial(redGPU, '#ff0000', 1, testTextureList[2])
-			testMat_colorPhongTexture_normal_displacement = new RedColorPhongTextureMaterial(redGPU, '#ff0000', 1, testTextureList[2], testTextureList[4])
+			testMat_color = new RedColorMaterial(redGPU, '#ffff12');
+			testMat_colorPhong = new RedColorPhongMaterial(redGPU, '#11ff23');
+			testMat_colorPhongTexture_normal = new RedColorPhongTextureMaterial(redGPU, '#fff253', 1, testTextureList[2])
+			testMat_colorPhongTexture_normal_displacement = new RedColorPhongTextureMaterial(redGPU, '#341fff', 1, testTextureList[2], testTextureList[5], testTextureList[4])
 			console.log(testMat_colorPhong)
 			testMat_bitmap = new RedBitmapMaterial(redGPU, testTextureList[0]);
-			testMat_standard_diffuse = new RedStandardMaterial(redGPU, testTextureList[1]);
-			testMat_standard_diffuse_normal = new RedStandardMaterial(redGPU, testTextureList[0], testTextureList[2]);
-			testMat_standard_diffuse_normal_displacement = new RedStandardMaterial(redGPU, testTextureList[1], testTextureList[2], testTextureList[4]);
+			testMat_standard_diffuse = new RedStandardMaterial(redGPU, testTextureList[1], null, testTextureList[5]);
+			testMat_standard_diffuse_normal = new RedStandardMaterial(redGPU, testTextureList[0], testTextureList[2], testTextureList[5],);
+			testMat_standard_diffuse_normal_displacement = new RedStandardMaterial(redGPU, testTextureList[1], testTextureList[2], testTextureList[5], testTextureList[4]);
 			testMat_standard_diffuse_normal_displacement.displacementPower = 1
 			testMat_standard_diffuse_normal_displacement.displacementFlowSpeedX = 0.1
 			testMat_standard_diffuse_normal_displacement.displacementFlowSpeedY = 0.1
@@ -159,6 +160,13 @@ import RedColorPhongTextureMaterial from "./src/material/RedColorPhongTextureMat
 				testMesh.z = Math.random() * 30 - 15
 				tScene2.addChild(testMesh)
 			}
+			let testMesh = new RedMesh(
+				redGPU,
+				new RedSphere(redGPU, 0.5, 32, 32, 32),
+				testMat_standard_diffuse
+			);
+			testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = 10
+			tScene.addChild(testMesh)
 
 			let division = MAX / 8
 			while (i--) {
@@ -270,7 +278,9 @@ import RedColorPhongTextureMaterial from "./src/material/RedColorPhongTextureMat
 				// tView.camera.y =10;
 				// tView.camera.z = 10;
 				// tView.camera.lookAt(0, 0, 0);
-
+				tLight.x = Math.sin(time / 1000)
+				tLight.y = Math.cos(time / 500)
+				tLight.z = Math.cos(time / 750)
 				renderer.render(time, redGPU);
 				testMat_colorPhongTexture_normal_displacement.displacementPower = testMat_standard_diffuse_normal_displacement.displacementPower = Math.sin(time / 1000) * 5
 				testMat_standard_diffuse.normalPower = testMat_standard_diffuse_normal.normalPower = testMat_standard_diffuse_normal_displacement.normalPower = Math.abs(Math.sin(time / 1000)) + 1
