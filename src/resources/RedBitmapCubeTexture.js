@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.29 18:29:5
+ *   Last modification time of this file - 2019.11.30 16:32:22
  *
  */
 "use strict";
@@ -68,8 +68,8 @@ export default class RedBitmapCubeTexture {
 
 		console.log('mip', mip, 'width', width, 'height', height)
 	};
-	#makeCubeTexture = function(redGPU, useMipmap, imgList, maxW, maxH) {
-		if (useMipmap) this.mipMaps = Math.floor(Math.log2(Math.max(maxW, maxH)));
+	#makeCubeTexture = function (redGPU, useMipmap, imgList, maxW, maxH) {
+		if (useMipmap) this.mipMaps = Math.round(Math.log2(Math.max(maxW, maxH)));
 		const textureDescriptor = {
 			size: {
 				width: maxW,
@@ -96,17 +96,17 @@ export default class RedBitmapCubeTexture {
 					this.#updateTexture(redGPU.device, img, gpuTexture, faceWidth, faceHeight, i, face)
 				}
 			}
-		})
+		});
 
 		this.resolve(gpuTexture)
-	}
+	};
 	constructor(redGPU, srcList, useMipmap = true) {
 		// 귀찮아서 텍스쳐 맹그는 놈은 들고옴
 
 		let maxW = 0;
 		let maxH = 0;
 		let loadCount = 0;
-		let imgList = []
+		let imgList = [];
 		srcList.forEach((src, face) => {
 			if (!src) {
 				console.log('src')
@@ -120,9 +120,9 @@ export default class RedBitmapCubeTexture {
 					console.log(v)
 				};
 
-				img.onload = async _ => {
-					imgList[face] = img
-					loadCount++
+				img.onload = _ => {
+					imgList[face] = img;
+					loadCount++;
 					maxW = Math.max(maxW, img.width);
 					maxH = Math.max(maxH, img.height);
 					if (loadCount == 6) this.#makeCubeTexture(redGPU, useMipmap, imgList, maxW, maxH)

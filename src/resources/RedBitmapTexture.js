@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.29 18:29:5
+ *   Last modification time of this file - 2019.11.30 16:32:22
  *
  */
 "use strict";
@@ -20,8 +20,8 @@ export default class RedBitmapTexture {
 		}
 		imageCanvas.width = width;
 		imageCanvas.height = height;
-		imageCanvasContext.translate(0, height);
-		imageCanvasContext.scale(1, -1);
+		// imageCanvasContext.translate(0, height);
+		// imageCanvasContext.scale(1, -1);
 		imageCanvasContext.drawImage(img, 0, 0, width, height);
 		const imageData = imageCanvasContext.getImageData(0, 0, width, height);
 		let data = null;
@@ -59,8 +59,8 @@ export default class RedBitmapTexture {
 		};
 
 		const textureExtent = {
-			width : width,
-			height : height,
+			width: width,
+			height: height,
 			depth: 1
 		};
 		const commandEncoder = device.createCommandEncoder({});
@@ -76,9 +76,9 @@ export default class RedBitmapTexture {
 			console.log('src')
 		} else {
 			const mapKey = src + useMipmap;
-			console.log('mapKey',mapKey);
+			console.log('mapKey', mapKey);
 			if (TABLE.get(mapKey)) {
-				console.log('캐시된 녀석을 던집',mapKey, TABLE.get(mapKey));
+				console.log('캐시된 녀석을 던집', mapKey, TABLE.get(mapKey));
 				return TABLE.get(mapKey);
 			}
 			const img = new Image();
@@ -87,8 +87,8 @@ export default class RedBitmapTexture {
 				console.log(v)
 			};
 
-			img.onload = async _ => {
-				if (useMipmap) this.mipMaps = Math.floor(Math.log2(Math.max(img.width, img.height)));
+			img.onload = _ => {
+				if (useMipmap) this.mipMaps = Math.round(Math.log2(Math.max(img.width, img.height)));
 
 				const textureDescriptor = {
 					size: {

@@ -2,14 +2,14 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 14:51:39
+ *   Last modification time of this file - 2019.11.30 16:32:22
  *
  */
 
 "use strict";
 import RedUtil from "../util/RedUtil.js";
 
-const float1_Float32Array = new Float32Array(1)
+const float1_Float32Array = new Float32Array(1);
 const color = Base => class extends Base {
 	#color = '#ff0000';
 	#alpha = 1;

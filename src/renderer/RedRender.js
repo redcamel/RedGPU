@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.29 21:5:56
+ *   Last modification time of this file - 2019.11.30 16:32:22
  *
  */
 let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty) => {
@@ -18,9 +18,9 @@ let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty) 
 	let prevVertexBuffer_UUID;
 	let prevIndexBuffer_UUID;
 	let prevMaterial_UUID;
-	let tMVMatrix, tNMatrix
-	let tLocalMatrix
-	let parentMTX
+	let tMVMatrix, tNMatrix;
+	let tLocalMatrix;
+	let parentMTX;
 	let aSx, aSy, aSz, aCx, aCy, aCz, aX, aY, aZ,
 		a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23, a30, a31, a32, a33,
 		b0, b1, b2, b3,
@@ -83,13 +83,13 @@ let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty) 
 
 
 		prevMaterial_UUID = tMesh._prevMaterialUUID = tMaterial._UUID;
-		if (tMesh.children.length) renderScene(redGPU, passEncoder, tMesh, tMesh.children,parentDirty || tDirtyTransform);
+		if (tMesh.children.length) renderScene(redGPU, passEncoder, tMesh, tMesh.children, parentDirty || tDirtyTransform);
 		if (tDirtyTransform || parentDirty) {
 			// TODO 매트릭스 계산부분을 여기로 나중에 다들고 오는게 성능에 좋음...
 
-			 tMVMatrix = tMesh.matrix;
-			 tLocalMatrix = tMesh.localMatrix;
-			 parentMTX = parent ? parent.matrix : null;
+			tMVMatrix = tMesh.matrix;
+			tLocalMatrix = tMesh.localMatrix;
+			parentMTX = parent ? parent.matrix : null;
 
 			/////////////////////////////////////
 			a00 = 1, a01 = 0, a02 = 0,
@@ -184,8 +184,8 @@ let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty) 
 						tMVMatrix[12] = tLocalMatrix[12], tMVMatrix[13] = tLocalMatrix[13], tMVMatrix[14] = tLocalMatrix[14], tMVMatrix[15] = tLocalMatrix[15]
 				);
 			// normal calc
-			
-			 tNMatrix = tMesh.normalMatrix;
+
+			tNMatrix = tMesh.normalMatrix;
 			a00 = tMVMatrix[0], a01 = tMVMatrix[1], a02 = tMVMatrix[2], a03 = tMVMatrix[3],
 				a10 = tMVMatrix[4], a11 = tMVMatrix[5], a12 = tMVMatrix[6], a13 = tMVMatrix[7],
 				a20 = tMVMatrix[8], a21 = tMVMatrix[9], a22 = tMVMatrix[10], a23 = tMVMatrix[11],
@@ -213,9 +213,9 @@ let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty) 
 				tNMatrix[7] = (a00 * b12 - a01 * b10 + a02 * b02) * b22,
 				tNMatrix[11] = (-a31 * b3 + a32 * b1 - a33 * a30) * b22,
 				tNMatrix[15] = (a20 * b3 - a21 * b1 + a22 * a30) * b22,
-			// tMesh.calcTransform(parent);
-			// tMesh.updateUniformBuffer();
-			tMesh.uniformBuffer_mesh.GPUBuffer.setSubData(0, tMesh.matrix);
+				// tMesh.calcTransform(parent);
+				// tMesh.updateUniformBuffer();
+				tMesh.uniformBuffer_mesh.GPUBuffer.setSubData(0, tMesh.matrix);
 			tMesh.uniformBuffer_mesh.GPUBuffer.setSubData(64, tMesh.normalMatrix);
 		}
 		tMesh.dirtyPipeline = false;
@@ -262,10 +262,10 @@ export default class RedRender {
 		redView.updateSystemUniform(passEncoder, redGPU);
 		if (tScene.skyBox) {
 			tScene.skyBox['scaleX'] = tScene.skyBox['scaleY'] = tScene.skyBox['scaleZ'] = redView.camera['farClipping'] * 0.6;
-			renderScene(redGPU, redView, passEncoder, null,[tScene.skyBox]);
+			renderScene(redGPU, redView, passEncoder, null, [tScene.skyBox]);
 		}
-		if (tScene.grid) renderScene(redGPU, redView, passEncoder, null,[tScene.grid]);
-		renderScene(redGPU, redView, passEncoder, null,tScene.children);
+		if (tScene.grid) renderScene(redGPU, redView, passEncoder, null, [tScene.grid]);
+		renderScene(redGPU, redView, passEncoder, null, tScene.children);
 		passEncoder.endPass();
 		let tX = redView.viewRect[0];
 		let tY = redView.viewRect[1];

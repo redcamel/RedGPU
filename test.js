@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 15:4:23
+ *   Last modification time of this file - 2019.11.30 16:32:22
  *
  */
 
@@ -56,7 +56,7 @@ class TestMaterial extends RedBaseMaterial {
 	}
 	`;
 	static PROGRAM_OPTION_LIST = [];
-	static uniformsBindGroupLayoutDescriptor = {
+	static uniformsBindGroupLayoutDescriptor_material = {
 		bindings: [
 			{
 				binding: 0,
