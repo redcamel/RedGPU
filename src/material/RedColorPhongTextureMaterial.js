@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.29 22:21:48
+ *   Last modification time of this file - 2019.11.30 16:32:22
  *
  */
 
@@ -25,33 +25,31 @@ export default class RedColorPhongTextureMaterial extends RedMaterialPreset.mix(
 	#version 450
 	${RedShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
     ${RedShareGLSL.GLSL_SystemUniforms_vertex.calcDisplacement}    
-    layout(set = 2,binding = 0) uniform MeshUniforms {
+    layout( set = ${RedShareGLSL.SET_INDEX_MeshUniforms}, binding = 0 ) uniform MeshUniforms {
         mat4 modelMatrix;
         mat4 normalMatrix;
     } meshUniforms;
-	layout(location = 0) in vec3 position;
-	layout(location = 1) in vec3 normal;
-	layout(location = 2) in vec2 uv;
-	layout(location = 0) out vec3 vNormal;
-	layout(location = 1) out vec2 vUV;
-	layout(location = 2) out vec4 vVertexPosition;
+	layout( location = 0 ) in vec3 position;
+	layout( location = 1 ) in vec3 normal;
+	layout( location = 2 ) in vec2 uv;
+	layout( location = 0 ) out vec3 vNormal;
+	layout( location = 1 ) out vec2 vUV;
+	layout( location = 2 ) out vec4 vVertexPosition;
 	
-	layout(set = 3,binding = 0) uniform VertexUniforms {
+	layout( set = ${RedShareGLSL.SET_INDEX_VertexUniforms}, binding = 0 ) uniform VertexUniforms {
         float displacementFlowSpeedX;
         float displacementFlowSpeedY;
         float displacementPower;
     } vertexUniforms;
     
-    layout(set = 3, binding = 2) uniform sampler uSampler;
-	//#RedGPU#displacementTexture# layout(set = 3, binding = 3) uniform texture2D uDisplacementTexture;
+    layout( set = ${RedShareGLSL.SET_INDEX_VertexUniforms}, binding = 2 ) uniform sampler uSampler;
+	//#RedGPU#displacementTexture# layout( set = ${RedShareGLSL.SET_INDEX_VertexUniforms}, binding = 3) uniform texture2D uDisplacementTexture;
 	void main() {
-		vVertexPosition = meshUniforms.modelMatrix* vec4(position,1.0);
+		vVertexPosition = meshUniforms.modelMatrix * vec4(position,1.0);
 		vNormal = (meshUniforms.normalMatrix * vec4(normal,1.0)).xyz;
 		vUV = uv;
 		//#RedGPU#displacementTexture# vVertexPosition.xyz += calcDisplacement(vNormal, vertexUniforms.displacementFlowSpeedX, vertexUniforms.displacementFlowSpeedY, vertexUniforms.displacementPower, uv, uDisplacementTexture, uSampler);
 		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * vVertexPosition;
-		
-	
 	}
 	`;
 	static fragmentShaderGLSL = `
@@ -59,43 +57,44 @@ export default class RedColorPhongTextureMaterial extends RedMaterialPreset.mix(
 	${RedShareGLSL.GLSL_SystemUniforms_fragment.systemUniformsWithLight}
 	${RedShareGLSL.GLSL_SystemUniforms_fragment.cotangent_frame}
 	${RedShareGLSL.GLSL_SystemUniforms_fragment.perturb_normal}
-	layout(set = 3,binding = 1) uniform Uniforms {
+	layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 1 ) uniform FragmentUniforms {
         vec4 color;
         float normalPower;
         float shininess; 
         float specularPower;
 	    vec4 specularColor;
-    } uniforms;
-	layout(location = 0) in vec3 vNormal;
-	layout(location = 1) in vec2 vUV;
-	layout(location = 2) in vec4 vVertexPosition;
-	layout(set = 3, binding = 4) uniform sampler uSampler;
-	//#RedGPU#normalTexture# layout(set = 3, binding = 5) uniform texture2D uNormalTexture;
-	layout(location = 0) out vec4 outColor;
+    } fragmentUniforms;
+	layout( location = 0 ) in vec3 vNormal;
+	layout( location = 1 ) in vec2 vUV;
+	layout( location = 2 ) in vec4 vVertexPosition;
+	layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 4 ) uniform sampler uSampler;
+	//#RedGPU#normalTexture# layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 5 ) uniform texture2D uNormalTexture;
+	layout( location = 0 ) out vec4 outColor;
+	
 	void main() {
 		vec3 N = normalize(vNormal);
 		vec4 normalColor = vec4(0.0);
 		//#RedGPU#normalTexture# normalColor = texture(sampler2D(uNormalTexture, uSampler), vUV) ;
 		//#RedGPU#useFlatMode# N = getFlatNormal(vVertexPosition.xyz);
-		//#RedGPU#normalTexture# N = perturb_normal(N, vVertexPosition.xyz, vUV, normalColor.rgb, uniforms.normalPower) ;
+		//#RedGPU#normalTexture# N = perturb_normal(N, vVertexPosition.xyz, vUV, normalColor.rgb, fragmentUniforms.normalPower) ;
 		
 		calcDirectionalLight(
-			uniforms.color,
+			fragmentUniforms.color,
 			N,		
-			systemUniforms.directionalLightCount,
-			systemUniforms.directionalLightList,
-			uniforms.shininess,
-			uniforms.specularPower,
-			uniforms.specularColor
+			lightUniforms.directionalLightCount,
+			lightUniforms.directionalLightList,
+			fragmentUniforms.shininess,
+			fragmentUniforms.specularPower,
+			fragmentUniforms.specularColor
 		);
 	    calcPointLight(
-			uniforms.color,
+			fragmentUniforms.color,
 			N,		
-			systemUniforms.pointLightCount,
-			systemUniforms.pointLightList,
-			uniforms.shininess,
-			uniforms.specularPower,
-			uniforms.specularColor,
+			lightUniforms.pointLightCount,
+			lightUniforms.pointLightList,
+			fragmentUniforms.shininess,
+			fragmentUniforms.specularPower,
+			fragmentUniforms.specularColor,
 			vVertexPosition.xyz
 		);
 	
@@ -105,67 +104,28 @@ export default class RedColorPhongTextureMaterial extends RedMaterialPreset.mix(
 	}
 `;
 	static PROGRAM_OPTION_LIST = ['displacementTexture', 'normalTexture', 'useFlatMode'];
-	static uniformsBindGroupLayoutDescriptor = {
+	static uniformsBindGroupLayoutDescriptor_material= {
 		bindings: [
-			{
-				binding: 0,
-				visibility: GPUShaderStage.VERTEX,
-				type: "uniform-buffer"
-			},
-			{
-				binding: 1,
-				visibility: GPUShaderStage.FRAGMENT,
-				type: "uniform-buffer"
-			},
-			{
-				binding: 2,
-				visibility: GPUShaderStage.VERTEX,
-				type: "sampler"
-			},
-			{
-				binding: 3,
-				visibility: GPUShaderStage.VERTEX,
-				type: "sampled-texture"
-			},
-			{
-				binding: 4,
-				visibility: GPUShaderStage.FRAGMENT,
-				type: "sampler"
-			},
-			{
-				binding: 5,
-				visibility: GPUShaderStage.FRAGMENT,
-				type: "sampled-texture"
-			}
+			{binding: 0, visibility: GPUShaderStage.VERTEX, type: "uniform-buffer"},
+			{binding: 1, visibility: GPUShaderStage.FRAGMENT, type: "uniform-buffer"},
+			{binding: 2, visibility: GPUShaderStage.VERTEX, type: "sampler"},
+			{binding: 3, visibility: GPUShaderStage.VERTEX, type: "sampled-texture"},
+			{binding: 4, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
+			{binding: 5, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"}
 		]
 	};
 	static uniformBufferDescriptor_vertex = [
-		{
-			size: RedTypeSize.float,
-			valueName: 'displacementFlowSpeedX',
-
-		},
-		{
-			size: RedTypeSize.float,
-			valueName: 'displacementFlowSpeedY',
-
-		},
-		{
-			size: RedTypeSize.float,
-			valueName: 'displacementPower',
-
-		}
+		{size: RedTypeSize.float, valueName: 'displacementFlowSpeedX'},
+		{size: RedTypeSize.float, valueName: 'displacementFlowSpeedY'},
+		{size: RedTypeSize.float, valueName: 'displacementPower'}
 	];
 	static uniformBufferDescriptor_fragment = [
-		{size: RedTypeSize.float4, valueName: 'colorRGBA',},
-		{size: RedTypeSize.float, valueName: 'normalPower',},
-		{size: RedTypeSize.float, valueName: 'shininess',},
-		{size: RedTypeSize.float, valueName: 'specularPower',},
-		{
-			size: RedTypeSize.float4,
-			valueName: 'specularColorRGBA',
-		},
-	]
+		{size: RedTypeSize.float4, valueName: 'colorRGBA'},
+		{size: RedTypeSize.float, valueName: 'normalPower'},
+		{size: RedTypeSize.float, valueName: 'shininess'},
+		{size: RedTypeSize.float, valueName: 'specularPower'},
+		{size: RedTypeSize.float4, valueName: 'specularColorRGBA'}
+	];
 
 
 	constructor(redGPU, color = '#ff0000', alpha = 1, normalTexture, displacementTexture) {
@@ -215,34 +175,17 @@ export default class RedColorPhongTextureMaterial extends RedMaterialPreset.mix(
 					size: this.uniformBufferDescriptor_fragment.size
 				}
 			},
-			{
-				binding: 2,
-				resource: this.sampler.GPUSampler,
-			},
-
+			{binding: 2, resource: this.sampler.GPUSampler},
 			{
 				binding: 3,
-				resource: this._displacementTexture ? this._displacementTexture.GPUTextureView : this.redGPU.state.emptyTextureView,
+				resource: this._displacementTexture ? this._displacementTexture.GPUTextureView : this.redGPU.state.emptyTextureView
 			},
-			{
-				binding: 4,
-				resource: this.sampler.GPUSampler,
-			},
+			{binding: 4, resource: this.sampler.GPUSampler},
 			{
 				binding: 5,
-				resource: this._normalTexture ? this._normalTexture.GPUTextureView : this.redGPU.state.emptyTextureView,
+				resource: this._normalTexture ? this._normalTexture.GPUTextureView : this.redGPU.state.emptyTextureView
 			}
 		];
-		this.uniformBindGroupDescriptor = {
-			layout: this.GPUBindGroupLayout,
-			bindings: this.bindings
-		};
-
-
-		this.searchModules();
-		this.setUniformBindGroupDescriptor();
-		this.uniformBindGroup_material.setGPUBindGroup(this.uniformBindGroupDescriptor)
-		this.updateUniformBuffer()
-		this.updateUUID();
+		this._afterResetBindingInfo();
 	}
 }

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.29 18:29:5
+ *   Last modification time of this file - 2019.11.30 16:32:22
  *
  */
 
@@ -43,7 +43,7 @@ export default class RedGPU {
 							height: 1,
 							depth: 1,
 						},
-						format: this.swapChainFormat ,
+						format: this.swapChainFormat,
 						usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.SAMPLED,
 					}).createView(),
 					emptyCubeTextureView: device.createTexture({
@@ -56,7 +56,7 @@ export default class RedGPU {
 						arrayLayerCount: 6,
 						mipLevelCount: 1,
 						sampleCount: 1,
-						format: this.swapChainFormat ,
+						format: this.swapChainFormat,
 						usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.SAMPLED,
 					}).createView({
 						format: 'rgba8unorm',

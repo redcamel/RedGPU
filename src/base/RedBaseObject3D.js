@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.29 18:29:5
+ *   Last modification time of this file - 2019.11.30 16:32:22
  *
  */
 
@@ -10,16 +10,10 @@
 
 import RedUniformBuffer from "../buffer/RedUniformBuffer.js";
 import RedDisplayContainer from "./RedDisplayContainer.js";
-import RedBindGroup from "../buffer/RedBindGroup.js";
 import RedPipeline from "./RedPipeline.js";
 import RedUniformBufferDescriptor from "../buffer/RedUniformBufferDescriptor.js";
 import RedTypeSize from "../resources/RedTypeSize.js";
 
-let makeUniformBindLayout = function (redGPU, uniformsBindGroupLayoutDescriptor) {
-	let uniformsBindGroupLayout;
-	uniformsBindGroupLayout = redGPU.device.createBindGroupLayout(uniformsBindGroupLayoutDescriptor);
-	return uniformsBindGroupLayout
-};
 export default class RedBaseObject3D extends RedDisplayContainer {
 	static uniformsBindGroupLayoutDescriptor_mesh = {
 		bindings: [
@@ -57,13 +51,13 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 	_cullMode = 'back';
 	_primitiveTopology = "triangle-list";
 	pipeline;
-	#bindings
+	#bindings;
 
 	constructor(redGPU) {
 		super();
 		this.#redGPU = redGPU;
 		this.uniformBuffer_mesh = new RedUniformBuffer(redGPU);
-		this.uniformBuffer_mesh.setBuffer(RedBaseObject3D.uniformBufferDescriptor_mesh)
+		this.uniformBuffer_mesh.setBuffer(RedBaseObject3D.uniformBufferDescriptor_mesh);
 		this.#bindings = [
 			{
 				binding: 0,
@@ -74,7 +68,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 				}
 			}
 		];
-		this.GPUBindGroupLayout = makeUniformBindLayout(redGPU, RedBaseObject3D.uniformsBindGroupLayoutDescriptor_mesh);
+		this.GPUBindGroupLayout = redGPU.device.createBindGroupLayout(RedBaseObject3D.uniformsBindGroupLayoutDescriptor_mesh);
 		this.GPUBindGroup = this.#redGPU.device.createBindGroup({
 			layout: this.GPUBindGroupLayout,
 			bindings: this.#bindings
@@ -98,7 +92,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 			let tValue;
 			dataMesh = RedBaseObject3D.uniformBufferDescriptor_mesh.redStruct;
 
-			i = dataMesh.length
+			i = dataMesh.length;
 			while (i--) {
 				tData = dataMesh[i];
 				if (tData) {

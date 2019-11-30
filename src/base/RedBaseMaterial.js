@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.29 12:46:41
+ *   Last modification time of this file - 2019.11.30 16:32:22
  *
  */
 
@@ -32,7 +32,7 @@ export default class RedBaseMaterial extends RedUUID {
 		this.#redGPU = value;
 	}
 
-	static uniformBufferDescriptor_empty = []
+	static uniformBufferDescriptor_empty = [];
 
 
 	uniformBufferDescriptor_vertex;
@@ -63,20 +63,20 @@ export default class RedBaseMaterial extends RedUUID {
 
 		if (!materialClass.uniformBufferDescriptor_vertex) throw new Error(`${materialClass.name} : uniformBufferDescriptor_vertex 를 정의해야함`);
 		if (!materialClass.uniformBufferDescriptor_fragment) throw new Error(`${materialClass.name} : uniformBufferDescriptor_fragment 를 정의해야함`);
-		if (!materialClass.uniformsBindGroupLayoutDescriptor) throw  new Error(`${materialClass.name} : uniformsBindGroupLayoutDescriptor 를  정의해야함`);
+		if (!materialClass.uniformsBindGroupLayoutDescriptor_material) throw  new Error(`${materialClass.name} : uniformsBindGroupLayoutDescriptor 를  정의해야함`);
 
 		this.uniformBufferDescriptor_vertex = new RedUniformBufferDescriptor(materialClass.uniformBufferDescriptor_vertex);
 		this.uniformBufferDescriptor_fragment = new RedUniformBufferDescriptor(materialClass.uniformBufferDescriptor_fragment);
-		this.GPUBindGroupLayout = makeUniformBindLayout(redGPU, materialClass.uniformsBindGroupLayoutDescriptor);
+		this.GPUBindGroupLayout = makeUniformBindLayout(redGPU, materialClass.uniformsBindGroupLayoutDescriptor_material);
 
 		this.vShaderModule = vShaderModule;
 		this.fShaderModule = fShaderModule;
 
 		// 버퍼속성
 		this.uniformBuffer_vertex = new RedUniformBuffer(redGPU);
-		this.uniformBuffer_vertex.setBuffer(this.uniformBufferDescriptor_vertex)
+		this.uniformBuffer_vertex.setBuffer(this.uniformBufferDescriptor_vertex);
 		this.uniformBuffer_fragment = new RedUniformBuffer(redGPU);
-		this.uniformBuffer_fragment.setBuffer(this.uniformBufferDescriptor_fragment)
+		this.uniformBuffer_fragment.setBuffer(this.uniformBufferDescriptor_fragment);
 		this.uniformBindGroup_material = new RedBindGroup(redGPU);
 
 
@@ -129,16 +129,27 @@ export default class RedBaseMaterial extends RedUUID {
 	resetBindingInfo() {
 		throw new Error(`${this.constructor.name} : must override!!!`)
 	}
+	_afterResetBindingInfo() {
+		this.uniformBindGroupDescriptor = {
+			layout: this.GPUBindGroupLayout,
+			bindings: this.bindings
+		};
+		this.searchModules();
+		this.setUniformBindGroupDescriptor();
+		this.uniformBindGroup_material.setGPUBindGroup(this.uniformBindGroupDescriptor);
+		this.updateUniformBuffer();// FIXME - 아마도 프로그램당 고유 재질 주소를 공유한다고 치면... 재질 프로그램 버전별로 하나씩 들고있어야한다...그렇다면 이거 재업로드 비용을 상당히 줄일수있을듯
+		this.updateUUID();
+	}
 
 	searchModules() {
 		let tKey = [this.constructor.name];
-		let i = 0, len = this.constructor.PROGRAM_OPTION_LIST.length
+		let i = 0, len = this.constructor.PROGRAM_OPTION_LIST.length;
 		for (i; i < len; i++) {
 			let key = this.constructor.PROGRAM_OPTION_LIST[i];
 			if (this[key]) tKey.push(key);
 		}
-		tKey = tKey.join('_')
-		console.log('searchModules', tKey)
+		tKey = tKey.join('_');
+		console.log('searchModules', tKey);
 		this.vShaderModule.searchShaderModule(tKey);
 		this.fShaderModule.searchShaderModule(tKey);
 		console.log(this.vShaderModule);

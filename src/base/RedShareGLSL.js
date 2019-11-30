@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.29 22:21:48
+ *   Last modification time of this file - 2019.11.30 16:32:22
  *
  */
 
@@ -10,15 +10,20 @@
 export default class RedShareGLSL {
 	static MAX_DIRECTIONAL_LIGHT = 3;
 	static MAX_POINT_LIGHT = 100;
+	static SET_INDEX_SystemUniforms = 0;
+	static SET_INDEX_LightUniforms = 1;
+	static SET_INDEX_MeshUniforms = 2;
+	static SET_INDEX_VertexUniforms = 3;
+	static SET_INDEX_FragmentUniforms = 3;
 	static GLSL_SystemUniforms_vertex = {
 		systemUniforms: `
-		layout(set=0,binding = 0) uniform SystemUniforms {
+		layout( set =  ${RedShareGLSL.SET_INDEX_SystemUniforms}, binding = 0 ) uniform SystemUniforms {
 	        mat4 perspectiveMTX;
 	        mat4 cameraMTX;
 	        float time;
 	    } systemUniforms;
 	    `,
-		calcDisplacement : `
+		calcDisplacement: `
 		//#RedGPU#displacementTexture# vec3 calcDisplacement(vec3 vNormal, float displacementFlowSpeedX, float displacementFlowSpeedY, float displacementPower, vec2 targetUV, texture2D targetDisplacementTexture, sampler targetSampler){
 		//#RedGPU#displacementTexture#    return normalize(vNormal) * texture(sampler2D(targetDisplacementTexture, targetSampler), targetUV + vec2(
 		//#RedGPU#displacementTexture#              displacementFlowSpeedX * (systemUniforms.time/1000.0),
@@ -44,12 +49,12 @@ export default class RedShareGLSL {
 	        vec3 position; float intensity;
 	        float radius;
 		};
-		layout(set=1,binding = 0) uniform SystemUniforms {
+		layout( set =  ${RedShareGLSL.SET_INDEX_LightUniforms}, binding = 0 ) uniform LightUniforms {
 	        float directionalLightCount;
 	        float pointLightCount;
 	        DirectionalLight directionalLightList[MAX_DIRECTIONAL_LIGHT];
 	        PointLight pointLightList[MAX_POINT_LIGHT];	        
-        } systemUniforms;
+        } lightUniforms;
         /////////////////////////////////////////////////////////////////////////////
         void calcDirectionalLight(
             vec4 diffuseColor,

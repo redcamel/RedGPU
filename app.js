@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.29 22:21:48
+ *   Last modification time of this file - 2019.11.30 16:32:22
  *
  */
 
@@ -36,7 +36,9 @@ import RedColorPhongTextureMaterial from "./src/material/RedColorPhongTextureMat
 
 	const glslang = await glslangModule.default();
 	console.log(glslang);
-	let tMat1, tMat2, tMat3, tMat4, tMat5, tMat6, tMat7, tMat8;
+	let testMat_color, testMat_colorPhong, testMat_bitmap, testMat_standard_diffuse, testMat_standard_diffuse_normal,
+		testMat_standard_diffuse_normal_displacement, testMat_colorPhongTexture_normal,
+		testMat_colorPhongTexture_normal_displacement;
 	let redGPU = new RedGPU(cvs, glslang,
 		function () {
 
@@ -83,7 +85,7 @@ import RedColorPhongTextureMaterial from "./src/material/RedColorPhongTextureMat
 			tScene.addLight(tLight)
 
 
-			let i2 = 20
+			let i2 = 10
 			let testColor = ['#ff0000', '#00ff00', '#0000ff', '#ffffff', '#ff2234']
 			while (i2--) {
 				let tLight = new RedPointLight(testColor[i2 % 5], 1, 1, parseInt(Math.random() * 35) + 35)
@@ -105,25 +107,25 @@ import RedColorPhongTextureMaterial from "./src/material/RedColorPhongTextureMat
 			];
 
 
-			tMat1 = new RedColorMaterial(redGPU, '#ffff00');
-			tMat2 = new RedColorPhongMaterial(redGPU, '#00ff00');
-			tMat7 = new RedColorPhongTextureMaterial(redGPU, '#ff0000', 1, testTextureList[2])
-			tMat8 = new RedColorPhongTextureMaterial(redGPU, '#ff0000', 1, testTextureList[2], testTextureList[4])
-			console.log(tMat2)
-			tMat3 = new RedBitmapMaterial(redGPU, testTextureList[0]);
-			tMat4 = new RedStandardMaterial(redGPU, testTextureList[1]);
-			tMat5 = new RedStandardMaterial(redGPU, testTextureList[0]);
-			tMat6 = new RedStandardMaterial(redGPU, testTextureList[1], testTextureList[2], testTextureList[4]);
-			tMat6.displacementPower = 1
-			tMat6.displacementFlowSpeedX = 0.1
-			tMat6.displacementFlowSpeedY = 0.1
+			testMat_color = new RedColorMaterial(redGPU, '#ffff00');
+			testMat_colorPhong = new RedColorPhongMaterial(redGPU, '#00ff00');
+			testMat_colorPhongTexture_normal = new RedColorPhongTextureMaterial(redGPU, '#ff0000', 1, testTextureList[2])
+			testMat_colorPhongTexture_normal_displacement = new RedColorPhongTextureMaterial(redGPU, '#ff0000', 1, testTextureList[2], testTextureList[4])
+			console.log(testMat_colorPhong)
+			testMat_bitmap = new RedBitmapMaterial(redGPU, testTextureList[0]);
+			testMat_standard_diffuse = new RedStandardMaterial(redGPU, testTextureList[1]);
+			testMat_standard_diffuse_normal = new RedStandardMaterial(redGPU, testTextureList[0], testTextureList[2]);
+			testMat_standard_diffuse_normal_displacement = new RedStandardMaterial(redGPU, testTextureList[1], testTextureList[2], testTextureList[4]);
+			testMat_standard_diffuse_normal_displacement.displacementPower = 1
+			testMat_standard_diffuse_normal_displacement.displacementFlowSpeedX = 0.1
+			testMat_standard_diffuse_normal_displacement.displacementFlowSpeedY = 0.1
 
-			tMat8.displacementPower = 1
-			tMat8.displacementFlowSpeedX = 0.01
-			tMat8.displacementFlowSpeedY = 0.01
+			testMat_colorPhongTexture_normal_displacement.displacementPower = 1
+			testMat_colorPhongTexture_normal_displacement.displacementFlowSpeedX = 0.01
+			testMat_colorPhongTexture_normal_displacement.displacementFlowSpeedY = 0.01
 
 
-			// let mats = [tMat1, tMat2, tMat3, tMat4, tMat5, tMat6]
+			// let mats = [testMat_color, testMat_colorPhong, testMat_bitmap, testMat_standard_diffuse, testMat_standard_diffuse_normal, testMat_standard_diffuse_normal_displacement]
 			let changeNum = 0
 			// setInterval(_ => {
 			// 	let tChildren = tView.scene.children
@@ -150,7 +152,7 @@ import RedColorPhongTextureMaterial from "./src/material/RedColorPhongTextureMat
 				let testMesh = new RedMesh(
 					redGPU,
 					new RedSphere(redGPU, 0.5, 32, 32, 32),
-					tMat3
+					testMat_bitmap
 				);
 				testMesh.x = Math.random() * 30 - 15
 				testMesh.y = Math.random() * 30 - 15
@@ -163,26 +165,26 @@ import RedColorPhongTextureMaterial from "./src/material/RedColorPhongTextureMat
 				let testMesh = new RedMesh(
 					redGPU,
 					randomGeometry(),
-					i > division * 7 ? tMat1
-						: i > division * 6 ? tMat2
-						: i > division * 5 ? tMat3
-							: i > division * 4 ? tMat4
-								: i > division * 3 ? tMat5
-									: i > division * 2 ? tMat6
-										: i > division * 1 ? tMat7 : tMat8
+					i > division * 7 ? testMat_color
+						: i > division * 6 ? testMat_colorPhong
+						: i > division * 5 ? testMat_bitmap
+							: i > division * 4 ? testMat_standard_diffuse
+								: i > division * 3 ? testMat_standard_diffuse_normal
+									: i > division * 2 ? testMat_standard_diffuse_normal_displacement
+										: i > division * 1 ? testMat_colorPhongTexture_normal : testMat_colorPhongTexture_normal_displacement
 				);
 				testMesh.x = Math.random() * 300 - 150;
 				testMesh.y = Math.random() * 300 - 150;
 				testMesh.z = Math.random() * 300 - 150;
 				testMesh.rotationX = testMesh.rotationY = testMesh.rotationZ = Math.random() * 360;
 				testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = Math.random() * 5 + 1;
-				if (testMesh.material == tMat6) testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = 10
+				if (testMesh.material == testMat_standard_diffuse_normal_displacement) testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = 10
 				tScene.addChild(testMesh)
 				// //
 				// let testMesh2 = new RedMesh(
 				// 	redGPU,
 				// 	new RedSphere(redGPU, 1, 16, 16, 16),
-				// 	tMat2
+				// 	testMat_colorPhong
 				// );
 				// testMesh2.x = 2
 				// testMesh2.scaleX = testMesh2.scaleY = testMesh2.scaleZ = 0.5;
@@ -191,7 +193,7 @@ import RedColorPhongTextureMaterial from "./src/material/RedColorPhongTextureMat
 				// let testMesh3 = new RedMesh(
 				// 	redGPU,
 				// 	new RedSphere(redGPU),
-				// 	tMat3
+				// 	testMat_bitmap
 				// );
 				// testMesh3.x = 2
 				// testMesh3.scaleX = testMesh3.scaleY = testMesh3.scaleZ = 0.5;
@@ -270,10 +272,10 @@ import RedColorPhongTextureMaterial from "./src/material/RedColorPhongTextureMat
 				// tView.camera.lookAt(0, 0, 0);
 
 				renderer.render(time, redGPU);
-				tMat8.displacementPower = tMat6.displacementPower = Math.sin(time / 1000) * 5
-				tMat4.normalPower = tMat5.normalPower = tMat6.normalPower = Math.abs(Math.sin(time / 1000)) + 1
-				tMat2.shininess = tMat4.shininess = tMat5.shininess = Math.abs(Math.sin(time / 1000)) * 64 + 8
-				tMat2.specularPower = Math.abs(Math.sin(time / 1000)) * 5
+				testMat_colorPhongTexture_normal_displacement.displacementPower = testMat_standard_diffuse_normal_displacement.displacementPower = Math.sin(time / 1000) * 5
+				testMat_standard_diffuse.normalPower = testMat_standard_diffuse_normal.normalPower = testMat_standard_diffuse_normal_displacement.normalPower = Math.abs(Math.sin(time / 1000)) + 1
+				testMat_colorPhong.shininess = testMat_standard_diffuse.shininess = testMat_standard_diffuse_normal.shininess = Math.abs(Math.sin(time / 1000)) * 64 + 8
+				testMat_colorPhong.specularPower = Math.abs(Math.sin(time / 1000)) * 5
 
 
 				let tChildren = tView.scene.pointLightList
@@ -313,6 +315,12 @@ import RedColorPhongTextureMaterial from "./src/material/RedColorPhongTextureMat
 			'./assets/cubemap/SwedishRoyalCastle/ny.jpg',
 			'./assets/cubemap/SwedishRoyalCastle/pz.jpg',
 			'./assets/cubemap/SwedishRoyalCastle/nz.jpg'
+			// './assets/cubemap/posx.jpg',
+			// './assets/cubemap/negx.jpg',
+			// './assets/cubemap/posy.jpg',
+			// './assets/cubemap/negy.jpg',
+			// './assets/cubemap/posz.jpg',
+			// './assets/cubemap/negz.jpg'
 		])
 		console.log('RedBitmapCubeTexture', testCubeTexture)
 
@@ -383,7 +391,14 @@ import RedColorPhongTextureMaterial from "./src/material/RedColorPhongTextureMat
 		tFolder.open()
 
 		tFolder.add(testData, 'useFloatMode').onChange(v => {
-			tMat2.useFlatMode = tMat6.useFlatMode = v
+			testMat_color,
+				testMat_colorPhong.useFlatMode = v
+			testMat_standard_diffuse.useFlatMode = v
+			testMat_standard_diffuse_normal.useFlatMode = v
+			testMat_standard_diffuse_normal_displacement.useFlatMode = v
+			testMat_colorPhongTexture_normal.useFlatMode = v
+			testMat_colorPhongTexture_normal_displacement.useFlatMode = v
+
 		});
 		tFolder.add(testData, 'useDepthTest').onChange(v => tScene.children.forEach(tMesh => tMesh.useDepthTest = v));
 
