@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 22:24:1
+ *   Last modification time of this file - 2019.12.2 10:10:11
  *
  */
 
@@ -149,7 +149,7 @@ import RedAxis from "./src/object3D/RedAxis.js";
 			//
 			// 	while (i--) {
 			//
-			// 		tChildren[i].material = mats[changeNum%5]
+			// 		tChildren[i].material = mats[changeNum%mats.length]
 			// 	}
 			// }, 2500)
 

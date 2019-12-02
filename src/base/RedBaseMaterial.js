@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 18:40:19
+ *   Last modification time of this file - 2019.12.2 10:10:11
  *
  */
 
@@ -38,6 +38,7 @@ export default class RedBaseMaterial extends RedUUID {
 	uniformBufferDescriptor_vertex;
 	uniformBufferDescriptor_fragment;
 	GPUBindGroupLayout;
+	#uniformBufferUpdated = false;
 	vShaderModule;
 	fShaderModule;
 	vertexStage;
@@ -137,18 +138,21 @@ export default class RedBaseMaterial extends RedUUID {
 		this.searchModules();
 		this.setUniformBindGroupDescriptor();
 		this.uniformBindGroup_material.setGPUBindGroup(this.uniformBindGroupDescriptor);
-		this.updateUniformBuffer();// FIXME - 아마도 프로그램당 고유 재질 주소를 공유한다고 치면... 재질 프로그램 버전별로 하나씩 들고있어야한다...그렇다면 이거 재업로드 비용을 상당히 줄일수있을듯
+		if (!this.#uniformBufferUpdated) {
+			this.updateUniformBuffer();
+			this.#uniformBufferUpdated = true;
+		}
 		this.updateUUID();
 	}
 
 	searchModules() {
-		console.log(this,this.constructor,this.constructor.name)
+		console.log(this, this.constructor, this.constructor.name)
 		console.log(this.constructor.PROGRAM_OPTION_LIST)
 		let tKey = [this.constructor.name];
 		let i = 0, len = this.constructor.PROGRAM_OPTION_LIST.length;
 		for (i; i < len; i++) {
 			let key = this.constructor.PROGRAM_OPTION_LIST[i];
-			console.log(key,this[key])
+			console.log(key, this[key])
 			if (this[key]) tKey.push(key);
 		}
 		tKey = tKey.join('_');

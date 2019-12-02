@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 22:24:1
+ *   Last modification time of this file - 2019.12.2 10:10:11
  *
  */
 
@@ -46,7 +46,7 @@ import RedAxis from "./src/object3D/RedAxis.js";
 			tCamera.targetView = tView // optional
 
 			tScene.grid = tGrid
-			tScene.axis = new RedAxis(redGPU)
+			// tScene.axis = new RedAxis(redGPU)
 			let tLight
 			tLight = new RedDirectionalLight('#ff0000', 1)
 			tLight.x = 10
@@ -84,7 +84,7 @@ import RedAxis from "./src/object3D/RedAxis.js";
 				testMat
 			);
 
-			// tScene.addChild(testMesh)
+			tScene.addChild(testMesh)
 
 			let renderer = new RedRender();
 			let render = function (time) {
