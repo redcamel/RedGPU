@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 20:54:38
+ *   Last modification time of this file - 2019.12.2 10:10:11
  *
  */
 
@@ -21,25 +21,21 @@ export default class RedUniformBufferDescriptor {
 		this.redStruct.map((v) => {
 			v.offset = offset;
 			if (v.size <= FLOAT4_SIZE) {
-				let t0 = Math.round(offset / FLOAT4_SIZE);
-				let t1 = Math.floor((offset + v.size) / FLOAT4_SIZE);
+				let t0 = Math.floor(offset / FLOAT4_SIZE);
+				let t1 = Math.floor((offset + v.size-1) / FLOAT4_SIZE);
 				if (t0 == t1) offset += v.size;
 				else {
 					offset += FLOAT4_SIZE - offset % FLOAT4_SIZE
+					offset += v.size
 				}
 			} else {
-				if (offset == 0) v.offset = 0;
-				else {
-					if (offset % 16) offset += FLOAT4_SIZE - offset % FLOAT4_SIZE;
-
-				}
-				offset += RedTypeSize.mat4
+				if (offset % 16) offset += FLOAT4_SIZE - offset % FLOAT4_SIZE;
+				offset += v.size
 			}
-			console.log(v);
 			this.redStructOffsetMap[v['valueName']] = v.offset;
 			v._UUID = v.valueName + '_' + RedUUID.makeUUID()
 		});
-		this.size = this.redStruct.length ? (offset + this.redStruct[this.redStruct.length - 1].size + (offset + this.redStruct[this.redStruct.length - 1].size) % 16) : FLOAT4_SIZE;
+		this.size = this.redStruct.length ? (offset + this.redStruct[this.redStruct.length - 1].size) : FLOAT4_SIZE;
 		this.usage = usage;
 		console.log(this)
 	}
