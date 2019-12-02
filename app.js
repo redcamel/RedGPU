@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.2 10:10:11
+ *   Last modification time of this file - 2019.12.2 12:39:33
  *
  */
 
@@ -22,13 +22,13 @@ import RedColorMaterial from "./src/material/RedColorMaterial.js";
 import RedColorPhongMaterial from "./src/material/RedColorPhongMaterial.js";
 import RedGrid from "./src/object3D/RedGrid.js";
 import RedObitController from "./src/controller/RedObitController.js";
-import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 import RedPointLight from "./src/light/RedPointLight.js";
 import RedSkyBox from "./src/object3D/RedSkyBox.js";
 import RedBitmapCubeTexture from "./src/resources/RedBitmapCubeTexture.js";
 import RedColorPhongTextureMaterial from "./src/material/RedColorPhongTextureMaterial.js";
 import RedEnvironmentMaterial from "./src/material/RedEnvironmentMaterial.js";
 import RedAxis from "./src/object3D/RedAxis.js";
+import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 
 
 (async function () {
@@ -66,6 +66,7 @@ import RedAxis from "./src/object3D/RedAxis.js";
 			tCamera.targetView = tView // optional
 			tCamera2.targetView = tView2 // optional
 			tCamera.distance = 200
+			tCamera.speedDistance = 10
 
 			tScene.grid = tGrid;
 			tScene.axis = tAxis;
@@ -91,12 +92,12 @@ import RedAxis from "./src/object3D/RedAxis.js";
 
 
 			let i2 = 10
-			let testColor = ['#ff0000', '#00ff00', '#0000ff', '#ffffff', '#ff2234']
+			let testColor = ['#ff0000', '#00ff00', '#0000ff', '#ffffff', '#ffff00']
 			while (i2--) {
-				let tLight = new RedPointLight(testColor[i2 % 5], 1, 2, parseInt(Math.random() * 35) + 35)
-				tLight.x = Math.random() * 80 - 40
-				tLight.y = Math.random() * 80 - 40
-				tLight.z = Math.random() * 80 - 40
+				let tLight = new RedPointLight(testColor[i2%testColor.length], 1, 1, Math.random()*25+25)
+				tLight.x = Math.random() * 100 - 50;
+				tLight.y = Math.random() * 100 - 50;
+				tLight.z = Math.random() * 100 - 50;
 				tScene.addLight(tLight)
 			}
 
@@ -120,9 +121,9 @@ import RedAxis from "./src/object3D/RedAxis.js";
 				'./assets/cubemap/SwedishRoyalCastle/nz.jpg'
 			])
 
-			testMat_environment = new RedEnvironmentMaterial(redGPU, testTextureList[1],testCubeTexture)
+			testMat_environment = new RedEnvironmentMaterial(redGPU, testTextureList[1], testCubeTexture)
 			testMat_color = new RedColorMaterial(redGPU, '#ffff12');
-			testMat_colorPhong = new RedColorPhongMaterial(redGPU, '#11ff23');
+			testMat_colorPhong = new RedColorPhongMaterial(redGPU, '#ffffff');
 			testMat_colorPhongTexture_normal = new RedColorPhongTextureMaterial(redGPU, '#fff253', 1, testTextureList[2])
 			testMat_colorPhongTexture_normal_displacement = new RedColorPhongTextureMaterial(redGPU, '#341fff', 1, testTextureList[2], testTextureList[5], testTextureList[6], testTextureList[4])
 			console.log(testMat_colorPhong)
@@ -204,12 +205,12 @@ import RedAxis from "./src/object3D/RedAxis.js";
 									: i > division * 2 ? testMat_standard_diffuse_normal_displacement
 										: i > division * 1 ? testMat_colorPhongTexture_normal : testMat_colorPhongTexture_normal_displacement
 				);
-				testMesh.x = Math.random() * 300 - 150;
-				testMesh.y = Math.random() * 300 - 150;
-				testMesh.z = Math.random() * 300 - 150;
+				testMesh.x = Math.random() * 200 - 100;
+				testMesh.y = Math.random() * 200 - 100;
+				testMesh.z = Math.random() * 200 - 100;
 				testMesh.rotationX = testMesh.rotationY = testMesh.rotationZ = Math.random() * 360;
 				testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = Math.random() * 5 + 1;
-				if (testMesh.material == testMat_standard_diffuse_normal_displacement) testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = 10
+				if (testMesh.material == testMat_standard_diffuse_normal_displacement) testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = 5
 				tScene.addChild(testMesh)
 				// //
 				// let testMesh2 = new RedMesh(
@@ -305,19 +306,20 @@ import RedAxis from "./src/object3D/RedAxis.js";
 				tLight.y = Math.cos(time / 500)
 				tLight.z = Math.cos(time / 750)
 				renderer.render(time, redGPU);
-				testMat_standard_diffuse_normal.emissivePower =testMat_standard_diffuse_normal_displacement.emissivePower =testMat_colorPhongTexture_normal_displacement.emissivePower = Math.abs(Math.sin(time/250))
+				testMat_standard_diffuse_normal.emissivePower = testMat_standard_diffuse_normal_displacement.emissivePower = testMat_colorPhongTexture_normal_displacement.emissivePower = Math.abs(Math.sin(time / 250))
 				testMat_colorPhongTexture_normal_displacement.displacementPower = testMat_standard_diffuse_normal_displacement.displacementPower = Math.sin(time / 1000) * 5
 				testMat_standard_diffuse.normalPower = testMat_standard_diffuse_normal.normalPower = testMat_standard_diffuse_normal_displacement.normalPower = Math.abs(Math.sin(time / 1000)) + 1
-				testMat_colorPhong.shininess = testMat_standard_diffuse.shininess = testMat_standard_diffuse_normal.shininess = Math.abs(Math.sin(time / 1000)) * 64 + 8
-				testMat_colorPhong.specularPower = Math.abs(Math.sin(time / 1000)) * 5
+				testMat_standard_diffuse.shininess = testMat_standard_diffuse.shininess = testMat_standard_diffuse_normal.shininess = Math.abs(Math.sin(time / 1000)) * 64 + 8
+				testMat_standard_diffuse.specularPower = Math.abs(Math.sin(time / 1000)) * 5
+				testMat_colorPhong.shininess = 8
 
 
 				let tChildren = tView.scene.pointLightList
 				let i = tChildren.length;
 				while (i--) {
-					tChildren[i].x = Math.sin(time / 1000 + i * 10 + Math.PI * 2 / tChildren.length * i) * 60
-					tChildren[i].y = Math.tan(time / 2000 + i * 10 + Math.PI * 2 / tChildren.length * i) * 60 + Math.cos(time / 500 + i * 10 + Math.PI * 2 / tChildren.length * i) * 12
-					tChildren[i].z = Math.cos(time / 2000 + i * 10 + Math.PI * 2 / tChildren.length * i) * 60
+					tChildren[i].x = Math.sin(time / 1000 + i * 10 + Math.PI * 2 / tChildren.length * i) * 75
+					tChildren[i].y = Math.sin(time / 2000 + i * 10 + Math.PI * 2 / tChildren.length * i) * 20
+					tChildren[i].z = Math.cos(time / (2000 + i* 10)  + Math.PI * 2 / tChildren.length * i) * 75
 				}
 
 				//  tChildren = tView.scene.children

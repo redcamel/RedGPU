@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 16:32:22
+ *   Last modification time of this file - 2019.12.2 12:39:33
  *
  */
 
@@ -17,13 +17,7 @@ export default class RedBaseLight extends RedMaterialPreset.mix(
 	x = 0;
 	y = 0;
 	z = 0;
-	#position = new Float32Array([0, 0, 0]);
-	get position() {
-		this.#position[0] = this.x;
-		this.#position[1] = this.y;
-		this.#position[2] = this.z;
-		return this.#position
-	}
+
 
 	get intensity() {
 		return this.#intensity;

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 20:54:38
+ *   Last modification time of this file - 2019.12.2 12:39:33
  *
  */
 
@@ -44,7 +44,8 @@ export default class RedShareGLSL {
 		};
 		struct PointLight {
 	        vec4 color;
-	        vec3 position; float intensity;
+	        vec3 position;
+	        float intensity;
 	        float radius;
 		};
 		layout( set =  ${RedShareGLSL.SET_INDEX_SystemUniforms_fragment}, binding = 0 ) uniform SystemUniforms {

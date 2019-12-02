@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 20:54:38
+ *   Last modification time of this file - 2019.12.2 12:39:33
  *
  */
 
@@ -33,7 +33,9 @@ export default class RedView {
 	baseResolveTargetView;
 	baseDepthStencilAttachment;
 	baseDepthStencilAttachmentView;
-
+	//
+	#systemUniformInfo_vertex_data;
+	#systemUniformInfo_fragment_data;
 	constructor(redGPU, scene, camera) {
 		this.#redGPU = redGPU;
 		this.camera = camera;
@@ -49,12 +51,10 @@ export default class RedView {
 			RedTypeSize.mat4 + // projectionMatrix
 			RedTypeSize.mat4 +  // camera
 			RedTypeSize.float // time
-
 		;
 		const uniformBufferDescriptor = {
 			size: uniformBufferSize,
 			usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-
 		};
 		const bindGroupLayoutDescriptor = {
 			bindings: [
@@ -65,8 +65,9 @@ export default class RedView {
 				}
 			]
 		};
-		let uniformBuffer, uniformBindGroupLayout;
-		const bindGroupDescriptor = {
+		let uniformBuffer, uniformBindGroupLayout, uniformBindGroup, bindGroupDescriptor;
+		this.#systemUniformInfo_vertex_data = new Float32Array(uniformBufferSize / Float32Array.BYTES_PER_ELEMENT);
+		bindGroupDescriptor = {
 			layout: uniformBindGroupLayout = device.createBindGroupLayout(bindGroupLayoutDescriptor),
 			bindings: [
 				{
@@ -79,7 +80,7 @@ export default class RedView {
 				}
 			]
 		};
-		let uniformBindGroup = device.createBindGroup(bindGroupDescriptor);
+		uniformBindGroup = device.createBindGroup(bindGroupDescriptor);
 		return {
 			GPUBuffer: uniformBuffer,
 			GPUBindGroupLayout: uniformBindGroupLayout,
@@ -88,13 +89,10 @@ export default class RedView {
 	};
 	#makeSystemUniformInfo_fragment = function (device) {
 		let uniformBufferSize =
-			RedTypeSize.float4 + // cameraPosition
-			// directionalLight
-			RedTypeSize.float4 +
-			RedTypeSize.float4 * 2 * RedShareGLSL.MAX_DIRECTIONAL_LIGHT +
-			// pointLight
-			RedTypeSize.float4 +
-			RedTypeSize.float4 * 3 * RedShareGLSL.MAX_POINT_LIGHT
+			RedTypeSize.float4 + // directionalLightCount,pointLightCount
+			RedTypeSize.float4 * 2 * RedShareGLSL.MAX_DIRECTIONAL_LIGHT + // directionalLight
+			RedTypeSize.float4 * 3 * RedShareGLSL.MAX_POINT_LIGHT + // pointLight
+			RedTypeSize.float4  // cameraPosition
 		;
 		const uniformBufferDescriptor = {
 			size: uniformBufferSize,
@@ -110,8 +108,9 @@ export default class RedView {
 				}
 			]
 		};
-		let uniformBuffer, uniformBindGroupLayout;
-		const bindGroupDescriptor = {
+		let uniformBuffer, uniformBindGroupLayout, uniformBindGroup, bindGroupDescriptor;
+		this.#systemUniformInfo_fragment_data = new Float32Array(uniformBufferSize / Float32Array.BYTES_PER_ELEMENT);
+		bindGroupDescriptor = {
 			layout: uniformBindGroupLayout = device.createBindGroupLayout(bindGroupLayoutDescriptor),
 			bindings: [
 				{
@@ -124,7 +123,7 @@ export default class RedView {
 				}
 			]
 		};
-		let uniformBindGroup = device.createBindGroup(bindGroupDescriptor);
+		uniformBindGroup = device.createBindGroup(bindGroupDescriptor);
 		return {
 			GPUBuffer: uniformBuffer,
 			GPUBindGroupLayout: uniformBindGroupLayout,
@@ -177,62 +176,67 @@ export default class RedView {
 	}
 	updateSystemUniform(passEncoder, redGPU) {
 		//TODO 여기도 오프셋 자동으로 계산하게 변경해야함
-		let systemUniformInfo_vertex = this.systemUniformInfo_vertex;
+		let systemUniformInfo_vertex, systemUniformInfo_fragment, aspect, offset;
+		let i, len;
+		systemUniformInfo_vertex = this.systemUniformInfo_vertex;
+		systemUniformInfo_fragment = this.systemUniformInfo_fragment;
 		this.#viewRect = this.getViewRect(redGPU);
-		// passEncoder.setViewport(tX, tY, this.canvas.width, this.canvas.height, 0, 1);
 		passEncoder.setViewport(0, 0, this.#viewRect[2], this.#viewRect[3], 0, 1);
 		passEncoder.setScissorRect(0, 0, this.#viewRect[2], this.#viewRect[3]);
 		passEncoder.setBindGroup(0, systemUniformInfo_vertex.GPUBindGroup);
-		let aspect = Math.abs(this.#viewRect[2] / this.#viewRect[3]);
-		mat4.perspective(this.projectionMatrix, (Math.PI / 180) * this.camera.fov, aspect, this.camera.nearClipping, this.camera.farClipping);
-		let offset = 0;
-		systemUniformInfo_vertex.GPUBuffer.setSubData(offset, this.projectionMatrix);
-		offset += RedTypeSize.mat4;
-		systemUniformInfo_vertex.GPUBuffer.setSubData(offset, this.camera.matrix);
-		offset += RedTypeSize.mat4;
-		systemUniformInfo_vertex.GPUBuffer.setSubData(offset, new Float32Array([performance.now()]));
-		offset += RedTypeSize.float;
-		///////////////////////////////////////////////////////////////////////////////////////////////////
-		let systemUniformInfo_fragment = this.systemUniformInfo_fragment;
 		passEncoder.setBindGroup(1, systemUniformInfo_fragment.GPUBindGroup);
+		// update systemUniformInfo_vertex /////////////////////////////////////////////////////////////////////////////////////////////////
 		offset = 0;
-
-		systemUniformInfo_fragment.GPUBuffer.setSubData(offset, new Float32Array([
-			this.scene.directionalLightList.length,
-			this.scene.pointLightList.length
-		]));
-		offset += RedTypeSize.float4; // TODO : 이걸와 4로 해야되는거지 -_-
-
-		let i = 0, len = this.scene.directionalLightList.length;
+		aspect = Math.abs(this.#viewRect[2] / this.#viewRect[3]);
+		mat4.perspective(this.projectionMatrix, (Math.PI / 180) * this.camera.fov, aspect, this.camera.nearClipping, this.camera.farClipping);
+		this.#systemUniformInfo_vertex_data.set(this.projectionMatrix, offset);
+		offset += RedTypeSize.mat4 / Float32Array.BYTES_PER_ELEMENT;
+		this.#systemUniformInfo_vertex_data.set(this.camera.matrix, offset);
+		offset += RedTypeSize.mat4 / Float32Array.BYTES_PER_ELEMENT;
+		this.#systemUniformInfo_vertex_data.set([performance.now()], offset);
+		offset += RedTypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
+		// update GPUBuffer
+		systemUniformInfo_vertex.GPUBuffer.setSubData(0, this.#systemUniformInfo_vertex_data);
+		// update systemUniformInfo_fragment /////////////////////////////////////////////////////////////////////////////////////////////////
+		offset = 0;
+		// update light count
+		this.#systemUniformInfo_fragment_data.set([this.scene.directionalLightList.length, this.scene.pointLightList.length], offset);
+		i = 0;
+		// update directionalLightList
+		offset = RedTypeSize.float4 / Float32Array.BYTES_PER_ELEMENT
+		len = this.scene.directionalLightList.length;
 		for (i; i < len; i++) {
 			let tLight = this.scene.directionalLightList[i];
 			if (tLight) {
-				systemUniformInfo_fragment.GPUBuffer.setSubData(offset, tLight.colorRGBA);
-				offset += RedTypeSize.float4;
-				systemUniformInfo_fragment.GPUBuffer.setSubData(offset, new Float32Array([tLight.x, tLight.y, tLight.z, tLight.intensity]));
-				offset += RedTypeSize.float4;
+				this.#systemUniformInfo_fragment_data.set(tLight.colorRGBA, offset);
+				offset += RedTypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
+				this.#systemUniformInfo_fragment_data.set([tLight.x, tLight.y, tLight.z, tLight.intensity], offset);
+				offset += RedTypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
 			}
 		}
-		offset =  RedTypeSize.float4 + RedTypeSize.float4 * 2 * RedShareGLSL.MAX_DIRECTIONAL_LIGHT;
-		i = 0, len = this.scene.pointLightList.length;
+		// update pointLightList
+		offset = (RedTypeSize.float4 + RedTypeSize.float4 * 2 * RedShareGLSL.MAX_DIRECTIONAL_LIGHT) / Float32Array.BYTES_PER_ELEMENT;
+		i = 0;
+		len = this.scene.pointLightList.length;
 		for (i; i < len; i++) {
 			let tLight = this.scene.pointLightList[i];
 			if (tLight) {
-				systemUniformInfo_fragment.GPUBuffer.setSubData(offset, tLight.colorRGBA);
-				offset += RedTypeSize.float4;
-				systemUniformInfo_fragment.GPUBuffer.setSubData(offset, new Float32Array([tLight.x, tLight.y, tLight.z, tLight.intensity]));
-				offset += RedTypeSize.float4;
-				systemUniformInfo_fragment.GPUBuffer.setSubData(offset, new Float32Array([tLight.radius]));
-				offset += RedTypeSize.float4
+				this.#systemUniformInfo_fragment_data.set(tLight.colorRGBA, offset);
+				offset += RedTypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
+				this.#systemUniformInfo_fragment_data.set([tLight.x, tLight.y, tLight.z, tLight.intensity], offset);
+				offset += RedTypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
+				this.#systemUniformInfo_fragment_data.set([tLight.radius], offset);
+				offset += RedTypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
 			}
 		}
-		offset =  RedTypeSize.float4 + RedTypeSize.float4 * 2 * RedShareGLSL.MAX_DIRECTIONAL_LIGHT + RedTypeSize.float4 * 3 * RedShareGLSL.MAX_POINT_LIGHT;
-		systemUniformInfo_fragment.GPUBuffer.setSubData(offset, new Float32Array([this.camera.x, this.camera.y, this.camera.z,0]));
-		offset += RedTypeSize.float4;
-
-
+		// update camera position
+		offset = (RedTypeSize.float4 + RedTypeSize.float4 * 2 * RedShareGLSL.MAX_DIRECTIONAL_LIGHT + RedTypeSize.float4 * 3 * RedShareGLSL.MAX_POINT_LIGHT) / Float32Array.BYTES_PER_ELEMENT;
+		this.#systemUniformInfo_fragment_data.set([this.camera.x, this.camera.y, this.camera.z], offset);
+		offset += RedTypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
+		// update GPUBuffer
+		// console.log(this.#systemUniformInfo_fragment_data)
+		systemUniformInfo_fragment.GPUBuffer.setSubData(0, this.#systemUniformInfo_fragment_data);
 	}
-
 	get scene() {
 		return this.#scene;
 	}
