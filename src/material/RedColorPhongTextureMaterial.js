@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 22:24:1
+ *   Last modification time of this file - 2019.12.2 12:39:33
  *
  */
 
@@ -96,7 +96,7 @@ export default class RedColorPhongTextureMaterial extends RedMaterialPreset.mix(
 			fragmentUniforms.specularPower,
 			fragmentUniforms.specularColor,
 			specularTextureValue
-		);
+		)
 	    +
 	    calcPointLight(
 			fragmentUniforms.color,
