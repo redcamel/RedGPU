@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.2 12:39:33
+ *   Last modification time of this file - 2019.12.3 17:35:29
  *
  */
 
@@ -10,6 +10,7 @@
 import RedUtil from "./util/RedUtil.js"
 import RedTypeSize from "./resources/RedTypeSize.js";
 import RedShareGLSL from "./base/RedShareGLSL.js"
+import RedPostEffect from "./postEffect/RedPostEffect.js";
 
 export default class RedView {
 	get viewRect() {
@@ -36,6 +37,8 @@ export default class RedView {
 	//
 	#systemUniformInfo_vertex_data;
 	#systemUniformInfo_fragment_data;
+	#postEffect;
+
 	constructor(redGPU, scene, camera) {
 		this.#redGPU = redGPU;
 		this.camera = camera;
@@ -43,6 +46,7 @@ export default class RedView {
 		this.systemUniformInfo_vertex = this.#makeSystemUniformInfo_vertex(redGPU.device);
 		this.systemUniformInfo_fragment = this.#makeSystemUniformInfo_fragment(redGPU.device);
 		this.projectionMatrix = mat4.create();
+		this.#postEffect = new RedPostEffect(redGPU);
 
 	}
 
@@ -92,7 +96,8 @@ export default class RedView {
 			RedTypeSize.float4 + // directionalLightCount,pointLightCount
 			RedTypeSize.float4 * 2 * RedShareGLSL.MAX_DIRECTIONAL_LIGHT + // directionalLight
 			RedTypeSize.float4 * 3 * RedShareGLSL.MAX_POINT_LIGHT + // pointLight
-			RedTypeSize.float4  // cameraPosition
+			RedTypeSize.float4+  // cameraPosition
+			RedTypeSize.float2 // resolution
 		;
 		const uniformBufferDescriptor = {
 			size: uniformBufferSize,
@@ -134,44 +139,48 @@ export default class RedView {
 		this.#viewRect = this.getViewRect(redGPU);
 		if (this.baseAttachment) {
 			this.baseAttachment.destroy();
-			this.baseDepthStencilAttachment.destroy();
 			this.baseResolveTarget.destroy();
+			this.baseDepthStencilAttachment.destroy();
 		}
 		console.log(this.#viewRect);
 		this.baseAttachment = redGPU.device.createTexture({
-			size: {
-				width: this.#viewRect[2],
-				height: this.#viewRect[3],
-				depth: 1
-			},
+			size: {width: this.#viewRect[2], height: this.#viewRect[3], depth: 1},
 			sampleCount: 4,
 			format: redGPU.swapChainFormat,
-			usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC
+			usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED
 		});
 		this.baseAttachmentView = this.baseAttachment.createView();
 		this.baseResolveTarget = redGPU.device.createTexture({
-			size: {
-				width: this.#viewRect[2],
-				height: this.#viewRect[3],
-				depth: 1
-			},
+			size: {width: this.#viewRect[2], height: this.#viewRect[3], depth: 1},
 			sampleCount: 1,
 			format: redGPU.swapChainFormat,
-			usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC
+			usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED
 		});
 		this.baseResolveTargetView = this.baseResolveTarget.createView();
+
+		this.baseAttachment2 = redGPU.device.createTexture({
+			size: {width: this.#viewRect[2], height: this.#viewRect[3], depth: 1},
+			sampleCount: 4,
+			format: redGPU.swapChainFormat,
+			usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED
+		});
+		this.baseAttachment2View = this.baseAttachment2.createView();
+		this.baseResolveTarget2 = redGPU.device.createTexture({
+			size: {width: this.#viewRect[2], height: this.#viewRect[3], depth: 1},
+			sampleCount: 1,
+			format: redGPU.swapChainFormat,
+			usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED
+		});
+		this.baseResolveTarget2View = this.baseResolveTarget2.createView();
+
 		this.baseDepthStencilAttachment = redGPU.device.createTexture({
-			size: {
-				width: this.#viewRect[2],
-				height: this.#viewRect[3],
-				depth: 1
-			},
+			size: {width: this.#viewRect[2], height: this.#viewRect[3], depth: 1},
 			sampleCount: 4,
 			format: "depth24plus-stencil8",
-			usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC
+			usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED
 		});
 		this.baseDepthStencilAttachmentView = this.baseDepthStencilAttachment.createView();
-		console.log('this.baseAttachment', this.baseAttachment)
+
 
 	}
 	updateSystemUniform(passEncoder, redGPU) {
@@ -233,9 +242,14 @@ export default class RedView {
 		offset = (RedTypeSize.float4 + RedTypeSize.float4 * 2 * RedShareGLSL.MAX_DIRECTIONAL_LIGHT + RedTypeSize.float4 * 3 * RedShareGLSL.MAX_POINT_LIGHT) / Float32Array.BYTES_PER_ELEMENT;
 		this.#systemUniformInfo_fragment_data.set([this.camera.x, this.camera.y, this.camera.z], offset);
 		offset += RedTypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
+		// update resolution
+		this.#systemUniformInfo_fragment_data.set([this.#viewRect[2], this.#viewRect[3]], offset);
 		// update GPUBuffer
 		// console.log(this.#systemUniformInfo_fragment_data)
 		systemUniformInfo_fragment.GPUBuffer.setSubData(0, this.#systemUniformInfo_fragment_data);
+	}
+	get postEffect() {
+		return this.#postEffect;
 	}
 	get scene() {
 		return this.#scene;

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.2 12:39:33
+ *   Last modification time of this file - 2019.12.3 17:35:29
  *
  */
 
@@ -56,7 +56,7 @@ export default class RedColorPhongTextureMaterial extends RedMaterialPreset.mix(
 	`;
 	static fragmentShaderGLSL = `
 	#version 450
-	${RedShareGLSL.GLSL_SystemUniforms_fragment.systemUniformsWithLight}
+	${RedShareGLSL.GLSL_SystemUniforms_fragment.systemUniforms}
 	${RedShareGLSL.GLSL_SystemUniforms_fragment.cotangent_frame}
 	${RedShareGLSL.GLSL_SystemUniforms_fragment.perturb_normal}
 	layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 3 ) uniform FragmentUniforms {
@@ -75,6 +75,7 @@ export default class RedColorPhongTextureMaterial extends RedMaterialPreset.mix(
 	//#RedGPU#specularTexture# layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 6 ) uniform texture2D uSpecularTexture;
 	//#RedGPU#emissiveTexture# layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 7 ) uniform texture2D uEmissiveTexture;
 	layout( location = 0 ) out vec4 outColor;
+	layout( location = 1 ) out vec4 outDepthColor;
 	
 	void main() {
 		vec3 N = normalize(vNormal);
@@ -114,6 +115,7 @@ export default class RedColorPhongTextureMaterial extends RedMaterialPreset.mix(
 		//#RedGPU#emissiveTexture# finalColor.rgb += emissiveColor.rgb * fragmentUniforms.emissivePower;
 		
 		outColor = finalColor;
+		outDepthColor = vec4( vec3(gl_FragCoord.z/gl_FragCoord.w), 1.0 );
 	}
 `;
 	static PROGRAM_OPTION_LIST = ['displacementTexture', 'emissiveTexture', 'normalTexture', 'specularTexture', 'useFlatMode'];

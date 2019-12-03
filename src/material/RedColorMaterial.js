@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 17:10:18
+ *   Last modification time of this file - 2019.12.3 17:35:29
  *
  */
 
@@ -33,8 +33,10 @@ export default class RedColorMaterial extends RedMaterialPreset.mix(
         vec4 color;
     } fragmentUniforms;
 	layout( location = 0 ) out vec4 outColor;
+	layout( location = 1 ) out vec4 outDepthColor;
 	void main() {
 		outColor = fragmentUniforms.color;
+		outDepthColor = vec4( vec3(gl_FragCoord.z/gl_FragCoord.w), 1.0 );
 	}
 	`;
 	static PROGRAM_OPTION_LIST = [];

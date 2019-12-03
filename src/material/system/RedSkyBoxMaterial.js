@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 16:56:31
+ *   Last modification time of this file - 2019.12.3 17:35:29
  *
  */
 
@@ -33,10 +33,12 @@ export default class RedSkyBoxMaterial extends RedMaterialPreset.mix(
 	layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 0) uniform sampler uSampler;
 	layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 1) uniform textureCube uSkyBoxTexture;
 	layout( location = 0 ) out vec4 outColor;
+	layout( location = 1 ) out vec4 outDepthColor;
 	void main() {
 		vec4 diffuseColor = vec4(0.0);
 		//#RedGPU#skyBoxTexture# diffuseColor = texture(samplerCube(uSkyBoxTexture,uSampler), vReflectionCubeCoord) ;
 		outColor = diffuseColor;
+		outDepthColor = vec4( vec3(gl_FragCoord.z/gl_FragCoord.w), 1.0 );
 	}
 `;
 	static PROGRAM_OPTION_LIST = ['skyBoxTexture'];

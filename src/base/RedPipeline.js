@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 16:32:22
+ *   Last modification time of this file - 2019.12.3 17:35:29
  *
  */
 
@@ -20,7 +20,69 @@ export default class RedPipeline extends RedUUID {
 		this.#targetMesh = targetMesh;
 		this.GPURenderPipeline = null;
 	}
-	updatePipeline(redGPU, redView) {
+	updatePipeline_sampleCount4(redGPU, redView) {
+		let targetMesh = this.#targetMesh;
+		const device = redGPU.device;
+		const descriptor = {
+			// 레이아웃은 재질이 알고있으니 들고옴
+			layout: device.createPipelineLayout(
+				{
+					bindGroupLayouts: [
+						redView.systemUniformInfo_vertex.GPUBindGroupLayout,
+						redView.systemUniformInfo_fragment.GPUBindGroupLayout,
+						targetMesh.GPUBindGroupLayout,
+						targetMesh._material.GPUBindGroupLayout
+					]
+				}
+			),
+			// 버텍스와 프레그먼트는 재질에서 들고온다.
+			vertexStage: {
+				module: targetMesh._material.vShaderModule.GPUShaderModule,
+				entryPoint: 'main'
+			},
+			fragmentStage: {
+				module: targetMesh._material.fShaderModule.GPUShaderModule,
+				entryPoint: 'main'
+			},
+			// 버텍스 상태는 지오메트리가 알고있음으로 들고옴
+			vertexState: targetMesh._geometry.vertexState,
+			// 컬러모드 지정하고
+			colorStates: [
+				{
+					format: redGPU.swapChainFormat,
+					alphaBlend: {
+						srcFactor: "src-alpha",
+						dstFactor: "one-minus-src-alpha",
+						operation: "add"
+					},
+					colorBlend: {
+						srcFactor: "src-alpha",
+						dstFactor: "one-minus-src-alpha",
+						operation: "add"
+					}
+				},
+				{
+					format: redGPU.swapChainFormat
+				}
+			],
+			rasterizationState: {
+				frontFace: 'ccw',
+				cullMode: targetMesh._cullMode
+			},
+			primitiveTopology: targetMesh._primitiveTopology,
+			depthStencilState: {
+				format: "depth24plus-stencil8",
+				depthWriteEnabled: targetMesh._useDepthTest,
+				depthCompare: targetMesh._useDepthTest ? targetMesh._depthTestFunc : 'always',
+			},
+			sampleCount: 4,
+			//alphaToCoverageEnabled : true // alphaToCoverageEnabled isn't supported (yet)
+		};
+
+		this.GPURenderPipeline = device.createRenderPipeline(descriptor);
+		this.updateUUID()
+	}
+	updatePipeline_sampleCount1(redGPU, redView) {
 		let targetMesh = this.#targetMesh;
 		const device = redGPU.device;
 		const descriptor = {
@@ -67,16 +129,13 @@ export default class RedPipeline extends RedUUID {
 				cullMode: targetMesh._cullMode
 			},
 			primitiveTopology: targetMesh._primitiveTopology,
-			depthStencilState: {
-				format: "depth24plus-stencil8",
-				depthWriteEnabled: targetMesh._useDepthTest,
-				depthCompare: targetMesh._useDepthTest ? targetMesh._depthTestFunc : 'always',
-			},
-			sampleCount: 4,
+
+			sampleCount: 1,
 			//alphaToCoverageEnabled : true // alphaToCoverageEnabled isn't supported (yet)
 		};
 
 		this.GPURenderPipeline = device.createRenderPipeline(descriptor);
 		this.updateUUID()
 	}
+
 }

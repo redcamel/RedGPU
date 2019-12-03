@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 20:54:38
+ *   Last modification time of this file - 2019.12.3 17:35:29
  *
  */
 
@@ -39,7 +39,7 @@ export default class RedColorPhongMaterial extends RedMaterialPreset.mix(
 	`;
 	static fragmentShaderGLSL = `
 	#version 450
-	${RedShareGLSL.GLSL_SystemUniforms_fragment.systemUniformsWithLight}
+	${RedShareGLSL.GLSL_SystemUniforms_fragment.systemUniforms}
 	layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 0 ) uniform FragmentUniforms {
         vec4 color;
         float shininess; 
@@ -49,6 +49,7 @@ export default class RedColorPhongMaterial extends RedMaterialPreset.mix(
 	layout( location = 0 ) in vec3 vNormal;
 	layout( location = 1 ) in vec4 vVertexPosition;
 	layout( location = 0 ) out vec4 outColor;
+	layout( location = 1 ) out vec4 outDepthColor;
 	void main() {
 		vec3 N = normalize(vNormal);
 		//#RedGPU#useFlatMode# N = getFlatNormal(vVertexPosition.xyz);
@@ -80,6 +81,7 @@ export default class RedColorPhongMaterial extends RedMaterialPreset.mix(
 		);
 			
 		outColor = finalColor;
+		outDepthColor = vec4( vec3(gl_FragCoord.z/gl_FragCoord.w), 1.0 );
 	}
 `;
 	static PROGRAM_OPTION_LIST = ['useFlatMode'];
