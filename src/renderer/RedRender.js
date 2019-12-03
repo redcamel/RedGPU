@@ -2,9 +2,10 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 22:24:1
+ *   Last modification time of this file - 2019.12.3 17:35:29
  *
  */
+
 let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty) => {
 	let i;
 
@@ -41,7 +42,7 @@ let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty) 
 			tMaterialChanged = tMesh._prevMaterialUUID != tMaterial._UUID;
 
 			if (tDirtyPipeline || tMaterialChanged) {
-				tPipeline.updatePipeline(redGPU, redView);
+				if (!tMesh.isPostEffectQuad) tPipeline.updatePipeline_sampleCount4(redGPU, redView);
 				// const renderBundleEncoder = redGPU.device.createRenderBundleEncoder({
 				// 	colorFormats: [redGPU.swapChainFormat],
 				// 	depthStencilFormat :["depth24plus-stencil8"],
@@ -241,16 +242,28 @@ export default class RedRender {
 		}
 
 		const renderPassDescriptor = {
-			colorAttachments: [{
-				attachment: redView.baseAttachmentView,
-				resolveTarget: redView.baseResolveTargetView,
-				loadValue: {
-					r: tSceneBackgroundColor_rgba[0],
-					g: tSceneBackgroundColor_rgba[1],
-					b: tSceneBackgroundColor_rgba[2],
-					a: tSceneBackgroundColor_rgba[3]
+			colorAttachments: [
+				{
+					attachment: redView.baseAttachmentView,
+					resolveTarget: redView.baseResolveTargetView,
+					loadValue: {
+						r: tSceneBackgroundColor_rgba[0],
+						g: tSceneBackgroundColor_rgba[1],
+						b: tSceneBackgroundColor_rgba[2],
+						a: tSceneBackgroundColor_rgba[3]
+					}
+				},
+				{
+					attachment: redView.baseAttachment2View,
+					resolveTarget: redView.baseResolveTarget2View,
+					loadValue: {
+						r: tSceneBackgroundColor_rgba[0],
+						g: tSceneBackgroundColor_rgba[1],
+						b: tSceneBackgroundColor_rgba[2],
+						a: tSceneBackgroundColor_rgba[3]
+					}
 				}
-			}],
+			],
 			depthStencilAttachment: {
 				attachment: redView.baseDepthStencilAttachmentView,
 				depthLoadValue: 1.0,
@@ -272,6 +285,23 @@ export default class RedRender {
 		if (tScene.axis) renderScene(redGPU, redView, passEncoder, null, [tScene.axis]);
 		renderScene(redGPU, redView, passEncoder, null, tScene.children);
 		passEncoder.endPass();
+
+		//////////////////////////////////////////////////////////////////////////////////////////
+
+
+		let last_effect_baseAttachmentView = redView.baseResolveTargetView
+		let last_effect_baseAttachment = redView.baseResolveTarget
+		let i3 = 0;
+		let len3 = redView.postEffect.effectList.length
+		for (i3; i3 < len3; i3++) {
+			let tEffect = redView.postEffect.effectList[i3]
+			tEffect.render(redGPU, redView, renderScene, last_effect_baseAttachmentView)
+			last_effect_baseAttachmentView = tEffect.baseAttachmentView
+			last_effect_baseAttachment = tEffect.baseAttachment
+		}
+
+		//////////////////////////////////////////////////////////////////////////////////////////
+		// 최종렌더
 		let tX = redView.viewRect[0];
 		let tY = redView.viewRect[1];
 		let tW = redView.viewRect[2] + redView.viewRect[0] > this.#redGPU.canvas.width ? redView.viewRect[2] - redView.viewRect[0] : redView.viewRect[2];
@@ -280,7 +310,7 @@ export default class RedRender {
 		if (tH > this.#redGPU.canvas.height) tH = this.#redGPU.canvas.height - tX;
 		commandEncoder.copyTextureToTexture(
 			{
-				texture: redView.baseResolveTarget
+				texture: last_effect_baseAttachment
 			},
 			{
 				texture: this.#swapChainTexture,

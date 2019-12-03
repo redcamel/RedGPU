@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.2 12:39:33
+ *   Last modification time of this file - 2019.12.3 17:35:29
  *
  */
 
@@ -29,6 +29,8 @@ import RedColorPhongTextureMaterial from "./src/material/RedColorPhongTextureMat
 import RedEnvironmentMaterial from "./src/material/RedEnvironmentMaterial.js";
 import RedAxis from "./src/object3D/RedAxis.js";
 import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
+import RedPostEffect_Bloom from "./src/postEffect/bloom/RedPostEffect_Bloom.js";
+import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 
 
 (async function () {
@@ -45,7 +47,7 @@ import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 	let redGPU = new RedGPU(cvs, glslang,
 		function () {
 
-			let MAX = 5000;
+			let MAX = 3000;
 			let i = MAX;
 			let tView, tView2;
 			let tScene = new RedScene();
@@ -102,6 +104,12 @@ import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 			}
 
 			redGPU.addView(tView)
+			let tEffect = new RedPostEffect_Bloom(redGPU);
+			let tEffect2 = new RedPostEffect_DoF(redGPU);
+			tEffect.bloomStrength =0.35
+			tEffect2.focusLength = 150
+			tView.postEffect.addEffect(tEffect)
+			tView.postEffect.addEffect(tEffect2)
 			// redGPU.addView(tView2)
 			let testTextureList = [
 				new RedBitmapTexture(redGPU, 'assets/UV_Grid_Sm.jpg'),
