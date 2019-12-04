@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.3 17:35:29
+ *   Last modification time of this file - 2019.12.4 10:51:28
  *
  */
 
@@ -139,7 +139,7 @@ export default class RedPostEffect_HalfTone extends RedBasePostEffect {
 	}
 
 	set grayMode(value) {
-		this._grayMode = value;
+		this._grayMode = value ? 1 : 0;
 		float1_Float32Array[0] = this._grayMode ? 1 : 0;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['grayMode'], float1_Float32Array)
 	}
