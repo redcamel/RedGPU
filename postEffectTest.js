@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.3 17:35:29
+ *   Last modification time of this file - 2019.12.4 10:51:28
  *
  */
 
@@ -33,6 +33,9 @@ import RedPostEffect_GaussianBlur from "./src/postEffect/blur/RedPostEffect_Gaus
 import RedPostEffect_ZoomBlur from "./src/postEffect/blur/RedPostEffect_ZoomBlur.js";
 import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 import RedPostEffect_Bloom from "./src/postEffect/bloom/RedPostEffect_Bloom.js";
+import RedPostEffect_Vignetting from "./src/postEffect/RedPostEffect_Vignetting.js";
+import RedPostEffect_Film from "./src/postEffect/RedPostEffect_Film.js";
+import RedPostEffect_Convolution from "./src/postEffect/RedPostEffect_Convolution.js";
 
 (async function () {
 	const cvs = document.createElement('canvas');
@@ -50,6 +53,7 @@ import RedPostEffect_Bloom from "./src/postEffect/bloom/RedPostEffect_Bloom.js";
 			let tCamera = new RedObitController(this)
 			let tCamera2 = new RedObitController(this)
 			tGrid.centerColor = '#ff0000'
+			// tScene.backgroundColor = '#fff'
 
 
 			tView = new RedView(this, tScene, tCamera)
@@ -66,7 +70,12 @@ import RedPostEffect_Bloom from "./src/postEffect/bloom/RedPostEffect_Bloom.js";
 			// tView.postEffect.addEffect(new RedPostEffect_GaussianBlur(redGPU))
 			// tView.postEffect.addEffect(new RedPostEffect_ZoomBlur(redGPU))
 			// tView.postEffect.addEffect(new RedPostEffect_DoF(redGPU))
-			tView.postEffect.addEffect(new RedPostEffect_Bloom(redGPU))
+			// tView.postEffect.addEffect(new RedPostEffect_Bloom(redGPU))
+			// tView.postEffect.addEffect(new RedPostEffect_Vignetting(redGPU))
+			// tView.postEffect.addEffect(new RedPostEffect_Film(redGPU))
+			tView.postEffect.addEffect(new RedPostEffect_Convolution(redGPU))
+
+
 
 			tCamera.targetView = tView // optional
 

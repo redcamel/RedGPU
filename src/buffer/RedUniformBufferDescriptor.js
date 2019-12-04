@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.2 10:10:11
+ *   Last modification time of this file - 2019.12.4 10:51:28
  *
  */
 
@@ -29,7 +29,7 @@ export default class RedUniformBufferDescriptor {
 					offset += v.size
 				}
 			} else {
-				if (offset % 16) offset += FLOAT4_SIZE - offset % FLOAT4_SIZE;
+				if (offset % FLOAT4_SIZE) offset += FLOAT4_SIZE - offset % FLOAT4_SIZE;
 				offset += v.size
 			}
 			this.redStructOffsetMap[v['valueName']] = v.offset;
