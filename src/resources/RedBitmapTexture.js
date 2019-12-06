@@ -2,12 +2,15 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 16:32:22
+ *   Last modification time of this file - 2019.12.6 19:2:34
  *
  */
 "use strict";
+import RedSampler from "./RedSampler.js";
+
 let imageCanvas;
 let imageCanvasContext;
+let defaultSampler;
 const TABLE = new Map();
 export default class RedBitmapTexture {
 	#updateList = [];
@@ -69,13 +72,15 @@ export default class RedBitmapTexture {
 
 		console.log('mip', mip, 'width', width, 'height', height)
 	};
-	constructor(redGPU, src, useMipmap = true) {
+	constructor(redGPU, src, sampler, useMipmap = true) {
 		// 귀찮아서 텍스쳐 맹그는 놈은 들고옴
+		if (!defaultSampler) defaultSampler = new RedSampler(redGPU);
+		this.sampler = sampler || defaultSampler;
 		let self = this;
 		if (!src) {
 			console.log('src')
 		} else {
-			const mapKey = src + useMipmap;
+			const mapKey = src + sampler.string + useMipmap;
 			console.log('mapKey', mapKey);
 			if (TABLE.get(mapKey)) {
 				console.log('캐시된 녀석을 던집', mapKey, TABLE.get(mapKey));
@@ -88,12 +93,16 @@ export default class RedBitmapTexture {
 			};
 
 			img.onload = _ => {
-				if (useMipmap) this.mipMaps = Math.round(Math.log2(Math.max(img.width, img.height)));
+				let tW = img.width;
+				let tH = img.height;
+				if(tW>1024) tW = 1024;
+				if(tH>1024) tH = 1024;
+				if (useMipmap) this.mipMaps = Math.round(Math.log2(Math.max(tW, tH)));
 
 				const textureDescriptor = {
 					size: {
-						width: img.width,
-						height: img.height,
+						width: tW,
+						height: tH,
 						depth: 1,
 					},
 					dimension: '2d',
@@ -104,8 +113,8 @@ export default class RedBitmapTexture {
 				};
 				const gpuTexture = redGPU.device.createTexture(textureDescriptor);
 				let i = 1, len = this.mipMaps;
-				let faceWidth = img.width;
-				let faceHeight = img.height;
+				let faceWidth = tW;
+				let faceHeight = tH;
 
 				this.#updateTexture(redGPU.device, img, gpuTexture, faceWidth, faceHeight, 0);
 				if (useMipmap) {
@@ -116,7 +125,9 @@ export default class RedBitmapTexture {
 					}
 				}
 				TABLE.set(mapKey, this);
+
 				self.resolve(gpuTexture)
+
 			}
 		}
 	}

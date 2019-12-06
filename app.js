@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.3 17:35:29
+ *   Last modification time of this file - 2019.12.6 19:2:34
  *
  */
 
@@ -35,7 +35,7 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 
 (async function () {
 	const cvs = document.createElement('canvas');
-	const glslangModule = await import(/* webpackIgnore: true */ 'https://unpkg.com/@webgpu/glslang@0.0.9/dist/web-devel/glslang.js');
+	const glslangModule = await import(/* webpackIgnore: true */ 'https://unpkg.com/@webgpu/glslang@0.0.11/dist/web-devel/glslang.js');
 	document.body.appendChild(cvs);
 
 	const glslang = await glslangModule.default();
@@ -45,7 +45,12 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 		testMat_colorPhongTexture_normal_displacement,
 		testMat_environment;
 	let redGPU = new RedGPU(cvs, glslang,
-		function () {
+		function (v,reason) {
+
+			if(!v){
+				console.log('reason',reason)
+				return alert(reason || `WebGPU is unsupported, or no adapters or devices are available.`)
+			}
 
 			let MAX = 3000;
 			let i = MAX;

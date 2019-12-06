@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.3 17:35:29
+ *   Last modification time of this file - 2019.12.6 19:2:34
  *
  */
 
@@ -12,7 +12,7 @@ import RedShareGLSL from "../../base/RedShareGLSL.js";
 import RedBasePostEffect from "../../base/RedBasePostEffect.js";
 import RedTypeSize from "../../resources/RedTypeSize.js";
 
-const float1_Float32Array = new Float32Array(1)
+const float1_Float32Array = new Float32Array(1);
 export default class RedPostEffect_BrightnessContrast extends RedBasePostEffect {
 	static vertexShaderGLSL = `
 	#version 450
@@ -67,7 +67,7 @@ export default class RedPostEffect_BrightnessContrast extends RedBasePostEffect 
 	}
 `;
 	static PROGRAM_OPTION_LIST = [];
-	static uniformsBindGroupLayoutDescriptor_material = RedBasePostEffect.uniformsBindGroupLayoutDescriptor_material
+	static uniformsBindGroupLayoutDescriptor_material = RedBasePostEffect.uniformsBindGroupLayoutDescriptor_material;
 	static uniformBufferDescriptor_vertex = RedBaseMaterial.uniformBufferDescriptor_empty;
 	static uniformBufferDescriptor_fragment = [
 		{size: RedTypeSize.float, valueName: 'hue'},

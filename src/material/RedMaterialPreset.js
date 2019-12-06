@@ -2,14 +2,14 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 20:54:38
+ *   Last modification time of this file - 2019.12.6 19:2:34
  *
  */
 
 "use strict";
-import RedUtil from "../util/RedUtil.js";
+import RedUTIL from "../util/RedUTIL.js";
 
-const float1_Float32Array = new Float32Array(1);
+let float1_Float32Array = new Float32Array(1);
 
 
 const color = Base => class extends Base {
@@ -22,7 +22,7 @@ const color = Base => class extends Base {
 
 	set color(hex) {
 		this.#color = hex;
-		let rgb = RedUtil.hexToRGB_ZeroToOne(hex);
+		let rgb = RedUTIL.hexToRGB_ZeroToOne(hex);
 		this.#colorRGBA[0] = rgb[0];
 		this.#colorRGBA[1] = rgb[1];
 		this.#colorRGBA[2] = rgb[2];
@@ -45,24 +45,24 @@ const color = Base => class extends Base {
 	}
 };
 // TODO - makeTextureClass 이개념을 쓰고싶은데 흠...
-// const makeTextureClass = function (name) {
+// const defineTextureClass = function (name) {
 // 	let t0;
 // 	t0 = Base => class extends Base {
-// 		[`_${name}`];
+// 		[`_${name}`]=null;
 // 		set [name](texture) {
 // 			this[`_${name}`] = null;
 // 			this.checkTexture(texture, name);
 // 		}
 //
 // 		get [name]() {
-// 			return [`_${name}`]
+// 			return this[`_${name}`]
 // 		}
 // 	};
 // 	return t0
 // }
-// const diffuseTexture = makeTextureClass('diffuseTexture');
-// const normalTexture = makeTextureClass('normalTexture');
-// const specularTexture = makeTextureClass('specularTexture');
+// const defineTextureClass = makeTextureClass('diffuseTexture');
+// const defineTextureClass = makeTextureClass('normalTexture');
+// const defineTextureClass = makeTextureClass('specularTexture');
 
 
 const diffuseTexture = Base => class extends Base {
@@ -238,7 +238,7 @@ const basicLightPropertys = Base => class extends Base {
 
 	set specularColor(value) {
 		this._specularColor = value;
-		let rgb = RedUtil.hexToRGB_ZeroToOne(value);
+		let rgb = RedUTIL.hexToRGB_ZeroToOne(value);
 		this._specularColorRGBA[0] = rgb[0];
 		this._specularColorRGBA[1] = rgb[1];
 		this._specularColorRGBA[2] = rgb[2];

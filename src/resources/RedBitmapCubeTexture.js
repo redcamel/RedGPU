@@ -2,12 +2,15 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 16:32:22
+ *   Last modification time of this file - 2019.12.6 19:2:34
  *
  */
 "use strict";
+import RedSampler from "./RedSampler.js";
+
 let imageCanvas;
 let imageCanvasContext;
+let defaultSampler;
 export default class RedBitmapCubeTexture {
 	#updateList = [];
 	#GPUTexture;
@@ -100,9 +103,10 @@ export default class RedBitmapCubeTexture {
 
 		this.resolve(gpuTexture)
 	};
-	constructor(redGPU, srcList, useMipmap = true) {
+	constructor(redGPU, srcList,sampler, useMipmap = true) {
 		// 귀찮아서 텍스쳐 맹그는 놈은 들고옴
-
+		if (!defaultSampler) defaultSampler = new RedSampler(redGPU);
+		this.sampler = sampler || defaultSampler;
 		let maxW = 0;
 		let maxH = 0;
 		let loadCount = 0;
@@ -125,6 +129,8 @@ export default class RedBitmapCubeTexture {
 					loadCount++;
 					maxW = Math.max(maxW, img.width);
 					maxH = Math.max(maxH, img.height);
+					if(maxW>1024) maxW = 1024;
+					if(maxH>1024) maxH = 1024;
 					if (loadCount == 6) this.#makeCubeTexture(redGPU, useMipmap, imgList, maxW, maxH)
 				}
 			}

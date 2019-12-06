@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 16:32:22
+ *   Last modification time of this file - 2019.12.6 19:2:34
  *
  */
 
@@ -23,64 +23,69 @@ export default class RedGPU {
 
 	constructor(canvas, glslang, initFunc) {
 		this.#detector = new RedDetectorGPU(this);
-		navigator.gpu.requestAdapter().then(adapter => {
-			adapter.requestDevice().then(device => {
-				this.glslang = glslang;
-				this.canvas = canvas;
-				this.context = canvas.getContext('gpupresent');
-				this.device = device;
-				this.swapChainFormat = "rgba8unorm";
-				this.swapChain = configureSwapChain(this.device, this.swapChainFormat, this.context);
-				this.state = {
-					RedGeometry: new Map(),
-					RedBuffer: {
-						vertexBuffer: new Map(),
-						indexBuffer: new Map()
-					},
-					emptyTextureView: device.createTexture({
-						size: {
-							width: 1,
-							height: 1,
-							depth: 1,
+		let state = true
+		if (navigator.gpu) {
+			navigator.gpu.requestAdapter().then(adapter => {
+				adapter.requestDevice().then(device => {
+					this.glslang = glslang;
+					this.canvas = canvas;
+					this.context = canvas.getContext('gpupresent');
+					this.device = device;
+					this.swapChainFormat = "rgba8unorm";
+					this.swapChain = configureSwapChain(this.device, this.swapChainFormat, this.context);
+					this.state = {
+						RedGeometry: new Map(),
+						RedBuffer: {
+							vertexBuffer: new Map(),
+							indexBuffer: new Map()
 						},
-						format: this.swapChainFormat,
-						usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.SAMPLED,
-					}).createView(),
-					emptyCubeTextureView: device.createTexture({
-						size: {
-							width: 1,
-							height: 1,
-							depth: 1,
-						},
-						dimension: '2d',
-						arrayLayerCount: 6,
-						mipLevelCount: 1,
-						sampleCount: 1,
-						format: this.swapChainFormat,
-						usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.SAMPLED,
-					}).createView({
-						format: 'rgba8unorm',
-						dimension: 'cube',
-						aspect: 'all',
-						baseMipLevel: 0,
-						mipLevelCount: 1,
-						baseArrayLayer: 0,
-						arrayLayerCount: 6
-					})
-				};
-				/////
-				this.#detector.detectGPU();
-				///////
-				this.setSize('100%', '100%');
-				if (!redGPUList.size) setGlobalResizeEvent();
-				redGPUList.add(this);
-				console.log(redGPUList);
-				initFunc.call(this)
+						emptyTextureView: device.createTexture({
+							size: {
+								width: 1,
+								height: 1,
+								depth: 1,
+							},
+							format: this.swapChainFormat,
+							usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.SAMPLED,
+						}).createView(),
+						emptyCubeTextureView: device.createTexture({
+							size: {
+								width: 1,
+								height: 1,
+								depth: 1,
+							},
+							dimension: '2d',
+							arrayLayerCount: 6,
+							mipLevelCount: 1,
+							sampleCount: 1,
+							format: this.swapChainFormat,
+							usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.SAMPLED,
+						}).createView({
+							format: 'rgba8unorm',
+							dimension: 'cube',
+							aspect: 'all',
+							baseMipLevel: 0,
+							mipLevelCount: 1,
+							baseArrayLayer: 0,
+							arrayLayerCount: 6
+						})
+					};
+					/////
+					this.#detector.detectGPU();
+					///////
+					this.setSize('100%', '100%');
+					if (!redGPUList.size) setGlobalResizeEvent();
+					redGPUList.add(this);
+					console.log(redGPUList);
+					initFunc.call(this)
+				});
+			}).catch(error => {
+				state = false
+				initFunc(false, error)
 			});
-		}).catch(error => {
-			alert(`WebGPU is unsupported, or no adapters or devices are available.`)
-		});
-
+		} else {
+			initFunc(state = false,'navigate.gpu is null')
+		}
 	}
 	addView(redView) {
 		this.viewList.push(redView)
@@ -88,6 +93,7 @@ export default class RedGPU {
 	removeView(redView) {
 		if (this.viewList.includes(redView)) this.viewList.splice(redView, 1)
 	}
+
 	get detector() {return this.#detector};
 	setSize(w = this.#width, h = this.#height) {
 		this.#width = w;

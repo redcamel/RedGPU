@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.4 10:51:28
+ *   Last modification time of this file - 2019.12.6 19:2:34
  *
  */
 
@@ -15,21 +15,20 @@ export default class RedUniformBufferDescriptor {
 	constructor(redStruct, usage = GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST) {
 		this.redStruct = JSON.parse(JSON.stringify(redStruct));
 		this.redStructOffsetMap = {};
-		let size = 0;
 		let offset = 0;
 		let FLOAT4_SIZE = RedTypeSize.float4;
 		this.redStruct.map((v) => {
-			v.offset = offset;
+			// console.log( v.valueName, '사이즈', v.size, '현재 오프셋',offset, offset % FLOAT4_SIZE, '빈공간', FLOAT4_SIZE - offset % FLOAT4_SIZE)
 			if (v.size <= FLOAT4_SIZE) {
 				let t0 = Math.floor(offset / FLOAT4_SIZE);
-				let t1 = Math.floor((offset + v.size-1) / FLOAT4_SIZE);
-				if (t0 == t1) offset += v.size;
-				else {
-					offset += FLOAT4_SIZE - offset % FLOAT4_SIZE
-					offset += v.size
-				}
+				let t1 = Math.floor((offset + v.size - 1) / FLOAT4_SIZE);
+				if (t0 != t1) offset += FLOAT4_SIZE - offset % FLOAT4_SIZE;
+				v.offset = offset;
+				// console.log(v.valueName, '결정된 오프셋', offset)
+				offset += v.size
 			} else {
 				if (offset % FLOAT4_SIZE) offset += FLOAT4_SIZE - offset % FLOAT4_SIZE;
+				v.offset = offset;
 				offset += v.size
 			}
 			this.redStructOffsetMap[v['valueName']] = v.offset;

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.3 17:35:29
+ *   Last modification time of this file - 2019.12.6 19:2:34
  *
  */
 
@@ -38,8 +38,9 @@ let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty) 
 		tDirtyTransform = tMesh.dirtyTransform;
 		tDirtyPipeline = tMesh.dirtyPipeline;
 		tPipeline = tMesh.pipeline;
+		if(tMaterial) tMaterialChanged = tMesh._prevMaterialUUID != tMaterial._UUID;
 		if (tGeometry) {
-			tMaterialChanged = tMesh._prevMaterialUUID != tMaterial._UUID;
+
 
 			if (tDirtyPipeline || tMaterialChanged) {
 				if (!tMesh.isPostEffectQuad) tPipeline.updatePipeline_sampleCount4(redGPU, redView);
@@ -86,7 +87,7 @@ let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty) 
 
 			prevMaterial_UUID = tMesh._prevMaterialUUID = tMaterial._UUID;
 		}
-		if (tMesh.children.length) renderScene(redGPU, redView, passEncoder, tMesh, tMesh.children, parentDirty || tDirtyTransform);
+
 		if (tDirtyTransform || parentDirty) {
 			// TODO 매트릭스 계산부분을 여기로 나중에 다들고 오는게 성능에 좋음...
 
@@ -218,11 +219,12 @@ let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty) 
 				tNMatrix[15] = (a20 * b3 - a21 * b1 + a22 * a30) * b22;
 			// tMesh.calcTransform(parent);
 			// tMesh.updateUniformBuffer();
-			if (tGeometry) {
-				tMesh.uniformBuffer_mesh.GPUBuffer.setSubData(0, tMesh.matrix);
-				tMesh.uniformBuffer_mesh.GPUBuffer.setSubData(64, tMesh.normalMatrix);
-			}
+
+			tMesh.uniformBuffer_mesh.GPUBuffer.setSubData(0, tMesh.matrix);
+			tMesh.uniformBuffer_mesh.GPUBuffer.setSubData(64, tMesh.normalMatrix);
+
 		}
+		if (tMesh.children.length) renderScene(redGPU, redView, passEncoder, tMesh, tMesh.children, parentDirty || tDirtyTransform);
 		tMesh.dirtyPipeline = false;
 		tMesh.dirtyTransform = false;
 	}
@@ -288,15 +290,14 @@ export default class RedRender {
 
 		//////////////////////////////////////////////////////////////////////////////////////////
 
-
-		let last_effect_baseAttachmentView = redView.baseResolveTargetView
-		let last_effect_baseAttachment = redView.baseResolveTarget
+		let last_effect_baseAttachmentView = redView.baseResolveTargetView;
+		let last_effect_baseAttachment = redView.baseResolveTarget;
 		let i3 = 0;
-		let len3 = redView.postEffect.effectList.length
+		let len3 = redView.postEffect.effectList.length;
 		for (i3; i3 < len3; i3++) {
-			let tEffect = redView.postEffect.effectList[i3]
-			tEffect.render(redGPU, redView, renderScene, last_effect_baseAttachmentView)
-			last_effect_baseAttachmentView = tEffect.baseAttachmentView
+			let tEffect = redView.postEffect.effectList[i3];
+			tEffect.render(redGPU, redView, renderScene, last_effect_baseAttachmentView);
+			last_effect_baseAttachmentView = tEffect.baseAttachmentView;
 			last_effect_baseAttachment = tEffect.baseAttachment
 		}
 

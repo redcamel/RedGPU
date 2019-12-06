@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.2 10:10:11
+ *   Last modification time of this file - 2019.12.6 19:2:34
  *
  */
 
@@ -98,8 +98,9 @@ export default class RedBaseMaterial extends RedUUID {
 		// console.log('뭐하나보자')
 		while (i2--) {
 			tData = dataVertex[i2];
-			// console.log(tData)
+
 			if (tData) {
+				console.log(tData);
 				tValue = this[tData.valueName];
 				if (typeof tValue == 'number') {
 					tempFloat32[0] = tValue;
@@ -109,8 +110,9 @@ export default class RedBaseMaterial extends RedUUID {
 
 			}
 			tData = dataFragment[i2];
-			// console.log(tData)
+
 			if (tData) {
+				console.log(tData);
 				tValue = this[tData.valueName];
 				// 	console.log('변경!',tData)
 				if (typeof tValue == 'number') {
@@ -146,13 +148,13 @@ export default class RedBaseMaterial extends RedUUID {
 	}
 
 	searchModules() {
-		console.log(this, this.constructor, this.constructor.name)
-		console.log(this.constructor.PROGRAM_OPTION_LIST)
+		console.log(this, this.constructor, this.constructor.name);
+		console.log(this.constructor.PROGRAM_OPTION_LIST);
 		let tKey = [this.constructor.name];
 		let i = 0, len = this.constructor.PROGRAM_OPTION_LIST.length;
 		for (i; i < len; i++) {
 			let key = this.constructor.PROGRAM_OPTION_LIST[i];
-			console.log(key, this[key])
+			console.log(key, this[key]);
 			if (this[key]) tKey.push(key);
 		}
 		tKey = tKey.join('_');

@@ -2,12 +2,12 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.3 17:35:29
+ *   Last modification time of this file - 2019.12.6 19:2:34
  *
  */
 
 "use strict";
-import RedUtil from "./util/RedUtil.js"
+import RedUTIL from "./util/RedUTIL.js"
 import RedTypeSize from "./resources/RedTypeSize.js";
 import RedShareGLSL from "./base/RedShareGLSL.js"
 import RedPostEffect from "./postEffect/RedPostEffect.js";
@@ -212,7 +212,7 @@ export default class RedView {
 		this.#systemUniformInfo_fragment_data.set([this.scene.directionalLightList.length, this.scene.pointLightList.length], offset);
 		i = 0;
 		// update directionalLightList
-		offset = RedTypeSize.float4 / Float32Array.BYTES_PER_ELEMENT
+		offset = RedTypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
 		len = this.scene.directionalLightList.length;
 		for (i; i < len; i++) {
 			let tLight = this.scene.directionalLightList[i];
@@ -296,12 +296,12 @@ export default class RedView {
 		if (typeof width == 'number') this.#width = width < 0 ? 0 : parseInt(width);
 		else {
 			if (width.includes('%') && (+width.replace('%', '') >= 0)) this.#width = width;
-			else RedUtil.throwFunc('RedView setSize : width는 0이상의 숫자나 %만 허용.', width);
+			else RedUTIL.throwFunc('RedView setSize : width는 0이상의 숫자나 %만 허용.', width);
 		}
 		if (typeof height == 'number') this.#height = height < 0 ? 0 : parseInt(height);
 		else {
 			if (height.includes('%') && (+height.replace('%', '') >= 0)) this.#height = height;
-			else RedUtil.throwFunc('RedView setSize : height는 0이상의 숫자나 %만 허용.', height);
+			else RedUTIL.throwFunc('RedView setSize : height는 0이상의 숫자나 %만 허용.', height);
 		}
 		this.getViewRect(this.#redGPU);
 		this.resetTexture(this.#redGPU)
@@ -311,12 +311,12 @@ export default class RedView {
 		if (typeof x == 'number') this._x = x < 0 ? 0 : parseInt(x);
 		else {
 			if (x.includes('%') && (+x.replace('%', '') >= 0)) this._x = x;
-			else RedUtil.throwFunc('RedView setLocation : x는 0이상의 숫자나 %만 허용.', x);
+			else RedUTIL.throwFunc('RedView setLocation : x는 0이상의 숫자나 %만 허용.', x);
 		}
 		if (typeof y == 'number') this._y = y < 0 ? 0 : parseInt(y);
 		else {
 			if (y.includes('%') && (+y.replace('%', '') >= 0)) this._y = y;
-			else RedUtil.throwFunc('RedView setLocation : y는 0이상의 숫자나 %만 허용.', y);
+			else RedUTIL.throwFunc('RedView setLocation : y는 0이상의 숫자나 %만 허용.', y);
 		}
 		console.log('setLocation', this._x, this._y);
 		this.getViewRect(this.#redGPU)

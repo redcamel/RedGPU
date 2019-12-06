@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 16:32:22
+ *   Last modification time of this file - 2019.12.6 19:2:34
  *
  */
 
@@ -387,7 +387,6 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 					tMatrix[12] = tLocalMatrix[12], tMatrix[13] = tLocalMatrix[13], tMatrix[14] = tLocalMatrix[14], tMatrix[15] = tLocalMatrix[15]
 			);
 
-		this.calcNormalTransform(parent)
 	}
 
 }

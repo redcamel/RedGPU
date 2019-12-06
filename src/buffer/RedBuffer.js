@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 16:32:22
+ *   Last modification time of this file - 2019.12.6 19:2:34
  *
  */
 
@@ -30,6 +30,7 @@ export default class RedBuffer extends RedUUID {
 				this.interleaveInfo = interleaveInfo;
 				interleaveInfo.forEach(v => this.vertexCount += v['stride'] / Float32Array.BYTES_PER_ELEMENT);
 				this.vertexCount = data.length / this.vertexCount;
+				console.log('최종 this.vertexCount',this.vertexCount);
 				break;
 			case RedBuffer.TYPE_INDEX :
 				tUsage = usage || GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST;
@@ -48,6 +49,7 @@ export default class RedBuffer extends RedUUID {
 
 		console.log(this);
 	}
+
 
 	destroy() {
 		if (this.GPUBuffer) this.GPUBuffer.destroy();
