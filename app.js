@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.6 19:2:34
+ *   Last modification time of this file - 2019.12.6 20:7:15
  *
  */
 
@@ -35,9 +35,9 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 
 (async function () {
 	const cvs = document.createElement('canvas');
-	const glslangModule = await import(/* webpackIgnore: true */ 'https://unpkg.com/@webgpu/glslang@0.0.11/dist/web-devel/glslang.js');
-	document.body.appendChild(cvs);
 
+	document.body.appendChild(cvs);
+	const glslangModule = await import(/* webpackIgnore: true */ 'https://unpkg.com/@webgpu/glslang@0.0.11/dist/web-devel/glslang.js');
 	const glslang = await glslangModule.default();
 	console.log(glslang);
 	let testMat_color, testMat_colorPhong, testMat_bitmap, testMat_standard_diffuse, testMat_standard_diffuse_normal,
