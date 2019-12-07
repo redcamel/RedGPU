@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.7 15:34:43
+ *   Last modification time of this file - 2019.12.7 18:58:41
  *
  */
 
@@ -154,7 +154,7 @@ export default class RedBaseMaterial extends RedUUID {
 			console.log(key, this[key]);
 			if (this[key]) tKey.push(key);
 		}
-		tKey = tKey.join('_');
+		// tKey = tKey.join('_');
 		console.log('searchModules', tKey);
 		this.vShaderModule.searchShaderModule(tKey);
 		this.fShaderModule.searchShaderModule(tKey);

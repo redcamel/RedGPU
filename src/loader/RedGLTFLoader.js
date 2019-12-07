@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.6 19:2:34
+ *   Last modification time of this file - 2019.12.7 18:58:41
  *
  */
 
@@ -1445,7 +1445,14 @@ var RedGLTFLoader;
 				}
 			};
 			var getSamplerInfo = function (redGLTFLoader, json, samplerIndex) {
-				var result = {};
+				var result = {
+					magFilter: "linear",
+					minFilter: "linear",
+					mipmapFilter: "linear",
+					addressModeU: "repeat",
+					addressModeV: "repeat",
+					addressModeW: "repeat"
+				};
 				var wrapTable = {
 					33071: 'clamp-to-edge', //CLAMP_TO_EDGE,
 					33648: 'mirror-repeat', //MIRRORED_REPEAT
@@ -1468,6 +1475,7 @@ var RedGLTFLoader;
 				} else {
 					console.log('있긴하냐', samplerIndex)
 				}
+
 				result['string'] = JSON.stringify(result);
 				console.log('result', result);
 				return result
