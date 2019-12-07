@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.4 10:51:28
+ *   Last modification time of this file - 2019.12.6 19:2:34
  *
  */
 
@@ -12,7 +12,7 @@ import RedShareGLSL from "../base/RedShareGLSL.js";
 import RedBasePostEffect from "../base/RedBasePostEffect.js";
 import RedTypeSize from "../resources/RedTypeSize.js";
 
-const float1_Float32Array = new Float32Array(1)
+const float1_Float32Array = new Float32Array(1);
 export default class RedPostEffect_Convolution extends RedBasePostEffect {
 	static vertexShaderGLSL = `
 	#version 450
@@ -65,7 +65,7 @@ export default class RedPostEffect_Convolution extends RedBasePostEffect {
 	}
 `;
 	static PROGRAM_OPTION_LIST = [];
-	static uniformsBindGroupLayoutDescriptor_material = RedBasePostEffect.uniformsBindGroupLayoutDescriptor_material
+	static uniformsBindGroupLayoutDescriptor_material = RedBasePostEffect.uniformsBindGroupLayoutDescriptor_material;
 	static uniformBufferDescriptor_vertex = RedBaseMaterial.uniformBufferDescriptor_empty;
 	static uniformBufferDescriptor_fragment = [
 		{size: RedTypeSize.mat3, valueName: 'kernel'},
@@ -100,7 +100,7 @@ export default class RedPostEffect_Convolution extends RedBasePostEffect {
 	_kernelWeight;
 	constructor(redGPU) {
 		super(redGPU);
-		this.kernel = RedPostEffect_Convolution.BLUR;
+		this.kernel = RedPostEffect_Convolution.NORMAL;
 		console.log('this.uniformBuffer_fragment',this.uniformBuffer_fragment)
 	}
 
@@ -110,7 +110,7 @@ export default class RedPostEffect_Convolution extends RedBasePostEffect {
 
 	set kernel(value) {
 		this._kernel = value;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['kernel'], this._kernel)
+		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['kernel'], this._kernel);
 		this.kernelWeight = 1
 	}
 	get kernelWeight() {
@@ -118,9 +118,9 @@ export default class RedPostEffect_Convolution extends RedBasePostEffect {
 	}
 	set kernelWeight(value) {
 		let sum = 0;
-		let i = this._kernel.length
+		let i = this._kernel.length;
 		while (i--) sum += this._kernel[i];
-		this._kernelWeight = sum
+		this._kernelWeight = sum;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['kernelWeight'], float1_Float32Array)
 	}
 

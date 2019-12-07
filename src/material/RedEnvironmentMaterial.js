@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.3 17:35:29
+ *   Last modification time of this file - 2019.12.7 15:34:43
  *
  */
 
@@ -10,17 +10,17 @@
 import RedTypeSize from "../resources/RedTypeSize.js";
 import RedBaseMaterial from "../base/RedBaseMaterial.js";
 import RedShareGLSL from "../base/RedShareGLSL.js";
-import RedMaterialPreset from "./RedMaterialPreset.js";
+import RedMix from "../base/RedMix.js";
 
-export default class RedEnvironmentMaterial extends RedMaterialPreset.mix(
+export default class RedEnvironmentMaterial extends RedMix.mix(
 	RedBaseMaterial,
-	RedMaterialPreset.diffuseTexture,
-	RedMaterialPreset.normalTexture,
-	RedMaterialPreset.specularTexture,
-	RedMaterialPreset.emissiveTexture,
-	RedMaterialPreset.environmentTexture,
-	RedMaterialPreset.displacementTexture,
-	RedMaterialPreset.basicLightPropertys
+	RedMix.diffuseTexture,
+	RedMix.normalTexture,
+	RedMix.specularTexture,
+	RedMix.emissiveTexture,
+	RedMix.environmentTexture,
+	RedMix.displacementTexture,
+	RedMix.basicLightPropertys
 ) {
 	static vertexShaderGLSL = `
 	#version 450
@@ -90,7 +90,6 @@ export default class RedEnvironmentMaterial extends RedMaterialPreset.mix(
 		//#RedGPU#useFlatMode# N = getFlatNormal(vVertexPosition.xyz);
 		//#RedGPU#normalTexture# N = perturb_normal(N, vVertexPosition.xyz, vUV, normalColor.rgb, fragmentUniforms.normalPower) ;
 	
-		float u_reflectionPower = 1.0;
 		//#RedGPU#environmentTexture# vec3 R = reflect( vVertexPosition.xyz - systemUniforms.cameraPosition, N);
 		//#RedGPU#environmentTexture# vec4 reflectionColor = texture(samplerCube(uEnvironmentTexture,uSampler), R);
 		//#RedGPU#environmentTexture# diffuseColor = mix(diffuseColor, reflectionColor, fragmentUniforms.environmentPower);

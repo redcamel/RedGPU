@@ -2,13 +2,13 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.3 17:35:29
+ *   Last modification time of this file - 2019.12.6 19:2:34
  *
  */
 
 "use strict";
 import RedDisplayContainer from "./base/RedDisplayContainer.js";
-import RedUtil from "./util/RedUtil.js"
+import RedUTIL from "./util/RedUTIL.js"
 import RedDirectionalLight from "./light/RedDirectionalLight.js";
 import RedPointLight from "./light/RedPointLight.js";
 
@@ -45,7 +45,7 @@ export default class RedScene extends RedDisplayContainer {
 
 	set backgroundColor(value) {
 		this.#backgroundColor = value;
-		let rgb = RedUtil.hexToRGB_ZeroToOne(value);
+		let rgb = RedUTIL.hexToRGB_ZeroToOne(value);
 		this.#backgroundColorRGBA = [...rgb, this.#backgroundColorAlpha]
 	}
 
@@ -77,7 +77,7 @@ export default class RedScene extends RedDisplayContainer {
 				this.#pointLightList.push(light);
 				break;
 			default:
-				RedUtil.throwFunc('addLight : RedBaseLight 인스턴스만 가능');
+				RedUTIL.throwFunc('addLight : RedBaseLight 인스턴스만 가능');
 		}
 	}
 

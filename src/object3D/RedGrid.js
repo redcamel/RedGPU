@@ -2,13 +2,13 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.30 16:32:22
+ *   Last modification time of this file - 2019.12.6 19:2:34
  *
  */
 
 "use strict";
 import RedBaseObject3D from "../base/RedBaseObject3D.js";
-import RedUtil from "../util/RedUtil.js";
+import RedUTIL from "../util/RedUTIL.js";
 import RedGeometry from "../geometry/RedGeometry.js";
 import RedBuffer from "../buffer/RedBuffer.js";
 import RedInterleaveInfo from "../geometry/RedInterleaveInfo.js";
@@ -44,7 +44,7 @@ export default class RedGrid extends RedBaseObject3D {
 		step = this.size / this.divisions;
 		halfSize = this.size / 2;
 		for (i = 0, k = -halfSize; i <= this.divisions; i++ , k += step) {
-			tColor = i === center ? RedUtil.hexToRGB_ZeroToOne(this.centerColor) : RedUtil.hexToRGB_ZeroToOne(this.color);
+			tColor = i === center ? RedUTIL.hexToRGB_ZeroToOne(this.centerColor) : RedUTIL.hexToRGB_ZeroToOne(this.color);
 			interleaveData.push(
 				-halfSize, 0, k, tColor[0], tColor[1], tColor[2], 1,
 				halfSize, 0, k, tColor[0], tColor[1], tColor[2], 1,

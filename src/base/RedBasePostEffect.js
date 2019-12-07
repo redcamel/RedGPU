@@ -2,19 +2,19 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.3 17:35:29
+ *   Last modification time of this file - 2019.12.7 15:34:43
  *
  */
 
 "use strict";
 import RedBaseMaterial from "../base/RedBaseMaterial.js";
-import RedMaterialPreset from "../material/RedMaterialPreset.js";
+import RedMix from "./RedMix.js";
 import RedMesh from "../object3D/RedMesh.js";
 import RedPlane from "../primitives/RedPlane.js";
 
-export default class RedBasePostEffect extends RedMaterialPreset.mix(
+export default class RedBasePostEffect extends RedMix.mix(
 	RedBaseMaterial,
-	RedMaterialPreset.diffuseTexture
+	RedMix.diffuseTexture
 ) {
 	static vertexShaderGLSL = ``;
 	static fragmentShaderGLSL = ``;
@@ -34,13 +34,13 @@ export default class RedBasePostEffect extends RedMaterialPreset.mix(
 	baseAttachmentView;
 	constructor(redGPU) {
 		super(redGPU);
-		this.quad = new RedMesh(redGPU, new RedPlane(redGPU), this)
+		this.quad = new RedMesh(redGPU, new RedPlane(redGPU), this);
 		this.quad.isPostEffectQuad = true
 	}
 	render(redGPU, redView, renderScene, diffuseTextureView) {
 		if (this.#prevViewRect.toString() != redView.viewRect.toString()) {
-			if (this.baseAttachment) this.baseAttachment.destroy()
-			this.#prevViewRect = redView.viewRect.concat()
+			if (this.baseAttachment) this.baseAttachment.destroy();
+			this.#prevViewRect = redView.viewRect.concat();
 			this.baseAttachment = redGPU.device.createTexture({
 				size: {
 					width: redView.viewRect[2],
@@ -65,7 +65,7 @@ export default class RedBasePostEffect extends RedMaterialPreset.mix(
 		);
 		if (this._diffuseTexture != diffuseTextureView) {
 			this._diffuseTexture = diffuseTextureView;
-			this.quad.pipeline.updatePipeline_sampleCount1(redGPU, redView)
+			this.quad.pipeline.updatePipeline_sampleCount1(redGPU, redView);
 			this.resetBindingInfo()
 		}
 		redView.updateSystemUniform(passEncoder_effect, redGPU);

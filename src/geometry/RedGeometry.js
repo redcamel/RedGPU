@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.26 19:46:12
+ *   Last modification time of this file - 2019.12.6 19:2:34
  *
  */
 
@@ -15,7 +15,6 @@ export default class RedGeometry {
 	constructor(redGPU, interleaveBuffer, indexBuffer) {
 		this.interleaveBuffer = interleaveBuffer;
 		this.indexBuffer = indexBuffer;
-		console.log('interleaveBuffer.interleaveInfo', interleaveBuffer.interleaveInfo);
 		let arrayStride = 0;
 		let attributes = [];
 		interleaveBuffer.interleaveInfo.forEach(function (v, idx) {
@@ -29,6 +28,7 @@ export default class RedGeometry {
 			);
 			arrayStride += v['stride'];
 		});
+		attributes.forEach(function(v){console.log(v)});
 		this.vertexState = {
 			indexFormat: 'uint32',
 			vertexBuffers: [

@@ -2,22 +2,21 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.2 12:39:33
+ *   Last modification time of this file - 2019.12.7 15:34:43
  *
  */
 
 "use strict";
-import RedMaterialPreset from "../material/RedMaterialPreset.js";
+import RedMix from "./RedMix.js";
 
-export default class RedBaseLight extends RedMaterialPreset.mix(
-	RedMaterialPreset.EmptyClass,
-	RedMaterialPreset.color
+export default class RedBaseLight extends RedMix.mix(
+	RedMix.EmptyClass,
+	RedMix.color
 ) {
 	#intensity = 1;
 	x = 0;
 	y = 0;
 	z = 0;
-
 
 	get intensity() {
 		return this.#intensity;
