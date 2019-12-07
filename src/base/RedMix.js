@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.6 19:2:34
+ *   Last modification time of this file - 2019.12.7 15:34:43
  *
  */
 
@@ -262,9 +262,31 @@ const basicLightPropertys = Base => class extends Base {
 
 };
 
-class EmptyClass {
-	constructor() {}
+const defineNumber = function (keyName, option = {}) {
+	let t0;
+	let hasMin = option.hasOwnProperty('min');
+	let hsaMax = option.hasOwnProperty('max');
+	let min = option['min'];
+	let max = option['max'];
+	t0 = Base => class extends Base {
+		#range = {min: min, max: max};
+		[`#${keyName}`] = option['value']
+		set [keyName](value) {
+			this[`#${keyName}`] = null;
+			if (typeof value != 'number') RedUTIL.throwFunc(`${keyName} : only allow Number. - inputValue : ${value} { type : ${typeof value} }`);
+			if (hasMin && value < min) value = min;
+			if (hsaMax && value > max) value = max;
+			this[`#${keyName}`] = value;
+			if (option['callback']) option['callback'].call(this, value);
+		}
+		get [keyName]() {
+			return this[`#${keyName}`]
+		}
+	};
+	return t0
 }
+
+class EmptyClass {}
 
 export default {
 	mix: (Base, ...texture) => {
@@ -272,6 +294,7 @@ export default {
 	},
 	EmptyClass: EmptyClass,
 	color: color,
+	defineNumber : defineNumber,
 	diffuseTexture: diffuseTexture,
 	normalTexture: normalTexture,
 	specularTexture: specularTexture,

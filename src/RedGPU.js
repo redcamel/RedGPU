@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.6 19:2:34
+ *   Last modification time of this file - 2019.12.7 15:34:43
  *
  */
 
@@ -77,14 +77,14 @@ export default class RedGPU {
 					if (!redGPUList.size) setGlobalResizeEvent();
 					redGPUList.add(this);
 					console.log(redGPUList);
-					initFunc.call(this)
+					initFunc.call(this, true)
 				});
 			}).catch(error => {
 				state = false
 				initFunc(false, error)
 			});
 		} else {
-			initFunc(state = false,'navigate.gpu is null')
+			initFunc(state = false, 'navigate.gpu is null')
 		}
 	}
 	addView(redView) {

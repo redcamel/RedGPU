@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.3 17:35:29
+ *   Last modification time of this file - 2019.12.7 15:34:43
  *
  */
 
@@ -10,17 +10,17 @@
 import RedTypeSize from "../resources/RedTypeSize.js";
 import RedShareGLSL from "../base/RedShareGLSL.js";
 
-import RedMaterialPreset from "./RedMaterialPreset.js";
+import RedMix from "../base/RedMix.js";
 import RedBaseMaterial from "../base/RedBaseMaterial.js";
 
-export default class RedColorPhongTextureMaterial extends RedMaterialPreset.mix(
+export default class RedColorPhongTextureMaterial extends RedMix.mix(
 	RedBaseMaterial,
-	RedMaterialPreset.color,
-	RedMaterialPreset.normalTexture,
-	RedMaterialPreset.specularTexture,
-	RedMaterialPreset.emissiveTexture,
-	RedMaterialPreset.displacementTexture,
-	RedMaterialPreset.basicLightPropertys
+	RedMix.color,
+	RedMix.normalTexture,
+	RedMix.specularTexture,
+	RedMix.emissiveTexture,
+	RedMix.displacementTexture,
+	RedMix.basicLightPropertys
 ) {
 
 	static vertexShaderGLSL = `

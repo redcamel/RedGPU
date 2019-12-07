@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.6 19:2:34
+ *   Last modification time of this file - 2019.12.7 15:34:43
  *
  */
 
@@ -31,9 +31,7 @@ export default class RedBaseMaterial extends RedUUID {
 	set redGPU(value) {
 		this.#redGPU = value;
 	}
-
 	static uniformBufferDescriptor_empty = [];
-
 
 	uniformBufferDescriptor_vertex;
 	uniformBufferDescriptor_fragment;
@@ -57,14 +55,13 @@ export default class RedBaseMaterial extends RedUUID {
 		let vertexGLSL = materialClass.vertexShaderGLSL;
 		let fragmentGLSL = materialClass.fragmentShaderGLSL;
 		let programOptionList = materialClass.PROGRAM_OPTION_LIST || [];
-		let vKey = materialClass.name + '_vertex';
-		let fKey = materialClass.name + '_fragment';
+
 		vShaderModule = new RedShaderModule_GLSL(redGPU, 'vertex', materialClass, vertexGLSL, programOptionList);
 		fShaderModule = new RedShaderModule_GLSL(redGPU, 'fragment', materialClass, fragmentGLSL, programOptionList);
 
-		if (!materialClass.uniformBufferDescriptor_vertex) throw new Error(`${materialClass.name} : uniformBufferDescriptor_vertex 를 정의해야함`);
-		if (!materialClass.uniformBufferDescriptor_fragment) throw new Error(`${materialClass.name} : uniformBufferDescriptor_fragment 를 정의해야함`);
-		if (!materialClass.uniformsBindGroupLayoutDescriptor_material) throw  new Error(`${materialClass.name} : uniformsBindGroupLayoutDescriptor 를  정의해야함`);
+		if (!materialClass.uniformBufferDescriptor_vertex) throw new Error(`${materialClass.name} : must define a static uniformBufferDescriptor_vertex.`);
+		if (!materialClass.uniformBufferDescriptor_fragment) throw new Error(`${materialClass.name} : must define a static uniformBufferDescriptor_fragment.`);
+		if (!materialClass.uniformsBindGroupLayoutDescriptor_material) throw  new Error(`${materialClass.name} : must define a static uniformsBindGroupLayoutDescriptor_material.`);
 
 		this.uniformBufferDescriptor_vertex = new RedUniformBufferDescriptor(materialClass.uniformBufferDescriptor_vertex);
 		this.uniformBufferDescriptor_fragment = new RedUniformBufferDescriptor(materialClass.uniformBufferDescriptor_fragment);
@@ -96,9 +93,9 @@ export default class RedBaseMaterial extends RedUUID {
 		// console.log(dataVertex)
 		i2 = dataVertex.length > dataFragment.length ? dataVertex.length : dataFragment.length;
 		// console.log('뭐하나보자')
+		//FIXME - _로 가져올 수있게 변경할까?
 		while (i2--) {
 			tData = dataVertex[i2];
-
 			if (tData) {
 				console.log(tData);
 				tValue = this[tData.valueName];

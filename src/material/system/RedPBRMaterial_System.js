@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.6 19:2:34
+ *   Last modification time of this file - 2019.12.7 15:34:43
  *
  */
 
@@ -10,17 +10,17 @@
 import RedTypeSize from "../../resources/RedTypeSize.js";
 import RedBaseMaterial from "../../base/RedBaseMaterial.js";
 import RedShareGLSL from "../../base/RedShareGLSL.js";
-import RedMaterialPreset from "../RedMaterialPreset.js";
+import RedMix from "../../base/RedMix.js";
 
 let float1_Float32Array = new Float32Array(1);
-export default class RedPBRMaterial_System extends RedMaterialPreset.mix(
+export default class RedPBRMaterial_System extends RedMix.mix(
 	RedBaseMaterial,
-	RedMaterialPreset.diffuseTexture,
-	RedMaterialPreset.normalTexture,
-	RedMaterialPreset.emissiveTexture,
-	RedMaterialPreset.environmentTexture,
-	RedMaterialPreset.displacementTexture,
-	RedMaterialPreset.basicLightPropertys
+	RedMix.diffuseTexture,
+	RedMix.normalTexture,
+	RedMix.emissiveTexture,
+	RedMix.environmentTexture,
+	RedMix.displacementTexture,
+	RedMix.basicLightPropertys
 ) {
 
 	static vertexShaderGLSL = `

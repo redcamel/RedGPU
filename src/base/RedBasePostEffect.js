@@ -2,19 +2,19 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.6 19:2:34
+ *   Last modification time of this file - 2019.12.7 15:34:43
  *
  */
 
 "use strict";
 import RedBaseMaterial from "../base/RedBaseMaterial.js";
-import RedMaterialPreset from "../material/RedMaterialPreset.js";
+import RedMix from "./RedMix.js";
 import RedMesh from "../object3D/RedMesh.js";
 import RedPlane from "../primitives/RedPlane.js";
 
-export default class RedBasePostEffect extends RedMaterialPreset.mix(
+export default class RedBasePostEffect extends RedMix.mix(
 	RedBaseMaterial,
-	RedMaterialPreset.diffuseTexture
+	RedMix.diffuseTexture
 ) {
 	static vertexShaderGLSL = ``;
 	static fragmentShaderGLSL = ``;
