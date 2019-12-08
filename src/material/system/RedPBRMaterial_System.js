@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.7 18:58:41
+ *   Last modification time of this file - 2019.12.8 17:1:40
  *
  */
 
@@ -12,6 +12,7 @@ import RedBaseMaterial from "../../base/RedBaseMaterial.js";
 import RedShareGLSL from "../../base/RedShareGLSL.js";
 import RedMix from "../../base/RedMix.js";
 
+let maxJoint = 128; // TODO - 이거 계산해내야함 나중에
 let float1_Float32Array = new Float32Array(1);
 export default class RedPBRMaterial_System extends RedMix.mix(
 	RedBaseMaterial,
@@ -26,7 +27,7 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 	static vertexShaderGLSL = `
 	#version 450
     ${RedShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
-    ${RedShareGLSL.GLSL_SystemUniforms_vertex.calcDisplacement}    
+    ${RedShareGLSL.GLSL_SystemUniforms_vertex.calcDisplacement}
     layout( set = ${RedShareGLSL.SET_INDEX_MeshUniforms}, binding = 0 ) uniform MeshUniforms {
         mat4 modelMatrix;
         mat4 normalMatrix;
@@ -37,7 +38,9 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 	layout( location = 2 ) in vec3 normal;
 	layout( location = 3 ) in vec2 uv;
 	layout( location = 4 ) in vec2 uv1;
-	layout( location = 5 ) in vec4 vertexTangent;
+	layout( location = 5 ) in vec4 aVertexWeight;
+	layout( location = 6 ) in vec4 aVertexJoint;
+	layout( location = 7 ) in vec4 vertexTangent;
 	layout( location = 0 ) out vec4 vVertexColor_0;
 	layout( location = 1 ) out vec3 vNormal;
 	layout( location = 2 ) out vec2 vUV;
@@ -45,6 +48,9 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 	layout( location = 4 ) out vec4 vVertexTangent;
 	layout( location = 5 ) out vec4 vVertexPosition;
 	layout( set = ${RedShareGLSL.SET_INDEX_VertexUniforms}, binding = 0 ) uniform VertexUniforms {
+		mat4 jointMatrix[${maxJoint}];
+		mat4 inverseBindMatrixForJoint[${maxJoint}];
+		mat4 globalTransformOfNodeThatTheMeshIsAttachedTo;
         float displacementFlowSpeedX;
         float displacementFlowSpeedY;
         float displacementPower;
@@ -53,9 +59,20 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 	layout( set = ${RedShareGLSL.SET_INDEX_VertexUniforms}, binding = 1 ) uniform sampler uDisplacementSampler;
 	//#RedGPU#displacementTexture# layout( set = ${RedShareGLSL.SET_INDEX_VertexUniforms}, binding = 2 ) uniform texture2D uDisplacementTexture;
 	void main() {		
-		vVertexPosition = meshUniforms.modelMatrix * vec4(position, 1.0);
+		mat4 targetMatrix = meshUniforms.modelMatrix ;
+		mat4 skinMat = mat4(1.0,0.0,0.0,0.0, 0.0,1.0,0.0,0.0, 0.0,0.0,1.0,0.0, 0.0,0.0,0.0,1.0);
+		//#RedGPU#skin# skinMat =
+		//#RedGPU#skin#  aVertexWeight.x * vertexUniforms.globalTransformOfNodeThatTheMeshIsAttachedTo * vertexUniforms.jointMatrix[ int(aVertexJoint.x) ] * vertexUniforms.inverseBindMatrixForJoint[int(aVertexJoint.x)]+
+		//#RedGPU#skin#  aVertexWeight.y * vertexUniforms.globalTransformOfNodeThatTheMeshIsAttachedTo * vertexUniforms.jointMatrix[ int(aVertexJoint.y) ] * vertexUniforms.inverseBindMatrixForJoint[int(aVertexJoint.y)]+
+		//#RedGPU#skin#  aVertexWeight.z * vertexUniforms.globalTransformOfNodeThatTheMeshIsAttachedTo * vertexUniforms.jointMatrix[ int(aVertexJoint.z) ] * vertexUniforms.inverseBindMatrixForJoint[int(aVertexJoint.z)]+
+		//#RedGPU#skin#  aVertexWeight.w * vertexUniforms.globalTransformOfNodeThatTheMeshIsAttachedTo * vertexUniforms.jointMatrix[ int(aVertexJoint.w) ] * vertexUniforms.inverseBindMatrixForJoint[int(aVertexJoint.w)];
+		
+		vVertexPosition = meshUniforms.modelMatrix * skinMat * vec4(position, 1.0);
 		vVertexColor_0 = vertexColor_0;
-		vNormal = (meshUniforms.normalMatrix * vec4(normal,1.0)).xyz;
+		
+		vNormal = (meshUniforms.normalMatrix *  vec4(normal,1.0)).xyz;
+		 vNormal = (meshUniforms.normalMatrix  * skinMat * vec4(normal,0.0)).xyz;		
+		
 		vUV = uv;
 		vUV1 = uv1;
 		vVertexTangent = vertexTangent;
@@ -68,6 +85,7 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 	${RedShareGLSL.GLSL_SystemUniforms_fragment.systemUniforms}
 	${RedShareGLSL.GLSL_SystemUniforms_fragment.cotangent_frame}
 	${RedShareGLSL.GLSL_SystemUniforms_fragment.perturb_normal}
+	
 	layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 3 ) uniform FragmentUniforms {
         float normalPower;
         float shininess; 
@@ -82,6 +100,7 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 	    float occlusionTexCoordIndex;
 	    float metallicFactor;
 	    float roughnessFactor;
+	    float cutOff;
 	    
     } fragmentUniforms;
 	layout( location = 0 ) in vec4 vVertexColor_0;
@@ -130,7 +149,9 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 		vec4 diffuseColor = fragmentUniforms.baseColorFactor;
 		//#RedGPU#useVertexColor_0# diffuseColor *= clamp(vVertexColor_0,0.0,1.0) ;
 		//#RedGPU#diffuseTexture# diffuseColor *= texture(sampler2D(uDiffuseTexture, uDiffuseSampler), diffuseTexCoord) ;
+
 	
+		//#RedGPU#useCutOff# if(diffuseColor.a <= fragmentUniforms.cutOff) discard;
 		
 	    vec3 N = normalize(vNormal);
 	    //#RedGPU#useMaterialDoubleSide# vec3 fdx = dFdx(vVertexPosition.xyz);
@@ -192,6 +213,7 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 		//#RedGPU#environmentTexture# diffuseColor = mix( diffuseColor , vec4(0.04, 0.04, 0.04, 1.0) , tRoughnessPower * (tMetallicPower) * 0.5);
 		
 		
+		
 		 vec4 finalColor = diffuseColor;
 		
 
@@ -211,7 +233,8 @@ finalColor.a = fragmentUniforms.occlusionPower;
 	static PROGRAM_OPTION_LIST = [
 		'diffuseTexture', 'displacementTexture',
 		'emissiveTexture', 'environmentTexture', 'normalTexture', 'occlusionTexture', 'roughnessTexture',
-		'useFlatMode',
+		'useCutOff',
+		'useFlatMode', 'skin',
 		'useMaterialDoubleSide',
 		'useVertexTangent',
 		'useVertexColor_0'
@@ -237,6 +260,9 @@ finalColor.a = fragmentUniforms.occlusionPower;
 		]
 	};
 	static uniformBufferDescriptor_vertex = [
+		{size: RedTypeSize.mat4 * maxJoint, valueName: 'jointMatrix'},
+		{size: RedTypeSize.mat4 * maxJoint, valueName: 'inverseBindMatrixForJoint'},
+		{size: RedTypeSize.mat4, valueName: 'globalTransformOfNodeThatTheMeshIsAttachedTo'},
 		{size: RedTypeSize.float, valueName: 'displacementFlowSpeedX'},
 		{size: RedTypeSize.float, valueName: 'displacementFlowSpeedY'},
 		{size: RedTypeSize.float, valueName: 'displacementPower'}
@@ -254,7 +280,8 @@ finalColor.a = fragmentUniforms.occlusionPower;
 		{size: RedTypeSize.float, valueName: 'roughnessTexCoordIndex'},
 		{size: RedTypeSize.float, valueName: 'occlusionTexCoordIndex'},
 		{size: RedTypeSize.float, valueName: 'metallicFactor'},
-		{size: RedTypeSize.float, valueName: 'roughnessFactor'}
+		{size: RedTypeSize.float, valueName: 'roughnessFactor'},
+		{size: RedTypeSize.float, valueName: 'cutOff'}
 	];
 
 	_baseColorFactor = new Float32Array(4);
@@ -271,6 +298,36 @@ finalColor.a = fragmentUniforms.occlusionPower;
 	_useVertexTangent = false;
 	_emissivePower = 1;
 	_occlusionPower = 1
+	_cutOff = 0.0
+	_useCutOff = true;
+
+	_skin = false;
+	jointMatrix = new Float32Array(RedTypeSize.mat4 * maxJoint / Float32Array.BYTES_PER_ELEMENT);
+	inverseBindMatrixForJoint = new Float32Array(RedTypeSize.mat4 * maxJoint / Float32Array.BYTES_PER_ELEMENT);
+	globalTransformOfNodeThatTheMeshIsAttachedTo = new Float32Array(RedTypeSize.mat4 / Float32Array.BYTES_PER_ELEMENT);
+	set cutOff(value) {
+		this._cutOff = value;
+		float1_Float32Array[0] = value;
+		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['cutOff'], float1_Float32Array)
+	}
+	get cutOff() {
+		return this._cutOff;
+	}
+	get useCutOff() {
+		return this._useCutOff
+	}
+	set useCutOff(v) {
+		this._useCutOff = v
+		this.resetBindingInfo()
+	}
+	get skin() {
+		return this._skin
+	}
+	set skin(v) {
+		this._skin = v
+		this.resetBindingInfo()
+	}
+
 	set emissivePower(value) {
 		this._emissivePower = value;
 		float1_Float32Array[0] = value;
@@ -418,7 +475,7 @@ finalColor.a = fragmentUniforms.occlusionPower;
 						break;
 					case 'occlusionTexture' :
 						this._occlusionTexture = texture;
-						console.log('occlusionTexture',texture)
+						console.log('occlusionTexture', texture)
 						break;
 				}
 				console.log("로딩완료됨 textureName", textureName, texture.GPUTexture);

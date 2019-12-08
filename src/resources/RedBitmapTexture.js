@@ -2,11 +2,12 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.7 15:34:43
+ *   Last modification time of this file - 2019.12.8 17:1:40
  *
  */
 "use strict";
 import RedSampler from "./RedSampler.js";
+import RedUTIL from "../util/RedUTIL.js";
 
 let imageCanvas;
 let imageCanvasContext;
@@ -95,6 +96,8 @@ export default class RedBitmapTexture {
 			img.onload = _ => {
 				let tW = img.width;
 				let tH = img.height;
+				tW = RedUTIL.nextHighestPowerOfTwo(tW);
+				tH = RedUTIL.nextHighestPowerOfTwo(tH)
 				if(tW>1024) tW = 1024;
 				if(tH>1024) tH = 1024;
 				if (useMipmap) this.mipMaps = Math.round(Math.log2(Math.max(tW, tH)));

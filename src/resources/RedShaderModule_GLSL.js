@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.7 18:58:41
+ *   Last modification time of this file - 2019.12.8 17:1:40
  *
  */
 const rootMap = {
@@ -64,7 +64,7 @@ export default class RedShaderModule_GLSL {
 
 	searchShaderModule(optionList) {
 		optionList.sort()
-		console.log('searchShaderModule', optionList);
+
 		let searchKey = optionList.join('_')
 		if(!this.sourceMap.get(searchKey)){
 			this.sourceMap.set(searchKey,parseSource(this.originSource, optionList));

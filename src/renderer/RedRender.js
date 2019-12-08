@@ -2,9 +2,11 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.6 19:2:34
+ *   Last modification time of this file - 2019.12.8 17:1:40
  *
  */
+
+import RedGLTFLoader from "../loader/RedGLTFLoader.js";
 
 let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty) => {
 	let i;
@@ -22,6 +24,7 @@ let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty) 
 	let tMVMatrix, tNMatrix;
 	let tLocalMatrix;
 	let parentMTX;
+	let tSkinInfo;
 	let aSx, aSy, aSz, aCx, aCy, aCz, aX, aY, aZ,
 		a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23, a30, a31, a32, a33,
 		b0, b1, b2, b3,
@@ -38,7 +41,8 @@ let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty) 
 		tDirtyTransform = tMesh.dirtyTransform;
 		tDirtyPipeline = tMesh.dirtyPipeline;
 		tPipeline = tMesh.pipeline;
-		if(tMaterial) tMaterialChanged = tMesh._prevMaterialUUID != tMaterial._UUID;
+		tSkinInfo = tMesh.skinInfo;
+		if (tMaterial) tMaterialChanged = tMesh._prevMaterialUUID != tMaterial._UUID;
 		if (tGeometry) {
 
 
@@ -87,11 +91,10 @@ let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty) 
 
 			prevMaterial_UUID = tMesh._prevMaterialUUID = tMaterial._UUID;
 		}
-
+		tMVMatrix = tMesh.matrix;
 		if (tDirtyTransform || parentDirty) {
 			// TODO 매트릭스 계산부분을 여기로 나중에 다들고 오는게 성능에 좋음...
 
-			tMVMatrix = tMesh.matrix;
 			tLocalMatrix = tMesh.localMatrix;
 			parentMTX = parent ? parent.matrix : null;
 
@@ -222,7 +225,98 @@ let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty) 
 
 			tMesh.uniformBuffer_mesh.GPUBuffer.setSubData(0, tMesh.matrix);
 			tMesh.uniformBuffer_mesh.GPUBuffer.setSubData(64, tMesh.normalMatrix);
-
+		}
+		if (tSkinInfo) {
+			var joints = tSkinInfo['joints'];
+			var joint_i = 0, len = joints.length;
+			var tJointMTX;
+			var globalTransformOfJointNode = new Float32Array(len * 16);
+			var globalTransformOfNodeThatTheMeshIsAttachedTo = new Float32Array([
+				tMVMatrix[0],
+				tMVMatrix[1],
+				tMVMatrix[2],
+				tMVMatrix[3],
+				tMVMatrix[4],
+				tMVMatrix[5],
+				tMVMatrix[6],
+				tMVMatrix[7],
+				tMVMatrix[8],
+				tMVMatrix[9],
+				tMVMatrix[10],
+				tMVMatrix[11],
+				tMVMatrix[12],
+				tMVMatrix[13],
+				tMVMatrix[14],
+				tMVMatrix[15]
+			]);
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			// Inverse
+			var te = globalTransformOfNodeThatTheMeshIsAttachedTo,
+				me = globalTransformOfNodeThatTheMeshIsAttachedTo,
+				n11 = me[0], n21 = me[1], n31 = me[2], n41 = me[3],
+				n12 = me[4], n22 = me[5], n32 = me[6], n42 = me[7],
+				n13 = me[8], n23 = me[9], n33 = me[10], n43 = me[11],
+				n14 = me[12], n24 = me[13], n34 = me[14], n44 = me[15],
+				t11 = n23 * n34 * n42 - n24 * n33 * n42 + n24 * n32 * n43 - n22 * n34 * n43 - n23 * n32 * n44 + n22 * n33 * n44,
+				t12 = n14 * n33 * n42 - n13 * n34 * n42 - n14 * n32 * n43 + n12 * n34 * n43 + n13 * n32 * n44 - n12 * n33 * n44,
+				t13 = n13 * n24 * n42 - n14 * n23 * n42 + n14 * n22 * n43 - n12 * n24 * n43 - n13 * n22 * n44 + n12 * n23 * n44,
+				t14 = n14 * n23 * n32 - n13 * n24 * n32 - n14 * n22 * n33 + n12 * n24 * n33 + n13 * n22 * n34 - n12 * n23 * n34;
+			var det = n11 * t11 + n21 * t12 + n31 * t13 + n41 * t14;
+			if (det === 0) {
+				console.warn("can't invert matrix, determinant is 0");
+				return mat4.identity(globalTransformOfNodeThatTheMeshIsAttachedTo);
+			} else {
+				var detInv = 1 / det;
+				te[0] = t11 * detInv;
+				te[1] = (n24 * n33 * n41 - n23 * n34 * n41 - n24 * n31 * n43 + n21 * n34 * n43 + n23 * n31 * n44 - n21 * n33 * n44) * detInv;
+				te[2] = (n22 * n34 * n41 - n24 * n32 * n41 + n24 * n31 * n42 - n21 * n34 * n42 - n22 * n31 * n44 + n21 * n32 * n44) * detInv;
+				te[3] = (n23 * n32 * n41 - n22 * n33 * n41 - n23 * n31 * n42 + n21 * n33 * n42 + n22 * n31 * n43 - n21 * n32 * n43) * detInv;
+				te[4] = t12 * detInv;
+				te[5] = (n13 * n34 * n41 - n14 * n33 * n41 + n14 * n31 * n43 - n11 * n34 * n43 - n13 * n31 * n44 + n11 * n33 * n44) * detInv;
+				te[6] = (n14 * n32 * n41 - n12 * n34 * n41 - n14 * n31 * n42 + n11 * n34 * n42 + n12 * n31 * n44 - n11 * n32 * n44) * detInv;
+				te[7] = (n12 * n33 * n41 - n13 * n32 * n41 + n13 * n31 * n42 - n11 * n33 * n42 - n12 * n31 * n43 + n11 * n32 * n43) * detInv;
+				te[8] = t13 * detInv;
+				te[9] = (n14 * n23 * n41 - n13 * n24 * n41 - n14 * n21 * n43 + n11 * n24 * n43 + n13 * n21 * n44 - n11 * n23 * n44) * detInv;
+				te[10] = (n12 * n24 * n41 - n14 * n22 * n41 + n14 * n21 * n42 - n11 * n24 * n42 - n12 * n21 * n44 + n11 * n22 * n44) * detInv;
+				te[11] = (n13 * n22 * n41 - n12 * n23 * n41 - n13 * n21 * n42 + n11 * n23 * n42 + n12 * n21 * n43 - n11 * n22 * n43) * detInv;
+				te[12] = t14 * detInv;
+				te[13] = (n13 * n24 * n31 - n14 * n23 * n31 + n14 * n21 * n33 - n11 * n24 * n33 - n13 * n21 * n34 + n11 * n23 * n34) * detInv;
+				te[14] = (n14 * n22 * n31 - n12 * n24 * n31 - n14 * n21 * n32 + n11 * n24 * n32 + n12 * n21 * n34 - n11 * n22 * n34) * detInv;
+				te[15] = (n12 * n23 * n31 - n13 * n22 * n31 + n13 * n21 * n32 - n11 * n23 * n32 - n12 * n21 * n33 + n11 * n22 * n33) * detInv;
+			}
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			// 글로벌 조인트 노드병합함
+			for (joint_i; joint_i < len; joint_i++) {
+				// 조인트 공간내에서의 전역
+				tJointMTX = joints[joint_i]['matrix'];
+				globalTransformOfJointNode[joint_i * 16 + 0] = tJointMTX[0];
+				globalTransformOfJointNode[joint_i * 16 + 1] = tJointMTX[1];
+				globalTransformOfJointNode[joint_i * 16 + 2] = tJointMTX[2];
+				globalTransformOfJointNode[joint_i * 16 + 3] = tJointMTX[3];
+				globalTransformOfJointNode[joint_i * 16 + 4] = tJointMTX[4];
+				globalTransformOfJointNode[joint_i * 16 + 5] = tJointMTX[5];
+				globalTransformOfJointNode[joint_i * 16 + 6] = tJointMTX[6];
+				globalTransformOfJointNode[joint_i * 16 + 7] = tJointMTX[7];
+				globalTransformOfJointNode[joint_i * 16 + 8] = tJointMTX[8];
+				globalTransformOfJointNode[joint_i * 16 + 9] = tJointMTX[9];
+				globalTransformOfJointNode[joint_i * 16 + 10] = tJointMTX[10];
+				globalTransformOfJointNode[joint_i * 16 + 11] = tJointMTX[11];
+				globalTransformOfJointNode[joint_i * 16 + 12] = tJointMTX[12];
+				globalTransformOfJointNode[joint_i * 16 + 13] = tJointMTX[13];
+				globalTransformOfJointNode[joint_i * 16 + 14] = tJointMTX[14];
+				globalTransformOfJointNode[joint_i * 16 + 15] = tJointMTX[15]
+			}
+			tMaterial.uniformBuffer_vertex.GPUBuffer.setSubData(tMaterial.uniformBufferDescriptor_vertex.redStructOffsetMap['globalTransformOfNodeThatTheMeshIsAttachedTo'], globalTransformOfNodeThatTheMeshIsAttachedTo)
+			tMaterial.uniformBuffer_vertex.GPUBuffer.setSubData(tMaterial.uniformBufferDescriptor_vertex.redStructOffsetMap['jointMatrix'], globalTransformOfJointNode)
+			tMaterial.uniformBuffer_vertex.GPUBuffer.setSubData(tMaterial.uniformBufferDescriptor_vertex.redStructOffsetMap['inverseBindMatrixForJoint'], tSkinInfo['inverseBindMatrices'])
+			// tGL.uniformMatrix4fv(tSystemUniformGroup['uGlobalTransformOfNodeThatTheMeshIsAttachedTo']['location'], false, globalTransformOfNodeThatTheMeshIsAttachedTo);
+			// tGL.uniformMatrix4fv(tSystemUniformGroup['uJointMatrix']['location'], false, globalTransformOfJointNode);
+			// if (!tSkinInfo['inverseBindMatrices']['_UUID']) tSkinInfo['inverseBindMatrices']['_UUID'] = JSON.stringify(tSkinInfo['inverseBindMatrices'])
+			// tUUID = tSystemUniformGroup['uInverseBindMatrixForJoint']['_UUID']
+			// if (tCacheUniformInfo[tUUID] != tSkinInfo['inverseBindMatrices']['_UUID']) {
+			// 	tGL.uniformMatrix4fv(tSystemUniformGroup['uInverseBindMatrixForJoint']['location'], false, tSkinInfo['inverseBindMatrices'])
+			// 	tCacheUniformInfo[tUUID] = tSkinInfo['inverseBindMatrices']['_UUID']
+			// }
 		}
 		if (tMesh.children.length) renderScene(redGPU, redView, passEncoder, tMesh, tMesh.children, parentDirty || tDirtyTransform);
 		tMesh.dirtyPipeline = false;
@@ -337,6 +431,7 @@ export default class RedRender {
 		this.#swapChainTextureView = this.#swapChainTexture.createView();
 		let i = 0, len = redGPU.viewList.length;
 		for (i; i < len; i++) this.#renderView(redGPU, redGPU.viewList[i])
+		RedGLTFLoader.animationLooper(time);
 		// console.log(cacheTable)
 	}
 }

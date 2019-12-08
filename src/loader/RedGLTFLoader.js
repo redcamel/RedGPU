@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.7 18:58:41
+ *   Last modification time of this file - 2019.12.8 17:1:40
  *
  */
 
@@ -638,7 +638,7 @@ var RedGLTFLoader;
 										weights_targetData[weights_baseIndex + 1] = weights_prev1 + interpolationValue * (weights_next1 - weights_prev1);
 										weights_targetData[weights_baseIndex + 2] = weights_prev2 + interpolationValue * (weights_next2 - weights_prev2)
 									}
-									weights_targetMesh['geometry']['interleaveBuffer'].upload(weights_targetData)
+									weights_targetMesh['geometry']['interleaveBuffer'].update(weights_targetData)
 								}
 								break
 						}
@@ -648,7 +648,9 @@ var RedGLTFLoader;
 					else interpolationValue = (currentTime - previousTime) / (nextTime - previousTime);
 					if (interpolationValue.toString() == 'NaN') interpolationValue = 0;
 					if (target) {
+
 						var tAniData_data = aniData['data'];
+
 						switch (aniData['key']) {
 							case 'rotation':
 								/////////////////////////////////////////////
@@ -787,6 +789,8 @@ var RedGLTFLoader;
 								break;
 							case 'weights' :
 								// console.log(aniData)
+
+
 								weights_aniTargetsIDX = aniData['targets'].length;
 								while (weights_aniTargetsIDX--) {
 									weights_targetMesh = aniData['targets'][weights_aniTargetsIDX];
@@ -839,7 +843,7 @@ var RedGLTFLoader;
 										weights_targetData[weights_baseIndex + 1] = weights_prev1 + interpolationValue * (weights_next1 - weights_prev1);
 										weights_targetData[weights_baseIndex + 2] = weights_prev2 + interpolationValue * (weights_next2 - weights_prev2)
 									}
-									weights_targetMesh['geometry']['interleaveBuffer'].upload(weights_targetData)
+									weights_targetMesh['geometry']['interleaveBuffer'].update(weights_targetData)
 								}
 								break
 						}
@@ -1070,6 +1074,7 @@ var RedGLTFLoader;
 			}
 			skinInfo['inverseBindMatrices'] = new Float32Array(skinInfo['inverseBindMatrices']);
 			tMesh['skinInfo'] = skinInfo
+			tMesh.material.skin = tMesh['skinInfo'] ? true : false;
 			// console.log(skinInfo)
 		};
 		parseNode = (function () {
@@ -1675,6 +1680,11 @@ var RedGLTFLoader;
 					interleaveData[idx++] = jointWeights[i * 4 + 2];
 					interleaveData[idx++] = jointWeights[i * 4 + 3];
 					// interleaveData.push(jointWeights[i * 4 + 0], jointWeights[i * 4 + 1], jointWeights[i * 4 + 2], jointWeights[i * 4 + 3])
+				}else{
+					interleaveData[idx++] = 0;
+					interleaveData[idx++] = 0;
+					interleaveData[idx++] = 0;
+					interleaveData[idx++] = 0;
 				}
 				if (joints.length) {
 					interleaveData[idx++] = joints[i * 4 + 0];
@@ -1682,6 +1692,11 @@ var RedGLTFLoader;
 					interleaveData[idx++] = joints[i * 4 + 2];
 					interleaveData[idx++] = joints[i * 4 + 3];
 					// interleaveData.push(joints[i * 4 + 0], joints[i * 4 + 1], joints[i * 4 + 2], joints[i * 4 + 3])
+				}else{
+					interleaveData[idx++] = 0;
+					interleaveData[idx++] = 0;
+					interleaveData[idx++] = 0;
+					interleaveData[idx++] = 0;
 				}
 				if (tangents.length) {
 					interleaveData[idx++] = tangents[i * 4 + 0];
@@ -1811,8 +1826,8 @@ var RedGLTFLoader;
 				if (uvs.length) tInterleaveInfoList.push(new RedInterleaveInfo('aTexcoord', 'float2'));
 				if (uvs1.length) tInterleaveInfoList.push(new RedInterleaveInfo('aTexcoord1', 'float2'));
 				else if (uvs.length) tInterleaveInfoList.push(new RedInterleaveInfo('aTexcoord1', 'float2'));
-				if (jointWeights.length) tInterleaveInfoList.push(new RedInterleaveInfo('aVertexWeight', 'float4'));
-				if (joints.length) tInterleaveInfoList.push(new RedInterleaveInfo('aVertexJoint', 'float4'));
+				tInterleaveInfoList.push(new RedInterleaveInfo('aVertexWeight', 'float4'));
+				tInterleaveInfoList.push(new RedInterleaveInfo('aVertexJoint', 'float4'));
 				tInterleaveInfoList.push(new RedInterleaveInfo('aVertexTangent', 'float4'));
 
 				tGeo = new RedGeometry(
@@ -1837,6 +1852,8 @@ var RedGLTFLoader;
 				}
 				// console.log('tMaterial', tMaterial)
 				tMesh = new RedMesh(redGLTFLoader['redGPU'], tGeo, tMaterial);
+
+
 				if (tName) {
 					tMesh.name = tName;
 					if (redGLTFLoader['parsingOption']) {
@@ -1869,8 +1886,7 @@ var RedGLTFLoader;
 						break;
 					default :
 						tMesh.useBlendMode = false;
-						tMaterial._cutOff = -0.1
-					// tMesh.useBlendMode = false
+						tMaterial.useCutOff = false
 				}
 				if (verticesColor_0.length) tMaterial.useVertexColor_0 = true;
 				if (tangents.length) tMaterial.useVertexTangent = true;
@@ -1918,6 +1934,7 @@ var RedGLTFLoader;
 				tMesh['_morphInfo']['list'].forEach(function (v, index) {
 					// console.log('tInterleaveInfoList', tInterleaveInfoList)
 					// console.log('NUM', NUM)
+
 					var i = 0, len = targetData.length / NUM;
 					var tWeights = tMesh['_morphInfo']['list']['weights'][index] == undefined ? 0.5 : tMesh['_morphInfo']['list']['weights'][index];
 					for (i; i < len; i++) {
@@ -1926,7 +1943,7 @@ var RedGLTFLoader;
 						targetData[i * NUM + 2] += v['vertices'][i * 3 + 2] * tWeights
 					}
 				});
-				//FIXME - tMesh['geometry']['interleaveBuffer'].upload(targetData);
+				tMesh['geometry']['interleaveBuffer'].update(targetData);
 				tMesh['_morphInfo']['origin'] = new Float32Array(targetData);
 				/////////////////////////////////////////////////////
 				v['RedMesh'] = tMesh;
@@ -2020,7 +2037,7 @@ var RedGLTFLoader;
 							tMesh = tNode['RedMesh'];
 							meshes[tNode['mesh']]['primitives'].forEach(function (v) {
 								targets.push(v['RedMesh']);
-								v['RedMesh'].geometry.primitiveTopology = redGLTFLoader['redGPU']['gl'].DYNAMIC_DRAW
+								// v['RedMesh'].geometry.drawMode = redGLTFLoader['redGL']['gl'].DYNAMIC_DRAW
 							})
 						} else {
 							var tGroup;
@@ -2086,7 +2103,7 @@ var RedGLTFLoader;
 		})();
 		return function (redGLTFLoader, redGPU, json, callBack, binaryChunk) {
 			console.log('파싱시작', redGLTFLoader['path'] + redGLTFLoader['fileName']);
-			// console.log('rawData', json);
+			console.log('rawData', json);
 			checkAsset(json);
 			if (binaryChunk) {
 				console.log(json);
@@ -2097,7 +2114,7 @@ var RedGLTFLoader;
 						// 리소스 로딩이 완료되면 다음 진행
 						parseCameras(redGLTFLoader, json);
 						parseScene(redGLTFLoader, json, function () {
-							// parseAnimations(redGLTFLoader, json);
+							parseAnimations(redGLTFLoader, json);
 							if (callBack) callBack();
 						})
 
@@ -2109,7 +2126,7 @@ var RedGLTFLoader;
 						// 리소스 로딩이 완료되면 다음 진행
 						parseCameras(redGLTFLoader, json);
 						parseScene(redGLTFLoader, json, function () {
-							// parseAnimations(redGLTFLoader, json);
+							parseAnimations(redGLTFLoader, json);
 							if (callBack) callBack();
 						})
 

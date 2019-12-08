@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.6 19:2:34
+ *   Last modification time of this file - 2019.12.8 17:1:39
  *
  */
 
@@ -24,11 +24,15 @@ export default class RedBuffer extends RedUUID {
 		let tUsage;
 		this.type = bufferType;
 		this.vertexCount = 0;
+		this.stride = 0
 		switch (bufferType) {
 			case RedBuffer.TYPE_VERTEX :
 				tUsage = usage || GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST;
 				this.interleaveInfo = interleaveInfo;
-				interleaveInfo.forEach(v => this.vertexCount += v['stride'] / Float32Array.BYTES_PER_ELEMENT);
+				interleaveInfo.forEach(v => {
+					this.vertexCount += v['stride'] / Float32Array.BYTES_PER_ELEMENT;
+					this.stride +=v['stride'] / Float32Array.BYTES_PER_ELEMENT
+				});
 				this.vertexCount = data.length / this.vertexCount;
 				console.log('최종 this.vertexCount',this.vertexCount);
 				break;
@@ -42,14 +46,16 @@ export default class RedBuffer extends RedUUID {
 			size: data.byteLength,
 			usage: tUsage
 		};
-		this.originData = data;
+		this.data = data;
 		this.GPUBuffer = redGPU.device.createBuffer(this.bufferDescriptor);
 		this.GPUBuffer.setSubData(0, data);
 		redGPU.state.RedBuffer[bufferType].set(typeKey, this);
-
 		console.log(this);
 	}
-
+	update(data){
+		this.data = data;
+		this.GPUBuffer.setSubData(0, new Float32Array(data));
+	}
 
 	destroy() {
 		if (this.GPUBuffer) this.GPUBuffer.destroy();
