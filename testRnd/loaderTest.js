@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.8 17:1:40
+ *   Last modification time of this file - 2019.12.8 17:2:58
  *
  */
 
@@ -62,8 +62,8 @@ import RedAxis from "../src/object3D/RedAxis.js";
 			tGrid.centerColor = '#ff0000'
 			// tScene.backgroundColor = '#fff'
 
-			// tCamera.distance = 100
-			// tCamera.speedDistance = 10
+			tCamera.distance = 3
+			tCamera.speedDistance = 0.1
 
 
 			tView = new RedView(this, tScene, tCamera)
@@ -91,7 +91,7 @@ import RedAxis from "../src/object3D/RedAxis.js";
 			new RedGLTFLoader(
 				this, // redGL
 				'assets/gltf/', // assetRootPath
-				'AlphaBlendModeTest.gltf', // fileName
+				'DamagedHelmet.gltf', // fileName
 				function (v) { // callBack
 					console.log(v)
 					let tMesh = v['resultMesh']
@@ -110,15 +110,15 @@ import RedAxis from "../src/object3D/RedAxis.js";
 
 				])
 			);
-			// tScene.skyBox = new RedSkyBox(this,new RedBitmapCubeTexture(redGPU, [
-			// 	'./assets/cubemap/SwedishRoyalCastle/px.jpg',
-			// 	'./assets/cubemap/SwedishRoyalCastle/nx.jpg',
-			// 	'./assets/cubemap/SwedishRoyalCastle/py.jpg',
-			// 	'./assets/cubemap/SwedishRoyalCastle/ny.jpg',
-			// 	'./assets/cubemap/SwedishRoyalCastle/pz.jpg',
-			// 	'./assets/cubemap/SwedishRoyalCastle/nz.jpg'
-			//
-			// ]))
+			tScene.skyBox = new RedSkyBox(this,new RedBitmapCubeTexture(redGPU, [
+				'./assets/cubemap/SwedishRoyalCastle/px.jpg',
+				'./assets/cubemap/SwedishRoyalCastle/nx.jpg',
+				'./assets/cubemap/SwedishRoyalCastle/py.jpg',
+				'./assets/cubemap/SwedishRoyalCastle/ny.jpg',
+				'./assets/cubemap/SwedishRoyalCastle/pz.jpg',
+				'./assets/cubemap/SwedishRoyalCastle/nz.jpg'
+
+			]))
 
 			let renderer = new RedRender();
 			let render = function (time) {
