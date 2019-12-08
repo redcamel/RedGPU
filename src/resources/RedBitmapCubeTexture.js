@@ -2,11 +2,12 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.7 15:34:43
+ *   Last modification time of this file - 2019.12.8 17:1:40
  *
  */
 "use strict";
 import RedSampler from "./RedSampler.js";
+import RedUTIL from "../util/RedUTIL.js";
 
 let imageCanvas;
 let imageCanvasContext;
@@ -72,6 +73,8 @@ export default class RedBitmapCubeTexture {
 		console.log('mip', mip, 'width', width, 'height', height)
 	};
 	#makeCubeTexture = function (redGPU, useMipmap, imgList, maxW, maxH) {
+		maxW = RedUTIL.nextHighestPowerOfTwo(maxW);
+		maxH = RedUTIL.nextHighestPowerOfTwo(maxH)
 		if (useMipmap) this.mipMaps = Math.round(Math.log2(Math.max(maxW, maxH)));
 		const textureDescriptor = {
 			size: {

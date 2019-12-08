@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.6 19:2:34
+ *   Last modification time of this file - 2019.12.8 17:1:40
  *
  */
 
@@ -12,6 +12,14 @@ let clamp = function (value, min, max) {
 };
 export default {
 	clamp: clamp,
+	nextHighestPowerOfTwo: (function () {
+		var i;
+		return function (v) {
+			--v;
+			for (i = 1; i < 32; i <<= 1) v = v | v >> i;
+			return v + 1;
+		}
+	})(),
 	quaternionToRotationMat4: function (q, m) {
 		let x = q[0];
 		let y = q[1];
