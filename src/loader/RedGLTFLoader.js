@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.8 17:1:40
+ *   Last modification time of this file - 2019.12.9 16:15:54
  *
  */
 
@@ -1473,8 +1473,8 @@ var RedGLTFLoader;
 				};
 				if (json['samplers']) {
 					var t0 = json['samplers'][samplerIndex];
-					if ('magFilter' in t0) result['mag'] = magFilterTable[t0['magFilter']] || 'linear';
-					if ('minFilter' in t0) result['min'] = minFilterTable[t0['minFilter']] || 'linear';
+					if ('mag' in t0) result['magFilter'] = magFilterTable[t0['magFilter']] || 'linear';
+					if ('min' in t0) result['minFilter'] = minFilterTable[t0['minFilter']] || 'linear';
 					if ('wrapS' in t0) result['addressModeU'] = wrapTable[t0['wrapS']];
 					if ('wrapT' in t0) result['addressModeV'] = wrapTable[t0['wrapT']]
 				} else {
@@ -1878,14 +1878,16 @@ var RedGLTFLoader;
 					// TODO
 
 					case 'BLEND' :
-						tMesh['useTransparentSort'] = true;
+						tMesh.transparentSort = true
+						tMaterial.alphaBlend = 2;
 						break;
 					case 'MASK' :
-						tMesh.useBlendMode = false;
+						tMaterial.alphaBlend = 1;
 						tMaterial.cutOff = tAlphaCutoff;
+						tMaterial.useCutOff = true
 						break;
 					default :
-						tMesh.useBlendMode = false;
+						tMaterial.alphaBlend = 0;
 						tMaterial.useCutOff = false
 				}
 				if (verticesColor_0.length) tMaterial.useVertexColor_0 = true;
@@ -1948,13 +1950,13 @@ var RedGLTFLoader;
 				/////////////////////////////////////////////////////
 				v['RedMesh'] = tMesh;
 				tMeshList.push(tMesh);
-				console.log('vertices', vertices);
-				console.log('normalData', normalData);
-				console.log('uvs', uvs);
-				console.log('joints', joints);
-				console.log('jointWeights', jointWeights);
-				console.log('tangents', tangents);
-				console.log('indices', indices)
+				// console.log('vertices', vertices);
+				// console.log('normalData', normalData);
+				// console.log('uvs', uvs);
+				// console.log('joints', joints);
+				// console.log('jointWeights', jointWeights);
+				// console.log('tangents', tangents);
+				// console.log('indices', indices)
 			});
 			return tMeshList
 		};

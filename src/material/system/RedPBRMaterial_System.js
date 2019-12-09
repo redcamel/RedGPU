@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.8 17:1:40
+ *   Last modification time of this file - 2019.12.9 16:15:54
  *
  */
 
@@ -101,6 +101,7 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 	    float metallicFactor;
 	    float roughnessFactor;
 	    float cutOff;
+	    float alphaBlend;
 	    
     } fragmentUniforms;
 	layout( location = 0 ) in vec4 vVertexColor_0;
@@ -149,14 +150,15 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 		vec4 diffuseColor = fragmentUniforms.baseColorFactor;
 		//#RedGPU#useVertexColor_0# diffuseColor *= clamp(vVertexColor_0,0.0,1.0) ;
 		//#RedGPU#diffuseTexture# diffuseColor *= texture(sampler2D(uDiffuseTexture, uDiffuseSampler), diffuseTexCoord) ;
-
 	
-		//#RedGPU#useCutOff# if(diffuseColor.a <= fragmentUniforms.cutOff) discard;
+		
+		float tAlpha = diffuseColor.a;
+		//#RedGPU#useCutOff# if(tAlpha <= fragmentUniforms.cutOff) discard;
 		
 	    vec3 N = normalize(vNormal);
 	    //#RedGPU#useMaterialDoubleSide# vec3 fdx = dFdx(vVertexPosition.xyz);
 		//#RedGPU#useMaterialDoubleSide# vec3 fdy = dFdy(vVertexPosition.xyz);
-		//#RedGPU#useMaterialDoubleSide# vec3 faceNormal = normalize(cross(fdx,fdy));
+		//#RedGPU#useMaterialDoubleSide# vec3 faceNormal = normalize(cross(fdy,fdx));
 		bool backFaceYn = false;
 		//#RedGPU#useMaterialDoubleSide# if (dot (vNormal, faceNormal) < 0.0) { N = -N; backFaceYn = true; };
 
@@ -164,7 +166,7 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 		//#RedGPU#normalTexture# normalColor = texture(sampler2D(uNormalTexture, uNormalSampler), normalTexCoord) ;
 		//#RedGPU#useFlatMode# N = getFlatNormal(vVertexPosition.xyz);
 		//#RedGPU#normalTexture# N = perturb_normal(N, vVertexPosition.xyz, backFaceYn ?  1.0 - normalTexCoord : normalTexCoord, vec3(normalColor.r, 1.0- normalColor.g, normalColor.b), fragmentUniforms.normalPower) ;
-		
+
 		//#RedGPU#useVertexTangent# //#RedGPU#normalTexture# vec3 pos_dx = dFdx(vVertexPosition.xyz);
 		//#RedGPU#useVertexTangent# //#RedGPU#normalTexture# vec3 pos_dy = dFdy(vVertexPosition.xyz);
 		//#RedGPU#useVertexTangent# //#RedGPU#normalTexture# vec3 tex_dx = dFdx(vec3(normalTexCoord, 0.0));
@@ -176,20 +178,28 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 		//#RedGPU#useVertexTangent# //#RedGPU#normalTexture# mat3 tbn = mat3(t, b, ng);
 		//#RedGPU#useVertexTangent# //#RedGPU#normalTexture# N = normalize(tbn * ((2.0 * normalColor.rgb - 1.0) * vec3(1.0, 1.0 * vVertexTangent.w,1.0)));
 		//#RedGPU#useVertexTangent# //#RedGPU#normalTexture# N = backFaceYn ? -N : N;
-		
-	
 
+		// 환경맵 계산
+		//#RedGPU#environmentTexture# vec3 R = reflect( vVertexPosition.xyz - systemUniforms.cameraPosition, N);
+		//#RedGPU#environmentTexture# vec4 reflectionColor = texture(samplerCube(uEnvironmentTexture,uEnvironmentSampler), R);		
+		// 환경맵 합성
+		//#RedGPU#environmentTexture# diffuseColor.rgb = mix( diffuseColor.rgb , reflectionColor.rgb , max(tMetallicPower-tRoughnessPower,0.0)*(1.0-tRoughnessPower));
+		//#RedGPU#environmentTexture# diffuseColor = mix( diffuseColor , vec4(0.04, 0.04, 0.04, 1.0) , tRoughnessPower * (tMetallicPower) * 0.5);
+
+
+	
+		outColor = diffuseColor;
 		vec4 specularLightColor = vec4(1.0, 1.0, 1.0, 1.0);
 	    vec4 ld = vec4(0.0, 0.0, 0.0, 1.0);
 	    vec4 ls = vec4(0.0, 0.0, 0.0, 1.0);
-	    
+
 	    vec3 L;	
-	    
-	    
+
+
 	    float lambertTerm;
 	    float intensity;
 	    float specular;
-			
+
 		DirectionalLight lightInfo;
 		vec4 lightColor;
 		for(int i=0; i<systemUniforms.directionalLightCount; i++){
@@ -203,29 +213,25 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 				ls +=  specularLightColor * specular * fragmentUniforms.metallicFactor * lightInfo.intensity * lightInfo.color.a * (1.0-tRoughnessPower+0.04);
 			}
 		}
-		diffuseColor = ld+ls;
-		
-		// 환경맵 계산
-		//#RedGPU#environmentTexture# vec3 R = reflect( vVertexPosition.xyz - systemUniforms.cameraPosition, N);
-		//#RedGPU#environmentTexture# vec4 reflectionColor = texture(samplerCube(uEnvironmentTexture,uEnvironmentSampler), R);		
-		// 환경맵 합성
-		//#RedGPU#environmentTexture# diffuseColor.rgb = mix( diffuseColor.rgb , reflectionColor.rgb , max(tMetallicPower-tRoughnessPower,0.0)*(1.0-tRoughnessPower));
-		//#RedGPU#environmentTexture# diffuseColor = mix( diffuseColor , vec4(0.04, 0.04, 0.04, 1.0) , tRoughnessPower * (tMetallicPower) * 0.5);
-		
-		
-		
-		 vec4 finalColor = diffuseColor;
-		
+
+
+		 vec4 finalColor = ld+ls;
+
+
+		// 컷오프 - BLEND, MASK
+		//#RedGPU#useCutOff# if(tAlpha <= fragmentUniforms.cutOff) discard;
 
 		// 이미시브 합성
 		//#RedGPU#emissiveTexture# vec4 emissiveColor = texture(sampler2D(uEmissiveTexture, uEmissiveSampler), emissiveTexCoord);
 		//#RedGPU#emissiveTexture# finalColor.rgb += emissiveColor.rgb * fragmentUniforms.emissivePower;
-		
+
 		// 오클루젼 합성
 		//#RedGPU#occlusionTexture# vec4 occlusionColor =texture(sampler2D(uOcclusionTexture, uOcclusionSampler), occlusionTexCoord);
 		//#RedGPU#occlusionTexture# finalColor.rgb = mix(finalColor.rgb, finalColor.rgb * occlusionColor.r, occlusionColor.r * fragmentUniforms.occlusionPower);
 
-finalColor.a = fragmentUniforms.occlusionPower;
+
+		// 알파블렌드 - BLEND
+		if( fragmentUniforms.alphaBlend == 2.0 ) finalColor.a = tAlpha ;
 		outColor = finalColor;
 		outDepthColor = vec4( vec3(gl_FragCoord.z/gl_FragCoord.w), 1.0 );
 	}
@@ -281,7 +287,9 @@ finalColor.a = fragmentUniforms.occlusionPower;
 		{size: RedTypeSize.float, valueName: 'occlusionTexCoordIndex'},
 		{size: RedTypeSize.float, valueName: 'metallicFactor'},
 		{size: RedTypeSize.float, valueName: 'roughnessFactor'},
-		{size: RedTypeSize.float, valueName: 'cutOff'}
+		{size: RedTypeSize.float, valueName: 'cutOff'},
+		{size: RedTypeSize.float, valueName: 'alphaBlend'},
+
 	];
 
 	_baseColorFactor = new Float32Array(4);
@@ -292,6 +300,7 @@ finalColor.a = fragmentUniforms.occlusionPower;
 	_roughnessTexCoordIndex = 0;
 	_occlusionTexCoordIndex = 0;
 	_roughnessTexture;
+	_occlusionTexture;
 	_metallicFactor = 1;
 	_roughnessFactor = 1;
 	_useMaterialDoubleSide = false;
@@ -300,11 +309,30 @@ finalColor.a = fragmentUniforms.occlusionPower;
 	_occlusionPower = 1
 	_cutOff = 0.0
 	_useCutOff = true;
+	_alphaBlend = 0;
 
 	_skin = false;
 	jointMatrix = new Float32Array(RedTypeSize.mat4 * maxJoint / Float32Array.BYTES_PER_ELEMENT);
 	inverseBindMatrixForJoint = new Float32Array(RedTypeSize.mat4 * maxJoint / Float32Array.BYTES_PER_ELEMENT);
 	globalTransformOfNodeThatTheMeshIsAttachedTo = new Float32Array(RedTypeSize.mat4 / Float32Array.BYTES_PER_ELEMENT);
+
+
+	set occlusionTexture(texture) {
+		this._occlusionTexture = null;
+		this.checkTexture(texture, 'occlusionTexture')
+	}
+	get occlusionTexture() {
+		return this._occlusionTexture
+	}
+
+	set alphaBlend(value) {
+		this._alphaBlend = value;
+		float1_Float32Array[0] = value;
+		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['alphaBlend'], float1_Float32Array)
+	}
+	get alphaBlend() {
+		return this._alphaBlend;
+	}
 	set cutOff(value) {
 		this._cutOff = value;
 		float1_Float32Array[0] = value;
@@ -318,14 +346,14 @@ finalColor.a = fragmentUniforms.occlusionPower;
 	}
 	set useCutOff(v) {
 		this._useCutOff = v
-		this.resetBindingInfo()
+		this.needResetBindingInfo = true
 	}
 	get skin() {
 		return this._skin
 	}
 	set skin(v) {
 		this._skin = v
-		this.resetBindingInfo()
+		this.needResetBindingInfo = true
 	}
 
 	set emissivePower(value) {
@@ -349,14 +377,14 @@ finalColor.a = fragmentUniforms.occlusionPower;
 	}
 	set useMaterialDoubleSide(v) {
 		this._useMaterialDoubleSide = v
-		this.resetBindingInfo()
+		this.needResetBindingInfo = true
 	}
 	get useVertexTangent() {
 		return this._useVertexTangent
 	}
 	set useVertexTangent(v) {
 		this._useVertexTangent = v
-		this.resetBindingInfo()
+		this.needResetBindingInfo = true
 	}
 	set roughnessTexture(texture) {
 		this._roughnessTexture = null;
@@ -405,7 +433,7 @@ finalColor.a = fragmentUniforms.occlusionPower;
 	}
 	set useVertexColor_0(value) {
 		this._useVertexColor_0 = value;
-		this.resetBindingInfo()
+		this.needResetBindingInfo = true
 	}
 	get baseColorFactor() {
 		return this._baseColorFactor;
@@ -451,7 +479,7 @@ finalColor.a = fragmentUniforms.occlusionPower;
 		this.occlusionTexture = occlusionTexture;
 		this.emissiveTexture = emissiveTexture;
 		this.roughnessTexture = roughnessTexture;
-		this.resetBindingInfo()
+		this.needResetBindingInfo = true
 	}
 
 	checkTexture(texture, textureName) {
@@ -479,13 +507,13 @@ finalColor.a = fragmentUniforms.occlusionPower;
 						break;
 				}
 				console.log("로딩완료됨 textureName", textureName, texture.GPUTexture);
-				this.resetBindingInfo()
+				this.needResetBindingInfo = true
 			} else {
 				texture.addUpdateTarget(this, textureName)
 			}
 
 		} else {
-			this.resetBindingInfo()
+			this.needResetBindingInfo = true
 		}
 	}
 

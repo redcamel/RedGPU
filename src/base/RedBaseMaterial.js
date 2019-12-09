@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.8 17:1:39
+ *   Last modification time of this file - 2019.12.9 16:15:54
  *
  */
 
@@ -48,6 +48,7 @@ export default class RedBaseMaterial extends RedUUID {
 	uniformBuffer_vertex;
 	uniformBuffer_fragment;
 	uniformBindGroup_material;
+	needResetBindingInfo = false
 	constructor(redGPU) {
 		super();
 		let vShaderModule, fShaderModule;
