@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.7 15:34:43
+ *   Last modification time of this file - 2019.12.9 16:15:54
  *
  */
 
@@ -60,7 +60,7 @@ export default class RedBitmapMaterial extends RedMix.mix(
 	constructor(redGPU, diffuseTexture) {
 		super(redGPU);
 		this.diffuseTexture = diffuseTexture;
-		this.resetBindingInfo()
+		this.needResetBindingInfo = true
 	}
 
 	checkTexture(texture, textureName) {
@@ -72,13 +72,13 @@ export default class RedBitmapMaterial extends RedMix.mix(
 						break
 				}
 				console.log(textureName, texture);
-				this.resetBindingInfo()
+				this.needResetBindingInfo = true
 			} else {
 				texture.addUpdateTarget(this, textureName)
 			}
 
 		} else {
-			this.resetBindingInfo()
+			this.needResetBindingInfo = true
 		}
 	}
 	resetBindingInfo() {

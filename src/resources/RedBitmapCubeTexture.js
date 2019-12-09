@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.8 17:1:40
+ *   Last modification time of this file - 2019.12.9 16:15:54
  *
  */
 "use strict";
@@ -123,6 +123,7 @@ export default class RedBitmapCubeTexture {
 
 				const img = new Image();
 				img.src = src;
+				img.crossOrigin = 'anonymous';
 				img.onerror = function (v) {
 					console.log(v)
 				};

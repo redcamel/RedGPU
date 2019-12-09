@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.3 17:35:29
+ *   Last modification time of this file - 2019.12.9 16:15:54
  *
  */
 
@@ -50,16 +50,17 @@ export default class RedPipeline extends RedUUID {
 			colorStates: [
 				{
 					format: redGPU.swapChainFormat,
+					colorBlend: {
+						srcFactor: "src-alpha",
+						dstFactor: "one-minus-src-alpha",
+						operation: "add"
+					},
 					alphaBlend: {
 						srcFactor: "src-alpha",
 						dstFactor: "one-minus-src-alpha",
 						operation: "add"
 					},
-					colorBlend: {
-						srcFactor: "src-alpha",
-						dstFactor: "one-minus-src-alpha",
-						operation: "add"
-					}
+					writeMask : GPUColorWrite.RED | GPUColorWrite.GREEN | GPUColorWrite.BLUE
 				},
 				{
 					format: redGPU.swapChainFormat

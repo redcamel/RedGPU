@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.3 17:35:29
+ *   Last modification time of this file - 2019.12.9 16:15:54
  *
  */
 
@@ -43,7 +43,7 @@ export default class RedGridMaterial extends RedBaseMaterial {
 	static uniformBufferDescriptor_fragment = RedBaseMaterial.uniformBufferDescriptor_empty;
 	constructor(redGPU) {
 		super(redGPU);
-		this.resetBindingInfo()
+		this.needResetBindingInfo = true
 	}
 	resetBindingInfo() {
 		this.bindings = [];

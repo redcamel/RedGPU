@@ -2,13 +2,13 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.8 17:1:40
+ *   Last modification time of this file - 2019.12.9 16:15:54
  *
  */
 
 import RedGLTFLoader from "../loader/RedGLTFLoader.js";
-
-let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty) => {
+let transparentSort = []
+let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty,		transparentSortMode) => {
 	let i;
 
 	let tGeometry;
@@ -42,9 +42,35 @@ let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty) 
 		tDirtyPipeline = tMesh.dirtyPipeline;
 		tPipeline = tMesh.pipeline;
 		tSkinInfo = tMesh.skinInfo;
-		if (tMaterial) tMaterialChanged = tMesh._prevMaterialUUID != tMaterial._UUID;
+
+		if (tMaterial) {
+			if(tMaterial.needResetBindingInfo) {
+				tMaterial.resetBindingInfo()
+				tMaterial.needResetBindingInfo = false
+			}
+
+			tMaterialChanged = tMesh._prevMaterialUUID != tMaterial._UUID;
+		}
 		if (tGeometry) {
 
+			if(transparentSortMode){
+				if (prevPipeline_UUID != tPipeline._UUID) {
+					passEncoder.setPipeline(tPipeline.GPURenderPipeline);
+					prevPipeline_UUID = tPipeline._UUID
+				}
+				if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
+					passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
+					prevVertexBuffer_UUID = tGeometry.interleaveBuffer._UUID
+				}
+				if (tGeometry.indexBuffer && prevIndexBuffer_UUID != tGeometry.indexBuffer._UUID) {
+					passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
+					prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
+				}
+				passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹는 매그룹마다 다르니 또 업데이트 해줘야함 -_-
+				passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
+				if (tGeometry.indexBuffer) passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
+				else passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
+			}
 
 			if (tDirtyPipeline || tMaterialChanged) {
 				if (!tMesh.isPostEffectQuad) tPipeline.updatePipeline_sampleCount4(redGPU, redView);
@@ -68,22 +94,27 @@ let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty) 
 			}
 
 			// passEncoder.executeBundles([tMesh.renderBundle]);
-			if (prevPipeline_UUID != tPipeline._UUID) {
-				passEncoder.setPipeline(tPipeline.GPURenderPipeline);
-				prevPipeline_UUID = tPipeline._UUID
+			if(tMesh.transparentSort){
+				transparentSort.push(tMesh)
+			}else{
+				if (prevPipeline_UUID != tPipeline._UUID) {
+					passEncoder.setPipeline(tPipeline.GPURenderPipeline);
+					prevPipeline_UUID = tPipeline._UUID
+				}
+				if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
+					passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
+					prevVertexBuffer_UUID = tGeometry.interleaveBuffer._UUID
+				}
+				if (tGeometry.indexBuffer && prevIndexBuffer_UUID != tGeometry.indexBuffer._UUID) {
+					passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
+					prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
+				}
+				passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹는 매그룹마다 다르니 또 업데이트 해줘야함 -_-
+				passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
+				if (tGeometry.indexBuffer) passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
+				else passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
 			}
-			if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
-				passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
-				prevVertexBuffer_UUID = tGeometry.interleaveBuffer._UUID
-			}
-			if (tGeometry.indexBuffer && prevIndexBuffer_UUID != tGeometry.indexBuffer._UUID) {
-				passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
-				prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
-			}
-			passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹는 매그룹마다 다르니 또 업데이트 해줘야함 -_-
-			passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
-			if (tGeometry.indexBuffer) passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
-			else passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
+
 
 			// materialPropertyCheck
 			////////////////////////
@@ -380,6 +411,8 @@ export default class RedRender {
 		if (tScene.grid) renderScene(redGPU, redView, passEncoder, null, [tScene.grid]);
 		if (tScene.axis) renderScene(redGPU, redView, passEncoder, null, [tScene.axis]);
 		renderScene(redGPU, redView, passEncoder, null, tScene.children);
+		renderScene(redGPU, redView, passEncoder, null, transparentSort,null, true);
+		transparentSort.length = 0
 		passEncoder.endPass();
 
 		//////////////////////////////////////////////////////////////////////////////////////////
@@ -432,6 +465,7 @@ export default class RedRender {
 		let i = 0, len = redGPU.viewList.length;
 		for (i; i < len; i++) this.#renderView(redGPU, redGPU.viewList[i])
 		RedGLTFLoader.animationLooper(time);
+
 		// console.log(cacheTable)
 	}
 }

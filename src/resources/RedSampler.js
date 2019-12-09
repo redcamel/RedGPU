@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.8 17:1:40
+ *   Last modification time of this file - 2019.12.9 16:15:54
  *
  */
 
@@ -10,13 +10,12 @@
 export default class RedSampler {
 	constructor(redGPU, option = {}) {
 		this.GPUSampler = redGPU.device.createSampler({
-			magFilter: "linear",
-			minFilter: "linear",
-			mipmapFilter: "linear",
-			addressModeU: "repeat",
-			addressModeV: "repeat",
-			addressModeW: "repeat"
-
+			magFilter: option['magFilter'] || "linear",
+			minFilter: option['minFilter'] || "linear",
+			mipmapFilter: option['mipmapFilter'] || "linear",
+			addressModeU: option['addressModeU'] || "repeat",
+			addressModeV: option['addressModeV'] || "repeat",
+			addressModeW: option['addressModeW'] || "repeat"
 		});
 	}
 }

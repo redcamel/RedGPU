@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.7 15:34:43
+ *   Last modification time of this file - 2019.12.9 16:15:54
  *
  */
 
@@ -256,7 +256,7 @@ const basicLightPropertys = Base => class extends Base {
 
 	set useFlatMode(value) {
 		this._useFlatMode = value;
-		this.resetBindingInfo()
+		this.needResetBindingInfo = true
 	}
 
 

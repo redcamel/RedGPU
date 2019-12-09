@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.8 17:2:58
+ *   Last modification time of this file - 2019.12.9 16:15:54
  *
  */
 
@@ -61,9 +61,10 @@ import RedAxis from "../src/object3D/RedAxis.js";
 			let tCamera2 = new RedObitController(this)
 			tGrid.centerColor = '#ff0000'
 			// tScene.backgroundColor = '#fff'
+			// tScene.backgroundColorAlpha = 0
 
-			tCamera.distance = 3
-			tCamera.speedDistance = 0.1
+			tCamera.distance = 10
+			tCamera.speedDistance = 1
 
 
 			tView = new RedView(this, tScene, tCamera)
@@ -74,29 +75,127 @@ import RedAxis from "../src/object3D/RedAxis.js";
 			// tScene.axis = new RedAxis(redGPU)
 			let tLight
 			tLight = new RedDirectionalLight()
-			tLight.x = 10
-			tLight.y = 10
-			tLight.z = 10
+			tLight.x = 3
+			tLight.y = 2
+			tLight.z = 3
 			tScene.addLight(tLight)
 			//
-			tLight = new RedDirectionalLight()
-			tLight.x = -10
-			tLight.y = -10
-			tLight.z = -10
-			tScene.addLight(tLight)
+			// tLight = new RedDirectionalLight()
+			// tLight.x = 100
+			// tLight.y = 100
+			// tLight.z = 100
+			// tScene.addLight(tLight)
 
 
 			redGPU.addView(tView)
 
+			// new RedGLTFLoader(
+			// 	this, // redGL
+			// 	'assets/gltf/', // assetRootPath
+			// 	'NormalTangentMirrorTest.gltf', // fileName
+			// 	function (v) { // callBack
+			// 		console.log(v)
+			// 		let tMesh = v['resultMesh']
+			// 		tMesh.scaleX = tMesh.scaleY = tMesh.scaleZ = 1
+			//
+			// 		tScene.addChild(tMesh)
+			//
+			// 	},
+			// 	new RedBitmapCubeTexture(redGPU, [
+			// 		'./assets/cubemap/SwedishRoyalCastle/px.jpg',
+			// 		'./assets/cubemap/SwedishRoyalCastle/nx.jpg',
+			// 		'./assets/cubemap/SwedishRoyalCastle/py.jpg',
+			// 		'./assets/cubemap/SwedishRoyalCastle/ny.jpg',
+			// 		'./assets/cubemap/SwedishRoyalCastle/pz.jpg',
+			// 		'./assets/cubemap/SwedishRoyalCastle/nz.jpg'
+			//
+			// 	])
+			// );
+			// new RedGLTFLoader(
+			// 	this, // redGL
+			// 	'assets/gltf/', // assetRootPath
+			// 	'TextureSettingsTest.gltf', // fileName
+			// 	function (v) { // callBack
+			// 		console.log(v)
+			// 		let tMesh = v['resultMesh']
+			// 		tMesh.scaleX = tMesh.scaleY = tMesh.scaleZ = 1
+			// 		tMesh.z = -5
+			// 		tScene.addChild(tMesh)
+			//
+			// 	},
+			// 	new RedBitmapCubeTexture(redGPU, [
+			// 		'./assets/cubemap/SwedishRoyalCastle/px.jpg',
+			// 		'./assets/cubemap/SwedishRoyalCastle/nx.jpg',
+			// 		'./assets/cubemap/SwedishRoyalCastle/py.jpg',
+			// 		'./assets/cubemap/SwedishRoyalCastle/ny.jpg',
+			// 		'./assets/cubemap/SwedishRoyalCastle/pz.jpg',
+			// 		'./assets/cubemap/SwedishRoyalCastle/nz.jpg'
+			//
+			// 	])
+			// );
+
+
+			// new RedGLTFLoader(
+			// 	this, // redGL
+			// 	'https://cdn.rawgit.com/KhronosGroup/glTF-Blender-Exporter/0e23c773bf27dad67d2c25f060370d6fa012d87d/polly/', 'project_polly.gltf',
+			// 	function (v) { // callBack
+			// 		console.log(v)
+			// 		let tMesh = v['resultMesh']
+			// 		tMesh.scaleX = tMesh.scaleY = tMesh.scaleZ = 1
+			// 		// v['resultMesh'].scaleX = v['resultMesh'].scaleY = v['resultMesh'].scaleZ = 0.001
+			// 		// tScene.addChild({children:[tMesh.children[2],tMesh.children[8]]})
+			// 		// tScene.addChild({children:[tMesh.children[2]]})
+			//
+			// 		tScene.addChild(tMesh)
+			//
+			// 	},
+			// 	new RedBitmapCubeTexture(redGPU, [
+			// 		'./assets/cubemap/SwedishRoyalCastle/px.jpg',
+			// 		'./assets/cubemap/SwedishRoyalCastle/nx.jpg',
+			// 		'./assets/cubemap/SwedishRoyalCastle/py.jpg',
+			// 		'./assets/cubemap/SwedishRoyalCastle/ny.jpg',
+			// 		'./assets/cubemap/SwedishRoyalCastle/pz.jpg',
+			// 		'./assets/cubemap/SwedishRoyalCastle/nz.jpg'
+			//
+			// 	])
+			// );
+
+			// new RedGLTFLoader(
+			// 	this, // redGL
+			// 	'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Sponza/glTF/', // assetRootPath
+			// 	'Sponza.gltf', // fileName
+			// 	function (v) { // callBack
+			// 		console.log(v)
+			// 		let tMesh = v['resultMesh']
+			// 		tMesh.scaleX = tMesh.scaleY = tMesh.scaleZ = 1
+			// 		// v['resultMesh'].scaleX = v['resultMesh'].scaleY = v['resultMesh'].scaleZ = 0.001
+			// 		// tScene.addChild({children:[tMesh.children[2],tMesh.children[8]]})
+			// 		// tScene.addChild({children:[tMesh.children[2]]})
+			//
+			// 		tScene.addChild(tMesh)
+			//
+			// 	},
+			// 	new RedBitmapCubeTexture(redGPU, [
+			// 		'./assets/cubemap/SwedishRoyalCastle/px.jpg',
+			// 		'./assets/cubemap/SwedishRoyalCastle/nx.jpg',
+			// 		'./assets/cubemap/SwedishRoyalCastle/py.jpg',
+			// 		'./assets/cubemap/SwedishRoyalCastle/ny.jpg',
+			// 		'./assets/cubemap/SwedishRoyalCastle/pz.jpg',
+			// 		'./assets/cubemap/SwedishRoyalCastle/nz.jpg'
+			//
+			// 	])
+			// );
 			new RedGLTFLoader(
 				this, // redGL
 				'assets/gltf/', // assetRootPath
-				'DamagedHelmet.gltf', // fileName
+				'AlphaBlendModeTest.gltf', // fileName
 				function (v) { // callBack
 					console.log(v)
 					let tMesh = v['resultMesh']
 					tMesh.scaleX = tMesh.scaleY = tMesh.scaleZ = 1
 					// v['resultMesh'].scaleX = v['resultMesh'].scaleY = v['resultMesh'].scaleZ = 0.001
+					// tScene.addChild({children:[tMesh.children[2],tMesh.children[8]]})
+					// tScene.addChild({children:[tMesh.children[2]]})
 					tScene.addChild(tMesh)
 
 				},
@@ -110,6 +209,30 @@ import RedAxis from "../src/object3D/RedAxis.js";
 
 				])
 			);
+			// new RedGLTFLoader(
+			// 	this, // redGL
+			// 	'assets/gltf/', // assetRootPath
+			// 	'DamagedHelmet.gltf', // fileName
+			// 	function (v) { // callBack
+			// 		console.log(v)
+			// 		let tMesh = v['resultMesh']
+			// 		tMesh.scaleX = tMesh.scaleY = tMesh.scaleZ = 1
+			// 		// v['resultMesh'].scaleX = v['resultMesh'].scaleY = v['resultMesh'].scaleZ = 0.001
+			// 		// tScene.addChild({children:[tMesh.children[2],tMesh.children[8]]})
+			// 		// tScene.addChild({children:[tMesh.children[2]]})
+			// 		tScene.addChild(tMesh)
+			//
+			// 	},
+			// 	new RedBitmapCubeTexture(redGPU, [
+			// 		'./assets/cubemap/SwedishRoyalCastle/px.jpg',
+			// 		'./assets/cubemap/SwedishRoyalCastle/nx.jpg',
+			// 		'./assets/cubemap/SwedishRoyalCastle/py.jpg',
+			// 		'./assets/cubemap/SwedishRoyalCastle/ny.jpg',
+			// 		'./assets/cubemap/SwedishRoyalCastle/pz.jpg',
+			// 		'./assets/cubemap/SwedishRoyalCastle/nz.jpg'
+			//
+			// 	])
+			// );
 			tScene.skyBox = new RedSkyBox(this,new RedBitmapCubeTexture(redGPU, [
 				'./assets/cubemap/SwedishRoyalCastle/px.jpg',
 				'./assets/cubemap/SwedishRoyalCastle/nx.jpg',
