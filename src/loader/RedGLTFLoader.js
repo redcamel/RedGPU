@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.9 16:15:54
+ *   Last modification time of this file - 2019.12.9 17:49:5
  *
  */
 
@@ -1473,8 +1473,8 @@ var RedGLTFLoader;
 				};
 				if (json['samplers']) {
 					var t0 = json['samplers'][samplerIndex];
-					if ('mag' in t0) result['magFilter'] = magFilterTable[t0['magFilter']] || 'linear';
-					if ('min' in t0) result['minFilter'] = minFilterTable[t0['minFilter']] || 'linear';
+					if ('magFilter' in t0) result['magFilter'] = magFilterTable[t0['magFilter']] || 'linear';
+					if ('minFilter' in t0) result['minFilter'] = minFilterTable[t0['minFilter']] || 'linear';
 					if ('wrapS' in t0) result['addressModeU'] = wrapTable[t0['wrapS']];
 					if ('wrapT' in t0) result['addressModeV'] = wrapTable[t0['wrapT']]
 				} else {

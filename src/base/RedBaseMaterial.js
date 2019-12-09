@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.9 16:15:54
+ *   Last modification time of this file - 2019.12.9 17:49:5
  *
  */
 
@@ -98,7 +98,7 @@ export default class RedBaseMaterial extends RedUUID {
 		while (i2--) {
 			tData = dataVertex[i2];
 			if (tData) {
-				console.log(tData);
+				// console.log(tData);
 				tValue = this[tData.valueName];
 				if (typeof tValue == 'number') {
 					tempFloat32[0] = tValue;
@@ -110,7 +110,7 @@ export default class RedBaseMaterial extends RedUUID {
 			tData = dataFragment[i2];
 
 			if (tData) {
-				console.log(tData);
+				// console.log(tData);
 				tValue = this[tData.valueName];
 				// 	console.log('변경!',tData)
 				if (typeof tValue == 'number') {
