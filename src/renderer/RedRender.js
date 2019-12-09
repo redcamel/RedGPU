@@ -2,13 +2,15 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.9 16:15:54
+ *   Last modification time of this file - 2019.12.9 17:49:5
  *
  */
 
 import RedGLTFLoader from "../loader/RedGLTFLoader.js";
-let transparentSort = []
-let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty,		transparentSortMode) => {
+
+let transparentSortList = [];
+let tCacheUniformInfo = {}
+let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty, transparentSortMode) => {
 	let i;
 
 	let tGeometry;
@@ -17,7 +19,6 @@ let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty,	
 	let tDirtyTransform, tDirtyPipeline;
 	let tMaterialChanged;
 	let tPipeline;
-	let prevPipeline_UUID;
 	let prevVertexBuffer_UUID;
 	let prevIndexBuffer_UUID;
 	let prevMaterial_UUID;
@@ -44,7 +45,7 @@ let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty,	
 		tSkinInfo = tMesh.skinInfo;
 
 		if (tMaterial) {
-			if(tMaterial.needResetBindingInfo) {
+			if (tMaterial.needResetBindingInfo) {
 				tMaterial.resetBindingInfo()
 				tMaterial.needResetBindingInfo = false
 			}
@@ -53,11 +54,9 @@ let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty,	
 		}
 		if (tGeometry) {
 
-			if(transparentSortMode){
-				if (prevPipeline_UUID != tPipeline._UUID) {
-					passEncoder.setPipeline(tPipeline.GPURenderPipeline);
-					prevPipeline_UUID = tPipeline._UUID
-				}
+			if (transparentSortMode) {
+				passEncoder.setPipeline(tPipeline.GPURenderPipeline);
+
 				if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
 					passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
 					prevVertexBuffer_UUID = tGeometry.interleaveBuffer._UUID
@@ -94,13 +93,12 @@ let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty,	
 			}
 
 			// passEncoder.executeBundles([tMesh.renderBundle]);
-			if(tMesh.transparentSort){
-				transparentSort.push(tMesh)
-			}else{
-				if (prevPipeline_UUID != tPipeline._UUID) {
-					passEncoder.setPipeline(tPipeline.GPURenderPipeline);
-					prevPipeline_UUID = tPipeline._UUID
-				}
+			if (tMesh.transparentSort) {
+				transparentSortList.push(tMesh)
+			} else {
+
+				passEncoder.setPipeline(tPipeline.GPURenderPipeline);
+
 				if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
 					passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
 					prevVertexBuffer_UUID = tGeometry.interleaveBuffer._UUID
@@ -339,15 +337,15 @@ let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty,	
 			}
 			tMaterial.uniformBuffer_vertex.GPUBuffer.setSubData(tMaterial.uniformBufferDescriptor_vertex.redStructOffsetMap['globalTransformOfNodeThatTheMeshIsAttachedTo'], globalTransformOfNodeThatTheMeshIsAttachedTo)
 			tMaterial.uniformBuffer_vertex.GPUBuffer.setSubData(tMaterial.uniformBufferDescriptor_vertex.redStructOffsetMap['jointMatrix'], globalTransformOfJointNode)
-			tMaterial.uniformBuffer_vertex.GPUBuffer.setSubData(tMaterial.uniformBufferDescriptor_vertex.redStructOffsetMap['inverseBindMatrixForJoint'], tSkinInfo['inverseBindMatrices'])
 			// tGL.uniformMatrix4fv(tSystemUniformGroup['uGlobalTransformOfNodeThatTheMeshIsAttachedTo']['location'], false, globalTransformOfNodeThatTheMeshIsAttachedTo);
 			// tGL.uniformMatrix4fv(tSystemUniformGroup['uJointMatrix']['location'], false, globalTransformOfJointNode);
-			// if (!tSkinInfo['inverseBindMatrices']['_UUID']) tSkinInfo['inverseBindMatrices']['_UUID'] = JSON.stringify(tSkinInfo['inverseBindMatrices'])
-			// tUUID = tSystemUniformGroup['uInverseBindMatrixForJoint']['_UUID']
-			// if (tCacheUniformInfo[tUUID] != tSkinInfo['inverseBindMatrices']['_UUID']) {
-			// 	tGL.uniformMatrix4fv(tSystemUniformGroup['uInverseBindMatrixForJoint']['location'], false, tSkinInfo['inverseBindMatrices'])
-			// 	tCacheUniformInfo[tUUID] = tSkinInfo['inverseBindMatrices']['_UUID']
-			// }
+
+			if (!tSkinInfo['inverseBindMatrices']['_UUID']) tSkinInfo['inverseBindMatrices']['_UUID'] = JSON.stringify(tSkinInfo['inverseBindMatrices'])
+			let tUUID = tMaterial.uniformBuffer_vertex['_UUID']
+			if (tCacheUniformInfo[tUUID] != tSkinInfo['inverseBindMatrices']['_UUID']) {
+				tMaterial.uniformBuffer_vertex.GPUBuffer.setSubData(tMaterial.uniformBufferDescriptor_vertex.redStructOffsetMap['inverseBindMatrixForJoint'], tSkinInfo['inverseBindMatrices'])
+				tCacheUniformInfo[tUUID] = tSkinInfo['inverseBindMatrices']['_UUID']
+			}
 		}
 		if (tMesh.children.length) renderScene(redGPU, redView, passEncoder, tMesh, tMesh.children, parentDirty || tDirtyTransform);
 		tMesh.dirtyPipeline = false;
@@ -411,8 +409,8 @@ export default class RedRender {
 		if (tScene.grid) renderScene(redGPU, redView, passEncoder, null, [tScene.grid]);
 		if (tScene.axis) renderScene(redGPU, redView, passEncoder, null, [tScene.axis]);
 		renderScene(redGPU, redView, passEncoder, null, tScene.children);
-		renderScene(redGPU, redView, passEncoder, null, transparentSort,null, true);
-		transparentSort.length = 0
+		renderScene(redGPU, redView, passEncoder, null, transparentSortList, null, true);
+		transparentSortList.length = 0
 		passEncoder.endPass();
 
 		//////////////////////////////////////////////////////////////////////////////////////////
