@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.10 14:18:48
+ *   Last modification time of this file - 2019.12.10 17:42:12
  *
  */
 
@@ -29,7 +29,7 @@ const getPool = function (redGPU, targetMesh) {
 	if (!MESH_UNIFORM_TABLE[MESH_UNIFORM_POOL_tableIndex]) {
 		uniformBuffer_mesh = new RedUniformBuffer(redGPU);
 		uniformBuffer_mesh.setBuffer(uniformBufferDescriptor_mesh);
-		MESH_UNIFORM_TABLE.push(uniformBuffer_mesh)
+		MESH_UNIFORM_TABLE[MESH_UNIFORM_POOL_tableIndex] = uniformBuffer_mesh
 	}
 	uniformBuffer_mesh = MESH_UNIFORM_TABLE[MESH_UNIFORM_POOL_tableIndex]
 	let result = {
@@ -43,6 +43,7 @@ const getPool = function (redGPU, targetMesh) {
 		MESH_UNIFORM_POOL_tableIndex++
 		MESH_UNIFORM_POOL_index = 0
 	}
+	// console.log('MESH_UNIFORM_TABLE',MESH_UNIFORM_TABLE)
 	return result
 }
 
