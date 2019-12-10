@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.10 14:18:48
+ *   Last modification time of this file - 2019.12.10 19:41:33
  *
  */
 
@@ -81,7 +81,8 @@ export default class RedColorPhongMaterial extends RedMix.mix(
 			fragmentUniforms.specularColor,
 			specularTextureValue,
 			vVertexPosition.xyz
-		);
+		)
+		+ la;
 			
 		outColor = finalColor;
 		outDepthColor = vec4( vec3(gl_FragCoord.z/gl_FragCoord.w), 1.0 );

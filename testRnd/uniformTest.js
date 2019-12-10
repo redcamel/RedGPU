@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.10 17:42:12
+ *   Last modification time of this file - 2019.12.10 19:41:33
  *
  */
 
@@ -13,14 +13,10 @@ import RedView from "../src/RedView.js";
 import RedGrid from "../src/object3D/RedGrid.js";
 import RedObitController from "../src/controller/RedObitController.js";
 import RedDirectionalLight from "../src/light/RedDirectionalLight.js";
-import RedTypeSize from "../src/resources/RedTypeSize.js";
 import RedMesh from "../src/object3D/RedMesh.js";
-import RedBox from "../src/primitives/RedBox.js";
-import RedColorMaterial from "../src/material/RedColorMaterial.js";
 import RedColorPhongMaterial from "../src/material/RedColorPhongMaterial.js";
-import RedBitmapMaterial from "../src/material/RedBitmapMaterial.js";
-import RedBitmapTexture from "../src/resources/RedBitmapTexture.js";
-import RedAxis from "../src/object3D/RedAxis.js";
+import RedSphere from "../src/primitives/RedSphere.js";
+import RedAmbientLight from "../src/light/RedAmbientLight.js";
 
 (async function () {
 	const cvs = document.createElement('canvas');
@@ -57,29 +53,27 @@ import RedAxis from "../src/object3D/RedAxis.js";
 			// tScene.axis = new RedAxis(redGPU)
 			let tLight
 			tLight = new RedDirectionalLight()
-			tLight.x = 3
-			tLight.y = 2
-			tLight.z = 3
+			tLight.x = 9
+			tLight.y = 9
+			tLight.z = 9
+			tScene.addLight(tLight)
+
+
+			tLight = new RedAmbientLight()
 			tScene.addLight(tLight)
 
 			redGPU.addView(tView)
 
 			let i = 0
 			let len = 100
-			for(i;i<len;i++){
-				// new RedBitmapMaterial(redGPU, new RedBitmapTexture(redGPU,'../assets/crate.png'))
-				let tMesh = new RedMesh(redGPU, new RedBox(redGPU), new RedColorPhongMaterial(redGPU))
-				tMesh.x = i * (1.5)
-				tMesh.y = i * (1.5)
-				console.log('tMesh',tMesh)
+			for (i; i < len; i++) {
+				let tMesh = new RedMesh(redGPU, new RedSphere(redGPU,0.5,16,16,16), new RedColorPhongMaterial(redGPU))
+				tMesh.x = Math.random() * 10 - 5
+				tMesh.y = Math.random() * 10 - 5
+				tMesh.z = Math.random() * 10 - 5
 
 				tScene.addChild(tMesh)
 			}
-			setTimeout(function(){
-				let t = new RedMesh(redGPU, new RedBox(redGPU), new RedColorMaterial(redGPU))
-				tScene.addChild(t)
-				t.x =5
-			},3000)
 
 			let renderer = new RedRender();
 			let render = function (time) {
