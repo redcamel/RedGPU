@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.6 19:2:34
+ *   Last modification time of this file - 2019.12.10 19:41:33
  *
  */
 
@@ -96,6 +96,7 @@ export default class RedView {
 			RedTypeSize.float4 + // directionalLightCount,pointLightCount
 			RedTypeSize.float4 * 2 * RedShareGLSL.MAX_DIRECTIONAL_LIGHT + // directionalLight
 			RedTypeSize.float4 * 3 * RedShareGLSL.MAX_POINT_LIGHT + // pointLight
+			RedTypeSize.float4 * RedTypeSize.float4+ // ambientLight
 			RedTypeSize.float4+  // cameraPosition
 			RedTypeSize.float2 // resolution
 		;
@@ -238,8 +239,13 @@ export default class RedView {
 				offset += RedTypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
 			}
 		}
-		// update camera position
 		offset = (RedTypeSize.float4 + RedTypeSize.float4 * 2 * RedShareGLSL.MAX_DIRECTIONAL_LIGHT + RedTypeSize.float4 * 3 * RedShareGLSL.MAX_POINT_LIGHT) / Float32Array.BYTES_PER_ELEMENT;
+		let tLight = this.scene.ambientLight;
+		this.#systemUniformInfo_fragment_data.set(tLight ? tLight.colorRGBA : [0,0,0,0], offset);
+		offset += RedTypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
+		this.#systemUniformInfo_fragment_data.set([tLight ? tLight.intensity : 1], offset);
+		offset += RedTypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
+		// update camera position
 		this.#systemUniformInfo_fragment_data.set([this.camera.x, this.camera.y, this.camera.z], offset);
 		offset += RedTypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
 		// update resolution

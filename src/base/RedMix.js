@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.9 16:15:54
+ *   Last modification time of this file - 2019.12.10 19:41:33
  *
  */
 
@@ -23,9 +23,9 @@ const color = Base => class extends Base {
 	set color(hex) {
 		this.#color = hex;
 		let rgb = RedUTIL.hexToRGB_ZeroToOne(hex);
-		this.#colorRGBA[0] = rgb[0];
-		this.#colorRGBA[1] = rgb[1];
-		this.#colorRGBA[2] = rgb[2];
+		this.#colorRGBA[0] = rgb[0]*this.#alpha;
+		this.#colorRGBA[1] = rgb[1]*this.#alpha;
+		this.#colorRGBA[2] = rgb[2]*this.#alpha;
 		this.#colorRGBA[3] = this.#alpha;
 		//TODO - 시스템 버퍼쪽도 같은 개념으로 바꿔야 if 비용을 줄일 수 있음
 		if (this.uniformBuffer_fragment) this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['colorRGBA'], this.#colorRGBA)
@@ -36,7 +36,11 @@ const color = Base => class extends Base {
 	}
 
 	set alpha(value) {
-		this.#alpha = this.#colorRGBA[3] = value;
+		let rgb = RedUTIL.hexToRGB_ZeroToOne(this.#color);
+		this.#colorRGBA[0] = rgb[0]*value;
+		this.#colorRGBA[1] = rgb[1]*value;
+		this.#colorRGBA[2] = rgb[2]*value;
+		this.#colorRGBA[3] = value
 		if (this.uniformBuffer_fragment) this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['colorRGBA'], this.#colorRGBA)
 	}
 

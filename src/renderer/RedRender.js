@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.10 17:42:12
+ *   Last modification time of this file - 2019.12.10 18:21:15
  *
  */
 
@@ -79,6 +79,7 @@ let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty, 
 				}
 				passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹는 매그룹마다 다르니 또 업데이트 해줘야함 -_-
 				if (prevMaterial_UUID != tMaterial._UUID) passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
+				prevMaterial_UUID = tMaterial._UUID;
 				if (tGeometry.indexBuffer) {
 					if (prevIndexBuffer_UUID != tGeometry.indexBuffer._UUID) {
 						passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);

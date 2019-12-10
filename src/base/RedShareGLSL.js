@@ -2,15 +2,15 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.10 14:18:48
+ *   Last modification time of this file - 2019.12.10 19:41:33
  *
  */
 
 "use strict";
 export default class RedShareGLSL {
-	static MESH_UNIFORM_POOL_NUM = 50
-	static MAX_DIRECTIONAL_LIGHT = 3;
-	static MAX_POINT_LIGHT = 100;
+	static MESH_UNIFORM_POOL_NUM = 25
+	static MAX_DIRECTIONAL_LIGHT = 8;
+	static MAX_POINT_LIGHT = 200;
 	static SET_INDEX_SystemUniforms_vertex = 0;
 	static SET_INDEX_SystemUniforms_fragment = 1;
 	static SET_INDEX_MeshUniforms = 2;
@@ -48,15 +48,21 @@ export default class RedShareGLSL {
 	        float intensity;
 	        float radius;
 		};
+		struct AmbientLight {
+	        vec4 color;
+	        float intensity;
+		};
 		layout( set =  ${RedShareGLSL.SET_INDEX_SystemUniforms_fragment}, binding = 0 ) uniform SystemUniforms {
 	        float directionalLightCount;
 	        float pointLightCount;
 	        DirectionalLight directionalLightList[MAX_DIRECTIONAL_LIGHT];
-	        PointLight pointLightList[MAX_POINT_LIGHT];	        
+	        PointLight pointLightList[MAX_POINT_LIGHT];
+	        AmbientLight ambientLight;	        
 	        vec3 cameraPosition;
 	        vec2 resolution;
         } systemUniforms;
         /////////////////////////////////////////////////////////////////////////////
+        vec4 la = systemUniforms.ambientLight.color * systemUniforms.ambientLight.intensity;
         vec4 calcDirectionalLight(
             vec4 diffuseColor,
             vec3 N,		
