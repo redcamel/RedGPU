@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.9 16:15:54
+ *   Last modification time of this file - 2019.12.10 14:18:48
  *
  */
 
@@ -13,6 +13,39 @@ import RedDisplayContainer from "./RedDisplayContainer.js";
 import RedPipeline from "./RedPipeline.js";
 import RedUniformBufferDescriptor from "../buffer/RedUniformBufferDescriptor.js";
 import RedTypeSize from "../resources/RedTypeSize.js";
+import RedShareGLSL from "./RedShareGLSL.js";
+
+const MESH_UNIFORM_TABLE = []
+let MESH_UNIFORM_POOL_index = 0
+let MESH_UNIFORM_POOL_tableIndex = 0
+const uniformBufferDescriptor_mesh = new RedUniformBufferDescriptor(
+	[
+		{size: RedTypeSize.mat4 * RedShareGLSL.MESH_UNIFORM_POOL_NUM, valueName: 'matrix'},
+		{size: RedTypeSize.mat4 * RedShareGLSL.MESH_UNIFORM_POOL_NUM, valueName: 'normalMatrix'}
+	]
+);
+const getPool = function (redGPU, targetMesh) {
+	let uniformBuffer_mesh
+	if (!MESH_UNIFORM_TABLE[MESH_UNIFORM_POOL_tableIndex]) {
+		uniformBuffer_mesh = new RedUniformBuffer(redGPU);
+		uniformBuffer_mesh.setBuffer(uniformBufferDescriptor_mesh);
+		MESH_UNIFORM_TABLE.push(uniformBuffer_mesh)
+	}
+	uniformBuffer_mesh = MESH_UNIFORM_TABLE[MESH_UNIFORM_POOL_tableIndex]
+	let result = {
+		uniformBuffer_mesh: uniformBuffer_mesh,
+		offsetMatrix: RedTypeSize.mat4 * MESH_UNIFORM_POOL_index ,
+		offsetNormalMatrix: RedTypeSize.mat4 * RedShareGLSL.MESH_UNIFORM_POOL_NUM + (RedTypeSize.mat4 * MESH_UNIFORM_POOL_index) ,
+		uniformIndex: MESH_UNIFORM_POOL_index
+	}
+	MESH_UNIFORM_POOL_index++
+	if (MESH_UNIFORM_POOL_index == RedShareGLSL.MESH_UNIFORM_POOL_NUM) {
+		MESH_UNIFORM_POOL_tableIndex++
+		MESH_UNIFORM_POOL_index = 0
+	}
+	return result
+}
+
 
 export default class RedBaseObject3D extends RedDisplayContainer {
 	static uniformsBindGroupLayoutDescriptor_mesh = {
@@ -21,13 +54,17 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 				binding: 0,
 				visibility: GPUShaderStage.VERTEX,
 				type: "uniform-buffer"
+			},
+			{
+				binding: 1,
+				visibility: GPUShaderStage.VERTEX,
+				type: "uniform-buffer"
 			}
 		]
 	};
-	static uniformBufferDescriptor_mesh = new RedUniformBufferDescriptor(
+	static uniformBufferDescriptor_meshIndex = new RedUniformBufferDescriptor(
 		[
-			{size: RedTypeSize.mat4, valueName: 'matrix'},
-			{size: RedTypeSize.mat4, valueName: 'normalMatrix'}
+			{size: RedTypeSize.float, valueName: 'meshUniformIndex'}
 		]
 	);
 	_x = 0;
@@ -47,7 +84,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 	#redGPU;
 	//
 	_useDepthTest = true;
-	_depthTestFunc = 'less';
+	_depthTestFunc = 'less-equal';
 	_cullMode = 'back';
 	_primitiveTopology = "triangle-list";
 	pipeline;
@@ -56,15 +93,30 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 	constructor(redGPU) {
 		super();
 		this.#redGPU = redGPU;
-		this.uniformBuffer_mesh = new RedUniformBuffer(redGPU);
-		this.uniformBuffer_mesh.setBuffer(RedBaseObject3D.uniformBufferDescriptor_mesh);
+		let bufferData = getPool(redGPU, this)
+		this.uniformBuffer_mesh = bufferData.uniformBuffer_mesh
+		this.uniformBuffer_mesh.meshFloat32Array = new Float32Array(RedTypeSize.mat4 * 2 * RedShareGLSL.MESH_UNIFORM_POOL_NUM / Float32Array.BYTES_PER_ELEMENT)
+		this.offsetMatrix = bufferData.offsetMatrix;
+		this.offsetNormalMatrix = bufferData.offsetNormalMatrix;
+
+		this.uniformBuffer_meshIndex = new RedUniformBuffer(redGPU);
+		this.uniformBuffer_meshIndex.setBuffer(RedBaseObject3D.uniformBufferDescriptor_meshIndex);
+		this.uniformBuffer_meshIndex.GPUBuffer.setSubData(0, new Float32Array([bufferData.uniformIndex]))
 		this.#bindings = [
 			{
 				binding: 0,
 				resource: {
 					buffer: this.uniformBuffer_mesh.GPUBuffer,
 					offset: 0,
-					size: RedTypeSize.mat4 * 2
+					size: RedTypeSize.mat4 * 2 * RedShareGLSL.MESH_UNIFORM_POOL_NUM
+				}
+			},
+			{
+				binding: 1,
+				resource: {
+					buffer: this.uniformBuffer_meshIndex.GPUBuffer,
+					offset: 0,
+					size: RedTypeSize.float
 				}
 			}
 		];
@@ -81,31 +133,6 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 		this.localMatrix = mat4.create()
 
 	}
-
-	updateUniformBuffer = (_ => {
-		let tempFloat32 = new Float32Array(1);
-		return function () {
-			//음 전체 속성 업데이트라고 봐야할까나..
-			//TODO : 최적화...필요..
-			let i;
-			let dataMesh, tData;
-			let tValue;
-			dataMesh = RedBaseObject3D.uniformBufferDescriptor_mesh.redStruct;
-
-			i = dataMesh.length;
-			while (i--) {
-				tData = dataMesh[i];
-				if (tData) {
-					tValue = this[tData.valueName];
-					if (typeof tValue == 'number') {
-						tempFloat32[0] = tValue;
-						tValue = tempFloat32
-					}
-					this.uniformBuffer_mesh.GPUBuffer.setSubData(tData['offset'], tValue);
-				}
-			}
-		}
-	})();
 
 
 	get x() {

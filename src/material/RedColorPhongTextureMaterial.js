@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.9 16:15:54
+ *   Last modification time of this file - 2019.12.10 14:18:48
  *
  */
 
@@ -28,9 +28,12 @@ export default class RedColorPhongTextureMaterial extends RedMix.mix(
 	${RedShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
     ${RedShareGLSL.GLSL_SystemUniforms_vertex.calcDisplacement}    
     layout( set = ${RedShareGLSL.SET_INDEX_MeshUniforms}, binding = 0 ) uniform MeshUniforms {
-        mat4 modelMatrix;
-        mat4 normalMatrix;
+        mat4 modelMatrix[${RedShareGLSL.MESH_UNIFORM_POOL_NUM}];
+        mat4 normalMatrix[${RedShareGLSL.MESH_UNIFORM_POOL_NUM}];
     } meshUniforms;
+    layout( set = ${RedShareGLSL.SET_INDEX_MeshUniforms}, binding = 1 ) uniform MeshUniformIndex {
+        float index;
+    } meshUniformsIndex;
 	layout( location = 0 ) in vec3 position;
 	layout( location = 1 ) in vec3 normal;
 	layout( location = 2 ) in vec2 uv;
@@ -47,8 +50,8 @@ export default class RedColorPhongTextureMaterial extends RedMix.mix(
     layout( set = ${RedShareGLSL.SET_INDEX_VertexUniforms}, binding = 1 ) uniform sampler uSampler;
 	//#RedGPU#displacementTexture# layout( set = ${RedShareGLSL.SET_INDEX_VertexUniforms}, binding = 2) uniform texture2D uDisplacementTexture;
 	void main() {
-		vVertexPosition = meshUniforms.modelMatrix * vec4(position,1.0);
-		vNormal = (meshUniforms.normalMatrix * vec4(normal,1.0)).xyz;
+		vVertexPosition = meshUniforms.modelMatrix[ int(meshUniformsIndex.index) ] * vec4(position,1.0);
+		vNormal = (meshUniforms.normalMatrix[ int(meshUniformsIndex.index) ] * vec4(normal,1.0)).xyz;
 		vUV = uv;
 		//#RedGPU#displacementTexture# vVertexPosition.xyz += calcDisplacement(vNormal, vertexUniforms.displacementFlowSpeedX, vertexUniforms.displacementFlowSpeedY, vertexUniforms.displacementPower, uv, uDisplacementTexture, uSampler);
 		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * vVertexPosition;

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.8 17:1:40
+ *   Last modification time of this file - 2019.12.10 14:18:48
  *
  */
 
@@ -46,8 +46,7 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 		testMat_environment;
 	let redGPU = new RedGPU(cvs, glslang,
 		function () {
-
-			let MAX = 3000;
+			let MAX = 5000;
 			let i = MAX;
 			let tView, tView2;
 			let tScene = new RedScene();
@@ -67,8 +66,8 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 
 			tCamera.targetView = tView // optional
 			tCamera2.targetView = tView2 // optional
-			tCamera.distance = 200
-			tCamera.speedDistance = 10
+			tCamera.distance = 50
+			tCamera.speedDistance = 5
 
 			tScene.grid = tGrid;
 			tScene.axis = tAxis;
@@ -96,17 +95,17 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 			let i2 = 10
 			let testColor = ['#ff0000', '#00ff00', '#0000ff', '#ffffff', '#ffff00']
 			while (i2--) {
-				let tLight = new RedPointLight(testColor[i2%testColor.length], 1, 1, Math.random()*25+25)
-				tLight.x = Math.random() * 100 - 50;
-				tLight.y = Math.random() * 100 - 50;
-				tLight.z = Math.random() * 100 - 50;
+				let tLight = new RedPointLight(testColor[i2 % testColor.length], 1, 1, Math.random() * 25 + 25)
+				tLight.x = Math.random() * 300 - 150;
+				tLight.y = Math.random() * 300 - 150;
+				tLight.z = Math.random() * 300 - 150;
 				tScene.addLight(tLight)
 			}
 
 			redGPU.addView(tView)
 			let tEffect = new RedPostEffect_Bloom(redGPU);
 			let tEffect2 = new RedPostEffect_DoF(redGPU);
-			tEffect.bloomStrength =0.35
+			tEffect.bloomStrength = 0.35
 			tEffect2.focusLength = 150
 			tView.postEffect.addEffect(tEffect)
 			tView.postEffect.addEffect(tEffect2)
@@ -213,11 +212,11 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 									: i > division * 2 ? testMat_standard_diffuse_normal_displacement
 										: i > division * 1 ? testMat_colorPhongTexture_normal : testMat_colorPhongTexture_normal_displacement
 				);
-				testMesh.x = Math.random() * 200 - 100;
-				testMesh.y = Math.random() * 200 - 100;
-				testMesh.z = Math.random() * 200 - 100;
+				testMesh.x = Math.random() * 500 - 250;
+				testMesh.y = Math.random() * 500 - 250;
+				testMesh.z = Math.random() * 500 - 250;
 				testMesh.rotationX = testMesh.rotationY = testMesh.rotationZ = Math.random() * 360;
-				testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = Math.random() * 5 + 1;
+				testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = Math.random() * 5 + 3;
 				if (testMesh.material == testMat_standard_diffuse_normal_displacement) testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = 5
 				tScene.addChild(testMesh)
 				// //
@@ -240,76 +239,12 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 				// testMesh2.addChild(testMesh3)
 
 			}
-			// const pModel = new Promise((resolve) => {
-			// 	OBJ.downloadMeshes({
-			// 		'obj': './assets/WaltHead.obj'
-			// 	}, resolve);
-			// });
-			// pModel.then(function (v) {
-			// 	console.log('pModel', v)
-			// 	let interleave = []
-			// 	let vertexData = v.obj.vertices
-			// 	let vertexNormals = v.obj.vertexNormals
-			// 	let uvData = v.obj.textures
-			//
-			//
-			// 	let i = 0, len = v.obj.indices.length
-			// 	for (i; i < len; i++) {
-			// 		let tIndex = v.obj.indices[i]
-			// 		interleave[tIndex * 8 + 0] = vertexData[tIndex * 3 + 0]
-			// 		interleave[tIndex * 8 + 1] = vertexData[tIndex * 3 + 1]
-			// 		interleave[tIndex * 8 + 2] = vertexData[tIndex * 3 + 2]
-			// 		interleave[tIndex * 8 + 3] = vertexNormals[tIndex * 3 + 0]
-			// 		interleave[tIndex * 8 + 4] = vertexNormals[tIndex * 3 + 1]
-			// 		interleave[tIndex * 8 + 5] = vertexNormals[tIndex * 3 + 2]
-			// 		interleave[tIndex * 8 + 6] = uvData[tIndex * 2 + 0]
-			// 		interleave[tIndex * 8 + 7] = uvData[tIndex * 2 + 1]
-			// 	}
-			// 	let testModelGeo = new RedGeometry(
-			// 		redGPU,
-			// 		new RedBuffer(
-			// 			redGPU,
-			// 			`testModelGeo_interleaveBuffer`,
-			// 			RedBuffer.TYPE_VERTEX,
-			// 			new Float32Array(interleave),
-			// 			[
-			// 				new RedInterleaveInfo('vertexPosition', 'float3'),
-			// 				new RedInterleaveInfo('vertexNormal', 'float3'),
-			// 				new RedInterleaveInfo('texcoord', 'float2')
-			// 			]
-			// 		),
-			// 		new RedBuffer(
-			// 			redGPU,
-			// 			`testModelGeo_indexBuffer`,
-			// 			RedBuffer.TYPE_INDEX,
-			// 			new Uint32Array(v.obj.indices)
-			// 		)
-			// 	)
-			// 	let testModelMesh = new RedMesh(redGPU, testModelGeo, new RedColorPhongMaterial(redGPU))
-			// 	testModelMesh.x = -90
-			// 	testModelMesh.rotationY = -90
-			// 	tScene.addChild(testModelMesh)
-			// 	testModelMesh = new RedMesh(redGPU, testModelGeo, new RedColorPhongMaterial(redGPU))
-			// 	testModelMesh.x = 90
-			// 	testModelMesh.rotationY = 90
-			// 	tScene.addChild(testModelMesh)
-			// });
+
 
 			let renderer = new RedRender();
 			let render = function (time) {
 
-				// tView.camera.x = Math.sin(time / 3000) * 80;
-				// tView.camera.y = Math.cos(time / 4000) * 80;
-				// tView.camera.z = Math.cos(time / 3000) * 80;
-				// tView.camera.x = 3;
-				// tView.camera.y = 3;
-				// tView.camera.z = 3;
 
-
-				// tView.camera.x = 10;
-				// tView.camera.y =10;
-				// tView.camera.z = 10;
-				// tView.camera.lookAt(0, 0, 0);
 				tLight.x = Math.sin(time / 1000)
 				tLight.y = Math.cos(time / 500)
 				tLight.z = Math.cos(time / 750)
@@ -327,18 +262,22 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 				while (i--) {
 					tChildren[i].x = Math.sin(time / 1000 + i * 10 + Math.PI * 2 / tChildren.length * i) * 75
 					tChildren[i].y = Math.sin(time / 2000 + i * 10 + Math.PI * 2 / tChildren.length * i) * 20
-					tChildren[i].z = Math.cos(time / (2000 + i* 10)  + Math.PI * 2 / tChildren.length * i) * 75
+					tChildren[i].z = Math.cos(time / (2000 + i * 10) + Math.PI * 2 / tChildren.length * i) * 75
 				}
 
-				//  tChildren = tView.scene.children
-				// i = 500
-				//
-				// while (i--) {
-				// 	tChildren[i]._rotationX +=1
-				// 	tChildren[i]._rotationY +=1
-				// 	tChildren[i]._rotationZ +=1
-				// 	tChildren[i].dirtyTransform = 1
-				// }
+				tChildren = tView.scene.children
+				i = tChildren.length
+
+
+				while (i--) {
+					// if(i%5==0){
+						tChildren[i]._rotationX += 1
+						tChildren[i]._rotationY += 1
+						tChildren[i]._rotationZ += 1
+						tChildren[i].dirtyTransform = 1
+					// }
+
+				}
 
 
 				requestAnimationFrame(render);
