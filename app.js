@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.10 9:20:28
+ *   Last modification time of this file - 2019.12.10 10:18:32
  *
  */
 
@@ -47,7 +47,7 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 	let redGPU = new RedGPU(cvs, glslang,
 		function () {
 
-			let MAX = 10000;
+			let MAX = 5000;
 			let i = MAX;
 			let tView, tView2;
 			let tScene = new RedScene();
@@ -330,15 +330,16 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 					tChildren[i].z = Math.cos(time / (2000 + i * 10) + Math.PI * 2 / tChildren.length * i) * 75
 				}
 
-				//  tChildren = tView.scene.children
-				// i = tChildren.length
-				//
-				// while (i--) {
-				// 	tChildren[i]._rotationX +=1
-				// 	tChildren[i]._rotationY +=1
-				// 	tChildren[i]._rotationZ +=1
-				// 	tChildren[i].dirtyTransform = 1
-				// }
+				tChildren = tView.scene.children
+				i = tChildren.length
+				if(i>1000) i = 1000
+
+				while (i--) {
+					tChildren[i]._rotationX += 1
+					tChildren[i]._rotationY += 1
+					tChildren[i]._rotationZ += 1
+					tChildren[i].dirtyTransform = 1
+				}
 
 
 				requestAnimationFrame(render);
