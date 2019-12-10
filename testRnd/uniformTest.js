@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.10 10:18:32
+ *   Last modification time of this file - 2019.12.10 12:26:38
  *
  */
 
@@ -14,6 +14,9 @@ import RedGrid from "../src/object3D/RedGrid.js";
 import RedObitController from "../src/controller/RedObitController.js";
 import RedDirectionalLight from "../src/light/RedDirectionalLight.js";
 import RedTypeSize from "../src/resources/RedTypeSize.js";
+import RedMesh from "../src/object3D/RedMesh.js";
+import RedBox from "../src/primitives/RedBox.js";
+import RedColorMaterial from "../src/material/RedColorMaterial.js";
 
 (async function () {
 	const cvs = document.createElement('canvas');
@@ -58,14 +61,15 @@ import RedTypeSize from "../src/resources/RedTypeSize.js";
 
 			redGPU.addView(tView)
 
-
-			let i = 20000
-			while (i--) {
-				redGPU.device.createBuffer({
-					size: RedTypeSize.mat4 * 2 * 1000,
-					usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-				})
+			let i = 100
+			while(i--){
+				let tMesh = new RedMesh(redGPU, new RedBox(redGPU), new RedColorMaterial(redGPU))
+				tMesh.x = Math.random()*50-25
+				tMesh.y = Math.random()*50-25
+				tMesh.z = Math.random()*50-25
+				tScene.addChild(tMesh)
 			}
+
 
 			let renderer = new RedRender();
 			let render = function (time) {

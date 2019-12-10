@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.10 9:20:28
+ *   Last modification time of this file - 2019.12.10 12:26:38
  *
  */
 
@@ -47,7 +47,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 	#redGPU;
 	//
 	_useDepthTest = true;
-	_depthTestFunc = 'less';
+	_depthTestFunc = 'less-equal';
 	_cullMode = 'back';
 	_primitiveTopology = "triangle-list";
 	pipeline;
@@ -82,31 +82,6 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	}
 
-	updateUniformBuffer = (_ => {
-		let tempFloat32 = new Float32Array(1);
-		return function () {
-			//음 전체 속성 업데이트라고 봐야할까나..
-			//TODO : 최적화...필요..
-			let i;
-			let dataMesh, tData;
-			let tValue;
-			dataMesh = RedBaseObject3D.uniformBufferDescriptor_mesh.redStruct;
-
-			i = dataMesh.length;
-			while (i--) {
-				tData = dataMesh[i];
-				if (tData) {
-					tValue = this[tData.valueName];
-					if (typeof tValue == 'number') {
-						tempFloat32[0] = tValue;
-						tValue = tempFloat32
-					}
-					// this.uniformBuffer_mesh.GPUBuffer.setSubData(tData['offset'], tValue);
-				}
-			}
-			// this.uniformBuffer_mesh.GPUBuffer.setSubData(0, this.uniformBuffer_mesh.GPUBuffer);
-		}
-	})();
 
 
 	get x() {

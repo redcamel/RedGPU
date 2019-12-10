@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.10 10:18:32
+ *   Last modification time of this file - 2019.12.10 12:26:38
  *
  */
 
@@ -240,76 +240,12 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 				// testMesh2.addChild(testMesh3)
 
 			}
-			// const pModel = new Promise((resolve) => {
-			// 	OBJ.downloadMeshes({
-			// 		'obj': './assets/WaltHead.obj'
-			// 	}, resolve);
-			// });
-			// pModel.then(function (v) {
-			// 	console.log('pModel', v)
-			// 	let interleave = []
-			// 	let vertexData = v.obj.vertices
-			// 	let vertexNormals = v.obj.vertexNormals
-			// 	let uvData = v.obj.textures
-			//
-			//
-			// 	let i = 0, len = v.obj.indices.length
-			// 	for (i; i < len; i++) {
-			// 		let tIndex = v.obj.indices[i]
-			// 		interleave[tIndex * 8 + 0] = vertexData[tIndex * 3 + 0]
-			// 		interleave[tIndex * 8 + 1] = vertexData[tIndex * 3 + 1]
-			// 		interleave[tIndex * 8 + 2] = vertexData[tIndex * 3 + 2]
-			// 		interleave[tIndex * 8 + 3] = vertexNormals[tIndex * 3 + 0]
-			// 		interleave[tIndex * 8 + 4] = vertexNormals[tIndex * 3 + 1]
-			// 		interleave[tIndex * 8 + 5] = vertexNormals[tIndex * 3 + 2]
-			// 		interleave[tIndex * 8 + 6] = uvData[tIndex * 2 + 0]
-			// 		interleave[tIndex * 8 + 7] = uvData[tIndex * 2 + 1]
-			// 	}
-			// 	let testModelGeo = new RedGeometry(
-			// 		redGPU,
-			// 		new RedBuffer(
-			// 			redGPU,
-			// 			`testModelGeo_interleaveBuffer`,
-			// 			RedBuffer.TYPE_VERTEX,
-			// 			new Float32Array(interleave),
-			// 			[
-			// 				new RedInterleaveInfo('vertexPosition', 'float3'),
-			// 				new RedInterleaveInfo('vertexNormal', 'float3'),
-			// 				new RedInterleaveInfo('texcoord', 'float2')
-			// 			]
-			// 		),
-			// 		new RedBuffer(
-			// 			redGPU,
-			// 			`testModelGeo_indexBuffer`,
-			// 			RedBuffer.TYPE_INDEX,
-			// 			new Uint32Array(v.obj.indices)
-			// 		)
-			// 	)
-			// 	let testModelMesh = new RedMesh(redGPU, testModelGeo, new RedColorPhongMaterial(redGPU))
-			// 	testModelMesh.x = -90
-			// 	testModelMesh.rotationY = -90
-			// 	tScene.addChild(testModelMesh)
-			// 	testModelMesh = new RedMesh(redGPU, testModelGeo, new RedColorPhongMaterial(redGPU))
-			// 	testModelMesh.x = 90
-			// 	testModelMesh.rotationY = 90
-			// 	tScene.addChild(testModelMesh)
-			// });
+
 
 			let renderer = new RedRender();
 			let render = function (time) {
 
-				// tView.camera.x = Math.sin(time / 3000) * 80;
-				// tView.camera.y = Math.cos(time / 4000) * 80;
-				// tView.camera.z = Math.cos(time / 3000) * 80;
-				// tView.camera.x = 3;
-				// tView.camera.y = 3;
-				// tView.camera.z = 3;
 
-
-				// tView.camera.x = 10;
-				// tView.camera.y =10;
-				// tView.camera.z = 10;
-				// tView.camera.lookAt(0, 0, 0);
 				tLight.x = Math.sin(time / 1000)
 				tLight.y = Math.cos(time / 500)
 				tLight.z = Math.cos(time / 750)
@@ -332,13 +268,16 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 
 				tChildren = tView.scene.children
 				i = tChildren.length
-				if(i>1000) i = 1000
+
 
 				while (i--) {
-					tChildren[i]._rotationX += 1
-					tChildren[i]._rotationY += 1
-					tChildren[i]._rotationZ += 1
-					tChildren[i].dirtyTransform = 1
+					if(i%5==0){
+						tChildren[i]._rotationX += 1
+						tChildren[i]._rotationY += 1
+						tChildren[i]._rotationZ += 1
+						tChildren[i].dirtyTransform = 1
+					}
+
 				}
 
 

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.9 16:15:54
+ *   Last modification time of this file - 2019.12.10 12:26:38
  *
  */
 
@@ -63,7 +63,7 @@ export default class RedSkyBoxMaterial extends RedMix.mix(
 		super(redGPU);
 		this.skyBoxTexture = skyBoxTexture;
 		this.needResetBindingInfo = true;
-		this.updateUniformBuffer()
+
 	}
 
 	checkTexture(texture, textureName) {
