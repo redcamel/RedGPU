@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.9 16:15:54
+ *   Last modification time of this file - 2019.12.10 14:18:48
  *
  */
 
@@ -29,9 +29,12 @@ export default class RedPBRMaterial_System extends RedMix.mix(
     ${RedShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
     ${RedShareGLSL.GLSL_SystemUniforms_vertex.calcDisplacement}
     layout( set = ${RedShareGLSL.SET_INDEX_MeshUniforms}, binding = 0 ) uniform MeshUniforms {
-        mat4 modelMatrix;
-        mat4 normalMatrix;
+        mat4 modelMatrix[${RedShareGLSL.MESH_UNIFORM_POOL_NUM}];
+        mat4 normalMatrix[${RedShareGLSL.MESH_UNIFORM_POOL_NUM}];
     } meshUniforms;
+    layout( set = ${RedShareGLSL.SET_INDEX_MeshUniforms}, binding = 1 ) uniform MeshUniformIndex {
+        float index;
+    } meshUniformsIndex;
          
 	layout( location = 0 ) in vec3 position;
 	layout( location = 1 ) in vec4 vertexColor_0;
@@ -59,7 +62,7 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 	layout( set = ${RedShareGLSL.SET_INDEX_VertexUniforms}, binding = 1 ) uniform sampler uDisplacementSampler;
 	//#RedGPU#displacementTexture# layout( set = ${RedShareGLSL.SET_INDEX_VertexUniforms}, binding = 2 ) uniform texture2D uDisplacementTexture;
 	void main() {		
-		mat4 targetMatrix = meshUniforms.modelMatrix ;
+		mat4 targetMatrix = meshUniforms.modelMatrix[ int(meshUniformsIndex.index) ] ;
 		mat4 skinMat = mat4(1.0,0.0,0.0,0.0, 0.0,1.0,0.0,0.0, 0.0,0.0,1.0,0.0, 0.0,0.0,0.0,1.0);
 		//#RedGPU#skin# skinMat =
 		//#RedGPU#skin#  aVertexWeight.x * vertexUniforms.globalTransformOfNodeThatTheMeshIsAttachedTo * vertexUniforms.jointMatrix[ int(aVertexJoint.x) ] * vertexUniforms.inverseBindMatrixForJoint[int(aVertexJoint.x)]+
@@ -67,11 +70,11 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 		//#RedGPU#skin#  aVertexWeight.z * vertexUniforms.globalTransformOfNodeThatTheMeshIsAttachedTo * vertexUniforms.jointMatrix[ int(aVertexJoint.z) ] * vertexUniforms.inverseBindMatrixForJoint[int(aVertexJoint.z)]+
 		//#RedGPU#skin#  aVertexWeight.w * vertexUniforms.globalTransformOfNodeThatTheMeshIsAttachedTo * vertexUniforms.jointMatrix[ int(aVertexJoint.w) ] * vertexUniforms.inverseBindMatrixForJoint[int(aVertexJoint.w)];
 		
-		vVertexPosition = meshUniforms.modelMatrix * skinMat * vec4(position, 1.0);
+		vVertexPosition = meshUniforms.modelMatrix[ int(meshUniformsIndex.index) ] * skinMat * vec4(position, 1.0);
 		vVertexColor_0 = vertexColor_0;
 		
-		vNormal = (meshUniforms.normalMatrix *  vec4(normal,1.0)).xyz;
-		 vNormal = (meshUniforms.normalMatrix  * skinMat * vec4(normal,0.0)).xyz;		
+		vNormal = (meshUniforms.normalMatrix[ int(meshUniformsIndex.index) ] *  vec4(normal,1.0)).xyz;
+		 vNormal = (meshUniforms.normalMatrix[ int(meshUniformsIndex.index) ]  * skinMat * vec4(normal,0.0)).xyz;		
 		
 		vUV = uv;
 		vUV1 = uv1;

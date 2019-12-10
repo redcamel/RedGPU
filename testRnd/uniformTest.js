@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.10 12:26:38
+ *   Last modification time of this file - 2019.12.10 14:18:48
  *
  */
 
@@ -17,6 +17,9 @@ import RedTypeSize from "../src/resources/RedTypeSize.js";
 import RedMesh from "../src/object3D/RedMesh.js";
 import RedBox from "../src/primitives/RedBox.js";
 import RedColorMaterial from "../src/material/RedColorMaterial.js";
+import RedColorPhongMaterial from "../src/material/RedColorPhongMaterial.js";
+import RedBitmapMaterial from "../src/material/RedBitmapMaterial.js";
+import RedBitmapTexture from "../src/resources/RedBitmapTexture.js";
 
 (async function () {
 	const cvs = document.createElement('canvas');
@@ -35,14 +38,13 @@ import RedColorMaterial from "../src/material/RedColorMaterial.js";
 			}
 			let tView;
 			let tScene = new RedScene();
-			let tGrid = new RedGrid(this)
+			// let tGrid = new RedGrid(this)
 			let tCamera = new RedObitController(this)
-			let tCamera2 = new RedObitController(this)
-			tGrid.centerColor = '#ff0000'
+			// tGrid.centerColor = '#ff0000'
 			// tScene.backgroundColor = '#fff'
 			// tScene.backgroundColorAlpha = 0
 
-			tCamera.distance = 10
+			tCamera.distance = 20
 			tCamera.speedDistance = 1
 
 
@@ -50,7 +52,7 @@ import RedColorMaterial from "../src/material/RedColorMaterial.js";
 
 			tCamera.targetView = tView // optional
 
-			tScene.grid = tGrid
+			// tScene.grid = tGrid
 			// tScene.axis = new RedAxis(redGPU)
 			let tLight
 			tLight = new RedDirectionalLight()
@@ -61,12 +63,15 @@ import RedColorMaterial from "../src/material/RedColorMaterial.js";
 
 			redGPU.addView(tView)
 
-			let i = 100
-			while(i--){
-				let tMesh = new RedMesh(redGPU, new RedBox(redGPU), new RedColorMaterial(redGPU))
-				tMesh.x = Math.random()*50-25
-				tMesh.y = Math.random()*50-25
-				tMesh.z = Math.random()*50-25
+			let i = 0
+			let len = 10
+			for(i;i<len;i++){
+				// new RedBitmapMaterial(redGPU, new RedBitmapTexture(redGPU,'../assets/crate.png'))
+				let tMesh = new RedMesh(redGPU, new RedBox(redGPU), new RedColorPhongMaterial(redGPU))
+				tMesh.x = i * (1.5)
+				tMesh.y = i * (1.5)
+				console.log('tMesh',tMesh)
+
 				tScene.addChild(tMesh)
 			}
 
@@ -74,6 +79,9 @@ import RedColorMaterial from "../src/material/RedColorMaterial.js";
 			let renderer = new RedRender();
 			let render = function (time) {
 
+				tScene.children.forEach(mesh=>{
+					mesh.rotationX++
+				})
 				// tLight.x = Math.sin(time / 1000)
 				// tLight.y = Math.cos(time / 500)
 				// tLight.z = Math.cos(time / 750)

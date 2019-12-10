@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.10 12:26:38
+ *   Last modification time of this file - 2019.12.10 14:18:48
  *
  */
 
@@ -46,7 +46,6 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 		testMat_environment;
 	let redGPU = new RedGPU(cvs, glslang,
 		function () {
-
 			let MAX = 5000;
 			let i = MAX;
 			let tView, tView2;
@@ -108,8 +107,8 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 			let tEffect2 = new RedPostEffect_DoF(redGPU);
 			tEffect.bloomStrength = 0.35
 			tEffect2.focusLength = 150
-			// tView.postEffect.addEffect(tEffect)
-			// tView.postEffect.addEffect(tEffect2)
+			tView.postEffect.addEffect(tEffect)
+			tView.postEffect.addEffect(tEffect2)
 			// redGPU.addView(tView2)
 			let testTextureList = [
 				new RedBitmapTexture(redGPU, 'assets/UV_Grid_Sm.jpg'),
@@ -213,11 +212,11 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 									: i > division * 2 ? testMat_standard_diffuse_normal_displacement
 										: i > division * 1 ? testMat_colorPhongTexture_normal : testMat_colorPhongTexture_normal_displacement
 				);
-				testMesh.x = Math.random() * 200 - 100;
-				testMesh.y = Math.random() * 200 - 100;
-				testMesh.z = Math.random() * 200 - 100;
+				testMesh.x = Math.random() * 500 - 250;
+				testMesh.y = Math.random() * 500 - 250;
+				testMesh.z = Math.random() * 500 - 250;
 				testMesh.rotationX = testMesh.rotationY = testMesh.rotationZ = Math.random() * 360;
-				testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = Math.random() * 5 + 1;
+				testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = Math.random() * 5 + 3;
 				if (testMesh.material == testMat_standard_diffuse_normal_displacement) testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = 5
 				tScene.addChild(testMesh)
 				// //
@@ -271,12 +270,12 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 
 
 				while (i--) {
-					if(i%5==0){
+					// if(i%5==0){
 						tChildren[i]._rotationX += 1
 						tChildren[i]._rotationY += 1
 						tChildren[i]._rotationZ += 1
 						tChildren[i].dirtyTransform = 1
-					}
+					// }
 
 				}
 

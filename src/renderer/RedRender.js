@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.10 9:20:28
+ *   Last modification time of this file - 2019.12.10 14:18:48
  *
  */
 
@@ -12,6 +12,7 @@ let transparentSortList = [];
 let tCacheUniformInfo = {}
 var resultMTX = mat4.create();
 var resultPreMTX = mat4.create();
+var updateTargetMatrixBufferList = []
 
 let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty, transparentSortMode) => {
 	let i;
@@ -145,8 +146,6 @@ let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty, 
 						passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
 						prevVertexBuffer_UUID = tGeometry.interleaveBuffer._UUID
 					}
-
-
 					if (tGeometry.indexBuffer) {
 						if (prevIndexBuffer_UUID != tGeometry.indexBuffer._UUID) {
 							passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
@@ -296,8 +295,11 @@ let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty, 
 			// tMesh.calcTransform(parent);
 			// tMesh.updateUniformBuffer();
 
-			tMesh.uniformBuffer_mesh.GPUBuffer.setSubData(0, tMesh.matrix);
-			tMesh.uniformBuffer_mesh.GPUBuffer.setSubData(64, tMesh.normalMatrix);
+			tMesh.uniformBuffer_mesh.meshFloat32Array.set(tMesh.matrix, tMesh.offsetMatrix / Float32Array.BYTES_PER_ELEMENT)
+			tMesh.uniformBuffer_mesh.meshFloat32Array.set(tMesh.normalMatrix, tMesh.offsetNormalMatrix / Float32Array.BYTES_PER_ELEMENT);
+			updateTargetMatrixBufferList.includes(tMesh.uniformBuffer_mesh) ? 0 : updateTargetMatrixBufferList.push(tMesh.uniformBuffer_mesh)
+			// tMesh.uniformBuffer_mesh.GPUBuffer.setSubData(tMesh.offsetMatrix, tMesh.matrix);
+			// tMesh.uniformBuffer_mesh.GPUBuffer.setSubData(tMesh.offsetNormalMatrix, tMesh.normalMatrix);
 		}
 		if (tSkinInfo) {
 			var joints = tSkinInfo['joints'];
@@ -457,6 +459,8 @@ export default class RedRender {
 		renderScene(redGPU, redView, passEncoder, null, tScene.children);
 		if (transparentSortList.length) renderScene(redGPU, redView, passEncoder, null, transparentSortList, null, true);
 		transparentSortList.length = 0
+		updateTargetMatrixBufferList.forEach(uniformBuffer_mesh => uniformBuffer_mesh.GPUBuffer.setSubData(0, uniformBuffer_mesh.meshFloat32Array))
+		updateTargetMatrixBufferList.length = 0
 		passEncoder.endPass();
 
 		//////////////////////////////////////////////////////////////////////////////////////////
@@ -510,6 +514,7 @@ export default class RedRender {
 		for (i; i < len; i++) this.#renderView(redGPU, redGPU.viewList[i])
 		RedGLTFLoader.animationLooper(time);
 
+		// tMesh.uniformBuffer_mesh.GPUBuffer.setSubData(tMesh.offsetMatrix, tMesh.matrix);
 		// console.log(cacheTable)
 	}
 }
