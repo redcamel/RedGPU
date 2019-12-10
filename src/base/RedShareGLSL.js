@@ -8,7 +8,7 @@
 
 "use strict";
 export default class RedShareGLSL {
-	static MESH_UNIFORM_POOL_NUM = 25
+	static MESH_UNIFORM_POOL_NUM = 50
 	static MAX_DIRECTIONAL_LIGHT = 8;
 	static MAX_POINT_LIGHT = 200;
 	static SET_INDEX_SystemUniforms_vertex = 0;

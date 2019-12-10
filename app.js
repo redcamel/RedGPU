@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.10 19:44:46
+ *   Last modification time of this file - 2019.12.10 20:8:18
  *
  */
 
@@ -35,7 +35,7 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 
 (async function () {
 	const cvs = document.createElement('canvas');
-	const glslangModule = await import(/* webpackIgnore: true */ 'https://unpkg.com/@webgpu/glslang@0.0.9/dist/web-devel/glslang.js');
+	const glslangModule = await import(/* webpackIgnore: true */ 'https://unpkg.com/@webgpu/glslang@0.0.11/dist/web-devel/glslang.js');
 	document.body.appendChild(cvs);
 
 	const glslang = await glslangModule.default();
@@ -67,7 +67,7 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 			tCamera.targetView = tView // optional
 			tCamera2.targetView = tView2 // optional
 			tCamera.distance = 50
-			tCamera.speedDistance = 5
+			tCamera.speedDistance = 2
 
 			tScene.grid = tGrid;
 			tScene.axis = tAxis;
@@ -92,13 +92,11 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 			tScene.addLight(tLight)
 
 
-			let i2 = 20
+			let i2 = 5
 			let testColor = ['#ff0000', '#00ff00', '#0000ff', '#ffffff', '#ffff00']
 			while (i2--) {
 				let tLight = new RedPointLight(testColor[i2 % testColor.length], 1, 1, Math.random() * 25 )
-				tLight.x = Math.random() * 300 - 150;
-				tLight.y = Math.random() * 300 - 150;
-				tLight.z = Math.random() * 300 - 150;
+
 				tScene.addLight(tLight)
 			}
 
@@ -212,12 +210,12 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 									: i > division * 2 ? testMat_standard_diffuse_normal_displacement
 										: i > division * 1 ? testMat_colorPhongTexture_normal : testMat_colorPhongTexture_normal_displacement
 				);
-				testMesh.x = Math.random() * 500 - 250;
-				testMesh.y = Math.random() * 500 - 250;
-				testMesh.z = Math.random() * 500 - 250;
+				testMesh.x = Math.random() * 3000 - 1500;
+				testMesh.y = Math.random() * 3000 - 1500;
+				testMesh.z = Math.random() * 3000 - 1500;
 				testMesh.rotationX = testMesh.rotationY = testMesh.rotationZ = Math.random() * 360;
-				testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = Math.random() * 5 + 10;
-				if (testMesh.material == testMat_standard_diffuse_normal_displacement) testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = 5
+				testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = Math.random() * 25 + 35;
+				if (testMesh.material == testMat_standard_diffuse_normal_displacement) testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = 55
 				tScene.addChild(testMesh)
 				// //
 				// let testMesh2 = new RedMesh(
