@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.10 19:41:33
+ *   Last modification time of this file - 2019.12.10 20:8:18
  *
  */
 
@@ -20,7 +20,7 @@ import RedAmbientLight from "../src/light/RedAmbientLight.js";
 
 (async function () {
 	const cvs = document.createElement('canvas');
-	const glslangModule = await import(/* webpackIgnore: true */ 'https://unpkg.com/@webgpu/glslang@0.0.9/dist/web-devel/glslang.js');
+	const glslangModule = await import(/* webpackIgnore: true */ 'https://unpkg.com/@webgpu/glslang@0.0.11/dist/web-devel/glslang.js');
 	document.body.appendChild(cvs);
 
 	const glslang = await glslangModule.default();

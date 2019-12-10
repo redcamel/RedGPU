@@ -1,3 +1,11 @@
+/*
+ *   RedGPU - MIT License
+ *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
+ *   issue : https://github.com/redcamel/RedGPU/issues
+ *   Last modification time of this file - 2019.12.10 20:8:18
+ *
+ */
+
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -104,7 +112,7 @@ let glslang = undefined;
 /* harmony default export */ __webpack_exports__["default"] = (async function() {
 	if (glslang !== undefined) return glslang;
 	// @ts-ignore
-	const glslangModule = await import(/* webpackIgnore: true */ 'https://unpkg.com/@webgpu/glslang@0.0.9/dist/web-devel/glslang.js');
+	const glslangModule = await import(/* webpackIgnore: true */ 'https://unpkg.com/@webgpu/glslang@0.0.11/dist/web-devel/glslang.js');
 	glslang = await glslangModule.default();
 	return glslang;
 });
