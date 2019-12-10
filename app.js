@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.10 14:18:48
+ *   Last modification time of this file - 2019.12.10 17:42:12
  *
  */
 
@@ -46,7 +46,7 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 		testMat_environment;
 	let redGPU = new RedGPU(cvs, glslang,
 		function () {
-			let MAX = 5000;
+			let MAX = 8000;
 			let i = MAX;
 			let tView, tView2;
 			let tScene = new RedScene();

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.10 14:18:48
+ *   Last modification time of this file - 2019.12.10 17:42:12
  *
  */
 
@@ -295,12 +295,14 @@ let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty, 
 			// tMesh.calcTransform(parent);
 			// tMesh.updateUniformBuffer();
 
-			tMesh.uniformBuffer_mesh.meshFloat32Array.set(tMesh.matrix, tMesh.offsetMatrix / Float32Array.BYTES_PER_ELEMENT)
-			tMesh.uniformBuffer_mesh.meshFloat32Array.set(tMesh.normalMatrix, tMesh.offsetNormalMatrix / Float32Array.BYTES_PER_ELEMENT);
-			updateTargetMatrixBufferList.includes(tMesh.uniformBuffer_mesh) ? 0 : updateTargetMatrixBufferList.push(tMesh.uniformBuffer_mesh)
+
 			// tMesh.uniformBuffer_mesh.GPUBuffer.setSubData(tMesh.offsetMatrix, tMesh.matrix);
 			// tMesh.uniformBuffer_mesh.GPUBuffer.setSubData(tMesh.offsetNormalMatrix, tMesh.normalMatrix);
+			updateTargetMatrixBufferList.includes(tMesh.uniformBuffer_mesh) ? 0 : updateTargetMatrixBufferList.push(tMesh.uniformBuffer_mesh)
 		}
+		tMesh.uniformBuffer_mesh.meshFloat32Array.set(tMesh.matrix, tMesh.offsetMatrix / Float32Array.BYTES_PER_ELEMENT)
+		tMesh.uniformBuffer_mesh.meshFloat32Array.set(tMesh.normalMatrix, tMesh.offsetNormalMatrix / Float32Array.BYTES_PER_ELEMENT);
+
 		if (tSkinInfo) {
 			var joints = tSkinInfo['joints'];
 			var joint_i = 0, len = joints.length;
@@ -459,8 +461,10 @@ export default class RedRender {
 		renderScene(redGPU, redView, passEncoder, null, tScene.children);
 		if (transparentSortList.length) renderScene(redGPU, redView, passEncoder, null, transparentSortList, null, true);
 		transparentSortList.length = 0
-		updateTargetMatrixBufferList.forEach(uniformBuffer_mesh => uniformBuffer_mesh.GPUBuffer.setSubData(0, uniformBuffer_mesh.meshFloat32Array))
+		let i = updateTargetMatrixBufferList.length;
+		while (i--) updateTargetMatrixBufferList[i].GPUBuffer.setSubData(0, updateTargetMatrixBufferList[i].meshFloat32Array)
 		updateTargetMatrixBufferList.length = 0
+
 		passEncoder.endPass();
 
 		//////////////////////////////////////////////////////////////////////////////////////////

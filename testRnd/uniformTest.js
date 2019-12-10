@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.10 14:18:48
+ *   Last modification time of this file - 2019.12.10 17:42:12
  *
  */
 
@@ -20,6 +20,7 @@ import RedColorMaterial from "../src/material/RedColorMaterial.js";
 import RedColorPhongMaterial from "../src/material/RedColorPhongMaterial.js";
 import RedBitmapMaterial from "../src/material/RedBitmapMaterial.js";
 import RedBitmapTexture from "../src/resources/RedBitmapTexture.js";
+import RedAxis from "../src/object3D/RedAxis.js";
 
 (async function () {
 	const cvs = document.createElement('canvas');
@@ -38,7 +39,7 @@ import RedBitmapTexture from "../src/resources/RedBitmapTexture.js";
 			}
 			let tView;
 			let tScene = new RedScene();
-			// let tGrid = new RedGrid(this)
+			let tGrid = new RedGrid(this)
 			let tCamera = new RedObitController(this)
 			// tGrid.centerColor = '#ff0000'
 			// tScene.backgroundColor = '#fff'
@@ -52,7 +53,7 @@ import RedBitmapTexture from "../src/resources/RedBitmapTexture.js";
 
 			tCamera.targetView = tView // optional
 
-			// tScene.grid = tGrid
+			tScene.grid = tGrid
 			// tScene.axis = new RedAxis(redGPU)
 			let tLight
 			tLight = new RedDirectionalLight()
@@ -64,7 +65,7 @@ import RedBitmapTexture from "../src/resources/RedBitmapTexture.js";
 			redGPU.addView(tView)
 
 			let i = 0
-			let len = 10
+			let len = 100
 			for(i;i<len;i++){
 				// new RedBitmapMaterial(redGPU, new RedBitmapTexture(redGPU,'../assets/crate.png'))
 				let tMesh = new RedMesh(redGPU, new RedBox(redGPU), new RedColorPhongMaterial(redGPU))
@@ -74,14 +75,18 @@ import RedBitmapTexture from "../src/resources/RedBitmapTexture.js";
 
 				tScene.addChild(tMesh)
 			}
-
+			setTimeout(function(){
+				let t = new RedMesh(redGPU, new RedBox(redGPU), new RedColorMaterial(redGPU))
+				tScene.addChild(t)
+				t.x =5
+			},3000)
 
 			let renderer = new RedRender();
 			let render = function (time) {
 
-				tScene.children.forEach(mesh=>{
-					mesh.rotationX++
-				})
+				// tScene.children.forEach(mesh=>{
+				// 	mesh.rotationX++
+				// })
 				// tLight.x = Math.sin(time / 1000)
 				// tLight.y = Math.cos(time / 500)
 				// tLight.z = Math.cos(time / 750)
