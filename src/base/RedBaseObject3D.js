@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.9 16:15:54
+ *   Last modification time of this file - 2019.12.10 9:20:28
  *
  */
 
@@ -101,9 +101,10 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 						tempFloat32[0] = tValue;
 						tValue = tempFloat32
 					}
-					this.uniformBuffer_mesh.GPUBuffer.setSubData(tData['offset'], tValue);
+					// this.uniformBuffer_mesh.GPUBuffer.setSubData(tData['offset'], tValue);
 				}
 			}
+			// this.uniformBuffer_mesh.GPUBuffer.setSubData(0, this.uniformBuffer_mesh.GPUBuffer);
 		}
 	})();
 

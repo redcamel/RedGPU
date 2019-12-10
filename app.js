@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.8 17:1:40
+ *   Last modification time of this file - 2019.12.10 9:20:28
  *
  */
 
@@ -47,7 +47,7 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 	let redGPU = new RedGPU(cvs, glslang,
 		function () {
 
-			let MAX = 3000;
+			let MAX = 10000;
 			let i = MAX;
 			let tView, tView2;
 			let tScene = new RedScene();
@@ -67,8 +67,8 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 
 			tCamera.targetView = tView // optional
 			tCamera2.targetView = tView2 // optional
-			tCamera.distance = 200
-			tCamera.speedDistance = 10
+			tCamera.distance = 50
+			tCamera.speedDistance = 5
 
 			tScene.grid = tGrid;
 			tScene.axis = tAxis;
@@ -96,20 +96,20 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 			let i2 = 10
 			let testColor = ['#ff0000', '#00ff00', '#0000ff', '#ffffff', '#ffff00']
 			while (i2--) {
-				let tLight = new RedPointLight(testColor[i2%testColor.length], 1, 1, Math.random()*25+25)
-				tLight.x = Math.random() * 100 - 50;
-				tLight.y = Math.random() * 100 - 50;
-				tLight.z = Math.random() * 100 - 50;
+				let tLight = new RedPointLight(testColor[i2 % testColor.length], 1, 1, Math.random() * 25 + 25)
+				tLight.x = Math.random() * 300 - 150;
+				tLight.y = Math.random() * 300 - 150;
+				tLight.z = Math.random() * 300 - 150;
 				tScene.addLight(tLight)
 			}
 
 			redGPU.addView(tView)
 			let tEffect = new RedPostEffect_Bloom(redGPU);
 			let tEffect2 = new RedPostEffect_DoF(redGPU);
-			tEffect.bloomStrength =0.35
+			tEffect.bloomStrength = 0.35
 			tEffect2.focusLength = 150
-			tView.postEffect.addEffect(tEffect)
-			tView.postEffect.addEffect(tEffect2)
+			// tView.postEffect.addEffect(tEffect)
+			// tView.postEffect.addEffect(tEffect2)
 			// redGPU.addView(tView2)
 			let testTextureList = [
 				new RedBitmapTexture(redGPU, 'assets/UV_Grid_Sm.jpg'),
@@ -327,11 +327,11 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 				while (i--) {
 					tChildren[i].x = Math.sin(time / 1000 + i * 10 + Math.PI * 2 / tChildren.length * i) * 75
 					tChildren[i].y = Math.sin(time / 2000 + i * 10 + Math.PI * 2 / tChildren.length * i) * 20
-					tChildren[i].z = Math.cos(time / (2000 + i* 10)  + Math.PI * 2 / tChildren.length * i) * 75
+					tChildren[i].z = Math.cos(time / (2000 + i * 10) + Math.PI * 2 / tChildren.length * i) * 75
 				}
 
 				//  tChildren = tView.scene.children
-				// i = 500
+				// i = tChildren.length
 				//
 				// while (i--) {
 				// 	tChildren[i]._rotationX +=1
