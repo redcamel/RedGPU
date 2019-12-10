@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.10 17:42:12
+ *   Last modification time of this file - 2019.12.10 18:21:15
  *
  */
 
@@ -46,7 +46,7 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 		testMat_environment;
 	let redGPU = new RedGPU(cvs, glslang,
 		function () {
-			let MAX = 8000;
+			let MAX = 5000;
 			let i = MAX;
 			let tView, tView2;
 			let tScene = new RedScene();
@@ -92,7 +92,7 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 			tScene.addLight(tLight)
 
 
-			let i2 = 10
+			let i2 = 20
 			let testColor = ['#ff0000', '#00ff00', '#0000ff', '#ffffff', '#ffff00']
 			while (i2--) {
 				let tLight = new RedPointLight(testColor[i2 % testColor.length], 1, 1, Math.random() * 25 + 25)
@@ -109,7 +109,7 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 			tEffect2.focusLength = 150
 			tView.postEffect.addEffect(tEffect)
 			tView.postEffect.addEffect(tEffect2)
-			// redGPU.addView(tView2)
+			redGPU.addView(tView2)
 			let testTextureList = [
 				new RedBitmapTexture(redGPU, 'assets/UV_Grid_Sm.jpg'),
 				new RedBitmapTexture(redGPU, 'assets/Brick03_col.jpg'),

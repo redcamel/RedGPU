@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.10 14:18:48
+ *   Last modification time of this file - 2019.12.10 18:21:15
  *
  */
 
@@ -222,7 +222,6 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 
 
 		// 컷오프 - BLEND, MASK
-		//#RedGPU#useCutOff# if(tAlpha <= fragmentUniforms.cutOff) discard;
 
 		// 이미시브 합성
 		//#RedGPU#emissiveTexture# vec4 emissiveColor = texture(sampler2D(uEmissiveTexture, uEmissiveSampler), emissiveTexCoord);
@@ -234,7 +233,10 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 
 
 		// 알파블렌드 - BLEND
-		if( fragmentUniforms.alphaBlend == 2.0 ) finalColor.a = tAlpha ;
+		if( fragmentUniforms.alphaBlend == 2.0 ) {
+			finalColor.rgb *= tAlpha ;
+			finalColor.a = tAlpha;
+		}
 		outColor = finalColor;
 		outDepthColor = vec4( vec3(gl_FragCoord.z/gl_FragCoord.w), 1.0 );
 	}
