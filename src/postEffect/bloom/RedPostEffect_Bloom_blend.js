@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.6 19:2:34
+ *   Last modification time of this file - 2019.12.11 20:19:9
  *
  */
 
@@ -11,6 +11,7 @@ import RedBaseMaterial from "../../base/RedBaseMaterial.js";
 import RedShareGLSL from "../../base/RedShareGLSL.js";
 import RedBasePostEffect from "../../base/RedBasePostEffect.js";
 import RedTypeSize from "../../resources/RedTypeSize.js";
+
 const float1_Float32Array = new Float32Array(1);
 export default class RedPostEffect_Bloom_blend extends RedBasePostEffect {
 	static vertexShaderGLSL = `

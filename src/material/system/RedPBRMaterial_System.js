@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.10 18:21:15
+ *   Last modification time of this file - 2019.12.11 20:19:9
  *
  */
 
@@ -321,7 +321,7 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 	inverseBindMatrixForJoint = new Float32Array(RedTypeSize.mat4 * maxJoint / Float32Array.BYTES_PER_ELEMENT);
 	globalTransformOfNodeThatTheMeshIsAttachedTo = new Float32Array(RedTypeSize.mat4 / Float32Array.BYTES_PER_ELEMENT);
 
-
+	#timeout
 	set occlusionTexture(texture) {
 		this._occlusionTexture = null;
 		this.checkTexture(texture, 'occlusionTexture')
@@ -512,7 +512,11 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 						break;
 				}
 				console.log("로딩완료됨 textureName", textureName, texture.GPUTexture);
-				this.needResetBindingInfo = true
+
+				clearTimeout(this.#timeout);
+				this.#timeout = setTimeout(_ => {
+					this.needResetBindingInfo = true
+				}, 500)
 			} else {
 				texture.addUpdateTarget(this, textureName)
 			}

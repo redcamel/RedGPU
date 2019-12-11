@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.11 18:4:20
+ *   Last modification time of this file - 2019.12.11 20:19:9
  *
  */
 "use strict";
@@ -16,12 +16,12 @@ export default class RedBitmapTexture {
 	#updateList = [];
 	#GPUTexture;
 	#GPUTextureView;
-	#updateTexture = function (device, img, gpuTexture, width, height, mip, face = -1) {
+	#updateTexture = function (commandEncoder, device, img, gpuTexture, width, height, mip, face = -1) {
 		let imageCanvas;
 		let imageCanvasContext;
 		// if (!imageCanvas) {
-			imageCanvas = document.createElement('canvas',);
-			imageCanvasContext = imageCanvas.getContext('2d');
+		imageCanvas = document.createElement('canvas',);
+		imageCanvasContext = imageCanvas.getContext('2d');
 		// }
 		imageCanvas.width = width;
 		imageCanvas.height = height;
@@ -68,9 +68,9 @@ export default class RedBitmapTexture {
 			height: height,
 			depth: 1
 		};
-		const commandEncoder = device.createCommandEncoder({});
+
 		commandEncoder.copyBufferToTexture(bufferView, textureView, textureExtent);
-		device.defaultQueue.submit([commandEncoder.finish()]);
+
 
 		console.log('mip', mip, 'width', width, 'height', height)
 		return imageCanvas
@@ -102,8 +102,8 @@ export default class RedBitmapTexture {
 				let tH = img.height;
 				tW = RedUTIL.nextHighestPowerOfTwo(tW);
 				tH = RedUTIL.nextHighestPowerOfTwo(tH)
-				if(tW>1024) tW = 1024;
-				if(tH>1024) tH = 1024;
+				if (tW > 1024) tW = 1024;
+				if (tH > 1024) tH = 1024;
 				if (useMipmap) this.mipMaps = Math.round(Math.log2(Math.max(tW, tH)));
 
 				const textureDescriptor = {
@@ -124,14 +124,17 @@ export default class RedBitmapTexture {
 				let faceHeight = tH;
 
 				let result
-				result = this.#updateTexture(redGPU.device, img, gpuTexture, faceWidth, faceHeight, 0);
+				const commandEncoder = redGPU.device.createCommandEncoder({});
+				result = this.#updateTexture(commandEncoder, redGPU.device, img, gpuTexture, faceWidth, faceHeight, 0);
 				if (useMipmap) {
 					for (i; i <= len; i++) {
 						faceWidth = Math.max(Math.floor(faceWidth / 2), 1);
 						faceHeight = Math.max(Math.floor(faceHeight / 2), 1);
-						result = this.#updateTexture(redGPU.device, result, gpuTexture, faceWidth, faceHeight, i)
+						result = this.#updateTexture(commandEncoder, redGPU.device, result, gpuTexture, faceWidth, faceHeight, i)
 					}
 				}
+
+				redGPU.device.defaultQueue.submit([commandEncoder.finish()]);
 				self.resolve(gpuTexture)
 
 			}
@@ -150,10 +153,12 @@ export default class RedBitmapTexture {
 		this.#GPUTexture = texture;
 		this.#GPUTextureView = texture.createView();
 		console.log('this.#updateList', this.#updateList);
-		this.#updateList.forEach(data => {
-			console.log(data[1]);
+		let i = this.#updateList.length;
+		let data;
+		while (i--) {
+			data = this.#updateList[i]
 			data[0][data[1]] = this
-		});
+		}
 		this.#updateList.length = 0
 	}
 

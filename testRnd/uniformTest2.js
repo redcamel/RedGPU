@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.11 18:4:20
+ *   Last modification time of this file - 2019.12.11 20:19:9
  *
  */
 
@@ -22,8 +22,7 @@ import RedSkyBox from "../src/object3D/RedSkyBox.js";
 import RedAxis from "../src/object3D/RedAxis.js";
 import RedDirectionalLight from "../src/light/RedDirectionalLight.js";
 import RedBitmapTexture from "../src/resources/RedBitmapTexture.js";
-import RedBitmapMaterial from "../src/material/RedBitmapMaterial.js";
-import RedBitmapCubeTexture from "../src/resources/RedBitmapCubeTexture.js";
+import RedStandardMaterial from "../src/material/RedStandardMaterial.js";
 
 
 (async function () {
@@ -59,7 +58,7 @@ import RedBitmapCubeTexture from "../src/resources/RedBitmapCubeTexture.js";
 			tScene.axis = tAxis;
 			tScene.skyBox = new RedSkyBox(redGPU)
 			let tLight
-			tLight = new RedDirectionalLight('#0000ff', 0.5)
+			tLight = new RedDirectionalLight()
 			tLight.x = 10
 			tLight.y = 10
 			tLight.z = 10
@@ -87,7 +86,7 @@ import RedBitmapCubeTexture from "../src/resources/RedBitmapCubeTexture.js";
 				new RedBitmapTexture(redGPU, '../assets/specular.png'),
 				new RedBitmapTexture(redGPU, '../assets/emissive.jpg')
 			]
-			testMat_bitmap = new RedBitmapMaterial(redGPU, testTextureList[0]);
+			testMat_bitmap = new RedStandardMaterial(redGPU, testTextureList[1], testTextureList[2],testTextureList[5], testTextureList[6], testTextureList[4]);
 
 
 			let randomGeometry = function () {
