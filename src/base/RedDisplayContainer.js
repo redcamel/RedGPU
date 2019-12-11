@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.10 12:26:38
+ *   Last modification time of this file - 2019.12.11 10:43:27
  *
  */
 
@@ -21,6 +21,7 @@ export default class RedDisplayContainer extends RedUUID {
 		child instanceof RedBaseObject3D || RedUTIL.throwFunc(`addChild - only allow RedBaseObject3D Instance. - inputValue : ${child} { type : ${typeof child} }`);
 		if (this.children.includes(child)) RedUTIL.throwFunc(`${child} : Already registered object. - inputValue : ${child} { type : ${typeof child} }`);
 		else this.children.push(child)
+
 	}
 	addChildAt(child, index) {
 		child instanceof RedBaseObject3D || RedUTIL.throwFunc(`addChildAt - only allow RedBaseObject3D Instance. - inputValue : ${child}, ${index} { type : ${typeof child}, ${typeof index} }`);

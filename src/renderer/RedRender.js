@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.10 18:21:15
+ *   Last modification time of this file - 2019.12.11 10:43:27
  *
  */
 
@@ -296,13 +296,12 @@ let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty, 
 			// tMesh.calcTransform(parent);
 			// tMesh.updateUniformBuffer();
 
-
-			// tMesh.uniformBuffer_mesh.GPUBuffer.setSubData(tMesh.offsetMatrix, tMesh.matrix);
-			// tMesh.uniformBuffer_mesh.GPUBuffer.setSubData(tMesh.offsetNormalMatrix, tMesh.normalMatrix);
 			updateTargetMatrixBufferList.includes(tMesh.uniformBuffer_mesh) ? 0 : updateTargetMatrixBufferList.push(tMesh.uniformBuffer_mesh)
+			tMesh.uniformBuffer_mesh.meshFloat32Array.set(tMesh.matrix, tMesh.offsetMatrix / Float32Array.BYTES_PER_ELEMENT)
+			tMesh.uniformBuffer_mesh.meshFloat32Array.set(tMesh.normalMatrix, tMesh.offsetNormalMatrix / Float32Array.BYTES_PER_ELEMENT);
+
 		}
-		tMesh.uniformBuffer_mesh.meshFloat32Array.set(tMesh.matrix, tMesh.offsetMatrix / Float32Array.BYTES_PER_ELEMENT)
-		tMesh.uniformBuffer_mesh.meshFloat32Array.set(tMesh.normalMatrix, tMesh.offsetNormalMatrix / Float32Array.BYTES_PER_ELEMENT);
+
 
 		if (tSkinInfo) {
 			var joints = tSkinInfo['joints'];

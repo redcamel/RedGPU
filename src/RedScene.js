@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.10 19:41:33
+ *   Last modification time of this file - 2019.12.11 10:43:27
  *
  */
 
@@ -24,6 +24,7 @@ export default class RedScene extends RedDisplayContainer {
 	#ambientLight;
 	#grid;
 	#axis;
+	#skyBox
 	constructor() {
 		super()
 	}
@@ -41,6 +42,13 @@ export default class RedScene extends RedDisplayContainer {
 
 	set axis(value) {
 		this.#axis = value;
+	}
+	get skyBox() {
+		return this.#skyBox;
+	}
+
+	set skyBox(value) {
+		this.#skyBox = value;
 	}
 	get backgroundColor() {
 		return this.#backgroundColor;

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.10 17:42:12
+ *   Last modification time of this file - 2019.12.11 10:43:27
  *
  */
 
@@ -29,10 +29,12 @@ const getPool = function (redGPU, targetMesh) {
 	if (!MESH_UNIFORM_TABLE[MESH_UNIFORM_POOL_tableIndex]) {
 		uniformBuffer_mesh = new RedUniformBuffer(redGPU);
 		uniformBuffer_mesh.setBuffer(uniformBufferDescriptor_mesh);
+		uniformBuffer_mesh.float32Array = new Float32Array(RedTypeSize.mat4 * 2 * RedShareGLSL.MESH_UNIFORM_POOL_NUM / Float32Array.BYTES_PER_ELEMENT)
 		MESH_UNIFORM_TABLE[MESH_UNIFORM_POOL_tableIndex] = uniformBuffer_mesh
 	}
 	uniformBuffer_mesh = MESH_UNIFORM_TABLE[MESH_UNIFORM_POOL_tableIndex]
 	let result = {
+		float32Array : uniformBuffer_mesh.float32Array,
 		uniformBuffer_mesh: uniformBuffer_mesh,
 		offsetMatrix: RedTypeSize.mat4 * MESH_UNIFORM_POOL_index ,
 		offsetNormalMatrix: RedTypeSize.mat4 * RedShareGLSL.MESH_UNIFORM_POOL_NUM + (RedTypeSize.mat4 * MESH_UNIFORM_POOL_index) ,
@@ -96,7 +98,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 		this.#redGPU = redGPU;
 		let bufferData = getPool(redGPU, this)
 		this.uniformBuffer_mesh = bufferData.uniformBuffer_mesh
-		this.uniformBuffer_mesh.meshFloat32Array = new Float32Array(RedTypeSize.mat4 * 2 * RedShareGLSL.MESH_UNIFORM_POOL_NUM / Float32Array.BYTES_PER_ELEMENT)
+		this.uniformBuffer_mesh.meshFloat32Array = bufferData.float32Array
 		this.offsetMatrix = bufferData.offsetMatrix;
 		this.offsetNormalMatrix = bufferData.offsetNormalMatrix;
 
