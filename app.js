@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.11 17:10:40
+ *   Last modification time of this file - 2019.12.11 20:19:9
  *
  */
 
@@ -67,7 +67,7 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 			tCamera.targetView = tView // optional
 			tCamera2.targetView = tView2 // optional
 			tCamera.distance = 50
-			tCamera.speedDistance = 5
+			tCamera.speedDistance = 10
 
 			tScene.grid = tGrid;
 			tScene.axis = tAxis;
@@ -248,7 +248,7 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 				tLight.z = Math.cos(time / 750)
 				renderer.render(time, redGPU);
 				testMat_standard_diffuse_normal.emissivePower = testMat_standard_diffuse_normal_displacement.emissivePower = testMat_colorPhongTexture_normal_displacement.emissivePower = Math.abs(Math.sin(time / 250))
-				testMat_colorPhongTexture_normal_displacement.displacementPower = testMat_standard_diffuse_normal_displacement.displacementPower = Math.sin(time / 1000) * 5
+				testMat_colorPhongTexture_normal_displacement.displacementPower = testMat_standard_diffuse_normal_displacement.displacementPower = Math.sin(time / 1000) * 25
 				testMat_standard_diffuse.normalPower = testMat_standard_diffuse_normal.normalPower = testMat_standard_diffuse_normal_displacement.normalPower = Math.abs(Math.sin(time / 1000)) + 1
 				testMat_standard_diffuse.shininess = testMat_standard_diffuse.shininess = testMat_standard_diffuse_normal.shininess = Math.abs(Math.sin(time / 1000)) * 64 + 8
 				testMat_standard_diffuse.specularPower = Math.abs(Math.sin(time / 1000)) * 5

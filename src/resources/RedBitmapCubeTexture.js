@@ -2,25 +2,27 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.9 16:15:54
+ *   Last modification time of this file - 2019.12.11 20:19:9
  *
  */
 "use strict";
 import RedSampler from "./RedSampler.js";
 import RedUTIL from "../util/RedUTIL.js";
 
-let imageCanvas;
-let imageCanvasContext;
+
 let defaultSampler;
+const TABLE = new Map();
 export default class RedBitmapCubeTexture {
 	#updateList = [];
 	#GPUTexture;
 	#GPUTextureView;
-	#updateTexture = function (device, img, gpuTexture, width, height, mip, face = -1) {
-		if (!imageCanvas) {
-			imageCanvas = document.createElement('canvas');
-			imageCanvasContext = imageCanvas.getContext('2d');
-		}
+	#updateTexture = function (commandEncoder, device, img, gpuTexture, width, height, mip, face = -1) {
+		let imageCanvas;
+		let imageCanvasContext;
+		// if (!imageCanvas) {
+		imageCanvas = document.createElement('canvas');
+		imageCanvasContext = imageCanvas.getContext('2d');
+		// }
 		imageCanvas.width = width;
 		imageCanvas.height = height;
 		// imageCanvasContext.translate(0, height);
@@ -32,7 +34,7 @@ export default class RedBitmapCubeTexture {
 		if (rowPitch == width * 4) {
 			data = imageData.data;
 		} else {
-			data = new Uint8Array(rowPitch * height);
+			data = new Uint8ClampedArray(rowPitch * height);
 			let pixelsIndex = 0;
 			for (let y = 0; y < height; ++y) {
 				for (let x = 0; x < width; ++x) {
@@ -66,11 +68,10 @@ export default class RedBitmapCubeTexture {
 			height: height,
 			depth: 1
 		};
-		const commandEncoder = device.createCommandEncoder({});
-		commandEncoder.copyBufferToTexture(bufferView, textureView, textureExtent);
-		device.defaultQueue.submit([commandEncoder.finish()]);
 
+		commandEncoder.copyBufferToTexture(bufferView, textureView, textureExtent);
 		console.log('mip', mip, 'width', width, 'height', height)
+		return imageCanvas
 	};
 	#makeCubeTexture = function (redGPU, useMipmap, imgList, maxW, maxH) {
 		maxW = RedUTIL.nextHighestPowerOfTwo(maxW);
@@ -90,23 +91,27 @@ export default class RedBitmapCubeTexture {
 			usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.SAMPLED
 		};
 		const gpuTexture = redGPU.device.createTexture(textureDescriptor);
+		let result
+		const commandEncoder = redGPU.device.createCommandEncoder({});
+
 		imgList.forEach((img, face) => {
 			let i = 1, len = this.mipMaps;
 			let faceWidth = maxW;
 			let faceHeight = maxH;
-			this.#updateTexture(redGPU.device, img, gpuTexture, faceWidth, faceHeight, 0, face);
+			result = this.#updateTexture(commandEncoder, redGPU.device, img, gpuTexture, faceWidth, faceHeight, 0, face);
 			if (useMipmap) {
 				for (i; i <= len; i++) {
 					faceWidth = Math.max(Math.floor(faceWidth / 2), 1);
 					faceHeight = Math.max(Math.floor(faceHeight / 2), 1);
-					this.#updateTexture(redGPU.device, img, gpuTexture, faceWidth, faceHeight, i, face)
+					result = this.#updateTexture(commandEncoder, redGPU.device, result, gpuTexture, faceWidth, faceHeight, i, face)
 				}
 			}
 		});
+		redGPU.device.defaultQueue.submit([commandEncoder.finish()]);
 
 		this.resolve(gpuTexture)
 	};
-	constructor(redGPU, srcList,sampler, useMipmap = true) {
+	constructor(redGPU, srcList, sampler, useMipmap = true) {
 		// 귀찮아서 텍스쳐 맹그는 놈은 들고옴
 		if (!defaultSampler) defaultSampler = new RedSampler(redGPU);
 		this.sampler = sampler || defaultSampler;
@@ -114,13 +119,17 @@ export default class RedBitmapCubeTexture {
 		let maxH = 0;
 		let loadCount = 0;
 		let imgList = [];
+		const mapKey = srcList + this.sampler.string + useMipmap;
+		console.log('mapKey', mapKey);
+		if (TABLE.get(mapKey)) {
+			console.log('캐시된 녀석을 던집', mapKey, TABLE.get(mapKey));
+			return TABLE.get(mapKey);
+		}
+		TABLE.set(mapKey, this);
 		srcList.forEach((src, face) => {
 			if (!src) {
 				console.log('src')
 			} else {
-				const mapKey = src + this.sampler.string + useMipmap;
-				console.log('mapKey', mapKey);
-
 				const img = new Image();
 				img.src = src;
 				img.crossOrigin = 'anonymous';
@@ -133,8 +142,8 @@ export default class RedBitmapCubeTexture {
 					loadCount++;
 					maxW = Math.max(maxW, img.width);
 					maxH = Math.max(maxH, img.height);
-					if(maxW>1024) maxW = 1024;
-					if(maxH>1024) maxH = 1024;
+					if (maxW > 1024) maxW = 1024;
+					if (maxH > 1024) maxH = 1024;
 					if (loadCount == 6) this.#makeCubeTexture(redGPU, useMipmap, imgList, maxW, maxH)
 				}
 			}
@@ -165,10 +174,12 @@ export default class RedBitmapCubeTexture {
 			}
 		);
 		console.log('this.#updateList', this.#updateList);
-		this.#updateList.forEach(data => {
-			console.log(data[1]);
+		let i = this.#updateList.length;
+		let data;
+		while (i--) {
+			data = this.#updateList[i]
 			data[0][data[1]] = this
-		});
+		}
 		this.#updateList.length = 0
 	}
 
