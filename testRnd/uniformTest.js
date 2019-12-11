@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.10 20:8:18
+ *   Last modification time of this file - 2019.12.11 10:43:27
  *
  */
 
@@ -17,6 +17,7 @@ import RedMesh from "../src/object3D/RedMesh.js";
 import RedColorPhongMaterial from "../src/material/RedColorPhongMaterial.js";
 import RedSphere from "../src/primitives/RedSphere.js";
 import RedAmbientLight from "../src/light/RedAmbientLight.js";
+import RedColorMaterial from "../src/material/RedColorMaterial.js";
 
 (async function () {
 	const cvs = document.createElement('canvas');
@@ -68,12 +69,20 @@ import RedAmbientLight from "../src/light/RedAmbientLight.js";
 			let len = 100
 			for (i; i < len; i++) {
 				let tMesh = new RedMesh(redGPU, new RedSphere(redGPU,0.5,16,16,16), new RedColorPhongMaterial(redGPU))
-				tMesh.x = Math.random() * 10 - 5
-				tMesh.y = Math.random() * 10 - 5
-				tMesh.z = Math.random() * 10 - 5
+				// tMesh.x = Math.random() * 10 - 5
+				// tMesh.y = Math.random() * 10 - 5
+				// tMesh.z = Math.random() * 10 - 5
+				tMesh.x = i * 1.1
+				tMesh.y = i * 1.1
 
 				tScene.addChild(tMesh)
 			}
+
+			setTimeout(function(){
+				let tMesh = new RedMesh(redGPU, new RedSphere(redGPU,0.5,16,16,16), new RedColorMaterial(redGPU))
+				tMesh.x = 1
+				tScene.addChild(tMesh)
+			},2000)
 
 			let renderer = new RedRender();
 			let render = function (time) {
