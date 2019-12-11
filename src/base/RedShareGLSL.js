@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.10 19:41:33
+ *   Last modification time of this file - 2019.12.11 16:17:46
  *
  */
 
@@ -11,6 +11,7 @@ export default class RedShareGLSL {
 	static MESH_UNIFORM_POOL_NUM = 50
 	static MAX_DIRECTIONAL_LIGHT = 8;
 	static MAX_POINT_LIGHT = 200;
+	static MAX_SPOT_LIGHT = 200;
 	static SET_INDEX_SystemUniforms_vertex = 0;
 	static SET_INDEX_SystemUniforms_fragment = 1;
 	static SET_INDEX_MeshUniforms = 2;
@@ -37,6 +38,7 @@ export default class RedShareGLSL {
 		systemUniforms: `
 		const int MAX_DIRECTIONAL_LIGHT = ${RedShareGLSL.MAX_DIRECTIONAL_LIGHT};
 		const int MAX_POINT_LIGHT =  ${RedShareGLSL.MAX_POINT_LIGHT};
+		const int MAX_SPOT_LIGHT =  ${RedShareGLSL.MAX_SPOT_LIGHT};
 		struct DirectionalLight {
 	        vec4 color;
 	        vec3 position;
@@ -52,12 +54,21 @@ export default class RedShareGLSL {
 	        vec4 color;
 	        float intensity;
 		};
+		struct SpotLight {
+	        vec4 color;
+	        vec3 position;
+	        float intensity;
+	        float cutoff;
+	        float exponent;
+		};
 		layout( set =  ${RedShareGLSL.SET_INDEX_SystemUniforms_fragment}, binding = 0 ) uniform SystemUniforms {
 	        float directionalLightCount;
 	        float pointLightCount;
+	        float spotLightCount;
 	        DirectionalLight directionalLightList[MAX_DIRECTIONAL_LIGHT];
 	        PointLight pointLightList[MAX_POINT_LIGHT];
 	        AmbientLight ambientLight;	        
+	        SpotLight spotLightList[MAX_SPOT_LIGHT];
 	        vec3 cameraPosition;
 	        vec2 resolution;
         } systemUniforms;
@@ -134,8 +145,59 @@ export default class RedShareGLSL {
 				    intensity = lightInfo.intensity;
 				    if(lambertTerm > 0.0){
 				        attenuation = clamp(1.0 - distanceLength*distanceLength/(lightInfo.radius*lightInfo.radius), 0.0, 1.0); 
-				        attenuation *= attenuation;
+			            attenuation *= attenuation;
 						ld += lightColor * diffuseColor * lambertTerm * intensity * attenuation;
+						specular = pow( max(dot(reflect(L, N), -L), 0.0), shininess) * specularPower * specularTextureValue;
+						ls +=  specularColor * specular * intensity * attenuation * lightColor.a;
+				    }
+			    }
+		    }
+		    return ld + ls;
+		}
+		vec4 calcSpotLight(
+            vec4 diffuseColor,
+            vec3 N,		
+			float loopNum,
+			SpotLight[MAX_SPOT_LIGHT] lightList,
+			float shininess,
+			float specularPower,
+			vec4 specularColor,
+			float specularTextureValue,
+			vec3 vVertexPosition
+		){
+			vec4 ld = vec4(0.0, 0.0, 0.0, 1.0);
+		    vec4 ls = vec4(0.0, 0.0, 0.0, 1.0);
+		    
+		    vec3 L;	
+		    vec4 lightColor;
+		    
+		    float lambertTerm;
+		    float intensity;
+		    float specular;
+		  
+		    SpotLight lightInfo;
+	        float distanceLength ;
+		    float attenuation;
+		    for(int i = 0; i< loopNum; i++){
+		        lightInfo = lightList[i];
+		        L = -lightInfo.position + vVertexPosition;
+			    distanceLength = abs(length(L));
+			    vec3 spotDirection = vec3(0,-1,0);
+			    L = normalize(L);	
+				float spotEffect = dot(normalize(spotDirection),L);
+                lightColor = lightInfo.color;
+			    lambertTerm = dot(N,-L);
+		        float limit = 20;
+		        float inLight = step(cos(limit * 3.14/180), spotEffect);
+                float light = inLight * lambertTerm;
+			    if(lambertTerm > 0.0 ){			     
+				    if(spotEffect > cos(limit * 3.14/180) ){
+				        spotEffect = pow(spotEffect, lightInfo.exponent);
+			            attenuation = 1.0/(.01 + .01*distanceLength +.02*distanceLength*distanceLength);
+						attenuation *= spotEffect * light;
+					    intensity = lightInfo.intensity;					 
+				     
+						ld += lightColor * diffuseColor * intensity * attenuation;
 						specular = pow( max(dot(reflect(L, N), -L), 0.0), shininess) * specularPower * specularTextureValue;
 						ls +=  specularColor * specular * intensity * attenuation * lightColor.a;
 				    }
