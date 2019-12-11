@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.11 10:59:54
+ *   Last modification time of this file - 2019.12.11 16:17:47
  *
  */
 
@@ -137,12 +137,11 @@ let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty, 
 
 				///////////////////////////////////////
 
-				passEncoder.setPipeline(tPipeline.GPURenderPipeline);
-				if (tViewRect[2] - tX > 0 && tViewRect[3] - tY > 0) {
-
+				// if (tViewRect[2] - tX > 0 && tViewRect[3] - tY > 0) {
+					passEncoder.setPipeline(tPipeline.GPURenderPipeline);
+					passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹는 매그룹마다 다르니 또 업데이트 해줘야함 -_-
 					if (prevMaterial_UUID != tMaterial._UUID) passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
 					prevMaterial_UUID = tMaterial._UUID;
-					passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹는 매그룹마다 다르니 또 업데이트 해줘야함 -_-
 					if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
 						passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
 						prevVertexBuffer_UUID = tGeometry.interleaveBuffer._UUID
@@ -155,7 +154,7 @@ let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty, 
 						passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
 					} else passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
 
-				}
+				// }
 				tMesh._prevMaterialUUID = tMaterial._UUID;
 			}
 
@@ -518,7 +517,6 @@ export default class RedRender {
 		for (i; i < len; i++) this.#renderView(redGPU, redGPU.viewList[i])
 		RedGLTFLoader.animationLooper(time);
 
-		// tMesh.uniformBuffer_mesh.GPUBuffer.setSubData(tMesh.offsetMatrix, tMesh.matrix);
-		// console.log(cacheTable)
+
 	}
 }

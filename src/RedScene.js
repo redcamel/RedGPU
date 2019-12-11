@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.11 10:59:54
+ *   Last modification time of this file - 2019.12.11 16:17:47
  *
  */
 
@@ -13,6 +13,7 @@ import RedDirectionalLight from "./light/RedDirectionalLight.js";
 import RedPointLight from "./light/RedPointLight.js";
 import RedShareGLSL from "./base/RedShareGLSL.js";
 import RedAmbientLight from "./light/RedAmbientLight.js";
+import RedSpotLight from "./light/RedSpotLight.js";
 
 export default class RedScene extends RedDisplayContainer {
 
@@ -21,6 +22,7 @@ export default class RedScene extends RedDisplayContainer {
 	#backgroundColorRGBA = [0, 0, 0, this.#backgroundColorAlpha];
 	#directionalLightList = [];
 	#pointLightList = [];
+	#spotLightList = [];
 	#ambientLight;
 	#grid;
 	#axis;
@@ -81,6 +83,10 @@ export default class RedScene extends RedDisplayContainer {
 	get ambientLight() {
 		return this.#ambientLight
 	}
+	get spotLightList() {
+		return this.#spotLightList
+	}
+
 
 
 	addLight(light) {
@@ -93,11 +99,15 @@ export default class RedScene extends RedDisplayContainer {
 				if (this.#pointLightList.length == RedShareGLSL.MAX_POINT_LIGHT) RedUTIL.throwFunc(`addLight : RedPointLight - Up to ${RedShareGLSL.MAX_POINT_LIGHT} are allowed.`);
 				this.#pointLightList.push(light);
 				break;
+			case RedSpotLight:
+				if (this.#spotLightList.length == RedShareGLSL.MAX_SPOT_LIGHT) RedUTIL.throwFunc(`addLight : spotLightList - Up to ${RedShareGLSL.MAX_SPOT_LIGHT} are allowed.`);
+				this.#spotLightList.push(light);
+				break;
 			case RedAmbientLight:
 				this.#ambientLight = light
 				break;
 			default:
-				RedUTIL.throwFunc(`addLight : only allow RedBaseObject3D Instance - inputValue : ${light} { type : ${typeof light} }`);
+				RedUTIL.throwFunc(`addLight : only allow RedBaseLight Instance - inputValue : ${light} { type : ${typeof light} }`);
 		}
 	}
 
@@ -112,16 +122,21 @@ export default class RedScene extends RedDisplayContainer {
 				tIndex = this.#pointLightList.indexOf(light);
 				if (tIndex > -1) this.#pointLightList.splice(tIndex, 1);
 				break;
+			case RedSpotLight:
+				tIndex = this.#spotLightList.indexOf(light);
+				if (tIndex > -1) this.#spotLightList.splice(tIndex, 1);
+				break;
 			case RedAmbientLight:
 				this.#ambientLight = null
 				break;
 			default:
-				RedUTIL.throwFunc(`removeLight : only allow RedBaseObject3D Instance - inputValue : ${light} { type : ${typeof light} }`);
+				RedUTIL.throwFunc(`removeLight : only allow RedBaseLight Instance - inputValue : ${light} { type : ${typeof light} }`);
 		}
 	}
 	removeLightAll() {
 		this.#directionalLightList.length = 0;
 		this.#pointLightList.length = 0;
+		this.#spotLightList.length = 0;
 		this.#ambientLight = null
 	}
 

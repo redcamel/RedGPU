@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.11 10:59:54
+ *   Last modification time of this file - 2019.12.11 16:17:47
  *
  */
 
@@ -93,11 +93,14 @@ export default class RedView {
 	};
 	#makeSystemUniformInfo_fragment = function (device) {
 		let uniformBufferSize =
-			RedTypeSize.float4 + // directionalLightCount,pointLightCount
+			RedTypeSize.float4 + // directionalLightCount,pointLightCount, spotLightCount
 			RedTypeSize.float4 * 2 * RedShareGLSL.MAX_DIRECTIONAL_LIGHT + // directionalLight
 			RedTypeSize.float4 * 3 * RedShareGLSL.MAX_POINT_LIGHT + // pointLight
-			RedTypeSize.float4 * RedTypeSize.float4+ // ambientLight
-			RedTypeSize.float4+  // cameraPosition
+			RedTypeSize.float4 * RedTypeSize.float4 + // ambientLight
+			RedTypeSize.float4 * 3 * RedShareGLSL.MAX_SPOT_LIGHT + // spotLight
+
+
+			RedTypeSize.float4 +  // cameraPosition
 			RedTypeSize.float2 // resolution
 		;
 		const uniformBufferDescriptor = {
@@ -211,7 +214,7 @@ export default class RedView {
 		// update systemUniformInfo_fragment /////////////////////////////////////////////////////////////////////////////////////////////////
 		offset = 0;
 		// update light count
-		this.#systemUniformInfo_fragment_data.set([this.scene.directionalLightList.length, this.scene.pointLightList.length], offset);
+		this.#systemUniformInfo_fragment_data.set([this.scene.directionalLightList.length, this.scene.pointLightList.length, this.scene.spotLightList.length], offset);
 		i = 0;
 		// update directionalLightList
 		offset = RedTypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
@@ -241,11 +244,27 @@ export default class RedView {
 			}
 		}
 		offset = (RedTypeSize.float4 + RedTypeSize.float4 * 2 * RedShareGLSL.MAX_DIRECTIONAL_LIGHT + RedTypeSize.float4 * 3 * RedShareGLSL.MAX_POINT_LIGHT) / Float32Array.BYTES_PER_ELEMENT;
+		// update ambientLight
 		let tLight = this.scene.ambientLight;
-		this.#systemUniformInfo_fragment_data.set(tLight ? tLight.colorRGBA : [0,0,0,0], offset);
+		this.#systemUniformInfo_fragment_data.set(tLight ? tLight.colorRGBA : [0, 0, 0, 0], offset);
 		offset += RedTypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
 		this.#systemUniformInfo_fragment_data.set([tLight ? tLight.intensity : 1], offset);
 		offset += RedTypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
+		// update spotLightList
+		i = 0;
+		len = this.scene.spotLightList.length;
+		for (i; i < len; i++) {
+			let tLight = this.scene.spotLightList[i];
+			if (tLight) {
+				this.#systemUniformInfo_fragment_data.set(tLight.colorRGBA, offset);
+				offset += RedTypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
+				this.#systemUniformInfo_fragment_data.set([tLight.x, tLight.y, tLight.z, tLight.intensity], offset);
+				offset += RedTypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
+				this.#systemUniformInfo_fragment_data.set([tLight.cutoff, tLight.exponent], offset);
+				offset += RedTypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
+			}
+		}
+		offset = (RedTypeSize.float4 + RedTypeSize.float4 * 2 * RedShareGLSL.MAX_DIRECTIONAL_LIGHT + RedTypeSize.float4 * 3 * RedShareGLSL.MAX_POINT_LIGHT + RedTypeSize.float4 * 3 * RedShareGLSL.MAX_SPOT_LIGHT + RedTypeSize.float4 * 2) / Float32Array.BYTES_PER_ELEMENT;
 		// update camera position
 		this.#systemUniformInfo_fragment_data.set([this.camera.x, this.camera.y, this.camera.z], offset);
 		offset += RedTypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
