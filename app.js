@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.11 17:10:40
+ *   Last modification time of this file - 2019.12.11 18:4:20
  *
  */
 
@@ -67,7 +67,7 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 			tCamera.targetView = tView // optional
 			tCamera2.targetView = tView2 // optional
 			tCamera.distance = 50
-			tCamera.speedDistance = 5
+			tCamera.speedDistance = 10
 
 			tScene.grid = tGrid;
 			tScene.axis = tAxis;

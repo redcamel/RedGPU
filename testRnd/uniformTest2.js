@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.11 17:16:51
+ *   Last modification time of this file - 2019.12.11 18:4:20
  *
  */
 
@@ -18,12 +18,12 @@ import RedView from "../src/RedView.js";
 import RedColorMaterial from "../src/material/RedColorMaterial.js";
 import RedGrid from "../src/object3D/RedGrid.js";
 import RedObitController from "../src/controller/RedObitController.js";
-import RedPointLight from "../src/light/RedPointLight.js";
 import RedSkyBox from "../src/object3D/RedSkyBox.js";
 import RedAxis from "../src/object3D/RedAxis.js";
 import RedDirectionalLight from "../src/light/RedDirectionalLight.js";
-import RedPostEffect_Bloom from "../src/postEffect/bloom/RedPostEffect_Bloom.js";
-import RedPostEffect_DoF from "../src/postEffect/dof/RedPostEffect_DoF.js";
+import RedBitmapTexture from "../src/resources/RedBitmapTexture.js";
+import RedBitmapMaterial from "../src/material/RedBitmapMaterial.js";
+import RedBitmapCubeTexture from "../src/resources/RedBitmapCubeTexture.js";
 
 
 (async function () {
@@ -52,7 +52,6 @@ import RedPostEffect_DoF from "../src/postEffect/dof/RedPostEffect_DoF.js";
 			tView = new RedView(this, tScene, tCamera)
 
 
-
 			tCamera.targetView = tView // optional
 			tCamera.speedDistance = 5
 
@@ -66,11 +65,29 @@ import RedPostEffect_DoF from "../src/postEffect/dof/RedPostEffect_DoF.js";
 			tLight.z = 10
 			tScene.addLight(tLight)
 
+			// tScene.skyBox = new RedSkyBox(redGPU, new RedBitmapCubeTexture(redGPU, [
+			// 	'../assets/cubemap/SwedishRoyalCastle/px.jpg',
+			// 	'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
+			// 	'../assets/cubemap/SwedishRoyalCastle/py.jpg',
+			// 	'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
+			// 	'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
+			// 	'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
+			// ]))
+
 			redGPU.addView(tView)
 
 
-
 			testMat_color = new RedColorMaterial(redGPU, '#ffff12');
+			let testTextureList = [
+				new RedBitmapTexture(redGPU, '../assets/UV_Grid_Sm.jpg'),
+				new RedBitmapTexture(redGPU, '../assets/Brick03_col.jpg'),
+				new RedBitmapTexture(redGPU, '../assets/Brick03_nrm.jpg'),
+				new RedBitmapTexture(redGPU, '../assets/crate.png'),
+				new RedBitmapTexture(redGPU, '../assets/Brick03_disp.jpg'),
+				new RedBitmapTexture(redGPU, '../assets/specular.png'),
+				new RedBitmapTexture(redGPU, '../assets/emissive.jpg')
+			]
+			testMat_bitmap = new RedBitmapMaterial(redGPU, testTextureList[0]);
 
 
 			let randomGeometry = function () {
@@ -86,7 +103,7 @@ import RedPostEffect_DoF from "../src/postEffect/dof/RedPostEffect_DoF.js";
 				let testMesh = new RedMesh(
 					redGPU,
 					randomGeometry(),
-					testMat_color
+					testMat_bitmap
 				);
 				testMesh.x = Math.random() * 3000 - 1500;
 				testMesh.y = Math.random() * 3000 - 1500;
