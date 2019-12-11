@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.11 10:43:27
+ *   Last modification time of this file - 2019.12.11 10:59:54
  *
  */
 
@@ -350,15 +350,15 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 				tView.setSize('100%', '100%')
 			}
 		}
-		tFolder.add(viewTestData, 'setLocationTest1').name('setLocation(0,0)');
-		tFolder.add(viewTestData, 'setLocationTest2').name('setLocation(100,100)');
-		tFolder.add(viewTestData, 'setLocationTest3').name('setLocation(50%,100)');
-		tFolder.add(viewTestData, 'setLocationTest4').name('setLocation(40%,40%)');
-		tFolder.add(viewTestData, 'setSizeTest1').name('setSize(200,200)');
-		tFolder.add(viewTestData, 'setSizeTest2').name('setSize(50%,100%)');
-		tFolder.add(viewTestData, 'setSizeTest3').name('setSize(50%,50%)');
-		tFolder.add(viewTestData, 'setSizeTest4').name('setSize(20%,20%)');
-		tFolder.add(viewTestData, 'setSizeTest5').name('setSize(100%,100%)');
+		// tFolder.add(viewTestData, 'setLocationTest1').name('setLocation(0,0)');
+		// tFolder.add(viewTestData, 'setLocationTest2').name('setLocation(100,100)');
+		// tFolder.add(viewTestData, 'setLocationTest3').name('setLocation(50%,100)');
+		// tFolder.add(viewTestData, 'setLocationTest4').name('setLocation(40%,40%)');
+		// tFolder.add(viewTestData, 'setSizeTest1').name('setSize(200,200)');
+		// tFolder.add(viewTestData, 'setSizeTest2').name('setSize(50%,100%)');
+		// tFolder.add(viewTestData, 'setSizeTest3').name('setSize(50%,50%)');
+		// tFolder.add(viewTestData, 'setSizeTest4').name('setSize(20%,20%)');
+		// tFolder.add(viewTestData, 'setSizeTest5').name('setSize(100%,100%)');
 
 		let testUI = new dat.GUI({});
 		let testData = {
