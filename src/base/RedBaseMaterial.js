@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.9 17:49:5
+ *   Last modification time of this file - 2019.12.11 18:48:37
  *
  */
 
@@ -23,6 +23,7 @@ let makeUniformBindLayout = function (redGPU, uniformsBindGroupLayoutDescriptor)
 	}
 	return uniformsBindGroupLayout
 };
+let RedBaseMaterial_callNum = 0
 export default class RedBaseMaterial extends RedUUID {
 	get redGPU() {
 		return this.#redGPU;
@@ -148,6 +149,8 @@ export default class RedBaseMaterial extends RedUUID {
 	searchModules() {
 		console.log(this, this.constructor, this.constructor.name);
 		console.log(this.constructor.PROGRAM_OPTION_LIST);
+		RedBaseMaterial_callNum++
+		console.log('RedBaseMaterial_callNum', RedBaseMaterial_callNum)
 		let tKey = [this.constructor.name];
 		let i = 0, len = this.constructor.PROGRAM_OPTION_LIST.length;
 		for (i; i < len; i++) {
