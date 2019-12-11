@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.11 20:19:9
+ *   Last modification time of this file - 2019.12.11 21:5:50
  *
  */
 
@@ -60,7 +60,7 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 
 			tView = new RedView(this, tScene, tCamera)
 			tView2 = new RedView(this, tScene2, tCamera2)
-			tView2.setSize(300, 300)
+			tView2.setSize(150, 150)
 			tView2.setLocation(0, 0)
 
 

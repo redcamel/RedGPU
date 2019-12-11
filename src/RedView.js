@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.11 20:19:9
+ *   Last modification time of this file - 2019.12.11 21:5:50
  *
  */
 
@@ -313,8 +313,8 @@ export default class RedView {
 		return [
 			typeof this.x == 'number' ? this.x : parseInt(this.x) / 100 * redGPU.canvas.width,
 			typeof this.y == 'number' ? this.y : parseInt(this.y) / 100 * redGPU.canvas.height,
-			typeof this.width == 'number' ? this.width : parseInt(this.width) / 100 * redGPU.canvas.width,
-			typeof this.height == 'number' ? this.height : parseInt(this.height) / 100 * redGPU.canvas.height
+			typeof this.width == 'number' ? this.width : parseInt(parseInt(this.width) / 100 * redGPU.canvas.width),
+			typeof this.height == 'number' ? this.height : parseInt(parseInt(this.height) / 100 * redGPU.canvas.height)
 		]
 	}
 

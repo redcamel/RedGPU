@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.11 20:19:9
+ *   Last modification time of this file - 2019.12.11 21:5:50
  *
  */
 
@@ -131,8 +131,8 @@ let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty, 
 				resultPosition.w = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
 				resultPosition.x = resultPosition.x * 0.5 / resultPosition.w + 0.5;
 				resultPosition.y = resultPosition.y * 0.5 / resultPosition.w + 0.5;
-				tX = (tViewRect[0] + resultPosition.x * tViewRect[2])
-				tY = (tViewRect[1] + (1 - resultPosition.y) * tViewRect[3])
+				tX = (resultPosition.x * tViewRect[2])
+				tY = ((1 - resultPosition.y) * tViewRect[3])
 
 
 				///////////////////////////////////////
