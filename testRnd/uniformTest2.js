@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.12 14:28:6
+ *   Last modification time of this file - 2019.12.12 15:9:7
  *
  */
 
@@ -87,8 +87,8 @@ import RedStandardMaterial from "../src/material/RedStandardMaterial.js";
 				new RedBitmapTexture(redGPU, '../assets/emissive.jpg')
 			]
 			// testMat_bitmap = new RedStandardMaterial(redGPU, testTextureList[1], testTextureList[2],testTextureList[5], testTextureList[6], testTextureList[4]);
-			// testMat_bitmap = new RedStandardMaterial(redGPU, testTextureList[1], testTextureList[2],testTextureList[5], testTextureList[6], testTextureList[4]);
-			testMat_bitmap = new RedStandardMaterial(redGPU, testTextureList[0], testTextureList[2],testTextureList[5], testTextureList[6], testTextureList[4]);
+			testMat_bitmap = new RedStandardMaterial(redGPU, testTextureList[1], testTextureList[2],testTextureList[5], testTextureList[6], testTextureList[4]);
+			// testMat_bitmap = new RedStandardMaterial(redGPU, testTextureList[0]);
 
 
 			let randomGeometry = function () {
