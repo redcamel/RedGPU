@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.6 19:2:34
+ *   Last modification time of this file - 2019.12.12 18:13:13
  *
  */
 
@@ -28,7 +28,7 @@ export default class RedGeometry {
 			);
 			arrayStride += v['stride'];
 		});
-		attributes.forEach(function(v){console.log(v)});
+		// attributes.forEach(function(v){console.log(v)});
 		this.vertexState = {
 			indexFormat: 'uint32',
 			vertexBuffers: [

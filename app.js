@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.11 21:5:50
+ *   Last modification time of this file - 2019.12.12 18:13:13
  *
  */
 
@@ -71,7 +71,6 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 
 			tScene.grid = tGrid;
 			tScene.axis = tAxis;
-			tScene.skyBox = new RedSkyBox(redGPU)
 			let tLight
 			tLight = new RedDirectionalLight('#0000ff', 0.5)
 			tLight.x = 10
@@ -117,6 +116,7 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 				new RedBitmapTexture(redGPU, 'assets/specular.png'),
 				new RedBitmapTexture(redGPU, 'assets/emissive.jpg')
 			];
+
 			let testCubeTexture = new RedBitmapCubeTexture(redGPU, [
 				'./assets/cubemap/SwedishRoyalCastle/px.jpg',
 				'./assets/cubemap/SwedishRoyalCastle/nx.jpg',

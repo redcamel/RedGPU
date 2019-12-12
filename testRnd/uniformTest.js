@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.11 10:59:54
+ *   Last modification time of this file - 2019.12.12 18:13:13
  *
  */
 
@@ -82,7 +82,7 @@ import RedColorMaterial from "../src/material/RedColorMaterial.js";
 				let tMesh = new RedMesh(redGPU, new RedSphere(redGPU,0.5,16,16,16), new RedColorMaterial(redGPU))
 				tMesh.x = 1
 				tScene.addChild(tMesh)
-			},2000)
+			},500)
 
 			let renderer = new RedRender();
 			let render = function (time) {
