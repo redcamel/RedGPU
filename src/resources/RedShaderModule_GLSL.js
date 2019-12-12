@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.12 18:13:13
+ *   Last modification time of this file - 2019.12.12 18:53:51
  *
  */
 const rootMap = {
@@ -22,7 +22,6 @@ const parseSource = function (tSource, replaceList) {
 		let tReg = new RegExp(`\/\/\#RedGPU\#${replaceList[i]}\#`, 'gi');
 		tSource = tSource.replace(tReg, '')
 	}
-
 	console.timeEnd('searchTime :' + replaceList)
 	return tSource
 }
@@ -32,28 +31,9 @@ export default class RedShaderModule_GLSL {
 	shaderModuleMap;
 	GPUShaderModule;
 	currentKey;
-	constructor(redGPU, type, materialClass, source, programOptionList = []) {
+	constructor(redGPU, type, materialClass, source, ) {
 		if (!rootMap[type][materialClass.name]) {
 			let tSourceMap = new Map();
-			programOptionList.sort();
-			// let parseSource = function (optionList) {
-			// 	let i = optionList.length;
-			// 	while(i--){
-			// 		let key = optionList[i]
-			// 		let newList = optionList.concat();
-			// 		let tSource = source;
-			// 		newList.forEach(function (replaceKey) {
-			// 			let tReg = new RegExp(`\/\/\#RedGPU\#${replaceKey}\#`, 'gi');
-			// 			tSource = tSource.replace(tReg, '')
-			// 		});
-			// 		tSourceMap.set([materialClass.name, ...newList].join('_'), tSource);
-			// 		newList.splice(i, 1);
-			// 		parseSource(newList);
-			// 	}
-			//
-			//
-			// };
-			// parseSource(programOptionList);
 			tSourceMap.set(materialClass.name, source);
 			rootMap[type][materialClass.name] = tSourceMap;
 		}
