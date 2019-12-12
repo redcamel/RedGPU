@@ -2,14 +2,15 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.11 20:19:9
+ *   Last modification time of this file - 2019.12.12 14:28:6
  *
  */
 "use strict";
 import RedSampler from "./RedSampler.js";
 import RedUTIL from "../util/RedUTIL.js";
 
-
+let imageCanvas;
+let imageCanvasContext;
 let defaultSampler;
 const TABLE = new Map();
 export default class RedBitmapTexture {
@@ -17,69 +18,73 @@ export default class RedBitmapTexture {
 	#GPUTexture;
 	#GPUTextureView;
 	#updateTexture = function (commandEncoder, device, img, gpuTexture, width, height, mip, face = -1) {
-		let imageCanvas;
-		let imageCanvasContext;
-		// if (!imageCanvas) {
-		imageCanvas = document.createElement('canvas',);
-		imageCanvasContext = imageCanvas.getContext('2d');
-		// }
-		imageCanvas.width = width;
-		imageCanvas.height = height;
-		// imageCanvasContext.translate(0, height);
-		// imageCanvasContext.scale(1, -1);
-		imageCanvasContext.drawImage(img, 0, 0, width, height);
-		const imageData = imageCanvasContext.getImageData(0, 0, width, height);
-		let data = null;
-		const rowPitch = Math.ceil(width * 4 / 256) * 256;
-		if (rowPitch == width * 4) {
-			data = imageData.data;
-		} else {
-			data = new Uint8ClampedArray(rowPitch * height);
-			let pixelsIndex = 0;
-			for (let y = 0; y < height; ++y) {
-				for (let x = 0; x < width; ++x) {
-					let i = x * 4 + y * rowPitch;
-					data[i] = imageData.data[pixelsIndex];
-					data[i + 1] = imageData.data[pixelsIndex + 1];
-					data[i + 2] = imageData.data[pixelsIndex + 2];
-					data[i + 3] = imageData.data[pixelsIndex + 3];
-					pixelsIndex += 4;
+		let promise = new Promise(((resolve, reject) => {
+			if (!imageCanvas) {
+				imageCanvas = document.createElement('canvas',);
+				imageCanvasContext = imageCanvas.getContext('2d');
+			}
+			imageCanvas.width = width;
+			imageCanvas.height = height;
+			// imageCanvasContext.translate(0, height);
+			// imageCanvasContext.scale(1, -1);
+			imageCanvasContext.drawImage(img, 0, 0, width, height);
+			const imageData = imageCanvasContext.getImageData(0, 0, width, height);
+
+			let data;
+			const rowPitch = Math.ceil(width * 4 / 256) * 256;
+			if (rowPitch == width * 4) {
+				data = imageData.data;
+				console.log('여기니')
+			} else {
+
+				data = new Uint8ClampedArray(rowPitch * height);
+				let pixelsIndex = 0;
+				for (let y = 0; y < height; ++y) {
+					for (let x = 0; x < width; ++x) {
+						let i = x * 4 + y * rowPitch;
+						data[i] = imageData.data[pixelsIndex];
+						data[i + 1] = imageData.data[pixelsIndex + 1];
+						data[i + 2] = imageData.data[pixelsIndex + 2];
+						data[i + 3] = imageData.data[pixelsIndex + 3];
+						pixelsIndex += 4;
+					}
 				}
 			}
-		}
-		const textureDataBuffer = device.createBuffer({
-			size: data.byteLength + data.byteLength % 4,
-			usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC,
-		});
-		textureDataBuffer.setSubData(0, data);
-		const bufferView = {
-			buffer: textureDataBuffer,
-			rowPitch: rowPitch,
-			imageHeight: height,
-		};
-		const textureView = {
-			texture: gpuTexture,
-			mipLevel: mip,
-			arrayLayer: Math.max(face, 0),
-		};
 
-		const textureExtent = {
-			width: width,
-			height: height,
-			depth: 1
-		};
+			const textureDataBuffer = device.createBuffer({
+				size: data.byteLength + data.byteLength % 4,
+				usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC,
+			});
+			textureDataBuffer.setSubData(0, data);
+			const bufferView = {
+				buffer: textureDataBuffer,
+				rowPitch: rowPitch,
+				imageHeight: height,
+			};
+			const textureView = {
+				texture: gpuTexture,
+				mipLevel: mip,
+				arrayLayer: Math.max(face, 0),
+			};
 
-		commandEncoder.copyBufferToTexture(bufferView, textureView, textureExtent);
+			const textureExtent = {
+				width: width,
+				height: height,
+				depth: 1
+			};
 
+			commandEncoder.copyBufferToTexture(bufferView, textureView, textureExtent);
+			console.log('mip', mip, 'width', width, 'height', height)
+			resolve()
+		}))
 
-		console.log('mip', mip, 'width', width, 'height', height)
-		return imageCanvas
+		return promise
 	};
 	constructor(redGPU, src, sampler, useMipmap = true) {
 		// 귀찮아서 텍스쳐 맹그는 놈은 들고옴
 		if (!defaultSampler) defaultSampler = new RedSampler(redGPU);
 		this.sampler = sampler || defaultSampler;
-		let self = this;
+
 		if (!src) {
 			console.log('src')
 		} else {
@@ -96,8 +101,7 @@ export default class RedBitmapTexture {
 				console.log(v)
 			};
 			TABLE.set(mapKey, this);
-
-			img.onload = _ => {
+			img.decode().then(_ => {
 				let tW = img.width;
 				let tH = img.height;
 				tW = RedUTIL.nextHighestPowerOfTwo(tW);
@@ -123,21 +127,24 @@ export default class RedBitmapTexture {
 				let faceWidth = tW;
 				let faceHeight = tH;
 
-				let result
+				let result = []
 				const commandEncoder = redGPU.device.createCommandEncoder({});
-				result = this.#updateTexture(commandEncoder, redGPU.device, img, gpuTexture, faceWidth, faceHeight, 0);
+				result.push(this.#updateTexture(commandEncoder, redGPU.device, img, gpuTexture, faceWidth, faceHeight, 0))
 				if (useMipmap) {
 					for (i; i <= len; i++) {
 						faceWidth = Math.max(Math.floor(faceWidth / 2), 1);
 						faceHeight = Math.max(Math.floor(faceHeight / 2), 1);
-						result = this.#updateTexture(commandEncoder, redGPU.device, result, gpuTexture, faceWidth, faceHeight, i)
+						result.push(this.#updateTexture(commandEncoder, redGPU.device, img, gpuTexture, faceWidth, faceHeight, i))
 					}
 				}
-
-				redGPU.device.defaultQueue.submit([commandEncoder.finish()]);
-				self.resolve(gpuTexture)
-
-			}
+				Promise.all(result).then(
+					_ => {
+						console.log('오긴하니', src)
+						this.resolve(gpuTexture)
+						redGPU.device.defaultQueue.submit([commandEncoder.finish()]);
+					}
+				)
+			})
 		}
 	}
 
@@ -152,14 +159,16 @@ export default class RedBitmapTexture {
 	resolve(texture) {
 		this.#GPUTexture = texture;
 		this.#GPUTextureView = texture.createView();
-		console.log('this.#updateList', this.#updateList);
-		let i = this.#updateList.length;
 		let data;
-		while (i--) {
-			data = this.#updateList[i]
-			data[0][data[1]] = this
+		let tick = _ => {
+			data = this.#updateList[this.#updateList.length - 1]
+			if (data) {
+				data[0][data[1]] = this
+				this.#updateList.pop()
+				requestAnimationFrame(tick)
+			}
 		}
-		this.#updateList.length = 0
+		requestAnimationFrame(tick)
 	}
 
 	addUpdateTarget(target, key) {
