@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.11 20:19:9
+ *   Last modification time of this file - 2019.12.12 18:13:13
  *
  */
 
@@ -23,7 +23,7 @@ let makeUniformBindLayout = function (redGPU, uniformsBindGroupLayoutDescriptor)
 	}
 	return uniformsBindGroupLayout
 };
-let RedBaseMaterial_callNum = 0
+let RedBaseMaterial_searchModules_callNum = 0
 export default class RedBaseMaterial extends RedUUID {
 	get redGPU() {
 		return this.#redGPU;
@@ -132,6 +132,7 @@ export default class RedBaseMaterial extends RedUUID {
 		throw new Error(`${this.constructor.name} : resetBindingInfo must override!!!`)
 	}
 	_afterResetBindingInfo() {
+		console.time('_afterResetBindingInfo'+this._UUID)
 		this.uniformBindGroupDescriptor = {
 			layout: this.GPUBindGroupLayout,
 			bindings: this.bindings
@@ -143,27 +144,28 @@ export default class RedBaseMaterial extends RedUUID {
 			this.updateUniformBuffer();
 			this.#uniformBufferUpdated = true;
 		}
+		console.timeEnd('_afterResetBindingInfo'+this._UUID)
 		this.updateUUID();
 	}
 
 	searchModules() {
-		console.log(this, this.constructor, this.constructor.name);
-		console.log(this.constructor.PROGRAM_OPTION_LIST);
-		RedBaseMaterial_callNum++
-		console.log('RedBaseMaterial_callNum', RedBaseMaterial_callNum)
+		// console.log(this, this.constructor, this.constructor.name);
+		// console.log(this.constructor.PROGRAM_OPTION_LIST);
+		RedBaseMaterial_searchModules_callNum++
+		console.log('RedBaseMaterial_searchModules_callNum', RedBaseMaterial_searchModules_callNum)
 		let tKey = [this.constructor.name];
 		let i = 0, len = this.constructor.PROGRAM_OPTION_LIST.length;
 		for (i; i < len; i++) {
 			let key = this.constructor.PROGRAM_OPTION_LIST[i];
-			console.log(key, this[key]);
+			// console.log(key, this[key]);
 			if (this[key]) tKey.push(key);
 		}
 		// tKey = tKey.join('_');
 		console.log('searchModules', tKey);
 		this.vShaderModule.searchShaderModule(tKey);
 		this.fShaderModule.searchShaderModule(tKey);
-		console.log(this.vShaderModule);
-		console.log(this.fShaderModule);
+		// console.log(this.vShaderModule);
+		// console.log(this.fShaderModule);
 	}
 
 	setUniformBindGroupDescriptor() {

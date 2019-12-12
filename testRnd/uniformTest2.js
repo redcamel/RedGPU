@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.12 15:9:7
+ *   Last modification time of this file - 2019.12.12 18:13:13
  *
  */
 
@@ -86,65 +86,67 @@ import RedStandardMaterial from "../src/material/RedStandardMaterial.js";
 				new RedBitmapTexture(redGPU, '../assets/specular.png'),
 				new RedBitmapTexture(redGPU, '../assets/emissive.jpg')
 			]
-			// testMat_bitmap = new RedStandardMaterial(redGPU, testTextureList[1], testTextureList[2],testTextureList[5], testTextureList[6], testTextureList[4]);
-			testMat_bitmap = new RedStandardMaterial(redGPU, testTextureList[1], testTextureList[2],testTextureList[5], testTextureList[6], testTextureList[4]);
-			// testMat_bitmap = new RedStandardMaterial(redGPU, testTextureList[0]);
+			setTimeout(_=>{
+				// testMat_bitmap = new RedStandardMaterial(redGPU, testTextureList[1], testTextureList[2],testTextureList[5], testTextureList[6], testTextureList[4]);
+				testMat_bitmap = new RedStandardMaterial(redGPU, testTextureList[1], testTextureList[2],testTextureList[5], testTextureList[6], testTextureList[4]);
+				// testMat_bitmap = new RedStandardMaterial(redGPU, testTextureList[0]);
 
 
-			let randomGeometry = function () {
-				return new RedSphere(redGPU, 0.5, 16, 16, 16)
-				return Math.random() > 0.5
-					? new RedSphere(redGPU, 0.5, 16, 16, 16) :
-					Math.random() > 0.5
-						? new RedCylinder(redGPU, 0, 1, 2, 16, 16) :
-						Math.random() > 0.5 ? new RedBox(redGPU) : new RedPlane(redGPU)
-			}
-
-			while (i--) {
-				let testMesh = new RedMesh(
-					redGPU,
-					randomGeometry(),
-					testMat_bitmap
-				);
-				testMesh.x = Math.random() * 3000 - 1500;
-				testMesh.y = Math.random() * 3000 - 1500;
-				testMesh.z = Math.random() * 3000 - 1500;
-				testMesh.rotationX = testMesh.rotationY = testMesh.rotationZ = Math.random() * 360;
-				testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = Math.random() * 25 + 35;
-				if (testMesh.material == testMat_standard_diffuse_normal_displacement) testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = 55
-				tScene.addChild(testMesh)
-
-
-			}
-
-
-			let renderer = new RedRender();
-			let render = function (time) {
-
-
-				tLight.x = Math.sin(time / 1000)
-				tLight.y = Math.cos(time / 500)
-				tLight.z = Math.cos(time / 750)
-				renderer.render(time, redGPU);
-
-				let tChildren = tView.scene.children
-				i = tChildren.length
-
+				let randomGeometry = function () {
+					return new RedSphere(redGPU, 0.5, 16, 16, 16)
+					return Math.random() > 0.5
+						? new RedSphere(redGPU, 0.5, 16, 16, 16) :
+						Math.random() > 0.5
+							? new RedCylinder(redGPU, 0, 1, 2, 16, 16) :
+							Math.random() > 0.5 ? new RedBox(redGPU) : new RedPlane(redGPU)
+				}
 
 				while (i--) {
-					// if(i%5==0){
-					tChildren[i]._rotationX += 1
-					tChildren[i]._rotationY += 1
-					tChildren[i]._rotationZ += 1
-					tChildren[i].dirtyTransform = 1
-					// }
+					let testMesh = new RedMesh(
+						redGPU,
+						randomGeometry(),
+						testMat_bitmap
+					);
+					testMesh.x = Math.random() * 3000 - 1500;
+					testMesh.y = Math.random() * 3000 - 1500;
+					testMesh.z = Math.random() * 3000 - 1500;
+					testMesh.rotationX = testMesh.rotationY = testMesh.rotationZ = Math.random() * 360;
+					testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = Math.random() * 25 + 35;
+					if (testMesh.material == testMat_standard_diffuse_normal_displacement) testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = 55
+					tScene.addChild(testMesh)
+
 
 				}
 
 
+				let renderer = new RedRender();
+				let render = function (time) {
+
+
+					tLight.x = Math.sin(time / 1000)
+					tLight.y = Math.cos(time / 500)
+					tLight.z = Math.cos(time / 750)
+					renderer.render(time, redGPU);
+
+					let tChildren = tView.scene.children
+					i = tChildren.length
+
+
+					while (i--) {
+						// if(i%5==0){
+						tChildren[i]._rotationX += 1
+						tChildren[i]._rotationY += 1
+						tChildren[i]._rotationZ += 1
+						tChildren[i].dirtyTransform = 1
+						// }
+
+					}
+
+
+					requestAnimationFrame(render);
+				};
 				requestAnimationFrame(render);
-			};
-			requestAnimationFrame(render);
+			},500)
 		}
 	);
 

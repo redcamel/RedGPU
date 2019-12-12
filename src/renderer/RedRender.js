@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.11 21:5:50
+ *   Last modification time of this file - 2019.12.12 18:13:13
  *
  */
 
@@ -10,7 +10,6 @@ import RedGLTFLoader from "../loader/RedGLTFLoader.js";
 
 let transparentSortList = [];
 let tCacheUniformInfo = {}
-var resultMTX = mat4.create();
 var resultPreMTX = mat4.create();
 var updateTargetMatrixBufferList = []
 
@@ -70,7 +69,7 @@ let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty, 
 		}
 		if (tGeometry) {
 
-			if (transparentSortMode) {
+			if (transparentSortMode && tPipeline.GPURenderPipeline) {
 				passEncoder.setPipeline(tPipeline.GPURenderPipeline);
 
 				if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
@@ -137,7 +136,7 @@ let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty, 
 
 				///////////////////////////////////////
 
-				if (tViewRect[2] - tX > 0 && tViewRect[3] - tY > 0) {
+				if (tViewRect[2] - tX > 0 && tViewRect[3] - tY > 0 && tPipeline.GPURenderPipeline) {
 					passEncoder.setPipeline(tPipeline.GPURenderPipeline);
 					passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹는 매그룹마다 다르니 또 업데이트 해줘야함 -_-
 					if (prevMaterial_UUID != tMaterial._UUID) passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
