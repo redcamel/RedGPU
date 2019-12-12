@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.12 18:53:51
+ *   Last modification time of this file - 2019.12.12 21:19:8
  *
  */
 
@@ -45,7 +45,7 @@ import RedColorPhongMaterial from "../src/material/RedColorPhongMaterial.js";
 
 (async function () {
 	const cvs = document.createElement('canvas');
-	const glslangModule = await import(/* webpackIgnore: true */ 'https://unpkg.com/@webgpu/glslang@0.0.11/dist/web-devel/glslang.js');
+	const glslangModule = await import(/* webpackIgnore: true */ 'https://unpkg.com/@webgpu/glslang@0.0.12/dist/web-devel/glslang.js');
 	document.body.appendChild(cvs);
 
 	const glslang = await glslangModule.default();
@@ -222,22 +222,22 @@ import RedColorPhongMaterial from "../src/material/RedColorPhongMaterial.js";
 			// 	//
 			// 	// ])
 			// );
-			// let self = this
-			// new RedGLTFLoader(self, 'assets/gltf/breakDance/', 'scene.gltf', function (v) {
-			// 	tScene.addChild(v['resultMesh'])
-			// 	v['resultMesh'].scaleX = v['resultMesh'].scaleY = v['resultMesh'].scaleZ = 0.0012
-			// 	v['resultMesh'].x = 0
-			// 	var i = 40
-			// 	while (i--) {
-			// 		new RedGLTFLoader(self,  'assets/gltf/breakDance/', 'scene.gltf', function (v) {
-			// 			tScene.addChild(v['resultMesh'])
-			// 			v['resultMesh'].scaleX = v['resultMesh'].scaleY = v['resultMesh'].scaleZ = 0.002
-			// 			v['resultMesh'].x = Math.random() * 30 - 15
-			// 			v['resultMesh'].z = Math.random() * 30 - 15
-			//
-			// 		})
-			// 	}
-			// })
+			let self = this
+			new RedGLTFLoader(self, 'assets/gltf/breakDance/', 'scene.gltf', function (v) {
+				tScene.addChild(v['resultMesh'])
+				v['resultMesh'].scaleX = v['resultMesh'].scaleY = v['resultMesh'].scaleZ = 0.0012
+				v['resultMesh'].x = 0
+				var i = 40
+				while (i--) {
+					new RedGLTFLoader(self,  'assets/gltf/breakDance/', 'scene.gltf', function (v) {
+						tScene.addChild(v['resultMesh'])
+						v['resultMesh'].scaleX = v['resultMesh'].scaleY = v['resultMesh'].scaleZ = 0.002
+						v['resultMesh'].x = Math.random() * 30 - 15
+						v['resultMesh'].z = Math.random() * 30 - 15
+
+					})
+				}
+			})
 
 			// new RedGLTFLoader(
 			// 	this, // redGL

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.12 18:17:7
+ *   Last modification time of this file - 2019.12.12 21:19:8
  *
  */
 
@@ -35,7 +35,11 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 
 (async function () {
 	const cvs = document.createElement('canvas');
-	const glslangModule = await import(/* webpackIgnore: true */ 'https://unpkg.com/@webgpu/glslang@0.0.11/dist/web-devel/glslang.js');
+	const glslangModule = await import(/* webpackIgnore: true */ 'https://unpkg.com/@webgpu/glslang@0.0.12/dist/web-devel/glslang.js');
+	// dist/web-min-nocompute: 정점 / 조각 만 지원하고 GLSL 컴파일 메시지가없는 웹용으로 빌드하십시오 .
+	// dist/web-devel-nocompute: 꼭짓점 / 조각 만 지원하는 웹용으로 빌드하십시오.
+	// dist/web-devel: 모든 기능을 갖춘 웹용으로 빌드하십시오.
+	// dist/node-devel: 비동기 시작 및 모든 기능을 갖춘 Node 용 빌드. (이를 사용하려면 import @webgpu/glslang)
 	document.body.appendChild(cvs);
 
 	const glslang = await glslangModule.default();
@@ -91,7 +95,7 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 			tScene.addLight(tLight)
 
 
-			let i2 = 5
+			let i2 = 0
 			let testColor = ['#ff0000', '#00ff00', '#0000ff', '#ffffff', '#ffff00']
 			while (i2--) {
 				let tLight = new RedPointLight(testColor[i2 % testColor.length], 1, 1, Math.random() * 25 )
@@ -268,12 +272,12 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 
 
 				while (i--) {
-					// if(i%5==0){
+
 						tChildren[i]._rotationX += 1
 						tChildren[i]._rotationY += 1
 						tChildren[i]._rotationZ += 1
 						tChildren[i].dirtyTransform = 1
-					// }
+
 
 				}
 

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.12 18:53:51
+ *   Last modification time of this file - 2019.12.12 21:19:8
  *
  */
 
@@ -106,7 +106,6 @@ export default class RedBaseMaterial extends RedUUID {
 					tValue = tempFloat32
 				}
 				this.uniformBuffer_vertex.GPUBuffer.setSubData(tData['offset'], tValue);
-
 			}
 			tData = dataFragment[i2];
 
@@ -148,6 +147,7 @@ export default class RedBaseMaterial extends RedUUID {
 	searchModules() {
 		// console.log(this, this.constructor, this.constructor.name);
 		// console.log(this.constructor.PROGRAM_OPTION_LIST);
+
 		RedBaseMaterial_searchModules_callNum++
 		console.log('RedBaseMaterial_searchModules_callNum', RedBaseMaterial_searchModules_callNum)
 		let tKey = [this.constructor.name];
@@ -157,10 +157,12 @@ export default class RedBaseMaterial extends RedUUID {
 			// console.log(key, this[key]);
 			if (this[key]) tKey.push(key);
 		}
+		console.time('searchModules_'+ tKey);
 		// tKey = tKey.join('_');
 		console.log('searchModules', tKey);
 		this.vShaderModule.searchShaderModule(tKey);
 		this.fShaderModule.searchShaderModule(tKey);
+		console.timeEnd('searchModules_'+ tKey);
 		// console.log(this.vShaderModule);
 		// console.log(this.fShaderModule);
 	}
