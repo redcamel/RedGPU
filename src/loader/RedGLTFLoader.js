@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.9 17:49:5
+ *   Last modification time of this file - 2019.12.12 21:19:8
  *
  */
 
@@ -1480,7 +1480,6 @@ var RedGLTFLoader;
 				} else {
 					console.log('있긴하냐', samplerIndex)
 				}
-
 				result['string'] = JSON.stringify(result);
 				console.log('result', result);
 				return result
@@ -1505,9 +1504,8 @@ var RedGLTFLoader;
 						var tURL = getURL(redGLTFLoader, json, diffuseSourceIndex);
 						var samplerIndex = baseTextureInfo['sampler'];
 						var option = getSamplerInfo(redGLTFLoader, json, samplerIndex);
-						var tKey = tURL + option['string'];
-						if (redGLTFLoader['parsingResult']['textures'][tKey]) diffseTexture = redGLTFLoader['parsingResult']['textures'][tKey];
-						else diffseTexture = redGLTFLoader['parsingResult']['textures'][tKey] = new RedBitmapTexture(redGLTFLoader['redGPU'], tURL, new RedSampler(redGLTFLoader['redGPU'], option))
+						var tKey = tURL;
+						diffseTexture = redGLTFLoader['parsingResult']['textures'][tKey] = new RedBitmapTexture(redGLTFLoader['redGPU'], tURL, new RedSampler(redGLTFLoader['redGPU'], option))
 						// var t0 = document.createElement('img')
 						// t0.src = json['images'][diffuseSourceIndex]['uri']
 						// t0.style.cssText = 'position:absolute;top:0px;left:0px;width:500px'
@@ -1520,9 +1518,8 @@ var RedGLTFLoader;
 						var tURL = getURL(redGLTFLoader, json, roughnessSourceIndex);
 						var samplerIndex = roughnessTextureInfo['sampler'];
 						var option = getSamplerInfo(redGLTFLoader, json, samplerIndex);
-						var tKey = tURL + option['string'];
-						if (redGLTFLoader['parsingResult']['textures'][tKey]) roughnessTexture = redGLTFLoader['parsingResult']['textures'][tKey];
-						else roughnessTexture = redGLTFLoader['parsingResult']['textures'][tKey] = new RedBitmapTexture(redGLTFLoader['redGPU'], tURL, new RedSampler(redGLTFLoader['redGPU'], option))
+						var tKey = tURL;
+						roughnessTexture = redGLTFLoader['parsingResult']['textures'][tKey] = new RedBitmapTexture(redGLTFLoader['redGPU'], tURL, new RedSampler(redGLTFLoader['redGPU'], option))
 						// var t0 = document.createElement('img')
 						// t0.src = json['images'][roughnessSourceIndex]['uri']
 						// t0.style.cssText = 'position:absolute;top:0px;left:0px;width:500px'
@@ -1536,9 +1533,8 @@ var RedGLTFLoader;
 						var tURL = getURL(redGLTFLoader, json, normalSourceIndex);
 						var samplerIndex = normalTextureInfo['sampler'];
 						var option = getSamplerInfo(redGLTFLoader, json, samplerIndex);
-						var tKey = tURL + option['string'];
-						if (redGLTFLoader['parsingResult']['textures'][tKey]) normalTexture = redGLTFLoader['parsingResult']['textures'][tKey];
-						else normalTexture = redGLTFLoader['parsingResult']['textures'][tKey] = new RedBitmapTexture(redGLTFLoader['redGPU'], tURL, new RedSampler(redGLTFLoader['redGPU'], option))
+						var tKey = tURL;
+						normalTexture = redGLTFLoader['parsingResult']['textures'][tKey] = new RedBitmapTexture(redGLTFLoader['redGPU'], tURL, new RedSampler(redGLTFLoader['redGPU'], option))
 						// var t0 = document.createElement('img')
 						// t0.src = json['images'][normalSourceIndex]['uri']
 						// t0.style.cssText = 'position:absolute;top:0px;left:0px;width:500px'
@@ -1552,9 +1548,8 @@ var RedGLTFLoader;
 						var tURL = getURL(redGLTFLoader, json, emissiveSourceIndex);
 						var samplerIndex = emissiveTextureInfo['sampler'];
 						var option = getSamplerInfo(redGLTFLoader, json, samplerIndex);
-						var tKey = tURL + option['string'];
-						if (redGLTFLoader['parsingResult']['textures'][tKey]) emissiveTexture = redGLTFLoader['parsingResult']['textures'][tKey];
-						else emissiveTexture = redGLTFLoader['parsingResult']['textures'][tKey] = new RedBitmapTexture(redGLTFLoader['redGPU'], tURL, new RedSampler(redGLTFLoader['redGPU'], option))
+						var tKey = tURL;
+						emissiveTexture = redGLTFLoader['parsingResult']['textures'][tKey] = new RedBitmapTexture(redGLTFLoader['redGPU'], tURL, new RedSampler(redGLTFLoader['redGPU'], option))
 						// var t0 = document.createElement('img')
 						// t0.src = json['images'][emissiveSourceIndex]['uri']
 						// t0.style.cssText = 'position:absolute;top:0px;left:0px;width:500px'
@@ -1568,9 +1563,8 @@ var RedGLTFLoader;
 						var tURL = getURL(redGLTFLoader, json, occlusionSourceIndex);
 						var samplerIndex = occlusionTextureInfo['sampler'];
 						var option = getSamplerInfo(redGLTFLoader, json, samplerIndex);
-						var tKey = tURL + option['string'];
-						if (redGLTFLoader['parsingResult']['textures'][tKey]) occlusionTexture = redGLTFLoader['parsingResult']['textures'][tKey];
-						else occlusionTexture = redGLTFLoader['parsingResult']['textures'][tKey] = new RedBitmapTexture(redGLTFLoader['redGPU'], tURL, new RedSampler(redGLTFLoader['redGPU'], option))
+						var tKey = tURL;
+						occlusionTexture = redGLTFLoader['parsingResult']['textures'][tKey] = new RedBitmapTexture(redGLTFLoader['redGPU'], tURL, new RedSampler(redGLTFLoader['redGPU'], option))
 						// var t0 = document.createElement('img')
 						// t0.src = json['images'][occlusionSourceIndex]['uri']
 						// t0.style.cssText = 'position:absolute;top:0px;left:0px;width:500px'
@@ -1680,7 +1674,7 @@ var RedGLTFLoader;
 					interleaveData[idx++] = jointWeights[i * 4 + 2];
 					interleaveData[idx++] = jointWeights[i * 4 + 3];
 					// interleaveData.push(jointWeights[i * 4 + 0], jointWeights[i * 4 + 1], jointWeights[i * 4 + 2], jointWeights[i * 4 + 3])
-				}else{
+				} else {
 					interleaveData[idx++] = 0;
 					interleaveData[idx++] = 0;
 					interleaveData[idx++] = 0;
@@ -1692,7 +1686,7 @@ var RedGLTFLoader;
 					interleaveData[idx++] = joints[i * 4 + 2];
 					interleaveData[idx++] = joints[i * 4 + 3];
 					// interleaveData.push(joints[i * 4 + 0], joints[i * 4 + 1], joints[i * 4 + 2], joints[i * 4 + 3])
-				}else{
+				} else {
 					interleaveData[idx++] = 0;
 					interleaveData[idx++] = 0;
 					interleaveData[idx++] = 0;

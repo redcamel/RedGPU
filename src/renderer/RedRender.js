@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.12 18:13:13
+ *   Last modification time of this file - 2019.12.12 21:19:8
  *
  */
 
@@ -64,8 +64,8 @@ let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty, 
 			if (tMaterial.needResetBindingInfo) {
 				tMaterial.resetBindingInfo();
 				tMaterial.needResetBindingInfo = false;
+				tMaterialChanged = tMesh._prevMaterialUUID != tMaterial._UUID;
 			}
-			tMaterialChanged = tMesh._prevMaterialUUID != tMaterial._UUID;
 		}
 		if (tGeometry) {
 
@@ -89,7 +89,10 @@ let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty, 
 			}
 
 			if (tDirtyPipeline || tMaterialChanged) {
-				if (!tMesh.isPostEffectQuad) tPipeline.updatePipeline_sampleCount4(redGPU, redView);
+				if (!tMesh.isPostEffectQuad) {
+					// console.log('tDirtyPipeline',tDirtyPipeline,'tMaterialChanged',tMaterialChanged)
+					tPipeline.updatePipeline_sampleCount4(redGPU, redView);
+				}
 				// const renderBundleEncoder = redGPU.device.createRenderBundleEncoder({
 				// 	colorFormats: [redGPU.swapChainFormat],
 				// 	depthStencilFormat :["depth24plus-stencil8"],

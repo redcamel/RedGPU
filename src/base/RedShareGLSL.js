@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.11 18:48:37
+ *   Last modification time of this file - 2019.12.12 21:19:8
  *
  */
 
@@ -10,8 +10,8 @@
 export default class RedShareGLSL {
 	static MESH_UNIFORM_POOL_NUM = 100
 	static MAX_DIRECTIONAL_LIGHT = 8;
-	static MAX_POINT_LIGHT = 200;
-	static MAX_SPOT_LIGHT = 200;
+	static MAX_POINT_LIGHT = 100;
+	static MAX_SPOT_LIGHT = 100;
 	static SET_INDEX_SystemUniforms_vertex = 0;
 	static SET_INDEX_SystemUniforms_fragment = 1;
 	static SET_INDEX_MeshUniforms = 2;
