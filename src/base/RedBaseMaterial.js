@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.12 18:13:13
+ *   Last modification time of this file - 2019.12.12 18:53:51
  *
  */
 
@@ -58,8 +58,8 @@ export default class RedBaseMaterial extends RedUUID {
 		let fragmentGLSL = materialClass.fragmentShaderGLSL;
 		let programOptionList = materialClass.PROGRAM_OPTION_LIST || [];
 
-		vShaderModule = new RedShaderModule_GLSL(redGPU, 'vertex', materialClass, vertexGLSL, programOptionList);
-		fShaderModule = new RedShaderModule_GLSL(redGPU, 'fragment', materialClass, fragmentGLSL, programOptionList);
+		vShaderModule = new RedShaderModule_GLSL(redGPU, 'vertex', materialClass, vertexGLSL);
+		fShaderModule = new RedShaderModule_GLSL(redGPU, 'fragment', materialClass, fragmentGLSL);
 
 		if (!materialClass.uniformBufferDescriptor_vertex) throw new Error(`${materialClass.name} : must define a static uniformBufferDescriptor_vertex.`);
 		if (!materialClass.uniformBufferDescriptor_fragment) throw new Error(`${materialClass.name} : must define a static uniformBufferDescriptor_fragment.`);
@@ -133,10 +133,7 @@ export default class RedBaseMaterial extends RedUUID {
 	}
 	_afterResetBindingInfo() {
 		console.time('_afterResetBindingInfo'+this._UUID)
-		this.uniformBindGroupDescriptor = {
-			layout: this.GPUBindGroupLayout,
-			bindings: this.bindings
-		};
+
 		this.searchModules();
 		this.setUniformBindGroupDescriptor();
 		this.uniformBindGroup_material.setGPUBindGroup(this.uniformBindGroupDescriptor);

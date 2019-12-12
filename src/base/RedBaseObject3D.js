@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.12 18:17:7
+ *   Last modification time of this file - 2019.12.12 18:53:51
  *
  */
 
@@ -235,7 +235,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	set material(v) {
 		this._material = v;
-		// this.dirtyPipeline = true;
+		this.dirtyPipeline = true;
 		// this.dirtyTransform = true
 	}
 
