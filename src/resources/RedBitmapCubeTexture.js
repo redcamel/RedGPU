@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 13:21:23
+ *   Last modification time of this file - 2019.12.13 19:11:47
  *
  */
 "use strict";
@@ -49,7 +49,7 @@ export default class RedBitmapCubeTexture {
 			}
 			const textureDataBuffer = device.createBuffer({
 				size: data.byteLength + data.byteLength % 4,
-				usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC,
+				usage: globalThis.GPUBufferUsage.COPY_DST | globalThis.GPUBufferUsage.COPY_SRC,
 			});
 			textureDataBuffer.setSubData(0, data);
 			const bufferView = {
@@ -75,7 +75,7 @@ export default class RedBitmapCubeTexture {
 		}))
 		return promise
 	};
-	#makeCubeTexture = function (redGPU, useMipmap, imgList, maxW, maxH) {
+	#makeCubeTexture = function (redGPUContext, useMipmap, imgList, maxW, maxH) {
 		maxW = RedUTIL.nextHighestPowerOfTwo(maxW);
 		maxH = RedUTIL.nextHighestPowerOfTwo(maxH)
 		if (useMipmap) this.mipMaps = Math.round(Math.log2(Math.max(maxW, maxH)));
@@ -92,20 +92,20 @@ export default class RedBitmapCubeTexture {
 			mipLevelCount: useMipmap ? this.mipMaps + 1 : 1,
 			usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.SAMPLED
 		};
-		const gpuTexture = redGPU.device.createTexture(textureDescriptor);
+		const gpuTexture = redGPUContext.device.createTexture(textureDescriptor);
 		let result = []
-		const commandEncoder = redGPU.device.createCommandEncoder({});
+		const commandEncoder = redGPUContext.device.createCommandEncoder({});
 
 		imgList.forEach((img, face) => {
 			let i = 1, len = this.mipMaps;
 			let faceWidth = maxW;
 			let faceHeight = maxH;
-			result.push(this.#updateTexture(commandEncoder, redGPU.device, img, gpuTexture, faceWidth, faceHeight, 0, face));
+			result.push(this.#updateTexture(commandEncoder, redGPUContext.device, img, gpuTexture, faceWidth, faceHeight, 0, face));
 			if (useMipmap) {
 				for (i; i <= len; i++) {
 					faceWidth = Math.max(Math.floor(faceWidth / 2), 1);
 					faceHeight = Math.max(Math.floor(faceHeight / 2), 1);
-					result.push(this.#updateTexture(commandEncoder, redGPU.device, img, gpuTexture, faceWidth, faceHeight, i, face))
+					result.push(this.#updateTexture(commandEncoder, redGPUContext.device, img, gpuTexture, faceWidth, faceHeight, i, face))
 				}
 			}
 		});
@@ -113,14 +113,14 @@ export default class RedBitmapCubeTexture {
 			_ => {
 				console.log('오긴하니', imgList)
 				this.resolve(gpuTexture)
-				redGPU.device.defaultQueue.submit([commandEncoder.finish()]);
+				redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
 			}
 		)
 
 	};
-	constructor(redGPU, srcList, sampler, useMipmap = true, onload, onerror) {
+	constructor(redGPUContext, srcList, sampler, useMipmap = true, onload, onerror) {
 		//TODO : onload처리
-		if (!defaultSampler) defaultSampler = new RedSampler(redGPU);
+		if (!defaultSampler) defaultSampler = new RedSampler(redGPUContext);
 		this.sampler = sampler || defaultSampler;
 		let maxW = 0;
 		let maxH = 0;
@@ -152,7 +152,7 @@ export default class RedBitmapCubeTexture {
 					maxH = Math.max(maxH, img.height);
 					if (maxW > 1024) maxW = 1024;
 					if (maxH > 1024) maxH = 1024;
-					if (loadCount == 6) this.#makeCubeTexture(redGPU, useMipmap, imgList, maxW, maxH)
+					if (loadCount == 6) this.#makeCubeTexture(redGPUContext, useMipmap, imgList, maxW, maxH)
 				})
 			}
 		})

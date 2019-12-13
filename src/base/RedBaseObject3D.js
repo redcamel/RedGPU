@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 13:21:22
+ *   Last modification time of this file - 2019.12.13 19:11:47
  *
  */
 
@@ -24,10 +24,10 @@ const uniformBufferDescriptor_mesh = new RedUniformBufferDescriptor(
 		{size: RedTypeSize.mat4 * RedShareGLSL.MESH_UNIFORM_POOL_NUM, valueName: 'normalMatrix'}
 	]
 );
-const getPool = function (redGPU, targetMesh) {
+const getPool = function (redGPUContext, targetMesh) {
 	let uniformBuffer_mesh
 	if (!MESH_UNIFORM_TABLE[MESH_UNIFORM_POOL_tableIndex]) {
-		uniformBuffer_mesh = new RedUniformBuffer(redGPU);
+		uniformBuffer_mesh = new RedUniformBuffer(redGPUContext);
 		uniformBuffer_mesh.setBuffer(uniformBufferDescriptor_mesh);
 		MESH_UNIFORM_TABLE[MESH_UNIFORM_POOL_tableIndex] = uniformBuffer_mesh
 	}
@@ -83,7 +83,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 	//
 	_material;
 	_geometry;
-	#redGPU;
+	#redGPUContext;
 	//
 	_useDepthTest = true;
 	_depthTestFunc = 'less-equal';
@@ -92,16 +92,16 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 	pipeline;
 	#bindings;
 
-	constructor(redGPU) {
+	constructor(redGPUContext) {
 		super();
-		this.#redGPU = redGPU;
-		let bufferData = getPool(redGPU, this)
+		this.#redGPUContext = redGPUContext;
+		let bufferData = getPool(redGPUContext, this)
 		this.uniformBuffer_mesh = bufferData.uniformBuffer_mesh
 		this.uniformBuffer_mesh.meshFloat32Array = bufferData.float32Array
 		this.offsetMatrix = bufferData.offsetMatrix;
 		this.offsetNormalMatrix = bufferData.offsetNormalMatrix;
 
-		this.uniformBuffer_meshIndex = new RedUniformBuffer(redGPU);
+		this.uniformBuffer_meshIndex = new RedUniformBuffer(redGPUContext);
 		this.uniformBuffer_meshIndex.setBuffer(RedBaseObject3D.uniformBufferDescriptor_meshIndex);
 		this.uniformBuffer_meshIndex.GPUBuffer.setSubData(0, new Float32Array([bufferData.uniformIndex]))
 		this.#bindings = [
@@ -122,14 +122,14 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 				}
 			}
 		];
-		this.GPUBindGroupLayout = redGPU.device.createBindGroupLayout(RedBaseObject3D.uniformsBindGroupLayoutDescriptor_mesh);
-		this.GPUBindGroup = this.#redGPU.device.createBindGroup({
+		this.GPUBindGroupLayout = redGPUContext.device.createBindGroupLayout(RedBaseObject3D.uniformsBindGroupLayoutDescriptor_mesh);
+		this.GPUBindGroup = this.#redGPUContext.device.createBindGroup({
 			layout: this.GPUBindGroupLayout,
 			bindings: this.#bindings
 		});
 
 
-		this.pipeline = new RedPipeline(redGPU, this);
+		this.pipeline = new RedPipeline(redGPUContext, this);
 		this.normalMatrix = mat4.create();
 		this.matrix = mat4.create();
 		this.localMatrix = mat4.create()

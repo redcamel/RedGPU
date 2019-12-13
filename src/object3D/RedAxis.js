@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 10:30:31
+ *   Last modification time of this file - 2019.12.13 19:11:47
  *
  */
 
@@ -16,21 +16,21 @@ import RedSphere from "../primitives/RedSphere.js";
 
 export default class RedAxis extends RedBaseObject3D {
 
-	constructor(redGPU) {
-		super(redGPU);
+	constructor(redGPUContext) {
+		super(redGPUContext);
 		let tArrowMesh;
 		let tAxis;
 		let tBox, tArrow;
 		let tMatX, tMatY, tMatZ;
-		tBox = new RedBox(redGPU);
-		tArrow = new RedCylinder(redGPU, 0, 0.5);
-		tMatX = new RedColorMaterial(redGPU, '#ff0000');
-		tMatY = new RedColorMaterial(redGPU, '#00ff00');
-		tMatZ = new RedColorMaterial(redGPU, '#0000ff');
+		tBox = new RedBox(redGPUContext);
+		tArrow = new RedCylinder(redGPUContext, 0, 0.5);
+		tMatX = new RedColorMaterial(redGPUContext, '#ff0000');
+		tMatY = new RedColorMaterial(redGPUContext, '#00ff00');
+		tMatZ = new RedColorMaterial(redGPUContext, '#0000ff');
 		////////////////////////////////////////////
 		// xAxis
-		tArrowMesh = new RedMesh(redGPU, tArrow, tMatX);
-		tAxis = new RedMesh(redGPU, tBox, tMatX);
+		tArrowMesh = new RedMesh(redGPUContext, tArrow, tMatX);
+		tAxis = new RedMesh(redGPUContext, tBox, tMatX);
 		tAxis.scaleX = tAxis.scaleY = tAxis.scaleZ = 0.1;
 		tAxis.scaleX = 5;
 		tArrowMesh.x = 5;
@@ -40,8 +40,8 @@ export default class RedAxis extends RedBaseObject3D {
 		this['children'].push(tArrowMesh);
 		////////////////////////////////////////////
 		// yAxis
-		tArrowMesh = new RedMesh(redGPU, tArrow, tMatY);
-		tAxis = new RedMesh(redGPU, tBox, tMatY);
+		tArrowMesh = new RedMesh(redGPUContext, tArrow, tMatY);
+		tAxis = new RedMesh(redGPUContext, tBox, tMatY);
 		tAxis.scaleX = tAxis.scaleY = tAxis.scaleZ = 0.1;
 		tAxis.scaleY = 5;
 		tArrowMesh.y = 5;
@@ -50,8 +50,8 @@ export default class RedAxis extends RedBaseObject3D {
 		this['children'].push(tArrowMesh);
 		////////////////////////////////////////////
 		// zAxis
-		tArrowMesh = new RedMesh(redGPU, tArrow, tMatZ);
-		tAxis = new RedMesh(redGPU, tBox, tMatZ);
+		tArrowMesh = new RedMesh(redGPUContext, tArrow, tMatZ);
+		tAxis = new RedMesh(redGPUContext, tBox, tMatZ);
 		tAxis.scaleX = tAxis.scaleY = tAxis.scaleZ = 0.1;
 		tAxis.scaleZ = 5;
 		tArrowMesh.z = 5;
@@ -60,7 +60,7 @@ export default class RedAxis extends RedBaseObject3D {
 		this['children'].push(tAxis);
 		this['children'].push(tArrowMesh);
 		////////////////////////////////////////////
-		this['children'].push(new RedMesh(redGPU, new RedSphere(redGPU, 0.25, 16, 16, 16), new RedColorMaterial(redGPU, '#ff00ff')));
+		this['children'].push(new RedMesh(redGPUContext, new RedSphere(redGPUContext, 0.25, 16, 16, 16), new RedColorMaterial(redGPUContext, '#ff00ff')));
 		console.log(this)
 	}
 

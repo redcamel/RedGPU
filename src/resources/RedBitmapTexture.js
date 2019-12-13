@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 13:21:23
+ *   Last modification time of this file - 2019.12.13 19:11:47
  *
  */
 "use strict";
@@ -56,7 +56,7 @@ export default class RedBitmapTexture {
 			console.timeEnd('uint8 make')
 			const textureDataBuffer = device.createBuffer({
 				size: data.byteLength + data.byteLength % 4,
-				usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC,
+				usage: globalThis.GPUBufferUsage.COPY_DST | globalThis.GPUBufferUsage.COPY_SRC,
 			});
 			textureDataBuffer.setSubData(0, data);
 			const bufferView = {
@@ -83,8 +83,8 @@ export default class RedBitmapTexture {
 
 		return promise
 	};
-	constructor(redGPU, src, sampler, useMipmap = true, onload, onerror) {
-		if (!defaultSampler) defaultSampler = new RedSampler(redGPU);
+	constructor(redGPUContext, src, sampler, useMipmap = true, onload, onerror) {
+		if (!defaultSampler) defaultSampler = new RedSampler(redGPUContext);
 		this.sampler = sampler || defaultSampler;
 
 		if (!src) {
@@ -127,24 +127,24 @@ export default class RedBitmapTexture {
 					mipLevelCount: useMipmap ? this.mipMaps + 1 : 1,
 					usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.SAMPLED
 				};
-				const gpuTexture = redGPU.device.createTexture(textureDescriptor);
+				const gpuTexture = redGPUContext.device.createTexture(textureDescriptor);
 				let mipIndex = 0, len = this.mipMaps;
 				let faceWidth = tW;
 				let faceHeight = tH;
 
 
-				const commandEncoder = redGPU.device.createCommandEncoder({});
+				const commandEncoder = redGPUContext.device.createCommandEncoder({});
 				let self = this
 				function callNextMip(targetImage) {
 					// console.log('대상이미지', targetImage)
-					let promise = self.#updateTexture(commandEncoder, redGPU.device, targetImage, gpuTexture, faceWidth, faceHeight, mipIndex)
+					let promise = self.#updateTexture(commandEncoder, redGPUContext.device, targetImage, gpuTexture, faceWidth, faceHeight, mipIndex)
 					if (useMipmap) {
 						if (mipIndex == len) {
 							promise.then(
 								_ => {
 									// console.log('오긴하니', src)
 									self.resolve(gpuTexture)
-									redGPU.device.defaultQueue.submit([commandEncoder.finish()]);
+									redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
 									if (onload) onload()
 								}
 							)
@@ -161,7 +161,7 @@ export default class RedBitmapTexture {
 						promise.then(_ => {
 								// console.log('밉맵실행', src, mipIndex)
 								self.resolve(gpuTexture)
-								redGPU.device.defaultQueue.submit([commandEncoder.finish()]);
+								redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
 								if (onload) onload()
 							}
 						)

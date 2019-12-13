@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 10:30:31
+ *   Last modification time of this file - 2019.12.13 19:11:47
  *
  */
 
@@ -20,22 +20,22 @@ export default class RedGrid extends RedBaseObject3D {
 	#divisions = 100;
 	#centerColor = '#cccccc';
 	#color = '#666666';
-	#redGPU;
+	#redGPUContext;
 
-	constructor(redGPU, size = 100, divisions = 100, centerColor = '#cccccc', color = '#666666') {
-		super(redGPU);
-		this.#redGPU = redGPU;
+	constructor(redGPUContext, size = 100, divisions = 100, centerColor = '#cccccc', color = '#666666') {
+		super(redGPUContext);
+		this.#redGPUContext = redGPUContext;
 		this.size = size;
 		this.divisions = divisions;
 		this.centerColor = centerColor;
 		this.color = color;
 		this.makeGridGeometry();
-		this.material = new RedGridMaterial(redGPU);
+		this.material = new RedGridMaterial(redGPUContext);
 		this.primitiveTopology = 'line-list'
 	}
 
 	makeGridGeometry() {
-		let redGPU = this.#redGPU;
+		let redGPUContext = this.#redGPUContext;
 		let center, step, halfSize;
 		let i, k, tColor;
 
@@ -53,9 +53,9 @@ export default class RedGrid extends RedBaseObject3D {
 			);
 		}
 		this.geometry = new RedGeometry(
-			redGPU,
+			redGPUContext,
 			new RedBuffer(
-				redGPU,
+				redGPUContext,
 				'gridInterleaveBuffer_' + this.size + '_' + this.divisions + '_' + this.centerColor + '_' + this.color,
 				RedBuffer.TYPE_VERTEX,
 				new Float32Array(interleaveData),

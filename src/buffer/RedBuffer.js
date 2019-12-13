@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 10:30:31
+ *   Last modification time of this file - 2019.12.13 19:11:47
  *
  */
 
@@ -18,16 +18,16 @@ export default class RedBuffer extends RedUUID {
 	bufferDescriptor;
 	GPUBuffer;
 
-	constructor(redGPU, typeKey, bufferType, data, interleaveInfo, usage) {
+	constructor(redGPUContext, typeKey, bufferType, data, interleaveInfo, usage) {
 		super();
-		if (redGPU.state.RedBuffer[bufferType].has(typeKey)) return redGPU.state.RedBuffer[bufferType].get(typeKey);
+		if (redGPUContext.state.RedBuffer[bufferType].has(typeKey)) return redGPUContext.state.RedBuffer[bufferType].get(typeKey);
 		let tUsage;
 		this.type = bufferType;
 		this.vertexCount = 0;
 		this.stride = 0
 		switch (bufferType) {
 			case RedBuffer.TYPE_VERTEX :
-				tUsage = usage || GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST;
+				tUsage = usage || globalThis.GPUBufferUsage.VERTEX | globalThis.GPUBufferUsage.COPY_DST;
 				this.interleaveInfo = interleaveInfo;
 				interleaveInfo.forEach(v => {
 					this.vertexCount += v['stride'] / Float32Array.BYTES_PER_ELEMENT;
@@ -37,7 +37,7 @@ export default class RedBuffer extends RedUUID {
 				console.log('최종 this.vertexCount', this.vertexCount);
 				break;
 			case RedBuffer.TYPE_INDEX :
-				tUsage = usage || GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST;
+				tUsage = usage || globalThis.GPUBufferUsage.INDEX | globalThis.GPUBufferUsage.COPY_DST;
 				this.indexNum = data.length;
 				break
 		}
@@ -47,9 +47,9 @@ export default class RedBuffer extends RedUUID {
 			usage: tUsage
 		};
 		this.data = data;
-		this.GPUBuffer = redGPU.device.createBuffer(this.bufferDescriptor);
+		this.GPUBuffer = redGPUContext.device.createBuffer(this.bufferDescriptor);
 		this.GPUBuffer.setSubData(0, data);
-		redGPU.state.RedBuffer[bufferType].set(typeKey, this);
+		redGPUContext.state.RedBuffer[bufferType].set(typeKey, this);
 		console.log(this);
 	}
 	update(data) {

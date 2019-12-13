@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 10:30:31
+ *   Last modification time of this file - 2019.12.13 19:11:47
  *
  */
 
@@ -62,8 +62,8 @@ export default class RedPostEffect_Pixelize extends RedBasePostEffect {
 		{size: RedTypeSize.float, valueName: 'width'},
 		{size: RedTypeSize.float, valueName: 'height'}
 	];
-	constructor(redGPU) {
-		super(redGPU);
+	constructor(redGPUContext) {
+		super(redGPUContext);
 
 	}
 	_width = 5;

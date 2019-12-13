@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 10:30:31
+ *   Last modification time of this file - 2019.12.13 19:11:47
  *
  */
 
@@ -13,7 +13,7 @@ let tCacheUniformInfo = {}
 var resultPreMTX = mat4.create();
 var updateTargetMatrixBufferList = []
 
-let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty, transparentSortMode) => {
+let renderScene = (redGPUContext, redView, passEncoder, parent, children, parentDirty, transparentSortMode) => {
 	let i;
 	let tGeometry;
 	let tMaterial;
@@ -90,7 +90,7 @@ let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty, 
 				if (!tMesh.isPostEffectQuad) {
 					// console.log('tDirtyPipeline', tDirtyPipeline, 'tMaterialChanged', tMaterialChanged)
 					// console.time('tPipeline.updatePipeline_sampleCount4' + tMesh._UUID)
-					tPipeline.updatePipeline_sampleCount4(redGPU, redView);
+					tPipeline.updatePipeline_sampleCount4(redGPUContext, redView);
 					// console.timeEnd('tPipeline.updatePipeline_sampleCount4' + tMesh._UUID)
 				}
 			} else {
@@ -366,23 +366,23 @@ let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty, 
 				tCacheUniformInfo[tUUID] = tSkinInfo['inverseBindMatrices']['_UUID']
 			}
 		}
-		if (tMesh.children.length) renderScene(redGPU, redView, passEncoder, tMesh, tMesh.children, parentDirty || tDirtyTransform);
+		if (tMesh.children.length) renderScene(redGPUContext, redView, passEncoder, tMesh, tMesh.children, parentDirty || tDirtyTransform);
 		tMesh.dirtyPipeline = false;
 		tMesh.dirtyTransform = false;
 	}
 };
 export default class RedRender {
-	#redGPU;
+	#redGPUContext;
 	#swapChainTexture;
 	#swapChainTextureView;
-	#renderView = (redGPU, redView) => {
+	#renderView = (redGPUContext, redView) => {
 		let tScene, tSceneBackgroundColor_rgba;
 		tScene = redView.scene;
 		tSceneBackgroundColor_rgba = tScene.backgroundColorRGBA;
 		redView.camera.update();
 		// console.log(swapChain.getCurrentTexture())
 		if (!redView.baseAttachmentView) {
-			redView.resetTexture(redGPU)
+			redView.resetTexture(redGPUContext)
 		}
 		mat4.multiply(resultPreMTX, redView.projectionMatrix, redView.camera.matrix);
 		const renderPassDescriptor = {
@@ -416,21 +416,21 @@ export default class RedRender {
 				stencilStoreOp: "store",
 			}
 		};
-		let commandEncoder = this.#redGPU.device.createCommandEncoder();
+		let commandEncoder = this.#redGPUContext.device.createCommandEncoder();
 		let passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
 
 		// 시스템 유니폼 업데이트
-		redView.updateSystemUniform(passEncoder, redGPU);
+		redView.updateSystemUniform(passEncoder, redGPUContext);
 		if (tScene.skyBox) {
 			if (redView.camera['farClipping'] * 0.6 != tScene.skyBox._prevScale) {
 				tScene.skyBox['scaleX'] = tScene.skyBox['scaleY'] = tScene.skyBox['scaleZ'] = tScene.skyBox._prevScale = redView.camera['farClipping'] * 0.6;
 			}
-			renderScene(redGPU, redView, passEncoder, null, [tScene.skyBox]);
+			renderScene(redGPUContext, redView, passEncoder, null, [tScene.skyBox]);
 		}
-		if (tScene.grid) renderScene(redGPU, redView, passEncoder, null, [tScene.grid]);
-		if (tScene.axis) renderScene(redGPU, redView, passEncoder, null, [tScene.axis]);
-		renderScene(redGPU, redView, passEncoder, null, tScene.children);
-		if (transparentSortList.length) renderScene(redGPU, redView, passEncoder, null, transparentSortList, null, true);
+		if (tScene.grid) renderScene(redGPUContext, redView, passEncoder, null, [tScene.grid]);
+		if (tScene.axis) renderScene(redGPUContext, redView, passEncoder, null, [tScene.axis]);
+		renderScene(redGPUContext, redView, passEncoder, null, tScene.children);
+		if (transparentSortList.length) renderScene(redGPUContext, redView, passEncoder, null, transparentSortList, null, true);
 		transparentSortList.length = 0
 		let i = updateTargetMatrixBufferList.length;
 		while (i--) updateTargetMatrixBufferList[i].GPUBuffer.setSubData(0, updateTargetMatrixBufferList[i].meshFloat32Array)
@@ -446,7 +446,7 @@ export default class RedRender {
 		let len3 = redView.postEffect.effectList.length;
 		for (i3; i3 < len3; i3++) {
 			let tEffect = redView.postEffect.effectList[i3];
-			tEffect.render(redGPU, redView, renderScene, last_effect_baseAttachmentView);
+			tEffect.render(redGPUContext, redView, renderScene, last_effect_baseAttachmentView);
 			last_effect_baseAttachmentView = tEffect.baseAttachmentView;
 			last_effect_baseAttachment = tEffect.baseAttachment
 		}
@@ -455,10 +455,10 @@ export default class RedRender {
 		// 최종렌더
 		let tX = redView.viewRect[0];
 		let tY = redView.viewRect[1];
-		let tW = redView.viewRect[2] + redView.viewRect[0] > this.#redGPU.canvas.width ? redView.viewRect[2] - redView.viewRect[0] : redView.viewRect[2];
-		let tH = redView.viewRect[3] + redView.viewRect[1] > this.#redGPU.canvas.height ? redView.viewRect[3] - redView.viewRect[1] : redView.viewRect[3];
-		if (tW > this.#redGPU.canvas.width) tW = this.#redGPU.canvas.width - tX;
-		if (tH > this.#redGPU.canvas.height) tH = this.#redGPU.canvas.height - tX;
+		let tW = redView.viewRect[2] + redView.viewRect[0] > this.#redGPUContext.canvas.width ? redView.viewRect[2] - redView.viewRect[0] : redView.viewRect[2];
+		let tH = redView.viewRect[3] + redView.viewRect[1] > this.#redGPUContext.canvas.height ? redView.viewRect[3] - redView.viewRect[1] : redView.viewRect[3];
+		if (tW > this.#redGPUContext.canvas.width) tW = this.#redGPUContext.canvas.width - tX;
+		if (tH > this.#redGPUContext.canvas.height) tH = this.#redGPUContext.canvas.height - tX;
 		commandEncoder.copyTextureToTexture(
 			{
 				texture: last_effect_baseAttachment
@@ -477,16 +477,16 @@ export default class RedRender {
 				depth: 1
 			}
 		);
-		this.#redGPU.device.defaultQueue.submit([commandEncoder.finish()]);
+		this.#redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
 	};
 
 
-	render(time, redGPU) {
-		this.#redGPU = redGPU;
-		this.#swapChainTexture = redGPU.swapChain.getCurrentTexture();
+	render(time, redGPUContext) {
+		this.#redGPUContext = redGPUContext;
+		this.#swapChainTexture = redGPUContext.swapChain.getCurrentTexture();
 		this.#swapChainTextureView = this.#swapChainTexture.createView();
-		let i = 0, len = redGPU.viewList.length;
-		for (i; i < len; i++) this.#renderView(redGPU, redGPU.viewList[i])
+		let i = 0, len = redGPUContext.viewList.length;
+		for (i; i < len; i++) this.#renderView(redGPUContext, redGPUContext.viewList[i])
 		RedGLTFLoader.animationLooper(time);
 	}
 }

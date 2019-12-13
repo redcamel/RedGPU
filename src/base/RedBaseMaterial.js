@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 13:21:22
+ *   Last modification time of this file - 2019.12.13 19:11:47
  *
  */
 
@@ -15,22 +15,22 @@ import RedUniformBufferDescriptor from "../buffer/RedUniformBufferDescriptor.js"
 import RedBindGroup from "../buffer/RedBindGroup.js";
 
 const TABLE = new Map();
-let makeUniformBindLayout = function (redGPU, uniformsBindGroupLayoutDescriptor) {
+let makeUniformBindLayout = function (redGPUContext, uniformsBindGroupLayoutDescriptor) {
 	let uniformsBindGroupLayout;
 	if (!(uniformsBindGroupLayout = TABLE.get(uniformsBindGroupLayoutDescriptor))) {
-		uniformsBindGroupLayout = redGPU.device.createBindGroupLayout(uniformsBindGroupLayoutDescriptor);
+		uniformsBindGroupLayout = redGPUContext.device.createBindGroupLayout(uniformsBindGroupLayoutDescriptor);
 		TABLE.set(uniformsBindGroupLayoutDescriptor, uniformsBindGroupLayout)
 	}
 	return uniformsBindGroupLayout
 };
 let RedBaseMaterial_searchModules_callNum = 0
 export default class RedBaseMaterial extends RedUUID {
-	get redGPU() {
-		return this.#redGPU;
+	get redGPUContext() {
+		return this.#redGPUContext;
 	}
 
-	set redGPU(value) {
-		this.#redGPU = value;
+	set redGPUContext(value) {
+		this.#redGPUContext = value;
 	}
 	static uniformBufferDescriptor_empty = [];
 
@@ -44,13 +44,13 @@ export default class RedBaseMaterial extends RedUUID {
 	fragmentStage;
 	sampler;
 	bindings;
-	#redGPU;
+	#redGPUContext;
 	//
 	uniformBuffer_vertex;
 	uniformBuffer_fragment;
 	uniformBindGroup_material;
 	needResetBindingInfo = false
-	constructor(redGPU) {
+	constructor(redGPUContext) {
 		super();
 		let vShaderModule, fShaderModule;
 		let materialClass = this.constructor;
@@ -58,8 +58,8 @@ export default class RedBaseMaterial extends RedUUID {
 		let fragmentGLSL = materialClass.fragmentShaderGLSL;
 		let programOptionList = materialClass.PROGRAM_OPTION_LIST || [];
 
-		vShaderModule = new RedShaderModule_GLSL(redGPU, 'vertex', materialClass, vertexGLSL);
-		fShaderModule = new RedShaderModule_GLSL(redGPU, 'fragment', materialClass, fragmentGLSL);
+		vShaderModule = new RedShaderModule_GLSL(redGPUContext, 'vertex', materialClass, vertexGLSL);
+		fShaderModule = new RedShaderModule_GLSL(redGPUContext, 'fragment', materialClass, fragmentGLSL);
 
 		if (!materialClass.uniformBufferDescriptor_vertex) throw new Error(`${materialClass.name} : must define a static uniformBufferDescriptor_vertex.`);
 		if (!materialClass.uniformBufferDescriptor_fragment) throw new Error(`${materialClass.name} : must define a static uniformBufferDescriptor_fragment.`);
@@ -67,21 +67,21 @@ export default class RedBaseMaterial extends RedUUID {
 
 		this.uniformBufferDescriptor_vertex = new RedUniformBufferDescriptor(materialClass.uniformBufferDescriptor_vertex);
 		this.uniformBufferDescriptor_fragment = new RedUniformBufferDescriptor(materialClass.uniformBufferDescriptor_fragment);
-		this.GPUBindGroupLayout = makeUniformBindLayout(redGPU, materialClass.uniformsBindGroupLayoutDescriptor_material);
+		this.GPUBindGroupLayout = makeUniformBindLayout(redGPUContext, materialClass.uniformsBindGroupLayoutDescriptor_material);
 
 		this.vShaderModule = vShaderModule;
 		this.fShaderModule = fShaderModule;
 
 		// 버퍼속성
-		this.uniformBuffer_vertex = new RedUniformBuffer(redGPU);
+		this.uniformBuffer_vertex = new RedUniformBuffer(redGPUContext);
 		this.uniformBuffer_vertex.setBuffer(this.uniformBufferDescriptor_vertex);
-		this.uniformBuffer_fragment = new RedUniformBuffer(redGPU);
+		this.uniformBuffer_fragment = new RedUniformBuffer(redGPUContext);
 		this.uniformBuffer_fragment.setBuffer(this.uniformBufferDescriptor_fragment);
-		this.uniformBindGroup_material = new RedBindGroup(redGPU);
+		this.uniformBindGroup_material = new RedBindGroup(redGPUContext);
 
 
-		this.sampler = new RedSampler(redGPU);
-		this.#redGPU = redGPU;
+		this.sampler = new RedSampler(redGPUContext);
+		this.#redGPUContext = redGPUContext;
 	}
 	updateUniformBuffer() {
 		let tempFloat32 = new Float32Array(1);

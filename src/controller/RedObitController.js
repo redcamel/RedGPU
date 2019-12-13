@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 10:30:31
+ *   Last modification time of this file - 2019.12.13 19:11:47
  *
  */
 
@@ -59,8 +59,8 @@ export default class RedObitController extends RedCamera {
 	//
 	#needUpdate = true;
 	targetView;
-	constructor(redGPU) {
-		super(redGPU);
+	constructor(redGPUContext) {
+		super(redGPUContext);
 		(_ => {
 			let HD_down, HD_Move, HD_up, HD_wheel;
 			let sX, sY;
@@ -82,9 +82,9 @@ export default class RedObitController extends RedCamera {
 				}
 				return true
 			};
-			tMove = redGPU.detector.move;
-			tUp = redGPU.detector.up;
-			tDown = redGPU.detector.down;
+			tMove = redGPUContext.detector.move;
+			tUp = redGPUContext.detector.up;
+			tDown = redGPUContext.detector.down;
 			sX = 0;
 			sY = 0;
 			mX = 0;
@@ -96,7 +96,7 @@ export default class RedObitController extends RedCamera {
 				if (this.#needUpdate) {
 					sX = e[tX_key];
 					sY = e[tY_key];
-					redGPU['canvas'].addEventListener(tMove, HD_Move);
+					redGPUContext['canvas'].addEventListener(tMove, HD_Move);
 					window.addEventListener(tUp, HD_up);
 				}
 			};
@@ -112,7 +112,7 @@ export default class RedObitController extends RedCamera {
 				}
 			};
 			HD_up = e => {
-				redGPU['canvas'].removeEventListener(tMove, HD_Move);
+				redGPUContext['canvas'].removeEventListener(tMove, HD_Move);
 				window.removeEventListener(tUp, HD_up);
 			};
 			HD_wheel = e => {
@@ -121,8 +121,8 @@ export default class RedObitController extends RedCamera {
 					this.#distance += e['deltaY'] / 100 * this.#speedDistance
 				}
 			};
-			redGPU['canvas'].addEventListener(tDown, HD_down);
-			redGPU['canvas'].addEventListener('wheel', HD_wheel);
+			redGPUContext['canvas'].addEventListener(tDown, HD_down);
+			redGPUContext['canvas'].addEventListener('wheel', HD_wheel);
 		})(this);
 	};
 

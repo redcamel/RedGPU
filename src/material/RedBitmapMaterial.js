@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 13:21:23
+ *   Last modification time of this file - 2019.12.13 19:11:47
  *
  */
 
@@ -60,8 +60,8 @@ export default class RedBitmapMaterial extends RedMix.mix(
 	static uniformBufferDescriptor_vertex = RedBaseMaterial.uniformBufferDescriptor_empty;
 	static uniformBufferDescriptor_fragment = RedBaseMaterial.uniformBufferDescriptor_empty;
 
-	constructor(redGPU, diffuseTexture) {
-		super(redGPU);
+	constructor(redGPUContext, diffuseTexture) {
+		super(redGPUContext);
 		this.diffuseTexture = diffuseTexture;
 		this.needResetBindingInfo = true
 	}
@@ -91,7 +91,7 @@ export default class RedBitmapMaterial extends RedMix.mix(
 			{binding: 0, resource: this.sampler.GPUSampler},
 			{
 				binding: 1,
-				resource: this._diffuseTexture ? this._diffuseTexture.GPUTextureView : this.redGPU.state.emptyTextureView
+				resource: this._diffuseTexture ? this._diffuseTexture.GPUTextureView : this.redGPUContext.state.emptyTextureView
 			}
 		];
 		this._afterResetBindingInfo();

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 13:21:23
+ *   Last modification time of this file - 2019.12.13 19:11:47
  *
  */
 
@@ -475,9 +475,9 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 		float1_Float32Array[0] = value;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['emissiveTexCoordIndex'], float1_Float32Array)
 	}
-	constructor(redGPU, diffuseTexture, environmentTexture, normalTexture, occlusionTexture, emissiveTexture, roughnessTexture) {
+	constructor(redGPUContext, diffuseTexture, environmentTexture, normalTexture, occlusionTexture, emissiveTexture, roughnessTexture) {
 
-		super(redGPU);
+		super(redGPUContext);
 		this.diffuseTexture = diffuseTexture;
 		this.environmentTexture = environmentTexture;
 		this.normalTexture = normalTexture;
@@ -544,7 +544,7 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 			},
 			{
 				binding: 2,
-				resource: this._displacementTexture ? this._displacementTexture.GPUTextureView : this.redGPU.state.emptyTextureView
+				resource: this._displacementTexture ? this._displacementTexture.GPUTextureView : this.redGPUContext.state.emptyTextureView
 			},
 			{
 				binding: 3,
@@ -560,7 +560,7 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 			},
 			{
 				binding: 5,
-				resource: this._diffuseTexture ? this._diffuseTexture.GPUTextureView : this.redGPU.state.emptyTextureView
+				resource: this._diffuseTexture ? this._diffuseTexture.GPUTextureView : this.redGPUContext.state.emptyTextureView
 			},
 			{
 				binding: 6,
@@ -568,7 +568,7 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 			},
 			{
 				binding: 7,
-				resource: this._normalTexture ? this._normalTexture.GPUTextureView : this.redGPU.state.emptyTextureView
+				resource: this._normalTexture ? this._normalTexture.GPUTextureView : this.redGPUContext.state.emptyTextureView
 			},
 			{
 				binding: 8,
@@ -576,7 +576,7 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 			},
 			{
 				binding: 9,
-				resource: this._roughnessTexture ? this._roughnessTexture.GPUTextureView : this.redGPU.state.emptyTextureView
+				resource: this._roughnessTexture ? this._roughnessTexture.GPUTextureView : this.redGPUContext.state.emptyTextureView
 			},
 			{
 				binding: 10,
@@ -584,7 +584,7 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 			},
 			{
 				binding: 11,
-				resource: this._emissiveTexture ? this._emissiveTexture.GPUTextureView : this.redGPU.state.emptyTextureView
+				resource: this._emissiveTexture ? this._emissiveTexture.GPUTextureView : this.redGPUContext.state.emptyTextureView
 			},
 			{
 				binding: 12,
@@ -592,7 +592,7 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 			},
 			{
 				binding: 13,
-				resource: this._environmentTexture ? this._environmentTexture.GPUTextureView : this.redGPU.state.emptyCubeTextureView
+				resource: this._environmentTexture ? this._environmentTexture.GPUTextureView : this.redGPUContext.state.emptyCubeTextureView
 			},
 			{
 				binding: 14,
@@ -600,7 +600,7 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 			},
 			{
 				binding: 15,
-				resource: this._occlusionTexture ? this._occlusionTexture.GPUTextureView : this.redGPU.state.emptyTextureView
+				resource: this._occlusionTexture ? this._occlusionTexture.GPUTextureView : this.redGPUContext.state.emptyTextureView
 			}
 
 

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 10:30:31
+ *   Last modification time of this file - 2019.12.13 19:11:47
  *
  */
 
@@ -32,10 +32,10 @@ export default class RedPostEffect_DoF extends RedBasePostEffect {
 	baseAttachmentView;
 	#blur;
 	#focusLength;
-	constructor(redGPU) {
-		super(redGPU);
-		this.#blurEffect = new RedPostEffect_GaussianBlur(redGPU);
-		this.#blenderEffect = new RedPostEffect_DoF_blend(redGPU);
+	constructor(redGPUContext) {
+		super(redGPUContext);
+		this.#blurEffect = new RedPostEffect_GaussianBlur(redGPUContext);
+		this.#blenderEffect = new RedPostEffect_DoF_blend(redGPUContext);
 		this.blur = 5;
 		this.focusLength = 15
 	}
@@ -54,12 +54,12 @@ export default class RedPostEffect_DoF extends RedBasePostEffect {
 		this.#blenderEffect.focusLength = value;
 
 	}
-	render(redGPU, redView, renderScene, diffuseTextureView) {
-		this.checkSize(redGPU, redView);
-		this.#blurEffect.render(redGPU, redView, renderScene, diffuseTextureView);
+	render(redGPUContext, redView, renderScene, diffuseTextureView) {
+		this.checkSize(redGPUContext, redView);
+		this.#blurEffect.render(redGPUContext, redView, renderScene, diffuseTextureView);
 		this.#blenderEffect._blurTexture = this.#blurEffect.baseAttachmentView;
 		this.#blenderEffect._depthTexture = redView.baseResolveTarget2View;
-		this.#blenderEffect.render(redGPU, redView, renderScene, diffuseTextureView);
+		this.#blenderEffect.render(redGPUContext, redView, renderScene, diffuseTextureView);
 		this.baseAttachment = this.#blenderEffect.baseAttachment;
 		this.baseAttachmentView = this.#blenderEffect.baseAttachmentView;
 	}
