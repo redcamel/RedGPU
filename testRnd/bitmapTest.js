@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 19:11:47
+ *   Last modification time of this file - 2019.12.13 19:22:24
  *
  */
 import RedGPU from "../src/RedGPU.js";
@@ -13,11 +13,6 @@ document.body.appendChild(cvs);
 
 new RedGPU.RedGPUContext(cvs,
 	function (v, reason) {
-
-		if (!v) {
-			console.log('reason', reason)
-			return alert(reason || `WebGPU is unsupported, or no adapters or devices are available.`)
-		}
 		let tView;
 		let tScene = new RedGPU.RedScene();
 		let tGrid = new RedGPU.RedGrid(this)
@@ -39,23 +34,23 @@ new RedGPU.RedGPUContext(cvs,
 
 
 		let t = [
-			new RedGPU.RedBitmapTexture(redGPUContext, '../assets/Brick03_col.jpg'),
-			new RedGPU.RedBitmapTexture(redGPUContext, '../assets/Brick03_col.jpg'),
-			new RedGPU.RedBitmapTexture(redGPUContext, '../assets/Brick03_col.jpg'),
-			new RedGPU.RedBitmapTexture(redGPUContext, '../assets/Brick03_col.jpg'),
-			new RedGPU.RedBitmapTexture(redGPUContext, '../assets/Brick03_col.jpg'),
-			new RedGPU.RedBitmapTexture(redGPUContext, '../assets/Brick03_col.jpg')
+			new RedGPU.RedBitmapTexture(this, '../assets/Brick03_col.jpg'),
+			new RedGPU.RedBitmapTexture(this, '../assets/Brick03_col.jpg'),
+			new RedGPU.RedBitmapTexture(this, '../assets/Brick03_col.jpg'),
+			new RedGPU.RedBitmapTexture(this, '../assets/Brick03_col.jpg'),
+			new RedGPU.RedBitmapTexture(this, '../assets/Brick03_col.jpg'),
+			new RedGPU.RedBitmapTexture(this, '../assets/Brick03_col.jpg')
 		]
 
 
-		let tMesh = new RedGPU.RedMesh(redGPUContext, new RedGPU.RedBox(redGPUContext,), new RedGPU.RedBitmapMaterial(redGPUContext, new RedGPU.RedBitmapTexture(redGPUContext, '../assets/Brick03_col.jpg'),))
+		let tMesh = new RedGPU.RedMesh(this, new RedGPU.RedBox(this,), new RedGPU.RedBitmapMaterial(this, new RedGPU.RedBitmapTexture(this, '../assets/Brick03_col.jpg'),))
 
 		tScene.addChild(tMesh)
 
 		let renderer = new RedGPU.RedRender();
-		let render = function (time) {
+		let render = time=> {
 			tMesh.rotationZ += 0
-			renderer.render(time, redGPUContext);
+			renderer.render(time,this);
 			requestAnimationFrame(render);
 		}
 		requestAnimationFrame(render);
