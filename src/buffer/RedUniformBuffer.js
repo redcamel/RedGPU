@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 10:30:31
+ *   Last modification time of this file - 2019.12.13 13:21:22
  *
  */
 
@@ -27,6 +27,7 @@ export default class RedUniformBuffer extends RedUUID {
 		if (!(uniformBufferDescriptor instanceof RedUniformBufferDescriptor)) RedUTIL.throwFunc(`${this.constructor.name} - only allow RedUniformBufferDescriptor Instance.- inputValue : ${uniformBufferDescriptor} { type : ${typeof uniformBufferDescriptor} }`);
 		if (this.GPUBuffer) this.GPUBuffer.destroy();
 		this.GPUBuffer = this.#redGPU.device.createBuffer(uniformBufferDescriptor);
+		this.float32Array = new Float32Array(uniformBufferDescriptor.size / Float32Array.BYTES_PER_ELEMENT)
 		this.uniformBufferDescriptor = uniformBufferDescriptor;
 	};
 }

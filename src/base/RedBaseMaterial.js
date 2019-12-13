@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 10:30:31
+ *   Last modification time of this file - 2019.12.13 13:21:22
  *
  */
 
@@ -93,6 +93,7 @@ export default class RedBaseMaterial extends RedUUID {
 		dataFragment = this.uniformBufferDescriptor_fragment.redStruct;
 		i2 = dataVertex.length > dataFragment.length ? dataVertex.length : dataFragment.length;
 		//FIXME - _로 가져올 수있게 변경할까?
+		console.time('updateUniformBuffer_' + this._UUID);
 		while (i2--) {
 			tData = dataVertex[i2];
 			if (tData) {
@@ -102,10 +103,9 @@ export default class RedBaseMaterial extends RedUUID {
 					tempFloat32[0] = tValue;
 					tValue = tempFloat32
 				}
-				this.uniformBuffer_vertex.GPUBuffer.setSubData(tData['offset'], tValue);
+				this.uniformBuffer_vertex.float32Array.set(tValue, tData['offset'] / Float32Array.BYTES_PER_ELEMENT)
 			}
 			tData = dataFragment[i2];
-
 			if (tData) {
 				// console.log(tData);
 				tValue = this[tData.valueName];
@@ -114,10 +114,13 @@ export default class RedBaseMaterial extends RedUUID {
 					tempFloat32[0] = tValue;
 					tValue = tempFloat32
 				}
-				this.uniformBuffer_fragment.GPUBuffer.setSubData(tData['offset'], tValue);
+				this.uniformBuffer_fragment.float32Array.set(tValue, tData['offset'] / Float32Array.BYTES_PER_ELEMENT)
 
 			}
 		}
+		this.uniformBuffer_vertex.GPUBuffer.setSubData(0, this.uniformBuffer_vertex.float32Array);
+		this.uniformBuffer_fragment.GPUBuffer.setSubData(0, this.uniformBuffer_fragment.float32Array);
+		console.timeEnd('updateUniformBuffer_' + this._UUID);
 	}
 
 	checkTexture(texture, textureName) {

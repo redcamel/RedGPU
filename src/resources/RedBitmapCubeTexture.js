@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 10:30:31
+ *   Last modification time of this file - 2019.12.13 13:21:23
  *
  */
 "use strict";
@@ -118,8 +118,8 @@ export default class RedBitmapCubeTexture {
 		)
 
 	};
-	constructor(redGPU, srcList, sampler, useMipmap = true) {
-		// 귀찮아서 텍스쳐 맹그는 놈은 들고옴
+	constructor(redGPU, srcList, sampler, useMipmap = true, onload, onerror) {
+		//TODO : onload처리
 		if (!defaultSampler) defaultSampler = new RedSampler(redGPU);
 		this.sampler = sampler || defaultSampler;
 		let maxW = 0;
@@ -140,10 +140,11 @@ export default class RedBitmapCubeTexture {
 				const img = new Image();
 				img.src = src;
 				img.crossOrigin = 'anonymous';
-				img.onerror = function (v) {
-					console.log(v)
+				img.onerror = e => {
+					console.log(e)
+					this.resolve(null)
+					if (onerror) onerror(e)
 				};
-
 				img.decode().then(_ => {
 					imgList[face] = img;
 					loadCount++;
@@ -168,7 +169,7 @@ export default class RedBitmapCubeTexture {
 
 	resolve(texture) {
 		this.#GPUTexture = texture;
-		this.#GPUTextureView = texture.createView(
+		this.#GPUTextureView = texture ? texture.createView(
 			{
 				format: 'rgba8unorm',
 				dimension: 'cube',
@@ -179,9 +180,9 @@ export default class RedBitmapCubeTexture {
 				arrayLayerCount: 6
 
 			}
-		);
+		) : null;
 		this.#updateList.forEach(data => {
-			console.log(data[1]);
+			// console.log(data[1]);
 			data[0][data[1]] = this
 		});
 		this.#updateList.length = 0

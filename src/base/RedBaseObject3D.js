@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 10:30:31
+ *   Last modification time of this file - 2019.12.13 13:21:22
  *
  */
 
@@ -29,7 +29,6 @@ const getPool = function (redGPU, targetMesh) {
 	if (!MESH_UNIFORM_TABLE[MESH_UNIFORM_POOL_tableIndex]) {
 		uniformBuffer_mesh = new RedUniformBuffer(redGPU);
 		uniformBuffer_mesh.setBuffer(uniformBufferDescriptor_mesh);
-		uniformBuffer_mesh.float32Array = new Float32Array(RedTypeSize.mat4 * 2 * RedShareGLSL.MESH_UNIFORM_POOL_NUM / Float32Array.BYTES_PER_ELEMENT)
 		MESH_UNIFORM_TABLE[MESH_UNIFORM_POOL_tableIndex] = uniformBuffer_mesh
 	}
 	uniformBuffer_mesh = MESH_UNIFORM_TABLE[MESH_UNIFORM_POOL_tableIndex]
@@ -235,7 +234,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	set material(v) {
 		this._material = v;
-		// this.dirtyPipeline = true;
+		this.dirtyPipeline = true;
 		// this.dirtyTransform = true
 	}
 

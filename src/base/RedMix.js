@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 10:30:31
+ *   Last modification time of this file - 2019.12.13 13:21:22
  *
  */
 
@@ -72,7 +72,7 @@ const color = Base => class extends Base {
 const diffuseTexture = Base => class extends Base {
 	_diffuseTexture;
 	set diffuseTexture(texture) {
-		this._diffuseTexture = null;
+		// this._diffuseTexture = null;
 		this.checkTexture(texture, 'diffuseTexture')
 	}
 
@@ -83,7 +83,7 @@ const diffuseTexture = Base => class extends Base {
 const normalTexture = Base => class extends Base {
 	_normalTexture;
 	set normalTexture(texture) {
-		this._normalTexture = null;
+		// this._normalTexture = null;
 		this.checkTexture(texture, 'normalTexture')
 	}
 
@@ -95,7 +95,7 @@ const normalTexture = Base => class extends Base {
 const specularTexture = Base => class extends Base {
 	_specularTexture;
 	set specularTexture(texture) {
-		this._specularTexture = null;
+		// this._specularTexture = null;
 		this.checkTexture(texture, 'specularTexture')
 	}
 
@@ -116,7 +116,7 @@ const emissiveTexture = Base => class extends Base {
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['emissivePower'], float1_Float32Array)
 	}
 	set emissiveTexture(texture) {
-		this._specularTexture = null;
+		// this._emissiveTexture = null;
 		this.checkTexture(texture, 'emissiveTexture')
 	}
 
@@ -137,7 +137,7 @@ const environmentTexture = Base => class extends Base {
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['environmentPower'], float1_Float32Array)
 	}
 	set environmentTexture(texture) {
-		this._environmentTexture = null;
+		// this._environmentTexture = null;
 		this.checkTexture(texture, 'environmentTexture')
 	}
 
@@ -153,21 +153,12 @@ const displacementTexture = Base => class extends Base {
 	_displacementFlowSpeedY = 0.0;
 	_displacementPower = 0.1;
 	set displacementTexture(texture) {
-		this._displacementTexture = null;
+		// this._displacementTexture = null;
 		this.checkTexture(texture, 'displacementTexture')
 	}
 	get displacementTexture() {
 		return this._displacementTexture
 	}
-	set displacementTexture(texture) {
-		this._displacementTexture = null;
-		this.checkTexture(texture, 'displacementTexture')
-	}
-
-	get displacementTexture() {
-		return this._displacementTexture
-	}
-
 
 	get displacementFlowSpeedY() {
 		return this._displacementFlowSpeedY;

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 11:0:31
+ *   Last modification time of this file - 2019.12.13 13:21:23
  *
  */
 
@@ -239,41 +239,41 @@ import RedColorPhongMaterial from "../src/material/RedColorPhongMaterial.js";
 			// 	}
 			// })
 
-			new RedGLTFLoader(
-				this, // redGL
-				'assets/gltf/', // assetRootPath
-				'DamagedHelmet.gltf', // fileName
-				function (v) { // callBack
-					console.log(v)
-					let tMesh = v['resultMesh']
-					// tMesh.scaleX = tMesh.scaleY = tMesh.scaleZ = 1
-					// v['resultMesh'].scaleX = v['resultMesh'].scaleY = v['resultMesh'].scaleZ = 0.001
-					// tScene.addChild({children:[tMesh.children[2],tMesh.children[8]]})
-					// tScene.addChild({children:[tMesh.children[2]]})
-					tScene.addChild(tMesh)
-
-
-				},
-				new RedBitmapCubeTexture(redGPU, [
-					'./assets/cubemap/SwedishRoyalCastle/px.jpg',
-					'./assets/cubemap/SwedishRoyalCastle/nx.jpg',
-					'./assets/cubemap/SwedishRoyalCastle/py.jpg',
-					'./assets/cubemap/SwedishRoyalCastle/ny.jpg',
-					'./assets/cubemap/SwedishRoyalCastle/pz.jpg',
-					'./assets/cubemap/SwedishRoyalCastle/nz.jpg'
-
-				])
-			);
+			// new RedGLTFLoader(
+			// 	this, // redGL
+			// 	'assets/gltf/', // assetRootPath
+			// 	'DamagedHelmet.gltf', // fileName
+			// 	function (v) { // callBack
+			// 		console.log(v)
+			// 		let tMesh = v['resultMesh']
+			// 		// tMesh.scaleX = tMesh.scaleY = tMesh.scaleZ = 1
+			// 		// v['resultMesh'].scaleX = v['resultMesh'].scaleY = v['resultMesh'].scaleZ = 0.001
+			// 		// tScene.addChild({children:[tMesh.children[2],tMesh.children[8]]})
+			// 		// tScene.addChild({children:[tMesh.children[2]]})
+			// 		tScene.addChild(tMesh)
 			//
-			// tScene.skyBox = new RedSkyBox(this,new RedBitmapCubeTexture(redGPU, [
-			// 	'./assets/cubemap/SwedishRoyalCastle/px.jpg?t=1',
-			// 	'./assets/cubemap/SwedishRoyalCastle/nx.jpg?t=1',
-			// 	'./assets/cubemap/SwedishRoyalCastle/py.jpg?t=1',
-			// 	'./assets/cubemap/SwedishRoyalCastle/ny.jpg?t=1',
-			// 	'./assets/cubemap/SwedishRoyalCastle/pz.jpg?t=1',
-			// 	'./assets/cubemap/SwedishRoyalCastle/nz.jpg?t=1'
 			//
-			// ]))
+			// 	},
+			// 	new RedBitmapCubeTexture(redGPU, [
+			// 		'./assets/cubemap/SwedishRoyalCastle/px.jpg',
+			// 		'./assets/cubemap/SwedishRoyalCastle/nx.jpg',
+			// 		'./assets/cubemap/SwedishRoyalCastle/py.jpg',
+			// 		'./assets/cubemap/SwedishRoyalCastle/ny.jpg',
+			// 		'./assets/cubemap/SwedishRoyalCastle/pz.jpg',
+			// 		'./assets/cubemap/SwedishRoyalCastle/nz.jpg'
+			//
+			// 	])
+			// );
+			//
+			tScene.skyBox = new RedSkyBox(this,new RedBitmapCubeTexture(redGPU, [
+				'./assets/cubemap/SwedishRoyalCastle/px.jpg?t=1',
+				'./assets/cubemap/SwedishRoyalCastle/nx.jpg?t=1',
+				'./assets/cubemap/SwedishRoyalCastle/py.jpg?t=1',
+				'./assets/cubemap/SwedishRoyalCastle/ny.jpg?t=1',
+				'./assets/cubemap/SwedishRoyalCastle/pz.jpg?t=1',
+				'./assets/cubemap/SwedishRoyalCastle/nz.jpg?t=1'
+
+			]))
 			setTimeout(function(){
 				let t = new RedMesh(redGPU, new RedBox(redGPU), new RedColorPhongMaterial(redGPU))
 				tScene.addChild(t)

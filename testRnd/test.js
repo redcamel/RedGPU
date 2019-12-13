@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 10:30:31
+ *   Last modification time of this file - 2019.12.13 13:21:23
  *
  */
 
@@ -72,7 +72,9 @@ import RedStandardMaterial from "../src/material/RedStandardMaterial.js";
 					redGPU,
 					new RedSphere(redGPU, 0.5, 16, 16, 16),
 					// new RedColorMaterial(redGPU, '#ffff12')
-					testMat_bitmap = new RedStandardMaterial(redGPU, ...testTextureList)
+					// testMat_bitmap = new RedStandardMaterial(redGPU, ...testTextureList)
+					// testMat_bitmap = new RedStandardMaterial(redGPU, testTextureList[0],testTextureList[1])
+					testMat_bitmap
 				);
 				testMesh.x = Math.random() * 30 - 15;
 				testMesh.y = Math.random() * 30 - 15;

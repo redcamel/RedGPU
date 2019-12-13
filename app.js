@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.12 21:19:8
+ *   Last modification time of this file - 2019.12.13 13:21:23
  *
  */
 
@@ -31,6 +31,7 @@ import RedAxis from "./src/object3D/RedAxis.js";
 import RedDirectionalLight from "./src/light/RedDirectionalLight.js";
 import RedPostEffect_Bloom from "./src/postEffect/bloom/RedPostEffect_Bloom.js";
 import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
+import RedPostEffect_Gray from "./src/postEffect/adjustments/RedPostEffect_Gray.js";
 
 
 (async function () {
@@ -110,6 +111,7 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 			tEffect2.focusLength = 1000
 			tView.postEffect.addEffect(tEffect)
 			tView.postEffect.addEffect(tEffect2)
+			// tView.postEffect.addEffect(new RedPostEffect_Gray(redGPU))
 			redGPU.addView(tView2)
 			let testTextureList = [
 				new RedBitmapTexture(redGPU, 'assets/UV_Grid_Sm.jpg'),
@@ -149,13 +151,13 @@ import RedPostEffect_DoF from "./src/postEffect/dof/RedPostEffect_DoF.js";
 			testMat_colorPhongTexture_normal_displacement.displacementFlowSpeedY = 0.01
 
 
-			// let mats = [testMat_color, testMat_colorPhong, testMat_bitmap, testMat_standard_diffuse, testMat_standard_diffuse_normal, testMat_standard_diffuse_normal_displacement]
-			// let changeNum = 0
+			let mats = [testMat_color, testMat_colorPhong, testMat_bitmap, testMat_standard_diffuse, testMat_standard_diffuse_normal, testMat_standard_diffuse_normal_displacement]
+			let changeNum = 0
 			// setInterval(_ => {
 			// 	let tChildren = tView.scene.children
 			// 	let i = tChildren.length;
 			// 	changeNum++
-			// 	console.log('안오냐')
+			// 	console.log('안오냐',mats[changeNum%mats.length])
 			//
 			// 	while (i--) {
 			//
