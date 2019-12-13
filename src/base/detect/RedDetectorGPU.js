@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.11.28 11:53:1
+ *   Last modification time of this file - 2019.12.13 13:21:22
  *
  */
 
@@ -11,6 +11,9 @@ export default class RedDetectorGPU {
 	#redGPU;
 	constructor() {
 		this.#getBrowserInfo();
+		// console.log = function(){}
+		// console.time = function(){}
+		// console.timeEnd = function(){}
 		if (this.browser === 'ie') console.table = console.log;
 	};
 	detectGPU = _ => { console.log('TODO - 추후 GPU 디텍팅을 해야한다.') };

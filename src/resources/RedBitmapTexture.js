@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 10:30:31
+ *   Last modification time of this file - 2019.12.13 13:21:23
  *
  */
 "use strict";
@@ -84,7 +84,6 @@ export default class RedBitmapTexture {
 		return promise
 	};
 	constructor(redGPU, src, sampler, useMipmap = true, onload, onerror) {
-		// 귀찮아서 텍스쳐 맹그는 놈은 들고옴
 		if (!defaultSampler) defaultSampler = new RedSampler(redGPU);
 		this.sampler = sampler || defaultSampler;
 
@@ -101,9 +100,10 @@ export default class RedBitmapTexture {
 			const img = new Image();
 			img.src = src;
 			img.crossOrigin = 'anonymous';
-			img.onerror = function (v) {
-				console.log(v)
-				if (onerror) onerror(v)
+			img.onerror = e => {
+				console.log(e)
+				this.resolve(null)
+				if (onerror) onerror(e)
 			};
 			TABLE.set(mapKey, this);
 			img.decode().then(_ => {
@@ -183,7 +183,7 @@ export default class RedBitmapTexture {
 
 	resolve(texture) {
 		this.#GPUTexture = texture;
-		this.#GPUTextureView = texture.createView();
+		this.#GPUTextureView = texture ? texture.createView() : null;
 		this.#updateList.forEach(data => {
 			console.log(data[1]);
 			data[0][data[1]] = this
