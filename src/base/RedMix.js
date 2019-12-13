@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.10 19:41:33
+ *   Last modification time of this file - 2019.12.13 10:30:31
  *
  */
 
@@ -23,9 +23,9 @@ const color = Base => class extends Base {
 	set color(hex) {
 		this.#color = hex;
 		let rgb = RedUTIL.hexToRGB_ZeroToOne(hex);
-		this.#colorRGBA[0] = rgb[0]*this.#alpha;
-		this.#colorRGBA[1] = rgb[1]*this.#alpha;
-		this.#colorRGBA[2] = rgb[2]*this.#alpha;
+		this.#colorRGBA[0] = rgb[0] * this.#alpha;
+		this.#colorRGBA[1] = rgb[1] * this.#alpha;
+		this.#colorRGBA[2] = rgb[2] * this.#alpha;
 		this.#colorRGBA[3] = this.#alpha;
 		//TODO - 시스템 버퍼쪽도 같은 개념으로 바꿔야 if 비용을 줄일 수 있음
 		if (this.uniformBuffer_fragment) this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['colorRGBA'], this.#colorRGBA)
@@ -37,9 +37,9 @@ const color = Base => class extends Base {
 
 	set alpha(value) {
 		let rgb = RedUTIL.hexToRGB_ZeroToOne(this.#color);
-		this.#colorRGBA[0] = rgb[0]*value;
-		this.#colorRGBA[1] = rgb[1]*value;
-		this.#colorRGBA[2] = rgb[2]*value;
+		this.#colorRGBA[0] = rgb[0] * value;
+		this.#colorRGBA[1] = rgb[1] * value;
+		this.#colorRGBA[2] = rgb[2] * value;
 		this.#colorRGBA[3] = value
 		if (this.uniformBuffer_fragment) this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['colorRGBA'], this.#colorRGBA)
 	}
@@ -126,7 +126,7 @@ const emissiveTexture = Base => class extends Base {
 };
 const environmentTexture = Base => class extends Base {
 	_environmentTexture;
-	_environmentPower =1;
+	_environmentPower = 1;
 	get environmentPower() {
 		return this._environmentPower;
 	}
@@ -290,7 +290,8 @@ const defineNumber = function (keyName, option = {}) {
 	return t0
 }
 
-class EmptyClass {}
+class EmptyClass {
+}
 
 export default {
 	mix: (Base, ...texture) => {
@@ -298,12 +299,12 @@ export default {
 	},
 	EmptyClass: EmptyClass,
 	color: color,
-	defineNumber : defineNumber,
+	defineNumber: defineNumber,
 	diffuseTexture: diffuseTexture,
 	normalTexture: normalTexture,
 	specularTexture: specularTexture,
 	emissiveTexture: emissiveTexture,
-	environmentTexture : environmentTexture,
+	environmentTexture: environmentTexture,
 	displacementTexture: displacementTexture,
 	basicLightPropertys: basicLightPropertys
 }

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.12 18:13:13
+ *   Last modification time of this file - 2019.12.13 10:30:31
  *
  */
 
@@ -516,7 +516,7 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 				clearTimeout(this.#timeout);
 				this.#timeout = setTimeout(_ => {
 					this.needResetBindingInfo = true
-				},500)
+				}, 500)
 			} else {
 				texture.addUpdateTarget(this, textureName)
 			}

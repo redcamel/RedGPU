@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.11 20:19:9
+ *   Last modification time of this file - 2019.12.13 10:30:31
  *
  */
 
@@ -37,8 +37,8 @@ export default class RedBasePostEffect extends RedMix.mix(
 		this.quad = new RedMesh(redGPU, new RedPlane(redGPU), this);
 		this.quad.isPostEffectQuad = true
 	}
-	checkSize(redGPU,redView){
-		if ([this.#prevViewRect[2],this.#prevViewRect[3]].toString() != [redView.viewRect[2],redView.viewRect[3]].toString()) {
+	checkSize(redGPU, redView) {
+		if ([this.#prevViewRect[2], this.#prevViewRect[3]].toString() != [redView.viewRect[2], redView.viewRect[3]].toString()) {
 			if (this.baseAttachment) this.baseAttachment.destroy();
 			this.#prevViewRect = redView.viewRect.concat();
 			this.baseAttachment = redGPU.device.createTexture({
@@ -56,7 +56,7 @@ export default class RedBasePostEffect extends RedMix.mix(
 		}
 	}
 	render(redGPU, redView, renderScene, diffuseTextureView) {
-		this.checkSize(redGPU,redView);
+		this.checkSize(redGPU, redView);
 
 		const commandEncoder_effect = redGPU.device.createCommandEncoder();
 		const passEncoder_effect = commandEncoder_effect.beginRenderPass(

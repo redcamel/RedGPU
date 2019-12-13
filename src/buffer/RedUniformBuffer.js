@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.11 20:19:9
+ *   Last modification time of this file - 2019.12.13 10:30:31
  *
  */
 
@@ -12,7 +12,7 @@ import RedUTIL from "../util/RedUTIL.js";
 import RedGPU from "../RedGPU.js";
 import RedUUID from "../base/RedUUID.js";
 
-export default class RedUniformBuffer extends RedUUID{
+export default class RedUniformBuffer extends RedUUID {
 	#redGPU;
 	GPUBuffer;
 	uniformBufferDescriptor;

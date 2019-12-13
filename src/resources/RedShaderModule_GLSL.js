@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.12 18:53:51
+ *   Last modification time of this file - 2019.12.13 10:30:31
  *
  */
 const rootMap = {
@@ -31,7 +31,7 @@ export default class RedShaderModule_GLSL {
 	shaderModuleMap;
 	GPUShaderModule;
 	currentKey;
-	constructor(redGPU, type, materialClass, source, ) {
+	constructor(redGPU, type, materialClass, source,) {
 		if (!rootMap[type][materialClass.name]) {
 			let tSourceMap = new Map();
 			tSourceMap.set(materialClass.name, source);

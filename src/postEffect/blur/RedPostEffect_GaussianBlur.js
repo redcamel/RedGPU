@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.11 20:19:9
+ *   Last modification time of this file - 2019.12.13 10:30:31
  *
  */
 
@@ -47,7 +47,7 @@ export default class RedPostEffect_GaussianBlur extends RedBasePostEffect {
 
 	}
 	render(redGPU, redView, renderScene, diffuseTextureView) {
-		this.checkSize(redGPU,redView);
+		this.checkSize(redGPU, redView);
 		this.#blurX.render(redGPU, redView, renderScene, diffuseTextureView);
 		this.#blurY.render(redGPU, redView, renderScene, this.#blurX.baseAttachmentView);
 		this.baseAttachment = this.#blurY.baseAttachment;

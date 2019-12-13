@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 10:30:31
+ *   Last modification time of this file - 2019.12.12 21:19:8
  *
  */
 
@@ -68,6 +68,7 @@ let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty, 
 			}
 		}
 		if (tGeometry) {
+
 			if (transparentSortMode && tPipeline.GPURenderPipeline) {
 				passEncoder.setPipeline(tPipeline.GPURenderPipeline);
 
@@ -86,64 +87,84 @@ let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty, 
 					passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
 				} else passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
 			}
+
 			if (tDirtyPipeline || tMaterialChanged) {
 				if (!tMesh.isPostEffectQuad) {
-					// console.log('tDirtyPipeline', tDirtyPipeline, 'tMaterialChanged', tMaterialChanged)
-					// console.time('tPipeline.updatePipeline_sampleCount4' + tMesh._UUID)
+					console.log('tDirtyPipeline',tDirtyPipeline,'tMaterialChanged',tMaterialChanged)
+					console.time('tPipeline.updatePipeline_sampleCount4' + tMesh._UUID)
 					tPipeline.updatePipeline_sampleCount4(redGPU, redView);
-					// console.timeEnd('tPipeline.updatePipeline_sampleCount4' + tMesh._UUID)
+					console.timeEnd('tPipeline.updatePipeline_sampleCount4' + tMesh._UUID)
 				}
+				// const renderBundleEncoder = redGPU.device.createRenderBundleEncoder({
+				// 	colorFormats: [redGPU.swapChainFormat],
+				// 	depthStencilFormat :["depth24plus-stencil8"],
+				// 	sampleCount:4
+				// });
+				// renderBundleEncoder.setPipeline(tPipeline.GPURenderPipeline);
+				// renderBundleEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
+				// if(tGeometry.indexBuffer) renderBundleEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
+				// renderBundleEncoder.setBindGroup(0, redView.systemUniformInfo_vertex.GPUBindGroup);
+				// renderBundleEncoder.setBindGroup(1, redView.systemUniformInfo_fragment.GPUBindGroup);
+				// renderBundleEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹
+				// renderBundleEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup); // 젲;ㄹ 빙;ㄴㄷ;ㅇ ㄱ,릅
+				// if (tGeometry.indexBuffer) renderBundleEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
+				// else renderBundleEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
+				//
+				// const renderBundle = renderBundleEncoder.finish();
+				// tMesh.renderBundle = renderBundle
+			}
+
+			// passEncoder.executeBundles([tMesh.renderBundle]);
+			if (tMesh.transparentSort) {
+				transparentSortList.push(tMesh)
 			} else {
-				if (tMesh.transparentSort) {
-					transparentSortList.push(tMesh)
-				} else {
-					///////////////////////////////////////
-					a00 = resultPreMTX[0], a01 = resultPreMTX[1], a02 = resultPreMTX[2], a03 = resultPreMTX[3];
-					a10 = resultPreMTX[4], a11 = resultPreMTX[5], a12 = resultPreMTX[6], a13 = resultPreMTX[7];
-					a20 = resultPreMTX[8], a21 = resultPreMTX[9], a22 = resultPreMTX[10], a23 = resultPreMTX[11];
-					a30 = resultPreMTX[12], a31 = resultPreMTX[13], a32 = resultPreMTX[14], a33 = resultPreMTX[15];
-					b0 = tMVMatrix[12];
-					b1 = tMVMatrix[13];
-					b2 = tMVMatrix[14];
-					b3 = tMVMatrix[15];
-					resultPosition.x = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
-					resultPosition.y = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
-					// resultPosition.z = b0*a02 + b1*a12 + b2*a22 + b3*a32;
-					resultPosition.w = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
-					resultPosition.x = resultPosition.x * 0.5 / resultPosition.w + 0.5;
-					resultPosition.y = resultPosition.y * 0.5 / resultPosition.w + 0.5;
-					tX = (resultPosition.x * tViewRect[2])
-					tY = ((1 - resultPosition.y) * tViewRect[3])
-					///////////////////////////////////////
-					if (tViewRect[2] - tX > 0 && tViewRect[3] - tY > 0 && tPipeline.GPURenderPipeline) {
-						passEncoder.setPipeline(tPipeline.GPURenderPipeline);
-						passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹는 매그룹마다 다르니 또 업데이트 해줘야함 -_-
-						if (prevMaterial_UUID != tMaterial._UUID) passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
-						prevMaterial_UUID = tMaterial._UUID;
-						if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
-							passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
-							prevVertexBuffer_UUID = tGeometry.interleaveBuffer._UUID
-						}
-						if (tGeometry.indexBuffer) {
-							if (prevIndexBuffer_UUID != tGeometry.indexBuffer._UUID) {
-								passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
-								prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
-							}
-							passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
-						} else passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
-
+				///////////////////////////////////////
+				a00 = resultPreMTX[0], a01 = resultPreMTX[1], a02 = resultPreMTX[2], a03 = resultPreMTX[3];
+				a10 = resultPreMTX[4], a11 = resultPreMTX[5], a12 = resultPreMTX[6], a13 = resultPreMTX[7];
+				a20 = resultPreMTX[8], a21 = resultPreMTX[9], a22 = resultPreMTX[10], a23 = resultPreMTX[11];
+				a30 = resultPreMTX[12], a31 = resultPreMTX[13], a32 = resultPreMTX[14], a33 = resultPreMTX[15];
+				b0 = tMVMatrix[12];
+				b1 = tMVMatrix[13];
+				b2 = tMVMatrix[14];
+				b3 = tMVMatrix[15];
+				resultPosition.x = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
+				resultPosition.y = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
+				// resultPosition.z = b0*a02 + b1*a12 + b2*a22 + b3*a32;
+				resultPosition.w = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
+				resultPosition.x = resultPosition.x * 0.5 / resultPosition.w + 0.5;
+				resultPosition.y = resultPosition.y * 0.5 / resultPosition.w + 0.5;
+				tX = (resultPosition.x * tViewRect[2])
+				tY = ((1 - resultPosition.y) * tViewRect[3])
+				///////////////////////////////////////
+				if (tViewRect[2] - tX > 0 && tViewRect[3] - tY > 0 && tPipeline.GPURenderPipeline) {
+					passEncoder.setPipeline(tPipeline.GPURenderPipeline);
+					passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹는 매그룹마다 다르니 또 업데이트 해줘야함 -_-
+					if (prevMaterial_UUID != tMaterial._UUID) passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
+					prevMaterial_UUID = tMaterial._UUID;
+					if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
+						passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
+						prevVertexBuffer_UUID = tGeometry.interleaveBuffer._UUID
 					}
-					tMesh._prevMaterialUUID = tMaterial._UUID;
-				}
+					if (tGeometry.indexBuffer) {
+						if (prevIndexBuffer_UUID != tGeometry.indexBuffer._UUID) {
+							passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
+							prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
+						}
+						passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
+					} else passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
 
+				}
+				tMesh._prevMaterialUUID = tMaterial._UUID;
 			}
 			// materialPropertyCheck
 			////////////////////////
 		}
 
 		if (tDirtyTransform || parentDirty) {
+
 			tLocalMatrix = tMesh.localMatrix;
 			parentMTX = parent ? parent.matrix : null;
+
 			/////////////////////////////////////
 			a00 = 1, a01 = 0, a02 = 0,
 				a10 = 0, a11 = 1, a12 = 0,
@@ -274,6 +295,8 @@ let renderScene = (redGPU, redView, passEncoder, parent, children, parentDirty, 
 			tMesh.uniformBuffer_mesh.meshFloat32Array.set(tMesh.normalMatrix, tMesh.offsetNormalMatrix / Float32Array.BYTES_PER_ELEMENT);
 
 		}
+
+
 		if (tSkinInfo) {
 			var joints = tSkinInfo['joints'];
 			var joint_i = 0, len = joints.length;

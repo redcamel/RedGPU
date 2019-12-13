@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.10 14:18:48
+ *   Last modification time of this file - 2019.12.13 10:30:31
  *
  */
 
@@ -51,7 +51,7 @@ export default class RedBitmapMaterial extends RedMix.mix(
 	}
 `;
 	static PROGRAM_OPTION_LIST = ['diffuseTexture'];
-	static uniformsBindGroupLayoutDescriptor_material= {
+	static uniformsBindGroupLayoutDescriptor_material = {
 		bindings: [
 			{binding: 0, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
 			{binding: 1, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"}

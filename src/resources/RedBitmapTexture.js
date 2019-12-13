@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.12 21:19:8
+ *   Last modification time of this file - 2019.12.13 10:30:31
  *
  */
 "use strict";
@@ -92,7 +92,7 @@ export default class RedBitmapTexture {
 			console.log('src')
 		} else {
 			const mapKey = src + this.sampler.string + useMipmap;
-			console.log('this.sampler.string',this.sampler.string)
+			console.log('this.sampler.string', this.sampler.string)
 			console.log('mapKey', mapKey);
 			if (TABLE.get(mapKey)) {
 				console.log('캐시된 녀석을 던집', mapKey, TABLE.get(mapKey));
@@ -184,16 +184,11 @@ export default class RedBitmapTexture {
 	resolve(texture) {
 		this.#GPUTexture = texture;
 		this.#GPUTextureView = texture.createView();
-		let data;
-		let tick = _ => {
-			data = this.#updateList[this.#updateList.length - 1]
-			if (data) {
-				data[0][data[1]] = this
-				this.#updateList.pop()
-				requestAnimationFrame(tick)
-			}
-		}
-		requestAnimationFrame(tick)
+		this.#updateList.forEach(data => {
+			console.log(data[1]);
+			data[0][data[1]] = this
+		});
+		this.#updateList.length = 0
 	}
 
 	addUpdateTarget(target, key) {
