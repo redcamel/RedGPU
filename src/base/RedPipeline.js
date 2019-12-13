@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 13:21:22
+ *   Last modification time of this file - 2019.12.13 19:11:47
  *
  */
 
@@ -13,18 +13,18 @@ import RedUUID from "./RedUUID.js";
 let RedPipeline_callNum = 0
 let lastPromises = [];
 export default class RedPipeline extends RedUUID {
-	#redGPU;
+	#redGPUContext;
 	#targetMesh;
 	GPURenderPipeline;
-	constructor(redGPU, targetMesh) {
+	constructor(redGPUContext, targetMesh) {
 		super();
-		this.#redGPU = redGPU;
+		this.#redGPUContext = redGPUContext;
 		this.#targetMesh = targetMesh;
 		this.GPURenderPipeline = null;
 	}
-	updatePipeline_sampleCount4(redGPU, redView) {
+	updatePipeline_sampleCount4(redGPUContext, redView) {
 		let targetMesh = this.#targetMesh;
-		const device = redGPU.device;
+		const device = redGPUContext.device;
 		const descriptor = {
 			// 레이아웃은 재질이 알고있으니 들고옴
 			layout: device.createPipelineLayout(
@@ -51,7 +51,7 @@ export default class RedPipeline extends RedUUID {
 			// 컬러모드 지정하고
 			colorStates: [
 				{
-					format: redGPU.swapChainFormat,
+					format: redGPUContext.swapChainFormat,
 					colorBlend: {
 						srcFactor: "src-alpha",
 						dstFactor: "one-minus-src-alpha",
@@ -64,7 +64,7 @@ export default class RedPipeline extends RedUUID {
 					}
 				},
 				{
-					format: redGPU.swapChainFormat
+					format: redGPUContext.swapChainFormat
 				}
 			],
 			rasterizationState: {
@@ -112,9 +112,9 @@ export default class RedPipeline extends RedUUID {
 
 
 	}
-	updatePipeline_sampleCount1(redGPU, redView) {
+	updatePipeline_sampleCount1(redGPUContext, redView) {
 		let targetMesh = this.#targetMesh;
-		const device = redGPU.device;
+		const device = redGPUContext.device;
 		const descriptor = {
 			// 레이아웃은 재질이 알고있으니 들고옴
 			layout: device.createPipelineLayout(
@@ -141,7 +141,7 @@ export default class RedPipeline extends RedUUID {
 			// 컬러모드 지정하고
 			colorStates: [
 				{
-					format: redGPU.swapChainFormat,
+					format: redGPUContext.swapChainFormat,
 					alphaBlend: {
 						srcFactor: "src-alpha",
 						dstFactor: "one-minus-src-alpha",

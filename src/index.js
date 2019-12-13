@@ -5,13 +5,8 @@
  *   Last modification time of this file - 2019.12.13 19:11:47
  *
  */
-"use strict";
+import RedGPUContext from "./RedGPUContext.js";
 
-export default class RedPostEffect {
-	#effectList = [];
-	constructor(redGPUContext) {
-
-	}
-	get effectList() { return this.#effectList}
-	addEffect(v) {this.#effectList.push(v)}
+export default {
+	RedGPUContext
 }

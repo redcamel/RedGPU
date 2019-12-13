@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 10:30:31
+ *   Last modification time of this file - 2019.12.13 19:11:47
  *
  */
 
@@ -12,16 +12,16 @@ import RedGeometry from "../geometry/RedGeometry.js";
 import RedInterleaveInfo from "../geometry/RedInterleaveInfo.js";
 
 export default class RedBox {
-	constructor(redGPU, width = 1, height = 1, depth = 1, wSegments = 1, hSegments = 1, dSegments = 1) {
+	constructor(redGPUContext, width = 1, height = 1, depth = 1, wSegments = 1, hSegments = 1, dSegments = 1) {
 		let typeKey;
 		// 유일키 생성
 		typeKey = [this.constructor.name, width, height, depth, wSegments, hSegments, dSegments].join('_');
-		if (redGPU.state.RedGeometry.has(typeKey)) return redGPU.state.RedGeometry.get(typeKey);
-		let tData = this.#makeData(redGPU, typeKey, width, height, depth, wSegments, hSegments, dSegments);
+		if (redGPUContext.state.RedGeometry.has(typeKey)) return redGPUContext.state.RedGeometry.get(typeKey);
+		let tData = this.#makeData(redGPUContext, typeKey, width, height, depth, wSegments, hSegments, dSegments);
 		this.interleaveBuffer = tData['interleaveBuffer'];
 		this.indexBuffer = tData['indexBuffer'];
 		this.vertexState = tData['vertexState'];
-		redGPU.state.RedGeometry.set(typeKey, this);
+		redGPUContext.state.RedGeometry.set(typeKey, this);
 		console.log(this)
 	}
 
@@ -66,7 +66,7 @@ export default class RedBox {
 			groupStart += groupCount;
 			numberOfVertices += vertexCounter;
 		};
-		return function (redGPU, typeKey, width, height, depth, wSegments, hSegments, dSegments) {
+		return function (redGPUContext, typeKey, width, height, depth, wSegments, hSegments, dSegments) {
 			////////////////////////////////////////////////////////////////////////////
 			// 데이터 생성!
 			// buffers Data
@@ -81,9 +81,9 @@ export default class RedBox {
 			buildPlane(interleaveData, indexData, 'x', 'y', 'z', 1, -1, width, height, depth, wSegments, hSegments, 4); // pz
 			buildPlane(interleaveData, indexData, 'x', 'y', 'z', -1, -1, width, height, -depth, wSegments, hSegments, 5); // nz
 			return new RedGeometry(
-				redGPU,
+				redGPUContext,
 				new RedBuffer(
-					redGPU,
+					redGPUContext,
 					`${typeKey}_interleaveBuffer`,
 					RedBuffer.TYPE_VERTEX,
 					new Float32Array(interleaveData),
@@ -94,7 +94,7 @@ export default class RedBox {
 					]
 				),
 				new RedBuffer(
-					redGPU,
+					redGPUContext,
 					`${typeKey}_indexBuffer`,
 					RedBuffer.TYPE_INDEX,
 					new Uint32Array(indexData)

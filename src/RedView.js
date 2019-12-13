@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.11 21:5:50
+ *   Last modification time of this file - 2019.12.13 19:11:47
  *
  */
 
@@ -16,7 +16,7 @@ export default class RedView {
 	get viewRect() {
 		return this.#viewRect;
 	}
-	#redGPU;
+	#redGPUContext;
 	#scene;
 	#camera;
 	_x = 0;
@@ -39,14 +39,14 @@ export default class RedView {
 	#systemUniformInfo_fragment_data;
 	#postEffect;
 
-	constructor(redGPU, scene, camera) {
-		this.#redGPU = redGPU;
+	constructor(redGPUContext, scene, camera) {
+		this.#redGPUContext = redGPUContext;
 		this.camera = camera;
 		this.scene = scene;
-		this.systemUniformInfo_vertex = this.#makeSystemUniformInfo_vertex(redGPU.device);
-		this.systemUniformInfo_fragment = this.#makeSystemUniformInfo_fragment(redGPU.device);
+		this.systemUniformInfo_vertex = this.#makeSystemUniformInfo_vertex(redGPUContext.device);
+		this.systemUniformInfo_fragment = this.#makeSystemUniformInfo_fragment(redGPUContext.device);
 		this.projectionMatrix = mat4.create();
-		this.#postEffect = new RedPostEffect(redGPU);
+		this.#postEffect = new RedPostEffect(redGPUContext);
 
 	}
 
@@ -58,7 +58,7 @@ export default class RedView {
 		;
 		const uniformBufferDescriptor = {
 			size: uniformBufferSize,
-			usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+			usage: globalThis.GPUBufferUsage.UNIFORM | globalThis.GPUBufferUsage.COPY_DST,
 		};
 		const bindGroupLayoutDescriptor = {
 			bindings: [
@@ -105,7 +105,7 @@ export default class RedView {
 		;
 		const uniformBufferDescriptor = {
 			size: uniformBufferSize,
-			usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+			usage: globalThis.GPUBufferUsage.UNIFORM | globalThis.GPUBufferUsage.COPY_DST,
 
 		};
 		const bindGroupLayoutDescriptor = {
@@ -139,8 +139,8 @@ export default class RedView {
 			GPUBindGroup: uniformBindGroup
 		}
 	};
-	resetTexture(redGPU) {
-		this.#viewRect = this.getViewRect(redGPU);
+	resetTexture(redGPUContext) {
+		this.#viewRect = this.getViewRect(redGPUContext);
 		if (this.baseAttachment) {
 			this.baseAttachment.destroy();
 			this.baseAttachment2.destroy();
@@ -149,37 +149,37 @@ export default class RedView {
 			this.baseDepthStencilAttachment.destroy();
 		}
 		console.log(this.#viewRect);
-		this.baseAttachment = redGPU.device.createTexture({
+		this.baseAttachment = redGPUContext.device.createTexture({
 			size: {width: this.#viewRect[2], height: this.#viewRect[3], depth: 1},
 			sampleCount: 4,
-			format: redGPU.swapChainFormat,
+			format: redGPUContext.swapChainFormat,
 			usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED
 		});
 		this.baseAttachmentView = this.baseAttachment.createView();
-		this.baseResolveTarget = redGPU.device.createTexture({
+		this.baseResolveTarget = redGPUContext.device.createTexture({
 			size: {width: this.#viewRect[2], height: this.#viewRect[3], depth: 1},
 			sampleCount: 1,
-			format: redGPU.swapChainFormat,
+			format: redGPUContext.swapChainFormat,
 			usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED
 		});
 		this.baseResolveTargetView = this.baseResolveTarget.createView();
 
-		this.baseAttachment2 = redGPU.device.createTexture({
+		this.baseAttachment2 = redGPUContext.device.createTexture({
 			size: {width: this.#viewRect[2], height: this.#viewRect[3], depth: 1},
 			sampleCount: 4,
-			format: redGPU.swapChainFormat,
+			format: redGPUContext.swapChainFormat,
 			usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED
 		});
 		this.baseAttachment2View = this.baseAttachment2.createView();
-		this.baseResolveTarget2 = redGPU.device.createTexture({
+		this.baseResolveTarget2 = redGPUContext.device.createTexture({
 			size: {width: this.#viewRect[2], height: this.#viewRect[3], depth: 1},
 			sampleCount: 1,
-			format: redGPU.swapChainFormat,
+			format: redGPUContext.swapChainFormat,
 			usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED
 		});
 		this.baseResolveTarget2View = this.baseResolveTarget2.createView();
 
-		this.baseDepthStencilAttachment = redGPU.device.createTexture({
+		this.baseDepthStencilAttachment = redGPUContext.device.createTexture({
 			size: {width: this.#viewRect[2], height: this.#viewRect[3], depth: 1},
 			sampleCount: 4,
 			format: "depth24plus-stencil8",
@@ -188,13 +188,13 @@ export default class RedView {
 		this.baseDepthStencilAttachmentView = this.baseDepthStencilAttachment.createView();
 
 	}
-	updateSystemUniform(passEncoder, redGPU) {
+	updateSystemUniform(passEncoder, redGPUContext) {
 		//TODO 여기도 오프셋 자동으로 계산하게 변경해야함
 		let systemUniformInfo_vertex, systemUniformInfo_fragment, aspect, offset;
 		let i, len;
 		systemUniformInfo_vertex = this.systemUniformInfo_vertex;
 		systemUniformInfo_fragment = this.systemUniformInfo_fragment;
-		this.#viewRect = this.getViewRect(redGPU);
+		this.#viewRect = this.getViewRect(redGPUContext);
 		passEncoder.setViewport(0, 0, this.#viewRect[2], this.#viewRect[3], 0, 1);
 		passEncoder.setScissorRect(0, 0, this.#viewRect[2], this.#viewRect[3]);
 		passEncoder.setBindGroup(0, systemUniformInfo_vertex.GPUBindGroup);
@@ -309,12 +309,12 @@ export default class RedView {
 		return this.#height;
 	}
 
-	getViewRect(redGPU) {
+	getViewRect(redGPUContext) {
 		return [
-			typeof this.x == 'number' ? this.x : parseInt(this.x) / 100 * redGPU.canvas.width,
-			typeof this.y == 'number' ? this.y : parseInt(this.y) / 100 * redGPU.canvas.height,
-			typeof this.width == 'number' ? this.width : parseInt(parseInt(this.width) / 100 * redGPU.canvas.width),
-			typeof this.height == 'number' ? this.height : parseInt(parseInt(this.height) / 100 * redGPU.canvas.height)
+			typeof this.x == 'number' ? this.x : parseInt(this.x) / 100 * redGPUContext.canvas.width,
+			typeof this.y == 'number' ? this.y : parseInt(this.y) / 100 * redGPUContext.canvas.height,
+			typeof this.width == 'number' ? this.width : parseInt(parseInt(this.width) / 100 * redGPUContext.canvas.width),
+			typeof this.height == 'number' ? this.height : parseInt(parseInt(this.height) / 100 * redGPUContext.canvas.height)
 		]
 	}
 
@@ -329,8 +329,8 @@ export default class RedView {
 			if (height.includes('%') && (+height.replace('%', '') >= 0)) this.#height = height;
 			else RedUTIL.throwFunc('RedView setSize : height는 0이상의 숫자나 %만 허용.', height);
 		}
-		this.getViewRect(this.#redGPU);
-		this.resetTexture(this.#redGPU)
+		this.getViewRect(this.#redGPUContext);
+		this.resetTexture(this.#redGPUContext)
 	}
 
 	setLocation(x = this._x, y = this._y) {
@@ -345,7 +345,7 @@ export default class RedView {
 			else RedUTIL.throwFunc('RedView setLocation : y는 0이상의 숫자나 %만 허용.', y);
 		}
 		console.log('setLocation', this._x, this._y);
-		this.getViewRect(this.#redGPU)
+		this.getViewRect(this.#redGPUContext)
 	}
 
 }

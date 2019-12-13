@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 13:21:23
+ *   Last modification time of this file - 2019.12.13 19:11:47
  *
  */
 
@@ -149,8 +149,8 @@ export default class RedColorPhongTextureMaterial extends RedMix.mix(
 	];
 
 	#timeout
-	constructor(redGPU, color = '#ff0000', alpha = 1, normalTexture, specularTexture, emissiveTexture, displacementTexture) {
-		super(redGPU);
+	constructor(redGPUContext, color = '#ff0000', alpha = 1, normalTexture, specularTexture, emissiveTexture, displacementTexture) {
+		super(redGPUContext);
 		this.color = color;
 		this.alpha = alpha;
 		this.normalTexture = normalTexture;
@@ -207,7 +207,7 @@ export default class RedColorPhongTextureMaterial extends RedMix.mix(
 			{binding: 1, resource: this.sampler.GPUSampler},
 			{
 				binding: 2,
-				resource: this._displacementTexture ? this._displacementTexture.GPUTextureView : this.redGPU.state.emptyTextureView
+				resource: this._displacementTexture ? this._displacementTexture.GPUTextureView : this.redGPUContext.state.emptyTextureView
 			},
 			{
 				binding: 3,
@@ -220,15 +220,15 @@ export default class RedColorPhongTextureMaterial extends RedMix.mix(
 			{binding: 4, resource: this.sampler.GPUSampler},
 			{
 				binding: 5,
-				resource: this._normalTexture ? this._normalTexture.GPUTextureView : this.redGPU.state.emptyTextureView
+				resource: this._normalTexture ? this._normalTexture.GPUTextureView : this.redGPUContext.state.emptyTextureView
 			},
 			{
 				binding: 6,
-				resource: this._specularTexture ? this._specularTexture.GPUTextureView : this.redGPU.state.emptyTextureView
+				resource: this._specularTexture ? this._specularTexture.GPUTextureView : this.redGPUContext.state.emptyTextureView
 			},
 			{
 				binding: 7,
-				resource: this._emissiveTexture ? this._emissiveTexture.GPUTextureView : this.redGPU.state.emptyTextureView
+				resource: this._emissiveTexture ? this._emissiveTexture.GPUTextureView : this.redGPUContext.state.emptyTextureView
 			}
 		];
 		this._afterResetBindingInfo();

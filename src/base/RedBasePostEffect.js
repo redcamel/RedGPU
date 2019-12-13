@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 10:30:31
+ *   Last modification time of this file - 2019.12.13 19:11:47
  *
  */
 
@@ -32,33 +32,33 @@ export default class RedBasePostEffect extends RedMix.mix(
 	#prevViewRect = [];
 	baseAttachment;
 	baseAttachmentView;
-	constructor(redGPU) {
-		super(redGPU);
-		this.quad = new RedMesh(redGPU, new RedPlane(redGPU), this);
+	constructor(redGPUContext) {
+		super(redGPUContext);
+		this.quad = new RedMesh(redGPUContext, new RedPlane(redGPUContext), this);
 		this.quad.isPostEffectQuad = true
 	}
-	checkSize(redGPU, redView) {
+	checkSize(redGPUContext, redView) {
 		if ([this.#prevViewRect[2], this.#prevViewRect[3]].toString() != [redView.viewRect[2], redView.viewRect[3]].toString()) {
 			if (this.baseAttachment) this.baseAttachment.destroy();
 			this.#prevViewRect = redView.viewRect.concat();
-			this.baseAttachment = redGPU.device.createTexture({
+			this.baseAttachment = redGPUContext.device.createTexture({
 				size: {
 					width: redView.viewRect[2],
 					height: redView.viewRect[3],
 					depth: 1
 				},
 				sampleCount: 1,
-				format: redGPU.swapChainFormat,
+				format: redGPUContext.swapChainFormat,
 				usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED
 			});
 			this.baseAttachmentView = this.baseAttachment.createView();
 			return true
 		}
 	}
-	render(redGPU, redView, renderScene, diffuseTextureView) {
-		this.checkSize(redGPU, redView);
+	render(redGPUContext, redView, renderScene, diffuseTextureView) {
+		this.checkSize(redGPUContext, redView);
 
-		const commandEncoder_effect = redGPU.device.createCommandEncoder();
+		const commandEncoder_effect = redGPUContext.device.createCommandEncoder();
 		const passEncoder_effect = commandEncoder_effect.beginRenderPass(
 			{
 				colorAttachments: [{
@@ -69,14 +69,14 @@ export default class RedBasePostEffect extends RedMix.mix(
 		);
 		if (this._diffuseTexture != diffuseTextureView) {
 			this._diffuseTexture = diffuseTextureView;
-			this.quad.pipeline.updatePipeline_sampleCount1(redGPU, redView);
+			this.quad.pipeline.updatePipeline_sampleCount1(redGPUContext, redView);
 			this.resetBindingInfo()
 		}
-		redView.updateSystemUniform(passEncoder_effect, redGPU);
-		renderScene(redGPU, redView, passEncoder_effect, null, [this.quad]);
+		redView.updateSystemUniform(passEncoder_effect, redGPUContext);
+		renderScene(redGPUContext, redView, passEncoder_effect, null, [this.quad]);
 		passEncoder_effect.endPass();
 
-		redGPU.device.defaultQueue.submit([commandEncoder_effect.finish()]);
+		redGPUContext.device.defaultQueue.submit([commandEncoder_effect.finish()]);
 	}
 	resetBindingInfo() {
 		this.bindings = [

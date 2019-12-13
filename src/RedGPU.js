@@ -2,154 +2,182 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 10:30:31
+ *   Last modification time of this file - 2019.12.13 19:19:24
  *
  */
-
-"use strict";
+// base ///////////////////////////////////////////////////////////////////////
 import RedDetectorGPU from "./base/detect/RedDetectorGPU.js";
-
-let redGPUList = new Set();
-let setGlobalResizeEvent = function () {
-	window.addEventListener('resize', _ => {
-		for (const redGPU of redGPUList) redGPU.setSize()
-	})
-};
-export default class RedGPU {
-	#width = 0;
-	#height = 0;
-	#detector;
-	viewList = [];
-
-	constructor(canvas, glslang, initFunc) {
-		this.#detector = new RedDetectorGPU(this);
-		let state = true
-		if (navigator.gpu) {
-			navigator.gpu.requestAdapter({}).then(adapter => {
-				adapter.requestDevice({
-					powerPreference: "high-performance"
-				}).then(device => {
-					this.glslang = glslang;
-					this.canvas = canvas;
-					this.context = canvas.getContext('gpupresent');
-					this.device = device;
-					this.swapChainFormat = "rgba8unorm";
-					this.swapChain = configureSwapChain(this.device, this.swapChainFormat, this.context);
-					this.state = {
-						RedGeometry: new Map(),
-						RedBuffer: {
-							vertexBuffer: new Map(),
-							indexBuffer: new Map()
-						},
-						emptyTextureView: device.createTexture({
-							size: {
-								width: 1,
-								height: 1,
-								depth: 1,
-							},
-							format: this.swapChainFormat,
-							usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.SAMPLED,
-						}).createView(),
-						emptyCubeTextureView: device.createTexture({
-							size: {
-								width: 1,
-								height: 1,
-								depth: 1,
-							},
-							dimension: '2d',
-							arrayLayerCount: 6,
-							mipLevelCount: 1,
-							sampleCount: 1,
-							format: this.swapChainFormat,
-							usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.SAMPLED,
-						}).createView({
-							format: 'rgba8unorm',
-							dimension: 'cube',
-							aspect: 'all',
-							baseMipLevel: 0,
-							mipLevelCount: 1,
-							baseArrayLayer: 0,
-							arrayLayerCount: 6
-						})
-					};
-					/////
-					this.#detector.detectGPU();
-					///////
-					this.setSize('100%', '100%');
-					if (!redGPUList.size) setGlobalResizeEvent();
-					redGPUList.add(this);
-					console.log(redGPUList);
-					initFunc.call(this, true)
-				});
-			}).catch(error => {
-				state = false
-				initFunc(false, error)
-			});
-		} else {
-			initFunc(state = false, 'navigate.gpu is null')
-		}
-	}
-	addView(redView) {
-		this.viewList.push(redView)
-	}
-	removeView(redView) {
-		if (this.viewList.includes(redView)) this.viewList.splice(redView, 1)
-	}
-
-	get detector() {return this.#detector};
-	setSize(w = this.#width, h = this.#height) {
-		this.#width = w;
-		this.#height = h;
-		console.log('setSize!!!!!!!!!!!!!!!!!!!!!!');
-		console.log(w, h);
-		let tW, tH;
-		let rect = document.body.getBoundingClientRect();
-		if (typeof w != 'number' && w.includes('%')) tW = parseInt(+rect.width * w.replace('%', '') / 100);
-		else tW = w;
-		if (typeof h != 'number' && h.includes('%')) tH = parseInt(+rect.height * h.replace('%', '') / 100);
-		else tH = h;
-		this.canvas.width = tW;
-		this.canvas.height = tH;
-		this.canvas.style.width = tW + 'px';
-		this.canvas.style.height = tH + 'px';
-
-		console.log(this.baseAttachment);
-
-		this.viewList.forEach(redView => {
-			redView.setSize();
-			redView.setLocation()
-		});
-
-		requestAnimationFrame(_ => {
-			const swapChainTexture = this.swapChain.getCurrentTexture();
-			const commandEncoder = this.device.createCommandEncoder();
-			const textureView = swapChainTexture.createView();
-			console.log('textureView', textureView);
-			const passEncoder = commandEncoder.beginRenderPass({
-				colorAttachments: [
-					{
-						attachment: textureView,
-						loadValue: {r: 1, g: 0, b: 0.0, a: 0.0}
-					}
-				]
-			});
-			console.log(`setSize - input : ${w},${h} / result : ${tW}, ${tH}`);
-			passEncoder.setViewport(0, 0, tW, tH, 0, 1);
-			passEncoder.setScissorRect(0, 0, tW, tH);
-			passEncoder.endPass();
-			const test = commandEncoder.finish();
-			this.device.defaultQueue.submit([test]);
-		});
-	}
-
+import RedBaseLight from "./base/RedBaseLight.js";
+import RedBaseMaterial from "./base/RedBaseMaterial.js";
+import RedBaseObject3D from "./base/RedBaseObject3D.js";
+import RedShareGLSL from "./base/RedShareGLSL.js";
+import RedBasePostEffect from "./base/RedBasePostEffect.js";
+import RedMix from "./base/RedMix.js";
+import RedPipeline from "./base/RedPipeline.js";
+import RedDisplayContainer from "./base/RedDisplayContainer.js";
+import RedUUID from "./base/RedUUID.js";
+// buffer ///////////////////////////////////////////////////////////////////////
+import RedBindGroup from "./buffer/RedBindGroup.js";
+import RedBuffer from "./buffer/RedBuffer.js";
+import RedUniformBuffer from "./buffer/RedUniformBuffer.js";
+import RedUniformBufferDescriptor from "./buffer/RedUniformBufferDescriptor.js";
+// controller ///////////////////////////////////////////////////////////////////////
+import RedCamera from "./controller/RedCamera.js";
+import RedObitController from "./controller/RedObitController.js";
+// geometry ///////////////////////////////////////////////////////////////////////
+import RedGeometry from "./geometry/RedGeometry.js";
+import RedInterleaveInfo from "./geometry/RedInterleaveInfo.js";
+// light ///////////////////////////////////////////////////////////////////////
+import RedAmbientLight from "./light/RedAmbientLight.js";
+import RedDirectionalLight from "./light/RedDirectionalLight.js";
+import RedPointLight from "./light/RedPointLight.js";
+import RedSpotLight from "./light/RedSpotLight.js";
+// loader ///////////////////////////////////////////////////////////////////////
+import RedGLTFLoader from "./loader/RedGLTFLoader.js";
+// material ///////////////////////////////////////////////////////////////////////
+import RedGridMaterial from "./material/system/RedGridMaterial.js";
+import RedPBRMaterial_System from "./material/system/RedPBRMaterial_System.js";
+import RedSkyBoxMaterial from "./material/system/RedSkyBoxMaterial.js";
+import RedBitmapMaterial from "./material/RedBitmapMaterial.js";
+import RedColorMaterial from "./material/RedColorMaterial.js";
+import RedColorPhongMaterial from "./material/RedColorPhongMaterial.js";
+import RedColorPhongTextureMaterial from "./material/RedColorPhongTextureMaterial.js";
+import RedEnvironmentMaterial from "./material/RedEnvironmentMaterial.js";
+import RedStandardMaterial from "./material/RedStandardMaterial.js";
+// object3D ///////////////////////////////////////////////////////////////////////
+import RedAxis from "./object3D/RedAxis.js";
+import RedGrid from "./object3D/RedGrid.js";
+import RedMesh from "./object3D/RedMesh.js";
+import RedSkyBox from "./object3D/RedSkyBox.js";
+// postEffect ///////////////////////////////////////////////////////////////////////
+import RedPostEffect_BrightnessContrast from "./postEffect/adjustments/RedPostEffect_BrightnessContrast.js";
+import RedPostEffect_Gray from "./postEffect/adjustments/RedPostEffect_Gray.js";
+import RedPostEffect_HueSaturation from "./postEffect/adjustments/RedPostEffect_HueSaturation.js";
+import RedPostEffect_Invert from "./postEffect/adjustments/RedPostEffect_Invert.js";
+import RedPostEffect_Threshold from "./postEffect/adjustments/RedPostEffect_Threshold.js";
+import RedPostEffect_Bloom from "./postEffect/bloom/RedPostEffect_Bloom.js";
+import RedPostEffect_Bloom_blend from "./postEffect/bloom/RedPostEffect_Bloom_blend.js";
+import RedPostEffect_Blur from "./postEffect/blur/RedPostEffect_Blur.js";
+import RedPostEffect_BlurX from "./postEffect/blur/RedPostEffect_BlurX.js";
+import RedPostEffect_BlurY from "./postEffect/blur/RedPostEffect_BlurY.js";
+import RedPostEffect_GaussianBlur from "./postEffect/blur/RedPostEffect_GaussianBlur.js";
+import RedPostEffect_ZoomBlur from "./postEffect/blur/RedPostEffect_ZoomBlur.js";
+import RedPostEffect_DoF from "./postEffect/dof/RedPostEffect_DoF.js";
+import RedPostEffect_DoF_blend from "./postEffect/dof/RedPostEffect_DoF_blend.js";
+import RedPostEffect_HalfTone from "./postEffect/pixelate/RedPostEffect_HalfTone.js";
+import RedPostEffect_Pixelize from "./postEffect/pixelate/RedPostEffect_Pixelize.js";
+import RedPostEffect from "./postEffect/RedPostEffect.js";
+import RedPostEffect_Convolution from "./postEffect/RedPostEffect_Convolution.js";
+import RedPostEffect_Film from "./postEffect/RedPostEffect_Film.js";
+import RedPostEffect_Vignetting from "./postEffect/RedPostEffect_Vignetting.js";
+// primitives ///////////////////////////////////////////////////////////////////////
+import RedBox from "./primitives/RedBox.js";
+import RedCylinder from "./primitives/RedCylinder.js";
+import RedPlane from "./primitives/RedPlane.js";
+import RedSphere from "./primitives/RedSphere.js";
+// renderder ///////////////////////////////////////////////////////////////////////
+import RedRender from "./renderer/RedRender.js";
+// resources ///////////////////////////////////////////////////////////////////////
+import RedBitmapCubeTexture from "./resources/RedBitmapCubeTexture.js";
+import RedBitmapTexture from "./resources/RedBitmapTexture.js";
+import RedSampler from "./resources/RedSampler.js";
+import RedShaderModule_GLSL from "./resources/RedShaderModule_GLSL.js";
+import RedTypeSize from "./resources/RedTypeSize.js";
+// util ///////////////////////////////////////////////////////////////////////
+import RedUTILColor from "./util/func/RedUTILColor.js";
+import RedUTILMath from "./util/func/RedUTILMath.js";
+import RedUTIL from "./util/RedUTIL.js";
+//
+import RedGPUContext from "./RedGPUContext.js"
+import RedScene from "./RedScene.js"
+import RedView from "./RedView.js"
+const RedGPU = {
+	glMatrix,
+	// base
+	RedDetectorGPU,
+	RedBaseLight,
+	RedBaseMaterial,
+	RedBaseObject3D,
+	RedShareGLSL,
+	RedBasePostEffect,
+	RedMix,
+	RedPipeline,
+	RedDisplayContainer,
+	RedUUID,
+	// buffer ///////////////////////////////////////////////////////////////////////
+	RedBindGroup,
+	RedBuffer,
+	RedUniformBuffer,
+	RedUniformBufferDescriptor,
+	// controller ///////////////////////////////////////////////////////////////////////
+	RedCamera,
+	RedObitController,
+	// geometry ///////////////////////////////////////////////////////////////////////
+	RedGeometry,
+	RedInterleaveInfo,
+	// light ///////////////////////////////////////////////////////////////////////
+	RedAmbientLight,
+	RedDirectionalLight,
+	RedPointLight,
+	RedSpotLight,
+	// loader ///////////////////////////////////////////////////////////////////////
+	RedGLTFLoader,
+	// material ///////////////////////////////////////////////////////////////////////
+	RedGridMaterial,
+	RedPBRMaterial_System,
+	RedSkyBoxMaterial,
+	RedBitmapMaterial,
+	RedColorMaterial,
+	RedColorPhongMaterial,
+	RedColorPhongTextureMaterial,
+	RedEnvironmentMaterial,
+	RedStandardMaterial,
+	// object3D ///////////////////////////////////////////////////////////////////////
+	RedAxis,
+	RedGrid,
+	RedMesh,
+	RedSkyBox,
+	// postEffect ///////////////////////////////////////////////////////////////////////
+	RedPostEffect_BrightnessContrast,
+	RedPostEffect_Gray,
+	RedPostEffect_HueSaturation,
+	RedPostEffect_Invert,
+	RedPostEffect_Threshold,
+	RedPostEffect_Bloom,
+	RedPostEffect_Bloom_blend,
+	RedPostEffect_Blur,
+	RedPostEffect_BlurX,
+	RedPostEffect_BlurY,
+	RedPostEffect_GaussianBlur,
+	RedPostEffect_ZoomBlur,
+	RedPostEffect_DoF,
+	RedPostEffect_DoF_blend,
+	RedPostEffect_HalfTone,
+	RedPostEffect_Pixelize,
+	RedPostEffect,
+	RedPostEffect_Convolution,
+	RedPostEffect_Film,
+	RedPostEffect_Vignetting,
+	// primitives ///////////////////////////////////////////////////////////////////////
+	RedBox,
+	RedCylinder,
+	RedPlane,
+	RedSphere,
+	// renderder ///////////////////////////////////////////////////////////////////////
+	RedRender,
+	// resources ///////////////////////////////////////////////////////////////////////
+	RedBitmapCubeTexture,
+	RedBitmapTexture,
+	RedSampler,
+	RedShaderModule_GLSL,
+	RedTypeSize,
+	// util ///////////////////////////////////////////////////////////////////////
+	RedUTILColor,
+	RedUTILMath,
+	RedUTIL,
+	//
+	RedGPUContext,
+	RedScene,
+	RedView
 }
-
-function configureSwapChain(device, swapChainFormat, context) {
-	const swapChainDescriptor = {
-		device: device,
-		format: swapChainFormat,
-		usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC
-	};
-	console.log('swapChainDescriptor', swapChainDescriptor);
-	return context.configureSwapChain(swapChainDescriptor);
-}
+export default RedGPU;

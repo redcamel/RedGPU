@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 10:30:31
+ *   Last modification time of this file - 2019.12.13 19:11:47
  *
  */
 
@@ -84,8 +84,8 @@ export default class RedPostEffect_DoF_blend extends RedBasePostEffect {
 		float1_Float32Array[0] = this._focusLength;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['focusLength'], float1_Float32Array)
 	}
-	constructor(redGPU) {
-		super(redGPU);
+	constructor(redGPUContext) {
+		super(redGPUContext);
 	}
 	resetBindingInfo() {
 		this.bindings = [

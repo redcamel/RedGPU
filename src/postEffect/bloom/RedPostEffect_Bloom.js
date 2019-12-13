@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 10:30:31
+ *   Last modification time of this file - 2019.12.13 19:11:47
  *
  */
 
@@ -36,11 +36,11 @@ export default class RedPostEffect_Bloom extends RedBasePostEffect {
 	#threshold;
 	#exposure;
 	#bloomStrength;
-	constructor(redGPU) {
-		super(redGPU);
-		this.#thresholdEffect = new RedPostEffect_Threshold(redGPU);
-		this.#blurEffect = new RedPostEffect_GaussianBlur(redGPU);
-		this.#blenderEffect = new RedPostEffect_Bloom_blend(redGPU);
+	constructor(redGPUContext) {
+		super(redGPUContext);
+		this.#thresholdEffect = new RedPostEffect_Threshold(redGPUContext);
+		this.#blurEffect = new RedPostEffect_GaussianBlur(redGPUContext);
+		this.#blenderEffect = new RedPostEffect_Bloom_blend(redGPUContext);
 		this.blur = 20;
 		this.threshold = 75;
 		this.exposure = 1;
@@ -74,12 +74,12 @@ export default class RedPostEffect_Bloom extends RedBasePostEffect {
 		this.#bloomStrength = value;
 		this.#blenderEffect.bloomStrength = value;
 	}
-	render(redGPU, redView, renderScene, diffuseTextureView) {
-		this.checkSize(redGPU, redView);
-		this.#thresholdEffect.render(redGPU, redView, renderScene, diffuseTextureView);
-		this.#blurEffect.render(redGPU, redView, renderScene, this.#thresholdEffect.baseAttachmentView);
+	render(redGPUContext, redView, renderScene, diffuseTextureView) {
+		this.checkSize(redGPUContext, redView);
+		this.#thresholdEffect.render(redGPUContext, redView, renderScene, diffuseTextureView);
+		this.#blurEffect.render(redGPUContext, redView, renderScene, this.#thresholdEffect.baseAttachmentView);
 		this.#blenderEffect._blurTexture = this.#blurEffect.baseAttachmentView;
-		this.#blenderEffect.render(redGPU, redView, renderScene, diffuseTextureView);
+		this.#blenderEffect.render(redGPUContext, redView, renderScene, diffuseTextureView);
 		this.baseAttachment = this.#blenderEffect.baseAttachment;
 		this.baseAttachmentView = this.#blenderEffect.baseAttachmentView;
 	}

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 10:30:31
+ *   Last modification time of this file - 2019.12.13 19:11:47
  *
  */
 
@@ -14,8 +14,8 @@ export default class RedCamera extends RedBaseObject3D {
 	fov = 60;
 	nearClipping = 0.1;
 	farClipping = 100000;
-	constructor(redGPU) {
-		super(redGPU)
+	constructor(redGPUContext) {
+		super(redGPUContext)
 	}
 
 	lookAt(x, y, z) {

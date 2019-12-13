@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 10:30:31
+ *   Last modification time of this file - 2019.12.13 19:11:47
  *
  */
 const rootMap = {
@@ -26,18 +26,18 @@ const parseSource = function (tSource, replaceList) {
 	return tSource
 }
 export default class RedShaderModule_GLSL {
-	#redGPU;
+	#redGPUContext;
 	type;
 	shaderModuleMap;
 	GPUShaderModule;
 	currentKey;
-	constructor(redGPU, type, materialClass, source,) {
+	constructor(redGPUContext, type, materialClass, source,) {
 		if (!rootMap[type][materialClass.name]) {
 			let tSourceMap = new Map();
 			tSourceMap.set(materialClass.name, source);
 			rootMap[type][materialClass.name] = tSourceMap;
 		}
-		this.#redGPU = redGPU;
+		this.#redGPUContext = redGPUContext;
 		this.type = type;
 		this.originSource = source;
 		this.sourceMap = rootMap[type][materialClass.name];
@@ -66,11 +66,11 @@ export default class RedShaderModule_GLSL {
 			console.time('compileGLSL : ' + this.type + ' / ' + searchKey)
 			this.shaderModuleDescriptor = {
 				key: searchKey,
-				code: this.#redGPU.glslang.compileGLSL(this.sourceMap.get(searchKey), this.type),
+				code: this.#redGPUContext.glslang.compileGLSL(this.sourceMap.get(searchKey), this.type),
 				source: this.sourceMap.get(searchKey)
 			};
 			console.timeEnd('compileGLSL : ' + this.type + ' / ' + searchKey)
-			this.GPUShaderModule = this.#redGPU.device.createShaderModule(this.shaderModuleDescriptor);
+			this.GPUShaderModule = this.#redGPUContext.device.createShaderModule(this.shaderModuleDescriptor);
 			this.shaderModuleMap[searchKey] = this.GPUShaderModule;
 			// console.log(searchKey, this.shaderModuleMap[searchKey])
 		}

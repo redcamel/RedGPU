@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 10:30:31
+ *   Last modification time of this file - 2019.12.13 19:11:47
  *
  */
 "use strict";
@@ -11,10 +11,10 @@ import RedBox from "../primitives/RedBox.js";
 import RedSkyBoxMaterial from "../material/system/RedSkyBoxMaterial.js";
 
 export default class RedSkyBox extends RedBaseObject3D {
-	constructor(redGPU, skyBoxTexture) {
-		super(redGPU);
-		this.geometry = new RedBox(redGPU);
-		this.material = new RedSkyBoxMaterial(redGPU, skyBoxTexture);
+	constructor(redGPUContext, skyBoxTexture) {
+		super(redGPUContext);
+		this.geometry = new RedBox(redGPUContext);
+		this.material = new RedSkyBoxMaterial(redGPUContext, skyBoxTexture);
 		this.cullMode = 'front';
 	}
 }

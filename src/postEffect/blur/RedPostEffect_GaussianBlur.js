@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 10:30:31
+ *   Last modification time of this file - 2019.12.13 19:11:47
  *
  */
 
@@ -31,10 +31,10 @@ export default class RedPostEffect_GaussianBlur extends RedBasePostEffect {
 	baseAttachment;
 	baseAttachmentView;
 	_radius;
-	constructor(redGPU) {
-		super(redGPU);
-		this.#blurX = new RedPostEffect_BlurX(redGPU);
-		this.#blurY = new RedPostEffect_BlurY(redGPU);
+	constructor(redGPUContext) {
+		super(redGPUContext);
+		this.#blurX = new RedPostEffect_BlurX(redGPUContext);
+		this.#blurY = new RedPostEffect_BlurY(redGPUContext);
 		this.radius = 5;
 	}
 	get radius() {
@@ -46,10 +46,10 @@ export default class RedPostEffect_GaussianBlur extends RedBasePostEffect {
 		this.#blurY.size = value;
 
 	}
-	render(redGPU, redView, renderScene, diffuseTextureView) {
-		this.checkSize(redGPU, redView);
-		this.#blurX.render(redGPU, redView, renderScene, diffuseTextureView);
-		this.#blurY.render(redGPU, redView, renderScene, this.#blurX.baseAttachmentView);
+	render(redGPUContext, redView, renderScene, diffuseTextureView) {
+		this.checkSize(redGPUContext, redView);
+		this.#blurX.render(redGPUContext, redView, renderScene, diffuseTextureView);
+		this.#blurY.render(redGPUContext, redView, renderScene, this.#blurX.baseAttachmentView);
 		this.baseAttachment = this.#blurY.baseAttachment;
 		this.baseAttachmentView = this.#blurY.baseAttachmentView;
 	}

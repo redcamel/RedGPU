@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 10:30:31
+ *   Last modification time of this file - 2019.12.13 19:11:47
  *
  */
 
@@ -12,16 +12,16 @@ import RedGeometry from "../geometry/RedGeometry.js";
 import RedInterleaveInfo from "../geometry/RedInterleaveInfo.js";
 
 export default class RedPlane {
-	constructor(redGPU, width = 1, height = 1, wSegments = 1, hSegments = 1, flipY = false) {
+	constructor(redGPUContext, width = 1, height = 1, wSegments = 1, hSegments = 1, flipY = false) {
 		let typeKey;
 		// 유일키 생성
 		typeKey = [this.constructor.name, width, height, wSegments, hSegments].join('_');
-		if (redGPU.state.RedGeometry.has(typeKey)) return redGPU.state.RedGeometry.get(typeKey);
-		let tData = this.#makeData(redGPU, typeKey, width, height, wSegments, hSegments);
+		if (redGPUContext.state.RedGeometry.has(typeKey)) return redGPUContext.state.RedGeometry.get(typeKey);
+		let tData = this.#makeData(redGPUContext, typeKey, width, height, wSegments, hSegments);
 		this.interleaveBuffer = tData['interleaveBuffer'];
 		this.indexBuffer = tData['indexBuffer'];
 		this.vertexState = tData['vertexState'];
-		redGPU.state.RedGeometry.set(typeKey, this);
+		redGPUContext.state.RedGeometry.set(typeKey, this);
 		console.log(this)
 	}
 
@@ -33,7 +33,7 @@ export default class RedPlane {
 		let ix, iy;
 		let tX, tY;
 		let a, b, c, d;
-		return function (redGPU, typeKey, width, height, wSegments, hSegments, flipY) {
+		return function (redGPUContext, typeKey, width, height, wSegments, hSegments, flipY) {
 			width_half = width / 2;
 			height_half = height / 2;
 			gridX = Math.floor(wSegments) || 1;
@@ -68,9 +68,9 @@ export default class RedPlane {
 			}
 			////////////////////////////////////////////////////////////////////////////
 			return new RedGeometry(
-				redGPU,
+				redGPUContext,
 				new RedBuffer(
-					redGPU,
+					redGPUContext,
 					`${typeKey}_interleaveBuffer`,
 					RedBuffer.TYPE_VERTEX,
 					new Float32Array(interleaveData),
@@ -81,7 +81,7 @@ export default class RedPlane {
 					]
 				),
 				new RedBuffer(
-					redGPU,
+					redGPUContext,
 					`${typeKey}_indexBuffer`,
 					RedBuffer.TYPE_INDEX,
 					new Uint32Array(indexData)
