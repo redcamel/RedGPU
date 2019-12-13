@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.12 21:19:8
+ *   Last modification time of this file - 2019.12.13 10:30:31
  *
  */
 
@@ -85,16 +85,13 @@ export default class RedBaseMaterial extends RedUUID {
 	}
 	updateUniformBuffer() {
 		let tempFloat32 = new Float32Array(1);
-		//음 전체 속성 업데이트라고 봐야할까나..
-		//TODO : 최적화...필요..
+		//TODO : 이거 한번에 업데이트 할수있게 수정해야함
 		let i2;
 		let dataVertex, dataFragment, tData;
 		let tValue;
 		dataVertex = this.uniformBufferDescriptor_vertex.redStruct;
 		dataFragment = this.uniformBufferDescriptor_fragment.redStruct;
-		// console.log(dataVertex)
 		i2 = dataVertex.length > dataFragment.length ? dataVertex.length : dataFragment.length;
-		// console.log('뭐하나보자')
 		//FIXME - _로 가져올 수있게 변경할까?
 		while (i2--) {
 			tData = dataVertex[i2];
@@ -131,7 +128,7 @@ export default class RedBaseMaterial extends RedUUID {
 		throw new Error(`${this.constructor.name} : resetBindingInfo must override!!!`)
 	}
 	_afterResetBindingInfo() {
-		console.time('_afterResetBindingInfo'+this._UUID)
+		console.time('_afterResetBindingInfo - ' + this.constructor.name)
 
 		this.searchModules();
 		this.setUniformBindGroupDescriptor();
@@ -140,7 +137,7 @@ export default class RedBaseMaterial extends RedUUID {
 			this.updateUniformBuffer();
 			this.#uniformBufferUpdated = true;
 		}
-		console.timeEnd('_afterResetBindingInfo'+this._UUID)
+		console.timeEnd('_afterResetBindingInfo - ' + this.constructor.name)
 		this.updateUUID();
 	}
 
@@ -157,12 +154,12 @@ export default class RedBaseMaterial extends RedUUID {
 			// console.log(key, this[key]);
 			if (this[key]) tKey.push(key);
 		}
-		console.time('searchModules_'+ tKey);
+		console.time('searchModules_' + tKey);
 		// tKey = tKey.join('_');
 		console.log('searchModules', tKey);
 		this.vShaderModule.searchShaderModule(tKey);
 		this.fShaderModule.searchShaderModule(tKey);
-		console.timeEnd('searchModules_'+ tKey);
+		console.timeEnd('searchModules_' + tKey);
 		// console.log(this.vShaderModule);
 		// console.log(this.fShaderModule);
 	}

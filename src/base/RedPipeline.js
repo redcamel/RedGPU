@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.12 21:19:8
+ *   Last modification time of this file - 2019.12.13 10:30:31
  *
  */
 
@@ -11,7 +11,6 @@
 import RedUUID from "./RedUUID.js";
 
 let RedPipeline_callNum = 0
-let lastPromise;
 export default class RedPipeline extends RedUUID {
 	#redGPU;
 	#targetMesh;
@@ -80,39 +79,10 @@ export default class RedPipeline extends RedUUID {
 			sampleCount: 4,
 			//alphaToCoverageEnabled : true // alphaToCoverageEnabled isn't supported (yet)
 		};
-		if(lastPromise){
-			lastPromise.then(_=>{
-				let promise = new Promise(((resolve, reject) => {
-					// console.time('updatePipeline_sampleCount4' + this._UUID)
-					let t0 = device.createRenderPipeline(descriptor);
-					// console.log('updatePipeline_sampleCount4 - targetMesh._material.fShaderModule.currentKey', targetMesh._material.fShaderModule.currentKey)
-					// console.timeEnd('updatePipeline_sampleCount4' + this._UUID)
-					resolve(t0)
-				}))
-				promise.then(v=>{
-					RedPipeline_callNum++
-					console.log('RedPipeline_callNum',RedPipeline_callNum)
-					this.GPURenderPipeline = v
-					this.updateUUID()
-				})
-				lastPromise = promise
-			})
-		}else{
-			let promise = new Promise(((resolve, reject) => {
-				// console.time('updatePipeline_sampleCount4' + this._UUID)
-				let t0 = device.createRenderPipeline(descriptor);
-				// console.log('updatePipeline_sampleCount4 - targetMesh._material.fShaderModule.currentKey', targetMesh._material.fShaderModule.currentKey)
-				// console.timeEnd('updatePipeline_sampleCount4' + this._UUID)
-				resolve(t0)
-			}))
-			promise.then(v=>{
-				RedPipeline_callNum++
-				console.log('RedPipeline_callNum',RedPipeline_callNum)
-				this.GPURenderPipeline = v
-				this.updateUUID()
-			})
-		}
-
+		RedPipeline_callNum++
+		console.log('RedPipeline_callNum', RedPipeline_callNum)
+		this.GPURenderPipeline = device.createRenderPipeline(descriptor);
+		this.updateUUID()
 
 
 	}

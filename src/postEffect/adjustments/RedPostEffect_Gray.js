@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.11 20:19:9
+ *   Last modification time of this file - 2019.12.13 10:30:31
  *
  */
 
@@ -11,7 +11,7 @@ import RedBaseMaterial from "../../base/RedBaseMaterial.js";
 import RedShareGLSL from "../../base/RedShareGLSL.js";
 import RedBasePostEffect from "../../base/RedBasePostEffect.js";
 
-export default class RedPostEffect_Gray extends RedBasePostEffect{
+export default class RedPostEffect_Gray extends RedBasePostEffect {
 	static vertexShaderGLSL = `
 	#version 450
 	${RedShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
