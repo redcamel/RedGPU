@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 19:11:47
+ *   Last modification time of this file - 2019.12.13 19:19:24
  *
  */
 
@@ -13,7 +13,6 @@ import RedInterleaveInfo from "../geometry/RedInterleaveInfo.js";
 
 export default class RedSphere {
 	constructor(redGPUContext, radius = 1, widthSegments = 8, heightSegments = 6, phiStart = 0, phiLength = Math.PI * 2, thetaStart = 0, thetaLength = Math.PI) {
-		console.log('뭐냐',redGPUContext)
 		let typeKey;
 		widthSegments = Math.max(3, Math.floor(widthSegments));
 		heightSegments = Math.max(2, Math.floor(heightSegments));
