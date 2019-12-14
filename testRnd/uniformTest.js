@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 19:33:10
+ *   Last modification time of this file - 2019.12.14 20:25:55
  *
  */
 import RedGPU from "../src/RedGPU.js";
@@ -35,13 +35,14 @@ new RedGPU.RedGPUContext(
 					'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
 					'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
 				],
-				'../assets/UV_Grid_Sm.jpg',
-				'../assets/UV_Grid_Sm.jpg',
-				'../assets/UV_Grid_Sm.jpg',
-				'../assets/UV_Grid_Sm.jpg',
-				'../assets/UV_Grid_Sm.jpg',
-				'../assets/UV_Grid_Sm.jpg',
-				'../assets/UV_Grid_Sm.jpg',
+				[
+					'../assets/cubemap/SwedishRoyalCastle/px.jpg',
+					'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
+					'../assets/cubemap/SwedishRoyalCastle/py.jpg',
+					'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
+					'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
+					'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
+				]
 			],
 			_ => {
 
@@ -92,9 +93,9 @@ new RedGPU.RedGPUContext(
 				testMat_colorPhongTexture_normal = new RedGPU.RedColorPhongTextureMaterial(this, '#fff253', 1, textureLoader.getTextureByIndex(2))
 				testMat_colorPhongTexture_normal_displacement = new RedGPU.RedColorPhongTextureMaterial(this, '#341fff', 1, textureLoader.getTextureByIndex(2), textureLoader.getTextureByIndex(5), textureLoader.getTextureByIndex(6), textureLoader.getTextureByIndex(4))
 				console.log(testMat_colorPhong)
-				testMat_bitmap = new RedGPU.RedBitmapMaterial(this, textureLoader.getTextureByIndex(13));
+				testMat_bitmap = new RedGPU.RedBitmapMaterial(this, textureLoader.getTextureByIndex(0));
 				testMat_standard_diffuse = new RedGPU.RedStandardMaterial(this, textureLoader.getTextureByIndex(1), null, textureLoader.getTextureByIndex(5), textureLoader.getTextureByIndex(6));
-				testMat_standard_diffuse_normal = new RedGPU.RedStandardMaterial(this, textureLoader.getTextureByIndex(0), textureLoader.getTextureByIndex(2), textureLoader.getTextureByIndex(5), textureLoader.getTextureByIndex(6));
+				testMat_standard_diffuse_normal = new RedGPU.RedStandardMaterial(this, textureLoader.getTextureByIndex(1), textureLoader.getTextureByIndex(2), textureLoader.getTextureByIndex(5), textureLoader.getTextureByIndex(6));
 				testMat_standard_diffuse_normal_displacement = new RedGPU.RedStandardMaterial(this, textureLoader.getTextureByIndex(1), textureLoader.getTextureByIndex(2), textureLoader.getTextureByIndex(5), textureLoader.getTextureByIndex(6), textureLoader.getTextureByIndex(4));
 
 
