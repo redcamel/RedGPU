@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 15:38:23
+ *   Last modification time of this file - 2019.12.14 17:33:43
  *
  */
 "use strict";
@@ -12,25 +12,29 @@ import RedBitmapCubeTexture from "../resources/RedBitmapCubeTexture.js";
 
 export default class RedTextureLoader extends RedUUID {
 	textures = [];
-	constructor(redGPUContext, srcList, callback) {
+	constructor(redGPUContext, srcInfoList, callback) {
 		super();
 		let loaded, check;
-		srcList = srcList || [];
+		srcInfoList = srcInfoList || [];
 		loaded = 0;
 		check = _ => {
 			loaded++
-			if (loaded == srcList.length) {
+			if (loaded == srcInfoList.length) {
 				if (callback) callback.call(this)
 			}
 		};
-		srcList.forEach((src, idx) => {
-			let t0;
+		srcInfoList.forEach((srcInfo, idx) => {
+			let t0, tSrc, tSampler;
 			let targetClass = RedBitmapTexture;
-			if (src instanceof Array) targetClass = RedBitmapCubeTexture;
+			if (srcInfo.hasOwnProperty('src')) {
+				tSrc = srcInfo.src;
+				tSampler = srcInfo.sampler;
+			} else tSrc = srcInfo
+			if (tSrc instanceof Array) targetClass = RedBitmapCubeTexture;
 			t0 = {
-				src: src,
+				src: tSrc,
 				texture: new targetClass(
-					redGPUContext, src, null, true,
+					redGPUContext, tSrc, tSampler, true,
 					function (e) {
 						// console.log('onload', this);
 						t0.loadSuccess = true;
@@ -45,11 +49,12 @@ export default class RedTextureLoader extends RedUUID {
 					}
 				),
 				loadEnd: false,
-				loadSuccess: false
+				loadSuccess: false,
+				userInfo: srcInfo
 			}
 			this.textures.push(t0)
 		})
-		console.log(this)
+		// console.log(this)
 	}
 	getTextureByIndex(index) {
 		return this.textures[index].texture
