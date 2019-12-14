@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 15:14:27
+ *   Last modification time of this file - 2019.12.14 16:4:46
  *
  */
 
@@ -28,6 +28,7 @@ let checkGlslang = function () {
 	return promise
 }
 export default class RedGPUContext {
+	static useDebugConsole = false;
 	#width = 0;
 	#height = 0;
 	#detector;
@@ -92,7 +93,6 @@ export default class RedGPUContext {
 								this.setSize('100%', '100%');
 								if (!redGPUContextList.size) setGlobalResizeEvent();
 								redGPUContextList.add(this);
-								console.log(redGPUContextList);
 								initFunc.call(this, true)
 							});
 					}).catch(error => {
@@ -115,8 +115,6 @@ export default class RedGPUContext {
 	setSize(w = this.#width, h = this.#height) {
 		this.#width = w;
 		this.#height = h;
-		console.log('setSize!!!!!!!!!!!!!!!!!!!!!!');
-		console.log(w, h);
 		let tW, tH;
 		let rect = document.body.getBoundingClientRect();
 		if (typeof w != 'number' && w.includes('%')) tW = parseInt(+rect.width * w.replace('%', '') / 100);
@@ -127,19 +125,14 @@ export default class RedGPUContext {
 		this.canvas.height = tH;
 		this.canvas.style.width = tW + 'px';
 		this.canvas.style.height = tH + 'px';
-
-		console.log(this.baseAttachment);
-
 		this.viewList.forEach(redView => {
 			redView.setSize();
 			redView.setLocation()
 		});
-
 		requestAnimationFrame(_ => {
 			const swapChainTexture = this.swapChain.getCurrentTexture();
 			const commandEncoder = this.device.createCommandEncoder();
 			const textureView = swapChainTexture.createView();
-			console.log('textureView', textureView);
 			const passEncoder = commandEncoder.beginRenderPass({
 				colorAttachments: [
 					{
@@ -148,7 +141,7 @@ export default class RedGPUContext {
 					}
 				]
 			});
-			console.log(`setSize - input : ${w},${h} / result : ${tW}, ${tH}`);
+			if (RedGPUContext.useDebugConsole) console.log(`setSize - input : ${w},${h} / result : ${tW}, ${tH}`);
 			passEncoder.setViewport(0, 0, tW, tH, 0, 1);
 			passEncoder.setScissorRect(0, 0, tW, tH);
 			passEncoder.endPass();
@@ -165,6 +158,6 @@ function configureSwapChain(device, swapChainFormat, context) {
 		format: swapChainFormat,
 		usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC
 	};
-	console.log('swapChainDescriptor', swapChainDescriptor);
+	if (RedGPUContext.useDebugConsole) console.log('swapChainDescriptor', swapChainDescriptor);
 	return context.configureSwapChain(swapChainDescriptor);
 }

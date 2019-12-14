@@ -2,12 +2,13 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 15:38:23
+ *   Last modification time of this file - 2019.12.14 16:4:46
  *
  */
 "use strict";
 import RedSampler from "./RedSampler.js";
 import RedUTIL from "../util/RedUTIL.js";
+import RedGPUContext from "../RedGPUContext.js";
 
 let imageCanvas;
 let imageCanvasContext;
@@ -70,7 +71,7 @@ export default class RedBitmapCubeTexture {
 			};
 
 			commandEncoder.copyBufferToTexture(bufferView, textureView, textureExtent);
-			console.log('mip', mip, 'width', width, 'height', height)
+			if (RedGPUContext.useDebugConsole) console.log('mip', mip, 'width', width, 'height', height)
 			resolve()
 		}))
 		return promise
@@ -111,7 +112,6 @@ export default class RedBitmapCubeTexture {
 		});
 		Promise.all(result).then(
 			_ => {
-				console.log('오긴하니', imgList)
 				if (onload) onload.call(this)
 				this.resolve(gpuTexture)
 				redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
@@ -128,9 +128,9 @@ export default class RedBitmapCubeTexture {
 		let loadCount = 0;
 		let imgList = [];
 		const mapKey = srcList + this.sampler.string + useMipmap;
-		console.log('mapKey', mapKey);
+		if (RedGPUContext.useDebugConsole) console.log('mapKey', mapKey);
 		if (TABLE.get(mapKey)) {
-			console.log('캐시된 녀석을 던집', mapKey, TABLE.get(mapKey));
+
 			return TABLE.get(mapKey);
 		}
 		TABLE.set(mapKey, this);
@@ -142,7 +142,6 @@ export default class RedBitmapCubeTexture {
 				img.src = src;
 				img.crossOrigin = 'anonymous';
 				img.onerror = e => {
-					console.log(e)
 					if (onerror) onerror.call(this, e)
 					this.resolve(null)
 				};
@@ -183,7 +182,6 @@ export default class RedBitmapCubeTexture {
 			}
 		) : null;
 		this.#updateList.forEach(data => {
-			// console.log(data[1]);
 			data[0][data[1]] = this
 		});
 		this.#updateList.length = 0

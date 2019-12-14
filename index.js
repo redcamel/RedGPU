@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 15:38:23
+ *   Last modification time of this file - 2019.12.14 16:4:46
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -92,12 +92,12 @@ new RedGPU.RedGPUContext(
 				}
 
 				this.addView(tView)
-				let tEffect = new RedGPU.RedPostEffect_Bloom(this);
-				let tEffect2 = new RedGPU.RedPostEffect_DoF(this);
-				tEffect.bloomStrength = 0.35
-				tEffect2.focusLength = 1000
-				tView.postEffect.addEffect(tEffect)
-				tView.postEffect.addEffect(tEffect2)
+				// let tEffect = new RedGPU.RedPostEffect_Bloom(this);
+				// let tEffect2 = new RedGPU.RedPostEffect_DoF(this);
+				// tEffect.bloomStrength = 0.35
+				// tEffect2.focusLength = 1000
+				// tView.postEffect.addEffect(tEffect)
+				// tView.postEffect.addEffect(tEffect2)
 				// tView.postEffect.addEffect(new RedGPU.RedPostEffect_Gray(this))
 				this.addView(tView2)
 
@@ -109,7 +109,7 @@ new RedGPU.RedGPUContext(
 				testMat_colorPhong = new RedGPU.RedColorPhongMaterial(this, '#ffffff');
 				testMat_colorPhongTexture_normal = new RedGPU.RedColorPhongTextureMaterial(this, '#fff253', 1, textureLoader.getTextureByIndex(2))
 				testMat_colorPhongTexture_normal_displacement = new RedGPU.RedColorPhongTextureMaterial(this, '#341fff', 1, textureLoader.getTextureByIndex(2), textureLoader.getTextureByIndex(5), textureLoader.getTextureByIndex(6), textureLoader.getTextureByIndex(4))
-				console.log(testMat_colorPhong)
+
 				testMat_bitmap = new RedGPU.RedBitmapMaterial(this, textureLoader.getTextureByIndex(0));
 				testMat_standard_diffuse = new RedGPU.RedStandardMaterial(this, textureLoader.getTextureByIndex(1), null, textureLoader.getTextureByIndex(5), textureLoader.getTextureByIndex(6));
 				testMat_standard_diffuse_normal = new RedGPU.RedStandardMaterial(this, textureLoader.getTextureByIndex(0), textureLoader.getTextureByIndex(2), textureLoader.getTextureByIndex(5), textureLoader.getTextureByIndex(6));

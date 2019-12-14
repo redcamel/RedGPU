@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 13:31:48
+ *   Last modification time of this file - 2019.12.14 16:4:46
  *
  */
 
@@ -13,6 +13,7 @@ import RedUUID from "./RedUUID.js";
 import RedUniformBuffer from "../buffer/RedUniformBuffer.js";
 import RedUniformBufferDescriptor from "../buffer/RedUniformBufferDescriptor.js";
 import RedBindGroup from "../buffer/RedBindGroup.js";
+import RedGPUContext from "../RedGPUContext.js";
 
 const TABLE = new Map();
 let makeUniformBindLayout = function (redGPUContext, uniformsBindGroupLayoutDescriptor) {
@@ -93,7 +94,6 @@ export default class RedBaseMaterial extends RedUUID {
 		dataFragment = this.uniformBufferDescriptor_fragment.redStruct;
 		i2 = dataVertex.length > dataFragment.length ? dataVertex.length : dataFragment.length;
 		//FIXME - _로 가져올 수있게 변경할까?
-		console.time('updateUniformBuffer_' + this._UUID);
 		while (i2--) {
 			tData = dataVertex[i2];
 			if (tData) {
@@ -120,19 +120,14 @@ export default class RedBaseMaterial extends RedUUID {
 		}
 		this.uniformBuffer_vertex.GPUBuffer.setSubData(0, this.uniformBuffer_vertex.float32Array);
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(0, this.uniformBuffer_fragment.float32Array);
-		console.timeEnd('updateUniformBuffer_' + this._UUID);
 	}
 
-	checkTexture(texture, textureName) {
-		throw new Error(`${this.constructor.name} : checkTexture must override!!!`)
-	}
+	checkTexture(texture, textureName) {throw new Error(`${this.constructor.name} : checkTexture must override!!!`)}
 
-	resetBindingInfo() {
-		throw new Error(`${this.constructor.name} : resetBindingInfo must override!!!`)
-	}
+	resetBindingInfo() {throw new Error(`${this.constructor.name} : resetBindingInfo must override!!!`)}
+
 	_afterResetBindingInfo() {
-		console.time('_afterResetBindingInfo - ' + this.constructor.name)
-
+		if (RedGPUContext.useDebugConsole) console.time('_afterResetBindingInfo - ' + this.constructor.name)
 		this.searchModules();
 		this.setUniformBindGroupDescriptor();
 		this.uniformBindGroup_material.setGPUBindGroup(this.uniformBindGroupDescriptor);
@@ -140,16 +135,13 @@ export default class RedBaseMaterial extends RedUUID {
 			this.updateUniformBuffer();
 			this.#uniformBufferUpdated = true;
 		}
-		console.timeEnd('_afterResetBindingInfo - ' + this.constructor.name)
+		if (RedGPUContext.useDebugConsole) console.timeEnd('_afterResetBindingInfo - ' + this.constructor.name)
 		this.updateUUID();
 	}
 
 	searchModules() {
-		// console.log(this, this.constructor, this.constructor.name);
-		// console.log(this.constructor.PROGRAM_OPTION_LIST);
-
 		RedBaseMaterial_searchModules_callNum++
-		console.log('RedBaseMaterial_searchModules_callNum', RedBaseMaterial_searchModules_callNum)
+		if (RedGPUContext.useDebugConsole) console.log('RedBaseMaterial_searchModules_callNum', RedBaseMaterial_searchModules_callNum)
 		let tKey = [this.constructor.name];
 		let i = 0, len = this.constructor.PROGRAM_OPTION_LIST.length;
 		for (i; i < len; i++) {
@@ -157,14 +149,11 @@ export default class RedBaseMaterial extends RedUUID {
 			// console.log(key, this[key]);
 			if (this[key]) tKey.push(key);
 		}
-		console.time('searchModules_' + tKey);
-		// tKey = tKey.join('_');
-		console.log('searchModules', tKey);
+		if (RedGPUContext.useDebugConsole) console.log('searchModules', tKey);
+		if (RedGPUContext.useDebugConsole) console.time('searchModules_' + tKey);
 		this.vShaderModule.searchShaderModule(tKey);
 		this.fShaderModule.searchShaderModule(tKey);
-		console.timeEnd('searchModules_' + tKey);
-		// console.log(this.vShaderModule);
-		// console.log(this.fShaderModule);
+		if (RedGPUContext.useDebugConsole) console.timeEnd('searchModules_' + tKey);
 	}
 
 	setUniformBindGroupDescriptor() {
