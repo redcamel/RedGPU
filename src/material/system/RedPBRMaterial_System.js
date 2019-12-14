@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 16:4:46
+ *   Last modification time of this file - 2019.12.14 16:24:24
  *
  */
 
@@ -508,7 +508,6 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 						break;
 					case 'occlusionTexture' :
 						this._occlusionTexture = texture;
-						console.log('occlusionTexture', texture)
 						break;
 				}
 				if (RedGPUContext.useDebugConsole) console.log("로딩완료or로딩에러확인 textureName", textureName, texture ? texture.GPUTexture : '');

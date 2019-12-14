@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 13:31:48
+ *   Last modification time of this file - 2019.12.14 16:24:24
  *
  */
 
@@ -17,6 +17,7 @@ import RedBuffer from "../buffer/RedBuffer.js";
 import RedUTIL from "../util/RedUTIL.js";
 import RedCamera from "../controller/RedCamera.js";
 import RedSampler from "../resources/RedSampler.js";
+import RedGPUContext from "../RedGPUContext.js";
 
 var RedGLTFLoader;
 (function () {
@@ -95,7 +96,7 @@ var RedGLTFLoader;
 				// request.setRequestHeader("Content-Type", (type ? type : "application/xml; ") + 'charset=UTF-8')
 				request.onreadystatechange = function (e) {
 					if (request.readyState === 4 && request.status === 200) {
-						console.log(request);
+						if (RedGPUContext.useDebugConsole) console.log(request);
 						cache[src] = request;
 						onLoader(request)
 					} else {
@@ -120,7 +121,7 @@ var RedGLTFLoader;
 				request.responseType = "arraybuffer";
 				request.onreadystatechange = function (e) {
 					if (request.readyState === 4 && request.status === 200) {
-						console.log(request);
+						if (RedGPUContext.useDebugConsole) console.log(request);
 						cache[src] = request;
 						onLoader(request)
 					} else {
@@ -134,7 +135,6 @@ var RedGLTFLoader;
 	RedGLTFLoader = function (redGPUContext, path, fileName, callback, environmentTexture, parsingOption) {
 		if ((!(this instanceof RedGLTFLoader))) return new RedGLTFLoader(redGPUContext, path, fileName, callback, environmentTexture, parsingOption);
 		this.redGPUContext = redGPUContext;
-		console.log('~~~~~~~~~~~');
 		var self = this;
 		if (fileName.indexOf('.glb') > -1) {
 			/////////////////////////
@@ -206,9 +206,7 @@ var RedGLTFLoader;
 					var binaryChunk = body;
 					if (jsonChunk['images']) {
 						jsonChunk['images'].forEach(function (v) {
-							console.log(v);
 							if (v['mimeType'] === 'image/png' || v['mimeType'] === 'image/jpeg' || v['mimeType'] === 'image/gif') {
-								console.log(binaryChunk);
 								var tS, tE;
 								tS = jsonChunk['bufferViews'][v['bufferView']]['byteOffset'] || 0;
 								var tt = binaryChunk.slice(
@@ -225,12 +223,9 @@ var RedGLTFLoader;
 							}
 						})
 					}
-
-					console.log(jsonChunk);
-					console.log(binaryChunk);
 					parser(self, redGPUContext, jsonChunk, function () {
 						if (callback) {
-							console.log('모델 파싱 종료');
+							if (RedGPUContext.useDebugConsole) console.log('Model parsing has ended.');
 							callback(self)
 						}
 					}, binaryChunk)
@@ -247,13 +242,13 @@ var RedGLTFLoader;
 
 					parser(self, redGPUContext, JSON.parse(request['response']), function () {
 						if (callback) {
-							console.log('모델 파싱 종료');
+							if (RedGPUContext.useDebugConsole) console.log('Model parsing has ended.');
 							callback(self)
 						}
 					})
 				},
 				function (request, error) {
-					console.log(request, error)
+					if (RedGPUContext.useDebugConsole) console.log(request, error)
 				}
 			)
 		}
@@ -290,14 +285,12 @@ var RedGLTFLoader;
 					targetAnimationData: animationData
 				}
 			)
-			// console.log('loopList', loopList)
 		};
-		console.log(this)
+		if (RedGPUContext.useDebugConsole) console.log(this)
 	};
 
 	var loopList = [];
 	RedGLTFLoader['animationLooper'] = function (time) {
-		// console.log('loopList',loopList)
 		var currentTime, previousTime, nextTime;
 		var nX, nY, nZ, nW, nXOut, nYOut, nZOut, nXIn, nYIn, nZIn, nWIn;
 		var pX, pY, pZ, pW, pXOut, pYOut, pZOut, pWOut;
@@ -753,13 +746,9 @@ var RedGLTFLoader;
 								tRotation[0] = -(tRotation[0] * 180 / Math.PI);
 								tRotation[1] = -(tRotation[1] * 180 / Math.PI);
 								tRotation[2] = -(tRotation[2] * 180 / Math.PI);
-								// console.log(prevRotation, nextRotation)
 								target.rotationX = tRotation[0];
 								target.rotationY = tRotation[1];
 								target.rotationZ = tRotation[2];
-								// console.log(prevIndex, nextIndex)
-								// console.log(parseInt(prevRotation[2]), parseInt(nextRotation[2]))
-								// console.log(target.rotationX ,target.rotationY ,target.rotationZ )
 								break;
 							case 'translation' :
 								// nextTranslation
@@ -788,9 +777,6 @@ var RedGLTFLoader;
 								target.scaleZ = pZ + interpolationValue * (nZ - pZ);
 								break;
 							case 'weights' :
-								// console.log(aniData)
-
-
 								weights_aniTargetsIDX = aniData['targets'].length;
 								while (weights_aniTargetsIDX--) {
 									weights_targetMesh = aniData['targets'][weights_aniTargetsIDX];
@@ -868,7 +854,6 @@ var RedGLTFLoader;
 			최소한 버전을 반드시 포함해야함.
 		 */
 		checkAsset = function (json) {
-			// console.log(json)
 			if (json['asset'] === undefined) RedUTIL.throwFunc('RedGLTFLoader - asset은 반드시 정의되어야함');
 			if (json['asset'].version[0] < 2) RedUTIL.throwFunc('RedGLTFLoader - asset의 버전은 2.0이상이어야함')
 		};
@@ -881,34 +866,32 @@ var RedGLTFLoader;
 				tList.push(v)
 			});
 			tList.forEach(function (v) {
-				// console.log('버퍼테이터', v)
 				allNum++;
 				if (v['uri'] instanceof ArrayBuffer) {
 					loadedNum++;
 					redGLTFLoader['parsingResult']['uris'][v['_redURIkey']][v['_redURIIndex']] = new DataView(v['uri']);
 					if (loadedNum == allNum) {
-						console.log("redGLTFLoader['parsingResult']['uris']", redGLTFLoader['parsingResult']['uris']);
-						console.log("uris로딩현황", loadedNum, loadedNum);
+						if (RedGPUContext.useDebugConsole) console.log("redGLTFLoader['parsingResult']['uris']", redGLTFLoader['parsingResult']['uris']);
+						if (RedGPUContext.useDebugConsole) console.log("uris로딩현황", loadedNum, loadedNum);
 						if (callback) callback()
 					}
 				} else {
 					var tSrc = v['uri'].substr(0, 5) == 'data:' ? v['uri'] : redGLTFLoader['path'] + v['uri'];
-					// console.log('tSrc', tSrc)
+
 					arrayBufferLoader(
 						tSrc,
 						function (request) {
 							loadedNum++;
-							console.log(request);
-							// console.log(request.response)
+							if (RedGPUContext.useDebugConsole) console.log(request);
 							redGLTFLoader['parsingResult']['uris'][v['_redURIkey']][v['_redURIIndex']] = new DataView(request.response);
 							if (loadedNum == allNum) {
-								console.log("redGLTFLoader['parsingResult']['uris']", redGLTFLoader['parsingResult']['uris']);
-								console.log("uris로딩현황", loadedNum, loadedNum);
+								if (RedGPUContext.useDebugConsole) console.log("redGLTFLoader['parsingResult']['uris']", redGLTFLoader['parsingResult']['uris']);
+								if (RedGPUContext.useDebugConsole) console.log("uris로딩현황", loadedNum, loadedNum);
 								if (callback) callback()
 							}
 						},
 						function (request, error) {
-							console.log(request, error)
+							if (RedGPUContext.useDebugConsole) console.log(request, error)
 						}
 					)
 				}
@@ -922,7 +905,7 @@ var RedGLTFLoader;
 			getBufferResources(redGLTFLoader, json, callback);
 		};
 		parseCameras = function (redGLTFLoader, json) {
-			console.log(json);
+			if (RedGPUContext.useDebugConsole) console.log(json);
 			if (json['cameras']) {
 				json['cameras'].forEach(function (v) {
 					console.log('카메라', v);
@@ -939,8 +922,8 @@ var RedGLTFLoader;
 			}
 		};
 		parseScene = function (redGLTFLoader, json, callback) {
-			console.log('parseScene 시작');
-			console.log(json);
+			if (RedGPUContext.useDebugConsole) console.log('parseScene 시작');
+			if (RedGPUContext.useDebugConsole) console.log(json);
 			var i, len;
 			var nodesInScene;
 			var nodeIndex;
@@ -956,10 +939,6 @@ var RedGLTFLoader;
 				} else requestAnimationFrame(tick);
 			};
 			requestAnimationFrame(tick);
-			// json['scenes'][0]['nodes'].forEach(function (nodeIndex) {
-			//     // console.log('노드를 찾음', nodeIndex)
-			//     parseNode(redGLTFLoader, json, nodeIndex, json['nodes'][nodeIndex], redGLTFLoader['resultMesh'])
-			// })
 		};
 		checkTRSAndMATRIX = (function () {
 			var rotationMTX = mat4.create();
@@ -971,10 +950,6 @@ var RedGLTFLoader;
 				if ('matrix' in info) {
 					// parseMatrix
 					tMatrix = info['matrix'];
-					// console.log('~~~', info, tMatrix)
-					// mat4.getRotation(tQuaternion, tMatrix)
-					// if (tQuaternion[3] < 0) console.log('tQuaternion', tQuaternion)
-					// RedUTIL.quaternionToRotationMat4(tQuaternion, rotationMTX)
 					RedUTIL.mat4ToEuler(tMatrix, tRotation);
 					target.rotationX = -(tRotation[0] * 180 / Math.PI);
 					target.rotationY = -(tRotation[1] * 180 / Math.PI);
@@ -1075,21 +1050,15 @@ var RedGLTFLoader;
 			skinInfo['inverseBindMatrices'] = new Float32Array(skinInfo['inverseBindMatrices']);
 			tMesh['skinInfo'] = skinInfo
 			tMesh.material.skin = tMesh['skinInfo'] ? true : false;
-			// console.log(skinInfo)
 		};
 		parseNode = (function () {
 			return function (redGLTFLoader, json, nodeIndex, info, parentMesh) {
 				if ('mesh' in info) {
 					var tMeshIndex = info['mesh'];
-					// console.log('nodeInfo', info)
-					// console.log('parentMesh', parentMesh)
 					makeMesh(redGLTFLoader, json, json['meshes'][tMeshIndex]).forEach(function (tMesh) {
 						info['RedMesh'] = tMesh;
 						parentMesh.addChild(tMesh);
-						// console.log("메쉬인덱스를 찾음", tMeshIndex, parentMesh)
 						checkTRSAndMATRIX(tMesh, info);
-						// tMesh.matrix = matrix
-						// tMesh.autoUpdateMatrix = false
 						if ('children' in info) {
 							info['children'].forEach(function (index) {
 								parseNode(redGLTFLoader, json, index, json['nodes'][index], tMesh)
@@ -1103,8 +1072,6 @@ var RedGLTFLoader;
 					})
 				} else {
 					var tGroup;
-					// console.log('차일드 정보로 구성된 정보임', info)
-
 					if (redGLTFLoader['parsingResult']['groups'][nodeIndex]) {
 						console.log('기존에 존재!', redGLTFLoader['parsingResult']['groups'][nodeIndex]);
 						tGroup = redGLTFLoader['parsingResult']['groups'][nodeIndex];
@@ -1125,8 +1092,6 @@ var RedGLTFLoader;
 						tGroup.addChild(tCameraMesh);
 						redGLTFLoader['parsingResult']['cameras'][info['camera']]['_cameraMesh'] = tCameraMesh
 					}
-					// tGroup.matrix = matrix
-					// tGroup.autoUpdateMatrix = false
 					if ('children' in info) {
 						info['children'].forEach(function (index) {
 							parseNode(redGLTFLoader, json, index, json['nodes'][index], tGroup)
@@ -1148,7 +1113,6 @@ var RedGLTFLoader;
 				(function () {
 					var tSparse = tAccessors['sparse'];
 					var tSparseValuesAccessors = tSparse['values'];
-					console.log('tSparseValuesAccessors', tSparseValuesAccessors);
 					var tBufferView = json['bufferViews'][tSparseValuesAccessors['bufferView']];
 					var tBufferIndex = tBufferView['buffer'];
 					var tBuffer = json['buffers'][tBufferIndex];
@@ -1172,34 +1136,29 @@ var RedGLTFLoader;
 					switch (tAccessors['type']) {
 						case 'VEC3' :
 							len = i + (tComponentType['BYTES_PER_ELEMENT'] * tSparse['count']) / tComponentType['BYTES_PER_ELEMENT'] * 3;
-							console.log('오오오오', key, i, len);
+
 							for (i; i < len; i++) {
 								if (key == 'NORMAL') sparseNormals.push(tBufferURIDataView[tMethod](i * tComponentType['BYTES_PER_ELEMENT'], true));
 								else if (key == 'POSITION') sparseVerties.push(tBufferURIDataView[tMethod](i * tComponentType['BYTES_PER_ELEMENT'], true))
 							}
-							// console.log('인터리브 버퍼 데이터', vertices)
 							break;
 						case 'VEC2' :
 							len = i + (tComponentType['BYTES_PER_ELEMENT'] * tSparse['count']) / tComponentType['BYTES_PER_ELEMENT'] * 2;
-							// console.log(i, len)
 							for (i; i < len; i++) {
 								if (key == 'TEXCOORD_0') {
 									sparseUvs.push(tBufferURIDataView[tMethod](i * tComponentType['BYTES_PER_ELEMENT'], true))
 								}
 							}
-							// console.log('인터리브 버퍼 데이터', vertices)
 							break;
 						default :
 							console.log('알수없는 형식 엑세서 타입', tAccessors['type']);
 							break
 					}
 				})();
-				// console.log(sparseVerties)
-				// console.log(sparseNormals)
-				// console.log(sparseUvs);
+
 				var tSparse = tAccessors['sparse'];
 				var tSparseAccessors = tSparse['indices'];
-				// console.log('tSparseAccessors', tSparseAccessors)
+
 				var tBufferView = json['bufferViews'][tSparseAccessors['bufferView']];
 				var tBufferIndex = tBufferView['buffer'];
 				var tBuffer = json['buffers'][tBufferIndex];
@@ -1218,16 +1177,16 @@ var RedGLTFLoader;
 				i = (tBufferViewOffset + tAccessorBufferOffset) / tComponentType['BYTES_PER_ELEMENT'];
 				//
 				len = i + (tComponentType['BYTES_PER_ELEMENT'] * tSparse['count']) / tComponentType['BYTES_PER_ELEMENT'];
-				// console.log('오오오오', key, i, len)
+
 				var sparseIndex = 0;
 				for (i; i < len; i++) {
 					var targetIndex = tBufferURIDataView[tMethod](i * tComponentType['BYTES_PER_ELEMENT'], true);
-					// console.log('몇번째껄 부르는건가', targetIndex)
+
 					vertices[targetIndex * 3] = sparseVerties[sparseIndex * 3];
 					vertices[targetIndex * 3 + 1] = sparseVerties[sparseIndex * 3 + 1];
 					vertices[targetIndex * 3 + 2] = sparseVerties[sparseIndex * 3 + 2];
 					sparseIndex++
-					// indices.push(tBufferURIDataView[tMethod](i * tComponentType['BYTES_PER_ELEMENT'], true))
+
 				}
 			}
 		};
@@ -1345,7 +1304,6 @@ var RedGLTFLoader;
 							// else RedUTIL.throwFunc('VEC3에서 현재 지원하고 있지 않는 키', key)
 							strideIndex++
 						}
-						// console.log('인터리브 버퍼 데이터', vertices)
 					}
 					break;
 				case 'VEC2' :
@@ -1426,15 +1384,15 @@ var RedGLTFLoader;
 			var tCount = accessorInfo['accessor']['count'];
 			var i = accessorInfo['startIndex'];
 			var len;
-			// console.log('인덱스!!', accessorInfo)
+
 			switch (tType) {
 				case 'SCALAR' :
 					len = i + tCount;
-					// console.log(i, len)
+
 					for (i; i < len; i++) {
 						indices.push(tBufferURIDataView[tGetMethod](i * tBYTES_PER_ELEMENT, true))
 					}
-					// console.log('인덱스버퍼 데이터', indices)
+
 					break;
 				default :
 					console.log('알수없는 형식 엑세서 타입', accessorInfo['accessor']);
@@ -1478,10 +1436,10 @@ var RedGLTFLoader;
 					if ('wrapS' in t0) result['addressModeU'] = wrapTable[t0['wrapS']];
 					if ('wrapT' in t0) result['addressModeV'] = wrapTable[t0['wrapT']]
 				} else {
-					console.log('있긴하냐', samplerIndex)
+					console.log('샘플러가 존재하지않음', samplerIndex)
 				}
 				result['string'] = JSON.stringify(result);
-				console.log('result', result);
+				if (RedGPUContext.useDebugConsole) console.log('result', result);
 				return result
 			};
 			return function (redGLTFLoader, json, v) {
@@ -1496,7 +1454,7 @@ var RedGLTFLoader;
 					if ('alphaMode' in tMaterialInfo) alphaMode = tMaterialInfo['alphaMode'];
 					if ('alphaCutoff' in tMaterialInfo) alphaCutoff = tMaterialInfo['alphaCutoff'];
 					var diffseTexture, normalTexture, roughnessTexture, emissiveTexture, occlusionTexture;
-					// console.log('tMaterialInfo', tMaterialInfo)
+
 					if ('baseColorTexture' in tMaterialInfo['pbrMetallicRoughness']) {
 						var baseTextureIndex = tMaterialInfo['pbrMetallicRoughness']['baseColorTexture']['index'];
 						var baseTextureInfo = json['textures'][baseTextureIndex];
@@ -1506,10 +1464,7 @@ var RedGLTFLoader;
 						var option = getSamplerInfo(redGLTFLoader, json, samplerIndex);
 						var tKey = tURL;
 						diffseTexture = redGLTFLoader['parsingResult']['textures'][tKey] = new RedBitmapTexture(redGLTFLoader['redGPUContext'], tURL, new RedSampler(redGLTFLoader['redGPUContext'], option))
-						// var t0 = document.createElement('img')
-						// t0.src = json['images'][diffuseSourceIndex]['uri']
-						// t0.style.cssText = 'position:absolute;top:0px;left:0px;width:500px'
-						// document.body.appendChild(t0)
+
 					}
 					if ('metallicRoughnessTexture' in tMaterialInfo['pbrMetallicRoughness']) {
 						var roughnessTextureIndex = tMaterialInfo['pbrMetallicRoughness']['metallicRoughnessTexture']['index'];
@@ -1520,10 +1475,7 @@ var RedGLTFLoader;
 						var option = getSamplerInfo(redGLTFLoader, json, samplerIndex);
 						var tKey = tURL;
 						roughnessTexture = redGLTFLoader['parsingResult']['textures'][tKey] = new RedBitmapTexture(redGLTFLoader['redGPUContext'], tURL, new RedSampler(redGLTFLoader['redGPUContext'], option))
-						// var t0 = document.createElement('img')
-						// t0.src = json['images'][roughnessSourceIndex]['uri']
-						// t0.style.cssText = 'position:absolute;top:0px;left:0px;width:500px'
-						// document.body.appendChild(t0)
+
 					}
 					var normalTextureIndex = tMaterialInfo['normalTexture'];
 					if (normalTextureIndex != undefined) {
@@ -1535,10 +1487,7 @@ var RedGLTFLoader;
 						var option = getSamplerInfo(redGLTFLoader, json, samplerIndex);
 						var tKey = tURL;
 						normalTexture = redGLTFLoader['parsingResult']['textures'][tKey] = new RedBitmapTexture(redGLTFLoader['redGPUContext'], tURL, new RedSampler(redGLTFLoader['redGPUContext'], option))
-						// var t0 = document.createElement('img')
-						// t0.src = json['images'][normalSourceIndex]['uri']
-						// t0.style.cssText = 'position:absolute;top:0px;left:0px;width:500px'
-						// document.body.appendChild(t0)
+
 					}
 					var emissiveTextureIndex = tMaterialInfo['emissiveTexture'];
 					if (emissiveTextureIndex != undefined) {
@@ -1550,10 +1499,7 @@ var RedGLTFLoader;
 						var option = getSamplerInfo(redGLTFLoader, json, samplerIndex);
 						var tKey = tURL;
 						emissiveTexture = redGLTFLoader['parsingResult']['textures'][tKey] = new RedBitmapTexture(redGLTFLoader['redGPUContext'], tURL, new RedSampler(redGLTFLoader['redGPUContext'], option))
-						// var t0 = document.createElement('img')
-						// t0.src = json['images'][emissiveSourceIndex]['uri']
-						// t0.style.cssText = 'position:absolute;top:0px;left:0px;width:500px'
-						// document.body.appendChild(t0)
+
 					}
 					var occlusionTextureIndex = tMaterialInfo['occlusionTexture'];
 					if (occlusionTextureIndex != undefined) {
@@ -1578,16 +1524,6 @@ var RedGLTFLoader;
 						roughnessFactor = tMaterialInfo['pbrMetallicRoughness']['roughnessFactor']
 					}
 					var tColor;
-					// if (!redGLTFLoader['environmentTexture']) {
-					//     redGLTFLoader['environmentTexture'] = RedBitmapCubeTexture(redGLTFLoader['redGPUContext'], [
-					//         '../asset/cubemap/SwedishRoyalCastle/px.jpg',
-					//         '../asset/cubemap/SwedishRoyalCastle/nx.jpg',
-					//         '../asset/cubemap/SwedishRoyalCastle/py.jpg',
-					//         '../asset/cubemap/SwedishRoyalCastle/ny.jpg',
-					//         '../asset/cubemap/SwedishRoyalCastle/pz.jpg',
-					//         '../asset/cubemap/SwedishRoyalCastle/nz.jpg'
-					//     ])
-					// }
 					var env = redGLTFLoader['environmentTexture'];
 					// Type	Description	Required
 					// baseColorFactor	number [4]	The material's base color factor.	No, default: [1,1,1,1]
@@ -1631,49 +1567,44 @@ var RedGLTFLoader;
 					interleaveData[idx++] = vertices[i * 3 + 0];
 					interleaveData[idx++] = vertices[i * 3 + 1];
 					interleaveData[idx++] = vertices[i * 3 + 2];
-					// interleaveData.push(vertices[i * 3 + 0], vertices[i * 3 + 1], vertices[i * 3 + 2])
 				}
 				if (verticesColor_0.length) {
 					interleaveData[idx++] = verticesColor_0[i * 4 + 0];
 					interleaveData[idx++] = verticesColor_0[i * 4 + 1];
 					interleaveData[idx++] = verticesColor_0[i * 4 + 2];
 					interleaveData[idx++] = verticesColor_0[i * 4 + 3];
-
-					// interleaveData.push(verticesColor_0[i * 4 + 0], verticesColor_0[i * 4 + 1], verticesColor_0[i * 4 + 2], verticesColor_0[i * 4 + 3])
 				} else {
 					interleaveData[idx++] = 0;
 					interleaveData[idx++] = 0;
 					interleaveData[idx++] = 0;
 					interleaveData[idx++] = 0;
-					// interleaveData.push(0, 0, 0, 0)
 				}
 				if (normalData.length) {
 					interleaveData[idx++] = normalData[i * 3 + 0];
 					interleaveData[idx++] = normalData[i * 3 + 1];
 					interleaveData[idx++] = normalData[i * 3 + 2];
-					// interleaveData.push(normalData[i * 3 + 0], normalData[i * 3 + 1], normalData[i * 3 + 2])
+				} else {
+					interleaveData[idx++] = 0;
+					interleaveData[idx++] = 0;
+					interleaveData[idx++] = 0;
 				}
 				if (!uvs.length) uvs.push(0, 0);
 				if (uvs.length) {
 					interleaveData[idx++] = uvs[i * 2 + 0];
 					interleaveData[idx++] = uvs[i * 2 + 1];
-					// interleaveData.push(uvs[i * 2 + 0], uvs[i * 2 + 1])
 				}
 				if (uvs1.length) {
 					interleaveData[idx++] = uvs1[i * 2 + 0];
 					interleaveData[idx++] = uvs1[i * 2 + 1];
-					// interleaveData.push(uvs1[i * 2 + 0], uvs1[i * 2 + 1])
 				} else if (uvs.length) {
 					interleaveData[idx++] = uvs[i * 2 + 0];
 					interleaveData[idx++] = uvs[i * 2 + 1];
-					// interleaveData.push(uvs[i * 2 + 0], uvs[i * 2 + 1])
 				}
 				if (jointWeights.length) {
 					interleaveData[idx++] = jointWeights[i * 4 + 0];
 					interleaveData[idx++] = jointWeights[i * 4 + 1];
 					interleaveData[idx++] = jointWeights[i * 4 + 2];
 					interleaveData[idx++] = jointWeights[i * 4 + 3];
-					// interleaveData.push(jointWeights[i * 4 + 0], jointWeights[i * 4 + 1], jointWeights[i * 4 + 2], jointWeights[i * 4 + 3])
 				} else {
 					interleaveData[idx++] = 0;
 					interleaveData[idx++] = 0;
@@ -1685,7 +1616,6 @@ var RedGLTFLoader;
 					interleaveData[idx++] = joints[i * 4 + 1];
 					interleaveData[idx++] = joints[i * 4 + 2];
 					interleaveData[idx++] = joints[i * 4 + 3];
-					// interleaveData.push(joints[i * 4 + 0], joints[i * 4 + 1], joints[i * 4 + 2], joints[i * 4 + 3])
 				} else {
 					interleaveData[idx++] = 0;
 					interleaveData[idx++] = 0;
@@ -1697,19 +1627,15 @@ var RedGLTFLoader;
 					interleaveData[idx++] = tangents[i * 4 + 1];
 					interleaveData[idx++] = tangents[i * 4 + 2];
 					interleaveData[idx++] = tangents[i * 4 + 3];
-					// interleaveData.push(tangents[i * 4 + 0], tangents[i * 4 + 1], tangents[i * 4 + 2], tangents[i * 4 + 3])
 				} else {
 					interleaveData[idx++] = 0;
 					interleaveData[idx++] = 0;
 					interleaveData[idx++] = 0;
 					interleaveData[idx++] = 0;
-					// interleaveData.push(0, 0, 0, 0)
 				}
 			}
 		};
 		makeMesh = function (redGLTFLoader, json, meshData) {
-			// console.log('parseMesh :')
-			// console.log(meshData)
 			var tName, tDoubleSide, tAlphaMode, tAlphaCutoff;
 			if (meshData['name']) tName = meshData['name'];
 			var tMeshList = [];
@@ -1728,12 +1654,9 @@ var RedGLTFLoader;
 				var joints = [];
 				var tangents = [];
 				var tDrawMode;
-				// console.log(v, index)
 				// 형상 파싱
 				if (v['attributes']) {
-					// console.log('TODO: 어트리뷰트 파싱')
 					for (var key in v['attributes']) {
-						// console.log(k, '파싱')
 						// 엑세서를 통해서 정보파악하고
 						var accessorIndex = v['attributes'][key];
 						var accessorInfo = new RedGLTF_AccessorInfo(redGLTFLoader, json, accessorIndex);
@@ -1748,7 +1671,6 @@ var RedGLTFLoader;
 				}
 				// 인덱스 파싱
 				if ('indices' in v) {
-					// console.log('TODO: 인덱스 파싱')
 					// 버퍼뷰의 위치를 말하므로...이를 추적파싱항
 					var accessorIndex = v['indices'];
 					var accessorInfo = new RedGLTF_AccessorInfo(redGLTFLoader, json, accessorIndex);
@@ -1772,7 +1694,6 @@ var RedGLTFLoader;
 					// 4 TRIANGLES
 					// 5 TRIANGLE_STRIP
 					// 6 TRIANGLE_FAN
-					// console.log('primitiveMode ', v['mode'])
 					switch (v['mode']) {
 						case 0 :
 							tDrawMode = "point-list";
@@ -1802,12 +1723,10 @@ var RedGLTFLoader;
 				var normalData;
 				if (normals.length) normalData = normals;
 				else normalData = RedUTIL.calculateNormals(vertices, indices);
-				// console.log('vertices', vertices)
-				// console.log('normalData', normalData)
 				var interleaveData = [];
 				makeInterleaveData(interleaveData, vertices, verticesColor_0, normalData, uvs, uvs1, jointWeights, joints, tangents);
 
-				console.log('interleaveData', interleaveData);
+				if (RedGPUContext.useDebugConsole) console.log('interleaveData', interleaveData);
 
 
 				/////////////////////////////////////////////////////////
@@ -1842,9 +1761,7 @@ var RedGLTFLoader;
 				);
 				if (!tMaterial) {
 					RedUTIL.throwFunc('재질을 파싱할수없는경우 ', v)
-					// tMaterial = RedColorPhongMaterial(redGLTFLoader['redGPUContext'], RedUTIL.rgb2hex(parseInt(Math.random() * 255), parseInt(Math.random() * 255), parseInt(Math.random() * 255)))
 				}
-				// console.log('tMaterial', tMaterial)
 				tMesh = new RedMesh(redGLTFLoader['redGPUContext'], tGeo, tMaterial);
 
 
@@ -1866,8 +1783,6 @@ var RedGLTFLoader;
 					tMesh.cullMode = 'none';
 					tMaterial.useMaterialDoubleSide = true
 				}
-				// console.log('tAlphaMode', tAlphaMode)
-				// console.log('tAlphaCutoff', tAlphaCutoff)
 				switch (tAlphaMode) {
 					// TODO
 
@@ -1894,32 +1809,13 @@ var RedGLTFLoader;
 					var normalData;
 					if (v['normals'].length) normalData = v['normals'];
 					else normalData = RedUTIL.calculateNormals(v['vertices'], indices);
-					// console.log('vertices', vertices)
-					// console.log('normalData', normalData)
 					var interleaveData = [];
 					makeInterleaveData(interleaveData, v['vertices'], v['verticesColor_0'], normalData, v['uvs'], v['uvs1'], v['jointWeights'], v['joints'], v['tangents']);
-					// var i = 0, len = v['vertices'].length / 3
-					// for (i; i < len; i++) {
-					//     if (v['vertices'].length) interleaveData.push(v['vertices'][i * 3 + 0], v['vertices'][i * 3 + 1], v['vertices'][i * 3 + 2])
-					//     if (v['verticesColor_0'].length) interleaveData.push(v['verticesColor_0'][i * 4 + 0], v['verticesColor_0'][i * 4 + 1], v['verticesColor_0'][i * 4 + 2], v['verticesColor_0'][i * 4 + 3])
-					//     else interleaveData.push(0, 0, 0, 0)
-					//     if (normalData.length) interleaveData.push(normalData[i * 3 + 0], normalData[i * 3 + 1], normalData[i * 3 + 2])
-					//     if (!v['uvs'].length) v['uvs'].push(0, 0)
-					//     if (v['uvs'].length) interleaveData.push(v['uvs'][i * 2 + 0], v['uvs'][i * 2 + 1])
-					//     if (v['uvs1'].length) interleaveData.push(v['uvs1'][i * 2 + 0], v['uvs1'][i * 2 + 1])
-					//     else if (v['uvs'].length) interleaveData.push(v['uvs'][i * 2 + 0], v['uvs'][i * 2 + 1])
-					//     if (v['jointWeights'].length) interleaveData.push(v['jointWeights'][i * 4 + 0], v['jointWeights'][i * 4 + 1], v['jointWeights'][i * 4 + 2], v['jointWeights'][i * 4 + 3])
-					//     if (v['joints'].length) interleaveData.push(v['joints'][i * 4 + 0], v['joints'][i * 4 + 1], v['joints'][i * 4 + 2], v['joints'][i * 4 + 3])
-					//     if (v['tangents'].length) interleaveData.push(v['tangents'][i * 4 + 0], v['tangents'][i * 4 + 1], v['tangents'][i * 4 + 2], v['tangents'][i * 4 + 3])
-					//     else interleaveData.push(0, 0, 0, 0)
-					//
-					// }
 					v['interleaveData'] = interleaveData
 				});
 				tMesh['_morphInfo'] = morphInfo;
 				tMesh['_morphInfo']['origin'] = new Float32Array(interleaveData);
-				console.log('모프리스트', tMesh['_morphInfo']);
-				// console.log(morphInfo)
+				if (RedGPUContext.useDebugConsole) console.log('모프리스트', tMesh['_morphInfo']);
 				/////////////////////////////////////////////////////
 				var targetData = tMesh['geometry']['interleaveBuffer']['data'];
 				var NUM = 0;
@@ -1928,9 +1824,6 @@ var RedGLTFLoader;
 				});
 				var gap = 0;
 				tMesh['_morphInfo']['list'].forEach(function (v, index) {
-					// console.log('tInterleaveInfoList', tInterleaveInfoList)
-					// console.log('NUM', NUM)
-
 					var i = 0, len = targetData.length / NUM;
 					var tWeights = tMesh['_morphInfo']['list']['weights'][index] == undefined ? 0.5 : tMesh['_morphInfo']['list']['weights'][index];
 					for (i; i < len; i++) {
@@ -1957,17 +1850,13 @@ var RedGLTFLoader;
 		parseAnimations = (function () {
 			var parseAnimationInfo;
 			parseAnimationInfo = function (redGLTFLoader, json, accessorIndex) {
-				// console.log('accessorIndex', accessorIndex)
 				var dataList = [];
 				var accessorInfo = new RedGLTF_AccessorInfo(redGLTFLoader, json, accessorIndex);
 				var tBYTES_PER_ELEMENT = accessorInfo['componentType_BYTES_PER_ELEMENT'];
-				// var tBufferViewByteStride = accessorInfo['bufferViewByteStride'];
 				var tBufferURIDataView = accessorInfo['bufferURIDataView'];
 				var tGetMethod = accessorInfo['getMethod'];
 				var tType = accessorInfo['accessor']['type'];
 				var tCount = accessorInfo['accessor']['count'];
-				// var strideIndex = 0;
-				// var stridePerElement = tBufferViewByteStride / tBYTES_PER_ELEMENT
 				var i = accessorInfo['startIndex'];
 				var len;
 				switch (tType) {
@@ -1976,21 +1865,18 @@ var RedGLTFLoader;
 						for (i; i < len; i++) {
 							dataList.push(tBufferURIDataView[tGetMethod](i * tBYTES_PER_ELEMENT, true))
 						}
-						// console.log('타임 데이터', dataList)
 						break;
 					case 'VEC4' :
 						len = i + tCount * 4;
 						for (i; i < len; i++) {
 							dataList.push(tBufferURIDataView[tGetMethod](i * tBYTES_PER_ELEMENT, true))
 						}
-						// console.log('값 데이터', dataList)
 						break;
 					case 'VEC3' :
 						len = i + tCount * 3;
 						for (i; i < len; i++) {
 							dataList.push(tBufferURIDataView[tGetMethod](i * tBYTES_PER_ELEMENT, true))
 						}
-						// console.log('값 데이터', dataList)
 						break;
 					default :
 						console.log('알수없는 형식 엑세서 타입', accessorInfo['accessor']);
@@ -1999,13 +1885,12 @@ var RedGLTFLoader;
 				return dataList
 			};
 			return function (redGLTFLoader, json) {
-				console.log('애니메이션 파싱시작');
+				if (RedGPUContext.useDebugConsole) console.log('Animation parsing has start.');
 				var nodes = json['nodes'];
 				var meshes = json['meshes'];
 				var accessors = json['accessors'];
 				if (!json['animations']) json['animations'] = [];
 				json['animations'].forEach(function (v, index) {
-					// console.log(v)
 					var samplers = v['samplers'];
 					//TODO: 용어를 정리해봐야겠음.
 					// 이걸 애니메이션 클립으로 봐야하는가..
@@ -2013,7 +1898,6 @@ var RedGLTFLoader;
 
 					animationClip['minTime'] = 10000000;
 					animationClip['maxTime'] = -1;
-					// animationClip['name'] = 'animation_' + index;
 					animationClip['name'] = v['name'];
 					// 로더에 애니메이션 데이터들을 입력함
 					redGLTFLoader['parsingResult']['animations'].push(animationClip);
@@ -2026,14 +1910,12 @@ var RedGLTFLoader;
 						var aniTrack; //
 						var targets = [];
 						tSampler = samplers[channel['sampler']];
-						// console.log('tSampler', tSampler)
 						tChannelTargetData = channel['target'];
 						tNode = nodes[tChannelTargetData['node']];
 						if ('mesh' in tNode) {
 							tMesh = tNode['RedMesh'];
 							meshes[tNode['mesh']]['primitives'].forEach(function (v) {
 								targets.push(v['RedMesh']);
-								// v['RedMesh'].geometry.drawMode = redGLTFLoader['redGL']['gl'].DYNAMIC_DRAW
 							})
 						} else {
 							var tGroup;
@@ -2048,8 +1930,6 @@ var RedGLTFLoader;
 								return
 							}
 						}
-						// console.log('애니메이션 대상메쉬', tMesh)
-						// console.log(tChannelTargetData['path'])
 						if (
 							tChannelTargetData['path'] == 'scale'
 							|| tChannelTargetData['path'] == 'rotation'
@@ -2065,7 +1945,6 @@ var RedGLTFLoader;
 							// console.log('translation', tSampler['output'])
 							// console.log('translation 엑세서 데이터', tSampler['output'])
 							// console.log('scale 데이터리스트', t0)
-
 							animationClip.push(aniTrack = {
 									key: tChannelTargetData['path'],
 									time: parseAnimationInfo(redGLTFLoader, json, tSampler['input']),
@@ -2082,7 +1961,6 @@ var RedGLTFLoader;
 							if (animationClip['minTime'] > aniTrack['time'][0]) animationClip['minTime'] = aniTrack['time'][0];
 							if (animationClip['maxTime'] < aniTrack['time'][aniTrack['time'].length - 1]) animationClip['maxTime'] = aniTrack['time'][aniTrack['time'].length - 1]
 						}
-						// console.log('animationData', animationData)
 					});
 					console.log('animationClip', animationClip)
 				});
@@ -2090,20 +1968,16 @@ var RedGLTFLoader;
 					redGLTFLoader['parsingResult']['animations'].forEach(function (v) {
 						redGLTFLoader.playAnimation(v)
 					})
-					// redGLTFLoader.playAnimation(redGLTFLoader['parsingResult']['animations'][7])
-
-
 				}
+				if (RedGPUContext.useDebugConsole) console.log('Animation parsing has ended.');
 
 			}
 		})();
 		return function (redGLTFLoader, redGPUContext, json, callBack, binaryChunk) {
-			console.log('파싱시작', redGLTFLoader['path'] + redGLTFLoader['fileName']);
-			console.log('rawData', json);
+			if (RedGPUContext.useDebugConsole) console.log('parsing start', redGLTFLoader['path'] + redGLTFLoader['fileName']);
+			if (RedGPUContext.useDebugConsole) console.log('rawData', json);
 			checkAsset(json);
 			if (binaryChunk) {
-				console.log(json);
-				console.log(binaryChunk);
 				json.buffers[0]['uri'] = binaryChunk;
 				getBaseResource(redGLTFLoader, json,
 					function () {
