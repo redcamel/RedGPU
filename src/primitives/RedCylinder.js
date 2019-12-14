@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 19:11:47
+ *   Last modification time of this file - 2019.12.14 16:4:46
  *
  */
 
@@ -10,6 +10,7 @@
 import RedBuffer from "../buffer/RedBuffer.js";
 import RedGeometry from "../geometry/RedGeometry.js";
 import RedInterleaveInfo from "../geometry/RedInterleaveInfo.js";
+import RedGPUContext from "../RedGPUContext.js";
 
 export default class RedCylinder {
 	constructor(redGPUContext, radiusTop = 1, radiusBottom = 1, height = 1, radialSegments = 8, heightSegments = 1, openEnded = false, thetaStart = 0.0, thetaLength = Math.PI * 2) {
@@ -23,7 +24,7 @@ export default class RedCylinder {
 		this.indexBuffer = tData['indexBuffer'];
 		this.vertexState = tData['vertexState'];
 		redGPUContext.state.RedGeometry.set(typeKey, this);
-		console.log(this)
+		if (RedGPUContext.useDebugConsole) console.log(this)
 	}
 
 	#makeData = (function () {

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 19:11:47
+ *   Last modification time of this file - 2019.12.14 16:4:46
  *
  */
 
@@ -10,6 +10,7 @@
 import RedBaseMaterial from "../../base/RedBaseMaterial.js";
 import RedShareGLSL from "../../base/RedShareGLSL.js";
 import RedMix from "../../base/RedMix.js";
+import RedGPUContext from "../../RedGPUContext.js";
 
 export default class RedSkyBoxMaterial extends RedMix.mix(
 	RedBaseMaterial
@@ -78,14 +79,14 @@ export default class RedSkyBoxMaterial extends RedMix.mix(
 						this._skyBoxTexture = texture;
 						break
 				}
-				console.log("로딩완료or로딩에러확인 textureName", textureName, texture ? texture.GPUTexture : '');
+				if (RedGPUContext.useDebugConsole) console.log("로딩완료or로딩에러확인 textureName", textureName, texture ? texture.GPUTexture : '');
 				this.needResetBindingInfo = true
 			} else {
 				texture.addUpdateTarget(this, textureName)
 			}
 		} else {
-			if(this['_'+textureName]){
-				this['_'+textureName] = null;
+			if (this['_' + textureName]) {
+				this['_' + textureName] = null;
 				this.needResetBindingInfo = true
 			}
 		}

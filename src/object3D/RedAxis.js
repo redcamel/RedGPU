@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 19:11:47
+ *   Last modification time of this file - 2019.12.14 16:4:46
  *
  */
 
@@ -13,6 +13,7 @@ import RedCylinder from "../primitives/RedCylinder.js";
 import RedColorMaterial from "../material/RedColorMaterial.js"
 import RedMesh from "./RedMesh.js"
 import RedSphere from "../primitives/RedSphere.js";
+import RedGPUContext from "../RedGPUContext.js";
 
 export default class RedAxis extends RedBaseObject3D {
 
@@ -61,7 +62,7 @@ export default class RedAxis extends RedBaseObject3D {
 		this['children'].push(tArrowMesh);
 		////////////////////////////////////////////
 		this['children'].push(new RedMesh(redGPUContext, new RedSphere(redGPUContext, 0.25, 16, 16, 16), new RedColorMaterial(redGPUContext, '#ff00ff')));
-		console.log(this)
+		if (RedGPUContext.useDebugConsole) 	console.log(this)
 	}
 
 }

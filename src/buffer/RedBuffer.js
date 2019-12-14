@@ -2,12 +2,13 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 13:31:48
+ *   Last modification time of this file - 2019.12.14 16:4:46
  *
  */
 
 "use strict";
 import RedUUID from "../base/RedUUID.js";
+import RedGPUContext from "../RedGPUContext.js";
 
 export default class RedBuffer extends RedUUID {
 	static TYPE_VERTEX = 'vertexBuffer';
@@ -34,7 +35,6 @@ export default class RedBuffer extends RedUUID {
 					this.stride += v['stride'] / Float32Array.BYTES_PER_ELEMENT
 				});
 				this.vertexCount = data.length / this.vertexCount;
-				console.log('최종 this.vertexCount', this.vertexCount);
 				break;
 			case RedBuffer.TYPE_INDEX :
 				tUsage = usage || globalThis.GPUBufferUsage.INDEX | globalThis.GPUBufferUsage.COPY_DST;
@@ -50,7 +50,7 @@ export default class RedBuffer extends RedUUID {
 		this.GPUBuffer = redGPUContext.device.createBuffer(this.bufferDescriptor);
 		this.GPUBuffer.setSubData(0, data);
 		redGPUContext.state.RedBuffer[bufferType].set(typeKey, this);
-		console.log(this);
+		if (RedGPUContext.useDebugConsole) console.log(this);
 	}
 	update(data) {
 		this.data = data;

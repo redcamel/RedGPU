@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 15:14:27
+ *   Last modification time of this file - 2019.12.14 16:4:46
  *
  */
 // base ///////////////////////////////////////////////////////////////////////
@@ -94,7 +94,6 @@ import RedScene from "./RedScene.js"
 import RedView from "./RedView.js"
 
 const RedGPU = {
-	glMatrix,
 	// base
 	RedDetectorGPU,
 	RedBaseLight,

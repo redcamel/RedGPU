@@ -2,12 +2,13 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 15:38:23
+ *   Last modification time of this file - 2019.12.14 16:4:46
  *
  */
 "use strict";
 import RedSampler from "./RedSampler.js";
 import RedUTIL from "../util/RedUTIL.js";
+import RedGPUContext from "../RedGPUContext.js";
 
 
 let defaultSampler;
@@ -29,17 +30,14 @@ export default class RedBitmapTexture {
 			// imageCanvasContext.scale(1, -1);
 			imageCanvasContext.drawImage(img, 0, 0, width, height);
 			// const imageData = imageCanvasContext.getImageData(0, 0, width, height);
-			console.time('getImageData' + img.src)
+			if (RedGPUContext.useDebugConsole) console.time('getImageData' + img.src)
 			const imageData = imageCanvasContext.getImageData(0, 0, width, height);
-			console.timeEnd('getImageData' + img.src)
+			if (RedGPUContext.useDebugConsole) console.timeEnd('getImageData' + img.src)
 			let data;
 			const rowPitch = Math.ceil(width * 4 / 256) * 256;
-			console.time('uint8 make')
 			if (rowPitch == width * 4) {
 				data = imageData.data;
-				console.log('uint8 make', '여기냐1')
 			} else {
-				console.log('uint8 make', '여기냐2')
 				data = new Uint8ClampedArray(rowPitch * height);
 				let pixelsIndex = 0;
 				for (let y = 0; y < height; ++y) {
@@ -53,7 +51,6 @@ export default class RedBitmapTexture {
 					}
 				}
 			}
-			console.timeEnd('uint8 make')
 			const textureDataBuffer = device.createBuffer({
 				size: data.byteLength + data.byteLength % 4,
 				usage: globalThis.GPUBufferUsage.COPY_DST | globalThis.GPUBufferUsage.COPY_SRC,
@@ -77,7 +74,7 @@ export default class RedBitmapTexture {
 			};
 
 			commandEncoder.copyBufferToTexture(bufferView, textureView, textureExtent);
-			console.log('mip', mip, 'width', width, 'height', height)
+			if (RedGPUContext.useDebugConsole) console.log('mip', mip, 'width', width, 'height', height)
 			resolve(imageCanvas)
 		}))
 
@@ -90,10 +87,8 @@ export default class RedBitmapTexture {
 			console.log('src')
 		} else {
 			const mapKey = src + this.sampler.string + useMipmap;
-			console.log('this.sampler.string', this.sampler.string)
-			console.log('mapKey', mapKey);
+			if (RedGPUContext.useDebugConsole) console.log('mapKey', mapKey);
 			if (TABLE.get(mapKey)) {
-				console.log('캐시된 녀석을 던집', mapKey, TABLE.get(mapKey));
 				if (onload) onload.call(this)
 				return TABLE.get(mapKey);
 			}
@@ -135,13 +130,11 @@ export default class RedBitmapTexture {
 				const commandEncoder = redGPUContext.device.createCommandEncoder({});
 				let self = this
 				function callNextMip(targetImage) {
-					// console.log('대상이미지', targetImage)
 					let promise = self.#updateTexture(commandEncoder, redGPUContext.device, targetImage, gpuTexture, faceWidth, faceHeight, mipIndex)
 					if (useMipmap) {
 						if (mipIndex == len) {
 							promise.then(
 								_ => {
-									// console.log('오긴하니', src)
 									if (onload) onload.call(self)
 									self.resolve(gpuTexture)
 									redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
@@ -160,7 +153,6 @@ export default class RedBitmapTexture {
 						}
 					} else {
 						promise.then(_ => {
-								// console.log('밉맵실행', src, mipIndex)
 								if (onload) onload.call(self)
 								self.resolve(gpuTexture)
 								redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
@@ -187,7 +179,6 @@ export default class RedBitmapTexture {
 		this.#GPUTexture = texture;
 		this.#GPUTextureView = texture ? texture.createView() : null;
 		this.#updateList.forEach(data => {
-			console.log(data[1]);
 			data[0][data[1]] = this
 		});
 		this.#updateList.length = 0

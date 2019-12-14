@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 19:11:47
+ *   Last modification time of this file - 2019.12.14 16:4:46
  *
  */
 
@@ -11,6 +11,7 @@ import RedUTIL from "./util/RedUTIL.js"
 import RedTypeSize from "./resources/RedTypeSize.js";
 import RedShareGLSL from "./base/RedShareGLSL.js"
 import RedPostEffect from "./postEffect/RedPostEffect.js";
+import RedGPUContext from "./RedGPUContext.js";
 
 export default class RedView {
 	get viewRect() {
@@ -148,7 +149,6 @@ export default class RedView {
 			this.baseResolveTarget2.destroy();
 			this.baseDepthStencilAttachment.destroy();
 		}
-		console.log(this.#viewRect);
 		this.baseAttachment = redGPUContext.device.createTexture({
 			size: {width: this.#viewRect[2], height: this.#viewRect[3], depth: 1},
 			sampleCount: 4,
@@ -329,6 +329,7 @@ export default class RedView {
 			if (height.includes('%') && (+height.replace('%', '') >= 0)) this.#height = height;
 			else RedUTIL.throwFunc('RedView setSize : height는 0이상의 숫자나 %만 허용.', height);
 		}
+		if (RedGPUContext.useDebugConsole) console.log(`setSize - input : ${width},${height} / result : ${this.#width}, ${this.#height}`);
 		this.getViewRect(this.#redGPUContext);
 		this.resetTexture(this.#redGPUContext)
 	}
@@ -344,7 +345,7 @@ export default class RedView {
 			if (y.includes('%') && (+y.replace('%', '') >= 0)) this._y = y;
 			else RedUTIL.throwFunc('RedView setLocation : y는 0이상의 숫자나 %만 허용.', y);
 		}
-		console.log('setLocation', this._x, this._y);
+		if (RedGPUContext.useDebugConsole) console.log(`setLocation - input : ${x},${y} / result : ${this._x}, ${this._y}`);
 		this.getViewRect(this.#redGPUContext)
 	}
 
