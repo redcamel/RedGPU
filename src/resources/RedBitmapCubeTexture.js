@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 16:4:46
+ *   Last modification time of this file - 2019.12.14 17:33:43
  *
  */
 "use strict";
@@ -112,8 +112,8 @@ export default class RedBitmapCubeTexture {
 		});
 		Promise.all(result).then(
 			_ => {
-				if (onload) onload.call(this)
 				this.resolve(gpuTexture)
+				if (onload) onload.call(this)
 				redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
 			}
 		)
@@ -130,7 +130,6 @@ export default class RedBitmapCubeTexture {
 		const mapKey = srcList + this.sampler.string + useMipmap;
 		if (RedGPUContext.useDebugConsole) console.log('mapKey', mapKey);
 		if (TABLE.get(mapKey)) {
-
 			return TABLE.get(mapKey);
 		}
 		TABLE.set(mapKey, this);
@@ -142,8 +141,8 @@ export default class RedBitmapCubeTexture {
 				img.src = src;
 				img.crossOrigin = 'anonymous';
 				img.onerror = e => {
-					if (onerror) onerror.call(this, e)
 					this.resolve(null)
+					if (onerror) onerror.call(this, e)
 				};
 				img.decode().then(_ => {
 					imgList[face] = img;

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 16:4:46
+ *   Last modification time of this file - 2019.12.14 17:33:43
  *
  */
 "use strict";
@@ -81,23 +81,24 @@ export default class RedBitmapTexture {
 		return promise
 	};
 	constructor(redGPUContext, src, sampler, useMipmap = true, onload, onerror) {
+
 		if (!defaultSampler) defaultSampler = new RedSampler(redGPUContext);
 		this.sampler = sampler || defaultSampler;
+		this.src = src
 		if (!src) {
 			console.log('src')
 		} else {
 			const mapKey = src + this.sampler.string + useMipmap;
 			if (RedGPUContext.useDebugConsole) console.log('mapKey', mapKey);
 			if (TABLE.get(mapKey)) {
-				if (onload) onload.call(this)
 				return TABLE.get(mapKey);
 			}
 			const img = new Image();
 			img.src = src;
 			img.crossOrigin = 'anonymous';
 			img.onerror = e => {
-				if (onerror) onerror.call(this, e)
 				this.resolve(null)
+				if (onerror) onerror.call(this, e)
 			};
 			TABLE.set(mapKey, this);
 			img.decode().then(_ => {
@@ -135,8 +136,8 @@ export default class RedBitmapTexture {
 						if (mipIndex == len) {
 							promise.then(
 								_ => {
-									if (onload) onload.call(self)
 									self.resolve(gpuTexture)
+									if (onload) onload.call(self)
 									redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
 
 
@@ -153,8 +154,8 @@ export default class RedBitmapTexture {
 						}
 					} else {
 						promise.then(_ => {
-								if (onload) onload.call(self)
 								self.resolve(gpuTexture)
+								if (onload) onload.call(self)
 								redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
 
 							}
