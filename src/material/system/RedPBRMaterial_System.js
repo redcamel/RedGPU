@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 13:10:39
+ *   Last modification time of this file - 2019.12.14 13:16:40
  *
  */
 
@@ -311,8 +311,8 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 	_useMaterialDoubleSide = false;
 	_useVertexTangent = false;
 	_emissivePower = 1;
-	_occlusionPower = 1;
-	_cutOff = 0.0;
+	_occlusionPower = 1
+	_cutOff = 0.0
 	_useCutOff = true;
 	_alphaBlend = 0;
 
@@ -321,7 +321,7 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 	inverseBindMatrixForJoint = new Float32Array(RedTypeSize.mat4 * maxJoint / Float32Array.BYTES_PER_ELEMENT);
 	globalTransformOfNodeThatTheMeshIsAttachedTo = new Float32Array(RedTypeSize.mat4 / Float32Array.BYTES_PER_ELEMENT);
 
-	#timeout;
+	#timeout
 	set occlusionTexture(texture) {
 		// this._occlusionTexture = null;
 		this.checkTexture(texture, 'occlusionTexture')
@@ -350,14 +350,14 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 		return this._useCutOff
 	}
 	set useCutOff(v) {
-		this._useCutOff = v;
+		this._useCutOff = v
 		this.needResetBindingInfo = true
 	}
 	get skin() {
 		return this._skin
 	}
 	set skin(v) {
-		this._skin = v;
+		this._skin = v
 		this.needResetBindingInfo = true
 	}
 
@@ -381,14 +381,14 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 		return this._useMaterialDoubleSide
 	}
 	set useMaterialDoubleSide(v) {
-		this._useMaterialDoubleSide = v;
+		this._useMaterialDoubleSide = v
 		this.needResetBindingInfo = true
 	}
 	get useVertexTangent() {
 		return this._useVertexTangent
 	}
 	set useVertexTangent(v) {
-		this._useVertexTangent = v;
+		this._useVertexTangent = v
 		this.needResetBindingInfo = true
 	}
 	set roughnessTexture(texture) {
@@ -508,7 +508,7 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 						break;
 					case 'occlusionTexture' :
 						this._occlusionTexture = texture;
-						console.log('occlusionTexture', texture);
+						console.log('occlusionTexture', texture)
 						break;
 				}
 				console.log("로딩완료or로딩에러확인 textureName", textureName, texture ? texture.GPUTexture : '');

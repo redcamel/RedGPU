@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 13:10:39
+ *   Last modification time of this file - 2019.12.14 13:16:40
  *
  */
 
@@ -18,6 +18,13 @@ export default class RedBaseLight extends RedMix.mix(
 	y = 0;
 	z = 0;
 
-	get intensity() {return this.#intensity;}
-	set intensity(value) {this.#intensity = value;}
+	get intensity() {
+		return this.#intensity;
+	}
+
+	set intensity(value) {
+		this.#intensity = value;
+	}
+
+
 }

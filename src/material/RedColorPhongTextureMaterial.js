@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 13:10:39
+ *   Last modification time of this file - 2019.12.14 13:16:40
  *
  */
 
@@ -148,7 +148,7 @@ export default class RedColorPhongTextureMaterial extends RedMix.mix(
 		{size: RedTypeSize.float, valueName: 'emissivePower'}
 	];
 
-	#timeout;
+	#timeout
 	constructor(redGPUContext, color = '#ff0000', alpha = 1, normalTexture, specularTexture, emissiveTexture, displacementTexture) {
 		super(redGPUContext);
 		this.color = color;

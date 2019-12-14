@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 13:10:39
+ *   Last modification time of this file - 2019.12.14 13:16:40
  *
  */
 
@@ -24,7 +24,7 @@ export default class RedBuffer extends RedUUID {
 		let tUsage;
 		this.type = bufferType;
 		this.vertexCount = 0;
-		this.stride = 0;
+		this.stride = 0
 		switch (bufferType) {
 			case RedBuffer.TYPE_VERTEX :
 				tUsage = usage || globalThis.GPUBufferUsage.VERTEX | globalThis.GPUBufferUsage.COPY_DST;

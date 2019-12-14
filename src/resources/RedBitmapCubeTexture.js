@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 13:10:39
+ *   Last modification time of this file - 2019.12.14 13:16:40
  *
  */
 "use strict";
@@ -70,14 +70,14 @@ export default class RedBitmapCubeTexture {
 			};
 
 			commandEncoder.copyBufferToTexture(bufferView, textureView, textureExtent);
-			console.log('mip', mip, 'width', width, 'height', height);
+			console.log('mip', mip, 'width', width, 'height', height)
 			resolve()
-		}));
+		}))
 		return promise
 	};
 	#makeCubeTexture = function (redGPUContext, useMipmap, imgList, maxW, maxH) {
 		maxW = RedUTIL.nextHighestPowerOfTwo(maxW);
-		maxH = RedUTIL.nextHighestPowerOfTwo(maxH);
+		maxH = RedUTIL.nextHighestPowerOfTwo(maxH)
 		if (useMipmap) this.mipMaps = Math.round(Math.log2(Math.max(maxW, maxH)));
 		const textureDescriptor = {
 			size: {
@@ -93,7 +93,7 @@ export default class RedBitmapCubeTexture {
 			usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.SAMPLED
 		};
 		const gpuTexture = redGPUContext.device.createTexture(textureDescriptor);
-		let result = [];
+		let result = []
 		const commandEncoder = redGPUContext.device.createCommandEncoder({});
 
 		imgList.forEach((img, face) => {
@@ -111,8 +111,8 @@ export default class RedBitmapCubeTexture {
 		});
 		Promise.all(result).then(
 			_ => {
-				console.log('오긴하니', imgList);
-				this.resolve(gpuTexture);
+				console.log('오긴하니', imgList)
+				this.resolve(gpuTexture)
 				redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
 			}
 		)
@@ -141,8 +141,8 @@ export default class RedBitmapCubeTexture {
 				img.src = src;
 				img.crossOrigin = 'anonymous';
 				img.onerror = e => {
-					console.log(e);
-					this.resolve(null);
+					console.log(e)
+					this.resolve(null)
 					if (onerror) onerror(e)
 				};
 				img.decode().then(_ => {

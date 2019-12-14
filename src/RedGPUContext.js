@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 13:10:39
+ *   Last modification time of this file - 2019.12.14 13:16:40
  *
  */
 
@@ -26,7 +26,7 @@ let checkGlslang = function () {
 		} else resolve()
 	});
 	return promise
-};
+}
 export default class RedGPUContext {
 	#width = 0;
 	#height = 0;
@@ -37,7 +37,7 @@ export default class RedGPUContext {
 		checkGlslang().then(_ => {
 			console.log('glslang', glslang);
 			this.#detector = new RedDetectorGPU(this);
-			let state = true;
+			let state = true
 			if (navigator.gpu) {
 				navigator.gpu.requestAdapter({})
 					.then(adapter => {
@@ -96,7 +96,7 @@ export default class RedGPUContext {
 								initFunc.call(this, true)
 							});
 					}).catch(error => {
-					state = false;
+					state = false
 					initFunc(false, error)
 				});
 			} else {

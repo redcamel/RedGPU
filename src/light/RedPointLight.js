@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 13:10:39
+ *   Last modification time of this file - 2019.12.14 13:16:40
  *
  */
 
@@ -18,6 +18,10 @@ export default class RedPointLight extends RedBaseLight {
 		this.intensity = intensity;
 		this.radius = radius;
 	}
-	get radius() {return this.#radius;}
-	set radius(value) {this.#radius = value;}
+	get radius() {
+		return this.#radius;
+	}
+	set radius(value) {
+		this.#radius = value;
+	}
 }

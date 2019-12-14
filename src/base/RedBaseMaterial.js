@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 13:10:39
+ *   Last modification time of this file - 2019.12.14 13:16:40
  *
  */
 
@@ -23,7 +23,7 @@ let makeUniformBindLayout = function (redGPUContext, uniformsBindGroupLayoutDesc
 	}
 	return uniformsBindGroupLayout
 };
-let RedBaseMaterial_searchModules_callNum = 0;
+let RedBaseMaterial_searchModules_callNum = 0
 export default class RedBaseMaterial extends RedUUID {
 	get redGPUContext() {
 		return this.#redGPUContext;
@@ -49,7 +49,7 @@ export default class RedBaseMaterial extends RedUUID {
 	uniformBuffer_vertex;
 	uniformBuffer_fragment;
 	uniformBindGroup_material;
-	needResetBindingInfo = false;
+	needResetBindingInfo = false
 	constructor(redGPUContext) {
 		super();
 		let vShaderModule, fShaderModule;
@@ -123,10 +123,15 @@ export default class RedBaseMaterial extends RedUUID {
 		console.timeEnd('updateUniformBuffer_' + this._UUID);
 	}
 
-	checkTexture(texture, textureName) {throw new Error(`${this.constructor.name} : checkTexture must override!!!`)}
-	resetBindingInfo() {throw new Error(`${this.constructor.name} : resetBindingInfo must override!!!`)}
+	checkTexture(texture, textureName) {
+		throw new Error(`${this.constructor.name} : checkTexture must override!!!`)
+	}
+
+	resetBindingInfo() {
+		throw new Error(`${this.constructor.name} : resetBindingInfo must override!!!`)
+	}
 	_afterResetBindingInfo() {
-		console.time('_afterResetBindingInfo - ' + this.constructor.name);
+		console.time('_afterResetBindingInfo - ' + this.constructor.name)
 
 		this.searchModules();
 		this.setUniformBindGroupDescriptor();
@@ -135,7 +140,7 @@ export default class RedBaseMaterial extends RedUUID {
 			this.updateUniformBuffer();
 			this.#uniformBufferUpdated = true;
 		}
-		console.timeEnd('_afterResetBindingInfo - ' + this.constructor.name);
+		console.timeEnd('_afterResetBindingInfo - ' + this.constructor.name)
 		this.updateUUID();
 	}
 
@@ -143,8 +148,8 @@ export default class RedBaseMaterial extends RedUUID {
 		// console.log(this, this.constructor, this.constructor.name);
 		// console.log(this.constructor.PROGRAM_OPTION_LIST);
 
-		RedBaseMaterial_searchModules_callNum++;
-		console.log('RedBaseMaterial_searchModules_callNum', RedBaseMaterial_searchModules_callNum);
+		RedBaseMaterial_searchModules_callNum++
+		console.log('RedBaseMaterial_searchModules_callNum', RedBaseMaterial_searchModules_callNum)
 		let tKey = [this.constructor.name];
 		let i = 0, len = this.constructor.PROGRAM_OPTION_LIST.length;
 		for (i; i < len; i++) {
