@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 19:11:47
+ *   Last modification time of this file - 2019.12.14 13:10:39
  *
  */
 
@@ -10,16 +10,15 @@
 import RedUTIL from "../util/RedUTIL.js";
 
 let float1_Float32Array = new Float32Array(1);
-
-
+const mix = (Base, ...texture) => {
+	return [Base, ...texture].reduce((parent, extender) => { return extender(parent)})
+};
 const color = Base => class extends Base {
 	#color = '#ff0000';
 	#alpha = 1;
 	#colorRGBA = new Float32Array([1, 0, 0, this.#alpha]);
-	get color() {
-		return this.#color;
-	}
 
+	get color() {return this.#color;}
 	set color(hex) {
 		this.#color = hex;
 		let rgb = RedUTIL.hexToRGB_ZeroToOne(hex);
@@ -31,164 +30,85 @@ const color = Base => class extends Base {
 		if (this.uniformBuffer_fragment) this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['colorRGBA'], this.#colorRGBA)
 	}
 
-	get alpha() {
-		return this.#alpha;
-	}
-
+	get alpha() {return this.#alpha;}
 	set alpha(value) {
 		let rgb = RedUTIL.hexToRGB_ZeroToOne(this.#color);
 		this.#colorRGBA[0] = rgb[0] * value;
 		this.#colorRGBA[1] = rgb[1] * value;
 		this.#colorRGBA[2] = rgb[2] * value;
-		this.#colorRGBA[3] = value
+		this.#colorRGBA[3] = value;
 		if (this.uniformBuffer_fragment) this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['colorRGBA'], this.#colorRGBA)
 	}
 
-	get colorRGBA() {
-		return this.#colorRGBA;
-	}
+	get colorRGBA() {return this.#colorRGBA;}
 };
-// TODO - makeTextureClass 이개념을 쓰고싶은데 흠...
-// const defineTextureClass = function (name) {
-// 	let t0;
-// 	t0 = Base => class extends Base {
-// 		[`_${name}`]=null;
-// 		set [name](texture) {
-// 			this[`_${name}`] = null;
-// 			this.checkTexture(texture, name);
-// 		}
-//
-// 		get [name]() {
-// 			return this[`_${name}`]
-// 		}
-// 	};
-// 	return t0
-// }
-// const defineTextureClass = makeTextureClass('diffuseTexture');
-// const defineTextureClass = makeTextureClass('normalTexture');
-// const defineTextureClass = makeTextureClass('specularTexture');
-
-
-const diffuseTexture = Base => class extends Base {
-	_diffuseTexture;
-	set diffuseTexture(texture) {
-		// this._diffuseTexture = null;
-		this.checkTexture(texture, 'diffuseTexture')
-	}
-
-	get diffuseTexture() {
-		return this._diffuseTexture
-	}
+const defineTextureClass = function (name) {
+	return Base => class extends Base {
+		[`_${name}`] = null;
+		set [name](texture) {
+			// this[`_${name}`] = null;
+			this.checkTexture(texture, name);
+		}
+		get [name]() {
+			return this[`_${name}`]
+		}
+	};
 };
-const normalTexture = Base => class extends Base {
-	_normalTexture;
-	set normalTexture(texture) {
-		// this._normalTexture = null;
-		this.checkTexture(texture, 'normalTexture')
-	}
-
-	get normalTexture() {
-		return this._normalTexture
-	}
+const diffuseTexture = defineTextureClass('diffuseTexture');
+const normalTexture = defineTextureClass('normalTexture');
+const specularTexture = defineTextureClass('specularTexture');
+const emissiveTextureBase = defineTextureClass('emissiveTexture');
+const emissiveTexture = Base => {
+	let t0 = class extends Base {
+		_emissivePower = 1.0;
+		get emissivePower() {return this._emissivePower;}
+		set emissivePower(value) {
+			this._emissivePower = value;
+			float1_Float32Array[0] = this._emissivePower;
+			this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['emissivePower'], float1_Float32Array)
+		}
+	};
+	return mix(t0, emissiveTextureBase)
 };
-
-const specularTexture = Base => class extends Base {
-	_specularTexture;
-	set specularTexture(texture) {
-		// this._specularTexture = null;
-		this.checkTexture(texture, 'specularTexture')
-	}
-
-	get specularTexture() {
-		return this._specularTexture
-	}
+const environmentTextureBase = defineTextureClass('environmentTexture');
+const environmentTexture = Base => {
+	let t0 = class extends Base {
+		_environmentPower = 1;
+		get environmentPower() {return this._environmentPower;}
+		set environmentPower(value) {
+			this._environmentPower = value;
+			float1_Float32Array[0] = this._environmentPower;
+			this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['environmentPower'], float1_Float32Array)
+		}
+	};
+	return mix(t0, environmentTextureBase)
 };
-const emissiveTexture = Base => class extends Base {
-	_emissiveTexture;
-	_emissivePower = 1.0;
-	get emissivePower() {
-		return this._emissivePower;
-	}
-
-	set emissivePower(value) {
-		this._emissivePower = value;
-		float1_Float32Array[0] = this._emissivePower;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['emissivePower'], float1_Float32Array)
-	}
-	set emissiveTexture(texture) {
-		// this._emissiveTexture = null;
-		this.checkTexture(texture, 'emissiveTexture')
-	}
-
-	get emissiveTexture() {
-		return this._emissiveTexture
-	}
-};
-const environmentTexture = Base => class extends Base {
-	_environmentTexture;
-	_environmentPower = 1;
-	get environmentPower() {
-		return this._environmentPower;
-	}
-
-	set environmentPower(value) {
-		this._environmentPower = value;
-		float1_Float32Array[0] = this._environmentPower;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['environmentPower'], float1_Float32Array)
-	}
-	set environmentTexture(texture) {
-		// this._environmentTexture = null;
-		this.checkTexture(texture, 'environmentTexture')
-	}
-
-	get environmentTexture() {
-		return this._environmentTexture
-	}
-};
-
-
-const displacementTexture = Base => class extends Base {
-	_displacementTexture;
-	_displacementFlowSpeedX = 0.0;
-	_displacementFlowSpeedY = 0.0;
-	_displacementPower = 0.1;
-	set displacementTexture(texture) {
-		// this._displacementTexture = null;
-		this.checkTexture(texture, 'displacementTexture')
-	}
-	get displacementTexture() {
-		return this._displacementTexture
-	}
-
-	get displacementFlowSpeedY() {
-		return this._displacementFlowSpeedY;
-	}
-
-	set displacementFlowSpeedY(value) {
-		this._displacementFlowSpeedY = value;
-		float1_Float32Array[0] = this._displacementFlowSpeedY;
-		this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['displacementFlowSpeedY'], float1_Float32Array)
-	}
-
-	get displacementFlowSpeedX() {
-		return this._displacementFlowSpeedX;
-	}
-
-	set displacementFlowSpeedX(value) {
-		this._displacementFlowSpeedX = value;
-		float1_Float32Array[0] = this._displacementFlowSpeedX;
-		this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['displacementFlowSpeedX'], float1_Float32Array)
-	}
-
-	get displacementPower() {
-		return this._displacementPower;
-	}
-
-	set displacementPower(value) {
-		this._displacementPower = value;
-		float1_Float32Array[0] = this._displacementPower;
-		this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['displacementPower'], float1_Float32Array)
-	}
+const displacementTextureBase = defineTextureClass('displacementTexture');
+const displacementTexture = Base => {
+	let t0 = class extends Base {
+		_displacementFlowSpeedX = 0.0;
+		_displacementFlowSpeedY = 0.0;
+		_displacementPower = 0.1;
+		get displacementFlowSpeedY() {return this._displacementFlowSpeedY;}
+		set displacementFlowSpeedY(value) {
+			this._displacementFlowSpeedY = value;
+			float1_Float32Array[0] = this._displacementFlowSpeedY;
+			this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['displacementFlowSpeedY'], float1_Float32Array)
+		}
+		get displacementFlowSpeedX() {return this._displacementFlowSpeedX;}
+		set displacementFlowSpeedX(value) {
+			this._displacementFlowSpeedX = value;
+			float1_Float32Array[0] = this._displacementFlowSpeedX;
+			this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['displacementFlowSpeedX'], float1_Float32Array)
+		}
+		get displacementPower() {return this._displacementPower;}
+		set displacementPower(value) {
+			this._displacementPower = value;
+			float1_Float32Array[0] = this._displacementPower;
+			this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['displacementPower'], float1_Float32Array)
+		}
+	};
+	return mix(t0, displacementTextureBase)
 };
 const basicLightPropertys = Base => class extends Base {
 	_normalPower = 1;
@@ -198,39 +118,29 @@ const basicLightPropertys = Base => class extends Base {
 	_specularColorRGBA = new Float32Array([1, 1, 1, 1]);
 	//
 	_useFlatMode = false;
-	get normalPower() {
-		return this._normalPower;
-	}
-
+	get normalPower() {return this._normalPower;}
 	set normalPower(value) {
 		this._normalPower = value;
 		float1_Float32Array[0] = this._normalPower;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['normalPower'], float1_Float32Array)
 	}
 
-	get shininess() {
-		return this._shininess;
-	}
-
+	get shininess() {return this._shininess;}
 	set shininess(value) {
 		this._shininess = value;
 		float1_Float32Array[0] = this._shininess;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['shininess'], float1_Float32Array)
 
 	}
-	get specularPower() {
-		return this._specularPower;
-	}
 
+	get specularPower() {return this._specularPower;}
 	set specularPower(value) {
 		this._specularPower = value;
 		float1_Float32Array[0] = this._specularPower;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['specularPower'], float1_Float32Array)
 	}
-	get specularColor() {
-		return this._specularColor;
-	}
 
+	get specularColor() {return this._specularColor;}
 	set specularColor(value) {
 		this._specularColor = value;
 		let rgb = RedUTIL.hexToRGB_ZeroToOne(value);
@@ -241,20 +151,13 @@ const basicLightPropertys = Base => class extends Base {
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['specularColorRGBA'], this._specularColorRGBA)
 	}
 
-	get specularColorRGBA() {
-		return this._specularColorRGBA;
-	}
+	get specularColorRGBA() {return this._specularColorRGBA;}
 
-	get useFlatMode() {
-		return this._useFlatMode;
-	}
-
+	get useFlatMode() {return this._useFlatMode;}
 	set useFlatMode(value) {
 		this._useFlatMode = value;
 		this.needResetBindingInfo = true
 	}
-
-
 };
 
 const defineNumber = function (keyName, option = {}) {
@@ -265,7 +168,7 @@ const defineNumber = function (keyName, option = {}) {
 	let max = option['max'];
 	t0 = Base => class extends Base {
 		#range = {min: min, max: max};
-		[`#${keyName}`] = option['value']
+		[`#${keyName}`] = option['value'];
 		set [keyName](value) {
 			this[`#${keyName}`] = null;
 			if (typeof value != 'number') RedUTIL.throwFunc(`${keyName} : only allow Number. - inputValue : ${value} { type : ${typeof value} }`);
@@ -279,15 +182,13 @@ const defineNumber = function (keyName, option = {}) {
 		}
 	};
 	return t0
-}
+};
 
 class EmptyClass {
 }
 
 export default {
-	mix: (Base, ...texture) => {
-		return [Base, ...texture].reduce((parent, extender) => { return extender(parent)})
-	},
+	mix: mix,
 	EmptyClass: EmptyClass,
 	color: color,
 	defineNumber: defineNumber,

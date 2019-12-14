@@ -2,13 +2,19 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 19:11:47
+ *   Last modification time of this file - 2019.12.14 13:10:39
  *
  */
 import RedGPU from "./src/RedGPU.js";
 
 const cvs = document.createElement('canvas');
 document.body.appendChild(cvs);
+new RedGPU.RedGPUContext(
+	cvs,
+	function (successYn) {
+		console.log('hello RedGPU')
+	}
+)
 let testMat_color, testMat_colorPhong, testMat_bitmap, testMat_standard_diffuse, testMat_standard_diffuse_normal,
 	testMat_standard_diffuse_normal_displacement, testMat_colorPhongTexture_normal,
 	testMat_colorPhongTexture_normal_displacement,

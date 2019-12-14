@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 19:11:47
+ *   Last modification time of this file - 2019.12.14 13:10:39
  *
  */
 
@@ -10,8 +10,7 @@
 
 import RedUUID from "./RedUUID.js";
 
-let RedPipeline_callNum = 0
-let lastPromises = [];
+let RedPipeline_callNum = 0;
 export default class RedPipeline extends RedUUID {
 	#redGPUContext;
 	#targetMesh;
@@ -102,15 +101,13 @@ export default class RedPipeline extends RedUUID {
 		// if(lastPromises.length==1){
 		// 	makePromise()
 		// }
-		RedPipeline_callNum++
-		console.log('RedPipeline_callNum', RedPipeline_callNum)
-		console.time('updatePipeline_sampleCount4 - ' + this._UUID)
+		RedPipeline_callNum++;
+		console.log('RedPipeline_callNum', RedPipeline_callNum);
+		console.time('updatePipeline_sampleCount4 - ' + this._UUID);
 		this.GPURenderPipeline = device.createRenderPipeline(descriptor);
-		console.log('updatePipeline_sampleCount4 - ', targetMesh._material.fShaderModule.currentKey)
-		console.timeEnd('updatePipeline_sampleCount4 - ' + this._UUID)
+		console.log('updatePipeline_sampleCount4 - ', targetMesh._material.fShaderModule.currentKey);
+		console.timeEnd('updatePipeline_sampleCount4 - ' + this._UUID);
 		this.updateUUID()
-
-
 	}
 	updatePipeline_sampleCount1(redGPUContext, redView) {
 		let targetMesh = this.#targetMesh;
@@ -167,5 +164,4 @@ export default class RedPipeline extends RedUUID {
 		this.GPURenderPipeline = device.createRenderPipeline(descriptor);
 		this.updateUUID()
 	}
-
 }

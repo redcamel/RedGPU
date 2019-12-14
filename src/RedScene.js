@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 19:11:47
+ *   Last modification time of this file - 2019.12.14 13:10:39
  *
  */
 
@@ -26,7 +26,7 @@ export default class RedScene extends RedDisplayContainer {
 	#ambientLight;
 	#grid;
 	#axis;
-	#skyBox
+	#skyBox;
 	constructor() {
 		super()
 	}
@@ -103,7 +103,7 @@ export default class RedScene extends RedDisplayContainer {
 				this.#spotLightList.push(light);
 				break;
 			case RedAmbientLight:
-				this.#ambientLight = light
+				this.#ambientLight = light;
 				break;
 			default:
 				RedUTIL.throwFunc(`addLight : only allow RedBaseLight Instance - inputValue : ${light} { type : ${typeof light} }`);
@@ -126,7 +126,7 @@ export default class RedScene extends RedDisplayContainer {
 				if (tIndex > -1) this.#spotLightList.splice(tIndex, 1);
 				break;
 			case RedAmbientLight:
-				this.#ambientLight = null
+				this.#ambientLight = null;
 				break;
 			default:
 				RedUTIL.throwFunc(`removeLight : only allow RedBaseLight Instance - inputValue : ${light} { type : ${typeof light} }`);

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 19:11:47
+ *   Last modification time of this file - 2019.12.14 13:10:39
  *
  */
 
@@ -1073,7 +1073,7 @@ var RedGLTFLoader;
 					break
 			}
 			skinInfo['inverseBindMatrices'] = new Float32Array(skinInfo['inverseBindMatrices']);
-			tMesh['skinInfo'] = skinInfo
+			tMesh['skinInfo'] = skinInfo;
 			tMesh.material.skin = tMesh['skinInfo'] ? true : false;
 			// console.log(skinInfo)
 		};
@@ -1872,13 +1872,13 @@ var RedGLTFLoader;
 					// TODO
 
 					case 'BLEND' :
-						tMesh.transparentSort = true
+						tMesh.transparentSort = true;
 						tMaterial.alphaBlend = 2;
 						break;
 					case 'MASK' :
 						tMaterial.alphaBlend = 1;
 						tMaterial.cutOff = tAlphaCutoff;
-						tMaterial.useCutOff = true
+						tMaterial.useCutOff = true;
 						break;
 					default :
 						tMaterial.alphaBlend = 0;

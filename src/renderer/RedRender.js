@@ -2,16 +2,16 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 19:11:47
+ *   Last modification time of this file - 2019.12.14 13:10:39
  *
  */
 
 import RedGLTFLoader from "../loader/RedGLTFLoader.js";
 
 let transparentSortList = [];
-let tCacheUniformInfo = {}
+let tCacheUniformInfo = {};
 var resultPreMTX = mat4.create();
-var updateTargetMatrixBufferList = []
+var updateTargetMatrixBufferList = [];
 
 let renderScene = (redGPUContext, redView, passEncoder, parent, children, parentDirty, transparentSortMode) => {
 	let i;
@@ -36,12 +36,12 @@ let renderScene = (redGPUContext, redView, passEncoder, parent, children, parent
 	let tRadian, CPI, CPI2, C225, C127, C045, C157;
 	let CONVERT_RADIAN = Math.PI / 180;
 	CPI = 3.141592653589793, CPI2 = 6.283185307179586, C225 = 0.225, C127 = 1.27323954, C045 = 0.405284735, C157 = 1.5707963267948966;
-	let tX, tY
+	let tX, tY;
 	//////
 
 	var tViewRect;
 	var resultPosition;
-	tViewRect = redView.viewRect
+	tViewRect = redView.viewRect;
 	resultPosition = {
 		x: 0,
 		y: 0,
@@ -112,8 +112,8 @@ let renderScene = (redGPUContext, redView, passEncoder, parent, children, parent
 					resultPosition.w = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
 					resultPosition.x = resultPosition.x * 0.5 / resultPosition.w + 0.5;
 					resultPosition.y = resultPosition.y * 0.5 / resultPosition.w + 0.5;
-					tX = (resultPosition.x * tViewRect[2])
-					tY = ((1 - resultPosition.y) * tViewRect[3])
+					tX = (resultPosition.x * tViewRect[2]);
+					tY = ((1 - resultPosition.y) * tViewRect[3]);
 					///////////////////////////////////////
 					if (tViewRect[2] - tX > 0 && tViewRect[3] - tY > 0 && tPipeline.GPURenderPipeline) {
 						passEncoder.setPipeline(tPipeline.GPURenderPipeline);
@@ -269,8 +269,8 @@ let renderScene = (redGPUContext, redView, passEncoder, parent, children, parent
 			// tMesh.calcTransform(parent);
 			// tMesh.updateUniformBuffer();
 
-			updateTargetMatrixBufferList.includes(tMesh.uniformBuffer_mesh) ? 0 : updateTargetMatrixBufferList.push(tMesh.uniformBuffer_mesh)
-			tMesh.uniformBuffer_mesh.meshFloat32Array.set(tMesh.matrix, tMesh.offsetMatrix / Float32Array.BYTES_PER_ELEMENT)
+			updateTargetMatrixBufferList.includes(tMesh.uniformBuffer_mesh) ? 0 : updateTargetMatrixBufferList.push(tMesh.uniformBuffer_mesh);
+			tMesh.uniformBuffer_mesh.meshFloat32Array.set(tMesh.matrix, tMesh.offsetMatrix / Float32Array.BYTES_PER_ELEMENT);
 			tMesh.uniformBuffer_mesh.meshFloat32Array.set(tMesh.normalMatrix, tMesh.offsetNormalMatrix / Float32Array.BYTES_PER_ELEMENT);
 
 		}
@@ -354,15 +354,15 @@ let renderScene = (redGPUContext, redView, passEncoder, parent, children, parent
 				globalTransformOfJointNode[joint_i * 16 + 14] = tJointMTX[14];
 				globalTransformOfJointNode[joint_i * 16 + 15] = tJointMTX[15]
 			}
-			tMaterial.uniformBuffer_vertex.GPUBuffer.setSubData(tMaterial.uniformBufferDescriptor_vertex.redStructOffsetMap['globalTransformOfNodeThatTheMeshIsAttachedTo'], globalTransformOfNodeThatTheMeshIsAttachedTo)
-			tMaterial.uniformBuffer_vertex.GPUBuffer.setSubData(tMaterial.uniformBufferDescriptor_vertex.redStructOffsetMap['jointMatrix'], globalTransformOfJointNode)
+			tMaterial.uniformBuffer_vertex.GPUBuffer.setSubData(tMaterial.uniformBufferDescriptor_vertex.redStructOffsetMap['globalTransformOfNodeThatTheMeshIsAttachedTo'], globalTransformOfNodeThatTheMeshIsAttachedTo);
+			tMaterial.uniformBuffer_vertex.GPUBuffer.setSubData(tMaterial.uniformBufferDescriptor_vertex.redStructOffsetMap['jointMatrix'], globalTransformOfJointNode);
 			// tGL.uniformMatrix4fv(tSystemUniformGroup['uGlobalTransformOfNodeThatTheMeshIsAttachedTo']['location'], false, globalTransformOfNodeThatTheMeshIsAttachedTo);
 			// tGL.uniformMatrix4fv(tSystemUniformGroup['uJointMatrix']['location'], false, globalTransformOfJointNode);
 
-			if (!tSkinInfo['inverseBindMatrices']['_UUID']) tSkinInfo['inverseBindMatrices']['_UUID'] = JSON.stringify(tSkinInfo['inverseBindMatrices'])
-			let tUUID = tMaterial.uniformBuffer_vertex['_UUID']
+			if (!tSkinInfo['inverseBindMatrices']['_UUID']) tSkinInfo['inverseBindMatrices']['_UUID'] = JSON.stringify(tSkinInfo['inverseBindMatrices']);
+			let tUUID = tMaterial.uniformBuffer_vertex['_UUID'];
 			if (tCacheUniformInfo[tUUID] != tSkinInfo['inverseBindMatrices']['_UUID']) {
-				tMaterial.uniformBuffer_vertex.GPUBuffer.setSubData(tMaterial.uniformBufferDescriptor_vertex.redStructOffsetMap['inverseBindMatrixForJoint'], tSkinInfo['inverseBindMatrices'])
+				tMaterial.uniformBuffer_vertex.GPUBuffer.setSubData(tMaterial.uniformBufferDescriptor_vertex.redStructOffsetMap['inverseBindMatrixForJoint'], tSkinInfo['inverseBindMatrices']);
 				tCacheUniformInfo[tUUID] = tSkinInfo['inverseBindMatrices']['_UUID']
 			}
 		}
@@ -431,10 +431,10 @@ export default class RedRender {
 		if (tScene.axis) renderScene(redGPUContext, redView, passEncoder, null, [tScene.axis]);
 		renderScene(redGPUContext, redView, passEncoder, null, tScene.children);
 		if (transparentSortList.length) renderScene(redGPUContext, redView, passEncoder, null, transparentSortList, null, true);
-		transparentSortList.length = 0
+		transparentSortList.length = 0;
 		let i = updateTargetMatrixBufferList.length;
-		while (i--) updateTargetMatrixBufferList[i].GPUBuffer.setSubData(0, updateTargetMatrixBufferList[i].meshFloat32Array)
-		updateTargetMatrixBufferList.length = 0
+		while (i--) updateTargetMatrixBufferList[i].GPUBuffer.setSubData(0, updateTargetMatrixBufferList[i].meshFloat32Array);
+		updateTargetMatrixBufferList.length = 0;
 
 		passEncoder.endPass();
 
@@ -486,7 +486,7 @@ export default class RedRender {
 		this.#swapChainTexture = redGPUContext.swapChain.getCurrentTexture();
 		this.#swapChainTextureView = this.#swapChainTexture.createView();
 		let i = 0, len = redGPUContext.viewList.length;
-		for (i; i < len; i++) this.#renderView(redGPUContext, redGPUContext.viewList[i])
+		for (i; i < len; i++) this.#renderView(redGPUContext, redGPUContext.viewList[i]);
 		RedGLTFLoader.animationLooper(time);
 	}
 }

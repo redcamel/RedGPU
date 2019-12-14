@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 19:11:47
+ *   Last modification time of this file - 2019.12.14 13:10:39
  *
  */
 
@@ -160,7 +160,7 @@ export default class RedEnvironmentMaterial extends RedMix.mix(
 		{size: RedTypeSize.float, valueName: 'environmentPower'}
 	];
 
-	#timeout
+	#timeout;
 	constructor(redGPUContext, diffuseTexture, environmentTexture, normalTexture, specularTexture, emissiveTexture, displacementTexture) {
 		super(redGPUContext);
 		console.log(diffuseTexture, normalTexture);
