@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 13:16:40
+ *   Last modification time of this file - 2019.12.14 13:27:49
  *
  */
 
@@ -372,10 +372,10 @@ let renderScene = (redGPUContext, redView, passEncoder, parent, children, parent
 	}
 };
 export default class RedRender {
-	_private_redGPUContext;
-	_private_swapChainTexture;
-	_private_swapChainTextureView;
-	_private_renderView = (redGPUContext, redView) => {
+	#redGPUContext;
+	#swapChainTexture;
+	#swapChainTextureView;
+	#renderView = (redGPUContext, redView) => {
 		let tScene, tSceneBackgroundColor_rgba;
 		tScene = redView.scene;
 		tSceneBackgroundColor_rgba = tScene.backgroundColorRGBA;
@@ -416,7 +416,7 @@ export default class RedRender {
 				stencilStoreOp: "store",
 			}
 		};
-		let commandEncoder = this._private_redGPUContext.device.createCommandEncoder();
+		let commandEncoder = this.#redGPUContext.device.createCommandEncoder();
 		let passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
 
 		// 시스템 유니폼 업데이트
@@ -455,16 +455,16 @@ export default class RedRender {
 		// 최종렌더
 		let tX = redView.viewRect[0];
 		let tY = redView.viewRect[1];
-		let tW = redView.viewRect[2] + redView.viewRect[0] > this._private_redGPUContext.canvas.width ? redView.viewRect[2] - redView.viewRect[0] : redView.viewRect[2];
-		let tH = redView.viewRect[3] + redView.viewRect[1] > this._private_redGPUContext.canvas.height ? redView.viewRect[3] - redView.viewRect[1] : redView.viewRect[3];
-		if (tW > this._private_redGPUContext.canvas.width) tW = this._private_redGPUContext.canvas.width - tX;
-		if (tH > this._private_redGPUContext.canvas.height) tH = this._private_redGPUContext.canvas.height - tX;
+		let tW = redView.viewRect[2] + redView.viewRect[0] > this.#redGPUContext.canvas.width ? redView.viewRect[2] - redView.viewRect[0] : redView.viewRect[2];
+		let tH = redView.viewRect[3] + redView.viewRect[1] > this.#redGPUContext.canvas.height ? redView.viewRect[3] - redView.viewRect[1] : redView.viewRect[3];
+		if (tW > this.#redGPUContext.canvas.width) tW = this.#redGPUContext.canvas.width - tX;
+		if (tH > this.#redGPUContext.canvas.height) tH = this.#redGPUContext.canvas.height - tX;
 		commandEncoder.copyTextureToTexture(
 			{
 				texture: last_effect_baseAttachment
 			},
 			{
-				texture: this._private_swapChainTexture,
+				texture: this.#swapChainTexture,
 				origin: {
 					x: tX,
 					y: tY,
@@ -477,16 +477,16 @@ export default class RedRender {
 				depth: 1
 			}
 		);
-		this._private_redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
+		this.#redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
 	};
 
 
 	render(time, redGPUContext) {
-		this._private_redGPUContext = redGPUContext;
-		this._private_swapChainTexture = redGPUContext.swapChain.getCurrentTexture();
-		this._private_swapChainTextureView = this._private_swapChainTexture.createView();
+		this.#redGPUContext = redGPUContext;
+		this.#swapChainTexture = redGPUContext.swapChain.getCurrentTexture();
+		this.#swapChainTextureView = this.#swapChainTexture.createView();
 		let i = 0, len = redGPUContext.viewList.length;
-		for (i; i < len; i++) this._private_renderView(redGPUContext, redGPUContext.viewList[i])
+		for (i; i < len; i++) this.#renderView(redGPUContext, redGPUContext.viewList[i])
 		RedGLTFLoader.animationLooper(time);
 	}
 }
