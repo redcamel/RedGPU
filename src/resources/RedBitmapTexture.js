@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 15:14:27
+ *   Last modification time of this file - 2019.12.14 15:38:23
  *
  */
 "use strict";
@@ -94,14 +94,15 @@ export default class RedBitmapTexture {
 			console.log('mapKey', mapKey);
 			if (TABLE.get(mapKey)) {
 				console.log('캐시된 녀석을 던집', mapKey, TABLE.get(mapKey));
+				if (onload) onload.call(this)
 				return TABLE.get(mapKey);
 			}
 			const img = new Image();
 			img.src = src;
 			img.crossOrigin = 'anonymous';
 			img.onerror = e => {
-				this.resolve(null)
 				if (onerror) onerror.call(this, e)
+				this.resolve(null)
 			};
 			TABLE.set(mapKey, this);
 			img.decode().then(_ => {
@@ -141,10 +142,11 @@ export default class RedBitmapTexture {
 							promise.then(
 								_ => {
 									// console.log('오긴하니', src)
+									if (onload) onload.call(self)
 									self.resolve(gpuTexture)
 									redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
 
-									if (onload) onload.call(self)
+
 								}
 							)
 						} else {
@@ -159,9 +161,10 @@ export default class RedBitmapTexture {
 					} else {
 						promise.then(_ => {
 								// console.log('밉맵실행', src, mipIndex)
+								if (onload) onload.call(self)
 								self.resolve(gpuTexture)
 								redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
-								if (onload) onload.call(self)
+
 							}
 						)
 					}

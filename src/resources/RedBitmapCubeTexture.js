@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 13:31:48
+ *   Last modification time of this file - 2019.12.14 15:38:23
  *
  */
 "use strict";
@@ -75,7 +75,7 @@ export default class RedBitmapCubeTexture {
 		}))
 		return promise
 	};
-	#makeCubeTexture = function (redGPUContext, useMipmap, imgList, maxW, maxH) {
+	#makeCubeTexture = function (redGPUContext, useMipmap, imgList, maxW, maxH, onload) {
 		maxW = RedUTIL.nextHighestPowerOfTwo(maxW);
 		maxH = RedUTIL.nextHighestPowerOfTwo(maxH)
 		if (useMipmap) this.mipMaps = Math.round(Math.log2(Math.max(maxW, maxH)));
@@ -112,6 +112,7 @@ export default class RedBitmapCubeTexture {
 		Promise.all(result).then(
 			_ => {
 				console.log('오긴하니', imgList)
+				if (onload) onload.call(this)
 				this.resolve(gpuTexture)
 				redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
 			}
@@ -142,8 +143,8 @@ export default class RedBitmapCubeTexture {
 				img.crossOrigin = 'anonymous';
 				img.onerror = e => {
 					console.log(e)
+					if (onerror) onerror.call(this, e)
 					this.resolve(null)
-					if (onerror) onerror(e)
 				};
 				img.decode().then(_ => {
 					imgList[face] = img;
@@ -152,7 +153,7 @@ export default class RedBitmapCubeTexture {
 					maxH = Math.max(maxH, img.height);
 					if (maxW > 1024) maxW = 1024;
 					if (maxH > 1024) maxH = 1024;
-					if (loadCount == 6) this.#makeCubeTexture(redGPUContext, useMipmap, imgList, maxW, maxH)
+					if (loadCount == 6) this.#makeCubeTexture(redGPUContext, useMipmap, imgList, maxW, maxH, onload)
 				})
 			}
 		})

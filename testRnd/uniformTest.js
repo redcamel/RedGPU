@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 15:14:27
+ *   Last modification time of this file - 2019.12.14 15:38:23
  *
  */
 import RedGPU from "../src/RedGPU.js";
@@ -26,10 +26,18 @@ new RedGPU.RedGPUContext(
 				'../assets/crate.png',
 				'../assets/Brick03_disp.jpg',
 				'../assets/specular.png',
-				'../assets/emissive.jpg'
+				'../assets/emissive.jpg',
+				[
+					'../assets/cubemap/SwedishRoyalCastle/px.jpg',
+					'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
+					'../assets/cubemap/SwedishRoyalCastle/py.jpg',
+					'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
+					'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
+					'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
+				]
 			],
 			_ => {
-				console.log('텍스쳐 로딩완료', textureLoader)
+
 				let MAX = 5000;
 				let i = MAX;
 				let tView;
@@ -71,16 +79,7 @@ new RedGPU.RedGPUContext(
 				this.addView(tView)
 
 
-				let testCubeTexture = new RedGPU.RedBitmapCubeTexture(this, [
-					'./../assets/cubemap/SwedishRoyalCastle/px.jpg',
-					'./../assets/cubemap/SwedishRoyalCastle/nx.jpg',
-					'./../assets/cubemap/SwedishRoyalCastle/py.jpg',
-					'./../assets/cubemap/SwedishRoyalCastle/ny.jpg',
-					'./../assets/cubemap/SwedishRoyalCastle/pz.jpg',
-					'./../assets/cubemap/SwedishRoyalCastle/nz.jpg'
-				])
-
-				testMat_environment = new RedGPU.RedEnvironmentMaterial(this, textureLoader.getTextureByIndex(1), testCubeTexture)
+				testMat_environment = new RedGPU.RedEnvironmentMaterial(this, textureLoader.getTextureByIndex(1), textureLoader.getTextureByIndex(7))
 				testMat_color = new RedGPU.RedColorMaterial(this, '#ffff12');
 				testMat_colorPhong = new RedGPU.RedColorPhongMaterial(this, '#ffffff');
 				testMat_colorPhongTexture_normal = new RedGPU.RedColorPhongTextureMaterial(this, '#fff253', 1, textureLoader.getTextureByIndex(2))
@@ -102,18 +101,19 @@ new RedGPU.RedGPUContext(
 				}
 
 
-				let division = MAX / 8
+				let division = MAX / 9
 				while (i--) {
 					let testMesh = new RedGPU.RedMesh(
 						this,
 						randomGeometry(),
-						i > division * 7 ? testMat_color
-							: i > division * 6 ? testMat_colorPhong
-							: i > division * 5 ? testMat_bitmap
-								: i > division * 4 ? testMat_standard_diffuse
-									: i > division * 3 ? testMat_standard_diffuse_normal
-										: i > division * 2 ? testMat_standard_diffuse_normal_displacement
-											: i > division * 1 ? testMat_colorPhongTexture_normal : testMat_colorPhongTexture_normal_displacement
+						i > division * 8 ? testMat_environment
+							: i > division * 7 ? testMat_color
+								: i > division * 6 ? testMat_colorPhong
+									: i > division * 5 ? testMat_bitmap
+										: i > division * 4 ? testMat_standard_diffuse
+											: i > division * 3 ? testMat_standard_diffuse_normal
+												: i > division * 2 ? testMat_standard_diffuse_normal_displacement
+													: i > division * 1 ? testMat_colorPhongTexture_normal : testMat_colorPhongTexture_normal_displacement
 					);
 					testMesh.x = Math.random() * 3000 - 1500;
 					testMesh.y = Math.random() * 3000 - 1500;

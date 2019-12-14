@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 15:14:27
+ *   Last modification time of this file - 2019.12.14 15:38:23
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -26,7 +26,15 @@ new RedGPU.RedGPUContext(
 				'assets/crate.png',
 				'assets/Brick03_disp.jpg',
 				'assets/specular.png',
-				'assets/emissive.jpg'
+				'assets/emissive.jpg',
+				[
+					'./assets/cubemap/SwedishRoyalCastle/px.jpg',
+					'./assets/cubemap/SwedishRoyalCastle/nx.jpg',
+					'./assets/cubemap/SwedishRoyalCastle/py.jpg',
+					'./assets/cubemap/SwedishRoyalCastle/ny.jpg',
+					'./assets/cubemap/SwedishRoyalCastle/pz.jpg',
+					'./assets/cubemap/SwedishRoyalCastle/nz.jpg'
+				]
 			],
 			_ => {
 				console.log('텍스쳐 로딩완료', textureLoader)
@@ -94,14 +102,7 @@ new RedGPU.RedGPUContext(
 				this.addView(tView2)
 
 
-				let testCubeTexture = new RedGPU.RedBitmapCubeTexture(this, [
-					'./assets/cubemap/SwedishRoyalCastle/px.jpg',
-					'./assets/cubemap/SwedishRoyalCastle/nx.jpg',
-					'./assets/cubemap/SwedishRoyalCastle/py.jpg',
-					'./assets/cubemap/SwedishRoyalCastle/ny.jpg',
-					'./assets/cubemap/SwedishRoyalCastle/pz.jpg',
-					'./assets/cubemap/SwedishRoyalCastle/nz.jpg'
-				])
+				let testCubeTexture = textureLoader.getTextureByIndex(7)
 
 				testMat_environment = new RedGPU.RedEnvironmentMaterial(this, textureLoader.getTextureByIndex(1), testCubeTexture)
 				testMat_color = new RedGPU.RedColorMaterial(this, '#ffff12');
@@ -258,32 +259,16 @@ new RedGPU.RedGPUContext(
 					requestAnimationFrame(render);
 				};
 				requestAnimationFrame(render);
-				setTestUI(this, tView, tScene)
+				setTestUI(this, tView, tScene, testCubeTexture)
 			}
 		)
 
 	}
 );
 
-let setTestUI = function (redGPUContextContext, tView, tScene) {
+let setTestUI = function (redGPUContextContext, tView, tScene, testCubeTexture) {
 
 	let tFolder;
-
-	let testCubeTexture = new RedGPU.RedBitmapCubeTexture(redGPUContextContext, [
-		'./assets/cubemap/SwedishRoyalCastle/px.jpg',
-		'./assets/cubemap/SwedishRoyalCastle/nx.jpg',
-		'./assets/cubemap/SwedishRoyalCastle/py.jpg',
-		'./assets/cubemap/SwedishRoyalCastle/ny.jpg',
-		'./assets/cubemap/SwedishRoyalCastle/pz.jpg',
-		'./assets/cubemap/SwedishRoyalCastle/nz.jpg'
-		// './assets/cubemap/posx.jpg',
-		// './assets/cubemap/negx.jpg',
-		// './assets/cubemap/posy.jpg',
-		// './assets/cubemap/negy.jpg',
-		// './assets/cubemap/posz.jpg',
-		// './assets/cubemap/negz.jpg'
-	])
-	console.log('RedBitmapCubeTexture', testCubeTexture)
 
 	let skyBox = new RedGPU.RedSkyBox(redGPUContextContext, testCubeTexture)
 	tScene.skyBox = skyBox

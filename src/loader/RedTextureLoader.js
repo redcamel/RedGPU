@@ -2,12 +2,13 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 15:14:27
+ *   Last modification time of this file - 2019.12.14 15:38:23
  *
  */
 "use strict";
 import RedUUID from "../base/RedUUID.js";
 import RedBitmapTexture from "../resources/RedBitmapTexture.js";
+import RedBitmapCubeTexture from "../resources/RedBitmapCubeTexture.js";
 
 export default class RedTextureLoader extends RedUUID {
 	textures = [];
@@ -23,9 +24,12 @@ export default class RedTextureLoader extends RedUUID {
 			}
 		};
 		srcList.forEach((src, idx) => {
-			let t0 = {
+			let t0;
+			let targetClass = RedBitmapTexture;
+			if (src instanceof Array) targetClass = RedBitmapCubeTexture;
+			t0 = {
 				src: src,
-				texture: new RedBitmapTexture(
+				texture: new targetClass(
 					redGPUContext, src, null, true,
 					function (e) {
 						// console.log('onload', this);
