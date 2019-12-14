@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 13:31:48
+ *   Last modification time of this file - 2019.12.14 15:14:27
  *
  */
 
@@ -144,7 +144,7 @@ export default class RedGPUContext {
 				colorAttachments: [
 					{
 						attachment: textureView,
-						loadValue: {r: 1, g: 0, b: 0.0, a: 0.0}
+						loadValue: {r: 0, g: 0, b: 0.0, a: 0.0}
 					}
 				]
 			});
