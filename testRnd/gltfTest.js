@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 17:33:43
+ *   Last modification time of this file - 2019.12.14 20:25:55
  *
  */
 
@@ -135,31 +135,31 @@ new RedGPU.RedGPUContext(
 		// 	])
 		// );
 
-		new RedGPU.RedGLTFLoader(
-			this, // redGL
-			'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Sponza/glTF/', // assetRootPath
-			'Sponza.gltf', // fileName
-			function (v) { // callBack
-				console.log(v)
-				let tMesh = v['resultMesh']
-				tMesh.scaleX = tMesh.scaleY = tMesh.scaleZ = 1
-				// v['resultMesh'].scaleX = v['resultMesh'].scaleY = v['resultMesh'].scaleZ = 0.001
-				// tScene.addChild({children:[tMesh.children[2],tMesh.children[8]]})
-				// tScene.addChild({children:[tMesh.children[2]]})
-
-				tScene.addChild(tMesh)
-
-			},
-			new RedGPU.RedBitmapCubeTexture(this, [
-				'../assets/cubemap/SwedishRoyalCastle/px.jpg',
-				'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
-				'../assets/cubemap/SwedishRoyalCastle/py.jpg',
-				'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
-				'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
-				'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
-
-			])
-		);
+		// new RedGPU.RedGLTFLoader(
+		// 	this, // redGL
+		// 	'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Sponza/glTF/', // assetRootPath
+		// 	'Sponza.gltf', // fileName
+		// 	function (v) { // callBack
+		// 		console.log(v)
+		// 		let tMesh = v['resultMesh']
+		// 		tMesh.scaleX = tMesh.scaleY = tMesh.scaleZ = 1
+		// 		// v['resultMesh'].scaleX = v['resultMesh'].scaleY = v['resultMesh'].scaleZ = 0.001
+		// 		// tScene.addChild({children:[tMesh.children[2],tMesh.children[8]]})
+		// 		// tScene.addChild({children:[tMesh.children[2]]})
+		//
+		// 		tScene.addChild(tMesh)
+		//
+		// 	},
+		// 	new RedGPU.RedBitmapCubeTexture(this, [
+		// 		'../assets/cubemap/SwedishRoyalCastle/px.jpg',
+		// 		'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
+		// 		'../assets/cubemap/SwedishRoyalCastle/py.jpg',
+		// 		'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
+		// 		'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
+		// 		'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
+		//
+		// 	])
+		// );
 		// new RedGPU.RedGLTFLoader(
 		// 	this, // redGL
 		// 	'../assets/gltf/', // assetRootPath
@@ -227,15 +227,24 @@ new RedGPU.RedGPUContext(
 		// 	])
 		// );
 
-		// tScene.skyBox = new RedGPU.RedSkyBox(this, new RedGPU.RedBitmapCubeTexture(this, [
-		// 	'../assets/cubemap/SwedishRoyalCastle/px.jpg?t=1',
-		// 	'../assets/cubemap/SwedishRoyalCastle/nx.jpg?t=1',
-		// 	'../assets/cubemap/SwedishRoyalCastle/py.jpg?t=1',
-		// 	'../assets/cubemap/SwedishRoyalCastle/ny.jpg?t=1',
-		// 	'../assets/cubemap/SwedishRoyalCastle/pz.jpg?t=1',
-		// 	'../assets/cubemap/SwedishRoyalCastle/nz.jpg?t=1'
-		//
-		// ]))
+		tScene.skyBox = new RedGPU.RedSkyBox(this, new RedGPU.RedBitmapCubeTexture(this, [
+			'../assets/cubemap/SwedishRoyalCastle/px.jpg',
+			'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
+			'../assets/cubemap/SwedishRoyalCastle/py.jpg',
+			'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
+			'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
+			'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
+
+		]))
+		new RedGPU.RedBitmapCubeTexture(this, [
+			'../assets/cubemap/SwedishRoyalCastle/px.jpg',
+			'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
+			'../assets/cubemap/SwedishRoyalCastle/py.jpg',
+			'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
+			'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
+			'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
+
+		])
 
 		let renderer = new RedGPU.RedRender();
 		let render = time => {

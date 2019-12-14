@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 19:33:10
+ *   Last modification time of this file - 2019.12.14 20:25:55
  *
  */
 
@@ -1007,7 +1007,6 @@ var RedGLTFLoader;
 			};
 			var nodes = json['nodes'];
 			info['joints'].forEach(function (v) {
-				console.log(json['nodes'][v]);
 				checkJoint(redGLTFLoader, skinInfo, nodes, v)
 			});
 			// 스켈레톤 정보가 있으면 정보와 메쉬를 연결해둔다.
@@ -2023,7 +2022,6 @@ var RedGLTFLoader;
 								redGLTFLoader['redGPUContext'],
 								redGLTFLoader['parsingResult']['textureRawList'],
 								_ => {
-									console.log('오긴하니')
 									textureLoader.textures.forEach(v => {
 										v.userInfo.targetMaterial[v.userInfo.targetTexture] = v.texture;
 									})
@@ -2046,7 +2044,6 @@ var RedGLTFLoader;
 								redGLTFLoader['redGPUContext'],
 								redGLTFLoader['parsingResult']['textureRawList'],
 								_ => {
-									console.log('오긴하니2')
 									textureLoader.textures.forEach(v => {
 										v.userInfo.targetMaterial[v.userInfo.targetTexture] = v.texture;
 									})
