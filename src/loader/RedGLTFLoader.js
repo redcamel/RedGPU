@@ -2,22 +2,22 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 18:31:10
+ *   Last modification time of this file - 2019.12.14 19:33:10
  *
  */
 
 "use strict";
 import RedUUID from "../base/RedUUID.js";
 import RedMesh from "../object3D/RedMesh.js";
-import RedBitmapTexture from "../resources/RedBitmapTexture.js";
 import RedPBRMaterial_System from "../material/system/RedPBRMaterial_System.js";
 import RedInterleaveInfo from "../geometry/RedInterleaveInfo.js";
 import RedGeometry from "../geometry/RedGeometry.js";
 import RedBuffer from "../buffer/RedBuffer.js";
 import RedUTIL from "../util/RedUTIL.js";
 import RedCamera from "../controller/RedCamera.js";
-import RedSampler from "../resources/RedSampler.js";
 import RedGPUContext from "../RedGPUContext.js";
+import RedTextureLoader from "./RedTextureLoader.js";
+import RedSampler from "../resources/RedSampler.js";
 
 var RedGLTFLoader;
 (function () {
@@ -265,6 +265,7 @@ var RedGLTFLoader;
 				buffers: []
 			},
 			textures: {},
+			textureRawList: [],
 			cameras: [],
 			animations: []
 		};
@@ -1447,13 +1448,16 @@ var RedGLTFLoader;
 				var doubleSide = false;
 				var alphaMode;
 				var alphaCutoff = 0.5;
+
 				if ('material' in v) {
+					var env = redGLTFLoader['environmentTexture'];
+					tMaterial = new RedPBRMaterial_System(redGLTFLoader['redGPUContext'], null, env, null, null, null, null);
 					var tIndex = v['material'];
 					var tMaterialInfo = json['materials'][tIndex];
 					if ('doubleSided' in tMaterialInfo) doubleSide = tMaterialInfo['doubleSided'] ? true : false;
 					if ('alphaMode' in tMaterialInfo) alphaMode = tMaterialInfo['alphaMode'];
 					if ('alphaCutoff' in tMaterialInfo) alphaCutoff = tMaterialInfo['alphaCutoff'];
-					var diffseTexture, normalTexture, roughnessTexture, emissiveTexture, occlusionTexture;
+					var diffuseTexture, normalTexture, roughnessTexture, emissiveTexture, occlusionTexture;
 
 					if ('baseColorTexture' in tMaterialInfo['pbrMetallicRoughness']) {
 						var baseTextureIndex = tMaterialInfo['pbrMetallicRoughness']['baseColorTexture']['index'];
@@ -1463,7 +1467,13 @@ var RedGLTFLoader;
 						var samplerIndex = baseTextureInfo['sampler'];
 						var option = getSamplerInfo(redGLTFLoader, json, samplerIndex);
 						var tKey = tURL;
-						diffseTexture = redGLTFLoader['parsingResult']['textures'][tKey] = new RedBitmapTexture(redGLTFLoader['redGPUContext'], tURL, new RedSampler(redGLTFLoader['redGPUContext'], option))
+						redGLTFLoader['parsingResult']['textureRawList'].push({
+							src: tURL,
+							sampler: new RedSampler(redGLTFLoader['redGPUContext'], option),
+							targetTexture: 'diffuseTexture',
+							targetMaterial: tMaterial
+						})
+						// diffuseTexture = redGLTFLoader['parsingResult']['textures'][tKey] = new RedBitmapTexture(redGLTFLoader['redGPUContext'], tURL, new RedSampler(redGLTFLoader['redGPUContext'], option))
 
 					}
 					if ('metallicRoughnessTexture' in tMaterialInfo['pbrMetallicRoughness']) {
@@ -1474,7 +1484,13 @@ var RedGLTFLoader;
 						var samplerIndex = roughnessTextureInfo['sampler'];
 						var option = getSamplerInfo(redGLTFLoader, json, samplerIndex);
 						var tKey = tURL;
-						roughnessTexture = redGLTFLoader['parsingResult']['textures'][tKey] = new RedBitmapTexture(redGLTFLoader['redGPUContext'], tURL, new RedSampler(redGLTFLoader['redGPUContext'], option))
+						redGLTFLoader['parsingResult']['textureRawList'].push({
+							src: tURL,
+							sampler: new RedSampler(redGLTFLoader['redGPUContext'], option),
+							targetTexture: 'roughnessTexture',
+							targetMaterial: tMaterial
+						})
+						// roughnessTexture = redGLTFLoader['parsingResult']['textures'][tKey] = new RedBitmapTexture(redGLTFLoader['redGPUContext'], tURL, new RedSampler(redGLTFLoader['redGPUContext'], option))
 
 					}
 					var normalTextureIndex = tMaterialInfo['normalTexture'];
@@ -1486,7 +1502,13 @@ var RedGLTFLoader;
 						var samplerIndex = normalTextureInfo['sampler'];
 						var option = getSamplerInfo(redGLTFLoader, json, samplerIndex);
 						var tKey = tURL;
-						normalTexture = redGLTFLoader['parsingResult']['textures'][tKey] = new RedBitmapTexture(redGLTFLoader['redGPUContext'], tURL, new RedSampler(redGLTFLoader['redGPUContext'], option))
+						redGLTFLoader['parsingResult']['textureRawList'].push({
+							src: tURL,
+							sampler: new RedSampler(redGLTFLoader['redGPUContext'], option),
+							targetTexture: 'normalTexture',
+							targetMaterial: tMaterial
+						})
+						// normalTexture = redGLTFLoader['parsingResult']['textures'][tKey] = new RedBitmapTexture(redGLTFLoader['redGPUContext'], tURL, new RedSampler(redGLTFLoader['redGPUContext'], option))
 
 					}
 					var emissiveTextureIndex = tMaterialInfo['emissiveTexture'];
@@ -1498,7 +1520,13 @@ var RedGLTFLoader;
 						var samplerIndex = emissiveTextureInfo['sampler'];
 						var option = getSamplerInfo(redGLTFLoader, json, samplerIndex);
 						var tKey = tURL;
-						emissiveTexture = redGLTFLoader['parsingResult']['textures'][tKey] = new RedBitmapTexture(redGLTFLoader['redGPUContext'], tURL, new RedSampler(redGLTFLoader['redGPUContext'], option))
+						redGLTFLoader['parsingResult']['textureRawList'].push({
+							src: tURL,
+							sampler: new RedSampler(redGLTFLoader['redGPUContext'], option),
+							targetTexture: 'emissiveTexture',
+							targetMaterial: tMaterial
+						})
+						// emissiveTexture = redGLTFLoader['parsingResult']['textures'][tKey] = new RedBitmapTexture(redGLTFLoader['redGPUContext'], tURL, new RedSampler(redGLTFLoader['redGPUContext'], option))
 
 					}
 					var occlusionTextureIndex = tMaterialInfo['occlusionTexture'];
@@ -1510,7 +1538,13 @@ var RedGLTFLoader;
 						var samplerIndex = occlusionTextureInfo['sampler'];
 						var option = getSamplerInfo(redGLTFLoader, json, samplerIndex);
 						var tKey = tURL;
-						occlusionTexture = redGLTFLoader['parsingResult']['textures'][tKey] = new RedBitmapTexture(redGLTFLoader['redGPUContext'], tURL, new RedSampler(redGLTFLoader['redGPUContext'], option))
+						redGLTFLoader['parsingResult']['textureRawList'].push({
+							src: tURL,
+							sampler: new RedSampler(redGLTFLoader['redGPUContext'], option),
+							targetTexture: 'occlusionTexture',
+							targetMaterial: tMaterial
+						})
+						// occlusionTexture = redGLTFLoader['parsingResult']['textures'][tKey] = new RedBitmapTexture(redGLTFLoader['redGPUContext'], tURL, new RedSampler(redGLTFLoader['redGPUContext'], option))
 						// var t0 = document.createElement('img')
 						// t0.src = json['images'][occlusionSourceIndex]['uri']
 						// t0.style.cssText = 'position:absolute;top:0px;left:0px;width:500px'
@@ -1524,7 +1558,7 @@ var RedGLTFLoader;
 						roughnessFactor = tMaterialInfo['pbrMetallicRoughness']['roughnessFactor']
 					}
 					var tColor;
-					var env = redGLTFLoader['environmentTexture'];
+
 					// Type	Description	Required
 					// baseColorFactor	number [4]	The material's base color factor.	No, default: [1,1,1,1]
 					// baseColorTexture	object	The base color texture.	No
@@ -1532,7 +1566,7 @@ var RedGLTFLoader;
 					// roughnessFactor	number	The roughness of the material.	No, default: 1
 					// metallicRoughnessTexture	object	The metallic-roughness texture.	No
 
-					tMaterial = new RedPBRMaterial_System(redGLTFLoader['redGPUContext'], diffseTexture, env, normalTexture, occlusionTexture, emissiveTexture, roughnessTexture);
+
 					if (tMaterialInfo['pbrMetallicRoughness'] && tMaterialInfo['pbrMetallicRoughness']['baseColorFactor']) tColor = tMaterialInfo['pbrMetallicRoughness']['baseColorFactor'];
 					else tColor = [1.0, 1.0, 1.0, 1.0];
 					tMaterial['baseColorFactor'] = tColor;
@@ -1985,7 +2019,18 @@ var RedGLTFLoader;
 						parseCameras(redGLTFLoader, json);
 						parseScene(redGLTFLoader, json, function () {
 							parseAnimations(redGLTFLoader, json);
+							let textureLoader = new RedTextureLoader(
+								redGLTFLoader['redGPUContext'],
+								redGLTFLoader['parsingResult']['textureRawList'],
+								_ => {
+									console.log('오긴하니')
+									textureLoader.textures.forEach(v => {
+										v.userInfo.targetMaterial[v.userInfo.targetTexture] = v.texture;
+									})
+								}
+							)
 							if (callBack) callBack();
+
 						})
 
 					}
@@ -1997,7 +2042,18 @@ var RedGLTFLoader;
 						parseCameras(redGLTFLoader, json);
 						parseScene(redGLTFLoader, json, function () {
 							parseAnimations(redGLTFLoader, json);
+							let textureLoader = new RedTextureLoader(
+								redGLTFLoader['redGPUContext'],
+								redGLTFLoader['parsingResult']['textureRawList'],
+								_ => {
+									console.log('오긴하니2')
+									textureLoader.textures.forEach(v => {
+										v.userInfo.targetMaterial[v.userInfo.targetTexture] = v.texture;
+									})
+								}
+							)
 							if (callBack) callBack();
+
 						})
 
 					}
