@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 16:4:46
+ *   Last modification time of this file - 2019.12.14 19:33:10
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -38,7 +38,7 @@ new RedGPU.RedGPUContext(
 			],
 			_ => {
 				console.log('텍스쳐 로딩완료', textureLoader)
-				let MAX = 5000;
+				let MAX = 8000;
 				let i = MAX;
 				let tView, tView2;
 				let tScene = new RedGPU.RedScene();

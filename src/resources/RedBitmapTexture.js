@@ -2,18 +2,20 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 17:33:43
+ *   Last modification time of this file - 2019.12.14 19:33:10
  *
  */
 "use strict";
 import RedSampler from "./RedSampler.js";
 import RedUTIL from "../util/RedUTIL.js";
 import RedGPUContext from "../RedGPUContext.js";
+import RedUUID from "../base/RedUUID.js";
 
 
 let defaultSampler;
-const TABLE = new Map();
-export default class RedBitmapTexture {
+const MIPMAP_TABLE = new Map();
+const IMG_TABLE = {};
+export default class RedBitmapTexture extends RedUUID{
 	#updateList = [];
 	#GPUTexture;
 	#GPUTextureView;
@@ -81,90 +83,113 @@ export default class RedBitmapTexture {
 		return promise
 	};
 	constructor(redGPUContext, src, sampler, useMipmap = true, onload, onerror) {
-
+		super()
 		if (!defaultSampler) defaultSampler = new RedSampler(redGPUContext);
 		this.sampler = sampler || defaultSampler;
 		this.src = src
+		this.onload = onload
+		this.onerror = onerror
+		const mapKey = src + this.sampler.string + useMipmap;
 		if (!src) {
 			console.log('src')
 		} else {
-			const mapKey = src + this.sampler.string + useMipmap;
+
+
 			if (RedGPUContext.useDebugConsole) console.log('mapKey', mapKey);
-			if (TABLE.get(mapKey)) {
-				return TABLE.get(mapKey);
-			}
-			const img = new Image();
-			img.src = src;
-			img.crossOrigin = 'anonymous';
-			img.onerror = e => {
-				this.resolve(null)
-				if (onerror) onerror.call(this, e)
-			};
-			TABLE.set(mapKey, this);
-			img.decode().then(_ => {
-				let tW = img.width;
-				let tH = img.height;
-				tW = RedUTIL.nextHighestPowerOfTwo(tW);
-				tH = RedUTIL.nextHighestPowerOfTwo(tH)
-				if (tW > 1024) tW = 1024;
-				if (tH > 1024) tH = 1024;
-				if (useMipmap) this.mipMaps = Math.round(Math.log2(Math.max(tW, tH)));
-
-				const textureDescriptor = {
-					size: {
-						width: tW,
-						height: tH,
-						depth: 1,
-					},
-					dimension: '2d',
-					format: 'rgba8unorm',
-					arrayLayerCount: 1,
-					mipLevelCount: useMipmap ? this.mipMaps + 1 : 1,
-					usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.SAMPLED
+			if (IMG_TABLE[src]) {
+				IMG_TABLE[src].push(this)
+			} else {
+				const img = new Image();
+				img.src = src;
+				img.crossOrigin = 'anonymous';
+				img.onerror = e => {
+					this.resolve(null)
+					if (onerror) onerror.call(this, e)
 				};
-				const gpuTexture = redGPUContext.device.createTexture(textureDescriptor);
-				let mipIndex = 0, len = this.mipMaps;
-				let faceWidth = tW;
-				let faceHeight = tH;
-
-
-				const commandEncoder = redGPUContext.device.createCommandEncoder({});
-				let self = this
-				function callNextMip(targetImage) {
-					let promise = self.#updateTexture(commandEncoder, redGPUContext.device, targetImage, gpuTexture, faceWidth, faceHeight, mipIndex)
-					if (useMipmap) {
-						if (mipIndex == len) {
-							promise.then(
-								_ => {
-									self.resolve(gpuTexture)
-									if (onload) onload.call(self)
-									redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
-
-
-								}
-							)
+				IMG_TABLE[src] = [];
+				IMG_TABLE[src].push(this)
+				img.decode().then(_ => {
+					// console.log('업데이트 해야될 대상', src, IMG_TABLE[src])
+					IMG_TABLE[src].forEach(updateTarget => {
+						if (MIPMAP_TABLE.get(mapKey)) {
+							console.log('캐쉬된 놈을 써야함',updateTarget.src)
+							console.log(updateTarget)
+							if (updateTarget.onload) updateTarget.onload.call(updateTarget)
+							updateTarget.resolve(MIPMAP_TABLE.get(mapKey))
 						} else {
-							promise.then(canvas => {
-									faceWidth = Math.max(Math.floor(faceWidth / 2), 1);
-									faceHeight = Math.max(Math.floor(faceHeight / 2), 1);
-									mipIndex++
-									callNextMip(canvas)
+							console.log('새로만들어야함')
+							console.log(mapKey)
+							let tW = img.width;
+							let tH = img.height;
+							tW = RedUTIL.nextHighestPowerOfTwo(tW);
+							tH = RedUTIL.nextHighestPowerOfTwo(tH)
+							if (tW > 1024) tW = 1024;
+							if (tH > 1024) tH = 1024;
+							if (useMipmap) updateTarget.mipMaps = Math.round(Math.log2(Math.max(tW, tH)));
+							const textureDescriptor = {
+								size: {
+									width: tW,
+									height: tH,
+									depth: 1,
+								},
+								dimension: '2d',
+								format: 'rgba8unorm',
+								arrayLayerCount: 1,
+								mipLevelCount: useMipmap ? updateTarget.mipMaps + 1 : 1,
+								usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.SAMPLED
+							};
+							const gpuTexture = redGPUContext.device.createTexture(textureDescriptor);
+							MIPMAP_TABLE.set(mapKey,gpuTexture)
+							let mipIndex = 0, len = updateTarget.mipMaps;
+							let faceWidth = tW;
+							let faceHeight = tH;
+
+
+							const commandEncoder = redGPUContext.device.createCommandEncoder({});
+
+							function callNextMip(targetImage) {
+								let promise = updateTarget.#updateTexture(commandEncoder, redGPUContext.device, targetImage, gpuTexture, faceWidth, faceHeight, mipIndex)
+								if (useMipmap) {
+									if (mipIndex == len) {
+										promise.then(
+											_ => {
+												updateTarget.resolve(gpuTexture)
+
+												if (onload) onload.call(updateTarget)
+												redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
+
+
+											}
+										)
+									} else {
+										promise.then(canvas => {
+												faceWidth = Math.max(Math.floor(faceWidth / 2), 1);
+												faceHeight = Math.max(Math.floor(faceHeight / 2), 1);
+												mipIndex++
+												callNextMip(canvas)
+											}
+										)
+									}
+								} else {
+									promise.then(_ => {
+											updateTarget.resolve(gpuTexture)
+											if (onload) onload.call(updateTarget)
+											redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
+
+										}
+									)
 								}
-							)
-						}
-					} else {
-						promise.then(_ => {
-								self.resolve(gpuTexture)
-								if (onload) onload.call(self)
-								redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
 
 							}
-						)
-					}
+							callNextMip(img)
+						}
+					})
 
-				}
-				callNextMip(img)
-			})
+				}).then(_ => {
+
+				})
+			}
+
 		}
 	}
 
