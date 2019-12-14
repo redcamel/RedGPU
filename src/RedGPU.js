@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 13:31:48
+ *   Last modification time of this file - 2019.12.14 15:14:27
  *
  */
 // base ///////////////////////////////////////////////////////////////////////
@@ -34,6 +34,7 @@ import RedPointLight from "./light/RedPointLight.js";
 import RedSpotLight from "./light/RedSpotLight.js";
 // loader ///////////////////////////////////////////////////////////////////////
 import RedGLTFLoader from "./loader/RedGLTFLoader.js";
+import RedTextureLoader from "./loader/RedTextureLoader.js";
 // material ///////////////////////////////////////////////////////////////////////
 import RedGridMaterial from "./material/system/RedGridMaterial.js";
 import RedPBRMaterial_System from "./material/system/RedPBRMaterial_System.js";
@@ -91,6 +92,7 @@ import RedUTIL from "./util/RedUTIL.js";
 import RedGPUContext from "./RedGPUContext.js"
 import RedScene from "./RedScene.js"
 import RedView from "./RedView.js"
+
 const RedGPU = {
 	glMatrix,
 	// base
@@ -122,6 +124,7 @@ const RedGPU = {
 	RedSpotLight,
 	// loader ///////////////////////////////////////////////////////////////////////
 	RedGLTFLoader,
+	RedTextureLoader,
 	// material ///////////////////////////////////////////////////////////////////////
 	RedGridMaterial,
 	RedPBRMaterial_System,

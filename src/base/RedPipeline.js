@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 13:31:48
+ *   Last modification time of this file - 2019.12.14 15:38:23
  *
  */
 
@@ -103,11 +103,11 @@ export default class RedPipeline extends RedUUID {
 		// 	makePromise()
 		// }
 		RedPipeline_callNum++
-		console.log('RedPipeline_callNum', RedPipeline_callNum)
-		console.time('updatePipeline_sampleCount4 - ' + this._UUID)
+		// console.log('RedPipeline_callNum', RedPipeline_callNum)
+		// console.time('updatePipeline_sampleCount4 - ' + this._UUID)
 		this.GPURenderPipeline = device.createRenderPipeline(descriptor);
-		console.log('updatePipeline_sampleCount4 - ', targetMesh._material.fShaderModule.currentKey)
-		console.timeEnd('updatePipeline_sampleCount4 - ' + this._UUID)
+		// console.log('updatePipeline_sampleCount4 - ', targetMesh._material.fShaderModule.currentKey)
+		// console.timeEnd('updatePipeline_sampleCount4 - ' + this._UUID)
 		this.updateUUID()
 
 

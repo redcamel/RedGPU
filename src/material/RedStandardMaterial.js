@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 13:31:48
+ *   Last modification time of this file - 2019.12.14 15:14:27
  *
  */
 
@@ -152,7 +152,7 @@ export default class RedStandardMaterial extends RedMix.mix(
 		{size: RedTypeSize.float, valueName: 'emissivePower'}
 	];
 
-	#timeout
+
 	constructor(redGPUContext, diffuseTexture, normalTexture, specularTexture, emissiveTexture, displacementTexture) {
 		super(redGPUContext);
 		console.log(diffuseTexture, normalTexture);
@@ -185,10 +185,8 @@ export default class RedStandardMaterial extends RedMix.mix(
 						break
 				}
 				console.log("로딩완료or로딩에러확인 textureName", textureName, texture ? texture.GPUTexture : '');
-				clearTimeout(this.#timeout);
-				this.#timeout = setTimeout(_ => {
-					this.needResetBindingInfo = true
-				}, 500)
+
+				this.needResetBindingInfo = true
 			} else {
 				texture.addUpdateTarget(this, textureName)
 			}
