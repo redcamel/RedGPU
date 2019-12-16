@@ -2,17 +2,93 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 20:25:55
+ *   Last modification time of this file - 2019.12.16 20:34:19
  *
  */
 "use strict";
 import RedSampler from "./RedSampler.js";
-import RedGPUContext from "../RedGPUContext.js";
 import RedImageLoader from "./system/RedImageLoader.js";
 import RedUUID from "../base/RedUUID.js";
+import RedBitmapTexture from "./RedBitmapTexture.js";
+import RedGPUContext from "../RedGPUContext.js";
 
 let defaultSampler;
-const IMG_TABLE = {};
+const MIPMAP_TABLE = new Map();
+const updateTexture = function (commandEncoder, device, imageDatas, gpuTexture, updateTarget, face = -1) {
+	let promise = new Promise(((resolve, reject) => {
+
+		imageDatas.forEach((info, mip) => {
+			if (!updateTarget.useMipmap && mip) return
+			let data = new Uint8ClampedArray(info.data)
+			let width = info.width
+			let height = info.height
+			let rowPitch = info.rowPitch;
+			const textureDataBuffer = device.createBuffer({
+				size: data.byteLength + data.byteLength % 4,
+				usage: globalThis.GPUBufferUsage.COPY_DST | globalThis.GPUBufferUsage.COPY_SRC,
+			});
+			// console.log(imageData)
+			textureDataBuffer.setSubData(0, data);
+			const bufferView = {
+				buffer: textureDataBuffer,
+				rowPitch: rowPitch,
+				imageHeight: height,
+			};
+			const textureView = {
+				texture: gpuTexture,
+				mipLevel: mip,
+				arrayLayer: Math.max(face, 0),
+			};
+
+			const textureExtent = {
+				width: width,
+				height: height,
+				depth: 1
+			};
+			commandEncoder.copyBufferToTexture(bufferView, textureView, textureExtent);
+			if (RedGPUContext.useDebugConsole) console.log('mip', mip, 'width', width, 'height', height)
+		})
+
+		resolve()
+	}))
+
+	return promise
+};
+let makeMipmap = function (redGPUContext, imgList, targetTexture) {
+	console.log('imgList', imgList)
+	let tW = imgList[0].imageDatas[0].width;
+	let tH = imgList[0].imageDatas[0].height;
+	if (targetTexture.useMipmap) targetTexture.mipMaps = Math.round(Math.log2(Math.max(tW, tH)));
+	const textureDescriptor = {
+		size: {
+			width: tW,
+			height: tH,
+			depth: 1,
+		},
+		dimension: '2d',
+		format: 'rgba8unorm',
+		arrayLayerCount: targetTexture instanceof RedBitmapTexture ? 1 : 6,
+		mipLevelCount: targetTexture.useMipmap ? targetTexture.mipMaps + 1 : 1,
+		usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.SAMPLED
+	};
+	// console.log(textureDescriptor)
+	const gpuTexture = redGPUContext.device.createTexture(textureDescriptor);
+	MIPMAP_TABLE.set(targetTexture.mapKey, gpuTexture)
+	// console.log(tW, tH)
+	let result = []
+	const commandEncoder = redGPUContext.device.createCommandEncoder({});
+	imgList.forEach((imgInfo, face) => {
+		result.push(updateTexture(commandEncoder, redGPUContext.device, imgInfo.imageDatas, gpuTexture, targetTexture, face));
+
+	});
+	Promise.all(result).then(
+		_ => {
+			targetTexture.resolve(gpuTexture)
+			if (targetTexture.onload) targetTexture.onload.call(targetTexture)
+			redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
+		}
+	)
+}
 export default class RedBitmapCubeTexture extends RedUUID {
 	#updateList = [];
 	#GPUTexture;
@@ -30,16 +106,22 @@ export default class RedBitmapCubeTexture extends RedUUID {
 		if (!srcList) {
 			console.log('src')
 		} else {
-			if (RedGPUContext.useDebugConsole) console.log('mapKey', this.mapKey);
-			if (IMG_TABLE[srcList]) {
-				IMG_TABLE[srcList].push(this)
-			} else {
-				new RedImageLoader(IMG_TABLE, srcList, redGPUContext, this)
-				IMG_TABLE[srcList] = [];
-				IMG_TABLE[srcList].push(this)
-				console.log('IMG_TABLE',IMG_TABLE)
-			}
+			let self = this
+			new RedImageLoader(redGPUContext, srcList, function () {
+				console.log(MIPMAP_TABLE.get(self.mapKey))
 
+				if (MIPMAP_TABLE.get(self.mapKey)) {
+					console.log('캐싱사용')
+					self.resolve(MIPMAP_TABLE.get(self.mapKey))
+					if (self.onload) self.onload(self)
+				} else {
+					console.log('신규생성')
+					console.log(this)
+					makeMipmap(redGPUContext, this.imgList, self)
+				}
+
+
+			}, RedImageLoader.TYPE_CUBE)
 		}
 
 

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 19:11:47
+ *   Last modification time of this file - 2019.12.16 20:34:19
  *
  */
 
@@ -39,7 +39,7 @@ new RedGPU.RedGPUContext(
 		tLight.y = 10
 		tLight.z = 10
 		tScene.addLight(tLight)
-
+		//
 		tScene.skyBox = new RedGPU.RedSkyBox(this, new RedGPU.RedBitmapCubeTexture(this, [
 			'../assets/cubemap/SwedishRoyalCastle/px.jpg',
 			'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
@@ -49,19 +49,30 @@ new RedGPU.RedGPUContext(
 			'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
 		]))
 
+		setTimeout(_=>{
+			new RedGPU.RedBitmapCubeTexture(this, [
+				'../assets/cubemap/SwedishRoyalCastle/px.jpg',
+				'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
+				'../assets/cubemap/SwedishRoyalCastle/py.jpg',
+				'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
+				'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
+				'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
+			])
+		},5000)
 		this.addView(tView)
 
 
 		testMat_color = new RedGPU.RedColorMaterial(this, '#ffff12');
 		let testTextureList = [
-			new RedGPU.RedBitmapTexture(this, '../assets/UV_Grid_Sm.jpg'),
-			new RedGPU.RedBitmapTexture(this, '../assets/Brick03_col.jpg'),
-			new RedGPU.RedBitmapTexture(this, '../assets/Brick03_nrm.jpg'),
-			new RedGPU.RedBitmapTexture(this, '../assets/crate.png'),
-			new RedGPU.RedBitmapTexture(this, '../assets/Brick03_disp.jpg'),
-			new RedGPU.RedBitmapTexture(this, '../assets/specular.png'),
-			new RedGPU.RedBitmapTexture(this, '../assets/emissive.jpg')
+			// new RedGPU.RedBitmapTexture(this, '../assets/UV_Grid_Sm.jpg'),
+			// new RedGPU.RedBitmapTexture(this, '../assets/Brick03_col.jpg'),
+			// new RedGPU.RedBitmapTexture(this, '../assets/Brick03_nrm.jpg'),
+			// new RedGPU.RedBitmapTexture(this, '../assets/crate.png'),
+			// new RedGPU.RedBitmapTexture(this, '../assets/Brick03_disp.jpg'),
+			// new RedGPU.RedBitmapTexture(this, '../assets/specular.png'),
+			// new RedGPU.RedBitmapTexture(this, '../assets/emissive.jpg')
 		]
+		i=0
 		setTimeout(_ => {
 			// testMat_bitmap = new RedGPU.RedStandardMaterial(this, testTextureList[1], testTextureList[2],testTextureList[5], testTextureList[6], testTextureList[4]);
 			testMat_bitmap = new RedGPU.RedStandardMaterial(this, testTextureList[1], testTextureList[2], testTextureList[5], testTextureList[6], testTextureList[4]);

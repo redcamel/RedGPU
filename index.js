@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 19:33:10
+ *   Last modification time of this file - 2019.12.16 20:34:19
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -92,12 +92,12 @@ new RedGPU.RedGPUContext(
 				}
 
 				this.addView(tView)
-				// let tEffect = new RedGPU.RedPostEffect_Bloom(this);
-				// let tEffect2 = new RedGPU.RedPostEffect_DoF(this);
-				// tEffect.bloomStrength = 0.35
-				// tEffect2.focusLength = 1000
-				// tView.postEffect.addEffect(tEffect)
-				// tView.postEffect.addEffect(tEffect2)
+				let tEffect = new RedGPU.RedPostEffect_Bloom(this);
+				let tEffect2 = new RedGPU.RedPostEffect_DoF(this);
+				tEffect.bloomStrength = 0.35
+				tEffect2.focusLength = 1000
+				tView.postEffect.addEffect(tEffect)
+				tView.postEffect.addEffect(tEffect2)
 				// tView.postEffect.addEffect(new RedGPU.RedPostEffect_Gray(this))
 				this.addView(tView2)
 
