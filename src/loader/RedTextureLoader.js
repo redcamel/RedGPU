@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 19:33:10
+ *   Last modification time of this file - 2019.12.16 20:34:19
  *
  */
 "use strict";
@@ -31,32 +31,34 @@ export default class RedTextureLoader extends RedUUID {
 				tSrc = srcInfo.src;
 				tSampler = srcInfo.sampler;
 			} else tSrc = srcInfo
+
 			if (tSrc instanceof Array) targetClass = RedBitmapCubeTexture;
 			t0 = {
 				src: tSrc,
-				texture: new targetClass(
-					redGPUContext, tSrc, tSampler, true,
-					function (e) {
-						// console.log('onload', this);
-						t0.loadSuccess = true;
-						t0.loadEnd = true;
-						check();
-					},
-					function (e) {
-						// console.log('onerror', this,e)
-						t0.loadSuccess = false;
-						t0.loadEnd = true;
-						check();
-					}
-				),
+				texture: null,
 				loadEnd: false,
 				loadSuccess: false,
 				userInfo: srcInfo
 			}
+			t0.texture = new targetClass(
+				redGPUContext, tSrc, tSampler, true,
+				function (e) {
+					console.log('onload', this);
+					t0.loadSuccess = true;
+					t0.loadEnd = true;
+					check();
+				},
+				function (e) {
+					// console.log('onerror', this,e)
+					t0.loadSuccess = false;
+					t0.loadEnd = true;
+					check();
+				}
+			)
 			// console.log(t0)
 			this.textures.push(t0)
 		})
-		console.log(this)
+		// console.log(this)
 	}
 	getTextureByIndex(index) {
 		return this.textures[index].texture

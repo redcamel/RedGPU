@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 20:25:55
+ *   Last modification time of this file - 2019.12.16 20:34:19
  *
  */
 
@@ -124,42 +124,42 @@ new RedGPU.RedGPUContext(
 		// 		tScene.addChild(tMesh)
 		//
 		// 	},
-		// 	new RedGPU.RedBitmapCubeTexture(this, [
-		// 		'../assets/cubemap/SwedishRoyalCastle/px.jpg',
-		// 		'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
-		// 		'../assets/cubemap/SwedishRoyalCastle/py.jpg',
-		// 		'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
-		// 		'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
-		// 		'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
-		//
-		// 	])
+		// 	// new RedGPU.RedBitmapCubeTexture(this, [
+		// 	// 	'../assets/cubemap/SwedishRoyalCastle/px.jpg',
+		// 	// 	'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
+		// 	// 	'../assets/cubemap/SwedishRoyalCastle/py.jpg',
+		// 	// 	'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
+		// 	// 	'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
+		// 	// 	'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
+		// 	//
+		// 	// ])
 		// );
 
-		// new RedGPU.RedGLTFLoader(
-		// 	this, // redGL
-		// 	'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Sponza/glTF/', // assetRootPath
-		// 	'Sponza.gltf', // fileName
-		// 	function (v) { // callBack
-		// 		console.log(v)
-		// 		let tMesh = v['resultMesh']
-		// 		tMesh.scaleX = tMesh.scaleY = tMesh.scaleZ = 1
-		// 		// v['resultMesh'].scaleX = v['resultMesh'].scaleY = v['resultMesh'].scaleZ = 0.001
-		// 		// tScene.addChild({children:[tMesh.children[2],tMesh.children[8]]})
-		// 		// tScene.addChild({children:[tMesh.children[2]]})
-		//
-		// 		tScene.addChild(tMesh)
-		//
-		// 	},
-		// 	new RedGPU.RedBitmapCubeTexture(this, [
-		// 		'../assets/cubemap/SwedishRoyalCastle/px.jpg',
-		// 		'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
-		// 		'../assets/cubemap/SwedishRoyalCastle/py.jpg',
-		// 		'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
-		// 		'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
-		// 		'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
-		//
-		// 	])
-		// );
+		new RedGPU.RedGLTFLoader(
+			this, // redGL
+			'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Sponza/glTF/', // assetRootPath
+			'Sponza.gltf', // fileName
+			function (v) { // callBack
+				console.log(v)
+				let tMesh = v['resultMesh']
+				tMesh.scaleX = tMesh.scaleY = tMesh.scaleZ = 1
+				// v['resultMesh'].scaleX = v['resultMesh'].scaleY = v['resultMesh'].scaleZ = 0.001
+				// tScene.addChild({children:[tMesh.children[2],tMesh.children[8]]})
+				// tScene.addChild({children:[tMesh.children[2]]})
+
+				tScene.addChild(tMesh)
+
+			},
+			new RedGPU.RedBitmapCubeTexture(this, [
+				'../assets/cubemap/SwedishRoyalCastle/px.jpg',
+				'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
+				'../assets/cubemap/SwedishRoyalCastle/py.jpg',
+				'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
+				'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
+				'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
+
+			])
+		);
 		// new RedGPU.RedGLTFLoader(
 		// 	this, // redGL
 		// 	'../assets/gltf/', // assetRootPath
@@ -191,13 +191,15 @@ new RedGPU.RedGPUContext(
 		// 	v['resultMesh'].x = 0
 		// 	var i = 40
 		// 	while (i--) {
-		// 		new RedGPU.RedGLTFLoader(self,  '../assets/gltf/breakDance/', 'scene.gltf', function (v) {
-		// 			tScene.addChild(v['resultMesh'])
-		// 			v['resultMesh'].scaleX = v['resultMesh'].scaleY = v['resultMesh'].scaleZ = 0.002
-		// 			v['resultMesh'].x = Math.random() * 30 - 15
-		// 			v['resultMesh'].z = Math.random() * 30 - 15
+		// 		setTimeout(_=>{
+		// 			new RedGPU.RedGLTFLoader(self,  '../assets/gltf/breakDance/', 'scene.gltf', function (v) {
+		// 				tScene.addChild(v['resultMesh'])
+		// 				v['resultMesh'].scaleX = v['resultMesh'].scaleY = v['resultMesh'].scaleZ = 0.002
+		// 				v['resultMesh'].x = Math.random() * 30 - 15
+		// 				v['resultMesh'].z = Math.random() * 30 - 15
 		//
-		// 		})
+		// 			})
+		// 		},i*50)
 		// 	}
 		// })
 
@@ -226,25 +228,25 @@ new RedGPU.RedGPUContext(
 		//
 		// 	])
 		// );
-
-		tScene.skyBox = new RedGPU.RedSkyBox(this, new RedGPU.RedBitmapCubeTexture(this, [
-			'../assets/cubemap/SwedishRoyalCastle/px.jpg',
-			'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
-			'../assets/cubemap/SwedishRoyalCastle/py.jpg',
-			'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
-			'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
-			'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
-
-		]))
-		new RedGPU.RedBitmapCubeTexture(this, [
-			'../assets/cubemap/SwedishRoyalCastle/px.jpg',
-			'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
-			'../assets/cubemap/SwedishRoyalCastle/py.jpg',
-			'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
-			'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
-			'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
-
-		])
+		//
+		// tScene.skyBox = new RedGPU.RedSkyBox(this, new RedGPU.RedBitmapCubeTexture(this, [
+		// 	'../assets/cubemap/SwedishRoyalCastle/px.jpg',
+		// 	'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
+		// 	'../assets/cubemap/SwedishRoyalCastle/py.jpg',
+		// 	'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
+		// 	'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
+		// 	'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
+		//
+		// ]))
+		// new RedGPU.RedBitmapCubeTexture(this, [
+		// 	'../assets/cubemap/SwedishRoyalCastle/px.jpg',
+		// 	'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
+		// 	'../assets/cubemap/SwedishRoyalCastle/py.jpg',
+		// 	'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
+		// 	'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
+		// 	'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
+		//
+		// ])
 
 		let renderer = new RedGPU.RedRender();
 		let render = time => {
@@ -258,115 +260,3 @@ new RedGPU.RedGPUContext(
 		requestAnimationFrame(render);
 	}
 )
-
-let setTestUI = function (redGPUContextContext, tView, tScene) {
-
-	let tFolder;
-
-	let testCubeTexture = new RedGPU.RedBitmapCubeTexture(this, [
-		'../assets/cubemap/SwedishRoyalCastle/px.jpg',
-		'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
-		'../assets/cubemap/SwedishRoyalCastle/py.jpg',
-		'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
-		'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
-		'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
-		// '../assets/cubemap/posx.jpg',
-		// '../assets/cubemap/negx.jpg',
-		// '../assets/cubemap/posy.jpg',
-		// '../assets/cubemap/negy.jpg',
-		// '../assets/cubemap/posz.jpg',
-		// '../assets/cubemap/negz.jpg'
-	])
-	console.log('RedBitmapCubeTexture', testCubeTexture)
-
-	let skyBox = new RedGPU.RedSkyBox(this, testCubeTexture)
-	tScene.skyBox = skyBox
-	let testSceneUI = new dat.GUI({});
-	let testSceneData = {
-		useSkyBox: true,
-		useGrid: true,
-	}
-	testSceneUI.width = 350
-	tFolder = testSceneUI.addFolder('RedScene')
-	tFolder.open()
-	tFolder.add(testSceneData, 'useSkyBox').onChange(v => tScene.skyBox = v ? skyBox : null)
-	tFolder.add(testSceneData, 'useGrid').onChange(v => tScene.grid = v ? new RedGPU.RedGrid(this) : null)
-	tFolder.addColor(tScene, 'backgroundColor')
-	tFolder.add(tScene, 'backgroundColorAlpha', 0, 1, 0.01)
-	tFolder = testSceneUI.addFolder('RedView')
-	tFolder.open()
-	let viewTestData = {
-		setLocationTest1: function () {
-			tView.setLocation(0, 0)
-		},
-		setLocationTest2: function () {
-			tView.setLocation(100, 100)
-		},
-		setLocationTest3: function () {
-			tView.setLocation('50%', 100)
-		},
-		setLocationTest4: function () {
-			tView.setLocation('40%', '40%')
-		},
-		setSizeTest1: function () {
-			tView.setSize(200, 200)
-		},
-		setSizeTest2: function () {
-			tView.setSize('50%', '100%')
-		},
-		setSizeTest3: function () {
-			tView.setSize('50%', '50%')
-		},
-		setSizeTest4: function () {
-			tView.setSize('20%', '20%')
-		},
-		setSizeTest5: function () {
-			tView.setSize('100%', '100%')
-		}
-	}
-	tFolder.add(viewTestData, 'setLocationTest1').name('setLocation(0,0)');
-	tFolder.add(viewTestData, 'setLocationTest2').name('setLocation(100,100)');
-	tFolder.add(viewTestData, 'setLocationTest3').name('setLocation(50%,100)');
-	tFolder.add(viewTestData, 'setLocationTest4').name('setLocation(40%,40%)');
-	tFolder.add(viewTestData, 'setSizeTest1').name('setSize(200,200)');
-	tFolder.add(viewTestData, 'setSizeTest2').name('setSize(50%,100%)');
-	tFolder.add(viewTestData, 'setSizeTest3').name('setSize(50%,50%)');
-	tFolder.add(viewTestData, 'setSizeTest4').name('setSize(20%,20%)');
-	tFolder.add(viewTestData, 'setSizeTest5').name('setSize(100%,100%)');
-
-	let testUI = new dat.GUI({});
-	let testData = {
-		useDepthTest: true,
-		depthTestFunc: "less",
-		cullMode: "back",
-		primitiveTopology: "triangle-list"
-	};
-	tFolder = testUI.addFolder('RedMesh')
-	tFolder.open()
-
-	tFolder.add(testData, 'useDepthTest').onChange(v => tScene.children.forEach(tMesh => tMesh.useDepthTest = v));
-
-	tFolder.add(testData, 'depthTestFunc', [
-		"never",
-		"less",
-		"equal",
-		"less-equal",
-		"greater",
-		"not-equal",
-		"greater-equal",
-		"always"
-	]).onChange(v => tScene.children.forEach(tMesh => tMesh.depthTestFunc = v));
-	tFolder.add(testData, 'cullMode', [
-		"none",
-		"front",
-		"back"
-	]).onChange(v => tScene.children.forEach(tMesh => tMesh.cullMode = v));
-
-	tFolder.add(testData, 'primitiveTopology', [
-		"point-list",
-		"line-list",
-		"line-strip",
-		"triangle-list",
-		"triangle-strip"
-	]).onChange(v => tScene.children.forEach(tMesh => tMesh.primitiveTopology = v));
-}

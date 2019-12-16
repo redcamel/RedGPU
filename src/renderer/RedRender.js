@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 13:31:48
+ *   Last modification time of this file - 2019.12.16 20:34:19
  *
  */
 
@@ -379,7 +379,7 @@ export default class RedRender {
 		let tScene, tSceneBackgroundColor_rgba;
 		tScene = redView.scene;
 		tSceneBackgroundColor_rgba = tScene.backgroundColorRGBA;
-		redView.camera.update();
+		if(redView.camera.update) redView.camera.update();
 		// console.log(swapChain.getCurrentTexture())
 		if (!redView.baseAttachmentView) {
 			redView.resetTexture(redGPUContext)

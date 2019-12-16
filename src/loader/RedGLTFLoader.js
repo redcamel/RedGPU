@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 20:25:55
+ *   Last modification time of this file - 2019.12.16 20:34:19
  *
  */
 
@@ -2017,7 +2017,7 @@ var RedGLTFLoader;
 						// 리소스 로딩이 완료되면 다음 진행
 						parseCameras(redGLTFLoader, json);
 						parseScene(redGLTFLoader, json, function () {
-							parseAnimations(redGLTFLoader, json);
+
 							let textureLoader = new RedTextureLoader(
 								redGLTFLoader['redGPUContext'],
 								redGLTFLoader['parsingResult']['textureRawList'],
@@ -2025,9 +2025,11 @@ var RedGLTFLoader;
 									textureLoader.textures.forEach(v => {
 										v.userInfo.targetMaterial[v.userInfo.targetTexture] = v.texture;
 									})
+									parseAnimations(redGLTFLoader, json);
+									if (callBack) callBack();
 								}
 							)
-							if (callBack) callBack();
+
 
 						})
 
@@ -2039,7 +2041,7 @@ var RedGLTFLoader;
 						// 리소스 로딩이 완료되면 다음 진행
 						parseCameras(redGLTFLoader, json);
 						parseScene(redGLTFLoader, json, function () {
-							parseAnimations(redGLTFLoader, json);
+
 							let textureLoader = new RedTextureLoader(
 								redGLTFLoader['redGPUContext'],
 								redGLTFLoader['parsingResult']['textureRawList'],
@@ -2047,9 +2049,11 @@ var RedGLTFLoader;
 									textureLoader.textures.forEach(v => {
 										v.userInfo.targetMaterial[v.userInfo.targetTexture] = v.texture;
 									})
+									parseAnimations(redGLTFLoader, json);
+									if (callBack) callBack();
 								}
 							)
-							if (callBack) callBack();
+
 
 						})
 

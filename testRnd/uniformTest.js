@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 20:25:55
+ *   Last modification time of this file - 2019.12.16 20:34:19
  *
  */
 import RedGPU from "../src/RedGPU.js";
@@ -87,7 +87,7 @@ new RedGPU.RedGPUContext(
 				this.addView(tView)
 
 
-				testMat_environment = new RedGPU.RedEnvironmentMaterial(this, textureLoader.getTextureByIndex(1), textureLoader.getTextureByIndex(7))
+				// testMat_environment = new RedGPU.RedEnvironmentMaterial(this, textureLoader.getTextureByIndex(1), textureLoader.getTextureByIndex(7))
 				testMat_color = new RedGPU.RedColorMaterial(this, '#ffff12');
 				testMat_colorPhong = new RedGPU.RedColorPhongMaterial(this, '#ffffff');
 				testMat_colorPhongTexture_normal = new RedGPU.RedColorPhongTextureMaterial(this, '#fff253', 1, textureLoader.getTextureByIndex(2))
@@ -114,8 +114,8 @@ new RedGPU.RedGPUContext(
 					let testMesh = new RedGPU.RedMesh(
 						this,
 						randomGeometry(),
-						i > division * 8 ? testMat_environment
-							: i > division * 7 ? testMat_color
+						// i > division * 8 ? testMat_environment
+							i>division * 7 ? testMat_color
 								: i > division * 6 ? testMat_colorPhong
 									: i > division * 5 ? testMat_bitmap
 										: i > division * 4 ? testMat_standard_diffuse
@@ -128,7 +128,7 @@ new RedGPU.RedGPUContext(
 					testMesh.z = Math.random() * 3000 - 1500;
 					testMesh.rotationX = testMesh.rotationY = testMesh.rotationZ = Math.random() * 360;
 					testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = Math.random() * 25 + 35;
-					tScene.addChild(testMesh)
+					// tScene.addChild(testMesh)
 				}
 				let renderer = new RedGPU.RedRender();
 				let render = time => {

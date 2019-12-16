@@ -2,251 +2,240 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 20:25:55
+ *   Last modification time of this file - 2019.12.16 20:34:19
  *
  */
 
 "use strict"
 import RedUUID from "../../base/RedUUID.js";
-import RedUTIL from "../../util/RedUTIL.js";
-import RedGPUContext from "../../RedGPUContext.js";
-import RedBitmapTexture from "../RedBitmapTexture.js";
 
-const MIPMAP_TABLE = new Map();
-const updateTexture = function (commandEncoder, device, img, gpuTexture, width, height, mip, face = -1) {
-	let promise = new Promise(((resolve, reject) => {
-		let imageCanvas;
-		let imageCanvasContext;
-		imageCanvas = document.createElement('canvas',);
-		imageCanvasContext = imageCanvas.getContext('2d');
 
-		imageCanvas.width = width;
-		imageCanvas.height = height;
-		// imageCanvasContext.translate(0, height);
-		// imageCanvasContext.scale(1, -1);
-		imageCanvasContext.drawImage(img, 0, 0, width, height);
-		// const imageData = imageCanvasContext.getImageData(0, 0, width, height);
-		if (RedGPUContext.useDebugConsole) console.time('getImageData' + img.src)
-		const imageData = imageCanvasContext.getImageData(0, 0, width, height);
-		if (RedGPUContext.useDebugConsole) console.timeEnd('getImageData' + img.src)
-		let data;
-		const rowPitch = Math.ceil(width * 4 / 256) * 256;
-		if (rowPitch == width * 4) {
-			data = imageData.data;
-		} else {
-			data = new Uint8ClampedArray(rowPitch * height);
-			let pixelsIndex = 0;
-			for (let y = 0; y < height; ++y) {
-				for (let x = 0; x < width; ++x) {
-					let i = x * 4 + y * rowPitch;
-					data[i] = imageData.data[pixelsIndex];
-					data[i + 1] = imageData.data[pixelsIndex + 1];
-					data[i + 2] = imageData.data[pixelsIndex + 2];
-					data[i + 3] = imageData.data[pixelsIndex + 3];
-					pixelsIndex += 4;
-				}
-			}
-		}
-		const textureDataBuffer = device.createBuffer({
-			size: data.byteLength + data.byteLength % 4,
-			usage: globalThis.GPUBufferUsage.COPY_DST | globalThis.GPUBufferUsage.COPY_SRC,
-		});
-		textureDataBuffer.setSubData(0, data);
-		const bufferView = {
-			buffer: textureDataBuffer,
-			rowPitch: rowPitch,
-			imageHeight: height,
-		};
-		const textureView = {
-			texture: gpuTexture,
-			mipLevel: mip,
-			arrayLayer: Math.max(face, 0),
-		};
+const SRC_MAP = {}
 
-		const textureExtent = {
-			width: width,
-			height: height,
-			depth: 1
-		};
-
-		commandEncoder.copyBufferToTexture(bufferView, textureView, textureExtent);
-		if (RedGPUContext.useDebugConsole) console.log('mip', mip, 'width', width, 'height', height)
-		resolve(imageCanvas)
-	}))
-
-	return promise
-};
-const makeCubeTexture = function (redGPUContext, useMipmap, imgList, maxW, maxH, IMG_TABLE, src) {
-	IMG_TABLE[src].forEach(updateTarget => {
-		console.log('updateTarget.mapKey',updateTarget.mapKey)
-		if (MIPMAP_TABLE.get(updateTarget.mapKey)) {
-			console.log('Cube - 캐쉬된 놈을 써야함', updateTarget.src)
-			console.log(updateTarget)
-			if (updateTarget.onload) updateTarget.onload.call(updateTarget)
-			updateTarget.resolve(MIPMAP_TABLE.get(updateTarget.mapKey))
-		} else {
-			console.log('Cube - 새로만들어야함')
-			console.log(updateTarget.mapKey)
-		}
-		maxW = RedUTIL.nextHighestPowerOfTwo(maxW);
-		maxH = RedUTIL.nextHighestPowerOfTwo(maxH)
-		if (useMipmap) updateTarget.mipMaps = Math.round(Math.log2(Math.max(maxW, maxH)));
-		const textureDescriptor = {
-			size: {
-				width: maxW,
-				height: maxH,
-				depth: 1,
-			},
-			dimension: '2d',
-			format: 'rgba8unorm',
-			arrayLayerCount: 6,
-			mipLevelCount: useMipmap ? updateTarget.mipMaps + 1 : 1,
-			usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.SAMPLED
-		};
-		const gpuTexture = redGPUContext.device.createTexture(textureDescriptor);
-		MIPMAP_TABLE.set(updateTarget.mapKey, gpuTexture)
-		let result = []
-		const commandEncoder = redGPUContext.device.createCommandEncoder({});
-
-		imgList.forEach((img, face) => {
-			let i = 1, len = updateTarget.mipMaps;
-			let faceWidth = maxW;
-			let faceHeight = maxH;
-			result.push(updateTexture(commandEncoder, redGPUContext.device, img, gpuTexture, faceWidth, faceHeight, 0, face));
-			if (useMipmap) {
-				for (i; i <= len; i++) {
-					faceWidth = Math.max(Math.floor(faceWidth / 2), 1);
-					faceHeight = Math.max(Math.floor(faceHeight / 2), 1);
-					result.push(updateTexture(commandEncoder, redGPUContext.device, img, gpuTexture, faceWidth, faceHeight, i, face))
-				}
-			}
-		});
-		Promise.all(result).then(
-			_ => {
-				updateTarget.resolve(gpuTexture)
-				if (updateTarget.onload) updateTarget.onload.call(updateTarget)
-				redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
-			}
-		)
-	})
-
-};
 //TODO 정리해야함
-export default class RedImageLoader extends RedUUID {
+function createWorker(f) {
+	return new Worker(URL.createObjectURL(new Blob([`(${f})()`])));
+}
 
-	constructor(IMG_TABLE, src, redGPUContext, targetTexture) {
-		super()
-		if (targetTexture instanceof RedBitmapTexture) {
-			let img = new Image();
-			img.src = src;
-			img.crossOrigin = 'anonymous';
-			img.onerror = e => {
-				this.resolve(null)
-				if (targetTexture.onerror) targetTexture.onerror.call(this, e)
-			};
-			img.decode().then(_ => {
-				// console.log('업데이트 해야될 대상', src, IMG_TABLE[src])
-				IMG_TABLE[src].forEach(updateTarget => {
-					if (MIPMAP_TABLE.get(updateTarget.mapKey)) {
-						console.log('캐쉬된 놈을 써야함', updateTarget.src)
-						console.log(updateTarget)
-						if (updateTarget.onload) updateTarget.onload.call(updateTarget)
-						updateTarget.resolve(MIPMAP_TABLE.get(updateTarget.mapKey))
-					} else {
-						console.log('새로만들어야함')
-						console.log(updateTarget.mapKey)
-						let tW = img.width;
-						let tH = img.height;
-						tW = RedUTIL.nextHighestPowerOfTwo(tW);
-						tH = RedUTIL.nextHighestPowerOfTwo(tH)
-						if (tW > 1024) tW = 1024;
-						if (tH > 1024) tH = 1024;
-						if (updateTarget.useMipmap) updateTarget.mipMaps = Math.round(Math.log2(Math.max(tW, tH)));
-						const textureDescriptor = {
-							size: {
-								width: tW,
-								height: tH,
-								depth: 1,
-							},
-							dimension: '2d',
-							format: 'rgba8unorm',
-							arrayLayerCount: updateTarget instanceof RedBitmapTexture ? 1 : 6,
-							mipLevelCount: updateTarget.useMipmap ? updateTarget.mipMaps + 1 : 1,
-							usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.SAMPLED
-						};
-
-						const gpuTexture = redGPUContext.device.createTexture(textureDescriptor);
-						MIPMAP_TABLE.set(updateTarget.mapKey, gpuTexture)
-						let mipIndex = 0, len = updateTarget.mipMaps;
-						let faceWidth = tW;
-						let faceHeight = tH;
-
-
-						const commandEncoder = redGPUContext.device.createCommandEncoder({});
-
-						function callNextMip(targetImage) {
-							let promise = updateTexture(commandEncoder, redGPUContext.device, targetImage, gpuTexture, faceWidth, faceHeight, mipIndex)
-							if (updateTarget.useMipmap) {
-								if (mipIndex == len) {
-									promise.then(
-										_ => {
-											updateTarget.resolve(gpuTexture)
-											if (targetTexture.onload) targetTexture.onload.call(targetTexture)
-											redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
-										}
-									)
+const worker = createWorker(() => {
+	let nextHighestPowerOfTwo = (function () {
+		var i;
+		return function (v) {
+			--v;
+			for (i = 1; i < 32; i <<= 1) v = v | v >> i;
+			return v + 1;
+		}
+	})()
+	self.addEventListener('message', e => {
+		const src = e.data;
+		let errorInfo;
+		fetch(src, {mode: 'cors'})
+			.then(response => {
+				errorInfo = {
+					url: response.url,
+					ok: response.ok,
+					status: response.status,
+					statusText: response.statusText,
+					type: response.type
+				}
+				if (!response.ok) {
+					// console.log(response)
+					throw Error('error');
+				} else {
+					response.blob()
+						.then(blob => createImageBitmap(blob))
+						.then(bitmap => {
+							let faceWidth = bitmap.width;
+							let faceHeight = bitmap.height;
+							faceWidth = nextHighestPowerOfTwo(faceWidth);
+							faceHeight = nextHighestPowerOfTwo(faceHeight)
+							if (faceWidth > 1024) faceWidth = 1024;
+							if (faceHeight > 1024) faceHeight = 1024;
+							// console.log(data)
+							let imageDatas = []
+							let mipIndex = 0, len = Math.round(Math.log2(Math.max(faceWidth, faceHeight)));
+							let getMipmapDatas = img => {
+								const cvs = new OffscreenCanvas(faceWidth, faceHeight);
+								const ctx = cvs.getContext('2d');
+								ctx.drawImage(img, 0, 0, faceWidth, faceHeight);
+								let imageData = ctx.getImageData(0, 0, faceWidth, faceHeight).data
+								let data
+								const rowPitch = Math.ceil(faceWidth * 4 / 256) * 256;
+								if (rowPitch == faceWidth * 4) {
+									data = imageData;
 								} else {
-									promise.then(canvas => {
-											faceWidth = Math.max(Math.floor(faceWidth / 2), 1);
-											faceHeight = Math.max(Math.floor(faceHeight / 2), 1);
-											mipIndex++
-											callNextMip(canvas)
+									data = new Uint8ClampedArray(rowPitch * faceHeight);
+									let pixelsIndex = 0;
+									for (let y = 0; y < faceHeight; ++y) {
+										for (let x = 0; x < faceWidth; ++x) {
+											let i = x * 4 + y * rowPitch;
+											data[i] = imageData[pixelsIndex];
+											data[i + 1] = imageData[pixelsIndex + 1];
+											data[i + 2] = imageData[pixelsIndex + 2];
+											data[i + 3] = imageData[pixelsIndex + 3];
+											pixelsIndex += 4;
 										}
-									)
-								}
-							} else {
-								promise.then(_ => {
-										targetTexture.resolve(gpuTexture)
-										if (updateTarget.onload) targetTexture.onload.call(targetTexture)
-										redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
 									}
-								)
+								}
+								imageDatas.push({
+									data: data.buffer,
+									width: faceWidth,
+									height: faceHeight,
+									rowPitch: rowPitch
+								})
+								faceWidth = Math.max(Math.floor(faceWidth / 2), 1);
+								faceHeight = Math.max(Math.floor(faceHeight / 2), 1);
+								mipIndex++
+								if (mipIndex == len + 1) {
+									self.postMessage({src, imageDatas: imageDatas});
+								} else {
+									getMipmapDatas(cvs)
+								}
 							}
+							getMipmapDatas(bitmap)
+						})
+				}
 
-						}
-						callNextMip(img)
-					}
-				})
-
+			}).catch(error => {
+			self.postMessage({
+				error: errorInfo,
+				src: src
 			})
+		})
+
+	});
+});
+function loadImageWithWorker(src) {
+	return new Promise((resolve, reject) => {
+		function handler(e) {
+			if (e.data.src === src) {
+				worker.removeEventListener('message', handler);
+				if (e.data.error) {
+					reject(e.data.error);
+				}
+				resolve(e.data);
+			}
+		}
+		worker.addEventListener('message', handler);
+		worker.postMessage(src);
+	});
+}
+export default class RedImageLoader extends RedUUID {
+	static TYPE_2D = 'TYPE_2D'
+	static TYPE_CUBE = 'TYPE_CUBE'
+	constructor(redGPUContext, src, callback, type = RedImageLoader.TYPE_2D) {
+		super()
+		this.callback = callback;
+		if (type == RedImageLoader.TYPE_2D) {
+			let path = location.pathname.split('/')
+			if (path.length > 1) path.pop()
+			let targetSRC = location.origin + (path.join('/')) + '/' + src
+			if (src.includes(';base64,') || src.includes('://')) {
+				targetSRC = src
+			}
+			if (SRC_MAP[targetSRC]) {
+				if (SRC_MAP[targetSRC].loaded) {
+					console.log('곧장 맵찾으러감')
+					this['imageDatas'] = SRC_MAP[targetSRC]['imageDatas']
+					requestAnimationFrame(_=>{
+						if (callback) callback.call(this)
+					})
+				} else {
+					SRC_MAP[targetSRC].tempList.push(this)
+				}
+			} else {
+				SRC_MAP[targetSRC] = {
+					loaded: false,
+					tempList: []
+				}
+				SRC_MAP[targetSRC].tempList.push(this)
+				loadImageWithWorker(targetSRC)
+					.then(result => {
+						console.log(result)
+						console.log('첫 로딩업데이트 해야될 대상', SRC_MAP[targetSRC])
+						SRC_MAP[targetSRC].loaded = true
+						SRC_MAP[targetSRC]['imageDatas'] = result['imageDatas']
+						SRC_MAP[targetSRC].tempList.forEach(loader => {
+							loader['imageDatas'] = SRC_MAP[targetSRC]['imageDatas']
+							if (loader.callback) loader.callback.call(loader)
+						})
+						SRC_MAP[targetSRC].tempList.length = 0
+					})
+					.catch(result => {
+						console.log('로딩실패!', result)
+					});
+			}
+
 		} else {
 			let maxW = 0;
 			let maxH = 0;
 			let loadCount = 0;
 			let imgList = [];
-			src.forEach((tSrc, face) => {
-				if (!tSrc) {
-					console.log('src')
+			let srcList = src
+
+			srcList.forEach((src, face) => {
+				if (!src) {
+					// console.log('src')
 				} else {
-					let img = new Image();
-					img.src = tSrc;
-					img.crossOrigin = 'anonymous';
-					img.onerror = e => {
-						targetTexture.resolve(null)
-						if (targetTexture.onerror) targetTexture.onerror.call(this, e)
-					};
-					img.decode().then(_ => {
-						imgList[face] = img;
-						loadCount++;
-						maxW = Math.max(maxW, img.width);
-						maxH = Math.max(maxH, img.height);
-						if (maxW > 1024) maxW = 1024;
-						if (maxH > 1024) maxH = 1024;
-						if (loadCount == 6) makeCubeTexture(redGPUContext, targetTexture.useMipmap, imgList, maxW, maxH, IMG_TABLE, src)
-					})
+					let path = location.pathname.split('/')
+					if (path.length > 1) path.pop()
+					let targetSRC = location.origin + (path.join('/')) + '/' + src
+					if (src.includes(';base64,') || src.includes('://')) {
+						targetSRC = src
+					}
+
+					if (SRC_MAP[targetSRC]) {
+						if (SRC_MAP[targetSRC].loaded) {
+							console.log('곧장 맵찾으러감')
+							this['imageDatas'] = SRC_MAP[targetSRC]['imageDatas']
+							requestAnimationFrame(_=>{
+								if (callback) callback.call(this)
+							})
+						} else {
+							SRC_MAP[targetSRC].tempList.push(this)
+						}
+					} else {
+						SRC_MAP[targetSRC] = {
+							loaded: false,
+							imgList : imgList,
+							tempList: []
+						}
+						SRC_MAP[targetSRC].tempList.push(this)
+						loadImageWithWorker(targetSRC)
+							.then(result => {
+								imgList[face] = result;
+								loadCount++;
+								maxW = Math.max(maxW, result.imageDatas[0].width);
+								maxH = Math.max(maxH, result.imageDatas[0].height);
+								if (maxW > 1024) maxW = 1024;
+								if (maxH > 1024) maxH = 1024;
+								console.log(result)
+								console.log('첫 로딩업데이트 해야될 대상', SRC_MAP[targetSRC])
+								if (loadCount == 6) {
+									SRC_MAP[targetSRC].loaded = true
+									SRC_MAP[targetSRC]['imgList'] = imgList
+									SRC_MAP[targetSRC]['maxW'] = maxW
+									SRC_MAP[targetSRC]['maxH'] = maxH
+
+									SRC_MAP[targetSRC].tempList.forEach(loader => {
+										loader['imgList'] = SRC_MAP[targetSRC]['imgList']
+										loader['maxW'] = SRC_MAP[targetSRC]['maxW']
+										loader['maxH'] = SRC_MAP[targetSRC]['maxH']
+										if (loader.callback) loader.callback.call(loader)
+									})
+									SRC_MAP[targetSRC].tempList.length = 0
+								}
+
+							})
+							.catch(result => {
+								console.log('로딩실패!', result)
+							});
+					}
+
+
+
 				}
 			})
 		}
-
 	}
 }
