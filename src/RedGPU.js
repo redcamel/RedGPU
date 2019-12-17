@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 16:4:46
+ *   Last modification time of this file - 2019.12.17 11:18:30
  *
  */
 // base ///////////////////////////////////////////////////////////////////////
@@ -33,8 +33,9 @@ import RedDirectionalLight from "./light/RedDirectionalLight.js";
 import RedPointLight from "./light/RedPointLight.js";
 import RedSpotLight from "./light/RedSpotLight.js";
 // loader ///////////////////////////////////////////////////////////////////////
-import RedGLTFLoader from "./loader/RedGLTFLoader.js";
 import RedTextureLoader from "./loader/RedTextureLoader.js";
+import RedBaseTexture from "./base/RedBaseTexture.js";
+import RedGLTFLoader from "./loader/RedGLTFLoader.js";
 // material ///////////////////////////////////////////////////////////////////////
 import RedGridMaterial from "./material/system/RedGridMaterial.js";
 import RedPBRMaterial_System from "./material/system/RedPBRMaterial_System.js";
@@ -44,6 +45,8 @@ import RedColorMaterial from "./material/RedColorMaterial.js";
 import RedColorPhongMaterial from "./material/RedColorPhongMaterial.js";
 import RedColorPhongTextureMaterial from "./material/RedColorPhongTextureMaterial.js";
 import RedEnvironmentMaterial from "./material/RedEnvironmentMaterial.js";
+import RedSheetMaterial from "./material/RedSheetMaterial.js";
+
 import RedStandardMaterial from "./material/RedStandardMaterial.js";
 // object3D ///////////////////////////////////////////////////////////////////////
 import RedAxis from "./object3D/RedAxis.js";
@@ -79,6 +82,8 @@ import RedSphere from "./primitives/RedSphere.js";
 // renderder ///////////////////////////////////////////////////////////////////////
 import RedRender from "./renderer/RedRender.js";
 // resources ///////////////////////////////////////////////////////////////////////
+import RedCopyBufferToTexture from "./resources/system/RedCopyBufferToTexture.js";
+import RedImageLoader from "./resources/system/RedImageLoader.js";
 import RedBitmapCubeTexture from "./resources/RedBitmapCubeTexture.js";
 import RedBitmapTexture from "./resources/RedBitmapTexture.js";
 import RedSampler from "./resources/RedSampler.js";
@@ -101,6 +106,7 @@ const RedGPU = {
 	RedBaseObject3D,
 	RedShareGLSL,
 	RedBasePostEffect,
+	RedBaseTexture,
 	RedMix,
 	RedPipeline,
 	RedDisplayContainer,
@@ -132,6 +138,7 @@ const RedGPU = {
 	RedColorMaterial,
 	RedColorPhongMaterial,
 	RedColorPhongTextureMaterial,
+	RedSheetMaterial,
 	RedEnvironmentMaterial,
 	RedStandardMaterial,
 	// object3D ///////////////////////////////////////////////////////////////////////
@@ -168,6 +175,8 @@ const RedGPU = {
 	// renderder ///////////////////////////////////////////////////////////////////////
 	RedRender,
 	// resources ///////////////////////////////////////////////////////////////////////
+	RedCopyBufferToTexture,
+	RedImageLoader,
 	RedBitmapCubeTexture,
 	RedBitmapTexture,
 	RedSampler,
@@ -181,5 +190,5 @@ const RedGPU = {
 	RedGPUContext,
 	RedScene,
 	RedView
-}
+};
 export default RedGPU;

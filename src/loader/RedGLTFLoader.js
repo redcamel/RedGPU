@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.16 20:34:19
+ *   Last modification time of this file - 2019.12.17 11:18:30
  *
  */
 
@@ -1048,7 +1048,7 @@ var RedGLTFLoader;
 					break
 			}
 			skinInfo['inverseBindMatrices'] = new Float32Array(skinInfo['inverseBindMatrices']);
-			tMesh['skinInfo'] = skinInfo
+			tMesh['skinInfo'] = skinInfo;
 			tMesh.material.skin = tMesh['skinInfo'] ? true : false;
 		};
 		parseNode = (function () {
@@ -1820,13 +1820,13 @@ var RedGLTFLoader;
 					// TODO
 
 					case 'BLEND' :
-						tMesh.transparentSort = true
+						tMesh.transparentSort = true;
 						tMaterial.alphaBlend = 2;
 						break;
 					case 'MASK' :
 						tMaterial.alphaBlend = 1;
 						tMaterial.cutOff = tAlphaCutoff;
-						tMaterial.useCutOff = true
+						tMaterial.useCutOff = true;
 						break;
 					default :
 						tMaterial.alphaBlend = 0;
@@ -2024,7 +2024,7 @@ var RedGLTFLoader;
 								_ => {
 									textureLoader.textures.forEach(v => {
 										v.userInfo.targetMaterial[v.userInfo.targetTexture] = v.texture;
-									})
+									});
 									parseAnimations(redGLTFLoader, json);
 									if (callBack) callBack();
 								}
@@ -2048,7 +2048,7 @@ var RedGLTFLoader;
 								_ => {
 									textureLoader.textures.forEach(v => {
 										v.userInfo.targetMaterial[v.userInfo.targetTexture] = v.texture;
-									})
+									});
 									parseAnimations(redGLTFLoader, json);
 									if (callBack) callBack();
 								}

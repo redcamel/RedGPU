@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.17 9:48:50
+ *   Last modification time of this file - 2019.12.17 11:18:30
  *
  */
 
@@ -12,10 +12,10 @@ export default function RedCopyBufferToTexture(commandEncoder, device, imageData
 	let promise = new Promise(((resolve, reject) => {
 
 		imageDatas.forEach((info, mip) => {
-			if (!updateTarget.useMipmap && mip) return
-			let data = new Uint8ClampedArray(info.data)
-			let width = info.width
-			let height = info.height
+			if (!updateTarget.useMipmap && mip) return;
+			let data = new Uint8ClampedArray(info.data);
+			let width = info.width;
+			let height = info.height;
 			let rowPitch = info.rowPitch;
 			const textureDataBuffer = device.createBuffer({
 				size: data.byteLength + data.byteLength % 4,
@@ -41,10 +41,10 @@ export default function RedCopyBufferToTexture(commandEncoder, device, imageData
 			};
 			commandEncoder.copyBufferToTexture(bufferView, textureView, textureExtent);
 			if (RedGPUContext.useDebugConsole) console.log('mip', mip, 'width', width, 'height', height)
-		})
+		});
 
 		resolve()
-	}))
+	}));
 
 	return promise
 };

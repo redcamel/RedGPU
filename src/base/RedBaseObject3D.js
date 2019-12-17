@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 13:31:48
+ *   Last modification time of this file - 2019.12.17 11:18:30
  *
  */
 
@@ -15,9 +15,9 @@ import RedUniformBufferDescriptor from "../buffer/RedUniformBufferDescriptor.js"
 import RedTypeSize from "../resources/RedTypeSize.js";
 import RedShareGLSL from "./RedShareGLSL.js";
 
-const MESH_UNIFORM_TABLE = []
-let MESH_UNIFORM_POOL_index = 0
-let MESH_UNIFORM_POOL_tableIndex = 0
+const MESH_UNIFORM_TABLE = [];
+let MESH_UNIFORM_POOL_index = 0;
+let MESH_UNIFORM_POOL_tableIndex = 0;
 const uniformBufferDescriptor_mesh = new RedUniformBufferDescriptor(
 	[
 		{size: RedTypeSize.mat4 * RedShareGLSL.MESH_UNIFORM_POOL_NUM, valueName: 'matrix'},
@@ -25,28 +25,28 @@ const uniformBufferDescriptor_mesh = new RedUniformBufferDescriptor(
 	]
 );
 const getPool = function (redGPUContext, targetMesh) {
-	let uniformBuffer_mesh
+	let uniformBuffer_mesh;
 	if (!MESH_UNIFORM_TABLE[MESH_UNIFORM_POOL_tableIndex]) {
 		uniformBuffer_mesh = new RedUniformBuffer(redGPUContext);
 		uniformBuffer_mesh.setBuffer(uniformBufferDescriptor_mesh);
 		MESH_UNIFORM_TABLE[MESH_UNIFORM_POOL_tableIndex] = uniformBuffer_mesh
 	}
-	uniformBuffer_mesh = MESH_UNIFORM_TABLE[MESH_UNIFORM_POOL_tableIndex]
+	uniformBuffer_mesh = MESH_UNIFORM_TABLE[MESH_UNIFORM_POOL_tableIndex];
 	let result = {
 		float32Array: uniformBuffer_mesh.float32Array,
 		uniformBuffer_mesh: uniformBuffer_mesh,
 		offsetMatrix: RedTypeSize.mat4 * MESH_UNIFORM_POOL_index,
 		offsetNormalMatrix: RedTypeSize.mat4 * RedShareGLSL.MESH_UNIFORM_POOL_NUM + (RedTypeSize.mat4 * MESH_UNIFORM_POOL_index),
 		uniformIndex: MESH_UNIFORM_POOL_index
-	}
-	MESH_UNIFORM_POOL_index++
+	};
+	MESH_UNIFORM_POOL_index++;
 	if (MESH_UNIFORM_POOL_index == RedShareGLSL.MESH_UNIFORM_POOL_NUM) {
-		MESH_UNIFORM_POOL_tableIndex++
+		MESH_UNIFORM_POOL_tableIndex++;
 		MESH_UNIFORM_POOL_index = 0
 	}
 	// console.log('MESH_UNIFORM_TABLE',MESH_UNIFORM_TABLE)
 	return result
-}
+};
 
 
 export default class RedBaseObject3D extends RedDisplayContainer {
@@ -95,15 +95,15 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 	constructor(redGPUContext) {
 		super();
 		this.#redGPUContext = redGPUContext;
-		let bufferData = getPool(redGPUContext, this)
-		this.uniformBuffer_mesh = bufferData.uniformBuffer_mesh
-		this.uniformBuffer_mesh.meshFloat32Array = bufferData.float32Array
+		let bufferData = getPool(redGPUContext, this);
+		this.uniformBuffer_mesh = bufferData.uniformBuffer_mesh;
+		this.uniformBuffer_mesh.meshFloat32Array = bufferData.float32Array;
 		this.offsetMatrix = bufferData.offsetMatrix;
 		this.offsetNormalMatrix = bufferData.offsetNormalMatrix;
 
 		this.uniformBuffer_meshIndex = new RedUniformBuffer(redGPUContext);
 		this.uniformBuffer_meshIndex.setBuffer(RedBaseObject3D.uniformBufferDescriptor_meshIndex);
-		this.uniformBuffer_meshIndex.GPUBuffer.setSubData(0, new Float32Array([bufferData.uniformIndex]))
+		this.uniformBuffer_meshIndex.GPUBuffer.setSubData(0, new Float32Array([bufferData.uniformIndex]));
 		this.#bindings = [
 			{
 				binding: 0,
