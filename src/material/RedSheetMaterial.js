@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.17 17:0:49
+ *   Last modification time of this file - 2019.12.17 18:1:6
  *
  */
 
@@ -15,8 +15,8 @@ import RedTypeSize from "../resources/RedTypeSize.js";
 
 export default class RedSheetMaterial extends RedMix.mix(
 	RedBaseMaterial,
-	RedMix.diffuseTexture,
-	RedMix.alpha
+	RedMix.alpha,
+	RedMix.diffuseTexture
 ) {
 
 	static vertexShaderGLSL = `
@@ -80,10 +80,11 @@ export default class RedSheetMaterial extends RedMix.mix(
 		]
 	};
 	static uniformBufferDescriptor_vertex = [
-		{size: RedTypeSize.float4, valueName: 'sheetRect'},
+		{size: RedTypeSize.float4, valueName: 'sheetRect'}
+	];
+	static uniformBufferDescriptor_fragment = [
 		{size: RedTypeSize.float, valueName: 'alpha'}
 	];
-	static uniformBufferDescriptor_fragment = RedBaseMaterial.uniformBufferDescriptor_empty;
 	_frameRate;
 	get frameRate() {
 		return this._frameRate;
