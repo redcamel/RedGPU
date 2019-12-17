@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.17 11:18:30
+ *   Last modification time of this file - 2019.12.17 17:0:49
  *
  */
 
@@ -219,7 +219,7 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 		}
 
 
-		 vec4 finalColor = ld+ls;
+		 vec4 finalColor = ld+ls + la;;
 
 
 		// 컷오프 - BLEND, MASK

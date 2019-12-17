@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.17 11:18:30
+ *   Last modification time of this file - 2019.12.17 17:0:49
  *
  */
 
@@ -20,7 +20,8 @@ export default class RedStandardMaterial extends RedMix.mix(
 	RedMix.specularTexture,
 	RedMix.emissiveTexture,
 	RedMix.displacementTexture,
-	RedMix.basicLightPropertys
+	RedMix.basicLightPropertys,
+	RedMix.alpha
 ) {
 	static vertexShaderGLSL = `
 	#version 450
@@ -69,6 +70,7 @@ export default class RedStandardMaterial extends RedMix.mix(
         float specularPower;
 	    vec4 specularColor;
 	    float emissivePower;
+	    float alpha;
     } fragmentUniforms;
 
 	layout( location = 0 ) in vec3 vNormal;
@@ -83,8 +85,10 @@ export default class RedStandardMaterial extends RedMix.mix(
 	layout( location = 1 ) out vec4 outDepthColor;
 
 	void main() {
+		float testAlpha = 1.0;
 		vec4 diffuseColor = vec4(0.0);
 		//#RedGPU#diffuseTexture# diffuseColor = texture(sampler2D(uDiffuseTexture, uSampler), vUV) ;
+		//#RedGPU#diffuseTexture# testAlpha = diffuseColor.a;
 		
 	    vec3 N = normalize(vNormal);
 		vec4 normalColor = vec4(0.0);
@@ -117,12 +121,15 @@ export default class RedStandardMaterial extends RedMix.mix(
 			fragmentUniforms.specularColor,
 			specularTextureValue,
 			vVertexPosition.xyz
-		);
+		)
+		+ la;
 		
 		//#RedGPU#emissiveTexture# vec4 emissiveColor = texture(sampler2D(uEmissiveTexture, uSampler), vUV);
 		//#RedGPU#emissiveTexture# finalColor.rgb += emissiveColor.rgb * fragmentUniforms.emissivePower;
 		
+		finalColor.a = testAlpha;
 		outColor = finalColor;
+		outColor.a *= fragmentUniforms.alpha;
 		outDepthColor = vec4( vec3(gl_FragCoord.z/gl_FragCoord.w), 1.0 );
 	}
 `;
@@ -150,7 +157,8 @@ export default class RedStandardMaterial extends RedMix.mix(
 		{size: RedTypeSize.float, valueName: 'shininess'},
 		{size: RedTypeSize.float, valueName: 'specularPower'},
 		{size: RedTypeSize.float4, valueName: 'specularColorRGBA'},
-		{size: RedTypeSize.float, valueName: 'emissivePower'}
+		{size: RedTypeSize.float, valueName: 'emissivePower'},
+		{size: RedTypeSize.float, valueName: 'alpha'}
 	];
 
 	#raf;

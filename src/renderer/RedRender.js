@@ -2,19 +2,19 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.17 11:18:30
+ *   Last modification time of this file - 2019.12.17 17:0:49
  *
  */
 
 import RedGLTFLoader from "../loader/RedGLTFLoader.js";
 import RedSheetMaterial from "../material/RedSheetMaterial.js";
 
-let transparentSortList = [];
+let renderToTransparentLayerList = [];
 let tCacheUniformInfo = {};
 var resultPreMTX = mat4.create();
 var updateTargetMatrixBufferList = [];
 let currentTime;
-let renderScene = (redGPUContext, redView, passEncoder, parent, children, parentDirty, transparentSortMode) => {
+let renderScene = (redGPUContext, redView, passEncoder, parent, children, parentDirty, renderToTransparentLayerMode) => {
 	let i;
 	let tGeometry;
 	let tMaterial;
@@ -72,7 +72,7 @@ let renderScene = (redGPUContext, redView, passEncoder, parent, children, parent
 			}
 		}
 		if (tGeometry) {
-			if (transparentSortMode && tPipeline.GPURenderPipeline) {
+			if (renderToTransparentLayerMode && tPipeline.GPURenderPipeline) {
 				passEncoder.setPipeline(tPipeline.GPURenderPipeline);
 
 				if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
@@ -98,8 +98,8 @@ let renderScene = (redGPUContext, redView, passEncoder, parent, children, parent
 					// console.timeEnd('tPipeline.updatePipeline_sampleCount4' + tMesh._UUID)
 				}
 			} else {
-				if (tMesh.transparentSort) {
-					transparentSortList.push(tMesh)
+				if (tMesh.renderToTransparentLayer) {
+					renderToTransparentLayerList.push(tMesh)
 				} else {
 					///////////////////////////////////////
 					a00 = resultPreMTX[0], a01 = resultPreMTX[1], a02 = resultPreMTX[2], a03 = resultPreMTX[3];
@@ -434,8 +434,8 @@ export default class RedRender {
 		if (tScene.grid) renderScene(redGPUContext, redView, passEncoder, null, [tScene.grid]);
 		if (tScene.axis) renderScene(redGPUContext, redView, passEncoder, null, [tScene.axis]);
 		renderScene(redGPUContext, redView, passEncoder, null, tScene.children);
-		if (transparentSortList.length) renderScene(redGPUContext, redView, passEncoder, null, transparentSortList, null, true);
-		transparentSortList.length = 0;
+		if (renderToTransparentLayerList.length) renderScene(redGPUContext, redView, passEncoder, null, renderToTransparentLayerList, null, true);
+		renderToTransparentLayerList.length = 0;
 		let i = updateTargetMatrixBufferList.length;
 		while (i--) updateTargetMatrixBufferList[i].GPUBuffer.setSubData(0, updateTargetMatrixBufferList[i].meshFloat32Array);
 		updateTargetMatrixBufferList.length = 0;

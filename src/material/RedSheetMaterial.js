@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.17 14:27:8
+ *   Last modification time of this file - 2019.12.17 17:0:49
  *
  */
 
@@ -15,7 +15,8 @@ import RedTypeSize from "../resources/RedTypeSize.js";
 
 export default class RedSheetMaterial extends RedMix.mix(
 	RedBaseMaterial,
-	RedMix.diffuseTexture
+	RedMix.diffuseTexture,
+	RedMix.alpha
 ) {
 
 	static vertexShaderGLSL = `
@@ -51,17 +52,21 @@ export default class RedSheetMaterial extends RedMix.mix(
 	#version 450
 	layout( location = 0 ) in vec3 vNormal;
 	layout( location = 1 ) in vec2 vUV;
-	layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 1 ) uniform sampler uSampler;
-	layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 2 ) uniform texture2D uDiffuseTexture;
+	layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 1 ) uniform FragmentUniforms {
+        float alpha;
+    } fragmentUniforms;
+	layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 2 ) uniform sampler uSampler;
+	layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 3 ) uniform texture2D uDiffuseTexture;
 	layout( location = 0 ) out vec4 outColor;
 	layout( location = 1 ) out vec4 outDepthColor;
 	void main() {
 		vec4 diffuseColor = vec4(0.0);
 		//#RedGPU#diffuseTexture# diffuseColor = texture(sampler2D(uDiffuseTexture, uSampler), vUV) ;
 		
-		if(diffuseColor.a==0.0) discard;
+		if(diffuseColor.a<0.1) discard;
 			
 		outColor = diffuseColor;
+		outColor.a *= fragmentUniforms.alpha;
 		outDepthColor = vec4( vec3(gl_FragCoord.z/gl_FragCoord.w), 1.0 );
 	}
 `;
@@ -69,12 +74,14 @@ export default class RedSheetMaterial extends RedMix.mix(
 	static uniformsBindGroupLayoutDescriptor_material = {
 		bindings: [
 			{binding: 0, visibility: GPUShaderStage.VERTEX, type: "uniform-buffer"},
-			{binding: 1, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
-			{binding: 2, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"}
+			{binding: 1, visibility: GPUShaderStage.FRAGMENT, type: "uniform-buffer"},
+			{binding: 2, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
+			{binding: 3, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"}
 		]
 	};
 	static uniformBufferDescriptor_vertex = [
-		{size: RedTypeSize.float4, valueName: 'sheetRect'}
+		{size: RedTypeSize.float4, valueName: 'sheetRect'},
+		{size: RedTypeSize.float, valueName: 'alpha'}
 	];
 	static uniformBufferDescriptor_fragment = RedBaseMaterial.uniformBufferDescriptor_empty;
 	_frameRate;
@@ -202,9 +209,17 @@ export default class RedSheetMaterial extends RedMix.mix(
 					size: this.uniformBufferDescriptor_vertex.size
 				}
 			},
-			{binding: 1, resource: this.sampler.GPUSampler},
 			{
-				binding: 2,
+				binding: 1,
+				resource: {
+					buffer: this.uniformBuffer_fragment.GPUBuffer,
+					offset: 0,
+					size: this.uniformBufferDescriptor_fragment.size
+				}
+			},
+			{binding: 2, resource: this.sampler.GPUSampler},
+			{
+				binding: 3,
 				resource: this._diffuseTexture ? this._diffuseTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
 			}
 		];

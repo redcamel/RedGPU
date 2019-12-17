@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.17 11:18:30
+ *   Last modification time of this file - 2019.12.17 17:0:49
  *
  */
 
@@ -1820,7 +1820,7 @@ var RedGLTFLoader;
 					// TODO
 
 					case 'BLEND' :
-						tMesh.transparentSort = true;
+						tMesh.renderToTransparentLayer = true;
 						tMaterial.alphaBlend = 2;
 						break;
 					case 'MASK' :
