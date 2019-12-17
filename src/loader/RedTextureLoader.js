@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.16 20:34:19
+ *   Last modification time of this file - 2019.12.17 11:18:30
  *
  */
 "use strict";
@@ -19,7 +19,7 @@ export default class RedTextureLoader extends RedUUID {
 		loaded = 0;
 
 		check = _ => {
-			loaded++
+			loaded++;
 			if (loaded == srcInfoList.length) {
 				if (callback) callback.call(this)
 			}
@@ -30,7 +30,7 @@ export default class RedTextureLoader extends RedUUID {
 			if (srcInfo.hasOwnProperty('src')) {
 				tSrc = srcInfo.src;
 				tSampler = srcInfo.sampler;
-			} else tSrc = srcInfo
+			} else tSrc = srcInfo;
 
 			if (tSrc instanceof Array) targetClass = RedBitmapCubeTexture;
 			t0 = {
@@ -39,7 +39,7 @@ export default class RedTextureLoader extends RedUUID {
 				loadEnd: false,
 				loadSuccess: false,
 				userInfo: srcInfo
-			}
+			};
 			t0.texture = new targetClass(
 				redGPUContext, tSrc, tSampler, true,
 				function (e) {
@@ -54,7 +54,7 @@ export default class RedTextureLoader extends RedUUID {
 					t0.loadEnd = true;
 					check();
 				}
-			)
+			);
 			// console.log(t0)
 			this.textures.push(t0)
 		})

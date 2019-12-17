@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 17:33:43
+ *   Last modification time of this file - 2019.12.17 17:0:49
  *
  */
 
@@ -21,7 +21,8 @@ export default class RedEnvironmentMaterial extends RedMix.mix(
 	RedMix.emissiveTexture,
 	RedMix.environmentTexture,
 	RedMix.displacementTexture,
-	RedMix.basicLightPropertys
+	RedMix.basicLightPropertys,
+	RedMix.alpha
 ) {
 	static vertexShaderGLSL = `
 	#version 450
@@ -71,6 +72,7 @@ export default class RedEnvironmentMaterial extends RedMix.mix(
 	    vec4 specularColor;
 	    float emissivePower;
 	    float environmentPower;
+	    float alpha;
     } fragmentUniforms;
 
 	layout( location = 0 ) in vec3 vNormal;
@@ -85,8 +87,11 @@ export default class RedEnvironmentMaterial extends RedMix.mix(
 	layout( location = 0 ) out vec4 outColor;
 	layout( location = 1 ) out vec4 outDepthColor;
 	void main() {
+		float testAlpha = 1.0;
 		vec4 diffuseColor = vec4(0.0);
 		//#RedGPU#diffuseTexture# diffuseColor = texture(sampler2D(uDiffuseTexture, uSampler), vUV) ;
+		//#RedGPU#diffuseTexture# testAlpha = diffuseColor.a;
+		
 		
 	    vec3 N = normalize(vNormal);
 		vec4 normalColor = vec4(0.0);
@@ -123,12 +128,15 @@ export default class RedEnvironmentMaterial extends RedMix.mix(
 			fragmentUniforms.specularColor,
 			specularTextureValue,
 			vVertexPosition.xyz
-		);
+		)
+		+ la;
 		
 		//#RedGPU#emissiveTexture# vec4 emissiveColor = texture(sampler2D(uEmissiveTexture, uSampler), vUV);
 		//#RedGPU#emissiveTexture# finalColor.rgb += emissiveColor.rgb * fragmentUniforms.emissivePower;
 		
+		finalColor.a = testAlpha;
 		outColor = finalColor;
+		outColor.a *= fragmentUniforms.alpha;
 		outDepthColor = vec4( vec3(gl_FragCoord.z/gl_FragCoord.w), 1.0 );
 	}
 `;
@@ -158,9 +166,10 @@ export default class RedEnvironmentMaterial extends RedMix.mix(
 		{size: RedTypeSize.float, valueName: 'specularPower'},
 		{size: RedTypeSize.float4, valueName: 'specularColorRGBA'},
 		{size: RedTypeSize.float, valueName: 'emissivePower'},
-		{size: RedTypeSize.float, valueName: 'environmentPower'}
+		{size: RedTypeSize.float, valueName: 'environmentPower'},
+		{size: RedTypeSize.float, valueName: 'alpha'}
 	];
-	#raf
+	#raf;
 	constructor(redGPUContext, diffuseTexture, environmentTexture, normalTexture, specularTexture, emissiveTexture, displacementTexture) {
 		super(redGPUContext);
 		this.diffuseTexture = diffuseTexture;
@@ -175,7 +184,7 @@ export default class RedEnvironmentMaterial extends RedMix.mix(
 
 	checkTexture(texture, textureName) {
 		if (texture) {
-			if (texture.GPUTexture) {
+			if (texture._GPUTexture) {
 				switch (textureName) {
 					case 'diffuseTexture' :
 						this._diffuseTexture = texture;
@@ -196,8 +205,8 @@ export default class RedEnvironmentMaterial extends RedMix.mix(
 						this._displacementTexture = texture;
 						break
 				}
-				if (RedGPUContext.useDebugConsole) console.log("로딩완료or로딩에러확인 textureName", textureName, texture ? texture.GPUTexture : '');
-				cancelAnimationFrame(this.#raf)
+				if (RedGPUContext.useDebugConsole) console.log("로딩완료or로딩에러확인 textureName", textureName, texture ? texture._GPUTexture : '');
+				cancelAnimationFrame(this.#raf);
 				this.#raf = requestAnimationFrame(_=>{this.needResetBindingInfo = true})
 			} else {
 				texture.addUpdateTarget(this, textureName)
@@ -224,7 +233,7 @@ export default class RedEnvironmentMaterial extends RedMix.mix(
 			{binding: 1, resource: this.sampler.GPUSampler},
 			{
 				binding: 2,
-				resource: this._displacementTexture ? this._displacementTexture.GPUTextureView : this.redGPUContext.state.emptyTextureView
+				resource: this._displacementTexture ? this._displacementTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
 			},
 			{
 				binding: 3,
@@ -237,23 +246,23 @@ export default class RedEnvironmentMaterial extends RedMix.mix(
 			{binding: 4, resource: this.sampler.GPUSampler},
 			{
 				binding: 5,
-				resource: this._diffuseTexture ? this._diffuseTexture.GPUTextureView : this.redGPUContext.state.emptyTextureView
+				resource: this._diffuseTexture ? this._diffuseTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
 			},
 			{
 				binding: 6,
-				resource: this._normalTexture ? this._normalTexture.GPUTextureView : this.redGPUContext.state.emptyTextureView
+				resource: this._normalTexture ? this._normalTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
 			},
 			{
 				binding: 7,
-				resource: this._specularTexture ? this._specularTexture.GPUTextureView : this.redGPUContext.state.emptyTextureView
+				resource: this._specularTexture ? this._specularTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
 			},
 			{
 				binding: 8,
-				resource: this._emissiveTexture ? this._emissiveTexture.GPUTextureView : this.redGPUContext.state.emptyTextureView
+				resource: this._emissiveTexture ? this._emissiveTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
 			},
 			{
 				binding: 9,
-				resource: this._environmentTexture ? this._environmentTexture.GPUTextureView : this.redGPUContext.state.emptyCubeTextureView
+				resource: this._environmentTexture ? this._environmentTexture._GPUTextureView : this.redGPUContext.state.emptyCubeTextureView
 			}
 
 

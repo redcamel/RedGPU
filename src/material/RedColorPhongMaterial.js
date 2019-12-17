@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 19:11:47
+ *   Last modification time of this file - 2019.12.17 17:0:49
  *
  */
 
@@ -16,6 +16,7 @@ import RedBaseMaterial from "../base/RedBaseMaterial.js";
 export default class RedColorPhongMaterial extends RedMix.mix(
 	RedBaseMaterial,
 	RedMix.color,
+	RedMix.alpha,
 	RedMix.basicLightPropertys
 ) {
 
@@ -48,15 +49,18 @@ export default class RedColorPhongMaterial extends RedMix.mix(
         float shininess; 
         float specularPower;
 	    vec4 specularColor;
+        float alpha;
     } fragmentUniforms;
 	layout( location = 0 ) in vec3 vNormal;
 	layout( location = 1 ) in vec4 vVertexPosition;
 	layout( location = 0 ) out vec4 outColor;
 	layout( location = 1 ) out vec4 outDepthColor;
 	void main() {
+		float testAlpha = fragmentUniforms.color.a;
+
 		vec3 N = normalize(vNormal);
 		//#RedGPU#useFlatMode# N = getFlatNormal(vVertexPosition.xyz);
-		
+
 		float specularTextureValue = 1.0;
 		
 		vec4 finalColor = 
@@ -84,7 +88,9 @@ export default class RedColorPhongMaterial extends RedMix.mix(
 		)
 		+ la;
 			
+		finalColor.a = testAlpha;
 		outColor = finalColor;
+		outColor.a *= fragmentUniforms.alpha;
 		outDepthColor = vec4( vec3(gl_FragCoord.z/gl_FragCoord.w), 1.0 );
 	}
 `;
@@ -103,13 +109,14 @@ export default class RedColorPhongMaterial extends RedMix.mix(
 			size: RedTypeSize.float4,
 			valueName: 'specularColorRGBA',
 		},
+		{size: RedTypeSize.float, valueName: 'alpha'}
 	];
 
 
-	constructor(redGPUContext, color = '#ff0000', alpha = 1) {
+	constructor(redGPUContext, color = '#ff0000', colorAlpha = 1) {
 		super(redGPUContext);
 		this.color = color;
-		this.alpha = alpha;
+		this.colorAlpha = colorAlpha;
 
 		this.needResetBindingInfo = true
 

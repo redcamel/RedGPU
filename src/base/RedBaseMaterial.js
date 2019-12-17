@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 16:4:46
+ *   Last modification time of this file - 2019.12.17 11:18:30
  *
  */
 
@@ -24,7 +24,7 @@ let makeUniformBindLayout = function (redGPUContext, uniformsBindGroupLayoutDesc
 	}
 	return uniformsBindGroupLayout
 };
-let RedBaseMaterial_searchModules_callNum = 0
+let RedBaseMaterial_searchModules_callNum = 0;
 export default class RedBaseMaterial extends RedUUID {
 	get redGPUContext() {
 		return this.#redGPUContext;
@@ -50,7 +50,7 @@ export default class RedBaseMaterial extends RedUUID {
 	uniformBuffer_vertex;
 	uniformBuffer_fragment;
 	uniformBindGroup_material;
-	needResetBindingInfo = false
+	needResetBindingInfo = false;
 	constructor(redGPUContext) {
 		super();
 		let vShaderModule, fShaderModule;
@@ -127,7 +127,7 @@ export default class RedBaseMaterial extends RedUUID {
 	resetBindingInfo() {throw new Error(`${this.constructor.name} : resetBindingInfo must override!!!`)}
 
 	_afterResetBindingInfo() {
-		if (RedGPUContext.useDebugConsole) console.time('_afterResetBindingInfo - ' + this.constructor.name)
+		if (RedGPUContext.useDebugConsole) console.time('_afterResetBindingInfo - ' + this.constructor.name);
 		this.searchModules();
 		this.setUniformBindGroupDescriptor();
 		this.uniformBindGroup_material.setGPUBindGroup(this.uniformBindGroupDescriptor);
@@ -135,13 +135,13 @@ export default class RedBaseMaterial extends RedUUID {
 			this.updateUniformBuffer();
 			this.#uniformBufferUpdated = true;
 		}
-		if (RedGPUContext.useDebugConsole) console.timeEnd('_afterResetBindingInfo - ' + this.constructor.name)
+		if (RedGPUContext.useDebugConsole) console.timeEnd('_afterResetBindingInfo - ' + this.constructor.name);
 		this.updateUUID();
 	}
 
 	searchModules() {
-		RedBaseMaterial_searchModules_callNum++
-		if (RedGPUContext.useDebugConsole) console.log('RedBaseMaterial_searchModules_callNum', RedBaseMaterial_searchModules_callNum)
+		RedBaseMaterial_searchModules_callNum++;
+		if (RedGPUContext.useDebugConsole) console.log('RedBaseMaterial_searchModules_callNum', RedBaseMaterial_searchModules_callNum);
 		let tKey = [this.constructor.name];
 		let i = 0, len = this.constructor.PROGRAM_OPTION_LIST.length;
 		for (i; i < len; i++) {

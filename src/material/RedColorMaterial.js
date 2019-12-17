@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 19:11:47
+ *   Last modification time of this file - 2019.12.17 17:0:49
  *
  */
 
@@ -14,7 +14,8 @@ import RedMix from "../base/RedMix.js";
 
 export default class RedColorMaterial extends RedMix.mix(
 	RedBaseMaterial,
-	RedMix.color
+	RedMix.color,
+	RedMix.alpha
 ) {
 	static vertexShaderGLSL = `
 	#version 460
@@ -35,11 +36,13 @@ export default class RedColorMaterial extends RedMix.mix(
 	#version 460
 	layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 0 ) uniform FragmentUniforms {
         vec4 color;
+        float alpha;
     } fragmentUniforms;
 	layout( location = 0 ) out vec4 outColor;
 	layout( location = 1 ) out vec4 outDepthColor;
 	void main() {
 		outColor = fragmentUniforms.color;
+		outColor.a *= fragmentUniforms.alpha;
 		outDepthColor = vec4( vec3(gl_FragCoord.z/gl_FragCoord.w), 1.0 );
 	}
 	`;
@@ -51,13 +54,14 @@ export default class RedColorMaterial extends RedMix.mix(
 	};
 	static uniformBufferDescriptor_vertex = RedBaseMaterial.uniformBufferDescriptor_empty;
 	static uniformBufferDescriptor_fragment = [
-		{size: RedTypeSize.float4, valueName: 'colorRGBA'}
+		{size: RedTypeSize.float4, valueName: 'colorRGBA'},
+		{size: RedTypeSize.float, valueName: 'alpha'}
 	];
 
-	constructor(redGPUContext, color = '#ff0000', alpha = 1) {
+	constructor(redGPUContext, color = '#ff0000', colorAlpha = 1) {
 		super(redGPUContext);
 		this.color = color;
-		this.alpha = alpha;
+		this.colorAlpha = colorAlpha;
 		this.needResetBindingInfo = true
 	}
 	resetBindingInfo() {

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 13:27:49
+ *   Last modification time of this file - 2019.12.17 17:0:49
  *
  */
 
@@ -15,23 +15,23 @@ const mix = (Base, ...texture) => {
 };
 const color = Base => class extends Base {
 	#color = '#ff0000';
-	#alpha = 1;
-	#colorRGBA = new Float32Array([1, 0, 0, this.#alpha]);
+	#colorAlpha = 1;
+	#colorRGBA = new Float32Array([1, 0, 0, this.#colorAlpha]);
 
 	get color() {return this.#color;}
 	set color(hex) {
 		this.#color = hex;
 		let rgb = RedUTIL.hexToRGB_ZeroToOne(hex);
-		this.#colorRGBA[0] = rgb[0] * this.#alpha;
-		this.#colorRGBA[1] = rgb[1] * this.#alpha;
-		this.#colorRGBA[2] = rgb[2] * this.#alpha;
-		this.#colorRGBA[3] = this.#alpha;
+		this.#colorRGBA[0] = rgb[0] * this.#colorAlpha;
+		this.#colorRGBA[1] = rgb[1] * this.#colorAlpha;
+		this.#colorRGBA[2] = rgb[2] * this.#colorAlpha;
+		this.#colorRGBA[3] = this.#colorAlpha;
 		//TODO - 시스템 버퍼쪽도 같은 개념으로 바꿔야 if 비용을 줄일 수 있음
 		if (this.uniformBuffer_fragment) this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['colorRGBA'], this.#colorRGBA)
 	}
 
-	get alpha() {return this.#alpha;}
-	set alpha(value) {
+	get colorAlpha() {return this.#colorAlpha;}
+	set colorAlpha(value) {
 		let rgb = RedUTIL.hexToRGB_ZeroToOne(this.#color);
 		this.#colorRGBA[0] = rgb[0] * value;
 		this.#colorRGBA[1] = rgb[1] * value;
@@ -39,9 +39,17 @@ const color = Base => class extends Base {
 		this.#colorRGBA[3] = value;
 		if (this.uniformBuffer_fragment) this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['colorRGBA'], this.#colorRGBA)
 	}
-
 	get colorRGBA() {return this.#colorRGBA;}
 };
+const alpha = Base => class extends Base {
+	#alpha = 1;
+	get alpha() {return this.#alpha;}
+	set alpha(value) {
+		this.#alpha = value;
+		float1_Float32Array[0] = this.#alpha;
+		if (this.uniformBuffer_fragment) this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['alpha'], float1_Float32Array)
+	}
+}
 const defineTextureClass = function (name) {
 	return Base => class extends Base {
 		[`_${name}`] = null;
@@ -191,6 +199,7 @@ export default {
 	mix: mix,
 	EmptyClass: EmptyClass,
 	color: color,
+	alpha: alpha,
 	defineNumber: defineNumber,
 	diffuseTexture: diffuseTexture,
 	normalTexture: normalTexture,
