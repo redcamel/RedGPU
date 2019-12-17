@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.17 11:18:30
+ *   Last modification time of this file - 2019.12.17 15:12:16
  *
  */
 
@@ -86,7 +86,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 	#redGPUContext;
 	//
 	_useDepthTest = true;
-	_depthTestFunc = 'less-equal';
+	_depthTestFunc = 'less';
 	_cullMode = 'back';
 	_primitiveTopology = "triangle-list";
 	pipeline;

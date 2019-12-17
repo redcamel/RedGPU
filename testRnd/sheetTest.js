@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.17 14:27:8
+ *   Last modification time of this file - 2019.12.17 15:12:16
  *
  */
 import RedGPU from "../src/RedGPU.js";
@@ -26,13 +26,13 @@ new RedGPU.RedGPUContext(cvs,
 		this.addView(tView)
 
 
-		let i = 1
+		let i = 100
 		while(i--){
 			let tMesh
 			tMesh = new RedGPU.RedMesh(this, new RedGPU.RedPlane(this,), new RedGPU.RedSheetMaterial(this, new RedGPU.RedBitmapTexture(this, '../assets/sheet/spriteSheet.png'), 24, 5, 3, 15))
-			// tMesh.x = Math.random() * 10 - 5
-			// tMesh.y = Math.random() * 10 - 5
-			// tMesh.z = Math.random() * 10 - 5
+			tMesh.x = Math.random() * 10 - 5
+			tMesh.y = Math.random() * 10 - 5
+			tMesh.z = Math.random() * 10 - 5
 			tMesh.cullMode = 'none'
 			tScene.addChild(tMesh)
 		}
