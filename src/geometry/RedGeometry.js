@@ -2,19 +2,21 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.14 16:4:46
+ *   Last modification time of this file - 2019.12.17 9:48:50
  *
  */
 
 "use strict";
 import RedGPUContext from "../RedGPUContext.js";
+import RedUUID from "../base/RedUUID.js";
 
-export default class RedGeometry {
+export default class RedGeometry extends RedUUID {
 	interleaveBuffer;
 	indexBuffer;
 	vertexState;
 
 	constructor(redGPUContext, interleaveBuffer, indexBuffer) {
+		super()
 		this.interleaveBuffer = interleaveBuffer;
 		this.indexBuffer = indexBuffer;
 		let arrayStride = 0;
