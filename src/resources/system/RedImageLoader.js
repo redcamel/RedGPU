@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.17 11:18:30
+ *   Last modification time of this file - 2019.12.17 14:27:8
  *
  */
 
@@ -57,6 +57,8 @@ const worker = createWorker(() => {
 							let getMipmapDatas = img => {
 								const cvs = new OffscreenCanvas(faceWidth, faceHeight);
 								const ctx = cvs.getContext('2d');
+								ctx.fillStyle = 'rgba(0,0,0,0)'
+								ctx.fillRect(0,0,faceWidth,faceHeight)
 								ctx.drawImage(img, 0, 0, faceWidth, faceHeight);
 								let imageData = ctx.getImageData(0, 0, faceWidth, faceHeight).data;
 								let data;
@@ -70,7 +72,7 @@ const worker = createWorker(() => {
 										for (let x = 0; x < faceWidth; ++x) {
 											let i = x * 4 + y * rowPitch;
 											data[i] = imageData[pixelsIndex];
-											data[i + 1] = imageData[pixelsIndex + 1];
+											data[i + 1] = imageData[pixelsIndex + 1] ;
 											data[i + 2] = imageData[pixelsIndex + 2];
 											data[i + 3] = imageData[pixelsIndex + 3];
 											pixelsIndex += 4;
@@ -91,6 +93,7 @@ const worker = createWorker(() => {
 								} else {
 									getMipmapDatas(cvs)
 								}
+
 							};
 							getMipmapDatas(bitmap)
 						})

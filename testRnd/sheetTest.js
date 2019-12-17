@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.17 11:18:30
+ *   Last modification time of this file - 2019.12.17 14:27:8
  *
  */
 import RedGPU from "../src/RedGPU.js";
@@ -16,7 +16,7 @@ new RedGPU.RedGPUContext(cvs,
 		let tView;
 		let tScene = new RedGPU.RedScene();
 		let tGrid = new RedGPU.RedGrid(this)
-		let tCamera = new RedGPU.RedCamera(this)
+		let tCamera = new RedGPU.RedObitController(this)
 
 
 		tView = new RedGPU.RedView(this, tScene, tCamera)
@@ -26,13 +26,14 @@ new RedGPU.RedGPUContext(cvs,
 		this.addView(tView)
 
 
-		let i = 100
+		let i = 1
 		while(i--){
 			let tMesh
-			tMesh = new RedGPU.RedMesh(this, new RedGPU.RedBox(this,), new RedGPU.RedSheetMaterial(this, new RedGPU.RedBitmapTexture(this, '../assets/sheet/spriteSheet.png'), 24, 5, 3, 15))
-			tMesh.x = Math.random() * 10 - 5
-			tMesh.y = Math.random() * 10 - 5
-			tMesh.z = Math.random() * 10 - 5
+			tMesh = new RedGPU.RedMesh(this, new RedGPU.RedPlane(this,), new RedGPU.RedSheetMaterial(this, new RedGPU.RedBitmapTexture(this, '../assets/sheet/spriteSheet.png'), 24, 5, 3, 15))
+			// tMesh.x = Math.random() * 10 - 5
+			// tMesh.y = Math.random() * 10 - 5
+			// tMesh.z = Math.random() * 10 - 5
+			tMesh.cullMode = 'none'
 			tScene.addChild(tMesh)
 		}
 
@@ -40,10 +41,7 @@ new RedGPU.RedGPUContext(cvs,
 		let renderer = new RedGPU.RedRender();
 		let render = time => {
 
-			tCamera.x = Math.sin(time / 11500) * 10
-			tCamera.z = Math.cos(time / 11500) * 10
-			tCamera.y = 10
-			tCamera.lookAt(0, 0, 0)
+
 			renderer.render(time, this);
 			requestAnimationFrame(render);
 		}

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.16 20:34:19
+ *   Last modification time of this file - 2019.12.17 14:27:8
  *
  */
 import RedGPU from "../src/RedGPU.js";
@@ -16,7 +16,7 @@ new RedGPU.RedGPUContext(cvs,
 		let tView;
 		let tScene = new RedGPU.RedScene();
 		let tGrid = new RedGPU.RedGrid(this)
-		let tCamera = new RedGPU.RedCamera(this)
+		let tCamera = new RedGPU.RedObitController(this)
 		// tGrid.centerColor = '#ff0000'
 		// tScene.backgroundColor = '#fff'
 		// tScene.backgroundColorAlpha = 0
@@ -97,10 +97,8 @@ new RedGPU.RedGPUContext(cvs,
 					],
 					_=> {
 						console.log('안오겠지?')
-						tMesh = new RedGPU.RedMesh(this, new RedGPU.RedBox(this,), new RedGPU.RedBitmapMaterial(this, new RedGPU.RedBitmapTexture(this,'../assets/UV_Grid_Sm.jpg')))
-						tMesh.x = Math.random()*10-5
-						tMesh.y = Math.random()*10-5
-						tMesh.z = Math.random()*10-5
+						tMesh = new RedGPU.RedMesh(this, new RedGPU.RedBox(this,), new RedGPU.RedBitmapMaterial(this, new RedGPU.RedBitmapTexture(this,'../assets/Brick03_col.jpg')))
+
 						tScene.addChild(tMesh)
 					}
 				)
@@ -166,8 +164,8 @@ new RedGPU.RedGPUContext(cvs,
 		let renderer = new RedGPU.RedRender();
 		let render = time => {
 			if (tMesh) tMesh.rotationZ += 0
-			tCamera.x = Math.sin(time / 500) * 10
-			tCamera.z = Math.cos(time / 500) * 10
+			tCamera.x = 10
+			tCamera.z = 10
 			tCamera.y = 10
 			tCamera.lookAt(0, 0, 0)
 			renderer.render(time, this);
