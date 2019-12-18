@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.18 11:30:16
+ *   Last modification time of this file - 2019.12.18 12:6:16
  *
  */
 import RedGPU from "../src/RedGPU.js";
@@ -18,7 +18,7 @@ new RedGPU.RedGPUContext(cvs,
 		let tGrid = new RedGPU.RedGrid(this)
 		let tCamera = new RedGPU.RedObitController(this)
 		// tGrid.centerColor = '#ff0000'
-		tScene.backgroundColor = '#fff'
+		// tScene.backgroundColor = '#fff'
 		// tScene.backgroundColorAlpha = 0
 		let tLight
 		tLight = new RedGPU.RedDirectionalLight()
@@ -117,10 +117,13 @@ new RedGPU.RedGPUContext(cvs,
 						tScene.addChild(tMesh)
 
 						tMesh = new RedGPU.RedMesh(this, new RedGPU.RedSphere(this,), new RedGPU.RedColorMaterial(this, '#00ff00'))
-
 						tMesh.z = 2
-
 						tScene.addChild(tMesh)
+
+						let tMesh2 = new RedGPU.RedMesh(this, new RedGPU.RedSphere(this,), new RedGPU.RedColorMaterial(this, '#ff00ff'))
+						tMesh2.x = 3
+						tMesh2.scaleX = tMesh2.scaleY = tMesh2.scaleZ = 0.5;
+						tMesh.addChild(tMesh2)
 
 						tMesh = new RedGPU.RedMesh(this, new RedGPU.RedSphere(this,), new RedGPU.RedColorPhongMaterial(this))
 						tMesh.z = 4
