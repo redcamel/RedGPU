@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.17 9:48:50
+ *   Last modification time of this file - 2019.12.18 19:33:34
  *
  */
 
@@ -18,13 +18,7 @@ export default class RedSkyBoxMaterial extends RedMix.mix(
 	static vertexShaderGLSL = `
 	#version 450
 	${RedShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
-    layout( set = ${RedShareGLSL.SET_INDEX_MeshUniforms}, binding = 0 ) uniform MeshUniforms {
-        mat4 modelMatrix[${RedShareGLSL.MESH_UNIFORM_POOL_NUM}];
-        mat4 normalMatrix[${RedShareGLSL.MESH_UNIFORM_POOL_NUM}];
-    } meshUniforms;
-    layout( set = ${RedShareGLSL.SET_INDEX_MeshUniforms}, binding = 1 ) uniform MeshUniformIndex {
-        float index;
-    } meshUniformsIndex;
+    ${RedShareGLSL.GLSL_SystemUniforms_vertex.meshUniforms}
 	layout( location = 0 ) in vec3 position;
 	layout( location = 0 ) out vec3 vReflectionCubeCoord;
 	void main() {

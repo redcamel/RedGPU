@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.18 11:30:16
+ *   Last modification time of this file - 2019.12.18 19:33:34
  *
  */
 
@@ -14,6 +14,7 @@ import RedPipeline from "./RedPipeline.js";
 import RedUniformBufferDescriptor from "../buffer/RedUniformBufferDescriptor.js";
 import RedTypeSize from "../resources/RedTypeSize.js";
 import RedShareGLSL from "./RedShareGLSL.js";
+import RedRender from "../renderer/RedRender.js";
 
 const MESH_UNIFORM_TABLE = [];
 let MESH_UNIFORM_POOL_index = 0;
@@ -68,7 +69,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 	static uniformBufferDescriptor_meshIndex = new RedUniformBufferDescriptor(
 		[
 			{size: RedTypeSize.float, valueName: 'meshUniformIndex'},
-			{size: RedTypeSize.float, valueName: 'opacity'}
+			{size: RedTypeSize.float4, valueName: 'mouseColorID'}
 		]
 	);
 	_x = 0;
@@ -93,13 +94,21 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 	_primitiveTopology = "triangle-list";
 	pipeline;
 	#bindings;
-	_opacity;
-	get opacity() {
-		return this._opacity;
-	}
-	set opacity(value) {
-		this._opacity = value;
-		this.uniformBuffer_meshIndex.GPUBuffer.setSubData(RedTypeSize.float, new Float32Array([value]));
+	#mouseColorID = [
+		parseInt(Math.random() * 255),
+		parseInt(Math.random() * 255),
+		parseInt(Math.random() * 255),
+		255
+	];
+	addEventListener(type, handler) {
+		if(!RedRender.mouseMAP[this.#mouseColorID.toString()]){
+			RedRender.mouseMAP[this.#mouseColorID.toString()] = {
+				target: this
+			}
+		}
+		RedRender.mouseMAP[this.#mouseColorID.toString()][type] = handler;
+		// console.log(RedRender.mouseMAP)
+
 	}
 	constructor(redGPUContext) {
 		super();
@@ -113,6 +122,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 		this.uniformBuffer_meshIndex = new RedUniformBuffer(redGPUContext);
 		this.uniformBuffer_meshIndex.setBuffer(RedBaseObject3D.uniformBufferDescriptor_meshIndex);
 		this.uniformBuffer_meshIndex.GPUBuffer.setSubData(0, new Float32Array([bufferData.uniformIndex]));
+		this.uniformBuffer_meshIndex.GPUBuffer.setSubData(RedTypeSize.float4, new Float32Array([this.#mouseColorID[0] / 255, this.#mouseColorID[1] / 255, this.#mouseColorID[2] / 255, this.#mouseColorID[3] / 255]));
 		this.#bindings = [
 			{
 				binding: 0,

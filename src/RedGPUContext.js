@@ -2,12 +2,13 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.17 11:18:30
+ *   Last modification time of this file - 2019.12.18 19:33:34
  *
  */
 
 "use strict";
 import RedDetectorGPU from "./base/detect/RedDetectorGPU.js";
+import RedRender from "./renderer/RedRender.js";
 
 let redGPUContextList = new Set();
 let setGlobalResizeEvent = function () {
@@ -87,6 +88,47 @@ export default class RedGPUContext {
 										arrayLayerCount: 6
 									})
 								};
+								/////
+								this['_mouseEventInfo'] = [];
+								[this.#detector.click, this.#detector.move, this.#detector.down, this.#detector.up].forEach(v => {
+									let tXkey, tYkey;
+									tXkey = 'offsetX';
+									tYkey = 'offsetY';
+									let mouseX,mouseY;
+									this.canvas.addEventListener(v, e => {
+										e.preventDefault();
+										if (this.#detector.isMobile) {
+											if (e.changedTouches[0]) {
+												RedRender.mouseEventInfo.push(
+													{
+														type: e.type,
+														x: e.changedTouches[0].clientX,
+														y: e.changedTouches[0].clientY,
+														nativeEvent: e
+													}
+												);
+												mouseX = e.changedTouches[0].clientX;
+												mouseY = e.changedTouches[0].clientY
+											}
+										} else {
+											RedRender.mouseEventInfo.push(
+												{
+													type: e.type,
+													x: e[tXkey],
+													y: e[tYkey],
+													nativeEvent: e
+												}
+											);
+
+											mouseX = e[tXkey];
+											mouseY = e[tYkey];
+										}
+										this.viewList.forEach(redView => {
+											redView.mouseX = mouseX
+											redView.mouseY = mouseY
+										});
+									}, false)
+								});
 								/////
 								this.#detector.detectGPU();
 								///////

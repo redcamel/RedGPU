@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.18 12:6:16
+ *   Last modification time of this file - 2019.12.18 19:35:15
  *
  */
 
@@ -14,6 +14,151 @@ let tCacheUniformInfo = {};
 var resultPreMTX = mat4.create();
 var updateTargetMatrixBufferList = [];
 let currentTime;
+let pickColorArray;
+let checkMouseEvent = (function () {
+	let fireList = []
+	let prevInfo = {}
+	let cursorState;
+	let i, len;
+	let fireEvent = function () {
+
+		if (fireList.length) {
+			// console.log(fireList)
+			let v = fireList.shift();
+			v['info'][v['type']].call(v['info']['target'], {
+				target: v['info']['target'],
+				type: 'out'
+			})
+		}
+
+	};
+	return function (redGPUContext, redView, lastViewYn) {
+		i = 0;
+		len = RedRender.mouseEventInfo.length;
+		for (i; i < len; i++) {
+			let canvasMouseEvent = RedRender.mouseEventInfo[i];
+			// 마우스 이벤트 체크
+			let meshEventData;
+			if (pickColorArray) meshEventData = RedRender.mouseMAP[[...pickColorArray].toString()]
+
+			var tEventType;
+			if (meshEventData) {
+				if (canvasMouseEvent['type'] == redGPUContext.detector.down) {
+					tEventType = 'down';
+					// console.log('다운', tEventType, meshEventData);
+					if (tEventType && meshEventData[tEventType]) {
+						meshEventData[tEventType].call(meshEventData['target'], {
+							target: meshEventData['target'],
+							type: tEventType,
+							nativeEvent: canvasMouseEvent.nativeEvent
+						})
+					}
+				}
+				if (canvasMouseEvent['type'] == redGPUContext.detector.up) {
+					tEventType = 'up';
+					// console.log('업');
+					if (tEventType && meshEventData[tEventType]) {
+						meshEventData[tEventType].call(meshEventData['target'], {
+							target: meshEventData['target'],
+							type: tEventType,
+							nativeEvent: canvasMouseEvent.nativeEvent
+						})
+					}
+				}
+				if (prevInfo[redView['_UUID']] && prevInfo[redView['_UUID']] != meshEventData) {
+					tEventType = 'out';
+					// console.log('아웃');
+					if (tEventType && prevInfo[redView['_UUID']][tEventType]) {
+						prevInfo[redView['_UUID']][tEventType].call(prevInfo[redView['_UUID']]['target'], {
+							target: prevInfo[redView['_UUID']]['target'],
+							type: tEventType
+						})
+					}
+				}
+				if (prevInfo[redView['_UUID']] != meshEventData) {
+					tEventType = 'over';
+					if (tEventType && meshEventData[tEventType]) {
+						meshEventData[tEventType].call(meshEventData['target'], {
+							target: meshEventData['target'],
+							type: tEventType,
+							nativeEvent: canvasMouseEvent.nativeEvent
+						})
+					}
+					// console.log('오버')
+				}
+				prevInfo[redView['_UUID']] = meshEventData
+			} else {
+				tEventType = 'out';
+				if (prevInfo[redView['_UUID']] && prevInfo[redView['_UUID']][tEventType]) {
+					// console.log('아웃');
+					fireList.push(
+						{
+							info: prevInfo[redView['_UUID']],
+							type: tEventType,
+							nativeEvent: canvasMouseEvent.nativeEvent
+						}
+					)
+				}
+				prevInfo[redView['_UUID']] = null
+			}
+
+
+			fireEvent()
+		}
+		if (prevInfo[redView['_UUID']]) cursorState = 'pointer';
+		if (lastViewYn) {
+			document.body.style.cursor = cursorState;
+			RedRender.mouseEventInfo.length = 0;
+			cursorState = 'default'
+		}
+
+	}
+})()
+let readPixel = async (redGPUContext, redView, baseAttachment_mouseColorID_ResolveTargetView, commandEncoder) => {
+	// 이미지 카피
+	const pickTexture = redGPUContext.device.createTexture({
+		size: {width: 1, height: 1, depth: 1,},
+		dimension: '2d',
+		format: 'rgba8unorm',
+		usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.SAMPLED | GPUTextureUsage.COPY_SRC
+	});
+	let viewRect = redView.viewRect
+	if (
+		redView.mouseX > viewRect[0]
+		&& redView.mouseX < viewRect[0] + viewRect[2]
+		&& redView.mouseY > viewRect[1]
+		&& redView.mouseY < viewRect[1] + viewRect[3]
+	) {
+		commandEncoder.copyTextureToTexture(
+			{
+				texture: baseAttachment_mouseColorID_ResolveTargetView,
+				origin: {x: redView.mouseX, y: redView.mouseY, z: 0}
+			},
+			{texture: pickTexture}, {width: 1, height: 1, depth: 1}
+		);
+
+
+		// readPixel
+		const readPixelBuffer = redGPUContext.device.createBuffer({
+			size: 4,
+			usage: globalThis.GPUBufferUsage.COPY_DST | globalThis.GPUBufferUsage.MAP_READ,
+		});
+		const textureView = {texture: pickTexture,};
+		const bufferView = {buffer: readPixelBuffer, rowPitch: 256, imageHeight: 1,};
+		const textureExtent = {width: 1, height: 1, depth: 1};
+
+		commandEncoder.copyTextureToBuffer(textureView, bufferView, textureExtent);
+		redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
+
+		let arrayBuffer = await readPixelBuffer.mapReadAsync();
+		pickTexture.destroy()
+		readPixelBuffer.destroy()
+		pickColorArray = new Uint8ClampedArray(arrayBuffer)
+	} else {
+		redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
+		pickColorArray = null
+	}
+}
 let renderScene = (redGPUContext, redView, passEncoder, parent, children, parentDirty, renderToTransparentLayerMode) => {
 	let i;
 	let tGeometry;
@@ -375,10 +520,12 @@ let renderScene = (redGPUContext, redView, passEncoder, parent, children, parent
 	}
 };
 export default class RedRender {
+	static mouseMAP = {};
+	static mouseEventInfo = [];
 	#redGPUContext;
 	#swapChainTexture;
 	#swapChainTextureView;
-	#renderView = (redGPUContext, redView) => {
+	#renderView = async (redGPUContext, redView, lastViewYn) => {
 		let tScene, tSceneBackgroundColor_rgba;
 		tScene = redView.scene;
 		tSceneBackgroundColor_rgba = tScene.backgroundColorRGBA;
@@ -408,6 +555,16 @@ export default class RedRender {
 						g: tSceneBackgroundColor_rgba[1],
 						b: tSceneBackgroundColor_rgba[2],
 						a: tSceneBackgroundColor_rgba[3]
+					}
+				},
+				{
+					attachment: redView.baseAttachment_mouseColorIDView,
+					resolveTarget: redView.baseAttachment_mouseColorID_ResolveTargetView,
+					loadValue: {
+						r: 0,
+						g: 0,
+						b: 0,
+						a: 0
 					}
 				}
 			],
@@ -480,7 +637,11 @@ export default class RedRender {
 				depth: 1
 			}
 		);
-		this.#redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
+
+
+		readPixel(redGPUContext, redView, redView.baseAttachment_mouseColorID_ResolveTarget, commandEncoder)
+		checkMouseEvent(redGPUContext, redView, lastViewYn)
+
 	};
 
 
@@ -490,7 +651,7 @@ export default class RedRender {
 		this.#swapChainTexture = redGPUContext.swapChain.getCurrentTexture();
 		this.#swapChainTextureView = this.#swapChainTexture.createView();
 		let i = 0, len = redGPUContext.viewList.length;
-		for (i; i < len; i++) this.#renderView(redGPUContext, redGPUContext.viewList[i]);
+		for (i; i < len; i++) this.#renderView(redGPUContext, redGPUContext.viewList[i], i == len - 1);
 		RedGLTFLoader.animationLooper(time);
 	}
 }

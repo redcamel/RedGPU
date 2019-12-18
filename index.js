@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.16 20:34:19
+ *   Last modification time of this file - 2019.12.18 19:33:34
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -38,7 +38,7 @@ new RedGPU.RedGPUContext(
 			],
 			_ => {
 				console.log('텍스쳐 로딩완료', textureLoader)
-				let MAX = 8000;
+				let MAX = 5000;
 				let i = MAX;
 				let tView, tView2;
 				let tScene = new RedGPU.RedScene();
@@ -165,6 +165,22 @@ new RedGPU.RedGPUContext(
 				testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = 20
 				testMesh.x = -25
 				tScene.addChild(testMesh)
+				testMesh.addEventListener('down', function () {
+					var tValue = 40 * 3
+					TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
+				})
+				testMesh.addEventListener('up', function () {
+					var tValue = 40 * 2
+					TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
+				})
+				testMesh.addEventListener('over', function () {
+					var tValue = 40 * 2
+					TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
+				})
+				testMesh.addEventListener('out', function () {
+					var tValue = 40 * 1
+					TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
+				})
 
 				testMesh = new RedGPU.RedMesh(
 					this,
@@ -174,6 +190,22 @@ new RedGPU.RedGPUContext(
 				testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = 20
 				testMesh.x = 25
 				tScene.addChild(testMesh)
+				testMesh.addEventListener('down', function () {
+					var tValue = 40 * 3
+					TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
+				})
+				testMesh.addEventListener('up', function () {
+					var tValue = 40 * 2
+					TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
+				})
+				testMesh.addEventListener('over', function () {
+					var tValue = 40 * 2
+					TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
+				})
+				testMesh.addEventListener('out', function () {
+					var tValue = 40 * 1
+					TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
+				})
 
 				let division = MAX / 8
 				while (i--) {
@@ -188,12 +220,27 @@ new RedGPU.RedGPUContext(
 										: i > division * 2 ? testMat_standard_diffuse_normal_displacement
 											: i > division * 1 ? testMat_colorPhongTexture_normal : testMat_colorPhongTexture_normal_displacement
 					);
+					testMesh.addEventListener('down', function () {
+						var tValue = 40 * 3
+						TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
+					})
+					testMesh.addEventListener('up', function () {
+						var tValue = 40 * 2
+						TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
+					})
+					testMesh.addEventListener('over', function () {
+						var tValue = 40 * 2
+						TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
+					})
+					testMesh.addEventListener('out', function () {
+						var tValue = 40 * 1
+						TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
+					})
 					testMesh.x = Math.random() * 3000 - 1500;
 					testMesh.y = Math.random() * 3000 - 1500;
 					testMesh.z = Math.random() * 3000 - 1500;
 					testMesh.rotationX = testMesh.rotationY = testMesh.rotationZ = Math.random() * 360;
-					testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = Math.random() * 25 + 35;
-					if (testMesh.material == testMat_standard_diffuse_normal_displacement) testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = 55
+					testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = 40;
 					tScene.addChild(testMesh)
 					// //
 					// let testMesh2 = new RedGPU.RedMesh(
