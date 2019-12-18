@@ -69,7 +69,7 @@ new RedGPU.RedGPUContext(
 				tLight.y = 10
 				tLight.z = 10
 				tScene.addLight(tLight)
-				//
+
 				tLight = new RedGPU.RedDirectionalLight('#ff0000', 0.5)
 				tLight.x = -10
 				tLight.y = -10
@@ -83,10 +83,10 @@ new RedGPU.RedGPUContext(
 				tScene.addLight(tLight)
 
 
-				let i2 = 0
-				let testColor = ['#ff0000', '#00ff00', '#0000ff', '#ffffff', '#ffff00']
+				let i2 = 10
+				let testColor = ['#ff0000', '#00ff00', '#0000ff', '#ff00ff', '#ffff00']
 				while (i2--) {
-					let tLight = new RedGPU.RedPointLight(testColor[i2 % testColor.length], 1, 1, Math.random() * 25)
+					let tLight = new RedGPU.RedPointLight(testColor[i2 % testColor.length], 1, 1, 250)
 
 					tScene.addLight(tLight)
 				}
@@ -96,8 +96,8 @@ new RedGPU.RedGPUContext(
 				let tEffect2 = new RedGPU.RedPostEffect_DoF(this);
 				tEffect.bloomStrength = 0.35
 				tEffect2.focusLength = 1000
-				tView.postEffect.addEffect(tEffect)
-				tView.postEffect.addEffect(tEffect2)
+				// tView.postEffect.addEffect(tEffect)
+				// tView.postEffect.addEffect(tEffect2)
 				// tView.postEffect.addEffect(new RedGPU.RedPostEffect_Gray(this))
 				this.addView(tView2)
 
@@ -166,19 +166,19 @@ new RedGPU.RedGPUContext(
 				testMesh.x = -25
 				tScene.addChild(testMesh)
 				testMesh.addEventListener('down', function () {
-					var tValue = 40 * 3
+					var tValue = 50 * 3
 					TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
 				})
 				testMesh.addEventListener('up', function () {
-					var tValue = 40 * 2
+					var tValue = 50 * 2
 					TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
 				})
 				testMesh.addEventListener('over', function () {
-					var tValue = 40 * 2
+					var tValue = 50 * 2
 					TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
 				})
 				testMesh.addEventListener('out', function () {
-					var tValue = 40 * 1
+					var tValue = 50 * 1
 					TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
 				})
 
@@ -191,19 +191,19 @@ new RedGPU.RedGPUContext(
 				testMesh.x = 25
 				tScene.addChild(testMesh)
 				testMesh.addEventListener('down', function () {
-					var tValue = 40 * 3
+					var tValue = 50 * 3
 					TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
 				})
 				testMesh.addEventListener('up', function () {
-					var tValue = 40 * 2
+					var tValue = 50 * 2
 					TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
 				})
 				testMesh.addEventListener('over', function () {
-					var tValue = 40 * 2
+					var tValue = 50 * 2
 					TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
 				})
 				testMesh.addEventListener('out', function () {
-					var tValue = 40 * 1
+					var tValue = 50 * 1
 					TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
 				})
 
@@ -221,24 +221,24 @@ new RedGPU.RedGPUContext(
 											: i > division * 1 ? testMat_colorPhongTexture_normal : testMat_colorPhongTexture_normal_displacement
 					);
 					testMesh.addEventListener('down', function () {
-						var tValue = 40 * 3
+						var tValue = 50 * 3
 						TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
 					})
 					testMesh.addEventListener('up', function () {
-						var tValue = 40 * 2
+						var tValue = 50 * 2
 						TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
 					})
 					testMesh.addEventListener('over', function () {
-						var tValue = 40 * 2
+						var tValue = 50 * 2
 						TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
 					})
 					testMesh.addEventListener('out', function () {
-						var tValue = 40 * 1
+						var tValue = 50 * 1
 						TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
 					})
-					testMesh.x = Math.random() * 3000 - 1500;
-					testMesh.y = Math.random() * 3000 - 1500;
-					testMesh.z = Math.random() * 3000 - 1500;
+					testMesh.x = Math.random() * 2000 - 1000;
+					testMesh.y = Math.random() * 2000 - 1000;
+					testMesh.z = Math.random() * 2000 - 1000;
 					testMesh.rotationX = testMesh.rotationY = testMesh.rotationZ = Math.random() * 360;
 					testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = 40;
 					tScene.addChild(testMesh)
@@ -283,9 +283,9 @@ new RedGPU.RedGPUContext(
 					let tChildren = tView.scene.pointLightList
 					let i = tChildren.length;
 					while (i--) {
-						tChildren[i].x = Math.sin(time / 1000 + i * 10 + Math.PI * 2 / tChildren.length * i * 3) * 150
-						tChildren[i].y = Math.sin(time / 2000 + i * 10 + Math.PI * 2 / tChildren.length * i * 3) * 150
-						tChildren[i].z = Math.cos(time / (2000 + i * 10) + Math.PI * 2 / tChildren.length * i * 3) * 150
+						tChildren[i].x = Math.sin(time / 1000 + i * 10 + Math.PI * 2 / tChildren.length * i * 3) * 500
+						tChildren[i].y = Math.sin(time / 1000 + i * 10 + Math.PI * 2 / tChildren.length * i * 3) * 500
+						tChildren[i].z = Math.cos(time / 1000 + i * 10 + Math.PI * 2 / tChildren.length * i * 3) * 500
 					}
 
 					tChildren = tView.scene.children
