@@ -45,6 +45,7 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 	layout( location = 3 ) out vec2 vUV1;
 	layout( location = 4 ) out vec4 vVertexTangent;
 	layout( location = 5 ) out vec4 vVertexPosition;
+	layout( location = 6 ) out vec4 vMouseColorID;	
 	layout( set = ${RedShareGLSL.SET_INDEX_VertexUniforms}, binding = 0 ) uniform VertexUniforms {
 		mat4 jointMatrix[${maxJoint}];
 		mat4 inverseBindMatrixForJoint[${maxJoint}];
@@ -74,6 +75,7 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 		vUV = uv;
 		vUV1 = uv1;
 		vVertexTangent = vertexTangent;
+		vMouseColorID = meshUniformsIndex.mouseColorID;
 		//#RedGPU#displacementTexture# vVertexPosition.xyz += calcDisplacement(vNormal, vertexUniforms.displacementFlowSpeedX, vertexUniforms.displacementFlowSpeedY, vertexUniforms.displacementPower, uv, uDisplacementTexture, uDisplacementSampler);
 		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * vVertexPosition;		
 	}
@@ -108,6 +110,7 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 	layout( location = 3 ) in vec2 vUV1;
 	layout( location = 4 ) in vec4 vVertexTangent;
 	layout( location = 5 ) in vec4 vVertexPosition;
+	layout( location = 6 ) in vec4 vMouseColorID;	
 	//#RedGPU#diffuseTexture# layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 4 ) uniform sampler uDiffuseSampler;
 	//#RedGPU#diffuseTexture# layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 5 ) uniform texture2D uDiffuseTexture;
 	//#RedGPU#normalTexture# layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 6 ) uniform sampler uNormalSampler;
@@ -122,6 +125,7 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 	//#RedGPU#occlusionTexture# layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 15 ) uniform texture2D uOcclusionTexture;
 	layout( location = 0 ) out vec4 outColor;
 	layout( location = 1 ) out vec4 outDepthColor;
+	layout( location = 2 ) out vec4 outMouseColorID;
 	vec2 diffuseTexCoord;
 	vec2 normalTexCoord;
 	vec2 emissiveTexCoord;
@@ -213,7 +217,7 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 		}
 
 
-		 vec4 finalColor = ld+ls + la;;
+		 vec4 finalColor = ld + ls + la;;
 
 
 		// 컷오프 - BLEND, MASK
@@ -232,6 +236,7 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 			finalColor.a = tAlpha;
 		}
 		outColor = finalColor;
+		outMouseColorID = vMouseColorID;
 		outDepthColor = vec4( vec3(gl_FragCoord.z/gl_FragCoord.w), 1.0 );
 	}
 `;

@@ -5,7 +5,6 @@
  *   Last modification time of this file - 2019.12.18 19:33:34
  *
  */
-
 "use strict";
 import RedDetectorGPU from "./base/detect/RedDetectorGPU.js";
 import RedRender from "./renderer/RedRender.js";
@@ -94,7 +93,7 @@ export default class RedGPUContext {
 									let tXkey, tYkey;
 									tXkey = 'offsetX';
 									tYkey = 'offsetY';
-									let mouseX,mouseY;
+									let mouseX, mouseY;
 									this.canvas.addEventListener(v, e => {
 										e.preventDefault();
 										if (this.#detector.isMobile) {
@@ -119,13 +118,12 @@ export default class RedGPUContext {
 													nativeEvent: e
 												}
 											);
-
 											mouseX = e[tXkey];
 											mouseY = e[tYkey];
 										}
 										this.viewList.forEach(redView => {
-											redView.mouseX = mouseX
-											redView.mouseY = mouseY
+											redView.mouseX = mouseX - redView.viewRect[0]
+											redView.mouseY = mouseY - redView.viewRect[1]
 										});
 									}, false)
 								});
@@ -146,14 +144,19 @@ export default class RedGPUContext {
 			}
 		})
 	}
+
 	addView(redView) {
 		this.viewList.push(redView)
 	}
+
 	removeView(redView) {
 		if (this.viewList.includes(redView)) this.viewList.splice(redView, 1)
 	}
 
-	get detector() {return this.#detector};
+	get detector() {
+		return this.#detector
+	};
+
 	setSize(w = this.#width, h = this.#height) {
 		this.#width = w;
 		this.#height = h;
@@ -191,7 +194,6 @@ export default class RedGPUContext {
 			this.device.defaultQueue.submit([test]);
 		});
 	}
-
 }
 
 function configureSwapChain(device, swapChainFormat, context) {
