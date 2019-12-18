@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.17 15:12:16
+ *   Last modification time of this file - 2019.12.18 11:30:16
  *
  */
 
@@ -50,6 +50,7 @@ const getPool = function (redGPUContext, targetMesh) {
 
 
 export default class RedBaseObject3D extends RedDisplayContainer {
+
 	static uniformsBindGroupLayoutDescriptor_mesh = {
 		bindings: [
 			{
@@ -66,7 +67,8 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 	};
 	static uniformBufferDescriptor_meshIndex = new RedUniformBufferDescriptor(
 		[
-			{size: RedTypeSize.float, valueName: 'meshUniformIndex'}
+			{size: RedTypeSize.float, valueName: 'meshUniformIndex'},
+			{size: RedTypeSize.float, valueName: 'opacity'}
 		]
 	);
 	_x = 0;
@@ -91,7 +93,14 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 	_primitiveTopology = "triangle-list";
 	pipeline;
 	#bindings;
-
+	_opacity;
+	get opacity() {
+		return this._opacity;
+	}
+	set opacity(value) {
+		this._opacity = value;
+		this.uniformBuffer_meshIndex.GPUBuffer.setSubData(RedTypeSize.float, new Float32Array([value]));
+	}
 	constructor(redGPUContext) {
 		super();
 		this.#redGPUContext = redGPUContext;
