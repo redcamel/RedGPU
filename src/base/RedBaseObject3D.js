@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.18 19:33:34
+ *   Last modification time of this file - 2019.12.18 19:40:51
  *
  */
 
@@ -108,7 +108,11 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 		}
 		RedRender.mouseMAP[this.#mouseColorID.toString()][type] = handler;
 		// console.log(RedRender.mouseMAP)
-
+	}
+	removeEventListener(type){
+		if(RedRender.mouseMAP[this.#mouseColorID.toString()]){
+			RedRender.mouseMAP[this.#mouseColorID.toString()][type] = null;
+		}
 	}
 	constructor(redGPUContext) {
 		super();
