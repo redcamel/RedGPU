@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.17 17:0:49
+ *   Last modification time of this file - 2019.12.18 19:33:34
  *
  */
 
@@ -21,27 +21,25 @@ export default class RedBitmapMaterial extends RedMix.mix(
 	static vertexShaderGLSL = `
 	#version 450
 	${RedShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
-   layout( set = ${RedShareGLSL.SET_INDEX_MeshUniforms}, binding = 0 ) uniform MeshUniforms {
-        mat4 modelMatrix[${RedShareGLSL.MESH_UNIFORM_POOL_NUM}];
-    } meshUniforms;
-    layout( set = ${RedShareGLSL.SET_INDEX_MeshUniforms}, binding = 1 ) uniform MeshUniformIndex {
-        float index;
-    } meshUniformsIndex;
+    ${RedShareGLSL.GLSL_SystemUniforms_vertex.meshUniforms}
 	layout( location = 0 ) in vec3 position;
 	layout( location = 1 ) in vec3 normal;
 	layout( location = 2 ) in vec2 uv;
 	layout( location = 0 ) out vec3 vNormal;
 	layout( location = 1 ) out vec2 vUV;
+	layout( location = 2 ) out vec4 vMouseColorID;	
 	void main() {
 		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * meshUniforms.modelMatrix[ int(meshUniformsIndex.index) ] * vec4(position,1.0);
 		vNormal = normal;
 		vUV = uv;
+		vMouseColorID = meshUniformsIndex.mouseColorID;
 	}
 	`;
 	static fragmentShaderGLSL = `
 	#version 450
 	layout( location = 0 ) in vec3 vNormal;
 	layout( location = 1 ) in vec2 vUV;
+	layout( location = 2 ) in vec4 vMouseColorID;	
 	layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 0 ) uniform FragmentUniforms {
         float alpha;
     } fragmentUniforms;
@@ -49,11 +47,13 @@ export default class RedBitmapMaterial extends RedMix.mix(
 	layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 2 ) uniform texture2D uDiffuseTexture;
 	layout( location = 0 ) out vec4 outColor;
 	layout( location = 1 ) out vec4 outDepthColor;
+	layout( location = 2 ) out vec4 outMouseColorID;
 	void main() {
 		vec4 diffuseColor = vec4(0.0);
 		//#RedGPU#diffuseTexture# diffuseColor = texture(sampler2D(uDiffuseTexture, uSampler), vUV) ;
 		outColor = diffuseColor;
 		outColor.a *= fragmentUniforms.alpha;
+		outMouseColorID = vMouseColorID;
 		outDepthColor = vec4( vec3(gl_FragCoord.z/gl_FragCoord.w), 1.0 );
 	}
 `;

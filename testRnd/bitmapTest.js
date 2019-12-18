@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.18 12:6:16
+ *   Last modification time of this file - 2019.12.18 19:33:34
  *
  */
 import RedGPU from "../src/RedGPU.js";
@@ -13,6 +13,7 @@ document.body.appendChild(cvs);
 
 new RedGPU.RedGPUContext(cvs,
 	function (v, reason) {
+		console.log(this.context)
 		let tView;
 		let tScene = new RedGPU.RedScene();
 		let tGrid = new RedGPU.RedGrid(this)
@@ -84,77 +85,77 @@ new RedGPU.RedGPUContext(cvs,
 		//
 		// tScene.addChild(tMesh)
 
-		let textureLoader = new RedGPU.RedTextureLoader(
-			this,
-			[
-				'../assets/UV_Grid_Sm.jpg',
-				'../assets/UV_Grid_Sm.jpg',
-				'../assets/UV_Grid_Sm.jpg'
-			],
-			_ => {
-				console.log('여긴오겠고?')
-				new RedGPU.RedTextureLoader(
-					this,
-					[
-						'../assets/UV_Grid_Sm.jpg',
-						'../assets/UV_Grid_Sm.jpg',
-						'../assets/UV_Grid_Sm.jpg'
-					],
-					_ => {
-						console.log('안오겠지?')
-						tMesh = new RedGPU.RedMesh(this, new RedGPU.RedSphere(this,), new RedGPU.RedBitmapMaterial(this, new RedGPU.RedBitmapTexture(this, '../assets/Brick03_col.jpg')))
-						tMesh.x = -2
-						tScene.addChild(tMesh)
-
-						tMesh = new RedGPU.RedMesh(this, new RedGPU.RedSphere(this,), new RedGPU.RedBitmapMaterial(this, new RedGPU.RedBitmapTexture(this, '../assets/Brick03_col.jpg')))
-
-						tMesh.x = 2
-						tScene.addChild(tMesh)
-
-						tMesh = new RedGPU.RedMesh(this, new RedGPU.RedSphere(this,), new RedGPU.RedStandardMaterial(this, new RedGPU.RedBitmapTexture(this, '../assets/Brick03_col.jpg')))
-						tMesh.z = -2
-
-						tScene.addChild(tMesh)
-
-						tMesh = new RedGPU.RedMesh(this, new RedGPU.RedSphere(this,), new RedGPU.RedColorMaterial(this, '#00ff00'))
-						tMesh.z = 2
-						tScene.addChild(tMesh)
-
-						let tMesh2 = new RedGPU.RedMesh(this, new RedGPU.RedSphere(this,), new RedGPU.RedColorMaterial(this, '#ff00ff'))
-						tMesh2.x = 3
-						tMesh2.scaleX = tMesh2.scaleY = tMesh2.scaleZ = 0.5;
-						tMesh.addChild(tMesh2)
-
-						tMesh = new RedGPU.RedMesh(this, new RedGPU.RedSphere(this,), new RedGPU.RedColorPhongMaterial(this))
-						tMesh.z = 4
-
-						tScene.addChild(tMesh)
-
-						tMesh = new RedGPU.RedMesh(this, new RedGPU.RedSphere(this,), new RedGPU.RedColorPhongTextureMaterial(this))
-						tMesh.z = -4
-
-						tScene.addChild(tMesh)
-
-						tMesh = new RedGPU.RedMesh(this, new RedGPU.RedSphere(this,), new RedGPU.RedEnvironmentMaterial(this, new RedGPU.RedBitmapTexture(this, '../assets/Brick03_col.jpg'), new RedGPU.RedBitmapCubeTexture(this, [
-							'../assets/cubemap/SwedishRoyalCastle/px.jpg',
-							'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
-							'../assets/cubemap/SwedishRoyalCastle/py.jpg',
-							'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
-							'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
-							'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
-						])))
-						tMesh.z = -6
-						tScene.addChild(tMesh)
-						tMesh = new RedGPU.RedMesh(this, new RedGPU.RedBox(this,), new RedGPU.RedSheetMaterial(this, new RedGPU.RedBitmapTexture(this, '../assets/sheet/spriteSheet.png'), 24, 5, 3, 15))
-						tMesh.z = 0
-
-						tScene.addChild(tMesh)
-
-
-					}
-				)
-			}
-		)
+		// let textureLoader = new RedGPU.RedTextureLoader(
+		// 	this,
+		// 	[
+		// 		'../assets/UV_Grid_Sm.jpg',
+		// 		'../assets/UV_Grid_Sm.jpg',
+		// 		'../assets/UV_Grid_Sm.jpg'
+		// 	],
+		// 	_ => {
+		// 		console.log('여긴오겠고?')
+		// 		new RedGPU.RedTextureLoader(
+		// 			this,
+		// 			[
+		// 				'../assets/UV_Grid_Sm.jpg',
+		// 				'../assets/UV_Grid_Sm.jpg',
+		// 				'../assets/UV_Grid_Sm.jpg'
+		// 			],
+		// 			_ => {
+		// 				console.log('안오겠지?')
+		// 				tMesh = new RedGPU.RedMesh(this, new RedGPU.RedSphere(this,), new RedGPU.RedBitmapMaterial(this, new RedGPU.RedBitmapTexture(this, '../assets/Brick03_col.jpg')))
+		// 				tMesh.x = -2
+		// 				tScene.addChild(tMesh)
+		//
+		// 				tMesh = new RedGPU.RedMesh(this, new RedGPU.RedSphere(this,), new RedGPU.RedBitmapMaterial(this, new RedGPU.RedBitmapTexture(this, '../assets/Brick03_col.jpg')))
+		//
+		// 				tMesh.x = 2
+		// 				tScene.addChild(tMesh)
+		//
+		// 				tMesh = new RedGPU.RedMesh(this, new RedGPU.RedSphere(this,), new RedGPU.RedStandardMaterial(this, new RedGPU.RedBitmapTexture(this, '../assets/Brick03_col.jpg')))
+		// 				tMesh.z = -2
+		//
+		// 				tScene.addChild(tMesh)
+		//
+		// 				tMesh = new RedGPU.RedMesh(this, new RedGPU.RedSphere(this,), new RedGPU.RedColorMaterial(this, '#00ff00'))
+		// 				tMesh.z = 2
+		// 				tScene.addChild(tMesh)
+		//
+		// 				let tMesh2 = new RedGPU.RedMesh(this, new RedGPU.RedSphere(this,), new RedGPU.RedColorMaterial(this, '#ff00ff'))
+		// 				tMesh2.x = 3
+		// 				tMesh2.scaleX = tMesh2.scaleY = tMesh2.scaleZ = 0.5;
+		// 				tMesh.addChild(tMesh2)
+		//
+		// 				tMesh = new RedGPU.RedMesh(this, new RedGPU.RedSphere(this,), new RedGPU.RedColorPhongMaterial(this))
+		// 				tMesh.z = 4
+		//
+		// 				tScene.addChild(tMesh)
+		//
+		// 				tMesh = new RedGPU.RedMesh(this, new RedGPU.RedSphere(this,), new RedGPU.RedColorPhongTextureMaterial(this))
+		// 				tMesh.z = -4
+		//
+		// 				tScene.addChild(tMesh)
+		//
+		// 				tMesh = new RedGPU.RedMesh(this, new RedGPU.RedSphere(this,), new RedGPU.RedEnvironmentMaterial(this, new RedGPU.RedBitmapTexture(this, '../assets/Brick03_col.jpg'), new RedGPU.RedBitmapCubeTexture(this, [
+		// 					'../assets/cubemap/SwedishRoyalCastle/px.jpg',
+		// 					'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
+		// 					'../assets/cubemap/SwedishRoyalCastle/py.jpg',
+		// 					'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
+		// 					'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
+		// 					'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
+		// 				])))
+		// 				tMesh.z = -6
+		// 				tScene.addChild(tMesh)
+		// 				tMesh = new RedGPU.RedMesh(this, new RedGPU.RedBox(this,), new RedGPU.RedSheetMaterial(this, new RedGPU.RedBitmapTexture(this, '../assets/sheet/spriteSheet.png'), 24, 5, 3, 15))
+		// 				tMesh.z = 0
+		//
+		// 				tScene.addChild(tMesh)
+		//
+		//
+		// 			}
+		// 		)
+		// 	}
+		// )
 
 		// let t0 = new RedGPU.RedBitmapTexture(
 		// 	this,
@@ -212,12 +213,47 @@ new RedGPU.RedGPUContext(cvs,
 		// 	}
 		// )
 
+		let i = 1
+		while (i--) {
+			// let tMesh = new RedGPU.RedMesh(this, new RedGPU.RedBox(this), new RedGPU.RedColorMaterial(this))
+			// let tMesh = new RedGPU.RedMesh(this, new RedGPU.RedBox(this), new RedGPU.RedBitmapMaterial(this, new RedGPU.RedBitmapTexture(this, '../assets/Brick03_col.jpg')))
+			// let tMesh = new RedGPU.RedMesh(this, new RedGPU.RedBox(this), new RedGPU.RedStandardMaterial(this, new RedGPU.RedBitmapTexture(this, '../assets/Brick03_col.jpg')))
+			let tMesh = new RedGPU.RedMesh(this, new RedGPU.RedBox(this), new RedGPU.RedEnvironmentMaterial(this, new RedGPU.RedBitmapTexture(this, '../assets/Brick03_col.jpg'), new RedGPU.RedBitmapCubeTexture(this, [
+				'../assets/cubemap/SwedishRoyalCastle/px.jpg',
+				'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
+				'../assets/cubemap/SwedishRoyalCastle/py.jpg',
+				'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
+				'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
+				'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
+			])))
+			// tMesh.x = Math.random() * 10 - 5
+			// tMesh.y = Math.random() * 10 - 5
+			// tMesh.z = Math.random() * 10 - 5
+			tScene.addChild(tMesh)
+
+			tMesh.addEventListener('down', function () {
+				console.log('down', this)
+				this.scaleX = this.scaleY = this.scaleZ = 0.5
+			})
+			tMesh.addEventListener('up', function () {
+				console.log('up', this)
+				this.scaleX = this.scaleY = this.scaleZ = 1
+			})
+			tMesh.addEventListener('over', function () {
+				console.log('over', this)
+				this.material.alpha = 0.5
+			})
+			tMesh.addEventListener('out', function () {
+				console.log('out', this)
+				this.material.alpha = 1
+			})
+		}
+
 		let renderer = new RedGPU.RedRender();
 		let render = time => {
 			tScene.children.forEach(tMesh => {
 				tMesh.rotationZ += 0.1
-				tMesh.material.alpha = RedGPU.RedUTIL.clamp(Math.sin(time / 500), 0, 1)
-				// tMesh.opacity = RedGPU.RedUTIL.clamp(Math.sin(time / 500), 0, 1)
+				// tMesh.material.alpha = RedGPU.RedUTIL.clamp(Math.sin(time / 500), 0, 1)
 
 			})
 			tCamera.x = 10

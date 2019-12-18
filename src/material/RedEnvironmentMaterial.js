@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.17 17:0:49
+ *   Last modification time of this file - 2019.12.18 19:33:34
  *
  */
 
@@ -28,13 +28,7 @@ export default class RedEnvironmentMaterial extends RedMix.mix(
 	#version 450
     ${RedShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
     ${RedShareGLSL.GLSL_SystemUniforms_vertex.calcDisplacement}    
-    layout( set = ${RedShareGLSL.SET_INDEX_MeshUniforms}, binding = 0 ) uniform MeshUniforms {
-        mat4 modelMatrix[${RedShareGLSL.MESH_UNIFORM_POOL_NUM}];
-        mat4 normalMatrix[${RedShareGLSL.MESH_UNIFORM_POOL_NUM}];
-    } meshUniforms;
-    layout( set = ${RedShareGLSL.SET_INDEX_MeshUniforms}, binding = 1 ) uniform MeshUniformIndex {
-        float index;
-    } meshUniformsIndex;
+    ${RedShareGLSL.GLSL_SystemUniforms_vertex.meshUniforms}
          
 	layout( location = 0 ) in vec3 position;
 	layout( location = 1 ) in vec3 normal;
@@ -42,6 +36,7 @@ export default class RedEnvironmentMaterial extends RedMix.mix(
 	layout( location = 0 ) out vec3 vNormal;
 	layout( location = 1 ) out vec2 vUV;
 	layout( location = 2 ) out vec4 vVertexPosition;	
+	layout( location = 3 ) out vec4 vMouseColorID;	
 	layout( set = ${RedShareGLSL.SET_INDEX_VertexUniforms}, binding = 0 ) uniform VertexUniforms {
         float displacementFlowSpeedX;
         float displacementFlowSpeedY;
@@ -54,6 +49,7 @@ export default class RedEnvironmentMaterial extends RedMix.mix(
 		vVertexPosition = meshUniforms.modelMatrix[ int(meshUniformsIndex.index) ] * vec4(position, 1.0);
 		vNormal = (meshUniforms.normalMatrix[ int(meshUniformsIndex.index) ] * vec4(normal,1.0)).xyz;
 		vUV = uv;
+		vMouseColorID = meshUniformsIndex.mouseColorID;
 		//#RedGPU#displacementTexture# vVertexPosition.xyz += calcDisplacement(vNormal, vertexUniforms.displacementFlowSpeedX, vertexUniforms.displacementFlowSpeedY, vertexUniforms.displacementPower, uv, uDisplacementTexture, uSampler);
 		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * vVertexPosition;
 	
@@ -78,6 +74,7 @@ export default class RedEnvironmentMaterial extends RedMix.mix(
 	layout( location = 0 ) in vec3 vNormal;
 	layout( location = 1 ) in vec2 vUV;
 	layout( location = 2 ) in vec4 vVertexPosition;
+	layout( location = 3 ) in vec4 vMouseColorID;
 	layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 4 ) uniform sampler uSampler;
 	//#RedGPU#diffuseTexture# layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 5 ) uniform texture2D uDiffuseTexture;
 	//#RedGPU#normalTexture# layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 6 ) uniform texture2D uNormalTexture;	
@@ -86,6 +83,7 @@ export default class RedEnvironmentMaterial extends RedMix.mix(
 	//#RedGPU#environmentTexture# layout( set = ${RedShareGLSL.SET_INDEX_FragmentUniforms}, binding = 9 ) uniform textureCube uEnvironmentTexture;
 	layout( location = 0 ) out vec4 outColor;
 	layout( location = 1 ) out vec4 outDepthColor;
+	layout( location = 2 ) out vec4 outMouseColorID;
 	void main() {
 		float testAlpha = 1.0;
 		vec4 diffuseColor = vec4(0.0);
@@ -137,6 +135,7 @@ export default class RedEnvironmentMaterial extends RedMix.mix(
 		finalColor.a = testAlpha;
 		outColor = finalColor;
 		outColor.a *= fragmentUniforms.alpha;
+		outMouseColorID = vMouseColorID;
 		outDepthColor = vec4( vec3(gl_FragCoord.z/gl_FragCoord.w), 1.0 );
 	}
 `;
