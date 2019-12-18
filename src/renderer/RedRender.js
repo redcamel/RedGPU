@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.18 19:33:34
+ *   Last modification time of this file - 2019.12.18 19:35:15
  *
  */
 
@@ -124,10 +124,10 @@ let readPixel = async (redGPUContext, redView, baseAttachment_mouseColorID_Resol
 	});
 	let viewRect = redView.viewRect
 	if (
-		redView.mouseX >= viewRect[0]
-		&& redView.mouseX <= viewRect[0] + viewRect[2]
-		&& redView.mouseY >= viewRect[1]
-		&& redView.mouseY <= viewRect[1] + viewRect[3]
+		redView.mouseX > viewRect[0]
+		&& redView.mouseX < viewRect[0] + viewRect[2]
+		&& redView.mouseY > viewRect[1]
+		&& redView.mouseY < viewRect[1] + viewRect[3]
 	) {
 		commandEncoder.copyTextureToTexture(
 			{
