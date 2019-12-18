@@ -124,10 +124,10 @@ let readPixel = async (redGPUContext, redView, baseAttachment_mouseColorID_Resol
 	});
 	let viewRect = redView.viewRect
 	if (
-		redView.mouseX > viewRect[0]
-		&& redView.mouseX < viewRect[0] + viewRect[2]
-		&& redView.mouseY > viewRect[1]
-		&& redView.mouseY < viewRect[1] + viewRect[3]
+		redView.mouseX > 0
+		&& redView.mouseX < viewRect[2]
+		&& redView.mouseY > 0
+		&& redView.mouseY < viewRect[3]
 	) {
 		commandEncoder.copyTextureToTexture(
 			{
