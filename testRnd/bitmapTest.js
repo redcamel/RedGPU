@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.17 17:0:49
+ *   Last modification time of this file - 2019.12.18 12:6:16
  *
  */
 import RedGPU from "../src/RedGPU.js";
@@ -117,10 +117,13 @@ new RedGPU.RedGPUContext(cvs,
 						tScene.addChild(tMesh)
 
 						tMesh = new RedGPU.RedMesh(this, new RedGPU.RedSphere(this,), new RedGPU.RedColorMaterial(this, '#00ff00'))
-
 						tMesh.z = 2
-
 						tScene.addChild(tMesh)
+
+						let tMesh2 = new RedGPU.RedMesh(this, new RedGPU.RedSphere(this,), new RedGPU.RedColorMaterial(this, '#ff00ff'))
+						tMesh2.x = 3
+						tMesh2.scaleX = tMesh2.scaleY = tMesh2.scaleZ = 0.5;
+						tMesh.addChild(tMesh2)
 
 						tMesh = new RedGPU.RedMesh(this, new RedGPU.RedSphere(this,), new RedGPU.RedColorPhongMaterial(this))
 						tMesh.z = 4
@@ -141,7 +144,7 @@ new RedGPU.RedGPUContext(cvs,
 							'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
 						])))
 						tMesh.z = -6
-
+						tScene.addChild(tMesh)
 						tMesh = new RedGPU.RedMesh(this, new RedGPU.RedBox(this,), new RedGPU.RedSheetMaterial(this, new RedGPU.RedBitmapTexture(this, '../assets/sheet/spriteSheet.png'), 24, 5, 3, 15))
 						tMesh.z = 0
 
@@ -214,6 +217,7 @@ new RedGPU.RedGPUContext(cvs,
 			tScene.children.forEach(tMesh => {
 				tMesh.rotationZ += 0.1
 				tMesh.material.alpha = RedGPU.RedUTIL.clamp(Math.sin(time / 500), 0, 1)
+				// tMesh.opacity = RedGPU.RedUTIL.clamp(Math.sin(time / 500), 0, 1)
 
 			})
 			tCamera.x = 10
