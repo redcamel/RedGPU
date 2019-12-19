@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.18 19:33:34
+ *   Last modification time of this file - 2019.12.19 11:29:32
  *
  */
 
@@ -42,6 +42,15 @@ export default class RedShareGLSL {
 		//#RedGPU#displacementTexture#               displacementFlowSpeedY * (systemUniforms.time/1000.0)
 		//#RedGPU#displacementTexture#          )).x * displacementPower ;
 		//#RedGPU#displacementTexture# }
+		`,
+		getSprite3DMatrix : `
+		mat4 getSprite3DMatrix(mat4 cameraMTX, mat4 mvMatrix){
+			mat4 tMTX = cameraMTX * mvMatrix;
+			tMTX[0][0] = mvMatrix[0][0], tMTX[0][1] = 0.0, tMTX[0][2] = 0.0;
+			tMTX[1][0] = 0.0, tMTX[1][1] = mvMatrix[1][1], tMTX[1][2] = 0.0;
+			tMTX[2][0] = 0.0, tMTX[2][1] = 0.0, tMTX[2][2] = mvMatrix[2][2];
+			return tMTX;
+		}
 		`
 	};
 	static GLSL_SystemUniforms_fragment = {
