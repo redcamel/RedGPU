@@ -421,8 +421,8 @@ export default class RedRender {
 					}
 				},
 				{
-					attachment: redView.baseAttachment2View,
-					resolveTarget: redView.baseResolveTarget2View,
+					attachment: redView.baseAttachment_depthColorView,
+					resolveTarget: redView.baseAttachment_depthColor_ResolveTargetView,
 					loadValue: {
 						r: tSceneBackgroundColor_rgba[0],
 						g: tSceneBackgroundColor_rgba[1],

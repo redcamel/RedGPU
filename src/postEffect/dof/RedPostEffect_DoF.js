@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 19:11:47
+ *   Last modification time of this file - 2019.12.19 18:10:39
  *
  */
 
@@ -58,7 +58,7 @@ export default class RedPostEffect_DoF extends RedBasePostEffect {
 		this.checkSize(redGPUContext, redView);
 		this.#blurEffect.render(redGPUContext, redView, renderScene, diffuseTextureView);
 		this.#blenderEffect._blurTexture = this.#blurEffect.baseAttachmentView;
-		this.#blenderEffect._depthTexture = redView.baseResolveTarget2View;
+		this.#blenderEffect._depthTexture = redView.baseAttachment_depthColor_ResolveTargetView;
 		this.#blenderEffect.render(redGPUContext, redView, renderScene, diffuseTextureView);
 		this.baseAttachment = this.#blenderEffect.baseAttachment;
 		this.baseAttachmentView = this.#blenderEffect.baseAttachmentView;

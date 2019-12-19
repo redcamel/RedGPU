@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.19 13:50:11
+ *   Last modification time of this file - 2019.12.19 18:10:39
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -98,7 +98,55 @@ new RedGPU.RedGPUContext(
 				tEffect2.focusLength = 1000
 				tView.postEffect.addEffect(tEffect)
 				tView.postEffect.addEffect(tEffect2)
-				// tView.postEffect.addEffect(new RedGPU.RedPostEffect_Gray(this))
+
+				// tEffect = new RedGPU.RedPostEffect_Gray(this)
+				// tView.postEffect.addEffect(tEffect)
+
+				// tEffect = new RedGPU.RedPostEffect_Invert(this)
+				// tView.postEffect.addEffect(tEffect)
+
+				// tEffect = new RedGPU.RedPostEffect_Threshold(this)
+				// tView.postEffect.addEffect(tEffect)
+
+				// tEffect = new RedGPU.RedPostEffect_HueSaturation(this)
+				// tEffect.saturation = 100
+				// tView.postEffect.addEffect(tEffect)
+				//
+				// tEffect = new RedGPU.RedPostEffect_BrightnessContrast(this)
+				// tEffect.contrast = -100
+				// tView.postEffect.addEffect(tEffect)
+
+				// tEffect = new RedGPU.RedPostEffect_Blur(this)
+				// tView.postEffect.addEffect(tEffect)
+				//
+				// tEffect = new RedGPU.RedPostEffect_BlurX(this)
+				// tView.postEffect.addEffect(tEffect)
+				//
+				// tEffect = new RedGPU.RedPostEffect_BlurY(this)
+				// tView.postEffect.addEffect(tEffect)
+				//
+				// tEffect = new RedGPU.RedPostEffect_GaussianBlur(this)
+				// tView.postEffect.addEffect(tEffect)
+
+				// tEffect = new RedGPU.RedPostEffect_ZoomBlur(this)
+				// tView.postEffect.addEffect(tEffect)
+
+				// tEffect = new RedGPU.RedPostEffect_HalfTone(this)
+				// tView.postEffect.addEffect(tEffect)
+				//
+				// tEffect = new RedGPU.RedPostEffect_Pixelize(this)
+				// tView.postEffect.addEffect(tEffect)
+
+				// tEffect = new RedGPU.RedPostEffect_Convolution(this)
+				// tView.postEffect.addEffect(tEffect)
+
+				// tEffect = new RedGPU.RedPostEffect_Film(this)
+				// tView.postEffect.addEffect(tEffect)
+				//
+				// tEffect = new RedGPU.RedPostEffect_Vignetting(this)
+				// tView.postEffect.addEffect(tEffect)
+
+
 				this.addView(tView2)
 
 

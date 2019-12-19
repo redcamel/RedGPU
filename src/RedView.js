@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.18 19:33:34
+ *   Last modification time of this file - 2019.12.19 18:10:39
  *
  */
 
@@ -153,9 +153,9 @@ export default class RedView extends RedUUID{
 		this.#viewRect = this.getViewRect(redGPUContext);
 		if (this.baseAttachment) {
 			this.baseAttachment.destroy();
-			this.baseAttachment2.destroy();
+			this.baseAttachment_depthColor.destroy();
 			this.baseResolveTarget.destroy();
-			this.baseResolveTarget2.destroy();
+			this.baseAttachment_depthColor_ResolveTarget.destroy();
 			this.baseDepthStencilAttachment.destroy();
 		}
 		this.baseAttachment = redGPUContext.device.createTexture({
@@ -173,20 +173,20 @@ export default class RedView extends RedUUID{
 		});
 		this.baseResolveTargetView = this.baseResolveTarget.createView();
 
-		this.baseAttachment2 = redGPUContext.device.createTexture({
+		this.baseAttachment_depthColor = redGPUContext.device.createTexture({
 			size: {width: this.#viewRect[2], height: this.#viewRect[3], depth: 1},
 			sampleCount: 4,
 			format: redGPUContext.swapChainFormat,
 			usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED
 		});
-		this.baseAttachment2View = this.baseAttachment2.createView();
-		this.baseResolveTarget2 = redGPUContext.device.createTexture({
+		this.baseAttachment_depthColorView = this.baseAttachment_depthColor.createView();
+		this.baseAttachment_depthColor_ResolveTarget = redGPUContext.device.createTexture({
 			size: {width: this.#viewRect[2], height: this.#viewRect[3], depth: 1},
 			sampleCount: 1,
 			format: redGPUContext.swapChainFormat,
 			usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED
 		});
-		this.baseResolveTarget2View = this.baseResolveTarget2.createView();
+		this.baseAttachment_depthColor_ResolveTargetView = this.baseAttachment_depthColor_ResolveTarget.createView();
 
 
 		this.baseAttachment_mouseColorID = redGPUContext.device.createTexture({
@@ -203,6 +203,21 @@ export default class RedView extends RedUUID{
 			usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED
 		});
 		this.baseAttachment_mouseColorID_ResolveTargetView = this.baseAttachment_mouseColorID_ResolveTarget.createView();
+
+		this.baseAttachment_normal = redGPUContext.device.createTexture({
+			size: {width: this.#viewRect[2], height: this.#viewRect[3], depth: 1},
+			sampleCount: 4,
+			format: redGPUContext.swapChainFormat,
+			usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED
+		});
+		this.baseAttachment_normalView = this.baseAttachment_normal.createView();
+		this.baseAttachment_normal_ResolveTarget = redGPUContext.device.createTexture({
+			size: {width: this.#viewRect[2], height: this.#viewRect[3], depth: 1},
+			sampleCount: 1,
+			format: redGPUContext.swapChainFormat,
+			usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED
+		});
+		this.baseAttachment_normal_ResolveTargetView = this.baseAttachment_normal_ResolveTarget.createView();
 
 
 
