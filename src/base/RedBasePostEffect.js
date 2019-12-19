@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 19:11:47
+ *   Last modification time of this file - 2019.12.19 13:50:11
  *
  */
 
@@ -57,7 +57,6 @@ export default class RedBasePostEffect extends RedMix.mix(
 	}
 	render(redGPUContext, redView, renderScene, diffuseTextureView) {
 		this.checkSize(redGPUContext, redView);
-
 		const commandEncoder_effect = redGPUContext.device.createCommandEncoder();
 		const passEncoder_effect = commandEncoder_effect.beginRenderPass(
 			{

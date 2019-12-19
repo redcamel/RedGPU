@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.19 11:29:32
+ *   Last modification time of this file - 2019.12.19 13:50:11
  *
  */
 // renderder ///////////////////////////////////////////////////////////////////////
@@ -82,7 +82,6 @@ import RedBox from "./primitives/RedBox.js";
 import RedCylinder from "./primitives/RedCylinder.js";
 import RedPlane from "./primitives/RedPlane.js";
 import RedSphere from "./primitives/RedSphere.js";
-
 // resources ///////////////////////////////////////////////////////////////////////
 import RedCopyBufferToTexture from "./resources/system/RedCopyBufferToTexture.js";
 import RedImageLoader from "./resources/system/RedImageLoader.js";
