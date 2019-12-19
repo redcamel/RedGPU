@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.18 19:35:15
+ *   Last modification time of this file - 2019.12.19 11:29:32
  *
  */
 
@@ -167,6 +167,7 @@ let renderScene = (redGPUContext, redView, passEncoder, parent, children, parent
 	let tDirtyTransform, tDirtyPipeline;
 	let tMaterialChanged;
 	let tPipeline;
+
 	let prevVertexBuffer_UUID;
 	let prevIndexBuffer_UUID;
 	let prevMaterial_UUID;
@@ -206,6 +207,7 @@ let renderScene = (redGPUContext, redView, passEncoder, parent, children, parent
 		tPipeline = tMesh.pipeline;
 		tSkinInfo = tMesh.skinInfo;
 		tMVMatrix = tMesh.matrix;
+
 		if (tMaterial) {
 			if (tMaterial.needResetBindingInfo) {
 				tMaterial.resetBindingInfo();
@@ -384,10 +386,10 @@ let renderScene = (redGPUContext, redView, passEncoder, parent, children, parent
 						tMVMatrix[4] = tLocalMatrix[4], tMVMatrix[5] = tLocalMatrix[5], tMVMatrix[6] = tLocalMatrix[6], tMVMatrix[7] = tLocalMatrix[7],
 						tMVMatrix[8] = tLocalMatrix[8], tMVMatrix[9] = tLocalMatrix[9] , tMVMatrix[10] = tLocalMatrix[10], tMVMatrix[11] = tLocalMatrix[11],
 						tMVMatrix[12] = tLocalMatrix[12], tMVMatrix[13] = tLocalMatrix[13], tMVMatrix[14] = tLocalMatrix[14], tMVMatrix[15] = tLocalMatrix[15]
-				);
-			// normal calc
+				),
+				// normal calc
 
-			tNMatrix = tMesh.normalMatrix;
+				tNMatrix = tMesh.normalMatrix;
 			a00 = tMVMatrix[0], a01 = tMVMatrix[1], a02 = tMVMatrix[2], a03 = tMVMatrix[3],
 				a10 = tMVMatrix[4], a11 = tMVMatrix[5], a12 = tMVMatrix[6], a13 = tMVMatrix[7],
 				a20 = tMVMatrix[8], a21 = tMVMatrix[9], a22 = tMVMatrix[10], a23 = tMVMatrix[11],

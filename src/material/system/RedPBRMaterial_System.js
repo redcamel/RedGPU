@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.18 19:33:34
+ *   Last modification time of this file - 2019.12.19 10:20:57
  *
  */
 
@@ -66,11 +66,12 @@ export default class RedPBRMaterial_System extends RedMix.mix(
 		//#RedGPU#skin#  aVertexWeight.z * vertexUniforms.globalTransformOfNodeThatTheMeshIsAttachedTo * vertexUniforms.jointMatrix[ int(aVertexJoint.z) ] * vertexUniforms.inverseBindMatrixForJoint[int(aVertexJoint.z)]+
 		//#RedGPU#skin#  aVertexWeight.w * vertexUniforms.globalTransformOfNodeThatTheMeshIsAttachedTo * vertexUniforms.jointMatrix[ int(aVertexJoint.w) ] * vertexUniforms.inverseBindMatrixForJoint[int(aVertexJoint.w)];
 		
-		vVertexPosition = meshUniforms.modelMatrix[ int(meshUniformsIndex.index) ] * skinMat * vec4(position, 1.0);
+		vVertexPosition = meshUniforms.modelMatrix[ int(meshUniformsIndex.index) ] * vec4(position, 1.0);
+		//#RedGPU#skin# vVertexPosition = meshUniforms.modelMatrix[ int(meshUniformsIndex.index) ] * skinMat * vec4(position, 1.0);
 		vVertexColor_0 = vertexColor_0;
 		
 		vNormal = (meshUniforms.normalMatrix[ int(meshUniformsIndex.index) ] *  vec4(normal,1.0)).xyz;
-		 vNormal = (meshUniforms.normalMatrix[ int(meshUniformsIndex.index) ]  * skinMat * vec4(normal,0.0)).xyz;		
+	    //#RedGPU#skin# vNormal = (meshUniforms.normalMatrix[ int(meshUniformsIndex.index) ]  * skinMat * vec4(normal,0.0)).xyz;		
 		
 		vUV = uv;
 		vUV1 = uv1;

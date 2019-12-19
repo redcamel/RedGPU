@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.18 19:40:51
+ *   Last modification time of this file - 2019.12.19 11:29:32
  *
  */
 
@@ -94,6 +94,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 	_primitiveTopology = "triangle-list";
 	pipeline;
 	#bindings;
+	//FIXME - 유일키가 될수있도록 변경
 	#mouseColorID = [
 		parseInt(Math.random() * 255),
 		parseInt(Math.random() * 255),
@@ -101,7 +102,7 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 		255
 	];
 	addEventListener(type, handler) {
-		if(!RedRender.mouseMAP[this.#mouseColorID.toString()]){
+		if (!RedRender.mouseMAP[this.#mouseColorID.toString()]) {
 			RedRender.mouseMAP[this.#mouseColorID.toString()] = {
 				target: this
 			}
@@ -109,8 +110,8 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 		RedRender.mouseMAP[this.#mouseColorID.toString()][type] = handler;
 		// console.log(RedRender.mouseMAP)
 	}
-	removeEventListener(type){
-		if(RedRender.mouseMAP[this.#mouseColorID.toString()]){
+	removeEventListener(type) {
+		if (RedRender.mouseMAP[this.#mouseColorID.toString()]) {
 			RedRender.mouseMAP[this.#mouseColorID.toString()][type] = null;
 		}
 	}
@@ -159,139 +160,108 @@ export default class RedBaseObject3D extends RedDisplayContainer {
 
 	}
 
-
-	get x() {
-		return this._x
-	}
-
+	/////////////////////////////////////////////////////////
+	get x() {return this._x}
 	set x(v) {
 		this._x = v;
 		this.dirtyTransform = true;
 	}
-
-	get y() {
-		return this._y
-	}
-
+	get y() {return this._y}
 	set y(v) {
 		this._y = v;
 		this.dirtyTransform = true;
 	}
-
-	get z() {
-		return this._z;
-	}
-
+	get z() {return this._z;}
 	set z(v) {
 		this._z = v;
 		this.dirtyTransform = true;
 	}
-
-	get rotationX() {
-		return this._rotationX;
+	getPosition() {
+		return [this._x, this._y, this._z]
 	}
-
+	setPosition(x, y, z) {
+		this._x = x;
+		this._y = y;
+		this._z = z;
+		this.dirtyTransform = true;
+	}
+	/////////////////////////////////////////////////////////
+	get rotationX() {return this._rotationX;}
 	set rotationX(v) {
 		this._rotationX = v;
 		this.dirtyTransform = true;
 	}
-
-	get rotationY() {
-		return this._rotationY;
-	}
-
+	get rotationY() {return this._rotationY;}
 	set rotationY(v) {
 		this._rotationY = v;
 		this.dirtyTransform = true;
 	}
-
-	get rotationZ() {
-		return this._rotationZ;
-	}
-
+	get rotationZ() {return this._rotationZ;}
 	set rotationZ(v) {
 		this._rotationZ = v;
 		this.dirtyTransform = true;
 	}
-
-	get scaleX() {
-		return this._scaleX;
+	getRotation() {
+		return [this._rotationX, this._rotationY, this._rotationZ]
 	}
-
+	setRotation(rX, rY, rZ) {
+		this._rotationX = rX;
+		this._rotationY = rY;
+		this._rotationZ = rZ;
+		this.dirtyTransform = true;
+	}
+	/////////////////////////////////////////////////////////
+	get scaleX() {return this._scaleX;}
 	set scaleX(v) {
 		this._scaleX = v;
 		this.dirtyTransform = true;
 	}
-
-	get scaleY() {
-		return this._scaleY;
-	}
-
+	get scaleY() {return this._scaleY;}
 	set scaleY(v) {
 		this._scaleY = v;
 		this.dirtyTransform = true;
 	}
-
-	get scaleZ() {
-		return this._scaleZ;
-	}
-
+	get scaleZ() {return this._scaleZ;}
 	set scaleZ(v) {
 		this._scaleZ = v;
 		this.dirtyTransform = true;
 	}
-
-	get geometry() {
-		return this._geometry
+	getScale() {
+		return [this._scaleX, this._scaleY, this._scaleZ]
 	}
-
+	setScale(sX, sY, sZ) {
+		this._scaleX = sX;
+		this._scaleY = sY;
+		this._scaleZ = sZ;
+		this.dirtyTransform = true;
+	}
+	/////////////////////////////////////////////////////////
+	get geometry() {return this._geometry}
 	set geometry(v) {
 		this._geometry = v;
-		this.dirtyPipeline = true;
-		// this.dirtyTransform = true
+		this.dirtyPipeline = true;/* this.dirtyTransform = true*/
 	}
-
-	get material() {
-		return this._material
-	}
-
+	get material() {return this._material}
 	set material(v) {
 		this._material = v;
-		this.dirtyPipeline = true;
-		// this.dirtyTransform = true
+		this.dirtyPipeline = true;/* this.dirtyTransform = true*/
 	}
-
-	get useDepthTest() {
-		return this._useDepthTest;
-	}
-
+	get useDepthTest() {return this._useDepthTest;}
 	set useDepthTest(value) {
 		this.dirtyPipeline = true;
 		this._useDepthTest = value;
 	}
-
-	get depthTestFunc() {
-		return this._depthTestFunc;
-	}
-
+	get depthTestFunc() {return this._depthTestFunc;}
 	set depthTestFunc(value) {
 		this.dirtyPipeline = true;
 		this._depthTestFunc = value;
 	}
-
-	get cullMode() {
-		return this._cullMode;
-	}
-
+	get cullMode() {return this._cullMode;}
 	set cullMode(value) {
 		this.dirtyPipeline = true;
 		this._cullMode = value;
 	}
-
-	get primitiveTopology() {
-		return this._primitiveTopology;
-	}
-
+	get primitiveTopology() {return this._primitiveTopology;}
 	set primitiveTopology(value) {
 		this.dirtyPipeline = true;
 		this._primitiveTopology = value;

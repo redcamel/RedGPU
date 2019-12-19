@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.18 19:33:34
+ *   Last modification time of this file - 2019.12.19 11:29:32
  *
  */
 import RedGPU from "../src/RedGPU.js";
@@ -213,40 +213,42 @@ new RedGPU.RedGPUContext(cvs,
 		// 	}
 		// )
 
-		let i = 1
+		let i = 100
 		while (i--) {
 			// let tMesh = new RedGPU.RedMesh(this, new RedGPU.RedBox(this), new RedGPU.RedColorMaterial(this))
 			// let tMesh = new RedGPU.RedMesh(this, new RedGPU.RedBox(this), new RedGPU.RedBitmapMaterial(this, new RedGPU.RedBitmapTexture(this, '../assets/Brick03_col.jpg')))
 			// let tMesh = new RedGPU.RedMesh(this, new RedGPU.RedBox(this), new RedGPU.RedStandardMaterial(this, new RedGPU.RedBitmapTexture(this, '../assets/Brick03_col.jpg')))
-			let tMesh = new RedGPU.RedMesh(this, new RedGPU.RedBox(this), new RedGPU.RedEnvironmentMaterial(this, new RedGPU.RedBitmapTexture(this, '../assets/Brick03_col.jpg'), new RedGPU.RedBitmapCubeTexture(this, [
-				'../assets/cubemap/SwedishRoyalCastle/px.jpg',
-				'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
-				'../assets/cubemap/SwedishRoyalCastle/py.jpg',
-				'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
-				'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
-				'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
-			])))
-			// tMesh.x = Math.random() * 10 - 5
-			// tMesh.y = Math.random() * 10 - 5
-			// tMesh.z = Math.random() * 10 - 5
+			// let tMesh = new RedGPU.RedMesh(this, new RedGPU.RedBox(this), new RedGPU.RedEnvironmentMaterial(this, new RedGPU.RedBitmapTexture(this, '../assets/Brick03_col.jpg'), new RedGPU.RedBitmapCubeTexture(this, [
+			// 	'../assets/cubemap/SwedishRoyalCastle/px.jpg',
+			// 	'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
+			// 	'../assets/cubemap/SwedishRoyalCastle/py.jpg',
+			// 	'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
+			// 	'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
+			// 	'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
+			// ])))
+			let tMesh = new RedGPU.RedSprite3D(this, new RedGPU.RedBox(this), new RedGPU.RedSprite3DMaterial(this, new RedGPU.RedBitmapTexture(this, '../assets/Brick03_col.jpg')))
+
+			tMesh.x = Math.random() * 10 - 5
+			tMesh.y = Math.random() * 10 - 5
+			tMesh.z = Math.random() * 10 - 5
 			tScene.addChild(tMesh)
 
-			tMesh.addEventListener('down', function () {
-				console.log('down', this)
-				this.scaleX = this.scaleY = this.scaleZ = 0.5
-			})
-			tMesh.addEventListener('up', function () {
-				console.log('up', this)
-				this.scaleX = this.scaleY = this.scaleZ = 1
-			})
-			tMesh.addEventListener('over', function () {
-				console.log('over', this)
-				this.material.alpha = 0.5
-			})
-			tMesh.addEventListener('out', function () {
-				console.log('out', this)
-				this.material.alpha = 1
-			})
+			// tMesh.addEventListener('down', function () {
+			// 	console.log('down', this)
+			// 	this.scaleX = this.scaleY = this.scaleZ = 0.5
+			// })
+			// tMesh.addEventListener('up', function () {
+			// 	console.log('up', this)
+			// 	this.scaleX = this.scaleY = this.scaleZ = 1
+			// })
+			// tMesh.addEventListener('over', function () {
+			// 	console.log('over', this)
+			// 	this.material.alpha = 0.5
+			// })
+			// tMesh.addEventListener('out', function () {
+			// 	console.log('out', this)
+			// 	this.material.alpha = 1
+			// })
 		}
 
 		let renderer = new RedGPU.RedRender();

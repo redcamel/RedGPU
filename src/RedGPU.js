@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.18 19:33:34
+ *   Last modification time of this file - 2019.12.19 11:29:32
  *
  */
 // renderder ///////////////////////////////////////////////////////////////////////
@@ -48,13 +48,14 @@ import RedColorPhongMaterial from "./material/RedColorPhongMaterial.js";
 import RedColorPhongTextureMaterial from "./material/RedColorPhongTextureMaterial.js";
 import RedEnvironmentMaterial from "./material/RedEnvironmentMaterial.js";
 import RedSheetMaterial from "./material/RedSheetMaterial.js";
-
+import RedSprite3DMaterial from "./material/RedSprite3DMaterial.js";
 import RedStandardMaterial from "./material/RedStandardMaterial.js";
 // object3D ///////////////////////////////////////////////////////////////////////
 import RedAxis from "./object3D/RedAxis.js";
 import RedGrid from "./object3D/RedGrid.js";
 import RedMesh from "./object3D/RedMesh.js";
 import RedSkyBox from "./object3D/RedSkyBox.js";
+import RedSprite3D from "./object3D/RedSprite3D.js";
 // postEffect ///////////////////////////////////////////////////////////////////////
 import RedPostEffect_BrightnessContrast from "./postEffect/adjustments/RedPostEffect_BrightnessContrast.js";
 import RedPostEffect_Gray from "./postEffect/adjustments/RedPostEffect_Gray.js";
@@ -140,6 +141,7 @@ const RedGPU = {
 	RedColorPhongMaterial,
 	RedColorPhongTextureMaterial,
 	RedSheetMaterial,
+	RedSprite3DMaterial,
 	RedEnvironmentMaterial,
 	RedStandardMaterial,
 	// object3D ///////////////////////////////////////////////////////////////////////
@@ -147,6 +149,7 @@ const RedGPU = {
 	RedGrid,
 	RedMesh,
 	RedSkyBox,
+	RedSprite3D,
 	// postEffect ///////////////////////////////////////////////////////////////////////
 	RedPostEffect_BrightnessContrast,
 	RedPostEffect_Gray,
