@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.18 19:33:34
+ *   Last modification time of this file - 2019.12.19 18:10:39
  *
  */
 "use strict";
@@ -37,12 +37,15 @@ export default class RedGPUContext {
 	constructor(canvas, initFunc) {
 		checkGlslang().then(_ => {
 			console.log('glslang', glslang);
+			console.log(this)
 			this.#detector = new RedDetectorGPU(this);
 			let state = true;
 			if (navigator.gpu) {
-				navigator.gpu.requestAdapter({})
+				navigator.gpu.requestAdapter({powerPreference: "high-performance"})
 					.then(adapter => {
-						adapter.requestDevice({powerPreference: "high-performance"})
+						adapter.requestDevice({
+							extensions : ["anisotropic-filtering"]
+						})
 							.then(device => {
 								this.glslang = glslang;
 								this.canvas = canvas;

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.19 13:50:11
+ *   Last modification time of this file - 2019.12.19 18:10:39
  *
  */
 // renderder ///////////////////////////////////////////////////////////////////////
@@ -73,6 +73,8 @@ import RedPostEffect_DoF from "./postEffect/dof/RedPostEffect_DoF.js";
 import RedPostEffect_DoF_blend from "./postEffect/dof/RedPostEffect_DoF_blend.js";
 import RedPostEffect_HalfTone from "./postEffect/pixelate/RedPostEffect_HalfTone.js";
 import RedPostEffect_Pixelize from "./postEffect/pixelate/RedPostEffect_Pixelize.js";
+
+
 import RedPostEffect from "./postEffect/RedPostEffect.js";
 import RedPostEffect_Convolution from "./postEffect/RedPostEffect_Convolution.js";
 import RedPostEffect_Film from "./postEffect/RedPostEffect_Film.js";
@@ -166,6 +168,7 @@ const RedGPU = {
 	RedPostEffect_DoF_blend,
 	RedPostEffect_HalfTone,
 	RedPostEffect_Pixelize,
+
 	RedPostEffect,
 	RedPostEffect_Convolution,
 	RedPostEffect_Film,

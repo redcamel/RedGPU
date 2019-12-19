@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.19 11:29:32
+ *   Last modification time of this file - 2019.12.19 18:10:39
  *
  */
 
@@ -550,8 +550,8 @@ export default class RedRender {
 					}
 				},
 				{
-					attachment: redView.baseAttachment2View,
-					resolveTarget: redView.baseResolveTarget2View,
+					attachment: redView.baseAttachment_depthColorView,
+					resolveTarget: redView.baseAttachment_depthColor_ResolveTargetView,
 					loadValue: {
 						r: tSceneBackgroundColor_rgba[0],
 						g: tSceneBackgroundColor_rgba[1],
@@ -562,6 +562,16 @@ export default class RedRender {
 				{
 					attachment: redView.baseAttachment_mouseColorIDView,
 					resolveTarget: redView.baseAttachment_mouseColorID_ResolveTargetView,
+					loadValue: {
+						r: 0,
+						g: 0,
+						b: 0,
+						a: 0
+					}
+				},
+				{
+					attachment: redView.baseAttachment_normalView,
+					resolveTarget: redView.baseAttachment_normal_ResolveTargetView,
 					loadValue: {
 						r: 0,
 						g: 0,
