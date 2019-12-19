@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.19 13:50:11
+ *   Last modification time of this file - 2019.12.19 17:28:59
  *
  */
 
@@ -44,14 +44,7 @@ export default class RedPostEffect_Gray extends RedBasePostEffect {
 	}
 `;
 	static PROGRAM_OPTION_LIST = [];
-	static uniformsBindGroupLayoutDescriptor_material = {
-		bindings: [
-			{binding: 0, visibility: GPUShaderStage.FRAGMENT, type: "uniform-buffer"},
-			{binding: 1, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
-			{binding: 2, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"},
-			{binding: 3, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"}
-		]
-	};
+	static uniformsBindGroupLayoutDescriptor_material = RedBasePostEffect.uniformsBindGroupLayoutDescriptor_material
 	static uniformBufferDescriptor_vertex = RedBaseMaterial.uniformBufferDescriptor_empty;
 	static uniformBufferDescriptor_fragment = RedBaseMaterial.uniformBufferDescriptor_empty;
 	constructor(redGPUContext) {
