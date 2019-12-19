@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.19 11:29:32
+ *   Last modification time of this file - 2019.12.19 13:50:11
  *
  */
 import RedGPU from "../src/RedGPU.js";
@@ -212,10 +212,9 @@ new RedGPU.RedGPUContext(cvs,
 		// 		console.log(textureLoader)
 		// 	}
 		// )
-
 		let i = 100
 		while (i--) {
-			// let tMesh = new RedGPU.RedMesh(this, new RedGPU.RedBox(this), new RedGPU.RedColorMaterial(this))
+			let tMesh = new RedGPU.RedMesh(this, new RedGPU.RedBox(this), new RedGPU.RedColorMaterial(this))
 			// let tMesh = new RedGPU.RedMesh(this, new RedGPU.RedBox(this), new RedGPU.RedBitmapMaterial(this, new RedGPU.RedBitmapTexture(this, '../assets/Brick03_col.jpg')))
 			// let tMesh = new RedGPU.RedMesh(this, new RedGPU.RedBox(this), new RedGPU.RedStandardMaterial(this, new RedGPU.RedBitmapTexture(this, '../assets/Brick03_col.jpg')))
 			// let tMesh = new RedGPU.RedMesh(this, new RedGPU.RedBox(this), new RedGPU.RedEnvironmentMaterial(this, new RedGPU.RedBitmapTexture(this, '../assets/Brick03_col.jpg'), new RedGPU.RedBitmapCubeTexture(this, [
@@ -226,7 +225,7 @@ new RedGPU.RedGPUContext(cvs,
 			// 	'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
 			// 	'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
 			// ])))
-			let tMesh = new RedGPU.RedSprite3D(this, new RedGPU.RedBox(this), new RedGPU.RedSprite3DMaterial(this, new RedGPU.RedBitmapTexture(this, '../assets/Brick03_col.jpg')))
+			// let tMesh = new RedGPU.RedSprite3D(this, new RedGPU.RedBox(this), new RedGPU.RedSprite3DMaterial(this, new RedGPU.RedBitmapTexture(this, '../assets/Brick03_col.jpg')))
 
 			tMesh.x = Math.random() * 10 - 5
 			tMesh.y = Math.random() * 10 - 5
@@ -258,10 +257,7 @@ new RedGPU.RedGPUContext(cvs,
 				// tMesh.material.alpha = RedGPU.RedUTIL.clamp(Math.sin(time / 500), 0, 1)
 
 			})
-			tCamera.x = 10
-			tCamera.z = 10
-			tCamera.y = 10
-			tCamera.lookAt(0, 0, 0)
+			console.log(tCamera.getPosition())
 			renderer.render(time, this);
 			requestAnimationFrame(render);
 		}
