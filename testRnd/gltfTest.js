@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.19 11:29:32
+ *   Last modification time of this file - 2019.12.20 10:25:45
  *
  */
 
@@ -29,7 +29,7 @@ new RedGPU.RedGPUContext(
 		// tScene.backgroundColor = '#fff'
 		// tScene.backgroundColorAlpha = 0
 
-		tCamera.distance = 10
+		tCamera.distance = 2
 		tCamera.speedDistance = 1
 
 
@@ -61,6 +61,8 @@ new RedGPU.RedGPUContext(
 
 		tLight = new RedGPU.RedAmbientLight()
 		// tScene.addLight(tLight)
+
+
 
 		this.addView(tView)
 
@@ -137,7 +139,8 @@ new RedGPU.RedGPUContext(
 		//
 		new RedGPU.RedGLTFLoader(
 			this, // redGL
-			'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Sponza/glTF/', // assetRootPath
+			// 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Sponza/glTF/', // assetRootPath
+			'../assets/gltf/Sponza/glTF/', // assetRootPath
 			'Sponza.gltf', // fileName
 			function (v) { // callBack
 				console.log(v)
@@ -216,19 +219,23 @@ new RedGPU.RedGPUContext(
 		// 		// tScene.addChild({children:[tMesh.children[2]]})
 		// 		tScene.addChild(tMesh)
 		// 		tMesh = tMesh.children[0]
-		// 		tMesh.addEventListener('down', function () {
+		// 		tMesh.addEventListener('down', function (e) {
+		// 			console.log(e)
 		// 			var tValue = 3
 		// 			TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
 		// 		})
-		// 		tMesh.addEventListener('up', function () {
+		// 		tMesh.addEventListener('up', function (e) {
+		// 			console.log(e)
 		// 			var tValue = 2
 		// 			TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
 		// 		})
-		// 		tMesh.addEventListener('over', function () {
+		// 		tMesh.addEventListener('over', function (e) {
+		// 			console.log(e)
 		// 			var tValue = 2
 		// 			TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
 		// 		})
-		// 		tMesh.addEventListener('out', function () {
+		// 		tMesh.addEventListener('out', function (e) {
+		// 			console.log(e)
 		// 			var tValue = 1
 		// 			TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
 		// 		})
@@ -244,6 +251,7 @@ new RedGPU.RedGPUContext(
 		//
 		// 	])
 		// );
+
 		//
 		// tScene.skyBox = new RedGPU.RedSkyBox(this, new RedGPU.RedBitmapCubeTexture(this, [
 		// 	'../assets/cubemap/SwedishRoyalCastle/px.jpg',

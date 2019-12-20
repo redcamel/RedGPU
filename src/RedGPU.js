@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.19 18:10:39
+ *   Last modification time of this file - 2019.12.20 10:25:45
  *
  */
 // renderder ///////////////////////////////////////////////////////////////////////
@@ -168,7 +168,6 @@ const RedGPU = {
 	RedPostEffect_DoF_blend,
 	RedPostEffect_HalfTone,
 	RedPostEffect_Pixelize,
-
 	RedPostEffect,
 	RedPostEffect_Convolution,
 	RedPostEffect_Film,
