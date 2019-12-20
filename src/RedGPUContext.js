@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 13:27:33
+ *   Last modification time of this file - 2019.12.20 18:41:50
  *
  */
 "use strict";
@@ -145,6 +145,7 @@ export default class RedGPUContext {
 								if (!redGPUContextList.size) setGlobalResizeEvent();
 								redGPUContextList.add(this);
 								initFunc.call(this, true)
+
 							});
 					}).catch(error => {
 					state = false;

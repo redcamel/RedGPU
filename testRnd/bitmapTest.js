@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 13:27:33
+ *   Last modification time of this file - 2019.12.20 18:41:50
  *
  */
 import RedGPU from "../src/RedGPU.js";
@@ -23,11 +23,11 @@ new RedGPU.RedGPUContext(cvs,
 		// tScene.backgroundColorAlpha = 0
 		let tLight
 		tLight = new RedGPU.DirectionalLight()
-		tLight.x = 100
+		tLight.x = 0
 		tLight.y = 100
-		tLight.z = 100
+		tLight.z = 0
 		tScene.addLight(tLight)
-
+		tScene.axis = new RedGPU.Axis(this)
 		tView = new RedGPU.View(this, tScene, tCamera)
 		tCamera.targetView = tView // optional
 		tScene.grid = tGrid
@@ -212,43 +212,47 @@ new RedGPU.RedGPUContext(cvs,
 		// 		console.log(textureLoader)
 		// 	}
 		// )
-		let i = 100
-		while (i--) {
-			let tMesh = new RedGPU.Mesh(this, new RedGPU.Box(this), new RedGPU.ColorMaterial(this))
-			// let tMesh = new RedGPU.Mesh(this, new RedGPU.Box(this), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this, '../assets/Brick03_col.jpg')))
-			// let tMesh = new RedGPU.Mesh(this, new RedGPU.Box(this), new RedGPU.StandardMaterial(this, new RedGPU.BitmapTexture(this, '../assets/Brick03_col.jpg')))
-			// let tMesh = new RedGPU.Mesh(this, new RedGPU.Box(this), new RedGPU.EnvironmentMaterial(this, new RedGPU.BitmapTexture(this, '../assets/Brick03_col.jpg'), new RedGPU.BitmapCubeTexture(this, [
-			// 	'../assets/cubemap/SwedishRoyalCastle/px.jpg',
-			// 	'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
-			// 	'../assets/cubemap/SwedishRoyalCastle/py.jpg',
-			// 	'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
-			// 	'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
-			// 	'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
-			// ])))
-			// let tMesh = new RedGPU.Sprite3D(this, new RedGPU.Box(this), new RedGPU.Sprite3DMaterial(this, new RedGPU.BitmapTexture(this, '../assets/Brick03_col.jpg')))
+		tMesh = new RedGPU.Mesh(this, new RedGPU.Box(this), new RedGPU.StandardMaterial(this, new RedGPU.BitmapTexture(this, '../assets/Brick03_col.jpg')))
+		setTimeout(_ => {
+			let i = 1
+			while (i--) {
+				// let tMesh = new RedGPU.Mesh(this, new RedGPU.Box(this), new RedGPU.ColorMaterial(this))
+				// let tMesh = new RedGPU.Mesh(this, new RedGPU.Box(this), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this, '../assets/Brick03_col.jpg')))
+				let tMesh = new RedGPU.Mesh(this, new RedGPU.Box(this), new RedGPU.StandardMaterial(this, new RedGPU.BitmapTexture(this, '../assets/Brick03_col.jpg'), new RedGPU.BitmapTexture(this, '../assets/Brick03_nrm.jpg')))
+				// let tMesh = new RedGPU.Mesh(this, new RedGPU.Box(this), new RedGPU.EnvironmentMaterial(this, new RedGPU.BitmapTexture(this, '../assets/Brick03_col.jpg'), new RedGPU.BitmapCubeTexture(this, [
+				// 	'../assets/cubemap/SwedishRoyalCastle/px.jpg',
+				// 	'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
+				// 	'../assets/cubemap/SwedishRoyalCastle/py.jpg',
+				// 	'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
+				// 	'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
+				// 	'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
+				// ])))
+				// let tMesh = new RedGPU.Sprite3D(this, new RedGPU.Box(this), new RedGPU.Sprite3DMaterial(this, new RedGPU.BitmapTexture(this, '../assets/Brick03_col.jpg')))
 
-			tMesh.x = Math.random() * 10 - 5
-			tMesh.y = Math.random() * 10 - 5
-			tMesh.z = Math.random() * 10 - 5
-			tScene.addChild(tMesh)
+				// tMesh.x = Math.random() * 10 - 5
+				// tMesh.y = Math.random() * 10 - 5
+				// tMesh.z = Math.random() * 10 - 5
+				// tMesh.setRotation(Math.random() * 360, Math.random() * 360, Math.random() * 360)
+				tScene.addChild(tMesh)
 
-			// tMesh.addEventListener('down', function () {
-			// 	console.log('down', this)
-			// 	this.scaleX = this.scaleY = this.scaleZ = 0.5
-			// })
-			// tMesh.addEventListener('up', function () {
-			// 	console.log('up', this)
-			// 	this.scaleX = this.scaleY = this.scaleZ = 1
-			// })
-			// tMesh.addEventListener('over', function () {
-			// 	console.log('over', this)
-			// 	this.material.alpha = 0.5
-			// })
-			// tMesh.addEventListener('out', function () {
-			// 	console.log('out', this)
-			// 	this.material.alpha = 1
-			// })
-		}
+				// tMesh.addEventListener('down', function () {
+				// 	console.log('down', this)
+				// 	this.scaleX = this.scaleY = this.scaleZ = 0.5
+				// })
+				// tMesh.addEventListener('up', function () {
+				// 	console.log('up', this)
+				// 	this.scaleX = this.scaleY = this.scaleZ = 1
+				// })
+				// tMesh.addEventListener('over', function () {
+				// 	console.log('over', this)
+				// 	this.material.alpha = 0.5
+				// })
+				// tMesh.addEventListener('out', function () {
+				// 	console.log('out', this)
+				// 	this.material.alpha = 1
+				// })
+			}
+		}, 5000)
 
 		let renderer = new RedGPU.Render();
 		let render = time => {
@@ -257,7 +261,7 @@ new RedGPU.RedGPUContext(cvs,
 				// tMesh.material.alpha = RedGPU.UTIL.clamp(Math.sin(time / 500), 0, 1)
 
 			})
-			console.log(tCamera.getPosition())
+			// console.log(tCamera.getPosition())
 			renderer.render(time, this);
 			requestAnimationFrame(render);
 		}
