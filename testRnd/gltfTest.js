@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.19 11:29:32
+ *   Last modification time of this file - 2019.12.20 12:21:28
  *
  */
 
@@ -12,7 +12,7 @@ import RedGPU from "../src/RedGPU.js";
 const cvs = document.createElement('canvas');
 document.body.appendChild(cvs);
 
-new RedGPU.RedGPUContext(
+new RedGPU.GPUContext(
 	cvs,
 	function (v, reason) {
 
@@ -21,50 +21,52 @@ new RedGPU.RedGPUContext(
 			return alert(reason || `WebGPU is unsupported, or no adapters or devices are available.`)
 		}
 		let tView;
-		let tScene = new RedGPU.RedScene();
-		let tGrid = new RedGPU.RedGrid(this)
-		let tCamera = new RedGPU.RedObitController(this)
-		let tCamera2 = new RedGPU.RedObitController(this)
+		let tScene = new RedGPU.Scene();
+		let tGrid = new RedGPU.Grid(this)
+		let tCamera = new RedGPU.ObitController(this)
+		let tCamera2 = new RedGPU.ObitController(this)
 		tGrid.centerColor = '#ff0000'
 		// tScene.backgroundColor = '#fff'
 		// tScene.backgroundColorAlpha = 0
 
-		tCamera.distance = 10
+		tCamera.distance = 2
 		tCamera.speedDistance = 1
 
 
-		tView = new RedGPU.RedView(this, tScene, tCamera)
+		tView = new RedGPU.View(this, tScene, tCamera)
 
 		tCamera.targetView = tView // optional
 
 		tScene.grid = tGrid
 
-		tScene.axis = new RedGPU.RedAxis(this)
+		tScene.axis = new RedGPU.Axis(this)
 		let tLight
-		tLight = new RedGPU.RedDirectionalLight()
+		tLight = new RedGPU.DirectionalLight()
 		tLight.x = 3
 		tLight.y = 3
 		tLight.z = 3
 		tScene.addLight(tLight)
 		//
-		tLight = new RedGPU.RedDirectionalLight()
+		tLight = new RedGPU.DirectionalLight()
 		tLight.x = -100
 		tLight.y = 100
 		tLight.z = -100
 		tScene.addLight(tLight)
 
-		// tLight = new RedGPU.RedDirectionalLight()
+		// tLight = new RedGPU.DirectionalLight()
 		// tLight.x = 100
 		// tLight.y = -100
 		// tLight.z = 100
 		// tScene.addLight(tLight)
 
-		tLight = new RedGPU.RedAmbientLight()
+		tLight = new RedGPU.AmbientLight()
 		// tScene.addLight(tLight)
+
+
 
 		this.addView(tView)
 
-		// new RedGPU.RedGLTFLoader(
+		// new RedGPU.GLTFLoader(
 		// 	this, // redGL
 		// 	'../assets/gltf/', // assetRootPath
 		// 	'NormalTangentMirrorTest.gltf', // fileName
@@ -76,7 +78,7 @@ new RedGPU.RedGPUContext(
 		// 		tScene.addChild(tMesh)
 		//
 		// 	},
-		// 	new RedGPU.RedBitmapCubeTexture(this, [
+		// 	new RedGPU.BitmapCubeTexture(this, [
 		// 		'../assets/cubemap/SwedishRoyalCastle/px.jpg',
 		// 		'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
 		// 		'../assets/cubemap/SwedishRoyalCastle/py.jpg',
@@ -86,7 +88,7 @@ new RedGPU.RedGPUContext(
 		//
 		// 	])
 		// );
-		// new RedGPU.RedGLTFLoader(
+		// new RedGPU.GLTFLoader(
 		// 	this, // redGL
 		// 	'../assets/gltf/', // assetRootPath
 		// 	'TextureSettingsTest.gltf', // fileName
@@ -98,7 +100,7 @@ new RedGPU.RedGPUContext(
 		// 		tScene.addChild(tMesh)
 		//
 		// 	},
-		// 	new RedGPU.RedBitmapCubeTexture(this, [
+		// 	new RedGPU.BitmapCubeTexture(this, [
 		// 		'../assets/cubemap/SwedishRoyalCastle/px.jpg',
 		// 		'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
 		// 		'../assets/cubemap/SwedishRoyalCastle/py.jpg',
@@ -110,7 +112,7 @@ new RedGPU.RedGPUContext(
 		// );
 
 
-		// new RedGPU.RedGLTFLoader(
+		// new RedGPU.GLTFLoader(
 		// 	this, // redGL
 		// 	'https://cdn.rawgit.com/KhronosGroup/glTF-Blender-Exporter/0e23c773bf27dad67d2c25f060370d6fa012d87d/polly/', 'project_polly.gltf',
 		// 	function (v) { // callBack
@@ -124,7 +126,7 @@ new RedGPU.RedGPUContext(
 		// 		tScene.addChild(tMesh)
 		//
 		// 	},
-		// 	// new RedGPU.RedBitmapCubeTexture(this, [
+		// 	// new RedGPU.BitmapCubeTexture(this, [
 		// 	// 	'../assets/cubemap/SwedishRoyalCastle/px.jpg',
 		// 	// 	'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
 		// 	// 	'../assets/cubemap/SwedishRoyalCastle/py.jpg',
@@ -135,9 +137,10 @@ new RedGPU.RedGPUContext(
 		// 	// ])
 		// );
 		//
-		new RedGPU.RedGLTFLoader(
+		new RedGPU.GLTFLoader(
 			this, // redGL
-			'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Sponza/glTF/', // assetRootPath
+			// 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Sponza/glTF/', // assetRootPath
+			'../assets/gltf/Sponza/glTF/', // assetRootPath
 			'Sponza.gltf', // fileName
 			function (v) { // callBack
 				console.log(v)
@@ -150,7 +153,7 @@ new RedGPU.RedGPUContext(
 				tScene.addChild(tMesh)
 
 			},
-			new RedGPU.RedBitmapCubeTexture(this, [
+			new RedGPU.BitmapCubeTexture(this, [
 				'../assets/cubemap/SwedishRoyalCastle/px.jpg',
 				'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
 				'../assets/cubemap/SwedishRoyalCastle/py.jpg',
@@ -160,7 +163,7 @@ new RedGPU.RedGPUContext(
 
 			])
 		);
-		// new RedGPU.RedGLTFLoader(
+		// new RedGPU.GLTFLoader(
 		// 	this, // redGL
 		// 	'../assets/gltf/', // assetRootPath
 		// 	'AlphaBlendModeTest.gltf', // fileName
@@ -174,7 +177,7 @@ new RedGPU.RedGPUContext(
 		// 		tScene.addChild(tMesh)
 		//
 		// 	},
-		// 	// new RedGPU.RedBitmapCubeTexture(this, [
+		// 	// new RedGPU.BitmapCubeTexture(this, [
 		// 	// 	'../assets/cubemap/SwedishRoyalCastle/px.jpg',
 		// 	// 	'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
 		// 	// 	'../assets/cubemap/SwedishRoyalCastle/py.jpg',
@@ -185,14 +188,14 @@ new RedGPU.RedGPUContext(
 		// 	// ])
 		// );
 		// let self = this
-		// new RedGPU.RedGLTFLoader(self, '../assets/gltf/breakDance/', 'scene.gltf', function (v) {
+		// new RedGPU.GLTFLoader(self, '../assets/gltf/breakDance/', 'scene.gltf', function (v) {
 		// 	tScene.addChild(v['resultMesh'])
 		// 	v['resultMesh'].scaleX = v['resultMesh'].scaleY = v['resultMesh'].scaleZ = 0.0012
 		// 	v['resultMesh'].x = 0
 		// 	var i = 40
 		// 	while (i--) {
 		// 		setTimeout(_=>{
-		// 			new RedGPU.RedGLTFLoader(self,  '../assets/gltf/breakDance/', 'scene.gltf', function (v) {
+		// 			new RedGPU.GLTFLoader(self,  '../assets/gltf/breakDance/', 'scene.gltf', function (v) {
 		// 				tScene.addChild(v['resultMesh'])
 		// 				v['resultMesh'].scaleX = v['resultMesh'].scaleY = v['resultMesh'].scaleZ = 0.002
 		// 				v['resultMesh'].x = Math.random() * 30 - 15
@@ -203,7 +206,7 @@ new RedGPU.RedGPUContext(
 		// 	}
 		// })
 
-		// new RedGPU.RedGLTFLoader(
+		// new RedGPU.GLTFLoader(
 		// 	this, // redGL
 		// 	'../assets/gltf/', // assetRootPath
 		// 	'DamagedHelmet.gltf', // fileName
@@ -216,25 +219,29 @@ new RedGPU.RedGPUContext(
 		// 		// tScene.addChild({children:[tMesh.children[2]]})
 		// 		tScene.addChild(tMesh)
 		// 		tMesh = tMesh.children[0]
-		// 		tMesh.addEventListener('down', function () {
+		// 		tMesh.addEventListener('down', function (e) {
+		// 			console.log(e)
 		// 			var tValue = 3
 		// 			TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
 		// 		})
-		// 		tMesh.addEventListener('up', function () {
+		// 		tMesh.addEventListener('up', function (e) {
+		// 			console.log(e)
 		// 			var tValue = 2
 		// 			TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
 		// 		})
-		// 		tMesh.addEventListener('over', function () {
+		// 		tMesh.addEventListener('over', function (e) {
+		// 			console.log(e)
 		// 			var tValue = 2
 		// 			TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
 		// 		})
-		// 		tMesh.addEventListener('out', function () {
+		// 		tMesh.addEventListener('out', function (e) {
+		// 			console.log(e)
 		// 			var tValue = 1
 		// 			TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
 		// 		})
 		//
 		// 	},
-		// 	new RedGPU.RedBitmapCubeTexture(this, [
+		// 	new RedGPU.BitmapCubeTexture(this, [
 		// 		'../assets/cubemap/SwedishRoyalCastle/px.jpg',
 		// 		'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
 		// 		'../assets/cubemap/SwedishRoyalCastle/py.jpg',
@@ -244,8 +251,9 @@ new RedGPU.RedGPUContext(
 		//
 		// 	])
 		// );
+
 		//
-		// tScene.skyBox = new RedGPU.RedSkyBox(this, new RedGPU.RedBitmapCubeTexture(this, [
+		// tScene.skyBox = new RedGPU.SkyBox(this, new RedGPU.BitmapCubeTexture(this, [
 		// 	'../assets/cubemap/SwedishRoyalCastle/px.jpg',
 		// 	'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
 		// 	'../assets/cubemap/SwedishRoyalCastle/py.jpg',
@@ -254,7 +262,7 @@ new RedGPU.RedGPUContext(
 		// 	'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
 		//
 		// ]))
-		// new RedGPU.RedBitmapCubeTexture(this, [
+		// new RedGPU.BitmapCubeTexture(this, [
 		// 	'../assets/cubemap/SwedishRoyalCastle/px.jpg',
 		// 	'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
 		// 	'../assets/cubemap/SwedishRoyalCastle/py.jpg',
@@ -264,7 +272,7 @@ new RedGPU.RedGPUContext(
 		//
 		// ])
 
-		let renderer = new RedGPU.RedRender();
+		let renderer = new RedGPU.Render();
 		let render = time => {
 
 			// tLight.x = Math.sin(time / 1000)

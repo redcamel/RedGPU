@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.16 20:34:19
+ *   Last modification time of this file - 2019.12.20 12:21:28
  *
  */
 
@@ -11,20 +11,20 @@ import RedGPU from "../src/RedGPU.js";
 const cvs = document.createElement('canvas');
 document.body.appendChild(cvs);
 let testMat_color, testMat_bitmap;
-new RedGPU.RedGPUContext(
+new RedGPU.GPUContext(
 	cvs,
 	function () {
 		let MAX = 8000;
 		let i = MAX;
 		let tView;
-		let tScene = new RedGPU.RedScene();
+		let tScene = new RedGPU.Scene();
 
-		let tGrid = new RedGPU.RedGrid(this)
-		let tAxis = new RedGPU.RedAxis(this)
-		let tCamera = new RedGPU.RedObitController(this)
+		let tGrid = new RedGPU.Grid(this)
+		let tAxis = new RedGPU.Axis(this)
+		let tCamera = new RedGPU.ObitController(this)
 		tGrid.centerColor = '#ff0000'
 
-		tView = new RedGPU.RedView(this, tScene, tCamera)
+		tView = new RedGPU.View(this, tScene, tCamera)
 
 
 		tCamera.targetView = tView // optional
@@ -32,15 +32,15 @@ new RedGPU.RedGPUContext(
 
 		tScene.grid = tGrid;
 		tScene.axis = tAxis;
-		tScene.skyBox = new RedGPU.RedSkyBox(this)
+		tScene.skyBox = new RedGPU.SkyBox(this)
 		let tLight
-		tLight = new RedGPU.RedDirectionalLight()
+		tLight = new RedGPU.DirectionalLight()
 		tLight.x = 10
 		tLight.y = 10
 		tLight.z = 10
 		tScene.addLight(tLight)
 		//
-		tScene.skyBox = new RedGPU.RedSkyBox(this, new RedGPU.RedBitmapCubeTexture(this, [
+		tScene.skyBox = new RedGPU.SkyBox(this, new RedGPU.BitmapCubeTexture(this, [
 			'../assets/cubemap/SwedishRoyalCastle/px.jpg',
 			'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
 			'../assets/cubemap/SwedishRoyalCastle/py.jpg',
@@ -49,38 +49,36 @@ new RedGPU.RedGPUContext(
 			'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
 		]))
 
-		setTimeout(_=>{
-			new RedGPU.RedBitmapCubeTexture(this, [
-				'../assets/cubemap/SwedishRoyalCastle/px.jpg',
-				'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
-				'../assets/cubemap/SwedishRoyalCastle/py.jpg',
-				'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
-				'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
-				'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
-			])
-		},5000)
+		new RedGPU.BitmapCubeTexture(this, [
+			'../assets/cubemap/SwedishRoyalCastle/px.jpg',
+			'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
+			'../assets/cubemap/SwedishRoyalCastle/py.jpg',
+			'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
+			'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
+			'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
+		])
 		this.addView(tView)
 
 
-		testMat_color = new RedGPU.RedColorMaterial(this, '#ffff12');
+		testMat_color = new RedGPU.ColorMaterial(this, '#ffff12');
 		let testTextureList = [
-			// new RedGPU.RedBitmapTexture(this, '../assets/UV_Grid_Sm.jpg'),
-			// new RedGPU.RedBitmapTexture(this, '../assets/Brick03_col.jpg'),
-			// new RedGPU.RedBitmapTexture(this, '../assets/Brick03_nrm.jpg'),
-			// new RedGPU.RedBitmapTexture(this, '../assets/crate.png'),
-			// new RedGPU.RedBitmapTexture(this, '../assets/Brick03_disp.jpg'),
-			// new RedGPU.RedBitmapTexture(this, '../assets/specular.png'),
-			// new RedGPU.RedBitmapTexture(this, '../assets/emissive.jpg')
+			new RedGPU.BitmapTexture(this, '../assets/UV_Grid_Sm.jpg'),
+			new RedGPU.BitmapTexture(this, '../assets/Brick03_col.jpg'),
+			new RedGPU.BitmapTexture(this, '../assets/Brick03_nrm.jpg'),
+			new RedGPU.BitmapTexture(this, '../assets/crate.png'),
+			new RedGPU.BitmapTexture(this, '../assets/Brick03_disp.jpg'),
+			new RedGPU.BitmapTexture(this, '../assets/specular.png'),
+			new RedGPU.BitmapTexture(this, '../assets/emissive.jpg')
 		]
-		i=0
+
 		setTimeout(_ => {
-			// testMat_bitmap = new RedGPU.RedStandardMaterial(this, testTextureList[1], testTextureList[2],testTextureList[5], testTextureList[6], testTextureList[4]);
-			testMat_bitmap = new RedGPU.RedStandardMaterial(this, testTextureList[1], testTextureList[2], testTextureList[5], testTextureList[6], testTextureList[4]);
-			// testMat_bitmap = new RedGPU.RedStandardMaterial(this, testTextureList[0]);
+			// testMat_bitmap = new RedGPU.StandardMaterial(this, testTextureList[1], testTextureList[2],testTextureList[5], testTextureList[6], testTextureList[4]);
+			testMat_bitmap = new RedGPU.StandardMaterial(this, testTextureList[1], testTextureList[2], testTextureList[5], testTextureList[6], testTextureList[4]);
+			// testMat_bitmap = new RedGPU.StandardMaterial(this, testTextureList[0]);
 			while (i--) {
-				let testMesh = new RedGPU.RedMesh(
+				let testMesh = new RedGPU.Mesh(
 					this,
-					new RedGPU.RedSphere(this, 0.5, 16, 16, 16),
+					new RedGPU.Sphere(this, 0.5, 16, 16, 16),
 					testMat_bitmap
 				);
 				testMesh.x = Math.random() * 3000 - 1500;
@@ -90,7 +88,7 @@ new RedGPU.RedGPUContext(
 				testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = Math.random() * 25 + 35;
 				tScene.addChild(testMesh)
 			}
-			let renderer = new RedGPU.RedRender();
+			let renderer = new RedGPU.Render();
 			let render = time => {
 				tLight.x = Math.sin(time / 1000)
 				tLight.y = Math.cos(time / 500)

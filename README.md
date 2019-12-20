@@ -1,5 +1,5 @@
-# RedGPUContext
-RedGPUContext - Javascript webGPU Engine
+# GPUContext
+GPUContext - Javascript webGPU Engine
 
 run in Chrome Canary() behind the flag --enable-unsafe-webgpu.
 

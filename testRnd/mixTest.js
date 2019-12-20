@@ -2,15 +2,15 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 19:11:47
+ *   Last modification time of this file - 2019.12.20 12:21:28
  *
  */
 
 "use strict"
 
-import RedBitmapTexture from "../src/resources/RedBitmapTexture.js";
-import RedUTIL from "../src/util/RedUTIL.js";
-import RedBitmapCubeTexture from "../src/resources/RedBitmapCubeTexture.js";
+import BitmapTexture from "../src/resources/BitmapTexture.js";
+import UTIL from "../src/util/UTIL.js";
+import BitmapCubeTexture from "../src/resources/BitmapCubeTexture.js";
 
 const mix = (Base, ...texture) => {
 	return [Base, ...texture].reduce((parent, extender) => { return extender(parent)})
@@ -20,7 +20,7 @@ const defineBitmapTextureClass = function (keyName) {
 	t0 = Base => class extends Base {
 		[`_${keyName}`] = null
 		set [keyName](value) {
-			if (!(value instanceof RedBitmapTexture)) RedUTIL.throwFunc(`only allow RedBitmapTexture Instance.- inputValue : ${value} { type : ${typeof value} }`);
+			if (!(value instanceof BitmapTexture)) UTIL.throwFunc(`only allow BitmapTexture Instance.- inputValue : ${value} { type : ${typeof value} }`);
 			this[`_${keyName}`] = null;
 			this.checkTexture(value, keyName)
 		}
@@ -36,7 +36,7 @@ const defineBitmapCubeTextureClass = function (keyName) {
 	t0 = Base => class extends Base {
 		[`_${keyName}`] = null
 		set [keyName](value) {
-			if (!(value instanceof RedBitmapCubeTexture)) RedUTIL.throwFunc(`only allow defineBitmapCubeTextureClass Instance.- inputValue : ${value} { type : ${typeof value} }`);
+			if (!(value instanceof BitmapCubeTexture)) UTIL.throwFunc(`only allow defineBitmapCubeTextureClass Instance.- inputValue : ${value} { type : ${typeof value} }`);
 			this[`_${keyName}`] = null;
 			this.checkTexture(value, keyName)
 		}
@@ -52,8 +52,8 @@ const defineHexClass = function (keyName, option = {}) {
 	t0 = Base => class extends Base {
 		[`_${keyName}`] = null
 		set [keyName](value) {
-			typeof value == 'string' || RedUTIL.throwFunc(`${keyName} : only allow HEX. - inputValue : ${value} { type : ${typeof value} }`);
-			RedUTIL.regHex(value) || RedUTIL.throwFunc(`${keyName} : only allow HEX. - inputValue : ${value} { type : ${typeof value} }`);
+			typeof value == 'string' || UTIL.throwFunc(`${keyName} : only allow HEX. - inputValue : ${value} { type : ${typeof value} }`);
+			UTIL.regHex(value) || UTIL.throwFunc(`${keyName} : only allow HEX. - inputValue : ${value} { type : ${typeof value} }`);
 			this['_' + keyName] = value;
 			if (option['callback']) option['callback'].call(this, value);
 		}
@@ -68,7 +68,7 @@ const defineBooleanClass = function (keyName, option = {}) {
 	t0 = Base => class extends Base {
 		[`_${keyName}`] = option['value']
 		set [keyName](value) {
-			if (typeof value != 'boolean') RedUTIL.throwFunc(`${keyName} : only allow Boolean. - inputValue : ${value} { type : ${typeof value} }`);
+			if (typeof value != 'boolean') UTIL.throwFunc(`${keyName} : only allow Boolean. - inputValue : ${value} { type : ${typeof value} }`);
 			this['_' + keyName] = value;
 			if (option['callback']) option['callback'].call(this, value);
 		}
@@ -89,7 +89,7 @@ const defineNumberClass = function (keyName, option = {}) {
 		[`#${keyName}`] = option['value']
 		set [keyName](value) {
 			this[`#${keyName}`] = null;
-			if (typeof value != 'number') RedUTIL.throwFunc(`${keyName} : only allow Number. - inputValue : ${value} { type : ${typeof value} }`);
+			if (typeof value != 'number') UTIL.throwFunc(`${keyName} : only allow Number. - inputValue : ${value} { type : ${typeof value} }`);
 			if (hasMin && value < min) value = min;
 			if (hsaMax && value > max) value = max;
 			this[`#${keyName}`] = value;
@@ -110,19 +110,19 @@ const defineIntUintClass = function (keyName, option = {}, isUint = false) {
 	if (isUint) {
 		min = min || 0;
 		hasMin = true;
-		if (hasMin && min < 0) RedUTIL.throwFunc(`${keyName} : min option must be greater than or equal to zero. - inputValue(min) : ${min}`);
-		if (hsaMax && max < 0) RedUTIL.throwFunc(`${keyName} : max option must be greater than or equal to zero. - inputValue(max) : ${max}`);
+		if (hasMin && min < 0) UTIL.throwFunc(`${keyName} : min option must be greater than or equal to zero. - inputValue(min) : ${min}`);
+		if (hsaMax && max < 0) UTIL.throwFunc(`${keyName} : max option must be greater than or equal to zero. - inputValue(max) : ${max}`);
 	}
-	if (hasMin && hsaMax && max <= min) RedUTIL.throwFunc(`${keyName} : max option option must be greater than or equal to min option. - inputValue(min) : ${min} , inputValue(max) : ${max}`);
+	if (hasMin && hsaMax && max <= min) UTIL.throwFunc(`${keyName} : max option option must be greater than or equal to min option. - inputValue(min) : ${min} , inputValue(max) : ${max}`);
 	t0 = Base => class extends Base {
 		#range = {min: min, max: max};
 		[`#${keyName}`] = option['value'];
 		set [keyName](value) {
 			this[`#${keyName}`] = null;
-			if (typeof value != 'number') RedUTIL.throwFunc(`${keyName} : only allow int. - inputValue : ${value} { type : ${typeof value} }`);
+			if (typeof value != 'number') UTIL.throwFunc(`${keyName} : only allow int. - inputValue : ${value} { type : ${typeof value} }`);
 			if (hasMin && value < min) value = min;
 			if (hsaMax && value > max) value = max;
-			if (!(Math.floor(value) == value)) RedUTIL.throwFunc(`${keyName} : only allow int. - inputValue : ${value} { type : ${typeof value} }`);
+			if (!(Math.floor(value) == value)) UTIL.throwFunc(`${keyName} : only allow int. - inputValue : ${value} { type : ${typeof value} }`);
 			this[`#${keyName}`] = value;
 			if (option['callback']) option['callback'].call(this, value);
 		}
