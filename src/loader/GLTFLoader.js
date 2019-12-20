@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 12:21:27
+ *   Last modification time of this file - 2019.12.20 13:27:33
  *
  */
 
@@ -15,7 +15,7 @@ import Geometry from "../geometry/Geometry.js";
 import Buffer from "../buffer/Buffer.js";
 import UTIL from "../util/UTIL.js";
 import Camera from "../controller/Camera.js";
-import GPUContext from "../GPUContext.js";
+import RedGPUContext from "../RedGPUContext.js";
 import TextureLoader from "./TextureLoader.js";
 import Sampler from "../resources/Sampler.js";
 
@@ -96,7 +96,7 @@ var GLTFLoader;
 				// request.setRequestHeader("Content-Type", (type ? type : "application/xml; ") + 'charset=UTF-8')
 				request.onreadystatechange = function (e) {
 					if (request.readyState === 4 && request.status === 200) {
-						if (GPUContext.useDebugConsole) console.log(request);
+						if (RedGPUContext.useDebugConsole) console.log(request);
 						cache[src] = request;
 						onLoader(request)
 					} else {
@@ -121,7 +121,7 @@ var GLTFLoader;
 				request.responseType = "arraybuffer";
 				request.onreadystatechange = function (e) {
 					if (request.readyState === 4 && request.status === 200) {
-						if (GPUContext.useDebugConsole) console.log(request);
+						if (RedGPUContext.useDebugConsole) console.log(request);
 						cache[src] = request;
 						onLoader(request)
 					} else {
@@ -225,7 +225,7 @@ var GLTFLoader;
 					}
 					parser(self, redGPUContext, jsonChunk, function () {
 						if (callback) {
-							if (GPUContext.useDebugConsole) console.log('Model parsing has ended.');
+							if (RedGPUContext.useDebugConsole) console.log('Model parsing has ended.');
 							callback(self)
 						}
 					}, binaryChunk)
@@ -242,13 +242,13 @@ var GLTFLoader;
 
 					parser(self, redGPUContext, JSON.parse(request['response']), function () {
 						if (callback) {
-							if (GPUContext.useDebugConsole) console.log('Model parsing has ended.');
+							if (RedGPUContext.useDebugConsole) console.log('Model parsing has ended.');
 							callback(self)
 						}
 					})
 				},
 				function (request, error) {
-					if (GPUContext.useDebugConsole) console.log(request, error)
+					if (RedGPUContext.useDebugConsole) console.log(request, error)
 				}
 			)
 		}
@@ -287,7 +287,7 @@ var GLTFLoader;
 				}
 			)
 		};
-		if (GPUContext.useDebugConsole) console.log(this)
+		if (RedGPUContext.useDebugConsole) console.log(this)
 	};
 
 	var loopList = [];
@@ -872,8 +872,8 @@ var GLTFLoader;
 					loadedNum++;
 					redGLTFLoader['parsingResult']['uris'][v['_redURIkey']][v['_redURIIndex']] = new DataView(v['uri']);
 					if (loadedNum == allNum) {
-						if (GPUContext.useDebugConsole) console.log("redGLTFLoader['parsingResult']['uris']", redGLTFLoader['parsingResult']['uris']);
-						if (GPUContext.useDebugConsole) console.log("uris로딩현황", loadedNum, loadedNum);
+						if (RedGPUContext.useDebugConsole) console.log("redGLTFLoader['parsingResult']['uris']", redGLTFLoader['parsingResult']['uris']);
+						if (RedGPUContext.useDebugConsole) console.log("uris로딩현황", loadedNum, loadedNum);
 						if (callback) callback()
 					}
 				} else {
@@ -883,16 +883,16 @@ var GLTFLoader;
 						tSrc,
 						function (request) {
 							loadedNum++;
-							if (GPUContext.useDebugConsole) console.log(request);
+							if (RedGPUContext.useDebugConsole) console.log(request);
 							redGLTFLoader['parsingResult']['uris'][v['_redURIkey']][v['_redURIIndex']] = new DataView(request.response);
 							if (loadedNum == allNum) {
-								if (GPUContext.useDebugConsole) console.log("redGLTFLoader['parsingResult']['uris']", redGLTFLoader['parsingResult']['uris']);
-								if (GPUContext.useDebugConsole) console.log("uris로딩현황", loadedNum, loadedNum);
+								if (RedGPUContext.useDebugConsole) console.log("redGLTFLoader['parsingResult']['uris']", redGLTFLoader['parsingResult']['uris']);
+								if (RedGPUContext.useDebugConsole) console.log("uris로딩현황", loadedNum, loadedNum);
 								if (callback) callback()
 							}
 						},
 						function (request, error) {
-							if (GPUContext.useDebugConsole) console.log(request, error)
+							if (RedGPUContext.useDebugConsole) console.log(request, error)
 						}
 					)
 				}
@@ -906,7 +906,7 @@ var GLTFLoader;
 			getBufferResources(redGLTFLoader, json, callback);
 		};
 		parseCameras = function (redGLTFLoader, json) {
-			if (GPUContext.useDebugConsole) console.log(json);
+			if (RedGPUContext.useDebugConsole) console.log(json);
 			if (json['cameras']) {
 				json['cameras'].forEach(function (v) {
 					console.log('카메라', v);
@@ -923,8 +923,8 @@ var GLTFLoader;
 			}
 		};
 		parseScene = function (redGLTFLoader, json, callback) {
-			if (GPUContext.useDebugConsole) console.log('parseScene 시작');
-			if (GPUContext.useDebugConsole) console.log(json);
+			if (RedGPUContext.useDebugConsole) console.log('parseScene 시작');
+			if (RedGPUContext.useDebugConsole) console.log(json);
 			var i, len;
 			var nodesInScene;
 			var nodeIndex;
@@ -1439,7 +1439,7 @@ var GLTFLoader;
 					console.log('샘플러가 존재하지않음', samplerIndex)
 				}
 				result['string'] = JSON.stringify(result);
-				if (GPUContext.useDebugConsole) console.log('result', result);
+				if (RedGPUContext.useDebugConsole) console.log('result', result);
 				return result
 			};
 			return function (redGLTFLoader, json, v) {
@@ -1759,7 +1759,7 @@ var GLTFLoader;
 				var interleaveData = [];
 				makeInterleaveData(interleaveData, vertices, verticesColor_0, normalData, uvs, uvs1, jointWeights, joints, tangents);
 
-				if (GPUContext.useDebugConsole) console.log('interleaveData', interleaveData);
+				if (RedGPUContext.useDebugConsole) console.log('interleaveData', interleaveData);
 
 
 				/////////////////////////////////////////////////////////
@@ -1848,7 +1848,7 @@ var GLTFLoader;
 				});
 				tMesh['_morphInfo'] = morphInfo;
 				tMesh['_morphInfo']['origin'] = new Float32Array(interleaveData);
-				if (GPUContext.useDebugConsole) console.log('모프리스트', tMesh['_morphInfo']);
+				if (RedGPUContext.useDebugConsole) console.log('모프리스트', tMesh['_morphInfo']);
 				/////////////////////////////////////////////////////
 				var targetData = tMesh['geometry']['interleaveBuffer']['data'];
 				var NUM = 0;
@@ -1918,7 +1918,7 @@ var GLTFLoader;
 				return dataList
 			};
 			return function (redGLTFLoader, json) {
-				if (GPUContext.useDebugConsole) console.log('Animation parsing has start.');
+				if (RedGPUContext.useDebugConsole) console.log('Animation parsing has start.');
 				var nodes = json['nodes'];
 				var meshes = json['meshes'];
 				var accessors = json['accessors'];
@@ -2002,13 +2002,13 @@ var GLTFLoader;
 						redGLTFLoader.playAnimation(v)
 					})
 				}
-				if (GPUContext.useDebugConsole) console.log('Animation parsing has ended.');
+				if (RedGPUContext.useDebugConsole) console.log('Animation parsing has ended.');
 
 			}
 		})();
 		return function (redGLTFLoader, redGPUContext, json, callBack, binaryChunk) {
-			if (GPUContext.useDebugConsole) console.log('parsing start', redGLTFLoader['path'] + redGLTFLoader['fileName']);
-			if (GPUContext.useDebugConsole) console.log('rawData', json);
+			if (RedGPUContext.useDebugConsole) console.log('parsing start', redGLTFLoader['path'] + redGLTFLoader['fileName']);
+			if (RedGPUContext.useDebugConsole) console.log('rawData', json);
 			checkAsset(json);
 			if (binaryChunk) {
 				json.buffers[0]['uri'] = binaryChunk;

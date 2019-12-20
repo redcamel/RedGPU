@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 12:21:27
+ *   Last modification time of this file - 2019.12.20 13:27:33
  *
  */
 
@@ -13,7 +13,7 @@ import UUID from "./UUID.js";
 import UniformBuffer from "../buffer/UniformBuffer.js";
 import UniformBufferDescriptor from "../buffer/UniformBufferDescriptor.js";
 import BindGroup from "../buffer/BindGroup.js";
-import GPUContext from "../GPUContext.js";
+import RedGPUContext from "../RedGPUContext.js";
 
 const TABLE = new Map();
 let makeUniformBindLayout = function (redGPUContext, uniformsBindGroupLayoutDescriptor) {
@@ -127,7 +127,7 @@ export default class BaseMaterial extends UUID {
 	resetBindingInfo() {throw new Error(`${this.constructor.name} : resetBindingInfo must override!!!`)}
 
 	_afterResetBindingInfo() {
-		if (GPUContext.useDebugConsole) console.time('_afterResetBindingInfo - ' + this.constructor.name);
+		if (RedGPUContext.useDebugConsole) console.time('_afterResetBindingInfo - ' + this.constructor.name);
 		this.searchModules();
 		this.setUniformBindGroupDescriptor();
 		this.uniformBindGroup_material.setGPUBindGroup(this.uniformBindGroupDescriptor);
@@ -135,13 +135,13 @@ export default class BaseMaterial extends UUID {
 			this.updateUniformBuffer();
 			this.#uniformBufferUpdated = true;
 		}
-		if (GPUContext.useDebugConsole) console.timeEnd('_afterResetBindingInfo - ' + this.constructor.name);
+		if (RedGPUContext.useDebugConsole) console.timeEnd('_afterResetBindingInfo - ' + this.constructor.name);
 		this.updateUUID();
 	}
 
 	searchModules() {
 		BaseMaterial_searchModules_callNum++;
-		if (GPUContext.useDebugConsole) console.log('BaseMaterial_searchModules_callNum', BaseMaterial_searchModules_callNum);
+		if (RedGPUContext.useDebugConsole) console.log('BaseMaterial_searchModules_callNum', BaseMaterial_searchModules_callNum);
 		let tKey = [this.constructor.name];
 		let i = 0, len = this.constructor.PROGRAM_OPTION_LIST.length;
 		for (i; i < len; i++) {
@@ -149,11 +149,11 @@ export default class BaseMaterial extends UUID {
 			// console.log(key, this[key]);
 			if (this[key]) tKey.push(key);
 		}
-		if (GPUContext.useDebugConsole) console.log('searchModules', tKey);
-		if (GPUContext.useDebugConsole) console.time('searchModules_' + tKey);
+		if (RedGPUContext.useDebugConsole) console.log('searchModules', tKey);
+		if (RedGPUContext.useDebugConsole) console.time('searchModules_' + tKey);
 		this.vShaderModule.searchShaderModule(tKey);
 		this.fShaderModule.searchShaderModule(tKey);
-		if (GPUContext.useDebugConsole) console.timeEnd('searchModules_' + tKey);
+		if (RedGPUContext.useDebugConsole) console.timeEnd('searchModules_' + tKey);
 	}
 
 	setUniformBindGroupDescriptor() {

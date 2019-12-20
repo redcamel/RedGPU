@@ -2,11 +2,11 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 12:21:28
+ *   Last modification time of this file - 2019.12.20 13:27:33
  *
  */
 
-import GPUContext from "../../GPUContext.js";
+import RedGPUContext from "../../RedGPUContext.js";
 
 export default function CopyBufferToTexture(commandEncoder, device, imageDatas, gpuTexture, updateTarget, face = -1) {
 	let promise = new Promise(((resolve, reject) => {
@@ -40,7 +40,7 @@ export default function CopyBufferToTexture(commandEncoder, device, imageDatas, 
 				depth: 1
 			};
 			commandEncoder.copyBufferToTexture(bufferView, textureView, textureExtent);
-			if (GPUContext.useDebugConsole) console.log('mip', mip, 'width', width, 'height', height)
+			if (RedGPUContext.useDebugConsole) console.log('mip', mip, 'width', width, 'height', height)
 		});
 
 		resolve()

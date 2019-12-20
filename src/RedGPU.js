@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 12:21:28
+ *   Last modification time of this file - 2019.12.20 13:27:33
  *
  */
 // renderder ///////////////////////////////////////////////////////////////////////
@@ -95,7 +95,7 @@ import UTILColor from "./util/func/UTILColor.js";
 import UTILMath from "./util/func/UTILMath.js";
 import UTIL from "./util/UTIL.js";
 //
-import GPUContext from "./GPUContext.js"
+import RedGPUContext from "./RedGPUContext.js"
 import Scene from "./Scene.js"
 import View from "./View.js"
 
@@ -190,7 +190,7 @@ const RedGPU = {
 	UTILMath,
 	UTIL,
 	//
-	GPUContext,
+	RedGPUContext,
 	Scene,
 	View
 };

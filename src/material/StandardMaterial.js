@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 13:10:38
+ *   Last modification time of this file - 2019.12.20 13:27:33
  *
  */
 
@@ -11,7 +11,7 @@ import TypeSize from "../resources/TypeSize.js";
 import BaseMaterial from "../base/BaseMaterial.js";
 import ShareGLSL from "../base/ShareGLSL.js";
 import Mix from "../base/Mix.js";
-import GPUContext from "../GPUContext.js";
+import RedGPUContext from "../RedGPUContext.js";
 
 export default class StandardMaterial extends Mix.mix(
 	BaseMaterial,
@@ -191,7 +191,7 @@ export default class StandardMaterial extends Mix.mix(
 						this._displacementTexture = texture;
 						break
 				}
-				if (GPUContext.useDebugConsole) 	console.log("로딩완료or로딩에러확인 textureName", textureName, texture ? texture._GPUTexture : '');
+				if (RedGPUContext.useDebugConsole) 	console.log("로딩완료or로딩에러확인 textureName", textureName, texture ? texture._GPUTexture : '');
 
 				cancelAnimationFrame(this.#raf);
 				this.#raf = requestAnimationFrame(_=>{this.needResetBindingInfo = true})

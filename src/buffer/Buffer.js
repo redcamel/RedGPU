@@ -2,13 +2,13 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 12:21:27
+ *   Last modification time of this file - 2019.12.20 13:27:33
  *
  */
 
 "use strict";
 import UUID from "../base/UUID.js";
-import GPUContext from "../GPUContext.js";
+import RedGPUContext from "../RedGPUContext.js";
 
 export default class Buffer extends UUID {
 	static TYPE_VERTEX = 'vertexBuffer';
@@ -50,7 +50,7 @@ export default class Buffer extends UUID {
 		this.GPUBuffer = redGPUContext.device.createBuffer(this.bufferDescriptor);
 		this.GPUBuffer.setSubData(0, data);
 		redGPUContext.state.Buffer[bufferType].set(typeKey, this);
-		if (GPUContext.useDebugConsole) console.log(this);
+		if (RedGPUContext.useDebugConsole) console.log(this);
 	}
 	update(data) {
 		this.data = data;

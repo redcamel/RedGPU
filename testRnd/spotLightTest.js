@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 12:21:28
+ *   Last modification time of this file - 2019.12.20 13:27:33
  *
  */
 
@@ -16,7 +16,7 @@ import RedGPU from "../src/RedGPU.js";
 	const glslang = await glslangModule.default();
 	console.log(glslang);
 	let testMat
-	let redGPUContext = new RedGPU.GPUContext(cvs, glslang,
+	let redGPUContext = new RedGPU.RedGPUContext(cvs, glslang,
 		function (v, reason) {
 
 			if (!v) {
