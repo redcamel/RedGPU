@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 12:21:27
+ *   Last modification time of this file - 2019.12.20 18:41:50
  *
  */
 
@@ -44,10 +44,12 @@ export default class BaseTexture extends UUID {
 			) : null;
 
 		}
-		this.#updateList.forEach(data => {
-			data[0][data[1]] = this
-		});
-		this.#updateList.length = 0
+		let i = this.#updateList.length;
+		while (i--) {
+			let data = this.#updateList[i];
+			data[0][data[1]] = this;
+		}
+		this.#updateList.length = 0;
 
 	}
 
