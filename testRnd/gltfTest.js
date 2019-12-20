@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 18:44:27
+ *   Last modification time of this file - 2019.12.20 19:42:18
  *
  */
 
@@ -139,8 +139,8 @@ new RedGPU.RedGPUContext(
 		//
 		new RedGPU.GLTFLoader(
 			this, // redGL
-			'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Sponza/glTF/', // assetRootPath
-			// '../assets/gltf/Sponza/glTF/', // assetRootPath
+			// 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Sponza/glTF/', // assetRootPath
+			'../assets/gltf/Sponza/glTF/', // assetRootPath
 			'Sponza.gltf', // fileName
 			function (v) { // callBack
 				console.log(v)
