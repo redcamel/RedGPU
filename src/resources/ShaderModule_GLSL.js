@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 20:37:20
+ *   Last modification time of this file - 2019.12.20 20:42:40
  *
  */
 import RedGPUContext from "../RedGPUContext.js";
@@ -144,10 +144,10 @@ function glslParserWorker(target, name, originSource, type, optionList) {
 					}
 					if (e.data.error) reject(e.data.error);
 				}
-				if (e.data.end) {
-					worker.removeEventListener('message', handler);
-					resolve(e)
-				}
+				// if (e.data.end) {
+				// 	worker.removeEventListener('message', handler);
+				// 	resolve(e)
+				// }
 			}
 		}
 		worker.addEventListener('message', handler);
@@ -223,9 +223,7 @@ export default class ShaderModule_GLSL {
 		if (RedGPUContext.useDebugConsole) console.log('ShaderModule_GLSL_searchShaderModule_callNum', ShaderModule_GLSL_searchShaderModule_callNum);
 		this.currentKey = searchKey;
 
-		if (!this.sourceMap.get(searchKey)) {
-			this.sourceMap.set(searchKey, parseSource(this.originSource, optionList));
-		}
+
 		if (this.shaderModuleMap[searchKey]) {
 			this.GPUShaderModule = this.shaderModuleMap[searchKey];
 			return this.GPUShaderModule
@@ -233,11 +231,13 @@ export default class ShaderModule_GLSL {
 			// console.log('searchKey', searchKey)
 			let tCompileGLSL;
 			console.time('compileGLSL : ' + this.type + ' / ' + searchKey);
-			if (this.sourceMap.get(searchKey) && this.sourceMap.get(searchKey) instanceof Uint32Array) {
+			if (this.sourceMap.get(searchKey) instanceof Uint32Array) {
 				tCompileGLSL = this.sourceMap.get(searchKey)
 				console.log('compileGLSL - 캐쉬된놈을 쓴다', this.type, searchKey)
 			} else {
-
+				if (!this.sourceMap.get(searchKey)) {
+					this.sourceMap.set(searchKey, parseSource(this.originSource, optionList));
+				}
 				tCompileGLSL = this.#redGPUContext.glslang.compileGLSL(this.sourceMap.get(searchKey), this.type)
 				console.log('compileGLSL - 신규생성을 쓴다', this.type, searchKey)
 			}
