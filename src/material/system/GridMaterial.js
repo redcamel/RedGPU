@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 12:21:27
+ *   Last modification time of this file - 2019.12.20 13:10:38
  *
  */
 
@@ -13,7 +13,7 @@ import ShareGLSL from "../../base/ShareGLSL.js";
 export default class GridMaterial extends BaseMaterial {
 
 	static vertexShaderGLSL = `
-	#version 450
+	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
     ${ShareGLSL.GLSL_SystemUniforms_vertex.meshUniforms}
 	layout( location = 0 ) in vec3 position;
@@ -26,7 +26,7 @@ export default class GridMaterial extends BaseMaterial {
 	}
 	`;
 	static fragmentShaderGLSL = `
-	#version 450
+	${ShareGLSL.GLSL_VERSION}
 	layout( location = 0 ) in vec4 vColor;
 	layout( location = 0 ) out vec4 outColor;
 	layout( location = 1 ) out vec4 outDepthColor;

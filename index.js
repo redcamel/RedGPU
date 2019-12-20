@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 12:21:28
+ *   Last modification time of this file - 2019.12.20 13:10:38
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -49,13 +49,13 @@ new RedGPU.GPUContext(
 				let tScene = new RedGPU.Scene();
 				let tScene2 = new RedGPU.Scene();
 				// console.log('여기까지 시간은 어찌됨?',performance.now())
-				let tGrid = new RedGPU.Grid(this)
+				// let tGrid = new RedGPU.Grid(this)
 				// console.log('그리드만들고난뒤 시간은 어찌됨?',performance.now())
-				let tAxis = new RedGPU.Axis(this)
+				// let tAxis = new RedGPU.Axis(this)
 				// console.log('Axis만들고난뒤 시간은 어찌됨?',performance.now())
 				let tCamera = new RedGPU.ObitController(this)
 				let tCamera2 = new RedGPU.ObitController(this)
-				tGrid.centerColor = '#ff0000'
+				// tGrid.centerColor = '#ff0000'
 				tScene2.backgroundColor = '#ff0000'
 
 				tView = new RedGPU.View(this, tScene, tCamera)
@@ -69,8 +69,8 @@ new RedGPU.GPUContext(
 				tCamera.distance = 50
 				tCamera.speedDistance = 10
 
-				tScene.grid = tGrid;
-				tScene.axis = tAxis;
+				// tScene.grid = tGrid;
+				// tScene.axis = tAxis;
 				let tLight
 				tLight = new RedGPU.DirectionalLight('#0000ff', 0.5)
 				tLight.x = 10
@@ -100,10 +100,10 @@ new RedGPU.GPUContext(
 				}
 
 				this.addView(tView)
-				let tEffect = new RedGPU.PostEffect_Bloom(this);
-				let tEffect2 = new RedGPU.PostEffect_DoF(this);
-				tEffect.bloomStrength = 0.35
-				tEffect2.focusLength = 1000
+				// let tEffect = new RedGPU.PostEffect_Bloom(this);
+				// let tEffect2 = new RedGPU.PostEffect_DoF(this);
+				// tEffect.bloomStrength = 0.35
+				// tEffect2.focusLength = 1000
 				// tView.postEffect.addEffect(tEffect)
 				// tView.postEffect.addEffect(tEffect2)
 

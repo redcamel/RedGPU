@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 12:21:27
+ *   Last modification time of this file - 2019.12.20 13:10:38
  *
  */
 
@@ -18,24 +18,26 @@ export default class ColorMaterial extends Mix.mix(
 	Mix.alpha
 ) {
 	static vertexShaderGLSL = `
-	#version 460
+	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
 	${ShareGLSL.GLSL_SystemUniforms_vertex.meshUniforms}
 	layout( location = 0 ) in vec3 position;
-	layout( location = 1 ) out vec4 vMouseColorID;	
+	layout( location = 1 ) in vec3 normal;
+	layout( location = 0 ) out vec4 vMouseColorID;	
 	void main() {
-		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * meshUniforms.modelMatrix[ int(meshUniformsIndex.index) ] * vec4(position, 1.0);
 		vMouseColorID = meshUniformsIndex.mouseColorID;
+		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * meshUniforms.modelMatrix[ int(meshUniformsIndex.index) ] * vec4(position,1.0);
+	
 	}
 	`;
 	static fragmentShaderGLSL = `
-	#version 460
+	${ShareGLSL.GLSL_VERSION}
+	${ShareGLSL.GLSL_SystemUniforms_fragment.systemUniforms}
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 0 ) uniform FragmentUniforms {
         vec4 color;
         float alpha;
     } fragmentUniforms;
-    
-	layout( location = 1 ) in vec4 vMouseColorID;	
+	layout( location = 0 ) in vec4 vMouseColorID;	
 	layout( location = 0 ) out vec4 outColor;
 	layout( location = 1 ) out vec4 outDepthColor;
 	layout( location = 2 ) out vec4 outMouseColorID;
@@ -57,6 +59,7 @@ export default class ColorMaterial extends Mix.mix(
 		{size: TypeSize.float4, valueName: 'colorRGBA'},
 		{size: TypeSize.float, valueName: 'alpha'}
 	];
+
 
 	constructor(redGPUContext, color = '#ff0000', colorAlpha = 1) {
 		super(redGPUContext);

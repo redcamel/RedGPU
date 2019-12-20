@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 12:21:28
+ *   Last modification time of this file - 2019.12.20 13:10:38
  *
  */
 
@@ -12,15 +12,16 @@ import BasePostEffect from "../../base/BasePostEffect.js";
 import PostEffect_GaussianBlur from "../blur/PostEffect_GaussianBlur.js";
 import PostEffect_Threshold from "../adjustments/PostEffect_Threshold.js";
 import PostEffect_Bloom_blend from "./PostEffect_Bloom_blend.js";
+import ShareGLSL from "../../base/ShareGLSL.js";
 
 export default class PostEffect_Bloom extends BasePostEffect {
 
 	static vertexShaderGLSL = `
-		#version 450
+		${ShareGLSL.GLSL_VERSION}
 		void main() {}
 	`;
 	static fragmentShaderGLSL = `
-		#version 450
+		${ShareGLSL.GLSL_VERSION}
 		void main() {}
 	`;
 	static PROGRAM_OPTION_LIST = [];
