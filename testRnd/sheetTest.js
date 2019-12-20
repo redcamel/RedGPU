@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.17 15:12:16
+ *   Last modification time of this file - 2019.12.20 12:21:28
  *
  */
 import RedGPU from "../src/RedGPU.js";
@@ -11,15 +11,15 @@ const cvs = document.createElement('canvas');
 document.body.appendChild(cvs);
 
 
-new RedGPU.RedGPUContext(cvs,
+new RedGPU.GPUContext(cvs,
 	function (v, reason) {
 		let tView;
-		let tScene = new RedGPU.RedScene();
-		let tGrid = new RedGPU.RedGrid(this)
-		let tCamera = new RedGPU.RedObitController(this)
+		let tScene = new RedGPU.Scene();
+		let tGrid = new RedGPU.Grid(this)
+		let tCamera = new RedGPU.ObitController(this)
 
 
-		tView = new RedGPU.RedView(this, tScene, tCamera)
+		tView = new RedGPU.View(this, tScene, tCamera)
 		tCamera.targetView = tView // optional
 		tScene.grid = tGrid
 
@@ -29,7 +29,7 @@ new RedGPU.RedGPUContext(cvs,
 		let i = 100
 		while(i--){
 			let tMesh
-			tMesh = new RedGPU.RedMesh(this, new RedGPU.RedPlane(this,), new RedGPU.RedSheetMaterial(this, new RedGPU.RedBitmapTexture(this, '../assets/sheet/spriteSheet.png'), 24, 5, 3, 15))
+			tMesh = new RedGPU.Mesh(this, new RedGPU.Plane(this,), new RedGPU.SheetMaterial(this, new RedGPU.BitmapTexture(this, '../assets/sheet/spriteSheet.png'), 24, 5, 3, 15))
 			tMesh.x = Math.random() * 10 - 5
 			tMesh.y = Math.random() * 10 - 5
 			tMesh.z = Math.random() * 10 - 5
@@ -38,7 +38,7 @@ new RedGPU.RedGPUContext(cvs,
 		}
 
 
-		let renderer = new RedGPU.RedRender();
+		let renderer = new RedGPU.Render();
 		let render = time => {
 
 

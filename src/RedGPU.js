@@ -2,198 +2,196 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 10:25:45
+ *   Last modification time of this file - 2019.12.20 12:21:28
  *
  */
 // renderder ///////////////////////////////////////////////////////////////////////
-import RedRender from "./renderer/RedRender.js";
+import Render from "./renderer/Render.js";
 // base ///////////////////////////////////////////////////////////////////////
-import RedDetectorGPU from "./base/detect/RedDetectorGPU.js";
-import RedBaseLight from "./base/RedBaseLight.js";
-import RedBaseMaterial from "./base/RedBaseMaterial.js";
-import RedBaseObject3D from "./base/RedBaseObject3D.js";
-import RedShareGLSL from "./base/RedShareGLSL.js";
-import RedBasePostEffect from "./base/RedBasePostEffect.js";
-import RedMix from "./base/RedMix.js";
-import RedPipeline from "./base/RedPipeline.js";
-import RedDisplayContainer from "./base/RedDisplayContainer.js";
-import RedUUID from "./base/RedUUID.js";
+import DetectorGPU from "./base/detect/DetectorGPU.js";
+import BaseLight from "./base/BaseLight.js";
+import BaseMaterial from "./base/BaseMaterial.js";
+import BaseObject3D from "./base/BaseObject3D.js";
+import ShareGLSL from "./base/ShareGLSL.js";
+import BasePostEffect from "./base/BasePostEffect.js";
+import Mix from "./base/Mix.js";
+import Pipeline from "./base/Pipeline.js";
+import DisplayContainer from "./base/DisplayContainer.js";
+import UUID from "./base/UUID.js";
 // buffer ///////////////////////////////////////////////////////////////////////
-import RedBindGroup from "./buffer/RedBindGroup.js";
-import RedBuffer from "./buffer/RedBuffer.js";
-import RedUniformBuffer from "./buffer/RedUniformBuffer.js";
-import RedUniformBufferDescriptor from "./buffer/RedUniformBufferDescriptor.js";
+import BindGroup from "./buffer/BindGroup.js";
+import Buffer from "./buffer/Buffer.js";
+import UniformBuffer from "./buffer/UniformBuffer.js";
+import UniformBufferDescriptor from "./buffer/UniformBufferDescriptor.js";
 // controller ///////////////////////////////////////////////////////////////////////
-import RedCamera from "./controller/RedCamera.js";
-import RedObitController from "./controller/RedObitController.js";
+import Camera from "./controller/Camera.js";
+import ObitController from "./controller/ObitController.js";
 // geometry ///////////////////////////////////////////////////////////////////////
-import RedGeometry from "./geometry/RedGeometry.js";
-import RedInterleaveInfo from "./geometry/RedInterleaveInfo.js";
+import Geometry from "./geometry/Geometry.js";
+import InterleaveInfo from "./geometry/InterleaveInfo.js";
 // light ///////////////////////////////////////////////////////////////////////
-import RedAmbientLight from "./light/RedAmbientLight.js";
-import RedDirectionalLight from "./light/RedDirectionalLight.js";
-import RedPointLight from "./light/RedPointLight.js";
-import RedSpotLight from "./light/RedSpotLight.js";
+import AmbientLight from "./light/AmbientLight.js";
+import DirectionalLight from "./light/DirectionalLight.js";
+import PointLight from "./light/PointLight.js";
+import SpotLight from "./light/SpotLight.js";
 // loader ///////////////////////////////////////////////////////////////////////
-import RedTextureLoader from "./loader/RedTextureLoader.js";
-import RedBaseTexture from "./base/RedBaseTexture.js";
-import RedGLTFLoader from "./loader/RedGLTFLoader.js";
+import TextureLoader from "./loader/TextureLoader.js";
+import BaseTexture from "./base/BaseTexture.js";
+import GLTFLoader from "./loader/GLTFLoader.js";
 // material ///////////////////////////////////////////////////////////////////////
-import RedGridMaterial from "./material/system/RedGridMaterial.js";
-import RedPBRMaterial_System from "./material/system/RedPBRMaterial_System.js";
-import RedSkyBoxMaterial from "./material/system/RedSkyBoxMaterial.js";
-import RedBitmapMaterial from "./material/RedBitmapMaterial.js";
-import RedColorMaterial from "./material/RedColorMaterial.js";
-import RedColorPhongMaterial from "./material/RedColorPhongMaterial.js";
-import RedColorPhongTextureMaterial from "./material/RedColorPhongTextureMaterial.js";
-import RedEnvironmentMaterial from "./material/RedEnvironmentMaterial.js";
-import RedSheetMaterial from "./material/RedSheetMaterial.js";
-import RedSprite3DMaterial from "./material/RedSprite3DMaterial.js";
-import RedStandardMaterial from "./material/RedStandardMaterial.js";
+import GridMaterial from "./material/system/GridMaterial.js";
+import PBRMaterial_System from "./material/system/PBRMaterial_System.js";
+import SkyBoxMaterial from "./material/system/SkyBoxMaterial.js";
+import BitmapMaterial from "./material/BitmapMaterial.js";
+import ColorMaterial from "./material/ColorMaterial.js";
+import ColorPhongMaterial from "./material/ColorPhongMaterial.js";
+import ColorPhongTextureMaterial from "./material/ColorPhongTextureMaterial.js";
+import EnvironmentMaterial from "./material/EnvironmentMaterial.js";
+import SheetMaterial from "./material/SheetMaterial.js";
+import Sprite3DMaterial from "./material/Sprite3DMaterial.js";
+import StandardMaterial from "./material/StandardMaterial.js";
 // object3D ///////////////////////////////////////////////////////////////////////
-import RedAxis from "./object3D/RedAxis.js";
-import RedGrid from "./object3D/RedGrid.js";
-import RedMesh from "./object3D/RedMesh.js";
-import RedSkyBox from "./object3D/RedSkyBox.js";
-import RedSprite3D from "./object3D/RedSprite3D.js";
+import Axis from "./object3D/Axis.js";
+import Grid from "./object3D/Grid.js";
+import Mesh from "./object3D/Mesh.js";
+import SkyBox from "./object3D/SkyBox.js";
+import Sprite3D from "./object3D/Sprite3D.js";
 // postEffect ///////////////////////////////////////////////////////////////////////
-import RedPostEffect_BrightnessContrast from "./postEffect/adjustments/RedPostEffect_BrightnessContrast.js";
-import RedPostEffect_Gray from "./postEffect/adjustments/RedPostEffect_Gray.js";
-import RedPostEffect_HueSaturation from "./postEffect/adjustments/RedPostEffect_HueSaturation.js";
-import RedPostEffect_Invert from "./postEffect/adjustments/RedPostEffect_Invert.js";
-import RedPostEffect_Threshold from "./postEffect/adjustments/RedPostEffect_Threshold.js";
-import RedPostEffect_Bloom from "./postEffect/bloom/RedPostEffect_Bloom.js";
-import RedPostEffect_Bloom_blend from "./postEffect/bloom/RedPostEffect_Bloom_blend.js";
-import RedPostEffect_Blur from "./postEffect/blur/RedPostEffect_Blur.js";
-import RedPostEffect_BlurX from "./postEffect/blur/RedPostEffect_BlurX.js";
-import RedPostEffect_BlurY from "./postEffect/blur/RedPostEffect_BlurY.js";
-import RedPostEffect_GaussianBlur from "./postEffect/blur/RedPostEffect_GaussianBlur.js";
-import RedPostEffect_ZoomBlur from "./postEffect/blur/RedPostEffect_ZoomBlur.js";
-import RedPostEffect_DoF from "./postEffect/dof/RedPostEffect_DoF.js";
-import RedPostEffect_DoF_blend from "./postEffect/dof/RedPostEffect_DoF_blend.js";
-import RedPostEffect_HalfTone from "./postEffect/pixelate/RedPostEffect_HalfTone.js";
-import RedPostEffect_Pixelize from "./postEffect/pixelate/RedPostEffect_Pixelize.js";
-
-
-import RedPostEffect from "./postEffect/RedPostEffect.js";
-import RedPostEffect_Convolution from "./postEffect/RedPostEffect_Convolution.js";
-import RedPostEffect_Film from "./postEffect/RedPostEffect_Film.js";
-import RedPostEffect_Vignetting from "./postEffect/RedPostEffect_Vignetting.js";
+import PostEffect_BrightnessContrast from "./postEffect/adjustments/PostEffect_BrightnessContrast.js";
+import PostEffect_Gray from "./postEffect/adjustments/PostEffect_Gray.js";
+import PostEffect_HueSaturation from "./postEffect/adjustments/PostEffect_HueSaturation.js";
+import PostEffect_Invert from "./postEffect/adjustments/PostEffect_Invert.js";
+import PostEffect_Threshold from "./postEffect/adjustments/PostEffect_Threshold.js";
+import PostEffect_Bloom from "./postEffect/bloom/PostEffect_Bloom.js";
+import PostEffect_Bloom_blend from "./postEffect/bloom/PostEffect_Bloom_blend.js";
+import PostEffect_Blur from "./postEffect/blur/PostEffect_Blur.js";
+import PostEffect_BlurX from "./postEffect/blur/PostEffect_BlurX.js";
+import PostEffect_BlurY from "./postEffect/blur/PostEffect_BlurY.js";
+import PostEffect_GaussianBlur from "./postEffect/blur/PostEffect_GaussianBlur.js";
+import PostEffect_ZoomBlur from "./postEffect/blur/PostEffect_ZoomBlur.js";
+import PostEffect_DoF from "./postEffect/dof/PostEffect_DoF.js";
+import PostEffect_DoF_blend from "./postEffect/dof/PostEffect_DoF_blend.js";
+import PostEffect_HalfTone from "./postEffect/pixelate/PostEffect_HalfTone.js";
+import PostEffect_Pixelize from "./postEffect/pixelate/PostEffect_Pixelize.js";
+import PostEffect from "./postEffect/PostEffect.js";
+import PostEffect_Convolution from "./postEffect/PostEffect_Convolution.js";
+import PostEffect_Film from "./postEffect/PostEffect_Film.js";
+import PostEffect_Vignetting from "./postEffect/PostEffect_Vignetting.js";
 // primitives ///////////////////////////////////////////////////////////////////////
-import RedBox from "./primitives/RedBox.js";
-import RedCylinder from "./primitives/RedCylinder.js";
-import RedPlane from "./primitives/RedPlane.js";
-import RedSphere from "./primitives/RedSphere.js";
+import Box from "./primitives/Box.js";
+import Cylinder from "./primitives/Cylinder.js";
+import Plane from "./primitives/Plane.js";
+import Sphere from "./primitives/Sphere.js";
 // resources ///////////////////////////////////////////////////////////////////////
-import RedCopyBufferToTexture from "./resources/system/RedCopyBufferToTexture.js";
-import RedImageLoader from "./resources/system/RedImageLoader.js";
-import RedBitmapCubeTexture from "./resources/RedBitmapCubeTexture.js";
-import RedBitmapTexture from "./resources/RedBitmapTexture.js";
-import RedSampler from "./resources/RedSampler.js";
-import RedShaderModule_GLSL from "./resources/RedShaderModule_GLSL.js";
-import RedTypeSize from "./resources/RedTypeSize.js";
+import CopyBufferToTexture from "./resources/system/CopyBufferToTexture.js";
+import ImageLoader from "./resources/system/ImageLoader.js";
+import BitmapCubeTexture from "./resources/BitmapCubeTexture.js";
+import BitmapTexture from "./resources/BitmapTexture.js";
+import Sampler from "./resources/Sampler.js";
+import ShaderModule_GLSL from "./resources/ShaderModule_GLSL.js";
+import TypeSize from "./resources/TypeSize.js";
 // util ///////////////////////////////////////////////////////////////////////
-import RedUTILColor from "./util/func/RedUTILColor.js";
-import RedUTILMath from "./util/func/RedUTILMath.js";
-import RedUTIL from "./util/RedUTIL.js";
+import UTILColor from "./util/func/UTILColor.js";
+import UTILMath from "./util/func/UTILMath.js";
+import UTIL from "./util/UTIL.js";
 //
-import RedGPUContext from "./RedGPUContext.js"
-import RedScene from "./RedScene.js"
-import RedView from "./RedView.js"
+import GPUContext from "./GPUContext.js"
+import Scene from "./Scene.js"
+import View from "./View.js"
 
 const RedGPU = {
 	// base
-	RedDetectorGPU,
-	RedBaseLight,
-	RedBaseMaterial,
-	RedBaseObject3D,
-	RedShareGLSL,
-	RedBasePostEffect,
-	RedBaseTexture,
-	RedMix,
-	RedPipeline,
-	RedDisplayContainer,
-	RedUUID,
+	DetectorGPU,
+	BaseLight: BaseLight,
+	BaseMaterial,
+	BaseObject3D,
+	ShareGLSL,
+	BasePostEffect,
+	BaseTexture,
+	Mix,
+	Pipeline,
+	DisplayContainer,
+	UUID,
 	// buffer ///////////////////////////////////////////////////////////////////////
-	RedBindGroup,
-	RedBuffer,
-	RedUniformBuffer,
-	RedUniformBufferDescriptor,
+	BindGroup,
+	Buffer,
+	UniformBuffer,
+	UniformBufferDescriptor,
 	// controller ///////////////////////////////////////////////////////////////////////
-	RedCamera,
-	RedObitController,
+	Camera,
+	ObitController,
 	// geometry ///////////////////////////////////////////////////////////////////////
-	RedGeometry,
-	RedInterleaveInfo,
+	Geometry,
+	InterleaveInfo,
 	// light ///////////////////////////////////////////////////////////////////////
-	RedAmbientLight,
-	RedDirectionalLight,
-	RedPointLight,
-	RedSpotLight,
+	AmbientLight,
+	DirectionalLight,
+	PointLight,
+	SpotLight,
 	// loader ///////////////////////////////////////////////////////////////////////
-	RedGLTFLoader,
-	RedTextureLoader,
+	GLTFLoader,
+	TextureLoader,
 	// material ///////////////////////////////////////////////////////////////////////
-	RedGridMaterial,
-	RedPBRMaterial_System,
-	RedSkyBoxMaterial,
-	RedBitmapMaterial,
-	RedColorMaterial,
-	RedColorPhongMaterial,
-	RedColorPhongTextureMaterial,
-	RedSheetMaterial,
-	RedSprite3DMaterial,
-	RedEnvironmentMaterial,
-	RedStandardMaterial,
+	GridMaterial,
+	PBRMaterial_System,
+	SkyBoxMaterial,
+	BitmapMaterial,
+	ColorMaterial,
+	ColorPhongMaterial,
+	ColorPhongTextureMaterial,
+	SheetMaterial,
+	Sprite3DMaterial,
+	EnvironmentMaterial,
+	StandardMaterial,
 	// object3D ///////////////////////////////////////////////////////////////////////
-	RedAxis,
-	RedGrid,
-	RedMesh,
-	RedSkyBox,
-	RedSprite3D,
+	Axis,
+	Grid,
+	Mesh,
+	SkyBox,
+	Sprite3D,
 	// postEffect ///////////////////////////////////////////////////////////////////////
-	RedPostEffect_BrightnessContrast,
-	RedPostEffect_Gray,
-	RedPostEffect_HueSaturation,
-	RedPostEffect_Invert,
-	RedPostEffect_Threshold,
-	RedPostEffect_Bloom,
-	RedPostEffect_Bloom_blend,
-	RedPostEffect_Blur,
-	RedPostEffect_BlurX,
-	RedPostEffect_BlurY,
-	RedPostEffect_GaussianBlur,
-	RedPostEffect_ZoomBlur,
-	RedPostEffect_DoF,
-	RedPostEffect_DoF_blend,
-	RedPostEffect_HalfTone,
-	RedPostEffect_Pixelize,
-	RedPostEffect,
-	RedPostEffect_Convolution,
-	RedPostEffect_Film,
-	RedPostEffect_Vignetting,
+	PostEffect_BrightnessContrast,
+	PostEffect_Gray,
+	PostEffect_HueSaturation,
+	PostEffect_Invert,
+	PostEffect_Threshold,
+	PostEffect_Bloom,
+	PostEffect_Bloom_blend,
+	PostEffect_Blur,
+	PostEffect_BlurX,
+	PostEffect_BlurY,
+	PostEffect_GaussianBlur,
+	PostEffect_ZoomBlur,
+	PostEffect_DoF,
+	PostEffect_DoF_blend,
+	PostEffect_HalfTone,
+	PostEffect_Pixelize,
+	PostEffect,
+	PostEffect_Convolution,
+	PostEffect_Film,
+	PostEffect_Vignetting,
 	// primitives ///////////////////////////////////////////////////////////////////////
-	RedBox,
-	RedCylinder,
-	RedPlane,
-	RedSphere,
+	Box,
+	Cylinder,
+	Plane,
+	Sphere,
 	// renderder ///////////////////////////////////////////////////////////////////////
-	RedRender,
+	Render,
 	// resources ///////////////////////////////////////////////////////////////////////
-	RedCopyBufferToTexture,
-	RedImageLoader,
-	RedBitmapCubeTexture,
-	RedBitmapTexture,
-	RedSampler,
-	RedShaderModule_GLSL,
-	RedTypeSize,
+	CopyBufferToTexture,
+	ImageLoader,
+	BitmapCubeTexture,
+	BitmapTexture,
+	Sampler,
+	ShaderModule_GLSL,
+	TypeSize,
 	// util ///////////////////////////////////////////////////////////////////////
-	RedUTILColor,
-	RedUTILMath,
-	RedUTIL,
+	UTILColor,
+	UTILMath,
+	UTIL,
 	//
-	RedGPUContext,
-	RedScene,
-	RedView
+	GPUContext,
+	Scene,
+	View
 };
 export default RedGPU;

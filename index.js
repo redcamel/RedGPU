@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.19 18:10:39
+ *   Last modification time of this file - 2019.12.20 12:21:28
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -13,11 +13,14 @@ let testMat_color, testMat_colorPhong, testMat_bitmap, testMat_standard_diffuse,
 	testMat_standard_diffuse_normal_displacement, testMat_colorPhongTexture_normal,
 	testMat_colorPhongTexture_normal_displacement,
 	testMat_environment;
-new RedGPU.RedGPUContext(
+console.time('초기화 속도')
+new RedGPU.GPUContext(
 	cvs,
 	function () {
+		console.timeEnd('초기화 속도')
 		document.body.appendChild(cvs);
-		let textureLoader = new RedGPU.RedTextureLoader(
+		console.time('텍스쳐 로딩속도')
+		let textureLoader = new RedGPU.TextureLoader(
 			this,
 			[
 				'assets/UV_Grid_Sm.jpg',
@@ -38,20 +41,25 @@ new RedGPU.RedGPUContext(
 			],
 			_ => {
 				console.log('텍스쳐 로딩완료', textureLoader)
+				// console.timeEnd('텍스쳐 로딩속도')
+				// console.log('로딩완료된 시점의 시간은? 어찌됨?',performance.now())
 				let MAX = 5000;
 				let i = MAX;
 				let tView, tView2;
-				let tScene = new RedGPU.RedScene();
-				let tScene2 = new RedGPU.RedScene();
-				let tGrid = new RedGPU.RedGrid(this)
-				let tAxis = new RedGPU.RedAxis(this)
-				let tCamera = new RedGPU.RedObitController(this)
-				let tCamera2 = new RedGPU.RedObitController(this)
+				let tScene = new RedGPU.Scene();
+				let tScene2 = new RedGPU.Scene();
+				// console.log('여기까지 시간은 어찌됨?',performance.now())
+				let tGrid = new RedGPU.Grid(this)
+				// console.log('그리드만들고난뒤 시간은 어찌됨?',performance.now())
+				let tAxis = new RedGPU.Axis(this)
+				// console.log('Axis만들고난뒤 시간은 어찌됨?',performance.now())
+				let tCamera = new RedGPU.ObitController(this)
+				let tCamera2 = new RedGPU.ObitController(this)
 				tGrid.centerColor = '#ff0000'
 				tScene2.backgroundColor = '#ff0000'
 
-				tView = new RedGPU.RedView(this, tScene, tCamera)
-				tView2 = new RedGPU.RedView(this, tScene2, tCamera2)
+				tView = new RedGPU.View(this, tScene, tCamera)
+				tView2 = new RedGPU.View(this, tScene2, tCamera2)
 				tView2.setSize(150, 150)
 				tView2.setLocation(0, 0)
 
@@ -64,19 +72,19 @@ new RedGPU.RedGPUContext(
 				tScene.grid = tGrid;
 				tScene.axis = tAxis;
 				let tLight
-				tLight = new RedGPU.RedDirectionalLight('#0000ff', 0.5)
+				tLight = new RedGPU.DirectionalLight('#0000ff', 0.5)
 				tLight.x = 10
 				tLight.y = 10
 				tLight.z = 10
 				tScene.addLight(tLight)
 
-				tLight = new RedGPU.RedDirectionalLight('#ff0000', 0.5)
+				tLight = new RedGPU.DirectionalLight('#ff0000', 0.5)
 				tLight.x = -10
 				tLight.y = -10
 				tLight.z = -10
 				tScene.addLight(tLight)
 
-				tLight = new RedGPU.RedDirectionalLight('#00ff00', 0.5)
+				tLight = new RedGPU.DirectionalLight('#00ff00', 0.5)
 				tLight.x = -10
 				tLight.y = 20
 				tLight.z = 20
@@ -86,64 +94,64 @@ new RedGPU.RedGPUContext(
 				let i2 = 10
 				let testColor = ['#ff0000', '#00ff00', '#0000ff', '#ff00ff', '#ffff00']
 				while (i2--) {
-					let tLight = new RedGPU.RedPointLight(testColor[i2 % testColor.length], 1, 1, 250)
+					let tLight = new RedGPU.PointLight(testColor[i2 % testColor.length], 1, 1, 250)
 
 					tScene.addLight(tLight)
 				}
 
 				this.addView(tView)
-				let tEffect = new RedGPU.RedPostEffect_Bloom(this);
-				let tEffect2 = new RedGPU.RedPostEffect_DoF(this);
+				let tEffect = new RedGPU.PostEffect_Bloom(this);
+				let tEffect2 = new RedGPU.PostEffect_DoF(this);
 				tEffect.bloomStrength = 0.35
 				tEffect2.focusLength = 1000
-				tView.postEffect.addEffect(tEffect)
-				tView.postEffect.addEffect(tEffect2)
+				// tView.postEffect.addEffect(tEffect)
+				// tView.postEffect.addEffect(tEffect2)
 
-				// tEffect = new RedGPU.RedPostEffect_Gray(this)
+				// tEffect = new RedGPU.PostEffect_Gray(this)
 				// tView.postEffect.addEffect(tEffect)
 
-				// tEffect = new RedGPU.RedPostEffect_Invert(this)
+				// tEffect = new RedGPU.PostEffect_Invert(this)
 				// tView.postEffect.addEffect(tEffect)
 
-				// tEffect = new RedGPU.RedPostEffect_Threshold(this)
+				// tEffect = new RedGPU.PostEffect_Threshold(this)
 				// tView.postEffect.addEffect(tEffect)
 
-				// tEffect = new RedGPU.RedPostEffect_HueSaturation(this)
+				// tEffect = new RedGPU.PostEffect_HueSaturation(this)
 				// tEffect.saturation = 100
 				// tView.postEffect.addEffect(tEffect)
 				//
-				// tEffect = new RedGPU.RedPostEffect_BrightnessContrast(this)
+				// tEffect = new RedGPU.PostEffect_BrightnessContrast(this)
 				// tEffect.contrast = -100
 				// tView.postEffect.addEffect(tEffect)
 
-				// tEffect = new RedGPU.RedPostEffect_Blur(this)
+				// tEffect = new RedGPU.PostEffect_Blur(this)
 				// tView.postEffect.addEffect(tEffect)
 				//
-				// tEffect = new RedGPU.RedPostEffect_BlurX(this)
+				// tEffect = new RedGPU.PostEffect_BlurX(this)
 				// tView.postEffect.addEffect(tEffect)
 				//
-				// tEffect = new RedGPU.RedPostEffect_BlurY(this)
+				// tEffect = new RedGPU.PostEffect_BlurY(this)
 				// tView.postEffect.addEffect(tEffect)
 				//
-				// tEffect = new RedGPU.RedPostEffect_GaussianBlur(this)
+				// tEffect = new RedGPU.PostEffect_GaussianBlur(this)
 				// tView.postEffect.addEffect(tEffect)
 
-				// tEffect = new RedGPU.RedPostEffect_ZoomBlur(this)
+				// tEffect = new RedGPU.PostEffect_ZoomBlur(this)
 				// tView.postEffect.addEffect(tEffect)
 
-				// tEffect = new RedGPU.RedPostEffect_HalfTone(this)
+				// tEffect = new RedGPU.PostEffect_HalfTone(this)
 				// tView.postEffect.addEffect(tEffect)
 				//
-				// tEffect = new RedGPU.RedPostEffect_Pixelize(this)
+				// tEffect = new RedGPU.PostEffect_Pixelize(this)
 				// tView.postEffect.addEffect(tEffect)
 
-				// tEffect = new RedGPU.RedPostEffect_Convolution(this)
+				// tEffect = new RedGPU.PostEffect_Convolution(this)
 				// tView.postEffect.addEffect(tEffect)
 
-				// tEffect = new RedGPU.RedPostEffect_Film(this)
+				// tEffect = new RedGPU.PostEffect_Film(this)
 				// tView.postEffect.addEffect(tEffect)
 				//
-				// tEffect = new RedGPU.RedPostEffect_Vignetting(this)
+				// tEffect = new RedGPU.PostEffect_Vignetting(this)
 				// tView.postEffect.addEffect(tEffect)
 
 
@@ -152,16 +160,16 @@ new RedGPU.RedGPUContext(
 
 				let testCubeTexture = textureLoader.getTextureByIndex(7)
 
-				testMat_environment = new RedGPU.RedEnvironmentMaterial(this, textureLoader.getTextureByIndex(1), testCubeTexture)
-				testMat_color = new RedGPU.RedColorMaterial(this, '#ffff12');
-				testMat_colorPhong = new RedGPU.RedColorPhongMaterial(this, '#ffffff');
-				testMat_colorPhongTexture_normal = new RedGPU.RedColorPhongTextureMaterial(this, '#fff253', 1, textureLoader.getTextureByIndex(2))
-				testMat_colorPhongTexture_normal_displacement = new RedGPU.RedColorPhongTextureMaterial(this, '#341fff', 1, textureLoader.getTextureByIndex(2), textureLoader.getTextureByIndex(5), textureLoader.getTextureByIndex(6), textureLoader.getTextureByIndex(4))
+				testMat_environment = new RedGPU.EnvironmentMaterial(this, textureLoader.getTextureByIndex(1), testCubeTexture)
+				testMat_color = new RedGPU.ColorMaterial(this, '#ffff12');
+				testMat_colorPhong = new RedGPU.ColorPhongMaterial(this, '#ffffff');
+				testMat_colorPhongTexture_normal = new RedGPU.ColorPhongTextureMaterial(this, '#fff253', 1, textureLoader.getTextureByIndex(2))
+				testMat_colorPhongTexture_normal_displacement = new RedGPU.ColorPhongTextureMaterial(this, '#341fff', 1, textureLoader.getTextureByIndex(2), textureLoader.getTextureByIndex(5), textureLoader.getTextureByIndex(6), textureLoader.getTextureByIndex(4))
 
-				testMat_bitmap = new RedGPU.RedBitmapMaterial(this, textureLoader.getTextureByIndex(0));
-				testMat_standard_diffuse = new RedGPU.RedStandardMaterial(this, textureLoader.getTextureByIndex(1), null, textureLoader.getTextureByIndex(5), textureLoader.getTextureByIndex(6));
-				testMat_standard_diffuse_normal = new RedGPU.RedStandardMaterial(this, textureLoader.getTextureByIndex(0), textureLoader.getTextureByIndex(2), textureLoader.getTextureByIndex(5), textureLoader.getTextureByIndex(6));
-				testMat_standard_diffuse_normal_displacement = new RedGPU.RedStandardMaterial(this, textureLoader.getTextureByIndex(1), textureLoader.getTextureByIndex(2), textureLoader.getTextureByIndex(5), textureLoader.getTextureByIndex(6), textureLoader.getTextureByIndex(4));
+				testMat_bitmap = new RedGPU.BitmapMaterial(this, textureLoader.getTextureByIndex(0));
+				testMat_standard_diffuse = new RedGPU.StandardMaterial(this, textureLoader.getTextureByIndex(1), null, textureLoader.getTextureByIndex(5), textureLoader.getTextureByIndex(6));
+				testMat_standard_diffuse_normal = new RedGPU.StandardMaterial(this, textureLoader.getTextureByIndex(0), textureLoader.getTextureByIndex(2), textureLoader.getTextureByIndex(5), textureLoader.getTextureByIndex(6));
+				testMat_standard_diffuse_normal_displacement = new RedGPU.StandardMaterial(this, textureLoader.getTextureByIndex(1), textureLoader.getTextureByIndex(2), textureLoader.getTextureByIndex(5), textureLoader.getTextureByIndex(6), textureLoader.getTextureByIndex(4));
 				testMat_standard_diffuse_normal_displacement.displacementPower = 1
 				testMat_standard_diffuse_normal_displacement.displacementFlowSpeedX = 0.1
 				testMat_standard_diffuse_normal_displacement.displacementFlowSpeedY = 0.1
@@ -186,18 +194,18 @@ new RedGPU.RedGPUContext(
 				// }, 2500)
 
 				let randomGeometry = _ => {
-					return new RedGPU.RedSphere(this, 0.5, 16, 16, 16)
+					return new RedGPU.Sphere(this, 0.5, 16, 16, 16)
 					return Math.random() > 0.5
-						? new RedGPU.RedSphere(this, 0.5, 16, 16, 16) :
+						? new RedGPU.Sphere(this, 0.5, 16, 16, 16) :
 						Math.random() > 0.5
-							? new RedGPU.RedCylinder(this, 0, 1, 2, 16, 16) :
-							Math.random() > 0.5 ? new RedGPU.RedBox(this) : new RedGPU.RedPlane(this)
+							? new RedGPU.Cylinder(this, 0, 1, 2, 16, 16) :
+							Math.random() > 0.5 ? new RedGPU.Box(this) : new RedGPU.Plane(this)
 				}
 				let i3 = 100
 				while (i3--) {
-					let testMesh = new RedGPU.RedMesh(
+					let testMesh = new RedGPU.Mesh(
 						this,
-						new RedGPU.RedSphere(this, 0.5, 32, 32, 32),
+						new RedGPU.Sphere(this, 0.5, 32, 32, 32),
 						testMat_bitmap
 					);
 					testMesh.x = Math.random() * 30 - 15
@@ -205,9 +213,9 @@ new RedGPU.RedGPUContext(
 					testMesh.z = Math.random() * 30 - 15
 					tScene2.addChild(testMesh)
 				}
-				let testMesh = new RedGPU.RedMesh(
+				let testMesh = new RedGPU.Mesh(
 					this,
-					new RedGPU.RedSphere(this, 0.5, 32, 32, 32),
+					new RedGPU.Sphere(this, 0.5, 32, 32, 32),
 					testMat_standard_diffuse
 				);
 				testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = 20
@@ -230,9 +238,9 @@ new RedGPU.RedGPUContext(
 					TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
 				})
 
-				testMesh = new RedGPU.RedMesh(
+				testMesh = new RedGPU.Mesh(
 					this,
-					new RedGPU.RedSphere(this, 0.5, 32, 32, 32),
+					new RedGPU.Sphere(this, 0.5, 32, 32, 32),
 					testMat_environment
 				);
 				testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = 20
@@ -257,7 +265,7 @@ new RedGPU.RedGPUContext(
 
 				let division = MAX / 8
 				while (i--) {
-					let testMesh = new RedGPU.RedMesh(
+					let testMesh = new RedGPU.Mesh(
 						this,
 						randomGeometry(),
 						i > division * 7 ? testMat_color
@@ -291,18 +299,18 @@ new RedGPU.RedGPUContext(
 					testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = 40;
 					tScene.addChild(testMesh)
 					// //
-					// let testMesh2 = new RedGPU.RedMesh(
+					// let testMesh2 = new RedGPU.Mesh(
 					// 	this,
-					// 	new RedGPU.RedSphere(this, 1, 16, 16, 16),
+					// 	new RedGPU.Sphere(this, 1, 16, 16, 16),
 					// 	testMat_colorPhong
 					// );
 					// testMesh2.x = 2
 					// testMesh2.scaleX = testMesh2.scaleY = testMesh2.scaleZ = 0.5;
 					// testMesh.addChild(testMesh2)
 					//
-					// let testMesh3 = new RedGPU.RedMesh(
+					// let testMesh3 = new RedGPU.Mesh(
 					// 	this,
-					// 	new RedGPU.RedSphere(this),
+					// 	new RedGPU.Sphere(this),
 					// 	testMat_bitmap
 					// );
 					// testMesh3.x = 2
@@ -312,7 +320,7 @@ new RedGPU.RedGPUContext(
 				}
 
 
-				let renderer = new RedGPU.RedRender();
+				let renderer = new RedGPU.Render();
 				let render = time => {
 
 
@@ -365,7 +373,7 @@ let setTestUI = function (redGPUContextContext, tView, tScene, testCubeTexture) 
 
 	let tFolder;
 
-	let skyBox = new RedGPU.RedSkyBox(redGPUContextContext, testCubeTexture)
+	let skyBox = new RedGPU.SkyBox(redGPUContextContext, testCubeTexture)
 	tScene.skyBox = skyBox
 	let testSceneUI = new dat.GUI({});
 	let testSceneData = {
@@ -373,13 +381,13 @@ let setTestUI = function (redGPUContextContext, tView, tScene, testCubeTexture) 
 		useGrid: true,
 	}
 	testSceneUI.width = 350
-	tFolder = testSceneUI.addFolder('RedScene')
+	tFolder = testSceneUI.addFolder('Scene')
 	tFolder.open()
 	tFolder.add(testSceneData, 'useSkyBox').onChange(v => tScene.skyBox = v ? skyBox : null)
-	tFolder.add(testSceneData, 'useGrid').onChange(v => tScene.grid = v ? new RedGPU.RedGrid(redGPUContextContext) : null)
+	tFolder.add(testSceneData, 'useGrid').onChange(v => tScene.grid = v ? new RedGPU.Grid(redGPUContextContext) : null)
 	tFolder.addColor(tScene, 'backgroundColor')
 	tFolder.add(tScene, 'backgroundColorAlpha', 0, 1, 0.01)
-	tFolder = testSceneUI.addFolder('RedView')
+	tFolder = testSceneUI.addFolder('View')
 	tFolder.open()
 	let viewTestData = {
 		setLocationTest1: function () {
@@ -439,7 +447,7 @@ let setTestUI = function (redGPUContextContext, tView, tScene, testCubeTexture) 
 		testMat_colorPhongTexture_normal_displacement.useFlatMode = v
 
 	});
-	tFolder = testUI.addFolder('RedMesh')
+	tFolder = testUI.addFolder('Mesh')
 	tFolder.open()
 
 

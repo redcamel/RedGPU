@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.13 19:11:47
+ *   Last modification time of this file - 2019.12.20 12:21:28
  *
  */
 
@@ -16,7 +16,7 @@ import RedGPU from "../src/RedGPU.js";
 	const glslang = await glslangModule.default();
 	console.log(glslang);
 	let testMat
-	let redGPUContext = new RedGPU.RedGPUContext(cvs, glslang,
+	let redGPUContext = new RedGPU.GPUContext(cvs, glslang,
 		function (v, reason) {
 
 			if (!v) {
@@ -24,9 +24,9 @@ import RedGPU from "../src/RedGPU.js";
 				return alert(reason || `WebGPU is unsupported, or no adapters or devices are available.`)
 			}
 			let tView;
-			let tScene = new RedGPU.RedScene();
-			let tGrid = new RedGPU.RedGrid(this)
-			let tCamera = new RedGPU.RedObitController(this)
+			let tScene = new RedGPU.Scene();
+			let tGrid = new RedGPU.Grid(this)
+			let tCamera = new RedGPU.ObitController(this)
 			// tGrid.centerColor = '#ff0000'
 			// tScene.backgroundColor = '#fff'
 			// tScene.backgroundColorAlpha = 0
@@ -35,26 +35,26 @@ import RedGPU from "../src/RedGPU.js";
 			tCamera.speedDistance = 1
 
 
-			tView = new RedGPU.RedView(this, tScene, tCamera)
+			tView = new RedGPU.View(this, tScene, tCamera)
 
 			tCamera.targetView = tView // optional
 
 			tScene.grid = tGrid
-			// tScene.axis = new RedGPU.RedAxis(redGPUContext)
+			// tScene.axis = new RedGPU.Axis(redGPUContext)
 			let tLight
-			tLight = new RedGPU.RedDirectionalLight('#ffff00')
+			tLight = new RedGPU.DirectionalLight('#ffff00')
 			tLight.x = 9
 			tLight.y = 9
 			tLight.z = 9
 			// tScene.addLight(tLight)
 
-			tLight = new RedGPU.RedPointLight('#ff0000',1,1,3)
+			tLight = new RedGPU.PointLight('#ff0000',1,1,3)
 			tLight.x = 1
 			tLight.y = 1
 			tLight.z = 1
 			// tScene.addLight(tLight)
 
-			tLight = new RedGPU.RedSpotLight('#00ff00',1,1)
+			tLight = new RedGPU.SpotLight('#00ff00',1,1)
 
 			tLight.x = 0
 			tLight.y = 10
@@ -63,7 +63,7 @@ import RedGPU from "../src/RedGPU.js";
 			tScene.addLight(tLight)
 
 
-			// tLight = new RedGPU.RedAmbientLight()
+			// tLight = new RedGPU.AmbientLight()
 			// tScene.addLight(tLight)
 
 			redGPUContext.addView(tView)
@@ -71,7 +71,7 @@ import RedGPU from "../src/RedGPU.js";
 			let i = 0
 			let len = 2000
 			for (i; i < len; i++) {
-				let tMesh = new RedGPU.RedMesh(redGPUContext, new RedGPU.RedSphere(redGPUContext,0.5,16,16,16), new RedGPU.RedColorPhongMaterial(redGPUContext))
+				let tMesh = new RedGPU.Mesh(redGPUContext, new RedGPU.Sphere(redGPUContext,0.5,16,16,16), new RedGPU.ColorPhongMaterial(redGPUContext))
 				tMesh.x = Math.random() * 30 - 15
 				tMesh.y = Math.random() * 30 - 15
 				tMesh.z = Math.random() * 30 - 15
@@ -81,11 +81,11 @@ import RedGPU from "../src/RedGPU.js";
 				tScene.addChild(tMesh)
 			}
 
-			let tMesh = new RedGPU.RedMesh(redGPUContext, new RedGPU.RedPlane(redGPUContext,50,50,50,50), new RedGPU.RedColorPhongMaterial(redGPUContext))
+			let tMesh = new RedGPU.Mesh(redGPUContext, new RedGPU.Plane(redGPUContext,50,50,50,50), new RedGPU.ColorPhongMaterial(redGPUContext))
 			tMesh.rotationX = 90
 			tScene.addChild(tMesh)
 
-			let renderer = new RedGPU.RedRender();
+			let renderer = new RedGPU.Render();
 			let render = function (time) {
 
 				// tScene.children.forEach(mesh=>{
