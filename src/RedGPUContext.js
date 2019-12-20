@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 13:10:38
+ *   Last modification time of this file - 2019.12.20 13:27:33
  *
  */
 "use strict";
@@ -35,7 +35,7 @@ let checkGlslang = function () {
 	});
 	return promise
 };
-export default class GPUContext {
+export default class RedGPUContext {
 	static useDebugConsole = false;
 	#width = 0;
 	#height = 0;
@@ -197,7 +197,7 @@ export default class GPUContext {
 					}
 				]
 			});
-			if (GPUContext.useDebugConsole) console.log(`setSize - input : ${w},${h} / result : ${tW}, ${tH}`);
+			if (RedGPUContext.useDebugConsole) console.log(`setSize - input : ${w},${h} / result : ${tW}, ${tH}`);
 			passEncoder.setViewport(0, 0, tW, tH, 0, 1);
 			passEncoder.setScissorRect(0, 0, tW, tH);
 			passEncoder.endPass();
@@ -213,6 +213,6 @@ function configureSwapChain(device, swapChainFormat, context) {
 		format: swapChainFormat,
 		usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC
 	};
-	if (GPUContext.useDebugConsole) console.log('swapChainDescriptor', swapChainDescriptor);
+	if (RedGPUContext.useDebugConsole) console.log('swapChainDescriptor', swapChainDescriptor);
 	return context.configureSwapChain(swapChainDescriptor);
 }

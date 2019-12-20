@@ -2,14 +2,14 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 12:21:27
+ *   Last modification time of this file - 2019.12.20 13:27:33
  *
  */
 
 "use strict";
 import UniformBufferDescriptor from "./UniformBufferDescriptor.js";
 import UTIL from "../util/UTIL.js";
-import GPUContext from "../GPUContext.js";
+import RedGPUContext from "../RedGPUContext.js";
 import UUID from "../base/UUID.js";
 
 export default class UniformBuffer extends UUID {
@@ -19,7 +19,7 @@ export default class UniformBuffer extends UUID {
 
 	constructor(redGPUContext) {
 		super();
-		if (!(redGPUContext instanceof GPUContext)) UTIL.throwFunc(`${this.constructor.name} - only allow redGPUContext Instance.- inputValue : ${redGPUContext} { type : ${typeof redGPUContext} }`);
+		if (!(redGPUContext instanceof RedGPUContext)) UTIL.throwFunc(`${this.constructor.name} - only allow redGPUContext Instance.- inputValue : ${redGPUContext} { type : ${typeof redGPUContext} }`);
 		this.#redGPUContext = redGPUContext;
 	}
 

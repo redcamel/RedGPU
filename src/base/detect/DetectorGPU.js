@@ -2,12 +2,12 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 12:21:27
+ *   Last modification time of this file - 2019.12.20 13:27:33
  *
  */
 
 "use strict";
-import GPUContext from "../../GPUContext.js";
+import RedGPUContext from "../../RedGPUContext.js";
 
 export default class DetectorGPU {
 	#redGPUContext;
@@ -16,7 +16,7 @@ export default class DetectorGPU {
 		if (this.browser === 'ie') console.table = console.log;
 	};
 	detectGPU = _ => {
-		if (GPUContext.useDebugConsole) console.log('TODO - 추후 GPU 디텍팅을 해야한다.')
+		if (RedGPUContext.useDebugConsole) console.log('TODO - 추후 GPU 디텍팅을 해야한다.')
 	};
 	#getBrowserInfo = _ => {
 		let navi = window.navigator,

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 13:10:38
+ *   Last modification time of this file - 2019.12.20 13:27:33
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -14,7 +14,7 @@ let testMat_color, testMat_colorPhong, testMat_bitmap, testMat_standard_diffuse,
 	testMat_colorPhongTexture_normal_displacement,
 	testMat_environment;
 console.time('초기화 속도')
-new RedGPU.GPUContext(
+new RedGPU.RedGPUContext(
 	cvs,
 	function () {
 		console.timeEnd('초기화 속도')

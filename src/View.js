@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 12:21:28
+ *   Last modification time of this file - 2019.12.20 13:27:33
  *
  */
 
@@ -11,7 +11,7 @@ import UTIL from "./util/UTIL.js"
 import TypeSize from "./resources/TypeSize.js";
 import ShareGLSL from "./base/ShareGLSL.js"
 import PostEffect from "./postEffect/PostEffect.js";
-import GPUContext from "./GPUContext.js";
+import RedGPUContext from "./RedGPUContext.js";
 import UUID from "./base/UUID.js";
 
 export default class View extends UUID{
@@ -371,7 +371,7 @@ export default class View extends UUID{
 			if (height.includes('%') && (+height.replace('%', '') >= 0)) this.#height = height;
 			else UTIL.throwFunc('View setSize : height는 0이상의 숫자나 %만 허용.', height);
 		}
-		if (GPUContext.useDebugConsole) console.log(`setSize - input : ${width},${height} / result : ${this.#width}, ${this.#height}`);
+		if (RedGPUContext.useDebugConsole) console.log(`setSize - input : ${width},${height} / result : ${this.#width}, ${this.#height}`);
 		this.getViewRect(this.#redGPUContext);
 		this.resetTexture(this.#redGPUContext)
 	}
@@ -387,7 +387,7 @@ export default class View extends UUID{
 			if (y.includes('%') && (+y.replace('%', '') >= 0)) this._y = y;
 			else UTIL.throwFunc('View setLocation : y는 0이상의 숫자나 %만 허용.', y);
 		}
-		if (GPUContext.useDebugConsole) console.log(`setLocation - input : ${x},${y} / result : ${this._x}, ${this._y}`);
+		if (RedGPUContext.useDebugConsole) console.log(`setLocation - input : ${x},${y} / result : ${this._x}, ${this._y}`);
 		this.getViewRect(this.#redGPUContext)
 	}
 

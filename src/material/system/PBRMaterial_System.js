@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 13:10:38
+ *   Last modification time of this file - 2019.12.20 13:27:33
  *
  */
 
@@ -11,7 +11,7 @@ import TypeSize from "../../resources/TypeSize.js";
 import BaseMaterial from "../../base/BaseMaterial.js";
 import ShareGLSL from "../../base/ShareGLSL.js";
 import Mix from "../../base/Mix.js";
-import GPUContext from "../../GPUContext.js";
+import RedGPUContext from "../../RedGPUContext.js";
 
 let maxJoint = 128; // TODO - 이거 계산해내야함 나중에
 let float1_Float32Array = new Float32Array(1);
@@ -509,7 +509,7 @@ export default class PBRMaterial_System extends Mix.mix(
 						this._occlusionTexture = texture;
 						break;
 				}
-				if (GPUContext.useDebugConsole) console.log("로딩완료or로딩에러확인 textureName", textureName, texture ? texture._GPUTexture : '');
+				if (RedGPUContext.useDebugConsole) console.log("로딩완료or로딩에러확인 textureName", textureName, texture ? texture._GPUTexture : '');
 				cancelAnimationFrame(this.#raf);
 				this.#raf = requestAnimationFrame(_=>{this.needResetBindingInfo = true})
 

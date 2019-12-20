@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 12:21:28
+ *   Last modification time of this file - 2019.12.20 13:27:33
  *
  */
 
@@ -12,7 +12,7 @@ import RedGPU from "../src/RedGPU.js";
 const cvs = document.createElement('canvas');
 document.body.appendChild(cvs);
 
-new RedGPU.GPUContext(
+new RedGPU.RedGPUContext(
 	cvs,
 	function (v, reason) {
 
