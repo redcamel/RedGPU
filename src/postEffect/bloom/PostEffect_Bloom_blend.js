@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 12:21:28
+ *   Last modification time of this file - 2019.12.20 13:10:38
  *
  */
 
@@ -15,7 +15,7 @@ import TypeSize from "../../resources/TypeSize.js";
 const float1_Float32Array = new Float32Array(1);
 export default class PostEffect_Bloom_blend extends BasePostEffect {
 	static vertexShaderGLSL = `
-	#version 450
+	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
     layout( set = ${ShareGLSL.SET_INDEX_MeshUniforms}, binding = 0 ) uniform MeshUniforms {
         mat4 modelMatrix;
@@ -32,7 +32,7 @@ export default class PostEffect_Bloom_blend extends BasePostEffect {
 	}
 	`;
 	static fragmentShaderGLSL = `
-	#version 450
+	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_fragment.systemUniforms}
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 0 ) uniform FragmentUniforms {
         float bloomStrength;

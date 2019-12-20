@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 12:21:27
+ *   Last modification time of this file - 2019.12.20 13:10:38
  *
  */
 
@@ -25,7 +25,7 @@ export default class EnvironmentMaterial extends Mix.mix(
 	Mix.alpha
 ) {
 	static vertexShaderGLSL = `
-	#version 450
+	${ShareGLSL.GLSL_VERSION}
     ${ShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
     ${ShareGLSL.GLSL_SystemUniforms_vertex.calcDisplacement}    
     ${ShareGLSL.GLSL_SystemUniforms_vertex.meshUniforms}
@@ -57,7 +57,7 @@ export default class EnvironmentMaterial extends Mix.mix(
 	}
 	`;
 	static fragmentShaderGLSL = `
-	#version 450
+	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_fragment.systemUniforms}
 	${ShareGLSL.GLSL_SystemUniforms_fragment.cotangent_frame}
 	${ShareGLSL.GLSL_SystemUniforms_fragment.perturb_normal}

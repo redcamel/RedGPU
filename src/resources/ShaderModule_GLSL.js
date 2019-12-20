@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 12:21:28
+ *   Last modification time of this file - 2019.12.20 13:10:38
  *
  */
 import GPUContext from "../GPUContext.js";
@@ -65,13 +65,13 @@ export default class ShaderModule_GLSL {
 			return this.GPUShaderModule
 		} else {
 
-			if (GPUContext.useDebugConsole) console.time('compileGLSL : ' + this.type + ' / ' + searchKey);
+			console.time('compileGLSL : ' + this.type + ' / ' + searchKey);
 			this.shaderModuleDescriptor = {
 				key: searchKey,
 				code: this.#redGPUContext.glslang.compileGLSL(this.sourceMap.get(searchKey), this.type),
 				source: this.sourceMap.get(searchKey)
 			};
-			if (GPUContext.useDebugConsole) console.timeEnd('compileGLSL : ' + this.type + ' / ' + searchKey);
+			console.timeEnd('compileGLSL : ' + this.type + ' / ' + searchKey);
 			this.GPUShaderModule = this.#redGPUContext.device.createShaderModule(this.shaderModuleDescriptor);
 			this.shaderModuleMap[searchKey] = this.GPUShaderModule;
 		}

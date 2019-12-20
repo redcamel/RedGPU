@@ -2,12 +2,14 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 12:21:28
+ *   Last modification time of this file - 2019.12.20 13:10:38
  *
  */
 "use strict";
 import DetectorGPU from "./base/detect/DetectorGPU.js";
 import Render from "./renderer/Render.js";
+import ShareGLSL from "./base/ShareGLSL.js";
+
 
 let redGPUContextList = new Set();
 let setGlobalResizeEvent = function () {
@@ -22,12 +24,12 @@ let checkGlslang = function () {
 		if (!glslang) {
 			glslangModule = await import(/* webpackIgnore: true */ 'https://unpkg.com/@webgpu/glslang@0.0.12/dist/web-devel/glslang.js');
 			glslang = await glslangModule.default();
-			glslang.compileGLSL('#version 450\nvoid main(){}', 'vertex')
-			glslang.compileGLSL('#version 450\nvoid main(){}', 'fragment')
+			glslang.compileGLSL(` ${ShareGLSL.GLSL_VERSION}\nvoid main(){} `, 'vertex')
+			glslang.compileGLSL(` ${ShareGLSL.GLSL_VERSION}\nvoid main(){} `, 'fragment')
 			resolve()
 		} else {
-			glslang.compileGLSL('#version 450\nvoid main(){}', 'vertex')
-			glslang.compileGLSL('#version 450\nvoid main(){}', 'fragment')
+			glslang.compileGLSL(` ${ShareGLSL.GLSL_VERSION}\nvoid main(){} `, 'vertex')
+			glslang.compileGLSL(` ${ShareGLSL.GLSL_VERSION}\nvoid main(){} `, 'fragment')
 			resolve()
 		}
 	});
@@ -50,7 +52,7 @@ export default class GPUContext {
 				navigator.gpu.requestAdapter({powerPreference: "high-performance"})
 					.then(adapter => {
 						adapter.requestDevice({
-							extensions : ["anisotropic-filtering"]
+							extensions: ["anisotropic-filtering"]
 						})
 							.then(device => {
 								this.glslang = glslang;
