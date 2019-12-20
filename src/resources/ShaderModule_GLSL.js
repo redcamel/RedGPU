@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 19:42:18
+ *   Last modification time of this file - 2019.12.20 20:1:48
  *
  */
 import RedGPUContext from "../RedGPUContext.js";
@@ -18,6 +18,56 @@ function createWorker(f) {
 const worker = createWorker(async () => {
 	let glslangModule = await import(/* webpackIgnore: true */ 'https://unpkg.com/@webgpu/glslang@0.0.12/dist/web-devel/glslang.js');
 	let glslang = await glslangModule.default();
+
+	function k_combinations(set, k) {
+		var i, j, combs, head, tailcombs;
+		// There is no way to take e.g. sets of 5 elements from
+		// a set of 4.
+		if (k > set.length || k <= 0) {
+			return [];
+		}
+		// K-sized set has only one K-sized subset.
+		if (k === set.length) {
+			return [set];
+		}
+		// There is N 1-sized subsets in a N-sized set.
+		if (k === 1) {
+			combs = [];
+			for (i = 0; i < set.length; i++) {
+				combs.push([set[i]]);
+			}
+			return combs;
+		}
+		combs = [];
+		for (i = 0; i < set.length - k + 1; i++) {
+			// head is a list that includes only our current element.
+			head = set.slice(i, i + 1);
+			// We take smaller combinations from the subsequent elements
+			tailcombs = k_combinations(set.slice(i + 1), k - 1);
+			// For each (k-1)-combination we join it with the current
+			// and store it to the set of k-combinations.
+			for (j = 0; j < tailcombs.length; j++) {
+				combs.push(head.concat(tailcombs[j]));
+			}
+		}
+		return combs;
+	}
+
+	function combinations(set) {
+		var k, i, combs, k_combs;
+		combs = [];
+		for (k = 1; k <= set.length; k++) {
+			k_combs = k_combinations(set, k);
+			for (i = 0; i < k_combs.length; i++) {
+				combs.push(k_combs[i]);
+			}
+		}
+		return combs;
+	}
+
+	// console.log('combinations(programOptionList)',combinations(programOptionList))
+
+
 	const parseSource = function (tSource, replaceList) {
 		tSource = JSON.parse(JSON.stringify(tSource));
 		// console.time('searchTime :' + replaceList);
@@ -37,6 +87,9 @@ const worker = createWorker(async () => {
 		let temp = {}
 		let num = 0
 		//FIXME - 이부분 최적화해야함
+		var tList = combinations(e.data.optionList.sort());
+		console.log('조합을 찾아라', type, name, tList.length)
+		// console.log(tList)
 		let parse = optionList => {
 			let i = optionList.length;
 			while (i--) {
@@ -44,9 +97,9 @@ const worker = createWorker(async () => {
 				if (!temp[searchKey]) {
 					temp[searchKey] = 1
 					let parsedSource = parseSource(originSource, optionList)
-					console.time('compileGLSL - in worker : ' + type + ' / ' + searchKey);
+					// console.time('compileGLSL - in worker : ' + type + ' / ' + searchKey);
 					let compileGLSL = glslang.compileGLSL(parsedSource, type)
-					console.timeEnd('compileGLSL - in worker : ' + type + ' / ' + searchKey);
+					// console.timeEnd('compileGLSL - in worker : ' + type + ' / ' + searchKey);
 					num++
 					self.postMessage({
 						endCompile: true,
@@ -56,12 +109,12 @@ const worker = createWorker(async () => {
 						type: type
 					});
 				}
-				let newList = optionList.concat();
-				newList.splice(i, 1);
-				parse(newList);
 			}
 		};
-		parse(e.data.optionList);
+		tList.forEach(newList => {
+			parse(newList);
+		})
+
 
 		self.postMessage({
 			end: true,
@@ -148,7 +201,7 @@ export default class ShaderModule_GLSL {
 			checkMap[type][materialClass.name] = 1
 			glslParserWorker(this, materialClass.name, this.originSource, this.type, materialClass.PROGRAM_OPTION_LIST).then(
 				e => {
-					console.log('종료', e.data.name, e.data.type, e.data.totalNum)
+					console.log('모든경우의수 컴파일 완료', e.data.name, e.data.type, e.data.totalNum)
 					// console.log(this.sourceMap)
 				}
 			)

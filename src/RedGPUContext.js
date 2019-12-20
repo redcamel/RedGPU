@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 19:42:18
+ *   Last modification time of this file - 2019.12.20 20:1:48
  *
  */
 "use strict";
@@ -17,6 +17,7 @@ import EnvironmentMaterial from "./material/EnvironmentMaterial.js";
 import BitmapMaterial from "./material/BitmapMaterial.js";
 import GridMaterial from "./material/system/GridMaterial.js";
 import SkyBoxMaterial from "./material/system/SkyBoxMaterial.js";
+import PBRMaterial_System from "./material/system/PBRMaterial_System.js";
 
 
 let redGPUContextList = new Set();
