@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 22:10:59
+ *   Last modification time of this file - 2019.12.20 22:30:17
  *
  */
 import RedGPUContext from "../RedGPUContext.js";
@@ -142,7 +142,7 @@ function glslParserWorker(target, name, originSource, type, optionList) {
 					resolve(e)
 				}
 			} else {
-				console.log('체크', e, name, type)
+				// console.log('체크', e, name, type)
 			}
 
 		}
