@@ -2,13 +2,22 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 18:41:50
+ *   Last modification time of this file - 2019.12.20 20:1:48
  *
  */
 "use strict";
 import DetectorGPU from "./base/detect/DetectorGPU.js";
 import Render from "./renderer/Render.js";
 import ShareGLSL from "./base/ShareGLSL.js";
+import StandardMaterial from "./material/StandardMaterial.js";
+import ColorMaterial from "./material/ColorMaterial.js";
+import ColorPhongMaterial from "./material/ColorPhongMaterial.js";
+import ColorPhongTextureMaterial from "./material/ColorPhongTextureMaterial.js";
+import EnvironmentMaterial from "./material/EnvironmentMaterial.js";
+import BitmapMaterial from "./material/BitmapMaterial.js";
+import GridMaterial from "./material/system/GridMaterial.js";
+import SkyBoxMaterial from "./material/system/SkyBoxMaterial.js";
+import PBRMaterial_System from "./material/system/PBRMaterial_System.js";
 
 
 let redGPUContextList = new Set();
@@ -143,6 +152,17 @@ export default class RedGPUContext {
 								///////
 								this.setSize('100%', '100%');
 								if (!redGPUContextList.size) setGlobalResizeEvent();
+								////////////////////////////////////////////////////////
+								new ColorPhongMaterial(this)
+								new ColorMaterial(this)
+								new GridMaterial(this)
+								new SkyBoxMaterial(this)
+								new StandardMaterial(this)
+								new BitmapMaterial(this)
+								new EnvironmentMaterial(this)
+								new ColorPhongTextureMaterial(this)
+								// new PBRMaterial_System(this)
+								////////////////////////////////////////////////////////
 								redGPUContextList.add(this);
 								initFunc.call(this, true)
 

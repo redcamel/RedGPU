@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 13:27:33
+ *   Last modification time of this file - 2019.12.20 19:42:18
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -41,18 +41,18 @@ new RedGPU.RedGPUContext(
 			],
 			_ => {
 				console.log('텍스쳐 로딩완료', textureLoader)
-				// console.timeEnd('텍스쳐 로딩속도')
-				// console.log('로딩완료된 시점의 시간은? 어찌됨?',performance.now())
+				console.timeEnd('텍스쳐 로딩속도')
+				console.log('로딩완료된 시점의 시간은? 어찌됨?',performance.now())
 				let MAX = 5000;
 				let i = MAX;
 				let tView, tView2;
 				let tScene = new RedGPU.Scene();
 				let tScene2 = new RedGPU.Scene();
-				// console.log('여기까지 시간은 어찌됨?',performance.now())
-				// let tGrid = new RedGPU.Grid(this)
-				// console.log('그리드만들고난뒤 시간은 어찌됨?',performance.now())
-				// let tAxis = new RedGPU.Axis(this)
-				// console.log('Axis만들고난뒤 시간은 어찌됨?',performance.now())
+				console.log('여기까지 시간은 어찌됨?',performance.now())
+				let tGrid = new RedGPU.Grid(this)
+				console.log('그리드만들고난뒤 시간은 어찌됨?',performance.now())
+				let tAxis = new RedGPU.Axis(this)
+				console.log('Axis만들고난뒤 시간은 어찌됨?',performance.now())
 				let tCamera = new RedGPU.ObitController(this)
 				let tCamera2 = new RedGPU.ObitController(this)
 				// tGrid.centerColor = '#ff0000'
