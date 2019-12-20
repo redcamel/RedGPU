@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 20:37:20
+ *   Last modification time of this file - 2019.12.20 22:10:59
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -16,7 +16,9 @@ let testMat_color, testMat_colorPhong, testMat_bitmap, testMat_standard_diffuse,
 console.time('초기화 속도')
 new RedGPU.RedGPUContext(
 	cvs,
-	function () {
+	function (v) {
+		console.log('뭐가오는데',v)
+		if(!v) alert('죽었다')
 		console.timeEnd('초기화 속도')
 		document.body.appendChild(cvs);
 		console.time('텍스쳐 로딩속도')
@@ -100,12 +102,12 @@ new RedGPU.RedGPUContext(
 				}
 
 				this.addView(tView)
-				let tEffect = new RedGPU.PostEffect_Bloom(this);
-				let tEffect2 = new RedGPU.PostEffect_DoF(this);
-				tEffect.bloomStrength = 0.35
-				tEffect2.focusLength = 1000
-				tView.postEffect.addEffect(tEffect)
-				tView.postEffect.addEffect(tEffect2)
+				// let tEffect = new RedGPU.PostEffect_Bloom(this);
+				// let tEffect2 = new RedGPU.PostEffect_DoF(this);
+				// tEffect.bloomStrength = 0.35
+				// tEffect2.focusLength = 1000
+				// tView.postEffect.addEffect(tEffect)
+				// tView.postEffect.addEffect(tEffect2)
 
 				// tEffect = new RedGPU.PostEffect_Gray(this)
 				// tView.postEffect.addEffect(tEffect)

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 20:42:40
+ *   Last modification time of this file - 2019.12.20 22:10:59
  *
  */
 import RedGPUContext from "../RedGPUContext.js";
@@ -125,17 +125,10 @@ const worker = createWorker(async () => {
 		// console.log('optionList', e.data.optionList)
 	});
 });
-window.addEventListener("beforeunload", function (event) {
-	event.preventDefault();
-	worker.terminate()
-	// event.returnValue = 'alert(\' dhsi\')';
-
-});
 function glslParserWorker(target, name, originSource, type, optionList) {
 	return new Promise((resolve, reject) => {
 		function handler(e) {
 			if (e.data.name === name && e.data.type === type) {
-
 				if (e.data.endCompile) {
 					// console.log('오니', e.data.searchKey)
 					let tSearchKey = e.data.searchKey;
@@ -144,11 +137,14 @@ function glslParserWorker(target, name, originSource, type, optionList) {
 					}
 					if (e.data.error) reject(e.data.error);
 				}
-				// if (e.data.end) {
-				// 	worker.removeEventListener('message', handler);
-				// 	resolve(e)
-				// }
+				if (e.data.end) {
+					worker.removeEventListener('message', handler);
+					resolve(e)
+				}
+			} else {
+				console.log('체크', e, name, type)
 			}
+
 		}
 		worker.addEventListener('message', handler);
 		worker.postMessage({
@@ -191,9 +187,8 @@ export default class ShaderModule_GLSL {
 	currentKey;
 	constructor(redGPUContext, type, materialClass, source,) {
 		if (!rootOriginSourceMap[type][materialClass.name]) {
-			let tSourceMap = new Map();
-			tSourceMap.set(materialClass.name, source);
-			rootOriginSourceMap[type][materialClass.name] = tSourceMap;
+			rootOriginSourceMap[type][materialClass.name] = new Map();
+			;
 		}
 		this.#redGPUContext = redGPUContext;
 		this.type = type;
@@ -212,7 +207,6 @@ export default class ShaderModule_GLSL {
 			)
 		}
 
-		// console.log(this);
 	}
 
 	searchShaderModule(optionList) {
@@ -236,9 +230,9 @@ export default class ShaderModule_GLSL {
 				console.log('compileGLSL - 캐쉬된놈을 쓴다', this.type, searchKey)
 			} else {
 				if (!this.sourceMap.get(searchKey)) {
-					this.sourceMap.set(searchKey, parseSource(this.originSource, optionList));
+					this.sourceMap.set(searchKey, this.#redGPUContext.glslang.compileGLSL(parseSource(this.originSource, optionList), this.type));
 				}
-				tCompileGLSL = this.#redGPUContext.glslang.compileGLSL(this.sourceMap.get(searchKey), this.type)
+				tCompileGLSL = this.sourceMap.get(searchKey)
 				console.log('compileGLSL - 신규생성을 쓴다', this.type, searchKey)
 			}
 			console.timeEnd('compileGLSL : ' + this.type + ' / ' + searchKey);
