@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 18:41:50
+ *   Last modification time of this file - 2019.12.20 20:30:45
  *
  */
 import RedGPU from "../src/RedGPU.js";
@@ -212,8 +212,7 @@ new RedGPU.RedGPUContext(cvs,
 		// 		console.log(textureLoader)
 		// 	}
 		// )
-		tMesh = new RedGPU.Mesh(this, new RedGPU.Box(this), new RedGPU.StandardMaterial(this, new RedGPU.BitmapTexture(this, '../assets/Brick03_col.jpg')))
-		setTimeout(_ => {
+
 			let i = 1
 			while (i--) {
 				// let tMesh = new RedGPU.Mesh(this, new RedGPU.Box(this), new RedGPU.ColorMaterial(this))
@@ -252,7 +251,7 @@ new RedGPU.RedGPUContext(cvs,
 				// 	this.material.alpha = 1
 				// })
 			}
-		}, 5000)
+
 
 		let renderer = new RedGPU.Render();
 		let render = time => {

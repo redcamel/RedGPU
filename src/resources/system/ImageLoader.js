@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 12:21:28
+ *   Last modification time of this file - 2019.12.20 20:30:45
  *
  */
 
@@ -107,6 +107,12 @@ const worker = createWorker(() => {
 		})
 
 	});
+});
+window.addEventListener("beforeunload", function (event) {
+	event.preventDefault();
+	worker.terminate()
+	// event.returnValue = 'alert(\' dhsi\')';
+
 });
 function loadImageWithWorker(src) {
 	return new Promise((resolve, reject) => {
