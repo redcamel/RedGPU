@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 13:27:33
+ *   Last modification time of this file - 2019.12.21 17:1:46
  *
  */
 import RedGPU from "../src/RedGPU.js";
@@ -46,7 +46,7 @@ new RedGPU.RedGPUContext(
 			],
 			_ => {
 
-				let MAX = 5000;
+				let MAX = 10000;
 				let i = MAX;
 				let tView;
 				let tScene = new RedGPU.Scene();
@@ -134,6 +134,19 @@ new RedGPU.RedGPUContext(
 				let render = time => {
 
 					renderer.render(time, this);
+					let tChildren = tView.scene.children
+					i = tChildren.length
+
+
+					while (i--) {
+
+						tChildren[i]._rotationX += 1
+						tChildren[i]._rotationY += 1
+						tChildren[i]._rotationZ += 1
+						tChildren[i].dirtyTransform = 1
+
+
+					}
 
 					requestAnimationFrame(render);
 				};
