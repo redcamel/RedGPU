@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.21 17:1:46
+ *   Last modification time of this file - 2019.12.21 19:11:12
  *
  */
 
@@ -114,7 +114,8 @@ let checkMouseEvent = (function () {
 
 	}
 })();
-let readPixel = async (redGPUContext, redView, targetVIew, commandEncoder) => {
+
+let readPixel = async (redGPUContext, redView, targetTexture) => {
 	// 이미지 카피
 
 	let viewRect = redView.viewRect;
@@ -124,24 +125,31 @@ let readPixel = async (redGPUContext, redView, targetVIew, commandEncoder) => {
 		&& redView.mouseY > 0
 		&& redView.mouseY < viewRect[3]
 	) {
+
+		const copyEncoder = redGPUContext.device.createCommandEncoder();
 		// readPixel
-		const readPixelBuffer = redGPUContext.device.createBuffer({
+		let readPixelBuffer = redGPUContext.device.createBuffer({
 			size: 4,
 			usage: globalThis.GPUBufferUsage.COPY_DST | globalThis.GPUBufferUsage.MAP_READ,
 		});
-		const textureView = {texture: targetVIew, origin: {x: redView.mouseX, y: redView.mouseY, z: 0}};
+		const textureView = {texture: targetTexture, origin: {x: redView.mouseX, y: redView.mouseY, z: 0}};
 		const bufferView = {buffer: readPixelBuffer, rowPitch: 256, imageHeight: 1,};
 		const textureExtent = {width: 1, height: 1, depth: 1};
 
-		commandEncoder.copyTextureToBuffer(textureView, bufferView, textureExtent);
-		redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
+		copyEncoder.copyTextureToBuffer(textureView, bufferView, textureExtent);
 
-		let arrayBuffer = await readPixelBuffer.mapReadAsync();
-		readPixelBuffer.unmap()
-		readPixelBuffer.destroy();
+		const copyCommands = copyEncoder.finish();
+		redGPUContext.device.defaultQueue.submit([copyCommands]);
+
+		let arrayBuffer = await readPixelBuffer.mapReadAsync()
+		await readPixelBuffer.unmap()
+		await readPixelBuffer.destroy();
+		readPixelBuffer = null
 		pickColorArray = new Uint8ClampedArray(arrayBuffer)
+
+
 	} else {
-		redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
+
 		pickColorArray = null
 	}
 };
@@ -513,7 +521,7 @@ export default class Render {
 	#redGPUContext;
 	#swapChainTexture;
 	#swapChainTextureView;
-	#renderView = (redGPUContext, redView, lastViewYn) => {
+	#renderView = (redGPUContext, redView) => {
 		let tScene, tSceneBackgroundColor_rgba;
 		tScene = redView.scene;
 		tSceneBackgroundColor_rgba = tScene.backgroundColorRGBA;
@@ -616,9 +624,8 @@ export default class Render {
 			{width: tW, height: tH, depth: 1}
 		);
 
+		redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
 
-		readPixel(redGPUContext, redView, redView.baseAttachment_mouseColorID_ResolveTarget, commandEncoder);
-		checkMouseEvent(redGPUContext, redView, lastViewYn)
 
 	};
 
@@ -629,7 +636,13 @@ export default class Render {
 		this.#swapChainTexture = redGPUContext.swapChain.getCurrentTexture();
 		this.#swapChainTextureView = this.#swapChainTexture.createView();
 		let i = 0, len = redGPUContext.viewList.length;
-		for (i; i < len; i++) this.#renderView(redGPUContext, redGPUContext.viewList[i], i == len - 1);
+		for (i; i < len; i++) this.#renderView(redGPUContext, redGPUContext.viewList[i]);
+		i = 0;
+		// for (i; i < len; i++) {
+		// 	readPixel(redGPUContext, redGPUContext.viewList[i], redGPUContext.viewList[i].baseAttachment_mouseColorID_ResolveTarget);
+		// 	checkMouseEvent(redGPUContext, redGPUContext.viewList[i], i == len - 1)
+		// }
+
 		GLTFLoader.animationLooper(time);
 	}
 }

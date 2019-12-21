@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.21 17:1:46
+ *   Last modification time of this file - 2019.12.21 19:11:12
  *
  */
 "use strict";
@@ -157,6 +157,8 @@ export default class RedGPUContext {
 								///////
 								this.setSize('100%', '100%');
 								if (!redGPUContextList.size) setGlobalResizeEvent();
+								redGPUContextList.add(this);
+
 								////////////////////////////////////////////////////////
 								// new ColorPhongMaterial(this)
 								// new ColorMaterial(this)
@@ -171,7 +173,6 @@ export default class RedGPUContext {
 								// new Plane(this)
 								// new PBRMaterial_System(this)
 								////////////////////////////////////////////////////////
-								redGPUContextList.add(this);
 								initFunc.call(this, true)
 							});
 					}).catch(error => {

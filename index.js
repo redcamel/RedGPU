@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.21 15:32:29
+ *   Last modification time of this file - 2019.12.21 19:11:12
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -161,7 +161,7 @@ new RedGPU.RedGPUContext(
 				// tView.postEffect.addEffect(tEffect)
 
 
-				this.addView(tView2)
+				// this.addView(tView2)
 
 
 				let testCubeTexture = textureLoader.getTextureByIndex(7)
