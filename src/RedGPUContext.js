@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 22:10:59
+ *   Last modification time of this file - 2019.12.21 15:32:29
  *
  */
 "use strict";
@@ -166,14 +166,13 @@ export default class RedGPUContext {
 								new BitmapMaterial(this)
 								new EnvironmentMaterial(this)
 								new ColorPhongTextureMaterial(this)
-								new Box(this)
-								new Sphere(this)
-								new Plane(this)
+								// new Box(this)
+								// new Sphere(this)
+								// new Plane(this)
 								// new PBRMaterial_System(this)
 								////////////////////////////////////////////////////////
 								redGPUContextList.add(this);
 								initFunc.call(this, true)
-
 							});
 					}).catch(error => {
 					state = false;
@@ -214,25 +213,8 @@ export default class RedGPUContext {
 			redView.setSize();
 			redView.setLocation()
 		});
-		requestAnimationFrame(_ => {
-			const swapChainTexture = this.swapChain.getCurrentTexture();
-			const commandEncoder = this.device.createCommandEncoder();
-			const textureView = swapChainTexture.createView();
-			const passEncoder = commandEncoder.beginRenderPass({
-				colorAttachments: [
-					{
-						attachment: textureView,
-						loadValue: {r: 0, g: 0, b: 0.0, a: 0.0}
-					}
-				]
-			});
-			if (RedGPUContext.useDebugConsole) console.log(`setSize - input : ${w},${h} / result : ${tW}, ${tH}`);
-			passEncoder.setViewport(0, 0, tW, tH, 0, 1);
-			passEncoder.setScissorRect(0, 0, tW, tH);
-			passEncoder.endPass();
-			const test = commandEncoder.finish();
-			this.device.defaultQueue.submit([test]);
-		});
+		if (RedGPUContext.useDebugConsole) console.log(`setSize - input : ${w},${h} / result : ${tW}, ${tH}`);
+
 	}
 }
 

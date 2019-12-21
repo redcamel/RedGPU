@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 12:21:28
+ *   Last modification time of this file - 2019.12.21 15:32:29
  *
  */
 
@@ -107,21 +107,16 @@ let checkMouseEvent = (function () {
 		}
 		if (prevInfo[redView['_UUID']]) cursorState = 'pointer';
 		if (lastViewYn) {
-			document.body.style.cursor = cursorState;
+			redGPUContext.canvas.style.cursor = cursorState;
 			Render.mouseEventInfo.length = 0;
 			cursorState = 'default'
 		}
 
 	}
 })();
-let readPixel = async (redGPUContext, redView, baseAttachment_mouseColorID_ResolveTargetView, commandEncoder) => {
+let readPixel = async (redGPUContext, redView, targetVIew, commandEncoder) => {
 	// 이미지 카피
-	const pickTexture = redGPUContext.device.createTexture({
-		size: {width: 1, height: 1, depth: 1,},
-		dimension: '2d',
-		format: 'rgba8unorm',
-		usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.SAMPLED | GPUTextureUsage.COPY_SRC
-	});
+
 	let viewRect = redView.viewRect;
 	if (
 		redView.mouseX > 0
@@ -129,21 +124,12 @@ let readPixel = async (redGPUContext, redView, baseAttachment_mouseColorID_Resol
 		&& redView.mouseY > 0
 		&& redView.mouseY < viewRect[3]
 	) {
-		commandEncoder.copyTextureToTexture(
-			{
-				texture: baseAttachment_mouseColorID_ResolveTargetView,
-				origin: {x: redView.mouseX, y: redView.mouseY, z: 0}
-			},
-			{texture: pickTexture}, {width: 1, height: 1, depth: 1}
-		);
-
-
 		// readPixel
 		const readPixelBuffer = redGPUContext.device.createBuffer({
 			size: 4,
 			usage: globalThis.GPUBufferUsage.COPY_DST | globalThis.GPUBufferUsage.MAP_READ,
 		});
-		const textureView = {texture: pickTexture,};
+		const textureView = {texture: targetVIew,origin: {x: redView.mouseX, y: redView.mouseY, z: 0}};
 		const bufferView = {buffer: readPixelBuffer, rowPitch: 256, imageHeight: 1,};
 		const textureExtent = {width: 1, height: 1, depth: 1};
 
@@ -151,7 +137,7 @@ let readPixel = async (redGPUContext, redView, baseAttachment_mouseColorID_Resol
 		redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
 
 		let arrayBuffer = await readPixelBuffer.mapReadAsync();
-		pickTexture.destroy();
+		readPixelBuffer.unmap()
 		readPixelBuffer.destroy();
 		pickColorArray = new Uint8ClampedArray(arrayBuffer)
 	} else {
@@ -266,7 +252,7 @@ let renderScene = (redGPUContext, redView, passEncoder, parent, children, parent
 					tX = (resultPosition.x * tViewRect[2]);
 					tY = ((1 - resultPosition.y) * tViewRect[3]);
 					///////////////////////////////////////
-					if (tViewRect[2] - tX > 0 && tViewRect[3] - tY > 0 && tPipeline.GPURenderPipeline) {
+					if (tX>0 && tY>0 && tViewRect[2] - tX > 0 && tViewRect[3] - tY > 0 && tPipeline.GPURenderPipeline) {
 						passEncoder.setPipeline(tPipeline.GPURenderPipeline);
 						passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹는 매그룹마다 다르니 또 업데이트 해줘야함 -_-
 						if (prevMaterial_UUID != tMaterial._UUID) passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
@@ -527,7 +513,7 @@ export default class Render {
 	#redGPUContext;
 	#swapChainTexture;
 	#swapChainTextureView;
-	#renderView = async (redGPUContext, redView, lastViewYn) => {
+	#renderView = (redGPUContext, redView, lastViewYn) => {
 		let tScene, tSceneBackgroundColor_rgba;
 		tScene = redView.scene;
 		tSceneBackgroundColor_rgba = tScene.backgroundColorRGBA;
@@ -541,7 +527,7 @@ export default class Render {
 			colorAttachments: [
 				{
 					attachment: redView.baseAttachmentView,
-					resolveTarget: redView.baseResolveTargetView,
+					resolveTarget: redView.baseAttachment_ResolveTargetView,
 					loadValue: {
 						r: tSceneBackgroundColor_rgba[0],
 						g: tSceneBackgroundColor_rgba[1],
@@ -602,8 +588,8 @@ export default class Render {
 
 		//////////////////////////////////////////////////////////////////////////////////////////
 
-		let last_effect_baseAttachmentView = redView.baseResolveTargetView;
-		let last_effect_baseAttachment = redView.baseResolveTarget;
+		let last_effect_baseAttachmentView = redView.baseAttachment_ResolveTargetView;
+		let last_effect_baseAttachment = redView.baseAttachment_ResolveTarget;
 		let i3 = 0;
 		let len3 = redView.postEffect.effectList.length;
 		for (i3; i3 < len3; i3++) {

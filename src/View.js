@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 13:27:33
+ *   Last modification time of this file - 2019.12.21 15:32:29
  *
  */
 
@@ -14,7 +14,7 @@ import PostEffect from "./postEffect/PostEffect.js";
 import RedGPUContext from "./RedGPUContext.js";
 import UUID from "./base/UUID.js";
 
-export default class View extends UUID{
+export default class View extends UUID {
 	get viewRect() {
 		return this.#viewRect;
 	}
@@ -32,8 +32,8 @@ export default class View extends UUID{
 	//
 	baseAttachment;
 	baseAttachmentView;
-	baseResolveTarget;
-	baseResolveTargetView;
+	baseAttachment_ResolveTarget;
+	baseAttachment_ResolveTargetView;
 	baseAttachment_mouseColorID;
 	baseAttachment_mouseColorIDView;
 	baseAttachment_mouseColorID_ResolveTarget;
@@ -151,81 +151,34 @@ export default class View extends UUID{
 	};
 	resetTexture(redGPUContext) {
 		this.#viewRect = this.getViewRect(redGPUContext);
+		let list = ['baseAttachment', 'baseAttachment_depthColor', 'baseAttachment_mouseColorID'];
+		let sizeInfo = {width: this.#viewRect[2], height: this.#viewRect[3], depth: 1};
+		let usage = GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED;
 		if (this.baseAttachment) {
-			this.baseAttachment.destroy();
-			this.baseAttachment_depthColor.destroy();
-			this.baseResolveTarget.destroy();
-			this.baseAttachment_depthColor_ResolveTarget.destroy();
+			list.forEach(key => {
+				this[key].destroy()
+				this[key + '_ResolveTarget'].destroy()
+			})
 			this.baseDepthStencilAttachment.destroy();
 		}
-		this.baseAttachment = redGPUContext.device.createTexture({
-			size: {width: this.#viewRect[2], height: this.#viewRect[3], depth: 1},
-			sampleCount: 4,
-			format: redGPUContext.swapChainFormat,
-			usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED
+		list.forEach(key => {
+			this[key] = redGPUContext.device.createTexture({
+				size: sizeInfo, sampleCount: 4,
+				format: redGPUContext.swapChainFormat,
+				usage: usage
+			});
+			this[key + 'View'] = this[key].createView();
+			this[key + '_ResolveTarget'] = redGPUContext.device.createTexture({
+				size: sizeInfo, sampleCount: 1,
+				format: redGPUContext.swapChainFormat,
+				usage: usage
+			});
+			this[key + '_ResolveTargetView'] = this[key + '_ResolveTarget'].createView();
 		});
-		this.baseAttachmentView = this.baseAttachment.createView();
-		this.baseResolveTarget = redGPUContext.device.createTexture({
-			size: {width: this.#viewRect[2], height: this.#viewRect[3], depth: 1},
-			sampleCount: 1,
-			format: redGPUContext.swapChainFormat,
-			usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED
-		});
-		this.baseResolveTargetView = this.baseResolveTarget.createView();
-
-		this.baseAttachment_depthColor = redGPUContext.device.createTexture({
-			size: {width: this.#viewRect[2], height: this.#viewRect[3], depth: 1},
-			sampleCount: 4,
-			format: redGPUContext.swapChainFormat,
-			usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED
-		});
-		this.baseAttachment_depthColorView = this.baseAttachment_depthColor.createView();
-		this.baseAttachment_depthColor_ResolveTarget = redGPUContext.device.createTexture({
-			size: {width: this.#viewRect[2], height: this.#viewRect[3], depth: 1},
-			sampleCount: 1,
-			format: redGPUContext.swapChainFormat,
-			usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED
-		});
-		this.baseAttachment_depthColor_ResolveTargetView = this.baseAttachment_depthColor_ResolveTarget.createView();
-
-
-		this.baseAttachment_mouseColorID = redGPUContext.device.createTexture({
-			size: {width: this.#viewRect[2], height: this.#viewRect[3], depth: 1},
-			sampleCount: 4,
-			format: redGPUContext.swapChainFormat,
-			usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED
-		});
-		this.baseAttachment_mouseColorIDView = this.baseAttachment_mouseColorID.createView();
-		this.baseAttachment_mouseColorID_ResolveTarget = redGPUContext.device.createTexture({
-			size: {width: this.#viewRect[2], height: this.#viewRect[3], depth: 1},
-			sampleCount: 1,
-			format: redGPUContext.swapChainFormat,
-			usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED
-		});
-		this.baseAttachment_mouseColorID_ResolveTargetView = this.baseAttachment_mouseColorID_ResolveTarget.createView();
-
-		this.baseAttachment_normal = redGPUContext.device.createTexture({
-			size: {width: this.#viewRect[2], height: this.#viewRect[3], depth: 1},
-			sampleCount: 4,
-			format: redGPUContext.swapChainFormat,
-			usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED
-		});
-		this.baseAttachment_normalView = this.baseAttachment_normal.createView();
-		this.baseAttachment_normal_ResolveTarget = redGPUContext.device.createTexture({
-			size: {width: this.#viewRect[2], height: this.#viewRect[3], depth: 1},
-			sampleCount: 1,
-			format: redGPUContext.swapChainFormat,
-			usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED
-		});
-		this.baseAttachment_normal_ResolveTargetView = this.baseAttachment_normal_ResolveTarget.createView();
-
-
-
 		this.baseDepthStencilAttachment = redGPUContext.device.createTexture({
-			size: {width: this.#viewRect[2], height: this.#viewRect[3], depth: 1},
-			sampleCount: 4,
+			size: sizeInfo, sampleCount: 4,
 			format: "depth24plus-stencil8",
-			usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED
+			usage: usage
 		});
 		this.baseDepthStencilAttachmentView = this.baseDepthStencilAttachment.createView();
 

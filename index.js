@@ -2,23 +2,25 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 22:10:59
+ *   Last modification time of this file - 2019.12.21 15:32:29
  *
  */
 import RedGPU from "./src/RedGPU.js";
 
 const cvs = document.createElement('canvas');
 
+
 let testMat_color, testMat_colorPhong, testMat_bitmap, testMat_standard_diffuse, testMat_standard_diffuse_normal,
 	testMat_standard_diffuse_normal_displacement, testMat_colorPhongTexture_normal,
 	testMat_colorPhongTexture_normal_displacement,
 	testMat_environment;
 console.time('초기화 속도')
+
 new RedGPU.RedGPUContext(
 	cvs,
 	function (v) {
-		console.log('뭐가오는데',v)
-		if(!v) alert('죽었다')
+		console.log('뭐가오는데', v)
+		if (!v) alert('죽었다')
 		console.timeEnd('초기화 속도')
 		document.body.appendChild(cvs);
 		console.time('텍스쳐 로딩속도')
@@ -44,17 +46,17 @@ new RedGPU.RedGPUContext(
 			_ => {
 				console.log('텍스쳐 로딩완료', textureLoader)
 				console.timeEnd('텍스쳐 로딩속도')
-				console.log('로딩완료된 시점의 시간은? 어찌됨?',performance.now())
+				console.log('로딩완료된 시점의 시간은? 어찌됨?', performance.now())
 				let MAX = 5000;
 				let i = MAX;
 				let tView, tView2;
 				let tScene = new RedGPU.Scene();
 				let tScene2 = new RedGPU.Scene();
-				console.log('여기까지 시간은 어찌됨?',performance.now())
+				console.log('여기까지 시간은 어찌됨?', performance.now())
 				let tGrid = new RedGPU.Grid(this)
-				console.log('그리드만들고난뒤 시간은 어찌됨?',performance.now())
+				console.log('그리드만들고난뒤 시간은 어찌됨?', performance.now())
 				let tAxis = new RedGPU.Axis(this)
-				console.log('Axis만들고난뒤 시간은 어찌됨?',performance.now())
+				console.log('Axis만들고난뒤 시간은 어찌됨?', performance.now())
 				let tCamera = new RedGPU.ObitController(this)
 				let tCamera2 = new RedGPU.ObitController(this)
 				// tGrid.centerColor = '#ff0000'
@@ -93,7 +95,7 @@ new RedGPU.RedGPUContext(
 				tScene.addLight(tLight)
 
 
-				let i2 = 10
+				let i2 = 0
 				let testColor = ['#ff0000', '#00ff00', '#0000ff', '#ff00ff', '#ffff00']
 				while (i2--) {
 					let tLight = new RedGPU.PointLight(testColor[i2 % testColor.length], 1, 1, 250)
@@ -102,12 +104,14 @@ new RedGPU.RedGPUContext(
 				}
 
 				this.addView(tView)
-				// let tEffect = new RedGPU.PostEffect_Bloom(this);
-				// let tEffect2 = new RedGPU.PostEffect_DoF(this);
-				// tEffect.bloomStrength = 0.35
-				// tEffect2.focusLength = 1000
-				// tView.postEffect.addEffect(tEffect)
-				// tView.postEffect.addEffect(tEffect2)
+				let tEffect
+				tEffect = new RedGPU.PostEffect_Bloom(this);
+				tEffect.bloomStrength = 0.35
+				tView.postEffect.addEffect(tEffect)
+
+				tEffect = new RedGPU.PostEffect_DoF(this);
+				tEffect.focusLength = 1000
+				tView.postEffect.addEffect(tEffect)
 
 				// tEffect = new RedGPU.PostEffect_Gray(this)
 				// tView.postEffect.addEffect(tEffect)
@@ -223,22 +227,22 @@ new RedGPU.RedGPUContext(
 				testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = 20
 				testMesh.x = -25
 				tScene.addChild(testMesh)
-				testMesh.addEventListener('down', function () {
-					var tValue = 50 * 3
-					TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
-				})
-				testMesh.addEventListener('up', function () {
-					var tValue = 50 * 2
-					TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
-				})
-				testMesh.addEventListener('over', function () {
-					var tValue = 50 * 2
-					TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
-				})
-				testMesh.addEventListener('out', function () {
-					var tValue = 50 * 1
-					TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
-				})
+				// testMesh.addEventListener('down', function () {
+				// 	var tValue = 50 * 3
+				// 	TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
+				// })
+				// testMesh.addEventListener('up', function () {
+				// 	var tValue = 50 * 2
+				// 	TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
+				// })
+				// testMesh.addEventListener('over', function () {
+				// 	var tValue = 50 * 2
+				// 	TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
+				// })
+				// testMesh.addEventListener('out', function () {
+				// 	var tValue = 50 * 1
+				// 	TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
+				// })
 
 				testMesh = new RedGPU.Mesh(
 					this,

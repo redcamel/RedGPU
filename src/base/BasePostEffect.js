@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 12:21:27
+ *   Last modification time of this file - 2019.12.21 15:32:29
  *
  */
 
@@ -74,7 +74,6 @@ export default class BasePostEffect extends Mix.mix(
 		redView.updateSystemUniform(passEncoder_effect, redGPUContext);
 		renderScene(redGPUContext, redView, passEncoder_effect, null, [this.quad]);
 		passEncoder_effect.endPass();
-
 		redGPUContext.device.defaultQueue.submit([commandEncoder_effect.finish()]);
 	}
 	resetBindingInfo() {
