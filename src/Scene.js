@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 12:21:28
+ *   Last modification time of this file - 2019.12.21 15:32:29
  *
  */
 
@@ -99,8 +99,9 @@ export default class Scene extends DisplayContainer {
 				this.#pointLightList.push(light);
 				break;
 			case SpotLight:
-				if (this.#spotLightList.length == ShareGLSL.MAX_SPOT_LIGHT) UTIL.throwFunc(`addLight : spotLightList - Up to ${ShareGLSL.MAX_SPOT_LIGHT} are allowed.`);
-				this.#spotLightList.push(light);
+				UTIL.throwFunc(`addLight : spotLightList -아직사용할 수없는 유형의 라이트`)
+				// if (this.#spotLightList.length == ShareGLSL.MAX_SPOT_LIGHT) UTIL.throwFunc(`addLight : spotLightList - Up to ${ShareGLSL.MAX_SPOT_LIGHT} are allowed.`);
+				// this.#spotLightList.push(light);
 				break;
 			case AmbientLight:
 				this.#ambientLight = light;
@@ -122,8 +123,8 @@ export default class Scene extends DisplayContainer {
 				if (tIndex > -1) this.#pointLightList.splice(tIndex, 1);
 				break;
 			case SpotLight:
-				tIndex = this.#spotLightList.indexOf(light);
-				if (tIndex > -1) this.#spotLightList.splice(tIndex, 1);
+				// tIndex = this.#spotLightList.indexOf(light);
+				// if (tIndex > -1) this.#spotLightList.splice(tIndex, 1);
 				break;
 			case AmbientLight:
 				this.#ambientLight = null;

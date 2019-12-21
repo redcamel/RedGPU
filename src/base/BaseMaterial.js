@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 13:27:33
+ *   Last modification time of this file - 2019.12.21 15:32:29
  *
  */
 
@@ -59,8 +59,8 @@ export default class BaseMaterial extends UUID {
 		let fragmentGLSL = materialClass.fragmentShaderGLSL;
 		let programOptionList = materialClass.PROGRAM_OPTION_LIST || [];
 
-		vShaderModule = new ShaderModule_GLSL(redGPUContext, 'vertex', materialClass, vertexGLSL);
 		fShaderModule = new ShaderModule_GLSL(redGPUContext, 'fragment', materialClass, fragmentGLSL);
+		vShaderModule = new ShaderModule_GLSL(redGPUContext, 'vertex', materialClass, vertexGLSL);
 
 		if (!materialClass.uniformBufferDescriptor_vertex) throw new Error(`${materialClass.name} : must define a static uniformBufferDescriptor_vertex.`);
 		if (!materialClass.uniformBufferDescriptor_fragment) throw new Error(`${materialClass.name} : must define a static uniformBufferDescriptor_fragment.`);

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.21 12:26:45
+ *   Last modification time of this file - 2019.12.21 15:32:29
  *
  */
 import RedGPUContext from "../RedGPUContext.js";
@@ -97,9 +97,9 @@ const worker = createWorker(async () => {
 				if (!temp[searchKey]) {
 					temp[searchKey] = 1
 					let parsedSource = parseSource(originSource, optionList)
-					console.time('compileGLSL - in worker : ' + num + ' / ' + type + ' / ' + searchKey);
+					if (name != 'PBRMaterial_System') console.time('compileGLSL - in worker : ' + num + ' / ' + type + ' / ' + searchKey);
 					let compileGLSL = glslang.compileGLSL(parsedSource, type)
-					console.timeEnd('compileGLSL - in worker : ' + num + ' / ' + type + ' / ' + searchKey);
+					if (name != 'PBRMaterial_System') console.timeEnd('compileGLSL - in worker : ' + num + ' / ' + type + ' / ' + searchKey);
 					num++
 					self.postMessage({
 						endCompile: true,
@@ -197,15 +197,15 @@ export default class ShaderModule_GLSL {
 		if (!shaderModuleMap[type][materialClass.name]) shaderModuleMap[type][materialClass.name] = {};
 		this.shaderModuleMap = shaderModuleMap[type][materialClass.name];
 		this.searchShaderModule([materialClass.name]);
-		// if (!checkMap[type][materialClass.name]) {
-		// 	checkMap[type][materialClass.name] = 1
-		// 	glslParserWorker(this, materialClass.name, this.originSource, this.type, materialClass.PROGRAM_OPTION_LIST).then(
-		// 		e => {
-		// 			console.log('모든경우의수 컴파일 완료', e.data.name, e.data.type, e.data.totalNum)
-		// 			// console.log(this.sourceMap)
-		// 		}
-		// 	)
-		// }
+		if (!checkMap[type][materialClass.name]) {
+			checkMap[type][materialClass.name] = 1
+			glslParserWorker(this, materialClass.name, this.originSource, this.type, materialClass.PROGRAM_OPTION_LIST).then(
+				e => {
+					console.log('모든경우의수 컴파일 완료', e.data.name, e.data.type, e.data.totalNum)
+					// console.log(this.sourceMap)
+				}
+			)
+		}
 
 	}
 
