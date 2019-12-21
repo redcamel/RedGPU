@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 13:27:33
+ *   Last modification time of this file - 2019.12.21 19:11:12
  *
  */
 
@@ -2018,11 +2018,11 @@ var GLTFLoader;
 						parseCameras(redGLTFLoader, json);
 						parseScene(redGLTFLoader, json, function () {
 
-							let textureLoader = new TextureLoader(
+							new TextureLoader(
 								redGLTFLoader['redGPUContext'],
 								redGLTFLoader['parsingResult']['textureRawList'],
-								_ => {
-									textureLoader.textures.forEach(v => {
+								result => {
+									result.textures.forEach(v => {
 										v.userInfo.targetMaterial[v.userInfo.targetTexture] = v.texture;
 									});
 									parseAnimations(redGLTFLoader, json);
@@ -2042,11 +2042,11 @@ var GLTFLoader;
 						parseCameras(redGLTFLoader, json);
 						parseScene(redGLTFLoader, json, function () {
 
-							let textureLoader = new TextureLoader(
+							new TextureLoader(
 								redGLTFLoader['redGPUContext'],
 								redGLTFLoader['parsingResult']['textureRawList'],
-								_ => {
-									textureLoader.textures.forEach(v => {
+								result => {
+									result.textures.forEach(v => {
 										v.userInfo.targetMaterial[v.userInfo.targetTexture] = v.texture;
 									});
 									parseAnimations(redGLTFLoader, json);

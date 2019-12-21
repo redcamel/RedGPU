@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 12:21:27
+ *   Last modification time of this file - 2019.12.21 19:11:12
  *
  */
 "use strict";
@@ -21,7 +21,9 @@ export default class TextureLoader extends UUID {
 		check = _ => {
 			loaded++;
 			if (loaded == srcInfoList.length) {
-				if (callback) callback.call(this)
+				requestAnimationFrame(_=> {
+					if (callback) callback.call(this, this)
+				})
 			}
 		};
 		srcInfoList.forEach((srcInfo, idx) => {

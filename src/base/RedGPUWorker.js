@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.21 17:1:46
+ *   Last modification time of this file - 2019.12.21 19:11:12
  *
  */
 
@@ -12,10 +12,10 @@ function createWorker(f) {
 }
 
 const worker = createWorker(async () => {
-	// let glslangModule = await import(/* webpackIgnore: true */ 'https://unpkg.com/@webgpu/glslang@0.0.12/dist/web-devel/glslang.js');
-	// let glslang = await glslangModule.default();
-	// console.log('glslangModule',glslangModule)
-	// console.log('glslangModule',glslang)
+	let glslangModule = await import(/* webpackIgnore: true */ 'https://unpkg.com/@webgpu/glslang@0.0.12/dist/web-devel/glslang.js');
+	let glslang = await glslangModule.default();
+	console.log('glslangModule',glslangModule)
+	console.log('glslangModule',glslang)
 	let combinations = (_ => {
 		let k_combinations = (set, k) => {
 			var i, j, combs, head, tailcombs;
@@ -125,61 +125,61 @@ const worker = createWorker(async () => {
 			})
 		};
 	})();
-	// let getCompileGLSL = (_ => {
-	// 	let parseSource = function (tSource, replaceList) {
-	// 		tSource = JSON.parse(JSON.stringify(tSource));
-	// 		// console.time('searchTime :' + replaceList);
-	// 		let i = replaceList.length;
-	// 		while (i--) {
-	// 			let tReg = new RegExp(`\/\/\#RedGPU\#${replaceList[i]}\#`, 'gi');
-	// 			tSource = tSource.replace(tReg, '')
-	// 		}
-	// 		// console.timeEnd('searchTime :' + replaceList);
-	// 		return tSource
-	// 	};
-	// 	return data => {
-	// 		const info = data.src
-	// 		const shaderType = info.shaderType;
-	// 		const shaderName = info.shaderName;
-	// 		let originSource = info.originSource;
-	// 		let temp = {}
-	// 		let num = 0
-	// 		//FIXME - 이부분 최적화해야함
-	// 		var tList = combinations(info.optionList.sort());
-	// 		console.log('조합을 찾아라', shaderType, shaderName, tList.length)
-	// 		// console.log(tList)
-	// 		let parse = optionList => {
-	// 			let i = optionList.length;
-	// 			while (i--) {
-	// 				let searchKey = shaderName + '_' + optionList.join('_')
-	// 				if (!temp[searchKey]) {
-	// 					temp[searchKey] = 1
-	// 					let parsedSource = parseSource(originSource, optionList)
-	// 					if (shaderName != 'PBRMaterial_System') console.time('compileGLSL - in worker : ' + num + ' / ' + shaderType + ' / ' + searchKey);
-	// 					let compileGLSL = glslang.compileGLSL(parsedSource, shaderType)
-	// 					if (shaderName != 'PBRMaterial_System') console.timeEnd('compileGLSL - in worker : ' + num + ' / ' + shaderType + ' / ' + searchKey);
-	// 					num++
-	// 					self.postMessage({
-	// 						endCompile: true,
-	// 						shaderName: shaderName,
-	// 						searchKey: searchKey,
-	// 						compileGLSL: compileGLSL,
-	// 						shaderType: shaderType
-	// 					});
-	// 				}
-	// 			}
-	// 		};
-	// 		tList.forEach(newList => {
-	// 			parse(newList);
-	// 		})
-	// 		self.postMessage({
-	// 			end: true,
-	// 			shaderName: shaderName,
-	// 			shaderType: shaderType,
-	// 			totalNum: num
-	// 		});
-	// 	}
-	// })();
+	let getCompileGLSL = (_ => {
+		let parseSource = function (tSource, replaceList) {
+			tSource = JSON.parse(JSON.stringify(tSource));
+			// console.time('searchTime :' + replaceList);
+			let i = replaceList.length;
+			while (i--) {
+				let tReg = new RegExp(`\/\/\#RedGPU\#${replaceList[i]}\#`, 'gi');
+				tSource = tSource.replace(tReg, '')
+			}
+			// console.timeEnd('searchTime :' + replaceList);
+			return tSource
+		};
+		return data => {
+			const info = data.src
+			const shaderType = info.shaderType;
+			const shaderName = info.shaderName;
+			let originSource = info.originSource;
+			let temp = {}
+			let num = 0
+			//FIXME - 이부분 최적화해야함
+			var tList = combinations(info.optionList.sort());
+			console.log('조합을 찾아라', shaderType, shaderName, tList.length)
+			// console.log(tList)
+			let parse = optionList => {
+				let i = optionList.length;
+				while (i--) {
+					let searchKey = shaderName + '_' + optionList.join('_')
+					if (!temp[searchKey]) {
+						temp[searchKey] = 1
+						let parsedSource = parseSource(originSource, optionList)
+						if (shaderName != 'PBRMaterial_System') console.time('compileGLSL - in worker : ' + num + ' / ' + shaderType + ' / ' + searchKey);
+						let compileGLSL = glslang.compileGLSL(parsedSource, shaderType)
+						if (shaderName != 'PBRMaterial_System') console.timeEnd('compileGLSL - in worker : ' + num + ' / ' + shaderType + ' / ' + searchKey);
+						num++
+						self.postMessage({
+							endCompile: true,
+							shaderName: shaderName,
+							searchKey: searchKey,
+							compileGLSL: compileGLSL,
+							shaderType: shaderType
+						});
+					}
+				}
+			};
+			tList.forEach(newList => {
+				parse(newList);
+			})
+			self.postMessage({
+				end: true,
+				shaderName: shaderName,
+				shaderType: shaderType,
+				totalNum: num
+			});
+		}
+	})();
 
 	self.addEventListener('message', e => {
 		// console.log('뭐가오지?', e)
@@ -188,9 +188,9 @@ const worker = createWorker(async () => {
 			case 'image' :
 				getImage(e.data)
 				break
-			// case 'compileGLSL' :
-			// 	getCompileGLSL(e.data)
-			// 	break
+			case 'compileGLSL' :
+				getCompileGLSL(e.data)
+				break
 			default :
 				console.log(`worker - 처리할수없는 타입 : ${eventType}`)
 		}
@@ -211,35 +211,35 @@ const RedGPUWorker = {
 			worker.postMessage({src: src, workerType: 'image'});
 		});
 	},
-	// glslParserWorker: (target, shaderName, originSource, shaderType, optionList) => {
-	// 	return new Promise((resolve, reject) => {
-	// 		function handler(e) {
-	// 			if (e.data.shaderName === shaderName && e.data.shaderType === shaderType) {
-	// 				if (e.data.endCompile) {
-	// 					// console.log('오니', e.data.searchKey)
-	// 					let tSearchKey = e.data.searchKey;
-	// 					if (!target.sourceMap.has(tSearchKey)) target.sourceMap.set(tSearchKey, e.data.compileGLSL);
-	// 					if (e.data.error) reject(e.data.error);
-	// 				}
-	// 				if (e.data.end) {
-	// 					worker.removeEventListener('message', handler);
-	// 					resolve(e)
-	// 				}
-	// 			} else {
-	// 				// console.log('체크', e, shaderName, shaderType)
-	// 			}
-	// 		}
-	// 		worker.addEventListener('message', handler);
-	// 		worker.postMessage({
-	// 			src: {
-	// 				originSource: originSource,
-	// 				shaderName: shaderName,
-	// 				shaderType: shaderType,
-	// 				optionList: optionList,
-	// 			},
-	// 			workerType: 'compileGLSL'
-	// 		});
-	// 	});
-	// }
+	glslParserWorker: (target, shaderName, originSource, shaderType, optionList) => {
+		return new Promise((resolve, reject) => {
+			function handler(e) {
+				if (e.data.shaderName === shaderName && e.data.shaderType === shaderType) {
+					if (e.data.endCompile) {
+						// console.log('오니', e.data.searchKey)
+						let tSearchKey = e.data.searchKey;
+						if (!target.sourceMap.has(tSearchKey)) target.sourceMap.set(tSearchKey, e.data.compileGLSL);
+						if (e.data.error) reject(e.data.error);
+					}
+					if (e.data.end) {
+						worker.removeEventListener('message', handler);
+						resolve(e)
+					}
+				} else {
+					// console.log('체크', e, shaderName, shaderType)
+				}
+			}
+			worker.addEventListener('message', handler);
+			worker.postMessage({
+				src: {
+					originSource: originSource,
+					shaderName: shaderName,
+					shaderType: shaderType,
+					optionList: optionList,
+				},
+				workerType: 'compileGLSL'
+			});
+		});
+	}
 }
 export default RedGPUWorker
