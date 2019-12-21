@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.21 15:32:29
+ *   Last modification time of this file - 2019.12.21 17:1:46
  *
  */
 
@@ -129,7 +129,7 @@ let readPixel = async (redGPUContext, redView, targetVIew, commandEncoder) => {
 			size: 4,
 			usage: globalThis.GPUBufferUsage.COPY_DST | globalThis.GPUBufferUsage.MAP_READ,
 		});
-		const textureView = {texture: targetVIew,origin: {x: redView.mouseX, y: redView.mouseY, z: 0}};
+		const textureView = {texture: targetVIew, origin: {x: redView.mouseX, y: redView.mouseY, z: 0}};
 		const bufferView = {buffer: readPixelBuffer, rowPitch: 256, imageHeight: 1,};
 		const textureExtent = {width: 1, height: 1, depth: 1};
 
@@ -252,7 +252,7 @@ let renderScene = (redGPUContext, redView, passEncoder, parent, children, parent
 					tX = (resultPosition.x * tViewRect[2]);
 					tY = ((1 - resultPosition.y) * tViewRect[3]);
 					///////////////////////////////////////
-					if (tX>0 && tY>0 && tViewRect[2] - tX > 0 && tViewRect[3] - tY > 0 && tPipeline.GPURenderPipeline) {
+					if (tX > 0 && tY > 0 && tViewRect[2] - tX > 0 && tViewRect[3] - tY > 0 && tPipeline.GPURenderPipeline) {
 						passEncoder.setPipeline(tPipeline.GPURenderPipeline);
 						passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹는 매그룹마다 다르니 또 업데이트 해줘야함 -_-
 						if (prevMaterial_UUID != tMaterial._UUID) passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
@@ -608,22 +608,12 @@ export default class Render {
 		if (tW > this.#redGPUContext.canvas.width) tW = this.#redGPUContext.canvas.width - tX;
 		if (tH > this.#redGPUContext.canvas.height) tH = this.#redGPUContext.canvas.height - tX;
 		commandEncoder.copyTextureToTexture(
-			{
-				texture: last_effect_baseAttachment
-			},
+			{texture: last_effect_baseAttachment},
 			{
 				texture: this.#swapChainTexture,
-				origin: {
-					x: tX,
-					y: tY,
-					z: 0
-				}
+				origin: {x: tX, y: tY, z: 0}
 			},
-			{
-				width: tW,
-				height: tH,
-				depth: 1
-			}
+			{width: tW, height: tH, depth: 1}
 		);
 
 

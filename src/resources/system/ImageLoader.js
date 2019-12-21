@@ -2,127 +2,19 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 22:10:59
+ *   Last modification time of this file - 2019.12.21 17:1:46
  *
  */
 
 "use strict";
 import UUID from "../../base/UUID.js";
+import RedGPUWorker from "../../base/RedGPUWorker.js";
 
 
 const SRC_MAP = {};
 
 //TODO 정리해야함
-function createWorker(f) {
-	return new Worker(URL.createObjectURL(new Blob([`(${f})()`])));
-}
 
-const worker = createWorker(() => {
-	let nextHighestPowerOfTwo = (function () {
-		var i;
-		return function (v) {
-			--v;
-			for (i = 1; i < 32; i <<= 1) v = v | v >> i;
-			return v + 1;
-		}
-	})();
-	self.addEventListener('message', e => {
-		const src = e.data;
-		let errorInfo;
-		fetch(src, {mode: 'cors'})
-			.then(response => {
-				errorInfo = {
-					url: response.url,
-					ok: response.ok,
-					status: response.status,
-					statusText: response.statusText,
-					type: response.type
-				};
-				if (!response.ok) {
-					// console.log(response)
-					throw Error('error');
-				} else {
-					response.blob()
-						.then(blob => createImageBitmap(blob))
-						.then(bitmap => {
-							let faceWidth = bitmap.width;
-							let faceHeight = bitmap.height;
-							faceWidth = nextHighestPowerOfTwo(faceWidth);
-							faceHeight = nextHighestPowerOfTwo(faceHeight);
-							if (faceWidth > 1024) faceWidth = 1024;
-							if (faceHeight > 1024) faceHeight = 1024;
-							// console.log(data)
-							let imageDatas = [];
-							let mipIndex = 0, len = Math.round(Math.log2(Math.max(faceWidth, faceHeight)));
-							let getMipmapDatas = img => {
-								const cvs = new OffscreenCanvas(faceWidth, faceHeight);
-								const ctx = cvs.getContext('2d');
-								ctx.fillStyle = 'rgba(0,0,0,0)';
-								ctx.fillRect(0,0,faceWidth,faceHeight);
-								ctx.drawImage(img, 0, 0, faceWidth, faceHeight);
-								let imageData = ctx.getImageData(0, 0, faceWidth, faceHeight).data;
-								let data;
-								const rowPitch = Math.ceil(faceWidth * 4 / 256) * 256;
-								if (rowPitch == faceWidth * 4) {
-									data = imageData;
-								} else {
-									data = new Uint8ClampedArray(rowPitch * faceHeight);
-									let pixelsIndex = 0;
-									for (let y = 0; y < faceHeight; ++y) {
-										for (let x = 0; x < faceWidth; ++x) {
-											let i = x * 4 + y * rowPitch;
-											data[i] = imageData[pixelsIndex];
-											data[i + 1] = imageData[pixelsIndex + 1] ;
-											data[i + 2] = imageData[pixelsIndex + 2];
-											data[i + 3] = imageData[pixelsIndex + 3];
-											pixelsIndex += 4;
-										}
-									}
-								}
-								imageDatas.push({
-									data: data.buffer,
-									width: faceWidth,
-									height: faceHeight,
-									rowPitch: rowPitch
-								});
-								faceWidth = Math.max(Math.floor(faceWidth / 2), 1);
-								faceHeight = Math.max(Math.floor(faceHeight / 2), 1);
-								mipIndex++;
-								if (mipIndex == len + 1) {
-									self.postMessage({src, imageDatas: imageDatas});
-								} else {
-									getMipmapDatas(cvs)
-								}
-
-							};
-							getMipmapDatas(bitmap)
-						})
-				}
-
-			}).catch(error => {
-			self.postMessage({
-				error: errorInfo,
-				src: src
-			})
-		})
-
-	});
-});
-function loadImageWithWorker(src) {
-	return new Promise((resolve, reject) => {
-		function handler(e) {
-			if (e.data.src === src) {
-				worker.removeEventListener('message', handler);
-				if (e.data.error) {
-					reject(e.data.error);
-				}
-				resolve(e.data);
-			}
-		}
-		worker.addEventListener('message', handler);
-		worker.postMessage(src);
-	});
-}
 export default class ImageLoader extends UUID {
 	static TYPE_2D = 'TYPE_2D';
 	static TYPE_CUBE = 'TYPE_CUBE';
@@ -150,7 +42,7 @@ export default class ImageLoader extends UUID {
 					tempList: []
 				};
 				SRC_MAP[targetSRC].tempList.push(this);
-				loadImageWithWorker(targetSRC)
+				RedGPUWorker.loadImageWithWorker(targetSRC)
 					.then(result => {
 						console.log(result);
 						console.log('첫 로딩업데이트 해야될 대상', SRC_MAP[targetSRC]);
@@ -196,11 +88,11 @@ export default class ImageLoader extends UUID {
 					} else {
 						SRC_MAP[targetSRC] = {
 							loaded: false,
-							imgList : imgList,
+							imgList: imgList,
 							tempList: []
 						};
 						SRC_MAP[targetSRC].tempList.push(this);
-						loadImageWithWorker(targetSRC)
+						RedGPUWorker.loadImageWithWorker(targetSRC)
 							.then(result => {
 								imgList[face] = result;
 								loadCount++;
@@ -230,7 +122,6 @@ export default class ImageLoader extends UUID {
 								console.log('로딩실패!', result)
 							});
 					}
-
 
 
 				}
