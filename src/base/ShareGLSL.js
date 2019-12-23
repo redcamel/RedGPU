@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.21 19:11:12
+ *   Last modification time of this file - 2019.12.23 19:1:41
  *
  */
 
@@ -23,6 +23,7 @@ export default class ShareGLSL {
 		layout( set =  ${ShareGLSL.SET_INDEX_SystemUniforms_vertex}, binding = 0 ) uniform SystemUniforms {
 	        mat4 perspectiveMTX;
 	        mat4 cameraMTX;
+	        vec2 resolution;
 	        float time;
 	    } systemUniforms;
 	    `,

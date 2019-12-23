@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.23 14:37:36
+ *   Last modification time of this file - 2019.12.23 19:1:41
  *
  */
 import RedGPUContext from "../RedGPUContext.js";
@@ -83,18 +83,18 @@ export default class ShaderModule_GLSL {
 		} else {
 			// console.log('searchKey', searchKey)
 			let tCompileGLSL;
-			console.time('compileGLSL : ' + this.type + ' / ' + searchKey);
+			// console.time('compileGLSL : ' + this.type + ' / ' + searchKey);
 			if (this.sourceMap.get(searchKey) instanceof Uint32Array) {
 				tCompileGLSL = this.sourceMap.get(searchKey);
-				// console.log('compileGLSL - 캐쉬된놈을 쓴다', this.type, searchKey)
+				console.log('compileGLSL - 캐쉬된놈을 쓴다', this.type, searchKey)
 			} else {
 				if (!this.sourceMap.get(searchKey)) {
 					this.sourceMap.set(searchKey, this.#redGPUContext.glslang.compileGLSL(parseSource(this.originSource, optionList), this.type));
 				}
 				tCompileGLSL = this.sourceMap.get(searchKey);
-				// console.log('compileGLSL - 신규생성을 쓴다', this.type, searchKey)
+				console.log('compileGLSL - 신규생성을 쓴다', this.type, searchKey)
 			}
-			console.timeEnd('compileGLSL : ' + this.type + ' / ' + searchKey);
+			// console.timeEnd('compileGLSL : ' + this.type + ' / ' + searchKey);
 			// console.log(' 쓴다', tCompileGLSL)
 
 			this.shaderModuleDescriptor = {

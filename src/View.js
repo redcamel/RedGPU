@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.23 14:37:36
+ *   Last modification time of this file - 2019.12.23 19:1:41
  *
  */
 
@@ -64,7 +64,9 @@ export default class View extends UUID {
 		let uniformBufferSize =
 			TypeSize.mat4 + // projectionMatrix
 			TypeSize.mat4 +  // camera
+			TypeSize.float2+// resolution
 			TypeSize.float // time
+
 		;
 		const uniformBufferDescriptor = {
 			size: uniformBufferSize,
@@ -202,8 +204,8 @@ export default class View extends UUID {
 		offset += TypeSize.mat4 / Float32Array.BYTES_PER_ELEMENT;
 		this.#systemUniformInfo_vertex_data.set(this.camera.matrix, offset);
 		offset += TypeSize.mat4 / Float32Array.BYTES_PER_ELEMENT;
-		this.#systemUniformInfo_vertex_data.set([performance.now()], offset);
-		offset += TypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
+		this.#systemUniformInfo_vertex_data.set([this.#viewRect[2], this.#viewRect[3],performance.now()], offset);
+		offset += TypeSize.float2 / Float32Array.BYTES_PER_ELEMENT;
 		// update GPUBuffer
 		systemUniformInfo_vertex.GPUBuffer.setSubData(0, this.#systemUniformInfo_vertex_data);
 		// update systemUniformInfo_fragment /////////////////////////////////////////////////////////////////////////////////////////////////

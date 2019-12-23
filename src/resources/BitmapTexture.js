@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 12:21:28
+ *   Last modification time of this file - 2019.12.23 19:1:41
  *
  */
 "use strict";
@@ -39,7 +39,7 @@ let makeMipmap = function (redGPUContext, imageDatas, targetTexture) {
 	CopyBufferToTexture(commandEncoder, redGPUContext.device, imageDatas, gpuTexture, targetTexture).then(
 		_ => {
 			targetTexture.resolve(gpuTexture);
-			if (targetTexture.onload) targetTexture.onload();
+			if (targetTexture.onload) targetTexture.onload(targetTexture);
 			redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
 		}
 	)
@@ -76,8 +76,6 @@ export default class BitmapTexture extends BaseTexture {
 
 		}
 	}
-
-
 
 
 }

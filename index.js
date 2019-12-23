@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.23 14:37:36
+ *   Last modification time of this file - 2019.12.23 19:1:41
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -106,12 +106,12 @@ new RedGPU.RedGPUContext(
 				this.addView(tView)
 				let tEffect
 				tEffect = new RedGPU.PostEffect_Bloom(this);
-				tEffect.bloomStrength = 0.35
+				tEffect.bloomStrength = 0.5
 				tView.postEffect.addEffect(tEffect)
 
-				tEffect = new RedGPU.PostEffect_DoF(this);
-				tEffect.focusLength = 1000
-				tView.postEffect.addEffect(tEffect)
+				// tEffect = new RedGPU.PostEffect_DoF(this);
+				// tEffect.focusLength = 1000
+				// tView.postEffect.addEffect(tEffect)
 				console.log('여기까지 시간은 어찌됨?', performance.now())
 				// tEffect = new RedGPU.PostEffect_Gray(this)
 				// tView.postEffect.addEffect(tEffect)
@@ -211,7 +211,7 @@ new RedGPU.RedGPUContext(
 				while (i3--) {
 					let testMesh = new RedGPU.Mesh(
 						this,
-						new RedGPU.Sphere(this, 0.5, 32, 32, 32),
+						new RedGPU.Sphere(this, 0.5, 16, 16, 16),
 						testMat_bitmap
 					);
 					testMesh.x = Math.random() * 30 - 15
@@ -221,7 +221,7 @@ new RedGPU.RedGPUContext(
 				}
 				let testMesh = new RedGPU.Mesh(
 					this,
-					new RedGPU.Sphere(this, 0.5, 32, 32, 32),
+					new RedGPU.Sphere(this, 0.5, 16, 16, 16),
 					testMat_standard_diffuse
 				);
 				testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = 20
@@ -247,7 +247,7 @@ new RedGPU.RedGPUContext(
 
 				testMesh = new RedGPU.Mesh(
 					this,
-					new RedGPU.Sphere(this, 0.5, 32, 32, 32),
+					new RedGPU.Sphere(this, 0.5, 16, 16, 16),
 					testMat_environment
 				);
 				testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = 20
@@ -269,6 +269,8 @@ new RedGPU.RedGPUContext(
 					var tValue = 50 * 1
 					TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
 				})
+
+
 
 				let division = MAX / 8
 				while (i--) {
@@ -305,6 +307,7 @@ new RedGPU.RedGPUContext(
 					testMesh.rotationX = testMesh.rotationY = testMesh.rotationZ = Math.random() * 360;
 					testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = 40;
 					tScene.addChild(testMesh)
+
 					// //
 					// let testMesh2 = new RedGPU.Mesh(
 					// 	this,
@@ -326,6 +329,21 @@ new RedGPU.RedGPUContext(
 
 				}
 				console.log('여기까지 시간은 어찌됨?', performance.now())
+
+				i = 100
+				while(i--){
+					let tMesh = new RedGPU.Text(this,512,64)
+					tMesh.x = Math.random() * 100 - 50;
+					tMesh.y = Math.random() * 100 - 50;
+					tMesh.z = Math.random() * 100 - 50;
+					// tMesh.rotationX = tMesh.rotationY = tMesh.rotationZ = Math.random() * 360;
+					tMesh.scaleX = tMesh.scaleY = 10
+					tMesh.fontSize = 60
+					tMesh.fontWeight = 'bold'
+					tMesh.color = i%2 ?'#fff' : '#ff2255'
+					tMesh.text = i%2 ? '가나다라마바사' : 'ABCDEFG'
+					tScene.addChild(tMesh)
+				}
 
 				let renderer = new RedGPU.Render();
 				let render = time => {
@@ -355,10 +373,10 @@ new RedGPU.RedGPUContext(
 
 					while (i--) {
 
-						tChildren[i]._rotationX += 1
-						tChildren[i]._rotationY += 1
-						tChildren[i]._rotationZ += 1
-						tChildren[i].dirtyTransform = 1
+						// tChildren[i]._rotationX += 1
+						// tChildren[i]._rotationY += 1
+						// tChildren[i]._rotationZ += 1
+						// tChildren[i].dirtyTransform = 1
 
 
 					}
