@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.23 20:5:39
+ *   Last modification time of this file - 2019.12.23 20:12:20
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -330,7 +330,7 @@ new RedGPU.RedGPUContext(
 				}
 				console.log('여기까지 시간은 어찌됨?', performance.now())
 
-				i = 250
+				i = 150
 				while(i--){
 					let tMesh = new RedGPU.Text(this,512,64)
 					tMesh.x = Math.random() * 200 - 100;
