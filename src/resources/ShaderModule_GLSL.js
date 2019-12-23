@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.21 19:11:12
+ *   Last modification time of this file - 2019.12.23 12:0:11
  *
  */
 import RedGPUContext from "../RedGPUContext.js";
@@ -53,7 +53,7 @@ export default class ShaderModule_GLSL {
 		this.sourceMap = rootOriginSourceMap[type][materialClass.name];
 		if (!shaderModuleMap[type][materialClass.name]) shaderModuleMap[type][materialClass.name] = {};
 		this.shaderModuleMap = shaderModuleMap[type][materialClass.name];
-		this.searchShaderModule([materialClass.name]);
+
 		if (!checkMap[type][materialClass.name]) {
 			console.log(`materialClass.PROGRAM_OPTION_LIST - ${materialClass.name}`, materialClass.PROGRAM_OPTION_LIST.length, materialClass.PROGRAM_OPTION_LIST)
 			checkMap[type][materialClass.name] = 1
@@ -66,6 +66,7 @@ export default class ShaderModule_GLSL {
 				)
 			}
 		}
+		this.searchShaderModule([materialClass.name]);
 
 	}
 
