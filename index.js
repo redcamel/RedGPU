@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.21 19:11:12
+ *   Last modification time of this file - 2019.12.23 12:12:22
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -369,6 +369,9 @@ new RedGPU.RedGPUContext(
 				};
 				requestAnimationFrame(render);
 				setTestUI(this, tView, tScene, testCubeTexture)
+			},
+			function(e){
+				console.log('progress',this,e)
 			}
 		)
 

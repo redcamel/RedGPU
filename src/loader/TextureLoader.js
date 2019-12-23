@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.21 19:11:12
+ *   Last modification time of this file - 2019.12.23 12:12:22
  *
  */
 "use strict";
@@ -12,7 +12,7 @@ import BitmapCubeTexture from "../resources/BitmapCubeTexture.js";
 
 export default class TextureLoader extends UUID {
 	textures = [];
-	constructor(redGPUContext, srcInfoList, callback) {
+	constructor(redGPUContext, srcInfoList, callback, progressCallback) {
 		super();
 		let loaded, check;
 		srcInfoList = srcInfoList || [];
@@ -20,6 +20,10 @@ export default class TextureLoader extends UUID {
 
 		check = _ => {
 			loaded++;
+			if(progressCallback) progressCallback.call(this,{
+				totalNum : srcInfoList.length,
+				loaded : loaded
+			})
 			if (loaded == srcInfoList.length) {
 				requestAnimationFrame(_=> {
 					if (callback) callback.call(this, this)
