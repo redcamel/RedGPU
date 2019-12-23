@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 12:21:27
+ *   Last modification time of this file - 2019.12.23 14:37:36
  *
  */
 
@@ -90,7 +90,7 @@ export default class Pipeline extends UUID {
 		this.GPURenderPipeline = device.createRenderPipeline(descriptor);
 		// console.log('updatePipeline_sampleCount4 - ', targetMesh._material.fShaderModule.currentKey)
 		// console.timeEnd('updatePipeline_sampleCount4 - ' + this._UUID)
-		this.updateUUID()
+		// this.updateUUID()
 
 
 	}
@@ -147,7 +147,7 @@ export default class Pipeline extends UUID {
 		};
 
 		this.GPURenderPipeline = device.createRenderPipeline(descriptor);
-		this.updateUUID()
+		// this.updateUUID()
 	}
 
 }

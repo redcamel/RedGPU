@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 12:21:28
+ *   Last modification time of this file - 2019.12.23 14:37:36
  *
  */
 
@@ -15,13 +15,13 @@ export default {
 		return '#' + (0x1000000 + rgb).toString(16).slice(1)
 	},
 	regHex: (function () {
-		var reg = /^#(?:[0-9a-fA-F]{3}){1,2}$/;
+		const reg = /^#(?:[0-9a-fA-F]{3}){1,2}$/;
 		return function (hex) {
 			return reg.test(hex);
 		}
 	})(),
 	hexToRGB_ZeroToOne: function (hex) {
-		var t0, t1;
+		let t0, t1;
 		if (hex.indexOf('rgba') > -1) {
 			hex = hex.replace('rgba(', '');
 			hex = hex.replace(')', '');

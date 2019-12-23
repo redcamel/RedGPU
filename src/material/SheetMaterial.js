@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 13:27:33
+ *   Last modification time of this file - 2019.12.23 14:37:36
  *
  */
 
@@ -112,7 +112,7 @@ export default class SheetMaterial extends Mix.mix(
 	update(time) {
 		if (!this._nextFrameTime) this._nextFrameTime = this._perFrameTime + time;
 		if (this._playYn && this._nextFrameTime < time) {
-			var gapFrame = parseInt((time - this._nextFrameTime) / this._perFrameTime);
+			let gapFrame = parseInt((time - this._nextFrameTime) / this._perFrameTime);
 			gapFrame = gapFrame || 1;
 			this._nextFrameTime = this._perFrameTime + time;
 			this.currentIndex += gapFrame;

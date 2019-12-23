@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.23 12:12:22
+ *   Last modification time of this file - 2019.12.23 14:37:36
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -112,7 +112,7 @@ new RedGPU.RedGPUContext(
 				tEffect = new RedGPU.PostEffect_DoF(this);
 				tEffect.focusLength = 1000
 				tView.postEffect.addEffect(tEffect)
-
+				console.log('여기까지 시간은 어찌됨?', performance.now())
 				// tEffect = new RedGPU.PostEffect_Gray(this)
 				// tView.postEffect.addEffect(tEffect)
 
@@ -227,6 +227,7 @@ new RedGPU.RedGPUContext(
 				testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = 20
 				testMesh.x = -25
 				tScene.addChild(testMesh)
+
 				// testMesh.addEventListener('down', function () {
 				// 	var tValue = 50 * 3
 				// 	TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
@@ -324,12 +325,10 @@ new RedGPU.RedGPUContext(
 					// testMesh2.addChild(testMesh3)
 
 				}
-
+				console.log('여기까지 시간은 어찌됨?', performance.now())
 
 				let renderer = new RedGPU.Render();
 				let render = time => {
-
-
 					tLight.x = Math.sin(time / 1000)
 					tLight.y = Math.cos(time / 500)
 					tLight.z = Math.cos(time / 750)
@@ -363,7 +362,6 @@ new RedGPU.RedGPUContext(
 
 
 					}
-
 
 					requestAnimationFrame(render);
 				};

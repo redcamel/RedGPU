@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.23 12:0:11
+ *   Last modification time of this file - 2019.12.23 14:37:36
  *
  */
 "use strict";
@@ -36,12 +36,12 @@ let checkGlslang = function () {
 		if (!glslang) {
 			glslangModule = await import(/* webpackIgnore: true */ 'https://unpkg.com/@webgpu/glslang@0.0.12/dist/web-devel/glslang.js');
 			glslang = await glslangModule.default();
-			glslang.compileGLSL(` ${ShareGLSL.GLSL_VERSION}\nvoid main(){} `, 'vertex')
-			glslang.compileGLSL(` ${ShareGLSL.GLSL_VERSION}\nvoid main(){} `, 'fragment')
+			glslang.compileGLSL(` ${ShareGLSL.GLSL_VERSION}\nvoid main(){} `, 'vertex');
+			glslang.compileGLSL(` ${ShareGLSL.GLSL_VERSION}\nvoid main(){} `, 'fragment');
 			resolve()
 		} else {
-			glslang.compileGLSL(` ${ShareGLSL.GLSL_VERSION}\nvoid main(){} `, 'vertex')
-			glslang.compileGLSL(` ${ShareGLSL.GLSL_VERSION}\nvoid main(){} `, 'fragment')
+			glslang.compileGLSL(` ${ShareGLSL.GLSL_VERSION}\nvoid main(){} `, 'vertex');
+			glslang.compileGLSL(` ${ShareGLSL.GLSL_VERSION}\nvoid main(){} `, 'fragment');
 			resolve()
 		}
 	});
@@ -158,15 +158,15 @@ export default class RedGPUContext {
 								this.setSize('100%', '100%');
 								if (!redGPUContextList.size) setGlobalResizeEvent();
 								redGPUContextList.add(this);
-								initFunc.call(this, true)
+								initFunc.call(this, true);
 								////////////////////////////////////////////////////////
-								new ColorPhongMaterial(this)
-								new ColorMaterial(this)
-								new GridMaterial(this)
-								new SkyBoxMaterial(this)
-								new StandardMaterial(this)
-								new BitmapMaterial(this)
-								new EnvironmentMaterial(this)
+								new ColorPhongMaterial(this);
+								new ColorMaterial(this);
+								new GridMaterial(this);
+								new SkyBoxMaterial(this);
+								new StandardMaterial(this);
+								new BitmapMaterial(this);
+								new EnvironmentMaterial(this);
 								new ColorPhongTextureMaterial(this)
 								// new Box(this)
 								// new Sphere(this)

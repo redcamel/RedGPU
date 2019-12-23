@@ -2,17 +2,17 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.23 12:0:11
+ *   Last modification time of this file - 2019.12.23 14:37:36
  *
  */
 
-import GLTFLoader from "../loader/GLTFLoader.js";
+import GLTFLoader from "../loader/gltf/GLTFLoader.js";
 import SheetMaterial from "../material/SheetMaterial.js";
 
 let renderToTransparentLayerList = [];
 let tCacheUniformInfo = {};
-var resultPreMTX = mat4.create();
-var updateTargetMatrixBufferList = [];
+const resultPreMTX = mat4.create();
+const updateTargetMatrixBufferList = [];
 let currentTime;
 let pickColorArray;
 let checkMouseEvent = (function () {
@@ -41,7 +41,7 @@ let checkMouseEvent = (function () {
 			let meshEventData;
 			if (pickColorArray) meshEventData = Render.mouseMAP[[...pickColorArray].toString()];
 
-			var tEventType;
+			let tEventType;
 			if (meshEventData) {
 				if (canvasMouseEvent['type'] == redGPUContext.detector.down) {
 					tEventType = 'down';
@@ -143,10 +143,10 @@ let readPixel = async (redGPUContext, redView, targetTexture, commandEncoder) =>
 		redGPUContext.device.defaultQueue.submit([copyCommands]);
 
 		pickedArrayBuffer = readPixelBuffer.mapReadAsync().then(e => {
-			readPixelBuffer.unmap()
+			readPixelBuffer.unmap();
 			readPixelBuffer.destroy();
-			readPixelBuffer = null
-			pickColorArray = new Uint8ClampedArray(e)
+			readPixelBuffer = null;
+			pickColorArray = new Uint8ClampedArray(e);
 			pickedArrayBuffer = null
 		})
 
@@ -182,8 +182,8 @@ let renderScene = (redGPUContext, redView, passEncoder, parent, children, parent
 	let tX, tY;
 	//////
 
-	var tViewRect;
-	var resultPosition;
+	let tViewRect;
+	let resultPosition;
 	tViewRect = redView.viewRect;
 	resultPosition = {
 		x: 0,
@@ -421,11 +421,12 @@ let renderScene = (redGPUContext, redView, passEncoder, parent, children, parent
 			tMesh.uniformBuffer_mesh.meshFloat32Array.set(tMesh.normalMatrix, tMesh.offsetNormalMatrix / Float32Array.BYTES_PER_ELEMENT);
 		}
 		if (tSkinInfo) {
-			var joints = tSkinInfo['joints'];
-			var joint_i = 0, len = joints.length;
-			var tJointMTX;
-			var globalTransformOfJointNode = new Float32Array(len * 16);
-			var globalTransformOfNodeThatTheMeshIsAttachedTo = new Float32Array([
+			const joints = tSkinInfo['joints'];
+			let joint_i = 0;
+			const len = joints.length;
+			let tJointMTX;
+			const globalTransformOfJointNode = new Float32Array(len * 16);
+			const globalTransformOfNodeThatTheMeshIsAttachedTo = new Float32Array([
 				tMVMatrix[0],
 				tMVMatrix[1],
 				tMVMatrix[2],
@@ -445,7 +446,7 @@ let renderScene = (redGPUContext, redView, passEncoder, parent, children, parent
 			]);
 			////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			// Inverse
-			var te = globalTransformOfNodeThatTheMeshIsAttachedTo,
+			const te = globalTransformOfNodeThatTheMeshIsAttachedTo,
 				me = globalTransformOfNodeThatTheMeshIsAttachedTo,
 				n11 = me[0], n21 = me[1], n31 = me[2], n41 = me[3],
 				n12 = me[4], n22 = me[5], n32 = me[6], n42 = me[7],
@@ -455,12 +456,12 @@ let renderScene = (redGPUContext, redView, passEncoder, parent, children, parent
 				t12 = n14 * n33 * n42 - n13 * n34 * n42 - n14 * n32 * n43 + n12 * n34 * n43 + n13 * n32 * n44 - n12 * n33 * n44,
 				t13 = n13 * n24 * n42 - n14 * n23 * n42 + n14 * n22 * n43 - n12 * n24 * n43 - n13 * n22 * n44 + n12 * n23 * n44,
 				t14 = n14 * n23 * n32 - n13 * n24 * n32 - n14 * n22 * n33 + n12 * n24 * n33 + n13 * n22 * n34 - n12 * n23 * n34;
-			var det = n11 * t11 + n21 * t12 + n31 * t13 + n41 * t14;
+			const det = n11 * t11 + n21 * t12 + n31 * t13 + n41 * t14;
 			if (det === 0) {
 				console.warn("can't invert matrix, determinant is 0");
 				return mat4.identity(globalTransformOfNodeThatTheMeshIsAttachedTo);
 			} else {
-				var detInv = 1 / det;
+				const detInv = 1 / det;
 				te[0] = t11 * detInv;
 				te[1] = (n24 * n33 * n41 - n23 * n34 * n41 - n24 * n31 * n43 + n21 * n34 * n43 + n23 * n31 * n44 - n21 * n33 * n44) * detInv;
 				te[2] = (n22 * n34 * n41 - n24 * n32 * n41 + n24 * n31 * n42 - n21 * n34 * n42 - n22 * n31 * n44 + n21 * n32 * n44) * detInv;
