@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.23 14:37:36
+ *   Last modification time of this file - 2019.12.23 19:1:41
  *
  */
 
@@ -292,7 +292,7 @@ var GLTFLoader;
 	};
 
 	var loopList = [];
-	GLTFLoader['animationLooper'] = time => gltfAnimationLooper(time, loopList)
+	GLTFLoader['animationLooper'] = time => gltfAnimationLooper(time, loopList);
 	parser = (function () {
 		var checkAsset;
 		var getBufferResources;
