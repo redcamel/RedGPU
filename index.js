@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.23 19:1:41
+ *   Last modification time of this file - 2019.12.23 20:5:39
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -107,7 +107,7 @@ new RedGPU.RedGPUContext(
 				let tEffect
 				tEffect = new RedGPU.PostEffect_Bloom(this);
 				tEffect.bloomStrength = 0.5
-				tView.postEffect.addEffect(tEffect)
+				// tView.postEffect.addEffect(tEffect)
 
 				// tEffect = new RedGPU.PostEffect_DoF(this);
 				// tEffect.focusLength = 1000
@@ -285,22 +285,22 @@ new RedGPU.RedGPUContext(
 										: i > division * 2 ? testMat_standard_diffuse_normal_displacement
 											: i > division * 1 ? testMat_colorPhongTexture_normal : testMat_colorPhongTexture_normal_displacement
 					);
-					testMesh.addEventListener('down', function () {
-						var tValue = 50 * 3
-						TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
-					})
-					testMesh.addEventListener('up', function () {
-						var tValue = 50 * 2
-						TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
-					})
-					testMesh.addEventListener('over', function () {
-						var tValue = 50 * 2
-						TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
-					})
-					testMesh.addEventListener('out', function () {
-						var tValue = 50 * 1
-						TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
-					})
+					// testMesh.addEventListener('down', function () {
+					// 	var tValue = 50 * 3
+					// 	TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
+					// })
+					// testMesh.addEventListener('up', function () {
+					// 	var tValue = 50 * 2
+					// 	TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
+					// })
+					// testMesh.addEventListener('over', function () {
+					// 	var tValue = 50 * 2
+					// 	TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
+					// })
+					// testMesh.addEventListener('out', function () {
+					// 	var tValue = 50 * 1
+					// 	TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
+					// })
 					testMesh.x = Math.random() * 2000 - 1000;
 					testMesh.y = Math.random() * 2000 - 1000;
 					testMesh.z = Math.random() * 2000 - 1000;
@@ -330,14 +330,14 @@ new RedGPU.RedGPUContext(
 				}
 				console.log('여기까지 시간은 어찌됨?', performance.now())
 
-				i = 100
+				i = 250
 				while(i--){
 					let tMesh = new RedGPU.Text(this,512,64)
-					tMesh.x = Math.random() * 100 - 50;
-					tMesh.y = Math.random() * 100 - 50;
-					tMesh.z = Math.random() * 100 - 50;
+					tMesh.x = Math.random() * 200 - 100;
+					tMesh.y = Math.random() * 200 - 100;
+					tMesh.z = Math.random() * 200 - 100;
 					// tMesh.rotationX = tMesh.rotationY = tMesh.rotationZ = Math.random() * 360;
-					tMesh.scaleX = tMesh.scaleY = 10
+					tMesh.scaleX = tMesh.scaleY = Math.random()*20+5
 					tMesh.fontSize = 60
 					tMesh.fontWeight = 'bold'
 					tMesh.color = i%2 ?'#fff' : '#ff2255'
@@ -369,16 +369,18 @@ new RedGPU.RedGPUContext(
 
 					tChildren = tView.scene.children
 					i = tChildren.length
-
+					let tMesh
 
 					while (i--) {
+						tMesh = tChildren[i]
+						if(tMesh instanceof RedGPU.Text){
 
-						// tChildren[i]._rotationX += 1
-						// tChildren[i]._rotationY += 1
-						// tChildren[i]._rotationZ += 1
-						// tChildren[i].dirtyTransform = 1
-
-
+						}else{
+							tMesh._rotationX += 1
+							tMesh._rotationY += 1
+							tMesh._rotationZ += 1
+							tMesh.dirtyTransform = 1
+						}
 					}
 
 					requestAnimationFrame(render);
