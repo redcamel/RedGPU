@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.23 12:0:11
+ *   Last modification time of this file - 2019.12.23 14:37:36
  *
  */
 
@@ -15,7 +15,7 @@ const workerImage = createWorker(async () => {
 	/////////////////////////////////////////////////////////////////////////////
 	let getImage = (_ => {
 		let nextHighestPowerOfTwo = (function () {
-			var i;
+			let i;
 			return function (v) {
 				--v;
 				for (i = 1; i < 32; i <<= 1) v = v | v >> i;
@@ -103,7 +103,7 @@ const workerGLSLCompile = createWorker(async () => {
 	let glslang = await glslangModule.default();
 	let combinations = (_ => {
 		let k_combinations = (set, k) => {
-			var i, j, combs, head, tailcombs;
+			let i, j, combs, head, tailcombs;
 			if (k > set.length || k <= 0) return [];
 			if (k === set.length) return [set];
 			if (k === 1) {
@@ -118,9 +118,9 @@ const workerGLSLCompile = createWorker(async () => {
 				for (j = 0; j < tailcombs.length; j++) combs.push(head.concat(tailcombs[j]));
 			}
 			return combs;
-		}
+		};
 		return set => {
-			var k, i, combs, k_combs;
+			let k, i, combs, k_combs;
 			combs = [];
 			for (k = 1; k <= set.length; k++) {
 				k_combs = k_combinations(set, k);
@@ -128,7 +128,7 @@ const workerGLSLCompile = createWorker(async () => {
 			}
 			return combs;
 		}
-	})()
+	})();
 	let getCompileGLSL = (_ => {
 		let parseSource = function (tSource, replaceList) {
 			tSource = JSON.parse(JSON.stringify(tSource));
@@ -142,25 +142,25 @@ const workerGLSLCompile = createWorker(async () => {
 			return tSource
 		};
 		return async data => {
-			const info = data.src
+			const info = data.src;
 			const shaderType = info.shaderType;
 			const shaderName = info.shaderName;
 			let originSource = info.originSource;
-			let temp = {}
-			let num = 0
+			let temp = {};
+			let num = 0;
 			//FIXME - 이부분 최적화해야함
-			var tList = combinations(info.optionList.sort());
-			console.log('조합을 찾아라', shaderType, shaderName, tList.length)
+			const tList = combinations(info.optionList.sort());
+			console.log('조합을 찾아라', shaderType, shaderName, tList.length);
 			// console.log(tList)
 			let parse = optionList => {
-				let searchKey = shaderName + '_' + optionList.join('_')
+				let searchKey = shaderName + '_' + optionList.join('_');
 				if (!temp[searchKey]) {
-					temp[searchKey] = 1
-					let parsedSource = parseSource(originSource, optionList)
-					if (shaderName != 'PBRMaterial_System') console.time('compileGLSL - in worker : ' + num + ' / ' + shaderType + ' / ' + searchKey);
-					let compileGLSL = glslang.compileGLSL(parsedSource, shaderType)
-					if (shaderName != 'PBRMaterial_System') console.timeEnd('compileGLSL - in worker : ' + num + ' / ' + shaderType + ' / ' + searchKey);
-					num++
+					temp[searchKey] = 1;
+					let parsedSource = parseSource(originSource, optionList);
+					// if (shaderName != 'PBRMaterial_System') console.time('compileGLSL - in worker : ' + num + ' / ' + shaderType + ' / ' + searchKey);
+					let compileGLSL = glslang.compileGLSL(parsedSource, shaderType);
+					// if (shaderName != 'PBRMaterial_System') console.timeEnd('compileGLSL - in worker : ' + num + ' / ' + shaderType + ' / ' + searchKey);
+					num++;
 					self.postMessage({
 						endCompile: true,
 						shaderName: shaderName,
@@ -172,7 +172,7 @@ const workerGLSLCompile = createWorker(async () => {
 			};
 			tList.forEach(newList => {
 				parse(newList);
-			})
+			});
 			self.postMessage({
 				end: true,
 				shaderName: shaderName,
@@ -231,5 +231,5 @@ const RedGPUWorker = {
 			});
 		});
 	}
-}
+};
 export default RedGPUWorker

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 13:27:33
+ *   Last modification time of this file - 2019.12.23 14:37:36
  *
  */
 // renderder ///////////////////////////////////////////////////////////////////////
@@ -37,7 +37,7 @@ import SpotLight from "./light/SpotLight.js";
 // loader ///////////////////////////////////////////////////////////////////////
 import TextureLoader from "./loader/TextureLoader.js";
 import BaseTexture from "./base/BaseTexture.js";
-import GLTFLoader from "./loader/GLTFLoader.js";
+import GLTFLoader from "./loader/gltf/GLTFLoader.js";
 // material ///////////////////////////////////////////////////////////////////////
 import GridMaterial from "./material/system/GridMaterial.js";
 import PBRMaterial_System from "./material/system/PBRMaterial_System.js";

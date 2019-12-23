@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.21 15:32:29
+ *   Last modification time of this file - 2019.12.23 14:37:36
  *
  */
 
@@ -156,9 +156,9 @@ export default class View extends UUID {
 		let usage = GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED;
 		if (this.baseAttachment) {
 			list.forEach(key => {
-				this[key].destroy()
+				this[key].destroy();
 				this[key + '_ResolveTarget'].destroy()
-			})
+			});
 			this.baseDepthStencilAttachment.destroy();
 		}
 		list.forEach(key => {

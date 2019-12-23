@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.23 12:0:11
+ *   Last modification time of this file - 2019.12.23 14:37:36
  *
  */
 import RedGPUContext from "../RedGPUContext.js";
@@ -15,7 +15,7 @@ import RedGPUWorker from "../base/RedGPUWorker.js";
 const checkMap = {
 	vertex: {},
 	fragment: {}
-}
+};
 const rootOriginSourceMap = {
 	vertex: {},
 	fragment: {}
@@ -55,8 +55,8 @@ export default class ShaderModule_GLSL {
 		this.shaderModuleMap = shaderModuleMap[type][materialClass.name];
 
 		if (!checkMap[type][materialClass.name]) {
-			console.log(`materialClass.PROGRAM_OPTION_LIST - ${materialClass.name}`, materialClass.PROGRAM_OPTION_LIST.length, materialClass.PROGRAM_OPTION_LIST)
-			checkMap[type][materialClass.name] = 1
+			console.log(`materialClass.PROGRAM_OPTION_LIST - ${materialClass.name}`, materialClass.PROGRAM_OPTION_LIST.length, materialClass.PROGRAM_OPTION_LIST);
+			checkMap[type][materialClass.name] = 1;
 			if (materialClass.PROGRAM_OPTION_LIST.length) {
 				RedGPUWorker.glslParserWorker(this, materialClass.name, this.originSource, this.type, materialClass.PROGRAM_OPTION_LIST).then(
 					e => {
@@ -85,14 +85,14 @@ export default class ShaderModule_GLSL {
 			let tCompileGLSL;
 			console.time('compileGLSL : ' + this.type + ' / ' + searchKey);
 			if (this.sourceMap.get(searchKey) instanceof Uint32Array) {
-				tCompileGLSL = this.sourceMap.get(searchKey)
-				console.log('compileGLSL - 캐쉬된놈을 쓴다', this.type, searchKey)
+				tCompileGLSL = this.sourceMap.get(searchKey);
+				// console.log('compileGLSL - 캐쉬된놈을 쓴다', this.type, searchKey)
 			} else {
 				if (!this.sourceMap.get(searchKey)) {
 					this.sourceMap.set(searchKey, this.#redGPUContext.glslang.compileGLSL(parseSource(this.originSource, optionList), this.type));
 				}
-				tCompileGLSL = this.sourceMap.get(searchKey)
-				console.log('compileGLSL - 신규생성을 쓴다', this.type, searchKey)
+				tCompileGLSL = this.sourceMap.get(searchKey);
+				// console.log('compileGLSL - 신규생성을 쓴다', this.type, searchKey)
 			}
 			console.timeEnd('compileGLSL : ' + this.type + ' / ' + searchKey);
 			// console.log(' 쓴다', tCompileGLSL)
