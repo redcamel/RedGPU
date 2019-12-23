@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.23 19:1:41
+ *   Last modification time of this file - 2019.12.23 20:5:39
  *
  */
 
@@ -82,6 +82,7 @@ export default class Text extends BaseObject3D {
 
 		this.geometry = new Plane(redGPUContext);
 		this.material = new TextMaterial(redGPUContext);
+		this.cullMode = 'none';
 
 
 		this['_img'] = new Image();
@@ -115,7 +116,14 @@ export default class Text extends BaseObject3D {
 			this['material'].width = tW;
 			this['material'].height = tH;
 			this['_cvs'].toBlob(v => {
-				new BitmapTexture(redGPUContext, URL.createObjectURL(v), null, true, v => {
+				new BitmapTexture(redGPUContext, URL.createObjectURL(v), {
+					magFilter:  "linear",
+					minFilter: "linear",
+					mipmapFilter: "nearest",
+					addressModeU: "clamp-to-edge",
+					addressModeV: "clamp-to-edge",
+					addressModeW: "repeat"
+				}, true, v => {
 					console.log(' 왜안와?',v)
 					this['material'].diffuseTexture = v
 				})
