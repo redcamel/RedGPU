@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.23 20:5:39
+ *   Last modification time of this file - 2019.12.23 20:12:20
  *
  */
 
@@ -218,31 +218,32 @@ let renderScene = (redGPUContext, redView, passEncoder, parent, children, parent
 		}
 		if (tGeometry) {
 			if (renderToTransparentLayerMode && tPipeline.GPURenderPipeline) {
-				if (renderToTransparentLayerMode == 1 && tMesh instanceof Text) {
-					let tMTX = new Float32Array(16)
-					tMTX[12] = tMesh._x, tMTX[13] = tMesh._y, tMTX[14] = tMesh._z;
-					mat4.multiply(tMTX, redView.camera.matrix, tMTX) //FIXME - 이거풀어야함
-					textToTransparentLayerList.push({
-						z: tMTX[14],
-						tText: tMesh
-					})
-				} else {
-					passEncoder.setPipeline(tPipeline.GPURenderPipeline);
-					if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
-						passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
-						prevVertexBuffer_UUID = tGeometry.interleaveBuffer._UUID
-					}
-					passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹는 매그룹마다 다르니 또 업데이트 해줘야함 -_-
-					if (prevMaterial_UUID != tMaterial._UUID) passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
-					prevMaterial_UUID = tMaterial._UUID;
-					if (tGeometry.indexBuffer) {
-						if (prevIndexBuffer_UUID != tGeometry.indexBuffer._UUID) {
-							passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
-							prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
-						}
-						passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
-					} else passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
+				// if (renderToTransparentLayerMode == 1 && tMesh instanceof Text) {
+				// 	// let tMTX = new Float32Array(16)
+				// 	// tMTX[12] = tMesh._x, tMTX[13] = tMesh._y, tMTX[14] = tMesh._z;
+				// 	// mat4.multiply(tMTX, redView.camera.matrix, tMTX) //FIXME - 이거풀어야함
+				// 	// textToTransparentLayerList.push({
+				// 	// 	z: tMTX[14],
+				// 	// 	tText: tMesh
+				// 	// })
+				// } else {
+				//
+				// }
+				passEncoder.setPipeline(tPipeline.GPURenderPipeline);
+				if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
+					passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
+					prevVertexBuffer_UUID = tGeometry.interleaveBuffer._UUID
 				}
+				passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹는 매그룹마다 다르니 또 업데이트 해줘야함 -_-
+				if (prevMaterial_UUID != tMaterial._UUID) passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
+				prevMaterial_UUID = tMaterial._UUID;
+				if (tGeometry.indexBuffer) {
+					if (prevIndexBuffer_UUID != tGeometry.indexBuffer._UUID) {
+						passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
+						prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
+					}
+					passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
+				} else passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
 
 			}
 			if (tDirtyPipeline || tMaterialChanged) {
@@ -605,19 +606,18 @@ export default class Render {
 		renderToTransparentLayerList.length = 0;
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		//TODO - 여기 최적화
-		if (textToTransparentLayerList.length) {
-			let t1 = [];
-			let i = textToTransparentLayerList.length
-			textToTransparentLayerList.sort((a, b) => {
-				if (a.z > b.z) return -1
-				if (a.z < b.z) return 1
-				return 0
-			})
-			while(i--) t1[i] = textToTransparentLayerList[i].tText
-
-			renderScene(redGPUContext, redView, passEncoder, null, t1, null, 2);
-		}
-		textToTransparentLayerList.length = 0;
+		// if (textToTransparentLayerList.length) {
+		// 	let t1 = [];
+		// 	let i = textToTransparentLayerList.length
+		// 	textToTransparentLayerList.sort((a, b) => {
+		// 		if (a.z > b.z) return -1
+		// 		if (a.z < b.z) return 1
+		// 		return 0
+		// 	})
+		// 	while(i--) t1[i] = textToTransparentLayerList[i].tText
+		// 	renderScene(redGPUContext, redView, passEncoder, null, t1, null, 2);
+		// }
+		// textToTransparentLayerList.length = 0;
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		let i = updateTargetMatrixBufferList.length;
