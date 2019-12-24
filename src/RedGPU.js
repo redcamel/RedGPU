@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.23 19:1:41
+ *   Last modification time of this file - 2019.12.24 16:41:20
  *
  */
 // renderder ///////////////////////////////////////////////////////////////////////
@@ -57,6 +57,7 @@ import Mesh from "./object3D/Mesh.js";
 import SkyBox from "./object3D/SkyBox.js";
 import Sprite3D from "./object3D/Sprite3D.js";
 import Text from "./object3D/Text.js";
+import Line from "./object3D/Line.js";
 // postEffect ///////////////////////////////////////////////////////////////////////
 import PostEffect_BrightnessContrast from "./postEffect/adjustments/PostEffect_BrightnessContrast.js";
 import PostEffect_Gray from "./postEffect/adjustments/PostEffect_Gray.js";
@@ -151,6 +152,7 @@ const RedGPU = {
 	SkyBox,
 	Sprite3D,
 	Text,
+	Line,
 	// postEffect ///////////////////////////////////////////////////////////////////////
 	PostEffect_BrightnessContrast,
 	PostEffect_Gray,

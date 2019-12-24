@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 12:21:27
+ *   Last modification time of this file - 2019.12.24 16:41:20
  *
  */
 
@@ -35,7 +35,7 @@ export default class UniformBufferDescriptor {
 				offset += v.size
 			}
 			this.redStructOffsetMap[v['valueName']] = v.offset;
-			v._UUID = v.valueName + '_' + UUID.makeUUID()
+			v._UUID = v.valueName + '_' + UUID.getNextUUID()
 		});
 		let t0 = offset % FLOAT4_SIZE;
 		this.size = this.redStruct.length ? (offset + (t0 ? (FLOAT4_SIZE - t0) : 0)) : FLOAT4_SIZE;

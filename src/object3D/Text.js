@@ -2,11 +2,11 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.24 9:53:57
+ *   Last modification time of this file - 2019.12.24 16:41:20
  *
  */
 
-"use strict"
+"use strict";
 import BaseObject3D from "../base/BaseObject3D.js";
 import UTIL from "../util/UTIL.js";
 import Plane from "../primitives/Plane.js";
@@ -21,6 +21,7 @@ let setTexture = function (target) {
 	target['_svg'].querySelector('table').style.height = target['_height'] + 'px';
 	target['_img'].src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(target['_svg'].outerHTML);
 };
+//TODO - 여기 SVG질도 백그라운드로 보내야함
 let setStylePrototype;
 setStylePrototype = (function () {
 	return function (target, k, baseValue) {
@@ -40,14 +41,14 @@ setStylePrototype = (function () {
 		target[k] = baseValue;
 	}
 })();
-let tSVG, tHTMLContainer
+let tSVG, tHTMLContainer;
 export default class Text extends BaseObject3D {
 	_cvs;
 	_ctx;
 	_svg;
 	_img;
 	_width = 256;
-	_height = 128
+	_height = 128;
 	get height() {
 		return this._height;
 	}
@@ -124,7 +125,7 @@ export default class Text extends BaseObject3D {
 					addressModeV: "clamp-to-edge",
 					addressModeW: "repeat"
 				}, true, v => {
-					if(this['material'].diffuseTexture) this['material'].diffuseTexture.GPUTexture.destroy()
+					if(this['material'].diffuseTexture) this['material'].diffuseTexture.GPUTexture.destroy();
 					this['material'].diffuseTexture = v
 				})
 			})

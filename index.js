@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.24 9:53:57
+ *   Last modification time of this file - 2019.12.24 16:41:20
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -271,7 +271,6 @@ new RedGPU.RedGPUContext(
 				})
 
 
-
 				let division = MAX / 8
 				while (i--) {
 					let testMesh = new RedGPU.Mesh(
@@ -329,19 +328,48 @@ new RedGPU.RedGPUContext(
 
 				}
 				console.log('여기까지 시간은 어찌됨?', performance.now())
+				var addLine_random, addLine_circle;
+				// 60번 포인트를 랜덤으로 정의하고 라인추가
+				addLine_random = function (redGPUContext, color) {
+					var tLine;
+					var tX, tY, tZ;
+					var i = 25;
+					// 라인객체 생성
+					tLine = new RedGPU.Line(redGPUContext, color, RedGPU.Line.CATMULL_ROM);
+
+					tX = tY = tZ = 0
+					while (i--) {
+						tX += Math.random() - 0.5;
+						tY += Math.random() - 0.5;
+						tZ += Math.random() - 0.5;
+						// 라인에 포인트 추가
+						tLine.addPoint(Math.random() * 50 - 25, Math.random() * 50 - 25, Math.random() * 50 - 25, i % 3 == 0 ? color : i % 3 == 1 ? '#ff0000' : '#00ff00', Math.max(Math.random(), 0.5));
+					}
+					tScene.addChild(tLine);
+					tLine.tension = 1
+					tLine.distance = 0.1
+					tLine.x = Math.random() * 1000 - 500;
+					tLine.y = Math.random() * 1000 - 500;
+					tLine.z = Math.random() * 1000 - 500;
+
+				};
+				i = 150
+				while (i--) {
+					addLine_random(this, '#0000ff');
+				}
 
 				i = 150
-				while(i--){
-					let tMesh = new RedGPU.Text(this,512,64)
+				while (i--) {
+					let tMesh = new RedGPU.Text(this, 512, 64)
 					tMesh.x = Math.random() * 100 - 50;
 					tMesh.y = Math.random() * 100 - 50;
 					tMesh.z = Math.random() * 100 - 50;
 					// tMesh.rotationX = tMesh.rotationY = tMesh.rotationZ = Math.random() * 360;
-					tMesh.scaleX = tMesh.scaleY = Math.random()*20+5
+					tMesh.scaleX = tMesh.scaleY = Math.random() * 20 + 5
 					tMesh.fontSize = 60
 					tMesh.fontWeight = 'bold'
-					tMesh.color = i%2 ?'#fff' : '#ff2255'
-					tMesh.text = i%2 ? '가나다라마바사' : 'ABCDEFG'
+					tMesh.color = i % 2 ? '#fff' : '#ff2255'
+					tMesh.text = i % 2 ? '가나다라마바사' : 'ABCDEFG'
 					tScene.addChild(tMesh)
 				}
 
@@ -373,9 +401,9 @@ new RedGPU.RedGPUContext(
 
 					while (i--) {
 						tMesh = tChildren[i]
-						if(tMesh instanceof RedGPU.Text){
+						if (tMesh instanceof RedGPU.Text) {
 
-						}else{
+						} else {
 							tMesh._rotationX += 1
 							tMesh._rotationY += 1
 							tMesh._rotationZ += 1
@@ -388,8 +416,8 @@ new RedGPU.RedGPUContext(
 				requestAnimationFrame(render);
 				setTestUI(this, tView, tScene, testCubeTexture)
 			},
-			function(e){
-				console.log('progress',this,e)
+			function (e) {
+				console.log('progress', this, e)
 			}
 		)
 
