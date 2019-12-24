@@ -2,15 +2,15 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.24 16:41:20
+ *   Last modification time of this file - 2019.12.24 18:50:1
  *
  */
 
 "use strict";
-import TypeSize from "../resources/TypeSize.js";
-import BaseMaterial from "../base/BaseMaterial.js";
-import ShareGLSL from "../base/ShareGLSL.js";
-import Mix from "../base/Mix.js";
+import TypeSize from "../../resources/TypeSize.js";
+import BaseMaterial from "../../base/BaseMaterial.js";
+import ShareGLSL from "../../base/ShareGLSL.js";
+import Mix from "../../base/Mix.js";
 
 export default class LineMaterial extends Mix.mix(
 	BaseMaterial,

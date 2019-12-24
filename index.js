@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.24 16:41:20
+ *   Last modification time of this file - 2019.12.24 18:50:1
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -33,15 +33,7 @@ new RedGPU.RedGPUContext(
 				'assets/crate.png',
 				'assets/Brick03_disp.jpg',
 				'assets/specular.png',
-				'assets/emissive.jpg',
-				[
-					'./assets/cubemap/SwedishRoyalCastle/px.jpg',
-					'./assets/cubemap/SwedishRoyalCastle/nx.jpg',
-					'./assets/cubemap/SwedishRoyalCastle/py.jpg',
-					'./assets/cubemap/SwedishRoyalCastle/ny.jpg',
-					'./assets/cubemap/SwedishRoyalCastle/pz.jpg',
-					'./assets/cubemap/SwedishRoyalCastle/nz.jpg'
-				]
+				'assets/emissive.jpg'
 			],
 			_ => {
 				console.log('텍스쳐 로딩완료', textureLoader)
@@ -164,7 +156,14 @@ new RedGPU.RedGPUContext(
 				// this.addView(tView2)
 
 
-				let testCubeTexture = textureLoader.getTextureByIndex(7)
+				let testCubeTexture = new RedGPU.BitmapCubeTexture(this,[
+					'./assets/cubemap/SwedishRoyalCastle/px.jpg',
+					'./assets/cubemap/SwedishRoyalCastle/nx.jpg',
+					'./assets/cubemap/SwedishRoyalCastle/py.jpg',
+					'./assets/cubemap/SwedishRoyalCastle/ny.jpg',
+					'./assets/cubemap/SwedishRoyalCastle/pz.jpg',
+					'./assets/cubemap/SwedishRoyalCastle/nz.jpg'
+				])
 
 				testMat_environment = new RedGPU.EnvironmentMaterial(this, textureLoader.getTextureByIndex(1), testCubeTexture)
 				testMat_color = new RedGPU.ColorMaterial(this, '#ffff12');
@@ -348,9 +347,12 @@ new RedGPU.RedGPUContext(
 					tScene.addChild(tLine);
 					tLine.tension = 1
 					tLine.distance = 0.1
-					tLine.x = Math.random() * 1000 - 500;
-					tLine.y = Math.random() * 1000 - 500;
-					tLine.z = Math.random() * 1000 - 500;
+					tLine.x = Math.random() * 1500 - 750;
+					tLine.y = Math.random() * 1500 - 750;
+					tLine.z = Math.random() * 1500 - 750;
+					// setInterval(_ => {
+					// 	tLine.addPoint(Math.random() * 200 - 100, Math.random() * 200 - 100, Math.random() * 200 - 100)
+					// }, 1000)
 
 				};
 				i = 150
@@ -358,20 +360,51 @@ new RedGPU.RedGPUContext(
 					addLine_random(this, '#0000ff');
 				}
 
-				i = 150
+				i = 300
+				let tText
+				let tTextList = []
 				while (i--) {
-					let tMesh = new RedGPU.Text(this, 512, 64)
-					tMesh.x = Math.random() * 100 - 50;
-					tMesh.y = Math.random() * 100 - 50;
-					tMesh.z = Math.random() * 100 - 50;
-					// tMesh.rotationX = tMesh.rotationY = tMesh.rotationZ = Math.random() * 360;
-					tMesh.scaleX = tMesh.scaleY = Math.random() * 20 + 5
-					tMesh.fontSize = 60
-					tMesh.fontWeight = 'bold'
-					tMesh.color = i % 2 ? '#fff' : '#ff2255'
-					tMesh.text = i % 2 ? '가나다라마바사' : 'ABCDEFG'
-					tScene.addChild(tMesh)
+					 tText = new RedGPU.Text(this, 512, 64)
+					tText.x = Math.random() * 200 - 100;
+					tText.y = Math.random() * 200 - 100;
+					tText.z = Math.random() * 200 - 100;
+					// tText.rotationX = tText.rotationY = tText.rotationZ = Math.random() * 360;
+					tText.scaleX = tText.scaleY = Math.random() * 20 + 5
+					tText.fontSize = 60
+					tText.fontWeight = 'bold'
+					tText.color = i % 2 ? '#fff' : '#ff2255'
+					tText.text = i % 2 ? '가나다라마바사' : 'ABCDEFG'
+					tScene.addChild(tText)
+					tTextList.push(tText)
 				}
+
+				setInterval(_=>{
+					tText.text=  'test'+Math.random()
+					tText.fontSize = 32
+					// let tMesh = new RedGPU.Text(this, 512, 64)
+					// tMesh.x = Math.random() * 200 - 100;
+					// tMesh.y = Math.random() * 200 - 100;
+					// tMesh.z = Math.random() * 200 - 100;
+					// // tMesh.rotationX = tMesh.rotationY = tMesh.rotationZ = Math.random() * 360;
+					// tMesh.scaleX = tMesh.scaleY = Math.random() * 20 + 5
+					// tMesh.fontSize = 60
+					// tMesh.fontWeight = 'bold'
+					// tMesh.color = i % 2 ? '#fff' : '#ff2255'
+					// tMesh.text = i % 2 ? '가나다라마바사' : 'ABCDEFG'
+					// tScene.addChild(tMesh)
+					// let testMesh = new RedGPU.Mesh(
+					// 	this,
+					// 	randomGeometry(),
+					// 	testMat_standard_diffuse_normal_displacement
+					// );
+					//
+					// testMesh.x = Math.random() * 50 - 25;
+					// testMesh.y = Math.random() * 50 - 25;
+					// testMesh.z = Math.random() * 50 - 25;
+					// testMesh.rotationX = testMesh.rotationY = testMesh.rotationZ = Math.random() * 360;
+					// testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = 20;
+					// tScene.addChild(testMesh)
+				},3000)
 
 				let renderer = new RedGPU.Render();
 				let render = time => {
