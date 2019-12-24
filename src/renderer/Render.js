@@ -2,13 +2,12 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.24 16:41:20
+ *   Last modification time of this file - 2019.12.24 18:50:1
  *
  */
 
 import GLTFLoader from "../loader/gltf/GLTFLoader.js";
 import SheetMaterial from "../material/SheetMaterial.js";
-import Text from "../object3D/Text.js";
 
 let renderToTransparentLayerList = [];
 let textToTransparentLayerList = [];
@@ -159,12 +158,6 @@ let readPixel = async (redGPUContext, redView, targetTexture, commandEncoder) =>
 };
 let renderScene = (redGPUContext, redView, passEncoder, parent, children, parentDirty, renderToTransparentLayerMode = 0) => {
 	let i;
-	let tGeometry;
-	let tMaterial;
-	let tMesh;
-	let tDirtyTransform, tDirtyPipeline;
-	let tMaterialChanged;
-	let tPipeline;
 
 	let prevVertexBuffer_UUID;
 	let prevIndexBuffer_UUID;
@@ -197,6 +190,13 @@ let renderScene = (redGPUContext, redView, passEncoder, parent, children, parent
 
 	i = children.length;
 	while (i--) {
+		let tGeometry;
+		let tMaterial
+		let tMesh;
+		let tDirtyTransform;
+		let tPipeline;
+		let tDirtyPipeline
+		let tMaterialChanged;
 		tMesh = children[i];
 		tMaterial = tMesh._material;
 		tGeometry = tMesh._geometry;
@@ -660,6 +660,8 @@ export default class Render {
 			readPixel(redGPUContext, redView, redView.baseAttachment_mouseColorID_ResolveTarget, commandEncoder);
 			checkMouseEvent(redGPUContext, redView, lastViewYn)
 		}
+
+
 	};
 
 
