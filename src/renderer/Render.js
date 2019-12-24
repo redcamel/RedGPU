@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.24 18:50:1
+ *   Last modification time of this file - 2019.12.24 19:39:53
  *
  */
 
@@ -156,16 +156,15 @@ let readPixel = async (redGPUContext, redView, targetTexture, commandEncoder) =>
 		pickColorArray = null
 	}
 };
+
 let renderScene = (redGPUContext, redView, passEncoder, parent, children, parentDirty, renderToTransparentLayerMode = 0) => {
 	let i;
+
 
 	let prevVertexBuffer_UUID;
 	let prevIndexBuffer_UUID;
 	let prevMaterial_UUID;
-	let tMVMatrix, tNMatrix;
-	let tLocalMatrix;
-	let parentMTX;
-	let tSkinInfo;
+
 	let aSx, aSy, aSz, aCx, aCy, aCz, aX, aY, aZ,
 		a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23, a30, a31, a32, a33,
 		b0, b1, b2, b3,
@@ -190,6 +189,10 @@ let renderScene = (redGPUContext, redView, passEncoder, parent, children, parent
 
 	i = children.length;
 	while (i--) {
+		let tMVMatrix, tNMatrix;
+		let tLocalMatrix;
+		let parentMTX;
+		let tSkinInfo;
 		let tGeometry;
 		let tMaterial
 		let tMesh;
