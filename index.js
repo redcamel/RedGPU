@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.24 19:39:53
+ *   Last modification time of this file - 2019.12.24 20:56:2
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -24,6 +24,7 @@ new RedGPU.RedGPUContext(
 		console.timeEnd('초기화 속도')
 		document.body.appendChild(cvs);
 		console.time('텍스쳐 로딩속도')
+		RedGPU.Debugger.visible(true)
 		let textureLoader = new RedGPU.TextureLoader(
 			this,
 			[
@@ -153,7 +154,8 @@ new RedGPU.RedGPUContext(
 				// tView.postEffect.addEffect(tEffect)
 
 
-				// this.addView(tView2)
+				this.addView(tView2)
+				tView2.setLocation(100,200)
 
 
 				let testCubeTexture = new RedGPU.BitmapCubeTexture(this, [

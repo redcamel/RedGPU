@@ -2,13 +2,15 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.24 19:39:53
+ *   Last modification time of this file - 2019.12.24 20:56:2
  *
  */
 
 import GLTFLoader from "../loader/gltf/GLTFLoader.js";
 import SheetMaterial from "../material/SheetMaterial.js";
+import Debugger from "./system/Debugger.js";
 
+let currentDebuggerData;
 let renderToTransparentLayerList = [];
 let textToTransparentLayerList = [];
 let tCacheUniformInfo = {};
@@ -209,6 +211,7 @@ let renderScene = (redGPUContext, redView, passEncoder, parent, children, parent
 		tSkinInfo = tMesh.skinInfo;
 		tMVMatrix = tMesh.matrix;
 
+		currentDebuggerData['object3DNum']++;
 		if (tMaterial) {
 			if (tMaterial.needResetBindingInfo) {
 				tMaterial.resetBindingInfo();
@@ -246,7 +249,13 @@ let renderScene = (redGPUContext, redView, passEncoder, parent, children, parent
 						prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
 					}
 					passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
-				} else passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
+					currentDebuggerData['triangleNum'] += tGeometry.indexBuffer.indexNum / 3
+				} else {
+					passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
+					currentDebuggerData['triangleNum'] += tGeometry.interleaveBuffer.data.length / tGeometry.interleaveBuffer.stride
+				}
+				currentDebuggerData['drawCallNum']++
+
 
 			}
 			if (tDirtyPipeline || tMaterialChanged) {
@@ -254,6 +263,7 @@ let renderScene = (redGPUContext, redView, passEncoder, parent, children, parent
 					// console.log('tDirtyPipeline', tDirtyPipeline, 'tMaterialChanged', tMaterialChanged)
 					// console.time('tPipeline.updatePipeline_sampleCount4' + tMesh._UUID)
 					tPipeline.updatePipeline_sampleCount4(redGPUContext, redView);
+					currentDebuggerData['dirtyPipelineNum']++
 					// console.timeEnd('tPipeline.updatePipeline_sampleCount4' + tMesh._UUID)
 				}
 			} else {
@@ -293,7 +303,13 @@ let renderScene = (redGPUContext, redView, passEncoder, parent, children, parent
 								prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
 							}
 							passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
-						} else passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
+							currentDebuggerData['triangleNum'] += tGeometry.indexBuffer.indexNum / 3
+						} else {
+							passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
+							currentDebuggerData['triangleNum'] += tGeometry.interleaveBuffer.data.length / tGeometry.interleaveBuffer.stride
+						}
+						currentDebuggerData['drawCallNum']++
+
 
 					}
 					tMesh._prevMaterialUUID = tMaterial._UUID;
@@ -305,6 +321,7 @@ let renderScene = (redGPUContext, redView, passEncoder, parent, children, parent
 		}
 
 		if (tDirtyTransform || parentDirty) {
+			currentDebuggerData['dirtyTransformNum']++
 			tLocalMatrix = tMesh.localMatrix;
 			parentMTX = parent ? parent.matrix : null;
 			/////////////////////////////////////
@@ -542,6 +559,7 @@ export default class Render {
 	#swapChainTextureView;
 	#renderView = (redGPUContext, redView, lastViewYn) => {
 		let tScene, tSceneBackgroundColor_rgba;
+		let now = performance.now()
 		tScene = redView.scene;
 		tSceneBackgroundColor_rgba = tScene.backgroundColorRGBA;
 		if (redView.camera.update) redView.camera.update();
@@ -626,11 +644,10 @@ export default class Render {
 		let i = updateTargetMatrixBufferList.length;
 		while (i--) updateTargetMatrixBufferList[i].GPUBuffer.setSubData(0, updateTargetMatrixBufferList[i].meshFloat32Array);
 		updateTargetMatrixBufferList.length = 0;
-
 		passEncoder.endPass();
-
+		currentDebuggerData['baseRenderTime'] = performance.now() - now
 		//////////////////////////////////////////////////////////////////////////////////////////
-
+		now = performance.now();
 		let last_effect_baseAttachmentView = redView.baseAttachment_ResolveTargetView;
 		let last_effect_baseAttachment = redView.baseAttachment_ResolveTarget;
 		let i3 = 0;
@@ -641,8 +658,10 @@ export default class Render {
 			last_effect_baseAttachmentView = tEffect.baseAttachmentView;
 			last_effect_baseAttachment = tEffect.baseAttachment
 		}
+		currentDebuggerData['postEffectRenderTime'] = performance.now() - now
 
 		//////////////////////////////////////////////////////////////////////////////////////////
+		now = performance.now();
 		// 최종렌더
 		let tX = redView.viewRect[0];
 		let tY = redView.viewRect[1];
@@ -663,18 +682,29 @@ export default class Render {
 			readPixel(redGPUContext, redView, redView.baseAttachment_mouseColorID_ResolveTarget, commandEncoder);
 			checkMouseEvent(redGPUContext, redView, lastViewYn)
 		}
-
+		currentDebuggerData['finalRenderTime'] = performance.now() - now
 
 	};
 
 
 	render(time, redGPUContext) {
 		currentTime = time;
+		let debuggerData = Debugger.resetData(redGPUContext.viewList)
 		this.#redGPUContext = redGPUContext;
 		this.#swapChainTexture = redGPUContext.swapChain.getCurrentTexture();
 		this.#swapChainTextureView = this.#swapChainTexture.createView();
 		let i = 0, len = redGPUContext.viewList.length;
-		for (i; i < len; i++) this.#renderView(redGPUContext, redGPUContext.viewList[i], i == len - 1);
+		for (i; i < len; i++) {
+			currentDebuggerData = debuggerData[i];
+			currentDebuggerData.view = redGPUContext.viewList[i];
+			currentDebuggerData.x = currentDebuggerData.view.x
+			currentDebuggerData.y = currentDebuggerData.view.y
+			currentDebuggerData.width = currentDebuggerData.view.width
+			currentDebuggerData.height = currentDebuggerData.view.height
+			currentDebuggerData.viewRect = currentDebuggerData.view.viewRect
+			this.#renderView(redGPUContext, redGPUContext.viewList[i], i == len - 1);
+		}
 		GLTFLoader.animationLooper(time);
+		Debugger.update()
 	}
 }
