@@ -2,11 +2,13 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.24 18:50:1
+ *   Last modification time of this file - 2019.12.24 20:56:2
  *
  */
 // renderder ///////////////////////////////////////////////////////////////////////
 import Render from "./renderer/Render.js";
+import Debugger from "./renderer/system/Debugger.js";
+
 // base ///////////////////////////////////////////////////////////////////////
 import DetectorGPU from "./base/detect/DetectorGPU.js";
 import BaseLight from "./base/BaseLight.js";
@@ -181,6 +183,7 @@ const RedGPU = {
 	Sphere,
 	// renderder ///////////////////////////////////////////////////////////////////////
 	Render,
+	Debugger,
 	// resources ///////////////////////////////////////////////////////////////////////
 	CopyBufferToTexture,
 	ImageLoader,

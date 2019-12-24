@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.23 19:1:41
+ *   Last modification time of this file - 2019.12.24 20:56:2
  *
  */
 "use strict";
@@ -61,7 +61,7 @@ export default class BitmapTexture extends BaseTexture {
 		} else {
 			let self = this;
 			new ImageLoader(redGPUContext, src, function () {
-				console.log(MIPMAP_TABLE.get(self.mapKey));
+
 				if (MIPMAP_TABLE.get(self.mapKey)) {
 					console.log('캐싱사용');
 					self.resolve(MIPMAP_TABLE.get(self.mapKey));
