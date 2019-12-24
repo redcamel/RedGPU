@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.23 20:12:20
+ *   Last modification time of this file - 2019.12.24 16:41:20
  *
  */
 
@@ -526,7 +526,7 @@ let renderScene = (redGPUContext, redView, passEncoder, parent, children, parent
 				tCacheUniformInfo[tUUID] = tSkinInfo['inverseBindMatrices']['_UUID']
 			}
 		}
-		if (tMesh.children.length) renderScene(redGPUContext, redView, passEncoder, tMesh, tMesh.children, parentDirty || tDirtyTransform);
+		if (!renderToTransparentLayerMode && tMesh.children.length) renderScene(redGPUContext, redView, passEncoder, tMesh, tMesh.children, parentDirty || tDirtyTransform);
 		tMesh.dirtyPipeline = false;
 		tMesh.dirtyTransform = false;
 	}

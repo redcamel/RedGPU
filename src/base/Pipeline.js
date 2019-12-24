@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.23 14:37:36
+ *   Last modification time of this file - 2019.12.24 16:41:20
  *
  */
 
@@ -52,13 +52,13 @@ export default class Pipeline extends UUID {
 				{
 					format: redGPUContext.swapChainFormat,
 					colorBlend: {
-						srcFactor: "src-alpha",
-						dstFactor: "one-minus-src-alpha",
+						srcFactor: targetMesh._blendColorSrc,
+						dstFactor: targetMesh._blendColorDst,
 						operation: "add"
 					},
 					alphaBlend: {
-						srcFactor: "one",
-						dstFactor: "one-minus-src-alpha",
+						srcFactor: targetMesh._blendAlphaSrc,
+						dstFactor: targetMesh._blendAlphaDst,
 						operation: "add"
 					}
 				},

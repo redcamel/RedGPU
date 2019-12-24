@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.23 19:1:41
+ *   Last modification time of this file - 2019.12.24 16:41:20
  *
  */
 
@@ -258,7 +258,7 @@ var GLTFLoader;
 		this['path'] = path;
 		this['fileName'] = fileName;
 		this['resultMesh'] = new Mesh(redGPUContext);
-		this['resultMesh']['name'] = 'instanceOfGLTFLoader_' + UUID.makeUUID();
+		this['resultMesh']['name'] = 'instanceOfGLTFLoader_' + UUID.getNextUUID();
 		this['parsingResult'] = {
 			groups: [],
 			materials: [],
@@ -1226,14 +1226,14 @@ var GLTFLoader;
 					redGLTFLoader['redGPUContext'],
 					new Buffer(
 						redGLTFLoader['redGPUContext'],
-						'testGLTF_interleaveBuffer_' + UUID.makeUUID(),
+						'testGLTF_interleaveBuffer_' + UUID.getNextUUID(),
 						Buffer.TYPE_VERTEX,
 						new Float32Array(interleaveData),
 						tInterleaveInfoList
 					),
 					indices.length ? new Buffer(
 						redGLTFLoader['redGPUContext'],
-						'testGLTF_indexBuffer_' + UUID.makeUUID(),
+						'testGLTF_indexBuffer_' + UUID.getNextUUID(),
 						Buffer.TYPE_INDEX,
 						new Uint32Array(indices)
 					) : null

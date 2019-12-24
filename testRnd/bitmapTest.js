@@ -2,10 +2,11 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 20:37:20
+ *   Last modification time of this file - 2019.12.24 16:41:20
  *
  */
 import RedGPU from "../src/RedGPU.js";
+import Line from "../src/object3D/Line.js";
 
 const cvs = document.createElement('canvas');
 document.body.appendChild(cvs);
@@ -27,12 +28,44 @@ new RedGPU.RedGPUContext(cvs,
 		tLight.y = 100
 		tLight.z = 0
 		tScene.addLight(tLight)
-		tScene.axis = new RedGPU.Axis(this)
+		// tScene.axis = new RedGPU.Axis(this)
 		tView = new RedGPU.View(this, tScene, tCamera)
 		tCamera.targetView = tView // optional
 		tScene.grid = tGrid
 
 		this.addView(tView)
+
+
+		var addLine_random, addLine_circle;
+		// 60번 포인트를 랜덤으로 정의하고 라인추가
+		addLine_random = function (redGPUContext,color) {
+			var tLine;
+			var tX, tY, tZ;
+			var i = 50;
+			// 라인객체 생성
+			tLine = new Line(redGPUContext,color,Line.CATMULL_ROM);
+
+			tX = tY = tZ = 0
+			while (i--) {
+				tX += Math.random() - 0.5;
+				tY += Math.random() - 0.5;
+				tZ += Math.random() - 0.5;
+				// 라인에 포인트 추가
+				tLine.addPoint(Math.random() * 5 - 2.5, Math.random() * 5 - 2.5, Math.random() * 5 - 2.5,i%3==0 ? color : i%3==1 ?'#ff0000' :'#00ff00',Math.max(Math.random(),0.5));
+			}
+			tScene.addChild(tLine);
+			tLine.tension = 1
+			tLine.distance = 0.01
+
+		};
+
+
+		addLine_random(this, '#0000ff');
+		//
+		// addLine_random(this, '#ff0000');
+		// addLine_random(this, '#00ff00');
+		// addLine_random(this, '#0000ff');
+		// addLine_random(this, '#ff00ff');
 
 
 		let tMesh
@@ -213,44 +246,44 @@ new RedGPU.RedGPUContext(cvs,
 		// 	}
 		// )
 
-			let i = 1
-			while (i--) {
-				// let tMesh = new RedGPU.Mesh(this, new RedGPU.Box(this), new RedGPU.ColorMaterial(this))
-				// let tMesh = new RedGPU.Mesh(this, new RedGPU.Box(this), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this, '../assets/Brick03_col.jpg')))
-				let tMesh = new RedGPU.Mesh(this, new RedGPU.Box(this), new RedGPU.StandardMaterial(this, new RedGPU.BitmapTexture(this, '../assets/Brick03_col.jpg'), new RedGPU.BitmapTexture(this, '../assets/Brick03_nrm.jpg')))
-				// let tMesh = new RedGPU.Mesh(this, new RedGPU.Box(this), new RedGPU.EnvironmentMaterial(this, new RedGPU.BitmapTexture(this, '../assets/Brick03_col.jpg'), new RedGPU.BitmapCubeTexture(this, [
-				// 	'../assets/cubemap/SwedishRoyalCastle/px.jpg',
-				// 	'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
-				// 	'../assets/cubemap/SwedishRoyalCastle/py.jpg',
-				// 	'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
-				// 	'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
-				// 	'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
-				// ])))
-				// let tMesh = new RedGPU.Sprite3D(this, new RedGPU.Box(this), new RedGPU.Sprite3DMaterial(this, new RedGPU.BitmapTexture(this, '../assets/Brick03_col.jpg')))
+		let i = 1
+		while (i--) {
+			// let tMesh = new RedGPU.Mesh(this, new RedGPU.Box(this), new RedGPU.ColorMaterial(this))
+			// let tMesh = new RedGPU.Mesh(this, new RedGPU.Box(this), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this, '../assets/Brick03_col.jpg')))
+			let tMesh = new RedGPU.Mesh(this, new RedGPU.Box(this), new RedGPU.StandardMaterial(this, new RedGPU.BitmapTexture(this, '../assets/Brick03_col.jpg'), new RedGPU.BitmapTexture(this, '../assets/Brick03_nrm.jpg')))
+			// let tMesh = new RedGPU.Mesh(this, new RedGPU.Box(this), new RedGPU.EnvironmentMaterial(this, new RedGPU.BitmapTexture(this, '../assets/Brick03_col.jpg'), new RedGPU.BitmapCubeTexture(this, [
+			// 	'../assets/cubemap/SwedishRoyalCastle/px.jpg',
+			// 	'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
+			// 	'../assets/cubemap/SwedishRoyalCastle/py.jpg',
+			// 	'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
+			// 	'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
+			// 	'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
+			// ])))
+			// let tMesh = new RedGPU.Sprite3D(this, new RedGPU.Box(this), new RedGPU.Sprite3DMaterial(this, new RedGPU.BitmapTexture(this, '../assets/Brick03_col.jpg')))
 
-				// tMesh.x = Math.random() * 10 - 5
-				// tMesh.y = Math.random() * 10 - 5
-				// tMesh.z = Math.random() * 10 - 5
-				// tMesh.setRotation(Math.random() * 360, Math.random() * 360, Math.random() * 360)
-				tScene.addChild(tMesh)
+			// tMesh.x = Math.random() * 10 - 5
+			// tMesh.y = Math.random() * 10 - 5
+			// tMesh.z = Math.random() * 10 - 5
+			// tMesh.setRotation(Math.random() * 360, Math.random() * 360, Math.random() * 360)
+			// tScene.addChild(tMesh)
 
-				// tMesh.addEventListener('down', function () {
-				// 	console.log('down', this)
-				// 	this.scaleX = this.scaleY = this.scaleZ = 0.5
-				// })
-				// tMesh.addEventListener('up', function () {
-				// 	console.log('up', this)
-				// 	this.scaleX = this.scaleY = this.scaleZ = 1
-				// })
-				// tMesh.addEventListener('over', function () {
-				// 	console.log('over', this)
-				// 	this.material.alpha = 0.5
-				// })
-				// tMesh.addEventListener('out', function () {
-				// 	console.log('out', this)
-				// 	this.material.alpha = 1
-				// })
-			}
+			// tMesh.addEventListener('down', function () {
+			// 	console.log('down', this)
+			// 	this.scaleX = this.scaleY = this.scaleZ = 0.5
+			// })
+			// tMesh.addEventListener('up', function () {
+			// 	console.log('up', this)
+			// 	this.scaleX = this.scaleY = this.scaleZ = 1
+			// })
+			// tMesh.addEventListener('over', function () {
+			// 	console.log('over', this)
+			// 	this.material.alpha = 0.5
+			// })
+			// tMesh.addEventListener('out', function () {
+			// 	console.log('out', this)
+			// 	this.material.alpha = 1
+			// })
+		}
 
 
 		let renderer = new RedGPU.Render();

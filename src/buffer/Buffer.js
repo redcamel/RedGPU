@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 13:27:33
+ *   Last modification time of this file - 2019.12.24 16:41:20
  *
  */
 
@@ -15,7 +15,6 @@ export default class Buffer extends UUID {
 	static TYPE_INDEX = 'indexBuffer';
 	type;
 	vertexCount;
-	originData;
 	bufferDescriptor;
 	GPUBuffer;
 
