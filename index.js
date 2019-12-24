@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.23 20:12:20
+ *   Last modification time of this file - 2019.12.24 9:53:57
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -333,9 +333,9 @@ new RedGPU.RedGPUContext(
 				i = 150
 				while(i--){
 					let tMesh = new RedGPU.Text(this,512,64)
-					tMesh.x = Math.random() * 200 - 100;
-					tMesh.y = Math.random() * 200 - 100;
-					tMesh.z = Math.random() * 200 - 100;
+					tMesh.x = Math.random() * 100 - 50;
+					tMesh.y = Math.random() * 100 - 50;
+					tMesh.z = Math.random() * 100 - 50;
 					// tMesh.rotationX = tMesh.rotationY = tMesh.rotationZ = Math.random() * 360;
 					tMesh.scaleX = tMesh.scaleY = Math.random()*20+5
 					tMesh.fontSize = 60

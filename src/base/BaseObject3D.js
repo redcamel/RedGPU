@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 12:21:27
+ *   Last modification time of this file - 2019.12.24 9:53:57
  *
  */
 
@@ -51,7 +51,6 @@ const getPool = function (redGPUContext, targetMesh) {
 
 
 export default class BaseObject3D extends DisplayContainer {
-
 	static uniformsBindGroupLayoutDescriptor_mesh = {
 		bindings: [
 			{
@@ -92,6 +91,10 @@ export default class BaseObject3D extends DisplayContainer {
 	_depthTestFunc = 'less';
 	_cullMode = 'back';
 	_primitiveTopology = "triangle-list";
+	_blendColorSrc = 'src-alpha';
+	_blendColorDst = 'one-minus-src-alpha';
+	_blendAlphaSrc = 'one';
+	_blendAlphaDst = 'one-minus-src-alpha';
 	pipeline;
 	#bindings;
 	//FIXME - 유일키가 될수있도록 변경
@@ -161,6 +164,14 @@ export default class BaseObject3D extends DisplayContainer {
 	}
 
 	/////////////////////////////////////////////////////////
+	get blendColorSrc() {return this._blendColorSrc;}
+	set blendColorSrc(value) {this._blendColorSrc = value;}
+	get blendColorDst() {return this._blendColorDst;}
+	set blendColorDst(value) {this._blendColorDst = value;}
+	get blendAlphaDst() {return this._blendAlphaDst;}
+	set blendAlphaDst(value) {this._blendAlphaDst = value;}
+	get blendAlphaSrc() {return this._blendAlphaSrc;}
+	set blendAlphaSrc(value) {this._blendAlphaSrc = value;}
 	get x() {return this._x}
 	set x(v) {
 		this._x = v;

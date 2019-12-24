@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.23 20:16:44
+ *   Last modification time of this file - 2019.12.24 9:53:57
  *
  */
 
@@ -50,7 +50,7 @@ export default class TextMaterial extends Mix.mix(
 			
 		
 		//#RedGPU#useSprite3DMode#  //#RedGPU#useFixedScale#  gl_Position /= gl_Position.w;
-		//#RedGPU#useSprite3DMode#  //#RedGPU#useFixedScale#  gl_Position.xy += position.xy * vec2((systemUniforms.perspectiveMTX * modelMatrix)[0][0],(systemUniforms.perspectiveMTX * modelMatrix)[1][1]);
+		//#RedGPU#useSprite3DMode#  //#RedGPU#useFixedScale#  gl_Position.xy += position.xy * vec2((systemUniforms.perspectiveMTX * targetMatrix)[0][0],(systemUniforms.perspectiveMTX * targetMatrix)[1][1]);
 	
 		
 		vNormal = normal;

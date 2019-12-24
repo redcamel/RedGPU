@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.23 20:5:39
+ *   Last modification time of this file - 2019.12.24 9:53:57
  *
  */
 
@@ -65,7 +65,9 @@ export default class Text extends BaseObject3D {
 	constructor(redGPUContext, width = 256, height = 128) {
 		super(redGPUContext);
 
-		this['_cvs'] = document.createElement('canvas');
+		if (width > 1024) width = 1024;
+		if (height > 1024) height = 1024;
+		this['_cvs'] = new OffscreenCanvas(width, height);
 		this['_ctx'] = this['_cvs'].getContext('2d');
 		// SVG 생성
 		this['_svg'] = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -87,8 +89,6 @@ export default class Text extends BaseObject3D {
 
 		this['_img'] = new Image();
 
-		if (width > 1024) width = 1024;
-		if (height > 1024) height = 1024;
 		this.width = width;
 		this.height = height;
 		setStylePrototype(this, 'padding', 0);
@@ -115,7 +115,7 @@ export default class Text extends BaseObject3D {
 			this['_ctx'].drawImage(this['_img'], 0, 0, tW, tH);
 			this['material'].width = tW;
 			this['material'].height = tH;
-			this['_cvs'].toBlob(v => {
+			this['_cvs'].convertToBlob().then(v => {
 				new BitmapTexture(redGPUContext, URL.createObjectURL(v), {
 					magFilter:  "linear",
 					minFilter: "linear",
@@ -124,7 +124,7 @@ export default class Text extends BaseObject3D {
 					addressModeV: "clamp-to-edge",
 					addressModeW: "repeat"
 				}, true, v => {
-					console.log(' 왜안와?',v)
+					if(this['material'].diffuseTexture) this['material'].diffuseTexture.GPUTexture.destroy()
 					this['material'].diffuseTexture = v
 				})
 			})
@@ -166,7 +166,7 @@ export default class Text extends BaseObject3D {
 		let t1 = [];
 		let result = this['_text'];
 		t0 = t0 || [];
-		console.log(t0);
+		// console.log(t0);
 		let max = t0.length;
 		let loaded = 0;
 		t0.forEach(function (v) {
