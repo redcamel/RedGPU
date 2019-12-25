@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.24 18:50:1
+ *   Last modification time of this file - 2019.12.25 13:39:51
  *
  */
 import RedGPU from "../src/RedGPU.js";
@@ -69,41 +69,49 @@ new RedGPU.RedGPUContext(cvs,
 
 
 		let tMesh
-		// tMesh = new RedGPU.Mesh(this, new RedGPU.Sphere(this,), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this,'../assets/UV_Grid_Sm.jpg')))
-		// tMesh.x = Math.random()*10-5
-		// tMesh.y = Math.random()*10-5
-		// tMesh.z = Math.random()*10-5
-		// tScene.addChild(tMesh)
-		// tMesh = new RedGPU.Mesh(this, new RedGPU.Sphere(this,), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this,'../assets/Brick03_col.jpg')))
-		// tMesh.x = Math.random()*10-5
-		// tMesh.y = Math.random()*10-5
-		// tMesh.z = Math.random()*10-5
-		// tScene.addChild(tMesh)
-		// tMesh = new RedGPU.Mesh(this, new RedGPU.Sphere(this,), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this,'../assets/Brick03_nrm.jpg')))
-		// tMesh.x = Math.random()*10-5
-		// tMesh.y = Math.random()*10-5
-		// tMesh.z = Math.random()*10-5
-		// tScene.addChild(tMesh)
-		// tMesh = new RedGPU.Mesh(this, new RedGPU.Sphere(this,), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this,'../assets/crate.png')))
-		// tMesh.x = Math.random()*10-5
-		// tMesh.y = Math.random()*10-5
-		// tMesh.z = Math.random()*10-5
-		// tScene.addChild(tMesh)
-		// tMesh = new RedGPU.Mesh(this, new RedGPU.Sphere(this,), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this,'../assets/Brick03_disp.jpg')))
-		// tMesh.x = Math.random()*10-5
-		// tMesh.y = Math.random()*10-5
-		// tMesh.z = Math.random()*10-5
-		// tScene.addChild(tMesh)
-		// tMesh = new RedGPU.Mesh(this, new RedGPU.Sphere(this,), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this,'../assets/specular.png')))
-		// tMesh.x = Math.random()*10-5
-		// tMesh.y = Math.random()*10-5
-		// tMesh.z = Math.random()*10-5
-		// tScene.addChild(tMesh)
-		// tMesh = new RedGPU.Mesh(this, new RedGPU.Sphere(this,), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this,'../assets/emissive.jpg')))
-		// tMesh.x = Math.random()*10-5
-		// tMesh.y = Math.random()*10-5
-		// tMesh.z = Math.random()*10-5
-		// tScene.addChild(tMesh)
+		tMesh = new RedGPU.Mesh(this, new RedGPU.Box(this,), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this,'../assets/UV_Grid_Sm.jpg')))
+		tMesh.x = Math.random()*10-5
+		tMesh.y = Math.random()*10-5
+		tMesh.z = Math.random()*10-5
+		tScene.addChild(tMesh)
+
+		let tMesh2 = new RedGPU.Mesh(this, new RedGPU.Sphere(this,), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this,'../assets/UV_Grid_Sm.jpg')))
+		tMesh2.x = 1
+		tMesh2.y = 1
+		tMesh2.z = 1
+		tMesh.addChild(tMesh2)
+
+
+		tMesh = new RedGPU.Mesh(this, new RedGPU.Sphere(this,), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this,'../assets/Brick03_col.jpg')))
+		tMesh.x = Math.random()*10-5
+		tMesh.y = Math.random()*10-5
+		tMesh.z = Math.random()*10-5
+		tScene.addChild(tMesh)
+		tMesh = new RedGPU.Mesh(this, new RedGPU.Plane(this,), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this,'../assets/Brick03_nrm.jpg')))
+		tMesh.x = Math.random()*10-5
+		tMesh.y = Math.random()*10-5
+		tMesh.z = Math.random()*10-5
+		tScene.addChild(tMesh)
+		tMesh = new RedGPU.Mesh(this, new RedGPU.Cylinder(this,), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this,'../assets/crate.png')))
+		tMesh.x = Math.random()*10-5
+		tMesh.y = Math.random()*10-5
+		tMesh.z = Math.random()*10-5
+		tScene.addChild(tMesh)
+		tMesh = new RedGPU.Mesh(this, new RedGPU.Sphere(this,), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this,'../assets/Brick03_disp.jpg')))
+		tMesh.x = Math.random()*10-5
+		tMesh.y = Math.random()*10-5
+		tMesh.z = Math.random()*10-5
+		tScene.addChild(tMesh)
+		tMesh = new RedGPU.Mesh(this, new RedGPU.Sphere(this,), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this,'../assets/specular.png')))
+		tMesh.x = Math.random()*10-5
+		tMesh.y = Math.random()*10-5
+		tMesh.z = Math.random()*10-5
+		tScene.addChild(tMesh)
+		tMesh = new RedGPU.Mesh(this, new RedGPU.Sphere(this,), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this,'../assets/emissive.jpg')))
+		tMesh.x = Math.random()*10-5
+		tMesh.y = Math.random()*10-5
+		tMesh.z = Math.random()*10-5
+		tScene.addChild(tMesh)
 
 		// tMesh = new RedGPU.Mesh(this, new RedGPU.Sphere(this,), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this, '../assets/UV_Gri1d_Sm.jpg', null, true,
 		// 	function () {
