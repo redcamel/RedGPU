@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.24 18:50:1
+ *   Last modification time of this file - 2019.12.25 18:5:14
  *
  */
 
@@ -15,6 +15,8 @@ import UniformBufferDescriptor from "../buffer/UniformBufferDescriptor.js";
 import TypeSize from "../resources/TypeSize.js";
 import ShareGLSL from "./ShareGLSL.js";
 import Render from "../renderer/Render.js";
+import View from "../View.js";
+import UTIL from "../util/UTIL.js";
 
 const MESH_UNIFORM_TABLE = [];
 let MESH_UNIFORM_POOL_index = 0;
@@ -104,19 +106,112 @@ export default class BaseObject3D extends DisplayContainer {
 		parseInt(Math.random() * 255),
 		255
 	];
-	addEventListener(type, handler) {
-		if (!Render.mouseMAP[this.#mouseColorID.toString()]) {
-			Render.mouseMAP[this.#mouseColorID.toString()] = {
-				target: this
-			}
-		}
-		Render.mouseMAP[this.#mouseColorID.toString()][type] = handler;
-		// console.log(Render.mouseMAP)
+	get blendColorSrc() {return this._blendColorSrc;}
+	set blendColorSrc(value) {this._blendColorSrc = value;}
+	get blendColorDst() {return this._blendColorDst;}
+	set blendColorDst(value) {this._blendColorDst = value;}
+	get blendAlphaDst() {return this._blendAlphaDst;}
+	set blendAlphaDst(value) {this._blendAlphaDst = value;}
+	get blendAlphaSrc() {return this._blendAlphaSrc;}
+	set blendAlphaSrc(value) {this._blendAlphaSrc = value;}
+	get x() {return this._x}
+	set x(v) {
+		this._x = v;
+		this.dirtyTransform = true;
 	}
-	removeEventListener(type) {
-		if (Render.mouseMAP[this.#mouseColorID.toString()]) {
-			Render.mouseMAP[this.#mouseColorID.toString()][type] = null;
-		}
+	get y() {return this._y}
+	set y(v) {
+		this._y = v;
+		this.dirtyTransform = true;
+	}
+	get z() {return this._z;}
+	set z(v) {
+		this._z = v;
+		this.dirtyTransform = true;
+	}
+	getPosition() {return [this._x, this._y, this._z]}
+	setPosition(x, y, z) {
+		this._x = x;
+		this._y = y;
+		this._z = z;
+		this.dirtyTransform = true;
+	}
+	/////////////////////////////////////////////////////////
+	get rotationX() {return this._rotationX;}
+	set rotationX(v) {
+		this._rotationX = v;
+		this.dirtyTransform = true;
+	}
+	get rotationY() {return this._rotationY;}
+	set rotationY(v) {
+		this._rotationY = v;
+		this.dirtyTransform = true;
+	}
+	get rotationZ() {return this._rotationZ;}
+	set rotationZ(v) {
+		this._rotationZ = v;
+		this.dirtyTransform = true;
+	}
+	getRotation() {return [this._rotationX, this._rotationY, this._rotationZ]}
+	setRotation(rX, rY, rZ) {
+		this._rotationX = rX;
+		this._rotationY = rY;
+		this._rotationZ = rZ;
+		this.dirtyTransform = true;
+	}
+	/////////////////////////////////////////////////////////
+	get scaleX() {return this._scaleX;}
+	set scaleX(v) {
+		this._scaleX = v;
+		this.dirtyTransform = true;
+	}
+	get scaleY() {return this._scaleY;}
+	set scaleY(v) {
+		this._scaleY = v;
+		this.dirtyTransform = true;
+	}
+	get scaleZ() {return this._scaleZ;}
+	set scaleZ(v) {
+		this._scaleZ = v;
+		this.dirtyTransform = true;
+	}
+	getScale() {return [this._scaleX, this._scaleY, this._scaleZ]}
+	setScale(sX, sY, sZ) {
+		this._scaleX = sX;
+		this._scaleY = sY;
+		this._scaleZ = sZ;
+		this.dirtyTransform = true;
+	}
+	/////////////////////////////////////////////////////////
+	get geometry() {return this._geometry}
+	set geometry(v) {
+		this._geometry = v;
+		this.dirtyPipeline = true;/* this.dirtyTransform = true*/
+	}
+	get material() {return this._material}
+	set material(v) {
+		this._material = v;
+		this.dirtyPipeline = true;/* this.dirtyTransform = true*/
+	}
+	get useDepthTest() {return this._useDepthTest;}
+	set useDepthTest(value) {
+		this.dirtyPipeline = true;
+		this._useDepthTest = value;
+	}
+	get depthTestFunc() {return this._depthTestFunc;}
+	set depthTestFunc(value) {
+		this.dirtyPipeline = true;
+		this._depthTestFunc = value;
+	}
+	get cullMode() {return this._cullMode;}
+	set cullMode(value) {
+		this.dirtyPipeline = true;
+		this._cullMode = value;
+	}
+	get primitiveTopology() {return this._primitiveTopology;}
+	set primitiveTopology(value) {
+		this.dirtyPipeline = true;
+		this._primitiveTopology = value;
 	}
 	constructor(redGPUContext) {
 		super();
@@ -164,119 +259,64 @@ export default class BaseObject3D extends DisplayContainer {
 	}
 
 	/////////////////////////////////////////////////////////
-	get blendColorSrc() {return this._blendColorSrc;}
-	set blendColorSrc(value) {this._blendColorSrc = value;}
-	get blendColorDst() {return this._blendColorDst;}
-	set blendColorDst(value) {this._blendColorDst = value;}
-	get blendAlphaDst() {return this._blendAlphaDst;}
-	set blendAlphaDst(value) {this._blendAlphaDst = value;}
-	get blendAlphaSrc() {return this._blendAlphaSrc;}
-	set blendAlphaSrc(value) {this._blendAlphaSrc = value;}
-	get x() {return this._x}
-	set x(v) {
-		this._x = v;
-		this.dirtyTransform = true;
+	addEventListener(type, handler) {
+		if (!Render.mouseMAP[this.#mouseColorID.toString()]) {
+			Render.mouseMAP[this.#mouseColorID.toString()] = {
+				target: this
+			}
+		}
+		Render.mouseMAP[this.#mouseColorID.toString()][type] = handler;
+		// console.log(Render.mouseMAP)
 	}
-	get y() {return this._y}
-	set y(v) {
-		this._y = v;
-		this.dirtyTransform = true;
+	removeEventListener(type) {
+		if (Render.mouseMAP[this.#mouseColorID.toString()]) {
+			Render.mouseMAP[this.#mouseColorID.toString()][type] = null;
+		}
 	}
-	get z() {return this._z;}
-	set z(v) {
-		this._z = v;
-		this.dirtyTransform = true;
-	}
-	getPosition() {
-		return [this._x, this._y, this._z]
-	}
-	setPosition(x, y, z) {
-		this._x = x;
-		this._y = y;
-		this._z = z;
-		this.dirtyTransform = true;
-	}
-	/////////////////////////////////////////////////////////
-	get rotationX() {return this._rotationX;}
-	set rotationX(v) {
-		this._rotationX = v;
-		this.dirtyTransform = true;
-	}
-	get rotationY() {return this._rotationY;}
-	set rotationY(v) {
-		this._rotationY = v;
-		this.dirtyTransform = true;
-	}
-	get rotationZ() {return this._rotationZ;}
-	set rotationZ(v) {
-		this._rotationZ = v;
-		this.dirtyTransform = true;
-	}
-	getRotation() {
-		return [this._rotationX, this._rotationY, this._rotationZ]
-	}
-	setRotation(rX, rY, rZ) {
-		this._rotationX = rX;
-		this._rotationY = rY;
-		this._rotationZ = rZ;
-		this.dirtyTransform = true;
-	}
-	/////////////////////////////////////////////////////////
-	get scaleX() {return this._scaleX;}
-	set scaleX(v) {
-		this._scaleX = v;
-		this.dirtyTransform = true;
-	}
-	get scaleY() {return this._scaleY;}
-	set scaleY(v) {
-		this._scaleY = v;
-		this.dirtyTransform = true;
-	}
-	get scaleZ() {return this._scaleZ;}
-	set scaleZ(v) {
-		this._scaleZ = v;
-		this.dirtyTransform = true;
-	}
-	getScale() {
-		return [this._scaleX, this._scaleY, this._scaleZ]
-	}
-	setScale(sX, sY, sZ) {
-		this._scaleX = sX;
-		this._scaleY = sY;
-		this._scaleZ = sZ;
-		this.dirtyTransform = true;
-	}
-	/////////////////////////////////////////////////////////
-	get geometry() {return this._geometry}
-	set geometry(v) {
-		this._geometry = v;
-		this.dirtyPipeline = true;/* this.dirtyTransform = true*/
-	}
-	get material() {return this._material}
-	set material(v) {
-		this._material = v;
-		this.dirtyPipeline = true;/* this.dirtyTransform = true*/
-	}
-	get useDepthTest() {return this._useDepthTest;}
-	set useDepthTest(value) {
-		this.dirtyPipeline = true;
-		this._useDepthTest = value;
-	}
-	get depthTestFunc() {return this._depthTestFunc;}
-	set depthTestFunc(value) {
-		this.dirtyPipeline = true;
-		this._depthTestFunc = value;
-	}
-	get cullMode() {return this._cullMode;}
-	set cullMode(value) {
-		this.dirtyPipeline = true;
-		this._cullMode = value;
-	}
-	get primitiveTopology() {return this._primitiveTopology;}
-	set primitiveTopology(value) {
-		this.dirtyPipeline = true;
-		this._primitiveTopology = value;
-	}
-
-
+	localToWorld = (_ => {
+		//TODO - 값 확인해봐야함
+		let tMTX;
+		tMTX = mat4.create();
+		return function (x = 0, y = 0, z = 0) {
+			typeof x == 'number' || UTIL.throwFunc('RedBaseObject3D - localToWorld : x - number만 허용함', '입력값 : ', x);
+			typeof y == 'number' || UTIL.throwFunc('RedBaseObject3D - localToWorld : y - number만 허용함', '입력값 : ', y);
+			typeof z == 'number' || UTIL.throwFunc('RedBaseObject3D - localToWorld : z - number만 허용함', '입력값 : ', z);
+			tMTX[0] = 1, tMTX[1] = 0, tMTX[2] = 0, tMTX[3] = 0;
+			tMTX[4] = 0, tMTX[5] = 1, tMTX[6] = 0, tMTX[7] = 0;
+			tMTX[8] = 0, tMTX[9] = 0, tMTX[10] = 1, tMTX[11] = 0;
+			tMTX[12] = x, tMTX[13] = y, tMTX[14] = z, tMTX[15] = 1;
+			mat4.multiply(tMTX, this.matrix, tMTX);
+			return [tMTX[12], tMTX[13], tMTX[14]]
+		}
+	})()
+	getScreenPoint = (_ => {
+		//TODO - 값 확인해봐야함
+		let tMTX = mat4.create();
+		let tPositionMTX = mat4.create();
+		let tCamera, tViewRect;
+		let resultPosition;
+		resultPosition = {x: 0, y: 0, z: 0, w: 0};
+		return function (redView, localX = 0, localY = 0, localZ = 0) {
+			let worldPosition = this.localToWorld(localX,localY,localZ)
+			tPositionMTX[0] = 1, tPositionMTX[1] = 0, tPositionMTX[2] = 0, tPositionMTX[3] = 0;
+			tPositionMTX[4] = 0, tPositionMTX[5] = 1, tPositionMTX[6] = 0, tPositionMTX[7] = 0;
+			tPositionMTX[8] = 0, tPositionMTX[9] = 0, tPositionMTX[10] = 1, tPositionMTX[11] = 0;
+			tPositionMTX[12] = worldPosition[0], tPositionMTX[13] = worldPosition[1], tPositionMTX[14] = worldPosition[2], tPositionMTX[15] = 1;
+			redView instanceof View || UTIL.throwFunc('RedBaseObject3D - getScreenPoint : redView - RedView Instance 만 허용함', '입력값 : ', redView);
+			tCamera = redView.camera;
+			tViewRect = redView.viewRect;
+			mat4.multiply(tMTX, redView.projectionMatrix, tCamera.matrix);
+			mat4.multiply(tMTX, tMTX, tPositionMTX);
+			resultPosition.x = tMTX[12];
+			resultPosition.y = tMTX[13];
+			resultPosition.z = tMTX[14];
+			resultPosition.w = tMTX[15];
+			resultPosition.x = resultPosition.x * 0.5 / resultPosition.w + 0.5;
+			resultPosition.y = resultPosition.y * 0.5 / resultPosition.w + 0.5;
+			return [
+				(tViewRect[0] + resultPosition.x * tViewRect[2]) / window.devicePixelRatio,
+				(tViewRect[1] + (1 - resultPosition.y) * tViewRect[3]) / window.devicePixelRatio
+			]
+		}
+	})();
 }

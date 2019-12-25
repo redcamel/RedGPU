@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.25 14:45:40
+ *   Last modification time of this file - 2019.12.25 17:24:20
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -154,7 +154,7 @@ new RedGPU.RedGPUContext(
 				// tView.postEffect.addEffect(tEffect)
 
 
-				// this.addView(tView2)
+				this.addView(tView2)
 				tView2.setLocation(100, 200)
 
 
@@ -208,18 +208,18 @@ new RedGPU.RedGPUContext(
 							? new RedGPU.Cylinder(this, 0, 1, 2, 16, 16) :
 							Math.random() > 0.5 ? new RedGPU.Box(this) : new RedGPU.Plane(this)
 				}
-				// let i3 = 100
-				// while (i3--) {
-				// 	let testMesh = new RedGPU.Mesh(
-				// 		this,
-				// 		new RedGPU.Sphere(this, 0.5, 16, 16, 16),
-				// 		testMat_bitmap
-				// 	);
-				// 	testMesh.x = Math.random() * 30 - 15
-				// 	testMesh.y = Math.random() * 30 - 15
-				// 	testMesh.z = Math.random() * 30 - 15
-				// 	tScene2.addChild(testMesh)
-				// }
+				let i3 = 100
+				while (i3--) {
+					let testMesh = new RedGPU.Mesh(
+						this,
+						new RedGPU.Sphere(this, 0.5, 16, 16, 16),
+						testMat_bitmap
+					);
+					testMesh.x = Math.random() * 30 - 15
+					testMesh.y = Math.random() * 30 - 15
+					testMesh.z = Math.random() * 30 - 15
+					tScene2.addChild(testMesh)
+				}
 				// let testMesh = new RedGPU.Mesh(
 				// 	this,
 				// 	new RedGPU.Sphere(this, 0.5, 16, 16, 16),

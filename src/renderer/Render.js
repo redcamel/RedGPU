@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.25 14:45:40
+ *   Last modification time of this file - 2019.12.25 18:5:14
  *
  */
 
@@ -14,7 +14,7 @@ let currentDebuggerData;
 let renderToTransparentLayerList = [];
 let textToTransparentLayerList = [];
 let tCacheUniformInfo = {};
-const resultPreMTX = mat4.create();
+const resultPreMTX_mul_perspective_camera = mat4.create();
 const updateTargetMatrixBufferList = [];
 let currentTime;
 let pickColorArray;
@@ -269,47 +269,52 @@ let renderScene = (_ => {
 					if (renderToTransparentLayerMode == 0 && tMesh.renderToTransparentLayer) {
 						renderToTransparentLayerList.push(tMesh)
 					} else {
-						///////////////////////////////////////
-						a00 = resultPreMTX[0], a01 = resultPreMTX[1], a02 = resultPreMTX[2], a03 = resultPreMTX[3];
-						a10 = resultPreMTX[4], a11 = resultPreMTX[5], a12 = resultPreMTX[6], a13 = resultPreMTX[7];
-						a20 = resultPreMTX[8], a21 = resultPreMTX[9], a22 = resultPreMTX[10], a23 = resultPreMTX[11];
-						a30 = resultPreMTX[12], a31 = resultPreMTX[13], a32 = resultPreMTX[14], a33 = resultPreMTX[15];
-						b0 = tMVMatrix[12];
-						b1 = tMVMatrix[13];
-						b2 = tMVMatrix[14];
-						b3 = tMVMatrix[15];
-						resultPosition.x = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
-						resultPosition.y = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
-						// resultPosition.z = b0*a02 + b1*a12 + b2*a22 + b3*a32;
-						resultPosition.w = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
-						resultPosition.x = resultPosition.x * 0.5 / resultPosition.w + 0.5;
-						resultPosition.y = resultPosition.y * 0.5 / resultPosition.w + 0.5;
-						tX = (resultPosition.x * tViewRect[2]);
-						tY = ((1 - resultPosition.y) * tViewRect[3]);
-						///////////////////////////////////////
-						if (tX > 0 && tY > 0 && tViewRect[2] - tX > 0 && tViewRect[3] - tY > 0 && tPipeline.GPURenderPipeline) {
-							passEncoder.setPipeline(tPipeline.GPURenderPipeline);
-							if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
-								passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
-								prevVertexBuffer_UUID = tGeometry.interleaveBuffer._UUID
-							}
-							passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹는 매그룹마다 다르니 또 업데이트 해줘야함 -_-
-							if (prevMaterial_UUID != tMaterial._UUID) {
-								passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
-								prevMaterial_UUID = tMaterial._UUID
-							}
-							if (tGeometry.indexBuffer) {
-								if (prevIndexBuffer_UUID != tGeometry.indexBuffer._UUID) {
-									passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
-									prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
+						if (tPipeline.GPURenderPipeline) {
+							///////////////////////////////////////
+							// 일단 중점 포인트를 구하고
+							a00 = resultPreMTX_mul_perspective_camera[0], a01 = resultPreMTX_mul_perspective_camera[1], a02 = resultPreMTX_mul_perspective_camera[2], a03 = resultPreMTX_mul_perspective_camera[3];
+							a10 = resultPreMTX_mul_perspective_camera[4], a11 = resultPreMTX_mul_perspective_camera[5], a12 = resultPreMTX_mul_perspective_camera[6], a13 = resultPreMTX_mul_perspective_camera[7];
+							a20 = resultPreMTX_mul_perspective_camera[8], a21 = resultPreMTX_mul_perspective_camera[9], a22 = resultPreMTX_mul_perspective_camera[10], a23 = resultPreMTX_mul_perspective_camera[11];
+							a30 = resultPreMTX_mul_perspective_camera[12], a31 = resultPreMTX_mul_perspective_camera[13], a32 = resultPreMTX_mul_perspective_camera[14], a33 = resultPreMTX_mul_perspective_camera[15];
+							b0 = tMVMatrix[12];
+							b1 = tMVMatrix[13];
+							b2 = tMVMatrix[14];
+							b3 = tMVMatrix[15];
+							resultPosition.x = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
+							resultPosition.y = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
+							// resultPosition.z = b0*a02 + b1*a12 + b2*a22 + b3*a32;
+							resultPosition.w = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
+							resultPosition.x = resultPosition.x * 0.5 / resultPosition.w + 0.5;
+							resultPosition.y = resultPosition.y * 0.5 / resultPosition.w + 0.5;
+							tX = (resultPosition.x * tViewRect[2]);
+							tY = ((1 - resultPosition.y) * tViewRect[3]);
+							///////////////////////////////////////
+
+
+							if (tX > 0 && tY > 0 && tViewRect[2] - tX > 0 && tViewRect[3] - tY > 0) {
+								passEncoder.setPipeline(tPipeline.GPURenderPipeline);
+								if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
+									passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
+									prevVertexBuffer_UUID = tGeometry.interleaveBuffer._UUID
 								}
-								passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
-								currentDebuggerData['triangleNum'] += tGeometry.indexBuffer.indexNum / 3
-							} else {
-								passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
-								currentDebuggerData['triangleNum'] += tGeometry.interleaveBuffer.data.length / tGeometry.interleaveBuffer.stride
+								passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹는 매그룹마다 다르니 또 업데이트 해줘야함 -_-
+								if (prevMaterial_UUID != tMaterial._UUID) {
+									passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
+									prevMaterial_UUID = tMaterial._UUID
+								}
+								if (tGeometry.indexBuffer) {
+									if (prevIndexBuffer_UUID != tGeometry.indexBuffer._UUID) {
+										passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
+										prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
+									}
+									passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
+									currentDebuggerData['triangleNum'] += tGeometry.indexBuffer.indexNum / 3
+								} else {
+									passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
+									currentDebuggerData['triangleNum'] += tGeometry.interleaveBuffer.data.length / tGeometry.interleaveBuffer.stride
+								}
+								currentDebuggerData['drawCallNum']++
 							}
-							currentDebuggerData['drawCallNum']++
 						}
 						tMesh._prevMaterialUUID = tMaterial._UUID;
 					}
@@ -572,7 +577,7 @@ export default class Render {
 		if (!redView.baseAttachmentView) {
 			redView.resetTexture(redGPUContext)
 		}
-		mat4.multiply(resultPreMTX, redView.projectionMatrix, redView.camera.matrix);
+		mat4.multiply(resultPreMTX_mul_perspective_camera, redView.projectionMatrix, redView.camera.matrix);
 		const renderPassDescriptor = {
 			colorAttachments: [
 				{
