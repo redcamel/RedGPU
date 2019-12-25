@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 13:27:33
+ *   Last modification time of this file - 2019.12.25 17:24:20
  *
  */
 
@@ -11,9 +11,10 @@ import Buffer from "../buffer/Buffer.js";
 import Geometry from "../geometry/Geometry.js";
 import InterleaveInfo from "../geometry/InterleaveInfo.js";
 import RedGPUContext from "../RedGPUContext.js";
-
-export default class Plane {
+import baseGeometry from "../base/baseGeometry.js";
+export default class Plane extends baseGeometry{
 	constructor(redGPUContext, width = 1, height = 1, wSegments = 1, hSegments = 1, flipY = false) {
+		super()
 		let typeKey;
 		// 유일키 생성
 		typeKey = [this.constructor.name, width, height, wSegments, hSegments].join('_');

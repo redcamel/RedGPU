@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.25 13:39:51
+ *   Last modification time of this file - 2019.12.25 17:24:20
  *
  */
 import RedGPU from "../src/RedGPU.js";
@@ -38,12 +38,12 @@ new RedGPU.RedGPUContext(cvs,
 
 		var addLine_random, addLine_circle;
 		// 60번 포인트를 랜덤으로 정의하고 라인추가
-		addLine_random = function (redGPUContext,color) {
+		addLine_random = function (redGPUContext, color) {
 			var tLine;
 			var tX, tY, tZ;
 			var i = 50;
 			// 라인객체 생성
-			tLine = new Line(redGPUContext,color,Line.CATMULL_ROM);
+			tLine = new Line(redGPUContext, color, Line.CATMULL_ROM);
 
 			tX = tY = tZ = 0
 			while (i--) {
@@ -51,7 +51,7 @@ new RedGPU.RedGPUContext(cvs,
 				tY += Math.random() - 0.5;
 				tZ += Math.random() - 0.5;
 				// 라인에 포인트 추가
-				tLine.addPoint(Math.random() * 5 - 2.5, Math.random() * 5 - 2.5, Math.random() * 5 - 2.5,i%3==0 ? color : i%3==1 ?'#ff0000' :'#00ff00',Math.max(Math.random(),0.5));
+				tLine.addPoint(Math.random() * 5 - 2.5, Math.random() * 5 - 2.5, Math.random() * 5 - 2.5, i % 3 == 0 ? color : i % 3 == 1 ? '#ff0000' : '#00ff00', Math.max(Math.random(), 0.5));
 			}
 			tScene.addChild(tLine);
 			tLine.tension = 1
@@ -69,50 +69,71 @@ new RedGPU.RedGPUContext(cvs,
 
 
 		let tMesh
-		tMesh = new RedGPU.Mesh(this, new RedGPU.Box(this,), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this,'../assets/UV_Grid_Sm.jpg')))
-		tMesh.x = Math.random()*10-5
-		tMesh.y = Math.random()*10-5
-		tMesh.z = Math.random()*10-5
+		tMesh = new RedGPU.Mesh(this, new RedGPU.Box(this,), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this, '../assets/UV_Grid_Sm.jpg')))
+		tMesh.x = Math.random() * 10 - 5
+		tMesh.y = Math.random() * 10 - 5
+		tMesh.z = Math.random() * 10 - 5
 		tScene.addChild(tMesh)
 
-		let tMesh2 = new RedGPU.Mesh(this, new RedGPU.Sphere(this,), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this,'../assets/UV_Grid_Sm.jpg')))
+		let tMesh2 = new RedGPU.Mesh(this, new RedGPU.Sphere(this,), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this, '../assets/UV_Grid_Sm.jpg')))
 		tMesh2.x = 1
 		tMesh2.y = 1
 		tMesh2.z = 1
 		tMesh.addChild(tMesh2)
 
 
-		tMesh = new RedGPU.Mesh(this, new RedGPU.Sphere(this,), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this,'../assets/Brick03_col.jpg')))
-		tMesh.x = Math.random()*10-5
-		tMesh.y = Math.random()*10-5
-		tMesh.z = Math.random()*10-5
+		tMesh = new RedGPU.Mesh(this, new RedGPU.Sphere(this,), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this, '../assets/Brick03_col.jpg')))
+		tMesh.x = Math.random() * 10 - 5
+		tMesh.y = Math.random() * 10 - 5
+		tMesh.z = Math.random() * 10 - 5
 		tScene.addChild(tMesh)
-		tMesh = new RedGPU.Mesh(this, new RedGPU.Plane(this,), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this,'../assets/Brick03_nrm.jpg')))
-		tMesh.x = Math.random()*10-5
-		tMesh.y = Math.random()*10-5
-		tMesh.z = Math.random()*10-5
-		tScene.addChild(tMesh)
-		tMesh = new RedGPU.Mesh(this, new RedGPU.Cylinder(this,), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this,'../assets/crate.png')))
-		tMesh.x = Math.random()*10-5
-		tMesh.y = Math.random()*10-5
-		tMesh.z = Math.random()*10-5
-		tScene.addChild(tMesh)
-		tMesh = new RedGPU.Mesh(this, new RedGPU.Sphere(this,), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this,'../assets/Brick03_disp.jpg')))
-		tMesh.x = Math.random()*10-5
-		tMesh.y = Math.random()*10-5
-		tMesh.z = Math.random()*10-5
-		tScene.addChild(tMesh)
-		tMesh = new RedGPU.Mesh(this, new RedGPU.Sphere(this,), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this,'../assets/specular.png')))
-		tMesh.x = Math.random()*10-5
-		tMesh.y = Math.random()*10-5
-		tMesh.z = Math.random()*10-5
-		tScene.addChild(tMesh)
-		tMesh = new RedGPU.Mesh(this, new RedGPU.Sphere(this,), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this,'../assets/emissive.jpg')))
-		tMesh.x = Math.random()*10-5
-		tMesh.y = Math.random()*10-5
-		tMesh.z = Math.random()*10-5
+		tMesh = new RedGPU.Mesh(this, new RedGPU.Plane(this,), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this, '../assets/Brick03_nrm.jpg')))
+		tMesh.x = Math.random() * 10 - 5
+		tMesh.y = Math.random() * 10 - 5
+		tMesh.z = Math.random() * 10 - 5
 		tScene.addChild(tMesh)
 
+		tMesh = new RedGPU.Mesh(this, new RedGPU.Cylinder(this,), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this, '../assets/crate.png')))
+		tMesh.x = Math.random() * 10 - 5
+		tMesh.y = Math.random() * 10 - 5
+		tMesh.z = Math.random() * 10 - 5
+		tScene.addChild(tMesh)
+		// let tMeshVolume = new RedGPU.Mesh(this, new RedGPU.Box(this, tMesh.geometry.volume.volume[0], tMesh.geometry.volume.volume[0], tMesh.geometry.volume.volume[0]), new RedGPU.ColorMaterial(this))
+		// tMeshVolume.primitiveTopology = 'line-strip'
+		// tMesh.tMeshVolume = tMeshVolume
+		// tScene.addChild(tMeshVolume)
+
+		tMesh = new RedGPU.Mesh(this, new RedGPU.Sphere(this,), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this, '../assets/Brick03_disp.jpg')))
+		tMesh.x = Math.random() * 10 - 5
+		tMesh.y = Math.random() * 10 - 5
+		tMesh.z = Math.random() * 10 - 5
+		tScene.addChild(tMesh)
+		//  tMeshVolume = new RedGPU.Mesh(this, new RedGPU.Box(this, tMesh.geometry.volume.volume[0], tMesh.geometry.volume.volume[0], tMesh.geometry.volume.volume[0]), new RedGPU.ColorMaterial(this))
+		// tMeshVolume.primitiveTopology = 'line-strip'
+		// tMesh.tMeshVolume = tMeshVolume
+		// tScene.addChild(tMeshVolume)
+
+		tMesh = new RedGPU.Mesh(this, new RedGPU.Sphere(this,), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this, '../assets/specular.png')))
+		tMesh.x = Math.random() * 10 - 5
+		tMesh.y = Math.random() * 10 - 5
+		tMesh.z = Math.random() * 10 - 5
+		tScene.addChild(tMesh)
+		//  tMeshVolume = new RedGPU.Mesh(this, new RedGPU.Box(this, tMesh.geometry.volume.volume[0], tMesh.geometry.volume.volume[0], tMesh.geometry.volume.volume[0]), new RedGPU.ColorMaterial(this))
+		// tMeshVolume.primitiveTopology = 'line-strip'
+		// tMesh.tMeshVolume = tMeshVolume
+		// tScene.addChild(tMeshVolume)
+
+
+		tMesh = new RedGPU.Mesh(this, new RedGPU.Sphere(this,), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this, '../assets/emissive.jpg')))
+		tMesh.x = Math.random() * 10 - 5
+		tMesh.y = Math.random() * 10 - 5
+		tMesh.z = Math.random() * 10 - 5
+		tScene.addChild(tMesh)
+		let  tMeshVolume = new RedGPU.Mesh(this, new RedGPU.Box(this, tMesh.geometry.volume.volume[0], tMesh.geometry.volume.volume[0], tMesh.geometry.volume.volume[0]), new RedGPU.ColorMaterial(this))
+		tMeshVolume.primitiveTopology = 'line-strip'
+		tMesh.tMeshVolume = tMeshVolume
+		console.log('tMesh.geometry.volume', tMesh.geometry.volume)
+		tScene.addChild(tMeshVolume)
 		// tMesh = new RedGPU.Mesh(this, new RedGPU.Sphere(this,), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this, '../assets/UV_Gri1d_Sm.jpg', null, true,
 		// 	function () {
 		// 		console.log('로딩완료', this)
@@ -299,7 +320,16 @@ new RedGPU.RedGPUContext(cvs,
 			tScene.children.forEach(tMesh => {
 				tMesh.rotationZ += 0.1
 				// tMesh.material.alpha = RedGPU.UTIL.clamp(Math.sin(time / 500), 0, 1)
+				if(tMesh.tMeshVolume) {
+					tMesh.tMeshVolume.setPosition(...tMesh.getPosition())
+					tMesh.tMeshVolume.setScale(...tMesh.getScale())
+					tMesh.tMeshVolume.setRotation(...tMesh.getRotation())
 
+					let tVolume = tMesh.geometry.volume;
+					console.log(tVolume)
+					console.log('min',tMeshVolume.getScreenPoint(tView,tVolume.minX,tVolume.minY,tVolume.minZ))
+					console.log('max',tMeshVolume.getScreenPoint(tView,tVolume.maxX,tVolume.maxY,tVolume.maxZ))
+				}
 			})
 			// console.log(tCamera.getPosition())
 			renderer.render(time, this);
