@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.24 20:56:2
+ *   Last modification time of this file - 2019.12.25 13:39:51
  *
  */
 
@@ -158,15 +158,8 @@ let readPixel = async (redGPUContext, redView, targetTexture, commandEncoder) =>
 		pickColorArray = null
 	}
 };
-
 let renderScene = (redGPUContext, redView, passEncoder, parent, children, parentDirty, renderToTransparentLayerMode = 0) => {
 	let i;
-
-
-	let prevVertexBuffer_UUID;
-	let prevIndexBuffer_UUID;
-	let prevMaterial_UUID;
-
 	let aSx, aSy, aSz, aCx, aCy, aCz, aX, aY, aZ,
 		a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23, a30, a31, a32, a33,
 		b0, b1, b2, b3,
@@ -225,29 +218,22 @@ let renderScene = (redGPUContext, redView, passEncoder, parent, children, parent
 		if (tGeometry) {
 			if (renderToTransparentLayerMode && tPipeline.GPURenderPipeline) {
 				// if (renderToTransparentLayerMode == 1 && tMesh instanceof Text) {
-				// 	// let tMTX = new Float32Array(16)
-				// 	// tMTX[12] = tMesh._x, tMTX[13] = tMesh._y, tMTX[14] = tMesh._z;
-				// 	// mat4.multiply(tMTX, redView.camera.matrix, tMTX) //FIXME - 이거풀어야함
-				// 	// textToTransparentLayerList.push({
-				// 	// 	z: tMTX[14],
-				// 	// 	tText: tMesh
-				// 	// })
-				// } else {
-				//
-				// }
+				// // 	// let tMTX = new Float32Array(16)
+				// // 	// tMTX[12] = tMesh._x, tMTX[13] = tMesh._y, tMTX[14] = tMesh._z;
+				// // 	// mat4.multiply(tMTX, redView.camera.matrix, tMTX) //FIXME - 이거풀어야함
+				// // 	// textToTransparentLayerList.push({
+				// // 	// 	z: tMTX[14],
+				// // 	// 	tText: tMesh
+				// // 	// })
+				// // } else {
+				// //
+				// // }
 				passEncoder.setPipeline(tPipeline.GPURenderPipeline);
-				if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
-					passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
-					prevVertexBuffer_UUID = tGeometry.interleaveBuffer._UUID
-				}
+				passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
 				passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹는 매그룹마다 다르니 또 업데이트 해줘야함 -_-
-				if (prevMaterial_UUID != tMaterial._UUID) passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
-				prevMaterial_UUID = tMaterial._UUID;
+				passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
 				if (tGeometry.indexBuffer) {
-					if (prevIndexBuffer_UUID != tGeometry.indexBuffer._UUID) {
-						passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
-						prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
-					}
+					passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
 					passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
 					currentDebuggerData['triangleNum'] += tGeometry.indexBuffer.indexNum / 3
 				} else {
@@ -291,17 +277,10 @@ let renderScene = (redGPUContext, redView, passEncoder, parent, children, parent
 					if (tX > 0 && tY > 0 && tViewRect[2] - tX > 0 && tViewRect[3] - tY > 0 && tPipeline.GPURenderPipeline) {
 						passEncoder.setPipeline(tPipeline.GPURenderPipeline);
 						passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹는 매그룹마다 다르니 또 업데이트 해줘야함 -_-
-						if (prevMaterial_UUID != tMaterial._UUID) passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
-						prevMaterial_UUID = tMaterial._UUID;
-						if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
-							passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
-							prevVertexBuffer_UUID = tGeometry.interleaveBuffer._UUID
-						}
+						passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
+						passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
 						if (tGeometry.indexBuffer) {
-							if (prevIndexBuffer_UUID != tGeometry.indexBuffer._UUID) {
-								passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
-								prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
-							}
+							passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
 							passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
 							currentDebuggerData['triangleNum'] += tGeometry.indexBuffer.indexNum / 3
 						} else {
@@ -309,8 +288,6 @@ let renderScene = (redGPUContext, redView, passEncoder, parent, children, parent
 							currentDebuggerData['triangleNum'] += tGeometry.interleaveBuffer.data.length / tGeometry.interleaveBuffer.stride
 						}
 						currentDebuggerData['drawCallNum']++
-
-
 					}
 					tMesh._prevMaterialUUID = tMaterial._UUID;
 				}
@@ -697,11 +674,12 @@ export default class Render {
 		for (i; i < len; i++) {
 			currentDebuggerData = debuggerData[i];
 			currentDebuggerData.view = redGPUContext.viewList[i];
-			currentDebuggerData.x = currentDebuggerData.view.x
-			currentDebuggerData.y = currentDebuggerData.view.y
-			currentDebuggerData.width = currentDebuggerData.view.width
-			currentDebuggerData.height = currentDebuggerData.view.height
-			currentDebuggerData.viewRect = currentDebuggerData.view.viewRect
+			currentDebuggerData.x = currentDebuggerData.view.x;
+			currentDebuggerData.y = currentDebuggerData.view.y;
+			currentDebuggerData.width = currentDebuggerData.view.width;
+			currentDebuggerData.height = currentDebuggerData.view.height;
+			currentDebuggerData.viewRect = currentDebuggerData.view.viewRect;
+
 			this.#renderView(redGPUContext, redGPUContext.viewList[i], i == len - 1);
 		}
 		GLTFLoader.animationLooper(time);
