@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.25 17:24:20
+ *   Last modification time of this file - 2019.12.25 18:5:14
  *
  */
 
@@ -278,9 +278,9 @@ export default class BaseObject3D extends DisplayContainer {
 		let tMTX;
 		tMTX = mat4.create();
 		return function (x = 0, y = 0, z = 0) {
-			typeof x == 'number' || RedGLUtil.throwFunc('RedBaseObject3D - localToWorld : x - number만 허용함', '입력값 : ', x);
-			typeof y == 'number' || RedGLUtil.throwFunc('RedBaseObject3D - localToWorld : y - number만 허용함', '입력값 : ', y);
-			typeof z == 'number' || RedGLUtil.throwFunc('RedBaseObject3D - localToWorld : z - number만 허용함', '입력값 : ', z);
+			typeof x == 'number' || UTIL.throwFunc('RedBaseObject3D - localToWorld : x - number만 허용함', '입력값 : ', x);
+			typeof y == 'number' || UTIL.throwFunc('RedBaseObject3D - localToWorld : y - number만 허용함', '입력값 : ', y);
+			typeof z == 'number' || UTIL.throwFunc('RedBaseObject3D - localToWorld : z - number만 허용함', '입력값 : ', z);
 			tMTX[0] = 1, tMTX[1] = 0, tMTX[2] = 0, tMTX[3] = 0;
 			tMTX[4] = 0, tMTX[5] = 1, tMTX[6] = 0, tMTX[7] = 0;
 			tMTX[8] = 0, tMTX[9] = 0, tMTX[10] = 1, tMTX[11] = 0;
