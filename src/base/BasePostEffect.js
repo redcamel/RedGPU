@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.21 15:32:29
+ *   Last modification time of this file - 2019.12.25 14:45:40
  *
  */
 
@@ -11,6 +11,7 @@ import BaseMaterial from "../base/BaseMaterial.js";
 import Mix from "./Mix.js";
 import Mesh from "../object3D/Mesh.js";
 import Plane from "../primitives/Plane.js";
+import Render from "../renderer/Render.js";
 
 export default class BasePostEffect extends Mix.mix(
 	BaseMaterial,
@@ -71,6 +72,7 @@ export default class BasePostEffect extends Mix.mix(
 			this.quad.pipeline.updatePipeline_sampleCount1(redGPUContext, redView);
 			this.resetBindingInfo()
 		}
+		Render.clearStateCache()
 		redView.updateSystemUniform(passEncoder_effect, redGPUContext);
 		renderScene(redGPUContext, redView, passEncoder_effect, null, [this.quad]);
 		passEncoder_effect.endPass();

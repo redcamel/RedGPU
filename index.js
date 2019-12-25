@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.25 13:39:51
+ *   Last modification time of this file - 2019.12.25 14:45:40
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -40,7 +40,7 @@ new RedGPU.RedGPUContext(
 				console.log('텍스쳐 로딩완료', textureLoader)
 				console.timeEnd('텍스쳐 로딩속도')
 				console.log('로딩완료된 시점의 시간은? 어찌됨?', performance.now())
-				let MAX = 3000;
+				let MAX = 3500;
 				let i = MAX;
 				let tView, tView2;
 				let tScene = new RedGPU.Scene();
@@ -155,7 +155,7 @@ new RedGPU.RedGPUContext(
 
 
 				// this.addView(tView2)
-				tView2.setLocation(100,200)
+				tView2.setLocation(100, 200)
 
 
 				let testCubeTexture = new RedGPU.BitmapCubeTexture(this, [
@@ -201,7 +201,7 @@ new RedGPU.RedGPUContext(
 				// }, 2500)
 
 				let randomGeometry = _ => {
-					return new RedGPU.Sphere(this, 0.5, 16, 16, 16)
+
 					return Math.random() > 0.5
 						? new RedGPU.Sphere(this, 0.5, 16, 16, 16) :
 						Math.random() > 0.5
@@ -308,11 +308,11 @@ new RedGPU.RedGPUContext(
 					testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = 40;
 					tScene.addChild(testMesh)
 
-					let debugBox = new RedGPU.Mesh(this, new RedGPU.Box(this),testMat_colorPhong)
-					debugBox.primitiveTopology = 'line-strip'
-					debugBox.scaleX = debugBox.scaleY = debugBox.scaleZ = 1
+					let testBox = new RedGPU.Mesh(this, new RedGPU.Box(this), testMat_color)
+					testBox.primitiveTopology = 'line-strip'
+					testBox.scaleX = testBox.scaleY = testBox.scaleZ = 1
 					//
-					testMesh.addChild(debugBox)
+					testMesh.addChild(testBox)
 
 					// //
 					// let testMesh2 = new RedGPU.Mesh(
@@ -350,7 +350,7 @@ new RedGPU.RedGPUContext(
 						tY += Math.random() - 0.5;
 						tZ += Math.random() - 0.5;
 						// 라인에 포인트 추가
-						tLine.addPoint(Math.random() * 50 - 25, Math.random() * 50 - 25, Math.random() * 50 - 25, i % 3 == 0 ? color : i % 3 == 1 ? '#ff0000' : '#00ff00', Math.max(Math.random(), 0.5));
+						tLine.addPoint(Math.random() * 200 - 50, Math.random() * 200 - 50, Math.random() * 200 - 50, i % 3 == 0 ? color : i % 3 == 1 ? '#ff0000' : '#00ff00', Math.max(Math.random(), 0.5));
 					}
 					tScene.addChild(tLine);
 					tLine.tension = 1
@@ -363,7 +363,7 @@ new RedGPU.RedGPUContext(
 					// }, 1000)
 
 				};
-				i = 50
+				i = 25
 				while (i--) {
 					addLine_random(this, '#0000ff');
 				}
