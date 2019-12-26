@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.25 17:24:20
+ *   Last modification time of this file - 2019.12.26 15:24:22
  *
  */
 
@@ -10,16 +10,16 @@
 import UUID from "../base/UUID.js";
 
 export default class baseGeometry extends UUID {
-	#volume;
+	_volume;
 	get volume() {
-		if (!this.#volume) this.volumeCalculate();
-		return this.#volume;
+		if (!this._volume) this.volumeCalculate();
+		return this._volume;
 	}
 	constructor() {
 		super();
 	}
 	volumeCalculate() {
-		console.time('volumeCalculate');
+		// console.time('volumeCalculate');
 		var minX, minY, minZ, maxX, maxY, maxZ, t0, t1, t2, t, i, len;
 		var stride = this.interleaveBuffer['stride'];
 		// if (!volume[this]) {
@@ -36,17 +36,24 @@ export default class baseGeometry extends UUID {
 				minZ = t[t2] < minZ ? t[t2] : minZ,
 				maxZ = t[t2] > maxZ ? t[t2] : maxZ;
 		}
-		this.#volume = {};
-		this.#volume.volume = [maxX - minX, maxY - minY, maxZ - minZ];
-		this.#volume.minX = minX
-		this.#volume.maxX = maxX
-		this.#volume.minY = minY
-		this.#volume.maxY = maxY
-		this.#volume.minZ = minZ
-		this.#volume.maxZ = maxZ
-		this.#volume.radius = Math.hypot(...this.#volume.volume) / 2
+		this._volume = {};
+		this._volume.volume = [maxX - minX, maxY - minY, maxZ - minZ];
+		this._volume.minX = minX;
+		this._volume.maxX = maxX;
+		this._volume.minY = minY;
+		this._volume.maxY = maxY;
+		this._volume.minZ = minZ;
+		this._volume.maxZ = maxZ;
+		this._volume.xSize = Math.max(Math.abs(minX), Math.abs(maxX));
+		this._volume.ySize = Math.max(Math.abs(minY), Math.abs(maxY));
+		this._volume.zSize = Math.max(Math.abs(minZ), Math.abs(maxZ));
+		this._volume.geometryRadius =  Math.max(
+			this._volume.xSize,
+			this._volume.ySize,
+			this._volume.zSize
+		)
 		// }
-		console.timeEnd('volumeCalculate');
-		return this.#volume;
+		// console.timeEnd('volumeCalculate');
+		return this._volume;
 	}
 }

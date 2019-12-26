@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.25 18:5:14
+ *   Last modification time of this file - 2019.12.26 15:24:22
  *
  */
 import RedGPU from "../src/RedGPU.js";
@@ -21,7 +21,7 @@ new RedGPU.RedGPUContext(cvs,
 		let tCamera = new RedGPU.ObitController(this)
 		RedGPU.Debugger.visible(true)
 		// tGrid.centerColor = '#ff0000'
-		tCamera.speedDistance=0.1
+		tCamera.speedDistance=0.3
 		// tScene.backgroundColor = '#fff'
 		// tScene.backgroundColorAlpha = 0
 		let tLight
@@ -126,14 +126,16 @@ new RedGPU.RedGPUContext(cvs,
 		// tScene.addChild(tMeshVolume)
 
 
-		tMesh = new RedGPU.Mesh(this, new RedGPU.Sphere(this,), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this, '../assets/emissive.jpg')))
-		tMesh.x = Math.random() * 10 - 5
-		tMesh.y = Math.random() * 10 - 5
-		tMesh.z = Math.random() * 10 - 5
+		tMesh = new RedGPU.Mesh(this, new RedGPU.Sphere(this,), new RedGPU.ColorMaterial(this))
+		tMesh.x = 8
+		tMesh.y = 0
+		tMesh.z = 0
 		tScene.addChild(tMesh)
-		let tMeshVolume = new RedGPU.Mesh(this, new RedGPU.Box(this, tMesh.geometry.volume.volume[0], tMesh.geometry.volume.volume[0], tMesh.geometry.volume.volume[0]), new RedGPU.ColorMaterial(this))
+		let tMeshVolume = new RedGPU.Mesh(this, new RedGPU.Box(this), new RedGPU.ColorMaterial(this))
 		tMeshVolume.primitiveTopology = 'line-strip'
 		tMesh.tMeshVolume = tMeshVolume
+		tMesh.scaleX = tMesh.scaleY =tMesh.scaleZ  = 1
+		tMeshVolume.x = 11
 		console.log('tMesh.geometry.volume', tMesh.geometry.volume)
 		tScene.addChild(tMeshVolume)
 		// tMesh = new RedGPU.Mesh(this, new RedGPU.Sphere(this,), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this, '../assets/UV_Gri1d_Sm.jpg', null, true,
@@ -349,7 +351,7 @@ new RedGPU.RedGPUContext(cvs,
 		})();
 		let render = time => {
 			tScene.children.forEach(tMesh => {
-				tMesh.rotationZ += 0.1
+				// tMesh.rotationZ += 0.1
 				// tMesh.material.alpha = RedGPU.UTIL.clamp(Math.sin(time / 500), 0, 1)
 				if (tMesh.tMeshVolume) {
 					// tMesh.tMeshVolume.setPosition(...tMesh.getPosition())

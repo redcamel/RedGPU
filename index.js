@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.25 17:24:20
+ *   Last modification time of this file - 2019.12.26 15:24:22
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -40,7 +40,7 @@ new RedGPU.RedGPUContext(
 				console.log('텍스쳐 로딩완료', textureLoader)
 				console.timeEnd('텍스쳐 로딩속도')
 				console.log('로딩완료된 시점의 시간은? 어찌됨?', performance.now())
-				let MAX = 3500;
+				let MAX = 4000;
 				let i = MAX;
 				let tView, tView2;
 				let tScene = new RedGPU.Scene();
@@ -154,7 +154,7 @@ new RedGPU.RedGPUContext(
 				// tView.postEffect.addEffect(tEffect)
 
 
-				this.addView(tView2)
+				// this.addView(tView2)
 				tView2.setLocation(100, 200)
 
 
@@ -301,17 +301,18 @@ new RedGPU.RedGPUContext(
 						var tValue = 50 * 1
 						TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
 					})
-					testMesh.x = Math.random() * 3000 - 1500;
-					testMesh.y = Math.random() * 3000 - 1500;
-					testMesh.z = Math.random() * 3000 - 1500;
+					testMesh.x = Math.random() * 5000 - 2500;
+					testMesh.y = Math.random() * 5000 - 2500;
+					testMesh.z = Math.random() * 5000 - 2500;
 					testMesh.rotationX = testMesh.rotationY = testMesh.rotationZ = Math.random() * 360;
-					testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = 40;
+					testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = 100;
 					tScene.addChild(testMesh)
 
-					let testBox = new RedGPU.Mesh(this, new RedGPU.Box(this), testMat_color)
-					testBox.primitiveTopology = 'line-strip'
-					testBox.scaleX = testBox.scaleY = testBox.scaleZ = 1
-					//
+
+					let testBox;
+					testBox= new RedGPU.Mesh(this, new RedGPU.Sphere(this), testMat_standard_diffuse_normal)
+					testBox.scaleX = testBox.scaleY = testBox.scaleZ = 0.3
+					testBox.x = 1.5
 					testMesh.addChild(testBox)
 
 					// //
@@ -368,17 +369,17 @@ new RedGPU.RedGPUContext(
 					addLine_random(this, '#0000ff');
 				}
 
-				i = 100
+				i = 0
 				let tText
 				let tTextList = []
 				while (i--) {
-					tText = new RedGPU.Text(this, 512, 64)
+					tText = new RedGPU.Text(this, 256, 32)
 					tText.x = Math.random() * 200 - 100;
 					tText.y = Math.random() * 200 - 100;
 					tText.z = Math.random() * 200 - 100;
 					// tText.rotationX = tText.rotationY = tText.rotationZ = Math.random() * 360;
 					tText.scaleX = tText.scaleY = Math.random() * 20 + 20
-					tText.fontSize = 60
+					tText.fontSize = 32
 					tText.fontWeight = 'bold'
 					tText.color = i % 2 ? '#fff' : '#ff2255'
 					tText.text = i % 2 ? '가나다라마바사' : 'ABCDEFG'

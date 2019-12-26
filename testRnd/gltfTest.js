@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.24 19:39:53
+ *   Last modification time of this file - 2019.12.26 15:24:22
  *
  */
 
@@ -15,7 +15,7 @@ document.body.appendChild(cvs);
 new RedGPU.RedGPUContext(
 	cvs,
 	function (v, reason) {
-
+		RedGPU.Debugger.visible(true)
 		if (!v) {
 			console.log('reason', reason)
 			return alert(reason || `WebGPU is unsupported, or no adapters or devices are available.`)
@@ -112,36 +112,9 @@ new RedGPU.RedGPUContext(
 		// );
 
 
-		new RedGPU.GLTFLoader(
-			this, // redGL
-			'https://cdn.rawgit.com/KhronosGroup/glTF-Blender-Exporter/0e23c773bf27dad67d2c25f060370d6fa012d87d/polly/', 'project_polly.gltf',
-			function (v) { // callBack
-				console.log(v)
-				let tMesh = v['resultMesh']
-				tMesh.scaleX = tMesh.scaleY = tMesh.scaleZ = 1
-				// v['resultMesh'].scaleX = v['resultMesh'].scaleY = v['resultMesh'].scaleZ = 0.001
-				// tScene.addChild({children:[tMesh.children[2],tMesh.children[8]]})
-				// tScene.addChild({children:[tMesh.children[2]]})
-
-				tScene.addChild(tMesh)
-
-			},
-			// new RedGPU.BitmapCubeTexture(this, [
-			// 	'../assets/cubemap/SwedishRoyalCastle/px.jpg',
-			// 	'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
-			// 	'../assets/cubemap/SwedishRoyalCastle/py.jpg',
-			// 	'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
-			// 	'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
-			// 	'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
-			//
-			// ])
-		);
-
 		// new RedGPU.GLTFLoader(
 		// 	this, // redGL
-		// 	'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Sponza/glTF/', // assetRootPath
-		// 	// '../assets/gltf/Sponza/glTF/', // assetRootPath
-		// 	'Sponza.gltf', // fileName
+		// 	'https://cdn.rawgit.com/KhronosGroup/glTF-Blender-Exporter/0e23c773bf27dad67d2c25f060370d6fa012d87d/polly/', 'project_polly.gltf',
 		// 	function (v) { // callBack
 		// 		console.log(v)
 		// 		let tMesh = v['resultMesh']
@@ -153,16 +126,43 @@ new RedGPU.RedGPUContext(
 		// 		tScene.addChild(tMesh)
 		//
 		// 	},
-		// 	new RedGPU.BitmapCubeTexture(this, [
-		// 		'../assets/cubemap/SwedishRoyalCastle/px.jpg',
-		// 		'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
-		// 		'../assets/cubemap/SwedishRoyalCastle/py.jpg',
-		// 		'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
-		// 		'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
-		// 		'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
-		//
-		// 	])
+		// 	// new RedGPU.BitmapCubeTexture(this, [
+		// 	// 	'../assets/cubemap/SwedishRoyalCastle/px.jpg',
+		// 	// 	'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
+		// 	// 	'../assets/cubemap/SwedishRoyalCastle/py.jpg',
+		// 	// 	'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
+		// 	// 	'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
+		// 	// 	'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
+		// 	//
+		// 	// ])
 		// );
+
+		new RedGPU.GLTFLoader(
+			this, // redGL
+			'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Sponza/glTF/', // assetRootPath
+			// '../assets/gltf/Sponza/glTF/', // assetRootPath
+			'Sponza.gltf', // fileName
+			function (v) { // callBack
+				console.log(v)
+				let tMesh = v['resultMesh']
+				tMesh.scaleX = tMesh.scaleY = tMesh.scaleZ = 1
+				// v['resultMesh'].scaleX = v['resultMesh'].scaleY = v['resultMesh'].scaleZ = 0.001
+				// tScene.addChild({children:[tMesh.children[2],tMesh.children[8]]})
+				// tScene.addChild({children:[tMesh.children[2]]})
+
+				tScene.addChild(tMesh)
+
+			},
+			new RedGPU.BitmapCubeTexture(this, [
+				'../assets/cubemap/SwedishRoyalCastle/px.jpg',
+				'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
+				'../assets/cubemap/SwedishRoyalCastle/py.jpg',
+				'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
+				'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
+				'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
+
+			])
+		);
 		// new RedGPU.GLTFLoader(
 		// 	this, // redGL
 		// 	'../assets/gltf/', // assetRootPath
