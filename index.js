@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.26 20:16:42
+ *   Last modification time of this file - 2019.12.26 21:13:2
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -206,7 +206,7 @@ new RedGPU.RedGPUContext(
 						? new RedGPU.Sphere(this, 0.5, 16, 16, 16) :
 						Math.random() > 0.5
 							? new RedGPU.Cylinder(this, 0, 1, 2, 16, 16) :
-							Math.random() > 0.5 ? new RedGPU.Box(this,1,1,1,16,16,16) : new RedGPU.Plane(this,1,1,16,16)
+							Math.random() > 0.5 ? new RedGPU.Box(this, 1, 1, 1, 16, 16, 16) : new RedGPU.Plane(this, 1, 1, 16, 16)
 				}
 				let i3 = 100
 				while (i3--) {
@@ -310,7 +310,7 @@ new RedGPU.RedGPUContext(
 
 
 					let testBox;
-					testBox= new RedGPU.Mesh(this, new RedGPU.Sphere(this), testMat_colorPhong)
+					testBox = new RedGPU.Mesh(this, new RedGPU.Sphere(this), testMat_colorPhong)
 					testBox.scaleX = testBox.scaleY = testBox.scaleZ = 0.3
 					testBox.x = 1.5
 					testBox.primitiveTopology = 'line-strip'
@@ -370,7 +370,7 @@ new RedGPU.RedGPUContext(
 					addLine_random(this, '#0000ff');
 				}
 
-				i = 250
+				i = 50
 				let tText
 				let tTextList = []
 				while (i--) {
@@ -462,7 +462,7 @@ let setTestUI = function (redGPUContextContext, tView, tScene, testCubeTexture) 
 	tFolder = testSceneUI.addFolder('View')
 	tFolder.open()
 	let viewTestData = {
-		useFrustumCulling : true,
+		useFrustumCulling: true,
 		setLocationTest1: function () {
 			tView.setLocation(0, 0)
 		},
@@ -492,7 +492,7 @@ let setTestUI = function (redGPUContextContext, tView, tScene, testCubeTexture) 
 		}
 	}
 	tFolder.add(viewTestData, 'useFrustumCulling').onChange(v => {
-		tView.useFrustumCulling=v
+		tView.useFrustumCulling = v
 	})
 	tFolder.add(viewTestData, 'setLocationTest1').name('setLocation(0,0)');
 	tFolder.add(viewTestData, 'setLocationTest2').name('setLocation(100,100)');

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.21 17:1:46
+ *   Last modification time of this file - 2019.12.26 21:13:2
  *
  */
 
@@ -50,12 +50,16 @@ export default class ImageLoader extends UUID {
 						SRC_MAP[targetSRC]['imageDatas'] = result['imageDatas'];
 						SRC_MAP[targetSRC].tempList.forEach(loader => {
 							loader['imageDatas'] = SRC_MAP[targetSRC]['imageDatas'];
-							if (loader.callback) loader.callback.call(loader)
+							if (loader.callback) loader.callback.call(loader,result)
 						});
 						SRC_MAP[targetSRC].tempList.length = 0
 					})
 					.catch(result => {
 						console.log('로딩실패!', result)
+						SRC_MAP[targetSRC].tempList.forEach(loader => {
+							if (loader.callback) loader.callback.call(loader,result)
+						});
+						SRC_MAP[targetSRC].tempList.length = 0
 					});
 			}
 
@@ -112,7 +116,7 @@ export default class ImageLoader extends UUID {
 										loader['imgList'] = SRC_MAP[targetSRC]['imgList'];
 										loader['maxW'] = SRC_MAP[targetSRC]['maxW'];
 										loader['maxH'] = SRC_MAP[targetSRC]['maxH'];
-										if (loader.callback) loader.callback.call(loader)
+										if (loader.callback) loader.callback.call(loader,result)
 									});
 									SRC_MAP[targetSRC].tempList.length = 0
 								}
@@ -120,6 +124,10 @@ export default class ImageLoader extends UUID {
 							})
 							.catch(result => {
 								console.log('로딩실패!', result)
+								SRC_MAP[targetSRC].tempList.forEach(loader => {
+									if (loader.callback) loader.callback.call(loader,result)
+								});
+								SRC_MAP[targetSRC].tempList.length = 0
 							});
 					}
 
