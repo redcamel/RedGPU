@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.26 17:14:43
+ *   Last modification time of this file - 2019.12.26 18:13:2
  *
  */
 
@@ -34,10 +34,17 @@ export default class View extends UUID {
 	baseAttachmentView;
 	baseAttachment_ResolveTarget;
 	baseAttachment_ResolveTargetView;
+	//
 	baseAttachment_mouseColorID;
 	baseAttachment_mouseColorIDView;
 	baseAttachment_mouseColorID_ResolveTarget;
 	baseAttachment_mouseColorID_ResolveTargetView;
+	//
+	baseAttachment_depthColor;
+	baseAttachment_depthColorView;
+	baseAttachment_depthColor_ResolveTarget;
+	baseAttachment_depthColor_ResolveTargetView;
+	//
 	baseDepthStencilAttachment;
 	baseDepthStencilAttachmentView;
 	//

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.26 17:14:43
+ *   Last modification time of this file - 2019.12.26 18:13:2
  *
  */
 
@@ -618,12 +618,7 @@ export default class Render {
 				{
 					attachment: redView.baseAttachment_depthColorView,
 					resolveTarget: redView.baseAttachment_depthColor_ResolveTargetView,
-					loadValue: {
-						r: tSceneBackgroundColor_rgba[0],
-						g: tSceneBackgroundColor_rgba[1],
-						b: tSceneBackgroundColor_rgba[2],
-						a: tSceneBackgroundColor_rgba[3]
-					}
+					loadValue: {r: 0, g: 0, b: 0, a: 0}
 				},
 				{
 					attachment: redView.baseAttachment_mouseColorIDView,
@@ -673,10 +668,7 @@ export default class Render {
 		// }
 		// textToTransparentLayerList.length = 0;
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-		let i = updateTargetMatrixBufferList.length;
-		while (i--) updateTargetMatrixBufferList[i].GPUBuffer.setSubData(0, updateTargetMatrixBufferList[i].meshFloat32Array);
-		updateTargetMatrixBufferList.length = 0;
+		// updateTargetMatrixBufferList.length = 0;
 		passEncoder.endPass();
 		currentDebuggerData['baseRenderTime'] = performance.now() - now
 		//////////////////////////////////////////////////////////////////////////////////////////
@@ -716,7 +708,9 @@ export default class Render {
 			checkMouseEvent(redGPUContext, redView, lastViewYn)
 		}
 		currentDebuggerData['finalRenderTime'] = performance.now() - now
-
+		let i = updateTargetMatrixBufferList.length;
+		while (i--) updateTargetMatrixBufferList[i].GPUBuffer.setSubData(0, updateTargetMatrixBufferList[i].meshFloat32Array);
+		updateTargetMatrixBufferList.length = 0
 	};
 	render(time, redGPUContext) {
 		currentTime = time;

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.26 17:14:43
+ *   Last modification time of this file - 2019.12.26 18:13:2
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -63,8 +63,8 @@ new RedGPU.RedGPUContext(
 
 				tCamera.targetView = tView // optional
 				tCamera2.targetView = tView2 // optional
-				tCamera.distance = 50
-				tCamera.speedDistance = 15
+				tCamera.distance = 10
+				tCamera.speedDistance = 10
 
 				// tScene.grid = tGrid;
 				// tScene.axis = tAxis;
@@ -100,7 +100,7 @@ new RedGPU.RedGPUContext(
 				let tEffect
 				tEffect = new RedGPU.PostEffect_Bloom(this);
 				tEffect.bloomStrength = 0.5
-				// tView.postEffect.addEffect(tEffect)
+				tView.postEffect.addEffect(tEffect)
 
 				// tEffect = new RedGPU.PostEffect_DoF(this);
 				// tEffect.focusLength = 1000
@@ -154,7 +154,7 @@ new RedGPU.RedGPUContext(
 				// tView.postEffect.addEffect(tEffect)
 
 
-				// this.addView(tView2)
+				this.addView(tView2)
 				tView2.setLocation(100, 200)
 
 
@@ -310,9 +310,10 @@ new RedGPU.RedGPUContext(
 
 
 					let testBox;
-					testBox= new RedGPU.Mesh(this, new RedGPU.Sphere(this), testMat_standard_diffuse_normal)
+					testBox= new RedGPU.Mesh(this, new RedGPU.Sphere(this), testMat_colorPhong)
 					testBox.scaleX = testBox.scaleY = testBox.scaleZ = 0.3
 					testBox.x = 1.5
+					testBox.primitiveTopology = 'line-strip'
 					testMesh.addChild(testBox)
 
 					// //
