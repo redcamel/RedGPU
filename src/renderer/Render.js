@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.26 16:4:44
+ *   Last modification time of this file - 2019.12.26 16:29:49
  *
  */
 
@@ -196,21 +196,19 @@ let renderScene = (_ => {
 			let tRadian, CPI, CPI2, C225, C127, C045, C157;
 			let CONVERT_RADIAN = Math.PI / 180;
 			CPI = 3.141592653589793, CPI2 = 6.283185307179586, C225 = 0.225, C127 = 1.27323954, C045 = 0.405284735, C157 = 1.5707963267948966;
-			let tX, tY;
+
 			//////
 
-			let tViewRect;
-			let resultPosition;
-			tViewRect = redView.viewRect;
-			resultPosition = {
-				x: 0,
-				y: 0,
-				z: 0,
-				w: 0
-			};
 			/////
 
 			i = children.length;
+			let frustumPlanes0,frustumPlanes1,frustumPlanes2,frustumPlanes3,frustumPlanes4,frustumPlanes5
+			frustumPlanes0 = _frustumPlanes[0]
+			frustumPlanes1 = _frustumPlanes[1]
+			frustumPlanes2 = _frustumPlanes[2]
+			frustumPlanes3 = _frustumPlanes[3]
+			frustumPlanes4 = _frustumPlanes[4]
+			frustumPlanes5 = _frustumPlanes[5]
 			while (i--) {
 				let tMVMatrix, tNMatrix;
 				let tLocalMatrix;
@@ -299,56 +297,31 @@ let renderScene = (_ => {
 							renderToTransparentLayerList.push(tMesh)
 						} else {
 							if (tPipeline.GPURenderPipeline) {
-								///////////////////////////////////////
-								// 일단 중점 포인트를 구하고
-								// a00 = resultPreMTX_mul_perspective_camera[0], a01 = resultPreMTX_mul_perspective_camera[1], a02 = resultPreMTX_mul_perspective_camera[2], a03 = resultPreMTX_mul_perspective_camera[3];
-								// a10 = resultPreMTX_mul_perspective_camera[4], a11 = resultPreMTX_mul_perspective_camera[5], a12 = resultPreMTX_mul_perspective_camera[6], a13 = resultPreMTX_mul_perspective_camera[7];
-								// a20 = resultPreMTX_mul_perspective_camera[8], a21 = resultPreMTX_mul_perspective_camera[9], a22 = resultPreMTX_mul_perspective_camera[10], a23 = resultPreMTX_mul_perspective_camera[11];
-								// a30 = resultPreMTX_mul_perspective_camera[12], a31 = resultPreMTX_mul_perspective_camera[13], a32 = resultPreMTX_mul_perspective_camera[14], a33 = resultPreMTX_mul_perspective_camera[15];
-								// b0 = tMVMatrix[12];
-								// b1 = tMVMatrix[13];
-								// b2 = tMVMatrix[14];
-								// b3 = tMVMatrix[15];
-								// resultPosition.x = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
-								// resultPosition.y = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
-								// // resultPosition.z = b0*a02 + b1*a12 + b2*a22 + b3*a32;
-								// resultPosition.w = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
-								// resultPosition.x = resultPosition.x * 0.5 / resultPosition.w + 0.5;
-								// resultPosition.y = resultPosition.y * 0.5 / resultPosition.w + 0.5;
-								// tX = (resultPosition.x * tViewRect[2]);
-								// tY = ((1 - resultPosition.y) * tViewRect[3]);
-								// if (tX > 0 && tY > 0 && tViewRect[2] - tX > 0 && tViewRect[3] - tY > 0) {
-								///////////////////////////////////////
-								tVisible = true;
+								tVisible = 1;
 								geoVolume = tMesh._geometry._volume || tMesh._geometry.volume;
 								radius = geoVolume.xSize * tMesh.matrix[0];
 								radiusTemp = geoVolume.ySize * tMesh.matrix[5];
 								radius = radius < radiusTemp ? radiusTemp : radius
 								radiusTemp = geoVolume.zSize * tMesh.matrix[10];
 								radius = radius < radiusTemp ? radiusTemp : radius
-								let tFrustumPlane;
-								tFrustumPlane = _frustumPlanes[0];
-								cullDistance = tFrustumPlane[0] * tMVMatrix[12] + tFrustumPlane[1] * tMVMatrix[13] + tFrustumPlane[2] * tMVMatrix[14] + tFrustumPlane[3];
-								if (cullDistance <= -radius) tVisible = false
+
+								cullDistance = frustumPlanes0[0] * tMVMatrix[12] + frustumPlanes0[1] * tMVMatrix[13] + frustumPlanes0[2] * tMVMatrix[14] + frustumPlanes0[3];
+								if (cullDistance <= -radius) tVisible = 0
 								else {
-									tFrustumPlane = _frustumPlanes[1];
-									cullDistance = tFrustumPlane[0] * tMVMatrix[12] + tFrustumPlane[1] * tMVMatrix[13] + tFrustumPlane[2] * tMVMatrix[14] + tFrustumPlane[3];
-									if (cullDistance <= -radius) tVisible = false
+									cullDistance = frustumPlanes1[0] * tMVMatrix[12] + frustumPlanes1[1] * tMVMatrix[13] + frustumPlanes1[2] * tMVMatrix[14] + frustumPlanes1[3];
+									if (cullDistance <= -radius) tVisible = 0
 									else {
-										tFrustumPlane = _frustumPlanes[2];
-										cullDistance = tFrustumPlane[0] * tMVMatrix[12] + tFrustumPlane[1] * tMVMatrix[13] + tFrustumPlane[2] * tMVMatrix[14] + tFrustumPlane[3];
-										if (cullDistance <= -radius) tVisible = false
+										cullDistance = frustumPlanes2[0] * tMVMatrix[12] + frustumPlanes2[1] * tMVMatrix[13] + frustumPlanes2[2] * tMVMatrix[14] + frustumPlanes2[3];
+										if (cullDistance <= -radius) tVisible = 0
 										else {
-											tFrustumPlane = _frustumPlanes[3];
-											cullDistance = tFrustumPlane[0] * tMVMatrix[12] + tFrustumPlane[1] * tMVMatrix[13] + tFrustumPlane[2] * tMVMatrix[14] + tFrustumPlane[3];
-											if (cullDistance <= -radius) tVisible = false
+											cullDistance = frustumPlanes3[0] * tMVMatrix[12] + frustumPlanes3[1] * tMVMatrix[13] + frustumPlanes3[2] * tMVMatrix[14] + frustumPlanes3[3];
+											if (cullDistance <= -radius) tVisible = 0
 											else {
-												tFrustumPlane = _frustumPlanes[4];
-												cullDistance = tFrustumPlane[0] * tMVMatrix[12] + tFrustumPlane[1] * tMVMatrix[13] + tFrustumPlane[2] * tMVMatrix[14] + tFrustumPlane[3];
-												if (cullDistance <= -radius) tVisible = false
+												cullDistance = frustumPlanes4[0] * tMVMatrix[12] + frustumPlanes4[1] * tMVMatrix[13] + frustumPlanes4[2] * tMVMatrix[14] + frustumPlanes4[3];
+												if (cullDistance <= -radius) tVisible = 0
 												else {
-													tFrustumPlane = _frustumPlanes[5];
-													cullDistance = tFrustumPlane[0] * tMVMatrix[12] + tFrustumPlane[1] * tMVMatrix[13] + tFrustumPlane[2] * tMVMatrix[14] + tFrustumPlane[3];
+													cullDistance = frustumPlanes5[0] * tMVMatrix[12] + frustumPlanes5[1] * tMVMatrix[13] + frustumPlanes5[2] * tMVMatrix[14] + frustumPlanes5[3];
+													if (cullDistance <= -radius) tVisible = 0
 												}
 											}
 										}
