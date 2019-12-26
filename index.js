@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.26 15:24:22
+ *   Last modification time of this file - 2019.12.26 16:35:6
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -40,7 +40,7 @@ new RedGPU.RedGPUContext(
 				console.log('텍스쳐 로딩완료', textureLoader)
 				console.timeEnd('텍스쳐 로딩속도')
 				console.log('로딩완료된 시점의 시간은? 어찌됨?', performance.now())
-				let MAX = 4000;
+				let MAX = 3000;
 				let i = MAX;
 				let tView, tView2;
 				let tScene = new RedGPU.Scene();
@@ -64,7 +64,7 @@ new RedGPU.RedGPUContext(
 				tCamera.targetView = tView // optional
 				tCamera2.targetView = tView2 // optional
 				tCamera.distance = 50
-				tCamera.speedDistance = 10
+				tCamera.speedDistance = 15
 
 				// tScene.grid = tGrid;
 				// tScene.axis = tAxis;
@@ -369,7 +369,7 @@ new RedGPU.RedGPUContext(
 					addLine_random(this, '#0000ff');
 				}
 
-				i = 0
+				i = 50
 				let tText
 				let tTextList = []
 				while (i--) {
@@ -461,6 +461,7 @@ let setTestUI = function (redGPUContextContext, tView, tScene, testCubeTexture) 
 	tFolder = testSceneUI.addFolder('View')
 	tFolder.open()
 	let viewTestData = {
+		useFrustumCulling : true,
 		setLocationTest1: function () {
 			tView.setLocation(0, 0)
 		},
@@ -489,6 +490,9 @@ let setTestUI = function (redGPUContextContext, tView, tScene, testCubeTexture) 
 			tView.setSize('100%', '100%')
 		}
 	}
+	tFolder.add(viewTestData, 'useFrustumCulling').onChange(v => {
+		tView.useFrustumCulling=v
+	})
 	tFolder.add(viewTestData, 'setLocationTest1').name('setLocation(0,0)');
 	tFolder.add(viewTestData, 'setLocationTest2').name('setLocation(100,100)');
 	tFolder.add(viewTestData, 'setLocationTest3').name('setLocation(50%,100)');
@@ -503,6 +507,7 @@ let setTestUI = function (redGPUContextContext, tView, tScene, testCubeTexture) 
 	let testData = {
 		useFloatMode: false,
 		useDepthTest: true,
+
 		depthTestFunc: "less",
 		cullMode: "back",
 		primitiveTopology: "triangle-list"
@@ -518,6 +523,7 @@ let setTestUI = function (redGPUContextContext, tView, tScene, testCubeTexture) 
 		testMat_colorPhongTexture_normal_displacement.useFlatMode = v
 
 	});
+
 	tFolder = testUI.addFolder('Mesh')
 	tFolder.open()
 

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.23 19:1:41
+ *   Last modification time of this file - 2019.12.26 16:35:6
  *
  */
 
@@ -47,7 +47,13 @@ export default class View extends UUID {
 	//
 	mouseX = 0;
 	mouseY = 0;
-
+	_useFrustumCulling=true
+	get useFrustumCulling() {
+		return this._useFrustumCulling;
+	}
+	set useFrustumCulling(value) {
+		this._useFrustumCulling = value;
+	}
 	constructor(redGPUContext, scene, camera) {
 		super();
 		this.#redGPUContext = redGPUContext;
