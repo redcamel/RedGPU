@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.21 15:32:29
+ *   Last modification time of this file - 2019.12.26 20:16:42
  *
  */
 
@@ -57,7 +57,7 @@ export default class BaseMaterial extends UUID {
 		let materialClass = this.constructor;
 		let vertexGLSL = materialClass.vertexShaderGLSL;
 		let fragmentGLSL = materialClass.fragmentShaderGLSL;
-		let programOptionList = materialClass.PROGRAM_OPTION_LIST || [];
+		let programOptionList = materialClass.PROGRAM_OPTION_LIST || {vertex: [], fragment: []};
 
 		fShaderModule = new ShaderModule_GLSL(redGPUContext, 'fragment', materialClass, fragmentGLSL);
 		vShaderModule = new ShaderModule_GLSL(redGPUContext, 'vertex', materialClass, vertexGLSL);
@@ -142,18 +142,24 @@ export default class BaseMaterial extends UUID {
 	searchModules() {
 		BaseMaterial_searchModules_callNum++;
 		if (RedGPUContext.useDebugConsole) console.log('BaseMaterial_searchModules_callNum', BaseMaterial_searchModules_callNum);
-		let tKey = [this.constructor.name];
-		let i = 0, len = this.constructor.PROGRAM_OPTION_LIST.length;
+		let tKeyVertex = [this.constructor.name];
+		let tKeyFragment = [this.constructor.name];
+		let i = 0, len = Math.max(this.constructor.PROGRAM_OPTION_LIST.vertex.length,this.constructor.PROGRAM_OPTION_LIST.fragment.length);
 		for (i; i < len; i++) {
-			let key = this.constructor.PROGRAM_OPTION_LIST[i];
-			// console.log(key, this[key]);
-			if (this[key]) tKey.push(key);
+			let key;
+			key= this.constructor.PROGRAM_OPTION_LIST.vertex[i];
+			if (key && this[key]) tKeyVertex.push(key);
+			key= this.constructor.PROGRAM_OPTION_LIST.fragment[i];
+			if (key && this[key]) tKeyFragment.push(key);
 		}
-		if (RedGPUContext.useDebugConsole) console.log('searchModules', tKey);
-		if (RedGPUContext.useDebugConsole) console.time('searchModules_' + tKey);
-		this.vShaderModule.searchShaderModule(tKey);
-		this.fShaderModule.searchShaderModule(tKey);
-		if (RedGPUContext.useDebugConsole) console.timeEnd('searchModules_' + tKey);
+		if (RedGPUContext.useDebugConsole) console.log('searchModules_vertex_', tKeyVertex);
+		if (RedGPUContext.useDebugConsole) console.log('searchModules_fragment_', tKeyFragment);
+		if (RedGPUContext.useDebugConsole) console.time('searchModules_vertex_' + tKeyVertex);
+		if (RedGPUContext.useDebugConsole) console.time('searchModules_fragment_' + tKeyFragment);
+		this.vShaderModule.searchShaderModule(tKeyVertex);
+		this.fShaderModule.searchShaderModule(tKeyFragment);
+		if (RedGPUContext.useDebugConsole) console.timeEnd('searchModules_vertex_' + tKeyVertex);
+		if (RedGPUContext.useDebugConsole) console.timeEnd('searchModules_fragment_' + tKeyFragment);
 	}
 
 	setUniformBindGroupDescriptor() {

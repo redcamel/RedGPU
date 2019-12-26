@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 13:27:33
+ *   Last modification time of this file - 2019.12.26 20:16:42
  *
  */
 
@@ -71,40 +71,38 @@ new RedGPU.RedGPUContext(
 			new RedGPU.BitmapTexture(this, '../assets/emissive.jpg')
 		]
 
-		setTimeout(_ => {
-			// testMat_bitmap = new RedGPU.StandardMaterial(this, testTextureList[1], testTextureList[2],testTextureList[5], testTextureList[6], testTextureList[4]);
-			testMat_bitmap = new RedGPU.StandardMaterial(this, testTextureList[1], testTextureList[2], testTextureList[5], testTextureList[6], testTextureList[4]);
-			// testMat_bitmap = new RedGPU.StandardMaterial(this, testTextureList[0]);
+		// testMat_bitmap = new RedGPU.StandardMaterial(this, testTextureList[1], testTextureList[2],testTextureList[5], testTextureList[6], testTextureList[4]);
+		testMat_bitmap = new RedGPU.StandardMaterial(this, testTextureList[1], testTextureList[2], testTextureList[5], testTextureList[6], testTextureList[4],);
+		// testMat_bitmap = new RedGPU.StandardMaterial(this, testTextureList[0]);
+		while (i--) {
+			let testMesh = new RedGPU.Mesh(
+				this,
+				new RedGPU.Sphere(this, 0.5, 16, 16, 16),
+				testMat_bitmap
+			);
+			testMesh.x = Math.random() * 3000 - 1500;
+			testMesh.y = Math.random() * 3000 - 1500;
+			testMesh.z = Math.random() * 3000 - 1500;
+			testMesh.rotationX = testMesh.rotationY = testMesh.rotationZ = Math.random() * 360;
+			testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = Math.random() * 25 + 35;
+			tScene.addChild(testMesh)
+		}
+		let renderer = new RedGPU.Render();
+		let render = time => {
+			tLight.x = Math.sin(time / 1000)
+			tLight.y = Math.cos(time / 500)
+			tLight.z = Math.cos(time / 750)
+			renderer.render(time, this);
+			let tChildren = tView.scene.children
+			i = tChildren.length
 			while (i--) {
-				let testMesh = new RedGPU.Mesh(
-					this,
-					new RedGPU.Sphere(this, 0.5, 16, 16, 16),
-					testMat_bitmap
-				);
-				testMesh.x = Math.random() * 3000 - 1500;
-				testMesh.y = Math.random() * 3000 - 1500;
-				testMesh.z = Math.random() * 3000 - 1500;
-				testMesh.rotationX = testMesh.rotationY = testMesh.rotationZ = Math.random() * 360;
-				testMesh.scaleX = testMesh.scaleY = testMesh.scaleZ = Math.random() * 25 + 35;
-				tScene.addChild(testMesh)
+				tChildren[i]._rotationX += 1
+				tChildren[i]._rotationY += 1
+				tChildren[i]._rotationZ += 1
+				tChildren[i].dirtyTransform = 1
 			}
-			let renderer = new RedGPU.Render();
-			let render = time => {
-				tLight.x = Math.sin(time / 1000)
-				tLight.y = Math.cos(time / 500)
-				tLight.z = Math.cos(time / 750)
-				renderer.render(time, this);
-				let tChildren = tView.scene.children
-				i = tChildren.length
-				while (i--) {
-					tChildren[i]._rotationX += 1
-					tChildren[i]._rotationY += 1
-					tChildren[i]._rotationZ += 1
-					tChildren[i].dirtyTransform = 1
-				}
-				requestAnimationFrame(render);
-			};
 			requestAnimationFrame(render);
-		}, 500)
+		};
+		requestAnimationFrame(render);
 	}
 );

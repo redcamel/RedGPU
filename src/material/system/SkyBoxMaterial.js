@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 13:27:33
+ *   Last modification time of this file - 2019.12.26 20:16:42
  *
  */
 
@@ -40,7 +40,10 @@ export default class SkyBoxMaterial extends Mix.mix(
 		outDepthColor = vec4( vec3(gl_FragCoord.z/gl_FragCoord.w), 1.0 );
 	}
 `;
-	static PROGRAM_OPTION_LIST = ['skyBoxTexture'];
+	static PROGRAM_OPTION_LIST = {
+		vertex: [],
+		fragment: ['skyBoxTexture']
+	};
 	static uniformsBindGroupLayoutDescriptor_material = {
 		bindings: [
 			{binding: 0, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
