@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.26 15:24:22
+ *   Last modification time of this file - 2019.12.26 18:57:15
  *
  */
 "use strict";
@@ -21,6 +21,9 @@ import PBRMaterial_System from "./material/system/PBRMaterial_System.js";
 import Sphere from "./primitives/Sphere.js";
 import Box from "./primitives/Box.js";
 import Plane from "./primitives/Plane.js";
+import LineMaterial from "./material/system/LineMaterial.js";
+import TextMaterial from "./material/system/TextMaterial.js";
+import SheetMaterial from "./material/SheetMaterial.js";
 
 
 let redGPUContextList = new Set();
@@ -167,10 +170,10 @@ export default class RedGPUContext {
 								new StandardMaterial(this);
 								new BitmapMaterial(this);
 								new EnvironmentMaterial(this);
-								new ColorPhongTextureMaterial(this)
-								// new Box(this)
-								// new Sphere(this)
-								// new Plane(this)
+								new ColorPhongTextureMaterial(this);
+								new LineMaterial(this);
+								new TextMaterial(this)
+								new SheetMaterial(this)
 								// new PBRMaterial_System(this)
 								////////////////////////////////////////////////////////
 

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.23 14:37:36
+ *   Last modification time of this file - 2019.12.26 18:57:15
  *
  */
 
@@ -69,7 +69,7 @@ export default class SheetMaterial extends Mix.mix(
 		outDepthColor = vec4( vec3(gl_FragCoord.z/gl_FragCoord.w), 1.0 );
 	}
 `;
-	static PROGRAM_OPTION_LIST = ['diffuseTexture'];
+	static PROGRAM_OPTION_LIST = {vertex: [], fragment: ['diffuseTexture']};
 	static uniformsBindGroupLayoutDescriptor_material = {
 		bindings: [
 			{binding: 0, visibility: GPUShaderStage.VERTEX, type: "uniform-buffer"},

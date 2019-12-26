@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.23 14:37:36
+ *   Last modification time of this file - 2019.12.26 18:57:15
  *
  */
 
@@ -157,9 +157,9 @@ const workerGLSLCompile = createWorker(async () => {
 				if (!temp[searchKey]) {
 					temp[searchKey] = 1;
 					let parsedSource = parseSource(originSource, optionList);
-					// if (shaderName != 'PBRMaterial_System') console.time('compileGLSL - in worker : ' + num + ' / ' + shaderType + ' / ' + searchKey);
+					// console.time('compileGLSL - in worker : ' + num + ' / ' + shaderType + ' / ' + searchKey);
 					let compileGLSL = glslang.compileGLSL(parsedSource, shaderType);
-					// if (shaderName != 'PBRMaterial_System') console.timeEnd('compileGLSL - in worker : ' + num + ' / ' + shaderType + ' / ' + searchKey);
+					// console.timeEnd('compileGLSL - in worker : ' + num + ' / ' + shaderType + ' / ' + searchKey);
 					num++;
 					self.postMessage({
 						endCompile: true,

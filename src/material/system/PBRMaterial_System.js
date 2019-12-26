@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 13:27:33
+ *   Last modification time of this file - 2019.12.26 18:57:15
  *
  */
 
@@ -241,15 +241,17 @@ export default class PBRMaterial_System extends Mix.mix(
 		outDepthColor = vec4( vec3(gl_FragCoord.z/gl_FragCoord.w), 1.0 );
 	}
 `;
-	static PROGRAM_OPTION_LIST = [
-		'diffuseTexture', 'displacementTexture',
-		'emissiveTexture', 'environmentTexture', 'normalTexture', 'occlusionTexture', 'roughnessTexture',
-		'useCutOff',
-		'useFlatMode', 'skin',
-		'useMaterialDoubleSide',
-		'useVertexTangent',
-		'useVertexColor_0'
-	];
+	static PROGRAM_OPTION_LIST = {
+		vertex: ['displacementTexture', 'skin'],
+		fragment: [
+			'diffuseTexture', 'emissiveTexture', 'environmentTexture', 'normalTexture', 'occlusionTexture', 'roughnessTexture',
+			'useCutOff',
+			'useFlatMode', ,
+			'useMaterialDoubleSide',
+			'useVertexTangent',
+			'useVertexColor_0'
+		]
+	};
 	static uniformsBindGroupLayoutDescriptor_material = {
 		bindings: [
 			{binding: 0, visibility: GPUShaderStage.VERTEX, type: "uniform-buffer"},
@@ -511,15 +513,15 @@ export default class PBRMaterial_System extends Mix.mix(
 				}
 				if (RedGPUContext.useDebugConsole) console.log("로딩완료or로딩에러확인 textureName", textureName, texture ? texture._GPUTexture : '');
 				cancelAnimationFrame(this.#raf);
-				this.#raf = requestAnimationFrame(_=>{this.needResetBindingInfo = true})
+				this.#raf = requestAnimationFrame(_ => {this.needResetBindingInfo = true})
 
 			} else {
 				texture.addUpdateTarget(this, textureName)
 			}
 
 		} else {
-			if(this['_'+textureName]){
-				this['_'+textureName] = null;
+			if (this['_' + textureName]) {
+				this['_' + textureName] = null;
 				this.needResetBindingInfo = true
 			}
 		}
