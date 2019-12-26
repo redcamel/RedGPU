@@ -2,13 +2,13 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.24 19:39:53
+ *   Last modification time of this file - 2019.12.26 16:4:44
  *
  */
 
 "use strict";
 export default class ShareGLSL {
-	static MESH_UNIFORM_POOL_NUM = 150;
+	static MESH_UNIFORM_POOL_NUM = 200;
 	static GLSL_VERSION = '#version 450';
 	static MAX_DIRECTIONAL_LIGHT = 8;
 	static MAX_POINT_LIGHT = 100;

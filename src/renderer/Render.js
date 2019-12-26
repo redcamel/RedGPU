@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.26 15:24:22
+ *   Last modification time of this file - 2019.12.26 16:4:44
  *
  */
 
@@ -329,23 +329,23 @@ let renderScene = (_ => {
 								let tFrustumPlane;
 								tFrustumPlane = _frustumPlanes[0];
 								cullDistance = tFrustumPlane[0] * tMVMatrix[12] + tFrustumPlane[1] * tMVMatrix[13] + tFrustumPlane[2] * tMVMatrix[14] + tFrustumPlane[3];
-								if(cullDistance <= -radius) tVisible = false
+								if (cullDistance <= -radius) tVisible = false
 								else {
 									tFrustumPlane = _frustumPlanes[1];
 									cullDistance = tFrustumPlane[0] * tMVMatrix[12] + tFrustumPlane[1] * tMVMatrix[13] + tFrustumPlane[2] * tMVMatrix[14] + tFrustumPlane[3];
-									if(cullDistance <= -radius) tVisible = false
+									if (cullDistance <= -radius) tVisible = false
 									else {
 										tFrustumPlane = _frustumPlanes[2];
 										cullDistance = tFrustumPlane[0] * tMVMatrix[12] + tFrustumPlane[1] * tMVMatrix[13] + tFrustumPlane[2] * tMVMatrix[14] + tFrustumPlane[3];
-										if(cullDistance <= -radius) tVisible = false
+										if (cullDistance <= -radius) tVisible = false
 										else {
 											tFrustumPlane = _frustumPlanes[3];
 											cullDistance = tFrustumPlane[0] * tMVMatrix[12] + tFrustumPlane[1] * tMVMatrix[13] + tFrustumPlane[2] * tMVMatrix[14] + tFrustumPlane[3];
-											if(cullDistance <= -radius) tVisible = false
+											if (cullDistance <= -radius) tVisible = false
 											else {
 												tFrustumPlane = _frustumPlanes[4];
 												cullDistance = tFrustumPlane[0] * tMVMatrix[12] + tFrustumPlane[1] * tMVMatrix[13] + tFrustumPlane[2] * tMVMatrix[14] + tFrustumPlane[3];
-												if(cullDistance <= -radius) tVisible = false
+												if (cullDistance <= -radius) tVisible = false
 												else {
 													tFrustumPlane = _frustumPlanes[5];
 													cullDistance = tFrustumPlane[0] * tMVMatrix[12] + tFrustumPlane[1] * tMVMatrix[13] + tFrustumPlane[2] * tMVMatrix[14] + tFrustumPlane[3];
@@ -630,6 +630,7 @@ export default class Render {
 	static clearStateCache = _ => {
 		prevVertexBuffer_UUID = null;
 		prevIndexBuffer_UUID = null;
+		prevMaterial_UUID = null
 	}
 	#redGPUContext;
 	#swapChainTexture;
