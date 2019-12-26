@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.26 18:13:2
+ *   Last modification time of this file - 2019.12.26 20:16:42
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -370,7 +370,7 @@ new RedGPU.RedGPUContext(
 					addLine_random(this, '#0000ff');
 				}
 
-				i = 50
+				i = 250
 				let tText
 				let tTextList = []
 				while (i--) {

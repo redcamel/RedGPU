@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.26 18:13:2
+ *   Last modification time of this file - 2019.12.26 20:16:42
  *
  */
 
@@ -185,6 +185,7 @@ let readPixel = async (redGPUContext, redView, targetTexture, commandEncoder) =>
 let prevVertexBuffer_UUID;
 let prevIndexBuffer_UUID;
 let prevMaterial_UUID;
+let changedMaterial_UUID
 let renderScene = (_ => {
 		return (redGPUContext, redView, passEncoder, parent, children, parentDirty, renderToTransparentLayerMode = 0) => {
 			let i;
@@ -200,7 +201,21 @@ let renderScene = (_ => {
 			//////
 
 			/////
-
+			let tMVMatrix, tNMatrix;
+			let tLocalMatrix;
+			let parentMTX;
+			let tSkinInfo;
+			let tGeometry;
+			let tMaterial
+			let tMesh;
+			let tDirtyTransform;
+			let tPipeline;
+			let tDirtyPipeline
+			let tMaterialChanged;
+			let tVisible;
+			let geoVolume;
+			let radius;
+			let radiusTemp;
 			i = children.length;
 			let frustumPlanes0, frustumPlanes1, frustumPlanes2, frustumPlanes3, frustumPlanes4, frustumPlanes5
 			frustumPlanes0 = _frustumPlanes[0]
@@ -210,22 +225,7 @@ let renderScene = (_ => {
 			frustumPlanes4 = _frustumPlanes[4]
 			frustumPlanes5 = _frustumPlanes[5]
 			while (i--) {
-				let tMVMatrix, tNMatrix;
-				let tLocalMatrix;
-				let parentMTX;
-				let tSkinInfo;
-				let tGeometry;
-				let tMaterial
-				let tMesh;
-				let tDirtyTransform;
-				let tPipeline;
-				let tDirtyPipeline
-				let tMaterialChanged;
-				let tVisible;
-				let geoVolume;
-				let radius;
-				let radiusTemp;
-				let cullDistance;
+
 				tMesh = children[i];
 				tMaterial = tMesh._material;
 				tGeometry = tMesh._geometry;
@@ -241,10 +241,12 @@ let renderScene = (_ => {
 						tMaterial.resetBindingInfo();
 						tMaterial.needResetBindingInfo = false;
 						tMaterialChanged = tMesh._prevMaterialUUID != tMaterial._UUID;
+						changedMaterial_UUID[tMaterial._UUID] = 1
 					}
 					if (tMaterial instanceof SheetMaterial) {
 						if (tMaterial._playYn) tMaterial.update(currentTime)
 					}
+					tMaterialChanged = changedMaterial_UUID[tMaterial._UUID]
 				}
 				if (tGeometry) {
 					if (renderToTransparentLayerMode && tPipeline.GPURenderPipeline) {
@@ -719,6 +721,7 @@ export default class Render {
 		this.#swapChainTexture = redGPUContext.swapChain.getCurrentTexture();
 		this.#swapChainTextureView = this.#swapChainTexture.createView();
 		let i = 0, len = redGPUContext.viewList.length;
+		changedMaterial_UUID = {}
 		for (i; i < len; i++) {
 			currentDebuggerData = debuggerData[i];
 			currentDebuggerData.view = redGPUContext.viewList[i];
@@ -730,6 +733,7 @@ export default class Render {
 			Render.clearStateCache()
 			this.#renderView(redGPUContext, redGPUContext.viewList[i], i == len - 1);
 		}
+
 		GLTFLoader.animationLooper(time);
 		Debugger.update()
 	}
