@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.26 16:29:49
+ *   Last modification time of this file - 2019.12.26 16:35:6
  *
  */
 
@@ -202,7 +202,7 @@ let renderScene = (_ => {
 			/////
 
 			i = children.length;
-			let frustumPlanes0,frustumPlanes1,frustumPlanes2,frustumPlanes3,frustumPlanes4,frustumPlanes5
+			let frustumPlanes0, frustumPlanes1, frustumPlanes2, frustumPlanes3, frustumPlanes4, frustumPlanes5
 			frustumPlanes0 = _frustumPlanes[0]
 			frustumPlanes1 = _frustumPlanes[1]
 			frustumPlanes2 = _frustumPlanes[2]
@@ -298,35 +298,36 @@ let renderScene = (_ => {
 						} else {
 							if (tPipeline.GPURenderPipeline) {
 								tVisible = 1;
-								geoVolume = tMesh._geometry._volume || tMesh._geometry.volume;
-								radius = geoVolume.xSize * tMesh.matrix[0];
-								radiusTemp = geoVolume.ySize * tMesh.matrix[5];
-								radius = radius < radiusTemp ? radiusTemp : radius
-								radiusTemp = geoVolume.zSize * tMesh.matrix[10];
-								radius = radius < radiusTemp ? radiusTemp : radius
+								if (redView._useFrustumCulling) {
+									geoVolume = tMesh._geometry._volume || tMesh._geometry.volume;
+									radius = geoVolume.xSize * tMesh.matrix[0];
+									radiusTemp = geoVolume.ySize * tMesh.matrix[5];
+									radius = radius < radiusTemp ? radiusTemp : radius
+									radiusTemp = geoVolume.zSize * tMesh.matrix[10];
+									radius = radius < radiusTemp ? radiusTemp : radius
 
-								cullDistance = frustumPlanes0[0] * tMVMatrix[12] + frustumPlanes0[1] * tMVMatrix[13] + frustumPlanes0[2] * tMVMatrix[14] + frustumPlanes0[3];
-								if (cullDistance <= -radius) tVisible = 0
-								else {
-									cullDistance = frustumPlanes1[0] * tMVMatrix[12] + frustumPlanes1[1] * tMVMatrix[13] + frustumPlanes1[2] * tMVMatrix[14] + frustumPlanes1[3];
+									cullDistance = frustumPlanes0[0] * tMVMatrix[12] + frustumPlanes0[1] * tMVMatrix[13] + frustumPlanes0[2] * tMVMatrix[14] + frustumPlanes0[3];
 									if (cullDistance <= -radius) tVisible = 0
 									else {
-										cullDistance = frustumPlanes2[0] * tMVMatrix[12] + frustumPlanes2[1] * tMVMatrix[13] + frustumPlanes2[2] * tMVMatrix[14] + frustumPlanes2[3];
+										cullDistance = frustumPlanes1[0] * tMVMatrix[12] + frustumPlanes1[1] * tMVMatrix[13] + frustumPlanes1[2] * tMVMatrix[14] + frustumPlanes1[3];
 										if (cullDistance <= -radius) tVisible = 0
 										else {
-											cullDistance = frustumPlanes3[0] * tMVMatrix[12] + frustumPlanes3[1] * tMVMatrix[13] + frustumPlanes3[2] * tMVMatrix[14] + frustumPlanes3[3];
+											cullDistance = frustumPlanes2[0] * tMVMatrix[12] + frustumPlanes2[1] * tMVMatrix[13] + frustumPlanes2[2] * tMVMatrix[14] + frustumPlanes2[3];
 											if (cullDistance <= -radius) tVisible = 0
 											else {
-												cullDistance = frustumPlanes4[0] * tMVMatrix[12] + frustumPlanes4[1] * tMVMatrix[13] + frustumPlanes4[2] * tMVMatrix[14] + frustumPlanes4[3];
+												cullDistance = frustumPlanes3[0] * tMVMatrix[12] + frustumPlanes3[1] * tMVMatrix[13] + frustumPlanes3[2] * tMVMatrix[14] + frustumPlanes3[3];
 												if (cullDistance <= -radius) tVisible = 0
 												else {
-													cullDistance = frustumPlanes5[0] * tMVMatrix[12] + frustumPlanes5[1] * tMVMatrix[13] + frustumPlanes5[2] * tMVMatrix[14] + frustumPlanes5[3];
+													cullDistance = frustumPlanes4[0] * tMVMatrix[12] + frustumPlanes4[1] * tMVMatrix[13] + frustumPlanes4[2] * tMVMatrix[14] + frustumPlanes4[3];
 													if (cullDistance <= -radius) tVisible = 0
+													else {
+														cullDistance = frustumPlanes5[0] * tMVMatrix[12] + frustumPlanes5[1] * tMVMatrix[13] + frustumPlanes5[2] * tMVMatrix[14] + frustumPlanes5[3];
+														if (cullDistance <= -radius) tVisible = 0
+													}
 												}
 											}
 										}
 									}
-
 								}
 								// console.log(tVisible);
 								///////////////////////////////////////
