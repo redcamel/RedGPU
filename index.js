@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.26 16:35:6
+ *   Last modification time of this file - 2019.12.26 17:14:43
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -100,7 +100,7 @@ new RedGPU.RedGPUContext(
 				let tEffect
 				tEffect = new RedGPU.PostEffect_Bloom(this);
 				tEffect.bloomStrength = 0.5
-				tView.postEffect.addEffect(tEffect)
+				// tView.postEffect.addEffect(tEffect)
 
 				// tEffect = new RedGPU.PostEffect_DoF(this);
 				// tEffect.focusLength = 1000
@@ -206,7 +206,7 @@ new RedGPU.RedGPUContext(
 						? new RedGPU.Sphere(this, 0.5, 16, 16, 16) :
 						Math.random() > 0.5
 							? new RedGPU.Cylinder(this, 0, 1, 2, 16, 16) :
-							Math.random() > 0.5 ? new RedGPU.Box(this) : new RedGPU.Plane(this)
+							Math.random() > 0.5 ? new RedGPU.Box(this,1,1,1,16,16,16) : new RedGPU.Plane(this,1,1,16,16)
 				}
 				let i3 = 100
 				while (i3--) {
@@ -364,7 +364,7 @@ new RedGPU.RedGPUContext(
 					// }, 1000)
 
 				};
-				i = 25
+				i = 5
 				while (i--) {
 					addLine_random(this, '#0000ff');
 				}

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.26 16:35:6
+ *   Last modification time of this file - 2019.12.26 17:14:43
  *
  */
 
@@ -304,30 +304,14 @@ let renderScene = (_ => {
 									radiusTemp = geoVolume.ySize * tMesh.matrix[5];
 									radius = radius < radiusTemp ? radiusTemp : radius
 									radiusTemp = geoVolume.zSize * tMesh.matrix[10];
-									radius = radius < radiusTemp ? radiusTemp : radius
+									radius = radius < radiusTemp ? radiusTemp : radius;
 
-									cullDistance = frustumPlanes0[0] * tMVMatrix[12] + frustumPlanes0[1] * tMVMatrix[13] + frustumPlanes0[2] * tMVMatrix[14] + frustumPlanes0[3];
-									if (cullDistance <= -radius) tVisible = 0
-									else {
-										cullDistance = frustumPlanes1[0] * tMVMatrix[12] + frustumPlanes1[1] * tMVMatrix[13] + frustumPlanes1[2] * tMVMatrix[14] + frustumPlanes1[3];
-										if (cullDistance <= -radius) tVisible = 0
-										else {
-											cullDistance = frustumPlanes2[0] * tMVMatrix[12] + frustumPlanes2[1] * tMVMatrix[13] + frustumPlanes2[2] * tMVMatrix[14] + frustumPlanes2[3];
-											if (cullDistance <= -radius) tVisible = 0
-											else {
-												cullDistance = frustumPlanes3[0] * tMVMatrix[12] + frustumPlanes3[1] * tMVMatrix[13] + frustumPlanes3[2] * tMVMatrix[14] + frustumPlanes3[3];
-												if (cullDistance <= -radius) tVisible = 0
-												else {
-													cullDistance = frustumPlanes4[0] * tMVMatrix[12] + frustumPlanes4[1] * tMVMatrix[13] + frustumPlanes4[2] * tMVMatrix[14] + frustumPlanes4[3];
-													if (cullDistance <= -radius) tVisible = 0
-													else {
-														cullDistance = frustumPlanes5[0] * tMVMatrix[12] + frustumPlanes5[1] * tMVMatrix[13] + frustumPlanes5[2] * tMVMatrix[14] + frustumPlanes5[3];
-														if (cullDistance <= -radius) tVisible = 0
-													}
-												}
-											}
-										}
-									}
+									frustumPlanes0[0] * tMVMatrix[12] + frustumPlanes0[1] * tMVMatrix[13] + frustumPlanes0[2] * tMVMatrix[14] + frustumPlanes0[3] <= -radius ? tVisible = 0
+										: frustumPlanes1[0] * tMVMatrix[12] + frustumPlanes1[1] * tMVMatrix[13] + frustumPlanes1[2] * tMVMatrix[14] + frustumPlanes1[3] <= -radius ? tVisible = 0
+										: frustumPlanes2[0] * tMVMatrix[12] + frustumPlanes2[1] * tMVMatrix[13] + frustumPlanes2[2] * tMVMatrix[14] + frustumPlanes2[3] <= -radius ? tVisible = 0
+											: frustumPlanes3[0] * tMVMatrix[12] + frustumPlanes3[1] * tMVMatrix[13] + frustumPlanes3[2] * tMVMatrix[14] + frustumPlanes3[3] <= -radius ? tVisible = 0
+												: frustumPlanes4[0] * tMVMatrix[12] + frustumPlanes4[1] * tMVMatrix[13] + frustumPlanes4[2] * tMVMatrix[14] + frustumPlanes4[3] <= -radius ? tVisible = 0
+													: frustumPlanes5[0] * tMVMatrix[12] + frustumPlanes5[1] * tMVMatrix[13] + frustumPlanes5[2] * tMVMatrix[14] + frustumPlanes5[3] <= -radius ? tVisible = 0 : 0
 								}
 								// console.log(tVisible);
 								///////////////////////////////////////
@@ -617,7 +601,6 @@ export default class Render {
 		tSceneBackgroundColor_rgba = tScene.backgroundColorRGBA;
 		if (redView.camera.update) redView.camera.update();
 		// console.log(swapChain.getCurrentTexture())
-
 		mat4.multiply(resultPreMTX_mul_perspective_camera, redView.projectionMatrix, redView.camera.matrix);
 		ComputeViewFrustum()
 		const renderPassDescriptor = {
@@ -645,12 +628,7 @@ export default class Render {
 				{
 					attachment: redView.baseAttachment_mouseColorIDView,
 					resolveTarget: redView.baseAttachment_mouseColorID_ResolveTargetView,
-					loadValue: {
-						r: 0,
-						g: 0,
-						b: 0,
-						a: 0
-					}
+					loadValue: {r: 0, g: 0, b: 0, a: 0}
 				}
 			],
 			depthStencilAttachment: {
@@ -666,14 +644,17 @@ export default class Render {
 
 		// 시스템 유니폼 업데이트
 		redView.updateSystemUniform(passEncoder, redGPUContext);
+		let tOptionRenderList = []
 		if (tScene.skyBox) {
 			if (redView.camera['farClipping'] * 0.6 != tScene.skyBox._prevScale) {
 				tScene.skyBox['scaleX'] = tScene.skyBox['scaleY'] = tScene.skyBox['scaleZ'] = tScene.skyBox._prevScale = redView.camera['farClipping'] * 0.6;
 			}
+			tOptionRenderList.push(tScene.skyBox)
 			renderScene(redGPUContext, redView, passEncoder, null, [tScene.skyBox]);
 		}
-		if (tScene.grid) renderScene(redGPUContext, redView, passEncoder, null, [tScene.grid]);
-		if (tScene.axis) renderScene(redGPUContext, redView, passEncoder, null, [tScene.axis]);
+		if (tScene.grid) tOptionRenderList.push(tScene.grid)
+		if (tScene.axis) tOptionRenderList.push(tScene.axis)
+		renderScene(redGPUContext, redView, passEncoder, null, tOptionRenderList);
 		renderScene(redGPUContext, redView, passEncoder, null, tScene.children);
 		if (renderToTransparentLayerList.length) renderScene(redGPUContext, redView, passEncoder, null, renderToTransparentLayerList, null, 1);
 		renderToTransparentLayerList.length = 0;
@@ -752,7 +733,6 @@ export default class Render {
 			currentDebuggerData.width = currentDebuggerData.view.width;
 			currentDebuggerData.height = currentDebuggerData.view.height;
 			currentDebuggerData.viewRect = currentDebuggerData.view.viewRect;
-
 			Render.clearStateCache()
 			this.#renderView(redGPUContext, redGPUContext.viewList[i], i == len - 1);
 		}
