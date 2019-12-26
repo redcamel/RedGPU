@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.21 17:1:46
+ *   Last modification time of this file - 2019.12.26 21:13:2
  *
  */
 import RedGPU from "../src/RedGPU.js";
@@ -28,8 +28,8 @@ new RedGPU.RedGPUContext(
 				'../assets/specular.png',
 				'../assets/emissive.jpg',
 				[
-					'../assets/cubemap/SwedishRoyalCastle/px.jpg',
-					'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
+					'../assets/cubemap/SwedishRoyalC1astle/px.jpg',
+					'../assets/cubemap/SwedishRoyal1Castle/nx.jpg',
 					'../assets/cubemap/SwedishRoyalCastle/py.jpg',
 					'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
 					'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
@@ -45,8 +45,8 @@ new RedGPU.RedGPUContext(
 				]
 			],
 			_ => {
-
-				let MAX = 10000;
+				console.log('보자',textureLoader)
+				let MAX = 5000;
 				let i = MAX;
 				let tView;
 				let tScene = new RedGPU.Scene();

@@ -2,13 +2,13 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.26 20:16:42
+ *   Last modification time of this file - 2019.12.26 21:13:2
  *
  */
 
 "use strict";
 function createWorker(f) {
-	return new Worker(URL.createObjectURL(new Blob([`(${f})()`],{ type: 'application/javascript' })));
+	return new Worker(URL.createObjectURL(new Blob([`(${f})()`], {type: 'application/javascript'})));
 }
 
 const workerImage = createWorker(async () => {
@@ -79,7 +79,7 @@ const workerImage = createWorker(async () => {
 									faceWidth = Math.max(Math.floor(faceWidth / 2), 1);
 									faceHeight = Math.max(Math.floor(faceHeight / 2), 1);
 									mipIndex++;
-									if (mipIndex == len + 1) self.postMessage({src, imageDatas: imageDatas});
+									if (mipIndex == len + 1) self.postMessage({src, imageDatas: imageDatas, ok: true});
 									else getMipmapDatas(cvs);
 								};
 								getMipmapDatas(bitmap)
