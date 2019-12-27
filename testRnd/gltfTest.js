@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.27 20:17:56
+ *   Last modification time of this file - 2019.12.27 21:13:29
  *
  */
 
@@ -175,6 +175,32 @@ new RedGPU.RedGPUContext(
 				'../assets/cubemap/negz.jpg'
 			])
 		);
+
+
+		let self = this
+		new RedGPU.GLTFLoader(self, '../assets/gltf/breakDance/', 'scene.gltf', function (v) {
+			tScene.addChild(v['resultMesh'])
+			v['resultMesh'].scaleX = v['resultMesh'].scaleY = v['resultMesh'].scaleZ = 0.01
+			v['resultMesh'].x = (max) * 30 - 30 * max / 2
+			v['resultMesh'].z = 30
+			var i = matList.length
+			while (i--) {
+				let t0 = i
+				setTimeout(_=>{
+					new RedGPU.GLTFLoader(self,  '../assets/gltf/breakDance/', 'scene.gltf', function (v) {
+						tScene.addChild(v['resultMesh'])
+						v['resultMesh'].scaleX = v['resultMesh'].scaleY = v['resultMesh'].scaleZ = 0.01
+						v['resultMesh'].x = (t0) * 30 - 30 * max / 2
+						v['resultMesh'].z = 30
+						let targetMaterial = matList[t0]
+						console.log(targetMaterial)
+
+
+					})
+				},i*50)
+			}
+		})
+
 		new RedGPU.GLTFLoader(
 			this, // redGL
 			'../assets/gltf/', // assetRootPath
@@ -299,13 +325,7 @@ new RedGPU.RedGPUContext(
 		// 	//
 		// 	// ])
 		// );
-		let self = this
-		new RedGPU.GLTFLoader(self, '../assets/gltf/breakDance/', 'scene.gltf', function (v) {
-			tScene.addChild(v['resultMesh'])
-			v['resultMesh'].scaleX = v['resultMesh'].scaleY = v['resultMesh'].scaleZ = 0.01
-			v['resultMesh'].z = 30
 
-		})
 
 		// new RedGPU.GLTFLoader(
 		// 	this, // redGL
