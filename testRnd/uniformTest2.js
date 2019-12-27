@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.26 20:16:42
+ *   Last modification time of this file - 2019.12.27 14:44:15
  *
  */
 
@@ -34,7 +34,7 @@ new RedGPU.RedGPUContext(
 		tScene.axis = tAxis;
 		tScene.skyBox = new RedGPU.SkyBox(this)
 		let tLight
-		tLight = new RedGPU.DirectionalLight()
+		tLight = new RedGPU.DirectionalLight(this)
 		tLight.x = 10
 		tLight.y = 10
 		tLight.z = 10

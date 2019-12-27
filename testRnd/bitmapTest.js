@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.26 15:24:22
+ *   Last modification time of this file - 2019.12.27 14:44:15
  *
  */
 import RedGPU from "../src/RedGPU.js";
@@ -25,9 +25,17 @@ new RedGPU.RedGPUContext(cvs,
 		// tScene.backgroundColor = '#fff'
 		// tScene.backgroundColorAlpha = 0
 		let tLight
-		tLight = new RedGPU.DirectionalLight()
+
+
+		tLight = new RedGPU.DirectionalLight(this,'#ff0000',0.1)
 		tLight.x = 0
-		tLight.y = 100
+		tLight.y = 5
+		tLight.z = 0
+		tScene.addLight(tLight)
+
+		tLight = new RedGPU.DirectionalLight(this)
+		tLight.x = 0
+		tLight.y = 5
 		tLight.z = 0
 		tScene.addLight(tLight)
 		// tScene.axis = new RedGPU.Axis(this)
@@ -350,24 +358,14 @@ new RedGPU.RedGPUContext(cvs,
 			}
 		})();
 		let render = time => {
+			tLight.x = Math.sin(time/1000)*5
+			tLight.y = Math.cos(time/1000)*5
+			tLight.z = Math.sin(time/1000)*5
+
 			tScene.children.forEach(tMesh => {
 				// tMesh.rotationZ += 0.1
 				// tMesh.material.alpha = RedGPU.UTIL.clamp(Math.sin(time / 500), 0, 1)
-				if (tMesh.tMeshVolume) {
-					// tMesh.tMeshVolume.setPosition(...tMesh.getPosition())
-					// tMesh.tMeshVolume.setScale(...tMesh.getScale())
-					// tMesh.tMeshVolume.setRotation(...tMesh.getRotation())
 
-					// let tVolume = tMesh.geometry.volume;
-					// console.log(tVolume)
-					// let resultCenter = tMeshVolume.localToWorld();
-					// // console.log('min',tMeshVolume.getScreenPoint(tView,tVolume.minX,tVolume.minY,tVolume.minZ))
-					// // console.log('max',tMeshVolume.getScreenPoint(tView,tVolume.maxX,tVolume.maxY,tVolume.maxZ))
-					// let resultLeftTop = getScreenPointFromWorld(tView, resultCenter, -tVolume.radius, -tVolume.radius, 0)
-					// let resultRightBottom = getScreenPointFromWorld(tView, resultCenter, tVolume.radius, tVolume.radius, 0)
-					// console.log('resultLeftTop',resultLeftTop)
-					// console.log('resultRightBottom',resultRightBottom)
-				}
 			})
 			// console.log(tCamera.getPosition())
 			renderer.render(time, this);

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.23 14:37:36
+ *   Last modification time of this file - 2019.12.27 14:44:15
  *
  */
 
@@ -31,61 +31,25 @@ export default class Scene extends DisplayContainer {
 		super()
 	}
 
-	get grid() {
-		return this.#grid;
-	}
-
-	set grid(value) {
-		this.#grid = value;
-	}
-	get axis() {
-		return this.#axis;
-	}
-
-	set axis(value) {
-		this.#axis = value;
-	}
-	get skyBox() {
-		return this.#skyBox;
-	}
-
-	set skyBox(value) {
-		this.#skyBox = value;
-	}
-	get backgroundColor() {
-		return this.#backgroundColor;
-	}
-
+	get grid() {return this.#grid;}
+	set grid(value) {this.#grid = value;}
+	get axis() {return this.#axis;}
+	set axis(value) {this.#axis = value;}
+	get skyBox() {return this.#skyBox;}
+	set skyBox(value) {this.#skyBox = value;}
+	get backgroundColor() {return this.#backgroundColor;}
 	set backgroundColor(value) {
 		this.#backgroundColor = value;
 		let rgb = UTIL.hexToRGB_ZeroToOne(value);
 		this.#backgroundColorRGBA = [...rgb, this.#backgroundColorAlpha]
 	}
-
-	get backgroundColorAlpha() {
-		return this.#backgroundColorAlpha;
-	}
-
-	set backgroundColorAlpha(value) {
-		this.#backgroundColorAlpha = this.#backgroundColorRGBA[3] = value;
-	}
-
-	get backgroundColorRGBA() {
-		return this.#backgroundColorRGBA;
-	}
-
-	get directionalLightList() {
-		return this.#directionalLightList
-	}
-	get pointLightList() {
-		return this.#pointLightList
-	}
-	get ambientLight() {
-		return this.#ambientLight
-	}
-	get spotLightList() {
-		return this.#spotLightList
-	}
+	get backgroundColorAlpha() {return this.#backgroundColorAlpha;}
+	set backgroundColorAlpha(value) {this.#backgroundColorAlpha = this.#backgroundColorRGBA[3] = value;}
+	get backgroundColorRGBA() {return this.#backgroundColorRGBA;}
+	get directionalLightList() {return this.#directionalLightList}
+	get pointLightList() {return this.#pointLightList}
+	get ambientLight() {return this.#ambientLight}
+	get spotLightList() {return this.#spotLightList}
 
 
 	addLight(light) {

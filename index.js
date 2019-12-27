@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.27 10:47:2
+ *   Last modification time of this file - 2019.12.27 14:44:15
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -69,19 +69,19 @@ new RedGPU.RedGPUContext(
 				// tScene.grid = tGrid;
 				// tScene.axis = tAxis;
 				let tLight
-				tLight = new RedGPU.DirectionalLight('#0000ff', 0.5)
+				tLight = new RedGPU.DirectionalLight(this, '#0000ff', 0.5)
 				tLight.x = 10
 				tLight.y = 10
 				tLight.z = 10
 				tScene.addLight(tLight)
 
-				tLight = new RedGPU.DirectionalLight('#ff0000', 0.5)
+				tLight = new RedGPU.DirectionalLight(this, '#ff0000', 0.5)
 				tLight.x = -10
 				tLight.y = -10
 				tLight.z = -10
 				tScene.addLight(tLight)
 
-				tLight = new RedGPU.DirectionalLight('#00ff00', 0.5)
+				tLight = new RedGPU.DirectionalLight(this, '#00ff00', 0.5)
 				tLight.x = -10
 				tLight.y = 20
 				tLight.z = 20
@@ -91,7 +91,7 @@ new RedGPU.RedGPUContext(
 				let i2 = 0
 				let testColor = ['#ff0000', '#00ff00', '#0000ff', '#ff00ff', '#ffff00']
 				while (i2--) {
-					let tLight = new RedGPU.PointLight(testColor[i2 % testColor.length], 1, 1, 250)
+					let tLight = new RedGPU.PointLight(this, testColor[i2 % testColor.length], 1, 1, Math.random()*200 + 30)
 
 					tScene.addLight(tLight)
 				}
@@ -406,9 +406,9 @@ new RedGPU.RedGPUContext(
 					let tChildren = tView.scene.pointLightList
 					let i = tChildren.length;
 					while (i--) {
-						tChildren[i].x = Math.sin(time / 1000 + i * 10 + Math.PI * 2 / tChildren.length * i * 3) * 500
-						tChildren[i].y = Math.sin(time / 1000 + i * 10 + Math.PI * 2 / tChildren.length * i * 3) * 500
-						tChildren[i].z = Math.cos(time / 1000 + i * 10 + Math.PI * 2 / tChildren.length * i * 3) * 500
+						tChildren[i].x = Math.sin(time / 6000 + Math.PI * 2 / tChildren.length * i) * 400 + Math.sin(time / 3000 + Math.PI * 2 / tChildren.length * i) * 300
+						tChildren[i].y = Math.tan(time / 3000 + Math.PI * 2 / tChildren.length * i) * 20 + Math.atan(time / 2000 + Math.PI * 2 / tChildren.length * i) * 10
+						tChildren[i].z = Math.cos(time / 2500 + Math.PI * 2 / tChildren.length * i) * 400+ Math.atan(time / 3000 + Math.PI * 2 / tChildren.length * i) * 300
 					}
 
 					tChildren = tView.scene.children
