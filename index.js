@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.27 14:44:15
+ *   Last modification time of this file - 2019.12.27 20:17:56
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -64,7 +64,7 @@ new RedGPU.RedGPUContext(
 				tCamera.targetView = tView // optional
 				tCamera2.targetView = tView2 // optional
 				tCamera.distance = 10
-				tCamera.speedDistance = 10
+				tCamera.speedDistance = 30
 
 				// tScene.grid = tGrid;
 				// tScene.axis = tAxis;
@@ -73,28 +73,34 @@ new RedGPU.RedGPUContext(
 				tLight.x = 10
 				tLight.y = 10
 				tLight.z = 10
+				tLight.useDebugMesh=true
 				tScene.addLight(tLight)
 
 				tLight = new RedGPU.DirectionalLight(this, '#ff0000', 0.5)
 				tLight.x = -10
 				tLight.y = -10
 				tLight.z = -10
+				tLight.useDebugMesh=true
 				tScene.addLight(tLight)
 
 				tLight = new RedGPU.DirectionalLight(this, '#00ff00', 0.5)
 				tLight.x = -10
 				tLight.y = 20
 				tLight.z = 20
+				tLight.useDebugMesh=true
 				tScene.addLight(tLight)
 
 
-				let i2 = 0
-				let testColor = ['#ff0000', '#00ff00', '#0000ff', '#ff00ff', '#ffff00']
-				while (i2--) {
-					let tLight = new RedGPU.PointLight(this, testColor[i2 % testColor.length], 1, 1, Math.random()*200 + 30)
-
-					tScene.addLight(tLight)
-				}
+				// let i2 = 0
+				// let testColor = ['#ff0000', '#00ff00', '#0000ff', '#ff00ff', '#ffff00']
+				// while (i2--) {
+				// 	let tLight = new RedGPU.PointLight(this, testColor[i2 % testColor.length], 1, 1, 500)
+				// 	tLight.useDebugMesh=true
+				// 	tLight.x = Math.random()*3000-1500
+				// 	tLight.y = Math.random()*3000-1500
+				// 	tLight.z = Math.random()*3000-1500
+				// 	tScene.addLight(tLight)
+				// }
 
 				this.addView(tView)
 				let tEffect
@@ -102,9 +108,9 @@ new RedGPU.RedGPUContext(
 				tEffect.bloomStrength = 0.5
 				tView.postEffect.addEffect(tEffect)
 
-				// tEffect = new RedGPU.PostEffect_DoF(this);
-				// tEffect.focusLength = 1000
-				// tView.postEffect.addEffect(tEffect)
+				tEffect = new RedGPU.PostEffect_DoF(this);
+				tEffect.focusLength = 1000
+				tView.postEffect.addEffect(tEffect)
 				// console.log('여기까지 시간은 어찌됨?', performance.now())
 				// tEffect = new RedGPU.PostEffect_Gray(this)
 				// tView.postEffect.addEffect(tEffect)
@@ -405,11 +411,7 @@ new RedGPU.RedGPUContext(
 
 					let tChildren = tView.scene.pointLightList
 					let i = tChildren.length;
-					while (i--) {
-						tChildren[i].x = Math.sin(time / 6000 + Math.PI * 2 / tChildren.length * i) * 400 + Math.sin(time / 3000 + Math.PI * 2 / tChildren.length * i) * 300
-						tChildren[i].y = Math.tan(time / 3000 + Math.PI * 2 / tChildren.length * i) * 20 + Math.atan(time / 2000 + Math.PI * 2 / tChildren.length * i) * 10
-						tChildren[i].z = Math.cos(time / 2500 + Math.PI * 2 / tChildren.length * i) * 400+ Math.atan(time / 3000 + Math.PI * 2 / tChildren.length * i) * 300
-					}
+
 
 					tChildren = tView.scene.children
 					i = tChildren.length

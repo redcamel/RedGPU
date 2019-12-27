@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.27 10:47:2
+ *   Last modification time of this file - 2019.12.27 20:17:56
  *
  */
 
@@ -53,8 +53,8 @@ export default class PostEffect_DoF_blend extends BasePostEffect {
 		depthColor = texture( sampler2D( uDepthTexture, uSampler ), vUV );
 		depthColor = depthColor * fragmentUniforms.focusLength;
 		
-		diffuseColor.rgb *= min(depthColor.r,1.0);
-		blurColor.rgb *= max(1.0 - depthColor.r,0.0);
+		diffuseColor.rgb *= min(depthColor.w,1.0);
+		blurColor.rgb *= max(1.0 - depthColor.w,0.0);
 		outColor = diffuseColor + blurColor;
 	}
 `;

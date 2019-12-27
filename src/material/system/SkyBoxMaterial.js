@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.26 20:16:42
+ *   Last modification time of this file - 2019.12.27 20:17:56
  *
  */
 
@@ -37,7 +37,7 @@ export default class SkyBoxMaterial extends Mix.mix(
 		vec4 diffuseColor = vec4(0.0);
 		//#RedGPU#skyBoxTexture# diffuseColor = texture(samplerCube(uSkyBoxTexture,uSampler), vReflectionCubeCoord) ;
 		outColor = diffuseColor;
-		outDepthColor = vec4( vec3(gl_FragCoord.z/gl_FragCoord.w), 1.0 );
+		outDepthColor = vec4( vec3(1.0), gl_FragCoord.z/gl_FragCoord.w );
 	}
 `;
 	static PROGRAM_OPTION_LIST = {

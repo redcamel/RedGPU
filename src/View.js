@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.27 14:44:15
+ *   Last modification time of this file - 2019.12.27 20:17:56
  *
  */
 
@@ -168,7 +168,8 @@ export default class View extends UUID {
 		this.#viewRect = this.getViewRect(redGPUContext);
 		let list = ['baseAttachment', 'baseAttachment_depthColor', 'baseAttachment_mouseColorID'];
 		let sizeInfo = {width: this.#viewRect[2], height: this.#viewRect[3], depth: 1};
-		let usage = GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED;
+		let usage = GPUTextureUsage.OUTPUT_ATTACHMENT;
+		let usageResolve = GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED;
 		if (this.baseAttachment) {
 			list.forEach(key => {
 				this[key].destroy();
@@ -186,7 +187,7 @@ export default class View extends UUID {
 			this[key + '_ResolveTarget'] = redGPUContext.device.createTexture({
 				size: sizeInfo, sampleCount: 1,
 				format: redGPUContext.swapChainFormat,
-				usage: usage
+				usage: usageResolve
 			});
 			this[key + '_ResolveTargetView'] = this[key + '_ResolveTarget'].createView();
 		});
