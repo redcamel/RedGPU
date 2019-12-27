@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.26 20:16:42
+ *   Last modification time of this file - 2019.12.27 10:47:2
  *
  */
 
@@ -40,7 +40,7 @@ export default class PostEffect_BlurX extends BasePostEffect {
 	layout( location = 0 ) in vec3 vNormal;
 	layout( location = 1 ) in vec2 vUV;
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 1 ) uniform sampler uSampler;
-	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 2 ) uniform texture2D uDiffuseTexture;
+	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 2 ) uniform texture2D uSourceTexture;
 	layout( location = 0 ) out vec4 outColor;
 	
 	float random(vec3 scale, float seed) {
@@ -56,7 +56,7 @@ export default class PostEffect_BlurX extends BasePostEffect {
 		for (float t = -10.0; t <= 10.0; t++) {
 			float percent = (t + offset - 0.5) / 10.0;
 			float weight = 1.0 - abs(percent);
-			vec4 color = texture( sampler2D( uDiffuseTexture, uSampler ), vUV  + delta * percent );
+			vec4 color = texture( sampler2D( uSourceTexture, uSampler ), vUV  + delta * percent );
 			color.rgb *= color.a;
 			finalColor += color * weight;
 			total += weight;

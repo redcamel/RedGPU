@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.26 20:16:42
+ *   Last modification time of this file - 2019.12.27 10:47:2
  *
  */
 
@@ -14,8 +14,7 @@ import Plane from "../primitives/Plane.js";
 import Render from "../renderer/Render.js";
 
 export default class BasePostEffect extends Mix.mix(
-	BaseMaterial,
-	Mix.diffuseTexture
+	BaseMaterial
 ) {
 	static vertexShaderGLSL = ``;
 	static fragmentShaderGLSL = ``;
@@ -56,7 +55,7 @@ export default class BasePostEffect extends Mix.mix(
 			return true
 		}
 	}
-	render(redGPUContext, redView, renderScene, diffuseTextureView) {
+	render(redGPUContext, redView, renderScene, sourceTextureView) {
 		this.checkSize(redGPUContext, redView);
 		const commandEncoder_effect = redGPUContext.device.createCommandEncoder();
 		const passEncoder_effect = commandEncoder_effect.beginRenderPass(
@@ -67,8 +66,8 @@ export default class BasePostEffect extends Mix.mix(
 				}]
 			}
 		);
-		if (this._diffuseTexture != diffuseTextureView) {
-			this._diffuseTexture = diffuseTextureView;
+		if (this.sourceTexture != sourceTextureView) {
+			this.sourceTexture = sourceTextureView;
 			this.quad.pipeline.updatePipeline_sampleCount1(redGPUContext, redView);
 			this.resetBindingInfo()
 		}
@@ -91,7 +90,7 @@ export default class BasePostEffect extends Mix.mix(
 			{binding: 1, resource: this.sampler.GPUSampler},
 			{
 				binding: 2,
-				resource: this._diffuseTexture
+				resource: this.sourceTexture
 			}
 		];
 		this._afterResetBindingInfo();

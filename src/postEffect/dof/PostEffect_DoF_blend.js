@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.26 20:16:42
+ *   Last modification time of this file - 2019.12.27 10:47:2
  *
  */
 
@@ -40,7 +40,7 @@ export default class PostEffect_DoF_blend extends BasePostEffect {
 	layout( location = 0 ) in vec3 vNormal;
 	layout( location = 1 ) in vec2 vUV;
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 1 ) uniform sampler uSampler;
-	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 2 ) uniform texture2D uDiffuseTexture;
+	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 2 ) uniform texture2D uSourceTexture;
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 3 ) uniform texture2D uBlurTexture;
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 4 ) uniform texture2D uDepthTexture;
 	layout( location = 0 ) out vec4 outColor;
@@ -48,7 +48,7 @@ export default class PostEffect_DoF_blend extends BasePostEffect {
 		vec4 diffuseColor;
 		vec4 blurColor;
 		vec4 depthColor;
-		diffuseColor = texture( sampler2D( uDiffuseTexture, uSampler ), vUV );
+		diffuseColor = texture( sampler2D( uSourceTexture, uSampler ), vUV );
 		blurColor = texture( sampler2D( uBlurTexture, uSampler ), vUV );
 		depthColor = texture( sampler2D( uDepthTexture, uSampler ), vUV );
 		depthColor = depthColor * fragmentUniforms.focusLength;
@@ -72,8 +72,8 @@ export default class PostEffect_DoF_blend extends BasePostEffect {
 	static uniformBufferDescriptor_fragment = [
 		{size: TypeSize.float, valueName: 'focusLength'}
 	];
-	_blurTexture;
-	_depthTexture;
+	blurTexture;
+	depthTexture;
 	_focusLength = 15;
 	get focusLength() {
 		return this._focusLength;
@@ -100,15 +100,15 @@ export default class PostEffect_DoF_blend extends BasePostEffect {
 			{binding: 1, resource: this.sampler.GPUSampler},
 			{
 				binding: 2,
-				resource: this._diffuseTexture
+				resource: this.sourceTexture
 			},
 			{
 				binding: 3,
-				resource: this._blurTexture
+				resource: this.blurTexture
 			},
 			{
 				binding: 4,
-				resource: this._depthTexture
+				resource: this.depthTexture
 			}
 
 		];

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.26 20:16:42
+ *   Last modification time of this file - 2019.12.27 10:47:2
  *
  */
 
@@ -35,26 +35,26 @@ export default class PostEffect_Blur extends BasePostEffect {
 	layout( location = 0 ) in vec3 vNormal;
 	layout( location = 1 ) in vec2 vUV;
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 1 ) uniform sampler uSampler;
-	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 2 ) uniform texture2D uDiffuseTexture;
+	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 2 ) uniform texture2D uSourceTexture;
 	layout( location = 0 ) out vec4 outColor;
 	void main() {
 		vec2 px = vec2(1.0/systemUniforms.resolution.x, 1.0/systemUniforms.resolution.y);
 		vec4 finalColor = vec4(0.0);
-		finalColor += texture( sampler2D( uDiffuseTexture, uSampler ), vUV + vec2(-7.0*px.x, -7.0*px.y) )*0.0044299121055113265;
-		finalColor += texture( sampler2D( uDiffuseTexture, uSampler ), vUV + vec2(-6.0*px.x, -6.0*px.y) )*0.00895781211794;
-		finalColor += texture( sampler2D( uDiffuseTexture, uSampler ), vUV + vec2(-5.0*px.x, -5.0*px.y) )*0.0215963866053;
-		finalColor += texture( sampler2D( uDiffuseTexture, uSampler ), vUV + vec2(-4.0*px.x, -4.0*px.y) )*0.0443683338718;
-		finalColor += texture( sampler2D( uDiffuseTexture, uSampler ), vUV + vec2(-3.0*px.x, -3.0*px.y) )*0.0776744219933;
-		finalColor += texture( sampler2D( uDiffuseTexture, uSampler ), vUV + vec2(-2.0*px.x, -2.0*px.y) )*0.115876621105;
-		finalColor += texture( sampler2D( uDiffuseTexture, uSampler ), vUV + vec2(-1.0*px.x, -1.0*px.y) )*0.147308056121;
-		finalColor += texture( sampler2D( uDiffuseTexture, uSampler ), vUV                             )*0.159576912161;
-		finalColor += texture( sampler2D( uDiffuseTexture, uSampler ), vUV + vec2( 1.0*px.x,  1.0*px.y) )*0.147308056121;
-		finalColor += texture( sampler2D( uDiffuseTexture, uSampler ), vUV + vec2( 2.0*px.x,  2.0*px.y) )*0.115876621105;
-		finalColor += texture( sampler2D( uDiffuseTexture, uSampler ), vUV + vec2( 3.0*px.x,  3.0*px.y) )*0.0776744219933;
-		finalColor += texture( sampler2D( uDiffuseTexture, uSampler ), vUV + vec2( 4.0*px.x,  4.0*px.y) )*0.0443683338718;
-		finalColor += texture( sampler2D( uDiffuseTexture, uSampler ), vUV + vec2( 5.0*px.x,  5.0*px.y) )*0.0215963866053;
-		finalColor += texture( sampler2D( uDiffuseTexture, uSampler ), vUV + vec2( 6.0*px.x,  6.0*px.y) )*0.00895781211794;
-		finalColor += texture( sampler2D( uDiffuseTexture, uSampler ), vUV + vec2( 7.0*px.x,  7.0*px.y) )*0.0044299121055113265;
+		finalColor += texture( sampler2D( uSourceTexture, uSampler ), vUV + vec2(-7.0*px.x, -7.0*px.y) )*0.0044299121055113265;
+		finalColor += texture( sampler2D( uSourceTexture, uSampler ), vUV + vec2(-6.0*px.x, -6.0*px.y) )*0.00895781211794;
+		finalColor += texture( sampler2D( uSourceTexture, uSampler ), vUV + vec2(-5.0*px.x, -5.0*px.y) )*0.0215963866053;
+		finalColor += texture( sampler2D( uSourceTexture, uSampler ), vUV + vec2(-4.0*px.x, -4.0*px.y) )*0.0443683338718;
+		finalColor += texture( sampler2D( uSourceTexture, uSampler ), vUV + vec2(-3.0*px.x, -3.0*px.y) )*0.0776744219933;
+		finalColor += texture( sampler2D( uSourceTexture, uSampler ), vUV + vec2(-2.0*px.x, -2.0*px.y) )*0.115876621105;
+		finalColor += texture( sampler2D( uSourceTexture, uSampler ), vUV + vec2(-1.0*px.x, -1.0*px.y) )*0.147308056121;
+		finalColor += texture( sampler2D( uSourceTexture, uSampler ), vUV                             )*0.159576912161;
+		finalColor += texture( sampler2D( uSourceTexture, uSampler ), vUV + vec2( 1.0*px.x,  1.0*px.y) )*0.147308056121;
+		finalColor += texture( sampler2D( uSourceTexture, uSampler ), vUV + vec2( 2.0*px.x,  2.0*px.y) )*0.115876621105;
+		finalColor += texture( sampler2D( uSourceTexture, uSampler ), vUV + vec2( 3.0*px.x,  3.0*px.y) )*0.0776744219933;
+		finalColor += texture( sampler2D( uSourceTexture, uSampler ), vUV + vec2( 4.0*px.x,  4.0*px.y) )*0.0443683338718;
+		finalColor += texture( sampler2D( uSourceTexture, uSampler ), vUV + vec2( 5.0*px.x,  5.0*px.y) )*0.0215963866053;
+		finalColor += texture( sampler2D( uSourceTexture, uSampler ), vUV + vec2( 6.0*px.x,  6.0*px.y) )*0.00895781211794;
+		finalColor += texture( sampler2D( uSourceTexture, uSampler ), vUV + vec2( 7.0*px.x,  7.0*px.y) )*0.0044299121055113265;
 		outColor = finalColor;
 	}
 `;

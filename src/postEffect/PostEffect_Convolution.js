@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.26 20:16:42
+ *   Last modification time of this file - 2019.12.27 10:47:2
  *
  */
 
@@ -44,22 +44,22 @@ export default class PostEffect_Convolution extends BasePostEffect {
 	layout( location = 1 ) in vec2 vUV;
 	layout( location = 2 ) in float vTime;
 	layout( set = ${ShareGLSL.SET_INDEX_VertexUniforms}, binding = 1 ) uniform sampler uSampler;
-	layout( set = ${ShareGLSL.SET_INDEX_VertexUniforms}, binding = 2 ) uniform texture2D uDiffuseTexture;
+	layout( set = ${ShareGLSL.SET_INDEX_VertexUniforms}, binding = 2 ) uniform texture2D uSourceTexture;
 	layout( location = 0 ) out vec4 outColor;
 	
 	void main() {
 
 		vec2 perPX = vec2(1.0/systemUniforms.resolution.x, 1.0/systemUniforms.resolution.y);
 		vec4 finalColor = vec4(0.0);
-		finalColor += texture( sampler2D( uDiffuseTexture, uSampler ), vUV + perPX * vec2(-1.0, -1.0)) * fragmentUniforms.kernel[0][0] ;
-		finalColor += texture( sampler2D( uDiffuseTexture, uSampler ), vUV + perPX * vec2( 0.0, -1.0)) * fragmentUniforms.kernel[0][1] ;
-		finalColor += texture( sampler2D( uDiffuseTexture, uSampler ), vUV + perPX * vec2( 1.0, -1.0)) * fragmentUniforms.kernel[0][2] ;
-		finalColor += texture( sampler2D( uDiffuseTexture, uSampler ), vUV + perPX * vec2(-1.0,  0.0)) * fragmentUniforms.kernel[1][0] ;
-		finalColor += texture( sampler2D( uDiffuseTexture, uSampler ), vUV + perPX * vec2( 0.0,  0.0)) * fragmentUniforms.kernel[1][1] ;
-		finalColor += texture( sampler2D( uDiffuseTexture, uSampler ), vUV + perPX * vec2( 1.0,  0.0)) * fragmentUniforms.kernel[1][2] ;
-		finalColor += texture( sampler2D( uDiffuseTexture, uSampler ), vUV + perPX * vec2(-1.0,  1.0)) * fragmentUniforms.kernel[2][0] ;
-		finalColor += texture( sampler2D( uDiffuseTexture, uSampler ), vUV + perPX * vec2( 0.0,  1.0)) * fragmentUniforms.kernel[2][1] ;
-		finalColor += texture( sampler2D( uDiffuseTexture, uSampler ), vUV + perPX * vec2( 1.0,  1.0)) * fragmentUniforms.kernel[2][2] ;
+		finalColor += texture( sampler2D( uSourceTexture, uSampler ), vUV + perPX * vec2(-1.0, -1.0)) * fragmentUniforms.kernel[0][0] ;
+		finalColor += texture( sampler2D( uSourceTexture, uSampler ), vUV + perPX * vec2( 0.0, -1.0)) * fragmentUniforms.kernel[0][1] ;
+		finalColor += texture( sampler2D( uSourceTexture, uSampler ), vUV + perPX * vec2( 1.0, -1.0)) * fragmentUniforms.kernel[0][2] ;
+		finalColor += texture( sampler2D( uSourceTexture, uSampler ), vUV + perPX * vec2(-1.0,  0.0)) * fragmentUniforms.kernel[1][0] ;
+		finalColor += texture( sampler2D( uSourceTexture, uSampler ), vUV + perPX * vec2( 0.0,  0.0)) * fragmentUniforms.kernel[1][1] ;
+		finalColor += texture( sampler2D( uSourceTexture, uSampler ), vUV + perPX * vec2( 1.0,  0.0)) * fragmentUniforms.kernel[1][2] ;
+		finalColor += texture( sampler2D( uSourceTexture, uSampler ), vUV + perPX * vec2(-1.0,  1.0)) * fragmentUniforms.kernel[2][0] ;
+		finalColor += texture( sampler2D( uSourceTexture, uSampler ), vUV + perPX * vec2( 0.0,  1.0)) * fragmentUniforms.kernel[2][1] ;
+		finalColor += texture( sampler2D( uSourceTexture, uSampler ), vUV + perPX * vec2( 1.0,  1.0)) * fragmentUniforms.kernel[2][2] ;
 
 		outColor = vec4((finalColor / fragmentUniforms.kernelWeight).rgb, 1.0);
 	}

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.26 20:16:42
+ *   Last modification time of this file - 2019.12.27 10:47:2
  *
  */
 
@@ -40,11 +40,11 @@ export default class PostEffect_BrightnessContrast extends BasePostEffect {
 	layout( location = 0 ) in vec3 vNormal;
 	layout( location = 1 ) in vec2 vUV;
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 1 ) uniform sampler uSampler;
-	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 2 ) uniform texture2D uDiffuseTexture;
+	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 2 ) uniform texture2D uSourceTexture;
 	layout( location = 0 ) out vec4 outColor;
 	void main() {
 		vec4 finalColor = vec4(0.0);
-		finalColor = texture( sampler2D( uDiffuseTexture, uSampler ), vUV );
+		finalColor = texture( sampler2D( uSourceTexture, uSampler ), vUV );
 		if ( fragmentUniforms.contrast/255.0 > 0.0 ) finalColor.rgb = ( finalColor.rgb - 0.5 ) / ( 1.0 - fragmentUniforms.contrast/255.0 ) + 0.5;
 		else finalColor.rgb = ( finalColor.rgb - 0.5 ) * ( 1.0 + fragmentUniforms.contrast/255.0 ) + 0.5;
 		finalColor.rgb += fragmentUniforms.brightness;
