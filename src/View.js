@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.26 18:13:2
+ *   Last modification time of this file - 2019.12.27 14:44:15
  *
  */
 
@@ -232,9 +232,9 @@ export default class View extends UUID {
 		for (i; i < len; i++) {
 			let tLight = this.scene.directionalLightList[i];
 			if (tLight) {
-				this.#systemUniformInfo_fragment_data.set(tLight.colorRGBA, offset);
+				this.#systemUniformInfo_fragment_data.set(tLight._colorRGBA, offset);
 				offset += TypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
-				this.#systemUniformInfo_fragment_data.set([tLight.x, tLight.y, tLight.z, tLight.intensity], offset);
+				this.#systemUniformInfo_fragment_data.set([tLight._x, tLight._y, tLight._z, tLight._intensity], offset);
 				offset += TypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
 			}
 		}
@@ -245,20 +245,20 @@ export default class View extends UUID {
 		for (i; i < len; i++) {
 			let tLight = this.scene.pointLightList[i];
 			if (tLight) {
-				this.#systemUniformInfo_fragment_data.set(tLight.colorRGBA, offset);
+				this.#systemUniformInfo_fragment_data.set(tLight._colorRGBA, offset);
 				offset += TypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
-				this.#systemUniformInfo_fragment_data.set([tLight.x, tLight.y, tLight.z, tLight.intensity], offset);
+				this.#systemUniformInfo_fragment_data.set([tLight._x, tLight._y, tLight._z, tLight._intensity], offset);
 				offset += TypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
-				this.#systemUniformInfo_fragment_data.set([tLight.radius], offset);
+				this.#systemUniformInfo_fragment_data.set([tLight._radius], offset);
 				offset += TypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
 			}
 		}
 		offset = (TypeSize.float4 + TypeSize.float4 * 2 * ShareGLSL.MAX_DIRECTIONAL_LIGHT + TypeSize.float4 * 3 * ShareGLSL.MAX_POINT_LIGHT) / Float32Array.BYTES_PER_ELEMENT;
 		// update ambientLight
 		let tLight = this.scene.ambientLight;
-		this.#systemUniformInfo_fragment_data.set(tLight ? tLight.colorRGBA : [0, 0, 0, 0], offset);
+		this.#systemUniformInfo_fragment_data.set(tLight ? tLight._colorRGBA : [0, 0, 0, 0], offset);
 		offset += TypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
-		this.#systemUniformInfo_fragment_data.set([tLight ? tLight.intensity : 1], offset);
+		this.#systemUniformInfo_fragment_data.set([tLight ? tLight._intensity : 1], offset);
 		offset += TypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
 		// update spotLightList
 		i = 0;
@@ -266,9 +266,9 @@ export default class View extends UUID {
 		for (i; i < len; i++) {
 			let tLight = this.scene.spotLightList[i];
 			if (tLight) {
-				this.#systemUniformInfo_fragment_data.set(tLight.colorRGBA, offset);
+				this.#systemUniformInfo_fragment_data.set(tLight._colorRGBA, offset);
 				offset += TypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
-				this.#systemUniformInfo_fragment_data.set([tLight.x, tLight.y, tLight.z, tLight.intensity], offset);
+				this.#systemUniformInfo_fragment_data.set([tLight._x, tLight._y, tLight._z, tLight._intensity], offset);
 				offset += TypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
 				this.#systemUniformInfo_fragment_data.set([tLight.cutoff, tLight.exponent], offset);
 				offset += TypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.23 19:1:41
+ *   Last modification time of this file - 2019.12.27 14:44:15
  *
  */
 import RedGPU from "../src/RedGPU.js";
@@ -20,7 +20,7 @@ new RedGPU.RedGPUContext(cvs,
 		let tCamera = new RedGPU.ObitController(this)
 		let tLight
 		tScene.backgroundColor = '#fff'
-		tLight = new RedGPU.DirectionalLight()
+		tLight = new RedGPU.DirectionalLight(this)
 		tLight.x = 0
 		tLight.y = 100
 		tLight.z = 0

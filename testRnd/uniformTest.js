@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.26 21:13:2
+ *   Last modification time of this file - 2019.12.27 14:44:15
  *
  */
 import RedGPU from "../src/RedGPU.js";
@@ -65,19 +65,19 @@ new RedGPU.RedGPUContext(
 				tScene.grid = tGrid;
 				tScene.axis = tAxis;
 				let tLight
-				tLight = new RedGPU.DirectionalLight('#0000ff', 0.5)
+				tLight = new RedGPU.DirectionalLight(this,'#0000ff', 0.5)
 				tLight.x = 10
 				tLight.y = 10
 				tLight.z = 10
 				tScene.addLight(tLight)
 				//
-				tLight = new RedGPU.DirectionalLight('#ff0000', 0.5)
+				tLight = new RedGPU.DirectionalLight(this,'#ff0000', 0.5)
 				tLight.x = -10
 				tLight.y = -10
 				tLight.z = -10
 				tScene.addLight(tLight)
 
-				tLight = new RedGPU.DirectionalLight('#00ff00', 0.5)
+				tLight = new RedGPU.DirectionalLight(this,'#00ff00', 0.5)
 				tLight.x = -10
 				tLight.y = 20
 				tLight.z = 20

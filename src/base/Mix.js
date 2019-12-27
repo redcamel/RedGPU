@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.27 10:47:2
+ *   Last modification time of this file - 2019.12.27 14:44:15
  *
  */
 
@@ -16,30 +16,30 @@ const mix = (Base, ...texture) => {
 const color = Base => class extends Base {
 	#color = '#ff0000';
 	#colorAlpha = 1;
-	#colorRGBA = new Float32Array([1, 0, 0, this.#colorAlpha]);
+	_colorRGBA = new Float32Array([1, 0, 0, this.#colorAlpha]);
 
 	get color() {return this.#color;}
 	set color(hex) {
 		this.#color = hex;
 		let rgb = UTIL.hexToRGB_ZeroToOne(hex);
-		this.#colorRGBA[0] = rgb[0] * this.#colorAlpha;
-		this.#colorRGBA[1] = rgb[1] * this.#colorAlpha;
-		this.#colorRGBA[2] = rgb[2] * this.#colorAlpha;
-		this.#colorRGBA[3] = this.#colorAlpha;
+		this._colorRGBA[0] = rgb[0] * this.#colorAlpha;
+		this._colorRGBA[1] = rgb[1] * this.#colorAlpha;
+		this._colorRGBA[2] = rgb[2] * this.#colorAlpha;
+		this._colorRGBA[3] = this.#colorAlpha;
 		//TODO - 시스템 버퍼쪽도 같은 개념으로 바꿔야 if 비용을 줄일 수 있음
-		if (this.uniformBuffer_fragment) this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['colorRGBA'], this.#colorRGBA)
+		if (this.uniformBuffer_fragment) this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['colorRGBA'], this._colorRGBA)
 	}
 
 	get colorAlpha() {return this.#colorAlpha;}
 	set colorAlpha(value) {
 		let rgb = UTIL.hexToRGB_ZeroToOne(this.#color);
-		this.#colorRGBA[0] = rgb[0] * value;
-		this.#colorRGBA[1] = rgb[1] * value;
-		this.#colorRGBA[2] = rgb[2] * value;
-		this.#colorRGBA[3] = value;
-		if (this.uniformBuffer_fragment) this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['colorRGBA'], this.#colorRGBA)
+		this._colorRGBA[0] = rgb[0] * value;
+		this._colorRGBA[1] = rgb[1] * value;
+		this._colorRGBA[2] = rgb[2] * value;
+		this._colorRGBA[3] = value;
+		if (this.uniformBuffer_fragment) this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['colorRGBA'], this._colorRGBA)
 	}
-	get colorRGBA() {return this.#colorRGBA;}
+	get colorRGBA() {return this._colorRGBA;}
 };
 const alpha = Base => class extends Base {
 	#alpha = 1;

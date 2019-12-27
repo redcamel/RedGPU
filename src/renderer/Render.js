@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.26 20:16:42
+ *   Last modification time of this file - 2019.12.27 14:44:15
  *
  */
 
@@ -597,6 +597,7 @@ export default class Render {
 	#swapChainTextureView;
 
 	#renderView = (redGPUContext, redView, lastViewYn) => {
+		let i;
 		let tScene, tSceneBackgroundColor_rgba;
 		let now = performance.now()
 		tScene = redView.scene;
@@ -651,10 +652,30 @@ export default class Render {
 		}
 		if (tScene.grid) tOptionRenderList.push(tScene.grid)
 		if (tScene.axis) tOptionRenderList.push(tScene.axis)
-		renderScene(redGPUContext, redView, passEncoder, null, tOptionRenderList);
+		if (tOptionRenderList.length) renderScene(redGPUContext, redView, passEncoder, null, tOptionRenderList);
+		// 실제 Scene렌더
 		renderScene(redGPUContext, redView, passEncoder, null, tScene.children);
 		if (renderToTransparentLayerList.length) renderScene(redGPUContext, redView, passEncoder, null, renderToTransparentLayerList, null, 1);
 		renderToTransparentLayerList.length = 0;
+		// 라이트 디버거 렌더
+		tOptionRenderList.length = 0
+		i = Math.max(tScene.directionalLightList.length, tScene.pointLightList.length, tScene.spotLightList.length);
+		if (i) {
+			let cache_useFrustumCulling = redView.useFrustumCulling;
+			redView.useFrustumCulling = false;
+			while (i--) {
+				let tLight;
+				tLight= tScene.directionalLightList[i];
+				if (tLight && tLight.useDebugMesh) tOptionRenderList.push(tLight._debugMesh)
+				tLight= tScene.pointLightList[i];
+				if (tLight && tLight.useDebugMesh) tOptionRenderList.push(tLight._debugMesh)
+				tLight= tScene.spotLightList[i];
+				if (tLight && tLight.useDebugMesh) tOptionRenderList.push(tLight._debugMesh)
+			}
+			renderScene(redGPUContext, redView, passEncoder, null, tOptionRenderList);
+			redView.useFrustumCulling = cache_useFrustumCulling;
+		}
+		tOptionRenderList.length = 0
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		//TODO - 여기 최적화
 		// if (textToTransparentLayerList.length) {
@@ -670,17 +691,17 @@ export default class Render {
 		// }
 		// textToTransparentLayerList.length = 0;
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		// updateTargetMatrixBufferList.length = 0;
+
 		passEncoder.endPass();
 		currentDebuggerData['baseRenderTime'] = performance.now() - now
 		//////////////////////////////////////////////////////////////////////////////////////////
 		now = performance.now();
 		let last_effect_baseAttachmentView = redView.baseAttachment_ResolveTargetView;
 		let last_effect_baseAttachment = redView.baseAttachment_ResolveTarget;
-		let i3 = 0;
+		let effectIDX = 0;
 		let len3 = redView.postEffect.effectList.length;
-		for (i3; i3 < len3; i3++) {
-			let tEffect = redView.postEffect.effectList[i3];
+		for (effectIDX; effectIDX < len3; effectIDX++) {
+			let tEffect = redView.postEffect.effectList[effectIDX];
 			tEffect.render(redGPUContext, redView, renderScene, last_effect_baseAttachmentView);
 			last_effect_baseAttachmentView = tEffect.baseAttachmentView;
 			last_effect_baseAttachment = tEffect.baseAttachment
@@ -710,7 +731,7 @@ export default class Render {
 			checkMouseEvent(redGPUContext, redView, lastViewYn)
 		}
 		currentDebuggerData['finalRenderTime'] = performance.now() - now
-		let i = updateTargetMatrixBufferList.length;
+		i = updateTargetMatrixBufferList.length;
 		while (i--) updateTargetMatrixBufferList[i].GPUBuffer.setSubData(0, updateTargetMatrixBufferList[i].meshFloat32Array);
 		updateTargetMatrixBufferList.length = 0
 	};
