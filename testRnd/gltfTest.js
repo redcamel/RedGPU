@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.27 19:6:22
+ *   Last modification time of this file - 2019.12.27 20:17:56
  *
  */
 
@@ -111,30 +111,30 @@ new RedGPU.RedGPUContext(
 		this.addView(tView)
 		new RedGPU.GLTFLoader(
 			this, // redGL
-			'../assets/gltf/material_ball_in_3d-coat/', // assetRootPath
+			'../assets/gltf/gold_paint_test/', // assetRootPath
 			'scene.gltf', // fileName
 
 			v => { // callBack
 				console.log(v)
 				let tMesh = v['resultMesh']
-				tMesh.y = 7.7
-				tMesh.x = (max) * 20 - 20 * max / 2
+
+				tMesh.x = (max) * 30 - 30 * max / 2
 				tScene.addChild(tMesh)
-				tMesh.scaleX = tMesh.scaleY = tMesh.scaleZ = 1.5
+				tMesh.scaleX = tMesh.scaleY = tMesh.scaleZ = 25
 
 				let i = matList.length
 				while (i--) {
 					let t0 = i
 					new RedGPU.GLTFLoader(
 						this, // redGL
-						'../assets/gltf/material_ball_in_3d-coat/', // assetRootPath
+						'../assets/gltf/gold_paint_test/', // assetRootPath
 						'scene.gltf', // fileName
 						function (v) { // callBack
 							console.log(v)
 							let tMesh = v['resultMesh']
-							tMesh.y = 7.7
-							tMesh.x = (t0) * 20 - 20 * max / 2
-							tMesh.scaleX = tMesh.scaleY = tMesh.scaleZ = 1.5
+
+							tMesh.x = (t0) * 30 - 30 * max / 2
+							tMesh.scaleX = tMesh.scaleY = tMesh.scaleZ = 25
 							tScene.addChild(tMesh)
 							let targetMaterial = matList[t0]
 							console.log(targetMaterial)
@@ -230,7 +230,7 @@ new RedGPU.RedGPUContext(
 				console.log(v)
 				let tMesh = v['resultMesh']
 				tMesh.scaleX = tMesh.scaleY = tMesh.scaleZ = 100
-				tMesh.y= -4.5
+
 				// v['resultMesh'].scaleX = v['resultMesh'].scaleY = v['resultMesh'].scaleZ = 1
 				// tScene.addChild({children:[tMesh.children[2],tMesh.children[8]]})
 				// tScene.addChild({children:[tMesh.children[2]]})
