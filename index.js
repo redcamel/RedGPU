@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.26 21:13:2
+ *   Last modification time of this file - 2019.12.27 10:47:2
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -105,16 +105,16 @@ new RedGPU.RedGPUContext(
 				// tEffect = new RedGPU.PostEffect_DoF(this);
 				// tEffect.focusLength = 1000
 				// tView.postEffect.addEffect(tEffect)
-				console.log('여기까지 시간은 어찌됨?', performance.now())
+				// console.log('여기까지 시간은 어찌됨?', performance.now())
 				// tEffect = new RedGPU.PostEffect_Gray(this)
 				// tView.postEffect.addEffect(tEffect)
-
+				//
 				// tEffect = new RedGPU.PostEffect_Invert(this)
 				// tView.postEffect.addEffect(tEffect)
-
+				//
 				// tEffect = new RedGPU.PostEffect_Threshold(this)
 				// tView.postEffect.addEffect(tEffect)
-
+				//
 				// tEffect = new RedGPU.PostEffect_HueSaturation(this)
 				// tEffect.saturation = 100
 				// tView.postEffect.addEffect(tEffect)
@@ -122,7 +122,7 @@ new RedGPU.RedGPUContext(
 				// tEffect = new RedGPU.PostEffect_BrightnessContrast(this)
 				// tEffect.contrast = -100
 				// tView.postEffect.addEffect(tEffect)
-
+				//
 				// tEffect = new RedGPU.PostEffect_Blur(this)
 				// tView.postEffect.addEffect(tEffect)
 				//
@@ -134,19 +134,19 @@ new RedGPU.RedGPUContext(
 				//
 				// tEffect = new RedGPU.PostEffect_GaussianBlur(this)
 				// tView.postEffect.addEffect(tEffect)
-
+				//
 				// tEffect = new RedGPU.PostEffect_ZoomBlur(this)
 				// tView.postEffect.addEffect(tEffect)
-
+				//
 				// tEffect = new RedGPU.PostEffect_HalfTone(this)
 				// tView.postEffect.addEffect(tEffect)
 				//
 				// tEffect = new RedGPU.PostEffect_Pixelize(this)
 				// tView.postEffect.addEffect(tEffect)
-
+				//
 				// tEffect = new RedGPU.PostEffect_Convolution(this)
 				// tView.postEffect.addEffect(tEffect)
-
+				//
 				// tEffect = new RedGPU.PostEffect_Film(this)
 				// tView.postEffect.addEffect(tEffect)
 				//

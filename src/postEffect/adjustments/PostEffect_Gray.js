@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.26 20:16:42
+ *   Last modification time of this file - 2019.12.27 10:47:2
  *
  */
 
@@ -34,11 +34,11 @@ export default class PostEffect_Gray extends BasePostEffect {
 	layout( location = 0 ) in vec3 vNormal;
 	layout( location = 1 ) in vec2 vUV;
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 1 ) uniform sampler uSampler;
-	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 2 ) uniform texture2D uDiffuseTexture;
+	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 2 ) uniform texture2D uSourceTexture;
 	layout( location = 0 ) out vec4 outColor;
 	void main() {
 		vec4 diffuseColor = vec4(0.0);
-		diffuseColor = texture( sampler2D( uDiffuseTexture, uSampler ), vUV ) ;
+		diffuseColor = texture( sampler2D( uSourceTexture, uSampler ), vUV ) ;
 	    float gray = (diffuseColor.r  + diffuseColor.g + diffuseColor.b)/3.0;
 		outColor = vec4( gray, gray, gray, 1.0);;
 	}
