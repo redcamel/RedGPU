@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.27 14:44:15
+ *   Last modification time of this file - 2019.12.27 19:6:22
  *
  */
 import RedGPU from "../src/RedGPU.js";
@@ -134,7 +134,7 @@ new RedGPU.RedGPUContext(cvs,
 		// tScene.addChild(tMeshVolume)
 
 
-		tMesh = new RedGPU.Mesh(this, new RedGPU.Sphere(this,), new RedGPU.ColorMaterial(this))
+		tMesh = new RedGPU.Mesh(this, new RedGPU.Sphere(this,), new RedGPU.ColorPhongMaterial(this))
 		tMesh.x = 8
 		tMesh.y = 0
 		tMesh.z = 0

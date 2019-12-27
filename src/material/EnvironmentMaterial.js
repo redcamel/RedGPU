@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.26 20:16:42
+ *   Last modification time of this file - 2019.12.27 19:6:22
  *
  */
 
@@ -141,7 +141,7 @@ export default class EnvironmentMaterial extends Mix.mix(
 `;
 	static PROGRAM_OPTION_LIST = {
 		vertex: ['displacementTexture'],
-		fragment: ['diffuseTexture','emissiveTexture', 'environmentTexture','normalTexture', 'specularTexture', 'useFlatMode']
+		fragment: ['diffuseTexture', 'emissiveTexture', 'environmentTexture', 'normalTexture', 'specularTexture', 'useFlatMode']
 	};
 	static uniformsBindGroupLayoutDescriptor_material = {
 		bindings: [

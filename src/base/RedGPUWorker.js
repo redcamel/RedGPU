@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.26 21:13:2
+ *   Last modification time of this file - 2019.12.27 19:6:22
  *
  */
 
@@ -41,8 +41,8 @@ const workerImage = createWorker(async () => {
 							.then(bitmap => {
 								let faceWidth = nextHighestPowerOfTwo(bitmap.width);
 								let faceHeight = nextHighestPowerOfTwo(bitmap.height);
-								if (faceWidth > 1024) faceWidth = 1024;
-								if (faceHeight > 1024) faceHeight = 1024;
+								if (faceWidth > 1920) faceWidth = 1920;
+								if (faceHeight > 1920) faceHeight = 1920;
 								// console.log(data)
 								let imageDatas = [];
 								let mipIndex = 0, len = Math.round(Math.log2(Math.max(faceWidth, faceHeight)));

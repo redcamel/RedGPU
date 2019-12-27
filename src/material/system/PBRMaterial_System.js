@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.26 20:16:42
+ *   Last modification time of this file - 2019.12.27 19:6:22
  *
  */
 
@@ -32,10 +32,10 @@ export default class PBRMaterial_System extends Mix.mix(
     ${ShareGLSL.GLSL_SystemUniforms_vertex.meshUniforms}
          
 	layout( location = 0 ) in vec3 position;
-	layout( location = 1 ) in vec4 vertexColor_0;
-	layout( location = 2 ) in vec3 normal;
-	layout( location = 3 ) in vec2 uv;
-	layout( location = 4 ) in vec2 uv1;
+	layout( location = 1 ) in vec3 normal;
+	layout( location = 2 ) in vec2 uv;
+	layout( location = 3 ) in vec2 uv1;
+	layout( location = 4 ) in vec4 vertexColor_0;
 	layout( location = 5 ) in vec4 aVertexWeight;
 	layout( location = 6 ) in vec4 aVertexJoint;
 	layout( location = 7 ) in vec4 vertexTangent;

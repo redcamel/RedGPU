@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.27 14:44:15
+ *   Last modification time of this file - 2019.12.27 19:6:22
  *
  */
 
@@ -121,7 +121,7 @@ const displacementTexture = Base => {
 };
 const basicLightPropertys = Base => class extends Base {
 	_normalPower = 1;
-	_shininess = 64;
+	_shininess = 32;
 	_specularPower = 1;
 	_specularColor = '#ffffff';
 	_specularColorRGBA = new Float32Array([1, 1, 1, 1]);
