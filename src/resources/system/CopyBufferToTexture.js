@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.20 13:27:33
+ *   Last modification time of this file - 2019.12.27 19:6:22
  *
  */
 
@@ -13,6 +13,7 @@ export default function CopyBufferToTexture(commandEncoder, device, imageDatas, 
 
 		imageDatas.forEach((info, mip) => {
 			if (!updateTarget.useMipmap && mip) return;
+			if(mip>updateTarget.mipMaps) return
 			let data = new Uint8ClampedArray(info.data);
 			let width = info.width;
 			let height = info.height;

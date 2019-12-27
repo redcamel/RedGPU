@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.24 18:50:1
+ *   Last modification time of this file - 2019.12.27 19:6:22
  *
  */
 
@@ -66,8 +66,8 @@ export default class Text extends BaseObject3D {
 	constructor(redGPUContext, width = 256, height = 128) {
 		super(redGPUContext);
 
-		if (width > 1024) width = 1024;
-		if (height > 1024) height = 1024;
+		if (width > 1920) width = 1920;
+		if (height > 1920) height = 1920;
 		this['_cvs'] = new OffscreenCanvas(width, height);
 		this['_ctx'] = this['_cvs'].getContext('2d');
 		// SVG 생성

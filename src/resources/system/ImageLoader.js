@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.26 21:13:2
+ *   Last modification time of this file - 2019.12.27 19:6:22
  *
  */
 
@@ -102,8 +102,8 @@ export default class ImageLoader extends UUID {
 								loadCount++;
 								maxW = Math.max(maxW, result.imageDatas[0].width);
 								maxH = Math.max(maxH, result.imageDatas[0].height);
-								if (maxW > 1024) maxW = 1024;
-								if (maxH > 1024) maxH = 1024;
+								if (maxW > 1920) maxW = 1920;
+								if (maxH > 1920) maxH = 1920;
 								console.log(result);
 								console.log('첫 로딩업데이트 해야될 대상', SRC_MAP[targetSRC]);
 								if (loadCount == 6) {

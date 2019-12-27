@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.26 18:13:2
+ *   Last modification time of this file - 2019.12.27 19:6:22
  *
  */
 
@@ -27,7 +27,7 @@ export default class ShareGLSL {
 	        float time;
 	    } systemUniforms;
 	    `,
-		meshUniforms:`
+		meshUniforms: `
 		layout( set = ${ShareGLSL.SET_INDEX_MeshUniforms}, binding = 0 ) uniform MeshUniforms {
 	        mat4 modelMatrix[${ShareGLSL.MESH_UNIFORM_POOL_NUM}];
 	        mat4 normalMatrix[${ShareGLSL.MESH_UNIFORM_POOL_NUM}];
@@ -45,7 +45,7 @@ export default class ShareGLSL {
 		//#RedGPU#displacementTexture#          )).x * displacementPower ;
 		//#RedGPU#displacementTexture# }
 		`,
-		getSprite3DMatrix : `
+		getSprite3DMatrix: `
 		mat4 getSprite3DMatrix(mat4 cameraMTX, mat4 mvMatrix){
 			mat4 tMTX = cameraMTX * mvMatrix;
 			tMTX[0][0] = mvMatrix[0][0], tMTX[0][1] = 0.0, tMTX[0][2] = 0.0;
@@ -203,25 +203,24 @@ export default class ShareGLSL {
 		        lightInfo = lightList[i];
 		        L = -lightInfo.position + vVertexPosition;
 			    distanceLength = abs(length(L));
-			    vec3 spotDirection = vec3(0,-1,0);
+			    vec3 spotDirection = vec3(0.1,-1,0);
 			    L = normalize(L);	
+			    lambertTerm = dot(N,-L);
 				float spotEffect = dot(normalize(spotDirection),L);
                 lightColor = lightInfo.color;
-			    lambertTerm = dot(N,-L);
-		        float limit = 20;
-		        float inLight = step(cos(limit * 3.14/180), spotEffect);
-                float light = inLight * lambertTerm;
-			    if(lambertTerm > 0.0 ){			     
-				    if(spotEffect > cos(limit * 3.14/180) ){
+		        float limit = 10;
+		        float inLight = step(cos(limit * 3.141592653589793/180), spotEffect);
+                float light = inLight * spotEffect;
+			    if(lambertTerm > 0 && spotEffect > lightInfo.cutoff ){			     
+			        if(spotEffect > cos(limit * 3.141592653589793/180) ){
 				        spotEffect = pow(spotEffect, lightInfo.exponent);
-			            attenuation = 1.0/(.01 + .01*distanceLength +.02*distanceLength*distanceLength);
-						attenuation *= spotEffect * light;
+		                attenuation = spotEffect * light ;
 					    intensity = lightInfo.intensity;					 
 				     
 						ld += lightColor * diffuseColor * intensity * attenuation;
 						specular = pow( max(dot(reflect(L, N), -L), 0.0), shininess) * specularPower * specularTextureValue;
 						ls +=  specularColor * specular * intensity * attenuation * lightColor.a;
-				    }
+					}
 			    }
 		    }
 		    return ld + ls;

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.24 18:50:1
+ *   Last modification time of this file - 2019.12.27 19:6:22
  *
  */
 
@@ -1047,17 +1047,6 @@ var GLTFLoader;
 					interleaveData[idx++] = vertices[i * 3 + 1];
 					interleaveData[idx++] = vertices[i * 3 + 2];
 				}
-				if (verticesColor_0.length) {
-					interleaveData[idx++] = verticesColor_0[i * 4 + 0];
-					interleaveData[idx++] = verticesColor_0[i * 4 + 1];
-					interleaveData[idx++] = verticesColor_0[i * 4 + 2];
-					interleaveData[idx++] = verticesColor_0[i * 4 + 3];
-				} else {
-					interleaveData[idx++] = 0;
-					interleaveData[idx++] = 0;
-					interleaveData[idx++] = 0;
-					interleaveData[idx++] = 0;
-				}
 				if (normalData.length) {
 					interleaveData[idx++] = normalData[i * 3 + 0];
 					interleaveData[idx++] = normalData[i * 3 + 1];
@@ -1078,6 +1067,17 @@ var GLTFLoader;
 				} else if (uvs.length) {
 					interleaveData[idx++] = uvs[i * 2 + 0];
 					interleaveData[idx++] = uvs[i * 2 + 1];
+				}
+				if (verticesColor_0.length) {
+					interleaveData[idx++] = verticesColor_0[i * 4 + 0];
+					interleaveData[idx++] = verticesColor_0[i * 4 + 1];
+					interleaveData[idx++] = verticesColor_0[i * 4 + 2];
+					interleaveData[idx++] = verticesColor_0[i * 4 + 3];
+				} else {
+					interleaveData[idx++] = 0;
+					interleaveData[idx++] = 0;
+					interleaveData[idx++] = 0;
+					interleaveData[idx++] = 0;
 				}
 				if (jointWeights.length) {
 					interleaveData[idx++] = jointWeights[i * 4 + 0];
@@ -1213,11 +1213,11 @@ var GLTFLoader;
 				var tGeo;
 				var tInterleaveInfoList = [];
 				if (vertices.length) tInterleaveInfoList.push(new InterleaveInfo('aVertexPosition', 'float3'));
-				tInterleaveInfoList.push(new InterleaveInfo('aVertexColor_0', 'float4'));
 				if (normalData.length) tInterleaveInfoList.push(new InterleaveInfo('aVertexNormal', 'float3'));
 				if (uvs.length) tInterleaveInfoList.push(new InterleaveInfo('aTexcoord', 'float2'));
 				if (uvs1.length) tInterleaveInfoList.push(new InterleaveInfo('aTexcoord1', 'float2'));
 				else if (uvs.length) tInterleaveInfoList.push(new InterleaveInfo('aTexcoord1', 'float2'));
+				tInterleaveInfoList.push(new InterleaveInfo('aVertexColor_0', 'float4'));
 				tInterleaveInfoList.push(new InterleaveInfo('aVertexWeight', 'float4'));
 				tInterleaveInfoList.push(new InterleaveInfo('aVertexJoint', 'float4'));
 				tInterleaveInfoList.push(new InterleaveInfo('aVertexTangent', 'float4'));

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.26 21:13:2
+ *   Last modification time of this file - 2019.12.27 19:6:22
  *
  */
 "use strict";
@@ -19,7 +19,10 @@ let makeMipmap = function (redGPUContext, imageDatas, targetTexture) {
 	let tW = imageDatas[0].width;
 	let tH = imageDatas[0].height;
 	const commandEncoder = redGPUContext.device.createCommandEncoder({});
-	if (targetTexture.useMipmap) targetTexture.mipMaps = Math.round(Math.log2(Math.max(tW, tH)));
+	if (targetTexture.useMipmap) {
+		targetTexture.mipMaps = Math.round(Math.log2(Math.max(tW, tH)));
+		if(targetTexture.mipMaps>10) targetTexture.mipMaps = 10
+	}
 	const textureDescriptor = {
 		size: {
 			width: tW,
