@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.27 10:47:2
+ *   Last modification time of this file - 2019.12.30 20:3:4
  *
  */
 
@@ -12,13 +12,15 @@ import Mix from "./Mix.js";
 import Mesh from "../object3D/Mesh.js";
 import Plane from "../primitives/Plane.js";
 import Render from "../renderer/Render.js";
+import PipelinePostEffect from "./pipeline/PipelinePostEffect.js";
 
 export default class BasePostEffect extends Mix.mix(
 	BaseMaterial
 ) {
 	static vertexShaderGLSL = ``;
 	static fragmentShaderGLSL = ``;
-	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};;
+	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
+	;
 	static uniformsBindGroupLayoutDescriptor_material = {
 		bindings: [
 			{binding: 0, visibility: GPUShaderStage.FRAGMENT, type: "uniform-buffer"},
@@ -35,7 +37,7 @@ export default class BasePostEffect extends Mix.mix(
 	constructor(redGPUContext) {
 		super(redGPUContext);
 		this.quad = new Mesh(redGPUContext, new Plane(redGPUContext), this);
-		this.quad.isPostEffectQuad = true
+		this.quad.pipeline = new PipelinePostEffect(redGPUContext, this.quad)
 	}
 	checkSize(redGPUContext, redView) {
 		if ([this.#prevViewRect[2], this.#prevViewRect[3]].toString() != [redView.viewRect[2], redView.viewRect[3]].toString()) {
@@ -68,7 +70,7 @@ export default class BasePostEffect extends Mix.mix(
 		);
 		if (this.sourceTexture != sourceTextureView) {
 			this.sourceTexture = sourceTextureView;
-			this.quad.pipeline.updatePipeline_sampleCount1(redGPUContext, redView);
+			this.quad.pipeline.update(redGPUContext, redView);
 			this.resetBindingInfo()
 		}
 		Render.clearStateCache()

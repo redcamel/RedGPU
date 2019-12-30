@@ -2,13 +2,14 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.27 14:44:15
+ *   Last modification time of this file - 2019.12.30 20:3:4
  *
  */
 
 import GLTFLoader from "../loader/gltf/GLTFLoader.js";
 import SheetMaterial from "../material/SheetMaterial.js";
 import Debugger from "./system/Debugger.js";
+import PipelineBasic from "../base/pipeline/PipelineBasic.js";
 
 let _frustumPlanes = []
 function ComputeViewFrustum() {
@@ -287,12 +288,12 @@ let renderScene = (_ => {
 
 					}
 					if (tDirtyPipeline || tMaterialChanged) {
-						if (!tMesh.isPostEffectQuad) {
+						if (tPipeline instanceof PipelineBasic) {
 							// console.log('tDirtyPipeline', tDirtyPipeline, 'tMaterialChanged', tMaterialChanged)
-							// console.time('tPipeline.updatePipeline_sampleCount4' + tMesh._UUID)
-							tPipeline.updatePipeline_sampleCount4(redGPUContext, redView);
+							// console.time('tPipeline.update' + tMesh._UUID)
+							tPipeline.update(redGPUContext, redView);
 							currentDebuggerData['dirtyPipelineNum']++
-							// console.timeEnd('tPipeline.updatePipeline_sampleCount4' + tMesh._UUID)
+							// console.timeEnd('tPipeline.update' + tMesh._UUID)
 						}
 					} else {
 						if (renderToTransparentLayerMode == 0 && tMesh.renderToTransparentLayer) {

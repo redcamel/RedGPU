@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.25 17:24:20
+ *   Last modification time of this file - 2019.12.30 20:3:4
  *
  */
 // renderder ///////////////////////////////////////////////////////////////////////
@@ -19,7 +19,7 @@ import BaseObject3D from "./base/BaseObject3D.js";
 import ShareGLSL from "./base/ShareGLSL.js";
 import BasePostEffect from "./base/BasePostEffect.js";
 import Mix from "./base/Mix.js";
-import Pipeline from "./base/Pipeline.js";
+import PipelineBasic from "./base/pipeline/PipelineBasic.js";
 import DisplayContainer from "./base/DisplayContainer.js";
 import UUID from "./base/UUID.js";
 // buffer ///////////////////////////////////////////////////////////////////////
@@ -116,7 +116,7 @@ const RedGPU = {
 	BasePostEffect,
 	BaseTexture,
 	Mix,
-	Pipeline,
+	Pipeline: PipelineBasic,
 	DisplayContainer,
 	UUID,
 	// buffer ///////////////////////////////////////////////////////////////////////

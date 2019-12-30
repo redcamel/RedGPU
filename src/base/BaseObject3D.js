@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.27 14:44:15
+ *   Last modification time of this file - 2019.12.30 20:3:4
  *
  */
 
@@ -10,7 +10,7 @@
 
 import UniformBuffer from "../buffer/UniformBuffer.js";
 import DisplayContainer from "./DisplayContainer.js";
-import Pipeline from "./Pipeline.js";
+import PipelineBasic from "./pipeline/PipelineBasic.js";
 import UniformBufferDescriptor from "../buffer/UniformBufferDescriptor.js";
 import TypeSize from "../resources/TypeSize.js";
 import ShareGLSL from "./ShareGLSL.js";
@@ -251,7 +251,7 @@ export default class BaseObject3D extends DisplayContainer {
 		});
 
 
-		this.pipeline = new Pipeline(redGPUContext, this);
+		this.pipeline = new PipelineBasic(redGPUContext, this);
 		this.normalMatrix = mat4.create();
 		this.matrix = mat4.create();
 		this.localMatrix = mat4.create()

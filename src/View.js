@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.27 20:17:56
+ *   Last modification time of this file - 2019.12.30 20:3:4
  *
  */
 
@@ -54,7 +54,7 @@ export default class View extends UUID {
 	//
 	mouseX = 0;
 	mouseY = 0;
-	_useFrustumCulling=true
+	_useFrustumCulling = true
 	get useFrustumCulling() {
 		return this._useFrustumCulling;
 	}
@@ -77,7 +77,7 @@ export default class View extends UUID {
 		let uniformBufferSize =
 			TypeSize.mat4 + // projectionMatrix
 			TypeSize.mat4 +  // camera
-			TypeSize.float2+// resolution
+			TypeSize.float2 +// resolution
 			TypeSize.float // time
 
 		;
@@ -166,37 +166,67 @@ export default class View extends UUID {
 	};
 	resetTexture(redGPUContext) {
 		this.#viewRect = this.getViewRect(redGPUContext);
-		let list = ['baseAttachment', 'baseAttachment_depthColor', 'baseAttachment_mouseColorID'];
+		let info = {
+			colorAttachments: [
+				{
+					key: 'baseAttachment',
+					format: redGPUContext.swapChainFormat,
+					usage: GPUTextureUsage.OUTPUT_ATTACHMENT,
+					resolveUsage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC  | GPUTextureUsage.SAMPLED
+				},
+				{
+					key: 'baseAttachment_depthColor',
+					format: redGPUContext.swapChainFormat,
+					usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED,
+					resolveUsage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED
+				},
+				{
+					key: 'baseAttachment_mouseColorID',
+					format: redGPUContext.swapChainFormat,
+					usage: GPUTextureUsage.OUTPUT_ATTACHMENT,
+					resolveUsage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC
+				}
+			],
+			depthStencilAttachment: {
+				key: 'baseDepthStencilAttachment',
+				format: "depth24plus-stencil8",
+				usage: GPUTextureUsage.OUTPUT_ATTACHMENT
+			}
+		};
 		let sizeInfo = {width: this.#viewRect[2], height: this.#viewRect[3], depth: 1};
-		let usage = GPUTextureUsage.OUTPUT_ATTACHMENT;
-		let usageResolve = GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED;
+		let list = info.colorAttachments
 		if (this.baseAttachment) {
-			list.forEach(key => {
+			list.forEach(v => {
+				let key = v['key']
 				this[key].destroy();
 				this[key + '_ResolveTarget'].destroy()
 			});
 			this.baseDepthStencilAttachment.destroy();
 		}
-		list.forEach(key => {
+		list.forEach(v => {
+			let key = v['key']
+			let format = v['format']
+			let usage = v['usage']
+			let resolveUsage = v['resolveUsage'];
 			this[key] = redGPUContext.device.createTexture({
 				size: sizeInfo, sampleCount: 4,
-				format: redGPUContext.swapChainFormat,
+				format: format,
 				usage: usage
 			});
 			this[key + 'View'] = this[key].createView();
 			this[key + '_ResolveTarget'] = redGPUContext.device.createTexture({
 				size: sizeInfo, sampleCount: 1,
-				format: redGPUContext.swapChainFormat,
-				usage: usageResolve
+				format: format,
+				usage: resolveUsage
 			});
 			this[key + '_ResolveTargetView'] = this[key + '_ResolveTarget'].createView();
 		});
-		this.baseDepthStencilAttachment = redGPUContext.device.createTexture({
+		this[info['depthStencilAttachment']['key']] = redGPUContext.device.createTexture({
 			size: sizeInfo, sampleCount: 4,
-			format: "depth24plus-stencil8",
-			usage: usage
+			format: info['depthStencilAttachment']['format'],
+			usage: info['depthStencilAttachment']['usage']
 		});
-		this.baseDepthStencilAttachmentView = this.baseDepthStencilAttachment.createView();
+		this[info['depthStencilAttachment']['key'] + 'View'] = this[info['depthStencilAttachment']['key']].createView();
 
 	}
 	updateSystemUniform(passEncoder, redGPUContext) {
@@ -218,7 +248,7 @@ export default class View extends UUID {
 		offset += TypeSize.mat4 / Float32Array.BYTES_PER_ELEMENT;
 		this.#systemUniformInfo_vertex_data.set(this.camera.matrix, offset);
 		offset += TypeSize.mat4 / Float32Array.BYTES_PER_ELEMENT;
-		this.#systemUniformInfo_vertex_data.set([this.#viewRect[2], this.#viewRect[3],performance.now()], offset);
+		this.#systemUniformInfo_vertex_data.set([this.#viewRect[2], this.#viewRect[3], performance.now()], offset);
 		offset += TypeSize.float2 / Float32Array.BYTES_PER_ELEMENT;
 		// update GPUBuffer
 		systemUniformInfo_vertex.GPUBuffer.setSubData(0, this.#systemUniformInfo_vertex_data);
