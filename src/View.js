@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.31 15:22:8
+ *   Last modification time of this file - 2019.12.31 15:41:58
  *
  */
 
@@ -172,7 +172,7 @@ export default class View extends UUID {
 					key: 'baseAttachment',
 					format: redGPUContext.swapChainFormat,
 					usage: GPUTextureUsage.OUTPUT_ATTACHMENT,
-					resolveUsage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED
+					resolveUsage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC  | GPUTextureUsage.SAMPLED
 				},
 				{
 					key: 'baseAttachment_depthColor',
@@ -359,22 +359,20 @@ export default class View extends UUID {
 		]
 	}
 
-	setSize(width = this.#width, height = this.#height) {
-
-		if (typeof width == 'number') this.#width = width < 0 ? 0 : parseInt(width);
-		else {
-			if (width.includes('%') && (+width.replace('%', '') >= 0)) this.#width = width;
-			else UTIL.throwFunc('View setSize : width는 0이상의 숫자나 %만 허용.', width);
-		}
-		if (typeof height == 'number') this.#height = height < 0 ? 0 : parseInt(height);
-		else {
-			if (height.includes('%') && (+height.replace('%', '') >= 0)) this.#height = height;
-			else UTIL.throwFunc('View setSize : height는 0이상의 숫자나 %만 허용.', height);
-		}
-		if (RedGPUContext.useDebugConsole) console.log(`setSize - input : ${width},${height} / result : ${this.#width}, ${this.#height}`);
-		this.getViewRect(this.#redGPUContext);
-		this.resetTexture(this.#redGPUContext)
-
+	setSize(width = this.#width, height = this.#height){
+			let t0 = this.#viewRect.toString()
+			if (typeof width == 'number') this.#width = width < 0 ? 0 : parseInt(width);
+			else {
+				if (width.includes('%') && (+width.replace('%', '') >= 0)) this.#width = width;
+				else UTIL.throwFunc('View setSize : width는 0이상의 숫자나 %만 허용.', width);
+			}
+			if (typeof height == 'number') this.#height = height < 0 ? 0 : parseInt(height);
+			else {
+				if (height.includes('%') && (+height.replace('%', '') >= 0)) this.#height = height;
+				else UTIL.throwFunc('View setSize : height는 0이상의 숫자나 %만 허용.', height);
+			}
+			if (RedGPUContext.useDebugConsole) console.log(`setSize - input : ${width},${height} / result : ${this.#width}, ${this.#height}`);
+			if(this.getViewRect(this.#redGPUContext).toString() != t0) this.resetTexture(this.#redGPUContext)
 
 	}
 
