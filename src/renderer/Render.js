@@ -2,13 +2,14 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.27 14:44:15
+ *   Last modification time of this file - 2019.12.31 13:40:48
  *
  */
 
 import GLTFLoader from "../loader/gltf/GLTFLoader.js";
 import SheetMaterial from "../material/SheetMaterial.js";
 import Debugger from "./system/Debugger.js";
+import PipelineBasic from "../base/pipeline/PipelineBasic.js";
 
 let _frustumPlanes = []
 function ComputeViewFrustum() {
@@ -66,7 +67,7 @@ let checkMouseEvent = (function () {
 			let canvasMouseEvent = Render.mouseEventInfo[i];
 			// 마우스 이벤트 체크
 			let meshEventData;
-			if (pickColorArray) meshEventData = Render.mouseMAP[[...pickColorArray].toString()];
+			if (pickColorArray) meshEventData = Render.mouseMAP[pickColorArray];
 
 			let tEventType;
 			if (meshEventData) {
@@ -157,7 +158,7 @@ let readPixel = async (redGPUContext, redView, targetTexture, commandEncoder) =>
 		const copyEncoder = redGPUContext.device.createCommandEncoder();
 		// readPixel
 		let readPixelBuffer = redGPUContext.device.createBuffer({
-			size: 4,
+			size: 16,
 			usage: globalThis.GPUBufferUsage.COPY_DST | globalThis.GPUBufferUsage.MAP_READ,
 		});
 		const textureView = {texture: targetTexture, origin: {x: redView.mouseX, y: redView.mouseY, z: 0}};
@@ -173,7 +174,11 @@ let readPixel = async (redGPUContext, redView, targetTexture, commandEncoder) =>
 			readPixelBuffer.unmap();
 			readPixelBuffer.destroy();
 			readPixelBuffer = null;
-			pickColorArray = new Uint8ClampedArray(e);
+			// console.log(Render.mouseMAP)
+			pickColorArray = new Float32Array(e);
+			// console.log(pickColorArray)
+			pickColorArray = Math.round(pickColorArray[0])
+			// console.log(pickColorArray)
 			pickedArrayBuffer = null
 		})
 
@@ -287,12 +292,12 @@ let renderScene = (_ => {
 
 					}
 					if (tDirtyPipeline || tMaterialChanged) {
-						if (!tMesh.isPostEffectQuad) {
+						if (tPipeline instanceof PipelineBasic) {
 							// console.log('tDirtyPipeline', tDirtyPipeline, 'tMaterialChanged', tMaterialChanged)
-							// console.time('tPipeline.updatePipeline_sampleCount4' + tMesh._UUID)
-							tPipeline.updatePipeline_sampleCount4(redGPUContext, redView);
+							// console.time('tPipeline.update' + tMesh._UUID)
+							tPipeline.update(redGPUContext, redView);
 							currentDebuggerData['dirtyPipelineNum']++
-							// console.timeEnd('tPipeline.updatePipeline_sampleCount4' + tMesh._UUID)
+							// console.timeEnd('tPipeline.update' + tMesh._UUID)
 						}
 					} else {
 						if (renderToTransparentLayerMode == 0 && tMesh.renderToTransparentLayer) {

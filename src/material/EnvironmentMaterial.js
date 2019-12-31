@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.27 20:17:56
+ *   Last modification time of this file - 2019.12.31 13:40:48
  *
  */
 
@@ -36,7 +36,7 @@ export default class EnvironmentMaterial extends Mix.mix(
 	layout( location = 0 ) out vec3 vNormal;
 	layout( location = 1 ) out vec2 vUV;
 	layout( location = 2 ) out vec4 vVertexPosition;	
-	layout( location = 3 ) out vec4 vMouseColorID;	
+	layout( location = 3 ) out float vMouseColorID;	
 	layout( set = ${ShareGLSL.SET_INDEX_VertexUniforms}, binding = 0 ) uniform VertexUniforms {
         float displacementFlowSpeedX;
         float displacementFlowSpeedY;
@@ -74,7 +74,7 @@ export default class EnvironmentMaterial extends Mix.mix(
 	layout( location = 0 ) in vec3 vNormal;
 	layout( location = 1 ) in vec2 vUV;
 	layout( location = 2 ) in vec4 vVertexPosition;
-	layout( location = 3 ) in vec4 vMouseColorID;
+	layout( location = 3 ) in float vMouseColorID;
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 4 ) uniform sampler uSampler;
 	//#RedGPU#diffuseTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 5 ) uniform texture2D uDiffuseTexture;
 	//#RedGPU#normalTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 6 ) uniform texture2D uNormalTexture;	
@@ -82,7 +82,7 @@ export default class EnvironmentMaterial extends Mix.mix(
 	//#RedGPU#emissiveTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 8 ) uniform texture2D uEmissiveTexture;
 	//#RedGPU#environmentTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 9 ) uniform textureCube uEnvironmentTexture;
 	layout( location = 0 ) out vec4 outColor;
-	layout( location = 1 ) out vec4 outDepthColor;
+	layout( location = 1 ) out vec4 outNormalDepthColor;
 	layout( location = 2 ) out vec4 outMouseColorID;
 	void main() {
 		float testAlpha = 1.0;
@@ -135,8 +135,8 @@ export default class EnvironmentMaterial extends Mix.mix(
 		finalColor.a = testAlpha;
 		outColor = finalColor;
 		outColor.a *= fragmentUniforms.alpha;
-		outMouseColorID = vMouseColorID;
-		outDepthColor = vec4( vec3(1.0), gl_FragCoord.z/gl_FragCoord.w );
+		outMouseColorID = vec4(vMouseColorID, vec3(0.0));
+		outNormalDepthColor = vec4( N, gl_FragCoord.z/gl_FragCoord.w );
 	}
 `;
 	static PROGRAM_OPTION_LIST = {

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.27 20:17:56
+ *   Last modification time of this file - 2019.12.31 13:40:48
  *
  */
 
@@ -45,7 +45,7 @@ export default class PBRMaterial_System extends Mix.mix(
 	layout( location = 3 ) out vec2 vUV1;
 	layout( location = 4 ) out vec4 vVertexTangent;
 	layout( location = 5 ) out vec4 vVertexPosition;
-	layout( location = 6 ) out vec4 vMouseColorID;	
+	layout( location = 6 ) out float vMouseColorID;	
 	layout( set = ${ShareGLSL.SET_INDEX_VertexUniforms}, binding = 0 ) uniform VertexUniforms {
 		mat4 jointMatrix[${maxJoint}];
 		mat4 inverseBindMatrixForJoint[${maxJoint}];
@@ -111,7 +111,7 @@ export default class PBRMaterial_System extends Mix.mix(
 	layout( location = 3 ) in vec2 vUV1;
 	layout( location = 4 ) in vec4 vVertexTangent;
 	layout( location = 5 ) in vec4 vVertexPosition;
-	layout( location = 6 ) in vec4 vMouseColorID;	
+	layout( location = 6 ) in float vMouseColorID;	
 	//#RedGPU#diffuseTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 4 ) uniform sampler uDiffuseSampler;
 	//#RedGPU#diffuseTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 5 ) uniform texture2D uDiffuseTexture;
 	//#RedGPU#normalTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 6 ) uniform sampler uNormalSampler;
@@ -125,7 +125,7 @@ export default class PBRMaterial_System extends Mix.mix(
 	//#RedGPU#occlusionTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 14 ) uniform sampler uOcclusionSampler;	
 	//#RedGPU#occlusionTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 15 ) uniform texture2D uOcclusionTexture;
 	layout( location = 0 ) out vec4 outColor;
-	layout( location = 1 ) out vec4 outDepthColor;
+	layout( location = 1 ) out vec4 outNormalDepthColor;
 	layout( location = 2 ) out vec4 outMouseColorID;
 	vec2 diffuseTexCoord;
 	vec2 normalTexCoord;
@@ -237,8 +237,8 @@ export default class PBRMaterial_System extends Mix.mix(
 			finalColor.a = tAlpha;
 		}
 		outColor = finalColor;
-		outMouseColorID = vMouseColorID;
-		outDepthColor = vec4( vec3(1.0), gl_FragCoord.z/gl_FragCoord.w );
+		outMouseColorID = vec4(vMouseColorID, vec3(0.0));
+		outNormalDepthColor = vec4( N, gl_FragCoord.z/gl_FragCoord.w );
 	}
 `;
 	static PROGRAM_OPTION_LIST = {
