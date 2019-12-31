@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.27 19:6:22
+ *   Last modification time of this file - 2019.12.31 13:40:48
  *
  */
 
@@ -34,7 +34,7 @@ export default class ShareGLSL {
 	    } meshUniforms;
 	    layout( set = ${ShareGLSL.SET_INDEX_MeshUniforms}, binding = 1 ) uniform MeshUniformIndex {
 	        float index;
-	        vec4 mouseColorID;
+	        float mouseColorID;
 	    } meshUniformsIndex;
 		`,
 		calcDisplacement: `

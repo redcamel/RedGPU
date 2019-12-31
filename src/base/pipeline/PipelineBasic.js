@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.30 20:3:4
+ *   Last modification time of this file - 2019.12.31 13:40:48
  *
  */
 
@@ -67,7 +67,7 @@ export default class PipelineBasic extends UUID {
 					//baseAttachment_depthColorView
 				},
 				{
-					format: redGPUContext.swapChainFormat
+					format: 'rgba32float'
 					//baseAttachment_mouseColorIDView
 				}
 			],

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.27 20:17:56
+ *   Last modification time of this file - 2019.12.31 13:40:48
  *
  */
 
@@ -27,7 +27,7 @@ export default class BitmapMaterial extends Mix.mix(
 	layout( location = 2 ) in vec2 uv;
 	layout( location = 0 ) out vec3 vNormal;
 	layout( location = 1 ) out vec2 vUV;
-	layout( location = 2 ) out vec4 vMouseColorID;	
+	layout( location = 2 ) out float vMouseColorID;	
 	void main() {
 		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * meshUniforms.modelMatrix[ int(meshUniformsIndex.index) ] * vec4(position,1.0);
 		vNormal = normal;
@@ -39,22 +39,22 @@ export default class BitmapMaterial extends Mix.mix(
 	${ShareGLSL.GLSL_VERSION}
 	layout( location = 0 ) in vec3 vNormal;
 	layout( location = 1 ) in vec2 vUV;
-	layout( location = 2 ) in vec4 vMouseColorID;	
+	layout( location = 2 ) in float vMouseColorID;	
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 0 ) uniform FragmentUniforms {
         float alpha;
     } fragmentUniforms;
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 1 ) uniform sampler uSampler;
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 2 ) uniform texture2D uDiffuseTexture;
 	layout( location = 0 ) out vec4 outColor;
-	layout( location = 1 ) out vec4 outDepthColor;
+	layout( location = 1 ) out vec4 outNormalDepthColor;
 	layout( location = 2 ) out vec4 outMouseColorID;
 	void main() {
 		vec4 diffuseColor = vec4(0.0);
 		//#RedGPU#diffuseTexture# diffuseColor = texture(sampler2D(uDiffuseTexture, uSampler), vUV) ;
 		outColor = diffuseColor;
 		outColor.a *= fragmentUniforms.alpha;
-		outMouseColorID = vMouseColorID;
-		outDepthColor = vec4( vec3(1.0), gl_FragCoord.z/gl_FragCoord.w );
+		outMouseColorID = vec4(vMouseColorID, vec3(0.0));
+		outNormalDepthColor = vec4( vec3(0.0), gl_FragCoord.z/gl_FragCoord.w );
 	}
 `;
 	static PROGRAM_OPTION_LIST = {vertex: [], fragment: ['diffuseTexture']};

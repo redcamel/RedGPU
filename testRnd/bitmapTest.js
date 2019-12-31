@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.27 19:6:22
+ *   Last modification time of this file - 2019.12.31 13:40:48
  *
  */
 import RedGPU from "../src/RedGPU.js";
@@ -41,7 +41,7 @@ new RedGPU.RedGPUContext(cvs,
 		// tScene.axis = new RedGPU.Axis(this)
 		tView = new RedGPU.View(this, tScene, tCamera)
 		tCamera.targetView = tView // optional
-		tScene.grid = tGrid
+		// tScene.grid = tGrid
 
 		this.addView(tView)
 
@@ -287,11 +287,11 @@ new RedGPU.RedGPUContext(cvs,
 		// 	}
 		// )
 
-		let i = 1
+		let i = 10
 		while (i--) {
 			// let tMesh = new RedGPU.Mesh(this, new RedGPU.Box(this), new RedGPU.ColorMaterial(this))
 			// let tMesh = new RedGPU.Mesh(this, new RedGPU.Box(this), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this, '../assets/Brick03_col.jpg')))
-			let tMesh = new RedGPU.Mesh(this, new RedGPU.Box(this), new RedGPU.StandardMaterial(this, new RedGPU.BitmapTexture(this, '../assets/Brick03_col.jpg'), new RedGPU.BitmapTexture(this, '../assets/Brick03_nrm.jpg')))
+			let tMesh = new RedGPU.Mesh(this, new RedGPU.Box(this), new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this, '../assets/Brick03_col.jpg'), new RedGPU.BitmapTexture(this, '../assets/Brick03_nrm.jpg')))
 			// let tMesh = new RedGPU.Mesh(this, new RedGPU.Box(this), new RedGPU.EnvironmentMaterial(this, new RedGPU.BitmapTexture(this, '../assets/Brick03_col.jpg'), new RedGPU.BitmapCubeTexture(this, [
 			// 	'../assets/cubemap/SwedishRoyalCastle/px.jpg',
 			// 	'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
@@ -302,28 +302,28 @@ new RedGPU.RedGPUContext(cvs,
 			// ])))
 			// let tMesh = new RedGPU.Sprite3D(this, new RedGPU.Box(this), new RedGPU.Sprite3DMaterial(this, new RedGPU.BitmapTexture(this, '../assets/Brick03_col.jpg')))
 
-			// tMesh.x = Math.random() * 10 - 5
-			// tMesh.y = Math.random() * 10 - 5
-			// tMesh.z = Math.random() * 10 - 5
+			tMesh.x = Math.random() * 10 - 5
+			tMesh.y = Math.random() * 10 - 5
+			tMesh.z = Math.random() * 10 - 5
 			// tMesh.setRotation(Math.random() * 360, Math.random() * 360, Math.random() * 360)
-			// tScene.addChild(tMesh)
+			tScene.addChild(tMesh)
 
-			// tMesh.addEventListener('down', function () {
-			// 	console.log('down', this)
-			// 	this.scaleX = this.scaleY = this.scaleZ = 0.5
-			// })
-			// tMesh.addEventListener('up', function () {
-			// 	console.log('up', this)
-			// 	this.scaleX = this.scaleY = this.scaleZ = 1
-			// })
-			// tMesh.addEventListener('over', function () {
-			// 	console.log('over', this)
-			// 	this.material.alpha = 0.5
-			// })
-			// tMesh.addEventListener('out', function () {
-			// 	console.log('out', this)
-			// 	this.material.alpha = 1
-			// })
+			tMesh.addEventListener('down', function () {
+				console.log('down', this)
+				this.scaleX = this.scaleY = this.scaleZ = 0.5
+			})
+			tMesh.addEventListener('up', function () {
+				console.log('up', this)
+				this.scaleX = this.scaleY = this.scaleZ = 1
+			})
+			tMesh.addEventListener('over', function () {
+				console.log('over', this)
+				this.material.alpha = 0.5
+			})
+			tMesh.addEventListener('out', function () {
+				console.log('out', this)
+				this.material.alpha = 1
+			})
 		}
 
 

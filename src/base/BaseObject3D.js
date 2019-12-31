@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.30 20:3:4
+ *   Last modification time of this file - 2019.12.31 13:40:48
  *
  */
 
@@ -27,6 +27,7 @@ const uniformBufferDescriptor_mesh = new UniformBufferDescriptor(
 		{size: TypeSize.mat4 * ShareGLSL.MESH_UNIFORM_POOL_NUM, valueName: 'normalMatrix'}
 	]
 );
+let MOUSE_UUID = 0
 const getPool = function (redGPUContext, targetMesh) {
 	let uniformBuffer_mesh;
 	if (!MESH_UNIFORM_TABLE[MESH_UNIFORM_POOL_tableIndex]) {
@@ -70,7 +71,7 @@ export default class BaseObject3D extends DisplayContainer {
 	static uniformBufferDescriptor_meshIndex = new UniformBufferDescriptor(
 		[
 			{size: TypeSize.float, valueName: 'meshUniformIndex'},
-			{size: TypeSize.float4, valueName: 'mouseColorID'}
+			{size: TypeSize.float, valueName: 'mouseColorID'}
 		]
 	);
 	_x = 0;
@@ -100,12 +101,7 @@ export default class BaseObject3D extends DisplayContainer {
 	pipeline;
 	#bindings;
 	//FIXME - 유일키가 될수있도록 변경
-	#mouseColorID = [
-		parseInt(Math.random() * 255),
-		parseInt(Math.random() * 255),
-		parseInt(Math.random() * 255),
-		255
-	];
+	#mouseColorID =0;
 	get blendColorSrc() {return this._blendColorSrc;}
 	set blendColorSrc(value) {this._blendColorSrc = value;}
 	get blendColorDst() {return this._blendColorDst;}
@@ -221,11 +217,12 @@ export default class BaseObject3D extends DisplayContainer {
 		this.uniformBuffer_mesh.meshFloat32Array = bufferData.float32Array;
 		this.offsetMatrix = bufferData.offsetMatrix;
 		this.offsetNormalMatrix = bufferData.offsetNormalMatrix;
-
+		MOUSE_UUID++
+		this.#mouseColorID = MOUSE_UUID
 		this.uniformBuffer_meshIndex = new UniformBuffer(redGPUContext);
 		this.uniformBuffer_meshIndex.setBuffer(BaseObject3D.uniformBufferDescriptor_meshIndex);
 		this.uniformBuffer_meshIndex.GPUBuffer.setSubData(0, new Float32Array([bufferData.uniformIndex]));
-		this.uniformBuffer_meshIndex.GPUBuffer.setSubData(TypeSize.float4, new Float32Array([this.#mouseColorID[0] / 255, this.#mouseColorID[1] / 255, this.#mouseColorID[2] / 255, this.#mouseColorID[3] / 255]));
+		this.uniformBuffer_meshIndex.GPUBuffer.setSubData(TypeSize.float, new Float32Array([this.#mouseColorID]));
 		this.#bindings = [
 			{
 				binding: 0,
@@ -260,17 +257,17 @@ export default class BaseObject3D extends DisplayContainer {
 
 	/////////////////////////////////////////////////////////
 	addEventListener(type, handler) {
-		if (!Render.mouseMAP[this.#mouseColorID.toString()]) {
-			Render.mouseMAP[this.#mouseColorID.toString()] = {
+		if (!Render.mouseMAP[this.#mouseColorID]) {
+			Render.mouseMAP[this.#mouseColorID] = {
 				target: this
 			}
 		}
-		Render.mouseMAP[this.#mouseColorID.toString()][type] = handler;
+		Render.mouseMAP[this.#mouseColorID][type] = handler;
 		// console.log(Render.mouseMAP)
 	}
 	removeEventListener(type) {
-		if (Render.mouseMAP[this.#mouseColorID.toString()]) {
-			Render.mouseMAP[this.#mouseColorID.toString()][type] = null;
+		if (Render.mouseMAP[this.#mouseColorID]) {
+			Render.mouseMAP[this.#mouseColorID][type] = null;
 		}
 	}
 	targetTo = (_ => {
