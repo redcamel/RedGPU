@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 17:2:44
+ *   Last modification time of this file - 2020.1.1 17:43:39
  *
  */
 
@@ -12,6 +12,7 @@ import Geometry from "../geometry/Geometry.js";
 import InterleaveInfo from "../geometry/InterleaveInfo.js";
 import RedGPUContext from "../RedGPUContext.js";
 import baseGeometry from "../base/baseGeometry.js";
+
 export default class Sphere extends baseGeometry{
 	constructor(redGPUContext, radius = 1, widthSegments = 8, heightSegments = 6, phiStart = 0, phiLength = Math.PI * 2, thetaStart = 0, thetaLength = Math.PI) {
 		super();

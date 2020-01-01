@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 17:2:44
+ *   Last modification time of this file - 2020.1.1 17:43:39
  *
  */
 
@@ -37,12 +37,11 @@ let tCacheUniformInfo = {};
 const resultPreMTX_mul_perspective_camera = mat4.create();
 const updateTargetMatrixBufferList = [];
 let currentTime;
-let currentPickedArrayBuffer;
 let prevVertexBuffer_UUID;
 let prevIndexBuffer_UUID;
 let prevMaterial_UUID;
 let changedMaterial_UUID;
-let currentPickedMouseID
+
 let renderScene = (_ => {
 		return (redGPUContext, redView, passEncoder, parent, children, parentDirty, renderToTransparentLayerMode = 0) => {
 			let i;
@@ -421,12 +420,10 @@ let renderScene = (_ => {
 				tMesh.dirtyPipeline = false;
 				tMesh.dirtyTransform = false;
 			}
-		}
-			;
+		};
 	}
 )();
 export default class Render {
-	static mouseMAP = {};
 	static clearStateCache = _ => {
 		prevVertexBuffer_UUID = null;
 		prevIndexBuffer_UUID = null;
@@ -478,10 +475,9 @@ export default class Render {
 			}
 		};
 		let mainRenderCommandEncoder = this.#redGPUContext.device.createCommandEncoder();
-		let passEncoder = mainRenderCommandEncoder.beginRenderPass(renderPassDescriptor);
-
+		let mainRenderPassEncoder = mainRenderCommandEncoder.beginRenderPass(renderPassDescriptor);
 		// 시스템 유니폼 업데이트
-		redView.updateSystemUniform(passEncoder, redGPUContext);
+		redView.updateSystemUniform(mainRenderPassEncoder, redGPUContext);
 		let tOptionRenderList = [];
 		if (tScene.skyBox) {
 			if (redView.camera['farClipping'] * 0.6 != tScene.skyBox._prevScale) tScene.skyBox['scaleX'] = tScene.skyBox['scaleY'] = tScene.skyBox['scaleZ'] = tScene.skyBox._prevScale = redView.camera['farClipping'] * 0.6;
@@ -489,11 +485,11 @@ export default class Render {
 		}
 		if (tScene.grid) tOptionRenderList.push(tScene.grid);
 		if (tScene.axis) tOptionRenderList.push(tScene.axis);
-		if (tOptionRenderList.length) renderScene(redGPUContext, redView, passEncoder, null, tOptionRenderList);
+		if (tOptionRenderList.length) renderScene(redGPUContext, redView, mainRenderPassEncoder, null, tOptionRenderList);
 		// 실제 Scene렌더
-		renderScene(redGPUContext, redView, passEncoder, null, tScene.children);
+		renderScene(redGPUContext, redView, mainRenderPassEncoder, null, tScene.children);
 		// 투명레이어 렌더
-		if (renderToTransparentLayerList.length) renderScene(redGPUContext, redView, passEncoder, null, renderToTransparentLayerList, null, 1);
+		if (renderToTransparentLayerList.length) renderScene(redGPUContext, redView, mainRenderPassEncoder, null, renderToTransparentLayerList, null, 1);
 		renderToTransparentLayerList.length = 0;
 		// 라이트 디버거 렌더
 		tOptionRenderList.length = 0;
@@ -510,7 +506,7 @@ export default class Render {
 				tLight = tScene.spotLightList[i];
 				if (tLight && tLight.useDebugMesh) tOptionRenderList.push(tLight._debugMesh)
 			}
-			renderScene(redGPUContext, redView, passEncoder, null, tOptionRenderList);
+			renderScene(redGPUContext, redView, mainRenderPassEncoder, null, tOptionRenderList);
 			redView.useFrustumCulling = cache_useFrustumCulling;
 		}
 		tOptionRenderList.length = 0;
@@ -525,11 +521,11 @@ export default class Render {
 		// 		return 0
 		// 	})
 		// 	while(i--) t1[i] = textToTransparentLayerList[i].tText
-		// 	renderScene(redGPUContext, redView, passEncoder, null, t1, null, 2);
+		// 	renderScene(redGPUContext, redView, mainRenderPassEncoder, null, t1, null, 2);
 		// }
 		// textToTransparentLayerList.length = 0;
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		passEncoder.endPass();
+		mainRenderPassEncoder.endPass();
 		currentDebuggerData['baseRenderTime'] = performance.now() - now;
 		//////////////////////////////////////////////////////////////////////////////////////////
 		now = performance.now();
@@ -563,16 +559,11 @@ export default class Render {
 			{width: tW, height: tH, depth: 1}
 		);
 		redGPUContext.device.defaultQueue.submit([mainRenderCommandEncoder.finish()]);
-		if (!currentPickedArrayBuffer) {
-			currentPickedArrayBuffer = redView.readPixelArrayBuffer(redGPUContext, redView, redView.baseAttachment_mouseColorID_ResolveTarget, redView.mouseX, redView.mouseY);
-			currentPickedArrayBuffer.then(arrayBuffer => {
-				currentPickedArrayBuffer = null
-				currentPickedMouseID = Math.round(new Float32Array(arrayBuffer)[0])
-				this.#mouseEventChecker.checkMouseEvent(redGPUContext,  currentPickedMouseID)
-			})
-		}
 
+		// 마우스 이벤트 체크
+		this.#mouseEventChecker.check(redGPUContext,redView)
 		currentDebuggerData['finalRenderTime'] = performance.now() - now;
+		// 업데이트 대상 유니폼 버퍼 갱신
 		i = updateTargetMatrixBufferList.length;
 		while (i--) updateTargetMatrixBufferList[i].GPUBuffer.setSubData(0, updateTargetMatrixBufferList[i].meshFloat32Array);
 		updateTargetMatrixBufferList.length = 0
@@ -588,17 +579,9 @@ export default class Render {
 		changedMaterial_UUID = {};
 		for (i; i < len; i++) {
 			currentDebuggerData = debuggerData[i];
-			currentDebuggerData.view = redGPUContext.viewList[i];
-			currentDebuggerData.x = currentDebuggerData.view.x;
-			currentDebuggerData.y = currentDebuggerData.view.y;
-			currentDebuggerData.width = currentDebuggerData.view.width;
-			currentDebuggerData.height = currentDebuggerData.view.height;
-			currentDebuggerData.viewRect = currentDebuggerData.view.viewRect;
 			Render.clearStateCache();
-
 			this.#renderView(redGPUContext, redGPUContext.viewList[i]);
 		}
-
 		GLTFLoader.animationLooper(time);
 		Debugger.update()
 	}

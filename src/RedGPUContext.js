@@ -2,12 +2,11 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 17:2:44
+ *   Last modification time of this file - 2020.1.1 17:43:39
  *
  */
 "use strict";
 import DetectorGPU from "./base/detect/DetectorGPU.js";
-import Render from "./renderer/Render.js";
 import ShareGLSL from "./base/ShareGLSL.js";
 import StandardMaterial from "./material/StandardMaterial.js";
 import ColorMaterial from "./material/ColorMaterial.js";
@@ -17,10 +16,6 @@ import EnvironmentMaterial from "./material/EnvironmentMaterial.js";
 import BitmapMaterial from "./material/BitmapMaterial.js";
 import GridMaterial from "./material/system/GridMaterial.js";
 import SkyBoxMaterial from "./material/system/SkyBoxMaterial.js";
-import PBRMaterial_System from "./material/system/PBRMaterial_System.js";
-import Sphere from "./primitives/Sphere.js";
-import Box from "./primitives/Box.js";
-import Plane from "./primitives/Plane.js";
 import LineMaterial from "./material/system/LineMaterial.js";
 import TextMaterial from "./material/system/TextMaterial.js";
 import SheetMaterial from "./material/SheetMaterial.js";
