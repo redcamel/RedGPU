@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 17:2:44
+ *   Last modification time of this file - 2020.1.1 17:43:39
  *
  */
 "use strict";
@@ -29,14 +29,14 @@ let setDebugBox = _ => {
 const Debugger = {
 	resetData: viewList => {
 		info = [];
-		viewList.forEach(_ => info.push({
-			view: null,
+		viewList.forEach(view => info.push({
+			view: view,
 			object3DNum: 0,
 			drawCallNum: 0,
 			triangleNum: 0,
 			dirtyPipelineNum: 0,
 			dirtyTransformNum: 0,
-			x: null, y: null, width: null, height: null, viewRect: null,
+			x: view.x, y: view.y, width: view.width, height: view.height, viewRect: view.viewRect,
 			baseRenderTime: 0,
 			postEffectRenderTime: 0,
 			finalRenderTime: 0,

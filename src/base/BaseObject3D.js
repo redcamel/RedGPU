@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 17:2:44
+ *   Last modification time of this file - 2020.1.1 17:43:39
  *
  */
 
@@ -14,9 +14,9 @@ import PipelineBasic from "./pipeline/PipelineBasic.js";
 import UniformBufferDescriptor from "../buffer/UniformBufferDescriptor.js";
 import TypeSize from "../resources/TypeSize.js";
 import ShareGLSL from "./ShareGLSL.js";
-import Render from "../renderer/Render.js";
 import View from "../View.js";
 import UTIL from "../util/UTIL.js";
+import MouseEventChecker from "../renderer/system/MouseEventChecker.js";
 
 const MESH_UNIFORM_TABLE = [];
 let MESH_UNIFORM_POOL_index = 0;
@@ -257,17 +257,17 @@ export default class BaseObject3D extends DisplayContainer {
 
 	/////////////////////////////////////////////////////////
 	addEventListener(type, handler) {
-		if (!Render.mouseMAP[this.#mouseColorID]) {
-			Render.mouseMAP[this.#mouseColorID] = {
+		if (!MouseEventChecker.mouseMAP[this.#mouseColorID]) {
+			MouseEventChecker.mouseMAP[this.#mouseColorID] = {
 				target: this
 			}
 		}
-		Render.mouseMAP[this.#mouseColorID][type] = handler;
-		// console.log(Render.mouseMAP)
+		MouseEventChecker.mouseMAP[this.#mouseColorID][type] = handler;
+		// console.log(MouseEventChecker.mouseMAP)
 	}
 	removeEventListener(type) {
-		if (Render.mouseMAP[this.#mouseColorID]) {
-			Render.mouseMAP[this.#mouseColorID][type] = null;
+		if (MouseEventChecker.mouseMAP[this.#mouseColorID]) {
+			MouseEventChecker.mouseMAP[this.#mouseColorID][type] = null;
 		}
 	}
 	targetTo = (_ => {
