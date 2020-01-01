@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.27 19:6:22
+ *   Last modification time of this file - 2020.1.1 17:2:44
  *
  */
 
@@ -157,7 +157,7 @@ export default class Text extends BaseObject3D {
 	set text(v) {
 		tSVG = this['_svg'];
 		tHTMLContainer = tSVG.querySelector('foreignObject td');
-		v = v.toString()
+		v = v.toString();
 		this['_text'] = v.replace(/\<br\>/gi, '<div/>');
 		// console.log(this['_svg'].querySelector('foreignObject div'))
 		// console.log(this['_svg'].width)

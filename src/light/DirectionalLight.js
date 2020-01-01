@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.27 14:44:15
+ *   Last modification time of this file - 2020.1.1 17:2:44
  *
  */
 
@@ -17,7 +17,7 @@ export default class DirectionalLight extends BaseLight {
 
 	constructor(redGPUContext, color = '#ffffff', colorAlpha = 1, intensity = 1) {
 		super(redGPUContext);
-		this.#setDebugMesh(redGPUContext)
+		this.#setDebugMesh(redGPUContext);
 		this.color = color;
 		this.colorAlpha = colorAlpha;
 		this.intensity = intensity;
@@ -26,7 +26,7 @@ export default class DirectionalLight extends BaseLight {
 	#setDebugMesh = (redGPUContext) => {
 
 		let positionMesh = new Mesh(redGPUContext, new Sphere(redGPUContext,1), this._debugMaterial);
-		positionMesh.primitiveTopology = 'line-strip'
+		positionMesh.primitiveTopology = 'line-strip';
 		this._debugMesh.addChild(positionMesh);
 		[-0.7, 0, 0.7].forEach((v, index) => {
 			let directionMesh, directionMesh2;

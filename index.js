@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.27 21:13:29
+ *   Last modification time of this file - 2020.1.1 17:2:44
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -300,7 +300,7 @@ new RedGPU.RedGPUContext(
 						TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
 					})
 					testMesh.addEventListener('over', function () {
-						var tValue = 50 * 2
+						var tValue = 50 * 2.5
 						TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
 					})
 					testMesh.addEventListener('out', function () {

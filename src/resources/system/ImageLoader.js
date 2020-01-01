@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.27 19:6:22
+ *   Last modification time of this file - 2020.1.1 17:2:44
  *
  */
 
@@ -55,7 +55,7 @@ export default class ImageLoader extends UUID {
 						SRC_MAP[targetSRC].tempList.length = 0
 					})
 					.catch(result => {
-						console.log('로딩실패!', result)
+						console.log('로딩실패!', result);
 						SRC_MAP[targetSRC].tempList.forEach(loader => {
 							if (loader.callback) loader.callback.call(loader,result)
 						});
@@ -123,7 +123,7 @@ export default class ImageLoader extends UUID {
 
 							})
 							.catch(result => {
-								console.log('로딩실패!', result)
+								console.log('로딩실패!', result);
 								SRC_MAP[targetSRC].tempList.forEach(loader => {
 									if (loader.callback) loader.callback.call(loader,result)
 								});

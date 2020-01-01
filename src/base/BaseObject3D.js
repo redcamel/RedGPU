@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.31 13:40:48
+ *   Last modification time of this file - 2020.1.1 17:2:44
  *
  */
 
@@ -27,7 +27,7 @@ const uniformBufferDescriptor_mesh = new UniformBufferDescriptor(
 		{size: TypeSize.mat4 * ShareGLSL.MESH_UNIFORM_POOL_NUM, valueName: 'normalMatrix'}
 	]
 );
-let MOUSE_UUID = 0
+let MOUSE_UUID = 0;
 const getPool = function (redGPUContext, targetMesh) {
 	let uniformBuffer_mesh;
 	if (!MESH_UNIFORM_TABLE[MESH_UNIFORM_POOL_tableIndex]) {
@@ -217,8 +217,8 @@ export default class BaseObject3D extends DisplayContainer {
 		this.uniformBuffer_mesh.meshFloat32Array = bufferData.float32Array;
 		this.offsetMatrix = bufferData.offsetMatrix;
 		this.offsetNormalMatrix = bufferData.offsetNormalMatrix;
-		MOUSE_UUID++
-		this.#mouseColorID = MOUSE_UUID
+		MOUSE_UUID++;
+		this.#mouseColorID = MOUSE_UUID;
 		this.uniformBuffer_meshIndex = new UniformBuffer(redGPUContext);
 		this.uniformBuffer_meshIndex.setBuffer(BaseObject3D.uniformBufferDescriptor_meshIndex);
 		this.uniformBuffer_meshIndex.GPUBuffer.setSubData(0, new Float32Array([bufferData.uniformIndex]));
@@ -273,8 +273,8 @@ export default class BaseObject3D extends DisplayContainer {
 	targetTo = (_ => {
 		let up = new Float32Array([0, 1, 0]);
 		let tPosition = [];
-		let tRotation = []
-		let tMTX = mat4.create()
+		let tRotation = [];
+		let tMTX = mat4.create();
 		return function (x, y, z) {
 			tPosition[0] = x;
 			tPosition[1] = y;
@@ -305,7 +305,7 @@ export default class BaseObject3D extends DisplayContainer {
 			mat4.multiply(tMTX, this.matrix, tMTX);
 			return [tMTX[12], tMTX[13], tMTX[14]]
 		}
-	})()
+	})();
 	getScreenPoint = (_ => {
 		//TODO - 값 확인해봐야함
 		let tMTX = mat4.create();
@@ -314,7 +314,7 @@ export default class BaseObject3D extends DisplayContainer {
 		let resultPosition;
 		resultPosition = {x: 0, y: 0, z: 0, w: 0};
 		return function (redView, localX = 0, localY = 0, localZ = 0) {
-			let worldPosition = this.localToWorld(localX, localY, localZ)
+			let worldPosition = this.localToWorld(localX, localY, localZ);
 			tPositionMTX[0] = 1, tPositionMTX[1] = 0, tPositionMTX[2] = 0, tPositionMTX[3] = 0;
 			tPositionMTX[4] = 0, tPositionMTX[5] = 1, tPositionMTX[6] = 0, tPositionMTX[7] = 0;
 			tPositionMTX[8] = 0, tPositionMTX[9] = 0, tPositionMTX[10] = 1, tPositionMTX[11] = 0;
