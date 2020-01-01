@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 18:25:5
+ *   Last modification time of this file - 2020.1.1 18:50:31
  *
  */
 
@@ -433,7 +433,7 @@ let renderPostEffect = (redGPUContext, redView) => {
 		last_effect_baseAttachment = tEffect.baseAttachment
 	}
 	return last_effect_baseAttachment
-}
+};
 let renderTransparentLayerList = (redGPUContext, redView, mainRenderPassEncoder) => {
 	if (renderToTransparentLayerList.length) renderScene(redGPUContext, redView, mainRenderPassEncoder, null, renderToTransparentLayerList, null, 1);
 	renderToTransparentLayerList.length = 0;
@@ -456,7 +456,7 @@ let copyToFinalTexture = (redGPUContext, redView, commandEncoder, lastTexture, d
 		},
 		{width: tW, height: tH, depth: 1}
 	);
-}
+};
 let renderView = (redGPUContext, redView, swapChainTexture, mouseEventChecker) => {
 	let i;
 	let tScene, tSceneBackgroundColor_rgba;
@@ -502,11 +502,11 @@ let renderView = (redGPUContext, redView, swapChainTexture, mouseEventChecker) =
 	// 시스템 유니폼 업데이트
 	redView.updateSystemUniform(mainRenderPassEncoder, redGPUContext);
 	// render skyBox, grid, axis
-	renderOptions(redGPUContext, redView, mainRenderPassEncoder)
+	renderOptions(redGPUContext, redView, mainRenderPassEncoder);
 	// 실제 Scene렌더
 	renderScene(redGPUContext, redView, mainRenderPassEncoder, null, tScene.children);
 	// 투명레이어 렌더
-	renderTransparentLayerList(redGPUContext, redView, mainRenderPassEncoder)
+	renderTransparentLayerList(redGPUContext, redView, mainRenderPassEncoder);
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//TODO - 여기 최적화
 	// if (textToTransparentLayerList.length) {
@@ -523,7 +523,7 @@ let renderView = (redGPUContext, redView, swapChainTexture, mouseEventChecker) =
 	// textToTransparentLayerList.length = 0;
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// 라이트 디버거 렌더
-	let tOptionRenderList = []
+	let tOptionRenderList = [];
 	i = Math.max(tScene.directionalLightList.length, tScene.pointLightList.length, tScene.spotLightList.length);
 	if (i) {
 		let cache_useFrustumCulling = redView.useFrustumCulling;
@@ -546,22 +546,22 @@ let renderView = (redGPUContext, redView, swapChainTexture, mouseEventChecker) =
 	//////////////////////////////////////////////////////////////////////////////////////////
 	now = performance.now();
 	// 최종 텍스쳐 결정
-	let lastTexture = redView.postEffect.length ? renderPostEffect(redGPUContext, redView) : redView.baseAttachment_ResolveTarget;
+	let lastTexture = redView.postEffect.effectList.length ? renderPostEffect(redGPUContext, redView) : redView.baseAttachment_ResolveTarget;
 	currentDebuggerData['postEffectRenderTime'] = performance.now() - now;
 	//////////////////////////////////////////////////////////////////////////////////////////
 	now = performance.now();
 	// 최종렌더 - 뷰공간 반영 복사
-	copyToFinalTexture(redGPUContext, redView, mainRenderCommandEncoder, lastTexture, swapChainTexture)
+	copyToFinalTexture(redGPUContext, redView, mainRenderCommandEncoder, lastTexture, swapChainTexture);
 	// 렌더 종료
 	redGPUContext.device.defaultQueue.submit([mainRenderCommandEncoder.finish()]);
 	// 마우스 이벤트 체크
-	mouseEventChecker.check(redGPUContext, redView)
+	mouseEventChecker.check(redGPUContext, redView);
 	currentDebuggerData['finalRenderTime'] = performance.now() - now;
 	// 업데이트 대상 유니폼 버퍼 갱신
 	i = updateTargetMatrixBufferList.length;
 	while (i--) updateTargetMatrixBufferList[i].GPUBuffer.setSubData(0, updateTargetMatrixBufferList[i].meshFloat32Array);
 	updateTargetMatrixBufferList.length = 0
-}
+};
 export default class Render {
 	static clearStateCache = _ => {
 		prevVertexBuffer_UUID = null;

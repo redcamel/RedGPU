@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 18:25:5
+ *   Last modification time of this file - 2020.1.1 18:50:31
  *
  */
 
@@ -389,13 +389,13 @@ export default class View extends UUID {
 					readPixelBuffer = null;
 					resolve(arrayBuffer)
 				})
-			})
+			});
 			return promise
 		}
-	}
+	};
 
 	computeViewFrustumPlanes() {
-		let tMTX = mat4.create()
+		let tMTX = mat4.create();
 		mat4.multiply(tMTX, this.projectionMatrix, this.camera.matrix);
 		let planes = [];
 		planes[0] = [tMTX[3] - tMTX[0], tMTX[7] - tMTX[4], tMTX[11] - tMTX[8], tMTX[15] - tMTX[12]];

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 17:43:39
+ *   Last modification time of this file - 2020.1.1 18:50:31
  *
  */
 
@@ -26,7 +26,7 @@ let fireEvent = function () {
 
 };
 let currentPickedArrayBuffer;
-let currentPickedMouseID
+let currentPickedMouseID;
 let checkMouseEvent = function (redGPUContext, pickedMouseID) {
 	i = 0;
 	len = MouseEventChecker.mouseEventInfo.length;
@@ -105,7 +105,7 @@ let checkMouseEvent = function (redGPUContext, pickedMouseID) {
 	MouseEventChecker.mouseEventInfo.length = 0;
 	cursorState = 'default'
 
-}
+};
 export default class MouseEventChecker extends UUID{
 	static mouseEventInfo = [];
 	static mouseMAP = {};
@@ -116,8 +116,8 @@ export default class MouseEventChecker extends UUID{
 		if (!currentPickedArrayBuffer) {
 			currentPickedArrayBuffer = redView.readPixelArrayBuffer(redGPUContext, redView, redView.baseAttachment_mouseColorID_ResolveTarget, redView.mouseX, redView.mouseY);
 			currentPickedArrayBuffer.then(arrayBuffer => {
-				currentPickedArrayBuffer = null
-				currentPickedMouseID = Math.round(new Float32Array(arrayBuffer)[0])
+				currentPickedArrayBuffer = null;
+				currentPickedMouseID = Math.round(new Float32Array(arrayBuffer)[0]);
 				checkMouseEvent(redGPUContext, currentPickedMouseID)
 			})
 		}
