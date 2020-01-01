@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 17:43:39
+ *   Last modification time of this file - 2020.1.1 18:25:5
  *
  */
 
@@ -13,35 +13,17 @@ import PipelineBasic from "../base/pipeline/PipelineBasic.js";
 import MouseEventChecker from "./system/MouseEventChecker.js";
 
 let _frustumPlanes = [];
-function ComputeViewFrustumPlanes() {
-	let tMTX = resultPreMTX_mul_perspective_camera;
-	_frustumPlanes[0] = [tMTX[3] - tMTX[0], tMTX[7] - tMTX[4], tMTX[11] - tMTX[8], tMTX[15] - tMTX[12]];
-	_frustumPlanes[1] = [tMTX[3] + tMTX[0], tMTX[7] + tMTX[4], tMTX[11] + tMTX[8], tMTX[15] + tMTX[12]];
-	_frustumPlanes[2] = [tMTX[3] + tMTX[1], tMTX[7] + tMTX[5], tMTX[11] + tMTX[9], tMTX[15] + tMTX[13]];
-	_frustumPlanes[3] = [tMTX[3] - tMTX[1], tMTX[7] - tMTX[5], tMTX[11] - tMTX[9], tMTX[15] - tMTX[13]];
-	_frustumPlanes[4] = [tMTX[3] - tMTX[2], tMTX[7] - tMTX[6], tMTX[11] - tMTX[10], tMTX[15] - tMTX[14]];
-	_frustumPlanes[5] = [tMTX[3] + tMTX[2], tMTX[7] + tMTX[6], tMTX[11] + tMTX[10], tMTX[15] + tMTX[14]];
-	for (let i = 0; i < _frustumPlanes.length; i++) {
-		let plane = _frustumPlanes[i];
-		let norm = Math.sqrt(plane[0] * plane[0] + plane[1] * plane[1] + plane[2] * plane[2]);
-		plane[0] /= norm;
-		plane[1] /= norm;
-		plane[2] /= norm;
-		plane[3] /= norm;
-	}
-}
 let currentDebuggerData;
 let renderToTransparentLayerList = [];
+let updateTargetMatrixBufferList = [];
 let textToTransparentLayerList = [];
+
 let tCacheUniformInfo = {};
-const resultPreMTX_mul_perspective_camera = mat4.create();
-const updateTargetMatrixBufferList = [];
 let currentTime;
 let prevVertexBuffer_UUID;
 let prevIndexBuffer_UUID;
 let prevMaterial_UUID;
 let changedMaterial_UUID;
-
 let renderScene = (_ => {
 		return (redGPUContext, redView, passEncoder, parent, children, parentDirty, renderToTransparentLayerMode = 0) => {
 			let i;
@@ -423,164 +405,182 @@ let renderScene = (_ => {
 		};
 	}
 )();
-export default class Render {
-	static clearStateCache = _ => {
-		prevVertexBuffer_UUID = null;
-		prevIndexBuffer_UUID = null;
-		prevMaterial_UUID = null
-	};
-	#redGPUContext;
-	#swapChainTexture;
-	#swapChainTextureView;
-	#mouseEventChecker;
-	#renderView = (redGPUContext, redView) => {
-		let i;
-		let tScene, tSceneBackgroundColor_rgba;
-		let now = performance.now();
+let renderOptions = (_ => {
+	let tOptionRenderList = [];
+	let tScene;
+	return (redGPUContext, redView, passEncoder) => {
 		tScene = redView.scene;
-		tSceneBackgroundColor_rgba = tScene.backgroundColorRGBA;
-		if (redView.camera.update) redView.camera.update();
-		// console.log(swapChain.getCurrentTexture())
-		mat4.multiply(resultPreMTX_mul_perspective_camera, redView.projectionMatrix, redView.camera.matrix);
-		ComputeViewFrustumPlanes();
-		const renderPassDescriptor = {
-			colorAttachments: [
-				{
-					attachment: redView.baseAttachmentView,
-					resolveTarget: redView.baseAttachment_ResolveTargetView,
-					loadValue: {
-						r: tSceneBackgroundColor_rgba[0],
-						g: tSceneBackgroundColor_rgba[1],
-						b: tSceneBackgroundColor_rgba[2],
-						a: tSceneBackgroundColor_rgba[3]
-					}
-				},
-				{
-					attachment: redView.baseAttachment_depthColorView,
-					resolveTarget: redView.baseAttachment_depthColor_ResolveTargetView,
-					loadValue: {r: 0, g: 0, b: 0, a: 0}
-				},
-				{
-					attachment: redView.baseAttachment_mouseColorIDView,
-					resolveTarget: redView.baseAttachment_mouseColorID_ResolveTargetView,
-					loadValue: {r: 0, g: 0, b: 0, a: 0}
-				}
-			],
-			depthStencilAttachment: {
-				attachment: redView.baseDepthStencilAttachmentView,
-				depthLoadValue: 1.0,
-				depthStoreOp: "store",
-				stencilLoadValue: 0,
-				stencilStoreOp: "store",
-			}
-		};
-		let mainRenderCommandEncoder = this.#redGPUContext.device.createCommandEncoder();
-		let mainRenderPassEncoder = mainRenderCommandEncoder.beginRenderPass(renderPassDescriptor);
-		// 시스템 유니폼 업데이트
-		redView.updateSystemUniform(mainRenderPassEncoder, redGPUContext);
-		let tOptionRenderList = [];
 		if (tScene.skyBox) {
 			if (redView.camera['farClipping'] * 0.6 != tScene.skyBox._prevScale) tScene.skyBox['scaleX'] = tScene.skyBox['scaleY'] = tScene.skyBox['scaleZ'] = tScene.skyBox._prevScale = redView.camera['farClipping'] * 0.6;
 			tOptionRenderList.push(tScene.skyBox);
 		}
 		if (tScene.grid) tOptionRenderList.push(tScene.grid);
 		if (tScene.axis) tOptionRenderList.push(tScene.axis);
-		if (tOptionRenderList.length) renderScene(redGPUContext, redView, mainRenderPassEncoder, null, tOptionRenderList);
-		// 실제 Scene렌더
-		renderScene(redGPUContext, redView, mainRenderPassEncoder, null, tScene.children);
-		// 투명레이어 렌더
-		if (renderToTransparentLayerList.length) renderScene(redGPUContext, redView, mainRenderPassEncoder, null, renderToTransparentLayerList, null, 1);
-		renderToTransparentLayerList.length = 0;
-		// 라이트 디버거 렌더
+		if (tOptionRenderList.length) renderScene(redGPUContext, redView, passEncoder, null, tOptionRenderList);
 		tOptionRenderList.length = 0;
-		i = Math.max(tScene.directionalLightList.length, tScene.pointLightList.length, tScene.spotLightList.length);
-		if (i) {
-			let cache_useFrustumCulling = redView.useFrustumCulling;
-			redView.useFrustumCulling = false;
-			while (i--) {
-				let tLight;
-				tLight = tScene.directionalLightList[i];
-				if (tLight && tLight.useDebugMesh) tOptionRenderList.push(tLight._debugMesh);
-				tLight = tScene.pointLightList[i];
-				if (tLight && tLight.useDebugMesh) tOptionRenderList.push(tLight._debugMesh);
-				tLight = tScene.spotLightList[i];
-				if (tLight && tLight.useDebugMesh) tOptionRenderList.push(tLight._debugMesh)
-			}
-			renderScene(redGPUContext, redView, mainRenderPassEncoder, null, tOptionRenderList);
-			redView.useFrustumCulling = cache_useFrustumCulling;
-		}
-		tOptionRenderList.length = 0;
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		//TODO - 여기 최적화
-		// if (textToTransparentLayerList.length) {
-		// 	let t1 = [];
-		// 	let i = textToTransparentLayerList.length
-		// 	textToTransparentLayerList.sort((a, b) => {
-		// 		if (a.z > b.z) return -1
-		// 		if (a.z < b.z) return 1
-		// 		return 0
-		// 	})
-		// 	while(i--) t1[i] = textToTransparentLayerList[i].tText
-		// 	renderScene(redGPUContext, redView, mainRenderPassEncoder, null, t1, null, 2);
-		// }
-		// textToTransparentLayerList.length = 0;
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		mainRenderPassEncoder.endPass();
-		currentDebuggerData['baseRenderTime'] = performance.now() - now;
-		//////////////////////////////////////////////////////////////////////////////////////////
-		now = performance.now();
-		let last_effect_baseAttachmentView = redView.baseAttachment_ResolveTargetView;
-		let last_effect_baseAttachment = redView.baseAttachment_ResolveTarget;
-		// 포스트 이펙트 렌더
-		let effectIDX = 0;
-		let len3 = redView.postEffect.effectList.length;
-		for (effectIDX; effectIDX < len3; effectIDX++) {
-			let tEffect = redView.postEffect.effectList[effectIDX];
-			tEffect.render(redGPUContext, redView, renderScene, last_effect_baseAttachmentView);
-			last_effect_baseAttachmentView = tEffect.baseAttachmentView;
-			last_effect_baseAttachment = tEffect.baseAttachment
-		}
-		currentDebuggerData['postEffectRenderTime'] = performance.now() - now;
-		//////////////////////////////////////////////////////////////////////////////////////////
-		now = performance.now();
-		// 최종렌더 - 뷰공간 반영 복사
-		let tX = redView.viewRect[0];
-		let tY = redView.viewRect[1];
-		let tW = redView.viewRect[2] + redView.viewRect[0] > this.#redGPUContext.canvas.width ? redView.viewRect[2] - redView.viewRect[0] : redView.viewRect[2];
-		let tH = redView.viewRect[3] + redView.viewRect[1] > this.#redGPUContext.canvas.height ? redView.viewRect[3] - redView.viewRect[1] : redView.viewRect[3];
-		if (tW > this.#redGPUContext.canvas.width) tW = this.#redGPUContext.canvas.width - tX;
-		if (tH > this.#redGPUContext.canvas.height) tH = this.#redGPUContext.canvas.height - tX;
-		mainRenderCommandEncoder.copyTextureToTexture(
-			{texture: last_effect_baseAttachment},
+	}
+})();
+let renderPostEffect = (redGPUContext, redView) => {
+	let last_effect_baseAttachmentView = redView.baseAttachment_ResolveTargetView;
+	let last_effect_baseAttachment = redView.baseAttachment_ResolveTarget;
+	// 포스트 이펙트 렌더
+	let effectIDX = 0;
+	let len3 = redView.postEffect.effectList.length;
+	for (effectIDX; effectIDX < len3; effectIDX++) {
+		let tEffect = redView.postEffect.effectList[effectIDX];
+		tEffect.render(redGPUContext, redView, renderScene, last_effect_baseAttachmentView);
+		last_effect_baseAttachmentView = tEffect.baseAttachmentView;
+		last_effect_baseAttachment = tEffect.baseAttachment
+	}
+	return last_effect_baseAttachment
+}
+let renderTransparentLayerList = (redGPUContext, redView, mainRenderPassEncoder) => {
+	if (renderToTransparentLayerList.length) renderScene(redGPUContext, redView, mainRenderPassEncoder, null, renderToTransparentLayerList, null, 1);
+	renderToTransparentLayerList.length = 0;
+};
+let copyToFinalTexture = (redGPUContext, redView, commandEncoder, lastTexture, dstTexture) => {
+	let tViewRect = redView.viewRect;
+	let tX = tViewRect[0];
+	let tY = tViewRect[1];
+	let tW = tViewRect[2];
+	let tH = tViewRect[3];
+	tW = tW + tX > redGPUContext.canvas.width ? tW - tX : tW;
+	tH = tH + tY > redGPUContext.canvas.height ? tH - tY : tH;
+	if (tW > redGPUContext.canvas.width) tW = redGPUContext.canvas.width - tX;
+	if (tH > redGPUContext.canvas.height) tH = redGPUContext.canvas.height - tX;
+	commandEncoder.copyTextureToTexture(
+		{texture: lastTexture},
+		{
+			texture: dstTexture,
+			origin: {x: tX, y: tY, z: 0}
+		},
+		{width: tW, height: tH, depth: 1}
+	);
+}
+let renderView = (redGPUContext, redView, swapChainTexture, mouseEventChecker) => {
+	let i;
+	let tScene, tSceneBackgroundColor_rgba;
+	let now = performance.now();
+	tScene = redView.scene;
+	tSceneBackgroundColor_rgba = tScene.backgroundColorRGBA;
+	if (redView.camera.update) redView.camera.update();
+	// console.log(swapChain.getCurrentTexture())
+	_frustumPlanes = redView.computeViewFrustumPlanes(redView);
+	let renderPassDescriptor = {
+		colorAttachments: [
 			{
-				texture: this.#swapChainTexture,
-				origin: {x: tX, y: tY, z: 0}
+				attachment: redView.baseAttachmentView,
+				resolveTarget: redView.baseAttachment_ResolveTargetView,
+				loadValue: {
+					r: tSceneBackgroundColor_rgba[0],
+					g: tSceneBackgroundColor_rgba[1],
+					b: tSceneBackgroundColor_rgba[2],
+					a: tSceneBackgroundColor_rgba[3]
+				}
 			},
-			{width: tW, height: tH, depth: 1}
-		);
-		redGPUContext.device.defaultQueue.submit([mainRenderCommandEncoder.finish()]);
-
-		// 마우스 이벤트 체크
-		this.#mouseEventChecker.check(redGPUContext,redView)
-		currentDebuggerData['finalRenderTime'] = performance.now() - now;
-		// 업데이트 대상 유니폼 버퍼 갱신
-		i = updateTargetMatrixBufferList.length;
-		while (i--) updateTargetMatrixBufferList[i].GPUBuffer.setSubData(0, updateTargetMatrixBufferList[i].meshFloat32Array);
-		updateTargetMatrixBufferList.length = 0
+			{
+				attachment: redView.baseAttachment_depthColorView,
+				resolveTarget: redView.baseAttachment_depthColor_ResolveTargetView,
+				loadValue: {r: 0, g: 0, b: 0, a: 0}
+			},
+			{
+				attachment: redView.baseAttachment_mouseColorIDView,
+				resolveTarget: redView.baseAttachment_mouseColorID_ResolveTargetView,
+				loadValue: {r: 0, g: 0, b: 0, a: 0}
+			}
+		],
+		depthStencilAttachment: {
+			attachment: redView.baseDepthStencilAttachmentView,
+			depthLoadValue: 1.0,
+			depthStoreOp: "store",
+			stencilLoadValue: 0,
+			stencilStoreOp: "store",
+		}
 	};
+	let mainRenderCommandEncoder = redGPUContext.device.createCommandEncoder();
+	let mainRenderPassEncoder = mainRenderCommandEncoder.beginRenderPass(renderPassDescriptor);
+	// 시스템 유니폼 업데이트
+	redView.updateSystemUniform(mainRenderPassEncoder, redGPUContext);
+	// render skyBox, grid, axis
+	renderOptions(redGPUContext, redView, mainRenderPassEncoder)
+	// 실제 Scene렌더
+	renderScene(redGPUContext, redView, mainRenderPassEncoder, null, tScene.children);
+	// 투명레이어 렌더
+	renderTransparentLayerList(redGPUContext, redView, mainRenderPassEncoder)
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//TODO - 여기 최적화
+	// if (textToTransparentLayerList.length) {
+	// 	let t1 = [];
+	// 	let i = textToTransparentLayerList.length
+	// 	textToTransparentLayerList.sort((a, b) => {
+	// 		if (a.z > b.z) return -1
+	// 		if (a.z < b.z) return 1
+	// 		return 0
+	// 	})
+	// 	while(i--) t1[i] = textToTransparentLayerList[i].tText
+	// 	renderScene(redGPUContext, redView, mainRenderPassEncoder, null, t1, null, 2);
+	// }
+	// textToTransparentLayerList.length = 0;
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// 라이트 디버거 렌더
+	let tOptionRenderList = []
+	i = Math.max(tScene.directionalLightList.length, tScene.pointLightList.length, tScene.spotLightList.length);
+	if (i) {
+		let cache_useFrustumCulling = redView.useFrustumCulling;
+		redView.useFrustumCulling = false;
+		while (i--) {
+			let tLight;
+			tLight = tScene.directionalLightList[i];
+			if (tLight && tLight.useDebugMesh) tOptionRenderList.push(tLight._debugMesh);
+			tLight = tScene.pointLightList[i];
+			if (tLight && tLight.useDebugMesh) tOptionRenderList.push(tLight._debugMesh);
+			tLight = tScene.spotLightList[i];
+			if (tLight && tLight.useDebugMesh) tOptionRenderList.push(tLight._debugMesh)
+		}
+		renderScene(redGPUContext, redView, mainRenderPassEncoder, null, tOptionRenderList);
+		redView.useFrustumCulling = cache_useFrustumCulling;
+	}
+	tOptionRenderList.length = 0;
+	mainRenderPassEncoder.endPass();
+	currentDebuggerData['baseRenderTime'] = performance.now() - now;
+	//////////////////////////////////////////////////////////////////////////////////////////
+	now = performance.now();
+	// 최종 텍스쳐 결정
+	let lastTexture = redView.postEffect.length ? renderPostEffect(redGPUContext, redView) : redView.baseAttachment_ResolveTarget;
+	currentDebuggerData['postEffectRenderTime'] = performance.now() - now;
+	//////////////////////////////////////////////////////////////////////////////////////////
+	now = performance.now();
+	// 최종렌더 - 뷰공간 반영 복사
+	copyToFinalTexture(redGPUContext, redView, mainRenderCommandEncoder, lastTexture, swapChainTexture)
+	// 렌더 종료
+	redGPUContext.device.defaultQueue.submit([mainRenderCommandEncoder.finish()]);
+	// 마우스 이벤트 체크
+	mouseEventChecker.check(redGPUContext, redView)
+	currentDebuggerData['finalRenderTime'] = performance.now() - now;
+	// 업데이트 대상 유니폼 버퍼 갱신
+	i = updateTargetMatrixBufferList.length;
+	while (i--) updateTargetMatrixBufferList[i].GPUBuffer.setSubData(0, updateTargetMatrixBufferList[i].meshFloat32Array);
+	updateTargetMatrixBufferList.length = 0
+}
+export default class Render {
+	static clearStateCache = _ => {
+		prevVertexBuffer_UUID = null;
+		prevIndexBuffer_UUID = null;
+		prevMaterial_UUID = null
+	};
+	#mouseEventChecker;
+	constructor() {
+		this.#mouseEventChecker = new MouseEventChecker()
+	}
 	render(time, redGPUContext) {
 		currentTime = time;
 		let debuggerData = Debugger.resetData(redGPUContext.viewList);
-		this.#mouseEventChecker = new MouseEventChecker()
-		this.#redGPUContext = redGPUContext;
-		this.#swapChainTexture = redGPUContext.swapChain.getCurrentTexture();
-		this.#swapChainTextureView = this.#swapChainTexture.createView();
 		let i = 0, len = redGPUContext.viewList.length;
 		changedMaterial_UUID = {};
 		for (i; i < len; i++) {
 			currentDebuggerData = debuggerData[i];
 			Render.clearStateCache();
-			this.#renderView(redGPUContext, redGPUContext.viewList[i]);
+			renderView(redGPUContext, redGPUContext.viewList[i], redGPUContext.swapChain.getCurrentTexture(), this.#mouseEventChecker);
 		}
 		GLTFLoader.animationLooper(time);
 		Debugger.update()
