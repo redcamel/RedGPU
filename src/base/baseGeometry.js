@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 17:43:39
+ *   Last modification time of this file - 2020.1.1 18:50:31
  *
  */
 
@@ -20,8 +20,8 @@ export default class baseGeometry extends UUID {
 	}
 	volumeCalculate() {
 		// console.time('volumeCalculate');
-		var minX, minY, minZ, maxX, maxY, maxZ, t0, t1, t2, t, i, len;
-		var stride = this.interleaveBuffer['stride'];
+		let minX, minY, minZ, maxX, maxY, maxZ, t0, t1, t2, t, i, len;
+		let stride = this.interleaveBuffer['stride'];
 		// if (!volume[this]) {
 		minX = minY = minZ = maxX = maxY = maxZ = 0;
 		t = this.interleaveBuffer['data'];

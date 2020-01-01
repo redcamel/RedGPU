@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 17:43:39
+ *   Last modification time of this file - 2020.1.1 18:50:31
  *
  */
 "use strict";
@@ -23,7 +23,6 @@ let setDebugBox = _ => {
 			font-size:11px;
 			color:#fff;
 		`
-
 	}
 };
 const Debugger = {
@@ -80,7 +79,6 @@ const Debugger = {
 					t1 += noBR[k] ? ' / ' : '<br>'
 				}
 				t0.innerHTML = t1
-
 			})
 		}
 	}

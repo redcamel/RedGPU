@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 17:43:39
+ *   Last modification time of this file - 2020.1.1 18:50:31
  *
  */
 "use strict";
@@ -21,12 +21,21 @@ import TextMaterial from "./material/system/TextMaterial.js";
 import SheetMaterial from "./material/SheetMaterial.js";
 import MouseEventChecker from "./renderer/system/MouseEventChecker.js";
 
-
 let redGPUContextList = new Set();
 let setGlobalResizeEvent = function () {
 	window.addEventListener('resize', _ => {
 		for (const redGPUContext of redGPUContextList) redGPUContext.setSize()
 	})
+};
+
+let configureSwapChain = function (device, swapChainFormat, context) {
+	const swapChainDescriptor = {
+		device: device,
+		format: swapChainFormat,
+		usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC
+	};
+	if (RedGPUContext.useDebugConsole) console.log('swapChainDescriptor', swapChainDescriptor);
+	return context.configureSwapChain(swapChainDescriptor);
 };
 let glslangModule;
 let glslang;
@@ -52,7 +61,7 @@ export default class RedGPUContext {
 	#height = 0;
 	#detector;
 	viewList = [];
-
+	get detector() {return this.#detector};
 	constructor(canvas, initFunc) {
 		checkGlslang().then(_ => {
 			console.log('glslang', glslang);
@@ -62,7 +71,7 @@ export default class RedGPUContext {
 			if (navigator.gpu) {
 				navigator.gpu.requestAdapter(
 					// {powerPreference: "high-performance"}
-					)
+				)
 					.then(adapter => {
 						adapter.requestDevice({
 							// extensions: ["anisotropic-filtering"]
@@ -81,20 +90,12 @@ export default class RedGPUContext {
 										indexBuffer: new Map()
 									},
 									emptyTextureView: device.createTexture({
-										size: {
-											width: 1,
-											height: 1,
-											depth: 1,
-										},
+										size: {width: 1, height: 1, depth: 1,},
 										format: this.swapChainFormat,
 										usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.SAMPLED,
 									}).createView(),
 									emptyCubeTextureView: device.createTexture({
-										size: {
-											width: 1,
-											height: 1,
-											depth: 1,
-										},
+										size: {width: 1, height: 1, depth: 1,},
 										dimension: '2d',
 										arrayLayerCount: 6,
 										mipLevelCount: 1,
@@ -144,10 +145,10 @@ export default class RedGPUContext {
 											mouseX = e[tXkey];
 											mouseY = e[tYkey];
 										}
-										let i,tView;
-										i = this.viewList.length
-										while(i--){
-											tView = this.viewList[i]
+										let i, tView;
+										i = this.viewList.length;
+										while (i--) {
+											tView = this.viewList[i];
 											tView.mouseX = mouseX - tView.viewRect[0];
 											tView.mouseY = mouseY - tView.viewRect[1]
 										}
@@ -186,20 +187,11 @@ export default class RedGPUContext {
 			}
 		})
 	}
-
 	addView(redView) {
 		this.viewList.push(redView);
 		redView.resetTexture(this)
 	}
-
-	removeView(redView) {
-		if (this.viewList.includes(redView)) this.viewList.splice(redView, 1)
-	}
-
-	get detector() {
-		return this.#detector
-	};
-
+	removeView(redView) {if (this.viewList.includes(redView)) this.viewList.splice(redView, 1)}
 	setSize(w = this.#width, h = this.#height) {
 		this.#width = w;
 		this.#height = h;
@@ -218,16 +210,5 @@ export default class RedGPUContext {
 			redView.setLocation()
 		});
 		if (RedGPUContext.useDebugConsole) console.log(`setSize - input : ${w},${h} / result : ${tW}, ${tH}`);
-
 	}
-}
-
-function configureSwapChain(device, swapChainFormat, context) {
-	const swapChainDescriptor = {
-		device: device,
-		format: swapChainFormat,
-		usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC
-	};
-	if (RedGPUContext.useDebugConsole) console.log('swapChainDescriptor', swapChainDescriptor);
-	return context.configureSwapChain(swapChainDescriptor);
 }
