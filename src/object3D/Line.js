@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.24 18:50:1
+ *   Last modification time of this file - 2020.1.1 17:2:44
  *
  */
 
@@ -300,7 +300,7 @@ export default class Line extends BaseObject3D {
 			);
 			this.geometry = new Geometry(this.redGPUContext, this._interleaveBuffer)
 		} else {
-			this._interleaveBuffer = null
+			this._interleaveBuffer = null;
 			this.geometry = null
 		}
 	};

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.26 20:16:42
+ *   Last modification time of this file - 2020.1.1 17:2:44
  *
  */
 "use strict";
@@ -24,6 +24,7 @@ import Plane from "./primitives/Plane.js";
 import LineMaterial from "./material/system/LineMaterial.js";
 import TextMaterial from "./material/system/TextMaterial.js";
 import SheetMaterial from "./material/SheetMaterial.js";
+import MouseEventChecker from "./renderer/system/MouseEventChecker.js";
 
 
 let redGPUContextList = new Set();
@@ -116,7 +117,6 @@ export default class RedGPUContext {
 									})
 								};
 								/////
-								this['_mouseEventInfo'] = [];
 								[this.#detector.click, this.#detector.move, this.#detector.down, this.#detector.up].forEach(v => {
 									let tXkey, tYkey;
 									tXkey = 'offsetX';
@@ -126,7 +126,7 @@ export default class RedGPUContext {
 										e.preventDefault();
 										if (this.#detector.isMobile) {
 											if (e.changedTouches[0]) {
-												Render.mouseEventInfo.push(
+												MouseEventChecker.mouseEventInfo.push(
 													{
 														type: e.type,
 														x: e.changedTouches[0].clientX,
@@ -138,7 +138,7 @@ export default class RedGPUContext {
 												mouseY = e.changedTouches[0].clientY
 											}
 										} else {
-											Render.mouseEventInfo.push(
+											MouseEventChecker.mouseEventInfo.push(
 												{
 													type: e.type,
 													x: e[tXkey],
@@ -149,10 +149,13 @@ export default class RedGPUContext {
 											mouseX = e[tXkey];
 											mouseY = e[tYkey];
 										}
-										this.viewList.forEach(redView => {
-											redView.mouseX = mouseX - redView.viewRect[0];
-											redView.mouseY = mouseY - redView.viewRect[1]
-										});
+										let i,tView;
+										i = this.viewList.length
+										while(i--){
+											tView = this.viewList[i]
+											tView.mouseX = mouseX - tView.viewRect[0];
+											tView.mouseY = mouseY - tView.viewRect[1]
+										}
 									}, false)
 								});
 								/////
@@ -172,7 +175,7 @@ export default class RedGPUContext {
 								new EnvironmentMaterial(this);
 								new ColorPhongTextureMaterial(this);
 								new LineMaterial(this);
-								new TextMaterial(this)
+								new TextMaterial(this);
 								new SheetMaterial(this)
 								// new PBRMaterial_System(this)
 								////////////////////////////////////////////////////////
@@ -190,7 +193,7 @@ export default class RedGPUContext {
 	}
 
 	addView(redView) {
-		this.viewList.push(redView)
+		this.viewList.push(redView);
 		redView.resetTexture(this)
 	}
 

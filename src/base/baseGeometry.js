@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.26 15:24:22
+ *   Last modification time of this file - 2020.1.1 17:2:44
  *
  */
 
@@ -51,7 +51,7 @@ export default class baseGeometry extends UUID {
 			this._volume.xSize,
 			this._volume.ySize,
 			this._volume.zSize
-		)
+		);
 		// }
 		// console.timeEnd('volumeCalculate');
 		return this._volume;

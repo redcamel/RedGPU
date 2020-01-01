@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.31 13:40:48
+ *   Last modification time of this file - 2020.1.1 17:2:44
  *
  */
 
@@ -10,21 +10,16 @@ import GLTFLoader from "../loader/gltf/GLTFLoader.js";
 import SheetMaterial from "../material/SheetMaterial.js";
 import Debugger from "./system/Debugger.js";
 import PipelineBasic from "../base/pipeline/PipelineBasic.js";
+import MouseEventChecker from "./system/MouseEventChecker.js";
 
-let _frustumPlanes = []
-function ComputeViewFrustum() {
-	let tMTX = resultPreMTX_mul_perspective_camera
-	/* Now calculate the planes*/
+let _frustumPlanes = [];
+function ComputeViewFrustumPlanes() {
+	let tMTX = resultPreMTX_mul_perspective_camera;
 	_frustumPlanes[0] = [tMTX[3] - tMTX[0], tMTX[7] - tMTX[4], tMTX[11] - tMTX[8], tMTX[15] - tMTX[12]];
-	/*left*/
 	_frustumPlanes[1] = [tMTX[3] + tMTX[0], tMTX[7] + tMTX[4], tMTX[11] + tMTX[8], tMTX[15] + tMTX[12]];
-	/*bottom*/
 	_frustumPlanes[2] = [tMTX[3] + tMTX[1], tMTX[7] + tMTX[5], tMTX[11] + tMTX[9], tMTX[15] + tMTX[13]];
-	/*top*/
 	_frustumPlanes[3] = [tMTX[3] - tMTX[1], tMTX[7] - tMTX[5], tMTX[11] - tMTX[9], tMTX[15] - tMTX[13]];
-	/*far*/
 	_frustumPlanes[4] = [tMTX[3] - tMTX[2], tMTX[7] - tMTX[6], tMTX[11] - tMTX[10], tMTX[15] - tMTX[14]];
-	/*near*/
 	_frustumPlanes[5] = [tMTX[3] + tMTX[2], tMTX[7] + tMTX[6], tMTX[11] + tMTX[10], tMTX[15] + tMTX[14]];
 	for (let i = 0; i < _frustumPlanes.length; i++) {
 		let plane = _frustumPlanes[i];
@@ -42,155 +37,12 @@ let tCacheUniformInfo = {};
 const resultPreMTX_mul_perspective_camera = mat4.create();
 const updateTargetMatrixBufferList = [];
 let currentTime;
-let pickColorArray;
-let checkMouseEvent = (function () {
-	let fireList = [];
-	let prevInfo = {};
-	let cursorState;
-	let i, len;
-	let fireEvent = function () {
-
-		if (fireList.length) {
-			// console.log(fireList)
-			let v = fireList.shift();
-			v['info'][v['type']].call(v['info']['target'], {
-				target: v['info']['target'],
-				type: 'out'
-			})
-		}
-
-	};
-	return function (redGPUContext, redView, lastViewYn) {
-		i = 0;
-		len = Render.mouseEventInfo.length;
-		for (i; i < len; i++) {
-			let canvasMouseEvent = Render.mouseEventInfo[i];
-			// 마우스 이벤트 체크
-			let meshEventData;
-			if (pickColorArray) meshEventData = Render.mouseMAP[pickColorArray];
-
-			let tEventType;
-			if (meshEventData) {
-				if (canvasMouseEvent['type'] == redGPUContext.detector.down) {
-					tEventType = 'down';
-					// console.log('다운', tEventType, meshEventData);
-					if (tEventType && meshEventData[tEventType]) {
-						meshEventData[tEventType].call(meshEventData['target'], {
-							target: meshEventData['target'],
-							type: tEventType,
-							nativeEvent: canvasMouseEvent.nativeEvent
-						})
-					}
-				}
-				if (canvasMouseEvent['type'] == redGPUContext.detector.up) {
-					tEventType = 'up';
-					// console.log('업');
-					if (tEventType && meshEventData[tEventType]) {
-						meshEventData[tEventType].call(meshEventData['target'], {
-							target: meshEventData['target'],
-							type: tEventType,
-							nativeEvent: canvasMouseEvent.nativeEvent
-						})
-					}
-				}
-				if (prevInfo[redView['_UUID']] && prevInfo[redView['_UUID']] != meshEventData) {
-					tEventType = 'out';
-					// console.log('아웃');
-					if (tEventType && prevInfo[redView['_UUID']][tEventType]) {
-						prevInfo[redView['_UUID']][tEventType].call(prevInfo[redView['_UUID']]['target'], {
-							target: prevInfo[redView['_UUID']]['target'],
-							type: tEventType
-						})
-					}
-				}
-				if (prevInfo[redView['_UUID']] != meshEventData) {
-					tEventType = 'over';
-					if (tEventType && meshEventData[tEventType]) {
-						meshEventData[tEventType].call(meshEventData['target'], {
-							target: meshEventData['target'],
-							type: tEventType,
-							nativeEvent: canvasMouseEvent.nativeEvent
-						})
-					}
-					// console.log('오버')
-				}
-				prevInfo[redView['_UUID']] = meshEventData
-			} else {
-				tEventType = 'out';
-				if (prevInfo[redView['_UUID']] && prevInfo[redView['_UUID']][tEventType]) {
-					// console.log('아웃');
-					fireList.push(
-						{
-							info: prevInfo[redView['_UUID']],
-							type: tEventType,
-							nativeEvent: canvasMouseEvent.nativeEvent
-						}
-					)
-				}
-				prevInfo[redView['_UUID']] = null
-			}
-
-
-			fireEvent()
-		}
-		if (prevInfo[redView['_UUID']]) cursorState = 'pointer';
-		if (lastViewYn) {
-			redGPUContext.canvas.style.cursor = cursorState;
-			Render.mouseEventInfo.length = 0;
-			cursorState = 'default'
-		}
-
-	}
-})();
-let pickedArrayBuffer;
-let readPixel = async (redGPUContext, redView, targetTexture, commandEncoder) => {
-	// 이미지 카피
-
-	let viewRect = redView.viewRect;
-	if (
-		redView.mouseX > 0
-		&& redView.mouseX < viewRect[2]
-		&& redView.mouseY > 0
-		&& redView.mouseY < viewRect[3]
-	) {
-
-
-		const copyEncoder = redGPUContext.device.createCommandEncoder();
-		// readPixel
-		let readPixelBuffer = redGPUContext.device.createBuffer({
-			size: 16,
-			usage: globalThis.GPUBufferUsage.COPY_DST | globalThis.GPUBufferUsage.MAP_READ,
-		});
-		const textureView = {texture: targetTexture, origin: {x: redView.mouseX, y: redView.mouseY, z: 0}};
-		const bufferView = {buffer: readPixelBuffer, rowPitch: 256, imageHeight: 1,};
-		const textureExtent = {width: 1, height: 1, depth: 1};
-
-		copyEncoder.copyTextureToBuffer(textureView, bufferView, textureExtent);
-
-		const copyCommands = copyEncoder.finish();
-		redGPUContext.device.defaultQueue.submit([copyCommands]);
-
-		pickedArrayBuffer = readPixelBuffer.mapReadAsync().then(e => {
-			readPixelBuffer.unmap();
-			readPixelBuffer.destroy();
-			readPixelBuffer = null;
-			// console.log(Render.mouseMAP)
-			pickColorArray = new Float32Array(e);
-			// console.log(pickColorArray)
-			pickColorArray = Math.round(pickColorArray[0])
-			// console.log(pickColorArray)
-			pickedArrayBuffer = null
-		})
-
-
-	} else {
-		pickColorArray = null
-	}
-};
+let currentPickedArrayBuffer;
 let prevVertexBuffer_UUID;
 let prevIndexBuffer_UUID;
 let prevMaterial_UUID;
-let changedMaterial_UUID
+let changedMaterial_UUID;
+let currentPickedMouseID
 let renderScene = (_ => {
 		return (redGPUContext, redView, passEncoder, parent, children, parentDirty, renderToTransparentLayerMode = 0) => {
 			let i;
@@ -202,33 +54,30 @@ let renderScene = (_ => {
 			let tRadian, CPI, CPI2, C225, C127, C045, C157;
 			let CONVERT_RADIAN = Math.PI / 180;
 			CPI = 3.141592653589793, CPI2 = 6.283185307179586, C225 = 0.225, C127 = 1.27323954, C045 = 0.405284735, C157 = 1.5707963267948966;
-
-			//////
-
 			/////
 			let tMVMatrix, tNMatrix;
 			let tLocalMatrix;
 			let parentMTX;
 			let tSkinInfo;
 			let tGeometry;
-			let tMaterial
+			let tMaterial;
 			let tMesh;
 			let tDirtyTransform;
 			let tPipeline;
-			let tDirtyPipeline
+			let tDirtyPipeline;
 			let tMaterialChanged;
 			let tVisible;
 			let geoVolume;
 			let radius;
 			let radiusTemp;
 			i = children.length;
-			let frustumPlanes0, frustumPlanes1, frustumPlanes2, frustumPlanes3, frustumPlanes4, frustumPlanes5
-			frustumPlanes0 = _frustumPlanes[0]
-			frustumPlanes1 = _frustumPlanes[1]
-			frustumPlanes2 = _frustumPlanes[2]
-			frustumPlanes3 = _frustumPlanes[3]
-			frustumPlanes4 = _frustumPlanes[4]
-			frustumPlanes5 = _frustumPlanes[5]
+			let frustumPlanes0, frustumPlanes1, frustumPlanes2, frustumPlanes3, frustumPlanes4, frustumPlanes5;
+			frustumPlanes0 = _frustumPlanes[0];
+			frustumPlanes1 = _frustumPlanes[1];
+			frustumPlanes2 = _frustumPlanes[2];
+			frustumPlanes3 = _frustumPlanes[3];
+			frustumPlanes4 = _frustumPlanes[4];
+			frustumPlanes5 = _frustumPlanes[5];
 			while (i--) {
 
 				tMesh = children[i];
@@ -309,16 +158,18 @@ let renderScene = (_ => {
 									geoVolume = tMesh._geometry._volume || tMesh._geometry.volume;
 									radius = geoVolume.xSize * tMesh.matrix[0];
 									radiusTemp = geoVolume.ySize * tMesh.matrix[5];
-									radius = radius < radiusTemp ? radiusTemp : radius
+									radius = radius < radiusTemp ? radiusTemp : radius;
 									radiusTemp = geoVolume.zSize * tMesh.matrix[10];
 									radius = radius < radiusTemp ? radiusTemp : radius;
 
-									frustumPlanes0[0] * tMVMatrix[12] + frustumPlanes0[1] * tMVMatrix[13] + frustumPlanes0[2] * tMVMatrix[14] + frustumPlanes0[3] <= -radius ? tVisible = 0
-										: frustumPlanes1[0] * tMVMatrix[12] + frustumPlanes1[1] * tMVMatrix[13] + frustumPlanes1[2] * tMVMatrix[14] + frustumPlanes1[3] <= -radius ? tVisible = 0
-										: frustumPlanes2[0] * tMVMatrix[12] + frustumPlanes2[1] * tMVMatrix[13] + frustumPlanes2[2] * tMVMatrix[14] + frustumPlanes2[3] <= -radius ? tVisible = 0
-											: frustumPlanes3[0] * tMVMatrix[12] + frustumPlanes3[1] * tMVMatrix[13] + frustumPlanes3[2] * tMVMatrix[14] + frustumPlanes3[3] <= -radius ? tVisible = 0
-												: frustumPlanes4[0] * tMVMatrix[12] + frustumPlanes4[1] * tMVMatrix[13] + frustumPlanes4[2] * tMVMatrix[14] + frustumPlanes4[3] <= -radius ? tVisible = 0
-													: frustumPlanes5[0] * tMVMatrix[12] + frustumPlanes5[1] * tMVMatrix[13] + frustumPlanes5[2] * tMVMatrix[14] + frustumPlanes5[3] <= -radius ? tVisible = 0 : 0
+									a00 = tMVMatrix[12], a01 = tMVMatrix[13], a02 = tMVMatrix[14],
+
+										frustumPlanes0[0] * a00 + frustumPlanes0[1] * a01 + frustumPlanes0[2] * a02 + frustumPlanes0[3] <= -radius ? tVisible = 0
+											: frustumPlanes1[0] * a00 + frustumPlanes1[1] * a01 + frustumPlanes1[2] * a02 + frustumPlanes1[3] <= -radius ? tVisible = 0
+											: frustumPlanes2[0] * a00 + frustumPlanes2[1] * a01 + frustumPlanes2[2] * a02 + frustumPlanes2[3] <= -radius ? tVisible = 0
+												: frustumPlanes3[0] * a00 + frustumPlanes3[1] * a01 + frustumPlanes3[2] * a02 + frustumPlanes3[3] <= -radius ? tVisible = 0
+													: frustumPlanes4[0] * a00 + frustumPlanes4[1] * a01 + frustumPlanes4[2] * a02 + frustumPlanes4[3] <= -radius ? tVisible = 0
+														: frustumPlanes5[0] * a00 + frustumPlanes5[1] * a01 + frustumPlanes5[2] * a02 + frustumPlanes5[3] <= -radius ? tVisible = 0 : 0
 								}
 								// console.log(tVisible);
 								///////////////////////////////////////
@@ -356,7 +207,7 @@ let renderScene = (_ => {
 				}
 
 				if (tDirtyTransform || parentDirty) {
-					currentDebuggerData['dirtyTransformNum']++
+					currentDebuggerData['dirtyTransformNum']++;
 					tLocalMatrix = tMesh.localMatrix;
 					parentMTX = parent ? parent.matrix : null;
 					/////////////////////////////////////
@@ -489,32 +340,17 @@ let renderScene = (_ => {
 					tMesh.uniformBuffer_mesh.meshFloat32Array.set(tMesh.normalMatrix, tMesh.offsetNormalMatrix / Float32Array.BYTES_PER_ELEMENT);
 				}
 				if (tSkinInfo) {
-					const joints = tSkinInfo['joints'];
+					let joints = tSkinInfo['joints'];
 					let joint_i = 0;
-					const len = joints.length;
+					let len = joints.length;
 					let tJointMTX;
-					const globalTransformOfJointNode = new Float32Array(len * 16);
-					const globalTransformOfNodeThatTheMeshIsAttachedTo = new Float32Array([
-						tMVMatrix[0],
-						tMVMatrix[1],
-						tMVMatrix[2],
-						tMVMatrix[3],
-						tMVMatrix[4],
-						tMVMatrix[5],
-						tMVMatrix[6],
-						tMVMatrix[7],
-						tMVMatrix[8],
-						tMVMatrix[9],
-						tMVMatrix[10],
-						tMVMatrix[11],
-						tMVMatrix[12],
-						tMVMatrix[13],
-						tMVMatrix[14],
-						tMVMatrix[15]
+					let globalTransformOfJointNode = new Float32Array(len * 16);
+					let globalTransformOfNodeThatTheMeshIsAttachedTo = new Float32Array([
+						tMVMatrix[0], tMVMatrix[1], tMVMatrix[2], tMVMatrix[3], tMVMatrix[4], tMVMatrix[5], tMVMatrix[6], tMVMatrix[7], tMVMatrix[8], tMVMatrix[9], tMVMatrix[10], tMVMatrix[11], tMVMatrix[12], tMVMatrix[13], tMVMatrix[14], tMVMatrix[15]
 					]);
 					////////////////////////////////////////////////////////////////////////////////////////////////////////////
 					// Inverse
-					const te = globalTransformOfNodeThatTheMeshIsAttachedTo,
+					let te = globalTransformOfNodeThatTheMeshIsAttachedTo,
 						me = globalTransformOfNodeThatTheMeshIsAttachedTo,
 						n11 = me[0], n21 = me[1], n31 = me[2], n41 = me[3],
 						n12 = me[4], n22 = me[5], n32 = me[6], n42 = me[7],
@@ -524,7 +360,7 @@ let renderScene = (_ => {
 						t12 = n14 * n33 * n42 - n13 * n34 * n42 - n14 * n32 * n43 + n12 * n34 * n43 + n13 * n32 * n44 - n12 * n33 * n44,
 						t13 = n13 * n24 * n42 - n14 * n23 * n42 + n14 * n22 * n43 - n12 * n24 * n43 - n13 * n22 * n44 + n12 * n23 * n44,
 						t14 = n14 * n23 * n32 - n13 * n24 * n32 - n14 * n22 * n33 + n12 * n24 * n33 + n13 * n22 * n34 - n12 * n23 * n34;
-					const det = n11 * t11 + n21 * t12 + n31 * t13 + n41 * t14;
+					let det = n11 * t11 + n21 * t12 + n31 * t13 + n41 * t14;
 					if (det === 0) {
 						console.warn("can't invert matrix, determinant is 0");
 						return mat4.identity(globalTransformOfNodeThatTheMeshIsAttachedTo);
@@ -591,26 +427,25 @@ let renderScene = (_ => {
 )();
 export default class Render {
 	static mouseMAP = {};
-	static mouseEventInfo = [];
 	static clearStateCache = _ => {
 		prevVertexBuffer_UUID = null;
 		prevIndexBuffer_UUID = null;
 		prevMaterial_UUID = null
-	}
+	};
 	#redGPUContext;
 	#swapChainTexture;
 	#swapChainTextureView;
-
-	#renderView = (redGPUContext, redView, lastViewYn) => {
+	#mouseEventChecker;
+	#renderView = (redGPUContext, redView) => {
 		let i;
 		let tScene, tSceneBackgroundColor_rgba;
-		let now = performance.now()
+		let now = performance.now();
 		tScene = redView.scene;
 		tSceneBackgroundColor_rgba = tScene.backgroundColorRGBA;
 		if (redView.camera.update) redView.camera.update();
 		// console.log(swapChain.getCurrentTexture())
 		mat4.multiply(resultPreMTX_mul_perspective_camera, redView.projectionMatrix, redView.camera.matrix);
-		ComputeViewFrustum()
+		ComputeViewFrustumPlanes();
 		const renderPassDescriptor = {
 			colorAttachments: [
 				{
@@ -642,45 +477,43 @@ export default class Render {
 				stencilStoreOp: "store",
 			}
 		};
-		let commandEncoder = this.#redGPUContext.device.createCommandEncoder();
-		let passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
+		let mainRenderCommandEncoder = this.#redGPUContext.device.createCommandEncoder();
+		let passEncoder = mainRenderCommandEncoder.beginRenderPass(renderPassDescriptor);
 
 		// 시스템 유니폼 업데이트
 		redView.updateSystemUniform(passEncoder, redGPUContext);
-		let tOptionRenderList = []
+		let tOptionRenderList = [];
 		if (tScene.skyBox) {
-			if (redView.camera['farClipping'] * 0.6 != tScene.skyBox._prevScale) {
-				tScene.skyBox['scaleX'] = tScene.skyBox['scaleY'] = tScene.skyBox['scaleZ'] = tScene.skyBox._prevScale = redView.camera['farClipping'] * 0.6;
-			}
-			tOptionRenderList.push(tScene.skyBox)
-			renderScene(redGPUContext, redView, passEncoder, null, [tScene.skyBox]);
+			if (redView.camera['farClipping'] * 0.6 != tScene.skyBox._prevScale) tScene.skyBox['scaleX'] = tScene.skyBox['scaleY'] = tScene.skyBox['scaleZ'] = tScene.skyBox._prevScale = redView.camera['farClipping'] * 0.6;
+			tOptionRenderList.push(tScene.skyBox);
 		}
-		if (tScene.grid) tOptionRenderList.push(tScene.grid)
-		if (tScene.axis) tOptionRenderList.push(tScene.axis)
+		if (tScene.grid) tOptionRenderList.push(tScene.grid);
+		if (tScene.axis) tOptionRenderList.push(tScene.axis);
 		if (tOptionRenderList.length) renderScene(redGPUContext, redView, passEncoder, null, tOptionRenderList);
 		// 실제 Scene렌더
 		renderScene(redGPUContext, redView, passEncoder, null, tScene.children);
+		// 투명레이어 렌더
 		if (renderToTransparentLayerList.length) renderScene(redGPUContext, redView, passEncoder, null, renderToTransparentLayerList, null, 1);
 		renderToTransparentLayerList.length = 0;
 		// 라이트 디버거 렌더
-		tOptionRenderList.length = 0
+		tOptionRenderList.length = 0;
 		i = Math.max(tScene.directionalLightList.length, tScene.pointLightList.length, tScene.spotLightList.length);
 		if (i) {
 			let cache_useFrustumCulling = redView.useFrustumCulling;
 			redView.useFrustumCulling = false;
 			while (i--) {
 				let tLight;
-				tLight= tScene.directionalLightList[i];
-				if (tLight && tLight.useDebugMesh) tOptionRenderList.push(tLight._debugMesh)
-				tLight= tScene.pointLightList[i];
-				if (tLight && tLight.useDebugMesh) tOptionRenderList.push(tLight._debugMesh)
-				tLight= tScene.spotLightList[i];
+				tLight = tScene.directionalLightList[i];
+				if (tLight && tLight.useDebugMesh) tOptionRenderList.push(tLight._debugMesh);
+				tLight = tScene.pointLightList[i];
+				if (tLight && tLight.useDebugMesh) tOptionRenderList.push(tLight._debugMesh);
+				tLight = tScene.spotLightList[i];
 				if (tLight && tLight.useDebugMesh) tOptionRenderList.push(tLight._debugMesh)
 			}
 			renderScene(redGPUContext, redView, passEncoder, null, tOptionRenderList);
 			redView.useFrustumCulling = cache_useFrustumCulling;
 		}
-		tOptionRenderList.length = 0
+		tOptionRenderList.length = 0;
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		//TODO - 여기 최적화
 		// if (textToTransparentLayerList.length) {
@@ -696,13 +529,13 @@ export default class Render {
 		// }
 		// textToTransparentLayerList.length = 0;
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 		passEncoder.endPass();
-		currentDebuggerData['baseRenderTime'] = performance.now() - now
+		currentDebuggerData['baseRenderTime'] = performance.now() - now;
 		//////////////////////////////////////////////////////////////////////////////////////////
 		now = performance.now();
 		let last_effect_baseAttachmentView = redView.baseAttachment_ResolveTargetView;
 		let last_effect_baseAttachment = redView.baseAttachment_ResolveTarget;
+		// 포스트 이펙트 렌더
 		let effectIDX = 0;
 		let len3 = redView.postEffect.effectList.length;
 		for (effectIDX; effectIDX < len3; effectIDX++) {
@@ -711,18 +544,17 @@ export default class Render {
 			last_effect_baseAttachmentView = tEffect.baseAttachmentView;
 			last_effect_baseAttachment = tEffect.baseAttachment
 		}
-		currentDebuggerData['postEffectRenderTime'] = performance.now() - now
-
+		currentDebuggerData['postEffectRenderTime'] = performance.now() - now;
 		//////////////////////////////////////////////////////////////////////////////////////////
 		now = performance.now();
-		// 최종렌더
+		// 최종렌더 - 뷰공간 반영 복사
 		let tX = redView.viewRect[0];
 		let tY = redView.viewRect[1];
 		let tW = redView.viewRect[2] + redView.viewRect[0] > this.#redGPUContext.canvas.width ? redView.viewRect[2] - redView.viewRect[0] : redView.viewRect[2];
 		let tH = redView.viewRect[3] + redView.viewRect[1] > this.#redGPUContext.canvas.height ? redView.viewRect[3] - redView.viewRect[1] : redView.viewRect[3];
 		if (tW > this.#redGPUContext.canvas.width) tW = this.#redGPUContext.canvas.width - tX;
 		if (tH > this.#redGPUContext.canvas.height) tH = this.#redGPUContext.canvas.height - tX;
-		commandEncoder.copyTextureToTexture(
+		mainRenderCommandEncoder.copyTextureToTexture(
 			{texture: last_effect_baseAttachment},
 			{
 				texture: this.#swapChainTexture,
@@ -730,24 +562,30 @@ export default class Render {
 			},
 			{width: tW, height: tH, depth: 1}
 		);
-		redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
-		if (!pickedArrayBuffer) {
-			readPixel(redGPUContext, redView, redView.baseAttachment_mouseColorID_ResolveTarget, commandEncoder);
-			checkMouseEvent(redGPUContext, redView, lastViewYn)
+		redGPUContext.device.defaultQueue.submit([mainRenderCommandEncoder.finish()]);
+		if (!currentPickedArrayBuffer) {
+			currentPickedArrayBuffer = redView.readPixelArrayBuffer(redGPUContext, redView, redView.baseAttachment_mouseColorID_ResolveTarget, redView.mouseX, redView.mouseY);
+			currentPickedArrayBuffer.then(arrayBuffer => {
+				currentPickedArrayBuffer = null
+				currentPickedMouseID = Math.round(new Float32Array(arrayBuffer)[0])
+				this.#mouseEventChecker.checkMouseEvent(redGPUContext,  currentPickedMouseID)
+			})
 		}
-		currentDebuggerData['finalRenderTime'] = performance.now() - now
+
+		currentDebuggerData['finalRenderTime'] = performance.now() - now;
 		i = updateTargetMatrixBufferList.length;
 		while (i--) updateTargetMatrixBufferList[i].GPUBuffer.setSubData(0, updateTargetMatrixBufferList[i].meshFloat32Array);
 		updateTargetMatrixBufferList.length = 0
 	};
 	render(time, redGPUContext) {
 		currentTime = time;
-		let debuggerData = Debugger.resetData(redGPUContext.viewList)
+		let debuggerData = Debugger.resetData(redGPUContext.viewList);
+		this.#mouseEventChecker = new MouseEventChecker()
 		this.#redGPUContext = redGPUContext;
 		this.#swapChainTexture = redGPUContext.swapChain.getCurrentTexture();
 		this.#swapChainTextureView = this.#swapChainTexture.createView();
 		let i = 0, len = redGPUContext.viewList.length;
-		changedMaterial_UUID = {}
+		changedMaterial_UUID = {};
 		for (i; i < len; i++) {
 			currentDebuggerData = debuggerData[i];
 			currentDebuggerData.view = redGPUContext.viewList[i];
@@ -756,8 +594,9 @@ export default class Render {
 			currentDebuggerData.width = currentDebuggerData.view.width;
 			currentDebuggerData.height = currentDebuggerData.view.height;
 			currentDebuggerData.viewRect = currentDebuggerData.view.viewRect;
-			Render.clearStateCache()
-			this.#renderView(redGPUContext, redGPUContext.viewList[i], i == len - 1);
+			Render.clearStateCache();
+
+			this.#renderView(redGPUContext, redGPUContext.viewList[i]);
 		}
 
 		GLTFLoader.animationLooper(time);

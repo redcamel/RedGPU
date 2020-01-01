@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.25 17:24:20
+ *   Last modification time of this file - 2020.1.1 17:2:44
  *
  */
 
@@ -15,7 +15,7 @@ import baseGeometry from "../base/baseGeometry.js";
 
 export default class Cylinder extends baseGeometry {
 	constructor(redGPUContext, radiusTop = 1, radiusBottom = 1, height = 1, radialSegments = 8, heightSegments = 1, openEnded = false, thetaStart = 0.0, thetaLength = Math.PI * 2) {
-		super()
+		super();
 		let typeKey;
 		// 유일키 생성
 

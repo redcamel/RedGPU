@@ -2,17 +2,17 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.24 20:56:2
+ *   Last modification time of this file - 2020.1.1 17:2:44
  *
  */
-"use strict"
+"use strict";
 let info;
 let _visible = false;
 let debuggerBox;
 let style_bgColor = `rgba(0, 0, 0, 0.5)`;
 let setDebugBox = _ => {
 	if (!debuggerBox) {
-		debuggerBox = document.createElement('div')
+		debuggerBox = document.createElement('div');
 		debuggerBox.style.cssText = `
 			position:fixed;
 			bottom:0; left:0;
@@ -25,7 +25,7 @@ let setDebugBox = _ => {
 		`
 
 	}
-}
+};
 const Debugger = {
 	resetData: viewList => {
 		info = [];
@@ -41,42 +41,42 @@ const Debugger = {
 			postEffectRenderTime: 0,
 			finalRenderTime: 0,
 
-		}))
+		}));
 		return info;
 	},
 	visible: v => {
-		_visible = v
-		setDebugBox()
-		if (_visible) document.body.appendChild(debuggerBox)
+		_visible = v;
+		setDebugBox();
+		if (_visible) document.body.appendChild(debuggerBox);
 		else {
 			if (debuggerBox.parentNode) document.body.removeChild(debuggerBox)
 		}
 	},
 	update: _ => {
-		setDebugBox()
+		setDebugBox();
 		if (_visible) {
-			debuggerBox.innerHTML = ''
+			debuggerBox.innerHTML = '';
 			info.forEach(data => {
 				let container, t0, t1;
-				let noBR = {'x': 1, 'width': 1}
+				let noBR = {'x': 1, 'width': 1};
 				let tData;
-				container = document.createElement('div')
+				container = document.createElement('div');
 				container.style.cssText = `
 					background : rgba(0,0,0,0.75);
 					margin-bottom : 1px;
 					padding : 8px
-				`
-				debuggerBox.appendChild(container)
-				t0 = document.createElement('div')
-				container.appendChild(t0)
-				t1 = ''
+				`;
+				debuggerBox.appendChild(container);
+				t0 = document.createElement('div');
+				container.appendChild(t0);
+				t1 = '';
 				for (let k in data) {
-					tData = data[k]
+					tData = data[k];
 					if (typeof tData == 'number') {
-						if (k.includes('Time')) tData = tData.toFixed(5)
+						if (k.includes('Time')) tData = tData.toFixed(5);
 						tData = tData.toLocaleString()
 					}
-					t1 += `<span style="color:rgba(255,255,255,0.5)">${k}</span> : ${tData}`
+					t1 += `<span style="color:rgba(255,255,255,0.5)">${k}</span> : ${tData}`;
 					t1 += noBR[k] ? ' / ' : '<br>'
 				}
 				t0.innerHTML = t1
@@ -84,5 +84,5 @@ const Debugger = {
 			})
 		}
 	}
-}
+};
 export default Debugger;
