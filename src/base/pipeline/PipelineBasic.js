@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 18:50:31
+ *   Last modification time of this file - 2020.1.2 14:26:4
  *
  */
 
@@ -63,12 +63,8 @@ export default class PipelineBasic extends UUID {
 					}
 				},
 				{
-					format: redGPUContext.swapChainFormat
-					//baseAttachment_depthColorView
-				},
-				{
 					format: 'rgba32float'
-					//baseAttachment_mouseColorIDView
+					//baseAttachment_mouseColorID_depthView
 				}
 			],
 			rasterizationState: {
@@ -78,8 +74,8 @@ export default class PipelineBasic extends UUID {
 			primitiveTopology: targetMesh._primitiveTopology,
 			depthStencilState: {
 				format: "depth24plus-stencil8",
-				depthWriteEnabled: targetMesh._useDepthTest,
-				depthCompare: targetMesh._useDepthTest ? targetMesh._depthTestFunc : 'always',
+				depthWriteEnabled: targetMesh._depthWriteEnabled,
+				depthCompare: targetMesh._depthCompare ,
 			},
 			sampleCount: 4,
 			//alphaToCoverageEnabled : true // alphaToCoverageEnabled isn't supported (yet)

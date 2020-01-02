@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.27 10:47:2
+ *   Last modification time of this file - 2020.1.2 21:31:8
  *
  */
 
@@ -56,20 +56,12 @@ export default class PostEffect_Threshold extends BasePostEffect {
 	static uniformBufferDescriptor_fragment = [
 		{size: TypeSize.float, valueName: 'threshold'}
 	];
-	constructor(redGPUContext) {
-		super(redGPUContext);
-
-	}
 	_threshold = 128;
-	get threshold() {
-		return this._threshold;
-	}
-
-	set threshold(value) {
-		//FIXME min: 1, max: 255
+	get threshold() {return this._threshold;}
+	set threshold(value) {/*FIXME min: 1, max: 255*/
 		this._threshold = value;
 		float1_Float32Array[0] = this._threshold;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['threshold'], float1_Float32Array)
 	}
-
+	constructor(redGPUContext) {super(redGPUContext);}
 }

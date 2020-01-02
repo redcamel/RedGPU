@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 18:50:31
+ *   Last modification time of this file - 2020.1.2 21:31:8
  *
  */
 
@@ -79,8 +79,8 @@ export default class StandardMaterial extends Mix.mix(
 	//#RedGPU#specularTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 7 ) uniform texture2D uSpecularTexture;
 	//#RedGPU#emissiveTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 8 ) uniform texture2D uEmissiveTexture;
 	layout( location = 0 ) out vec4 outColor;
-	layout( location = 1 ) out vec4 outNormalDepthColor;
-	layout( location = 2 ) out vec4 outMouseColorID;
+	
+	layout( location = 1 ) out vec4 out_MouseColorID_Depth;
 
 	void main() {
 		float testAlpha = 1.0;
@@ -128,13 +128,13 @@ export default class StandardMaterial extends Mix.mix(
 		finalColor.a = testAlpha;
 		outColor = finalColor;
 		outColor.a *= fragmentUniforms.alpha;
-		outMouseColorID = vec4(vMouseColorID, vec3(0.0));
-		outNormalDepthColor = vec4( N, gl_FragCoord.z/gl_FragCoord.w );
+		out_MouseColorID_Depth = vec4(vMouseColorID, gl_FragCoord.z/gl_FragCoord.w, 0.0, 0.0);
+		
 	}
 `;
 	static PROGRAM_OPTION_LIST = {
 		vertex: ['displacementTexture'],
-		fragment: ['diffuseTexture','emissiveTexture', 'normalTexture', 'specularTexture', 'useFlatMode']
+		fragment: ['diffuseTexture', 'emissiveTexture', 'normalTexture', 'specularTexture', 'useFlatMode']
 	};
 	static uniformsBindGroupLayoutDescriptor_material = {
 		bindings: [

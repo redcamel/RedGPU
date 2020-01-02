@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 18:50:31
+ *   Last modification time of this file - 2020.1.2 14:26:4
  *
  */
 
@@ -69,16 +69,16 @@ export default class TextMaterial extends Mix.mix(
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 2 ) uniform sampler uSampler;
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 3 ) uniform texture2D uDiffuseTexture;
 	layout( location = 0 ) out vec4 outColor;
-	layout( location = 1 ) out vec4 outNormalDepthColor;
-	layout( location = 2 ) out vec4 outMouseColorID;
+	
+	layout( location = 1 ) out vec4 out_MouseColorID_Depth;
 	void main() {
 		vec4 diffuseColor = vec4(0.0);
 		//#RedGPU#diffuseTexture# diffuseColor = texture(sampler2D(uDiffuseTexture, uSampler), vUV) ;
 		if(diffuseColor.a < 0.05) discard;
 		outColor = diffuseColor;
 		outColor.a *= fragmentUniforms.alpha;
-		outMouseColorID = vec4(vMouseColorID, vec3(0.0));
-		outNormalDepthColor = vec4( vec3(0.0), gl_FragCoord.z/gl_FragCoord.w );
+		out_MouseColorID_Depth = vec4(vMouseColorID, gl_FragCoord.z/gl_FragCoord.w, 0.0, 0.0);
+		
 	}
 `;
 	static PROGRAM_OPTION_LIST = {

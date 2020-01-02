@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 18:50:31
+ *   Last modification time of this file - 2020.1.2 21:31:8
  *
  */
 
@@ -40,17 +40,16 @@ export default class LineMaterial extends Mix.mix(
 	layout( location = 0 ) in float vMouseColorID;
 	layout( location = 1 ) in vec4 vColor;			
 	layout( location = 0 ) out vec4 outColor;
-	layout( location = 1 ) out vec4 outNormalDepthColor;
-	layout( location = 2 ) out vec4 outMouseColorID;
+	
+	layout( location = 1 ) out vec4 out_MouseColorID_Depth;
 	void main() {
 		outColor = vColor;
 		outColor.a *= fragmentUniforms.alpha;
-		outMouseColorID = vec4(vMouseColorID, vec3(0.0));
-		outNormalDepthColor = vec4( vec3(0.0), gl_FragCoord.z/gl_FragCoord.w );
+		out_MouseColorID_Depth = vec4(vMouseColorID, gl_FragCoord.z/gl_FragCoord.w, 0.0, 0.0);
+		
 	}
 	`;
 	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
-	;
 	static uniformsBindGroupLayoutDescriptor_material = {
 		bindings: [
 			{binding: 0, visibility: GPUShaderStage.FRAGMENT, type: "uniform-buffer"}

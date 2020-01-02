@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 18:50:31
+ *   Last modification time of this file - 2020.1.2 21:31:8
  *
  */
 
@@ -15,13 +15,31 @@ import InterleaveInfo from "../geometry/InterleaveInfo.js";
 import GridMaterial from "../material/system/GridMaterial.js";
 
 export default class Grid extends BaseObject3D {
-
 	#size = 100;
 	#divisions = 100;
 	#centerColor = '#cccccc';
 	#color = '#666666';
 	#redGPUContext;
-
+	get color() {return this.#color;}
+	set color(value) {
+		this.#color = value;
+		this.makeGridGeometry()
+	}
+	get centerColor() {return this.#centerColor;}
+	set centerColor(value) {
+		this.#centerColor = value;
+		this.makeGridGeometry()
+	}
+	get divisions() {return this.#divisions;}
+	set divisions(value) {
+		this.#divisions = value;
+		this.makeGridGeometry()
+	}
+	get size() {return this.#size;}
+	set size(value) {
+		this.#size = value;
+		this.makeGridGeometry()
+	}
 	constructor(redGPUContext, size = 100, divisions = 100, centerColor = '#cccccc', color = '#666666') {
 		super(redGPUContext);
 		this.#redGPUContext = redGPUContext;
@@ -33,7 +51,6 @@ export default class Grid extends BaseObject3D {
 		this.material = new GridMaterial(redGPUContext);
 		this.primitiveTopology = 'line-list'
 	}
-
 	makeGridGeometry() {
 		let redGPUContext = this.#redGPUContext;
 		let center, step, halfSize;
@@ -66,41 +83,4 @@ export default class Grid extends BaseObject3D {
 			)
 		)
 	}
-
-	get color() {
-		return this.#color;
-	}
-
-	set color(value) {
-		this.#color = value;
-		this.makeGridGeometry()
-	}
-
-	get centerColor() {
-		return this.#centerColor;
-	}
-
-	set centerColor(value) {
-		this.#centerColor = value;
-		this.makeGridGeometry()
-	}
-
-	get divisions() {
-		return this.#divisions;
-	}
-
-	set divisions(value) {
-		this.#divisions = value;
-		this.makeGridGeometry()
-	}
-
-	get size() {
-		return this.#size;
-	}
-
-	set size(value) {
-		this.#size = value;
-		this.makeGridGeometry()
-	}
-
 }

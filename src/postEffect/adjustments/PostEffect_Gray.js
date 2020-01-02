@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.27 10:47:2
+ *   Last modification time of this file - 2020.1.2 21:31:8
  *
  */
 
@@ -43,11 +43,9 @@ export default class PostEffect_Gray extends BasePostEffect {
 		outColor = vec4( gray, gray, gray, 1.0);;
 	}
 `;
-	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};;
+	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
 	static uniformsBindGroupLayoutDescriptor_material = BasePostEffect.uniformsBindGroupLayoutDescriptor_material;
 	static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
 	static uniformBufferDescriptor_fragment = BaseMaterial.uniformBufferDescriptor_empty;
-	constructor(redGPUContext) {
-		super(redGPUContext);
-	}
+	constructor(redGPUContext) {super(redGPUContext);}
 }

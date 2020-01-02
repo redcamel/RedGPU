@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.27 10:47:2
+ *   Last modification time of this file - 2020.1.2 21:31:8
  *
  */
 
@@ -23,16 +23,25 @@ export default class PostEffect_DoF extends BasePostEffect {
 		${ShareGLSL.GLSL_VERSION}
 		void main() {}
 	`;
-	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};;
+	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
+	;
 	static uniformsBindGroupLayoutDescriptor_material = BasePostEffect.uniformsBindGroupLayoutDescriptor_material;
 	static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
 	static uniformBufferDescriptor_fragment = BaseMaterial.uniformBufferDescriptor_empty;
 	#blurEffect;
 	#blenderEffect;
-	baseAttachment;
-	baseAttachmentView;
 	#blur;
 	#focusLength;
+	get blur() {return this.#blur;}
+	set blur(value) {
+		this.#blur = value;
+		this.#blurEffect.radius = value;
+	}
+	get focusLength() {return this.#focusLength;}
+	set focusLength(value) {
+		this.#focusLength = value;
+		this.#blenderEffect.focusLength = value;
+	}
 	constructor(redGPUContext) {
 		super(redGPUContext);
 		this.#blurEffect = new PostEffect_GaussianBlur(redGPUContext);
@@ -40,26 +49,11 @@ export default class PostEffect_DoF extends BasePostEffect {
 		this.blur = 5;
 		this.focusLength = 15
 	}
-	get blur() {
-		return this.#blur;
-	}
-	set blur(value) {
-		this.#blur = value;
-		this.#blurEffect.radius = value;
-	}
-	get focusLength() {
-		return this.#focusLength;
-	}
-	set focusLength(value) {
-		this.#focusLength = value;
-		this.#blenderEffect.focusLength = value;
-
-	}
 	render(redGPUContext, redView, renderScene, sourceTextureView) {
 		this.checkSize(redGPUContext, redView);
 		this.#blurEffect.render(redGPUContext, redView, renderScene, sourceTextureView);
 		this.#blenderEffect.blurTexture = this.#blurEffect.baseAttachmentView;
-		this.#blenderEffect.depthTexture = redView.baseAttachment_depthColor_ResolveTargetView;
+		this.#blenderEffect.depthTexture = redView.baseAttachment_mouseColorID_depth_ResolveTargetView;
 		this.#blenderEffect.render(redGPUContext, redView, renderScene, sourceTextureView);
 		this.baseAttachment = this.#blenderEffect.baseAttachment;
 		this.baseAttachmentView = this.#blenderEffect.baseAttachmentView;

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 18:50:31
+ *   Last modification time of this file - 2020.1.2 20:56:47
  *
  */
 
@@ -27,7 +27,7 @@ export default class Buffer extends UUID {
 		this.stride = 0;
 		switch (bufferType) {
 			case Buffer.TYPE_VERTEX :
-				tUsage = usage || globalThis.GPUBufferUsage.VERTEX | globalThis.GPUBufferUsage.COPY_DST;
+				tUsage = usage || GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST;
 				this.interleaveInfo = interleaveInfo;
 				interleaveInfo.forEach(v => {
 					this.vertexCount += v['stride'] / Float32Array.BYTES_PER_ELEMENT;
@@ -36,7 +36,7 @@ export default class Buffer extends UUID {
 				this.vertexCount = data.length / this.vertexCount;
 				break;
 			case Buffer.TYPE_INDEX :
-				tUsage = usage || globalThis.GPUBufferUsage.INDEX | globalThis.GPUBufferUsage.COPY_DST;
+				tUsage = usage || GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST;
 				this.indexNum = data.length;
 				break
 		}

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 18:50:31
+ *   Last modification time of this file - 2020.1.2 21:31:8
  *
  */
 
@@ -32,12 +32,12 @@ export default class SkyBoxMaterial extends Mix.mix(
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 0) uniform sampler uSampler;
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 1) uniform textureCube uSkyBoxTexture;
 	layout( location = 0 ) out vec4 outColor;
-	layout( location = 1 ) out vec4 outNormalDepthColor;
+	
 	void main() {
 		vec4 diffuseColor = vec4(0.0);
 		//#RedGPU#skyBoxTexture# diffuseColor = texture(samplerCube(uSkyBoxTexture,uSampler), vReflectionCubeCoord) ;
 		outColor = diffuseColor;
-		outNormalDepthColor = vec4( vec3(0.0), gl_FragCoord.z/gl_FragCoord.w );
+		
 	}
 `;
 	static PROGRAM_OPTION_LIST = {
@@ -54,20 +54,15 @@ export default class SkyBoxMaterial extends Mix.mix(
 	static uniformBufferDescriptor_fragment = BaseMaterial.uniformBufferDescriptor_empty;
 
 	_skyBoxTexture;
-	set skyBoxTexture(texture) {
-		// this._skyBoxTexture = null;
+	set skyBoxTexture(texture) {/* this._skyBoxTexture = null;*/
 		this.checkTexture(texture, 'skyBoxTexture');
 	}
-	get skyBoxTexture() {
-		return this._skyBoxTexture
-	}
+	get skyBoxTexture() {return this._skyBoxTexture}
 	constructor(redGPUContext, skyBoxTexture) {
 		super(redGPUContext);
 		this.skyBoxTexture = skyBoxTexture;
 		this.needResetBindingInfo = true;
-
 	}
-
 	checkTexture(texture, textureName) {
 		if (texture) {
 			if (texture._GPUTexture) {

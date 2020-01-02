@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 18:50:31
+ *   Last modification time of this file - 2020.1.2 21:31:8
  *
  */
 
@@ -26,13 +26,8 @@ let makeUniformBindLayout = function (redGPUContext, uniformsBindGroupLayoutDesc
 };
 let BaseMaterial_searchModules_callNum = 0;
 export default class BaseMaterial extends UUID {
-	get redGPUContext() {
-		return this.#redGPUContext;
-	}
-
-	set redGPUContext(value) {
-		this.#redGPUContext = value;
-	}
+	get redGPUContext() {return this.#redGPUContext;}
+	set redGPUContext(value) {this.#redGPUContext = value;}
 	static uniformBufferDescriptor_empty = [];
 
 	uniformBufferDescriptor_vertex;

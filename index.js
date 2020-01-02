@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 17:2:44
+ *   Last modification time of this file - 2020.1.2 14:26:4
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -64,7 +64,7 @@ new RedGPU.RedGPUContext(
 				tCamera.targetView = tView // optional
 				tCamera2.targetView = tView2 // optional
 				tCamera.distance = 10
-				tCamera.speedDistance = 30
+				tCamera.speedDistance = 100
 
 				// tScene.grid = tGrid;
 				// tScene.axis = tAxis;
@@ -160,7 +160,7 @@ new RedGPU.RedGPUContext(
 				// tView.postEffect.addEffect(tEffect)
 
 
-				this.addView(tView2)
+				// this.addView(tView2)
 				tView2.setLocation(100, 200)
 
 
@@ -207,7 +207,7 @@ new RedGPU.RedGPUContext(
 				// }, 2500)
 
 				let randomGeometry = _ => {
-
+					return new RedGPU.Sphere(this, 0.5, 16, 16, 16)
 					return Math.random() > 0.5
 						? new RedGPU.Sphere(this, 0.5, 16, 16, 16) :
 						Math.random() > 0.5
@@ -416,7 +416,7 @@ new RedGPU.RedGPUContext(
 					tChildren = tView.scene.children
 					i = tChildren.length
 					let tMesh
-
+					//
 					while (i--) {
 						tMesh = tChildren[i]
 						if (tMesh instanceof RedGPU.Text) {
@@ -509,9 +509,9 @@ let setTestUI = function (redGPUContextContext, tView, tScene, testCubeTexture) 
 	let testUI = new dat.GUI({});
 	let testData = {
 		useFloatMode: false,
-		useDepthTest: true,
+		depthWriteEnabled: true,
 
-		depthTestFunc: "less",
+		depthCompare: "less",
 		cullMode: "back",
 		primitiveTopology: "triangle-list"
 	};
@@ -531,9 +531,9 @@ let setTestUI = function (redGPUContextContext, tView, tScene, testCubeTexture) 
 	tFolder.open()
 
 
-	tFolder.add(testData, 'useDepthTest').onChange(v => tScene.children.forEach(tMesh => tMesh.useDepthTest = v));
+	tFolder.add(testData, 'depthWriteEnabled').onChange(v => tScene.children.forEach(tMesh => tMesh.depthWriteEnabled = v));
 
-	tFolder.add(testData, 'depthTestFunc', [
+	tFolder.add(testData, 'depthCompare', [
 		"never",
 		"less",
 		"equal",
@@ -542,7 +542,7 @@ let setTestUI = function (redGPUContextContext, tView, tScene, testCubeTexture) 
 		"not-equal",
 		"greater-equal",
 		"always"
-	]).onChange(v => tScene.children.forEach(tMesh => tMesh.depthTestFunc = v));
+	]).onChange(v => tScene.children.forEach(tMesh => tMesh.depthCompare = v));
 	tFolder.add(testData, 'cullMode', [
 		"none",
 		"front",

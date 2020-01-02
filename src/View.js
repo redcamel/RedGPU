@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 18:50:31
+ *   Last modification time of this file - 2020.1.2 20:56:47
  *
  */
 
@@ -15,52 +15,50 @@ import RedGPUContext from "./RedGPUContext.js";
 import UUID from "./base/UUID.js";
 
 export default class View extends UUID {
-	get viewRect() {
-		return this.#viewRect;
-	}
 	#redGPUContext;
 	#scene;
 	#camera;
+	projectionMatrix;
+	//
 	_x = 0;
 	_y = 0;
 	#width = '100%';
 	#height = '100%';
 	#viewRect = [];
+	//
 	systemUniformInfo_vertex;
 	systemUniformInfo_fragment;
-	projectionMatrix;
+	#systemUniformInfo_vertex_data;
+	#systemUniformInfo_fragment_data;
 	//
 	baseAttachment;
 	baseAttachmentView;
 	baseAttachment_ResolveTarget;
 	baseAttachment_ResolveTargetView;
-	//
-	baseAttachment_mouseColorID;
-	baseAttachment_mouseColorIDView;
-	baseAttachment_mouseColorID_ResolveTarget;
-	baseAttachment_mouseColorID_ResolveTargetView;
-	//
-	baseAttachment_depthColor;
-	baseAttachment_depthColorView;
-	baseAttachment_depthColor_ResolveTarget;
-	baseAttachment_depthColor_ResolveTargetView;
-	//
+	baseAttachment_mouseColorID_depth;
+	baseAttachment_mouseColorID_depthView;
+	baseAttachment_mouseColorID_depth_ResolveTarget;
+	baseAttachment_mouseColorID_depth_ResolveTargetView;
 	baseDepthStencilAttachment;
 	baseDepthStencilAttachmentView;
 	//
-	#systemUniformInfo_vertex_data;
-	#systemUniformInfo_fragment_data;
 	#postEffect;
 	//
 	mouseX = 0;
 	mouseY = 0;
 	_useFrustumCulling = true;
-	get useFrustumCulling() {
-		return this._useFrustumCulling;
-	}
-	set useFrustumCulling(value) {
-		this._useFrustumCulling = value;
-	}
+	get useFrustumCulling() {return this._useFrustumCulling;}
+	set useFrustumCulling(value) {this._useFrustumCulling = value;}
+	get postEffect() {return this.#postEffect;}
+	get scene() {return this.#scene;}
+	set scene(value) {this.#scene = value;}
+	get camera() {return this.#camera;}
+	set camera(value) {this.#camera = value;}
+	get y() {return this._y;}
+	get x() {return this._x;}
+	get width() {return this.#width;}
+	get height() {return this.#height;}
+	get viewRect() {return this.#viewRect;}
 	constructor(redGPUContext, scene, camera) {
 		super();
 		this.#redGPUContext = redGPUContext;
@@ -70,20 +68,17 @@ export default class View extends UUID {
 		this.systemUniformInfo_fragment = this.#makeSystemUniformInfo_fragment(redGPUContext.device);
 		this.projectionMatrix = mat4.create();
 		this.#postEffect = new PostEffect(redGPUContext);
-
 	}
-
 	#makeSystemUniformInfo_vertex = function (device) {
 		let uniformBufferSize =
 			TypeSize.mat4 + // projectionMatrix
 			TypeSize.mat4 +  // camera
 			TypeSize.float2 +// resolution
 			TypeSize.float // time
-
 		;
 		const uniformBufferDescriptor = {
 			size: uniformBufferSize,
-			usage: globalThis.GPUBufferUsage.UNIFORM | globalThis.GPUBufferUsage.COPY_DST,
+			usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
 		};
 		const bindGroupLayoutDescriptor = {
 			bindings: [
@@ -123,15 +118,12 @@ export default class View extends UUID {
 			TypeSize.float4 * 3 * ShareGLSL.MAX_POINT_LIGHT + // pointLight
 			TypeSize.float4 * TypeSize.float4 + // ambientLight
 			TypeSize.float4 * 3 * ShareGLSL.MAX_SPOT_LIGHT + // spotLight
-
-
 			TypeSize.float4 +  // cameraPosition
 			TypeSize.float2 // resolution
 		;
 		const uniformBufferDescriptor = {
 			size: uniformBufferSize,
-			usage: globalThis.GPUBufferUsage.UNIFORM | globalThis.GPUBufferUsage.COPY_DST,
-
+			usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
 		};
 		const bindGroupLayoutDescriptor = {
 			bindings: [
@@ -175,16 +167,10 @@ export default class View extends UUID {
 					resolveUsage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED
 				},
 				{
-					key: 'baseAttachment_depthColor',
-					format: redGPUContext.swapChainFormat,
-					usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED,
-					resolveUsage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED
-				},
-				{
-					key: 'baseAttachment_mouseColorID',
+					key: 'baseAttachment_mouseColorID_depth',
 					format: 'rgba32float',
 					usage: GPUTextureUsage.OUTPUT_ATTACHMENT,
-					resolveUsage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC
+					resolveUsage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED
 				}
 			],
 			depthStencilAttachment: {
@@ -194,39 +180,31 @@ export default class View extends UUID {
 			}
 		};
 		let sizeInfo = {width: this.#viewRect[2], height: this.#viewRect[3], depth: 1};
-		let list = info.colorAttachments;
-		if (this.baseAttachment) {
-			list.forEach(v => {
-				let key = v['key'];
-				this[key].destroy();
-				this[key + '_ResolveTarget'].destroy()
-			});
-			this.baseDepthStencilAttachment.destroy();
-		}
-		list.forEach(v => {
+		[...info.colorAttachments, info.depthStencilAttachment].forEach(v => {
 			let key = v['key'];
 			let format = v['format'];
 			let usage = v['usage'];
 			let resolveUsage = v['resolveUsage'];
+
+			if (this[key]) {
+				this[key].destroy();
+				if (resolveUsage) this[key + '_ResolveTarget'].destroy()
+			}
 			this[key] = redGPUContext.device.createTexture({
 				size: sizeInfo, sampleCount: 4,
 				format: format,
 				usage: usage
 			});
 			this[key + 'View'] = this[key].createView();
-			this[key + '_ResolveTarget'] = redGPUContext.device.createTexture({
-				size: sizeInfo, sampleCount: 1,
-				format: format,
-				usage: resolveUsage
-			});
-			this[key + '_ResolveTargetView'] = this[key + '_ResolveTarget'].createView();
+			if (resolveUsage) {
+				this[key + '_ResolveTarget'] = redGPUContext.device.createTexture({
+					size: sizeInfo, sampleCount: 1,
+					format: format,
+					usage: resolveUsage
+				});
+				this[key + '_ResolveTargetView'] = this[key + '_ResolveTarget'].createView();
+			}
 		});
-		this[info['depthStencilAttachment']['key']] = redGPUContext.device.createTexture({
-			size: sizeInfo, sampleCount: 4,
-			format: info['depthStencilAttachment']['format'],
-			usage: info['depthStencilAttachment']['usage']
-		});
-		this[info['depthStencilAttachment']['key'] + 'View'] = this[info['depthStencilAttachment']['key']].createView();
 
 	}
 	updateSystemUniform(passEncoder, redGPUContext) {
@@ -236,10 +214,7 @@ export default class View extends UUID {
 		systemUniformInfo_vertex = this.systemUniformInfo_vertex;
 		systemUniformInfo_fragment = this.systemUniformInfo_fragment;
 		this.#viewRect = this.getViewRect(redGPUContext);
-		passEncoder.setViewport(0, 0, this.#viewRect[2], this.#viewRect[3], 0, 1);
-		passEncoder.setScissorRect(0, 0, this.#viewRect[2], this.#viewRect[3]);
-		passEncoder.setBindGroup(0, systemUniformInfo_vertex.GPUBindGroup);
-		passEncoder.setBindGroup(1, systemUniformInfo_fragment.GPUBindGroup);
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// update systemUniformInfo_vertex /////////////////////////////////////////////////////////////////////////////////////////////////
 		offset = 0;
 		aspect = Math.abs(this.#viewRect[2] / this.#viewRect[3]);
@@ -250,14 +225,15 @@ export default class View extends UUID {
 		offset += TypeSize.mat4 / Float32Array.BYTES_PER_ELEMENT;
 		this.#systemUniformInfo_vertex_data.set([this.#viewRect[2], this.#viewRect[3], performance.now()], offset);
 		offset += TypeSize.float2 / Float32Array.BYTES_PER_ELEMENT;
-		// update GPUBuffer
-		systemUniformInfo_vertex.GPUBuffer.setSubData(0, this.#systemUniformInfo_vertex_data);
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// update systemUniformInfo_fragment /////////////////////////////////////////////////////////////////////////////////////////////////
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// update light counts
 		offset = 0;
-		// update light count
 		this.#systemUniformInfo_fragment_data.set([this.scene.directionalLightList.length, this.scene.pointLightList.length, this.scene.spotLightList.length], offset);
-		i = 0;
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// update directionalLightList
+		i = 0;
 		offset = TypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
 		len = this.scene.directionalLightList.length;
 		for (i; i < len; i++) {
@@ -269,6 +245,7 @@ export default class View extends UUID {
 				offset += TypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
 			}
 		}
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// update pointLightList
 		offset = (TypeSize.float4 + TypeSize.float4 * 2 * ShareGLSL.MAX_DIRECTIONAL_LIGHT) / Float32Array.BYTES_PER_ELEMENT;
 		i = 0;
@@ -285,12 +262,14 @@ export default class View extends UUID {
 			}
 		}
 		offset = (TypeSize.float4 + TypeSize.float4 * 2 * ShareGLSL.MAX_DIRECTIONAL_LIGHT + TypeSize.float4 * 3 * ShareGLSL.MAX_POINT_LIGHT) / Float32Array.BYTES_PER_ELEMENT;
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// update ambientLight
 		let tLight = this.scene.ambientLight;
 		this.#systemUniformInfo_fragment_data.set(tLight ? tLight._colorRGBA : [0, 0, 0, 0], offset);
 		offset += TypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
 		this.#systemUniformInfo_fragment_data.set([tLight ? tLight._intensity : 1], offset);
 		offset += TypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// update spotLightList
 		i = 0;
 		len = this.scene.spotLightList.length;
@@ -306,24 +285,20 @@ export default class View extends UUID {
 			}
 		}
 		offset = (TypeSize.float4 + TypeSize.float4 * 2 * ShareGLSL.MAX_DIRECTIONAL_LIGHT + TypeSize.float4 * 3 * ShareGLSL.MAX_POINT_LIGHT + TypeSize.float4 * 3 * ShareGLSL.MAX_SPOT_LIGHT + TypeSize.float4 * 2) / Float32Array.BYTES_PER_ELEMENT;
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// update camera position
 		this.#systemUniformInfo_fragment_data.set([this.camera.x, this.camera.y, this.camera.z], offset);
 		offset += TypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// update resolution
 		this.#systemUniformInfo_fragment_data.set([this.#viewRect[2], this.#viewRect[3]], offset);
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// update GPUBuffer
-		// console.log(this.#systemUniformInfo_fragment_data)
+		passEncoder.setBindGroup(0, systemUniformInfo_vertex.GPUBindGroup);
+		passEncoder.setBindGroup(1, systemUniformInfo_fragment.GPUBindGroup);
+		systemUniformInfo_vertex.GPUBuffer.setSubData(0, this.#systemUniformInfo_vertex_data);
 		systemUniformInfo_fragment.GPUBuffer.setSubData(0, this.#systemUniformInfo_fragment_data);
 	}
-	get postEffect() {return this.#postEffect;}
-	get scene() {return this.#scene;}
-	set scene(value) {this.#scene = value;}
-	get camera() {return this.#camera;}
-	set camera(value) {this.#camera = value;}
-	get y() {return this._y;}
-	get x() {return this._x;}
-	get width() {return this.#width;}
-	get height() {return this.#height;}
 
 	getViewRect(redGPUContext) {
 		return [
@@ -374,15 +349,15 @@ export default class View extends UUID {
 			readPixelCommandEncoder = redGPUContext.device.createCommandEncoder();
 			readPixelBuffer = redGPUContext.device.createBuffer({
 				size: 16 * width * height,
-				usage: globalThis.GPUBufferUsage.COPY_DST | globalThis.GPUBufferUsage.MAP_READ,
+				usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
 			});
 			textureView = {texture: targetTexture, origin: {x: x, y: y, z: 0}};
-			bufferView = {buffer: readPixelBuffer, rowPitch: 256, imageHeight: 1};
+			bufferView = {buffer: readPixelBuffer, rowPitch: Math.max(256, 4 * width * height), imageHeight: 1};
 			textureExtent = {width: width, height: height, depth: 1};
 			readPixelCommandEncoder.copyTextureToBuffer(textureView, bufferView, textureExtent);
 			redGPUContext.device.defaultQueue.submit([readPixelCommandEncoder.finish()]);
 
-			let promise =  new Promise(resolve => {
+			let promise = new Promise(resolve => {
 				readPixelBuffer.mapReadAsync().then(arrayBuffer => {
 					readPixelBuffer.unmap();
 					readPixelBuffer.destroy();

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 18:50:31
+ *   Last modification time of this file - 2020.1.2 21:31:8
  *
  */
 
@@ -14,16 +14,9 @@ export default class BaseTexture extends UUID {
 	#updateList = [];
 	_GPUTexture;
 	_GPUTextureView;
-	constructor() {
-		super()
-	}
-	get GPUTexture() {
-		return this._GPUTexture
-	}
-
-	get GPUTextureView() {
-		return this._GPUTextureView
-	}
+	constructor() {super()}
+	get GPUTexture() {return this._GPUTexture}
+	get GPUTextureView() {return this._GPUTextureView}
 
 	resolve(texture) {
 		this._GPUTexture = texture;
@@ -50,12 +43,7 @@ export default class BaseTexture extends UUID {
 			data[0][data[1]] = this;
 		}
 		this.#updateList.length = 0;
-
 	}
 
-	addUpdateTarget(target, key) {
-		this.#updateList.push([
-			target, key
-		])
-	}
+	addUpdateTarget(target, key) { this.#updateList.push([target, key]) }
 }

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 18:50:31
+ *   Last modification time of this file - 2020.1.2 21:31:8
  *
  */
 
@@ -69,7 +69,7 @@ export default class PostEffect_ZoomBlur extends BasePostEffect {
 		outColor = finalColor;
 	}
 `;
-	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};;
+	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
 	static uniformsBindGroupLayoutDescriptor_material = BasePostEffect.uniformsBindGroupLayoutDescriptor_material;
 	static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
 	static uniformBufferDescriptor_fragment = [
@@ -77,46 +77,29 @@ export default class PostEffect_ZoomBlur extends BasePostEffect {
 		{size: TypeSize.float, valueName: 'centerY'},
 		{size: TypeSize.float, valueName: 'amount'}
 	];
-	constructor(redGPUContext) {
-		super(redGPUContext);
-
-	}
+	constructor(redGPUContext) {super(redGPUContext);}
 	_centerX = 0;
 	_centerY = 0;
 	_amount = 38;
-	get centerX() {
-		return this._centerX;
-	}
-
+	get centerX() {return this._centerX;}
 	set centerX(value) {
-
 		this._centerX = value;
 		float1_Float32Array[0] = this._centerX;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['centerX'], float1_Float32Array)
 	}
-	get centerY() {
-		return this._centerY;
-	}
-
+	get centerY() {return this._centerY;}
 	set centerY(value) {
-
 		this._centerY = value;
 		float1_Float32Array[0] = this._centerY;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['centerY'], float1_Float32Array)
 	}
-	get amount() {
-		return this._amount;
-	}
-
-	set amount(value) {
-		//FIXME - min: 1, max: 100
+	get amount() {return this._amount;}
+	set amount(value) {/*FIXME - min: 1, max: 100*/
 		this._amount = value;
 		float1_Float32Array[0] = this._amount;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['amount'], float1_Float32Array)
 	}
-	get radius() {
-		return this._radius;
-	}
+	get radius() {return this._radius;}
 
 
 }

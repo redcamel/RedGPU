@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.23 14:37:36
+ *   Last modification time of this file - 2020.1.2 21:31:8
  *
  */
 
@@ -22,12 +22,6 @@ export default {
 	})(),
 	hexToRGB_ZeroToOne: function (hex) {
 		let t0, t1;
-		if (hex.indexOf('rgba') > -1) {
-			hex = hex.replace('rgba(', '');
-			hex = hex.replace(')', '');
-			hex = hex.split(',');
-			hex = UTIL.rgb2hex(hex[0], hex[1], hex[2])
-		}
 		if (/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
 			t1 = [];
 			t0 = hex.substring(1).split('');

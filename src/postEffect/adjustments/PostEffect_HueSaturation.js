@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.27 10:47:2
+ *   Last modification time of this file - 2020.1.2 21:31:8
  *
  */
 
@@ -66,38 +66,26 @@ export default class PostEffect_BrightnessContrast extends BasePostEffect {
 		outColor = finalColor;
 	}
 `;
-	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};;
+	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
 	static uniformsBindGroupLayoutDescriptor_material = BasePostEffect.uniformsBindGroupLayoutDescriptor_material;
 	static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
 	static uniformBufferDescriptor_fragment = [
 		{size: TypeSize.float, valueName: 'hue'},
 		{size: TypeSize.float, valueName: 'saturation'}
 	];
-	constructor(redGPUContext) {
-		super(redGPUContext);
-
-	}
 	_hue = 0;
 	_saturation = 0;
-	get hue() {
-		return this._hue;
-	}
-
-	set hue(value) {
-		//FIXME min: -180, max: 180
+	get hue() {return this._hue;}
+	set hue(value) {/*FIXME min: -180, max: 180*/
 		this._hue = value;
 		float1_Float32Array[0] = this._hue;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['hue'], float1_Float32Array)
 	}
-	get saturation() {
-		return this._saturation;
-	}
-
-	set saturation(value) {
-		//FIXME min: -100, max: 100
+	get saturation() {return this._saturation;}
+	set saturation(value) {/*FIXME min: -100, max: 100*/
 		this._saturation = value;
 		float1_Float32Array[0] = this._saturation;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['saturation'], float1_Float32Array)
 	}
-
+	constructor(redGPUContext) {super(redGPUContext);}
 }
