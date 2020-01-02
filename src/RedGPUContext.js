@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 18:50:31
+ *   Last modification time of this file - 2020.1.2 14:24:48
  *
  */
 "use strict";
@@ -40,7 +40,7 @@ let configureSwapChain = function (device, swapChainFormat, context) {
 let glslangModule;
 let glslang;
 let checkGlslang = function () {
-	let promise = new Promise(async (resolve) => {
+	return new Promise(async (resolve) => {
 		if (!glslang) {
 			glslangModule = await import(/* webpackIgnore: true */ 'https://unpkg.com/@webgpu/glslang@0.0.12/dist/web-devel/glslang.js');
 			glslang = await glslangModule.default();
@@ -53,7 +53,6 @@ let checkGlslang = function () {
 			resolve()
 		}
 	});
-	return promise
 };
 export default class RedGPUContext {
 	static useDebugConsole = false;
@@ -91,8 +90,8 @@ export default class RedGPUContext {
 									},
 									emptyTextureView: device.createTexture({
 										size: {width: 1, height: 1, depth: 1,},
-										format: this.swapChainFormat,
-										usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.SAMPLED,
+										format: 'r8unorm',
+										usage:  GPUTextureUsage.SAMPLED,
 									}).createView(),
 									emptyCubeTextureView: device.createTexture({
 										size: {width: 1, height: 1, depth: 1,},
@@ -100,10 +99,10 @@ export default class RedGPUContext {
 										arrayLayerCount: 6,
 										mipLevelCount: 1,
 										sampleCount: 1,
-										format: this.swapChainFormat,
-										usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.SAMPLED,
+										format: 'r8unorm',
+										usage:  GPUTextureUsage.SAMPLED,
 									}).createView({
-										format: 'rgba8unorm',
+										format: 'r8unorm',
 										dimension: 'cube',
 										aspect: 'all',
 										baseMipLevel: 0,

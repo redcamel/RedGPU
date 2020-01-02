@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 17:43:39
+ *   Last modification time of this file - 2020.1.2 14:24:48
  *
  */
 
@@ -90,8 +90,8 @@ export default class BaseObject3D extends DisplayContainer {
 	_geometry;
 	#redGPUContext;
 	//
-	_useDepthTest = true;
-	_depthTestFunc = 'less';
+	_depthWriteEnabled = true;
+	_depthCompare = 'less';
 	_cullMode = 'back';
 	_primitiveTopology = "triangle-list";
 	_blendColorSrc = 'src-alpha';
@@ -189,15 +189,15 @@ export default class BaseObject3D extends DisplayContainer {
 		this._material = v;
 		this.dirtyPipeline = true;/* this.dirtyTransform = true*/
 	}
-	get useDepthTest() {return this._useDepthTest;}
-	set useDepthTest(value) {
+	get depthWriteEnabled() {return this._depthWriteEnabled;}
+	set depthWriteEnabled(value) {
 		this.dirtyPipeline = true;
-		this._useDepthTest = value;
+		this._depthWriteEnabled = value;
 	}
-	get depthTestFunc() {return this._depthTestFunc;}
-	set depthTestFunc(value) {
+	get depthCompare() {return this._depthCompare;}
+	set depthCompare(value) {
 		this.dirtyPipeline = true;
-		this._depthTestFunc = value;
+		this._depthCompare = value;
 	}
 	get cullMode() {return this._cullMode;}
 	set cullMode(value) {

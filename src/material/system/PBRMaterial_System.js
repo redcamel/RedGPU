@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 18:50:31
+ *   Last modification time of this file - 2020.1.2 14:24:48
  *
  */
 
@@ -125,8 +125,8 @@ export default class PBRMaterial_System extends Mix.mix(
 	//#RedGPU#occlusionTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 14 ) uniform sampler uOcclusionSampler;	
 	//#RedGPU#occlusionTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 15 ) uniform texture2D uOcclusionTexture;
 	layout( location = 0 ) out vec4 outColor;
-	layout( location = 1 ) out vec4 outNormalDepthColor;
-	layout( location = 2 ) out vec4 outMouseColorID;
+	
+	layout( location = 1 ) out vec4 out_MouseColorID_Depth;
 	vec2 diffuseTexCoord;
 	vec2 normalTexCoord;
 	vec2 emissiveTexCoord;
@@ -237,8 +237,8 @@ export default class PBRMaterial_System extends Mix.mix(
 			finalColor.a = tAlpha;
 		}
 		outColor = finalColor;
-		outMouseColorID = vec4(vMouseColorID, vec3(0.0));
-		outNormalDepthColor = vec4( N, gl_FragCoord.z/gl_FragCoord.w );
+		out_MouseColorID_Depth = vec4(vMouseColorID, gl_FragCoord.z/gl_FragCoord.w, 0.0, 0.0);
+		
 	}
 `;
 	static PROGRAM_OPTION_LIST = {

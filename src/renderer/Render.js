@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 18:50:31
+ *   Last modification time of this file - 2020.1.2 14:24:48
  *
  */
 
@@ -84,7 +84,68 @@ let renderScene = (_ => {
 					tMaterialChanged = changedMaterial_UUID[tMaterial._UUID]
 				}
 				if (tGeometry) {
-					if (renderToTransparentLayerMode && tPipeline.GPURenderPipeline) {
+					if (tDirtyPipeline || tMaterialChanged) {
+						if (tPipeline instanceof PipelineBasic) {
+							// console.log('tDirtyPipeline', tDirtyPipeline, 'tMaterialChanged', tMaterialChanged)
+							// console.time('tPipeline.update' + tMesh._UUID)
+							tPipeline.update(redGPUContext, redView);
+							currentDebuggerData['dirtyPipelineNum']++
+							// console.timeEnd('tPipeline.update' + tMesh._UUID)
+						}
+					} else {
+						if (renderToTransparentLayerMode == 0 && tMesh.renderToTransparentLayer) {
+							renderToTransparentLayerList.push(tMesh)
+						} else {
+
+							tVisible = 1;
+							if (redView._useFrustumCulling) {
+								geoVolume = tGeometry._volume || tGeometry.volume;
+								radius = geoVolume.xSize * tMesh.matrix[0];
+								radiusTemp = geoVolume.ySize * tMesh.matrix[5];
+								radius = radius < radiusTemp ? radiusTemp : radius;
+								radiusTemp = geoVolume.zSize * tMesh.matrix[10];
+								radius = radius < radiusTemp ? radiusTemp : radius;
+
+								a00 = tMVMatrix[12], a01 = tMVMatrix[13], a02 = tMVMatrix[14],
+
+									frustumPlanes0[0] * a00 + frustumPlanes0[1] * a01 + frustumPlanes0[2] * a02 + frustumPlanes0[3] <= -radius ? tVisible = 0
+										: frustumPlanes1[0] * a00 + frustumPlanes1[1] * a01 + frustumPlanes1[2] * a02 + frustumPlanes1[3] <= -radius ? tVisible = 0
+										: frustumPlanes2[0] * a00 + frustumPlanes2[1] * a01 + frustumPlanes2[2] * a02 + frustumPlanes2[3] <= -radius ? tVisible = 0
+											: frustumPlanes3[0] * a00 + frustumPlanes3[1] * a01 + frustumPlanes3[2] * a02 + frustumPlanes3[3] <= -radius ? tVisible = 0
+												: frustumPlanes4[0] * a00 + frustumPlanes4[1] * a01 + frustumPlanes4[2] * a02 + frustumPlanes4[3] <= -radius ? tVisible = 0
+													: frustumPlanes5[0] * a00 + frustumPlanes5[1] * a01 + frustumPlanes5[2] * a02 + frustumPlanes5[3] <= -radius ? tVisible = 0 : 0
+							}
+							// console.log(tVisible);
+							///////////////////////////////////////
+							if (tVisible) {
+								passEncoder.setPipeline(tPipeline.GPURenderPipeline);
+								if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
+									passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
+									prevVertexBuffer_UUID = tGeometry.interleaveBuffer._UUID
+								}
+								passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹는 매그룹마다 다르니 또 업데이트 해줘야함 -_-
+								if (prevMaterial_UUID != tMaterial._UUID) {
+									passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
+									prevMaterial_UUID = tMaterial._UUID
+								}
+								if (tGeometry.indexBuffer) {
+									if (prevIndexBuffer_UUID != tGeometry.indexBuffer._UUID) {
+										passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
+										prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
+									}
+									passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
+									currentDebuggerData['triangleNum'] += tGeometry.indexBuffer.indexNum / 3
+								} else {
+									passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
+									currentDebuggerData['triangleNum'] += tGeometry.interleaveBuffer.data.length / tGeometry.interleaveBuffer.stride
+								}
+								currentDebuggerData['drawCallNum']++
+							}
+
+							tMesh._prevMaterialUUID = tMaterial._UUID;
+						}
+					}
+					if (renderToTransparentLayerMode) {
 						// if (renderToTransparentLayerMode == 1 && tMesh instanceof Text) {
 						// // 	// let tMTX = new Float32Array(16)
 						// // 	// tMTX[12] = tMesh._x, tMTX[13] = tMesh._y, tMTX[14] = tMesh._z;
@@ -121,68 +182,7 @@ let renderScene = (_ => {
 
 
 					}
-					if (tDirtyPipeline || tMaterialChanged) {
-						if (tPipeline instanceof PipelineBasic) {
-							// console.log('tDirtyPipeline', tDirtyPipeline, 'tMaterialChanged', tMaterialChanged)
-							// console.time('tPipeline.update' + tMesh._UUID)
-							tPipeline.update(redGPUContext, redView);
-							currentDebuggerData['dirtyPipelineNum']++
-							// console.timeEnd('tPipeline.update' + tMesh._UUID)
-						}
-					} else {
-						if (renderToTransparentLayerMode == 0 && tMesh.renderToTransparentLayer) {
-							renderToTransparentLayerList.push(tMesh)
-						} else {
-							if (tPipeline.GPURenderPipeline) {
-								tVisible = 1;
-								if (redView._useFrustumCulling) {
-									geoVolume = tMesh._geometry._volume || tMesh._geometry.volume;
-									radius = geoVolume.xSize * tMesh.matrix[0];
-									radiusTemp = geoVolume.ySize * tMesh.matrix[5];
-									radius = radius < radiusTemp ? radiusTemp : radius;
-									radiusTemp = geoVolume.zSize * tMesh.matrix[10];
-									radius = radius < radiusTemp ? radiusTemp : radius;
 
-									a00 = tMVMatrix[12], a01 = tMVMatrix[13], a02 = tMVMatrix[14],
-
-										frustumPlanes0[0] * a00 + frustumPlanes0[1] * a01 + frustumPlanes0[2] * a02 + frustumPlanes0[3] <= -radius ? tVisible = 0
-											: frustumPlanes1[0] * a00 + frustumPlanes1[1] * a01 + frustumPlanes1[2] * a02 + frustumPlanes1[3] <= -radius ? tVisible = 0
-											: frustumPlanes2[0] * a00 + frustumPlanes2[1] * a01 + frustumPlanes2[2] * a02 + frustumPlanes2[3] <= -radius ? tVisible = 0
-												: frustumPlanes3[0] * a00 + frustumPlanes3[1] * a01 + frustumPlanes3[2] * a02 + frustumPlanes3[3] <= -radius ? tVisible = 0
-													: frustumPlanes4[0] * a00 + frustumPlanes4[1] * a01 + frustumPlanes4[2] * a02 + frustumPlanes4[3] <= -radius ? tVisible = 0
-														: frustumPlanes5[0] * a00 + frustumPlanes5[1] * a01 + frustumPlanes5[2] * a02 + frustumPlanes5[3] <= -radius ? tVisible = 0 : 0
-								}
-								// console.log(tVisible);
-								///////////////////////////////////////
-								if (tVisible) {
-									passEncoder.setPipeline(tPipeline.GPURenderPipeline);
-									if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
-										passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
-										prevVertexBuffer_UUID = tGeometry.interleaveBuffer._UUID
-									}
-									passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹는 매그룹마다 다르니 또 업데이트 해줘야함 -_-
-									if (prevMaterial_UUID != tMaterial._UUID) {
-										passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
-										prevMaterial_UUID = tMaterial._UUID
-									}
-									if (tGeometry.indexBuffer) {
-										if (prevIndexBuffer_UUID != tGeometry.indexBuffer._UUID) {
-											passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
-											prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
-										}
-										passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
-										currentDebuggerData['triangleNum'] += tGeometry.indexBuffer.indexNum / 3
-									} else {
-										passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
-										currentDebuggerData['triangleNum'] += tGeometry.interleaveBuffer.data.length / tGeometry.interleaveBuffer.stride
-									}
-									currentDebuggerData['drawCallNum']++
-								}
-							}
-							tMesh._prevMaterialUUID = tMaterial._UUID;
-						}
-
-					}
 					// materialPropertyCheck
 					////////////////////////
 				}
@@ -479,13 +479,8 @@ let renderView = (redGPUContext, redView, swapChainTexture, mouseEventChecker) =
 				}
 			},
 			{
-				attachment: redView.baseAttachment_depthColorView,
-				resolveTarget: redView.baseAttachment_depthColor_ResolveTargetView,
-				loadValue: {r: 0, g: 0, b: 0, a: 0}
-			},
-			{
-				attachment: redView.baseAttachment_mouseColorIDView,
-				resolveTarget: redView.baseAttachment_mouseColorID_ResolveTargetView,
+				attachment: redView.baseAttachment_mouseColorID_depthView,
+				resolveTarget: redView.baseAttachment_mouseColorID_depth_ResolveTargetView,
 				loadValue: {r: 0, g: 0, b: 0, a: 0}
 			}
 		],
@@ -557,10 +552,7 @@ let renderView = (redGPUContext, redView, swapChainTexture, mouseEventChecker) =
 	// 마우스 이벤트 체크
 	mouseEventChecker.check(redGPUContext, redView);
 	currentDebuggerData['finalRenderTime'] = performance.now() - now;
-	// 업데이트 대상 유니폼 버퍼 갱신
-	i = updateTargetMatrixBufferList.length;
-	while (i--) updateTargetMatrixBufferList[i].GPUBuffer.setSubData(0, updateTargetMatrixBufferList[i].meshFloat32Array);
-	updateTargetMatrixBufferList.length = 0
+
 };
 export default class Render {
 	static clearStateCache = _ => {
@@ -582,6 +574,10 @@ export default class Render {
 			Render.clearStateCache();
 			renderView(redGPUContext, redGPUContext.viewList[i], redGPUContext.swapChain.getCurrentTexture(), this.#mouseEventChecker);
 		}
+		// 업데이트 대상 유니폼 버퍼 갱신
+		i = updateTargetMatrixBufferList.length;
+		while (i--) updateTargetMatrixBufferList[i].GPUBuffer.setSubData(0, updateTargetMatrixBufferList[i].meshFloat32Array);
+		updateTargetMatrixBufferList.length = 0
 		GLTFLoader.animationLooper(time);
 		Debugger.update()
 	}

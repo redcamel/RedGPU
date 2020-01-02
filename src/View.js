@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 18:50:31
+ *   Last modification time of this file - 2020.1.2 14:24:48
  *
  */
 
@@ -35,15 +35,11 @@ export default class View extends UUID {
 	baseAttachment_ResolveTarget;
 	baseAttachment_ResolveTargetView;
 	//
-	baseAttachment_mouseColorID;
-	baseAttachment_mouseColorIDView;
-	baseAttachment_mouseColorID_ResolveTarget;
-	baseAttachment_mouseColorID_ResolveTargetView;
+	baseAttachment_mouseColorID_depth;
+	baseAttachment_mouseColorID_depthView;
+	baseAttachment_mouseColorID_depth_ResolveTarget;
+	baseAttachment_mouseColorID_depth_ResolveTargetView;
 	//
-	baseAttachment_depthColor;
-	baseAttachment_depthColorView;
-	baseAttachment_depthColor_ResolveTarget;
-	baseAttachment_depthColor_ResolveTargetView;
 	//
 	baseDepthStencilAttachment;
 	baseDepthStencilAttachmentView;
@@ -175,16 +171,10 @@ export default class View extends UUID {
 					resolveUsage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED
 				},
 				{
-					key: 'baseAttachment_depthColor',
-					format: redGPUContext.swapChainFormat,
-					usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED,
-					resolveUsage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED
-				},
-				{
-					key: 'baseAttachment_mouseColorID',
+					key: 'baseAttachment_mouseColorID_depth',
 					format: 'rgba32float',
 					usage: GPUTextureUsage.OUTPUT_ATTACHMENT,
-					resolveUsage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC
+					resolveUsage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.SAMPLED
 				}
 			],
 			depthStencilAttachment: {
@@ -377,12 +367,12 @@ export default class View extends UUID {
 				usage: globalThis.GPUBufferUsage.COPY_DST | globalThis.GPUBufferUsage.MAP_READ,
 			});
 			textureView = {texture: targetTexture, origin: {x: x, y: y, z: 0}};
-			bufferView = {buffer: readPixelBuffer, rowPitch: 256, imageHeight: 1};
+			bufferView = {buffer: readPixelBuffer, rowPitch: Math.max(256, 4 * width * height), imageHeight: 1};
 			textureExtent = {width: width, height: height, depth: 1};
 			readPixelCommandEncoder.copyTextureToBuffer(textureView, bufferView, textureExtent);
 			redGPUContext.device.defaultQueue.submit([readPixelCommandEncoder.finish()]);
 
-			let promise =  new Promise(resolve => {
+			let promise = new Promise(resolve => {
 				readPixelBuffer.mapReadAsync().then(arrayBuffer => {
 					readPixelBuffer.unmap();
 					readPixelBuffer.destroy();

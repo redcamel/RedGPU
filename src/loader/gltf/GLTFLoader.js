@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.27 19:6:22
+ *   Last modification time of this file - 2020.1.2 14:24:48
  *
  */
 
@@ -440,7 +440,7 @@ var GLTFLoader;
 				// tJointMesh.geometry = Sphere(redGLTFLoader['redGPUContext'], 0.05, 3, 3, 3);
 				// tJointMesh.material = ColorMaterial(redGLTFLoader['redGPUContext'], '#ff0000');
 				tJointMesh.primitiveTopology = 'line-list';
-				tJointMesh.depthTestFunc = 'never'
+				tJointMesh.depthCompare = 'never'
 			} else requestAnimationFrame(function () {
 				checkJoint(redGLTFLoader, skinInfo, nodes, v)
 			})

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 18:50:31
+ *   Last modification time of this file - 2020.1.2 14:24:48
  *
  */
 
@@ -29,10 +29,10 @@ export default class GridMaterial extends BaseMaterial {
 	${ShareGLSL.GLSL_VERSION}
 	layout( location = 0 ) in vec4 vColor;
 	layout( location = 0 ) out vec4 outColor;
-	layout( location = 1 ) out vec4 outNormalDepthColor;
+	
 	void main() {
 		outColor = vColor;
-		outNormalDepthColor = vec4( vec3(0.0), gl_FragCoord.z/gl_FragCoord.w );
+		
 	}
 	`;
 	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
