@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.2 14:24:48
+ *   Last modification time of this file - 2020.1.2 14:26:4
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -63,7 +63,7 @@ new RedGPU.RedGPUContext(
 
 				tCamera.targetView = tView // optional
 				tCamera2.targetView = tView2 // optional
-				tCamera.distance = 6000
+				tCamera.distance = 10
 				tCamera.speedDistance = 100
 
 				// tScene.grid = tGrid;
@@ -108,9 +108,9 @@ new RedGPU.RedGPUContext(
 				tEffect.bloomStrength = 0.5
 				tView.postEffect.addEffect(tEffect)
 
-				tEffect = new RedGPU.PostEffect_DoF(this);
-				tEffect.focusLength = 1000
-				tView.postEffect.addEffect(tEffect)
+				// tEffect = new RedGPU.PostEffect_DoF(this);
+				// tEffect.focusLength = 1000
+				// tView.postEffect.addEffect(tEffect)
 				// console.log('여기까지 시간은 어찌됨?', performance.now())
 				// tEffect = new RedGPU.PostEffect_Gray(this)
 				// tView.postEffect.addEffect(tEffect)
