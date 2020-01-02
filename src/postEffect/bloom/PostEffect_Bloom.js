@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 18:50:31
+ *   Last modification time of this file - 2020.1.2 21:31:8
  *
  */
 
@@ -24,19 +24,37 @@ export default class PostEffect_Bloom extends BasePostEffect {
 		${ShareGLSL.GLSL_VERSION}
 		void main() {}
 	`;
-	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};;
+	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
 	static uniformsBindGroupLayoutDescriptor_material = BasePostEffect.uniformsBindGroupLayoutDescriptor_material;
 	static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
 	static uniformBufferDescriptor_fragment = BaseMaterial.uniformBufferDescriptor_empty;
 	#blurEffect;
 	#blenderEffect;
 	#thresholdEffect;
-	baseAttachment;
-	baseAttachmentView;
 	#blur;
 	#threshold;
 	#exposure;
 	#bloomStrength;
+	get blur() {return this.#blur;}
+	set blur(value) {
+		this.#blur = value;
+		this.#blurEffect.radius = value;
+	}
+	get threshold() {return this.#threshold;}
+	set threshold(value) {
+		this.#threshold = value;
+		this.#thresholdEffect.threshold = value;
+	}
+	get exposure() {return this.#exposure;}
+	set exposure(value) {
+		this.#exposure = value;
+		this.#blenderEffect.exposure = value;
+	}
+	get bloomStrength() {return this.#bloomStrength;}
+	set bloomStrength(value) {
+		this.#bloomStrength = value;
+		this.#blenderEffect.bloomStrength = value;
+	}
 	constructor(redGPUContext) {
 		super(redGPUContext);
 		this.#thresholdEffect = new PostEffect_Threshold(redGPUContext);
@@ -47,34 +65,7 @@ export default class PostEffect_Bloom extends BasePostEffect {
 		this.exposure = 1;
 		this.bloomStrength = 1.2;
 	}
-	get blur() {
-		return this.#blur;
-	}
-	set blur(value) {
-		this.#blur = value;
-		this.#blurEffect.radius = value;
-	}
-	get threshold() {
-		return this.#threshold;
-	}
-	set threshold(value) {
-		this.#threshold = value;
-		this.#thresholdEffect.threshold = value;
-	}
-	get exposure() {
-		return this.#exposure;
-	}
-	set exposure(value) {
-		this.#exposure = value;
-		this.#blenderEffect.exposure = value;
-	}
-	get bloomStrength() {
-		return this.#bloomStrength;
-	}
-	set bloomStrength(value) {
-		this.#bloomStrength = value;
-		this.#blenderEffect.bloomStrength = value;
-	}
+
 	render(redGPUContext, redView, renderScene, sourceTextureView) {
 		this.checkSize(redGPUContext, redView);
 		this.#thresholdEffect.render(redGPUContext, redView, renderScene, sourceTextureView);

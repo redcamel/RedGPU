@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.2 14:26:4
+ *   Last modification time of this file - 2020.1.2 21:31:8
  *
  */
 
@@ -54,20 +54,15 @@ export default class SkyBoxMaterial extends Mix.mix(
 	static uniformBufferDescriptor_fragment = BaseMaterial.uniformBufferDescriptor_empty;
 
 	_skyBoxTexture;
-	set skyBoxTexture(texture) {
-		// this._skyBoxTexture = null;
+	set skyBoxTexture(texture) {/* this._skyBoxTexture = null;*/
 		this.checkTexture(texture, 'skyBoxTexture');
 	}
-	get skyBoxTexture() {
-		return this._skyBoxTexture
-	}
+	get skyBoxTexture() {return this._skyBoxTexture}
 	constructor(redGPUContext, skyBoxTexture) {
 		super(redGPUContext);
 		this.skyBoxTexture = skyBoxTexture;
 		this.needResetBindingInfo = true;
-
 	}
-
 	checkTexture(texture, textureName) {
 		if (texture) {
 			if (texture._GPUTexture) {

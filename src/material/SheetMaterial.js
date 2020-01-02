@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.2 14:26:4
+ *   Last modification time of this file - 2020.1.2 21:31:8
  *
  */
 
@@ -85,9 +85,7 @@ export default class SheetMaterial extends Mix.mix(
 		{size: TypeSize.float, valueName: 'alpha'}
 	];
 	_frameRate;
-	get frameRate() {
-		return this._frameRate;
-	}
+	get frameRate() {return this._frameRate;}
 	set frameRate(value) {
 		this._frameRate = value;
 		this._perFrameTime = 1000 / this._frameRate

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.2 14:26:4
+ *   Last modification time of this file - 2020.1.2 21:31:8
  *
  */
 
@@ -20,7 +20,6 @@ export default class BasePostEffect extends Mix.mix(
 	static vertexShaderGLSL = ``;
 	static fragmentShaderGLSL = ``;
 	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
-	;
 	static uniformsBindGroupLayoutDescriptor_material = {
 		bindings: [
 			{binding: 0, visibility: GPUShaderStage.FRAGMENT, type: "uniform-buffer"},
@@ -91,10 +90,7 @@ export default class BasePostEffect extends Mix.mix(
 				}
 			},
 			{binding: 1, resource: this.sampler.GPUSampler},
-			{
-				binding: 2,
-				resource: this.sourceTexture
-			}
+			{binding: 2, resource: this.sourceTexture}
 		];
 		this._afterResetBindingInfo();
 	}

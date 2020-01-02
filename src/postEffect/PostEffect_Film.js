@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 18:50:31
+ *   Last modification time of this file - 2020.1.2 21:31:8
  *
  */
 
@@ -79,7 +79,7 @@ export default class PostEffect_Film extends BasePostEffect {
 		outColor = vec4( finalColor, diffuseColor.a );
 	}
 `;
-	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};;
+	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
 	static uniformsBindGroupLayoutDescriptor_material = BasePostEffect.uniformsBindGroupLayoutDescriptor_material;
 	static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
 	static uniformBufferDescriptor_fragment = [
@@ -88,53 +88,35 @@ export default class PostEffect_Film extends BasePostEffect {
 		{size: TypeSize.float, valueName: 'scanlineCount'},
 		{size: TypeSize.float, valueName: 'grayMode'}
 	];
-	constructor(redGPUContext) {
-		super(redGPUContext);
-
-	}
 	_scanlineIntensity = 0.5;
 	_noiseIntensity = 0.5;
 	_scanlineCount = 2048;
 	_grayMode = 0.0;
-	get scanlineIntensity() {
-		return this._scanlineIntensity;
-	}
-
+	get scanlineIntensity() {return this._scanlineIntensity;}
 	set scanlineIntensity(value) {
-
 		this._scanlineIntensity = value;
 		float1_Float32Array[0] = this._scanlineIntensity;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['scanlineIntensity'], float1_Float32Array)
 	}
-	get noiseIntensity() {
-		return this._noiseIntensity;
-	}
-
+	get noiseIntensity() {return this._noiseIntensity;}
 	set noiseIntensity(value) {
-
 		this._noiseIntensity = value;
 		float1_Float32Array[0] = this._noiseIntensity;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['noiseIntensity'], float1_Float32Array)
 	}
-	get scanlineCount() {
-		return this._scanlineCount;
-	}
-
-	set scanlineCount(value) {
-		//FIXME - min: 1, max: 100
+	get scanlineCount() {return this._scanlineCount;}
+	set scanlineCount(value) {/*FIXME - min: 1, max: 100*/
 		this._scanlineCount = value;
 		float1_Float32Array[0] = this._scanlineCount;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['scanlineCount'], float1_Float32Array)
 	}
-	get grayMode() {
-		return this._grayMode;
-	}
-
+	get grayMode() {return this._grayMode;}
 	set grayMode(value) {
 		this._grayMode = value ? 1 : 0;
 		float1_Float32Array[0] = this._grayMode;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['grayMode'], float1_Float32Array)
 	}
+	constructor(redGPUContext) {super(redGPUContext);}
 
 
 }

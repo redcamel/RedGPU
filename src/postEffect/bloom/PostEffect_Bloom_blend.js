@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 18:50:31
+ *   Last modification time of this file - 2020.1.2 21:31:8
  *
  */
 
@@ -55,7 +55,8 @@ export default class PostEffect_Bloom_blend extends BasePostEffect {
 		outColor = finalColor;
 	}
 `;
-	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};;
+	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
+	;
 	static uniformsBindGroupLayoutDescriptor_material = {
 		bindings: [
 			{binding: 0, visibility: GPUShaderStage.FRAGMENT, type: "uniform-buffer"},
@@ -72,28 +73,19 @@ export default class PostEffect_Bloom_blend extends BasePostEffect {
 	blurTexture;
 	_bloomStrength = 15;
 	_exposure = 15;
-	get bloomStrength() {
-		return this._bloomStrength;
-	}
-
+	get bloomStrength() {return this._bloomStrength;}
 	set bloomStrength(value) {
 		this._bloomStrength = value;
 		float1_Float32Array[0] = this._bloomStrength;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['bloomStrength'], float1_Float32Array)
 	}
-
-	get exposure() {
-		return this._exposure;
-	}
-
+	get exposure() {return this._exposure;}
 	set exposure(value) {
 		this._exposure = value;
 		float1_Float32Array[0] = this._exposure;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['exposure'], float1_Float32Array)
 	}
-	constructor(redGPUContext) {
-		super(redGPUContext);
-	}
+	constructor(redGPUContext) {super(redGPUContext);}
 	resetBindingInfo() {
 		this.bindings = [
 			{
@@ -105,14 +97,8 @@ export default class PostEffect_Bloom_blend extends BasePostEffect {
 				}
 			},
 			{binding: 1, resource: this.sampler.GPUSampler},
-			{
-				binding: 2,
-				resource: this.sourceTexture
-			},
-			{
-				binding: 3,
-				resource: this.blurTexture
-			}
+			{binding: 2, resource: this.sourceTexture},
+			{binding: 3, resource: this.blurTexture}
 
 		];
 		this._afterResetBindingInfo();

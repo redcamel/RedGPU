@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.2 14:26:4
+ *   Last modification time of this file - 2020.1.2 21:31:8
  *
  */
 
@@ -58,7 +58,7 @@ export default class PostEffect_DoF_blend extends BasePostEffect {
 		outColor = diffuseColor + blurColor;
 	}
 `;
-	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};;
+	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
 	static uniformsBindGroupLayoutDescriptor_material = {
 		bindings: [
 			{binding: 0, visibility: GPUShaderStage.FRAGMENT, type: "uniform-buffer"},
@@ -75,18 +75,13 @@ export default class PostEffect_DoF_blend extends BasePostEffect {
 	blurTexture;
 	depthTexture;
 	_focusLength = 15;
-	get focusLength() {
-		return this._focusLength;
-	}
-
+	get focusLength() {return this._focusLength;}
 	set focusLength(value) {
 		this._focusLength = value;
 		float1_Float32Array[0] = this._focusLength;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['focusLength'], float1_Float32Array)
 	}
-	constructor(redGPUContext) {
-		super(redGPUContext);
-	}
+	constructor(redGPUContext) {super(redGPUContext);}
 	resetBindingInfo() {
 		this.bindings = [
 			{
@@ -98,18 +93,9 @@ export default class PostEffect_DoF_blend extends BasePostEffect {
 				}
 			},
 			{binding: 1, resource: this.sampler.GPUSampler},
-			{
-				binding: 2,
-				resource: this.sourceTexture
-			},
-			{
-				binding: 3,
-				resource: this.blurTexture
-			},
-			{
-				binding: 4,
-				resource: this.depthTexture
-			}
+			{binding: 2, resource: this.sourceTexture},
+			{binding: 3, resource: this.blurTexture},
+			{binding: 4, resource: this.depthTexture}
 
 		];
 		this._afterResetBindingInfo();

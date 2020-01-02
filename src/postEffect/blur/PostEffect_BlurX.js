@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 18:50:31
+ *   Last modification time of this file - 2020.1.2 21:31:8
  *
  */
 
@@ -66,25 +66,18 @@ export default class PostEffect_BlurX extends BasePostEffect {
 		outColor = finalColor;
 	}
 `;
-	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};;
+	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
 	static uniformsBindGroupLayoutDescriptor_material = BasePostEffect.uniformsBindGroupLayoutDescriptor_material;
 	static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
 	static uniformBufferDescriptor_fragment = [
 		{size: TypeSize.float, valueName: 'size'}
 	];
-	constructor(redGPUContext) {
-		super(redGPUContext);
-
-	}
 	_size = 50;
-	get size() {
-		return this._size;
-	}
-
+	get size() {return this._size;}
 	set size(value) {
 		this._size = value;
 		float1_Float32Array[0] = this._size;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['size'], float1_Float32Array)
 	}
-
+	constructor(redGPUContext) {super(redGPUContext);}
 }

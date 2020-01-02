@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 18:50:31
+ *   Last modification time of this file - 2020.1.2 21:31:8
  *
  */
 import RedGPUContext from "../RedGPUContext.js";
@@ -43,10 +43,7 @@ export default class ShaderModule_GLSL {
 	GPUShaderModule;
 	currentKey;
 	constructor(redGPUContext, type, materialClass, source,) {
-		if (!rootOriginSourceMap[type][materialClass.name]) {
-			rootOriginSourceMap[type][materialClass.name] = new Map();
-			;
-		}
+		if (!rootOriginSourceMap[type][materialClass.name]) rootOriginSourceMap[type][materialClass.name] = new Map();
 		this.#redGPUContext = redGPUContext;
 		this.type = type;
 		this.originSource = source;
@@ -54,7 +51,7 @@ export default class ShaderModule_GLSL {
 		if (!shaderModuleMap[type][materialClass.name]) shaderModuleMap[type][materialClass.name] = {};
 		this.shaderModuleMap = shaderModuleMap[type][materialClass.name];
 		if (!checkMap[type][materialClass.name]) {
-			console.log('type',type);
+			console.log('type', type);
 			console.log(`materialClass.PROGRAM_OPTION_LIST - ${materialClass.name}`, materialClass.PROGRAM_OPTION_LIST[type].length, materialClass.PROGRAM_OPTION_LIST[type]);
 			checkMap[type][materialClass.name] = 1;
 			if (materialClass.PROGRAM_OPTION_LIST[type].length) {
@@ -67,9 +64,7 @@ export default class ShaderModule_GLSL {
 			}
 		}
 		this.searchShaderModule([materialClass.name]);
-
 	}
-
 	searchShaderModule(optionList) {
 		optionList.sort();
 		let searchKey = optionList.join('_');
@@ -88,15 +83,12 @@ export default class ShaderModule_GLSL {
 				tCompileGLSL = this.sourceMap.get(searchKey);
 				console.log('compileGLSL - 캐쉬된놈을 쓴다', this.type, searchKey)
 			} else {
-				if (!this.sourceMap.get(searchKey)) {
-					this.sourceMap.set(searchKey, this.#redGPUContext.glslang.compileGLSL(parseSource(this.originSource, optionList), this.type));
-				}
 				tCompileGLSL = this.sourceMap.get(searchKey);
+				if (!tCompileGLSL) this.sourceMap.set(searchKey, tCompileGLSL = this.#redGPUContext.glslang.compileGLSL(parseSource(this.originSource, optionList), this.type));
 				console.log('compileGLSL - 신규생성을 쓴다', this.type, searchKey)
 			}
 			// console.timeEnd('compileGLSL : ' + this.type + ' / ' + searchKey);
 			// console.log(' 쓴다', tCompileGLSL)
-
 			this.shaderModuleDescriptor = {
 				key: searchKey,
 				code: tCompileGLSL,
@@ -104,9 +96,6 @@ export default class ShaderModule_GLSL {
 			};
 			this.GPUShaderModule = this.#redGPUContext.device.createShaderModule(this.shaderModuleDescriptor);
 			this.shaderModuleMap[searchKey] = this.GPUShaderModule;
-
 		}
-
-
 	}
 }

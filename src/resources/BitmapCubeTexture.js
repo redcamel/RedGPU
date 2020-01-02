@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 18:50:31
+ *   Last modification time of this file - 2020.1.2 21:31:8
  *
  */
 "use strict";
@@ -43,13 +43,12 @@ let makeMipmap = function (redGPUContext, imgList, targetTexture) {
 	const commandEncoder = redGPUContext.device.createCommandEncoder({});
 	imgList.forEach((imgInfo, face) => {
 		result.push(CopyBufferToTexture(commandEncoder, redGPUContext.device, imgInfo.imageDatas, gpuTexture, targetTexture, face));
-
 	});
 	Promise.all(result).then(
 		_ => {
+			redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
 			targetTexture.resolve(gpuTexture);
 			if (targetTexture.onload) targetTexture.onload.call(targetTexture);
-			redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
 		}
 	)
 };

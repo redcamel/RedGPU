@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 18:50:31
+ *   Last modification time of this file - 2020.1.2 21:31:8
  *
  */
 
@@ -64,7 +64,7 @@ export default class PostEffect_Convolution extends BasePostEffect {
 		outColor = vec4((finalColor / fragmentUniforms.kernelWeight).rgb, 1.0);
 	}
 `;
-	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};;
+	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
 	static uniformsBindGroupLayoutDescriptor_material = BasePostEffect.uniformsBindGroupLayoutDescriptor_material;
 	static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
 	static uniformBufferDescriptor_fragment = [
@@ -98,24 +98,13 @@ export default class PostEffect_Convolution extends BasePostEffect {
 	]);
 	_kernel;
 	_kernelWeight;
-	constructor(redGPUContext) {
-		super(redGPUContext);
-		this.kernel = PostEffect_Convolution.NORMAL;
-		console.log('this.uniformBuffer_fragment', this.uniformBuffer_fragment)
-	}
-
-	get kernel() {
-		return this._kernel;
-	}
-
+	get kernel() {return this._kernel;}
 	set kernel(value) {
 		this._kernel = value;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['kernel'], this._kernel);
 		this.kernelWeight = 1
 	}
-	get kernelWeight() {
-		return this._kernelWeight
-	}
+	get kernelWeight() {return this._kernelWeight}
 	set kernelWeight(value) {
 		let sum = 0;
 		let i = this._kernel.length;
@@ -123,6 +112,8 @@ export default class PostEffect_Convolution extends BasePostEffect {
 		this._kernelWeight = sum;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['kernelWeight'], float1_Float32Array)
 	}
-
-
+	constructor(redGPUContext) {
+		super(redGPUContext);
+		this.kernel = PostEffect_Convolution.NORMAL;
+	}
 }

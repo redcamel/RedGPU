@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.27 10:47:2
+ *   Last modification time of this file - 2020.1.2 21:31:8
  *
  */
 
@@ -51,38 +51,26 @@ export default class PostEffect_BrightnessContrast extends BasePostEffect {
 		outColor = finalColor;
 	}
 `;
-	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};;
+	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
 	static uniformsBindGroupLayoutDescriptor_material = BasePostEffect.uniformsBindGroupLayoutDescriptor_material;
 	static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
 	static uniformBufferDescriptor_fragment = [
 		{size: TypeSize.float, valueName: 'brightness'},
 		{size: TypeSize.float, valueName: 'contrast'}
 	];
-	constructor(redGPUContext) {
-		super(redGPUContext);
-
-	}
 	_brightness = 0;
 	_contrast = 0;
-	get brightness() {
-		return this._brightness;
-	}
-
-	set brightness(value) {
-		//FIXME min: -150, max: 150
+	get brightness() {return this._brightness;}
+	set brightness(value) {/*FIXME min: -150, max: 150*/
 		this._brightness = value;
 		float1_Float32Array[0] = this._brightness;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['brightness'], float1_Float32Array)
 	}
-	get contrast() {
-		return this._contrast;
-	}
-
-	set contrast(value) {
-		//FIXME min: -50, max: 100
+	get contrast() {return this._contrast;}
+	set contrast(value) {/*FIXME min: -50, max: 100*/
 		this._contrast = value;
 		float1_Float32Array[0] = this._contrast;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['contrast'], float1_Float32Array)
 	}
-
+	constructor(redGPUContext) {super(redGPUContext);}
 }

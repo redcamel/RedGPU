@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 18:50:31
+ *   Last modification time of this file - 2020.1.2 21:31:8
  *
  */
 "use strict";
@@ -21,14 +21,10 @@ let makeMipmap = function (redGPUContext, imageDatas, targetTexture) {
 	const commandEncoder = redGPUContext.device.createCommandEncoder({});
 	if (targetTexture.useMipmap) {
 		targetTexture.mipMaps = Math.round(Math.log2(Math.max(tW, tH)));
-		if(targetTexture.mipMaps>10) targetTexture.mipMaps = 10
+		if (targetTexture.mipMaps > 10) targetTexture.mipMaps = 10
 	}
 	const textureDescriptor = {
-		size: {
-			width: tW,
-			height: tH,
-			depth: 1,
-		},
+		size: {width: tW, height: tH, depth: 1,},
 		dimension: '2d',
 		format: 'rgba8unorm',
 		arrayLayerCount: targetTexture instanceof BitmapTexture ? 1 : 6,
@@ -41,9 +37,9 @@ let makeMipmap = function (redGPUContext, imageDatas, targetTexture) {
 	// console.log(tW, tH)
 	CopyBufferToTexture(commandEncoder, redGPUContext.device, imageDatas, gpuTexture, targetTexture).then(
 		_ => {
+			redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
 			targetTexture.resolve(gpuTexture);
 			if (targetTexture.onload) targetTexture.onload(targetTexture);
-			redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
 		}
 	)
 };
@@ -64,25 +60,19 @@ export default class BitmapTexture extends BaseTexture {
 		} else {
 			let self = this;
 			new ImageLoader(redGPUContext, src, function (e) {
-
 				if (MIPMAP_TABLE.get(self.mapKey)) {
 					console.log('BitmapTexture - 캐싱사용');
 					self.resolve(MIPMAP_TABLE.get(self.mapKey));
 					if (self.onload) self.onload(self)
 				} else {
-					console.log('BitmapTexture - 신규생성',e);
-					if(e.ok) makeMipmap(redGPUContext, this.imageDatas, self);
+					console.log('BitmapTexture - 신규생성', e);
+					if (e.ok) makeMipmap(redGPUContext, this.imageDatas, self);
 					else {
 						self.resolve(null);
 						if (self.onerror) self.onerror(self)
 					}
 				}
-
-
 			}, ImageLoader.TYPE_2D)
-
 		}
 	}
-
-
 }

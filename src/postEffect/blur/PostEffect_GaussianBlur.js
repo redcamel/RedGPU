@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.27 10:47:2
+ *   Last modification time of this file - 2020.1.2 21:31:8
  *
  */
 
@@ -29,23 +29,18 @@ export default class PostEffect_GaussianBlur extends BasePostEffect {
 	static uniformBufferDescriptor_fragment = BaseMaterial.uniformBufferDescriptor_empty;
 	#blurX;
 	#blurY;
-	baseAttachment;
-	baseAttachmentView;
 	_radius;
+	get radius() {return this._radius;}
+	set radius(value) {
+		this._radius = value;
+		this.#blurX.size = value;
+		this.#blurY.size = value;
+	}
 	constructor(redGPUContext) {
 		super(redGPUContext);
 		this.#blurX = new PostEffect_BlurX(redGPUContext);
 		this.#blurY = new PostEffect_BlurY(redGPUContext);
 		this.radius = 5;
-	}
-	get radius() {
-		return this._radius;
-	}
-	set radius(value) {
-		this._radius = value;
-		this.#blurX.size = value;
-		this.#blurY.size = value;
-
 	}
 	render(redGPUContext, redView, renderScene, sourceTextureView) {
 		this.checkSize(redGPUContext, redView);

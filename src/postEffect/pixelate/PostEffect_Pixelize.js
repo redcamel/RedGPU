@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.27 10:47:2
+ *   Last modification time of this file - 2020.1.2 21:31:8
  *
  */
 
@@ -62,31 +62,19 @@ export default class PostEffect_Pixelize extends BasePostEffect {
 		{size: TypeSize.float, valueName: 'width'},
 		{size: TypeSize.float, valueName: 'height'}
 	];
-	constructor(redGPUContext) {
-		super(redGPUContext);
-
-	}
 	_width = 5;
 	_height = 5;
-	get width() {
-		return this._width;
-	}
-
-	set width(value) {
-		//FIXME min: 0
+	get width() {return this._width;}
+	set width(value) {/*FIXME min: 0*/
 		this._width = value;
 		float1_Float32Array[0] = this._width;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['width'], float1_Float32Array)
 	}
-	get height() {
-		return this._height;
-	}
-
-	set height(value) {
-		//FIXME min: 0
+	get height() {return this._height;}
+	set height(value) {/*FIXME min: 0*/
 		this._height = value;
 		float1_Float32Array[0] = this._height;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['height'], float1_Float32Array)
 	}
-
+	constructor(redGPUContext) {super(redGPUContext);}
 }

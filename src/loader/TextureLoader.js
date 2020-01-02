@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 18:50:31
+ *   Last modification time of this file - 2020.1.2 21:31:8
  *
  */
 "use strict";
@@ -17,15 +17,14 @@ export default class TextureLoader extends UUID {
 		let loaded, check;
 		srcInfoList = srcInfoList || [];
 		loaded = 0;
-
 		check = _ => {
 			loaded++;
-			if(progressCallback) progressCallback.call(this,{
-				totalNum : srcInfoList.length,
-				loaded : loaded
+			if (progressCallback) progressCallback.call(this, {
+				totalNum: srcInfoList.length,
+				loaded: loaded
 			});
 			if (loaded == srcInfoList.length) {
-				requestAnimationFrame(_=> {
+				requestAnimationFrame(_ => {
 					if (callback) callback.call(this, this)
 				})
 			}
@@ -55,7 +54,7 @@ export default class TextureLoader extends UUID {
 					check();
 				},
 				function (e) {
-					console.log('onerror', this,e);
+					console.log('onerror', this, e);
 					t0.loadSuccess = false;
 					t0.loadEnd = true;
 					check();
@@ -67,6 +66,6 @@ export default class TextureLoader extends UUID {
 		// console.log(this)
 	}
 	getTextureByIndex(index) {
-		if(this.textures[index]) return this.textures[index].texture
+		if (this.textures[index]) return this.textures[index].texture
 	}
 }
