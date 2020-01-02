@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 17:2:44
+ *   Last modification time of this file - 2020.1.2 20:56:47
  *
  */
 
@@ -20,7 +20,7 @@ export default function CopyBufferToTexture(commandEncoder, device, imageDatas, 
 			let rowPitch = info.rowPitch;
 			const textureDataBuffer = device.createBuffer({
 				size: data.byteLength + data.byteLength % 4,
-				usage: globalThis.GPUBufferUsage.COPY_DST | globalThis.GPUBufferUsage.COPY_SRC,
+				usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC,
 			});
 			// console.log(imageData)
 			textureDataBuffer.setSubData(0, data);

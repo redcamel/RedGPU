@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 18:50:31
+ *   Last modification time of this file - 2020.1.2 20:56:47
  *
  */
 
@@ -13,7 +13,7 @@ import UUID from "../base/UUID.js";
 import UTIL from "../util/UTIL.js";
 
 export default class UniformBufferDescriptor {
-	constructor(redStruct = [], usage = globalThis.GPUBufferUsage.UNIFORM | globalThis.GPUBufferUsage.COPY_DST) {
+	constructor(redStruct = [], usage = GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST) {
 		if (!Array.isArray(redStruct)) UTIL.throwFunc(`${this.constructor.name} - only allow Array Instance. / inputValue : ${redStruct} { type : ${typeof redStruct} }`);
 		this.redStruct = JSON.parse(JSON.stringify(redStruct));
 		this.redStructOffsetMap = {};

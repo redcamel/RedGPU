@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.2 14:26:4
+ *   Last modification time of this file - 2020.1.2 20:56:47
  *
  */
 "use strict";
@@ -69,7 +69,7 @@ export default class RedGPUContext {
 			let state = true;
 			if (navigator.gpu) {
 				navigator.gpu.requestAdapter(
-					// {powerPreference: "high-performance"}
+					{powerPreference: "high-performance"}
 				)
 					.then(adapter => {
 						adapter.requestDevice({

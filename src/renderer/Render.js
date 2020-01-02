@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.2 14:26:4
+ *   Last modification time of this file - 2020.1.2 20:56:47
  *
  */
 
@@ -496,6 +496,9 @@ let renderView = (redGPUContext, redView, swapChainTexture, mouseEventChecker) =
 	let mainRenderPassEncoder = mainRenderCommandEncoder.beginRenderPass(renderPassDescriptor);
 	// 시스템 유니폼 업데이트
 	redView.updateSystemUniform(mainRenderPassEncoder, redGPUContext);
+	let tViewRect = redView.viewRect;
+	mainRenderPassEncoder.setViewport(0, 0, tViewRect[2], tViewRect[3], 0, 1);
+	mainRenderPassEncoder.setScissorRect(0, 0, tViewRect[2], tViewRect[3]);
 	// render skyBox, grid, axis
 	renderOptions(redGPUContext, redView, mainRenderPassEncoder);
 	// 실제 Scene렌더
