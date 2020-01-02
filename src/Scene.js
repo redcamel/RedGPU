@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 18:50:31
+ *   Last modification time of this file - 2020.1.2 15:32:35
  *
  */
 
@@ -16,7 +16,6 @@ import AmbientLight from "./light/AmbientLight.js";
 import SpotLight from "./light/SpotLight.js";
 
 export default class Scene extends DisplayContainer {
-
 	#backgroundColor = '#000';
 	#backgroundColorAlpha = 1;
 	#backgroundColorRGBA = [0, 0, 0, this.#backgroundColorAlpha];
@@ -27,10 +26,6 @@ export default class Scene extends DisplayContainer {
 	#grid;
 	#axis;
 	#skyBox;
-	constructor() {
-		super()
-	}
-
 	get grid() {return this.#grid;}
 	set grid(value) {this.#grid = value;}
 	get axis() {return this.#axis;}
@@ -50,21 +45,20 @@ export default class Scene extends DisplayContainer {
 	get pointLightList() {return this.#pointLightList}
 	get ambientLight() {return this.#ambientLight}
 	get spotLightList() {return this.#spotLightList}
-
-
+	constructor() {super()}
 	addLight(light) {
 		switch (light.constructor) {
 			case DirectionalLight:
-				if (this.#directionalLightList.length == ShareGLSL.MAX_DIRECTIONAL_LIGHT) UTIL.throwFunc(`addLight : DirectionalLight - Up to ${ShareGLSL.MAX_DIRECTIONAL_LIGHT} are allowed.`);
+				if (this.#directionalLightList.length === ShareGLSL.MAX_DIRECTIONAL_LIGHT) UTIL.throwFunc(`addLight : DirectionalLight - Up to ${ShareGLSL.MAX_DIRECTIONAL_LIGHT} are allowed.`);
 				this.#directionalLightList.push(light);
 				break;
 			case PointLight:
-				if (this.#pointLightList.length == ShareGLSL.MAX_POINT_LIGHT) UTIL.throwFunc(`addLight : PointLight - Up to ${ShareGLSL.MAX_POINT_LIGHT} are allowed.`);
+				if (this.#pointLightList.length === ShareGLSL.MAX_POINT_LIGHT) UTIL.throwFunc(`addLight : PointLight - Up to ${ShareGLSL.MAX_POINT_LIGHT} are allowed.`);
 				this.#pointLightList.push(light);
 				break;
 			case SpotLight:
 				UTIL.throwFunc(`addLight : spotLightList -아직사용할 수없는 유형의 라이트`);
-				// if (this.#spotLightList.length == ShareGLSL.MAX_SPOT_LIGHT) UTIL.throwFunc(`addLight : spotLightList - Up to ${ShareGLSL.MAX_SPOT_LIGHT} are allowed.`);
+				// if (this.#spotLightList.length === ShareGLSL.MAX_SPOT_LIGHT) UTIL.throwFunc(`addLight : spotLightList - Up to ${ShareGLSL.MAX_SPOT_LIGHT} are allowed.`);
 				// this.#spotLightList.push(light);
 				break;
 			case AmbientLight:
@@ -74,7 +68,6 @@ export default class Scene extends DisplayContainer {
 				UTIL.throwFunc(`addLight : only allow BaseLight Instance - inputValue : ${light} { type : ${typeof light} }`);
 		}
 	}
-
 	removeLight(light) {
 		let tIndex;
 		switch (light.constructor) {
@@ -103,5 +96,4 @@ export default class Scene extends DisplayContainer {
 		this.#spotLightList.length = 0;
 		this.#ambientLight = null
 	}
-
 }
