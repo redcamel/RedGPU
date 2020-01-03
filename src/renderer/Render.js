@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.3 15:45:13
+ *   Last modification time of this file - 2020.1.3 17:3:50
  *
  */
 
@@ -434,10 +434,18 @@ let renderPostEffect = (redGPUContext, redView) => {
 	}
 	return last_effect_baseAttachment
 };
-let renderTransparentLayerList = (redGPUContext, redView, mainRenderPassEncoder) => {
-	if (renderToTransparentLayerList.length) renderScene(redGPUContext, redView, mainRenderPassEncoder, null, renderToTransparentLayerList, null, 1);
+let renderTransparentLayerList = (redGPUContext, redView, passEncoder) => {
+	if (renderToTransparentLayerList.length) renderScene(redGPUContext, redView, passEncoder, null, renderToTransparentLayerList, null, 1);
 	renderToTransparentLayerList.length = 0;
 };
+let renderLightDebugger = (redGPUContext,redView,passEncoder)=>{
+	if (redView.debugLightList.length) {
+		let cache_useFrustumCulling = redView.useFrustumCulling;
+		redView.useFrustumCulling = false;
+		renderScene(redGPUContext, redView, passEncoder, null, redView.debugLightList);
+		redView.useFrustumCulling = cache_useFrustumCulling;
+	}
+}
 let copyToFinalTexture = (redGPUContext, redView, commandEncoder, lastTexture, dstTexture) => {
 	let tViewRect = redView.viewRect;
 	let tX = tViewRect[0];
@@ -520,25 +528,8 @@ let renderView = (redGPUContext, redView, swapChainTexture, mouseEventChecker) =
 	// }
 	// textToTransparentLayerList.length = 0;
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// 라이트 디버거 렌더 - FIXME - 이거 View가 먹어야겠군
-	let tOptionRenderList = [];
-	i = Math.max(tScene.directionalLightList.length, tScene.pointLightList.length, tScene.spotLightList.length);
-	if (i) {
-		let cache_useFrustumCulling = redView.useFrustumCulling;
-		redView.useFrustumCulling = false;
-		while (i--) {
-			let tLight;
-			tLight = tScene.directionalLightList[i];
-			if (tLight && tLight.useDebugMesh) tOptionRenderList.push(tLight._debugMesh);
-			tLight = tScene.pointLightList[i];
-			if (tLight && tLight.useDebugMesh) tOptionRenderList.push(tLight._debugMesh);
-			tLight = tScene.spotLightList[i];
-			if (tLight && tLight.useDebugMesh) tOptionRenderList.push(tLight._debugMesh)
-		}
-		renderScene(redGPUContext, redView, mainRenderPassEncoder, null, tOptionRenderList);
-		redView.useFrustumCulling = cache_useFrustumCulling;
-	}
-	tOptionRenderList.length = 0;
+	// 라이트 디버거 렌더
+	renderLightDebugger(redGPUContext,redView,mainRenderPassEncoder)
 	mainRenderPassEncoder.endPass();
 	currentDebuggerData['baseRenderTime'] = performance.now() - now;
 	//////////////////////////////////////////////////////////////////////////////////////////

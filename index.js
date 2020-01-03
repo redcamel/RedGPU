@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.3 15:45:13
+ *   Last modification time of this file - 2020.1.3 17:3:50
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -73,21 +73,21 @@ new RedGPU.RedGPUContext(
 				tLight.x = 10
 				tLight.y = 10
 				tLight.z = 10
-				tLight.useDebugMesh = true
+				// tLight.useDebugMesh = true
 				tScene.addLight(tLight)
 
 				tLight = new RedGPU.DirectionalLight(this, '#ff0000', 0.5)
 				tLight.x = -10
 				tLight.y = -10
 				tLight.z = -10
-				tLight.useDebugMesh = true
+				// tLight.useDebugMesh = true
 				tScene.addLight(tLight)
 
 				tLight = new RedGPU.DirectionalLight(this, '#00ff00', 0.5)
 				tLight.x = -10
 				tLight.y = 20
 				tLight.z = 20
-				tLight.useDebugMesh = true
+				// tLight.useDebugMesh = true
 				tScene.addLight(tLight)
 
 

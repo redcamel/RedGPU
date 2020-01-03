@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.27 21:13:29
+ *   Last modification time of this file - 2020.1.3 17:3:50
  *
  */
 
@@ -135,7 +135,7 @@ new RedGPU.RedGPUContext(
 
 							tMesh.x = (t0) * 30 - 30 * max / 2
 							tMesh.scaleX = tMesh.scaleY = tMesh.scaleZ = 25
-							tScene.addChild(tMesh)
+
 							let targetMaterial = matList[t0]
 							console.log(targetMaterial)
 							var setMaterial = function (target, reculsive) {
@@ -153,6 +153,9 @@ new RedGPU.RedGPUContext(
 
 							};
 							setMaterial(tMesh, true)
+							setTimeout(_=>{
+								tScene.addChild(tMesh)
+							},100*t0)
 						},
 						new RedGPU.BitmapCubeTexture(this, [
 							'../assets/cubemap/posx.jpg',
@@ -177,29 +180,29 @@ new RedGPU.RedGPUContext(
 		);
 
 
-		let self = this
-		new RedGPU.GLTFLoader(self, '../assets/gltf/breakDance/', 'scene.gltf', function (v) {
-			tScene.addChild(v['resultMesh'])
-			v['resultMesh'].scaleX = v['resultMesh'].scaleY = v['resultMesh'].scaleZ = 0.01
-			v['resultMesh'].x = (max) * 30 - 30 * max / 2
-			v['resultMesh'].z = 30
-			var i = matList.length
-			while (i--) {
-				let t0 = i
-				setTimeout(_=>{
-					new RedGPU.GLTFLoader(self,  '../assets/gltf/breakDance/', 'scene.gltf', function (v) {
-						tScene.addChild(v['resultMesh'])
-						v['resultMesh'].scaleX = v['resultMesh'].scaleY = v['resultMesh'].scaleZ = 0.01
-						v['resultMesh'].x = (t0) * 30 - 30 * max / 2
-						v['resultMesh'].z = 30
-						let targetMaterial = matList[t0]
-						console.log(targetMaterial)
-
-
-					})
-				},i*50)
-			}
-		})
+		// let self = this
+		// new RedGPU.GLTFLoader(self, '../assets/gltf/breakDance/', 'scene.gltf', function (v) {
+		// 	tScene.addChild(v['resultMesh'])
+		// 	v['resultMesh'].scaleX = v['resultMesh'].scaleY = v['resultMesh'].scaleZ = 0.01
+		// 	v['resultMesh'].x = (max) * 30 - 30 * max / 2
+		// 	v['resultMesh'].z = 30
+		// 	var i = matList.length
+		// 	while (i--) {
+		// 		let t0 = i
+		// 		setTimeout(_=>{
+		// 			new RedGPU.GLTFLoader(self,  '../assets/gltf/breakDance/', 'scene.gltf', function (v) {
+		// 				tScene.addChild(v['resultMesh'])
+		// 				v['resultMesh'].scaleX = v['resultMesh'].scaleY = v['resultMesh'].scaleZ = 0.01
+		// 				v['resultMesh'].x = (t0) * 30 - 30 * max / 2
+		// 				v['resultMesh'].z = 30
+		// 				let targetMaterial = matList[t0]
+		// 				console.log(targetMaterial)
+		//
+		//
+		// 			})
+		// 		},i*50)
+		// 	}
+		// })
 
 		new RedGPU.GLTFLoader(
 			this, // redGL
@@ -249,31 +252,31 @@ new RedGPU.RedGPUContext(
 		// );
 
 
-		new RedGPU.GLTFLoader(
-			this, // redGL
-			'https://cdn.rawgit.com/KhronosGroup/glTF-Blender-Exporter/0e23c773bf27dad67d2c25f060370d6fa012d87d/polly/', 'project_polly.gltf',
-			function (v) { // callBack
-				console.log(v)
-				let tMesh = v['resultMesh']
-				tMesh.scaleX = tMesh.scaleY = tMesh.scaleZ = 100
-
-				// v['resultMesh'].scaleX = v['resultMesh'].scaleY = v['resultMesh'].scaleZ = 1
-				// tScene.addChild({children:[tMesh.children[2],tMesh.children[8]]})
-				// tScene.addChild({children:[tMesh.children[2]]})
-
-				tScene.addChild(tMesh)
-
-			},
-			// new RedGPU.BitmapCubeTexture(this, [
-			// 	'../assets/cubemap/SwedishRoyalCastle/px.jpg',
-			// 	'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
-			// 	'../assets/cubemap/SwedishRoyalCastle/py.jpg',
-			// 	'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
-			// 	'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
-			// 	'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
-			//
-			// ])
-		);
+		// new RedGPU.GLTFLoader(
+		// 	this, // redGL
+		// 	'https://cdn.rawgit.com/KhronosGroup/glTF-Blender-Exporter/0e23c773bf27dad67d2c25f060370d6fa012d87d/polly/', 'project_polly.gltf',
+		// 	function (v) { // callBack
+		// 		console.log(v)
+		// 		let tMesh = v['resultMesh']
+		// 		tMesh.scaleX = tMesh.scaleY = tMesh.scaleZ = 100
+		//
+		// 		// v['resultMesh'].scaleX = v['resultMesh'].scaleY = v['resultMesh'].scaleZ = 1
+		// 		// tScene.addChild({children:[tMesh.children[2],tMesh.children[8]]})
+		// 		// tScene.addChild({children:[tMesh.children[2]]})
+		//
+		// 		tScene.addChild(tMesh)
+		//
+		// 	},
+		// 	// new RedGPU.BitmapCubeTexture(this, [
+		// 	// 	'../assets/cubemap/SwedishRoyalCastle/px.jpg',
+		// 	// 	'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
+		// 	// 	'../assets/cubemap/SwedishRoyalCastle/py.jpg',
+		// 	// 	'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
+		// 	// 	'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
+		// 	// 	'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
+		// 	//
+		// 	// ])
+		// );
 
 		// new RedGPU.GLTFLoader(
 		// 	this, // redGL
