@@ -2,14 +2,11 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.3 15:9:31
+ *   Last modification time of this file - 2020.1.3 15:45:13
  *
  */
 import RedGPUContext from "../RedGPUContext.js";
 import RedGPUWorker from "../base/RedGPUWorker.js";
-//TODO 정리해야함
-//TODO 정리해야함
-//TODO 정리해야함
 //TODO 정리해야함
 const rootOriginSourceMap = {vertex: {}, fragment: {}};
 const shaderModuleMap = {vertex: {}, fragment: {}};
@@ -18,7 +15,7 @@ const parseSource = function (tSource, replaceList) {
 	tSource = JSON.parse(JSON.stringify(tSource));
 	if (RedGPUContext.useDebugConsole) console.time('searchTime :' + replaceList);
 	let i = replaceList.length;
-	while (i--) tSource = tSource.replace(new RegExp(`\/\/\#RedGPU\#${replaceList[i]}\#`, 'gi'), '')
+	while (i--) tSource = tSource.replace(new RegExp(`\/\/\#RedGPU\#${replaceList[i]}\#`, 'gi'), '');
 	if (RedGPUContext.useDebugConsole) console.timeEnd('searchTime :' + replaceList);
 	return tSource
 };

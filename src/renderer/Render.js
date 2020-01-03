@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.2 20:56:47
+ *   Last modification time of this file - 2020.1.3 15:45:13
  *
  */
 
@@ -520,7 +520,7 @@ let renderView = (redGPUContext, redView, swapChainTexture, mouseEventChecker) =
 	// }
 	// textToTransparentLayerList.length = 0;
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// 라이트 디버거 렌더
+	// 라이트 디버거 렌더 - FIXME - 이거 View가 먹어야겠군
 	let tOptionRenderList = [];
 	i = Math.max(tScene.directionalLightList.length, tScene.pointLightList.length, tScene.spotLightList.length);
 	if (i) {

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 17:2:44
+ *   Last modification time of this file - 2020.1.3 15:45:13
  *
  */
 
@@ -21,13 +21,11 @@ export default class ImageLoader extends UUID {
 	constructor(redGPUContext, src, callback, type = ImageLoader.TYPE_2D) {
 		super();
 		this.callback = callback;
-		if (type == ImageLoader.TYPE_2D) {
+		if (type === ImageLoader.TYPE_2D) {
 			let path = location.pathname.split('/');
 			if (path.length > 1) path.pop();
 			let targetSRC = location.origin + (path.join('/')) + '/' + src;
-			if (src.includes(';base64,') || src.includes('://')) {
-				targetSRC = src
-			}
+			if (src.includes(';base64,') || src.includes('://')) targetSRC = src;
 			if (SRC_MAP[targetSRC]) {
 				if (SRC_MAP[targetSRC].loaded) {
 					console.log('곧장 맵찾으러감');
@@ -50,14 +48,14 @@ export default class ImageLoader extends UUID {
 						SRC_MAP[targetSRC]['imageDatas'] = result['imageDatas'];
 						SRC_MAP[targetSRC].tempList.forEach(loader => {
 							loader['imageDatas'] = SRC_MAP[targetSRC]['imageDatas'];
-							if (loader.callback) loader.callback.call(loader,result)
+							if (loader.callback) loader.callback.call(loader, result)
 						});
 						SRC_MAP[targetSRC].tempList.length = 0
 					})
 					.catch(result => {
 						console.log('로딩실패!', result);
 						SRC_MAP[targetSRC].tempList.forEach(loader => {
-							if (loader.callback) loader.callback.call(loader,result)
+							if (loader.callback) loader.callback.call(loader, result)
 						});
 						SRC_MAP[targetSRC].tempList.length = 0
 					});
@@ -69,7 +67,6 @@ export default class ImageLoader extends UUID {
 			let loadCount = 0;
 			let imgList = [];
 			let srcList = src;
-
 			srcList.forEach((src, face) => {
 				if (!src) {
 					// console.log('src')
@@ -80,7 +77,6 @@ export default class ImageLoader extends UUID {
 					if (src.includes(';base64,') || src.includes('://')) {
 						targetSRC = src
 					}
-
 					if (SRC_MAP[targetSRC]) {
 						if (SRC_MAP[targetSRC].loaded) {
 							console.log('곧장 맵찾으러감');
@@ -111,12 +107,11 @@ export default class ImageLoader extends UUID {
 									SRC_MAP[targetSRC]['imgList'] = imgList;
 									SRC_MAP[targetSRC]['maxW'] = maxW;
 									SRC_MAP[targetSRC]['maxH'] = maxH;
-
 									SRC_MAP[targetSRC].tempList.forEach(loader => {
 										loader['imgList'] = SRC_MAP[targetSRC]['imgList'];
 										loader['maxW'] = SRC_MAP[targetSRC]['maxW'];
 										loader['maxH'] = SRC_MAP[targetSRC]['maxH'];
-										if (loader.callback) loader.callback.call(loader,result)
+										if (loader.callback) loader.callback.call(loader, result)
 									});
 									SRC_MAP[targetSRC].tempList.length = 0
 								}
@@ -125,13 +120,11 @@ export default class ImageLoader extends UUID {
 							.catch(result => {
 								console.log('로딩실패!', result);
 								SRC_MAP[targetSRC].tempList.forEach(loader => {
-									if (loader.callback) loader.callback.call(loader,result)
+									if (loader.callback) loader.callback.call(loader, result)
 								});
 								SRC_MAP[targetSRC].tempList.length = 0
 							});
 					}
-
-
 				}
 			})
 		}
