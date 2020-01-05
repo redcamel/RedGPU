@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.2 14:26:4
+ *   Last modification time of this file - 2020.1.3 17:3:50
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -54,6 +54,7 @@ new RedGPU.RedGPUContext(
 				let tCamera2 = new RedGPU.ObitController(this)
 				// tGrid.centerColor = '#ff0000'
 				tScene2.backgroundColor = '#ff0000'
+				tScene2.backgroundColorAlpha = 1
 
 				tView = new RedGPU.View(this, tScene, tCamera)
 				tView2 = new RedGPU.View(this, tScene2, tCamera2)
@@ -73,21 +74,21 @@ new RedGPU.RedGPUContext(
 				tLight.x = 10
 				tLight.y = 10
 				tLight.z = 10
-				tLight.useDebugMesh=true
+				// tLight.useDebugMesh = true
 				tScene.addLight(tLight)
 
 				tLight = new RedGPU.DirectionalLight(this, '#ff0000', 0.5)
 				tLight.x = -10
 				tLight.y = -10
 				tLight.z = -10
-				tLight.useDebugMesh=true
+				// tLight.useDebugMesh = true
 				tScene.addLight(tLight)
 
 				tLight = new RedGPU.DirectionalLight(this, '#00ff00', 0.5)
 				tLight.x = -10
 				tLight.y = 20
 				tLight.z = 20
-				tLight.useDebugMesh=true
+				// tLight.useDebugMesh = true
 				tScene.addLight(tLight)
 
 
@@ -106,7 +107,7 @@ new RedGPU.RedGPUContext(
 				let tEffect
 				tEffect = new RedGPU.PostEffect_Bloom(this);
 				tEffect.bloomStrength = 0.5
-				tView.postEffect.addEffect(tEffect)
+				// tView.postEffect.addEffect(tEffect)
 
 				// tEffect = new RedGPU.PostEffect_DoF(this);
 				// tEffect.focusLength = 1000
@@ -160,7 +161,7 @@ new RedGPU.RedGPUContext(
 				// tView.postEffect.addEffect(tEffect)
 
 
-				// this.addView(tView2)
+				this.addView(tView2)
 				tView2.setLocation(100, 200)
 
 

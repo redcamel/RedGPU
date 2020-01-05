@@ -36,10 +36,24 @@ export default class Scene extends DisplayContainer {
 	set backgroundColor(value) {
 		this.#backgroundColor = value;
 		let rgb = UTIL.hexToRGB_ZeroToOne(value);
-		this.#backgroundColorRGBA = [...rgb, this.#backgroundColorAlpha]
+		this.#backgroundColorRGBA = [
+			rgb[0] * this.#backgroundColorAlpha,
+			rgb[1] * this.#backgroundColorAlpha,
+			rgb[2] * this.#backgroundColorAlpha,
+			this.#backgroundColorAlpha,
+		]
 	}
 	get backgroundColorAlpha() {return this.#backgroundColorAlpha;}
-	set backgroundColorAlpha(value) {this.#backgroundColorAlpha = this.#backgroundColorRGBA[3] = value;}
+	set backgroundColorAlpha(value) {
+		this.#backgroundColorAlpha =value;
+		let rgb = UTIL.hexToRGB_ZeroToOne(	this.#backgroundColor );
+		this.#backgroundColorRGBA = [
+			rgb[0] * this.#backgroundColorAlpha,
+			rgb[1] * this.#backgroundColorAlpha,
+			rgb[2] * this.#backgroundColorAlpha,
+			this.#backgroundColorAlpha,
+		]
+	}
 	get backgroundColorRGBA() {return this.#backgroundColorRGBA;}
 	get directionalLightList() {return this.#directionalLightList}
 	get pointLightList() {return this.#pointLightList}

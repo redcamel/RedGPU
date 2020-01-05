@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.2 20:56:47
+ *   Last modification time of this file - 2020.1.3 17:3:50
  *
  */
 
@@ -43,6 +43,8 @@ export default class View extends UUID {
 	baseDepthStencilAttachmentView;
 	//
 	#postEffect;
+	//
+	debugLightList = [];
 	//
 	mouseX = 0;
 	mouseY = 0;
@@ -231,6 +233,7 @@ export default class View extends UUID {
 		// update light counts
 		offset = 0;
 		this.#systemUniformInfo_fragment_data.set([this.scene.directionalLightList.length, this.scene.pointLightList.length, this.scene.spotLightList.length], offset);
+		this.debugLightList.length = 0
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// update directionalLightList
 		i = 0;
@@ -243,6 +246,7 @@ export default class View extends UUID {
 				offset += TypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
 				this.#systemUniformInfo_fragment_data.set([tLight._x, tLight._y, tLight._z, tLight._intensity], offset);
 				offset += TypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
+				if(tLight.useDebugMesh) this.debugLightList.push(tLight._debugMesh)
 			}
 		}
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -259,6 +263,7 @@ export default class View extends UUID {
 				offset += TypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
 				this.#systemUniformInfo_fragment_data.set([tLight._radius], offset);
 				offset += TypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
+				if(tLight.useDebugMesh) this.debugLightList.push(tLight._debugMesh)
 			}
 		}
 		offset = (TypeSize.float4 + TypeSize.float4 * 2 * ShareGLSL.MAX_DIRECTIONAL_LIGHT + TypeSize.float4 * 3 * ShareGLSL.MAX_POINT_LIGHT) / Float32Array.BYTES_PER_ELEMENT;
@@ -282,6 +287,7 @@ export default class View extends UUID {
 				offset += TypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
 				this.#systemUniformInfo_fragment_data.set([tLight.cutoff, tLight.exponent], offset);
 				offset += TypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
+				if(tLight.useDebugMesh) this.debugLightList.push(tLight._debugMesh)
 			}
 		}
 		offset = (TypeSize.float4 + TypeSize.float4 * 2 * ShareGLSL.MAX_DIRECTIONAL_LIGHT + TypeSize.float4 * 3 * ShareGLSL.MAX_POINT_LIGHT + TypeSize.float4 * 3 * ShareGLSL.MAX_SPOT_LIGHT + TypeSize.float4 * 2) / Float32Array.BYTES_PER_ELEMENT;
