@@ -54,6 +54,7 @@ new RedGPU.RedGPUContext(
 				let tCamera2 = new RedGPU.ObitController(this)
 				// tGrid.centerColor = '#ff0000'
 				tScene2.backgroundColor = '#ff0000'
+				tScene2.backgroundColorAlpha = 1
 
 				tView = new RedGPU.View(this, tScene, tCamera)
 				tView2 = new RedGPU.View(this, tScene2, tCamera2)
@@ -106,7 +107,7 @@ new RedGPU.RedGPUContext(
 				let tEffect
 				tEffect = new RedGPU.PostEffect_Bloom(this);
 				tEffect.bloomStrength = 0.5
-				tView.postEffect.addEffect(tEffect)
+				// tView.postEffect.addEffect(tEffect)
 
 				// tEffect = new RedGPU.PostEffect_DoF(this);
 				// tEffect.focusLength = 1000
@@ -160,7 +161,7 @@ new RedGPU.RedGPUContext(
 				// tView.postEffect.addEffect(tEffect)
 
 
-				// this.addView(tView2)
+				this.addView(tView2)
 				tView2.setLocation(100, 200)
 
 
