@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.6 17:52:1
+ *   Last modification time of this file - 2020.1.6 18:57:8
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -40,7 +40,7 @@ new RedGPU.RedGPUContext(
 				console.log('텍스쳐 로딩완료', textureLoader)
 				console.timeEnd('텍스쳐 로딩속도')
 				console.log('로딩완료된 시점의 시간은? 어찌됨?', performance.now())
-				let MAX = 3000;
+				let MAX = 6000;
 				let i = MAX;
 				let tView, tView2;
 				let tScene = new RedGPU.Scene();
@@ -337,7 +337,7 @@ new RedGPU.RedGPUContext(
 					testBox.scaleX = testBox.scaleY = testBox.scaleZ = 0.3
 					testBox.x = 1.5
 					testBox.primitiveTopology = 'line-strip'
-					testMesh.addChild(testBox)
+					// testMesh.addChild(testBox)
 
 					// //
 					// let testMesh2 = new RedGPU.Mesh(
@@ -393,17 +393,17 @@ new RedGPU.RedGPUContext(
 					addLine_random(this, '#0000ff');
 				}
 
-				i = 50
+				i = 250
 				let tText
 				let tTextList = []
 				while (i--) {
-					tText = new RedGPU.Text(this, 256, 32)
+					tText = new RedGPU.Text(this, 256, 34)
 					tText.x = Math.random() * 200 - 100;
 					tText.y = Math.random() * 200 - 100;
 					tText.z = Math.random() * 200 - 100;
 					// tText.rotationX = tText.rotationY = tText.rotationZ = Math.random() * 360;
 					tText.scaleX = tText.scaleY = Math.random() * 20 + 20
-					tText.fontSize = 32
+					tText.fontSize = 34
 					tText.fontWeight = 'bold'
 					tText.color = i % 2 ? '#fff' : '#ff2255'
 					tText.text = i % 2 ? '가나다라마바사' : 'ABCDEFG'
@@ -434,18 +434,18 @@ new RedGPU.RedGPUContext(
 					i = tChildren.length
 					let tMesh
 					//
-					while (i--) {
-						tMesh = tChildren[i]
-						if (tMesh instanceof RedGPU.Text) {
-
-						} else {
-							tMesh._rotationX += 1
-							tMesh._rotationY += 1
-							tMesh._rotationZ += 1
-							tMesh.dirtyTransform = 1
-
-						}
-					}
+					// while (i--) {
+					// 	tMesh = tChildren[i]
+					// 	if (tMesh instanceof RedGPU.Text) {
+					//
+					// 	} else {
+					// 		tMesh._rotationX += 1
+					// 		tMesh._rotationY += 1
+					// 		tMesh._rotationZ += 1
+					// 		tMesh.dirtyTransform = 1
+					//
+					// 	}
+					// }
 
 					requestAnimationFrame(render);
 				};
