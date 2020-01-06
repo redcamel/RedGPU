@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.3 17:3:50
+ *   Last modification time of this file - 2020.1.6 16:46:54
  *
  */
 
@@ -61,6 +61,8 @@ export default class View extends UUID {
 	get width() {return this.#width;}
 	get height() {return this.#height;}
 	get viewRect() {return this.#viewRect;}
+
+
 	constructor(redGPUContext, scene, camera) {
 		super();
 		this.#redGPUContext = redGPUContext;

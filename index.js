@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.3 17:3:50
+ *   Last modification time of this file - 2020.1.6 16:46:54
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -225,6 +225,22 @@ new RedGPU.RedGPUContext(
 					testMesh.x = Math.random() * 30 - 15
 					testMesh.y = Math.random() * 30 - 15
 					testMesh.z = Math.random() * 30 - 15
+					testMesh.addEventListener('down', function () {
+						var tValue =  3
+						TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
+					})
+					testMesh.addEventListener('up', function () {
+						var tValue =  2
+						TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
+					})
+					testMesh.addEventListener('over', function () {
+						var tValue =  2
+						TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
+					})
+					testMesh.addEventListener('out', function () {
+						var tValue =  1
+						TweenMax.to(this, 0.5, {scaleX: tValue, scaleY: tValue, scaleZ: tValue, ease: Back.easeOut});
+					})
 					tScene2.addChild(testMesh)
 				}
 				// let testMesh = new RedGPU.Mesh(
