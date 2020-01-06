@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.6 18:57:8
+ *   Last modification time of this file - 2020.1.6 18:59:43
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -405,6 +405,9 @@ new RedGPU.RedGPUContext(
 					tText.scaleX = tText.scaleY = Math.random() * 20 + 20
 					tText.fontSize = 34
 					tText.fontWeight = 'bold'
+					tText.rotationX = Math.random() * 360
+					tText.rotationY = Math.random()* 360
+					tText.rotationZ = Math.random()* 360
 					tText.color = i % 2 ? '#fff' : '#ff2255'
 					tText.text = i % 2 ? '가나다라마바사' : 'ABCDEFG'
 					tScene.addChild(tText)
