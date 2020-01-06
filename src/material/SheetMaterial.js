@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.2 21:31:8
+ *   Last modification time of this file - 2020.1.6 20:13:39
  *
  */
 
@@ -61,7 +61,7 @@ export default class SheetMaterial extends Mix.mix(
 		vec4 diffuseColor = vec4(0.0);
 		//#RedGPU#diffuseTexture# diffuseColor = texture(sampler2D(uDiffuseTexture, uSampler), vUV) ;
 		
-		if(diffuseColor.a<0.1) discard;
+		if(diffuseColor.a<0.05) discard;
 			
 		outColor = diffuseColor;
 		outColor.a *= fragmentUniforms.alpha;
