@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.6 16:46:54
+ *   Last modification time of this file - 2020.1.6 17:24:5
  *
  */
 
@@ -10,7 +10,6 @@ import GLTFLoader from "../loader/gltf/GLTFLoader.js";
 import SheetMaterial from "../material/SheetMaterial.js";
 import Debugger from "./system/Debugger.js";
 import PipelineBasic from "../base/pipeline/PipelineBasic.js";
-import MouseEventChecker from "./system/MouseEventChecker.js";
 
 let _frustumPlanes = [];
 let currentDebuggerData;
@@ -552,7 +551,7 @@ export default class Render {
 		prevIndexBuffer_UUID = null;
 		prevMaterial_UUID = null
 	};
-	#mouseEventCheckerList = []
+
 	constructor() {
 
 	}
@@ -569,8 +568,7 @@ export default class Render {
 			Render.clearStateCache();
 			renderView(redGPUContext, redView, redGPUContext.swapChain.getCurrentTexture());
 			// 마우스 이벤트 체크
-			if (!this.#mouseEventCheckerList[redView._UUID]) this.#mouseEventCheckerList[redView._UUID] = new MouseEventChecker(redView)
-			mouseStates.push(this.#mouseEventCheckerList[redView._UUID].check(redGPUContext, i == len - 1))
+			mouseStates.push(redView.mouseEventChecker.check(redGPUContext))
 		}
 		if (mouseStates.includes('pointer')) redGPUContext.canvas.style.cursor = 'pointer';
 		else redGPUContext.canvas.style.cursor = 'default';

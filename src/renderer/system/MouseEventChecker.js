@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.6 16:46:54
+ *   Last modification time of this file - 2020.1.6 17:24:5
  *
  */
 
@@ -23,20 +23,25 @@ let fireEvent = function (fireList) {
 
 };
 export default class MouseEventChecker extends UUID {
-	static mouseEventInfo = [];
+
 	static mouseMAP = {};
-	currentPickedArrayBuffer;
-	currentPickedMouseID;
-	fireList = [];
-	prevInfo;
-	checkMouseEvent = function (redGPUContext, pickedMouseID, lastYn) {
+	#currentPickedArrayBuffer;
+	#currentPickedMouseID;
+	#fireList = [];
+	#redView;
+	#prevInfo;
+	#_mouseEventInfo = [];
+	get mouseEventInfo() {
+		return this.#_mouseEventInfo;
+	}
+	checkMouseEvent = function (redGPUContext, pickedMouseID) {
 
 		let i, len;
 		i = 0;
-		len = MouseEventChecker.mouseEventInfo.length;
-		// console.log(MouseEventChecker.mouseEventInfo.length,MouseEventChecker.mouseEventInfo)
+		len = this.#_mouseEventInfo.length;
+		// console.log(this.#mouseEventInfo.length,this.#mouseEventInfo)
 		for (i; i < len; i++) {
-			let canvasMouseEvent = MouseEventChecker.mouseEventInfo[i];
+			let canvasMouseEvent = this.#_mouseEventInfo[i];
 			// 마우스 이벤트 체크
 			let meshEventData;
 			if (pickedMouseID) meshEventData = MouseEventChecker.mouseMAP[pickedMouseID];
@@ -64,17 +69,17 @@ export default class MouseEventChecker extends UUID {
 						})
 					}
 				}
-				if (this.prevInfo && this.prevInfo != meshEventData) {
+				if (this.#prevInfo && this.#prevInfo != meshEventData) {
 					tEventType = 'out';
 					// console.log('아웃');
-					if (tEventType && this.prevInfo[tEventType]) {
-						this.prevInfo[tEventType].call(this.prevInfo['target'], {
-							target: this.prevInfo['target'],
+					if (tEventType && this.#prevInfo[tEventType]) {
+						this.#prevInfo[tEventType].call(this.#prevInfo['target'], {
+							target: this.#prevInfo['target'],
 							type: tEventType
 						})
 					}
 				}
-				if (this.prevInfo != meshEventData) {
+				if (this.#prevInfo != meshEventData) {
 					tEventType = 'over';
 					if (tEventType && meshEventData[tEventType]) {
 						meshEventData[tEventType].call(meshEventData['target'], {
@@ -85,41 +90,41 @@ export default class MouseEventChecker extends UUID {
 					}
 					// console.log('오버')
 				}
-				this.prevInfo = meshEventData
+				this.#prevInfo = meshEventData
 			} else {
 				tEventType = 'out';
-				if (this.prevInfo && this.prevInfo[tEventType]) {
+				if (this.#prevInfo && this.#prevInfo[tEventType]) {
 					// console.log('아웃');
-					this.fireList.push(
+					this.#fireList.push(
 						{
-							info: this.prevInfo,
+							info: this.#prevInfo,
 							type: tEventType,
 							nativeEvent: canvasMouseEvent.nativeEvent
 						}
 					)
 				}
-				this.prevInfo = null
+				this.#prevInfo = null
 			}
-			fireEvent(this.fireList)
+			fireEvent(this.#fireList)
 		}
-		if (this.prevInfo) this.cursorState = 'pointer';
+		if (this.#prevInfo) this.cursorState = 'pointer';
 		else this.cursorState = 'default'
-		if(lastYn) MouseEventChecker.mouseEventInfo.length = 0;
-		// console.log(MouseEventChecker.mouseEventInfo)
+		this.#_mouseEventInfo.length = 0;
+		// console.log(this.#mouseEventInfo)
 
 	};
-	#redView;
+
 	constructor(redView) {
 		super()
 		this.#redView =redView;
 	};
-	check = (redGPUContext, lastYn) => {
-		if (!this.currentPickedArrayBuffer) {
-			this.currentPickedArrayBuffer = this.#redView.readPixelArrayBuffer(redGPUContext, this.#redView, this.#redView.baseAttachment_mouseColorID_depth_ResolveTarget, this.#redView.mouseX, this.#redView.mouseY);
-			this.currentPickedArrayBuffer.then(arrayBuffer => {
-				this.currentPickedArrayBuffer = null;
-				this.currentPickedMouseID = Math.round(new Float32Array(arrayBuffer)[0]);
-				this.checkMouseEvent(redGPUContext, this.currentPickedMouseID, lastYn)
+	check = (redGPUContext) => {
+		if (!this.#currentPickedArrayBuffer) {
+			this.#currentPickedArrayBuffer = this.#redView.readPixelArrayBuffer(redGPUContext, this.#redView, this.#redView.baseAttachment_mouseColorID_depth_ResolveTarget, this.#redView.mouseX, this.#redView.mouseY);
+			this.#currentPickedArrayBuffer.then(arrayBuffer => {
+				this.#currentPickedArrayBuffer = null;
+				this.#currentPickedMouseID = Math.round(new Float32Array(arrayBuffer)[0]);
+				this.checkMouseEvent(redGPUContext, this.#currentPickedMouseID)
 			})
 		}
 		return this.cursorState

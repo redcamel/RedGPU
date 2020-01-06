@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.6 16:46:54
+ *   Last modification time of this file - 2020.1.6 17:24:5
  *
  */
 
@@ -13,6 +13,7 @@ import ShareGLSL from "./base/ShareGLSL.js"
 import PostEffect from "./postEffect/PostEffect.js";
 import RedGPUContext from "./RedGPUContext.js";
 import UUID from "./base/UUID.js";
+import MouseEventChecker from "./renderer/system/MouseEventChecker.js";
 
 export default class View extends UUID {
 	#redGPUContext;
@@ -49,6 +50,10 @@ export default class View extends UUID {
 	mouseX = 0;
 	mouseY = 0;
 	_useFrustumCulling = true;
+	#mouseEventChecker;
+	get mouseEventChecker(){
+		return this.#mouseEventChecker
+	};
 	get useFrustumCulling() {return this._useFrustumCulling;}
 	set useFrustumCulling(value) {this._useFrustumCulling = value;}
 	get postEffect() {return this.#postEffect;}
@@ -72,6 +77,7 @@ export default class View extends UUID {
 		this.systemUniformInfo_fragment = this.#makeSystemUniformInfo_fragment(redGPUContext.device);
 		this.projectionMatrix = mat4.create();
 		this.#postEffect = new PostEffect(redGPUContext);
+		this.#mouseEventChecker = new MouseEventChecker(this)
 	}
 	#makeSystemUniformInfo_vertex = function (device) {
 		let uniformBufferSize =

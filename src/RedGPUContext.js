@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.2 20:56:47
+ *   Last modification time of this file - 2020.1.6 17:24:5
  *
  */
 "use strict";
@@ -19,7 +19,6 @@ import SkyBoxMaterial from "./material/system/SkyBoxMaterial.js";
 import LineMaterial from "./material/system/LineMaterial.js";
 import TextMaterial from "./material/system/TextMaterial.js";
 import SheetMaterial from "./material/SheetMaterial.js";
-import MouseEventChecker from "./renderer/system/MouseEventChecker.js";
 
 let redGPUContextList = new Set();
 let setGlobalResizeEvent = function () {
@@ -91,7 +90,7 @@ export default class RedGPUContext {
 									emptyTextureView: device.createTexture({
 										size: {width: 1, height: 1, depth: 1,},
 										format: 'r8unorm',
-										usage:  GPUTextureUsage.SAMPLED,
+										usage: GPUTextureUsage.SAMPLED,
 									}).createView(),
 									emptyCubeTextureView: device.createTexture({
 										size: {width: 1, height: 1, depth: 1,},
@@ -100,7 +99,7 @@ export default class RedGPUContext {
 										mipLevelCount: 1,
 										sampleCount: 1,
 										format: 'r8unorm',
-										usage:  GPUTextureUsage.SAMPLED,
+										usage: GPUTextureUsage.SAMPLED,
 									}).createView({
 										format: 'r8unorm',
 										dimension: 'cube',
@@ -119,28 +118,29 @@ export default class RedGPUContext {
 									let mouseX, mouseY;
 									this.canvas.addEventListener(v, e => {
 										e.preventDefault();
+										let tEvent;
 										if (this.#detector.isMobile) {
 											if (e.changedTouches[0]) {
-												MouseEventChecker.mouseEventInfo.push(
+												tEvent =
 													{
 														type: e.type,
 														x: e.changedTouches[0].clientX,
 														y: e.changedTouches[0].clientY,
 														nativeEvent: e
 													}
-												);
+												;
 												mouseX = e.changedTouches[0].clientX;
 												mouseY = e.changedTouches[0].clientY
 											}
 										} else {
-											MouseEventChecker.mouseEventInfo.push(
+											tEvent =
 												{
 													type: e.type,
 													x: e[tXkey],
 													y: e[tYkey],
 													nativeEvent: e
 												}
-											);
+											;
 											mouseX = e[tXkey];
 											mouseY = e[tYkey];
 										}
@@ -148,6 +148,7 @@ export default class RedGPUContext {
 										i = this.viewList.length;
 										while (i--) {
 											tView = this.viewList[i];
+											tView.mouseEventChecker.mouseEventInfo.push(tEvent)
 											tView.mouseX = mouseX - tView.viewRect[0];
 											tView.mouseY = mouseY - tView.viewRect[1]
 										}
