@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.6 16:46:54
+ *   Last modification time of this file - 2020.1.6 10:16:17
  *
  */
 
@@ -60,7 +60,6 @@ let renderScene = (_ => {
 			frustumPlanes4 = _frustumPlanes[4];
 			frustumPlanes5 = _frustumPlanes[5];
 			while (i--) {
-
 				tMesh = children[i];
 				tMaterial = tMesh._material;
 				tGeometry = tMesh._geometry;
@@ -96,7 +95,6 @@ let renderScene = (_ => {
 						if (renderToTransparentLayerMode == 0 && tMesh.renderToTransparentLayer) {
 							renderToTransparentLayerList.push(tMesh)
 						} else {
-
 							tVisible = 1;
 							if (redView._useFrustumCulling) {
 								geoVolume = tGeometry._volume || tGeometry.volume;
@@ -543,6 +541,8 @@ let renderView = (redGPUContext, redView, swapChainTexture, mouseEventChecker) =
 	copyToFinalTexture(redGPUContext, redView, mainRenderCommandEncoder, lastTexture, swapChainTexture);
 	// 렌더 종료
 	redGPUContext.device.defaultQueue.submit([mainRenderCommandEncoder.finish()]);
+	// 마우스 이벤트 체크
+	mouseEventChecker.check(redGPUContext, redView);
 	currentDebuggerData['finalRenderTime'] = performance.now() - now;
 
 };
@@ -552,28 +552,20 @@ export default class Render {
 		prevIndexBuffer_UUID = null;
 		prevMaterial_UUID = null
 	};
-	#mouseEventCheckerList = []
+	#mouseEventChecker;
 	constructor() {
-
+		this.#mouseEventChecker = new MouseEventChecker()
 	}
 	render(time, redGPUContext) {
 		currentTime = time;
 		let debuggerData = Debugger.resetData(redGPUContext.viewList);
 		let i = 0, len = redGPUContext.viewList.length;
-		let redView;
 		changedMaterial_UUID = {};
-		let mouseStates = []
 		for (i; i < len; i++) {
-			redView = redGPUContext.viewList[i];
 			currentDebuggerData = debuggerData[i];
 			Render.clearStateCache();
-			renderView(redGPUContext, redView, redGPUContext.swapChain.getCurrentTexture());
-			// 마우스 이벤트 체크
-			if (!this.#mouseEventCheckerList[redView._UUID]) this.#mouseEventCheckerList[redView._UUID] = new MouseEventChecker(redView)
-			mouseStates.push(this.#mouseEventCheckerList[redView._UUID].check(redGPUContext, i == len - 1))
+			renderView(redGPUContext, redGPUContext.viewList[i], redGPUContext.swapChain.getCurrentTexture(), this.#mouseEventChecker);
 		}
-		if (mouseStates.includes('pointer')) redGPUContext.canvas.style.cursor = 'pointer';
-		else redGPUContext.canvas.style.cursor = 'default';
 		// 업데이트 대상 유니폼 버퍼 갱신
 		i = updateTargetMatrixBufferList.length;
 		while (i--) updateTargetMatrixBufferList[i].GPUBuffer.setSubData(0, updateTargetMatrixBufferList[i].meshFloat32Array);

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.6 16:46:54
+ *   Last modification time of this file - 2020.1.6 10:16:17
  *
  */
 
@@ -17,6 +17,7 @@ let currentDebuggerData;
 let renderToTransparentLayerList = [];
 let updateTargetMatrixBufferList = [];
 let textToTransparentLayerList = [];
+let bundleList = [],bundleIDX;
 
 let tCacheUniformInfo = {};
 let currentTime;
@@ -60,7 +61,6 @@ let renderScene = (_ => {
 			frustumPlanes4 = _frustumPlanes[4];
 			frustumPlanes5 = _frustumPlanes[5];
 			while (i--) {
-
 				tMesh = children[i];
 				tMaterial = tMesh._material;
 				tGeometry = tMesh._geometry;
@@ -89,6 +89,22 @@ let renderScene = (_ => {
 							// console.log('tDirtyPipeline', tDirtyPipeline, 'tMaterialChanged', tMaterialChanged)
 							// console.time('tPipeline.update' + tMesh._UUID)
 							tPipeline.update(redGPUContext, redView);
+							let bundleEncoder = redGPUContext.device.createRenderBundleEncoder({
+								colorFormats: [redGPUContext.swapChainFormat, 'rgba32float'],
+								depthStencilFormat :[ 'depth24plus-stencil8'],
+								sampleCount: 4
+							})
+							bundleEncoder.setPipeline(tPipeline.GPURenderPipeline);
+							bundleEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
+							bundleEncoder.setBindGroup(0, redView.systemUniformInfo_vertex.GPUBindGroup);
+							bundleEncoder.setBindGroup(1, redView.systemUniformInfo_fragment.GPUBindGroup);
+							bundleEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹는 매그룹마다 다르니 또 업데이트 해줘야함 -_-
+							bundleEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
+							if (tGeometry.indexBuffer) {
+								bundleEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
+								bundleEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
+							} else bundleEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
+							tPipeline._bundle = bundleEncoder.finish()
 							currentDebuggerData['dirtyPipelineNum']++
 							// console.timeEnd('tPipeline.update' + tMesh._UUID)
 						}
@@ -96,7 +112,6 @@ let renderScene = (_ => {
 						if (renderToTransparentLayerMode == 0 && tMesh.renderToTransparentLayer) {
 							renderToTransparentLayerList.push(tMesh)
 						} else {
-
 							tVisible = 1;
 							if (redView._useFrustumCulling) {
 								geoVolume = tGeometry._volume || tGeometry.volume;
@@ -118,27 +133,29 @@ let renderScene = (_ => {
 							// console.log(tVisible);
 							///////////////////////////////////////
 							if (tVisible) {
-								passEncoder.setPipeline(tPipeline.GPURenderPipeline);
-								if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
-									passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
-									prevVertexBuffer_UUID = tGeometry.interleaveBuffer._UUID
-								}
-								passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹는 매그룹마다 다르니 또 업데이트 해줘야함 -_-
-								if (prevMaterial_UUID != tMaterial._UUID) {
-									passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
-									prevMaterial_UUID = tMaterial._UUID
-								}
-								if (tGeometry.indexBuffer) {
-									if (prevIndexBuffer_UUID != tGeometry.indexBuffer._UUID) {
-										passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
-										prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
-									}
-									passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
-									currentDebuggerData['triangleNum'] += tGeometry.indexBuffer.indexNum / 3
-								} else {
-									passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
-									currentDebuggerData['triangleNum'] += tGeometry.interleaveBuffer.data.length / tGeometry.interleaveBuffer.stride
-								}
+								bundleList[bundleIDX] = tPipeline._bundle
+								bundleIDX++
+								// passEncoder.setPipeline(tPipeline.GPURenderPipeline);
+								// if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
+								// 	passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
+								// 	prevVertexBuffer_UUID = tGeometry.interleaveBuffer._UUID
+								// }
+								// passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹는 매그룹마다 다르니 또 업데이트 해줘야함 -_-
+								// if (prevMaterial_UUID != tMaterial._UUID) {
+								// 	passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
+								// 	prevMaterial_UUID = tMaterial._UUID
+								// }
+								// if (tGeometry.indexBuffer) {
+								// 	if (prevIndexBuffer_UUID != tGeometry.indexBuffer._UUID) {
+								// 		passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
+								// 		prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
+								// 	}
+								// 	passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
+								// 	currentDebuggerData['triangleNum'] += tGeometry.indexBuffer.indexNum / 3
+								// } else {
+								// 	passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
+								// 	currentDebuggerData['triangleNum'] += tGeometry.interleaveBuffer.data.length / tGeometry.interleaveBuffer.stride
+								// }
 								currentDebuggerData['drawCallNum']++
 							}
 
@@ -157,27 +174,29 @@ let renderScene = (_ => {
 						// // } else {
 						// //
 						// // }
-						passEncoder.setPipeline(tPipeline.GPURenderPipeline);
-						if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
-							passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
-							prevVertexBuffer_UUID = tGeometry.interleaveBuffer._UUID
-						}
-						passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹는 매그룹마다 다르니 또 업데이트 해줘야함 -_-
-						if (prevMaterial_UUID != tMaterial._UUID) {
-							passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
-							prevMaterial_UUID = tMaterial._UUID
-						}
-						if (tGeometry.indexBuffer) {
-							if (prevIndexBuffer_UUID != tGeometry.indexBuffer._UUID) {
-								passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
-								prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
-							}
-							passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
-							currentDebuggerData['triangleNum'] += tGeometry.indexBuffer.indexNum / 3
-						} else {
-							passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
-							currentDebuggerData['triangleNum'] += tGeometry.interleaveBuffer.data.length / tGeometry.interleaveBuffer.stride
-						}
+						bundleList[bundleIDX] = tPipeline._bundle
+						bundleIDX++
+						// passEncoder.setPipeline(tPipeline.GPURenderPipeline);
+						// if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
+						// 	passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
+						// 	prevVertexBuffer_UUID = tGeometry.interleaveBuffer._UUID
+						// }
+						// passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹는 매그룹마다 다르니 또 업데이트 해줘야함 -_-
+						// if (prevMaterial_UUID != tMaterial._UUID) {
+						// 	passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
+						// 	prevMaterial_UUID = tMaterial._UUID
+						// }
+						// if (tGeometry.indexBuffer) {
+						// 	if (prevIndexBuffer_UUID != tGeometry.indexBuffer._UUID) {
+						// 		passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
+						// 		prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
+						// 	}
+						// 	passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
+						// 	currentDebuggerData['triangleNum'] += tGeometry.indexBuffer.indexNum / 3
+						// } else {
+						// 	passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
+						// 	currentDebuggerData['triangleNum'] += tGeometry.interleaveBuffer.data.length / tGeometry.interleaveBuffer.stride
+						// }
 						currentDebuggerData['drawCallNum']++
 
 
@@ -507,6 +526,8 @@ let renderView = (redGPUContext, redView, swapChainTexture, mouseEventChecker) =
 	let tViewRect = redView.viewRect;
 	mainRenderPassEncoder.setViewport(0, 0, tViewRect[2], tViewRect[3], 0, 1);
 	mainRenderPassEncoder.setScissorRect(0, 0, tViewRect[2], tViewRect[3]);
+	bundleIDX = 0;
+	bundleList.length = 0
 	// render skyBox, grid, axis
 	renderOptions(redGPUContext, redView, mainRenderPassEncoder);
 	// 실제 Scene렌더
@@ -530,6 +551,11 @@ let renderView = (redGPUContext, redView, swapChainTexture, mouseEventChecker) =
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// 라이트 디버거 렌더
 	renderLightDebugger(redGPUContext, redView, mainRenderPassEncoder)
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// 메인 렌더패스 종료
+	mainRenderPassEncoder.executeBundles(bundleList)
+	bundleIDX = 0;
+	bundleList.length = 0
 	mainRenderPassEncoder.endPass();
 	currentDebuggerData['baseRenderTime'] = performance.now() - now;
 	//////////////////////////////////////////////////////////////////////////////////////////
@@ -543,6 +569,8 @@ let renderView = (redGPUContext, redView, swapChainTexture, mouseEventChecker) =
 	copyToFinalTexture(redGPUContext, redView, mainRenderCommandEncoder, lastTexture, swapChainTexture);
 	// 렌더 종료
 	redGPUContext.device.defaultQueue.submit([mainRenderCommandEncoder.finish()]);
+	// 마우스 이벤트 체크
+	mouseEventChecker.check(redGPUContext, redView);
 	currentDebuggerData['finalRenderTime'] = performance.now() - now;
 
 };
@@ -552,28 +580,20 @@ export default class Render {
 		prevIndexBuffer_UUID = null;
 		prevMaterial_UUID = null
 	};
-	#mouseEventCheckerList = []
+	#mouseEventChecker;
 	constructor() {
-
+		this.#mouseEventChecker = new MouseEventChecker()
 	}
 	render(time, redGPUContext) {
 		currentTime = time;
 		let debuggerData = Debugger.resetData(redGPUContext.viewList);
 		let i = 0, len = redGPUContext.viewList.length;
-		let redView;
 		changedMaterial_UUID = {};
-		let mouseStates = []
 		for (i; i < len; i++) {
-			redView = redGPUContext.viewList[i];
 			currentDebuggerData = debuggerData[i];
 			Render.clearStateCache();
-			renderView(redGPUContext, redView, redGPUContext.swapChain.getCurrentTexture());
-			// 마우스 이벤트 체크
-			if (!this.#mouseEventCheckerList[redView._UUID]) this.#mouseEventCheckerList[redView._UUID] = new MouseEventChecker(redView)
-			mouseStates.push(this.#mouseEventCheckerList[redView._UUID].check(redGPUContext, i == len - 1))
+			renderView(redGPUContext, redGPUContext.viewList[i], redGPUContext.swapChain.getCurrentTexture(), this.#mouseEventChecker);
 		}
-		if (mouseStates.includes('pointer')) redGPUContext.canvas.style.cursor = 'pointer';
-		else redGPUContext.canvas.style.cursor = 'default';
 		// 업데이트 대상 유니폼 버퍼 갱신
 		i = updateTargetMatrixBufferList.length;
 		while (i--) updateTargetMatrixBufferList[i].GPUBuffer.setSubData(0, updateTargetMatrixBufferList[i].meshFloat32Array);
