@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.7 21:39:14
+ *   Last modification time of this file - 2020.1.7 22:3:4
  *
  */
 @import url('https://fonts.googleapis.com/css?family=Fira+Sans&display=swap');
@@ -44,3 +44,4 @@ a, a:hover, a:active, a:visited {
 ::-webkit-scrollbar-thumb:hover {
     background: #70020c;
 }
+

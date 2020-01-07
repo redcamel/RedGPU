@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.7 21:39:14
+ *   Last modification time of this file - 2020.1.7 22:3:4
  *
  */
 
@@ -24,14 +24,14 @@ const ExampleHelper = (_ => {
 	const setGithubLogo = _ => {
 		let t0;
 		document.body.appendChild(t0 = document.createElement('img'));
-		t0.src = "https://redcamel.github.io/RedGL2/asset/github.png";
+		t0.src = "../../assets/github.png";
 		t0.style.cssText = `
 		position: fixed;
 		top:20px; right:20px;
 		width:30px;
 		cursor: pointer;"
 	`
-		t0.onclick = _ => window.location.href = 'https://github.com/redcamel/RedGL2';
+		t0.onclick = _ => window.location.href = 'https://github.com/redcamel/RedGPU';
 	};
 	const setTitle = title => {
 		let t0;
@@ -51,8 +51,8 @@ const ExampleHelper = (_ => {
 			setTitle(title)
 		},
 		setTestUI: (_ => {
-			let setUI_RedGPUContext, setUI_View, setUI_Scene;
-			let setUI_SkyBox, setUI_Grid;
+			let setUI_RedGPUContext, setUI_View, setUI_Camera;
+			let setUI_Scene, setUI_SkyBox, setUI_Grid, setUI_Axis;
 			let containerUI;
 			containerUI = document.createElement('div');
 			containerUI.style.cssText = `
@@ -124,8 +124,11 @@ const ExampleHelper = (_ => {
 			setUI_Scene = (gui, RedGPU, redGPUContext, scene) => {
 				let rootFolder;
 				rootFolder = gui.addFolder('Scene');
+				rootFolder.addColor(scene, 'backgroundColor');
+				rootFolder.add(scene, 'backgroundColorAlpha', 0, 1, 0.01);
 				setUI_SkyBox(rootFolder, RedGPU, redGPUContext, scene);
 				setUI_Grid(rootFolder, RedGPU, redGPUContext, scene);
+				setUI_Axis(rootFolder, RedGPU, redGPUContext, scene);
 			};
 			setUI_SkyBox = (_ => {
 				let skyBox;
@@ -143,7 +146,6 @@ const ExampleHelper = (_ => {
 						]));
 					}
 					const testData = {useSkyBox: scene.skyBox ? true : false}
-					scene.skyBox = scene
 					rootFolder.add(testData, 'useSkyBox').onChange(v => scene.skyBox = v ? skyBox : null)
 				}
 			})();
@@ -154,16 +156,30 @@ const ExampleHelper = (_ => {
 					rootFolder = gui.addFolder('Grid');
 					if (!grid) grid = new RedGPU.Grid(redGPUContext)
 					const testData = {useGrid: scene.grid ? true : false};
-					scene.skyBox = scene
 					rootFolder.add(testData, 'useGrid').onChange(v => scene.grid = v ? grid : null);
 					rootFolder.add(grid, 'divisions', 0, 500);
 					rootFolder.add(grid, 'size', 0, 100);
 					rootFolder.addColor(grid, 'color');
 					rootFolder.addColor(grid, 'centerColor');
-
-
 				}
 			})();
+			setUI_Axis = (_ => {
+				let axis;
+				return (gui, RedGPU, redGPUContext, scene) => {
+					let rootFolder;
+					rootFolder = gui.addFolder('Axis');
+					if (!axis) axis = new RedGPU.Axis(redGPUContext)
+					const testData = {useAxis: scene.axis ? true : false};
+					rootFolder.add(testData, 'useAxis').onChange(v => scene.axis = v ? axis : null);
+				}
+			})();
+			setUI_Camera = (gui, camera) => {
+				let rootFolder;
+				rootFolder = gui.addFolder('Camera');
+				rootFolder.add(camera, 'fov', 0, 180, 0.01);
+				rootFolder.add(camera, 'nearClipping', 0, 10, 0.01);
+				rootFolder.add(camera, 'farClipping', 0, 100000, 0.01);
+			};
 			return (RedGPU, redGPUContext, view, scene, camera) => {
 				let gui, rootFolder;
 				gui = new dat.GUI({autoPlace: false});
@@ -173,6 +189,9 @@ const ExampleHelper = (_ => {
 				setUI_RedGPUContext(rootFolder, redGPUContext)
 				setUI_View(rootFolder, view)
 				setUI_Scene(rootFolder, RedGPU, redGPUContext, scene)
+				setUI_Camera(rootFolder, camera);
+
+				document.body.style.background = 'url("../../assets/bodyBG.png")'
 			}
 		})()
 	};
