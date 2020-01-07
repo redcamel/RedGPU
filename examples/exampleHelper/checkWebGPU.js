@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.7 18:49:16
+ *   Last modification time of this file - 2020.1.7 21:39:14
  *
  */
 'use strict'
@@ -20,6 +20,7 @@ var CheckWebGPU = {
 		};
 		return function (title) {
 			if (navigator.gpu) {
+				makeScript("https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.6/dat.gui.min.js");
 				makeScript("../exampleHelper/ExampleHelper.js");
 				makeScript("./index.js", 'module', _ => {
 					ExampleHelper.setBaseInformation(title);

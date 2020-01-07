@@ -2,21 +2,21 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.7 18:49:16
+ *   Last modification time of this file - 2020.1.7 21:39:14
  *
  */
 @import url('https://fonts.googleapis.com/css?family=Fira+Sans&display=swap');
 
 * {
     font-family: 'Fira Sans', sans-serif;
-    color: #b19898;
+    color: #fff;
 }
 
 html, body {
     margin: 0;
     padding: 0;
     overflow: hidden;
-    font-size: 1em;
+    font-size: 11px;
 }
 
 a, a:hover, a:active, a:visited {

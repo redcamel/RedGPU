@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.7 18:49:16
+ *   Last modification time of this file - 2020.1.7 21:39:14
  *
  */
 "use strict"
@@ -25,7 +25,9 @@ new RedGPU.RedGPUContext(
 		testMesh = new RedGPU.Mesh(this, new RedGPU.Box(this), new RedGPU.ColorMaterial(this))
 		tScene.addChild(testMesh)
 
-		tCamera.z = -5;
+		tCamera.x = 5;
+		tCamera.y = 5;
+		tCamera.z = 5;
 		tCamera.lookAt(0, 0, 0);
 
 		render = time => {
@@ -33,6 +35,7 @@ new RedGPU.RedGPUContext(
 			requestAnimationFrame(render)
 		}
 		requestAnimationFrame(render);
-		RedGPU.Debugger.visible(true,RedGPU.Debugger.RIGHT_BOTTOM)
+
+		ExampleHelper.setTestUI(RedGPU,this, tView, tScene, tCamera)
 	}
 );

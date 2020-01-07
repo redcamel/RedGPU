@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.7 16:13:31
+ *   Last modification time of this file - 2020.1.7 21:39:14
  *
  */
 
@@ -460,14 +460,18 @@ let renderLightDebugger = (redGPUContext, redView, passEncoder) => {
 };
 let copyToFinalTexture = (redGPUContext, redView, commandEncoder, lastTexture, dstTexture) => {
 	let tViewRect = redView.viewRect;
-	let tX = tViewRect[0];
-	let tY = tViewRect[1];
-	let tW = tViewRect[2];
-	let tH = tViewRect[3];
-	tW = tW + tX > redGPUContext.canvas.width ? tW - tX : tW;
-	tH = tH + tY > redGPUContext.canvas.height ? tH - tY : tH;
-	if (tW > redGPUContext.canvas.width) tW = redGPUContext.canvas.width - tX;
-	if (tH > redGPUContext.canvas.height) tH = redGPUContext.canvas.height - tX;
+	let [tX, tY, tW, tH] = tViewRect;
+	let [cvsW, cvsH] = [redGPUContext.canvas.width, redGPUContext.canvas.height]
+	tW = tW + tX >= cvsW ? tW - tX : tW;
+	tH = tH + tY >= cvsH ? tH - tY : tH;
+	if (tW < 0) tW = 0;
+	if (tH < 0) tH = 0;
+	if (tX < 0) tX = 0;
+	if (tY < 0) tY = 0;
+	if (tW > cvsW) tW = cvsW - tX;
+	if (tH > cvsH) tH = cvsH - tY;
+	if (tX > cvsW) tX = cvsW;
+	if (tY > cvsH) tY = cvsH;
 	commandEncoder.copyTextureToTexture(
 		{texture: lastTexture},
 		{
