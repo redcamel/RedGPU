@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.6 18:57:8
+ *   Last modification time of this file - 2020.1.6 20:13:39
  *
  */
 
@@ -98,7 +98,7 @@ let renderScene = (_ => {
 						if (renderToTransparentLayerMode == 0 && tMesh.renderToTransparentLayer) {
 							renderToTransparentLayerList.push(tMesh)
 						} else {
-							if (tMesh instanceof Text) {
+							if (tMesh instanceof Text || tMaterial instanceof SheetMaterial) {
 								a02 = redView.camera.matrix[2], a12 = redView.camera.matrix[6], a22 = redView.camera.matrix[10], a32 = redView.camera.matrix[14];
 								b0 = tMesh._x, b1 = tMesh._y, b2 = tMesh._z, b3 = 1;
 								textToTransparentLayerList.push({
