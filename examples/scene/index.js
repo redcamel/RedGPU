@@ -15,7 +15,6 @@ new RedGPU.RedGPUContext(
 	function () {
 		let tView, tScene, tCamera;
 		let renderer, render;
-		let testMesh;
 		///////////////////////////////////////////////////////////////////////////////////////////
 		// basic setup
 		tScene = new RedGPU.Scene();
@@ -23,11 +22,26 @@ new RedGPU.RedGPUContext(
 		tView = new RedGPU.View(this, tScene, tCamera);
 		renderer = new RedGPU.Render();
 		this.addView(tView);
+
 		///////////////////////////////////////////////////////////////////////////////////////////
-		// mesh setup
-		testMesh = new RedGPU.Mesh(this, new RedGPU.Box(this), new RedGPU.ColorMaterial(this));
-		tScene.addChild(testMesh);
+		// Scene property setting
+		tScene.grid = new RedGPU.Grid(this);
+		tScene.axis = new RedGPU.Axis(this);
+		tScene.skyBox = new RedGPU.SkyBox(
+			this, new RedGPU.BitmapCubeTexture(
+				this,
+				[
+					'../../assets/cubemap/SwedishRoyalCastle/px.jpg',
+					'../../assets/cubemap/SwedishRoyalCastle/nx.jpg',
+					'../../assets/cubemap/SwedishRoyalCastle/py.jpg',
+					'../../assets/cubemap/SwedishRoyalCastle/ny.jpg',
+					'../../assets/cubemap/SwedishRoyalCastle/pz.jpg',
+					'../../assets/cubemap/SwedishRoyalCastle/nz.jpg'
+				]
+			)
+		);
 		///////////////////////////////////////////////////////////////////////////////////////////
+
 		// renderer setup
 		render = time => {
 			renderer.render(time, this);
@@ -36,6 +50,6 @@ new RedGPU.RedGPUContext(
 		requestAnimationFrame(render);
 
 		// TestUI setup
-		ExampleHelper.setTestUI(RedGPU, this, tView, tScene, tCamera);
+		ExampleHelper.setTestUI_Scene(RedGPU, this, tScene, null, true);
 	}
 );
