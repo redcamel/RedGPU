@@ -2,24 +2,38 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.7 22:3:4
+ *   Last modification time of this file - 2020.1.7 22:21:57
  *
  */
 
 const ExampleHelper = (_ => {
 	const setBottom = _ => {
-		let t0;
+		let t0, t1;
 		t0 = document.createElement('div');
-		t0.innerHTML = `
-			This project is maintained by <a href="https://github.com/redcamel/">RedCamel</a>
-		`;
+		document.body.appendChild(t0);
 		t0.style.cssText = `
 			position : fixed;
-			left : 20px; bottom : 20px;
+			left : 20px; bottom : 20px; right:20px;
+		`;
+		//
+		t0.appendChild(t1 = document.createElement('div'))
+		t1.style.cssText = `
+			height : 0px;
+			border-bottom: 1px solid #333;
+		`
+		//
+		t0.appendChild(t1 = document.createElement('div'));
+		t1.innerHTML = `
+			This project is maintained by <a href="https://github.com/redcamel/">RedCamel</a>
+		`;
+		t1.style.cssText = `
+			margin-top:20px;
 			font-size : 10px;
 			color : #b19898;
 		`;
 		document.body.appendChild(t0);
+
+
 	};
 	const setGithubLogo = _ => {
 		let t0;
@@ -30,25 +44,33 @@ const ExampleHelper = (_ => {
 		top:20px; right:20px;
 		width:30px;
 		cursor: pointer;"
-	`
+	`;
 		t0.onclick = _ => window.location.href = 'https://github.com/redcamel/RedGPU';
 	};
-	const setTitle = title => {
-		let t0;
+	const setTitle = (title, description) => {
+		let t0, t1;
 		document.body.appendChild(t0 = document.createElement('div'));
 		t0.innerHTML = title;
 		t0.style.cssText = `
 		position: fixed;
-		bottom:37px; left:18px;
-		font-size : 30px;
+		bottom:65px; left:18px;
+		font-size : 32px;
 		color:#fff;
-	`
+		text-shadow : 1px 1px 1px rgba(0,0,0,1);
+		`;
+		t0.appendChild(t1 = document.createElement('div'));
+		t1.innerHTML = description;
+		t1.style.cssText = `
+		font-size : 9px;
+		padding:3px 0px 0px 1px;
+		color:#a4a7cc;
+		`;
 	};
 	return {
-		setBaseInformation: title => {
+		setBaseInformation: (title, description) => {
 			setBottom();
 			setGithubLogo();
-			setTitle(title)
+			setTitle(title, description)
 		},
 		setTestUI: (_ => {
 			let setUI_RedGPUContext, setUI_View, setUI_Camera;
@@ -56,10 +78,13 @@ const ExampleHelper = (_ => {
 			let containerUI;
 			containerUI = document.createElement('div');
 			containerUI.style.cssText = `
-				position : fixed;
-				top : 0; left : 0;
-				white-space : nowrap;
-			`;
+		position : fixed;
+		top : 0;
+		left : 0;
+		white - space
+	:
+		nowrap;
+	`;
 			document.body.appendChild(containerUI);
 			setUI_RedGPUContext = (gui, redGPUContext) => {
 				let rootFolder, folder;
@@ -145,7 +170,7 @@ const ExampleHelper = (_ => {
 							'../../assets/cubemap/SwedishRoyalCastle/nz.jpg'
 						]));
 					}
-					const testData = {useSkyBox: scene.skyBox ? true : false}
+					const testData = {useSkyBox: scene.skyBox ? true : false};
 					rootFolder.add(testData, 'useSkyBox').onChange(v => scene.skyBox = v ? skyBox : null)
 				}
 			})();
@@ -154,7 +179,7 @@ const ExampleHelper = (_ => {
 				return (gui, RedGPU, redGPUContext, scene) => {
 					let rootFolder;
 					rootFolder = gui.addFolder('Grid');
-					if (!grid) grid = new RedGPU.Grid(redGPUContext)
+					if (!grid) grid = new RedGPU.Grid(redGPUContext);
 					const testData = {useGrid: scene.grid ? true : false};
 					rootFolder.add(testData, 'useGrid').onChange(v => scene.grid = v ? grid : null);
 					rootFolder.add(grid, 'divisions', 0, 500);
@@ -168,7 +193,7 @@ const ExampleHelper = (_ => {
 				return (gui, RedGPU, redGPUContext, scene) => {
 					let rootFolder;
 					rootFolder = gui.addFolder('Axis');
-					if (!axis) axis = new RedGPU.Axis(redGPUContext)
+					if (!axis) axis = new RedGPU.Axis(redGPUContext);
 					const testData = {useAxis: scene.axis ? true : false};
 					rootFolder.add(testData, 'useAxis').onChange(v => scene.axis = v ? axis : null);
 				}
@@ -184,17 +209,21 @@ const ExampleHelper = (_ => {
 				let gui, rootFolder;
 				gui = new dat.GUI({autoPlace: false});
 				containerUI.append(gui.domElement);
-				rootFolder = gui.addFolder('TestHelper')
-				rootFolder.open()
-				setUI_RedGPUContext(rootFolder, redGPUContext)
-				setUI_View(rootFolder, view)
-				setUI_Scene(rootFolder, RedGPU, redGPUContext, scene)
+				rootFolder = gui.addFolder('TestHelper');
+				rootFolder.open();
+				setUI_RedGPUContext(rootFolder, redGPUContext);
+				setUI_View(rootFolder, view);
+				setUI_Scene(rootFolder, RedGPU, redGPUContext, scene);
 				setUI_Camera(rootFolder, camera);
-
 				document.body.style.background = 'url("../../assets/bodyBG.png")'
+
+				const testData = {useDebugger: false}
+				rootFolder.add(testData, 'useDebugger').onChange(v => {
+					RedGPU.Debugger.visible(v, RedGPU.Debugger.RIGHT_BOTTOM)
+				})
 			}
 		})()
 	};
-})()
+})();
 
 
