@@ -2,12 +2,46 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.7 16:41:3
+ *   Last modification time of this file - 2020.1.7 22:3:4
  *
  */
+@import url('https://fonts.googleapis.com/css?family=Fira+Sans&display=swap');
+
+* {
+    font-family: 'Fira Sans', sans-serif;
+    color: #fff;
+}
+
 html, body {
     margin: 0;
     padding: 0;
     overflow: hidden;
-    font-size: 0.85em;
+    font-size: 11px;
 }
+
+a, a:hover, a:active, a:visited {
+    color: rgb(242, 169, 113);
+    text-decoration: none;
+    text-shadow: 0 1px rgb(0, 0, 0);
+}
+
+/* width */
+::-webkit-scrollbar {
+    width: 4px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: #222;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #70020c;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #70020c;
+}
+

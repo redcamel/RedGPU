@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 18:50:31
+ *   Last modification time of this file - 2020.1.7 18:49:16
  *
  */
 "use strict";
@@ -26,6 +26,10 @@ let setDebugBox = _ => {
 	}
 };
 const Debugger = {
+	LEFT_TOP: 'leftTop',
+	RIGHT_TOP: 'rightTop',
+	LEFT_BOTTOM: 'leftBottom',
+	RIGHT_BOTTOM: 'rightBottom',
 	resetData: viewList => {
 		info = [];
 		viewList.forEach(view => info.push({
@@ -43,12 +47,34 @@ const Debugger = {
 		}));
 		return info;
 	},
-	visible: v => {
+	visible: (v, location = Debugger.LEFT_BOTTOM) => {
 		_visible = v;
 		setDebugBox();
-		if (_visible) document.body.appendChild(debuggerBox);
-		else {
+		if (_visible) {
+			document.body.appendChild(debuggerBox);
+			Debugger.setLocation(location)
+		} else {
 			if (debuggerBox.parentNode) document.body.removeChild(debuggerBox)
+		}
+	},
+	setLocation: (location = Debugger.LEFT_BOTTOM) => {
+		debuggerBox.style.top = '';
+		debuggerBox.style.bottom = '';
+		debuggerBox.style.left = '';
+		debuggerBox.style.right = '';
+		switch (location) {
+			case Debugger.LEFT_TOP :
+				debuggerBox.style.left = debuggerBox.style.top = 0;
+				break;
+			case Debugger.LEFT_BOTTOM :
+				debuggerBox.style.left = debuggerBox.style.bottom = 0;
+				break;
+			case Debugger.RIGHT_TOP :
+				debuggerBox.style.right = debuggerBox.style.top = 0;
+				break;
+			case Debugger.RIGHT_BOTTOM :
+				debuggerBox.style.right = debuggerBox.style.bottom = 0;
+				break;
 		}
 	},
 	update: _ => {
@@ -63,10 +89,11 @@ const Debugger = {
 				container.style.cssText = `
 					background : rgba(0,0,0,0.75);
 					margin-bottom : 1px;
-					padding : 8px
+					padding : 8px;
 				`;
 				debuggerBox.appendChild(container);
 				t0 = document.createElement('div');
+				t0.style.color = '#fff';
 				container.appendChild(t0);
 				t1 = '';
 				for (let k in data) {

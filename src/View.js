@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.7 16:13:31
+ *   Last modification time of this file - 2020.1.7 21:39:14
  *
  */
 
@@ -325,12 +325,12 @@ export default class View extends UUID {
 
 	setSize(width = this.#width, height = this.#height) {
 		let t0 = this.#viewRect.toString();
-		if (typeof width == 'number') this.#width = width < 0 ? 0 : parseInt(width);
+		if (typeof width == 'number') this.#width = width < 1 ? 1 : parseInt(width);
 		else {
 			if (width.includes('%') && (+width.replace('%', '') >= 0)) this.#width = width;
 			else UTIL.throwFunc('View setSize : width는 0이상의 숫자나 %만 허용.', width);
 		}
-		if (typeof height == 'number') this.#height = height < 0 ? 0 : parseInt(height);
+		if (typeof height == 'number') this.#height = height < 1 ? 1 : parseInt(height);
 		else {
 			if (height.includes('%') && (+height.replace('%', '') >= 0)) this.#height = height;
 			else UTIL.throwFunc('View setSize : height는 0이상의 숫자나 %만 허용.', height);
@@ -341,12 +341,12 @@ export default class View extends UUID {
 	}
 
 	setLocation(x = this._x, y = this._y) {
-		if (typeof x == 'number') this._x = x < 0 ? 0 : parseInt(x);
+		if (typeof x == 'number') this._x =  parseInt(x);
 		else {
 			if (x.includes('%') && (+x.replace('%', '') >= 0)) this._x = x;
 			else UTIL.throwFunc('View setLocation : x는 0이상의 숫자나 %만 허용.', x);
 		}
-		if (typeof y == 'number') this._y = y < 0 ? 0 : parseInt(y);
+		if (typeof y == 'number') this._y = parseInt(y);
 		else {
 			if (y.includes('%') && (+y.replace('%', '') >= 0)) this._y = y;
 			else UTIL.throwFunc('View setLocation : y는 0이상의 숫자나 %만 허용.', y);
