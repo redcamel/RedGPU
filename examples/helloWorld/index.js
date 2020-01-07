@@ -1,25 +1,10 @@
-# RedGPU
-RedGPU - Javascript webGPU Engine
-
-run in Chrome Canary() behind the flag --enable-unsafe-webgpu.
-
-## Usage
-html
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>RedGPU Example - HelloWorld</title>
-    <link type="text/css" rel="stylesheet" href="../css.css"/>
-    <script type="module" src="index.js"></script>
-</head>
-<body></body>
-</html>
-```
-
-module
-```javascript
+/*
+ *   RedGPU - MIT License
+ *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
+ *   issue : https://github.com/redcamel/RedGPU/issues
+ *   Last modification time of this file - 2020.1.7 16:41:3
+ *
+ */
 "use strict"
 import RedGPU from "../../src/RedGPU.js";
 
@@ -50,11 +35,3 @@ new RedGPU.RedGPUContext(
 		requestAnimationFrame(render);
 	}
 );
-```
-
-## Demo
- - [Demo](https://redcamel.github.io/RedGPU/)
-
-
-## etc
- - webGPU basic samples can be found [here](https://github.com/redcamel/webgpu)

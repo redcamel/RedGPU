@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.3 17:3:50
+ *   Last modification time of this file - 2020.1.7 16:13:31
  *
  */
 
@@ -19,7 +19,7 @@ import RedGPUContext from "../../RedGPUContext.js";
 import TextureLoader from "../TextureLoader.js";
 import Sampler from "../../resources/Sampler.js";
 import gltfAnimationLooper from "./gltfAnimationLooper.js";
-
+import glMatrix from "../../base/gl-matrix-min.js"
 var GLTFLoader;
 (function () {
 	var parser;
@@ -385,7 +385,7 @@ var GLTFLoader;
 			requestAnimationFrame(tick);
 		};
 		checkTRSAndMATRIX = (function () {
-			var rotationMTX = mat4.create();
+			var rotationMTX = glMatrix.mat4.create();
 			var tRotation = [0, 0, 0];
 			var tQuaternion = [];
 			var tScale = [];
@@ -401,7 +401,7 @@ var GLTFLoader;
 					target.x = tMatrix[12];
 					target.y = tMatrix[13];
 					target.z = tMatrix[14];
-					mat4.getScaling(tScale, tMatrix);
+					glMatrix.mat4.getScaling(tScale, tMatrix);
 					target.scaleX = tScale[0];
 					target.scaleY = tScale[1];
 					target.scaleZ = tScale[2]

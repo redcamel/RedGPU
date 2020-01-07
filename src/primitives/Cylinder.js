@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 17:2:44
+ *   Last modification time of this file - 2020.1.7 16:13:31
  *
  */
 
@@ -12,6 +12,7 @@ import Geometry from "../geometry/Geometry.js";
 import InterleaveInfo from "../geometry/InterleaveInfo.js";
 import RedGPUContext from "../RedGPUContext.js";
 import baseGeometry from "../base/baseGeometry.js";
+import glMatrix from "../base/gl-matrix-min.js";
 
 export default class Cylinder extends baseGeometry {
 	constructor(redGPUContext, radiusTop = 1, radiusBottom = 1, height = 1, radialSegments = 8, heightSegments = 1, openEnded = false, thetaStart = 0.0, thetaLength = Math.PI * 2) {
@@ -72,7 +73,7 @@ export default class Cylinder extends baseGeometry {
 						normal[0] = sinTheta;
 						normal[1] = slope;
 						normal[2] = cosTheta;
-						vec3.normalize(normal, normal);
+						glMatrix.vec3.normalize(normal, normal);
 						interleaveData.push(normal[0], normal[1], normal[2]);
 						// uv
 						interleaveData.push(u, v);

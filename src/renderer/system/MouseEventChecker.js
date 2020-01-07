@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.6 18:57:8
+ *   Last modification time of this file - 2020.1.7 16:13:31
  *
  */
 
@@ -108,14 +108,14 @@ export default class MouseEventChecker extends UUID {
 			fireEvent(this.#fireList)
 		}
 		if (this.#prevInfo) this.cursorState = 'pointer';
-		else this.cursorState = 'default'
+		else this.cursorState = 'default';
 		this.#_mouseEventInfo.length = 0;
 		// console.log(this.#mouseEventInfo)
 
 	};
 
 	constructor(redView) {
-		super()
+		super();
 		this.#redView =redView;
 	};
 	check = (redGPUContext) => {

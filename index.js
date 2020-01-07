@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.6 18:59:43
+ *   Last modification time of this file - 2020.1.7 16:13:31
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -40,7 +40,7 @@ new RedGPU.RedGPUContext(
 				console.log('텍스쳐 로딩완료', textureLoader)
 				console.timeEnd('텍스쳐 로딩속도')
 				console.log('로딩완료된 시점의 시간은? 어찌됨?', performance.now())
-				let MAX = 6000;
+				let MAX = 3000;
 				let i = MAX;
 				let tView, tView2;
 				let tScene = new RedGPU.Scene();
@@ -337,7 +337,7 @@ new RedGPU.RedGPUContext(
 					testBox.scaleX = testBox.scaleY = testBox.scaleZ = 0.3
 					testBox.x = 1.5
 					testBox.primitiveTopology = 'line-strip'
-					// testMesh.addChild(testBox)
+					testMesh.addChild(testBox)
 
 					// //
 					// let testMesh2 = new RedGPU.Mesh(
@@ -437,18 +437,18 @@ new RedGPU.RedGPUContext(
 					i = tChildren.length
 					let tMesh
 					//
-					// while (i--) {
-					// 	tMesh = tChildren[i]
-					// 	if (tMesh instanceof RedGPU.Text) {
-					//
-					// 	} else {
-					// 		tMesh._rotationX += 1
-					// 		tMesh._rotationY += 1
-					// 		tMesh._rotationZ += 1
-					// 		tMesh.dirtyTransform = 1
-					//
-					// 	}
-					// }
+					while (i--) {
+						tMesh = tChildren[i]
+						if (tMesh instanceof RedGPU.Text) {
+
+						} else {
+							tMesh._rotationX += 1
+							tMesh._rotationY += 1
+							tMesh._rotationZ += 1
+							tMesh.dirtyTransform = 1
+
+						}
+					}
 
 					requestAnimationFrame(render);
 				};

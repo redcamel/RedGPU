@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 18:50:31
+ *   Last modification time of this file - 2020.1.7 16:13:31
  *
  */
 
@@ -13,7 +13,7 @@ import Geometry from "../geometry/Geometry.js";
 import UTIL from "../util/UTIL.js";
 import UUID from "../base/UUID.js";
 import LineMaterial from "../material/system/LineMaterial.js";
-
+import glMatrix from "../base/gl-matrix-min.js";
 let solveCatmullRomPoint;
 let getPointsOnBezierCurves;
 let serializePoints;
@@ -22,11 +22,11 @@ let setDebugMeshs, destroyDebugMesh;
 let simplifyPoints;
 let vec2_distanceToSegmentSq;
 vec2_distanceToSegmentSq = function (p, v, w) {
-	let l2 = vec2.sqrDist(v, w);
-	if (l2 === 0) return vec2.sqrDist(p, v);
+	let l2 = glMatrix.vec2.sqrDist(v, w);
+	if (l2 === 0) return glMatrix.vec2.sqrDist(p, v);
 	let t = ((p[0] - v[0]) * (w[0] - v[0]) + (p[1] - v[1]) * (w[1] - v[1])) / l2;
 	t = Math.max(0, Math.min(1, t));
-	return vec2.sqrDist(p, vec2.lerp([0, 0], v, w, t));
+	return glMatrix.vec2.sqrDist(p, glMatrix.vec2.lerp([0, 0], v, w, t));
 };
 simplifyPoints = function (points, start, end, epsilon, newPoints) {
 	let outPoints = newPoints || [];
@@ -126,12 +126,12 @@ getPointsOnBezierCurves = (function () {
 			let c1 = points[offset + 1];
 			let c2 = points[offset + 2];
 			let p2 = points[offset + 3];/**/
-			let q1 = vec3.lerp([0, 0], p1, c1, t);
-			let q2 = vec3.lerp([0, 0], c1, c2, t);
-			let q3 = vec3.lerp([0, 0], c2, p2, t);/**/
-			let r1 = vec3.lerp([0, 0], q1, q2, t);
-			let r2 = vec3.lerp([0, 0], q2, q3, t);/**/
-			let red = vec3.lerp([0, 0], r1, r2, t);
+			let q1 = glMatrix.vec3.lerp([0, 0], p1, c1, t);
+			let q2 = glMatrix.vec3.lerp([0, 0], c1, c2, t);
+			let q3 = glMatrix.vec3.lerp([0, 0], c2, p2, t);/**/
+			let r1 = glMatrix.vec3.lerp([0, 0], q1, q2, t);
+			let r2 = glMatrix.vec3.lerp([0, 0], q2, q3, t);/**/
+			let red = glMatrix.vec3.lerp([0, 0], r1, r2, t);
 			red.colorRGBA = p1.colorRGBA;
 			// do 1st half
 			getPointsOnBezierCurveWithSplitting([p1, q1, r1, red], 0, tolerance, outPoints);

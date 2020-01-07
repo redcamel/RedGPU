@@ -2,10 +2,10 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.23 14:37:36
+ *   Last modification time of this file - 2020.1.7 16:13:31
  *
  */
-
+import glMatrix from "../../base/gl-matrix-min.js"
 export default function gltfAnimationLooper(time, loopList){
 	let currentTime, previousTime, nextTime;
 	let nX, nY, nZ, nW, nXOut, nYOut, nZOut, nXIn, nYIn, nZIn, nWIn;
@@ -401,7 +401,7 @@ export default function gltfAnimationLooper(time, loopList){
 								nW = -nW;
 							}
 							// calculate coefficients
-							if ((1.0 - cosom) > glMatrix.EPSILON) {
+							if ((1.0 - cosom) > glMatrix.glMatrix.EPSILON) {
 								// standard case (slerp)
 								omega = Math.acos(cosom);
 								sinom = Math.sin(omega);

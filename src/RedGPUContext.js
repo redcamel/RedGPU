@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.6 18:57:8
+ *   Last modification time of this file - 2020.1.7 16:41:3
  *
  */
 "use strict";
@@ -148,7 +148,7 @@ export default class RedGPUContext {
 										i = this.viewList.length;
 										while (i--) {
 											tView = this.viewList[i];
-											tView.mouseEventChecker.mouseEventInfo.push(tEvent)
+											tView.mouseEventChecker.mouseEventInfo.push(tEvent);
 											tView.mouseX = mouseX - tView.viewRect[0];
 											tView.mouseY = mouseY - tView.viewRect[1]
 										}
@@ -197,6 +197,8 @@ export default class RedGPUContext {
 		this.#height = h;
 		let tW, tH;
 		let rect = document.body.getBoundingClientRect();
+		rect.height = window.innerHeight
+		console.log('rect',rect)
 		if (typeof w != 'number' && w.includes('%')) tW = parseInt(+rect.width * w.replace('%', '') / 100);
 		else tW = w;
 		if (typeof h != 'number' && h.includes('%')) tH = parseInt(+rect.height * h.replace('%', '') / 100);

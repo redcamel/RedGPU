@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.6 20:13:39
+ *   Last modification time of this file - 2020.1.7 16:13:31
  *
  */
 
@@ -441,15 +441,15 @@ let renderTextLayerList = (redGPUContext, redView, passEncoder) => {
 		let t1 = [];
 		let i = textToTransparentLayerList.length;
 		textToTransparentLayerList.sort((a, b) => {
-			if (a.z > b.z) return -1
-			if (a.z < b.z) return 1
+			if (a.z > b.z) return -1;
+			if (a.z < b.z) return 1;
 			return 0
 		});
-		while (i--) t1[i] = textToTransparentLayerList[i].targetText
+		while (i--) t1[i] = textToTransparentLayerList[i].targetText;
 		renderScene(redGPUContext, redView, passEncoder, null, t1, null, 2);
 	}
 	textToTransparentLayerList.length = 0;
-}
+};
 let renderLightDebugger = (redGPUContext, redView, passEncoder) => {
 	if (redView.debugLightList.length) {
 		let cache_useFrustumCulling = redView.useFrustumCulling;
@@ -457,7 +457,7 @@ let renderLightDebugger = (redGPUContext, redView, passEncoder) => {
 		renderScene(redGPUContext, redView, passEncoder, null, redView.debugLightList);
 		redView.useFrustumCulling = cache_useFrustumCulling;
 	}
-}
+};
 let copyToFinalTexture = (redGPUContext, redView, commandEncoder, lastTexture, dstTexture) => {
 	let tViewRect = redView.viewRect;
 	let tX = tViewRect[0];
@@ -526,9 +526,9 @@ let renderView = (redGPUContext, redView, swapChainTexture, mouseEventChecker) =
 	// 투명레이어 렌더
 	renderTransparentLayerList(redGPUContext, redView, mainRenderPassEncoder);
 	// 텍스트 렌더
-	renderTextLayerList(redGPUContext, redView, mainRenderPassEncoder)
+	renderTextLayerList(redGPUContext, redView, mainRenderPassEncoder);
 	// 라이트 디버거 렌더
-	renderLightDebugger(redGPUContext, redView, mainRenderPassEncoder)
+	renderLightDebugger(redGPUContext, redView, mainRenderPassEncoder);
 	mainRenderPassEncoder.endPass();
 	currentDebuggerData['baseRenderTime'] = performance.now() - now;
 	//////////////////////////////////////////////////////////////////////////////////////////
@@ -561,7 +561,7 @@ export default class Render {
 		let i = 0, len = redGPUContext.viewList.length;
 		let redView;
 		changedMaterial_UUID = {};
-		let mouseStates = []
+		let mouseStates = [];
 		for (i; i < len; i++) {
 			redView = redGPUContext.viewList[i];
 			currentDebuggerData = debuggerData[i];
@@ -575,7 +575,7 @@ export default class Render {
 		// 업데이트 대상 유니폼 버퍼 갱신
 		i = updateTargetMatrixBufferList.length;
 		while (i--) updateTargetMatrixBufferList[i].GPUBuffer.setSubData(0, updateTargetMatrixBufferList[i].meshFloat32Array);
-		updateTargetMatrixBufferList.length = 0
+		updateTargetMatrixBufferList.length = 0;
 		GLTFLoader.animationLooper(time);
 		Debugger.update()
 	}

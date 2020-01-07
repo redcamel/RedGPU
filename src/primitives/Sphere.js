@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 17:43:39
+ *   Last modification time of this file - 2020.1.7 16:13:31
  *
  */
 
@@ -12,7 +12,7 @@ import Geometry from "../geometry/Geometry.js";
 import InterleaveInfo from "../geometry/InterleaveInfo.js";
 import RedGPUContext from "../RedGPUContext.js";
 import baseGeometry from "../base/baseGeometry.js";
-
+import glMatrix from "../base/gl-matrix-min.js";
 export default class Sphere extends baseGeometry{
 	constructor(redGPUContext, radius = 1, widthSegments = 8, heightSegments = 6, phiStart = 0, phiLength = Math.PI * 2, thetaStart = 0, thetaLength = Math.PI) {
 		super();
@@ -64,7 +64,7 @@ export default class Sphere extends baseGeometry{
 					normal[0] = vertex.x;
 					normal[1] = vertex.y;
 					normal[2] = vertex.z;
-					vec3.normalize(normal, normal);
+					glMatrix.vec3.normalize(normal, normal);
 					interleaveData.push(normal[0], normal[1], normal[2]);
 					// uv
 					interleaveData.push(u, v);

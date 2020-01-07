@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.6 18:57:8
+ *   Last modification time of this file - 2020.1.7 16:13:31
  *
  */
 
@@ -14,7 +14,7 @@ import PostEffect from "./postEffect/PostEffect.js";
 import RedGPUContext from "./RedGPUContext.js";
 import UUID from "./base/UUID.js";
 import MouseEventChecker from "./renderer/system/MouseEventChecker.js";
-
+import glMatrix from "./base/gl-matrix-min.js";
 export default class View extends UUID {
 	#redGPUContext;
 	#scene;
@@ -75,7 +75,7 @@ export default class View extends UUID {
 		this.scene = scene;
 		this.systemUniformInfo_vertex = this.#makeSystemUniformInfo_vertex(redGPUContext.device);
 		this.systemUniformInfo_fragment = this.#makeSystemUniformInfo_fragment(redGPUContext.device);
-		this.projectionMatrix = mat4.create();
+		this.projectionMatrix = glMatrix.mat4.create();
 		this.#postEffect = new PostEffect(redGPUContext);
 		this.#mouseEventChecker = new MouseEventChecker(this)
 	}
@@ -228,7 +228,7 @@ export default class View extends UUID {
 		// update systemUniformInfo_vertex /////////////////////////////////////////////////////////////////////////////////////////////////
 		offset = 0;
 		aspect = Math.abs(this.#viewRect[2] / this.#viewRect[3]);
-		mat4.perspective(this.projectionMatrix, (Math.PI / 180) * this.camera.fov, aspect, this.camera.nearClipping, this.camera.farClipping);
+		glMatrix.mat4.perspective(this.projectionMatrix, (Math.PI / 180) * this.camera.fov, aspect, this.camera.nearClipping, this.camera.farClipping);
 		this.#systemUniformInfo_vertex_data.set(this.projectionMatrix, offset);
 		offset += TypeSize.mat4 / Float32Array.BYTES_PER_ELEMENT;
 		this.#systemUniformInfo_vertex_data.set(this.camera.matrix, offset);
@@ -241,7 +241,7 @@ export default class View extends UUID {
 		// update light counts
 		offset = 0;
 		this.#systemUniformInfo_fragment_data.set([this.scene.directionalLightList.length, this.scene.pointLightList.length, this.scene.spotLightList.length], offset);
-		this.debugLightList.length = 0
+		this.debugLightList.length = 0;
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// update directionalLightList
 		i = 0;
@@ -384,8 +384,8 @@ export default class View extends UUID {
 	};
 
 	computeViewFrustumPlanes() {
-		let tMTX = mat4.create();
-		mat4.multiply(tMTX, this.projectionMatrix, this.camera.matrix);
+		let tMTX = glMatrix.mat4.create();
+		glMatrix.mat4.multiply(tMTX, this.projectionMatrix, this.camera.matrix);
 		let planes = [];
 		planes[0] = [tMTX[3] - tMTX[0], tMTX[7] - tMTX[4], tMTX[11] - tMTX[8], tMTX[15] - tMTX[12]];
 		planes[1] = [tMTX[3] + tMTX[0], tMTX[7] + tMTX[4], tMTX[11] + tMTX[8], tMTX[15] + tMTX[12]];

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.6 10:16:17
+ *   Last modification time of this file - 2020.1.7 16:13:31
  *
  */
 
@@ -93,7 +93,7 @@ let renderScene = (_ => {
 								colorFormats: [redGPUContext.swapChainFormat, 'rgba32float'],
 								depthStencilFormat :[ 'depth24plus-stencil8'],
 								sampleCount: 4
-							})
+							});
 							bundleEncoder.setPipeline(tPipeline.GPURenderPipeline);
 							bundleEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
 							bundleEncoder.setBindGroup(0, redView.systemUniformInfo_vertex.GPUBindGroup);
@@ -104,7 +104,7 @@ let renderScene = (_ => {
 								bundleEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
 								bundleEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
 							} else bundleEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
-							tPipeline._bundle = bundleEncoder.finish()
+							tPipeline._bundle = bundleEncoder.finish();
 							currentDebuggerData['dirtyPipelineNum']++
 							// console.timeEnd('tPipeline.update' + tMesh._UUID)
 						}
@@ -133,8 +133,8 @@ let renderScene = (_ => {
 							// console.log(tVisible);
 							///////////////////////////////////////
 							if (tVisible) {
-								bundleList[bundleIDX] = tPipeline._bundle
-								bundleIDX++
+								bundleList[bundleIDX] = tPipeline._bundle;
+								bundleIDX++;
 								// passEncoder.setPipeline(tPipeline.GPURenderPipeline);
 								// if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
 								// 	passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
@@ -174,8 +174,8 @@ let renderScene = (_ => {
 						// // } else {
 						// //
 						// // }
-						bundleList[bundleIDX] = tPipeline._bundle
-						bundleIDX++
+						bundleList[bundleIDX] = tPipeline._bundle;
+						bundleIDX++;
 						// passEncoder.setPipeline(tPipeline.GPURenderPipeline);
 						// if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
 						// 	passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
@@ -464,7 +464,7 @@ let renderLightDebugger = (redGPUContext, redView, passEncoder) => {
 		renderScene(redGPUContext, redView, passEncoder, null, redView.debugLightList);
 		redView.useFrustumCulling = cache_useFrustumCulling;
 	}
-}
+};
 let copyToFinalTexture = (redGPUContext, redView, commandEncoder, lastTexture, dstTexture) => {
 	let tViewRect = redView.viewRect;
 	let tX = tViewRect[0];
@@ -527,7 +527,7 @@ let renderView = (redGPUContext, redView, swapChainTexture, mouseEventChecker) =
 	mainRenderPassEncoder.setViewport(0, 0, tViewRect[2], tViewRect[3], 0, 1);
 	mainRenderPassEncoder.setScissorRect(0, 0, tViewRect[2], tViewRect[3]);
 	bundleIDX = 0;
-	bundleList.length = 0
+	bundleList.length = 0;
 	// render skyBox, grid, axis
 	renderOptions(redGPUContext, redView, mainRenderPassEncoder);
 	// 실제 Scene렌더
@@ -550,12 +550,12 @@ let renderView = (redGPUContext, redView, swapChainTexture, mouseEventChecker) =
 	// textToTransparentLayerList.length = 0;
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// 라이트 디버거 렌더
-	renderLightDebugger(redGPUContext, redView, mainRenderPassEncoder)
+	renderLightDebugger(redGPUContext, redView, mainRenderPassEncoder);
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// 메인 렌더패스 종료
-	mainRenderPassEncoder.executeBundles(bundleList)
+	mainRenderPassEncoder.executeBundles(bundleList);
 	bundleIDX = 0;
-	bundleList.length = 0
+	bundleList.length = 0;
 	mainRenderPassEncoder.endPass();
 	currentDebuggerData['baseRenderTime'] = performance.now() - now;
 	//////////////////////////////////////////////////////////////////////////////////////////
@@ -597,7 +597,7 @@ export default class Render {
 		// 업데이트 대상 유니폼 버퍼 갱신
 		i = updateTargetMatrixBufferList.length;
 		while (i--) updateTargetMatrixBufferList[i].GPUBuffer.setSubData(0, updateTargetMatrixBufferList[i].meshFloat32Array);
-		updateTargetMatrixBufferList.length = 0
+		updateTargetMatrixBufferList.length = 0;
 		GLTFLoader.animationLooper(time);
 		Debugger.update()
 	}
