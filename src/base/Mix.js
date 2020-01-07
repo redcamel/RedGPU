@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 18:50:31
+ *   Last modification time of this file - 2020.1.7 13:9:8
  *
  */
 
@@ -92,6 +92,28 @@ const environmentTexture = Base => {
 	};
 	return mix(t0, environmentTextureBase)
 };
+
+const refractionTextureBase = defineTextureClass('refractionTexture');
+const refractionTexture = Base => {
+	let t0 = class extends Base {
+		_refractionPower = 1;
+		_refractionRatio = 0.98;
+		get refractionPower() {return this._refractionPower;}
+		set refractionPower(value) {
+			this._refractionPower = value;
+			float1_Float32Array[0] = this._refractionPower;
+			this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['refractionPower'], float1_Float32Array)
+		}
+		get refractionRatio() {return this._refractionRatio;}
+		set refractionRatio(value) {
+			this._refractionRatio = value;
+			float1_Float32Array[0] = this._refractionRatio;
+			this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['refractionRatio'], float1_Float32Array)
+		}
+	};
+	return mix(t0, refractionTextureBase)
+};
+
 const displacementTextureBase = defineTextureClass('displacementTexture');
 const displacementTexture = Base => {
 	let t0 = class extends Base {
@@ -207,6 +229,7 @@ export default {
 	specularTexture: specularTexture,
 	emissiveTexture: emissiveTexture,
 	environmentTexture: environmentTexture,
+	refractionTexture: refractionTexture,
 	displacementTexture: displacementTexture,
 	basicLightPropertys: basicLightPropertys
 }
