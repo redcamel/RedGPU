@@ -2,13 +2,13 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 18:50:31
+ *   Last modification time of this file - 2020.1.7 16:13:31
  *
  */
 
 "use strict";
 import Camera from "./Camera.js";
-
+import glMatrix from "../base/gl-matrix-min.js"
 export default class ObitController extends Camera {
 	get needUpdate() { return this.#needUpdate; }
 	set needUpdate(value) { this.#needUpdate = value; }
@@ -140,11 +140,11 @@ export default class ObitController extends Camera {
 		this.#currentPan += (this.#pan - this.#currentPan) * tDelayRotation;
 		this.#currentTilt += (this.#tilt - this.#currentTilt) * tDelayRotation;
 		this.#currentDistance += (this.#distance - this.#currentDistance) * this.#delayDistance;
-		mat4.identity(tMTX0);
-		mat4.translate(tMTX0, tMTX0, [this.#centerX, this.#centerY, this.#centerZ]);
-		mat4.rotateY(tMTX0, tMTX0, this.#currentPan * PER_PI);
-		mat4.rotateX(tMTX0, tMTX0, this.#currentTilt * PER_PI);
-		mat4.translate(tMTX0, tMTX0, [0, 0, this.#currentDistance]);
+		glMatrix.mat4.identity(tMTX0);
+		glMatrix.mat4.translate(tMTX0, tMTX0, [this.#centerX, this.#centerY, this.#centerZ]);
+		glMatrix.mat4.rotateY(tMTX0, tMTX0, this.#currentPan * PER_PI);
+		glMatrix.mat4.rotateX(tMTX0, tMTX0, this.#currentTilt * PER_PI);
+		glMatrix.mat4.translate(tMTX0, tMTX0, [0, 0, this.#currentDistance]);
 		this.x = tMTX0[12];
 		this.y = tMTX0[13];
 		this.z = tMTX0[14];

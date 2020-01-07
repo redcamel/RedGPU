@@ -2,9 +2,10 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.7 13:9:8
+ *   Last modification time of this file - 2020.1.7 16:13:31
  *
  */
+import glMatrix from "./base/gl-matrix-min.js"
 // renderder ///////////////////////////////////////////////////////////////////////
 import Render from "./renderer/Render.js";
 import Debugger from "./renderer/system/Debugger.js";
@@ -106,6 +107,7 @@ import Scene from "./Scene.js"
 import View from "./View.js"
 
 const RedGPU = {
+	glMatrix,
 	// base
 	DetectorGPU,
 	baseGeometry,

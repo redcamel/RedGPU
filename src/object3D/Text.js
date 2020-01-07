@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.6 18:57:8
+ *   Last modification time of this file - 2020.1.7 16:13:31
  *
  */
 
@@ -86,7 +86,7 @@ export default class Text extends BaseObject3D {
 		this.geometry = new Plane(redGPUContext);
 		this.material = new TextMaterial(redGPUContext);
 		this.cullMode = 'none';
-		this.depthWriteEnabled = false
+		this.depthWriteEnabled = false;
 
 
 		this['_img'] = new Image();

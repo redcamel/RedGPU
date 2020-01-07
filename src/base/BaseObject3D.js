@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.2 14:26:4
+ *   Last modification time of this file - 2020.1.7 16:13:31
  *
  */
 
@@ -17,7 +17,7 @@ import ShareGLSL from "./ShareGLSL.js";
 import View from "../View.js";
 import UTIL from "../util/UTIL.js";
 import MouseEventChecker from "../renderer/system/MouseEventChecker.js";
-
+import glMatrix from "../base/gl-matrix-min.js";
 const MESH_UNIFORM_TABLE = [];
 let MESH_UNIFORM_POOL_index = 0;
 let MESH_UNIFORM_POOL_tableIndex = 0;
@@ -249,9 +249,9 @@ export default class BaseObject3D extends DisplayContainer {
 
 
 		this.pipeline = new PipelineBasic(redGPUContext, this);
-		this.normalMatrix = mat4.create();
-		this.matrix = mat4.create();
-		this.localMatrix = mat4.create()
+		this.normalMatrix = glMatrix.mat4.create();
+		this.matrix = glMatrix.mat4.create();
+		this.localMatrix = glMatrix.mat4.create()
 
 	}
 
@@ -274,14 +274,14 @@ export default class BaseObject3D extends DisplayContainer {
 		let up = new Float32Array([0, 1, 0]);
 		let tPosition = [];
 		let tRotation = [];
-		let tMTX = mat4.create();
+		let tMTX = glMatrix.mat4.create();
 		return function (x, y, z) {
 			tPosition[0] = x;
 			tPosition[1] = y;
 			tPosition[2] = z;
 			//out, eye, center, up
-			mat4.identity(tMTX);
-			mat4.targetTo(tMTX, [this._x, this._y, this._z], tPosition, up);
+			glMatrix.mat4.identity(tMTX);
+			glMatrix.mat4.targetTo(tMTX, [this._x, this._y, this._z], tPosition, up);
 			tRotation = UTIL.mat4ToEuler(tMTX, []);
 			this._rotationX = -tRotation[0] * 180 / Math.PI;
 			this._rotationY = -tRotation[1] * 180 / Math.PI;
@@ -293,7 +293,7 @@ export default class BaseObject3D extends DisplayContainer {
 	localToWorld = (_ => {
 		//TODO - 값 확인해봐야함
 		let tMTX;
-		tMTX = mat4.create();
+		tMTX = glMatrix.mat4.create();
 		return function (x = 0, y = 0, z = 0) {
 			typeof x == 'number' || UTIL.throwFunc('RedBaseObject3D - localToWorld : x - number만 허용함', '입력값 : ', x);
 			typeof y == 'number' || UTIL.throwFunc('RedBaseObject3D - localToWorld : y - number만 허용함', '입력값 : ', y);
@@ -302,14 +302,14 @@ export default class BaseObject3D extends DisplayContainer {
 			tMTX[4] = 0, tMTX[5] = 1, tMTX[6] = 0, tMTX[7] = 0;
 			tMTX[8] = 0, tMTX[9] = 0, tMTX[10] = 1, tMTX[11] = 0;
 			tMTX[12] = x, tMTX[13] = y, tMTX[14] = z, tMTX[15] = 1;
-			mat4.multiply(tMTX, this.matrix, tMTX);
+			glMatrix.mat4.multiply(tMTX, this.matrix, tMTX);
 			return [tMTX[12], tMTX[13], tMTX[14]]
 		}
 	})();
 	getScreenPoint = (_ => {
 		//TODO - 값 확인해봐야함
-		let tMTX = mat4.create();
-		let tPositionMTX = mat4.create();
+		let tMTX = glMatrix.mat4.create();
+		let tPositionMTX = glMatrix.mat4.create();
 		let tCamera, tViewRect;
 		let resultPosition;
 		resultPosition = {x: 0, y: 0, z: 0, w: 0};
@@ -322,8 +322,8 @@ export default class BaseObject3D extends DisplayContainer {
 			redView instanceof View || UTIL.throwFunc('RedBaseObject3D - getScreenPoint : redView - RedView Instance 만 허용함', '입력값 : ', redView);
 			tCamera = redView.camera;
 			tViewRect = redView.viewRect;
-			mat4.multiply(tMTX, redView.projectionMatrix, tCamera.matrix);
-			mat4.multiply(tMTX, tMTX, tPositionMTX);
+			glMatrix.mat4.multiply(tMTX, redView.projectionMatrix, tCamera.matrix);
+			glMatrix.mat4.multiply(tMTX, tMTX, tPositionMTX);
 			resultPosition.x = tMTX[12];
 			resultPosition.y = tMTX[13];
 			resultPosition.z = tMTX[14];
