@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.8 15:12:22
+ *   Last modification time of this file - 2020.1.8 15:38:58
  *
  */
 
@@ -262,7 +262,7 @@ const ExampleHelper = (_ => {
 		const testData = {
 			radius: 1,
 			widthSegments: 8,
-			heightSegments: 6,
+			heightSegments: 8,
 			phiStart: 0,
 			phiLength: Math.PI * 2,
 			thetaStart: 0,
