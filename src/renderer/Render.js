@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.8 11:32:0
+ *   Last modification time of this file - 2020.1.8 15:12:22
  *
  */
 
@@ -93,67 +93,67 @@ let renderScene = (_ => {
 							currentDebuggerData['dirtyPipelineNum']++
 							// console.timeEnd('tPipeline.update' + tMesh._UUID)
 						}
-					} else {
-						tVisible = 1;
-						if (renderToTransparentLayerMode == 0 && tMesh.renderToTransparentLayer) {
-							renderToTransparentLayerList.push(tMesh)
-						} else {
-							if (tMesh instanceof Text || tMaterial instanceof SheetMaterial) {
-								a02 = redView.camera.matrix[2], a12 = redView.camera.matrix[6], a22 = redView.camera.matrix[10], a32 = redView.camera.matrix[14];
-								b0 = tMesh._x, b1 = tMesh._y, b2 = tMesh._z, b3 = 1;
-								textToTransparentLayerList.push({
-									z: b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32,
-									targetText: tMesh
-								})
-							} else {
-								if (redView._useFrustumCulling) {
-									geoVolume = tGeometry._volume || tGeometry.volume;
-									radius = geoVolume.xSize * tMesh.matrix[0];
-									radiusTemp = geoVolume.ySize * tMesh.matrix[5];
-									radius = radius < radiusTemp ? radiusTemp : radius;
-									radiusTemp = geoVolume.zSize * tMesh.matrix[10];
-									radius = radius < radiusTemp ? radiusTemp : radius;
-
-									a00 = tMVMatrix[12], a01 = tMVMatrix[13], a02 = tMVMatrix[14],
-
-										frustumPlanes0[0] * a00 + frustumPlanes0[1] * a01 + frustumPlanes0[2] * a02 + frustumPlanes0[3] <= -radius ? tVisible = 0
-											: frustumPlanes1[0] * a00 + frustumPlanes1[1] * a01 + frustumPlanes1[2] * a02 + frustumPlanes1[3] <= -radius ? tVisible = 0
-											: frustumPlanes2[0] * a00 + frustumPlanes2[1] * a01 + frustumPlanes2[2] * a02 + frustumPlanes2[3] <= -radius ? tVisible = 0
-												: frustumPlanes3[0] * a00 + frustumPlanes3[1] * a01 + frustumPlanes3[2] * a02 + frustumPlanes3[3] <= -radius ? tVisible = 0
-													: frustumPlanes4[0] * a00 + frustumPlanes4[1] * a01 + frustumPlanes4[2] * a02 + frustumPlanes4[3] <= -radius ? tVisible = 0
-														: frustumPlanes5[0] * a00 + frustumPlanes5[1] * a01 + frustumPlanes5[2] * a02 + frustumPlanes5[3] <= -radius ? tVisible = 0 : 0
-								}
-								// console.log(tVisible);
-								///////////////////////////////////////
-								if (tVisible) {
-									passEncoder.setPipeline(tPipeline.GPURenderPipeline);
-									if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
-										passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
-										prevVertexBuffer_UUID = tGeometry.interleaveBuffer._UUID
-									}
-									passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹는 매그룹마다 다르니 또 업데이트 해줘야함 -_-
-									if (prevMaterial_UUID != tMaterial._UUID) {
-										passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
-										prevMaterial_UUID = tMaterial._UUID
-									}
-									if (tGeometry.indexBuffer) {
-										if (prevIndexBuffer_UUID != tGeometry.indexBuffer._UUID) {
-											passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
-											prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
-										}
-										passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
-										currentDebuggerData['triangleNum'] += tGeometry.indexBuffer.indexNum / 3
-									} else {
-										passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
-										currentDebuggerData['triangleNum'] += tGeometry.interleaveBuffer.data.length / tGeometry.interleaveBuffer.stride
-									}
-									currentDebuggerData['drawCallNum']++
-								}
-								tMesh._prevMaterialUUID = tMaterial._UUID;
-							}
-
-						}
 					}
+					tVisible = 1;
+					if (renderToTransparentLayerMode == 0 && tMesh.renderToTransparentLayer) {
+						renderToTransparentLayerList.push(tMesh)
+					} else {
+						if (tMesh instanceof Text || tMaterial instanceof SheetMaterial) {
+							a02 = redView.camera.matrix[2], a12 = redView.camera.matrix[6], a22 = redView.camera.matrix[10], a32 = redView.camera.matrix[14];
+							b0 = tMesh._x, b1 = tMesh._y, b2 = tMesh._z, b3 = 1;
+							textToTransparentLayerList.push({
+								z: b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32,
+								targetText: tMesh
+							})
+						} else {
+							if (redView._useFrustumCulling) {
+								geoVolume = tGeometry._volume || tGeometry.volume;
+								radius = geoVolume.xSize * tMesh.matrix[0];
+								radiusTemp = geoVolume.ySize * tMesh.matrix[5];
+								radius = radius < radiusTemp ? radiusTemp : radius;
+								radiusTemp = geoVolume.zSize * tMesh.matrix[10];
+								radius = radius < radiusTemp ? radiusTemp : radius;
+
+								a00 = tMVMatrix[12], a01 = tMVMatrix[13], a02 = tMVMatrix[14],
+
+									frustumPlanes0[0] * a00 + frustumPlanes0[1] * a01 + frustumPlanes0[2] * a02 + frustumPlanes0[3] <= -radius ? tVisible = 0
+										: frustumPlanes1[0] * a00 + frustumPlanes1[1] * a01 + frustumPlanes1[2] * a02 + frustumPlanes1[3] <= -radius ? tVisible = 0
+										: frustumPlanes2[0] * a00 + frustumPlanes2[1] * a01 + frustumPlanes2[2] * a02 + frustumPlanes2[3] <= -radius ? tVisible = 0
+											: frustumPlanes3[0] * a00 + frustumPlanes3[1] * a01 + frustumPlanes3[2] * a02 + frustumPlanes3[3] <= -radius ? tVisible = 0
+												: frustumPlanes4[0] * a00 + frustumPlanes4[1] * a01 + frustumPlanes4[2] * a02 + frustumPlanes4[3] <= -radius ? tVisible = 0
+													: frustumPlanes5[0] * a00 + frustumPlanes5[1] * a01 + frustumPlanes5[2] * a02 + frustumPlanes5[3] <= -radius ? tVisible = 0 : 0
+							}
+							// console.log(tVisible);
+							///////////////////////////////////////
+							if (tVisible) {
+								passEncoder.setPipeline(tPipeline.GPURenderPipeline);
+								if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
+									passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
+									prevVertexBuffer_UUID = tGeometry.interleaveBuffer._UUID
+								}
+								passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹는 매그룹마다 다르니 또 업데이트 해줘야함 -_-
+								if (prevMaterial_UUID != tMaterial._UUID) {
+									passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
+									prevMaterial_UUID = tMaterial._UUID
+								}
+								if (tGeometry.indexBuffer) {
+									if (prevIndexBuffer_UUID != tGeometry.indexBuffer._UUID) {
+										passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
+										prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
+									}
+									passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
+									currentDebuggerData['triangleNum'] += tGeometry.indexBuffer.indexNum / 3
+								} else {
+									passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
+									currentDebuggerData['triangleNum'] += tGeometry.interleaveBuffer.data.length / tGeometry.interleaveBuffer.stride
+								}
+								currentDebuggerData['drawCallNum']++
+							}
+							tMesh._prevMaterialUUID = tMaterial._UUID;
+						}
+
+					}
+
 					if (renderToTransparentLayerMode) {
 						passEncoder.setPipeline(tPipeline.GPURenderPipeline);
 						if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
@@ -470,7 +470,7 @@ let copyToFinalTexture = (redGPUContext, redView, commandEncoder, lastTexture, d
 		sourceX = -tX;
 		tW = tW + tX;
 		tX = 0;
-		if(tW<0) {
+		if (tW < 0) {
 			sourceX = 0
 			tW = 0
 		}
@@ -485,7 +485,7 @@ let copyToFinalTexture = (redGPUContext, redView, commandEncoder, lastTexture, d
 		sourceY = -tY;
 		tH = tH + tY;
 		tY = 0;
-		if(tH<0) {
+		if (tH < 0) {
 			sourceY = 0
 			tH = 0
 		}
