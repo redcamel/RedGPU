@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.31 13:40:48
+ *   Last modification time of this file - 2020.1.8 17:12:21
  *
  */
 
@@ -237,7 +237,7 @@ export default class ShareGLSL {
 		{	   
 			vec3 map = normalColor;
 			map =  map * 255./127. - 128./127.;
-			map.xy *= normalPower;
+			map.xy *= -normalPower;
 			mat3 TBN = cotangent_frame(N, V, texcoord);
 			return normalize(TBN * map);
 		}
