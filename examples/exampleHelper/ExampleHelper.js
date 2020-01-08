@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.8 17:12:21
+ *   Last modification time of this file - 2020.1.8 18:11:47
  *
  */
 
@@ -341,6 +341,25 @@ const ExampleHelper = (_ => {
 		folder.open()
 		folder.add(tMesh, 'primitiveTopology', ["point-list", "line-list", "line-strip", "triangle-list", "triangle-strip"])
 	};
+	const setTestUI_Sprite3D = (RedGPU, redGPUContext, tSprite3DList, open, gui) => {
+		checkGUI();
+		gui = gui || testHelperFolder;
+		let rootFolder, folder;
+		rootFolder = gui.addFolder('Sprite3D');
+		if (open) rootFolder.open();
+		rootFolder.add(tSprite3DList[0], 'useFixedScale').onChange(v => {
+			tSprite3DList.forEach(sprite3D => {
+				sprite3D.useFixedScale = v;
+			})
+		});
+		['scaleX', 'scaleY', 'scaleZ'].forEach(key => {
+			rootFolder.add(tSprite3DList[0], key, 0, 1, 0.01).onChange(v => {
+				tSprite3DList.forEach(sprite3D => {
+					sprite3D[key] = v;
+				})
+			})
+		});
+	}
 	const setTestUI_Mesh = (RedGPU, redGPUContext, tMesh, open, gui) => {
 		checkGUI();
 		gui = gui || testHelperFolder;
@@ -449,6 +468,7 @@ const ExampleHelper = (_ => {
 		setTestUI_View: setTestUI_View,
 		setTestUI_Debugger: setTestUI_Debugger,
 		setTestUI_Mesh: setTestUI_Mesh,
+		setTestUI_Sprite3D: setTestUI_Sprite3D,
 		setTestUI_Axis: setTestUI_Axis,
 		setTestUI_Grid: setTestUI_Grid,
 		setTestUI_SkyBox: setTestUI_SkyBox,

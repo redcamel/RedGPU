@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.7 13:9:8
+ *   Last modification time of this file - 2020.1.8 18:11:47
  *
  */
 
@@ -97,7 +97,7 @@ const refractionTextureBase = defineTextureClass('refractionTexture');
 const refractionTexture = Base => {
 	let t0 = class extends Base {
 		_refractionPower = 1;
-		_refractionRatio = 0.98;
+		_refractionRatio = 0.95;
 		get refractionPower() {return this._refractionPower;}
 		set refractionPower(value) {
 			this._refractionPower = value;

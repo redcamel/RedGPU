@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.8 15:12:22
+ *   Last modification time of this file - 2020.1.8 18:11:47
  *
  */
 
@@ -11,6 +11,7 @@ import SheetMaterial from "../material/SheetMaterial.js";
 import Debugger from "./system/Debugger.js";
 import PipelineBasic from "../base/pipeline/PipelineBasic.js";
 import Text from "../object3D/Text.js";
+import Sprite3D from "../object3D/Sprite3D.js";
 
 let _frustumPlanes = [];
 let currentDebuggerData;
@@ -98,7 +99,7 @@ let renderScene = (_ => {
 					if (renderToTransparentLayerMode == 0 && tMesh.renderToTransparentLayer) {
 						renderToTransparentLayerList.push(tMesh)
 					} else {
-						if (tMesh instanceof Text || tMaterial instanceof SheetMaterial) {
+						if (tMesh instanceof Text || tMesh instanceof Sprite3D ||tMaterial instanceof SheetMaterial) {
 							a02 = redView.camera.matrix[2], a12 = redView.camera.matrix[6], a22 = redView.camera.matrix[10], a32 = redView.camera.matrix[14];
 							b0 = tMesh._x, b1 = tMesh._y, b2 = tMesh._z, b3 = 1;
 							textToTransparentLayerList.push({

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.2 21:31:8
+ *   Last modification time of this file - 2020.1.8 18:11:47
  *
  */
 "use strict";
@@ -11,7 +11,6 @@ import Sprite3DMaterial from "../material/Sprite3DMaterial.js";
 import UTIL from "../util/UTIL.js";
 
 export default class Sprite3D extends BaseObject3D {
-	perspectiveScale = true;
 	set material(v) {
 		if (v instanceof Sprite3DMaterial) {
 			this._material = v;
@@ -20,12 +19,15 @@ export default class Sprite3D extends BaseObject3D {
 			UTIL.throwFunc(`addChild - only allow Sprite3DMaterial Instance. - inputValue : ${v} { type : ${typeof v} }`);
 		}
 	}
+	get material() { return this._material;}
 	get rotationX() {return this._rotationX;}
 	set rotationX(v) {}
 	get rotationY() {return this._rotationY;}
 	set rotationY(v) {}
 	get rotationZ() {return this._rotationZ;}
 	set rotationZ(v) {}
+	get useFixedScale() {return this.material.useFixedScale;}
+	set useFixedScale(value) {this.material.useFixedScale = value;}
 	constructor(redGPUContext, geometry, material) {
 		super(redGPUContext);
 		this.geometry = geometry;
