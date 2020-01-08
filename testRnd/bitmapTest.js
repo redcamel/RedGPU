@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.31 13:40:48
+ *   Last modification time of this file - 2020.1.8 22:30:15
  *
  */
 import RedGPU from "../src/RedGPU.js";
@@ -330,8 +330,8 @@ new RedGPU.RedGPUContext(cvs,
 		let renderer = new RedGPU.Render();
 		let getScreenPointFromWorld = (_ => {
 			//TODO - 값 확인해봐야함
-			let tMTX = mat4.create();
-			let tPositionMTX = mat4.create();
+			let tMTX = RedGPU.glMatrix.mat4.create();
+			let tPositionMTX = RedGPU.glMatrix.mat4.create();
 			let tCamera, tViewRect;
 			let resultPosition;
 			resultPosition = {x: 0, y: 0, z: 0, w: 0};
@@ -343,8 +343,8 @@ new RedGPU.RedGPUContext(cvs,
 				redView instanceof RedGPU.View || RedGPU.UTIL.throwFunc('RedBaseObject3D - getScreenPoint : redView - RedView Instance 만 허용함', '입력값 : ', redView);
 				tCamera = redView.camera;
 				tViewRect = redView.viewRect;
-				mat4.multiply(tMTX, redView.projectionMatrix, tCamera.matrix);
-				mat4.multiply(tMTX, tMTX, tPositionMTX);
+				RedGPU.glMatrix.mat4.multiply(tMTX, redView.projectionMatrix, tCamera.matrix);
+				RedGPU.glMatrix.mat4.multiply(tMTX, tMTX, tPositionMTX);
 				resultPosition.x = tMTX[12];
 				resultPosition.y = tMTX[13];
 				resultPosition.z = tMTX[14];

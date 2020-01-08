@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.7 13:9:8
+ *   Last modification time of this file - 2020.1.8 22:30:15
  *
  */
 
@@ -89,7 +89,7 @@ export default class RefractionMaterial extends Mix.mix(
 		float testAlpha = 1.0;
 		vec4 diffuseColor = vec4(0.0);
 		//#RedGPU#diffuseTexture# diffuseColor = texture(sampler2D(uDiffuseTexture, uSampler), vUV) ;
-		//#RedGPU#diffuseTexture# testAlpha = diffuseColor.a;
+		
 		
 		
 	    vec3 N = normalize(vNormal);
@@ -102,6 +102,8 @@ export default class RefractionMaterial extends Mix.mix(
 		//#RedGPU#refractionTexture# vec3 R = refract(I, N, fragmentUniforms.refractionRatio);
 		//#RedGPU#refractionTexture# vec4 refractionColor = texture(samplerCube(uRefractionTexture,uSampler), R);
 		//#RedGPU#refractionTexture# diffuseColor = mix(diffuseColor, refractionColor, fragmentUniforms.refractionPower);
+		
+		testAlpha = diffuseColor.a;
 		
 		float specularTextureValue = 1.0;
 		//#RedGPU#specularTexture# specularTextureValue = texture(sampler2D(uSpecularTexture, uSampler), vUV).r ;

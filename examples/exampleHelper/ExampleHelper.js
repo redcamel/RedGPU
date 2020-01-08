@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.8 19:10:27
+ *   Last modification time of this file - 2020.1.8 22:30:15
  *
  */
 
@@ -14,7 +14,7 @@ const ExampleHelper = (_ => {
 			let containerUI;
 			let rootGUI;
 			rootGUI = new dat.GUI({autoPlace: false});
-			rootGUI.width = 300;
+			rootGUI.width = 370;
 			testHelperFolder = rootGUI.addFolder('TestHelper');
 			testHelperFolder.open();
 			containerUI = document.createElement('div');
@@ -360,6 +360,45 @@ const ExampleHelper = (_ => {
 			})
 		});
 	};
+	const setTextUI_LINE_BEZIER = (RedGPU, lineList, open, gui) => {
+		checkGUI();
+		gui = gui || testHelperFolder;
+		let rootFolder, folder;
+		rootFolder = gui.addFolder('Line - Bezier');
+		if (open) rootFolder.open();
+		rootFolder.add(lineList[0], 'distance', 0, 5, 0.01).onChange(v => {
+			lineList.forEach(line => {
+				line.distance = v;
+			})
+		});
+		rootFolder.add(lineList[0], 'tolerance', 0, 5, 0.01).onChange(v => {
+			lineList.forEach(line => {
+				line.tolerance = v;
+			})
+		});
+	}
+	const setTextUI_LINE_CATMULLROM = (RedGPU, lineList, open, gui) => {
+		checkGUI();
+		gui = gui || testHelperFolder;
+		let rootFolder, folder;
+		rootFolder = gui.addFolder('Line - CATMULLROM');
+		if (open) rootFolder.open();
+		rootFolder.add(lineList[0], 'distance', 0, 5, 0.01).onChange(v => {
+			lineList.forEach(line => {
+				line.distance = v;
+			})
+		});
+		rootFolder.add(lineList[0], 'tension', 0, 5, 0.01).onChange(v => {
+			lineList.forEach(line => {
+				line.tension = v;
+			})
+		});
+		rootFolder.add(lineList[0], 'tolerance', 0, 1, 0.01).onChange(v => {
+			lineList.forEach(line => {
+				line.tolerance = v;
+			})
+		});
+	}
 	const setTestUI_Text = (RedGPU, redGPUContext, tText, open, gui) => {
 		checkGUI();
 		gui = gui || testHelperFolder;
@@ -402,6 +441,15 @@ const ExampleHelper = (_ => {
 		rootFolder.add(tText, 'useFixedScale');
 		rootFolder.add(tText, 'useSprite3DMode');
 
+		let t1;
+		t1 = document.createElement('div');
+		t1.setAttribute('contenteditable', true);
+		t1.style.cssText = 'overflow:auto;position:absolute;bottom:130px;left:18px;color:#fff;width:500px;height:160px;padding:10px;font-size:12px;background:1px 1px 0px rgba(255,255,255,0.5);border:1px solid #333;outline:none';
+		t1.textContent = tText.text;
+		document.body.appendChild(t1)
+		t1.addEventListener('input', function () {
+			tText['text'] = this.textContent;
+		})
 	};
 
 	const setTestUI_Mesh = (RedGPU, redGPUContext, tMesh, open, gui) => {
@@ -492,6 +540,153 @@ const ExampleHelper = (_ => {
 		})
 
 	};
+	// material
+	let setTestUI_ColorMaterial, setTestUI_ColorPhongMaterial, setTestUI_ColorPhongTextureMaterial;
+	let setTestUI_BitmapMaterial, setTestUI_StandardMaterial,setTestUI_EnvironmentMaterial,setTestUI_RefractionMaterial;
+	{
+		let makeColorProperty, makeBaseLightProperty;
+		let makeTextureProperty;
+		makeTextureProperty = (targetFolder, RedGPU, redGPUContext, material, propertyName, src) => {
+			let testData = {}
+			testData[propertyName] = true;
+			if(src instanceof Array){
+				targetFolder.add(testData, propertyName).onChange(v => {
+					if (v) material[propertyName] = new RedGPU.BitmapCubeTexture(redGPUContext, src);
+					else material[propertyName] = null;
+				});
+			}else{
+				targetFolder.add(testData, propertyName).onChange(v => {
+					if (v) material[propertyName] = new RedGPU.BitmapTexture(redGPUContext, src);
+					else material[propertyName] = null;
+				});
+			}
+
+			if (propertyName == 'emissiveTexture') {
+				targetFolder.add(material, 'emissivePower', 0, 3, 0.01)
+			}
+			if (propertyName == 'displacementTexture') {
+				targetFolder.add(material, 'displacementFlowSpeedX', 0, 1, 0.01)
+				targetFolder.add(material, 'displacementFlowSpeedY', 0, 1, 0.01)
+				targetFolder.add(material, 'displacementPower', 0, 5, 0.01)
+			}
+
+		}
+		makeColorProperty = (targetFolder, material) => {
+			targetFolder.addColor(material, 'color')
+			targetFolder.add(material, 'colorAlpha', 0, 1, 0.01)
+		}
+		makeBaseLightProperty = (targetFolder, material) => {
+			targetFolder.add(material, 'normalPower', -5, 5, 0.01);
+			targetFolder.add(material, 'shininess', 0, 256, 0.01);
+			targetFolder.add(material, 'specularPower', 0, 5, 0.01);
+			targetFolder.addColor(material, 'specularColor');
+			targetFolder.add(material, 'useFlatMode');
+		}
+		setTestUI_ColorMaterial = (RedGPU, material, open, gui) => {
+			checkGUI();
+			gui = gui || testHelperFolder;
+			let rootFolder, folder;
+			rootFolder = gui.addFolder('ColorMaterial');
+			if (open) rootFolder.open();
+			makeColorProperty(rootFolder, material);
+		}
+		setTestUI_ColorPhongMaterial = (RedGPU, material, open, gui) => {
+			checkGUI();
+			gui = gui || testHelperFolder;
+			let rootFolder, folder;
+			rootFolder = gui.addFolder('ColorPhongMaterial');
+			if (open) rootFolder.open();
+			makeColorProperty(rootFolder, material);
+			makeBaseLightProperty(rootFolder, material);
+		}
+		setTestUI_ColorPhongTextureMaterial = (RedGPU, redGPUContext, material, open, gui) => {
+			checkGUI();
+			gui = gui || testHelperFolder;
+			let rootFolder, folder;
+			rootFolder = gui.addFolder('ColorPhongTextureMaterial');
+			if (open) rootFolder.open();
+			makeColorProperty(rootFolder, material);
+			makeBaseLightProperty(rootFolder, material);
+			folder = rootFolder.addFolder('texture');
+			folder.open();
+			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'normalTexture', `${assetPath}Brick03_nrm.jpg`);
+			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'specularTexture', `${assetPath}specular.png`);
+			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'emissiveTexture', `${assetPath}emissive.jpg`);
+			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'displacementTexture', `${assetPath}Brick03_disp.jpg`);
+		}
+		setTestUI_BitmapMaterial = (RedGPU, redGPUContext, material, open, gui) => {
+			checkGUI();
+			gui = gui || testHelperFolder;
+			let rootFolder, folder;
+			rootFolder = gui.addFolder('BitmapMaterial');
+			if (open) rootFolder.open();
+			makeTextureProperty(rootFolder, RedGPU, redGPUContext, material, 'diffuseTexture', `${assetPath}Brick03_col.jpg`);
+		}
+		setTestUI_StandardMaterial = (RedGPU, redGPUContext, material, open, gui) => {
+			checkGUI();
+			gui = gui || testHelperFolder;
+			let rootFolder, folder;
+			rootFolder = gui.addFolder('StandardMaterial');
+			if (open) rootFolder.open();
+			makeBaseLightProperty(rootFolder, material);
+			folder = rootFolder.addFolder('texture');
+			folder.open();
+			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'diffuseTexture', `${assetPath}Brick03_col.jpg`);
+			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'normalTexture', `${assetPath}Brick03_nrm.jpg`);
+			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'specularTexture', `${assetPath}specular.png`);
+			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'emissiveTexture', `${assetPath}emissive.jpg`);
+			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'displacementTexture', `${assetPath}Brick03_disp.jpg`);
+		}
+		setTestUI_EnvironmentMaterial =  (RedGPU, redGPUContext, material, open, gui) => {
+			checkGUI();
+			gui = gui || testHelperFolder;
+			let rootFolder, folder;
+			rootFolder = gui.addFolder('StandardMaterial');
+			if (open) rootFolder.open();
+			makeBaseLightProperty(rootFolder, material);
+			folder = rootFolder.addFolder('texture');
+			folder.open();
+			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'diffuseTexture', `${assetPath}Brick03_col.jpg`);
+			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'environmentTexture', [
+				'../../../assets/cubemap/SwedishRoyalCastle/px.jpg',
+				'../../../assets/cubemap/SwedishRoyalCastle/nx.jpg',
+				'../../../assets/cubemap/SwedishRoyalCastle/py.jpg',
+				'../../../assets/cubemap/SwedishRoyalCastle/ny.jpg',
+				'../../../assets/cubemap/SwedishRoyalCastle/pz.jpg',
+				'../../../assets/cubemap/SwedishRoyalCastle/nz.jpg'
+			]);
+			folder.add(material, 'environmentPower', 0, 1, 0.01);
+			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'normalTexture', `${assetPath}Brick03_nrm.jpg`);
+			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'specularTexture', `${assetPath}specular.png`);
+			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'emissiveTexture', `${assetPath}emissive.jpg`);
+			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'displacementTexture', `${assetPath}Brick03_disp.jpg`);
+		}
+		setTestUI_RefractionMaterial =  (RedGPU, redGPUContext, material, open, gui) => {
+			checkGUI();
+			gui = gui || testHelperFolder;
+			let rootFolder, folder;
+			rootFolder = gui.addFolder('StandardMaterial');
+			if (open) rootFolder.open();
+			makeBaseLightProperty(rootFolder, material);
+			folder = rootFolder.addFolder('texture');
+			folder.open();
+			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'diffuseTexture', `${assetPath}Brick03_col.jpg`);
+			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'refractionTexture', [
+				'../../../assets/cubemap/SwedishRoyalCastle/px.jpg',
+				'../../../assets/cubemap/SwedishRoyalCastle/nx.jpg',
+				'../../../assets/cubemap/SwedishRoyalCastle/py.jpg',
+				'../../../assets/cubemap/SwedishRoyalCastle/ny.jpg',
+				'../../../assets/cubemap/SwedishRoyalCastle/pz.jpg',
+				'../../../assets/cubemap/SwedishRoyalCastle/nz.jpg'
+			]);
+			folder.add(material, 'refractionRatio', 0, 1, 0.001);
+			folder.add(material, 'refractionPower', 0, 1, 0.01);
+			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'normalTexture', `${assetPath}Brick03_nrm.jpg`);
+			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'specularTexture', `${assetPath}specular.png`);
+			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'emissiveTexture', `${assetPath}emissive.jpg`);
+			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'displacementTexture', `${assetPath}Brick03_disp.jpg`);
+		}
+	}
 	return {
 		setBaseInformation: (title, description) => {
 			setBottom();
@@ -517,11 +712,21 @@ const ExampleHelper = (_ => {
 		setTestUI_Axis: setTestUI_Axis,
 		setTestUI_Grid: setTestUI_Grid,
 		setTestUI_SkyBox: setTestUI_SkyBox,
+		setTextUI_LINE_BEZIER: setTextUI_LINE_BEZIER,
+		setTextUI_LINE_CATMULLROM: setTextUI_LINE_CATMULLROM,
 		setTestUI_PrimitivePlane: setTestUI_PrimitivePlane,
 		setTestUI_PrimitiveBox: setTestUI_PrimitiveBox,
 		setTestUI_PrimitiveSphere: setTestUI_PrimitiveSphere,
 		setTestUI_PrimitiveCylinder: setTestUI_PrimitiveCylinder,
-		setTestUI_Camera: setTestUI_Camera
+		setTestUI_Camera: setTestUI_Camera,
+		//
+		setTestUI_ColorMaterial: setTestUI_ColorMaterial,
+		setTestUI_ColorPhongMaterial: setTestUI_ColorPhongMaterial,
+		setTestUI_ColorPhongTextureMaterial: setTestUI_ColorPhongTextureMaterial,
+		setTestUI_BitmapMaterial: setTestUI_BitmapMaterial,
+		setTestUI_StandardMaterial: setTestUI_StandardMaterial,
+		setTestUI_EnvironmentMaterial : setTestUI_EnvironmentMaterial,
+		setTestUI_RefractionMaterial : setTestUI_RefractionMaterial
 	};
 })();
 
