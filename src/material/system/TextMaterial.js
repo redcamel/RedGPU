@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.6 18:57:8
+ *   Last modification time of this file - 2020.1.8 19:10:27
  *
  */
 
@@ -125,12 +125,12 @@ export default class TextMaterial extends Mix.mix(
 	get useFixedScale() {return this.#useFixedScale;}
 	set useFixedScale(value) {
 		this.#useFixedScale = value;
-		this.dirtyPipeline = true;
+		this.needResetBindingInfo = true;
 	}
 	get useSprite3DMode() {return this.#useSprite3DMode;}
 	set useSprite3DMode(value) {
 		this.#useSprite3DMode = value;
-		this.dirtyPipeline = true;
+		this.needResetBindingInfo = true;
 	}
 	checkTexture(texture, textureName) {
 		if (texture) {

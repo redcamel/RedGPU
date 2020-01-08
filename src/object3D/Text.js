@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.8 18:27:58
+ *   Last modification time of this file - 2020.1.8 19:10:27
  *
  */
 
@@ -50,20 +50,20 @@ export default class Text extends BaseObject3D {
 	_img;
 	_width = 256;
 	_height = 128;
-	get height() {
-		return this._height;
-	}
+	get height() {return this._height;}
 	set height(v) {
 		this['material']['height'] = this['_height'] = v < 2 ? 2 : v;
 		setTexture(this);
 	}
-	get width() {
-		return this._width;
-	}
+	get width() {return this._width;}
 	set width(v) {
 		this['material']['width'] = this['_width'] = v < 2 ? 2 : v;
 		setTexture(this);
 	}
+	get useFixedScale() {return this.material.useFixedScale;}
+	set useFixedScale(value) {this.material.useFixedScale = value;}
+	get useSprite3DMode() {return this.material.useSprite3DMode;}
+	set useSprite3DMode(value) {this.material.useSprite3DMode = value;}
 	constructor(redGPUContext, width = 256, height = 128) {
 		super(redGPUContext);
 		this.renderDrawLayerIndex = Render.DRAW_LAYER_INDEX2_Z_POINT_SORT;
@@ -120,23 +120,21 @@ export default class Text extends BaseObject3D {
 			this['material'].height = tH;
 			this['_cvs'].convertToBlob().then(v => {
 				new BitmapTexture(redGPUContext, URL.createObjectURL(v), {
-					magFilter:  "linear",
+					magFilter: "linear",
 					minFilter: "linear",
 					mipmapFilter: "nearest",
 					addressModeU: "clamp-to-edge",
 					addressModeV: "clamp-to-edge",
 					addressModeW: "repeat"
 				}, true, v => {
-					if(this['material'].diffuseTexture) this['material'].diffuseTexture.GPUTexture.destroy();
+					if (this['material'].diffuseTexture) this['material'].diffuseTexture.GPUTexture.destroy();
 					this['material'].diffuseTexture = v
 				})
 			})
-					};
+		};
 
 	}
-	addChild(child) {
-		// Text 에는 추가불가
-	}
+	addChild(child) {/*Text 에는 추가불가*/}
 	set material(v) {
 		if (v instanceof TextMaterial) {
 			this._material = v;
@@ -146,12 +144,8 @@ export default class Text extends BaseObject3D {
 		}
 
 	}
-	get material() {
-		return this._material
-	}
-	get text() {
-		return this['_text']
-	}
+	get material() {return this._material}
+	get text() {return this['_text']}
 	set text(v) {
 		tSVG = this['_svg'];
 		tHTMLContainer = tSVG.querySelector('foreignObject td');
