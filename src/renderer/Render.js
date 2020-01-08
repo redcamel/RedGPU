@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.8 11:31:26
+ *   Last modification time of this file - 2020.1.8 11:32:0
  *
  */
 
@@ -463,7 +463,7 @@ let copyToFinalTexture = (redGPUContext, redView, commandEncoder, lastTexture, d
 	let [tX, tY, tW, tH] = tViewRect;
 	let sourceX, sourceY;
 	let [cvsW, cvsH] = [redGPUContext.canvas.width, redGPUContext.canvas.height]
-	console.log('pre', tX, tY, tW, tH)
+	// console.log('pre', tX, tY, tW, tH)
 	sourceX = 0;
 	sourceY = 0
 	if (tX < 0) {
@@ -498,7 +498,7 @@ let copyToFinalTexture = (redGPUContext, redView, commandEncoder, lastTexture, d
 	}
 
 
-	console.log('after', tX, tY, tW, tH)
+	// console.log('after', tX, tY, tW, tH)
 	commandEncoder.copyTextureToTexture(
 		{
 			texture: lastTexture,
