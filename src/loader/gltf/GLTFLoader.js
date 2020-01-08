@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.7 16:13:31
+ *   Last modification time of this file - 2020.1.8 18:27:58
  *
  */
 
@@ -20,6 +20,7 @@ import TextureLoader from "../TextureLoader.js";
 import Sampler from "../../resources/Sampler.js";
 import gltfAnimationLooper from "./gltfAnimationLooper.js";
 import glMatrix from "../../base/gl-matrix-min.js"
+import Render from "../../renderer/Render.js";
 var GLTFLoader;
 (function () {
 	var parser;
@@ -1263,7 +1264,7 @@ var GLTFLoader;
 					// TODO
 
 					case 'BLEND' :
-						tMesh.renderToTransparentLayer = true;
+						tMesh.renderDrawLayerIndex = Render.DRAW_LAYER_INDEX1;
 						tMaterial.alphaBlend = 2;
 						break;
 					case 'MASK' :

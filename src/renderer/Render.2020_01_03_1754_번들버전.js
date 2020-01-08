@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.7 16:13:31
+ *   Last modification time of this file - 2020.1.8 18:27:58
  *
  */
 
@@ -14,7 +14,7 @@ import MouseEventChecker from "./system/MouseEventChecker.js";
 
 let _frustumPlanes = [];
 let currentDebuggerData;
-let renderToTransparentLayerList = [];
+let renderDrawLayerIndexList = [];
 let updateTargetMatrixBufferList = [];
 let textToTransparentLayerList = [];
 let bundleList = [],bundleIDX;
@@ -26,7 +26,7 @@ let prevIndexBuffer_UUID;
 let prevMaterial_UUID;
 let changedMaterial_UUID;
 let renderScene = (_ => {
-		return (redGPUContext, redView, passEncoder, parent, children, parentDirty, renderToTransparentLayerMode = 0) => {
+		return (redGPUContext, redView, passEncoder, parent, children, parentDirty, renderDrawLayerIndexMode = 0) => {
 			let i;
 			let aSx, aSy, aSz, aCx, aCy, aCz, aX, aY, aZ,
 				a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23, a30, a31, a32, a33,
@@ -109,8 +109,8 @@ let renderScene = (_ => {
 							// console.timeEnd('tPipeline.update' + tMesh._UUID)
 						}
 					} else {
-						if (renderToTransparentLayerMode == 0 && tMesh.renderToTransparentLayer) {
-							renderToTransparentLayerList.push(tMesh)
+						if (renderDrawLayerIndexMode == 0 && tMesh.renderDrawLayerIndex) {
+							renderDrawLayerIndexList.push(tMesh)
 						} else {
 							tVisible = 1;
 							if (redView._useFrustumCulling) {
@@ -162,8 +162,8 @@ let renderScene = (_ => {
 							tMesh._prevMaterialUUID = tMaterial._UUID;
 						}
 					}
-					if (renderToTransparentLayerMode) {
-						// if (renderToTransparentLayerMode == 1 && tMesh instanceof Text) {
+					if (renderDrawLayerIndexMode) {
+						// if (renderDrawLayerIndexMode == 1 && tMesh instanceof Text) {
 						// // 	// let tMTX = new Float32Array(16)
 						// // 	// tMTX[12] = tMesh._x, tMTX[13] = tMesh._y, tMTX[14] = tMesh._z;
 						// // 	// mat4.multiply(tMTX, redView.camera.matrix, tMTX) //FIXME - 이거풀어야함
@@ -417,7 +417,7 @@ let renderScene = (_ => {
 						tCacheUniformInfo[tUUID] = tSkinInfo['inverseBindMatrices']['_UUID']
 					}
 				}
-				if (!renderToTransparentLayerMode && tMesh.children.length) renderScene(redGPUContext, redView, passEncoder, tMesh, tMesh.children, parentDirty || tDirtyTransform);
+				if (!renderDrawLayerIndexMode && tMesh.children.length) renderScene(redGPUContext, redView, passEncoder, tMesh, tMesh.children, parentDirty || tDirtyTransform);
 				tMesh.dirtyPipeline = false;
 				tMesh.dirtyTransform = false;
 			}
@@ -454,8 +454,8 @@ let renderPostEffect = (redGPUContext, redView) => {
 	return last_effect_baseAttachment
 };
 let renderTransparentLayerList = (redGPUContext, redView, passEncoder) => {
-	if (renderToTransparentLayerList.length) renderScene(redGPUContext, redView, passEncoder, null, renderToTransparentLayerList, null, 1);
-	renderToTransparentLayerList.length = 0;
+	if (renderDrawLayerIndexList.length) renderScene(redGPUContext, redView, passEncoder, null, renderDrawLayerIndexList, null, 1);
+	renderDrawLayerIndexList.length = 0;
 };
 let renderLightDebugger = (redGPUContext, redView, passEncoder) => {
 	if (redView.debugLightList.length) {

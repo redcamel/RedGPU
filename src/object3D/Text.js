@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.7 16:13:31
+ *   Last modification time of this file - 2020.1.8 18:27:58
  *
  */
 
@@ -12,6 +12,7 @@ import UTIL from "../util/UTIL.js";
 import Plane from "../primitives/Plane.js";
 import TextMaterial from "../material/system/TextMaterial.js";
 import BitmapTexture from "../resources/BitmapTexture.js";
+import Render from "../renderer/Render.js";
 
 let setTexture = function (target) {
 	target['_height'] = +target['_height'];
@@ -65,7 +66,7 @@ export default class Text extends BaseObject3D {
 	}
 	constructor(redGPUContext, width = 256, height = 128) {
 		super(redGPUContext);
-
+		this.renderDrawLayerIndex = Render.DRAW_LAYER_INDEX2_Z_POINT_SORT;
 		if (width > 1920) width = 1920;
 		if (height > 1920) height = 1920;
 		this['_cvs'] = new OffscreenCanvas(width, height);
@@ -131,7 +132,6 @@ export default class Text extends BaseObject3D {
 				})
 			})
 					};
-		// this['renderToTransparentLayer'] = true;
 
 	}
 	addChild(child) {
