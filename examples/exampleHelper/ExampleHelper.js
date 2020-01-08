@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.8 18:11:47
+ *   Last modification time of this file - 2020.1.8 19:10:27
  *
  */
 
@@ -359,7 +359,51 @@ const ExampleHelper = (_ => {
 				})
 			})
 		});
-	}
+	};
+	const setTestUI_Text = (RedGPU, redGPUContext, tText, open, gui) => {
+		checkGUI();
+		gui = gui || testHelperFolder;
+		let rootFolder, folder;
+		rootFolder = gui.addFolder('Text');
+		if (open) rootFolder.open();
+		folder = rootFolder.addFolder('GPU Property');
+		folder.add(tText, 'depthWriteEnabled')
+		folder.add(tText, 'primitiveTopology', ["point-list", "line-list", "line-strip", "triangle-list", "triangle-strip"])
+		folder.add(tText, 'cullMode', ["none", "back", "front",])
+		folder.add(tText, 'depthCompare', ["never", "less", "equal", "less-equal", "greater", "not-equal", "greater-equal", "always"]);
+		['blendColorSrc', 'blendColorDst', 'blendAlphaSrc', 'blendAlphaDst'].forEach(key => {
+			folder.add(tText, key, ["zero", "one", "src-color", "one-minus-src-color", "src-alpha", "one-minus-src-alpha", "dst-color", "one-minus-dst-color", "dst-alpha", "one-minus-dst-alpha", "src-alpha-saturated", "blend-color", "one-minus-blend-color"])
+		});
+		folder = rootFolder.addFolder('Transform Property');
+		['x', 'y', 'z'].forEach(key => {
+			folder.add(tText, key, -10, 10, 0.01)
+			folder.add(tText, 'rotation' + key.toUpperCase(), 0, 360, 0.01)
+			folder.add(tText, 'scale' + key.toUpperCase(), 0, 10, 0.01)
+		});
+
+		const testData = {
+			background: tText.background,
+			color: tText.color
+		};
+		rootFolder.add(tText, 'width', 2, 1024, 1);
+		rootFolder.add(tText, 'height', 2, 1024, 1);
+		rootFolder.add(tText, 'padding', 0, 100, 0.1);
+		rootFolder.add(tText, 'fontFamily', ['Arial', 'Times New Roman', 'Times', 'serif']);
+		rootFolder.add(tText, 'fontSize', 0, 100, 0.1);
+		rootFolder.add(tText, 'fontWeight', ['normal', 'bold']);
+		rootFolder.add(tText, 'fontStyle', ['normal', 'italic']);
+		rootFolder.add(tText, 'lineHeight', 0, 100, 0.1);
+		rootFolder.add(tText, 'letterSpacing', 0, 4, 0.01);
+		rootFolder.add(tText, 'wordBreak', ['normal', 'break-all', 'break-word', 'keep-all', 'unset']);
+		rootFolder.add(tText, 'verticalAlign', ['top', 'middle', 'bottom']);
+		rootFolder.add(tText, 'textAlign', ['left', 'center', 'right']);
+		rootFolder.addColor(testData, 'background').onChange(function (v) {tText.background = v});
+		rootFolder.addColor(testData, 'color').onChange(function (v) {tText.color = v});
+		rootFolder.add(tText, 'useFixedScale');
+		rootFolder.add(tText, 'useSprite3DMode');
+
+	};
+
 	const setTestUI_Mesh = (RedGPU, redGPUContext, tMesh, open, gui) => {
 		checkGUI();
 		gui = gui || testHelperFolder;
@@ -469,6 +513,7 @@ const ExampleHelper = (_ => {
 		setTestUI_Debugger: setTestUI_Debugger,
 		setTestUI_Mesh: setTestUI_Mesh,
 		setTestUI_Sprite3D: setTestUI_Sprite3D,
+		setTestUI_Text: setTestUI_Text,
 		setTestUI_Axis: setTestUI_Axis,
 		setTestUI_Grid: setTestUI_Grid,
 		setTestUI_SkyBox: setTestUI_SkyBox,
