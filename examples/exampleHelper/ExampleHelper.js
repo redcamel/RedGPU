@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.8 15:38:58
+ *   Last modification time of this file - 2020.1.8 17:12:21
  *
  */
 
@@ -14,6 +14,7 @@ const ExampleHelper = (_ => {
 			let containerUI;
 			let rootGUI;
 			rootGUI = new dat.GUI({autoPlace: false});
+			rootGUI.width = 300;
 			testHelperFolder = rootGUI.addFolder('TestHelper');
 			testHelperFolder.open();
 			containerUI = document.createElement('div');
@@ -156,6 +157,7 @@ const ExampleHelper = (_ => {
 			let rootFolder;
 			rootFolder = gui.addFolder('SkyBox');
 			if (open) rootFolder.open();
+			skyBox = scene.skyBox;
 			if (!skyBox) {
 				skyBox = new RedGPU.SkyBox(redGPUContext, new RedGPU.BitmapCubeTexture(redGPUContext, [
 					`${assetPath}cubemap/SwedishRoyalCastle/px.jpg`,
@@ -178,11 +180,12 @@ const ExampleHelper = (_ => {
 			let rootFolder;
 			rootFolder = gui.addFolder('Grid');
 			if (open) rootFolder.open();
+			grid = scene.grid;
 			if (!grid) grid = new RedGPU.Grid(redGPUContext);
 			const testData = {useGrid: scene.grid ? true : false};
 			rootFolder.add(testData, 'useGrid').onChange(v => scene.grid = v ? grid : null);
 			rootFolder.add(grid, 'divisions', 0, 500);
-			rootFolder.add(grid, 'size', 0, 100);
+			rootFolder.add(grid, 'size', 0, 500);
 			rootFolder.addColor(grid, 'color');
 			rootFolder.addColor(grid, 'centerColor');
 		}
@@ -200,12 +203,39 @@ const ExampleHelper = (_ => {
 			rootFolder.add(testData, 'useAxis').onChange(v => scene.axis = v ? axis : null);
 		}
 	})();
-	const setTestUI_Camera = (gui, camera) => {
+	const setTestUI_Camera = (RedGPU, camera, open, gui) => {
+		checkGUI();
+		gui = gui || testHelperFolder;
 		let rootFolder;
-		rootFolder = gui.addFolder('Camera');
+		rootFolder = gui.addFolder(camera instanceof RedGPU.ObitController ? 'ObitController' : 'Camera');
+		if (open) rootFolder.open();
 		rootFolder.add(camera, 'fov', 0, 180, 0.01);
 		rootFolder.add(camera, 'nearClipping', 0, 10, 0.01);
 		rootFolder.add(camera, 'farClipping', 0, 100000, 0.01);
+		if (camera instanceof RedGPU.ObitController) {
+			rootFolder.add(camera, 'centerX', -10, 10, 0.01);
+			rootFolder.add(camera, 'centerY', -10, 10, 0.01);
+			rootFolder.add(camera, 'centerZ', -10, 10, 0.01);
+			rootFolder.add(camera, 'distance', 1, 100, 0.01);
+			rootFolder.add(camera, 'speedDistance', 0.1, 100, 0.01);
+			rootFolder.add(camera, 'delayDistance', 0.1, 1, 0.01);
+			rootFolder.add(camera, 'speedRotation', 0.1, 100, 0.01);
+			rootFolder.add(camera, 'delayRotation', 0.1, 1, 0.01);
+			rootFolder.add(camera, 'minTilt', -90, 90, 0.01);
+			rootFolder.add(camera, 'maxTilt', -90, 90, 0.01);
+			rootFolder.add(camera, 'pan', 0, 360, 0.01);
+			rootFolder.add(camera, 'tilt', -90, 90, 0.01);
+		} else {
+			rootFolder.add(camera, 'x', -10, 10, 0.01);
+			rootFolder.add(camera, 'y', -10, 10, 0.01);
+			rootFolder.add(camera, 'z', -10, 10, 0.01);
+			const testData = {
+				'lookAt(0,0,0)': _ => {
+					camera.lookAt(0, 0, 0)
+				}
+			}
+			rootFolder.add(testData, 'lookAt(0,0,0)');
+		}
 	};
 	const setTestUI_Debugger = RedGPU => {
 		checkGUI();
@@ -311,7 +341,7 @@ const ExampleHelper = (_ => {
 		folder.open()
 		folder.add(tMesh, 'primitiveTopology', ["point-list", "line-list", "line-strip", "triangle-list", "triangle-strip"])
 	};
-	const setTestUI_Mesh = (RedGPU, tMesh, open, gui) => {
+	const setTestUI_Mesh = (RedGPU, redGPUContext, tMesh, open, gui) => {
 		checkGUI();
 		gui = gui || testHelperFolder;
 		let rootFolder, folder;
@@ -324,7 +354,80 @@ const ExampleHelper = (_ => {
 		folder.add(tMesh, 'depthCompare', ["never", "less", "equal", "less-equal", "greater", "not-equal", "greater-equal", "always"]);
 		['blendColorSrc', 'blendColorDst', 'blendAlphaSrc', 'blendAlphaDst'].forEach(key => {
 			folder.add(tMesh, key, ["zero", "one", "src-color", "one-minus-src-color", "src-alpha", "one-minus-src-alpha", "dst-color", "one-minus-dst-color", "dst-alpha", "one-minus-dst-alpha", "src-alpha-saturated", "blend-color", "one-minus-blend-color"])
+		});
+		['x', 'y', 'z'].forEach(key => {
+			rootFolder.add(tMesh, key, -10, 10, 0.01)
+			rootFolder.add(tMesh, 'rotation' + key.toUpperCase(), 0, 360, 0.01)
+			rootFolder.add(tMesh, 'scale' + key.toUpperCase(), 0, 10, 0.01)
+		});
+		const testData = {
+			geometry: 'Sphere',
+			material: 'ColorPhongMaterial'
+		}
+		rootFolder.add(testData, 'geometry', ['Plane', 'Box', 'Sphere', 'Cylinder']).onChange(v => {
+			switch (v) {
+				case 'Plane' :
+					tMesh.geometry = new RedGPU.Plane(redGPUContext)
+					break
+				case 'Box' :
+					tMesh.geometry = new RedGPU.Box(redGPUContext)
+					break
+				case 'Sphere' :
+					tMesh.geometry = new RedGPU.Sphere(redGPUContext, 1, 32, 32, 32)
+					break
+				case 'Cylinder' :
+					tMesh.geometry = new RedGPU.Cylinder(redGPUContext, 0, 1, 2, 32, 32)
+					break
+			}
+
+		});
+		rootFolder.add(testData, 'material', [
+			'ColorMaterial', 'ColorPhongMaterial', 'ColorPhongTextureMaterial',
+			'BitmapMaterial', 'StandardMaterial',
+			'EnvironmentMaterial', 'RefractionMaterial'
+		]).onChange(v => {
+			switch (v) {
+				case 'ColorMaterial' :
+					tMesh.material = new RedGPU.ColorMaterial(redGPUContext)
+					break
+				case 'ColorPhongMaterial' :
+					tMesh.material = new RedGPU.ColorPhongMaterial(redGPUContext)
+					break
+				case 'ColorPhongTextureMaterial' :
+					tMesh.material = new RedGPU.ColorPhongTextureMaterial(redGPUContext);
+					tMesh.material.normalTexture = new RedGPU.BitmapTexture(redGPUContext, `${assetPath}Brick03_nrm.jpg`);
+					break
+				case 'BitmapMaterial' :
+					tMesh.material = new RedGPU.BitmapMaterial(redGPUContext, new RedGPU.BitmapTexture(redGPUContext, `${assetPath}Brick03_col.jpg`));
+					break
+				case 'StandardMaterial' :
+					tMesh.material = new RedGPU.StandardMaterial(
+						redGPUContext,
+						new RedGPU.BitmapTexture(redGPUContext, `${assetPath}Brick03_col.jpg`),
+						new RedGPU.BitmapTexture(redGPUContext, `${assetPath}Brick03_nrm.jpg`)
+					);
+					tMesh.material.normalPower = 2;
+					break
+				case 'EnvironmentMaterial' :
+				case 'RefractionMaterial':
+					tMesh.material = new RedGPU[v](
+						redGPUContext,
+						null,
+						new RedGPU.BitmapCubeTexture(redGPUContext, [
+							`${assetPath}cubemap/SwedishRoyalCastle/px.jpg`,
+							`${assetPath}cubemap/SwedishRoyalCastle/nx.jpg`,
+							`${assetPath}cubemap/SwedishRoyalCastle/py.jpg`,
+							`${assetPath}cubemap/SwedishRoyalCastle/ny.jpg`,
+							`${assetPath}cubemap/SwedishRoyalCastle/pz.jpg`,
+							`${assetPath}cubemap/SwedishRoyalCastle/nz.jpg`
+						])
+					);
+					break
+
+			}
+
 		})
+
 	};
 	return {
 		setBaseInformation: (title, description) => {
@@ -337,7 +440,7 @@ const ExampleHelper = (_ => {
 				setTestUI_RedGPUContext(redGPUContext);
 				setTestUI_View(view);
 				setTestUI_Scene(RedGPU, redGPUContext, scene);
-				setTestUI_Camera(testHelperFolder, camera);
+				setTestUI_Camera(RedGPU, camera);
 				setTestUI_Debugger(RedGPU)
 			}
 		})(),
@@ -346,10 +449,14 @@ const ExampleHelper = (_ => {
 		setTestUI_View: setTestUI_View,
 		setTestUI_Debugger: setTestUI_Debugger,
 		setTestUI_Mesh: setTestUI_Mesh,
+		setTestUI_Axis: setTestUI_Axis,
+		setTestUI_Grid: setTestUI_Grid,
+		setTestUI_SkyBox: setTestUI_SkyBox,
 		setTestUI_PrimitivePlane: setTestUI_PrimitivePlane,
 		setTestUI_PrimitiveBox: setTestUI_PrimitiveBox,
 		setTestUI_PrimitiveSphere: setTestUI_PrimitiveSphere,
-		setTestUI_PrimitiveCylinder: setTestUI_PrimitiveCylinder
+		setTestUI_PrimitiveCylinder: setTestUI_PrimitiveCylinder,
+		setTestUI_Camera: setTestUI_Camera
 	};
 })();
 

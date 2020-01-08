@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.8 15:38:58
+ *   Last modification time of this file - 2020.1.8 17:12:21
  *
  */
 
@@ -49,7 +49,7 @@ export default class ObitController extends Camera {
 	#speedRotation = 3;
 	#delayRotation = 0.1;
 	//
-	#tilt = 0;
+	#tilt = -45;
 	#minTilt = -90;
 	#maxTilt = 90;
 	#pan = 0;
