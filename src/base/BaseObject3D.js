@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.7 16:13:31
+ *   Last modification time of this file - 2020.1.8 18:27:58
  *
  */
 
@@ -18,6 +18,8 @@ import View from "../View.js";
 import UTIL from "../util/UTIL.js";
 import MouseEventChecker from "../renderer/system/MouseEventChecker.js";
 import glMatrix from "../base/gl-matrix-min.js";
+import Render from "../renderer/Render.js";
+
 const MESH_UNIFORM_TABLE = [];
 let MESH_UNIFORM_POOL_index = 0;
 let MESH_UNIFORM_POOL_tableIndex = 0;
@@ -101,7 +103,10 @@ export default class BaseObject3D extends DisplayContainer {
 	pipeline;
 	#bindings;
 	//FIXME - 유일키가 될수있도록 변경
-	#mouseColorID =0;
+	#mouseColorID = 0;
+	_renderDrawLayerIndex = Render.DRAW_LAYER_INDEX0;
+	get renderDrawLayerIndex() {return this._renderDrawLayerIndex;}
+	set renderDrawLayerIndex(value) {this._renderDrawLayerIndex = value;}
 	get blendColorSrc() {return this._blendColorSrc;}
 	set blendColorSrc(value) {this._blendColorSrc = value;}
 	get blendColorDst() {return this._blendColorDst;}

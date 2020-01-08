@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.8 15:12:22
+ *   Last modification time of this file - 2020.1.8 18:29:29
  *
  */
 
@@ -10,11 +10,10 @@ import GLTFLoader from "../loader/gltf/GLTFLoader.js";
 import SheetMaterial from "../material/SheetMaterial.js";
 import Debugger from "./system/Debugger.js";
 import PipelineBasic from "../base/pipeline/PipelineBasic.js";
-import Text from "../object3D/Text.js";
 
 let _frustumPlanes = [];
 let currentDebuggerData;
-let renderToTransparentLayerList = [];
+let renderDrawLayerIndexList = [];
 let updateTargetMatrixBufferList = [];
 let textToTransparentLayerList = [];
 
@@ -26,7 +25,7 @@ let prevMaterial_UUID;
 let changedMaterial_UUID;
 
 let renderScene = (_ => {
-		return (redGPUContext, redView, passEncoder, parent, children, parentDirty, renderToTransparentLayerMode = 0) => {
+		return (redGPUContext, redView, passEncoder, parent, children, parentDirty, renderDrawLayerIndexMode = 0) => {
 			let i;
 			let aSx, aSy, aSz, aCx, aCy, aCz, aX, aY, aZ,
 				a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23, a30, a31, a32, a33,
@@ -95,10 +94,10 @@ let renderScene = (_ => {
 						}
 					}
 					tVisible = 1;
-					if (renderToTransparentLayerMode == 0 && tMesh.renderToTransparentLayer) {
-						renderToTransparentLayerList.push(tMesh)
+					if (renderDrawLayerIndexMode == Render.DRAW_LAYER_INDEX0 && tMesh.renderDrawLayerIndex == Render.DRAW_LAYER_INDEX1) {
+						renderDrawLayerIndexList.push(tMesh)
 					} else {
-						if (tMesh instanceof Text || tMaterial instanceof SheetMaterial) {
+						if (tMesh.renderDrawLayerIndex == Render.DRAW_LAYER_INDEX2_Z_POINT_SORT || tMaterial instanceof SheetMaterial) {
 							a02 = redView.camera.matrix[2], a12 = redView.camera.matrix[6], a22 = redView.camera.matrix[10], a32 = redView.camera.matrix[14];
 							b0 = tMesh._x, b1 = tMesh._y, b2 = tMesh._z, b3 = 1;
 							textToTransparentLayerList.push({
@@ -154,7 +153,7 @@ let renderScene = (_ => {
 
 					}
 
-					if (renderToTransparentLayerMode) {
+					if (renderDrawLayerIndexMode) {
 						passEncoder.setPipeline(tPipeline.GPURenderPipeline);
 						if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
 							passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
@@ -396,7 +395,7 @@ let renderScene = (_ => {
 						tCacheUniformInfo[tUUID] = tSkinInfo['inverseBindMatrices']['_UUID']
 					}
 				}
-				if (!renderToTransparentLayerMode && tMesh.children.length) renderScene(redGPUContext, redView, passEncoder, tMesh, tMesh.children, parentDirty || tDirtyTransform);
+				if (!renderDrawLayerIndexMode && tMesh.children.length) renderScene(redGPUContext, redView, passEncoder, tMesh, tMesh.children, parentDirty || tDirtyTransform);
 				tMesh.dirtyPipeline = false;
 				tMesh.dirtyTransform = false;
 			}
@@ -433,8 +432,8 @@ let renderPostEffect = (redGPUContext, redView) => {
 	return last_effect_baseAttachment
 };
 let renderTransparentLayerList = (redGPUContext, redView, passEncoder) => {
-	if (renderToTransparentLayerList.length) renderScene(redGPUContext, redView, passEncoder, null, renderToTransparentLayerList, null, 1);
-	renderToTransparentLayerList.length = 0;
+	if (renderDrawLayerIndexList.length) renderScene(redGPUContext, redView, passEncoder, null, renderDrawLayerIndexList, null, Render.DRAW_LAYER_INDEX1);
+	renderDrawLayerIndexList.length = 0;
 };
 let renderTextLayerList = (redGPUContext, redView, passEncoder) => {
 	if (textToTransparentLayerList.length) {
@@ -446,7 +445,7 @@ let renderTextLayerList = (redGPUContext, redView, passEncoder) => {
 			return 0
 		});
 		while (i--) t1[i] = textToTransparentLayerList[i].targetText;
-		renderScene(redGPUContext, redView, passEncoder, null, t1, null, 2);
+		renderScene(redGPUContext, redView, passEncoder, null, t1, null, Render.DRAW_LAYER_INDEX2_Z_POINT_SORT);
 	}
 	textToTransparentLayerList.length = 0;
 };
@@ -585,6 +584,9 @@ export default class Render {
 		prevIndexBuffer_UUID = null;
 		prevMaterial_UUID = null
 	};
+	static DRAW_LAYER_INDEX0 = 0;
+	static DRAW_LAYER_INDEX1 = 1;
+	static DRAW_LAYER_INDEX2_Z_POINT_SORT = 2;
 
 	constructor() {
 
