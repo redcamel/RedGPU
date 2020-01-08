@@ -2,11 +2,11 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.7 22:48:40
+ *   Last modification time of this file - 2020.1.8 11:38:14
  *
  */
 "use strict"
-import RedGPU from "../../src/RedGPU.js";
+import RedGPU from "../../../src/RedGPU.js";
 
 const cvs = document.createElement('canvas');
 document.body.appendChild(cvs);
@@ -20,9 +20,7 @@ new RedGPU.RedGPUContext(
 		tScene = new RedGPU.Scene();
 		tCamera = new RedGPU.ObitController(this);
 		tView = new RedGPU.View(this, tScene, tCamera);
-		renderer = new RedGPU.Render();
 		this.addView(tView);
-
 		///////////////////////////////////////////////////////////////////////////////////////////
 		// Scene property setting
 		tScene.grid = new RedGPU.Grid(this);
@@ -31,18 +29,18 @@ new RedGPU.RedGPUContext(
 			this, new RedGPU.BitmapCubeTexture(
 				this,
 				[
-					'../../assets/cubemap/SwedishRoyalCastle/px.jpg',
-					'../../assets/cubemap/SwedishRoyalCastle/nx.jpg',
-					'../../assets/cubemap/SwedishRoyalCastle/py.jpg',
-					'../../assets/cubemap/SwedishRoyalCastle/ny.jpg',
-					'../../assets/cubemap/SwedishRoyalCastle/pz.jpg',
-					'../../assets/cubemap/SwedishRoyalCastle/nz.jpg'
+					'../../../assets/cubemap/SwedishRoyalCastle/px.jpg',
+					'../../../assets/cubemap/SwedishRoyalCastle/nx.jpg',
+					'../../../assets/cubemap/SwedishRoyalCastle/py.jpg',
+					'../../../assets/cubemap/SwedishRoyalCastle/ny.jpg',
+					'../../../assets/cubemap/SwedishRoyalCastle/pz.jpg',
+					'../../../assets/cubemap/SwedishRoyalCastle/nz.jpg'
 				]
 			)
 		);
 		///////////////////////////////////////////////////////////////////////////////////////////
-
 		// renderer setup
+		renderer = new RedGPU.Render();
 		render = time => {
 			renderer.render(time, this);
 			requestAnimationFrame(render);
@@ -50,6 +48,7 @@ new RedGPU.RedGPUContext(
 		requestAnimationFrame(render);
 
 		// TestUI setup
-		ExampleHelper.setTestUI_Scene(RedGPU, this, tScene, null, true);
+		ExampleHelper.setTestUI_View(tView, true);
+		ExampleHelper.setTestUI_Debugger(RedGPU);
 	}
 );
