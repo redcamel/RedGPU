@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.8 11:31:26
+ *   Last modification time of this file - 2020.1.8 11:32:56
  *
  */
 "use strict"
@@ -23,7 +23,9 @@ new RedGPU.RedGPUContext(
 		///////////////////////////////////////////////////////////////////////////////////////////
 		// Multi View setting
 		tView = new RedGPU.View(this, tScene, tCamera);
+		tCamera.targetView = tView; // optional
 		tView2 = new RedGPU.View(this, tScene, tCamera2);
+		tCamera2.targetView = tView2; // optional
 		tView.setSize('50%', '100%')
 		tView2.setSize('50%', '100%')
 		tView2.setLocation('50%', 0)
