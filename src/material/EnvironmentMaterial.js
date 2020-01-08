@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.2 14:26:4
+ *   Last modification time of this file - 2020.1.8 22:30:15
  *
  */
 
@@ -88,7 +88,6 @@ export default class EnvironmentMaterial extends Mix.mix(
 		float testAlpha = 1.0;
 		vec4 diffuseColor = vec4(0.0);
 		//#RedGPU#diffuseTexture# diffuseColor = texture(sampler2D(uDiffuseTexture, uSampler), vUV) ;
-		//#RedGPU#diffuseTexture# testAlpha = diffuseColor.a;
 		
 		
 	    vec3 N = normalize(vNormal);
@@ -100,6 +99,8 @@ export default class EnvironmentMaterial extends Mix.mix(
 		//#RedGPU#environmentTexture# vec3 R = reflect( vVertexPosition.xyz - systemUniforms.cameraPosition, N);
 		//#RedGPU#environmentTexture# vec4 reflectionColor = texture(samplerCube(uEnvironmentTexture,uSampler), R);
 		//#RedGPU#environmentTexture# diffuseColor = mix(diffuseColor, reflectionColor, fragmentUniforms.environmentPower);
+		
+		testAlpha = diffuseColor.a ;
 		
 		float specularTextureValue = 1.0;
 		//#RedGPU#specularTexture# specularTextureValue = texture(sampler2D(uSpecularTexture, uSampler), vUV).r ;
@@ -135,6 +136,7 @@ export default class EnvironmentMaterial extends Mix.mix(
 		finalColor.a = testAlpha;
 		outColor = finalColor;
 		outColor.a *= fragmentUniforms.alpha;
+
 		out_MouseColorID_Depth = vec4(vMouseColorID, gl_FragCoord.z/gl_FragCoord.w, 0.0, 0.0);
 		
 	}

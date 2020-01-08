@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.8 17:12:21
+ *   Last modification time of this file - 2020.1.8 22:30:15
  *
  */
 
@@ -229,7 +229,7 @@ export default class ShareGLSL {
 		vec3 getFlatNormal(vec3 vertexPosition){
 			vec3 dx = dFdx(vertexPosition.xyz);
 			vec3 dy = dFdy(vertexPosition.xyz);
-			return normalize(cross(normalize(dx), normalize(dy)));
+			return normalize(cross(normalize(dy), normalize(dx)));
 		}
 		`,
 		perturb_normal: `

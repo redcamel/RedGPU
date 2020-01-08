@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.7 16:13:31
+ *   Last modification time of this file - 2020.1.8 22:30:15
  *
  */
 
@@ -228,6 +228,11 @@ export default class Line extends BaseObject3D {
 	get distance() {return this.#distance;}
 	set distance(v) {
 		this.#distance = v;
+		parsePointsByType(this, this.#originalPoints, this.#tension, this.#tolerance, this.#distance)
+	}
+	get tolerance() {return this.#tolerance;}
+	set tolerance(v) {
+		this.#tolerance = v;
 		parsePointsByType(this, this.#originalPoints, this.#tension, this.#tolerance, this.#distance)
 	}
 	constructor(redGPUContext, baseColor = '#ff0000', type = Line.LINEAR) {
