@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.8 11:31:26
+ *   Last modification time of this file - 2020.1.8 15:12:22
  *
  */
 @import url('https://fonts.googleapis.com/css?family=Fira+Sans&display=swap');
@@ -26,6 +26,12 @@ a, a:hover, a:active, a:visited {
     text-shadow: 0 1px rgb(0, 0, 0);
 }
 
+input, select, option {
+    font-family: Arial;
+    color: #000;
+    font-size: 11px;
+}
+
 /* width */
 ::-webkit-scrollbar {
     width: 4px;
@@ -45,4 +51,5 @@ a, a:hover, a:active, a:visited {
 ::-webkit-scrollbar-thumb:hover {
     background: #70020c;
 }
+
 

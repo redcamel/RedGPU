@@ -51,8 +51,9 @@ new RedGPU.RedGPUContext(
 	}
 );
 ```
-#### live - [HelloWorld](https://redcamel.github.io/RedGPU/examples/helloWorld/)
-
+## [Examples](https://redcamel.github.io/RedGPU/examples/)
+   - See the [example](https://redcamel.github.io/RedGPU/examples/). Various examples are available.
+   
 ## Demo
  - [Demo](https://redcamel.github.io/RedGPU/)
 

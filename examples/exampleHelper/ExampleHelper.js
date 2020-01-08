@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.8 11:38:14
+ *   Last modification time of this file - 2020.1.8 15:12:22
  *
  */
 
@@ -213,7 +213,119 @@ const ExampleHelper = (_ => {
 		testHelperFolder.add(testData, 'useDebugger').onChange(v => {
 			RedGPU.Debugger.visible(v, RedGPU.Debugger.RIGHT_BOTTOM)
 		})
-	}
+	};
+	const setTestUI_PrimitivePlane = (RedGPU, redGPUContext, tMesh, open, gui) => {
+		checkGUI();
+		gui = gui || testHelperFolder;
+		let rootFolder, folder;
+		rootFolder = gui.addFolder('Primitive - Plane');
+		if (open) rootFolder.open();
+		const testData = {
+			width: 1, height: 1,
+			wSegments: 1, hSegments: 1
+		}
+		for (const k in testData) {
+			rootFolder.add(testData, k, 0, 10, k.includes('Segments') ? 1 : 0.01).onChange(v => {
+				tMesh.geometry = new RedGPU.Plane(redGPUContext, testData.width, testData.height, testData.wSegments, testData.hSegments)
+			});
+		}
+		folder = gui.addFolder('(Mesh instance)');
+		folder.open()
+		folder.add(tMesh, 'primitiveTopology', ["point-list", "line-list", "line-strip", "triangle-list", "triangle-strip"])
+	};
+	const setTestUI_PrimitiveBox = (RedGPU, redGPUContext, tMesh, open, gui) => {
+		checkGUI();
+		gui = gui || testHelperFolder;
+		let rootFolder, folder;
+		rootFolder = gui.addFolder('Primitive - Box');
+		if (open) rootFolder.open();
+		const testData = {
+			width: 1, height: 1, depth: 1,
+			wSegments: 1, hSegments: 1, dSegments: 1
+		}
+		console.log('tMesh', tMesh)
+		for (const k in testData) {
+			rootFolder.add(testData, k, 0, 10, k.includes('Segments') ? 1 : 0.01).onChange(v => {
+				tMesh.geometry = new RedGPU.Box(redGPUContext, testData.width, testData.height, testData.depth, testData.wSegments, testData.hSegments, testData.dSegments)
+			});
+		}
+		folder = gui.addFolder('(Mesh instance)');
+		folder.open()
+		folder.add(tMesh, 'primitiveTopology', ["point-list", "line-list", "line-strip", "triangle-list", "triangle-strip"])
+	};
+	const setTestUI_PrimitiveSphere = (RedGPU, redGPUContext, tMesh, open, gui) => {
+		checkGUI();
+		gui = gui || testHelperFolder;
+		let rootFolder, folder;
+		rootFolder = gui.addFolder('Primitive - Sphere');
+		if (open) rootFolder.open();
+		const testData = {
+			radius: 1,
+			widthSegments: 8,
+			heightSegments: 6,
+			phiStart: 0,
+			phiLength: Math.PI * 2,
+			thetaStart: 0,
+			thetaLength: Math.PI
+		}
+		console.log('tMesh', tMesh)
+		for (const k in testData) {
+			rootFolder.add(testData, k, 0, k.includes('Segments') ? 32 : Math.PI * 2, k.includes('Segments') ? 1 : 0.01).onChange(v => {
+				tMesh.geometry = new RedGPU.Sphere(redGPUContext, testData.radius, testData.widthSegments, testData.heightSegments, testData.phiStart, testData.phiLength, testData.thetaStart, testData.thetaLength)
+			});
+		}
+		folder = gui.addFolder('(Mesh instance)');
+		folder.open()
+		folder.add(tMesh, 'primitiveTopology', ["point-list", "line-list", "line-strip", "triangle-list", "triangle-strip"])
+	};
+	const setTestUI_PrimitiveCylinder = (RedGPU, redGPUContext, tMesh, open, gui) => {
+		checkGUI();
+		gui = gui || testHelperFolder;
+		let rootFolder, folder;
+		rootFolder = gui.addFolder('Primitive - Cylinder');
+		if (open) rootFolder.open();
+		const testData = {
+			radiusTop: 1,
+			radiusBottom: 1,
+			height: 1,
+			radialSegments: 8,
+			heightSegments: 1,
+			openEnded: false,
+			thetaStart: 0.0,
+			thetaLength: Math.PI * 2
+		}
+		console.log('tMesh', tMesh)
+		for (const k in testData) {
+			if (k == 'openEnded') {
+				rootFolder.add(testData, k).onChange(v => {
+					tMesh.geometry = new RedGPU.Cylinder(redGPUContext, testData.radiusTop, testData.radiusBottom, testData.height, testData.radialSegments, testData.heightSegments, testData.openEnded, testData.thetaStart, testData.thetaLength)
+				});
+			} else {
+				rootFolder.add(testData, k, 0, k.includes('Segments') ? 32 : Math.PI * 2, k.includes('Segments') ? 1 : 0.01).onChange(v => {
+					tMesh.geometry = new RedGPU.Cylinder(redGPUContext, testData.radiusTop, testData.radiusBottom, testData.height, testData.radialSegments, testData.heightSegments, testData.openEnded, testData.thetaStart, testData.thetaLength)
+				});
+			}
+
+		}
+		folder = gui.addFolder('(Mesh instance)');
+		folder.open()
+		folder.add(tMesh, 'primitiveTopology', ["point-list", "line-list", "line-strip", "triangle-list", "triangle-strip"])
+	};
+	const setTestUI_Mesh = (RedGPU, tMesh, open, gui) => {
+		checkGUI();
+		gui = gui || testHelperFolder;
+		let rootFolder, folder;
+		rootFolder = gui.addFolder('Mesh');
+		if (open) rootFolder.open();
+		folder = rootFolder.addFolder('GPU Property');
+		folder.add(tMesh, 'depthWriteEnabled')
+		folder.add(tMesh, 'primitiveTopology', ["point-list", "line-list", "line-strip", "triangle-list", "triangle-strip"])
+		folder.add(tMesh, 'cullMode', ["none", "back", "front",])
+		folder.add(tMesh, 'depthCompare', ["never", "less", "equal", "less-equal", "greater", "not-equal", "greater-equal", "always"]);
+		['blendColorSrc', 'blendColorDst', 'blendAlphaSrc', 'blendAlphaDst'].forEach(key => {
+			folder.add(tMesh, key, ["zero", "one", "src-color", "one-minus-src-color", "src-alpha", "one-minus-src-alpha", "dst-color", "one-minus-dst-color", "dst-alpha", "one-minus-dst-alpha", "src-alpha-saturated", "blend-color", "one-minus-blend-color"])
+		})
+	};
 	return {
 		setBaseInformation: (title, description) => {
 			setBottom();
@@ -232,7 +344,12 @@ const ExampleHelper = (_ => {
 		setTestUI_RedGPUContext: setTestUI_RedGPUContext,
 		setTestUI_Scene: setTestUI_Scene,
 		setTestUI_View: setTestUI_View,
-		setTestUI_Debugger: setTestUI_Debugger
+		setTestUI_Debugger: setTestUI_Debugger,
+		setTestUI_Mesh: setTestUI_Mesh,
+		setTestUI_PrimitivePlane: setTestUI_PrimitivePlane,
+		setTestUI_PrimitiveBox: setTestUI_PrimitiveBox,
+		setTestUI_PrimitiveSphere: setTestUI_PrimitiveSphere,
+		setTestUI_PrimitiveCylinder: setTestUI_PrimitiveCylinder
 	};
 })();
 
