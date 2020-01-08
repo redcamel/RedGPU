@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.8 11:31:26
+ *   Last modification time of this file - 2020.1.8 11:38:14
  *
  */
 
@@ -207,6 +207,13 @@ const ExampleHelper = (_ => {
 		rootFolder.add(camera, 'nearClipping', 0, 10, 0.01);
 		rootFolder.add(camera, 'farClipping', 0, 100000, 0.01);
 	};
+	const setTestUI_Debugger = RedGPU => {
+		checkGUI();
+		const testData = {useDebugger: false}
+		testHelperFolder.add(testData, 'useDebugger').onChange(v => {
+			RedGPU.Debugger.visible(v, RedGPU.Debugger.RIGHT_BOTTOM)
+		})
+	}
 	return {
 		setBaseInformation: (title, description) => {
 			setBottom();
@@ -219,15 +226,13 @@ const ExampleHelper = (_ => {
 				setTestUI_View(view);
 				setTestUI_Scene(RedGPU, redGPUContext, scene);
 				setTestUI_Camera(testHelperFolder, camera);
-				const testData = {useDebugger: false}
-				testHelperFolder.add(testData, 'useDebugger').onChange(v => {
-					RedGPU.Debugger.visible(v, RedGPU.Debugger.RIGHT_BOTTOM)
-				})
+				setTestUI_Debugger(RedGPU)
 			}
 		})(),
 		setTestUI_RedGPUContext: setTestUI_RedGPUContext,
 		setTestUI_Scene: setTestUI_Scene,
 		setTestUI_View: setTestUI_View,
+		setTestUI_Debugger: setTestUI_Debugger
 	};
 })();
 

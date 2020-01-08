@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.8 11:31:26
+ *   Last modification time of this file - 2020.1.8 11:38:14
  *
  */
 "use strict"
@@ -49,5 +49,6 @@ new RedGPU.RedGPUContext(
 
 		// TestUI setup
 		ExampleHelper.setTestUI_View(tView, true);
+		ExampleHelper.setTestUI_Debugger(RedGPU);
 	}
 );
