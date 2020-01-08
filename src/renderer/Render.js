@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.8 18:27:58
+ *   Last modification time of this file - 2020.1.8 18:29:29
  *
  */
 
@@ -94,7 +94,7 @@ let renderScene = (_ => {
 						}
 					}
 					tVisible = 1;
-					if (renderDrawLayerIndexMode == 0 && tMesh.renderDrawLayerIndex == Render.DRAW_LAYER_INDEX1) {
+					if (renderDrawLayerIndexMode == Render.DRAW_LAYER_INDEX0 && tMesh.renderDrawLayerIndex == Render.DRAW_LAYER_INDEX1) {
 						renderDrawLayerIndexList.push(tMesh)
 					} else {
 						if (tMesh.renderDrawLayerIndex == Render.DRAW_LAYER_INDEX2_Z_POINT_SORT || tMaterial instanceof SheetMaterial) {
