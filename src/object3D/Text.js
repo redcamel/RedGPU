@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.8 19:10:27
+ *   Last modification time of this file - 2020.1.9 16:3:38
  *
  */
 
@@ -111,7 +111,8 @@ export default class Text extends BaseObject3D {
 			let tW, tH;
 			tW = this['_width'];
 			tH = this['_height'];
-
+			// if (tW % 2 == 0) tW += 1;
+			// if (tH % 2 == 0) tH += 1;
 			this['_cvs']['width'] = tW;
 			this['_cvs']['height'] = tH;
 			this['_ctx'].clearRect(0, 0, tW, tH);
