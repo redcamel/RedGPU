@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.8 19:10:27
+ *   Last modification time of this file - 2020.1.9 14:4:9
  *
  */
 
@@ -82,7 +82,7 @@ export default class TextMaterial extends Mix.mix(
 	}
 `;
 	static PROGRAM_OPTION_LIST = {
-		vertex: ['useFixedScale','useSprite3DMode'],
+		vertex: ['useFixedScale', 'useSprite3DMode'],
 		fragment: ['diffuseTexture']
 	};
 	static uniformsBindGroupLayoutDescriptor_material = {
@@ -171,7 +171,10 @@ export default class TextMaterial extends Mix.mix(
 					size: this.uniformBufferDescriptor_fragment.size
 				}
 			},
-			{binding: 2, resource: this.sampler.GPUSampler},
+			{
+				binding: 2,
+				resource: this.redGPUContext.state.emptySampler.GPUSampler
+			},
 			{
 				binding: 3,
 				resource: this._diffuseTexture ? this._diffuseTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView

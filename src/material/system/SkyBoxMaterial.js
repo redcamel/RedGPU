@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.2 21:31:8
+ *   Last modification time of this file - 2020.1.9 14:4:9
  *
  */
 
@@ -85,7 +85,10 @@ export default class SkyBoxMaterial extends Mix.mix(
 	}
 	resetBindingInfo() {
 		this.bindings = [
-			{binding: 0, resource: this.sampler.GPUSampler},
+			{
+				binding: 0,
+				resource: this._skyBoxTexture ? this._skyBoxTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
+			},
 			{
 				binding: 1,
 				resource: this._skyBoxTexture ? this._skyBoxTexture._GPUTextureView : this.redGPUContext.state.emptyCubeTextureView

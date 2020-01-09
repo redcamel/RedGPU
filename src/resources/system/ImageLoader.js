@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.3 15:45:13
+ *   Last modification time of this file - 2020.1.9 14:4:9
  *
  */
 
@@ -28,9 +28,9 @@ export default class ImageLoader extends UUID {
 			if (src.includes(';base64,') || src.includes('://')) targetSRC = src;
 			if (SRC_MAP[targetSRC]) {
 				if (SRC_MAP[targetSRC].loaded) {
-					console.log('곧장 맵찾으러감');
+					console.log('곧장 맵찾으러감', SRC_MAP[targetSRC]);
 					this['imageDatas'] = SRC_MAP[targetSRC]['imageDatas'];
-					if (callback) callback.call(this)
+					if (callback) callback.call(this, {ok: true})
 				} else {
 					SRC_MAP[targetSRC].tempList.push(this)
 				}
@@ -81,7 +81,7 @@ export default class ImageLoader extends UUID {
 						if (SRC_MAP[targetSRC].loaded) {
 							console.log('곧장 맵찾으러감');
 							this['imageDatas'] = SRC_MAP[targetSRC]['imageDatas'];
-							if (callback) callback.call(this)
+							if (callback) callback.call(this, {ok: true})
 						} else {
 							SRC_MAP[targetSRC].tempList.push(this)
 						}

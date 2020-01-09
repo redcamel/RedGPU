@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.9 11:43:33
+ *   Last modification time of this file - 2020.1.9 14:4:9
  *
  */
 
@@ -251,11 +251,12 @@ const ExampleHelper = (_ => {
 		if (open) rootFolder.open();
 		const testData = {
 			width: 1, height: 1,
-			wSegments: 1, hSegments: 1
+			wSegments: 1, hSegments: 1,
+			uvSize: 1
 		};
 		for (const k in testData) {
 			rootFolder.add(testData, k, 0, 10, k.includes('Segments') ? 1 : 0.01).onChange(v => {
-				tMesh.geometry = new RedGPU.Plane(redGPUContext, testData.width, testData.height, testData.wSegments, testData.hSegments)
+				tMesh.geometry = new RedGPU.Plane(redGPUContext, testData.width, testData.height, testData.wSegments, testData.hSegments, testData.uvSize)
 			});
 		}
 		folder = gui.addFolder('(Mesh instance)');
@@ -270,12 +271,13 @@ const ExampleHelper = (_ => {
 		if (open) rootFolder.open();
 		const testData = {
 			width: 1, height: 1, depth: 1,
-			wSegments: 1, hSegments: 1, dSegments: 1
+			wSegments: 1, hSegments: 1, dSegments: 1,
+			uvSize: 1
 		};
 		console.log('tMesh', tMesh);
 		for (const k in testData) {
 			rootFolder.add(testData, k, 0, 10, k.includes('Segments') ? 1 : 0.01).onChange(v => {
-				tMesh.geometry = new RedGPU.Box(redGPUContext, testData.width, testData.height, testData.depth, testData.wSegments, testData.hSegments, testData.dSegments)
+				tMesh.geometry = new RedGPU.Box(redGPUContext, testData.width, testData.height, testData.depth, testData.wSegments, testData.hSegments, testData.dSegments, testData.uvSize)
 			});
 		}
 		folder = gui.addFolder('(Mesh instance)');
@@ -295,12 +297,13 @@ const ExampleHelper = (_ => {
 			phiStart: 0,
 			phiLength: Math.PI * 2,
 			thetaStart: 0,
-			thetaLength: Math.PI
+			thetaLength: Math.PI,
+			uvSize: 1
 		};
 		console.log('tMesh', tMesh);
 		for (const k in testData) {
 			rootFolder.add(testData, k, 0, k.includes('Segments') ? 32 : Math.PI * 2, k.includes('Segments') ? 1 : 0.01).onChange(v => {
-				tMesh.geometry = new RedGPU.Sphere(redGPUContext, testData.radius, testData.widthSegments, testData.heightSegments, testData.phiStart, testData.phiLength, testData.thetaStart, testData.thetaLength)
+				tMesh.geometry = new RedGPU.Sphere(redGPUContext, testData.radius, testData.widthSegments, testData.heightSegments, testData.phiStart, testData.phiLength, testData.thetaStart, testData.thetaLength, testData.uvSize)
 			});
 		}
 		folder = gui.addFolder('(Mesh instance)');
@@ -321,17 +324,18 @@ const ExampleHelper = (_ => {
 			heightSegments: 1,
 			openEnded: false,
 			thetaStart: 0.0,
-			thetaLength: Math.PI * 2
+			thetaLength: Math.PI * 2,
+			uvSize: 1
 		};
 		console.log('tMesh', tMesh);
 		for (const k in testData) {
 			if (k == 'openEnded') {
 				rootFolder.add(testData, k).onChange(v => {
-					tMesh.geometry = new RedGPU.Cylinder(redGPUContext, testData.radiusTop, testData.radiusBottom, testData.height, testData.radialSegments, testData.heightSegments, testData.openEnded, testData.thetaStart, testData.thetaLength)
+					tMesh.geometry = new RedGPU.Cylinder(redGPUContext, testData.radiusTop, testData.radiusBottom, testData.height, testData.radialSegments, testData.heightSegments, testData.openEnded, testData.thetaStart, testData.thetaLength, testData.uvSize)
 				});
 			} else {
 				rootFolder.add(testData, k, 0, k.includes('Segments') ? 32 : Math.PI * 2, k.includes('Segments') ? 1 : 0.01).onChange(v => {
-					tMesh.geometry = new RedGPU.Cylinder(redGPUContext, testData.radiusTop, testData.radiusBottom, testData.height, testData.radialSegments, testData.heightSegments, testData.openEnded, testData.thetaStart, testData.thetaLength)
+					tMesh.geometry = new RedGPU.Cylinder(redGPUContext, testData.radiusTop, testData.radiusBottom, testData.height, testData.radialSegments, testData.heightSegments, testData.openEnded, testData.thetaStart, testData.thetaLength, testData.uvSize)
 				});
 			}
 
@@ -543,6 +547,7 @@ const ExampleHelper = (_ => {
 	let setTestUI_ColorMaterial, setTestUI_ColorPhongMaterial, setTestUI_ColorPhongTextureMaterial;
 	let setTestUI_BitmapMaterial, setTestUI_SpriteSheetMaterial, setTestUI_StandardMaterial,
 		setTestUI_EnvironmentMaterial, setTestUI_RefractionMaterial;
+	let setTestUI_BitmapTexture;
 	{
 		let makeColorProperty, makeBaseLightProperty;
 		let makeTextureProperty;
@@ -638,11 +643,11 @@ const ExampleHelper = (_ => {
 			const testData = {
 				gotoAndStop: 0,
 				gotoAndPlay: 0,
-				action:'walk'
+				action: 'walk'
 			}
 			rootFolder.add(testData, 'gotoAndStop', 0, material.totalFrame, 1).onChange(v => {material.gotoAndStop(v)});
 			rootFolder.add(testData, 'gotoAndPlay', 0, material.totalFrame, 1).onChange(v => {material.gotoAndPlay(v)})
-			rootFolder.add(testData, 'action', ['walk','attack','jump']).onChange(v => {material.setAction(v)});
+			rootFolder.add(testData, 'action', ['walk', 'attack', 'jump']).onChange(v => {material.setAction(v)});
 
 		};
 		setTestUI_StandardMaterial = (RedGPU, redGPUContext, material, open, gui) => {
@@ -710,6 +715,70 @@ const ExampleHelper = (_ => {
 			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'displacementTexture', `${assetPath}Brick03_disp.jpg`);
 		}
 	}
+	setTestUI_BitmapTexture = (RedGPU, redGPUContext, material, open, gui) => {
+		checkGUI();
+		gui = gui || testHelperFolder;
+		let rootFolder, folder;
+		rootFolder = gui.addFolder('BitmapTexture');
+		if (open) rootFolder.open();
+		folder = rootFolder.addFolder('Texture Option');
+		folder.open();
+		{
+			const testData = {
+				useMipmap: true
+			};
+			let testDataSampler = {
+				magFilter: "linear",
+				minFilter: "linear",
+				mipmapFilter: "linear",
+				addressModeU: "repeat",
+				addressModeV: "repeat"
+				// addressModeW: "repeat"
+			};
+			folder.add(testData, "useMipmap").onChange(v => {
+				console.log(v)
+				material.diffuseTexture = new RedGPU.BitmapTexture(
+					redGPUContext,
+					`${assetPath}crate.png`,
+					new RedGPU.Sampler(
+						redGPUContext,
+						{
+							magFilter: testDataSampler.magFilter,
+							minFilter: testDataSampler.minFilter,
+							mipmapFilter: testDataSampler.mipmapFilter,
+							addressModeU: testDataSampler.addressModeU,
+							addressModeV: testDataSampler.addressModeV
+						}
+					),
+					testData.useMipmap
+				);
+			});
+
+
+			folder = rootFolder.addFolder('Sampler Option');
+			folder.open();
+			for (const k in testDataSampler) {
+				folder.add(testDataSampler, k, k.includes('addressMode') ? ['clamp-to-edge', 'repeat', 'mirror-repeat'] : ["nearest", "linear"]).onChange(v => {
+					console.log('testDataSampler', testDataSampler)
+					material.diffuseTexture = new RedGPU.BitmapTexture(
+						redGPUContext,
+						`${assetPath}crate.png`,
+						new RedGPU.Sampler(
+							redGPUContext,
+							{
+								magFilter: testDataSampler.magFilter,
+								minFilter: testDataSampler.minFilter,
+								mipmapFilter: testDataSampler.mipmapFilter,
+								addressModeU: testDataSampler.addressModeU,
+								addressModeV: testDataSampler.addressModeV
+							}
+						),
+						testData.useMipmap
+					);
+				})
+			}
+		}
+	}
 	return {
 		setBaseInformation: (title, description) => {
 			setBottom();
@@ -750,7 +819,9 @@ const ExampleHelper = (_ => {
 		setTestUI_StandardMaterial: setTestUI_StandardMaterial,
 		setTestUI_EnvironmentMaterial: setTestUI_EnvironmentMaterial,
 		setTestUI_RefractionMaterial: setTestUI_RefractionMaterial,
-		setTestUI_SpriteSheetMaterial: setTestUI_SpriteSheetMaterial
+		setTestUI_SpriteSheetMaterial: setTestUI_SpriteSheetMaterial,
+		//
+		setTestUI_BitmapTexture: setTestUI_BitmapTexture
 	};
 })();
 

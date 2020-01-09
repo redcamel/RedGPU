@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.3 15:45:13
+ *   Last modification time of this file - 2020.1.9 14:4:9
  *
  */
 "use strict";
@@ -50,13 +50,15 @@ export default class BitmapTexture extends BaseTexture {
 		this.sampler = sampler || defaultSampler;
 		this.onload = onload;
 		this.onerror = onerror;
-		this.mapKey = src + useMipmap;
+		this.mapKey = src + useMipmap + this.sampler.string;
 		this.useMipmap = useMipmap;
 		if (!src) {
 			console.log('src')
 		} else {
 			let self = this;
 			new ImageLoader(redGPUContext, src, function (e) {
+				// console.log(MIPMAP_TABLE)
+				// console.log(self.mapKey)
 				if (MIPMAP_TABLE.get(self.mapKey)) {
 					console.log('BitmapTexture - 캐싱사용');
 					self.resolve(MIPMAP_TABLE.get(self.mapKey));

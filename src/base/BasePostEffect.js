@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.2 21:31:8
+ *   Last modification time of this file - 2020.1.9 14:4:9
  *
  */
 
@@ -13,6 +13,7 @@ import Mesh from "../object3D/Mesh.js";
 import Plane from "../primitives/Plane.js";
 import Render from "../renderer/Render.js";
 import PipelinePostEffect from "./pipeline/PipelinePostEffect.js";
+import Sampler from "../resources/Sampler.js";
 
 export default class BasePostEffect extends Mix.mix(
 	BaseMaterial
@@ -37,6 +38,7 @@ export default class BasePostEffect extends Mix.mix(
 		super(redGPUContext);
 		this.quad = new Mesh(redGPUContext, new Plane(redGPUContext), this);
 		this.quad.pipeline = new PipelinePostEffect(redGPUContext, this.quad)
+		this.sampler = new Sampler(redGPUContext);
 	}
 	checkSize(redGPUContext, redView) {
 		if ([this.#prevViewRect[2], this.#prevViewRect[3]].toString() != [redView.viewRect[2], redView.viewRect[3]].toString()) {

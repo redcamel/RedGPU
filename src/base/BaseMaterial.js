@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.2 21:31:8
+ *   Last modification time of this file - 2020.1.9 14:4:9
  *
  */
 
@@ -38,7 +38,6 @@ export default class BaseMaterial extends UUID {
 	fShaderModule;
 	vertexStage;
 	fragmentStage;
-	sampler;
 	bindings;
 	#redGPUContext;
 	//
@@ -75,8 +74,6 @@ export default class BaseMaterial extends UUID {
 		this.uniformBuffer_fragment.setBuffer(this.uniformBufferDescriptor_fragment);
 		this.uniformBindGroup_material = new BindGroup(redGPUContext);
 
-
-		this.sampler = new Sampler(redGPUContext);
 		this.#redGPUContext = redGPUContext;
 	}
 	updateUniformBuffer() {

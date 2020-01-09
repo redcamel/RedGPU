@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.2 21:31:8
+ *   Last modification time of this file - 2020.1.9 14:4:9
  *
  */
 
@@ -73,11 +73,14 @@ export default class StandardMaterial extends Mix.mix(
 	layout( location = 1 ) in vec2 vUV;
 	layout( location = 2 ) in vec4 vVertexPosition;
 	layout( location = 3 ) in float vMouseColorID;	
-	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 4 ) uniform sampler uSampler;
+	//#RedGPU#diffuseTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 4 ) uniform sampler uDiffuseSampler;
 	//#RedGPU#diffuseTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 5 ) uniform texture2D uDiffuseTexture;
-	//#RedGPU#normalTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 6 ) uniform texture2D uNormalTexture;	
-	//#RedGPU#specularTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 7 ) uniform texture2D uSpecularTexture;
-	//#RedGPU#emissiveTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 8 ) uniform texture2D uEmissiveTexture;
+	//#RedGPU#normalTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 6 ) uniform sampler uNormalSampler;
+	//#RedGPU#normalTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 7 ) uniform texture2D uNormalTexture;
+	//#RedGPU#specularTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 8 ) uniform sampler uSpecularSampler;	
+	//#RedGPU#specularTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 9 ) uniform texture2D uSpecularTexture;
+	//#RedGPU#emissiveTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 10 ) uniform sampler uEmissiveSampler;
+	//#RedGPU#emissiveTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 11 ) uniform texture2D uEmissiveTexture;
 	layout( location = 0 ) out vec4 outColor;
 	
 	layout( location = 1 ) out vec4 out_MouseColorID_Depth;
@@ -85,17 +88,17 @@ export default class StandardMaterial extends Mix.mix(
 	void main() {
 		float testAlpha = 1.0;
 		vec4 diffuseColor = vec4(0.0);
-		//#RedGPU#diffuseTexture# diffuseColor = texture(sampler2D(uDiffuseTexture, uSampler), vUV) ;
+		//#RedGPU#diffuseTexture# diffuseColor = texture(sampler2D(uDiffuseTexture, uDiffuseSampler), vUV) ;
 		//#RedGPU#diffuseTexture# testAlpha = diffuseColor.a;
 		
 	    vec3 N = normalize(vNormal);
 		vec4 normalColor = vec4(0.0);
-		//#RedGPU#normalTexture# normalColor = texture(sampler2D(uNormalTexture, uSampler), vUV) ;
+		//#RedGPU#normalTexture# normalColor = texture(sampler2D(uNormalTexture, uNormalSampler), vUV) ;
 		//#RedGPU#useFlatMode# N = getFlatNormal(vVertexPosition.xyz);
 		//#RedGPU#normalTexture# N = perturb_normal(N, vVertexPosition.xyz, vUV, normalColor.rgb, fragmentUniforms.normalPower) ;
 	
 		float specularTextureValue = 1.0;
-		//#RedGPU#specularTexture# specularTextureValue = texture(sampler2D(uSpecularTexture, uSampler), vUV).r ;
+		//#RedGPU#specularTexture# specularTextureValue = texture(sampler2D(uSpecularTexture, uSpecularSampler), vUV).r ;
 		
 		vec4 finalColor = 
 		calcDirectionalLight(
@@ -122,7 +125,7 @@ export default class StandardMaterial extends Mix.mix(
 		)
 		+ la;
 		
-		//#RedGPU#emissiveTexture# vec4 emissiveColor = texture(sampler2D(uEmissiveTexture, uSampler), vUV);
+		//#RedGPU#emissiveTexture# vec4 emissiveColor = texture(sampler2D(uEmissiveTexture, uEmissiveSampler), vUV);
 		//#RedGPU#emissiveTexture# finalColor.rgb += emissiveColor.rgb * fragmentUniforms.emissivePower;
 		
 		finalColor.a = testAlpha;
@@ -144,9 +147,12 @@ export default class StandardMaterial extends Mix.mix(
 			{binding: 3, visibility: GPUShaderStage.FRAGMENT, type: "uniform-buffer"},
 			{binding: 4, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
 			{binding: 5, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"},
-			{binding: 6, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"},
+			{binding: 6, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
 			{binding: 7, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"},
-			{binding: 8, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"}
+			{binding: 8, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
+			{binding: 9, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"},
+			{binding: 10, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
+			{binding: 11, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"}
 		]
 	};
 	static uniformBufferDescriptor_vertex = [
@@ -219,7 +225,10 @@ export default class StandardMaterial extends Mix.mix(
 					size: this.uniformBufferDescriptor_vertex.size
 				}
 			},
-			{binding: 1, resource: this.sampler.GPUSampler},
+			{
+				binding: 1,
+				resource: this._displacementTexture ? this._displacementTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
+			},
 			{
 				binding: 2,
 				resource: this._displacementTexture ? this._displacementTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
@@ -232,21 +241,36 @@ export default class StandardMaterial extends Mix.mix(
 					size: this.uniformBufferDescriptor_fragment.size
 				}
 			},
-			{binding: 4, resource: this.sampler.GPUSampler},
+			{
+				binding: 4,
+				resource: this._diffuseTexture ? this._diffuseTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
+			},
 			{
 				binding: 5,
 				resource: this._diffuseTexture ? this._diffuseTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
 			},
 			{
 				binding: 6,
-				resource: this._normalTexture ? this._normalTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
+				resource: this._normalTexture ? this._normalTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
 			},
 			{
 				binding: 7,
-				resource: this._specularTexture ? this._specularTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
+				resource: this._normalTexture ? this._normalTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
 			},
 			{
 				binding: 8,
+				resource: this._specularTexture ? this._specularTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
+			},
+			{
+				binding: 9,
+				resource: this._specularTexture ? this._specularTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
+			},
+			{
+				binding: 10,
+				resource: this._emissiveTexture ? this._emissiveTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
+			},
+			{
+				binding: 11,
 				resource: this._emissiveTexture ? this._emissiveTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
 			}
 

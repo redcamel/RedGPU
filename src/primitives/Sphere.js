@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.8 15:38:58
+ *   Last modification time of this file - 2020.1.9 14:4:9
  *
  */
 
@@ -13,16 +13,17 @@ import InterleaveInfo from "../geometry/InterleaveInfo.js";
 import RedGPUContext from "../RedGPUContext.js";
 import baseGeometry from "../base/baseGeometry.js";
 import glMatrix from "../base/gl-matrix-min.js";
-export default class Sphere extends baseGeometry{
-	constructor(redGPUContext, radius = 1, widthSegments = 8, heightSegments = 8, phiStart = 0, phiLength = Math.PI * 2, thetaStart = 0, thetaLength = Math.PI) {
+
+export default class Sphere extends baseGeometry {
+	constructor(redGPUContext, radius = 1, widthSegments = 8, heightSegments = 8, phiStart = 0, phiLength = Math.PI * 2, thetaStart = 0, thetaLength = Math.PI, uvSize = 1) {
 		super();
 		let typeKey;
 		widthSegments = Math.max(3, Math.floor(widthSegments));
 		heightSegments = Math.max(2, Math.floor(heightSegments));
 		// 유일키 생성
-		typeKey = [this.constructor.name, radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength].join('_');
+		typeKey = [this.constructor.name, radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength, uvSize].join('_');
 		if (redGPUContext.state.Geometry.has(typeKey)) return redGPUContext.state.Geometry.get(typeKey);
-		let tData = this.#makeData(redGPUContext, typeKey, radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength);
+		let tData = this.#makeData(redGPUContext, typeKey, radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength, uvSize);
 		this.interleaveBuffer = tData['interleaveBuffer'];
 		this.indexBuffer = tData['indexBuffer'];
 		this.vertexState = tData['vertexState'];
@@ -38,7 +39,7 @@ export default class Sphere extends baseGeometry{
 		let a, b, c, d;
 		let vertex = new Float32Array([0, 0, 0]);
 		let normal = new Float32Array([0, 0, 0]);
-		return function (redGPUContext, typeKey, radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength) {
+		return function (redGPUContext, typeKey, radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength, uvSize) {
 			thetaEnd = thetaStart + thetaLength;
 			index = 0;
 			grid.length = 0;
@@ -67,7 +68,7 @@ export default class Sphere extends baseGeometry{
 					glMatrix.vec3.normalize(normal, normal);
 					interleaveData.push(normal[0], normal[1], normal[2]);
 					// uv
-					interleaveData.push(u, v);
+					interleaveData.push(u * uvSize, v * uvSize);
 					verticesRow.push(index++);
 				}
 				grid.push(verticesRow);
