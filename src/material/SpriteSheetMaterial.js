@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.9 10:26:54
+ *   Last modification time of this file - 2020.1.9 11:43:33
  *
  */
 
@@ -84,35 +84,34 @@ export default class SpriteSheetMaterial extends Mix.mix(
 	static uniformBufferDescriptor_fragment = [
 		{size: TypeSize.float, valueName: 'alpha'}
 	];
-	_frameRate;
-	get frameRate() {return this._frameRate;}
+	#frameRate;
+	#nextFrameTime = 0;
+	#aniMap = {};
+	get frameRate() {return this.#frameRate;}
 	set frameRate(value) {
-		this._frameRate = value;
-		this._perFrameTime = 1000 / this._frameRate
+		if (value < 1) this.#frameRate = 1;
+		this.#frameRate = value;
+		this._perFrameTime = 1000 / this.#frameRate
 	}
-	constructor(redGPUContext, diffuseTexture, frameRate = 60, segmentW = 1, segmentH = 1, totalFrame = 1) {
+	constructor(redGPUContext, spriteSheetAction) {
 		super(redGPUContext);
-		this.diffuseTexture = diffuseTexture;
+		if (spriteSheetAction) {
+			this.addAction('default', spriteSheetAction);
+			this.setAction('default');
+		}
 		this.needResetBindingInfo = true;
-		this.frameRate = frameRate;
-		this.segmentW = segmentW;
-		this.segmentH = segmentH;
-		this.totalFrame = totalFrame;
 		this.sheetRect = new Float32Array(4);
 		this.currentIndex = 0;
 		this.loop = true;
-		this._aniMap = {};
-		this._nextFrameTime = 0; // 다음 프레임 호출 시간
 		this._playYn = true;
 		console.log(this)
-
 	}
 	update(time) {
-		if (!this._nextFrameTime) this._nextFrameTime = this._perFrameTime + time;
-		if (this._playYn && this._nextFrameTime < time) {
-			let gapFrame = parseInt((time - this._nextFrameTime) / this._perFrameTime);
+		if (!this.#nextFrameTime) this.#nextFrameTime = this._perFrameTime + time;
+		if (this._playYn && this.#nextFrameTime < time) {
+			let gapFrame = parseInt((time - this.#nextFrameTime) / this._perFrameTime);
 			gapFrame = gapFrame || 1;
-			this._nextFrameTime = this._perFrameTime + time;
+			this.#nextFrameTime = this._perFrameTime + time;
 			this.currentIndex += gapFrame;
 			if (this.currentIndex >= this.totalFrame) {
 				if (this.loop) this._playYn = true, this.currentIndex = 0;
@@ -127,53 +126,42 @@ export default class SpriteSheetMaterial extends Mix.mix(
 	}
 
 	addAction(key, option) {
-		this._aniMap[key] = option
+		this.#aniMap[key] = option
+	};
+	removeAction(key, option) {
+		delete this.#aniMap[key]
 	};
 	setAction(key) {
-		this.diffuseTexture = this._aniMap[key]['texture'];
-		this.segmentW = this._aniMap[key]['segmentW'];
-		this.segmentH = this._aniMap[key]['segmentH'];
-		this.totalFrame = this._aniMap[key]['totalFrame'];
-		this.frameRate = this._aniMap[key]['frameRate'];
-		this['currentIndex'] = 0;
-		this['_nextFrameTime'] = 0;
+		this.diffuseTexture = this.#aniMap[key]['texture'];
+		this.segmentW = this.#aniMap[key]['segmentW'];
+		this.segmentH = this.#aniMap[key]['segmentH'];
+		this.totalFrame = this.#aniMap[key]['totalFrame'];
+		this.frameRate = this.#aniMap[key]['frameRate'];
+		this.currentIndex = 0;
+		this.#nextFrameTime = 0;
 	}
 
 	play() {
-		this._playYn = true
+		this._playYn = true;
+		this.#nextFrameTime = 0;
 	};
-
+	pause() {this._playYn = false};
 	stop() {
 		this._playYn = false;
 		this.currentIndex = 0;
 	};
-
-	pause() {
-		this._playYn = false
-	};
-
 	gotoAndStop(index) {
 		if (index > this.totalFrame - 1) index = this.totalFrame - 1;
 		if (index < 0) index = 0;
 		this._playYn = false;
 		this.currentIndex = index;
 	};
-	/*DOC:
-	 {
-		 title :`gotoAndPlay`,
-		 code : 'METHOD',
-		 description : `
-		    해당 프레임 부터 재생
-		 `,
-		 return : 'void'
-	 }
-	 :DOC*/
 	gotoAndPlay(index) {
 		if (index > this.totalFrame - 1) index = this.totalFrame - 1;
 		if (index < 0) index = 0;
 		this._playYn = true;
 		this.currentIndex = index;
-		this._nextFrameTime = 0;
+		this.#nextFrameTime = 0;
 	};
 
 	checkTexture(texture, textureName) {

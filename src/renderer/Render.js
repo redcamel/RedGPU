@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.9 10:26:54
+ *   Last modification time of this file - 2020.1.9 11:43:33
  *
  */
 
@@ -79,7 +79,7 @@ let renderScene = (_ => {
 						changedMaterial_UUID[tMaterial._UUID] = 1
 					}
 					if (tMaterial instanceof SpriteSheetMaterial) {
-						if (tMaterial._playYn) tMaterial.update(currentTime)
+						tMaterial.update(currentTime)
 					}
 					tMaterialChanged = changedMaterial_UUID[tMaterial._UUID]
 				}

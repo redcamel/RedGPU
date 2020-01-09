@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.9 10:26:54
+ *   Last modification time of this file - 2020.1.9 11:43:33
  *
  */
 import glMatrix from "./base/gl-matrix-min.js"
@@ -52,6 +52,8 @@ import ColorPhongMaterial from "./material/ColorPhongMaterial.js";
 import ColorPhongTextureMaterial from "./material/ColorPhongTextureMaterial.js";
 import EnvironmentMaterial from "./material/EnvironmentMaterial.js";
 import RefractionMaterial from "./material/RefractionMaterial.js";
+
+import SpriteSheetAction from "./material/SpriteSheetAction.js";
 import SpriteSheetMaterial from "./material/SpriteSheetMaterial.js";
 import Sprite3DMaterial from "./material/Sprite3DMaterial.js";
 import StandardMaterial from "./material/StandardMaterial.js";
@@ -148,7 +150,8 @@ const RedGPU = {
 	ColorMaterial,
 	ColorPhongMaterial,
 	ColorPhongTextureMaterial,
-	SheetMaterial: SpriteSheetMaterial,
+	SpriteSheetAction,
+	SpriteSheetMaterial,
 	Sprite3DMaterial,
 	EnvironmentMaterial,
 	RefractionMaterial,
