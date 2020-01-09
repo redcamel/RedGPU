@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.6 20:13:39
+ *   Last modification time of this file - 2020.1.9 10:26:54
  *
  */
 
@@ -13,7 +13,7 @@ import Mix from "../base/Mix.js";
 import RedGPUContext from "../RedGPUContext.js";
 import TypeSize from "../resources/TypeSize.js";
 
-export default class SheetMaterial extends Mix.mix(
+export default class SpriteSheetMaterial extends Mix.mix(
 	BaseMaterial,
 	Mix.alpha,
 	Mix.diffuseTexture
