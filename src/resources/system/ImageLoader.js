@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.9 14:4:9
+ *   Last modification time of this file - 2020.1.9 17:46:58
  *
  */
 
@@ -42,7 +42,7 @@ export default class ImageLoader extends UUID {
 				SRC_MAP[targetSRC].tempList.push(this);
 				RedGPUWorker.loadImageWithWorker(targetSRC)
 					.then(result => {
-						console.log(result);
+						console.log('result', result);
 						console.log('첫 로딩업데이트 해야될 대상', SRC_MAP[targetSRC]);
 						SRC_MAP[targetSRC].loaded = true;
 						SRC_MAP[targetSRC]['imageDatas'] = result['imageDatas'];
@@ -100,7 +100,7 @@ export default class ImageLoader extends UUID {
 								maxH = Math.max(maxH, result.imageDatas[0].height);
 								if (maxW > 1920) maxW = 1920;
 								if (maxH > 1920) maxH = 1920;
-								console.log(result);
+								console.log('result', result);
 								console.log('첫 로딩업데이트 해야될 대상', SRC_MAP[targetSRC]);
 								if (loadCount == 6) {
 									SRC_MAP[targetSRC].loaded = true;

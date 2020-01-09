@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.9 14:4:9
+ *   Last modification time of this file - 2020.1.9 17:58:24
  *
  */
 
@@ -454,7 +454,6 @@ const ExampleHelper = (_ => {
 			tText['text'] = this.textContent;
 		})
 	};
-
 	const setTestUI_Mesh = (RedGPU, redGPUContext, tMesh, open, gui) => {
 		checkGUI();
 		gui = gui || testHelperFolder;
@@ -548,6 +547,7 @@ const ExampleHelper = (_ => {
 	let setTestUI_BitmapMaterial, setTestUI_SpriteSheetMaterial, setTestUI_StandardMaterial,
 		setTestUI_EnvironmentMaterial, setTestUI_RefractionMaterial;
 	let setTestUI_BitmapTexture;
+
 	{
 		let makeColorProperty, makeBaseLightProperty;
 		let makeTextureProperty;
@@ -587,6 +587,7 @@ const ExampleHelper = (_ => {
 			targetFolder.addColor(material, 'specularColor');
 			targetFolder.add(material, 'useFlatMode');
 		};
+
 		setTestUI_ColorMaterial = (RedGPU, material, open, gui) => {
 			checkGUI();
 			gui = gui || testHelperFolder;

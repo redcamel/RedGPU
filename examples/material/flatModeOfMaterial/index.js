@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.9 16:3:38
+ *   Last modification time of this file - 2020.1.9 17:46:58
  *
  */
 "use strict"
@@ -40,6 +40,11 @@ new RedGPU.RedGPUContext(
 		tLight.x = 5;
 		tLight.y = 5;
 		tLight.z = 5;
+		tScene.addLight(tLight)
+		tLight = new RedGPU.DirectionalLight(this)
+		tLight.x = -5;
+		tLight.y = -5;
+		tLight.z = -5;
 		tScene.addLight(tLight)
 		///////////////////////////////////////////////////////////////////////////////////////////
 		// Mesh setup
@@ -81,12 +86,12 @@ new RedGPU.RedGPUContext(
 			tScene.addChild(tMesh);
 			tMesh.x = Math.sin(Math.PI * 2 / 5 * index) * distance
 			tMesh.z = Math.cos(Math.PI * 2 / 5 * index) * distance
-			let tText = new RedGPU.Text(this, 300)
+			let tText = new RedGPU.Text(this, 512)
 			tText.color = '#fff'
-			tText.fontSize = 24;
-			tText.lineHeight = 24;
+			tText.fontSize = 36;
+			tText.lineHeight = 28;
 			tText.setScale(7, 7, 7)
-			tText.text = key + `<span style="font-size: 20px"><br>useFlatMode = <span style="color:red">${useFlatMode}</span></span>`
+			tText.text = key + `<span style="font-size: 26px"><br>useFlatMode = <span style="color:red">${useFlatMode}</span></span>`
 			tText.y = 1.2
 			tText.useSprite3DMode = true;
 			// tText.useFixedScale = true;
