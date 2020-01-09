@@ -2,12 +2,12 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.8 18:29:29
+ *   Last modification time of this file - 2020.1.9 11:43:33
  *
  */
 
 import GLTFLoader from "../loader/gltf/GLTFLoader.js";
-import SheetMaterial from "../material/SheetMaterial.js";
+import SpriteSheetMaterial from "../material/SpriteSheetMaterial.js";
 import Debugger from "./system/Debugger.js";
 import PipelineBasic from "../base/pipeline/PipelineBasic.js";
 
@@ -78,8 +78,8 @@ let renderScene = (_ => {
 						tMaterialChanged = tMesh._prevMaterialUUID != tMaterial._UUID;
 						changedMaterial_UUID[tMaterial._UUID] = 1
 					}
-					if (tMaterial instanceof SheetMaterial) {
-						if (tMaterial._playYn) tMaterial.update(currentTime)
+					if (tMaterial instanceof SpriteSheetMaterial) {
+						tMaterial.update(currentTime)
 					}
 					tMaterialChanged = changedMaterial_UUID[tMaterial._UUID]
 				}
@@ -94,10 +94,10 @@ let renderScene = (_ => {
 						}
 					}
 					tVisible = 1;
-					if (renderDrawLayerIndexMode == Render.DRAW_LAYER_INDEX0 && tMesh.renderDrawLayerIndex == Render.DRAW_LAYER_INDEX1) {
+					if (renderDrawLayerIndexMode == Render.DRAW_LAYER_INDEX0 && tMesh._renderDrawLayerIndex == Render.DRAW_LAYER_INDEX1) {
 						renderDrawLayerIndexList.push(tMesh)
 					} else {
-						if (tMesh.renderDrawLayerIndex == Render.DRAW_LAYER_INDEX2_Z_POINT_SORT || tMaterial instanceof SheetMaterial) {
+						if (tMesh._renderDrawLayerIndex == Render.DRAW_LAYER_INDEX2_Z_POINT_SORT || tMaterial instanceof SpriteSheetMaterial) {
 							a02 = redView.camera.matrix[2], a12 = redView.camera.matrix[6], a22 = redView.camera.matrix[10], a32 = redView.camera.matrix[14];
 							b0 = tMesh._x, b1 = tMesh._y, b2 = tMesh._z, b3 = 1;
 							textToTransparentLayerList.push({

@@ -2,12 +2,12 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.8 18:27:58
+ *   Last modification time of this file - 2020.1.9 10:26:54
  *
  */
 
 import GLTFLoader from "../loader/gltf/GLTFLoader.js";
-import SheetMaterial from "../material/SheetMaterial.js";
+import SpriteSheetMaterial from "../material/SpriteSheetMaterial.js";
 import Debugger from "./system/Debugger.js";
 import PipelineBasic from "../base/pipeline/PipelineBasic.js";
 import MouseEventChecker from "./system/MouseEventChecker.js";
@@ -77,7 +77,7 @@ let renderScene = (_ => {
 						tMaterialChanged = tMesh._prevMaterialUUID != tMaterial._UUID;
 						changedMaterial_UUID[tMaterial._UUID] = 1
 					}
-					if (tMaterial instanceof SheetMaterial) {
+					if (tMaterial instanceof SpriteSheetMaterial) {
 						if (tMaterial._playYn) tMaterial.update(currentTime)
 					}
 					tMaterialChanged = changedMaterial_UUID[tMaterial._UUID]

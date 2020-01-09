@@ -2,19 +2,18 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.8 22:30:15
+ *   Last modification time of this file - 2020.1.9 11:43:33
  *
  */
 
 const ExampleHelper = (_ => {
 	let testHelperFolder;
-	const assetPath = '../../../assets/'
+	const assetPath = '../../../assets/';
 	const checkGUI = _ => {
 		if (!testHelperFolder) {
 			let containerUI;
 			let rootGUI;
 			rootGUI = new dat.GUI({autoPlace: false});
-			rootGUI.width = 370;
 			testHelperFolder = rootGUI.addFolder('TestHelper');
 			testHelperFolder.open();
 			containerUI = document.createElement('div');
@@ -23,19 +22,19 @@ const ExampleHelper = (_ => {
 				white - space : nowrap;
 			`;
 			document.body.appendChild(containerUI);
-			document.body.style.background = `url("${assetPath}bodyBG.png")`
+			document.body.style.background = `url("${assetPath}bodyBG.png")`;
 			containerUI.append(rootGUI.domElement);
 		}
 
-	}
+	};
 	const setBottom = _ => {
 		let container, t0;
 		container = document.createElement('div');
 		document.body.appendChild(container);
 		container.style.cssText = `position : fixed; left : 20px; bottom : 20px; right:20px;`;
 		//
-		container.appendChild(t0 = document.createElement('div'))
-		t0.style.cssText = `height : 0px; border-bottom: 1px solid #333;`
+		container.appendChild(t0 = document.createElement('div'));
+		t0.style.cssText = `height : 0px; border-bottom: 1px solid #333;`;
 		//
 		container.appendChild(t0 = document.createElement('div'));
 		t0.innerHTML = `This project is maintained by <a href="https://github.com/redcamel/">RedCamel</a>`;
@@ -233,13 +232,13 @@ const ExampleHelper = (_ => {
 				'lookAt(0,0,0)': _ => {
 					camera.lookAt(0, 0, 0)
 				}
-			}
+			};
 			rootFolder.add(testData, 'lookAt(0,0,0)');
 		}
 	};
 	const setTestUI_Debugger = RedGPU => {
 		checkGUI();
-		const testData = {useDebugger: false}
+		const testData = {useDebugger: false};
 		testHelperFolder.add(testData, 'useDebugger').onChange(v => {
 			RedGPU.Debugger.visible(v, RedGPU.Debugger.RIGHT_BOTTOM)
 		})
@@ -253,14 +252,14 @@ const ExampleHelper = (_ => {
 		const testData = {
 			width: 1, height: 1,
 			wSegments: 1, hSegments: 1
-		}
+		};
 		for (const k in testData) {
 			rootFolder.add(testData, k, 0, 10, k.includes('Segments') ? 1 : 0.01).onChange(v => {
 				tMesh.geometry = new RedGPU.Plane(redGPUContext, testData.width, testData.height, testData.wSegments, testData.hSegments)
 			});
 		}
 		folder = gui.addFolder('(Mesh instance)');
-		folder.open()
+		folder.open();
 		folder.add(tMesh, 'primitiveTopology', ["point-list", "line-list", "line-strip", "triangle-list", "triangle-strip"])
 	};
 	const setTestUI_PrimitiveBox = (RedGPU, redGPUContext, tMesh, open, gui) => {
@@ -272,15 +271,15 @@ const ExampleHelper = (_ => {
 		const testData = {
 			width: 1, height: 1, depth: 1,
 			wSegments: 1, hSegments: 1, dSegments: 1
-		}
-		console.log('tMesh', tMesh)
+		};
+		console.log('tMesh', tMesh);
 		for (const k in testData) {
 			rootFolder.add(testData, k, 0, 10, k.includes('Segments') ? 1 : 0.01).onChange(v => {
 				tMesh.geometry = new RedGPU.Box(redGPUContext, testData.width, testData.height, testData.depth, testData.wSegments, testData.hSegments, testData.dSegments)
 			});
 		}
 		folder = gui.addFolder('(Mesh instance)');
-		folder.open()
+		folder.open();
 		folder.add(tMesh, 'primitiveTopology', ["point-list", "line-list", "line-strip", "triangle-list", "triangle-strip"])
 	};
 	const setTestUI_PrimitiveSphere = (RedGPU, redGPUContext, tMesh, open, gui) => {
@@ -297,15 +296,15 @@ const ExampleHelper = (_ => {
 			phiLength: Math.PI * 2,
 			thetaStart: 0,
 			thetaLength: Math.PI
-		}
-		console.log('tMesh', tMesh)
+		};
+		console.log('tMesh', tMesh);
 		for (const k in testData) {
 			rootFolder.add(testData, k, 0, k.includes('Segments') ? 32 : Math.PI * 2, k.includes('Segments') ? 1 : 0.01).onChange(v => {
 				tMesh.geometry = new RedGPU.Sphere(redGPUContext, testData.radius, testData.widthSegments, testData.heightSegments, testData.phiStart, testData.phiLength, testData.thetaStart, testData.thetaLength)
 			});
 		}
 		folder = gui.addFolder('(Mesh instance)');
-		folder.open()
+		folder.open();
 		folder.add(tMesh, 'primitiveTopology', ["point-list", "line-list", "line-strip", "triangle-list", "triangle-strip"])
 	};
 	const setTestUI_PrimitiveCylinder = (RedGPU, redGPUContext, tMesh, open, gui) => {
@@ -323,8 +322,8 @@ const ExampleHelper = (_ => {
 			openEnded: false,
 			thetaStart: 0.0,
 			thetaLength: Math.PI * 2
-		}
-		console.log('tMesh', tMesh)
+		};
+		console.log('tMesh', tMesh);
 		for (const k in testData) {
 			if (k == 'openEnded') {
 				rootFolder.add(testData, k).onChange(v => {
@@ -338,7 +337,7 @@ const ExampleHelper = (_ => {
 
 		}
 		folder = gui.addFolder('(Mesh instance)');
-		folder.open()
+		folder.open();
 		folder.add(tMesh, 'primitiveTopology', ["point-list", "line-list", "line-strip", "triangle-list", "triangle-strip"])
 	};
 	const setTestUI_Sprite3D = (RedGPU, redGPUContext, tSprite3DList, open, gui) => {
@@ -376,7 +375,7 @@ const ExampleHelper = (_ => {
 				line.tolerance = v;
 			})
 		});
-	}
+	};
 	const setTextUI_LINE_CATMULLROM = (RedGPU, lineList, open, gui) => {
 		checkGUI();
 		gui = gui || testHelperFolder;
@@ -398,7 +397,7 @@ const ExampleHelper = (_ => {
 				line.tolerance = v;
 			})
 		});
-	}
+	};
 	const setTestUI_Text = (RedGPU, redGPUContext, tText, open, gui) => {
 		checkGUI();
 		gui = gui || testHelperFolder;
@@ -406,17 +405,17 @@ const ExampleHelper = (_ => {
 		rootFolder = gui.addFolder('Text');
 		if (open) rootFolder.open();
 		folder = rootFolder.addFolder('GPU Property');
-		folder.add(tText, 'depthWriteEnabled')
-		folder.add(tText, 'primitiveTopology', ["point-list", "line-list", "line-strip", "triangle-list", "triangle-strip"])
-		folder.add(tText, 'cullMode', ["none", "back", "front",])
+		folder.add(tText, 'depthWriteEnabled');
+		folder.add(tText, 'primitiveTopology', ["point-list", "line-list", "line-strip", "triangle-list", "triangle-strip"]);
+		folder.add(tText, 'cullMode', ["none", "back", "front",]);
 		folder.add(tText, 'depthCompare', ["never", "less", "equal", "less-equal", "greater", "not-equal", "greater-equal", "always"]);
 		['blendColorSrc', 'blendColorDst', 'blendAlphaSrc', 'blendAlphaDst'].forEach(key => {
 			folder.add(tText, key, ["zero", "one", "src-color", "one-minus-src-color", "src-alpha", "one-minus-src-alpha", "dst-color", "one-minus-dst-color", "dst-alpha", "one-minus-dst-alpha", "src-alpha-saturated", "blend-color", "one-minus-blend-color"])
 		});
 		folder = rootFolder.addFolder('Transform Property');
 		['x', 'y', 'z'].forEach(key => {
-			folder.add(tText, key, -10, 10, 0.01)
-			folder.add(tText, 'rotation' + key.toUpperCase(), 0, 360, 0.01)
+			folder.add(tText, key, -10, 10, 0.01);
+			folder.add(tText, 'rotation' + key.toUpperCase(), 0, 360, 0.01);
 			folder.add(tText, 'scale' + key.toUpperCase(), 0, 10, 0.01)
 		});
 
@@ -446,7 +445,7 @@ const ExampleHelper = (_ => {
 		t1.setAttribute('contenteditable', true);
 		t1.style.cssText = 'overflow:auto;position:absolute;bottom:130px;left:18px;color:#fff;width:500px;height:160px;padding:10px;font-size:12px;background:1px 1px 0px rgba(255,255,255,0.5);border:1px solid #333;outline:none';
 		t1.textContent = tText.text;
-		document.body.appendChild(t1)
+		document.body.appendChild(t1);
 		t1.addEventListener('input', function () {
 			tText['text'] = this.textContent;
 		})
@@ -459,35 +458,35 @@ const ExampleHelper = (_ => {
 		rootFolder = gui.addFolder('Mesh');
 		if (open) rootFolder.open();
 		folder = rootFolder.addFolder('GPU Property');
-		folder.add(tMesh, 'depthWriteEnabled')
-		folder.add(tMesh, 'primitiveTopology', ["point-list", "line-list", "line-strip", "triangle-list", "triangle-strip"])
-		folder.add(tMesh, 'cullMode', ["none", "back", "front",])
+		folder.add(tMesh, 'depthWriteEnabled');
+		folder.add(tMesh, 'primitiveTopology', ["point-list", "line-list", "line-strip", "triangle-list", "triangle-strip"]);
+		folder.add(tMesh, 'cullMode', ["none", "back", "front",]);
 		folder.add(tMesh, 'depthCompare', ["never", "less", "equal", "less-equal", "greater", "not-equal", "greater-equal", "always"]);
 		['blendColorSrc', 'blendColorDst', 'blendAlphaSrc', 'blendAlphaDst'].forEach(key => {
 			folder.add(tMesh, key, ["zero", "one", "src-color", "one-minus-src-color", "src-alpha", "one-minus-src-alpha", "dst-color", "one-minus-dst-color", "dst-alpha", "one-minus-dst-alpha", "src-alpha-saturated", "blend-color", "one-minus-blend-color"])
 		});
 		['x', 'y', 'z'].forEach(key => {
-			rootFolder.add(tMesh, key, -10, 10, 0.01)
-			rootFolder.add(tMesh, 'rotation' + key.toUpperCase(), 0, 360, 0.01)
+			rootFolder.add(tMesh, key, -10, 10, 0.01);
+			rootFolder.add(tMesh, 'rotation' + key.toUpperCase(), 0, 360, 0.01);
 			rootFolder.add(tMesh, 'scale' + key.toUpperCase(), 0, 10, 0.01)
 		});
 		const testData = {
 			geometry: 'Sphere',
 			material: 'ColorPhongMaterial'
-		}
+		};
 		rootFolder.add(testData, 'geometry', ['Plane', 'Box', 'Sphere', 'Cylinder']).onChange(v => {
 			switch (v) {
 				case 'Plane' :
-					tMesh.geometry = new RedGPU.Plane(redGPUContext)
-					break
+					tMesh.geometry = new RedGPU.Plane(redGPUContext);
+					break;
 				case 'Box' :
-					tMesh.geometry = new RedGPU.Box(redGPUContext)
-					break
+					tMesh.geometry = new RedGPU.Box(redGPUContext);
+					break;
 				case 'Sphere' :
-					tMesh.geometry = new RedGPU.Sphere(redGPUContext, 1, 32, 32, 32)
-					break
+					tMesh.geometry = new RedGPU.Sphere(redGPUContext, 1, 32, 32, 32);
+					break;
 				case 'Cylinder' :
-					tMesh.geometry = new RedGPU.Cylinder(redGPUContext, 0, 1, 2, 32, 32)
+					tMesh.geometry = new RedGPU.Cylinder(redGPUContext, 0, 1, 2, 32, 32);
 					break
 			}
 
@@ -499,18 +498,18 @@ const ExampleHelper = (_ => {
 		]).onChange(v => {
 			switch (v) {
 				case 'ColorMaterial' :
-					tMesh.material = new RedGPU.ColorMaterial(redGPUContext)
-					break
+					tMesh.material = new RedGPU.ColorMaterial(redGPUContext);
+					break;
 				case 'ColorPhongMaterial' :
-					tMesh.material = new RedGPU.ColorPhongMaterial(redGPUContext)
-					break
+					tMesh.material = new RedGPU.ColorPhongMaterial(redGPUContext);
+					break;
 				case 'ColorPhongTextureMaterial' :
 					tMesh.material = new RedGPU.ColorPhongTextureMaterial(redGPUContext);
 					tMesh.material.normalTexture = new RedGPU.BitmapTexture(redGPUContext, `${assetPath}Brick03_nrm.jpg`);
-					break
+					break;
 				case 'BitmapMaterial' :
 					tMesh.material = new RedGPU.BitmapMaterial(redGPUContext, new RedGPU.BitmapTexture(redGPUContext, `${assetPath}Brick03_col.jpg`));
-					break
+					break;
 				case 'StandardMaterial' :
 					tMesh.material = new RedGPU.StandardMaterial(
 						redGPUContext,
@@ -518,7 +517,7 @@ const ExampleHelper = (_ => {
 						new RedGPU.BitmapTexture(redGPUContext, `${assetPath}Brick03_nrm.jpg`)
 					);
 					tMesh.material.normalPower = 2;
-					break
+					break;
 				case 'EnvironmentMaterial' :
 				case 'RefractionMaterial':
 					tMesh.material = new RedGPU[v](
@@ -542,19 +541,20 @@ const ExampleHelper = (_ => {
 	};
 	// material
 	let setTestUI_ColorMaterial, setTestUI_ColorPhongMaterial, setTestUI_ColorPhongTextureMaterial;
-	let setTestUI_BitmapMaterial, setTestUI_StandardMaterial,setTestUI_EnvironmentMaterial,setTestUI_RefractionMaterial;
+	let setTestUI_BitmapMaterial, setTestUI_SpriteSheetMaterial, setTestUI_StandardMaterial,
+		setTestUI_EnvironmentMaterial, setTestUI_RefractionMaterial;
 	{
 		let makeColorProperty, makeBaseLightProperty;
 		let makeTextureProperty;
 		makeTextureProperty = (targetFolder, RedGPU, redGPUContext, material, propertyName, src) => {
-			let testData = {}
+			let testData = {};
 			testData[propertyName] = true;
-			if(src instanceof Array){
+			if (src instanceof Array) {
 				targetFolder.add(testData, propertyName).onChange(v => {
 					if (v) material[propertyName] = new RedGPU.BitmapCubeTexture(redGPUContext, src);
 					else material[propertyName] = null;
 				});
-			}else{
+			} else {
 				targetFolder.add(testData, propertyName).onChange(v => {
 					if (v) material[propertyName] = new RedGPU.BitmapTexture(redGPUContext, src);
 					else material[propertyName] = null;
@@ -565,23 +565,23 @@ const ExampleHelper = (_ => {
 				targetFolder.add(material, 'emissivePower', 0, 3, 0.01)
 			}
 			if (propertyName == 'displacementTexture') {
-				targetFolder.add(material, 'displacementFlowSpeedX', 0, 1, 0.01)
-				targetFolder.add(material, 'displacementFlowSpeedY', 0, 1, 0.01)
+				targetFolder.add(material, 'displacementFlowSpeedX', 0, 1, 0.01);
+				targetFolder.add(material, 'displacementFlowSpeedY', 0, 1, 0.01);
 				targetFolder.add(material, 'displacementPower', 0, 5, 0.01)
 			}
 
-		}
+		};
 		makeColorProperty = (targetFolder, material) => {
-			targetFolder.addColor(material, 'color')
+			targetFolder.addColor(material, 'color');
 			targetFolder.add(material, 'colorAlpha', 0, 1, 0.01)
-		}
+		};
 		makeBaseLightProperty = (targetFolder, material) => {
 			targetFolder.add(material, 'normalPower', -5, 5, 0.01);
 			targetFolder.add(material, 'shininess', 0, 256, 0.01);
 			targetFolder.add(material, 'specularPower', 0, 5, 0.01);
 			targetFolder.addColor(material, 'specularColor');
 			targetFolder.add(material, 'useFlatMode');
-		}
+		};
 		setTestUI_ColorMaterial = (RedGPU, material, open, gui) => {
 			checkGUI();
 			gui = gui || testHelperFolder;
@@ -589,7 +589,7 @@ const ExampleHelper = (_ => {
 			rootFolder = gui.addFolder('ColorMaterial');
 			if (open) rootFolder.open();
 			makeColorProperty(rootFolder, material);
-		}
+		};
 		setTestUI_ColorPhongMaterial = (RedGPU, material, open, gui) => {
 			checkGUI();
 			gui = gui || testHelperFolder;
@@ -598,7 +598,7 @@ const ExampleHelper = (_ => {
 			if (open) rootFolder.open();
 			makeColorProperty(rootFolder, material);
 			makeBaseLightProperty(rootFolder, material);
-		}
+		};
 		setTestUI_ColorPhongTextureMaterial = (RedGPU, redGPUContext, material, open, gui) => {
 			checkGUI();
 			gui = gui || testHelperFolder;
@@ -613,7 +613,7 @@ const ExampleHelper = (_ => {
 			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'specularTexture', `${assetPath}specular.png`);
 			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'emissiveTexture', `${assetPath}emissive.jpg`);
 			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'displacementTexture', `${assetPath}Brick03_disp.jpg`);
-		}
+		};
 		setTestUI_BitmapMaterial = (RedGPU, redGPUContext, material, open, gui) => {
 			checkGUI();
 			gui = gui || testHelperFolder;
@@ -621,7 +621,30 @@ const ExampleHelper = (_ => {
 			rootFolder = gui.addFolder('BitmapMaterial');
 			if (open) rootFolder.open();
 			makeTextureProperty(rootFolder, RedGPU, redGPUContext, material, 'diffuseTexture', `${assetPath}Brick03_col.jpg`);
-		}
+		};
+		setTestUI_SpriteSheetMaterial = (RedGPU, redGPUContext, material, open, gui) => {
+			checkGUI();
+			gui = gui || testHelperFolder;
+			let rootFolder, folder;
+			rootFolder = gui.addFolder('SpriteSheetMaterial');
+			if (open) rootFolder.open();
+			makeTextureProperty(rootFolder, RedGPU, redGPUContext, material, 'diffuseTexture', `${assetPath}sheet/spriteSheet.png`);
+			rootFolder.add(material, 'frameRate', 1, 120);
+			rootFolder.add(material, 'play');
+			rootFolder.add(material, 'stop');
+			rootFolder.add(material, 'pause');
+			rootFolder.add(material, 'currentIndex', 0, material.totalFrame, 1).listen();
+			rootFolder.add(material, 'loop');
+			const testData = {
+				gotoAndStop: 0,
+				gotoAndPlay: 0,
+				action:'walk'
+			}
+			rootFolder.add(testData, 'gotoAndStop', 0, material.totalFrame, 1).onChange(v => {material.gotoAndStop(v)});
+			rootFolder.add(testData, 'gotoAndPlay', 0, material.totalFrame, 1).onChange(v => {material.gotoAndPlay(v)})
+			rootFolder.add(testData, 'action', ['walk','attack','jump']).onChange(v => {material.setAction(v)});
+
+		};
 		setTestUI_StandardMaterial = (RedGPU, redGPUContext, material, open, gui) => {
 			checkGUI();
 			gui = gui || testHelperFolder;
@@ -636,8 +659,8 @@ const ExampleHelper = (_ => {
 			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'specularTexture', `${assetPath}specular.png`);
 			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'emissiveTexture', `${assetPath}emissive.jpg`);
 			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'displacementTexture', `${assetPath}Brick03_disp.jpg`);
-		}
-		setTestUI_EnvironmentMaterial =  (RedGPU, redGPUContext, material, open, gui) => {
+		};
+		setTestUI_EnvironmentMaterial = (RedGPU, redGPUContext, material, open, gui) => {
 			checkGUI();
 			gui = gui || testHelperFolder;
 			let rootFolder, folder;
@@ -660,8 +683,8 @@ const ExampleHelper = (_ => {
 			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'specularTexture', `${assetPath}specular.png`);
 			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'emissiveTexture', `${assetPath}emissive.jpg`);
 			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'displacementTexture', `${assetPath}Brick03_disp.jpg`);
-		}
-		setTestUI_RefractionMaterial =  (RedGPU, redGPUContext, material, open, gui) => {
+		};
+		setTestUI_RefractionMaterial = (RedGPU, redGPUContext, material, open, gui) => {
 			checkGUI();
 			gui = gui || testHelperFolder;
 			let rootFolder, folder;
@@ -694,7 +717,7 @@ const ExampleHelper = (_ => {
 		},
 		setTestUI: (_ => {
 			return (RedGPU, redGPUContext, view, scene, camera) => {
-				checkGUI()
+				checkGUI();
 				setTestUI_RedGPUContext(redGPUContext);
 				setTestUI_View(view);
 				setTestUI_Scene(RedGPU, redGPUContext, scene);
@@ -725,8 +748,9 @@ const ExampleHelper = (_ => {
 		setTestUI_ColorPhongTextureMaterial: setTestUI_ColorPhongTextureMaterial,
 		setTestUI_BitmapMaterial: setTestUI_BitmapMaterial,
 		setTestUI_StandardMaterial: setTestUI_StandardMaterial,
-		setTestUI_EnvironmentMaterial : setTestUI_EnvironmentMaterial,
-		setTestUI_RefractionMaterial : setTestUI_RefractionMaterial
+		setTestUI_EnvironmentMaterial: setTestUI_EnvironmentMaterial,
+		setTestUI_RefractionMaterial: setTestUI_RefractionMaterial,
+		setTestUI_SpriteSheetMaterial: setTestUI_SpriteSheetMaterial
 	};
 })();
 

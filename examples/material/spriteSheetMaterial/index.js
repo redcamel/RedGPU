@@ -38,13 +38,49 @@ new RedGPU.RedGPUContext(
 		///////////////////////////////////////////////////////////////////////////////////////////
 		// Mesh setup
 		let tMesh, tGeometry, tMaterial;
-		tGeometry = new RedGPU.Sphere(this, 1, 32, 32, 32);
-		tMaterial = new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this, '../../../assets/Brick03_col.jpg'));
+		tGeometry = new RedGPU.Plane(this);
+		tMaterial = new RedGPU.SpriteSheetMaterial(
+			this,
+			new RedGPU.SpriteSheetAction(
+				new RedGPU.BitmapTexture(this, '../../../assets/sheet/spriteSheet.png'),
+				30, 5, 3, 15
+			)
+		);
 		tMesh = new RedGPU.Mesh(
 			this,
 			tGeometry,
 			tMaterial
 		);
+		tMesh.cullMode = 'none';
+		tMesh.x = -1
+		tScene.addChild(tMesh);
+		//
+		tMaterial = new RedGPU.SpriteSheetMaterial(this);
+		tMaterial.addAction(
+			'walk', new RedGPU.SpriteSheetAction(
+				new RedGPU.BitmapTexture(this, '../../../assets/sheet/actionTest/walk.png'),
+				30, 8, 1, 8
+			)
+		);
+		tMaterial.addAction(
+			'attack', new RedGPU.SpriteSheetAction(
+				new RedGPU.BitmapTexture(this, '../../../assets/sheet/actionTest/attack.png'),
+				30, 6, 1, 6
+			)
+		);
+		tMaterial.addAction(
+			'jump', new RedGPU.SpriteSheetAction(
+				new RedGPU.BitmapTexture(this, '../../../assets/sheet/actionTest/jump.png'),
+				30, 8, 1, 8
+			)
+		);
+		tMaterial.setAction('walk')
+		tMesh = new RedGPU.Mesh(
+			this,
+			tGeometry,
+			tMaterial
+		);
+		tMesh.cullMode = 'none';
 		tScene.addChild(tMesh);
 		///////////////////////////////////////////////////////////////////////////////////////////
 		renderer = new RedGPU.Render();
@@ -56,7 +92,7 @@ new RedGPU.RedGPUContext(
 		requestAnimationFrame(render);
 
 		// TestUI setup
-		ExampleHelper.setTestUI_BitmapMaterial(RedGPU, this, tMaterial, true);
+		ExampleHelper.setTestUI_SpriteSheetMaterial(RedGPU, this, tMaterial, true);
 		ExampleHelper.setTestUI_Debugger(RedGPU);
 	}
 );

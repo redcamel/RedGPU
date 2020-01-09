@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.8 22:30:15
+ *   Last modification time of this file - 2020.1.9 10:26:54
  *
  */
 import RedGPU from "../src/RedGPU.js";
@@ -220,7 +220,7 @@ new RedGPU.RedGPUContext(cvs,
 		// 				])))
 		// 				tMesh.z = -6
 		// 				tScene.addChild(tMesh)
-		// 				tMesh = new RedGPU.Mesh(this, new RedGPU.Box(this,), new RedGPU.SheetMaterial(this, new RedGPU.BitmapTexture(this, '../assets/sheet/spriteSheet.png'), 24, 5, 3, 15))
+		// 				tMesh = new RedGPU.Mesh(this, new RedGPU.Box(this,), new RedGPU.SpriteSheetMaterial(this, new RedGPU.BitmapTexture(this, '../assets/sheet/spriteSheet.png'), 24, 5, 3, 15))
 		// 				tMesh.z = 0
 		//
 		// 				tScene.addChild(tMesh)

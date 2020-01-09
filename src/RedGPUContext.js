@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.7 21:39:14
+ *   Last modification time of this file - 2020.1.9 10:26:54
  *
  */
 "use strict";
@@ -18,7 +18,7 @@ import GridMaterial from "./material/system/GridMaterial.js";
 import SkyBoxMaterial from "./material/system/SkyBoxMaterial.js";
 import LineMaterial from "./material/system/LineMaterial.js";
 import TextMaterial from "./material/system/TextMaterial.js";
-import SheetMaterial from "./material/SheetMaterial.js";
+import SpriteSheetMaterial from "./material/SpriteSheetMaterial.js";
 
 let redGPUContextList = new Set();
 let setGlobalResizeEvent = function () {
@@ -172,7 +172,7 @@ export default class RedGPUContext {
 								new ColorPhongTextureMaterial(this);
 								new LineMaterial(this);
 								new TextMaterial(this);
-								new SheetMaterial(this)
+								new SpriteSheetMaterial(this)
 								// new PBRMaterial_System(this)
 								////////////////////////////////////////////////////////
 
