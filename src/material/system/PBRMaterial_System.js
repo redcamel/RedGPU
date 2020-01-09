@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.2 14:26:4
+ *   Last modification time of this file - 2020.1.9 14:4:9
  *
  */
 
@@ -539,7 +539,7 @@ export default class PBRMaterial_System extends Mix.mix(
 			},
 			{
 				binding: 1,
-				resource: this._displacementTexture ? this._displacementTexture.sampler.GPUSampler : this.sampler.GPUSampler
+				resource: this._displacementTexture ? this._displacementTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
 			},
 			{
 				binding: 2,
@@ -555,7 +555,7 @@ export default class PBRMaterial_System extends Mix.mix(
 			},
 			{
 				binding: 4,
-				resource: this._diffuseTexture ? this._diffuseTexture.sampler.GPUSampler : this.sampler.GPUSampler
+				resource: this._diffuseTexture ? this._diffuseTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
 			},
 			{
 				binding: 5,
@@ -563,7 +563,7 @@ export default class PBRMaterial_System extends Mix.mix(
 			},
 			{
 				binding: 6,
-				resource: this._normalTexture ? this._normalTexture.sampler.GPUSampler : this.sampler.GPUSampler
+				resource: this._normalTexture ? this._normalTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
 			},
 			{
 				binding: 7,
@@ -571,7 +571,7 @@ export default class PBRMaterial_System extends Mix.mix(
 			},
 			{
 				binding: 8,
-				resource: this._roughnessTexture ? this._roughnessTexture.sampler.GPUSampler : this.sampler.GPUSampler
+				resource: this._roughnessTexture ? this._roughnessTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
 			},
 			{
 				binding: 9,
@@ -579,7 +579,7 @@ export default class PBRMaterial_System extends Mix.mix(
 			},
 			{
 				binding: 10,
-				resource: this._emissiveTexture ? this._emissiveTexture.sampler.GPUSampler : this.sampler.GPUSampler
+				resource: this._emissiveTexture ? this._emissiveTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
 			},
 			{
 				binding: 11,
@@ -587,7 +587,7 @@ export default class PBRMaterial_System extends Mix.mix(
 			},
 			{
 				binding: 12,
-				resource: this._environmentTexture ? this._environmentTexture.sampler.GPUSampler : this.sampler.GPUSampler
+				resource: this._environmentTexture ? this._environmentTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
 			},
 			{
 				binding: 13,
@@ -595,7 +595,7 @@ export default class PBRMaterial_System extends Mix.mix(
 			},
 			{
 				binding: 14,
-				resource: this._occlusionTexture ? this._occlusionTexture.sampler.GPUSampler : this.sampler.GPUSampler
+				resource: this._occlusionTexture ? this._occlusionTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
 			},
 			{
 				binding: 15,

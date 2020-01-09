@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.9 10:26:54
+ *   Last modification time of this file - 2020.1.9 14:4:9
  *
  */
 "use strict";
@@ -19,6 +19,7 @@ import SkyBoxMaterial from "./material/system/SkyBoxMaterial.js";
 import LineMaterial from "./material/system/LineMaterial.js";
 import TextMaterial from "./material/system/TextMaterial.js";
 import SpriteSheetMaterial from "./material/SpriteSheetMaterial.js";
+import Sampler from "./resources/Sampler.js";
 
 let redGPUContextList = new Set();
 let setGlobalResizeEvent = function () {
@@ -87,6 +88,7 @@ export default class RedGPUContext {
 										vertexBuffer: new Map(),
 										indexBuffer: new Map()
 									},
+									emptySampler : new Sampler(this),
 									emptyTextureView: device.createTexture({
 										size: {width: 1, height: 1, depth: 1,},
 										format: 'r8unorm',

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.7 16:13:31
+ *   Last modification time of this file - 2020.1.9 14:4:9
  *
  */
 
@@ -12,15 +12,15 @@ import Geometry from "../geometry/Geometry.js";
 import InterleaveInfo from "../geometry/InterleaveInfo.js";
 import RedGPUContext from "../RedGPUContext.js";
 import baseGeometry from "../base/baseGeometry.js";
-import glMatrix from "../base/gl-matrix-min.js";
-export default class Box extends baseGeometry{
-	constructor(redGPUContext, width = 1, height = 1, depth = 1, wSegments = 1, hSegments = 1, dSegments = 1) {
+
+export default class Box extends baseGeometry {
+	constructor(redGPUContext, width = 1, height = 1, depth = 1, wSegments = 1, hSegments = 1, dSegments = 1, uvSize = 1) {
 		super();
 		let typeKey;
 		// 유일키 생성
-		typeKey = [this.constructor.name, width, height, depth, wSegments, hSegments, dSegments].join('_');
+		typeKey = [this.constructor.name, width, height, depth, wSegments, hSegments, dSegments, uvSize].join('_');
 		if (redGPUContext.state.Geometry.has(typeKey)) return redGPUContext.state.Geometry.get(typeKey);
-		let tData = this.#makeData(redGPUContext, typeKey, width, height, depth, wSegments, hSegments, dSegments);
+		let tData = this.#makeData(redGPUContext, typeKey, width, height, depth, wSegments, hSegments, dSegments, uvSize);
 		this.interleaveBuffer = tData['interleaveBuffer'];
 		this.indexBuffer = tData['indexBuffer'];
 		this.vertexState = tData['vertexState'];
@@ -32,7 +32,7 @@ export default class Box extends baseGeometry{
 		let numberOfVertices;
 		let groupStart;
 		let buildPlane;
-		buildPlane = function (interleaveData, indexData, u, v, w, udir, vdir, width, height, depth, gridX, gridY) {
+		buildPlane = function (interleaveData, indexData, u, v, w, udir, vdir, width, height, depth, gridX, gridY, uvSize) {
 			let segmentWidth = width / gridX;
 			let segmentHeight = height / gridY;
 			let widthHalf = width / 2, heightHalf = height / 2;
@@ -51,7 +51,7 @@ export default class Box extends baseGeometry{
 						interleaveData.push(vector.x, vector.y, vector.z), // position
 						vector[u] = 0, vector[v] = 0, vector[w] = depth > 0 ? 1 : -1,
 						interleaveData.push(vector.x, vector.y, vector.z), // normal
-						interleaveData.push(ix / gridX, (iy / gridY)), // texcoord
+						interleaveData.push(ix / gridX * uvSize, (iy / gridY * uvSize)), // texcoord
 						vertexCounter += 1; // counters
 				}
 			}
@@ -69,7 +69,7 @@ export default class Box extends baseGeometry{
 			groupStart += groupCount;
 			numberOfVertices += vertexCounter;
 		};
-		return function (redGPUContext, typeKey, width, height, depth, wSegments, hSegments, dSegments) {
+		return function (redGPUContext, typeKey, width, height, depth, wSegments, hSegments, dSegments, uvSize) {
 			////////////////////////////////////////////////////////////////////////////
 			// 데이터 생성!
 			// buffers Data
@@ -77,12 +77,12 @@ export default class Box extends baseGeometry{
 			let indexData = [];
 			numberOfVertices = 0;
 			groupStart = 0;
-			buildPlane(interleaveData, indexData, 'z', 'y', 'x', -1, -1, depth, height, width, dSegments, hSegments, 0); // px
-			buildPlane(interleaveData, indexData, 'z', 'y', 'x', 1, -1, depth, height, -width, dSegments, hSegments, 1); // nx
-			buildPlane(interleaveData, indexData, 'x', 'z', 'y', 1, 1, width, depth, height, wSegments, dSegments, 2); // py
-			buildPlane(interleaveData, indexData, 'x', 'z', 'y', 1, -1, width, depth, -height, wSegments, dSegments, 3); // ny
-			buildPlane(interleaveData, indexData, 'x', 'y', 'z', 1, -1, width, height, depth, wSegments, hSegments, 4); // pz
-			buildPlane(interleaveData, indexData, 'x', 'y', 'z', -1, -1, width, height, -depth, wSegments, hSegments, 5); // nz
+			buildPlane(interleaveData, indexData, 'z', 'y', 'x', -1, -1, depth, height, width, dSegments, hSegments, uvSize); // px
+			buildPlane(interleaveData, indexData, 'z', 'y', 'x', 1, -1, depth, height, -width, dSegments, hSegments, uvSize); // nx
+			buildPlane(interleaveData, indexData, 'x', 'z', 'y', 1, 1, width, depth, height, wSegments, dSegments, uvSize); // py
+			buildPlane(interleaveData, indexData, 'x', 'z', 'y', 1, -1, width, depth, -height, wSegments, dSegments, uvSize); // ny
+			buildPlane(interleaveData, indexData, 'x', 'y', 'z', 1, -1, width, height, depth, wSegments, hSegments, uvSize); // pz
+			buildPlane(interleaveData, indexData, 'x', 'y', 'z', -1, -1, width, height, -depth, wSegments, hSegments, uvSize); // nz
 			return new Geometry(
 				redGPUContext,
 				new Buffer(

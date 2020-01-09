@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.7 16:13:31
+ *   Last modification time of this file - 2020.1.9 14:4:9
  *
  */
 
@@ -15,14 +15,14 @@ import baseGeometry from "../base/baseGeometry.js";
 import glMatrix from "../base/gl-matrix-min.js";
 
 export default class Cylinder extends baseGeometry {
-	constructor(redGPUContext, radiusTop = 1, radiusBottom = 1, height = 1, radialSegments = 8, heightSegments = 1, openEnded = false, thetaStart = 0.0, thetaLength = Math.PI * 2) {
+	constructor(redGPUContext, radiusTop = 1, radiusBottom = 1, height = 1, radialSegments = 8, heightSegments = 1, openEnded = false, thetaStart = 0.0, thetaLength = Math.PI * 2, uvSize = 1) {
 		super();
 		let typeKey;
 		// 유일키 생성
 
-		typeKey = [this.constructor.name, redGPUContext, radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength].join('_');
+		typeKey = [this.constructor.name, redGPUContext, radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength,uvSize].join('_');
 		if (redGPUContext.state.Geometry.has(typeKey)) return redGPUContext.state.Geometry.get(typeKey);
-		let tData = this.#makeData(redGPUContext, typeKey, radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength);
+		let tData = this.#makeData(redGPUContext, typeKey, radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength,uvSize);
 		this.interleaveBuffer = tData['interleaveBuffer'];
 		this.indexBuffer = tData['indexBuffer'];
 		this.vertexState = tData['vertexState'];
@@ -34,7 +34,7 @@ export default class Cylinder extends baseGeometry {
 		let generateTorso;
 		let generateCap;
 		//TODO 정리
-		return function (redGPUContext, typeKey, radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength) {
+		return function (redGPUContext, typeKey, radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength,uvSize) {
 			////////////////////////////////////////////////////////////////////////////
 			// 데이터 생성!
 			// buffers Data
@@ -76,7 +76,7 @@ export default class Cylinder extends baseGeometry {
 						glMatrix.vec3.normalize(normal, normal);
 						interleaveData.push(normal[0], normal[1], normal[2]);
 						// uv
-						interleaveData.push(u, v);
+						interleaveData.push(u*uvSize, v*uvSize);
 						// save index of vertex in respective row
 						indexRow.push(index++);
 					}
@@ -118,7 +118,7 @@ export default class Cylinder extends baseGeometry {
 					// normal
 					interleaveData.push(0, sign, 0);
 					// uv
-					interleaveData.push(0.5, 0.5);
+					interleaveData.push(uvSize * 0.5, uvSize * 0.5);
 					// increase index
 					index++;
 				}
@@ -140,7 +140,7 @@ export default class Cylinder extends baseGeometry {
 					// uv
 					uv[0] = (cosTheta * 0.5) + 0.5;
 					uv[1] = (sinTheta * 0.5 * sign) + 0.5;
-					interleaveData.push(uv[0], 1 - uv[1]);
+					interleaveData.push(uv[0]*uvSize, uvSize - uv[1]*uvSize);
 					// increase index
 					index++;
 				}

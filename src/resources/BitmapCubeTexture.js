@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.3 15:45:13
+ *   Last modification time of this file - 2020.1.9 14:4:9
  *
  */
 "use strict";
@@ -53,7 +53,7 @@ export default class BitmapCubeTexture extends BaseTexture {
 		this.sampler = sampler || defaultSampler;
 		this.onload = onload;
 		this.onerror = onerror;
-		this.mapKey = srcList + useMipmap;
+		this.mapKey = srcList + useMipmap + this.sampler.string;
 		this.useMipmap = useMipmap;
 		if (!srcList) {
 			console.log('src')

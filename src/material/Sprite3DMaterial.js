@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.2 14:26:4
+ *   Last modification time of this file - 2020.1.9 14:4:9
  *
  */
 
@@ -114,7 +114,10 @@ export default class Sprite3DMaterial extends Mix.mix(
 					size: this.uniformBufferDescriptor_fragment.size
 				}
 			},
-			{binding: 1, resource: this.sampler.GPUSampler},
+			{
+				binding: 1,
+				resource: this._diffuseTexture ? this._diffuseTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
+			},
 			{
 				binding: 2,
 				resource: this._diffuseTexture ? this._diffuseTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
@@ -122,4 +125,4 @@ export default class Sprite3DMaterial extends Mix.mix(
 		];
 		this._afterResetBindingInfo();
 	}
-}
+	}

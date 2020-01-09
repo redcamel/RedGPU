@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.7 16:13:31
+ *   Last modification time of this file - 2020.1.9 14:4:9
  *
  */
 
@@ -12,15 +12,15 @@ import Geometry from "../geometry/Geometry.js";
 import InterleaveInfo from "../geometry/InterleaveInfo.js";
 import RedGPUContext from "../RedGPUContext.js";
 import baseGeometry from "../base/baseGeometry.js";
-import glMatrix from "../base/gl-matrix-min.js";
-export default class Plane extends baseGeometry{
-	constructor(redGPUContext, width = 1, height = 1, wSegments = 1, hSegments = 1, flipY = false) {
+
+export default class Plane extends baseGeometry {
+	constructor(redGPUContext, width = 1, height = 1, wSegments = 1, hSegments = 1, uvSize = 1, flipY = false) {
 		super();
 		let typeKey;
 		// 유일키 생성
-		typeKey = [this.constructor.name, width, height, wSegments, hSegments].join('_');
+		typeKey = [this.constructor.name, width, height, wSegments, hSegments, uvSize, flipY].join('_');
 		if (redGPUContext.state.Geometry.has(typeKey)) return redGPUContext.state.Geometry.get(typeKey);
-		let tData = this.#makeData(redGPUContext, typeKey, width, height, wSegments, hSegments);
+		let tData = this.#makeData(redGPUContext, typeKey, width, height, wSegments, hSegments, uvSize, flipY);
 		this.interleaveBuffer = tData['interleaveBuffer'];
 		this.indexBuffer = tData['indexBuffer'];
 		this.vertexState = tData['vertexState'];
@@ -36,7 +36,7 @@ export default class Plane extends baseGeometry{
 		let ix, iy;
 		let tX, tY;
 		let a, b, c, d;
-		return function (redGPUContext, typeKey, width, height, wSegments, hSegments, flipY) {
+		return function (redGPUContext, typeKey, width, height, wSegments, hSegments, uvSize, flipY) {
 			width_half = width / 2;
 			height_half = height / 2;
 			gridX = Math.floor(wSegments) || 1;
@@ -56,7 +56,7 @@ export default class Plane extends baseGeometry{
 				for (ix = 0; ix < gridX1; ix++) {
 					tX = ix * segment_width - width_half;
 					// position, normal, texcoord
-					interleaveData.push(tX, -tY, 0, 0, 0, 1, ix / gridX, flipY ? (1 - (iy / gridY)) : (iy / gridY));
+					interleaveData.push(tX, -tY, 0, 0, 0, 1, ix / gridX * uvSize, (flipY ? (1 - (iy / gridY)) : (iy / gridY)) * uvSize);
 				}
 			}
 			// indexData
