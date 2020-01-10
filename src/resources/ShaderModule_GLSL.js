@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.3 15:45:13
+ *   Last modification time of this file - 2020.1.10 20:9:14
  *
  */
 import RedGPUContext from "../RedGPUContext.js";
@@ -41,8 +41,8 @@ export default class ShaderModule_GLSL {
 		this.shaderModuleMap = shaderModuleMap[type][className];
 		if (!checkMap) {
 			let tOptionList = materialClass.PROGRAM_OPTION_LIST[type];
-			console.log('type', type);
-			console.log(`materialClass.PROGRAM_OPTION_LIST - ${className}`, tOptionList.length, tOptionList);
+			// console.log('type', type);
+			// console.log(`materialClass.PROGRAM_OPTION_LIST - ${className}`, tOptionList.length, tOptionList);
 			if (tOptionList.length) {
 				RedGPUWorker.glslParserWorker(this, className, this.originSource, this.type, tOptionList).then(
 					e => {

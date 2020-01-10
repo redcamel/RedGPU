@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.2 21:31:8
+ *   Last modification time of this file - 2020.1.10 20:9:14
  *
  */
 "use strict";
@@ -48,13 +48,13 @@ export default class TextureLoader extends UUID {
 			t0.texture = new targetClass(
 				redGPUContext, tSrc, tSampler, true,
 				function (e) {
-					console.log('onload', this);
+					// console.log('onload', this);
 					t0.loadSuccess = true;
 					t0.loadEnd = true;
 					check();
 				},
 				function (e) {
-					console.log('onerror', this, e);
+					// console.log('onerror', this, e);
 					t0.loadSuccess = false;
 					t0.loadEnd = true;
 					check();
