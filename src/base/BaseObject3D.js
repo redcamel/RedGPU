@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.10 17:54:42
+ *   Last modification time of this file - 2020.1.10 21:21:4
  *
  */
 
@@ -108,13 +108,25 @@ export default class BaseObject3D extends DisplayContainer {
 	get renderDrawLayerIndex() {return this._renderDrawLayerIndex;}
 	set renderDrawLayerIndex(value) {this._renderDrawLayerIndex = value;}
 	get blendColorSrc() {return this._blendColorSrc;}
-	set blendColorSrc(value) {this._blendColorSrc = value;this.dirtyPipeline = true;}
+	set blendColorSrc(value) {
+		this._blendColorSrc = value;
+		this.dirtyPipeline = true;
+	}
 	get blendColorDst() {return this._blendColorDst;}
-	set blendColorDst(value) {this._blendColorDst = value;this.dirtyPipeline = true;}
+	set blendColorDst(value) {
+		this._blendColorDst = value;
+		this.dirtyPipeline = true;
+	}
 	get blendAlphaDst() {return this._blendAlphaDst;}
-	set blendAlphaDst(value) {this._blendAlphaDst = value;this.dirtyPipeline = true;}
+	set blendAlphaDst(value) {
+		this._blendAlphaDst = value;
+		this.dirtyPipeline = true;
+	}
 	get blendAlphaSrc() {return this._blendAlphaSrc;}
-	set blendAlphaSrc(value) {this._blendAlphaSrc = value;this.dirtyPipeline = true;}
+	set blendAlphaSrc(value) {
+		this._blendAlphaSrc = value;
+		this.dirtyPipeline = true;
+	}
 	get x() {return this._x}
 	set x(v) {
 		this._x = v;
@@ -263,9 +275,7 @@ export default class BaseObject3D extends DisplayContainer {
 	/////////////////////////////////////////////////////////
 	addEventListener(type, handler) {
 		if (!MouseEventChecker.mouseMAP[this.#mouseColorID]) {
-			MouseEventChecker.mouseMAP[this.#mouseColorID] = {
-				target: this
-			}
+			MouseEventChecker.mouseMAP[this.#mouseColorID] = {target: this}
 		}
 		MouseEventChecker.mouseMAP[this.#mouseColorID][type] = handler;
 		// console.log(MouseEventChecker.mouseMAP)
@@ -300,15 +310,34 @@ export default class BaseObject3D extends DisplayContainer {
 		let tMTX;
 		tMTX = glMatrix.mat4.create();
 		return function (x = 0, y = 0, z = 0) {
-			typeof x == 'number' || UTIL.throwFunc('RedBaseObject3D - localToWorld : x - number만 허용함', '입력값 : ', x);
-			typeof y == 'number' || UTIL.throwFunc('RedBaseObject3D - localToWorld : y - number만 허용함', '입력값 : ', y);
-			typeof z == 'number' || UTIL.throwFunc('RedBaseObject3D - localToWorld : z - number만 허용함', '입력값 : ', z);
+			typeof x == 'number' || UTIL.throwFunc('BaseObject3D - localToWorld : x - number만 허용함', '입력값 : ', x);
+			typeof y == 'number' || UTIL.throwFunc('BaseObject3D - localToWorld : y - number만 허용함', '입력값 : ', y);
+			typeof z == 'number' || UTIL.throwFunc('BaseObject3D - localToWorld : z - number만 허용함', '입력값 : ', z);
 			tMTX[0] = 1, tMTX[1] = 0, tMTX[2] = 0, tMTX[3] = 0;
 			tMTX[4] = 0, tMTX[5] = 1, tMTX[6] = 0, tMTX[7] = 0;
 			tMTX[8] = 0, tMTX[9] = 0, tMTX[10] = 1, tMTX[11] = 0;
 			tMTX[12] = x, tMTX[13] = y, tMTX[14] = z, tMTX[15] = 1;
 			glMatrix.mat4.multiply(tMTX, this.matrix, tMTX);
 			return [tMTX[12], tMTX[13], tMTX[14]]
+		}
+	})();
+	worldToLocal = (_ => {
+		var tMTX, resultMTX;
+		tMTX = glMatrix.mat4.create();
+		resultMTX = glMatrix.mat4.create();
+		return function (x = 0, y = 0, z = 0) {
+			typeof x == 'number' || UTIL.throwFunc('BaseObject3D - worldToLocal : x - number만 허용함', '입력값 : ', x);
+			typeof y == 'number' || UTIL.throwFunc('BaseObject3D - worldToLocal : y - number만 허용함', '입력값 : ', y);
+			typeof z == 'number' || UTIL.throwFunc('BaseObject3D - worldToLocal : z - number만 허용함', '입력값 : ', z);
+			glMatrix.mat4.invert(tMTX, this.matrix);
+			glMatrix.mat4.transpose(tMTX, tMTX);
+
+			glMatrix.mat4.multiply(resultMTX, tMTX, this.matrix);
+			return [
+				resultMTX[0] * x + resultMTX[1] * y + resultMTX[2] * z + resultMTX[3],
+				resultMTX[4] * x + resultMTX[5] * y + resultMTX[6] * z + resultMTX[7],
+				resultMTX[8] * x + resultMTX[9] * y + resultMTX[10] * z + resultMTX[11]
+			]
 		}
 	})();
 	getScreenPoint = (_ => {
@@ -324,7 +353,7 @@ export default class BaseObject3D extends DisplayContainer {
 			tPositionMTX[4] = 0, tPositionMTX[5] = 1, tPositionMTX[6] = 0, tPositionMTX[7] = 0;
 			tPositionMTX[8] = 0, tPositionMTX[9] = 0, tPositionMTX[10] = 1, tPositionMTX[11] = 0;
 			tPositionMTX[12] = worldPosition[0], tPositionMTX[13] = worldPosition[1], tPositionMTX[14] = worldPosition[2], tPositionMTX[15] = 1;
-			redView instanceof View || UTIL.throwFunc('RedBaseObject3D - getScreenPoint : redView - RedView Instance 만 허용함', '입력값 : ', redView);
+			redView instanceof View || UTIL.throwFunc('BaseObject3D - getScreenPoint : redView - RedView Instance 만 허용함', '입력값 : ', redView);
 			tCamera = redView.camera;
 			tViewRect = redView.viewRect;
 			glMatrix.mat4.multiply(tMTX, redView.projectionMatrix, tCamera.matrix);
