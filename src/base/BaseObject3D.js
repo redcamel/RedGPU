@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.8 18:27:58
+ *   Last modification time of this file - 2020.1.10 17:54:42
  *
  */
 
@@ -108,13 +108,13 @@ export default class BaseObject3D extends DisplayContainer {
 	get renderDrawLayerIndex() {return this._renderDrawLayerIndex;}
 	set renderDrawLayerIndex(value) {this._renderDrawLayerIndex = value;}
 	get blendColorSrc() {return this._blendColorSrc;}
-	set blendColorSrc(value) {this._blendColorSrc = value;}
+	set blendColorSrc(value) {this._blendColorSrc = value;this.dirtyPipeline = true;}
 	get blendColorDst() {return this._blendColorDst;}
-	set blendColorDst(value) {this._blendColorDst = value;}
+	set blendColorDst(value) {this._blendColorDst = value;this.dirtyPipeline = true;}
 	get blendAlphaDst() {return this._blendAlphaDst;}
-	set blendAlphaDst(value) {this._blendAlphaDst = value;}
+	set blendAlphaDst(value) {this._blendAlphaDst = value;this.dirtyPipeline = true;}
 	get blendAlphaSrc() {return this._blendAlphaSrc;}
-	set blendAlphaSrc(value) {this._blendAlphaSrc = value;}
+	set blendAlphaSrc(value) {this._blendAlphaSrc = value;this.dirtyPipeline = true;}
 	get x() {return this._x}
 	set x(v) {
 		this._x = v;
