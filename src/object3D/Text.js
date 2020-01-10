@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.9 16:3:38
+ *   Last modification time of this file - 2020.1.10 20:10:29
  *
  */
 
@@ -123,7 +123,7 @@ export default class Text extends BaseObject3D {
 				new BitmapTexture(redGPUContext, URL.createObjectURL(v), {
 					magFilter: "linear",
 					minFilter: "linear",
-					mipmapFilter: "nearest",
+					mipmapFilter: "linear",
 					addressModeU: "clamp-to-edge",
 					addressModeV: "clamp-to-edge",
 					addressModeW: "repeat"

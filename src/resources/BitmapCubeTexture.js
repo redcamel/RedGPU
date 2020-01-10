@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.9 14:4:9
+ *   Last modification time of this file - 2020.1.10 20:9:14
  *
  */
 "use strict";
@@ -60,7 +60,7 @@ export default class BitmapCubeTexture extends BaseTexture {
 		} else {
 			let self = this;
 			new ImageLoader(redGPUContext, srcList, function (e) {
-				console.log(MIPMAP_TABLE.get(self.mapKey));
+				// console.log(MIPMAP_TABLE.get(self.mapKey));
 				if (MIPMAP_TABLE.get(self.mapKey)) {
 					console.log('BitmapCubeTexture - 캐싱사용', e);
 					self.resolve(MIPMAP_TABLE.get(self.mapKey));

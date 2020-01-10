@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.10 17:50:10
+ *   Last modification time of this file - 2020.1.10 20:9:14
  *
  */
 "use strict"
@@ -29,7 +29,7 @@ new RedGPU.RedGPUContext(
 		// Mesh setup
 		let tMesh, tGeometry, tMaterial;
 		tGeometry = new RedGPU.Sphere(this, 1, 32, 32, 32);
-		tMaterial = new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this, '../../../assets/Brick03_col.jpg'));
+		tMaterial = new RedGPU.ColorMaterial(this);
 		tMesh = new RedGPU.Mesh(
 			this,
 			tGeometry,
@@ -65,7 +65,6 @@ new RedGPU.RedGPUContext(
 		requestAnimationFrame(render);
 
 		// TestUI setup
-		ExampleHelper.setTestUI_BitmapMaterial(RedGPU, this, tMaterial, true);
 		ExampleHelper.setTestUI_Debugger(RedGPU);
 	}
 );
