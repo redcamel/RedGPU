@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.9 17:58:24
+ *   Last modification time of this file - 2020.1.10 21:59:8
  *
  */
 
@@ -40,6 +40,41 @@ const ExampleHelper = (_ => {
 		t0.innerHTML = `This project is maintained by <a href="https://github.com/redcamel/">RedCamel</a>`;
 		t0.style.cssText = `margin-top:20px; font-size : 10px; color : #b19898; padding-left: 32px`;
 		t0.appendChild(setGithubLogo())
+
+		// makeSourceView
+		t0 = document.createElement('link');
+		t0.setAttribute('rel', 'stylesheet');
+		t0.setAttribute('href', 'https://redcamel.github.io/Recard/beta/lib/prism.css');
+		document.head.appendChild(t0);
+		t0 = document.createElement('script');
+		t0.setAttribute('src', 'https://redcamel.github.io/Recard/beta/lib/prism.js');
+		document.head.appendChild(t0);
+		let rootBox;
+		let sourceViewBt;
+		document.body.appendChild(rootBox = document.createElement('div'));
+		document.body.appendChild(sourceViewBt = document.createElement('button'));
+		rootBox.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:#2b2b2b;z-index:10001;display:none;color:#fff;font-size:12px;overflow-y:auto;padding:10px;';
+		rootBox.className = 'sourceView'
+		sourceViewBt.style.cssText = 'position:fixed;right:10px;bottom:10px;background:#111;color:#fff;z-index:10002;border:0;outline:none;cursor:pointer;padding:8px;font-size:11px;border-radius:5px';
+		sourceViewBt.innerHTML = 'SOURCE VIEW';
+		sourceViewBt.addEventListener('click', function () {
+			if (rootBox.style.display == 'block') {
+				rootBox.style.display = 'none';
+				sourceViewBt.innerHTML = 'SOURCE VIEW';
+			} else {
+				sourceViewBt.innerHTML = 'CLOSE';
+				rootBox.style.display = 'block';
+				{
+					fetch(location.pathname.replace('html','js')).then(response=>response.text()).then(v=>{
+						rootBox.innerHTML = '<code class="language-javascript">' + Prism.highlight(v, Prism.languages.javascript) + '</code>'
+					})
+
+				}
+
+			}
+		});
+
+
 	};
 	const setGithubLogo = _ => {
 		let t0;
