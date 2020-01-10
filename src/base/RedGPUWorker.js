@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.27 19:6:22
+ *   Last modification time of this file - 2020.1.10 17:50:10
  *
  */
 
@@ -12,6 +12,7 @@ function createWorker(f) {
 }
 
 const workerImage = createWorker(async () => {
+	"use strict";
 	/////////////////////////////////////////////////////////////////////////////
 	let getImage = (_ => {
 		let nextHighestPowerOfTwo = (function () {
@@ -37,7 +38,7 @@ const workerImage = createWorker(async () => {
 					if (!response.ok) throw Error('error');
 					else {
 						response.blob()
-							.then(blob => createImageBitmap(blob))
+							.then(blob => self.createImageBitmap(blob))
 							.then(bitmap => {
 								let faceWidth = nextHighestPowerOfTwo(bitmap.width);
 								let faceHeight = nextHighestPowerOfTwo(bitmap.height);
@@ -99,6 +100,7 @@ const workerImage = createWorker(async () => {
 	});
 });
 const workerGLSLCompile = createWorker(async () => {
+	"use strict";
 	let glslangModule = await import(/* webpackIgnore: true */ 'https://unpkg.com/@webgpu/glslang@0.0.12/dist/web-devel/glslang.js');
 	let glslang = await glslangModule.default();
 	let combinations = (_ => {

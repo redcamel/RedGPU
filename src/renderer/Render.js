@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.9 16:3:38
+ *   Last modification time of this file - 2020.1.10 17:50:10
  *
  */
 
@@ -69,6 +69,7 @@ let renderScene = (_ => {
 				tPipeline = tMesh.pipeline;
 				tSkinInfo = tMesh.skinInfo;
 				tMVMatrix = tMesh.matrix;
+				tMaterialChanged = 0;
 
 				currentDebuggerData['object3DNum']++;
 				if (tMaterial) {
@@ -94,6 +95,7 @@ let renderScene = (_ => {
 						}
 					}
 					tVisible = 1;
+					let needRenderCheck = false;
 					if (renderDrawLayerIndexMode == Render.DRAW_LAYER_INDEX0 && tMesh._renderDrawLayerIndex == Render.DRAW_LAYER_INDEX1) {
 						renderDrawLayerIndexList.push(tMesh)
 					} else {
@@ -106,80 +108,57 @@ let renderScene = (_ => {
 								targetText: tMesh
 							})
 						} else {
-							if (redView._useFrustumCulling) {
-								geoVolume = tGeometry._volume || tGeometry.volume;
-								radius = geoVolume.xSize * tMesh.matrix[0];
-								radiusTemp = geoVolume.ySize * tMesh.matrix[5];
-								radius = radius < radiusTemp ? radiusTemp : radius;
-								radiusTemp = geoVolume.zSize * tMesh.matrix[10];
-								radius = radius < radiusTemp ? radiusTemp : radius;
-
-								a00 = tMVMatrix[12], a01 = tMVMatrix[13], a02 = tMVMatrix[14],
-
-									frustumPlanes0[0] * a00 + frustumPlanes0[1] * a01 + frustumPlanes0[2] * a02 + frustumPlanes0[3] <= -radius ? tVisible = 0
-										: frustumPlanes1[0] * a00 + frustumPlanes1[1] * a01 + frustumPlanes1[2] * a02 + frustumPlanes1[3] <= -radius ? tVisible = 0
-										: frustumPlanes2[0] * a00 + frustumPlanes2[1] * a01 + frustumPlanes2[2] * a02 + frustumPlanes2[3] <= -radius ? tVisible = 0
-											: frustumPlanes3[0] * a00 + frustumPlanes3[1] * a01 + frustumPlanes3[2] * a02 + frustumPlanes3[3] <= -radius ? tVisible = 0
-												: frustumPlanes4[0] * a00 + frustumPlanes4[1] * a01 + frustumPlanes4[2] * a02 + frustumPlanes4[3] <= -radius ? tVisible = 0
-													: frustumPlanes5[0] * a00 + frustumPlanes5[1] * a01 + frustumPlanes5[2] * a02 + frustumPlanes5[3] <= -radius ? tVisible = 0 : 0
-							}
-							// console.log(tVisible);
-							///////////////////////////////////////
-							if (tVisible) {
-								passEncoder.setPipeline(tPipeline.GPURenderPipeline);
-								if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
-									passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
-									prevVertexBuffer_UUID = tGeometry.interleaveBuffer._UUID
-								}
-								passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹는 매그룹마다 다르니 또 업데이트 해줘야함 -_-
-								if (prevMaterial_UUID != tMaterial._UUID) {
-									passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
-									prevMaterial_UUID = tMaterial._UUID
-								}
-								if (tGeometry.indexBuffer) {
-									if (prevIndexBuffer_UUID != tGeometry.indexBuffer._UUID) {
-										passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
-										prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
-									}
-									passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
-									currentDebuggerData['triangleNum'] += tGeometry.indexBuffer.indexNum / 3
-								} else {
-									passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
-									currentDebuggerData['triangleNum'] += tGeometry.interleaveBuffer.data.length / tGeometry.interleaveBuffer.stride
-								}
-								currentDebuggerData['drawCallNum']++
-							}
-							tMesh._prevMaterialUUID = tMaterial._UUID;
+							needRenderCheck = true
 						}
 
 					}
+					if(needRenderCheck || renderDrawLayerIndexMode){
+						if (redView._useFrustumCulling) {
+							geoVolume = tGeometry._volume || tGeometry.volume;
+							radius = geoVolume.xSize * tMesh.matrix[0];
+							radiusTemp = geoVolume.ySize * tMesh.matrix[5];
+							radius = radius < radiusTemp ? radiusTemp : radius;
+							radiusTemp = geoVolume.zSize * tMesh.matrix[10];
+							radius = radius < radiusTemp ? radiusTemp : radius;
 
-					if (renderDrawLayerIndexMode) {
-						passEncoder.setPipeline(tPipeline.GPURenderPipeline);
-						if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
-							passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
-							prevVertexBuffer_UUID = tGeometry.interleaveBuffer._UUID
+							a00 = tMVMatrix[12], a01 = tMVMatrix[13], a02 = tMVMatrix[14],
+
+								frustumPlanes0[0] * a00 + frustumPlanes0[1] * a01 + frustumPlanes0[2] * a02 + frustumPlanes0[3] <= -radius ? tVisible = 0
+									: frustumPlanes1[0] * a00 + frustumPlanes1[1] * a01 + frustumPlanes1[2] * a02 + frustumPlanes1[3] <= -radius ? tVisible = 0
+									: frustumPlanes2[0] * a00 + frustumPlanes2[1] * a01 + frustumPlanes2[2] * a02 + frustumPlanes2[3] <= -radius ? tVisible = 0
+										: frustumPlanes3[0] * a00 + frustumPlanes3[1] * a01 + frustumPlanes3[2] * a02 + frustumPlanes3[3] <= -radius ? tVisible = 0
+											: frustumPlanes4[0] * a00 + frustumPlanes4[1] * a01 + frustumPlanes4[2] * a02 + frustumPlanes4[3] <= -radius ? tVisible = 0
+												: frustumPlanes5[0] * a00 + frustumPlanes5[1] * a01 + frustumPlanes5[2] * a02 + frustumPlanes5[3] <= -radius ? tVisible = 0 : 0
 						}
-						passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹는 매그룹마다 다르니 또 업데이트 해줘야함 -_-
-						if (prevMaterial_UUID != tMaterial._UUID) {
-							passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
-							prevMaterial_UUID = tMaterial._UUID
-						}
-						if (tGeometry.indexBuffer) {
-							if (prevIndexBuffer_UUID != tGeometry.indexBuffer._UUID) {
-								passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
-								prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
+						// console.log(tVisible);
+						///////////////////////////////////////
+						if (tVisible) {
+							passEncoder.setPipeline(tPipeline.GPURenderPipeline);
+							if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
+								passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
+								prevVertexBuffer_UUID = tGeometry.interleaveBuffer._UUID
 							}
-							passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
-							currentDebuggerData['triangleNum'] += tGeometry.indexBuffer.indexNum / 3
-						} else {
-							passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
-							currentDebuggerData['triangleNum'] += tGeometry.interleaveBuffer.data.length / tGeometry.interleaveBuffer.stride
+							passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹는 매그룹마다 다르니 또 업데이트 해줘야함 -_-
+							if (prevMaterial_UUID != tMaterial._UUID) {
+								passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
+								prevMaterial_UUID = tMaterial._UUID
+							}
+							if (tGeometry.indexBuffer) {
+								if (prevIndexBuffer_UUID != tGeometry.indexBuffer._UUID) {
+									passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
+									prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
+								}
+								passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
+								currentDebuggerData['triangleNum'] += tGeometry.indexBuffer.indexNum / 3
+							} else {
+								passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
+								currentDebuggerData['triangleNum'] += tGeometry.interleaveBuffer.data.length / tGeometry.interleaveBuffer.stride
+							}
+							currentDebuggerData['drawCallNum']++
 						}
-						currentDebuggerData['drawCallNum']++
-
-
+						tMesh._prevMaterialUUID = tMaterial._UUID;
 					}
+
 
 					// materialPropertyCheck
 					////////////////////////
