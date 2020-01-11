@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.10 21:59:8
+ *   Last modification time of this file - 2020.1.11 18:20:56
  *
  */
 
@@ -19,6 +19,9 @@ const ExampleHelper = (_ => {
 			containerUI = document.createElement('div');
 			containerUI.style.cssText = `
 				position : fixed; top : 0; right : 0;
+				z-index:20;
+				height:100%;
+				overflow-y:auto;
 				white - space : nowrap;
 			`;
 			document.body.appendChild(containerUI);
@@ -53,9 +56,9 @@ const ExampleHelper = (_ => {
 		let sourceViewBt;
 		document.body.appendChild(rootBox = document.createElement('div'));
 		document.body.appendChild(sourceViewBt = document.createElement('button'));
-		rootBox.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:#2b2b2b;z-index:10001;display:none;color:#fff;font-size:12px;overflow-y:auto;padding:10px;';
+		rootBox.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:#2b2b2b;z-index:10;display:none;color:#fff;font-size:12px;overflow-y:auto;padding:10px;';
 		rootBox.className = 'sourceView'
-		sourceViewBt.style.cssText = 'position:fixed;right:10px;bottom:10px;background:#111;color:#fff;z-index:10002;border:0;outline:none;cursor:pointer;padding:8px;font-size:11px;border-radius:5px';
+		sourceViewBt.style.cssText = 'position:fixed;right:10px;bottom:10px;background:#111;color:#fff;z-index:11;border:0;outline:none;cursor:pointer;padding:8px;font-size:11px;border-radius:5px';
 		sourceViewBt.innerHTML = 'SOURCE VIEW';
 		sourceViewBt.addEventListener('click', function () {
 			if (rootBox.style.display == 'block') {
@@ -65,7 +68,7 @@ const ExampleHelper = (_ => {
 				sourceViewBt.innerHTML = 'CLOSE';
 				rootBox.style.display = 'block';
 				{
-					fetch(location.pathname.replace('html','js')).then(response=>response.text()).then(v=>{
+					fetch(location.pathname.replace('html', 'js')).then(response => response.text()).then(v => {
 						rootBox.innerHTML = '<code class="language-javascript">' + Prism.highlight(v, Prism.languages.javascript) + '</code>'
 					})
 
@@ -275,7 +278,7 @@ const ExampleHelper = (_ => {
 		checkGUI();
 		const testData = {useDebugger: false};
 		testHelperFolder.add(testData, 'useDebugger').onChange(v => {
-			RedGPU.Debugger.visible(v, RedGPU.Debugger.RIGHT_BOTTOM)
+			RedGPU.Debugger.visible(v, RedGPU.Debugger.LEFT_TOP)
 		})
 	};
 	const setTestUI_PrimitivePlane = (RedGPU, redGPUContext, tMesh, open, gui) => {
@@ -582,7 +585,7 @@ const ExampleHelper = (_ => {
 	let setTestUI_BitmapMaterial, setTestUI_SpriteSheetMaterial, setTestUI_StandardMaterial,
 		setTestUI_EnvironmentMaterial, setTestUI_RefractionMaterial;
 	let setTestUI_BitmapTexture;
-
+	let setTestUI_PostEffect;
 	{
 		let makeColorProperty, makeBaseLightProperty;
 		let makeTextureProperty;
@@ -750,6 +753,126 @@ const ExampleHelper = (_ => {
 			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'emissiveTexture', `${assetPath}emissive.jpg`);
 			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'displacementTexture', `${assetPath}Brick03_disp.jpg`);
 		}
+		setTestUI_PostEffect = (RedGPU, redGPUContext, view, open, gui) => {
+
+			checkGUI();
+			gui = gui || testHelperFolder;
+			let rootFolder, folder;
+			rootFolder = gui.addFolder('PostEffect');
+			if (open) rootFolder.open();
+			let effectList;
+			effectList = {
+				PostEffect_Bloom: new RedGPU.PostEffect_Bloom(redGPUContext),
+				PostEffect_DoF: new RedGPU.PostEffect_DoF(redGPUContext),
+				PostEffect_BrightnessContrast: new RedGPU.PostEffect_BrightnessContrast(redGPUContext),
+				PostEffect_Gray: new RedGPU.PostEffect_Gray(redGPUContext),
+				PostEffect_HueSaturation: new RedGPU.PostEffect_HueSaturation(redGPUContext),
+				PostEffect_Invert: new RedGPU.PostEffect_Invert(redGPUContext),
+				PostEffect_Threshold: new RedGPU.PostEffect_Threshold(redGPUContext),
+				PostEffect_Blur: new RedGPU.PostEffect_Blur(redGPUContext),
+				PostEffect_BlurX: new RedGPU.PostEffect_BlurX(redGPUContext),
+				PostEffect_BlurY: new RedGPU.PostEffect_BlurY(redGPUContext),
+				PostEffect_ZoomBlur: new RedGPU.PostEffect_ZoomBlur(redGPUContext),
+				PostEffect_GaussianBlur: new RedGPU.PostEffect_GaussianBlur(redGPUContext),
+				PostEffect_Pixelize: new RedGPU.PostEffect_Pixelize(redGPUContext),
+				PostEffect_HalfTone: new RedGPU.PostEffect_HalfTone(redGPUContext),
+				PostEffect_Convolution: new RedGPU.PostEffect_Convolution(redGPUContext,  RedGPU.PostEffect_Convolution['EMBOSS']),
+				PostEffect_Vignetting: new RedGPU.PostEffect_Vignetting(redGPUContext),
+				PostEffect_Film: new RedGPU.PostEffect_Film(redGPUContext),
+			}
+			let testData = function () {
+				for (let k in effectList) this[k] = false
+			}
+			testData = new testData()
+			let initPostEffect= (tName, effect, open, view)=> {
+				var tFolder;
+				if (tName) tFolder = rootFolder.addFolder(tName);
+				switch (tName) {
+					case 'PostEffect_Convolution':
+						let testData = {
+							kernel : 'EMBOSS'
+						}
+						tFolder.add(testData, 'kernel',['NORMAL','SHARPEN','BLUR','EDGE','EMBOSS']).onChange(v=>{
+							effect.kernel = RedGPU.PostEffect_Convolution[v]
+						});
+						break;
+					case 'PostEffect_BrightnessContrast':
+						tFolder.add(effect, 'brightness', -150, 150);
+						tFolder.add(effect, 'contrast', -50, 100);
+						break;
+					case 'PostEffect_HueSaturation':
+						tFolder.add(effect, 'hue', -180, 180);
+						tFolder.add(effect, 'saturation', -100, 100);
+						break;
+					case 'PostEffect_Threshold':
+						tFolder.add(effect, 'threshold', 1, 255);
+						break;
+					case 'PostEffect_Vignetting':
+						tFolder.add(effect, 'size', 0, 1);
+						tFolder.add(effect, 'intensity', 0, 2);
+						break;
+					case 'PostEffect_BlurX':
+						tFolder.add(effect, 'size', 0, 100, 0.01);
+						break;
+					case 'PostEffect_BlurY':
+						tFolder.add(effect, 'size', 0, 100, 0.01);
+						break;
+					case 'PostEffect_GaussianBlur':
+						tFolder.add(effect, 'radius', 0.1, 250, 0.01);
+						break;
+					case 'PostEffect_ZoomBlur':
+						tFolder.add(effect, 'amount', 0, 100, 0.01);
+						tFolder.add(effect, 'centerX', -1, 1, 0.01);
+						tFolder.add(effect, 'centerY', -1, 1, 0.01);
+						break;
+					case 'PostEffect_HalfTone':
+						tFolder.add(effect, 'centerX', -1, 1, 0.01);
+						tFolder.add(effect, 'centerY', -1, 1, 0.01);
+						tFolder.add(effect, 'radius', 0, 25, 0.01);
+						tFolder.add(effect, 'angle', 0, 360, 0.01);
+						tFolder.add(effect, 'grayMode')
+						break;
+					case 'PostEffect_Pixelize':
+						tFolder.add(effect, 'width', 0, 50, 0.01);
+						tFolder.add(effect, 'height', 0, 50, 0.01);
+						break;
+					case 'PostEffect_DoF':
+						tFolder.add(effect, 'blur', 0, 100, 0.01);
+						tFolder.add(effect, 'focusLength', 0, 100, 0.01);
+						break;
+					case 'PostEffect_Bloom':
+						tFolder.add(effect, 'blur', 0, 100);
+						tFolder.add(effect, 'exposure', 0, 5);
+						tFolder.add(effect, 'bloomStrength', 0, 5);
+						tFolder.add(effect, 'threshold', 1, 255);
+						break;
+					case 'PostEffect_Film':
+						tFolder.add(effect, 'scanlineIntensity', -1, 1, 0.01);
+						tFolder.add(effect, 'noiseIntensity', 0, 1, 0.01);
+						tFolder.add(effect, 'scanlineCount', 0, 4096);
+						tFolder.add(effect, 'grayMode');
+						break;
+				}
+				if (tFolder && open) tFolder.open();
+				return tFolder
+
+			}
+			for (let k in testData) {
+				(function () {
+					let tFolder = initPostEffect(k, effectList[k], true);
+					document.body.style.background=''
+					console.log(tFolder)
+					tFolder.add(testData, k).name('use ' + k.replace('PostEffect_', '')).onChange((function () {
+						let tEffect = effectList[k]
+						return function (v) {
+							if (v) view.postEffect.addEffect(tEffect)
+							else view.postEffect.removeEffect(tEffect)
+						}
+					})());
+				})();
+
+			}
+		}
 	}
 	setTestUI_BitmapTexture = (RedGPU, redGPUContext, material, open, gui) => {
 		checkGUI();
@@ -857,7 +980,9 @@ const ExampleHelper = (_ => {
 		setTestUI_RefractionMaterial: setTestUI_RefractionMaterial,
 		setTestUI_SpriteSheetMaterial: setTestUI_SpriteSheetMaterial,
 		//
-		setTestUI_BitmapTexture: setTestUI_BitmapTexture
+		setTestUI_BitmapTexture: setTestUI_BitmapTexture,
+		//
+		setTestUI_PostEffect: setTestUI_PostEffect
 	};
 })();
 

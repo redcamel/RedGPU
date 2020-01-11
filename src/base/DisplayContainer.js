@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 18:50:31
+ *   Last modification time of this file - 2020.1.11 18:20:56
  *
  */
 
@@ -32,7 +32,7 @@ export default class DisplayContainer extends UUID {
 		else this.children.push(child);
 	}
 	removeChild(child) {
-		if (this.children.includes(child)) this.children.splice(t0, 1);
+		if (this.children.includes(child)) this.children.splice(this.children.indexOf(child), 1);
 		else UTIL.throwFunc(`removeChild - Attempt to delete an object that does not exist. - inputValue : ${child} { type : ${typeof child} }`);
 	}
 	removeChildAt(index) {
