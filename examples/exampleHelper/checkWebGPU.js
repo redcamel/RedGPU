@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.8 11:31:26
+ *   Last modification time of this file - 2020.1.11 19:10:14
  *
  */
 'use strict'
@@ -31,7 +31,7 @@ var CheckWebGPU = {
 					}
 				})());
 			} else {
-				alert('WebGPU를 지원하지 않음')
+				alert('WebGPU not supported!. Use the latest version of Chrome Canary.')
 			}
 		}
 	})()
