@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.2 21:31:8
+ *   Last modification time of this file - 2020.1.11 19:7:38
  *
  */
 
@@ -91,7 +91,7 @@ export default class PostEffect_Film extends BasePostEffect {
 	_scanlineIntensity = 0.5;
 	_noiseIntensity = 0.5;
 	_scanlineCount = 2048;
-	_grayMode = 0.0;
+	_grayMode = false;
 	get scanlineIntensity() {return this._scanlineIntensity;}
 	set scanlineIntensity(value) {
 		this._scanlineIntensity = value;
@@ -112,8 +112,8 @@ export default class PostEffect_Film extends BasePostEffect {
 	}
 	get grayMode() {return this._grayMode;}
 	set grayMode(value) {
-		this._grayMode = value ? 1 : 0;
-		float1_Float32Array[0] = this._grayMode;
+		this._grayMode = value;
+		float1_Float32Array[0] = this._grayMode ? 1 : 0;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['grayMode'], float1_Float32Array)
 	}
 	constructor(redGPUContext) {super(redGPUContext);}
