@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.11 18:47:39
+ *   Last modification time of this file - 2020.1.11 19:7:38
  *
  */
 
@@ -759,7 +759,7 @@ const ExampleHelper = (_ => {
 			switch (tName) {
 				case 'PostEffect_Convolution':
 					let testData = {
-						kernel: 'EMBOSS'
+						kernel: 'NORMAL'
 					}
 					tFolder.add(testData, 'kernel', ['NORMAL', 'SHARPEN', 'BLUR', 'EDGE', 'EMBOSS']).onChange(v => {
 						effect.kernel = RedGPU.PostEffect_Convolution[v]
