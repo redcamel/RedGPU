@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.2 21:31:8
+ *   Last modification time of this file - 2020.1.11 18:20:56
  *
  */
 
@@ -13,7 +13,7 @@ import BasePostEffect from "../../base/BasePostEffect.js";
 import TypeSize from "../../resources/TypeSize.js";
 
 const float1_Float32Array = new Float32Array(1);
-export default class PostEffect_BrightnessContrast extends BasePostEffect {
+export default class PostEffect_HueSaturation extends BasePostEffect {
 	static vertexShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
@@ -46,7 +46,7 @@ export default class PostEffect_BrightnessContrast extends BasePostEffect {
 		vec4 finalColor = vec4(0.0);
 		finalColor = texture( sampler2D( uSourceTexture, uSampler ), vUV );
 		
-		float hue_value = fragmentUniforms.hue / 180.0;
+		float hue_value = fragmentUniforms.hue;
 		float angle = hue_value * 3.1415926535897932384626433832795;
 		float s = sin(angle), c = cos(angle);
 		vec3 weights = (vec3(2.0 * c, -sqrt(3.0) * s - c, sqrt(3.0) * s - c) + 1.0) / 3.0;
@@ -59,7 +59,7 @@ export default class PostEffect_BrightnessContrast extends BasePostEffect {
 		);
 		
 		float average = (finalColor.r + finalColor.g + finalColor.b) / 3.0;
-		float saturation_value = fragmentUniforms.saturation / 100.0;
+		float saturation_value = fragmentUniforms.saturation;
 		if (saturation_value > 0.0) finalColor.rgb += (average - finalColor.rgb) * (1.0 - 1.0 / (1.001 - saturation_value));
 		else finalColor.rgb += (average - finalColor.rgb) * (-saturation_value);
 		
@@ -78,13 +78,13 @@ export default class PostEffect_BrightnessContrast extends BasePostEffect {
 	get hue() {return this._hue;}
 	set hue(value) {/*FIXME min: -180, max: 180*/
 		this._hue = value;
-		float1_Float32Array[0] = this._hue;
+		float1_Float32Array[0] = this._hue/180;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['hue'], float1_Float32Array)
 	}
 	get saturation() {return this._saturation;}
 	set saturation(value) {/*FIXME min: -100, max: 100*/
 		this._saturation = value;
-		float1_Float32Array[0] = this._saturation;
+		float1_Float32Array[0] = this._saturation/100;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['saturation'], float1_Float32Array)
 	}
 	constructor(redGPUContext) {super(redGPUContext);}

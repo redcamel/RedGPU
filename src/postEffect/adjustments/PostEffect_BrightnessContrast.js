@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.2 21:31:8
+ *   Last modification time of this file - 2020.1.11 18:20:56
  *
  */
 
@@ -45,8 +45,8 @@ export default class PostEffect_BrightnessContrast extends BasePostEffect {
 	void main() {
 		vec4 finalColor = vec4(0.0);
 		finalColor = texture( sampler2D( uSourceTexture, uSampler ), vUV );
-		if ( fragmentUniforms.contrast/255.0 > 0.0 ) finalColor.rgb = ( finalColor.rgb - 0.5 ) / ( 1.0 - fragmentUniforms.contrast/255.0 ) + 0.5;
-		else finalColor.rgb = ( finalColor.rgb - 0.5 ) * ( 1.0 + fragmentUniforms.contrast/255.0 ) + 0.5;
+		if ( fragmentUniforms.contrast > 0.0 ) finalColor.rgb = ( finalColor.rgb - 0.5 ) / ( 1.0 - fragmentUniforms.contrast ) + 0.5;
+		else finalColor.rgb = ( finalColor.rgb - 0.5 ) * ( 1.0 + fragmentUniforms.contrast ) + 0.5;
 		finalColor.rgb += fragmentUniforms.brightness;
 		outColor = finalColor;
 	}
@@ -63,13 +63,13 @@ export default class PostEffect_BrightnessContrast extends BasePostEffect {
 	get brightness() {return this._brightness;}
 	set brightness(value) {/*FIXME min: -150, max: 150*/
 		this._brightness = value;
-		float1_Float32Array[0] = this._brightness;
+		float1_Float32Array[0] = this._brightness/ 255;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['brightness'], float1_Float32Array)
 	}
 	get contrast() {return this._contrast;}
 	set contrast(value) {/*FIXME min: -50, max: 100*/
 		this._contrast = value;
-		float1_Float32Array[0] = this._contrast;
+		float1_Float32Array[0] = this._contrast/ 255;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['contrast'], float1_Float32Array)
 	}
 	constructor(redGPUContext) {super(redGPUContext);}

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.2 21:31:8
+ *   Last modification time of this file - 2020.1.11 18:20:56
  *
  */
 
@@ -37,8 +37,8 @@ export default class PostEffect_Convolution extends BasePostEffect {
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_fragment.systemUniforms}
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 0 ) uniform FragmentUniforms {
-        mat3 kernel;
         float kernelWeight;
+        mat3 kernel;
     } fragmentUniforms;
 	layout( location = 0 ) in vec3 vNormal;
 	layout( location = 1 ) in vec2 vUV;
@@ -60,7 +60,7 @@ export default class PostEffect_Convolution extends BasePostEffect {
 		finalColor += texture( sampler2D( uSourceTexture, uSampler ), vUV + perPX * vec2(-1.0,  1.0)) * fragmentUniforms.kernel[2][0] ;
 		finalColor += texture( sampler2D( uSourceTexture, uSampler ), vUV + perPX * vec2( 0.0,  1.0)) * fragmentUniforms.kernel[2][1] ;
 		finalColor += texture( sampler2D( uSourceTexture, uSampler ), vUV + perPX * vec2( 1.0,  1.0)) * fragmentUniforms.kernel[2][2] ;
-
+	
 		outColor = vec4((finalColor / fragmentUniforms.kernelWeight).rgb, 1.0);
 	}
 `;
@@ -68,33 +68,33 @@ export default class PostEffect_Convolution extends BasePostEffect {
 	static uniformsBindGroupLayoutDescriptor_material = BasePostEffect.uniformsBindGroupLayoutDescriptor_material;
 	static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
 	static uniformBufferDescriptor_fragment = [
-		{size: TypeSize.mat3, valueName: 'kernel'},
-		{size: TypeSize.float, valueName: 'kernelWeight'}
+		{size: TypeSize.float, valueName: 'kernelWeight'},
+		{size: TypeSize.mat3, valueName: 'kernel'}
 	];
 	static NORMAL = new Float32Array([
-		0, 0, 0,
-		0, 1, 0,
-		0, 0, 0
+		0, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 0, 0
 	]);
 	static SHARPEN = new Float32Array([
-		0, -1, 0,
-		-1, 5, -1,
-		0, -1, 0
+		0, -1, 0, 0,
+		-1, 5, -1, 0,
+		0, -1, 0, 0,
 	]);
 	static BLUR = new Float32Array([
-		1, 1, 1,
-		1, 1, 1,
-		1, 1, 1
+		1, 1, 1, 0,
+		1, 1, 1, 0,
+		1, 1, 1, 0
 	]);
 	static EDGE = new Float32Array([
-		0, 1, 0,
-		1, -4, 1,
-		0, 1, 0
+		0, 1, 0, 0,
+		1, -4, 1, 0,
+		0, 1, 0, 0
 	]);
 	static EMBOSS = new Float32Array([
-		-2, -1, 0,
-		-1, 1, 1,
-		0, 1, 2
+		-2, -1, 0, 0,
+		-1, 1, 1, 0,
+		0, 1, 2, 0
 	]);
 	_kernel;
 	_kernelWeight;
@@ -110,10 +110,12 @@ export default class PostEffect_Convolution extends BasePostEffect {
 		let i = this._kernel.length;
 		while (i--) sum += this._kernel[i];
 		this._kernelWeight = sum;
+		float1_Float32Array[0] = sum;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['kernelWeight'], float1_Float32Array)
 	}
-	constructor(redGPUContext) {
+	constructor(redGPUContext, kernel = PostEffect_Convolution.NORMAL) {
 		super(redGPUContext);
-		this.kernel = PostEffect_Convolution.NORMAL;
+		this.kernel = kernel;
+		console.log(this.uniformBufferDescriptor_fragment)
 	}
 }

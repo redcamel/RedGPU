@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.9 14:4:9
+ *   Last modification time of this file - 2020.1.11 18:20:56
  *
  */
 
@@ -38,7 +38,14 @@ export default class BasePostEffect extends Mix.mix(
 		super(redGPUContext);
 		this.quad = new Mesh(redGPUContext, new Plane(redGPUContext), this);
 		this.quad.pipeline = new PipelinePostEffect(redGPUContext, this.quad)
-		this.sampler = new Sampler(redGPUContext);
+		this.sampler = new Sampler(redGPUContext, {
+			magFilter: "linear",
+			minFilter: "linear",
+			mipmapFilter: "linear",
+			addressModeU: "clamp-to-edge",
+			addressModeV: "clamp-to-edge",
+			addressModeW: "repeat"
+		});
 	}
 	checkSize(redGPUContext, redView) {
 		if ([this.#prevViewRect[2], this.#prevViewRect[3]].toString() != [redView.viewRect[2], redView.viewRect[3]].toString()) {
