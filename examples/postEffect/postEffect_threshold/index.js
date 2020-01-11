@@ -68,9 +68,9 @@ new RedGPU.RedGPUContext(
 				let tMaterial = new RedGPU.StandardMaterial(self, diffuseTexture, normalTexture, specularTexture, emissiveTexture, displacementTexture);
 				tMaterial.normalPower = 2
 				let setMeshs = function () {
-					var MAX;
-					var i, j;
-					var tMesh;
+					let MAX;
+					let i, j;
+					let tMesh;
 					i = j = MAX = 10;
 					while (i--) {
 						j = MAX
@@ -97,9 +97,10 @@ new RedGPU.RedGPUContext(
 			requestAnimationFrame(render);
 		};
 		requestAnimationFrame(render);
-
 		ExampleHelper.setTestUI_Debugger(RedGPU);
-		// TestUI setup
-		ExampleHelper.setTestUI_PostEffect(RedGPU, this, tView1, true);
+		// PostEffect & TestUI setup
+		let effect = new RedGPU.PostEffect_Threshold(this)
+		tView1.postEffect.addEffect(effect)
+		ExampleHelper.setTestUI_PostEffectBy(RedGPU, 'PostEffect_Threshold', tView1, effect);
 	}
 );

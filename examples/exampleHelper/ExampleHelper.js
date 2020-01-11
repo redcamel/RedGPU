@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.11 18:20:56
+ *   Last modification time of this file - 2020.1.11 18:47:39
  *
  */
 
@@ -19,7 +19,6 @@ const ExampleHelper = (_ => {
 			containerUI = document.createElement('div');
 			containerUI.style.cssText = `
 				position : fixed; top : 0; right : 0;
-				z-index:20;
 				height:100%;
 				overflow-y:auto;
 				white - space : nowrap;
@@ -56,9 +55,9 @@ const ExampleHelper = (_ => {
 		let sourceViewBt;
 		document.body.appendChild(rootBox = document.createElement('div'));
 		document.body.appendChild(sourceViewBt = document.createElement('button'));
-		rootBox.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:#2b2b2b;z-index:10;display:none;color:#fff;font-size:12px;overflow-y:auto;padding:10px;';
+		rootBox.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:#2b2b2b;z-index:20;display:none;color:#fff;font-size:12px;overflow-y:auto;padding:10px;';
 		rootBox.className = 'sourceView'
-		sourceViewBt.style.cssText = 'position:fixed;right:10px;bottom:10px;background:#111;color:#fff;z-index:11;border:0;outline:none;cursor:pointer;padding:8px;font-size:11px;border-radius:5px';
+		sourceViewBt.style.cssText = 'position:fixed;right:10px;bottom:10px;background:#111;color:#fff;z-index:20;border:0;outline:none;cursor:pointer;padding:8px;font-size:11px;border-radius:5px';
 		sourceViewBt.innerHTML = 'SOURCE VIEW';
 		sourceViewBt.addEventListener('click', function () {
 			if (rootBox.style.display == 'block') {
@@ -585,7 +584,8 @@ const ExampleHelper = (_ => {
 	let setTestUI_BitmapMaterial, setTestUI_SpriteSheetMaterial, setTestUI_StandardMaterial,
 		setTestUI_EnvironmentMaterial, setTestUI_RefractionMaterial;
 	let setTestUI_BitmapTexture;
-	let setTestUI_PostEffect;
+	let setTestUI_PostEffect, setTestUI_PostEffectBy;
+
 	{
 		let makeColorProperty, makeBaseLightProperty;
 		let makeTextureProperty;
@@ -753,8 +753,91 @@ const ExampleHelper = (_ => {
 			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'emissiveTexture', `${assetPath}emissive.jpg`);
 			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'displacementTexture', `${assetPath}Brick03_disp.jpg`);
 		}
-		setTestUI_PostEffect = (RedGPU, redGPUContext, view, open, gui) => {
+		let initPostEffect = (RedGPU, tName, effect, open, rootFolder) => {
+			var tFolder;
+			if (tName) tFolder = rootFolder.addFolder(tName);
+			switch (tName) {
+				case 'PostEffect_Convolution':
+					let testData = {
+						kernel: 'EMBOSS'
+					}
+					tFolder.add(testData, 'kernel', ['NORMAL', 'SHARPEN', 'BLUR', 'EDGE', 'EMBOSS']).onChange(v => {
+						effect.kernel = RedGPU.PostEffect_Convolution[v]
+					});
+					break;
+				case 'PostEffect_BrightnessContrast':
+					tFolder.add(effect, 'brightness', -150, 150);
+					tFolder.add(effect, 'contrast', -50, 100);
+					break;
+				case 'PostEffect_HueSaturation':
+					tFolder.add(effect, 'hue', -180, 180);
+					tFolder.add(effect, 'saturation', -100, 100);
+					break;
+				case 'PostEffect_Threshold':
+					tFolder.add(effect, 'threshold', 1, 255);
+					break;
+				case 'PostEffect_Vignetting':
+					tFolder.add(effect, 'size', 0, 1);
+					tFolder.add(effect, 'intensity', 0, 2);
+					break;
+				case 'PostEffect_BlurX':
+					tFolder.add(effect, 'size', 0, 100, 0.01);
+					break;
+				case 'PostEffect_BlurY':
+					tFolder.add(effect, 'size', 0, 100, 0.01);
+					break;
+				case 'PostEffect_GaussianBlur':
+					tFolder.add(effect, 'radius', 0.1, 250, 0.01);
+					break;
+				case 'PostEffect_ZoomBlur':
+					tFolder.add(effect, 'amount', 0, 100, 0.01);
+					tFolder.add(effect, 'centerX', -1, 1, 0.01);
+					tFolder.add(effect, 'centerY', -1, 1, 0.01);
+					break;
+				case 'PostEffect_HalfTone':
+					tFolder.add(effect, 'centerX', -1, 1, 0.01);
+					tFolder.add(effect, 'centerY', -1, 1, 0.01);
+					tFolder.add(effect, 'radius', 0, 25, 0.01);
+					tFolder.add(effect, 'angle', 0, 360, 0.01);
+					tFolder.add(effect, 'grayMode')
+					break;
+				case 'PostEffect_Pixelize':
+					tFolder.add(effect, 'width', 0, 50, 0.01);
+					tFolder.add(effect, 'height', 0, 50, 0.01);
+					break;
+				case 'PostEffect_DoF':
+					tFolder.add(effect, 'blur', 0, 100, 0.01);
+					tFolder.add(effect, 'focusLength', 0, 100, 0.01);
+					break;
+				case 'PostEffect_Bloom':
+					tFolder.add(effect, 'blur', 0, 100);
+					tFolder.add(effect, 'exposure', 0, 5);
+					tFolder.add(effect, 'bloomStrength', 0, 5);
+					tFolder.add(effect, 'threshold', 1, 255);
+					break;
+				case 'PostEffect_Film':
+					tFolder.add(effect, 'scanlineIntensity', -1, 1, 0.01);
+					tFolder.add(effect, 'noiseIntensity', 0, 1, 0.01);
+					tFolder.add(effect, 'scanlineCount', 0, 4096);
+					tFolder.add(effect, 'grayMode');
+					break;
+			}
+			if (tFolder && open) tFolder.open();
+			return tFolder
 
+		}
+		setTestUI_PostEffectBy = (RedGPU, tName, tView1, effect, gui) => {
+			checkGUI();
+			let tFolder = initPostEffect (RedGPU, tName, effect, true, testHelperFolder)
+			let testData = {
+				use : true
+			}
+			tFolder.add(testData, 'use').name('use ' + tName).onChange(function (v) {
+				if (v) tView1.postEffect.addEffect(effect)
+				else tView1.postEffect.removeEffect(effect)
+			});
+		}
+		setTestUI_PostEffect = (RedGPU, redGPUContext, view, open, gui) => {
 			checkGUI();
 			gui = gui || testHelperFolder;
 			let rootFolder, folder;
@@ -776,7 +859,7 @@ const ExampleHelper = (_ => {
 				PostEffect_GaussianBlur: new RedGPU.PostEffect_GaussianBlur(redGPUContext),
 				PostEffect_Pixelize: new RedGPU.PostEffect_Pixelize(redGPUContext),
 				PostEffect_HalfTone: new RedGPU.PostEffect_HalfTone(redGPUContext),
-				PostEffect_Convolution: new RedGPU.PostEffect_Convolution(redGPUContext,  RedGPU.PostEffect_Convolution['EMBOSS']),
+				PostEffect_Convolution: new RedGPU.PostEffect_Convolution(redGPUContext, RedGPU.PostEffect_Convolution['EMBOSS']),
 				PostEffect_Vignetting: new RedGPU.PostEffect_Vignetting(redGPUContext),
 				PostEffect_Film: new RedGPU.PostEffect_Film(redGPUContext),
 			}
@@ -784,83 +867,11 @@ const ExampleHelper = (_ => {
 				for (let k in effectList) this[k] = false
 			}
 			testData = new testData()
-			let initPostEffect= (tName, effect, open, view)=> {
-				var tFolder;
-				if (tName) tFolder = rootFolder.addFolder(tName);
-				switch (tName) {
-					case 'PostEffect_Convolution':
-						let testData = {
-							kernel : 'EMBOSS'
-						}
-						tFolder.add(testData, 'kernel',['NORMAL','SHARPEN','BLUR','EDGE','EMBOSS']).onChange(v=>{
-							effect.kernel = RedGPU.PostEffect_Convolution[v]
-						});
-						break;
-					case 'PostEffect_BrightnessContrast':
-						tFolder.add(effect, 'brightness', -150, 150);
-						tFolder.add(effect, 'contrast', -50, 100);
-						break;
-					case 'PostEffect_HueSaturation':
-						tFolder.add(effect, 'hue', -180, 180);
-						tFolder.add(effect, 'saturation', -100, 100);
-						break;
-					case 'PostEffect_Threshold':
-						tFolder.add(effect, 'threshold', 1, 255);
-						break;
-					case 'PostEffect_Vignetting':
-						tFolder.add(effect, 'size', 0, 1);
-						tFolder.add(effect, 'intensity', 0, 2);
-						break;
-					case 'PostEffect_BlurX':
-						tFolder.add(effect, 'size', 0, 100, 0.01);
-						break;
-					case 'PostEffect_BlurY':
-						tFolder.add(effect, 'size', 0, 100, 0.01);
-						break;
-					case 'PostEffect_GaussianBlur':
-						tFolder.add(effect, 'radius', 0.1, 250, 0.01);
-						break;
-					case 'PostEffect_ZoomBlur':
-						tFolder.add(effect, 'amount', 0, 100, 0.01);
-						tFolder.add(effect, 'centerX', -1, 1, 0.01);
-						tFolder.add(effect, 'centerY', -1, 1, 0.01);
-						break;
-					case 'PostEffect_HalfTone':
-						tFolder.add(effect, 'centerX', -1, 1, 0.01);
-						tFolder.add(effect, 'centerY', -1, 1, 0.01);
-						tFolder.add(effect, 'radius', 0, 25, 0.01);
-						tFolder.add(effect, 'angle', 0, 360, 0.01);
-						tFolder.add(effect, 'grayMode')
-						break;
-					case 'PostEffect_Pixelize':
-						tFolder.add(effect, 'width', 0, 50, 0.01);
-						tFolder.add(effect, 'height', 0, 50, 0.01);
-						break;
-					case 'PostEffect_DoF':
-						tFolder.add(effect, 'blur', 0, 100, 0.01);
-						tFolder.add(effect, 'focusLength', 0, 100, 0.01);
-						break;
-					case 'PostEffect_Bloom':
-						tFolder.add(effect, 'blur', 0, 100);
-						tFolder.add(effect, 'exposure', 0, 5);
-						tFolder.add(effect, 'bloomStrength', 0, 5);
-						tFolder.add(effect, 'threshold', 1, 255);
-						break;
-					case 'PostEffect_Film':
-						tFolder.add(effect, 'scanlineIntensity', -1, 1, 0.01);
-						tFolder.add(effect, 'noiseIntensity', 0, 1, 0.01);
-						tFolder.add(effect, 'scanlineCount', 0, 4096);
-						tFolder.add(effect, 'grayMode');
-						break;
-				}
-				if (tFolder && open) tFolder.open();
-				return tFolder
 
-			}
 			for (let k in testData) {
 				(function () {
-					let tFolder = initPostEffect(k, effectList[k], true);
-					document.body.style.background=''
+					let tFolder = initPostEffect(RedGPU,k, effectList[k], true, rootFolder);
+					document.body.style.background = ''
 					console.log(tFolder)
 					tFolder.add(testData, k).name('use ' + k.replace('PostEffect_', '')).onChange((function () {
 						let tEffect = effectList[k]
@@ -982,7 +993,8 @@ const ExampleHelper = (_ => {
 		//
 		setTestUI_BitmapTexture: setTestUI_BitmapTexture,
 		//
-		setTestUI_PostEffect: setTestUI_PostEffect
+		setTestUI_PostEffect: setTestUI_PostEffect,
+		setTestUI_PostEffectBy: setTestUI_PostEffectBy
 	};
 })();
 
