@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.11 19:7:38
+ *   Last modification time of this file - 2020.1.13 14:36:13
  *
  */
 
@@ -19,7 +19,7 @@ const ExampleHelper = (_ => {
 			containerUI = document.createElement('div');
 			containerUI.style.cssText = `
 				position : fixed; top : 0; right : 0;
-				height:100%;
+				height:auto;
 				overflow-y:auto;
 				white - space : nowrap;
 			`;
