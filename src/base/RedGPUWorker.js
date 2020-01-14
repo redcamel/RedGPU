@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.10 17:50:10
+ *   Last modification time of this file - 2020.1.14 11:34:46
  *
  */
 
@@ -203,14 +203,22 @@ const RedGPUWorker = {
 			workerImage.postMessage({src: src, workerType: 'image'});
 		});
 	},
-	glslParserWorker: (target, shaderName, originSource, shaderType, optionList) => {
+	glslParserWorker: (redGPUContext,target, shaderName, originSource, shaderType, optionList) => {
 		return new Promise((resolve, reject) => {
 			function handler(e) {
 				if (e.data.shaderName === shaderName && e.data.shaderType === shaderType) {
 					if (e.data.endCompile) {
 						// console.log('오니', e.data.searchKey)
 						let tSearchKey = e.data.searchKey;
-						if (!target.sourceMap.has(tSearchKey)) target.sourceMap.set(tSearchKey, e.data.compileGLSL);
+						if (!target.sourceMap.has(tSearchKey)) {
+							target.sourceMap.set(tSearchKey, e.data.compileGLSL);
+							let shaderModuleDescriptor = {
+								key: tSearchKey,
+								code:  e.data.compileGLSL,
+								// source: this.sourceMap.get(searchKey)
+							};
+							target.shaderModuleMap[tSearchKey] = redGPUContext.device.createShaderModule(shaderModuleDescriptor);
+						}
 						if (e.data.error) reject(e.data.error);
 					}
 					if (e.data.end) {

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2019.12.27 14:44:15
+ *   Last modification time of this file - 2020.1.14 17:51:9
  *
  */
 
@@ -93,7 +93,7 @@ new RedGPU.RedGPUContext(
 			tLight.y = Math.cos(time / 500)
 			tLight.z = Math.cos(time / 750)
 			renderer.render(time, this);
-			let tChildren = tView.scene.children
+			let tChildren = tView.scene._children
 			i = tChildren.length
 			while (i--) {
 				tChildren[i]._rotationX += 1

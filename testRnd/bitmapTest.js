@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.9 10:26:54
+ *   Last modification time of this file - 2020.1.14 17:51:9
  *
  */
 import RedGPU from "../src/RedGPU.js";
@@ -362,7 +362,7 @@ new RedGPU.RedGPUContext(cvs,
 			tLight.y = Math.cos(time/1000)*5
 			tLight.z = Math.sin(time/1000)*5
 
-			tScene.children.forEach(tMesh => {
+			tScene._children.forEach(tMesh => {
 				// tMesh.rotationZ += 0.1
 				// tMesh.material.alpha = RedGPU.UTIL.clamp(Math.sin(time / 500), 0, 1)
 
