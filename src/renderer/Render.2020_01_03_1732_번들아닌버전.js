@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.9 10:26:54
+ *   Last modification time of this file - 2020.1.14 17:51:9
  *
  */
 
@@ -25,7 +25,7 @@ let prevIndexBuffer_UUID;
 let prevMaterial_UUID;
 let changedMaterial_UUID;
 let renderScene = (_ => {
-		return (redGPUContext, redView, passEncoder, parent, children, parentDirty, renderDrawLayerIndexMode = 0) => {
+		return (redGPUContext, redView, passEncoder, parent, _children, parentDirty, renderDrawLayerIndexMode = 0) => {
 			let i;
 			let aSx, aSy, aSz, aCx, aCy, aCz, aX, aY, aZ,
 				a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23, a30, a31, a32, a33,
@@ -51,7 +51,7 @@ let renderScene = (_ => {
 			let geoVolume;
 			let radius;
 			let radiusTemp;
-			i = children.length;
+			i = _children.length;
 			let frustumPlanes0, frustumPlanes1, frustumPlanes2, frustumPlanes3, frustumPlanes4, frustumPlanes5;
 			frustumPlanes0 = _frustumPlanes[0];
 			frustumPlanes1 = _frustumPlanes[1];
@@ -60,7 +60,7 @@ let renderScene = (_ => {
 			frustumPlanes4 = _frustumPlanes[4];
 			frustumPlanes5 = _frustumPlanes[5];
 			while (i--) {
-				tMesh = children[i];
+				tMesh = _children[i];
 				tMaterial = tMesh._material;
 				tGeometry = tMesh._geometry;
 				tDirtyTransform = tMesh.dirtyTransform;
@@ -396,7 +396,7 @@ let renderScene = (_ => {
 						tCacheUniformInfo[tUUID] = tSkinInfo['inverseBindMatrices']['_UUID']
 					}
 				}
-				if (!renderDrawLayerIndexMode && tMesh.children.length) renderScene(redGPUContext, redView, passEncoder, tMesh, tMesh.children, parentDirty || tDirtyTransform);
+				if (!renderDrawLayerIndexMode && tMesh._children.length) renderScene(redGPUContext, redView, passEncoder, tMesh, tMesh._children, parentDirty || tDirtyTransform);
 				tMesh.dirtyPipeline = false;
 				tMesh.dirtyTransform = false;
 			}
@@ -508,7 +508,7 @@ let renderView = (redGPUContext, redView, swapChainTexture, mouseEventChecker) =
 	// render skyBox, grid, axis
 	renderOptions(redGPUContext, redView, mainRenderPassEncoder);
 	// 실제 Scene렌더
-	renderScene(redGPUContext, redView, mainRenderPassEncoder, null, tScene.children);
+	renderScene(redGPUContext, redView, mainRenderPassEncoder, null, tScene._children);
 	// 투명레이어 렌더
 	renderTransparentLayerList(redGPUContext, redView, mainRenderPassEncoder);
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

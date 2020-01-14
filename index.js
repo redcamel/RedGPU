@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.7 16:13:31
+ *   Last modification time of this file - 2020.1.14 17:51:9
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -196,7 +196,7 @@ new RedGPU.RedGPUContext(
 				let mats = [testMat_color, testMat_colorPhong, testMat_bitmap, testMat_standard_diffuse, testMat_standard_diffuse_normal, testMat_standard_diffuse_normal_displacement]
 				let changeNum = 0
 				// setInterval(_ => {
-				// 	let tChildren = tView.scene.children
+				// 	let tChildren = tView.scene._children
 				// 	let i = tChildren.length;
 				// 	changeNum++
 				// 	console.log('안오냐',mats[changeNum%mats.length])
@@ -208,7 +208,7 @@ new RedGPU.RedGPUContext(
 				// }, 2500)
 
 				let randomGeometry = _ => {
-					return new RedGPU.Sphere(this, 0.5, 16, 16, 16)
+					// return new RedGPU.Sphere(this, 0.5, 16, 16, 16)
 					return Math.random() > 0.5
 						? new RedGPU.Sphere(this, 0.5, 16, 16, 16) :
 						Math.random() > 0.5
@@ -338,6 +338,7 @@ new RedGPU.RedGPUContext(
 					testBox.x = 1.5
 					testBox.primitiveTopology = 'line-strip'
 					testMesh.addChild(testBox)
+					// testMesh.material = testMesh._parent.material
 
 					// //
 					// let testMesh2 = new RedGPU.Mesh(
@@ -393,7 +394,7 @@ new RedGPU.RedGPUContext(
 					addLine_random(this, '#0000ff');
 				}
 
-				i = 250
+				i = 50
 				let tText
 				let tTextList = []
 				while (i--) {
@@ -433,21 +434,16 @@ new RedGPU.RedGPUContext(
 					let i = tChildren.length;
 
 
-					tChildren = tView.scene.children
+					tChildren = tView.scene._children
 					i = tChildren.length
 					let tMesh
-					//
+
 					while (i--) {
 						tMesh = tChildren[i]
-						if (tMesh instanceof RedGPU.Text) {
-
-						} else {
-							tMesh._rotationX += 1
-							tMesh._rotationY += 1
-							tMesh._rotationZ += 1
-							tMesh.dirtyTransform = 1
-
-						}
+						tMesh._rotationX += 1
+						tMesh._rotationY += 1
+						tMesh._rotationZ += 1
+						tMesh.dirtyTransform = 1
 					}
 
 					requestAnimationFrame(render);
@@ -551,7 +547,7 @@ let setTestUI = function (redGPUContextContext, tView, tScene, testCubeTexture) 
 	tFolder.open()
 
 
-	tFolder.add(testData, 'depthWriteEnabled').onChange(v => tScene.children.forEach(tMesh => tMesh.depthWriteEnabled = v));
+	tFolder.add(testData, 'depthWriteEnabled').onChange(v => tScene._children.forEach(tMesh => tMesh.depthWriteEnabled = v));
 
 	tFolder.add(testData, 'depthCompare', [
 		"never",
@@ -562,12 +558,12 @@ let setTestUI = function (redGPUContextContext, tView, tScene, testCubeTexture) 
 		"not-equal",
 		"greater-equal",
 		"always"
-	]).onChange(v => tScene.children.forEach(tMesh => tMesh.depthCompare = v));
+	]).onChange(v => tScene._children.forEach(tMesh => tMesh.depthCompare = v));
 	tFolder.add(testData, 'cullMode', [
 		"none",
 		"front",
 		"back"
-	]).onChange(v => tScene.children.forEach(tMesh => tMesh.cullMode = v));
+	]).onChange(v => tScene._children.forEach(tMesh => tMesh.cullMode = v));
 
 	tFolder.add(testData, 'primitiveTopology', [
 		"point-list",
@@ -575,5 +571,5 @@ let setTestUI = function (redGPUContextContext, tView, tScene, testCubeTexture) 
 		"line-strip",
 		"triangle-list",
 		"triangle-strip"
-	]).onChange(v => tScene.children.forEach(tMesh => tMesh.primitiveTopology = v));
+	]).onChange(v => tScene._children.forEach(tMesh => tMesh.primitiveTopology = v));
 }

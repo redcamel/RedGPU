@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.14 11:34:46
+ *   Last modification time of this file - 2020.1.14 17:51:9
  *
  */
 import RedGPUContext from "../RedGPUContext.js";
@@ -62,7 +62,7 @@ export default class ShaderModule_GLSL {
 		if (RedGPUContext.useDebugConsole) console.log('ShaderModule_GLSL_searchShaderModule_callNum', ShaderModule_GLSL_searchShaderModule_callNum);
 		this.currentKey = searchKey;
 		if (this.shaderModuleMap[searchKey]) {
-			console.log('compileGLSL - 캐쉬된 쉐이더 모듈 쓴다', this.type, searchKey)
+			console.log('compileGLSL - cached shaderModule', this.type, searchKey)
 			return this.GPUShaderModule = this.shaderModuleMap[searchKey];
 		}
 		else {
@@ -71,10 +71,10 @@ export default class ShaderModule_GLSL {
 			// console.time('compileGLSL : ' + this.type + ' / ' + searchKey);
 			tCompileGLSL = this.sourceMap.get(searchKey);
 			if (tCompileGLSL instanceof Uint32Array) {
-				console.log('compileGLSL - 캐쉬된 쉐이더 소스쓴다', this.type, searchKey)
+				console.log('compileGLSL - cached shader source.', this.type, searchKey)
 			} else {
 				if (!tCompileGLSL) this.sourceMap.set(searchKey, tCompileGLSL = this.#redGPUContext.glslang.compileGLSL(parseSource(this.originSource, optionList), this.type));
-				console.log('compileGLSL - 신규생성한 쉐이더 소스쓴다', this.type, searchKey)
+				console.log('compileGLSL - new shader source.', this.type, searchKey)
 			}
 			// console.timeEnd('compileGLSL : ' + this.type + ' / ' + searchKey);
 			this.shaderModuleDescriptor = {

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.7 16:13:31
+ *   Last modification time of this file - 2020.1.14 17:51:9
  *
  */
 
@@ -168,7 +168,7 @@ new RedGPU.RedGPUContext(
 									target.material = targetMaterial
 
 								}
-								if (reculsive) target.children.forEach(function (v) {
+								if (reculsive) target._children.forEach(function (v) {
 									if (v['material']) {
 										v.material = targetMaterial
 
@@ -286,8 +286,8 @@ new RedGPU.RedGPUContext(
 				tMesh.scaleX = tMesh.scaleY = tMesh.scaleZ = 100
 
 				// v['resultMesh'].scaleX = v['resultMesh'].scaleY = v['resultMesh'].scaleZ = 1
-				// tScene.addChild({children:[tMesh.children[2],tMesh.children[8]]})
-				// tScene.addChild({children:[tMesh.children[2]]})
+				// tScene.addChild({_children:[tMesh._children[2],tMesh._children[8]]})
+				// tScene.addChild({_children:[tMesh._children[2]]})
 
 				tScene.addChild(tMesh)
 
@@ -313,8 +313,8 @@ new RedGPU.RedGPUContext(
 				let tMesh = v['resultMesh']
 				tMesh.scaleX = tMesh.scaleY = tMesh.scaleZ = 1
 				// v['resultMesh'].scaleX = v['resultMesh'].scaleY = v['resultMesh'].scaleZ = 0.001
-				// tScene.addChild({children:[tMesh.children[2],tMesh.children[8]]})
-				// tScene.addChild({children:[tMesh.children[2]]})
+				// tScene.addChild({_children:[tMesh._children[2],tMesh._children[8]]})
+				// tScene.addChild({_children:[tMesh._children[2]]})
 
 				tScene.addChild(tMesh)
 
@@ -338,8 +338,8 @@ new RedGPU.RedGPUContext(
 				let tMesh = v['resultMesh']
 				tMesh.scaleX = tMesh.scaleY = tMesh.scaleZ = 1
 				// v['resultMesh'].scaleX = v['resultMesh'].scaleY = v['resultMesh'].scaleZ = 0.001
-				// tScene.addChild({children:[tMesh.children[2],tMesh.children[8]]})
-				// tScene.addChild({children:[tMesh.children[2]]})
+				// tScene.addChild({_children:[tMesh._children[2],tMesh._children[8]]})
+				// tScene.addChild({_children:[tMesh._children[2]]})
 				tScene.addChild(tMesh)
 
 			},
@@ -364,10 +364,10 @@ new RedGPU.RedGPUContext(
 		// 		let tMesh = v['resultMesh']
 		// 		// tMesh.scaleX = tMesh.scaleY = tMesh.scaleZ = 1
 		// 		// v['resultMesh'].scaleX = v['resultMesh'].scaleY = v['resultMesh'].scaleZ = 0.001
-		// 		// tScene.addChild({children:[tMesh.children[2],tMesh.children[8]]})
-		// 		// tScene.addChild({children:[tMesh.children[2]]})
+		// 		// tScene.addChild({_children:[tMesh._children[2],tMesh._children[8]]})
+		// 		// tScene.addChild({_children:[tMesh._children[2]]})
 		// 		tScene.addChild(tMesh)
-		// 		tMesh = tMesh.children[0]
+		// 		tMesh = tMesh._children[0]
 		// 		tMesh.addEventListener('down', function (e) {
 		// 			console.log(e)
 		// 			var tValue = 3

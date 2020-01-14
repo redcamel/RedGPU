@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.10 17:50:10
+ *   Last modification time of this file - 2020.1.14 17:51:9
  *
  */
 
@@ -10,6 +10,7 @@ import GLTFLoader from "../loader/gltf/GLTFLoader.js";
 import SpriteSheetMaterial from "../material/SpriteSheetMaterial.js";
 import Debugger from "./system/Debugger.js";
 import PipelineBasic from "../base/pipeline/PipelineBasic.js";
+import DisplayContainer from "../base/DisplayContainer.js";
 
 let _frustumPlanes = [];
 let currentDebuggerData;
@@ -25,7 +26,7 @@ let prevMaterial_UUID;
 let changedMaterial_UUID;
 
 let renderScene = (_ => {
-		return (redGPUContext, redView, passEncoder, parent, children, parentDirty, renderDrawLayerIndexMode = 0) => {
+		return (redGPUContext, redView, passEncoder, parent2, children, parentDirty2, renderDrawLayerIndexMode = 0) => {
 			let i;
 			let aSx, aSy, aSz, aCx, aCy, aCz, aX, aY, aZ,
 				a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23, a30, a31, a32, a33,
@@ -36,21 +37,7 @@ let renderScene = (_ => {
 			let CONVERT_RADIAN = Math.PI / 180;
 			CPI = 3.141592653589793, CPI2 = 6.283185307179586, C225 = 0.225, C127 = 1.27323954, C045 = 0.405284735, C157 = 1.5707963267948966;
 			/////
-			let tMVMatrix, tNMatrix;
-			let tLocalMatrix;
-			let parentMTX;
-			let tSkinInfo;
-			let tGeometry;
-			let tMaterial;
-			let tMesh;
-			let tDirtyTransform;
-			let tPipeline;
-			let tDirtyPipeline;
-			let tMaterialChanged;
-			let tVisible;
-			let geoVolume;
-			let radius;
-			let radiusTemp;
+
 			i = children.length;
 			let frustumPlanes0, frustumPlanes1, frustumPlanes2, frustumPlanes3, frustumPlanes4, frustumPlanes5;
 			frustumPlanes0 = _frustumPlanes[0];
@@ -60,15 +47,37 @@ let renderScene = (_ => {
 			frustumPlanes4 = _frustumPlanes[4];
 			frustumPlanes5 = _frustumPlanes[5];
 			while (i--) {
-
+				let tMVMatrix, tNMatrix;
+				let tLocalMatrix;
+				let parentMTX, parentDirty, parent;
+				let tSkinInfo;
+				let tGeometry;
+				let tMaterial;
+				let tMesh;
+				let tDirtyTransform;
+				let tPipeline;
+				let tDirtyPipeline;
+				let tMaterialChanged;
+				let tVisible;
+				let geoVolume;
+				let radius;
+				let radiusTemp;
 				tMesh = children[i];
 				tMaterial = tMesh._material;
 				tGeometry = tMesh._geometry;
+				parent = tMesh._parent;
+				if (parent) {
+					parentDirty = parent._renderTimeDirtyTransform;
+					parentMTX = parent.matrix
+				}
 				tDirtyTransform = tMesh.dirtyTransform;
+				tMesh._renderTimeDirtyTransform = tDirtyTransform;
+
 				tDirtyPipeline = tMesh.dirtyPipeline;
 				tPipeline = tMesh.pipeline;
 				tSkinInfo = tMesh.skinInfo;
 				tMVMatrix = tMesh.matrix;
+				tLocalMatrix = tMesh.localMatrix;
 				tMaterialChanged = 0;
 
 				currentDebuggerData['object3DNum']++;
@@ -112,7 +121,7 @@ let renderScene = (_ => {
 						}
 
 					}
-					if(needRenderCheck || renderDrawLayerIndexMode){
+					if (needRenderCheck || renderDrawLayerIndexMode) {
 						if (redView._useFrustumCulling) {
 							geoVolume = tGeometry._volume || tGeometry.volume;
 							radius = geoVolume.xSize * tMesh.matrix[0];
@@ -164,10 +173,8 @@ let renderScene = (_ => {
 					////////////////////////
 				}
 
-				if (tDirtyTransform || parentDirty) {
+				if (tDirtyTransform) {
 					currentDebuggerData['dirtyTransformNum']++;
-					tLocalMatrix = tMesh.localMatrix;
-					parentMTX = parent ? parent.matrix : null;
 					/////////////////////////////////////
 					a00 = 1, a01 = 0, a02 = 0,
 						a10 = 0, a11 = 1, a12 = 0,
@@ -224,7 +231,8 @@ let renderScene = (_ => {
 						tLocalMatrix[11] = tLocalMatrix[11] * aZ;
 
 					// 부모가 있으면 곱처리함
-
+				}
+				if (parentDirty || tDirtyTransform) {
 					parentMTX ?
 						(
 							// 부모매트릭스 복사
@@ -375,7 +383,8 @@ let renderScene = (_ => {
 						tCacheUniformInfo[tUUID] = tSkinInfo['inverseBindMatrices']['_UUID']
 					}
 				}
-				if (!renderDrawLayerIndexMode && tMesh.children.length) renderScene(redGPUContext, redView, passEncoder, tMesh, tMesh.children, parentDirty || tDirtyTransform);
+				// if (!renderDrawLayerIndexMode && tMesh._flatChildren.length) renderScene(redGPUContext, redView, passEncoder, tMesh, tMesh._flatChildren, parentDirty || tDirtyTransform);
+
 				tMesh.dirtyPipeline = false;
 				tMesh.dirtyTransform = false;
 			}
@@ -535,7 +544,34 @@ let renderView = (redGPUContext, redView, swapChainTexture, mouseEventChecker) =
 	// render skyBox, grid, axis
 	renderOptions(redGPUContext, redView, mainRenderPassEncoder);
 	// 실제 Scene렌더
-	renderScene(redGPUContext, redView, mainRenderPassEncoder, null, tScene.children);
+	if (DisplayContainer.needFlatListUpdate) {
+		function flattenDeep(input) {
+			const stack = [...input];
+			const res = [];
+			while (stack.length) {
+				// 스택에서 값을 pop
+				const next = stack.pop();
+				res.push(next);
+				stack.push(...next._children);
+			}
+			//입력 순서를 복구하기 위한 reverse
+			return res.reverse();
+		}
+		tScene._flatChildList = flattenDeep(tScene._children)
+		tScene._flatChildList.sort((a, b) => {
+			if (a._geometry && b._geometry) {
+				if (a._geometry.interleaveBuffer._UUID > b._geometry.interleaveBuffer._UUID) return -1
+				if (a._geometry.interleaveBuffer._UUID < b._geometry.interleaveBuffer._UUID) return 1
+			}
+			return 0
+		})
+		DisplayContainer.needFlatListUpdate = false
+		// tScene._flatChildList = tScene._flatChildList.reverse()
+	}
+
+	// tScene._flatChildren = tScene._flatChildren.flat(100)
+
+	renderScene(redGPUContext, redView, mainRenderPassEncoder, null, tScene._flatChildList);
 	// 투명레이어 렌더
 	renderTransparentLayerList(redGPUContext, redView, mainRenderPassEncoder);
 	// 텍스트 렌더
