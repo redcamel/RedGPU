@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.14 17:51:9
+ *   Last modification time of this file - 2020.1.14 17:55:9
  *
  */
 
@@ -544,32 +544,7 @@ let renderView = (redGPUContext, redView, swapChainTexture, mouseEventChecker) =
 	// render skyBox, grid, axis
 	renderOptions(redGPUContext, redView, mainRenderPassEncoder);
 	// 실제 Scene렌더
-	if (DisplayContainer.needFlatListUpdate) {
-		function flattenDeep(input) {
-			const stack = [...input];
-			const res = [];
-			while (stack.length) {
-				// 스택에서 값을 pop
-				const next = stack.pop();
-				res.push(next);
-				stack.push(...next._children);
-			}
-			//입력 순서를 복구하기 위한 reverse
-			return res.reverse();
-		}
-		tScene._flatChildList = flattenDeep(tScene._children)
-		tScene._flatChildList.sort((a, b) => {
-			if (a._geometry && b._geometry) {
-				if (a._geometry.interleaveBuffer._UUID > b._geometry.interleaveBuffer._UUID) return -1
-				if (a._geometry.interleaveBuffer._UUID < b._geometry.interleaveBuffer._UUID) return 1
-			}
-			return 0
-		})
-		DisplayContainer.needFlatListUpdate = false
-		// tScene._flatChildList = tScene._flatChildList.reverse()
-	}
 
-	// tScene._flatChildren = tScene._flatChildren.flat(100)
 
 	renderScene(redGPUContext, redView, mainRenderPassEncoder, null, tScene._flatChildList);
 	// 투명레이어 렌더
@@ -618,6 +593,30 @@ export default class Render {
 			redView = redGPUContext.viewList[i];
 			currentDebuggerData = debuggerData[i];
 			Render.clearStateCache();
+			if (DisplayContainer.needFlatListUpdate) {
+				function flattenDeep(input) {
+					const stack = [...input];
+					const res = [];
+					while (stack.length) {
+						// 스택에서 값을 pop
+						const next = stack.pop();
+						res.push(next);
+						stack.push(...next._children);
+					}
+					//입력 순서를 복구하기 위한 reverse
+					return res.reverse();
+				}
+				redView.scene._flatChildList = flattenDeep(redView.scene._children)
+				redView.scene._flatChildList.sort((a, b) => {
+					if (a._geometry && b._geometry) {
+						if (a._geometry.interleaveBuffer._UUID > b._geometry.interleaveBuffer._UUID) return -1
+						if (a._geometry.interleaveBuffer._UUID < b._geometry.interleaveBuffer._UUID) return 1
+					}
+					return 0
+				})
+
+				// tScene._flatChildList = tScene._flatChildList.reverse()
+			}
 			renderView(redGPUContext, redView, redGPUContext.swapChain.getCurrentTexture());
 			// 마우스 이벤트 체크
 			mouseStates.push(redView.mouseEventChecker.check(redGPUContext))
@@ -627,6 +626,7 @@ export default class Render {
 		// 업데이트 대상 유니폼 버퍼 갱신
 		i = updateTargetMatrixBufferList.length;
 		while (i--) updateTargetMatrixBufferList[i].GPUBuffer.setSubData(0, updateTargetMatrixBufferList[i].meshFloat32Array);
+		DisplayContainer.needFlatListUpdate = false
 		updateTargetMatrixBufferList.length = 0;
 		GLTFLoader.animationLooper(time);
 		Debugger.update()
