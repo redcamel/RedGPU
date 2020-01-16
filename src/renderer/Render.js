@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.14 17:55:9
+ *   Last modification time of this file - 2020.1.16 9:27:55
  *
  */
 
@@ -26,7 +26,7 @@ let prevMaterial_UUID;
 let changedMaterial_UUID;
 
 let renderScene = (_ => {
-		return (redGPUContext, redView, passEncoder, parent2, children, parentDirty2, renderDrawLayerIndexMode = 0) => {
+		return (redGPUContext, redView, passEncoder, children, renderDrawLayerIndexMode = 0) => {
 			let i;
 			let aSx, aSy, aSz, aCx, aCy, aCz, aX, aY, aZ,
 				a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23, a30, a31, a32, a33,
@@ -383,8 +383,6 @@ let renderScene = (_ => {
 						tCacheUniformInfo[tUUID] = tSkinInfo['inverseBindMatrices']['_UUID']
 					}
 				}
-				// if (!renderDrawLayerIndexMode && tMesh._flatChildren.length) renderScene(redGPUContext, redView, passEncoder, tMesh, tMesh._flatChildren, parentDirty || tDirtyTransform);
-
 				tMesh.dirtyPipeline = false;
 				tMesh.dirtyTransform = false;
 			}
@@ -402,7 +400,7 @@ let renderOptions = (_ => {
 		}
 		if (tScene.grid) tOptionRenderList.push(tScene.grid);
 		if (tScene.axis) tOptionRenderList.push(tScene.axis);
-		if (tOptionRenderList.length) renderScene(redGPUContext, redView, passEncoder, null, tOptionRenderList);
+		if (tOptionRenderList.length) renderScene(redGPUContext, redView, passEncoder, tOptionRenderList);
 		tOptionRenderList.length = 0;
 	}
 })();
@@ -421,20 +419,20 @@ let renderPostEffect = (redGPUContext, redView) => {
 	return last_effect_baseAttachment
 };
 let renderTransparentLayerList = (redGPUContext, redView, passEncoder) => {
-	if (renderDrawLayerIndexList.length) renderScene(redGPUContext, redView, passEncoder, null, renderDrawLayerIndexList, null, Render.DRAW_LAYER_INDEX1);
+	if (renderDrawLayerIndexList.length) renderScene(redGPUContext, redView, passEncoder,  renderDrawLayerIndexList,  Render.DRAW_LAYER_INDEX1);
 	renderDrawLayerIndexList.length = 0;
 };
 let renderTextLayerList = (redGPUContext, redView, passEncoder) => {
 	if (textToTransparentLayerList.length) {
-		let t1 = [];
+		let tList = [];
 		let i = textToTransparentLayerList.length;
 		textToTransparentLayerList.sort((a, b) => {
 			if (a.z > b.z) return -1;
 			if (a.z < b.z) return 1;
 			return 0
 		});
-		while (i--) t1[i] = textToTransparentLayerList[i].targetText;
-		renderScene(redGPUContext, redView, passEncoder, null, t1, null, Render.DRAW_LAYER_INDEX2_Z_POINT_SORT);
+		while (i--) tList[i] = textToTransparentLayerList[i].targetText;
+		renderScene(redGPUContext, redView, passEncoder, tList, Render.DRAW_LAYER_INDEX2_Z_POINT_SORT);
 	}
 	textToTransparentLayerList.length = 0;
 };
@@ -442,7 +440,7 @@ let renderLightDebugger = (redGPUContext, redView, passEncoder) => {
 	if (redView.debugLightList.length) {
 		let cache_useFrustumCulling = redView.useFrustumCulling;
 		redView.useFrustumCulling = false;
-		renderScene(redGPUContext, redView, passEncoder, null, redView.debugLightList);
+		renderScene(redGPUContext, redView, passEncoder,  redView.debugLightList);
 		redView.useFrustumCulling = cache_useFrustumCulling;
 	}
 };
@@ -546,7 +544,7 @@ let renderView = (redGPUContext, redView, swapChainTexture, mouseEventChecker) =
 	// 실제 Scene렌더
 
 
-	renderScene(redGPUContext, redView, mainRenderPassEncoder, null, tScene._flatChildList);
+	renderScene(redGPUContext, redView, mainRenderPassEncoder,  tScene._flatChildList);
 	// 투명레이어 렌더
 	renderTransparentLayerList(redGPUContext, redView, mainRenderPassEncoder);
 	// 텍스트 렌더
