@@ -2,13 +2,15 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.16 11:31:50
+ *   Last modification time of this file - 2020.1.16 13:3:41
  *
  */
 
 const ExampleHelper = (_ => {
 	let testHelperFolder;
 	const assetPath = '../../../assets/';
+
+
 	const checkGUI = _ => {
 		if (!testHelperFolder) {
 			let containerUI;

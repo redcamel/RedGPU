@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.8 18:27:58
+ *   Last modification time of this file - 2020.1.16 13:3:41
  *
  */
 
@@ -1367,6 +1367,7 @@ var GLTFLoader;
 				var meshes = json['meshes'];
 				var accessors = json['accessors'];
 				if (!json['animations']) json['animations'] = [];
+				console.log(json['animations'])
 				json['animations'].forEach(function (v, index) {
 					var samplers = v['samplers'];
 					//TODO: 용어를 정리해봐야겠음.
@@ -1447,7 +1448,6 @@ var GLTFLoader;
 					})
 				}
 				if (RedGPUContext.useDebugConsole) console.log('Animation parsing has ended.');
-
 			}
 		})();
 		return function (redGLTFLoader, redGPUContext, json, callBack, binaryChunk) {
