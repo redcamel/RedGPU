@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.13 14:36:13
+ *   Last modification time of this file - 2020.1.16 9:38:24
  *
  */
 
@@ -833,6 +833,7 @@ const ExampleHelper = (_ => {
 				use : true
 			}
 			tFolder.add(testData, 'use').name('use ' + tName).onChange(function (v) {
+
 				if (v) tView1.postEffect.addEffect(effect)
 				else tView1.postEffect.removeEffect(effect)
 			});
@@ -878,6 +879,7 @@ const ExampleHelper = (_ => {
 						return function (v) {
 							if (v) view.postEffect.addEffect(tEffect)
 							else view.postEffect.removeEffect(tEffect)
+							console.log(view.postEffect.effectList)
 						}
 					})());
 				})();
