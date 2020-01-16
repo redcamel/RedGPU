@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.14 17:55:9
+ *   Last modification time of this file - 2020.1.16 11:31:50
  *
  */
 
@@ -26,7 +26,7 @@ let prevMaterial_UUID;
 let changedMaterial_UUID;
 
 let renderScene = (_ => {
-		return (redGPUContext, redView, passEncoder, parent2, children, parentDirty2, renderDrawLayerIndexMode = 0) => {
+		return (redGPUContext, redView, passEncoder, children, renderDrawLayerIndexMode = 0) => {
 			let i;
 			let aSx, aSy, aSz, aCx, aCy, aCz, aX, aY, aZ,
 				a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23, a30, a31, a32, a33,
@@ -68,10 +68,12 @@ let renderScene = (_ => {
 				parent = tMesh._parent;
 				if (parent) {
 					parentDirty = parent._renderTimeDirtyTransform;
-					parentMTX = parent.matrix
+					parentMTX = parent.matrix;
+					tMesh.dirtyTransform = parentDirty
 				}
 				tDirtyTransform = tMesh.dirtyTransform;
 				tMesh._renderTimeDirtyTransform = tDirtyTransform;
+				// console.log(tMesh._geometry, parentDirty,tMesh.dirtyTransform)
 
 				tDirtyPipeline = tMesh.dirtyPipeline;
 				tPipeline = tMesh.pipeline;
@@ -131,7 +133,6 @@ let renderScene = (_ => {
 							radius = radius < radiusTemp ? radiusTemp : radius;
 
 							a00 = tMVMatrix[12], a01 = tMVMatrix[13], a02 = tMVMatrix[14],
-
 								frustumPlanes0[0] * a00 + frustumPlanes0[1] * a01 + frustumPlanes0[2] * a02 + frustumPlanes0[3] <= -radius ? tVisible = 0
 									: frustumPlanes1[0] * a00 + frustumPlanes1[1] * a01 + frustumPlanes1[2] * a02 + frustumPlanes1[3] <= -radius ? tVisible = 0
 									: frustumPlanes2[0] * a00 + frustumPlanes2[1] * a01 + frustumPlanes2[2] * a02 + frustumPlanes2[3] <= -radius ? tVisible = 0
@@ -228,11 +229,43 @@ let renderScene = (_ => {
 						tLocalMatrix[8] = (a00 * b20 + a10 * b21 + a20 * b22) * aZ,
 						tLocalMatrix[9] = (a01 * b20 + a11 * b21 + a21 * b22) * aZ,
 						tLocalMatrix[10] = (a02 * b20 + a12 * b21 + a22 * b22) * aZ,
-						tLocalMatrix[11] = tLocalMatrix[11] * aZ;
+						tLocalMatrix[11] = tLocalMatrix[11] * aZ,
 
+						// 피봇처리
+					(tMesh['_pivotX'] || tMesh['_pivotY'] || tMesh['_pivotZ']) ? (
+						a00 = tLocalMatrix[0], a01 = tLocalMatrix[1], a02 = tLocalMatrix[2], a03 = tLocalMatrix[3],
+							a10 = tLocalMatrix[4], a11 = tLocalMatrix[5], a12 = tLocalMatrix[6], a13 = tLocalMatrix[7],
+							a20 = tLocalMatrix[8], a21 = tLocalMatrix[9], a22 = tLocalMatrix[10], a23 = tLocalMatrix[11],
+							a30 = tLocalMatrix[12], a31 = tLocalMatrix[13], a32 = tLocalMatrix[14], a33 = tLocalMatrix[15],
+							// Cache only the current line of the second matrix
+							b0 = 1, b1 = 0, b2 = 0, b3 = 0,
+							tLocalMatrix[0] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30,
+							tLocalMatrix[1] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31,
+							tLocalMatrix[2] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32,
+							tLocalMatrix[3] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33,
+							b0 = 0, b1 = 1, b2 = 0, b3 = 0,
+							tLocalMatrix[4] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30,
+							tLocalMatrix[5] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31,
+							tLocalMatrix[6] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32,
+							tLocalMatrix[7] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33,
+							b0 = 0, b1 = 0, b2 = 1, b3 = 0,
+							tLocalMatrix[8] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30,
+							tLocalMatrix[9] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31,
+							tLocalMatrix[10] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32,
+							tLocalMatrix[11] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33,
+							// mode2DYn TODO - 아직 2D처리안함
+							// 	? (
+							// 		parentMTX
+							// 			? (b0 = -tMesh['pivotX'], b1 = tMesh['pivotY'], b2 = -tMesh['pivotZ'], b3 = 1)
+							// 			: (b0 = -tMesh['pivotX'] / aX, b1 = tMesh['pivotY'] / aY, b2 = -tMesh['pivotZ'], b3 = 1)
+							// 	)
+							b0 = -tMesh['_pivotX'], b1 = -tMesh['_pivotY'], b2 = -tMesh['_pivotZ'], b3 = 1,
+							tLocalMatrix[12] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30,
+							tLocalMatrix[13] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31,
+							tLocalMatrix[14] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32,
+							tLocalMatrix[15] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33
+					) : 0,
 					// 부모가 있으면 곱처리함
-				}
-				if (parentDirty || tDirtyTransform) {
 					parentMTX ?
 						(
 							// 부모매트릭스 복사
@@ -305,6 +338,8 @@ let renderScene = (_ => {
 					tMesh.uniformBuffer_mesh.meshFloat32Array.set(tMesh.matrix, tMesh.offsetMatrix / Float32Array.BYTES_PER_ELEMENT);
 					tMesh.uniformBuffer_mesh.meshFloat32Array.set(tMesh.normalMatrix, tMesh.offsetNormalMatrix / Float32Array.BYTES_PER_ELEMENT);
 				}
+
+
 				if (tSkinInfo) {
 					let joints = tSkinInfo['joints'];
 					let joint_i = 0;
@@ -383,8 +418,6 @@ let renderScene = (_ => {
 						tCacheUniformInfo[tUUID] = tSkinInfo['inverseBindMatrices']['_UUID']
 					}
 				}
-				// if (!renderDrawLayerIndexMode && tMesh._flatChildren.length) renderScene(redGPUContext, redView, passEncoder, tMesh, tMesh._flatChildren, parentDirty || tDirtyTransform);
-
 				tMesh.dirtyPipeline = false;
 				tMesh.dirtyTransform = false;
 			}
@@ -402,7 +435,7 @@ let renderOptions = (_ => {
 		}
 		if (tScene.grid) tOptionRenderList.push(tScene.grid);
 		if (tScene.axis) tOptionRenderList.push(tScene.axis);
-		if (tOptionRenderList.length) renderScene(redGPUContext, redView, passEncoder, null, tOptionRenderList);
+		if (tOptionRenderList.length) renderScene(redGPUContext, redView, passEncoder, tOptionRenderList);
 		tOptionRenderList.length = 0;
 	}
 })();
@@ -421,20 +454,20 @@ let renderPostEffect = (redGPUContext, redView) => {
 	return last_effect_baseAttachment
 };
 let renderTransparentLayerList = (redGPUContext, redView, passEncoder) => {
-	if (renderDrawLayerIndexList.length) renderScene(redGPUContext, redView, passEncoder, null, renderDrawLayerIndexList, null, Render.DRAW_LAYER_INDEX1);
+	if (renderDrawLayerIndexList.length) renderScene(redGPUContext, redView, passEncoder,  renderDrawLayerIndexList,  Render.DRAW_LAYER_INDEX1);
 	renderDrawLayerIndexList.length = 0;
 };
 let renderTextLayerList = (redGPUContext, redView, passEncoder) => {
 	if (textToTransparentLayerList.length) {
-		let t1 = [];
+		let tList = [];
 		let i = textToTransparentLayerList.length;
 		textToTransparentLayerList.sort((a, b) => {
 			if (a.z > b.z) return -1;
 			if (a.z < b.z) return 1;
 			return 0
 		});
-		while (i--) t1[i] = textToTransparentLayerList[i].targetText;
-		renderScene(redGPUContext, redView, passEncoder, null, t1, null, Render.DRAW_LAYER_INDEX2_Z_POINT_SORT);
+		while (i--) tList[i] = textToTransparentLayerList[i].targetText;
+		renderScene(redGPUContext, redView, passEncoder, tList, Render.DRAW_LAYER_INDEX2_Z_POINT_SORT);
 	}
 	textToTransparentLayerList.length = 0;
 };
@@ -442,7 +475,7 @@ let renderLightDebugger = (redGPUContext, redView, passEncoder) => {
 	if (redView.debugLightList.length) {
 		let cache_useFrustumCulling = redView.useFrustumCulling;
 		redView.useFrustumCulling = false;
-		renderScene(redGPUContext, redView, passEncoder, null, redView.debugLightList);
+		renderScene(redGPUContext, redView, passEncoder,  redView.debugLightList);
 		redView.useFrustumCulling = cache_useFrustumCulling;
 	}
 };
@@ -546,7 +579,7 @@ let renderView = (redGPUContext, redView, swapChainTexture, mouseEventChecker) =
 	// 실제 Scene렌더
 
 
-	renderScene(redGPUContext, redView, mainRenderPassEncoder, null, tScene._flatChildList);
+	renderScene(redGPUContext, redView, mainRenderPassEncoder,  tScene._flatChildList);
 	// 투명레이어 렌더
 	renderTransparentLayerList(redGPUContext, redView, mainRenderPassEncoder);
 	// 텍스트 렌더
@@ -603,19 +636,18 @@ export default class Render {
 						res.push(next);
 						stack.push(...next._children);
 					}
-					//입력 순서를 복구하기 위한 reverse
-					return res.reverse();
+					return res
 				}
 				redView.scene._flatChildList = flattenDeep(redView.scene._children)
-				redView.scene._flatChildList.sort((a, b) => {
-					if (a._geometry && b._geometry) {
-						if (a._geometry.interleaveBuffer._UUID > b._geometry.interleaveBuffer._UUID) return -1
-						if (a._geometry.interleaveBuffer._UUID < b._geometry.interleaveBuffer._UUID) return 1
-					}
-					return 0
-				})
+				redView.scene._flatChildList = redView.scene._flatChildList.reverse()
+				// redView.scene._flatChildList.sort((a, b) => {
+				// 	if (a._geometry && b._geometry) {
+				// 		if (a._geometry.interleaveBuffer._UUID > b._geometry.interleaveBuffer._UUID) return -1
+				// 		if (a._geometry.interleaveBuffer._UUID < b._geometry.interleaveBuffer._UUID) return 1
+				// 	}
+				// 	return 0
+				// })
 
-				// tScene._flatChildList = tScene._flatChildList.reverse()
 			}
 			renderView(redGPUContext, redView, redGPUContext.swapChain.getCurrentTexture());
 			// 마우스 이벤트 체크

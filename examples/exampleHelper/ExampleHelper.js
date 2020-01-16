@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.13 14:36:13
+ *   Last modification time of this file - 2020.1.16 11:31:50
  *
  */
 
@@ -272,6 +272,49 @@ const ExampleHelper = (_ => {
 			};
 			rootFolder.add(testData, 'lookAt(0,0,0)');
 		}
+	};
+	const setTestUI_PivotPoint = (RedGPU, redGPUContext, targetMesh, childMesh, open, gui) => {
+		checkGUI();
+		gui = gui || testHelperFolder;
+		let rootFolder, folder;
+		rootFolder = gui.addFolder('Pivot Test');
+		if (open) rootFolder.open();
+
+		let pivotPoint1, pivotPoint2;
+		pivotPoint1 = new RedGPU.Mesh(redGPUContext, new RedGPU.Sphere(redGPUContext, 0.05), new RedGPU.ColorMaterial(redGPUContext))
+		targetMesh.addChild(pivotPoint1);
+		pivotPoint2 = new RedGPU.Mesh(redGPUContext, new RedGPU.Sphere(redGPUContext, 0.05), new RedGPU.ColorMaterial(redGPUContext))
+		childMesh.addChild(pivotPoint2);
+		let HD_point1,HD_point2
+		HD_point1 = _=>{
+			pivotPoint1.x = targetMesh.pivotX
+			pivotPoint1.y = targetMesh.pivotY
+			pivotPoint1.z = targetMesh.pivotZ
+		}
+		HD_point2 = _=>{
+			pivotPoint2.x = childMesh.pivotX
+			pivotPoint2.y = childMesh.pivotY
+			pivotPoint2.z = childMesh.pivotZ
+		}
+		HD_point1()
+		HD_point2()
+		folder = rootFolder.addFolder('Parent Test');
+		folder.open();
+		folder.add(targetMesh, 'x', -1, 1, 0.01).onChange(HD_point1);
+		folder.add(targetMesh, 'y', -1, 1, 0.01).onChange(HD_point1);
+		folder.add(targetMesh, 'z', -1, 1, 0.01).onChange(HD_point1);
+		folder.add(targetMesh, 'pivotX', -1, 1, 0.01).onChange(HD_point1);
+		folder.add(targetMesh, 'pivotY', -1, 1, 0.01).onChange(HD_point1);
+		folder.add(targetMesh, 'pivotZ', -1, 1, 0.01).onChange(HD_point1);
+		folder = rootFolder.addFolder('Child Test');
+		folder.open();
+		folder.add(childMesh, 'x', -1, 1, 0.01).onChange(HD_point2);
+		folder.add(childMesh, 'y', -1, 1, 0.01).onChange(HD_point2);
+		folder.add(childMesh, 'z', -1, 1, 0.01).onChange(HD_point2);
+		folder.add(childMesh, 'pivotX', -1, 1, 0.01).onChange(HD_point2);
+		folder.add(childMesh, 'pivotY', -1, 1, 0.01).onChange(HD_point2);
+		folder.add(childMesh, 'pivotZ', -1, 1, 0.01).onChange(HD_point2);
+
 	};
 	const setTestUI_Debugger = RedGPU => {
 		checkGUI();
@@ -828,11 +871,12 @@ const ExampleHelper = (_ => {
 		}
 		setTestUI_PostEffectBy = (RedGPU, tName, tView1, effect, gui) => {
 			checkGUI();
-			let tFolder = initPostEffect (RedGPU, tName, effect, true, testHelperFolder)
+			let tFolder = initPostEffect(RedGPU, tName, effect, true, testHelperFolder)
 			let testData = {
-				use : true
+				use: true
 			}
 			tFolder.add(testData, 'use').name('use ' + tName).onChange(function (v) {
+
 				if (v) tView1.postEffect.addEffect(effect)
 				else tView1.postEffect.removeEffect(effect)
 			});
@@ -870,7 +914,7 @@ const ExampleHelper = (_ => {
 
 			for (let k in testData) {
 				(function () {
-					let tFolder = initPostEffect(RedGPU,k, effectList[k], true, rootFolder);
+					let tFolder = initPostEffect(RedGPU, k, effectList[k], true, rootFolder);
 					document.body.style.background = ''
 					console.log(tFolder)
 					tFolder.add(testData, k).name('use ' + k.replace('PostEffect_', '')).onChange((function () {
@@ -878,6 +922,7 @@ const ExampleHelper = (_ => {
 						return function (v) {
 							if (v) view.postEffect.addEffect(tEffect)
 							else view.postEffect.removeEffect(tEffect)
+							console.log(view.postEffect.effectList)
 						}
 					})());
 				})();
@@ -981,6 +1026,7 @@ const ExampleHelper = (_ => {
 		setTestUI_PrimitiveSphere: setTestUI_PrimitiveSphere,
 		setTestUI_PrimitiveCylinder: setTestUI_PrimitiveCylinder,
 		setTestUI_Camera: setTestUI_Camera,
+		setTestUI_PivotPoint: setTestUI_PivotPoint,
 		//
 		setTestUI_ColorMaterial: setTestUI_ColorMaterial,
 		setTestUI_ColorPhongMaterial: setTestUI_ColorPhongMaterial,
