@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.16 18:59:50
+ *   Last modification time of this file - 2020.1.16 21:13:13
  *
  */
 
@@ -62,7 +62,7 @@ let renderScene = (_ => {
 				let geoVolume;
 				let radius;
 				let radiusTemp;
-				let tOpacity,tParentSumOpacity;
+				let tOpacity, tParentSumOpacity;
 				tMesh = children[i];
 				tMaterial = tMesh._material;
 				tGeometry = tMesh._geometry;
@@ -75,9 +75,9 @@ let renderScene = (_ => {
 					parentMTX = parent.matrix;
 					tParentSumOpacity = parent._sumOpacity
 				}
-				if(tMesh._sumOpacity != tOpacity * tParentSumOpacity) {
+				if (tMesh._sumOpacity != tOpacity * tParentSumOpacity) {
 					tMesh.sumOpacity = tOpacity * tParentSumOpacity
-					console.log('여기',tOpacity)
+					console.log('여기', tOpacity)
 				}
 
 				tDirtyTransform = tMesh.dirtyTransform;
@@ -241,41 +241,41 @@ let renderScene = (_ => {
 						tLocalMatrix[11] = tLocalMatrix[11] * aZ,
 
 						// 피봇처리
-					(tMesh['_pivotX'] || tMesh['_pivotY'] || tMesh['_pivotZ']) ? (
-						a00 = tLocalMatrix[0], a01 = tLocalMatrix[1], a02 = tLocalMatrix[2], a03 = tLocalMatrix[3],
-							a10 = tLocalMatrix[4], a11 = tLocalMatrix[5], a12 = tLocalMatrix[6], a13 = tLocalMatrix[7],
-							a20 = tLocalMatrix[8], a21 = tLocalMatrix[9], a22 = tLocalMatrix[10], a23 = tLocalMatrix[11],
-							a30 = tLocalMatrix[12], a31 = tLocalMatrix[13], a32 = tLocalMatrix[14], a33 = tLocalMatrix[15],
-							// Cache only the current line of the second matrix
-							b0 = 1, b1 = 0, b2 = 0, b3 = 0,
-							tLocalMatrix[0] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30,
-							tLocalMatrix[1] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31,
-							tLocalMatrix[2] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32,
-							tLocalMatrix[3] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33,
-							b0 = 0, b1 = 1, b2 = 0, b3 = 0,
-							tLocalMatrix[4] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30,
-							tLocalMatrix[5] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31,
-							tLocalMatrix[6] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32,
-							tLocalMatrix[7] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33,
-							b0 = 0, b1 = 0, b2 = 1, b3 = 0,
-							tLocalMatrix[8] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30,
-							tLocalMatrix[9] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31,
-							tLocalMatrix[10] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32,
-							tLocalMatrix[11] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33,
-							// mode2DYn TODO - 아직 2D처리안함
-							// 	? (
-							// 		parentMTX
-							// 			? (b0 = -tMesh['pivotX'], b1 = tMesh['pivotY'], b2 = -tMesh['pivotZ'], b3 = 1)
-							// 			: (b0 = -tMesh['pivotX'] / aX, b1 = tMesh['pivotY'] / aY, b2 = -tMesh['pivotZ'], b3 = 1)
-							// 	)
-							b0 = -tMesh['_pivotX'], b1 = -tMesh['_pivotY'], b2 = -tMesh['_pivotZ'], b3 = 1,
-							tLocalMatrix[12] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30,
-							tLocalMatrix[13] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31,
-							tLocalMatrix[14] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32,
-							tLocalMatrix[15] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33
-					) : 0
+						(tMesh['_pivotX'] || tMesh['_pivotY'] || tMesh['_pivotZ']) ? (
+							a00 = tLocalMatrix[0], a01 = tLocalMatrix[1], a02 = tLocalMatrix[2], a03 = tLocalMatrix[3],
+								a10 = tLocalMatrix[4], a11 = tLocalMatrix[5], a12 = tLocalMatrix[6], a13 = tLocalMatrix[7],
+								a20 = tLocalMatrix[8], a21 = tLocalMatrix[9], a22 = tLocalMatrix[10], a23 = tLocalMatrix[11],
+								a30 = tLocalMatrix[12], a31 = tLocalMatrix[13], a32 = tLocalMatrix[14], a33 = tLocalMatrix[15],
+								// Cache only the current line of the second matrix
+								b0 = 1, b1 = 0, b2 = 0, b3 = 0,
+								tLocalMatrix[0] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30,
+								tLocalMatrix[1] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31,
+								tLocalMatrix[2] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32,
+								tLocalMatrix[3] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33,
+								b0 = 0, b1 = 1, b2 = 0, b3 = 0,
+								tLocalMatrix[4] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30,
+								tLocalMatrix[5] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31,
+								tLocalMatrix[6] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32,
+								tLocalMatrix[7] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33,
+								b0 = 0, b1 = 0, b2 = 1, b3 = 0,
+								tLocalMatrix[8] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30,
+								tLocalMatrix[9] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31,
+								tLocalMatrix[10] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32,
+								tLocalMatrix[11] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33,
+								// mode2DYn TODO - 아직 2D처리안함
+								// 	? (
+								// 		parentMTX
+								// 			? (b0 = -tMesh['pivotX'], b1 = tMesh['pivotY'], b2 = -tMesh['pivotZ'], b3 = 1)
+								// 			: (b0 = -tMesh['pivotX'] / aX, b1 = tMesh['pivotY'] / aY, b2 = -tMesh['pivotZ'], b3 = 1)
+								// 	)
+								b0 = -tMesh['_pivotX'], b1 = -tMesh['_pivotY'], b2 = -tMesh['_pivotZ'], b3 = 1,
+								tLocalMatrix[12] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30,
+								tLocalMatrix[13] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31,
+								tLocalMatrix[14] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32,
+								tLocalMatrix[15] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33
+						) : 0
 				}
-				if(parentDirty || tDirtyTransform){
+				if (parentDirty || tDirtyTransform) {
 					currentDebuggerData['dirtyTransformNum']++;
 					// 부모가 있으면 곱처리함
 					parentMTX ?
@@ -418,17 +418,21 @@ let renderScene = (_ => {
 						globalTransformOfJointNode[joint_i * 16 + 14] = tJointMTX[14];
 						globalTransformOfJointNode[joint_i * 16 + 15] = tJointMTX[15]
 					}
-					tMaterial.uniformBuffer_vertex.GPUBuffer.setSubData(tMaterial.uniformBufferDescriptor_vertex.redStructOffsetMap['globalTransformOfNodeThatTheMeshIsAttachedTo'], globalTransformOfNodeThatTheMeshIsAttachedTo);
-					tMaterial.uniformBuffer_vertex.GPUBuffer.setSubData(tMaterial.uniformBufferDescriptor_vertex.redStructOffsetMap['jointMatrix'], globalTransformOfJointNode);
-					// tGL.uniformMatrix4fv(tSystemUniformGroup['uGlobalTransformOfNodeThatTheMeshIsAttachedTo']['location'], false, globalTransformOfNodeThatTheMeshIsAttachedTo);
-					// tGL.uniformMatrix4fv(tSystemUniformGroup['uJointMatrix']['location'], false, globalTransformOfJointNode);
+
+					// tMaterial.uniformBuffer_vertex.GPUBuffer.setSubData(tMaterial.uniformBufferDescriptor_vertex.redStructOffsetMap['globalTransformOfNodeThatTheMeshIsAttachedTo'], globalTransformOfNodeThatTheMeshIsAttachedTo);
+					// tMaterial.uniformBuffer_vertex.GPUBuffer.setSubData(tMaterial.uniformBufferDescriptor_vertex.redStructOffsetMap['jointMatrix'], globalTransformOfJointNode);
+
+					tMaterial.uniformBuffer_vertex.float32Array.set(globalTransformOfNodeThatTheMeshIsAttachedTo, tMaterial.uniformBufferDescriptor_vertex.redStructOffsetMap['globalTransformOfNodeThatTheMeshIsAttachedTo'] / Float32Array.BYTES_PER_ELEMENT)
+					tMaterial.uniformBuffer_vertex.float32Array.set(globalTransformOfJointNode, tMaterial.uniformBufferDescriptor_vertex.redStructOffsetMap['jointMatrix'] / Float32Array.BYTES_PER_ELEMENT)
 
 					if (!tSkinInfo['inverseBindMatrices']['_UUID']) tSkinInfo['inverseBindMatrices']['_UUID'] = JSON.stringify(tSkinInfo['inverseBindMatrices']);
 					let tUUID = tMaterial.uniformBuffer_vertex['_UUID'];
 					if (tCacheUniformInfo[tUUID] != tSkinInfo['inverseBindMatrices']['_UUID']) {
-						tMaterial.uniformBuffer_vertex.GPUBuffer.setSubData(tMaterial.uniformBufferDescriptor_vertex.redStructOffsetMap['inverseBindMatrixForJoint'], tSkinInfo['inverseBindMatrices']);
+						// tMaterial.uniformBuffer_vertex.GPUBuffer.setSubData(tMaterial.uniformBufferDescriptor_vertex.redStructOffsetMap['inverseBindMatrixForJoint'], tSkinInfo['inverseBindMatrices']);
+						tMaterial.uniformBuffer_vertex.float32Array.set(tSkinInfo['inverseBindMatrices'], tMaterial.uniformBufferDescriptor_vertex.redStructOffsetMap['inverseBindMatrixForJoint'] / Float32Array.BYTES_PER_ELEMENT);
 						tCacheUniformInfo[tUUID] = tSkinInfo['inverseBindMatrices']['_UUID']
 					}
+					tMaterial.uniformBuffer_vertex.GPUBuffer.setSubData(0,tMaterial.uniformBuffer_vertex.float32Array)
 				}
 				tMesh.dirtyPipeline = false;
 				tMesh.dirtyTransform = false;
@@ -466,7 +470,7 @@ let renderPostEffect = (redGPUContext, redView) => {
 	return last_effect_baseAttachment
 };
 let renderTransparentLayerList = (redGPUContext, redView, passEncoder) => {
-	if (renderDrawLayerIndexList.length) renderScene(redGPUContext, redView, passEncoder,  renderDrawLayerIndexList,  Render.DRAW_LAYER_INDEX1);
+	if (renderDrawLayerIndexList.length) renderScene(redGPUContext, redView, passEncoder, renderDrawLayerIndexList, Render.DRAW_LAYER_INDEX1);
 	renderDrawLayerIndexList.length = 0;
 };
 let renderTextLayerList = (redGPUContext, redView, passEncoder) => {
@@ -487,7 +491,7 @@ let renderLightDebugger = (redGPUContext, redView, passEncoder) => {
 	if (redView.debugLightList.length) {
 		let cache_useFrustumCulling = redView.useFrustumCulling;
 		redView.useFrustumCulling = false;
-		renderScene(redGPUContext, redView, passEncoder,  redView.debugLightList);
+		renderScene(redGPUContext, redView, passEncoder, redView.debugLightList);
 		redView.useFrustumCulling = cache_useFrustumCulling;
 	}
 };
@@ -591,7 +595,7 @@ let renderView = (redGPUContext, redView, swapChainTexture, mouseEventChecker) =
 	// 실제 Scene렌더
 
 
-	renderScene(redGPUContext, redView, mainRenderPassEncoder,  tScene._flatChildList);
+	renderScene(redGPUContext, redView, mainRenderPassEncoder, tScene._flatChildList);
 	// 투명레이어 렌더
 	renderTransparentLayerList(redGPUContext, redView, mainRenderPassEncoder);
 	// 텍스트 렌더
