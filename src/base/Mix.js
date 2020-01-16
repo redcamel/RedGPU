@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.8 18:11:47
+ *   Last modification time of this file - 2020.1.16 13:54:48
  *
  */
 
@@ -37,6 +37,7 @@ const color = Base => class extends Base {
 		this._colorRGBA[1] = rgb[1] * value;
 		this._colorRGBA[2] = rgb[2] * value;
 		this._colorRGBA[3] = value;
+		this.#colorAlpha = value;
 		if (this.uniformBuffer_fragment) this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['colorRGBA'], this._colorRGBA)
 	}
 	get colorRGBA() {return this._colorRGBA;}

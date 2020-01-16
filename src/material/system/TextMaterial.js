@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.9 14:4:9
+ *   Last modification time of this file - 2020.1.16 13:54:48
  *
  */
 
@@ -37,7 +37,7 @@ export default class TextMaterial extends Mix.mix(
 	void main() {
 		float w = vertexUniforms.width ;
 		float h = vertexUniforms.height ;
-		mat4 modelMatrix = meshUniforms.modelMatrix[ int(meshUniformsIndex.index) ];
+		mat4 modelMatrix = meshMatrixUniforms.modelMatrix[ int(meshUniforms.index) ];
 		mat4 targetMatrix;
 		
 		// 기본
@@ -55,7 +55,7 @@ export default class TextMaterial extends Mix.mix(
 		
 		vNormal = normal;
 		vUV = uv;
-		vMouseColorID = meshUniformsIndex.mouseColorID;
+		vMouseColorID = meshUniforms.mouseColorID;
 	}
 	`;
 	static fragmentShaderGLSL = `

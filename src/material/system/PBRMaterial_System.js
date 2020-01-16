@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.9 14:4:9
+ *   Last modification time of this file - 2020.1.16 13:54:48
  *
  */
 
@@ -58,7 +58,7 @@ export default class PBRMaterial_System extends Mix.mix(
 	layout( set = ${ShareGLSL.SET_INDEX_VertexUniforms}, binding = 1 ) uniform sampler uDisplacementSampler;
 	//#RedGPU#displacementTexture# layout( set = ${ShareGLSL.SET_INDEX_VertexUniforms}, binding = 2 ) uniform texture2D uDisplacementTexture;
 	void main() {		
-		mat4 targetMatrix = meshUniforms.modelMatrix[ int(meshUniformsIndex.index) ] ;
+		mat4 targetMatrix = meshMatrixUniforms.modelMatrix[ int(meshUniforms.index) ] ;
 		mat4 skinMat = mat4(1.0,0.0,0.0,0.0, 0.0,1.0,0.0,0.0, 0.0,0.0,1.0,0.0, 0.0,0.0,0.0,1.0);
 		//#RedGPU#skin# skinMat =
 		//#RedGPU#skin#  aVertexWeight.x * vertexUniforms.globalTransformOfNodeThatTheMeshIsAttachedTo * vertexUniforms.jointMatrix[ int(aVertexJoint.x) ] * vertexUniforms.inverseBindMatrixForJoint[int(aVertexJoint.x)]+
@@ -66,17 +66,17 @@ export default class PBRMaterial_System extends Mix.mix(
 		//#RedGPU#skin#  aVertexWeight.z * vertexUniforms.globalTransformOfNodeThatTheMeshIsAttachedTo * vertexUniforms.jointMatrix[ int(aVertexJoint.z) ] * vertexUniforms.inverseBindMatrixForJoint[int(aVertexJoint.z)]+
 		//#RedGPU#skin#  aVertexWeight.w * vertexUniforms.globalTransformOfNodeThatTheMeshIsAttachedTo * vertexUniforms.jointMatrix[ int(aVertexJoint.w) ] * vertexUniforms.inverseBindMatrixForJoint[int(aVertexJoint.w)];
 		
-		vVertexPosition = meshUniforms.modelMatrix[ int(meshUniformsIndex.index) ] * vec4(position, 1.0);
-		//#RedGPU#skin# vVertexPosition = meshUniforms.modelMatrix[ int(meshUniformsIndex.index) ] * skinMat * vec4(position, 1.0);
+		vVertexPosition = meshMatrixUniforms.modelMatrix[ int(meshUniforms.index) ] * vec4(position, 1.0);
+		//#RedGPU#skin# vVertexPosition = meshMatrixUniforms.modelMatrix[ int(meshUniforms.index) ] * skinMat * vec4(position, 1.0);
 		vVertexColor_0 = vertexColor_0;
 		
-		vNormal = (meshUniforms.normalMatrix[ int(meshUniformsIndex.index) ] *  vec4(normal,1.0)).xyz;
-	    //#RedGPU#skin# vNormal = (meshUniforms.normalMatrix[ int(meshUniformsIndex.index) ]  * skinMat * vec4(normal,0.0)).xyz;		
+		vNormal = (meshMatrixUniforms.normalMatrix[ int(meshUniforms.index) ] *  vec4(normal,1.0)).xyz;
+	    //#RedGPU#skin# vNormal = (meshMatrixUniforms.normalMatrix[ int(meshUniforms.index) ]  * skinMat * vec4(normal,0.0)).xyz;		
 		
 		vUV = uv;
 		vUV1 = uv1;
 		vVertexTangent = vertexTangent;
-		vMouseColorID = meshUniformsIndex.mouseColorID;
+		vMouseColorID = meshUniforms.mouseColorID;
 		//#RedGPU#displacementTexture# vVertexPosition.xyz += calcDisplacement(vNormal, vertexUniforms.displacementFlowSpeedX, vertexUniforms.displacementFlowSpeedY, vertexUniforms.displacementPower, uv, uDisplacementTexture, uDisplacementSampler);
 		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * vVertexPosition;		
 	}

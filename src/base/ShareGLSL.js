@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.8 22:30:15
+ *   Last modification time of this file - 2020.1.16 13:54:48
  *
  */
 
@@ -31,11 +31,12 @@ export default class ShareGLSL {
 		layout( set = ${ShareGLSL.SET_INDEX_MeshUniforms}, binding = 0 ) uniform MeshUniforms {
 	        mat4 modelMatrix[${ShareGLSL.MESH_UNIFORM_POOL_NUM}];
 	        mat4 normalMatrix[${ShareGLSL.MESH_UNIFORM_POOL_NUM}];
-	    } meshUniforms;
+	    } meshMatrixUniforms;
 	    layout( set = ${ShareGLSL.SET_INDEX_MeshUniforms}, binding = 1 ) uniform MeshUniformIndex {
 	        float index;
 	        float mouseColorID;
-	    } meshUniformsIndex;
+	        float opacity;
+	    } meshUniforms;
 		`,
 		calcDisplacement: `
 		//#RedGPU#displacementTexture# vec3 calcDisplacement(vec3 vNormal, float displacementFlowSpeedX, float displacementFlowSpeedY, float displacementPower, vec2 targetUV, texture2D targetDisplacementTexture, sampler targetSampler){

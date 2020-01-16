@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.2 14:26:4
+ *   Last modification time of this file - 2020.1.16 13:54:48
  *
  */
 
@@ -25,8 +25,8 @@ export default class ColorMaterial extends Mix.mix(
 	layout( location = 1 ) in vec3 normal;
 	layout( location = 0 ) out float vMouseColorID;	
 	void main() {
-		vMouseColorID = meshUniformsIndex.mouseColorID;
-		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * meshUniforms.modelMatrix[ int(meshUniformsIndex.index) ] * vec4(position,1.0);
+		vMouseColorID = meshUniforms.mouseColorID;
+		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * meshMatrixUniforms.modelMatrix[ int(meshUniforms.index) ] * vec4(position,1.0);
 	
 	}
 	`;
@@ -37,13 +37,11 @@ export default class ColorMaterial extends Mix.mix(
         vec4 color;
         float alpha;
     } fragmentUniforms;
-	layout( location = 0 ) in float vMouseColorID;	
+	layout( location = 0 ) in float vMouseColorID;
 	layout( location = 0 ) out vec4 outColor;
-	
 	layout( location = 1 ) out vec4 out_MouseColorID_Depth;
 	void main() {
 		outColor = fragmentUniforms.color;
-		outColor.a *= fragmentUniforms.alpha;
 		out_MouseColorID_Depth = vec4(vMouseColorID, gl_FragCoord.z/gl_FragCoord.w, 0.0, 0.0);
 		
 	}

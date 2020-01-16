@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.9 14:4:9
+ *   Last modification time of this file - 2020.1.16 13:54:48
  *
  */
 
@@ -22,8 +22,8 @@ export default class SkyBoxMaterial extends Mix.mix(
 	layout( location = 0 ) in vec3 position;
 	layout( location = 0 ) out vec3 vReflectionCubeCoord;
 	void main() {
-		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * meshUniforms.modelMatrix[ int(meshUniformsIndex.index) ] * vec4(position,1.0);
-		vReflectionCubeCoord = (meshUniforms.modelMatrix[ int(meshUniformsIndex.index) ] *vec4(position, 0.0)).xyz;
+		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * meshMatrixUniforms.modelMatrix[ int(meshUniforms.index) ] * vec4(position,1.0);
+		vReflectionCubeCoord = (meshMatrixUniforms.modelMatrix[ int(meshUniforms.index) ] *vec4(position, 0.0)).xyz;
 	}
 	`;
 	static fragmentShaderGLSL = `

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.16 11:31:50
+ *   Last modification time of this file - 2020.1.16 13:54:48
  *
  */
 
@@ -23,6 +23,7 @@ import Render from "../renderer/Render.js";
 const MESH_UNIFORM_TABLE = [];
 let MESH_UNIFORM_POOL_index = 0;
 let MESH_UNIFORM_POOL_tableIndex = 0;
+let float1_Float32Array = new Float32Array(1)
 const uniformBufferDescriptor_mesh = new UniformBufferDescriptor(
 	[
 		{size: TypeSize.mat4 * ShareGLSL.MESH_UNIFORM_POOL_NUM, valueName: 'matrix'},
@@ -31,16 +32,16 @@ const uniformBufferDescriptor_mesh = new UniformBufferDescriptor(
 );
 let MOUSE_UUID = 0;
 const getPool = function (redGPUContext, targetMesh) {
-	let uniformBuffer_mesh;
+	let uniformBuffer_meshMatrix;
 	if (!MESH_UNIFORM_TABLE[MESH_UNIFORM_POOL_tableIndex]) {
-		uniformBuffer_mesh = new UniformBuffer(redGPUContext);
-		uniformBuffer_mesh.setBuffer(uniformBufferDescriptor_mesh);
-		MESH_UNIFORM_TABLE[MESH_UNIFORM_POOL_tableIndex] = uniformBuffer_mesh
+		uniformBuffer_meshMatrix = new UniformBuffer(redGPUContext);
+		uniformBuffer_meshMatrix.setBuffer(uniformBufferDescriptor_mesh);
+		MESH_UNIFORM_TABLE[MESH_UNIFORM_POOL_tableIndex] = uniformBuffer_meshMatrix
 	}
-	uniformBuffer_mesh = MESH_UNIFORM_TABLE[MESH_UNIFORM_POOL_tableIndex];
+	uniformBuffer_meshMatrix = MESH_UNIFORM_TABLE[MESH_UNIFORM_POOL_tableIndex];
 	let result = {
-		float32Array: uniformBuffer_mesh.float32Array,
-		uniformBuffer_mesh: uniformBuffer_mesh,
+		float32Array: uniformBuffer_meshMatrix.float32Array,
+		uniformBuffer_meshMatrix: uniformBuffer_meshMatrix,
 		offsetMatrix: TypeSize.mat4 * MESH_UNIFORM_POOL_index,
 		offsetNormalMatrix: TypeSize.mat4 * ShareGLSL.MESH_UNIFORM_POOL_NUM + (TypeSize.mat4 * MESH_UNIFORM_POOL_index),
 		uniformIndex: MESH_UNIFORM_POOL_index
@@ -74,7 +75,8 @@ export default class BaseObject3D extends DisplayContainer {
 	static uniformBufferDescriptor_meshIndex = new UniformBufferDescriptor(
 		[
 			{size: TypeSize.float, valueName: 'meshUniformIndex'},
-			{size: TypeSize.float, valueName: 'mouseColorID'}
+			{size: TypeSize.float, valueName: 'mouseColorID'},
+			{size: TypeSize.float, valueName: 'opacity'}
 		]
 	);
 	_x = 0;
@@ -109,6 +111,13 @@ export default class BaseObject3D extends DisplayContainer {
 	//FIXME - 유일키가 될수있도록 변경
 	#mouseColorID = 0;
 	_renderDrawLayerIndex = Render.DRAW_LAYER_INDEX0;
+	#opacity = 1;
+	get opacity() {return this.#opacity;}
+	set opacity(value) {
+		this.#opacity = value;
+		float1_Float32Array[0] = this.#opacity;
+		this.uniformBuffer_mesh.GPUBuffer.setSubData(TypeSize.float2, float1_Float32Array)
+	}
 	get renderDrawLayerIndex() {return this._renderDrawLayerIndex;}
 	set renderDrawLayerIndex(value) {this._renderDrawLayerIndex = value;}
 	get blendColorSrc() {return this._blendColorSrc;}
@@ -258,21 +267,22 @@ export default class BaseObject3D extends DisplayContainer {
 		super();
 		this.#redGPUContext = redGPUContext;
 		let bufferData = getPool(redGPUContext, this);
-		this.uniformBuffer_mesh = bufferData.uniformBuffer_mesh;
-		this.uniformBuffer_mesh.meshFloat32Array = bufferData.float32Array;
+		this.uniformBuffer_meshMatrix = bufferData.uniformBuffer_meshMatrix;
+		this.uniformBuffer_meshMatrix.meshFloat32Array = bufferData.float32Array;
 		this.offsetMatrix = bufferData.offsetMatrix;
 		this.offsetNormalMatrix = bufferData.offsetNormalMatrix;
 		MOUSE_UUID++;
 		this.#mouseColorID = MOUSE_UUID;
-		this.uniformBuffer_meshIndex = new UniformBuffer(redGPUContext);
-		this.uniformBuffer_meshIndex.setBuffer(BaseObject3D.uniformBufferDescriptor_meshIndex);
-		this.uniformBuffer_meshIndex.GPUBuffer.setSubData(0, new Float32Array([bufferData.uniformIndex]));
-		this.uniformBuffer_meshIndex.GPUBuffer.setSubData(TypeSize.float, new Float32Array([this.#mouseColorID]));
+		this.uniformBuffer_mesh = new UniformBuffer(redGPUContext);
+		this.uniformBuffer_mesh.setBuffer(BaseObject3D.uniformBufferDescriptor_meshIndex);
+		this.uniformBuffer_mesh.GPUBuffer.setSubData(0, new Float32Array([bufferData.uniformIndex]));
+		this.uniformBuffer_mesh.GPUBuffer.setSubData(TypeSize.float, new Float32Array([this.#mouseColorID]));
+		this.opacity = 1;
 		this.#bindings = [
 			{
 				binding: 0,
 				resource: {
-					buffer: this.uniformBuffer_mesh.GPUBuffer,
+					buffer: this.uniformBuffer_meshMatrix.GPUBuffer,
 					offset: 0,
 					size: TypeSize.mat4 * 2 * ShareGLSL.MESH_UNIFORM_POOL_NUM
 				}
@@ -280,7 +290,7 @@ export default class BaseObject3D extends DisplayContainer {
 			{
 				binding: 1,
 				resource: {
-					buffer: this.uniformBuffer_meshIndex.GPUBuffer,
+					buffer: this.uniformBuffer_mesh.GPUBuffer,
 					offset: 0,
 					size: TypeSize.float
 				}

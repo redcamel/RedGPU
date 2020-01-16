@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.11 18:20:56
+ *   Last modification time of this file - 2020.1.16 13:54:48
  *
  */
 
@@ -19,7 +19,7 @@ export default class PostEffect_Convolution extends BasePostEffect {
 	${ShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
     layout( set = ${ShareGLSL.SET_INDEX_MeshUniforms}, binding = 0 ) uniform MeshUniforms {
         mat4 modelMatrix;
-    } meshUniforms;
+    } meshMatrixUniforms;
 	layout( location = 0 ) in vec3 position;
 	layout( location = 1 ) in vec3 normal;
 	layout( location = 2 ) in vec2 uv;
