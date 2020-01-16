@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.16 13:54:48
+ *   Last modification time of this file - 2020.1.16 18:59:49
  *
  */
 
@@ -29,10 +29,12 @@ export default class ColorPhongMaterial extends Mix.mix(
 	layout( location = 0 ) out vec3 vNormal;
 	layout( location = 1 ) out vec4 vVertexPosition;
 	layout( location = 2 ) out float vMouseColorID;
+	layout( location = 3 ) out float vSumOpacity;
 	void main() {
 		vVertexPosition = meshMatrixUniforms.modelMatrix[ int(meshUniforms.index) ] * vec4(position,1.0);
 		vNormal = (meshMatrixUniforms.normalMatrix[ int(meshUniforms.index) ] * vec4(normal,1.0)).xyz;
 		vMouseColorID = meshUniforms.mouseColorID;
+		vSumOpacity = meshUniforms.sumOpacity;
 		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * vVertexPosition;
 	}
 	`;
@@ -49,10 +51,11 @@ export default class ColorPhongMaterial extends Mix.mix(
 	layout( location = 0 ) in vec3 vNormal;
 	layout( location = 1 ) in vec4 vVertexPosition;
 	layout( location = 2 ) in float vMouseColorID;	
+	layout( location = 3 ) in float vSumOpacity;
 	layout( location = 0 ) out vec4 outColor;	
 	layout( location = 1 ) out vec4 out_MouseColorID_Depth;
 	void main() {
-		float testAlpha = fragmentUniforms.color.a;
+		float testAlpha = fragmentUniforms.color.a * vSumOpacity;
 
 		vec3 N = normalize(vNormal);
 		//#RedGPU#useFlatMode# N = getFlatNormal(vVertexPosition.xyz);

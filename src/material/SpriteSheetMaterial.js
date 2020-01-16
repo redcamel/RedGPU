@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.16 13:54:48
+ *   Last modification time of this file - 2020.1.16 18:59:50
  *
  */
 
@@ -31,13 +31,15 @@ export default class SpriteSheetMaterial extends Mix.mix(
 	layout( location = 2 ) in vec2 uv;
 	layout( location = 0 ) out vec3 vNormal;
 	layout( location = 1 ) out vec2 vUV;
-	layout( location = 2 ) out float vMouseColorID;	
+	layout( location = 2 ) out float vMouseColorID;
+	layout( location = 3 ) out float vSumOpacity;	
 	void main() {
 		vUV = uv;
 		vUV = vec2(
-		vUV.s * vertexUniforms.sheetRect.x + vertexUniforms.sheetRect.z,
-		vUV.t * vertexUniforms.sheetRect.y -vertexUniforms.sheetRect.w
-		);		
+			vUV.s * vertexUniforms.sheetRect.x + vertexUniforms.sheetRect.z,
+			vUV.t * vertexUniforms.sheetRect.y -vertexUniforms.sheetRect.w
+		);	
+		vSumOpacity = meshUniforms.sumOpacity;	
 		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * meshMatrixUniforms.modelMatrix[ int(meshUniforms.index) ] * vec4(position,1.0);
 		vNormal = normal;
 		vMouseColorID = meshUniforms.mouseColorID;
@@ -49,6 +51,7 @@ export default class SpriteSheetMaterial extends Mix.mix(
 	layout( location = 0 ) in vec3 vNormal;
 	layout( location = 1 ) in vec2 vUV;
 	layout( location = 2 ) in float vMouseColorID;	
+	layout( location = 3 ) in float vSumOpacity;	
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 1 ) uniform FragmentUniforms {
         float alpha;
     } fragmentUniforms;
@@ -64,7 +67,7 @@ export default class SpriteSheetMaterial extends Mix.mix(
 		if(diffuseColor.a<0.05) discard;
 			
 		outColor = diffuseColor;
-		outColor.a *= fragmentUniforms.alpha;
+		outColor.a *= fragmentUniforms.alpha * vSumOpacity;
 		out_MouseColorID_Depth = vec4(vMouseColorID, gl_FragCoord.z/gl_FragCoord.w, 0.0, 0.0);
 		
 	}

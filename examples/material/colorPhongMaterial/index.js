@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.16 13:54:48
+ *   Last modification time of this file - 2020.1.16 18:59:49
  *
  */
 "use strict"
@@ -44,15 +44,24 @@ new RedGPU.RedGPUContext(
 		tScene.addLight(tLight)
 		///////////////////////////////////////////////////////////////////////////////////////////
 		// Mesh setup
-		let tMesh, tGeometry, tMaterial;
-		tGeometry = new RedGPU.Sphere(this, 1, 32, 32, 32);
-		tMaterial = new RedGPU.ColorPhongMaterial(this);
+		let tMesh;
+		let tChildMesh;
 		tMesh = new RedGPU.Mesh(
 			this,
-			tGeometry,
-			tMaterial
+			new RedGPU.Sphere(this, 1, 32, 32, 32),
+			new RedGPU.ColorPhongMaterial(this)
 		);
 		tScene.addChild(tMesh);
+		tChildMesh = new RedGPU.Mesh(
+			this,
+			new RedGPU.Sphere(this, 0.5, 32, 32, 32),
+			new RedGPU.ColorPhongMaterial(this,'#00ff00')
+		);
+		tChildMesh.x = 2;
+		tMesh.addChild(tChildMesh);
+
+		tMesh.renderDrawLayerIndex = RedGPU.Render.DRAW_LAYER_INDEX2_Z_POINT_SORT
+		tChildMesh.renderDrawLayerIndex = RedGPU.Render.DRAW_LAYER_INDEX2_Z_POINT_SORT
 		///////////////////////////////////////////////////////////////////////////////////////////
 		renderer = new RedGPU.Render();
 		// renderer setup
@@ -63,7 +72,7 @@ new RedGPU.RedGPUContext(
 		requestAnimationFrame(render);
 
 		// TestUI setup
-		ExampleHelper.setTestUI_ColorPhongMaterial(RedGPU, tMesh,tMaterial, true);
+		ExampleHelper.setTestUI_ColorPhongMaterial(RedGPU, tMesh, tMesh.material, true);
 		ExampleHelper.setTestUI_Debugger(RedGPU);
 	}
 );

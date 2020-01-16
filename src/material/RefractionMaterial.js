@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.16 13:54:48
+ *   Last modification time of this file - 2020.1.16 18:59:50
  *
  */
 
@@ -37,6 +37,7 @@ export default class RefractionMaterial extends Mix.mix(
 	layout( location = 1 ) out vec2 vUV;
 	layout( location = 2 ) out vec4 vVertexPosition;	
 	layout( location = 3 ) out float vMouseColorID;	
+	layout( location = 4 ) out float vSumOpacity;
 	layout( set = ${ShareGLSL.SET_INDEX_VertexUniforms}, binding = 0 ) uniform VertexUniforms {
         float displacementFlowSpeedX;
         float displacementFlowSpeedY;
@@ -50,6 +51,7 @@ export default class RefractionMaterial extends Mix.mix(
 		vNormal = (meshMatrixUniforms.normalMatrix[ int(meshUniforms.index) ] * vec4(normal,1.0)).xyz;
 		vUV = uv;
 		vMouseColorID = meshUniforms.mouseColorID;
+		vSumOpacity = meshUniforms.sumOpacity;
 		//#RedGPU#displacementTexture# vVertexPosition.xyz += calcDisplacement(vNormal, vertexUniforms.displacementFlowSpeedX, vertexUniforms.displacementFlowSpeedY, vertexUniforms.displacementPower, uv, uDisplacementTexture, uDisplacementSampler);
 		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * vVertexPosition;
 	
@@ -76,6 +78,7 @@ export default class RefractionMaterial extends Mix.mix(
 	layout( location = 1 ) in vec2 vUV;
 	layout( location = 2 ) in vec4 vVertexPosition;
 	layout( location = 3 ) in float vMouseColorID;
+	layout( location = 4 ) in float vSumOpacity;
 	//#RedGPU#diffuseTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 4 ) uniform sampler uDiffuseSampler;
 	//#RedGPU#diffuseTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 5 ) uniform texture2D uDiffuseTexture;
 	//#RedGPU#normalTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 6 ) uniform sampler uNormalSampler;
@@ -142,7 +145,7 @@ export default class RefractionMaterial extends Mix.mix(
 		
 		finalColor.a = testAlpha;
 		outColor = finalColor;
-		outColor.a *= fragmentUniforms.alpha;
+		outColor.a *= fragmentUniforms.alpha * vSumOpacity;
 		out_MouseColorID_Depth = vec4(vMouseColorID, gl_FragCoord.z/gl_FragCoord.w, 0.0, 0.0);
 		
 	}

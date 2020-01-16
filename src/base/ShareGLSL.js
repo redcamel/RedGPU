@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.16 13:54:48
+ *   Last modification time of this file - 2020.1.16 18:59:49
  *
  */
 
@@ -28,14 +28,14 @@ export default class ShareGLSL {
 	    } systemUniforms;
 	    `,
 		meshUniforms: `
-		layout( set = ${ShareGLSL.SET_INDEX_MeshUniforms}, binding = 0 ) uniform MeshUniforms {
+		layout( set = ${ShareGLSL.SET_INDEX_MeshUniforms}, binding = 0 ) uniform MeshMatrixUniforms {
 	        mat4 modelMatrix[${ShareGLSL.MESH_UNIFORM_POOL_NUM}];
 	        mat4 normalMatrix[${ShareGLSL.MESH_UNIFORM_POOL_NUM}];
 	    } meshMatrixUniforms;
 	    layout( set = ${ShareGLSL.SET_INDEX_MeshUniforms}, binding = 1 ) uniform MeshUniformIndex {
 	        float index;
 	        float mouseColorID;
-	        float opacity;
+	        float sumOpacity;
 	    } meshUniforms;
 		`,
 		calcDisplacement: `
