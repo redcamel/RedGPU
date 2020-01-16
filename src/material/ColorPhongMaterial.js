@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.2 14:26:4
+ *   Last modification time of this file - 2020.1.16 13:54:48
  *
  */
 
@@ -28,11 +28,11 @@ export default class ColorPhongMaterial extends Mix.mix(
 	layout( location = 1 ) in vec3 normal;
 	layout( location = 0 ) out vec3 vNormal;
 	layout( location = 1 ) out vec4 vVertexPosition;
-	layout( location = 2 ) out float vMouseColorID;	
+	layout( location = 2 ) out float vMouseColorID;
 	void main() {
-		vVertexPosition = meshUniforms.modelMatrix[ int(meshUniformsIndex.index) ] * vec4(position,1.0);
-		vNormal = (meshUniforms.normalMatrix[ int(meshUniformsIndex.index) ] * vec4(normal,1.0)).xyz;
-		vMouseColorID = meshUniformsIndex.mouseColorID;
+		vVertexPosition = meshMatrixUniforms.modelMatrix[ int(meshUniforms.index) ] * vec4(position,1.0);
+		vNormal = (meshMatrixUniforms.normalMatrix[ int(meshUniforms.index) ] * vec4(normal,1.0)).xyz;
+		vMouseColorID = meshUniforms.mouseColorID;
 		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * vVertexPosition;
 	}
 	`;
@@ -49,8 +49,7 @@ export default class ColorPhongMaterial extends Mix.mix(
 	layout( location = 0 ) in vec3 vNormal;
 	layout( location = 1 ) in vec4 vVertexPosition;
 	layout( location = 2 ) in float vMouseColorID;	
-	layout( location = 0 ) out vec4 outColor;
-	
+	layout( location = 0 ) out vec4 outColor;	
 	layout( location = 1 ) out vec4 out_MouseColorID_Depth;
 	void main() {
 		float testAlpha = fragmentUniforms.color.a;
@@ -115,10 +114,7 @@ export default class ColorPhongMaterial extends Mix.mix(
 		super(redGPUContext);
 		this.color = color;
 		this.colorAlpha = colorAlpha;
-
 		this.needResetBindingInfo = true
-
-
 	}
 	resetBindingInfo() {
 		this.bindings = [

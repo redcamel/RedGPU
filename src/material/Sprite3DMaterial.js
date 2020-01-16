@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.9 14:4:9
+ *   Last modification time of this file - 2020.1.16 13:54:48
  *
  */
 
@@ -30,12 +30,12 @@ export default class Sprite3DMaterial extends Mix.mix(
 	layout( location = 2 ) out float vMouseColorID;	
     ${ShareGLSL.GLSL_SystemUniforms_vertex.getSprite3DMatrix}	
 	void main() {
-		gl_Position = systemUniforms.perspectiveMTX * getSprite3DMatrix( systemUniforms.cameraMTX, meshUniforms.modelMatrix[ int(meshUniformsIndex.index) ] ) * vec4(position,1.0);
+		gl_Position = systemUniforms.perspectiveMTX * getSprite3DMatrix( systemUniforms.cameraMTX, meshMatrixUniforms.modelMatrix[ int(meshUniforms.index) ] ) * vec4(position,1.0);
 		//#RedGPU#useFixedScale#  gl_Position /= gl_Position.w;
-		//#RedGPU#useFixedScale#  gl_Position.xy += position.xy * vec2((systemUniforms.perspectiveMTX * meshUniforms.modelMatrix[ int(meshUniformsIndex.index) ])[0][0],(systemUniforms.perspectiveMTX * meshUniforms.modelMatrix[ int(meshUniformsIndex.index) ])[1][1]);
+		//#RedGPU#useFixedScale#  gl_Position.xy += position.xy * vec2((systemUniforms.perspectiveMTX * meshMatrixUniforms.modelMatrix[ int(meshUniforms.index) ])[0][0],(systemUniforms.perspectiveMTX * meshMatrixUniforms.modelMatrix[ int(meshUniforms.index) ])[1][1]);
 		vNormal = normal;
 		vUV = uv;
-		vMouseColorID = meshUniformsIndex.mouseColorID;
+		vMouseColorID = meshUniforms.mouseColorID;
 	}
 	`;
 	static fragmentShaderGLSL = `

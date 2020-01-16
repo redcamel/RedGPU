@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.10 20:9:14
+ *   Last modification time of this file - 2020.1.16 13:54:48
  *
  */
 
@@ -38,9 +38,9 @@ export default class SpriteSheetMaterial extends Mix.mix(
 		vUV.s * vertexUniforms.sheetRect.x + vertexUniforms.sheetRect.z,
 		vUV.t * vertexUniforms.sheetRect.y -vertexUniforms.sheetRect.w
 		);		
-		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * meshUniforms.modelMatrix[ int(meshUniformsIndex.index) ] * vec4(position,1.0);
+		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * meshMatrixUniforms.modelMatrix[ int(meshUniforms.index) ] * vec4(position,1.0);
 		vNormal = normal;
-		vMouseColorID = meshUniformsIndex.mouseColorID;
+		vMouseColorID = meshUniforms.mouseColorID;
 	
 	}
 	`;

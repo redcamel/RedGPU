@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.16 11:54:21
+ *   Last modification time of this file - 2020.1.16 13:54:48
  *
  */
 
@@ -175,7 +175,7 @@ let renderScene = (_ => {
 				}
 
 				if (tDirtyTransform) {
-					currentDebuggerData['dirtyTransformNum']++;
+
 					/////////////////////////////////////
 					a00 = 1, a01 = 0, a02 = 0,
 						a10 = 0, a11 = 1, a12 = 0,
@@ -267,6 +267,7 @@ let renderScene = (_ => {
 					) : 0
 				}
 				if(parentDirty || tDirtyTransform){
+					currentDebuggerData['dirtyTransformNum']++;
 					// 부모가 있으면 곱처리함
 					parentMTX ?
 						(
@@ -336,9 +337,9 @@ let renderScene = (_ => {
 					// tMesh.calcTransform(parent);
 					// tMesh.updateUniformBuffer();
 
-					updateTargetMatrixBufferList.includes(tMesh.uniformBuffer_mesh) ? 0 : updateTargetMatrixBufferList.push(tMesh.uniformBuffer_mesh);
-					tMesh.uniformBuffer_mesh.meshFloat32Array.set(tMesh.matrix, tMesh.offsetMatrix / Float32Array.BYTES_PER_ELEMENT);
-					tMesh.uniformBuffer_mesh.meshFloat32Array.set(tMesh.normalMatrix, tMesh.offsetNormalMatrix / Float32Array.BYTES_PER_ELEMENT);
+					updateTargetMatrixBufferList.includes(tMesh.uniformBuffer_meshMatrix) ? 0 : updateTargetMatrixBufferList.push(tMesh.uniformBuffer_meshMatrix);
+					tMesh.uniformBuffer_meshMatrix.meshFloat32Array.set(tMesh.matrix, tMesh.offsetMatrix / Float32Array.BYTES_PER_ELEMENT);
+					tMesh.uniformBuffer_meshMatrix.meshFloat32Array.set(tMesh.normalMatrix, tMesh.offsetNormalMatrix / Float32Array.BYTES_PER_ELEMENT);
 				}
 
 
