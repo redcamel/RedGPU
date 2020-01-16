@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.10 21:21:4
+ *   Last modification time of this file - 2020.1.16 11:31:50
  *
  */
 
@@ -56,6 +56,7 @@ const getPool = function (redGPUContext, targetMesh) {
 
 
 export default class BaseObject3D extends DisplayContainer {
+
 	static uniformsBindGroupLayoutDescriptor_mesh = {
 		bindings: [
 			{
@@ -79,6 +80,9 @@ export default class BaseObject3D extends DisplayContainer {
 	_x = 0;
 	_y = 0;
 	_z = 0;
+	_pivotX = 0;
+	_pivotY = 0;
+	_pivotZ = 0;
 	_rotationX = 0;
 	_rotationY = 0;
 	_rotationZ = 0;
@@ -127,6 +131,7 @@ export default class BaseObject3D extends DisplayContainer {
 		this._blendAlphaSrc = value;
 		this.dirtyPipeline = true;
 	}
+	/////////////////////////////////////////////////////////
 	get x() {return this._x}
 	set x(v) {
 		this._x = v;
@@ -147,6 +152,29 @@ export default class BaseObject3D extends DisplayContainer {
 		this._x = x;
 		this._y = y;
 		this._z = z;
+		this.dirtyTransform = true;
+	}
+	/////////////////////////////////////////////////////////
+	get pivotZ() {return this._pivotZ;}
+	set pivotZ(value) {
+		this._pivotZ = value;
+		this.dirtyTransform = true;
+	}
+	get pivotY() {return this._pivotY;}
+	set pivotY(value) {
+		this._pivotY = value;
+		this.dirtyTransform = true;
+	}
+	get pivotX() {return this._pivotX;}
+	set pivotX(value) {
+		this._pivotX = value;
+		this.dirtyTransform = true;
+	}
+	getPivotPosition() {return [this._pivotX, this._pivotY, this._pivotZ]}
+	setPivotPosition(x, y, z) {
+		this._pivotX = x;
+		this._pivotY = y;
+		this._pivotZ = z;
 		this.dirtyTransform = true;
 	}
 	/////////////////////////////////////////////////////////
