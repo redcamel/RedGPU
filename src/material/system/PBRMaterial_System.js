@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.16 13:54:48
+ *   Last modification time of this file - 2020.1.16 18:59:49
  *
  */
 
@@ -46,6 +46,7 @@ export default class PBRMaterial_System extends Mix.mix(
 	layout( location = 4 ) out vec4 vVertexTangent;
 	layout( location = 5 ) out vec4 vVertexPosition;
 	layout( location = 6 ) out float vMouseColorID;	
+	layout( location = 7 ) out float vSumOpacity;
 	layout( set = ${ShareGLSL.SET_INDEX_VertexUniforms}, binding = 0 ) uniform VertexUniforms {
 		mat4 jointMatrix[${maxJoint}];
 		mat4 inverseBindMatrixForJoint[${maxJoint}];
@@ -77,6 +78,7 @@ export default class PBRMaterial_System extends Mix.mix(
 		vUV1 = uv1;
 		vVertexTangent = vertexTangent;
 		vMouseColorID = meshUniforms.mouseColorID;
+		vSumOpacity = meshUniforms.sumOpacity;
 		//#RedGPU#displacementTexture# vVertexPosition.xyz += calcDisplacement(vNormal, vertexUniforms.displacementFlowSpeedX, vertexUniforms.displacementFlowSpeedY, vertexUniforms.displacementPower, uv, uDisplacementTexture, uDisplacementSampler);
 		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * vVertexPosition;		
 	}
@@ -112,6 +114,7 @@ export default class PBRMaterial_System extends Mix.mix(
 	layout( location = 4 ) in vec4 vVertexTangent;
 	layout( location = 5 ) in vec4 vVertexPosition;
 	layout( location = 6 ) in float vMouseColorID;	
+	layout( location = 7 ) in float vSumOpacity;
 	//#RedGPU#diffuseTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 4 ) uniform sampler uDiffuseSampler;
 	//#RedGPU#diffuseTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 5 ) uniform texture2D uDiffuseTexture;
 	//#RedGPU#normalTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 6 ) uniform sampler uNormalSampler;
@@ -237,6 +240,7 @@ export default class PBRMaterial_System extends Mix.mix(
 			finalColor.a = tAlpha;
 		}
 		outColor = finalColor;
+		outColor.a *= vSumOpacity;
 		out_MouseColorID_Depth = vec4(vMouseColorID, gl_FragCoord.z/gl_FragCoord.w, 0.0, 0.0);
 		
 	}

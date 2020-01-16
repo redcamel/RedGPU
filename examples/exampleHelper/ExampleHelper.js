@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.16 13:54:48
+ *   Last modification time of this file - 2020.1.16 18:59:49
  *
  */
 
@@ -287,13 +287,13 @@ const ExampleHelper = (_ => {
 		targetMesh.addChild(pivotPoint1);
 		pivotPoint2 = new RedGPU.Mesh(redGPUContext, new RedGPU.Sphere(redGPUContext, 0.05), new RedGPU.ColorMaterial(redGPUContext))
 		childMesh.addChild(pivotPoint2);
-		let HD_point1,HD_point2
-		HD_point1 = _=>{
+		let HD_point1, HD_point2
+		HD_point1 = _ => {
 			pivotPoint1.x = targetMesh.pivotX
 			pivotPoint1.y = targetMesh.pivotY
 			pivotPoint1.z = targetMesh.pivotZ
 		}
-		HD_point2 = _=>{
+		HD_point2 = _ => {
 			pivotPoint2.x = childMesh.pivotX
 			pivotPoint2.y = childMesh.pivotY
 			pivotPoint2.z = childMesh.pivotZ
@@ -488,8 +488,10 @@ const ExampleHelper = (_ => {
 		checkGUI();
 		gui = gui || testHelperFolder;
 		let rootFolder, folder;
+
 		rootFolder = gui.addFolder('Text');
 		if (open) rootFolder.open();
+		makeOpacityProperty(rootFolder, tText)
 		folder = rootFolder.addFolder('GPU Property');
 		folder.add(tText, 'depthWriteEnabled');
 		folder.add(tText, 'primitiveTopology', ["point-list", "line-list", "line-strip", "triangle-list", "triangle-strip"]);
@@ -630,10 +632,10 @@ const ExampleHelper = (_ => {
 		setTestUI_EnvironmentMaterial, setTestUI_RefractionMaterial;
 	let setTestUI_BitmapTexture;
 	let setTestUI_PostEffect, setTestUI_PostEffectBy;
-
+	let makeColorProperty, makeBaseLightProperty, makeOpacityProperty, makeAlphaProperty;
+	let makeTextureProperty;
 	{
-		let makeColorProperty, makeBaseLightProperty,makeOpacityProperty;
-		let makeTextureProperty;
+
 		makeTextureProperty = (targetFolder, RedGPU, redGPUContext, material, propertyName, src) => {
 			let testData = {};
 			testData[propertyName] = true;
@@ -662,6 +664,9 @@ const ExampleHelper = (_ => {
 		makeOpacityProperty = (targetFolder, mesh) => {
 			targetFolder.add(mesh, 'opacity', 0, 1, 0.01)
 		};
+		makeAlphaProperty = (targetFolder, material) => {
+			targetFolder.add(material, 'alpha', 0, 1, 0.01)
+		};
 		makeColorProperty = (targetFolder, material) => {
 			targetFolder.addColor(material, 'color');
 			targetFolder.add(material, 'colorAlpha', 0, 1, 0.01)
@@ -675,33 +680,36 @@ const ExampleHelper = (_ => {
 			targetFolder.add(material, 'useFlatMode');
 		};
 
-		setTestUI_ColorMaterial = (RedGPU,mesh, material, open, gui) => {
+		setTestUI_ColorMaterial = (RedGPU, mesh, material, open, gui) => {
 			checkGUI();
 			gui = gui || testHelperFolder;
 			let rootFolder, folder;
-			// rootFolder = gui.addFolder('Mesh Property');
-			// if (open) rootFolder.open();
-			// makeOpacityProperty(rootFolder,mesh)
+			rootFolder = gui.addFolder('Mesh Property');
+			if (open) rootFolder.open();
+			makeOpacityProperty(rootFolder, mesh)
 			rootFolder = gui.addFolder('ColorMaterial');
 			if (open) rootFolder.open();
 			makeColorProperty(rootFolder, material);
 		};
-		setTestUI_ColorPhongMaterial = (RedGPU,mesh, material, open, gui) => {
+		setTestUI_ColorPhongMaterial = (RedGPU, mesh, material, open, gui) => {
 			checkGUI();
 			gui = gui || testHelperFolder;
 			let rootFolder, folder;
-			// rootFolder = gui.addFolder('Mesh Property');
-			// if (open) rootFolder.open();
-			// makeOpacityProperty(rootFolder,mesh)
+			rootFolder = gui.addFolder('Mesh Property');
+			if (open) rootFolder.open();
+			makeOpacityProperty(rootFolder, mesh)
 			rootFolder = gui.addFolder('ColorPhongMaterial');
 			if (open) rootFolder.open();
 			makeColorProperty(rootFolder, material);
 			makeBaseLightProperty(rootFolder, material);
 		};
-		setTestUI_ColorPhongTextureMaterial = (RedGPU, redGPUContext, material, open, gui) => {
+		setTestUI_ColorPhongTextureMaterial = (RedGPU, redGPUContext, mesh, material, open, gui) => {
 			checkGUI();
 			gui = gui || testHelperFolder;
 			let rootFolder, folder;
+			rootFolder = gui.addFolder('Mesh Property');
+			if (open) rootFolder.open();
+			makeOpacityProperty(rootFolder, mesh)
 			rootFolder = gui.addFolder('ColorPhongTextureMaterial');
 			if (open) rootFolder.open();
 			makeColorProperty(rootFolder, material);
@@ -713,20 +721,28 @@ const ExampleHelper = (_ => {
 			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'emissiveTexture', `${assetPath}emissive.jpg`);
 			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'displacementTexture', `${assetPath}Brick03_disp.jpg`);
 		};
-		setTestUI_BitmapMaterial = (RedGPU, redGPUContext, material, open, gui) => {
+		setTestUI_BitmapMaterial = (RedGPU, redGPUContext, mesh, material, open, gui) => {
 			checkGUI();
 			gui = gui || testHelperFolder;
 			let rootFolder, folder;
+			rootFolder = gui.addFolder('Mesh Property');
+			if (open) rootFolder.open();
+			makeOpacityProperty(rootFolder, mesh)
 			rootFolder = gui.addFolder('BitmapMaterial');
 			if (open) rootFolder.open();
+			makeAlphaProperty(rootFolder, material)
 			makeTextureProperty(rootFolder, RedGPU, redGPUContext, material, 'diffuseTexture', `${assetPath}Brick03_col.jpg`);
 		};
-		setTestUI_SpriteSheetMaterial = (RedGPU, redGPUContext, material, open, gui) => {
+		setTestUI_SpriteSheetMaterial = (RedGPU, redGPUContext, mesh,material, open, gui) => {
 			checkGUI();
 			gui = gui || testHelperFolder;
 			let rootFolder, folder;
+			rootFolder = gui.addFolder('Mesh Property');
+			if (open) rootFolder.open();
+			makeOpacityProperty(rootFolder, mesh)
 			rootFolder = gui.addFolder('SpriteSheetMaterial');
 			if (open) rootFolder.open();
+			makeAlphaProperty(rootFolder, material)
 			makeTextureProperty(rootFolder, RedGPU, redGPUContext, material, 'diffuseTexture', `${assetPath}sheet/spriteSheet.png`);
 			rootFolder.add(material, 'frameRate', 1, 120);
 			rootFolder.add(material, 'play');
@@ -744,12 +760,16 @@ const ExampleHelper = (_ => {
 			rootFolder.add(testData, 'action', ['walk', 'attack', 'jump']).onChange(v => {material.setAction(v)});
 
 		};
-		setTestUI_StandardMaterial = (RedGPU, redGPUContext, material, open, gui) => {
+		setTestUI_StandardMaterial = (RedGPU, redGPUContext, mesh, material, open, gui) => {
 			checkGUI();
 			gui = gui || testHelperFolder;
 			let rootFolder, folder;
+			rootFolder = gui.addFolder('Mesh Property');
+			if (open) rootFolder.open();
+			makeOpacityProperty(rootFolder, mesh)
 			rootFolder = gui.addFolder('StandardMaterial');
 			if (open) rootFolder.open();
+			makeAlphaProperty(rootFolder, material)
 			makeBaseLightProperty(rootFolder, material);
 			folder = rootFolder.addFolder('texture');
 			folder.open();
@@ -759,12 +779,16 @@ const ExampleHelper = (_ => {
 			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'emissiveTexture', `${assetPath}emissive.jpg`);
 			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'displacementTexture', `${assetPath}Brick03_disp.jpg`);
 		};
-		setTestUI_EnvironmentMaterial = (RedGPU, redGPUContext, material, open, gui) => {
+		setTestUI_EnvironmentMaterial = (RedGPU, redGPUContext,mesh, material, open, gui) => {
 			checkGUI();
 			gui = gui || testHelperFolder;
 			let rootFolder, folder;
-			rootFolder = gui.addFolder('StandardMaterial');
+			rootFolder = gui.addFolder('Mesh Property');
 			if (open) rootFolder.open();
+			makeOpacityProperty(rootFolder, mesh)
+			rootFolder = gui.addFolder('EnvironmentMaterial');
+			if (open) rootFolder.open();
+			makeAlphaProperty(rootFolder, material)
 			makeBaseLightProperty(rootFolder, material);
 			folder = rootFolder.addFolder('texture');
 			folder.open();
@@ -783,12 +807,16 @@ const ExampleHelper = (_ => {
 			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'emissiveTexture', `${assetPath}emissive.jpg`);
 			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'displacementTexture', `${assetPath}Brick03_disp.jpg`);
 		};
-		setTestUI_RefractionMaterial = (RedGPU, redGPUContext, material, open, gui) => {
+		setTestUI_RefractionMaterial =  (RedGPU, redGPUContext,mesh, material, open, gui) => {
 			checkGUI();
 			gui = gui || testHelperFolder;
 			let rootFolder, folder;
+			rootFolder = gui.addFolder('Mesh Property');
+			if (open) rootFolder.open();
+			makeOpacityProperty(rootFolder, mesh)
 			rootFolder = gui.addFolder('StandardMaterial');
 			if (open) rootFolder.open();
+			makeAlphaProperty(rootFolder, material)
 			makeBaseLightProperty(rootFolder, material);
 			folder = rootFolder.addFolder('texture');
 			folder.open();

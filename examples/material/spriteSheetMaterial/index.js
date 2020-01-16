@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.9 11:43:33
+ *   Last modification time of this file - 2020.1.16 18:59:49
  *
  */
 "use strict"
@@ -37,24 +37,7 @@ new RedGPU.RedGPUContext(
 		this.addView(tView);
 		///////////////////////////////////////////////////////////////////////////////////////////
 		// Mesh setup
-		let tMesh, tGeometry, tMaterial;
-		tGeometry = new RedGPU.Plane(this);
-		tMaterial = new RedGPU.SpriteSheetMaterial(
-			this,
-			new RedGPU.SpriteSheetAction(
-				new RedGPU.BitmapTexture(this, '../../../assets/sheet/spriteSheet.png'),
-				30, 5, 3, 15
-			)
-		);
-		tMesh = new RedGPU.Mesh(
-			this,
-			tGeometry,
-			tMaterial
-		);
-		tMesh.cullMode = 'none';
-		tMesh.x = -1
-		tScene.addChild(tMesh);
-		//
+		let tMesh,  tMaterial;
 		tMaterial = new RedGPU.SpriteSheetMaterial(this);
 		tMaterial.addAction(
 			'walk', new RedGPU.SpriteSheetAction(
@@ -77,11 +60,29 @@ new RedGPU.RedGPUContext(
 		tMaterial.setAction('walk')
 		tMesh = new RedGPU.Mesh(
 			this,
-			tGeometry,
+			new RedGPU.Plane(this),
 			tMaterial
 		);
 		tMesh.cullMode = 'none';
 		tScene.addChild(tMesh);
+		let tChildMesh = new RedGPU.Mesh(
+			this,
+			new RedGPU.Plane(this),
+			new RedGPU.SpriteSheetMaterial(
+				this,
+				new RedGPU.SpriteSheetAction(
+					new RedGPU.BitmapTexture(this, '../../../assets/sheet/spriteSheet.png'),
+					30, 5, 3, 15
+				)
+			)
+		);
+		tChildMesh.cullMode = 'none';
+		tChildMesh.x = -0.5
+		tChildMesh.z = -1
+		tMesh.addChild(tChildMesh);
+
+		tMesh.renderDrawLayerIndex = RedGPU.Render.DRAW_LAYER_INDEX2_Z_POINT_SORT
+		tChildMesh.renderDrawLayerIndex = RedGPU.Render.DRAW_LAYER_INDEX2_Z_POINT_SORT
 		///////////////////////////////////////////////////////////////////////////////////////////
 		renderer = new RedGPU.Render();
 		// renderer setup
@@ -92,7 +93,7 @@ new RedGPU.RedGPUContext(
 		requestAnimationFrame(render);
 
 		// TestUI setup
-		ExampleHelper.setTestUI_SpriteSheetMaterial(RedGPU, this, tMaterial, true);
+		ExampleHelper.setTestUI_SpriteSheetMaterial(RedGPU, this, tMesh, tMesh.material, true);
 		ExampleHelper.setTestUI_Debugger(RedGPU);
 	}
 );

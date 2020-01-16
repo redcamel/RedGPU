@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.16 13:54:48
+ *   Last modification time of this file - 2020.1.16 18:59:50
  *
  */
 
@@ -62,15 +62,24 @@ let renderScene = (_ => {
 				let geoVolume;
 				let radius;
 				let radiusTemp;
+				let tOpacity,tParentSumOpacity;
 				tMesh = children[i];
 				tMaterial = tMesh._material;
 				tGeometry = tMesh._geometry;
 				parent = tMesh._parent;
 				parentMTX = 0;
+				tParentSumOpacity = 1;
+				tOpacity = tMesh._opacity;
 				if (parent) {
 					parentDirty = parent._renderTimeDirtyTransform;
 					parentMTX = parent.matrix;
+					tParentSumOpacity = parent._sumOpacity
 				}
+				if(tMesh._sumOpacity != tOpacity * tParentSumOpacity) {
+					tMesh.sumOpacity = tOpacity * tParentSumOpacity
+					console.log('여기',tOpacity)
+				}
+
 				tDirtyTransform = tMesh.dirtyTransform;
 				tMesh._renderTimeDirtyTransform = tDirtyTransform;
 				// console.log(tMesh._geometry, parentDirty,tMesh.dirtyTransform)

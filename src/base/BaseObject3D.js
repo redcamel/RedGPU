@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.16 13:54:48
+ *   Last modification time of this file - 2020.1.16 18:59:49
  *
  */
 
@@ -76,7 +76,7 @@ export default class BaseObject3D extends DisplayContainer {
 		[
 			{size: TypeSize.float, valueName: 'meshUniformIndex'},
 			{size: TypeSize.float, valueName: 'mouseColorID'},
-			{size: TypeSize.float, valueName: 'opacity'}
+			{size: TypeSize.float, valueName: 'sumOpacity'}
 		]
 	);
 	_x = 0;
@@ -111,12 +111,17 @@ export default class BaseObject3D extends DisplayContainer {
 	//FIXME - 유일키가 될수있도록 변경
 	#mouseColorID = 0;
 	_renderDrawLayerIndex = Render.DRAW_LAYER_INDEX0;
-	#opacity = 1;
-	get opacity() {return this.#opacity;}
-	set opacity(value) {
-		this.#opacity = value;
-		float1_Float32Array[0] = this.#opacity;
+	_sumOpacity = 1;
+	_opacity = 1;
+	get sumOpacity() {return this._sumOpacity;}
+	set sumOpacity(value) {
+		this._sumOpacity = value;
+		float1_Float32Array[0] = this._sumOpacity;
 		this.uniformBuffer_mesh.GPUBuffer.setSubData(TypeSize.float2, float1_Float32Array)
+	}
+	get opacity() {return this._opacity;}
+	set opacity(value) {
+		this._opacity = value;
 	}
 	get renderDrawLayerIndex() {return this._renderDrawLayerIndex;}
 	set renderDrawLayerIndex(value) {this._renderDrawLayerIndex = value;}
@@ -277,7 +282,7 @@ export default class BaseObject3D extends DisplayContainer {
 		this.uniformBuffer_mesh.setBuffer(BaseObject3D.uniformBufferDescriptor_meshIndex);
 		this.uniformBuffer_mesh.GPUBuffer.setSubData(0, new Float32Array([bufferData.uniformIndex]));
 		this.uniformBuffer_mesh.GPUBuffer.setSubData(TypeSize.float, new Float32Array([this.#mouseColorID]));
-		this.opacity = 1;
+		this.sumOpacity = 1;
 		this.#bindings = [
 			{
 				binding: 0,

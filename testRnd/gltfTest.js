@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.14 17:51:9
+ *   Last modification time of this file - 2020.1.16 18:59:50
  *
  */
 
@@ -142,7 +142,6 @@ new RedGPU.RedGPUContext(
 			v => { // callBack
 				console.log(v)
 				let tMesh = v['resultMesh']
-
 				tMesh.x = (max) * 30 - 30 * max / 2
 				tScene.addChild(tMesh)
 				tMesh.scaleX = tMesh.scaleY = tMesh.scaleZ = 25
@@ -157,7 +156,7 @@ new RedGPU.RedGPUContext(
 						function (v) { // callBack
 							console.log(v)
 							let tMesh = v['resultMesh']
-
+							// tMesh.opacity = 0.5
 							tMesh.x = (t0) * 30 - 30 * max / 2
 							tMesh.scaleX = tMesh.scaleY = tMesh.scaleZ = 25
 
