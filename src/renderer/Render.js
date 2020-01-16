@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.16 11:31:50
+ *   Last modification time of this file - 2020.1.16 11:54:21
  *
  */
 
@@ -66,10 +66,10 @@ let renderScene = (_ => {
 				tMaterial = tMesh._material;
 				tGeometry = tMesh._geometry;
 				parent = tMesh._parent;
+				parentMTX = 0;
 				if (parent) {
 					parentDirty = parent._renderTimeDirtyTransform;
 					parentMTX = parent.matrix;
-					tMesh.dirtyTransform = parentDirty
 				}
 				tDirtyTransform = tMesh.dirtyTransform;
 				tMesh._renderTimeDirtyTransform = tDirtyTransform;
@@ -264,7 +264,9 @@ let renderScene = (_ => {
 							tLocalMatrix[13] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31,
 							tLocalMatrix[14] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32,
 							tLocalMatrix[15] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33
-					) : 0,
+					) : 0
+				}
+				if(parentDirty || tDirtyTransform){
 					// 부모가 있으면 곱처리함
 					parentMTX ?
 						(
