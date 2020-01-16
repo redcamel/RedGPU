@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.16 18:59:50
+ *   Last modification time of this file - 2020.1.16 21:13:13
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -438,13 +438,13 @@ new RedGPU.RedGPUContext(
 					i = tChildren.length
 					let tMesh
 
-					// while (i--) {
-					// 	tMesh = tChildren[i]
-					// 	tMesh._rotationX += 1
-					// 	tMesh._rotationY += 1
-					// 	tMesh._rotationZ += 1
-					// 	tMesh.dirtyTransform = 1
-					// }
+					while (i--) {
+						tMesh = tChildren[i]
+						tMesh._rotationX += 1
+						tMesh._rotationY += 1
+						tMesh._rotationZ += 1
+						tMesh.dirtyTransform = 1
+					}
 
 					requestAnimationFrame(render);
 				};

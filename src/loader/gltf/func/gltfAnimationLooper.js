@@ -2,11 +2,12 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.7 16:13:31
+ *   Last modification time of this file - 2020.1.16 21:13:13
  *
  */
-import glMatrix from "../../base/gl-matrix-min.js"
-export default function gltfAnimationLooper(time, loopList){
+import glMatrix from "../../../base/gl-matrix-min.js"
+
+export default function gltfAnimationLooper(time, loopList) {
 	let currentTime, previousTime, nextTime;
 	let nX, nY, nZ, nW, nXOut, nYOut, nZOut, nXIn, nYIn, nZIn, nWIn;
 	let pX, pY, pZ, pW, pXOut, pYOut, pZOut, pWOut;
@@ -92,6 +93,7 @@ export default function gltfAnimationLooper(time, loopList){
 				}
 			}
 			/////////////////////////////////////////////////////////////////////////////////
+			if (target) target.dirtyTransform = true;
 			if (aniData['interpolation'] == 'CUBICSPLINE') {
 				interpolationValue = nextTime - previousTime;
 				if (interpolationValue.toString() == 'NaN') interpolationValue = 0;
@@ -226,9 +228,9 @@ export default function gltfAnimationLooper(time, loopList){
 								tRotation[0] = -(tRotation[0] * 180 / Math.PI);
 								tRotation[1] = -(tRotation[1] * 180 / Math.PI);
 								tRotation[2] = -(tRotation[2] * 180 / Math.PI);
-								target.rotationX = tRotation[0];
-								target.rotationY = tRotation[1];
-								target.rotationZ = tRotation[2]
+								target._rotationX = tRotation[0];
+								target._rotationY = tRotation[1];
+								target._rotationZ = tRotation[2]
 							}
 							break;
 						case 'translation' :
@@ -249,17 +251,17 @@ export default function gltfAnimationLooper(time, loopList){
 								startOut = pXOut * interpolationValue;
 								endV = nX;
 								endIn = nXOut * interpolationValue;
-								target.x = s0 * startV + s1 * startOut + s2 * endV + s3 * endIn;
+								target._x = s0 * startV + s1 * startOut + s2 * endV + s3 * endIn;
 								startV = pY;
 								startOut = pYOut * interpolationValue;
 								endV = nY;
 								endIn = nYOut * interpolationValue;
-								target.y = s0 * startV + s1 * startOut + s2 * endV + s3 * endIn;
+								target._y = s0 * startV + s1 * startOut + s2 * endV + s3 * endIn;
 								startV = pZ;
 								startOut = pZOut * interpolationValue;
 								endV = nZ;
 								endIn = nZOut * interpolationValue;
-								target.z = s0 * startV + s1 * startOut + s2 * endV + s3 * endIn;
+								target._z = s0 * startV + s1 * startOut + s2 * endV + s3 * endIn;
 							}
 							break;
 						case 'scale' :
@@ -280,17 +282,17 @@ export default function gltfAnimationLooper(time, loopList){
 								startOut = pXOut * interpolationValue;
 								endV = nX;
 								endIn = nXOut * interpolationValue;
-								target.scaleX = s0 * startV + s1 * startOut + s2 * endV + s3 * endIn;
+								target._scaleX = s0 * startV + s1 * startOut + s2 * endV + s3 * endIn;
 								startV = pY;
 								startOut = pYOut * interpolationValue;
 								endV = nY;
 								endIn = nYOut * interpolationValue;
-								target.scaleY = s0 * startV + s1 * startOut + s2 * endV + s3 * endIn;
+								target._scaleY = s0 * startV + s1 * startOut + s2 * endV + s3 * endIn;
 								startV = pZ;
 								startOut = pZOut * interpolationValue;
 								endV = nZ;
 								endIn = nZOut * interpolationValue;
-								target.scaleZ = s0 * startV + s1 * startOut + s2 * endV + s3 * endIn;
+								target._scaleZ = s0 * startV + s1 * startOut + s2 * endV + s3 * endIn;
 							}
 							break;
 						case 'weights' :
@@ -462,9 +464,9 @@ export default function gltfAnimationLooper(time, loopList){
 							tRotation[0] = -(tRotation[0] * 180 / Math.PI);
 							tRotation[1] = -(tRotation[1] * 180 / Math.PI);
 							tRotation[2] = -(tRotation[2] * 180 / Math.PI);
-							target.rotationX = tRotation[0];
-							target.rotationY = tRotation[1];
-							target.rotationZ = tRotation[2];
+							target._rotationX = tRotation[0];
+							target._rotationY = tRotation[1];
+							target._rotationZ = tRotation[2];
 							break;
 						case 'translation' :
 							// nextTranslation
@@ -475,9 +477,9 @@ export default function gltfAnimationLooper(time, loopList){
 							pX = tAniData_data[prevIndex * 3];
 							pY = tAniData_data[prevIndex * 3 + 1];
 							pZ = tAniData_data[prevIndex * 3 + 2];
-							target.x = pX + interpolationValue * (nX - pX);
-							target.y = pY + interpolationValue * (nY - pY);
-							target.z = pZ + interpolationValue * (nZ - pZ);
+							target._x = pX + interpolationValue * (nX - pX);
+							target._y = pY + interpolationValue * (nY - pY);
+							target._z = pZ + interpolationValue * (nZ - pZ);
 							break;
 						case 'scale':
 							// nextScale
@@ -488,9 +490,9 @@ export default function gltfAnimationLooper(time, loopList){
 							pX = tAniData_data[prevIndex * 3];
 							pY = tAniData_data[prevIndex * 3 + 1];
 							pZ = tAniData_data[prevIndex * 3 + 2];
-							target.scaleX = pX + interpolationValue * (nX - pX);
-							target.scaleY = pY + interpolationValue * (nY - pY);
-							target.scaleZ = pZ + interpolationValue * (nZ - pZ);
+							target._scaleX = pX + interpolationValue * (nX - pX);
+							target._scaleY = pY + interpolationValue * (nY - pY);
+							target._scaleZ = pZ + interpolationValue * (nZ - pZ);
 							break;
 						case 'weights' :
 							weights_aniTargetsIDX = aniData['targets'].length;
