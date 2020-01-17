@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.16 21:13:13
+ *   Last modification time of this file - 2020.1.17 11:10:39
  *
  */
 
@@ -16,21 +16,19 @@ let parseNode_GLTF = (function () {
 	return function (redGLTFLoader, json, nodeIndex, info, parentMesh) {
 		if ('mesh' in info) {
 			let tMeshIndex = info['mesh'];
-			makeMesh_GLTF(redGLTFLoader, json, json['meshes'][tMeshIndex]).forEach(function (tMesh) {
-				info['Mesh'] = tMesh;
-				parentMesh.addChild(tMesh);
-				parseTRSAndMATRIX_GLTF(tMesh, info);
-				if ('children' in info) {
-					info['children'].forEach(function (index) {
-						parseNode_GLTF(redGLTFLoader, json, index, json['nodes'][index], tMesh)
-					})
-				}
-				if ('skin' in info) {
-					requestAnimationFrame(function () {
-						parseSkin_GLTF(redGLTFLoader, json, json['skins'][info['skin']], tMesh)
-					})
-				}
-			})
+			makeMesh_GLTF(redGLTFLoader, json, json['meshes'][tMeshIndex])
+				.forEach(
+					function (tMesh) {
+						parentMesh.addChild(info['Mesh'] = tMesh);
+						parseTRSAndMATRIX_GLTF(tMesh, info);
+						if ('children' in info) {
+							info['children'].forEach(function (index) {
+								parseNode_GLTF(redGLTFLoader, json, index, json['nodes'][index], tMesh)
+							})
+						}
+						if ('skin' in info) parseSkin_GLTF(redGLTFLoader, json, json['skins'][info['skin']], tMesh)
+					}
+				)
 		} else {
 			let tGroup;
 			if (redGLTFLoader['parsingResult']['groups'][nodeIndex]) {
@@ -58,11 +56,7 @@ let parseNode_GLTF = (function () {
 					parseNode_GLTF(redGLTFLoader, json, index, json['nodes'][index], tGroup)
 				})
 			}
-			if ('skin' in info) {
-				requestAnimationFrame(function () {
-					parseSkin_GLTF(redGLTFLoader, json, json['skins'][info['skin']], tGroup)
-				})
-			}
+			if ('skin' in info) parseSkin_GLTF(redGLTFLoader, json, json['skins'][info['skin']], tGroup)
 		}
 	}
 })();

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.16 21:13:13
+ *   Last modification time of this file - 2020.1.17 11:10:39
  *
  */
 
@@ -20,15 +20,15 @@ let parseScene_GLTF = function (redGLTFLoader, json, callback) {
 	nodesInScene = json['scenes'][0]['nodes'];
 	i = 0;
 	len = nodesInScene.length;
-	let tick = function () {
+	let parse = function () {
 		nodeIndex = nodesInScene[i];
 		parseNode_GLTF(redGLTFLoader, json, nodeIndex, json['nodes'][nodeIndex], redGLTFLoader['resultMesh']);
 		i++;
 		if (i === len) {
 			if (callback) callback()
-		} else requestAnimationFrame(tick);
+		} else parse();
 	};
-	requestAnimationFrame(tick);
+	parse()
 };
 
 export default parseScene_GLTF
