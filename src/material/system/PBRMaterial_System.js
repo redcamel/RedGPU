@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.16 18:59:49
+ *   Last modification time of this file - 2020.1.17 21:7:30
  *
  */
 
@@ -22,6 +22,8 @@ export default class PBRMaterial_System extends Mix.mix(
 	Mix.emissiveTexture,
 	Mix.environmentTexture,
 	Mix.displacementTexture,
+	Mix.roughnessTextureGLTF,
+	Mix.occlusionTextureGLTF,
 	Mix.basicLightPropertys
 ) {
 
@@ -54,32 +56,37 @@ export default class PBRMaterial_System extends Mix.mix(
         float displacementFlowSpeedX;
         float displacementFlowSpeedY;
         float displacementPower;
+        float __displacementTextureRenderYn;
+        float useSkin;
+        
     } vertexUniforms;
 	
 	layout( set = ${ShareGLSL.SET_INDEX_VertexUniforms}, binding = 1 ) uniform sampler uDisplacementSampler;
-	//#RedGPU#displacementTexture# layout( set = ${ShareGLSL.SET_INDEX_VertexUniforms}, binding = 2 ) uniform texture2D uDisplacementTexture;
+	layout( set = ${ShareGLSL.SET_INDEX_VertexUniforms}, binding = 2 ) uniform texture2D uDisplacementTexture;
 	void main() {		
 		mat4 targetMatrix = meshMatrixUniforms.modelMatrix[ int(meshUniforms.index) ] ;
 		mat4 skinMat = mat4(1.0,0.0,0.0,0.0, 0.0,1.0,0.0,0.0, 0.0,0.0,1.0,0.0, 0.0,0.0,0.0,1.0);
-		//#RedGPU#skin# skinMat =
-		//#RedGPU#skin#  aVertexWeight.x * vertexUniforms.globalTransformOfNodeThatTheMeshIsAttachedTo * vertexUniforms.jointMatrix[ int(aVertexJoint.x) ] * vertexUniforms.inverseBindMatrixForJoint[int(aVertexJoint.x)]+
-		//#RedGPU#skin#  aVertexWeight.y * vertexUniforms.globalTransformOfNodeThatTheMeshIsAttachedTo * vertexUniforms.jointMatrix[ int(aVertexJoint.y) ] * vertexUniforms.inverseBindMatrixForJoint[int(aVertexJoint.y)]+
-		//#RedGPU#skin#  aVertexWeight.z * vertexUniforms.globalTransformOfNodeThatTheMeshIsAttachedTo * vertexUniforms.jointMatrix[ int(aVertexJoint.z) ] * vertexUniforms.inverseBindMatrixForJoint[int(aVertexJoint.z)]+
-		//#RedGPU#skin#  aVertexWeight.w * vertexUniforms.globalTransformOfNodeThatTheMeshIsAttachedTo * vertexUniforms.jointMatrix[ int(aVertexJoint.w) ] * vertexUniforms.inverseBindMatrixForJoint[int(aVertexJoint.w)];
+		if(vertexUniforms.useSkin == TRUTHY) {
+			skinMat =
+			aVertexWeight.x * vertexUniforms.globalTransformOfNodeThatTheMeshIsAttachedTo * vertexUniforms.jointMatrix[ int(aVertexJoint.x) ] * vertexUniforms.inverseBindMatrixForJoint[int(aVertexJoint.x)]+
+			aVertexWeight.y * vertexUniforms.globalTransformOfNodeThatTheMeshIsAttachedTo * vertexUniforms.jointMatrix[ int(aVertexJoint.y) ] * vertexUniforms.inverseBindMatrixForJoint[int(aVertexJoint.y)]+
+			aVertexWeight.z * vertexUniforms.globalTransformOfNodeThatTheMeshIsAttachedTo * vertexUniforms.jointMatrix[ int(aVertexJoint.z) ] * vertexUniforms.inverseBindMatrixForJoint[int(aVertexJoint.z)]+
+			aVertexWeight.w * vertexUniforms.globalTransformOfNodeThatTheMeshIsAttachedTo * vertexUniforms.jointMatrix[ int(aVertexJoint.w) ] * vertexUniforms.inverseBindMatrixForJoint[int(aVertexJoint.w)];
+			vVertexPosition = meshMatrixUniforms.modelMatrix[ int(meshUniforms.index) ] * skinMat * vec4(position, 1.0);
+			vNormal = (meshMatrixUniforms.normalMatrix[ int(meshUniforms.index) ]  * skinMat * vec4(normal,0.0)).xyz;
+		}else{
+			vVertexPosition = meshMatrixUniforms.modelMatrix[ int(meshUniforms.index) ] * vec4(position, 1.0);
+			vNormal = (meshMatrixUniforms.normalMatrix[ int(meshUniforms.index) ] *  vec4(normal,1.0)).xyz;
+		}
 		
-		vVertexPosition = meshMatrixUniforms.modelMatrix[ int(meshUniforms.index) ] * vec4(position, 1.0);
-		//#RedGPU#skin# vVertexPosition = meshMatrixUniforms.modelMatrix[ int(meshUniforms.index) ] * skinMat * vec4(position, 1.0);
 		vVertexColor_0 = vertexColor_0;
-		
-		vNormal = (meshMatrixUniforms.normalMatrix[ int(meshUniforms.index) ] *  vec4(normal,1.0)).xyz;
-	    //#RedGPU#skin# vNormal = (meshMatrixUniforms.normalMatrix[ int(meshUniforms.index) ]  * skinMat * vec4(normal,0.0)).xyz;		
 		
 		vUV = uv;
 		vUV1 = uv1;
 		vVertexTangent = vertexTangent;
 		vMouseColorID = meshUniforms.mouseColorID;
 		vSumOpacity = meshUniforms.sumOpacity;
-		//#RedGPU#displacementTexture# vVertexPosition.xyz += calcDisplacement(vNormal, vertexUniforms.displacementFlowSpeedX, vertexUniforms.displacementFlowSpeedY, vertexUniforms.displacementPower, uv, uDisplacementTexture, uDisplacementSampler);
+		if(vertexUniforms.__displacementTextureRenderYn == TRUTHY) vVertexPosition.xyz += calcDisplacement(vNormal, vertexUniforms.displacementFlowSpeedX, vertexUniforms.displacementFlowSpeedY, vertexUniforms.displacementPower, uv, uDisplacementTexture, uDisplacementSampler);
 		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * vVertexPosition;		
 	}
 	`;
@@ -105,6 +112,19 @@ export default class PBRMaterial_System extends Mix.mix(
 	    float roughnessFactor;
 	    float cutOff;
 	    float alphaBlend;
+	    //
+	    float useFlatMode;
+	    float useCutOff;
+	    float useVertexTangent;
+	    float useVertexColor_0;
+	    float useMaterialDoubleSide;
+	    //
+	    float __diffuseTextureRenderYn;
+		float __environmentTextureRenderYn;
+		float __normalTextureRenderYn;
+		float __occlusionTextureRenderYn;
+		float __emissiveTextureRenderYn;
+		float __roughnessTextureRenderYn;
 	    
     } fragmentUniforms;
 	layout( location = 0 ) in vec4 vVertexColor_0;
@@ -115,18 +135,18 @@ export default class PBRMaterial_System extends Mix.mix(
 	layout( location = 5 ) in vec4 vVertexPosition;
 	layout( location = 6 ) in float vMouseColorID;	
 	layout( location = 7 ) in float vSumOpacity;
-	//#RedGPU#diffuseTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 4 ) uniform sampler uDiffuseSampler;
-	//#RedGPU#diffuseTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 5 ) uniform texture2D uDiffuseTexture;
-	//#RedGPU#normalTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 6 ) uniform sampler uNormalSampler;
-	//#RedGPU#normalTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 7 ) uniform texture2D uNormalTexture;
-	//#RedGPU#roughnessTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 8 ) uniform sampler uRoughnessSampler;	
-	//#RedGPU#roughnessTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 9 ) uniform texture2D uRoughnessTexture;
-	//#RedGPU#emissiveTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 10 ) uniform sampler uEmissiveSampler;	
-	//#RedGPU#emissiveTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 11 ) uniform texture2D uEmissiveTexture;
-	//#RedGPU#environmentTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 12 ) uniform sampler uEnvironmentSampler;
-	//#RedGPU#environmentTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 13 ) uniform textureCube uEnvironmentTexture;
-	//#RedGPU#occlusionTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 14 ) uniform sampler uOcclusionSampler;	
-	//#RedGPU#occlusionTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 15 ) uniform texture2D uOcclusionTexture;
+	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 4 ) uniform sampler uDiffuseSampler;
+	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 5 ) uniform texture2D uDiffuseTexture;
+	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 6 ) uniform sampler uNormalSampler;
+	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 7 ) uniform texture2D uNormalTexture;
+	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 8 ) uniform sampler uRoughnessSampler;	
+	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 9 ) uniform texture2D uRoughnessTexture;
+	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 10 ) uniform sampler uEmissiveSampler;	
+	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 11 ) uniform texture2D uEmissiveTexture;
+	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 12 ) uniform sampler uEnvironmentSampler;
+	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 13 ) uniform textureCube uEnvironmentTexture;
+	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 14 ) uniform sampler uOcclusionSampler;	
+	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 15 ) uniform texture2D uOcclusionTexture;
 	layout( location = 0 ) out vec4 outColor;
 	
 	layout( location = 1 ) out vec4 out_MouseColorID_Depth;
@@ -148,49 +168,61 @@ export default class PBRMaterial_System extends Mix.mix(
 		float tRoughnessPower = fragmentUniforms.roughnessFactor;
 		
 		vec4 roughnessColor = vec4(0.0);
-		//#RedGPU#roughnessTexture# roughnessColor = texture(sampler2D(uRoughnessTexture, uRoughnessSampler), roughnessTexCoord);
-		//#RedGPU#roughnessTexture# tMetallicPower *= roughnessColor.b; // 메탈릭 산출 roughnessColor.b
-		//#RedGPU#roughnessTexture# tRoughnessPower *= roughnessColor.g; // 거칠기 산출 roughnessColor.g
+		if(fragmentUniforms.__roughnessTextureRenderYn == TRUTHY) {
+			roughnessColor = texture(sampler2D(uRoughnessTexture, uRoughnessSampler), roughnessTexCoord);
+			tMetallicPower *= roughnessColor.b; // 메탈릭 산출 roughnessColor.b
+			tRoughnessPower *= roughnessColor.g; // 거칠기 산출 roughnessColor.g
+		}
+		
 		
 	
 		vec4 diffuseColor = fragmentUniforms.baseColorFactor;
-		//#RedGPU#useVertexColor_0# diffuseColor *= clamp(vVertexColor_0,0.0,1.0) ;
-		//#RedGPU#diffuseTexture# diffuseColor *= texture(sampler2D(uDiffuseTexture, uDiffuseSampler), diffuseTexCoord) ;
-	
-		
+		if(fragmentUniforms.useVertexColor_0 == TRUTHY) diffuseColor *= clamp(vVertexColor_0,0.0,1.0) ;
+		if(fragmentUniforms.__diffuseTextureRenderYn == TRUTHY) diffuseColor *= texture(sampler2D(uDiffuseTexture, uDiffuseSampler), diffuseTexCoord) ;
+			
 		float tAlpha = diffuseColor.a;
-		//#RedGPU#useCutOff# if(tAlpha <= fragmentUniforms.cutOff) discard;
+		if(fragmentUniforms.useCutOff == TRUTHY) {
+			if(tAlpha <= fragmentUniforms.cutOff) discard;
+		}
 		
 	    vec3 N = normalize(vNormal);
-	    //#RedGPU#useMaterialDoubleSide# vec3 fdx = dFdx(vVertexPosition.xyz);
-		//#RedGPU#useMaterialDoubleSide# vec3 fdy = dFdy(vVertexPosition.xyz);
-		//#RedGPU#useMaterialDoubleSide# vec3 faceNormal = normalize(cross(fdy,fdx));
-		bool backFaceYn = false;
-		//#RedGPU#useMaterialDoubleSide# if (dot (vNormal, faceNormal) < 0.0) { N = -N; backFaceYn = true; };
-
+	    bool backFaceYn = false;
+	    if(fragmentUniforms.useMaterialDoubleSide == TRUTHY) {
+		    vec3 fdx = dFdx(vVertexPosition.xyz);
+			vec3 fdy = dFdy(vVertexPosition.xyz);
+			vec3 faceNormal = normalize(cross(fdy,fdx));
+			if (dot (vNormal, faceNormal) < 0.0) { N = -N; backFaceYn = true; };
+	    } 
 		vec4 normalColor = vec4(0.0);
-		//#RedGPU#normalTexture# normalColor = texture(sampler2D(uNormalTexture, uNormalSampler), normalTexCoord) ;
-		//#RedGPU#useFlatMode# N = getFlatNormal(vVertexPosition.xyz);
-		//#RedGPU#normalTexture# N = perturb_normal(N, vVertexPosition.xyz, backFaceYn ?  1.0 - normalTexCoord : normalTexCoord, vec3(normalColor.r, 1.0- normalColor.g, normalColor.b), fragmentUniforms.normalPower) ;
+		if(fragmentUniforms.__normalTextureRenderYn == TRUTHY) normalColor = texture(sampler2D(uNormalTexture, uNormalSampler), normalTexCoord) ;
+		if(fragmentUniforms.useFlatMode == TRUTHY) N = getFlatNormal(vVertexPosition.xyz);
+		if(fragmentUniforms.__normalTextureRenderYn == TRUTHY) N = perturb_normal(N, vVertexPosition.xyz, backFaceYn ?  1.0 - normalTexCoord : normalTexCoord, vec3(normalColor.r, 1.0- normalColor.g, normalColor.b), fragmentUniforms.normalPower) ;
 
-		//#RedGPU#useVertexTangent# //#RedGPU#normalTexture# vec3 pos_dx = dFdx(vVertexPosition.xyz);
-		//#RedGPU#useVertexTangent# //#RedGPU#normalTexture# vec3 pos_dy = dFdy(vVertexPosition.xyz);
-		//#RedGPU#useVertexTangent# //#RedGPU#normalTexture# vec3 tex_dx = dFdx(vec3(normalTexCoord, 0.0));
-		//#RedGPU#useVertexTangent# //#RedGPU#normalTexture# vec3 tex_dy = dFdy(vec3(normalTexCoord, 0.0));
-		//#RedGPU#useVertexTangent# //#RedGPU#normalTexture# vec3 t = (tex_dy.t * pos_dx - tex_dx.t * pos_dy) / (tex_dx.s * tex_dy.t - tex_dy.s * tex_dx.t);
-		//#RedGPU#useVertexTangent# //#RedGPU#normalTexture# vec3 ng = normalize(vNormal);
-		//#RedGPU#useVertexTangent# //#RedGPU#normalTexture# t = normalize(t - ng * dot(ng, t));
-		//#RedGPU#useVertexTangent# //#RedGPU#normalTexture# vec3 b = normalize(cross(ng, t));
-		//#RedGPU#useVertexTangent# //#RedGPU#normalTexture# mat3 tbn = mat3(t, b, ng);
-		//#RedGPU#useVertexTangent# //#RedGPU#normalTexture# N = normalize(tbn * ((2.0 * normalColor.rgb - 1.0) * vec3(1.0, 1.0 * vVertexTangent.w,1.0)));
-		//#RedGPU#useVertexTangent# //#RedGPU#normalTexture# N = backFaceYn ? -N : N;
+		if(fragmentUniforms.useVertexTangent == TRUTHY) {
+			if(fragmentUniforms.__normalTextureRenderYn == TRUTHY){
+				vec3 pos_dx = dFdx(vVertexPosition.xyz);
+				vec3 pos_dy = dFdy(vVertexPosition.xyz);
+				vec3 tex_dx = dFdx(vec3(normalTexCoord, 0.0));
+				vec3 tex_dy = dFdy(vec3(normalTexCoord, 0.0));
+				vec3 t = (tex_dy.t * pos_dx - tex_dx.t * pos_dy) / (tex_dx.s * tex_dy.t - tex_dy.s * tex_dx.t);
+				vec3 ng = normalize(vNormal);
+				t = normalize(t - ng * dot(ng, t));
+				vec3 b = normalize(cross(ng, t));
+				mat3 tbn = mat3(t, b, ng);
+				N = normalize(tbn * ((2.0 * normalColor.rgb - 1.0) * vec3(1.0, 1.0 * vVertexTangent.w,1.0)));
+				N = backFaceYn ? -N : N;
+			}			
+		}
 
-		// 환경맵 계산
-		//#RedGPU#environmentTexture# vec3 R = reflect( vVertexPosition.xyz - systemUniforms.cameraPosition, N);
-		//#RedGPU#environmentTexture# vec4 reflectionColor = texture(samplerCube(uEnvironmentTexture,uEnvironmentSampler), R);		
-		// 환경맵 합성
-		//#RedGPU#environmentTexture# diffuseColor.rgb = mix( diffuseColor.rgb , reflectionColor.rgb , max(tMetallicPower-tRoughnessPower,0.0)*(1.0-tRoughnessPower));
-		//#RedGPU#environmentTexture# diffuseColor = mix( diffuseColor , vec4(0.04, 0.04, 0.04, 1.0) , tRoughnessPower * (tMetallicPower) * 0.5);
+		if(fragmentUniforms.__environmentTextureRenderYn == TRUTHY) {
+			// 환경맵 계산
+			vec3 R = reflect( vVertexPosition.xyz - systemUniforms.cameraPosition, N);
+			vec4 reflectionColor = texture(samplerCube(uEnvironmentTexture,uEnvironmentSampler), R);		
+			// 환경맵 합성
+			diffuseColor.rgb = mix( diffuseColor.rgb , reflectionColor.rgb , max(tMetallicPower-tRoughnessPower,0.0)*(1.0-tRoughnessPower));
+			diffuseColor = mix( diffuseColor , vec4(0.04, 0.04, 0.04, 1.0) , tRoughnessPower * (tMetallicPower) * 0.5);
+		}
+		
 
 
 	
@@ -219,20 +251,20 @@ export default class PBRMaterial_System extends Mix.mix(
 				ls +=  specularLightColor * specular * fragmentUniforms.metallicFactor * lightInfo.intensity * lightInfo.color.a * (1.0-tRoughnessPower+0.04);
 			}
 		}
-
-
+		
 		 vec4 finalColor = ld + ls + la;;
-
-
-		// 컷오프 - BLEND, MASK
-
-		// 이미시브 합성
-		//#RedGPU#emissiveTexture# vec4 emissiveColor = texture(sampler2D(uEmissiveTexture, uEmissiveSampler), emissiveTexCoord);
-		//#RedGPU#emissiveTexture# finalColor.rgb += emissiveColor.rgb * fragmentUniforms.emissivePower;
-
+		
+		if(fragmentUniforms.__emissiveTextureRenderYn == TRUTHY) {
+			// 이미시브 합성
+			vec4 emissiveColor = texture(sampler2D(uEmissiveTexture, uEmissiveSampler), emissiveTexCoord);
+			finalColor.rgb += emissiveColor.rgb * fragmentUniforms.emissivePower;
+		}		
+	
+		if(fragmentUniforms.__occlusionTextureRenderYn == TRUTHY) {
 		// 오클루젼 합성
-		//#RedGPU#occlusionTexture# vec4 occlusionColor =texture(sampler2D(uOcclusionTexture, uOcclusionSampler), occlusionTexCoord);
-		//#RedGPU#occlusionTexture# finalColor.rgb = mix(finalColor.rgb, finalColor.rgb * occlusionColor.r, occlusionColor.r * fragmentUniforms.occlusionPower);
+			vec4 occlusionColor =texture(sampler2D(uOcclusionTexture, uOcclusionSampler), occlusionTexCoord);
+			finalColor.rgb = mix(finalColor.rgb, finalColor.rgb * occlusionColor.r, occlusionColor.r * fragmentUniforms.occlusionPower);
+		}
 
 
 		// 알파블렌드 - BLEND
@@ -240,21 +272,22 @@ export default class PBRMaterial_System extends Mix.mix(
 			finalColor.a = tAlpha;
 		}
 		outColor = finalColor;
-		outColor.a *= vSumOpacity;
 		out_MouseColorID_Depth = vec4(vMouseColorID, gl_FragCoord.z/gl_FragCoord.w, 0.0, 0.0);
 		
 	}
 `;
 	static PROGRAM_OPTION_LIST = {
-		vertex: ['displacementTexture', 'skin'],
-		fragment: [
-			'diffuseTexture', 'emissiveTexture', 'environmentTexture', 'normalTexture', 'occlusionTexture', 'roughnessTexture',
-			'useCutOff',
-			'useFlatMode', ,
-			'useMaterialDoubleSide',
-			'useVertexTangent',
-			'useVertexColor_0'
-		]
+		vertex: [],
+		fragment: []
+		// vertex: ['displacementTexture', 'skin'],
+		// fragment: [
+		// 	'diffuseTexture', 'emissiveTexture', 'environmentTexture', 'normalTexture', 'occlusionTexture', 'roughnessTexture',
+		// 	'useCutOff',
+		// 	'useFlatMode', ,
+		// 	'useMaterialDoubleSide',
+		// 	'useVertexTangent',
+		// 	'useVertexColor_0'
+		// ]
 	};
 	static uniformsBindGroupLayoutDescriptor_material = {
 		bindings: [
@@ -282,7 +315,11 @@ export default class PBRMaterial_System extends Mix.mix(
 		{size: TypeSize.mat4, valueName: 'globalTransformOfNodeThatTheMeshIsAttachedTo'},
 		{size: TypeSize.float, valueName: 'displacementFlowSpeedX'},
 		{size: TypeSize.float, valueName: 'displacementFlowSpeedY'},
-		{size: TypeSize.float, valueName: 'displacementPower'}
+		{size: TypeSize.float, valueName: 'displacementPower'},
+		{size: TypeSize.float, valueName: '__displacementTextureRenderYn'},
+		{size: TypeSize.float, valueName: 'useSkin'},
+
+
 	];
 	static uniformBufferDescriptor_fragment = [
 		{size: TypeSize.float, valueName: 'normalPower'},
@@ -300,7 +337,20 @@ export default class PBRMaterial_System extends Mix.mix(
 		{size: TypeSize.float, valueName: 'roughnessFactor'},
 		{size: TypeSize.float, valueName: 'cutOff'},
 		{size: TypeSize.float, valueName: 'alphaBlend'},
+		//
+		{size: TypeSize.float, valueName: 'useFlatMode'},
+		{size: TypeSize.float, valueName: 'useCutOff'},
+		{size: TypeSize.float, valueName: 'useVertexTangent'},
+		{size: TypeSize.float, valueName: 'useVertexColor_0'},
+		{size: TypeSize.float, valueName: 'useMaterialDoubleSide'},
 
+		//
+		{size: TypeSize.float, valueName: '__diffuseTextureRenderYn'},
+		{size: TypeSize.float, valueName: '__environmentTextureRenderYn'},
+		{size: TypeSize.float, valueName: '__normalTextureRenderYn'},
+		{size: TypeSize.float, valueName: '__occlusionTextureRenderYn'},
+		{size: TypeSize.float, valueName: '__emissiveTextureRenderYn'},
+		{size: TypeSize.float, valueName: '__roughnessTextureRenderYn'}
 	];
 
 	_baseColorFactor = new Float32Array(4);
@@ -308,173 +358,94 @@ export default class PBRMaterial_System extends Mix.mix(
 	_diffuseTexCoordIndex = 0;
 	_normalTexCoordIndex = 0;
 	_emissiveTexCoordIndex = 0;
-	_roughnessTexCoordIndex = 0;
-	_occlusionTexCoordIndex = 0;
-	_roughnessTexture;
-	_occlusionTexture;
 	_metallicFactor = 1;
-	_roughnessFactor = 1;
 	_useMaterialDoubleSide = false;
 	_useVertexTangent = false;
 	_emissivePower = 1;
-	_occlusionPower = 1;
 	_cutOff = 0.0;
 	_useCutOff = true;
 	_alphaBlend = 0;
 
-	_skin = false;
+	_useSkin = false;
 	jointMatrix = new Float32Array(TypeSize.mat4 * maxJoint / Float32Array.BYTES_PER_ELEMENT);
 	inverseBindMatrixForJoint = new Float32Array(TypeSize.mat4 * maxJoint / Float32Array.BYTES_PER_ELEMENT);
 	globalTransformOfNodeThatTheMeshIsAttachedTo = new Float32Array(TypeSize.mat4 / Float32Array.BYTES_PER_ELEMENT);
 	#raf;
-	set occlusionTexture(texture) {
-		// this._occlusionTexture = null;
-		this.checkTexture(texture, 'occlusionTexture')
-	}
-	get occlusionTexture() {
-		return this._occlusionTexture
-	}
 
 	set alphaBlend(value) {
 		this._alphaBlend = value;
 		float1_Float32Array[0] = value;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['alphaBlend'], float1_Float32Array)
 	}
-	get alphaBlend() {
-		return this._alphaBlend;
-	}
+	get alphaBlend() {return this._alphaBlend;}
 	set cutOff(value) {
 		this._cutOff = value;
 		float1_Float32Array[0] = value;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['cutOff'], float1_Float32Array)
 	}
-	get cutOff() {
-		return this._cutOff;
-	}
-	get useCutOff() {
-		return this._useCutOff
-	}
+	get cutOff() {return this._cutOff;}
+	get useCutOff() {return this._useCutOff}
 	set useCutOff(v) {
 		this._useCutOff = v;
-		this.needResetBindingInfo = true
+		float1_Float32Array[0] = v ? 1 : 0;
+		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['useCutOff'], float1_Float32Array)
 	}
-	get skin() {
-		return this._skin
+	get useSkin() {return this._useSkin}
+	set useSkin(v) {
+		this._useSkin = v;
+		float1_Float32Array[0] = v ? 1 : 0;
+		this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['useSkin'], float1_Float32Array)
 	}
-	set skin(v) {
-		this._skin = v;
-		this.needResetBindingInfo = true
-	}
-
 	set emissivePower(value) {
 		this._emissivePower = value;
 		float1_Float32Array[0] = value;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['emissivePower'], float1_Float32Array)
 	}
-	get emissivePower() {
-		return this._emissivePower;
-	}
-	set occlusionPower(value) {
-		this._occlusionPower = value;
-		float1_Float32Array[0] = value;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['occlusionPower'], float1_Float32Array)
-	}
-	get occlusionPower() {
-		return this._occlusionPower;
-	}
-	get useMaterialDoubleSide() {
-		return this._useMaterialDoubleSide
-	}
+	get emissivePower() {return this._emissivePower;}
+
+	get useMaterialDoubleSide() {return this._useMaterialDoubleSide}
 	set useMaterialDoubleSide(v) {
 		this._useMaterialDoubleSide = v;
-		this.needResetBindingInfo = true
+		float1_Float32Array[0] =  v ? 1 : 0;
+		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['useMaterialDoubleSide'], float1_Float32Array)
 	}
-	get useVertexTangent() {
-		return this._useVertexTangent
-	}
+	get useVertexTangent() {return this._useVertexTangent}
 	set useVertexTangent(v) {
 		this._useVertexTangent = v;
-		this.needResetBindingInfo = true
+		float1_Float32Array[0] = v;
+		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['useVertexTangent'], float1_Float32Array)
 	}
-	set roughnessTexture(texture) {
-		// this._roughnessTexture = null;
-		this.checkTexture(texture, 'roughnessTexture')
-	}
-	get roughnessTexture() {
-		return this._roughnessTexture
-	}
-	get roughnessTexCoordIndex() {
-		return this._roughnessTexCoordIndex;
-	}
-	set roughnessTexCoordIndex(value) {
-		this._roughnessTexCoordIndex = value;
-		float1_Float32Array[0] = value;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['roughnessTexCoordIndex'], float1_Float32Array)
-	}
-	get roughnessFactor() {
-		return this._roughnessFactor;
-	}
-	set roughnessFactor(value) {
-		this._roughnessFactor = value;
-		float1_Float32Array[0] = value;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['roughnessFactor'], float1_Float32Array)
-	}
-	get occlusionTexCoordIndex() {
-		return this._occlusionTexCoordIndex;
-	}
-	set occlusionTexCoordIndex(value) {
-		this._occlusionTexCoordIndex = value;
-		float1_Float32Array[0] = value;
 
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['occlusionTexCoordIndex'], float1_Float32Array)
-	}
-	get metallicFactor() {
-		return this._metallicFactor;
-	}
+	get metallicFactor() {return this._metallicFactor;}
 	set metallicFactor(value) {
 		this._metallicFactor = value;
 		float1_Float32Array[0] = value;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['metallicFactor'], float1_Float32Array)
 	}
-
-
-	get useVertexColor_0() {
-		return this._useVertexColor_0;
-	}
+	get useVertexColor_0() {return this._useVertexColor_0;}
 	set useVertexColor_0(value) {
 		this._useVertexColor_0 = value;
-		this.needResetBindingInfo = true
+		float1_Float32Array[0] = value ? 1 : 0;
+		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['useVertexColor_0'], float1_Float32Array)
 	}
-	get baseColorFactor() {
-		return this._baseColorFactor;
-	}
-
+	get baseColorFactor() {return this._baseColorFactor;}
 	set baseColorFactor(value) {
 		this._baseColorFactor = new Float32Array(value);
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['baseColorFactor'], this._baseColorFactor)
 	}
-	get diffuseTexCoordIndex() {
-		return this._diffuseTexCoordIndex;
-	}
-
+	get diffuseTexCoordIndex() {return this._diffuseTexCoordIndex;}
 	set diffuseTexCoordIndex(value) {
 		this._diffuseTexCoordIndex = value;
 		float1_Float32Array[0] = value;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['diffuseTexCoordIndex'], float1_Float32Array)
 	}
-	get normalTexCoordIndex() {
-		return this._normalTexCoordIndex;
-	}
-
+	get normalTexCoordIndex() {return this._normalTexCoordIndex;}
 	set normalTexCoordIndex(value) {
 		this._normalTexCoordIndex = value;
 		float1_Float32Array[0] = value;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['normalTexCoordIndex'], float1_Float32Array)
 	}
-	get emissiveTexCoordIndex() {
-		return this._emissiveTexCoordIndex;
-	}
-
+	get emissiveTexCoordIndex() {return this._emissiveTexCoordIndex;}
 	set emissiveTexCoordIndex(value) {
 		this._emissiveTexCoordIndex = value;
 		float1_Float32Array[0] = value;
@@ -495,29 +466,42 @@ export default class PBRMaterial_System extends Mix.mix(
 	checkTexture(texture, textureName) {
 		if (texture) {
 			if (texture._GPUTexture) {
+				let tKey;
 				switch (textureName) {
 					case 'diffuseTexture' :
 						this._diffuseTexture = texture;
+						tKey = textureName;
 						break;
 					case 'normalTexture' :
 						this._normalTexture = texture;
+						tKey = textureName;
 						break;
 					case 'environmentTexture' :
 						this._environmentTexture = texture;
+						tKey = textureName;
 						break;
 					case 'emissiveTexture' :
 						this._emissiveTexture = texture;
+						tKey = textureName;
 						break;
 					case 'roughnessTexture' :
 						this._roughnessTexture = texture;
+						tKey = textureName;
 						break;
 					case 'occlusionTexture' :
 						this._occlusionTexture = texture;
+						tKey = textureName;
 						break;
 				}
 				if (RedGPUContext.useDebugConsole) console.log("로딩완료or로딩에러확인 textureName", textureName, texture ? texture._GPUTexture : '');
-				cancelAnimationFrame(this.#raf);
-				this.#raf = requestAnimationFrame(_ => {this.needResetBindingInfo = true})
+				if (tKey) {
+					float1_Float32Array[0] = this[`__${textureName}RenderYn`] = 1
+					if (tKey == 'displacementTexture') this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+					else this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+				}
+				// cancelAnimationFrame(this.#raf);
+				// this.#raf = requestAnimationFrame(_ => {this.needResetBindingInfo = true})
+				this.needResetBindingInfo = true
 
 			} else {
 				texture.addUpdateTarget(this, textureName)
@@ -526,6 +510,10 @@ export default class PBRMaterial_System extends Mix.mix(
 		} else {
 			if (this['_' + textureName]) {
 				this['_' + textureName] = null;
+				float1_Float32Array[0] = this[`__${textureName}RenderYn`] = 0
+				if (textureName == 'displacementTexture') this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+				else this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+				this.needResetBindingInfo = true
 				this.needResetBindingInfo = true
 			}
 		}

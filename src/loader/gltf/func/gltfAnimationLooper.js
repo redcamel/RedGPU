@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.16 21:13:13
+ *   Last modification time of this file - 2020.1.17 11:10:39
  *
  */
 import glMatrix from "../../../base/gl-matrix-min.js"
@@ -45,7 +45,6 @@ export default function gltfAnimationLooper(time, loopList) {
 	let weights_cacheKey;
 	while (loopListIDX--) {
 		loopListItem = loopList[loopListIDX];
-
 		targetAnimationData = loopListItem['targetAnimationData'];
 		targetAnimationDataIDX = targetAnimationData.length;
 		while (targetAnimationDataIDX--) {
@@ -106,7 +105,6 @@ export default function gltfAnimationLooper(time, loopList) {
 				let s3 = ppp - pp;
 				let s0 = 1 - s2;
 				let s1 = s3 - pp + p;
-
 				if (target) {
 					let startV, startOut, endV, endIn;
 					let tAniData_data = aniData['data'];
@@ -359,15 +357,12 @@ export default function gltfAnimationLooper(time, loopList) {
 				else interpolationValue = (currentTime - previousTime) / (nextTime - previousTime);
 				if (interpolationValue.toString() == 'NaN') interpolationValue = 0;
 				if (target) {
-
 					let tAniData_data = aniData['data'];
-
 					switch (aniData['key']) {
 						case 'rotation':
 							/////////////////////////////////////////////
 							// quat.normalize(prevRotation, prevRotation);
 							// quat.normalize(nextRotation, nextRotation);
-
 							// prevRotation
 							x = tAniData_data[prevIndex * 4];
 							y = tAniData_data[prevIndex * 4 + 1];

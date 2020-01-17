@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.16 21:13:13
+ *   Last modification time of this file - 2020.1.17 20:58:48
  *
  */
 
@@ -32,7 +32,7 @@ let parseSkin_GLTF = function (redGLTFLoader, json, info, tMesh) {
 		checkJoint(redGLTFLoader, skinInfo, nodes, v)
 	});
 	// 스켈레톤 정보가 있으면 정보와 메쉬를 연결해둔다.
-	if (info['skevaron']) skinInfo['skevaron'] = json['nodes'][info['skevaron']]['Mesh'];
+	if (info['skeleton']) skinInfo['skeleton'] = json['nodes'][info['skeleton']]['Mesh'];
 	// 액세서 구하고..
 	// 정보 파싱한다.
 	let accessorIndex = info['inverseBindMatrices'];
@@ -71,6 +71,6 @@ let parseSkin_GLTF = function (redGLTFLoader, json, info, tMesh) {
 	}
 	skinInfo['inverseBindMatrices'] = new Float32Array(skinInfo['inverseBindMatrices']);
 	tMesh['skinInfo'] = skinInfo;
-	tMesh.material.skin = tMesh['skinInfo'] ? true : false;
+	tMesh.material.useSkin = tMesh['skinInfo'] ? true : false;
 };
 export default parseSkin_GLTF;

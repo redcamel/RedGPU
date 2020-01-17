@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.16 21:13:13
+ *   Last modification time of this file - 2020.1.17 20:58:48
  *
  */
 
@@ -46,23 +46,23 @@ let renderScene = (_ => {
 			frustumPlanes3 = _frustumPlanes[3];
 			frustumPlanes4 = _frustumPlanes[4];
 			frustumPlanes5 = _frustumPlanes[5];
+			let tMVMatrix, tNMatrix;
+			let tLocalMatrix;
+			let parentMTX, parentDirty, parent;
+			let tSkinInfo;
+			let tGeometry;
+			let tMaterial;
+			let tMesh;
+			let tDirtyTransform;
+			let tPipeline;
+			let tDirtyPipeline;
+			let tMaterialChanged;
+			let tVisible;
+			let geoVolume;
+			let radius;
+			let radiusTemp;
+			let tOpacity, tParentSumOpacity;
 			while (i--) {
-				let tMVMatrix, tNMatrix;
-				let tLocalMatrix;
-				let parentMTX, parentDirty, parent;
-				let tSkinInfo;
-				let tGeometry;
-				let tMaterial;
-				let tMesh;
-				let tDirtyTransform;
-				let tPipeline;
-				let tDirtyPipeline;
-				let tMaterialChanged;
-				let tVisible;
-				let geoVolume;
-				let radius;
-				let radiusTemp;
-				let tOpacity, tParentSumOpacity;
 				tMesh = children[i];
 				tMaterial = tMesh._material;
 				tGeometry = tMesh._geometry;
@@ -77,7 +77,7 @@ let renderScene = (_ => {
 				}
 				if (tMesh._sumOpacity != tOpacity * tParentSumOpacity) {
 					tMesh.sumOpacity = tOpacity * tParentSumOpacity
-					console.log('여기', tOpacity)
+					console.log('sumOpacity', tOpacity)
 				}
 
 				tDirtyTransform = tMesh.dirtyTransform;

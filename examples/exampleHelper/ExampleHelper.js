@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.16 18:59:49
+ *   Last modification time of this file - 2020.1.17 20:58:48
  *
  */
 
@@ -743,7 +743,7 @@ const ExampleHelper = (_ => {
 			rootFolder = gui.addFolder('SpriteSheetMaterial');
 			if (open) rootFolder.open();
 			makeAlphaProperty(rootFolder, material)
-			makeTextureProperty(rootFolder, RedGPU, redGPUContext, material, 'diffuseTexture', `${assetPath}sheet/spriteSheet.png`);
+			// makeTextureProperty(rootFolder, RedGPU, redGPUContext, material, 'diffuseTexture', `${assetPath}sheet/spriteSheet.png`);
 			rootFolder.add(material, 'frameRate', 1, 120);
 			rootFolder.add(material, 'play');
 			rootFolder.add(material, 'stop');

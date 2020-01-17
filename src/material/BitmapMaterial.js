@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.16 18:59:49
+ *   Last modification time of this file - 2020.1.17 20:58:48
  *
  */
 
@@ -13,6 +13,7 @@ import Mix from "../base/Mix.js";
 import RedGPUContext from "../RedGPUContext.js";
 import TypeSize from "../resources/TypeSize.js";
 
+let float1_Float32Array = new Float32Array(1)
 export default class BitmapMaterial extends Mix.mix(
 	BaseMaterial,
 	Mix.diffuseTexture,
@@ -39,12 +40,15 @@ export default class BitmapMaterial extends Mix.mix(
 	`;
 	static fragmentShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
+	const float TRUTHY = 1.0;
 	layout( location = 0 ) in vec3 vNormal;
 	layout( location = 1 ) in vec2 vUV;
 	layout( location = 2 ) in float vMouseColorID;	
 	layout( location = 3 ) in float vSumOpacity;
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 0 ) uniform FragmentUniforms {
         float alpha;
+        //
+        float __diffuseTextureRenderYn;
     } fragmentUniforms;
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 1 ) uniform sampler uSampler;
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 2 ) uniform texture2D uDiffuseTexture;
@@ -52,14 +56,19 @@ export default class BitmapMaterial extends Mix.mix(
 	layout( location = 1 ) out vec4 out_MouseColorID_Depth;
 	void main() {
 		vec4 diffuseColor = vec4(0.0);
-		//#RedGPU#diffuseTexture# diffuseColor = texture(sampler2D(uDiffuseTexture, uSampler), vUV) ;
+		if(fragmentUniforms.__diffuseTextureRenderYn == TRUTHY) diffuseColor = texture(sampler2D(uDiffuseTexture, uSampler), vUV) ;
 		outColor = diffuseColor;
 		outColor.a *= fragmentUniforms.alpha * vSumOpacity;
 		out_MouseColorID_Depth = vec4(vMouseColorID, gl_FragCoord.z/gl_FragCoord.w, 0.0, 0.0);
 		
 	}
 `;
-	static PROGRAM_OPTION_LIST = {vertex: [], fragment: ['diffuseTexture']};
+	static PROGRAM_OPTION_LIST = {
+		vertex: [],
+		fragment: []
+		// vertex: [],
+		// fragment: ['diffuseTexture']
+	};
 	static uniformsBindGroupLayoutDescriptor_material = {
 		bindings: [
 			{binding: 0, visibility: GPUShaderStage.FRAGMENT, type: "uniform-buffer"},
@@ -69,7 +78,9 @@ export default class BitmapMaterial extends Mix.mix(
 	};
 	static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
 	static uniformBufferDescriptor_fragment = [
-		{size: TypeSize.float, valueName: 'alpha'}
+		{size: TypeSize.float, valueName: 'alpha'},
+		//
+		{size: TypeSize.float, valueName: '__diffuseTextureRenderYn'},
 	];
 	constructor(redGPUContext, diffuseTexture) {
 		super(redGPUContext);
@@ -79,12 +90,19 @@ export default class BitmapMaterial extends Mix.mix(
 	checkTexture(texture, textureName) {
 		if (texture) {
 			if (texture._GPUTexture) {
+				let tKey;
 				switch (textureName) {
 					case 'diffuseTexture' :
 						this._diffuseTexture = texture;
+						tKey = textureName;
 						break
 				}
 				if (RedGPUContext.useDebugConsole) console.log("로딩완료or로딩에러확인 textureName", textureName, texture ? texture._GPUTexture : '');
+				if (tKey) {
+					float1_Float32Array[0] = this[`__${textureName}RenderYn`] = 1
+					if (tKey == 'displacementTexture') this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+					else this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+				}
 				this.needResetBindingInfo = true
 			} else {
 				texture.addUpdateTarget(this, textureName)
@@ -93,6 +111,9 @@ export default class BitmapMaterial extends Mix.mix(
 		} else {
 			if (this['_' + textureName]) {
 				this['_' + textureName] = null;
+				float1_Float32Array[0] = this[`__${textureName}RenderYn`] = 0
+				if (textureName == 'displacementTexture') this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+				else this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
 				this.needResetBindingInfo = true
 			}
 		}

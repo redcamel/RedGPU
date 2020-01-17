@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.16 21:13:13
+ *   Last modification time of this file - 2020.1.17 11:10:39
  *
  */
 
@@ -351,8 +351,11 @@ var GLTFLoader;
 									result.textures.forEach(v => {
 										v.userInfo.targetMaterial[v.userInfo.targetTexture] = v.texture;
 									});
-									parseAnimation_GLTF(redGLTFLoader, json);
-									if (callBack) callBack();
+									parseAnimation_GLTF(redGLTFLoader, json).then(_=>{
+										console.time('parseAnimation_GLTF_'+redGLTFLoader.fileName)
+										if (callBack) callBack();
+										console.timeEnd('parseAnimation_GLTF_'+redGLTFLoader.fileName)
+									});
 								}
 							)
 						})
@@ -371,8 +374,13 @@ var GLTFLoader;
 									result.textures.forEach(v => {
 										v.userInfo.targetMaterial[v.userInfo.targetTexture] = v.texture;
 									});
-									parseAnimation_GLTF(redGLTFLoader, json);
-									if (callBack) callBack();
+
+									parseAnimation_GLTF(redGLTFLoader, json).then(_=>{
+										console.time('parseAnimation_GLTF_'+redGLTFLoader.fileName)
+										if (callBack) callBack();
+										console.timeEnd('parseAnimation_GLTF_'+redGLTFLoader.fileName)
+									});
+
 								}
 							)
 						})

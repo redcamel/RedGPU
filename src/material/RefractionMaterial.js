@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.16 18:59:50
+ *   Last modification time of this file - 2020.1.17 20:58:48
  *
  */
 
@@ -13,6 +13,7 @@ import ShareGLSL from "../base/ShareGLSL.js";
 import Mix from "../base/Mix.js";
 import RedGPUContext from "../RedGPUContext.js";
 
+let float1_Float32Array = new Float32Array(1);
 export default class RefractionMaterial extends Mix.mix(
 	BaseMaterial,
 	Mix.diffuseTexture,
@@ -42,20 +43,19 @@ export default class RefractionMaterial extends Mix.mix(
         float displacementFlowSpeedX;
         float displacementFlowSpeedY;
         float displacementPower;
+        float __displacementTextureRenderYn;
     } vertexUniforms;
 	
 	layout( set = ${ShareGLSL.SET_INDEX_VertexUniforms}, binding = 1 ) uniform sampler uDisplacementSampler;
-	//#RedGPU#displacementTexture# layout( set = ${ShareGLSL.SET_INDEX_VertexUniforms}, binding = 2 ) uniform texture2D uDisplacementTexture;
+	layout( set = ${ShareGLSL.SET_INDEX_VertexUniforms}, binding = 2 ) uniform texture2D uDisplacementTexture;
 	void main() {		
 		vVertexPosition = meshMatrixUniforms.modelMatrix[ int(meshUniforms.index) ] * vec4(position, 1.0);
 		vNormal = (meshMatrixUniforms.normalMatrix[ int(meshUniforms.index) ] * vec4(normal,1.0)).xyz;
 		vUV = uv;
 		vMouseColorID = meshUniforms.mouseColorID;
 		vSumOpacity = meshUniforms.sumOpacity;
-		//#RedGPU#displacementTexture# vVertexPosition.xyz += calcDisplacement(vNormal, vertexUniforms.displacementFlowSpeedX, vertexUniforms.displacementFlowSpeedY, vertexUniforms.displacementPower, uv, uDisplacementTexture, uDisplacementSampler);
-		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * vVertexPosition;
-	
-	
+		if(vertexUniforms.__displacementTextureRenderYn == TRUTHY) vVertexPosition.xyz += calcDisplacement(vNormal, vertexUniforms.displacementFlowSpeedX, vertexUniforms.displacementFlowSpeedY, vertexUniforms.displacementPower, uv, uDisplacementTexture, uDisplacementSampler);
+		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * vVertexPosition;		
 	}
 	`;
 	static fragmentShaderGLSL = `
@@ -72,6 +72,13 @@ export default class RefractionMaterial extends Mix.mix(
 	    float refractionPower;
 	    float refractionRatio;
 	    float alpha;
+	    float useFlatMode;
+	    //
+	    float __diffuseTextureRenderYn;
+		float __refractionTextureRenderYn;
+		float __normalTextureRenderYn;
+		float __specularTextureRenderYn;
+		float __emissiveTextureRenderYn;
     } fragmentUniforms;
 
 	layout( location = 0 ) in vec3 vNormal;
@@ -79,41 +86,41 @@ export default class RefractionMaterial extends Mix.mix(
 	layout( location = 2 ) in vec4 vVertexPosition;
 	layout( location = 3 ) in float vMouseColorID;
 	layout( location = 4 ) in float vSumOpacity;
-	//#RedGPU#diffuseTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 4 ) uniform sampler uDiffuseSampler;
-	//#RedGPU#diffuseTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 5 ) uniform texture2D uDiffuseTexture;
-	//#RedGPU#normalTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 6 ) uniform sampler uNormalSampler;
-	//#RedGPU#normalTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 7 ) uniform texture2D uNormalTexture;
-	//#RedGPU#specularTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 8 ) uniform sampler uSpecularTSampler;	
-	//#RedGPU#specularTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 9 ) uniform texture2D uSpecularTexture;
-	//#RedGPU#emissiveTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 10 ) uniform sampler uEmissiveSampler;
-	//#RedGPU#emissiveTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 11 ) uniform texture2D uEmissiveTexture;
-	//#RedGPU#refractionTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 12 ) uniform sampler uRefractionSampler;
-	//#RedGPU#refractionTexture# layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 13 ) uniform textureCube uRefractionTexture;
+	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 4 ) uniform sampler uDiffuseSampler;
+	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 5 ) uniform texture2D uDiffuseTexture;
+	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 6 ) uniform sampler uNormalSampler;
+	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 7 ) uniform texture2D uNormalTexture;
+	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 8 ) uniform sampler uSpecularSampler;	
+	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 9 ) uniform texture2D uSpecularTexture;
+	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 10 ) uniform sampler uEmissiveSampler;
+	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 11 ) uniform texture2D uEmissiveTexture;
+	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 12 ) uniform sampler uRefractionSampler;
+	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 13 ) uniform textureCube uRefractionTexture;
 	layout( location = 0 ) out vec4 outColor;
 	
 	layout( location = 1 ) out vec4 out_MouseColorID_Depth;
 	void main() {
-		float testAlpha = 1.0;
+		float testAlpha = 0.0;
 		vec4 diffuseColor = vec4(0.0);
-		//#RedGPU#diffuseTexture# diffuseColor = texture(sampler2D(uDiffuseTexture, uDiffuseSampler), vUV) ;
-		
-		
-		
+		if(fragmentUniforms.__diffuseTextureRenderYn == TRUTHY) diffuseColor = texture(sampler2D(uDiffuseTexture, uDiffuseSampler), vUV) ;
+			
 	    vec3 N = normalize(vNormal);
 		vec4 normalColor = vec4(0.0);
-		//#RedGPU#normalTexture# normalColor = texture(sampler2D(uNormalTexture, uNormalSampler), vUV) ;
-		//#RedGPU#useFlatMode# N = getFlatNormal(vVertexPosition.xyz);
-		//#RedGPU#normalTexture# N = perturb_normal(N, vVertexPosition.xyz, vUV, normalColor.rgb, fragmentUniforms.normalPower) ;
+		if(fragmentUniforms.__normalTextureRenderYn == TRUTHY) normalColor = texture(sampler2D(uNormalTexture, uNormalSampler), vUV) ;
+		if(fragmentUniforms.useFlatMode == TRUTHY) N = getFlatNormal(vVertexPosition.xyz);
+		if(fragmentUniforms.__normalTextureRenderYn == TRUTHY) N = perturb_normal(N, vVertexPosition.xyz, vUV, normalColor.rgb, fragmentUniforms.normalPower) ;
 	
-		//#RedGPU#refractionTexture# vec3 I = normalize(vVertexPosition.xyz - systemUniforms.cameraPosition);
-		//#RedGPU#refractionTexture# vec3 R = refract(I, N, fragmentUniforms.refractionRatio);
-		//#RedGPU#refractionTexture# vec4 refractionColor = texture(samplerCube(uRefractionTexture,uRefractionSampler), R);
-		//#RedGPU#refractionTexture# diffuseColor = mix(diffuseColor, refractionColor, fragmentUniforms.refractionPower);
+		if(fragmentUniforms.__refractionTextureRenderYn == TRUTHY) {
+			vec3 I = normalize(vVertexPosition.xyz - systemUniforms.cameraPosition);
+			vec3 R = refract(I, N, fragmentUniforms.refractionRatio);
+			vec4 refractionColor = texture(samplerCube(uRefractionTexture,uRefractionSampler), R);
+			diffuseColor = mix(diffuseColor, refractionColor, fragmentUniforms.refractionPower);
+		}
 		
 		testAlpha = diffuseColor.a;
 		
 		float specularTextureValue = 1.0;
-		//#RedGPU#specularTexture# specularTextureValue = texture(sampler2D(uSpecularTexture, uSpecularTSampler), vUV).r ;
+		if(fragmentUniforms.__specularTextureRenderYn == TRUTHY) specularTextureValue = texture(sampler2D(uSpecularTexture, uSpecularSampler), vUV).r ;
 		
 		vec4 finalColor = 
 		calcDirectionalLight(
@@ -140,8 +147,10 @@ export default class RefractionMaterial extends Mix.mix(
 		)
 		+ la;
 		
-		//#RedGPU#emissiveTexture# vec4 emissiveColor = texture(sampler2D(uEmissiveTexture, uEmissiveSampler), vUV);
-		//#RedGPU#emissiveTexture# finalColor.rgb += emissiveColor.rgb * fragmentUniforms.emissivePower;
+		if(fragmentUniforms.__emissiveTextureRenderYn == TRUTHY) {
+			vec4 emissiveColor = texture(sampler2D(uEmissiveTexture, uEmissiveSampler), vUV);
+			finalColor.rgb += emissiveColor.rgb * fragmentUniforms.emissivePower;
+		}
 		
 		finalColor.a = testAlpha;
 		outColor = finalColor;
@@ -151,8 +160,10 @@ export default class RefractionMaterial extends Mix.mix(
 	}
 `;
 	static PROGRAM_OPTION_LIST = {
-		vertex: ['displacementTexture'],
-		fragment: ['diffuseTexture', 'emissiveTexture', 'refractionTexture', 'normalTexture', 'specularTexture', 'useFlatMode']
+		// vertex: ['displacementTexture'],
+		// fragment: ['diffuseTexture', 'emissiveTexture', 'refractionTexture', 'normalTexture', 'specularTexture', 'useFlatMode']
+		vertex: [],
+		fragment: []
 	};
 	static uniformsBindGroupLayoutDescriptor_material = {
 		bindings: [
@@ -175,7 +186,8 @@ export default class RefractionMaterial extends Mix.mix(
 	static uniformBufferDescriptor_vertex = [
 		{size: TypeSize.float, valueName: 'displacementFlowSpeedX'},
 		{size: TypeSize.float, valueName: 'displacementFlowSpeedY'},
-		{size: TypeSize.float, valueName: 'displacementPower'}
+		{size: TypeSize.float, valueName: 'displacementPower'},
+		{size: TypeSize.float, valueName: '__displacementTextureRenderYn'}
 	];
 	static uniformBufferDescriptor_fragment = [
 		{size: TypeSize.float, valueName: 'normalPower'},
@@ -185,7 +197,14 @@ export default class RefractionMaterial extends Mix.mix(
 		{size: TypeSize.float, valueName: 'emissivePower'},
 		{size: TypeSize.float, valueName: 'refractionPower'},
 		{size: TypeSize.float, valueName: 'refractionRatio'},
-		{size: TypeSize.float, valueName: 'alpha'}
+		{size: TypeSize.float, valueName: 'alpha'},
+		{size: TypeSize.float, valueName: 'useFlatMode'},
+		//
+		{size: TypeSize.float, valueName: '__diffuseTextureRenderYn'},
+		{size: TypeSize.float, valueName: '__refractionTextureRenderYn'},
+		{size: TypeSize.float, valueName: '__normalTextureRenderYn'},
+		{size: TypeSize.float, valueName: '__specularTextureRenderYn'},
+		{size: TypeSize.float, valueName: '__emissiveTextureRenderYn'}
 	];
 	#raf;
 	constructor(redGPUContext, diffuseTexture, refractionTexture, normalTexture, specularTexture, emissiveTexture, displacementTexture) {
@@ -196,36 +215,47 @@ export default class RefractionMaterial extends Mix.mix(
 		this.emissiveTexture = emissiveTexture;
 		this.specularTexture = specularTexture;
 		this.displacementTexture = displacementTexture;
-
 		this.needResetBindingInfo = true
 	}
-
 	checkTexture(texture, textureName) {
 		if (texture) {
 			if (texture._GPUTexture) {
+				let tKey;
 				switch (textureName) {
 					case 'diffuseTexture' :
 						this._diffuseTexture = texture;
+						tKey = textureName;
 						break;
 					case 'normalTexture' :
 						this._normalTexture = texture;
+						tKey = textureName;
 						break;
 					case 'specularTexture' :
 						this._specularTexture = texture;
+						tKey = textureName;
 						break;
 					case 'emissiveTexture' :
 						this._emissiveTexture = texture;
+						tKey = textureName;
 						break;
 					case 'refractionTexture' :
 						this._refractionTexture = texture;
+						tKey = textureName;
 						break;
 					case 'displacementTexture' :
 						this._displacementTexture = texture;
+						tKey = textureName;
 						break
 				}
 				if (RedGPUContext.useDebugConsole) console.log("로딩완료or로딩에러확인 textureName", textureName, texture ? texture._GPUTexture : '');
-				cancelAnimationFrame(this.#raf);
-				this.#raf = requestAnimationFrame(_ => {this.needResetBindingInfo = true})
+				if (tKey) {
+					float1_Float32Array[0] = this[`__${textureName}RenderYn`] = 1
+					if (tKey == 'displacementTexture') this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+					else this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+				}
+				this.needResetBindingInfo = true
+				// cancelAnimationFrame(this.#raf);
+				// this.#raf = requestAnimationFrame(_ => {this.needResetBindingInfo = true})
 			} else {
 				texture.addUpdateTarget(this, textureName)
 			}
@@ -233,6 +263,9 @@ export default class RefractionMaterial extends Mix.mix(
 		} else {
 			if (this['_' + textureName]) {
 				this['_' + textureName] = null;
+				float1_Float32Array[0] = this[`__${textureName}RenderYn`] = 0
+				if (textureName == 'displacementTexture') this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+				else this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
 				this.needResetBindingInfo = true
 			}
 		}
@@ -309,4 +342,4 @@ export default class RefractionMaterial extends Mix.mix(
 		];
 		this._afterResetBindingInfo();
 	}
-	}
+}

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.16 18:59:49
+ *   Last modification time of this file - 2020.1.17 20:58:48
  *
  */
 
@@ -47,6 +47,7 @@ export default class ColorPhongMaterial extends Mix.mix(
         float specularPower;
 	    vec4 specularColor;
         float alpha;
+        float useFlatMode;
     } fragmentUniforms;
 	layout( location = 0 ) in vec3 vNormal;
 	layout( location = 1 ) in vec4 vVertexPosition;
@@ -58,7 +59,7 @@ export default class ColorPhongMaterial extends Mix.mix(
 		float testAlpha = fragmentUniforms.color.a * vSumOpacity;
 
 		vec3 N = normalize(vNormal);
-		//#RedGPU#useFlatMode# N = getFlatNormal(vVertexPosition.xyz);
+		if(fragmentUniforms.useFlatMode == TRUTHY) N = getFlatNormal(vVertexPosition.xyz);
 
 		float specularTextureValue = 1.0;
 		
@@ -109,7 +110,8 @@ export default class ColorPhongMaterial extends Mix.mix(
 			size: TypeSize.float4,
 			valueName: 'specularColorRGBA',
 		},
-		{size: TypeSize.float, valueName: 'alpha'}
+		{size: TypeSize.float, valueName: 'alpha'},
+		{size: TypeSize.float, valueName: 'useFlatMode'}
 	];
 
 

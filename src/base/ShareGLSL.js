@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.16 18:59:49
+ *   Last modification time of this file - 2020.1.17 20:58:48
  *
  */
 
@@ -12,7 +12,7 @@ export default class ShareGLSL {
 	static GLSL_VERSION = '#version 460';
 	static MAX_DIRECTIONAL_LIGHT = 8;
 	static MAX_POINT_LIGHT = 100;
-	static MAX_SPOT_LIGHT = 100;
+	static MAX_SPOT_LIGHT = 1;
 	static SET_INDEX_SystemUniforms_vertex = 0;
 	static SET_INDEX_SystemUniforms_fragment = 1;
 	static SET_INDEX_MeshUniforms = 2;
@@ -20,6 +20,7 @@ export default class ShareGLSL {
 	static SET_INDEX_FragmentUniforms = 3;
 	static GLSL_SystemUniforms_vertex = {
 		systemUniforms: `
+		const float TRUTHY = 1.0;
 		layout( set =  ${ShareGLSL.SET_INDEX_SystemUniforms_vertex}, binding = 0 ) uniform SystemUniforms {
 	        mat4 perspectiveMTX;
 	        mat4 cameraMTX;
@@ -39,12 +40,12 @@ export default class ShareGLSL {
 	    } meshUniforms;
 		`,
 		calcDisplacement: `
-		//#RedGPU#displacementTexture# vec3 calcDisplacement(vec3 vNormal, float displacementFlowSpeedX, float displacementFlowSpeedY, float displacementPower, vec2 targetUV, texture2D targetDisplacementTexture, sampler targetSampler){
-		//#RedGPU#displacementTexture#    return normalize(vNormal) * texture(sampler2D(targetDisplacementTexture, targetSampler), targetUV + vec2(
-		//#RedGPU#displacementTexture#              displacementFlowSpeedX * (systemUniforms.time/1000.0),
-		//#RedGPU#displacementTexture#               displacementFlowSpeedY * (systemUniforms.time/1000.0)
-		//#RedGPU#displacementTexture#          )).x * displacementPower ;
-		//#RedGPU#displacementTexture# }
+		 vec3 calcDisplacement(vec3 vNormal, float displacementFlowSpeedX, float displacementFlowSpeedY, float displacementPower, vec2 targetUV, texture2D targetDisplacementTexture, sampler targetSampler){
+		    return normalize(vNormal) * texture(sampler2D(targetDisplacementTexture, targetSampler), targetUV + vec2(
+		              displacementFlowSpeedX * (systemUniforms.time/1000.0),
+		               displacementFlowSpeedY * (systemUniforms.time/1000.0)
+		          )).x * displacementPower ;
+		 }
 		`,
 		getSprite3DMatrix: `
 		mat4 getSprite3DMatrix(mat4 cameraMTX, mat4 mvMatrix){
@@ -58,6 +59,7 @@ export default class ShareGLSL {
 	};
 	static GLSL_SystemUniforms_fragment = {
 		systemUniforms: `
+		const float TRUTHY = 1.0;
 		const int MAX_DIRECTIONAL_LIGHT = ${ShareGLSL.MAX_DIRECTIONAL_LIGHT};
 		const int MAX_POINT_LIGHT =  ${ShareGLSL.MAX_POINT_LIGHT};
 		const int MAX_SPOT_LIGHT =  ${ShareGLSL.MAX_SPOT_LIGHT};

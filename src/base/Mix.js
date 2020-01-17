@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.16 13:54:48
+ *   Last modification time of this file - 2020.1.17 20:58:48
  *
  */
 
@@ -54,6 +54,7 @@ const alpha = Base => class extends Base {
 const defineTextureClass = function (name) {
 	return Base => class extends Base {
 		[`_${name}`] = null;
+		[`__${name}RenderYn`] = 0;
 		set [name](texture) {
 			// this[`_${name}`] = null;
 			this.checkTexture(texture, name);
@@ -142,6 +143,58 @@ const displacementTexture = Base => {
 	};
 	return mix(t0, displacementTextureBase)
 };
+
+
+const roughnessTextureBase = defineTextureClass('roughnessTexture');
+const roughnessTextureGLTF = Base => {
+	let t0 = class extends Base {
+		_roughnessTexCoordIndex = 0;
+		_roughnessFactor = 1;
+		set roughnessTexture(texture) {
+			this.checkTexture(texture, 'roughnessTexture')
+		}
+		get roughnessTexture() {return this._roughnessTexture}
+		get roughnessTexCoordIndex() {return this._roughnessTexCoordIndex;}
+		set roughnessTexCoordIndex(value) {
+			this._roughnessTexCoordIndex = value;
+			float1_Float32Array[0] = value;
+			this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['roughnessTexCoordIndex'], float1_Float32Array)
+		}
+		get roughnessFactor() {return this._roughnessFactor;}
+		set roughnessFactor(value) {
+			this._roughnessFactor = value;
+			float1_Float32Array[0] = value;
+			this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['roughnessFactor'], float1_Float32Array)
+		}
+	};
+	return mix(t0, roughnessTextureBase)
+};
+
+const occlusionTextureBase = defineTextureClass('occlusionTexture');
+const occlusionTextureGLTF = Base => {
+	let t0 = class extends Base {
+		_occlusionTexCoordIndex = 0;
+		_occlusionPower = 1;
+		set occlusionTexture(texture) {
+			this.checkTexture(texture, 'occlusionTexture')
+		}
+		get occlusionTexture() {return this._occlusionTexture}
+		get occlusionTexCoordIndex() {return this._occlusionTexCoordIndex;}
+		set occlusionTexCoordIndex(value) {
+			this._occlusionTexCoordIndex = value;
+			float1_Float32Array[0] = value;
+			this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['occlusionTexCoordIndex'], float1_Float32Array)
+		}
+		get occlusionPower() {return this._occlusionPower;}
+		set occlusionPower(value) {
+			this._occlusionPower = value;
+			float1_Float32Array[0] = value;
+			this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['occlusionPower'], float1_Float32Array)
+		}
+	};
+	return mix(t0, occlusionTextureBase)
+};
+
 const basicLightPropertys = Base => class extends Base {
 	_normalPower = 1;
 	_shininess = 32;
@@ -188,7 +241,8 @@ const basicLightPropertys = Base => class extends Base {
 	get useFlatMode() {return this._useFlatMode;}
 	set useFlatMode(value) {
 		this._useFlatMode = value;
-		this.needResetBindingInfo = true
+		float1_Float32Array[0] = value ? 1 : 0
+		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['useFlatMode'], float1_Float32Array)
 	}
 };
 
@@ -232,5 +286,7 @@ export default {
 	environmentTexture: environmentTexture,
 	refractionTexture: refractionTexture,
 	displacementTexture: displacementTexture,
+	roughnessTextureGLTF : roughnessTextureGLTF,
+	occlusionTextureGLTF :occlusionTextureGLTF,
 	basicLightPropertys: basicLightPropertys
 }
