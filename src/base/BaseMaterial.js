@@ -2,18 +2,18 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.9 14:4:9
+ *   Last modification time of this file - 2020.1.17 20:58:48
  *
  */
 
 "use strict";
 import ShaderModule_GLSL from "../resources/ShaderModule_GLSL.js";
-import Sampler from "../resources/Sampler.js";
 import UUID from "./UUID.js";
 import UniformBuffer from "../buffer/UniformBuffer.js";
 import UniformBufferDescriptor from "../buffer/UniformBufferDescriptor.js";
 import BindGroup from "../buffer/BindGroup.js";
 import RedGPUContext from "../RedGPUContext.js";
+import UTIL from "../util/UTIL.js";
 
 const TABLE = new Map();
 let makeUniformBindLayout = function (redGPUContext, uniformsBindGroupLayoutDescriptor) {
@@ -91,8 +91,12 @@ export default class BaseMaterial extends UUID {
 			if (tData) {
 				// console.log(tData);
 				tValue = this[tData.valueName];
+				if (tValue == undefined || tValue == null) UTIL.throwFunc(`uniformBufferDescriptor_vertex에 올바르지않은 ${tData.valueName}가 존재함`)
 				if (typeof tValue == 'number') {
 					tempFloat32[0] = tValue;
+					tValue = tempFloat32
+				} else if (typeof tValue == 'boolean') {
+					tempFloat32[0] = tValue ? 1 : 0;
 					tValue = tempFloat32
 				}
 				this.uniformBuffer_vertex.float32Array.set(tValue, tData['offset'] / Float32Array.BYTES_PER_ELEMENT)
@@ -101,9 +105,12 @@ export default class BaseMaterial extends UUID {
 			if (tData) {
 				// console.log(tData);
 				tValue = this[tData.valueName];
-				// 	console.log('변경!',tData)
+				if (tValue == undefined || tValue == null) UTIL.throwFunc(`uniformBufferDescriptor_fragment에 올바르지않은 ${tData.valueName}가 존재함`)
 				if (typeof tValue == 'number') {
 					tempFloat32[0] = tValue;
+					tValue = tempFloat32
+				} else if (typeof tValue == 'boolean') {
+					tempFloat32[0] = tValue ? 1 : 0;
 					tValue = tempFloat32
 				}
 				this.uniformBuffer_fragment.float32Array.set(tValue, tData['offset'] / Float32Array.BYTES_PER_ELEMENT)
@@ -136,12 +143,13 @@ export default class BaseMaterial extends UUID {
 		if (RedGPUContext.useDebugConsole) console.log('BaseMaterial_searchModules_callNum', BaseMaterial_searchModules_callNum);
 		let tKeyVertex = [this.constructor.name];
 		let tKeyFragment = [this.constructor.name];
-		let i = 0, len = Math.max(this.constructor.PROGRAM_OPTION_LIST.vertex.length,this.constructor.PROGRAM_OPTION_LIST.fragment.length);
+		let i = 0,
+			len = Math.max(this.constructor.PROGRAM_OPTION_LIST.vertex.length, this.constructor.PROGRAM_OPTION_LIST.fragment.length);
 		for (i; i < len; i++) {
 			let key;
-			key= this.constructor.PROGRAM_OPTION_LIST.vertex[i];
+			key = this.constructor.PROGRAM_OPTION_LIST.vertex[i];
 			if (key && this[key]) tKeyVertex.push(key);
-			key= this.constructor.PROGRAM_OPTION_LIST.fragment[i];
+			key = this.constructor.PROGRAM_OPTION_LIST.fragment[i];
 			if (key && this[key]) tKeyFragment.push(key);
 		}
 		if (RedGPUContext.useDebugConsole) console.log('searchModules_vertex_', tKeyVertex);
