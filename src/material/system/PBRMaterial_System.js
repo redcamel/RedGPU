@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.17 20:58:48
+ *   Last modification time of this file - 2020.1.17 21:7:30
  *
  */
 
@@ -66,20 +66,18 @@ export default class PBRMaterial_System extends Mix.mix(
 	void main() {		
 		mat4 targetMatrix = meshMatrixUniforms.modelMatrix[ int(meshUniforms.index) ] ;
 		mat4 skinMat = mat4(1.0,0.0,0.0,0.0, 0.0,1.0,0.0,0.0, 0.0,0.0,1.0,0.0, 0.0,0.0,0.0,1.0);
-		// if(vertexUniforms.useSkin == TRUTHY) {
-		// 	skinMat =
-		// 	aVertexWeight.x * vertexUniforms.globalTransformOfNodeThatTheMeshIsAttachedTo * vertexUniforms.jointMatrix[ int(aVertexJoint.x) ] * vertexUniforms.inverseBindMatrixForJoint[int(aVertexJoint.x)]+
-		// 	aVertexWeight.y * vertexUniforms.globalTransformOfNodeThatTheMeshIsAttachedTo * vertexUniforms.jointMatrix[ int(aVertexJoint.y) ] * vertexUniforms.inverseBindMatrixForJoint[int(aVertexJoint.y)]+
-		// 	aVertexWeight.z * vertexUniforms.globalTransformOfNodeThatTheMeshIsAttachedTo * vertexUniforms.jointMatrix[ int(aVertexJoint.z) ] * vertexUniforms.inverseBindMatrixForJoint[int(aVertexJoint.z)]+
-		// 	aVertexWeight.w * vertexUniforms.globalTransformOfNodeThatTheMeshIsAttachedTo * vertexUniforms.jointMatrix[ int(aVertexJoint.w) ] * vertexUniforms.inverseBindMatrixForJoint[int(aVertexJoint.w)];
-		// 	vVertexPosition = meshMatrixUniforms.modelMatrix[ int(meshUniforms.index) ] * skinMat * vec4(position, 1.0);
-		// 	vNormal = (meshMatrixUniforms.normalMatrix[ int(meshUniforms.index) ]  * skinMat * vec4(normal,0.0)).xyz;
-		// }else{
-		// 	vVertexPosition = meshMatrixUniforms.modelMatrix[ int(meshUniforms.index) ] * vec4(position, 1.0);
-		// 	vNormal = (meshMatrixUniforms.normalMatrix[ int(meshUniforms.index) ] *  vec4(normal,1.0)).xyz;
-		// }
+		if(vertexUniforms.useSkin == TRUTHY) {
+			skinMat =
+			aVertexWeight.x * vertexUniforms.globalTransformOfNodeThatTheMeshIsAttachedTo * vertexUniforms.jointMatrix[ int(aVertexJoint.x) ] * vertexUniforms.inverseBindMatrixForJoint[int(aVertexJoint.x)]+
+			aVertexWeight.y * vertexUniforms.globalTransformOfNodeThatTheMeshIsAttachedTo * vertexUniforms.jointMatrix[ int(aVertexJoint.y) ] * vertexUniforms.inverseBindMatrixForJoint[int(aVertexJoint.y)]+
+			aVertexWeight.z * vertexUniforms.globalTransformOfNodeThatTheMeshIsAttachedTo * vertexUniforms.jointMatrix[ int(aVertexJoint.z) ] * vertexUniforms.inverseBindMatrixForJoint[int(aVertexJoint.z)]+
+			aVertexWeight.w * vertexUniforms.globalTransformOfNodeThatTheMeshIsAttachedTo * vertexUniforms.jointMatrix[ int(aVertexJoint.w) ] * vertexUniforms.inverseBindMatrixForJoint[int(aVertexJoint.w)];
+			vVertexPosition = meshMatrixUniforms.modelMatrix[ int(meshUniforms.index) ] * skinMat * vec4(position, 1.0);
+			vNormal = (meshMatrixUniforms.normalMatrix[ int(meshUniforms.index) ]  * skinMat * vec4(normal,0.0)).xyz;
+		}else{
 			vVertexPosition = meshMatrixUniforms.modelMatrix[ int(meshUniforms.index) ] * vec4(position, 1.0);
 			vNormal = (meshMatrixUniforms.normalMatrix[ int(meshUniforms.index) ] *  vec4(normal,1.0)).xyz;
+		}
 		
 		vVertexColor_0 = vertexColor_0;
 		
@@ -213,8 +211,7 @@ export default class PBRMaterial_System extends Mix.mix(
 				mat3 tbn = mat3(t, b, ng);
 				N = normalize(tbn * ((2.0 * normalColor.rgb - 1.0) * vec3(1.0, 1.0 * vVertexTangent.w,1.0)));
 				N = backFaceYn ? -N : N;
-			}
-			
+			}			
 		}
 
 		if(fragmentUniforms.__environmentTextureRenderYn == TRUTHY) {
