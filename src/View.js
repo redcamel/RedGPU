@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.7 21:39:14
+ *   Last modification time of this file - 2020.1.18 16:39:19
  *
  */
 
@@ -295,7 +295,7 @@ export default class View extends UUID {
 				offset += TypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
 				this.#systemUniformInfo_fragment_data.set([tLight.cutoff, tLight.exponent], offset);
 				offset += TypeSize.float4 / Float32Array.BYTES_PER_ELEMENT;
-				if(tLight.useDebugMesh) this.debugLightList.push(tLight._debugMesh)
+				if(tLight.useDebugMesh) this.debugLightList.push(tLight._debugMesh.children)
 			}
 		}
 		offset = (TypeSize.float4 + TypeSize.float4 * 2 * ShareGLSL.MAX_DIRECTIONAL_LIGHT + TypeSize.float4 * 3 * ShareGLSL.MAX_POINT_LIGHT + TypeSize.float4 * 3 * ShareGLSL.MAX_SPOT_LIGHT + TypeSize.float4 * 2) / Float32Array.BYTES_PER_ELEMENT;
@@ -312,6 +312,7 @@ export default class View extends UUID {
 		passEncoder.setBindGroup(1, systemUniformInfo_fragment.GPUBindGroup);
 		systemUniformInfo_vertex.GPUBuffer.setSubData(0, this.#systemUniformInfo_vertex_data);
 		systemUniformInfo_fragment.GPUBuffer.setSubData(0, this.#systemUniformInfo_fragment_data);
+
 	}
 
 	getViewRect(redGPUContext) {

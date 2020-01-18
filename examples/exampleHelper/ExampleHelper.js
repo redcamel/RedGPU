@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.17 20:58:48
+ *   Last modification time of this file - 2020.1.18 16:39:19
  *
  */
 
@@ -275,6 +275,29 @@ const ExampleHelper = (_ => {
 			rootFolder.add(testData, 'lookAt(0,0,0)');
 		}
 	};
+	const setTestUI_AmbientLight = (RedGPU, scene, light, open, gui) => {
+		checkGUI();
+		gui = gui || testHelperFolder;
+		let rootFolder, folder;
+		rootFolder = gui.addFolder('AmbientLight Test');
+		if (open) rootFolder.open();
+		rootFolder.addColor(light, 'color')
+		rootFolder.add(light, 'intensity', 0, 1, 0.01)
+	}
+	const setTestUI_DirectionalLight = (RedGPU, scene, light, open, gui) => {
+		checkGUI();
+		gui = gui || testHelperFolder;
+		let rootFolder, folder;
+		rootFolder = gui.addFolder('DirectionalLight Test');
+		if (open) rootFolder.open();
+		rootFolder.addColor(light, 'color')
+		rootFolder.add(light, 'intensity', 0, 1, 0.01)
+		rootFolder.add(light, 'useDebugMesh')
+		rootFolder.add(light, 'x', -10, 10, 0.01)
+		rootFolder.add(light, 'y', -10, 10, 0.01)
+		rootFolder.add(light, 'z', -10, 10, 0.01)
+	}
+
 	const setTestUI_PivotPoint = (RedGPU, redGPUContext, targetMesh, childMesh, open, gui) => {
 		checkGUI();
 		gui = gui || testHelperFolder;
@@ -626,6 +649,7 @@ const ExampleHelper = (_ => {
 		})
 
 	};
+
 	// material
 	let setTestUI_ColorMaterial, setTestUI_ColorPhongMaterial, setTestUI_ColorPhongTextureMaterial;
 	let setTestUI_BitmapMaterial, setTestUI_SpriteSheetMaterial, setTestUI_StandardMaterial,
@@ -733,7 +757,7 @@ const ExampleHelper = (_ => {
 			makeAlphaProperty(rootFolder, material)
 			makeTextureProperty(rootFolder, RedGPU, redGPUContext, material, 'diffuseTexture', `${assetPath}Brick03_col.jpg`);
 		};
-		setTestUI_SpriteSheetMaterial = (RedGPU, redGPUContext, mesh,material, open, gui) => {
+		setTestUI_SpriteSheetMaterial = (RedGPU, redGPUContext, mesh, material, open, gui) => {
 			checkGUI();
 			gui = gui || testHelperFolder;
 			let rootFolder, folder;
@@ -779,7 +803,7 @@ const ExampleHelper = (_ => {
 			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'emissiveTexture', `${assetPath}emissive.jpg`);
 			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'displacementTexture', `${assetPath}Brick03_disp.jpg`);
 		};
-		setTestUI_EnvironmentMaterial = (RedGPU, redGPUContext,mesh, material, open, gui) => {
+		setTestUI_EnvironmentMaterial = (RedGPU, redGPUContext, mesh, material, open, gui) => {
 			checkGUI();
 			gui = gui || testHelperFolder;
 			let rootFolder, folder;
@@ -807,7 +831,7 @@ const ExampleHelper = (_ => {
 			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'emissiveTexture', `${assetPath}emissive.jpg`);
 			makeTextureProperty(folder, RedGPU, redGPUContext, material, 'displacementTexture', `${assetPath}Brick03_disp.jpg`);
 		};
-		setTestUI_RefractionMaterial =  (RedGPU, redGPUContext,mesh, material, open, gui) => {
+		setTestUI_RefractionMaterial = (RedGPU, redGPUContext, mesh, material, open, gui) => {
 			checkGUI();
 			gui = gui || testHelperFolder;
 			let rootFolder, folder;
@@ -1080,7 +1104,10 @@ const ExampleHelper = (_ => {
 		setTestUI_BitmapTexture: setTestUI_BitmapTexture,
 		//
 		setTestUI_PostEffect: setTestUI_PostEffect,
-		setTestUI_PostEffectBy: setTestUI_PostEffectBy
+		setTestUI_PostEffectBy: setTestUI_PostEffectBy,
+		//
+		setTestUI_AmbientLight: setTestUI_AmbientLight,
+		setTestUI_DirectionalLight: setTestUI_DirectionalLight
 	};
 })();
 

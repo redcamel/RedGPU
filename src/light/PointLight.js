@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 18:50:31
+ *   Last modification time of this file - 2020.1.18 16:39:19
  *
  */
 
@@ -18,10 +18,9 @@ export default class PointLight extends BaseLight {
 		this._radius = value;
 		this._debugMesh.setScale(value, value, value)
 	}
-	constructor(redGPUContext, color = '#ffffff', colorAlpha = 1, intensity = 1, radius = 1) {
+	constructor(redGPUContext, color = '#ffffff', intensity = 1, radius = 1) {
 		super(redGPUContext);
 		this.color = color;
-		this.colorAlpha = colorAlpha;
 		this.intensity = intensity;
 		this.radius = radius;
 		this.#setDebugMesh(redGPUContext)

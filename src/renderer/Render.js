@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.17 20:58:48
+ *   Last modification time of this file - 2020.1.18 16:39:19
  *
  */
 
@@ -11,6 +11,7 @@ import SpriteSheetMaterial from "../material/SpriteSheetMaterial.js";
 import Debugger from "./system/Debugger.js";
 import PipelineBasic from "../base/pipeline/PipelineBasic.js";
 import DisplayContainer from "../base/DisplayContainer.js";
+import UTIL from "../util/UTIL.js";
 
 let _frustumPlanes = [];
 let currentDebuggerData;
@@ -62,6 +63,7 @@ let renderScene = (_ => {
 			let radius;
 			let radiusTemp;
 			let tOpacity, tParentSumOpacity;
+			let tFlatRenderYn = children == redView.scene._flatChildList;
 			while (i--) {
 				tMesh = children[i];
 				tMaterial = tMesh._material;
@@ -81,7 +83,7 @@ let renderScene = (_ => {
 				}
 
 				tDirtyTransform = tMesh.dirtyTransform;
-				tMesh._renderTimeDirtyTransform = tDirtyTransform;
+				tMesh._renderTimeDirtyTransform = parentDirty || tDirtyTransform;
 				// console.log(tMesh._geometry, parentDirty,tMesh.dirtyTransform)
 
 				tDirtyPipeline = tMesh.dirtyPipeline;
@@ -432,8 +434,9 @@ let renderScene = (_ => {
 						tMaterial.uniformBuffer_vertex.float32Array.set(tSkinInfo['inverseBindMatrices'], tMaterial.uniformBufferDescriptor_vertex.redStructOffsetMap['inverseBindMatrixForJoint'] / Float32Array.BYTES_PER_ELEMENT);
 						tCacheUniformInfo[tUUID] = tSkinInfo['inverseBindMatrices']['_UUID']
 					}
-					tMaterial.uniformBuffer_vertex.GPUBuffer.setSubData(0,tMaterial.uniformBuffer_vertex.float32Array)
+					tMaterial.uniformBuffer_vertex.GPUBuffer.setSubData(0, tMaterial.uniformBuffer_vertex.float32Array)
 				}
+				if (!tFlatRenderYn) renderScene(redGPUContext, redView, passEncoder, tMesh.children)
 				tMesh.dirtyPipeline = false;
 				tMesh.dirtyTransform = false;
 			}
@@ -643,27 +646,7 @@ export default class Render {
 			currentDebuggerData = debuggerData[i];
 			Render.clearStateCache();
 			if (DisplayContainer.needFlatListUpdate) {
-				function flattenDeep(input) {
-					const stack = [...input];
-					const res = [];
-					while (stack.length) {
-						// 스택에서 값을 pop
-						const next = stack.pop();
-						res.push(next);
-						stack.push(...next._children);
-					}
-					return res
-				}
-				redView.scene._flatChildList = flattenDeep(redView.scene._children)
-				redView.scene._flatChildList = redView.scene._flatChildList.reverse()
-				// redView.scene._flatChildList.sort((a, b) => {
-				// 	if (a._geometry && b._geometry) {
-				// 		if (a._geometry.interleaveBuffer._UUID > b._geometry.interleaveBuffer._UUID) return -1
-				// 		if (a._geometry.interleaveBuffer._UUID < b._geometry.interleaveBuffer._UUID) return 1
-				// 	}
-				// 	return 0
-				// })
-
+				redView.scene._flatChildList = UTIL.getFlatChildList(redView.scene._children)
 			}
 			renderView(redGPUContext, redView, redGPUContext.swapChain.getCurrentTexture());
 			// 마우스 이벤트 체크

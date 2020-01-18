@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 18:50:31
+ *   Last modification time of this file - 2020.1.18 16:39:19
  *
  */
 
@@ -19,8 +19,7 @@ export default class BaseLight extends UUID {
 	_z = 0;
 
 	#color = '#ff0000';
-	#colorAlpha = 1;
-	_colorRGBA = new Float32Array([1, 0, 0, this.#colorAlpha]);
+	_colorRGBA = new Float32Array([1, 0, 0, 1]);
 	_debugMesh;
 	_debugMaterial;
 	useDebugMesh = false;
@@ -28,21 +27,11 @@ export default class BaseLight extends UUID {
 	set color(hex) {
 		this.#color = hex;
 		let rgb = UTIL.hexToRGB_ZeroToOne(hex);
-		this._colorRGBA[0] = rgb[0] * this.#colorAlpha;
-		this._colorRGBA[1] = rgb[1] * this.#colorAlpha;
-		this._colorRGBA[2] = rgb[2] * this.#colorAlpha;
-		this._colorRGBA[3] = this.#colorAlpha;
+		this._colorRGBA[0] = rgb[0];
+		this._colorRGBA[1] = rgb[1];
+		this._colorRGBA[2] = rgb[2];
+		this._colorRGBA[3] = 1;
 		this._debugMaterial.color = hex
-
-	}
-
-	get colorAlpha() {return this.#colorAlpha;}
-	set colorAlpha(value) {
-		let rgb = UTIL.hexToRGB_ZeroToOne(this.#color);
-		this._colorRGBA[0] = rgb[0] * value;
-		this._colorRGBA[1] = rgb[1] * value;
-		this._colorRGBA[2] = rgb[2] * value;
-		this._colorRGBA[3] = value;
 	}
 	get colorRGBA() {return this._colorRGBA;}
 	get x() {return this._x}
@@ -56,7 +45,10 @@ export default class BaseLight extends UUID {
 		this._debugMesh.targetTo(0, 0, 0);
 	}
 	get z() {return this._z;}
-	set z(v) {this._z = this._debugMesh.z = v;this._debugMesh.targetTo(0, 0, 0);}
+	set z(v) {
+		this._z = this._debugMesh.z = v;
+		this._debugMesh.targetTo(0, 0, 0);
+	}
 	get intensity() {return this._intensity;}
 	set intensity(value) {
 		this._intensity = value;

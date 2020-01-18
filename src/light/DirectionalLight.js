@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.1 18:50:31
+ *   Last modification time of this file - 2020.1.18 16:39:19
  *
  */
 
@@ -15,22 +15,20 @@ import Cylinder from "../primitives/Cylinder.js";
 export default class DirectionalLight extends BaseLight {
 
 
-	constructor(redGPUContext, color = '#ffffff', colorAlpha = 1, intensity = 1) {
+	constructor(redGPUContext, color = '#ffffff', intensity = 1) {
 		super(redGPUContext);
 		this.#setDebugMesh(redGPUContext);
 		this.color = color;
-		this.colorAlpha = colorAlpha;
 		this.intensity = intensity;
 
 	}
 	#setDebugMesh = (redGPUContext) => {
-
-		let positionMesh = new Mesh(redGPUContext, new Sphere(redGPUContext,1), this._debugMaterial);
+		let positionMesh = new Mesh(redGPUContext, new Sphere(redGPUContext, 1, 16, 16, 16), this._debugMaterial);
 		positionMesh.primitiveTopology = 'line-strip';
 		this._debugMesh.addChild(positionMesh);
 		[-0.7, 0, 0.7].forEach((v, index) => {
 			let directionMesh, directionMesh2;
-			directionMesh = new Mesh(redGPUContext, new Cylinder(redGPUContext, 0.1, 0.05, index == 1 ? 100000 : 2), this._debugMaterial);
+			directionMesh = new Mesh(redGPUContext, new Cylinder(redGPUContext, 0.01, 0.01, index == 1 ? 100000 : 2), this._debugMaterial);
 			directionMesh.rotationX = 90;
 			directionMesh.x = v;
 			directionMesh.z = -1;
