@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.18 16:39:19
+ *   Last modification time of this file - 2020.1.18 17:23:53
  *
  */
 
@@ -293,10 +293,25 @@ const ExampleHelper = (_ => {
 		rootFolder.addColor(light, 'color')
 		rootFolder.add(light, 'intensity', 0, 1, 0.01)
 		rootFolder.add(light, 'useDebugMesh')
+		rootFolder.add(light, 'x', -10, 10, 0.01).listen()
+		rootFolder.add(light, 'y', -10, 10, 0.01).listen()
+		rootFolder.add(light, 'z', -10, 10, 0.01).listen()
+	}
+	const setTestUI_PointLight = (RedGPU, scene, light, open, gui) => {
+		checkGUI();
+		gui = gui || testHelperFolder;
+		let rootFolder, folder;
+		rootFolder = gui.addFolder('DirectionalLight Test');
+		if (open) rootFolder.open();
+		rootFolder.addColor(light, 'color')
+		rootFolder.add(light, 'intensity', 0, 1, 0.01)
+		rootFolder.add(light, 'useDebugMesh')
 		rootFolder.add(light, 'x', -10, 10, 0.01)
 		rootFolder.add(light, 'y', -10, 10, 0.01)
 		rootFolder.add(light, 'z', -10, 10, 0.01)
+		rootFolder.add(light, 'radius', 0, 10, 0.01)
 	}
+
 
 	const setTestUI_PivotPoint = (RedGPU, redGPUContext, targetMesh, childMesh, open, gui) => {
 		checkGUI();
@@ -1107,7 +1122,8 @@ const ExampleHelper = (_ => {
 		setTestUI_PostEffectBy: setTestUI_PostEffectBy,
 		//
 		setTestUI_AmbientLight: setTestUI_AmbientLight,
-		setTestUI_DirectionalLight: setTestUI_DirectionalLight
+		setTestUI_DirectionalLight: setTestUI_DirectionalLight,
+		setTestUI_PointLight : setTestUI_PointLight
 	};
 })();
 

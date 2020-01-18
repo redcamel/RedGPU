@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.18 16:39:19
+ *   Last modification time of this file - 2020.1.18 17:23:53
  *
  */
 
@@ -26,7 +26,7 @@ export default class PointLight extends BaseLight {
 		this.#setDebugMesh(redGPUContext)
 	}
 	#setDebugMesh = (redGPUContext) => {
-		let positionMesh = new Mesh(redGPUContext, new Sphere(redGPUContext, 0.5, 16, 16, 16), this._debugMaterial);
+		let positionMesh = new Mesh(redGPUContext, new Sphere(redGPUContext, 1, 32, 32, 32), this._debugMaterial);
 		positionMesh.primitiveTopology = 'line-strip';
 		this._debugMesh.addChild(positionMesh);
 	}
