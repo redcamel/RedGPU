@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.18 16:39:19
+ *   Last modification time of this file - 2020.1.18 17:23:53
  *
  */
 
@@ -57,6 +57,7 @@ export default class BaseLight extends UUID {
 		super();
 		this._debugMesh = new Mesh(redGPUContext);
 		this._debugMaterial = new ColorMaterial(redGPUContext);
+		this._debugMaterial.colorAlpha = 0.5
 	}
 
 }
