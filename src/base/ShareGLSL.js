@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.17 20:58:48
+ *   Last modification time of this file - 2020.1.18 16:39:19
  *
  */
 
@@ -128,7 +128,7 @@ export default class ShareGLSL {
 			    if(lambertTerm > 0.0){
 					ld += lightColor * diffuseColor * lambertTerm * intensity;
 					specular = pow( max(dot(reflect(L, N), -L), 0.0), shininess) * specularPower * specularTextureValue;
-					ls +=  specularColor * specular * intensity * lightColor.a;
+					ls +=  specularColor * specular * intensity ;
 			    }
 		    }
 		    return ld + ls;
@@ -172,7 +172,7 @@ export default class ShareGLSL {
 			            attenuation *= attenuation;
 						ld += lightColor * diffuseColor * lambertTerm * intensity * attenuation;
 						specular = pow( max(dot(reflect(L, N), -L), 0.0), shininess) * specularPower * specularTextureValue;
-						ls +=  specularColor * specular * intensity * attenuation * lightColor.a;
+						ls +=  specularColor * specular * intensity * attenuation ;
 				    }
 			    }
 		    }
@@ -222,7 +222,7 @@ export default class ShareGLSL {
 				     
 						ld += lightColor * diffuseColor * intensity * attenuation;
 						specular = pow( max(dot(reflect(L, N), -L), 0.0), shininess) * specularPower * specularTextureValue;
-						ls +=  specularColor * specular * intensity * attenuation * lightColor.a;
+						ls +=  specularColor * specular * intensity * attenuation ;
 					}
 			    }
 		    }

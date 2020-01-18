@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.17 20:58:48
+ *   Last modification time of this file - 2020.1.18 16:39:19
  *
  */
 import RedGPU from "./src/RedGPU.js";
@@ -208,7 +208,7 @@ new RedGPU.RedGPUContext(
 				// }, 2500)
 
 				let randomGeometry = _ => {
-					return new RedGPU.Sphere(this, 0.5, 16, 16, 16)
+					// return new RedGPU.Sphere(this, 0.5, 16, 16, 16)
 					return Math.random() > 0.5
 						? new RedGPU.Sphere(this, 0.5, 16, 16, 16) :
 						Math.random() > 0.5
