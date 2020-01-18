@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.18 16:39:19
+ *   Last modification time of this file - 2020.1.18 17:6:13
  *
  */
 
@@ -71,6 +71,7 @@ let renderScene = (_ => {
 				parent = tMesh._parent;
 				parentMTX = 0;
 				tParentSumOpacity = 1;
+				parentDirty = 0;
 				tOpacity = tMesh._opacity;
 				if (parent) {
 					parentDirty = parent._renderTimeDirtyTransform;
