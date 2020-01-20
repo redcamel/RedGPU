@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.17 21:7:30
+ *   Last modification time of this file - 2020.1.20 18:6:15
  *
  */
 
@@ -495,8 +495,8 @@ export default class PBRMaterial_System extends Mix.mix(
 				}
 				if (RedGPUContext.useDebugConsole) console.log("로딩완료or로딩에러확인 textureName", textureName, texture ? texture._GPUTexture : '');
 				if (tKey) {
-					float1_Float32Array[0] = this[`__${textureName}RenderYn`] = 1
-					if (tKey == 'displacementTexture') this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+					float1_Float32Array[0] = this[`__${textureName}RenderYn`] = 1;
+					if (tKey == 'displacementTexture') this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
 					else this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
 				}
 				// cancelAnimationFrame(this.#raf);
@@ -510,10 +510,10 @@ export default class PBRMaterial_System extends Mix.mix(
 		} else {
 			if (this['_' + textureName]) {
 				this['_' + textureName] = null;
-				float1_Float32Array[0] = this[`__${textureName}RenderYn`] = 0
-				if (textureName == 'displacementTexture') this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
-				else this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
-				this.needResetBindingInfo = true
+				float1_Float32Array[0] = this[`__${textureName}RenderYn`] = 0;
+				if (textureName == 'displacementTexture') this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+				else this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+				this.needResetBindingInfo = true;
 				this.needResetBindingInfo = true
 			}
 		}

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.8 17:12:21
+ *   Last modification time of this file - 2020.1.20 18:6:15
  *
  */
 
@@ -142,7 +142,7 @@ export default class ObitController extends Camera {
 		this.#currentTilt += (this.#tilt - this.#currentTilt) * tDelayRotation;
 		if (this.#distance < this.nearClipping) this.#distance = this.nearClipping;
 		this.#currentDistance += (this.#distance - this.#currentDistance) * this.#delayDistance;
-		if (this.#currentDistance < this.nearClipping) this.#currentDistance = this.nearClipping
+		if (this.#currentDistance < this.nearClipping) this.#currentDistance = this.nearClipping;
 		glMatrix.mat4.identity(tMTX0);
 		glMatrix.mat4.translate(tMTX0, tMTX0, [this.#centerX, this.#centerY, this.#centerZ]);
 		glMatrix.mat4.rotateY(tMTX0, tMTX0, this.#currentPan * PER_PI);

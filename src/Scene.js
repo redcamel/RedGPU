@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.14 17:51:9
+ *   Last modification time of this file - 2020.1.20 18:6:15
  *
  */
 
@@ -26,7 +26,7 @@ export default class Scene extends DisplayContainer {
 	#grid;
 	#axis;
 	#skyBox;
-	_flatChildList = []
+	_flatChildList = [];
 	get grid() {return this.#grid;}
 	set grid(value) {this.#grid = value;}
 	get axis() {return this.#axis;}

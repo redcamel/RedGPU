@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.18 17:6:13
+ *   Last modification time of this file - 2020.1.20 18:6:15
  *
  */
 
@@ -79,7 +79,7 @@ let renderScene = (_ => {
 					tParentSumOpacity = parent._sumOpacity
 				}
 				if (tMesh._sumOpacity != tOpacity * tParentSumOpacity) {
-					tMesh.sumOpacity = tOpacity * tParentSumOpacity
+					tMesh.sumOpacity = tOpacity * tParentSumOpacity;
 					console.log('sumOpacity', tOpacity)
 				}
 
@@ -425,8 +425,8 @@ let renderScene = (_ => {
 					// tMaterial.uniformBuffer_vertex.GPUBuffer.setSubData(tMaterial.uniformBufferDescriptor_vertex.redStructOffsetMap['globalTransformOfNodeThatTheMeshIsAttachedTo'], globalTransformOfNodeThatTheMeshIsAttachedTo);
 					// tMaterial.uniformBuffer_vertex.GPUBuffer.setSubData(tMaterial.uniformBufferDescriptor_vertex.redStructOffsetMap['jointMatrix'], globalTransformOfJointNode);
 
-					tMaterial.uniformBuffer_vertex.float32Array.set(globalTransformOfNodeThatTheMeshIsAttachedTo, tMaterial.uniformBufferDescriptor_vertex.redStructOffsetMap['globalTransformOfNodeThatTheMeshIsAttachedTo'] / Float32Array.BYTES_PER_ELEMENT)
-					tMaterial.uniformBuffer_vertex.float32Array.set(globalTransformOfJointNode, tMaterial.uniformBufferDescriptor_vertex.redStructOffsetMap['jointMatrix'] / Float32Array.BYTES_PER_ELEMENT)
+					tMaterial.uniformBuffer_vertex.float32Array.set(globalTransformOfNodeThatTheMeshIsAttachedTo, tMaterial.uniformBufferDescriptor_vertex.redStructOffsetMap['globalTransformOfNodeThatTheMeshIsAttachedTo'] / Float32Array.BYTES_PER_ELEMENT);
+					tMaterial.uniformBuffer_vertex.float32Array.set(globalTransformOfJointNode, tMaterial.uniformBufferDescriptor_vertex.redStructOffsetMap['jointMatrix'] / Float32Array.BYTES_PER_ELEMENT);
 
 					if (!tSkinInfo['inverseBindMatrices']['_UUID']) tSkinInfo['inverseBindMatrices']['_UUID'] = JSON.stringify(tSkinInfo['inverseBindMatrices']);
 					let tUUID = tMaterial.uniformBuffer_vertex['_UUID'];
@@ -437,7 +437,7 @@ let renderScene = (_ => {
 					}
 					tMaterial.uniformBuffer_vertex.GPUBuffer.setSubData(0, tMaterial.uniformBuffer_vertex.float32Array)
 				}
-				if (!tFlatRenderYn) renderScene(redGPUContext, redView, passEncoder, tMesh.children)
+				if (!tFlatRenderYn) renderScene(redGPUContext, redView, passEncoder, tMesh.children);
 				tMesh.dirtyPipeline = false;
 				tMesh.dirtyTransform = false;
 			}
@@ -503,16 +503,16 @@ let copyToFinalTexture = (redGPUContext, redView, commandEncoder, lastTexture, d
 	let tViewRect = redView.viewRect;
 	let [tX, tY, tW, tH] = tViewRect;
 	let sourceX, sourceY;
-	let [cvsW, cvsH] = [redGPUContext.canvas.width, redGPUContext.canvas.height]
+	let [cvsW, cvsH] = [redGPUContext.canvas.width, redGPUContext.canvas.height];
 	// console.log('pre', tX, tY, tW, tH)
 	sourceX = 0;
-	sourceY = 0
+	sourceY = 0;
 	if (tX < 0) {
 		sourceX = -tX;
 		tW = tW + tX;
 		tX = 0;
 		if (tW < 0) {
-			sourceX = 0
+			sourceX = 0;
 			tW = 0
 		}
 	} else {
@@ -527,7 +527,7 @@ let copyToFinalTexture = (redGPUContext, redView, commandEncoder, lastTexture, d
 		tH = tH + tY;
 		tY = 0;
 		if (tH < 0) {
-			sourceY = 0
+			sourceY = 0;
 			tH = 0
 		}
 	} else {
@@ -658,7 +658,7 @@ export default class Render {
 		// 업데이트 대상 유니폼 버퍼 갱신
 		i = updateTargetMatrixBufferList.length;
 		while (i--) updateTargetMatrixBufferList[i].GPUBuffer.setSubData(0, updateTargetMatrixBufferList[i].meshFloat32Array);
-		DisplayContainer.needFlatListUpdate = false
+		DisplayContainer.needFlatListUpdate = false;
 		updateTargetMatrixBufferList.length = 0;
 		GLTFLoader.animationLooper(time);
 		Debugger.update()

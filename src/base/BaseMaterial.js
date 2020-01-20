@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.17 20:58:48
+ *   Last modification time of this file - 2020.1.20 18:6:15
  *
  */
 
@@ -91,7 +91,7 @@ export default class BaseMaterial extends UUID {
 			if (tData) {
 				// console.log(tData);
 				tValue = this[tData.valueName];
-				if (tValue == undefined || tValue == null) UTIL.throwFunc(`uniformBufferDescriptor_vertex에 올바르지않은 ${tData.valueName}가 존재함`)
+				if (tValue == undefined || tValue == null) UTIL.throwFunc(`uniformBufferDescriptor_vertex에 올바르지않은 ${tData.valueName}가 존재함`);
 				if (typeof tValue == 'number') {
 					tempFloat32[0] = tValue;
 					tValue = tempFloat32
@@ -105,7 +105,7 @@ export default class BaseMaterial extends UUID {
 			if (tData) {
 				// console.log(tData);
 				tValue = this[tData.valueName];
-				if (tValue == undefined || tValue == null) UTIL.throwFunc(`uniformBufferDescriptor_fragment에 올바르지않은 ${tData.valueName}가 존재함`)
+				if (tValue == undefined || tValue == null) UTIL.throwFunc(`uniformBufferDescriptor_fragment에 올바르지않은 ${tData.valueName}가 존재함`);
 				if (typeof tValue == 'number') {
 					tempFloat32[0] = tValue;
 					tValue = tempFloat32

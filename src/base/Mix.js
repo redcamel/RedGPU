@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.17 20:58:48
+ *   Last modification time of this file - 2020.1.20 18:6:15
  *
  */
 
@@ -241,7 +241,7 @@ const basicLightPropertys = Base => class extends Base {
 	get useFlatMode() {return this._useFlatMode;}
 	set useFlatMode(value) {
 		this._useFlatMode = value;
-		float1_Float32Array[0] = value ? 1 : 0
+		float1_Float32Array[0] = value ? 1 : 0;
 		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['useFlatMode'], float1_Float32Array)
 	}
 };

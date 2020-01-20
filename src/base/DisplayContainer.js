@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.14 17:51:9
+ *   Last modification time of this file - 2020.1.20 18:6:15
  *
  */
 
@@ -25,10 +25,10 @@ export default class DisplayContainer extends UUID {
 			v instanceof BaseObject3D || UTIL.throwFunc(`addChild - only allow BaseObject3D Instance. - inputValue : ${v} { type : ${typeof v} }`);
 			if (this._children.includes(v)) UTIL.throwFunc(`${v} : Already registered object. - inputValue : ${v} { type : ${typeof v} }`);
 			else {
-				v._parent = this.directionalLightList ? null : this
+				v._parent = this.directionalLightList ? null : this;
 				this._children.push(v)
 			}
-		})
+		});
 		DisplayContainer.needFlatListUpdate = true
 	}
 	addChildAt(child, index) {
@@ -37,7 +37,7 @@ export default class DisplayContainer extends UUID {
 		if (this._children.length < index) index = this._children.length;
 		if (index != undefined) this._children.splice(index, 0, child);
 		else {
-			child._parent = this.directionalLightList ? null : this
+			child._parent = this.directionalLightList ? null : this;
 			this._children.push(child);
 		}
 		DisplayContainer.needFlatListUpdate = true

@@ -2,11 +2,11 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.16 21:13:13
+ *   Last modification time of this file - 2020.1.20 18:6:15
  *
  */
 
-"use strict"
+"use strict";
 import RedGPUContext from "../../../RedGPUContext.js";
 import PBRMaterial_System from "../../../material/system/PBRMaterial_System.js";
 import Sampler from "../../../resources/Sampler.js";
