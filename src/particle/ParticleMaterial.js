@@ -2,49 +2,52 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.20 18:6:15
+ *   Last modification time of this file - 2020.1.29 22:10:29
  *
  */
 
 "use strict";
 import BaseMaterial from "../base/BaseMaterial.js";
 import ShareGLSL from "../base/ShareGLSL.js";
-import Mix from "../base/Mix.js";
-import RedGPUContext from "../RedGPUContext.js";
 import TypeSize from "../resources/TypeSize.js";
+import BitmapMaterial from "../material/BitmapMaterial.js";
 
 let float1_Float32Array = new Float32Array(1);
-export default class BitmapMaterial extends Mix.mix(
-	BaseMaterial,
-	Mix.diffuseTexture,
-	Mix.alpha
-) {
+export default class ParticleMaterial extends BitmapMaterial {
 	static vertexShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
     ${ShareGLSL.GLSL_SystemUniforms_vertex.meshUniforms}
-	layout( location = 0 ) in vec3 position;
-	layout( location = 1 ) in vec3 normal;
-	layout( location = 2 ) in vec2 uv;
-	layout( location = 0 ) out vec3 vNormal;
-	layout( location = 1 ) out vec2 vUV;
-	layout( location = 2 ) out float vMouseColorID;	
-	layout( location = 3 ) out float vSumOpacity;
+    ${ShareGLSL.GLSL_SystemUniforms_vertex.getSprite3DMatrix}    
+	layout(location = 0) in vec3 a_pos;
+    layout(location = 1) in vec2 a_uv;
+    layout(location = 2) in vec3 position;
+    layout(location = 3) in vec3 scale;
+    layout(location = 4) in float alpha;
+	layout(location = 0 ) out vec2 vUV;
+	layout(location = 1 ) out float vMouseColorID;	
+	layout(location = 2 ) out float vSumOpacity;
 	void main() {
-		vNormal = normal;
-		vUV = uv;
+		vUV = a_uv;
 		vMouseColorID = meshUniforms.mouseColorID;
-		vSumOpacity = meshUniforms.sumOpacity;
-		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * meshMatrixUniforms.modelMatrix[ int(meshUniforms.index) ] * vec4(position,1.0);
+		vSumOpacity = meshUniforms.sumOpacity * alpha;
+		float ratio = systemUniforms.resolution.x/systemUniforms.resolution.y; 
+		mat4 scaleMTX = mat4(
+			scale.x, 0, 0, 0,
+			0, scale.y , 0, 0,
+			0, 0, scale.z, 0,
+			position, 1
+		);
+		// gl_Position = systemUniforms.perspectiveMTX * getSprite3DMatrix( systemUniforms.cameraMTX, meshMatrixUniforms.modelMatrix[ int(meshUniforms.index) ]* scaleMTX )  * vec4(a_pos , 1);
+		gl_Position = systemUniforms.perspectiveMTX * getSprite3DMatrix( systemUniforms.cameraMTX, scaleMTX )  * vec4(a_pos , 1);
 	}
 	`;
 	static fragmentShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	const float TRUTHY = 1.0;
-	layout( location = 0 ) in vec3 vNormal;
-	layout( location = 1 ) in vec2 vUV;
-	layout( location = 2 ) in float vMouseColorID;	
-	layout( location = 3 ) in float vSumOpacity;
+	layout( location = 0 ) in vec2 vUV;
+	layout( location = 1 ) in float vMouseColorID;	
+	layout( location = 2 ) in float vSumOpacity;
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 0 ) uniform FragmentUniforms {
         float alpha;
         //
@@ -86,37 +89,6 @@ export default class BitmapMaterial extends Mix.mix(
 		super(redGPUContext);
 		this.diffuseTexture = diffuseTexture;
 		this.needResetBindingInfo = true
-	}
-	checkTexture(texture, textureName) {
-		if (texture) {
-			if (texture._GPUTexture) {
-				let tKey;
-				switch (textureName) {
-					case 'diffuseTexture' :
-						this._diffuseTexture = texture;
-						tKey = textureName;
-						break
-				}
-				if (RedGPUContext.useDebugConsole) console.log("로딩완료or로딩에러확인 textureName", textureName, texture ? texture._GPUTexture : '');
-				if (tKey) {
-					float1_Float32Array[0] = this[`__${textureName}RenderYn`] = 1;
-					if (tKey == 'displacementTexture') this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
-					else this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
-				}
-				this.needResetBindingInfo = true
-			} else {
-				texture.addUpdateTarget(this, textureName)
-			}
-
-		} else {
-			if (this['_' + textureName]) {
-				this['_' + textureName] = null;
-				float1_Float32Array[0] = this[`__${textureName}RenderYn`] = 0;
-				if (textureName == 'displacementTexture') this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
-				else this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
-				this.needResetBindingInfo = true
-			}
-		}
 	}
 	resetBindingInfo() {
 		this.bindings = [

@@ -2,10 +2,10 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.16 21:13:13
+ *   Last modification time of this file - 2020.1.20 18:6:15
  *
  */
-"use strict"
+"use strict";
 const WEBGL_COMPONENT_TYPES = {
 	5120: Int8Array,
 	5121: Uint8Array,

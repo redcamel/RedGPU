@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.17 11:10:39
+ *   Last modification time of this file - 2020.1.20 18:6:15
  *
  */
 
@@ -50,7 +50,7 @@ let parseAnimation_GLTF = function (redGLTFLoader, json, callback) {
 			let nodes = json['nodes'];
 			let meshes = json['meshes'];
 			let current = 0, total = 0;
-			console.log(json['animations'])
+			console.log(json['animations']);
 			json['animations'].forEach(function (v) {
 				let samplers = v['samplers'];
 				//TODO: 용어를 정리해봐야겠음.
@@ -63,7 +63,7 @@ let parseAnimation_GLTF = function (redGLTFLoader, json, callback) {
 				redGLTFLoader['parsingResult']['animations'].push(animationClip);
 				// 채널을 돌면서 파악한다.
 				let i = 0;
-				const len = v['channels'].length
+				const len = v['channels'].length;
 				total += len;
 				let parseChannels = index => {
 					let tSampler;
@@ -113,9 +113,9 @@ let parseAnimation_GLTF = function (redGLTFLoader, json, callback) {
 						if (animationClip['minTime'] > aniTrack['time'][0]) animationClip['minTime'] = aniTrack['time'][0];
 						if (animationClip['maxTime'] < aniTrack['time'][aniTrack['time'].length - 1]) animationClip['maxTime'] = aniTrack['time'][aniTrack['time'].length - 1]
 					}
-					i++
-					current++
-					if (i != len) requestAnimationFrame(_ => parseChannels(i))
+					i++;
+					current++;
+					if (i != len) requestAnimationFrame(_ => parseChannels(i));
 					if (current == total) {
 						if (redGLTFLoader['parsingResult']['animations'].length) {
 							redGLTFLoader['parsingResult']['animations'].forEach(v => redGLTFLoader.playAnimation(v))
@@ -123,8 +123,8 @@ let parseAnimation_GLTF = function (redGLTFLoader, json, callback) {
 						if (RedGPUContext.useDebugConsole) console.log('Animation parsing has ended.');
 						resolve()
 					}
-				}
-				parseChannels(i)
+				};
+				parseChannels(i);
 				console.log('animationClip', animationClip)
 			});
 		} else resolve()

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.16 21:13:13
+ *   Last modification time of this file - 2020.1.20 18:6:15
  *
  */
 import RedGPUContext from "../RedGPUContext.js";
@@ -62,7 +62,7 @@ export default class ShaderModule_GLSL {
 		if (RedGPUContext.useDebugConsole) console.log('ShaderModule_GLSL_searchShaderModule_callNum', ShaderModule_GLSL_searchShaderModule_callNum);
 		this.currentKey = searchKey;
 		if (this.shaderModuleMap[searchKey]) {
-			console.log('use cached shaderModule', this.type, searchKey)
+			console.log('use cached shaderModule', this.type, searchKey);
 			return this.GPUShaderModule = this.shaderModuleMap[searchKey];
 		}
 		else {

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.16 18:59:49
+ *   Last modification time of this file - 2020.1.20 18:6:15
  *
  */
 
@@ -23,7 +23,7 @@ import Render from "../renderer/Render.js";
 const MESH_UNIFORM_TABLE = [];
 let MESH_UNIFORM_POOL_index = 0;
 let MESH_UNIFORM_POOL_tableIndex = 0;
-let float1_Float32Array = new Float32Array(1)
+let float1_Float32Array = new Float32Array(1);
 const uniformBufferDescriptor_mesh = new UniformBufferDescriptor(
 	[
 		{size: TypeSize.mat4 * ShareGLSL.MESH_UNIFORM_POOL_NUM, valueName: 'matrix'},

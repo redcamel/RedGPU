@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.16 9:38:24
+ *   Last modification time of this file - 2020.1.20 18:6:15
  *
  */
 
@@ -37,7 +37,7 @@ export default class BasePostEffect extends Mix.mix(
 	constructor(redGPUContext) {
 		super(redGPUContext);
 		this.quad = new Mesh(redGPUContext, new Plane(redGPUContext), this);
-		this.quad.pipeline = new PipelinePostEffect(redGPUContext, this.quad)
+		this.quad.pipeline = new PipelinePostEffect(redGPUContext, this.quad);
 		this.sampler = new Sampler(redGPUContext, {
 			magFilter: "linear",
 			minFilter: "linear",
