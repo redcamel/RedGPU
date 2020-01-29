@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.20 18:6:15
+ *   Last modification time of this file - 2020.1.29 22:10:29
  *
  */
 
@@ -12,6 +12,8 @@ import Debugger from "./system/Debugger.js";
 import PipelineBasic from "../base/pipeline/PipelineBasic.js";
 import DisplayContainer from "../base/DisplayContainer.js";
 import UTIL from "../util/UTIL.js";
+import ParticleComputeUnit from "../particle/ParticleComputeUnit.js";
+import PipelineParticle from "../base/pipeline/PipelineParticle.js";
 
 let _frustumPlanes = [];
 let currentDebuggerData;
@@ -109,7 +111,7 @@ let renderScene = (_ => {
 				}
 				if (tGeometry) {
 					if (tDirtyPipeline || tMaterialChanged) {
-						if (tPipeline instanceof PipelineBasic) {
+						if (tPipeline instanceof PipelineBasic || tPipeline instanceof PipelineParticle) {
 							// console.log('tDirtyPipeline', tDirtyPipeline, 'tMaterialChanged', tMaterialChanged)
 							// console.time('tPipeline.update' + tMesh._UUID)
 							tPipeline.update(redGPUContext, redView);
@@ -154,30 +156,60 @@ let renderScene = (_ => {
 						}
 						// console.log(tVisible);
 						///////////////////////////////////////
-						if (tVisible) {
-							passEncoder.setPipeline(tPipeline.GPURenderPipeline);
-							if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
-								passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
-								prevVertexBuffer_UUID = tGeometry.interleaveBuffer._UUID
-							}
-							passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹는 매그룹마다 다르니 또 업데이트 해줘야함 -_-
-							if (prevMaterial_UUID != tMaterial._UUID) {
-								passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
-								prevMaterial_UUID = tMaterial._UUID
-							}
-							if (tGeometry.indexBuffer) {
-								if (prevIndexBuffer_UUID != tGeometry.indexBuffer._UUID) {
-									passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
-									prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
+						if(tMesh instanceof ParticleComputeUnit) {
+							tMesh.compute(currentTime)
+
+								passEncoder.setPipeline(tPipeline.GPURenderPipeline);
+								if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
+									passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
+									prevVertexBuffer_UUID = tGeometry.interleaveBuffer._UUID
 								}
-								passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
-								currentDebuggerData['triangleNum'] += tGeometry.indexBuffer.indexNum / 3
-							} else {
-								passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
-								currentDebuggerData['triangleNum'] += tGeometry.interleaveBuffer.data.length / tGeometry.interleaveBuffer.stride
+								passEncoder.setVertexBuffer(1, tMesh.particleBuffer);
+								passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹는 매그룹마다 다르니 또 업데이트 해줘야함 -_-
+								if (prevMaterial_UUID != tMaterial._UUID) {
+									passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
+									prevMaterial_UUID = tMaterial._UUID
+								}
+								if (tGeometry.indexBuffer) {
+									if (prevIndexBuffer_UUID != tGeometry.indexBuffer._UUID) {
+										passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
+										prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
+									}
+									passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, tMesh._particleNum, 0, 0, 0);
+									currentDebuggerData['triangleNum'] += tGeometry.indexBuffer.indexNum / 3
+								} else {
+									passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, tMesh._particleNum, 0, 0, 0);
+									currentDebuggerData['triangleNum'] += tGeometry.interleaveBuffer.data.length / tGeometry.interleaveBuffer.stride
+								}
+								currentDebuggerData['drawCallNum']++
+
+						}else{
+							if (tVisible) {
+								passEncoder.setPipeline(tPipeline.GPURenderPipeline);
+								if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
+									passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
+									prevVertexBuffer_UUID = tGeometry.interleaveBuffer._UUID
+								}
+								passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹는 매그룹마다 다르니 또 업데이트 해줘야함 -_-
+								if (prevMaterial_UUID != tMaterial._UUID) {
+									passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
+									prevMaterial_UUID = tMaterial._UUID
+								}
+								if (tGeometry.indexBuffer) {
+									if (prevIndexBuffer_UUID != tGeometry.indexBuffer._UUID) {
+										passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
+										prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
+									}
+									passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
+									currentDebuggerData['triangleNum'] += tGeometry.indexBuffer.indexNum / 3
+								} else {
+									passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, 1, 0, 0, 0);
+									currentDebuggerData['triangleNum'] += tGeometry.interleaveBuffer.data.length / tGeometry.interleaveBuffer.stride
+								}
+								currentDebuggerData['drawCallNum']++
 							}
-							currentDebuggerData['drawCallNum']++
 						}
+
 						tMesh._prevMaterialUUID = tMaterial._UUID;
 					}
 

@@ -11,7 +11,7 @@
 import UUID from "../UUID.js";
 
 
-export default class PipelineBasic extends UUID {
+export default class PipelineParticle extends UUID {
 	#redGPUContext;
 	#targetMesh;
 	GPURenderPipeline;
@@ -47,7 +47,49 @@ export default class PipelineBasic extends UUID {
 				entryPoint: 'main'
 			},
 			// 버텍스 상태는 지오메트리가 알고있음으로 들고옴
-			vertexState: targetMesh._geometry.vertexState,
+			vertexState : {
+				indexFormat: 'uint32',
+				vertexBuffers: [
+					{
+						// vertex buffer
+						arrayStride: 8 * 4,
+						stepMode: "vertex",
+						attributes: [
+							{
+								// vertex positions
+								shaderLocation: 0,
+								offset: 0,
+								format: "float3",
+							},
+							{
+								// vertex uv
+								shaderLocation: 1,
+								offset: 6 * 4,
+								format: "float2"
+							}
+						],
+					},
+					{
+						// instanced particles buffer
+						arrayStride: targetMesh.PROPERTY_NUM * 4,
+						stepMode: "instance",
+						attributes: [
+							{
+								/* position*/
+								shaderLocation: 2, offset: 4 * 4, format: "float3"
+							},
+							{
+								/* scale*/
+								shaderLocation: 3, offset: 8 * 4, format: "float3"
+							},
+							{
+								/* alpha*/
+								shaderLocation: 4, offset: 11 * 4, format: "float"
+							},
+						]
+					},
+				]
+			},
 			// 컬러모드 지정하고
 			colorStates: [
 				{
