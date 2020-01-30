@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.30 19:35:31
+ *   Last modification time of this file - 2020.1.30 20:31:4
  *
  */
 
@@ -441,7 +441,7 @@ const ExampleHelper = (_ => {
 			geometry: 'Plane',
 			texture : 'particle.png'
 		};
-
+		rootFolder.add(particle,'particleNum',1,50000,1)
 		rootFolder.add(particle, 'sprite3DMode');
 		folder = gui.addFolder('Range');
 		folder.open();
@@ -465,6 +465,10 @@ const ExampleHelper = (_ => {
 		['minStartRotationY', 'maxStartRotationY', 'minEndRotationY', 'maxEndRotationY'].forEach(function (key) {subFolder.add(particle, key, -720, 720, 0.01)});
 		subFolder = gui.addFolder('Range RotationZ');
 		['minStartRotationZ', 'maxStartRotationZ', 'minEndRotationZ', 'maxEndRotationZ'].forEach(function (key) {subFolder.add(particle, key, -720, 720, 0.01)});
+		subFolder = gui.addFolder('blendFactor');
+		['blendColorSrc', 'blendColorDst', 'blendAlphaSrc', 'blendAlphaDst'].forEach(key => {
+			subFolder.add(particle, key, ["zero", "one", "src-color", "one-minus-src-color", "src-alpha", "one-minus-src-alpha", "dst-color", "one-minus-dst-color", "dst-alpha", "one-minus-dst-alpha", "src-alpha-saturated", "blend-color", "one-minus-blend-color"])
+		});
 
 		const EASE_LIST = [
 			'Linear',/**/ 'QuintIn', 'QuintOut', 'QuintInOut',/**/ 'BackIn', 'BackOut', 'BackInOut',/**/ 'CircIn', 'CircOut', 'CircInOut',/**/ 'CubicIn', 'CubicOut', 'CubicInOut',/**/ 'ExpoIn', 'ExpoOut', 'ExpoInOut',/**/ 'QuadIn', 'QuadOut', 'QuadInOut',/**/ 'QuartIn', 'QuartOut', 'QuartInOut',/**/ 'SineIn', 'SineOut', 'SineInOut',/**/ 'ElasticIn', 'ElasticOut', 'ElasticInOut'
