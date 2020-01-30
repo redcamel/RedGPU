@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.29 22:10:29
+ *   Last modification time of this file - 2020.1.30 11:55:11
  *
  */
 
@@ -43,7 +43,10 @@ let getComputeSource = v => {
 	layout(std140, set = ${ShareGLSL.SET_INDEX_ComputeUniforms}, binding = 0) uniform SimParams {
 	    float time;
 	    float minLife,maxLife;
-	    float minStartX,maxStartX;
+	    float minStartX, maxStartX, minEndX, maxEndX;
+	    float minStartY, maxStartY, minEndY, maxEndY;
+	    float minStartZ, maxStartZ, minEndZ, maxEndZ;
+	    float minStartAlpha, maxStartAlpha, minEndAlpha, maxEndAlpha;
 	    vec3 currentPosition;
 	} params;
 	
@@ -54,10 +57,7 @@ let getComputeSource = v => {
 	
 	
 
-	float rand(vec2 co)
-	{
-	    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
-	}
+	
 	const float PI = 3.141592653589793;
 	const float HPI = PI * 0.5;
 	const float PI2 = PI * 2;
@@ -130,11 +130,11 @@ let getComputeSource = v => {
 		}
 		return n;
 	}
+	float rand(float n){return fract(sin(n) * 43758.5453123);}
 	float randomRange(float min, float max, float v)
 	{
-        float newValue = rand(vec2( min, max) + v) * max;
-        if(newValue < min) newValue = min;
-		return newValue;
+        float newValue = rand(v);
+		return (newValue * (max-min)) + min;
 	}
 	void main() {
 		uint index = gl_GlobalInvocationID.x;
@@ -143,12 +143,19 @@ let getComputeSource = v => {
 		float age = params.time - targetParticle.startTime;
 		float lifeRatio = age/targetParticle.life;
 		if(lifeRatio>=1) {
+			float uuid = params.time + index;
 			particlesA.particles[index].startTime = params.time;
-			particlesA.particles[index].life = randomRange( params.minLife, params.maxLife, params.time + index );
+			particlesA.particles[index].life = randomRange( params.minLife, params.maxLife, uuid );
 			//
-			// particlesA.particles[index].infoPosition.infoX.startValue = randomRange( params.minStartX, params.maxStartX, params.time + index );
-			// particlesA.particles[index].infoPosition.infoY.startValue = randomRange( params.minStartX, params.maxStartX, params.time + index );
-			// particlesA.particles[index].infoPosition.infoZ.startValue = randomRange( params.minStartX, params.maxStartX, params.time + index );
+			particlesA.particles[index].infoPosition.infoX.startValue = randomRange( params.minStartX, params.maxStartX, uuid + 1 );
+			particlesA.particles[index].infoPosition.infoX.endValue   = randomRange( params.minEndX, params.maxEndX, uuid + 2 );
+			particlesA.particles[index].infoPosition.infoY.startValue = randomRange( params.minStartY, params.maxStartY, uuid + 3 );
+			particlesA.particles[index].infoPosition.infoY.endValue   = randomRange( params.minEndY, params.maxEndY, uuid + 4 );
+			particlesA.particles[index].infoPosition.infoZ.startValue = randomRange( params.minStartZ, params.maxStartZ, uuid + 5 );
+			particlesA.particles[index].infoPosition.infoZ.endValue   = randomRange( params.minEndZ, params.maxEndZ, uuid + 6 );
+			//
+			particlesA.particles[index].infoAlpha.startValue = randomRange( params.minStartAlpha, params.maxStartAlpha, uuid + 7 );
+			particlesA.particles[index].infoAlpha.endValue   = randomRange( params.minEndAlpha, params.maxEndAlpha, uuid + 8 );
 			//
 			particlesA.particles[index].infoPosition.infoX.birthCenterValue = params.currentPosition.x;
 			particlesA.particles[index].infoPosition.infoY.birthCenterValue = params.currentPosition.y;
@@ -183,17 +190,72 @@ export default class ParticleComputeUnit extends BaseObject3D {
 	set minStartX(value) {this._minStartX = value;}
 	get maxStartX() {return this._maxStartX;}
 	set maxStartX(value) {this._maxStartX = value;}
+	get minEndX() {return this._minEndX;}
+	set minEndX(value) {this._minEndX = value;}
+	get maxEndX() {return this._maxEndX;}
+	set maxEndX(value) {this._maxEndX = value;}
+	//
+	get minStartY() {return this._minStartY;}
+	set minStartY(value) {this._minStartY = value;}
+	get maxStartY() {return this._maxStartY;}
+	set maxStartY(value) {this._maxStartY = value;}
+	get minEndY() {return this._minEndY;}
+	set minEndY(value) {this._minEndY = value;}
+	get maxEndY() {return this._maxEndY;}
+	set maxEndY(value) {this._maxEndY = value;}
+	//
+	get minStartZ() {return this._minStartZ;}
+	set minStartZ(value) {this._minStartZ = value;}
+	get maxStartZ() {return this._maxStartZ;}
+	set maxStartZ(value) {this._maxStartZ = value;}
+	get minEndZ() {return this._minEndZ;}
+	set minEndZ(value) {this._minEndZ = value;}
+	get maxEndZ() {return this._maxEndZ;}
+	set maxEndZ(value) {this._maxEndZ = value;}
+	//
+	get minStartAlpha() {return this._minStartAlpha;}
+	set minStartAlpha(value) {this._minStartAlpha = value;}
+	get maxStartAlpha() {return this._maxStartAlpha;}
+	set maxStartAlpha(value) {this._maxStartAlpha = value;}
+	get minEndAlpha() {return this._minEndAlpha;}
+	set minEndAlpha(value) {this._minEndAlpha = value;}
+	get maxEndAlpha() {return this._maxEndAlpha;}
+	set maxEndAlpha(value) {this._maxEndAlpha = value;}
+	//
 	get maxLife() {return this._maxLife;}
 	set maxLife(value) {this._maxLife = value;}
 	get minLife() {return this._minLife;}
 	set minLife(value) {this._minLife = value;}
+	//
 	get particleNum() {return this._particleNum;}
 	set particleNum(value) {this._particleNum = value;}
 	#redGPUContext;
 	#simParamData;
 	computePipeline;
 	particleBindGroup;
-	particleBuffer
+	particleBuffer;
+	_minLife=2000;
+	_maxLife=10000;
+	//
+	_minStartX = -1;
+	_maxStartX = 1;
+	_minEndX = -15;
+	_maxEndX = 15;
+	//
+	_minStartY = -1;
+	_maxStartY = 1;
+	_minEndY = -15;
+	_maxEndY = 15;
+	//
+	_minStartZ = -1;
+	_maxStartZ = 1;
+	_minEndZ = -15;
+	_maxEndZ = 15;
+	//
+	_minStartAlpha = 0.0;
+	_maxStartAlpha = 1.0;
+	_minEndAlpha = 0.0;
+	_maxEndAlpha = 0.0;
 	compute(time) {
 		this.#simParamData.set(
 			[
@@ -201,16 +263,20 @@ export default class ParticleComputeUnit extends BaseObject3D {
 				performance.now(),
 				// lifeRange
 				this._minLife, this._maxLife,
-				0, // empty
 				// xRange
-				this._minStartX, this._maxStartX,
-				0,0, // empty
+				this._minStartX, this._maxStartX, this._minEndX, this._maxEndX,
+				// yRange
+				this._minStartY, this._maxStartY, this._minEndY, this._maxEndY,
+				// zRange
+				this._minStartZ, this._maxStartZ, this._minEndZ, this._maxEndZ,
+				// alphaRange
+				this._minStartAlpha, this._maxStartAlpha, this._minEndAlpha, this._maxEndAlpha,
 				// position
 				this._x,this._y,this._z
 			],
 			0
 		)
-		this.simParamBuffer.setSubData(0, new Float32Array(this.#simParamData))
+		this.simParamBuffer.setSubData(0, this.#simParamData)
 		const commandEncoder = this.#redGPUContext.device.createCommandEncoder({});
 		const passEncoder = commandEncoder.beginComputePass();
 		passEncoder.setPipeline(this.computePipeline);
@@ -220,10 +286,7 @@ export default class ParticleComputeUnit extends BaseObject3D {
 		this.#redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
 
 	}
-	_minLife=2000;
-	_maxLife=10000;
-	_minStartX = -10;
-	_maxStartX = 10;
+
 	constructor(redGPUContext, particleNum = 1, initInfo = {}, texture, geometry) {
 		super(redGPUContext);
 		this.#redGPUContext = redGPUContext;
@@ -245,10 +308,14 @@ export default class ParticleComputeUnit extends BaseObject3D {
 				performance.now(),
 				// lifeRange
 				this._minLife, this._maxLife,
-				0,// empty
 				// xRange
-				this._minStartX, this._maxStartX,
-				0,0, // empty
+				this._minStartX, this._maxStartX, this._minEndX, this._maxEndX,
+				// yRange
+				this._minStartY, this._maxStartY, this._minEndY, this._maxEndY,
+				// zRange
+				this._minStartZ, this._maxStartZ, this._minEndZ, this._maxEndZ,
+				// alphaRange
+				this._minStartAlpha, this._maxStartAlpha, this._minEndAlpha, this._maxEndAlpha,
 				// position
 				this._x,this._y,this._z
 			]
