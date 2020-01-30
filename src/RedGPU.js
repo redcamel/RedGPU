@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.9 11:43:33
+ *   Last modification time of this file - 2020.1.30 19:35:31
  *
  */
 import glMatrix from "./base/gl-matrix-min.js"
@@ -65,6 +65,8 @@ import SkyBox from "./object3D/SkyBox.js";
 import Sprite3D from "./object3D/Sprite3D.js";
 import Text from "./object3D/Text.js";
 import Line from "./object3D/Line.js";
+// particle ///////////////////////////////////////////////////////////////////////
+import Particle from "./particle/Particle.js";
 // postEffect ///////////////////////////////////////////////////////////////////////
 import PostEffect_BrightnessContrast from "./postEffect/adjustments/PostEffect_BrightnessContrast.js";
 import PostEffect_Gray from "./postEffect/adjustments/PostEffect_Gray.js";
@@ -164,6 +166,8 @@ const RedGPU = {
 	Sprite3D,
 	Text,
 	Line,
+	// particle /////////////////////////////////////////////////////////////////////////
+	Particle,
 	// postEffect ///////////////////////////////////////////////////////////////////////
 	PostEffect_BrightnessContrast,
 	PostEffect_Gray,

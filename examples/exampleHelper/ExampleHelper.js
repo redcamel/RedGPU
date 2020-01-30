@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.18 17:23:53
+ *   Last modification time of this file - 2020.1.30 19:35:31
  *
  */
 
@@ -430,6 +430,61 @@ const ExampleHelper = (_ => {
 		folder.open();
 		folder.add(tMesh, 'primitiveTopology', ["point-list", "line-list", "line-strip", "triangle-list", "triangle-strip"])
 	};
+
+	const setTestUI_Particle = (RedGPU, redGPUContext, particle, open, gui) => {
+		checkGUI();
+		gui = gui || testHelperFolder;
+		let rootFolder, folder;
+		rootFolder = gui.addFolder('Particle');
+		if (open) rootFolder.open();
+		let testData = {
+			geometry: 'Plane',
+			texture : 'particle.png'
+		};
+
+		rootFolder.add(particle, 'sprite3DMode');
+		folder = gui.addFolder('Range');
+		folder.open();
+		let subFolder;
+		subFolder = gui.addFolder('Range Life');
+		subFolder.open();
+		['minLife', 'maxLife'].forEach(function (key) { subFolder.add(particle, key, 1000, 10000, 0.01) });
+		subFolder = gui.addFolder('Range X');
+		['minStartX', 'maxStartX', 'minEndX', 'maxEndX'].forEach(function (key) { subFolder.add(particle, key, -10, 10, 0.01) });
+		subFolder = gui.addFolder('Range Y');
+		['minStartY', 'maxStartY', 'minEndY', 'maxEndY'].forEach(function (key) { subFolder.add(particle, key, -10, 10, 0.01) });
+		subFolder = gui.addFolder('Range Z');
+		['minStartZ', 'maxStartZ', 'minEndZ', 'maxEndZ'].forEach(function (key) {subFolder.add(particle, key, -10, 10, 0.01)});
+		subFolder = gui.addFolder('Range Scale');
+		['minStartScale', 'maxStartScale', 'minEndScale', 'maxEndScale'].forEach(function (key) {subFolder.add(particle, key, -10, 10, 0.01)});
+		subFolder = gui.addFolder('Range Alpha');
+		['minStartAlpha', 'maxStartAlpha', 'minEndAlpha', 'maxEndAlpha'].forEach(function (key) {subFolder.add(particle, key, 0, 1, 0.01)});
+		subFolder = gui.addFolder('Range RotationX');
+		['minStartRotationX', 'maxStartRotationX', 'minEndRotationX', 'maxEndRotationX'].forEach(function (key) {subFolder.add(particle, key, -720, 720, 0.01)});
+		subFolder = gui.addFolder('Range RotationY');
+		['minStartRotationY', 'maxStartRotationY', 'minEndRotationY', 'maxEndRotationY'].forEach(function (key) {subFolder.add(particle, key, -720, 720, 0.01)});
+		subFolder = gui.addFolder('Range RotationZ');
+		['minStartRotationZ', 'maxStartRotationZ', 'minEndRotationZ', 'maxEndRotationZ'].forEach(function (key) {subFolder.add(particle, key, -720, 720, 0.01)});
+
+		const EASE_LIST = [
+			'Linear',/**/ 'QuintIn', 'QuintOut', 'QuintInOut',/**/ 'BackIn', 'BackOut', 'BackInOut',/**/ 'CircIn', 'CircOut', 'CircInOut',/**/ 'CubicIn', 'CubicOut', 'CubicInOut',/**/ 'ExpoIn', 'ExpoOut', 'ExpoInOut',/**/ 'QuadIn', 'QuadOut', 'QuadInOut',/**/ 'QuartIn', 'QuartOut', 'QuartInOut',/**/ 'SineIn', 'SineOut', 'SineInOut',/**/ 'ElasticIn', 'ElasticOut', 'ElasticInOut'
+		]
+		folder = gui.addFolder('Ease Type');
+		folder.open();
+		['easeX', 'easeY', 'easeZ', 'easeAlpha', 'easeScale', 'easeRotationX', 'easeRotationY', 'easeRotationZ'].forEach(function (key) {
+			testData[key] = 'Linear';
+			folder.add(testData, key, EASE_LIST).onChange(v => {
+				particle[key] = RedGPU.Particle[v]
+			})
+		});
+		rootFolder.add(testData, 'texture', ['crate.png', 'particle.png']).onChange(v => {
+			particle.texture = new RedGPU.BitmapTexture(redGPUContext, assetPath + v)
+		})
+		rootFolder.add(testData, 'geometry', ['Plane', 'Box', 'Sphere', 'Cylinder']).onChange(v => {
+			particle.geometry = new RedGPU[v](redGPUContext)
+		})
+
+	}
 	const setTestUI_PrimitiveCylinder = (RedGPU, redGPUContext, tMesh, open, gui) => {
 		checkGUI();
 		gui = gui || testHelperFolder;
@@ -1123,7 +1178,9 @@ const ExampleHelper = (_ => {
 		//
 		setTestUI_AmbientLight: setTestUI_AmbientLight,
 		setTestUI_DirectionalLight: setTestUI_DirectionalLight,
-		setTestUI_PointLight : setTestUI_PointLight
+		setTestUI_PointLight: setTestUI_PointLight,
+		//
+		setTestUI_Particle: setTestUI_Particle
 	};
 })();
 

@@ -2,12 +2,11 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.30 17:38:1
+ *   Last modification time of this file - 2020.1.30 19:35:31
  *
  */
 
 "use strict";
-import BaseMaterial from "../base/BaseMaterial.js";
 import ShareGLSL from "../base/ShareGLSL.js";
 import TypeSize from "../resources/TypeSize.js";
 import BitmapMaterial from "../material/BitmapMaterial.js";
@@ -28,6 +27,9 @@ export default class ParticleMaterial extends BitmapMaterial {
 	layout(location = 0 ) out vec2 vUV;
 	layout(location = 1 ) out float vMouseColorID;	
 	layout(location = 2 ) out float vSumOpacity;
+	layout( set = ${ShareGLSL.SET_INDEX_VertexUniforms}, binding = 0 ) uniform VertexUniforms {
+        float sprite3DMode;
+    } vertexUniforms;
 	mat4 rotationMTX(vec3 t)
     {
        float s = sin(t[0]);float c = cos(t[0]);
@@ -41,8 +43,7 @@ export default class ParticleMaterial extends BitmapMaterial {
 		vMouseColorID = meshUniforms.mouseColorID;
 		vSumOpacity = meshUniforms.sumOpacity * alpha;
 		float ratio = systemUniforms.resolution.x/systemUniforms.resolution.y; 
-		float sprite3DYn = 1.0;
-		if( sprite3DYn == 1.0 ) {
+		if( vertexUniforms.sprite3DMode == 1.0 ) {
 			mat4 scaleMTX = mat4(
 				1, 0, 0, 0,
 				0, 1, 0, 0,
@@ -75,18 +76,18 @@ export default class ParticleMaterial extends BitmapMaterial {
 	layout( location = 0 ) in vec2 vUV;
 	layout( location = 1 ) in float vMouseColorID;	
 	layout( location = 2 ) in float vSumOpacity;
-	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 0 ) uniform FragmentUniforms {
+	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 1 ) uniform FragmentUniforms {
         float alpha;
         //
         float __diffuseTextureRenderYn;
     } fragmentUniforms;
-	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 1 ) uniform sampler uSampler;
-	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 2 ) uniform texture2D uDiffuseTexture;
+	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 2 ) uniform sampler uSampler;
+	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 3 ) uniform texture2D uDiffuseTexture;
 	layout( location = 0 ) out vec4 outColor;
 	layout( location = 1 ) out vec4 out_MouseColorID_Depth;
 	void main() {
 		vec4 diffuseColor = vec4(0.0);
-		if(fragmentUniforms.__diffuseTextureRenderYn == TRUTHY) diffuseColor = texture(sampler2D(uDiffuseTexture, uSampler), vUV) ;
+		diffuseColor = texture(sampler2D(uDiffuseTexture, uSampler), vUV) ;
 		outColor = diffuseColor;
 		outColor.a *= fragmentUniforms.alpha * vSumOpacity;
 		out_MouseColorID_Depth = vec4(vMouseColorID, gl_FragCoord.z/gl_FragCoord.w, 0.0, 0.0);
@@ -101,17 +102,27 @@ export default class ParticleMaterial extends BitmapMaterial {
 	};
 	static uniformsBindGroupLayoutDescriptor_material = {
 		bindings: [
-			{binding: 0, visibility: GPUShaderStage.FRAGMENT, type: "uniform-buffer"},
-			{binding: 1, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
-			{binding: 2, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"}
+			{binding: 0, visibility: GPUShaderStage.VERTEX, type: "uniform-buffer"},
+			{binding: 1, visibility: GPUShaderStage.FRAGMENT, type: "uniform-buffer"},
+			{binding: 2, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
+			{binding: 3, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"}
 		]
 	};
-	static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
-	static uniformBufferDescriptor_fragment = [
-		{size: TypeSize.float, valueName: 'alpha'},
-		//
-		{size: TypeSize.float, valueName: '__diffuseTextureRenderYn'},
+	static uniformBufferDescriptor_vertex = [
+		{size: TypeSize.float, valueName: 'sprite3DMode'}
 	];
+	static uniformBufferDescriptor_fragment = [
+		{size: TypeSize.float, valueName: 'alpha'}
+	];
+	_sprite3DMode=true;
+	get sprite3DMode() {
+		return this._sprite3DMode;
+	}
+	set sprite3DMode(value) {
+		this._sprite3DMode = value;
+		float1_Float32Array[0] = value ? 1 : 0;
+		this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['sprite3DMode'], float1_Float32Array)
+	}
 	constructor(redGPUContext, diffuseTexture) {
 		super(redGPUContext);
 		this.diffuseTexture = diffuseTexture;
@@ -122,17 +133,25 @@ export default class ParticleMaterial extends BitmapMaterial {
 			{
 				binding: 0,
 				resource: {
+					buffer: this.uniformBuffer_vertex.GPUBuffer,
+					offset: 0,
+					size: this.uniformBufferDescriptor_vertex.size
+				}
+			},
+			{
+				binding: 1,
+				resource: {
 					buffer: this.uniformBuffer_fragment.GPUBuffer,
 					offset: 0,
 					size: this.uniformBufferDescriptor_fragment.size
 				}
 			},
 			{
-				binding: 1,
+				binding: 2,
 				resource: this._diffuseTexture ? this._diffuseTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
 			},
 			{
-				binding: 2,
+				binding: 3,
 				resource: this._diffuseTexture ? this._diffuseTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
 			}
 		];
