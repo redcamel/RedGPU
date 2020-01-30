@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.30 17:14:16
+ *   Last modification time of this file - 2020.1.30 17:38:1
  *
  */
 
@@ -44,6 +44,7 @@ let getComputeSource = v => {
 	// 이건 설정값인듯 하고
 	layout(std140, set = ${ShareGLSL.SET_INDEX_ComputeUniforms}, binding = 0) uniform SimParams {
 	    float time;
+        float currentPositionX,currentPositionY,currentPositionZ;
 	    float minLife,maxLife;
 	    float minStartX, maxStartX, minEndX, maxEndX;
 	    float minStartY, maxStartY, minEndY, maxEndY;
@@ -53,7 +54,7 @@ let getComputeSource = v => {
         float minStartRotationX, maxStartRotationX, minEndRotationX, maxEndRotationX;
 	    float minStartRotationY, maxStartRotationY, minEndRotationY, maxEndRotationY;
 	    float minStartRotationZ, maxStartRotationZ, minEndRotationZ, maxEndRotationZ;
-	    vec3 currentPosition;
+	
 	} params;
 	
 	// 여기다 쓰곘다는건가	
@@ -173,9 +174,9 @@ let getComputeSource = v => {
 			particlesA.particles[index].infoRotation.infoZ.startValue = randomRange( params.minStartZ, params.maxStartZ, uuid + 15 );
 			particlesA.particles[index].infoRotation.infoZ.endValue   = randomRange( params.minEndZ, params.maxEndZ, uuid + 16 );
 			// birth position
-			particlesA.particles[index].infoPosition.infoX.birthCenterValue = params.currentPosition.x;
-			particlesA.particles[index].infoPosition.infoY.birthCenterValue = params.currentPosition.y;
-			particlesA.particles[index].infoPosition.infoZ.birthCenterValue = params.currentPosition.z;
+			particlesA.particles[index].infoPosition.infoX.birthCenterValue = params.currentPositionX;
+			particlesA.particles[index].infoPosition.infoY.birthCenterValue = params.currentPositionY;
+			particlesA.particles[index].infoPosition.infoZ.birthCenterValue = params.currentPositionZ;
 			lifeRatio = 0;
 		}
 		Info tInfo;
@@ -262,6 +263,8 @@ export default class ParticleComputeUnit extends BaseObject3D {
 			[
 				// startTime time
 				time,
+				// position
+				this._x,this._y,this._z,
 				// lifeRange
 				this.minLife, this.maxLife,
 				// x,y,z Range
@@ -276,8 +279,6 @@ export default class ParticleComputeUnit extends BaseObject3D {
 				this.minStartRotationX, this.maxStartRotationX, this.minEndRotationX, this.maxEndRotationX,
 				this.minStartRotationY, this.maxStartRotationY, this.minEndRotationY, this.maxEndRotationY,
 				this.minStartRotationZ, this.maxStartRotationZ, this.minEndRotationZ, this.maxEndRotationZ,
-				// position
-				this._x,this._y,this._z
 			],
 			0
 		)
@@ -312,6 +313,8 @@ export default class ParticleComputeUnit extends BaseObject3D {
 			[
 				// startTime time
 				performance.now(),
+				// position
+				this._x,this._y,this._z,
 				// lifeRange
 				this.minLife, this.maxLife,
 				// x,y,z Range
@@ -326,8 +329,6 @@ export default class ParticleComputeUnit extends BaseObject3D {
 				this.minStartRotationX, this.maxStartRotationX, this.minEndRotationX, this.maxEndRotationX,
 				this.minStartRotationY, this.maxStartRotationY, this.minEndRotationY, this.maxEndRotationY,
 				this.minStartRotationZ, this.maxStartRotationZ, this.minEndRotationZ, this.maxEndRotationZ,
-				// position
-				this._x,this._y,this._z
 			]
 		)
 		let bufferDescriptor = {
@@ -348,7 +349,7 @@ export default class ParticleComputeUnit extends BaseObject3D {
 		const initialParticleData = new Float32Array(this._particleNum * PROPERTY_NUM);
 		const currentTime = performance.now();
 		for (let i = 0; i < this._particleNum; ++i) {
-			let life = Math.random() * 10000;
+			let life = Math.random() * this.maxLife;
 			let age = Math.random() * life;
 			initialParticleData[PROPERTY_NUM * i + 0] = currentTime - age // start time
 			initialParticleData[PROPERTY_NUM * i + 1] = life; // life
