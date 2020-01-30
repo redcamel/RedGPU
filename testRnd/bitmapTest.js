@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.30 11:55:11
+ *   Last modification time of this file - 2020.1.30 17:14:16
  *
  */
 import RedGPU from "../src/RedGPU.js";
@@ -339,7 +339,8 @@ new RedGPU.RedGPUContext(cvs,
 		]))
 
 
-		let particleTest = new ParticleComputeUnit(this, 10000, {}, new RedGPU.BitmapTexture(this, '../assets/particle.png'))
+		let particleTest = new ParticleComputeUnit(this, 10000, {}, new RedGPU.BitmapTexture(this, '../assets/crate.png'))
+		// let particleTest = new ParticleComputeUnit(this, 10000, {}, new RedGPU.BitmapTexture(this, '../assets/particle.png'))
 		tScene.addChild(particleTest)
 		tMesh = new RedGPU.Mesh(this, new RedGPU.Sphere(this, 0.5, 32, 32, 32), new RedGPU.ColorMaterial(this))
 		tMesh.setPosition(0, 0, 0)

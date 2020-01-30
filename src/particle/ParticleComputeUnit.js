@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.30 11:55:11
+ *   Last modification time of this file - 2020.1.30 17:14:16
  *
  */
 
@@ -31,11 +31,13 @@ let getComputeSource = v => {
 	struct Particle {
 		float startTime;
 	    float life;
-	    vec4 valuePosition;
-	    vec3 valueScale;
+	    vec3 valuePosition;
 	    float valueAlpha;
+        vec3 valueRotation;
+	    float valueScale;	  
 	    InfoGroup infoPosition;
-	    InfoGroup infoScale;
+	    InfoGroup infoRotation;
+	    Info infoScale;
 	    Info infoAlpha;
 	};
 	
@@ -47,6 +49,10 @@ let getComputeSource = v => {
 	    float minStartY, maxStartY, minEndY, maxEndY;
 	    float minStartZ, maxStartZ, minEndZ, maxEndZ;
 	    float minStartAlpha, maxStartAlpha, minEndAlpha, maxEndAlpha;
+	    float minStartScale, maxStartScale, minEndScale, maxEndScale;
+        float minStartRotationX, maxStartRotationX, minEndRotationX, maxEndRotationX;
+	    float minStartRotationY, maxStartRotationY, minEndRotationY, maxEndRotationY;
+	    float minStartRotationZ, maxStartRotationZ, minEndRotationZ, maxEndRotationZ;
 	    vec3 currentPosition;
 	} params;
 	
@@ -146,24 +152,34 @@ let getComputeSource = v => {
 			float uuid = params.time + index;
 			particlesA.particles[index].startTime = params.time;
 			particlesA.particles[index].life = randomRange( params.minLife, params.maxLife, uuid );
-			//
+			// position
 			particlesA.particles[index].infoPosition.infoX.startValue = randomRange( params.minStartX, params.maxStartX, uuid + 1 );
 			particlesA.particles[index].infoPosition.infoX.endValue   = randomRange( params.minEndX, params.maxEndX, uuid + 2 );
 			particlesA.particles[index].infoPosition.infoY.startValue = randomRange( params.minStartY, params.maxStartY, uuid + 3 );
 			particlesA.particles[index].infoPosition.infoY.endValue   = randomRange( params.minEndY, params.maxEndY, uuid + 4 );
 			particlesA.particles[index].infoPosition.infoZ.startValue = randomRange( params.minStartZ, params.maxStartZ, uuid + 5 );
 			particlesA.particles[index].infoPosition.infoZ.endValue   = randomRange( params.minEndZ, params.maxEndZ, uuid + 6 );
-			//
+			// alpha
 			particlesA.particles[index].infoAlpha.startValue = randomRange( params.minStartAlpha, params.maxStartAlpha, uuid + 7 );
 			particlesA.particles[index].infoAlpha.endValue   = randomRange( params.minEndAlpha, params.maxEndAlpha, uuid + 8 );
-			//
+			// scale
+			particlesA.particles[index].infoScale.startValue = randomRange( params.minStartScale, params.maxStartScale, uuid + 9 );
+			particlesA.particles[index].infoScale.endValue   = randomRange( params.minEndScale, params.maxEndScale, uuid + 10 );
+			// rotation
+			particlesA.particles[index].infoRotation.infoX.startValue = randomRange( params.minStartX, params.maxStartX, uuid + 11 );
+			particlesA.particles[index].infoRotation.infoX.endValue   = randomRange( params.minEndX, params.maxEndX, uuid + 12 );
+			particlesA.particles[index].infoRotation.infoY.startValue = randomRange( params.minStartY, params.maxStartY, uuid + 13 );
+			particlesA.particles[index].infoRotation.infoY.endValue   = randomRange( params.minEndY, params.maxEndY, uuid + 14 );
+			particlesA.particles[index].infoRotation.infoZ.startValue = randomRange( params.minStartZ, params.maxStartZ, uuid + 15 );
+			particlesA.particles[index].infoRotation.infoZ.endValue   = randomRange( params.minEndZ, params.maxEndZ, uuid + 16 );
+			// birth position
 			particlesA.particles[index].infoPosition.infoX.birthCenterValue = params.currentPosition.x;
 			particlesA.particles[index].infoPosition.infoY.birthCenterValue = params.currentPosition.y;
 			particlesA.particles[index].infoPosition.infoZ.birthCenterValue = params.currentPosition.z;
 			lifeRatio = 0;
 		}
-		// position
 		Info tInfo;
+		// position
 		tInfo = targetParticle.infoPosition.infoX;
 		particlesA.particles[index].valuePosition.x = tInfo.birthCenterValue + tInfo.startValue +  (tInfo.endValue - tInfo.startValue) * calEasing(lifeRatio, tInfo.easeType);
 		tInfo = targetParticle.infoPosition.infoY;
@@ -171,61 +187,25 @@ let getComputeSource = v => {
 		tInfo = targetParticle.infoPosition.infoZ;
 		particlesA.particles[index].valuePosition.z = tInfo.birthCenterValue + tInfo.startValue +  (tInfo.endValue - tInfo.startValue) * calEasing(lifeRatio, tInfo.easeType);
 		
-		// scale
-		tInfo = targetParticle.infoScale.infoX;
-		particlesA.particles[index].valueScale.x = tInfo.startValue + (tInfo.endValue - tInfo.startValue) * calEasing(lifeRatio, tInfo.easeType);
-		tInfo = targetParticle.infoScale.infoY;
-		particlesA.particles[index].valueScale.y = tInfo.startValue + (tInfo.endValue - tInfo.startValue) * calEasing(lifeRatio, tInfo.easeType);
-		tInfo = targetParticle.infoScale.infoZ;
-		particlesA.particles[index].valueScale.z = tInfo.startValue +  (tInfo.endValue - tInfo.startValue) * calEasing(lifeRatio, tInfo.easeType);
-		
 		// alpha
 		tInfo = targetParticle.infoAlpha;
 		particlesA.particles[index].valueAlpha = tInfo.startValue +  (tInfo.endValue - tInfo.startValue) * calEasing(lifeRatio, tInfo.easeType);
+		
+		// scale
+		tInfo = targetParticle.infoScale;
+		particlesA.particles[index].valueScale = tInfo.startValue + (tInfo.endValue - tInfo.startValue) * calEasing(lifeRatio, tInfo.easeType);
+				
+		// rotation
+		tInfo = targetParticle.infoRotation.infoX;
+		particlesA.particles[index].valueRotation.x = tInfo.startValue +  (tInfo.endValue - tInfo.startValue) * calEasing(lifeRatio, tInfo.easeType);
+		tInfo = targetParticle.infoRotation.infoY;
+		particlesA.particles[index].valueRotation.y = tInfo.startValue +  (tInfo.endValue - tInfo.startValue) * calEasing(lifeRatio, tInfo.easeType);
+		tInfo = targetParticle.infoRotation.infoZ;
+		particlesA.particles[index].valueRotation.z = tInfo.startValue +  (tInfo.endValue - tInfo.startValue) * calEasing(lifeRatio, tInfo.easeType);
 	}
 `
 }
 export default class ParticleComputeUnit extends BaseObject3D {
-	get minStartX() {return this._minStartX;}
-	set minStartX(value) {this._minStartX = value;}
-	get maxStartX() {return this._maxStartX;}
-	set maxStartX(value) {this._maxStartX = value;}
-	get minEndX() {return this._minEndX;}
-	set minEndX(value) {this._minEndX = value;}
-	get maxEndX() {return this._maxEndX;}
-	set maxEndX(value) {this._maxEndX = value;}
-	//
-	get minStartY() {return this._minStartY;}
-	set minStartY(value) {this._minStartY = value;}
-	get maxStartY() {return this._maxStartY;}
-	set maxStartY(value) {this._maxStartY = value;}
-	get minEndY() {return this._minEndY;}
-	set minEndY(value) {this._minEndY = value;}
-	get maxEndY() {return this._maxEndY;}
-	set maxEndY(value) {this._maxEndY = value;}
-	//
-	get minStartZ() {return this._minStartZ;}
-	set minStartZ(value) {this._minStartZ = value;}
-	get maxStartZ() {return this._maxStartZ;}
-	set maxStartZ(value) {this._maxStartZ = value;}
-	get minEndZ() {return this._minEndZ;}
-	set minEndZ(value) {this._minEndZ = value;}
-	get maxEndZ() {return this._maxEndZ;}
-	set maxEndZ(value) {this._maxEndZ = value;}
-	//
-	get minStartAlpha() {return this._minStartAlpha;}
-	set minStartAlpha(value) {this._minStartAlpha = value;}
-	get maxStartAlpha() {return this._maxStartAlpha;}
-	set maxStartAlpha(value) {this._maxStartAlpha = value;}
-	get minEndAlpha() {return this._minEndAlpha;}
-	set minEndAlpha(value) {this._minEndAlpha = value;}
-	get maxEndAlpha() {return this._maxEndAlpha;}
-	set maxEndAlpha(value) {this._maxEndAlpha = value;}
-	//
-	get maxLife() {return this._maxLife;}
-	set maxLife(value) {this._maxLife = value;}
-	get minLife() {return this._minLife;}
-	set minLife(value) {this._minLife = value;}
 	//
 	get particleNum() {return this._particleNum;}
 	set particleNum(value) {this._particleNum = value;}
@@ -234,43 +214,68 @@ export default class ParticleComputeUnit extends BaseObject3D {
 	computePipeline;
 	particleBindGroup;
 	particleBuffer;
-	_minLife=2000;
-	_maxLife=10000;
+	minLife=2000;
+	maxLife=10000;
 	//
-	_minStartX = -1;
-	_maxStartX = 1;
-	_minEndX = -15;
-	_maxEndX = 15;
+	minStartX = -1;
+	maxStartX = 1;
+	minEndX = -15;
+	maxEndX = 15;
 	//
-	_minStartY = -1;
-	_maxStartY = 1;
-	_minEndY = -15;
-	_maxEndY = 15;
+	minStartY = -1;
+	maxStartY = 1;
+	minEndY = -15;
+	maxEndY = 15;
 	//
-	_minStartZ = -1;
-	_maxStartZ = 1;
-	_minEndZ = -15;
-	_maxEndZ = 15;
+	minStartZ = -1;
+	maxStartZ = 1;
+	minEndZ = -15;
+	maxEndZ = 15;
 	//
-	_minStartAlpha = 0.0;
-	_maxStartAlpha = 1.0;
-	_minEndAlpha = 0.0;
-	_maxEndAlpha = 0.0;
+	minStartAlpha = 0.0;
+	maxStartAlpha = 1.0;
+	minEndAlpha = 0.0;
+	maxEndAlpha = 0.0;
+	//
+	minStartScale = 0.0;
+	maxStartScale = 0.25;
+	minEndScale = 0.0;
+	maxEndScale = 3.0;
+	//
+	minStartRotationX = -Math.random()*360;
+	maxStartRotationX = Math.random()*360;
+	minEndRotationX =  -Math.random()*360;
+	maxEndRotationX = Math.random()*360;
+	//
+	minStartRotationY =  -Math.random()*360;
+	maxStartRotationY = Math.random()*360;
+	minEndRotationY =  -Math.random()*360;
+	maxEndRotationY = Math.random()*360;
+	//
+	minStartRotationZ =  -Math.random()*360;
+	maxStartRotationZ = Math.random()*360;
+	minEndRotationZ =  -Math.random()*360;
+	maxEndRotationZ = Math.random()*360;
+	//
 	compute(time) {
 		this.#simParamData.set(
 			[
 				// startTime time
-				performance.now(),
+				time,
 				// lifeRange
-				this._minLife, this._maxLife,
-				// xRange
-				this._minStartX, this._maxStartX, this._minEndX, this._maxEndX,
-				// yRange
-				this._minStartY, this._maxStartY, this._minEndY, this._maxEndY,
-				// zRange
-				this._minStartZ, this._maxStartZ, this._minEndZ, this._maxEndZ,
+				this.minLife, this.maxLife,
+				// x,y,z Range
+				this.minStartX, this.maxStartX, this.minEndX, this.maxEndX,
+				this.minStartY, this.maxStartY, this.minEndY, this.maxEndY,
+				this.minStartZ, this.maxStartZ, this.minEndZ, this.maxEndZ,
 				// alphaRange
-				this._minStartAlpha, this._maxStartAlpha, this._minEndAlpha, this._maxEndAlpha,
+				this.minStartAlpha, this.maxStartAlpha, this.minEndAlpha, this.maxEndAlpha,
+				// scaleRange
+				this.minStartScale, this.maxStartScale, this.minEndScale, this.maxEndScale,
+				// x,y,z Range
+				this.minStartRotationX, this.maxStartRotationX, this.minEndRotationX, this.maxEndRotationX,
+				this.minStartRotationY, this.maxStartRotationY, this.minEndRotationY, this.maxEndRotationY,
+				this.minStartRotationZ, this.maxStartRotationZ, this.minEndRotationZ, this.maxEndRotationZ,
 				// position
 				this._x,this._y,this._z
 			],
@@ -294,12 +299,13 @@ export default class ParticleComputeUnit extends BaseObject3D {
 		this.geometry = geometry || new Plane(redGPUContext);
 		this.material = new ParticleMaterial(redGPUContext, texture);
 		this.renderDrawLayerIndex = Render.DRAW_LAYER_INDEX2_Z_POINT_SORT;
-		this.PROPERTY_NUM = 40
+		this.PROPERTY_NUM = 44
 		this.blendColorSrc = 'src-alpha';
 		this.blendColorDst = 'one';
 		this.blendAlphaSrc = 'src-alpha';
 		this.blendAlphaDst = 'one';
 		this.depthWriteEnabled = false;
+		this.cullMode ='none'
 
 		// 컴퓨트 파이프 라인 생성
 		this.#simParamData = new Float32Array(
@@ -307,15 +313,19 @@ export default class ParticleComputeUnit extends BaseObject3D {
 				// startTime time
 				performance.now(),
 				// lifeRange
-				this._minLife, this._maxLife,
-				// xRange
-				this._minStartX, this._maxStartX, this._minEndX, this._maxEndX,
-				// yRange
-				this._minStartY, this._maxStartY, this._minEndY, this._maxEndY,
-				// zRange
-				this._minStartZ, this._maxStartZ, this._minEndZ, this._maxEndZ,
+				this.minLife, this.maxLife,
+				// x,y,z Range
+				this.minStartX, this.maxStartX, this.minEndX, this.maxEndX,
+				this.minStartY, this.maxStartY, this.minEndY, this.maxEndY,
+				this.minStartZ, this.maxStartZ, this.minEndZ, this.maxEndZ,
 				// alphaRange
-				this._minStartAlpha, this._maxStartAlpha, this._minEndAlpha, this._maxEndAlpha,
+				this.minStartAlpha, this.maxStartAlpha, this.minEndAlpha, this.maxEndAlpha,
+				// scaleRange
+				this.minStartScale, this.maxStartScale, this.minEndScale, this.maxEndScale,
+				// x,y,z Range
+				this.minStartRotationX, this.maxStartRotationX, this.minEndRotationX, this.maxEndRotationX,
+				this.minStartRotationY, this.maxStartRotationY, this.minEndRotationY, this.maxEndRotationY,
+				this.minStartRotationZ, this.maxStartRotationZ, this.minEndRotationZ, this.maxEndRotationZ,
 				// position
 				this._x,this._y,this._z
 			]
@@ -343,16 +353,15 @@ export default class ParticleComputeUnit extends BaseObject3D {
 			initialParticleData[PROPERTY_NUM * i + 0] = currentTime - age // start time
 			initialParticleData[PROPERTY_NUM * i + 1] = life; // life
 			// position
-			initialParticleData[PROPERTY_NUM * i + 4] = Math.random() * 100 - 50; // x
-			initialParticleData[PROPERTY_NUM * i + 5] = Math.random() * 100 - 50; // y
-			initialParticleData[PROPERTY_NUM * i + 6] = Math.random() * 100 - 50; // z
-			initialParticleData[PROPERTY_NUM * i + 7] = 0;
+			initialParticleData[PROPERTY_NUM * i + 4] = 0; // x
+			initialParticleData[PROPERTY_NUM * i + 5] = 0; // y
+			initialParticleData[PROPERTY_NUM * i + 6] = 0; // z
+			initialParticleData[PROPERTY_NUM * i + 7] = // alpha;
 			// scale
-			initialParticleData[PROPERTY_NUM * i + 8] = 0; // scaleX
-			initialParticleData[PROPERTY_NUM * i + 9] = 0; // scaleY
-			initialParticleData[PROPERTY_NUM * i + 10] = 0; // scaleZ
-			// alpha
-			initialParticleData[PROPERTY_NUM * i + 11] = 0; // alpha
+			initialParticleData[PROPERTY_NUM * i + 8] = 0; // rotationX
+			initialParticleData[PROPERTY_NUM * i + 9] = 0; // rotationY
+			initialParticleData[PROPERTY_NUM * i + 10] = 0; // rotationZ
+			initialParticleData[PROPERTY_NUM * i + 11] = 0; // scale
 			// x
 			initialParticleData[PROPERTY_NUM * i + 12] = Math.random() * 0.5 - 0.25; // startValue
 			initialParticleData[PROPERTY_NUM * i + 13] = Math.random() * 100 - 50; // endValue
@@ -368,25 +377,31 @@ export default class ParticleComputeUnit extends BaseObject3D {
 			initialParticleData[PROPERTY_NUM * i + 21] = Math.random() * 100 - 50; // endValue
 			initialParticleData[PROPERTY_NUM * i + 22] = parseInt(Math.random() * 27); // ease
 			initialParticleData[PROPERTY_NUM * i + 23] = 0; // startPosition
-			// scaleX
-			let tScaleStart = Math.random() * 0.25
-			let tScaleEnd = Math.random() * 3
-			let tScaleEase = parseInt(Math.random() * 27)
-			initialParticleData[PROPERTY_NUM * i + 24] = tScaleStart; // startValue
-			initialParticleData[PROPERTY_NUM * i + 25] = tScaleEnd; // endValue
-			initialParticleData[PROPERTY_NUM * i + 26] = tScaleEase; // ease
-			// scaleY
-			initialParticleData[PROPERTY_NUM * i + 28] = tScaleStart; // startValue
-			initialParticleData[PROPERTY_NUM * i + 29] = tScaleEnd; // endValue
-			initialParticleData[PROPERTY_NUM * i + 30] = tScaleEase; // ease
-			// scaleZ
-			initialParticleData[PROPERTY_NUM * i + 32] = tScaleStart; // startValue
-			initialParticleData[PROPERTY_NUM * i + 33] = tScaleEnd; // endValue
-			initialParticleData[PROPERTY_NUM * i + 34] = tScaleEase; // ease
-			// alpha
-			initialParticleData[PROPERTY_NUM * i + 36] = Math.random(); // startValue
-			initialParticleData[PROPERTY_NUM * i + 37] = 0; // endValue
+			// rotationX
+			initialParticleData[PROPERTY_NUM * i + 24] = Math.random() * 360; // startValue
+			initialParticleData[PROPERTY_NUM * i + 25] = Math.random() * 360; // endValue
+			initialParticleData[PROPERTY_NUM * i + 26] = parseInt(Math.random() * 27); // ease
+			initialParticleData[PROPERTY_NUM * i + 27] = 0; //
+			// rotationY
+			initialParticleData[PROPERTY_NUM * i + 28] = Math.random() * 360; // startValue
+			initialParticleData[PROPERTY_NUM * i + 29] = Math.random() * 360; // endValue
+			initialParticleData[PROPERTY_NUM * i + 30] = parseInt(Math.random() * 27); // ease
+			initialParticleData[PROPERTY_NUM * i + 31] = 0; //
+			// rotationZ
+			initialParticleData[PROPERTY_NUM * i + 32] = Math.random() * 360; // startValue
+			initialParticleData[PROPERTY_NUM * i + 33] = Math.random() * 360; // endValue
+			initialParticleData[PROPERTY_NUM * i + 34] = parseInt(Math.random() * 27); // ease
+			initialParticleData[PROPERTY_NUM * i + 35] = 0; //
+			// scale
+			initialParticleData[PROPERTY_NUM * i + 36] = Math.random() * 0.25; // startValue
+			initialParticleData[PROPERTY_NUM * i + 37] = Math.random() * 3; // endValue
 			initialParticleData[PROPERTY_NUM * i + 38] = parseInt(Math.random() * 27); // ease
+			initialParticleData[PROPERTY_NUM * i + 39] = 0; //
+			// alpha
+			initialParticleData[PROPERTY_NUM * i + 40] = Math.random(); // startValue
+			initialParticleData[PROPERTY_NUM * i + 41] = 0; // endValue
+			initialParticleData[PROPERTY_NUM * i + 42] = parseInt(Math.random() * 27); // ease
+			initialParticleData[PROPERTY_NUM * i + 43] = 0; //
 		}
 
 		this.simParamBuffer = redGPUContext.device.createBuffer(bufferDescriptor);

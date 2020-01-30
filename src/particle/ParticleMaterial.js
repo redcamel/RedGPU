@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.29 22:10:29
+ *   Last modification time of this file - 2020.1.30 17:14:16
  *
  */
 
@@ -22,24 +22,46 @@ export default class ParticleMaterial extends BitmapMaterial {
 	layout(location = 0) in vec3 a_pos;
     layout(location = 1) in vec2 a_uv;
     layout(location = 2) in vec3 position;
-    layout(location = 3) in vec3 scale;
-    layout(location = 4) in float alpha;
+    layout(location = 3) in float alpha;
+    layout(location = 4) in vec3 rotation;
+    layout(location = 5) in float scale;
 	layout(location = 0 ) out vec2 vUV;
 	layout(location = 1 ) out float vMouseColorID;	
 	layout(location = 2 ) out float vSumOpacity;
+	mat4 rotationMTX(vec3 t)
+    {
+       float s = sin(t[0]);float c = cos(t[0]);
+       mat4 m1 = mat4( 1,0,0,0, 0,c,s,0, 0,-s,c,0, 0,0,0,1);s = sin(t[1]);c = cos(t[1]);
+       mat4 m2 = mat4(c,0,-s,0, 0,1,0,0, s,0,c,0,  0,0,0,1);s = sin(t[2]);c = cos(t[2]);
+       mat4 m3 = mat4(c,s,0,0, -s,c,0,0, 0,0,1,0,  0,0,0,1);
+       return m3*m2*m1;
+    }
 	void main() {
 		vUV = a_uv;
 		vMouseColorID = meshUniforms.mouseColorID;
 		vSumOpacity = meshUniforms.sumOpacity * alpha;
 		float ratio = systemUniforms.resolution.x/systemUniforms.resolution.y; 
-		mat4 scaleMTX = mat4(
-			scale.x, 0, 0, 0,
-			0, scale.y , 0, 0,
-			0, 0, scale.z, 0,
-			position, 1
-		);
-		// gl_Position = systemUniforms.perspectiveMTX * getSprite3DMatrix( systemUniforms.cameraMTX, meshMatrixUniforms.modelMatrix[ int(meshUniforms.index) ]* scaleMTX )  * vec4(a_pos , 1);
-		gl_Position = systemUniforms.perspectiveMTX * getSprite3DMatrix( systemUniforms.cameraMTX, scaleMTX )  * vec4(a_pos , 1);
+		float sprite3DYn = 1.0;
+		if( sprite3DYn == 1.0 ) {
+			mat4 scaleMTX = mat4(
+				scale, 0, 0, 0,
+				0, scale , 0, 0,
+				0, 0, scale, 0,
+				position, 1
+			) ;
+			gl_Position = systemUniforms.perspectiveMTX * getSprite3DMatrix( systemUniforms.cameraMTX, scaleMTX ) * rotationMTX(vec3(0,0, rotation.z)) * vec4(a_pos , 1);
+		}else{
+			mat4 scaleMTX = mat4(
+				scale, 0, 0, 0,
+				0, scale , 0, 0,
+				0, 0, scale, 0,
+				position, 1
+			)
+			* rotationMTX(rotation);
+			gl_Position = systemUniforms.perspectiveMTX *  systemUniforms.cameraMTX * meshMatrixUniforms.modelMatrix[ int(meshUniforms.index) ]* scaleMTX * vec4(a_pos , 1);
+		
+		}
+		
 	}
 	`;
 	static fragmentShaderGLSL = `

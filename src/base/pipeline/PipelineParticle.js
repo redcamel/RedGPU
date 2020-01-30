@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.29 22:10:29
+ *   Last modification time of this file - 2020.1.30 17:14:16
  *
  */
 
@@ -79,13 +79,19 @@ export default class PipelineParticle extends UUID {
 								shaderLocation: 2, offset: 4 * 4, format: "float3"
 							},
 							{
-								/* scale*/
-								shaderLocation: 3, offset: 8 * 4, format: "float3"
+								/* alpha*/
+								shaderLocation: 3, offset: 7 * 4, format: "float"
 							},
 							{
-								/* alpha*/
-								shaderLocation: 4, offset: 11 * 4, format: "float"
+								/* rotation*/
+								shaderLocation: 4, offset: 8 * 4, format: "float3"
 							},
+							{
+								/* scale*/
+								shaderLocation: 5, offset: 11 * 4, format: "float"
+							},
+
+
 						]
 					},
 				]
