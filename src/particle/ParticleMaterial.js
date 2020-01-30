@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.30 17:14:16
+ *   Last modification time of this file - 2020.1.30 17:38:1
  *
  */
 
@@ -44,22 +44,27 @@ export default class ParticleMaterial extends BitmapMaterial {
 		float sprite3DYn = 1.0;
 		if( sprite3DYn == 1.0 ) {
 			mat4 scaleMTX = mat4(
+				1, 0, 0, 0,
+				0, 1, 0, 0,
+				0, 0, 1, 0,
+				position, 1
+			) *
+			mat4(
 				scale, 0, 0, 0,
 				0, scale , 0, 0,
 				0, 0, scale, 0,
-				position, 1
+				0, 0, 0, 1
 			) ;
-			gl_Position = systemUniforms.perspectiveMTX * getSprite3DMatrix( systemUniforms.cameraMTX, scaleMTX ) * rotationMTX(vec3(0,0, rotation.z)) * vec4(a_pos , 1);
+			gl_Position = systemUniforms.perspectiveMTX * getSprite3DMatrix( systemUniforms.cameraMTX,  scaleMTX ) * rotationMTX(vec3(0,0, rotation.z)) * vec4(a_pos , 1);
 		}else{
 			mat4 scaleMTX = mat4(
 				scale, 0, 0, 0,
-				0, scale , 0, 0,
+				0, scale, 0, 0,
 				0, 0, scale, 0,
 				position, 1
 			)
 			* rotationMTX(rotation);
-			gl_Position = systemUniforms.perspectiveMTX *  systemUniforms.cameraMTX * meshMatrixUniforms.modelMatrix[ int(meshUniforms.index) ]* scaleMTX * vec4(a_pos , 1);
-		
+			gl_Position = systemUniforms.perspectiveMTX *  systemUniforms.cameraMTX * scaleMTX * vec4(a_pos , 1);
 		}
 		
 	}
