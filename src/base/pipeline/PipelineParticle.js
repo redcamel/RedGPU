@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.30 17:14:16
+ *   Last modification time of this file - 2020.1.30 19:35:31
  *
  */
 
@@ -71,7 +71,7 @@ export default class PipelineParticle extends UUID {
 					},
 					{
 						// instanced particles buffer
-						arrayStride: targetMesh.PROPERTY_NUM * 4,
+						arrayStride: targetMesh._PROPERTY_NUM * 4,
 						stepMode: "instance",
 						attributes: [
 							{

@@ -2,11 +2,11 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.30 17:38:1
+ *   Last modification time of this file - 2020.1.30 19:35:31
  *
  */
 import RedGPU from "../src/RedGPU.js";
-import ParticleComputeUnit from "../src/particle/ParticleComputeUnit.js";
+import Particle from "../src/particle/Particle.js";
 
 
 const cvs = document.createElement('canvas');
@@ -339,8 +339,8 @@ new RedGPU.RedGPUContext(cvs,
 		]))
 
 
-		// let particleTest = new ParticleComputeUnit(this, 10000, {}, new RedGPU.BitmapTexture(this, '../assets/crate.png'))
-		let particleTest = new ParticleComputeUnit(this, 10000, {}, new RedGPU.BitmapTexture(this, '../assets/particle.png'))
+		let particleTest = new Particle(this, 10000, {}, new RedGPU.BitmapTexture(this, '../assets/crate.png'))
+		// let particleTest = new Particle(this, 10000, {}, new RedGPU.BitmapTexture(this, '../assets/particle.png'))
 		tScene.addChild(particleTest)
 		tMesh = new RedGPU.Mesh(this, new RedGPU.Sphere(this, 0.5, 32, 32, 32), new RedGPU.ColorMaterial(this))
 		tMesh.setPosition(0, 0, 0)
@@ -377,9 +377,9 @@ new RedGPU.RedGPUContext(cvs,
 			}
 		})();
 		let render = time => {
-			particleTest.x = Math.sin(time / 2000 + Math.cos(time / 3000)) * Math.cos(time / 1000) * 20
+			particleTest.x = Math.sin(time / 2000 + Math.cos(time / 3000)) * Math.cos(time / 1000) * 30
 			particleTest.y = Math.sin(time / 3000 + Math.cos(time / 2000)) * Math.cos(time / 1000) * 20
-			particleTest.z = Math.cos(time / 1000 + Math.cos(time / 2000)) * Math.cos(time / 1000) * 20
+			particleTest.z = Math.cos(time / 1000 + Math.cos(time / 2000)) * Math.cos(time / 1000) * 30
 
 			tLight.x = Math.sin(time / 1000) * 5
 			tLight.y = Math.cos(time / 1000) * 5

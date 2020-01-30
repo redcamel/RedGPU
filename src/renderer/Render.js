@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.29 22:10:29
+ *   Last modification time of this file - 2020.1.30 19:35:31
  *
  */
 
@@ -12,7 +12,7 @@ import Debugger from "./system/Debugger.js";
 import PipelineBasic from "../base/pipeline/PipelineBasic.js";
 import DisplayContainer from "../base/DisplayContainer.js";
 import UTIL from "../util/UTIL.js";
-import ParticleComputeUnit from "../particle/ParticleComputeUnit.js";
+import Particle from "../particle/Particle.js";
 import PipelineParticle from "../base/pipeline/PipelineParticle.js";
 
 let _frustumPlanes = [];
@@ -156,7 +156,7 @@ let renderScene = (_ => {
 						}
 						// console.log(tVisible);
 						///////////////////////////////////////
-						if(tMesh instanceof ParticleComputeUnit) {
+						if(tMesh instanceof Particle) {
 							tMesh.compute(currentTime)
 
 								passEncoder.setPipeline(tPipeline.GPURenderPipeline);
