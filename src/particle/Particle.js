@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.30 19:35:31
+ *   Last modification time of this file - 2020.1.30 20:31:4
  *
  */
 
@@ -252,13 +252,16 @@ export default class Particle extends BaseObject3D {
 	static ElasticInOut = 27;
 	//
 	get particleNum() {return this._particleNum;}
-	set particleNum(value) {this._particleNum = value;}
+	set particleNum(value) {
+		this._particleNum = value;
+		this.setParticleData()
+	}
 	get sprite3DMode() {return this._material._sprite3DMode;}
 	set sprite3DMode(value) {return this._material.sprite3DMode = value;}
 	get texture() {return this._material.diffuseTexture;}
 	set texture(value) {return this._material.diffuseTexture = value;}
-	get material(){return this._material}
-	set material(v){/*임의설정불가*/}
+	get material() {return this._material}
+	set material(v) {/*임의설정불가*/}
 	#redGPUContext;
 	#simParamData;
 	computePipeline;
@@ -290,7 +293,7 @@ export default class Particle extends BaseObject3D {
 	minStartScale = 0.0;
 	maxStartScale = 0.25;
 	minEndScale = 0.0;
-	maxEndScale = 5.0;
+	maxEndScale = 3.0;
 	//
 	minStartRotationX = -Math.random() * 360;
 	maxStartRotationX = Math.random() * 360;
@@ -354,7 +357,15 @@ export default class Particle extends BaseObject3D {
 		super(redGPUContext);
 		this.#redGPUContext = redGPUContext;
 		this._material = new ParticleMaterial(redGPUContext);
-		this.particleNum = particleNum || 1;
+		{
+			for(const k in initInfo){
+				if(this.hasOwnProperty(k)) {
+					console.log(k)
+					this[k] = initInfo[k]
+				}
+			}
+		}
+
 		this.geometry = geometry || new Plane(redGPUContext);
 		this.texture = texture;
 		this.renderDrawLayerIndex = Render.DRAW_LAYER_INDEX2_Z_POINT_SORT;
@@ -393,16 +404,13 @@ export default class Particle extends BaseObject3D {
 			size: this.#simParamData.byteLength,
 			usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
 		};
-
-		let computeSource = getComputeSource(this._particleNum)
-		console.log(computeSource)
-		let shaderModuleDescriptor = {
-			code: redGPUContext.glslang.compileGLSL(computeSource, 'compute'),
-			source: computeSource
-		};
-		console.log('shaderModuleDescriptor', shaderModuleDescriptor);
-		let computeModule = redGPUContext.device.createShaderModule(shaderModuleDescriptor);
-
+		this.simParamBuffer = redGPUContext.device.createBuffer(bufferDescriptor);
+		this.simParamBuffer.setSubData(0, this.#simParamData);
+		this.pipeline = new PipelineParticle(redGPUContext, this)
+		this.particleNum = particleNum || 1;
+	}
+	setParticleData() {
+		let redGPUContext = this.#redGPUContext;
 		const _PROPERTY_NUM = this._PROPERTY_NUM;
 		const initialParticleData = new Float32Array(this._particleNum * _PROPERTY_NUM);
 		const currentTime = performance.now();
@@ -416,8 +424,8 @@ export default class Particle extends BaseObject3D {
 			initialParticleData[_PROPERTY_NUM * i + 5] = 0; // y
 			initialParticleData[_PROPERTY_NUM * i + 6] = 0; // z
 			initialParticleData[_PROPERTY_NUM * i + 7] = // alpha;
-			// scale
-			initialParticleData[_PROPERTY_NUM * i + 8] = 0; // rotationX
+				// scale
+				initialParticleData[_PROPERTY_NUM * i + 8] = 0; // rotationX
 			initialParticleData[_PROPERTY_NUM * i + 9] = 0; // rotationY
 			initialParticleData[_PROPERTY_NUM * i + 10] = 0; // rotationZ
 			initialParticleData[_PROPERTY_NUM * i + 11] = 0; // scale
@@ -425,17 +433,17 @@ export default class Particle extends BaseObject3D {
 			initialParticleData[_PROPERTY_NUM * i + 12] = Math.random() * (this.maxStartX - this.minStartX) + this.minStartX; // startValue
 			initialParticleData[_PROPERTY_NUM * i + 13] = Math.random() * (this.maxEndX - this.minEndX) + this.minEndX; // endValue
 			initialParticleData[_PROPERTY_NUM * i + 14] = this.easeX; // ease
-			initialParticleData[_PROPERTY_NUM * i + 15] = 0; // startPosition
+			initialParticleData[_PROPERTY_NUM * i + 15] = this._x; // startPosition
 			// y
 			initialParticleData[_PROPERTY_NUM * i + 16] = Math.random() * (this.maxStartY - this.minStartY) + this.minStartY; // startValue
 			initialParticleData[_PROPERTY_NUM * i + 17] = Math.random() * (this.maxEndY - this.minEndY) + this.minEndY; // endValue
 			initialParticleData[_PROPERTY_NUM * i + 18] = this.easeY; // ease
-			initialParticleData[_PROPERTY_NUM * i + 19] = 0; // startPosition
+			initialParticleData[_PROPERTY_NUM * i + 19] = this._y; // startPosition
 			// z
 			initialParticleData[_PROPERTY_NUM * i + 20] = Math.random() * (this.maxStartZ - this.minStartZ) + this.minStartZ; // startValue
 			initialParticleData[_PROPERTY_NUM * i + 21] = Math.random() * (this.maxEndZ - this.minEndZ) + this.minEndZ; // endValue
 			initialParticleData[_PROPERTY_NUM * i + 22] = this.easeZ; // ease
-			initialParticleData[_PROPERTY_NUM * i + 23] = 0; // startPosition
+			initialParticleData[_PROPERTY_NUM * i + 23] = this._z; // startPosition
 			// rotationX
 			initialParticleData[_PROPERTY_NUM * i + 24] = Math.random() * (this.maxStartRotationX - this.minStartRotationX) + this.minStartRotationX; // startValue
 			initialParticleData[_PROPERTY_NUM * i + 25] = Math.random() * (this.maxEndRotationX - this.minEndRotationX) + this.minEndRotationX; // endValue
@@ -457,22 +465,28 @@ export default class Particle extends BaseObject3D {
 			initialParticleData[_PROPERTY_NUM * i + 38] = this.easeScale; // ease
 			initialParticleData[_PROPERTY_NUM * i + 39] = 0; //
 			// alpha
-			initialParticleData[_PROPERTY_NUM * i + 40] = Math.random() * (this.maxStartAlpha - this.minStartAlpha) + this.minStartAlpha;; // startValue
+			initialParticleData[_PROPERTY_NUM * i + 40] = Math.random() * (this.maxStartAlpha - this.minStartAlpha) + this.minStartAlpha;
+			; // startValue
 			initialParticleData[_PROPERTY_NUM * i + 41] = Math.random() * (this.maxEndAlpha - this.minEndAlpha) + this.minEndAlpha; // endValue
 			initialParticleData[_PROPERTY_NUM * i + 42] = this.easeAlpha; // ease
 			initialParticleData[_PROPERTY_NUM * i + 43] = 0; //
 		}
-
-		this.simParamBuffer = redGPUContext.device.createBuffer(bufferDescriptor);
-		this.simParamBuffer.setSubData(0, this.#simParamData);
-
-
+		if (this.particleBuffer) {
+			this.particleBuffer.destroy()
+			this.particleBuffer = null
+		}
 		this.particleBuffer = redGPUContext.device.createBuffer({
 			size: initialParticleData.byteLength,
 			usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE
 		});
 		this.particleBuffer.setSubData(0, initialParticleData);
-
+		let computeSource = getComputeSource(this._particleNum)
+		let shaderModuleDescriptor = {
+			code: redGPUContext.glslang.compileGLSL(computeSource, 'compute'),
+			source: computeSource
+		};
+		console.log('shaderModuleDescriptor', shaderModuleDescriptor);
+		let computeModule = redGPUContext.device.createShaderModule(shaderModuleDescriptor);
 		const computeBindGroupLayout = redGPUContext.device.createBindGroupLayout({
 			bindings: [
 				{binding: 0, visibility: GPUShaderStage.COMPUTE, type: "uniform-buffer"},
@@ -483,7 +497,6 @@ export default class Particle extends BaseObject3D {
 		const computePipelineLayout = redGPUContext.device.createPipelineLayout({
 			bindGroupLayouts: [computeBindGroupLayout],
 		});
-
 		this.particleBindGroup = redGPUContext.device.createBindGroup({
 			layout: computeBindGroupLayout,
 			bindings: [
@@ -512,9 +525,5 @@ export default class Particle extends BaseObject3D {
 				entryPoint: "main"
 			},
 		});
-
-		this.pipeline = new PipelineParticle(redGPUContext, this)
-
-
 	}
 }
