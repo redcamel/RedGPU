@@ -1,0 +1,24 @@
+{
+  "name": "RedGPU",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/RedGPU.mjs",
+  "scripts": {
+    "build": "rollup -c",
+    "buildWatch": "rollup -c -w src/**/*"
+  },
+  "author": "redcamel",
+  "license": "MIT",
+  "dependencies": {
+    "rollup": "^1.31.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.8.4",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "@babel/preset-env": "^7.8.4",
+    "@rollup/plugin-node-resolve": "^7.1.1",
+    "@rollup/plugin-strip": "^1.3.2",
+    "rollup-plugin-babel": "^4.3.3",
+    "rollup-plugin-terser": "^5.2.0"
+  }
+}
