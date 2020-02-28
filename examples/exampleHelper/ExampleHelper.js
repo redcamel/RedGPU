@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.2.28 21:0:29
+ *   Last modification time of this file - 2020.2.28 21:9:4
  *
  */
 
@@ -438,36 +438,36 @@ const ExampleHelper = (_ => {
         if (open) rootFolder.open();
         let tGLTF
         let gltfInfoList = [
-            ['glTF/DamagedHelmet.gltf', 5],
-            ['glTF/AnimatedMorphCube/glTF/AnimatedMorphCube.gltf', 5],
-            ['glTF/AnimatedMorphSphere/glTF/AnimatedMorphSphere.gltf', 5],
-            ['glTF/2CylinderEngine.gltf', 1000, 100],
-            ['glTF/AlphaBlendModeTest.gltf', 7],
-            ['glTF/animation.gltf'],
-            ['glTF/basic.gltf'],
-            ['glTF/BoxAnimated.gltf'],
-            ['glTF/BoxTextured.gltf'],
-            ['glTF/BrainStem.gltf', 7],
-            ['glTF/Buggy.gltf', 500, 50],
-            ['glTF/CesiumMan.gltf'],
-            ['glTF/CesiumMilkTruck.gltf', 10],
-            ['glTF/Duck.gltf', 10],
-            ['glTF/MetalRoughSpheres.gltf', 15],
-            ['glTF/Monster.gltf', 200, 10],
-            ['glTF/MultiUVTest.gltf'],
-            // ['glTF/NormalTangentMirrorTest.gltf'],
-            ['glTF/NormalTangentTest.gltf'],
-            ['glTF/OrientationTest.gltf', 30],
-            ['glTF/ReciprocatingSaw.gltf', 500, 50],
-            ['glTF/RiggedFigure.gltf'],
-            ['glTF/RiggedSimple.gltf', 10],
-            ['glTF/simpleMesh.gltf'],
-            ['glTF/SimpleMorph.gltf'],
-            ['glTF/SimpleSkin.gltf'],
-            ['glTF/SimpleSparseAccessor.gltf'],
-            ['glTF/TextureCoordinateTest.gltf'],
-            ['glTF/TextureSettingsTest.gltf', 30],
-            ['glTF/VC.gltf', 30, 5],
+            ['gltf/DamagedHelmet.gltf', 5],
+            ['gltf/AnimatedMorphCube/gltf/AnimatedMorphCube.gltf', 5],
+            ['gltf/AnimatedMorphSphere/gltf/AnimatedMorphSphere.gltf', 5],
+            ['gltf/2CylinderEngine.gltf', 1000, 100],
+            ['gltf/AlphaBlendModeTest.gltf', 7],
+            ['gltf/animation.gltf'],
+            ['gltf/basic.gltf'],
+            ['gltf/BoxAnimated.gltf'],
+            ['gltf/BoxTextured.gltf'],
+            ['gltf/BrainStem.gltf', 7],
+            ['gltf/Buggy.gltf', 500, 50],
+            ['gltf/CesiumMan.gltf'],
+            ['gltf/CesiumMilkTruck.gltf', 10],
+            ['gltf/Duck.gltf', 10],
+            ['gltf/MetalRoughSpheres.gltf', 15],
+            ['gltf/Monster.gltf', 200, 10],
+            ['gltf/MultiUVTest.gltf'],
+            // ['gltf/NormalTangentMirrorTest.gltf'],
+            ['gltf/NormalTangentTest.gltf'],
+            ['gltf/OrientationTest.gltf', 30],
+            ['gltf/ReciprocatingSaw.gltf', 500, 50],
+            ['gltf/RiggedFigure.gltf'],
+            ['gltf/RiggedSimple.gltf', 10],
+            ['gltf/simpleMesh.gltf'],
+            ['gltf/SimpleMorph.gltf'],
+            ['gltf/SimpleSkin.gltf'],
+            ['gltf/SimpleSparseAccessor.gltf'],
+            ['gltf/TextureCoordinateTest.gltf'],
+            ['gltf/TextureSettingsTest.gltf', 30],
+            ['gltf/VC.gltf', 30, 5],
         ]
         let tCubeTexture = new RedGPU.BitmapCubeTexture(
             redGPUContext,
@@ -493,7 +493,7 @@ const ExampleHelper = (_ => {
             tCamera.speedDistance = speedDistance;
             tCamera.pan = 45;
             tCamera.tilt = -15;
-            tCamera.nearClipping = (path == 'glTF/tokyo/' || path == 'glTF/gundam/') ? 1 : 0.1
+            tCamera.nearClipping = (path == 'gltf/tokyo/' || path == 'gltf/gundam/') ? 1 : 0.1
             if (tGLTF) tScene.removeChild(tGLTF['resultMesh'])
             tGLTF = null;
             tGLTF = new RedGPU.GLTFLoader(
