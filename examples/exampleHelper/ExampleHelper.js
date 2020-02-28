@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.2.28 21:9:4
+ *   Last modification time of this file - 2020.2.28 21:14:12
  *
  */
 
@@ -439,8 +439,8 @@ const ExampleHelper = (_ => {
         let tGLTF
         let gltfInfoList = [
             ['gltf/DamagedHelmet.gltf', 5],
-            ['gltf/AnimatedMorphCube/gltf/AnimatedMorphCube.gltf', 5],
-            ['gltf/AnimatedMorphSphere/gltf/AnimatedMorphSphere.gltf', 5],
+            ['gltf/AnimatedMorphCube/glTF/AnimatedMorphCube.gltf', 5],
+            ['gltf/AnimatedMorphSphere/glTF/AnimatedMorphSphere.gltf', 5],
             ['gltf/2CylinderEngine.gltf', 1000, 100],
             ['gltf/AlphaBlendModeTest.gltf', 7],
             ['gltf/animation.gltf'],
