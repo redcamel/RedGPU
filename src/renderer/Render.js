@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.30 19:35:31
+ *   Last modification time of this file - 2020.2.29 14:13:25
  *
  */
 
@@ -158,7 +158,6 @@ let renderScene = (_ => {
 						///////////////////////////////////////
 						if(tMesh instanceof Particle) {
 							tMesh.compute(currentTime)
-
 								passEncoder.setPipeline(tPipeline.GPURenderPipeline);
 								if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
 									passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);

@@ -2,10 +2,10 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.18 16:39:19
+ *   Last modification time of this file - 2020.2.29 14:13:25
  *
  */
-import RedGPU from "./src/RedGPU.js";
+import RedGPU from "../src/RedGPU.js";
 
 const cvs = document.createElement('canvas');
 
