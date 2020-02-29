@@ -13,7 +13,7 @@ run in Edge Canary() behind the flag --enable-unsafe-webgpu.
     <meta charset="UTF-8">
     <title>RedGPU Example - HelloWorld</title>
     <link type="text/css" rel="stylesheet" href="../css.css"/>
-    <script type="module" src="index.js"></script>
+    <script type="module" src="testRnd/index.js"></script>
 </head>
 <body></body>
 </html>
@@ -54,9 +54,6 @@ new RedGPU.RedGPUContext(
 ```
 ## [Examples](https://redcamel.github.io/RedGPU/examples/)
    - See the [example](https://redcamel.github.io/RedGPU/examples/). Various examples are available.
-   
-## Demo
- - [Demo](https://redcamel.github.io/RedGPU/)
 
 
 ## etc
