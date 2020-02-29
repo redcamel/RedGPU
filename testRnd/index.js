@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.2.29 14:13:25
+ *   Last modification time of this file - 2020.2.29 14:37:55
  *
  */
 import RedGPU from "../src/RedGPU.js";
@@ -28,13 +28,13 @@ new RedGPU.RedGPUContext(
 		let textureLoader = new RedGPU.TextureLoader(
 			this,
 			[
-				'assets/UV_Grid_Sm.jpg',
-				'assets/Brick03_col.jpg',
-				'assets/Brick03_nrm.jpg',
-				'assets/crate.png',
-				'assets/Brick03_disp.jpg',
-				'assets/specular.png',
-				'assets/emissive.jpg'
+				'../assets/UV_Grid_Sm.jpg',
+				'../assets/Brick03_col.jpg',
+				'../assets/Brick03_nrm.jpg',
+				'../assets/crate.png',
+				'../assets/Brick03_disp.jpg',
+				'../assets/specular.png',
+				'../assets/emissive.jpg'
 			],
 			_ => {
 				console.log('텍스쳐 로딩완료', textureLoader)
@@ -166,12 +166,12 @@ new RedGPU.RedGPUContext(
 
 
 				let testCubeTexture = new RedGPU.BitmapCubeTexture(this, [
-					'./assets/cubemap/SwedishRoyalCastle/px.jpg',
-					'./assets/cubemap/SwedishRoyalCastle/nx.jpg',
-					'./assets/cubemap/SwedishRoyalCastle/py.jpg',
-					'./assets/cubemap/SwedishRoyalCastle/ny.jpg',
-					'./assets/cubemap/SwedishRoyalCastle/pz.jpg',
-					'./assets/cubemap/SwedishRoyalCastle/nz.jpg'
+					'../assets/cubemap/SwedishRoyalCastle/px.jpg',
+					'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
+					'../assets/cubemap/SwedishRoyalCastle/py.jpg',
+					'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
+					'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
+					'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
 				])
 
 				testMat_environment = new RedGPU.EnvironmentMaterial(this, textureLoader.getTextureByIndex(1), testCubeTexture)
