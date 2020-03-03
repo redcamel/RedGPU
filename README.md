@@ -13,7 +13,7 @@ RedGPU - Javascript webGPU Engine
     <meta charset="UTF-8">
     <title>RedGPU Example - HelloWorld</title>
     <link type="text/css" rel="stylesheet" href="../css.css"/>
-    <script type="module" src="testRnd/index.js"></script>
+    <script type="module" src="your host.js"></script>
 </head>
 <body></body>
 </html>
@@ -22,7 +22,7 @@ RedGPU - Javascript webGPU Engine
 #### module
 ```javascript
 "use strict"
-import RedGPU from "../../src/RedGPU.js";
+import RedGPU from "dist/RedGPU.min.mjs";
 
 const cvs = document.createElement('canvas');
 document.body.appendChild(cvs);

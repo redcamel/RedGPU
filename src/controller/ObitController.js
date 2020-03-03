@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.20 18:6:15
+ *   Last modification time of this file - 2020.2.29 17:25:44
  *
  */
 
@@ -56,7 +56,7 @@ export default class ObitController extends Camera {
 	//
 	#currentPan = 0;
 	#currentTilt = 0;
-	#currentDistance = 0;
+	currentDistance = 0;
 	//
 	#needUpdate = true;
 	targetView;
@@ -141,13 +141,13 @@ export default class ObitController extends Camera {
 		this.#currentPan += (this.#pan - this.#currentPan) * tDelayRotation;
 		this.#currentTilt += (this.#tilt - this.#currentTilt) * tDelayRotation;
 		if (this.#distance < this.nearClipping) this.#distance = this.nearClipping;
-		this.#currentDistance += (this.#distance - this.#currentDistance) * this.#delayDistance;
-		if (this.#currentDistance < this.nearClipping) this.#currentDistance = this.nearClipping;
+		this.currentDistance += (this.#distance - this.currentDistance) * this.#delayDistance;
+		if (this.currentDistance < this.nearClipping) this.currentDistance = this.nearClipping;
 		glMatrix.mat4.identity(tMTX0);
 		glMatrix.mat4.translate(tMTX0, tMTX0, [this.#centerX, this.#centerY, this.#centerZ]);
 		glMatrix.mat4.rotateY(tMTX0, tMTX0, this.#currentPan * PER_PI);
 		glMatrix.mat4.rotateX(tMTX0, tMTX0, this.#currentTilt * PER_PI);
-		glMatrix.mat4.translate(tMTX0, tMTX0, [0, 0, this.#currentDistance]);
+		glMatrix.mat4.translate(tMTX0, tMTX0, [0, 0, this.currentDistance]);
 		this.x = tMTX0[12];
 		this.y = tMTX0[13];
 		this.z = tMTX0[14];
