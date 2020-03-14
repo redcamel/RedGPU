@@ -2,15 +2,15 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.2.29 17:25:44
+ *   Last modification time of this file - 2020.3.14 19:2:51
  *
  */
 
 "use strict";
-import Camera from "./Camera.js";
+import Camera3D from "./Camera3D.js";
 import glMatrix from "../base/gl-matrix-min.js"
 
-export default class ObitController extends Camera {
+export default class ObitController extends Camera3D {
 	get needUpdate() { return this.#needUpdate; }
 	set needUpdate(value) { this.#needUpdate = value; }
 	get centerX() { return this.#centerX; }

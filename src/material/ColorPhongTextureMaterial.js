@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.20 18:6:15
+ *   Last modification time of this file - 2020.3.14 19:2:51
  *
  */
 
@@ -13,6 +13,7 @@ import ShareGLSL from "../base/ShareGLSL.js";
 import Mix from "../base/Mix.js";
 import BaseMaterial from "../base/BaseMaterial.js";
 import RedGPUContext from "../RedGPUContext.js";
+
 let float1_Float32Array = new Float32Array(1);
 export default class ColorPhongTextureMaterial extends Mix.mix(
 	BaseMaterial,

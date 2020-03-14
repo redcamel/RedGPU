@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.30 19:35:31
+ *   Last modification time of this file - 2020.3.14 19:2:51
  *
  */
 import glMatrix from "./base/gl-matrix-min.js"
@@ -11,7 +11,6 @@ import Render from "./renderer/Render.js";
 import Debugger from "./renderer/system/Debugger.js";
 // base ///////////////////////////////////////////////////////////////////////
 import DetectorGPU from "./base/detect/DetectorGPU.js";
-
 import baseGeometry from "./base/baseGeometry.js";
 import BaseLight from "./base/BaseLight.js";
 import BaseMaterial from "./base/BaseMaterial.js";
@@ -28,7 +27,8 @@ import Buffer from "./buffer/Buffer.js";
 import UniformBuffer from "./buffer/UniformBuffer.js";
 import UniformBufferDescriptor from "./buffer/UniformBufferDescriptor.js";
 // controller ///////////////////////////////////////////////////////////////////////
-import Camera from "./controller/Camera.js";
+import Camera2D from "./controller/Camera2D.js";
+import Camera3D from "./controller/Camera3D.js";
 import ObitController from "./controller/ObitController.js";
 // geometry ///////////////////////////////////////////////////////////////////////
 import Geometry from "./geometry/Geometry.js";
@@ -114,24 +114,25 @@ const RedGPU = {
 	glMatrix,
 	// base
 	DetectorGPU,
+	UUID,
+	Mix,
 	baseGeometry,
 	BaseLight,
 	BaseMaterial,
+	DisplayContainer,
 	BaseObject3D,
 	ShareGLSL,
 	BasePostEffect,
 	BaseTexture,
-	Mix,
-	Pipeline: PipelineBasic,
-	DisplayContainer,
-	UUID,
+	PipelineBasic,
 	// buffer ///////////////////////////////////////////////////////////////////////
 	BindGroup,
 	Buffer,
 	UniformBuffer,
 	UniformBufferDescriptor,
 	// controller ///////////////////////////////////////////////////////////////////////
-	Camera,
+	Camera2D,
+	Camera3D,
 	ObitController,
 	// geometry ///////////////////////////////////////////////////////////////////////
 	Geometry,

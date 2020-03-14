@@ -2,12 +2,13 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.17 20:58:48
+ *   Last modification time of this file - 2020.3.14 19:2:51
  *
  */
 
 "use strict";
 import AccessorInfo_GLTF from "../cls/AccessorInfo_GLTF.js";
+
 let checkJoint = function (redGLTFLoader, skinInfo, nodes, v) {
 	let tJointMesh = nodes[v]['Mesh'];
 	if (tJointMesh) {

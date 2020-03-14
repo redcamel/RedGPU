@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.20 18:6:15
+ *   Last modification time of this file - 2020.3.14 19:2:51
  *
  */
 
@@ -99,7 +99,7 @@ export default class BaseObject3D extends DisplayContainer {
 	#redGPUContext;
 	//
 	_depthWriteEnabled = true;
-	_depthCompare = 'less';
+	_depthCompare = 'less-equal';
 	_cullMode = 'back';
 	_primitiveTopology = "triangle-list";
 	_blendColorSrc = 'src-alpha';

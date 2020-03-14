@@ -142,7 +142,7 @@
     ], 
     "cameras" : [
         {
-            "name" : "Camera", 
+            "name" : "Camera3D",
             "perspective" : {
                 "aspectRatio" : 1.7777777777777777, 
                 "yfov" : 0.5033799372418416, 
@@ -212,7 +212,7 @@
             "children" : [
                 0
             ], 
-            "name" : "Camera", 
+            "name" : "Camera3D",
             "rotation" : [
                 0.483536034822464, 
                 0.33687159419059753, 
