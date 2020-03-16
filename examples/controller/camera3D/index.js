@@ -18,46 +18,24 @@ new RedGPU.RedGPUContext(
 		///////////////////////////////////////////////////////////////////////////////////////////
 		// basic setup
 		tScene = new RedGPU.Scene();
-		tScene.grid = new RedGPU.Grid(this);
 		tCamera = new RedGPU.Camera3D(this);
-		tCamera.y = 15;
-		tCamera.z = 15;
-		tCamera.lookAt(0, 0, 0);
+		tCamera.x = 5;
+		tCamera.y = 5;
+		tCamera.z = 5;
+		tCamera.lookAt(0,0,0)
 		tView = new RedGPU.View(this, tScene, tCamera);
+		tScene.grid = new RedGPU.Grid(this);
 		this.addView(tView);
 		///////////////////////////////////////////////////////////////////////////////////////////
 		// Mesh setup
 		let tMesh, tGeometry, tMaterial;
-		tGeometry = new RedGPU.Sphere(this, 1, 32, 32, 32);
-		tMaterial = new RedGPU.ColorMaterial(this);
-		tMesh = new RedGPU.Mesh(
-			this,
-			tGeometry,
-			tMaterial
-		);
+		tGeometry = new RedGPU.Sphere(this);
+		tMaterial = new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this,'../../../assets/UV_Grid_Sm.jpg'));
+		tMesh = new RedGPU.Mesh(this, tGeometry, tMaterial);
 		tScene.addChild(tMesh);
 		///////////////////////////////////////////////////////////////////////////////////////////
-		// screenToWorld
-		let tText = document.createElement('div');
-		tText.style.cssText = `position:absolute;background:#000;padding:5px;color:#fff;transform:translate(-50%,50px);white-space:nowrap`;
-		document.body.appendChild(tText)
-		document.querySelector('canvas').addEventListener(
-			'mousemove',
-			function (e) {
-				let currentPosition = RedGPU.UTIL.screenToWorld(
-					e.layerX * window.devicePixelRatio,
-					e.layerY * window.devicePixelRatio,
-					tView
-				);
-				tMesh.setPosition(...currentPosition);
-				tText.style.left = e.layerX+'px';
-				tText.style.top = e.layerY+'px';
-				tText.innerHTML = 'x : ' + currentPosition[0].toFixed(2) + ' / y : ' + currentPosition[1].toFixed(2) + ' / z : ' + currentPosition[2].toFixed(2);
-			}
-		);
-		renderer = new RedGPU.Render();
-		///////////////////////////////////////////////////////////////////////////////////////////
 		// renderer setup
+		renderer = new RedGPU.Render();
 		render = time => {
 			renderer.render(time, this);
 			requestAnimationFrame(render);
@@ -65,6 +43,7 @@ new RedGPU.RedGPUContext(
 		requestAnimationFrame(render);
 
 		// TestUI setup
+		ExampleHelper.setTestUI_Camera3D(RedGPU, tCamera, true);
 		ExampleHelper.setTestUI_Debugger(RedGPU);
 	}
 );

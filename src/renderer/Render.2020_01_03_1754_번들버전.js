@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.16 13:54:48
+ *   Last modification time of this file - 2020.3.14 19:2:51
  *
  */
 
@@ -166,7 +166,7 @@ let renderScene = (_ => {
 						// if (renderDrawLayerIndexMode == 1 && tMesh instanceof Text) {
 						// // 	// let tMTX = new Float32Array(16)
 						// // 	// tMTX[12] = tMesh._x, tMTX[13] = tMesh._y, tMTX[14] = tMesh._z;
-						// // 	// mat4.multiply(tMTX, redView.camera.matrix, tMTX) //FIXME - 이거풀어야함
+						// // 	// mat4.multiply(tMTX, redView.camera3D.matrix, tMTX) //FIXME - 이거풀어야함
 						// // 	// textToTransparentLayerList.push({
 						// // 	// 	z: tMTX[14],
 						// // 	// 	tText: tMesh

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.8 17:12:21
+ *   Last modification time of this file - 2020.3.14 19:2:51
  *
  */
 
@@ -10,7 +10,7 @@
 import BaseObject3D from "../base/BaseObject3D.js";
 import glMatrix from "../base/gl-matrix-min.js"
 
-export default class Camera extends BaseObject3D {
+export default class Camera3D extends BaseObject3D {
 	#up = new Float32Array([0, 1, 0]);
 	fov = 60;
 	nearClipping = 0.1;

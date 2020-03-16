@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.8 22:30:15
+ *   Last modification time of this file - 2020.3.14 19:2:51
  *
  */
 
@@ -14,6 +14,7 @@ import UTIL from "../util/UTIL.js";
 import UUID from "../base/UUID.js";
 import LineMaterial from "../material/system/LineMaterial.js";
 import glMatrix from "../base/gl-matrix-min.js";
+
 let solveCatmullRomPoint;
 let getPointsOnBezierCurves;
 let serializePoints;

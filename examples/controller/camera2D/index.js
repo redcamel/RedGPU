@@ -8,6 +8,7 @@
 "use strict"
 import RedGPU from "../../../dist/RedGPU.min.mjs";
 
+
 const cvs = document.createElement('canvas');
 document.body.appendChild(cvs);
 new RedGPU.RedGPUContext(
@@ -18,29 +19,45 @@ new RedGPU.RedGPUContext(
 		///////////////////////////////////////////////////////////////////////////////////////////
 		// basic setup
 		tScene = new RedGPU.Scene();
-		tCamera = new RedGPU.ObitController(this);
+		tCamera = new RedGPU.Camera2D(this);
 		tView = new RedGPU.View(this, tScene, tCamera);
-		tScene.grid = new RedGPU.Grid(this);
-		tScene.skyBox = new RedGPU.SkyBox(
-			this, new RedGPU.BitmapCubeTexture(
-				this,
-				[
-					'../../../assets/cubemap/SwedishRoyalCastle/px.jpg',
-					'../../../assets/cubemap/SwedishRoyalCastle/nx.jpg',
-					'../../../assets/cubemap/SwedishRoyalCastle/py.jpg',
-					'../../../assets/cubemap/SwedishRoyalCastle/ny.jpg',
-					'../../../assets/cubemap/SwedishRoyalCastle/pz.jpg',
-					'../../../assets/cubemap/SwedishRoyalCastle/nz.jpg'
-				]
-			)
-		);
 		this.addView(tView);
 		///////////////////////////////////////////////////////////////////////////////////////////
 		// Mesh setup
+		var testTween = function (view, target) {
+			var tScale = Math.random() * 32 + 6
+			TweenMax.to(target, Math.random() * 2 + 1, {
+				x: Math.random() * view.viewRect[2],
+				y: Math.random() * view.viewRect[3],
+				scaleX: tScale,
+				scaleY: tScale,
+				rotationZ: Math.random() * 360,
+				ease: Ease.QuintInOut,
+				onComplete: function () {
+					testTween(view, this.target)
+				}
+			})
+		}
 		let tMesh, tGeometry, tMaterial;
-		tGeometry = new RedGPU.Sphere(this, 1, 16, 16, 16);
+		tGeometry = new RedGPU.Plane(this);
 		tMaterial = new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this, '../../../assets/UV_Grid_Sm.jpg'));
+		let i = 5000;
+		while(i--){
+
+
+			tMesh = new RedGPU.Mesh(this, tGeometry, tMaterial);
+
+			tMesh.setScale(100, 100, 1)
+			tScene.addChild(tMesh);
+			testTween(tView,tMesh)
+		}
+
+
+		tMaterial = new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this, '../../../assets/crate.png'));
 		tMesh = new RedGPU.Mesh(this, tGeometry, tMaterial);
+
+		tMesh.setScale(200, 200, 1)
+		tMesh.setPosition(100, 100, 0)
 		tScene.addChild(tMesh);
 		///////////////////////////////////////////////////////////////////////////////////////////
 		// renderer setup
@@ -52,7 +69,7 @@ new RedGPU.RedGPUContext(
 		requestAnimationFrame(render);
 
 		// TestUI setup
-		ExampleHelper.setTestUI_Camera3D(RedGPU, tCamera, true);
+		ExampleHelper.setTestUI_Camera2D(RedGPU, this, tMesh, true);
 		ExampleHelper.setTestUI_Debugger(RedGPU);
 	}
 );

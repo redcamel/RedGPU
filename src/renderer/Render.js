@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.2.29 14:13:25
+ *   Last modification time of this file - 2020.3.14 19:2:51
  *
  */
 
@@ -14,6 +14,7 @@ import DisplayContainer from "../base/DisplayContainer.js";
 import UTIL from "../util/UTIL.js";
 import Particle from "../particle/Particle.js";
 import PipelineParticle from "../base/pipeline/PipelineParticle.js";
+import Camera2D from "../controller/Camera2D.js";
 
 let _frustumPlanes = [];
 let currentDebuggerData;
@@ -66,6 +67,7 @@ let renderScene = (_ => {
 			let radiusTemp;
 			let tOpacity, tParentSumOpacity;
 			let tFlatRenderYn = children == redView.scene._flatChildList;
+			let isCamera2D = redView.camera instanceof Camera2D;
 			while (i--) {
 				tMesh = children[i];
 				tMaterial = tMesh._material;
@@ -156,33 +158,33 @@ let renderScene = (_ => {
 						}
 						// console.log(tVisible);
 						///////////////////////////////////////
-						if(tMesh instanceof Particle) {
+						if (tMesh instanceof Particle) {
 							tMesh.compute(currentTime)
-								passEncoder.setPipeline(tPipeline.GPURenderPipeline);
-								if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
-									passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
-									prevVertexBuffer_UUID = tGeometry.interleaveBuffer._UUID
+							passEncoder.setPipeline(tPipeline.GPURenderPipeline);
+							if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
+								passEncoder.setVertexBuffer(0, tGeometry.interleaveBuffer.GPUBuffer);
+								prevVertexBuffer_UUID = tGeometry.interleaveBuffer._UUID
+							}
+							passEncoder.setVertexBuffer(1, tMesh.particleBuffer);
+							passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹는 매그룹마다 다르니 또 업데이트 해줘야함 -_-
+							if (prevMaterial_UUID != tMaterial._UUID) {
+								passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
+								prevMaterial_UUID = tMaterial._UUID
+							}
+							if (tGeometry.indexBuffer) {
+								if (prevIndexBuffer_UUID != tGeometry.indexBuffer._UUID) {
+									passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
+									prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
 								}
-								passEncoder.setVertexBuffer(1, tMesh.particleBuffer);
-								passEncoder.setBindGroup(2, tMesh.GPUBindGroup); // 메쉬 바인딩 그룹는 매그룹마다 다르니 또 업데이트 해줘야함 -_-
-								if (prevMaterial_UUID != tMaterial._UUID) {
-									passEncoder.setBindGroup(3, tMaterial.uniformBindGroup_material.GPUBindGroup);
-									prevMaterial_UUID = tMaterial._UUID
-								}
-								if (tGeometry.indexBuffer) {
-									if (prevIndexBuffer_UUID != tGeometry.indexBuffer._UUID) {
-										passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
-										prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
-									}
-									passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, tMesh._particleNum, 0, 0, 0);
-									currentDebuggerData['triangleNum'] += tGeometry.indexBuffer.indexNum / 3
-								} else {
-									passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, tMesh._particleNum, 0, 0, 0);
-									currentDebuggerData['triangleNum'] += tGeometry.interleaveBuffer.data.length / tGeometry.interleaveBuffer.stride
-								}
-								currentDebuggerData['drawCallNum']++
+								passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, tMesh._particleNum, 0, 0, 0);
+								currentDebuggerData['triangleNum'] += tGeometry.indexBuffer.indexNum / 3
+							} else {
+								passEncoder.draw(tGeometry.interleaveBuffer.vertexCount, tMesh._particleNum, 0, 0, 0);
+								currentDebuggerData['triangleNum'] += tGeometry.interleaveBuffer.data.length / tGeometry.interleaveBuffer.stride
+							}
+							currentDebuggerData['drawCallNum']++
 
-						}else{
+						} else {
 							if (tVisible) {
 								passEncoder.setPipeline(tPipeline.GPURenderPipeline);
 								if (prevVertexBuffer_UUID != tGeometry.interleaveBuffer._UUID) {
@@ -225,7 +227,7 @@ let renderScene = (_ => {
 						a20 = 0, a21 = 0, a22 = 1,
 						// tLocalMatrix translate
 						tLocalMatrix[12] = tMesh._x ,
-						tLocalMatrix[13] = tMesh._y,
+						tLocalMatrix[13] = tMesh._y * (isCamera2D ? -1 : 1),
 						tLocalMatrix[14] = tMesh._z,
 						tLocalMatrix[15] = 1,
 						// tLocalMatrix rotate
@@ -296,13 +298,12 @@ let renderScene = (_ => {
 								tLocalMatrix[9] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31,
 								tLocalMatrix[10] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32,
 								tLocalMatrix[11] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33,
-								// mode2DYn TODO - 아직 2D처리안함
-								// 	? (
-								// 		parentMTX
-								// 			? (b0 = -tMesh['pivotX'], b1 = tMesh['pivotY'], b2 = -tMesh['pivotZ'], b3 = 1)
-								// 			: (b0 = -tMesh['pivotX'] / aX, b1 = tMesh['pivotY'] / aY, b2 = -tMesh['pivotZ'], b3 = 1)
-								// 	)
-								b0 = -tMesh['_pivotX'], b1 = -tMesh['_pivotY'], b2 = -tMesh['_pivotZ'], b3 = 1,
+								isCamera2D
+									? (
+										parentMTX
+											? (b0 = -tMesh['_pivotX'], b1 = tMesh['_pivotY'], b2 = -tMesh['_pivotZ'], b3 = 1)
+											: (b0 = -tMesh['_pivotX'] / aX, b1 = tMesh['_pivotY'] / aY, b2 = -tMesh['_pivotZ'], b3 = 1)
+									) : (b0 = -tMesh['_pivotX'], b1 = -tMesh['_pivotY'], b2 = -tMesh['_pivotZ'], b3 = 1),
 								tLocalMatrix[12] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30,
 								tLocalMatrix[13] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31,
 								tLocalMatrix[14] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32,
@@ -679,6 +680,7 @@ export default class Render {
 			Render.clearStateCache();
 			if (DisplayContainer.needFlatListUpdate) {
 				redView.scene._flatChildList = UTIL.getFlatChildList(redView.scene._children)
+				console.log(redView.scene._flatChildList)
 			}
 			renderView(redGPUContext, redView, redGPUContext.swapChain.getCurrentTexture());
 			// 마우스 이벤트 체크

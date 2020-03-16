@@ -33,7 +33,7 @@ new RedGPU.RedGPUContext(
 		let renderer, render;
 		let testMesh;
 		tScene = new RedGPU.Scene();
-		tCamera = new RedGPU.Camera(this);
+		tCamera = new RedGPU.Camera3D(this);
 		tView = new RedGPU.View(this, tScene, tCamera);
 		renderer = new RedGPU.Render();
 		this.addView(tView)
