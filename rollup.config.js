@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.2.28 21:0:29
+ *   Last modification time of this file - 2020.3.23 18:29:56
  *
  */
 
@@ -15,24 +15,26 @@ const config ={
     output: [
         {
             file: 'dist/RedGPU.min.mjs',
-            format: 'esm',
+            format: 'es',
             name : 'RedGPU'
         }
     ],
     plugins: [
         resolve(),
-        terser({
-            module: true,
-            // toplevel:true,
-            // keep_classnames:true,
-            keep_fnames :true
-        }),
-
         babel({
             plugins: ["@babel/plugin-proposal-class-properties"],
             exclude: 'node_modules/**' // only transpile our source code
         }),
-        strip({})
+        strip({}),
+        terser({
+            module: true,
+            mangle: {
+                reserved: ['Rich']
+            },
+            // toplevel:true,
+            // keep_classnames:true,
+            keep_fnames :true
+        })
     ]
 };
 
