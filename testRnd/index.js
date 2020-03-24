@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.3.14 19:2:51
+ *   Last modification time of this file - 2020.3.24 19:45:8
  *
  */
 import RedGPU from "../src/RedGPU.js";
@@ -336,7 +336,7 @@ new RedGPU.RedGPUContext(
 					testBox = new RedGPU.Mesh(this, randomGeometry(), testMat_colorPhong)
 					testBox.scaleX = testBox.scaleY = testBox.scaleZ = 0.3
 					testBox.x = 1.5
-					testBox.primitiveTopology = 'line-strip'
+					// testBox.primitiveTopology = 'line-strip'
 					testMesh.addChild(testBox)
 					// testMesh.material = testMesh._parent.material
 
@@ -565,11 +565,11 @@ let setTestUI = function (redGPUContextContext, tView, tScene, testCubeTexture) 
 		"back"
 	]).onChange(v => tScene._children.forEach(tMesh => tMesh.cullMode = v));
 
-	tFolder.add(testData, 'primitiveTopology', [
-		"point-list",
-		"line-list",
-		"line-strip",
-		"triangle-list",
-		"triangle-strip"
-	]).onChange(v => tScene._children.forEach(tMesh => tMesh.primitiveTopology = v));
+	// tFolder.add(testData, 'primitiveTopology', [
+	// 	"point-list",
+	// 	"line-list",
+	// 	"line-strip",
+	// 	"triangle-list",
+	// 	"triangle-strip"
+	// ]).onChange(v => tScene._children.forEach(tMesh => tMesh.primitiveTopology = v));
 }
