@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.2.29 14:37:55
+ *   Last modification time of this file - 2020.3.23 18:29:56
  *
  */
 "use strict";
@@ -42,7 +42,7 @@ let glslang;
 let checkGlslang = function () {
 	return new Promise(async (resolve) => {
 		if (!glslang) {
-			glslangModule = await import(/* webpackIgnore: true */ 'https://unpkg.com/@webgpu/glslang@0.0.13/dist/web-devel/glslang.js');
+			glslangModule = await import(/* webpackIgnore: true */ 'https://unpkg.com/@webgpu/glslang@0.0.15/dist/web-devel/glslang.js');
 			glslang = await glslangModule.default();
 			glslang.compileGLSL(` ${ShareGLSL.GLSL_VERSION}\nvoid main(){} `, 'vertex');
 			glslang.compileGLSL(` ${ShareGLSL.GLSL_VERSION}\nvoid main(){} `, 'fragment');

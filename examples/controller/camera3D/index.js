@@ -2,14 +2,15 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.3.14 19:2:51
+ *   Last modification time of this file - 2020.3.23 18:29:56
  *
  */
 "use strict"
-import RedGPU from "../../../dist/RedGPU.min.mjs";
+
 
 const cvs = document.createElement('canvas');
 document.body.appendChild(cvs);
+
 new RedGPU.RedGPUContext(
 	cvs,
 	function () {
@@ -17,6 +18,7 @@ new RedGPU.RedGPUContext(
 		let renderer, render;
 		///////////////////////////////////////////////////////////////////////////////////////////
 		// basic setup
+
 		tScene = new RedGPU.Scene();
 		tCamera = new RedGPU.Camera3D(this);
 		tCamera.x = 5;
