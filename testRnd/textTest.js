@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.3.24 21:21:28
+ *   Last modification time of this file - 2020.3.24 21:43:4
  *
  */
 import RedGPU from "https://redcamel.github.io/RedGPU/src/RedGPU.js";
@@ -21,7 +21,6 @@ new RedGPU.RedGPUContext(cvs,
 		this.addView(tView);
 		tCamera.distance = 2;
 
-		this.setSize(window.innerWidth, window.innerHeight);
 
 		// Cube data
 		//             1.0 y

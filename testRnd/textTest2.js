@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.3.24 21:36:11
+ *   Last modification time of this file - 2020.3.24 21:43:4
  *
  */
 import RedGPU from "https://redcamel.github.io/RedGPU/src/RedGPU.js";
@@ -16,9 +16,6 @@ class VertexColorMaterial extends RedGPU.BaseMaterial {
     #version 460
 	${RedGPU.ShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
     ${RedGPU.ShareGLSL.GLSL_SystemUniforms_vertex.meshUniforms}
-    layout(set=2,binding = 0) uniform Uniforms {
-        mat4 modelMatrix;
-    } uniforms;
     layout(location = 0) in vec3 position;
     layout(location = 1) in vec4 vertexColor;
     layout(location = 0) out vec4 vVertexColor;
@@ -65,8 +62,6 @@ new RedGPU.RedGPUContext(cvs,
         let tView = new RedGPU.View(this, tScene, tCamera);
         this.addView(tView);
         tCamera.distance = 2;
-
-        this.setSize(window.innerWidth, window.innerHeight);
 
         // Square data
         //             1.0 y
