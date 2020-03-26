@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.3.26 17:40:55
+ *   Last modification time of this file - 2020.3.26 17:47:56
  *
  */
 
@@ -33,7 +33,7 @@ const config ={
             },
             // toplevel:true,
             // keep_classnames:true,
-            keep_fnames :true
+            // keep_fnames :true
         })
     ]
 };
