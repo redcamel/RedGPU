@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.30 19:35:31
+ *   Last modification time of this file - 2020.3.26 17:3:14
  *
  */
 
@@ -24,7 +24,7 @@ export default class PipelineParticle extends UUID {
 	update(redGPUContext, redView) {
 		let targetMesh = this.#targetMesh;
 		const device = redGPUContext.device;
-		console.log('targetMesh._geometry.vertexState',targetMesh._geometry.vertexState)
+		console.log('targetMesh._geometry.vertexState',targetMesh._geometry.vertexState);
 		const descriptor = {
 			// 레이아웃은 재질이 알고있으니 들고옴
 			layout: device.createPipelineLayout(

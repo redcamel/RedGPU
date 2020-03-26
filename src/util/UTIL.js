@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.3.14 19:2:51
+ *   Last modification time of this file - 2020.3.26 17:3:14
  *
  */
 
@@ -50,7 +50,7 @@ const screenToWorld = (_ => {
 })();
 const getFlatChildList = list=>{
 	function flattenDeep(input) {
-		console.log('input',input)
+		console.log('input',input);
 		const stack = [...input];
 		const res = [];
 		while (stack.length) {

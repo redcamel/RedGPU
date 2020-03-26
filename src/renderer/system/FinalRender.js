@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.3.26 14:41:31
+ *   Last modification time of this file - 2020.3.26 17:3:14
  *
  */
 
@@ -63,7 +63,7 @@ export default class FinalRender extends BasePostEffect {
         {size: TypeSize.float4, valueName: 'viewRect'}
     ];
     static uniformBufferDescriptor_fragment = BaseMaterial.uniformBufferDescriptor_empty;
-    viewRect = new Float32Array(4)
+    viewRect = new Float32Array(4);
     constructor(redGPUContext) {
         super(redGPUContext);
         this.projectionMatrix = glMatrix.mat4.create()
@@ -107,7 +107,7 @@ export default class FinalRender extends BasePostEffect {
                 1
             ]
         );
-        this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['projectionMatrix'], this.projectionMatrix)
+        this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['projectionMatrix'], this.projectionMatrix);
         return true
     }
     render(redGPUContext, redView, renderScene, sourceTextureView,passEncoder_effect) {

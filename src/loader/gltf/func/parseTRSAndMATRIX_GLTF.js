@@ -2,19 +2,19 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.17 20:58:48
+ *   Last modification time of this file - 2020.3.26 17:3:14
  *
  */
 "use strict";
 import glMatrix from "../../../base/gl-matrix-min.js";
 import UTIL from "../../../util/UTIL.js";
 
-var parseTRSAndMATRIX_GLTF = (function () {
-	var rotationMTX = glMatrix.mat4.create();
-	var tRotation = [0, 0, 0];
-	var tQuaternion = [];
-	var tScale = [];
-	var tMatrix;
+const parseTRSAndMATRIX_GLTF = (function () {
+	const rotationMTX = glMatrix.mat4.create();
+	const tRotation = [0, 0, 0];
+	let tQuaternion = [];
+	const tScale = [];
+	let tMatrix;
 	return function (target, info) {
 		if ('matrix' in info) {
 			// parseMatrix
