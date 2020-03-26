@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.3.26 14:41:31
+ *   Last modification time of this file - 2020.3.26 16:12:51
  *
  */
 
@@ -657,7 +657,8 @@ let renderView = (redGPUContext, redView, swapChainTexture, swapChainTextureView
 
 
     // 렌더 종료
-    redGPUContext.device.defaultQueue.submit([mainRenderCommandEncoder.finish()]);
+    // redGPUContext.device.defaultQueue.submit([mainRenderCommandEncoder.finish()]);
+    return mainRenderCommandEncoder.finish()
     currentDebuggerData['finalRenderTime'] = performance.now() - now;
 
 };
@@ -684,6 +685,7 @@ export default class Render {
         let mouseStates = [];
         let swapChainTexture = redGPUContext.swapChain.getCurrentTexture()
         let swapChainTextureView = swapChainTexture.createView()
+        let submitList = []
         const finale_commandEncoder = redGPUContext.device.createCommandEncoder();
         const final_passEncoder = finale_commandEncoder.beginRenderPass(
             {
@@ -701,7 +703,7 @@ export default class Render {
                 redView.scene._flatChildList = UTIL.getFlatChildList(redView.scene._children)
                 console.log(redView.scene._flatChildList)
             }
-            renderView(redGPUContext, redView, swapChainTexture, swapChainTextureView);
+            submitList.push(renderView(redGPUContext, redView, swapChainTexture, swapChainTextureView));
             // 마우스 이벤트 체크
             mouseStates.push(redView.mouseEventChecker.check(redGPUContext))
             if (!redView._finalRender) redView._finalRender = new FinalRender(redGPUContext)
@@ -710,7 +712,8 @@ export default class Render {
             redView._finalRender.render(redGPUContext, redView, renderScene, redView._lastTextureView, final_passEncoder)
         }
         final_passEncoder.endPass();
-        redGPUContext.device.defaultQueue.submit([finale_commandEncoder.finish()]);
+        submitList.push(finale_commandEncoder.finish())
+        redGPUContext.device.defaultQueue.submit(submitList);
         //
         if (mouseStates.includes('pointer')) redGPUContext.canvas.style.cursor = 'pointer';
         else redGPUContext.canvas.style.cursor = 'default';
