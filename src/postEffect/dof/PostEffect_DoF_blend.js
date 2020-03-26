@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.16 18:59:50
+ *   Last modification time of this file - 2020.3.26 16:12:51
  *
  */
 
@@ -17,9 +17,7 @@ export default class PostEffect_DoF_blend extends BasePostEffect {
 	static vertexShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
-    layout( set = ${ShareGLSL.SET_INDEX_MeshUniforms}, binding = 0 ) uniform MeshMatrixUniforms {
-        mat4 modelMatrix;
-    } meshMatrixUniforms;
+    
 	layout( location = 0 ) in vec3 position;
 	layout( location = 1 ) in vec3 normal;
 	layout( location = 2 ) in vec2 uv;

@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.30 20:31:4
+ *   Last modification time of this file - 2020.3.26 17:3:14
  *
  */
 
@@ -213,7 +213,7 @@ let getComputeSource = v => {
 		particlesA.particles[index].valueRotation.z = (tInfo.startValue +  (tInfo.endValue - tInfo.startValue) * calEasing(lifeRatio, tInfo.easeType)) * PI/180;
 	}
 `
-}
+};
 export default class Particle extends BaseObject3D {
 	static Linear = 0;
 	static QuintIn = 1;
@@ -341,8 +341,8 @@ export default class Particle extends BaseObject3D {
 				this.minStartRotationZ, this.maxStartRotationZ, this.minEndRotationZ, this.maxEndRotationZ, this.easeRotationZ
 			],
 			0
-		)
-		this.simParamBuffer.setSubData(0, this.#simParamData)
+		);
+		this.simParamBuffer.setSubData(0, this.#simParamData);
 		const commandEncoder = this.#redGPUContext.device.createCommandEncoder({});
 		const passEncoder = commandEncoder.beginComputePass();
 		passEncoder.setPipeline(this.computePipeline);
@@ -360,7 +360,7 @@ export default class Particle extends BaseObject3D {
 		{
 			for(const k in initInfo){
 				if(this.hasOwnProperty(k)) {
-					console.log(k)
+					console.log(k);
 					this[k] = initInfo[k]
 				}
 			}
@@ -369,13 +369,13 @@ export default class Particle extends BaseObject3D {
 		this.geometry = geometry || new Plane(redGPUContext);
 		this.texture = texture;
 		this.renderDrawLayerIndex = Render.DRAW_LAYER_INDEX2_Z_POINT_SORT;
-		this._PROPERTY_NUM = 44
+		this._PROPERTY_NUM = 44;
 		this.blendColorSrc = 'src-alpha';
 		this.blendColorDst = 'one';
 		this.blendAlphaSrc = 'src-alpha';
 		this.blendAlphaDst = 'one';
 		this.depthWriteEnabled = false;
-		this.cullMode = 'none'
+		this.cullMode = 'none';
 
 		// 컴퓨트 파이프 라인 생성
 		this.#simParamData = new Float32Array(
@@ -399,14 +399,14 @@ export default class Particle extends BaseObject3D {
 				this.minStartRotationY, this.maxStartRotationY, this.minEndRotationY, this.maxEndRotationY, this.easeRotationY,
 				this.minStartRotationZ, this.maxStartRotationZ, this.minEndRotationZ, this.maxEndRotationZ, this.easeRotationZ
 			]
-		)
+		);
 		let bufferDescriptor = {
 			size: this.#simParamData.byteLength,
 			usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
 		};
 		this.simParamBuffer = redGPUContext.device.createBuffer(bufferDescriptor);
 		this.simParamBuffer.setSubData(0, this.#simParamData);
-		this.pipeline = new PipelineParticle(redGPUContext, this)
+		this.pipeline = new PipelineParticle(redGPUContext, this);
 		this.particleNum = particleNum || 1;
 	}
 	setParticleData() {
@@ -417,7 +417,7 @@ export default class Particle extends BaseObject3D {
 		for (let i = 0; i < this._particleNum; ++i) {
 			let life = Math.random() * this.maxLife;
 			let age = Math.random() * life;
-			initialParticleData[_PROPERTY_NUM * i + 0] = currentTime - age // start time
+			initialParticleData[_PROPERTY_NUM * i + 0] = currentTime - age; // start time
 			initialParticleData[_PROPERTY_NUM * i + 1] = life; // life
 			// position
 			initialParticleData[_PROPERTY_NUM * i + 4] = 0; // x
@@ -472,7 +472,7 @@ export default class Particle extends BaseObject3D {
 			initialParticleData[_PROPERTY_NUM * i + 43] = 0; //
 		}
 		if (this.particleBuffer) {
-			this.particleBuffer.destroy()
+			this.particleBuffer.destroy();
 			this.particleBuffer = null
 		}
 		this.particleBuffer = redGPUContext.device.createBuffer({
@@ -480,7 +480,7 @@ export default class Particle extends BaseObject3D {
 			usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE
 		});
 		this.particleBuffer.setSubData(0, initialParticleData);
-		let computeSource = getComputeSource(this._particleNum)
+		let computeSource = getComputeSource(this._particleNum);
 		let shaderModuleDescriptor = {
 			code: redGPUContext.glslang.compileGLSL(computeSource, 'compute'),
 			source: computeSource
