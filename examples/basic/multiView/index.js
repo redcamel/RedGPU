@@ -2,12 +2,11 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.2.28 21:0:29
+ *   Last modification time of this file - 2020.3.26 14:41:31
  *
  */
 "use strict"
 import RedGPU from "../../../dist/RedGPU.min.mjs";
-
 const cvs = document.createElement('canvas');
 document.body.appendChild(cvs);
 new RedGPU.RedGPUContext(

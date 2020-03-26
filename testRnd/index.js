@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.3.24 19:45:8
+ *   Last modification time of this file - 2020.3.26 14:41:31
  *
  */
 import RedGPU from "../src/RedGPU.js";
@@ -54,11 +54,11 @@ new RedGPU.RedGPUContext(
 				let tCamera2 = new RedGPU.ObitController(this)
 				// tGrid.centerColor = '#ff0000'
 				tScene2.backgroundColor = '#ff0000'
-				tScene2.backgroundColorAlpha = 0.0
+				tScene2.backgroundColorAlpha = 0.5
 
 				tView = new RedGPU.View(this, tScene, tCamera)
 				tView2 = new RedGPU.View(this, tScene2, tCamera2)
-				tView2.setSize(150, 150)
+				tView2.setSize(512, 300)
 				tView2.setLocation(0, 0)
 
 
@@ -219,7 +219,7 @@ new RedGPU.RedGPUContext(
 				while (i3--) {
 					let testMesh = new RedGPU.Mesh(
 						this,
-						new RedGPU.Sphere(this, 0.5, 16, 16, 16),
+						new RedGPU.Box(this),
 						testMat_bitmap
 					);
 					testMesh.x = Math.random() * 30 - 15
@@ -428,7 +428,10 @@ new RedGPU.RedGPUContext(
 					testMat_standard_diffuse.shininess = testMat_standard_diffuse.shininess = testMat_standard_diffuse_normal.shininess = Math.abs(Math.sin(time / 1000)) * 64 + 8
 					testMat_standard_diffuse.specularPower = Math.abs(Math.sin(time / 1000)) * 5
 					testMat_colorPhong.shininess = 8
-
+					let viewRect = tView2.viewRect;
+					let tW = window.innerWidth;
+					let tH = window.innerHeight;
+					tView2.setLocation(Math.sin(time / 500) * viewRect[2] / 3 + tW / 2 - viewRect[2] / 2, Math.cos(time / 500) * viewRect[3] / 3 + tH / 2 - viewRect[3] / 2);
 
 					let tChildren = tView.scene.pointLightList
 					let i = tChildren.length;

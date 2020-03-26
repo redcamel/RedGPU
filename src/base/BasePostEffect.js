@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.1.20 18:6:15
+ *   Last modification time of this file - 2020.3.26 14:41:31
  *
  */
 
@@ -25,7 +25,8 @@ export default class BasePostEffect extends Mix.mix(
 		bindings: [
 			{binding: 0, visibility: GPUShaderStage.FRAGMENT, type: "uniform-buffer"},
 			{binding: 1, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
-			{binding: 2, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"}
+			{binding: 2, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"},
+			{binding: 3, visibility: GPUShaderStage.VERTEX, type: "uniform-buffer"},
 		]
 	};
 	static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
@@ -100,7 +101,15 @@ export default class BasePostEffect extends Mix.mix(
 				}
 			},
 			{binding: 1, resource: this.sampler.GPUSampler},
-			{binding: 2, resource: this.sourceTexture}
+			{binding: 2, resource: this.sourceTexture},
+			{
+				binding: 3,
+				resource: {
+					buffer: this.uniformBuffer_vertex.GPUBuffer,
+					offset: 0,
+					size: this.uniformBufferDescriptor_vertex.size
+				}
+			},
 		];
 		this._afterResetBindingInfo();
 	}
