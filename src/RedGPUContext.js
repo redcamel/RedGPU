@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.3.23 18:29:56
+ *   Last modification time of this file - 2020.3.26 17:40:55
  *
  */
 "use strict";
@@ -20,6 +20,7 @@ import LineMaterial from "./material/system/LineMaterial.js";
 import TextMaterial from "./material/system/TextMaterial.js";
 import SpriteSheetMaterial from "./material/SpriteSheetMaterial.js";
 import Sampler from "./resources/Sampler.js";
+import GLSLANG from "./base/GLSLANG.js";
 
 let redGPUContextList = new Set();
 let setGlobalResizeEvent = function () {
@@ -42,7 +43,7 @@ let glslang;
 let checkGlslang = function () {
 	return new Promise(async (resolve) => {
 		if (!glslang) {
-			glslangModule = await import(/* webpackIgnore: true */ 'https://unpkg.com/@webgpu/glslang@0.0.15/dist/web-devel/glslang.js');
+			glslangModule = await import(/* webpackIgnore: true */ GLSLANG);
 			glslang = await glslangModule.default();
 			glslang.compileGLSL(` ${ShareGLSL.GLSL_VERSION}\nvoid main(){} `, 'vertex');
 			glslang.compileGLSL(` ${ShareGLSL.GLSL_VERSION}\nvoid main(){} `, 'fragment');
@@ -54,6 +55,7 @@ let checkGlslang = function () {
 		}
 	});
 };
+
 export default class RedGPUContext {
 	static useDebugConsole = false;
 	#width = 0;

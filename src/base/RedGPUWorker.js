@@ -2,11 +2,13 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.3.24 17:55:8
+ *   Last modification time of this file - 2020.3.26 17:40:55
  *
  */
 
 "use strict";
+import GLSLANG from "./GLSLANG.js";
+
 function createWorker(f) {
 	return new Worker(URL.createObjectURL(new Blob([`(${f})()`], {type: 'application/javascript'})));
 }
@@ -101,7 +103,7 @@ const workerImage = createWorker(async () => {
 });
 const workerGLSLCompile = createWorker(async () => {
 	"use strict";
-	let glslangModule = await import(/* webpackIgnore: true */ 'https://unpkg.com/@webgpu/glslang@0.0.15/dist/web-devel/glslang.js');
+	let glslangModule = await import(/* webpackIgnore: true */ GLSLANG);
 	let glslang = await glslangModule.default();
 	let combinations = (_ => {
 		let k_combinations = (set, k) => {

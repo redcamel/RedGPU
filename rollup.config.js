@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.3.23 18:29:56
+ *   Last modification time of this file - 2020.3.26 17:40:55
  *
  */
 
@@ -29,7 +29,7 @@ const config ={
         terser({
             module: true,
             mangle: {
-                reserved: ['Rich']
+                reserved: ['RedGPU']
             },
             // toplevel:true,
             // keep_classnames:true,
