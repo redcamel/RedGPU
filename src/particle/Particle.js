@@ -488,7 +488,7 @@ export default class Particle extends BaseObject3D {
 		console.log('shaderModuleDescriptor', shaderModuleDescriptor);
 		let computeModule = redGPUContext.device.createShaderModule(shaderModuleDescriptor);
 		const computeBindGroupLayout = redGPUContext.device.createBindGroupLayout({
-			bindings: [
+			entries: [
 				{binding: 0, visibility: GPUShaderStage.COMPUTE, type: "uniform-buffer"},
 				{binding: 1, visibility: GPUShaderStage.COMPUTE, type: "storage-buffer"}
 			],
@@ -499,7 +499,7 @@ export default class Particle extends BaseObject3D {
 		});
 		this.particleBindGroup = redGPUContext.device.createBindGroup({
 			layout: computeBindGroupLayout,
-			bindings: [
+			entries: [
 				{
 					binding: 0,
 					resource: {

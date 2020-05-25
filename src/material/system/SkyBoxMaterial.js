@@ -45,9 +45,9 @@ export default class SkyBoxMaterial extends Mix.mix(
 		fragment: ['skyBoxTexture']
 	};
 	static uniformsBindGroupLayoutDescriptor_material = {
-		bindings: [
+		entries: [
 			{binding: 0, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
-			{binding: 1, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture", textureDimension: 'cube'}
+			{binding: 1, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture", viewDimension: 'cube'}
 		]
 	};
 	static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
@@ -84,7 +84,7 @@ export default class SkyBoxMaterial extends Mix.mix(
 		}
 	}
 	resetBindingInfo() {
-		this.bindings = [
+		this.entries = [
 			{
 				binding: 0,
 				resource: this._skyBoxTexture ? this._skyBoxTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler

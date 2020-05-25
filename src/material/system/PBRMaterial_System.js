@@ -290,7 +290,7 @@ export default class PBRMaterial_System extends Mix.mix(
 		// ]
 	};
 	static uniformsBindGroupLayoutDescriptor_material = {
-		bindings: [
+		entries: [
 			{binding: 0, visibility: GPUShaderStage.VERTEX, type: "uniform-buffer"},
 			{binding: 1, visibility: GPUShaderStage.VERTEX, type: "sampler"},
 			{binding: 2, visibility: GPUShaderStage.VERTEX, type: "sampled-texture"},
@@ -304,7 +304,7 @@ export default class PBRMaterial_System extends Mix.mix(
 			{binding: 10, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
 			{binding: 11, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"},
 			{binding: 12, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
-			{binding: 13, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture", textureDimension: 'cube'},
+			{binding: 13, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture", viewDimension: 'cube'},
 			{binding: 14, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
 			{binding: 15, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"},
 		]
@@ -520,7 +520,7 @@ export default class PBRMaterial_System extends Mix.mix(
 	}
 
 	resetBindingInfo() {
-		this.bindings = [
+		this.entries = [
 			{
 				binding: 0,
 				resource: {

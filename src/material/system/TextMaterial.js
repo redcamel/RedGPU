@@ -89,7 +89,7 @@ export default class TextMaterial extends Mix.mix(
 		fragment: ['diffuseTexture']
 	};
 	static uniformsBindGroupLayoutDescriptor_material = {
-		bindings: [
+		entries: [
 			{binding: 0, visibility: GPUShaderStage.VERTEX, type: "uniform-buffer"},
 			{binding: 1, visibility: GPUShaderStage.FRAGMENT, type: "uniform-buffer"},
 			{binding: 2, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
@@ -157,7 +157,7 @@ export default class TextMaterial extends Mix.mix(
 		}
 	}
 	resetBindingInfo() {
-		this.bindings = [
+		this.entries = [
 			{
 				binding: 0,
 				resource: {

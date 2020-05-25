@@ -6,7 +6,8 @@
  *
  */
 "use strict"
-import RedGPU from "../../../dist/RedGPU.min.mjs";
+// import RedGPU from "../../../dist/RedGPU.min.mjs";
+import RedGPU from "../../../src/RedGPU.js";
 
 const cvs = document.createElement('canvas');
 document.body.appendChild(cvs);

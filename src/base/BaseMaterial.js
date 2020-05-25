@@ -38,7 +38,7 @@ export default class BaseMaterial extends UUID {
 	fShaderModule;
 	vertexStage;
 	fragmentStage;
-	bindings;
+	entries;
 	#redGPUContext;
 	//
 	uniformBuffer_vertex;
@@ -165,7 +165,7 @@ export default class BaseMaterial extends UUID {
 	setUniformBindGroupDescriptor() {
 		this.uniformBindGroupDescriptor = {
 			layout: this.GPUBindGroupLayout,
-			bindings: this.bindings
+			entries: this.entries
 		};
 	}
 }

@@ -59,7 +59,7 @@ const getPool = function (redGPUContext, targetMesh) {
 export default class BaseObject3D extends DisplayContainer {
 
 	static uniformsBindGroupLayoutDescriptor_mesh = {
-		bindings: [
+		entries: [
 			{
 				binding: 0,
 				visibility: GPUShaderStage.VERTEX,
@@ -107,7 +107,7 @@ export default class BaseObject3D extends DisplayContainer {
 	_blendAlphaSrc = 'one';
 	_blendAlphaDst = 'one-minus-src-alpha';
 	pipeline;
-	#bindings;
+	#entries;
 	//FIXME - 유일키가 될수있도록 변경
 	#mouseColorID = 0;
 	_renderDrawLayerIndex = Render.DRAW_LAYER_INDEX0;
@@ -283,7 +283,7 @@ export default class BaseObject3D extends DisplayContainer {
 		this.uniformBuffer_mesh.GPUBuffer.setSubData(0, new Float32Array([bufferData.uniformIndex]));
 		this.uniformBuffer_mesh.GPUBuffer.setSubData(TypeSize.float, new Float32Array([this.#mouseColorID]));
 		this.sumOpacity = 1;
-		this.#bindings = [
+		this.#entries = [
 			{
 				binding: 0,
 				resource: {
@@ -304,7 +304,7 @@ export default class BaseObject3D extends DisplayContainer {
 		this.GPUBindGroupLayout = redGPUContext.device.createBindGroupLayout(BaseObject3D.uniformsBindGroupLayoutDescriptor_mesh);
 		this.GPUBindGroup = this.#redGPUContext.device.createBindGroup({
 			layout: this.GPUBindGroupLayout,
-			bindings: this.#bindings
+			entries: this.#entries
 		});
 
 

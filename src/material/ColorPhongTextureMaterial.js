@@ -148,7 +148,7 @@ export default class ColorPhongTextureMaterial extends Mix.mix(
 		// fragment: ['emissiveTexture', 'normalTexture', 'specularTexture', 'useFlatMode']
 	};
 	static uniformsBindGroupLayoutDescriptor_material = {
-		bindings: [
+		entries: [
 			{binding: 0, visibility: GPUShaderStage.VERTEX, type: "uniform-buffer"},
 			{binding: 1, visibility: GPUShaderStage.VERTEX, type: "sampler"},
 			{binding: 2, visibility: GPUShaderStage.VERTEX, type: "sampled-texture"},
@@ -239,7 +239,7 @@ export default class ColorPhongTextureMaterial extends Mix.mix(
 		}
 	}
 	resetBindingInfo() {
-		this.bindings = [
+		this.entries = [
 			{
 				binding: 0,
 				resource: {

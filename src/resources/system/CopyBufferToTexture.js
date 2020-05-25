@@ -16,7 +16,7 @@ export default function CopyBufferToTexture(commandEncoder, device, imageDatas, 
 			let data = new Uint8ClampedArray(info.data);
 			let width = info.width;
 			let height = info.height;
-			let rowPitch = info.rowPitch;
+			let bytesPerRow = info.bytesPerRow;
 			const textureDataBuffer = device.createBuffer({
 				size: data.byteLength + data.byteLength % 4,
 				usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC,
@@ -25,8 +25,8 @@ export default function CopyBufferToTexture(commandEncoder, device, imageDatas, 
 			textureDataBuffer.setSubData(0, data);
 			const bufferView = {
 				buffer: textureDataBuffer,
-				rowPitch: rowPitch,
-				imageHeight: height,
+				bytesPerRow: bytesPerRow,
+				rowsPerImage: height,
 			};
 			const textureView = {
 				texture: gpuTexture,

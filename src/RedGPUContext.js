@@ -2,7 +2,7 @@
  *   RedGPU - MIT License
  *   Copyright (c) 2019 ~ By RedCamel( webseon@gmail.com )
  *   issue : https://github.com/redcamel/RedGPU/issues
- *   Last modification time of this file - 2020.3.23 18:29:56
+ *   Last modification time of this file - 2020.3.26 17:47:56
  *
  */
 "use strict";
@@ -54,6 +54,7 @@ let checkGlslang = function () {
 		}
 	});
 };
+
 export default class RedGPUContext {
 	static useDebugConsole = false;
 	#width = 0;
@@ -80,7 +81,7 @@ export default class RedGPUContext {
 								this.canvas = canvas;
 								this.context = canvas.getContext('gpupresent');
 								this.device = device;
-								this.swapChainFormat = "rgba8unorm";
+								this.swapChainFormat = "bgra8unorm";
 								this.swapChain = configureSwapChain(this.device, this.swapChainFormat, this.context);
 								this.state = {
 									Geometry: new Map(),
@@ -97,7 +98,7 @@ export default class RedGPUContext {
 									emptyCubeTextureView: device.createTexture({
 										size: {width: 1, height: 1, depth: 1,},
 										dimension: '2d',
-										arrayLayerCount: 6,
+										// arrayLayerCount: 6,
 										mipLevelCount: 1,
 										sampleCount: 1,
 										format: 'r8unorm',
