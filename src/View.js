@@ -421,13 +421,19 @@ export default class View extends UUID {
 			readPixelCommandEncoder.copyTextureToBuffer(textureView, bufferView, textureExtent);
 			redGPUContext.device.defaultQueue.submit([readPixelCommandEncoder.finish()]);
 			console.log(readPixelBuffer)
+			readPixelBuffer = redGPUContext.device.createBufferMapped({
+				size: 16 * width * height,
+				usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
+			})[0];
+			console.log('bufferView',bufferView)
 			let promise = new Promise(resolve => {
-				readPixelBuffer.mapReadAsync().then(arrayBuffer => {
+				bufferView.buffer.mapReadAsync().then(arrayBuffer => {
 					readPixelBuffer.unmap();
 					readPixelBuffer.destroy();
 					readPixelBuffer = null;
 					resolve(arrayBuffer)
 				})
+				// resolve(new Float32Array(readPixelBuffer[1]))
 			});
 			return promise
 		}
