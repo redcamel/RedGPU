@@ -101,7 +101,7 @@ export default class ParticleMaterial extends BitmapMaterial {
 		// fragment: ['diffuseTexture']
 	};
 	static uniformsBindGroupLayoutDescriptor_material = {
-		bindings: [
+		entries: [
 			{binding: 0, visibility: GPUShaderStage.VERTEX, type: "uniform-buffer"},
 			{binding: 1, visibility: GPUShaderStage.FRAGMENT, type: "uniform-buffer"},
 			{binding: 2, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
@@ -129,7 +129,7 @@ export default class ParticleMaterial extends BitmapMaterial {
 		this.needResetBindingInfo = true
 	}
 	resetBindingInfo() {
-		this.bindings = [
+		this.entries = [
 			{
 				binding: 0,
 				resource: {

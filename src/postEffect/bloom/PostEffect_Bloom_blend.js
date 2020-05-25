@@ -56,7 +56,7 @@ export default class PostEffect_Bloom_blend extends BasePostEffect {
 	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
 	;
 	static uniformsBindGroupLayoutDescriptor_material = {
-		bindings: [
+		entries: [
 			{binding: 0, visibility: GPUShaderStage.FRAGMENT, type: "uniform-buffer"},
 			{binding: 1, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
 			{binding: 2, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"},
@@ -85,7 +85,7 @@ export default class PostEffect_Bloom_blend extends BasePostEffect {
 	}
 	constructor(redGPUContext) {super(redGPUContext);}
 	resetBindingInfo() {
-		this.bindings = [
+		this.entries = [
 			{
 				binding: 0,
 				resource: {

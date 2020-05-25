@@ -54,7 +54,7 @@ export default class ColorMaterial extends Mix.mix(
 	`;
 	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
 	static uniformsBindGroupLayoutDescriptor_material = {
-		bindings: [
+		entries: [
 			{binding: 0, visibility: GPUShaderStage.FRAGMENT, type: "uniform-buffer"}
 		]
 	};
@@ -72,7 +72,7 @@ export default class ColorMaterial extends Mix.mix(
 		this.needResetBindingInfo = true
 	}
 	resetBindingInfo() {
-		this.bindings = [
+		this.entries = [
 			{
 				binding: 0,
 				resource: {

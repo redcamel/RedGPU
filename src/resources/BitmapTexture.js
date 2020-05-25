@@ -26,7 +26,7 @@ let makeMipmap = function (redGPUContext, imageDatas, targetTexture) {
 		size: {width: tW, height: tH, depth: 1,},
 		dimension: '2d',
 		format: 'rgba8unorm',
-		arrayLayerCount: 1,
+		// arrayLayerCount: 1,
 		mipLevelCount: targetTexture.useMipmap ? targetTexture.mipMaps + 1 : 1,
 		usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.SAMPLED
 	};

@@ -36,7 +36,7 @@ export default class GridMaterial extends BaseMaterial {
 	}
 	`;
 	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
-	static uniformsBindGroupLayoutDescriptor_material = {bindings: []};
+	static uniformsBindGroupLayoutDescriptor_material = {entries: []};
 	static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
 	static uniformBufferDescriptor_fragment = BaseMaterial.uniformBufferDescriptor_empty;
 	constructor(redGPUContext) {
@@ -44,7 +44,7 @@ export default class GridMaterial extends BaseMaterial {
 		this.needResetBindingInfo = true
 	}
 	resetBindingInfo() {
-		this.bindings = [];
+		this.entries = [];
 		this._afterResetBindingInfo();
 	}
 }

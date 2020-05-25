@@ -105,7 +105,7 @@ export default class View extends UUID {
 			usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
 		};
 		const bindGroupLayoutDescriptor = {
-			bindings: [
+			entries: [
 				{
 					binding: 0,
 					visibility: GPUShaderStage.VERTEX,
@@ -117,7 +117,7 @@ export default class View extends UUID {
 		this.#systemUniformInfo_vertex_data = new Float32Array(uniformBufferSize / Float32Array.BYTES_PER_ELEMENT);
 		bindGroupDescriptor = {
 			layout: uniformBindGroupLayout = device.createBindGroupLayout(bindGroupLayoutDescriptor),
-			bindings: [
+			entries: [
 				{
 					binding: 0,
 					resource: {
@@ -150,7 +150,7 @@ export default class View extends UUID {
 			usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
 		};
 		const bindGroupLayoutDescriptor = {
-			bindings: [
+			entries: [
 				{
 					binding: 0,
 					visibility: GPUShaderStage.FRAGMENT,
@@ -162,7 +162,7 @@ export default class View extends UUID {
 		this.#systemUniformInfo_fragment_data = new Float32Array(uniformBufferSize / Float32Array.BYTES_PER_ELEMENT);
 		bindGroupDescriptor = {
 			layout: uniformBindGroupLayout = device.createBindGroupLayout(bindGroupLayoutDescriptor),
-			bindings: [
+			entries: [
 				{
 					binding: 0,
 					resource: {
@@ -416,11 +416,11 @@ export default class View extends UUID {
 				usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
 			});
 			textureView = {texture: targetTexture, origin: {x: x, y: y, z: 0}};
-			bufferView = {buffer: readPixelBuffer, rowPitch: Math.max(256, 4 * width * height), imageHeight: 1};
+			bufferView = {buffer: readPixelBuffer, bytesPerRow: Math.max(256, 4 * width * height), rowsPerImage: 1};
 			textureExtent = {width: width, height: height, depth: 1};
 			readPixelCommandEncoder.copyTextureToBuffer(textureView, bufferView, textureExtent);
 			redGPUContext.device.defaultQueue.submit([readPixelCommandEncoder.finish()]);
-
+			console.log(readPixelBuffer)
 			let promise = new Promise(resolve => {
 				readPixelBuffer.mapReadAsync().then(arrayBuffer => {
 					readPixelBuffer.unmap();

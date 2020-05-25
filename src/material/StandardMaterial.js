@@ -157,7 +157,7 @@ export default class StandardMaterial extends Mix.mix(
 		fragment: []
 	};
 	static uniformsBindGroupLayoutDescriptor_material = {
-		bindings: [
+		entries: [
 			{binding: 0, visibility: GPUShaderStage.VERTEX, type: "uniform-buffer"},
 			{binding: 1, visibility: GPUShaderStage.VERTEX, type: "sampler"},
 			{binding: 2, visibility: GPUShaderStage.VERTEX, type: "sampled-texture"},
@@ -254,7 +254,7 @@ export default class StandardMaterial extends Mix.mix(
 	}
 
 	resetBindingInfo() {
-		this.bindings = [
+		this.entries = [
 			{
 				binding: 0,
 				resource: {

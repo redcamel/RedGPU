@@ -56,14 +56,14 @@ const workerImage = createWorker(async () => {
 									ctx.drawImage(img, 0, 0, faceWidth, faceHeight);
 									let imageData = ctx.getImageData(0, 0, faceWidth, faceHeight).data;
 									let data;
-									const rowPitch = Math.ceil(faceWidth * 4 / 256) * 256;
-									if (rowPitch == faceWidth * 4) data = imageData;
+									const bytesPerRow = Math.ceil(faceWidth * 4 / 256) * 256;
+									if (bytesPerRow == faceWidth * 4) data = imageData;
 									else {
-										data = new Uint8ClampedArray(rowPitch * faceHeight);
+										data = new Uint8ClampedArray(bytesPerRow * faceHeight);
 										let pixelsIndex = 0;
 										for (let y = 0; y < faceHeight; ++y) {
 											for (let x = 0; x < faceWidth; ++x) {
-												let i = x * 4 + y * rowPitch;
+												let i = x * 4 + y * bytesPerRow;
 												data[i] = imageData[pixelsIndex];
 												data[i + 1] = imageData[pixelsIndex + 1];
 												data[i + 2] = imageData[pixelsIndex + 2];
@@ -76,7 +76,7 @@ const workerImage = createWorker(async () => {
 										data: data.buffer,
 										width: faceWidth,
 										height: faceHeight,
-										rowPitch: rowPitch
+										bytesPerRow: bytesPerRow
 									});
 									faceWidth = Math.max(Math.floor(faceWidth / 2), 1);
 									faceHeight = Math.max(Math.floor(faceHeight / 2), 1);

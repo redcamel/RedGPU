@@ -22,7 +22,7 @@ export default class BasePostEffect extends Mix.mix(
 	static fragmentShaderGLSL = ``;
 	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
 	static uniformsBindGroupLayoutDescriptor_material = {
-		bindings: [
+		entries: [
 			{binding: 0, visibility: GPUShaderStage.FRAGMENT, type: "uniform-buffer"},
 			{binding: 1, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
 			{binding: 2, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"},
@@ -91,7 +91,7 @@ export default class BasePostEffect extends Mix.mix(
 		redGPUContext.device.defaultQueue.submit([commandEncoder_effect.finish()]);
 	}
 	resetBindingInfo() {
-		this.bindings = [
+		this.entries = [
 			{
 				binding: 0,
 				resource: {
