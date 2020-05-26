@@ -23,6 +23,7 @@ export default class BaseTexture extends UUID {
 		if (this instanceof BitmapTexture) this._GPUTextureView = texture ? texture.createView() : null;
 		else {
 			this._GPUTexture = texture;
+			console.log(texture)
 			this._GPUTextureView = texture ? texture.createView(
 				{
 					format: 'rgba8unorm',
