@@ -87,7 +87,7 @@ export default class ParticleMaterial extends BitmapMaterial {
 	layout( location = 1 ) out vec4 out_MouseColorID_Depth;
 	void main() {
 		vec4 diffuseColor = vec4(0.0);
-		diffuseColor = texture(sampler2D(uDiffuseTexture, uSampler), vUV) ;
+		if(fragmentUniforms.__diffuseTextureRenderYn == TRUTHY) diffuseColor = texture(sampler2D(uDiffuseTexture, uSampler), vUV) ;
 		outColor = diffuseColor;
 		outColor.a *= fragmentUniforms.alpha * vSumOpacity;
 		out_MouseColorID_Depth = vec4(vMouseColorID, gl_FragCoord.z/gl_FragCoord.w, 0.0, 0.0);
@@ -112,7 +112,8 @@ export default class ParticleMaterial extends BitmapMaterial {
 		{size: TypeSize.float, valueName: 'sprite3DMode'}
 	];
 	static uniformBufferDescriptor_fragment = [
-		{size: TypeSize.float, valueName: 'alpha'}
+		{size: TypeSize.float, valueName: 'alpha'},
+		{size: TypeSize.float, valueName: '__diffuseTextureRenderYn'}
 	];
 	_sprite3DMode=true;
 	get sprite3DMode() {
