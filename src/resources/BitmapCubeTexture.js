@@ -62,18 +62,19 @@ export default class BitmapCubeTexture extends BaseTexture {
 			new ImageLoader(redGPUContext, srcList, function (e) {
 				// console.log(MIPMAP_TABLE.get(self.mapKey));
 				//FIXME - 캐싱이 왜안되나
-				// if (MIPMAP_TABLE.get(self.mapKey)) {
-				// 	console.log('BitmapCubeTexture - 캐싱사용', e);
-				// 	self.resolve(MIPMAP_TABLE.get(self.mapKey));
-				// 	if (self.onload) self.onload(self)
-				// } else {
+				if (MIPMAP_TABLE.get(self.mapKey)) {
+					console.log('BitmapCubeTexture - 캐싱사용', e);
+					console.log('뭐가오는거지',MIPMAP_TABLE)
+					self.resolve(MIPMAP_TABLE.get(self.mapKey));
+					if (self.onload) self.onload(self)
+				} else {
 					console.log('BitmapCubeTexture - 신규생성', e);
 					if (e.ok) makeMipmap(redGPUContext, this.imgList, self);
 					else {
 						self.resolve(null);
 						if (self.onerror) self.onerror(self)
 					}
-				// }
+				}
 			}, ImageLoader.TYPE_CUBE)
 		}
 	}

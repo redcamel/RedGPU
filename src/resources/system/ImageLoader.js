@@ -77,6 +77,7 @@ export default class ImageLoader extends UUID {
 					if (src.includes(';base64,') || src.includes('://')) {
 						targetSRC = src
 					}
+
 					if (SRC_MAP[targetSRC]) {
 						if (SRC_MAP[targetSRC].loaded) {
 							console.log('곧장 맵찾으러감');
@@ -118,7 +119,7 @@ export default class ImageLoader extends UUID {
 
 							})
 							.catch(result => {
-								console.log('로딩실패!', result);
+								console.log('로딩실패!',targetSRC, result);
 								SRC_MAP[targetSRC].tempList.forEach(loader => {
 									if (loader.callback) loader.callback.call(loader, result)
 								});

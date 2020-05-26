@@ -24,7 +24,10 @@ export default class BaseTexture extends UUID {
 		else {
 			this._GPUTexture = texture;
 			console.log(texture)
-			this._GPUTextureView = texture ? texture.createView(
+			if(texture._GPUTextureView){
+				this._GPUTextureView = texture._GPUTextureView
+			}else{
+			texture._GPUTextureView = this._GPUTextureView = texture ? texture.createView(
 				{
 					format: 'rgba8unorm',
 					dimension: 'cube',
@@ -33,9 +36,9 @@ export default class BaseTexture extends UUID {
 					mipLevelCount: this.mipMaps + 1,
 					baseArrayLayer: 0,
 					arrayLayerCount: 6
-
 				}
 			) : null;
+			}
 
 		}
 		let i = this.#updateList.length;

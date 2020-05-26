@@ -11,7 +11,6 @@ import ImageLoader from "./system/ImageLoader.js";
 import CopyBufferToTexture from './system/CopyBufferToTexture.js'
 import BaseTexture from "../base/BaseTexture.js";
 
-
 let defaultSampler;
 const MIPMAP_TABLE = new Map();
 let makeMipmap = function (redGPUContext, imageDatas, targetTexture) {
@@ -57,21 +56,20 @@ export default class BitmapTexture extends BaseTexture {
 		} else {
 			let self = this;
 			new ImageLoader(redGPUContext, src, function (e) {
-				// console.log(MIPMAP_TABLE)
-				// console.log(self.mapKey)
-				// if (MIPMAP_TABLE.get(self.mapKey)) {
-				// 	console.log('BitmapTexture - 캐싱사용');
-				// 	self.resolve(MIPMAP_TABLE.get(self.mapKey));
-				// 	if (self.onload) self.onload(self)
-				// } else {
-				//FIXME - 캐싱이 왜안되나
+				console.log(MIPMAP_TABLE)
+				console.log(self.mapKey)
+				if (MIPMAP_TABLE.get(self.mapKey)) {
+					console.log('BitmapTexture - 캐싱사용');
+					self.resolve(MIPMAP_TABLE.get(self.mapKey));
+					if (self.onload) self.onload(self)
+				} else {
 					console.log('BitmapTexture - 신규생성', e);
 					if (e.ok) makeMipmap(redGPUContext, this.imageDatas, self);
 					else {
 						self.resolve(null);
 						if (self.onerror) self.onerror(self)
 					}
-				// }
+				}
 			}, ImageLoader.TYPE_2D)
 		}
 	}
