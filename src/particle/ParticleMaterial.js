@@ -122,7 +122,8 @@ export default class ParticleMaterial extends BitmapMaterial {
 	set sprite3DMode(value) {
 		this._sprite3DMode = value;
 		float1_Float32Array[0] = value ? 1 : 0;
-		this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['sprite3DMode'], float1_Float32Array)
+		// this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['sprite3DMode'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_vertex.GPUBuffer,this.uniformBufferDescriptor_vertex.redStructOffsetMap['sprite3DMode'], float1_Float32Array)
 	}
 	constructor(redGPUContext, diffuseTexture) {
 		super(redGPUContext);

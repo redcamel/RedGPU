@@ -99,7 +99,8 @@ export default class PostEffect_Convolution extends BasePostEffect {
 	get kernel() {return this._kernel;}
 	set kernel(value) {
 		this._kernel = value;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['kernel'], this._kernel);
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['kernel'], this._kernel);
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['kernel'], this._kernel)
 		this.kernelWeight = 1
 	}
 	get kernelWeight() {return this._kernelWeight}
@@ -109,7 +110,8 @@ export default class PostEffect_Convolution extends BasePostEffect {
 		while (i--) sum += this._kernel[i];
 		this._kernelWeight = sum;
 		float1_Float32Array[0] = sum;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['kernelWeight'], float1_Float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['kernelWeight'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['kernelWeight'], float1_Float32Array)
 	}
 	constructor(redGPUContext, kernel = PostEffect_Convolution.NORMAL) {
 		super(redGPUContext);

@@ -10,7 +10,7 @@
 import RedGPUContext from "../../RedGPUContext.js";
 
 export default class DetectorGPU {
-	#redGPUContext;
+	redGPUContext;
 	constructor() {
 		this.#getBrowserInfo();
 		if (this.browser === 'ie') console.table = console.log;

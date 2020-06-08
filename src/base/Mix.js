@@ -5,20 +5,24 @@
  *   Last modification time of this file - 2020.1.20 18:6:15
  *
  */
-
 "use strict";
 import UTIL from "../util/UTIL.js";
 
 let float1_Float32Array = new Float32Array(1);
 const mix = (Base, ...texture) => {
-	return [Base, ...texture].reduce((parent, extender) => { return extender(parent)})
+	return [Base, ...texture].reduce((parent, extender) => {
+		return extender(parent)
+	})
 };
 const color = Base => class extends Base {
 	#color = '#ff0000';
 	#colorAlpha = 1;
 	_colorRGBA = new Float32Array([1, 0, 0, this.#colorAlpha]);
 
-	get color() {return this.#color;}
+	get color() {
+		return this.#color;
+	}
+
 	set color(hex) {
 		this.#color = hex;
 		let rgb = UTIL.hexToRGB_ZeroToOne(hex);
@@ -27,10 +31,16 @@ const color = Base => class extends Base {
 		this._colorRGBA[2] = rgb[2] * this.#colorAlpha;
 		this._colorRGBA[3] = this.#colorAlpha;
 		//TODO - 시스템 버퍼쪽도 같은 개념으로 바꿔야 if 비용을 줄일 수 있음
-		if (this.uniformBuffer_fragment) this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['colorRGBA'], this._colorRGBA)
+		if (this.uniformBuffer_fragment) {
+			// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['colorRGBA'], this._colorRGBA)
+			this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['colorRGBA'], this._colorRGBA)
+		}
 	}
 
-	get colorAlpha() {return this.#colorAlpha;}
+	get colorAlpha() {
+		return this.#colorAlpha;
+	}
+
 	set colorAlpha(value) {
 		let rgb = UTIL.hexToRGB_ZeroToOne(this.#color);
 		this._colorRGBA[0] = rgb[0] * value;
@@ -38,17 +48,29 @@ const color = Base => class extends Base {
 		this._colorRGBA[2] = rgb[2] * value;
 		this._colorRGBA[3] = value;
 		this.#colorAlpha = value;
-		if (this.uniformBuffer_fragment) this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['colorRGBA'], this._colorRGBA)
+		if (this.uniformBuffer_fragment) {
+			// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['colorRGBA'], this._colorRGBA)
+			this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['colorRGBA'], this._colorRGBA)
+		}
 	}
-	get colorRGBA() {return this._colorRGBA;}
+
+	get colorRGBA() {
+		return this._colorRGBA;
+	}
 };
 const alpha = Base => class extends Base {
 	#alpha = 1;
-	get alpha() {return this.#alpha;}
+	get alpha() {
+		return this.#alpha;
+	}
+
 	set alpha(value) {
 		this.#alpha = value;
 		float1_Float32Array[0] = this.#alpha;
-		if (this.uniformBuffer_fragment) this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['alpha'], float1_Float32Array)
+		if (this.uniformBuffer_fragment) {
+			// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['alpha'], float1_Float32Array)
+			this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['alpha'], float1_Float32Array)
+		}
 	}
 };
 const defineTextureClass = function (name) {
@@ -59,12 +81,12 @@ const defineTextureClass = function (name) {
 			// this[`_${name}`] = null;
 			this.checkTexture(texture, name);
 		}
+
 		get [name]() {
 			return this[`_${name}`]
 		}
 	};
 };
-
 const diffuseTexture = defineTextureClass('diffuseTexture');
 const normalTexture = defineTextureClass('normalTexture');
 const specularTexture = defineTextureClass('specularTexture');
@@ -72,11 +94,15 @@ const emissiveTextureBase = defineTextureClass('emissiveTexture');
 const emissiveTexture = Base => {
 	let t0 = class extends Base {
 		_emissivePower = 1.0;
-		get emissivePower() {return this._emissivePower;}
+		get emissivePower() {
+			return this._emissivePower;
+		}
+
 		set emissivePower(value) {
 			this._emissivePower = value;
 			float1_Float32Array[0] = this._emissivePower;
-			this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['emissivePower'], float1_Float32Array)
+			// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['emissivePower'], float1_Float32Array)
+			this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['emissivePower'], float1_Float32Array)
 		}
 	};
 	return mix(t0, emissiveTextureBase)
@@ -85,116 +111,168 @@ const environmentTextureBase = defineTextureClass('environmentTexture');
 const environmentTexture = Base => {
 	let t0 = class extends Base {
 		_environmentPower = 1;
-		get environmentPower() {return this._environmentPower;}
+		get environmentPower() {
+			return this._environmentPower;
+		}
+
 		set environmentPower(value) {
 			this._environmentPower = value;
 			float1_Float32Array[0] = this._environmentPower;
-			this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['environmentPower'], float1_Float32Array)
+			// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['environmentPower'], float1_Float32Array)
+			this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['environmentPower'], float1_Float32Array)
 		}
 	};
 	return mix(t0, environmentTextureBase)
 };
-
 const refractionTextureBase = defineTextureClass('refractionTexture');
 const refractionTexture = Base => {
 	let t0 = class extends Base {
 		_refractionPower = 1;
 		_refractionRatio = 0.95;
-		get refractionPower() {return this._refractionPower;}
+
+		get refractionPower() {
+			return this._refractionPower;
+		}
+
 		set refractionPower(value) {
 			this._refractionPower = value;
 			float1_Float32Array[0] = this._refractionPower;
-			this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['refractionPower'], float1_Float32Array)
+			// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['refractionPower'], float1_Float32Array)
+			this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['refractionPower'], float1_Float32Array)
 		}
-		get refractionRatio() {return this._refractionRatio;}
+
+		get refractionRatio() {
+			return this._refractionRatio;
+		}
+
 		set refractionRatio(value) {
 			this._refractionRatio = value;
 			float1_Float32Array[0] = this._refractionRatio;
-			this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['refractionRatio'], float1_Float32Array)
+			// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['refractionRatio'], float1_Float32Array)
+			this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['refractionRatio'], float1_Float32Array)
 		}
 	};
 	return mix(t0, refractionTextureBase)
 };
-
 const displacementTextureBase = defineTextureClass('displacementTexture');
 const displacementTexture = Base => {
 	let t0 = class extends Base {
 		_displacementFlowSpeedX = 0.0;
 		_displacementFlowSpeedY = 0.0;
 		_displacementPower = 0.1;
-		get displacementFlowSpeedY() {return this._displacementFlowSpeedY;}
+
+		get displacementFlowSpeedY() {
+			return this._displacementFlowSpeedY;
+		}
+
 		set displacementFlowSpeedY(value) {
 			this._displacementFlowSpeedY = value;
 			float1_Float32Array[0] = this._displacementFlowSpeedY;
-			this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['displacementFlowSpeedY'], float1_Float32Array)
+			// this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['displacementFlowSpeedY'], float1_Float32Array)
+			this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_vertex.GPUBuffer, this.uniformBufferDescriptor_vertex.redStructOffsetMap['displacementFlowSpeedY'], float1_Float32Array)
 		}
-		get displacementFlowSpeedX() {return this._displacementFlowSpeedX;}
+
+		get displacementFlowSpeedX() {
+			return this._displacementFlowSpeedX;
+		}
+
 		set displacementFlowSpeedX(value) {
 			this._displacementFlowSpeedX = value;
 			float1_Float32Array[0] = this._displacementFlowSpeedX;
-			this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['displacementFlowSpeedX'], float1_Float32Array)
+			// this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['displacementFlowSpeedX'], float1_Float32Array)
+			this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_vertex.GPUBuffer, this.uniformBufferDescriptor_vertex.redStructOffsetMap['displacementFlowSpeedX'], float1_Float32Array)
 		}
-		get displacementPower() {return this._displacementPower;}
+
+		get displacementPower() {
+			return this._displacementPower;
+		}
+
 		set displacementPower(value) {
 			this._displacementPower = value;
 			float1_Float32Array[0] = this._displacementPower;
-			this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['displacementPower'], float1_Float32Array)
+			// this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['displacementPower'], float1_Float32Array)
+			this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_vertex.GPUBuffer, this.uniformBufferDescriptor_vertex.redStructOffsetMap['displacementPower'], float1_Float32Array)
 		}
 	};
 	return mix(t0, displacementTextureBase)
 };
-
-
 const roughnessTextureBase = defineTextureClass('roughnessTexture');
 const roughnessTextureGLTF = Base => {
 	let t0 = class extends Base {
 		_roughnessTexCoordIndex = 0;
 		_roughnessFactor = 1;
+
 		set roughnessTexture(texture) {
 			this.checkTexture(texture, 'roughnessTexture')
 		}
-		get roughnessTexture() {return this._roughnessTexture}
-		get roughnessTexCoordIndex() {return this._roughnessTexCoordIndex;}
+
+		get roughnessTexture() {
+			return this._roughnessTexture
+		}
+
+		get roughnessTexCoordIndex() {
+			return this._roughnessTexCoordIndex;
+		}
+
 		set roughnessTexCoordIndex(value) {
 			this._roughnessTexCoordIndex = value;
 			float1_Float32Array[0] = value;
-			this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['roughnessTexCoordIndex'], float1_Float32Array)
+			// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['roughnessTexCoordIndex'], float1_Float32Array)
+			this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['roughnessTexCoordIndex'], float1_Float32Array)
 		}
-		get roughnessFactor() {return this._roughnessFactor;}
+
+		get roughnessFactor() {
+			return this._roughnessFactor;
+		}
+
 		set roughnessFactor(value) {
 			this._roughnessFactor = value;
 			float1_Float32Array[0] = value;
-			this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['roughnessFactor'], float1_Float32Array)
+			// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['roughnessFactor'], float1_Float32Array)
+			this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['roughnessFactor'], float1_Float32Array)
 		}
 	};
 	return mix(t0, roughnessTextureBase)
 };
-
 const occlusionTextureBase = defineTextureClass('occlusionTexture');
 const occlusionTextureGLTF = Base => {
 	let t0 = class extends Base {
 		_occlusionTexCoordIndex = 0;
 		_occlusionPower = 1;
+
 		set occlusionTexture(texture) {
 			this.checkTexture(texture, 'occlusionTexture')
 		}
-		get occlusionTexture() {return this._occlusionTexture}
-		get occlusionTexCoordIndex() {return this._occlusionTexCoordIndex;}
+
+		get occlusionTexture() {
+			return this._occlusionTexture
+		}
+
+		get occlusionTexCoordIndex() {
+			return this._occlusionTexCoordIndex;
+		}
+
 		set occlusionTexCoordIndex(value) {
 			this._occlusionTexCoordIndex = value;
 			float1_Float32Array[0] = value;
-			this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['occlusionTexCoordIndex'], float1_Float32Array)
+			// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['occlusionTexCoordIndex'], float1_Float32Array)
+			this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['occlusionTexCoordIndex'], float1_Float32Array)
+
 		}
-		get occlusionPower() {return this._occlusionPower;}
+
+		get occlusionPower() {
+			return this._occlusionPower;
+		}
+
 		set occlusionPower(value) {
 			this._occlusionPower = value;
 			float1_Float32Array[0] = value;
-			this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['occlusionPower'], float1_Float32Array)
+			// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['occlusionPower'], float1_Float32Array)
+			this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['occlusionPower'], float1_Float32Array)
 		}
 	};
 	return mix(t0, occlusionTextureBase)
 };
-
 const basicLightPropertys = Base => class extends Base {
 	_normalPower = 1;
 	_shininess = 32;
@@ -203,29 +281,44 @@ const basicLightPropertys = Base => class extends Base {
 	_specularColorRGBA = new Float32Array([1, 1, 1, 1]);
 	//
 	_useFlatMode = false;
-	get normalPower() {return this._normalPower;}
+
+	get normalPower() {
+		return this._normalPower;
+	}
+
 	set normalPower(value) {
 		this._normalPower = value;
 		float1_Float32Array[0] = this._normalPower;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['normalPower'], float1_Float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['normalPower'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['normalPower'], float1_Float32Array)
 	}
 
-	get shininess() {return this._shininess;}
+	get shininess() {
+		return this._shininess;
+	}
+
 	set shininess(value) {
 		this._shininess = value;
 		float1_Float32Array[0] = this._shininess;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['shininess'], float1_Float32Array)
-
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['shininess'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['shininess'], float1_Float32Array)
 	}
 
-	get specularPower() {return this._specularPower;}
+	get specularPower() {
+		return this._specularPower;
+	}
+
 	set specularPower(value) {
 		this._specularPower = value;
 		float1_Float32Array[0] = this._specularPower;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['specularPower'], float1_Float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['specularPower'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['specularPower'], float1_Float32Array)
 	}
 
-	get specularColor() {return this._specularColor;}
+	get specularColor() {
+		return this._specularColor;
+	}
+
 	set specularColor(value) {
 		this._specularColor = value;
 		let rgb = UTIL.hexToRGB_ZeroToOne(value);
@@ -233,19 +326,25 @@ const basicLightPropertys = Base => class extends Base {
 		this._specularColorRGBA[1] = rgb[1];
 		this._specularColorRGBA[2] = rgb[2];
 		this._specularColorRGBA[3] = 1;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['specularColorRGBA'], this._specularColorRGBA)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['specularColorRGBA'], this._specularColorRGBA)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['specularColorRGBA'], this._specularColorRGBA)
 	}
 
-	get specularColorRGBA() {return this._specularColorRGBA;}
+	get specularColorRGBA() {
+		return this._specularColorRGBA;
+	}
 
-	get useFlatMode() {return this._useFlatMode;}
+	get useFlatMode() {
+		return this._useFlatMode;
+	}
+
 	set useFlatMode(value) {
 		this._useFlatMode = value;
 		float1_Float32Array[0] = value ? 1 : 0;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['useFlatMode'], float1_Float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['useFlatMode'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['useFlatMode'], float1_Float32Array)
 	}
 };
-
 const defineNumber = function (keyName, option = {}) {
 	let t0;
 	let hasMin = option.hasOwnProperty('min');
@@ -263,6 +362,7 @@ const defineNumber = function (keyName, option = {}) {
 			this[`#${keyName}`] = value;
 			if (option['callback']) option['callback'].call(this, value);
 		}
+
 		get [keyName]() {
 			return this[`#${keyName}`]
 		}
@@ -286,7 +386,7 @@ export default {
 	environmentTexture: environmentTexture,
 	refractionTexture: refractionTexture,
 	displacementTexture: displacementTexture,
-	roughnessTextureGLTF : roughnessTextureGLTF,
-	occlusionTextureGLTF :occlusionTextureGLTF,
+	roughnessTextureGLTF: roughnessTextureGLTF,
+	occlusionTextureGLTF: occlusionTextureGLTF,
 	basicLightPropertys: basicLightPropertys
 }

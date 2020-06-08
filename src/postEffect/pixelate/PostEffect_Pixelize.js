@@ -66,13 +66,15 @@ export default class PostEffect_Pixelize extends BasePostEffect {
 	set width(value) {/*FIXME min: 0*/
 		this._width = value;
 		float1_Float32Array[0] = this._width;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['width'], float1_Float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['width'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['width'], float1_Float32Array)
 	}
 	get height() {return this._height;}
 	set height(value) {/*FIXME min: 0*/
 		this._height = value;
 		float1_Float32Array[0] = this._height;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['height'], float1_Float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['height'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['height'], float1_Float32Array)
 	}
 	constructor(redGPUContext) {super(redGPUContext);}
 }

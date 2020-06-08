@@ -5,7 +5,6 @@
  *   Last modification time of this file - 2020.1.20 18:6:15
  *
  */
-
 "use strict";
 import BaseMaterial from "../base/BaseMaterial.js";
 import ShareGLSL from "../base/ShareGLSL.js";
@@ -82,11 +81,13 @@ export default class BitmapMaterial extends Mix.mix(
 		//
 		{size: TypeSize.float, valueName: '__diffuseTextureRenderYn'},
 	];
+
 	constructor(redGPUContext, diffuseTexture) {
 		super(redGPUContext);
 		this.diffuseTexture = diffuseTexture;
 		this.needResetBindingInfo = true
 	}
+
 	checkTexture(texture, textureName) {
 		if (texture) {
 			if (texture._GPUTexture) {
@@ -100,24 +101,34 @@ export default class BitmapMaterial extends Mix.mix(
 				if (RedGPUContext.useDebugConsole) console.log("로딩완료or로딩에러확인 textureName", textureName, texture ? texture._GPUTexture : '');
 				if (tKey) {
 					float1_Float32Array[0] = this[`__${textureName}RenderYn`] = 1;
-					if (tKey == 'displacementTexture') this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
-					else this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+					if (tKey == 'displacementTexture') {
+						// this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+						this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_vertex.GPUBuffer, this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+					} else {
+						// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+						this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+					}
 				}
 				this.needResetBindingInfo = true
 			} else {
 				texture.addUpdateTarget(this, textureName)
 			}
-
 		} else {
 			if (this['_' + textureName]) {
 				this['_' + textureName] = null;
 				float1_Float32Array[0] = this[`__${textureName}RenderYn`] = 0;
-				if (textureName == 'displacementTexture') this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
-				else this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+				if (textureName == 'displacementTexture') {
+					// this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+					this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_vertex.GPUBuffer, this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+				} else {
+					// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+					this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+				}
 				this.needResetBindingInfo = true
 			}
 		}
 	}
+
 	resetBindingInfo() {
 		this.entries = [
 			{

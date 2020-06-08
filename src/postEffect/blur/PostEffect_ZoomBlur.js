@@ -83,19 +83,22 @@ export default class PostEffect_ZoomBlur extends BasePostEffect {
 	set centerX(value) {
 		this._centerX = value;
 		float1_Float32Array[0] = this._centerX;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['centerX'], float1_Float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['centerX'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['centerX'], float1_Float32Array)
 	}
 	get centerY() {return this._centerY;}
 	set centerY(value) {
 		this._centerY = value;
 		float1_Float32Array[0] = this._centerY;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['centerY'], float1_Float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['centerY'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['centerY'], float1_Float32Array)
 	}
 	get amount() {return this._amount;}
 	set amount(value) {/*FIXME - min: 1, max: 100*/
 		this._amount = value;
 		float1_Float32Array[0] = this._amount;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['amount'], float1_Float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['amount'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['amount'], float1_Float32Array)
 	}
 	get radius() {return this._radius;}
 

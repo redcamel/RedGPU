@@ -26,8 +26,6 @@ let makeUniformBindLayout = function (redGPUContext, uniformsBindGroupLayoutDesc
 };
 let BaseMaterial_searchModules_callNum = 0;
 export default class BaseMaterial extends UUID {
-	get redGPUContext() {return this.#redGPUContext;}
-	set redGPUContext(value) {this.#redGPUContext = value;}
 	static uniformBufferDescriptor_empty = [];
 
 	uniformBufferDescriptor_vertex;
@@ -39,7 +37,7 @@ export default class BaseMaterial extends UUID {
 	vertexStage;
 	fragmentStage;
 	entries;
-	#redGPUContext;
+	redGPUContext;
 	//
 	uniformBuffer_vertex;
 	uniformBuffer_fragment;
@@ -74,7 +72,7 @@ export default class BaseMaterial extends UUID {
 		this.uniformBuffer_fragment.setBuffer(this.uniformBufferDescriptor_fragment);
 		this.uniformBindGroup_material = new BindGroup(redGPUContext);
 
-		this.#redGPUContext = redGPUContext;
+		this.redGPUContext = redGPUContext;
 	}
 	updateUniformBuffer() {
 		let tempFloat32 = new Float32Array(1);
@@ -117,8 +115,10 @@ export default class BaseMaterial extends UUID {
 
 			}
 		}
-		this.uniformBuffer_vertex.GPUBuffer.setSubData(0, this.uniformBuffer_vertex.float32Array);
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(0, this.uniformBuffer_fragment.float32Array);
+		// this.uniformBuffer_vertex.GPUBuffer.setSubData(0, this.uniformBuffer_vertex.float32Array);
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_vertex.GPUBuffer, 0, this.uniformBuffer_vertex.float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(0, this.uniformBuffer_fragment.float32Array);
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, 0, this.uniformBuffer_fragment.float32Array)
 	}
 
 	checkTexture(texture, textureName) {throw new Error(`${this.constructor.name} : checkTexture must override!!!`)}

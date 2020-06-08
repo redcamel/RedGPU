@@ -94,25 +94,29 @@ export default class PostEffect_Film extends BasePostEffect {
 	set scanlineIntensity(value) {
 		this._scanlineIntensity = value;
 		float1_Float32Array[0] = this._scanlineIntensity;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['scanlineIntensity'], float1_Float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['scanlineIntensity'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['scanlineIntensity'], float1_Float32Array)
 	}
 	get noiseIntensity() {return this._noiseIntensity;}
 	set noiseIntensity(value) {
 		this._noiseIntensity = value;
 		float1_Float32Array[0] = this._noiseIntensity;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['noiseIntensity'], float1_Float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['noiseIntensity'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['noiseIntensity'], float1_Float32Array)
 	}
 	get scanlineCount() {return this._scanlineCount;}
 	set scanlineCount(value) {/*FIXME - min: 1, max: 100*/
 		this._scanlineCount = value;
 		float1_Float32Array[0] = this._scanlineCount;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['scanlineCount'], float1_Float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['scanlineCount'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['scanlineCount'], float1_Float32Array)
 	}
 	get grayMode() {return this._grayMode;}
 	set grayMode(value) {
 		this._grayMode = value;
 		float1_Float32Array[0] = this._grayMode ? 1 : 0;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['grayMode'], float1_Float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['grayMode'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['grayMode'], float1_Float32Array)
 	}
 	constructor(redGPUContext) {super(redGPUContext);}
 

@@ -375,31 +375,36 @@ export default class PBRMaterial_System extends Mix.mix(
 	set alphaBlend(value) {
 		this._alphaBlend = value;
 		float1_Float32Array[0] = value;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['alphaBlend'], float1_Float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['alphaBlend'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['alphaBlend'], float1_Float32Array)
 	}
 	get alphaBlend() {return this._alphaBlend;}
 	set cutOff(value) {
 		this._cutOff = value;
 		float1_Float32Array[0] = value;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['cutOff'], float1_Float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['cutOff'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['cutOff'], float1_Float32Array)
 	}
 	get cutOff() {return this._cutOff;}
 	get useCutOff() {return this._useCutOff}
 	set useCutOff(v) {
 		this._useCutOff = v;
 		float1_Float32Array[0] = v ? 1 : 0;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['useCutOff'], float1_Float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['useCutOff'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['useCutOff'], float1_Float32Array)
 	}
 	get useSkin() {return this._useSkin}
 	set useSkin(v) {
 		this._useSkin = v;
 		float1_Float32Array[0] = v ? 1 : 0;
-		this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['useSkin'], float1_Float32Array)
+		// this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['useSkin'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_vertex.GPUBuffer, this.uniformBufferDescriptor_vertex.redStructOffsetMap['useSkin'], float1_Float32Array)
 	}
 	set emissivePower(value) {
 		this._emissivePower = value;
 		float1_Float32Array[0] = value;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['emissivePower'], float1_Float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['emissivePower'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['emissivePower'], float1_Float32Array)
 	}
 	get emissivePower() {return this._emissivePower;}
 
@@ -407,52 +412,59 @@ export default class PBRMaterial_System extends Mix.mix(
 	set useMaterialDoubleSide(v) {
 		this._useMaterialDoubleSide = v;
 		float1_Float32Array[0] =  v ? 1 : 0;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['useMaterialDoubleSide'], float1_Float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['useMaterialDoubleSide'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['useMaterialDoubleSide'], float1_Float32Array)
 	}
 	get useVertexTangent() {return this._useVertexTangent}
 	set useVertexTangent(v) {
 		this._useVertexTangent = v;
 		float1_Float32Array[0] = v;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['useVertexTangent'], float1_Float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['useVertexTangent'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['useVertexTangent'], float1_Float32Array)
 	}
 
 	get metallicFactor() {return this._metallicFactor;}
 	set metallicFactor(value) {
 		this._metallicFactor = value;
 		float1_Float32Array[0] = value;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['metallicFactor'], float1_Float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['metallicFactor'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['metallicFactor'], float1_Float32Array)
 	}
 	get useVertexColor_0() {return this._useVertexColor_0;}
 	set useVertexColor_0(value) {
 		this._useVertexColor_0 = value;
 		float1_Float32Array[0] = value ? 1 : 0;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['useVertexColor_0'], float1_Float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['useVertexColor_0'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['useVertexColor_0'], float1_Float32Array)
 	}
 	get baseColorFactor() {return this._baseColorFactor;}
 	set baseColorFactor(value) {
 		this._baseColorFactor = new Float32Array(value);
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['baseColorFactor'], this._baseColorFactor)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['baseColorFactor'], this._baseColorFactor)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['baseColorFactor'], this._baseColorFactor)
 	}
 	get diffuseTexCoordIndex() {return this._diffuseTexCoordIndex;}
 	set diffuseTexCoordIndex(value) {
 		this._diffuseTexCoordIndex = value;
 		float1_Float32Array[0] = value;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['diffuseTexCoordIndex'], float1_Float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['diffuseTexCoordIndex'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['diffuseTexCoordIndex'], float1_Float32Array)
 	}
 	get normalTexCoordIndex() {return this._normalTexCoordIndex;}
 	set normalTexCoordIndex(value) {
 		this._normalTexCoordIndex = value;
 		float1_Float32Array[0] = value;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['normalTexCoordIndex'], float1_Float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['normalTexCoordIndex'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['normalTexCoordIndex'], float1_Float32Array)
 	}
 	get emissiveTexCoordIndex() {return this._emissiveTexCoordIndex;}
 	set emissiveTexCoordIndex(value) {
 		this._emissiveTexCoordIndex = value;
 		float1_Float32Array[0] = value;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['emissiveTexCoordIndex'], float1_Float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['emissiveTexCoordIndex'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['emissiveTexCoordIndex'], float1_Float32Array)
 	}
 	constructor(redGPUContext, diffuseTexture, environmentTexture, normalTexture, occlusionTexture, emissiveTexture, roughnessTexture) {
-
 		super(redGPUContext);
 		this.diffuseTexture = diffuseTexture;
 		this.environmentTexture = environmentTexture;
@@ -496,8 +508,14 @@ export default class PBRMaterial_System extends Mix.mix(
 				if (RedGPUContext.useDebugConsole) console.log("로딩완료or로딩에러확인 textureName", textureName, texture ? texture._GPUTexture : '');
 				if (tKey) {
 					float1_Float32Array[0] = this[`__${textureName}RenderYn`] = 1;
-					if (tKey == 'displacementTexture') this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
-					else this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+					if (tKey == 'displacementTexture') {
+						// this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+						this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_vertex.GPUBuffer, this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+					}
+					else {
+						// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+						this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+					}
 				}
 				// cancelAnimationFrame(this.#raf);
 				// this.#raf = requestAnimationFrame(_ => {this.needResetBindingInfo = true})
@@ -511,10 +529,15 @@ export default class PBRMaterial_System extends Mix.mix(
 			if (this['_' + textureName]) {
 				this['_' + textureName] = null;
 				float1_Float32Array[0] = this[`__${textureName}RenderYn`] = 0;
-				if (textureName == 'displacementTexture') this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
-				else this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+				if (textureName == 'displacementTexture') {
+					// this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+					this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_vertex.GPUBuffer, this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+				}
+				else {
+					// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+					this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+				}
 				this.needResetBindingInfo = true;
-				this.needResetBindingInfo = true
 			}
 		}
 	}

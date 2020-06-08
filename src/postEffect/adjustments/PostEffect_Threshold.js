@@ -59,7 +59,8 @@ export default class PostEffect_Threshold extends BasePostEffect {
 	set threshold(value) {/*FIXME min: 1, max: 255*/
 		this._threshold = value;
 		float1_Float32Array[0] = this._threshold;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['threshold'], float1_Float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['threshold'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['threshold'], float1_Float32Array)
 	}
 	constructor(redGPUContext) {super(redGPUContext);}
 }

@@ -5,9 +5,7 @@
  *   Last modification time of this file - 2020.3.26 17:3:14
  *
  */
-
 "use strict";
-
 import UniformBuffer from "../buffer/UniformBuffer.js";
 import DisplayContainer from "./DisplayContainer.js";
 import PipelineBasic from "./pipeline/PipelineBasic.js";
@@ -54,10 +52,7 @@ const getPool = function (redGPUContext, targetMesh) {
 	// console.log('MESH_UNIFORM_TABLE',MESH_UNIFORM_TABLE)
 	return result
 };
-
-
 export default class BaseObject3D extends DisplayContainer {
-
 	static uniformsBindGroupLayoutDescriptor_mesh = {
 		entries: [
 			{
@@ -96,7 +91,7 @@ export default class BaseObject3D extends DisplayContainer {
 	//
 	_material;
 	_geometry;
-	#redGPUContext;
+	_redGPUContext;
 	//
 	_depthWriteEnabled = true;
 	_depthCompare = 'less-equal';
@@ -113,164 +108,284 @@ export default class BaseObject3D extends DisplayContainer {
 	_renderDrawLayerIndex = Render.DRAW_LAYER_INDEX0;
 	_sumOpacity = 1;
 	_opacity = 1;
-	get sumOpacity() {return this._sumOpacity;}
+
+	get sumOpacity() {
+		return this._sumOpacity;
+	}
+
 	set sumOpacity(value) {
 		this._sumOpacity = value;
 		float1_Float32Array[0] = this._sumOpacity;
-		this.uniformBuffer_mesh.GPUBuffer.setSubData(TypeSize.float2, float1_Float32Array)
+		// this.uniformBuffer_mesh.GPUBuffer.setSubData(TypeSize.float2, float1_Float32Array)
+		this._redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_mesh.GPUBuffer, TypeSize.float2, float1_Float32Array)
 	}
-	get opacity() {return this._opacity;}
+
+	get opacity() {
+		return this._opacity;
+	}
+
 	set opacity(value) {
 		this._opacity = value;
 	}
-	get renderDrawLayerIndex() {return this._renderDrawLayerIndex;}
-	set renderDrawLayerIndex(value) {this._renderDrawLayerIndex = value;}
-	get blendColorSrc() {return this._blendColorSrc;}
+
+	get renderDrawLayerIndex() {
+		return this._renderDrawLayerIndex;
+	}
+
+	set renderDrawLayerIndex(value) {
+		this._renderDrawLayerIndex = value;
+	}
+
+	get blendColorSrc() {
+		return this._blendColorSrc;
+	}
+
 	set blendColorSrc(value) {
 		this._blendColorSrc = value;
 		this.dirtyPipeline = true;
 	}
-	get blendColorDst() {return this._blendColorDst;}
+
+	get blendColorDst() {
+		return this._blendColorDst;
+	}
+
 	set blendColorDst(value) {
 		this._blendColorDst = value;
 		this.dirtyPipeline = true;
 	}
-	get blendAlphaDst() {return this._blendAlphaDst;}
+
+	get blendAlphaDst() {
+		return this._blendAlphaDst;
+	}
+
 	set blendAlphaDst(value) {
 		this._blendAlphaDst = value;
 		this.dirtyPipeline = true;
 	}
-	get blendAlphaSrc() {return this._blendAlphaSrc;}
+
+	get blendAlphaSrc() {
+		return this._blendAlphaSrc;
+	}
+
 	set blendAlphaSrc(value) {
 		this._blendAlphaSrc = value;
 		this.dirtyPipeline = true;
 	}
+
 	/////////////////////////////////////////////////////////
-	get x() {return this._x}
+	get x() {
+		return this._x
+	}
+
 	set x(v) {
 		this._x = v;
 		this.dirtyTransform = true;
 	}
-	get y() {return this._y}
+
+	get y() {
+		return this._y
+	}
+
 	set y(v) {
 		this._y = v;
 		this.dirtyTransform = true;
 	}
-	get z() {return this._z;}
+
+	get z() {
+		return this._z;
+	}
+
 	set z(v) {
 		this._z = v;
 		this.dirtyTransform = true;
 	}
-	getPosition() {return [this._x, this._y, this._z]}
+
+	getPosition() {
+		return [this._x, this._y, this._z]
+	}
+
 	setPosition(x, y, z) {
 		this._x = x;
 		this._y = y;
 		this._z = z;
 		this.dirtyTransform = true;
 	}
+
 	/////////////////////////////////////////////////////////
-	get pivotZ() {return this._pivotZ;}
+	get pivotZ() {
+		return this._pivotZ;
+	}
+
 	set pivotZ(value) {
 		this._pivotZ = value;
 		this.dirtyTransform = true;
 	}
-	get pivotY() {return this._pivotY;}
+
+	get pivotY() {
+		return this._pivotY;
+	}
+
 	set pivotY(value) {
 		this._pivotY = value;
 		this.dirtyTransform = true;
 	}
-	get pivotX() {return this._pivotX;}
+
+	get pivotX() {
+		return this._pivotX;
+	}
+
 	set pivotX(value) {
 		this._pivotX = value;
 		this.dirtyTransform = true;
 	}
-	getPivotPosition() {return [this._pivotX, this._pivotY, this._pivotZ]}
+
+	getPivotPosition() {
+		return [this._pivotX, this._pivotY, this._pivotZ]
+	}
+
 	setPivotPosition(x, y, z) {
 		this._pivotX = x;
 		this._pivotY = y;
 		this._pivotZ = z;
 		this.dirtyTransform = true;
 	}
+
 	/////////////////////////////////////////////////////////
-	get rotationX() {return this._rotationX;}
+	get rotationX() {
+		return this._rotationX;
+	}
+
 	set rotationX(v) {
 		this._rotationX = v;
 		this.dirtyTransform = true;
 	}
-	get rotationY() {return this._rotationY;}
+
+	get rotationY() {
+		return this._rotationY;
+	}
+
 	set rotationY(v) {
 		this._rotationY = v;
 		this.dirtyTransform = true;
 	}
-	get rotationZ() {return this._rotationZ;}
+
+	get rotationZ() {
+		return this._rotationZ;
+	}
+
 	set rotationZ(v) {
 		this._rotationZ = v;
 		this.dirtyTransform = true;
 	}
-	getRotation() {return [this._rotationX, this._rotationY, this._rotationZ]}
+
+	getRotation() {
+		return [this._rotationX, this._rotationY, this._rotationZ]
+	}
+
 	setRotation(rX, rY, rZ) {
 		this._rotationX = rX;
 		this._rotationY = rY;
 		this._rotationZ = rZ;
 		this.dirtyTransform = true;
 	}
+
 	/////////////////////////////////////////////////////////
-	get scaleX() {return this._scaleX;}
+	get scaleX() {
+		return this._scaleX;
+	}
+
 	set scaleX(v) {
 		this._scaleX = v;
 		this.dirtyTransform = true;
 	}
-	get scaleY() {return this._scaleY;}
+
+	get scaleY() {
+		return this._scaleY;
+	}
+
 	set scaleY(v) {
 		this._scaleY = v;
 		this.dirtyTransform = true;
 	}
-	get scaleZ() {return this._scaleZ;}
+
+	get scaleZ() {
+		return this._scaleZ;
+	}
+
 	set scaleZ(v) {
 		this._scaleZ = v;
 		this.dirtyTransform = true;
 	}
-	getScale() {return [this._scaleX, this._scaleY, this._scaleZ]}
+
+	getScale() {
+		return [this._scaleX, this._scaleY, this._scaleZ]
+	}
+
 	setScale(sX, sY, sZ) {
 		this._scaleX = sX;
 		this._scaleY = sY;
 		this._scaleZ = sZ;
 		this.dirtyTransform = true;
 	}
+
 	/////////////////////////////////////////////////////////
-	get geometry() {return this._geometry}
+	get geometry() {
+		return this._geometry
+	}
+
 	set geometry(v) {
 		this._geometry = v;
 		this.dirtyPipeline = true;/* this.dirtyTransform = true*/
 	}
-	get material() {return this._material}
+
+	get material() {
+		return this._material
+	}
+
 	set material(v) {
 		this._material = v;
 		this.dirtyPipeline = true;/* this.dirtyTransform = true*/
 	}
-	get depthWriteEnabled() {return this._depthWriteEnabled;}
+
+	get depthWriteEnabled() {
+		return this._depthWriteEnabled;
+	}
+
 	set depthWriteEnabled(value) {
 		this.dirtyPipeline = true;
 		this._depthWriteEnabled = value;
 	}
-	get depthCompare() {return this._depthCompare;}
+
+	get depthCompare() {
+		return this._depthCompare;
+	}
+
 	set depthCompare(value) {
 		this.dirtyPipeline = true;
 		this._depthCompare = value;
 	}
-	get cullMode() {return this._cullMode;}
+
+	get cullMode() {
+		return this._cullMode;
+	}
+
 	set cullMode(value) {
 		this.dirtyPipeline = true;
 		this._cullMode = value;
 	}
-	get primitiveTopology() {return this._primitiveTopology;}
+
+	get primitiveTopology() {
+		return this._primitiveTopology;
+	}
+
 	set primitiveTopology(value) {
 		this.dirtyPipeline = true;
 		this._primitiveTopology = value;
 	}
+
 	constructor(redGPUContext) {
 		super();
-		this.#redGPUContext = redGPUContext;
+		this._redGPUContext = redGPUContext;
 		let bufferData = getPool(redGPUContext, this);
 		this.uniformBuffer_meshMatrix = bufferData.uniformBuffer_meshMatrix;
 		this.uniformBuffer_meshMatrix.meshFloat32Array = bufferData.float32Array;
@@ -280,8 +395,10 @@ export default class BaseObject3D extends DisplayContainer {
 		this.#mouseColorID = MOUSE_UUID;
 		this.uniformBuffer_mesh = new UniformBuffer(redGPUContext);
 		this.uniformBuffer_mesh.setBuffer(BaseObject3D.uniformBufferDescriptor_meshIndex);
-		this.uniformBuffer_mesh.GPUBuffer.setSubData(0, new Float32Array([bufferData.uniformIndex]));
-		this.uniformBuffer_mesh.GPUBuffer.setSubData(TypeSize.float, new Float32Array([this.#mouseColorID]));
+		// this.uniformBuffer_mesh.GPUBuffer.setSubData(0, new Float32Array([bufferData.uniformIndex]));
+		redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_mesh.GPUBuffer, 0, new Float32Array([bufferData.uniformIndex]))
+		// this.uniformBuffer_mesh.GPUBuffer.setSubData(TypeSize.float, new Float32Array([this.#mouseColorID]));
+		redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_mesh.GPUBuffer, TypeSize.float, new Float32Array([this.#mouseColorID]))
 		this.sumOpacity = 1;
 		this.#entries = [
 			{
@@ -302,17 +419,14 @@ export default class BaseObject3D extends DisplayContainer {
 			}
 		];
 		this.GPUBindGroupLayout = redGPUContext.device.createBindGroupLayout(BaseObject3D.uniformsBindGroupLayoutDescriptor_mesh);
-		this.GPUBindGroup = this.#redGPUContext.device.createBindGroup({
+		this.GPUBindGroup = this._redGPUContext.device.createBindGroup({
 			layout: this.GPUBindGroupLayout,
 			entries: this.#entries
 		});
-
-
 		this.pipeline = new PipelineBasic(redGPUContext, this);
 		this.normalMatrix = glMatrix.mat4.create();
 		this.matrix = glMatrix.mat4.create();
 		this.localMatrix = glMatrix.mat4.create()
-
 	}
 
 	/////////////////////////////////////////////////////////
@@ -323,11 +437,13 @@ export default class BaseObject3D extends DisplayContainer {
 		MouseEventChecker.mouseMAP[this.#mouseColorID][type] = handler;
 		// console.log(MouseEventChecker.mouseMAP)
 	}
+
 	removeEventListener(type) {
 		if (MouseEventChecker.mouseMAP[this.#mouseColorID]) {
 			MouseEventChecker.mouseMAP[this.#mouseColorID][type] = null;
 		}
 	}
+
 	targetTo = (_ => {
 		let up = new Float32Array([0, 1, 0]);
 		let tPosition = [];
@@ -345,7 +461,6 @@ export default class BaseObject3D extends DisplayContainer {
 			this._rotationY = -tRotation[1] * 180 / Math.PI;
 			this._rotationZ = -tRotation[2] * 180 / Math.PI;
 			this.dirtyTransform = true;
-
 		}
 	})();
 	localToWorld = (_ => {
@@ -374,7 +489,6 @@ export default class BaseObject3D extends DisplayContainer {
 			typeof z == 'number' || UTIL.throwFunc('BaseObject3D - worldToLocal : z - number만 허용함', '입력값 : ', z);
 			glMatrix.mat4.invert(tMTX, this.matrix);
 			glMatrix.mat4.transpose(tMTX, tMTX);
-
 			glMatrix.mat4.multiply(resultMTX, tMTX, this.matrix);
 			return [
 				resultMTX[0] * x + resultMTX[1] * y + resultMTX[2] * z + resultMTX[3],

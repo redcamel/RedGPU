@@ -63,13 +63,15 @@ export default class PostEffect_Vignetting extends BasePostEffect {
 	set intensity(value) {
 		this._intensity = value;
 		float1_Float32Array[0] = this._intensity;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['intensity'], float1_Float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['intensity'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['intensity'], float1_Float32Array)
 	}
 	get size() {return this._size;}
 	set size(value) {
 		this._size = value;
 		float1_Float32Array[0] = this._size;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['size'], float1_Float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['size'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['size'], float1_Float32Array)
 	}
 	constructor(redGPUContext) {super(redGPUContext);}
 }

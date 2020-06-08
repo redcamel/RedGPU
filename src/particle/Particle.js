@@ -262,7 +262,7 @@ export default class Particle extends BaseObject3D {
 	set texture(value) {return this._material.diffuseTexture = value;}
 	get material() {return this._material}
 	set material(v) {/*임의설정불가*/}
-	#redGPUContext;
+	redGPUContext;
 	#simParamData;
 	computePipeline;
 	particleBindGroup;
@@ -342,20 +342,22 @@ export default class Particle extends BaseObject3D {
 			],
 			0
 		);
-		this.simParamBuffer.setSubData(0, this.#simParamData);
-		const commandEncoder = this.#redGPUContext.device.createCommandEncoder({});
+		// this.simParamBuffer.setSubData(0, this.#simParamData);
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.simParamBuffer,0, this.#simParamData)
+		//
+		const commandEncoder = this.redGPUContext.device.createCommandEncoder({});
 		const passEncoder = commandEncoder.beginComputePass();
 		passEncoder.setPipeline(this.computePipeline);
 		passEncoder.setBindGroup(ShareGLSL.SET_INDEX_ComputeUniforms, this.particleBindGroup);
 		passEncoder.dispatch(this._particleNum);
 		passEncoder.endPass();
-		this.#redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
+		this.redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
 
 	}
 
 	constructor(redGPUContext, particleNum = 1, initInfo = {}, texture, geometry) {
 		super(redGPUContext);
-		this.#redGPUContext = redGPUContext;
+		this.redGPUContext = redGPUContext;
 		this._material = new ParticleMaterial(redGPUContext);
 		{
 			for(const k in initInfo){
@@ -405,12 +407,14 @@ export default class Particle extends BaseObject3D {
 			usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
 		};
 		this.simParamBuffer = redGPUContext.device.createBuffer(bufferDescriptor);
-		this.simParamBuffer.setSubData(0, this.#simParamData);
+		// this.simParamBuffer.setSubData(0, this.#simParamData);
+		redGPUContext.device.defaultQueue.writeBuffer(this.simParamBuffer,0, this.#simParamData)
+		//
 		this.pipeline = new PipelineParticle(redGPUContext, this);
 		this.particleNum = particleNum || 1;
 	}
 	setParticleData() {
-		let redGPUContext = this.#redGPUContext;
+		let redGPUContext = this.redGPUContext;
 		const _PROPERTY_NUM = this._PROPERTY_NUM;
 		const initialParticleData = new Float32Array(this._particleNum * _PROPERTY_NUM);
 		const currentTime = performance.now();
@@ -479,7 +483,9 @@ export default class Particle extends BaseObject3D {
 			size: initialParticleData.byteLength,
 			usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE
 		});
-		this.particleBuffer.setSubData(0, initialParticleData);
+		// this.particleBuffer.setSubData(0, initialParticleData);
+		redGPUContext.device.defaultQueue.writeBuffer(this.particleBuffer,0, initialParticleData)
+		//
 		let computeSource = getComputeSource(this._particleNum);
 		let shaderModuleDescriptor = {
 			code: redGPUContext.glslang.compileGLSL(computeSource, 'compute'),

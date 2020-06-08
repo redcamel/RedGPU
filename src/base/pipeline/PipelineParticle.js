@@ -12,12 +12,12 @@ import UUID from "../UUID.js";
 
 
 export default class PipelineParticle extends UUID {
-	#redGPUContext;
+	redGPUContext;
 	#targetMesh;
 	GPURenderPipeline;
 	constructor(redGPUContext, targetMesh) {
 		super();
-		this.#redGPUContext = redGPUContext;
+		this.redGPUContext = redGPUContext;
 		this.#targetMesh = targetMesh;
 		this.GPURenderPipeline = null;
 	}

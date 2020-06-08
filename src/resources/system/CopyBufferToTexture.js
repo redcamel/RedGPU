@@ -22,7 +22,8 @@ export default function CopyBufferToTexture(commandEncoder, device, imageDatas, 
 				usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC,
 			});
 			// console.log(imageData)
-			textureDataBuffer.setSubData(0, data);
+			// textureDataBuffer.setSubData(0, data);
+			device.defaultQueue.writeBuffer(textureDataBuffer, 0, data)
 			const bufferView = {
 				buffer: textureDataBuffer,
 				bytesPerRow: bytesPerRow,
@@ -31,7 +32,9 @@ export default function CopyBufferToTexture(commandEncoder, device, imageDatas, 
 			const textureView = {
 				texture: gpuTexture,
 				mipLevel: mip,
-				arrayLayer: Math.max(face, 0),
+				origin: {
+					z : Math.max(face, 0)
+				},
 			};
 			const textureExtent = {
 				width: width,

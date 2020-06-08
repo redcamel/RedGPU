@@ -48,6 +48,7 @@ export default class ColorPhongMaterial extends Mix.mix(
 	    vec4 specularColor;
         float alpha;
         float useFlatMode;
+        //
     } fragmentUniforms;
 	layout( location = 0 ) in vec3 vNormal;
 	layout( location = 1 ) in vec4 vVertexPosition;
@@ -60,7 +61,7 @@ export default class ColorPhongMaterial extends Mix.mix(
 
 		vec3 N = normalize(vNormal);
 		if(fragmentUniforms.useFlatMode == TRUTHY) N = getFlatNormal(vVertexPosition.xyz);
-
+		
 		float specularTextureValue = 1.0;
 		
 		vec4 finalColor = 
