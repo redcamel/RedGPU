@@ -5,11 +5,9 @@
  *   Last modification time of this file - 2020.3.14 19:2:51
  *
  */
-
 "use strict";
 import TypeSize from "../resources/TypeSize.js";
 import ShareGLSL from "../base/ShareGLSL.js";
-
 import Mix from "../base/Mix.js";
 import BaseMaterial from "../base/BaseMaterial.js";
 import RedGPUContext from "../RedGPUContext.js";
@@ -25,7 +23,6 @@ export default class ColorPhongTextureMaterial extends Mix.mix(
 	Mix.displacementTexture,
 	Mix.basicLightPropertys
 ) {
-
 	static vertexShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
@@ -182,6 +179,7 @@ export default class ColorPhongTextureMaterial extends Mix.mix(
 		{size: TypeSize.float, valueName: '__emissiveTextureRenderYn'}
 	];
 	#raf;
+
 	constructor(redGPUContext, color = '#ff0000', colorAlpha = 1, normalTexture, specularTexture, emissiveTexture, displacementTexture) {
 		super(redGPUContext);
 		this.color = color;
@@ -192,6 +190,7 @@ export default class ColorPhongTextureMaterial extends Mix.mix(
 		this.displacementTexture = displacementTexture;
 		this.needResetBindingInfo = true
 	}
+
 	checkTexture(texture, textureName) {
 		if (texture) {
 			if (texture._GPUTexture) {
@@ -213,13 +212,17 @@ export default class ColorPhongTextureMaterial extends Mix.mix(
 						this._displacementTexture = texture;
 						tKey = textureName;
 						break
-
 				}
 				if (RedGPUContext.useDebugConsole) console.log("로딩완료or로딩에러확인 textureName", textureName, texture ? texture._GPUTexture : '');
 				if (tKey) {
 					float1_Float32Array[0] = this[`__${textureName}RenderYn`] = 1;
-					if (tKey == 'displacementTexture') this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
-					else this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+					if (tKey == 'displacementTexture') {
+						// this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+						this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_vertex.GPUBuffer, this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+					} else {
+						// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+						this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+					}
 				}
 				// cancelAnimationFrame(this.#raf);
 				// this.#raf = requestAnimationFrame(_ => {this.needResetBindingInfo = true})
@@ -227,17 +230,22 @@ export default class ColorPhongTextureMaterial extends Mix.mix(
 			} else {
 				texture.addUpdateTarget(this, textureName)
 			}
-
 		} else {
 			if (this['_' + textureName]) {
 				this['_' + textureName] = null;
 				float1_Float32Array[0] = this[`__${textureName}RenderYn`] = 0;
-				if (textureName == 'displacementTexture') this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
-				else this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+				if (textureName == 'displacementTexture') {
+					// this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+					this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_vertex.GPUBuffer, this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+				} else {
+					// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+					this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+				}
 				this.needResetBindingInfo = true
 			}
 		}
 	}
+
 	resetBindingInfo() {
 		this.entries = [
 			{

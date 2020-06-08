@@ -20,7 +20,7 @@ const parseSource = function (tSource, replaceList) {
 	return tSource
 };
 export default class ShaderModule_GLSL {
-	#redGPUContext;
+	redGPUContext;
 	type;
 	originSource;
 	shaderModuleMap;
@@ -34,7 +34,7 @@ export default class ShaderModule_GLSL {
 			rootOriginSourceMap[type][className] = new Map();
 			shaderModuleMap[type][className] = {};
 		}
-		this.#redGPUContext = redGPUContext;
+		this.redGPUContext = redGPUContext;
 		this.type = type;
 		this.originSource = source;
 		this.sourceMap = rootOriginSourceMap[type][className];
@@ -44,7 +44,7 @@ export default class ShaderModule_GLSL {
 			// console.log('type', type);
 			// console.log(`materialClass.PROGRAM_OPTION_LIST - ${className}`, tOptionList.length, tOptionList);
 			if (tOptionList.length) {
-				RedGPUWorker.glslParserWorker(this.#redGPUContext,this, className, this.originSource, this.type, tOptionList).then(
+				RedGPUWorker.glslParserWorker(this.redGPUContext,this, className, this.originSource, this.type, tOptionList).then(
 					e => {
 						console.log('모든경우의수 컴파일 완료', e.data.shaderName, e.data.shaderType, e.data.totalNum)
 						// console.log(this.sourceMap)
@@ -73,7 +73,7 @@ export default class ShaderModule_GLSL {
 			if (tCompileGLSL instanceof Uint32Array) {
 				console.log('compileGLSL - cached shader source.', this.type, searchKey)
 			} else {
-				if (!tCompileGLSL) this.sourceMap.set(searchKey, tCompileGLSL = this.#redGPUContext.glslang.compileGLSL(parseSource(this.originSource, optionList), this.type));
+				if (!tCompileGLSL) this.sourceMap.set(searchKey, tCompileGLSL = this.redGPUContext.glslang.compileGLSL(parseSource(this.originSource, optionList), this.type));
 				console.log('compileGLSL - new shader source.', this.type, searchKey)
 			}
 			// console.timeEnd('compileGLSL : ' + this.type + ' / ' + searchKey);
@@ -82,7 +82,7 @@ export default class ShaderModule_GLSL {
 				code: tCompileGLSL,
 				// source: this.sourceMap.get(searchKey)
 			};
-			this.GPUShaderModule = this.#redGPUContext.device.createShaderModule(this.shaderModuleDescriptor);
+			this.GPUShaderModule = this.redGPUContext.device.createShaderModule(this.shaderModuleDescriptor);
 			this.shaderModuleMap[searchKey] = this.GPUShaderModule;
 		}
 	}

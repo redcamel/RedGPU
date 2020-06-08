@@ -56,14 +56,14 @@ export default class BitmapTexture extends BaseTexture {
 		} else {
 			let self = this;
 			new ImageLoader(redGPUContext, src, function (e) {
-				console.log(MIPMAP_TABLE)
-				console.log(self.mapKey)
+				// console.log(MIPMAP_TABLE)
+				// console.log(self.mapKey)
 				if (MIPMAP_TABLE.get(self.mapKey)) {
-					console.log('BitmapTexture - 캐싱사용');
+					console.log('BitmapTexture - 캐싱사용',e);
 					self.resolve(MIPMAP_TABLE.get(self.mapKey));
 					if (self.onload) self.onload(self)
 				} else {
-					console.log('BitmapTexture - 신규생성', e);
+					console.log('BitmapTexture - 신규생성',e);
 					if (e.ok) makeMipmap(redGPUContext, this.imageDatas, self);
 					else {
 						self.resolve(null);

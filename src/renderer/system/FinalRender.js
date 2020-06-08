@@ -107,7 +107,8 @@ export default class FinalRender extends BasePostEffect {
                 1
             ]
         );
-        this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['projectionMatrix'], this.projectionMatrix);
+        // this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['projectionMatrix'], this.projectionMatrix);
+        redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_vertex.GPUBuffer,this.uniformBufferDescriptor_vertex.redStructOffsetMap['projectionMatrix'], this.projectionMatrix)
         return true
     }
     render(redGPUContext, redView, renderScene, sourceTextureView,passEncoder_effect) {

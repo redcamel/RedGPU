@@ -77,7 +77,8 @@ export default class PostEffect_DoF_blend extends BasePostEffect {
 	set focusLength(value) {
 		this._focusLength = value;
 		float1_Float32Array[0] = this._focusLength;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['focusLength'], float1_Float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['focusLength'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['focusLength'], float1_Float32Array)
 	}
 	constructor(redGPUContext) {super(redGPUContext);}
 	resetBindingInfo() {

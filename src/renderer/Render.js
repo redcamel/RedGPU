@@ -468,7 +468,8 @@ let renderScene = (_ => {
                         tMaterial.uniformBuffer_vertex.float32Array.set(tSkinInfo['inverseBindMatrices'], tMaterial.uniformBufferDescriptor_vertex.redStructOffsetMap['inverseBindMatrixForJoint'] / Float32Array.BYTES_PER_ELEMENT);
                         tCacheUniformInfo[tUUID] = tSkinInfo['inverseBindMatrices']['_UUID']
                     }
-                    tMaterial.uniformBuffer_vertex.GPUBuffer.setSubData(0, tMaterial.uniformBuffer_vertex.float32Array)
+                    // tMaterial.uniformBuffer_vertex.GPUBuffer.setSubData(0, tMaterial.uniformBuffer_vertex.float32Array)
+                    redGPUContext.device.defaultQueue.writeBuffer(tMaterial.uniformBuffer_vertex.GPUBuffer, 0, tMaterial.uniformBuffer_vertex.float32Array)
                 }
                 if (!tFlatRenderYn) renderScene(redGPUContext, redView, passEncoder, tMesh.children);
                 tMesh.dirtyPipeline = false;
@@ -719,7 +720,10 @@ export default class Render {
         else redGPUContext.canvas.style.cursor = 'default';
         // 업데이트 대상 유니폼 버퍼 갱신
         i = updateTargetMatrixBufferList.length;
-        while (i--) updateTargetMatrixBufferList[i].GPUBuffer.setSubData(0, updateTargetMatrixBufferList[i].meshFloat32Array);
+        while (i--) {
+            // updateTargetMatrixBufferList[i].GPUBuffer.setSubData(0, updateTargetMatrixBufferList[i].meshFloat32Array);
+            redGPUContext.device.defaultQueue.writeBuffer(updateTargetMatrixBufferList[i].GPUBuffer, 0, updateTargetMatrixBufferList[i].meshFloat32Array)
+        }
         DisplayContainer.needFlatListUpdate = false;
         updateTargetMatrixBufferList.length = 0;
         GLTFLoader.animationLooper(time);

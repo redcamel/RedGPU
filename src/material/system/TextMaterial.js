@@ -112,13 +112,15 @@ export default class TextMaterial extends Mix.mix(
 	set width(value) {
 		this._width = value;
 		float1_Float32Array[0] = this._width;
-		this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['width'], float1_Float32Array)
+		// this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['width'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_vertex.GPUBuffer, this.uniformBufferDescriptor_vertex.redStructOffsetMap['width'], float1_Float32Array)
 	}
 	get height() {return this._height;}
 	set height(value) {
 		this._height = value;
 		float1_Float32Array[0] = this._height;
-		this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['height'], float1_Float32Array)
+		// this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['height'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_vertex.GPUBuffer, this.uniformBufferDescriptor_vertex.redStructOffsetMap['height'], float1_Float32Array)
 	}
 	constructor(redGPUContext, diffuseTexture) {
 		super(redGPUContext);

@@ -5,7 +5,6 @@
  *   Last modification time of this file - 2020.1.20 18:6:15
  *
  */
-
 "use strict";
 import TypeSize from "../resources/TypeSize.js";
 import BaseMaterial from "../base/BaseMaterial.js";
@@ -206,10 +205,9 @@ export default class EnvironmentMaterial extends Mix.mix(
 		{size: TypeSize.float, valueName: '__normalTextureRenderYn'},
 		{size: TypeSize.float, valueName: '__specularTextureRenderYn'},
 		{size: TypeSize.float, valueName: '__emissiveTextureRenderYn'}
-
-
 	];
 	#raf;
+
 	constructor(redGPUContext, diffuseTexture, environmentTexture, normalTexture, specularTexture, emissiveTexture, displacementTexture) {
 		super(redGPUContext);
 		this.diffuseTexture = diffuseTexture;
@@ -220,6 +218,7 @@ export default class EnvironmentMaterial extends Mix.mix(
 		this.displacementTexture = displacementTexture;
 		this.needResetBindingInfo = true
 	}
+
 	checkTexture(texture, textureName) {
 		if (texture) {
 			if (texture._GPUTexture) {
@@ -236,7 +235,6 @@ export default class EnvironmentMaterial extends Mix.mix(
 					case 'specularTexture' :
 						this._specularTexture = texture;
 						tKey = textureName;
-
 						break;
 					case 'emissiveTexture' :
 						this._emissiveTexture = texture;
@@ -254,8 +252,14 @@ export default class EnvironmentMaterial extends Mix.mix(
 				if (RedGPUContext.useDebugConsole) console.log("로딩완료or로딩에러확인 textureName", textureName, texture ? texture._GPUTexture : '');
 				if (tKey) {
 					float1_Float32Array[0] = this[`__${textureName}RenderYn`] = 1;
-					if(tKey=='displacementTexture') this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
-					else this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+					if (tKey == 'displacementTexture') {
+						// this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+						this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_vertex.GPUBuffer, this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+					}
+					else {
+						// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+						this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+					}
 				}
 				// cancelAnimationFrame(this.#raf);
 				// this.#raf = requestAnimationFrame(_ => {this.needResetBindingInfo = true})
@@ -263,13 +267,18 @@ export default class EnvironmentMaterial extends Mix.mix(
 			} else {
 				texture.addUpdateTarget(this, textureName)
 			}
-
 		} else {
 			if (this['_' + textureName]) {
 				this['_' + textureName] = null;
 				float1_Float32Array[0] = this[`__${textureName}RenderYn`] = 0;
-				if(textureName=='displacementTexture') this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
-				else this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+				if (textureName == 'displacementTexture') {
+					// this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+					this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_vertex.GPUBuffer, this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+				}
+				else {
+					// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+					this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+				}
 				this.needResetBindingInfo = true
 			}
 		}
@@ -341,8 +350,6 @@ export default class EnvironmentMaterial extends Mix.mix(
 				binding: 13,
 				resource: this._environmentTexture ? this._environmentTexture._GPUTextureView : this.redGPUContext.state.emptyCubeTextureView
 			}
-
-
 		];
 		this._afterResetBindingInfo();
 	}

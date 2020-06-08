@@ -88,36 +88,41 @@ export default class PostEffect_HalfTone extends BasePostEffect {
 	_centerY = 0;
 	_angle = 0;
 	_radius = 2;
-	_grayMode = 0;
+	_grayMode = false;
 	get centerX() {return this._centerX;}
 	set centerX(value) {
 		this._centerX = value;
 		float1_Float32Array[0] = this._centerX;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['centerX'], float1_Float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['centerX'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['centerX'], float1_Float32Array)
 	}
 	get centerY() {return this._centerY;}
 	set centerY(value) {
 		this._centerY = value;
 		float1_Float32Array[0] = this._centerY;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['centerY'], float1_Float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['centerY'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['centerY'], float1_Float32Array)
 	}
 	get angle() {return this._angle;}
 	set angle(value) {
 		this._angle = value;
 		float1_Float32Array[0] = this._angle;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['angle'], float1_Float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['angle'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['angle'], float1_Float32Array)
 	}
 	get radius() {return this._radius;}
 	set radius(value) {
 		this._radius = value;
 		float1_Float32Array[0] = this._radius;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['radius'], float1_Float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['radius'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['radius'], float1_Float32Array)
 	}
 	get grayMode() {return this._grayMode;}
 	set grayMode(value) {
-		this._grayMode = value ? 1 : 0;
+		this._grayMode = value;
 		float1_Float32Array[0] = this._grayMode ? 1 : 0;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['grayMode'], float1_Float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['grayMode'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['grayMode'], float1_Float32Array)
 	}
 	constructor(redGPUContext) {super(redGPUContext);}
 }

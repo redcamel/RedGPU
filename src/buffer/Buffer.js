@@ -17,10 +17,12 @@ export default class Buffer extends UUID {
 	vertexCount;
 	bufferDescriptor;
 	GPUBuffer;
+	redGPUContext;
 
 	constructor(redGPUContext, typeKey, bufferType, data, interleaveInfo, usage) {
 		super();
 		if (redGPUContext.state.Buffer[bufferType].has(typeKey)) return redGPUContext.state.Buffer[bufferType].get(typeKey);
+		this.redGPUContext = redGPUContext
 		let tUsage;
 		this.type = bufferType;
 		this.vertexCount = 0;
@@ -47,13 +49,16 @@ export default class Buffer extends UUID {
 		};
 		this.data = data;
 		this.GPUBuffer = redGPUContext.device.createBuffer(this.bufferDescriptor);
-		this.GPUBuffer.setSubData(0, data);
+		console.log(redGPUContext.device)
+		redGPUContext.device.defaultQueue.writeBuffer(this.GPUBuffer,0,data)
+		// this.GPUBuffer.setSubData(0, data);
 		redGPUContext.state.Buffer[bufferType].set(typeKey, this);
 		if (RedGPUContext.useDebugConsole) console.log(this);
 	}
 	update(data) {
 		this.data = data;
-		this.GPUBuffer.setSubData(0, new Float32Array(data));
+		// this.GPUBuffer.setSubData(0, new Float32Array(data));
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.GPUBuffer,0, new Float32Array(data))
 	}
 
 	destroy() {

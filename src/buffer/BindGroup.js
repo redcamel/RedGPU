@@ -11,15 +11,15 @@
 import RedGPUContext from "../RedGPUContext.js";
 
 export default class BindGroup {
-	#redGPUContext;
+	redGPUContext;
 	GPUBindGroup = null;
 	constructor(redGPUContext) {
-		this.#redGPUContext = redGPUContext;
+		this.redGPUContext = redGPUContext;
 	}
 	setGPUBindGroup(uniformBindGroupDescriptor) {
 		if (RedGPUContext.useDebugConsole) console.time('uniformBindGroupDescriptor');
 		if (RedGPUContext.useDebugConsole) console.log('uniformBindGroupDescriptor', uniformBindGroupDescriptor);
-		this.GPUBindGroup = this.#redGPUContext.device.createBindGroup(uniformBindGroupDescriptor);
+		this.GPUBindGroup = this.redGPUContext.device.createBindGroup(uniformBindGroupDescriptor);
 		if (RedGPUContext.useDebugConsole) console.timeEnd('uniformBindGroupDescriptor')
 	}
 }

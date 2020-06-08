@@ -953,7 +953,7 @@ const ExampleHelper = (_ => {
 			targetFolder.add(material, 'alpha', 0, 1, 0.01)
 		};
 		makeBaseLightProperty = (targetFolder, material) => {
-			targetFolder.add(material, 'normalPower', -5, 5, 0.01);
+			if(material.hasOwnProperty('normalPower')) targetFolder.add(material, 'normalPower', -5, 5, 0.01);
 			targetFolder.add(material, 'shininess', 0, 256, 0.01);
 			targetFolder.add(material, 'specularPower', 0, 5, 0.01);
 			targetFolder.addColor(material, 'specularColor');

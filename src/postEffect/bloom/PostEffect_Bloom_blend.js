@@ -75,13 +75,15 @@ export default class PostEffect_Bloom_blend extends BasePostEffect {
 	set bloomStrength(value) {
 		this._bloomStrength = value;
 		float1_Float32Array[0] = this._bloomStrength;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['bloomStrength'], float1_Float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['bloomStrength'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['bloomStrength'], float1_Float32Array)
 	}
 	get exposure() {return this._exposure;}
 	set exposure(value) {
 		this._exposure = value;
 		float1_Float32Array[0] = this._exposure;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['exposure'], float1_Float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['exposure'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['exposure'], float1_Float32Array)
 	}
 	constructor(redGPUContext) {super(redGPUContext);}
 	resetBindingInfo() {

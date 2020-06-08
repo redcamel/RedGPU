@@ -96,7 +96,7 @@ export default class RedGPUContext {
 										usage: GPUTextureUsage.SAMPLED,
 									}).createView(),
 									emptyCubeTextureView: device.createTexture({
-										size: {width: 1, height: 1, depth: 1,},
+										size: {width: 1, height: 1, depth: 6,},
 										dimension: '2d',
 										// arrayLayerCount: 6,
 										mipLevelCount: 1,

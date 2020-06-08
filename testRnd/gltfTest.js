@@ -283,32 +283,32 @@ new RedGPU.RedGPUContext(
 		// 	])
 		// );
 
-		new RedGPU.GLTFLoader(
-			this, // redGL
-			'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Sponza/glTF/', // assetRootPath
-			// '../assets/gltf/Sponza/glTF/', // assetRootPath
-			'Sponza.gltf', // fileName
-			function (v) { // callBack
-				console.log(v)
-				let tMesh = v['resultMesh']
-				tMesh.scaleX = tMesh.scaleY = tMesh.scaleZ = 15
-				// v['resultMesh'].scaleX = v['resultMesh'].scaleY = v['resultMesh'].scaleZ = 0.001
-				// tScene.addChild({_children:[tMesh._children[2],tMesh._children[8]]})
-				// tScene.addChild({_children:[tMesh._children[2]]})
-
-				tScene.addChild(tMesh)
-
-			},
-			new RedGPU.BitmapCubeTexture(this, [
-				'../assets/cubemap/SwedishRoyalCastle/px.jpg',
-				'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
-				'../assets/cubemap/SwedishRoyalCastle/py.jpg',
-				'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
-				'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
-				'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
-
-			])
-		);
+		// new RedGPU.GLTFLoader(
+		// 	this, // redGL
+		// 	'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Sponza/glTF/', // assetRootPath
+		// 	// '../assets/gltf/Sponza/glTF/', // assetRootPath
+		// 	'Sponza.gltf', // fileName
+		// 	function (v) { // callBack
+		// 		console.log(v)
+		// 		let tMesh = v['resultMesh']
+		// 		tMesh.scaleX = tMesh.scaleY = tMesh.scaleZ = 15
+		// 		// v['resultMesh'].scaleX = v['resultMesh'].scaleY = v['resultMesh'].scaleZ = 0.001
+		// 		// tScene.addChild({_children:[tMesh._children[2],tMesh._children[8]]})
+		// 		// tScene.addChild({_children:[tMesh._children[2]]})
+		//
+		// 		tScene.addChild(tMesh)
+		//
+		// 	},
+		// 	new RedGPU.BitmapCubeTexture(this, [
+		// 		'../assets/cubemap/SwedishRoyalCastle/px.jpg',
+		// 		'../assets/cubemap/SwedishRoyalCastle/nx.jpg',
+		// 		'../assets/cubemap/SwedishRoyalCastle/py.jpg',
+		// 		'../assets/cubemap/SwedishRoyalCastle/ny.jpg',
+		// 		'../assets/cubemap/SwedishRoyalCastle/pz.jpg',
+		// 		'../assets/cubemap/SwedishRoyalCastle/nz.jpg'
+		//
+		// 	])
+		// );
 		// new RedGPU.GLTFLoader(
 		// 	this, // redGL
 		// 	'../assets/gltf/', // assetRootPath

@@ -77,13 +77,15 @@ export default class PostEffect_HueSaturation extends BasePostEffect {
 	set hue(value) {/*FIXME min: -180, max: 180*/
 		this._hue = value;
 		float1_Float32Array[0] = this._hue/180;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['hue'], float1_Float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['hue'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['hue'], float1_Float32Array)
 	}
 	get saturation() {return this._saturation;}
 	set saturation(value) {/*FIXME min: -100, max: 100*/
 		this._saturation = value;
 		float1_Float32Array[0] = this._saturation/100;
-		this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['saturation'], float1_Float32Array)
+		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['saturation'], float1_Float32Array)
+		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['saturation'], float1_Float32Array)
 	}
 	constructor(redGPUContext) {super(redGPUContext);}
 }

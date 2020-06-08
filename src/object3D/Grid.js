@@ -19,7 +19,7 @@ export default class Grid extends BaseObject3D {
 	#divisions = 100;
 	#centerColor = '#cccccc';
 	#color = '#666666';
-	#redGPUContext;
+	redGPUContext;
 	get color() {return this.#color;}
 	set color(value) {
 		this.#color = value;
@@ -42,7 +42,7 @@ export default class Grid extends BaseObject3D {
 	}
 	constructor(redGPUContext, size = 100, divisions = 100, centerColor = '#cccccc', color = '#666666') {
 		super(redGPUContext);
-		this.#redGPUContext = redGPUContext;
+		this.redGPUContext = redGPUContext;
 		this.size = size;
 		this.divisions = divisions;
 		this.centerColor = centerColor;
@@ -52,7 +52,7 @@ export default class Grid extends BaseObject3D {
 		this.primitiveTopology = 'line-list'
 	}
 	makeGridGeometry() {
-		let redGPUContext = this.#redGPUContext;
+		let redGPUContext = this.redGPUContext;
 		let center, step, halfSize;
 		let i, k, tColor;
 

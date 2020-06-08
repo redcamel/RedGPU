@@ -17,7 +17,7 @@ import MouseEventChecker from "./renderer/system/MouseEventChecker.js";
 import glMatrix from "./base/gl-matrix-min.js";
 
 export default class View extends UUID {
-	#redGPUContext;
+	redGPUContext;
 	#scene;
 	#camera;
 	projectionMatrix;
@@ -83,7 +83,7 @@ export default class View extends UUID {
 
 	constructor(redGPUContext, scene, camera) {
 		super();
-		this.#redGPUContext = redGPUContext;
+		this.redGPUContext = redGPUContext;
 		this.camera = camera;
 		this.scene = scene;
 		this.systemUniformInfo_vertex = this.#makeSystemUniformInfo_vertex(redGPUContext.device);
@@ -359,8 +359,10 @@ export default class View extends UUID {
 		// update GPUBuffer
 		passEncoder.setBindGroup(0, systemUniformInfo_vertex.GPUBindGroup);
 		passEncoder.setBindGroup(1, systemUniformInfo_fragment.GPUBindGroup);
-		systemUniformInfo_vertex.GPUBuffer.setSubData(0, this.#systemUniformInfo_vertex_data);
-		systemUniformInfo_fragment.GPUBuffer.setSubData(0, this.#systemUniformInfo_fragment_data);
+		// systemUniformInfo_vertex.GPUBuffer.setSubData(0, this.#systemUniformInfo_vertex_data);
+		redGPUContext.device.defaultQueue.writeBuffer(systemUniformInfo_vertex.GPUBuffer, 0, this.#systemUniformInfo_vertex_data)
+		// systemUniformInfo_fragment.GPUBuffer.setSubData(0, this.#systemUniformInfo_fragment_data);
+		redGPUContext.device.defaultQueue.writeBuffer(systemUniformInfo_fragment.GPUBuffer, 0, this.#systemUniformInfo_fragment_data)
 
 	}
 
@@ -386,7 +388,7 @@ export default class View extends UUID {
 			else UTIL.throwFunc('View setSize : height는 0이상의 숫자나 %만 허용.', height);
 		}
 		if (RedGPUContext.useDebugConsole) console.log(`setSize - input : ${width},${height} / result : ${this.#width}, ${this.#height}`);
-		if (this.getViewRect(this.#redGPUContext).toString() != t0) this.resetTexture(this.#redGPUContext)
+		if (this.getViewRect(this.redGPUContext).toString() != t0) this.resetTexture(this.redGPUContext)
 
 	}
 
@@ -402,7 +404,7 @@ export default class View extends UUID {
 			else UTIL.throwFunc('View setLocation : y는 0이상의 숫자나 %만 허용.', y);
 		}
 		if (RedGPUContext.useDebugConsole) console.log(`setLocation - input : ${x},${y} / result : ${this._x}, ${this._y}`);
-		this.getViewRect(this.#redGPUContext)
+		this.getViewRect(this.redGPUContext)
 	}
 
 	readPixelArrayBuffer = async (redGPUContext, redView, targetTexture, x = 0, y = 0, width = 1, height = 1) => {
@@ -420,12 +422,12 @@ export default class View extends UUID {
 			textureExtent = {width: width, height: height, depth: 1};
 			readPixelCommandEncoder.copyTextureToBuffer(textureView, bufferView, textureExtent);
 			redGPUContext.device.defaultQueue.submit([readPixelCommandEncoder.finish()]);
-			console.log(readPixelBuffer)
+			// console.log(readPixelBuffer)
 			readPixelBuffer = redGPUContext.device.createBufferMapped({
 				size: 16 * width * height,
 				usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
 			})[0];
-			console.log('bufferView',bufferView)
+			// console.log('bufferView',bufferView)
 			let promise = new Promise(resolve => {
 				bufferView.buffer.mapReadAsync().then(arrayBuffer => {
 					readPixelBuffer.unmap();
