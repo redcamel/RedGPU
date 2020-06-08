@@ -40,7 +40,7 @@ new RedGPU.RedGPUContext(
 				console.log('텍스쳐 로딩완료', textureLoader)
 				console.timeEnd('텍스쳐 로딩속도')
 				console.log('로딩완료된 시점의 시간은? 어찌됨?', performance.now())
-				let MAX = 3000;
+				let MAX = 5000;
 				let i = MAX;
 				let tView, tView2;
 				let tScene = new RedGPU.Scene();
