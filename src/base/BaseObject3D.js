@@ -406,7 +406,7 @@ export default class BaseObject3D extends DisplayContainer {
 				resource: {
 					buffer: this.uniformBuffer_meshMatrix.GPUBuffer,
 					offset: 0,
-					size: TypeSize.mat4 * 2 * ShareGLSL.MESH_UNIFORM_POOL_NUM
+					size: this.uniformBuffer_meshMatrix.uniformBufferDescriptor.size
 				}
 			},
 			{
@@ -414,7 +414,7 @@ export default class BaseObject3D extends DisplayContainer {
 				resource: {
 					buffer: this.uniformBuffer_mesh.GPUBuffer,
 					offset: 0,
-					size: TypeSize.float
+					size: this.uniformBuffer_mesh.uniformBufferDescriptor.size
 				}
 			}
 		];

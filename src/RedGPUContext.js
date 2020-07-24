@@ -70,11 +70,16 @@ export default class RedGPUContext {
 			let state = true;
 			if (navigator.gpu) {
 				navigator.gpu.requestAdapter(
-					{powerPreference: "high-performance"}
+					{
+						powerPreference: "high-performance"
+					}
 				)
 					.then(adapter => {
 						adapter.requestDevice({
 							// extensions: ["anisotropic-filtering"]
+							// limits:{
+							// 	maxUniformBufferBindingSize : 16384
+							// }
 						})
 							.then(device => {
 								this.glslang = glslang;
