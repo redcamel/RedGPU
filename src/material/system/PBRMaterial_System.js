@@ -13,7 +13,7 @@ import ShareGLSL from "../../base/ShareGLSL.js";
 import Mix from "../../base/Mix.js";
 import RedGPUContext from "../../RedGPUContext.js";
 
-let maxJoint = 128; // TODO - 이거 계산해내야함 나중에
+let maxJoint = 127; // TODO - 이거 계산해내야함 나중에
 let float1_Float32Array = new Float32Array(1);
 export default class PBRMaterial_System extends Mix.mix(
 	BaseMaterial,
