@@ -33,7 +33,7 @@ export default class Geometry extends baseGeometry {
 		});
 		// attributes.forEach(function(v){console.log(v)});
 		this.vertexState = {
-			indexFormat: 'uint32',
+			// indexFormat: 'uint32',
 			vertexBuffers: [
 				{
 					arrayStride: arrayStride,

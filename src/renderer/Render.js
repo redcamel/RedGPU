@@ -174,7 +174,7 @@ let renderScene = (_ => {
                             }
                             if (tGeometry.indexBuffer) {
                                 if (prevIndexBuffer_UUID != tGeometry.indexBuffer._UUID) {
-                                    passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
+                                    passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer,'uint32');
                                     prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
                                 }
                                 passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, tMesh._particleNum, 0, 0, 0);
@@ -199,7 +199,7 @@ let renderScene = (_ => {
                                 }
                                 if (tGeometry.indexBuffer) {
                                     if (prevIndexBuffer_UUID != tGeometry.indexBuffer._UUID) {
-                                        passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer);
+                                        passEncoder.setIndexBuffer(tGeometry.indexBuffer.GPUBuffer,'uint32');
                                         prevIndexBuffer_UUID = tGeometry.indexBuffer._UUID
                                     }
                                     passEncoder.drawIndexed(tGeometry.indexBuffer.indexNum, 1, 0, 0, 0);
