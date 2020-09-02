@@ -48,7 +48,7 @@ export default class PipelineParticle extends UUID {
 			},
 			// 버텍스 상태는 지오메트리가 알고있음으로 들고옴
 			vertexState : {
-				indexFormat: 'uint32',
+				// indexFormat: 'uint32',
 				vertexBuffers: [
 					{
 						// vertex buffer
