@@ -40,7 +40,7 @@ let configure = function (redGPUContext) {
   const swapChainDescriptor = {
     device: redGPUContext.device,
     format: redGPUContext.swapChainFormat,
-    usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC,
+    usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC ,
     size: {
       width: redGPUContext.canvas.clientWidth * window.devicePixelRatio,
       height: redGPUContext.canvas.clientHeight * window.devicePixelRatio,
@@ -102,6 +102,7 @@ export default class RedGPUContext {
                 this.context = canvas.getContext('webgpu');
                 this.device = device;
                 this.swapChainFormat = this.context.getPreferredFormat(this.adapter)
+                // this.swapChainFormat = 'rgba8unorm'
                 this.swapChain = configure(this);
                 this.state = {
                   Geometry: new Map(),

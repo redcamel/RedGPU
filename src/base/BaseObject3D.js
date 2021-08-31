@@ -158,6 +158,7 @@ export default class BaseObject3D extends DisplayContainer {
     this.uniformBuffer_meshMatrix.meshFloat32Array = bufferData.float32Array;
     this.offsetMatrix = bufferData.offsetMatrix;
     this.offsetNormalMatrix = bufferData.offsetNormalMatrix;
+    // MOUSE_UUID++;
     MOUSE_UUID++;
     this.#mouseColorID = MOUSE_UUID;
     this.uniformBuffer_mesh = new UniformBuffer(redGPUContext);
