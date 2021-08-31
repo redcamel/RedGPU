@@ -93,7 +93,8 @@ export default class BasePostEffect extends Mix.mix(
       {
         colorAttachments: [{
           view: this.baseAttachmentView,
-          loadValue: {r: 0, g: 0, b: 0, a: 0}
+          loadValue: {r: 0, g: 0, b: 0, a: 0},
+
         }]
       }
     );

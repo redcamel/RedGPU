@@ -610,7 +610,8 @@ let renderView = (redGPUContext, redView, swapChainTexture, swapChainTextureView
           g: tSceneBackgroundColor_rgba[1],
           b: tSceneBackgroundColor_rgba[2],
           a: tSceneBackgroundColor_rgba[3]
-        }
+        },
+
       },
       {
         view: redView.baseAttachment_mouseColorID_depthView,

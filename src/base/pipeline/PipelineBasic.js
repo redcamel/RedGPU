@@ -57,26 +57,25 @@ export default class PipelineBasic extends UUID {
                 operation: "add"
               },
               alpha: {
-                srcFactor: "src-alpha",
-                dstFactor: "one-minus-src-alpha",
-                operation: "add"
+                  srcFactor: "src-alpha",
+                  dstFactor: "one",
+                  operation: "add"
               }
+              // color: {
+              //   srcFactor: "src-alpha",
+              //   dstFactor: "one-minus-src-alpha",
+              //   operation: "add"
+              // },
+              // alpha: {
+              //   srcFactor: "src-alpha",
+              //   dstFactor: "one-minus-src-alpha",
+              //   operation: "add"
+              // }
             }
           },
           {
-            format: 'rgba16float',
-            blend: {
-              color: {
-                srcFactor: "src-alpha",
-                dstFactor: "one-minus-src-alpha",
-                operation: "add"
-              },
-              alpha: {
-                srcFactor: "src-alpha",
-                dstFactor: "one-minus-src-alpha",
-                operation: "add"
-              }
-            }
+            format: 'rgba32float',
+
           },
         ],
       },

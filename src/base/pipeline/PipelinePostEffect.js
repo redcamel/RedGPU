@@ -57,7 +57,8 @@ export default class PipelinePostEffect extends UUID {
               },
               alpha: {
                 srcFactor: "src-alpha",
-                dstFactor: "one-minus-src-alpha",
+                // dstFactor: "one-minus-src-alpha",
+                dstFactor: "one",
                 operation: "add"
               }
             }
@@ -65,7 +66,6 @@ export default class PipelinePostEffect extends UUID {
         ]
       },
       // 컬러모드 지정하고
-
 
       primitive: {
         topology: targetMesh._primitiveTopology,

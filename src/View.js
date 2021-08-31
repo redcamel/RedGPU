@@ -201,7 +201,7 @@ export default class View extends UUID {
         },
         {
           key: 'baseAttachment_mouseColorID_depth',
-          format: 'rgba16float',
+          format: 'rgba32float',
           usage: GPUTextureUsage.RENDER_ATTACHMENT,
           resolveUsage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.TEXTURE_BINDING
         }

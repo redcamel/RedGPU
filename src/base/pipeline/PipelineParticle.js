@@ -111,19 +111,8 @@ export default class PipelineParticle extends UUID {
 
           },
           {
-            format: 'rgba16float',
-            blend: {
-              color: {
-                srcFactor: "src-alpha",
-                dstFactor: "one-minus-src-alpha",
-                operation: "add"
-              },
-              alpha: {
-                srcFactor: "src-alpha",
-                dstFactor: "one-minus-src-alpha",
-                operation: "add"
-              }
-            }
+            format: 'rgba32float',
+
           },
         ],
       },
