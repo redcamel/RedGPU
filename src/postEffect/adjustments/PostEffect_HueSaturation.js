@@ -14,7 +14,7 @@ import TypeSize from "../../resources/TypeSize.js";
 
 const float1_Float32Array = new Float32Array(1);
 export default class PostEffect_HueSaturation extends BasePostEffect {
-	static vertexShaderGLSL = `
+  static vertexShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
     
@@ -29,7 +29,7 @@ export default class PostEffect_HueSaturation extends BasePostEffect {
 		vUV = uv;
 	}
 	`;
-	static fragmentShaderGLSL = `
+  static fragmentShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 0 ) uniform FragmentUniforms {
         float hue;
@@ -64,28 +64,35 @@ export default class PostEffect_HueSaturation extends BasePostEffect {
 		outColor = finalColor;
 	}
 `;
-	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
-	static uniformsBindGroupLayoutDescriptor_material = BasePostEffect.uniformsBindGroupLayoutDescriptor_material;
-	static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
-	static uniformBufferDescriptor_fragment = [
-		{size: TypeSize.float, valueName: 'hue'},
-		{size: TypeSize.float, valueName: 'saturation'}
-	];
-	_hue = 0;
-	_saturation = 0;
-	get hue() {return this._hue;}
-	set hue(value) {/*FIXME min: -180, max: 180*/
-		this._hue = value;
-		float1_Float32Array[0] = this._hue/180;
-		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['hue'], float1_Float32Array)
-		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['hue'], float1_Float32Array)
-	}
-	get saturation() {return this._saturation;}
-	set saturation(value) {/*FIXME min: -100, max: 100*/
-		this._saturation = value;
-		float1_Float32Array[0] = this._saturation/100;
-		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['saturation'], float1_Float32Array)
-		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['saturation'], float1_Float32Array)
-	}
-	constructor(redGPUContext) {super(redGPUContext);}
+  static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
+  static uniformsBindGroupLayoutDescriptor_material = BasePostEffect.uniformsBindGroupLayoutDescriptor_material;
+  static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
+  static uniformBufferDescriptor_fragment = [
+    {size: TypeSize.float32, valueName: 'hue'},
+    {size: TypeSize.float32, valueName: 'saturation'}
+  ];
+
+  constructor(redGPUContext) {super(redGPUContext);}
+
+  _hue = 0;
+
+  get hue() {return this._hue;}
+
+  set hue(value) {/*FIXME min: -180, max: 180*/
+    this._hue = value;
+    float1_Float32Array[0] = this._hue / 180;
+    // this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['hue'], float1_Float32Array)
+    this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['hue'], float1_Float32Array);
+  }
+
+  _saturation = 0;
+
+  get saturation() {return this._saturation;}
+
+  set saturation(value) {/*FIXME min: -100, max: 100*/
+    this._saturation = value;
+    float1_Float32Array[0] = this._saturation / 100;
+    // this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['saturation'], float1_Float32Array)
+    this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['saturation'], float1_Float32Array);
+  }
 }

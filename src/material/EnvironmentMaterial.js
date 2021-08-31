@@ -14,17 +14,17 @@ import RedGPUContext from "../RedGPUContext.js";
 
 let float1_Float32Array = new Float32Array(1);
 export default class EnvironmentMaterial extends Mix.mix(
-	BaseMaterial,
-	Mix.diffuseTexture,
-	Mix.normalTexture,
-	Mix.specularTexture,
-	Mix.emissiveTexture,
-	Mix.environmentTexture,
-	Mix.displacementTexture,
-	Mix.basicLightPropertys,
-	Mix.alpha
+  BaseMaterial,
+  Mix.diffuseTexture,
+  Mix.normalTexture,
+  Mix.specularTexture,
+  Mix.emissiveTexture,
+  Mix.environmentTexture,
+  Mix.displacementTexture,
+  Mix.basicLightPropertys,
+  Mix.alpha
 ) {
-	static vertexShaderGLSL = `
+  static vertexShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
     ${ShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
     ${ShareGLSL.GLSL_SystemUniforms_vertex.calcDisplacement}    
@@ -53,13 +53,13 @@ export default class EnvironmentMaterial extends Mix.mix(
 		vUV = uv;
 		vMouseColorID = meshUniforms.mouseColorID;
 		vSumOpacity = meshUniforms.sumOpacity;
-		if(vertexUniforms.__displacementTextureRenderYn == TRUTHY) vVertexPosition.xyz += calcDisplacement(vNormal, vertexUniforms.displacementFlowSpeedX, vertexUniforms.displacementFlowSpeedY, vertexUniforms.displacementPower, uv, uDisplacementTexture, uDisplacementSampler);
+		// if(vertexUniforms.__displacementTextureRenderYn == TRUTHY) vVertexPosition.xyz += calcDisplacement(vNormal, vertexUniforms.displacementFlowSpeedX, vertexUniforms.displacementFlowSpeedY, vertexUniforms.displacementPower, uv, uDisplacementTexture, uDisplacementSampler);
 		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * vVertexPosition;
 	
 	
 	}
 	`;
-	static fragmentShaderGLSL = `
+  static fragmentShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_fragment.systemUniforms}
 	${ShareGLSL.GLSL_SystemUniforms_fragment.cotangent_frame}
@@ -160,197 +160,251 @@ export default class EnvironmentMaterial extends Mix.mix(
 		
 	}
 `;
-	static PROGRAM_OPTION_LIST = {
-		// vertex: ['displacementTexture'],
-		// fragment: ['diffuseTexture', 'emissiveTexture', 'environmentTexture', 'normalTexture', 'specularTexture', 'useFlatMode']
-		vertex: [],
-		fragment: []
-	};
-	static uniformsBindGroupLayoutDescriptor_material = {
-		entries: [
-			{binding: 0, visibility: GPUShaderStage.VERTEX, type: "uniform-buffer"},
-			{binding: 1, visibility: GPUShaderStage.VERTEX, type: "sampler"},
-			{binding: 2, visibility: GPUShaderStage.VERTEX, type: "sampled-texture"},
-			{binding: 3, visibility: GPUShaderStage.FRAGMENT, type: "uniform-buffer"},
-			{binding: 4, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
-			{binding: 5, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"},
-			{binding: 6, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
-			{binding: 7, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"},
-			{binding: 8, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
-			{binding: 9, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"},
-			{binding: 10, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
-			{binding: 11, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"},
-			{binding: 12, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
-			{binding: 13, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture", viewDimension: 'cube'}
-		]
-	};
-	static uniformBufferDescriptor_vertex = [
-		{size: TypeSize.float, valueName: 'displacementFlowSpeedX'},
-		{size: TypeSize.float, valueName: 'displacementFlowSpeedY'},
-		{size: TypeSize.float, valueName: 'displacementPower'},
-		{size: TypeSize.float, valueName: '__displacementTextureRenderYn'}
-	];
-	static uniformBufferDescriptor_fragment = [
-		{size: TypeSize.float, valueName: 'normalPower'},
-		{size: TypeSize.float, valueName: 'shininess'},
-		{size: TypeSize.float, valueName: 'specularPower'},
-		{size: TypeSize.float4, valueName: 'specularColorRGBA'},
-		{size: TypeSize.float, valueName: 'emissivePower'},
-		{size: TypeSize.float, valueName: 'environmentPower'},
-		{size: TypeSize.float, valueName: 'alpha'},
-		{size: TypeSize.float, valueName: 'useFlatMode'},
-		//
-		{size: TypeSize.float, valueName: '__diffuseTextureRenderYn'},
-		{size: TypeSize.float, valueName: '__environmentTextureRenderYn'},
-		{size: TypeSize.float, valueName: '__normalTextureRenderYn'},
-		{size: TypeSize.float, valueName: '__specularTextureRenderYn'},
-		{size: TypeSize.float, valueName: '__emissiveTextureRenderYn'}
-	];
-	#raf;
+  static PROGRAM_OPTION_LIST = {
+    // vertex: ['displacementTexture'],
+    // fragment: ['diffuseTexture', 'emissiveTexture', 'environmentTexture', 'normalTexture', 'specularTexture', 'useFlatMode']
+    vertex: [],
+    fragment: []
+  };
+  static uniformsBindGroupLayoutDescriptor_material = {
+    entries: [
+      {
+        binding: 0, visibility: GPUShaderStage.VERTEX, buffer: {
+          type: 'uniform',
+        },
+      },
+      {
+        binding: 1, visibility: GPUShaderStage.VERTEX, sampler: {
+          type: 'filtering',
+        },
+      },
+      {
+        binding: 2, visibility: GPUShaderStage.VERTEX, texture: {
+          type: "float"
+        }
+      },
+      {
+        binding: 3, visibility: GPUShaderStage.FRAGMENT, buffer: {
+          type: 'uniform',
+        },
+      },
+      {
+        binding: 4, visibility: GPUShaderStage.FRAGMENT, sampler: {
+          type: 'filtering',
+        },
+      },
+      {
+        binding: 5, visibility: GPUShaderStage.FRAGMENT, texture: {
+          type: "float"
+        }
+      },
+      {
+        binding: 6, visibility: GPUShaderStage.FRAGMENT, sampler: {
+          type: 'filtering',
+        },
+      },
+      {
+        binding: 7, visibility: GPUShaderStage.FRAGMENT, texture: {
+          type: "float"
+        }
+      },
+      {
+        binding: 8, visibility: GPUShaderStage.FRAGMENT, sampler: {
+          type: 'filtering',
+        },
+      },
+      {
+        binding: 9, visibility: GPUShaderStage.FRAGMENT, texture: {
+          type: "float"
+        }
+      },
+      {
+        binding: 10, visibility: GPUShaderStage.FRAGMENT, sampler: {
+          type: 'filtering',
+        },
+      },
+      {
+        binding: 11, visibility: GPUShaderStage.FRAGMENT, texture: {
+          type: "float"
+        }
+      },
+      {
+        binding: 12, visibility: GPUShaderStage.FRAGMENT, sampler: {
+          type: 'filtering',
+        },
+      },
+      {
+        binding: 13, visibility: GPUShaderStage.FRAGMENT, texture: {
+           viewDimension: 'cube'
+        }
+      }
+    ]
+  };
+  static uniformBufferDescriptor_vertex = [
+    {size: TypeSize.float32, valueName: 'displacementFlowSpeedX'},
+    {size: TypeSize.float32, valueName: 'displacementFlowSpeedY'},
+    {size: TypeSize.float32, valueName: 'displacementPower'},
+    {size: TypeSize.float32, valueName: '__displacementTextureRenderYn'}
+  ];
+  static uniformBufferDescriptor_fragment = [
+    {size: TypeSize.float32, valueName: 'normalPower'},
+    {size: TypeSize.float32, valueName: 'shininess'},
+    {size: TypeSize.float32, valueName: 'specularPower'},
+    {size: TypeSize.float32x4, valueName: 'specularColorRGBA'},
+    {size: TypeSize.float32, valueName: 'emissivePower'},
+    {size: TypeSize.float32, valueName: 'environmentPower'},
+    {size: TypeSize.float32, valueName: 'alpha'},
+    {size: TypeSize.float32, valueName: 'useFlatMode'},
+    //
+    {size: TypeSize.float32, valueName: '__diffuseTextureRenderYn'},
+    {size: TypeSize.float32, valueName: '__environmentTextureRenderYn'},
+    {size: TypeSize.float32, valueName: '__normalTextureRenderYn'},
+    {size: TypeSize.float32, valueName: '__specularTextureRenderYn'},
+    {size: TypeSize.float32, valueName: '__emissiveTextureRenderYn'}
+  ];
+  #raf;
 
-	constructor(redGPUContext, diffuseTexture, environmentTexture, normalTexture, specularTexture, emissiveTexture, displacementTexture) {
-		super(redGPUContext);
-		this.diffuseTexture = diffuseTexture;
-		this.environmentTexture = environmentTexture;
-		this.normalTexture = normalTexture;
-		this.emissiveTexture = emissiveTexture;
-		this.specularTexture = specularTexture;
-		this.displacementTexture = displacementTexture;
-		this.needResetBindingInfo = true
-	}
+  constructor(redGPUContext, diffuseTexture, environmentTexture, normalTexture, specularTexture, emissiveTexture, displacementTexture) {
+    super(redGPUContext);
+    this.diffuseTexture = diffuseTexture;
+    this.environmentTexture = environmentTexture;
+    this.normalTexture = normalTexture;
+    this.emissiveTexture = emissiveTexture;
+    this.specularTexture = specularTexture;
+    this.displacementTexture = displacementTexture;
+    this.needResetBindingInfo = true;
+  }
 
-	checkTexture(texture, textureName) {
-		if (texture) {
-			if (texture._GPUTexture) {
-				let tKey;
-				switch (textureName) {
-					case 'diffuseTexture' :
-						this._diffuseTexture = texture;
-						tKey = textureName;
-						break;
-					case 'normalTexture' :
-						this._normalTexture = texture;
-						tKey = textureName;
-						break;
-					case 'specularTexture' :
-						this._specularTexture = texture;
-						tKey = textureName;
-						break;
-					case 'emissiveTexture' :
-						this._emissiveTexture = texture;
-						tKey = textureName;
-						break;
-					case 'environmentTexture' :
-						this._environmentTexture = texture;
-						tKey = textureName;
-						break;
-					case 'displacementTexture' :
-						this._displacementTexture = texture;
-						tKey = textureName;
-						break
-				}
-				if (RedGPUContext.useDebugConsole) console.log("로딩완료or로딩에러확인 textureName", textureName, texture ? texture._GPUTexture : '');
-				if (tKey) {
-					float1_Float32Array[0] = this[`__${textureName}RenderYn`] = 1;
-					if (tKey == 'displacementTexture') {
-						// this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
-						this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_vertex.GPUBuffer, this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
-					}
-					else {
-						// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
-						this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
-					}
-				}
-				// cancelAnimationFrame(this.#raf);
-				// this.#raf = requestAnimationFrame(_ => {this.needResetBindingInfo = true})
-				this.needResetBindingInfo = true
-			} else {
-				texture.addUpdateTarget(this, textureName)
-			}
-		} else {
-			if (this['_' + textureName]) {
-				this['_' + textureName] = null;
-				float1_Float32Array[0] = this[`__${textureName}RenderYn`] = 0;
-				if (textureName == 'displacementTexture') {
-					// this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
-					this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_vertex.GPUBuffer, this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
-				}
-				else {
-					// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
-					this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
-				}
-				this.needResetBindingInfo = true
-			}
-		}
-	}
+  checkTexture(texture, textureName) {
+    if (texture) {
+      if (texture._GPUTexture) {
+        let tKey;
+        switch (textureName) {
+          case 'diffuseTexture' :
+            this._diffuseTexture = texture;
+            tKey = textureName;
+            break;
+          case 'normalTexture' :
+            this._normalTexture = texture;
+            tKey = textureName;
+            break;
+          case 'specularTexture' :
+            this._specularTexture = texture;
+            tKey = textureName;
+            break;
+          case 'emissiveTexture' :
+            this._emissiveTexture = texture;
+            tKey = textureName;
+            break;
+          case 'environmentTexture' :
+            this._environmentTexture = texture;
+            tKey = textureName;
+            break;
+          case 'displacementTexture' :
+            this._displacementTexture = texture;
+            tKey = textureName;
+            break;
+        }
+        if (RedGPUContext.useDebugConsole) console.log("로딩완료or로딩에러확인 textureName", textureName, texture ? texture._GPUTexture : '');
+        if (tKey) {
+          float1_Float32Array[0] = this[`__${textureName}RenderYn`] = 1;
+          if (tKey == 'displacementTexture') {
+            // this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+            this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_vertex.GPUBuffer, this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+          } else {
+            // this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+            this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+          }
+        }
+        // cancelAnimationFrame(this.#raf);
+        // this.#raf = requestAnimationFrame(_ => {this.needResetBindingInfo = true})
+        this.needResetBindingInfo = true;
+      } else {
+        texture.addUpdateTarget(this, textureName);
+      }
+    } else {
+      if (this['_' + textureName]) {
+        this['_' + textureName] = null;
+        float1_Float32Array[0] = this[`__${textureName}RenderYn`] = 0;
+        if (textureName == 'displacementTexture') {
+          // this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+          this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_vertex.GPUBuffer, this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+        } else {
+          // this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+          this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+        }
+        this.needResetBindingInfo = true;
+      }
+    }
+  }
 
-	resetBindingInfo() {
-		this.entries = [
-			{
-				binding: 0,
-				resource: {
-					buffer: this.uniformBuffer_vertex.GPUBuffer,
-					offset: 0,
-					size: this.uniformBufferDescriptor_vertex.size
-				}
-			},
-			{
-				binding: 1,
-				resource: this._displacementTexture ? this._displacementTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
-			},
-			{
-				binding: 2,
-				resource: this._displacementTexture ? this._displacementTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
-			},
-			{
-				binding: 3,
-				resource: {
-					buffer: this.uniformBuffer_fragment.GPUBuffer,
-					offset: 0,
-					size: this.uniformBufferDescriptor_fragment.size
-				}
-			},
-			{
-				binding: 4,
-				resource: this._diffuseTexture ? this._diffuseTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
-			},
-			{
-				binding: 5,
-				resource: this._diffuseTexture ? this._diffuseTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
-			},
-			{
-				binding: 6,
-				resource: this._normalTexture ? this._normalTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
-			},
-			{
-				binding: 7,
-				resource: this._normalTexture ? this._normalTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
-			},
-			{
-				binding: 8,
-				resource: this._specularTexture ? this._specularTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
-			},
-			{
-				binding: 9,
-				resource: this._specularTexture ? this._specularTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
-			},
-			{
-				binding: 10,
-				resource: this._emissiveTexture ? this._emissiveTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
-			},
-			{
-				binding: 11,
-				resource: this._emissiveTexture ? this._emissiveTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
-			},
-			{
-				binding: 12,
-				resource: this._environmentTexture ? this._environmentTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
-			},
-			{
-				binding: 13,
-				resource: this._environmentTexture ? this._environmentTexture._GPUTextureView : this.redGPUContext.state.emptyCubeTextureView
-			}
-		];
-		this._afterResetBindingInfo();
-	}
+  resetBindingInfo() {
+    this.entries = [
+      {
+        binding: 0,
+        resource: {
+          buffer: this.uniformBuffer_vertex.GPUBuffer,
+          offset: 0,
+          size: this.uniformBufferDescriptor_vertex.size
+        }
+      },
+      {
+        binding: 1,
+        resource: this._displacementTexture ? this._displacementTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
+      },
+      {
+        binding: 2,
+        resource: this._displacementTexture ? this._displacementTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
+      },
+      {
+        binding: 3,
+        resource: {
+          buffer: this.uniformBuffer_fragment.GPUBuffer,
+          offset: 0,
+          size: this.uniformBufferDescriptor_fragment.size
+        }
+      },
+      {
+        binding: 4,
+        resource: this._diffuseTexture ? this._diffuseTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
+      },
+      {
+        binding: 5,
+        resource: this._diffuseTexture ? this._diffuseTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
+      },
+      {
+        binding: 6,
+        resource: this._normalTexture ? this._normalTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
+      },
+      {
+        binding: 7,
+        resource: this._normalTexture ? this._normalTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
+      },
+      {
+        binding: 8,
+        resource: this._specularTexture ? this._specularTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
+      },
+      {
+        binding: 9,
+        resource: this._specularTexture ? this._specularTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
+      },
+      {
+        binding: 10,
+        resource: this._emissiveTexture ? this._emissiveTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
+      },
+      {
+        binding: 11,
+        resource: this._emissiveTexture ? this._emissiveTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
+      },
+      {
+        binding: 12,
+        resource: this._environmentTexture ? this._environmentTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
+      },
+      {
+        binding: 13,
+        resource: this._environmentTexture ? this._environmentTexture._GPUTextureView : this.redGPUContext.state.emptyCubeTextureView
+      }
+    ];
+    this._afterResetBindingInfo();
+  }
 }

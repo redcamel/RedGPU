@@ -11,14 +11,11 @@ import BaseMaterial from "../../base/BaseMaterial.js";
 import ShareGLSL from "../../base/ShareGLSL.js";
 import BasePostEffect from "../../base/BasePostEffect.js";
 import TypeSize from "../../resources/TypeSize.js";
-import Mesh from "../../object3D/Mesh.js";
-import Plane from "../../primitives/Plane.js";
-import PipelinePostEffect from "../../base/pipeline/PipelinePostEffect.js";
 import glMatrix from "../../base/gl-matrix-min.js";
 import Render from "../Render.js";
 
 export default class FinalRender extends BasePostEffect {
-    static vertexShaderGLSL = `
+  static vertexShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
 	${ShareGLSL.GLSL_SystemUniforms_vertex.meshUniforms}
@@ -39,7 +36,7 @@ export default class FinalRender extends BasePostEffect {
 		vUV = uv;
 	}
 	`;
-    static fragmentShaderGLSL = `
+  static fragmentShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	layout( location = 0 ) in vec3 vNormal;
 	layout( location = 1 ) in vec2 vUV;
@@ -56,73 +53,75 @@ export default class FinalRender extends BasePostEffect {
 		outColor = diffuseColor;
 	}
 `;
-    static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
-    static uniformsBindGroupLayoutDescriptor_material = BasePostEffect.uniformsBindGroupLayoutDescriptor_material;
-    static uniformBufferDescriptor_vertex = [
-        {size: TypeSize.mat4, valueName: 'projectionMatrix'},
-        {size: TypeSize.float4, valueName: 'viewRect'}
-    ];
-    static uniformBufferDescriptor_fragment = BaseMaterial.uniformBufferDescriptor_empty;
-    viewRect = new Float32Array(4);
-    constructor(redGPUContext) {
-        super(redGPUContext);
-        this.projectionMatrix = glMatrix.mat4.create()
+  static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
+  static uniformsBindGroupLayoutDescriptor_material = BasePostEffect.uniformsBindGroupLayoutDescriptor_material;
+  static uniformBufferDescriptor_vertex = [
+    {size: TypeSize.mat4, valueName: 'projectionMatrix'},
+    {size: TypeSize.float32x4, valueName: 'viewRect'}
+  ];
+  static uniformBufferDescriptor_fragment = BaseMaterial.uniformBufferDescriptor_empty;
+  viewRect = new Float32Array(4);
+
+  constructor(redGPUContext) {
+    super(redGPUContext);
+    this.projectionMatrix = glMatrix.mat4.create();
+  }
+
+  checkSize(redGPUContext, redView) {
+    glMatrix.mat4.ortho(
+      this.projectionMatrix,
+      0., // left
+      1., // right
+      0., // bottom
+      1., // top,
+      -1000,
+      1000
+    );
+    glMatrix.mat4.scale(
+      this.projectionMatrix,
+      this.projectionMatrix,
+      [
+        1 / parseInt(redGPUContext.canvas.style.width),
+        1 / parseInt(redGPUContext.canvas.style.height),
+        1
+      ]
+    );
+    glMatrix.mat4.translate(
+      this.projectionMatrix,
+      this.projectionMatrix,
+      [
+        redView.getViewRect(redGPUContext)[2] / 2 + redView.getViewRect(redGPUContext)[0],
+        parseInt(redGPUContext.canvas.style.height) - redView.getViewRect(redGPUContext)[3] / 2 - redView.getViewRect(redGPUContext)[1],
+        0
+      ]
+    );
+
+    glMatrix.mat4.scale(
+      this.projectionMatrix,
+      this.projectionMatrix,
+      [
+        redView.getViewRect(redGPUContext)[2],
+        redView.getViewRect(redGPUContext)[3],
+        1
+      ]
+    );
+    // this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['projectionMatrix'], this.projectionMatrix);
+    redGPUContext.device.queue.writeBuffer(this.uniformBuffer_vertex.GPUBuffer, this.uniformBufferDescriptor_vertex.redStructOffsetMap['projectionMatrix'], this.projectionMatrix);
+    return true;
+  }
+
+  render(redGPUContext, redView, renderScene, sourceTextureView, passEncoder_effect) {
+    let result = this.checkSize(redGPUContext, redView);
+    let t0 = this.sourceTexture === sourceTextureView;
+    this.sourceTexture = sourceTextureView;
+    if (!t0) this.resetBindingInfo();
+    if (result) {
+      this.quad.pipeline.update(redGPUContext, redView);
     }
 
-    checkSize(redGPUContext, redView) {
-        glMatrix.mat4.ortho(
-            this.projectionMatrix,
-            0., // left
-            1., // right
-            0., // bottom
-            1., // top,
-            -1000,
-            1000
-        );
-        glMatrix.mat4.scale(
-            this.projectionMatrix,
-            this.projectionMatrix,
-            [
-                1 / parseInt(redGPUContext.canvas.style.width),
-                1 / parseInt(redGPUContext.canvas.style.height),
-                1
-            ]
-        );
-        glMatrix.mat4.translate(
-            this.projectionMatrix,
-            this.projectionMatrix,
-            [
-                redView.getViewRect(redGPUContext)[2]/2 + redView.getViewRect(redGPUContext)[0],
-                parseInt(redGPUContext.canvas.style.height)-redView.getViewRect(redGPUContext)[3]/2 - redView.getViewRect(redGPUContext)[1],
-                0
-            ]
-        );
+    Render.clearStateCache();
+    redView.updateSystemUniform(passEncoder_effect, redGPUContext);
+    renderScene(redGPUContext, redView, passEncoder_effect, [this.quad]);
 
-        glMatrix.mat4.scale(
-            this.projectionMatrix,
-            this.projectionMatrix,
-            [
-                redView.getViewRect(redGPUContext)[2],
-                redView.getViewRect(redGPUContext)[3],
-                1
-            ]
-        );
-        // this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['projectionMatrix'], this.projectionMatrix);
-        redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_vertex.GPUBuffer,this.uniformBufferDescriptor_vertex.redStructOffsetMap['projectionMatrix'], this.projectionMatrix)
-        return true
-    }
-    render(redGPUContext, redView, renderScene, sourceTextureView,passEncoder_effect) {
-        let result = this.checkSize(redGPUContext, redView);
-        let t0 = this.sourceTexture === sourceTextureView;
-        this.sourceTexture = sourceTextureView;
-        if (!t0) this.resetBindingInfo();
-        if (result) {
-            this.quad.pipeline.update(redGPUContext, redView);
-        }
-
-        Render.clearStateCache();
-        redView.updateSystemUniform(passEncoder_effect, redGPUContext);
-        renderScene(redGPUContext, redView, passEncoder_effect, [this.quad]);
-
-    }
+  }
 }

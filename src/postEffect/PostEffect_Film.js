@@ -14,7 +14,7 @@ import TypeSize from "../resources/TypeSize.js";
 
 const float1_Float32Array = new Float32Array(1);
 export default class PostEffect_Film extends BasePostEffect {
-	static vertexShaderGLSL = `
+  static vertexShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
     
@@ -31,7 +31,7 @@ export default class PostEffect_Film extends BasePostEffect {
 		gl_Position = vec4(position*2.0,1.0);
 	}
 	`;
-	static fragmentShaderGLSL = `
+  static fragmentShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_fragment.systemUniforms}
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 0 ) uniform FragmentUniforms {
@@ -77,48 +77,61 @@ export default class PostEffect_Film extends BasePostEffect {
 		outColor = vec4( finalColor, diffuseColor.a );
 	}
 `;
-	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
-	static uniformsBindGroupLayoutDescriptor_material = BasePostEffect.uniformsBindGroupLayoutDescriptor_material;
-	static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
-	static uniformBufferDescriptor_fragment = [
-		{size: TypeSize.float, valueName: 'scanlineIntensity'},
-		{size: TypeSize.float, valueName: 'noiseIntensity'},
-		{size: TypeSize.float, valueName: 'scanlineCount'},
-		{size: TypeSize.float, valueName: 'grayMode'}
-	];
-	_scanlineIntensity = 0.5;
-	_noiseIntensity = 0.5;
-	_scanlineCount = 2048;
-	_grayMode = false;
-	get scanlineIntensity() {return this._scanlineIntensity;}
-	set scanlineIntensity(value) {
-		this._scanlineIntensity = value;
-		float1_Float32Array[0] = this._scanlineIntensity;
-		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['scanlineIntensity'], float1_Float32Array)
-		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['scanlineIntensity'], float1_Float32Array)
-	}
-	get noiseIntensity() {return this._noiseIntensity;}
-	set noiseIntensity(value) {
-		this._noiseIntensity = value;
-		float1_Float32Array[0] = this._noiseIntensity;
-		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['noiseIntensity'], float1_Float32Array)
-		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['noiseIntensity'], float1_Float32Array)
-	}
-	get scanlineCount() {return this._scanlineCount;}
-	set scanlineCount(value) {/*FIXME - min: 1, max: 100*/
-		this._scanlineCount = value;
-		float1_Float32Array[0] = this._scanlineCount;
-		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['scanlineCount'], float1_Float32Array)
-		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['scanlineCount'], float1_Float32Array)
-	}
-	get grayMode() {return this._grayMode;}
-	set grayMode(value) {
-		this._grayMode = value;
-		float1_Float32Array[0] = this._grayMode ? 1 : 0;
-		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['grayMode'], float1_Float32Array)
-		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['grayMode'], float1_Float32Array)
-	}
-	constructor(redGPUContext) {super(redGPUContext);}
+  static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
+  static uniformsBindGroupLayoutDescriptor_material = BasePostEffect.uniformsBindGroupLayoutDescriptor_material;
+  static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
+  static uniformBufferDescriptor_fragment = [
+    {size: TypeSize.float32, valueName: 'scanlineIntensity'},
+    {size: TypeSize.float32, valueName: 'noiseIntensity'},
+    {size: TypeSize.float32, valueName: 'scanlineCount'},
+    {size: TypeSize.float32, valueName: 'grayMode'}
+  ];
+
+  constructor(redGPUContext) {super(redGPUContext);}
+
+  _scanlineIntensity = 0.5;
+
+  get scanlineIntensity() {return this._scanlineIntensity;}
+
+  set scanlineIntensity(value) {
+    this._scanlineIntensity = value;
+    float1_Float32Array[0] = this._scanlineIntensity;
+    // this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['scanlineIntensity'], float1_Float32Array)
+    this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['scanlineIntensity'], float1_Float32Array);
+  }
+
+  _noiseIntensity = 0.5;
+
+  get noiseIntensity() {return this._noiseIntensity;}
+
+  set noiseIntensity(value) {
+    this._noiseIntensity = value;
+    float1_Float32Array[0] = this._noiseIntensity;
+    // this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['noiseIntensity'], float1_Float32Array)
+    this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['noiseIntensity'], float1_Float32Array);
+  }
+
+  _scanlineCount = 2048;
+
+  get scanlineCount() {return this._scanlineCount;}
+
+  set scanlineCount(value) {/*FIXME - min: 1, max: 100*/
+    this._scanlineCount = value;
+    float1_Float32Array[0] = this._scanlineCount;
+    // this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['scanlineCount'], float1_Float32Array)
+    this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['scanlineCount'], float1_Float32Array);
+  }
+
+  _grayMode = false;
+
+  get grayMode() {return this._grayMode;}
+
+  set grayMode(value) {
+    this._grayMode = value;
+    float1_Float32Array[0] = this._grayMode ? 1 : 0;
+    // this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['grayMode'], float1_Float32Array)
+    this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['grayMode'], float1_Float32Array);
+  }
 
 
 }

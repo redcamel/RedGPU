@@ -5,7 +5,7 @@
  *   Last modification time of this file - 2020.3.14 19:2:51
  *
  */
-import glMatrix from "./base/gl-matrix-min.js"
+import glMatrix from "./base/gl-matrix-min.js";
 // renderder ///////////////////////////////////////////////////////////////////////
 import Render from "./renderer/Render.js";
 import Debugger from "./renderer/system/Debugger.js";
@@ -106,113 +106,113 @@ import UTILColor from "./util/func/UTILColor.js";
 import UTILMath from "./util/func/UTILMath.js";
 import UTIL from "./util/UTIL.js";
 //
-import RedGPUContext from "./RedGPUContext.js"
-import Scene from "./Scene.js"
-import View from "./View.js"
+import RedGPUContext from "./RedGPUContext.js";
+import Scene from "./Scene.js";
+import View from "./View.js";
 
 const RedGPU = {
-	glMatrix,
-	// base
-	DetectorGPU,
-	UUID,
-	Mix,
-	baseGeometry,
-	BaseLight,
-	BaseMaterial,
-	DisplayContainer,
-	BaseObject3D,
-	ShareGLSL,
-	BasePostEffect,
-	BaseTexture,
-	PipelineBasic,
-	// buffer ///////////////////////////////////////////////////////////////////////
-	BindGroup,
-	Buffer,
-	UniformBuffer,
-	UniformBufferDescriptor,
-	// controller ///////////////////////////////////////////////////////////////////////
-	Camera2D,
-	Camera3D,
-	ObitController,
-	// geometry ///////////////////////////////////////////////////////////////////////
-	Geometry,
-	InterleaveInfo,
-	// light ///////////////////////////////////////////////////////////////////////
-	AmbientLight,
-	DirectionalLight,
-	PointLight,
-	SpotLight,
-	// loader ///////////////////////////////////////////////////////////////////////
-	GLTFLoader,
-	TextureLoader,
-	// material ///////////////////////////////////////////////////////////////////////
-	GridMaterial,
-	PBRMaterial_System,
-	SkyBoxMaterial,
-	BitmapMaterial,
-	ColorMaterial,
-	ColorPhongMaterial,
-	ColorPhongTextureMaterial,
-	SpriteSheetAction,
-	SpriteSheetMaterial,
-	Sprite3DMaterial,
-	EnvironmentMaterial,
-	RefractionMaterial,
-	StandardMaterial,
-	// object3D ///////////////////////////////////////////////////////////////////////
-	Axis,
-	Grid,
-	Mesh,
-	SkyBox,
-	Sprite3D,
-	Text,
-	Line,
-	// particle /////////////////////////////////////////////////////////////////////////
-	Particle,
-	// postEffect ///////////////////////////////////////////////////////////////////////
-	PostEffect_BrightnessContrast,
-	PostEffect_Gray,
-	PostEffect_HueSaturation,
-	PostEffect_Invert,
-	PostEffect_Threshold,
-	PostEffect_Bloom,
-	PostEffect_Bloom_blend,
-	PostEffect_Blur,
-	PostEffect_BlurX,
-	PostEffect_BlurY,
-	PostEffect_GaussianBlur,
-	PostEffect_ZoomBlur,
-	PostEffect_DoF,
-	PostEffect_DoF_blend,
-	PostEffect_HalfTone,
-	PostEffect_Pixelize,
-	PostEffect,
-	PostEffect_Convolution,
-	PostEffect_Film,
-	PostEffect_Vignetting,
-	// primitives ///////////////////////////////////////////////////////////////////////
-	Box,
-	Cylinder,
-	Plane,
-	Sphere,
-	// renderder ///////////////////////////////////////////////////////////////////////
-	Render,
-	Debugger,
-	// resources ///////////////////////////////////////////////////////////////////////
-	CopyBufferToTexture,
-	ImageLoader,
-	BitmapCubeTexture,
-	BitmapTexture,
-	Sampler,
-	ShaderModule_GLSL,
-	TypeSize,
-	// util ///////////////////////////////////////////////////////////////////////
-	UTILColor,
-	UTILMath,
-	UTIL,
-	//
-	RedGPUContext,
-	Scene,
-	View
+  glMatrix,
+  // base
+  DetectorGPU,
+  UUID,
+  Mix,
+  baseGeometry,
+  BaseLight,
+  BaseMaterial,
+  DisplayContainer,
+  BaseObject3D,
+  ShareGLSL,
+  BasePostEffect,
+  BaseTexture,
+  PipelineBasic,
+  // buffer ///////////////////////////////////////////////////////////////////////
+  BindGroup,
+  Buffer,
+  UniformBuffer,
+  UniformBufferDescriptor,
+  // controller ///////////////////////////////////////////////////////////////////////
+  Camera2D,
+  Camera3D,
+  ObitController,
+  // geometry ///////////////////////////////////////////////////////////////////////
+  Geometry,
+  InterleaveInfo,
+  // light ///////////////////////////////////////////////////////////////////////
+  AmbientLight,
+  DirectionalLight,
+  PointLight,
+  SpotLight,
+  // loader ///////////////////////////////////////////////////////////////////////
+  GLTFLoader,
+  TextureLoader,
+  // material ///////////////////////////////////////////////////////////////////////
+  GridMaterial,
+  PBRMaterial_System,
+  SkyBoxMaterial,
+  BitmapMaterial,
+  ColorMaterial,
+  ColorPhongMaterial,
+  ColorPhongTextureMaterial,
+  SpriteSheetAction,
+  SpriteSheetMaterial,
+  Sprite3DMaterial,
+  EnvironmentMaterial,
+  RefractionMaterial,
+  StandardMaterial,
+  // object3D ///////////////////////////////////////////////////////////////////////
+  Axis,
+  Grid,
+  Mesh,
+  SkyBox,
+  Sprite3D,
+  Text,
+  Line,
+  // particle /////////////////////////////////////////////////////////////////////////
+  Particle,
+  // postEffect ///////////////////////////////////////////////////////////////////////
+  PostEffect_BrightnessContrast,
+  PostEffect_Gray,
+  PostEffect_HueSaturation,
+  PostEffect_Invert,
+  PostEffect_Threshold,
+  PostEffect_Bloom,
+  PostEffect_Bloom_blend,
+  PostEffect_Blur,
+  PostEffect_BlurX,
+  PostEffect_BlurY,
+  PostEffect_GaussianBlur,
+  PostEffect_ZoomBlur,
+  PostEffect_DoF,
+  PostEffect_DoF_blend,
+  PostEffect_HalfTone,
+  PostEffect_Pixelize,
+  PostEffect,
+  PostEffect_Convolution,
+  PostEffect_Film,
+  PostEffect_Vignetting,
+  // primitives ///////////////////////////////////////////////////////////////////////
+  Box,
+  Cylinder,
+  Plane,
+  Sphere,
+  // renderder ///////////////////////////////////////////////////////////////////////
+  Render,
+  Debugger,
+  // resources ///////////////////////////////////////////////////////////////////////
+  CopyBufferToTexture,
+  ImageLoader,
+  BitmapCubeTexture,
+  BitmapTexture,
+  Sampler,
+  ShaderModule_GLSL,
+  TypeSize,
+  // util ///////////////////////////////////////////////////////////////////////
+  UTILColor,
+  UTILMath,
+  UTIL,
+  //
+  RedGPUContext,
+  Scene,
+  View
 };
 export default RedGPU;

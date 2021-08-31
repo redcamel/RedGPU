@@ -11,10 +11,10 @@ import Box from "../primitives/Box.js";
 import SkyBoxMaterial from "../material/system/SkyBoxMaterial.js";
 
 export default class SkyBox extends BaseObject3D {
-	constructor(redGPUContext, skyBoxTexture) {
-		super(redGPUContext);
-		this.geometry = new Box(redGPUContext);
-		this.material = new SkyBoxMaterial(redGPUContext, skyBoxTexture);
-		this.cullMode = 'front';
-	}
+  constructor(redGPUContext, skyBoxTexture) {
+    super(redGPUContext);
+    this.geometry = new Box(redGPUContext);
+    this.material = new SkyBoxMaterial(redGPUContext, skyBoxTexture);
+    this.cullMode = 'front';
+  }
 }

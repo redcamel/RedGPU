@@ -13,7 +13,7 @@ import BitmapMaterial from "../material/BitmapMaterial.js";
 
 let float1_Float32Array = new Float32Array(1);
 export default class ParticleMaterial extends BitmapMaterial {
-	static vertexShaderGLSL = `
+  static vertexShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
     ${ShareGLSL.GLSL_SystemUniforms_vertex.meshUniforms}
@@ -70,7 +70,7 @@ export default class ParticleMaterial extends BitmapMaterial {
 		
 	}
 	`;
-	static fragmentShaderGLSL = `
+  static fragmentShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	const float TRUTHY = 1.0;
 	layout( location = 0 ) in vec2 vUV;
@@ -94,69 +94,90 @@ export default class ParticleMaterial extends BitmapMaterial {
 		
 	}
 `;
-	static PROGRAM_OPTION_LIST = {
-		vertex: [],
-		fragment: []
-		// vertex: [],
-		// fragment: ['diffuseTexture']
-	};
-	static uniformsBindGroupLayoutDescriptor_material = {
-		entries: [
-			{binding: 0, visibility: GPUShaderStage.VERTEX, type: "uniform-buffer"},
-			{binding: 1, visibility: GPUShaderStage.FRAGMENT, type: "uniform-buffer"},
-			{binding: 2, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
-			{binding: 3, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"}
-		]
-	};
-	static uniformBufferDescriptor_vertex = [
-		{size: TypeSize.float, valueName: 'sprite3DMode'}
-	];
-	static uniformBufferDescriptor_fragment = [
-		{size: TypeSize.float, valueName: 'alpha'},
-		{size: TypeSize.float, valueName: '__diffuseTextureRenderYn'}
-	];
-	_sprite3DMode=true;
-	get sprite3DMode() {
-		return this._sprite3DMode;
-	}
-	set sprite3DMode(value) {
-		this._sprite3DMode = value;
-		float1_Float32Array[0] = value ? 1 : 0;
-		// this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['sprite3DMode'], float1_Float32Array)
-		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_vertex.GPUBuffer,this.uniformBufferDescriptor_vertex.redStructOffsetMap['sprite3DMode'], float1_Float32Array)
-	}
-	constructor(redGPUContext, diffuseTexture) {
-		super(redGPUContext);
-		this.diffuseTexture = diffuseTexture;
-		this.needResetBindingInfo = true
-	}
-	resetBindingInfo() {
-		this.entries = [
-			{
-				binding: 0,
-				resource: {
-					buffer: this.uniformBuffer_vertex.GPUBuffer,
-					offset: 0,
-					size: this.uniformBufferDescriptor_vertex.size
-				}
-			},
-			{
-				binding: 1,
-				resource: {
-					buffer: this.uniformBuffer_fragment.GPUBuffer,
-					offset: 0,
-					size: this.uniformBufferDescriptor_fragment.size
-				}
-			},
-			{
-				binding: 2,
-				resource: this._diffuseTexture ? this._diffuseTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
-			},
-			{
-				binding: 3,
-				resource: this._diffuseTexture ? this._diffuseTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
-			}
-		];
-		this._afterResetBindingInfo();
-	}
+  static PROGRAM_OPTION_LIST = {
+    vertex: [],
+    fragment: []
+    // vertex: [],
+    // fragment: ['diffuseTexture']
+  };
+  static uniformsBindGroupLayoutDescriptor_material = {
+    entries: [
+      {
+        binding: 0, visibility: GPUShaderStage.VERTEX, buffer: {
+          type: 'uniform',
+        },
+      },
+      {
+        binding: 1, visibility: GPUShaderStage.FRAGMENT, buffer: {
+          type: 'uniform',
+        },
+      },
+      {
+        binding: 2, visibility: GPUShaderStage.FRAGMENT, sampler: {
+          type: 'filtering',
+        },
+      },
+      {
+        binding: 3, visibility: GPUShaderStage.FRAGMENT, texture: {
+          type: "float"
+        }
+      }
+    ]
+  };
+  static uniformBufferDescriptor_vertex = [
+    {size: TypeSize.float32, valueName: 'sprite3DMode'}
+  ];
+  static uniformBufferDescriptor_fragment = [
+    {size: TypeSize.float32, valueName: 'alpha'},
+    {size: TypeSize.float32, valueName: '__diffuseTextureRenderYn'}
+  ];
+
+  constructor(redGPUContext, diffuseTexture) {
+    super(redGPUContext);
+    this.diffuseTexture = diffuseTexture;
+    this.needResetBindingInfo = true;
+  }
+
+  _sprite3DMode = true;
+
+  get sprite3DMode() {
+    return this._sprite3DMode;
+  }
+
+  set sprite3DMode(value) {
+    this._sprite3DMode = value;
+    float1_Float32Array[0] = value ? 1 : 0;
+    // this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['sprite3DMode'], float1_Float32Array)
+    this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_vertex.GPUBuffer, this.uniformBufferDescriptor_vertex.redStructOffsetMap['sprite3DMode'], float1_Float32Array);
+  }
+
+  resetBindingInfo() {
+    this.entries = [
+      {
+        binding: 0,
+        resource: {
+          buffer: this.uniformBuffer_vertex.GPUBuffer,
+          offset: 0,
+          size: this.uniformBufferDescriptor_vertex.size
+        }
+      },
+      {
+        binding: 1,
+        resource: {
+          buffer: this.uniformBuffer_fragment.GPUBuffer,
+          offset: 0,
+          size: this.uniformBufferDescriptor_fragment.size
+        }
+      },
+      {
+        binding: 2,
+        resource: this._diffuseTexture ? this._diffuseTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
+      },
+      {
+        binding: 3,
+        resource: this._diffuseTexture ? this._diffuseTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
+      }
+    ];
+    this._afterResetBindingInfo();
+  }
 }

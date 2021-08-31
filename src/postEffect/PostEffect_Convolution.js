@@ -14,7 +14,7 @@ import TypeSize from "../resources/TypeSize.js";
 
 const float1_Float32Array = new Float32Array(1);
 export default class PostEffect_Convolution extends BasePostEffect {
-	static vertexShaderGLSL = `
+  static vertexShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
     
@@ -31,7 +31,7 @@ export default class PostEffect_Convolution extends BasePostEffect {
 		gl_Position = vec4(position*2.0,1.0);
 	}
 	`;
-	static fragmentShaderGLSL = `
+  static fragmentShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_fragment.systemUniforms}
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 0 ) uniform FragmentUniforms {
@@ -62,60 +62,67 @@ export default class PostEffect_Convolution extends BasePostEffect {
 		outColor = vec4((finalColor / fragmentUniforms.kernelWeight).rgb, 1.0);
 	}
 `;
-	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
-	static uniformsBindGroupLayoutDescriptor_material = BasePostEffect.uniformsBindGroupLayoutDescriptor_material;
-	static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
-	static uniformBufferDescriptor_fragment = [
-		{size: TypeSize.float, valueName: 'kernelWeight'},
-		{size: TypeSize.mat3, valueName: 'kernel'}
-	];
-	static NORMAL = new Float32Array([
-		0, 0, 0, 0,
-		0, 1, 0, 0,
-		0, 0, 0, 0
-	]);
-	static SHARPEN = new Float32Array([
-		0, -1, 0, 0,
-		-1, 5, -1, 0,
-		0, -1, 0, 0,
-	]);
-	static BLUR = new Float32Array([
-		1, 1, 1, 0,
-		1, 1, 1, 0,
-		1, 1, 1, 0
-	]);
-	static EDGE = new Float32Array([
-		0, 1, 0, 0,
-		1, -4, 1, 0,
-		0, 1, 0, 0
-	]);
-	static EMBOSS = new Float32Array([
-		-2, -1, 0, 0,
-		-1, 1, 1, 0,
-		0, 1, 2, 0
-	]);
-	_kernel;
-	_kernelWeight;
-	get kernel() {return this._kernel;}
-	set kernel(value) {
-		this._kernel = value;
-		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['kernel'], this._kernel);
-		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['kernel'], this._kernel)
-		this.kernelWeight = 1
-	}
-	get kernelWeight() {return this._kernelWeight}
-	set kernelWeight(value) {
-		let sum = 0;
-		let i = this._kernel.length;
-		while (i--) sum += this._kernel[i];
-		this._kernelWeight = sum;
-		float1_Float32Array[0] = sum;
-		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['kernelWeight'], float1_Float32Array)
-		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['kernelWeight'], float1_Float32Array)
-	}
-	constructor(redGPUContext, kernel = PostEffect_Convolution.NORMAL) {
-		super(redGPUContext);
-		this.kernel = kernel;
-		console.log(this.uniformBufferDescriptor_fragment)
-	}
+  static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
+  static uniformsBindGroupLayoutDescriptor_material = BasePostEffect.uniformsBindGroupLayoutDescriptor_material;
+  static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
+  static uniformBufferDescriptor_fragment = [
+    {size: TypeSize.float32, valueName: 'kernelWeight'},
+    {size: TypeSize.mat3, valueName: 'kernel'}
+  ];
+  static NORMAL = new Float32Array([
+    0, 0, 0, 0,
+    0, 1, 0, 0,
+    0, 0, 0, 0
+  ]);
+  static SHARPEN = new Float32Array([
+    0, -1, 0, 0,
+    -1, 5, -1, 0,
+    0, -1, 0, 0,
+  ]);
+  static BLUR = new Float32Array([
+    1, 1, 1, 0,
+    1, 1, 1, 0,
+    1, 1, 1, 0
+  ]);
+  static EDGE = new Float32Array([
+    0, 1, 0, 0,
+    1, -4, 1, 0,
+    0, 1, 0, 0
+  ]);
+  static EMBOSS = new Float32Array([
+    -2, -1, 0, 0,
+    -1, 1, 1, 0,
+    0, 1, 2, 0
+  ]);
+
+  constructor(redGPUContext, kernel = PostEffect_Convolution.NORMAL) {
+    super(redGPUContext);
+    this.kernel = kernel;
+    console.log(this.uniformBufferDescriptor_fragment);
+  }
+
+  _kernel;
+
+  get kernel() {return this._kernel;}
+
+  set kernel(value) {
+    this._kernel = value;
+    // this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['kernel'], this._kernel);
+    this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['kernel'], this._kernel);
+    this.kernelWeight = 1;
+  }
+
+  _kernelWeight;
+
+  get kernelWeight() {return this._kernelWeight;}
+
+  set kernelWeight(value) {
+    let sum = 0;
+    let i = this._kernel.length;
+    while (i--) sum += this._kernel[i];
+    this._kernelWeight = sum;
+    float1_Float32Array[0] = sum;
+    // this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['kernelWeight'], float1_Float32Array)
+    this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['kernelWeight'], float1_Float32Array);
+  }
 }

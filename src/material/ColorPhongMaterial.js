@@ -14,13 +14,13 @@ import Mix from "../base/Mix.js";
 import BaseMaterial from "../base/BaseMaterial.js";
 
 export default class ColorPhongMaterial extends Mix.mix(
-	BaseMaterial,
-	Mix.color,
-	Mix.alpha,
-	Mix.basicLightPropertys
+  BaseMaterial,
+  Mix.color,
+  Mix.alpha,
+  Mix.basicLightPropertys
 ) {
 
-	static vertexShaderGLSL = `
+  static vertexShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
 	${ShareGLSL.GLSL_SystemUniforms_vertex.meshUniforms}
@@ -38,7 +38,7 @@ export default class ColorPhongMaterial extends Mix.mix(
 		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * vVertexPosition;
 	}
 	`;
-	static fragmentShaderGLSL = `
+  static fragmentShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_fragment.systemUniforms}
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 0 ) uniform FragmentUniforms {
@@ -96,45 +96,50 @@ export default class ColorPhongMaterial extends Mix.mix(
 		
 	}
 `;
-	// static PROGRAM_OPTION_LIST = {vertex: [], fragment: ['useFlatMode']};
-	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
+  // static PROGRAM_OPTION_LIST = {vertex: [], fragment: ['useFlatMode']};
+  static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
 
-	static uniformsBindGroupLayoutDescriptor_material = {
-		entries: [
-			{binding: 0, visibility: GPUShaderStage.FRAGMENT, type: "uniform-buffer"}
-		]
-	};
-	static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
-	static uniformBufferDescriptor_fragment = [
-		{size: TypeSize.float4, valueName: 'colorRGBA'},
-		{size: TypeSize.float, valueName: 'shininess'},
-		{size: TypeSize.float, valueName: 'specularPower'},
-		{
-			size: TypeSize.float4,
-			valueName: 'specularColorRGBA',
-		},
-		{size: TypeSize.float, valueName: 'alpha'},
-		{size: TypeSize.float, valueName: 'useFlatMode'}
-	];
+  static uniformsBindGroupLayoutDescriptor_material = {
+    entries: [
+      {
+        binding: 0, visibility: GPUShaderStage.FRAGMENT, buffer: {
+          type: 'uniform',
+        },
+      }
+    ]
+  };
+  static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
+  static uniformBufferDescriptor_fragment = [
+    {size: TypeSize.float32x4, valueName: 'colorRGBA'},
+    {size: TypeSize.float32, valueName: 'shininess'},
+    {size: TypeSize.float32, valueName: 'specularPower'},
+    {
+      size: TypeSize.float32x4,
+      valueName: 'specularColorRGBA',
+    },
+    {size: TypeSize.float32, valueName: 'alpha'},
+    {size: TypeSize.float32, valueName: 'useFlatMode'}
+  ];
 
 
-	constructor(redGPUContext, color = '#ff0000', colorAlpha = 1) {
-		super(redGPUContext);
-		this.color = color;
-		this.colorAlpha = colorAlpha;
-		this.needResetBindingInfo = true
-	}
-	resetBindingInfo() {
-		this.entries = [
-			{
-				binding: 0,
-				resource: {
-					buffer: this.uniformBuffer_fragment.GPUBuffer,
-					offset: 0,
-					size: this.uniformBufferDescriptor_fragment.size
-				}
-			}
-		];
-		this._afterResetBindingInfo();
-	}
+  constructor(redGPUContext, color = '#ff0000', colorAlpha = 1) {
+    super(redGPUContext);
+    this.color = color;
+    this.colorAlpha = colorAlpha;
+    this.needResetBindingInfo = true;
+  }
+
+  resetBindingInfo() {
+    this.entries = [
+      {
+        binding: 0,
+        resource: {
+          buffer: this.uniformBuffer_fragment.GPUBuffer,
+          offset: 0,
+          size: this.uniformBufferDescriptor_fragment.size
+        }
+      }
+    ];
+    this._afterResetBindingInfo();
+  }
 }

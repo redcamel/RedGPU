@@ -14,7 +14,7 @@ import TypeSize from "../../resources/TypeSize.js";
 
 const float1_Float32Array = new Float32Array(1);
 export default class PostEffect_BlurX extends BasePostEffect {
-	static vertexShaderGLSL = `
+  static vertexShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
     
@@ -29,7 +29,7 @@ export default class PostEffect_BlurX extends BasePostEffect {
 		vUV = uv;
 	}
 	`;
-	static fragmentShaderGLSL = `
+  static fragmentShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_fragment.systemUniforms}
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 0 ) uniform FragmentUniforms {
@@ -64,19 +64,23 @@ export default class PostEffect_BlurX extends BasePostEffect {
 		outColor = finalColor;
 	}
 `;
-	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
-	static uniformsBindGroupLayoutDescriptor_material = BasePostEffect.uniformsBindGroupLayoutDescriptor_material;
-	static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
-	static uniformBufferDescriptor_fragment = [
-		{size: TypeSize.float, valueName: 'size'}
-	];
-	_size = 50;
-	get size() {return this._size;}
-	set size(value) {
-		this._size = value;
-		float1_Float32Array[0] = this._size;
-		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['size'], float1_Float32Array)
-		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['size'], float1_Float32Array)
-	}
-	constructor(redGPUContext) {super(redGPUContext);}
+  static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
+  static uniformsBindGroupLayoutDescriptor_material = BasePostEffect.uniformsBindGroupLayoutDescriptor_material;
+  static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
+  static uniformBufferDescriptor_fragment = [
+    {size: TypeSize.float32, valueName: 'size'}
+  ];
+
+  constructor(redGPUContext) {super(redGPUContext);}
+
+  _size = 50;
+
+  get size() {return this._size;}
+
+  set size(value) {
+    this._size = value;
+    float1_Float32Array[0] = this._size;
+    // this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['size'], float1_Float32Array)
+    this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['size'], float1_Float32Array);
+  }
 }

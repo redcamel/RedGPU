@@ -14,7 +14,7 @@ import TypeSize from "../resources/TypeSize.js";
 
 const float1_Float32Array = new Float32Array(1);
 export default class PostEffect_Vignetting extends BasePostEffect {
-	static vertexShaderGLSL = `
+  static vertexShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
     
@@ -29,7 +29,7 @@ export default class PostEffect_Vignetting extends BasePostEffect {
 		gl_Position = vec4(position*2.0,1.0);
 	}
 	`;
-	static fragmentShaderGLSL = `
+  static fragmentShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_fragment.systemUniforms}
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 0 ) uniform FragmentUniforms {
@@ -49,29 +49,36 @@ export default class PostEffect_Vignetting extends BasePostEffect {
 		outColor = finalColor;
 	}
 `;
-	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
-	;
-	static uniformsBindGroupLayoutDescriptor_material = BasePostEffect.uniformsBindGroupLayoutDescriptor_material;
-	static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
-	static uniformBufferDescriptor_fragment = [
-		{size: TypeSize.float, valueName: 'intensity'},
-		{size: TypeSize.float, valueName: 'size'}
-	];
-	_intensity = 0.85;
-	_size = 0.1;
-	get intensity() {return this._intensity;}
-	set intensity(value) {
-		this._intensity = value;
-		float1_Float32Array[0] = this._intensity;
-		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['intensity'], float1_Float32Array)
-		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['intensity'], float1_Float32Array)
-	}
-	get size() {return this._size;}
-	set size(value) {
-		this._size = value;
-		float1_Float32Array[0] = this._size;
-		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['size'], float1_Float32Array)
-		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['size'], float1_Float32Array)
-	}
-	constructor(redGPUContext) {super(redGPUContext);}
+  static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
+
+  static uniformsBindGroupLayoutDescriptor_material = BasePostEffect.uniformsBindGroupLayoutDescriptor_material;
+  static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
+  static uniformBufferDescriptor_fragment = [
+    {size: TypeSize.float32, valueName: 'intensity'},
+    {size: TypeSize.float32, valueName: 'size'}
+  ];
+
+  constructor(redGPUContext) {super(redGPUContext);}
+
+  _intensity = 0.85;
+
+  get intensity() {return this._intensity;}
+
+  set intensity(value) {
+    this._intensity = value;
+    float1_Float32Array[0] = this._intensity;
+    // this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['intensity'], float1_Float32Array)
+    this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['intensity'], float1_Float32Array);
+  }
+
+  _size = 0.1;
+
+  get size() {return this._size;}
+
+  set size(value) {
+    this._size = value;
+    float1_Float32Array[0] = this._size;
+    // this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['size'], float1_Float32Array)
+    this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['size'], float1_Float32Array);
+  }
 }

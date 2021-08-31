@@ -14,7 +14,7 @@ import TypeSize from "../../resources/TypeSize.js";
 
 const float1_Float32Array = new Float32Array(1);
 export default class PostEffect_BrightnessContrast extends BasePostEffect {
-	static vertexShaderGLSL = `
+  static vertexShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
     
@@ -29,7 +29,7 @@ export default class PostEffect_BrightnessContrast extends BasePostEffect {
 		vUV = uv;
 	}
 	`;
-	static fragmentShaderGLSL = `
+  static fragmentShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 0 ) uniform FragmentUniforms {
         float brightness;
@@ -49,28 +49,35 @@ export default class PostEffect_BrightnessContrast extends BasePostEffect {
 		outColor = finalColor;
 	}
 `;
-	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
-	static uniformsBindGroupLayoutDescriptor_material = BasePostEffect.uniformsBindGroupLayoutDescriptor_material;
-	static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
-	static uniformBufferDescriptor_fragment = [
-		{size: TypeSize.float, valueName: 'brightness'},
-		{size: TypeSize.float, valueName: 'contrast'}
-	];
-	_brightness = 0;
-	_contrast = 0;
-	get brightness() {return this._brightness;}
-	set brightness(value) {/*FIXME min: -150, max: 150*/
-		this._brightness = value;
-		float1_Float32Array[0] = this._brightness/ 255;
-		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['brightness'], float1_Float32Array)
-		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['brightness'], float1_Float32Array)
-	}
-	get contrast() {return this._contrast;}
-	set contrast(value) {/*FIXME min: -50, max: 100*/
-		this._contrast = value;
-		float1_Float32Array[0] = this._contrast/ 255;
-		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['contrast'], float1_Float32Array)
-		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['contrast'], float1_Float32Array)
-	}
-	constructor(redGPUContext) {super(redGPUContext);}
+  static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
+  static uniformsBindGroupLayoutDescriptor_material = BasePostEffect.uniformsBindGroupLayoutDescriptor_material;
+  static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
+  static uniformBufferDescriptor_fragment = [
+    {size: TypeSize.float32, valueName: 'brightness'},
+    {size: TypeSize.float32, valueName: 'contrast'}
+  ];
+
+  constructor(redGPUContext) {super(redGPUContext);}
+
+  _brightness = 0;
+
+  get brightness() {return this._brightness;}
+
+  set brightness(value) {/*FIXME min: -150, max: 150*/
+    this._brightness = value;
+    float1_Float32Array[0] = this._brightness / 255;
+    // this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['brightness'], float1_Float32Array)
+    this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['brightness'], float1_Float32Array);
+  }
+
+  _contrast = 0;
+
+  get contrast() {return this._contrast;}
+
+  set contrast(value) {/*FIXME min: -50, max: 100*/
+    this._contrast = value;
+    float1_Float32Array[0] = this._contrast / 255;
+    // this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['contrast'], float1_Float32Array)
+    this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['contrast'], float1_Float32Array);
+  }
 }

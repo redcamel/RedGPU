@@ -10,12 +10,12 @@
 import UUID from "../base/UUID.js";
 
 export default class SpriteSheetAction extends UUID {
-	constructor(texture, frameRate = 60, segmentW = 1, segmentH = 1, totalFrame = 1) {
-		super();
-		this.texture = texture;
-		this.frameRate = frameRate;
-		this.segmentW = segmentW;
-		this.segmentH = segmentH;
-		this.totalFrame = totalFrame;
-	}
+  constructor(texture, frameRate = 60, segmentW = 1, segmentH = 1, totalFrame = 1) {
+    super();
+    this.texture = texture;
+    this.frameRate = frameRate;
+    this.segmentW = segmentW;
+    this.segmentH = segmentH;
+    this.totalFrame = totalFrame;
+  }
 }

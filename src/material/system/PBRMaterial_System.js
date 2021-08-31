@@ -16,18 +16,18 @@ import RedGPUContext from "../../RedGPUContext.js";
 let maxJoint = 127; // TODO - 이거 계산해내야함 나중에
 let float1_Float32Array = new Float32Array(1);
 export default class PBRMaterial_System extends Mix.mix(
-	BaseMaterial,
-	Mix.diffuseTexture,
-	Mix.normalTexture,
-	Mix.emissiveTexture,
-	Mix.environmentTexture,
-	Mix.displacementTexture,
-	Mix.roughnessTextureGLTF,
-	Mix.occlusionTextureGLTF,
-	Mix.basicLightPropertys
+  BaseMaterial,
+  Mix.diffuseTexture,
+  Mix.normalTexture,
+  Mix.emissiveTexture,
+  Mix.environmentTexture,
+  Mix.displacementTexture,
+  Mix.roughnessTextureGLTF,
+  Mix.occlusionTextureGLTF,
+  Mix.basicLightPropertys
 ) {
 
-	static vertexShaderGLSL = `
+  static vertexShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
     ${ShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
     ${ShareGLSL.GLSL_SystemUniforms_vertex.calcDisplacement}
@@ -86,11 +86,11 @@ export default class PBRMaterial_System extends Mix.mix(
 		vVertexTangent = vertexTangent;
 		vMouseColorID = meshUniforms.mouseColorID;
 		vSumOpacity = meshUniforms.sumOpacity;
-		if(vertexUniforms.__displacementTextureRenderYn == TRUTHY) vVertexPosition.xyz += calcDisplacement(vNormal, vertexUniforms.displacementFlowSpeedX, vertexUniforms.displacementFlowSpeedY, vertexUniforms.displacementPower, uv, uDisplacementTexture, uDisplacementSampler);
+		// if(vertexUniforms.__displacementTextureRenderYn == TRUTHY) vVertexPosition.xyz += calcDisplacement(vNormal, vertexUniforms.displacementFlowSpeedX, vertexUniforms.displacementFlowSpeedY, vertexUniforms.displacementPower, uv, uDisplacementTexture, uDisplacementSampler);
 		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * vVertexPosition;		
 	}
 	`;
-	static fragmentShaderGLSL = `
+  static fragmentShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_fragment.systemUniforms}
 	${ShareGLSL.GLSL_SystemUniforms_fragment.cotangent_frame}
@@ -276,349 +276,446 @@ export default class PBRMaterial_System extends Mix.mix(
 		
 	}
 `;
-	static PROGRAM_OPTION_LIST = {
-		vertex: [],
-		fragment: []
-		// vertex: ['displacementTexture', 'skin'],
-		// fragment: [
-		// 	'diffuseTexture', 'emissiveTexture', 'environmentTexture', 'normalTexture', 'occlusionTexture', 'roughnessTexture',
-		// 	'useCutOff',
-		// 	'useFlatMode', ,
-		// 	'useMaterialDoubleSide',
-		// 	'useVertexTangent',
-		// 	'useVertexColor_0'
-		// ]
-	};
-	static uniformsBindGroupLayoutDescriptor_material = {
-		entries: [
-			{binding: 0, visibility: GPUShaderStage.VERTEX, type: "uniform-buffer"},
-			{binding: 1, visibility: GPUShaderStage.VERTEX, type: "sampler"},
-			{binding: 2, visibility: GPUShaderStage.VERTEX, type: "sampled-texture"},
-			{binding: 3, visibility: GPUShaderStage.FRAGMENT, type: "uniform-buffer"},
-			{binding: 4, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
-			{binding: 5, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"},
-			{binding: 6, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
-			{binding: 7, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"},
-			{binding: 8, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
-			{binding: 9, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"},
-			{binding: 10, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
-			{binding: 11, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"},
-			{binding: 12, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
-			{binding: 13, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture", viewDimension: 'cube'},
-			{binding: 14, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
-			{binding: 15, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"},
-		]
-	};
-	static uniformBufferDescriptor_vertex = [
-		{size: TypeSize.mat4 * maxJoint, valueName: 'jointMatrix'},
-		{size: TypeSize.mat4 * maxJoint, valueName: 'inverseBindMatrixForJoint'},
-		{size: TypeSize.mat4, valueName: 'globalTransformOfNodeThatTheMeshIsAttachedTo'},
-		{size: TypeSize.float, valueName: 'displacementFlowSpeedX'},
-		{size: TypeSize.float, valueName: 'displacementFlowSpeedY'},
-		{size: TypeSize.float, valueName: 'displacementPower'},
-		{size: TypeSize.float, valueName: '__displacementTextureRenderYn'},
-		{size: TypeSize.float, valueName: 'useSkin'},
+  static PROGRAM_OPTION_LIST = {
+    vertex: [],
+    fragment: []
+    // vertex: ['displacementTexture', 'skin'],
+    // fragment: [
+    // 	'diffuseTexture', 'emissiveTexture', 'environmentTexture', 'normalTexture', 'occlusionTexture', 'roughnessTexture',
+    // 	'useCutOff',
+    // 	'useFlatMode', ,
+    // 	'useMaterialDoubleSide',
+    // 	'useVertexTangent',
+    // 	'useVertexColor_0'
+    // ]
+  };
+  static uniformsBindGroupLayoutDescriptor_material = {
+    entries: [
+      {
+        binding: 0, visibility: GPUShaderStage.VERTEX, buffer: {
+          type: 'uniform',
+        },
+      },
+      {
+        binding: 1, visibility: GPUShaderStage.VERTEX, sampler: {
+          type: 'filtering',
+        },
+      },
+      {
+        binding: 2, visibility: GPUShaderStage.VERTEX, texture: {
+          type: "float"
+        }
+      },
+      {
+        binding: 3, visibility: GPUShaderStage.FRAGMENT, buffer: {
+          type: 'uniform',
+        },
+      },
+      {
+        binding: 4, visibility: GPUShaderStage.FRAGMENT, sampler: {
+          type: 'filtering',
+        },
+      },
+      {
+        binding: 5, visibility: GPUShaderStage.FRAGMENT, texture: {
+          type: "float"
+        }
+      },
+      {
+        binding: 6, visibility: GPUShaderStage.FRAGMENT, sampler: {
+          type: 'filtering',
+        },
+      },
+      {
+        binding: 7, visibility: GPUShaderStage.FRAGMENT, texture: {
+          type: "float"
+        }
+      },
+      {
+        binding: 8, visibility: GPUShaderStage.FRAGMENT, sampler: {
+          type: 'filtering',
+        },
+      },
+      {
+        binding: 9, visibility: GPUShaderStage.FRAGMENT, texture: {
+          type: "float"
+        }
+      },
+      {
+        binding: 10, visibility: GPUShaderStage.FRAGMENT, sampler: {
+          type: 'filtering',
+        },
+      },
+      {
+        binding: 11, visibility: GPUShaderStage.FRAGMENT, texture: {
+          type: "float"
+        }
+      },
+      {
+        binding: 12, visibility: GPUShaderStage.FRAGMENT, sampler: {
+          type: 'filtering',
+        },
+      },
+      {
+        binding: 13, visibility: GPUShaderStage.FRAGMENT, texture: {
+           viewDimension: 'cube'
+        }
+      },
+      {
+        binding: 14, visibility: GPUShaderStage.FRAGMENT, sampler: {
+          type: 'filtering',
+        },
+      },
+      {
+        binding: 15, visibility: GPUShaderStage.FRAGMENT, texture: {
+          type: "float"
+        }
+      },
+    ]
+  };
+  static uniformBufferDescriptor_vertex = [
+    {size: TypeSize.mat4 * maxJoint, valueName: 'jointMatrix'},
+    {size: TypeSize.mat4 * maxJoint, valueName: 'inverseBindMatrixForJoint'},
+    {size: TypeSize.mat4, valueName: 'globalTransformOfNodeThatTheMeshIsAttachedTo'},
+    {size: TypeSize.float32, valueName: 'displacementFlowSpeedX'},
+    {size: TypeSize.float32, valueName: 'displacementFlowSpeedY'},
+    {size: TypeSize.float32, valueName: 'displacementPower'},
+    {size: TypeSize.float32, valueName: '__displacementTextureRenderYn'},
+    {size: TypeSize.float32, valueName: 'useSkin'},
 
 
-	];
-	static uniformBufferDescriptor_fragment = [
-		{size: TypeSize.float, valueName: 'normalPower'},
-		{size: TypeSize.float, valueName: 'shininess'},
-		{size: TypeSize.float, valueName: 'emissivePower'},
-		{size: TypeSize.float, valueName: 'occlusionPower'},
-		{size: TypeSize.float, valueName: 'environmentPower'},
-		{size: TypeSize.float4, valueName: 'baseColorFactor'},
-		{size: TypeSize.float, valueName: 'diffuseTexCoordIndex'},
-		{size: TypeSize.float, valueName: 'normalTexCoordIndex'},
-		{size: TypeSize.float, valueName: 'emissiveTexCoordIndex'},
-		{size: TypeSize.float, valueName: 'roughnessTexCoordIndex'},
-		{size: TypeSize.float, valueName: 'occlusionTexCoordIndex'},
-		{size: TypeSize.float, valueName: 'metallicFactor'},
-		{size: TypeSize.float, valueName: 'roughnessFactor'},
-		{size: TypeSize.float, valueName: 'cutOff'},
-		{size: TypeSize.float, valueName: 'alphaBlend'},
-		//
-		{size: TypeSize.float, valueName: 'useFlatMode'},
-		{size: TypeSize.float, valueName: 'useCutOff'},
-		{size: TypeSize.float, valueName: 'useVertexTangent'},
-		{size: TypeSize.float, valueName: 'useVertexColor_0'},
-		{size: TypeSize.float, valueName: 'useMaterialDoubleSide'},
+  ];
+  static uniformBufferDescriptor_fragment = [
+    {size: TypeSize.float32, valueName: 'normalPower'},
+    {size: TypeSize.float32, valueName: 'shininess'},
+    {size: TypeSize.float32, valueName: 'emissivePower'},
+    {size: TypeSize.float32, valueName: 'occlusionPower'},
+    {size: TypeSize.float32, valueName: 'environmentPower'},
+    {size: TypeSize.float32x4, valueName: 'baseColorFactor'},
+    {size: TypeSize.float32, valueName: 'diffuseTexCoordIndex'},
+    {size: TypeSize.float32, valueName: 'normalTexCoordIndex'},
+    {size: TypeSize.float32, valueName: 'emissiveTexCoordIndex'},
+    {size: TypeSize.float32, valueName: 'roughnessTexCoordIndex'},
+    {size: TypeSize.float32, valueName: 'occlusionTexCoordIndex'},
+    {size: TypeSize.float32, valueName: 'metallicFactor'},
+    {size: TypeSize.float32, valueName: 'roughnessFactor'},
+    {size: TypeSize.float32, valueName: 'cutOff'},
+    {size: TypeSize.float32, valueName: 'alphaBlend'},
+    //
+    {size: TypeSize.float32, valueName: 'useFlatMode'},
+    {size: TypeSize.float32, valueName: 'useCutOff'},
+    {size: TypeSize.float32, valueName: 'useVertexTangent'},
+    {size: TypeSize.float32, valueName: 'useVertexColor_0'},
+    {size: TypeSize.float32, valueName: 'useMaterialDoubleSide'},
 
-		//
-		{size: TypeSize.float, valueName: '__diffuseTextureRenderYn'},
-		{size: TypeSize.float, valueName: '__environmentTextureRenderYn'},
-		{size: TypeSize.float, valueName: '__normalTextureRenderYn'},
-		{size: TypeSize.float, valueName: '__occlusionTextureRenderYn'},
-		{size: TypeSize.float, valueName: '__emissiveTextureRenderYn'},
-		{size: TypeSize.float, valueName: '__roughnessTextureRenderYn'}
-	];
+    //
+    {size: TypeSize.float32, valueName: '__diffuseTextureRenderYn'},
+    {size: TypeSize.float32, valueName: '__environmentTextureRenderYn'},
+    {size: TypeSize.float32, valueName: '__normalTextureRenderYn'},
+    {size: TypeSize.float32, valueName: '__occlusionTextureRenderYn'},
+    {size: TypeSize.float32, valueName: '__emissiveTextureRenderYn'},
+    {size: TypeSize.float32, valueName: '__roughnessTextureRenderYn'}
+  ];
+  jointMatrix = new Float32Array(TypeSize.mat4 * maxJoint / Float32Array.BYTES_PER_ELEMENT);
+  inverseBindMatrixForJoint = new Float32Array(TypeSize.mat4 * maxJoint / Float32Array.BYTES_PER_ELEMENT);
+  globalTransformOfNodeThatTheMeshIsAttachedTo = new Float32Array(TypeSize.mat4 / Float32Array.BYTES_PER_ELEMENT);
+  #raf;
 
-	_baseColorFactor = new Float32Array(4);
-	_useVertexColor_0 = false;
-	_diffuseTexCoordIndex = 0;
-	_normalTexCoordIndex = 0;
-	_emissiveTexCoordIndex = 0;
-	_metallicFactor = 1;
-	_useMaterialDoubleSide = false;
-	_useVertexTangent = false;
-	_emissivePower = 1;
-	_cutOff = 0.0;
-	_useCutOff = true;
-	_alphaBlend = 0;
+  constructor(redGPUContext, diffuseTexture, environmentTexture, normalTexture, occlusionTexture, emissiveTexture, roughnessTexture) {
+    super(redGPUContext);
+    this.diffuseTexture = diffuseTexture;
+    this.environmentTexture = environmentTexture;
+    this.normalTexture = normalTexture;
+    this.occlusionTexture = occlusionTexture;
+    this.emissiveTexture = emissiveTexture;
+    this.roughnessTexture = roughnessTexture;
+    this.needResetBindingInfo = true;
+  }
 
-	_useSkin = false;
-	jointMatrix = new Float32Array(TypeSize.mat4 * maxJoint / Float32Array.BYTES_PER_ELEMENT);
-	inverseBindMatrixForJoint = new Float32Array(TypeSize.mat4 * maxJoint / Float32Array.BYTES_PER_ELEMENT);
-	globalTransformOfNodeThatTheMeshIsAttachedTo = new Float32Array(TypeSize.mat4 / Float32Array.BYTES_PER_ELEMENT);
-	#raf;
+  _baseColorFactor = new Float32Array(4);
 
-	set alphaBlend(value) {
-		this._alphaBlend = value;
-		float1_Float32Array[0] = value;
-		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['alphaBlend'], float1_Float32Array)
-		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['alphaBlend'], float1_Float32Array)
-	}
-	get alphaBlend() {return this._alphaBlend;}
-	set cutOff(value) {
-		this._cutOff = value;
-		float1_Float32Array[0] = value;
-		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['cutOff'], float1_Float32Array)
-		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['cutOff'], float1_Float32Array)
-	}
-	get cutOff() {return this._cutOff;}
-	get useCutOff() {return this._useCutOff}
-	set useCutOff(v) {
-		this._useCutOff = v;
-		float1_Float32Array[0] = v ? 1 : 0;
-		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['useCutOff'], float1_Float32Array)
-		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['useCutOff'], float1_Float32Array)
-	}
-	get useSkin() {return this._useSkin}
-	set useSkin(v) {
-		this._useSkin = v;
-		float1_Float32Array[0] = v ? 1 : 0;
-		// this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['useSkin'], float1_Float32Array)
-		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_vertex.GPUBuffer, this.uniformBufferDescriptor_vertex.redStructOffsetMap['useSkin'], float1_Float32Array)
-	}
-	set emissivePower(value) {
-		this._emissivePower = value;
-		float1_Float32Array[0] = value;
-		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['emissivePower'], float1_Float32Array)
-		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['emissivePower'], float1_Float32Array)
-	}
-	get emissivePower() {return this._emissivePower;}
+  get baseColorFactor() {return this._baseColorFactor;}
 
-	get useMaterialDoubleSide() {return this._useMaterialDoubleSide}
-	set useMaterialDoubleSide(v) {
-		this._useMaterialDoubleSide = v;
-		float1_Float32Array[0] =  v ? 1 : 0;
-		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['useMaterialDoubleSide'], float1_Float32Array)
-		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['useMaterialDoubleSide'], float1_Float32Array)
-	}
-	get useVertexTangent() {return this._useVertexTangent}
-	set useVertexTangent(v) {
-		this._useVertexTangent = v;
-		float1_Float32Array[0] = v;
-		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['useVertexTangent'], float1_Float32Array)
-		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['useVertexTangent'], float1_Float32Array)
-	}
+  set baseColorFactor(value) {
+    this._baseColorFactor = new Float32Array(value);
+    // this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['baseColorFactor'], this._baseColorFactor)
+    this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['baseColorFactor'], this._baseColorFactor);
+  }
 
-	get metallicFactor() {return this._metallicFactor;}
-	set metallicFactor(value) {
-		this._metallicFactor = value;
-		float1_Float32Array[0] = value;
-		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['metallicFactor'], float1_Float32Array)
-		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['metallicFactor'], float1_Float32Array)
-	}
-	get useVertexColor_0() {return this._useVertexColor_0;}
-	set useVertexColor_0(value) {
-		this._useVertexColor_0 = value;
-		float1_Float32Array[0] = value ? 1 : 0;
-		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['useVertexColor_0'], float1_Float32Array)
-		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['useVertexColor_0'], float1_Float32Array)
-	}
-	get baseColorFactor() {return this._baseColorFactor;}
-	set baseColorFactor(value) {
-		this._baseColorFactor = new Float32Array(value);
-		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['baseColorFactor'], this._baseColorFactor)
-		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['baseColorFactor'], this._baseColorFactor)
-	}
-	get diffuseTexCoordIndex() {return this._diffuseTexCoordIndex;}
-	set diffuseTexCoordIndex(value) {
-		this._diffuseTexCoordIndex = value;
-		float1_Float32Array[0] = value;
-		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['diffuseTexCoordIndex'], float1_Float32Array)
-		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['diffuseTexCoordIndex'], float1_Float32Array)
-	}
-	get normalTexCoordIndex() {return this._normalTexCoordIndex;}
-	set normalTexCoordIndex(value) {
-		this._normalTexCoordIndex = value;
-		float1_Float32Array[0] = value;
-		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['normalTexCoordIndex'], float1_Float32Array)
-		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['normalTexCoordIndex'], float1_Float32Array)
-	}
-	get emissiveTexCoordIndex() {return this._emissiveTexCoordIndex;}
-	set emissiveTexCoordIndex(value) {
-		this._emissiveTexCoordIndex = value;
-		float1_Float32Array[0] = value;
-		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['emissiveTexCoordIndex'], float1_Float32Array)
-		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['emissiveTexCoordIndex'], float1_Float32Array)
-	}
-	constructor(redGPUContext, diffuseTexture, environmentTexture, normalTexture, occlusionTexture, emissiveTexture, roughnessTexture) {
-		super(redGPUContext);
-		this.diffuseTexture = diffuseTexture;
-		this.environmentTexture = environmentTexture;
-		this.normalTexture = normalTexture;
-		this.occlusionTexture = occlusionTexture;
-		this.emissiveTexture = emissiveTexture;
-		this.roughnessTexture = roughnessTexture;
-		this.needResetBindingInfo = true
-	}
+  _useVertexColor_0 = false;
 
-	checkTexture(texture, textureName) {
-		if (texture) {
-			if (texture._GPUTexture) {
-				let tKey;
-				switch (textureName) {
-					case 'diffuseTexture' :
-						this._diffuseTexture = texture;
-						tKey = textureName;
-						break;
-					case 'normalTexture' :
-						this._normalTexture = texture;
-						tKey = textureName;
-						break;
-					case 'environmentTexture' :
-						this._environmentTexture = texture;
-						tKey = textureName;
-						break;
-					case 'emissiveTexture' :
-						this._emissiveTexture = texture;
-						tKey = textureName;
-						break;
-					case 'roughnessTexture' :
-						this._roughnessTexture = texture;
-						tKey = textureName;
-						break;
-					case 'occlusionTexture' :
-						this._occlusionTexture = texture;
-						tKey = textureName;
-						break;
-				}
-				if (RedGPUContext.useDebugConsole) console.log("로딩완료or로딩에러확인 textureName", textureName, texture ? texture._GPUTexture : '');
-				if (tKey) {
-					float1_Float32Array[0] = this[`__${textureName}RenderYn`] = 1;
-					if (tKey == 'displacementTexture') {
-						// this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
-						this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_vertex.GPUBuffer, this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
-					}
-					else {
-						// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
-						this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
-					}
-				}
-				// cancelAnimationFrame(this.#raf);
-				// this.#raf = requestAnimationFrame(_ => {this.needResetBindingInfo = true})
-				this.needResetBindingInfo = true
+  get useVertexColor_0() {return this._useVertexColor_0;}
 
-			} else {
-				texture.addUpdateTarget(this, textureName)
-			}
+  set useVertexColor_0(value) {
+    this._useVertexColor_0 = value;
+    float1_Float32Array[0] = value ? 1 : 0;
+    // this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['useVertexColor_0'], float1_Float32Array)
+    this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['useVertexColor_0'], float1_Float32Array);
+  }
 
-		} else {
-			if (this['_' + textureName]) {
-				this['_' + textureName] = null;
-				float1_Float32Array[0] = this[`__${textureName}RenderYn`] = 0;
-				if (textureName == 'displacementTexture') {
-					// this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
-					this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_vertex.GPUBuffer, this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
-				}
-				else {
-					// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
-					this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
-				}
-				this.needResetBindingInfo = true;
-			}
-		}
-	}
+  _diffuseTexCoordIndex = 0;
 
-	resetBindingInfo() {
-		this.entries = [
-			{
-				binding: 0,
-				resource: {
-					buffer: this.uniformBuffer_vertex.GPUBuffer,
-					offset: 0,
-					size: this.uniformBufferDescriptor_vertex.size
-				}
-			},
-			{
-				binding: 1,
-				resource: this._displacementTexture ? this._displacementTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
-			},
-			{
-				binding: 2,
-				resource: this._displacementTexture ? this._displacementTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
-			},
-			{
-				binding: 3,
-				resource: {
-					buffer: this.uniformBuffer_fragment.GPUBuffer,
-					offset: 0,
-					size: this.uniformBufferDescriptor_fragment.size
-				}
-			},
-			{
-				binding: 4,
-				resource: this._diffuseTexture ? this._diffuseTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
-			},
-			{
-				binding: 5,
-				resource: this._diffuseTexture ? this._diffuseTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
-			},
-			{
-				binding: 6,
-				resource: this._normalTexture ? this._normalTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
-			},
-			{
-				binding: 7,
-				resource: this._normalTexture ? this._normalTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
-			},
-			{
-				binding: 8,
-				resource: this._roughnessTexture ? this._roughnessTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
-			},
-			{
-				binding: 9,
-				resource: this._roughnessTexture ? this._roughnessTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
-			},
-			{
-				binding: 10,
-				resource: this._emissiveTexture ? this._emissiveTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
-			},
-			{
-				binding: 11,
-				resource: this._emissiveTexture ? this._emissiveTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
-			},
-			{
-				binding: 12,
-				resource: this._environmentTexture ? this._environmentTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
-			},
-			{
-				binding: 13,
-				resource: this._environmentTexture ? this._environmentTexture._GPUTextureView : this.redGPUContext.state.emptyCubeTextureView
-			},
-			{
-				binding: 14,
-				resource: this._occlusionTexture ? this._occlusionTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
-			},
-			{
-				binding: 15,
-				resource: this._occlusionTexture ? this._occlusionTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
-			}
+  get diffuseTexCoordIndex() {return this._diffuseTexCoordIndex;}
+
+  set diffuseTexCoordIndex(value) {
+    this._diffuseTexCoordIndex = value;
+    float1_Float32Array[0] = value;
+    // this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['diffuseTexCoordIndex'], float1_Float32Array)
+    this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['diffuseTexCoordIndex'], float1_Float32Array);
+  }
+
+  _normalTexCoordIndex = 0;
+
+  get normalTexCoordIndex() {return this._normalTexCoordIndex;}
+
+  set normalTexCoordIndex(value) {
+    this._normalTexCoordIndex = value;
+    float1_Float32Array[0] = value;
+    // this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['normalTexCoordIndex'], float1_Float32Array)
+    this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['normalTexCoordIndex'], float1_Float32Array);
+  }
+
+  _emissiveTexCoordIndex = 0;
+
+  get emissiveTexCoordIndex() {return this._emissiveTexCoordIndex;}
+
+  set emissiveTexCoordIndex(value) {
+    this._emissiveTexCoordIndex = value;
+    float1_Float32Array[0] = value;
+    // this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['emissiveTexCoordIndex'], float1_Float32Array)
+    this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['emissiveTexCoordIndex'], float1_Float32Array);
+  }
+
+  _metallicFactor = 1;
+
+  get metallicFactor() {return this._metallicFactor;}
+
+  set metallicFactor(value) {
+    this._metallicFactor = value;
+    float1_Float32Array[0] = value;
+    // this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['metallicFactor'], float1_Float32Array)
+    this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['metallicFactor'], float1_Float32Array);
+  }
+
+  _useMaterialDoubleSide = false;
+
+  get useMaterialDoubleSide() {return this._useMaterialDoubleSide;}
+
+  set useMaterialDoubleSide(v) {
+    this._useMaterialDoubleSide = v;
+    float1_Float32Array[0] = v ? 1 : 0;
+    // this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['useMaterialDoubleSide'], float1_Float32Array)
+    this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['useMaterialDoubleSide'], float1_Float32Array);
+  }
+
+  _useVertexTangent = false;
+
+  get useVertexTangent() {return this._useVertexTangent;}
+
+  set useVertexTangent(v) {
+    this._useVertexTangent = v;
+    float1_Float32Array[0] = v;
+    // this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['useVertexTangent'], float1_Float32Array)
+    this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['useVertexTangent'], float1_Float32Array);
+  }
+
+  _emissivePower = 1;
+
+  get emissivePower() {return this._emissivePower;}
+
+  set emissivePower(value) {
+    this._emissivePower = value;
+    float1_Float32Array[0] = value;
+    // this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['emissivePower'], float1_Float32Array)
+    this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['emissivePower'], float1_Float32Array);
+  }
+
+  _cutOff = 0.0;
+
+  get cutOff() {return this._cutOff;}
+
+  set cutOff(value) {
+    this._cutOff = value;
+    float1_Float32Array[0] = value;
+    // this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['cutOff'], float1_Float32Array)
+    this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['cutOff'], float1_Float32Array);
+  }
+
+  _useCutOff = true;
+
+  get useCutOff() {return this._useCutOff;}
+
+  set useCutOff(v) {
+    this._useCutOff = v;
+    float1_Float32Array[0] = v ? 1 : 0;
+    // this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['useCutOff'], float1_Float32Array)
+    this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['useCutOff'], float1_Float32Array);
+  }
+
+  _alphaBlend = 0;
+
+  get alphaBlend() {return this._alphaBlend;}
+
+  set alphaBlend(value) {
+    this._alphaBlend = value;
+    float1_Float32Array[0] = value;
+    // this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['alphaBlend'], float1_Float32Array)
+    this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['alphaBlend'], float1_Float32Array);
+  }
+
+  _useSkin = false;
+
+  get useSkin() {return this._useSkin;}
+
+  set useSkin(v) {
+    this._useSkin = v;
+    float1_Float32Array[0] = v ? 1 : 0;
+    // this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['useSkin'], float1_Float32Array)
+    this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_vertex.GPUBuffer, this.uniformBufferDescriptor_vertex.redStructOffsetMap['useSkin'], float1_Float32Array);
+  }
+
+  checkTexture(texture, textureName) {
+    if (texture) {
+      if (texture._GPUTexture) {
+        let tKey;
+        switch (textureName) {
+          case 'diffuseTexture' :
+            this._diffuseTexture = texture;
+            tKey = textureName;
+            break;
+          case 'normalTexture' :
+            this._normalTexture = texture;
+            tKey = textureName;
+            break;
+          case 'environmentTexture' :
+            this._environmentTexture = texture;
+            tKey = textureName;
+            break;
+          case 'emissiveTexture' :
+            this._emissiveTexture = texture;
+            tKey = textureName;
+            break;
+          case 'roughnessTexture' :
+            this._roughnessTexture = texture;
+            tKey = textureName;
+            break;
+          case 'occlusionTexture' :
+            this._occlusionTexture = texture;
+            tKey = textureName;
+            break;
+        }
+        if (RedGPUContext.useDebugConsole) console.log("로딩완료or로딩에러확인 textureName", textureName, texture ? texture._GPUTexture : '');
+        if (tKey) {
+          float1_Float32Array[0] = this[`__${textureName}RenderYn`] = 1;
+          if (tKey == 'displacementTexture') {
+            // this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+            this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_vertex.GPUBuffer, this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+          } else {
+            // this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+            this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+          }
+        }
+        // cancelAnimationFrame(this.#raf);
+        // this.#raf = requestAnimationFrame(_ => {this.needResetBindingInfo = true})
+        this.needResetBindingInfo = true;
+
+      } else {
+        texture.addUpdateTarget(this, textureName);
+      }
+
+    } else {
+      if (this['_' + textureName]) {
+        this['_' + textureName] = null;
+        float1_Float32Array[0] = this[`__${textureName}RenderYn`] = 0;
+        if (textureName == 'displacementTexture') {
+          // this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+          this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_vertex.GPUBuffer, this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+        } else {
+          // this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+          this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+        }
+        this.needResetBindingInfo = true;
+      }
+    }
+  }
+
+  resetBindingInfo() {
+    this.entries = [
+      {
+        binding: 0,
+        resource: {
+          buffer: this.uniformBuffer_vertex.GPUBuffer,
+          offset: 0,
+          size: this.uniformBufferDescriptor_vertex.size
+        }
+      },
+      {
+        binding: 1,
+        resource: this._displacementTexture ? this._displacementTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
+      },
+      {
+        binding: 2,
+        resource: this._displacementTexture ? this._displacementTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
+      },
+      {
+        binding: 3,
+        resource: {
+          buffer: this.uniformBuffer_fragment.GPUBuffer,
+          offset: 0,
+          size: this.uniformBufferDescriptor_fragment.size
+        }
+      },
+      {
+        binding: 4,
+        resource: this._diffuseTexture ? this._diffuseTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
+      },
+      {
+        binding: 5,
+        resource: this._diffuseTexture ? this._diffuseTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
+      },
+      {
+        binding: 6,
+        resource: this._normalTexture ? this._normalTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
+      },
+      {
+        binding: 7,
+        resource: this._normalTexture ? this._normalTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
+      },
+      {
+        binding: 8,
+        resource: this._roughnessTexture ? this._roughnessTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
+      },
+      {
+        binding: 9,
+        resource: this._roughnessTexture ? this._roughnessTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
+      },
+      {
+        binding: 10,
+        resource: this._emissiveTexture ? this._emissiveTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
+      },
+      {
+        binding: 11,
+        resource: this._emissiveTexture ? this._emissiveTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
+      },
+      {
+        binding: 12,
+        resource: this._environmentTexture ? this._environmentTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
+      },
+      {
+        binding: 13,
+        resource: this._environmentTexture ? this._environmentTexture._GPUTextureView : this.redGPUContext.state.emptyCubeTextureView
+      },
+      {
+        binding: 14,
+        resource: this._occlusionTexture ? this._occlusionTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
+      },
+      {
+        binding: 15,
+        resource: this._occlusionTexture ? this._occlusionTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
+      }
 
 
-		];
-		this._afterResetBindingInfo();
-	}
+    ];
+    this._afterResetBindingInfo();
+  }
 }

@@ -12,7 +12,7 @@ import ShareGLSL from "../../base/ShareGLSL.js";
 
 export default class GridMaterial extends BaseMaterial {
 
-	static vertexShaderGLSL = `
+  static vertexShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
     ${ShareGLSL.GLSL_SystemUniforms_vertex.meshUniforms}
@@ -25,26 +25,30 @@ export default class GridMaterial extends BaseMaterial {
 		vColor = color;
 	}
 	`;
-	static fragmentShaderGLSL = `
+  static fragmentShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
+	${ShareGLSL.GLSL_SystemUniforms_fragment.systemUniforms}
 	layout( location = 0 ) in vec4 vColor;
 	layout( location = 0 ) out vec4 outColor;
-	
+	layout( location = 1 ) out vec4 out_MouseColorID_Depth;
 	void main() {
 		outColor = vColor;
+			out_MouseColorID_Depth = vec4(0.0);
 		
 	}
 	`;
-	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
-	static uniformsBindGroupLayoutDescriptor_material = {entries: []};
-	static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
-	static uniformBufferDescriptor_fragment = BaseMaterial.uniformBufferDescriptor_empty;
-	constructor(redGPUContext) {
-		super(redGPUContext);
-		this.needResetBindingInfo = true
-	}
-	resetBindingInfo() {
-		this.entries = [];
-		this._afterResetBindingInfo();
-	}
+  static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
+  static uniformsBindGroupLayoutDescriptor_material = {entries: []};
+  static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
+  static uniformBufferDescriptor_fragment = BaseMaterial.uniformBufferDescriptor_empty;
+
+  constructor(redGPUContext) {
+    super(redGPUContext);
+    this.needResetBindingInfo = true;
+  }
+
+  resetBindingInfo() {
+    this.entries = [];
+    this._afterResetBindingInfo();
+  }
 }
