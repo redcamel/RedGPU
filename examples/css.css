@@ -52,4 +52,6 @@ input, select, option {
     background: #70020c;
 }
 
-
+.dg select{
+    width : 100%
+}

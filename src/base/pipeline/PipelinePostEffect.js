@@ -49,6 +49,7 @@ export default class PipelinePostEffect extends UUID {
         targets: [
           {
             format: redGPUContext.context.getPreferredFormat(redGPUContext.adapter),
+            // format: 'rgba8unorm',
             blend: {
               color: {
                 srcFactor: "src-alpha",
@@ -63,6 +64,7 @@ export default class PipelinePostEffect extends UUID {
               }
             }
           },
+
         ]
       },
       // 컬러모드 지정하고

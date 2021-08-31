@@ -127,7 +127,7 @@ export default class MouseEventChecker extends UUID {
       this.#currentPickedArrayBuffer = this.#redView.readPixelArrayBuffer(redGPUContext, this.#redView, this.#redView.baseAttachment_mouseColorID_depth_ResolveTarget, this.#redView.mouseX, this.#redView.mouseY);
 
       this.#currentPickedArrayBuffer.then(arrayBuffer => {
-        console.log(Math.round(new Float32Array(arrayBuffer)[0]))
+        // console.log(Math.round(new Float32Array(arrayBuffer)[0]))
         this.#currentPickedArrayBuffer = null;
         this.#currentPickedMouseID = Math.round(new Float32Array(arrayBuffer)[0]);
         this.checkMouseEvent(redGPUContext, this.#currentPickedMouseID);

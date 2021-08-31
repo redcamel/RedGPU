@@ -96,6 +96,7 @@ export default class PipelineParticle extends UUID {
         targets: [
           {
             format: redGPUContext.context.getPreferredFormat(redGPUContext.adapter),
+            // format: 'rgba8unorm',
             blend: {
               color: {
                 srcFactor: 'src-alpha',
