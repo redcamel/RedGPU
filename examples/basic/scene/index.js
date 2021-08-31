@@ -38,6 +38,8 @@ new RedGPU.RedGPUContext(
 				]
 			)
 		);
+		let testMesh = new RedGPU.Mesh(this, new RedGPU.Box(this), new RedGPU.ColorMaterial(this));
+		tScene.addChild(testMesh);
 		///////////////////////////////////////////////////////////////////////////////////////////
 		renderer = new RedGPU.Render();
 		// renderer setup

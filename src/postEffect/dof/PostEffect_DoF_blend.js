@@ -14,7 +14,7 @@ import TypeSize from "../../resources/TypeSize.js";
 
 const float1_Float32Array = new Float32Array(1);
 export default class PostEffect_DoF_blend extends BasePostEffect {
-	static vertexShaderGLSL = `
+  static vertexShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
     
@@ -29,7 +29,7 @@ export default class PostEffect_DoF_blend extends BasePostEffect {
 		vUV = uv;
 	}
 	`;
-	static fragmentShaderGLSL = `
+  static fragmentShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_fragment.systemUniforms}
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 0 ) uniform FragmentUniforms {
@@ -56,47 +56,72 @@ export default class PostEffect_DoF_blend extends BasePostEffect {
 		outColor = diffuseColor + blurColor;
 	}
 `;
-	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
-	static uniformsBindGroupLayoutDescriptor_material = {
-		entries: [
-			{binding: 0, visibility: GPUShaderStage.FRAGMENT, type: "uniform-buffer"},
-			{binding: 1, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
-			{binding: 2, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"},
-			{binding: 3, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"},
-			{binding: 4, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"}
-		]
-	};
-	static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
-	static uniformBufferDescriptor_fragment = [
-		{size: TypeSize.float, valueName: 'focusLength'}
-	];
-	blurTexture;
-	depthTexture;
-	_focusLength = 15;
-	get focusLength() {return this._focusLength;}
-	set focusLength(value) {
-		this._focusLength = value;
-		float1_Float32Array[0] = this._focusLength;
-		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['focusLength'], float1_Float32Array)
-		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['focusLength'], float1_Float32Array)
-	}
-	constructor(redGPUContext) {super(redGPUContext);}
-	resetBindingInfo() {
-		this.entries = [
-			{
-				binding: 0,
-				resource: {
-					buffer: this.uniformBuffer_fragment.GPUBuffer,
-					offset: 0,
-					size: this.uniformBufferDescriptor_fragment.size
-				}
-			},
-			{binding: 1, resource: this.sampler.GPUSampler},
-			{binding: 2, resource: this.sourceTexture},
-			{binding: 3, resource: this.blurTexture},
-			{binding: 4, resource: this.depthTexture}
+  static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
+  static uniformsBindGroupLayoutDescriptor_material = {
+    entries: [
+      {
+        binding: 0, visibility: GPUShaderStage.FRAGMENT, buffer: {
+          type: 'uniform',
+        },
+      },
+      {
+        binding: 1, visibility: GPUShaderStage.FRAGMENT, sampler: {
+          type: 'filtering',
+        },
+      },
+      {
+        binding: 2, visibility: GPUShaderStage.FRAGMENT, texture: {
+          type: "float"
+        }
+      },
+      {
+        binding: 3, visibility: GPUShaderStage.FRAGMENT, texture: {
+          type: "float"
+        }
+      },
+      {
+        binding: 4, visibility: GPUShaderStage.FRAGMENT, texture: {
+          type: "float"
+        }
+      }
+    ]
+  };
+  static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
+  static uniformBufferDescriptor_fragment = [
+    {size: TypeSize.float32, valueName: 'focusLength'}
+  ];
+  blurTexture;
+  depthTexture;
 
-		];
-		this._afterResetBindingInfo();
-	}
+  constructor(redGPUContext) {super(redGPUContext);}
+
+  _focusLength = 15;
+
+  get focusLength() {return this._focusLength;}
+
+  set focusLength(value) {
+    this._focusLength = value;
+    float1_Float32Array[0] = this._focusLength;
+    // this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['focusLength'], float1_Float32Array)
+    this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['focusLength'], float1_Float32Array);
+  }
+
+  resetBindingInfo() {
+    this.entries = [
+      {
+        binding: 0,
+        resource: {
+          buffer: this.uniformBuffer_fragment.GPUBuffer,
+          offset: 0,
+          size: this.uniformBufferDescriptor_fragment.size
+        }
+      },
+      {binding: 1, resource: this.sampler.GPUSampler},
+      {binding: 2, resource: this.sourceTexture},
+      {binding: 3, resource: this.blurTexture},
+      {binding: 4, resource: this.depthTexture}
+
+    ];
+    this._afterResetBindingInfo();
+  }
 }

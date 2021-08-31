@@ -23,6 +23,8 @@ new RedGPU.RedGPUContext(
 		tCamera = new RedGPU.ObitController(this);
 		tView = new RedGPU.View(this, tScene, tCamera);
 		this.addView(tView);
+
+
 		///////////////////////////////////////////////////////////////////////////////////////////
 		// mesh setup
 		testMesh = new RedGPU.Mesh(this, new RedGPU.Box(this), new RedGPU.ColorMaterial(this));

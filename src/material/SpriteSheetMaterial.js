@@ -15,12 +15,12 @@ import TypeSize from "../resources/TypeSize.js";
 
 let float1_Float32Array = new Float32Array(1);
 export default class SpriteSheetMaterial extends Mix.mix(
-	BaseMaterial,
-	Mix.alpha,
-	Mix.diffuseTexture
+  BaseMaterial,
+  Mix.alpha,
+  Mix.diffuseTexture
 ) {
 
-	static vertexShaderGLSL = `
+  static vertexShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
     ${ShareGLSL.GLSL_SystemUniforms_vertex.meshUniforms}
@@ -47,7 +47,7 @@ export default class SpriteSheetMaterial extends Mix.mix(
 	
 	}
 	`;
-	static fragmentShaderGLSL = `
+  static fragmentShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	const float TRUTHY = 1.0;
 	layout( location = 0 ) in vec3 vNormal;
@@ -76,181 +76,206 @@ export default class SpriteSheetMaterial extends Mix.mix(
 		
 	}
 `;
-	static PROGRAM_OPTION_LIST = {
-		vertex: [],
-		fragment: []
-		// vertex: [],
-		// fragment: ['diffuseTexture']
-	};
-	static uniformsBindGroupLayoutDescriptor_material = {
-		entries: [
-			{binding: 0, visibility: GPUShaderStage.VERTEX, type: "uniform-buffer"},
-			{binding: 1, visibility: GPUShaderStage.FRAGMENT, type: "uniform-buffer"},
-			{binding: 2, visibility: GPUShaderStage.FRAGMENT, type: "sampler"},
-			{binding: 3, visibility: GPUShaderStage.FRAGMENT, type: "sampled-texture"}
-		]
-	};
-	static uniformBufferDescriptor_vertex = [
-		{size: TypeSize.float4, valueName: 'sheetRect'}
-	];
-	static uniformBufferDescriptor_fragment = [
-		{size: TypeSize.float, valueName: 'alpha'},
-		//
-		{size: TypeSize.float, valueName: '__diffuseTextureRenderYn'},
-	];
-	#frameRate;
-	#nextFrameTime = 0;
-	#aniMap = {};
-	get frameRate() {return this.#frameRate;}
-	set frameRate(value) {
-		if (value < 1) this.#frameRate = 1;
-		this.#frameRate = value;
-		this._perFrameTime = 1000 / this.#frameRate
-	}
-	constructor(redGPUContext, spriteSheetAction) {
-		super(redGPUContext);
-		if (spriteSheetAction) {
-			this.addAction('default', spriteSheetAction);
-			this.setAction('default');
-		}
-		this.needResetBindingInfo = true;
-		this.sheetRect = new Float32Array(4);
-		this.currentIndex = 0;
-		this.loop = true;
-		this._playYn = true;
-		// console.log(this)
-	}
-	update(time) {
-		if (!this.#nextFrameTime) this.#nextFrameTime = this._perFrameTime + time;
-		if (this._playYn && this.#nextFrameTime < time) {
-			let gapFrame = parseInt((time - this.#nextFrameTime) / this._perFrameTime);
-			gapFrame = gapFrame || 1;
-			this.#nextFrameTime = this._perFrameTime + time;
-			this.currentIndex += gapFrame;
-			if (this.currentIndex >= this.totalFrame) {
-				if (this.loop) this._playYn = true, this.currentIndex = 0;
-				else this._playYn = false, this.currentIndex = this.totalFrame - 1
-			}
-		}
-		this.sheetRect[0] = 1 / this.segmentW;
-		this.sheetRect[1] = 1 / this.segmentH;
-		this.sheetRect[2] = (this.currentIndex % this.segmentW) / this.segmentW;
-		this.sheetRect[3] = Math.floor(this.currentIndex / this.segmentH) / this.segmentH;
-		if (this.uniformBuffer_vertex) {
-			// this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['sheetRect'], this.sheetRect)
-			this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_vertex.GPUBuffer, this.uniformBufferDescriptor_vertex.redStructOffsetMap['sheetRect'], this.sheetRect)
-		}
-	}
+  static PROGRAM_OPTION_LIST = {
+    vertex: [],
+    fragment: []
+    // vertex: [],
+    // fragment: ['diffuseTexture']
+  };
+  static uniformsBindGroupLayoutDescriptor_material = {
+    entries: [
+      {
+        binding: 0, visibility: GPUShaderStage.VERTEX, buffer: {
+          type: 'uniform',
+        },
+      },
+      {
+        binding: 1, visibility: GPUShaderStage.FRAGMENT, buffer: {
+          type: 'uniform',
+        },
+      },
+      {
+        binding: 2, visibility: GPUShaderStage.FRAGMENT, sampler: {
+          type: 'filtering',
+        },
+      },
+      {
+        binding: 3, visibility: GPUShaderStage.FRAGMENT, texture: {
+          type: "float"
+        }
+      }
+    ]
+  };
+  static uniformBufferDescriptor_vertex = [
+    {size: TypeSize.float32x4, valueName: 'sheetRect'}
+  ];
+  static uniformBufferDescriptor_fragment = [
+    {size: TypeSize.float32, valueName: 'alpha'},
+    //
+    {size: TypeSize.float32, valueName: '__diffuseTextureRenderYn'},
+  ];
+  #frameRate;
+  #nextFrameTime = 0;
+  #aniMap = {};
 
-	addAction(key, option) {
-		this.#aniMap[key] = option
-	};
-	removeAction(key, option) {
-		delete this.#aniMap[key]
-	};
-	setAction(key) {
-		this.diffuseTexture = this.#aniMap[key]['texture'];
-		this.segmentW = this.#aniMap[key]['segmentW'];
-		this.segmentH = this.#aniMap[key]['segmentH'];
-		this.totalFrame = this.#aniMap[key]['totalFrame'];
-		this.frameRate = this.#aniMap[key]['frameRate'];
-		this.currentIndex = 0;
-		this.#nextFrameTime = 0;
-	}
+  constructor(redGPUContext, spriteSheetAction) {
+    super(redGPUContext);
+    if (spriteSheetAction) {
+      this.addAction('default', spriteSheetAction);
+      this.setAction('default');
+    }
+    this.needResetBindingInfo = true;
+    this.sheetRect = new Float32Array(4);
+    this.currentIndex = 0;
+    this.loop = true;
+    this._playYn = true;
+    // console.log(this)
+  }
 
-	play() {
-		this._playYn = true;
-		this.#nextFrameTime = 0;
-	};
-	pause() {this._playYn = false};
-	stop() {
-		this._playYn = false;
-		this.currentIndex = 0;
-	};
-	gotoAndStop(index) {
-		if (index > this.totalFrame - 1) index = this.totalFrame - 1;
-		if (index < 0) index = 0;
-		this._playYn = false;
-		this.currentIndex = index;
-	};
-	gotoAndPlay(index) {
-		if (index > this.totalFrame - 1) index = this.totalFrame - 1;
-		if (index < 0) index = 0;
-		this._playYn = true;
-		this.currentIndex = index;
-		this.#nextFrameTime = 0;
-	};
+  get frameRate() {return this.#frameRate;}
 
-	checkTexture(texture, textureName) {
-		if (texture) {
-			if (texture._GPUTexture) {
-				let tKey;
-				switch (textureName) {
-					case 'diffuseTexture' :
-						this._diffuseTexture = texture;
-						tKey = textureName;
-						break
-				}
-				if (RedGPUContext.useDebugConsole) console.log("로딩완료or로딩에러확인 textureName", textureName, texture ? texture._GPUTexture : '');
-				if (tKey) {
-					float1_Float32Array[0] = this[`__${textureName}RenderYn`] = 1;
-					if (tKey == 'displacementTexture') {
-						// this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
-						this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_vertex.GPUBuffer, this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
-					}
-					else {
-						// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
-						this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
-					}
-				}
-				this.needResetBindingInfo = true
-			} else {
-				texture.addUpdateTarget(this, textureName)
-			}
+  set frameRate(value) {
+    if (value < 1) this.#frameRate = 1;
+    this.#frameRate = value;
+    this._perFrameTime = 1000 / this.#frameRate;
+  }
 
-		} else {
-			if (this['_' + textureName]) {
-				this['_' + textureName] = null;
-				float1_Float32Array[0] = this[`__${textureName}RenderYn`] = 0;
-				if (textureName == 'displacementTexture') {
-					// this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
-					this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_vertex.GPUBuffer, this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
-				}
-				else {
-					// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
-					this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
-				}
-				this.needResetBindingInfo = true
-			}
-		}
-	}
-	resetBindingInfo() {
-		this.entries = [
-			{
-				binding: 0,
-				resource: {
-					buffer: this.uniformBuffer_vertex.GPUBuffer,
-					offset: 0,
-					size: this.uniformBufferDescriptor_vertex.size
-				}
-			},
-			{
-				binding: 1,
-				resource: {
-					buffer: this.uniformBuffer_fragment.GPUBuffer,
-					offset: 0,
-					size: this.uniformBufferDescriptor_fragment.size
-				}
-			},
-			{
-				binding: 2,
-				resource: this._diffuseTexture ? this._diffuseTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
-			},
-			{
-				binding: 3,
-				resource: this._diffuseTexture ? this._diffuseTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
-			}
-		];
-		this._afterResetBindingInfo();
-	}
+  update(time) {
+    if (!this.#nextFrameTime) this.#nextFrameTime = this._perFrameTime + time;
+    if (this._playYn && this.#nextFrameTime < time) {
+      let gapFrame = parseInt((time - this.#nextFrameTime) / this._perFrameTime);
+      gapFrame = gapFrame || 1;
+      this.#nextFrameTime = this._perFrameTime + time;
+      this.currentIndex += gapFrame;
+      if (this.currentIndex >= this.totalFrame) {
+        if (this.loop) this._playYn = true, this.currentIndex = 0;
+        else this._playYn = false, this.currentIndex = this.totalFrame - 1;
+      }
+    }
+    this.sheetRect[0] = 1 / this.segmentW;
+    this.sheetRect[1] = 1 / this.segmentH;
+    this.sheetRect[2] = (this.currentIndex % this.segmentW) / this.segmentW;
+    this.sheetRect[3] = Math.floor(this.currentIndex / this.segmentH) / this.segmentH;
+    if (this.uniformBuffer_vertex) {
+      // this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap['sheetRect'], this.sheetRect)
+      this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_vertex.GPUBuffer, this.uniformBufferDescriptor_vertex.redStructOffsetMap['sheetRect'], this.sheetRect);
+    }
+  }
+
+  addAction(key, option) {
+    this.#aniMap[key] = option;
+  };
+
+  removeAction(key, option) {
+    delete this.#aniMap[key];
+  };
+
+  setAction(key) {
+    this.diffuseTexture = this.#aniMap[key]['texture'];
+    this.segmentW = this.#aniMap[key]['segmentW'];
+    this.segmentH = this.#aniMap[key]['segmentH'];
+    this.totalFrame = this.#aniMap[key]['totalFrame'];
+    this.frameRate = this.#aniMap[key]['frameRate'];
+    this.currentIndex = 0;
+    this.#nextFrameTime = 0;
+  }
+
+  play() {
+    this._playYn = true;
+    this.#nextFrameTime = 0;
+  };
+
+  pause() {this._playYn = false;};
+
+  stop() {
+    this._playYn = false;
+    this.currentIndex = 0;
+  };
+
+  gotoAndStop(index) {
+    if (index > this.totalFrame - 1) index = this.totalFrame - 1;
+    if (index < 0) index = 0;
+    this._playYn = false;
+    this.currentIndex = index;
+  };
+
+  gotoAndPlay(index) {
+    if (index > this.totalFrame - 1) index = this.totalFrame - 1;
+    if (index < 0) index = 0;
+    this._playYn = true;
+    this.currentIndex = index;
+    this.#nextFrameTime = 0;
+  };
+
+  checkTexture(texture, textureName) {
+    if (texture) {
+      if (texture._GPUTexture) {
+        let tKey;
+        switch (textureName) {
+          case 'diffuseTexture' :
+            this._diffuseTexture = texture;
+            tKey = textureName;
+            break;
+        }
+        if (RedGPUContext.useDebugConsole) console.log("로딩완료or로딩에러확인 textureName", textureName, texture ? texture._GPUTexture : '');
+        if (tKey) {
+          float1_Float32Array[0] = this[`__${textureName}RenderYn`] = 1;
+          if (tKey == 'displacementTexture') {
+            // this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+            this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_vertex.GPUBuffer, this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+          } else {
+            // this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array)
+            this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+          }
+        }
+        this.needResetBindingInfo = true;
+      } else {
+        texture.addUpdateTarget(this, textureName);
+      }
+
+    } else {
+      if (this['_' + textureName]) {
+        this['_' + textureName] = null;
+        float1_Float32Array[0] = this[`__${textureName}RenderYn`] = 0;
+        if (textureName == 'displacementTexture') {
+          // this.uniformBuffer_vertex.GPUBuffer.setSubData(this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+          this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_vertex.GPUBuffer, this.uniformBufferDescriptor_vertex.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+        } else {
+          // this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+          this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap[`__${textureName}RenderYn`], float1_Float32Array);
+        }
+        this.needResetBindingInfo = true;
+      }
+    }
+  }
+
+  resetBindingInfo() {
+    this.entries = [
+      {
+        binding: 0,
+        resource: {
+          buffer: this.uniformBuffer_vertex.GPUBuffer,
+          offset: 0,
+          size: this.uniformBufferDescriptor_vertex.size
+        }
+      },
+      {
+        binding: 1,
+        resource: {
+          buffer: this.uniformBuffer_fragment.GPUBuffer,
+          offset: 0,
+          size: this.uniformBufferDescriptor_fragment.size
+        }
+      },
+      {
+        binding: 2,
+        resource: this._diffuseTexture ? this._diffuseTexture.sampler.GPUSampler : this.redGPUContext.state.emptySampler.GPUSampler
+      },
+      {
+        binding: 3,
+        resource: this._diffuseTexture ? this._diffuseTexture._GPUTextureView : this.redGPUContext.state.emptyTextureView
+      }
+    ];
+    this._afterResetBindingInfo();
+  }
 }

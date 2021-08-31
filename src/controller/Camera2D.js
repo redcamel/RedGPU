@@ -10,7 +10,7 @@
 import BaseObject3D from "../base/BaseObject3D.js";
 
 export default class Camera2D extends BaseObject3D {
-	constructor(redGPUContext) {
-		super(redGPUContext)
-	}
+  constructor(redGPUContext) {
+    super(redGPUContext);
+  }
 }

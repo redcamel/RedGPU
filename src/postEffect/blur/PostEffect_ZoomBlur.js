@@ -14,7 +14,7 @@ import TypeSize from "../../resources/TypeSize.js";
 
 const float1_Float32Array = new Float32Array(1);
 export default class PostEffect_ZoomBlur extends BasePostEffect {
-	static vertexShaderGLSL = `
+  static vertexShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
     
@@ -29,7 +29,7 @@ export default class PostEffect_ZoomBlur extends BasePostEffect {
 		gl_Position = vec4(position*2.0,1.0);
 	}
 	`;
-	static fragmentShaderGLSL = `
+  static fragmentShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_fragment.systemUniforms}
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 0 ) uniform FragmentUniforms {
@@ -67,40 +67,51 @@ export default class PostEffect_ZoomBlur extends BasePostEffect {
 		outColor = finalColor;
 	}
 `;
-	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
-	static uniformsBindGroupLayoutDescriptor_material = BasePostEffect.uniformsBindGroupLayoutDescriptor_material;
-	static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
-	static uniformBufferDescriptor_fragment = [
-		{size: TypeSize.float, valueName: 'centerX'},
-		{size: TypeSize.float, valueName: 'centerY'},
-		{size: TypeSize.float, valueName: 'amount'}
-	];
-	constructor(redGPUContext) {super(redGPUContext);}
-	_centerX = 0;
-	_centerY = 0;
-	_amount = 38;
-	get centerX() {return this._centerX;}
-	set centerX(value) {
-		this._centerX = value;
-		float1_Float32Array[0] = this._centerX;
-		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['centerX'], float1_Float32Array)
-		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['centerX'], float1_Float32Array)
-	}
-	get centerY() {return this._centerY;}
-	set centerY(value) {
-		this._centerY = value;
-		float1_Float32Array[0] = this._centerY;
-		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['centerY'], float1_Float32Array)
-		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['centerY'], float1_Float32Array)
-	}
-	get amount() {return this._amount;}
-	set amount(value) {/*FIXME - min: 1, max: 100*/
-		this._amount = value;
-		float1_Float32Array[0] = this._amount;
-		// this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['amount'], float1_Float32Array)
-		this.redGPUContext.device.defaultQueue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['amount'], float1_Float32Array)
-	}
-	get radius() {return this._radius;}
+  static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
+  static uniformsBindGroupLayoutDescriptor_material = BasePostEffect.uniformsBindGroupLayoutDescriptor_material;
+  static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
+  static uniformBufferDescriptor_fragment = [
+    {size: TypeSize.float32, valueName: 'centerX'},
+    {size: TypeSize.float32, valueName: 'centerY'},
+    {size: TypeSize.float32, valueName: 'amount'}
+  ];
+
+  constructor(redGPUContext) {super(redGPUContext);}
+
+  _centerX = 0;
+
+  get centerX() {return this._centerX;}
+
+  set centerX(value) {
+    this._centerX = value;
+    float1_Float32Array[0] = this._centerX;
+    // this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['centerX'], float1_Float32Array)
+    this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['centerX'], float1_Float32Array);
+  }
+
+  _centerY = 0;
+
+  get centerY() {return this._centerY;}
+
+  set centerY(value) {
+    this._centerY = value;
+    float1_Float32Array[0] = this._centerY;
+    // this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['centerY'], float1_Float32Array)
+    this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['centerY'], float1_Float32Array);
+  }
+
+  _amount = 38;
+
+  get amount() {return this._amount;}
+
+  set amount(value) {/*FIXME - min: 1, max: 100*/
+    this._amount = value;
+    float1_Float32Array[0] = this._amount;
+    // this.uniformBuffer_fragment.GPUBuffer.setSubData(this.uniformBufferDescriptor_fragment.redStructOffsetMap['amount'], float1_Float32Array)
+    this.redGPUContext.device.queue.writeBuffer(this.uniformBuffer_fragment.GPUBuffer, this.uniformBufferDescriptor_fragment.redStructOffsetMap['amount'], float1_Float32Array);
+  }
+
+  get radius() {return this._radius;}
 
 
 }

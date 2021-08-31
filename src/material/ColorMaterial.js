@@ -13,11 +13,11 @@ import ShareGLSL from "../base/ShareGLSL.js";
 import Mix from "../base/Mix.js";
 
 export default class ColorMaterial extends Mix.mix(
-	BaseMaterial,
-	Mix.color,
-	Mix.alpha
+  BaseMaterial,
+  Mix.color,
+  Mix.alpha
 ) {
-	static vertexShaderGLSL = `
+  static vertexShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
 	${ShareGLSL.GLSL_SystemUniforms_vertex.meshUniforms}
@@ -32,7 +32,7 @@ export default class ColorMaterial extends Mix.mix(
 	
 	}
 	`;
-	static fragmentShaderGLSL = `
+  static fragmentShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_fragment.systemUniforms}
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 0 ) uniform FragmentUniforms {
@@ -52,36 +52,41 @@ export default class ColorMaterial extends Mix.mix(
 		
 	}
 	`;
-	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
-	static uniformsBindGroupLayoutDescriptor_material = {
-		entries: [
-			{binding: 0, visibility: GPUShaderStage.FRAGMENT, type: "uniform-buffer"}
-		]
-	};
-	static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
-	static uniformBufferDescriptor_fragment = [
-		{size: TypeSize.float4, valueName: 'colorRGBA'},
-		{size: TypeSize.float, valueName: 'alpha'}
-	];
+  static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
+  static uniformsBindGroupLayoutDescriptor_material = {
+    entries: [
+      {
+        binding: 0, visibility: GPUShaderStage.FRAGMENT, buffer: {
+          type: 'uniform',
+        },
+      }
+    ]
+  };
+  static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
+  static uniformBufferDescriptor_fragment = [
+    {size: TypeSize.float32x4, valueName: 'colorRGBA'},
+    {size: TypeSize.float32, valueName: 'alpha'}
+  ];
 
 
-	constructor(redGPUContext, color = '#ff0000', colorAlpha = 1) {
-		super(redGPUContext);
-		this.color = color;
-		this.colorAlpha = colorAlpha;
-		this.needResetBindingInfo = true
-	}
-	resetBindingInfo() {
-		this.entries = [
-			{
-				binding: 0,
-				resource: {
-					buffer: this.uniformBuffer_fragment.GPUBuffer,
-					offset: 0,
-					size: this.uniformBufferDescriptor_fragment.size
-				}
-			}
-		];
-		this._afterResetBindingInfo();
-	}
+  constructor(redGPUContext, color = '#ff0000', colorAlpha = 1) {
+    super(redGPUContext);
+    this.color = color;
+    this.colorAlpha = colorAlpha;
+    this.needResetBindingInfo = true;
+  }
+
+  resetBindingInfo() {
+    this.entries = [
+      {
+        binding: 0,
+        resource: {
+          buffer: this.uniformBuffer_fragment.GPUBuffer,
+          offset: 0,
+          size: this.uniformBufferDescriptor_fragment.size
+        }
+      }
+    ];
+    this._afterResetBindingInfo();
+  }
 }

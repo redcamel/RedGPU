@@ -8,19 +8,19 @@
 
 "use strict";
 export default class ShareGLSL {
-	static MESH_UNIFORM_POOL_NUM = 100;
-	static GLSL_VERSION = '#version 460';
-	static MAX_DIRECTIONAL_LIGHT = 8;
-	static MAX_POINT_LIGHT = 100;
-	static MAX_SPOT_LIGHT = 1;
-	static SET_INDEX_ComputeUniforms = 0;
-	static SET_INDEX_SystemUniforms_vertex = 0;
-	static SET_INDEX_SystemUniforms_fragment = 1;
-	static SET_INDEX_MeshUniforms = 2;
-	static SET_INDEX_VertexUniforms = 3;
-	static SET_INDEX_FragmentUniforms = 3;
-	static GLSL_SystemUniforms_vertex = {
-		systemUniforms: `
+  static MESH_UNIFORM_POOL_NUM = 50;
+  static GLSL_VERSION = '#version 460';
+  static MAX_DIRECTIONAL_LIGHT = 3;
+  static MAX_POINT_LIGHT = 5;
+  static MAX_SPOT_LIGHT = 1;
+  static SET_INDEX_ComputeUniforms = 0;
+  static SET_INDEX_SystemUniforms_vertex = 0;
+  static SET_INDEX_SystemUniforms_fragment = 1;
+  static SET_INDEX_MeshUniforms = 2;
+  static SET_INDEX_VertexUniforms = 3;
+  static SET_INDEX_FragmentUniforms = 3;
+  static GLSL_SystemUniforms_vertex = {
+    systemUniforms: `
 		const float TRUTHY = 1.0;
 		layout( set =  ${ShareGLSL.SET_INDEX_SystemUniforms_vertex}, binding = 0 ) uniform SystemUniforms {
 	        mat4 perspectiveMTX;
@@ -29,7 +29,7 @@ export default class ShareGLSL {
 	        float time;
 	    } systemUniforms;
 	    `,
-		meshUniforms: `
+    meshUniforms: `
 		layout( set = ${ShareGLSL.SET_INDEX_MeshUniforms}, binding = 0 ) uniform MeshMatrixUniforms {
 	        mat4 modelMatrix[${ShareGLSL.MESH_UNIFORM_POOL_NUM}];
 	        mat4 normalMatrix[${ShareGLSL.MESH_UNIFORM_POOL_NUM}];
@@ -40,15 +40,16 @@ export default class ShareGLSL {
 	        float sumOpacity;
 	    } meshUniforms;
 		`,
-		calcDisplacement: `
-		 vec3 calcDisplacement(vec3 vNormal, float displacementFlowSpeedX, float displacementFlowSpeedY, float displacementPower, vec2 targetUV, texture2D targetDisplacementTexture, sampler targetSampler){
+    calcDisplacement: `
+		 vec3 calcDisplacement(vec3 vNormal, float displacementFlowSpeedX, float displacementFlowSpeedY, float displacementPower, vec2 targetUV, texture2D targetDisplacementTexture, sampler targetSampler)
+		 {
 		    return normalize(vNormal) * texture(sampler2D(targetDisplacementTexture, targetSampler), targetUV + vec2(
 		              displacementFlowSpeedX * (systemUniforms.time/1000.0),
 		               displacementFlowSpeedY * (systemUniforms.time/1000.0)
 		          )).x * displacementPower ;
 		 }
 		`,
-		getSprite3DMatrix: `
+    getSprite3DMatrix: `
 		mat4 getSprite3DMatrix(mat4 cameraMTX, mat4 mvMatrix){
 			mat4 tMTX = cameraMTX * mvMatrix;
 			tMTX[0][0] = mvMatrix[0][0], tMTX[0][1] = 0.0, tMTX[0][2] = 0.0;
@@ -57,9 +58,9 @@ export default class ShareGLSL {
 			return tMTX;
 		}
 		`
-	};
-	static GLSL_SystemUniforms_fragment = {
-		systemUniforms: `
+  };
+  static GLSL_SystemUniforms_fragment = {
+    systemUniforms: `
 		const float TRUTHY = 1.0;
 		const int MAX_DIRECTIONAL_LIGHT = ${ShareGLSL.MAX_DIRECTIONAL_LIGHT};
 		const int MAX_POINT_LIGHT =  ${ShareGLSL.MAX_POINT_LIGHT};
@@ -165,16 +166,17 @@ export default class ShareGLSL {
 			    distanceLength = abs(length(L));
 			    if(lightInfo.radius> distanceLength){
 			        L = normalize(L);	
-				    lightColor = lightInfo.color;
-				    lambertTerm = dot(N,-L);
-				    intensity = lightInfo.intensity;
-				    if(lambertTerm > 0.0){
-				        attenuation = clamp(1.0 - distanceLength*distanceLength/(lightInfo.radius*lightInfo.radius), 0.0, 1.0); 
-			            attenuation *= attenuation;
-						ld += lightColor * diffuseColor * lambertTerm * intensity * attenuation;
-						specular = pow( max(dot(reflect(L, N), -L), 0.0), shininess) * specularPower * specularTextureValue;
-						ls +=  specularColor * specular * intensity * attenuation ;
-				    }
+              lightColor = lightInfo.color;
+              lambertTerm = dot(N,-L);
+              intensity = lightInfo.intensity;
+              if(lambertTerm > 0.0){
+                  attenuation = clamp(1.0 - distanceLength*distanceLength/(lightInfo.radius*lightInfo.radius), 0.0, 1.0); 
+                  attenuation *= attenuation;
+            	    ld += lightColor* diffuseColor * lambertTerm * intensity * attenuation;
+            	 
+                  specular = pow( max(dot(reflect(L, N), -L), 0.0), shininess) * specularPower * specularTextureValue;
+                  ls +=  specularColor * specular * intensity * attenuation;
+              }
 			    }
 		    }
 		    return ld + ls;
@@ -236,7 +238,7 @@ export default class ShareGLSL {
 			return normalize(cross(normalize(dy), normalize(dx)));
 		}
 		`,
-		perturb_normal: `
+    perturb_normal: `
 		vec3 perturb_normal( vec3 N, vec3 V, vec2 texcoord, vec3 normalColor , float normalPower)
 		{	   
 			vec3 map = normalColor;
@@ -246,9 +248,10 @@ export default class ShareGLSL {
 			return normalize(TBN * map);
 		}
 		`,
-		cotangent_frame: `
+    cotangent_frame: `
 		mat3 cotangent_frame(vec3 N, vec3 p, vec2 uv)
 		{
+		
 			vec3 dp1 = dFdx( p );
 			vec3 dp2 = dFdy( p );
 			vec2 duv1 = dFdx( uv );
@@ -263,6 +266,6 @@ export default class ShareGLSL {
 			return mat3( T * invmax, B * invmax, N );
 		}
 		`
-	}
+  };
 
 }

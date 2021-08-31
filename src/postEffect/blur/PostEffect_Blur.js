@@ -12,7 +12,7 @@ import ShareGLSL from "../../base/ShareGLSL.js";
 import BasePostEffect from "../../base/BasePostEffect.js";
 
 export default class PostEffect_Blur extends BasePostEffect {
-	static vertexShaderGLSL = `
+  static vertexShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
     
@@ -27,7 +27,7 @@ export default class PostEffect_Blur extends BasePostEffect {
 		vUV = uv;
 	}
 	`;
-	static fragmentShaderGLSL = `
+  static fragmentShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_fragment.systemUniforms}
 	layout( location = 0 ) in vec3 vNormal;
@@ -56,9 +56,11 @@ export default class PostEffect_Blur extends BasePostEffect {
 		outColor = finalColor;
 	}
 `;
-	static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};;
-	static uniformsBindGroupLayoutDescriptor_material = BasePostEffect.uniformsBindGroupLayoutDescriptor_material;
-	static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
-	static uniformBufferDescriptor_fragment = BaseMaterial.uniformBufferDescriptor_empty;
-	constructor(redGPUContext) {super(redGPUContext);}
+  static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
+
+  static uniformsBindGroupLayoutDescriptor_material = BasePostEffect.uniformsBindGroupLayoutDescriptor_material;
+  static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;
+  static uniformBufferDescriptor_fragment = BaseMaterial.uniformBufferDescriptor_empty;
+
+  constructor(redGPUContext) {super(redGPUContext);}
 }

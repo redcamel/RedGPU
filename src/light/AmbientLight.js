@@ -10,9 +10,9 @@
 import BaseLight from "../base/BaseLight.js";
 
 export default class AmbientLight extends BaseLight {
-	constructor(redGPUContext, color = '#111', intensity = 0.1) {
-		super(redGPUContext);
-		this.color = color;
-		this.intensity = intensity;
-	}
+  constructor(redGPUContext, color = '#111', intensity = 0.1) {
+    super(redGPUContext);
+    this.color = color;
+    this.intensity = intensity;
+  }
 }

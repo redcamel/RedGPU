@@ -11,10 +11,10 @@ import TypeSize from "../resources/TypeSize.js";
 import RedGPUContext from "../RedGPUContext.js";
 
 export default class InterleaveInfo {
-	constructor(attributeHint, format) {
-		this['attributeHint'] = attributeHint;
-		this['format'] = format;
-		this['stride'] = TypeSize[format];
-		if (RedGPUContext.useDebugConsole) console.log(this)
-	}
+  constructor(attributeHint, format) {
+    this['attributeHint'] = attributeHint;
+    this['format'] = format;
+    this['stride'] = TypeSize[format];
+    if (RedGPUContext.useDebugConsole) console.log(this);
+  }
 }

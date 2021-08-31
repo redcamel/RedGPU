@@ -7,27 +7,27 @@
  */
 
 "use strict";
-let parseIndicesInfo_GLTF = function (redGLTFLoader, json,  accessorInfo, indices) {
-	let tBYTES_PER_ELEMENT = accessorInfo['componentType_BYTES_PER_ELEMENT'];
-	let tBufferURIDataView = accessorInfo['bufferURIDataView'];
-	let tGetMethod = accessorInfo['getMethod'];
-	let tType = accessorInfo['accessor']['type'];
-	let tCount = accessorInfo['accessor']['count'];
-	let i = accessorInfo['startIndex'];
-	let len;
+let parseIndicesInfo_GLTF = function (redGLTFLoader, json, accessorInfo, indices) {
+  let tBYTES_PER_ELEMENT = accessorInfo['componentType_BYTES_PER_ELEMENT'];
+  let tBufferURIDataView = accessorInfo['bufferURIDataView'];
+  let tGetMethod = accessorInfo['getMethod'];
+  let tType = accessorInfo['accessor']['type'];
+  let tCount = accessorInfo['accessor']['count'];
+  let i = accessorInfo['startIndex'];
+  let len;
 
-	switch (tType) {
-		case 'SCALAR' :
-			len = i + tCount;
+  switch (tType) {
+    case 'SCALAR' :
+      len = i + tCount;
 
-			for (i; i < len; i++) {
-				indices.push(tBufferURIDataView[tGetMethod](i * tBYTES_PER_ELEMENT, true))
-			}
+      for (i; i < len; i++) {
+        indices.push(tBufferURIDataView[tGetMethod](i * tBYTES_PER_ELEMENT, true));
+      }
 
-			break;
-		default :
-			console.log('알수없는 형식 엑세서 타입', accessorInfo['accessor']);
-			break
-	}
+      break;
+    default :
+      console.log('알수없는 형식 엑세서 타입', accessorInfo['accessor']);
+      break;
+  }
 };
-export default parseIndicesInfo_GLTF
+export default parseIndicesInfo_GLTF;

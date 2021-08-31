@@ -42,7 +42,7 @@ new RedGPU.RedGPUContext(
 		tMesh = new RedGPU.Mesh(
 			this,
 			new RedGPU.Sphere(this, 1, 32, 32, 32),
-			new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this, '../../../assets/Brick03_col.jpg'))
+			new RedGPU.BitmapMaterial(this, new RedGPU.BitmapTexture(this, '../../../assets/Brick03_col.jpg'), new RedGPU.BitmapTexture(this, '../../../assets/Brick03_col.jpg'))
 		);
 		tScene.addChild(tMesh);
 		tChildMesh = new RedGPU.Mesh(

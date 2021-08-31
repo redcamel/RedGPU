@@ -14,7 +14,7 @@ import ShareGLSL from "../base/ShareGLSL.js";
 import PipelineParticle from "../base/pipeline/PipelineParticle.js";
 
 let getComputeSource = v => {
-	return `
+  return `
 	#version 450
 	// 파티클 구조체 선언
 	struct Info {
@@ -212,324 +212,340 @@ let getComputeSource = v => {
 		tInfo = targetParticle.infoRotation.infoZ;
 		particlesA.particles[index].valueRotation.z = (tInfo.startValue +  (tInfo.endValue - tInfo.startValue) * calEasing(lifeRatio, tInfo.easeType)) * PI/180;
 	}
-`
+`;
 };
 export default class Particle extends BaseObject3D {
-	static Linear = 0;
-	static QuintIn = 1;
-	static QuintOut = 2;
-	static QuintInOut = 3;
-	//
-	static BackIn = 4;
-	static BackOut = 5;
-	static BackInOut = 6;
-	//
-	static CircIn = 7;
-	static CircOut = 8;
-	static CircInOut = 9;
-	//
-	static CubicIn = 10;
-	static CubicOut = 11;
-	static CubicInOut = 12;
-	//
-	static ExpoIn = 13;
-	static ExpoOut = 14;
-	static ExpoInOut = 15;
-	//
-	static QuadIn = 16;
-	static QuadOut = 17;
-	static QuadInOut = 18;
-	//
-	static QuartIn = 19;
-	static QuartOut = 20;
-	static QuartInOut = 21;
-	//
-	static SineIn = 22;
-	static SineOut = 23;
-	static SineInOut = 24;
-	static ElasticIn = 25;
-	static ElasticOut = 26;
-	static ElasticInOut = 27;
-	//
-	get particleNum() {return this._particleNum;}
-	set particleNum(value) {
-		this._particleNum = value;
-		this.setParticleData()
-	}
-	get sprite3DMode() {return this._material._sprite3DMode;}
-	set sprite3DMode(value) {return this._material.sprite3DMode = value;}
-	get texture() {return this._material.diffuseTexture;}
-	set texture(value) {return this._material.diffuseTexture = value;}
-	get material() {return this._material}
-	set material(v) {/*임의설정불가*/}
-	redGPUContext;
-	#simParamData;
-	computePipeline;
-	particleBindGroup;
-	particleBuffer;
-	minLife = 2000;
-	maxLife = 10000;
-	//
-	minStartX = -1;
-	maxStartX = 1;
-	minEndX = -15;
-	maxEndX = 15;
-	//
-	minStartY = -1;
-	maxStartY = 1;
-	minEndY = -15;
-	maxEndY = 15;
-	//
-	minStartZ = -1;
-	maxStartZ = 1;
-	minEndZ = -15;
-	maxEndZ = 15;
-	//
-	minStartAlpha = 0.0;
-	maxStartAlpha = 1.0;
-	minEndAlpha = 0.0;
-	maxEndAlpha = 0.0;
-	//
-	minStartScale = 0.0;
-	maxStartScale = 0.25;
-	minEndScale = 0.0;
-	maxEndScale = 3.0;
-	//
-	minStartRotationX = -Math.random() * 360;
-	maxStartRotationX = Math.random() * 360;
-	minEndRotationX = -Math.random() * 360;
-	maxEndRotationX = Math.random() * 360;
-	//
-	minStartRotationY = -Math.random() * 360;
-	maxStartRotationY = Math.random() * 360;
-	minEndRotationY = -Math.random() * 360;
-	maxEndRotationY = Math.random() * 360;
-	//
-	minStartRotationZ = -Math.random() * 360;
-	maxStartRotationZ = Math.random() * 360;
-	minEndRotationZ = -Math.random() * 360;
-	maxEndRotationZ = Math.random() * 360;
-	//
-	easeX = Particle.Linear;
-	easeY = Particle.Linear;
-	easeZ = Particle.Linear;
-	easeScale = Particle.Linear;
-	easeRotationX = Particle.Linear;
-	easeRotationY = Particle.Linear;
-	easeRotationZ = Particle.Linear;
-	easeAlpha = Particle.Linear;
-	compute(time) {
-		this.#simParamData.set(
-			[
-				// startTime time
-				time,
-				// position
-				this._x, this._y, this._z,
-				// lifeRange
-				this.minLife, this.maxLife,
-				// x,y,z Range
-				this.minStartX, this.maxStartX, this.minEndX, this.maxEndX, this.easeX,
-				this.minStartY, this.maxStartY, this.minEndY, this.maxEndY, this.easeY,
-				this.minStartZ, this.maxStartZ, this.minEndZ, this.maxEndZ, this.easeZ,
-				// alphaRange
-				this.minStartAlpha, this.maxStartAlpha, this.minEndAlpha, this.maxEndAlpha, this.easeAlpha,
-				// scaleRange
-				this.minStartScale, this.maxStartScale, this.minEndScale, this.maxEndScale, this.easeScale,
-				// x,y,z Range
-				this.minStartRotationX, this.maxStartRotationX, this.minEndRotationX, this.maxEndRotationX, this.easeRotationX,
-				this.minStartRotationY, this.maxStartRotationY, this.minEndRotationY, this.maxEndRotationY, this.easeRotationY,
-				this.minStartRotationZ, this.maxStartRotationZ, this.minEndRotationZ, this.maxEndRotationZ, this.easeRotationZ
-			],
-			0
-		);
-		// this.simParamBuffer.setSubData(0, this.#simParamData);
-		this.redGPUContext.device.defaultQueue.writeBuffer(this.simParamBuffer,0, this.#simParamData)
-		//
-		const commandEncoder = this.redGPUContext.device.createCommandEncoder({});
-		const passEncoder = commandEncoder.beginComputePass();
-		passEncoder.setPipeline(this.computePipeline);
-		passEncoder.setBindGroup(ShareGLSL.SET_INDEX_ComputeUniforms, this.particleBindGroup);
-		passEncoder.dispatch(this._particleNum);
-		passEncoder.endPass();
-		this.redGPUContext.device.defaultQueue.submit([commandEncoder.finish()]);
+  static Linear = 0;
+  static QuintIn = 1;
+  static QuintOut = 2;
+  static QuintInOut = 3;
+  //
+  static BackIn = 4;
+  static BackOut = 5;
+  static BackInOut = 6;
+  //
+  static CircIn = 7;
+  static CircOut = 8;
+  static CircInOut = 9;
+  //
+  static CubicIn = 10;
+  static CubicOut = 11;
+  static CubicInOut = 12;
+  //
+  static ExpoIn = 13;
+  static ExpoOut = 14;
+  static ExpoInOut = 15;
+  //
+  static QuadIn = 16;
+  static QuadOut = 17;
+  static QuadInOut = 18;
+  //
+  static QuartIn = 19;
+  static QuartOut = 20;
+  static QuartInOut = 21;
+  //
+  static SineIn = 22;
+  static SineOut = 23;
+  static SineInOut = 24;
+  static ElasticIn = 25;
+  static ElasticOut = 26;
+  static ElasticInOut = 27;
+  redGPUContext;
+  #simParamData;
+  computePipeline;
+  particleBindGroup;
+  particleBuffer;
+  minLife = 2000;
+  maxLife = 10000;
+  //
+  minStartX = -1;
+  maxStartX = 1;
+  minEndX = -15;
+  maxEndX = 15;
+  //
+  minStartY = -1;
+  maxStartY = 1;
+  minEndY = -15;
+  maxEndY = 15;
+  //
+  minStartZ = -1;
+  maxStartZ = 1;
+  minEndZ = -15;
+  maxEndZ = 15;
+  //
+  minStartAlpha = 0.0;
+  maxStartAlpha = 1.0;
+  minEndAlpha = 0.0;
+  maxEndAlpha = 0.0;
+  //
+  minStartScale = 0.0;
+  maxStartScale = 0.25;
+  minEndScale = 0.0;
+  maxEndScale = 3.0;
+  //
+  minStartRotationX = -Math.random() * 360;
+  maxStartRotationX = Math.random() * 360;
+  minEndRotationX = -Math.random() * 360;
+  maxEndRotationX = Math.random() * 360;
+  //
+  minStartRotationY = -Math.random() * 360;
+  maxStartRotationY = Math.random() * 360;
+  minEndRotationY = -Math.random() * 360;
+  maxEndRotationY = Math.random() * 360;
+  //
+  minStartRotationZ = -Math.random() * 360;
+  maxStartRotationZ = Math.random() * 360;
+  minEndRotationZ = -Math.random() * 360;
+  maxEndRotationZ = Math.random() * 360;
+  //
+  easeX = Particle.Linear;
+  easeY = Particle.Linear;
+  easeZ = Particle.Linear;
+  easeScale = Particle.Linear;
+  easeRotationX = Particle.Linear;
+  easeRotationY = Particle.Linear;
+  easeRotationZ = Particle.Linear;
+  easeAlpha = Particle.Linear;
 
-	}
+  constructor(redGPUContext, particleNum = 1, initInfo = {}, texture, geometry) {
+    super(redGPUContext);
+    this.redGPUContext = redGPUContext;
+    this._material = new ParticleMaterial(redGPUContext);
+    {
+      for (const k in initInfo) {
+        if (this.hasOwnProperty(k)) {
+          console.log(k);
+          this[k] = initInfo[k];
+        }
+      }
+    }
 
-	constructor(redGPUContext, particleNum = 1, initInfo = {}, texture, geometry) {
-		super(redGPUContext);
-		this.redGPUContext = redGPUContext;
-		this._material = new ParticleMaterial(redGPUContext);
-		{
-			for(const k in initInfo){
-				if(this.hasOwnProperty(k)) {
-					console.log(k);
-					this[k] = initInfo[k]
-				}
-			}
-		}
+    this.geometry = geometry || new Plane(redGPUContext);
+    this.texture = texture;
+    this.renderDrawLayerIndex = Render.DRAW_LAYER_INDEX2_Z_POINT_SORT;
+    this._PROPERTY_NUM = 44;
+    this.blendColorSrc = 'src-alpha';
+    this.blendColorDst = 'one';
+    this.blendAlphaSrc = 'src-alpha';
+    this.blendAlphaDst = 'one';
+    this.depthWriteEnabled = false;
+    this.cullMode = 'none';
 
-		this.geometry = geometry || new Plane(redGPUContext);
-		this.texture = texture;
-		this.renderDrawLayerIndex = Render.DRAW_LAYER_INDEX2_Z_POINT_SORT;
-		this._PROPERTY_NUM = 44;
-		this.blendColorSrc = 'src-alpha';
-		this.blendColorDst = 'one';
-		this.blendAlphaSrc = 'src-alpha';
-		this.blendAlphaDst = 'one';
-		this.depthWriteEnabled = false;
-		this.cullMode = 'none';
+    // 컴퓨트 파이프 라인 생성
+    this.#simParamData = new Float32Array(
+      [
+        // startTime time
+        performance.now(),
+        // position
+        this._x, this._y, this._z,
+        // lifeRange
+        this.minLife, this.maxLife,
+        // x,y,z Range
+        this.minStartX, this.maxStartX, this.minEndX, this.maxEndX, this.easeX,
+        this.minStartY, this.maxStartY, this.minEndY, this.maxEndY, this.easeY,
+        this.minStartZ, this.maxStartZ, this.minEndZ, this.maxEndZ, this.easeZ,
+        // alphaRange
+        this.minStartAlpha, this.maxStartAlpha, this.minEndAlpha, this.maxEndAlpha, this.easeAlpha,
+        // scaleRange
+        this.minStartScale, this.maxStartScale, this.minEndScale, this.maxEndScale, this.easeScale,
+        // x,y,z Range
+        this.minStartRotationX, this.maxStartRotationX, this.minEndRotationX, this.maxEndRotationX, this.easeRotationX,
+        this.minStartRotationY, this.maxStartRotationY, this.minEndRotationY, this.maxEndRotationY, this.easeRotationY,
+        this.minStartRotationZ, this.maxStartRotationZ, this.minEndRotationZ, this.maxEndRotationZ, this.easeRotationZ
+      ]
+    );
+    let bufferDescriptor = {
+      size: this.#simParamData.byteLength,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+    };
+    this.simParamBuffer = redGPUContext.device.createBuffer(bufferDescriptor);
+    // this.simParamBuffer.setSubData(0, this.#simParamData);
+    redGPUContext.device.queue.writeBuffer(this.simParamBuffer, 0, this.#simParamData);
+    //
+    this.pipeline = new PipelineParticle(redGPUContext, this);
+    this.particleNum = particleNum || 1;
+  }
 
-		// 컴퓨트 파이프 라인 생성
-		this.#simParamData = new Float32Array(
-			[
-				// startTime time
-				performance.now(),
-				// position
-				this._x, this._y, this._z,
-				// lifeRange
-				this.minLife, this.maxLife,
-				// x,y,z Range
-				this.minStartX, this.maxStartX, this.minEndX, this.maxEndX, this.easeX,
-				this.minStartY, this.maxStartY, this.minEndY, this.maxEndY, this.easeY,
-				this.minStartZ, this.maxStartZ, this.minEndZ, this.maxEndZ, this.easeZ,
-				// alphaRange
-				this.minStartAlpha, this.maxStartAlpha, this.minEndAlpha, this.maxEndAlpha, this.easeAlpha,
-				// scaleRange
-				this.minStartScale, this.maxStartScale, this.minEndScale, this.maxEndScale, this.easeScale,
-				// x,y,z Range
-				this.minStartRotationX, this.maxStartRotationX, this.minEndRotationX, this.maxEndRotationX, this.easeRotationX,
-				this.minStartRotationY, this.maxStartRotationY, this.minEndRotationY, this.maxEndRotationY, this.easeRotationY,
-				this.minStartRotationZ, this.maxStartRotationZ, this.minEndRotationZ, this.maxEndRotationZ, this.easeRotationZ
-			]
-		);
-		let bufferDescriptor = {
-			size: this.#simParamData.byteLength,
-			usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-		};
-		this.simParamBuffer = redGPUContext.device.createBuffer(bufferDescriptor);
-		// this.simParamBuffer.setSubData(0, this.#simParamData);
-		redGPUContext.device.defaultQueue.writeBuffer(this.simParamBuffer,0, this.#simParamData)
-		//
-		this.pipeline = new PipelineParticle(redGPUContext, this);
-		this.particleNum = particleNum || 1;
-	}
-	setParticleData() {
-		let redGPUContext = this.redGPUContext;
-		const _PROPERTY_NUM = this._PROPERTY_NUM;
-		const initialParticleData = new Float32Array(this._particleNum * _PROPERTY_NUM);
-		const currentTime = performance.now();
-		for (let i = 0; i < this._particleNum; ++i) {
-			let life = Math.random() * this.maxLife;
-			let age = Math.random() * life;
-			initialParticleData[_PROPERTY_NUM * i + 0] = currentTime - age; // start time
-			initialParticleData[_PROPERTY_NUM * i + 1] = life; // life
-			// position
-			initialParticleData[_PROPERTY_NUM * i + 4] = 0; // x
-			initialParticleData[_PROPERTY_NUM * i + 5] = 0; // y
-			initialParticleData[_PROPERTY_NUM * i + 6] = 0; // z
-			initialParticleData[_PROPERTY_NUM * i + 7] = // alpha;
-				// scale
-				initialParticleData[_PROPERTY_NUM * i + 8] = 0; // rotationX
-			initialParticleData[_PROPERTY_NUM * i + 9] = 0; // rotationY
-			initialParticleData[_PROPERTY_NUM * i + 10] = 0; // rotationZ
-			initialParticleData[_PROPERTY_NUM * i + 11] = 0; // scale
-			// x
-			initialParticleData[_PROPERTY_NUM * i + 12] = Math.random() * (this.maxStartX - this.minStartX) + this.minStartX; // startValue
-			initialParticleData[_PROPERTY_NUM * i + 13] = Math.random() * (this.maxEndX - this.minEndX) + this.minEndX; // endValue
-			initialParticleData[_PROPERTY_NUM * i + 14] = this.easeX; // ease
-			initialParticleData[_PROPERTY_NUM * i + 15] = this._x; // startPosition
-			// y
-			initialParticleData[_PROPERTY_NUM * i + 16] = Math.random() * (this.maxStartY - this.minStartY) + this.minStartY; // startValue
-			initialParticleData[_PROPERTY_NUM * i + 17] = Math.random() * (this.maxEndY - this.minEndY) + this.minEndY; // endValue
-			initialParticleData[_PROPERTY_NUM * i + 18] = this.easeY; // ease
-			initialParticleData[_PROPERTY_NUM * i + 19] = this._y; // startPosition
-			// z
-			initialParticleData[_PROPERTY_NUM * i + 20] = Math.random() * (this.maxStartZ - this.minStartZ) + this.minStartZ; // startValue
-			initialParticleData[_PROPERTY_NUM * i + 21] = Math.random() * (this.maxEndZ - this.minEndZ) + this.minEndZ; // endValue
-			initialParticleData[_PROPERTY_NUM * i + 22] = this.easeZ; // ease
-			initialParticleData[_PROPERTY_NUM * i + 23] = this._z; // startPosition
-			// rotationX
-			initialParticleData[_PROPERTY_NUM * i + 24] = Math.random() * (this.maxStartRotationX - this.minStartRotationX) + this.minStartRotationX; // startValue
-			initialParticleData[_PROPERTY_NUM * i + 25] = Math.random() * (this.maxEndRotationX - this.minEndRotationX) + this.minEndRotationX; // endValue
-			initialParticleData[_PROPERTY_NUM * i + 26] = this.easeRotationX; // ease
-			initialParticleData[_PROPERTY_NUM * i + 27] = 0; //
-			// rotationY
-			initialParticleData[_PROPERTY_NUM * i + 28] = Math.random() * (this.maxStartRotationY - this.minStartRotationY) + this.minStartRotationY; // startValue
-			initialParticleData[_PROPERTY_NUM * i + 29] = Math.random() * (this.maxEndRotationY - this.minEndRotationY) + this.minEndRotationY; // endValue
-			initialParticleData[_PROPERTY_NUM * i + 30] = this.easeRotationY; // ease
-			initialParticleData[_PROPERTY_NUM * i + 31] = 0; //
-			// rotationZ
-			initialParticleData[_PROPERTY_NUM * i + 32] = Math.random() * (this.maxStartRotationZ - this.minStartRotationZ) + this.minStartRotationZ; // startValue
-			initialParticleData[_PROPERTY_NUM * i + 33] = Math.random() * (this.maxEndRotationZ - this.minEndRotationZ) + this.minEndRotationZ; // endValue
-			initialParticleData[_PROPERTY_NUM * i + 34] = this.easeRotationZ; // ease
-			initialParticleData[_PROPERTY_NUM * i + 35] = 0; //
-			// scale
-			initialParticleData[_PROPERTY_NUM * i + 36] = Math.random() * (this.maxStartScale - this.minStartScale) + this.minStartScale; // startValue
-			initialParticleData[_PROPERTY_NUM * i + 37] = Math.random() * (this.maxEndScale - this.minEndScale) + this.minEndScale; // endValue
-			initialParticleData[_PROPERTY_NUM * i + 38] = this.easeScale; // ease
-			initialParticleData[_PROPERTY_NUM * i + 39] = 0; //
-			// alpha
-			initialParticleData[_PROPERTY_NUM * i + 40] = Math.random() * (this.maxStartAlpha - this.minStartAlpha) + this.minStartAlpha;
-			; // startValue
-			initialParticleData[_PROPERTY_NUM * i + 41] = Math.random() * (this.maxEndAlpha - this.minEndAlpha) + this.minEndAlpha; // endValue
-			initialParticleData[_PROPERTY_NUM * i + 42] = this.easeAlpha; // ease
-			initialParticleData[_PROPERTY_NUM * i + 43] = 0; //
-		}
-		if (this.particleBuffer) {
-			this.particleBuffer.destroy();
-			this.particleBuffer = null
-		}
-		this.particleBuffer = redGPUContext.device.createBuffer({
-			size: initialParticleData.byteLength,
-			usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE
-		});
-		// this.particleBuffer.setSubData(0, initialParticleData);
-		redGPUContext.device.defaultQueue.writeBuffer(this.particleBuffer,0, initialParticleData)
-		//
-		let computeSource = getComputeSource(this._particleNum);
-		let shaderModuleDescriptor = {
-			code: redGPUContext.glslang.compileGLSL(computeSource, 'compute'),
-			source: computeSource
-		};
-		console.log('shaderModuleDescriptor', shaderModuleDescriptor);
-		let computeModule = redGPUContext.device.createShaderModule(shaderModuleDescriptor);
-		const computeBindGroupLayout = redGPUContext.device.createBindGroupLayout({
-			entries: [
-				{binding: 0, visibility: GPUShaderStage.COMPUTE, type: "uniform-buffer"},
-				{binding: 1, visibility: GPUShaderStage.COMPUTE, type: "storage-buffer"}
-			],
-		});
+  //
+  get particleNum() {return this._particleNum;}
 
-		const computePipelineLayout = redGPUContext.device.createPipelineLayout({
-			bindGroupLayouts: [computeBindGroupLayout],
-		});
-		this.particleBindGroup = redGPUContext.device.createBindGroup({
-			layout: computeBindGroupLayout,
-			entries: [
-				{
-					binding: 0,
-					resource: {
-						buffer: this.simParamBuffer,
-						offset: 0,
-						size: this.#simParamData.byteLength
-					},
-				},
-				{
-					binding: 1,
-					resource: {
-						buffer: this.particleBuffer,
-						offset: 0,
-						size: initialParticleData.byteLength,
-					},
-				}
-			],
-		});
-		this.computePipeline = redGPUContext.device.createComputePipeline({
-			layout: computePipelineLayout,
-			computeStage: {
-				module: computeModule,
-				entryPoint: "main"
-			},
-		});
-	}
+  set particleNum(value) {
+    this._particleNum = value;
+    this.setParticleData();
+  }
+
+  get sprite3DMode() {return this._material._sprite3DMode;}
+
+  set sprite3DMode(value) {return this._material.sprite3DMode = value;}
+
+  get texture() {return this._material.diffuseTexture;}
+
+  set texture(value) {return this._material.diffuseTexture = value;}
+
+  get material() {return this._material;}
+
+  set material(v) {/*임의설정불가*/}
+
+  compute(time) {
+    this.#simParamData.set(
+      [
+        // startTime time
+        time,
+        // position
+        this._x, this._y, this._z,
+        // lifeRange
+        this.minLife, this.maxLife,
+        // x,y,z Range
+        this.minStartX, this.maxStartX, this.minEndX, this.maxEndX, this.easeX,
+        this.minStartY, this.maxStartY, this.minEndY, this.maxEndY, this.easeY,
+        this.minStartZ, this.maxStartZ, this.minEndZ, this.maxEndZ, this.easeZ,
+        // alphaRange
+        this.minStartAlpha, this.maxStartAlpha, this.minEndAlpha, this.maxEndAlpha, this.easeAlpha,
+        // scaleRange
+        this.minStartScale, this.maxStartScale, this.minEndScale, this.maxEndScale, this.easeScale,
+        // x,y,z Range
+        this.minStartRotationX, this.maxStartRotationX, this.minEndRotationX, this.maxEndRotationX, this.easeRotationX,
+        this.minStartRotationY, this.maxStartRotationY, this.minEndRotationY, this.maxEndRotationY, this.easeRotationY,
+        this.minStartRotationZ, this.maxStartRotationZ, this.minEndRotationZ, this.maxEndRotationZ, this.easeRotationZ
+      ],
+      0
+    );
+    // this.simParamBuffer.setSubData(0, this.#simParamData);
+    this.redGPUContext.device.queue.writeBuffer(this.simParamBuffer, 0, this.#simParamData);
+    //
+    const commandEncoder = this.redGPUContext.device.createCommandEncoder({});
+    const passEncoder = commandEncoder.beginComputePass();
+    passEncoder.setPipeline(this.computePipeline);
+    passEncoder.setBindGroup(ShareGLSL.SET_INDEX_ComputeUniforms, this.particleBindGroup);
+    passEncoder.dispatch(this._particleNum);
+    passEncoder.endPass();
+    this.redGPUContext.device.queue.submit([commandEncoder.finish()]);
+
+  }
+
+  setParticleData() {
+    let redGPUContext = this.redGPUContext;
+    const _PROPERTY_NUM = this._PROPERTY_NUM;
+    const initialParticleData = new Float32Array(this._particleNum * _PROPERTY_NUM);
+    const currentTime = performance.now();
+    for (let i = 0; i < this._particleNum; ++i) {
+      let life = Math.random() * this.maxLife;
+      let age = Math.random() * life;
+      initialParticleData[_PROPERTY_NUM * i + 0] = currentTime - age; // start time
+      initialParticleData[_PROPERTY_NUM * i + 1] = life; // life
+      // position
+      initialParticleData[_PROPERTY_NUM * i + 4] = 0; // x
+      initialParticleData[_PROPERTY_NUM * i + 5] = 0; // y
+      initialParticleData[_PROPERTY_NUM * i + 6] = 0; // z
+      initialParticleData[_PROPERTY_NUM * i + 7] = // alpha;
+        // scale
+        initialParticleData[_PROPERTY_NUM * i + 8] = 0; // rotationX
+      initialParticleData[_PROPERTY_NUM * i + 9] = 0; // rotationY
+      initialParticleData[_PROPERTY_NUM * i + 10] = 0; // rotationZ
+      initialParticleData[_PROPERTY_NUM * i + 11] = 0; // scale
+      // x
+      initialParticleData[_PROPERTY_NUM * i + 12] = Math.random() * (this.maxStartX - this.minStartX) + this.minStartX; // startValue
+      initialParticleData[_PROPERTY_NUM * i + 13] = Math.random() * (this.maxEndX - this.minEndX) + this.minEndX; // endValue
+      initialParticleData[_PROPERTY_NUM * i + 14] = this.easeX; // ease
+      initialParticleData[_PROPERTY_NUM * i + 15] = this._x; // startPosition
+      // y
+      initialParticleData[_PROPERTY_NUM * i + 16] = Math.random() * (this.maxStartY - this.minStartY) + this.minStartY; // startValue
+      initialParticleData[_PROPERTY_NUM * i + 17] = Math.random() * (this.maxEndY - this.minEndY) + this.minEndY; // endValue
+      initialParticleData[_PROPERTY_NUM * i + 18] = this.easeY; // ease
+      initialParticleData[_PROPERTY_NUM * i + 19] = this._y; // startPosition
+      // z
+      initialParticleData[_PROPERTY_NUM * i + 20] = Math.random() * (this.maxStartZ - this.minStartZ) + this.minStartZ; // startValue
+      initialParticleData[_PROPERTY_NUM * i + 21] = Math.random() * (this.maxEndZ - this.minEndZ) + this.minEndZ; // endValue
+      initialParticleData[_PROPERTY_NUM * i + 22] = this.easeZ; // ease
+      initialParticleData[_PROPERTY_NUM * i + 23] = this._z; // startPosition
+      // rotationX
+      initialParticleData[_PROPERTY_NUM * i + 24] = Math.random() * (this.maxStartRotationX - this.minStartRotationX) + this.minStartRotationX; // startValue
+      initialParticleData[_PROPERTY_NUM * i + 25] = Math.random() * (this.maxEndRotationX - this.minEndRotationX) + this.minEndRotationX; // endValue
+      initialParticleData[_PROPERTY_NUM * i + 26] = this.easeRotationX; // ease
+      initialParticleData[_PROPERTY_NUM * i + 27] = 0; //
+      // rotationY
+      initialParticleData[_PROPERTY_NUM * i + 28] = Math.random() * (this.maxStartRotationY - this.minStartRotationY) + this.minStartRotationY; // startValue
+      initialParticleData[_PROPERTY_NUM * i + 29] = Math.random() * (this.maxEndRotationY - this.minEndRotationY) + this.minEndRotationY; // endValue
+      initialParticleData[_PROPERTY_NUM * i + 30] = this.easeRotationY; // ease
+      initialParticleData[_PROPERTY_NUM * i + 31] = 0; //
+      // rotationZ
+      initialParticleData[_PROPERTY_NUM * i + 32] = Math.random() * (this.maxStartRotationZ - this.minStartRotationZ) + this.minStartRotationZ; // startValue
+      initialParticleData[_PROPERTY_NUM * i + 33] = Math.random() * (this.maxEndRotationZ - this.minEndRotationZ) + this.minEndRotationZ; // endValue
+      initialParticleData[_PROPERTY_NUM * i + 34] = this.easeRotationZ; // ease
+      initialParticleData[_PROPERTY_NUM * i + 35] = 0; //
+      // scale
+      initialParticleData[_PROPERTY_NUM * i + 36] = Math.random() * (this.maxStartScale - this.minStartScale) + this.minStartScale; // startValue
+      initialParticleData[_PROPERTY_NUM * i + 37] = Math.random() * (this.maxEndScale - this.minEndScale) + this.minEndScale; // endValue
+      initialParticleData[_PROPERTY_NUM * i + 38] = this.easeScale; // ease
+      initialParticleData[_PROPERTY_NUM * i + 39] = 0; //
+      // alpha
+      initialParticleData[_PROPERTY_NUM * i + 40] = Math.random() * (this.maxStartAlpha - this.minStartAlpha) + this.minStartAlpha;
+      // startValue
+      initialParticleData[_PROPERTY_NUM * i + 41] = Math.random() * (this.maxEndAlpha - this.minEndAlpha) + this.minEndAlpha; // endValue
+      initialParticleData[_PROPERTY_NUM * i + 42] = this.easeAlpha; // ease
+      initialParticleData[_PROPERTY_NUM * i + 43] = 0; //
+    }
+    if (this.particleBuffer) {
+      this.particleBuffer.destroy();
+      this.particleBuffer = null;
+    }
+    this.particleBuffer = redGPUContext.device.createBuffer({
+      size: initialParticleData.byteLength,
+      usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE
+    });
+    // this.particleBuffer.setSubData(0, initialParticleData);
+    redGPUContext.device.queue.writeBuffer(this.particleBuffer, 0, initialParticleData);
+    //
+    let computeSource = getComputeSource(this._particleNum);
+    let shaderModuleDescriptor = {
+      code: redGPUContext.glslang.compileGLSL(computeSource, 'compute'),
+      source: computeSource
+    };
+    console.log('shaderModuleDescriptor', shaderModuleDescriptor);
+    let computeModule = redGPUContext.device.createShaderModule(shaderModuleDescriptor);
+    const computeBindGroupLayout = redGPUContext.device.createBindGroupLayout({
+      entries: [
+        {
+          binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: {
+            type: 'uniform',
+          },
+        },
+        {binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: {
+            type: 'storage',
+          }}
+      ],
+    });
+
+    const computePipelineLayout = redGPUContext.device.createPipelineLayout({
+      bindGroupLayouts: [computeBindGroupLayout],
+    });
+    this.particleBindGroup = redGPUContext.device.createBindGroup({
+      layout: computeBindGroupLayout,
+      entries: [
+        {
+          binding: 0,
+          resource: {
+            buffer: this.simParamBuffer,
+            offset: 0,
+            size: this.#simParamData.byteLength
+          },
+        },
+        {
+          binding: 1,
+          resource: {
+            buffer: this.particleBuffer,
+            offset: 0,
+            size: initialParticleData.byteLength,
+          },
+        }
+      ],
+    });
+    this.computePipeline = redGPUContext.device.createComputePipeline({
+      layout: computePipelineLayout,
+      compute: {
+        module: computeModule,
+        entryPoint: "main"
+      },
+    });
+  }
 }

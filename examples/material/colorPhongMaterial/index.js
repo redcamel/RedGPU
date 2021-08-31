@@ -58,7 +58,7 @@ new RedGPU.RedGPUContext(
 			new RedGPU.ColorPhongMaterial(this,'#00ff00')
 		);
 		tChildMesh.x = 2;
-		tMesh.addChild(tChildMesh);
+		// tMesh.addChild(tChildMesh);
 
 		tMesh.renderDrawLayerIndex = RedGPU.Render.DRAW_LAYER_INDEX2_Z_POINT_SORT
 		tChildMesh.renderDrawLayerIndex = RedGPU.Render.DRAW_LAYER_INDEX2_Z_POINT_SORT

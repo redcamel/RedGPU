@@ -10,9 +10,9 @@
 import BaseObject3D from "../base/BaseObject3D.js";
 
 export default class Mesh extends BaseObject3D {
-	constructor(redGPUContext, geometry, material) {
-		super(redGPUContext);
-		this.geometry = geometry;
-		this.material = material;
-	}
+  constructor(redGPUContext, geometry, material) {
+    super(redGPUContext);
+    this.geometry = geometry;
+    this.material = material;
+  }
 }
