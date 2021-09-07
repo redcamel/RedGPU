@@ -8,10 +8,10 @@
 
 "use strict";
 export default class ShareGLSL {
-  static MESH_UNIFORM_POOL_NUM = 50;
+  static MESH_UNIFORM_POOL_NUM = 25;
   static GLSL_VERSION = '#version 460';
   static MAX_DIRECTIONAL_LIGHT = 3;
-  static MAX_POINT_LIGHT = 5;
+  static MAX_POINT_LIGHT = 10;
   static MAX_SPOT_LIGHT = 1;
   static SET_INDEX_ComputeUniforms = 0;
   static SET_INDEX_SystemUniforms_vertex = 0;
