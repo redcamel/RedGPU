@@ -1,9 +1,6 @@
 # RedGPU
 RedGPU - Javascript webGPU Engine
 
-- run in Chrome Canary() behind the flag --enable-unsafe-webgpu.
-- run in Edge Canary() behind the flag --enable-unsafe-webgpu.
-
 ## Usage
 #### html
 ```html
