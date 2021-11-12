@@ -95,8 +95,8 @@ export default class ShareGLSL {
 	        PointLight pointLightList[MAX_POINT_LIGHT];
 	        AmbientLight ambientLight;	        
 	        SpotLight spotLightList[MAX_SPOT_LIGHT];
-	        vec3 cameraPosition;
 	        vec2 resolution;
+	        vec3 cameraPosition;
         } systemUniforms;
         /////////////////////////////////////////////////////////////////////////////
         vec4 la = systemUniforms.ambientLight.color * systemUniforms.ambientLight.intensity;
