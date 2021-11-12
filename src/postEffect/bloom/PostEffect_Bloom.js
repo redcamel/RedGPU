@@ -16,14 +16,8 @@ import ShareGLSL from "../../base/ShareGLSL.js";
 
 export default class PostEffect_Bloom extends BasePostEffect {
 
-  static vertexShaderGLSL = `
-		${ShareGLSL.GLSL_VERSION}
-		void main() {}
-	`;
-  static fragmentShaderGLSL = `
-		${ShareGLSL.GLSL_VERSION}
-		void main() {}
-	`;
+  static vertexShaderGLSL = BasePostEffect.vertexShaderGLSL
+  static fragmentShaderGLSL =BasePostEffect.fragmentShaderGLSL
   static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
   static uniformsBindGroupLayoutDescriptor_material = BasePostEffect.uniformsBindGroupLayoutDescriptor_material;
   static uniformBufferDescriptor_vertex = BaseMaterial.uniformBufferDescriptor_empty;

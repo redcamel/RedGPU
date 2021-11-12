@@ -71,13 +71,19 @@ export default class ShaderModule_GLSL {
       let tCompileGLSL;
       // console.time('compileGLSL : ' + this.type + ' / ' + searchKey);
       tCompileGLSL = this.sourceMap.get(searchKey);
+
       if (tCompileGLSL instanceof Uint32Array) {
         console.log('compileGLSL - cached shader source.', this.type, searchKey);
       } else {
-        if (!tCompileGLSL) this.sourceMap.set(searchKey, tCompileGLSL = this.redGPUContext.glslang.compileGLSL(parseSource(this.originSource, optionList), this.type));
+        // console.log(this.originSource)
+        if (!tCompileGLSL) this.sourceMap.set(searchKey,  tCompileGLSL = (this.redGPUContext.twgsl.convertSpirV2WGSL(this.redGPUContext.glslang.compileGLSL(parseSource(this.originSource, optionList), this.type))));
+        // if (!tCompileGLSL) this.sourceMap.set(searchKey, tCompileGLSL = (this.redGPUContext.glslang.compileGLSL(parseSource(this.originSource, optionList), this.type)));
+        // console.log('spirv',spirv)
+        // console.log('tCompileGLSL',tCompileGLSL)
         console.log('compileGLSL - new shader source.', this.type, searchKey);
       }
       // console.timeEnd('compileGLSL : ' + this.type + ' / ' + searchKey);
+      console.log('머가오는겨2',searchKey,tCompileGLSL)
       this.shaderModuleDescriptor = {
         key: searchKey,
         code: tCompileGLSL,
@@ -86,5 +92,6 @@ export default class ShaderModule_GLSL {
       this.GPUShaderModule = this.redGPUContext.device.createShaderModule(this.shaderModuleDescriptor);
       this.shaderModuleMap[searchKey] = this.GPUShaderModule;
     }
+
   }
 }

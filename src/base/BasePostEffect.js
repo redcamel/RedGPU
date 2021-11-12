@@ -14,12 +14,22 @@ import Plane from "../primitives/Plane.js";
 import Render from "../renderer/Render.js";
 import PipelinePostEffect from "./pipeline/PipelinePostEffect.js";
 import Sampler from "../resources/Sampler.js";
+import ShareGLSL from "./ShareGLSL";
 
 export default class BasePostEffect extends Mix.mix(
   BaseMaterial
 ) {
-  static vertexShaderGLSL = ``;
-  static fragmentShaderGLSL = ``;
+  static vertexShaderGLSL = `
+  ${ShareGLSL.GLSL_VERSION}
+  void main() {
+      gl_Position = vec4(0.0);
+  }
+ `;
+
+  static fragmentShaderGLSL = `
+  ${ShareGLSL.GLSL_VERSION}
+  void main() {
+  } `;
   static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};
   static uniformsBindGroupLayoutDescriptor_material = {
     entries: [

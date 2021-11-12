@@ -104,91 +104,110 @@ const workerGLSLCompile = createWorker(async () => {
   "use strict";
   let glslangModule = await import(/* webpackIgnore: true */ 'https://unpkg.com/@webgpu/glslang@0.0.15/dist/web-devel/glslang.js');
   let glslang = await glslangModule.default();
-  let combinations = (_ => {
-    let k_combinations = (set, k) => {
-      let i, j, combs, head, tailcombs;
-      if (k > set.length || k <= 0) return [];
-      if (k === set.length) return [set];
-      if (k === 1) {
-        combs = [];
-        for (i = 0; i < set.length; i++) combs.push([set[i]]);
-        return combs;
+  let twgslLib
+  let checkTwgsl = async function () {
+    return new Promise(async (resolve) => {
+      if (!twgslLib) {
+        // await import(/* webpackIgnore: true */ 'https://cx20.github.io/webgpu-test/libs/twgsl.js');
+        await import(/* webpackIgnore: true */ 'https://preview.babylonjs.com/twgsl/twgsl.js');
+        console.log('twgsl2',twgsl)
+        twgslLib = twgsl;
+        resolve();
+      } else {
+        resolve();
       }
-      combs = [];
-      for (i = 0; i < set.length - k + 1; i++) {
-        head = set.slice(i, i + 1);
-        tailcombs = k_combinations(set.slice(i + 1), k - 1);
-        for (j = 0; j < tailcombs.length; j++) combs.push(head.concat(tailcombs[j]));
-      }
-      return combs;
-    };
-    return set => {
-      let k, i, combs, k_combs;
-      combs = [];
-      for (k = 1; k <= set.length; k++) {
-        k_combs = k_combinations(set, k);
-        for (i = 0; i < k_combs.length; i++) combs.push(k_combs[i]);
-      }
-      return combs;
-    };
-  })();
-  let getCompileGLSL = (_ => {
-    let parseSource = function (tSource, replaceList) {
-      tSource = JSON.parse(JSON.stringify(tSource));
-      // console.time('searchTime :' + replaceList);
-      let i = replaceList.length;
-      while (i--) {
-        let tReg = new RegExp(`\/\/\#RedGPU\#${replaceList[i]}\#`, 'gi');
-        tSource = tSource.replace(tReg, '');
-      }
-      // console.timeEnd('searchTime :' + replaceList);
-      return tSource;
-    };
-    return async data => {
-      const info = data.src;
-      const shaderType = info.shaderType;
-      const shaderName = info.shaderName;
-      let originSource = info.originSource;
-      let temp = {};
-      let num = 0;
-      //FIXME - 이부분 최적화해야함
-      const tList = combinations(info.optionList.sort());
-      console.log('조합을 찾아라', shaderType, shaderName, tList.length);
-      // console.log(tList)
-      let parse = optionList => {
-        let searchKey = shaderName + '_' + optionList.join('_');
-        if (!temp[searchKey]) {
-          temp[searchKey] = 1;
-          let parsedSource = parseSource(originSource, optionList);
-          // console.time('compileGLSL - in worker : ' + num + ' / ' + shaderType + ' / ' + searchKey);
-          let compileGLSL = glslang.compileGLSL(parsedSource, shaderType);
-          // console.timeEnd('compileGLSL - in worker : ' + num + ' / ' + shaderType + ' / ' + searchKey);
-          num++;
-          self.postMessage({
-            endCompile: true,
-            shaderName: shaderName,
-            searchKey: searchKey,
-            compileGLSL: compileGLSL,
-            shaderType: shaderType
-          });
+    });
+  };
+  await checkTwgsl().then(_=>{
+    return twgslLib('https://preview.babylonjs.com/twgsl/twgsl.wasm')
+  }).then(twgsl => {
+    let combinations = (_ => {
+      let k_combinations = (set, k) => {
+        let i, j, combs, head, tailcombs;
+        if (k > set.length || k <= 0) return [];
+        if (k === set.length) return [set];
+        if (k === 1) {
+          combs = [];
+          for (i = 0; i < set.length; i++) combs.push([set[i]]);
+          return combs;
         }
+        combs = [];
+        for (i = 0; i < set.length - k + 1; i++) {
+          head = set.slice(i, i + 1);
+          tailcombs = k_combinations(set.slice(i + 1), k - 1);
+          for (j = 0; j < tailcombs.length; j++) combs.push(head.concat(tailcombs[j]));
+        }
+        return combs;
       };
-      tList.forEach(newList => {
-        parse(newList);
-      });
-      self.postMessage({
-        end: true,
-        shaderName: shaderName,
-        shaderType: shaderType,
-        totalNum: num
-      });
-    };
-  })();
+      return set => {
+        let k, i, combs, k_combs;
+        combs = [];
+        for (k = 1; k <= set.length; k++) {
+          k_combs = k_combinations(set, k);
+          for (i = 0; i < k_combs.length; i++) combs.push(k_combs[i]);
+        }
+        return combs;
+      };
+    })();
+    let getCompileGLSL = (_ => {
+      let parseSource = function (tSource, replaceList) {
+        tSource = JSON.parse(JSON.stringify(tSource));
+        // console.time('searchTime :' + replaceList);
+        let i = replaceList.length;
+        while (i--) {
+          let tReg = new RegExp(`\/\/\#RedGPU\#${replaceList[i]}\#`, 'gi');
+          tSource = tSource.replace(tReg, '');
+        }
+        // console.timeEnd('searchTime :' + replaceList);
+        return tSource;
+      };
+      return async data => {
+        const info = data.src;
+        const shaderType = info.shaderType;
+        const shaderName = info.shaderName;
+        let originSource = info.originSource;
+        let temp = {};
+        let num = 0;
+        //FIXME - 이부분 최적화해야함
+        const tList = combinations(info.optionList.sort());
+        console.log('조합을 찾아라', shaderType, shaderName, tList.length);
+        // console.log(tList)
+        let parse = optionList => {
+          let searchKey = shaderName + '_' + optionList.join('_');
+          if (!temp[searchKey]) {
+            temp[searchKey] = 1;
+            let parsedSource = parseSource(originSource, optionList);
+            // console.time('compileGLSL - in worker : ' + num + ' / ' + shaderType + ' / ' + searchKey);
+            let compileGLSL = twgsl.convertSpirV2WGSL(glslang.compileGLSL(parsedSource, shaderType));
+            // console.timeEnd('compileGLSL - in worker : ' + num + ' / ' + shaderType + ' / ' + searchKey);
+            num++;
+            self.postMessage({
+              endCompile: true,
+              shaderName: shaderName,
+              searchKey: searchKey,
+              compileGLSL: compileGLSL,
+              shaderType: shaderType
+            });
+          }
+        };
+        tList.forEach(newList => {
+          parse(newList);
+        });
+        self.postMessage({
+          end: true,
+          shaderName: shaderName,
+          shaderType: shaderType,
+          totalNum: num
+        });
+      };
+    })();
 
-  self.addEventListener('message', e => {
-    // console.log('뭐가오지?', e)
-    getCompileGLSL(e.data);
-  });
+    self.addEventListener('message', e => {
+      // console.log('뭐가오지?', e)
+      getCompileGLSL(e.data);
+    });
+  })
+
 });
 const RedGPUWorker = {
   loadImageWithWorker: src => {
@@ -213,7 +232,8 @@ const RedGPUWorker = {
             // console.log('오니', e.data.searchKey)
             let tSearchKey = e.data.searchKey;
             if (!target.sourceMap.has(tSearchKey)) {
-              target.sourceMap.set(tSearchKey, e.data.compileGLSL);
+              console.log('머가오는겨',e.data.searchKey,e.data)
+              target.sourceMap.set(tSearchKey, (e.data.compileGLSL));
               let shaderModuleDescriptor = {
                 key: tSearchKey,
                 code: e.data.compileGLSL,

@@ -8,17 +8,6 @@
 "use strict";
 import DetectorGPU from "./base/detect/DetectorGPU.js";
 import ShareGLSL from "./base/ShareGLSL.js";
-import StandardMaterial from "./material/StandardMaterial.js";
-import ColorMaterial from "./material/ColorMaterial.js";
-import ColorPhongMaterial from "./material/ColorPhongMaterial.js";
-import ColorPhongTextureMaterial from "./material/ColorPhongTextureMaterial.js";
-import EnvironmentMaterial from "./material/EnvironmentMaterial.js";
-import BitmapMaterial from "./material/BitmapMaterial.js";
-import GridMaterial from "./material/system/GridMaterial.js";
-import SkyBoxMaterial from "./material/system/SkyBoxMaterial.js";
-import LineMaterial from "./material/system/LineMaterial.js";
-import TextMaterial from "./material/system/TextMaterial.js";
-import SpriteSheetMaterial from "./material/SpriteSheetMaterial.js";
 import Sampler from "./resources/Sampler.js";
 
 let redGPUContextList = new Set();
@@ -68,6 +57,21 @@ let checkGlslang = function () {
     }
   });
 };
+let twgslLib
+let checkTwgsl = function () {
+  return new Promise(async (resolve) => {
+    if (!twgslLib) {
+     // await import(/* webpackIgnore: true */ 'https://cx20.github.io/webgpu-test/libs/twgsl.js');
+     await import(/* webpackIgnore: true */ 'https://preview.babylonjs.com/twgsl/twgsl.js');
+      console.log('twgsl',twgsl)
+      twgslLib = twgsl;
+      resolve();
+    } else {
+      resolve();
+    }
+  });
+};
+
 
 export default class RedGPUContext {
   static useDebugConsole = false;
@@ -77,7 +81,10 @@ export default class RedGPUContext {
   viewList = [];
 
   constructor(canvas, initFunc) {
-    checkGlslang().then(_ => {
+    checkGlslang().then(_=>checkTwgsl()).then(_=>{
+      return twgslLib('https://preview.babylonjs.com/twgsl/twgsl.wasm')
+    }).then(twgsl => {
+      console.log(twgsl,twgsl)
       console.log('glslang', glslang);
       console.log(this);
       this.#detector = new DetectorGPU(this);
@@ -97,6 +104,7 @@ export default class RedGPUContext {
             })
               .then(device => {
                 this.adapter = adapter
+                this.twgsl = twgsl
                 this.glslang = glslang;
                 this.canvas = canvas;
                 this.context = canvas.getContext('webgpu');

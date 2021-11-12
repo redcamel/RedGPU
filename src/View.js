@@ -356,14 +356,21 @@ export default class View extends UUID {
         if (tLight.useDebugMesh) this.debugLightList.push(tLight._debugMesh.children);
       }
     }
-    offset = (TypeSize.float32x4 + TypeSize.float32x4 * 2 * ShareGLSL.MAX_DIRECTIONAL_LIGHT + TypeSize.float32x4 * 3 * ShareGLSL.MAX_POINT_LIGHT + TypeSize.float32x4 * 3 * ShareGLSL.MAX_SPOT_LIGHT + TypeSize.float32x4 * 2) / Float32Array.BYTES_PER_ELEMENT;
+    offset = (
+        TypeSize.float32x4 +
+        TypeSize.float32x4 * 2 * ShareGLSL.MAX_DIRECTIONAL_LIGHT +
+        TypeSize.float32x4 * 3 * ShareGLSL.MAX_POINT_LIGHT +
+        TypeSize.float32x4 * 3 * ShareGLSL.MAX_SPOT_LIGHT +
+        TypeSize.float32x4 * 2
+      )
+      / Float32Array.BYTES_PER_ELEMENT;
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // update camera3D position
     this.#systemUniformInfo_fragment_data.set([this.camera.x, this.camera.y, this.camera.z], offset);
     offset += TypeSize.float32x4 / Float32Array.BYTES_PER_ELEMENT;
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // update resolution
-    this.#systemUniformInfo_fragment_data.set([this.#viewRect[2], this.#viewRect[3]], offset);
+    this.#systemUniformInfo_fragment_data.set([+this.#viewRect[2], +this.#viewRect[3]], offset);
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // update GPUBuffer
     passEncoder.setBindGroup(0, systemUniformInfo_vertex.GPUBindGroup);
