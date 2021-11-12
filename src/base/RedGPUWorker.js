@@ -108,8 +108,8 @@ const workerGLSLCompile = createWorker(async () => {
   let checkTwgsl = async function () {
     return new Promise(async (resolve) => {
       if (!twgslLib) {
-        // await import(/* webpackIgnore: true */ 'https://cx20.github.io/webgpu-test/libs/twgsl.js');
-        await import(/* webpackIgnore: true */ 'https://preview.babylonjs.com/twgsl/twgsl.js');
+        // await import(/* webpackIgnore: true */ 'https://preview.babylonjs.com/twgsl/twgsl.js');
+        await import(/* webpackIgnore: true */ 'https://redcamel.github.io/RedGPU/libs/twgsl.js');
         console.log('twgsl2',twgsl)
         twgslLib = twgsl;
         resolve();
@@ -119,7 +119,8 @@ const workerGLSLCompile = createWorker(async () => {
     });
   };
   await checkTwgsl().then(_=>{
-    return twgslLib('https://preview.babylonjs.com/twgsl/twgsl.wasm')
+    // return twgslLib('https://preview.babylonjs.com/twgsl/twgsl.wasm')
+    return twgslLib('https://redcamel.github.io/RedGPU/libs/twgsl.wasm')
   }).then(twgsl => {
     let combinations = (_ => {
       let k_combinations = (set, k) => {
