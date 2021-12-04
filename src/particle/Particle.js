@@ -498,7 +498,7 @@ export default class Particle extends BaseObject3D {
     //
     let computeSource = getComputeSource(this._particleNum);
     let shaderModuleDescriptor = {
-      code: redGPUContext.glslang.compileGLSL(computeSource, 'compute'),
+      code: redGPUContext.twgsl.convertSpirV2WGSL(redGPUContext.glslang.compileGLSL(computeSource, 'compute')),
       source: computeSource
     };
     console.log('shaderModuleDescriptor', shaderModuleDescriptor);

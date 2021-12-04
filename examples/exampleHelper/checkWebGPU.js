@@ -40,7 +40,7 @@ var CheckWebGPU = {
 					gtag('config', 'UA-134079611-3');
 				}
 			} else {
-				alert('WebGPU not supported!. Use the latest version of Chrome Canary.')
+				alert('- WebGPU not supported!. Use the latest version of Chrome Canary.\n- When running localhost, port 3003 should be used.')
 			}
 		}
 	})()
