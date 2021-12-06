@@ -40,15 +40,26 @@ export default class ShareGLSL {
 	        float sumOpacity;
 	    } meshUniforms;
 		`,
-    calcDisplacement: `
-		 vec3 calcDisplacement(vec3 vNormal, float displacementFlowSpeedX, float displacementFlowSpeedY, float displacementPower, vec2 targetUV, texture2D targetDisplacementTexture, sampler targetSampler)
-		 {
-		    return normalize(vNormal) * texture(sampler2D(targetDisplacementTexture, targetSampler), targetUV + vec2(
-		              displacementFlowSpeedX * (systemUniforms.time/1000.0),
-		               displacementFlowSpeedY * (systemUniforms.time/1000.0)
-		          )).x * displacementPower ;
-		 }
-		`,
+    calcDisplacement: (
+        vNormal='vNormal',
+        displacementFlowSpeedX='displacementFlowSpeedX',
+        displacementFlowSpeedY='displacementFlowSpeedY',
+        displacementPower='displacementPower',
+        targetUV='targetUV',
+        targetDisplacementTexture='targetDisplacementTexture',
+        targetSampler='targetSampler'
+    )=>{
+        return `
+        normalize(${vNormal}) 
+        * texture(
+            sampler2D(${targetDisplacementTexture}, ${targetSampler}), 
+            ${targetUV} + vec2(
+                ${displacementFlowSpeedX} * (systemUniforms.time/1000.0),
+                ${displacementFlowSpeedY} * (systemUniforms.time/1000.0)
+            )
+        ).x * ${displacementPower};
+		`
+    },
     getSprite3DMatrix: `
 		mat4 getSprite3DMatrix(mat4 cameraMTX, mat4 mvMatrix){
 			mat4 tMTX = cameraMTX * mvMatrix;

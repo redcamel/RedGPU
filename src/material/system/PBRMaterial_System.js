@@ -30,7 +30,6 @@ export default class PBRMaterial_System extends Mix.mix(
   static vertexShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
     ${ShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
-    ${ShareGLSL.GLSL_SystemUniforms_vertex.calcDisplacement}
     ${ShareGLSL.GLSL_SystemUniforms_vertex.meshUniforms}
          
 	layout( location = 0 ) in vec3 position;
@@ -86,7 +85,7 @@ export default class PBRMaterial_System extends Mix.mix(
 		vVertexTangent = vertexTangent;
 		vMouseColorID = meshUniforms.mouseColorID;
 		vSumOpacity = meshUniforms.sumOpacity;
-		// if(vertexUniforms.__displacementTextureRenderYn == TRUTHY) vVertexPosition.xyz += calcDisplacement(vNormal, vertexUniforms.displacementFlowSpeedX, vertexUniforms.displacementFlowSpeedY, vertexUniforms.displacementPower, uv, uDisplacementTexture, uDisplacementSampler);
+		if(vertexUniforms.__displacementTextureRenderYn == TRUTHY) vVertexPosition.xyz += ${ShareGLSL.GLSL_SystemUniforms_vertex.calcDisplacement('vNormal', 'vertexUniforms.displacementFlowSpeedX', 'vertexUniforms.displacementFlowSpeedY', 'vertexUniforms.displacementPower', 'uv', 'uDisplacementTexture', 'uDisplacementSampler')}
 		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * vVertexPosition;		
 	}
 	`;
