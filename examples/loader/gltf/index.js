@@ -53,6 +53,7 @@ new RedGPU.RedGPUContext(
         renderer = new RedGPU.Render();
         render = time => {
             renderer.render(time, this);
+                // tScene.children[0].rotationY+=0.1
             requestAnimationFrame(render);
         };
         requestAnimationFrame(render);

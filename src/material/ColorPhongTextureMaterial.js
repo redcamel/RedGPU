@@ -26,7 +26,7 @@ export default class ColorPhongTextureMaterial extends Mix.mix(
   static vertexShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
-    ${ShareGLSL.GLSL_SystemUniforms_vertex.calcDisplacement}    
+    
     ${ShareGLSL.GLSL_SystemUniforms_vertex.meshUniforms}
 	layout( location = 0 ) in vec3 position;
 	layout( location = 1 ) in vec3 normal;
@@ -51,7 +51,7 @@ export default class ColorPhongTextureMaterial extends Mix.mix(
 		vUV = uv;
 		vMouseColorID = meshUniforms.mouseColorID;
 		vSumOpacity = meshUniforms.sumOpacity;
-		// if(vertexUniforms.__displacementTextureRenderYn == TRUTHY)  vVertexPosition.xyz += calcDisplacement(vNormal, vertexUniforms.displacementFlowSpeedX, vertexUniforms.displacementFlowSpeedY, vertexUniforms.displacementPower, uv, uDisplacementTexture, uSampler);
+		if(vertexUniforms.__displacementTextureRenderYn == TRUTHY) vVertexPosition.xyz += ${ShareGLSL.GLSL_SystemUniforms_vertex.calcDisplacement('vNormal', 'vertexUniforms.displacementFlowSpeedX', 'vertexUniforms.displacementFlowSpeedY', 'vertexUniforms.displacementPower', 'uv', 'uDisplacementTexture', 'uSampler')}
 		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * vVertexPosition;
 	}
 	`;
