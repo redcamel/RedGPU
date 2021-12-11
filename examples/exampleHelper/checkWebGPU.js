@@ -19,10 +19,10 @@ var CheckWebGPU = {
 			document.head.appendChild(script)
 
 		};
-		return function (title, description) {
+		return function (title, description,path='../../') {
 			if (navigator.gpu) {
 				makeScript("https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.6/dat.gui.min.js");
-				makeScript("../../exampleHelper/ExampleHelper.js");
+				makeScript(`${path}/exampleHelper/ExampleHelper.js`);
 				makeScript("./index.js", 'module', (function () {
 					var t0, t1;
 					t0 = title;
