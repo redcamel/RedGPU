@@ -284,12 +284,12 @@ var GLTFLoader;
     var checkAsset;
     var getBufferResources;
     /*
-      glTF는 asset 속성이 있어야한다.
+      glTF는 assets 속성이 있어야한다.
       최소한 버전을 반드시 포함해야함.
      */
     checkAsset = function (json) {
-      if (json['asset'] === undefined) UTIL.throwFunc('GLTFLoader - asset은 반드시 정의되어야함');
-      if (json['asset'].version[0] < 2) UTIL.throwFunc('GLTFLoader - asset의 버전은 2.0이상이어야함');
+      if (json['assets'] === undefined) UTIL.throwFunc('GLTFLoader - asset은 반드시 정의되어야함');
+      if (json['assets'].version[0] < 2) UTIL.throwFunc('GLTFLoader - asset의 버전은 2.0이상이어야함');
     };
     /*
     전체 데이터중 외부소스데이터를 모두 실제화 해둔다.

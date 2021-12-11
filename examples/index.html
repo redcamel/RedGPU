@@ -15,156 +15,80 @@
 
     <title>RedGPU - Examples</title>
     <meta name="keywords" content="RedGPU, WebGPU, Example, Demo">
-    <link type="text/css" rel="stylesheet" href="./css.css"/>
+    <link type="text/css" rel="stylesheet" href="css.css"/>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.0.2/TimelineMax.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.0.2/TweenMax.min.js"></script>
+    <script src="https://redcamel.github.io/Alucard/release/0.8/min/Alucard.min.js"></script>
+    <script src="exampleHelper/checkWebGPU.js"></script>
     <style>
-        html, body {
-            font-size: 11px;
-            line-height: 16px;
-            overflow-y: auto;
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            background: rgb(14, 17, 21);
+            color: rgb(242, 169, 113);
+            font-size: 12px;
         }
-        ul {
-            margin:10px 20px;
-            padding : 10px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 5px;
+
+        a, a:hover, a:active, a:visited {
+            color: rgb(242, 169, 113);
+            text-decoration: none;
         }
-        ul ul{
-            margin:10px 20px;
-            padding : 10px;
-            background: #222;
-            border-radius: 5px;
-        }
+
         li {
-            display: inline-block;
-            padding: 10px;
-            margin: 5px;
-            background: #111;
-            border-radius: 5px;
+            list-style: none;
+            vertical-align: top;
+            text-shadow: 0 1px rgb(0, 0, 0);
+        }
+
+        h1, h2 {
+            font-weight: lighter;
+            color: rgb(242, 169, 113);
+        }
+
+        h2 {
+            /*font-weight: bold;*/
+            text-shadow: 0 1px 3px rgb(0, 0, 0);
+            font-size: 16px;
+
+        }
+
+        /* width */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        /* Track */
+        ::-webkit-scrollbar-track {
+            background: #222;
+        }
+
+        /* Handle */
+        ::-webkit-scrollbar-thumb {
+            background: #70020c;
+        }
+
+        /* Handle on hover */
+        ::-webkit-scrollbar-thumb:hover {
+            background: #70020c;
         }
     </style>
 </head>
 <body>
-<h1 style="margin: 20px 20px; font-size: 20px"> RedGPU - Examples</h1>
-<ul>
-    <h3>Basic</h3>
-    <li><a href="basic/helloWorld/index.html">HelloWorld</a></li>
-    <li><a href="basic/scene/index.html">Scene</a></li>
-    <li><a href="basic/view/index.html">View</a></li>
-    <li><a href="basic/multiView/index.html">Multi View</a></li>
-</ul>
-<ul>
-    <h3>Primitive</h3>
-    <li><a href="primitive/plane/index.html">Plane</a></li>
-    <li><a href="primitive/box/index.html">Box</a></li>
-    <li><a href="primitive/sphere/index.html">Sphere</a></li>
-    <li><a href="primitive/cylinder/index.html">Cylinder</a></li>
-</ul>
-<ul>
-    <h3>Controller</h3>
-    <li><a href="controller/camera2D/index.html">Camera2D</a></li>
-    <li><a href="controller/camera3D/index.html">Camera3D</a></li>
-    <li><a href="controller/obitController/index.html">ObitController</a></li>
-</ul>
-<ul>
-    <h3>Object3D</h3>
-    <li><a href="object3D/axis/index.html">Axis</a></li>
-    <li><a href="object3D/grid/index.html">Grid</a></li>
-    <li><a href="object3D/skyBox/index.html">SkyBox</a></li>
-    <li><a href="object3D/mesh/index.html">Mesh</a></li>
-    <li><a href="object3D/sprite3D/index.html">Sprite3D</a></li>
-    <li><a href="object3D/text/index.html">Text</a></li>
-    <li><a href="object3D/targetTo/index.html">Method targetTo</a></li>
-</ul>
-<ul>
-    <h3>Coordinate</h3>
-    <li><a href="coordinate/screenToWorld/index.html">Method screenToWorld</a></li>
-    <li><a href="coordinate/getScreenPoint/index.html">Method getScreenPoint</a></li>
-    <li><a href="coordinate/localToWorld/index.html">Method localToWorld</a></li>
-    <li><a href="coordinate/worldToLocal/index.html">Method worldToLocal</a></li>
-    <li><a href="coordinate/pivotPoint/index.html">pivotPoint</a></li>
-    <li><a href="coordinate/pivotPoint_2d/index.html">pivotPoint - Camera2D</a></li>
-</ul>
-<ul>
-    <h3>Line</h3>
-    <li><a href="object3D/lineLinear/index.html">Line - LINEAR</a></li>
-    <li><a href="object3D/lineBezier/index.html">Line - BEZIER</a></li>
-    <li><a href="object3D/lineCatmullRom/index.html">Line - CATMULLROM</a></li>
-</ul>
-<ul>
-    <h3>Material</h3>
-    <li><a href="material/colorMaterial/index.html">ColorMaterial</a></li>
-    <li><a href="material/colorPhongMaterial/index.html">ColorPhongMaterial</a></li>
-    <li><a href="material/colorPhongTextureMaterial/index.html">ColorPhongTextureMaterial</a></li>
-    <li><a href="material/bitmapMaterial/index.html">BitmapMaterial</a></li>
-    <li><a href="material/standardMaterial/index.html">StandardMaterial</a></li>
-    <li><a href="material/environmentMaterial/index.html">EnvironmentMaterial</a></li>
-    <li><a href="material/refractionMaterial/index.html">RefractionMaterial</a></li>
-    <li><a href="material/spriteSheetMaterial/index.html">SpriteSheetMaterial</a></li>
-    <li><a href="material/flatModeOfMaterial/index.html">FlatMode of Material</a></li>
-
-</ul>
-<ul>
-    <h3>Texture Sampler</h3>
-    <li><a href="texture/bitmapTexture/index.html">BitmapTexture - Sampler</a></li>
-</ul>
-
-<ul>
-    <h3>Light</h3>
-    <li><a href="light/ambientLight/index.html">AmbientLight</a></li>
-    <li><a href="light/directionalLight/index.html">DirectionalLight</a></li>
-    <li><a href="light/pointLight/index.html">PointLight</a></li>
-</ul>
-
-<ul>
-    <h3>Loader</h3>
-    <li><a href="loader/gltf/index.html">GLTFLoader</a></li>
-    <li><a href="loader/gltfComplex/index.html">gltfComplex</a></li>
-    <li>TODO - TextureLoader</li>
-</ul>
-
-<ul>
-    <h3>MouseEvent</h3>
-    <li><a href="mouseEvent/mouseEvent/index.html">MouseEvent</a></li>
-    <li><a href="mouseEvent/mouseEventInMultiView/index.html">mouseEvent in multi view</a></li>
-
-</ul>
-
-<ul>
-    <h3>Particle</h3>
-    <li><a href="particle/particle/index.html">Particle</a></li>
-</ul>
-
-<ul>
-    <h3>PostEffect</h3>
-    <li><a href="postEffect/postEffect/index.html">PostEffect</a></li>
-    <li><a href="postEffect/postEffect_bloom/index.html">PostEffect Bloom</a></li>
-<!--    <li><a href="postEffect/postEffect_dof/index.html">PostEffect DoF</a></li>-->
-    <li><a href="postEffect/postEffect_convolution/index.html">PostEffect Convolution</a></li>
-    <li><a href="postEffect/postEffect_film/index.html">PostEffect Film</a></li>
-    <li><a href="postEffect/postEffect_vignetting/index.html">PostEffect Vignetting</a></li>
-    <ul>
-        <h3>Adjustments</h3>
-        <li><a href="postEffect/postEffect_brightnessContrast/index.html">PostEffect BrightnessContrast</a></li>
-        <li><a href="postEffect/postEffect_gray/index.html">PostEffect Gray</a></li>
-        <li><a href="postEffect/postEffect_hueSaturation/index.html">PostEffect HueSaturation</a></li>
-        <li><a href="postEffect/postEffect_invert/index.html">PostEffect Invert</a></li>
-        <li><a href="postEffect/postEffect_threshold/index.html">PostEffect Threshold</a></li>
-    </ul>
-    <ul>
-        <h3>Blur</h3>
-        <li><a href="postEffect/postEffect_blur/index.html">PostEffect Blur</a></li>
-        <li><a href="postEffect/postEffect_blurX/index.html">PostEffect BlurX</a></li>
-        <li><a href="postEffect/postEffect_blurY/index.html">PostEffect BlurY</a></li>
-        <li><a href="postEffect/postEffect_gaussianBlur/index.html">PostEffect GaussianBlur</a></li>
-        <li><a href="postEffect/postEffect_zoomBlur/index.html">PostEffect ZoomBlur</a></li>
-    </ul>
-    <ul>
-        <h3>Pixelate</h3>
-        <li><a href="postEffect/postEffect_halfTone/index.html">PostEffect HalfTone</a></li>
-        <li><a href="postEffect/postEffect_pixelize/index.html">PostEffect Pixelize</a></li>
-    </ul>
-
-
-</ul>
+<div style="position: absolute;padding-bottom: 70px;overflow-y: auto;top:0;bottom:70px">
+    <div style="padding:20px 30px 0 30px;font-size: 40px;text-shadow: 0 0 10px rgb(0, 0, 0)">
+        <div>RedGPU Examples</div>
+        <div style="font-size:12px;margin-left:3px;opacity: 0.75">JavaScript WbeGPU library</div>
+    </div>
+    <br>
+    <div>
+        <ul id="exampleBox" style="padding-left:35px"></ul>
+    </div>
+</div>
+<script>
+    CheckWebGPU.checkWebGPU('','','./')
+</script>
 </body>
 </html>
