@@ -31,7 +31,7 @@ const ExampleHelper = (_ => {
 		}
 
 	};
-	const setBottom = _ => {
+	const setBottom = path => {
 		let container, t0;
 		container = document.createElement('div');
 		document.body.appendChild(container);
@@ -43,7 +43,7 @@ const ExampleHelper = (_ => {
 		container.appendChild(t0 = document.createElement('div'));
 		t0.innerHTML = `This project is maintained by <a href="https://github.com/redcamel/">RedCamel</a>`;
 		t0.style.cssText = `margin-top:20px; font-size : 10px; color : #b19898; padding-left: 32px`;
-		t0.appendChild(setGithubLogo())
+		t0.appendChild(setGithubLogo(path))
 
 		// makeSourceView
 		t0 = document.createElement('link');
@@ -80,10 +80,10 @@ const ExampleHelper = (_ => {
 
 
 	};
-	const setGithubLogo = _ => {
+	const setGithubLogo = path => {
 		let t0;
 		t0 = document.createElement('img');
-		t0.src = `${assetPath}github.png`;
+		t0.src = `../${path}/assets/github.png`;
 		t0.style.cssText = `position: fixed; bottom:15px; left:20px; width:25px; cursor: pointer;`;
 		t0.onclick = _ => window.location.href = 'https://github.com/redcamel/RedGPU';
 		return t0;
@@ -1315,8 +1315,8 @@ const ExampleHelper = (_ => {
 		}
 	}
 	return {
-		setBaseInformation: (title, description) => {
-			setBottom();
+		setBaseInformation: (title, description,path) => {
+			setBottom(path);
 			setTitle(title, description)
 		},
 		setTestUI: (_ => {
