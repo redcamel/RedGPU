@@ -28,7 +28,7 @@ var CheckWebGPU = {
 					t0 = title;
 					t1 = description;
 					return function () {
-						ExampleHelper.setBaseInformation(t0,t1)
+						ExampleHelper.setBaseInformation(t0,t1,path)
 					}
 				})());
 				<!-- Global site tag (gtag.js) - Google Analytics -->
