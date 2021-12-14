@@ -1,5 +1,5 @@
 # RedGPU
-RedGPU - Javascript webGPU Engine
+RedGPU - Javascript WebGPU Engine
 
 ## Usage
 - When running localhost, port 3003 should be used.
