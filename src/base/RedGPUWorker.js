@@ -108,8 +108,8 @@ const workerGLSLCompile = createWorker(async () => {
   let checkTwgsl = async function () {
     return new Promise(async (resolve) => {
       if (!twgslLib) {
-        // await import(/* webpackIgnore: true */ 'https://preview.babylonjs.com/twgsl/twgsl.js');
-        await import(/* webpackIgnore: true */ 'https://redcamel.github.io/RedGPU/libs/twgsl.js');
+        await import(/* webpackIgnore: true */ 'https://preview.babylonjs.com/twgsl/twgsl.js');
+        // await import(/* webpackIgnore: true */ 'https://redcamel.github.io/RedGPU/libs/twgsl.js');
         console.log('twgsl2',twgsl)
         twgslLib = twgsl;
         resolve();
@@ -119,8 +119,8 @@ const workerGLSLCompile = createWorker(async () => {
     });
   };
   await checkTwgsl().then(_=>{
-    // return twgslLib('https://preview.babylonjs.com/twgsl/twgsl.wasm')
-    return twgslLib('https://redcamel.github.io/RedGPU/libs/twgsl.wasm')
+    return twgslLib('https://preview.babylonjs.com/twgsl/twgsl.wasm')
+    // return twgslLib('https://redcamel.github.io/RedGPU/libs/twgsl.wasm')
   }).then(twgsl => {
     let combinations = (_ => {
       let k_combinations = (set, k) => {
@@ -179,7 +179,7 @@ const workerGLSLCompile = createWorker(async () => {
             temp[searchKey] = 1;
             let parsedSource = parseSource(originSource, optionList);
             // console.time('compileGLSL - in worker : ' + num + ' / ' + shaderType + ' / ' + searchKey);
-            let compileGLSL = twgsl.convertSpirV2WGSL(glslang.compileGLSL(parsedSource, shaderType));
+            let compileGLSL = twgsl.convertSpirV2WGSL(glslang.compileGLSL(parsedSource, shaderType)).replace(/@stride\([0-9]*\)/g,'');
             // console.timeEnd('compileGLSL - in worker : ' + num + ' / ' + shaderType + ' / ' + searchKey);
             num++;
             self.postMessage({

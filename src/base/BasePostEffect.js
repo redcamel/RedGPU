@@ -103,8 +103,9 @@ export default class BasePostEffect extends Mix.mix(
       {
         colorAttachments: [{
           view: this.baseAttachmentView,
-          loadValue: {r: 0, g: 0, b: 0, a: 0},
-
+          clearValue: {r: 0, g: 0, b: 0, a: 0},
+          storeOp : 'store',
+          loadOp : 'clear'
         }]
       }
     );
@@ -118,7 +119,7 @@ export default class BasePostEffect extends Mix.mix(
     Render.clearStateCache();
     redView.updateSystemUniform(passEncoder_effect, redGPUContext);
     renderScene(redGPUContext, redView, passEncoder_effect, [this.quad]);
-    passEncoder_effect.endPass();
+    passEncoder_effect.end();
     redGPUContext.device.queue.submit([commandEncoder_effect.finish()]);
   }
 

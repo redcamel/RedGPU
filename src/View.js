@@ -197,11 +197,11 @@ export default class View extends UUID {
           key: 'baseAttachment',
           format: redGPUContext.swapChainFormat,
           usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.TEXTURE_BINDING,
-          resolveUsage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.TEXTURE_BINDING
+          resolveUsage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.TEXTURE_BINDING,
         },
         {
           key: 'baseAttachment_mouseColorID_depth',
-          format: 'rgba32float',
+          format: 'rgba16float',
           // format: redGPUContext.context.getPreferredFormat(redGPUContext.adapter),
           usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.TEXTURE_BINDING,
           resolveUsage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.TEXTURE_BINDING

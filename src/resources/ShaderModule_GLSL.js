@@ -71,12 +71,12 @@ export default class ShaderModule_GLSL {
       let tCompileGLSL;
       // console.time('compileGLSL : ' + this.type + ' / ' + searchKey);
       tCompileGLSL = this.sourceMap.get(searchKey);
-
+      console.log('머가오는겨3',searchKey,parseSource(this.originSource, optionList),tCompileGLSL)
       if (tCompileGLSL instanceof Uint32Array) {
         console.log('compileGLSL - cached shader source.', this.type, searchKey);
       } else {
         // console.log(this.originSource)
-        if (!tCompileGLSL) this.sourceMap.set(searchKey,  tCompileGLSL = (this.redGPUContext.twgsl.convertSpirV2WGSL(this.redGPUContext.glslang.compileGLSL(parseSource(this.originSource, optionList), this.type))));
+        if (!tCompileGLSL) this.sourceMap.set(searchKey,  tCompileGLSL = (this.redGPUContext.twgsl.convertSpirV2WGSL(this.redGPUContext.glslang.compileGLSL(parseSource(this.originSource, optionList), this.type))).replace(/@stride\([0-9]*\)/g,''));
         // if (!tCompileGLSL) this.sourceMap.set(searchKey, tCompileGLSL = (this.redGPUContext.glslang.compileGLSL(parseSource(this.originSource, optionList), this.type)));
         // console.log('spirv',spirv)
         // console.log('tCompileGLSL',tCompileGLSL)

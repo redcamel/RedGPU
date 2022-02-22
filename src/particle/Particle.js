@@ -418,7 +418,7 @@ export default class Particle extends BaseObject3D {
     passEncoder.setPipeline(this.computePipeline);
     passEncoder.setBindGroup(ShareGLSL.SET_INDEX_ComputeUniforms, this.particleBindGroup);
     passEncoder.dispatch(this._particleNum);
-    passEncoder.endPass();
+    passEncoder.end();
     this.redGPUContext.device.queue.submit([commandEncoder.finish()]);
 
   }
@@ -498,7 +498,7 @@ export default class Particle extends BaseObject3D {
     //
     let computeSource = getComputeSource(this._particleNum);
     let shaderModuleDescriptor = {
-      code: redGPUContext.twgsl.convertSpirV2WGSL(redGPUContext.glslang.compileGLSL(computeSource, 'compute')),
+      code: redGPUContext.twgsl.convertSpirV2WGSL(redGPUContext.glslang.compileGLSL(computeSource, 'compute')).replace(/@stride\([0-9]*\)/g,''),
       source: computeSource
     };
     console.log('shaderModuleDescriptor', shaderModuleDescriptor);

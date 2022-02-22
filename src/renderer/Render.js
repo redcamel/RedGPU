@@ -605,25 +605,30 @@ let renderView = (redGPUContext, redView, swapChainTexture, swapChainTextureView
       {
         view: redView.baseAttachmentView,
         resolveTarget: redView.baseAttachment_ResolveTargetView,
-        loadValue: {
+        clearValue: {
           r: tSceneBackgroundColor_rgba[0],
           g: tSceneBackgroundColor_rgba[1],
           b: tSceneBackgroundColor_rgba[2],
           a: tSceneBackgroundColor_rgba[3]
         },
-
+        storeOp : 'store',
+        loadOp : 'clear'
       },
       {
         view: redView.baseAttachment_mouseColorID_depthView,
         resolveTarget: redView.baseAttachment_mouseColorID_depth_ResolveTargetView,
-        loadValue: {r: 0, g: 0, b: 0, a: 0}
+        clearValue: {r: 0, g: 0, b: 0, a: 0},
+        storeOp : 'store',
+        loadOp : 'clear'
       }
     ],
     depthStencilAttachment: {
       view: redView.baseDepthStencilAttachmentView,
-      depthLoadValue: 1.0,
+      depthClearValue: 1.0,
+      depthLoadOp: "clear",
       depthStoreOp: "store",
-      stencilLoadValue: 0,
+      stencilClearValue: 0,
+      stencilLoadOp: "load",
       stencilStoreOp: "store",
     }
   };
@@ -646,7 +651,7 @@ let renderView = (redGPUContext, redView, swapChainTexture, swapChainTextureView
   renderTextLayerList(redGPUContext, redView, mainRenderPassEncoder);
   // 라이트 디버거 렌더
   renderLightDebugger(redGPUContext, redView, mainRenderPassEncoder);
-  mainRenderPassEncoder.endPass();
+  mainRenderPassEncoder.end();
   currentDebuggerData['baseRenderTime'] = performance.now() - now;
   //////////////////////////////////////////////////////////////////////////////////////////
   now = performance.now();
@@ -695,7 +700,9 @@ export default class Render {
       {
         colorAttachments: [{
           view: swapChainTextureView,
-          loadValue: {r: 0, g: 0, b: 0, a: 0}
+          clearValue: {r: 0, g: 0, b: 0, a: 0},
+          storeOp : 'store',
+          loadOp : 'clear'
         }]
       }
     );
@@ -715,7 +722,7 @@ export default class Render {
       redView._finalRender.baseAttachmentView = swapChainTextureView;
       redView._finalRender.render(redGPUContext, redView, renderScene, redView._lastTextureView, final_passEncoder);
     }
-    final_passEncoder.endPass();
+    final_passEncoder.end();
     submitList.push(finale_commandEncoder.finish());
     redGPUContext.device.queue.submit(submitList);
     //
