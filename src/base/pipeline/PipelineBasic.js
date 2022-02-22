@@ -76,7 +76,7 @@ export default class PipelineBasic extends UUID {
             }
           },
           {
-            format: 'rgba32float',
+            format: 'rgba16float',
             // format: redGPUContext.context.getPreferredFormat(redGPUContext.adapter),
 
           },

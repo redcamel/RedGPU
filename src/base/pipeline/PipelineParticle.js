@@ -112,7 +112,7 @@ export default class PipelineParticle extends UUID {
 
           },
           {
-            format: 'rgba32float',
+            format: 'rgba16float',
 
           },
         ],

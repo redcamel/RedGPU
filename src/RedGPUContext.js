@@ -61,8 +61,8 @@ let twgslLib
 let checkTwgsl = function () {
   return new Promise(async (resolve) => {
     if (!twgslLib) {
-     // await import(/* webpackIgnore: true */ 'https://preview.babylonjs.com/twgsl/twgsl.js');
-     await import(/* webpackIgnore: true */ 'https://redcamel.github.io/RedGPU/libs/twgsl.js');
+     await import(/* webpackIgnore: true */ 'https://preview.babylonjs.com/twgsl/twgsl.js');
+     // await import(/* webpackIgnore: true */ 'https://redcamel.github.io/RedGPU/libs/twgsl.js');
       console.log('twgsl',twgsl)
       twgslLib = twgsl;
       resolve();
@@ -82,8 +82,8 @@ export default class RedGPUContext {
 
   constructor(canvas, initFunc) {
     checkGlslang().then(_=>checkTwgsl()).then(_=>{
-      // return twgslLib('https://preview.babylonjs.com/twgsl/twgsl.wasm')
-      return twgslLib('https://redcamel.github.io/RedGPU/libs/twgsl.wasm')
+      return twgslLib('https://preview.babylonjs.com/twgsl/twgsl.wasm')
+      // return twgslLib('https://redcamel.github.io/RedGPU/libs/twgsl.wasm')
     }).then(twgsl => {
       console.log(twgsl,twgsl)
       console.log('glslang', glslang);
