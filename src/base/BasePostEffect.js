@@ -14,7 +14,7 @@ import Plane from "../primitives/Plane.js";
 import Render from "../renderer/Render.js";
 import PipelinePostEffect from "./pipeline/PipelinePostEffect.js";
 import Sampler from "../resources/Sampler.js";
-import ShareGLSL from "./ShareGLSL";
+import ShareGLSL from "./ShareGLSL.js";
 
 export default class BasePostEffect extends Mix.mix(
   BaseMaterial
