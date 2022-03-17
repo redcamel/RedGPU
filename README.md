@@ -3,6 +3,7 @@ RedGPU - Javascript WebGPU Library
 
 ## Usage
 - When running localhost, port 3003 should be used.
+- Running in chrome canary.
 #### html
 ```html
 <!DOCTYPE html>
