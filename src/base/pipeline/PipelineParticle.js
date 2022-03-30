@@ -113,6 +113,7 @@ export default class PipelineParticle extends UUID {
           },
           {
             format: 'rgba16float',
+            // format: redGPUContext.context.getPreferredFormat(redGPUContext.adapter),
 
           },
         ],

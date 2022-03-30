@@ -34,6 +34,7 @@ let configure = function (redGPUContext) {
       width: redGPUContext.canvas.clientWidth * window.devicePixelRatio,
       height: redGPUContext.canvas.clientHeight * window.devicePixelRatio,
     },
+    compositingAlphaMode : 'premultiplied'
   };
   console.log(swapChainDescriptor)
   if (redGPUContext.useDebugConsole) console.log('swapChainDescriptor', swapChainDescriptor);
