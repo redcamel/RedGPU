@@ -417,7 +417,7 @@ export default class Particle extends BaseObject3D {
     const passEncoder = commandEncoder.beginComputePass();
     passEncoder.setPipeline(this.computePipeline);
     passEncoder.setBindGroup(ShareGLSL.SET_INDEX_ComputeUniforms, this.particleBindGroup);
-    passEncoder.dispatch(this._particleNum);
+    passEncoder.dispatchWorkgroups(this._particleNum);
     passEncoder.end();
     this.redGPUContext.device.queue.submit([commandEncoder.finish()]);
 
