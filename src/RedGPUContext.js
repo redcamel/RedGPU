@@ -17,6 +17,7 @@ let setGlobalResizeEvent = function () {
       redGPUContext.setSize()
       configure(redGPUContext)
     }
+
   }
   window.addEventListener('resize', resize);
   requestAnimationFrame(e=>{
@@ -25,16 +26,15 @@ let setGlobalResizeEvent = function () {
 };
 
 let configure = function (redGPUContext) {
-
   const swapChainDescriptor = {
     device: redGPUContext.device,
     format: redGPUContext.swapChainFormat,
     usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC ,
-    size: {
-      width: redGPUContext.canvas.clientWidth * window.devicePixelRatio,
-      height: redGPUContext.canvas.clientHeight * window.devicePixelRatio,
-    },
-    compositingAlphaMode : 'premultiplied'
+    // size: {
+    //   width: redGPUContext.canvas.clientWidth * window.devicePixelRatio,
+    //   height: redGPUContext.canvas.clientHeight * window.devicePixelRatio,
+    // },
+    alphaMode  : 'premultiplied'
   };
   console.log(swapChainDescriptor)
   if (redGPUContext.useDebugConsole) console.log('swapChainDescriptor', swapChainDescriptor);
@@ -111,9 +111,8 @@ export default class RedGPUContext {
                 this.canvas = canvas;
                 this.context = canvas.getContext('webgpu');
                 this.device = device;
-                this.swapChainFormat = this.context.getPreferredFormat(this.adapter)
-                // this.swapChainFormat = 'rgba8unorm'
-                this.swapChain = configure(this);
+                this.swapChainFormat = navigator.gpu.getPreferredCanvasFormat(this.adapter)
+
                 this.state = {
                   Geometry: new Map(),
                   Buffer: {

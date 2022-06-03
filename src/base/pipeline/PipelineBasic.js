@@ -24,7 +24,7 @@ export default class PipelineBasic extends UUID {
   }
 
   update(redGPUContext, redView) {
-    console.log('redGPUContext.context.getPreferredFormat(redGPUContext.adapter)',redGPUContext.context.getPreferredFormat(redGPUContext.adapter))
+    console.log('navigator.gpu.getPreferredCanvasFormat(redGPUContext.adapter)',navigator.gpu.getPreferredCanvasFormat(redGPUContext.adapter))
     let targetMesh = this.#targetMesh;
     const device = redGPUContext.device;
     const descriptor = {
@@ -50,7 +50,7 @@ export default class PipelineBasic extends UUID {
         entryPoint: 'main',
         targets: [
           {
-            format: redGPUContext.context.getPreferredFormat(redGPUContext.adapter),
+            format: navigator.gpu.getPreferredCanvasFormat(redGPUContext.adapter),
             // format: 'rgba8unorm',
             blend: {
               color: {
@@ -77,7 +77,7 @@ export default class PipelineBasic extends UUID {
           },
           {
             format: 'rgba16float',
-            // format: redGPUContext.context.getPreferredFormat(redGPUContext.adapter),
+            // format: navigator.gpu.getPreferredCanvasFormat(redGPUContext.adapter),
 
           },
         ],
