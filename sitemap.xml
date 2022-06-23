@@ -1,0 +1,688 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+		
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/basic/helloWorld/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/basic/multiView/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/basic/scene/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/basic/view/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/basic/helloWorld/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/basic/multiView/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/basic/scene/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/basic/view/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/controller/camera2D/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/controller/camera3D/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/controller/obitController/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/controller/camera2D/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/controller/camera3D/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/controller/obitController/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/coordinate/getScreenPoint/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/coordinate/localToWorld/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/coordinate/pivotPoint/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/coordinate/pivotPoint_2d/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/coordinate/screenToWorld/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/coordinate/worldToLocal/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/coordinate/getScreenPoint/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/coordinate/localToWorld/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/coordinate/pivotPoint/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/coordinate/pivotPoint_2d/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/coordinate/screenToWorld/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/coordinate/worldToLocal/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/light/ambientLight/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/light/directionalLight/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/light/pointLight/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/light/ambientLight/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/light/directionalLight/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/light/pointLight/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/loader/gltf/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/loader/gltfComplex/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/loader/gltf/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/loader/gltfComplex/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/material/colorMaterial/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/material/colorPhongMaterial/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/material/colorPhongTextureMaterial/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/material/bitmapMaterial/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/material/standardMaterial/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/material/environmentMaterial/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/material/refractionMaterial/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/material/spriteSheetMaterial/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/material/colorMaterial/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/material/colorPhongMaterial/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/material/colorPhongTextureMaterial/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/material/bitmapMaterial/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/material/standardMaterial/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/material/environmentMaterial/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/material/refractionMaterial/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/material/spriteSheetMaterial/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/mouseEvent/mouseEvent/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/mouseEvent/mouseEventInMultiView/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/mouseEvent/mouseEvent/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/mouseEvent/mouseEventInMultiView/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/object3D/axis/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/object3D/grid/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/object3D/lineBezier/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/object3D/lineCatmullRom/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/object3D/lineLinear/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/object3D/mesh/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/object3D/skyBox/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/object3D/sprite3D/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/object3D/targetTo/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/object3D/text/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/object3D/axis/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/object3D/grid/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/object3D/lineBezier/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/object3D/lineCatmullRom/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/object3D/lineLinear/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/object3D/mesh/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/object3D/skyBox/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/object3D/sprite3D/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/object3D/targetTo/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/object3D/text/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/particle/particle/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/particle/particle/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/postEffect/postEffectindex.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/postEffect/postEffect_gray/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/postEffect/postEffect_hueSaturation/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/postEffect/postEffect_invert/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/postEffect/postEffect_threshold/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/postEffect/postEffect_blur/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/postEffect/postEffect_blurX/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/postEffect/postEffect_blurY/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/postEffect/postEffect_zoomBlur/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/postEffect/postEffect_gaussianBlur/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/postEffect/postEffect_brightnessContrast/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/postEffect/postEffect_bloom/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/postEffect/postEffect_dof/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/postEffect/postEffect_convolution/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/postEffect/postEffect_film/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/postEffect/postEffect_halfTone/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/postEffect/postEffect_pixelize/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/postEffect/postEffect_vignetting/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/postEffect/postEffectindex.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/postEffect/postEffect_gray/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/postEffect/postEffect_hueSaturation/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/postEffect/postEffect_invert/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/postEffect/postEffect_threshold/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/postEffect/postEffect_blur/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/postEffect/postEffect_blurX/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/postEffect/postEffect_blurY/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/postEffect/postEffect_zoomBlur/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/postEffect/postEffect_gaussianBlur/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/postEffect/postEffect_brightnessContrast/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/postEffect/postEffect_bloom/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/postEffect/postEffect_dof/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/postEffect/postEffect_convolution/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/postEffect/postEffect_film/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/postEffect/postEffect_halfTone/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/postEffect/postEffect_pixelize/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/postEffect/postEffect_vignetting/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+</urlset>
