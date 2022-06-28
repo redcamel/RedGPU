@@ -23,15 +23,7 @@ gulp.task('make-sitemap', function (done) {
 	}
 	t0.forEach(v => {
 		if(v['list']) parseList(v)
-		v['list'].forEach(v2 => {
-			listStr += `
-				<url>
-					<loc>https://redcamel.github.io/RedGPU/examples/${v2['href']}</loc>
-					<changefreq>weekly</changefreq>
-					<priority>0.5</priority>
-				</url>
-				`
-		})
+
 	})
 	const result = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
