@@ -26,6 +26,30 @@
 				</url>
 				
 				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/primitive/box/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/primitive/plane/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/primitive/cylinder/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/primitive/sphere/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
 					<loc>https://redcamel.github.io/RedGPU/examples/controller/camera2D/index.html</loc>
 					<changefreq>weekly</changefreq>
 					<priority>0.5</priority>
@@ -153,6 +177,12 @@
 				
 				<url>
 					<loc>https://redcamel.github.io/RedGPU/examples/material/spriteSheetMaterial/index.html</loc>
+					<changefreq>weekly</changefreq>
+					<priority>0.5</priority>
+				</url>
+				
+				<url>
+					<loc>https://redcamel.github.io/RedGPU/examples/texture/bitmapTexture/index.html</loc>
 					<changefreq>weekly</changefreq>
 					<priority>0.5</priority>
 				</url>

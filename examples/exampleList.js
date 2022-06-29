@@ -21,6 +21,27 @@ const exampleList = [
 		]
 	},
 	{
+		key: 'Primitives',
+		list: [
+			{
+				key: 'box',
+				href: 'primitive/box/index.html'
+			},
+			{
+				key: 'plane',
+				href: 'primitive/plane/index.html'
+			},
+			{
+				key: 'cylinder',
+				href: 'primitive/cylinder/index.html'
+			},
+			{
+				key: 'sphere',
+				href: 'primitive/sphere/index.html'
+			}
+		]
+	},
+	{
 		key: 'controller',
 		list: [
 			{
@@ -130,6 +151,15 @@ const exampleList = [
 			{
 				key: 'spriteSheetMaterial',
 				href: 'material/spriteSheetMaterial/index.html'
+			}
+		]
+	},
+	{
+		key: 'texture',
+		list: [
+			{
+				key: 'bitmapTexture',
+				href: 'texture/bitmapTexture/index.html'
 			}
 		]
 	},
