@@ -1,5 +1,9 @@
 # RedGPU
 RedGPU - Javascript WebGPU Library
+<p>
+  <a href="https://twitter.com/redcamel15"><img src="https://img.shields.io/twitter/follow/redcamel15.svg?style=social" alt="Twitter Follow" /></a>
+  <a href="LICENSE.md"><img src="https://img.shields.io/github/license/sourcerer-io/hall-of-fame.svg?colorB=ff0000"></a>
+</p>
 
 ## Usage
 - When running localhost, port 3003 should be used.
