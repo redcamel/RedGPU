@@ -62,15 +62,15 @@ const exampleList = [
 		key: 'coordinate',
 		list: [
 			{
-				key: 'camera2D',
+				key: 'getScreenPoint',
 				href: 'coordinate/getScreenPoint/index.html'
 			},
 			{
-				key: 'camera3D',
+				key: 'localToWorld',
 				href: 'coordinate/localToWorld/index.html'
 			},
 			{
-				key: 'obitController',
+				key: 'pivotPoint',
 				href: 'coordinate/pivotPoint/index.html'
 			},
 			{
