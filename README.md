@@ -5,6 +5,13 @@ RedGPU - Javascript WebGPU Library
   <a href="LICENSE.md"><img src="https://img.shields.io/github/license/sourcerer-io/hall-of-fame.svg?colorB=ff0000"></a>
 </p>
 
+
+## V2.0.0 Rnd
+```
+V2.0.0 research is in progress. Other repositories are being worked on and will be released as meaningful work progresses.
+The first target is set to be released on October 1, 2022.
+```
+
 ## Usage
 - When running localhost, port 3003 should be used.
 - Running in chrome canary.
