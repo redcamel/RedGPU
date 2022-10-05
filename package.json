@@ -10,8 +10,10 @@
   "author": "redcamel",
   "license": "MIT",
   "dependencies": {
-    "rollup": "^1.31.1"
+    "rollup": "^1.31.1",
+    "@webgpu/types": "~0.1.21"
   },
+
   "devDependencies": {
     "@babel/core": "^7.8.4",
     "@babel/plugin-proposal-class-properties": "^7.8.3",

@@ -180,9 +180,7 @@ export default class PBRMaterial_System extends Mix.mix(
 		if(fragmentUniforms.__diffuseTextureRenderYn == TRUTHY) diffuseColor *= texture(sampler2D(uDiffuseTexture, uDiffuseSampler), diffuseTexCoord) ;
 			
 		float tAlpha = diffuseColor.a;
-		if(fragmentUniforms.useCutOff == TRUTHY) {
-			if(tAlpha <= fragmentUniforms.cutOff) discard;
-		}
+	
 		
 	    vec3 N = normalize(vNormal);
 	    bool backFaceYn = false;
@@ -269,6 +267,9 @@ export default class PBRMaterial_System extends Mix.mix(
 		// 알파블렌드 - BLEND
 		if( fragmentUniforms.alphaBlend == 2.0 ) {		
 			finalColor.a = tAlpha;
+		}
+    if(fragmentUniforms.useCutOff == TRUTHY) {
+			if(tAlpha <= fragmentUniforms.cutOff) discard;
 		}
 		outColor = finalColor;
 		out_MouseColorID_Depth = vec4(vMouseColorID, gl_FragCoord.z/gl_FragCoord.w, 0.0, 0.0);
