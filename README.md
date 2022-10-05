@@ -8,8 +8,8 @@ RedGPU - Javascript WebGPU Library
 
 ## V2.0.0 Rnd
 ```
-V2.0.0 research is in progress. Other repositories are being worked on and will be released as meaningful work progresses.
-The first target is set to be released on October 1, 2022.
+V2.0.0 research is ongoing. Other repositories are in the works and will be released as meaningful work progresses.
+The first target will be released on December 1, 2022.
 ```
 
 ## Usage
