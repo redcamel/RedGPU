@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="origin-trial"
+          content="Ao8jST271x470LFlNSGr39ki/5eTV+eIte3YDSgSdsNvVrw25zKJypNoSRxzSdFnyyq46LaQXE5knZbCnQ7wNgEAAABleyJvcmlnaW4iOiJodHRwczovL3JlZGNhbWVsLmdpdGh1Yi5pbzo0NDMiLCJmZWF0dXJlIjoiV2ViR1BVIiwiZXhwaXJ5IjoxNjYzNzE4Mzk5LCJpc1N1YmRvbWFpbiI6dHJ1ZX0=">
+    <meta http-equiv="origin-trial"
+          content="AhikjZCn3LjpxZgPEUAaj0Hi95/9QX6bB4jg9xCGP2u7s54+1K/4IdlFrV3fTh13gEAnrj+xpxZj1iEVlY2yaAQAAABJeyJvcmlnaW4iOiJodHRwOi8vbG9jYWxob3N0OjMwMDMiLCJmZWF0dXJlIjoiV2ViR1BVIiwiZXhwaXJ5IjoxNjYzNzE4Mzk5fQ==">
+
+    <title>Title</title>
+    <link rel="stylesheet" href="sample.css"/>
+
+    <style>
+        #debug {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            font-size: 10px;
+        }
+    </style>
+</head>
+<body>
+<div id="debug"/>
+</body>
+<script type="module">
+
+
+	const BASE_OPTION = {
+		powerPreference: "high-performance",
+		forceFallbackAdapter: false
+	}
+	const BASE_REQUIRED_FEATURES = {}
+
+	/**
+	 * RedGPU initialization function.
+	 * @param {HTMLCanvasElement} canvas
+	 * @param label
+	 * @param {GPUCanvasAlphaMode=} alphaMode  알파모드 설정
+	 * @param {GPURequestAdapterOptions=} requestAdapterOptions
+	 * @param {Function=} HD_destroy GPUDevice가 lost 될 경우 발동할 핸들러
+	 *
+	 * @example
+	 * RedGPU.initialize(HTMLCanvasElement instance).then(
+	 *  (redGPUContext)=>{
+	 *     console.log(redGPUContext) // success!
+	 *  }
+	 * )
+	 */
+	const init = (canvas, label, alphaMode = 'premultiplied', requestAdapterOptions = BASE_OPTION, HD_destroy) => {
+		alphaMode = alphaMode || 'premultiplied'
+		return new Promise(async (resolve, reject) => {
+			let errorInfo;
+			const checkCanvas = canvas => canvas instanceof HTMLCanvasElement
+			const checkAdapter = gpu => {
+				gpu.requestAdapter(requestAdapterOptions)
+					.then(checkDevice)
+					.catch(e => {
+						errorInfo = {successYn: false, reason: e}
+						reject(errorInfo)
+					})
+			}
+			const checkDevice = adapter => {
+				const gpuDeviceDescriptor = {
+					...BASE_REQUIRED_FEATURES,
+					label: label || `gpuDevice : Label input is recommended.`
+				};
+				adapter.requestDevice(gpuDeviceDescriptor)
+					.then(device => {
+						console.log('device', device)
+						checkContext(canvas, adapter, device)
+						device.addEventListener('uncapturederror', (event) => {
+							// TODO uncapturederror 보강처리
+							// Re-surface the error, because adding an event listener may silence console logs.
+							console.error('TODO A WebGPU error was not captured:', event.error);
+
+						});
+						device.lost.then(v => {
+							console.log('GPUDevice Lost', v)
+							device.destroy()
+							HD_destroy?.(v)
+						})
+					})
+					.catch(e => {
+						errorInfo = {successYn: false, reason: e}
+						reject(errorInfo)
+						throw errorInfo
+					})
+			}
+			const checkContext = (canvas, adapter, device) => {
+				const context = canvas.getContext('webgpu')
+
+				if (context) resolve({canvas, adapter, device, context, alphaMode})
+				else {
+					errorInfo = {successYn: false, reason: 'canvas.getContext(\'webgpu\') is null'}
+					reject(errorInfo)
+				}
+			}
+			const {gpu} = navigator
+			if (checkCanvas(canvas)) {
+				if (gpu) checkAdapter(gpu)
+				else {
+					errorInfo = {
+						successYn: false,
+						reason: 'Cannot find navigator.gpu.'
+					}
+					reject(errorInfo)
+				}
+			} else {
+				errorInfo = {
+					successYn: false,
+					reason: 'canvas is not HTMLCanvasElement '
+				}
+				reject(errorInfo)
+			}
+		})
+	}
+
+	let i = 0
+	const MAX_TEST = 100
+	const call = () => {
+		const canvas = document.createElement('canvas')
+		canvas.style.width = 600 + 'px'
+		canvas.width = 600
+		canvas.style.height = 600 + 'px'
+		canvas.height = 600
+		canvas.style.background = 'red'
+		document.body.appendChild(canvas)
+
+		init(canvas).then(initInfo => {
+			const {canvas, adapter, device, context, alphaMode} = initInfo
+			// const configurationDescription = {
+			// 	device: device,
+			// 	format: navigator.gpu.getPreferredCanvasFormat(),
+			// };
+			// console.log('configurationDescription', configurationDescription);
+			// context.configure(configurationDescription);
+			// context.unconfigure()
+			device.destroy()
+			document.body.removeChild(canvas)
+			console.log(initInfo)
+			setTimeout(() => {
+				i++
+				console.log(i)
+				if (i < MAX_TEST) call()
+			}, 100)
+		})
+	}
+	call()
+
+</script>
+
+
+</html>
