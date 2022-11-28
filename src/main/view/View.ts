@@ -149,6 +149,12 @@ class View extends ViewBase {
         return this.#systemAmbientDirectionalLightBufferInfo;
     }
 
+    #finalRenderUniformBuffer: GPUBuffer
+
+    get finalRenderUniformBuffer(): GPUBuffer {
+        return this.#finalRenderUniformBuffer;
+    }
+
     /**
      * View
      * @param redGPUContext
@@ -240,6 +246,10 @@ class View extends ViewBase {
 
 
     #makeBuffer() {
+        this.#finalRenderUniformBuffer = this.redGPUContext.gpuDevice.createBuffer({
+            size: 4 * 4 * Float32Array.BYTES_PER_ELEMENT,
+            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+        });
         this.#systemBufferInfo = new UniformBufferFloat32(this.redGPUContext, new UniformBufferDescriptor(
             [
                 {size: TypeSize.mat4, valueName: 'projectionMatrix'},

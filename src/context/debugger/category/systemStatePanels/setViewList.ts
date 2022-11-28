@@ -13,8 +13,8 @@ const setViewList = (gui,redGPUContext:RedGPUContext,targetDebugger:RedGPUContex
 		viewItemList.length = 0
 		redGPUContext.viewList.forEach(view => {
 			const folder = viewListFolder.addFolder(view.label)
-			gui_setItemDisableInput(folder.add(view,'label'))
-			gui_setItemDisableInput(folder.add(view.scene,'label').name('scene label'))
+			gui_setItemDisableInput(folder.add(view,'label').name('view'),'auto')
+			gui_setItemDisableInput(folder.add(view.scene,'label').name('scene'),'auto')
 			gui_setItemDisableInput(folder.add(view.camera.constructor,'name').name('camera type'),'auto')
 			folder.open()
 			viewItemList.push(folder)

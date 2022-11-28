@@ -1,5 +1,6 @@
 import * as RedGPU from '../../../dist/RedGPU.mjs'
 import setExampleHelper from "../../exampleHelper/setExampleHelper.js";
+import testUI from "../sample/testUI.js";
 
 const run = () => {
 	const canvas = document.createElement('canvas')
@@ -9,7 +10,7 @@ const run = () => {
 	document.body.appendChild(canvas)
 	RedGPU.init(canvas)
 		.then(redGPUContext => {
-				redGPUContext.debugger.useDebugger = true
+
 				const renderer = new RedGPU.Renderer(redGPUContext)
 				//
 				const scene = new RedGPU.Scene()
@@ -19,9 +20,11 @@ const run = () => {
 				scene.grid = new RedGPU.Grid(redGPUContext)
 				scene.axis = new RedGPU.Axis(redGPUContext)
 				//
+				// view.setLocation(100,100)
 				const scene2 = new RedGPU.Scene()
 				const view2 = new RedGPU.View(redGPUContext, scene2)
-				view2.setSize('50%', '50%')
+				view2.setSize(200, 200)
+				view2.setLocation(-100, 150)
 				redGPUContext.addView(view2)
 				scene2.backgroundAlpha = 0.5
 				scene2.backgroundColor = 0xff0000
@@ -39,7 +42,10 @@ const run = () => {
 				renderer.afterRender = (nowTime, targetView) => {
 				}
 				renderer.startRender()
+				//
 				setExampleHelper(redGPUContext, run.toString());
+				redGPUContext.debugger.useDebugger = true
+				redGPUContext.debugger.userDebugSet = testUI
 			}
 		)
 		.catch(v => {

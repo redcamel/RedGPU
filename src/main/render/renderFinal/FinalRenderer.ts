@@ -7,12 +7,12 @@ import {View} from "../../view";
 
 class FinalRenderer extends RedGPUContextBase {
     vertexBuffer: GPUBuffer
-    uniformBuffer: GPUBuffer
+
     sampler: GPUSampler
     uniformsBindGroupLayout: GPUBindGroupLayout
     uniformBindGroup: GPUBindGroup
     pipeline: GPURenderPipeline
-    modelMatrix
+    #matrix
     pixelViewRect
 
     constructor(redGPUContext: RedGPUContext) {
@@ -21,7 +21,7 @@ class FinalRenderer extends RedGPUContextBase {
         const vShaderModule = makeShaderModule(gpuDevice, vertexSource)
         const fShaderModule = makeShaderModule(gpuDevice, fragmentSource)
         console.log(vShaderModule, fShaderModule)
-        this.modelMatrix = mat4.create()
+        this.#matrix = mat4.create()
         ////////////////////////////////////////////////////////////////////////
         // make vertexBuffer
         this.vertexBuffer = makeVertexBuffer(
@@ -29,12 +29,12 @@ class FinalRenderer extends RedGPUContextBase {
             new Float32Array(
                 [
                     //x,y,z,w, u,v
-                    -1.0, -1.0, 0.0, 1.0,  0.0, 1.0,
-                    1.0, -1.0, 0.0, 1.0,   1.0, 1.0,
-                    -1.0, 1.0, 0.0, 1.0,   0.0, 0.0,
-                    -1.0, 1.0, 0.0, 1.0,   0.0, 0.0,
-                    1.0, -1.0, 0.0, 1.0,   1.0, 1.0,
-                    1.0, 1.0, 0.0, 1.0,    1.0, 0.0
+                    -1.0, -1.0, 0.0, 1.0, 0.0, 1.0,
+                    1.0, -1.0, 0.0, 1.0, 1.0, 1.0,
+                    -1.0, 1.0, 0.0, 1.0, 0.0, 0.0,
+                    -1.0, 1.0, 0.0, 1.0, 0.0, 0.0,
+                    1.0, -1.0, 0.0, 1.0, 1.0, 1.0,
+                    1.0, 1.0, 0.0, 1.0, 1.0, 0.0
                 ]
             )
         );
@@ -62,11 +62,7 @@ class FinalRenderer extends RedGPUContextBase {
                 }
             ]
         });
-        const matrix44Size = 4 * 4 * Float32Array.BYTES_PER_ELEMENT; // 4x4 matrix
-        this.uniformBuffer = gpuDevice.createBuffer({
-            size: matrix44Size,
-            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-        });
+
         this.sampler = gpuDevice.createSampler({
             magFilter: "linear",
             minFilter: "linear",
@@ -162,23 +158,23 @@ class FinalRenderer extends RedGPUContextBase {
 
         };
 
+
         const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
         passEncoder.setPipeline(this.pipeline);
 
         //
-
+        passEncoder.setViewport(0, 0, pixelSize.width, pixelSize.height, 0, 1);
+        passEncoder.setScissorRect(0, 0, pixelSize.width, pixelSize.height);
         viewList.forEach((view: View) => {
-            const viewW = view.pixelViewRect[2]
-            const viewH = view.pixelViewRect[3]
-            passEncoder.setViewport(0, 0, viewW, viewH, 0, 1);
-            passEncoder.setScissorRect(0, 0, viewW, viewH);
+            const {pixelViewRect} = view
+
             const uniformBindGroupDescriptor = {
                 layout: this.uniformsBindGroupLayout,
                 entries: [
                     {
                         binding: 0,
                         resource: {
-                            buffer: this.uniformBuffer,
+                            buffer: view.finalRenderUniformBuffer,
                             offset: 0,
                             size: 4 * 4 * Float32Array.BYTES_PER_ELEMENT
                         }
@@ -194,20 +190,60 @@ class FinalRenderer extends RedGPUContextBase {
                 ]
             };
             this.uniformBindGroup = gpuDevice.createBindGroup(uniformBindGroupDescriptor);
-            mat4.identity(this.modelMatrix)
-
-            gpuDevice.queue.writeBuffer(this.uniformBuffer, 0, this.modelMatrix);
             passEncoder.setVertexBuffer(0, this.vertexBuffer);
             passEncoder.setBindGroup(0, this.uniformBindGroup);
+
+            mat4.identity(this.#matrix)
+            mat4.ortho(
+                this.#matrix,
+                0., // left
+                1., // right
+                0., // bottom
+                1., // top,
+                -1000,
+                1000
+            );
+            mat4.scale(
+                this.#matrix,
+                this.#matrix,
+                [
+                    1 / pixelSize.width,
+                    1 / pixelSize.height,
+                    1
+                ]
+            );
+
+            mat4.translate(
+                this.#matrix,
+                this.#matrix,
+                [
+                    pixelViewRect[2] / 2 + pixelViewRect[0],
+                    pixelSize.height - pixelViewRect[3] / 2 - pixelViewRect[1],
+                    0
+                ]
+            );
+            mat4.scale(
+                this.#matrix,
+                this.#matrix,
+                [
+                    pixelViewRect[2] / 2,
+                    pixelViewRect[3] / 2,
+                    1
+                ]
+            );
+            gpuDevice.queue.writeBuffer(view.finalRenderUniformBuffer, 0, this.#matrix);
+
             ///////////////////////////////////////////////////////////////////
             // setVertexBuffer
 
             passEncoder.draw(6, 1, 0, 0);
         })
-
+        passEncoder.setViewport(0, 0, pixelSize.width, pixelSize.height, 0, 1);
+        passEncoder.setScissorRect(0, 0, pixelSize.width, pixelSize.height);
         //
         passEncoder.end();
         gpuDevice.queue.submit([commandEncoder.finish()]);
+
 
     }
 

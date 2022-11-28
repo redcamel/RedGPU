@@ -128,6 +128,10 @@ class ViewBase extends RedGPUContextBase {
         this.width = w
         this.height = h
     }
+    setLocation(x = this.#x, y = this.#y) {
+        this.x = x
+        this.y = y
+    }
 
     #projectionMatrix = mat4.create()
     get projectionMatrix(): any {

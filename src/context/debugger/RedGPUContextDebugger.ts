@@ -4,6 +4,9 @@ import debuggerRenderViewList from "./draw/debuggerRenderViewList";
 import debuggerRenderResourceManager from "./draw/debuggerRenderResourceManager";
 import setStatePanels from "./category/systemStatePanels/setStatePanels";
 import setActiveDebugger from "./category/systemStatePanels/setActiveDebugger";
+import gui_setItemBooleanNameSize from "./funcs/gui_setItemBooleanNameSize";
+import gui_setItemDisableInput from "./funcs/gui_setItemDisableInput";
+import gui_setItem from "./funcs/gui_setItem";
 
 class RedGPUContextDebugger extends RedGPUContextBase {
     #gui;
@@ -80,27 +83,42 @@ class RedGPUContextDebugger extends RedGPUContextBase {
         return this.#useDebugger;
     }
 
-    #temp_HD_ViewList
-    __userDebugSet
+    #__temp_HD_ViewList
+    #userDebugSet
+
+    get userDebugSet() {
+        return this.#userDebugSet;
+    }
+
+    set userDebugSet(value) {
+        this.#userDebugSet = value;
+        if (this.#gui) {
+            this.temp_HD_ViewList = null
+            this.#gui.destroy()
+            this.#gui = null
+        }
+        if (value && this.#useDebugger) this.useDebugger = true
+    }
 
     set temp_HD_ViewList(value) {
-        if (this.#temp_HD_ViewList) window.removeEventListener('changeViewList', this.#temp_HD_ViewList)
-        this.#temp_HD_ViewList = value;
+        if (this.#__temp_HD_ViewList) window.removeEventListener('changeViewList', this.#__temp_HD_ViewList)
+        this.#__temp_HD_ViewList = value;
     }
 
     set useDebugger(value: boolean) {
         const redGPUContext = this.redGPUContext
         this.#useDebugger = value;
+
         if (value) {
             if (!this.#gui) {
                 console.log(redGPUContext)
                 const gui = this.#gui = new dat.GUI()
-                const hasUserDebug = this.__userDebugSet
-                setStatePanels(gui, redGPUContext, this, !hasUserDebug)
+                this.#userDebugSet?.(gui, redGPUContext, this)
+                setStatePanels(gui, redGPUContext, this, !this.userDebugSet)
                 setActiveDebugger(gui, this)
-                hasUserDebug?.(gui, redGPUContext, this)
+                this.#gui.show()
             }
-            this.#gui.show()
+
         } else {
             this.temp_HD_ViewList = null
             this.#gui.hide()
@@ -148,6 +166,11 @@ class RedGPUContextDebugger extends RedGPUContextBase {
 
 
     }
+
+    __gui_setItemDisableInput = gui_setItemDisableInput
+    __gui_setItemBooleanNameSize = gui_setItemBooleanNameSize
+    __gui_setItem = gui_setItem
+
 
 }
 
