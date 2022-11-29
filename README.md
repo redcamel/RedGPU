@@ -10,9 +10,8 @@ RedGPU - Javascript WebGPU Library
 ```
 V2.0.0 research is ongoing. Other repositories are in the works and will be released as meaningful work progresses.
 The first target will be released on December 1, 2022.
-
-You can check the source at <a href="https://github.com/redcamel/RedGPU/tree/preview2.0">RedGPU Preview branch.</a>
 ```
+You can check the source at [RedGPU2.0 Preview branch.](https://github.com/redcamel/RedGPU/tree/preview2.0)</a>
 
 ## Usage
 - When running localhost, port 3003 should be used.
