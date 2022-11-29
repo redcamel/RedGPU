@@ -18,7 +18,6 @@ import * as glMatrix from "./common.js";
  * </pre>
  * The last column is ignored so the array is shorter and operations are faster.
  */
-
 /**
  * Creates a new identity mat2d
  *
@@ -27,14 +26,12 @@ import * as glMatrix from "./common.js";
 
 export function create() {
 	var out = new glMatrix.ARRAY_TYPE(6);
-
 	if (glMatrix.ARRAY_TYPE != Float32Array) {
 		out[1] = 0;
 		out[2] = 0;
 		out[4] = 0;
 		out[5] = 0;
 	}
-
 	out[0] = 1;
 	out[3] = 1;
 	return out;
@@ -155,11 +152,9 @@ export function invert(out, a) {
 	var atx = a[4],
 		aty = a[5];
 	var det = aa * ad - ab * ac;
-
 	if (!det) {
 		return null;
 	}
-
 	det = 1.0 / det;
 	out[0] = ad * det;
 	out[1] = -ab * det;

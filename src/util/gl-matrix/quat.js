@@ -7,7 +7,6 @@ import * as vec4 from "./vec4.js";
  * Quaternion in the format XYZW
  * @module quat
  */
-
 /**
  * Creates a new identity quat
  *
@@ -16,13 +15,11 @@ import * as vec4 from "./vec4.js";
 
 export function create() {
 	var out = new glMatrix.ARRAY_TYPE(4);
-
 	if (glMatrix.ARRAY_TYPE != Float32Array) {
 		out[0] = 0;
 		out[1] = 0;
 		out[2] = 0;
 	}
-
 	out[3] = 1;
 	return out;
 }
@@ -79,7 +76,6 @@ export function setAxisAngle(out, axis, rad) {
 export function getAxisAngle(out_axis, q) {
 	var rad = Math.acos(q[3]) * 2.0;
 	var s = Math.sin(rad / 2.0);
-
 	if (s > glMatrix.EPSILON) {
 		out_axis[0] = q[0] / s;
 		out_axis[1] = q[1] / s;
@@ -90,7 +86,6 @@ export function getAxisAngle(out_axis, q) {
 		out_axis[1] = 0;
 		out_axis[2] = 0;
 	}
-
 	return rad;
 }
 
@@ -308,9 +303,7 @@ export function slerp(out, a, b, t) {
 		bz = b[2],
 		bw = b[3];
 	var omega, cosom, sinom, scale0, scale1; // calc cosine
-
 	cosom = ax * bx + ay * by + az * bz + aw * bw; // adjust signs (if necessary)
-
 	if (cosom < 0.0) {
 		cosom = -cosom;
 		bx = -bx;
@@ -318,7 +311,6 @@ export function slerp(out, a, b, t) {
 		bz = -bz;
 		bw = -bw;
 	} // calculate coefficients
-
 	if (1.0 - cosom > glMatrix.EPSILON) {
 		// standard case (slerp)
 		omega = Math.acos(cosom);
@@ -331,7 +323,6 @@ export function slerp(out, a, b, t) {
 		scale0 = 1.0 - t;
 		scale1 = t;
 	} // calculate final values
-
 	out[0] = scale0 * ax + scale1 * bx;
 	out[1] = scale0 * ay + scale1 * by;
 	out[2] = scale0 * az + scale1 * bz;
@@ -376,7 +367,6 @@ export function invert(out, a) {
 		a3 = a[3];
 	var dot = a0 * a0 + a1 * a1 + a2 * a2 + a3 * a3;
 	var invDot = dot ? 1.0 / dot : 0; // TODO: Would be faster to return [0,0,0,0] immediately if dot == 0
-
 	out[0] = -a0 * invDot;
 	out[1] = -a1 * invDot;
 	out[2] = -a2 * invDot;
@@ -418,14 +408,11 @@ export function fromMat3(out, m) {
 	// article "Quaternion Calculus and Fast Animation".
 	var fTrace = m[0] + m[4] + m[8];
 	var fRoot;
-
 	if (fTrace > 0.0) {
 		// |w| > 1/2, may as well choose w > 1/2
 		fRoot = Math.sqrt(fTrace + 1.0); // 2w
-
 		out[3] = 0.5 * fRoot;
 		fRoot = 0.5 / fRoot; // 1/(4w)
-
 		out[0] = (m[5] - m[7]) * fRoot;
 		out[1] = (m[6] - m[2]) * fRoot;
 		out[2] = (m[1] - m[3]) * fRoot;
@@ -443,7 +430,6 @@ export function fromMat3(out, m) {
 		out[j] = (m[j * 3 + i] + m[i * 3 + j]) * fRoot;
 		out[k] = (m[k * 3 + i] + m[i * 3 + k]) * fRoot;
 	}
-
 	return out;
 }
 
@@ -471,7 +457,6 @@ export function fromEuler(out, x, y, z) {
 	var cy = Math.cos(y);
 	var sz = Math.sin(z);
 	var cz = Math.cos(z);
-
 	switch (order) {
 		case "xyz":
 			out[0] = sx * cy * cz + cx * sy * sz;
@@ -479,46 +464,39 @@ export function fromEuler(out, x, y, z) {
 			out[2] = cx * cy * sz + sx * sy * cz;
 			out[3] = cx * cy * cz - sx * sy * sz;
 			break;
-
 		case "xzy":
 			out[0] = sx * cy * cz - cx * sy * sz;
 			out[1] = cx * sy * cz - sx * cy * sz;
 			out[2] = cx * cy * sz + sx * sy * cz;
 			out[3] = cx * cy * cz + sx * sy * sz;
 			break;
-
 		case "yxz":
 			out[0] = sx * cy * cz + cx * sy * sz;
 			out[1] = cx * sy * cz - sx * cy * sz;
 			out[2] = cx * cy * sz - sx * sy * cz;
 			out[3] = cx * cy * cz + sx * sy * sz;
 			break;
-
 		case "yzx":
 			out[0] = sx * cy * cz + cx * sy * sz;
 			out[1] = cx * sy * cz + sx * cy * sz;
 			out[2] = cx * cy * sz - sx * sy * cz;
 			out[3] = cx * cy * cz - sx * sy * sz;
 			break;
-
 		case "zxy":
 			out[0] = sx * cy * cz - cx * sy * sz;
 			out[1] = cx * sy * cz + sx * cy * sz;
 			out[2] = cx * cy * sz + sx * sy * cz;
 			out[3] = cx * cy * cz - sx * sy * sz;
 			break;
-
 		case "zyx":
 			out[0] = sx * cy * cz - cx * sy * sz;
 			out[1] = cx * sy * cz + sx * cy * sz;
 			out[2] = cx * cy * sz - sx * sy * cz;
 			out[3] = cx * cy * cz + sx * sy * sz;
 			break;
-
 		default:
 			throw new Error('Unknown angle order ' + order);
 	}
-
 	return out;
 }
 
@@ -708,7 +686,6 @@ export var rotationTo = function () {
 	var yUnitVec3 = vec3.fromValues(0, 1, 0);
 	return function (out, a, b) {
 		var dot = vec3.dot(a, b);
-
 		if (dot < -0.999999) {
 			vec3.cross(tmpvec3, xUnitVec3, a);
 			if (vec3.len(tmpvec3) < 0.000001) vec3.cross(tmpvec3, yUnitVec3, a);

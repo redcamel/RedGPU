@@ -1,7 +1,6 @@
 import RedGPUContextBase from "../../context/RedGPUContextBase";
 import RedGPUContext from "../../context/RedGPUContext";
 import {View} from "../view";
-import {Scene} from "../scene";
 import FinalRenderer from "./renderFinal/FinalRenderer";
 
 class Renderer extends RedGPUContextBase {
@@ -12,7 +11,7 @@ class Renderer extends RedGPUContextBase {
     #requestID: number
     #prevUseMultiSample: boolean
 
-    #finalRenderer:FinalRenderer
+    #finalRenderer: FinalRenderer
 
     #mainRender: Function
     get mainRender(): Function {
@@ -143,7 +142,7 @@ class Renderer extends RedGPUContextBase {
             console.log('뷰렌더텍스쳐갱신')
         }
 
-        const {backgroundColorRGB,backgroundAlpha} = scene
+        const {backgroundColorRGB, backgroundAlpha} = scene
         const renderPassDescriptor: GPURenderPassDescriptor = {
             /**
              * @typedef {GPURenderPassColorAttachment}
@@ -153,7 +152,12 @@ class Renderer extends RedGPUContextBase {
                     view: redGPUContext.useMultiSample ? view.resultTextureView : view.resolveTextureView,
                     resolveTarget: redGPUContext.useMultiSample ? view.resolveTextureView : undefined,
                     // TODO - Scene의 색상을 받도록 수정
-                    clearValue: {r: backgroundColorRGB[0], g: backgroundColorRGB[1], b: backgroundColorRGB[2], a: backgroundAlpha},
+                    clearValue: {
+                        r: backgroundColorRGB[0],
+                        g: backgroundColorRGB[1],
+                        b: backgroundColorRGB[2],
+                        a: backgroundAlpha
+                    },
                     loadOp: 'clear',
                     storeOp: 'store',
                 },

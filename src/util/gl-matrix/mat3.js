@@ -4,7 +4,6 @@ import * as glMatrix from "./common.js";
  * 3x3 Matrix
  * @module mat3
  */
-
 /**
  * Creates a new identity mat3
  *
@@ -13,7 +12,6 @@ import * as glMatrix from "./common.js";
 
 export function create() {
 	var out = new glMatrix.ARRAY_TYPE(9);
-
 	if (glMatrix.ARRAY_TYPE != Float32Array) {
 		out[1] = 0;
 		out[2] = 0;
@@ -22,7 +20,6 @@ export function create() {
 		out[6] = 0;
 		out[7] = 0;
 	}
-
 	out[0] = 1;
 	out[4] = 1;
 	out[8] = 1;
@@ -201,7 +198,6 @@ export function transpose(out, a) {
 		out[7] = a[5];
 		out[8] = a[8];
 	}
-
 	return out;
 }
 
@@ -226,13 +222,10 @@ export function invert(out, a) {
 	var b01 = a22 * a11 - a12 * a21;
 	var b11 = -a22 * a10 + a12 * a20;
 	var b21 = a21 * a10 - a11 * a20; // Calculate the determinant
-
 	var det = a00 * b01 + a01 * b11 + a02 * b21;
-
 	if (!det) {
 		return null;
 	}
-
 	det = 1.0 / det;
 	out[0] = b01 * det;
 	out[1] = (-a22 * a01 + a02 * a21) * det;
@@ -600,13 +593,10 @@ export function normalFromMat4(out, a) {
 	var b09 = a21 * a32 - a22 * a31;
 	var b10 = a21 * a33 - a23 * a31;
 	var b11 = a22 * a33 - a23 * a32; // Calculate the determinant
-
 	var det = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
-
 	if (!det) {
 		return null;
 	}
-
 	det = 1.0 / det;
 	out[0] = (a11 * b11 - a12 * b10 + a13 * b09) * det;
 	out[1] = (a12 * b08 - a10 * b11 - a13 * b07) * det;

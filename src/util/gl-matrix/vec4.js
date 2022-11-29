@@ -4,7 +4,6 @@ import * as glMatrix from "./common.js";
  * 4 Dimensional Vector
  * @module vec4
  */
-
 /**
  * Creates a new, empty vec4
  *
@@ -13,14 +12,12 @@ import * as glMatrix from "./common.js";
 
 export function create() {
 	var out = new glMatrix.ARRAY_TYPE(4);
-
 	if (glMatrix.ARRAY_TYPE != Float32Array) {
 		out[0] = 0;
 		out[1] = 0;
 		out[2] = 0;
 		out[3] = 0;
 	}
-
 	return out;
 }
 
@@ -387,11 +384,9 @@ export function normalize(out, a) {
 	var z = a[2];
 	var w = a[3];
 	var len = x * x + y * y + z * z + w * w;
-
 	if (len > 0) {
 		len = 1 / Math.sqrt(len);
 	}
-
 	out[0] = x * len;
 	out[1] = y * len;
 	out[2] = z * len;
@@ -473,22 +468,18 @@ export function random(out, scale) {
 	scale = scale === undefined ? 1.0 : scale; // Marsaglia, George. Choosing a Point from the Surface of a
 	// Sphere. Ann. Math. Statist. 43 (1972), no. 2, 645--646.
 	// http://projecteuclid.org/euclid.aoms/1177692644;
-
 	var v1, v2, v3, v4;
 	var s1, s2;
-
 	do {
 		v1 = glMatrix.RANDOM() * 2 - 1;
 		v2 = glMatrix.RANDOM() * 2 - 1;
 		s1 = v1 * v1 + v2 * v2;
 	} while (s1 >= 1);
-
 	do {
 		v3 = glMatrix.RANDOM() * 2 - 1;
 		v4 = glMatrix.RANDOM() * 2 - 1;
 		s2 = v3 * v3 + v4 * v4;
 	} while (s2 >= 1);
-
 	var d = Math.sqrt((1 - s1) / s2);
 	out[0] = scale * v1;
 	out[1] = scale * v2;
@@ -535,12 +526,10 @@ export function transformQuat(out, a, q) {
 		qy = q[1],
 		qz = q[2],
 		qw = q[3]; // calculate quat * vec
-
 	var ix = qw * x + qy * z - qz * y;
 	var iy = qw * y + qz * x - qx * z;
 	var iz = qw * z + qx * y - qy * x;
 	var iw = -qx * x - qy * y - qz * z; // calculate result * inverse quat
-
 	out[0] = ix * qw + iw * -qx + iy * -qz - iz * -qy;
 	out[1] = iy * qw + iw * -qy + iz * -qx - ix * -qz;
 	out[2] = iz * qw + iw * -qz + ix * -qy - iy * -qx;
@@ -665,21 +654,17 @@ export var forEach = function () {
 	var vec = create();
 	return function (a, stride, offset, count, fn, arg) {
 		var i, l;
-
 		if (!stride) {
 			stride = 4;
 		}
-
 		if (!offset) {
 			offset = 0;
 		}
-
 		if (count) {
 			l = Math.min(count * stride + offset, a.length);
 		} else {
 			l = a.length;
 		}
-
 		for (i = offset; i < l; i += stride) {
 			vec[0] = a[i];
 			vec[1] = a[i + 1];
@@ -691,7 +676,6 @@ export var forEach = function () {
 			a[i + 2] = vec[2];
 			a[i + 3] = vec[3];
 		}
-
 		return a;
 	};
 }();

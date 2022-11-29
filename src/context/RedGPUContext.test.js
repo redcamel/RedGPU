@@ -10,7 +10,6 @@ RedTest.testGroup(
 				const canvas = document.createElement('canvas');
 				RedGPU.init(canvas).then(v => {
 					console.log(v.width, v.height)
-
 					RedTest.run(true)
 					v.destroy()
 				}).catch(v => {
@@ -20,7 +19,6 @@ RedTest.testGroup(
 			},
 			true
 		);
-
 	}
 );
 RedTest.testGroup(
@@ -67,7 +65,6 @@ RedTest.testGroup(
 						v.setSize(width, height)
 						console.log('입력값', width, height, '세팅값', v.width, v.height)
 						console.log('pixelSize', v.pixelSize)
-
 						RedTest.run(v.width === width && v.height === height)
 						v.destroy()
 					}).catch(v => {
@@ -84,7 +81,6 @@ const size = 125;
 RedTest.testGroup(
 	"setSize Test - 부모가 존재할때 부모의 크기를 기반으로 계산하는지",
 	function () {
-
 		[
 			{
 				value: ['50%', '10%'],
@@ -137,7 +133,6 @@ RedTest.testGroup(
 						v.setSize(width, height)
 						console.log('pixelSize', v.pixelSize, pixelSize_width, pixelSize_height)
 						console.log('pixelSize', v.pixelSize.width === pixelSize_width, v.pixelSize.height === pixelSize_height)
-
 						RedTest.run(v.pixelSize.width === pixelSize_width && v.pixelSize.height === pixelSize_height)
 						v.destroy()
 					}).catch(v => {
@@ -148,14 +143,12 @@ RedTest.testGroup(
 				successTestYn ? true : false
 			);
 		})
-
 	}
 );
 RedTest.testGroup(
 	"addView Test",
 	function () {
 		const failTestView = null;
-
 		[
 			{
 				title: '등록하려는 대상이 View instance 가 아닌경우',
@@ -171,7 +164,6 @@ RedTest.testGroup(
 			}
 		].forEach(v => {
 			let {title, value, successTestYn, expectValue} = v
-
 			RedTest.test(
 				`${successTestYn ? '성공' : '실패'} 테스트 ${title || ''} : ${value} `,
 				function () {
@@ -181,7 +173,6 @@ RedTest.testGroup(
 							value = value(v)
 						}
 						v.addView(value)
-
 						RedTest.run(true)
 						v.destroy()
 					}).catch(v => {
@@ -191,7 +182,6 @@ RedTest.testGroup(
 				expectValue
 			);
 		})
-
 	}
 );
 RedTest.testGroup(
@@ -212,7 +202,6 @@ RedTest.testGroup(
 			}
 		].forEach(v => {
 			let {title, value, successTestYn, expectValue} = v
-
 			RedTest.test(
 				`${successTestYn ? '성공' : '실패'} 테스트 ${title || ''}  `,
 				function () {
@@ -223,7 +212,6 @@ RedTest.testGroup(
 						}
 						v.addView(value)
 						v.removeView(value)
-
 						RedTest.run(true)
 						v.destroy()
 					}).catch(v => {
@@ -242,7 +230,6 @@ RedTest.testGroup(
 					const view2 = new RedGPU.View(v)
 					v.addView(view1)
 					v.removeView(view2)
-
 					RedTest.run(true)
 					v.destroy()
 				}).catch(v => {

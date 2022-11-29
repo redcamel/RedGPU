@@ -1,6 +1,6 @@
 import Controller from "dat.gui/src/dat/controllers/Controller.js";
 
-const gui_setItemDisableInput = (controller: Controller, width?,fontSize?) => {
+const gui_setItemDisableInput = (controller: Controller, width?, fontSize?) => {
     const rightModeYn = width === 'auto'
     const {domElement, __input, __li} = controller
     controller.listen()

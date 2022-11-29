@@ -5,7 +5,6 @@ RedTest.title = "View TEST";
 RedTest.testGroup(
 	"View Constructor Test",
 	function () {
-
 		RedTest.test(
 			"실패 테스트 : new View(redGPUContext instance)만 허용",
 			function () {
@@ -19,7 +18,6 @@ RedTest.testGroup(
 						RedTest.run(false)
 						v.destroy()
 					}
-
 				}).catch(v => {
 					console.log(v)
 					RedTest.run(null)
@@ -41,7 +39,6 @@ RedTest.testGroup(
 						RedTest.run(false)
 						v.destroy()
 					}
-
 				}).catch(v => {
 					console.log(v)
 					RedTest.run(null)
@@ -51,7 +48,6 @@ RedTest.testGroup(
 		);
 	}
 );
-
 [
 	'x', 'y', 'width', 'height'
 ].map(key => {
@@ -132,16 +128,13 @@ RedTest.testGroup(
 					successTestYn
 				);
 			})
-
 		}
 	);
 })
-
 const size = 125;
 RedTest.testGroup(
 	"(View instance).pixelViewRect Test",
 	function () {
-
 		[
 			{
 				value: ['50%', '10%'],
@@ -195,14 +188,11 @@ RedTest.testGroup(
 				successTestYn ? true : false
 			);
 		})
-
 	}
 );
-
 RedTest.testGroup(
 	"(View instance).pixelViewRect Test : redGPUContext도 같이 체크",
 	function () {
-
 		[
 			{
 				value: ['50%', '10%'],
@@ -257,6 +247,5 @@ RedTest.testGroup(
 				successTestYn ? true : false
 			);
 		})
-
 	}
 );

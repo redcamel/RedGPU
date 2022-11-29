@@ -1,6 +1,6 @@
 {
 
-  "entryPoints": ["./src/index.ts"],
+  "entryPoints": ["./src/RedGPU.ts"],
   "entryPointStrategy": "expand",
   "out": "docs"
 }

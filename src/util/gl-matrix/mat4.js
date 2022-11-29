@@ -4,7 +4,6 @@ import * as glMatrix from "./common.js";
  * 4x4 Matrix<br>Format: column-major, when typed out it looks like row-major<br>The matrices are being post multiplied.
  * @module mat4
  */
-
 /**
  * Creates a new identity mat4
  *
@@ -13,7 +12,6 @@ import * as glMatrix from "./common.js";
 
 export function create() {
 	var out = new glMatrix.ARRAY_TYPE(16);
-
 	if (glMatrix.ARRAY_TYPE != Float32Array) {
 		out[1] = 0;
 		out[2] = 0;
@@ -28,7 +26,6 @@ export function create() {
 		out[13] = 0;
 		out[14] = 0;
 	}
-
 	out[0] = 1;
 	out[5] = 1;
 	out[10] = 1;
@@ -252,7 +249,6 @@ export function transpose(out, a) {
 		out[14] = a[11];
 		out[15] = a[15];
 	}
-
 	return out;
 }
 
@@ -293,13 +289,10 @@ export function invert(out, a) {
 	var b09 = a21 * a32 - a22 * a31;
 	var b10 = a21 * a33 - a23 * a31;
 	var b11 = a22 * a33 - a23 * a32; // Calculate the determinant
-
 	var det = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
-
 	if (!det) {
 		return null;
 	}
-
 	det = 1.0 / det;
 	out[0] = (a11 * b11 - a12 * b10 + a13 * b09) * det;
 	out[1] = (a02 * b10 - a01 * b11 - a03 * b09) * det;
@@ -410,7 +403,6 @@ export function determinant(a) {
 	var b7 = a10 * b5 - a11 * b4 + a12 * b3;
 	var b8 = a20 * b2 - a21 * b1 + a22 * b0;
 	var b9 = a30 * b2 - a31 * b1 + a32 * b0; // Calculate the determinant
-
 	return a13 * b6 - a03 * b7 + a33 * b8 - a23 * b9;
 }
 
@@ -440,7 +432,6 @@ export function multiply(out, a, b) {
 		a31 = a[13],
 		a32 = a[14],
 		a33 = a[15]; // Cache only the current line of the second matrix
-
 	var b0 = b[0],
 		b1 = b[1],
 		b2 = b[2],
@@ -492,7 +483,6 @@ export function translate(out, a, v) {
 	var a00, a01, a02, a03;
 	var a10, a11, a12, a13;
 	var a20, a21, a22, a23;
-
 	if (a === out) {
 		out[12] = a[0] * x + a[4] * y + a[8] * z + a[12];
 		out[13] = a[1] * x + a[5] * y + a[9] * z + a[13];
@@ -528,7 +518,6 @@ export function translate(out, a, v) {
 		out[14] = a02 * x + a12 * y + a22 * z + a[14];
 		out[15] = a03 * x + a13 * y + a23 * z + a[15];
 	}
-
 	return out;
 }
 
@@ -586,11 +575,9 @@ export function rotate(out, a, rad, axis) {
 	var b00, b01, b02;
 	var b10, b11, b12;
 	var b20, b21, b22;
-
 	if (len < glMatrix.EPSILON) {
 		return null;
 	}
-
 	len = 1 / len;
 	x *= len;
 	y *= len;
@@ -610,7 +597,6 @@ export function rotate(out, a, rad, axis) {
 	a21 = a[9];
 	a22 = a[10];
 	a23 = a[11]; // Construct the elements of the rotation matrix
-
 	b00 = x * x * t + c;
 	b01 = y * x * t + z * s;
 	b02 = z * x * t - y * s;
@@ -620,7 +606,6 @@ export function rotate(out, a, rad, axis) {
 	b20 = x * z * t + y * s;
 	b21 = y * z * t - x * s;
 	b22 = z * z * t + c; // Perform rotation-specific matrix multiplication
-
 	out[0] = a00 * b00 + a10 * b01 + a20 * b02;
 	out[1] = a01 * b00 + a11 * b01 + a21 * b02;
 	out[2] = a02 * b00 + a12 * b01 + a22 * b02;
@@ -633,7 +618,6 @@ export function rotate(out, a, rad, axis) {
 	out[9] = a01 * b20 + a11 * b21 + a21 * b22;
 	out[10] = a02 * b20 + a12 * b21 + a22 * b22;
 	out[11] = a03 * b20 + a13 * b21 + a23 * b22;
-
 	if (a !== out) {
 		// If the source and destination differ, copy the unchanged last row
 		out[12] = a[12];
@@ -641,7 +625,6 @@ export function rotate(out, a, rad, axis) {
 		out[14] = a[14];
 		out[15] = a[15];
 	}
-
 	return out;
 }
 
@@ -665,7 +648,6 @@ export function rotateX(out, a, rad) {
 	var a21 = a[9];
 	var a22 = a[10];
 	var a23 = a[11];
-
 	if (a !== out) {
 		// If the source and destination differ, copy the unchanged rows
 		out[0] = a[0];
@@ -677,7 +659,6 @@ export function rotateX(out, a, rad) {
 		out[14] = a[14];
 		out[15] = a[15];
 	} // Perform axis-specific matrix multiplication
-
 	out[4] = a10 * c + a20 * s;
 	out[5] = a11 * c + a21 * s;
 	out[6] = a12 * c + a22 * s;
@@ -709,7 +690,6 @@ export function rotateY(out, a, rad) {
 	var a21 = a[9];
 	var a22 = a[10];
 	var a23 = a[11];
-
 	if (a !== out) {
 		// If the source and destination differ, copy the unchanged rows
 		out[4] = a[4];
@@ -721,7 +701,6 @@ export function rotateY(out, a, rad) {
 		out[14] = a[14];
 		out[15] = a[15];
 	} // Perform axis-specific matrix multiplication
-
 	out[0] = a00 * c - a20 * s;
 	out[1] = a01 * c - a21 * s;
 	out[2] = a02 * c - a22 * s;
@@ -753,7 +732,6 @@ export function rotateZ(out, a, rad) {
 	var a11 = a[5];
 	var a12 = a[6];
 	var a13 = a[7];
-
 	if (a !== out) {
 		// If the source and destination differ, copy the unchanged last row
 		out[8] = a[8];
@@ -765,7 +743,6 @@ export function rotateZ(out, a, rad) {
 		out[14] = a[14];
 		out[15] = a[15];
 	} // Perform axis-specific matrix multiplication
-
 	out[0] = a00 * c + a10 * s;
 	out[1] = a01 * c + a11 * s;
 	out[2] = a02 * c + a12 * s;
@@ -860,11 +837,9 @@ export function fromRotation(out, rad, axis) {
 		z = axis[2];
 	var len = Math.hypot(x, y, z);
 	var s, c, t;
-
 	if (len < glMatrix.EPSILON) {
 		return null;
 	}
-
 	len = 1 / len;
 	x *= len;
 	y *= len;
@@ -872,7 +847,6 @@ export function fromRotation(out, rad, axis) {
 	s = Math.sin(rad);
 	c = Math.cos(rad);
 	t = 1 - c; // Perform rotation-specific matrix multiplication
-
 	out[0] = x * x * t + c;
 	out[1] = y * x * t + z * s;
 	out[2] = z * x * t - y * s;
@@ -907,7 +881,6 @@ export function fromRotation(out, rad, axis) {
 export function fromXRotation(out, rad) {
 	var s = Math.sin(rad);
 	var c = Math.cos(rad); // Perform axis-specific matrix multiplication
-
 	out[0] = 1;
 	out[1] = 0;
 	out[2] = 0;
@@ -942,7 +915,6 @@ export function fromXRotation(out, rad) {
 export function fromYRotation(out, rad) {
 	var s = Math.sin(rad);
 	var c = Math.cos(rad); // Perform axis-specific matrix multiplication
-
 	out[0] = c;
 	out[1] = 0;
 	out[2] = -s;
@@ -977,7 +949,6 @@ export function fromYRotation(out, rad) {
 export function fromZRotation(out, rad) {
 	var s = Math.sin(rad);
 	var c = Math.cos(rad); // Perform axis-specific matrix multiplication
-
 	out[0] = c;
 	out[1] = s;
 	out[2] = 0;
@@ -1069,7 +1040,6 @@ export function fromQuat2(out, a) {
 		az = a[6],
 		aw = a[7];
 	var magnitude = bx * bx + by * by + bz * bz + bw * bw; //Only scale if it makes sense
-
 	if (magnitude > 0) {
 		translation[0] = (ax * bw + aw * bx + ay * bz - az * by) * 2 / magnitude;
 		translation[1] = (ay * bw + aw * by + az * bx - ax * bz) * 2 / magnitude;
@@ -1079,7 +1049,6 @@ export function fromQuat2(out, a) {
 		translation[1] = (ay * bw + aw * by + az * bx - ax * bz) * 2;
 		translation[2] = (az * bw + aw * bz + ax * by - ay * bx) * 2;
 	}
-
 	fromRotationTranslation(out, a, translation);
 	return out;
 }
@@ -1155,7 +1124,6 @@ export function getRotation(out, mat) {
 	var sm33 = mat[10] * is3;
 	var trace = sm11 + sm22 + sm33;
 	var S = 0;
-
 	if (trace > 0) {
 		S = Math.sqrt(trace + 1.0) * 2;
 		out[3] = 0.25 * S;
@@ -1181,7 +1149,6 @@ export function getRotation(out, mat) {
 		out[1] = (sm23 + sm32) / S;
 		out[2] = 0.25 * S;
 	}
-
 	return out;
 }
 
@@ -1225,7 +1192,6 @@ export function decompose(out_r, out_t, out_s, mat) {
 	var sm33 = m33 * is3;
 	var trace = sm11 + sm22 + sm33;
 	var S = 0;
-
 	if (trace > 0) {
 		S = Math.sqrt(trace + 1.0) * 2;
 		out_r[3] = 0.25 * S;
@@ -1251,7 +1217,6 @@ export function decompose(out_r, out_t, out_s, mat) {
 		out_r[1] = (sm23 + sm32) / S;
 		out_r[2] = 0.25 * S;
 	}
-
 	return out_r;
 }
 
@@ -1497,7 +1462,6 @@ export function perspectiveNO(out, fovy, aspect, near, far) {
 	out[12] = 0;
 	out[13] = 0;
 	out[15] = 0;
-
 	if (far != null && far !== Infinity) {
 		var nf = 1 / (near - far);
 		out[10] = (far + near) * nf;
@@ -1506,7 +1470,6 @@ export function perspectiveNO(out, fovy, aspect, near, far) {
 		out[10] = -1;
 		out[14] = -2 * near;
 	}
-
 	return out;
 }
 
@@ -1547,7 +1510,6 @@ export function perspectiveZO(out, fovy, aspect, near, far) {
 	out[12] = 0;
 	out[13] = 0;
 	out[15] = 0;
-
 	if (far != null && far !== Infinity) {
 		var nf = 1 / (near - far);
 		out[10] = far * nf;
@@ -1556,7 +1518,6 @@ export function perspectiveZO(out, fovy, aspect, near, far) {
 		out[10] = -1;
 		out[14] = -near;
 	}
-
 	return out;
 }
 
@@ -1703,11 +1664,9 @@ export function lookAt(out, eye, center, up) {
 	var centerx = center[0];
 	var centery = center[1];
 	var centerz = center[2];
-
 	if (Math.abs(eyex - centerx) < glMatrix.EPSILON && Math.abs(eyey - centery) < glMatrix.EPSILON && Math.abs(eyez - centerz) < glMatrix.EPSILON) {
 		return identity(out);
 	}
-
 	z0 = eyex - centerx;
 	z1 = eyey - centery;
 	z2 = eyez - centerz;
@@ -1719,7 +1678,6 @@ export function lookAt(out, eye, center, up) {
 	x1 = upz * z0 - upx * z2;
 	x2 = upx * z1 - upy * z0;
 	len = Math.hypot(x0, x1, x2);
-
 	if (!len) {
 		x0 = 0;
 		x1 = 0;
@@ -1730,12 +1688,10 @@ export function lookAt(out, eye, center, up) {
 		x1 *= len;
 		x2 *= len;
 	}
-
 	y0 = z1 * x2 - z2 * x1;
 	y1 = z2 * x0 - z0 * x2;
 	y2 = z0 * x1 - z1 * x0;
 	len = Math.hypot(y0, y1, y2);
-
 	if (!len) {
 		y0 = 0;
 		y1 = 0;
@@ -1746,7 +1702,6 @@ export function lookAt(out, eye, center, up) {
 		y1 *= len;
 		y2 *= len;
 	}
-
 	out[0] = x0;
 	out[1] = y0;
 	out[2] = z0;
@@ -1787,26 +1742,22 @@ export function targetTo(out, eye, target, up) {
 		z1 = eyey - target[1],
 		z2 = eyez - target[2];
 	var len = z0 * z0 + z1 * z1 + z2 * z2;
-
 	if (len > 0) {
 		len = 1 / Math.sqrt(len);
 		z0 *= len;
 		z1 *= len;
 		z2 *= len;
 	}
-
 	var x0 = upy * z2 - upz * z1,
 		x1 = upz * z0 - upx * z2,
 		x2 = upx * z1 - upy * z0;
 	len = x0 * x0 + x1 * x1 + x2 * x2;
-
 	if (len > 0) {
 		len = 1 / Math.sqrt(len);
 		x0 *= len;
 		x1 *= len;
 		x2 *= len;
 	}
-
 	out[0] = x0;
 	out[1] = x1;
 	out[2] = x2;

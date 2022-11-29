@@ -4,7 +4,6 @@ import * as glMatrix from "./common.js";
  * 3 Dimensional Vector
  * @module vec3
  */
-
 /**
  * Creates a new, empty vec3
  *
@@ -13,13 +12,11 @@ import * as glMatrix from "./common.js";
 
 export function create() {
 	var out = new glMatrix.ARRAY_TYPE(3);
-
 	if (glMatrix.ARRAY_TYPE != Float32Array) {
 		out[0] = 0;
 		out[1] = 0;
 		out[2] = 0;
 	}
-
 	return out;
 }
 
@@ -362,12 +359,10 @@ export function normalize(out, a) {
 	var y = a[1];
 	var z = a[2];
 	var len = x * x + y * y + z * z;
-
 	if (len > 0) {
 		//TODO: evaluate use of glm_invsqrt here?
 		len = 1 / Math.sqrt(len);
 	}
-
 	out[0] = a[0] * len;
 	out[1] = a[1] * len;
 	out[2] = a[2] * len;
@@ -579,24 +574,19 @@ export function transformQuat(out, a, q) {
 		y = a[1],
 		z = a[2]; // var qvec = [qx, qy, qz];
 	// var uv = vec3.cross([], qvec, a);
-
 	var uvx = qy * z - qz * y,
 		uvy = qz * x - qx * z,
 		uvz = qx * y - qy * x; // var uuv = vec3.cross([], qvec, uv);
-
 	var uuvx = qy * uvz - qz * uvy,
 		uuvy = qz * uvx - qx * uvz,
 		uuvz = qx * uvy - qy * uvx; // vec3.scale(uv, uv, 2 * w);
-
 	var w2 = qw * 2;
 	uvx *= w2;
 	uvy *= w2;
 	uvz *= w2; // vec3.scale(uuv, uuv, 2);
-
 	uuvx *= 2;
 	uuvy *= 2;
 	uuvz *= 2; // return vec3.add(out, a, vec3.add(out, uv, uuv));
-
 	out[0] = x + uvx + uuvx;
 	out[1] = y + uvy + uuvy;
 	out[2] = z + uvz + uuvz;
@@ -615,15 +605,12 @@ export function transformQuat(out, a, q) {
 export function rotateX(out, a, b, rad) {
 	var p = [],
 		r = []; //Translate point to the origin
-
 	p[0] = a[0] - b[0];
 	p[1] = a[1] - b[1];
 	p[2] = a[2] - b[2]; //perform rotation
-
 	r[0] = p[0];
 	r[1] = p[1] * Math.cos(rad) - p[2] * Math.sin(rad);
 	r[2] = p[1] * Math.sin(rad) + p[2] * Math.cos(rad); //translate to correct position
-
 	out[0] = r[0] + b[0];
 	out[1] = r[1] + b[1];
 	out[2] = r[2] + b[2];
@@ -642,15 +629,12 @@ export function rotateX(out, a, b, rad) {
 export function rotateY(out, a, b, rad) {
 	var p = [],
 		r = []; //Translate point to the origin
-
 	p[0] = a[0] - b[0];
 	p[1] = a[1] - b[1];
 	p[2] = a[2] - b[2]; //perform rotation
-
 	r[0] = p[2] * Math.sin(rad) + p[0] * Math.cos(rad);
 	r[1] = p[1];
 	r[2] = p[2] * Math.cos(rad) - p[0] * Math.sin(rad); //translate to correct position
-
 	out[0] = r[0] + b[0];
 	out[1] = r[1] + b[1];
 	out[2] = r[2] + b[2];
@@ -669,15 +653,12 @@ export function rotateY(out, a, b, rad) {
 export function rotateZ(out, a, b, rad) {
 	var p = [],
 		r = []; //Translate point to the origin
-
 	p[0] = a[0] - b[0];
 	p[1] = a[1] - b[1];
 	p[2] = a[2] - b[2]; //perform rotation
-
 	r[0] = p[0] * Math.cos(rad) - p[1] * Math.sin(rad);
 	r[1] = p[0] * Math.sin(rad) + p[1] * Math.cos(rad);
 	r[2] = p[2]; //translate to correct position
-
 	out[0] = r[0] + b[0];
 	out[1] = r[1] + b[1];
 	out[2] = r[2] + b[2];
@@ -817,21 +798,17 @@ export var forEach = function () {
 	var vec = create();
 	return function (a, stride, offset, count, fn, arg) {
 		var i, l;
-
 		if (!stride) {
 			stride = 3;
 		}
-
 		if (!offset) {
 			offset = 0;
 		}
-
 		if (count) {
 			l = Math.min(count * stride + offset, a.length);
 		} else {
 			l = a.length;
 		}
-
 		for (i = offset; i < l; i += stride) {
 			vec[0] = a[i];
 			vec[1] = a[i + 1];
@@ -841,7 +818,6 @@ export var forEach = function () {
 			a[i + 1] = vec[1];
 			a[i + 2] = vec[2];
 		}
-
 		return a;
 	};
 }();

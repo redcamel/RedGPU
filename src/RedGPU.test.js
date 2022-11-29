@@ -62,7 +62,6 @@ RedTest.testGroup(
 				expectValue
 			);
 		})
-
 	}
 )
 RedTest.testGroup(
@@ -104,7 +103,6 @@ RedTest.testGroup(
 				function () {
 					const canvas = document.createElement('canvas')
 					RedGPU.init(canvas, null, value).then(v => {
-
 						RedTest.run(v.alphaMode)
 					}).catch(v => {
 						RedTest.run(false)

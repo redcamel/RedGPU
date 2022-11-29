@@ -1,5 +1,5 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import {Mesh} from "../../../../object3d/mesh/Mesh";
+import {Mesh} from "../../../../object3d";
 import Sphere from "../../../../resource/geometry/primitives/Sphere";
 import ColorMaterial from "../../../../material/colorMaterial/ColorMaterial";
 import Box from "../../../../resource/geometry/primitives/Box";

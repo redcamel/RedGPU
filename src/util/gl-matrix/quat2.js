@@ -9,7 +9,6 @@ import * as mat4 from "./mat4.js";
  * Make sure to have normalized dual quaternions, otherwise the functions may not work as intended.<br>
  * @module quat2
  */
-
 /**
  * Creates a new identity dual quat
  *
@@ -18,7 +17,6 @@ import * as mat4 from "./mat4.js";
 
 export function create() {
 	var dq = new glMatrix.ARRAY_TYPE(8);
-
 	if (glMatrix.ARRAY_TYPE != Float32Array) {
 		dq[0] = 0;
 		dq[1] = 0;
@@ -28,7 +26,6 @@ export function create() {
 		dq[6] = 0;
 		dq[7] = 0;
 	}
-
 	dq[3] = 1;
 	return dq;
 }
@@ -559,7 +556,6 @@ export function rotateAroundAxis(out, a, axis, rad) {
 	if (Math.abs(rad) < glMatrix.EPSILON) {
 		return copy(out, a);
 	}
-
 	var axisLength = Math.hypot(axis[0], axis[1], axis[2]);
 	rad = rad * 0.5;
 	var s = Math.sin(rad);
@@ -794,7 +790,6 @@ export var sqrLen = squaredLength;
 
 export function normalize(out, a) {
 	var magnitude = squaredLength(a);
-
 	if (magnitude > 0) {
 		magnitude = Math.sqrt(magnitude);
 		var a0 = a[0] / magnitude;
@@ -815,7 +810,6 @@ export function normalize(out, a) {
 		out[6] = (b2 - a2 * a_dot_b) / magnitude;
 		out[7] = (b3 - a3 * a_dot_b) / magnitude;
 	}
-
 	return out;
 }
 

@@ -1,6 +1,6 @@
 import UniformBufferDescriptor from "../../../../resource/buffers/uniformBuffer/UniformBufferDescriptor";
 import TypeSize from "../../../../resource/buffers/TypeSize";
-import {Mesh} from "../../../../object3d/mesh/Mesh";
+import {Mesh} from "../../../../object3d";
 import Geometry from "../../../../resource/geometry/Geometry";
 import InterleaveUnit from "../../../../resource/buffers/interleaveInfo/InterleaveUnit";
 import InterleaveInfo from "../../../../resource/buffers/interleaveInfo/InterleaveInfo";

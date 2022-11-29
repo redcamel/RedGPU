@@ -4,7 +4,6 @@ import * as glMatrix from "./common.js";
  * 2x2 Matrix
  * @module mat2
  */
-
 /**
  * Creates a new identity mat2
  *
@@ -13,12 +12,10 @@ import * as glMatrix from "./common.js";
 
 export function create() {
 	var out = new glMatrix.ARRAY_TYPE(4);
-
 	if (glMatrix.ARRAY_TYPE != Float32Array) {
 		out[1] = 0;
 		out[2] = 0;
 	}
-
 	out[0] = 1;
 	out[3] = 1;
 	return out;
@@ -130,7 +127,6 @@ export function transpose(out, a) {
 		out[2] = a[1];
 		out[3] = a[3];
 	}
-
 	return out;
 }
 
@@ -147,13 +143,10 @@ export function invert(out, a) {
 		a1 = a[1],
 		a2 = a[2],
 		a3 = a[3]; // Calculate the determinant
-
 	var det = a0 * a3 - a2 * a1;
-
 	if (!det) {
 		return null;
 	}
-
 	det = 1.0 / det;
 	out[0] = a3 * det;
 	out[1] = -a1 * det;

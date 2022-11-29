@@ -1,5 +1,5 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import {Mesh} from "../../../../object3d/mesh/Mesh";
+import {Mesh} from "../../../../object3d";
 import Geometry from "../../../../resource/geometry/Geometry";
 import InterleaveInfo from "../../../../resource/buffers/interleaveInfo/InterleaveInfo";
 import InterleaveUnit from "../../../../resource/buffers/interleaveInfo/InterleaveUnit";
