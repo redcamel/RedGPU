@@ -206,6 +206,10 @@ class Renderer extends RedGPUContextBase {
         passEncoder.end();
         gpuDevice.queue.submit([commandEncoder.finish()]);
 
+        {
+            // TODO - PostEffect Render
+            view.postEffectManager.render()
+        }
         mainTime = performance.now() - checkStartTime
         checkStartTime = performance.now()
         if (this.#afterRender) {

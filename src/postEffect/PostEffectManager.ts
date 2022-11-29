@@ -3,7 +3,6 @@ import RedGPUContextBase from "../context/RedGPUContextBase";
 import PostEffectBase from "./PostEffectBase";
 
 
-
 /**
  * PostEffect를 관리하는 매니저
  */
@@ -19,6 +18,14 @@ class PostEffectManager extends RedGPUContextBase {
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
+    }
+
+    render() {
+        //TODO
+        console.log('TODO PostEffect Render')
+        this.#children.forEach((effect: PostEffectBase) => {
+            effect.render()
+        })
     }
 
     /**

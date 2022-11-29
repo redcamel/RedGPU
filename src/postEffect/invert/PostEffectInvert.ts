@@ -8,6 +8,10 @@ class PostEffectInvert extends PostEffectBase {
         super(redGPUContext);
     }
 
+    render(){
+        // TODO
+        console.log('TODO - PostEffectInvert.render()')
+    }
 }
 
 export default PostEffectInvert
