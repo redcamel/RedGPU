@@ -24,24 +24,24 @@ const debuggerRenderViewList = (viewList) => {
                     debugStr2 += `<div style="margin:6px 0px;height:1px;background: rgba(255,255,255,0.2)"></div>`
                 }
             }
-            const renderChild = target => {
-                const {children} = target
-                return children.map(v => {
-                    // console.log(v)
-                    return `
-<div> 
-	${v.constructor.name}
-	<div style="padding-left: 10px">
-		<div>${v.geometry ? v.geometry.constructor.name : ''}</div>
-		<div>${v.material?.constructor.name}</div>    
-		${v.children.length ? `<div style="padding-left: 10px">${renderChild(v.children)}</div>` : ''}
-	</div> 
-</div>`
-                }).flat().join('').trim()
-            }
-            // console.log(renderChild(scene))
-            //TODO
-            debugStr2 += `${renderChild(scene)}`
+//             const renderChild = target => {
+//                 const {children} = target
+//                 return children.map(v => {
+//                     // console.log(v)
+//                     return `
+// <div>
+// 	${v.constructor.name}
+// 	<div style="padding-left: 10px">
+// 		<div>${v.geometry ? v.geometry.constructor.name : ''}</div>
+// 		<div>${v.material?.constructor.name}</div>
+// 		${v.children.length ? `<div style="padding-left: 10px">${renderChild(v.children)}</div>` : ''}
+// 	</div>
+// </div>`
+//                 }).flat().join('').trim()
+//             }
+//             // console.log(renderChild(scene))
+//             //TODO
+//             debugStr2 += `${renderChild(scene)}`
 
         }
         debugStr += `<div style="background: rgba(0,0,0,0.5);padding: 16px;">${debugStr2}</div>`
