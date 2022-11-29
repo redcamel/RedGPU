@@ -131,7 +131,6 @@ class RedGPUContext {
     get viewList(): View[] {
         return this.#viewList;
     }
-
     /**
      * @param {HTMLCanvasElement} htmlCanvas
      * @param {GPUAdapter} gpuAdapter

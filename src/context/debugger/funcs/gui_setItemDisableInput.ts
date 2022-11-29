@@ -13,6 +13,7 @@ const gui_setItemDisableInput = (controller: Controller, width?,fontSize?) => {
     __input.style.opacity = 0.75
     __input.style.fontSize = fontSize || '10px'
     __input.style.textAlign = 'right'
+    return controller
 }
 
 export default gui_setItemDisableInput
