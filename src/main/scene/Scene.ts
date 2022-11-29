@@ -87,7 +87,7 @@ class Scene extends DisplayContainer {
     }
 
     /**
-     * @constructor Scene
+     * @constructor scene
      *
 
      */

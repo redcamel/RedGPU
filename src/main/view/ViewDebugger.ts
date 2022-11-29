@@ -15,7 +15,7 @@ class ViewDebugger {
         const {Frame, Render, Light, ViewRect} = this
         //
         this['View Label'] = view['label']
-        this['Scene Label'] = scene['label']
+        this['scene Label'] = scene['label']
         ViewRect['size'] = `${view.width} x ${view.height} (${view.pixelViewRect[2]}px x ${view.pixelViewRect[3]}px)`
         ViewRect['location'] = `${view.x} x ${view.y} (${view.pixelViewRect[0]}px x ${view.pixelViewRect[1]}px)`
 

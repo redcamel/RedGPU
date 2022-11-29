@@ -114,8 +114,8 @@ class RedGPUContextDebugger extends RedGPUContextBase {
                 console.log(redGPUContext)
                 const gui = this.#gui = new dat.GUI()
                 this.#userDebugSet?.(gui, redGPUContext, this)
-                setStatePanels(gui, redGPUContext, this, !this.userDebugSet)
                 setActiveDebugger(gui, this)
+                setStatePanels(gui, redGPUContext, this, !this.userDebugSet)
                 this.#gui.show()
             }
 

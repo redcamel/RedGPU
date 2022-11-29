@@ -1,5 +1,6 @@
 import * as RedGPU from '../../../dist/RedGPU.mjs'
 import setExampleHelper from "../../exampleHelper/setExampleHelper.js";
+import testUI from "./testUI.js";
 
 const run = () => {
 	const canvas = document.createElement('canvas')
@@ -34,6 +35,7 @@ const run = () => {
 
 				// Setting Debug
 				redGPUContext.debugger.useDebugger = true
+				redGPUContext.debugger.userDebugSet = testUI
 			}
 		)
 		.catch(v => {

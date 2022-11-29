@@ -4,7 +4,7 @@
     "target": "esnext",
     "module": "esnext",
     "allowJs": true,
-    "declaration": true,
+//    "declaration": true,
     "moduleResolution": "node",
     "typeRoots": [
       "./node_modules/@webgpu/types",
