@@ -4,6 +4,7 @@ export * from "./systemShaderDefine";
 
 export * from "./context";
 export * from "./main/view";
+export * from "./postEffect";
 export * from "./main/render";
 export * from "./main/scene";
 

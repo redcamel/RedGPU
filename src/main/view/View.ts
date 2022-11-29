@@ -12,10 +12,20 @@ import CONST_DIRTY_TRANSFORM_STATE from "../../object3d/base/CONST_DIRTY_TRANSFO
 import computeViewFrustumPlanes from "../../util/computeViewFrustumPlanes";
 import ViewBase from "./ViewBase";
 import throwErrorInstanceOf from "../../util/errorFunc/throwErrorInstanceOf";
+import PostEffectManager from "../../postEffect/PostEffectManager";
 
-let UUID: number = 0
+let UUID: number = 0;
 
+/**
+ * ## View 객체는 Scene과 Camera를 소유하는 객체입니다.
+ * postEffectManager를 통해 View에 후처리 이펙트를 적용할수 있습니다.
+ */
 class View extends ViewBase {
+    #postEffectManager: PostEffectManager
+    get postEffectManager(): PostEffectManager {
+        return this.#postEffectManager;
+    }
+
     #resultTexture: GPUTexture
     get resultTexture(): GPUTexture {
         return this.#resultTexture;
@@ -156,7 +166,7 @@ class View extends ViewBase {
     }
 
     /**
-     * View
+     * 생성자
      * @param redGPUContext
      * @param scene
      * @param label
@@ -166,6 +176,7 @@ class View extends ViewBase {
         this.#label = label || `View${UUID++} (Label input is recommended.)`
         this.scene = scene
         this.#camera = new BasicCamera()
+        this.#postEffectManager = new PostEffectManager(redGPUContext)
         this.#init()
         console.log('View', this)
     }
