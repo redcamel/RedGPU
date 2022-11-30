@@ -110,10 +110,11 @@ class Renderer extends RedGPUContextBase {
         if (
             redGPUContext.dirtyMultiSample
             || !view.resultTexture
-            || view.resultTexture.width !== view.pixelViewRect[2]
-            || view.resultTexture.height !== view.pixelViewRect[3]
+            || view.resultTexture.width !== Math.floor(view.pixelViewRect[2])
+            || view.resultTexture.height !== Math.floor(view.pixelViewRect[3])
         ) {
-            const size = [view.pixelViewRect[2], view.pixelViewRect[3]]
+            console.log('reset view.resultTexture')
+            const size = [Math.floor(view.pixelViewRect[2]), Math.floor(view.pixelViewRect[3])]
             const sampleCount = redGPUContext.useMultiSample ? 4 : 1
 
             const usage = hasPostEffect ? (GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING) : soloRender ? GPUTextureUsage.RENDER_ATTACHMENT : (GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING)
