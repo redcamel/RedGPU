@@ -3,6 +3,7 @@ import throwError from "../../util/errorFunc/throwError";
 import {mat4} from "../../util/gl-matrix";
 import RedGPUContextBase from "../../context/RedGPUContextBase";
 import ViewDebugger from "./ViewDebugger";
+import redGPUContext from "../../context/RedGPUContext";
 
 class ViewBase extends RedGPUContextBase {
     #dirtyViewRect: boolean = true
@@ -114,11 +115,12 @@ class ViewBase extends RedGPUContextBase {
 
     calcPixelViewRect() {
         const parentPixelSize = this.redGPUContext.pixelSize
+        const {renderScale} = this.redGPUContext
         this.#pixelViewRect = [
-            typeof this.#x === 'number' ? this.#x : Math.floor(parentPixelSize.width * parseFloat(this.#x) / 100),
-            typeof this.#y === 'number' ? this.#y : Math.floor(parentPixelSize.height * parseFloat(this.#y) / 100),
-            typeof this.#width === 'number' ? this.#width : Math.floor(parentPixelSize.width * parseFloat(this.#width) / 100),
-            typeof this.#height === 'number' ? this.#height : Math.floor(parentPixelSize.height * parseFloat(this.#height) / 100),
+            Math.floor((typeof this.#x === 'number' ? this.#x : parentPixelSize.width * parseFloat(this.#x) / 100) ),
+            Math.floor((typeof this.#y === 'number' ? this.#y : parentPixelSize.height * parseFloat(this.#y) / 100) ),
+            Math.floor((typeof this.#width === 'number' ? this.#width : parentPixelSize.width * parseFloat(this.#width) / 100) ),
+            Math.floor((typeof this.#height === 'number' ? this.#height : parentPixelSize.height * parseFloat(this.#height) / 100) ),
         ]
 
         this.#dirtyViewRect = true

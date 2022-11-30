@@ -99,15 +99,14 @@ class PostEffectInvert extends PostEffectBase {
 
     render(postEffectManager:PostEffectManager,sourceTextureView:GPUTextureView):GPUTextureView{
         if(!this.pipeline) this.#init(postEffectManager)
-        console.log('TODO - PostEffectInvert.render()')
         const redGPUContext = this.redGPUContext
 
         const {gpuDevice, gpuContext, pixelSize} = redGPUContext
         const commandEncoder: GPUCommandEncoder = gpuDevice.createCommandEncoder();
         const texture:GPUTexture = gpuDevice.createTexture({
             size: {
-                width: postEffectManager.view.pixelViewRect[2],
-                height: postEffectManager.view.pixelViewRect[3],
+                width: Math.floor(postEffectManager.view.pixelViewRect[2]),
+                height: Math.floor(postEffectManager.view.pixelViewRect[3]),
                 depthOrArrayLayers: 1
             },
             sampleCount: 1,

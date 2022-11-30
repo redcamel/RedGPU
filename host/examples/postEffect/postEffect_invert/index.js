@@ -1,5 +1,6 @@
-import * as RedGPU from '../../../dist/RedGPU.mjs'
-import setExampleHelper from "../../exampleHelper/setExampleHelper.js";
+import * as RedGPU from '../../../../dist/RedGPU.mjs'
+import setExampleHelper from "../../../exampleHelper/setExampleHelper.js";
+import testUI from "./testUI.js";
 
 const run = () => {
 	const canvas = document.createElement('canvas')
@@ -9,18 +10,39 @@ const run = () => {
 	document.body.appendChild(canvas)
 	RedGPU.init(canvas)
 		.then(redGPUContext => {
-				//TODO - PostEffect System
 				// Set scene
 				const scene = new RedGPU.Scene()
 				scene.grid = new RedGPU.Grid(redGPUContext)
 				scene.axis = new RedGPU.Axis(redGPUContext)
 
+				{
+					// Set Object & Light
+					scene.lightManager.addLight(new RedGPU.DirectionalLight(redGPUContext))
+
+					scene.lightManager.directionalLightList[0].y = -1
+					const testTexture = new RedGPU.BitmapTexture(redGPUContext, '../../../assets/crate.png')
+					const testMat = new RedGPU.BitmapMaterial(redGPUContext, testTexture)
+					let i = 100
+					while (i--) {
+						let mesh
+						const size = Math.random() * 10 + 0.5
+						mesh = new RedGPU.Mesh(redGPUContext, new RedGPU.Box(redGPUContext, size, size, size), testMat)
+						scene.addChild(mesh)
+						mesh.z = Math.random() * 100 - 50
+						mesh.x = Math.random() * 100 - 50
+						mesh.y = Math.random() * 100 - 50
+						mesh.rotationX = Math.random() * 360
+						mesh.rotationY = Math.random() * 360
+						mesh.rotationZ = Math.random() * 360
+					}
+				}
+
 				// Set View
 				const view = new RedGPU.View(redGPUContext, scene)
 				redGPUContext.addView(view)
 
-			// Set PostEffect
-			view.postEffectManager.addEffect(new RedGPU.PostEffectInvert(redGPUContext))
+				// Set PostEffect
+				view.postEffectManager.addEffect(new RedGPU.PostEffectInvert(redGPUContext))
 
 				// Set Renderer
 				const renderer = new RedGPU.Renderer(redGPUContext)
@@ -38,6 +60,7 @@ const run = () => {
 
 				// Setting Debug
 				redGPUContext.debugger.useDebugger = true
+				redGPUContext.debugger.userDebugSet = testUI
 			}
 		)
 		.catch(v => {

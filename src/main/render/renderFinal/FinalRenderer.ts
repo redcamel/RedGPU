@@ -197,6 +197,7 @@ class FinalRenderer extends RedGPUContextBase {
             passEncoder.setVertexBuffer(0, this.vertexBuffer.gpuBuffer);
             passEncoder.setBindGroup(0, this.uniformBindGroup);
 
+            const {renderScale} = redGPUContext
             mat4.identity(this.#matrix)
             mat4.ortho(
                 this.#matrix,
@@ -221,8 +222,8 @@ class FinalRenderer extends RedGPUContextBase {
                 this.#matrix,
                 this.#matrix,
                 [
-                    pixelViewRect[2] / 2 + pixelViewRect[0],
-                    pixelSize.height - pixelViewRect[3] / 2 - pixelViewRect[1],
+                    (pixelViewRect[2] / 2 + pixelViewRect[0] ) ,
+                    (pixelSize.height - pixelViewRect[3] / 2 - pixelViewRect[1]),
                     0
                 ]
             );
@@ -235,6 +236,7 @@ class FinalRenderer extends RedGPUContextBase {
                     1
                 ]
             );
+
             gpuDevice.queue.writeBuffer(view.finalRenderUniformBuffer, 0, this.#matrix);
 
             ///////////////////////////////////////////////////////////////////

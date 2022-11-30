@@ -317,8 +317,8 @@ class RedGPUContext {
         this.#htmlCanvas.height = tH * this.#renderScale;
         this.#htmlCanvas.style.width = tW + 'px';
         this.#htmlCanvas.style.height = tH + 'px';
-        this.#pixelSize.width = tW * this.#renderScale;
-        this.#pixelSize.height = tH * this.#renderScale;
+        this.#pixelSize.width = Math.floor(tW * this.#renderScale);
+        this.#pixelSize.height = Math.floor(tH * this.#renderScale);
         this.viewList.forEach(view => {
             view.setSize();
             // redView.setLocation();
