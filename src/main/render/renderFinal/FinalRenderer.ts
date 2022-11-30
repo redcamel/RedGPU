@@ -172,8 +172,6 @@ class FinalRenderer extends RedGPUContextBase {
         viewList.forEach((view: View) => {
             const {pixelViewRect} = view
             const {renderScale} = redGPUContext
-            const viewScaleW = (pixelViewRect[2] === pixelSize.width ? 1 : renderScale)
-            const viewScaleH = (pixelViewRect[3] === pixelSize.height ? 1 : renderScale)
 
             const uniformBindGroupDescriptor = {
                 layout: this.uniformsBindGroupLayout,
@@ -211,6 +209,7 @@ class FinalRenderer extends RedGPUContextBase {
                 -1000,
                 1000
             );
+
             mat4.scale(
                 this.#matrix,
                 this.#matrix,
@@ -220,28 +219,36 @@ class FinalRenderer extends RedGPUContextBase {
                     1
                 ]
             );
-
-
-            const temp = mat4.create()
-
             mat4.translate(
-                temp,
-                temp,
+                this.#matrix,
+                this.#matrix,
                 [
-                    (pixelViewRect[2] * viewScaleW / 2 + pixelViewRect[0] * renderScale),
-                    (pixelSize.height - pixelViewRect[3] * viewScaleH / 2 - pixelViewRect[1] * renderScale),
+                    (pixelViewRect[2]  / 2),
+                    (pixelSize.height - pixelViewRect[3]  / 2),
                     0
                 ]
             );
+
+            const temp = mat4.create()
             mat4.scale(
                 temp,
                 temp,
                 [
-                    pixelViewRect[2] / 2 * viewScaleW,
-                    pixelViewRect[3] / 2 * viewScaleH,
+                    pixelViewRect[2] / 2 ,
+                    pixelViewRect[3] / 2 ,
                     1
                 ]
             );
+            mat4.translate(
+                this.#matrix,
+                this.#matrix,
+                [
+                    (pixelViewRect[0] ),
+                    (-pixelViewRect[1] ),
+                    0
+                ]
+            );
+
             mat4.multiply(
                 this.#matrix,
                 this.#matrix,

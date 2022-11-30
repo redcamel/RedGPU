@@ -117,10 +117,10 @@ class ViewBase extends RedGPUContextBase {
         const parentPixelSize = this.redGPUContext.pixelSize
         const {renderScale} = this.redGPUContext
         this.#pixelViewRect = [
-            ((typeof this.#x === 'number' ? this.#x : parentPixelSize.width * parseFloat(this.#x) / 100) ),
-            ((typeof this.#y === 'number' ? this.#y : parentPixelSize.height * parseFloat(this.#y) / 100) ),
-            ((typeof this.#width === 'number' ? this.#width : parentPixelSize.width * parseFloat(this.#width) / 100) ),
-            ((typeof this.#height === 'number' ? this.#height : parentPixelSize.height * parseFloat(this.#height) / 100) ),
+            ((typeof this.#x === 'number' ? renderScale * this.#x : parentPixelSize.width * parseFloat(this.#x) / 100)),
+            ((typeof this.#y === 'number' ? renderScale * this.#y : parentPixelSize.height * parseFloat(this.#y) / 100)),
+            ((typeof this.#width === 'number' ? renderScale * this.#width : parentPixelSize.width * parseFloat(this.#width) / 100)),
+            ((typeof this.#height === 'number' ? renderScale * this.#height : parentPixelSize.height * parseFloat(this.#height) / 100)),
         ]
 
         this.#dirtyViewRect = true
