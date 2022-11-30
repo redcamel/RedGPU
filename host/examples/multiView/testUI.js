@@ -5,13 +5,31 @@ const testUI = (gui, redGPUContext, targetDebugger) => {
 	viewList.forEach(view => {
 		const viewFolder = root.addFolder(view.label);
 		const pixelViewRectTestData = {
-			pixelViewRect : view.pixelViewRect.toString()
+			pixelViewRect : view.pixelViewRect.toString(),
+			x:view.x.toString(),
+			y:view.y.toString(),
+			width:view.width.toString(),
+			height:view.height.toString()
 		};
+		const updateData = ()=>{
+			pixelViewRectTestData.pixelViewRect = view.pixelViewRect.map(v=>v.toFixed(2))
+			pixelViewRectTestData.x = view.x.toString()
+			pixelViewRectTestData.y = view.y.toString()
+			pixelViewRectTestData.width = view.width.toString()
+			pixelViewRectTestData.height = view.height.toString()
+		}
 		['x', 'y'].forEach(key => {
-			viewFolder.add(view, key, -200, 200, 0.01).onChange(v=> pixelViewRectTestData.pixelViewRect = view.pixelViewRect.map(v=>v.toFixed(2)))
+			viewFolder.add(view, key, -200, 200, 0.01).onChange(v=> {
+
+				updateData()
+			})
 		});
-		['width', 'height'].forEach(key => {
-			targetDebugger.__gui_setItemDisableInput(viewFolder.add(view, key))
+		['x','y','width', 'height'].forEach(key => {
+			targetDebugger.__gui_setItemDisableInput(viewFolder.add(pixelViewRectTestData, key).name(`current ${key}`)).onChange(v=>{
+				const updateData = ()=>{
+					pixelViewRectTestData.pixelViewRect = view.pixelViewRect.toString()
+				}
+			})
 		});
 		targetDebugger.__gui_setItemDisableInput(viewFolder.add(pixelViewRectTestData, 'pixelViewRect'),'auto','11px')
 		targetDebugger.__gui_setItemDisableInput(viewFolder.add(view.scene, 'label').name('scene'), 'auto')
@@ -21,38 +39,39 @@ const testUI = (gui, redGPUContext, targetDebugger) => {
 		const testData = {
 			setLocationTest1: function () {
 				view.setLocation(0, 0)
+				updateData()
 			},
 			setLocationTest2: function () {
 				view.setLocation(100, 100)
-
+				updateData()
 			},
 			setLocationTest3: function () {
 				view.setLocation('50%', 100)
-
+				updateData()
 			},
 			setLocationTest4: function () {
 				view.setLocation('40%', '40%')
-
+				updateData()
 			},
 			setSizeTest1: function () {
 				view.setSize(200, 200)
-
+				updateData()
 			},
 			setSizeTest2: function () {
 				view.setSize('50%', '100%')
-
+				updateData()
 			},
 			setSizeTest3: function () {
 				view.setSize('50%', '50%')
-
+				updateData()
 			},
 			setSizeTest4: function () {
 				view.setSize('20%', '20%')
-
+				updateData()
 			},
 			setSizeTest5: function () {
 				view.setSize('100%', '100%')
-
+				updateData()
 			}
 		};
 		methodFolder.add(testData, 'setLocationTest1').name('setLocation(0,0)');
