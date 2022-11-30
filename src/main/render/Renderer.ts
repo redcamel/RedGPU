@@ -184,8 +184,8 @@ class Renderer extends RedGPUContextBase {
 
         const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
         passEncoder.setBindGroup(0, view.renderInfo_SystemUniformBindGroup);
-        passEncoder.setViewport(0, 0, view.pixelViewRect[2], view.pixelViewRect[3], 0, 1);
-        passEncoder.setScissorRect(0, 0, view.pixelViewRect[2], view.pixelViewRect[3]);
+        passEncoder.setViewport(0, 0, Math.floor(view.pixelViewRect[2]), Math.floor(view.pixelViewRect[3]), 0, 1);
+        passEncoder.setScissorRect(0, 0, Math.floor(view.pixelViewRect[2]), Math.floor(view.pixelViewRect[3]));
 
         view.updateSystemUniform()
         view.updateClusterLight()
