@@ -171,6 +171,9 @@ class FinalRenderer extends RedGPUContextBase {
         passEncoder.setScissorRect(0, 0, pixelSize.width, pixelSize.height);
         viewList.forEach((view: View) => {
             const {pixelViewRect} = view
+            const {renderScale} = redGPUContext
+            const viewScaleW = (pixelViewRect[2] === pixelSize.width ? 1 : renderScale)
+            const viewScaleH = (pixelViewRect[3] === pixelSize.height ? 1 : renderScale)
 
             const uniformBindGroupDescriptor = {
                 layout: this.uniformsBindGroupLayout,
@@ -197,7 +200,7 @@ class FinalRenderer extends RedGPUContextBase {
             passEncoder.setVertexBuffer(0, this.vertexBuffer.gpuBuffer);
             passEncoder.setBindGroup(0, this.uniformBindGroup);
 
-            const {renderScale} = redGPUContext
+
             mat4.identity(this.#matrix)
             mat4.ortho(
                 this.#matrix,
@@ -218,24 +221,32 @@ class FinalRenderer extends RedGPUContextBase {
                 ]
             );
 
+
+            const temp = mat4.create()
+
             mat4.translate(
-                this.#matrix,
-                this.#matrix,
+                temp,
+                temp,
                 [
-                    (pixelViewRect[2] / 2 + pixelViewRect[0] ) ,
-                    (pixelSize.height - pixelViewRect[3] / 2 - pixelViewRect[1]),
+                    (pixelViewRect[2] * viewScaleW / 2 + pixelViewRect[0] * renderScale),
+                    (pixelSize.height - pixelViewRect[3] * viewScaleH / 2 - pixelViewRect[1] * renderScale),
                     0
                 ]
             );
             mat4.scale(
-                this.#matrix,
-                this.#matrix,
+                temp,
+                temp,
                 [
-                    pixelViewRect[2] / 2,
-                    pixelViewRect[3] / 2,
+                    pixelViewRect[2] / 2 * viewScaleW,
+                    pixelViewRect[3] / 2 * viewScaleH,
                     1
                 ]
             );
+            mat4.multiply(
+                this.#matrix,
+                this.#matrix,
+                temp,
+            )
 
             gpuDevice.queue.writeBuffer(view.finalRenderUniformBuffer, 0, this.#matrix);
 
