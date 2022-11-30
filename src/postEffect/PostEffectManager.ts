@@ -12,11 +12,12 @@ import {View} from "../main/view";
  * PostEffect 를 관리하는 매니저
  */
 class PostEffectManager extends RedGPUContextBase {
-    #vertexBuffer:VertexBuffer
+    #vertexBuffer: VertexBuffer
     get vertexBuffer(): VertexBuffer {
         return this.#vertexBuffer;
     }
-    #sampler:TextureSampler
+
+    #sampler: TextureSampler
 
     get sampler(): TextureSampler {
         return this.#sampler;
@@ -26,7 +27,8 @@ class PostEffectManager extends RedGPUContextBase {
     get children(): PostEffectBase[] {
         return this.#children;
     }
-    #view:View
+
+    #view: View
     get view(): View {
         return this.#view;
     }
@@ -40,7 +42,8 @@ class PostEffectManager extends RedGPUContextBase {
         this.#view = view
         this.#init(view.redGPUContext)
     }
-    #init(redGPUContext:RedGPUContext){
+
+    #init(redGPUContext: RedGPUContext) {
         this.#vertexBuffer = new VertexBuffer(
             redGPUContext,
             new Float32Array(
@@ -71,9 +74,9 @@ class PostEffectManager extends RedGPUContextBase {
     render() {
         //TODO
         console.log('TODO PostEffect Render')
-        let lastSourceTextureView:GPUTextureView = this.#view.resolveTextureView
+        let lastSourceTextureView: GPUTextureView = this.#view.resolveTextureView
         this.#children.forEach((effect: PostEffectBase) => {
-            lastSourceTextureView = effect.render(this,lastSourceTextureView)
+            lastSourceTextureView = effect.render(this, lastSourceTextureView)
         })
         return lastSourceTextureView
     }

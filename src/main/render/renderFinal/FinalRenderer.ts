@@ -223,8 +223,8 @@ class FinalRenderer extends RedGPUContextBase {
                 this.#matrix,
                 this.#matrix,
                 [
-                    (pixelViewRect[2]  / 2),
-                    (pixelSize.height - pixelViewRect[3]  / 2),
+                    (pixelViewRect[2] / 2),
+                    (pixelSize.height - pixelViewRect[3] / 2),
                     0
                 ]
             );
@@ -234,8 +234,8 @@ class FinalRenderer extends RedGPUContextBase {
                 temp,
                 temp,
                 [
-                    pixelViewRect[2] / 2 ,
-                    pixelViewRect[3] / 2 ,
+                    pixelViewRect[2] / 2,
+                    pixelViewRect[3] / 2,
                     1
                 ]
             );
@@ -243,8 +243,8 @@ class FinalRenderer extends RedGPUContextBase {
                 this.#matrix,
                 this.#matrix,
                 [
-                    (pixelViewRect[0] ),
-                    (-pixelViewRect[1] ),
+                    (pixelViewRect[0]),
+                    (-pixelViewRect[1]),
                     0
                 ]
             );

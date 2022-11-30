@@ -74,7 +74,7 @@ class DisplayContainer {
      */
     removeChild(child: Mesh) {
         const index = this.#children.indexOf(child)
-        if (index > -1 ) {
+        if (index > -1) {
             child.parent = null;
             this.#children.splice(index, 1);
         }

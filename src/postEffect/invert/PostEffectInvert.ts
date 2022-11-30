@@ -1,23 +1,20 @@
 import {RedGPUContext} from "../../context";
 import {PostEffectBase} from "../index";
 import PostEffectManager from "../PostEffectManager";
-import makeShaderModule from "../../resource/makeShaderModule";
-import vertexSource from "./vertex.wgsl";
-import fragmentSource from "./fragment.wgsl";
 import UniformBufferFloat32 from "../../resource/buffers/uniformBuffer/UniformBufferFloat32";
 import UniformBufferDescriptor from "../../resource/buffers/uniformBuffer/UniformBufferDescriptor";
 import TypeSize from "../../resource/buffers/TypeSize";
 
 
 class PostEffectInvert extends PostEffectBase {
-    uniformBuffer:UniformBufferFloat32
+    uniformBuffer: UniformBufferFloat32
+
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
     }
-    #init(postEffectManager:PostEffectManager){
+
+    #init(postEffectManager: PostEffectManager) {
         const {gpuDevice} = this.redGPUContext
-        const vShaderModule = makeShaderModule(gpuDevice, vertexSource, `vertex_${this.constructor.name}`)
-        const fShaderModule = makeShaderModule(gpuDevice, fragmentSource, `fragment_${this.constructor.name}`)
 
         this.uniformBuffer = new UniformBufferFloat32(this.redGPUContext, new UniformBufferDescriptor(
             [
@@ -49,61 +46,17 @@ class PostEffectInvert extends PostEffectBase {
                 }
             ]
         });
-        const presentationFormat: GPUTextureFormat = navigator.gpu.getPreferredCanvasFormat();
-        const pipeLineDescriptor: GPURenderPipelineDescriptor = {
-            // set bindGroupLayouts
-            layout: gpuDevice.createPipelineLayout({bindGroupLayouts: [this.uniformsBindGroupLayout]}),
-            vertex: {
-                module: vShaderModule,
-                entryPoint: 'main',
-
-                buffers: [
-                    {
-                        arrayStride: postEffectManager.vertexBuffer.arrayStride,
-                        attributes: postEffectManager.vertexBuffer.attributes.map((v, index) => {
-                            return {
-                                // position
-                                shaderLocation: index,
-                                offset: v.offset,
-                                format: v.format
-                            }
-                        })
-                    }
-                ]
-            },
-            fragment: {
-                module: fShaderModule,
-                entryPoint: 'main',
-                targets: [
-                    {
-                        format: presentationFormat,
-                        blend: {
-                            color: {
-                                srcFactor: "src-alpha",
-                                dstFactor: "one-minus-src-alpha",
-                                operation: "add"
-                            },
-                            alpha: {
-                                srcFactor: "one",
-                                dstFactor: "one-minus-src-alpha",
-                                operation: "add"
-                            }
-                        }
-                    },
-                ],
-            },
-        }
-        this.pipeline = gpuDevice.createRenderPipeline(pipeLineDescriptor);
+        this.setPipeline(postEffectManager)
 
     }
 
-    render(postEffectManager:PostEffectManager,sourceTextureView:GPUTextureView):GPUTextureView{
-        if(!this.pipeline) this.#init(postEffectManager)
+    render(postEffectManager: PostEffectManager, sourceTextureView: GPUTextureView): GPUTextureView {
+        if (!this.pipeline) this.#init(postEffectManager)
         const redGPUContext = this.redGPUContext
 
         const {gpuDevice, gpuContext, pixelSize} = redGPUContext
         const commandEncoder: GPUCommandEncoder = gpuDevice.createCommandEncoder();
-        const texture:GPUTexture = gpuDevice.createTexture({
+        const texture: GPUTexture = gpuDevice.createTexture({
             size: {
                 width: Math.floor(postEffectManager.view.pixelViewRect[2]),
                 height: Math.floor(postEffectManager.view.pixelViewRect[3]),

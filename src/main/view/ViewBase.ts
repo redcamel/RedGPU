@@ -3,7 +3,6 @@ import throwError from "../../util/errorFunc/throwError";
 import {mat4} from "../../util/gl-matrix";
 import RedGPUContextBase from "../../context/RedGPUContextBase";
 import ViewDebugger from "./ViewDebugger";
-import redGPUContext from "../../context/RedGPUContext";
 
 class ViewBase extends RedGPUContextBase {
     #dirtyViewRect: boolean = true

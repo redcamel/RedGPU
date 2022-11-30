@@ -2,7 +2,6 @@ import RedGPUContextBase from "../context/RedGPUContextBase";
 import RedGPUContext from "../context/RedGPUContext";
 import UniformBufferFloat32 from "../resource/buffers/uniformBuffer/UniformBufferFloat32";
 import UniformBufferDescriptor from "../resource/buffers/uniformBuffer/UniformBufferDescriptor";
-import shaderDefineReplace from "../systemShaderDefine/shaderDefineReplace";
 import makeUUID from "../util/makeUUID";
 import makeShaderModule from "../resource/makeShaderModule";
 
