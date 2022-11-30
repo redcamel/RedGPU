@@ -19,8 +19,8 @@ const run = () => {
 				const view = new RedGPU.View(redGPUContext, scene)
 				redGPUContext.addView(view)
 
-				// Set PostEffect
-			  view.postEffectManager.addEffect(new RedGPU.PostEffectInvert(redGPUContext))
+			// Set PostEffect
+			view.postEffectManager.addEffect(new RedGPU.PostEffectInvert(redGPUContext))
 
 				// Set Renderer
 				const renderer = new RedGPU.Renderer(redGPUContext)

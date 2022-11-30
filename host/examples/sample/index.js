@@ -17,6 +17,7 @@ const run = () => {
 				const ambientLight = new RedGPU.AmbientLight(redGPUContext)
 				// ambientLight.color = 0xff0000
 				// ambientLight.intensity=1
+
 				scene.lightManager.addLight(ambientLight);
 				const renderer = new RedGPU.Renderer(redGPUContext)
 				const lightNum = 1024

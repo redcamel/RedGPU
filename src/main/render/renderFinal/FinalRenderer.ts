@@ -4,11 +4,16 @@ import vertexSource from './vertex.wgsl';
 import fragmentSource from './fragment.wgsl';
 import {mat4} from "../../../util/gl-matrix";
 import {View} from "../../view";
+import {TextureSampler} from "../../../resource/texture";
+import makeShaderModule from "../../../resource/makeShaderModule";
+import VertexBuffer from "../../../resource/buffers/buffer/VertexBuffer";
+import InterleaveInfo from "../../../resource/buffers/interleaveInfo/InterleaveInfo";
+import InterleaveUnit from "../../../resource/buffers/interleaveInfo/InterleaveUnit";
 
 class FinalRenderer extends RedGPUContextBase {
-    vertexBuffer: GPUBuffer
+    vertexBuffer: VertexBuffer
 
-    sampler: GPUSampler
+    sampler: TextureSampler
     uniformsBindGroupLayout: GPUBindGroupLayout
     uniformBindGroup: GPUBindGroup
     pipeline: GPURenderPipeline
@@ -18,25 +23,31 @@ class FinalRenderer extends RedGPUContextBase {
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext)
         const {gpuDevice} = redGPUContext
-        const vShaderModule = makeShaderModule(gpuDevice, vertexSource)
-        const fShaderModule = makeShaderModule(gpuDevice, fragmentSource)
+        const vShaderModule = makeShaderModule(gpuDevice, vertexSource, 'FinalRenderer_vShaderModule')
+        const fShaderModule = makeShaderModule(gpuDevice, fragmentSource, 'FinalRenderer_fShaderModule')
         console.log(vShaderModule, fShaderModule)
         this.#matrix = mat4.create()
         ////////////////////////////////////////////////////////////////////////
         // make vertexBuffer
-        this.vertexBuffer = makeVertexBuffer(
-            gpuDevice,
+        this.vertexBuffer = new VertexBuffer(
+            redGPUContext,
             new Float32Array(
                 [
-                    //x,y,z,w, u,v
-                    -1.0, -1.0, 0.0, 1.0, 0.0, 1.0,
-                    1.0, -1.0, 0.0, 1.0, 1.0, 1.0,
-                    -1.0, 1.0, 0.0, 1.0, 0.0, 0.0,
-                    -1.0, 1.0, 0.0, 1.0, 0.0, 0.0,
-                    1.0, -1.0, 0.0, 1.0, 1.0, 1.0,
-                    1.0, 1.0, 0.0, 1.0, 1.0, 0.0
+                    //x,y,z, u,v
+                    -1.0, -1.0, 0.0, 0.0, 1.0,
+                    1.0, -1.0, 0.0, 1.0, 1.0,
+                    -1.0, 1.0, 0.0, 0.0, 0.0,
+                    -1.0, 1.0, 0.0, 0.0, 0.0,
+                    1.0, -1.0, 0.0, 1.0, 1.0,
+                    1.0, 1.0, 0.0, 1.0, 0.0
                 ]
-            )
+            ),
+            new InterleaveInfo(
+                [
+                    new InterleaveUnit(InterleaveUnit.VERTEX_POSITION, "float32x3"),
+                    new InterleaveUnit(InterleaveUnit.TEXCOORD, 'float32x2')
+                ]
+            ),
         );
         this.uniformsBindGroupLayout = gpuDevice.createBindGroupLayout({
             entries: [
@@ -63,13 +74,14 @@ class FinalRenderer extends RedGPUContextBase {
             ]
         });
 
-        this.sampler = gpuDevice.createSampler({
+        this.sampler = new TextureSampler(redGPUContext, {
             magFilter: "linear",
             minFilter: "linear",
             mipmapFilter: "nearest"
         });
 
         /////
+        console.log(this.vertexBuffer)
         const presentationFormat: GPUTextureFormat = navigator.gpu.getPreferredCanvasFormat();
         const pipeLineDescriptor: GPURenderPipelineDescriptor = {
             // set bindGroupLayouts
@@ -80,21 +92,15 @@ class FinalRenderer extends RedGPUContextBase {
 
                 buffers: [
                     {
-                        arrayStride: 6 * Float32Array.BYTES_PER_ELEMENT,
-                        attributes: [
-                            {
+                        arrayStride: this.vertexBuffer.arrayStride,
+                        attributes: this.vertexBuffer.attributes.map((v, index) => {
+                            return {
                                 // position
-                                shaderLocation: 0,
-                                offset: 0,
-                                format: "float32x4"
-                            },
-                            {
-                                // uv
-                                shaderLocation: 1,
-                                offset: 4 * Float32Array.BYTES_PER_ELEMENT,
-                                format: "float32x2"
-                            },
-                        ]
+                                shaderLocation: index,
+                                offset: v.offset,
+                                format: v.format
+                            }
+                        })
                     }
                 ]
             },
@@ -119,8 +125,6 @@ class FinalRenderer extends RedGPUContextBase {
                     },
                 ],
             },
-
-
         }
         this.pipeline = gpuDevice.createRenderPipeline(pipeLineDescriptor);
         /////
@@ -181,7 +185,7 @@ class FinalRenderer extends RedGPUContextBase {
                     },
                     {
                         binding: 1,
-                        resource: this.sampler,
+                        resource: this.sampler.gpuSampler,
                     },
                     {
                         binding: 2,
@@ -190,7 +194,7 @@ class FinalRenderer extends RedGPUContextBase {
                 ]
             };
             this.uniformBindGroup = gpuDevice.createBindGroup(uniformBindGroupDescriptor);
-            passEncoder.setVertexBuffer(0, this.vertexBuffer);
+            passEncoder.setVertexBuffer(0, this.vertexBuffer.gpuBuffer);
             passEncoder.setBindGroup(0, this.uniformBindGroup);
 
             mat4.identity(this.#matrix)
@@ -250,24 +254,3 @@ class FinalRenderer extends RedGPUContextBase {
 }
 
 export default FinalRenderer
-
-function makeShaderModule(device, source) {
-    const shaderModuleDescriptor: GPUShaderModuleDescriptor = {
-        code: source
-    };
-    return device.createShaderModule(shaderModuleDescriptor);
-}
-
-function makeVertexBuffer(device: GPUDevice, data: Float32Array) {
-    console.log(`// makeVertexBuffer start /////////////////////////////////////////////////////////////`);
-    let bufferDescriptor: GPUBufferDescriptor = {
-        size: data.byteLength,
-        usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST
-    };
-    let verticesBuffer: GPUBuffer = device.createBuffer(bufferDescriptor);
-    console.log('bufferDescriptor', bufferDescriptor);
-    device.queue.writeBuffer(verticesBuffer, 0, data);
-    console.log('verticesBuffer', verticesBuffer);
-    console.log(`// makeVertexBuffer end /////////////////////////////////////////////////////////////`);
-    return verticesBuffer;
-}

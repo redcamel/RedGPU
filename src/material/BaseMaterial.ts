@@ -4,6 +4,7 @@ import UniformBufferFloat32 from "../resource/buffers/uniformBuffer/UniformBuffe
 import UniformBufferDescriptor from "../resource/buffers/uniformBuffer/UniformBufferDescriptor";
 import shaderDefineReplace from "../systemShaderDefine/shaderDefineReplace";
 import makeUUID from "../util/makeUUID";
+import makeShaderModule from "../resource/makeShaderModule";
 
 class BaseMaterial extends RedGPUContextBase {
 
@@ -139,20 +140,3 @@ class BaseMaterial extends RedGPUContextBase {
 
 export default BaseMaterial
 
-const draftCache = new Map()
-
-function makeShaderModule(device, source, label = '') {
-    if (draftCache.has(source)) {
-        return draftCache.get(source)
-    }
-
-    const shaderModuleDescriptor = {
-        code: shaderDefineReplace(source),
-        label
-    };
-    const t0 = device.createShaderModule(shaderModuleDescriptor);
-    draftCache.set(source, t0)
-    // console.log('draftCache', draftCache, t0)
-    // console.log(t0)
-    return t0
-}

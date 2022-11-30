@@ -61,9 +61,14 @@ class Renderer extends RedGPUContextBase {
         const redGPUContext = this.redGPUContext
         const targetDebugger = redGPUContext.debugger
         const soloRenderYn = redGPUContext.viewList.length === 1
+
         if (nowTime - this.#prevTime > 8) {
-            redGPUContext.viewList.forEach(view => this.#renderView(view, nowTime, redGPUContext, soloRenderYn))
-            if (!soloRenderYn) {
+            let hasPostEffect = false
+            redGPUContext.viewList.forEach(view => {
+                this.#renderView(view, nowTime, redGPUContext, soloRenderYn)
+                if (view.postEffectManager.children.length) hasPostEffect = true
+            })
+            if (!soloRenderYn || hasPostEffect) {
                 this.#finalRenderer.render(redGPUContext.viewList)
             }
             this.#prevTime = nowTime
@@ -94,9 +99,11 @@ class Renderer extends RedGPUContextBase {
         let renderMeshNum = 0
         let triangleNum = 0
 
+
         const {gpuDevice, gpuContext} = redGPUContext
         const commandEncoder: GPUCommandEncoder = gpuDevice.createCommandEncoder();
-        if (soloRender) {
+        const hasPostEffect = !!view.postEffectManager.children.length
+        if (soloRender && !hasPostEffect) {
             view.resolveTexture = gpuContext.getCurrentTexture();
             view.resolveTextureView = view.resolveTexture.createView()
         }
@@ -108,7 +115,8 @@ class Renderer extends RedGPUContextBase {
         ) {
             const size = [view.pixelViewRect[2], view.pixelViewRect[3]]
             const sampleCount = redGPUContext.useMultiSample ? 4 : 1
-            const usage = soloRender ? GPUTextureUsage.RENDER_ATTACHMENT : (GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING)
+
+            const usage = hasPostEffect ? (GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING) : soloRender ? GPUTextureUsage.RENDER_ATTACHMENT : (GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING)
             const format = navigator.gpu.getPreferredCanvasFormat()
             view.resultTexture = gpuDevice.createTexture({
                 size,
@@ -118,7 +126,7 @@ class Renderer extends RedGPUContextBase {
             });
             view.resultTextureView = view.resultTexture.createView();
             ///////////
-            if (soloRender) {
+            if (soloRender && !hasPostEffect) {
 
             } else {
                 view.resolveTexture = gpuDevice.createTexture({
@@ -208,7 +216,10 @@ class Renderer extends RedGPUContextBase {
 
         {
             // TODO - PostEffect Render
-            view.postEffectManager.render()
+            if (view.postEffectManager.children.length) {
+                view.resolveTextureView = view.postEffectManager.render()
+            }
+
         }
         mainTime = performance.now() - checkStartTime
         checkStartTime = performance.now()

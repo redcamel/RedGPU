@@ -176,7 +176,7 @@ class View extends ViewBase {
         this.#label = label || `View${UUID++} (Label input is recommended.)`
         this.scene = scene
         this.#camera = new BasicCamera()
-        this.#postEffectManager = new PostEffectManager(redGPUContext)
+        this.#postEffectManager = new PostEffectManager(this)
         this.#init()
         console.log('View', this)
     }
