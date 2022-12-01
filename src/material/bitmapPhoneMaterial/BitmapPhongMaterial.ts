@@ -33,12 +33,14 @@ const fragmentUniformBindGroupLayoutDescriptor: GPUBindGroupLayoutDescriptor = {
 
 const fragmentUniformBufferDescriptor = [
     ...Mix.alphaUniformDefine,
+    ...Mix.lightPropertyUniformDefine
 ];
 
-class BitmapMaterial extends Mix.mix(
+class BitmapPhongMaterial extends Mix.mix(
     BaseMaterial,
     Mix.diffuseTexture,
     Mix.alpha,
+    Mix.lightProperty,
 ) {
 
 
@@ -109,4 +111,4 @@ class BitmapMaterial extends Mix.mix(
 
 }
 
-export default BitmapMaterial
+export default BitmapPhongMaterial

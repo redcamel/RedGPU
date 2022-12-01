@@ -7,7 +7,16 @@ const setPrism = () => {
 	getPrism()
 }
 const setUI = (redGPUContext) => {
-
+	const t0 = document.createElement('div')
+	t0.innerHTML = `
+<div style="font-size: 11px;padding : 4px;background: rgba(0,0,0,0.5);margin-top:6px;">
+    This is the RedGPU 2.0 Preview page.
+    <div>You can check the source at <a href="https://github.com/redcamel/RedGPU/tree/preview2.0">RedGPU Preview
+        branch.</a></div>
+    <div>Demo play is provided via <a href="https://redcamel.github.io/Rnd_Doc/host/index.html">this URL</a></div>
+</div>	
+	`
+	document.querySelector('.subTitle')?.appendChild(t0)
 }
 const setExampleHelper = (redGPUContext, source) => {
 	setPrism()
@@ -36,6 +45,7 @@ const setExampleHelper = (redGPUContext, source) => {
 			rootBox.innerHTML = '<code class="language-javascript">' + Prism.highlight(source, Prism.languages.javascript) + '</code>'
 		}
 	});
+
 }
 
 export default setExampleHelper

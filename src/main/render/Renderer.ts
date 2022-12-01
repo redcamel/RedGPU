@@ -66,6 +66,8 @@ class Renderer extends RedGPUContextBase {
             let hasPostEffect = false
             redGPUContext.viewList.forEach(view => {
                 this.#renderView(view, nowTime, redGPUContext, soloRenderYn)
+            })
+            redGPUContext.viewList.forEach(view => {
                 if (view.postEffectManager.children.length) hasPostEffect = true
             })
             if (!soloRenderYn || hasPostEffect) {
@@ -125,7 +127,7 @@ class Renderer extends RedGPUContextBase {
                 format,
                 usage
             });
-            view.resultTextureView = view.resultTexture.createView();
+            view.resultTextureView = view.resultTexture.createView({label : `${view.label}_resultTextureView` });
             ///////////
             if (soloRender && !hasPostEffect) {
 
@@ -137,7 +139,7 @@ class Renderer extends RedGPUContextBase {
                     usage,
                 });
 
-                view.resolveTextureView = view.resolveTexture.createView();
+                view.resolveTextureView = view.resolveTexture.createView({label : `${view.label}_resolveTextureView` });
             }
 
             ///////////
@@ -216,7 +218,6 @@ class Renderer extends RedGPUContextBase {
         gpuDevice.queue.submit([commandEncoder.finish()]);
 
         {
-            // TODO - PostEffect Render
             if (view.postEffectManager.children.length) {
                 view.resolveTextureView = view.postEffectManager.render()
             }

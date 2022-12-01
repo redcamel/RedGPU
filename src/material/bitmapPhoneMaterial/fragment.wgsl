@@ -2,6 +2,9 @@
 
 struct MaterialUniforms {
     alpha : f32,
+    shininess : f32,
+    specularPower : f32,
+    specularColor : vec3<f32>,
 };
 
 @group(2) @binding(0) var<uniform> materialUniforms : MaterialUniforms;
@@ -19,8 +22,18 @@ struct InputData {
 
 fn main(inputData:InputData) -> @location(0) vec4<f32> {
     var diffuseColor:vec4<f32> = textureSample(_texture,_sampler, inputData.uv);
+    var lightColorSum = calcLights(
+        systemLightUniforms,
+        inputData.position,
+        normalize(inputData.vertexNormal),
+        inputData.vertexPosition,
+        //
+        materialUniforms.shininess,
+        materialUniforms.specularPower,
+        materialUniforms.specularColor
+      );
     // result color
-    diffuseColor = vec4<f32>(diffuseColor.rgb, diffuseColor.a * materialUniforms.alpha);
+    diffuseColor = vec4<f32>(diffuseColor.rgb * lightColorSum, diffuseColor.a * materialUniforms.alpha);
     if(diffuseColor.a == 0.0) {
      discard;
     }

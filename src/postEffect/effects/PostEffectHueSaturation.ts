@@ -4,21 +4,59 @@ import PostEffectManager from "../PostEffectManager";
 import UniformBufferFloat32 from "../../resource/buffers/uniformBuffer/UniformBufferFloat32";
 import UniformBufferDescriptor from "../../resource/buffers/uniformBuffer/UniformBufferDescriptor";
 import TypeSize from "../../resource/buffers/TypeSize";
+import vertexSource from "./wgslVertex/baseVertex.wgsl";
+import fragmentSource from "./wgslFragment/hueSaturationFragment.wgsl";
 
+let float32Array_1 = new Float32Array(1);
 
-class PostEffectInvert extends PostEffectBase {
+class PostEffectHueSaturation extends PostEffectBase {
     uniformBuffer: UniformBufferFloat32
+    #saturation: number = 0
+
+    get saturation(): number {
+        return this.#saturation;
+    }
+
+    set saturation(value: number) {
+        if (value < -100) value = -100
+        if (value > 100) value = 100
+        this.#saturation = value;
+        float32Array_1[0] = value/100
+        this.redGPUContext.gpuDevice.queue.writeBuffer(
+            this.uniformBuffer.gpuBuffer,
+            this.uniformBuffer.descriptor.redGpuStructOffsetMap['saturation'],
+            float32Array_1
+        );
+    }
+
+    #hue: number = 0
+
+    get hue(): number {
+        return this.#hue;
+    }
+
+    set hue(value: number) {
+        if (value < -180) value = -180
+        if (value > 180) value = 180
+        this.#hue = value;
+        float32Array_1[0] = value/180
+        this.redGPUContext.gpuDevice.queue.writeBuffer(
+            this.uniformBuffer.gpuBuffer,
+            this.uniformBuffer.descriptor.redGpuStructOffsetMap['hue'],
+            float32Array_1
+        );
+    }
 
     constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext);
+        super(redGPUContext, vertexSource, fragmentSource);
     }
 
     #init(postEffectManager: PostEffectManager) {
         const {gpuDevice} = this.redGPUContext
-
         this.uniformBuffer = new UniformBufferFloat32(this.redGPUContext, new UniformBufferDescriptor(
             [
-                {size: TypeSize.float32x2, valueName: 'resolution'},
+                {size: TypeSize.float32, valueName: 'hue'},
+                {size: TypeSize.float32, valueName: 'saturation'},
             ]
         ))
 
@@ -26,7 +64,7 @@ class PostEffectInvert extends PostEffectBase {
             entries: [
                 {
                     binding: 0,
-                    visibility: GPUShaderStage.VERTEX,
+                    visibility: GPUShaderStage.FRAGMENT,
                     buffer: {
                         type: 'uniform',
                     },
@@ -51,39 +89,11 @@ class PostEffectInvert extends PostEffectBase {
     }
 
     render(postEffectManager: PostEffectManager, sourceTextureView: GPUTextureView): GPUTextureView {
-        if (!this.pipeline) this.#init(postEffectManager)
         const redGPUContext = this.redGPUContext
-
-        const {gpuDevice, gpuContext, pixelSize} = redGPUContext
-        const commandEncoder: GPUCommandEncoder = gpuDevice.createCommandEncoder();
-        const texture: GPUTexture = gpuDevice.createTexture({
-            size: {
-                width: Math.floor(postEffectManager.view.pixelViewRect[2]),
-                height: Math.floor(postEffectManager.view.pixelViewRect[3]),
-                depthOrArrayLayers: 1
-            },
-            sampleCount: 1,
-            format: navigator.gpu.getPreferredCanvasFormat(),
-            usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING
-        })
-        const textureView: GPUTextureView = texture.createView();
-
-        const renderPassDescriptor: GPURenderPassDescriptor = {
-            /**
-             * @typedef {GPURenderPassColorAttachment}
-             */
-            colorAttachments: [
-                {
-                    view: textureView,
-                    clearValue: {r: 0.0, g: 0.0, b: 0.0, a: 0.0},
-                    loadOp: 'clear',
-                    storeOp: 'store',
-                },
-            ]
-
-        };
-        const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
-        passEncoder.setPipeline(this.pipeline);
+        const {gpuDevice} = redGPUContext
+        const {textureView, renderPassDescriptor} = this.getRenderInfo(postEffectManager)
+        if (!this.pipeline) this.#init(postEffectManager)
+        //
         const uniformBindGroupDescriptor = {
             layout: this.uniformsBindGroupLayout,
             entries: [
@@ -106,15 +116,18 @@ class PostEffectInvert extends PostEffectBase {
             ]
         };
         this.uniformBindGroup = gpuDevice.createBindGroup(uniformBindGroupDescriptor);
+        //
+        const commandEncoder: GPUCommandEncoder = gpuDevice.createCommandEncoder();
+        const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
+        passEncoder.setPipeline(this.pipeline);
         passEncoder.setVertexBuffer(0, postEffectManager.vertexBuffer.gpuBuffer);
         passEncoder.setBindGroup(0, this.uniformBindGroup);
-        // gpuDevice.queue.writeBuffer(view.finalRenderUniformBuffer, 0, this.#matrix);
         passEncoder.draw(6, 1, 0, 0);
-        //
         passEncoder.end();
         gpuDevice.queue.submit([commandEncoder.finish()]);
+
         return textureView
     }
 }
 
-export default PostEffectInvert
+export default PostEffectHueSaturation

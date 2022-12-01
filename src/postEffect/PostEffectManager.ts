@@ -72,8 +72,7 @@ class PostEffectManager extends RedGPUContextBase {
     }
 
     render() {
-        //TODO
-        console.log('TODO PostEffect Render')
+        console.log('PostEffect Render')
         let lastSourceTextureView: GPUTextureView = this.#view.resolveTextureView
         this.#children.forEach((effect: PostEffectBase) => {
             lastSourceTextureView = effect.render(this, lastSourceTextureView)
@@ -98,7 +97,6 @@ class PostEffectManager extends RedGPUContextBase {
         if (index > -1) {
             this.#children.splice(index, 1);
         }
-        return this
     }
 }
 

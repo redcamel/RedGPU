@@ -171,8 +171,7 @@ class FinalRenderer extends RedGPUContextBase {
         passEncoder.setScissorRect(0, 0, pixelSize.width, pixelSize.height);
         viewList.forEach((view: View) => {
             const {pixelViewRect} = view
-            const {renderScale} = redGPUContext
-
+            console.log(view.resolveTextureView,view.resultTextureView.label)
             const uniformBindGroupDescriptor = {
                 layout: this.uniformsBindGroupLayout,
                 entries: [

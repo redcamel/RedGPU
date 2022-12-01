@@ -3,8 +3,7 @@ import RedGPUContextBase from "../context/RedGPUContextBase";
 import throwError from "../util/errorFunc/throwError";
 import PostEffectManager from "./PostEffectManager";
 import makeShaderModule from "../resource/makeShaderModule";
-import vertexSource from "./invert/vertex.wgsl";
-import fragmentSource from "./invert/fragment.wgsl";
+
 
 class PostEffectBase extends RedGPUContextBase {
     #subPassList: [] = []
@@ -15,22 +14,32 @@ class PostEffectBase extends RedGPUContextBase {
     uniformsBindGroupLayout: GPUBindGroupLayout
     uniformBindGroup: GPUBindGroup
     pipeline: GPURenderPipeline
+    #vShaderModule:GPUShaderModule
+    get vShaderModule(): GPUShaderModule {
+        return this.#vShaderModule;
+    }
 
-    constructor(redGPUContext: RedGPUContext) {
+    #fShaderModule:GPUShaderModule
+
+    get fShaderModule(): GPUShaderModule {
+        return this.#fShaderModule;
+    }
+
+    constructor(redGPUContext: RedGPUContext,vertexSource:string,fragmentSource:string) {
         super(redGPUContext);
+        const {gpuDevice} = this.redGPUContext
+        this.#vShaderModule = makeShaderModule(gpuDevice, vertexSource, `vertex_${this.constructor.name}`)
+        this.#fShaderModule = makeShaderModule(gpuDevice, fragmentSource, `fragment_${this.constructor.name}`)
     }
 
     setPipeline(postEffectManager) {
         const {gpuDevice} = this.redGPUContext
-        const vShaderModule = makeShaderModule(gpuDevice, vertexSource, `vertex_${this.constructor.name}`)
-        const fShaderModule = makeShaderModule(gpuDevice, fragmentSource, `fragment_${this.constructor.name}`)
-
         const presentationFormat: GPUTextureFormat = navigator.gpu.getPreferredCanvasFormat();
         const pipeLineDescriptor: GPURenderPipelineDescriptor = {
             // set bindGroupLayouts
             layout: gpuDevice.createPipelineLayout({bindGroupLayouts: [this.uniformsBindGroupLayout]}),
             vertex: {
-                module: vShaderModule,
+                module: this.#vShaderModule,
                 entryPoint: 'main',
 
                 buffers: [
@@ -48,7 +57,7 @@ class PostEffectBase extends RedGPUContextBase {
                 ]
             },
             fragment: {
-                module: fShaderModule,
+                module: this.#fShaderModule,
                 entryPoint: 'main',
                 targets: [
                     {
@@ -72,6 +81,40 @@ class PostEffectBase extends RedGPUContextBase {
         this.pipeline = gpuDevice.createRenderPipeline(pipeLineDescriptor);
     }
 
+    getRenderInfo(postEffectManager : PostEffectManager){
+        const redGPUContext = this.redGPUContext
+        const {gpuDevice} = redGPUContext
+        const texture: GPUTexture = gpuDevice.createTexture({
+            label: `${this.constructor.name}_texture`,
+            size: {
+                width: Math.floor(postEffectManager.view.pixelViewRect[2]),
+                height: Math.floor(postEffectManager.view.pixelViewRect[3]),
+                depthOrArrayLayers: 1
+            },
+            sampleCount: 1,
+            format: navigator.gpu.getPreferredCanvasFormat(),
+            usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING
+        })
+        const textureView: GPUTextureView = texture.createView();
+        const renderPassDescriptor: GPURenderPassDescriptor = {
+            /**
+             * @typedef {GPURenderPassColorAttachment}
+             */
+            colorAttachments: [
+                {
+                    view: textureView,
+                    clearValue: {r: 0.0, g: 0.0, b: 0.0, a: 0.0},
+                    loadOp: 'clear',
+                    storeOp: 'store',
+                },
+            ]
+        };
+        return {
+            texture,
+            textureView,
+            renderPassDescriptor
+        }
+    }
     render(postEffectManager: PostEffectManager, sourceTextureView: GPUTextureView): GPUTextureView {
         throwError('Must Override')
         return

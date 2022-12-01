@@ -38,11 +38,13 @@ class RedGPUContextResourceManager extends RedGPUContextBase {
     constructor(context) {
         super(context)
         const emptyTextureInfo = this.redGPUContext.gpuDevice.createTexture({
+            label:'emptyTexture',
             size: {width: 1, height: 1, depthOrArrayLayers: 1},
             format: navigator.gpu.getPreferredCanvasFormat(),
-            usage: GPUTextureUsage.TEXTURE_BINDING,
+            usage: GPUTextureUsage.TEXTURE_BINDING || GPUTextureUsage.RENDER_ATTACHMENT,
         })
         const emptyCubeTextureInfo = this.redGPUContext.gpuDevice.createTexture({
+            label:'emptyCubeTexture',
             size: {width: 1, height: 1, depthOrArrayLayers: 6,},
             dimension: '2d',
             // arrayLayerCount: 6,

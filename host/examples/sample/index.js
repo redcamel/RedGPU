@@ -66,7 +66,7 @@ const run = () => {
 				const geometrySphere = new RedGPU.Sphere(redGPUContext)
 				const geometryBox = new RedGPU.Box(redGPUContext)
 				const testTexture = new RedGPU.BitmapTexture(redGPUContext, '../../assets/crate.png')
-				const testMat = new RedGPU.BitmapMaterial(redGPUContext, testTexture)
+				const testMat = new RedGPU.BitmapPhongMaterial(redGPUContext, testTexture)
 				testMat.specularPower = 10
 				testMat.shininess = 64
 				testMat.specularColor = '0xffffff'
@@ -87,7 +87,7 @@ const run = () => {
 					// {
 					// if(i%20===0) {
 					// 	testTexture2 = new RedGPU.BitmapTexture(redGPUContext, '../../assets/crate.png')
-					// 	testMat2 = new RedGPU.BitmapMaterial(redGPUContext, testTexture)
+					// 	testMat2 = new RedGPU.BitmapPhongMaterial(redGPUContext, testTexture)
 					// }
 					//
 					// }

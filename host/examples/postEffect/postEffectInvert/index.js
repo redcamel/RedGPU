@@ -16,10 +16,7 @@ const run = () => {
 				scene.axis = new RedGPU.Axis(redGPUContext)
 
 				{
-					// Set Object & Light
-					scene.lightManager.addLight(new RedGPU.DirectionalLight(redGPUContext))
-
-					scene.lightManager.directionalLightList[0].y = -1
+					// Set Object
 					const testTexture = new RedGPU.BitmapTexture(redGPUContext, '../../../assets/crate.png')
 					const testMat = new RedGPU.BitmapMaterial(redGPUContext, testTexture)
 					let i = 100
