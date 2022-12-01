@@ -3,6 +3,7 @@ import PostEffectBase from "./PostEffectBase";
 import PostEffectInvert from "./effects/PostEffectInvert";
 import PostEffectGray from "./effects/PostEffectGray";
 import PostEffectHueSaturation from "./effects/PostEffectHueSaturation";
+import PostEffectBrightnessContrast from "./effects/PostEffectBrightnessContrast";
 
 
 export {
@@ -11,5 +12,6 @@ export {
     //
     PostEffectInvert,
     PostEffectGray,
-    PostEffectHueSaturation
+    PostEffectHueSaturation,
+    PostEffectBrightnessContrast
 }

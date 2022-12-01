@@ -19,6 +19,9 @@ const testUI = (gui, redGPUContext, targetDebugger) => {
 		testData.saturationController = targetDebugger.__gui_setItem(root.add(effect, 'saturation',-100,100,0.01))
 	}
 	const removeController = () => {
+		if (testData.currentEffect) {
+			view.postEffectManager.removeEffect(testData.currentEffect)
+		}
 		testData.currentEffect = null
 		if (testData.hueController) {
 			root.remove(testData.hueController)
@@ -34,10 +37,7 @@ const testUI = (gui, redGPUContext, targetDebugger) => {
 		if (v) {
 			setController()
 		} else {
-			if (view.postEffectManager.children[0]) {
-				removeController()
-				view.postEffectManager.removeEffect(view.postEffectManager.children[0])
-			}
+			removeController()
 		}
 	})
 	setController()

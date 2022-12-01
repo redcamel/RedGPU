@@ -49,3 +49,8 @@ html, body {
 ::-webkit-scrollbar-thumb:hover {
     background: #70020c;
 }
+
+a, a:visited, a:active, a:hover {
+    font-size: 0.8em;
+    color: #fff
+}
