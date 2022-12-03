@@ -58,8 +58,8 @@ class PostEffectPixelize extends PostEffectBase {
                 {size: TypeSize.float32, valueName: 'height'},
             ]
         ))
-        this.width = 5
-        this.height = 5
+        this.width = 25
+        this.height = 25
 
         this.uniformsBindGroupLayout = gpuDevice.createBindGroupLayout({
             entries: [

@@ -6,6 +6,7 @@ const testUI = (gui, redGPUContext, targetDebugger) => {
 	const testData = {
 		usePostEffectPixelize: true,
 		currentEffect: view.postEffectManager.children[0],
+		effectRenderTimeController: null,
 		widthController: null,
 		heightController: null
 	}
@@ -15,14 +16,19 @@ const testUI = (gui, redGPUContext, targetDebugger) => {
 		const effect = new RedGPU.PostEffectPixelize(redGPUContext)
 		view.postEffectManager.addEffect(effect)
 		testData.currentEffect = effect
-		testData.widthController = targetDebugger.__gui_setItem(root.add(effect, 'width', 0, 30, 0.01))
-		testData.heightController = targetDebugger.__gui_setItem(root.add(effect, 'height', 0, 30, 0.01))
+		testData.effectRenderTimeController = targetDebugger.__gui_setItemDisableInput(root.add(effect, 'effectRenderTime', 0, 3, 0.0001), 'auto')
+		testData.widthController = targetDebugger.__gui_setItem(root.add(effect, 'width', 1, 30, 0.01))
+		testData.heightController = targetDebugger.__gui_setItem(root.add(effect, 'height', 1, 30, 0.01))
 	}
 	const removeController = () => {
 		if (testData.currentEffect) {
 			view.postEffectManager.removeEffect(testData.currentEffect)
 		}
 		testData.currentEffect = null
+		if (testData.effectRenderTimeController) {
+			root.remove(testData.effectRenderTimeController)
+			testData.effectRenderTimeController = null
+		}
 		if (testData.widthController) {
 			root.remove(testData.widthController)
 			testData.widthController = null
@@ -38,7 +44,6 @@ const testUI = (gui, redGPUContext, targetDebugger) => {
 			setController()
 		} else {
 			removeController()
-
 		}
 	})
 	setController()

@@ -1,5 +1,3 @@
-
-
 const setPrism = () => {
 	let t0 = document.createElement('style');
 	t0.innerHTML = `${prismCss}`
@@ -18,6 +16,7 @@ const setUI = (redGPUContext) => {
 	`
 	document.querySelector('.subTitle')?.appendChild(t0)
 }
+
 const setExampleHelper = (redGPUContext, source) => {
 	setPrism()
 	setUI(redGPUContext)
@@ -33,7 +32,6 @@ const setExampleHelper = (redGPUContext, source) => {
 	rootBox.className = 'sourceView'
 	sourceViewBt.style.cssText = 'position:fixed;right:10px;bottom:10px;background:#222;color:#fff;z-index:10002;border:0;outline:none;cursor:pointer;padding:8px;font-size:11px;border-radius:5px';
 	sourceViewBt.innerHTML = 'SOURCE VIEW';
-
 	sourceViewBt.addEventListener('click', function () {
 		if (rootBox.style.display == 'block') {
 			rootBox.style.display = 'none';
@@ -41,15 +39,11 @@ const setExampleHelper = (redGPUContext, source) => {
 		} else {
 			sourceViewBt.innerHTML = 'CLOSE';
 			rootBox.style.display = 'block';
-
 			rootBox.innerHTML = '<code class="language-javascript">' + Prism.highlight(source, Prism.languages.javascript) + '</code>'
 		}
 	});
-
 }
-
 export default setExampleHelper
-
 const prismCss = `
 
 
@@ -110,15 +104,20 @@ pre[class*="language-"] a[href]:hover{ cursor:help; text-decoration:underline }
 pre[class*='language-']{ position:relative }
 pre[class*='language-'][data-language]::before{ content:attr(data-language); color:black; background-color:#CFCFCF; display:inline-block; position:absolute; top:0; right:0; font-size:0.9em; border-radius:0 0 0 5px; padding:0 0.5em; text-shadow:none }
 `
-
 const getPrism = () => {
 	var _self = "undefined" != typeof window ? window : "undefined" != typeof WorkerGlobalScope && self instanceof WorkerGlobalScope ? self : {},
 		Prism = function () {
 			var e = /\blang(?:uage)?-(\w+)\b/i, t = 0, n = _self.Prism = {
 				util: {
-					encode: function (e) {return e instanceof a ? new a(e.type, n.util.encode(e.content), e.alias) : "Array" === n.util.type(e) ? e.map(n.util.encode) : e.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/\u00a0/g, " ")},
-					type: function (e) {return Object.prototype.toString.call(e).match(/\[object (\w+)\]/)[1]},
-					objId: function (e) {return e.__id || Object.defineProperty(e, "__id", {value: ++t}), e.__id},
+					encode: function (e) {
+						return e instanceof a ? new a(e.type, n.util.encode(e.content), e.alias) : "Array" === n.util.type(e) ? e.map(n.util.encode) : e.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/\u00a0/g, " ")
+					},
+					type: function (e) {
+						return Object.prototype.toString.call(e).match(/\[object (\w+)\]/)[1]
+					},
+					objId: function (e) {
+						return e.__id || Object.defineProperty(e, "__id", {value: ++t}), e.__id
+					},
 					clone: function (e) {
 						var t = n.util.type(e);
 						switch (t) {
@@ -127,7 +126,9 @@ const getPrism = () => {
 								for (var r in e) e.hasOwnProperty(r) && (a[r] = n.util.clone(e[r]));
 								return a;
 							case"Array":
-								return e.map && e.map(function (e) {return n.util.clone(e)})
+								return e.map && e.map(function (e) {
+									return n.util.clone(e)
+								})
 						}
 						return e
 					}
@@ -150,14 +151,18 @@ const getPrism = () => {
 							if (s == t) for (var l in a) a.hasOwnProperty(l) && (o[l] = a[l]);
 							o[s] = i[s]
 						}
-						return n.languages.DFS(n.languages, function (t, n) {n === r[e] && t != e && (this[t] = o)}), r[e] = o
+						return n.languages.DFS(n.languages, function (t, n) {
+							n === r[e] && t != e && (this[t] = o)
+						}), r[e] = o
 					}, DFS: function (e, t, a, r) {
 						r = r || {};
 						for (var i in e) e.hasOwnProperty(i) && (t.call(e, i, e[i], a || i), "Object" !== n.util.type(e[i]) || r[n.util.objId(e[i])] ? "Array" !== n.util.type(e[i]) || r[n.util.objId(e[i])] || (r[n.util.objId(e[i])] = !0, n.languages.DFS(e[i], t, i, r)) : (r[n.util.objId(e[i])] = !0, n.languages.DFS(e[i], t, null, r)))
 					}
 				},
 				plugins: {},
-				highlightAll: function (e, t) {for (var a, r = document.querySelectorAll('code[class*="language-"], [class*="language-"] code, code[class*="lang-"], [class*="lang-"] code'), i = 0; a = r[i++];) n.highlightElement(a, e === !0, t)},
+				highlightAll: function (e, t) {
+					for (var a, r = document.querySelectorAll('code[class*="language-"], [class*="language-"] code, code[class*="lang-"], [class*="lang-"] code'), i = 0; a = r[i++];) n.highlightElement(a, e === !0, t)
+				},
 				highlightElement: function (t, a, r) {
 					for (var i, l, o = t; o && !e.test(o.className);) o = o.parentNode;
 					o && (i = (o.className.match(e) || [, ""])[1], l = n.languages[i]), t.className = t.className.replace(e, "").replace(/\s+/g, " ") + " language-" + i, o = t.parentNode, /pre/i.test(o.nodeName) && (o.className = o.className.replace(e, "").replace(/\s+/g, " ") + " language-" + i);
@@ -165,7 +170,9 @@ const getPrism = () => {
 					if (!s || !l) return n.hooks.run("complete", u), void 0;
 					if (n.hooks.run("before-highlight", u), a && _self.Worker) {
 						var c = new Worker(n.filename);
-						c.onmessage = function (e) {u.highlightedCode = e.data, n.hooks.run("before-insert", u), u.element.innerHTML = u.highlightedCode, r && r.call(u.element), n.hooks.run("after-highlight", u), n.hooks.run("complete", u)}, c.postMessage(JSON.stringify({
+						c.onmessage = function (e) {
+							u.highlightedCode = e.data, n.hooks.run("before-insert", u), u.element.innerHTML = u.highlightedCode, r && r.call(u.element), n.hooks.run("after-highlight", u), n.hooks.run("complete", u)
+						}, c.postMessage(JSON.stringify({
 							language: u.language,
 							code: u.code,
 							immediateClose: !0
@@ -217,10 +224,14 @@ const getPrism = () => {
 						if (a && a.length) for (var r, i = 0; r = a[i++];) r(t)
 					}
 				}
-			}, a = n.Token = function (e, t, n) {this.type = e, this.content = t, this.alias = n};
+			}, a = n.Token = function (e, t, n) {
+				this.type = e, this.content = t, this.alias = n
+			};
 			if (a.stringify = function (e, t, r) {
 				if ("string" == typeof e) return e;
-				if ("Array" === n.util.type(e)) return e.map(function (n) {return a.stringify(n, t, e)}).join("");
+				if ("Array" === n.util.type(e)) return e.map(function (n) {
+					return a.stringify(n, t, e)
+				}).join("");
 				var i = {
 					type: e.type,
 					content: a.stringify(e.content, t, r),
@@ -261,7 +272,9 @@ const getPrism = () => {
 			}
 		},
 		entity: /&#?[\da-z]{1,8};/i
-	}, Prism.hooks.add("wrap", function (a) {"entity" === a.type && (a.attributes.title = a.content.replace(/&amp;/, "&"))}), Prism.languages.xml = Prism.languages.markup, Prism.languages.html = Prism.languages.markup, Prism.languages.mathml = Prism.languages.markup, Prism.languages.svg = Prism.languages.markup;
+	}, Prism.hooks.add("wrap", function (a) {
+		"entity" === a.type && (a.attributes.title = a.content.replace(/&amp;/, "&"))
+	}), Prism.languages.xml = Prism.languages.markup, Prism.languages.html = Prism.languages.markup, Prism.languages.mathml = Prism.languages.markup, Prism.languages.svg = Prism.languages.markup;
 	Prism.languages.css = {
 		comment: /\/\*[\w\W]*?\*\//,
 		atrule: {pattern: /@[\w-]+?.*?(;|(?=\s*\{))/i, inside: {rule: /@[\w-]+/}},
@@ -348,9 +361,13 @@ const getPrism = () => {
 		"null": /\bnull\b/gi
 	}, Prism.languages.jsonp = Prism.languages.json;
 	!function () {
-		function e(e, t) {return Array.prototype.slice.call((t || document).querySelectorAll(e))}
+		function e(e, t) {
+			return Array.prototype.slice.call((t || document).querySelectorAll(e))
+		}
 
-		function t(e, t) {return t = " " + t + " ", (" " + e.className + " ").replace(/[\n\t]/g, " ").indexOf(t) > -1}
+		function t(e, t) {
+			return t = " " + t + " ", (" " + e.className + " ").replace(/[\n\t]/g, " ").indexOf(t) > -1
+		}
 
 		function n(e, n, i) {
 			for (var o, a = n.replace(/\s+/g, "").split(","), l = +e.getAttribute("data-line-offset") || 0, d = r() ? parseInt : parseFloat, c = d(getComputedStyle(e).lineHeight), s = 0; o = a[s++];) {
@@ -362,7 +379,9 @@ const getPrism = () => {
 
 		function i() {
 			var t = location.hash.slice(1);
-			e(".temporary.line-highlight").forEach(function (e) {e.parentNode.removeChild(e)});
+			e(".temporary.line-highlight").forEach(function (e) {
+				e.parentNode.removeChild(e)
+			});
 			var i = (t.match(/\.([\d,-]+)$/) || [, ""])[1];
 			if (i && !document.getElementById(t)) {
 				var r = t.slice(0, t.lastIndexOf(".")), o = document.getElementById(r);
@@ -383,7 +402,9 @@ const getPrism = () => {
 			}(), o = 0;
 			Prism.hooks.add("complete", function (t) {
 				var r = t.element.parentNode, a = r && r.getAttribute("data-line");
-				r && a && /pre/i.test(r.nodeName) && (clearTimeout(o), e(".line-highlight", r).forEach(function (e) {e.parentNode.removeChild(e)}), n(r, a), o = setTimeout(i, 1))
+				r && a && /pre/i.test(r.nodeName) && (clearTimeout(o), e(".line-highlight", r).forEach(function (e) {
+					e.parentNode.removeChild(e)
+				}), n(r, a), o = setTimeout(i, 1))
 			}), window.addEventListener && window.addEventListener("hashchange", i)
 		}
 	}();
@@ -420,14 +441,24 @@ const getPrism = () => {
 				var l = document.createElement("code");
 				l.className = "language-" + r, t.textContent = "", l.textContent = "Loading…", t.appendChild(l);
 				var i = new XMLHttpRequest;
-				i.open("GET", a, !0), i.onreadystatechange = function () {4 == i.readyState && (i.status < 400 && i.responseText ? (l.textContent = i.responseText, Prism.highlightElement(l)) : l.textContent = i.status >= 400 ? "✖ Error " + i.status + " while fetching file: " + i.statusText : "✖ Error: File does not exist or is empty")}, i.send(null)
+				i.open("GET", a, !0), i.onreadystatechange = function () {
+					4 == i.readyState && (i.status < 400 && i.responseText ? (l.textContent = i.responseText, Prism.highlightElement(l)) : l.textContent = i.status >= 400 ? "✖ Error " + i.status + " while fetching file: " + i.statusText : "✖ Error: File does not exist or is empty")
+				}, i.send(null)
 			})
 		}, document.addEventListener("DOMContentLoaded", self.Prism.fileHighlight))
 	}();
 	!function () {
-		function t(t) {"function" != typeof t || e(t) || r.push(t)}
+		function t(t) {
+			"function" != typeof t || e(t) || r.push(t)
+		}
 
-		function e(t) {return "function" == typeof t ? r.filter(function (e) {return e.valueOf() === t.valueOf()})[0] : "string" == typeof t && t.length > 0 ? r.filter(function (e) {return e.name === t})[0] : null}
+		function e(t) {
+			return "function" == typeof t ? r.filter(function (e) {
+				return e.valueOf() === t.valueOf()
+			})[0] : "string" == typeof t && t.length > 0 ? r.filter(function (e) {
+				return e.name === t
+			})[0] : null
+		}
 
 		function n(t) {
 			if ("string" == typeof t && (t = e(t)), "function" == typeof t) {
@@ -448,7 +479,9 @@ const getPrism = () => {
 				}
 				var u = "prismjsonp" + o++, f = document.createElement("a"), l = f.href = t.getAttribute("data-jsonp");
 				f.href += (f.search ? "&" : "?") + (t.getAttribute("data-callback") || "callback") + "=" + u;
-				var s = setTimeout(function () {e.textContent === i && (e.textContent = "Timeout loading '" + l + "'")}, 5e3),
+				var s = setTimeout(function () {
+						e.textContent === i && (e.textContent = "Timeout loading '" + l + "'")
+					}, 5e3),
 					d = document.createElement("script");
 				d.src = f.href, window[u] = function (n) {
 					document.head.removeChild(d), clearTimeout(s), delete window[u];
@@ -482,12 +515,18 @@ const getPrism = () => {
 					return void 0 !== t.data.files[n] ? t.data.files[n].content : "Error: unknown or missing gist file " + n
 				}
 				return null
-			}), t(function (t) {return t && t.node && "string" == typeof t.data ? t.data : null});
+			}), t(function (t) {
+				return t && t.node && "string" == typeof t.data ? t.data : null
+			});
 			var o = 0, i = "Loading…";
 			a()
 		}
 	}();
-	!function () {"undefined" != typeof self && !self.Prism || "undefined" != typeof global && !global.Prism || Prism.hooks.add("wrap", function (e) {"keyword" === e.type && e.classes.push("keyword-" + e.content)})}();
+	!function () {
+		"undefined" != typeof self && !self.Prism || "undefined" != typeof global && !global.Prism || Prism.hooks.add("wrap", function (e) {
+			"keyword" === e.type && e.classes.push("keyword-" + e.content)
+		})
+	}();
 	!function () {
 		"undefined" != typeof self && self.Prism && self.document && Prism.hooks.add("complete", function (e) {
 			if (e.code) {

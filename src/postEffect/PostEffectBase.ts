@@ -7,6 +7,15 @@ import makeShaderModule from "../resource/makeShaderModule";
 
 class PostEffectBase extends RedGPUContextBase {
     #subPassList: [] = []
+    #effectRenderTime:number = 0.00
+    get effectRenderTime(): number {
+        return this.#effectRenderTime;
+    }
+
+    set effectRenderTime(value: number) {
+        this.#effectRenderTime = value;
+    }
+
     get subPassList(): [] {
         return this.#subPassList;
     }
@@ -81,10 +90,21 @@ class PostEffectBase extends RedGPUContextBase {
         this.pipeline = gpuDevice.createRenderPipeline(pipeLineDescriptor);
     }
 
+    #renderTexture:GPUTexture
+    #renderTextureView:GPUTextureView
     getRenderInfo(postEffectManager : PostEffectManager){
         const redGPUContext = this.redGPUContext
         const {gpuDevice} = redGPUContext
-        const texture: GPUTexture = gpuDevice.createTexture({
+        if(this.#renderTexture){
+            if(
+                this.#renderTexture.width !== Math.floor(postEffectManager.view.pixelViewRect[2])
+                || this.#renderTexture.height !== Math.floor(postEffectManager.view.pixelViewRect[3])
+            ){
+                this.#renderTexture.destroy()
+                this.#renderTexture = null
+            }
+        }
+        this.#renderTexture = gpuDevice.createTexture({
             label: `${this.constructor.name}_texture`,
             size: {
                 width: Math.floor(postEffectManager.view.pixelViewRect[2]),
@@ -95,14 +115,14 @@ class PostEffectBase extends RedGPUContextBase {
             format: navigator.gpu.getPreferredCanvasFormat(),
             usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING
         })
-        const textureView: GPUTextureView = texture.createView();
+        this.#renderTextureView = this.#renderTexture.createView();
         const renderPassDescriptor: GPURenderPassDescriptor = {
             /**
              * @typedef {GPURenderPassColorAttachment}
              */
             colorAttachments: [
                 {
-                    view: textureView,
+                    view: this.#renderTextureView,
                     clearValue: {r: 0.0, g: 0.0, b: 0.0, a: 0.0},
                     loadOp: 'clear',
                     storeOp: 'store',
@@ -110,8 +130,8 @@ class PostEffectBase extends RedGPUContextBase {
             ]
         };
         return {
-            texture,
-            textureView,
+            texture : this.#renderTexture,
+            textureView : this.#renderTextureView,
             renderPassDescriptor
         }
     }
