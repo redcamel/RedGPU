@@ -101,7 +101,7 @@ export default class View extends UUID {
       TypeSize.mat4 + // projectionMatrix
       TypeSize.mat4 +  // camera3D
       TypeSize.float32x2 +// resolution
-      TypeSize.float32 // time
+      TypeSize.float32x2 // time
     ;
     const uniformBufferDescriptor = {
       size: uniformBufferSize,
