@@ -80,8 +80,8 @@ class PostEffectManager extends RedGPUContextBase {
             startTime = performance.now()
             lastSourceTextureView = effect.render(this, lastSourceTextureView)
             endTime = performance.now()
-            // console.log(endTime - startTime,endTime,startTime)
-            effect.effectRenderTime = (endTime - startTime )
+            // console.log(endTime - startTime)
+            effect.effectRenderTime = (endTime - startTime)
             startTime = endTime
         })
         return lastSourceTextureView

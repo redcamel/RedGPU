@@ -4,17 +4,38 @@ const testUI = (gui, redGPUContext, targetDebugger) => {
 	const {viewList} = redGPUContext
 	const view = viewList[0]
 	const testData = {
-		usePostEffectGray: true
+		usePostEffectGray: true,
+		currentEffect: view.postEffectManager.children[0],
+		effectRenderTimeController: null,
 	}
 	const root = gui.addFolder('PostEffectGray Test UI');
-	targetDebugger.__gui_setItemBooleanNameSize(gui.add(testData, 'usePostEffectGray')).onChange(v => {
+	const setController = () => {
+		removeController()
+		const effect = new RedGPU.PostEffectGray(redGPUContext)
+		view.postEffectManager.addEffect(effect)
+		testData.currentEffect = effect
+		testData.effectRenderTimeController = targetDebugger.__gui_setItemDisableInput(root.add(effect, 'effectRenderTimeString'), 'auto')
+
+	}
+	const removeController = () => {
+		if (testData.currentEffect) {
+			view.postEffectManager.removeEffect(testData.currentEffect)
+		}
+		testData.currentEffect = null
+		if (testData.effectRenderTimeController) {
+			root.remove(testData.effectRenderTimeController)
+			testData.effectRenderTimeController = null
+		}
+	}
+	targetDebugger.__gui_setItemBooleanNameSize(root.add(testData, 'usePostEffectGray')).onFinishChange(v => {
 		testData['usePostEffectGray'] = v
 		if (v) {
-			view.postEffectManager.addEffect(new RedGPU.PostEffectGray(redGPUContext))
+			setController()
 		} else {
-			view.postEffectManager.removeEffect(view.postEffectManager.children[0])
+			removeController()
 		}
 	})
+	setController()
 	root.open()
 }
 export default testUI

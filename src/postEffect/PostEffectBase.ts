@@ -7,11 +7,13 @@ import makeShaderModule from "../resource/makeShaderModule";
 
 class PostEffectBase extends RedGPUContextBase {
     #subPassList: [] = []
-    #effectRenderTime:number = 0.00
+    #effectRenderTime:number = 0
     get effectRenderTime(): number {
         return this.#effectRenderTime;
     }
-
+    get effectRenderTimeString(): string {
+        return this.#effectRenderTime.toString().substring(0,7);
+    }
     set effectRenderTime(value: number) {
         this.#effectRenderTime = value;
     }

@@ -6,7 +6,6 @@ import UniformBufferDescriptor from "../../resource/buffers/uniformBuffer/Unifor
 import TypeSize from "../../resource/buffers/TypeSize";
 import vertexSource from "./wgslVertex/baseVertex.wgsl";
 import fragmentSource from "./wgslFragment/pixelizeFragment.wgsl";
-import view from "../../main/view/View";
 
 let float32Array_1 = new Float32Array(1);
 let float32Array_2 = new Float32Array(2);

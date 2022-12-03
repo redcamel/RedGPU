@@ -6,6 +6,7 @@ const testUI = (gui, redGPUContext, targetDebugger) => {
 	const testData = {
 		usePostEffectHueSaturation: true,
 		currentEffect: view.postEffectManager.children[0],
+		effectRenderTimeController:null,
 		hueController: null,
 		saturationController: null
 	}
@@ -15,6 +16,7 @@ const testUI = (gui, redGPUContext, targetDebugger) => {
 		const effect = new RedGPU.PostEffectHueSaturation(redGPUContext)
 		view.postEffectManager.addEffect(effect)
 		testData.currentEffect = effect
+		testData.effectRenderTimeController = targetDebugger.__gui_setItemDisableInput(root.add(effect, 'effectRenderTimeString'), 'auto')
 		testData.hueController = targetDebugger.__gui_setItem(root.add(effect, 'hue',-180,180,0.01))
 		testData.saturationController = targetDebugger.__gui_setItem(root.add(effect, 'saturation',-100,100,0.01))
 	}
@@ -23,6 +25,10 @@ const testUI = (gui, redGPUContext, targetDebugger) => {
 			view.postEffectManager.removeEffect(testData.currentEffect)
 		}
 		testData.currentEffect = null
+		if (testData.effectRenderTimeController) {
+			root.remove(testData.effectRenderTimeController)
+			testData.effectRenderTimeController = null
+		}
 		if (testData.hueController) {
 			root.remove(testData.hueController)
 			testData.hueController = null

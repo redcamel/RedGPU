@@ -1,9 +1,6 @@
 import {RedGPUContext} from "../../context";
 import {PostEffectBase} from "../index";
 import PostEffectManager from "../PostEffectManager";
-import UniformBufferFloat32 from "../../resource/buffers/uniformBuffer/UniformBufferFloat32";
-import UniformBufferDescriptor from "../../resource/buffers/uniformBuffer/UniformBufferDescriptor";
-import TypeSize from "../../resource/buffers/TypeSize";
 import vertexSource from "./wgslVertex/baseVertex.wgsl";
 import fragmentSource from "./wgslFragment/invertFragment.wgsl";
 

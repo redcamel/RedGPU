@@ -16,7 +16,7 @@ const testUI = (gui, redGPUContext, targetDebugger) => {
 		const effect = new RedGPU.PostEffectPixelize(redGPUContext)
 		view.postEffectManager.addEffect(effect)
 		testData.currentEffect = effect
-		testData.effectRenderTimeController = targetDebugger.__gui_setItemDisableInput(root.add(effect, 'effectRenderTime', 0, 3, 0.0001), 'auto')
+		testData.effectRenderTimeController = targetDebugger.__gui_setItemDisableInput(root.add(effect, 'effectRenderTimeString'), 'auto')
 		testData.widthController = targetDebugger.__gui_setItem(root.add(effect, 'width', 1, 30, 0.01))
 		testData.heightController = targetDebugger.__gui_setItem(root.add(effect, 'height', 1, 30, 0.01))
 	}

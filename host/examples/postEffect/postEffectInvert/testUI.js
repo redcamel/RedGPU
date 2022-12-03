@@ -4,17 +4,38 @@ const testUI = (gui, redGPUContext, targetDebugger) => {
 	const {viewList} = redGPUContext
 	const view = viewList[0]
 	const testData = {
-		usePostEffectInvert: true
+		usePostEffectInvert: true,
+		currentEffect: view.postEffectManager.children[0],
+		effectRenderTimeController: null,
 	}
 	const root = gui.addFolder('PostEffectInvert Test UI');
-	targetDebugger.__gui_setItemBooleanNameSize(gui.add(testData, 'usePostEffectInvert')).onChange(v => {
+	const setController = () => {
+		removeController()
+		const effect = new RedGPU.PostEffectInvert(redGPUContext)
+		view.postEffectManager.addEffect(effect)
+		testData.currentEffect = effect
+		testData.effectRenderTimeController = targetDebugger.__gui_setItemDisableInput(root.add(effect, 'effectRenderTimeString'), 'auto')
+
+	}
+	const removeController = () => {
+		if (testData.currentEffect) {
+			view.postEffectManager.removeEffect(testData.currentEffect)
+		}
+		testData.currentEffect = null
+		if (testData.effectRenderTimeController) {
+			root.remove(testData.effectRenderTimeController)
+			testData.effectRenderTimeController = null
+		}
+	}
+	targetDebugger.__gui_setItemBooleanNameSize(root.add(testData, 'usePostEffectInvert')).onFinishChange(v => {
 		testData['usePostEffectInvert'] = v
 		if (v) {
-			view.postEffectManager.addEffect(new RedGPU.PostEffectInvert(redGPUContext))
+			setController()
 		} else {
-			view.postEffectManager.removeEffect(view.postEffectManager.children[0])
+			removeController()
 		}
 	})
+	setController()
 	root.open()
 }
 export default testUI

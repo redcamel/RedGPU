@@ -6,6 +6,7 @@ const testUI = (gui, redGPUContext, targetDebugger) => {
 	const testData = {
 		usePostEffectBrightnessContrast: true,
 		currentEffect: view.postEffectManager.children[0],
+		effectRenderTimeController:null,
 		brightnessController: null,
 		contrastController: null
 	}
@@ -15,6 +16,7 @@ const testUI = (gui, redGPUContext, targetDebugger) => {
 		const effect = new RedGPU.PostEffectBrightnessContrast(redGPUContext)
 		view.postEffectManager.addEffect(effect)
 		testData.currentEffect = effect
+		testData.effectRenderTimeController = targetDebugger.__gui_setItemDisableInput(root.add(effect, 'effectRenderTimeString'), 'auto')
 		testData.brightnessController = targetDebugger.__gui_setItem(root.add(effect, 'brightness',-150,150,0.01))
 		testData.contrastController = targetDebugger.__gui_setItem(root.add(effect, 'contrast',-50,100,0.01))
 	}
@@ -23,6 +25,10 @@ const testUI = (gui, redGPUContext, targetDebugger) => {
 			view.postEffectManager.removeEffect(testData.currentEffect)
 		}
 		testData.currentEffect = null
+		if (testData.effectRenderTimeController) {
+			root.remove(testData.effectRenderTimeController)
+			testData.effectRenderTimeController = null
+		}
 		if (testData.brightnessController) {
 			root.remove(testData.brightnessController)
 			testData.brightnessController = null
