@@ -71,7 +71,7 @@ export default class ShaderModule_GLSL {
       let tCompileGLSL;
       // console.time('compileGLSL : ' + this.type + ' / ' + searchKey);
       tCompileGLSL = this.sourceMap.get(searchKey);
-      console.log('머가오는겨3',searchKey,parseSource(this.originSource, optionList),tCompileGLSL)
+      // console.log('머가오는겨3',searchKey,parseSource(this.originSource, optionList),tCompileGLSL)
       if (tCompileGLSL instanceof Uint32Array) {
         console.log('compileGLSL - cached shader source.', this.type, searchKey);
       } else {
@@ -83,7 +83,7 @@ export default class ShaderModule_GLSL {
         console.log('compileGLSL - new shader source.', this.type, searchKey);
       }
       // console.timeEnd('compileGLSL : ' + this.type + ' / ' + searchKey);
-      console.log('머가오는겨2',searchKey,tCompileGLSL)
+      // console.log('머가오는겨2',searchKey,tCompileGLSL)
       this.shaderModuleDescriptor = {
         key: searchKey,
         code: tCompileGLSL,
