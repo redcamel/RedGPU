@@ -108,12 +108,12 @@ class RedGPUContext {
         return this.#height;
     }
 
-    #pixelSize: { width: number; height: number } = {width: 0, height: 0}
+    #pixelSizeInt: { width: number; height: number } = {width: 0, height: 0}
     /**
      * @category size
      */
-    get pixelSize(): { width: number; height: number } {
-        return this.#pixelSize;
+    get pixelSizeInt(): { width: number; height: number } {
+        return this.#pixelSizeInt;
     }
 
     get label(): string {
@@ -317,8 +317,8 @@ class RedGPUContext {
         this.#htmlCanvas.height = tH * this.#renderScale;
         this.#htmlCanvas.style.width = tW + 'px';
         this.#htmlCanvas.style.height = tH + 'px';
-        this.#pixelSize.width = Math.floor(tW * this.#renderScale);
-        this.#pixelSize.height = Math.floor(tH * this.#renderScale);
+        this.#pixelSizeInt.width = Math.floor(tW * this.#renderScale);
+        this.#pixelSizeInt.height = Math.floor(tH * this.#renderScale);
         this.viewList.forEach(view => {
             view.setSize();
             // redView.setLocation();

@@ -110,10 +110,17 @@ class ViewBase extends RedGPUContextBase {
     get pixelViewRect(): number[] {
         return this.#pixelViewRect;
     }
-
+    get pixelViewRectInt(): number[] {
+        return [
+            Math.floor(this.#pixelViewRect[0]),
+            Math.floor(this.#pixelViewRect[1]),
+            Math.floor(this.#pixelViewRect[2]),
+            Math.floor(this.#pixelViewRect[3])
+        ];
+    }
 
     calcPixelViewRect() {
-        const parentPixelSize = this.redGPUContext.pixelSize
+        const parentPixelSize = this.redGPUContext.pixelSizeInt
         const {renderScale} = this.redGPUContext
         this.#pixelViewRect = [
             ((typeof this.#x === 'number' ? renderScale * this.#x : parentPixelSize.width * parseFloat(this.#x) / 100)),

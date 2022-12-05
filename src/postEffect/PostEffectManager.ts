@@ -72,7 +72,7 @@ class PostEffectManager extends RedGPUContextBase {
     }
 
     render() {
-        console.log('PostEffect Render')
+        // console.log('PostEffect Render')
         let lastSourceTextureView: GPUTextureView = this.#view.resolveTextureView
         let startTime:number
         let endTime:number

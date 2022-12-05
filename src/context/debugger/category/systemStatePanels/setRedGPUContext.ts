@@ -16,8 +16,8 @@ const setRedGPUContext = (gui, redGPUContext: RedGPUContext) => {
     // size
     gui_setItemDisableInput(redGPUContextFolder.add(redGPUContext, 'width'))
     gui_setItemDisableInput(redGPUContextFolder.add(redGPUContext, 'height'))
-    gui_setItemDisableInput(redGPUContextFolder.add(redGPUContext.pixelSize, 'width').name('pixelSize.width'))
-    gui_setItemDisableInput(redGPUContextFolder.add(redGPUContext.pixelSize, 'height').name('pixelSize.height'))
+    gui_setItemDisableInput(redGPUContextFolder.add(redGPUContext.pixelSizeInt, 'width').name('pixelSizeInt.width'))
+    gui_setItemDisableInput(redGPUContextFolder.add(redGPUContext.pixelSizeInt, 'height').name('pixelSizeInt.height'))
 
     redGPUContextFolder.open()
 }

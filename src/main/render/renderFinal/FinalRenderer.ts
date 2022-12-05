@@ -18,7 +18,6 @@ class FinalRenderer extends RedGPUContextBase {
     uniformBindGroup: GPUBindGroup
     pipeline: GPURenderPipeline
     #matrix
-    pixelViewRect
 
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext)
@@ -134,7 +133,7 @@ class FinalRenderer extends RedGPUContextBase {
     render(viewList) {
         const redGPUContext = this.redGPUContext
 
-        const {gpuDevice, gpuContext, pixelSize} = redGPUContext
+        const {gpuDevice, gpuContext, pixelSizeInt} = redGPUContext
         const commandEncoder: GPUCommandEncoder = gpuDevice.createCommandEncoder();
         const textureView: GPUTextureView = gpuContext.getCurrentTexture().createView();
 
@@ -167,8 +166,8 @@ class FinalRenderer extends RedGPUContextBase {
         passEncoder.setPipeline(this.pipeline);
 
         //
-        passEncoder.setViewport(0, 0, pixelSize.width, pixelSize.height, 0, 1);
-        passEncoder.setScissorRect(0, 0, pixelSize.width, pixelSize.height);
+        passEncoder.setViewport(0, 0, pixelSizeInt.width, pixelSizeInt.height, 0, 1);
+        passEncoder.setScissorRect(0, 0, pixelSizeInt.width, pixelSizeInt.height);
         viewList.forEach((view: View) => {
             const {pixelViewRect} = view
             // console.log(view.resolveTextureView,view.resultTextureView.label)
@@ -213,8 +212,8 @@ class FinalRenderer extends RedGPUContextBase {
                 this.#matrix,
                 this.#matrix,
                 [
-                    1 / pixelSize.width,
-                    1 / pixelSize.height,
+                    1 / pixelSizeInt.width,
+                    1 / pixelSizeInt.height,
                     1
                 ]
             );
@@ -223,7 +222,7 @@ class FinalRenderer extends RedGPUContextBase {
                 this.#matrix,
                 [
                     (pixelViewRect[2] / 2),
-                    (pixelSize.height - pixelViewRect[3] / 2),
+                    (pixelSizeInt.height - pixelViewRect[3] / 2),
                     0
                 ]
             );
@@ -261,8 +260,8 @@ class FinalRenderer extends RedGPUContextBase {
 
             passEncoder.draw(6, 1, 0, 0);
         })
-        passEncoder.setViewport(0, 0, pixelSize.width, pixelSize.height, 0, 1);
-        passEncoder.setScissorRect(0, 0, pixelSize.width, pixelSize.height);
+        passEncoder.setViewport(0, 0, pixelSizeInt.width, pixelSizeInt.height, 0, 1);
+        passEncoder.setScissorRect(0, 0, pixelSizeInt.width, pixelSizeInt.height);
         //
         passEncoder.end();
         gpuDevice.queue.submit([commandEncoder.finish()]);

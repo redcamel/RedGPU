@@ -113,7 +113,7 @@ RedTest.testGroup(
 							try {
 								view[key] = value
 								console.log(key, '입력값', value, ' / ', `확인 view.${key}`, view[key])
-								console.log('redGPUContext.pixelSize', redGPUContext.pixelSize)
+								console.log('redGPUContext.pixelSizeInt', redGPUContext.pixelSizeInt)
 								console.log('view.pixelViewRect', view.pixelViewRect)
 								RedTest.run(view[key] === value)
 								redGPUContext.destroy()
@@ -159,7 +159,7 @@ RedTest.testGroup(
 		].forEach(v => {
 			const {value, expect, successTestYn, description} = v
 			const [width, height] = value
-			const [pixelSize_width, pixelSize_height] = expect
+			const [pixelSizeInt_width, pixelSizeInt_height] = expect
 			const title = `${v['successTestYn'] ? '성공' : '실패'} 테스트 : setSize( ${width}, ${height} ) ${description || ''} `
 			RedTest.test(
 				title,
@@ -176,9 +176,9 @@ RedTest.testGroup(
 					RedGPU.init(canvas).then(v => {
 						const view = new RedGPU.View(v)
 						view.setSize(width, height)
-						console.log('pixelViewRect', view.pixelViewRect, pixelSize_width, pixelSize_height)
-						console.log('pixelViewRect', view.pixelViewRect[2] === pixelSize_width, view.pixelViewRect[3] === pixelSize_height)
-						RedTest.run(view.pixelViewRect[2] === pixelSize_width && view.pixelViewRect[3] === pixelSize_height)
+						console.log('pixelViewRect', view.pixelViewRect, pixelSizeInt_width, pixelSizeInt_height)
+						console.log('pixelViewRect', view.pixelViewRect[2] === pixelSizeInt_width, view.pixelViewRect[3] === pixelSizeInt_height)
+						RedTest.run(view.pixelViewRect[2] === pixelSizeInt_width && view.pixelViewRect[3] === pixelSizeInt_height)
 						v.destroy()
 					}).catch(v => {
 						console.log(v)
@@ -217,7 +217,7 @@ RedTest.testGroup(
 		].forEach(v => {
 			const {value, expect, successTestYn, description} = v
 			const [width, height] = value
-			const [pixelSize_width, pixelSize_height] = expect
+			const [pixelSizeInt_width, pixelSizeInt_height] = expect
 			const title = `${v['successTestYn'] ? '성공' : '실패'} 테스트 : setSize( ${width}, ${height} ) ${description || ''} `
 			RedTest.test(
 				title,
@@ -235,9 +235,9 @@ RedTest.testGroup(
 						v.setSize(width, height)
 						const view = new RedGPU.View(v)
 						view.setSize(width, height)
-						console.log('pixelViewRect', view.pixelViewRect, pixelSize_width, pixelSize_height)
-						console.log('pixelViewRect', view.pixelViewRect[2] === pixelSize_width, view.pixelViewRect[3] === pixelSize_height)
-						RedTest.run(view.pixelViewRect[2] === pixelSize_width && view.pixelViewRect[3] === pixelSize_height)
+						console.log('pixelViewRect', view.pixelViewRect, pixelSizeInt_width, pixelSizeInt_height)
+						console.log('pixelViewRect', view.pixelViewRect[2] === pixelSizeInt_width, view.pixelViewRect[3] === pixelSizeInt_height)
+						RedTest.run(view.pixelViewRect[2] === pixelSizeInt_width && view.pixelViewRect[3] === pixelSizeInt_height)
 						v.destroy()
 					}).catch(v => {
 						console.log(v)

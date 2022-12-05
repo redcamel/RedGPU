@@ -97,10 +97,12 @@ class PostEffectBase extends RedGPUContextBase {
     getRenderInfo(postEffectManager : PostEffectManager){
         const redGPUContext = this.redGPUContext
         const {gpuDevice} = redGPUContext
+        const {view} = postEffectManager
+        const {pixelViewRectInt} = view
         if(this.#renderTexture){
             if(
-                this.#renderTexture.width !== Math.floor(postEffectManager.view.pixelViewRect[2])
-                || this.#renderTexture.height !== Math.floor(postEffectManager.view.pixelViewRect[3])
+                this.#renderTexture.width !== pixelViewRectInt[2]
+                || this.#renderTexture.height !== pixelViewRectInt[3]
             ){
                 this.#renderTexture.destroy()
                 this.#renderTexture = null
@@ -109,8 +111,8 @@ class PostEffectBase extends RedGPUContextBase {
         this.#renderTexture = gpuDevice.createTexture({
             label: `${this.constructor.name}_texture`,
             size: {
-                width: Math.floor(postEffectManager.view.pixelViewRect[2]),
-                height: Math.floor(postEffectManager.view.pixelViewRect[3]),
+                width: pixelViewRectInt[2],
+                height: pixelViewRectInt[3],
                 depthOrArrayLayers: 1
             },
             sampleCount: 1,

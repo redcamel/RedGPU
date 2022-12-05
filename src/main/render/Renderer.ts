@@ -84,7 +84,7 @@ class Renderer extends RedGPUContextBase {
     }
 
     #renderView(view: View, nowTime: number, redGPUContext: RedGPUContext, soloRender: boolean = true) {
-        const {scene} = view
+        const {scene,pixelViewRectInt} = view
         let beforeTime: number = 0
         let mainTime: number = 0
         let afterTime: number = 0
@@ -112,11 +112,11 @@ class Renderer extends RedGPUContextBase {
         if (
             redGPUContext.dirtyMultiSample
             || !view.resultTexture
-            || view.resultTexture.width !== Math.floor(view.pixelViewRect[2])
-            || view.resultTexture.height !== Math.floor(view.pixelViewRect[3])
+            || view.resultTexture.width !== pixelViewRectInt[2]
+            || view.resultTexture.height !== pixelViewRectInt[3]
         ) {
             console.log('reset view.resultTexture')
-            const size = [Math.floor(view.pixelViewRect[2]), Math.floor(view.pixelViewRect[3])]
+            const size = [pixelViewRectInt[2], pixelViewRectInt[3]]
             const sampleCount = redGPUContext.useMultiSample ? 4 : 1
 
             const usage = hasPostEffect ? (GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING) : soloRender ? GPUTextureUsage.RENDER_ATTACHMENT : (GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING)
@@ -187,8 +187,8 @@ class Renderer extends RedGPUContextBase {
 
         const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
         passEncoder.setBindGroup(0, view.renderInfo_SystemUniformBindGroup);
-        passEncoder.setViewport(0, 0, Math.floor(view.pixelViewRect[2]), Math.floor(view.pixelViewRect[3]), 0, 1);
-        passEncoder.setScissorRect(0, 0, Math.floor(view.pixelViewRect[2]), Math.floor(view.pixelViewRect[3]));
+        passEncoder.setViewport(0, 0, pixelViewRectInt[2], pixelViewRectInt[3], 0, 1);
+        passEncoder.setScissorRect(0, 0, pixelViewRectInt[2], pixelViewRectInt[3]);
 
         view.updateSystemUniform()
         view.updateClusterLight()

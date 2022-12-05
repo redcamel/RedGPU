@@ -64,7 +64,7 @@ RedTest.testGroup(
 					RedGPU.init(canvas).then(v => {
 						v.setSize(width, height)
 						console.log('입력값', width, height, '세팅값', v.width, v.height)
-						console.log('pixelSize', v.pixelSize)
+						console.log('pixelSizeInt', v.pixelSizeInt)
 						RedTest.run(v.width === width && v.height === height)
 						v.destroy()
 					}).catch(v => {
@@ -115,7 +115,7 @@ RedTest.testGroup(
 		].forEach(v => {
 			const {value, expect, successTestYn, description} = v
 			const [width, height] = value
-			const [pixelSize_width, pixelSize_height] = expect
+			const [pixelSizeInt_width, pixelSizeInt_height] = expect
 			const title = `${v['successTestYn'] ? '성공' : '실패'} 테스트 : setSize( ${width}, ${height} ) ${description || ''} `
 			RedTest.test(
 				title,
@@ -131,9 +131,9 @@ RedTest.testGroup(
 					document.body.appendChild(container)
 					RedGPU.init(canvas).then(v => {
 						v.setSize(width, height)
-						console.log('pixelSize', v.pixelSize, pixelSize_width, pixelSize_height)
-						console.log('pixelSize', v.pixelSize.width === pixelSize_width, v.pixelSize.height === pixelSize_height)
-						RedTest.run(v.pixelSize.width === pixelSize_width && v.pixelSize.height === pixelSize_height)
+						console.log('pixelSizeInt', v.pixelSizeInt, pixelSizeInt_width, pixelSizeInt_height)
+						console.log('pixelSizeInt', v.pixelSizeInt.width === pixelSizeInt_width, v.pixelSizeInt.height === pixelSizeInt_height)
+						RedTest.run(v.pixelSizeInt.width === pixelSizeInt_width && v.pixelSizeInt.height === pixelSizeInt_height)
 						v.destroy()
 					}).catch(v => {
 						console.log(v)
