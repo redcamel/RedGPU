@@ -37,6 +37,7 @@ class PassLightClustersBound extends RedGPUContextBase {
             passEncoder.setBindGroup(0, systemUniformBindGroup);
             passEncoder.setBindGroup(1, this.#clusterBoundBindGroup);
             passEncoder.dispatchWorkgroups(DISPATCH_SIZE[0], DISPATCH_SIZE[1], DISPATCH_SIZE[2]);
+
         }
 
     }
