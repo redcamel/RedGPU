@@ -15,6 +15,12 @@ The first target will be released on December 1, 2022.
 - You can check the 2.0 Demo at [RedGPU2.0 Demo.](https://redcamel.github.io/Rnd_Doc/host/index.html)</a>
 
 ## V1.0 -----------------
+## [Examples](https://redcamel.github.io/RedGPU/examples/)
+   - See the [example](https://redcamel.github.io/RedGPU/examples/). Various examples are available.
+
+
+
+https://user-images.githubusercontent.com/820587/172777357-32c64963-abbe-432c-80e0-7893025b58ef.mp4
 ## Usage
 - When running localhost, port 3003 should be used.
 - Running in chrome canary.
@@ -65,13 +71,4 @@ new RedGPU.RedGPUContext(
 	}
 );
 ```
-## [Examples](https://redcamel.github.io/RedGPU/examples/)
-   - See the [example](https://redcamel.github.io/RedGPU/examples/). Various examples are available.
 
-
-
-https://user-images.githubusercontent.com/820587/172777357-32c64963-abbe-432c-80e0-7893025b58ef.mp4
-
-
-## etc
- - webGPU basic samples can be found [here](https://github.com/redcamel/webgpu)
