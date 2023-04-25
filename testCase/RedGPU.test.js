@@ -2,7 +2,7 @@ import * as RedGPU from "../dist/RedGPU.mjs";
 
 RedTest.title = "RedGPU TEST";
 RedTest.testGroup(
-	"RedGPU.init Test",
+	"RedGPU.initialize Test",
 	function () {
 		RedTest.test(
 			"실패 테스트 : canvas 인자를 입력 안했을때",
@@ -31,7 +31,7 @@ RedTest.testGroup(
 	}
 )
 RedTest.testGroup(
-	"RedGPU.init - label Test",
+	"RedGPU.initialize - label Test",
 	function () {
 		[
 			{
@@ -62,11 +62,10 @@ RedTest.testGroup(
 				expectValue
 			);
 		})
-
 	}
 )
 RedTest.testGroup(
-	"RedGPU.init - alphaMode Test",
+	"RedGPU.initialize - alphaMode Test",
 	function () {
 		[
 			{
@@ -104,7 +103,6 @@ RedTest.testGroup(
 				function () {
 					const canvas = document.createElement('canvas')
 					RedGPU.init(canvas, null, value).then(v => {
-
 						RedTest.run(v.alphaMode)
 					}).catch(v => {
 						RedTest.run(false)
@@ -116,7 +114,7 @@ RedTest.testGroup(
 	}
 )
 RedTest.testGroup(
-	"RedGPU.init - alphaMode Test",
+	"RedGPU.initialize - alphaMode Test",
 	function () {
 		RedTest.test(
 			"성공 테스트 : canvas 인자를 제대로 입력했을때",
@@ -150,7 +148,7 @@ RedTest.testGroup(
 		// 			console.log('HD_destroy가 발동하는가', v)
 		// 			RedTest.run(true)
 		// 		}
-		// 		RedGPU.init(canvas, undefined, undefined, HD_destroy)
+		// 		RedGPU.initialize(canvas, undefined, undefined, HD_destroy)
 		// 			.then(v => {
 		// 				v.destroy()
 		// 			}).catch(e => {
