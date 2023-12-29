@@ -6,15 +6,7 @@ RedGPU - Javascript WebGPU Library
 </p>
 
 
-## RedGPU 2.0 research progress.
-```
-V2.0.0 research is ongoing. Other repositories are in the works and will be released as meaningful work progresses.
-The first target will be released on December 1, 2022.
-```
-- You can check the 2.0 source at [RedGPU2.0 Preview branch.](https://github.com/redcamel/RedGPU/tree/preview2.0)</a>
-- You can check the 2.0 Demo at [RedGPU2.0 Demo.](https://redcamel.github.io/Rnd_Doc/host/index.html)</a>
-
-## V1.0 -----------------
+## RedGPU V1.x
 ## [Examples](https://redcamel.github.io/RedGPU/examples/)
    - See the [example](https://redcamel.github.io/RedGPU/examples/). Various examples are available.
 
@@ -71,4 +63,12 @@ new RedGPU.RedGPUContext(
 	}
 );
 ```
+
+## RedGPU 2.0 research progress.
+```
+V2.0.0 research is ongoing. Other repositories are in the works and will be released as meaningful work progresses.
+The first target will be released on December 1, 2022.
+```
+- You can check the 2.0 source at [RedGPU2.0 Preview branch.](https://github.com/redcamel/RedGPU/tree/preview2.0)</a>
+- You can check the 2.0 Demo at [RedGPU2.0 Demo.](https://redcamel.github.io/Rnd_Doc/host/index.html)</a>
 
