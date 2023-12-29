@@ -148,8 +148,9 @@ export default class View extends UUID {
       TypeSize.float32x4 * 3 * ShareGLSL.MAX_POINT_LIGHT + // pointLight
       TypeSize.float32x4 * TypeSize.float32x4 + // ambientLight
       TypeSize.float32x4 * 3 * ShareGLSL.MAX_SPOT_LIGHT + // spotLight
-      TypeSize.float32x4 +  // cameraPosition
-      TypeSize.float32x2  // resolution
+      TypeSize.float32x2  +// resolution
+      TypeSize.float32x4   // cameraPosition
+
     ;
     const uniformBufferDescriptor = {
       size: uniformBufferSize,
@@ -365,12 +366,14 @@ export default class View extends UUID {
       )
       / Float32Array.BYTES_PER_ELEMENT;
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // update camera3D position
-    this.#systemUniformInfo_fragment_data.set([this.camera.x, this.camera.y, this.camera.z], offset);
-    offset += TypeSize.float32x4 / Float32Array.BYTES_PER_ELEMENT;
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // update resolution
     this.#systemUniformInfo_fragment_data.set([+this.#viewRect[2], +this.#viewRect[3]], offset);
+    offset += TypeSize.float32x2 / Float32Array.BYTES_PER_ELEMENT;
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // update camera3D position
+    this.#systemUniformInfo_fragment_data.set([this.camera.x, this.camera.y, this.camera.z], offset);
+
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // update GPUBuffer
     passEncoder.setBindGroup(0, systemUniformInfo_vertex.GPUBindGroup);
