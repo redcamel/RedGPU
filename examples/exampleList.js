@@ -235,7 +235,7 @@ const exampleList = [
 		list: [
 			{
 				key: 'postEffect',
-				href: 'postEffect/postEffectindex.html'
+				href: 'postEffect/postEffect/index.html'
 			},
 			{
 				key: 'postEffect_gray',
