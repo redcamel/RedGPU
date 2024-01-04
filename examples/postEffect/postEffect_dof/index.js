@@ -32,7 +32,9 @@ new RedGPU.RedGPUContext(
 			)
 		);
 		tCamera = new RedGPU.ObitController(this);
-		tCamera.distance = 20;
+		tCamera.distance = 0;
+		tCamera.tilt=-15
+		tCamera.speedDistance=0.5
 		tView1 = new RedGPU.View(this, tScene, tCamera);
 		tView1.setSize('50%', '100%');
 		this.addView(tView1);
@@ -69,20 +71,24 @@ new RedGPU.RedGPUContext(
 				tMaterial.normalPower = 2
 				let setMeshs = function () {
 					let MAX;
-					let i, j;
+					let i, j,k;
 					let tMesh;
 					i = j = MAX = 10;
 					while (i--) {
 						j = MAX
 						while (j--) {
-							tMesh = new RedGPU.Mesh(
-								self,
-								new RedGPU.Sphere(self, 1, 32, 32, 32),
-								tMaterial
-							);
-							tScene.addChild(tMesh);
-							tMesh.x = Math.sin(Math.PI * 2 / (MAX - 1) * i) * j * 3;
-							tMesh.z = Math.cos(Math.PI * 2 / (MAX - 1) * i) * j * 3;
+							k = MAX
+							while (k--) {
+								tMesh = new RedGPU.Mesh(
+									self,
+									new RedGPU.Sphere(self, 0.5, 16, 16, 16),
+									tMaterial
+								);
+								tMesh.x = (i - MAX / 2) * 2
+								tMesh.y = (j - MAX / 2) * 2
+								tMesh.z = (k - MAX / 2) * 2
+								tScene.addChild(tMesh)
+							}
 						}
 					}
 				};
