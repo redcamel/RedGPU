@@ -11,7 +11,6 @@ import BasePostEffect from "../../base/BasePostEffect.js";
 import PostEffect_GaussianBlur from "../blur/PostEffect_GaussianBlur.js";
 import PostEffect_Threshold from "../adjustments/PostEffect_Threshold.js";
 import PostEffect_Bloom_blend from "./PostEffect_Bloom_blend.js";
-import ShareGLSL from "../../base/ShareGLSL.js";
 
 export default class PostEffect_Bloom extends BasePostEffect {
 

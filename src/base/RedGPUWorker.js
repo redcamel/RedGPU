@@ -16,7 +16,7 @@ const workerImage = createWorker(async () => {
   let getImage = (_ => {
     let nextHighestPowerOfTwo = (function () {
       let i;
-      return function (v) {
+      return v => {
         --v;
         for (i = 1; i < 32; i <<= 1) v = v | v >> i;
         return v + 1;
@@ -34,57 +34,55 @@ const workerImage = createWorker(async () => {
             statusText: response.statusText,
             type: response.type
           };
-          if (!response.ok) throw Error('error');
-          else {
-            response.blob()
-              .then(blob => self.createImageBitmap(blob))
-              .then(bitmap => {
-                let faceWidth = nextHighestPowerOfTwo(bitmap.width);
-                let faceHeight = nextHighestPowerOfTwo(bitmap.height);
-                if (faceWidth > 1920) faceWidth = 1920;
-                if (faceHeight > 1920) faceHeight = 1920;
-                // console.log(data)
-                let imageDatas = [];
-                let mipIndex = 0, len = Math.round(Math.log2(Math.max(faceWidth, faceHeight)));
-                let getMipmapDatas = img => {
-                  const cvs = new OffscreenCanvas(faceWidth, faceHeight);
-                  const ctx = cvs.getContext('2d');
-                  ctx.fillStyle = 'rgba(0,0,0,0)';
-                  ctx.fillRect(0, 0, faceWidth, faceHeight);
-                  ctx.drawImage(img, 0, 0, faceWidth, faceHeight);
-                  let imageData = ctx.getImageData(0, 0, faceWidth, faceHeight).data;
-                  let data;
-                  const bytesPerRow = Math.ceil(faceWidth * 4 / 256) * 256;
-                  if (bytesPerRow == faceWidth * 4) data = imageData;
-                  else {
-                    data = new Uint8ClampedArray(bytesPerRow * faceHeight);
-                    let pixelsIndex = 0;
-                    for (let y = 0; y < faceHeight; ++y) {
-                      for (let x = 0; x < faceWidth; ++x) {
-                        let i = x * 4 + y * bytesPerRow;
-                        data[i] = imageData[pixelsIndex];
-                        data[i + 1] = imageData[pixelsIndex + 1];
-                        data[i + 2] = imageData[pixelsIndex + 2];
-                        data[i + 3] = imageData[pixelsIndex + 3];
-                        pixelsIndex += 4;
-                      }
+          if (!response.ok) throw new Error('error');
+          response.blob()
+            .then(blob => self.createImageBitmap(blob))
+            .then(bitmap => {
+              let faceWidth = nextHighestPowerOfTwo(bitmap.width);
+              let faceHeight = nextHighestPowerOfTwo(bitmap.height);
+              if (faceWidth > 1920) faceWidth = 1920;
+              if (faceHeight > 1920) faceHeight = 1920;
+              // console.log(data)
+              let imageDatas = [];
+              let mipIndex = 0, len = Math.round(Math.log2(Math.max(faceWidth, faceHeight)));
+              let getMipmapDatas = img => {
+                const cvs = new OffscreenCanvas(faceWidth, faceHeight);
+                const ctx = cvs.getContext('2d');
+                ctx.fillStyle = 'rgba(0,0,0,0)';
+                ctx.fillRect(0, 0, faceWidth, faceHeight);
+                ctx.drawImage(img, 0, 0, faceWidth, faceHeight);
+                let imageData = ctx.getImageData(0, 0, faceWidth, faceHeight).data;
+                let data;
+                const bytesPerRow = Math.ceil(faceWidth * 4 / 256) * 256;
+                if (bytesPerRow == faceWidth * 4) data = imageData;
+                else {
+                  data = new Uint8ClampedArray(bytesPerRow * faceHeight);
+                  let pixelsIndex = 0;
+                  for (let y = 0; y < faceHeight; ++y) {
+                    for (let x = 0; x < faceWidth; ++x) {
+                      let i = x * 4 + y * bytesPerRow;
+                      data[i] = imageData[pixelsIndex];
+                      data[i + 1] = imageData[pixelsIndex + 1];
+                      data[i + 2] = imageData[pixelsIndex + 2];
+                      data[i + 3] = imageData[pixelsIndex + 3];
+                      pixelsIndex += 4;
                     }
                   }
-                  imageDatas.push({
-                    data: data.buffer,
-                    width: faceWidth,
-                    height: faceHeight,
-                    bytesPerRow: bytesPerRow
-                  });
-                  faceWidth = Math.max(Math.floor(faceWidth / 2), 1);
-                  faceHeight = Math.max(Math.floor(faceHeight / 2), 1);
-                  mipIndex++;
-                  if (mipIndex == len + 1) self.postMessage({src, imageDatas: imageDatas, ok: true});
-                  else getMipmapDatas(cvs);
-                };
-                getMipmapDatas(bitmap);
-              });
-          }
+                }
+                imageDatas.push({
+                  data: data.buffer,
+                  width: faceWidth,
+                  height: faceHeight,
+                  bytesPerRow: bytesPerRow
+                });
+                faceWidth = Math.max(Math.floor(faceWidth / 2), 1);
+                faceHeight = Math.max(Math.floor(faceHeight / 2), 1);
+                mipIndex++;
+                if (mipIndex == len + 1) self.postMessage({src, imageDatas: imageDatas, ok: true});
+                else getMipmapDatas(cvs);
+              };
+              getMipmapDatas(bitmap);
+            });
         }).catch(error => {
         self.postMessage({
           error: errorInfo,
@@ -109,10 +107,8 @@ const workerGLSLCompile = createWorker(async () => {
         // await import(/* webpackIgnore: true */ 'https://redcamel.github.io/RedGPU/libs/twgsl.js');
         console.log('twgsl2',twgsl)
         twgslLib = twgsl;
-        resolve();
-      } else {
-        resolve();
       }
+      resolve();
     });
   };
   await checkTwgsl().then(_=>{

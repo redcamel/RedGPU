@@ -10,7 +10,6 @@ import BaseMaterial from "../../base/BaseMaterial.js";
 import BasePostEffect from "../../base/BasePostEffect.js";
 import PostEffect_GaussianBlur from "../blur/PostEffect_GaussianBlur.js";
 import PostEffect_DoF_blend from "./PostEffect_DoF_blend.js";
-import ShareGLSL from "../../base/ShareGLSL.js";
 
 export default class PostEffect_DoF extends BasePostEffect {
 

@@ -19,7 +19,7 @@ let setGlobalResizeEvent = function () {
 
   }
   window.addEventListener('resize', resize);
-  requestAnimationFrame(e=>{
+  requestAnimationFrame(_ => {
     resize()
   })
 };
@@ -65,10 +65,8 @@ let checkTwgsl = function () {
      // await import(/* webpackIgnore: true */ 'https://redcamel.github.io/RedGPU/libs/twgsl.js');
       console.log('twgsl',twgsl)
       twgslLib = twgsl;
-      resolve();
-    } else {
-      resolve();
     }
+    resolve();
   });
 };
 
@@ -89,7 +87,6 @@ export default class RedGPUContext {
       console.log('glslang', glslang);
       console.log(this);
       this.#detector = new DetectorGPU(this);
-      let state = true;
       if (navigator.gpu) {
         navigator.gpu.requestAdapter(
           {
@@ -211,7 +208,6 @@ export default class RedGPUContext {
 
               });
           }).catch(error => {
-          state = false;
           initFunc(false, error);
         });
       } else {
