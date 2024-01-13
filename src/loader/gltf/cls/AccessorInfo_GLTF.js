@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import UTIL from "../../../util/UTIL.js";
 import WEBGL_COMPONENT_TYPES from "./WEBGL_COMPONENT_TYPES.js";
 

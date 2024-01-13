@@ -5,7 +5,6 @@
  *   Last modification time of this file - 2020.3.14 19:2:51
  *
  */
-"use strict";
 import TypeSize from "../resources/TypeSize.js";
 import ShareGLSL from "../base/ShareGLSL.js";
 import Mix from "../base/Mix.js";
@@ -26,7 +25,7 @@ export default class ColorPhongTextureMaterial extends Mix.mix(
   static vertexShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
-    
+
     ${ShareGLSL.GLSL_SystemUniforms_vertex.meshUniforms}
 	layout( location = 0 ) in vec3 position;
 	layout( location = 1 ) in vec3 normal;
@@ -34,7 +33,7 @@ export default class ColorPhongTextureMaterial extends Mix.mix(
 	layout( location = 0 ) out vec3 vNormal;
 	layout( location = 1 ) out vec2 vUV;
 	layout( location = 2 ) out vec4 vVertexPosition;
-	layout( location = 3 ) out float vMouseColorID;	
+	layout( location = 3 ) out float vMouseColorID;
 	layout( location = 4 ) out float vSumOpacity;
 	layout( set = ${ShareGLSL.SET_INDEX_VertexUniforms}, binding = 0 ) uniform VertexUniforms {
         float displacementFlowSpeedX;
@@ -42,7 +41,7 @@ export default class ColorPhongTextureMaterial extends Mix.mix(
         float displacementPower;
         float __displacementTextureRenderYn;
     } vertexUniforms;
-    
+
     layout( set = ${ShareGLSL.SET_INDEX_VertexUniforms}, binding = 1 ) uniform sampler uSampler;
 	layout( set = ${ShareGLSL.SET_INDEX_VertexUniforms}, binding = 2) uniform texture2D uDisplacementTexture;
 	void main() {
@@ -63,7 +62,7 @@ export default class ColorPhongTextureMaterial extends Mix.mix(
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 3 ) uniform FragmentUniforms {
         vec4 color;
         float normalPower;
-        float shininess; 
+        float shininess;
         float specularPower;
 	    vec4 specularColor;
 	    float emissivePower;
@@ -77,7 +76,7 @@ export default class ColorPhongTextureMaterial extends Mix.mix(
 	layout( location = 0 ) in vec3 vNormal;
 	layout( location = 1 ) in vec2 vUV;
 	layout( location = 2 ) in vec4 vVertexPosition;
-	layout( location = 3 ) in float vMouseColorID;	
+	layout( location = 3 ) in float vMouseColorID;
 	layout( location = 4 ) in float vSumOpacity;
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 4 ) uniform sampler uNormalSampler;
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 5 ) uniform texture2D uNormalTexture;
@@ -86,25 +85,25 @@ export default class ColorPhongTextureMaterial extends Mix.mix(
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 8 ) uniform sampler uEmissiveSampler;
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 9 ) uniform texture2D uEmissiveTexture;
 	layout( location = 0 ) out vec4 outColor;
-	
+
 	layout( location = 1 ) out vec4 out_MouseColorID_Depth;
-	
+
 	void main() {
 		float testAlpha = fragmentUniforms.color.a * vSumOpacity;
-		
+
 		vec3 N = normalize(vNormal);
 		vec4 normalColor = vec4(0.0);
 		if(fragmentUniforms.__normalTextureRenderYn == TRUTHY) normalColor = texture(sampler2D(uNormalTexture, uNormalSampler), vUV) ;
 		if(fragmentUniforms.useFlatMode == TRUTHY) N = getFlatNormal(vVertexPosition.xyz);
 		if(fragmentUniforms.__normalTextureRenderYn == TRUTHY) N = perturb_normal(N, vVertexPosition.xyz, vUV, normalColor.rgb, fragmentUniforms.normalPower) ;
-		
+
 		float specularTextureValue = 1.0;
 		if(fragmentUniforms.__specularTextureRenderYn == TRUTHY) specularTextureValue = texture(sampler2D(uSpecularTexture, uSpecularSampler), vUV).r ;
-		
-		vec4 finalColor = 
+
+		vec4 finalColor =
 		calcDirectionalLight(
 			fragmentUniforms.color,
-			N,		
+			N,
 			systemUniforms.directionalLightCount,
 			systemUniforms.directionalLightList,
 			fragmentUniforms.shininess,
@@ -115,7 +114,7 @@ export default class ColorPhongTextureMaterial extends Mix.mix(
 	    +
 	    calcPointLight(
 			fragmentUniforms.color,
-			N,		
+			N,
 			systemUniforms.pointLightCount,
 			systemUniforms.pointLightList,
 			fragmentUniforms.shininess,
@@ -130,12 +129,12 @@ export default class ColorPhongTextureMaterial extends Mix.mix(
 			vec4 emissiveColor = texture(sampler2D(uEmissiveTexture, uEmissiveSampler), vUV);
 			finalColor.rgb += emissiveColor.rgb * fragmentUniforms.emissivePower;
 		}
-		
+
 		finalColor.a = testAlpha;
 		outColor = finalColor;
 		outColor.a *= fragmentUniforms.alpha;
 		out_MouseColorID_Depth = vec4(vMouseColorID, gl_FragCoord.z/gl_FragCoord.w, 0.0, 0.0);
-		
+
 	}
 `;
   static PROGRAM_OPTION_LIST = {

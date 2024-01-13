@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import RedGPUContext from "../../../RedGPUContext.js";
 import Camera3D from "../../../controller/Camera3D.js";
 

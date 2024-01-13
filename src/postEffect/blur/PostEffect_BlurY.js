@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import BaseMaterial from "../../base/BaseMaterial.js";
 import ShareGLSL from "../../base/ShareGLSL.js";
 import BasePostEffect from "../../base/BasePostEffect.js";
@@ -17,7 +16,7 @@ export default class PostEffect_BlurY extends BasePostEffect {
   static vertexShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
-    
+
 	layout( location = 0 ) in vec3 position;
 	layout( location = 1 ) in vec3 normal;
 	layout( location = 2 ) in vec2 uv;
@@ -40,7 +39,7 @@ export default class PostEffect_BlurY extends BasePostEffect {
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 1 ) uniform sampler uSampler;
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 2 ) uniform texture2D uSourceTexture;
 	layout( location = 0 ) out vec4 outColor;
-	
+
 	float random(vec3 scale, float seed) {
 		return fract(sin(dot(gl_FragCoord.xyz + seed, scale)) * 43758.5453 + seed);
 	}

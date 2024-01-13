@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import TypeSize from "../resources/TypeSize.js";
 import BaseMaterial from "../base/BaseMaterial.js";
 import ShareGLSL from "../base/ShareGLSL.js";
@@ -23,13 +22,13 @@ export default class ColorMaterial extends Mix.mix(
 	${ShareGLSL.GLSL_SystemUniforms_vertex.meshUniforms}
 	layout( location = 0 ) in vec3 position;
 	layout( location = 1 ) in vec3 normal;
-	layout( location = 0 ) out float vMouseColorID;	
+	layout( location = 0 ) out float vMouseColorID;
 	layout( location = 1 ) out float vSumOpacity;
 	void main() {
 		vMouseColorID = meshUniforms.mouseColorID;
 		vSumOpacity = meshUniforms.sumOpacity;
 		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * meshMatrixUniforms.modelMatrix[ int(meshUniforms.index) ] * vec4(position,1.0);
-	
+
 	}
 	`;
   static fragmentShaderGLSL = `
@@ -47,9 +46,9 @@ export default class ColorMaterial extends Mix.mix(
 	void main() {
 		outColor = fragmentUniforms.color;
 		outColor.a *= vSumOpacity;
-		outColor.a *= fragmentUniforms.alpha;	
+		outColor.a *= fragmentUniforms.alpha;
 		out_MouseColorID_Depth = vec4(vMouseColorID, gl_FragCoord.z/gl_FragCoord.w, 0.0, 0.0);
-		
+
 	}
 	`;
   static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};

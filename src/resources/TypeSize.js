@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 let TypeSize = {
   'float32': 1 * Float32Array.BYTES_PER_ELEMENT,
   'float32x2': 2 * Float32Array.BYTES_PER_ELEMENT,

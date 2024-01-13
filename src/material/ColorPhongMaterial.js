@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import TypeSize from "../resources/TypeSize.js";
 import ShareGLSL from "../base/ShareGLSL.js";
 
@@ -43,7 +42,7 @@ export default class ColorPhongMaterial extends Mix.mix(
 	${ShareGLSL.GLSL_SystemUniforms_fragment.systemUniforms}
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 0 ) uniform FragmentUniforms {
         vec4 color;
-        float shininess; 
+        float shininess;
         float specularPower;
 	    vec4 specularColor;
         float alpha;
@@ -52,22 +51,22 @@ export default class ColorPhongMaterial extends Mix.mix(
     } fragmentUniforms;
 	layout( location = 0 ) in vec3 vNormal;
 	layout( location = 1 ) in vec4 vVertexPosition;
-	layout( location = 2 ) in float vMouseColorID;	
+	layout( location = 2 ) in float vMouseColorID;
 	layout( location = 3 ) in float vSumOpacity;
-	layout( location = 0 ) out vec4 outColor;	
+	layout( location = 0 ) out vec4 outColor;
 	layout( location = 1 ) out vec4 out_MouseColorID_Depth;
 	void main() {
 		float testAlpha = fragmentUniforms.color.a * vSumOpacity;
 
 		vec3 N = normalize(vNormal);
 		if(fragmentUniforms.useFlatMode == TRUTHY) N = getFlatNormal(vVertexPosition.xyz);
-		
+
 		float specularTextureValue = 1.0;
-		
-		vec4 finalColor = 
+
+		vec4 finalColor =
 		calcDirectionalLight(
 			fragmentUniforms.color,
-			N,		
+			N,
 			systemUniforms.directionalLightCount,
 			systemUniforms.directionalLightList,
 			fragmentUniforms.shininess,
@@ -78,7 +77,7 @@ export default class ColorPhongMaterial extends Mix.mix(
 		+
 	    calcPointLight(
 			fragmentUniforms.color,
-			N,		
+			N,
 			systemUniforms.pointLightCount,
 			systemUniforms.pointLightList,
 			fragmentUniforms.shininess,
@@ -88,12 +87,12 @@ export default class ColorPhongMaterial extends Mix.mix(
 			vVertexPosition.xyz
 		)
 		+ la;
-			
+
 		finalColor.a = testAlpha;
 		outColor = finalColor;
 		outColor.a *= fragmentUniforms.alpha;
 		out_MouseColorID_Depth = vec4(vMouseColorID, gl_FragCoord.z/gl_FragCoord.w, 0.0, 0.0);
-		
+
 	}
 `;
   // static PROGRAM_OPTION_LIST = {vertex: [], fragment: ['useFlatMode']};

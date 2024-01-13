@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import UniformBufferDescriptor from "./UniformBufferDescriptor.js";
 import UTIL from "../util/UTIL.js";
 import RedGPUContext from "../RedGPUContext.js";

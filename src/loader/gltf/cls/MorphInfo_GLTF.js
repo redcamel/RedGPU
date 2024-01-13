@@ -5,7 +5,6 @@
  *   Last modification time of this file - 2020.1.20 18:6:15
  *
  */
-"use strict";
 import AccessorInfo_GLTF from "./AccessorInfo_GLTF.js";
 import parseAttributeInfo_GLTF from "../func/parseAttributeInfo_GLTF.js";
 import parseSparse_GLTF from "../func/parseSparse_GLTF.js";

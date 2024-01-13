@@ -5,7 +5,6 @@
  *   Last modification time of this file - 2020.1.16 11:31:50
  *
  */
-"use strict";
 let info;
 let _visible = false;
 let debuggerBox;

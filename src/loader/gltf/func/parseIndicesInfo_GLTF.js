@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 let parseIndicesInfo_GLTF = function (redGLTFLoader, json, accessorInfo, indices) {
   let tBYTES_PER_ELEMENT = accessorInfo['componentType_BYTES_PER_ELEMENT'];
   let tBufferURIDataView = accessorInfo['bufferURIDataView'];

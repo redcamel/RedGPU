@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import AccessorInfo_GLTF from "../cls/AccessorInfo_GLTF.js";
 import PBRMaterial_System from "../../../material/system/PBRMaterial_System.js";
 import UTIL from "../../../util/UTIL.js";

@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import DisplayContainer from "./base/DisplayContainer.js";
 import UTIL from "./util/UTIL.js";
 import DirectionalLight from "./light/DirectionalLight.js";

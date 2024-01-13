@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import UTILColor from './func/UTILColor.js';
 import UTILMath from './func/UTILMath.js';
 import glMatrix from '../base/gl-matrix-min.js';

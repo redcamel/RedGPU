@@ -5,7 +5,6 @@
  *   Last modification time of this file - 2020.1.20 18:6:15
  *
  */
-"use strict";
 const WEBGL_COMPONENT_TYPES = {
   5120: Int8Array,
   5121: Uint8Array,

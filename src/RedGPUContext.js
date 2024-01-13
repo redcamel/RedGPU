@@ -5,7 +5,6 @@
  *   Last modification time of this file - 2020.3.26 17:47:56
  *
  */
-"use strict";
 import DetectorGPU from "./base/detect/DetectorGPU.js";
 import ShareGLSL from "./base/ShareGLSL.js";
 import Sampler from "./resources/Sampler.js";

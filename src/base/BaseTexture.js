@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import UUID from "./UUID.js";
 import BitmapTexture from "../resources/BitmapTexture.js";
 

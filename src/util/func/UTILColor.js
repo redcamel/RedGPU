@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import UTIL from "../UTIL.js";
 
 export default {

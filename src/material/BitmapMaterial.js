@@ -5,7 +5,6 @@
  *   Last modification time of this file - 2020.1.20 18:6:15
  *
  */
-"use strict";
 import BaseMaterial from "../base/BaseMaterial.js";
 import ShareGLSL from "../base/ShareGLSL.js";
 import Mix from "../base/Mix.js";
@@ -27,7 +26,7 @@ export default class BitmapMaterial extends Mix.mix(
 	layout( location = 2 ) in vec2 uv;
 	layout( location = 0 ) out vec3 vNormal;
 	layout( location = 1 ) out vec2 vUV;
-	layout( location = 2 ) out float vMouseColorID;	
+	layout( location = 2 ) out float vMouseColorID;
 	layout( location = 3 ) out float vSumOpacity;
 	void main() {
 		vNormal = normal;
@@ -42,7 +41,7 @@ export default class BitmapMaterial extends Mix.mix(
 	const float TRUTHY = 1.0;
 	layout( location = 0 ) in vec3 vNormal;
 	layout( location = 1 ) in vec2 vUV;
-	layout( location = 2 ) in float vMouseColorID;	
+	layout( location = 2 ) in float vMouseColorID;
 	layout( location = 3 ) in float vSumOpacity;
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 0 ) uniform FragmentUniforms {
         float alpha;
@@ -59,7 +58,7 @@ export default class BitmapMaterial extends Mix.mix(
 		outColor = diffuseColor;
 		outColor.a *= fragmentUniforms.alpha * vSumOpacity;
 		out_MouseColorID_Depth = vec4(vMouseColorID, gl_FragCoord.z/gl_FragCoord.w, 0.0, 0.0);
-		
+
 	}
 `;
   static PROGRAM_OPTION_LIST = {

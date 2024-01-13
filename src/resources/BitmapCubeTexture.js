@@ -5,7 +5,6 @@
  *   Last modification time of this file - 2020.1.10 20:9:14
  *
  */
-"use strict";
 import Sampler from "./Sampler.js";
 import ImageLoader from "./system/ImageLoader.js";
 import BitmapTexture from "./BitmapTexture.js";

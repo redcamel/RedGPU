@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import AccessorInfo_GLTF from "../cls/AccessorInfo_GLTF.js";
 
 let checkJoint = function (redGLTFLoader, skinInfo, nodes, v) {

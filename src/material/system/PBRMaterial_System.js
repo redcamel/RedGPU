@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import TypeSize from "../../resources/TypeSize.js";
 import BaseMaterial from "../../base/BaseMaterial.js";
 import ShareGLSL from "../../base/ShareGLSL.js";
@@ -31,7 +30,7 @@ export default class PBRMaterial_System extends Mix.mix(
 	${ShareGLSL.GLSL_VERSION}
     ${ShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
     ${ShareGLSL.GLSL_SystemUniforms_vertex.meshUniforms}
-         
+
 	layout( location = 0 ) in vec3 position;
 	layout( location = 1 ) in vec3 normal;
 	layout( location = 2 ) in vec2 uv;
@@ -46,7 +45,7 @@ export default class PBRMaterial_System extends Mix.mix(
 	layout( location = 3 ) out vec2 vUV1;
 	layout( location = 4 ) out vec4 vVertexTangent;
 	layout( location = 5 ) out vec4 vVertexPosition;
-	layout( location = 6 ) out float vMouseColorID;	
+	layout( location = 6 ) out float vMouseColorID;
 	layout( location = 7 ) out float vSumOpacity;
 	layout( set = ${ShareGLSL.SET_INDEX_VertexUniforms}, binding = 0 ) uniform VertexUniforms {
 		mat4 jointMatrix[${maxJoint}];
@@ -57,12 +56,12 @@ export default class PBRMaterial_System extends Mix.mix(
         float displacementPower;
         float __displacementTextureRenderYn;
         float useSkin;
-        
+
     } vertexUniforms;
-	
+
 	layout( set = ${ShareGLSL.SET_INDEX_VertexUniforms}, binding = 1 ) uniform sampler uDisplacementSampler;
 	layout( set = ${ShareGLSL.SET_INDEX_VertexUniforms}, binding = 2 ) uniform texture2D uDisplacementTexture;
-	void main() {		
+	void main() {
 		mat4 targetMatrix = meshMatrixUniforms.modelMatrix[ int(meshUniforms.index) ] ;
 		mat4 skinMat = mat4(1.0,0.0,0.0,0.0, 0.0,1.0,0.0,0.0, 0.0,0.0,1.0,0.0, 0.0,0.0,0.0,1.0);
 		if(vertexUniforms.useSkin == TRUTHY) {
@@ -77,16 +76,16 @@ export default class PBRMaterial_System extends Mix.mix(
 			vVertexPosition = meshMatrixUniforms.modelMatrix[ int(meshUniforms.index) ] * vec4(position, 1.0);
 			vNormal = (meshMatrixUniforms.normalMatrix[ int(meshUniforms.index) ] *  vec4(normal,1.0)).xyz;
 		}
-		
+
 		vVertexColor_0 = vertexColor_0;
-		
+
 		vUV = uv;
 		vUV1 = uv1;
 		vVertexTangent = vertexTangent;
 		vMouseColorID = meshUniforms.mouseColorID;
 		vSumOpacity = meshUniforms.sumOpacity;
 		if(vertexUniforms.__displacementTextureRenderYn == TRUTHY) vVertexPosition.xyz += ${ShareGLSL.GLSL_SystemUniforms_vertex.calcDisplacement('vNormal', 'vertexUniforms.displacementFlowSpeedX', 'vertexUniforms.displacementFlowSpeedY', 'vertexUniforms.displacementPower', 'uv', 'uDisplacementTexture', 'uDisplacementSampler')}
-		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * vVertexPosition;		
+		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * vVertexPosition;
 	}
 	`;
   static fragmentShaderGLSL = `
@@ -94,10 +93,10 @@ export default class PBRMaterial_System extends Mix.mix(
 	${ShareGLSL.GLSL_SystemUniforms_fragment.systemUniforms}
 	${ShareGLSL.GLSL_SystemUniforms_fragment.cotangent_frame}
 	${ShareGLSL.GLSL_SystemUniforms_fragment.perturb_normal}
-	
+
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 3 ) uniform FragmentUniforms {
         float normalPower;
-        float shininess; 
+        float shininess;
 	    float emissivePower;
 	    float occlusionPower;
 	    float environmentPower;
@@ -124,7 +123,7 @@ export default class PBRMaterial_System extends Mix.mix(
 		float __occlusionTextureRenderYn;
 		float __emissiveTextureRenderYn;
 		float __roughnessTextureRenderYn;
-	    
+
     } fragmentUniforms;
 	layout( location = 0 ) in vec4 vVertexColor_0;
 	layout( location = 1 ) in vec3 vNormal;
@@ -132,22 +131,22 @@ export default class PBRMaterial_System extends Mix.mix(
 	layout( location = 3 ) in vec2 vUV1;
 	layout( location = 4 ) in vec4 vVertexTangent;
 	layout( location = 5 ) in vec4 vVertexPosition;
-	layout( location = 6 ) in float vMouseColorID;	
+	layout( location = 6 ) in float vMouseColorID;
 	layout( location = 7 ) in float vSumOpacity;
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 4 ) uniform sampler uDiffuseSampler;
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 5 ) uniform texture2D uDiffuseTexture;
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 6 ) uniform sampler uNormalSampler;
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 7 ) uniform texture2D uNormalTexture;
-	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 8 ) uniform sampler uRoughnessSampler;	
+	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 8 ) uniform sampler uRoughnessSampler;
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 9 ) uniform texture2D uRoughnessTexture;
-	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 10 ) uniform sampler uEmissiveSampler;	
+	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 10 ) uniform sampler uEmissiveSampler;
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 11 ) uniform texture2D uEmissiveTexture;
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 12 ) uniform sampler uEnvironmentSampler;
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 13 ) uniform textureCube uEnvironmentTexture;
-	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 14 ) uniform sampler uOcclusionSampler;	
+	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 14 ) uniform sampler uOcclusionSampler;
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 15 ) uniform texture2D uOcclusionTexture;
 	layout( location = 0 ) out vec4 outColor;
-	
+
 	layout( location = 1 ) out vec4 out_MouseColorID_Depth;
 	vec2 diffuseTexCoord;
 	vec2 normalTexCoord;
@@ -161,27 +160,27 @@ export default class PBRMaterial_System extends Mix.mix(
 		emissiveTexCoord = fragmentUniforms.emissiveTexCoordIndex == 0.0 ? vUV : vUV1;
 		roughnessTexCoord = fragmentUniforms.roughnessTexCoordIndex == 0.0 ? vUV : vUV1;
 		occlusionTexCoord = fragmentUniforms.occlusionTexCoordIndex == 0.0 ? vUV : vUV1;
-		
-		
+
+
 		float tMetallicPower = fragmentUniforms.metallicFactor;
 		float tRoughnessPower = fragmentUniforms.roughnessFactor;
-		
+
 		vec4 roughnessColor = vec4(0.0);
 		if(fragmentUniforms.__roughnessTextureRenderYn == TRUTHY) {
 			roughnessColor = texture(sampler2D(uRoughnessTexture, uRoughnessSampler), roughnessTexCoord);
 			tMetallicPower *= roughnessColor.b; // 메탈릭 산출 roughnessColor.b
 			tRoughnessPower *= roughnessColor.g; // 거칠기 산출 roughnessColor.g
 		}
-		
-		
-	
+
+
+
 		vec4 diffuseColor = fragmentUniforms.baseColorFactor;
 		if(fragmentUniforms.useVertexColor_0 == TRUTHY) diffuseColor *= clamp(vVertexColor_0,0.0,1.0) ;
 		if(fragmentUniforms.__diffuseTextureRenderYn == TRUTHY) diffuseColor *= texture(sampler2D(uDiffuseTexture, uDiffuseSampler), diffuseTexCoord) ;
-			
+
 		float tAlpha = diffuseColor.a;
-	
-		
+
+
 	    vec3 N = normalize(vNormal);
 	    bool backFaceYn = false;
 	    if(fragmentUniforms.useMaterialDoubleSide == TRUTHY) {
@@ -189,7 +188,7 @@ export default class PBRMaterial_System extends Mix.mix(
 			vec3 fdy = dFdy(vVertexPosition.xyz);
 			vec3 faceNormal = normalize(cross(fdy,fdx));
 			if (dot (vNormal, faceNormal) < 0.0) { N = -N; backFaceYn = true; };
-	    } 
+	    }
 		vec4 normalColor = vec4(0.0);
 		if(fragmentUniforms.__normalTextureRenderYn == TRUTHY) normalColor = texture(sampler2D(uNormalTexture, uNormalSampler), normalTexCoord) ;
 		if(fragmentUniforms.useFlatMode == TRUTHY) N = getFlatNormal(vVertexPosition.xyz);
@@ -208,27 +207,27 @@ export default class PBRMaterial_System extends Mix.mix(
 				mat3 tbn = mat3(t, b, ng);
 				N = normalize(tbn * ((2.0 * normalColor.rgb - 1.0) * vec3(1.0, 1.0 * vVertexTangent.w,1.0)));
 				N = backFaceYn ? -N : N;
-			}			
+			}
 		}
 
 		if(fragmentUniforms.__environmentTextureRenderYn == TRUTHY) {
 			// 환경맵 계산
 			vec3 R = reflect( vVertexPosition.xyz - systemUniforms.cameraPosition, N);
-			vec4 reflectionColor = texture(samplerCube(uEnvironmentTexture,uEnvironmentSampler), R);		
+			vec4 reflectionColor = texture(samplerCube(uEnvironmentTexture,uEnvironmentSampler), R);
 			// 환경맵 합성
 			diffuseColor.rgb = mix( diffuseColor.rgb , reflectionColor.rgb , max(tMetallicPower-tRoughnessPower,0.0)*(1.0-tRoughnessPower));
 			diffuseColor = mix( diffuseColor , vec4(0.04, 0.04, 0.04, 1.0) , tRoughnessPower * (tMetallicPower) * 0.5);
 		}
-		
 
 
-	
+
+
 		outColor = diffuseColor;
 		vec4 specularLightColor = vec4(1.0, 1.0, 1.0, 1.0);
 	    vec4 ld = vec4(0.0, 0.0, 0.0, 1.0);
 	    vec4 ls = vec4(0.0, 0.0, 0.0, 1.0);
 
-	    vec3 L;	
+	    vec3 L;
 
 
 	    float lambertTerm;
@@ -248,15 +247,15 @@ export default class PBRMaterial_System extends Mix.mix(
 				ls +=  specularLightColor * specular * fragmentUniforms.metallicFactor * lightInfo.intensity * lightInfo.color.a * (1.0-tRoughnessPower+0.04);
 			}
 		}
-		
+
 		 vec4 finalColor = ld + ls + la;;
-		
+
 		if(fragmentUniforms.__emissiveTextureRenderYn == TRUTHY) {
 			// 이미시브 합성
 			vec4 emissiveColor = texture(sampler2D(uEmissiveTexture, uEmissiveSampler), emissiveTexCoord);
 			finalColor.rgb += emissiveColor.rgb * fragmentUniforms.emissivePower;
-		}		
-	
+		}
+
 		if(fragmentUniforms.__occlusionTextureRenderYn == TRUTHY) {
 		// 오클루젼 합성
 			vec4 occlusionColor =texture(sampler2D(uOcclusionTexture, uOcclusionSampler), occlusionTexCoord);
@@ -265,7 +264,7 @@ export default class PBRMaterial_System extends Mix.mix(
 
 
 		// 알파블렌드 - BLEND
-		if( fragmentUniforms.alphaBlend == 2.0 ) {		
+		if( fragmentUniforms.alphaBlend == 2.0 ) {
 			finalColor.a = tAlpha;
 		}
     if(fragmentUniforms.useCutOff == TRUTHY) {
@@ -273,7 +272,7 @@ export default class PBRMaterial_System extends Mix.mix(
 		}
 		outColor = finalColor;
 		out_MouseColorID_Depth = vec4(vMouseColorID, gl_FragCoord.z/gl_FragCoord.w, 0.0, 0.0);
-		
+
 	}
 `;
   static PROGRAM_OPTION_LIST = {

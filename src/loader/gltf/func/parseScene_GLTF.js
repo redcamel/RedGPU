@@ -6,8 +6,6 @@
  *
  */
 
-"use strict";
-
 import RedGPUContext from "../../../RedGPUContext.js";
 import parseNode_GLTF from "./parseNode_GLTF.js";
 

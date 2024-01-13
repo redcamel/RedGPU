@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import BaseMaterial from "../../base/BaseMaterial.js";
 import ShareGLSL from "../../base/ShareGLSL.js";
 
@@ -34,7 +33,7 @@ export default class GridMaterial extends BaseMaterial {
 	void main() {
 		outColor = vColor;
 			out_MouseColorID_Depth = vec4(0.0);
-		
+
 	}
 	`;
   static PROGRAM_OPTION_LIST = {vertex: [], fragment: []};

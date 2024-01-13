@@ -5,7 +5,6 @@
  *   Last modification time of this file - 2020.1.16 21:13:13
  *
  */
-"use strict";
 let makeInterleaveData_GLTF = function (interleaveData, vertices, verticesColor_0, normalData, uvs, uvs1, jointWeights, joints, tangents) {
   let i = 0, len = vertices.length / 3;
   let idx = 0;

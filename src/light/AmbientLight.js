@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import BaseLight from "../base/BaseLight.js";
 
 export default class AmbientLight extends BaseLight {

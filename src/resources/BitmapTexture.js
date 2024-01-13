@@ -5,7 +5,6 @@
  *   Last modification time of this file - 2020.1.9 14:4:9
  *
  */
-"use strict";
 import generateWebGPUTextureMipmap from "./mipmapGenerator/generateWebGPUTextureMipmap";
 import Sampler from "./Sampler.js";
 import ImageLoader from "./system/ImageLoader.js";

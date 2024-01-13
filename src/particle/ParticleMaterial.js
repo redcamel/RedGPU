@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import ShareGLSL from "../base/ShareGLSL.js";
 import TypeSize from "../resources/TypeSize.js";
 import BitmapMaterial from "../material/BitmapMaterial.js";
@@ -17,7 +16,7 @@ export default class ParticleMaterial extends BitmapMaterial {
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
     ${ShareGLSL.GLSL_SystemUniforms_vertex.meshUniforms}
-    ${ShareGLSL.GLSL_SystemUniforms_vertex.getSprite3DMatrix}    
+    ${ShareGLSL.GLSL_SystemUniforms_vertex.getSprite3DMatrix}
 	layout(location = 0) in vec3 a_pos;
     layout(location = 1) in vec2 a_uv;
     layout(location = 2) in vec3 position;
@@ -25,7 +24,7 @@ export default class ParticleMaterial extends BitmapMaterial {
     layout(location = 4) in vec3 rotation;
     layout(location = 5) in float scale;
 	layout(location = 0 ) out vec2 vUV;
-	layout(location = 1 ) out float vMouseColorID;	
+	layout(location = 1 ) out float vMouseColorID;
 	layout(location = 2 ) out float vSumOpacity;
 	layout( set = ${ShareGLSL.SET_INDEX_VertexUniforms}, binding = 0 ) uniform VertexUniforms {
         float sprite3DMode;
@@ -42,7 +41,7 @@ export default class ParticleMaterial extends BitmapMaterial {
 		vUV = a_uv;
 		vMouseColorID = meshUniforms.mouseColorID;
 		vSumOpacity = meshUniforms.sumOpacity * alpha;
-		float ratio = systemUniforms.resolution.x/systemUniforms.resolution.y; 
+		float ratio = systemUniforms.resolution.x/systemUniforms.resolution.y;
 		if( vertexUniforms.sprite3DMode == 1.0 ) {
 			mat4 scaleMTX = mat4(
 				1, 0, 0, 0,
@@ -67,14 +66,14 @@ export default class ParticleMaterial extends BitmapMaterial {
 			* rotationMTX(rotation);
 			gl_Position = systemUniforms.perspectiveMTX *  systemUniforms.cameraMTX * scaleMTX * vec4(a_pos , 1);
 		}
-		
+
 	}
 	`;
   static fragmentShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	const float TRUTHY = 1.0;
 	layout( location = 0 ) in vec2 vUV;
-	layout( location = 1 ) in float vMouseColorID;	
+	layout( location = 1 ) in float vMouseColorID;
 	layout( location = 2 ) in float vSumOpacity;
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 1 ) uniform FragmentUniforms {
         float alpha;
@@ -91,7 +90,7 @@ export default class ParticleMaterial extends BitmapMaterial {
 		outColor = diffuseColor;
 		outColor.a *= fragmentUniforms.alpha * vSumOpacity;
 		out_MouseColorID_Depth = vec4(vMouseColorID, gl_FragCoord.z/gl_FragCoord.w, 0.0, 0.0);
-		
+
 	}
 `;
   static PROGRAM_OPTION_LIST = {

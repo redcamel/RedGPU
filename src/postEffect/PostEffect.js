@@ -5,7 +5,6 @@
  *   Last modification time of this file - 2020.1.11 18:20:56
  *
  */
-"use strict";
 
 import UTIL from "../util/UTIL.js";
 

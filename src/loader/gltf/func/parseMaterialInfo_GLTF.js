@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import RedGPUContext from "../../../RedGPUContext.js";
 import PBRMaterial_System from "../../../material/system/PBRMaterial_System.js";
 import Sampler from "../../../resources/Sampler.js";

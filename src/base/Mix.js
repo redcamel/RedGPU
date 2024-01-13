@@ -5,7 +5,6 @@
  *   Last modification time of this file - 2020.1.20 18:6:15
  *
  */
-"use strict";
 import UTIL from "../util/UTIL.js";
 
 let float1_Float32Array = new Float32Array(1);

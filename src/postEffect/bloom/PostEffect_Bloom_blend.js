@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import BaseMaterial from "../../base/BaseMaterial.js";
 import ShareGLSL from "../../base/ShareGLSL.js";
 import BasePostEffect from "../../base/BasePostEffect.js";
@@ -17,7 +16,7 @@ export default class PostEffect_Bloom_blend extends BasePostEffect {
   static vertexShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
-    
+
 	layout( location = 0 ) in vec3 position;
 	layout( location = 1 ) in vec3 normal;
 	layout( location = 2 ) in vec2 uv;
@@ -47,7 +46,7 @@ export default class PostEffect_Bloom_blend extends BasePostEffect {
 		vec4 blurColor;
 		vec4 finalColor;
 		diffuseColor = texture( sampler2D( uSourceTexture, uSampler ), vUV );
-		blurColor = texture( sampler2D( uBlurTexture, uSampler ), vUV );	
+		blurColor = texture( sampler2D( uBlurTexture, uSampler ), vUV );
 		finalColor = diffuseColor;
 		finalColor.rgb = (finalColor.rgb  + blurColor.rgb * fragmentUniforms.bloomStrength ) * fragmentUniforms.exposure ;
 		outColor = finalColor;

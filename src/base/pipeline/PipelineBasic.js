@@ -6,8 +6,6 @@
  *
  */
 
-"use strict";
-
 import UUID from "../UUID.js";
 
 

@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import WEBGL_COMPONENT_TYPES from "../cls/WEBGL_COMPONENT_TYPES.js";
 
 let parseSparse_GLTF = function (redGLTFLoader, key, tAccessors, json, vertices, uvs, uvs1, normals, jointWeights, joints) {

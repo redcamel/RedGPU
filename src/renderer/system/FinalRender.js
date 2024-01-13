@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import BaseMaterial from "../../base/BaseMaterial.js";
 import ShareGLSL from "../../base/ShareGLSL.js";
 import BasePostEffect from "../../base/BasePostEffect.js";
@@ -31,7 +30,7 @@ export default class FinalRender extends BasePostEffect {
 	void main() {
 		// gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * meshMatrixUniforms.modelMatrix[ int(meshUniforms.index) ] * vec4(position,1.0);
 		gl_Position = vertexUniforms.projectionMatrix * vec4(position,1.0);
-		
+
 		vNormal = normal;
 		vUV = uv;
 	}
@@ -45,7 +44,7 @@ export default class FinalRender extends BasePostEffect {
 	layout( location = 0 ) out vec4 outColor;
 	void main() {
 		vec4 diffuseColor = vec4(0.0);
-	
+
 		diffuseColor = texture( sampler2D( uSourceTexture, uSampler ), vUV ) ;
 		// diffuseColor.a = 0.5;
 

@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import RedGPUContext from "../RedGPUContext.js";
 import baseGeometry from "../base/baseGeometry.js";
 

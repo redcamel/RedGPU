@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import ShaderModule_GLSL from "../resources/ShaderModule_GLSL.js";
 import UUID from "./UUID.js";
 import UniformBuffer from "../buffer/UniformBuffer.js";

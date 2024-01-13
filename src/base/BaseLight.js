@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import UUID from "./UUID.js";
 import UTIL from "../util/UTIL.js";
 import ColorMaterial from "../material/ColorMaterial.js";

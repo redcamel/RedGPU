@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 let _UUID = 1;
 export default class UUID {
   constructor() {this._UUID = _UUID++;}

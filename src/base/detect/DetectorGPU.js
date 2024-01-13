@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import RedGPUContext from "../../RedGPUContext.js";
 
 export default class DetectorGPU {

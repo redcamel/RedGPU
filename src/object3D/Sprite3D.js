@@ -5,7 +5,6 @@
  *   Last modification time of this file - 2020.1.8 18:27:58
  *
  */
-"use strict";
 import BaseObject3D from "../base/BaseObject3D.js";
 import Sprite3DMaterial from "../material/Sprite3DMaterial.js";
 import UTIL from "../util/UTIL.js";

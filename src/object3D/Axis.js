@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import BaseObject3D from "../base/BaseObject3D.js";
 import Box from "../primitives/Box.js";
 import Cylinder from "../primitives/Cylinder.js";

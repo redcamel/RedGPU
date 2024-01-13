@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import BaseObject3D from "../base/BaseObject3D.js";
 
 export default class Mesh extends BaseObject3D {

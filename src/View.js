@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import UTIL from "./util/UTIL.js";
 import TypeSize from "./resources/TypeSize.js";
 import ShareGLSL from "./base/ShareGLSL.js";

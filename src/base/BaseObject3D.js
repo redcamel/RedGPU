@@ -5,7 +5,6 @@
  *   Last modification time of this file - 2020.3.26 17:3:14
  *
  */
-"use strict";
 import UniformBuffer from "../buffer/UniformBuffer.js";
 import DisplayContainer from "./DisplayContainer.js";
 import PipelineBasic from "./pipeline/PipelineBasic.js";

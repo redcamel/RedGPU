@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import UUID from "../base/UUID.js";
 
 export default class baseGeometry extends UUID {

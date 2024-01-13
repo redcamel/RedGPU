@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import BaseMaterial from "../base/BaseMaterial.js";
 import ShareGLSL from "../base/ShareGLSL.js";
 import BasePostEffect from "../base/BasePostEffect.js";
@@ -17,7 +16,7 @@ export default class PostEffect_Vignetting extends BasePostEffect {
   static vertexShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
-    
+
 	layout( location = 0 ) in vec3 position;
 	layout( location = 1 ) in vec3 normal;
 	layout( location = 2 ) in vec2 uv;

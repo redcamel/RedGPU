@@ -5,7 +5,6 @@
  *   Last modification time of this file - 2020.1.1 18:50:31
  *
  */
-"use strict";
 import BaseObject3D from "../base/BaseObject3D.js";
 import Box from "../primitives/Box.js";
 import SkyBoxMaterial from "../material/system/SkyBoxMaterial.js";

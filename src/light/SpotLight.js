@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import BaseLight from "../base/BaseLight.js";
 import Mesh from "../object3D/Mesh.js";
 import Cylinder from "../primitives/Cylinder.js";

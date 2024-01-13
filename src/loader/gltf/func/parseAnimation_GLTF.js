@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import RedGPUContext from "../../../RedGPUContext.js";
 import AccessorInfo_GLTF from "../cls/AccessorInfo_GLTF.js";
 

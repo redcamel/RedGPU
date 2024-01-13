@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import BaseMaterial from "../base/BaseMaterial.js";
 import Mix from "./Mix.js";
 import Mesh from "../object3D/Mesh.js";

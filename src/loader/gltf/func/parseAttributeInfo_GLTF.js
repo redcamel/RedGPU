@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import UTIL from "../../../util/UTIL.js";
 
 let parseAttributeInfo_GLTF = function (redGLTFLoader, json, key, accessorInfo, vertices, uvs, uvs1, normals, jointWeights, joints, verticesColor_0, tangents) {

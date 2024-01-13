@@ -5,7 +5,6 @@
  *   Last modification time of this file - 2020.3.26 17:3:14
  *
  */
-"use strict";
 import glMatrix from "../../../base/gl-matrix-min.js";
 import UTIL from "../../../util/UTIL.js";
 

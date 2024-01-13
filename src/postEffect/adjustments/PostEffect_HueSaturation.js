@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import BaseMaterial from "../../base/BaseMaterial.js";
 import ShareGLSL from "../../base/ShareGLSL.js";
 import BasePostEffect from "../../base/BasePostEffect.js";
@@ -17,7 +16,7 @@ export default class PostEffect_HueSaturation extends BasePostEffect {
   static vertexShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
-    
+
 	layout( location = 0 ) in vec3 position;
 	layout( location = 1 ) in vec3 normal;
 	layout( location = 2 ) in vec2 uv;
@@ -43,24 +42,24 @@ export default class PostEffect_HueSaturation extends BasePostEffect {
 	void main() {
 		vec4 finalColor = vec4(0.0);
 		finalColor = texture( sampler2D( uSourceTexture, uSampler ), vUV );
-		
+
 		float hue_value = fragmentUniforms.hue;
 		float angle = hue_value * 3.1415926535897932384626433832795;
 		float s = sin(angle), c = cos(angle);
 		vec3 weights = (vec3(2.0 * c, -sqrt(3.0) * s - c, sqrt(3.0) * s - c) + 1.0) / 3.0;
 		float len = length(finalColor.rgb);
-		
+
 		finalColor.rgb = vec3(
 			dot(finalColor.rgb, weights.xyz),
 			dot(finalColor.rgb, weights.zxy),
 			dot(finalColor.rgb, weights.yzx)
 		);
-		
+
 		float average = (finalColor.r + finalColor.g + finalColor.b) / 3.0;
 		float saturation_value = fragmentUniforms.saturation;
 		if (saturation_value > 0.0) finalColor.rgb += (average - finalColor.rgb) * (1.0 - 1.0 / (1.001 - saturation_value));
 		else finalColor.rgb += (average - finalColor.rgb) * (-saturation_value);
-		
+
 		outColor = finalColor;
 	}
 `;

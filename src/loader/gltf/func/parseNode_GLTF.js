@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import parseTRSAndMATRIX_GLTF from "./parseTRSAndMATRIX_GLTF.js";
 import parseSkin_GLTF from "./parseSkin_GLTF.js";
 import Mesh from "../../../object3D/Mesh.js";

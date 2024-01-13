@@ -6,15 +6,13 @@
  *
  */
 
-"use strict";
 
 function createWorker(f) {
   return new Worker(URL.createObjectURL(new Blob([`(${f})()`], {type: 'application/javascript'})));
 }
 
 const workerImage = createWorker(async () => {
-  "use strict";
-  /////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////
   let getImage = (_ => {
     let nextHighestPowerOfTwo = (function () {
       let i;
@@ -101,8 +99,7 @@ const workerImage = createWorker(async () => {
   });
 });
 const workerGLSLCompile = createWorker(async () => {
-  "use strict";
-  let glslangModule = await import(/* webpackIgnore: true */ 'https://unpkg.com/@webgpu/glslang@0.0.15/dist/web-devel/glslang.js');
+    let glslangModule = await import(/* webpackIgnore: true */ 'https://unpkg.com/@webgpu/glslang@0.0.15/dist/web-devel/glslang.js');
   let glslang = await glslangModule.default();
   let twgslLib
   let checkTwgsl = async function () {

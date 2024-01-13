@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import UUID from "../../base/UUID.js";
 import Mesh from "../../object3D/Mesh.js";
 import UTIL from "../../util/UTIL.js";

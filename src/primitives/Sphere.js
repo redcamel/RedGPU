@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import Buffer from "../buffer/Buffer.js";
 import Geometry from "../geometry/Geometry.js";
 import InterleaveInfo from "../geometry/InterleaveInfo.js";

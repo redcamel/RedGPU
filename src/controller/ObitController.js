@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import Camera3D from "./Camera3D.js";
 import glMatrix from "../base/gl-matrix-min.js";
 

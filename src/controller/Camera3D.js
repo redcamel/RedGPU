@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import BaseObject3D from "../base/BaseObject3D.js";
 import glMatrix from "../base/gl-matrix-min.js";
 

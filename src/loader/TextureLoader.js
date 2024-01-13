@@ -5,7 +5,6 @@
  *   Last modification time of this file - 2020.1.16 21:13:13
  *
  */
-"use strict";
 import UUID from "../base/UUID.js";
 import BitmapTexture from "../resources/BitmapTexture.js";
 import BitmapCubeTexture from "../resources/BitmapCubeTexture.js";

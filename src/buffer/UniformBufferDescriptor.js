@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 
 import TypeSize from "../resources/TypeSize.js";
 import UUID from "../base/UUID.js";

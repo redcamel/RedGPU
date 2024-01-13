@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import BaseMaterial from "../../base/BaseMaterial.js";
 import BasePostEffect from "../../base/BasePostEffect.js";
 import PostEffect_BlurX from "./PostEffect_BlurX.js";

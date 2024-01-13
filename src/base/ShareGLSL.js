@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 export default class ShareGLSL {
   static MESH_UNIFORM_POOL_NUM = 25;
   static GLSL_VERSION = '#version 460';
@@ -50,9 +49,9 @@ export default class ShareGLSL {
         targetSampler='targetSampler'
     )=>{
         return `
-        normalize(${vNormal}) 
+        normalize(${vNormal})
         * texture(
-            sampler2D(${targetDisplacementTexture}, ${targetSampler}), 
+            sampler2D(${targetDisplacementTexture}, ${targetSampler}),
             ${targetUV} + vec2(
                 ${displacementFlowSpeedX} * (systemUniforms.time/1000.0),
                 ${displacementFlowSpeedY} * (systemUniforms.time/1000.0)
@@ -104,7 +103,7 @@ export default class ShareGLSL {
 	        float spotLightCount;
 	        DirectionalLight directionalLightList[MAX_DIRECTIONAL_LIGHT];
 	        PointLight pointLightList[MAX_POINT_LIGHT];
-	        AmbientLight ambientLight;	        
+	        AmbientLight ambientLight;
 	        SpotLight spotLightList[MAX_SPOT_LIGHT];
 	        vec2 resolution;
 	        vec3 cameraPosition;
@@ -113,7 +112,7 @@ export default class ShareGLSL {
         vec4 la = systemUniforms.ambientLight.color * systemUniforms.ambientLight.intensity;
         vec4 calcDirectionalLight(
             vec4 diffuseColor,
-            vec3 N,		
+            vec3 N,
 			float loopNum,
 			DirectionalLight[MAX_DIRECTIONAL_LIGHT] lightList,
 			float shininess,
@@ -123,18 +122,18 @@ export default class ShareGLSL {
 		){
 		    vec4 ld = vec4(0.0, 0.0, 0.0, 1.0);
 		    vec4 ls = vec4(0.0, 0.0, 0.0, 1.0);
-		    
-		    vec3 L;	
+
+		    vec3 L;
 		    vec4 lightColor;
-		    
+
 		    float lambertTerm;
 		    float intensity;
 		    float specular;
-		    		    
+
 		    DirectionalLight lightInfo;
 		    for(int i = 0; i< loopNum; i++){
 		        lightInfo = lightList[i];
-			    L = normalize(-lightInfo.position);	
+			    L = normalize(-lightInfo.position);
 			    lightColor = lightInfo.color;
 			    lambertTerm = dot(N,-L);
 			    intensity = lightInfo.intensity;
@@ -149,7 +148,7 @@ export default class ShareGLSL {
 		/////////////////////////////////////////////////////////////////////////////
 		vec4 calcPointLight(
             vec4 diffuseColor,
-            vec3 N,		
+            vec3 N,
 			float loopNum,
 			PointLight[MAX_POINT_LIGHT] lightList,
 			float shininess,
@@ -160,14 +159,14 @@ export default class ShareGLSL {
 		){
 			vec4 ld = vec4(0.0, 0.0, 0.0, 1.0);
 		    vec4 ls = vec4(0.0, 0.0, 0.0, 1.0);
-		    
-		    vec3 L;	
+
+		    vec3 L;
 		    vec4 lightColor;
-		    
+
 		    float lambertTerm;
 		    float intensity;
 		    float specular;
-		  
+
 		    PointLight lightInfo;
 		    float distanceLength ;
 		    float attenuation;
@@ -176,15 +175,15 @@ export default class ShareGLSL {
 		        L = -lightInfo.position + vVertexPosition;
 			    distanceLength = abs(length(L));
 			    if(lightInfo.radius> distanceLength){
-			        L = normalize(L);	
+			        L = normalize(L);
               lightColor = lightInfo.color;
               lambertTerm = dot(N,-L);
               intensity = lightInfo.intensity;
               if(lambertTerm > 0.0){
-                  attenuation = clamp(1.0 - distanceLength*distanceLength/(lightInfo.radius*lightInfo.radius), 0.0, 1.0); 
+                  attenuation = clamp(1.0 - distanceLength*distanceLength/(lightInfo.radius*lightInfo.radius), 0.0, 1.0);
                   attenuation *= attenuation;
             	    ld += lightColor* diffuseColor * lambertTerm * intensity * attenuation;
-            	 
+
                   specular = pow( max(dot(reflect(L, N), -L), 0.0), shininess) * specularPower * specularTextureValue;
                   ls +=  specularColor * specular * intensity * attenuation;
               }
@@ -194,7 +193,7 @@ export default class ShareGLSL {
 		}
 		vec4 calcSpotLight(
             vec4 diffuseColor,
-            vec3 N,		
+            vec3 N,
 			float loopNum,
 			SpotLight[MAX_SPOT_LIGHT] lightList,
 			float shininess,
@@ -205,14 +204,14 @@ export default class ShareGLSL {
 		){
 			vec4 ld = vec4(0.0, 0.0, 0.0, 1.0);
 		    vec4 ls = vec4(0.0, 0.0, 0.0, 1.0);
-		    
-		    vec3 L;	
+
+		    vec3 L;
 		    vec4 lightColor;
-		    
+
 		    float lambertTerm;
 		    float intensity;
 		    float specular;
-		  
+
 		    SpotLight lightInfo;
 	        float distanceLength ;
 		    float attenuation;
@@ -221,19 +220,19 @@ export default class ShareGLSL {
 		        L = -lightInfo.position + vVertexPosition;
 			    distanceLength = abs(length(L));
 			    vec3 spotDirection = vec3(0.1,-1,0);
-			    L = normalize(L);	
+			    L = normalize(L);
 			    lambertTerm = dot(N,-L);
 				float spotEffect = dot(normalize(spotDirection),L);
                 lightColor = lightInfo.color;
 		        float limit = 10;
 		        float inLight = step(cos(limit * 3.141592653589793/180), spotEffect);
                 float light = inLight * spotEffect;
-			    if(lambertTerm > 0 && spotEffect > lightInfo.cutoff ){			     
+			    if(lambertTerm > 0 && spotEffect > lightInfo.cutoff ){
 			        if(spotEffect > cos(limit * 3.141592653589793/180) ){
 				        spotEffect = pow(spotEffect, lightInfo.exponent);
 		                attenuation = spotEffect * light ;
-					    intensity = lightInfo.intensity;					 
-				     
+					    intensity = lightInfo.intensity;
+
 						ld += lightColor * diffuseColor * intensity * attenuation;
 						specular = pow( max(dot(reflect(L, N), -L), 0.0), shininess) * specularPower * specularTextureValue;
 						ls +=  specularColor * specular * intensity * attenuation ;
@@ -251,7 +250,7 @@ export default class ShareGLSL {
 		`,
     perturb_normal: `
 		vec3 perturb_normal( vec3 N, vec3 V, vec2 texcoord, vec3 normalColor , float normalPower)
-		{	   
+		{
 			vec3 map = normalColor;
 			map =  map * 255./127. - 128./127.;
 			map.xy *= -normalPower;
@@ -262,17 +261,17 @@ export default class ShareGLSL {
     cotangent_frame: `
 		mat3 cotangent_frame(vec3 N, vec3 p, vec2 uv)
 		{
-		
+
 			vec3 dp1 = dFdx( p );
 			vec3 dp2 = dFdy( p );
 			vec2 duv1 = dFdx( uv );
 			vec2 duv2 = dFdy( uv );
-			
+
 			vec3 dp2perp = cross( dp2, N );
 			vec3 dp1perp = cross( N, dp1 );
 			vec3 T = dp2perp * duv1.x + dp1perp * duv2.x;
 			vec3 B = dp2perp * duv1.y + dp1perp * duv2.y;
-			
+
 			float invmax = inversesqrt( max( dot(T,T), dot(B,B) ) );
 			return mat3( T * invmax, B * invmax, N );
 		}

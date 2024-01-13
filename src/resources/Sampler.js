@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 const TABLE = {};
 export default class Sampler {
   constructor(redGPUContext, option = {}) {

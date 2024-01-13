@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import BaseMaterial from "../base/BaseMaterial.js";
 import ShareGLSL from "../base/ShareGLSL.js";
 import BasePostEffect from "../base/BasePostEffect.js";
@@ -17,7 +16,7 @@ export default class PostEffect_Convolution extends BasePostEffect {
   static vertexShaderGLSL = `
 	${ShareGLSL.GLSL_VERSION}
 	${ShareGLSL.GLSL_SystemUniforms_vertex.systemUniforms}
-    
+
 	layout( location = 0 ) in vec3 position;
 	layout( location = 1 ) in vec3 normal;
 	layout( location = 2 ) in vec2 uv;
@@ -44,7 +43,7 @@ export default class PostEffect_Convolution extends BasePostEffect {
 	layout( set = ${ShareGLSL.SET_INDEX_VertexUniforms}, binding = 1 ) uniform sampler uSampler;
 	layout( set = ${ShareGLSL.SET_INDEX_VertexUniforms}, binding = 2 ) uniform texture2D uSourceTexture;
 	layout( location = 0 ) out vec4 outColor;
-	
+
 	void main() {
 
 		vec2 perPX = vec2(1.0/systemUniforms.resolution.x, 1.0/systemUniforms.resolution.y);
@@ -58,7 +57,7 @@ export default class PostEffect_Convolution extends BasePostEffect {
 		finalColor += texture( sampler2D( uSourceTexture, uSampler ), vUV + perPX * vec2(-1.0,  1.0)) * fragmentUniforms.kernel[2][0] ;
 		finalColor += texture( sampler2D( uSourceTexture, uSampler ), vUV + perPX * vec2( 0.0,  1.0)) * fragmentUniforms.kernel[2][1] ;
 		finalColor += texture( sampler2D( uSourceTexture, uSampler ), vUV + perPX * vec2( 1.0,  1.0)) * fragmentUniforms.kernel[2][2] ;
-	
+
 		outColor = vec4((finalColor / fragmentUniforms.kernelWeight).rgb, 1.0);
 	}
 `;

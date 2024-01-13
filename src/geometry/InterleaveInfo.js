@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import TypeSize from "../resources/TypeSize.js";
 import RedGPUContext from "../RedGPUContext.js";
 

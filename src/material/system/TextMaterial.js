@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import BaseMaterial from "../../base/BaseMaterial.js";
 import ShareGLSL from "../../base/ShareGLSL.js";
 import Mix from "../../base/Mix.js";
@@ -32,28 +31,28 @@ export default class TextMaterial extends Mix.mix(
 	layout( location = 2 ) in vec2 uv;
 	layout( location = 0 ) out vec3 vNormal;
 	layout( location = 1 ) out vec2 vUV;
-	layout( location = 2 ) out float vMouseColorID;	
+	layout( location = 2 ) out float vMouseColorID;
 	layout( location = 3 ) out float vSumOpacity;
-    ${ShareGLSL.GLSL_SystemUniforms_vertex.getSprite3DMatrix}	
+    ${ShareGLSL.GLSL_SystemUniforms_vertex.getSprite3DMatrix}
 	void main() {
 		float w = vertexUniforms.width ;
 		float h = vertexUniforms.height ;
 		mat4 modelMatrix = meshMatrixUniforms.modelMatrix[ int(meshUniforms.index) ];
 		mat4 targetMatrix;
-		
+
 		// 기본
 		targetMatrix = modelMatrix * mat4( w / max( w, h ), 0.0, 0.0, 0.0,   0.0, h / max( w, h ), 0.0, 0.0,    0.0, 0.0, 1.0, 0.0,    0.0, 0.0, 0.0, 1.0 );
-		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * targetMatrix * vec4(position,1.0);				
-		
+		gl_Position = systemUniforms.perspectiveMTX * systemUniforms.cameraMTX * targetMatrix * vec4(position,1.0);
+
 		// sprite3D
 		//#RedGPU#useSprite3DMode#  targetMatrix = modelMatrix * mat4( w / systemUniforms.resolution.y, 0.0, 0.0, 0.0,    0.0, h / systemUniforms.resolution.y, 0.0, 0.0,    0.0, 0.0, 1.0, 0.0,    0.0, 0.0, 0.0, 1.0);
-		//#RedGPU#useSprite3DMode#  gl_Position = systemUniforms.perspectiveMTX * getSprite3DMatrix( systemUniforms.cameraMTX, targetMatrix ) * vec4(position,1.0);	
-			
-		
+		//#RedGPU#useSprite3DMode#  gl_Position = systemUniforms.perspectiveMTX * getSprite3DMatrix( systemUniforms.cameraMTX, targetMatrix ) * vec4(position,1.0);
+
+
 		//#RedGPU#useSprite3DMode#  //#RedGPU#useFixedScale#  gl_Position /= gl_Position.w;
 		//#RedGPU#useSprite3DMode#  //#RedGPU#useFixedScale#  gl_Position.xy += position.xy * vec2((systemUniforms.perspectiveMTX * targetMatrix)[0][0],(systemUniforms.perspectiveMTX * targetMatrix)[1][1]);
-	
-		
+
+
 		vNormal = normal;
 		vUV = uv;
 		vMouseColorID = meshUniforms.mouseColorID;
@@ -64,7 +63,7 @@ export default class TextMaterial extends Mix.mix(
 	${ShareGLSL.GLSL_VERSION}
 	layout( location = 0 ) in vec3 vNormal;
 	layout( location = 1 ) in vec2 vUV;
-	layout( location = 2 ) in float vMouseColorID;	
+	layout( location = 2 ) in float vMouseColorID;
 	layout( location = 3 ) in float vSumOpacity;
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 1 ) uniform FragmentUniforms {
         float alpha;
@@ -72,7 +71,7 @@ export default class TextMaterial extends Mix.mix(
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 2 ) uniform sampler uSampler;
 	layout( set = ${ShareGLSL.SET_INDEX_FragmentUniforms}, binding = 3 ) uniform texture2D uDiffuseTexture;
 	layout( location = 0 ) out vec4 outColor;
-	
+
 	layout( location = 1 ) out vec4 out_MouseColorID_Depth;
 	void main() {
 		vec4 diffuseColor = vec4(0.0);
@@ -81,7 +80,7 @@ export default class TextMaterial extends Mix.mix(
 		outColor = diffuseColor;
 		outColor.a *= fragmentUniforms.alpha * vSumOpacity;
 		out_MouseColorID_Depth = vec4(vMouseColorID, gl_FragCoord.z/gl_FragCoord.w, 0.0, 0.0);
-		
+
 	}
 `;
   static PROGRAM_OPTION_LIST = {

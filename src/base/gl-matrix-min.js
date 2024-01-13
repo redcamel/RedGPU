@@ -5,7 +5,6 @@
  *   Last modification time of this file - 2020.1.20 18:6:15
  *
  */
-"use strict";
 var n = 1e-6, a = "undefined" != typeof Float32Array ? Float32Array : Array, r = Math.random;
 var u = Math.PI / 180;
 Math.hypot || (Math.hypot = function () {

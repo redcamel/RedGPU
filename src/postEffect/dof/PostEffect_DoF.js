@@ -6,7 +6,6 @@
  *
  */
 
-"use strict";
 import BaseMaterial from "../../base/BaseMaterial.js";
 import BasePostEffect from "../../base/BasePostEffect.js";
 import PostEffect_GaussianBlur from "../blur/PostEffect_GaussianBlur.js";
