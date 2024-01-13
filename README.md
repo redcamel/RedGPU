@@ -32,7 +32,6 @@ https://user-images.githubusercontent.com/820587/172777357-32c64963-abbe-432c-80
 
 #### module
 ```javascript
-"use strict"
 import RedGPU from "dist/RedGPU.min.mjs";
 
 const cvs = document.createElement('canvas');

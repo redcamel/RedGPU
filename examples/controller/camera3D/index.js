@@ -5,7 +5,6 @@
  *   Last modification time of this file - 2020.3.23 18:29:56
  *
  */
-"use strict"
 
 import RedGPU from "../../../dist/RedGPU.min.mjs";
 

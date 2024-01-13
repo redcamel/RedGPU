@@ -5,7 +5,6 @@
  *   Last modification time of this file - 2020.2.28 21:0:29
  *
  */
-"use strict";
 import RedGPU from "../../../dist/RedGPU.min.mjs";
 
 const cvs = document.createElement('canvas');
