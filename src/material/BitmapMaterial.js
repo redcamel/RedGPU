@@ -7,8 +7,8 @@
  */
 "use strict";
 import BaseMaterial from "../base/BaseMaterial.js";
-import ShareGLSL from "../base/ShareGLSL.js";
 import Mix from "../base/Mix.js";
+import ShareGLSL from "../base/ShareGLSL.js";
 import RedGPUContext from "../RedGPUContext.js";
 import TypeSize from "../resources/TypeSize.js";
 

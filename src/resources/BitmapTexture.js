@@ -6,11 +6,9 @@
  *
  */
 "use strict";
-import generateWebGPUTextureMipmap from "./mipmapGenerator/generateWebGPUTextureMipmap";
-import Sampler from "./Sampler.js";
-import ImageLoader from "./system/ImageLoader.js";
-import CopyBufferToTexture from './system/CopyBufferToTexture.js';
 import BaseTexture from "../base/BaseTexture.js";
+import generateWebGPUTextureMipmap from "./mipmapGenerator/generateWebGPUTextureMipmap.js";
+import Sampler from "./Sampler.js";
 
 let defaultSampler;
 const MIPMAP_TABLE = new Map();
