@@ -64,24 +64,39 @@ export default class ObitController extends Camera3D {
       sY = 0;
       mX = 0;
       mY = 0;
-      tX_key = 'layerX';
-      tY_key = 'layerY';
+      tX_key = redGPUContext.detector.isMobile ? 'clientX' : 'layerX';
+      tY_key = redGPUContext.detector.isMobile ? 'clientY' : 'layerY';;
       HD_down = e => {
         if (!checkArea(e)) return;
         if (this.#needUpdate) {
-          sX = e[tX_key];
-          sY = e[tY_key];
+          if(redGPUContext.detector.isMobile){
+            sX = e.changedTouches[0][tX_key];
+            sY = e.changedTouches[0][tY_key];
+          }else{
+            sX = e[tX_key];
+            sY = e[tY_key];
+          }
+
           redGPUContext['canvas'].addEventListener(tMove, HD_Move);
           window.addEventListener(tUp, HD_up);
         }
       };
       HD_Move = e => {
+        console.log(e)
         if (!checkArea(e)) return;
         if (this.#needUpdate) {
-          mX = e[tX_key] - sX;
-          mY = e[tY_key] - sY;
-          sX = e[tX_key];
-          sY = e[tY_key];
+          if(redGPUContext.detector.isMobile){
+            mX = e.changedTouches[0][tX_key] - sX;
+            mY = e.changedTouches[0][tY_key] - sY;
+            sX = e.changedTouches[0][tX_key];
+            sY = e.changedTouches[0][tY_key];
+          }else{
+            mX = e[tX_key] - sX;
+            mY = e[tY_key] - sY;
+            sX = e[tX_key];
+            sY = e[tY_key];
+          }
+
           this.#pan -= mX * this.#speedRotation * 0.1;
           this.#tilt -= mY * this.#speedRotation * 0.1;
         }
