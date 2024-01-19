@@ -386,10 +386,10 @@ export default class View extends UUID {
 
 	getViewRect(redGPUContext) {
 		return [
-			typeof this.x == 'number' ? this.x : parseInt(this.x) / 100 * redGPUContext.canvas.width,
-			typeof this.y == 'number' ? this.y : parseInt(this.y) / 100 * redGPUContext.canvas.height,
-			typeof this.width == 'number' ? this.width : parseInt(parseInt(this.width) / 100 * redGPUContext.canvas.width),
-			typeof this.height == 'number' ? this.height : parseInt(parseInt(this.height) / 100 * redGPUContext.canvas.height)
+			typeof this.x == 'number' ? this.x : parseInt(this.x) / 100 * redGPUContext.canvas.width / devicePixelRatio,
+			typeof this.y == 'number' ? this.y : parseInt(this.y) / 100 * redGPUContext.canvas.height / devicePixelRatio,
+			typeof this.width == 'number' ? this.width : parseInt(parseInt(this.width) / 100 * redGPUContext.canvas.width / devicePixelRatio),
+			typeof this.height == 'number' ? this.height : parseInt(parseInt(this.height) / 100 * redGPUContext.canvas.height / devicePixelRatio)
 		];
 	}
 

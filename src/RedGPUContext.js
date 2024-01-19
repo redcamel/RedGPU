@@ -243,8 +243,9 @@ export default class RedGPUContext {
     else tH = h;
     if (tW < 1) tW = 1;
     if (tH < 1) tH = 1;
-    this.canvas.width = tW;
-    this.canvas.height = tH;
+    const ratio = window['devicePixelRatio'] || 1;
+    this.canvas.width = tW *  ratio;
+    this.canvas.height = tH *  ratio;
     this.canvas.style.width = tW + 'px';
     this.canvas.style.height = tH + 'px';
     this.viewList.forEach(redView => {
