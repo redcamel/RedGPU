@@ -706,6 +706,7 @@ export default class Render {
         }]
       }
     );
+
     for (i; i < len; i++) {
       redView = redGPUContext.viewList[i];
       currentDebuggerData = debuggerData[i];
