@@ -28,10 +28,10 @@ const run = () => {
 					while (i--) {
 						const color = ('0x' + genRanHex(6))
 						const t0 = new RedGPU.PointLight(redGPUContext, color)
-						t0.x = Math.random() * 100 - 50
-						t0.y = Math.random() * 100 - 50
-						t0.z = Math.random() * 100 - 50
-						t0.radius = 10
+						t0.x = Math.random() * 50 - 25
+						t0.y = Math.random() * 50 - 25
+						t0.z = Math.random() * 50 - 25
+						t0.radius = 2
 						t0.intensity = 5
 						scene.lightManager.addLight(t0)
 					}
@@ -91,7 +91,7 @@ const run = () => {
 					// }
 					//
 					// }
-					const size = Math.random() * 3 + 0.5
+					const size = Math.random() * 3
 					if (Math.random() > 0.5) {
 						mesh = new RedGPU.Mesh(redGPUContext, new RedGPU.Sphere(redGPUContext, size), testMat2)
 					} else {
@@ -99,9 +99,9 @@ const run = () => {
 					}
 					// mesh = new RedGPU.Mesh(redGPUContext, geometrySphere, testMat2)
 					scene.addChild(mesh)
-					mesh.z = Math.random() * 100 - 50
-					mesh.x = Math.random() * 100 - 50
-					mesh.y = Math.random() * 100 - 50
+					mesh.z = Math.random() * 50 - 25
+					mesh.x = Math.random() * 50 - 25
+					mesh.y = Math.random() * 50 - 25
 					mesh.rotationX = Math.random() * 360
 					mesh.rotationY = Math.random() * 360
 					mesh.rotationZ = Math.random() * 360
@@ -109,11 +109,11 @@ const run = () => {
 				}
 				renderer.beforeRender = (nowTime, targetView, targetScene) => {
 					// console.log(navigator.hardwareConcurrency)
-					targetView.camera.x = Math.cos(nowTime / 3000) * 25 - Math.cos(nowTime / 2000) * 25
-					targetView.camera.y = Math.sin(nowTime / 3000) * 25 + Math.sin(nowTime / 2000) * 25
-					targetView.camera.z = Math.sin(nowTime / 3000) * 40
-					testMat.shininess = Math.sin(nowTime / 500) * 60 + 60
-					testMat.specularPower = Math.sin(nowTime / 500) * 3 + 5
+					targetView.camera.x = Math.cos(nowTime / 3000) * 125 - Math.cos(nowTime / 2000) * 25
+					targetView.camera.y = Math.sin(nowTime / 3000) * 125 + Math.sin(nowTime / 2000) * 25
+					targetView.camera.z = Math.sin(nowTime / 3000) * 140
+					// testMat.shininess = Math.sin(nowTime / 500) * 60 + 60
+					// testMat.specularPower = Math.sin(nowTime / 500) * 3 + 5
 					// targetScene.lightManager.directionalLightList[0].x = Math.sin(nowTime / 300)
 					// targetScene.lightManager.directionalLightList[0].y = Math.cos(nowTime / 300)
 				}
