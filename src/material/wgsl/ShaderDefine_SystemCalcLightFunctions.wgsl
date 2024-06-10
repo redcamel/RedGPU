@@ -22,7 +22,7 @@ fn calcDirectionalLight(
 };
 
 fn calcPointLight(
-    light:Light, normal:vec3<f32>,
+    light:PointLight, normal:vec3<f32>,
     vertexPosition:vec3<f32>,
     ///
     shininess:f32,
@@ -91,7 +91,7 @@ fn calcLights(
         for (var lightIndex = 0u; lightIndex < lightCount; lightIndex = lightIndex + 1u) {
             let i = clusterLightGroup.indices[lightOffset + lightIndex];
             lightColorSum = lightColorSum + (calcPointLight(
-                lightList.lights[i],
+                pointLightList.lights[i],
                 normal,
                 vertexPosition,
                 shininess,

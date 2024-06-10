@@ -46,17 +46,17 @@ fn getTile(fragCoord : vec4<f32>) -> vec3<u32> {
                      zTile);
 }
 
-struct Light {
+struct PointLight {
     position : vec3<f32>,
     radius : f32,
     color : vec3<f32>,
     intensity : f32
 };
-struct LightList {
+struct PointLightList {
     count:vec4<f32>,
-    lights : array<Light>
+    lights : array<PointLight>
 };
 
 @group(0) @binding(0) var<uniform> systemUniforms : SystemUniforms;
-@group(0) @binding(2) var<storage> lightList : LightList;
+@group(0) @binding(2) var<storage> pointLightList : PointLightList;
 @group(0) @binding(3) var<storage, read_write> clusterLightGroup : PointLight_ClusterLightsGroup;

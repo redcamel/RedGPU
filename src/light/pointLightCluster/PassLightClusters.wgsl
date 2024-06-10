@@ -1,14 +1,14 @@
 #REDGPU_DEFINE_SYSTEM_UNIFORMS
 @group(1) @binding(0) var<storage> clusters : PointLight_Clusters;
 
-fn testSphereAABB( light:u32,  tile:u32) -> bool{
-        var radius:f32 = lightList.lights[light].radius;
-       var center:vec3<f32>  = (systemUniforms.cameraMatrix *  vec4<f32>(lightList.lights[light].position, 1.0)).xyz;
-       var  squaredDistance:f32 = sqDistPointAABB(center, tile, clusters.cubeList[tile].minAABB.xyz, clusters.cubeList[tile].maxAABB.xyz);
+fn pointLight_testSphereAABB( light:u32,  tile:u32) -> bool{
+        var radius:f32 = pointLightList.lights[light].radius;
+       var center:vec3<f32>  = (systemUniforms.cameraMatrix *  vec4<f32>(pointLightList.lights[light].position, 1.0)).xyz;
+       var  squaredDistance:f32 = pointLight_sqDistPointAABB(center, tile, clusters.cubeList[tile].minAABB.xyz, clusters.cubeList[tile].maxAABB.xyz);
 
        return squaredDistance <= (radius * radius);
    }
-fn sqDistPointAABB(targetPoint:vec3<f32>, tile:u32,minAABB : vec3<f32>, maxAABB : vec3<f32>) -> f32 {
+fn pointLight_sqDistPointAABB(targetPoint:vec3<f32>, tile:u32,minAABB : vec3<f32>, maxAABB : vec3<f32>) -> f32 {
     var sqDist = 0.0;
     // const minAABB : vec3<f32> = clusters.cubeList[tileIndex].minAABB;
     // const maxAABB : vec3<f32> = clusters.cubeList[tileIndex].maxAABB;
@@ -33,16 +33,16 @@ fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
                     global_id.z * pointLight_tileCount.x * pointLight_tileCount.y;
     var clusterLightCount = 0u;
     var cluserPointLightIndices : array<u32, REDGPU_DEFINE_MAX_LIGHTS_PER_CLUSTERu>;
-    for (var i = 0u; i < u32(lightList.count[0]); i = i + 1u) {
-        var  radius:f32 = lightList.lights[i].radius;
+    for (var i = 0u; i < u32(pointLightList.count[0]); i = i + 1u) {
+        var  radius:f32 = pointLightList.lights[i].radius;
         // PointLights without an explicit radius affect every cluster, but this is a poor way to handle that.
         var lightInCluster = radius <= 0.0;
 //        if (!lightInCluster) {
-//            let pointLightViewPos = systemUniforms.cameraMatrix * vec4<f32>(lightList.lights[i].position, 1.0);
-//            let sqDist = sqDistPointAABB(pointLightViewPos.xyz,tileIndex, clusters.cubeList[tileIndex].minAABB.xyz, clusters.cubeList[tileIndex].maxAABB.xyz);
+//            let pointLightViewPos = systemUniforms.cameraMatrix * vec4<f32>(pointLightList.lights[i].position, 1.0);
+//            let sqDist = pointLight_sqDistPointAABB(pointLightViewPos.xyz,tileIndex, clusters.cubeList[tileIndex].minAABB.xyz, clusters.cubeList[tileIndex].maxAABB.xyz);
 //            lightInCluster = sqDist <= (radius * radius);
 //        }
-        lightInCluster = testSphereAABB(i,tileIndex);
+        lightInCluster = pointLight_testSphereAABB(i,tileIndex);
         if (lightInCluster) {
             // PointLight affects this cluster. Add it to the list.
             cluserPointLightIndices[clusterLightCount] = i;
