@@ -1,13 +1,13 @@
 import {BitmapTexture} from "../texture";
 
 class TextureInfo {
-    resource?: BitmapTexture
-    textureView?: GPUTextureView
+	resource?: BitmapTexture
+	textureView?: GPUTextureView
 
-    constructor(resource, textureView = null) {
-        this.resource = resource
-        this.textureView = textureView
-    }
+	constructor(resource, textureView = null) {
+		this.resource = resource
+		this.textureView = textureView
+	}
 }
 
 export default TextureInfo

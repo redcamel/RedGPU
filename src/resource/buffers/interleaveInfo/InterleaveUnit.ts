@@ -1,48 +1,47 @@
 import TypeSize from "../TypeSize";
 
 class InterleaveUnit {
-    static #VERTEX_POSITION = 'vertexPosition'
-    static get VERTEX_POSITION(): string {
-        return this.#VERTEX_POSITION;
-    }
+	static #VERTEX_POSITION = 'vertexPosition'
+	static #VERTEX_NORMAL = 'vertexNormal'
+	static #VERTEX_COLOR = 'vertexColor'
+	static #TEXCOORD = 'texcoord'
+	#attributeHint: string
+	#format: GPUVertexFormat | GPUIndexFormat
+	#stride: GPUSize64
 
-    static #VERTEX_NORMAL = 'vertexNormal'
-    static get VERTEX_NORMAL(): string {
-        return this.#VERTEX_NORMAL;
-    }
+	constructor(attributeHint: string, format: GPUVertexFormat | GPUIndexFormat) {
+		this.#attributeHint = attributeHint;
+		this.#format = format;
+		this.#stride = TypeSize[format];
+	}
 
-    static #VERTEX_COLOR = 'vertexColor'
-    static get VERTEX_COLOR(): string {
-        return this.#VERTEX_COLOR;
-    }
+	static get VERTEX_POSITION(): string {
+		return this.#VERTEX_POSITION;
+	}
 
-    static #TEXCOORD = 'texcoord'
-    static get TEXCOORD(): string {
-        return this.#TEXCOORD;
-    }
+	static get VERTEX_NORMAL(): string {
+		return this.#VERTEX_NORMAL;
+	}
 
-    #attributeHint: string
-    get attributeHint(): string {
-        return this.#attributeHint;
-    }
+	static get VERTEX_COLOR(): string {
+		return this.#VERTEX_COLOR;
+	}
 
-    #format: GPUVertexFormat | GPUIndexFormat
+	static get TEXCOORD(): string {
+		return this.#TEXCOORD;
+	}
 
-    get format(): GPUVertexFormat | GPUIndexFormat {
-        return this.#format;
-    }
+	get attributeHint(): string {
+		return this.#attributeHint;
+	}
 
-    #stride: GPUSize64
+	get format(): GPUVertexFormat | GPUIndexFormat {
+		return this.#format;
+	}
 
-    get stride(): GPUSize64 {
-        return this.#stride;
-    }
-
-    constructor(attributeHint: string, format: GPUVertexFormat | GPUIndexFormat) {
-        this.#attributeHint = attributeHint;
-        this.#format = format;
-        this.#stride = TypeSize[format];
-    }
+	get stride(): GPUSize64 {
+		return this.#stride;
+	}
 }
 
 export default InterleaveUnit

@@ -1,6 +1,6 @@
 import * as glMatrix from "./common.js";
-import * as quat from "./quat.js";
 import * as mat4 from "./mat4.js";
+import * as quat from "./quat.js";
 
 /**
  * Dual Quaternion<br>

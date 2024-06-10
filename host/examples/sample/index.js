@@ -54,8 +54,8 @@ const run = () => {
 				}
 				const view = new RedGPU.View(redGPUContext, scene)
 				redGPUContext.addView(view)
-				// redGPUContext.setSize(10,10)
-				// view.setSize(10,10)
+				redGPUContext.setSize(10,10)
+				view.setSize(10,10)
 
 				{
 					const destroyTexture = new RedGPU.BitmapTexture(redGPUContext, '../../assets/UV_Grid_Sm.jpg')

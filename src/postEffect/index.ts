@@ -8,12 +8,12 @@ import PostEffectPixelize from "./effects/PostEffectPixelize";
 
 
 export {
-    PostEffectManager,
-    PostEffectBase,
-    //
-    PostEffectInvert,
-    PostEffectGray,
-    PostEffectHueSaturation,
-    PostEffectBrightnessContrast,
-    PostEffectPixelize
+	PostEffectManager,
+	PostEffectBase,
+	//
+	PostEffectInvert,
+	PostEffectGray,
+	PostEffectHueSaturation,
+	PostEffectBrightnessContrast,
+	PostEffectPixelize
 }

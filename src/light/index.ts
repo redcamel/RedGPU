@@ -5,9 +5,9 @@ import LightManager from "./LightManager";
 import PointLight from "./PointLight";
 
 export {
-    BaseLight,
-    AmbientLight,
-    DirectionalLight,
-    PointLight,
-    LightManager,
+	BaseLight,
+	AmbientLight,
+	DirectionalLight,
+	PointLight,
+	LightManager,
 }

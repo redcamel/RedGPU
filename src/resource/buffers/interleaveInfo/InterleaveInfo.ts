@@ -1,38 +1,37 @@
 import InterleaveUnit from "./InterleaveUnit";
 
 class InterleaveInfo {
+	#stride = 0;
+	#arrayStride = 0;
+	#attributes = [];
 
-    #stride = 0;
-    get stride() {
-        return this.#stride;
-    }
+	constructor(dataList: InterleaveUnit[]) {
+		dataList.forEach((v, index) => {
+			this.#stride += v.stride / Float32Array.BYTES_PER_ELEMENT;
+			//
+			this.#attributes.push(
+				{
+					attributeHint: v['attributeHint'],
+					shaderLocation: index,
+					offset: this.#arrayStride,
+					format: v['format']
+				}
+			);
+			this.#arrayStride += v['stride'];
+		})
+	}
 
-    #arrayStride = 0;
-    get arrayStride(): number {
-        return this.#arrayStride;
-    }
+	get stride() {
+		return this.#stride;
+	}
 
-    #attributes = [];
-    get attributes(): any[] {
-        return this.#attributes;
-    }
+	get arrayStride(): number {
+		return this.#arrayStride;
+	}
 
-    constructor(dataList: InterleaveUnit[]) {
-        dataList.forEach((v, index) => {
-            this.#stride += v.stride / Float32Array.BYTES_PER_ELEMENT;
-            //
-            this.#attributes.push(
-                {
-                    attributeHint: v['attributeHint'],
-                    shaderLocation: index,
-                    offset: this.#arrayStride,
-                    format: v['format']
-                }
-            );
-            this.#arrayStride += v['stride'];
-        })
-
-    }
+	get attributes(): any[] {
+		return this.#attributes;
+	}
 }
 
 export default InterleaveInfo

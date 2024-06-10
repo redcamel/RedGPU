@@ -1,5 +1,4 @@
 #REDGPU_DEFINE_SYSTEM_UNIFORMS
-#REDGPU_DEFINE_POINT_LIGHT_CLUSTER
 @group(1) @binding(0) var<storage, read_write> clusters : Clusters;
 
 fn lineIntersectionToZPlane(a : vec3<f32>, b : vec3<f32>, zDistance : f32) -> vec3<f32> {

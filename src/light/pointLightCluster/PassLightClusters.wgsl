@@ -1,7 +1,4 @@
 #REDGPU_DEFINE_SYSTEM_UNIFORMS
-#REDGPU_DEFINE_SYSTEM_POINT_LIGHTS
-#REDGPU_DEFINE_POINT_LIGHT_CLUSTER
-
 @group(1) @binding(0) var<storage> clusters : Clusters;
 
 fn testSphereAABB( light:u32,  tile:u32) -> bool{

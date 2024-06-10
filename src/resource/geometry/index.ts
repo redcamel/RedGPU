@@ -3,7 +3,7 @@ import Box from "./primitives/Box";
 import Sphere from "./primitives/Sphere";
 
 export {
-    Geometry,
-    Box,
-    Sphere
+	Geometry,
+	Box,
+	Sphere
 }

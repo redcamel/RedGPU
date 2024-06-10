@@ -1,9 +1,9 @@
-import NormalHelper from "./normalHelper/NormalHelper";
-import Grid from "./grid/Grid";
 import Axis from "./asix/Axis";
+import Grid from "./grid/Grid";
+import NormalHelper from "./normalHelper/NormalHelper";
 
 export {
-    NormalHelper,
-    Grid,
-    Axis
+	NormalHelper,
+	Grid,
+	Axis
 }

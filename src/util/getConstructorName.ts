@@ -1,4 +1,4 @@
 const getConstructorName = function (target) {
-    return `${target.constructor.name}`
+	return `${target.constructor.name}`
 }
 export default getConstructorName
