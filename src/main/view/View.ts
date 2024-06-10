@@ -37,14 +37,11 @@ class View extends ViewBase {
 	#systemBufferInfo: UniformBufferFloat32
 	#systemUniformsBindGroupLayout: GPUBindGroupLayout
 	#renderInfo_SystemUniformBindGroup: GPUBindGroup
-	#passLightClustersBound: PassLightClustersBound
 	#passLightClusters: PassLightClusters
 	#systemPointLight_ClusterLightsBufferInfo: UniformBufferFloat32
 	#systemAmbientDirectionalLightBufferInfo: UniformBufferFloat32
 	#finalRenderUniformBuffer: GPUBuffer
-	#calcLightClusteringYn: boolean = false
-	#prevClusterBoundTime: number = 0
-	#prevPointLight_ClusterLightsTime: number = 0
+
 
 	/**
 	 * 생성자
@@ -160,9 +157,6 @@ class View extends ViewBase {
 		return this.#renderInfo_SystemUniformBindGroup;
 	}
 
-	get passLightClustersBound(): PassLightClustersBound {
-		return this.#passLightClustersBound;
-	}
 
 	get passLightClusters(): PassLightClusters {
 		return this.#passLightClusters;
@@ -208,8 +202,8 @@ class View extends ViewBase {
 		const {gpuDevice} = redGPUContext
 		this.#renderDirectionalLightNum = 0
 		this.#renderPointLightNum = 0
-		if (!this.#passLightClustersBound) {
-			this.#passLightClustersBound = new PassLightClustersBound(redGPUContext, this)
+		if (!this.#passLightClusters) {
+
 			this.#passLightClusters = new PassLightClusters(redGPUContext, this)
 		}
 		if (scene) {
@@ -327,17 +321,7 @@ class View extends ViewBase {
 			}
 			//TODO - dirtyViewRect 기반으로 변경
 			// if (this.#dirtyViewRect) {
-			if (this.#passLightClustersBound && this.#passLightClustersBound.clusterBoundBuffer) {
-				{
-					const commandEncoder = gpuDevice.createCommandEncoder();
-					const passEncoder = commandEncoder.beginComputePass({
-						label: 'Bound cluster'
-					});
-					this.#passLightClustersBound.render(commandEncoder, passEncoder)
-					passEncoder.end();
-					gpuDevice.queue.submit([commandEncoder.finish()]);
-				}
-			}
+
 			// }
 			{
 				const commandEncoder = gpuDevice.createCommandEncoder();

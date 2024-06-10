@@ -86,10 +86,10 @@ fn calcLights(
         }
         // point light
         let clusterIndex = getPointLightClusterIndex(position);
-        let lightOffset  = clusterLightGroup.lights[clusterIndex].offset;
-        let lightCount:u32   = clusterLightGroup.lights[clusterIndex].count;
+        let lightOffset  = pointLight_clusterLightGroup.lights[clusterIndex].offset;
+        let lightCount:u32   = pointLight_clusterLightGroup.lights[clusterIndex].count;
         for (var lightIndex = 0u; lightIndex < lightCount; lightIndex = lightIndex + 1u) {
-            let i = clusterLightGroup.indices[lightOffset + lightIndex];
+            let i = pointLight_clusterLightGroup.indices[lightOffset + lightIndex];
             lightColorSum = lightColorSum + (calcPointLight(
                 pointLightList.lights[i],
                 normal,

@@ -9,19 +9,20 @@ import PassLightClustersHelper from "./PassLightClustersHelper";
 // Initialize empty array with 4 zeros
 const emptyArray = new Uint32Array([0, 0, 0, 0]);
 
-// Class for creating 3D clusters
+// Class for creating 3D pointLight_Clusters
 class PassLightClusters extends RedGPUContextBase {
 	#targetView: View
 	#clusterLightBindGroup: GPUBindGroup
 	#clusterLightPipeline: GPUComputePipeline
 	#clusterLightsBuffer: GPUBuffer
 	#passLightClustersBound: PassLightClustersBound
-
+	#prevWidth:number
+	#prevHeight:number
 	// Constructor for initializing class instances
 	constructor(redGPUContext: RedGPUContext, targetView: View) {
 		super(redGPUContext);
 		this.#targetView = targetView;
-		this.#passLightClustersBound = targetView.passLightClustersBound;
+		this.#passLightClustersBound = 	new PassLightClustersBound(redGPUContext, targetView)
 		this.#initPipeLine();
 		console.log('PassLightClusters', this);
 	}
@@ -36,6 +37,19 @@ class PassLightClusters extends RedGPUContextBase {
 		commandEncoder: GPUCommandEncoder,
 		passEncoder: GPUComputePassEncoder
 	) {
+		const {gpuDevice} = this.redGPUContext
+		if (this.#prevWidth !== this.#targetView.pixelViewRect[2] || this.#prevHeight !== this.#targetView.pixelViewRect[3]) {
+			console.log('재계산')
+			{
+				const commandEncoder = gpuDevice.createCommandEncoder();
+				const passEncoder = commandEncoder.beginComputePass({
+					label: 'Bound cluster'
+				});
+				this.#passLightClustersBound.render(commandEncoder, passEncoder)
+				passEncoder.end();
+				gpuDevice.queue.submit([commandEncoder.finish()]);
+			}
+		}
 		const systemUniformBindGroup: GPUBindGroup = this.#targetView.renderInfo_SystemUniformBindGroup;
 		if (systemUniformBindGroup) {
 			const DISPATCH_SIZE = PassLightClustersHelper.getDispatchSize();
@@ -45,6 +59,8 @@ class PassLightClusters extends RedGPUContextBase {
 			passEncoder.setBindGroup(1, this.#clusterLightBindGroup);
 			passEncoder.dispatchWorkgroups(DISPATCH_SIZE[0], DISPATCH_SIZE[1], DISPATCH_SIZE[2]);
 		}
+		this.#prevWidth = this.#targetView.pixelViewRect[2]
+		this.#prevHeight = this.#targetView.pixelViewRect[3]
 	}
 
 	// Method for initializing pipeline

@@ -54,8 +54,8 @@ const run = () => {
 				}
 				const view = new RedGPU.View(redGPUContext, scene)
 				redGPUContext.addView(view)
-				redGPUContext.setSize(10,10)
-				view.setSize(10,10)
+				redGPUContext.setSize('100%',5)
+				view.setSize('100%',5)
 
 				{
 					const destroyTexture = new RedGPU.BitmapTexture(redGPUContext, '../../assets/UV_Grid_Sm.jpg')
@@ -111,9 +111,9 @@ const run = () => {
 				}
 				renderer.beforeRender = (nowTime, targetView, targetScene) => {
 					// console.log(navigator.hardwareConcurrency)
-					targetView.camera.x = Math.cos(nowTime / 3000) * 125 - Math.cos(nowTime / 2000) * 25
-					targetView.camera.y = Math.sin(nowTime / 3000) * 125 + Math.sin(nowTime / 2000) * 25
-					targetView.camera.z = Math.sin(nowTime / 3000) * 140
+					targetView.camera.x = Math.cos(nowTime / 30000) * 55
+					targetView.camera.y = Math.sin(nowTime / 30000) * 55
+					targetView.camera.z = Math.sin(nowTime / 30000) * 55
 					// testMat.shininess = Math.sin(nowTime / 500) * 60 + 60
 					// testMat.specularPower = Math.sin(nowTime / 500) * 3 + 5
 					// targetScene.lightManager.directionalLightList[0].x = Math.sin(nowTime / 300)

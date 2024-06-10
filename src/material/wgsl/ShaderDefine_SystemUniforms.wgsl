@@ -59,4 +59,4 @@ struct PointLightList {
 
 @group(0) @binding(0) var<uniform> systemUniforms : SystemUniforms;
 @group(0) @binding(2) var<storage> pointLightList : PointLightList;
-@group(0) @binding(3) var<storage, read_write> clusterLightGroup : PointLight_ClusterLightsGroup;
+@group(0) @binding(3) var<storage, read_write> pointLight_clusterLightGroup : PointLight_ClusterLightsGroup;
