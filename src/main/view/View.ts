@@ -41,7 +41,13 @@ class View extends ViewBase {
 	#systemPointLight_ClusterLightsBufferInfo: UniformBufferFloat32
 	#systemAmbientDirectionalLightBufferInfo: UniformBufferFloat32
 	#finalRenderUniformBuffer: GPUBuffer
+	#passLightClustersBound: PassLightClustersBound
+	#prevWidth: number
+	#prevHeight: number
 
+	get passLightClustersBound(): PassLightClustersBound {
+		return this.#passLightClustersBound;
+	}
 
 	/**
 	 * 생성자
@@ -157,7 +163,6 @@ class View extends ViewBase {
 		return this.#renderInfo_SystemUniformBindGroup;
 	}
 
-
 	get passLightClusters(): PassLightClusters {
 		return this.#passLightClusters;
 	}
@@ -202,11 +207,24 @@ class View extends ViewBase {
 		const {gpuDevice} = redGPUContext
 		this.#renderDirectionalLightNum = 0
 		this.#renderPointLightNum = 0
-		if (!this.#passLightClusters) {
-
-			this.#passLightClusters = new PassLightClusters(redGPUContext, this)
+		if (this.#prevWidth !== this.pixelViewRect[2] || this.#prevHeight !== this.pixelViewRect[3]) {
+			console.log('재계산')
+			{
+				const commandEncoder = gpuDevice.createCommandEncoder();
+				const passEncoder = commandEncoder.beginComputePass({
+					label: 'Bound cluster'
+				});
+				this.#passLightClustersBound.render(commandEncoder, passEncoder)
+				passEncoder.end();
+				gpuDevice.queue.submit([commandEncoder.finish()]);
+			}
 		}
+		this.#prevWidth = this.pixelViewRect[2]
+		this.#prevHeight = this.pixelViewRect[3]
 		if (scene) {
+			if (!this.#passLightClusters) {
+				this.#passLightClusters = new PassLightClusters(redGPUContext, this)
+			}
 			const {ambientLight, pointLightList, directionalLightList} = scene.lightManager
 			//ambient
 			{
@@ -321,7 +339,6 @@ class View extends ViewBase {
 			}
 			//TODO - dirtyViewRect 기반으로 변경
 			// if (this.#dirtyViewRect) {
-
 			// }
 			{
 				const commandEncoder = gpuDevice.createCommandEncoder();
