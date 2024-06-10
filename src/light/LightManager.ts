@@ -6,7 +6,7 @@ import PointLight from "./PointLight";
 
 class LightManager {
 	static #MAX_DIRECTIONAL_LIGHT_NUM: number = 3
-	static #MAX_POINT_LIGHT_NUM: number = 1024
+	static #MAX_POINT_LIGHT_NUM: number = 512
 	#ambientLight: AmbientLight
 	#directionalLightList: DirectionalLight[] = []
 	#pointLightList: PointLight[] = []

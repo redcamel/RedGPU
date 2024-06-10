@@ -207,6 +207,7 @@ class View extends ViewBase {
 		const {gpuDevice} = redGPUContext
 		this.#renderDirectionalLightNum = 0
 		this.#renderPointLightNum = 0
+		if(!this.#passLightClustersBound) this.#passLightClustersBound = new PassLightClustersBound(redGPUContext,this)
 		if (this.#prevWidth !== this.pixelViewRect[2] || this.#prevHeight !== this.pixelViewRect[3]) {
 			console.log('재계산')
 			{
@@ -335,7 +336,8 @@ class View extends ViewBase {
 				clusterLightBufferInfoData.set([pointLightNum, 0, 0, 0], offsetMap['pointLightCount'])
 				this.redGPUContext.gpuDevice.queue.writeBuffer(this.#systemPointLight_ClusterLightsBufferInfo.gpuBuffer, offsetMap['pointLightCount'], new Float32Array([pointLightNum, 0, 0, 0]));
 				// send data to GPU
-				if (dirtyLightNum) this.#systemPointLight_ClusterLightsBufferInfo.update(clusterLightBufferInfoData)
+				// if (dirtyLightNum)
+					this.#systemPointLight_ClusterLightsBufferInfo.update(clusterLightBufferInfoData)
 			}
 			//TODO - dirtyViewRect 기반으로 변경
 			// if (this.#dirtyViewRect) {
