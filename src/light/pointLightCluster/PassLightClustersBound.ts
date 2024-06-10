@@ -62,6 +62,7 @@ class PassLightClustersBound extends RedGPUContextBase {
         }
         this.#clusterBoundBindGroupLayout = gpuDevice.createBindGroupLayout(this.#clusterBoundBindGroupLayoutDescriptor);
         this.#clusterBoundBindGroup = gpuDevice.createBindGroup({
+            label : 'clusterBoundBindGroup',
             layout: this.#clusterBoundBindGroupLayout,
             entries: [
                 {
@@ -74,6 +75,7 @@ class PassLightClustersBound extends RedGPUContextBase {
         });
 
         this.#clusterBoundPipeline = gpuDevice.createComputePipeline({
+            label : 'clusterBoundPipeline',
             layout: gpuDevice.createPipelineLayout({
                 bindGroupLayouts: [
                     this.#targetSystemUniformsBindGroupLayout,

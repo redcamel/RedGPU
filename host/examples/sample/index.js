@@ -12,7 +12,7 @@ const run = () => {
 		.then(redGPUContext => {
 				console.log('성공', redGPUContext)
 				console.log(redGPUContext.debugger)
-				redGPUContext.debugger.useDebugger = true
+				// redGPUContext.debugger.useDebugger = true
 				const scene = new RedGPU.Scene()
 				const ambientLight = new RedGPU.AmbientLight(redGPUContext)
 				// ambientLight.color = 0xff0000
@@ -54,6 +54,8 @@ const run = () => {
 				}
 				const view = new RedGPU.View(redGPUContext, scene)
 				redGPUContext.addView(view)
+				// redGPUContext.setSize(10,10)
+				// view.setSize(10,10)
 
 				{
 					const destroyTexture = new RedGPU.BitmapTexture(redGPUContext, '../../assets/UV_Grid_Sm.jpg')

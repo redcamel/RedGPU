@@ -1,19 +1,8 @@
 #REDGPU_DEFINE_SYSTEM_UNIFORMS
 #REDGPU_DEFINE_SYSTEM_POINT_LIGHTS
 #REDGPU_DEFINE_POINT_LIGHT_CLUSTER
-struct ClusterLights  {
-    offset : u32,
-    count : u32
-};
 
-const inducesLength:u32 = REDGPU_DEFINE_MAX_LIGHTS_PER_CLUSTER * REDGPU_DEFINE_TOTAL_TILES;
-struct ClusterLightGroup {
-    offset : atomic<u32>,
-    lights : array<ClusterLights , REDGPU_DEFINE_TOTAL_TILES>,
-    indices : array<u32, inducesLength>
-};
-@group(1) @binding(0) var<storage,read_write> clusters : Clusters;
-@group(1) @binding(1) var<storage, read_write> clusterLightGroup : ClusterLightGroup;
+@group(1) @binding(0) var<storage> clusters : Clusters;
 
 fn testSphereAABB( light:u32,  tile:u32) -> bool{
         var radius:f32 = lightList.lights[light].radius;
@@ -27,7 +16,7 @@ fn sqDistPointAABB(targetPoint:vec3<f32>, tile:u32,minAABB : vec3<f32>, maxAABB 
     // const minAABB : vec3<f32> = clusters.cubeList[tileIndex].minAABB;
     // const maxAABB : vec3<f32> = clusters.cubeList[tileIndex].maxAABB;
     // Wait, does this actually work? Just porting code, but it seems suspect?
-    clusters.cubeList[tile].maxAABB[3] = f32(tile);
+//    clusters.cubeList[tile].maxAABB[3] = f32(tile);
     for(var i = 0; i < 3; i = i + 1) {
       let v = targetPoint[i];
       if(v < minAABB[i]){

@@ -1,14 +1,4 @@
-struct ClusterLights  {
-    offset : u32,
-    count : u32
-};
 
-const inducesLength:u32 = REDGPU_DEFINE_MAX_LIGHTS_PER_CLUSTER * REDGPU_DEFINE_TOTAL_TILES;
-struct ClusterLightGroup {
-    offset : atomic<u32>,
-    lights : array<ClusterLights , REDGPU_DEFINE_TOTAL_TILES>,
-    indices : array<u32, inducesLength>
-};
 
 
 fn linearDepth(depthSample : f32) -> f32 {
@@ -30,4 +20,3 @@ fn getTile(fragCoord : vec4<f32>) -> vec3<u32> {
                      u32(fragCoord.y / (systemUniforms.resolution.y / f32(tileCount.y))),
                      zTile);
 }
-@group(0) @binding(3) var<storage, read_write> clusterLightGroup : ClusterLightGroup;

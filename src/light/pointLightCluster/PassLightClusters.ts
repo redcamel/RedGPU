@@ -52,17 +52,18 @@ class PassLightClusters extends RedGPUContextBase {
                 {
                     binding: 0,
                     visibility: GPUShaderStage.COMPUTE,
-                    buffer: {type: 'storage'}
+                    buffer: {type: 'read-only-storage'}
                 },
-                {
-                    binding: 1,
-                    visibility: GPUShaderStage.COMPUTE,
-                    buffer: {type: 'storage'}
-                }
+                // {
+                //     binding: 1,
+                //     visibility: GPUShaderStage.COMPUTE,
+                //     buffer: {type: 'storage'}
+                // }
             ]
         }
         this.#clusterLightBindGroupLayout = gpuDevice.createBindGroupLayout(this.#clusterLightBindGroupLayoutDescriptor);
         this.#clusterLightBindGroup = gpuDevice.createBindGroup({
+            label : 'clusterLightBindGroup',
             layout: this.#clusterLightBindGroupLayout,
             entries: [
                 {
@@ -71,16 +72,17 @@ class PassLightClusters extends RedGPUContextBase {
                         buffer: this.#passLightClustersBound.clusterBoundBuffer,
                     },
                 },
-                {
-                    binding: 1,
-                    resource: {
-                        buffer: this.#clusterLightsBuffer,
-                    },
-                }
+                // {
+                //     binding: 1,
+                //     resource: {
+                //         buffer: this.#clusterLightsBuffer,
+                //     },
+                // }
             ],
         });
 
         this.#clusterLightPipeline = gpuDevice.createComputePipeline({
+            label : 'clusterLightPipeline',
             layout: gpuDevice.createPipelineLayout({
                 bindGroupLayouts: [
                     this.#targetSystemUniformsBindGroupLayout,

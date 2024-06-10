@@ -203,7 +203,7 @@ class View extends ViewBase {
                 },
                 {
                     binding: 3,
-                    visibility: GPUShaderStage.FRAGMENT,
+                    visibility: GPUShaderStage.FRAGMENT| GPUShaderStage.COMPUTE,
                     buffer: {type: 'storage'}
                 },
 
@@ -214,6 +214,7 @@ class View extends ViewBase {
         this.calcPixelViewRect()
         this.updateClusterLight()
         const renderInfo_SystemUniformBindGroupDescriptor = {
+            label :'systemUniformsBindGroup',
             layout: this.#systemUniformsBindGroupLayout,
             entries: [
                 {
