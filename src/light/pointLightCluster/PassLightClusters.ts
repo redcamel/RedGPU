@@ -52,7 +52,7 @@ class PassLightClusters extends RedGPUContextBase {
 		const {gpuDevice} = this.redGPUContext;
 		const source = shaderDefineReplace(PassLightClustersSource);
 		this.#clusterLightsBuffer = gpuDevice.createBuffer({
-			size: PassLightClustersHelper.getClusterLightBufferSize(),
+			size: PassLightClustersHelper.getPointLight_ClusterLightsBufferSize(),
 			usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
 		});
 		var clusterLightBindGroupLayout = gpuDevice.createBindGroupLayout({

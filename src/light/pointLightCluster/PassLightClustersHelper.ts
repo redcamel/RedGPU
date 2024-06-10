@@ -7,7 +7,7 @@ const PassLightClustersHelper = {
 	WORKGROUP_SIZE_Z: 16,
 	MAX_POINT_LIGHTS_PER_CLUSTER: 32,
 	getTotalTileSize: () => PassLightClustersHelper.TILE_COUNT_X * PassLightClustersHelper.TILE_COUNT_Y * PassLightClustersHelper.TILE_COUNT_Z,
-	getClusterLightBufferSize: () => {
+	getPointLight_ClusterLightsBufferSize: () => {
 		const totalTileSize = PassLightClustersHelper.getTotalTileSize();
 		return (8 * totalTileSize) + (8 * PassLightClustersHelper.MAX_POINT_LIGHTS_PER_CLUSTER * totalTileSize) + 4
 	},

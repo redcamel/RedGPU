@@ -175,7 +175,7 @@ class Renderer extends RedGPUContextBase {
 		passEncoder.setViewport(0, 0, pixelViewRectInt[2], pixelViewRectInt[3], 0, 1);
 		passEncoder.setScissorRect(0, 0, pixelViewRectInt[2], pixelViewRectInt[3]);
 		view.updateSystemUniform()
-		view.updateClusterLight()
+		view.updateClusters()
 		/////////
 		scene.skyBox?.render(view, passEncoder, nowTime)
 		scene.grid?.render(view, passEncoder, nowTime)

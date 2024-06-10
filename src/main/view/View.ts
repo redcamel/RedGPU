@@ -39,12 +39,12 @@ class View extends ViewBase {
 	#renderInfo_SystemUniformBindGroup: GPUBindGroup
 	#passLightClustersBound: PassLightClustersBound
 	#passLightClusters: PassLightClusters
-	#systemClusterLightBufferInfo: UniformBufferFloat32
+	#systemPointLight_ClusterLightsBufferInfo: UniformBufferFloat32
 	#systemAmbientDirectionalLightBufferInfo: UniformBufferFloat32
 	#finalRenderUniformBuffer: GPUBuffer
 	#calcLightClusteringYn: boolean = false
 	#prevClusterBoundTime: number = 0
-	#prevClusterLightTime: number = 0
+	#prevPointLight_ClusterLightsTime: number = 0
 
 	/**
 	 * 생성자
@@ -168,8 +168,8 @@ class View extends ViewBase {
 		return this.#passLightClusters;
 	}
 
-	get systemClusterLightBufferInfo(): UniformBufferFloat32 {
-		return this.#systemClusterLightBufferInfo;
+	get systemPointLight_ClusterLightsBufferInfo(): UniformBufferFloat32 {
+		return this.#systemPointLight_ClusterLightsBufferInfo;
 	}
 
 	get systemAmbientDirectionalLightBufferInfo(): UniformBufferFloat32 {
@@ -203,7 +203,7 @@ class View extends ViewBase {
 		this.#systemBufferInfo.update(systemBufferInfoData)
 	}
 
-	updateClusterLight() {
+	updateClusters() {
 		const {redGPUContext, scene} = this
 		const {gpuDevice} = redGPUContext
 		this.#renderDirectionalLightNum = 0
@@ -260,8 +260,8 @@ class View extends ViewBase {
 			}
 			//pointLight
 			{
-				const clusterLightBufferInfoData = this.#systemClusterLightBufferInfo.data
-				const {redStructOffsetMap: offsetMap} = this.#systemClusterLightBufferInfo.descriptor
+				const clusterLightBufferInfoData = this.#systemPointLight_ClusterLightsBufferInfo.data
+				const {redStructOffsetMap: offsetMap} = this.#systemPointLight_ClusterLightsBufferInfo.descriptor
 				const frustumPlanes = computeViewFrustumPlanes(this.projectionMatrix, this.camera.matrix)
 				let frustumPlanes0, frustumPlanes1, frustumPlanes2, frustumPlanes3, frustumPlanes4, frustumPlanes5;
 				frustumPlanes0 = frustumPlanes[0];
@@ -321,9 +321,9 @@ class View extends ViewBase {
 				}
 				// updatePointLightCount
 				clusterLightBufferInfoData.set([pointLightNum, 0, 0, 0], offsetMap['pointLightCount'])
-				this.redGPUContext.gpuDevice.queue.writeBuffer(this.#systemClusterLightBufferInfo.gpuBuffer, offsetMap['pointLightCount'], new Float32Array([pointLightNum, 0, 0, 0]));
+				this.redGPUContext.gpuDevice.queue.writeBuffer(this.#systemPointLight_ClusterLightsBufferInfo.gpuBuffer, offsetMap['pointLightCount'], new Float32Array([pointLightNum, 0, 0, 0]));
 				// send data to GPU
-				if (dirtyLightNum) this.#systemClusterLightBufferInfo.update(clusterLightBufferInfoData)
+				if (dirtyLightNum) this.#systemPointLight_ClusterLightsBufferInfo.update(clusterLightBufferInfoData)
 			}
 			//TODO - dirtyViewRect 기반으로 변경
 			// if (this.#dirtyViewRect) {
@@ -380,7 +380,7 @@ class View extends ViewBase {
 		});
 		this.#makeBuffer()
 		this.calcPixelViewRect()
-		this.updateClusterLight()
+		this.updateClusters()
 		const renderInfo_SystemUniformBindGroupDescriptor = {
 			label: 'systemUniformsBindGroup',
 			layout: this.#systemUniformsBindGroupLayout,
@@ -404,9 +404,9 @@ class View extends ViewBase {
 				{
 					binding: 2,
 					resource: {
-						buffer: this.#systemClusterLightBufferInfo.gpuBuffer,
+						buffer: this.#systemPointLight_ClusterLightsBufferInfo.gpuBuffer,
 						offset: 0,
-						size: this.#systemClusterLightBufferInfo.gpuBufferSize
+						size: this.#systemPointLight_ClusterLightsBufferInfo.gpuBufferSize
 					}
 				},
 				{
@@ -455,7 +455,7 @@ class View extends ViewBase {
 			),
 			GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
 		)
-		this.#systemClusterLightBufferInfo = new UniformBufferFloat32(
+		this.#systemPointLight_ClusterLightsBufferInfo = new UniformBufferFloat32(
 			this.redGPUContext,
 			new UniformBufferDescriptor(
 				[

@@ -1,5 +1,5 @@
 #REDGPU_DEFINE_SYSTEM_UNIFORMS
-@group(1) @binding(0) var<storage> clusters : Clusters;
+@group(1) @binding(0) var<storage> clusters : PointLight_Clusters;
 
 fn testSphereAABB( light:u32,  tile:u32) -> bool{
         var radius:f32 = lightList.lights[light].radius;
@@ -29,8 +29,8 @@ fn sqDistPointAABB(targetPoint:vec3<f32>, tile:u32,minAABB : vec3<f32>, maxAABB 
 @compute @workgroup_size(REDGPU_DEFINE_WORKGROUP_SIZE_X,REDGPU_DEFINE_WORKGROUP_SIZE_Y, REDGPU_DEFINE_WORKGROUP_SIZE_Z)
 fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
     let tileIndex = global_id.x +
-                    global_id.y * tileCount.x +
-                    global_id.z * tileCount.x * tileCount.y;
+                    global_id.y * pointLight_tileCount.x +
+                    global_id.z * pointLight_tileCount.x * pointLight_tileCount.y;
     var clusterLightCount = 0u;
     var cluserPointLightIndices : array<u32, REDGPU_DEFINE_MAX_LIGHTS_PER_CLUSTERu>;
     for (var i = 0u; i < u32(lightList.count[0]); i = i + 1u) {
