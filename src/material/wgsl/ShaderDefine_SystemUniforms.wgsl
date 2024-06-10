@@ -29,14 +29,14 @@ struct PointLight_Clusters {
 fn linearDepth(depthSample : f32) -> f32 {
     return systemUniforms.nearFar.y*systemUniforms.nearFar.x / fma(depthSample, systemUniforms.nearFar.x-systemUniforms.nearFar.y, systemUniforms.nearFar.y);
 }
-fn getClusterIndex(fragCoord : vec4<f32>) -> u32 {
-    let tile = getTile(fragCoord);
+fn getPointLightClusterIndex(fragCoord : vec4<f32>) -> u32 {
+    let tile = getPointLightTile(fragCoord);
     return tile.x +
            tile.y * pointLight_tileCount.x +
            tile.z * pointLight_tileCount.x * pointLight_tileCount.y;
 
 }
-fn getTile(fragCoord : vec4<f32>) -> vec3<u32> {
+fn getPointLightTile(fragCoord : vec4<f32>) -> vec3<u32> {
     // TODO: scale and bias calculation can be moved outside the shader to save cycles.
     let sliceScale = f32(pointLight_tileCount.z) / log2(systemUniforms.nearFar.y / systemUniforms.nearFar.x);
     let sliceBias = -(f32(pointLight_tileCount.z) * log2(systemUniforms.nearFar.x) / log2(systemUniforms.nearFar.y / systemUniforms.nearFar.x));

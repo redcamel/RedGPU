@@ -85,7 +85,7 @@ fn calcLights(
                 );
         }
         // point light
-        let clusterIndex = getClusterIndex(position);
+        let clusterIndex = getPointLightClusterIndex(position);
         let lightOffset  = clusterLightGroup.lights[clusterIndex].offset;
         let lightCount:u32   = clusterLightGroup.lights[clusterIndex].count;
         for (var lightIndex = 0u; lightIndex < lightCount; lightIndex = lightIndex + 1u) {
