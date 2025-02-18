@@ -168,7 +168,7 @@ const createPrimitive = (redGPUContext, scene) => {
 // 테스트 패널 렌더링 함수 (개발 또는 디버그용)
 const renderTestPane = async (redGPUContext) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
-	const {setRedGPUTest_pane} = await import("../../../exampleHelper/createExample/panes");
+	const {setRedGPUTest_pane} = await import("../../../exampleHelper/createExample/panes/index.js");
 
 	const pane = new Pane();
 	setRedGPUTest_pane(pane, redGPUContext, false);

@@ -92,7 +92,7 @@ const renderTestPane = async (redGPUContext) => {
 	// Dynamically load Tweakpane and configuration helper modules
 	// Tweakpane 및 설정 모듈을 동적으로 가져옵니다.
 	const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
-	const {setRedGPUTest_pane, setViewListTest} = await import("../../../exampleHelper/createExample/panes");
+	const {setRedGPUTest_pane, setViewListTest} = await import("../../../exampleHelper/createExample/panes/index.js");
 
 	// Initialize Tweakpane and configure the views
 	// Tweakpane을 초기화하고 뷰를 설정합니다.
