@@ -7,7 +7,6 @@ struct InstanceUniforms {
 	  instanceOpacity:array<f32,100000>,
       useDisplacementTexture:u32,
       displacementScale:f32,
-      combinedOpacity:f32,
 };
 @group(1) @binding(0) var<storage, read> instanceUniforms: InstanceUniforms;
 @group(1) @binding(1) var displacementTextureSampler: sampler;
@@ -25,7 +24,7 @@ struct OutputData {
     @location(0) vertexPosition: vec3<f32>,
     @location(1) vertexNormal: vec3<f32>,
     @location(2) uv: vec2<f32>,
-    @location(12) combinedOpacity: f32,
+    @location(12) instanceOpacity: f32,
     @location(13) shadowPos: vec3<f32>,
     @location(14) receiveShadow: f32,
     @location(15) pickingId: vec4<f32>,
@@ -71,13 +70,13 @@ fn main( inputData:InputData ) -> OutputData {
     // NDC로 변환
     let ndcPosition: vec3<f32> = clipPosition.xyz / clipPosition.w;
 
-    // 프러스텀 컬링 기준
-    if (ndcPosition.x < -1.0 - margin || ndcPosition.x > 1.0 + margin ||
-        ndcPosition.y < -1.0 - margin || ndcPosition.y > 1.0 + margin ||
-        ndcPosition.z < 0.0 || ndcPosition.z > 1.0 + margin) {
-        output.position = vec4<f32>(0.0, 0.0, 0.0, 0.0);
-        return output;
-    }
+//    // 프러스텀 컬링 기준 TODO 확인해야함
+//    if (ndcPosition.x < -1.0 - margin || ndcPosition.x > 1.0 + margin ||
+//        ndcPosition.y < -1.0 - margin || ndcPosition.y > 1.0 + margin ||
+//        ndcPosition.z < 0.0 || ndcPosition.z > 1.0 + margin) {
+//        output.position = vec4<f32>(0.0, 0.0, 0.0, 0.0);
+//        return output;
+//    }
 
 output.position = clipPosition; // 정상적으로 처리
 
@@ -102,7 +101,7 @@ output.position = clipPosition; // 정상적으로 처리
     output.vertexPosition = position.xyz;
     output.vertexNormal = normalPosition;
     output.uv = input_uv;
-    output.combinedOpacity = instanceUniforms.instanceOpacity[input_instanceIdx];
+    output.instanceOpacity = instanceUniforms.instanceOpacity[input_instanceIdx];
     return output;
 }
 @vertex

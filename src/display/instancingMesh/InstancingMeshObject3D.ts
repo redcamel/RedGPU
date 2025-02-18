@@ -61,7 +61,7 @@ class InstancingMeshObject3D {
     readonly #location: number = 0
     #instancingMesh: InstancingMesh
     #redGPUContext: RedGPUContext
-	#opacity:number=1
+	  #opacity:number=1
 
 
     get opacity(): number {
