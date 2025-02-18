@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist";
+import * as RedGPU from "../../../../dist/index.js";
 import {setSeparator} from "../../../exampleHelper/createExample/panes";
 
 // 1. Create and append a canvas
