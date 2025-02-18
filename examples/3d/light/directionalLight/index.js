@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist";
+import * as RedGPU from "../../../../dist/index.js";
 
 
 // 1. Create and append a canvas

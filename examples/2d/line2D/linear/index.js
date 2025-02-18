@@ -1,5 +1,5 @@
 // RedGPU 사용을 위한 모듈 임포트
-import * as RedGPU from "../../../../dist";
+import * as RedGPU from "../../../../dist/index.js";
 
 /* 1. 캔버스 생성 */
 const canvas = document.createElement("canvas");

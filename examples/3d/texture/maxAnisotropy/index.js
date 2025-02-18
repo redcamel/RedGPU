@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist";
+import * as RedGPU from "../../../../dist/index.js";
 
 // Canvas 생성 및 추가
 const canvas = document.createElement("canvas");

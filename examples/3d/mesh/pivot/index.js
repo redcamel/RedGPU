@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist";
+import * as RedGPU from "../../../../dist/index.js";
 
 // Create and append a canvas to the document
 // 캔버스를 생성하고 문서에 추가

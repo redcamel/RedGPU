@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist";
+import * as RedGPU from "../../../../dist/index.js";
 
 // 1. 캔버스 생성 및 추가
 // Step 1: Create and append a canvas to the document
