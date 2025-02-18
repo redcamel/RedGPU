@@ -1,0 +1,161 @@
+.RedGPUDebugPanel {
+    max-height: 100%;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.80);
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    color: #fff;
+    font-size: 11px;
+    min-width: 250px;
+    will-change: transform;
+    transform: translateZ(0);
+    line-height: 1;
+
+}
+
+.RedGPUDebugPanel::-webkit-scrollbar {
+    width: 6px; /* 스크롤바의 넓이 */
+}
+
+.RedGPUDebugPanel::-webkit-scrollbar-track {
+    background: #000; /* 스크롤바의 전체. */
+}
+
+.RedGPUDebugPanel::-webkit-scrollbar-thumb {
+    background: #333; /* 스크롤바의 움직이는 부분. */
+}
+
+.RedGPUDebugPanel::-webkit-scrollbar-thumb:hover {
+    background: #444; /* 스크롤바를 호버하면 움직이는 부분의 색변화 */
+}
+
+.debug-group {
+    padding: 10px 10px;
+    line-height: 1.4;
+
+    b {
+        color: #fdb48d;
+        font-weight: 700;
+    }
+}
+
+.debug-sub-group {
+    margin: 8px 0;
+    padding: 6px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.01));
+    line-height: 1.4;
+    border-radius: 6px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.16);
+
+    b {
+        color: #fdb48d;
+        font-weight: 700;
+    }
+}
+
+.debug-sub-group-title {
+    color: #e3b096;
+}
+
+.debug-item {
+    display: flex;
+    gap: 10px;
+    color: #ccc;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: normal;
+    will-change: transform;
+    transform: translateZ(0);
+
+    b {
+        color: #fdb48d;
+        font-weight: 700;
+    }
+}
+
+.boolean-true {
+    line-height: 1;
+    padding: 2px 4px;
+    border-radius: 2px;
+    margin: 2px 0;
+    background: green;
+}
+
+.boolean-false {
+    line-height: 1;
+    padding: 2px 4px;
+    border-radius: 2px;
+    margin: 2px 0;
+    background: red;
+}
+
+.debug-folder {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.debug-folder-title {
+    display: flex;
+    align-items: center;
+    padding: 10px 8px;
+    width: 100%;
+    font-size: 12px;
+    line-height: 1;
+    justify-content: space-between;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.025);
+    cursor: pointer;
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.95), rgba(255, 255, 255, 0.055));
+
+    b {
+        color: #fdb48d;
+        font-weight: 700;
+        font-size: 11px
+    }
+}
+
+
+.debug-item-title {
+    color: #888;
+    font-weight: 500;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3);
+    max-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.debug-item-cache-key {
+    color: #fff;
+    font-weight: 500;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3);
+    max-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.div-line {
+    height: 1px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0);
+    background: rgba(255, 255, 255, 0.06);
+    width: 100%;
+    margin: 10px 0;
+}
+
+.root-padding {
+    padding: 6px;
+    width: 100%;
+}
+
+.color-box {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    padding: 3px;
+    margin: 2px;
+}

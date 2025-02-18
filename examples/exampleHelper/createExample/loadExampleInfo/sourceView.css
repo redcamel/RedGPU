@@ -1,0 +1,82 @@
+/* 소스 보기 버튼 스타일 */
+.helperSourceView {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    z-index: 1000;
+    padding: 10px 16px;
+    font-size: 16px;
+    border-radius: 8px;
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+}
+
+.helperSourceView:hover {
+    background-color: #0056b3;
+}
+
+/* 플로팅 코드 보기 창 스타일 */
+.helperSourceViewFloatingCode {
+    display: none;
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    width: calc(100% - 24px);
+    height: calc(100% - 24px);
+    z-index: 1001;
+    background-color: #2d2d2d;
+    border-radius: 12px;
+    overflow-y: auto;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    color: #fff;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+/* 상단 영역 스타일 (타이틀 + 닫기 버튼) */
+.helperSourceViewTopBar {
+    position: sticky;
+    top: 0;
+    background-color: #2d2d2d;
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+}
+
+.helperSourceViewTitle {
+    font-size: 18px;
+    font-weight: bold;
+    color: #fff;
+}
+
+.helperSourceViewCloseButton {
+    background-color: #e74c3c;
+    color: #fff;
+    border: none;
+    padding: 8px 12px;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.helperSourceViewCloseButton:hover {
+    background-color: #c0392b;
+}
+
+/* 코드 블록 스타일 */
+.helperSourceViewFloatingCode pre {
+    background-color: #1e1e1e;
+    padding: 12px;
+    border-radius: 6px;
+    overflow-x: auto;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #fff;
+}

@@ -1,0 +1,302 @@
+@import url('https://cdn.jsdelivr.net/gh/sun-typeface/SUIT/fonts/variable/woff2/SUIT-Variable.css');
+
+html, body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    background: #111;
+    color: #fff;
+    line-height: 1.5;
+}
+
+* {
+    font-family: 'SUIT Variable', 'Arial', sans-serif;
+    font-weight: 500;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.example_container {
+    position: fixed;
+    top: 160px;
+    left: 0;
+    width: 244px;
+    bottom: 52px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: rgba(0, 0, 0, 0.6);
+
+}
+.top_container{
+    position: fixed;
+    width: 244px;
+    height: 160px;
+    left: 0;
+    top : 0;
+    z-index: 1;
+    background: rgba(0, 0, 0, 0.8);
+}
+.project_title {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    min-height: 52px;
+    display: flex;
+    flex-direction: column;
+    gap:8px;
+    padding: 16px;
+    font-size: 22px;
+    text-shadow: 0 0 10px rgb(0, 0, 0);
+    line-height: 1;
+}
+.project_title span{
+    font-size: 12px;
+    color:#fff;
+    opacity: 0.5;
+    text-shadow: 0 0 10px rgb(0, 0, 0);
+}
+.search-container {
+
+}
+
+.search-container input {
+    display: flex;
+    width: 100%;
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.9);
+    font-size: 14px;
+    outline: 0;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.tabs-container {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.tabs-container .tab-button {
+    margin-right: 8px;
+    outline: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    background: rgba(0, 0, 0, 0.2);
+    color: #fff;
+    font-size: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+
+.tabs-container .active {
+    /* 클릭된 탭의 활성 상태 */
+    border: 1px solid #fff;
+    background: #fff;
+    color: #000;
+}
+
+.list-container {
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+
+}
+
+/* 설명 텍스트 스타일 */
+.descriptionUl {
+    width: fit-content;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.75);
+    font-weight: bold;
+    border-radius: 12px;
+    /*padding: 16px;*/
+    overflow: hidden;
+    pointer-events: painted;
+    padding-left: 0;
+    line-height: 1;
+}
+
+.ko-text {
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.en-text {
+    font-size: 11px;
+    font-style: italic;
+}
+
+/* 리스트 기본 스타일 */
+.list-container > ul {
+    padding: 0;
+    margin: 6px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    list-style-type: none;
+    text-shadow: rgba(0, 0, 0, 0.5) 1px 1px 1px;
+}
+.list-container > ul:first-child {
+    border-top: none;
+}
+
+/* 최상위 카테고리 스타일 (2d, 3d) */
+ul > li {
+    display: flex;
+    flex-direction: column;
+    font-size: 20px;
+    font-weight: 600;
+    /*color : #fff*/
+
+}
+
+li > ul {
+    display: flex;
+    flex-direction: column;
+    /*align-items: flex-start;*/
+    /*gap:16px;*/
+    flex-wrap: wrap;
+    padding-left: 6px;
+
+}
+
+/* 하위 UL 스타일 */
+ul ul {
+    /*padding-left: 6px;*/
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    /*gap:10px*/
+}
+
+/* 하위 li 스타일 */
+ul ul > li {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    /*align-items: flex-start;*/
+    /*gap:16px;*/
+    font-size: 15px;
+}
+
+/* 링크 스타일 */
+a {
+    pointer-events: painted;
+    text-decoration: none;
+    color: rgb(221, 132, 80);
+    font-size: 13px;
+    transition: color 0.21s;
+    padding: 4px 0;
+    overflow: hidden;
+    word-break: break-all;
+    min-width: calc(100% - 70px);
+    text-overflow: ellipsis;
+
+    img {
+        opacity: 0.75;
+        transition: opacity 0.5s;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    div{
+
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 100%;
+        white-space: nowrap;
+    }
+}
+
+/* 링크 Hover 스타일 */
+a:hover {
+    color: #fff;
+
+    img {
+        opacity: 1;
+    }
+}
+
+
+.footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 52px;
+    min-height: 52px;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 0 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    line-height: 1;
+    font-size: 14px;
+    color: rgb(177, 152, 152);
+
+    a {
+        color: rgb(242, 169, 113);
+        font-size: 14px;
+    }
+}
+.footer_left{
+    white-space: nowrap;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    img{
+        line-height: 1;
+    }
+    a{
+        min-width: 0;
+    }
+}
+/* 설명 텍스트 스타일 */
+ul ul ul > li {
+    font-size: 0.9rem;
+}
+
+/* 반응형 스타일 */
+@media (max-width: 768px) {
+
+
+    ul > li {
+        font-size: 1.2rem;
+    }
+
+    ul ul > li {
+        font-size: 0.9rem;
+    }
+
+    ul ul ul > li {
+        font-size: 0.8rem;
+    }
+}
+
+
+/* width */
+::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: #222;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #70020c;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #70020c;
+}
