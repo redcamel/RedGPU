@@ -279,7 +279,7 @@ const initialize = () => {
 	// 하단 카피라이트 추가
 	const footer = document.createElement('footer');
 	footer.className = 'footer';
-	footer.innerHTML = `<div class="footer_left"><a href="https://github.com/redcamel/RedGPU" target="_blank"><img src="/RedGPUHelper/examples/assets/github.png" height="32"/></a><div>This project is maintained by <a href="https://github.com/redcamel/RedGPU" target="_blank">RedCamel</a></div></div>`;
+	footer.innerHTML = `<div class="footer_left"><a href="https://github.com/redcamel/RedGPU" target="_blank"><img src="/RedGPU/examples/assets/github.png" height="32"/></a><div>This project is maintained by <a href="https://github.com/redcamel/RedGPU" target="_blank">RedCamel</a></div></div>`;
 	container.appendChild(footer);
 
 };
