@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>RedGPU TestCase</title>
+
+    <meta charset="UTF-8">
+    <meta content="RedGPU,WebGPU,testCase" name="keywords">
+    <meta content="width=device-width, initial-scale=1" name="viewport"/>
+    <script src="https://redcamel.github.io/RedTest/core/RedTest.js"></script>
+    <link href="https://redcamel.github.io/RedTest/core/RedTest.css" rel="stylesheet"/>
+    <link href="https://redcamel.github.io/RedTest/core/prism.css" rel="stylesheet"/>
+    <style>
+        html, body {
+            overflow-y: auto;
+            height: 100%
+        }
+    </style>
+</head>
+<body>
+<script>
+	RedTest.initIndex(
+		'RedGPU Test',
+		[
+			//
+			"color/RedGPU-Color.html",
+			//
+			"initialize/RedGPU-initialize.html",
+			//
+			"context/RedGPU-ResourceBase.html",
+			"context/core/RedGPU-ContextSizeManager.html",
+			"resources/RedGPU-RedResourceManager.html",
+			//
+		]
+	);
+</script>
+</body>
+</html>

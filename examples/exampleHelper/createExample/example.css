@@ -1,0 +1,107 @@
+@import url('https://cdn.jsdelivr.net/gh/sun-typeface/SUIT/fonts/variable/woff2/SUIT-Variable.css');
+@import url('loadExampleInfo/sourceView.css');
+
+html, body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    background: url(../../assets/documentBody.png);
+}
+
+* {
+
+    margin: 0;
+    padding: 0;
+    font-family: 'SUIT Variable', 'Arial', sans-serif;
+    font-weight: 500;
+
+    box-sizing: border-box;
+    position: relative;
+
+}
+.footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 72px;
+    background: rgba(0, 0, 0, 0.75);
+    padding: 0 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    line-height: 1;
+    font-size: 14px;
+    color: rgb(177, 152, 152);
+
+    a {
+        color: rgb(242, 169, 113);
+        font-size: 14px;
+    }
+}
+.footer_left{
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    img{
+        line-height: 1;
+    }
+}
+/* width */
+::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: #222;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #70020c;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #70020c;
+}
+
+.title_box {
+    position: fixed;
+    top: 8px;
+    left: 6px;
+    right: 272px;
+    line-height: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px;
+    border-radius: 8px;
+    font-size: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    word-break: keep-all;
+
+    color: #fff;
+
+    h1 {
+        font-weight: 600;
+        line-height: 1;
+        margin-bottom: 4px;
+    }
+
+    h2 {
+        font-size: 13px;
+        line-height: 1.4;
+        color: #a4a7cc;
+    }
+
+    h3 {
+        font-size: 13px;
+        line-height: 1.4;
+        color: #8c8d93;
+    }
+}
