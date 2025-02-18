@@ -1016,7 +1016,7 @@ const ExampleList = [
                                 list: [
                                     {
                                         name: 'ClearCoatTest',
-                                        path: '3d/gltf/gltfExtensions/clearCoat/clearCoatTest',
+                                        path: '3d/gltf/gltfExtensions/clearcoat/clearCoatTest',
                                         thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/ClearCoatTest/screenshot/screenshot.jpg?raw=true',
                                         description: {
                                             ko: ``,
@@ -1025,7 +1025,7 @@ const ExampleList = [
                                     },
                                     {
                                         name: 'ClearcoatWicker',
-                                        path: '3d/gltf/gltfExtensions/clearCoat/clearcoatWicker',
+                                        path: '3d/gltf/gltfExtensions/clearcoat/clearcoatWicker',
                                         thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/ClearcoatWicker/screenshot/screenshot.jpg?raw=true',
                                         description: {
                                             ko: ``,
@@ -1034,7 +1034,7 @@ const ExampleList = [
                                     },
                                     // {
                                     //     name: 'CompareClearcoat',
-                                    //     path: '3d/gltf/gltfExtensions/clearCoat/compareClearcoat',
+                                    //     path: '3d/gltf/gltfExtensions/clearcoat/compareClearcoat',
                                     //     thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/CompareClearcoat/screenshot/screenshot.jpg?raw=true',
                                     //     description: {
                                     //         ko: ``,
