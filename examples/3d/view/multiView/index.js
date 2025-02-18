@@ -155,7 +155,7 @@ RedGPU.init(
 // Function to create a test control panel
 const renderTestPane = async (redGPUContext) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
-	const {setRedGPUTest_pane, setViewListTest} = await import("../../../exampleHelper/createExample/panes");
+	const {setRedGPUTest_pane, setViewListTest} = await import("../../../exampleHelper/createExample/panes/index.js");
 	const pane = new Pane();
 
 	// RedGPU용 기본 테스트 패널 설정

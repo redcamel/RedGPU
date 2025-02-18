@@ -1,5 +1,5 @@
 import * as RedGPU from "../../../../dist/index.js";
-import {setSeparator} from "../../../exampleHelper/createExample/panes";
+import {setSeparator} from "../../../exampleHelper/createExample/panes/index.js";
 
 // 1. Create and append a canvas
 // 1. 캔버스를 생성하고 문서에 추가

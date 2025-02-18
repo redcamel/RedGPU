@@ -61,7 +61,7 @@ const renderTestPane = async (redGPUContext) => {
 		setRedGPUTest_pane,
 		setViewListTest,
 		setSceneListTest
-	} = await import("../../exampleHelper/createExample/panes");
+	} = await import("../../exampleHelper/createExample/panes/index.js");
 	const pane = new Pane();
 	setRedGPUTest_pane(pane, redGPUContext, false);
 	setViewListTest(pane, redGPUContext.viewList, false);

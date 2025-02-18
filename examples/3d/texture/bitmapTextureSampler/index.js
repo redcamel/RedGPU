@@ -70,7 +70,7 @@ const addSingleMesh = (redGPUContext, scene) => {
 };
 const renderTestPane = async (redGPUContext, mesh) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
-	const {setSeparator} = await import("../../../exampleHelper/createExample/panes");
+	const {setSeparator} = await import("../../../exampleHelper/createExample/panes/index.js");
 	const pane = new Pane();
 
 	// Add a separator

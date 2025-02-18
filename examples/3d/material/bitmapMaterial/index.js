@@ -70,7 +70,7 @@ const createSampleMesh = (redGPUContext, scene) => {
 // 테스트용 UI를 구성하는 함수
 const renderTestPane = async (redGPUContext, mesh) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
-	const {setSeparator} = await import("../../../exampleHelper/createExample/panes");
+	const {setSeparator} = await import("../../../exampleHelper/createExample/panes/index.js");
 	const pane = new Pane();
 
 	pane.addBinding(mesh.material, 'opacity', {min: 0, max: 1, step: 0.01})
