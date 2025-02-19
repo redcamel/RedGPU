@@ -3,6 +3,7 @@ import defineProperty_SETTING from "./defineProperty_SETTING";
 
 function createSetter(propertyKey: string, symbol: symbol, isFragment: boolean) {
     const useKey = `use${propertyKey.charAt(0).toUpperCase()}${propertyKey.substring(1)}`
+    const usePremultiplyKey = `premultiply${propertyKey.charAt(0).toUpperCase()}${propertyKey.substring(1)}`
     return function (texture: BitmapTexture) {
         const prevTexture: BitmapTexture = this[symbol]
         this[symbol] = texture
@@ -14,6 +15,11 @@ function createSetter(propertyKey: string, symbol: symbol, isFragment: boolean) 
                 fragmentUniformBuffer.writeBuffer(fragmentUniformInfo.members[useKey], texture ? 1 : 0)
             } else {
                 console.warn(this.material, useKey, '는 fragment shader에 정의 되어있지 않습니다. 문제가 되지 않을수 있으나 확인 필요')
+            }
+            if (fragmentUniformInfo.members[usePremultiplyKey]) {
+                fragmentUniformBuffer.writeBuffer(fragmentUniformInfo.members[usePremultiplyKey], texture?.usePremultiplyAlpha ? 1 : 0)
+            } else {
+                console.warn(this.material, usePremultiplyKey, '는 fragment shader에 정의 되어있지 않습니다. 문제가 되지 않을수 있으나 확인 필요')
             }
         } else if (gpuRenderInfo) {
             const {vertexUniformInfo, vertexUniformBuffer} = gpuRenderInfo;

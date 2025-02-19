@@ -12,12 +12,15 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 	// Create a scene and add a view with the camera controller
 	const scene = new RedGPU.Display.Scene();
+	scene.backgroundColor.r=128
+	scene.useBackgroundColor = true;
 	const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 	view.grid = true;
 	redGPUContext.addView(view);
 
 	const textField3D = new RedGPU.Display.TextField3D(redGPUContext)
 	textField3D.text = textField3D.name.split(' ').join('<br/>')
+	textField3D.color = 'red'
 	scene.addChild(textField3D);
 	// Sprite3D 10개를 원형 배치
 	const spriteCount = 10; // 원에 배치될 Sprite3D 개수
@@ -30,6 +33,7 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 		const textField3D = new RedGPU.Display.TextField3D(redGPUContext);
 		textField3D.text = textField3D.name.split(' ').join('<br/>')
+		textField3D.color = 'red'
 		textField3D.x = x;
 		textField3D.z = z;
 		scene.addChild(textField3D); // 씬에 추가
