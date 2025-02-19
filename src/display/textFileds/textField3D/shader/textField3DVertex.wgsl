@@ -27,7 +27,6 @@ struct OutputData {
     @location(15) pickingId: vec4<f32>,
 };
 
-
 @vertex
 fn main( inputData:InputData ) -> OutputData {
   var output : OutputData;
@@ -70,8 +69,12 @@ var scaleMatrix: mat4x4<f32>;
          0.0, 0.0, 1.0, 0.0,
          0.0, 0.0, 0.0, 1.0
      );
+
+
+
  // 빌보드와 퍼스펙티브 조건 처리
  if (u_useBillboard == 1) {
+      // 로컬 모델 매트릭스에서 부모 회전 제거
      // 빌보드 활성화 시 스케일 매트릭스
      if (u_useBillboardPerspective == 1) {
          // 퍼스펙티브 스케일이 활성화된 경우
@@ -88,7 +91,7 @@ var scaleMatrix: mat4x4<f32>;
 
      // 빌보드 처리
      position = getBillboardMatrix(u_cameraMatrix, u_modelMatrix) * scaleMatrix * vec4<f32>(objectPosition, 1.0);
-     normalPosition = getBillboardMatrix(u_cameraMatrix, u_normalModelMatrix) * scaleMatrix * vec4<f32>(input_vertexNormal.xyz, 1.0);
+     normalPosition = getBillboardMatrix(u_cameraMatrix, u_modelMatrix) * scaleMatrix * vec4<f32>(input_vertexNormal.xyz, 1.0);
 
      // 추가 위치 보정
      var temp = output.position / output.position.w;
