@@ -263,7 +263,7 @@ class ATextField extends Mesh {
                         this.material.diffuseTexture = v;
                         this.dirtyTransform = true;
                     },
-                    null, null, true
+                    null, null, this.#mode3dYn
                 );
             };
 
