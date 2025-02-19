@@ -172,10 +172,13 @@ ul ul {
     flex-direction: column;
     width: 100%;
     /*gap:10px*/
+
+    padding-left: 6px;
 }
 
 /* 하위 li 스타일 */
 ul ul > li {
+
     display: flex;
     flex-direction: column;
     width: 100%;

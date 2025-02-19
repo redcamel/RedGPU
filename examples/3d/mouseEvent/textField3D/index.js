@@ -14,12 +14,13 @@ RedGPU.init(
 		// 궤도형 카메라 컨트롤러 생성
 		const controller = new RedGPU.Camera.ObitController(redGPUContext);
 		controller.distance = 7.5
-		controller.tilt = 0
+
 		controller.speedDistance = 0.1
 		// Create a scene and add a view with the camera controller
 		// 씬을 생성하고 카메라 컨트롤러와 함께 뷰 추가
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+		view.grid=true
 		redGPUContext.addView(view);
 
 		// Add sample mesh to the scene
@@ -37,7 +38,7 @@ RedGPU.init(
 
 		// Render Test Pane for real-time adjustments
 		// 실시간 조정을 위한 테스트 패널 렌더링
-		renderTestPane(redGPUContext);
+		renderTestPane(redGPUContext,scene);
 	},
 	(failReason) => {
 		// Handle initialization failure
@@ -75,6 +76,7 @@ const createSampleTextField3D = async (redGPUContext, scene) => {
 		textField.fontSize = 16
 		textField.padding = 10
 		textField.borderRadius = 10
+		textField.primitiveState.cullMode = 'none'
 
 		// 메쉬와 이벤트 추가
 		scene.addChild(textField);
@@ -99,8 +101,24 @@ function getRandomHexValue() {
 
 // Function to render Test Pane (for controls)
 // 테스트 패널을 렌더링하는 함수
-const renderTestPane = async (redGPUContext,) => {
+const renderTestPane = async (redGPUContext,scene) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const pane = new Pane();
+	const TextField3DFolder = pane.addFolder({title: 'TextField3D', expanded: true});
+	const controls = {
+		useBillboardPerspective: scene.children[0].useBillboardPerspective,
+		useBillboard: scene.children[0].useBillboard,
+	}
+	TextField3DFolder.addBinding(controls, 'useBillboardPerspective').on('change', (evt) => {
+		scene.children.forEach((child) => {
+			child.useBillboardPerspective = evt.value;
+		});
+	});
 
+// useBillboard 바인딩
+	TextField3DFolder.addBinding(controls, 'useBillboard').on('change', (evt) => {
+		scene.children.forEach((child) => {
+			child.useBillboard = evt.value;
+		});
+	});
 };
