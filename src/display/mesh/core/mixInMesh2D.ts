@@ -79,10 +79,10 @@ export function mixInMesh2D<TBase extends new (...args: any[]) => Mesh2DBase>(Ba
             switch (mode) {
                 case BLEND_MODE.NORMAL: {
                     blendColorState.operation = GPU_BLEND_OPERATION.ADD;
-                    blendColorState.srcFactor = GPU_BLEND_FACTOR.ONE;
+                    blendColorState.srcFactor = GPU_BLEND_FACTOR.SRC_ALPHA;
                     blendColorState.dstFactor = GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA;
                     blendAlphaState.operation = GPU_BLEND_OPERATION.ADD;
-                    blendAlphaState.srcFactor = GPU_BLEND_FACTOR.ONE;
+                    blendAlphaState.srcFactor = GPU_BLEND_FACTOR.SRC_ALPHA;
                     blendAlphaState.dstFactor = GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA;
                     break;
                 }

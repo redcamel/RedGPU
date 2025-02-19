@@ -207,7 +207,7 @@ class ATextField extends Mesh {
         // document.body.appendChild(this.#img)
         this.#textureImg.onload = _ => {
             let tW: number, tH: number;
-            const { width, height } = this.#getRenderHtmlSize();
+            const {width, height} = this.#getRenderHtmlSize();
             const multiple = this.#mode3dYn ? 2 : 1;
             tW = width * multiple;
             tH = height * multiple;
@@ -259,14 +259,16 @@ class ATextField extends Mesh {
             // Blob으로 변환하여 처리
             const callback = (blob: Blob | MediaSource) => {
                 new BitmapTexture(this.#redGPUContext, URL.createObjectURL(blob), this.#mode3dYn, v => {
-                    this.material.diffuseTexture?.destroy();
-                    this.material.diffuseTexture = v;
-                    this.dirtyTransform = true;
-                });
+                        this.material.diffuseTexture?.destroy();
+                        this.material.diffuseTexture = v;
+                        this.dirtyTransform = true;
+                    },
+                    null, null, true
+                );
             };
 
             if (this.#textureCvs instanceof OffscreenCanvas) {
-                this.#textureCvs.convertToBlob({ type: 'image/png' }).then(callback);
+                this.#textureCvs.convertToBlob({type: 'image/png'}).then(callback);
             } else {
                 this.#textureCvs.toBlob(callback, 'image/png');
             }
