@@ -1304,35 +1304,7 @@ const ExampleList = [
                     },
                 ]
             },
-            {
-                name: 'Line2D',
-                list: [
-                    {
-                        name: 'Linear Type',
-                        path: '2d/line2D/linear',
-                        description: {
-                            ko: ``,
-                            en: ``
-                        },
-                    },
-                    {
-                        name: 'Bezier Type',
-                        path: '2d/line2D/bezier',
-                        description: {
-                            ko: ``,
-                            en: ``
-                        },
-                    },
-                    {
-                        name: 'CatmullRom Type',
-                        path: '2d/line2D/catmullRom',
-                        description: {
-                            ko: ``,
-                            en: ``
-                        },
-                    },
-                ]
-            },
+
 
             {
                 name: '2D Object Opacity',
