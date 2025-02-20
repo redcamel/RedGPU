@@ -13,13 +13,13 @@ interface TextFieldMaterial {
     diffuseTextureSampler: Sampler
 }
 
-class TextField3DMaterial extends ABitmapBaseMaterial {
+class TextFieldMaterial extends ABitmapBaseMaterial {
     dirtyPipeline: boolean = false
 
     constructor(redGPUContext: RedGPUContext, diffuseTexture?: BitmapTexture, name?: string) {
         super(
             redGPUContext,
-            'TEXT_FILED_3D_MATERIAL',
+            'TEXT_FILED_MATERIAL',
             SHADER_INFO,
             2
         )
@@ -30,9 +30,9 @@ class TextField3DMaterial extends ABitmapBaseMaterial {
     }
 }
 
-DefineForFragment.defineByPreset(TextField3DMaterial, [
+DefineForFragment.defineByPreset(TextFieldMaterial, [
     DefineForFragment.PRESET_TEXTURE.DIFFUSE_TEXTURE,
     DefineForFragment.PRESET_SAMPLER.DIFFUSE_TEXTURE_SAMPLER,
 ])
-Object.freeze(TextField3DMaterial)
-export default TextField3DMaterial
+Object.freeze(TextFieldMaterial)
+export default TextFieldMaterial

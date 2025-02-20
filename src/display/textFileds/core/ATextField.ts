@@ -242,13 +242,14 @@ class ATextField extends Mesh {
 
             // Blob으로 변환하여 처리
             const callback = (blob: Blob | MediaSource) => {
-                new BitmapTexture(this.#redGPUContext, URL.createObjectURL(blob), true, v => {
-                        this.material.diffuseTexture?.destroy();
-                        this.material.diffuseTexture = v;
-                        this.dirtyTransform = true;
-                    },
-                    null, null, false
-                );
+                this.material.diffuseTexture.src=URL.createObjectURL(blob);
+                // new BitmapTexture(this.#redGPUContext, URL.createObjectURL(blob), true, v => {
+                //         this.material.diffuseTexture?.destroy();
+                //         this.material.diffuseTexture = v;
+                //         this.dirtyTransform = true;
+                //     },
+                //     null, null, false
+                // );
             };
 
             if (this.#textureCvs instanceof OffscreenCanvas) {
