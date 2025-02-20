@@ -15,13 +15,13 @@ class ObitController extends AController {
     #centerZ = 0;
     //
     #distance = 15;
-    #speedDistance = 5;
+    #speedDistance = 2;
     #delayDistance = 0.1;
     //
-    #speedRotation = 4;
-    #delayRotation = 0.78;
+    #speedRotation = 3;
+    #delayRotation = 0.1;
     //
-    #tilt = -45;
+    #tilt = -35;
     #minTilt = -90;
     #maxTilt = 90;
     #pan = 0;
@@ -90,7 +90,6 @@ class ObitController extends AController {
         const HD_wheel = e => {
             currentEventView = this.#targetView;
             if (!checkArea(e)) return;
-            console.log('보자', this.name)
             this.#distance += e['deltaY'] / 100 * this.#speedDistance;
             currentEventView = null
         };
@@ -219,13 +218,13 @@ class ObitController extends AController {
         PER_PI = Math.PI / 180;
         if (this.#tilt < this.#minTilt) this.#tilt = this.#minTilt;
         if (this.#tilt > this.#maxTilt) this.#tilt = this.#maxTilt;
-        tDelayRotation = (1 - this.#delayRotation);
+        tDelayRotation = (this.#delayRotation);
         const {camera} = this
         tMTX0 = camera.modelMatrix;
         this.#currentPan += (this.#pan - this.#currentPan) * tDelayRotation;
         this.#currentTilt += (this.#tilt - this.#currentTilt) * tDelayRotation;
         if (this.#distance < camera.nearClipping) this.#distance = camera.nearClipping;
-        this.#currentDistance += (this.#distance - this.#currentDistance) * (1 - this.#delayDistance);
+        this.#currentDistance += (this.#distance - this.#currentDistance) * (this.#delayDistance);
         if (this.#currentDistance < camera.nearClipping) this.#currentDistance = camera.nearClipping;
         mat4.identity(tMTX0);
         mat4.translate(tMTX0, tMTX0, [this.#centerX, this.#centerY, this.#centerZ]);
