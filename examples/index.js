@@ -34,17 +34,9 @@ RedGPU.init(
 				"./assets/skybox/pz.jpg", // Positive Z
 				"./assets/skybox/nz.jpg", // Negative Z
 			])
-		const texture = new RedGPU.Resource.BitmapTexture(
-			redGPUContext,
-			"./assets/skybox/sphericalSkyBox.jpg"
-		);
-		// Create and return the skybox
-		// 스카이박스 생성 및 반환
-		const sphericalSkyBox = new RedGPU.Display.SphericalSkyBox(redGPUContext, texture);
 		view.iblTexture = cubeTexture
 		view.skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture)
 
-		view.skybox = sphericalSkyBox
 		const renderer = new RedGPU.Renderer(redGPUContext)
 
 		//
