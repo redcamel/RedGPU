@@ -1,3 +1,4 @@
+
 import * as RedGPU from "../../../../dist/index.js";
 
 const canvas = document.createElement('canvas');
@@ -9,8 +10,7 @@ RedGPU.init(
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View2D(redGPUContext, scene);
 		redGPUContext.addView(view);
-		redGPUContext.backgroundColor.setColorByRGB(223, 132, 255)
-		redGPUContext.backgroundColor.a = 1
+		redGPUContext.backgroundColor.setColorByRGB(255, 132, 255)
 
 		const texture_blendTest_base = new RedGPU.Resource.BitmapTexture(
 			redGPUContext,
@@ -211,4 +211,8 @@ const renderTestPane = async (redGPUContext, base, shape) => {
 		});
 	}
 	setBlendModeTest()
+	const test = document.createElement('div')
+	test.innerHTML = 'Shape Origin';
+	test.style.cssText = 'position:fixed;top:300px;right:20px;font-size:12px;color:white'
+	document.body.appendChild(test)
 };

@@ -11,6 +11,10 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 	// Create a scene and add a view with the camera controller
 	const scene = new RedGPU.Display.Scene();
+	scene.backgroundColor.r=12
+	// scene.backgroundColor.g=0
+	// scene.backgroundColor.b=128
+	scene.useBackgroundColor = true;
 	const view = new RedGPU.Display.View2D(redGPUContext, scene, controller);
 	redGPUContext.addView(view);
 
