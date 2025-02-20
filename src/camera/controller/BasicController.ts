@@ -71,11 +71,11 @@ class BasicController extends AController {
                 let tViewRect = targetView.pixelRectObject;
                 const {x, y} = this.getCanvasEventPoint(e, redGPUContext)
                 if (isMobile) {
-                    tX = x * window.devicePixelRatio;
-                    tY = y * window.devicePixelRatio;
+                    tX = x * window.devicePixelRatio * redGPUContext.renderScale;
+                    tY = y * window.devicePixelRatio * redGPUContext.renderScale;
                 } else {
-                    tX = x * window.devicePixelRatio;
-                    tY = y * window.devicePixelRatio;
+                    tX = x * window.devicePixelRatio * redGPUContext.renderScale;
+                    tY = y * window.devicePixelRatio * redGPUContext.renderScale;
                 }
                 if (!(tViewRect.x < tX && tX < tViewRect.x + tViewRect.width)) return;
                 if (!(tViewRect.y < tY && tY < tViewRect.y + tViewRect.height)) return;
