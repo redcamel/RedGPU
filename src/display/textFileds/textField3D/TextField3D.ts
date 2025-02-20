@@ -7,7 +7,7 @@ import BitmapTexture from "../../../resources/texture/BitmapTexture";
 import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import ATextField from "../core/ATextField";
 import vertexModuleSource from "./shader/textField3DVertex.wgsl";
-import TextField3DMaterial from "../core/textFieldMaterial/TextFieldMaterial";
+import TextFieldMaterial from "../core/textFieldMaterial/TextFieldMaterial";
 
 interface TextField3D {
     useBillboardPerspective: boolean;
@@ -28,7 +28,7 @@ class TextField3D extends ATextField {
             this.#renderTextureHeight = height / 1024
         });
         this._geometry = new Plane(redGPUContext);
-        this._material = new TextField3DMaterial(redGPUContext, new BitmapTexture(redGPUContext))
+        this._material = new TextFieldMaterial(redGPUContext, new BitmapTexture(redGPUContext))
         this._material.transparent = true
         this.dirtyPipeline = true
         this.dirtyTransform = true

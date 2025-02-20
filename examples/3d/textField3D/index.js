@@ -8,6 +8,7 @@ document.body.appendChild(canvas);
 RedGPU.init(canvas, (redGPUContext) => {
 	// Create a camera controller (Orbit type)
 	const controller = new RedGPU.Camera.ObitController(redGPUContext);
+	controller.distance = 7.5
 	controller.speedDistance = 0.5
 
 	// Create a scene and add a view with the camera controller

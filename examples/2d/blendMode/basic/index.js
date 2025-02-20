@@ -211,8 +211,4 @@ const renderTestPane = async (redGPUContext, base, shape) => {
 		});
 	}
 	setBlendModeTest()
-	const test = document.createElement('div')
-	test.innerHTML = 'Shape Origin';
-	test.style.cssText = 'position:fixed;top:300px;right:20px;font-size:12px;color:white'
-	document.body.appendChild(test)
 };
