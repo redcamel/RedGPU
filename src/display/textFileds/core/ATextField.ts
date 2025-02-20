@@ -61,12 +61,11 @@ class ATextField extends Mesh {
             })
         } else {
             this._material.diffuseTextureSampler = new Sampler(redGPUContext, {
-                minFilter: GPU_FILTER_MODE.LINEAR,
-                magFilter: GPU_FILTER_MODE.LINEAR,
-                mipmapFilter: GPU_MIPMAP_FILTER_MODE.LINEAR
+                minFilter: GPU_FILTER_MODE.NEAREST,
+                magFilter: GPU_FILTER_MODE.NEAREST,
+                mipmapFilter: null
             })
-            this._material.diffuseTextureSampler.minFilter = null
-            this._material.diffuseTextureSampler.magFilter = null
+
         }
 
         this.depthStencilState.depthWriteEnabled = false
@@ -208,11 +207,12 @@ class ATextField extends Mesh {
         this.#textureImg.onload = _ => {
             let tW: number, tH: number;
             const {width, height} = this.#getRenderHtmlSize();
-            const multiple = this.#mode3dYn ? 2 : 1;
+            const multiple = this.#mode3dYn ? 2 : 2;
+            const textureImgRatio = this.#mode3dYn ? 1 : 2;
             tW = width * multiple;
             tH = height * multiple;
-            this.#textureImg.width = tW;
-            this.#textureImg.height = tH;
+            this.#textureImg.width = tW/textureImgRatio;
+            this.#textureImg.height = tH/textureImgRatio;
 
             console.log("Final Texture Sizes:", {
                 svgWidth: tW,
@@ -224,10 +224,10 @@ class ATextField extends Mesh {
 
             // 스타일 크기 동기화
             if (!(this.#textureCvs instanceof OffscreenCanvas)) {
-                this.#textureCvs.style.width = `${tW}px`;
-                this.#textureCvs.style.height = `${tH}px`;
+                this.#textureCvs.style.width = `${tW/multiple}px`;
+                this.#textureCvs.style.height = `${tH/multiple}px`;
             }
-            this.#textureCtx.imageSmoothingEnabled = false;
+            this.#textureCtx.imageSmoothingEnabled = true;
             this.#textureCtx.imageSmoothingQuality = 'high';
             this.#textureCtx.clearRect(0, 0, tW, tH);
             this.#textureCtx.fillStyle = 'rgba(0, 0, 0, 0)'; // 투명 배경으로 초기화
@@ -236,34 +236,18 @@ class ATextField extends Mesh {
             // 이미지 캔버스에 그리기
             this.#textureCtx.drawImage(this.#textureImg, 0, 0, tW, tH);
 
-            // TODO - 이거쓸껀지 결정하자...
-            // // Alpha 분리 (비프리멀티플 처리)
-            // const imageData = this.#textureCtx.getImageData(0, 0, tW, tH);
-            // const data = imageData.data;
-            //
-            // for (let i = 0; i < data.length; i += 4) {
-            //     const alpha = data[i + 3] / 255; // Alpha 값을 0~1로 변환
-            //     if (alpha > 0) {
-            //         data[i] /= alpha;    // R 채널 비프리멀티플
-            //         data[i + 1] /= alpha; // G 채널 비프리멀티플
-            //         data[i + 2] /= alpha; // B 채널 비프리멀티플
-            //     }
-            // }
-            //
-            // // 비프리멀티플된 데이터를 캔버스에 다시 쓰기
-            // this.#textureCtx.putImageData(imageData, 0, 0);
 
-            this.#textureImgOnload?.(tW, tH)
+
             this.dirtyTransform = true;
 
             // Blob으로 변환하여 처리
             const callback = (blob: Blob | MediaSource) => {
-                new BitmapTexture(this.#redGPUContext, URL.createObjectURL(blob), this.#mode3dYn, v => {
+                new BitmapTexture(this.#redGPUContext, URL.createObjectURL(blob), true, v => {
                         this.material.diffuseTexture?.destroy();
                         this.material.diffuseTexture = v;
                         this.dirtyTransform = true;
                     },
-                    null, null, this.#mode3dYn
+                    null, null, false
                 );
             };
 
@@ -301,7 +285,7 @@ class ATextField extends Mesh {
 
     #setHtmlElement() {
         this.#htmlElement = document.createElement('div')
-        this.#htmlElement.style.cssText = TEXT_CONTAINER_STYLE + 'text-rendering: geometricPrecision;;position:absolute;top:200px;left:0;visibility:hidden'
+        this.#htmlElement.style.cssText = TEXT_CONTAINER_STYLE + ';position:absolute;top:200px;left:0;visibility:hidden;text-rendering:optimizeLegibility'
         // this.#htmlElement.style.cssText = TEXT_CONTAINER_STYLE + ';position:absolute;top:250px;left:0px;'
         document.body.appendChild(this.#htmlElement)
     }
@@ -309,11 +293,11 @@ class ATextField extends Mesh {
     #setSvgElement() {
         const svg = this.#svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         svg.setAttribute('xmlns', "http://www.w3.org/2000/svg");
-        svg.setAttribute('text-rendering', 'geometricPrecision');
+        svg.setAttribute('text-rendering', 'optimizeLegibility');
         svg.style.cssText = 'position:absolute;top:0px;left:0px;z-index:1;margin:0;padding:0;overflow:visible;background:transparent';
         svg.innerHTML = `
             <rect x="0" y="0" width="100%" height="100%" fill="rgba(0, 0, 0, 0)" />
-            <foreignObject  width="100%" height="100%" style="margin:0;padding:0" overflow="visible">
+            <foreignObject  width="100%" height="100%" style="margin:0;padding:0;" overflow="visible">
 			    <div xmlns="http://www.w3.org/1999/xhtml" style="${TEXT_CONTAINER_STYLE}"></div>
 			</foreignObject>`;
         // document.body.appendChild(this.#svg)
