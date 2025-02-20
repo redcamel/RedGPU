@@ -127,16 +127,28 @@ class ViewTransform {
                 -100000,
                 100000
             );
+            mat4.scale(
+                this.#projectionMatrix,
+                this.#projectionMatrix,
+                [
+                    redGPUContext.renderScale,
+                    redGPUContext.renderScale,
+                    1
+                ]
+            )
             mat4.translate(this.#projectionMatrix, this.#projectionMatrix, [-0.5, 0.5, 0]);
             mat4.scale(
                 this.#projectionMatrix,
                 this.#projectionMatrix,
                 [
-                    1 / pixelRectObject.width * redGPUContext.renderScale * window.devicePixelRatio,
-                    -1 / pixelRectObject.height * redGPUContext.renderScale * window.devicePixelRatio,
+                    1 / pixelRectObject.width *  window.devicePixelRatio,
+                    -1 / pixelRectObject.height *  window.devicePixelRatio,
                     1
                 ]
             );
+
+
+
             mat4.identity(this.rawCamera.modelMatrix);
         } else {
             const {fieldOfView, nearClipping, farClipping} = this.rawCamera
