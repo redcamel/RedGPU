@@ -5,8 +5,8 @@ export const BLEND_MODE = {
     SCREEN: 3,
     LINEAR_DODGE: 4,
     SUBTRACT: 5,
-    // DARKEN: 6, // 추가된 예: 어둡게 적용
-    // OVERLAY: 7, // 추가된 예: 오버레이 효과
+    DIFFERENCE: 6,
+    EXCLUSION: 7,
 } as const;
 export type BLEND_MODE = typeof BLEND_MODE[keyof typeof BLEND_MODE];
 

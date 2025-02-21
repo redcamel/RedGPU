@@ -131,6 +131,25 @@ export function mixInMesh2D<TBase extends new (...args: any[]) => Mesh2DBase>(Ba
                     blendAlphaState.dstFactor = GPU_BLEND_FACTOR.ONE;
                     break;
                 }
+                case BLEND_MODE.DIFFERENCE: {
+                    blendColorState.operation = GPU_BLEND_OPERATION.SUBTRACT;
+                    blendColorState.srcFactor = GPU_BLEND_FACTOR.ONE;
+                    blendColorState.dstFactor = GPU_BLEND_FACTOR.ONE;
+                    blendAlphaState.operation = GPU_BLEND_OPERATION.SUBTRACT;
+                    blendAlphaState.srcFactor = GPU_BLEND_FACTOR.ONE;
+                    blendAlphaState.dstFactor = GPU_BLEND_FACTOR.ONE;
+                    break;
+                }
+                case BLEND_MODE.EXCLUSION: {
+                    blendColorState.operation = GPU_BLEND_OPERATION.ADD;
+                    blendColorState.srcFactor = GPU_BLEND_FACTOR.ONE_MINUS_DST_ALPHA;
+                    blendColorState.dstFactor = GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA;
+                    blendAlphaState.operation = GPU_BLEND_OPERATION.ADD;
+                    blendAlphaState.srcFactor = GPU_BLEND_FACTOR.ONE;
+                    blendAlphaState.dstFactor = GPU_BLEND_FACTOR.ONE;
+                    break;
+                }
+
                 default: {
                     console.warn(`Unsupported blend mode: ${mode}`);
                     break;
