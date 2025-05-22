@@ -291,6 +291,9 @@ class ResourceManager extends ResourceBase {
                             visibility: GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE,
                             buffer: {type: 'storage',}
                         },
+                        {binding: 7, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
+                        {binding: 8, visibility: GPUShaderStage.FRAGMENT, texture: {}},
+                        {binding: 9, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
                     ],
                 }
             )

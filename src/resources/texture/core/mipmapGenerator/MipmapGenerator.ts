@@ -65,14 +65,13 @@ class MipmapGenerator {
     }
 
     /**
-     * Generates mipmaps for the given GPUTexture from the data in level 0.
-     *
-     * @param {GPUTexture} texture - Texture to generate mipmaps for.
-     * @param {object} textureDescriptor - GPUTextureDescriptor the texture was created with.
+     * 
+     * @param texture
+     * @param textureDescriptor
      */
     generateMipmap(texture: GPUTexture, textureDescriptor: GPUTextureDescriptor) {
         const {gpuDevice,} = this.#redGPUContext
-        console.log(textureDescriptor.format)
+        // console.log(textureDescriptor.format)
         const pipeline: GPURenderPipeline = this.getMipmapPipeline(textureDescriptor.format);
         if (textureDescriptor.dimension == '3d' || textureDescriptor.dimension == '1d') {
             throw new Error('Generating mipmaps for non-2d textures is currently unsupported!');

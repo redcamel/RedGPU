@@ -6,6 +6,7 @@ import GPU_LOAD_OP from "../gpuConst/GPU_LOAD_OP";
 import GPU_STORE_OP from "../gpuConst/GPU_STORE_OP";
 import DebugRender from "./debugRender/DebugRender";
 import FinalRender from "./finalRender/FinalRender";
+import render2PathLayer from "./renderLayers/render2PathLayer";
 import renderAlphaLayer from "./renderLayers/renderAlphaLayer";
 import renderBasicLayer from "./renderLayers/renderBasicLayer";
 import renderPickingLayer from "./renderLayers/renderPickingLayer";
@@ -108,6 +109,40 @@ class Renderer {
                 renderAlphaLayer(view, viewRenderPassEncoder)
                 viewRenderPassEncoder.end()
             }
+            {
+
+                if(view.debugViewRenderState.render2PathLayer.length){
+                    const {mipmapGenerator} = redGPUContext.resourceManager
+                    let renderPath1ResultTexture = view.viewRenderTextureManager.render2PathTexture
+                    commandEncoder.copyTextureToTexture(
+                      {
+                          texture: view.viewRenderTextureManager.colorResolveTexture,
+                      },
+                      {
+                          texture: renderPath1ResultTexture,
+                      },
+                      { width:view.pixelRectObject.width, height:view.pixelRectObject.height, depthOrArrayLayers: 1 },
+                    );
+                    mipmapGenerator.generateMipmap(renderPath1ResultTexture, view.viewRenderTextureManager.render2PathTextureDescriptor)
+                    const renderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass({
+                        colorAttachments: [{
+                            ...colorAttachment,
+                            loadOp:'load'
+                        }],
+                        depthStencilAttachment :{
+                            ...depthStencilAttachment,
+                            depthLoadOp: GPU_LOAD_OP.LOAD,
+                        },
+                    });
+                    this.#updateViewSystemUniforms(view, renderPassEncoder, false, true,renderPath1ResultTexture);
+                    // 예제에서 주어진 렌더링 로직 실행
+
+                    render2PathLayer(view, renderPassEncoder);
+                    renderPassEncoder.end(); // 첫 번째 패스 종료
+                }
+
+            }
+
             //TODO 포스트 이펙트 체크
             if (view.postEffectManager.effectList.length) {
                 renderPassDescriptor.colorAttachments[0].postEffectView = view.postEffectManager.render()
@@ -170,7 +205,8 @@ class Renderer {
         return {colorAttachment, depthStencilAttachment};
     }
 
-    #updateViewSystemUniforms(view: View3D, viewRenderPassEncoder: GPURenderPassEncoder, shadowRender: boolean = false, calcPointLightCluster: boolean = true) {
+    #updateViewSystemUniforms(view: View3D, viewRenderPassEncoder: GPURenderPassEncoder, shadowRender: boolean = false, calcPointLightCluster: boolean = true,
+                              renderPath1ResultTexture:GPUTexture= null) {
         const {inverseProjectionMatrix, pixelRectObject, projectionMatrix, rawCamera, redGPUContext, scene} = view
         const {gpuDevice} = redGPUContext
         const {modelMatrix: cameraMatrix, position: cameraPosition} = rawCamera
@@ -197,7 +233,7 @@ class Renderer {
         }
         lightManager.updateViewSystemUniforms(view)
         shadowManager.updateViewSystemUniforms(redGPUContext)
-        view.update(view, shadowRender, calcPointLightCluster)
+        view.update(view, shadowRender, calcPointLightCluster,renderPath1ResultTexture)
         // 시스템 유니폼 업데이트
         viewRenderPassEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
         [

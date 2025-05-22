@@ -7,6 +7,7 @@ class MorphInfoData_GLTF {
     normals: number[] = [];
     uvs: number[] = [];
     uvs1: number[] = [];
+    uvs2: number[] = [];
     jointWeights: number[] = [];
     joints: number[] = [];
     tangents: number[] = [];
@@ -20,13 +21,14 @@ class MorphInfoData_GLTF {
      * @param {number[]} [normals=[]] - The normals of the object.
      * @param {number[]} [uvs=[]] - The texture coordinates of the object.
      * @param {number[]} [uvs1=[]] - Additional texture coordinates of the object.
+     * @param {number[]} [uvs2=[]] - Additional texture coordinates of the object.
      * @param {number[]} [jointWeights=[]] - The weights of the joints affecting the object.
      * @param {number[]} [joints=[]] - The indices of the joints influencing the object.
      * @param {number[]} [tangents=[]] - The tangents of the object.
      */
     constructor(
         vertices: number[] = [], verticesColor_0: number[] = [], normals: number[] = [],
-        uvs: number[] = [], uvs1: number[] = [],
+        uvs: number[] = [], uvs1: number[] = [],uvs2:number[]=[],
         jointWeights: number[] = [], joints: number[] = [], tangents: number[] = []
     ) {
         this.vertices = vertices;
@@ -34,6 +36,7 @@ class MorphInfoData_GLTF {
         this.normals = normals;
         this.uvs = uvs;
         this.uvs1 = uvs1;
+        this.uvs2 = uvs1;
         this.jointWeights = jointWeights;
         this.joints = joints;
         this.tangents = tangents;

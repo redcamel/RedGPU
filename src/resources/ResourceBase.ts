@@ -109,7 +109,7 @@ class ResourceBase {
      */
     #manageResourceState(isAddingListener: boolean) {
         const {resourceManager} = this.#redGPUContext;
-        console.log('`managed${this.constructor.name}State`', `managed${this.constructor.name}State`)
+        // console.log('`managed${this.constructor.name}State`', `managed${this.constructor.name}State`)
         if (resourceManager) {
             const targetState = resourceManager[`managed${this.constructor.name}State`]?.table?.[this.#uuid];
             if (targetState) {

@@ -8,8 +8,8 @@ const imageBitmapToGPUTexture = (
     //
     for (let i = 0; i < imageBitmap.length; i++) {
         const targetImgBitmap = imageBitmap[i]
-        const source: GPUImageCopyExternalImage = {source: targetImgBitmap}
-        const destination: GPUImageCopyTextureTagged = {
+        const source: GPUCopyExternalImageSourceInfo = {source: targetImgBitmap}
+        const destination: GPUCopyExternalImageDestInfo = {
             texture: newGPUTexture,
             origin: [0, 0, i],
             premultipliedAlpha: usePremultiplyAlpha

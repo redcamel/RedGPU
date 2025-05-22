@@ -99,7 +99,7 @@ const parseBuffer = (buffer: ArrayBuffer): { content: string, binaryChunk: any }
  */
 const processImagesIfExist = (gltfData: GLTF, binaryChunk: any) => {
     const {images, bufferViews} = gltfData
-    const supportedFormats = ['image/png', 'image/jpeg', 'image/gif'];
+    const supportedFormats = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
     if (images) {
         for (let i = 0; i < images.length; i++) {
             const image = images[i];

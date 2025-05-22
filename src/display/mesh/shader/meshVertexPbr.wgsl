@@ -2,6 +2,7 @@
 #redgpu_include drawDirectionalShadowDepth;
 struct VertexUniforms {
     pickingId:u32,
+    localMatrix: mat4x4<f32>,
     modelMatrix: mat4x4<f32>,
     normalModelMatrix: mat4x4<f32>,
     useDisplacementTexture:u32,
@@ -36,6 +37,9 @@ struct OutputData {
     @location(6) shadowPos: vec3<f32>,
     @location(7) receiveShadow: f32,
     @location(8) pickingId: vec4<f32>,
+    @location(9) ndcPosition: vec3<f32>,
+    @location(10) localNodeScale: f32,
+    @location(11) volumeScale: f32,
 };
 @vertex
 fn main(inputData: InputData) -> OutputData {
@@ -48,7 +52,9 @@ fn main(inputData: InputData) -> OutputData {
     let u_projectionMatrix = systemUniforms.projectionMatrix;
     let u_camera = systemUniforms.camera;
     let u_cameraMatrix = u_camera.cameraMatrix;
+    let u_cameraPosition = u_camera.cameraPosition;
     //
+    let u_localMatrix = vertexUniforms.localMatrix;
     let u_modelMatrix = vertexUniforms.modelMatrix;
     let u_normalModelMatrix = vertexUniforms.normalModelMatrix;
     //
@@ -69,7 +75,10 @@ fn main(inputData: InputData) -> OutputData {
     output.uv = inputData.uv;
     output.uv1 = inputData.uv1;
     output.vertexColor_0 = inputData.vertexColor_0;
-    output.vertexTangent = inputData.vertexTangent;
+    output.vertexTangent = u_normalModelMatrix * inputData.vertexTangent;
+//    output.vertexTangent = inputData.vertexTangent;
+    let viewDirection = normalize(position.xyz - u_cameraPosition);
+
 
     var posFromLight =  u_directionalLightProjectionViewMatrix * vec4(position.xyz, 1.0);
     // Convert XY to (0, 1)
@@ -79,7 +88,17 @@ fn main(inputData: InputData) -> OutputData {
       posFromLight.z
     );
     output.receiveShadow = u_receiveShadow;
+    output.ndcPosition = output.position.xyz / output.position.w;
 
+let nodeScaleX: f32 = length(u_localMatrix[0].xyz);
+let nodeScaleY: f32 = length(u_localMatrix[1].xyz);
+let nodeScaleZ = length(u_localMatrix[2].xyz);
+output.localNodeScale = pow(nodeScaleX * nodeScaleY * nodeScaleZ, 1.0/ 3.0) ;
+
+let volumeScaleX: f32 = length(u_modelMatrix[0].xyz);
+let volumeScaleY: f32 = length(u_modelMatrix[1].xyz);
+let volumeScaleZ = length(u_modelMatrix[2].xyz);
+output.volumeScale = pow(volumeScaleX * volumeScaleY * volumeScaleZ, 1.0/ 3.0) ;
     return output;
 }
 

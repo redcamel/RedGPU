@@ -16,7 +16,7 @@ import RedGPUContext from "./context/RedGPUContext";
  * @param {function=} onDestroy - 장치가 손실된 경우에 호출되는 선택적인 함수입니다.
  * <br/>An optional function that is called when the device is lost.
  *
- * @param {GPUCanvasAlphaMode} alphaMode - 캔버스의 알파 모드로서 기본 값은 'premultiplied'입니다.
+ * @param {GPUCanvasAlphaMode} alphaMode - 캔버스의 알파 모드로서 기본 값은 premultiplied 입니다.
  * <br/>The alpha mode of the canvas, the default value is 'premultiplied'.
  *
  * @param {GPURequestAdapterOptions} requestAdapterOptions - 어댑터 요청에 대한 옵션으로써 기본 값은 { powerPreference: "high-performance", forceFallbackAdapter: false }입니다.
@@ -33,7 +33,7 @@ const init = async (
         forceFallbackAdapter: false,
     },
 ) => {
-    console.log(` ▄▄       ▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄ ▄▄  ▄▄▄▄▄▄▄▄▄▄▄ `);
+
     const {gpu} = navigator
     const errorHandler = (e: Error, defaultMsg: string) => {
         const msg = generateErrorMessage(e, defaultMsg);

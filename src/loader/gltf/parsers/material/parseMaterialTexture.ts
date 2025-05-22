@@ -15,39 +15,46 @@ const parseMaterialTexture = (
 ) => {
     const {redGPUContext, gltfData} = gltfLoader
     const {textureRawList} = gltfLoader.parsingResult
+
     const targetTextureInfoGlTfId = textureInfo.index;
     const targetTextureInfo = gltfData.textures[targetTextureInfoGlTfId];
-    const targetSourceGlTfId = targetTextureInfo.source;
+    const targetSourceGlTfId = targetTextureInfo.extensions?.EXT_texture_webp?.source || targetTextureInfo.source;
     const tURL = getURL(gltfLoader, gltfData, targetSourceGlTfId);
-    const samplerGlTfId = targetTextureInfo.sampler;
-    const option = getSamplerInfo(gltfLoader, gltfData, samplerGlTfId);
-    const {parsedURI, cacheKey} = tURL
-    const key = `${targetTextureKey}SourceGlTfId_${targetSourceGlTfId}`
-    if (!textureRawList[key]) {
-        textureRawList[key] = ({
-            src: parsedURI,
-            cacheKey,
-            targetTextureKey: targetTextureKey,
-            targetSamplerKey: `${targetTextureKey}Sampler`,
-            materialList: [tMaterial],
-            samplerList: [new Sampler(redGPUContext, option)],
-            format: format || navigator.gpu.getPreferredCanvasFormat()
-        });
-    } else {
-        textureRawList[key].materialList.push(tMaterial)
-        textureRawList[key].samplerList.push(new Sampler(redGPUContext, option))
-    }
-    tMaterial[`${targetTextureKey}_texCoord_index`] = textureInfo.texCoord || 0;
-    if ('extensions' in textureInfo) {
-        const {extensions} = textureInfo
-        const {KHR_texture_transform} = extensions
-        if (KHR_texture_transform) {
-            parse_KHR_texture_transform(tMaterial, targetTextureKey, KHR_texture_transform)
+    if(tURL) {
+        const samplerGlTfId = targetTextureInfo.sampler;
+        const option = getSamplerInfo(gltfLoader, gltfData, samplerGlTfId);
+        const {parsedURI, cacheKey} = tURL
+        const key = `${targetTextureKey}SourceGlTfId_${targetSourceGlTfId}`
+        if (!textureRawList[key]) {
+            textureRawList[key] = ({
+                src: parsedURI,
+                cacheKey,
+                targetTextureKey: targetTextureKey,
+                targetSamplerKey: `${targetTextureKey}Sampler`,
+                materialList: [tMaterial],
+                samplerList: [new Sampler(redGPUContext, option)],
+                format: format || navigator.gpu.getPreferredCanvasFormat()
+            });
+        } else {
+            textureRawList[key].materialList.push(tMaterial)
+            textureRawList[key].samplerList.push(new Sampler(redGPUContext, option))
+        }
+        tMaterial[`${targetTextureKey}_texCoord_index`] = textureInfo.texCoord || 0;
+        if ('extensions' in textureInfo) {
+            const {extensions} = textureInfo
+            const {KHR_texture_transform} = extensions
+            if (KHR_texture_transform) {
+                parse_KHR_texture_transform(tMaterial, targetTextureKey, KHR_texture_transform)
+            }
         }
     }
 }
 export default parseMaterialTexture
 const getURL = function (gltfLoader: GLTFLoader, scenesData: GLTF, sourceGlTfId: GlTfId) {
+    if(!scenesData.images[sourceGlTfId]) {
+        console.log('없어',scenesData.images,sourceGlTfId)
+        return null
+    }
     const {uri} = scenesData.images[sourceGlTfId]
     let parsedURI
     const cacheKey = `${gltfLoader.url}_${sourceGlTfId}`

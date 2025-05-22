@@ -9,6 +9,7 @@ import AccessorInfo_GLTF from "../cls/AccessorInfo_GLTF";
  * @param {Array} vertices - The array to store vertex data.
  * @param {Array} uvs - The array to store uv data.
  * @param {Array} uvs1 - The array to store uv1 data.
+ * @param {Array} uvs2 - The array to store uv1 data.
  * @param {Array} normals - The array to store normal data.
  * @param {Array} jointWeights - The array to store joint weight data.
  * @param {Array} joints - The array to store joint data.
@@ -18,7 +19,7 @@ import AccessorInfo_GLTF from "../cls/AccessorInfo_GLTF";
 const parseAttributeInfo_GLTF = function (
     key: string,
     accessorInfo: AccessorInfo_GLTF,
-    vertices, uvs, uvs1, normals,
+    vertices, uvs, uvs1,uvs2,normals,
     jointWeights, joints,
     verticesColor_0, tangents
 ) {
@@ -99,7 +100,10 @@ const parseAttributeInfo_GLTF = function (
                             uvs.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
                         } else if (key == 'TEXCOORD_1') {
                             uvs1.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
-                        } else consoleAndThrowError('VEC2에서 현재 지원하고 있지 않는 키', key);
+                        } else if (key == 'TEXCOORD_2') {
+                            uvs2.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
+                            //TODO uvs2 구현해야함
+                        }else consoleAndThrowError('VEC2에서 현재 지원하고 있지 않는 키', key);
                     }
                     strideIndex++;
                 }
@@ -110,7 +114,9 @@ const parseAttributeInfo_GLTF = function (
                         uvs.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
                     } else if (key == 'TEXCOORD_1') {
                         uvs1.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
-                    } else consoleAndThrowError('VEC2에서 현재 지원하고 있지 않는 키', key);
+                    } else if (key == 'TEXCOORD_2') {
+                        uvs2.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
+                    }else consoleAndThrowError('VEC2에서 현재 지원하고 있지 않는 키', key);
                     strideIndex++;
                 }
             }
