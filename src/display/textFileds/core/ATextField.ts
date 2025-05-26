@@ -1,5 +1,4 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import GPU_BLEND_FACTOR from "../../../gpuConst/GPU_BLEND_FACTOR";
 import GPU_FILTER_MODE from "../../../gpuConst/GPU_FILTER_MODE";
 import GPU_MIPMAP_FILTER_MODE from "../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 import BitmapMaterial from "../../../material/bitmapMaterial/BitmapMaterial";

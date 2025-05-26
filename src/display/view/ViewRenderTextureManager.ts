@@ -1,9 +1,19 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import validateRedGPUContext from "../../runtimeChecker/validateFunc/validateRedGPUContext";
+import getMipLevelCount from "../../utils/math/getMipLevelCount";
 import View3D from "./View3D";
 
 class ViewRenderTextureManager {
+    get render2PathTexture(): GPUTexture {
+        return this.#render2PathTexture;
+    }
     #colorTexture: GPUTexture
+    #render2PathTexture: GPUTexture
+    #render2PathTextureDescriptor: GPUTextureDescriptor
+    get render2PathTextureDescriptor(): GPUTextureDescriptor {
+        return this.#render2PathTextureDescriptor;
+    }
+
     #colorResolveTexture: GPUTexture
     #depthTexture: GPUTexture
     #colorTextureView: GPUTextureView
@@ -63,6 +73,7 @@ class ViewRenderTextureManager {
                 currentTexture?.destroy()
                 if (!depthYn) this.#colorResolveTexture?.destroy()
             }
+            this.#render2PathTexture?.destroy()
             const newTexture = gpuDevice.createTexture({
                 size: [
                     Math.max(pixelRectObjectW, 1),
@@ -88,12 +99,20 @@ class ViewRenderTextureManager {
                         },
                         sampleCount: 1,
                         format: navigator.gpu.getPreferredCanvasFormat(),
-                        usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING
+                        usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC
                     })
                     this.#colorResolveTexture = newResolveTexture
                     this.#colorResolveTextureView = newResolveTexture.createView()
                 }
             }
+            this.#render2PathTextureDescriptor = {
+                size: { width:pixelRectObjectW, height:pixelRectObjectH, depthOrArrayLayers: 1 },
+                format: navigator.gpu.getPreferredCanvasFormat(),
+                usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT
+                  | GPUTextureUsage.COPY_SRC,
+                mipLevelCount: getMipLevelCount(pixelRectObjectW, pixelRectObjectH)
+            }
+            this.#render2PathTexture = gpuDevice.createTexture(this.#render2PathTextureDescriptor);
         }
     }
 }

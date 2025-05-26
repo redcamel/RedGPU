@@ -12,6 +12,7 @@ import ResourceManager from "../../resources/resourceManager/ResourceManager";
 import Sampler from "../../resources/sampler/Sampler";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import CubeTexture from "../../resources/texture/CubeTexture";
+import PackedTexture from "../../resources/texture/PackedTexture";
 import TINT_BLEND_MODE from "../TINT_BLEND_MODE";
 import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "./getBindGroupLayoutDescriptorFromShaderInfo";
 
@@ -187,13 +188,21 @@ class ABaseMaterial extends ResourceBase {
             const info = this.#TEXTURE_STRUCT[k]
             const {binding, name, group, type} = info
             const {name: textureType} = type
+            console.log(this,name,this[name])
+            let resource
+            if(textureType==='texture_cube') resource = this.getGPUResourceCubeTextureView(this[name])
+            else if(this[name] instanceof PackedTexture){
+                if(this[name].gpuTexture) resource = this[name].gpuTexture.createView({})
+                else resource = this.#emptyBitmapGPUTextureView
+
+            }else{
+                resource = this.getGPUResourceBitmapTextureView(this[name]) || this.#emptyBitmapGPUTextureView
+            }
             if (group === 2) {
                 entries.push(
                     {
                         binding: binding,
-                        resource:
-                            textureType === "texture_cube" ? this.getGPUResourceCubeTextureView(this[name]) :
-                                this.getGPUResourceBitmapTextureView(this[name]),
+                        resource
                     }
                 )
             }
@@ -269,7 +278,7 @@ class ABaseMaterial extends ResourceBase {
     }
 
     getGPUResourceCubeTextureView(cubeTexture: CubeTexture, viewDescriptor?: GPUTextureViewDescriptor) {
-        return cubeTexture?.gpuTexture?.createView(viewDescriptor || CubeTexture.defaultViewDescriptor) || this.#emptyCubeTextureView
+        return cubeTexture?.gpuTexture?.createView(viewDescriptor || cubeTexture.viewDescriptor || CubeTexture.defaultViewDescriptor) || this.#emptyCubeTextureView
     }
 
     getGPUResourceSampler(sampler: Sampler) {

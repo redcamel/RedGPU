@@ -13,14 +13,14 @@ function createSetter(propertyKey: string, symbol: symbol, isFragment: boolean) 
             if (fragmentUniformInfo.members[useKey]) {
                 fragmentUniformBuffer.writeBuffer(fragmentUniformInfo.members[useKey], texture ? 1 : 0)
             } else {
-                console.warn(this.material, useKey, '는 fragment shader에 정의 되어있지 않습니다. 문제가 되지 않을수 있으나 확인 필요')
+                // console.warn(this.material, useKey, '는 fragment shader에 정의 되어있지 않습니다. 문제가 되지 않을수 있으나 확인 필요')
             }
         } else if (gpuRenderInfo) {
             const {vertexUniformInfo, vertexUniformBuffer} = gpuRenderInfo;
             if (vertexUniformInfo.members[useKey]) {
                 vertexUniformBuffer.writeBuffer(vertexUniformBuffer.members[useKey], texture ? 1 : 0)
             } else {
-                console.warn(this.material, useKey, '는 vertex shader에 정의 되어있지 않습니다. 문제가 되지 않을수 있으나 확인 필요')
+                // console.warn(this.material, useKey, '는 vertex shader에 정의 되어있지 않습니다. 문제가 되지 않을수 있으나 확인 필요')
             }
         }
     }

@@ -31,14 +31,14 @@ class MorphInfo_GLTF {
             this.morphInfoDataList = meshPrimitive.targets.map((target) => {
                 const morphData = new MorphInfoData_GLTF()
                 for (let key in target) {
-                    const {vertices, verticesColor_0, normals, uvs, uvs1, jointWeights, joints, tangents} = morphData;
+                    const {vertices, verticesColor_0, normals, uvs, uvs1, uvs2,jointWeights, joints, tangents,} = morphData;
                     const accessorGlTfId = target[key];
                     const accessorInfo = new AccessorInfo_GLTF(gltfLoader, gltfData, accessorGlTfId);
                     const {accessor} = accessorInfo
                     // 어트리뷰트 갈궈서 파악함
                     parseAttributeInfo_GLTF(
                         key, accessorInfo,
-                        vertices, uvs, uvs1, normals,
+                        vertices, uvs, uvs1, uvs2,normals,
                         jointWeights, joints,
                         verticesColor_0, tangents
                     );

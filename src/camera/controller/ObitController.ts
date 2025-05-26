@@ -67,7 +67,7 @@ class ObitController extends AController {
             currentEventView = this.#targetView;
             if (!checkArea(e)) return;
             const {x, y} = this.getCanvasEventPoint(e, redGPUContext)
-            console.log(x, y)
+            // console.log(x, y)
             sX = x
             sY = y
             redGPUContext.htmlCanvas.addEventListener(detector.move, HD_Move);

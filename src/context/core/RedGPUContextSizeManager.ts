@@ -202,13 +202,15 @@ class RedGPUContextSizeManager {
         this.#changeCanvasStyles(tW, tH);
         this.#updatePixelRect(tW, tH)
         this.#updateViewsSize()
-        console.log(this.parentDomRect)
-        console.log(`${this.constructor.name}.setSize - input : ${w},${h} / result : ${tW}, ${tH}`);
-        console.log({
-            width: this.#width,
-            height: this.#height,
-            pixelRectArray: this.#pixelRectArray
-        })
+        // console.log(this.parentDomRect)
+        console.log(
+          `${this.constructor.name}.setSize - input : ${w},${h} | output : ${tW}, ${tH}`,
+          {
+              width: this.#width,
+              height: this.#height,
+              pixelRectArray: this.#pixelRectArray
+          });
+
     }
 
     #updatePixelRect(tW: number, tH: number) {

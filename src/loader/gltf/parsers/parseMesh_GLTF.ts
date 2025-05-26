@@ -1,5 +1,6 @@
 import Mesh from "../../../display/mesh/Mesh";
 import Geometry from "../../../geometry/Geometry";
+import GPU_COMPARE_FUNCTION from "../../../gpuConst/GPU_COMPARE_FUNCTION";
 import GPU_CULL_MODE from "../../../gpuConst/GPU_CULL_MODE";
 import GPU_PRIMITIVE_TOPOLOGY from "../../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
 import PBRMaterial from "../../../material/pbrMaterial/PBRMaterial";
@@ -40,6 +41,7 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
         let verticesColor_0 = [];
         let uvs = [];
         let uvs1 = [];
+        let uvs2 = [];
         let normals = [];
         let jointWeights = [];
         let joints = [];
@@ -55,7 +57,7 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
                 // 어트리뷰트 갈궈서 파악함
                 parseAttributeInfo_GLTF(
                     key, accessorInfo,
-                    vertices, uvs, uvs1, normals,
+                    vertices, uvs, uvs1,uvs2, normals,
                     jointWeights, joints,
                     verticesColor_0, tangents
                 );
@@ -133,7 +135,7 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
         if (normals.length) normalData = normals;
         else normalData = calculateNormals(vertices, indices);
         let interleaveData = [];
-        parseInterleaveData_GLTF(interleaveData, vertices, verticesColor_0, normalData, uvs, uvs1, jointWeights, joints, tangents);
+        parseInterleaveData_GLTF(interleaveData, vertices, verticesColor_0, normalData, uvs, uvs1,uvs2, jointWeights, joints, tangents);
         // console.log('interleaveData', interleaveData);
         /////////////////////////////////////////////////////////
         // 메쉬 생성
@@ -142,7 +144,8 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
         if (vertices.length) tInterleaveInfoList['aVertexPosition'] = InterleaveType.float32x3
         if (normalData.length) tInterleaveInfoList['aVertexNormal'] = InterleaveType.float32x3
         if (uvs.length) tInterleaveInfoList['aTexcoord'] = InterleaveType.float32x2
-        if (uvs1.length) tInterleaveInfoList['aTexcoord1'] = InterleaveType.float32x2
+        if (uvs2.length) tInterleaveInfoList['aTexcoord1'] = InterleaveType.float32x2
+        else if (uvs1.length) tInterleaveInfoList['aTexcoord1'] = InterleaveType.float32x2
         else if (uvs.length) tInterleaveInfoList['aTexcoord1'] = InterleaveType.float32x2
         tInterleaveInfoList['aVertexColor_0'] = InterleaveType.float32x4
         // if (jointWeights.length)
@@ -186,8 +189,14 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
         if (tMesh.material.doubleSided) {
             tMesh.primitiveState.cullMode = GPU_CULL_MODE.NONE;
         }
+        if (tMesh.material.use2PathRender) {
+            tMesh.primitiveState.cullMode = GPU_CULL_MODE.NONE;
+            tMesh.depthStencilState.depthCompare = GPU_COMPARE_FUNCTION.LESS
+            // tMesh.depthStencilState.depthWriteEnabled = false
+        }
         if (tMesh.material.alphaBlend === 2) {
             // TODO
+            tMesh.depthStencilState.depthCompare = GPU_COMPARE_FUNCTION.LESS
         }
         /////////////////////////////////////////////////////////
         {
@@ -203,7 +212,7 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
                 parseInterleaveData_GLTF(
                     interleaveData,
                     morph.vertices, morph.verticesColor_0,
-                    normalData, morph.uvs, morph.uvs1,
+                    normalData, morph.uvs, morph.uvs1,morph.uvs2,
                     morph.jointWeights, morph.joints,
                     morph.tangents
                 );

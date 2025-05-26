@@ -2,9 +2,9 @@ import PBRMaterial from "../../../../../material/pbrMaterial/PBRMaterial";
 import parseMaterialTexture from "../parseMaterialTexture";
 
 const parse_KHR_materials_specular = (currentMaterial: PBRMaterial, KHR_materials_specular, gltfLoader) => {
+    currentMaterial.useKHR_materials_specular = true
     currentMaterial.KHR_specularFactor = KHR_materials_specular.specularFactor ?? 1.0
     currentMaterial.KHR_specularColorFactor = KHR_materials_specular.specularColorFactor || [1, 1, 1]
-    currentMaterial.useKHR_materials_specular = true
     const {
         specularTexture: specularTextureInfo,
         specularColorTexture: specularColorTextureInfo,
