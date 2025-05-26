@@ -90,13 +90,13 @@ const createThumbnail = (item, link) => {
 		const thumbContainer = document.createElement('div');
 		Object.assign(thumbContainer.style, {
 			width: '100%',
-			height: '180px',
+			height: '160px',
 			overflow: 'hidden',
 			marginTop: '8px',
 			borderRadius: '12px',  // 더 부드러운 모서리
 			background: '#000', // 더 어두운 배경색
-			boxShadow: '0 3px 6px rgba(0,0,0,0.16)', // 미묘한 그림자 효과
-			border: '1px solid rgba(255,255,255,0.05)' // 미묘한 테두리
+			// boxShadow: '0 3px 6px rgba(0,0,0,0.16)', // 미묘한 그림자 효과
+			// border: '1px solid rgba(255,255,255,0.05)' // 미묘한 테두리
 		});
 
 		if (Array.isArray(item.thumb)) {
@@ -109,7 +109,7 @@ const createThumbnail = (item, link) => {
 				gap: '3px', // 약간 더 넓은 간격
 				width: '100%',
 				height: '100%',
-				padding: '3px', // 외부 여백 추가
+				// padding: '3px', // 외부 여백 추가
 				boxSizing: 'border-box'
 			});
 
@@ -130,6 +130,8 @@ const createThumbnail = (item, link) => {
 
 				const thumb = document.createElement('img');
 				thumb.src = thumbUrl || 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/VertexColorTest/screenshot/screenshot-x150.png?raw=true';
+				thumb.alt = `${item.name} thumbnail`;
+				thumb.loading = 'lazy'; // 지연 로딩 추가
 
 				// 이미지 효과 개선
 				Object.assign(thumb.style, {
@@ -139,7 +141,7 @@ const createThumbnail = (item, link) => {
 					width: '100%',
 					height: '100%',
 					objectFit: 'contain',
-					padding: '4px',
+					// padding: '4px',
 					boxSizing: 'border-box',
 
 				});
@@ -170,7 +172,7 @@ const createThumbnail = (item, link) => {
 				display: 'flex',
 				justifyContent: 'center',
 				alignItems: 'center',
-				padding: '6px', // 더 넓은 여백
+				// padding: '6px', // 더 넓은 여백
 				boxSizing: 'border-box',
 
 			});
@@ -186,7 +188,7 @@ const createThumbnail = (item, link) => {
 				width: '100%',
 				height: '100%',
 				objectFit: 'contain',
-				padding: '8px',
+				// padding: '8px',
 				boxSizing: 'border-box',
 
 			});
@@ -211,6 +213,7 @@ const renderItem = (item, parent, query) => {
         const link = document.createElement('a');
         link.href = item.path;
         link.className = 'example-link';
+        link.title = `${stripTags(item.name)} sample view`
         link.innerHTML = `<div class="example-name">${stripTags(item.name)}</div>`;
 
         // 샘플 페이지로 이동 시 현재 상태 저장
@@ -456,10 +459,36 @@ const initialize = () => {
     if (savedState && savedState.scrollPosition) {
         restoreScrollPosition(container, savedState.scrollPosition);
     }
-
+	addMetaTags()
     // 페이지 이탈 시 상태 저장 (브라우저 닫기 등)
     window.addEventListener('beforeunload', saveState);
 };
+// initialize 함수 내에 메타 태그 추가
+const addMetaTags = () => {
+	// 기본 메타 태그
+	const metaTags = [
+		{ name: 'description', content: 'RedGPU - collection of examples for the JavaScript WebGPU library. Explore 2D/3D graphics rendering samples.' },
+		{ name: 'keywords', content: 'RedGPU, WebGPU, JavaScript, 3D, 2D, graphics, examples, library' },
+		{ property: 'og:title', content: 'RedGPU Examples - JavaScript WebGPU Library' },
+		{ property: 'og:description', content: 'Explore various examples and usage methods of the RedGPU JavaScript WebGPU library.' },
+		{ property: 'og:type', content: 'website' },
+		{ property: 'og:url', content: window.location.href },
+		{ name: 'twitter:card', content: 'summary_large_image' },
+		{ name: 'twitter:title', content: 'RedGPU Examples - JavaScript WebGPU Library' },
+		{ name: 'twitter:description', content: 'RedGPU - Collection of examples for the JavaScript graphics library utilizing the latest WebGPU API' }
+	];
 
+	// 메타 태그 추가
+	metaTags.forEach(tag => {
+		const meta = document.createElement('meta');
+		Object.keys(tag).forEach(key => {
+			meta.setAttribute(key, tag[key]);
+		});
+		document.head.appendChild(meta);
+	});
+};
+
+// initialize 함수 내에서 호출
+addMetaTags();
 // 초기화 실행
 initialize();

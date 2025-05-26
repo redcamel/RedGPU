@@ -208,10 +208,11 @@ html, body {
 
 /* 링크 일반 스타일 */
 a {
+
     text-decoration: none;
     color: rgb(221, 132, 80);
     font-size: 13px;
-    transition: color 0.21s;
+    transition: color 0.21s, filter 0.2s;
     padding: 4px 0;
     overflow: hidden;
     word-break: break-all;
@@ -219,7 +220,9 @@ a {
     text-overflow: ellipsis;
     pointer-events: painted;
 }
+a img{
 
+}
 a:hover {
     color: #fff;
 }
@@ -227,12 +230,14 @@ a:hover {
 a img {
     /*opacity: 0.75;*/
     /*transition: opacity 0.5s;*/
+    filter:grayscale(0.3);
+    transition: filter 0.26s ease-in-out;
     border-radius: 8px;
     border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 a:hover img {
-    opacity: 1;
+    filter:grayscale(0);
 }
 
 a div {
