@@ -21,7 +21,7 @@ class PassPointLightClusters {
         this.#redGPUContext = redGPUContext
         this.#view = view;
         this.#initPipeLine();
-        console.log('PassPointLightClusters', this);
+        console.log(this);
     }
 
     // Getter method for clusterLightsBuffer

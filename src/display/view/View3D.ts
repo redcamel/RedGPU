@@ -22,7 +22,6 @@ import Grid from "../helper/grid/Grid";
 import Scene from "../scene/Scene";
 import SkyBox from "../skyboxs/skyBox/SkyBox";
 import SkyBoxMaterial from "../skyboxs/skyBox/SkyBoxMaterial";
-import SphericalSkyBox from "../skyboxs/spherialSkyBox/SphericalSkyBox";
 import ViewRenderTextureManager from "./ViewRenderTextureManager";
 import ViewTransform from "./ViewTransform";
 
@@ -37,7 +36,7 @@ class View3D extends ViewTransform {
     #instanceId: number
     #grid: Grid
     #axis: Axis
-    #skybox: SkyBox | SphericalSkyBox
+    #skybox: SkyBox
     #name: string
     #scene: Scene
     //
@@ -169,11 +168,11 @@ class View3D extends ViewTransform {
         this.#axis = value as Axis;
     }
 
-    get skybox(): SkyBox | SphericalSkyBox {
+    get skybox(): SkyBox  {
         return this.#skybox;
     }
 
-    set skybox(value: SkyBox | SphericalSkyBox) {
+    set skybox(value: SkyBox ) {
         this.#skybox = value;
     }
 
@@ -210,10 +209,10 @@ class View3D extends ViewTransform {
         this.#scene = value;
     }
 
-    update(view: View3D, shadowRender: boolean = false, calcPointLightCluster: boolean = false) {
+    update(view: View3D, shadowRender: boolean = false, calcPointLightCluster: boolean = false,renderPath1ResultTexture?:GPUTexture) {
         //TODO 바인드그룹이 계속 생겨나는걸.... 막아야겠군
         const {scene} = view
-        let iblTexture = view.iblTexture?.gpuTexture || (view.skybox?._material instanceof SkyBoxMaterial ? view.skybox._material.skyboxTexture?.gpuTexture : undefined)
+        const iblTexture = view.iblTexture?.gpuTexture || (view.skybox?._material instanceof SkyBoxMaterial ? view.skybox._material.skyboxTexture?.gpuTexture : undefined)
         let shadowDepthGPUTextureView = shadowRender ? scene.shadowManager.shadowDepthGPUTextureViewEmpty : scene.shadowManager.shadowDepthGPUTextureView
         const index = view.redGPUContext.viewList.indexOf(view)
         const key = `${index}_${shadowRender ? 'shadowRender' : 'basic'}`
@@ -223,11 +222,12 @@ class View3D extends ViewTransform {
             if (prevInfo) {
                 needResetBindGroup = (
                     prevInfo.iblTexture !== iblTexture ||
+                    prevInfo.renderPath1ResultTexture !== renderPath1ResultTexture ||
                     prevInfo.shadowDepthGPUTextureView !== shadowDepthGPUTextureView
                     || !this.#passLightClusters
                 )
             }
-            if (needResetBindGroup) this.#createVertexUniformBindGroup(key, shadowDepthGPUTextureView, iblTexture)
+            if (needResetBindGroup) this.#createVertexUniformBindGroup(key, shadowDepthGPUTextureView, iblTexture,renderPath1ResultTexture)
             else this.#systemUniform_Vertex_UniformBindGroup = this.#prevInfoList[key].vertexUniformBindGroup;
             [
                 {key: 'useIblTexture', value: [iblTexture ? 1 : 0]},
@@ -242,6 +242,7 @@ class View3D extends ViewTransform {
             });
             this.#prevInfoList[key] = {
                 iblTexture,
+                renderPath1ResultTexture,
                 shadowDepthGPUTextureView,
                 vertexUniformBindGroup: this.#systemUniform_Vertex_UniformBindGroup
             }
@@ -256,7 +257,7 @@ class View3D extends ViewTransform {
             (0 < mouseY && mouseY < pixelRectObject.height);
     }
 
-    #createVertexUniformBindGroup(key: string, shadowDepthGPUTextureView: GPUTextureView, iblTexture: GPUTexture) {
+    #createVertexUniformBindGroup(key: string, shadowDepthGPUTextureView: GPUTextureView, iblTexture: GPUTexture,renderPath1ResultTexture:GPUTexture) {
         this.#updateClusters(true)
         const systemUniform_Vertex_BindGroupDescriptor: GPUBindGroupDescriptor = {
             layout: this.redGPUContext.resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System),
@@ -284,7 +285,10 @@ class View3D extends ViewTransform {
                 },
                 {
                     binding: 4,
-                    resource: iblTexture?.createView(CubeTexture.defaultViewDescriptor)
+                    resource: this.iblTexture?.gpuTexture?.createView( this.iblTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor)
+                      || this.#skybox?._material?.skyboxTexture?.gpuTexture?.createView(
+                        this.#skybox._material.skyboxTexture.viewDescriptor || CubeTexture.defaultViewDescriptor
+                      )
                         || this.redGPUContext.resourceManager.emptyCubeTextureView
                 },
                 {
@@ -302,7 +306,20 @@ class View3D extends ViewTransform {
                         offset: 0,
                         size: this.#passLightClusters.clusterLightsBuffer.size
                     }
-                }
+                },
+                {
+                    binding: 7,
+                    resource: this.#basicSampler
+                },
+                {
+                    binding: 8,
+                    resource: renderPath1ResultTexture?.createView()
+                      || this.redGPUContext.resourceManager.emptyBitmapTextureView
+                },
+                {
+                    binding: 9,
+                    resource: this.#basicSampler
+                },
             ]
         }
         this.#systemUniform_Vertex_UniformBindGroup = this.redGPUContext.gpuDevice.createBindGroup(systemUniform_Vertex_BindGroupDescriptor);
@@ -353,7 +370,7 @@ class View3D extends ViewTransform {
             const pointLightNum = pointLights.length
             if (pointLightNum) {
                 let i = pointLightNum
-                console.log('실행이되긴하하나2')
+                // console.log('실행이되긴하하나2')
                 while (i--) {
                     const tLight = pointLights[i]
                     //TODO - 프러스텀 컬링할꺼냐 말꺼냐

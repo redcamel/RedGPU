@@ -27,6 +27,12 @@ class CubeTexture extends ManagedResourceBase {
     #useMipmap: boolean
     #imgBitmaps: ImageBitmap[]
     #videoMemorySize: number = 0
+    get viewDescriptor(){
+        return {
+            ...CubeTexture.defaultViewDescriptor,
+            mipLevelCount:this.#mipLevelCount
+        }
+    }
     readonly #format: GPUTextureFormat
     readonly #onLoad: (cubeTextureInstance: CubeTexture) => void;
     readonly #onError: (error: Error) => void;

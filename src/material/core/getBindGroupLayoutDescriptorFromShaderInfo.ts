@@ -3,7 +3,7 @@ const getBindGroupLayoutDescriptorFromShaderInfo = (SHADER_INFO, targetGroupInde
     const entries: GPUBindGroupLayoutEntry[] = []
     for (const k in storage) {
         const info = storage[k]
-        console.log(info, storage)
+        // console.log(info, storage)
         const {binding, name, group, type} = info
         if (info.access) {
             const accessType = {
@@ -63,7 +63,7 @@ const getBindGroupLayoutDescriptorFromShaderInfo = (SHADER_INFO, targetGroupInde
             )
         }
     }
-    console.log(entries)
+    console.log('GPUBindGroupLayoutEntry',entries)
     return {
         entries
     }

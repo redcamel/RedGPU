@@ -9,6 +9,7 @@ import ABaseMaterial from "./ABaseMaterial";
  * @extends ABaseMaterial
  */
 class ABitmapBaseMaterial extends ABaseMaterial {
+    __packingList:any[]
     constructor(
         redGPUContext: RedGPUContext,
         moduleName: string,
@@ -37,6 +38,7 @@ class ABitmapBaseMaterial extends ABaseMaterial {
         this.#updateFragmentState()
     }
 
+
     /**
      * Updates the fragment state.
      *
@@ -46,8 +48,19 @@ class ABitmapBaseMaterial extends ABaseMaterial {
      */
     #updateFragmentState = () => {
         this.dirtyPipeline = true;
+        // console.log('this.__packingList',this.__packingList)
+        {
+            let i = (this.__packingList || []).length
+            while (i--) {
+                this.__packingList[i]()
+            }
+
+        }
+
         if (this.gpuRenderInfo?.fragmentShaderModule) this._updateFragmentState()
         else this.initGPURenderInfos();
+
+
     }
 }
 

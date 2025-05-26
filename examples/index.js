@@ -8,9 +8,9 @@ RedGPU.init(
 	redGPUContext => {
 		// redGPUContext.useMSAA=false
 		const controllerTest = new RedGPU.Camera.ObitController(redGPUContext);
-		controllerTest.distance = 4
+		controllerTest.distance = 2
 		controllerTest.speedDistance = 0.1
-		controllerTest.tilt = -10
+		// controllerTest.tilt = -10
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controllerTest);
 		// redGPUContext.useDebugPanel = true
@@ -50,19 +50,20 @@ RedGPU.init(
 					console.log('GLTFLoader ', v)
 					console.log('GLTFLoader parsingResult', v.parsingResult)
 					scene.addChild(model = v['resultMesh'])
+					model.setScale(10)
 					console.log(model)
 				}
 			)
 		}
 
-		loadGLTF('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF/DamagedHelmet.gltf',);
+		loadGLTF('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MosquitoInAmber/glTF/MosquitoInAmber.gltf',);
 		// loadGLTF('./assets/gltf/busterDrone/busterDrone.gltf');
 		const render = (time) => {
 			directionalLightTest.direction[0] = Math.sin(time / 1500)
 			directionalLightTest.direction[1] = -1
 			directionalLightTest.direction[2] = Math.cos(time / 1500)
 			if (model) {
-				model.rotationY += 0.1
+				model.rotationY += 0.5
 			}
 
 		}

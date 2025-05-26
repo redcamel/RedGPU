@@ -28,7 +28,7 @@ const parseGLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, callBack) => {
                                 material[targetTextureKey] = textureLoaderData.texture;
                                 if (samplerList[index]) {
                                     material[targetSamplerKey] = samplerList[index];
-                                    console.log('targetSamplerKey', material)
+                                    // console.log('targetSamplerKey', material)
                                 }
                             })
                         });

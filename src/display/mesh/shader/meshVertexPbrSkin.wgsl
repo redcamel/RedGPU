@@ -1,6 +1,7 @@
 #redgpu_include SYSTEM_UNIFORM;
 struct VertexUniforms {
     pickingId:u32,
+    localMatrix: mat4x4<f32>,
     modelMatrix:mat4x4<f32>,
     normalModelMatrix:mat4x4<f32>,
     useDisplacementTexture:u32,
@@ -37,6 +38,10 @@ struct OutputDataSkin {
     @location(6) shadowPos: vec3<f32>,
     @location(7) receiveShadow: f32,
     @location(8) pickingId: vec4<f32>,
+
+    @location(9) ndcPosition: vec3<f32>,
+    @location(10) localNodeScale: f32,
+    @location(11) volumeScale: f32,
 };
 
 struct OutputShadowData {
@@ -52,6 +57,7 @@ fn main( inputData:InputDataSkin ) -> OutputDataSkin {
     let u_camera = systemUniforms.camera;
     let u_cameraMatrix = u_camera.cameraMatrix;
     //
+    let u_localMatrix = vertexUniforms.localMatrix;
     let u_modelMatrix = vertexUniforms.modelMatrix;
     let u_normalModelMatrix = vertexUniforms.normalModelMatrix;
 
@@ -81,7 +87,8 @@ fn main( inputData:InputDataSkin ) -> OutputDataSkin {
     output.uv = inputData.uv;
     output.uv1 = inputData.uv1;
     output.vertexColor_0 = inputData.vertexColor_0;
-    output.vertexTangent = inputData.vertexTangent;
+//    output.vertexTangent = inputData.vertexTangent;
+    output.vertexTangent = u_normalModelMatrix * inputData.vertexTangent;
 
     var posFromLight =  u_directionalLightProjectionViewMatrix * position;
     // Convert XY to (0, 1)
@@ -91,6 +98,16 @@ fn main( inputData:InputDataSkin ) -> OutputDataSkin {
       posFromLight.z
     );
     output.receiveShadow = u_receiveShadow;
+
+    let nodeScaleX: f32 = length(u_localMatrix[0].xyz);
+    let nodeScaleY: f32 = length(u_localMatrix[1].xyz);
+    let nodeScaleZ: f32 = length(u_localMatrix[2].xyz);
+    output.localNodeScale = pow(nodeScaleX * nodeScaleY * nodeScaleZ, 1.0/ 3.0) ;
+
+    let volumeScaleX: f32 = length(u_modelMatrix[0].xyz);
+    let volumeScaleY: f32 = length(u_modelMatrix[1].xyz);
+    let volumeScaleZ: f32 = length(u_modelMatrix[2].xyz);
+    output.volumeScale = pow(volumeScaleX * volumeScaleY * volumeScaleZ, 1.0/ 3.0) ;
   return output;
 }
 

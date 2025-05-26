@@ -30,12 +30,9 @@ class Sampler extends ResourceBase {
     #maxAnisotropy: number = 1;
 
     /**
-     * Creates a new instance of the Constructor class.
      *
-     * @param {RedGPUContext} redGPUContext - The RedGPUContext object.
-     * @param {GPUSamplerDescriptor} options - The options for the GPUSampler.
-     * @constructor
-
+     * @param redGPUContext
+     * @param options
      */
     constructor(redGPUContext: RedGPUContext, options?: GPUSamplerDescriptor) {
         super(redGPUContext)

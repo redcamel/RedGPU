@@ -755,6 +755,13 @@ class Mesh extends MeshBase {
                     vertexUniformInfoMembers.normalModelMatrix.uniformOffset,
                     new vertexUniformInfoMembers.normalModelMatrix.View(this.normalModelMatrix),
                 )
+                if(vertexUniformInfoMembers.localMatrix) {
+                    gpuDevice.queue.writeBuffer(
+                      vertexUniformBuffer.gpuBuffer,
+                      vertexUniformInfoMembers.localMatrix.uniformOffset,
+                      new vertexUniformInfoMembers.localMatrix.View(this.localMatrix),
+                    )
+                }
                 dirtyTransformForChildren = true
                 this.dirtyTransform = false
             }
@@ -771,7 +778,9 @@ class Mesh extends MeshBase {
                 this.dirtyOpacity = false
             }
             {
-                if (this.meshType === 'particle') {
+                if (currentMaterial.use2PathRender) {
+                    debugViewRenderState.render2PathLayer[debugViewRenderState.render2PathLayer.length] = this
+                } else if (this.meshType === 'particle') {
                     debugViewRenderState.particleLayer[debugViewRenderState.particleLayer.length] = this
                 } else if (this.meshType === 'instanceMesh') {
                     debugViewRenderState.instanceMeshLayer[debugViewRenderState.instanceMeshLayer.length] = this

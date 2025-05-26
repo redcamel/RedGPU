@@ -15,7 +15,7 @@ class LinePointWithInOut {
     ) {
         let t0: any = [...convertHexToRgb(color, true)];
         t0 = [t0[0] / 255, t0[1] / 255, t0[2] / 255, colorAlpha];
-        console.log('t0', t0)
+        // console.log('t0', t0)
         this.inLinePoint = new LinePoint(inX, inY, inZ, t0);
         this.linePoint = new LinePoint(x, y, z, t0);
         this.outLinePoint = new LinePoint(outX, outY, outZ, t0);

@@ -7,6 +7,7 @@
  * @param {Array<number>} normalData - The array of normal data.
  * @param {Array<number>} uvs - The array of texture coordinates.
  * @param {Array<number>} uvs1 - The array of secondary texture coordinates.
+ * @param {Array<number>} uvs2 - The array of secondary texture coordinates.
  * @param {Array<number>} jointWeights - The array of joint weights.
  * @param {Array<number>} joints - The array of joints.
  * @param {Array<number>} tangents - The array of tangents.
@@ -14,7 +15,7 @@
 const parseInterleaveData_GLTF = (
     interleaveData: number[],
     vertices: number[], verticesColor_0: number[], normalData: number[],
-    uvs: number[], uvs1: number[],
+    uvs: number[], uvs1: number[],uvs2:number[],
     jointWeights: number[], joints: number[],
     tangents: number[]
 ) => {
@@ -26,6 +27,7 @@ const parseInterleaveData_GLTF = (
     const has_vertices = vertices.length
     const has_normalData = normalData.length
     const has_uvs1 = uvs1.length
+    const has_uvs2 = uvs2.length
     const has_verticesColor_0 = verticesColor_0.length
     const has_jointWeights = jointWeights.length
     const has_joints = joints.length
@@ -54,7 +56,10 @@ const parseInterleaveData_GLTF = (
             interleaveData[idx++] = uvs[index2D];
             interleaveData[idx++] = uvs[index2D_1];
         }
-        if (has_uvs1) {
+        if (has_uvs2) {
+            interleaveData[idx++] = uvs2[index2D];
+            interleaveData[idx++] = uvs2[index2D_1];
+        }else if (has_uvs1) {
             interleaveData[idx++] = uvs1[index2D];
             interleaveData[idx++] = uvs1[index2D_1];
         } else if (uvs.length) {

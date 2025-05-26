@@ -2,8 +2,11 @@ import PBRMaterial from "../../../../../material/pbrMaterial/PBRMaterial";
 import parseMaterialTexture from "../parseMaterialTexture";
 
 const parse_KHR_materials_transmission = (currentMaterial: PBRMaterial, KHR_materials_transmission, gltfLoader) => {
-    currentMaterial.transmissionFactor = KHR_materials_transmission.transmissionFactor || 0.0
-    currentMaterial.transparent = true
+    currentMaterial.useKHR_materials_transmission = true
+    currentMaterial.KHR_transmissionFactor = KHR_materials_transmission.transmissionFactor || 0.0
+
+    currentMaterial.use2PathRender = true
+
     {
         const transmissionTextureInfo = KHR_materials_transmission.transmissionTexture;
         if (transmissionTextureInfo) {
@@ -11,7 +14,7 @@ const parse_KHR_materials_transmission = (currentMaterial: PBRMaterial, KHR_mate
                 gltfLoader,
                 currentMaterial,
                 transmissionTextureInfo,
-                'transmissionTexture',
+                'KHR_transmissionTexture',
             )
         }
     }

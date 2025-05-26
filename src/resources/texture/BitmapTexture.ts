@@ -158,7 +158,7 @@ class BitmapTexture extends ManagedResourceBase {
         //
         if (this.#useMipmap) mipmapGenerator.generateMipmap(newGPUTexture, textureDescriptor)
         this.#setGpuTexture(newGPUTexture)
-        console.log('오긴오나')
+        // console.log('오긴오나')
     }
 
     async #convertSvgToImageBitmap(src: string): Promise<ImageBitmap> {
