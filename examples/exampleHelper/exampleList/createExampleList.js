@@ -1,287 +1,465 @@
 import ExampleList from './exampleList.js';
 
-// 최상위 탭과 하위 내용을 보여줄 컨테이너
-let currentActiveIndex = null; // 처음에는 null로 설정
+// 상태 관리 - sessionStorage에 저장/복원할 항목들
+const STATE_KEY = 'redgpu_examples_state';
+let currentActiveIndex = null;
 let searchQueryGlobal = '';
+
+// 상태 저장 함수
+const saveState = () => {
+    const state = {
+        activeIndex: currentActiveIndex,
+        searchQuery: searchQueryGlobal,
+        scrollPosition: {
+            x: document.querySelector('.example_container')?.scrollLeft || 0,
+            y: document.querySelector('.example_container')?.scrollTop || 0
+        }
+    };
+    sessionStorage.setItem(STATE_KEY, JSON.stringify(state));
+};
+
+// 상태 복원 함수
+const restoreState = () => {
+    const savedState = sessionStorage.getItem(STATE_KEY);
+    if (savedState) {
+        const state = JSON.parse(savedState);
+        currentActiveIndex = state.activeIndex;
+        searchQueryGlobal = state.searchQuery || '';
+        return state;
+    }
+    return null;
+};
 
 // 최상위 탭 생성
 const createTopLevelTabs = (container) => {
-	const tabsContainer = document.createElement('div');
-	tabsContainer.className = 'tabs-container';
+    const tabsContainer = document.createElement('div');
+    tabsContainer.className = 'tabs-container';
 
-	ExampleList.forEach((item, index) => {
-		const tabButton = document.createElement('button');
-		tabButton.textContent = item.name;
-		tabButton.classList.add('tab-button'); // 공통 스타일용 클래스
+    ExampleList.forEach((item, index) => {
+        const tabButton = document.createElement('button');
+        tabButton.textContent = item.name;
+        tabButton.classList.add('tab-button');
 
-		if (item.name === '2D') {
-			tabButton.classList.add('twod');
-		} else if (item.name === '3D') {
-			tabButton.classList.add('threed');
-		}
+        if (item.name === '2D') {
+            tabButton.classList.add('twod');
+        } else if (item.name === '3D') {
+            tabButton.classList.add('threed');
+        }
 
-		tabButton.addEventListener('click', () => {
-			// 이미 활성화된 탭인 경우, 활성 해제 후 전체 해제 처리
-			if (tabButton.classList.contains('active')) {
-				tabButton.classList.remove('active');
-				currentActiveIndex = null;
-				loadDescription(container, searchQueryGlobal);
-			} else {
-				// 먼저 모든 탭의 활성 상태 제거
-				const allTabButtons = document.querySelectorAll('.tabs-container .tab-button');
-				allTabButtons.forEach((btn) => btn.classList.remove('active'));
+        // 상태 복원 시 활성화된 탭 설정
+        if (index === currentActiveIndex) {
+            tabButton.classList.add('active');
+        }
 
-				// 현재 버튼만 활성화
-				tabButton.classList.add('active');
+        tabButton.addEventListener('click', () => {
+            if (tabButton.classList.contains('active')) {
+                tabButton.classList.remove('active');
+                currentActiveIndex = null;
+                loadDescription(container, searchQueryGlobal);
+                saveState(); // 상태 저장
+            } else {
+                const allTabButtons = document.querySelectorAll('.tabs-container .tab-button');
+                allTabButtons.forEach((btn) => btn.classList.remove('active'));
+                tabButton.classList.add('active');
+                currentActiveIndex = index;
+                loadDescription(container, searchQueryGlobal);
+                saveState(); // 상태 저장
+            }
+        });
 
-				// 선택한 탭 인덱스로 설정 후 컨텐츠 로드
-				currentActiveIndex = index;
-				loadDescription(container, searchQueryGlobal);
-			}
-		});
+        tabsContainer.appendChild(tabButton);
+    });
 
-		tabsContainer.appendChild(tabButton);
-	});
-
-	container.appendChild(tabsContainer);
+    container.appendChild(tabsContainer);
+    return tabsContainer;
 };
 
 // 검색어가 일치하는지 확인
 const matchesSearch = (item, query) => {
-	const lowerQuery = query.toLowerCase();
-	return (
-		!query ||
-		item.name.toLowerCase().includes(lowerQuery) ||
-		(item.description?.ko && item.description.ko.toLowerCase().includes(lowerQuery)) ||
-		(item.description?.en && item.description.en.toLowerCase().includes(lowerQuery))
-	);
+    const lowerQuery = query.toLowerCase();
+    return (
+        !query ||
+        item.name.toLowerCase().includes(lowerQuery) ||
+        (item.description?.ko && item.description.ko.toLowerCase().includes(lowerQuery)) ||
+        (item.description?.en && item.description.en.toLowerCase().includes(lowerQuery))
+    );
 };
-// 리스트 렌더링 수정
-const renderList = (items, parent, query) => {
-	items.forEach(item => {
-		if (matchesSearch(item, query)) {
-			const li = document.createElement('li');
-			parent.appendChild(li);
+const createThumbnail = (item, link) => {
+	if (item.description && item.thumb) {
+		// 고정 크기의 컨테이너 생성
+		const thumbContainer = document.createElement('div');
+		Object.assign(thumbContainer.style, {
+			width: '100%',
+			height: '180px',
+			overflow: 'hidden',
+			marginTop: '8px',
+			borderRadius: '12px',  // 더 부드러운 모서리
+			background: '#000', // 더 어두운 배경색
+			boxShadow: '0 3px 6px rgba(0,0,0,0.16)', // 미묘한 그림자 효과
+			border: '1px solid rgba(255,255,255,0.05)' // 미묘한 테두리
+		});
 
-			if (item.path) {
-				// 링크 표현
-				const link = document.createElement('a');
-				link.href = item.path;
-				link.innerHTML = `<div>· ${item.name}</div>`;
-				li.appendChild(link);
+		if (Array.isArray(item.thumb)) {
+			// 그리드 스타일 컨테이너 생성
+			const gridContainer = document.createElement('div');
+			Object.assign(gridContainer.style, {
+				display: 'grid',
+				gridTemplateColumns: 'repeat(2, 1fr)',
+				gridTemplateRows: 'repeat(2, 1fr)',
+				gap: '3px', // 약간 더 넓은 간격
+				width: '100%',
+				height: '100%',
+				padding: '3px', // 외부 여백 추가
+				boxSizing: 'border-box'
+			});
 
-				// **example_container 스크롤 위치 저장**
-				link.addEventListener('click', (event) => {
-					event.preventDefault(); // 기본 링크 이동 방지
-					saveScrollPosition(); // 스크롤 위치 저장
-					window.location.href = link.href; // 링크로 이동
+			// 최대 4개 이미지만 처리
+			const maxImages = Math.min(item.thumb.length, 4);
+			for (let i = 0; i < maxImages; i++) {
+				const thumbUrl = item.thumb[i];
+
+				const thumbWrap = document.createElement('div');
+				Object.assign(thumbWrap.style, {
+					overflow: 'hidden',
+					width: '100%',
+					height: '100%',
+					position: 'relative',
+					// background: '#1e1e1e', // 배경색 미세 조정
+					borderRadius: '4px' // 내부 요소에도 둥근 모서리 적용
 				});
 
-				// 썸네일 처리
-				if (item.description && item.thumb) {
-					const descriptionUl = document.createElement('ul');
-					descriptionUl.className = 'descriptionUl';
-					li.appendChild(descriptionUl);
+				const thumb = document.createElement('img');
+				thumb.src = thumbUrl || 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/VertexColorTest/screenshot/screenshot-x150.png?raw=true';
 
-					if (Array.isArray(item.thumb)) {
-						const thumbContainer = document.createElement('div');
-						Object.assign(thumbContainer.style, {
-							display: 'flex', gap: '4px', flexWrap: 'wrap', width: '170px',
-						});
-						item.thumb.forEach(thumbUrl => {
-							const thumb = document.createElement('img');
-							thumb.src = thumbUrl || 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/VertexColorTest/screenshot/screenshot-x150.png?raw=true';
-							Object.assign(thumb.style, {
-								width: 'calc(50% - 4px)',
-								height: 'auto',
-								flexShrink: '0',
-							});
-							thumbContainer.appendChild(thumb);
-						});
-						link.appendChild(thumbContainer);
-					} else {
-						const thumb = document.createElement('img');
-						thumb.src =
-							item.thumb ||
-							'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/VertexColorTest/screenshot/screenshot-x150.png?raw=true';
-						Object.assign(thumb.style, {marginTop: '4px', width: '170px'});
-						link.appendChild(thumb);
-					}
-				}
-			} else {
-				// 링크가 없는 경우 텍스트만
-				li.textContent = item.name;
-				parent.style.color = '#fff';
-				parent.style.textOverflow = 'ellipsis';
-				parent.style.overflow = 'hidden';
+				// 이미지 효과 개선
+				Object.assign(thumb.style, {
+					position: 'absolute',
+					top: '0',
+					left: '0',
+					width: '100%',
+					height: '100%',
+					objectFit: 'contain',
+					padding: '4px',
+					boxSizing: 'border-box',
+
+				});
+
+
+				thumbWrap.appendChild(thumb);
+				gridContainer.appendChild(thumbWrap);
 			}
 
-			// 하위 목록 재귀
-			if (item.list && Array.isArray(item.list)) {
-				const childUl = document.createElement('ul');
-				renderList(item.list, childUl, query);
-				li.appendChild(childUl);
+			// 4개 미만인 경우 빈 셀 추가
+			for (let i = maxImages; i < 4; i++) {
+				const emptyCell = document.createElement('div');
+				Object.assign(emptyCell.style, {
+					background: '#1e1e1e',
+					borderRadius: '4px' // 빈 셀에도 둥근 모서리 적용
+				});
+				gridContainer.appendChild(emptyCell);
 			}
-		} else if (item.list && Array.isArray(item.list)) {
-			// 상위가 검색어에 안 맞아도, 하위에 검색 결과가 있을 수 있음
-			const childUl = document.createElement('ul');
-			renderList(item.list, childUl, query);
-			if (childUl.hasChildNodes()) {
-				parent.appendChild(childUl);
-			}
+
+			thumbContainer.appendChild(gridContainer);
+		} else {
+			// 단일 이미지 처리
+			const thumbWrap = document.createElement('div');
+			Object.assign(thumbWrap.style, {
+				width: '100%',
+				height: '100%',
+				position: 'relative',
+				display: 'flex',
+				justifyContent: 'center',
+				alignItems: 'center',
+				padding: '6px', // 더 넓은 여백
+				boxSizing: 'border-box',
+
+			});
+
+			const thumb = document.createElement('img');
+			thumb.src = item.thumb || 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/VertexColorTest/screenshot/screenshot-x150.png?raw=true';
+
+			// 이미지 효과 개선
+			Object.assign(thumb.style, {
+				position: 'absolute',
+				top: '0',
+				left: '0',
+				width: '100%',
+				height: '100%',
+				objectFit: 'contain',
+				padding: '8px',
+				boxSizing: 'border-box',
+
+			});
+
+			thumbWrap.appendChild(thumb);
+			thumbContainer.appendChild(thumbWrap);
 		}
-	});
+
+		link.appendChild(thumbContainer);
+	}
+};
+const stripTags = (str) => str.replace(/<\/?[^>]+(>|$)/g, "");
+
+
+// 아이템 렌더링 함수
+const renderItem = (item, parent, query) => {
+    const itemElement = document.createElement('div');
+    itemElement.className = 'example-item';
+
+    if (item.path) {
+        // 링크가 있는 예제 아이템
+        const link = document.createElement('a');
+        link.href = item.path;
+        link.className = 'example-link';
+        link.innerHTML = `<div class="example-name">${stripTags(item.name)}</div>`;
+
+        // 샘플 페이지로 이동 시 현재 상태 저장
+        link.addEventListener('click', (event) => {
+            event.preventDefault();
+            saveState(); // 전체 상태 저장
+            window.location.href = link.href;
+        });
+
+        // 썸네일 추가
+        createThumbnail(item, link);
+
+        itemElement.appendChild(link);
+    } else {
+        // 링크가 없는 그룹 타이틀
+        const titleElement = document.createElement('h3');
+        titleElement.className = 'group-title';
+        titleElement.textContent = item.name;
+        itemElement.appendChild(titleElement);
+    }
+
+    parent.appendChild(itemElement);
+    return itemElement;
+};
+
+// 아이템이 그룹인지 확인하는 함수
+const isGroupItem = (item) => {
+    return !item.path && item.list && Array.isArray(item.list);
+};
+
+// 그룹 내용 렌더링 함수
+const renderGroupContent = (item, container, query) => {
+    if (item.list && Array.isArray(item.list)) {
+        // 일반 아이템과 그룹 아이템으로 분류
+        const regularItems = [];
+        const groupItems = [];
+
+        item.list.forEach(subItem => {
+            if (matchesSearch(subItem, query) ||
+                (subItem.list && subItem.list.some(subSubItem => matchesSearch(subSubItem, query)))) {
+                if (isGroupItem(subItem)) {
+                    groupItems.push(subItem);
+                } else {
+                    regularItems.push(subItem);
+                }
+            }
+        });
+
+        // 일반 아이템이 있으면 가로 레이아웃으로 표시
+        if (regularItems.length > 0) {
+            const regularItemsContainer = document.createElement('div');
+            regularItemsContainer.className = 'regular-items-container horizontal-layout';
+            container.appendChild(regularItemsContainer);
+
+            regularItems.forEach(subItem => {
+                renderItem(subItem, regularItemsContainer, query);
+            });
+        }
+
+        // 그룹 아이템이 있으면 세로 레이아웃으로 표시
+        if (groupItems.length > 0) {
+            const groupItemsContainer = document.createElement('div');
+            groupItemsContainer.className = 'group-items-container vertical-layout';
+            container.appendChild(groupItemsContainer);
+
+            groupItems.forEach(subItem => {
+                const subGroupContainer = document.createElement('div');
+                subGroupContainer.className = 'subgroup-container';
+                groupItemsContainer.appendChild(subGroupContainer);
+
+                // 그룹 타이틀
+                const subGroupTitle = document.createElement('h4');
+                subGroupTitle.className = 'subgroup-title';
+                subGroupTitle.textContent = subItem.name;
+                subGroupContainer.appendChild(subGroupTitle);
+
+                // 재귀적으로 하위 그룹 내용 렌더링
+                renderGroupContent(subItem, subGroupContainer, query);
+            });
+        }
+    }
+};
+
+// 메인 리스트 렌더링 함수
+const renderExamplesList = (items, container, query) => {
+    // 최상위 그룹 컨테이너 생성
+    const groupsContainer = document.createElement('div');
+    groupsContainer.className = 'groups-container vertical-layout';
+    container.appendChild(groupsContainer);
+
+    // 각 최상위 아이템을 그룹으로 처리
+    items.forEach(item => {
+        // 검색 필터링
+        if (!matchesSearch(item, query) &&
+            (!item.list || !item.list.some(subItem =>
+                matchesSearch(subItem, query) ||
+                (subItem.list && subItem.list.some(subSubItem => matchesSearch(subSubItem, query)))
+            ))
+        ) {
+            return; // 검색에 해당하지 않는 항목은 건너뜀
+        }
+
+        // 그룹 컨테이너 생성
+        const groupContainer = document.createElement('div');
+        groupContainer.className = 'group-container';
+        groupsContainer.appendChild(groupContainer);
+
+        // 그룹 타이틀 렌더링
+        renderItem(item, groupContainer, query);
+
+        // 그룹 내용 렌더링 (하위 아이템들)
+        renderGroupContent(item, groupContainer, query);
+    });
+
+    // 컨테이너에 자식이 없으면 제거
+    if (!groupsContainer.hasChildNodes()) {
+        container.removeChild(groupsContainer);
+    }
 };
 
 // 선택된 탭(최상위 아이템)의 하위 목록 표시
 const loadDescription = (container, searchQuery = '') => {
-	searchQueryGlobal = searchQuery;
-	const containerId = 'list-container';
-	let listContainer = document.getElementById(containerId);
+    searchQueryGlobal = searchQuery;
+    const containerId = 'list-container';
+    let listContainer = document.getElementById(containerId);
 
-	if (!listContainer) {
-		listContainer = document.createElement('div');
-		listContainer.id = containerId;
-		listContainer.className = 'list-container';
-		container.appendChild(listContainer);
-	}
+    if (!listContainer) {
+        listContainer = document.createElement('div');
+        listContainer.id = containerId;
+        listContainer.className = 'list-container';
+        container.appendChild(listContainer);
+    }
 
-	listContainer.innerHTML = '';
+    listContainer.innerHTML = '';
 
-	// currentActiveIndex가 null이면 전체 목록 표시
-	if (currentActiveIndex === null) {
-		const ul = document.createElement('ul');
-		listContainer.appendChild(ul);
-		renderList(ExampleList, ul, searchQueryGlobal);
-		return;
-	}
+    // currentActiveIndex가 null이면 전체 목록 표시
+    if (currentActiveIndex === null) {
+        renderExamplesList(ExampleList, listContainer, searchQueryGlobal);
+        return;
+    }
 
-	// 특정 탭이 선택된 경우 해당 탭 정보만 표시
-	const selectedItem = ExampleList[currentActiveIndex];
-	if (!selectedItem) return;
+    // 특정 탭이 선택된 경우 해당 탭 정보만 표시
+    const selectedItem = ExampleList[currentActiveIndex];
+    if (!selectedItem) return;
 
-	const ul = document.createElement('ul');
-	listContainer.appendChild(ul);
-
-	if (matchesSearch(selectedItem, searchQuery)) {
-		const li = document.createElement('li');
-		ul.appendChild(li);
-
-		if (selectedItem.path) {
-			const link = document.createElement('a');
-			link.href = selectedItem.path;
-			link.textContent = selectedItem.name;
-			li.appendChild(link);
-		} else {
-			li.textContent = selectedItem.name;
-			ul.style.color = '#fff';
-		}
-
-		// 하위 목록 표시
-		if (selectedItem.list && Array.isArray(selectedItem.list)) {
-			const childUl = document.createElement('ul');
-			renderList(selectedItem.list, childUl, searchQuery);
-			li.appendChild(childUl);
-		}
-	} else if (selectedItem.list && Array.isArray(selectedItem.list)) {
-		// 최상위가 검색어와 일치하지 않아도, 하위에서 검색 가능
-		renderList(selectedItem.list, ul, searchQuery);
-	}
+    if (matchesSearch(selectedItem, searchQuery) ||
+        (selectedItem.list && selectedItem.list.some(item =>
+            matchesSearch(item, searchQuery) ||
+            (item.list && item.list.some(subItem => matchesSearch(subItem, searchQuery)))
+        ))
+    ) {
+        const selectedItemsArray = [selectedItem];
+        renderExamplesList(selectedItemsArray, listContainer, searchQueryGlobal);
+    }
 };
 
 // 검색 바 추가
 const addSearchBar = () => {
-	const container = document.createElement('div');
-	container.className = 'top_container';
-	document.body.appendChild(container);
+    const container = document.createElement('div');
+    container.className = 'top_container';
+    document.body.appendChild(container);
 
-	const project_title = document.createElement('project_title');
-	project_title.className = 'project_title';
-	project_title.innerHTML = `<div>RedGPU Examples</div><span>JavaScript WebGPU library</span>`;
-	container.appendChild(project_title);
+    const project_title = document.createElement('project_title');
+    project_title.className = 'project_title';
+    project_title.innerHTML = `<div>RedGPU Examples</div><span>JavaScript WebGPU library</span>`;
+    container.appendChild(project_title);
 
-	const searchContainer = document.createElement('div');
-	searchContainer.className = 'search-container';
-	const inputField = document.createElement('input');
-	inputField.type = 'text';
-	inputField.placeholder = 'Search';
+    const searchContainer = document.createElement('div');
+    searchContainer.className = 'search-container';
+    const inputField = document.createElement('input');
+    inputField.type = 'text';
+    inputField.placeholder = 'Search';
 
-	inputField.addEventListener('input', () => {
-		loadDescription(container, inputField.value.trim());
-	});
+    // 저장된 검색어가 있으면 복원
+    if (searchQueryGlobal) {
+        inputField.value = searchQueryGlobal;
+    }
 
-	searchContainer.appendChild(inputField);
-	project_title.appendChild(searchContainer);
+    inputField.addEventListener('input', () => {
+        const query = inputField.value.trim();
+        searchQueryGlobal = query;
+        loadDescription(container, query);
+        saveState(); // 상태 저장
+    });
 
-	createTopLevelTabs(project_title);
+    searchContainer.appendChild(inputField);
+    project_title.appendChild(searchContainer);
 
+    createTopLevelTabs(project_title);
+
+    return container;
 };
 
-// example_container에서 스크롤 위치 저장
-const saveScrollPosition = () => {
-	const container = document.querySelector('.example_container');
-	if (container) {
-		const scrollPosition = {
-			x: container.scrollLeft,
-			y: container.scrollTop,
-		};
-		localStorage.setItem('scrollPosition', JSON.stringify(scrollPosition));
-	}
-};
-
-// example_container에서 스크롤 위치 복원
+// 이미지 로드 대기 함수
 const waitForImagesToLoad = (container) => {
-	const images = container.querySelectorAll('img');
-	return Promise.all(
-		Array.from(images).map((img) => {
-			return new Promise((resolve) => {
-				if (img.complete) {
-					// 이미지가 이미 로드된 경우
-					resolve();
-				} else {
-					// 이미지 로드 이벤트를 기다림
-					img.addEventListener('load', resolve);
-					img.addEventListener('error', resolve); // 에러 처리
-				}
-			});
-		})
-	);
+    const images = container.querySelectorAll('img');
+    return Promise.all(
+        Array.from(images).map((img) => {
+            return new Promise((resolve) => {
+                if (img.complete) {
+                    resolve();
+                } else {
+                    img.addEventListener('load', resolve);
+                    img.addEventListener('error', resolve);
+                }
+            });
+        })
+    );
 };
 
-const restoreScrollPosition = async () => {
-	const savedScrollPosition = localStorage.getItem('scrollPosition');
-	if (savedScrollPosition) {
-		const {x, y} = JSON.parse(savedScrollPosition);
-		const container = document.querySelector('.example_container');
-		if (container) {
-			// 이미지 로드 대기
-			await waitForImagesToLoad(container);
-			// 이미지 로드 후 스크롤 복원
-			container.scrollTo(x, y);
-			// 스크롤 복원 후, 저장된 위치 초기화 (옵션)
-			localStorage.removeItem('scrollPosition');
-		}
-	}
+// 스크롤 위치 복원
+const restoreScrollPosition = async (container, scrollPosition) => {
+    if (scrollPosition && (scrollPosition.x !== 0 || scrollPosition.y !== 0)) {
+        // 이미지 로드 대기
+        await waitForImagesToLoad(container);
+        // 이미지 로드 후 스크롤 복원
+        container.scrollTo(scrollPosition.x, scrollPosition.y);
+    }
 };
+
 const initialize = () => {
+    // 먼저 상태 복원
+    const savedState = restoreState();
 
-	addSearchBar();
-	const container = document.createElement('div');
-	container.className = 'example_container';
-	document.body.appendChild(container);
+    // 상단 검색바와 탭 추가
+    const topContainer = addSearchBar();
 
-	// 처음 로드시 currentActiveIndex가 null이므로 전체 아이템 표시
-	loadDescription(container);
+    // 예제 컨테이너 생성
+    const container = document.createElement('div');
+    container.className = 'example_container';
+    document.body.appendChild(container);
 
-	// 스크롤 위치 복원
-	restoreScrollPosition();
+    // 저장된 검색어로 콘텐츠 로드
+    loadDescription(container, searchQueryGlobal);
 
-	// 하단 카피라이트 추가
-	const footer = document.createElement('footer');
-	footer.className = 'footer';
-	footer.innerHTML = `<div class="footer_left"><a href="https://github.com/redcamel/RedGPU" target="_blank"><img src="/RedGPU/examples/assets/github.png" height="32"/></a><div>This project is maintained by <a href="https://github.com/redcamel/RedGPU" target="_blank">RedCamel</a></div></div>`;
-	container.appendChild(footer);
+    // 하단 카피라이트 추가
+    const footer = document.createElement('footer');
+    footer.className = 'footer';
+    footer.innerHTML = `<div class="footer_left"><a href="https://github.com/redcamel/RedGPU" target="_blank"><img src="/RedGPU/examples/assets/github.png" height="32"/></a><div>This project is maintained by <a href="https://github.com/redcamel/RedGPU" target="_blank">RedCamel</a></div></div>`;
+    container.appendChild(footer);
 
+    // 저장된 스크롤 위치가 있으면 복원
+    if (savedState && savedState.scrollPosition) {
+        restoreScrollPosition(container, savedState.scrollPosition);
+    }
+
+    // 페이지 이탈 시 상태 저장 (브라우저 닫기 등)
+    window.addEventListener('beforeunload', saveState);
 };
 
+// 초기화 실행
 initialize();
