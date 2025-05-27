@@ -85,120 +85,136 @@ const matchesSearch = (item, query) => {
     );
 };
 const createThumbnail = (item, link) => {
-	if (item.description && item.thumb) {
-		// 고정 크기의 컨테이너 생성
-		const thumbContainer = document.createElement('div');
-		Object.assign(thumbContainer.style, {
-			width: '100%',
-			height: '160px',
-			overflow: 'hidden',
-			marginTop: '8px',
-			borderRadius: '12px',  // 더 부드러운 모서리
-			background: '#000', // 더 어두운 배경색
-			// boxShadow: '0 3px 6px rgba(0,0,0,0.16)', // 미묘한 그림자 효과
-			// border: '1px solid rgba(255,255,255,0.05)' // 미묘한 테두리
-		});
+    // 썸네일 컨테이너 생성
+    const thumbContainer = document.createElement('div');
+    Object.assign(thumbContainer.style, {
+        width: '100%',
+        height: item.thumb ? '170px' : '90px',
+        overflow: 'hidden',
+        background: '#000',
+        borderRadius: '8px',
+        border: '1px solid rgba(255,255,255,0.05)'
+    });
 
-		if (Array.isArray(item.thumb)) {
-			// 그리드 스타일 컨테이너 생성
-			const gridContainer = document.createElement('div');
-			Object.assign(gridContainer.style, {
-				display: 'grid',
-				gridTemplateColumns: 'repeat(2, 1fr)',
-				gridTemplateRows: 'repeat(2, 1fr)',
-				gap: '3px', // 약간 더 넓은 간격
-				width: '100%',
-				height: '100%',
-				// padding: '3px', // 외부 여백 추가
-				boxSizing: 'border-box'
-			});
+    // 썸네일이 있는 경우
+    if (item.thumb) {
+        if (Array.isArray(item.thumb)) {
+            // 그리드 레이아웃 처리 (여러 이미지)
+            createGridThumbnails(item, thumbContainer);
+        } else {
+            // 단일 이미지 처리
+            createSingleThumbnail(item, thumbContainer);
+        }
+    } else {
+        // 썸네일이 없는 경우 타이틀만 표시
+        createTitleOnly(item, thumbContainer);
+    }
 
-			// 최대 4개 이미지만 처리
-			const maxImages = Math.min(item.thumb.length, 4);
-			for (let i = 0; i < maxImages; i++) {
-				const thumbUrl = item.thumb[i];
+    link.appendChild(thumbContainer);
+};
 
-				const thumbWrap = document.createElement('div');
-				Object.assign(thumbWrap.style, {
-					overflow: 'hidden',
-					width: '100%',
-					height: '100%',
-					position: 'relative',
-					// background: '#1e1e1e', // 배경색 미세 조정
-					borderRadius: '4px' // 내부 요소에도 둥근 모서리 적용
-				});
+// 그리드 썸네일 생성 함수
+const createGridThumbnails = (item, container) => {
+    const gridContainer = document.createElement('div');
+    Object.assign(gridContainer.style, {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(2, 1fr)',
+        gridTemplateRows: 'repeat(2, 1fr)',
+        gap: '3px',
+        width: '100%',
+        height: '100%',
+        boxSizing: 'border-box'
+    });
 
-				const thumb = document.createElement('img');
-				thumb.src = thumbUrl || 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/VertexColorTest/screenshot/screenshot-x150.png?raw=true';
-				thumb.alt = `${item.name} thumbnail`;
-				thumb.loading = 'lazy'; // 지연 로딩 추가
+    // 최대 4개 이미지 처리
+    const maxImages = Math.min(item.thumb.length, 4);
+    for (let i = 0; i < maxImages; i++) {
+        const thumbWrap = document.createElement('div');
+        Object.assign(thumbWrap.style, {
+            overflow: 'hidden',
+            width: '100%',
+            height: '100%',
+            position: 'relative'
+        });
 
-				// 이미지 효과 개선
-				Object.assign(thumb.style, {
-					position: 'absolute',
-					top: '0',
-					left: '0',
-					width: '100%',
-					height: '100%',
-					objectFit: 'contain',
-					// padding: '4px',
-					boxSizing: 'border-box',
+        const thumb = document.createElement('img');
+        thumb.src = item.thumb[i];
+        thumb.alt = `${item.name} thumbnail`;
+        thumb.loading = 'lazy';
 
-				});
+        Object.assign(thumb.style, {
+            position: 'absolute',
+            top: '0',
+            left: '0',
+            width: '100%',
+            height: '100%',
+            objectFit: 'contain'
+        });
 
+        thumbWrap.appendChild(thumb);
+        gridContainer.appendChild(thumbWrap);
+    }
 
-				thumbWrap.appendChild(thumb);
-				gridContainer.appendChild(thumbWrap);
-			}
+    // 빈 셀 추가
+    for (let i = maxImages; i < 4; i++) {
+        const emptyCell = document.createElement('div');
+        Object.assign(emptyCell.style, {
+            background: '#1e1e1e',
+            borderRadius: '4px'
+        });
+        gridContainer.appendChild(emptyCell);
+    }
 
-			// 4개 미만인 경우 빈 셀 추가
-			for (let i = maxImages; i < 4; i++) {
-				const emptyCell = document.createElement('div');
-				Object.assign(emptyCell.style, {
-					background: '#1e1e1e',
-					borderRadius: '4px' // 빈 셀에도 둥근 모서리 적용
-				});
-				gridContainer.appendChild(emptyCell);
-			}
+    container.appendChild(gridContainer);
+};
 
-			thumbContainer.appendChild(gridContainer);
-		} else {
-			// 단일 이미지 처리
-			const thumbWrap = document.createElement('div');
-			Object.assign(thumbWrap.style, {
-				width: '100%',
-				height: '100%',
-				position: 'relative',
-				display: 'flex',
-				justifyContent: 'center',
-				alignItems: 'center',
-				// padding: '6px', // 더 넓은 여백
-				boxSizing: 'border-box',
+// 단일 썸네일 생성 함수
+const createSingleThumbnail = (item, container) => {
+    const thumbWrap = document.createElement('div');
+    Object.assign(thumbWrap.style, {
+        width: '100%',
+        height: '100%',
+        position: 'relative',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center'
+    });
 
-			});
+    const thumb = document.createElement('img');
+    thumb.src = item.thumb;
 
-			const thumb = document.createElement('img');
-			thumb.src = item.thumb || 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/VertexColorTest/screenshot/screenshot-x150.png?raw=true';
+    Object.assign(thumb.style, {
+        position: 'absolute',
+        top: '0',
+        left: '0',
+        width: '100%',
+        height: 'calc(100% - 41px)',
+        objectFit: 'contain'
+    });
 
-			// 이미지 효과 개선
-			Object.assign(thumb.style, {
-				position: 'absolute',
-				top: '0',
-				left: '0',
-				width: '100%',
-				height: '100%',
-				objectFit: 'contain',
-				// padding: '8px',
-				boxSizing: 'border-box',
+    thumbWrap.appendChild(thumb);
+    container.appendChild(thumbWrap);
+};
 
-			});
+// 타이틀 전용 컨테이너 생성 함수
+const createTitleOnly = (item, container) => {
+    const noThumbContainer = document.createElement('div');
+    Object.assign(noThumbContainer.style, {
+        width: '100%',
+        height: 'calc(100% - 41px)',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: '10px',
+        boxSizing: 'border-box',
+        color: '#ffffff',
+        textAlign: 'center',
+        fontWeight: 'bold',
+        fontSize: '16px'
+    });
 
-			thumbWrap.appendChild(thumb);
-			thumbContainer.appendChild(thumbWrap);
-		}
-
-		link.appendChild(thumbContainer);
-	}
+    noThumbContainer.textContent = item.name || 'No thumbnail';
+    container.appendChild(noThumbContainer);
 };
 const stripTags = (str) => str.replace(/<\/?[^>]+(>|$)/g, "");
 

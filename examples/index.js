@@ -50,13 +50,14 @@ RedGPU.init(
 					console.log('GLTFLoader ', v)
 					console.log('GLTFLoader parsingResult', v.parsingResult)
 					scene.addChild(model = v['resultMesh'])
-					model.setScale(10)
+					model.setScale(redGPUContext.detector.isMobile ? 0.5 : 10)
 					console.log(model)
 				}
 			)
 		}
 
-		loadGLTF('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MosquitoInAmber/glTF/MosquitoInAmber.gltf',);
+		const modelURL = redGPUContext.detector.isMobile ? 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF/DamagedHelmet.gltf' : 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MosquitoInAmber/glTF/MosquitoInAmber.gltf'
+		loadGLTF(modelURL);
 		// loadGLTF('./assets/gltf/busterDrone/busterDrone.gltf');
 		const render = (time) => {
 			directionalLightTest.direction[0] = Math.sin(time / 1500)

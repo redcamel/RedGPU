@@ -537,14 +537,6 @@ const ExampleList = [
 						},
 					},
 					{
-						name: 'Vignetting',
-						path: '3d/postEffect/vignetting',
-						description: {
-							ko: ``,
-							en: ``
-						},
-					},
-					{
 						name: 'Convolution',
 						path: '3d/postEffect/convolution',
 						description: {

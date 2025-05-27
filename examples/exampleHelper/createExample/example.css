@@ -72,36 +72,95 @@ html, body {
 
 .title_box {
     position: fixed;
-    top: 8px;
-    left: 6px;
-    right: 272px;
+    top: 0;
+    left: 0;
+    right: 0;
     line-height: 1;
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    padding: 16px;
-    border-radius: 8px;
-    font-size: 12px;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(0, 0, 0, 0.75);
     word-break: keep-all;
-
     color: #fff;
 
-    h1 {
-        font-weight: 600;
-        line-height: 1;
-        margin-bottom: 4px;
+}
+.navigation-bar {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.nav-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    min-height: 56px;
+    background-color: #202020;
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.nav-button:hover {
+    background-color: #333;
+}
+
+.nav-button span {
+    margin-left: 4px;
+}
+.nav-button.category-button{
+    background: transparent;
+}
+
+@media screen and (max-width: 768px) {
+    .navigation-bar {
+        gap: 8px;
     }
 
-    h2 {
-        font-size: 13px;
-        line-height: 1.4;
-        color: #a4a7cc;
+    .nav-button {
+        font-size: 12px;
+        padding: 6px 12px;
     }
+}
 
-    h3 {
-        font-size: 13px;
-        line-height: 1.4;
-        color: #8c8d93;
+.item-title{
+    position: absolute;
+    top:50%;
+    left:50%;
+    transform: translate(-50%,-50%);
+    line-height: 1;
+    font-size: 1.4em;
+    color:rgb(221, 132, 80);
+    font-weight: 700;
+}
+.item-description{
+    position: absolute;
+    top:96px;
+    left:50%;
+    transform: translate(-50%,-50%);
+    line-height: 1.4;
+    font-size: 1em;
+    color:#a4a7cc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    text-align: center;
+    max-width: 1024px;
+}
+
+@media screen and (max-width: 480px) {
+    .item-description {
+        top:72px;
+        left:0;
+        right:0;
+        padding: 0 12px;
+        transform: none;
+        font-size: 0.8em;
+        justify-content: flex-start;
+        text-align: left;
+
     }
 }

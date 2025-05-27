@@ -16,6 +16,7 @@ html, body {
     font-weight: 500;
     box-sizing: border-box;
     position: relative;
+    line-height: 1;
 }
 
 .example_container {
@@ -168,9 +169,10 @@ html, body {
 
 /* 아이템 및 링크 */
 .example-item {
-    margin-bottom: 5px;
     width: 22%;
     max-width: 22%;
+    line-height: 1;
+
 }
 /* 모바일 화면 분기 처리 */
 @media screen and (max-width: 768px) {
@@ -191,8 +193,20 @@ html, body {
 }
 
 .example-name {
-    margin-bottom: 5px;
+    position: absolute;
+    left:0;
+    right:0;
+    bottom:0;
+    /*margin-bottom: 5px;*/
     font-size: 1.2em;
+    line-height: 1;
+    z-index: 1;
+    border-radius: 0 0 8px 8px;
+    display: flex;
+    align-items: center;
+    padding: 12px 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.16);
+    background: #000 linear-gradient(to right, rgba(155, 155, 155, 0.1) 0%, rgba(0, 0, 0, 0.0) 100%);
 }
 
 .example-link {
@@ -208,12 +222,10 @@ html, body {
 
 /* 링크 일반 스타일 */
 a {
-
     text-decoration: none;
     color: rgb(221, 132, 80);
     font-size: 13px;
     transition: color 0.21s, filter 0.2s;
-    padding: 4px 0;
     overflow: hidden;
     word-break: break-all;
     min-width: calc(100% - 70px);
