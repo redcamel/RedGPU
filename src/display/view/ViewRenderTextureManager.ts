@@ -106,7 +106,7 @@ class ViewRenderTextureManager {
                 }
             }
             this.#render2PathTextureDescriptor = {
-                size: { width:pixelRectObjectW, height:pixelRectObjectH, depthOrArrayLayers: 1 },
+                size: { width:Math.max(1,pixelRectObjectW), height:Math.max(1,pixelRectObjectH), depthOrArrayLayers: 1 },
                 format: navigator.gpu.getPreferredCanvasFormat(),
                 usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT
                   | GPUTextureUsage.COPY_SRC,
