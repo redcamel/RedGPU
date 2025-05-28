@@ -209,25 +209,25 @@ class View3D extends ViewTransform {
         this.#scene = value;
     }
 
-    update(view: View3D, shadowRender: boolean = false, calcPointLightCluster: boolean = false,renderPath1ResultTexture?:GPUTexture) {
+    update(view: View3D, shadowRender: boolean = false, calcPointLightCluster: boolean = false,renderPath1ResultTextureView?:GPUTextureView) {
         //TODO 바인드그룹이 계속 생겨나는걸.... 막아야겠군
         const {scene} = view
         const iblTexture = view.iblTexture?.gpuTexture || (view.skybox?._material instanceof SkyBoxMaterial ? view.skybox._material.skyboxTexture?.gpuTexture : undefined)
         let shadowDepthGPUTextureView = shadowRender ? scene.shadowManager.shadowDepthGPUTextureViewEmpty : scene.shadowManager.shadowDepthGPUTextureView
         const index = view.redGPUContext.viewList.indexOf(view)
-        const key = `${index}_${shadowRender ? 'shadowRender' : 'basic'}`
+        const key = `${index}_${shadowRender ? 'shadowRender' : 'basic'}_2path_${!!renderPath1ResultTextureView}`
         if (index > -1) {
             let needResetBindGroup = true
             let prevInfo = this.#prevInfoList[key]
             if (prevInfo) {
                 needResetBindGroup = (
                     prevInfo.iblTexture !== iblTexture ||
-                    prevInfo.renderPath1ResultTexture !== renderPath1ResultTexture ||
+                    prevInfo.renderPath1ResultTextureView !== renderPath1ResultTextureView ||
                     prevInfo.shadowDepthGPUTextureView !== shadowDepthGPUTextureView
                     || !this.#passLightClusters
                 )
             }
-            if (needResetBindGroup) this.#createVertexUniformBindGroup(key, shadowDepthGPUTextureView, iblTexture,renderPath1ResultTexture)
+            if (needResetBindGroup) this.#createVertexUniformBindGroup(key, shadowDepthGPUTextureView, iblTexture,renderPath1ResultTextureView)
             else this.#systemUniform_Vertex_UniformBindGroup = this.#prevInfoList[key].vertexUniformBindGroup;
             [
                 {key: 'useIblTexture', value: [iblTexture ? 1 : 0]},
@@ -242,7 +242,7 @@ class View3D extends ViewTransform {
             });
             this.#prevInfoList[key] = {
                 iblTexture,
-                renderPath1ResultTexture,
+                renderPath1ResultTextureView,
                 shadowDepthGPUTextureView,
                 vertexUniformBindGroup: this.#systemUniform_Vertex_UniformBindGroup
             }
@@ -257,7 +257,7 @@ class View3D extends ViewTransform {
             (0 < mouseY && mouseY < pixelRectObject.height);
     }
 
-    #createVertexUniformBindGroup(key: string, shadowDepthGPUTextureView: GPUTextureView, iblTexture: GPUTexture,renderPath1ResultTexture:GPUTexture) {
+    #createVertexUniformBindGroup(key: string, shadowDepthGPUTextureView: GPUTextureView, iblTexture: GPUTexture,renderPath1ResultTextureView:GPUTextureView) {
         this.#updateClusters(true)
         const systemUniform_Vertex_BindGroupDescriptor: GPUBindGroupDescriptor = {
             layout: this.redGPUContext.resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System),
@@ -285,11 +285,13 @@ class View3D extends ViewTransform {
                 },
                 {
                     binding: 4,
-                    resource: this.iblTexture?.gpuTexture?.createView( this.iblTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor)
-                      || this.#skybox?._material?.skyboxTexture?.gpuTexture?.createView(
-                        this.#skybox._material.skyboxTexture.viewDescriptor || CubeTexture.defaultViewDescriptor
-                      )
-                        || this.redGPUContext.resourceManager.emptyCubeTextureView
+                    resource:
+                      // this.iblTexture?.gpuTexture?.createView( this.iblTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor)
+                      // || this.#skybox?._material?.skyboxTexture?.gpuTexture?.createView(
+                      //   this.#skybox._material.skyboxTexture.viewDescriptor || CubeTexture.defaultViewDescriptor
+                      // )
+                      //   ||
+                      this.redGPUContext.resourceManager.emptyCubeTextureView
                 },
                 {
                     binding: 5,
@@ -313,7 +315,7 @@ class View3D extends ViewTransform {
                 },
                 {
                     binding: 8,
-                    resource: renderPath1ResultTexture?.createView()
+                    resource: renderPath1ResultTextureView
                       || this.redGPUContext.resourceManager.emptyBitmapTextureView
                 },
                 {

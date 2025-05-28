@@ -112,8 +112,9 @@ class Renderer {
             {
 
                 if(view.debugViewRenderState.render2PathLayer.length){
-                    const {mipmapGenerator} = redGPUContext.resourceManager
-                    let renderPath1ResultTexture = view.viewRenderTextureManager.render2PathTexture
+
+                    let renderPath1ResultTexture = view.viewRenderTextureManager.renderPath1ResultTexture
+                    let renderPath1ResultTextureView = view.viewRenderTextureManager.renderPath1ResultTextureView
                     commandEncoder.copyTextureToTexture(
                       {
                           texture: view.viewRenderTextureManager.colorResolveTexture,
@@ -123,7 +124,7 @@ class Renderer {
                       },
                       { width:view.pixelRectObject.width, height:view.pixelRectObject.height, depthOrArrayLayers: 1 },
                     );
-                    mipmapGenerator.generateMipmap(renderPath1ResultTexture, view.viewRenderTextureManager.render2PathTextureDescriptor)
+
                     const renderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass({
                         colorAttachments: [{
                             ...colorAttachment,
@@ -134,7 +135,7 @@ class Renderer {
                             depthLoadOp: GPU_LOAD_OP.LOAD,
                         },
                     });
-                    this.#updateViewSystemUniforms(view, renderPassEncoder, false, true,renderPath1ResultTexture);
+                    this.#updateViewSystemUniforms(view, renderPassEncoder, false, true,renderPath1ResultTextureView);
                     // 예제에서 주어진 렌더링 로직 실행
 
                     render2PathLayer(view, renderPassEncoder);
@@ -206,7 +207,7 @@ class Renderer {
     }
 
     #updateViewSystemUniforms(view: View3D, viewRenderPassEncoder: GPURenderPassEncoder, shadowRender: boolean = false, calcPointLightCluster: boolean = true,
-                              renderPath1ResultTexture:GPUTexture= null) {
+                              renderPath1ResultTextureView:GPUTextureView= null) {
         const {inverseProjectionMatrix, pixelRectObject, projectionMatrix, rawCamera, redGPUContext, scene} = view
         const {gpuDevice} = redGPUContext
         const {modelMatrix: cameraMatrix, position: cameraPosition} = rawCamera
@@ -233,7 +234,7 @@ class Renderer {
         }
         lightManager.updateViewSystemUniforms(view)
         shadowManager.updateViewSystemUniforms(redGPUContext)
-        view.update(view, shadowRender, calcPointLightCluster,renderPath1ResultTexture)
+        view.update(view, shadowRender, calcPointLightCluster,renderPath1ResultTextureView)
         // 시스템 유니폼 업데이트
         viewRenderPassEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
         [
