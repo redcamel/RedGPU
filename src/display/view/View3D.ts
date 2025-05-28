@@ -215,7 +215,7 @@ class View3D extends ViewTransform {
         const iblTexture = view.iblTexture?.gpuTexture || (view.skybox?._material instanceof SkyBoxMaterial ? view.skybox._material.skyboxTexture?.gpuTexture : undefined)
         let shadowDepthGPUTextureView = shadowRender ? scene.shadowManager.shadowDepthGPUTextureViewEmpty : scene.shadowManager.shadowDepthGPUTextureView
         const index = view.redGPUContext.viewList.indexOf(view)
-        const key = `${index}_${shadowRender ? 'shadowRender' : 'basic'}`
+        const key = `${index}_${shadowRender ? 'shadowRender' : 'basic'}_2path${!!renderPath1ResultTexture}`
         if (index > -1) {
             let needResetBindGroup = true
             let prevInfo = this.#prevInfoList[key]
@@ -285,11 +285,13 @@ class View3D extends ViewTransform {
                 },
                 {
                     binding: 4,
-                    resource: this.iblTexture?.gpuTexture?.createView( this.iblTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor)
+                    resource:
+                      this.iblTexture?.gpuTexture?.createView( this.iblTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor)
                       || this.#skybox?._material?.skyboxTexture?.gpuTexture?.createView(
                         this.#skybox._material.skyboxTexture.viewDescriptor || CubeTexture.defaultViewDescriptor
                       )
-                        || this.redGPUContext.resourceManager.emptyCubeTextureView
+                        ||
+                      this.redGPUContext.resourceManager.emptyCubeTextureView
                 },
                 {
                     binding: 5,
@@ -313,7 +315,8 @@ class View3D extends ViewTransform {
                 },
                 {
                     binding: 8,
-                    resource: renderPath1ResultTexture?.createView()
+                    // resource: renderPath1ResultTexture?.createView()
+                    resource: this.viewRenderTextureManager.renderPath1ResultTextureView
                       || this.redGPUContext.resourceManager.emptyBitmapTextureView
                 },
                 {
