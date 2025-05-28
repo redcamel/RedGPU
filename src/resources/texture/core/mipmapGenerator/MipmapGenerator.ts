@@ -15,11 +15,78 @@ class MipmapGenerator {
     readonly #pipelines: { [key: string]: GPURenderPipeline }
     #bindGroupLayout: GPUBindGroupLayout
     #mipmapShaderModule: GPUShaderModule
+    readonly #textureViewCache: Map<GPUTexture, Map<number, Map<number, GPUTextureView>>> = new Map();
+    readonly #bindGroupCache: Map<GPUTextureView, GPUBindGroup> = new Map();
 
     constructor(redGPUContext: RedGPUContext) {
         this.#redGPUContext = redGPUContext
         this.#sampler = new Sampler(redGPUContext, {minFilter: 'linear'}).gpuSampler
         this.#pipelines = {};
+    }
+    getTextureView(texture: GPUTexture, baseMipLevel: number, baseArrayLayer: number): GPUTextureView {
+        // 텍스쳐에 대한 캐시맵이 없으면 생성
+        if (!this.#textureViewCache.has(texture)) {
+            this.#textureViewCache.set(texture, new Map());
+        }
+
+        const mipLevelMap = this.#textureViewCache.get(texture)!;
+        // 해당 밉맵 레벨에 대한 캐시맵이 없으면 생성
+        if (!mipLevelMap.has(baseMipLevel)) {
+            mipLevelMap.set(baseMipLevel, new Map());
+        }
+
+        const arrayLayerMap = mipLevelMap.get(baseMipLevel)!;
+        // 해당 배열 레이어에 대한 뷰가 없으면 생성하고 캐시에 저장
+        if (!arrayLayerMap.has(baseArrayLayer)) {
+            const view = texture.createView({
+                baseMipLevel,
+                mipLevelCount: 1,
+                dimension: '2d',
+                baseArrayLayer,
+                arrayLayerCount: 1,
+            });
+            arrayLayerMap.set(baseArrayLayer, view);
+        }
+
+        return arrayLayerMap.get(baseArrayLayer)!;
+    }
+    getBindGroup(textureView: GPUTextureView): GPUBindGroup {
+        if (!this.#bindGroupCache.has(textureView)) {
+            const {gpuDevice} = this.#redGPUContext;
+            const bindGroup = gpuDevice.createBindGroup({
+                layout: this.#bindGroupLayout,
+                entries: [{
+                    binding: 0,
+                    resource: this.#sampler,
+                }, {
+                    binding: 1,
+                    resource: textureView,
+                }],
+            });
+            this.#bindGroupCache.set(textureView, bindGroup);
+        }
+
+        return this.#bindGroupCache.get(textureView)!;
+    }
+
+    // 캐시 정리 메서드
+    clearCaches(texture?: GPUTexture) {
+        if (texture) {
+            // 특정 텍스쳐에 대한 텍스쳐 뷰를 찾아서 관련 바인드 그룹도 함께 제거
+            if (this.#textureViewCache.has(texture)) {
+                const mipLevelMaps = this.#textureViewCache.get(texture)!;
+                for (const mipLevelMap of mipLevelMaps.values()) {
+                    for (const textureView of mipLevelMap.values()) {
+                        this.#bindGroupCache.delete(textureView);
+                    }
+                }
+                this.#textureViewCache.delete(texture);
+            }
+        } else {
+            // 모든 캐시 정리
+            this.#textureViewCache.clear();
+            this.#bindGroupCache.clear();
+        }
     }
 
     getMipmapPipeline(format: GPUTextureFormat): GPURenderPipeline {
@@ -65,7 +132,7 @@ class MipmapGenerator {
     }
 
     /**
-     * 
+     *
      * @param texture
      * @param textureDescriptor
      */
@@ -97,22 +164,13 @@ class MipmapGenerator {
         }
         const commandEncoder = gpuDevice.createCommandEncoder({});
         for (let arrayLayer = 0; arrayLayer < arrayLayerCount; ++arrayLayer) {
-            let srcView: GPUTextureView = texture.createView({
-                baseMipLevel: 0,
-                mipLevelCount: 1,
-                dimension: '2d',
-                baseArrayLayer: arrayLayer,
-                arrayLayerCount: 1,
-            });
+            let srcView: GPUTextureView = this.getTextureView(texture, 0, arrayLayer);
+
             let dstMipLevel = renderToSource ? 1 : 0;
             for (let i = 1; i < textureDescriptor.mipLevelCount; ++i) {
-                const dstView: GPUTextureView = mipTexture.createView({
-                    baseMipLevel: dstMipLevel++,
-                    mipLevelCount: 1,
-                    dimension: '2d',
-                    baseArrayLayer: arrayLayer,
-                    arrayLayerCount: 1,
-                });
+                const dstView: GPUTextureView = this.getTextureView(mipTexture, dstMipLevel++, arrayLayer);
+
+
                 const passEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass({
                     colorAttachments: [{
                         view: dstView,
@@ -121,16 +179,8 @@ class MipmapGenerator {
                         storeOp: GPU_STORE_OP.STORE
                     }],
                 });
-                const bindGroup: GPUBindGroup = gpuDevice.createBindGroup({
-                    layout: this.#bindGroupLayout,
-                    entries: [{
-                        binding: 0,
-                        resource: this.#sampler,
-                    }, {
-                        binding: 1,
-                        resource: srcView,
-                    }],
-                });
+                const bindGroup: GPUBindGroup =  this.getBindGroup(srcView);
+
                 passEncoder.setPipeline(pipeline);
                 passEncoder.setBindGroup(0, bindGroup);
                 passEncoder.draw(3, 1, 0, 0);
@@ -160,6 +210,8 @@ class MipmapGenerator {
         }
         gpuDevice.queue.submit([commandEncoder.finish()]);
         if (!renderToSource) {
+            this.clearCaches(mipTexture);
+
             mipTexture.destroy();
         }
         return texture;

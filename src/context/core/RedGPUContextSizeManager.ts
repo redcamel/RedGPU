@@ -197,8 +197,8 @@ class RedGPUContextSizeManager {
         RedGPUContextSizeManager.validateSizeValue(h)
         this.#width = w;
         this.#height = h;
-        const tW = Math.max(0.01, RedGPUContextSizeManager.getPixelDimension(this.parentDomRect, 'width', w))
-        const tH = Math.max(0.01, RedGPUContextSizeManager.getPixelDimension(this.parentDomRect, 'height', h))
+        const tW =  RedGPUContextSizeManager.getPixelDimension(this.parentDomRect, 'width', w)
+        const tH =  RedGPUContextSizeManager.getPixelDimension(this.parentDomRect, 'height', h)
         this.#changeCanvasStyles(tW, tH);
         this.#updatePixelRect(tW, tH)
         this.#updateViewsSize()

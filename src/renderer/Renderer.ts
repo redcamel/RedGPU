@@ -113,7 +113,7 @@ class Renderer {
 
                 if(view.debugViewRenderState.render2PathLayer.length){
                     const {mipmapGenerator} = redGPUContext.resourceManager
-                    let renderPath1ResultTexture = view.viewRenderTextureManager.render2PathTexture
+                    let renderPath1ResultTexture = view.viewRenderTextureManager.renderPath1ResultTexture
                     commandEncoder.copyTextureToTexture(
                       {
                           texture: view.viewRenderTextureManager.colorResolveTexture,
@@ -123,7 +123,7 @@ class Renderer {
                       },
                       { width:view.pixelRectObject.width, height:view.pixelRectObject.height, depthOrArrayLayers: 1 },
                     );
-                    mipmapGenerator.generateMipmap(renderPath1ResultTexture, view.viewRenderTextureManager.render2PathTextureDescriptor)
+                    mipmapGenerator.generateMipmap(renderPath1ResultTexture, view.viewRenderTextureManager.renderPath1ResultTextureDescriptor)
                     const renderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass({
                         colorAttachments: [{
                             ...colorAttachment,
