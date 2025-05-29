@@ -38,14 +38,7 @@ class Renderer {
             }
         }
         this.#finalRender.render(redGPUContext, viewList_renderPassDescriptorList)
-        {
-            // 포스트이펙트떄 생성된 텍스쳐 삭제
-            let i = 0
-            const len = redGPUContext.viewList.length
-            for (i; i < len; i++) {
-                redGPUContext.viewList[i].postEffectManager.clear()
-            }
-        }
+
         console.log('/////////////////// end renderFrame ///////////////////')
     }
 

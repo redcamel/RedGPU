@@ -5,105 +5,127 @@ import AMultiPassPostEffect from "./core/AMultiPassPostEffect";
 import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
 
 class PostEffectManager {
-    readonly #view: View3D
-    #effectList = []
-    #sourceTexture: GPUTexture
-    #sourceTextureView: GPUTextureView
-    #WORK_SIZE_X = 16
-    #WORK_SIZE_Y = 4
-    #WORK_SIZE_Z = 1
+	readonly #view: View3D
+	#postEffects: Array<ASinglePassPostEffect | AMultiPassPostEffect> = []
+	#storageTexture: GPUTexture
+	#sourceTextureView: GPUTextureView
+	#storageTextureView: GPUTextureView
+	#COMPUTE_WORKGROUP_SIZE_X = 16
+	#COMPUTE_WORKGROUP_SIZE_Y = 4
+	#COMPUTE_WORKGROUP_SIZE_Z = 1
 
-    constructor(view: View3D) {
-        this.#view = view;
-    }
+	constructor(view: View3D) {
+		this.#view = view;
+		this.#init()
+	}
 
-    get view(): View3D {
-        return this.#view;
-    }
+	get view(): View3D {
+		return this.#view;
+	}
 
-    get effectList(): any[] {
-        return this.#effectList;
-    }
+	get effectList(): Array<ASinglePassPostEffect | AMultiPassPostEffect> {
+		return this.#postEffects;
+	}
 
-    addEffect(v: ASinglePassPostEffect | AMultiPassPostEffect) {
-        this.#effectList.push(v)
-    }
+	addEffect(v: ASinglePassPostEffect | AMultiPassPostEffect) {
+		this.#postEffects.push(v)
+	}
 
-    addEffectAt(v: ASinglePassPostEffect | AMultiPassPostEffect) {
-        //TODO
-    }
+	addEffectAt(v: ASinglePassPostEffect | AMultiPassPostEffect) {
+		//TODO
+	}
 
-    getEffectAt(index: number): ASinglePassPostEffect | AMultiPassPostEffect {
-        return this.#effectList[index]
-    }
+	getEffectAt(index: number): ASinglePassPostEffect | AMultiPassPostEffect {
+		return this.#postEffects[index]
+	}
 
-    removeEffect(v: ASinglePassPostEffect | AMultiPassPostEffect) {
-        //TODO
-    }
+	removeEffect(v: ASinglePassPostEffect | AMultiPassPostEffect) {
+		//TODO
+	}
 
-    removeEffectAt(v: ASinglePassPostEffect | AMultiPassPostEffect) {
-        //TODO
-    }
+	removeEffectAt(v: ASinglePassPostEffect | AMultiPassPostEffect) {
+		//TODO
+	}
 
-    removeAllEffect(v: ASinglePassPostEffect | AMultiPassPostEffect) {
-        this.#effectList.forEach(effect => {
-            effect.clear()
-        })
-        this.#effectList.length = 0
-    }
+	removeAllEffects() {
+		this.#postEffects.forEach(effect => {
+			effect.clear()
+		})
+		this.#postEffects.length = 0
+	}
 
-    render() {
-        const {colorResolveTextureView, colorTexture} = this.#view.viewRenderTextureManager
-        //
-        this.#sourceTextureView = this.#copyToStorage(this.#view, colorResolveTextureView)
-        let sourceTextureView = this.#sourceTextureView
-        const {width, height} = colorTexture
-        this.#effectList.forEach(effect => {
-            sourceTextureView = effect.render(
-                this.#view,
-                width,
-                height,
-                sourceTextureView
-            )
-        })
-        return sourceTextureView
-    }
+	render() {
+		const {colorResolveTextureView, colorTexture} = this.#view.viewRenderTextureManager
+		//
+		this.#sourceTextureView = this.#renderToStorageTexture(this.#view, colorResolveTextureView)
+		let sourceTextureView = this.#sourceTextureView
+		const {width, height} = colorTexture
+		this.#postEffects.forEach(effect => {
+			sourceTextureView = effect.render(
+				this.#view,
+				width,
+				height,
+				sourceTextureView
+			)
+		})
+		return sourceTextureView
+	}
 
-    clear() {
-        this.#effectList.forEach(effect => {
-            effect.clear()
-        })
-    }
+	clear() {
+		this.#postEffects.forEach(effect => {
+			effect.clear()
+		})
+	}
 
-    #copyToStorage(view: View3D, sourceTextureView: GPUTextureView) {
-        if (this.#sourceTexture) {
-            this.#sourceTexture.destroy();
-            this.#sourceTexture = null;
-        }
-        const {redGPUContext, viewRenderTextureManager} = view;
-        const {colorTexture} = viewRenderTextureManager;
-        const {gpuDevice} = redGPUContext;
-        const {width, height} = colorTexture;
-        const computeCode = this.#getComputeCode();
-        const computeModule = gpuDevice.createShaderModule({code: computeCode,});
-        const bindGroupLayout_compute = this.#createBindGroupLayout(redGPUContext);
-        this.#sourceTexture = this.#createTexture(gpuDevice, width, height);
-        const copyTextureView = this.#sourceTexture.createView();
-        this.#runComputePass(
-            gpuDevice,
-            this.#createComputePipeline(gpuDevice, computeModule, bindGroupLayout_compute),
-            this.#createBindGroup(redGPUContext, bindGroupLayout_compute, sourceTextureView, copyTextureView),
-            width, height
-        );
-        return copyTextureView;
-    }
+	#textureComputeShaderModule: GPUShaderModule
+	#textureComputeBindGroup: GPUBindGroup
+	#textureComputeBindGroupLayout: GPUBindGroupLayout
+	#textureComputePipeline: GPUComputePipeline
 
-    #getComputeCode() {
-        return `
+	#init() {
+		const {redGPUContext} = this.#view;
+		const {gpuDevice} = redGPUContext;
+		const textureComputeShader = this.#getTextureComputeShader();
+		this.#textureComputeShaderModule = gpuDevice.createShaderModule({code: textureComputeShader,});
+		this.#textureComputeBindGroupLayout = this.#createTextureBindGroupLayout(redGPUContext);
+		this.#textureComputePipeline = this.#createTextureComputePipeline(gpuDevice, this.#textureComputeShaderModule, this.#textureComputeBindGroupLayout)
+	}
+
+	#previousDimensions: { width: number, height: number }
+
+	#renderToStorageTexture(view: View3D, sourceTextureView: GPUTextureView) {
+		const {redGPUContext, viewRenderTextureManager} = view;
+		const {colorTexture} = viewRenderTextureManager;
+		const {gpuDevice} = redGPUContext;
+		const {width, height} = colorTexture;
+		if (width !== this.#previousDimensions?.width || height !== this.#previousDimensions?.height) {
+			if (this.#storageTexture) {
+				this.#storageTexture.destroy();
+				this.#storageTexture = null;
+			}
+			this.#storageTexture = this.#createStorageTexture(gpuDevice, width, height);
+			this.#storageTextureView = this.#storageTexture.createView();
+			this.#textureComputeBindGroup = this.#createTextureBindGroup(redGPUContext, this.#textureComputeBindGroupLayout, sourceTextureView, this.#storageTextureView)
+		}
+		this.#previousDimensions = {
+			width,
+			height,
+		}
+		this.#executeComputePass(
+			gpuDevice,
+			this.#textureComputePipeline,
+			this.#textureComputeBindGroup,
+			width, height
+		);
+		return this.#storageTextureView;
+	}
+
+	#getTextureComputeShader() {
+		return `
       @group(0) @binding(0) var sourceTextureSampler: sampler;
       @group(0) @binding(1) var sourceTexture : texture_2d<f32>;
       @group(0) @binding(2) var outputTexture : texture_storage_2d<rgba8unorm, write>;
-      @compute @workgroup_size(${this.#WORK_SIZE_X},${this.#WORK_SIZE_Y},${this.#WORK_SIZE_Z})
+      @compute @workgroup_size(${this.#COMPUTE_WORKGROUP_SIZE_X},${this.#COMPUTE_WORKGROUP_SIZE_Y},${this.#COMPUTE_WORKGROUP_SIZE_Z})
       fn main (
         @builtin(global_invocation_id) global_id : vec3<u32>,
       ){
@@ -121,60 +143,60 @@ class PostEffectManager {
           textureStore(outputTexture, index, color );
       };
     `;
-    }
+	}
 
-    #createBindGroupLayout(redGPUContext: RedGPUContext) {
-        return redGPUContext.resourceManager.createBindGroupLayout('POST_EFFECT_COPY_TO_STORAGE', {
-            entries: [
-                {binding: 0, visibility: GPUShaderStage.COMPUTE, sampler: {type: 'filtering',}},
-                {binding: 1, visibility: GPUShaderStage.COMPUTE, texture: {}},
-                {binding: 2, visibility: GPUShaderStage.COMPUTE, storageTexture: {format: 'rgba8unorm'}},
-            ]
-        });
-    }
+	#createTextureBindGroupLayout(redGPUContext: RedGPUContext) {
+		return redGPUContext.resourceManager.createBindGroupLayout('POST_EFFECT_COPY_TO_STORAGE', {
+			entries: [
+				{binding: 0, visibility: GPUShaderStage.COMPUTE, sampler: {type: 'filtering',}},
+				{binding: 1, visibility: GPUShaderStage.COMPUTE, texture: {}},
+				{binding: 2, visibility: GPUShaderStage.COMPUTE, storageTexture: {format: 'rgba8unorm'}},
+			]
+		});
+	}
 
-    #createTexture(gpuDevice: GPUDevice, width: number, height: number) {
-        return gpuDevice.createTexture({
-            size: {width: width, height: height,},
-            format: 'rgba8unorm',
-            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING
-        });
-    }
+	#createStorageTexture(gpuDevice: GPUDevice, width: number, height: number) {
+		return gpuDevice.createTexture({
+			size: {width: width, height: height,},
+			format: 'rgba8unorm',
+			usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING
+		});
+	}
 
-    #createBindGroup(redGPUContext: RedGPUContext, bindGroupLayout: GPUBindGroupLayout, sourceTextureView: GPUTextureView, copyTextureView: GPUTextureView) {
-        return redGPUContext.gpuDevice.createBindGroup({
-            layout: bindGroupLayout,
-            entries: [
-                {binding: 0, resource: new Sampler(redGPUContext).gpuSampler},
-                {binding: 1, resource: sourceTextureView},
-                {binding: 2, resource: copyTextureView},
-            ]
-        });
-    }
+	#createTextureBindGroup(redGPUContext: RedGPUContext, bindGroupLayout: GPUBindGroupLayout, sourceTextureView: GPUTextureView, storageTextureView: GPUTextureView) {
+		return redGPUContext.gpuDevice.createBindGroup({
+			layout: bindGroupLayout,
+			entries: [
+				{binding: 0, resource: new Sampler(redGPUContext).gpuSampler},
+				{binding: 1, resource: sourceTextureView},
+				{binding: 2, resource: storageTextureView},
+			]
+		});
+	}
 
-    #createComputePipeline(gpuDevice: GPUDevice, cModule: GPUShaderModule, bindGroupLayout: GPUBindGroupLayout) {
-        return gpuDevice.createComputePipeline({
-            layout: gpuDevice.createPipelineLayout({
-                bindGroupLayouts: [
-                    bindGroupLayout,
-                ]
-            }),
-            compute: {
-                module: cModule,
-                entryPoint: 'main',
-            }
-        });
-    }
+	#createTextureComputePipeline(gpuDevice: GPUDevice, shaderModule: GPUShaderModule, bindGroupLayout: GPUBindGroupLayout) {
+		return gpuDevice.createComputePipeline({
+			layout: gpuDevice.createPipelineLayout({
+				bindGroupLayouts: [
+					bindGroupLayout,
+				]
+			}),
+			compute: {
+				module: shaderModule,
+				entryPoint: 'main',
+			}
+		});
+	}
 
-    #runComputePass(gpuDevice: GPUDevice, pipeline: GPUComputePipeline, bindGroup: GPUBindGroup, width: number, height: number) {
-        const commandEncoder = gpuDevice.createCommandEncoder();
-        const computePassEncoder = commandEncoder.beginComputePass();
-        computePassEncoder.setPipeline(pipeline);
-        computePassEncoder.setBindGroup(0, bindGroup);
-        computePassEncoder.dispatchWorkgroups(Math.ceil(width / this.#WORK_SIZE_X), Math.ceil(height / this.#WORK_SIZE_Y));
-        computePassEncoder.end();
-        gpuDevice.queue.submit([commandEncoder.finish()]);
-    }
+	#executeComputePass(gpuDevice: GPUDevice, pipeline: GPUComputePipeline, bindGroup: GPUBindGroup, width: number, height: number) {
+		const commandEncoder = gpuDevice.createCommandEncoder();
+		const computePassEncoder = commandEncoder.beginComputePass();
+		computePassEncoder.setPipeline(pipeline);
+		computePassEncoder.setBindGroup(0, bindGroup);
+		computePassEncoder.dispatchWorkgroups(Math.ceil(width / this.#COMPUTE_WORKGROUP_SIZE_X), Math.ceil(height / this.#COMPUTE_WORKGROUP_SIZE_Y));
+		computePassEncoder.end();
+		gpuDevice.queue.submit([commandEncoder.finish()]);
+	}
 }
 
 Object.freeze(PostEffectManager)
