@@ -84,7 +84,7 @@ class ColorBalance extends ASinglePassPostEffect {
         )
         this.init(
             redGPUContext,
-            'POST_EFFECT_BRIGHTNESS_CONTRAST',
+            'POST_EFFECT_COLOR_BALANCE',
             computeCode
         )
     }

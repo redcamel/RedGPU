@@ -1,10 +1,12 @@
 import AMultiPassPostEffect from "./core/AMultiPassPostEffect";
 import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
 import BrightnessContrast from "./effects/adjustments/BrightnessContrast";
+import ColorTemperatureTint from "./effects/adjustments/ColorTemperatureTint";
 import Grayscale from "./effects/adjustments/Grayscale";
 import HueSaturation from "./effects/adjustments/HueSaturation";
 import Invert from "./effects/adjustments/Invert";
 import Threshold from "./effects/adjustments/Threshold";
+import Vibrance from "./effects/adjustments/Vibrance";
 import BlurX from "./effects/blur/BlurX";
 import BlurY from "./effects/blur/BlurY";
 import GaussianBlur from "./effects/blur/GaussianBlur";
@@ -14,9 +16,11 @@ import OldBloom from "./effects/oldBloom/OldBloom";
 import Vignetting from "./effects/Vignetting";
 import PostEffectManager from "./PostEffectManager";
 import ColorBalance from "./effects/adjustments/ColorBalance";
+
 export {
     Convolution,
     ColorBalance,
+    ColorTemperatureTint,
     PostEffectManager,
     BrightnessContrast,
     OldBloom,
@@ -30,5 +34,6 @@ export {
     GaussianBlur,
     ASinglePassPostEffect,
     AMultiPassPostEffect,
+    Vibrance,
     Vignetting
 }
