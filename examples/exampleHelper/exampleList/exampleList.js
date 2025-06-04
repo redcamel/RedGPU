@@ -580,6 +580,14 @@ const ExampleList = [
 								},
 							},
 							{
+								name: 'ColorTemperatureTint',
+								path: '3d/postEffect/adjustments/colorTemperatureTint',
+								description: {
+									ko: ``,
+									en: ``
+								},
+							},
+							{
 								name: 'BrightnessContrast',
 								path: '3d/postEffect/adjustments/brightnessContrast',
 								description: {

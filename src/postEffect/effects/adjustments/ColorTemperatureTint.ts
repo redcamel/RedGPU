@@ -7,7 +7,6 @@ class ColorTemperatureTint extends ASinglePassPostEffect {
 	#temperature: number = 6500      // 1000 ~ 20000 (Kelvin)
 	#tint: number = 0               // -100 ~ 100 (Green/Magenta)
 	#strength: number = 100         // 0 ~ 100 (효과 강도)
-
 	constructor(redGPUContext: RedGPUContext) {
 		super();
 		const computeCode = createPostEffectCode(
@@ -91,6 +90,9 @@ class ColorTemperatureTint extends ASinglePassPostEffect {
 			'POST_EFFECT_COLOR_TEMPERATURE_TINT',
 			computeCode
 		)
+		this.strength = this.#strength
+		this.tint = this.#tint
+		this.temperature = this.#temperature
 	}
 
 	get temperature(): number {

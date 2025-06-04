@@ -80,12 +80,14 @@ const renderTestPane = async (redGPUContext) => {
 	const pane = new Pane();
 
 	const view = redGPUContext.viewList[0]
+	const effect = view.postEffectManager.getEffectAt(0);
+
+	// 이펙트의 실제 초기값으로 TEST_STATE 설정
 	const TEST_STATE = {
 		ColorTemperatureTint: true,
-
-		temperature: view.postEffectManager.getEffectAt(0).temperature,
-		tint: view.postEffectManager.getEffectAt(0).tint,
-		strength: view.postEffectManager.getEffectAt(0).strength
+		temperature: effect.temperature,
+		tint: effect.tint,
+		strength: effect.strength
 	}
 
 	const folder = pane.addFolder({title: 'Color Temperature & Tint', expanded: true})
@@ -93,11 +95,11 @@ const renderTestPane = async (redGPUContext) => {
 	// ColorTemperatureTint 토글
 	folder.addBinding(TEST_STATE, 'ColorTemperatureTint').on('change', (v) => {
 		if (v.value) {
-			const effect = new RedGPU.PostEffect.ColorTemperatureTint(redGPUContext);
-			effect.temperature = TEST_STATE.temperature;
-			effect.tint = TEST_STATE.tint;
-			effect.strength = TEST_STATE.strength;
-			view.postEffectManager.addEffect(effect);
+			const newEffect = new RedGPU.PostEffect.ColorTemperatureTint(redGPUContext);
+			newEffect.temperature = TEST_STATE.temperature;
+			newEffect.tint = TEST_STATE.tint;
+			newEffect.strength = TEST_STATE.strength;
+			view.postEffectManager.addEffect(newEffect);
 		} else {
 			view.postEffectManager.removeAllEffect();
 		}
@@ -114,8 +116,10 @@ const renderTestPane = async (redGPUContext) => {
 		max: 20000,
 		step: 100
 	}).on('change', (v) => {
-		if (view.postEffectManager.getEffectAt(0)) {
-			view.postEffectManager.getEffectAt(0).temperature = v.value;
+		const currentEffect = view.postEffectManager.getEffectAt(0);
+		if (currentEffect) {
+			currentEffect.temperature = v.value;
+			updateTemperatureInfo(v.value);
 		}
 	});
 
@@ -124,8 +128,9 @@ const renderTestPane = async (redGPUContext) => {
 		max: 100,
 		step: 1
 	}).on('change', (v) => {
-		if (view.postEffectManager.getEffectAt(0)) {
-			view.postEffectManager.getEffectAt(0).tint = v.value;
+		const currentEffect = view.postEffectManager.getEffectAt(0);
+		if (currentEffect) {
+			currentEffect.tint = v.value;
 		}
 	});
 
@@ -134,8 +139,9 @@ const renderTestPane = async (redGPUContext) => {
 		max: 100,
 		step: 1
 	}).on('change', (v) => {
-		if (view.postEffectManager.getEffectAt(0)) {
-			view.postEffectManager.getEffectAt(0).strength = v.value;
+		const currentEffect = view.postEffectManager.getEffectAt(0);
+		if (currentEffect) {
+			currentEffect.strength = v.value;
 		}
 	});
 
@@ -150,121 +156,122 @@ const renderTestPane = async (redGPUContext) => {
 	const kelvinDisplay = infoFolder.addBinding(temperatureInfo, 'kelvinValue', {readonly: true});
 	const descDisplay = infoFolder.addBinding(temperatureInfo, 'description', {readonly: true});
 
-	// 온도값 업데이트 시 정보도 업데이트
-	temperatureControl.on('change', (v) => {
-		temperatureInfo.kelvinValue = `${v.value}K`;
-		temperatureInfo.description = getTemperatureDescription(v.value);
+	// 온도 정보 업데이트 함수
+	function updateTemperatureInfo(temperature) {
+		temperatureInfo.kelvinValue = `${temperature}K`;
+		temperatureInfo.description = getTemperatureDescription(temperature);
 		kelvinDisplay.refresh();
 		descDisplay.refresh();
-	});
+	}
 
 	// 퀵 액션 버튼들 (프리셋 통합)
 	const actionFolder = pane.addFolder({title: 'Quick Actions & Presets', expanded: true});
 
 	// 시간대별 프리셋
 	actionFolder.addButton({title: '🌅 Sunrise (3200K, -10)'}).on('click', () => {
-		const effect = view.postEffectManager.getEffectAt(0);
-		if (effect) {
-			effect.temperature = 3200;
-			effect.tint = -10;
-			updateUI(effect);
+		const currentEffect = view.postEffectManager.getEffectAt(0);
+		if (currentEffect) {
+			currentEffect.temperature = 3200;
+			currentEffect.tint = -10;
+			updateUI(currentEffect);
 		}
 	});
 
 	actionFolder.addButton({title: '☀️ Noon (6500K, 0)'}).on('click', () => {
-		const effect = view.postEffectManager.getEffectAt(0);
-		if (effect) {
-			effect.temperature = 6500;
-			effect.tint = 0;
-			updateUI(effect);
+		const currentEffect = view.postEffectManager.getEffectAt(0);
+		if (currentEffect) {
+			currentEffect.temperature = 6500;
+			currentEffect.tint = 0;
+			updateUI(currentEffect);
 		}
 	});
 
 	actionFolder.addButton({title: '🌆 Sunset (2800K, +5)'}).on('click', () => {
-		const effect = view.postEffectManager.getEffectAt(0);
-		if (effect) {
-			effect.temperature = 2800;
-			effect.tint = 5;
-			updateUI(effect);
+		const currentEffect = view.postEffectManager.getEffectAt(0);
+		if (currentEffect) {
+			currentEffect.temperature = 2800;
+			currentEffect.tint = 5;
+			updateUI(currentEffect);
 		}
 	});
 
 	actionFolder.addButton({title: '🌙 Moonlight (4000K, +15)'}).on('click', () => {
-		const effect = view.postEffectManager.getEffectAt(0);
-		if (effect) {
-			effect.temperature = 4000;
-			effect.tint = 15;
-			updateUI(effect);
+		const currentEffect = view.postEffectManager.getEffectAt(0);
+		if (currentEffect) {
+			currentEffect.temperature = 4000;
+			currentEffect.tint = 15;
+			updateUI(currentEffect);
 		}
 	});
 
 	// 조명 타입별 프리셋
 	actionFolder.addButton({title: '🕯️ Candle Light (1900K, -5)'}).on('click', () => {
-		const effect = view.postEffectManager.getEffectAt(0);
-		if (effect) {
-			effect.setCandleLight();
-			updateUI(effect);
+		const currentEffect = view.postEffectManager.getEffectAt(0);
+		if (currentEffect) {
+			currentEffect.setCandleLight();
+			updateUI(currentEffect);
 		}
 	});
 
 	actionFolder.addButton({title: '🔥 Warm Tone (3200K, -10)'}).on('click', () => {
-		const effect = view.postEffectManager.getEffectAt(0);
-		if (effect) {
-			effect.setWarmTone();
-			updateUI(effect);
+		const currentEffect = view.postEffectManager.getEffectAt(0);
+		if (currentEffect) {
+			currentEffect.setWarmTone();
+			updateUI(currentEffect);
 		}
 	});
 
 	actionFolder.addButton({title: '💡 Daylight (5600K, 0)'}).on('click', () => {
-		const effect = view.postEffectManager.getEffectAt(0);
-		if (effect) {
-			effect.setDaylight();
-			updateUI(effect);
+		const currentEffect = view.postEffectManager.getEffectAt(0);
+		if (currentEffect) {
+			currentEffect.setDaylight();
+			updateUI(currentEffect);
 		}
 	});
 
 	actionFolder.addButton({title: '⚪ Neutral (6500K, 0)'}).on('click', () => {
-		const effect = view.postEffectManager.getEffectAt(0);
-		if (effect) {
-			effect.setNeutral();
-			updateUI(effect);
+		const currentEffect = view.postEffectManager.getEffectAt(0);
+		if (currentEffect) {
+			currentEffect.setNeutral();
+			updateUI(currentEffect);
 		}
 	});
 
 	actionFolder.addButton({title: '☁️ Cloudy Day (7500K, +5)'}).on('click', () => {
-		const effect = view.postEffectManager.getEffectAt(0);
-		if (effect) {
-			effect.setCloudyDay();
-			updateUI(effect);
+		const currentEffect = view.postEffectManager.getEffectAt(0);
+		if (currentEffect) {
+			currentEffect.setCloudyDay();
+			updateUI(currentEffect);
 		}
 	});
 
 	actionFolder.addButton({title: '❄️ Cool Tone (8000K, +10)'}).on('click', () => {
-		const effect = view.postEffectManager.getEffectAt(0);
-		if (effect) {
-			effect.setCoolTone();
-			updateUI(effect);
+		const currentEffect = view.postEffectManager.getEffectAt(0);
+		if (currentEffect) {
+			currentEffect.setCoolTone();
+			updateUI(currentEffect);
 		}
 	});
 
 	actionFolder.addButton({title: '💫 Neon Light (9000K, +15)'}).on('click', () => {
-		const effect = view.postEffectManager.getEffectAt(0);
-		if (effect) {
-			effect.setNeonLight();
-			updateUI(effect);
+		const currentEffect = view.postEffectManager.getEffectAt(0);
+		if (currentEffect) {
+			currentEffect.setNeonLight();
+			updateUI(currentEffect);
 		}
 	});
 
 	function updateUI(effect) {
+		// TEST_STATE 업데이트
 		TEST_STATE.temperature = effect.temperature;
 		TEST_STATE.tint = effect.tint;
+
+		// UI 컨트롤 새로고침
 		temperatureControl.refresh();
 		tintControl.refresh();
 
-		temperatureInfo.kelvinValue = `${effect.temperature}K`;
-		temperatureInfo.description = getTemperatureDescription(effect.temperature);
-		kelvinDisplay.refresh();
-		descDisplay.refresh();
+		// 온도 정보 업데이트
+		updateTemperatureInfo(effect.temperature);
 	}
 };
 
