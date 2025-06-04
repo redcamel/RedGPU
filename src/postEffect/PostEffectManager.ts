@@ -47,7 +47,7 @@ class PostEffectManager {
 		//TODO
 	}
 
-	removeAllEffects() {
+	removeAllEffect() {
 		this.#postEffects.forEach(effect => {
 			effect.clear()
 		})

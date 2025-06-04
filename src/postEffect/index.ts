@@ -13,9 +13,10 @@ import Convolution from "./effects/Convolution";
 import OldBloom from "./effects/oldBloom/OldBloom";
 import Vignetting from "./effects/Vignetting";
 import PostEffectManager from "./PostEffectManager";
-
+import ColorBalance from "./effects/adjustments/ColorBalance";
 export {
     Convolution,
+    ColorBalance,
     PostEffectManager,
     BrightnessContrast,
     OldBloom,
