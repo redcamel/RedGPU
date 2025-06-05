@@ -528,14 +528,7 @@ const ExampleList = [
 			{
 				name: 'PostEffect',
 				list: [
-					{
-						name: 'Vignetting',
-						path: '3d/postEffect/vignetting',
-						description: {
-							ko: ``,
-							en: ``
-						},
-					},
+
 					{
 						name: 'Convolution',
 						path: '3d/postEffect/convolution',
@@ -678,11 +671,11 @@ const ExampleList = [
 						]
 					},
 					{
-						name: 'Distortions',
+						name: 'Lens',
 						list: [
 							{
 								name: 'LensDistortion',
-								path: '3d/postEffect/distortions/lensDistortion',
+								path: '3d/postEffect/lens/lensDistortion',
 								description: {
 									ko: ``,
 									en: ``
@@ -690,12 +683,20 @@ const ExampleList = [
 							},
 							{
 								name: 'ChromaticAberration',
-								path: '3d/postEffect/distortions/chromaticAberration',
+								path: '3d/postEffect/lens/chromaticAberration',
 								description: {
 									ko: ``,
 									en: ``
 								}
-							}
+							},
+							{
+								name: 'Vignetting',
+								path: '3d/postEffect/lens/vignetting',
+								description: {
+									ko: ``,
+									en: ``
+								},
+							},
 						]
 					},
 				],

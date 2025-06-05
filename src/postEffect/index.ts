@@ -14,10 +14,10 @@ import GaussianBlur from "./effects/blur/GaussianBlur";
 import RadialBlur from "./effects/blur/RadialBlur";
 import ZoomBlur from "./effects/blur/ZoomBlur";
 import Convolution from "./effects/Convolution";
-import ChromaticAberration from "./effects/distortions/ChromaticAberration";
-import LensDistortion from "./effects/distortions/LensDistortion";
+import ChromaticAberration from "./effects/lens/ChromaticAberration";
+import LensDistortion from "./effects/lens/LensDistortion";
 import OldBloom from "./effects/oldBloom/OldBloom";
-import Vignetting from "./effects/Vignetting";
+import Vignetting from "./effects/lens/Vignetting";
 import PostEffectManager from "./PostEffectManager";
 import ColorBalance from "./effects/adjustments/ColorBalance";
 

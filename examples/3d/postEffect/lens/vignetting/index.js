@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js";
+import * as RedGPU from "../../../../../dist";
 
 // 1. Create and append a canvas
 // 1. 캔버스를 생성하고 문서에 추가
@@ -54,12 +54,12 @@ function loadGLTF(view, url) {
 	const {redGPUContext, scene} = view
 	const cubeTexture =
 		new RedGPU.Resource.CubeTexture(redGPUContext, [
-			"../../../assets/skybox/px.jpg", // Positive X
-			"../../../assets/skybox/nx.jpg", // Negative X
-			"../../../assets/skybox/py.jpg", // Positive Y
-			"../../../assets/skybox/ny.jpg", // Negative Y
-			"../../../assets/skybox/pz.jpg", // Positive Z
-			"../../../assets/skybox/nz.jpg", // Negative Z
+			"../../../../assets/skybox/px.jpg", // Positive X
+			"../../../../assets/skybox/nx.jpg", // Negative X
+			"../../../../assets/skybox/py.jpg", // Positive Y
+			"../../../../assets/skybox/ny.jpg", // Negative Y
+			"../../../../assets/skybox/pz.jpg", // Positive Z
+			"../../../../assets/skybox/nz.jpg", // Negative Z
 		])
 	view.iblTexture = cubeTexture
 	view.skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture)

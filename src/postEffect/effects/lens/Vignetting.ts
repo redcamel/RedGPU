@@ -1,7 +1,7 @@
-import RedGPUContext from "../../context/RedGPUContext";
-import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumberRange";
-import ASinglePassPostEffect from "../core/ASinglePassPostEffect";
-import createPostEffectCode from "../core/createPostEffectCode";
+import RedGPUContext from "../../../context/RedGPUContext";
+import validateNumberRange from "../../../runtimeChecker/validateFunc/validateNumberRange";
+import ASinglePassPostEffect from "../../core/ASinglePassPostEffect";
+import createPostEffectCode from "../../core/createPostEffectCode";
 
 class Vignetting extends ASinglePassPostEffect {
     #smoothness: number = 0.2
