@@ -66,11 +66,16 @@ const renderTestPane = async (redGPUContext) => {
 	const pane = new Pane();
 
 	const view = redGPUContext.viewList[0];
+	const effect = view.postEffectManager.getEffectAt(0);
+
 	const TEST_STATE = {
 		FilmGrain: true,
-		filmGrainIntensity: view.postEffectManager.getEffectAt(0).filmGrainIntensity,
-		filmGrainResponse: view.postEffectManager.getEffectAt(0).filmGrainResponse,
-		filmGrainScale: view.postEffectManager.getEffectAt(0).filmGrainScale
+		filmGrainIntensity: effect.filmGrainIntensity,
+		filmGrainResponse: effect.filmGrainResponse,
+		filmGrainScale: effect.filmGrainScale,
+		coloredGrain: effect.coloredGrain,
+		grainSaturation: effect.grainSaturation,
+		grainVariation: effect.grainVariation
 	};
 
 	const updateEffect = () => {
@@ -79,28 +84,38 @@ const renderTestPane = async (redGPUContext) => {
 		effect.filmGrainIntensity = TEST_STATE.filmGrainIntensity;
 		effect.filmGrainResponse = TEST_STATE.filmGrainResponse;
 		effect.filmGrainScale = TEST_STATE.filmGrainScale;
+		effect.coloredGrain = TEST_STATE.coloredGrain;
+		effect.grainSaturation = TEST_STATE.grainSaturation;
+		effect.grainVariation = TEST_STATE.grainVariation;
 	};
 
 	const applyPreset = (presetName) => {
 		const effect = view.postEffectManager.getEffectAt(0);
 		if (effect) {
 			effect.applyPreset(RedGPU.PostEffect.FilmGrain[presetName]);
+			// 프리셋 적용 후 UI 상태 업데이트
 			TEST_STATE.filmGrainIntensity = effect.filmGrainIntensity;
 			TEST_STATE.filmGrainResponse = effect.filmGrainResponse;
 			TEST_STATE.filmGrainScale = effect.filmGrainScale;
+			TEST_STATE.coloredGrain = effect.coloredGrain;
+			TEST_STATE.grainSaturation = effect.grainSaturation;
+			TEST_STATE.grainVariation = effect.grainVariation;
 			pane.refresh();
 		}
 	};
 
 	const folder = pane.addFolder({title: 'Film Grain', expanded: true});
 
+	// 필름 그레인 토글
 	folder.addBinding(TEST_STATE, 'FilmGrain').on('change', (v) => {
 		if (v.value) {
-			const effect = new RedGPU.PostEffect.FilmGrain(redGPUContext);
-			effect.filmGrainIntensity = TEST_STATE.filmGrainIntensity;
-			effect.filmGrainResponse = TEST_STATE.filmGrainResponse;
-			effect.filmGrainScale = TEST_STATE.filmGrainScale;
-			view.postEffectManager.addEffect(effect);
+			const newEffect = new RedGPU.PostEffect.FilmGrain(redGPUContext);
+			newEffect.filmGrainIntensity = TEST_STATE.filmGrainIntensity;
+			newEffect.filmGrainResponse = TEST_STATE.filmGrainResponse;
+			newEffect.filmGrainScale = TEST_STATE.filmGrainScale;
+			newEffect.coloredGrain = TEST_STATE.coloredGrain;
+			newEffect.grainSaturation = TEST_STATE.grainSaturation;
+			view.postEffectManager.addEffect(newEffect);
 		} else {
 			view.postEffectManager.removeAllEffect();
 		}
@@ -108,8 +123,11 @@ const renderTestPane = async (redGPUContext) => {
 		intensityControl.disabled = !v.value;
 		responseControl.disabled = !v.value;
 		scaleControl.disabled = !v.value;
+		coloredGrainControl.disabled = !v.value;
+		grainSaturationControl.disabled = !v.value;
 	});
 
+	// 기본 속성들
 	const intensityControl = folder.addBinding(TEST_STATE, 'filmGrainIntensity', {
 		min: 0.0,
 		max: 1.0,
@@ -131,11 +149,31 @@ const renderTestPane = async (redGPUContext) => {
 		label: 'Scale'
 	}).on('change', updateEffect);
 
-	// 프리셋 버튼들 추가
+	// 새로운 속성들
+	const coloredGrainControl = folder.addBinding(TEST_STATE, 'coloredGrain', {
+		min: 0.0,
+		max: 1.0,
+		step: 0.01,
+		label: 'Colored Grain'
+	}).on('change', updateEffect);
+
+	const grainSaturationControl = folder.addBinding(TEST_STATE, 'grainSaturation', {
+		min: 0.0,
+		max: 2.0,
+		step: 0.01,
+		label: 'Grain Saturation'
+	}).on('change', updateEffect);
+
+
+
+
+	// 프리셋 버튼들
 	const presetFolder = folder.addFolder({title: 'Presets', expanded: true});
 
 	presetFolder.addButton({title: 'Subtle'}).on('click', () => applyPreset('SUBTLE'));
 	presetFolder.addButton({title: 'Medium'}).on('click', () => applyPreset('MEDIUM'));
 	presetFolder.addButton({title: 'Heavy'}).on('click', () => applyPreset('HEAVY'));
 	presetFolder.addButton({title: 'Vintage'}).on('click', () => applyPreset('VINTAGE'));
+
+
 };

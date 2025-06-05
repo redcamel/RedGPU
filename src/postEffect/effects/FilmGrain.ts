@@ -5,22 +5,30 @@ import createPostEffectCode from "../core/createPostEffectCode";
 const SUBTLE = {
 	filmGrainIntensity: 0.02,
 	filmGrainResponse: 0.9,
-	filmGrainScale: 1.0
+	filmGrainScale: 1.0,
+	coloredGrain: 0.3,
+	grainSaturation: 0.4
 };
 const MEDIUM = {
 	filmGrainIntensity: 0.05,
 	filmGrainResponse: 0.8,
-	filmGrainScale: 1.2
+	filmGrainScale: 1.2,
+	coloredGrain: 0.5,
+	grainSaturation: 0.6
 };
 const HEAVY = {
 	filmGrainIntensity: 0.12,
 	filmGrainResponse: 0.6,
-	filmGrainScale: 1.5
+	filmGrainScale: 1.5,
+	coloredGrain: 0.7,
+	grainSaturation: 0.8
 };
 const VINTAGE = {
 	filmGrainIntensity: 0.08,
 	filmGrainResponse: 0.7,
-	filmGrainScale: 2.0
+	filmGrainScale: 2.0,
+	coloredGrain: 0.9,
+	grainSaturation: 1.0
 };
 
 class FilmGrain extends ASinglePassPostEffect {
@@ -29,15 +37,16 @@ class FilmGrain extends ASinglePassPostEffect {
 	static HEAVY = HEAVY;
 	static VINTAGE = VINTAGE;
 
-	#filmGrainIntensity: number = 0.25 // 필름 그레인의 강도/세기
-	#filmGrainResponse: number = 0.8; // 밝기(luminance)에 따른 그레인의 반응성/민감도
-	#filmGrainScale: number = 1.2; // 그레인 크기 배율 (1.0 = 기본 크기)
+	#filmGrainIntensity: number = 0.25; // 필름 그레인의 강도/세기
+	#filmGrainResponse: number = 0.8;   // 밝기(luminance)에 따른 그레인의 반응성/민감도
+	#filmGrainScale: number = 1.2;      // 그레인 크기 배율 (1.0 = 기본 크기)
+	#coloredGrain: number = 0.5;        // 컬러 그레인 vs 흑백 그레인 비율 (0.0 = 완전 흑백, 1.0 = 완전 컬러)
+	#grainSaturation: number = 0.6;     // 그레인 색상의 채도 (0.0 = 무채색, 2.0 = 과포화)
 	#time: number = 0.0;
 	#devicePixelRatio: number = 1.0;
 
 	constructor(redGPUContext: RedGPUContext) {
 		super();
-		// 디바이스 픽셀 비율 가져오기
 		this.#devicePixelRatio = window?.devicePixelRatio || 1.0;
 
 		const computeCode = createPostEffectCode(
@@ -54,6 +63,8 @@ class FilmGrain extends ASinglePassPostEffect {
                 let filmGrainIntensity_value: f32 = uniforms.filmGrainIntensity;
                 let filmGrainResponse_value: f32 = uniforms.filmGrainResponse;
                 let filmGrainScale_value: f32 = uniforms.filmGrainScale;
+                let coloredGrain_value: f32 = uniforms.coloredGrain;
+                let grainSaturation_value: f32 = uniforms.grainSaturation;
                 let time_value: f32 = uniforms.time;
                 let devicePixelRatio_value: f32 = uniforms.devicePixelRatio;
                 
@@ -68,15 +79,24 @@ class FilmGrain extends ASinglePassPostEffect {
                     fract(time_value * 0.0671)
                 ) * 1000.0;
                 
-                let noise = filmGrainNoise(grainCoord);
+                let noiseR = filmGrainNoise(grainCoord + vec2<f32>(0.0, 0.0));
+                let noiseG = filmGrainNoise(grainCoord + vec2<f32>(127.1, 311.7));
+                let noiseB = filmGrainNoise(grainCoord + vec2<f32>(269.5, 183.3));
+                
+                let monoGrain = (noiseR + noiseG + noiseB) / 3.0;
+                let colorGrain = vec3<f32>(noiseR, noiseG, noiseB);
+                
+                var grainColor = mix(vec3<f32>(monoGrain), colorGrain, coloredGrain_value);
+                
+                let grainLuminance = dot(grainColor, vec3<f32>(0.333));
+                grainColor = mix(vec3<f32>(grainLuminance), grainColor, grainSaturation_value);
                 
                 let luminance = dot(originalColor.rgb, vec3<f32>(0.299, 0.587, 0.114));
-                
                 let luminanceWeight = pow(max(luminance, 0.01), filmGrainResponse_value);
                 
-                let grain = noise * filmGrainIntensity_value * luminanceWeight;
+                let grain = grainColor * filmGrainIntensity_value * luminanceWeight;
                 
-                let finalColor = originalColor.rgb + vec3<f32>(grain);
+                let finalColor = originalColor.rgb + grain;
                 
                 let outputColor = vec4<f32>(clamp(finalColor, vec3<f32>(0.0), vec3<f32>(1.0)), originalColor.a);
                 
@@ -87,6 +107,8 @@ class FilmGrain extends ASinglePassPostEffect {
                 filmGrainIntensity: f32,
                 filmGrainResponse: f32,
                 filmGrainScale: f32,
+                coloredGrain: f32,
+                grainSaturation: f32,
                 time: f32,
                 devicePixelRatio: f32
             };
@@ -126,6 +148,8 @@ class FilmGrain extends ASinglePassPostEffect {
 		this.uniformBuffer.writeBuffer(this.uniformInfo.members.filmGrainIntensity, this.#filmGrainIntensity);
 		this.uniformBuffer.writeBuffer(this.uniformInfo.members.filmGrainResponse, this.#filmGrainResponse);
 		this.uniformBuffer.writeBuffer(this.uniformInfo.members.filmGrainScale, this.#filmGrainScale);
+		this.uniformBuffer.writeBuffer(this.uniformInfo.members.coloredGrain, this.#coloredGrain);
+		this.uniformBuffer.writeBuffer(this.uniformInfo.members.grainSaturation, this.#grainSaturation);
 		this.uniformBuffer.writeBuffer(this.uniformInfo.members.time, this.#time);
 		this.uniformBuffer.writeBuffer(this.uniformInfo.members.devicePixelRatio, this.#devicePixelRatio);
 	}
@@ -165,10 +189,30 @@ class FilmGrain extends ASinglePassPostEffect {
 		this.uniformBuffer.writeBuffer(this.uniformInfo.members.filmGrainScale, this.#filmGrainScale);
 	}
 
+	get coloredGrain(): number {
+		return this.#coloredGrain;
+	}
+
+	set coloredGrain(value: number) {
+		this.#coloredGrain = Math.max(0.0, Math.min(1.0, value));
+		this.uniformBuffer.writeBuffer(this.uniformInfo.members.coloredGrain, this.#coloredGrain);
+	}
+
+	get grainSaturation(): number {
+		return this.#grainSaturation;
+	}
+
+	set grainSaturation(value: number) {
+		this.#grainSaturation = Math.max(0.0, Math.min(2.0, value));
+		this.uniformBuffer.writeBuffer(this.uniformInfo.members.grainSaturation, this.#grainSaturation);
+	}
+
 	applyPreset(preset: typeof SUBTLE | typeof MEDIUM | typeof HEAVY | typeof VINTAGE): void {
 		this.#filmGrainIntensity = preset.filmGrainIntensity;
 		this.#filmGrainResponse = preset.filmGrainResponse;
 		this.#filmGrainScale = preset.filmGrainScale;
+		this.#coloredGrain = preset.coloredGrain;
+		this.#grainSaturation = preset.grainSaturation;
 		this.#updateUniforms();
 	}
 
