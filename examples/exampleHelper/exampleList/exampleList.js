@@ -587,6 +587,7 @@ const ExampleList = [
 									en: ``
 								},
 							},
+
 							{
 								name: 'BrightnessContrast',
 								path: '3d/postEffect/adjustments/brightnessContrast',
@@ -636,6 +637,14 @@ const ExampleList = [
 							{
 								name: 'BlurY',
 								path: '3d/postEffect/blur/blurY',
+								description: {
+									ko: ``,
+									en: ``
+								},
+							},
+							{
+								name: 'DirectionalBlur',
+								path: '3d/postEffect/blur/DirectionalBlur',
 								description: {
 									ko: ``,
 									en: ``

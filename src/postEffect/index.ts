@@ -9,6 +9,7 @@ import Threshold from "./effects/adjustments/Threshold";
 import Vibrance from "./effects/adjustments/Vibrance";
 import BlurX from "./effects/blur/BlurX";
 import BlurY from "./effects/blur/BlurY";
+import DirectionalBlur from "./effects/blur/DirectionalBlur";
 import GaussianBlur from "./effects/blur/GaussianBlur";
 import ZoomBlur from "./effects/blur/ZoomBlur";
 import Convolution from "./effects/Convolution";
@@ -18,11 +19,12 @@ import PostEffectManager from "./PostEffectManager";
 import ColorBalance from "./effects/adjustments/ColorBalance";
 
 export {
+    BrightnessContrast,
     Convolution,
     ColorBalance,
     ColorTemperatureTint,
+    DirectionalBlur,
     PostEffectManager,
-    BrightnessContrast,
     OldBloom,
     Invert,
     BlurX,
