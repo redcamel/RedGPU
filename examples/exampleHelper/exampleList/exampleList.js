@@ -552,14 +552,7 @@ const ExampleList = [
 							en: ``
 						},
 					},
-					{
-						name: 'LensDistortion',
-						path: '3d/postEffect/lensDistortion',
-						description: {
-							ko: ``,
-							en: ``
-						},
-					},
+
 					{
 						name: 'Adjustments',
 						list: [
@@ -682,6 +675,27 @@ const ExampleList = [
 									en: ``
 								},
 							},
+						]
+					},
+					{
+						name: 'Distortions',
+						list: [
+							{
+								name: 'LensDistortion',
+								path: '3d/postEffect/distortions/lensDistortion',
+								description: {
+									ko: ``,
+									en: ``
+								}
+							},
+							{
+								name: 'ChromaticAberration',
+								path: '3d/postEffect/distortions/chromaticAberration',
+								description: {
+									ko: ``,
+									en: ``
+								}
+							}
 						]
 					},
 				],

@@ -1,8 +1,8 @@
-import RedGPUContext from "../../context/RedGPUContext";
-import validateNumber from "../../runtimeChecker/validateFunc/validateNumber";
-import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumberRange";
-import ASinglePassPostEffect from "../core/ASinglePassPostEffect";
-import createPostEffectCode from "../core/createPostEffectCode";
+import RedGPUContext from "../../../context/RedGPUContext";
+import validateNumber from "../../../runtimeChecker/validateFunc/validateNumber";
+import validateNumberRange from "../../../runtimeChecker/validateFunc/validateNumberRange";
+import ASinglePassPostEffect from "../../core/ASinglePassPostEffect";
+import createPostEffectCode from "../../core/createPostEffectCode";
 
 class LensDistortion extends ASinglePassPostEffect {
 	#barrelStrength: number = 0.1

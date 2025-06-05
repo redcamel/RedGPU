@@ -14,7 +14,8 @@ import GaussianBlur from "./effects/blur/GaussianBlur";
 import RadialBlur from "./effects/blur/RadialBlur";
 import ZoomBlur from "./effects/blur/ZoomBlur";
 import Convolution from "./effects/Convolution";
-import LensDistortion from "./effects/LensDistortion";
+import ChromaticAberration from "./effects/distortions/ChromaticAberration";
+import LensDistortion from "./effects/distortions/LensDistortion";
 import OldBloom from "./effects/oldBloom/OldBloom";
 import Vignetting from "./effects/Vignetting";
 import PostEffectManager from "./PostEffectManager";
@@ -24,6 +25,7 @@ export {
     BrightnessContrast,
     Convolution,
     ColorBalance,
+    ChromaticAberration,
     ColorTemperatureTint,
     DirectionalBlur,
     PostEffectManager,
