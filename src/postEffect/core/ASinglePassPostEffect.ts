@@ -153,12 +153,15 @@ class ASinglePassPostEffect {
 				entries
 			})
 		}
+		this.update(performance.now())
 		this.execute(gpuDevice, width, height)
 		return targetOutputView
 	}
 
 	#prevInfo
+	update(deltaTime: number){
 
+	}
 	#createRenderTexture(view: View3D): boolean {
 		const {redGPUContext, viewRenderTextureManager} = view
 		const {colorTexture} = viewRenderTextureManager

@@ -14,6 +14,7 @@ import GaussianBlur from "./effects/blur/GaussianBlur";
 import RadialBlur from "./effects/blur/RadialBlur";
 import ZoomBlur from "./effects/blur/ZoomBlur";
 import Convolution from "./effects/Convolution";
+import FilmGrain from "./effects/FilmGrain";
 import ChromaticAberration from "./effects/lens/ChromaticAberration";
 import LensDistortion from "./effects/lens/LensDistortion";
 import OldBloom from "./effects/oldBloom/OldBloom";
@@ -26,6 +27,7 @@ export {
     Convolution,
     ColorBalance,
     ChromaticAberration,
+    FilmGrain,
     ColorTemperatureTint,
     DirectionalBlur,
     PostEffectManager,
