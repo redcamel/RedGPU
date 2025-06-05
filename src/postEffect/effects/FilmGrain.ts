@@ -5,28 +5,28 @@ import createPostEffectCode from "../core/createPostEffectCode";
 const SUBTLE = {
 	filmGrainIntensity: 0.02,
 	filmGrainResponse: 0.9,
-	filmGrainScale: 1.0,
+	filmGrainScale: 2.5,
 	coloredGrain: 0.3,
 	grainSaturation: 0.4
 };
 const MEDIUM = {
 	filmGrainIntensity: 0.05,
 	filmGrainResponse: 0.8,
-	filmGrainScale: 1.2,
+	filmGrainScale: 3.0,
 	coloredGrain: 0.5,
 	grainSaturation: 0.6
 };
 const HEAVY = {
 	filmGrainIntensity: 0.12,
 	filmGrainResponse: 0.6,
-	filmGrainScale: 1.5,
+	filmGrainScale: 4.0,
 	coloredGrain: 0.7,
 	grainSaturation: 0.8
 };
 const VINTAGE = {
 	filmGrainIntensity: 0.08,
 	filmGrainResponse: 0.7,
-	filmGrainScale: 2.0,
+	filmGrainScale: 5.0,
 	coloredGrain: 0.9,
 	grainSaturation: 1.0
 };
@@ -37,11 +37,12 @@ class FilmGrain extends ASinglePassPostEffect {
 	static HEAVY = HEAVY;
 	static VINTAGE = VINTAGE;
 
-	#filmGrainIntensity: number = 0.25; // 필름 그레인의 강도/세기
-	#filmGrainResponse: number = 0.8;   // 밝기(luminance)에 따른 그레인의 반응성/민감도
-	#filmGrainScale: number = 1.2;      // 그레인 크기 배율 (1.0 = 기본 크기)
-	#coloredGrain: number = 0.5;        // 컬러 그레인 vs 흑백 그레인 비율 (0.0 = 완전 흑백, 1.0 = 완전 컬러)
-	#grainSaturation: number = 0.6;     // 그레인 색상의 채도 (0.0 = 무채색, 2.0 = 과포화)
+	#filmGrainIntensity: number = HEAVY.filmGrainIntensity;
+	#filmGrainResponse: number = HEAVY.filmGrainResponse;
+	#filmGrainScale: number = HEAVY.filmGrainScale;
+	#coloredGrain: number = HEAVY.coloredGrain;
+	#grainSaturation: number = HEAVY.grainSaturation;
+
 	#time: number = 0.0;
 	#devicePixelRatio: number = 1.0;
 
@@ -73,13 +74,19 @@ class FilmGrain extends ASinglePassPostEffect {
                     return;
                 }
                 
-                let pixelRatio = vec2<f32>(dimW, dimH) * devicePixelRatio_value;
-                let grainCoord = (uv * pixelRatio) / filmGrainScale_value + vec2<f32>(
-                    fract(time_value * 0.1317),
-                    fract(time_value * 0.0671)
-                ) * 1000.0;
+                let baseScale = max(filmGrainScale_value, 0.1);
+                let scaledUV = uv * vec2<f32>(dimW, dimH) * devicePixelRatio_value / baseScale;
                 
-                let noiseR = filmGrainNoise(grainCoord + vec2<f32>(0.0, 0.0));
+                let timeOffset = vec2<f32>(
+                    fract(time_value * 0.0317) * 100.0,
+                    fract(time_value * 0.0271) * 100.0
+                );
+                let grainCoord = scaledUV + timeOffset;
+                
+                let sampleOffset = 1.0 / baseScale;
+                let noiseR = (filmGrainNoise(grainCoord) + 
+                             filmGrainNoise(grainCoord + vec2<f32>(sampleOffset, 0.0)) +
+                             filmGrainNoise(grainCoord + vec2<f32>(0.0, sampleOffset))) / 3.0;
                 let noiseG = filmGrainNoise(grainCoord + vec2<f32>(127.1, 311.7));
                 let noiseB = filmGrainNoise(grainCoord + vec2<f32>(269.5, 183.3));
                 
@@ -88,13 +95,14 @@ class FilmGrain extends ASinglePassPostEffect {
                 
                 var grainColor = mix(vec3<f32>(monoGrain), colorGrain, coloredGrain_value);
                 
-                let grainLuminance = dot(grainColor, vec3<f32>(0.333));
+                let grainLuminance = dot(grainColor, vec3<f32>(0.299, 0.587, 0.114));
                 grainColor = mix(vec3<f32>(grainLuminance), grainColor, grainSaturation_value);
                 
                 let luminance = dot(originalColor.rgb, vec3<f32>(0.299, 0.587, 0.114));
                 let luminanceWeight = pow(max(luminance, 0.01), filmGrainResponse_value);
                 
-                let grain = grainColor * filmGrainIntensity_value * luminanceWeight;
+                let grainIntensity = filmGrainIntensity_value * luminanceWeight;
+                let grain = grainColor * grainIntensity;
                 
                 let finalColor = originalColor.rgb + grain;
                 
@@ -117,7 +125,7 @@ class FilmGrain extends ASinglePassPostEffect {
                 let p = floor(coord);
                 let f = fract(coord);
                 
-                let u = f * f * (3.0 - 2.0 * f);
+                let u = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
                 
                 let a = hash(p);
                 let b = hash(p + vec2<f32>(1.0, 0.0));
@@ -185,7 +193,7 @@ class FilmGrain extends ASinglePassPostEffect {
 	}
 
 	set filmGrainScale(value: number) {
-		this.#filmGrainScale = Math.max(0.1, Math.min(5.0, value));
+		this.#filmGrainScale = Math.max(0.1, Math.min(20.0, value));
 		this.uniformBuffer.writeBuffer(this.uniformInfo.members.filmGrainScale, this.#filmGrainScale);
 	}
 

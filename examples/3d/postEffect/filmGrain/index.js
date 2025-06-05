@@ -74,8 +74,7 @@ const renderTestPane = async (redGPUContext) => {
 		filmGrainResponse: effect.filmGrainResponse,
 		filmGrainScale: effect.filmGrainScale,
 		coloredGrain: effect.coloredGrain,
-		grainSaturation: effect.grainSaturation,
-		grainVariation: effect.grainVariation
+		grainSaturation: effect.grainSaturation
 	};
 
 	const updateEffect = () => {
@@ -86,27 +85,23 @@ const renderTestPane = async (redGPUContext) => {
 		effect.filmGrainScale = TEST_STATE.filmGrainScale;
 		effect.coloredGrain = TEST_STATE.coloredGrain;
 		effect.grainSaturation = TEST_STATE.grainSaturation;
-		effect.grainVariation = TEST_STATE.grainVariation;
 	};
 
 	const applyPreset = (presetName) => {
 		const effect = view.postEffectManager.getEffectAt(0);
 		if (effect) {
 			effect.applyPreset(RedGPU.PostEffect.FilmGrain[presetName]);
-			// 프리셋 적용 후 UI 상태 업데이트
 			TEST_STATE.filmGrainIntensity = effect.filmGrainIntensity;
 			TEST_STATE.filmGrainResponse = effect.filmGrainResponse;
 			TEST_STATE.filmGrainScale = effect.filmGrainScale;
 			TEST_STATE.coloredGrain = effect.coloredGrain;
 			TEST_STATE.grainSaturation = effect.grainSaturation;
-			TEST_STATE.grainVariation = effect.grainVariation;
 			pane.refresh();
 		}
 	};
 
 	const folder = pane.addFolder({title: 'Film Grain', expanded: true});
 
-	// 필름 그레인 토글
 	folder.addBinding(TEST_STATE, 'FilmGrain').on('change', (v) => {
 		if (v.value) {
 			const newEffect = new RedGPU.PostEffect.FilmGrain(redGPUContext);
@@ -127,7 +122,6 @@ const renderTestPane = async (redGPUContext) => {
 		grainSaturationControl.disabled = !v.value;
 	});
 
-	// 기본 속성들
 	const intensityControl = folder.addBinding(TEST_STATE, 'filmGrainIntensity', {
 		min: 0.0,
 		max: 1.0,
@@ -144,12 +138,12 @@ const renderTestPane = async (redGPUContext) => {
 
 	const scaleControl = folder.addBinding(TEST_STATE, 'filmGrainScale', {
 		min: 0.1,
-		max: 5.0,
+		max: 20.0,
 		step: 0.1,
 		label: 'Scale'
 	}).on('change', updateEffect);
 
-	// 새로운 속성들
+
 	const coloredGrainControl = folder.addBinding(TEST_STATE, 'coloredGrain', {
 		min: 0.0,
 		max: 1.0,
@@ -164,16 +158,10 @@ const renderTestPane = async (redGPUContext) => {
 		label: 'Grain Saturation'
 	}).on('change', updateEffect);
 
-
-
-
-	// 프리셋 버튼들
 	const presetFolder = folder.addFolder({title: 'Presets', expanded: true});
 
 	presetFolder.addButton({title: 'Subtle'}).on('click', () => applyPreset('SUBTLE'));
 	presetFolder.addButton({title: 'Medium'}).on('click', () => applyPreset('MEDIUM'));
 	presetFolder.addButton({title: 'Heavy'}).on('click', () => applyPreset('HEAVY'));
 	presetFolder.addButton({title: 'Vintage'}).on('click', () => applyPreset('VINTAGE'));
-
-
 };
