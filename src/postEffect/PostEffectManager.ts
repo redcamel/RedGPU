@@ -55,9 +55,8 @@ class PostEffectManager {
 	}
 
 	render() {
-		const {colorTextureView,colorResolveTextureView, colorTexture} = this.#view.viewRenderTextureManager
+		const {colorTextureView, colorResolveTextureView, colorTexture} = this.#view.viewRenderTextureManager
 		this.#sourceTextureView = this.#renderToStorageTexture(this.#view, this.#view.redGPUContext.useMSAA ? colorResolveTextureView : colorTextureView)
-
 		let sourceTextureView = this.#sourceTextureView
 		const {width, height} = colorTexture
 		this.#postEffects.forEach(effect => {
@@ -92,25 +91,40 @@ class PostEffectManager {
 	}
 
 	#previousDimensions: { width: number, height: number }
+	#previousUseMSAA: boolean
 
 	#renderToStorageTexture(view: View3D, sourceTextureView: GPUTextureView) {
 		const {redGPUContext, viewRenderTextureManager} = view;
 		const {colorTexture} = viewRenderTextureManager;
-		const {gpuDevice} = redGPUContext;
+		const {gpuDevice, useMSAA} = redGPUContext;
 		const {width, height} = colorTexture;
-		if (width !== this.#previousDimensions?.width || height !== this.#previousDimensions?.height) {
+
+		const dimensionsChanged = width !== this.#previousDimensions?.width || height !== this.#previousDimensions?.height;
+		const msaaChanged = this.#previousUseMSAA !== useMSAA;
+
+		// 크기가 변경되면 텍스처 재생성
+		if (dimensionsChanged) {
 			if (this.#storageTexture) {
 				this.#storageTexture.destroy();
 				this.#storageTexture = null;
 			}
 			this.#storageTexture = this.#createStorageTexture(gpuDevice, width, height);
 			this.#storageTextureView = this.#storageTexture.createView();
-			this.#textureComputeBindGroup = this.#createTextureBindGroup(redGPUContext, this.#textureComputeBindGroupLayout, sourceTextureView, this.#storageTextureView)
 		}
-		this.#previousDimensions = {
-			width,
-			height,
+
+		// 크기 변경 또는 MSAA 변경 시 BindGroup 재생성
+		if (dimensionsChanged || msaaChanged) {
+			this.#textureComputeBindGroup = this.#createTextureBindGroup(
+				redGPUContext,
+				this.#textureComputeBindGroupLayout,
+				sourceTextureView,
+				this.#storageTextureView
+			);
 		}
+
+		this.#previousUseMSAA = useMSAA;
+		this.#previousDimensions = { width, height };
+
 		this.#executeComputePass(
 			gpuDevice,
 			this.#textureComputePipeline,

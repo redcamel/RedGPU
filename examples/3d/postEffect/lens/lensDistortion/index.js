@@ -76,8 +76,11 @@ function loadGLTF(view, url) {
 // Function to render Test Pane (for controls)
 // 테스트 패널을 렌더링하는 함수
 const renderTestPane = async (redGPUContext) => {
+	const {setRedGPUTest_pane} = await import("../../../../exampleHelper/createExample/panes/index.js");
+
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const pane = new Pane();
+	setRedGPUTest_pane(pane, redGPUContext, true);
 
 	const view = redGPUContext.viewList[0]
 	const TEST_STATE = {

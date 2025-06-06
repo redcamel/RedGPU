@@ -66,7 +66,7 @@ class FinalRender {
         finalRenderPassEnc.setViewport(0, 0, canvasW, canvasH, 0, 1);
         finalRenderPassEnc.setScissorRect(0, 0, canvasW, canvasH);
         //
-        if (!this.#vertexBindGroupLayout) this.#initGPUDetails(redGPUContext)
+        if (!this.#vertexBindGroupLayout || useMSAA !==this.#prevUseMSAA) this.#initGPUDetails(redGPUContext)
         this.#renderViewList(
             redGPUContext,
             finalRenderPassEnc,
@@ -212,7 +212,7 @@ class FinalRender {
     }
 
     #getPipeline(redGPUContext: RedGPUContext) {
-        if (!this.#pipeline) {
+        if (!this.#pipeline || redGPUContext.useMSAA !==this.#prevUseMSAA) {
             const {gpuDevice} = redGPUContext
             const pipelineLayout: GPUPipelineLayout = gpuDevice.createPipelineLayout({
                 bindGroupLayouts: [
