@@ -55,9 +55,9 @@ class PostEffectManager {
 	}
 
 	render() {
-		const {colorResolveTextureView, colorTexture} = this.#view.viewRenderTextureManager
-		//
-		this.#sourceTextureView = this.#renderToStorageTexture(this.#view, colorResolveTextureView)
+		const {colorTextureView,colorResolveTextureView, colorTexture} = this.#view.viewRenderTextureManager
+		this.#sourceTextureView = this.#renderToStorageTexture(this.#view, this.#view.redGPUContext.useMSAA ? colorResolveTextureView : colorTextureView)
+
 		let sourceTextureView = this.#sourceTextureView
 		const {width, height} = colorTexture
 		this.#postEffects.forEach(effect => {
