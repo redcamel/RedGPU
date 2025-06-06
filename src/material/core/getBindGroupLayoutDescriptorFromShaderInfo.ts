@@ -1,4 +1,9 @@
-const getBindGroupLayoutDescriptorFromShaderInfo = (SHADER_INFO, targetGroupIndex: number, visibility: GPUFlagsConstant) => {
+const getBindGroupLayoutDescriptorFromShaderInfo = (
+  SHADER_INFO,
+  targetGroupIndex: number,
+  visibility: GPUFlagsConstant,
+  useMSAA:boolean=true
+) => {
     const {textures, samplers, uniforms, storage} = SHADER_INFO
     const entries: GPUBindGroupLayoutEntry[] = []
     for (const k in storage) {
@@ -35,10 +40,15 @@ const getBindGroupLayoutDescriptorFromShaderInfo = (SHADER_INFO, targetGroupInde
         const info = textures[k]
         const {binding, name, group, type} = info
         const {name: textureType} = type
+        console.log('textureType',textureType)
         if (targetGroupIndex === group) {
             entries.push(
                 {
-                    binding, visibility, texture: textureType === "texture_cube" ? {
+                    binding, visibility, texture:textureType === "texture_depth_2d" ? {
+                        viewDimension: '2d',
+                        sampleType: 'depth',
+                        multisampled: useMSAA
+                    }: textureType === "texture_cube" ? {
                         viewDimension: 'cube'
                     } : {}
                 }
@@ -74,8 +84,8 @@ const getFragmentBindGroupLayoutDescriptorFromShaderInfo = (SHADER_INFO, targetG
 const getVertexBindGroupLayoutDescriptorFromShaderInfo = (SHADER_INFO, targetGroupIndex: number) => {
     return getBindGroupLayoutDescriptorFromShaderInfo(SHADER_INFO, targetGroupIndex, GPUShaderStage.VERTEX)
 }
-const getComputeBindGroupLayoutDescriptorFromShaderInfo = (SHADER_INFO, targetGroupIndex: number) => {
-    return getBindGroupLayoutDescriptorFromShaderInfo(SHADER_INFO, targetGroupIndex, GPUShaderStage.COMPUTE)
+const getComputeBindGroupLayoutDescriptorFromShaderInfo = (SHADER_INFO, targetGroupIndex: number,useMSAA:boolean) => {
+    return getBindGroupLayoutDescriptorFromShaderInfo(SHADER_INFO, targetGroupIndex, GPUShaderStage.COMPUTE,useMSAA)
 }
 export {
     getFragmentBindGroupLayoutDescriptorFromShaderInfo,

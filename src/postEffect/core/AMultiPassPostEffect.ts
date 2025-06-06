@@ -1,11 +1,12 @@
+import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
 import ASinglePassPostEffect from "./ASinglePassPostEffect";
 
 class AMultiPassPostEffect extends ASinglePassPostEffect {
     #passList: ASinglePassPostEffect[] = []
 
-    constructor(passList: ASinglePassPostEffect[]) {
-        super();
+    constructor(redGPUContext:RedGPUContext,passList: ASinglePassPostEffect[]) {
+        super(redGPUContext);
         this.#passList.push(
             ...passList
         )

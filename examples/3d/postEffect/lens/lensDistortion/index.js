@@ -16,6 +16,7 @@ RedGPU.init(
 		controller.distance = 3
 		controller.speedDistance = 0.1
 		controller.tilt = 0
+		redGPUContext.useMSAA = false
 
 		// Create a scene and add a view with the camera controller
 		// 씬을 생성하고 카메라 컨트롤러와 함께 뷰 추가
@@ -76,10 +77,11 @@ function loadGLTF(view, url) {
 // Function to render Test Pane (for controls)
 // 테스트 패널을 렌더링하는 함수
 const renderTestPane = async (redGPUContext) => {
+	const {setRedGPUTest_pane} = await import("../../../../exampleHelper/createExample/panes/index.js");
 
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const pane = new Pane();
-
+	setRedGPUTest_pane(pane, redGPUContext, true);
 	const view = redGPUContext.viewList[0]
 	const TEST_STATE = {
 		LensDistortion: true,

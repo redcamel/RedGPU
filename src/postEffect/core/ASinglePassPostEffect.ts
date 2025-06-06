@@ -2,25 +2,36 @@ import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../material";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
+import Sampler from "../../resources/sampler/Sampler";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 
 class ASinglePassPostEffect {
 	#computeShader: GPUShaderModule
 	#computeBindGroupLayout: GPUBindGroupLayout
 	#computeBindGroup: GPUBindGroup
+	#computeBindGroupEntries: GPUBindGroupEntry[]
 	#computePipeline: GPUComputePipeline
 	///
 	#uniformBuffer: UniformBuffer
 	#uniformInfo
 	#storageInfo
+	#name
+	#SHADER_INFO
+	#bindGroupLayout: GPUBindGroupLayout
 //
 	#outputTexture: GPUTexture[] = []
 	#outputTextureView: GPUTextureView[] = []
 	#WORK_SIZE_X = 16
 	#WORK_SIZE_Y = 16
 	#WORK_SIZE_Z = 1
+	#previousUseMSAA: boolean
+	#redGPUContext:RedGPUContext
+	get redGPUContext(): RedGPUContext {
+		return this.#redGPUContext;
+	}
 
-	constructor() {
+	constructor(redGPUContext:RedGPUContext) {
+		this.#redGPUContext = redGPUContext
 	}
 
 	get storageInfo() {
@@ -76,14 +87,16 @@ class ASinglePassPostEffect {
 	}
 
 	init(redGPUContext: RedGPUContext, name: string, computeCode: string, bindGroupLayout?: GPUBindGroupLayout) {
-		const {resourceManager, gpuDevice} = redGPUContext
+		this.#name = name
+		this.#bindGroupLayout = bindGroupLayout
+		const {resourceManager, gpuDevice, useMSAA} = redGPUContext
 		this.#computeShader = resourceManager.createGPUShaderModule(
 			name,
 			{code: computeCode}
 		)
-		const SHADER_INFO = parseWGSL(computeCode)
-		const STORAGE_STRUCT = SHADER_INFO.storage;
-		const UNIFORM_STRUCT = SHADER_INFO.uniforms.uniforms;
+		this.#SHADER_INFO = parseWGSL(computeCode)
+		const STORAGE_STRUCT = this.#SHADER_INFO.storage;
+		const UNIFORM_STRUCT = this.#SHADER_INFO.uniforms.uniforms;
 		this.#storageInfo = STORAGE_STRUCT
 		// console.log(name, 'UNIFORM_STRUCT', UNIFORM_STRUCT)
 		// console.log(name, 'STORAGE_STRUCT', STORAGE_STRUCT)
@@ -93,18 +106,10 @@ class ASinglePassPostEffect {
 			this.#uniformBuffer = new UniformBuffer(
 				redGPUContext,
 				uniformData,
-				`${this.constructor.name}_UniformBuffer`
+				`${this.constructor.name}_UniformBuffer`,
+
 			)
 		}
-		this.#computeBindGroupLayout = bindGroupLayout || redGPUContext.resourceManager.getGPUBindGroupLayout(`${name}_BIND_GROUP_LAYOUT`) || redGPUContext.resourceManager.createBindGroupLayout(
-			`${name}_BIND_GROUP_LAYOUT`,
-			getComputeBindGroupLayoutDescriptorFromShaderInfo(SHADER_INFO, 0)
-		)
-		this.#computePipeline = gpuDevice.createComputePipeline({
-			label: `${name}_COMPUTE_PIPELINE`,
-			layout: gpuDevice.createPipelineLayout({bindGroupLayouts: [this.#computeBindGroupLayout]}),
-			compute: {module: this.#computeShader, entryPoint: 'main',}
-		})
 	}
 
 	execute(gpuDevice: GPUDevice, width: number, height: number) {
@@ -118,24 +123,40 @@ class ASinglePassPostEffect {
 	}
 
 	render(view: View3D, width: number, height: number, ...sourceTextureView) {
-		const changed = this.#createRenderTexture(view)
+		const dimensionsChanged = this.#createRenderTexture(view)
+		const msaaChanged = this.#previousUseMSAA !== view.redGPUContext.useMSAA;
 		const targetOutputView = this.getOutputTextureView()
 		const {redGPUContext} = view
-		const {gpuDevice} = redGPUContext
-		if (changed) {
-			const entries: GPUBindGroupEntry[] = []
+		const {gpuDevice, useMSAA} = redGPUContext
+		if (dimensionsChanged || msaaChanged) {
+
+
+
+			this.#computeBindGroupEntries = []
 			for (const k in this.#storageInfo) {
 				const info = this.#storageInfo[k]
 				const {binding, name} = info
-				entries.push(
+				this.#computeBindGroupEntries.push(
 					{
 						binding: binding,
 						resource: name === 'outputTexture' ? targetOutputView : sourceTextureView[binding],
 					}
 				)
 			}
+			this.#computeBindGroupEntries.push(
+				{
+					binding: 2,
+					resource: view.viewRenderTextureManager.depthTextureView
+				}
+			)
+			this.#computeBindGroupEntries.push(
+				{
+					binding: 3,
+					resource: new Sampler(redGPUContext).gpuSampler
+				}
+			)
 			if (this.#uniformBuffer) {
-				entries.push(
+				this.#computeBindGroupEntries.push(
 					{
 						binding: this.#uniformInfo.binding,
 						resource: {
@@ -148,20 +169,33 @@ class ASinglePassPostEffect {
 			}
 			// console.log(entries)
 			// console.log(this.#computeBindGroupLayout)
+		}
+		if (dimensionsChanged || msaaChanged) {
+			this.#computeBindGroupLayout = redGPUContext.resourceManager.getGPUBindGroupLayout(`${this.#name}_BIND_GROUP_LAYOUT_USE_MSAA_${useMSAA}`) ||
+				redGPUContext.resourceManager.createBindGroupLayout(`${this.#name}_BIND_GROUP_LAYOUT_USE_MSAA_${useMSAA}`,
+				getComputeBindGroupLayoutDescriptorFromShaderInfo(this.#SHADER_INFO, 0, useMSAA)
+			)
 			this.#computeBindGroup = gpuDevice.createBindGroup({
 				layout: this.#computeBindGroupLayout,
-				entries
+				entries: this.#computeBindGroupEntries
+			})
+			this.#computePipeline = gpuDevice.createComputePipeline({
+				label: `${this.#name}_COMPUTE_PIPELINE_USE_MSAA_${useMSAA}`,
+				layout: gpuDevice.createPipelineLayout({bindGroupLayouts: [this.#computeBindGroupLayout]}),
+				compute: {module: this.#computeShader, entryPoint: 'main',}
 			})
 		}
 		this.update(performance.now())
 		this.execute(gpuDevice, width, height)
+		this.#previousUseMSAA = view.redGPUContext.useMSAA
 		return targetOutputView
 	}
 
 	#prevInfo
-	update(deltaTime: number){
 
+	update(deltaTime: number) {
 	}
+
 	#createRenderTexture(view: View3D): boolean {
 		const {redGPUContext, viewRenderTextureManager} = view
 		const {colorTexture} = viewRenderTextureManager

@@ -11,7 +11,7 @@ class LensDistortion extends ASinglePassPostEffect {
 	#centerY: number = 0
 
 	constructor(redGPUContext: RedGPUContext) {
-		super();
+		super(redGPUContext);
 		const computeCode = createPostEffectCode(
 			this,
 			`
@@ -33,7 +33,10 @@ class LensDistortion extends ASinglePassPostEffect {
 				let distortionFactor = barrelFactor * pincushionFactor;
 				
 				let distortedUV = uvCenter + offset * distortionFactor;
-				
+				let depth = textureLoad(depthTexture, vec2<i32>(global_id.xy), 0);
+				let depthColor = vec4<f32>(depth, depth, depth, 1.0);
+
+
 				if (distortedUV.x < 0.0 || distortedUV.x > 1.0 || 
 					distortedUV.y < 0.0 || distortedUV.y > 1.0) {
 					textureStore(outputTexture, vec2<i32>(global_id.xy), vec4<f32>(0.0, 0.0, 0.0, 1.0));
@@ -45,6 +48,8 @@ class LensDistortion extends ASinglePassPostEffect {
 					
 					let sampledColor = textureLoad(sourceTexture, sampleCoord).xyzw;
 					textureStore(outputTexture, vec2<i32>(global_id.xy), sampledColor);
+					textureStore(outputTexture, vec2<i32>(global_id.xy), depthColor);
+
 				}
 			`,
 			`
@@ -54,12 +59,12 @@ class LensDistortion extends ASinglePassPostEffect {
 				centerX: f32,
 				centerY: f32
 			};
-			`
+			`,
 		)
 		this.init(
 			redGPUContext,
 			'POST_EFFECT_LENS_DISTORTION',
-			computeCode
+			computeCode,
 		)
 		this.barrelStrength = this.#barrelStrength
 		this.pincushionStrength = this.#pincushionStrength

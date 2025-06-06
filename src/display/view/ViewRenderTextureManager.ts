@@ -113,7 +113,8 @@ class ViewRenderTextureManager {
 				],
 				sampleCount: useMSAA ? 4 : 1,
 				format: depthYn ? 'depth24plus' : navigator.gpu.getPreferredCanvasFormat(),
-				usage: GPUTextureUsage.RENDER_ATTACHMENT | (textureType === 'color' ? GPUTextureUsage.TEXTURE_BINDING : 0)
+				// usage: GPUTextureUsage.RENDER_ATTACHMENT | (textureType === 'color' ? GPUTextureUsage.TEXTURE_BINDING : 0)
+				usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING
 			})
 			if (depthYn) {
 				this.#depthTexture = newTexture;
