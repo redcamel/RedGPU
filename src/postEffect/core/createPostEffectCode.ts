@@ -1,8 +1,8 @@
 import ASinglePassPostEffect from "./ASinglePassPostEffect";
 
-const createPostEffectCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: string = '') => {
+const createCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: string = '', useMSAA: boolean = false) => {
 	const {WORK_SIZE_X, WORK_SIZE_Y, WORK_SIZE_Z} = effect
-	const depthTextureType = effect.redGPUContext.useMSAA ? 'texture_depth_multisampled_2d' : 'texture_depth_2d';
+	const depthTextureType = useMSAA ? 'texture_depth_multisampled_2d' : 'texture_depth_2d';
 	return `
 			${uniformStruct}
       @group(0) @binding(0) var sourceTexture : texture_storage_2d<rgba8unorm,read>;
@@ -16,8 +16,17 @@ const createPostEffectCode = (effect: ASinglePassPostEffect, code: string, unifo
         @builtin(global_invocation_id) global_id : vec3<u32>,
       ){
           ${code}
-      };
+      }
   `
 }
+
+// 헬퍼 함수: MSAA와 Non-MSAA 코드를 모두 생성
+const createPostEffectCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: string = '') => {
+	return {
+		msaa: createCode(effect, code, uniformStruct, true),
+		nonMsaa: createCode(effect, code, uniformStruct, false)
+	}
+}
+
 Object.freeze(createPostEffectCode)
 export default createPostEffectCode

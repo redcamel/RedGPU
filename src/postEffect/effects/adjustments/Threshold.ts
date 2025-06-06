@@ -7,7 +7,7 @@ class Threshold extends ASinglePassPostEffect {
     #threshold: number = 128
 
     constructor(redGPUContext: RedGPUContext) {
-        super();
+        super(redGPUContext);
         const computeCode = createPostEffectCode(
             this,
             `

@@ -8,7 +8,7 @@ class Vibrance extends ASinglePassPostEffect {
 	#saturation: number = 0    // -100 ~ 100
 
 	constructor(redGPUContext: RedGPUContext) {
-		super();
+		super(redGPUContext);
 		const computeCode = createPostEffectCode(
 			this,
 			`

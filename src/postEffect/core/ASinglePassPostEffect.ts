@@ -6,17 +6,21 @@ import Sampler from "../../resources/sampler/Sampler";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 
 class ASinglePassPostEffect {
-	#computeShader: GPUShaderModule
+	#computeShaderMSAA: GPUShaderModule
+	#computeShaderNonMSAA: GPUShaderModule
 	#computeBindGroupLayout: GPUBindGroupLayout
 	#computeBindGroup: GPUBindGroup
 	#computeBindGroupEntries: GPUBindGroupEntry[]
 	#computePipeline: GPUComputePipeline
 	///
 	#uniformBuffer: UniformBuffer
-	#uniformInfo
-	#storageInfo
+	#uniformInfoMSAA
+	#uniformInfoNonMSAA
+	#storageInfoMSAA
+	#storageInfoNonMSAA
 	#name
-	#SHADER_INFO
+	#SHADER_INFO_MSAA
+	#SHADER_INFO_NON_MSAA
 	#bindGroupLayout: GPUBindGroupLayout
 //
 	#outputTexture: GPUTexture[] = []
@@ -25,17 +29,23 @@ class ASinglePassPostEffect {
 	#WORK_SIZE_Y = 16
 	#WORK_SIZE_Z = 1
 	#previousUseMSAA: boolean
-	#redGPUContext:RedGPUContext
+	#redGPUContext: RedGPUContext
 	get redGPUContext(): RedGPUContext {
 		return this.#redGPUContext;
 	}
 
-	constructor(redGPUContext:RedGPUContext) {
+	constructor(redGPUContext: RedGPUContext) {
 		this.#redGPUContext = redGPUContext
 	}
 
 	get storageInfo() {
-		return this.#storageInfo;
+		const useMSAA = this.#redGPUContext.useMSAA;
+		return useMSAA ? this.#storageInfoMSAA : this.#storageInfoNonMSAA;
+	}
+
+	get shaderInfo() {
+		const useMSAA = this.#redGPUContext.useMSAA;
+		return useMSAA ? this.#SHADER_INFO_MSAA : this.#SHADER_INFO_NON_MSAA;
 	}
 
 	get uniformBuffer(): UniformBuffer {
@@ -43,7 +53,8 @@ class ASinglePassPostEffect {
 	}
 
 	get uniformInfo() {
-		return this.#uniformInfo;
+		const useMSAA = this.#redGPUContext.useMSAA;
+		return useMSAA ? this.#uniformInfoMSAA : this.#uniformInfoNonMSAA;
 	}
 
 	get WORK_SIZE_X(): number {
@@ -86,28 +97,45 @@ class ASinglePassPostEffect {
 		}
 	}
 
-	init(redGPUContext: RedGPUContext, name: string, computeCode: string, bindGroupLayout?: GPUBindGroupLayout) {
+	init(redGPUContext: RedGPUContext, name: string, computeCodes: {
+		msaa: string,
+		nonMsaa: string
+	}, bindGroupLayout?: GPUBindGroupLayout) {
 		this.#name = name
-		this.#bindGroupLayout = bindGroupLayout
+		// this.#bindGroupLayout = bindGroupLayout
 		const {resourceManager, gpuDevice, useMSAA} = redGPUContext
-		this.#computeShader = resourceManager.createGPUShaderModule(
-			name,
-			{code: computeCode}
+		// MSAA 셰이더 생성
+		this.#computeShaderMSAA = resourceManager.createGPUShaderModule(
+			`${name}_MSAA`,
+			{code: computeCodes.msaa}
 		)
-		this.#SHADER_INFO = parseWGSL(computeCode)
-		const STORAGE_STRUCT = this.#SHADER_INFO.storage;
-		const UNIFORM_STRUCT = this.#SHADER_INFO.uniforms.uniforms;
-		this.#storageInfo = STORAGE_STRUCT
-		// console.log(name, 'UNIFORM_STRUCT', UNIFORM_STRUCT)
-		// console.log(name, 'STORAGE_STRUCT', STORAGE_STRUCT)
-		if (UNIFORM_STRUCT) {
-			this.#uniformInfo = UNIFORM_STRUCT
-			const uniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength)
+		// Non-MSAA 셰이더 생성
+		this.#computeShaderNonMSAA = resourceManager.createGPUShaderModule(
+			`${name}_NonMSAA`,
+			{code: computeCodes.nonMsaa}
+		)
+		// SHADER_INFO 파싱
+		this.#SHADER_INFO_MSAA = parseWGSL(computeCodes.msaa)
+		this.#SHADER_INFO_NON_MSAA = parseWGSL(computeCodes.nonMsaa)
+		// console.log('MSAA Shader Code:', computeCodes.msaa);
+		// console.log('Non-MSAA Shader Code:', computeCodes.nonMsaa);
+		// MSAA 정보 저장
+		const STORAGE_STRUCT_MSAA = this.#SHADER_INFO_MSAA.storage;
+		const UNIFORM_STRUCT_MSAA = this.#SHADER_INFO_MSAA.uniforms.uniforms;
+		this.#storageInfoMSAA = STORAGE_STRUCT_MSAA
+		this.#uniformInfoMSAA = UNIFORM_STRUCT_MSAA
+		// Non-MSAA 정보 저장
+		const STORAGE_STRUCT_NON_MSAA = this.#SHADER_INFO_NON_MSAA.storage;
+		const UNIFORM_STRUCT_NON_MSAA = this.#SHADER_INFO_NON_MSAA.uniforms.uniforms;
+		this.#storageInfoNonMSAA = STORAGE_STRUCT_NON_MSAA
+		this.#uniformInfoNonMSAA = UNIFORM_STRUCT_NON_MSAA
+		// UniformBuffer는 구조가 동일하므로 하나만 생성 (Non-MSAA 기준)
+		if (UNIFORM_STRUCT_NON_MSAA) {
+			const uniformData = new ArrayBuffer(UNIFORM_STRUCT_NON_MSAA.arrayBufferByteLength)
 			this.#uniformBuffer = new UniformBuffer(
 				redGPUContext,
 				uniformData,
 				`${this.constructor.name}_UniformBuffer`,
-
 			)
 		}
 	}
@@ -129,12 +157,12 @@ class ASinglePassPostEffect {
 		const {redGPUContext} = view
 		const {gpuDevice, useMSAA} = redGPUContext
 		if (dimensionsChanged || msaaChanged) {
-
-
-
+			// 현재 MSAA 상태에 맞는 정보 사용
+			const currentStorageInfo = this.storageInfo;
+			const currentUniformInfo = this.uniformInfo;
 			this.#computeBindGroupEntries = []
-			for (const k in this.#storageInfo) {
-				const info = this.#storageInfo[k]
+			for (const k in currentStorageInfo) {
+				const info = currentStorageInfo[k]
 				const {binding, name} = info
 				this.#computeBindGroupEntries.push(
 					{
@@ -143,22 +171,33 @@ class ASinglePassPostEffect {
 					}
 				)
 			}
-			this.#computeBindGroupEntries.push(
-				{
-					binding: 2,
-					resource: view.viewRenderTextureManager.depthTextureView
+			// console.log('shaderInfo', this.shaderInfo)
+			this.shaderInfo.textures.forEach(texture => {
+				const {name} = texture
+				if (name === "depthTexture") {
+					this.#computeBindGroupEntries.push(
+						{
+							binding: texture.binding,
+							resource: view.viewRenderTextureManager.depthTextureView
+						}
+					)
 				}
-			)
-			this.#computeBindGroupEntries.push(
-				{
-					binding: 3,
-					resource: new Sampler(redGPUContext).gpuSampler
+			})
+			this.shaderInfo.samplers.forEach(texture => {
+				const {name} = texture
+				if (name === "depthSampler") {
+					this.#computeBindGroupEntries.push(
+						{
+							binding: 3,
+							resource: new Sampler(redGPUContext).gpuSampler
+						}
+					)
 				}
-			)
-			if (this.#uniformBuffer) {
+			})
+			if (this.#uniformBuffer && currentUniformInfo) {
 				this.#computeBindGroupEntries.push(
 					{
-						binding: this.#uniformInfo.binding,
+						binding: currentUniformInfo.binding,
 						resource: {
 							buffer: this.#uniformBuffer.gpuBuffer,
 							offset: 0,
@@ -167,14 +206,15 @@ class ASinglePassPostEffect {
 					}
 				)
 			}
-			// console.log(entries)
-			// console.log(this.#computeBindGroupLayout)
 		}
 		if (dimensionsChanged || msaaChanged) {
+			// MSAA 상태에 따라 적절한 SHADER_INFO 선택
+			const currentShaderInfo = useMSAA ? this.#SHADER_INFO_MSAA : this.#SHADER_INFO_NON_MSAA;
+			const currentShader = useMSAA ? this.#computeShaderMSAA : this.#computeShaderNonMSAA;
 			this.#computeBindGroupLayout = redGPUContext.resourceManager.getGPUBindGroupLayout(`${this.#name}_BIND_GROUP_LAYOUT_USE_MSAA_${useMSAA}`) ||
 				redGPUContext.resourceManager.createBindGroupLayout(`${this.#name}_BIND_GROUP_LAYOUT_USE_MSAA_${useMSAA}`,
-				getComputeBindGroupLayoutDescriptorFromShaderInfo(this.#SHADER_INFO, 0, useMSAA)
-			)
+					getComputeBindGroupLayoutDescriptorFromShaderInfo(currentShaderInfo, 0, useMSAA)
+				)
 			this.#computeBindGroup = gpuDevice.createBindGroup({
 				layout: this.#computeBindGroupLayout,
 				entries: this.#computeBindGroupEntries
@@ -182,7 +222,7 @@ class ASinglePassPostEffect {
 			this.#computePipeline = gpuDevice.createComputePipeline({
 				label: `${this.#name}_COMPUTE_PIPELINE_USE_MSAA_${useMSAA}`,
 				layout: gpuDevice.createPipelineLayout({bindGroupLayouts: [this.#computeBindGroupLayout]}),
-				compute: {module: this.#computeShader, entryPoint: 'main',}
+				compute: {module: currentShader, entryPoint: 'main',}
 			})
 		}
 		this.update(performance.now())

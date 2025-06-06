@@ -37,7 +37,7 @@ class Convolution extends ASinglePassPostEffect {
     #kernel: number[] = BLUR;
 
     constructor(redGPUContext: RedGPUContext) {
-        super();
+        super(redGPUContext);
         const computeCode = createPostEffectCode(
             this,
             `

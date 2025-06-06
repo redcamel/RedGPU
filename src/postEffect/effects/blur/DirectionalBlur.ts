@@ -9,7 +9,7 @@ class DirectionalBlur extends ASinglePassPostEffect {
 	#angle: number = 0  // 0도 = 오른쪽 (포토샵 기본값)
 
 	constructor(redGPUContext: RedGPUContext) {
-		super();
+		super(redGPUContext);
 		const computeCode = createPostEffectCode(
 			this,
 			`

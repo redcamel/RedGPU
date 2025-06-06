@@ -8,7 +8,7 @@ class BrightnessContrast extends ASinglePassPostEffect {
     #contrast: number = 0
 
     constructor(redGPUContext: RedGPUContext) {
-        super();
+        super(redGPUContext);
         const computeCode = createPostEffectCode(
             this,
             `

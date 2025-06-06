@@ -8,7 +8,7 @@ class ColorTemperatureTint extends ASinglePassPostEffect {
 	#tint: number = 0               // -100 ~ 100 (Green/Magenta)
 	#strength: number = 100         // 0 ~ 100 (효과 강도)
 	constructor(redGPUContext: RedGPUContext) {
-		super();
+		super(redGPUContext);
 		const computeCode = createPostEffectCode(
 			this,
 			`

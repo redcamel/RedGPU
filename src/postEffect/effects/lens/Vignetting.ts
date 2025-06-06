@@ -8,7 +8,7 @@ class Vignetting extends ASinglePassPostEffect {
     #size: number = 0.5
 
     constructor(redGPUContext: RedGPUContext) {
-        super();
+        super(redGPUContext);
         const computeCode = createPostEffectCode(
             this,
             `

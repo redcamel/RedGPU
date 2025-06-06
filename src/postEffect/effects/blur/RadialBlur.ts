@@ -11,7 +11,7 @@ class RadialBlur extends ASinglePassPostEffect {
 	#sampleCount: number = 16
 
 	constructor(redGPUContext: RedGPUContext) {
-		super();
+		super(redGPUContext);
 		const computeCode = createPostEffectCode(
 			this,
 			`

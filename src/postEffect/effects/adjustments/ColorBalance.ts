@@ -20,7 +20,7 @@ class ColorBalance extends ASinglePassPostEffect {
 
 
     constructor(redGPUContext: RedGPUContext) {
-        super();
+        super(redGPUContext);
         const computeCode = createPostEffectCode(
             this,
             `

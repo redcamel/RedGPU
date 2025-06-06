@@ -10,7 +10,7 @@ class ZoomBlur extends ASinglePassPostEffect {
     #centerY: number = 0
 
     constructor(redGPUContext: RedGPUContext) {
-        super();
+        super(redGPUContext);
         const computeCode = createPostEffectCode(
             this,
             `

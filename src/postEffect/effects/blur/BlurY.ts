@@ -7,7 +7,7 @@ class BlurY extends ASinglePassPostEffect {
     #size: number = 32
 
     constructor(redGPUContext: RedGPUContext) {
-        super();
+        super(redGPUContext);
         const computeCode = createPostEffectCode(
             this,
             `

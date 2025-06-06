@@ -10,7 +10,7 @@ class ChromaticAberration extends ASinglePassPostEffect {
 	#falloff: number = 1.0
 
 	constructor(redGPUContext: RedGPUContext) {
-		super();
+		super(redGPUContext);
 		const computeCode = createPostEffectCode(
 			this,
 			`

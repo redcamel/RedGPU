@@ -4,7 +4,7 @@ import createPostEffectCode from "../../core/createPostEffectCode";
 
 class Invert extends ASinglePassPostEffect {
     constructor(redGPUContext: RedGPUContext) {
-        super();
+        super(redGPUContext);
         const computeCode = createPostEffectCode(
             this,
             `

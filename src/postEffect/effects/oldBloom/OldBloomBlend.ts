@@ -7,7 +7,7 @@ class OldBloomBlend extends ASinglePassPostEffect {
     #exposure: number = 1
 
     constructor(redGPUContext: RedGPUContext) {
-        super();
+        super(redGPUContext);
         const {WORK_SIZE_X, WORK_SIZE_Y, WORK_SIZE_Z} = this
         const computeCode =
             `
@@ -44,7 +44,10 @@ class OldBloomBlend extends ASinglePassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_OLD_BLOOM',
-            computeCode,
+          {
+              msaa:computeCode,
+              nonMsaa:computeCode
+          },
         )
         this.exposure = this.#exposure
         this.bloomStrength = this.#bloomStrength

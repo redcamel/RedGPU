@@ -47,7 +47,7 @@ class FilmGrain extends ASinglePassPostEffect {
 	#devicePixelRatio: number = 1.0;
 
 	constructor(redGPUContext: RedGPUContext) {
-		super();
+		super(redGPUContext);
 		this.#devicePixelRatio = window?.devicePixelRatio || 1.0;
 
 		const computeCode = createPostEffectCode(
