@@ -8,9 +8,12 @@ import parseWGSL from "../../resources/wgslParser/parseWGSL";
 class ASinglePassPostEffect {
 	#computeShaderMSAA: GPUShaderModule
 	#computeShaderNonMSAA: GPUShaderModule
-	#computeBindGroupLayout: GPUBindGroupLayout
-	#computeBindGroup: GPUBindGroup
-	#computeBindGroupEntries: GPUBindGroupEntry[]
+	#computeBindGroupLayout0: GPUBindGroupLayout
+	#computeBindGroupLayout1: GPUBindGroupLayout
+	#computeBindGroup0: GPUBindGroup
+	#computeBindGroup1: GPUBindGroup
+	#computeBindGroupEntries0: GPUBindGroupEntry[]
+	#computeBindGroupEntries1: GPUBindGroupEntry[]
 	#computePipeline: GPUComputePipeline
 	///
 	#uniformBuffer: UniformBuffer
@@ -144,7 +147,8 @@ class ASinglePassPostEffect {
 		const commentEncode_compute = gpuDevice.createCommandEncoder()
 		const computePassEncoder = commentEncode_compute.beginComputePass()
 		computePassEncoder.setPipeline(this.#computePipeline)
-		computePassEncoder.setBindGroup(0, this.#computeBindGroup)
+		computePassEncoder.setBindGroup(0, this.#computeBindGroup0)
+		computePassEncoder.setBindGroup(1, this.#computeBindGroup1)
 		computePassEncoder.dispatchWorkgroups(Math.ceil(width / this.WORK_SIZE_X), Math.ceil(height / this.WORK_SIZE_Y));
 		computePassEncoder.end();
 		gpuDevice.queue.submit([commentEncode_compute.finish()]);
@@ -160,71 +164,97 @@ class ASinglePassPostEffect {
 			// 현재 MSAA 상태에 맞는 정보 사용
 			const currentStorageInfo = this.storageInfo;
 			const currentUniformInfo = this.uniformInfo;
-			this.#computeBindGroupEntries = []
+			this.#computeBindGroupEntries0 = []
+			this.#computeBindGroupEntries1 = []
+
+			// Group 0: source textures (outputTexture 제외)
 			for (const k in currentStorageInfo) {
 				const info = currentStorageInfo[k]
 				const {binding, name} = info
-				this.#computeBindGroupEntries.push(
-					{
-						binding: binding,
-						resource: name === 'outputTexture' ? targetOutputView : sourceTextureView[binding],
-					}
-				)
+				if (name !== 'outputTexture') {
+					this.#computeBindGroupEntries0.push(
+						{
+							binding: binding,
+							resource: sourceTextureView[binding],
+						}
+					)
+				}
 			}
-			// console.log('shaderInfo', this.shaderInfo)
+
+			// Group 1: output texture
+			this.#computeBindGroupEntries1.push({
+				binding: 0,
+				resource: targetOutputView,
+			})
+			console.log('this.#computeBindGroupEntries0',this.#computeBindGroupEntries0,this.#computeBindGroupEntries1)
+
+			// Group 0에 추가 리소스들 (depth, sampler, uniform)
 			this.shaderInfo.textures.forEach(texture => {
-				const {name} = texture
+				const {name, binding} = texture
 				if (name === "depthTexture") {
-					this.#computeBindGroupEntries.push(
-						{
-							binding: texture.binding,
-							resource: view.viewRenderTextureManager.depthTextureView
-						}
-					)
+					this.#computeBindGroupEntries0.push({
+						binding: binding,
+						resource: view.viewRenderTextureManager.depthTextureView
+					})
 				}
 			})
-			this.shaderInfo.samplers.forEach(texture => {
-				const {name} = texture
-				if (name === "depthSampler") {
-					this.#computeBindGroupEntries.push(
-						{
-							binding: 3,
-							resource: new Sampler(redGPUContext).gpuSampler
-						}
-					)
+
+			this.shaderInfo.samplers.forEach(sampler => {
+				const {name, binding} = sampler
+				if (name === "depthSampler" || name === "textureSampler") {
+					this.#computeBindGroupEntries0.push({
+						binding: binding,
+						resource: new Sampler(redGPUContext).gpuSampler
+					})
 				}
 			})
+
+			// uniform buffer는 마지막에 추가
 			if (this.#uniformBuffer && currentUniformInfo) {
-				this.#computeBindGroupEntries.push(
-					{
-						binding: currentUniformInfo.binding,
-						resource: {
-							buffer: this.#uniformBuffer.gpuBuffer,
-							offset: 0,
-							size: this.#uniformBuffer.size
-						},
-					}
-				)
+				this.#computeBindGroupEntries1.push({
+					binding: currentUniformInfo.binding,
+					resource: {
+						buffer: this.#uniformBuffer.gpuBuffer,
+						offset: 0,
+						size: this.#uniformBuffer.size
+					},
+				})
 			}
 		}
+
 		if (dimensionsChanged || msaaChanged) {
-			// MSAA 상태에 따라 적절한 SHADER_INFO 선택
 			const currentShaderInfo = useMSAA ? this.#SHADER_INFO_MSAA : this.#SHADER_INFO_NON_MSAA;
 			const currentShader = useMSAA ? this.#computeShaderMSAA : this.#computeShaderNonMSAA;
-			this.#computeBindGroupLayout = redGPUContext.resourceManager.getGPUBindGroupLayout(`${this.#name}_BIND_GROUP_LAYOUT_USE_MSAA_${useMSAA}`) ||
-				redGPUContext.resourceManager.createBindGroupLayout(`${this.#name}_BIND_GROUP_LAYOUT_USE_MSAA_${useMSAA}`,
+
+			this.#computeBindGroupLayout0 = redGPUContext.resourceManager.getGPUBindGroupLayout(`${this.#name}_BIND_GROUP_LAYOUT_0_USE_MSAA_${useMSAA}`) ||
+				redGPUContext.resourceManager.createBindGroupLayout(`${this.#name}_BIND_GROUP_LAYOUT_0_USE_MSAA_${useMSAA}`,
 					getComputeBindGroupLayoutDescriptorFromShaderInfo(currentShaderInfo, 0, useMSAA)
 				)
-			this.#computeBindGroup = gpuDevice.createBindGroup({
-				layout: this.#computeBindGroupLayout,
-				entries: this.#computeBindGroupEntries
+
+
+			this.#computeBindGroupLayout1 = redGPUContext.resourceManager.getGPUBindGroupLayout(`${this.#name}_BIND_GROUP_LAYOUT_1_USE_MSAA_${useMSAA}`) ||
+				redGPUContext.resourceManager.createBindGroupLayout(`${this.#name}_BIND_GROUP_LAYOUT_1_USE_MSAA_${useMSAA}`,
+					getComputeBindGroupLayoutDescriptorFromShaderInfo(currentShaderInfo, 1, useMSAA)
+				)
+			console.log('this.#computeBindGroupLayout0 ',this.#computeBindGroupLayout0,this.#computeBindGroupEntries0)
+			console.log('this.#computeBindGroupLayout1 ',this.#computeBindGroupLayout1,this.#computeBindGroupEntries1)
+			this.#computeBindGroup0 = gpuDevice.createBindGroup({
+				layout: this.#computeBindGroupLayout0,
+				entries: this.#computeBindGroupEntries0
 			})
+
+			this.#computeBindGroup1 = gpuDevice.createBindGroup({
+				layout: this.#computeBindGroupLayout1,
+				entries: this.#computeBindGroupEntries1
+			})
+
 			this.#computePipeline = gpuDevice.createComputePipeline({
 				label: `${this.#name}_COMPUTE_PIPELINE_USE_MSAA_${useMSAA}`,
-				layout: gpuDevice.createPipelineLayout({bindGroupLayouts: [this.#computeBindGroupLayout]}),
+				layout: gpuDevice.createPipelineLayout({bindGroupLayouts: [this.#computeBindGroupLayout0, this.#computeBindGroupLayout1]}),
 				compute: {module: currentShader, entryPoint: 'main',}
 			})
 		}
+
 		this.update(performance.now())
 		this.execute(gpuDevice, width, height)
 		this.#previousUseMSAA = view.redGPUContext.useMSAA

@@ -6,11 +6,12 @@ const createCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: 
 	return `
 			${uniformStruct}
       @group(0) @binding(0) var sourceTexture : texture_storage_2d<rgba8unorm,read>;
-      @group(0) @binding(1) var outputTexture : texture_storage_2d<rgba8unorm, write>;
-      @group(0) @binding(2) var depthTexture : ${depthTextureType};
-      @group(0) @binding(3) var depthSampler: sampler;
-
-			${uniformStruct ? '@group(0) @binding(4) var<uniform> uniforms: Uniforms;' : ''}
+      @group(0) @binding(1) var depthTexture : ${depthTextureType};
+      @group(0) @binding(2) var depthSampler: sampler;
+	
+      @group(1) @binding(0) var outputTexture : texture_storage_2d<rgba8unorm, write>;
+      ${uniformStruct ? '@group(1) @binding(1) var<uniform> uniforms: Uniforms;' : ''}
+      
       @compute @workgroup_size(${WORK_SIZE_X},${WORK_SIZE_Y},${WORK_SIZE_Z})
       fn main (
         @builtin(global_invocation_id) global_id : vec3<u32>,

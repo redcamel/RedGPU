@@ -16,17 +16,18 @@ import ZoomBlur from "./effects/blur/ZoomBlur";
 import Convolution from "./effects/Convolution";
 import FilmGrain from "./effects/FilmGrain";
 import ChromaticAberration from "./effects/lens/ChromaticAberration";
+import DOF from "./effects/lens/dof/DOF";
 import LensDistortion from "./effects/lens/LensDistortion";
 import OldBloom from "./effects/oldBloom/OldBloom";
 import Vignetting from "./effects/lens/Vignetting";
 import PostEffectManager from "./PostEffectManager";
 import ColorBalance from "./effects/adjustments/ColorBalance";
-
 export {
     BrightnessContrast,
     Convolution,
     ColorBalance,
     ChromaticAberration,
+    DOF,
     FilmGrain,
     ColorTemperatureTint,
     DirectionalBlur,
