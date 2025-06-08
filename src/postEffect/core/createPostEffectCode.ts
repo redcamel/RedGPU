@@ -1,13 +1,12 @@
 import ASinglePassPostEffect from "./ASinglePassPostEffect";
 
-const createCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: string = '', useMSAA: boolean = false) => {
+const createCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: string = '', useMSAA: boolean = false,) => {
 	const {WORK_SIZE_X, WORK_SIZE_Y, WORK_SIZE_Z} = effect
 	const depthTextureType = useMSAA ? 'texture_depth_multisampled_2d' : 'texture_depth_2d';
 	return `
 			${uniformStruct}
       @group(0) @binding(0) var sourceTexture : texture_storage_2d<rgba8unorm,read>;
-      @group(0) @binding(1) var depthTexture : ${depthTextureType};
-      @group(0) @binding(2) var depthSampler: sampler;
+      ${effect.useDepthTexture ? `@group(0) @binding(1) var depthTexture : ${depthTextureType}` : ''};
 	
       @group(1) @binding(0) var outputTexture : texture_storage_2d<rgba8unorm, write>;
       ${uniformStruct ? '@group(1) @binding(1) var<uniform> uniforms: Uniforms;' : ''}
@@ -20,7 +19,6 @@ const createCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: 
       }
   `
 }
-
 // 헬퍼 함수: MSAA와 Non-MSAA 코드를 모두 생성
 const createPostEffectCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: string = '') => {
 	return {
@@ -28,6 +26,5 @@ const createPostEffectCode = (effect: ASinglePassPostEffect, code: string, unifo
 		nonMsaa: createCode(effect, code, uniformStruct, false)
 	}
 }
-
 Object.freeze(createPostEffectCode)
 export default createPostEffectCode

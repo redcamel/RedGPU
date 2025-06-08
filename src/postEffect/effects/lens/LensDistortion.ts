@@ -32,8 +32,6 @@ class LensDistortion extends ASinglePassPostEffect {
 			let distortionFactor = barrelFactor * pincushionFactor;
 			
 			let distortedUV = uvCenter + offset * distortionFactor;
-			let depth = textureLoad(depthTexture, vec2<i32>(global_id.xy), 0);
-			let depthColor = vec4<f32>(depth, depth, depth, 1.0);
 
 			if (distortedUV.x < 0.0 || distortedUV.x > 1.0 || 
 				distortedUV.y < 0.0 || distortedUV.y > 1.0) {

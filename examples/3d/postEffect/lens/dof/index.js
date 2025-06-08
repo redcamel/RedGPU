@@ -98,7 +98,7 @@ const renderTestPane = async (redGPUContext) => {
 	const pane = new Pane();
 	const view = redGPUContext.viewList[0]
 	const effect = view.postEffectManager.getEffectAt(0)
-
+	setRedGPUTest_pane(pane,redGPUContext,true)
 	const TEST_STATE = {
 		DOF: true,
 		focusDistance: effect.focusDistance,

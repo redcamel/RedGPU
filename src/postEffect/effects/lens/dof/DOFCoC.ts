@@ -12,6 +12,7 @@ class DOFCoC extends ASinglePassPostEffect {
 
 	constructor(redGPUContext: RedGPUContext) {
 		super(redGPUContext);
+		this.useDepthTexture=true
 		const computeCode = createPostEffectCode(
 			this,
 			`
