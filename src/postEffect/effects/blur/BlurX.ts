@@ -58,7 +58,6 @@ class BlurX extends ASinglePassPostEffect {
 		validateNumberRange(value)
 		this.#size = value;
 		this.updateUniform('size', value)
-
 	}
 }
 

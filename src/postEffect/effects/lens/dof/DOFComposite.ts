@@ -22,7 +22,6 @@ class DOFComposite extends ASinglePassPostEffect {
 				textureStore(outputTexture, index, vec4<f32>(blendedColor.rgb, blendedColor.a));
 			};
 		`
-
 		this.init(
 			redGPUContext,
 			'POST_EFFECT_DOF_COMPOSITE',

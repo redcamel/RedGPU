@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import validateNumberRange from "../../../../runtimeChecker/validateFunc/validateNumberRange";
 import View3D from "../../../../display/view/View3D";
+import validateNumberRange from "../../../../runtimeChecker/validateFunc/validateNumberRange";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 
 class DOFFarField extends ASinglePassPostEffect {
@@ -89,7 +89,6 @@ class DOFFarField extends ASinglePassPostEffect {
 				}
 			};
 		`
-
 		this.init(
 			redGPUContext,
 			'POST_EFFECT_DOF_FAR_FIELD',

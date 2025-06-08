@@ -146,18 +146,6 @@ class FilmGrain extends ASinglePassPostEffect {
 		this.#updateUniforms();
 	}
 
-	#updateUniforms(): void {
-
-		this.updateUniform('filmGrainIntensity', this.#filmGrainIntensity);
-		this.updateUniform('filmGrainResponse', this.#filmGrainResponse);
-		this.updateUniform('filmGrainScale', this.#filmGrainScale);
-		this.updateUniform('coloredGrain', this.#coloredGrain);
-		this.updateUniform('grainSaturation', this.#grainSaturation);
-		this.updateUniform('time', this.#time);
-		this.updateUniform('devicePixelRatio', this.#devicePixelRatio);
-	}
-
-
 	get filmGrainIntensity(): number {
 		return this.#filmGrainIntensity;
 	}
@@ -215,6 +203,16 @@ class FilmGrain extends ASinglePassPostEffect {
 	update(deltaTime: number): void {
 		this.#time += deltaTime;
 		this.updateUniform('time', this.#time);
+	}
+
+	#updateUniforms(): void {
+		this.updateUniform('filmGrainIntensity', this.#filmGrainIntensity);
+		this.updateUniform('filmGrainResponse', this.#filmGrainResponse);
+		this.updateUniform('filmGrainScale', this.#filmGrainScale);
+		this.updateUniform('coloredGrain', this.#coloredGrain);
+		this.updateUniform('grainSaturation', this.#grainSaturation);
+		this.updateUniform('time', this.#time);
+		this.updateUniform('devicePixelRatio', this.#devicePixelRatio);
 	}
 }
 

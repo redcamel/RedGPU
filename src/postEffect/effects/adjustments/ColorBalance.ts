@@ -54,7 +54,7 @@ class ColorBalance extends ASinglePassPostEffect {
           
         textureStore(outputTexture, index, color );
 			`
-		const uniformStructCode =`
+		const uniformStructCode = `
         struct Uniforms {
             shadowCyanRed:f32,
             shadowMagentaGreen:f32,

@@ -2,9 +2,9 @@ import RedGPUContext from "../../../../context/RedGPUContext";
 import View3D from "../../../../display/view/View3D";
 import AMultiPassPostEffect from "../../../core/AMultiPassPostEffect";
 import DOFCoC from "./DOFCoC";
-import DOFNearFarBlend from "./DOFNearFarBlend";
 import DOFComposite from "./DOFComposite";
 import DOFFarField from "./DOFFarField";
+import DOFNearFarBlend from "./DOFNearFarBlend";
 import DOFNearField from "./DOFNearField";
 
 class DOF extends AMultiPassPostEffect {
@@ -39,7 +39,6 @@ class DOF extends AMultiPassPostEffect {
 		this.#effect_farField = this.passList[2] as DOFFarField
 		this.#effect_nearFarBlend = this.passList[3] as DOFNearFarBlend
 		this.#effect_composite = this.passList[4] as DOFComposite
-
 		this.#effect_coc.focusDistance = this.#focusDistance
 		this.#effect_coc.aperture = this.#aperture
 		this.#effect_coc.maxCoC = this.#maxCoC
@@ -139,15 +138,12 @@ class DOF extends AMultiPassPostEffect {
 		const nearResult = this.#effect_nearField.render(
 			view, width, height, sourceTextureView, cocResult
 		)
-
 		const farResult = this.#effect_farField.render(
 			view, width, height, sourceTextureView, cocResult
 		)
-
 		const blendedResult = this.#effect_nearFarBlend.render(
 			view, width, height, sourceTextureView, nearResult, farResult
 		)
-
 		return this.#effect_composite.render(
 			view, width, height, blendedResult, cocResult
 		)

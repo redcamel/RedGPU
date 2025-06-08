@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import validateNumberRange from "../../../../runtimeChecker/validateFunc/validateNumberRange";
 import View3D from "../../../../display/view/View3D";
+import validateNumberRange from "../../../../runtimeChecker/validateFunc/validateNumberRange";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 
 class DOFNearFarBlend extends ASinglePassPostEffect {
@@ -45,7 +45,6 @@ class DOFNearFarBlend extends ASinglePassPostEffect {
 				textureStore(outputTexture, index, vec4<f32>(result, 1.0));
 			};
 		`
-
 		this.init(
 			redGPUContext,
 			'POST_EFFECT_DOF_NEAR_FAR_BLEND',

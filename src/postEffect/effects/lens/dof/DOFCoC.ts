@@ -12,7 +12,7 @@ class DOFCoC extends ASinglePassPostEffect {
 
 	constructor(redGPUContext: RedGPUContext) {
 		super(redGPUContext);
-		this.useDepthTexture=true
+		this.useDepthTexture = true
 		const computeCode = createBasicPostEffectCode(
 			this,
 			`
@@ -75,13 +75,11 @@ class DOFCoC extends ASinglePassPostEffect {
 				}
 			`
 		);
-
 		this.init(
 			redGPUContext,
 			'POST_EFFECT_DOF_COC',
 			computeCode
 		);
-
 		this.focusDistance = this.#focusDistance;
 		this.aperture = this.#aperture;
 		this.maxCoC = this.#maxCoC;
