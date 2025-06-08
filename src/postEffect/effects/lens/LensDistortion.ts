@@ -2,7 +2,7 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import validateNumber from "../../../runtimeChecker/validateFunc/validateNumber";
 import validateNumberRange from "../../../runtimeChecker/validateFunc/validateNumberRange";
 import ASinglePassPostEffect from "../../core/ASinglePassPostEffect";
-import createPostEffectCode from "../../core/createPostEffectCode";
+import createBasicPostEffectCode from "../../core/createBasicPostEffectCode";
 
 class LensDistortion extends ASinglePassPostEffect {
 	#barrelStrength: number = 0.1
@@ -12,8 +12,7 @@ class LensDistortion extends ASinglePassPostEffect {
 
 	constructor(redGPUContext: RedGPUContext) {
 		super(redGPUContext);
-
-		const shaderCode = `
+		const computeCode = `
 			let dimensions = textureDimensions(sourceTexture);
 			let dimW = f32(dimensions.x);
 			let dimH = f32(dimensions.y);
@@ -46,8 +45,7 @@ class LensDistortion extends ASinglePassPostEffect {
 				textureStore(outputTexture, vec2<i32>(global_id.xy), sampledColor);
 			}
 		`;
-
-		const uniformStruct = `
+		const uniformStructCode = `
 			struct Uniforms {
 				barrelStrength: f32,
 				pincushionStrength: f32,
@@ -55,13 +53,10 @@ class LensDistortion extends ASinglePassPostEffect {
 				centerY: f32
 			};
 		`;
-
-		const computeCodes = createPostEffectCode(this, shaderCode, uniformStruct);
-
 		this.init(
 			redGPUContext,
 			'POST_EFFECT_LENS_DISTORTION',
-			computeCodes,
+			createBasicPostEffectCode(this, computeCode, uniformStructCode),
 		)
 		this.barrelStrength = this.#barrelStrength
 		this.pincushionStrength = this.#pincushionStrength

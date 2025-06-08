@@ -20,11 +20,11 @@ const createCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: 
   `
 }
 // 헬퍼 함수: MSAA와 Non-MSAA 코드를 모두 생성
-const createPostEffectCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: string = '') => {
+const createBasicPostEffectCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: string = '') => {
 	return {
 		msaa: createCode(effect, code, uniformStruct, true),
 		nonMsaa: createCode(effect, code, uniformStruct, false)
 	}
 }
-Object.freeze(createPostEffectCode)
-export default createPostEffectCode
+Object.freeze(createBasicPostEffectCode)
+export default createBasicPostEffectCode

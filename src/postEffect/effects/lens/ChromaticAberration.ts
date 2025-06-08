@@ -1,7 +1,7 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import validateNumberRange from "../../../runtimeChecker/validateFunc/validateNumberRange";
 import ASinglePassPostEffect from "../../core/ASinglePassPostEffect";
-import createPostEffectCode from "../../core/createPostEffectCode";
+import createBasicPostEffectCode from "../../core/createBasicPostEffectCode";
 
 class ChromaticAberration extends ASinglePassPostEffect {
 	#strength: number = 0.015
@@ -11,9 +11,7 @@ class ChromaticAberration extends ASinglePassPostEffect {
 
 	constructor(redGPUContext: RedGPUContext) {
 		super(redGPUContext);
-		const computeCode = createPostEffectCode(
-			this,
-			`
+		const computeCode = `
 				let dimensions = textureDimensions(sourceTexture);
 				let dimW = f32(dimensions.x);
 				let dimH = f32(dimensions.y);
@@ -57,20 +55,19 @@ class ChromaticAberration extends ASinglePassPostEffect {
 				
 				let originalAlpha = textureLoad(sourceTexture, vec2<i32>(global_id.xy)).a;
 				textureStore(outputTexture, vec2<i32>(global_id.xy), vec4<f32>(finalColor, originalAlpha));
-			`,
-			`
+		`
+		const uniformStructCode = `
 			struct Uniforms {
 				strength: f32,
 				centerX: f32,
 				centerY: f32,
 				falloff: f32
 			};
-			`
-		)
+		`
 		this.init(
 			redGPUContext,
 			'POST_EFFECT_CHROMATIC_ABERRATION',
-			computeCode
+			createBasicPostEffectCode(this, computeCode, uniformStructCode)
 		)
 		this.strength = this.#strength
 		this.centerX = this.#centerX
@@ -113,7 +110,7 @@ class ChromaticAberration extends ASinglePassPostEffect {
 	}
 
 	set falloff(value: number) {
-		validateNumberRange(value, 0,5)
+		validateNumberRange(value, 0, 5)
 		this.#falloff = value;
 		this.uniformBuffer.writeBuffer(this.uniformInfo.members.falloff, value)
 	}

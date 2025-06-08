@@ -1,7 +1,7 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import validateNumberRange from "../../../../runtimeChecker/validateFunc/validateNumberRange";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
-import createPostEffectCode from "../../../core/createPostEffectCode";
+import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 
 class DOFCoC extends ASinglePassPostEffect {
 	#focusDistance: number = 15.0;
@@ -13,7 +13,7 @@ class DOFCoC extends ASinglePassPostEffect {
 	constructor(redGPUContext: RedGPUContext) {
 		super(redGPUContext);
 		this.useDepthTexture=true
-		const computeCode = createPostEffectCode(
+		const computeCode = createBasicPostEffectCode(
 			this,
 			`
 				let index = vec2<u32>(global_id.xy);
