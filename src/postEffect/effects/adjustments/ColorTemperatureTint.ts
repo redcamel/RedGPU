@@ -98,7 +98,7 @@ class ColorTemperatureTint extends ASinglePassPostEffect {
 	set temperature(value: number) {
 		validateNumberRange(value, 1000, 20000)
 		this.#temperature = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.temperature, value)
+		this.updateUniform('temperature', value)
 	}
 
 	get tint(): number {
@@ -108,7 +108,7 @@ class ColorTemperatureTint extends ASinglePassPostEffect {
 	set tint(value: number) {
 		validateNumberRange(value, -100, 100)
 		this.#tint = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.tint, value)
+		this.updateUniform('tint', value)
 	}
 
 	get strength(): number {
@@ -118,7 +118,7 @@ class ColorTemperatureTint extends ASinglePassPostEffect {
 	set strength(value: number) {
 		validateNumberRange(value, 0, 100)
 		this.#strength = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.strength, value)
+		this.updateUniform('strength', value)
 	}
 
 	// 편의 메서드들

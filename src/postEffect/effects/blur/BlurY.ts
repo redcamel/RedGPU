@@ -57,7 +57,7 @@ class BlurY extends ASinglePassPostEffect {
 	set size(value: number) {
 		validateNumberRange(value)
 		this.#size = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.size, value)
+		this.updateUniform('size', value)
 	}
 }
 

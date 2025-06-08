@@ -82,7 +82,7 @@ class DirectionalBlur extends ASinglePassPostEffect {
 	set amount(value: number) {
 		validateNumberRange(value, 0)
 		this.#amount = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.amount, value)
+		this.updateUniform('amount', value)
 	}
 
 	// 내부 메서드: 각도를 방향 벡터로 변환
@@ -90,8 +90,8 @@ class DirectionalBlur extends ASinglePassPostEffect {
 		const radians = this.#angle * Math.PI / 180;
 		const directionX = Math.cos(radians);
 		const directionY = Math.sin(radians);
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.directionX, directionX);
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.directionY, directionY);
+		this.updateUniform('directionX', directionX)
+		this.updateUniform('directionY', directionY)
 	}
 }
 

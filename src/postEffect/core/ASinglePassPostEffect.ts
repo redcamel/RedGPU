@@ -240,7 +240,9 @@ class ASinglePassPostEffect {
 
 	update(deltaTime: number) {
 	}
-
+	updateUniform(key:string, value:number | number[]|boolean) {
+		this.uniformBuffer.writeBuffer(this.uniformInfo.members[key], value)
+	}
 	#createRenderTexture(view: View3D): boolean {
 		const {redGPUContext, viewRenderTextureManager} = view
 		const {colorTexture} = viewRenderTextureManager

@@ -85,7 +85,7 @@ class ColorBalance extends ASinglePassPostEffect {
 	set shadowCyanRed(value: number) {
 		validateNumberRange(value, -100, 100)
 		this.#shadowCyanRed = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.shadowCyanRed, value)
+		this.updateUniform('shadowCyanRed', value)
 	}
 
 	get shadowMagentaGreen(): number {
@@ -95,7 +95,7 @@ class ColorBalance extends ASinglePassPostEffect {
 	set shadowMagentaGreen(value: number) {
 		validateNumberRange(value, -100, 100)
 		this.#shadowMagentaGreen = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.shadowMagentaGreen, value)
+		this.updateUniform('shadowMagentaGreen', value)
 	}
 
 	get shadowYellowBlue(): number {
@@ -105,7 +105,7 @@ class ColorBalance extends ASinglePassPostEffect {
 	set shadowYellowBlue(value: number) {
 		validateNumberRange(value, -100, 100)
 		this.#shadowYellowBlue = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.shadowYellowBlue, value)
+		this.updateUniform('shadowYellowBlue', value)
 	}
 
 	get midtoneCyanRed(): number {
@@ -115,7 +115,7 @@ class ColorBalance extends ASinglePassPostEffect {
 	set midtoneCyanRed(value: number) {
 		validateNumberRange(value, -100, 100)
 		this.#midtoneCyanRed = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.midtoneCyanRed, value)
+		this.updateUniform('midtoneCyanRed', value)
 	}
 
 	get midtoneMagentaGreen(): number {
@@ -125,7 +125,7 @@ class ColorBalance extends ASinglePassPostEffect {
 	set midtoneMagentaGreen(value: number) {
 		validateNumberRange(value, -100, 100)
 		this.#midtoneMagentaGreen = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.midtoneMagentaGreen, value)
+		this.updateUniform('midtoneMagentaGreen', value)
 	}
 
 	get midtoneYellowBlue(): number {
@@ -135,7 +135,7 @@ class ColorBalance extends ASinglePassPostEffect {
 	set midtoneYellowBlue(value: number) {
 		validateNumberRange(value, -100, 100)
 		this.#midtoneYellowBlue = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.midtoneYellowBlue, value)
+		this.updateUniform('midtoneYellowBlue', value)
 	}
 
 	get highlightCyanRed(): number {
@@ -145,7 +145,7 @@ class ColorBalance extends ASinglePassPostEffect {
 	set highlightCyanRed(value: number) {
 		validateNumberRange(value, -100, 100)
 		this.#highlightCyanRed = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.highlightCyanRed, value)
+		this.updateUniform('highlightCyanRed', value)
 	}
 
 	get highlightMagentaGreen(): number {
@@ -155,7 +155,7 @@ class ColorBalance extends ASinglePassPostEffect {
 	set highlightMagentaGreen(value: number) {
 		validateNumberRange(value, -100, 100)
 		this.#highlightMagentaGreen = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.highlightMagentaGreen, value)
+		this.updateUniform('highlightMagentaGreen', value)
 	}
 
 	get highlightYellowBlue(): number {
@@ -165,7 +165,7 @@ class ColorBalance extends ASinglePassPostEffect {
 	set highlightYellowBlue(value: number) {
 		validateNumberRange(value, -100, 100)
 		this.#highlightYellowBlue = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.highlightYellowBlue, value)
+		this.updateUniform('highlightYellowBlue', value)
 	}
 
 	get preserveLuminosity(): boolean {
@@ -174,7 +174,7 @@ class ColorBalance extends ASinglePassPostEffect {
 
 	set preserveLuminosity(value: boolean) {
 		this.#preserveLuminosity = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.preserveLuminosity, value)
+		this.updateUniform('preserveLuminosity', value)
 	}
 }
 

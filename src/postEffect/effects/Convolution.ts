@@ -83,8 +83,8 @@ class Convolution extends ASinglePassPostEffect {
 		let kernelWeight = 0;
 		for (const k in this.#kernel) kernelWeight += this.#kernel[k];
 		console.log('kernelWeight', kernelWeight);
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.kernelWeight, kernelWeight)
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.kernel, value)
+		this.updateUniform('kernelWeight', kernelWeight)
+		this.updateUniform('kernel', value)
 	}
 }
 

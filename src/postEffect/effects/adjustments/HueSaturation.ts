@@ -70,7 +70,7 @@ class HueSaturation extends ASinglePassPostEffect {
 	set hue(value: number) {
 		validateNumberRange(value, -180, 180)
 		this.#hue = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.hue, value)
+		this.updateUniform('hue', value)
 	}
 
 	get saturation(): number {
@@ -80,7 +80,7 @@ class HueSaturation extends ASinglePassPostEffect {
 	set saturation(value: number) {
 		validateNumberRange(value, -100, 100)
 		this.#saturation = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.saturation, value)
+		this.updateUniform('saturation', value)
 	}
 }
 

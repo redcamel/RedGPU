@@ -59,7 +59,7 @@ class OldBloomBlend extends ASinglePassPostEffect {
 
     set bloomStrength(value: number) {
         this.#bloomStrength = value;
-        this.uniformBuffer.writeBuffer(this.uniformInfo.members.bloomStrength, value)
+        this.updateUniform('bloomStrength', value)
     }
 
     get exposure(): number {
@@ -68,7 +68,7 @@ class OldBloomBlend extends ASinglePassPostEffect {
 
     set exposure(value: number) {
         this.#exposure = value;
-        this.uniformBuffer.writeBuffer(this.uniformInfo.members.exposure, value)
+        this.updateUniform('exposure', value)
     }
 
     render(view: View3D, width: number, height: number, sourceTextureView: GPUTextureView, sourceTextureView1: GPUTextureView) {

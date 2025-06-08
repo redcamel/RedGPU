@@ -54,7 +54,7 @@ class BrightnessContrast extends ASinglePassPostEffect {
 	set brightness(value: number) {
 		validateNumberRange(value, -150, 150)
 		this.#brightness = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.brightness, value)
+		this.updateUniform('brightness', value)
 	}
 
 	get contrast(): number {
@@ -64,7 +64,7 @@ class BrightnessContrast extends ASinglePassPostEffect {
 	set contrast(value: number) {
 		validateNumberRange(value, -50, 100)
 		this.#contrast = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.contrast, value)
+		this.updateUniform('contrast', value)
 	}
 }
 

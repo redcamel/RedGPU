@@ -84,7 +84,7 @@ class RadialBlur extends ASinglePassPostEffect {
 	set centerX(value: number) {
 		validateNumber(value)
 		this.#centerX = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.centerX, value)
+		this.updateUniform('centerX', value)
 	}
 
 	get centerY(): number {
@@ -94,7 +94,7 @@ class RadialBlur extends ASinglePassPostEffect {
 	set centerY(value: number) {
 		validateNumber(value)
 		this.#centerY = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.centerY, value)
+		this.updateUniform('centerY', value)
 	}
 
 	get amount(): number {
@@ -104,7 +104,7 @@ class RadialBlur extends ASinglePassPostEffect {
 	set amount(value: number) {
 		validateNumberRange(value, 0)
 		this.#amount = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.amount, value)
+		this.updateUniform('amount', value)
 	}
 
 	get sampleCount(): number {
@@ -114,7 +114,7 @@ class RadialBlur extends ASinglePassPostEffect {
 	set sampleCount(value: number) {
 		validateNumberRange(value, 4)
 		this.#sampleCount = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.sampleCount, value)
+		this.updateUniform('sampleCount', value)
 	}
 }
 

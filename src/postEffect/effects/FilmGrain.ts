@@ -147,13 +147,14 @@ class FilmGrain extends ASinglePassPostEffect {
 	}
 
 	#updateUniforms(): void {
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.filmGrainIntensity, this.#filmGrainIntensity);
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.filmGrainResponse, this.#filmGrainResponse);
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.filmGrainScale, this.#filmGrainScale);
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.coloredGrain, this.#coloredGrain);
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.grainSaturation, this.#grainSaturation);
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.time, this.#time);
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.devicePixelRatio, this.#devicePixelRatio);
+
+		this.updateUniform('filmGrainIntensity', this.#filmGrainIntensity);
+		this.updateUniform('filmGrainResponse', this.#filmGrainResponse);
+		this.updateUniform('filmGrainScale', this.#filmGrainScale);
+		this.updateUniform('coloredGrain', this.#coloredGrain);
+		this.updateUniform('grainSaturation', this.#grainSaturation);
+		this.updateUniform('time', this.#time);
+		this.updateUniform('devicePixelRatio', this.#devicePixelRatio);
 	}
 
 
@@ -163,7 +164,7 @@ class FilmGrain extends ASinglePassPostEffect {
 
 	set filmGrainIntensity(value: number) {
 		this.#filmGrainIntensity = Math.max(0.0, Math.min(1.0, value));
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.filmGrainIntensity, this.#filmGrainIntensity);
+		this.updateUniform('filmGrainIntensity', this.#filmGrainIntensity);
 	}
 
 	get filmGrainResponse(): number {
@@ -172,7 +173,7 @@ class FilmGrain extends ASinglePassPostEffect {
 
 	set filmGrainResponse(value: number) {
 		this.#filmGrainResponse = Math.max(0.0, Math.min(2.0, value));
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.filmGrainResponse, this.#filmGrainResponse);
+		this.updateUniform('filmGrainResponse', this.#filmGrainResponse);
 	}
 
 	get filmGrainScale(): number {
@@ -181,7 +182,7 @@ class FilmGrain extends ASinglePassPostEffect {
 
 	set filmGrainScale(value: number) {
 		this.#filmGrainScale = Math.max(0.1, Math.min(20.0, value));
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.filmGrainScale, this.#filmGrainScale);
+		this.updateUniform('filmGrainScale', this.#filmGrainScale);
 	}
 
 	get coloredGrain(): number {
@@ -190,7 +191,7 @@ class FilmGrain extends ASinglePassPostEffect {
 
 	set coloredGrain(value: number) {
 		this.#coloredGrain = Math.max(0.0, Math.min(1.0, value));
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.coloredGrain, this.#coloredGrain);
+		this.updateUniform('coloredGrain', this.#coloredGrain);
 	}
 
 	get grainSaturation(): number {
@@ -199,7 +200,7 @@ class FilmGrain extends ASinglePassPostEffect {
 
 	set grainSaturation(value: number) {
 		this.#grainSaturation = Math.max(0.0, Math.min(2.0, value));
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.grainSaturation, this.#grainSaturation);
+		this.updateUniform('grainSaturation', this.#grainSaturation);
 	}
 
 	applyPreset(preset: typeof SUBTLE | typeof MEDIUM | typeof HEAVY | typeof VINTAGE): void {
@@ -213,7 +214,7 @@ class FilmGrain extends ASinglePassPostEffect {
 
 	update(deltaTime: number): void {
 		this.#time += deltaTime;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.time, this.#time);
+		this.updateUniform('time', this.#time);
 	}
 }
 

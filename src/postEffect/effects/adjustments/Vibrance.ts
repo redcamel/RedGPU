@@ -86,7 +86,7 @@ class Vibrance extends ASinglePassPostEffect {
 	set vibrance(value: number) {
 		validateNumberRange(value, -100, 100)
 		this.#vibrance = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.vibrance, value)
+		this.updateUniform('vibrance', value)
 	}
 
 	get saturation(): number {
@@ -96,7 +96,7 @@ class Vibrance extends ASinglePassPostEffect {
 	set saturation(value: number) {
 		validateNumberRange(value, -100, 100)
 		this.#saturation = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.saturation, value)
+		this.updateUniform('saturation', value)
 	}
 }
 

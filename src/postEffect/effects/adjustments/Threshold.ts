@@ -43,7 +43,7 @@ class Threshold extends ASinglePassPostEffect {
 	set threshold(value: number) {
 		validateNumberRange(value, 1, 255)
 		this.#threshold = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.threshold, value)
+		this.updateUniform('threshold', value)
 	}
 }
 
