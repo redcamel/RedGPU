@@ -102,7 +102,7 @@ RedGPU.init(
 	}
 );
 
-function loadGLTF(scene, url) {
+function loadGLTF(view, url) {
 	const {redGPUContext, scene} = view
 
 	let mesh
