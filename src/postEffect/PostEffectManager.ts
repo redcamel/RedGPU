@@ -71,6 +71,7 @@ class PostEffectManager {
 			)
 		})
 		const {useFXAA} = this.#view.redGPUContext
+		// TODO - 이거 골떄리네...
 		// if (!this.#fxaa )
 			this.#fxaa = new FXAA(this.#view.redGPUContext)
 		if (useFXAA) {
