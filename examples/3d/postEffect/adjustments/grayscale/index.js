@@ -59,7 +59,7 @@ RedGPU.init(
 		scene.lightManager.addDirectionalLight(directionalLight);
 
 		// 3D 모델 로드
-		loadGLTF(viewEffect, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF/DamagedHelmet.gltf');
+		loadGLTF(redGPUContext,scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF/DamagedHelmet.gltf');
 
 		// ============================================
 		// 레이아웃 설정 (반응형)
@@ -102,8 +102,7 @@ RedGPU.init(
 	}
 );
 
-function loadGLTF(view, url) {
-	const {redGPUContext, scene} = view
+function loadGLTF(redGPUContext,scene, url) {
 
 	let mesh
 	new RedGPU.GLTFLoader(
