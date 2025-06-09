@@ -1,6 +1,7 @@
 import ColorRGBA from "../color/ColorRGBA";
 import View3D from "../display/view/View3D";
 import PICKING_EVENT_TYPE from "../picking/PICKING_EVENT_TYPE";
+import FXAA from "../postEffect/FXAA";
 import ResourceManager from "../resources/resourceManager/ResourceManager";
 import consoleAndThrowError from "../utils/consoleAndThrowError";
 import RedGPUContextSizeManager from "./core/RedGPUContextSizeManager";
@@ -14,7 +15,9 @@ import RedGPUContextDetector from "./detector/RedGPUContextDetector";
  */
 class RedGPUContext extends RedGPUContextViewContainer {
     currentRequestAnimationFrame: number
-    useMSAA: boolean = true
+    useMSAA: boolean = false
+    useFXAA: boolean = true
+    fxaa:FXAA
     onResize: ((width: number, height: number) => void) | null = null;
     #configurationDescription: GPUCanvasConfiguration
     readonly #gpuAdapter: GPUAdapter

@@ -65,6 +65,7 @@ const setRedGPUTest_pane = (pane, redGPUContext, openYn = false) => {
 	});
 
 	folder.addBinding(redGPUContext, 'useMSAA')
+	folder.addBinding(redGPUContext, 'useFXAA')
 	folder.addBinding(redGPUContext, 'useDebugPanel')
 	folder.addBinding(redGPUContext, 'renderScale', {min: 0.01, max: 1, step: 0.01})
 	folder.addBinding(TEST_DATA, 'backgroundColor', {

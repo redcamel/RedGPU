@@ -1,8 +1,10 @@
+import redGPUContext from "../context/RedGPUContext";
 import RedGPUContext from "../context/RedGPUContext";
 import View3D from "../display/view/View3D";
 import Sampler from "../resources/sampler/Sampler";
 import AMultiPassPostEffect from "./core/AMultiPassPostEffect";
 import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
+import FXAA from "./FXAA";
 
 class PostEffectManager {
 	readonly #view: View3D
@@ -13,6 +15,7 @@ class PostEffectManager {
 	#COMPUTE_WORKGROUP_SIZE_X = 16
 	#COMPUTE_WORKGROUP_SIZE_Y = 4
 	#COMPUTE_WORKGROUP_SIZE_Z = 1
+	#fxaa: FXAA
 
 	constructor(view: View3D) {
 		this.#view = view;
@@ -67,6 +70,17 @@ class PostEffectManager {
 				sourceTextureView
 			)
 		})
+		const {useFXAA} = this.#view.redGPUContext
+		// if (!this.#fxaa )
+			this.#fxaa = new FXAA(this.#view.redGPUContext)
+		if (useFXAA) {
+			sourceTextureView = this.#fxaa.render(
+				this.#view,
+				width,
+				height,
+				sourceTextureView
+			)
+		}
 		return sourceTextureView
 	}
 
@@ -98,10 +112,8 @@ class PostEffectManager {
 		const {colorTexture} = viewRenderTextureManager;
 		const {gpuDevice, useMSAA} = redGPUContext;
 		const {width, height} = colorTexture;
-
 		const dimensionsChanged = width !== this.#previousDimensions?.width || height !== this.#previousDimensions?.height;
 		const msaaChanged = this.#previousUseMSAA !== useMSAA;
-
 		// 크기가 변경되면 텍스처 재생성
 		if (dimensionsChanged) {
 			if (this.#storageTexture) {
@@ -111,7 +123,6 @@ class PostEffectManager {
 			this.#storageTexture = this.#createStorageTexture(gpuDevice, width, height);
 			this.#storageTextureView = this.#storageTexture.createView();
 		}
-
 		// 크기 변경 또는 MSAA 변경 시 BindGroup 재생성
 		if (dimensionsChanged || msaaChanged) {
 			this.#textureComputeBindGroup = this.#createTextureBindGroup(
@@ -121,10 +132,8 @@ class PostEffectManager {
 				this.#storageTextureView
 			);
 		}
-
 		this.#previousUseMSAA = useMSAA;
-		this.#previousDimensions = { width, height };
-
+		this.#previousDimensions = {width, height};
 		this.#executeComputePass(
 			gpuDevice,
 			this.#textureComputePipeline,
