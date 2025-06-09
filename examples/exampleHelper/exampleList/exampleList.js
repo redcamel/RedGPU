@@ -698,6 +698,14 @@ const ExampleList = [
 								}
 							},
 							{
+								name: 'DepthOfField',
+								path: '3d/postEffect/lens/dof',
+								description: {
+									ko: ``,
+									en: ``
+								}
+							},
+							{
 								name: 'Vignetting',
 								path: '3d/postEffect/lens/vignetting',
 								description: {

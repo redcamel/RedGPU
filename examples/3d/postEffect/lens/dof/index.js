@@ -48,7 +48,6 @@ RedGPU.init(
 		document.body.appendChild(errorMessage);
 	}
 );
-
 function loadGLTF(view, url) {
 	const {redGPUContext, scene} = view
 
@@ -56,37 +55,87 @@ function loadGLTF(view, url) {
 		redGPUContext,
 		url,
 		(v) => {
-			const originalMesh = v['resultMesh']
+			const material = new RedGPU.Material.BitmapMaterial(redGPUContext, new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../../assets/UV_Grid_Sm.jpg'))
 
-			// DOF 효과가 잘 보이도록 정육면체 공간에 랜덤 배치
-			const totalObjects = 600
+			// 🎯 Z축 일렬 배치 (DOF 테스트용)
+			const zLineObjects = 20;        // Z축 일렬로 배치할 오브젝트 수
+			const zStart = -100;            // 시작 Z 위치 (가까운 곳)
+			const zEnd = 100;               // 끝 Z 위치 (먼 곳)
+			const zInterval = (zEnd - zStart) / (zLineObjects - 1);
 
-			// 정육면체 크기 설정
-			const cubeSize = 30  // 정육면체 한 변의 길이
-			const halfSize = cubeSize / 2
+			for (let i = 0; i < zLineObjects; i++) {
+				const mesh = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Box(redGPUContext), material);
 
-			for (let i = 0; i < totalObjects; i++) {
-				const mesh = originalMesh.clone()
+				// Z축 일정 간격 배치
+				mesh.x = 0;                 // 중앙에 배치
+				mesh.y = 0;                 // 중앙에 배치
+				mesh.z = zStart + (i * zInterval);  // Z축으로 일정 간격
 
-				// 정육면체 내부에 완전 랜덤 배치
-				mesh.x = (Math.random() - 0.5) * cubeSize  // -40 ~ +40
-				mesh.y = (Math.random() - 0.5) * cubeSize  // -40 ~ +40
-				mesh.z = (Math.random() - 0.5) * cubeSize  // -40 ~ +40
+				// 거리별로 다른 색상/크기로 구분
+				const normalizedDistance = i / (zLineObjects - 1);  // 0~1
+				const scale = 3 + normalizedDistance * 2;  // 3~5 크기 (먼 것일수록 크게)
+				mesh.setScale(scale);
 
-				// 랜덤 회전 (더 자연스럽게)
-				mesh.rotationX = Math.random() * Math.PI * 2
-				mesh.rotationY = Math.random() * Math.PI * 2
-				mesh.rotationZ = Math.random() * Math.PI * 2
+				// 약간의 회전으로 구분 쉽게
+				mesh.rotationY = i * 15;  // 각각 다른 Y축 회전
 
-				// 거리에 따른 크기 조정 (원근감)
-				const distanceFromCenter = Math.sqrt(mesh.x * mesh.x + mesh.y * mesh.y + mesh.z * mesh.z)
-				const scale = 8 + (distanceFromCenter / halfSize) * 4  // 8~12 크기
-				// mesh.setScale(scale)
-
-
-				scene.addChild(mesh)
+				scene.addChild(mesh);
 			}
 
+			// 🌐 기존 랜덤 배치 (배경용)
+			const totalRandomObjects = 300;  // 랜덤 오브젝트 수 줄임
+			const cubeSize = 50;
+			const halfSize = cubeSize / 2;
+
+			for (let i = 0; i < totalRandomObjects; i++) {
+				const mesh = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Box(redGPUContext), material);
+
+				// 정육면체 내부에 완전 랜덤 배치 (하지만 중앙 Z축은 피하기)
+				mesh.x = (Math.random() - 0.5) * cubeSize;
+				mesh.y = (Math.random() - 0.5) * cubeSize;
+				mesh.z = (Math.random() - 0.5) * cubeSize * 4;
+
+				// 중앙 Z축 라인과 겹치지 않도록 조정
+				if (Math.abs(mesh.x) < 15 && Math.abs(mesh.y) < 15) {
+					mesh.x += mesh.x > 0 ? 20 : -20;  // 중앙에서 벗어나게
+				}
+
+				// 랜덤 회전
+				mesh.rotationX = Math.random() * 360;
+				mesh.rotationY = Math.random() * 360;
+				mesh.rotationZ = Math.random() * 360;
+
+				// 거리에 따른 크기 조정
+				const distanceFromCenter = Math.sqrt(mesh.x * mesh.x + mesh.y * mesh.y + mesh.z * mesh.z);
+				const scale = 1 + (distanceFromCenter / halfSize) * 2;  // 1~3 크기 (작게)
+				mesh.setScale(scale);
+
+				scene.addChild(mesh);
+			}
+
+			// 🎯 추가: 포커스 참조용 특별한 오브젝트들
+			const focusMarkers = [
+				{z: -50, color: 'near'},   // 근거리 마커
+				{z: 0, color: 'focus'},    // 포커스 지점 마커
+				{z: 50, color: 'far'}      // 원거리 마커
+			];
+
+			focusMarkers.forEach((marker, index) => {
+				const mesh = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Box(redGPUContext), material);
+
+				mesh.x = 25;  // 오른쪽에 배치
+				mesh.y = 0;
+				mesh.z = marker.z;
+
+				// 마커별로 다른 크기
+				const scale = marker.color === 'focus' ? 8 : 5;  // 포커스 지점은 크게
+				mesh.setScale(scale);
+
+				// 마커별로 다른 회전
+				mesh.rotationY = index * 120;  // 120도씩 다르게
+
+				scene.addChild(mesh);
+			});
 		}
 	)
 }
@@ -98,9 +147,10 @@ const renderTestPane = async (redGPUContext) => {
 	const pane = new Pane();
 	const view = redGPUContext.viewList[0]
 	const effect = view.postEffectManager.getEffectAt(0)
-	setRedGPUTest_pane(pane,redGPUContext,true)
+
 	const TEST_STATE = {
 		DOF: true,
+		currentPreset: 'Game Default', // 현재 활성화된 프리셋 표시용
 		focusDistance: effect.focusDistance,
 		aperture: effect.aperture,
 		maxCoC: effect.maxCoC,
@@ -114,9 +164,11 @@ const renderTestPane = async (redGPUContext) => {
 
 	const folder = pane.addFolder({title: 'DOF Settings', expanded: true})
 
+	// DOF On/Off
 	folder.addBinding(TEST_STATE, 'DOF').on('change', (v) => {
 		if (v.value) {
 			const newEffect = new RedGPU.PostEffect.DOF(redGPUContext);
+			// 현재 설정값들로 복원
 			newEffect.focusDistance = TEST_STATE.focusDistance;
 			newEffect.aperture = TEST_STATE.aperture;
 			newEffect.maxCoC = TEST_STATE.maxCoC;
@@ -130,114 +182,201 @@ const renderTestPane = async (redGPUContext) => {
 		} else {
 			view.postEffectManager.removeAllEffect();
 		}
-
-		focusDistanceControl.disabled = !v.value;
-		apertureControl.disabled = !v.value;
-		maxCoCControl.disabled = !v.value;
-		// nearPlaneControl.disabled = !v.value;
-		// farPlaneControl.disabled = !v.value;
-		nearBlurSizeControl.disabled = !v.value;
-		farBlurSizeControl.disabled = !v.value;
-		nearStrengthControl.disabled = !v.value;
-		farStrengthControl.disabled = !v.value;
+		updateControlsState(!v.value);
 	});
 
-	// Focus Distance - 오브젝트 배치 범위에 맞춘 조정
-	const focusDistanceControl = folder.addBinding(TEST_STATE, 'focusDistance', {
-		min: 10,      // 가까운 오브젝트
-		max: 200,     // 먼 오브젝트
-		step: 5       // 5 유닛 단위로 조절
-	}).on('change', (v) => {
-		if (view.postEffectManager.getEffectAt(0)) {
-			view.postEffectManager.getEffectAt(0).focusDistance = v.value
-		}
-	})
+	// 현재 프리셋 표시 (읽기 전용)
+	folder.addBinding(TEST_STATE, 'currentPreset', {
+		readonly: true,
+		label: 'Current Preset'
+	});
 
-	// Aperture
-	const apertureControl = folder.addBinding(TEST_STATE, 'aperture', {
-		min: 1.0,     // 매우 넓은 조리개 (더 강한 효과)
-		max: 8.0,     // 적당히 좁은 조리개
+
+
+	// 세부 설정 폴더
+	const detailFolder = folder.addFolder({title: 'Manual Controls', expanded: true});
+
+	// 세부 설정 컨트롤들
+	const focusDistanceControl = detailFolder.addBinding(TEST_STATE, 'focusDistance', {
+		min: 1,
+		max: 100,
+		step: 1
+	}).on('change', (v) => {
+		const currentEffect = view.postEffectManager.getEffectAt(0);
+		if (currentEffect) {
+			currentEffect.focusDistance = v.value;
+			TEST_STATE.currentPreset = 'Custom';
+			pane.refresh();
+		}
+	});
+
+	const apertureControl = detailFolder.addBinding(TEST_STATE, 'aperture', {
+		min: 1.0,
+		max: 8.0,
 		step: 0.1
 	}).on('change', (v) => {
-		if (view.postEffectManager.getEffectAt(0)) {
-			view.postEffectManager.getEffectAt(0).aperture = v.value
+		const currentEffect = view.postEffectManager.getEffectAt(0);
+		if (currentEffect) {
+			currentEffect.aperture = v.value;
+			TEST_STATE.currentPreset = 'Custom';
+			pane.refresh();
 		}
-	})
+	});
 
-	// MaxCoC
-	const maxCoCControl = folder.addBinding(TEST_STATE, 'maxCoC', {
-		min: 10,      // 최소 흐림
-		max: 100,     // 매우 큰 흐림
+	const maxCoCControl = detailFolder.addBinding(TEST_STATE, 'maxCoC', {
+		min: 10,
+		max: 100,
 		step: 5
 	}).on('change', (v) => {
-		if (view.postEffectManager.getEffectAt(0)) {
-			view.postEffectManager.getEffectAt(0).maxCoC = v.value
+		const currentEffect = view.postEffectManager.getEffectAt(0);
+		if (currentEffect) {
+			currentEffect.maxCoC = v.value;
+			TEST_STATE.currentPreset = 'Custom';
+			pane.refresh();
 		}
-	})
-	//
-	// // Near Plane - 새로 추가
-	// const nearPlaneControl = folder.addBinding(TEST_STATE, 'nearPlane', {
-	// 	min: 0.01,    // 매우 가까운 근평면
-	// 	max: 1.0,     // 조금 먼 근평면
-	// 	step: 0.01
-	// }).on('change', (v) => {
-	// 	if (view.postEffectManager.getEffectAt(0)) {
-	// 		view.postEffectManager.getEffectAt(0).nearPlane = v.value
-	// 	}
-	// })
-	//
-	// // Far Plane - 새로 추가
-	// const farPlaneControl = folder.addBinding(TEST_STATE, 'farPlane', {
-	// 	min: 100,     // 가까운 원평면
-	// 	max: 5000,    // 매우 먼 원평면
-	// 	step: 100
-	// }).on('change', (v) => {
-	// 	if (view.postEffectManager.getEffectAt(0)) {
-	// 		view.postEffectManager.getEffectAt(0).farPlane = v.value
-	// 	}
-	// })
+	});
 
-	// Near Blur Size
-	const nearBlurSizeControl = folder.addBinding(TEST_STATE, 'nearBlurSize', {
-		min: 5,       // 최소 블러
-		max: 50,      // 매우 큰 블러
+	const nearBlurSizeControl = detailFolder.addBinding(TEST_STATE, 'nearBlurSize', {
+		min: 5,
+		max: 50,
 		step: 2
 	}).on('change', (v) => {
-		if (view.postEffectManager.getEffectAt(0)) {
-			view.postEffectManager.getEffectAt(0).nearBlurSize = v.value
+		const currentEffect = view.postEffectManager.getEffectAt(0);
+		if (currentEffect) {
+			currentEffect.nearBlurSize = v.value;
+			TEST_STATE.currentPreset = 'Custom';
+			pane.refresh();
 		}
-	})
+	});
 
-	// Far Blur Size
-	const farBlurSizeControl = folder.addBinding(TEST_STATE, 'farBlurSize', {
-		min: 5,       // 최소 블러
-		max: 50,      // 매우 큰 블러
+	const farBlurSizeControl = detailFolder.addBinding(TEST_STATE, 'farBlurSize', {
+		min: 5,
+		max: 50,
 		step: 2
 	}).on('change', (v) => {
-		if (view.postEffectManager.getEffectAt(0)) {
-			view.postEffectManager.getEffectAt(0).farBlurSize = v.value
+		const currentEffect = view.postEffectManager.getEffectAt(0);
+		if (currentEffect) {
+			currentEffect.farBlurSize = v.value;
+			TEST_STATE.currentPreset = 'Custom';
+			pane.refresh();
 		}
-	})
+	});
 
-	// Near Strength
-	const nearStrengthControl = folder.addBinding(TEST_STATE, 'nearStrength', {
-		min: 0,       // 효과 없음
-		max: 3.0,     // 매우 강한 효과
+	const nearStrengthControl = detailFolder.addBinding(TEST_STATE, 'nearStrength', {
+		min: 0,
+		max: 3.0,
 		step: 0.1
 	}).on('change', (v) => {
-		if (view.postEffectManager.getEffectAt(0)) {
-			view.postEffectManager.getEffectAt(0).nearStrength = v.value
+		const currentEffect = view.postEffectManager.getEffectAt(0);
+		if (currentEffect) {
+			currentEffect.nearStrength = v.value;
+			TEST_STATE.currentPreset = 'Custom';
+			pane.refresh();
 		}
-	})
+	});
 
-	// Far Strength
-	const farStrengthControl = folder.addBinding(TEST_STATE, 'farStrength', {
-		min: 0,       // 효과 없음
-		max: 3.0,     // 매우 강한 효과
+	const farStrengthControl = detailFolder.addBinding(TEST_STATE, 'farStrength', {
+		min: 0,
+		max: 3.0,
 		step: 0.1
 	}).on('change', (v) => {
-		if (view.postEffectManager.getEffectAt(0)) {
-			view.postEffectManager.getEffectAt(0).farStrength = v.value
+		const currentEffect = view.postEffectManager.getEffectAt(0);
+		if (currentEffect) {
+			currentEffect.farStrength = v.value;
+			TEST_STATE.currentPreset = 'Custom';
+			pane.refresh();
 		}
-	})
+	});
+
+	// 🎯 프리셋 버튼들
+	const presetFolder = folder.addFolder({title: 'DOF Presets', expanded: true});
+
+	// 프리셋 적용 함수
+	function applyPreset(presetName, presetMethod) {
+		const currentEffect = view.postEffectManager.getEffectAt(0);
+		if (!currentEffect) return;
+
+		// 프리셋 메서드 호출
+		if (presetMethod && typeof currentEffect[presetMethod] === 'function') {
+			currentEffect[presetMethod]();
+		}
+
+		// UI 상태 업데이트
+		TEST_STATE.currentPreset = presetName;
+		updateUIFromEffect(currentEffect);
+	}
+
+
+
+	// 🎮 게임 기본 버튼
+	presetFolder.addButton({
+		title: '🎮 Game Default',
+	}).on('click', () => {
+		applyPreset('Game Default', 'setGameDefault');
+	});
+
+	// 🎬 시네마틱 버튼
+	presetFolder.addButton({
+		title: '🎬 Cinematic',
+	}).on('click', () => {
+		applyPreset('Cinematic', 'setCinematic');
+	});
+
+	// 📷 인물 사진 버튼
+	presetFolder.addButton({
+		title: '📷 Portrait',
+	}).on('click', () => {
+		applyPreset('Portrait', 'setPortrait');
+	});
+
+	// 🌄 풍경 사진 버튼
+	presetFolder.addButton({
+		title: '🌄 Landscape',
+	}).on('click', () => {
+		applyPreset('Landscape', 'setLandscape');
+	});
+
+	// 🔍 매크로 촬영 버튼
+	presetFolder.addButton({
+		title: '🔍 Macro',
+	}).on('click', () => {
+		applyPreset('Macro', 'setMacro');
+	});
+
+	// 🏃 액션/스포츠 버튼
+	presetFolder.addButton({
+		title: '🏃 Sports',
+	}).on('click', () => {
+		applyPreset('Sports', 'setSports');
+	});
+
+	// 🌙 야간 촬영 버튼
+	presetFolder.addButton({
+		title: '🌙 Night Mode',
+	}).on('click', () => {
+		applyPreset('Night Mode', 'setNightMode');
+	});
+	// 유틸리티 함수들
+	function updateControlsState(disabled) {
+		focusDistanceControl.disabled = disabled;
+		apertureControl.disabled = disabled;
+		maxCoCControl.disabled = disabled;
+		nearBlurSizeControl.disabled = disabled;
+		farBlurSizeControl.disabled = disabled;
+		nearStrengthControl.disabled = disabled;
+		farStrengthControl.disabled = disabled;
+	}
+
+	function updateUIFromEffect(effect) {
+		TEST_STATE.focusDistance = effect.focusDistance;
+		TEST_STATE.aperture = effect.aperture;
+		TEST_STATE.maxCoC = effect.maxCoC;
+		TEST_STATE.nearBlurSize = effect.nearBlurSize;
+		TEST_STATE.farBlurSize = effect.farBlurSize;
+		TEST_STATE.nearStrength = effect.nearStrength;
+		TEST_STATE.farStrength = effect.farStrength;
+
+		// UI 새로고침
+		pane.refresh();
+	}
 };
