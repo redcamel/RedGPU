@@ -152,14 +152,38 @@ class ASinglePassPostEffect {
 		computePassEncoder.end();
 		gpuDevice.queue.submit([commentEncode_compute.finish()]);
 	}
+	#previousSourceTextureReferences: GPUTextureView[] = [];
+
+	#detectSourceTextureChange(sourceTextureView: GPUTextureView[]): boolean {
+		if (!this.#previousSourceTextureReferences || this.#previousSourceTextureReferences.length !== sourceTextureView.length) {
+			return true;
+		}
+
+		for (let i = 0; i < sourceTextureView.length; i++) {
+			if (this.#previousSourceTextureReferences[i] !== sourceTextureView[i]) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	#saveCurrentSourceTextureReferences(sourceTextureView: GPUTextureView[]) {
+		this.#previousSourceTextureReferences = [...sourceTextureView];
+	}
 
 	render(view: View3D, width: number, height: number, ...sourceTextureView) {
 		const dimensionsChanged = this.#createRenderTexture(view)
 		const msaaChanged = this.#previousUseMSAA !== view.redGPUContext.useMSAA;
+
+		// 소스 텍스처 변경 감지
+		const sourceTextureChanged = this.#detectSourceTextureChange(sourceTextureView);
+
+
 		const targetOutputView = this.getOutputTextureView()
 		const {redGPUContext} = view
 		const {gpuDevice, useMSAA} = redGPUContext
-		if (dimensionsChanged || msaaChanged) {
+		if (dimensionsChanged || msaaChanged || sourceTextureChanged) {
 			const currentStorageInfo = this.storageInfo;
 			const currentUniformInfo = this.uniformInfo;
 			this.#computeBindGroupEntries0 = []
@@ -205,7 +229,7 @@ class ASinglePassPostEffect {
 				})
 			}
 		}
-		if (dimensionsChanged || msaaChanged) {
+		if (dimensionsChanged || msaaChanged || sourceTextureChanged) {
 			const currentShaderInfo = useMSAA ? this.#SHADER_INFO_MSAA : this.#SHADER_INFO_NON_MSAA;
 			const currentShader = useMSAA ? this.#computeShaderMSAA : this.#computeShaderNonMSAA;
 			this.#computeBindGroupLayout0 = redGPUContext.resourceManager.getGPUBindGroupLayout(`${this.#name}_BIND_GROUP_LAYOUT_0_USE_MSAA_${useMSAA}`) ||
@@ -231,6 +255,9 @@ class ASinglePassPostEffect {
 				layout: gpuDevice.createPipelineLayout({bindGroupLayouts: [this.#computeBindGroupLayout0, this.#computeBindGroupLayout1]}),
 				compute: {module: currentShader, entryPoint: 'main',}
 			})
+			// 소스 텍스처 참조 저장
+			this.#saveCurrentSourceTextureReferences(sourceTextureView);
+
 		}
 		this.update(performance.now())
 		this.execute(gpuDevice, width, height)
