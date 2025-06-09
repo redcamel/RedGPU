@@ -15,9 +15,8 @@ import RedGPUContextDetector from "./detector/RedGPUContextDetector";
  */
 class RedGPUContext extends RedGPUContextViewContainer {
     currentRequestAnimationFrame: number
-    useMSAA: boolean = false
-    useFXAA: boolean = true
-    fxaa:FXAA
+    useMSAA: boolean = true
+    useFXAA: boolean = false
     onResize: ((width: number, height: number) => void) | null = null;
     #configurationDescription: GPUCanvasConfiguration
     readonly #gpuAdapter: GPUAdapter
