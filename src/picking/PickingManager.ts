@@ -75,7 +75,7 @@ class PickingManager {
             this.destroy()
             this.#pickingGPUTexture = this.#createTexture(navigator.gpu.getPreferredCanvasFormat())
             this.#pickingGPUTextureView = this.#pickingGPUTexture.createView()
-            this.#pickingDepthGPUTexture = this.#createTexture('depth24plus')
+            this.#pickingDepthGPUTexture = this.#createTexture('depth32float')
             this.#pickingDepthGPUTextureView = this.#pickingDepthGPUTexture.createView()
         }
     }

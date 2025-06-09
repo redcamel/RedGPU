@@ -98,7 +98,7 @@ class Grid {
                 }],
             },
             depthStencil: {
-                format: 'depth24plus',
+                format: 'depth32float',
                 depthWriteEnabled: false,
                 depthCompare: GPU_COMPARE_FUNCTION.LESS_EQUAL,
             }
