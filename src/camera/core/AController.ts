@@ -17,7 +17,7 @@ class AController {
         this.#camera = value;
     }
 
-    update(view: View3D) {
+    update(view: View3D,time: number): void {
     }
 
     getCanvasEventPoint = (e: MouseEvent | TouchEvent, redGPUContext: RedGPUContext) => {

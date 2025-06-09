@@ -73,7 +73,7 @@ class Renderer {
             depthStencilAttachment,
         }
         // @ts-ignore
-        camera.update?.(view)
+        camera.update?.(view,time)
         const commandEncoder: GPUCommandEncoder = redGPUContext.gpuDevice.createCommandEncoder()
         view.debugViewRenderState.reset(null, time)
         if (pixelRectObject.width && pixelRectObject.height) {

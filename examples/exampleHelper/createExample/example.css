@@ -26,7 +26,7 @@ html, body {
     left: 0;
     right: 0;
     height: 72px;
-    background: rgba(0, 0, 0, 0.75);
+    background: rgb(32, 32, 32);
     padding: 0 16px;
     display: flex;
     justify-content: space-between;

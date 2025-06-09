@@ -204,7 +204,7 @@ class BasicController extends AController {
         this.#keyNameMapper.turnDown = value
     }
 
-    update(view: View3D) {
+    update(view: View3D,time:number) {
         this.#targetView = view
         const tDelay = this.#delay;
         const tDelayRotation = this.#delayRotation;

@@ -3,7 +3,7 @@ import * as RedGPU from "../../../../../dist/index.js";
 // 1. Create and append a canvas
 // 1. 캔버스를 생성하고 문서에 추가
 const canvas = document.createElement('canvas');
-document.body.appendChild(canvas);
+document.querySelector('#example-container').appendChild(canvas);
 
 // 2. Initialize RedGPU
 // 2. RedGPU 초기화
@@ -17,18 +17,48 @@ RedGPU.init(
 		controller.speedDistance = 0.1
 		controller.tilt = 0
 
+		const controller2 = new RedGPU.Camera.ObitController(redGPUContext);
+		controller2.distance = 3
+		controller2.speedDistance = 0.1
+		controller2.tilt = 0
+
+		const cubeTexture =
+			new RedGPU.Resource.CubeTexture(redGPUContext, [
+				"../../../../assets/skybox/px.jpg", // Positive X
+				"../../../../assets/skybox/nx.jpg", // Negative X
+				"../../../../assets/skybox/py.jpg", // Positive Y
+				"../../../../assets/skybox/ny.jpg", // Negative Y
+				"../../../../assets/skybox/pz.jpg", // Positive Z
+				"../../../../assets/skybox/nz.jpg", // Negative Z
+			])
+
 		// Create a scene and add a view with the camera controller
 		// 씬을 생성하고 카메라 컨트롤러와 함께 뷰 추가
 		const scene = new RedGPU.Display.Scene();
-		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		redGPUContext.addView(view);
+		const view1 = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+		view1.iblTexture = cubeTexture
+		view1.skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture)
+		redGPUContext.addView(view1);
+		const view2 = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+		view2.iblTexture = cubeTexture
+		view2.skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture)
+		redGPUContext.addView(view2);
 
 		const directionalLightTest = new RedGPU.Light.DirectionalLight()
 		scene.lightManager.addDirectionalLight(directionalLightTest)
-		loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF/DamagedHelmet.gltf',);
+		loadGLTF(view1, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF/DamagedHelmet.gltf',);
 
-		view.postEffectManager.addEffect(new RedGPU.PostEffect.Grayscale(redGPUContext))
+		view1.postEffectManager.addEffect(new RedGPU.PostEffect.Grayscale(redGPUContext))
 
+		if (redGPUContext.detector.isMobile) {
+			view1.setSize('100%', '50%')
+			view2.setSize('100%', '50%')
+			view2.setPosition(0, '50%')
+		} else {
+			view1.setSize('50%', '100%')
+			view2.setSize('50%', '100%')
+			view2.setPosition('50%', 0)
+		}
 		// Create a renderer and start rendering
 		// 렌더러 생성 후 렌더링 시작
 		const renderer = new RedGPU.Renderer(redGPUContext);
@@ -50,17 +80,7 @@ RedGPU.init(
 
 function loadGLTF(view, url) {
 	const {redGPUContext, scene} = view
-	const cubeTexture =
-		new RedGPU.Resource.CubeTexture(redGPUContext, [
-			"../../../../assets/skybox/px.jpg", // Positive X
-			"../../../../assets/skybox/nx.jpg", // Negative X
-			"../../../../assets/skybox/py.jpg", // Positive Y
-			"../../../../assets/skybox/ny.jpg", // Negative Y
-			"../../../../assets/skybox/pz.jpg", // Positive Z
-			"../../../../assets/skybox/nz.jpg", // Negative Z
-		])
-	view.iblTexture = cubeTexture
-	view.skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture)
+
 	let mesh
 	new RedGPU.GLTFLoader(
 		redGPUContext,
