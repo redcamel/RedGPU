@@ -12,7 +12,6 @@ class DOFUnified extends ASinglePassPostEffect {
 	constructor(redGPUContext: RedGPUContext) {
 		super(redGPUContext);
 		const {WORK_SIZE_X, WORK_SIZE_Y, WORK_SIZE_Z} = this;
-
 		const computeCode = `
             struct Uniforms {
                 nearBlurSize: f32,
@@ -117,7 +116,6 @@ class DOFUnified extends ASinglePassPostEffect {
                 }
             }
         `;
-
 		this.init(
 			redGPUContext,
 			'POST_EFFECT_DOF_UNIFIED',
@@ -126,7 +124,6 @@ class DOFUnified extends ASinglePassPostEffect {
 				nonMsaa: computeCode
 			}
 		);
-
 		this.nearBlurSize = this.#nearBlurSize;
 		this.farBlurSize = this.#farBlurSize;
 		this.nearStrength = this.#nearStrength;
@@ -134,31 +131,35 @@ class DOFUnified extends ASinglePassPostEffect {
 	}
 
 	get nearBlurSize(): number { return this.#nearBlurSize; }
+
 	set nearBlurSize(value: number) {
 		validateNumberRange(value);
 		this.#nearBlurSize = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.nearBlurSize, value);
+		this.updateUniform('nearBlurSize', value)
 	}
 
 	get farBlurSize(): number { return this.#farBlurSize; }
+
 	set farBlurSize(value: number) {
 		validateNumberRange(value);
 		this.#farBlurSize = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.farBlurSize, value);
+		this.updateUniform('farBlurSize', value)
 	}
 
 	get nearStrength(): number { return this.#nearStrength; }
+
 	set nearStrength(value: number) {
 		validateNumberRange(value);
 		this.#nearStrength = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.nearStrength, value);
+		this.updateUniform('nearStrength', value)
 	}
 
 	get farStrength(): number { return this.#farStrength; }
+
 	set farStrength(value: number) {
 		validateNumberRange(value);
 		this.#farStrength = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.farStrength, value);
+		this.updateUniform('farStrength', value)
 	}
 
 	render(view: View3D, width: number, height: number, sourceTextureView: GPUTextureView, cocTextureView: GPUTextureView) {

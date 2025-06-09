@@ -82,7 +82,7 @@ class ChromaticAberration extends ASinglePassPostEffect {
 	set strength(value: number) {
 		validateNumberRange(value, 0)
 		this.#strength = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.strength, value)
+		this.updateUniform('strength', value)
 	}
 
 	get centerX(): number {
@@ -92,7 +92,7 @@ class ChromaticAberration extends ASinglePassPostEffect {
 	set centerX(value: number) {
 		validateNumberRange(value, 0, 1)
 		this.#centerX = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.centerX, value)
+		this.updateUniform('centerX', value)
 	}
 
 	get centerY(): number {
@@ -102,7 +102,7 @@ class ChromaticAberration extends ASinglePassPostEffect {
 	set centerY(value: number) {
 		validateNumberRange(value, 0, 1)
 		this.#centerY = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.centerY, value)
+		this.updateUniform('centerY', value)
 	}
 
 	get falloff(): number {
@@ -112,7 +112,7 @@ class ChromaticAberration extends ASinglePassPostEffect {
 	set falloff(value: number) {
 		validateNumberRange(value, 0, 5)
 		this.#falloff = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.falloff, value)
+		this.updateUniform('falloff', value)
 	}
 }
 

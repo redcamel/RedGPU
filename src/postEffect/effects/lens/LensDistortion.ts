@@ -71,7 +71,7 @@ class LensDistortion extends ASinglePassPostEffect {
 	set barrelStrength(value: number) {
 		validateNumberRange(value, 0)
 		this.#barrelStrength = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.barrelStrength, value)
+		this.updateUniform('barrelStrength', value)
 	}
 
 	get pincushionStrength(): number {
@@ -81,7 +81,7 @@ class LensDistortion extends ASinglePassPostEffect {
 	set pincushionStrength(value: number) {
 		validateNumberRange(value, 0)
 		this.#pincushionStrength = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.pincushionStrength, value)
+		this.updateUniform('pincushionStrength', value)
 	}
 
 	get centerX(): number {
@@ -91,7 +91,7 @@ class LensDistortion extends ASinglePassPostEffect {
 	set centerX(value: number) {
 		validateNumber(value)
 		this.#centerX = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.centerX, value)
+		this.updateUniform('centerX', value)
 	}
 
 	get centerY(): number {
@@ -101,7 +101,7 @@ class LensDistortion extends ASinglePassPostEffect {
 	set centerY(value: number) {
 		validateNumber(value)
 		this.#centerY = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.centerY, value)
+		this.updateUniform('centerY', value)
 	}
 }
 

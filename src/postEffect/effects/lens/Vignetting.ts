@@ -53,7 +53,7 @@ class Vignetting extends ASinglePassPostEffect {
 	set size(value: number) {
 		validateNumberRange(value, 0,)
 		this.#size = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.size, value)
+		this.updateUniform('size', value)
 	}
 
 	get smoothness(): number {
@@ -63,7 +63,7 @@ class Vignetting extends ASinglePassPostEffect {
 	set smoothness(value: number) {
 		validateNumberRange(value, 0, 1)
 		this.#smoothness = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.smoothness, value)
+		this.updateUniform('smoothness', value)
 	}
 }
 

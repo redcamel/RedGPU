@@ -94,7 +94,7 @@ class DOFCoC extends ASinglePassPostEffect {
 	set focusDistance(value: number) {
 		validateNumberRange(value);
 		this.#focusDistance = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.focusDistance, value);
+		this.updateUniform('focusDistance', value)
 	}
 
 	get aperture(): number {
@@ -104,7 +104,7 @@ class DOFCoC extends ASinglePassPostEffect {
 	set aperture(value: number) {
 		validateNumberRange(value);
 		this.#aperture = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.aperture, value);
+		this.updateUniform('aperture', value)
 	}
 
 	get maxCoC(): number {
@@ -114,7 +114,7 @@ class DOFCoC extends ASinglePassPostEffect {
 	set maxCoC(value: number) {
 		validateNumberRange(value);
 		this.#maxCoC = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.maxCoC, value);
+		this.updateUniform('maxCoC', value)
 	}
 
 	get nearPlane(): number {
@@ -124,7 +124,7 @@ class DOFCoC extends ASinglePassPostEffect {
 	set nearPlane(value: number) {
 		validateNumberRange(value);
 		this.#nearPlane = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.nearPlane, value);
+		this.updateUniform('nearPlane', value)
 	}
 
 	get farPlane(): number {
@@ -134,7 +134,7 @@ class DOFCoC extends ASinglePassPostEffect {
 	set farPlane(value: number) {
 		validateNumberRange(value);
 		this.#farPlane = value;
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members.farPlane, value);
+		this.updateUniform('farPlane', value)
 	}
 }
 
