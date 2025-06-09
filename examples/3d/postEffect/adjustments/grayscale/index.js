@@ -10,64 +10,88 @@ document.querySelector('#example-container').appendChild(canvas);
 RedGPU.init(
 	canvas,
 	(redGPUContext) => {
-		// Create a camera controller (Orbit type)
+		// ============================================
+		// 기본 설정
+		// ============================================
+
 		// 궤도형 카메라 컨트롤러 생성
 		const controller = new RedGPU.Camera.ObitController(redGPUContext);
-		controller.distance = 3
-		controller.speedDistance = 0.1
-		controller.tilt = 0
+		controller.distance = 3;
+		controller.speedDistance = 0.1;
+		controller.tilt = 0;
 
-		const controller2 = new RedGPU.Camera.ObitController(redGPUContext);
-		controller2.distance = 3
-		controller2.speedDistance = 0.1
-		controller2.tilt = 0
+		// 스카이박스 텍스처 생성
+		const cubeTexture = new RedGPU.Resource.CubeTexture(redGPUContext, [
+			"../../../../assets/skybox/px.jpg", // Positive X
+			"../../../../assets/skybox/nx.jpg", // Negative X
+			"../../../../assets/skybox/py.jpg", // Positive Y
+			"../../../../assets/skybox/ny.jpg", // Negative Y
+			"../../../../assets/skybox/pz.jpg", // Positive Z
+			"../../../../assets/skybox/nz.jpg", // Negative Z
+		]);
 
-		const cubeTexture =
-			new RedGPU.Resource.CubeTexture(redGPUContext, [
-				"../../../../assets/skybox/px.jpg", // Positive X
-				"../../../../assets/skybox/nx.jpg", // Negative X
-				"../../../../assets/skybox/py.jpg", // Positive Y
-				"../../../../assets/skybox/ny.jpg", // Negative Y
-				"../../../../assets/skybox/pz.jpg", // Positive Z
-				"../../../../assets/skybox/nz.jpg", // Negative Z
-			])
-
-		// Create a scene and add a view with the camera controller
-		// 씬을 생성하고 카메라 컨트롤러와 함께 뷰 추가
+		// 씬 생성
 		const scene = new RedGPU.Display.Scene();
-		const view1 = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		view1.iblTexture = cubeTexture
-		view1.skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture)
-		redGPUContext.addView(view1);
-		const view2 = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		view2.iblTexture = cubeTexture
-		view2.skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture)
-		redGPUContext.addView(view2);
 
-		const directionalLightTest = new RedGPU.Light.DirectionalLight()
-		scene.lightManager.addDirectionalLight(directionalLightTest)
-		loadGLTF(view1, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF/DamagedHelmet.gltf',);
+		// ============================================
+		// 뷰 생성 및 설정
+		// ============================================
 
-		view1.postEffectManager.addEffect(new RedGPU.PostEffect.Grayscale(redGPUContext))
+		// 일반 뷰 생성 (원본)
+		const viewNormal = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+		viewNormal.iblTexture = cubeTexture;
+		viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture);
+		redGPUContext.addView(viewNormal);
+
+		// 이펙트 뷰 생성 (그레이스케일 적용)
+		const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+		viewEffect.iblTexture = cubeTexture;
+		viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture);
+		viewEffect.postEffectManager.addEffect(new RedGPU.PostEffect.Grayscale(redGPUContext));
+		redGPUContext.addView(viewEffect);
+
+		// ============================================
+		// 씬 설정
+		// ============================================
+
+		// 조명 추가
+		const directionalLight = new RedGPU.Light.DirectionalLight();
+		scene.lightManager.addDirectionalLight(directionalLight);
+
+		// 3D 모델 로드
+		loadGLTF(viewEffect, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF/DamagedHelmet.gltf');
+
+		// ============================================
+		// 레이아웃 설정 (반응형)
+		// ============================================
 
 		if (redGPUContext.detector.isMobile) {
-			view1.setSize('100%', '50%')
-			view2.setSize('100%', '50%')
-			view2.setPosition(0, '50%')
+			// 모바일: 위아래 분할
+			viewNormal.setSize('100%', '50%');
+			viewNormal.setPosition(0, '50%');     // 하단
+			viewEffect.setSize('100%', '50%');
+			viewEffect.setPosition(0, 0);         // 상단
 		} else {
-			view1.setSize('50%', '100%')
-			view2.setSize('50%', '100%')
-			view2.setPosition('50%', 0)
+			// 데스크톱: 좌우 분할
+			viewNormal.setSize('50%', '100%');
+			viewNormal.setPosition(0, 0);         // 좌측
+			viewEffect.setSize('50%', '100%');
+			viewEffect.setPosition('50%', 0);     // 우측
 		}
-		// Create a renderer and start rendering
-		// 렌더러 생성 후 렌더링 시작
+
+		// ============================================
+		// 렌더링 시작
+		// ============================================
+
+		// 렌더러 생성 및 시작
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		const render = () => {
-
+			// 추가 렌더링 로직이 필요하면 여기에 작성
 		};
 		renderer.start(redGPUContext, render);
-		renderTestPane(redGPUContext)
 
+		// 컨트롤 패널 생성
+		renderTestPane(redGPUContext, viewEffect);
 	},
 	(failReason) => {
 		// Handle initialization failure
@@ -78,7 +102,7 @@ RedGPU.init(
 	}
 );
 
-function loadGLTF(view, url) {
+function loadGLTF(scene, url) {
 	const {redGPUContext, scene} = view
 
 	let mesh
@@ -93,11 +117,11 @@ function loadGLTF(view, url) {
 
 // Function to render Test Pane (for controls)
 // 테스트 패널을 렌더링하는 함수
-const renderTestPane = async (redGPUContext) => {
+const renderTestPane = async (redGPUContext, viewEffect) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const pane = new Pane();
 
-	const view = redGPUContext.viewList[0]
+	const view = viewEffect
 
 	const TEST_STATE = {
 		Grayscale: true,
