@@ -4,14 +4,14 @@ import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "./core/createBasicPostEffectCode";
 
 class FXAA extends ASinglePassPostEffect {
-	#subpix: number = 0.75
-	#edgeThreshold: number = 0.166
-	#edgeThresholdMin: number = 0.0833
+    #subpix: number = 0.75
+    #edgeThreshold: number = 0.166
+    #edgeThresholdMin: number = 0.0833
 
 
-	constructor(redGPUContext: RedGPUContext) {
-		super(redGPUContext);
-		const computeCode = `
+    constructor(redGPUContext: RedGPUContext) {
+        super(redGPUContext);
+        const computeCode = `
 let index = vec2<u32>(global_id.xy);
 let dimensions: vec2<u32> = textureDimensions(sourceTexture);
 let dimW = f32(dimensions.x);
@@ -50,52 +50,52 @@ let finalColor = mix(colorC.rgb, blurredColor, blendAmount);
 
 textureStore(outputTexture, index, vec4<f32>(finalColor, colorC.a));
 `;
-		const uniformStructCode = `
+        const uniformStructCode = `
 struct Uniforms {
   subpix: f32,
   edgeThreshold: f32,
   edgeThresholdMin: f32 
 };
 `;
-		this.init(
-			redGPUContext,
-			'POST_EFFECT_FXAA',
-			createBasicPostEffectCode(this, computeCode, uniformStructCode)
-		)
-		this.subpix = this.#subpix
-		this.edgeThreshold = this.#edgeThreshold
-		this.edgeThresholdMin = this.#edgeThresholdMin
-	}
+        this.init(
+            redGPUContext,
+            'POST_EFFECT_FXAA',
+            createBasicPostEffectCode(this, computeCode, uniformStructCode)
+        )
+        this.subpix = this.#subpix
+        this.edgeThreshold = this.#edgeThreshold
+        this.edgeThresholdMin = this.#edgeThresholdMin
+    }
 
-	get subpix(): number {
-		return this.#subpix;
-	}
+    get subpix(): number {
+        return this.#subpix;
+    }
 
-	set subpix(value: number) {
-		validateNumberRange(value, 0, 1);
-		this.#subpix = value;
-		this.updateUniform('subpix', value);
-	}
+    set subpix(value: number) {
+        validateNumberRange(value, 0, 1);
+        this.#subpix = value;
+        this.updateUniform('subpix', value);
+    }
 
-	get edgeThreshold(): number {
-		return this.#edgeThreshold;
-	}
+    get edgeThreshold(): number {
+        return this.#edgeThreshold;
+    }
 
-	set edgeThreshold(value: number) {
-		validateNumberRange(value, 0.0001, 0.25)
-		this.#edgeThreshold = value;
-		this.updateUniform('edgeThreshold', value);
-	}
+    set edgeThreshold(value: number) {
+        validateNumberRange(value, 0.0001, 0.25)
+        this.#edgeThreshold = value;
+        this.updateUniform('edgeThreshold', value);
+    }
 
-	get edgeThresholdMin(): number {
-		return this.#edgeThresholdMin;
-	}
+    get edgeThresholdMin(): number {
+        return this.#edgeThresholdMin;
+    }
 
-	set edgeThresholdMin(value: number) {
-		validateNumberRange(value, 0.00001, 0.1)
-		this.#edgeThresholdMin = value;
-		this.updateUniform('edgeThresholdMin', value);
-	}
+    set edgeThresholdMin(value: number) {
+        validateNumberRange(value, 0.00001, 0.1)
+        this.#edgeThresholdMin = value;
+        this.updateUniform('edgeThresholdMin', value);
+    }
 }
 
 Object.freeze(FXAA)
