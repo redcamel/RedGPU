@@ -7,6 +7,7 @@ import consoleAndThrowError from "../utils/consoleAndThrowError";
 import RedGPUContextSizeManager from "./core/RedGPUContextSizeManager";
 import RedGPUContextViewContainer from "./core/RedGPUContextViewContainer";
 import RedGPUContextDetector from "./detector/RedGPUContextDetector";
+import Antialiasing from "./antialiasing/Antialiasing";
 
 /**
  * RedGPU.initialize 실행이후 생성 제공되는 객체.
@@ -31,6 +32,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
     #useDebugPanel: boolean = false
     #keyboardKeyBuffer: { [key: string]: boolean } = {}
 
+    #antialiasing:Antialiasing
     constructor(
         htmlCanvas: HTMLCanvasElement,
         gpuAdapter: GPUAdapter,
@@ -47,6 +49,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
         this.#sizeManager = new RedGPUContextSizeManager(this)
         this.#detector = new RedGPUContextDetector(this)
         this.#resourceManager = new ResourceManager(this)
+        this.#antialiasing = new Antialiasing(this)
         this.#initialize()
     }
 
