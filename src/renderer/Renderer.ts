@@ -107,14 +107,35 @@ class Renderer {
                 if(view.debugViewRenderState.render2PathLayer.length){
                     const {mipmapGenerator} = redGPUContext.resourceManager
                     let renderPath1ResultTexture = view.viewRenderTextureManager.renderPath1ResultTexture
+
+                    // useMSAA 설정에 따라 소스 텍스처 선택
+                    let sourceTexture = view.redGPUContext.useMSAA
+                        ? view.viewRenderTextureManager.colorResolveTexture
+                        : view.viewRenderTextureManager.colorTexture;
+
+                    if (!sourceTexture) {
+                        if (view.redGPUContext.useMSAA) {
+                            console.error('MSAA가 활성화되어 있지만 colorResolveTexture가 정의되지 않았습니다');
+                        } else {
+                            console.error('colorTexture가 정의되지 않았습니다');
+                        }
+                        console.log('view.redGPUContext.useMSAA:', view.redGPUContext.useMSAA);
+                        console.log('viewRenderTextureManager:', view.viewRenderTextureManager);
+                    }
+
+                    if (!renderPath1ResultTexture) {
+                        console.error('renderPath1ResultTexture가 정의되지 않았습니다');
+
+                    }
+
                     commandEncoder.copyTextureToTexture(
-                      {
-                          texture: view.viewRenderTextureManager.colorResolveTexture,
-                      },
-                      {
-                          texture: renderPath1ResultTexture,
-                      },
-                      { width:view.pixelRectObject.width, height:view.pixelRectObject.height, depthOrArrayLayers: 1 },
+                        {
+                            texture: sourceTexture,
+                        },
+                        {
+                            texture: renderPath1ResultTexture,
+                        },
+                        { width: view.pixelRectObject.width, height: view.pixelRectObject.height, depthOrArrayLayers: 1 },
                     );
                     mipmapGenerator.generateMipmap(renderPath1ResultTexture, view.viewRenderTextureManager.renderPath1ResultTextureDescriptor)
                     const renderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass({
