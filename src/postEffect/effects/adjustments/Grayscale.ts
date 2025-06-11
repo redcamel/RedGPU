@@ -13,6 +13,7 @@ class Grayscale extends ASinglePassPostEffect {
         let uv = 	vec2<f32>(f32(index.x)/dimW,f32(index.y)/dimH);
         var color:vec4<f32> = textureLoad( sourceTexture, index, );
         let gray = (color.r  + color.g + color.b)/3.0;
+        /* 주석테스트 */
         textureStore(outputTexture, index, vec4<f32>( gray, gray, gray, 1.0) );
     `
 		const uniformStructCode = ''

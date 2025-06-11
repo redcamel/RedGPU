@@ -62,14 +62,14 @@ export default [
 				extensions: ['.css'],
 				minimize: true
 			}),
-			// strip(
-			// 	{
-			// 		include: ['**/*.ts'],
-			// 		exclude: ["./init.ts"],
-			// 		functions: ['console.log'], // 제거할 함수 지정
-			// 		debugger: true,
-			// 	}
-			// ),
+			strip(
+				{
+					include: ['**/*.ts'],
+					exclude: ["./init.ts"],
+					functions: ['console.log'], // 제거할 함수 지정
+					debugger: true,
+				}
+			),
 			typescript({
 					tsconfig: 'tsconfig.json'
 				}
@@ -123,23 +123,6 @@ function stringWgsl() {
 			if (filter(id)) {
 				let newCode = code
 					.replace(/\/\/.*/g, '')
-					// .replace(/(\s|\\t){1,}/g, ' ')
-					// .replace(/\\t/g, ' ')
-					// .replace(/(\s?)=(\s?)/g, '=')
-					// .replace(/(\s?):(\s?)/g, ':')
-					// .replace(/(\s?);(\s?)/g, ';')
-					// .replace(/(\s?),(\s?)/g, ',')
-					// .replace(/(\s?)\/(\s?)/g, '/')
-					// .replace(/(\s?)\*(\s?)/g, '*')
-					// .replace(/\s-|-\s|\s-\s/g, '-')
-					// .replace(/(\s?)\+(\s?)/g, '+')
-					// .replace(/(\s?)\{(\s?)/g, '{')
-					// .replace(/(\s?)}(\s?)/g, '}')
-					// .replace(/(\s?)>(\s?)/g, '>')
-					// .replace(/(\s?)<(\s?)/g, '<')
-					// .replace(/(\s?)\((\s?)/g, '(')
-					// .replace(/(\s?)\)(\s?)/g, ')')
-				// newCode = newCode.replace(/return/g, 'return ');
 				newCode = JSON.stringify(newCode)
 				return {
 					code: `export default ${newCode};`,

@@ -1,4 +1,13 @@
 import ASinglePassPostEffect from "./ASinglePassPostEffect";
+// 간단하고 정확한 주석 제거
+const removeComments = (code: string): string => {
+	// console.log('입력:', code);
+	let result = code.replace(/\/\/[^\r\n]*(?=\S)/g, '\n').replace(/\/\/[^\r\n]*/g, '');
+	// console.log('출력:', result);
+	return result;
+}
+
+
 
 const createCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: string = '', useMSAA: boolean = false,) => {
 	const {WORK_SIZE_X, WORK_SIZE_Y, WORK_SIZE_Z} = effect
@@ -15,7 +24,7 @@ const createCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: 
       fn main (
         @builtin(global_invocation_id) global_id : vec3<u32>,
       ){
-          ${code}
+          ${removeComments(code)}
       }
   `
 }
