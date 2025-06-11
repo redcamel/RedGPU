@@ -86,7 +86,7 @@ class ViewRenderTextureManager {
 				label: `renderPath1ResultTexture_${pixelRectObjectW}x${pixelRectObjectH}_${Date.now()}`
 			}
 			this.#renderPath1ResultTexture = gpuDevice.createTexture(this.#renderPath1ResultTextureDescriptor);
-			this.#renderPath1ResultTextureView = this.#renderPath1ResultTexture.createView()
+			this.#renderPath1ResultTextureView = this.#renderPath1ResultTexture.createView({label: this.#renderPath1ResultTexture.label})
 		}
 	}
 
@@ -125,10 +125,10 @@ class ViewRenderTextureManager {
 			})
 			if (depthYn) {
 				this.#depthTexture = newTexture;
-				this.#depthTextureView = newTexture.createView();
+				this.#depthTextureView = newTexture.createView({label: newTexture.label});
 			} else {
 				this.#colorTexture = newTexture;
-				this.#colorTextureView = newTexture.createView();
+				this.#colorTextureView = newTexture.createView({label: newTexture.label});
 				if (useMSAA) {
 					const newResolveTexture = gpuDevice.createTexture({
 						size: {
@@ -142,7 +142,7 @@ class ViewRenderTextureManager {
 						usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC
 					})
 					this.#colorResolveTexture = newResolveTexture
-					this.#colorResolveTextureView = newResolveTexture.createView()
+					this.#colorResolveTextureView = newResolveTexture.createView({label:newResolveTexture.label})
 				}
 			}
 		}

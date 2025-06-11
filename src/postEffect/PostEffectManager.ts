@@ -134,7 +134,7 @@ class PostEffectManager {
 				this.#storageTexture = null;
 			}
 			this.#storageTexture = this.#createStorageTexture(gpuDevice, width, height);
-			this.#storageTextureView = this.#storageTexture.createView();
+			this.#storageTextureView = this.#storageTexture.createView({label: this.#storageTexture.label});
 		}
 		// 크기 변경 또는 MSAA 변경 시 BindGroup 재생성
 		if (dimensionsChanged || changedMSAA) {

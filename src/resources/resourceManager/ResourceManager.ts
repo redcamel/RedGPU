@@ -228,7 +228,7 @@ class ResourceManager extends ResourceBase {
                 label: 'emptyBitmapTexture',
             });
 
-            this.#emptyBitmapTextureView = emptyBitmapTexture.createView(); // 뷰 생성
+            this.#emptyBitmapTextureView = emptyBitmapTexture.createView({label: emptyBitmapTexture.label}); // 뷰 생성
             const transparentPixel = new Uint8Array([0, 0, 0, 0]); // 투명 RGBA (1x1)
 
             // 텍스처 초기화

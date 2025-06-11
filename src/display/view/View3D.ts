@@ -315,7 +315,6 @@ class View3D extends ViewTransform {
                 },
                 {
                     binding: 8,
-                    // resource: renderPath1ResultTexture?.createView()
                     resource: this.viewRenderTextureManager.renderPath1ResultTextureView
                       || this.redGPUContext.resourceManager.emptyBitmapTextureView
                 },

@@ -44,6 +44,7 @@ class MipmapGenerator {
                 dimension: '2d',
                 baseArrayLayer,
                 arrayLayerCount: 1,
+                label : `mipmap_${baseMipLevel}_${baseArrayLayer}_${texture.label}`
             });
             arrayLayerMap.set(baseArrayLayer, view);
         }

@@ -114,10 +114,10 @@ class PackedTexture {
 		const packedTexture = this.#gpuDevice.createTexture(textureDescriptor);
 
 		const bindGroupEntries = [
-			{ binding: 0, resource: textures.r ? textures.r.createView() : this.#redGPUContext.resourceManager.emptyBitmapTextureView },
-			{ binding: 1, resource: textures.g ? textures.g.createView() : this.#redGPUContext.resourceManager.emptyBitmapTextureView },
-			{ binding: 2, resource: textures.b ? textures.b.createView() : this.#redGPUContext.resourceManager.emptyBitmapTextureView },
-			{ binding: 3, resource: textures.a ? textures.a.createView() : this.#redGPUContext.resourceManager.emptyBitmapTextureView },
+			{ binding: 0, resource: textures.r ? textures.r.createView({label: textures.r.label}) : this.#redGPUContext.resourceManager.emptyBitmapTextureView },
+			{ binding: 1, resource: textures.g ? textures.g.createView({label: textures.g.label}) : this.#redGPUContext.resourceManager.emptyBitmapTextureView },
+			{ binding: 2, resource: textures.b ? textures.b.createView({label: textures.b.label}) : this.#redGPUContext.resourceManager.emptyBitmapTextureView },
+			{ binding: 3, resource: textures.a ? textures.a.createView({label: textures.a.label}) : this.#redGPUContext.resourceManager.emptyBitmapTextureView },
 			{ binding: 4, resource: this.#sampler },
 		];
 
@@ -131,7 +131,7 @@ class PackedTexture {
 		const passEncoder = commandEncoder.beginRenderPass({
 			colorAttachments: [
 				{
-					view: packedTexture.createView(),
+					view: packedTexture.createView({label: packedTexture.label,}),
 					loadOp: 'clear',
 					storeOp: 'store',
 					clearValue: [0, 0, 0, 0],

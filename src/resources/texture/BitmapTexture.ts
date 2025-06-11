@@ -145,6 +145,7 @@ class BitmapTexture extends ManagedResourceBase {
             size: [W, H],
             format: this.#format,
             usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
+            label:this.#src
         };
         // // 밉맵을 생성할꺼면 소스를 계산해서... 밉맵 카운트를 추가 정의한다.
         if (this.#useMipmap) {

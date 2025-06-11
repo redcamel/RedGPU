@@ -151,6 +151,7 @@ class CubeTexture extends ManagedResourceBase {
                 size: [W, H, depthOrArrayLayers],
                 format: this.#format,
                 usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
+                label:`cubeTexture_${this.#srcList?.toString() || this.uuid}`
             };
             // // 밉맵을 생성할꺼면 소스를 계산해서... 밉맵 카운트를 추가 정의한다.
             if (this.#useMipmap) {

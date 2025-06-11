@@ -289,7 +289,7 @@ class ASinglePassPostEffect {
 				label: `PostEffect_${this.#name}_${width}x${height}_${Date.now()}`
 			})
 			this.#outputTexture.push(newTexture)
-			this.#outputTextureView.push(newTexture.createView())
+			this.#outputTextureView.push(newTexture.createView({label:newTexture.label}))
 		}
 		this.#prevInfo = {
 			width,

@@ -74,9 +74,9 @@ class PickingManager {
         if (this.#pickingGPUTexture?.width !== this.#view.pixelRectObject.width || this.#pickingGPUTexture?.height !== this.#view.pixelRectObject.height) {
             this.destroy()
             this.#pickingGPUTexture = this.#createTexture(navigator.gpu.getPreferredCanvasFormat())
-            this.#pickingGPUTextureView = this.#pickingGPUTexture.createView()
+            this.#pickingGPUTextureView = this.#pickingGPUTexture.createView({label: this.#pickingGPUTexture.label})
             this.#pickingDepthGPUTexture = this.#createTexture('depth32float')
-            this.#pickingDepthGPUTextureView = this.#pickingDepthGPUTexture.createView()
+            this.#pickingDepthGPUTextureView = this.#pickingDepthGPUTexture.createView({label: this.#pickingDepthGPUTexture.label})
         }
     }
 
