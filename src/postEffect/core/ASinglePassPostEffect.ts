@@ -284,7 +284,8 @@ class ASinglePassPostEffect {
 					height,
 				},
 				format: 'rgba8unorm',
-				usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING
+				usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING,
+				label: `PostEffect_${this.#name}_${width}x${height}_${Date.now()}`
 			})
 			this.#outputTexture.push(newTexture)
 			this.#outputTextureView.push(newTexture.createView())

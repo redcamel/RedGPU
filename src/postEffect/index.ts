@@ -1,6 +1,7 @@
 import AMultiPassPostEffect from "./core/AMultiPassPostEffect";
 import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
 import BrightnessContrast from "./effects/adjustments/BrightnessContrast";
+import ColorBalance from "./effects/adjustments/ColorBalance";
 import ColorTemperatureTint from "./effects/adjustments/ColorTemperatureTint";
 import Grayscale from "./effects/adjustments/Grayscale";
 import HueSaturation from "./effects/adjustments/HueSaturation";
@@ -18,10 +19,10 @@ import FilmGrain from "./effects/FilmGrain";
 import ChromaticAberration from "./effects/lens/ChromaticAberration";
 import DOF from "./effects/lens/dof/DOF";
 import LensDistortion from "./effects/lens/LensDistortion";
-import OldBloom from "./effects/oldBloom/OldBloom";
 import Vignetting from "./effects/lens/Vignetting";
+import OldBloom from "./effects/oldBloom/OldBloom";
 import PostEffectManager from "./PostEffectManager";
-import ColorBalance from "./effects/adjustments/ColorBalance";
+
 export {
     BrightnessContrast,
     Convolution,

@@ -157,10 +157,10 @@ class Renderer {
 
             }
 
-            //TODO 포스트 이펙트 체크
-            if (view.postEffectManager.effectList.length || view.redGPUContext.useFXAA) {
+            // 포스트 이펙트 체크
+
                 renderPassDescriptor.colorAttachments[0].postEffectView = view.postEffectManager.render()
-            }
+
             if (pickingManager) {
                 pickingManager.checkTexture(view)
                 const pickingPassDescriptor: GPURenderPassDescriptor = {

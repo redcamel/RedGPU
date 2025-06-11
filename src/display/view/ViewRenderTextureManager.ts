@@ -103,7 +103,11 @@ class ViewRenderTextureManager {
 		if (needCreateTexture) {
 			if (currentTexture) {
 				currentTexture?.destroy()
-				if (!depthYn) this.#colorResolveTexture?.destroy()
+				if (!depthYn) {
+					this.#colorResolveTexture?.destroy()
+					this.#colorResolveTexture = null
+					this.#colorResolveTextureView = null
+				}
 			}
 			const newTexture = gpuDevice.createTexture({
 				size: [
@@ -112,6 +116,7 @@ class ViewRenderTextureManager {
 					1
 				],
 				sampleCount: useMSAA ? 4 : 1,
+				label: `${textureType}_${pixelRectObjectW}x${pixelRectObjectH}_${Date.now()}`,
 				format: depthYn ? 'depth32float' : navigator.gpu.getPreferredCanvasFormat(),
 				// usage: GPUTextureUsage.RENDER_ATTACHMENT | (textureType === 'color' ? GPUTextureUsage.TEXTURE_BINDING : 0)
 				usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | (!depthYn && !useMSAA  ? GPUTextureUsage.COPY_SRC : 0)
@@ -130,6 +135,7 @@ class ViewRenderTextureManager {
 							depthOrArrayLayers: 1
 						},
 						sampleCount: 1,
+						label: `${textureType}_resolve_${pixelRectObjectW}x${pixelRectObjectH}_${Date.now()}`,
 						format: navigator.gpu.getPreferredCanvasFormat(),
 						usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC
 					})
