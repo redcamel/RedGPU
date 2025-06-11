@@ -82,9 +82,9 @@ class PostEffectManager {
 		// FXAA 적용 (필요한 경우)
 		if (useFXAA) {
 			if (!this.#fxaa) {
-				this.#fxaa = new FXAA(this.#view.redGPUContext);
+				this.#fxaa = new FXAA(redGPUContext);
 			}
-
+			this.#fxaa.subpix = antialiasingManager.fxaa_subpix
 			currentTextureView = this.#fxaa.render(
 				this.#view,
 				width,
