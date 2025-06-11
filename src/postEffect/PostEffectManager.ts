@@ -57,30 +57,42 @@ class PostEffectManager {
 	}
 
 	render() {
-		const {viewRenderTextureManager, redGPUContext} = this.#view
-		const {useMSAA, useFXAA} = redGPUContext
-		const {colorTextureView, colorResolveTextureView, colorTexture} = viewRenderTextureManager
-		this.#sourceTextureView = this.#renderToStorageTexture(this.#view, useMSAA ? colorResolveTextureView : colorTextureView)
-		let sourceTextureView = this.#sourceTextureView
-		const {width, height} = colorTexture
+
+		const { viewRenderTextureManager, redGPUContext } = this.#view;
+		const { useMSAA, useFXAA } = redGPUContext;
+		const { colorTextureView, colorResolveTextureView, colorTexture } = viewRenderTextureManager;
+		const { width, height } = colorTexture;
+
+		// 초기 텍스처 설정 (MSAA 여부에 따라 소스 결정)
+		const initialSourceView = useMSAA ? colorResolveTextureView : colorTextureView;
+		this.#sourceTextureView = this.#renderToStorageTexture(this.#view, initialSourceView);
+
+		let currentTextureView = this.#sourceTextureView;
+
 		this.#postEffects.forEach(effect => {
-			sourceTextureView = effect.render(
+			currentTextureView = effect.render(
 				this.#view,
 				width,
 				height,
-				sourceTextureView
-			)
-		})
-		if (!this.#fxaa) this.#fxaa = new FXAA(this.#view.redGPUContext)
+				currentTextureView
+			);
+		});
+
+		// FXAA 적용 (필요한 경우)
 		if (useFXAA) {
-			sourceTextureView = this.#fxaa.render(
+			if (!this.#fxaa) {
+				this.#fxaa = new FXAA(this.#view.redGPUContext);
+			}
+
+			currentTextureView = this.#fxaa.render(
 				this.#view,
 				width,
 				height,
-				sourceTextureView
-			)
+				currentTextureView
+			);
 		}
-		return sourceTextureView
+
+		return currentTextureView;
 	}
 
 	clear() {
