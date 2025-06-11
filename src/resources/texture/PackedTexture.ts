@@ -1,4 +1,5 @@
 import RedGPUContext from "../../context/RedGPUContext";
+import createUUID from "../../utils/createUUID";
 
 class PackedTexture {
 	 get gpuTexture(): GPUTexture {
@@ -97,12 +98,14 @@ class PackedTexture {
 	async packing(
 		textures: { r?: GPUTexture; g?: GPUTexture; b?: GPUTexture; a?: GPUTexture },
 		width: number,
-		height: number
+		height: number,
+		label?:string
 	){
 		const textureDescriptor: GPUTextureDescriptor = {
 			size: [width, height, 1],
 			format: 'rgba8unorm',
 			usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC,
+			label: label || `packedTexture_${createUUID()}'`
 		};
 		if(this.#gpuTexture){
 			this.#gpuTexture.destroy()

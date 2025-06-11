@@ -336,7 +336,8 @@ class PBRMaterial extends ABitmapBaseMaterial {
 				b: this.metallicRoughnessTexture?.gpuTexture,
 			},
 			width,
-			height
+			height,
+			'packedORMTexture'
 		)
 	}
 
@@ -356,7 +357,8 @@ class PBRMaterial extends ABitmapBaseMaterial {
 				g: this.KHR_clearcoatRoughnessTexture?.gpuTexture,
 			},
 			width,
-			height
+			height,
+			'packedKHR_clearcoatTexture'
 		)
 	}
 
@@ -375,7 +377,8 @@ class PBRMaterial extends ABitmapBaseMaterial {
 				g: this.KHR_thicknessTexture?.gpuTexture,
 			},
 			width,
-			height
+			height,
+			'packedKHR_transmission'
 		)
 	}
 
@@ -396,7 +399,8 @@ class PBRMaterial extends ABitmapBaseMaterial {
 				a: this.KHR_diffuseTransmissionTexture?.gpuTexture,
 			},
 			width,
-			height
+			height,
+			'packedKHR_diffuse_transmission'
 		)
 	}
 
@@ -417,7 +421,8 @@ class PBRMaterial extends ABitmapBaseMaterial {
 				a: this.KHR_sheenRoughnessTexture?.gpuTexture,
 			},
 			width,
-			height
+			height,
+			'packedKHR_sheen'
 		)
 	}
 
@@ -436,7 +441,8 @@ class PBRMaterial extends ABitmapBaseMaterial {
 				g: this.KHR_iridescenceThicknessTexture?.gpuTexture,
 			},
 			width,
-			height
+			height,
+			'packedKHR_iridescence'
 		)
 	}
 
