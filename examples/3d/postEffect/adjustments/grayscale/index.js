@@ -59,7 +59,7 @@ RedGPU.init(
 		scene.lightManager.addDirectionalLight(directionalLight);
 
 		// 3D 모델 로드
-		loadGLTF(redGPUContext,scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF/DamagedHelmet.gltf');
+		loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF/DamagedHelmet.gltf');
 
 		// ============================================
 		// 레이아웃 설정 (반응형)
@@ -102,7 +102,7 @@ RedGPU.init(
 	}
 );
 
-function loadGLTF(redGPUContext,scene, url) {
+function loadGLTF(redGPUContext, scene, url) {
 
 	let mesh
 	new RedGPU.GLTFLoader(
@@ -117,11 +117,8 @@ function loadGLTF(redGPUContext,scene, url) {
 // Function to render Test Pane (for controls)
 // 테스트 패널을 렌더링하는 함수
 const renderTestPane = async (redGPUContext, viewEffect) => {
-	const {setRedGPUTest_pane} = await import("../../../../exampleHelper/createExample/panes/index.js");
-
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const pane = new Pane();
-	setRedGPUTest_pane(pane, redGPUContext, true);
 	const view = viewEffect
 
 	const TEST_STATE = {

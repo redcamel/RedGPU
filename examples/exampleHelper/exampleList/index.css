@@ -169,8 +169,8 @@ html, body {
 
 /* 아이템 및 링크 */
 .example-item {
-    width: 22%;
-    max-width: 22%;
+    width: 200px;
+    max-width: 200px;
     line-height: 1;
 
 }
@@ -198,8 +198,7 @@ html, body {
     right:0;
     bottom:0;
     /*margin-bottom: 5px;*/
-    font-size: 1.2em;
-    line-height: 1;
+    font-size: 1.1em;
     z-index: 1;
     border-radius: 0 0 8px 8px;
     display: flex;
@@ -207,6 +206,8 @@ html, body {
     padding: 12px 12px;
     border-top: 1px solid rgba(255, 255, 255, 0.16);
     background: #000 linear-gradient(to right, rgba(155, 155, 155, 0.1) 0%, rgba(0, 0, 0, 0.0) 100%);
+    line-height: 1.4;
+    word-break: keep-all;
 }
 
 .example-link {
@@ -252,12 +253,12 @@ a:hover img {
     filter:grayscale(0);
 }
 
-a div {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    width: 100%;
-    white-space: nowrap;
-}
+/*a div {*/
+/*    overflow: hidden;*/
+/*    text-overflow: ellipsis;*/
+/*    width: 100%;*/
+/*    white-space: nowrap;*/
+/*}*/
 
 .footer a {
     color: rgb(242, 169, 113);
