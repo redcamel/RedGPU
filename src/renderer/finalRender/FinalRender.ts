@@ -28,7 +28,7 @@ const PIPELINE_DESCRIPTOR_LABEL = 'PIPELINE_DESCRIPTOR_FINAL_RENDER'
  * @class
  */
 class FinalRender {
-    #prevUseMSAA: boolean
+
     #vertexUniformBuffers: UniformBuffer[] = []
     #vertexUniformBindGroups: GPUBindGroup[] = []
     #vertexBindGroupLayout: GPUBindGroupLayout
@@ -55,7 +55,8 @@ class FinalRender {
      * @param {GPURenderPassDescriptor[]} viewList_renderPassDescriptorList - The list of render passes to be rendered.
      */
     render(redGPUContext: RedGPUContext, viewList_renderPassDescriptorList: GPURenderPassDescriptor[]) {
-        const {useMSAA, sizeManager, gpuDevice, resourceManager} = redGPUContext
+        const {sizeManager, gpuDevice, antialiasingManager} = redGPUContext
+        const {changedMSAA,useMSAA} = antialiasingManager
         const {pixelRectObject: canvasPixelRectObject} = sizeManager
         const {width: canvasW, height: canvasH} = canvasPixelRectObject
         if (canvasW === 0 || canvasH === 0) return
@@ -66,7 +67,7 @@ class FinalRender {
         finalRenderPassEnc.setViewport(0, 0, canvasW, canvasH, 0, 1);
         finalRenderPassEnc.setScissorRect(0, 0, canvasW, canvasH);
         //
-        if (!this.#vertexBindGroupLayout || useMSAA !==this.#prevUseMSAA) this.#initGPUDetails(redGPUContext)
+        if (!this.#vertexBindGroupLayout || changedMSAA) this.#initGPUDetails(redGPUContext)
         this.#renderViewList(
             redGPUContext,
             finalRenderPassEnc,
@@ -78,7 +79,6 @@ class FinalRender {
         )
         finalRenderPassEnc.end()
         gpuDevice.queue.submit([finalRenderCommandEnc.finish()])
-        this.#prevUseMSAA = useMSAA
     }
 
     #renderViewList(
@@ -110,7 +110,7 @@ class FinalRender {
             )
             //
             const needNewBindGroup =
-                this.#prevUseMSAA !== useMSAA
+                redGPUContext.antialiasingManager.changedMSAA
                 || !this.#viewSizes[index]
                 || this.#viewSizes[index].width !== viewW
                 || this.#viewSizes[index].height !== viewH
@@ -212,7 +212,7 @@ class FinalRender {
     }
 
     #getPipeline(redGPUContext: RedGPUContext) {
-        if (!this.#pipeline || redGPUContext.useMSAA !==this.#prevUseMSAA) {
+        if (!this.#pipeline || redGPUContext.antialiasingManager.changedMSAA) {
             const {gpuDevice} = redGPUContext
             const pipelineLayout: GPUPipelineLayout = gpuDevice.createPipelineLayout({
                 bindGroupLayouts: [

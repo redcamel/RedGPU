@@ -169,7 +169,7 @@ class Grid {
         this.#vertexBuffer.changeData(vertexData)
         if (this.#pipeline) {
             const {triangleCount, indexNum} = this.#indexBuffer
-            currentRenderPassEncoder.setPipeline(view.redGPUContext.useMSAA ? this.#pipelineMSAA : this.#pipeline);
+            currentRenderPassEncoder.setPipeline(view.redGPUContext.antialiasingManager.useMSAA ? this.#pipelineMSAA : this.#pipeline);
             currentRenderPassEncoder.setBindGroup(1, this.#fragmentBindGroup);
             currentRenderPassEncoder.setVertexBuffer(0, this.#vertexBuffer.gpuBuffer);
             currentRenderPassEncoder.setIndexBuffer(this.#indexBuffer.gpuBuffer, 'uint32');

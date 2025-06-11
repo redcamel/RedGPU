@@ -59,7 +59,8 @@ class PostEffectManager {
 	render() {
 
 		const { viewRenderTextureManager, redGPUContext } = this.#view;
-		const { useMSAA, useFXAA } = redGPUContext;
+		const { antialiasingManager}=redGPUContext
+		const { useMSAA, useFXAA } = antialiasingManager;
 		const { colorTextureView, colorResolveTextureView, colorTexture } = viewRenderTextureManager;
 		const { width, height } = colorTexture;
 
@@ -116,15 +117,16 @@ class PostEffectManager {
 	}
 
 	#previousDimensions: { width: number, height: number }
-	#previousUseMSAA: boolean
+
 
 	#renderToStorageTexture(view: View3D, sourceTextureView: GPUTextureView) {
 		const {redGPUContext, viewRenderTextureManager} = view;
 		const {colorTexture} = viewRenderTextureManager;
-		const {gpuDevice, useMSAA} = redGPUContext;
+		const {gpuDevice, antialiasingManager} = redGPUContext;
+		const {useMSAA,changedMSAA} = antialiasingManager;
 		const {width, height} = colorTexture;
 		const dimensionsChanged = width !== this.#previousDimensions?.width || height !== this.#previousDimensions?.height;
-		const msaaChanged = this.#previousUseMSAA !== useMSAA;
+
 		// 크기가 변경되면 텍스처 재생성
 		if (dimensionsChanged) {
 			if (this.#storageTexture) {
@@ -135,7 +137,7 @@ class PostEffectManager {
 			this.#storageTextureView = this.#storageTexture.createView();
 		}
 		// 크기 변경 또는 MSAA 변경 시 BindGroup 재생성
-		if (dimensionsChanged || msaaChanged) {
+		if (dimensionsChanged || changedMSAA) {
 			this.#textureComputeBindGroup = this.#createTextureBindGroup(
 				redGPUContext,
 				this.#textureComputeBindGroupLayout,
@@ -143,7 +145,6 @@ class PostEffectManager {
 				this.#storageTextureView
 			);
 		}
-		this.#previousUseMSAA = useMSAA;
 		this.#previousDimensions = {width, height};
 		this.#executeComputePass(
 			gpuDevice,

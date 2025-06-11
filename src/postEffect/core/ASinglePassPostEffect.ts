@@ -1,3 +1,4 @@
+import AntialiasingManager from "../../context/antialiasing/AntialiasingManager";
 import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../material";
@@ -28,7 +29,6 @@ class ASinglePassPostEffect {
 	#WORK_SIZE_X = 16
 	#WORK_SIZE_Y = 16
 	#WORK_SIZE_Z = 1
-	#previousUseMSAA: boolean
 	#useDepthTexture: boolean = false
 	get useDepthTexture(): boolean {
 		return this.#useDepthTexture;
@@ -39,12 +39,15 @@ class ASinglePassPostEffect {
 	}
 
 	#redGPUContext: RedGPUContext
+	#antialiasingManager: AntialiasingManager
+
 	get redGPUContext(): RedGPUContext {
 		return this.#redGPUContext;
 	}
 
 	constructor(redGPUContext: RedGPUContext) {
 		this.#redGPUContext = redGPUContext
+		this.#antialiasingManager = redGPUContext.antialiasingManager
 	}
 
 	get storageInfo() {
@@ -52,7 +55,7 @@ class ASinglePassPostEffect {
 	}
 
 	get shaderInfo() {
-		const useMSAA = this.#redGPUContext.useMSAA;
+		const useMSAA = this.#antialiasingManager.useMSAA;
 		return useMSAA ? this.#SHADER_INFO_MSAA : this.#SHADER_INFO_NON_MSAA;
 	}
 
@@ -110,7 +113,7 @@ class ASinglePassPostEffect {
 	}, bindGroupLayout?: GPUBindGroupLayout) {
 		this.#name = name
 		// this.#bindGroupLayout = bindGroupLayout
-		const {resourceManager, gpuDevice, useMSAA} = redGPUContext
+		const {resourceManager,} = redGPUContext
 		// MSAA 셰이더 생성
 		this.#computeShaderMSAA = resourceManager.createGPUShaderModule(
 			`${name}_MSAA`,
@@ -152,19 +155,18 @@ class ASinglePassPostEffect {
 		computePassEncoder.end();
 		gpuDevice.queue.submit([commentEncode_compute.finish()]);
 	}
+
 	#previousSourceTextureReferences: GPUTextureView[] = [];
 
 	#detectSourceTextureChange(sourceTextureView: GPUTextureView[]): boolean {
 		if (!this.#previousSourceTextureReferences || this.#previousSourceTextureReferences.length !== sourceTextureView.length) {
 			return true;
 		}
-
 		for (let i = 0; i < sourceTextureView.length; i++) {
 			if (this.#previousSourceTextureReferences[i] !== sourceTextureView[i]) {
 				return true;
 			}
 		}
-
 		return false;
 	}
 
@@ -173,16 +175,15 @@ class ASinglePassPostEffect {
 	}
 
 	render(view: View3D, width: number, height: number, ...sourceTextureView) {
+		const {gpuDevice, antialiasingManager} = this.#redGPUContext
+		const {useMSAA} = antialiasingManager
 		const dimensionsChanged = this.#createRenderTexture(view)
-		const msaaChanged = this.#previousUseMSAA !== view.redGPUContext.useMSAA;
-
+		const msaaChanged = antialiasingManager.changedMSAA;
 		// 소스 텍스처 변경 감지
 		const sourceTextureChanged = this.#detectSourceTextureChange(sourceTextureView);
-
-
 		const targetOutputView = this.getOutputTextureView()
 		const {redGPUContext} = view
-		const {gpuDevice, useMSAA} = redGPUContext
+
 		if (dimensionsChanged || msaaChanged || sourceTextureChanged) {
 			const currentStorageInfo = this.storageInfo;
 			const currentUniformInfo = this.uniformInfo;
@@ -257,19 +258,19 @@ class ASinglePassPostEffect {
 			})
 			// 소스 텍스처 참조 저장
 			this.#saveCurrentSourceTextureReferences(sourceTextureView);
-
 		}
 		this.update(performance.now())
 		this.execute(gpuDevice, width, height)
-		this.#previousUseMSAA = view.redGPUContext.useMSAA
 		return targetOutputView
 	}
 
 	update(deltaTime: number) {
 	}
-	updateUniform(key:string, value:number | number[]|boolean) {
+
+	updateUniform(key: string, value: number | number[] | boolean) {
 		this.uniformBuffer.writeBuffer(this.uniformInfo.members[key], value)
 	}
+
 	#createRenderTexture(view: View3D): boolean {
 		const {redGPUContext, viewRenderTextureManager} = view
 		const {colorTexture} = viewRenderTextureManager

@@ -29,7 +29,6 @@ interface Mesh {
 
 class Mesh extends MeshBase {
     displacementTexture: BitmapTexture
-    #prevUseMSAA: boolean = true
     #instanceId: number
     #name: string
     #parent: Object3DContainer
@@ -693,10 +692,9 @@ class Mesh extends MeshBase {
         if (this.dirtyPipeline || currentMaterial?.dirtyPipeline || dirtyVertexUniformFromMaterial[currentMaterialUUID]) {
             dirtyVertexUniformFromMaterial[currentMaterialUUID] = true
         }
-        const {useMSAA, gpuDevice} = redGPUContext
+        const {antialiasingManager, gpuDevice} = redGPUContext
         if (currentGeometry) {
-            if (useMSAA !== this.#prevUseMSAA) {
-                this.#prevUseMSAA = useMSAA
+            if (antialiasingManager.changedMSAA) {
                 this.dirtyPipeline = true
             }
             if (!this.gpuRenderInfo) this.initGPURenderInfos()

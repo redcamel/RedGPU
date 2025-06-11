@@ -28,7 +28,6 @@ class SphericalSkyBox {
     gpuRenderInfo: VertexGPURenderInfo
     _geometry: Primitive
     _material: SphericalSkyBoxMaterial
-    #prevUseMSAA: boolean = true
     readonly #redGPUContext: RedGPUContext
     #primitiveState: PrimitiveState
     #depthStencilState: DepthStencilState
@@ -71,9 +70,8 @@ class SphericalSkyBox {
     }
 
     #updateMSAAStatus() {
-        const {useMSAA} = this.#redGPUContext
-        if (useMSAA !== this.#prevUseMSAA) {
-            this.#prevUseMSAA = useMSAA
+        const {changedMSAA} = this.#redGPUContext.antialiasingManager
+        if (changedMSAA) {
             this.dirtyPipeline = true
         }
     }
@@ -118,7 +116,7 @@ class SphericalSkyBox {
     }
 
     #updatePipeline(): GPURenderPipeline {
-        const {resourceManager, gpuDevice,} = this.#redGPUContext
+        const {resourceManager, gpuDevice,antialiasingManager} = this.#redGPUContext
         // 셰이더 모듈 설명자를 생성합니다.
         const vModuleDescriptor: GPUShaderModuleDescriptor = {code: vertexModuleSource}
         const vertexShaderModule: GPUShaderModule = resourceManager.createGPUShaderModule(
@@ -152,7 +150,7 @@ class SphericalSkyBox {
             primitive: this.#primitiveState.state,
             depthStencil: this.#depthStencilState.state,
             multisample: {
-                count: this.#redGPUContext.useMSAA ? 4 : 1,
+                count: antialiasingManager.useMSAA ? 4 : 1,
             },
         }
         return gpuDevice.createRenderPipeline(pipelineDescriptor)

@@ -19,7 +19,6 @@ const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_INSTANCING'
 const VERTEX_BIND_GROUP_DESCRIPTOR_NAME = 'VERTEX_BIND_GROUP_DESCRIPTOR_INSTANCING'
 
 class InstancingMesh extends Mesh {
-    #prevUseMSAA: boolean = true
     readonly #redGPUContext: RedGPUContext
     #instanceCount: number = 1
     #instanceChildren: InstancingMeshObject3D[] = []
@@ -99,9 +98,8 @@ class InstancingMesh extends Mesh {
         else debugViewRenderState.num3DGroups++
         const redGPUContext = this.#redGPUContext
         if (this.geometry) {
-            const {useMSAA, gpuDevice} = redGPUContext
-            if (useMSAA !== this.#prevUseMSAA) {
-                this.#prevUseMSAA = useMSAA
+            const {antialiasingManager, gpuDevice} = redGPUContext
+            if (antialiasingManager.changedMSAA) {
                 this.dirtyPipeline = true
             }
             if (!this.gpuRenderInfo) this.#initGPURenderInfos(redGPUContext)

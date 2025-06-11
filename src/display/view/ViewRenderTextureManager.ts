@@ -92,7 +92,8 @@ class ViewRenderTextureManager {
 
 	#createTextureIfNeeded(textureType: 'depth' | 'color'): void {
 		const depthYn = textureType === 'depth'
-		const {useMSAA, gpuDevice} = this.#redGPUContext
+		const {antialiasingManager, gpuDevice} = this.#redGPUContext
+		const {useMSAA} = antialiasingManager
 		const currentTexture = depthYn ? this.#depthTexture : this.#colorTexture;
 		const {pixelRectObject} = this.#view
 		const {width: pixelRectObjectW, height: pixelRectObjectH} = pixelRectObject

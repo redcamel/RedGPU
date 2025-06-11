@@ -76,7 +76,7 @@ const createBasePipeline = (
             pipelineDescriptor.fragment = material_gpuRenderInfo.fragmentState
             pipelineDescriptor.depthStencil = mesh.depthStencilState.state
             pipelineDescriptor.multisample = {
-                count: redGPUContext.useMSAA ? 4 : 1,
+                count: redGPUContext.antialiasingManager.useMSAA ? 4 : 1,
             }
     }
     return gpuDevice.createRenderPipeline(pipelineDescriptor)

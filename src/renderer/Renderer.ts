@@ -38,6 +38,7 @@ class Renderer {
             }
         }
         this.#finalRender.render(redGPUContext, viewList_renderPassDescriptorList)
+        redGPUContext.antialiasingManager.changedMSAA=false
 
         console.log('/////////////////// end renderFrame ///////////////////')
     }
@@ -62,6 +63,8 @@ class Renderer {
 
     renderView(view: View3D, time: number) {
         const {redGPUContext, camera, scene, pickingManager, pixelRectObject, axis, grid, debugViewRenderState} = view
+        const {antialiasingManager} = redGPUContext
+        const {useMSAA} = antialiasingManager
         const {shadowManager,} = scene
         const {
             colorAttachment,
@@ -109,17 +112,17 @@ class Renderer {
                     let renderPath1ResultTexture = view.viewRenderTextureManager.renderPath1ResultTexture
 
                     // useMSAA 설정에 따라 소스 텍스처 선택
-                    let sourceTexture = view.redGPUContext.useMSAA
+                    let sourceTexture = useMSAA
                         ? view.viewRenderTextureManager.colorResolveTexture
                         : view.viewRenderTextureManager.colorTexture;
 
                     if (!sourceTexture) {
-                        if (view.redGPUContext.useMSAA) {
+                        if (useMSAA) {
                             console.error('MSAA가 활성화되어 있지만 colorResolveTexture가 정의되지 않았습니다');
                         } else {
                             console.error('colorTexture가 정의되지 않았습니다');
                         }
-                        console.log('view.redGPUContext.useMSAA:', view.redGPUContext.useMSAA);
+                        console.log('view.redGPUContext.useMSAA:', useMSAA);
                         console.log('viewRenderTextureManager:', view.viewRenderTextureManager);
                     }
 
@@ -196,6 +199,8 @@ class Renderer {
         const {scene, redGPUContext, viewRenderTextureManager} = view
         const {depthTextureView, colorTextureView, colorResolveTextureView} = viewRenderTextureManager
         const {useBackgroundColor, backgroundColor} = scene
+        const {antialiasingManager} = redGPUContext
+        const {useMSAA} = antialiasingManager
         const rgbaNormal = backgroundColor.rgbaNormal
         const colorAttachment: GPURenderPassColorAttachment = {
             view: colorTextureView,
@@ -208,7 +213,7 @@ class Renderer {
             loadOp: GPU_LOAD_OP.CLEAR,
             storeOp: GPU_STORE_OP.STORE
         }
-        if (redGPUContext.useMSAA) colorAttachment.resolveTarget = colorResolveTextureView
+        if (useMSAA) colorAttachment.resolveTarget = colorResolveTextureView
         // console.log('depthTextureView', depthTextureView)
         const depthStencilAttachment: GPURenderPassDepthStencilAttachment = {
             view: depthTextureView,
