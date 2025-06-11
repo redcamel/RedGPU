@@ -72,6 +72,7 @@ class ShadowManager {
             size: [1, 1, 1],
             usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
             format: 'depth32float',
+            label: `ShadowManager_EmptyDepthTexture_1x1_${Date.now()}`,
         })
         this.#shadowDepthGPUTextureViewEmpty = t0.createView()
     }
@@ -82,6 +83,7 @@ class ShadowManager {
             size: [this.#directionalLightShadowDepthTextureSize, this.#directionalLightShadowDepthTextureSize, 1],
             usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
             format: 'depth32float',
+            label: `ShadowManager_directionalLightShadowDepthTextureSize_${this.#directionalLightShadowDepthTextureSize}x${this.#directionalLightShadowDepthTextureSize}_${Date.now()}`,
         });
         this.#shadowDepthGPUTextureView = this.#shadowDepthGPUTexture.createView()
         if (!this.#shadowDepthGPUTextureViewEmpty) this.#createEmptyDepthTexture(gpuDevice)

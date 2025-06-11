@@ -82,7 +82,8 @@ class ViewRenderTextureManager {
 				format: navigator.gpu.getPreferredCanvasFormat(),
 				usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT
 					| GPUTextureUsage.COPY_SRC,
-				mipLevelCount: getMipLevelCount(pixelRectObjectW, pixelRectObjectH)
+				mipLevelCount: getMipLevelCount(pixelRectObjectW, pixelRectObjectH),
+				label: `renderPath1ResultTexture_${pixelRectObjectW}x${pixelRectObjectH}_${Date.now()}`
 			}
 			this.#renderPath1ResultTexture = gpuDevice.createTexture(this.#renderPath1ResultTextureDescriptor);
 			this.#renderPath1ResultTextureView = this.#renderPath1ResultTexture.createView()

@@ -193,7 +193,8 @@ class PostEffectManager {
 		return gpuDevice.createTexture({
 			size: {width: width, height: height,},
 			format: 'rgba8unorm',
-			usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING
+			usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING,
+			label: `PostEffect_Storage_${width}x${height}_${Date.now()}`,
 		});
 	}
 
