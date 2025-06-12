@@ -3,66 +3,106 @@ import * as RedGPU from "../../../../../dist/index.js";
 // 1. Create and append a canvas
 // 1. 캔버스를 생성하고 문서에 추가
 const canvas = document.createElement('canvas');
-document.body.appendChild(canvas);
+document.querySelector('#example-container').appendChild(canvas);
 
 // 2. Initialize RedGPU
 // 2. RedGPU 초기화
 RedGPU.init(
 	canvas,
 	(redGPUContext) => {
-		// Create a camera controller (Orbit type)
+		// ============================================
+		// 기본 설정
+		// ============================================
+
 		// 궤도형 카메라 컨트롤러 생성
 		const controller = new RedGPU.Camera.ObitController(redGPUContext);
-		controller.distance = 3
-		controller.speedDistance = 0.1
-		controller.tilt = 0
+		controller.distance = 3;
+		controller.speedDistance = 0.1;
+		controller.tilt = 0;
 
-		// Create a scene and add a view with the camera controller
-		// 씬을 생성하고 카메라 컨트롤러와 함께 뷰 추가
-		const scene = new RedGPU.Display.Scene();
-		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		redGPUContext.addView(view);
-
-		const directionalLightTest = new RedGPU.Light.DirectionalLight()
-		scene.lightManager.addDirectionalLight(directionalLightTest)
-		loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF/DamagedHelmet.gltf');
-
-		const effect = new RedGPU.PostEffect.ColorTemperatureTint(redGPUContext)
-
-		view.postEffectManager.addEffect(effect)
-
-		// Create a renderer and start rendering
-		// 렌더러 생성 후 렌더링 시작
-		const renderer = new RedGPU.Renderer(redGPUContext);
-		const render = () => {
-
-		};
-		renderer.start(redGPUContext, render);
-		renderTestPane(redGPUContext)
-
-	},
-	(failReason) => {
-		// Handle initialization failure
-		console.error('Initialization failed:', failReason); // 초기화 실패 로그 출력
-		const errorMessage = document.createElement('div');
-		errorMessage.innerHTML = failReason; // 실패 원인 메시지를 표시
-		document.body.appendChild(errorMessage);
-	}
-);
-
-function loadGLTF(view, url) {
-	const {redGPUContext, scene} = view
-	const cubeTexture =
-		new RedGPU.Resource.CubeTexture(redGPUContext, [
+		// 스카이박스 텍스처 생성
+		const cubeTexture = new RedGPU.Resource.CubeTexture(redGPUContext, [
 			"../../../../assets/skybox/px.jpg", // Positive X
 			"../../../../assets/skybox/nx.jpg", // Negative X
 			"../../../../assets/skybox/py.jpg", // Positive Y
 			"../../../../assets/skybox/ny.jpg", // Negative Y
 			"../../../../assets/skybox/pz.jpg", // Positive Z
 			"../../../../assets/skybox/nz.jpg", // Negative Z
-		])
-	view.iblTexture = cubeTexture
-	view.skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture)
+		]);
+
+		// 씬 생성
+		const scene = new RedGPU.Display.Scene();
+
+		// ============================================
+		// 뷰 생성 및 설정
+		// ============================================
+
+		// 일반 뷰 생성
+		const viewNormal = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+		viewNormal.iblTexture = cubeTexture;
+		viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture);
+		redGPUContext.addView(viewNormal);
+
+		// 이펙트 뷰 생성
+		const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+		viewEffect.iblTexture = cubeTexture;
+		viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture);
+		viewEffect.postEffectManager.addEffect(new RedGPU.PostEffect.ColorTemperatureTint(redGPUContext));
+		redGPUContext.addView(viewEffect);
+
+		// ============================================
+		// 씬 설정
+		// ============================================
+
+		// 조명 추가
+		const directionalLight = new RedGPU.Light.DirectionalLight();
+		scene.lightManager.addDirectionalLight(directionalLight);
+
+		// 3D 모델 로드
+		loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF/DamagedHelmet.gltf');
+
+		// ============================================
+		// 레이아웃 설정
+		// ============================================
+
+		if (redGPUContext.detector.isMobile) {
+			// 모바일: 위아래 분할
+			viewNormal.setSize('100%', '50%');
+			viewNormal.setPosition(0, 0);         // 상단
+			viewEffect.setSize('100%', '50%');
+			viewEffect.setPosition(0, '50%');     // 하단
+		} else {
+			// 데스크톱: 좌우 분할
+			viewNormal.setSize('50%', '100%');
+			viewNormal.setPosition(0, 0);         // 좌측
+			viewEffect.setSize('50%', '100%');
+			viewEffect.setPosition('50%', 0);     // 우측
+		}
+
+		// ============================================
+		// 렌더링 시작
+		// ============================================
+
+		// 렌더러 생성 및 시작
+		const renderer = new RedGPU.Renderer(redGPUContext);
+		const render = () => {
+			// 추가 렌더링 로직이 필요하면 여기에 작성
+		};
+		renderer.start(redGPUContext, render);
+
+		// 컨트롤 패널 생성
+		renderTestPane(redGPUContext, viewEffect);
+	},
+	(failReason) => {
+		console.error('Initialization failed:', failReason);
+		const errorMessage = document.createElement('div');
+		errorMessage.innerHTML = failReason;
+		document.body.appendChild(errorMessage);
+	}
+);
+
+function loadGLTF(redGPUContext, scene, url) {
+
 	let mesh
 	new RedGPU.GLTFLoader(
 		redGPUContext,
@@ -73,14 +113,12 @@ function loadGLTF(view, url) {
 	)
 }
 
-// Function to render Test Pane (for controls)
-// 테스트 패널을 렌더링하는 함수
-const renderTestPane = async (redGPUContext) => {
+const renderTestPane = async (redGPUContext,targetView) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+	const {createPostEffectLabel} = await import('../../../../exampleHelper/createExample/loadExampleInfo/createPostEffectLabel.js');
+	createPostEffectLabel('ColorTemperatureTint', redGPUContext.detector.isMobile)
 	const pane = new Pane();
-
-	const view = redGPUContext.viewList[0]
-	const effect = view.postEffectManager.getEffectAt(0);
+	const effect = targetView.postEffectManager.getEffectAt(0);
 
 	// 이펙트의 실제 초기값으로 TEST_STATE 설정
 	const TEST_STATE = {
@@ -99,9 +137,9 @@ const renderTestPane = async (redGPUContext) => {
 			newEffect.temperature = TEST_STATE.temperature;
 			newEffect.tint = TEST_STATE.tint;
 			newEffect.strength = TEST_STATE.strength;
-			view.postEffectManager.addEffect(newEffect);
+			targetView.postEffectManager.addEffect(newEffect);
 		} else {
-			view.postEffectManager.removeAllEffect();
+			targetView.postEffectManager.removeAllEffect();
 		}
 
 		// 조정바 활성화/비활성화
@@ -116,7 +154,7 @@ const renderTestPane = async (redGPUContext) => {
 		max: 20000,
 		step: 100
 	}).on('change', (v) => {
-		const currentEffect = view.postEffectManager.getEffectAt(0);
+		const currentEffect = targetView.postEffectManager.getEffectAt(0);
 		if (currentEffect) {
 			currentEffect.temperature = v.value;
 			updateTemperatureInfo(v.value);
@@ -128,7 +166,7 @@ const renderTestPane = async (redGPUContext) => {
 		max: 100,
 		step: 1
 	}).on('change', (v) => {
-		const currentEffect = view.postEffectManager.getEffectAt(0);
+		const currentEffect = targetView.postEffectManager.getEffectAt(0);
 		if (currentEffect) {
 			currentEffect.tint = v.value;
 		}
@@ -139,7 +177,7 @@ const renderTestPane = async (redGPUContext) => {
 		max: 100,
 		step: 1
 	}).on('change', (v) => {
-		const currentEffect = view.postEffectManager.getEffectAt(0);
+		const currentEffect = targetView.postEffectManager.getEffectAt(0);
 		if (currentEffect) {
 			currentEffect.strength = v.value;
 		}
@@ -169,7 +207,7 @@ const renderTestPane = async (redGPUContext) => {
 
 	// 시간대별 프리셋
 	actionFolder.addButton({title: '🌅 Sunrise (3200K, -10)'}).on('click', () => {
-		const currentEffect = view.postEffectManager.getEffectAt(0);
+		const currentEffect = targetView.postEffectManager.getEffectAt(0);
 		if (currentEffect) {
 			currentEffect.temperature = 3200;
 			currentEffect.tint = -10;
@@ -178,7 +216,7 @@ const renderTestPane = async (redGPUContext) => {
 	});
 
 	actionFolder.addButton({title: '☀️ Noon (6500K, 0)'}).on('click', () => {
-		const currentEffect = view.postEffectManager.getEffectAt(0);
+		const currentEffect = targetView.postEffectManager.getEffectAt(0);
 		if (currentEffect) {
 			currentEffect.temperature = 6500;
 			currentEffect.tint = 0;
@@ -187,7 +225,7 @@ const renderTestPane = async (redGPUContext) => {
 	});
 
 	actionFolder.addButton({title: '🌆 Sunset (2800K, +5)'}).on('click', () => {
-		const currentEffect = view.postEffectManager.getEffectAt(0);
+		const currentEffect = targetView.postEffectManager.getEffectAt(0);
 		if (currentEffect) {
 			currentEffect.temperature = 2800;
 			currentEffect.tint = 5;
@@ -196,7 +234,7 @@ const renderTestPane = async (redGPUContext) => {
 	});
 
 	actionFolder.addButton({title: '🌙 Moonlight (4000K, +15)'}).on('click', () => {
-		const currentEffect = view.postEffectManager.getEffectAt(0);
+		const currentEffect = targetView.postEffectManager.getEffectAt(0);
 		if (currentEffect) {
 			currentEffect.temperature = 4000;
 			currentEffect.tint = 15;
@@ -206,7 +244,7 @@ const renderTestPane = async (redGPUContext) => {
 
 	// 조명 타입별 프리셋
 	actionFolder.addButton({title: '🕯️ Candle Light (1900K, -5)'}).on('click', () => {
-		const currentEffect = view.postEffectManager.getEffectAt(0);
+		const currentEffect = targetView.postEffectManager.getEffectAt(0);
 		if (currentEffect) {
 			currentEffect.setCandleLight();
 			updateUI(currentEffect);
@@ -214,7 +252,7 @@ const renderTestPane = async (redGPUContext) => {
 	});
 
 	actionFolder.addButton({title: '🔥 Warm Tone (3200K, -10)'}).on('click', () => {
-		const currentEffect = view.postEffectManager.getEffectAt(0);
+		const currentEffect = targetView.postEffectManager.getEffectAt(0);
 		if (currentEffect) {
 			currentEffect.setWarmTone();
 			updateUI(currentEffect);
@@ -222,7 +260,7 @@ const renderTestPane = async (redGPUContext) => {
 	});
 
 	actionFolder.addButton({title: '💡 Daylight (5600K, 0)'}).on('click', () => {
-		const currentEffect = view.postEffectManager.getEffectAt(0);
+		const currentEffect = targetView.postEffectManager.getEffectAt(0);
 		if (currentEffect) {
 			currentEffect.setDaylight();
 			updateUI(currentEffect);
@@ -230,7 +268,7 @@ const renderTestPane = async (redGPUContext) => {
 	});
 
 	actionFolder.addButton({title: '⚪ Neutral (6500K, 0)'}).on('click', () => {
-		const currentEffect = view.postEffectManager.getEffectAt(0);
+		const currentEffect = targetView.postEffectManager.getEffectAt(0);
 		if (currentEffect) {
 			currentEffect.setNeutral();
 			updateUI(currentEffect);
@@ -238,7 +276,7 @@ const renderTestPane = async (redGPUContext) => {
 	});
 
 	actionFolder.addButton({title: '☁️ Cloudy Day (7500K, +5)'}).on('click', () => {
-		const currentEffect = view.postEffectManager.getEffectAt(0);
+		const currentEffect = targetView.postEffectManager.getEffectAt(0);
 		if (currentEffect) {
 			currentEffect.setCloudyDay();
 			updateUI(currentEffect);
@@ -246,7 +284,7 @@ const renderTestPane = async (redGPUContext) => {
 	});
 
 	actionFolder.addButton({title: '❄️ Cool Tone (8000K, +10)'}).on('click', () => {
-		const currentEffect = view.postEffectManager.getEffectAt(0);
+		const currentEffect = targetView.postEffectManager.getEffectAt(0);
 		if (currentEffect) {
 			currentEffect.setCoolTone();
 			updateUI(currentEffect);
@@ -254,7 +292,7 @@ const renderTestPane = async (redGPUContext) => {
 	});
 
 	actionFolder.addButton({title: '💫 Neon Light (9000K, +15)'}).on('click', () => {
-		const currentEffect = view.postEffectManager.getEffectAt(0);
+		const currentEffect = targetView.postEffectManager.getEffectAt(0);
 		if (currentEffect) {
 			currentEffect.setNeonLight();
 			updateUI(currentEffect);

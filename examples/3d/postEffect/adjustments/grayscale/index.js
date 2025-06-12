@@ -37,13 +37,13 @@ RedGPU.init(
 		// 뷰 생성 및 설정
 		// ============================================
 
-		// 일반 뷰 생성 (원본)
+		// 일반 뷰 생성
 		const viewNormal = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		viewNormal.iblTexture = cubeTexture;
 		viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture);
 		redGPUContext.addView(viewNormal);
 
-		// 이펙트 뷰 생성 (그레이스케일 적용)
+		// 이펙트 뷰 생성
 		const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		viewEffect.iblTexture = cubeTexture;
 		viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture);
@@ -62,15 +62,15 @@ RedGPU.init(
 		loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF/DamagedHelmet.gltf');
 
 		// ============================================
-		// 레이아웃 설정 (반응형)
+		// 레이아웃 설정
 		// ============================================
 
 		if (redGPUContext.detector.isMobile) {
 			// 모바일: 위아래 분할
 			viewNormal.setSize('100%', '50%');
-			viewNormal.setPosition(0, '50%');     // 하단
+			viewNormal.setPosition(0, 0);         // 상단
 			viewEffect.setSize('100%', '50%');
-			viewEffect.setPosition(0, 0);         // 상단
+			viewEffect.setPosition(0, '50%');     // 하단
 		} else {
 			// 데스크톱: 좌우 분할
 			viewNormal.setSize('50%', '100%');
@@ -94,10 +94,9 @@ RedGPU.init(
 		renderTestPane(redGPUContext, viewEffect);
 	},
 	(failReason) => {
-		// Handle initialization failure
-		console.error('Initialization failed:', failReason); // 초기화 실패 로그 출력
+		console.error('Initialization failed:', failReason);
 		const errorMessage = document.createElement('div');
-		errorMessage.innerHTML = failReason; // 실패 원인 메시지를 표시
+		errorMessage.innerHTML = failReason;
 		document.body.appendChild(errorMessage);
 	}
 );
@@ -114,13 +113,12 @@ function loadGLTF(redGPUContext, scene, url) {
 	)
 }
 
-// Function to render Test Pane (for controls)
-// 테스트 패널을 렌더링하는 함수
 const renderTestPane = async (redGPUContext, viewEffect) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+	const {createPostEffectLabel} = await import('../../../../exampleHelper/createExample/loadExampleInfo/createPostEffectLabel.js');
+	createPostEffectLabel('Grayscale', redGPUContext.detector.isMobile)
 	const pane = new Pane();
 	const view = viewEffect
-
 	const TEST_STATE = {
 		Grayscale: true,
 	}
