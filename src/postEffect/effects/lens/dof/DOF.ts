@@ -19,6 +19,8 @@ class DOF extends AMultiPassPostEffect {
 	#nearStrength: number = 1.0;
 	#farStrength: number = 1.0;
 
+
+
 	constructor(redGPUContext: RedGPUContext) {
 		super(
 			redGPUContext,
