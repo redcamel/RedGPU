@@ -113,7 +113,7 @@ function loadGLTF(redGPUContext, scene, url) {
 	)
 }
 
-const renderTestPane = async (redGPUContext,targetView) => {
+const renderTestPane = async (redGPUContext, targetView) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const {createPostEffectLabel} = await import('../../../../exampleHelper/createExample/loadExampleInfo/createPostEffectLabel.js');
 	createPostEffectLabel('ColorTemperatureTint', redGPUContext.detector.isMobile)

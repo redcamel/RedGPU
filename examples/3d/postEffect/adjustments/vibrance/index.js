@@ -125,8 +125,6 @@ const renderTestPane = async (redGPUContext, targetView) => {
 		vibrance: targetView.postEffectManager.getEffectAt(0).vibrance,
 		saturation: targetView.postEffectManager.getEffectAt(0).saturation,
 
-
-
 	}
 	const folder = pane.addFolder({title: 'PostEffect', expanded: true})
 	// Vibrance 토글
@@ -150,8 +148,5 @@ const renderTestPane = async (redGPUContext, targetView) => {
 	const saturationControl = folder.addBinding(TEST_STATE, 'saturation', {min: -100, max: 100}).on('change', (v) => {
 		targetView.postEffectManager.getEffectAt(0).saturation = v.value
 	})
-
-
-
 
 };

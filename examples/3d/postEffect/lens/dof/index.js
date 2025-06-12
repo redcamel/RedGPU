@@ -1,45 +1,97 @@
-import * as RedGPU from "../../../../../dist";
+import * as RedGPU from "../../../../../dist/index.js";
 
+// 1. Create and append a canvas
+// 1. 캔버스를 생성하고 문서에 추가
 const canvas = document.createElement('canvas');
-document.body.appendChild(canvas);
+document.querySelector('#example-container').appendChild(canvas);
 
+// 2. Initialize RedGPU
+// 2. RedGPU 초기화
 RedGPU.init(
 	canvas,
 	(redGPUContext) => {
+		// ============================================
+		// 기본 설정
+		// ============================================
+
+		// 궤도형 카메라 컨트롤러 생성
 		const controller = new RedGPU.Camera.ObitController(redGPUContext);
-		controller.distance = 15  // 카메라를 더 멀리
-		controller.speedDistance = 0.5
-		controller.tilt = -15     // 약간 위에서 내려다보기
+		controller.distance = 30;
+		controller.speedDistance = 0.5;
+		controller.tilt = -15;
 
+		// 스카이박스 텍스처 생성
+		const cubeTexture = new RedGPU.Resource.CubeTexture(redGPUContext, [
+			"../../../../assets/skybox/px.jpg", // Positive X
+			"../../../../assets/skybox/nx.jpg", // Negative X
+			"../../../../assets/skybox/py.jpg", // Positive Y
+			"../../../../assets/skybox/ny.jpg", // Negative Y
+			"../../../../assets/skybox/pz.jpg", // Positive Z
+			"../../../../assets/skybox/nz.jpg", // Negative Z
+		]);
+
+		// 씬 생성
 		const scene = new RedGPU.Display.Scene();
-		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		redGPUContext.addView(view);
-		const cubeTexture =
-			new RedGPU.Resource.CubeTexture(redGPUContext, [
-				"../../../../assets/skybox/px.jpg",
-				"../../../../assets/skybox/nx.jpg",
-				"../../../../assets/skybox/py.jpg",
-				"../../../../assets/skybox/ny.jpg",
-				"../../../../assets/skybox/pz.jpg",
-				"../../../../assets/skybox/nz.jpg",
-			])
-		view.iblTexture = cubeTexture
-		view.skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture)
-		const directionalLightTest = new RedGPU.Light.DirectionalLight()
-		scene.lightManager.addDirectionalLight(directionalLightTest)
-		loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF/DamagedHelmet.gltf',);
 
-		const effect = new RedGPU.PostEffect.DOF(redGPUContext)
+		// ============================================
+		// 뷰 생성 및 설정
+		// ============================================
 
-		view.postEffectManager.addEffect(effect)
+		// 일반 뷰 생성
+		const viewNormal = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+		viewNormal.iblTexture = cubeTexture;
+		viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture);
+		redGPUContext.addView(viewNormal);
 
+		// 이펙트 뷰 생성
+		const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+		viewEffect.iblTexture = cubeTexture;
+		viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture);
+		viewEffect.postEffectManager.addEffect(new RedGPU.PostEffect.DOF(redGPUContext));
+		redGPUContext.addView(viewEffect);
+
+		// ============================================
+		// 씬 설정
+		// ============================================
+
+		// 조명 추가
+		const directionalLight = new RedGPU.Light.DirectionalLight();
+		scene.lightManager.addDirectionalLight(directionalLight);
+
+		// 3D 모델 로드
+		loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF/DamagedHelmet.gltf');
+
+		// ============================================
+		// 레이아웃 설정
+		// ============================================
+
+		if (redGPUContext.detector.isMobile) {
+			// 모바일: 위아래 분할
+			viewNormal.setSize('100%', '50%');
+			viewNormal.setPosition(0, 0);         // 상단
+			viewEffect.setSize('100%', '50%');
+			viewEffect.setPosition(0, '50%');     // 하단
+		} else {
+			// 데스크톱: 좌우 분할
+			viewNormal.setSize('50%', '100%');
+			viewNormal.setPosition(0, 0);         // 좌측
+			viewEffect.setSize('50%', '100%');
+			viewEffect.setPosition('50%', 0);     // 우측
+		}
+
+		// ============================================
+		// 렌더링 시작
+		// ============================================
+
+		// 렌더러 생성 및 시작
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		const render = () => {
-
+			// 추가 렌더링 로직이 필요하면 여기에 작성
 		};
 		renderer.start(redGPUContext, render);
-		renderTestPane(redGPUContext)
 
+		// 컨트롤 패널 생성
+		renderTestPane(redGPUContext, viewEffect);
 	},
 	(failReason) => {
 		console.error('Initialization failed:', failReason);
@@ -48,8 +100,8 @@ RedGPU.init(
 		document.body.appendChild(errorMessage);
 	}
 );
-function loadGLTF(view, url) {
-	const {redGPUContext, scene} = view
+
+function loadGLTF(redGPUContext, scene, url) {
 
 	new RedGPU.GLTFLoader(
 		redGPUContext,
@@ -140,13 +192,13 @@ function loadGLTF(view, url) {
 	)
 }
 
-const renderTestPane = async (redGPUContext) => {
-	const {setRedGPUTest_pane} = await import("../../../../exampleHelper/createExample/panes/index.js");
+const renderTestPane = async (redGPUContext, targetView) => {
+	const {createPostEffectLabel} = await import('../../../../exampleHelper/createExample/loadExampleInfo/createPostEffectLabel.js');
+	createPostEffectLabel('DOF', redGPUContext.detector.isMobile)
 
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const pane = new Pane();
-	const view = redGPUContext.viewList[0]
-	const effect = view.postEffectManager.getEffectAt(0)
+	const effect = targetView.postEffectManager.getEffectAt(0)
 
 	const TEST_STATE = {
 		DOF: true,
@@ -178,9 +230,9 @@ const renderTestPane = async (redGPUContext) => {
 			newEffect.farBlurSize = TEST_STATE.farBlurSize;
 			newEffect.nearStrength = TEST_STATE.nearStrength;
 			newEffect.farStrength = TEST_STATE.farStrength;
-			view.postEffectManager.addEffect(newEffect);
+			targetView.postEffectManager.addEffect(newEffect);
 		} else {
-			view.postEffectManager.removeAllEffect();
+			targetView.postEffectManager.removeAllEffect();
 		}
 		updateControlsState(!v.value);
 	});
@@ -191,8 +243,6 @@ const renderTestPane = async (redGPUContext) => {
 		label: 'Current Preset'
 	});
 
-
-
 	// 세부 설정 폴더
 	const detailFolder = folder.addFolder({title: 'Manual Controls', expanded: true});
 
@@ -202,7 +252,7 @@ const renderTestPane = async (redGPUContext) => {
 		max: 100,
 		step: 1
 	}).on('change', (v) => {
-		const currentEffect = view.postEffectManager.getEffectAt(0);
+		const currentEffect = targetView.postEffectManager.getEffectAt(0);
 		if (currentEffect) {
 			currentEffect.focusDistance = v.value;
 			TEST_STATE.currentPreset = 'Custom';
@@ -215,7 +265,7 @@ const renderTestPane = async (redGPUContext) => {
 		max: 8.0,
 		step: 0.1
 	}).on('change', (v) => {
-		const currentEffect = view.postEffectManager.getEffectAt(0);
+		const currentEffect = targetView.postEffectManager.getEffectAt(0);
 		if (currentEffect) {
 			currentEffect.aperture = v.value;
 			TEST_STATE.currentPreset = 'Custom';
@@ -228,7 +278,7 @@ const renderTestPane = async (redGPUContext) => {
 		max: 100,
 		step: 5
 	}).on('change', (v) => {
-		const currentEffect = view.postEffectManager.getEffectAt(0);
+		const currentEffect = targetView.postEffectManager.getEffectAt(0);
 		if (currentEffect) {
 			currentEffect.maxCoC = v.value;
 			TEST_STATE.currentPreset = 'Custom';
@@ -241,7 +291,7 @@ const renderTestPane = async (redGPUContext) => {
 		max: 50,
 		step: 2
 	}).on('change', (v) => {
-		const currentEffect = view.postEffectManager.getEffectAt(0);
+		const currentEffect = targetView.postEffectManager.getEffectAt(0);
 		if (currentEffect) {
 			currentEffect.nearBlurSize = v.value;
 			TEST_STATE.currentPreset = 'Custom';
@@ -254,7 +304,7 @@ const renderTestPane = async (redGPUContext) => {
 		max: 50,
 		step: 2
 	}).on('change', (v) => {
-		const currentEffect = view.postEffectManager.getEffectAt(0);
+		const currentEffect = targetView.postEffectManager.getEffectAt(0);
 		if (currentEffect) {
 			currentEffect.farBlurSize = v.value;
 			TEST_STATE.currentPreset = 'Custom';
@@ -267,7 +317,7 @@ const renderTestPane = async (redGPUContext) => {
 		max: 3.0,
 		step: 0.1
 	}).on('change', (v) => {
-		const currentEffect = view.postEffectManager.getEffectAt(0);
+		const currentEffect = targetView.postEffectManager.getEffectAt(0);
 		if (currentEffect) {
 			currentEffect.nearStrength = v.value;
 			TEST_STATE.currentPreset = 'Custom';
@@ -280,7 +330,7 @@ const renderTestPane = async (redGPUContext) => {
 		max: 3.0,
 		step: 0.1
 	}).on('change', (v) => {
-		const currentEffect = view.postEffectManager.getEffectAt(0);
+		const currentEffect = targetView.postEffectManager.getEffectAt(0);
 		if (currentEffect) {
 			currentEffect.farStrength = v.value;
 			TEST_STATE.currentPreset = 'Custom';
@@ -293,7 +343,7 @@ const renderTestPane = async (redGPUContext) => {
 
 	// 프리셋 적용 함수
 	function applyPreset(presetName, presetMethod) {
-		const currentEffect = view.postEffectManager.getEffectAt(0);
+		const currentEffect = targetView.postEffectManager.getEffectAt(0);
 		if (!currentEffect) return;
 
 		// 프리셋 메서드 호출
@@ -305,8 +355,6 @@ const renderTestPane = async (redGPUContext) => {
 		TEST_STATE.currentPreset = presetName;
 		updateUIFromEffect(currentEffect);
 	}
-
-
 
 	// 🎮 게임 기본 버튼
 	presetFolder.addButton({
@@ -356,6 +404,7 @@ const renderTestPane = async (redGPUContext) => {
 	}).on('click', () => {
 		applyPreset('Night Mode', 'setNightMode');
 	});
+
 	// 유틸리티 함수들
 	function updateControlsState(disabled) {
 		focusDistanceControl.disabled = disabled;
