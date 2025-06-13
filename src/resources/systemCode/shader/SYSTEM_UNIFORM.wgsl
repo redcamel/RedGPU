@@ -91,10 +91,10 @@ fn getPointLightTile(fragCoord : vec4<f32>) -> vec3<u32> {
 }
 
 struct PointLight {
-    position : vec3<f32>,
-    radius : f32,
-    color : vec3<f32>,
-    intensity : f32
+    position : vec3<f32>, radius : f32,
+    color : vec3<f32>,    intensity : f32,
+    isSpotLight:f32,    directionX:f32,    directionY:f32,    directionZ:f32,
+    outerCutoff:f32,    innerCutoff:f32,
 };
 struct PointLightList {
     count:vec4<f32>,

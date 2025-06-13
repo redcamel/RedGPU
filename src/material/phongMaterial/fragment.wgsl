@@ -167,34 +167,6 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     let lightOffset  = pointLight_clusterLightGroup.lights[clusterIndex].offset;
     let lightCount:u32   = pointLight_clusterLightGroup.lights[clusterIndex].count;
 
-// for (var lightIndex = 0u; lightIndex < lightCount; lightIndex = lightIndex + 1u) {
-//        let i = pointLight_clusterLightGroup.indices[lightOffset + lightIndex];
-//        let u_spotLightPosition = pointLightList.lights[i].position;
-//        let u_spotLightColor = pointLightList.lights[i].color;
-//        let u_spotLightIntensity = pointLightList.lights[i].intensity ;
-//        let u_spotLightInnerCutoff = radians(21.0);
-//        let u_spotLightOuterCutoff = radians(26.0);
-//        let u_spotLightDirection = vec3<f32>(0,-1,0);;
-//
-//        let L = normalize(u_spotLightPosition - inputData.vertexPosition);
-//        let NdotL = max(dot(N, L), 0.0);
-//        let H = normalize(L + E);
-//        let NdotH = dot(N, H);
-//
-//        let theta = dot(L, -normalize(u_spotLightDirection));
-//
-//        let innerCos = cos(u_spotLightInnerCutoff);
-//        let outerCos = cos(u_spotLightOuterCutoff);
-//        let inLight = smoothstep(outerCos, innerCos, theta);
-//
-//        let specular = select( 0.0, pow(NdotH, u_shininess), NdotH > 0.0 );
-//        let ld = (u_spotLightColor * u_spotLightIntensity) * NdotL * inLight;
-//        let ls = u_specularColor * u_specularStrength * specular * inLight;
-//
-//        mixColor += ld + ls;
-//    }
-
-
     for (var lightIndex = 0u; lightIndex < lightCount; lightIndex = lightIndex + 1u) {
         let i = pointLight_clusterLightGroup.indices[lightOffset + lightIndex];
         let u_pointLightPosition = pointLightList.lights[i].position;
@@ -213,7 +185,7 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
             let diffuse = max(dot(N, L), 0.0);
             let specular = pow(max(dot(R, E), 0.0), u_shininess);
 
-            let ld = (u_pointLightColor * u_pointLightIntensity) * diffuse * attenuation * u_pointLightIntensity;
+            let ld = (diffuseColor * u_pointLightColor * u_pointLightIntensity) * diffuse * attenuation * u_pointLightIntensity;
             let ls = u_specularColor * u_specularStrength * specular * attenuation  * u_pointLightIntensity;
 
             mixColor += ld + ls;

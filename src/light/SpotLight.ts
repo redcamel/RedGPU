@@ -5,11 +5,11 @@ import convertHexToRgb from "../utils/convertColor/convertHexToRgb";
 class SpotLight extends BaseLight {
 	#radius: number = 1
 	#x: number = 0
-	#y: number = 0
+	#y: number = 2
 	#z: number = 0
 	#directionX: number = 0
-	#directionY: number = 0
-	#directionZ: number = -1
+	#directionY: number = -1
+	#directionZ: number = 0
 	#innerCutoff: number = Math.cos(Math.PI / 12)
 	#outerCutoff: number = Math.cos(Math.PI / 8)
 

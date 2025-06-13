@@ -333,7 +333,7 @@ class View3D extends ViewTransform {
         const systemUniform_Vertex_UniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength)
         this.#systemUniform_Vertex_UniformBuffer = new UniformBuffer(this.redGPUContext, systemUniform_Vertex_UniformData, '#systemUniform_Vertex_UniformBuffer');
         //
-        this.#clusterPointLightsBufferData = new Float32Array((8 * PassPointLightClustersHelper.MAX_POINT_LIGHTS) + 4)
+        this.#clusterPointLightsBufferData = new Float32Array((16 * PassPointLightClustersHelper.MAX_POINT_LIGHTS) + 4)
         this.#clusterPointLightsBuffer = this.redGPUContext.gpuDevice.createBuffer(
             {
                 label: 'clusterPointLightsBuffer',
@@ -370,30 +370,54 @@ class View3D extends ViewTransform {
             this.#passLightClusters = new PassPointLightClusters(redGPUContext, this)
         }
         if (scene) {
-            const {pointLights} = scene.lightManager
+            const {pointLights,spotLights} = scene.lightManager
             const pointLightNum = pointLights.length
+            const spotLightNum = spotLights.length
             if (pointLightNum) {
                 let i = pointLightNum
                 // console.log('실행이되긴하하나2')
                 while (i--) {
                     const tLight = pointLights[i]
                     //TODO - 프러스텀 컬링할꺼냐 말꺼냐
-                    const stride = 8
+                    const stride = 16
                     const offset = 4 + stride * i
                     this.#clusterPointLightsBufferData.set(
                         [
                             ...tLight.position, tLight.radius,
-                            ...tLight.color.rgbNormal, tLight.intensity,
+                            ...tLight.color.rgbNormal, tLight.intensity,0
                         ],
                         offset,
                     )
                 }
-                this.#clusterPointLightsBufferData.set(
-                    [pointLightNum, 0, 0, 0],
-                    0,
-                )
-                this.redGPUContext.gpuDevice.queue.writeBuffer(this.#clusterPointLightsBuffer, 0, this.#clusterPointLightsBufferData);
+
+
             }
+            if (spotLightNum) {
+                const stride = 16
+                const prevOffset = pointLightNum * stride
+                let i = spotLightNum
+                // console.log('실행이되긴하하나2')
+                while (i--) {
+                    const tLight = spotLights[i]
+                    //TODO - 프러스텀 컬링할꺼냐 말꺼냐
+
+                    const offset = 4 + stride * i + prevOffset;
+                    this.#clusterPointLightsBufferData.set(
+                      [
+                          ...tLight.position, tLight.radius,
+                          ...tLight.color.rgbNormal, tLight.intensity,1,...tLight.direction,tLight.outerCutoff,tLight.innerCutoff
+                      ],
+                      offset,
+                    )
+                }
+
+
+            }
+            this.#clusterPointLightsBufferData.set(
+              [pointLightNum, spotLightNum, 0, 0],
+              0,
+            )
+            this.redGPUContext.gpuDevice.queue.writeBuffer(this.#clusterPointLightsBuffer, 0, this.#clusterPointLightsBufferData);
             this.#passLightClusters.render()
         }
     }

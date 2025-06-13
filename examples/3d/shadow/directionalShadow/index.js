@@ -81,8 +81,6 @@ function loadGLTF(redGPUContext, scene, url) {
 	)
 }
 
-// Function to create a skybox
-// 스카이박스를 생성하는 함수
 const createSkybox = (redGPUContext) => {
 	// Define texture paths for skybox
 	// 스카이박스 텍스처 경로 정의
