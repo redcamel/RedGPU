@@ -80,11 +80,11 @@ class Renderer {
         const commandEncoder: GPUCommandEncoder = redGPUContext.gpuDevice.createCommandEncoder()
         view.debugViewRenderState.reset(null, time)
         if (pixelRectObject.width && pixelRectObject.height) {
-            if (shadowManager.shadowDepthGPUTextureView) {
+            if (shadowManager.directionalShadowDepthTextureView) {
                 const shadowPassDescriptor: GPURenderPassDescriptor = {
                     colorAttachments: [],
                     depthStencilAttachment: {
-                        view: shadowManager.shadowDepthGPUTextureView,
+                        view: shadowManager.directionalShadowDepthTextureView,
                         depthClearValue: 1.0,
                         depthLoadOp: GPU_LOAD_OP.CLEAR,
                         depthStoreOp: GPU_STORE_OP.STORE,

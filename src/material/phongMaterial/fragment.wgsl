@@ -135,7 +135,8 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
                 directionalShadowMapSampler,
                 u_directionalLightShadowDepthTextureSize,
                 u_directionalLightShadowBias,
-                inputData.shadowPos
+                inputData.shadowPos,
+
             );
 
     if(!receiveShadowYn){
@@ -145,16 +146,20 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     for (var i = 0u; i < u_directionalLightCount; i = i + 1) {
         let u_directionalLightDirection = u_directionalLights[i].direction;
         let u_directionalLightColor = u_directionalLights[i].color;
-        let u_directionalLightIntensity = u_directionalLights[i].intensity * visibility;
+        let u_directionalLightIntensity = u_directionalLights[i].intensity;
 
         let L = normalize(u_directionalLightDirection);
-        let R = reflect(L,N);
-        let lambertTerm = max(dot(N,-L),0.0);
-        let specular = pow(max(dot(R,E),0.0),u_shininess) * specularSamplerValue;
-        let la = u_ambientLightColor * u_ambientLightIntensity * visibility;
-        let ld = diffuseColor * (u_directionalLightColor * u_directionalLightIntensity) * lambertTerm ;
-        let ls = u_specularColor * u_specularStrength * (u_directionalLightColor * u_directionalLightIntensity) * specular;
-        mixColor += la + ld + ls;
+        let R = reflect(L, N);
+        let lambertTerm = max(dot(N, -L), 0.0);
+        let specular = pow(max(dot(R, E), 0.0), u_shininess) * specularSamplerValue;
+
+        // 디렉셔널 라이트 기여도 (쉐도우 적용)
+        let lightContribution = u_directionalLightColor * u_directionalLightIntensity * visibility;
+        let ld = diffuseColor * lightContribution * lambertTerm;
+        let ls = u_specularColor * u_specularStrength * lightContribution * specular;
+
+        mixColor += ld + ls;
+
     }
 
     // PointLight

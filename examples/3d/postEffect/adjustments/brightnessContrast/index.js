@@ -113,7 +113,7 @@ function loadGLTF(redGPUContext, scene, url) {
 	)
 }
 
-// 테스트 패널을 렌더링하는 함수
+
 const renderTestPane = async (redGPUContext, targetView) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const {createPostEffectLabel} = await import('../../../../exampleHelper/createExample/loadExampleInfo/createPostEffectLabel.js');

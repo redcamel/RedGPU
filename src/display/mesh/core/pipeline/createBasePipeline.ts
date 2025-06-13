@@ -40,10 +40,9 @@ const createBasePipeline = (
         vertexBindGroupLayout
     ]
     if (pipelineType !== PIPELINE_TYPE.SHADOW) bindGroupLayouts.push(material_gpuRenderInfo.fragmentBindGroupLayout)
-    // 파이프라인 레이아웃 설명자를 생성합니다.
+
     const pipelineLayoutDescriptor: GPUPipelineLayoutDescriptor = {bindGroupLayouts}
     const pipelineLayout: GPUPipelineLayout = gpuDevice.createPipelineLayout(pipelineLayoutDescriptor);
-    // 랜더 파이프라인 설명자를 생성합니다.
     const pipelineDescriptor: GPURenderPipelineDescriptor = {
         label: pipelineLabel,
         layout: pipelineLayout,

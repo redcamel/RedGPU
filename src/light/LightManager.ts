@@ -86,7 +86,7 @@ class LightManager {
                 [members.directionalLightCount, lightManager.directionalLightCount],
                 [members.directionalLightProjectionViewMatrix, this.#getDirectionalLightProjectionViewMatrix(view)],
                 [members.directionalLightProjectionMatrix, this.#getDirectionalLightProjectionMatrix(view)],
-                [members.directionalLightViewMatrix, this.#getDirectionalLightViewMatrix(view)],
+                [members.directionalLightViewMatrix, this.#getMainDirectionalLightViewMatrix(view)],
                 [members.directionalLightShadowDepthTextureSize, shadowManager.directionalLightShadowDepthTextureSize],
                 [members.directionalLightShadowBias, shadowManager.directionalLightShadowBias],
                 //
@@ -117,7 +117,7 @@ class LightManager {
     }
 
     #getDirectionalLightProjectionViewMatrix(view: View3D): mat4 {
-        return mat4.multiply(mat4.create(), this.#getDirectionalLightProjectionMatrix(view), this.#getDirectionalLightViewMatrix(view));
+        return mat4.multiply(mat4.create(), this.#getDirectionalLightProjectionMatrix(view), this.#getMainDirectionalLightViewMatrix(view));
     }
 
     #getDirectionalLightProjectionMatrix(view: View3D): mat4 {
@@ -138,7 +138,7 @@ class LightManager {
         return lightProjectionMatrix;
     }
 
-    #getDirectionalLightViewMatrix(view: View3D): mat4 {
+    #getMainDirectionalLightViewMatrix(view: View3D): mat4 {
         mat4.identity(this.#lightProjectionMatrix)
         const distance = Math.max(vec3.distance(vec3.fromValues(
             view.rawCamera.x,

@@ -213,7 +213,7 @@ class View3D extends ViewTransform {
         //TODO 바인드그룹이 계속 생겨나는걸.... 막아야겠군
         const {scene} = view
         const iblTexture = view.iblTexture?.gpuTexture || (view.skybox?._material instanceof SkyBoxMaterial ? view.skybox._material.skyboxTexture?.gpuTexture : undefined)
-        let shadowDepthGPUTextureView = shadowRender ? scene.shadowManager.shadowDepthGPUTextureViewEmpty : scene.shadowManager.shadowDepthGPUTextureView
+        let directionalShadowDepthTextureView = shadowRender ? scene.shadowManager.directionalShadowDepthTextureViewEmpty : scene.shadowManager.directionalShadowDepthTextureView
         const index = view.redGPUContext.viewList.indexOf(view)
         const key = `${index}_${shadowRender ? 'shadowRender' : 'basic'}_2path${!!renderPath1ResultTexture}`
         if (index > -1) {
@@ -223,11 +223,11 @@ class View3D extends ViewTransform {
                 needResetBindGroup = (
                     prevInfo.iblTexture !== iblTexture ||
                     prevInfo.renderPath1ResultTexture !== renderPath1ResultTexture ||
-                    prevInfo.shadowDepthGPUTextureView !== shadowDepthGPUTextureView
+                    prevInfo.directionalShadowDepthTextureView !== directionalShadowDepthTextureView
                     || !this.#passLightClusters
                 )
             }
-            if (needResetBindGroup) this.#createVertexUniformBindGroup(key, shadowDepthGPUTextureView, iblTexture,renderPath1ResultTexture)
+            if (needResetBindGroup) this.#createVertexUniformBindGroup(key, directionalShadowDepthTextureView, iblTexture,renderPath1ResultTexture)
             else this.#systemUniform_Vertex_UniformBindGroup = this.#prevInfoList[key].vertexUniformBindGroup;
             [
                 {key: 'useIblTexture', value: [iblTexture ? 1 : 0]},
@@ -243,7 +243,7 @@ class View3D extends ViewTransform {
             this.#prevInfoList[key] = {
                 iblTexture,
                 renderPath1ResultTexture,
-                shadowDepthGPUTextureView,
+                directionalShadowDepthTextureView,
                 vertexUniformBindGroup: this.#systemUniform_Vertex_UniformBindGroup
             }
         }
@@ -257,7 +257,7 @@ class View3D extends ViewTransform {
             (0 < mouseY && mouseY < pixelRectObject.height);
     }
 
-    #createVertexUniformBindGroup(key: string, shadowDepthGPUTextureView: GPUTextureView, iblTexture: GPUTexture,renderPath1ResultTexture:GPUTexture) {
+    #createVertexUniformBindGroup(key: string, directionalShadowDepthTextureView: GPUTextureView, iblTexture: GPUTexture,renderPath1ResultTexture:GPUTexture) {
         this.#updateClusters(true)
         const systemUniform_Vertex_BindGroupDescriptor: GPUBindGroupDescriptor = {
             layout: this.redGPUContext.resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System),
@@ -277,7 +277,7 @@ class View3D extends ViewTransform {
                 },
                 {
                     binding: 2,
-                    resource: shadowDepthGPUTextureView
+                    resource: directionalShadowDepthTextureView
                 },
                 {
                     binding: 3,

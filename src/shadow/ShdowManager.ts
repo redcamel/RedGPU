@@ -7,21 +7,21 @@ import validateUintRange from "../runtimeChecker/validateFunc/validateUintRange"
 class ShadowManager {
     #directionalLightShadowDepthTextureSize: number = 2048
     #directionalLightShadowBias: number = 0.005
-    #shadowDepthGPUTexture: GPUTexture
-    #shadowDepthGPUTextureView: GPUTextureView
-    #shadowDepthGPUTextureViewEmpty: GPUTextureView
+    #directionalShadowDepthTexture: GPUTexture
+    #directionalShadowDepthTextureView: GPUTextureView
+    #directionalShadowDepthTextureViewEmpty: GPUTextureView
     #redGPUContext: RedGPUContext
     #castingList: (Mesh | InstancingMesh)[] = []
     get castingList(): (Mesh | InstancingMesh)[] {
         return this.#castingList;
     }
 
-    get shadowDepthGPUTextureView(): GPUTextureView {
-        return this.#shadowDepthGPUTextureView;
+    get directionalShadowDepthTextureView(): GPUTextureView {
+        return this.#directionalShadowDepthTextureView;
     }
 
-    get shadowDepthGPUTextureViewEmpty(): GPUTextureView {
-        return this.#shadowDepthGPUTextureViewEmpty;
+    get directionalShadowDepthTextureViewEmpty(): GPUTextureView {
+        return this.#directionalShadowDepthTextureViewEmpty;
     }
 
     get directionalLightShadowBias(): number {
@@ -53,15 +53,15 @@ class ShadowManager {
     }
 
     destroy() {
-        if (this.#shadowDepthGPUTexture) {
-            this.#shadowDepthGPUTexture.destroy()
-            this.#shadowDepthGPUTexture = null
-            this.#shadowDepthGPUTextureView = null
+        if (this.#directionalShadowDepthTexture) {
+            this.#directionalShadowDepthTexture.destroy()
+            this.#directionalShadowDepthTexture = null
+            this.#directionalShadowDepthTextureView = null
         }
     }
 
     #checkDepthTexture() {
-        if (this.#shadowDepthGPUTexture?.width !== this.#directionalLightShadowDepthTextureSize) {
+        if (this.#directionalShadowDepthTexture?.width !== this.#directionalLightShadowDepthTextureSize) {
             this.destroy()
             this.#createDepthTexture()
         }
@@ -74,19 +74,19 @@ class ShadowManager {
             format: 'depth32float',
             label: `ShadowManager_EmptyDepthTexture_1x1_${Date.now()}`,
         })
-        this.#shadowDepthGPUTextureViewEmpty = t0.createView({label: t0.label})
+        this.#directionalShadowDepthTextureViewEmpty = t0.createView({label: t0.label})
     }
 
     #createDepthTexture() {
         const {gpuDevice} = this.#redGPUContext
-        this.#shadowDepthGPUTexture = gpuDevice.createTexture({
+        this.#directionalShadowDepthTexture = gpuDevice.createTexture({
             size: [this.#directionalLightShadowDepthTextureSize, this.#directionalLightShadowDepthTextureSize, 1],
             usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
             format: 'depth32float',
             label: `ShadowManager_directionalLightShadowDepthTextureSize_${this.#directionalLightShadowDepthTextureSize}x${this.#directionalLightShadowDepthTextureSize}_${Date.now()}`,
         });
-        this.#shadowDepthGPUTextureView = this.#shadowDepthGPUTexture.createView({label: this.#shadowDepthGPUTexture.label})
-        if (!this.#shadowDepthGPUTextureViewEmpty) this.#createEmptyDepthTexture(gpuDevice)
+        this.#directionalShadowDepthTextureView = this.#directionalShadowDepthTexture.createView({label: this.#directionalShadowDepthTexture.label})
+        if (!this.#directionalShadowDepthTextureViewEmpty) this.#createEmptyDepthTexture(gpuDevice)
     }
 }
 

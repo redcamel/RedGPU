@@ -479,8 +479,8 @@ const ExampleList = [
 				name: 'Shadow',
 				list: [
 					{
-						name: 'TODO - DirectionalLight Shadow',
-						// path: '3d/shadow/directionalLight',
+						name: 'DirectionalLight Shadow',
+						path: '3d/shadow/directionalShadow',
 						description: {
 							ko: ``,
 							en: ``
