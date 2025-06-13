@@ -5,8 +5,8 @@
  * @property {string} CLEAR - Represents that the GPU should clear the previous content at the specified location.
  */
 const GPU_LOAD_OP = {
-    LOAD: 'load',
-    CLEAR: 'clear',
+	LOAD: 'load',
+	CLEAR: 'clear',
 } as const
 Object.freeze(GPU_LOAD_OP)
 export default GPU_LOAD_OP

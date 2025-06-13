@@ -30,6 +30,15 @@ class ASinglePassPostEffect {
 	#WORK_SIZE_Y = 16
 	#WORK_SIZE_Z = 1
 	#useDepthTexture: boolean = false
+	#redGPUContext: RedGPUContext
+	#antialiasingManager: AntialiasingManager
+	#previousSourceTextureReferences: GPUTextureView[] = [];
+
+	constructor(redGPUContext: RedGPUContext) {
+		this.#redGPUContext = redGPUContext
+		this.#antialiasingManager = redGPUContext.antialiasingManager
+	}
+
 	get useDepthTexture(): boolean {
 		return this.#useDepthTexture;
 	}
@@ -38,16 +47,8 @@ class ASinglePassPostEffect {
 		this.#useDepthTexture = value;
 	}
 
-	#redGPUContext: RedGPUContext
-	#antialiasingManager: AntialiasingManager
-
 	get redGPUContext(): RedGPUContext {
 		return this.#redGPUContext;
-	}
-
-	constructor(redGPUContext: RedGPUContext) {
-		this.#redGPUContext = redGPUContext
-		this.#antialiasingManager = redGPUContext.antialiasingManager
 	}
 
 	get storageInfo() {
@@ -156,24 +157,6 @@ class ASinglePassPostEffect {
 		gpuDevice.queue.submit([commentEncode_compute.finish()]);
 	}
 
-	#previousSourceTextureReferences: GPUTextureView[] = [];
-
-	#detectSourceTextureChange(sourceTextureView: GPUTextureView[]): boolean {
-		if (!this.#previousSourceTextureReferences || this.#previousSourceTextureReferences.length !== sourceTextureView.length) {
-			return true;
-		}
-		for (let i = 0; i < sourceTextureView.length; i++) {
-			if (this.#previousSourceTextureReferences[i] !== sourceTextureView[i]) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	#saveCurrentSourceTextureReferences(sourceTextureView: GPUTextureView[]) {
-		this.#previousSourceTextureReferences = [...sourceTextureView];
-	}
-
 	render(view: View3D, width: number, height: number, ...sourceTextureView) {
 		const {gpuDevice, antialiasingManager} = this.#redGPUContext
 		const {useMSAA} = antialiasingManager
@@ -183,7 +166,6 @@ class ASinglePassPostEffect {
 		const sourceTextureChanged = this.#detectSourceTextureChange(sourceTextureView);
 		const targetOutputView = this.getOutputTextureView()
 		const {redGPUContext} = view
-
 		if (dimensionsChanged || msaaChanged || sourceTextureChanged) {
 			const currentStorageInfo = this.storageInfo;
 			const currentUniformInfo = this.uniformInfo;
@@ -271,6 +253,22 @@ class ASinglePassPostEffect {
 		this.uniformBuffer.writeBuffer(this.uniformInfo.members[key], value)
 	}
 
+	#detectSourceTextureChange(sourceTextureView: GPUTextureView[]): boolean {
+		if (!this.#previousSourceTextureReferences || this.#previousSourceTextureReferences.length !== sourceTextureView.length) {
+			return true;
+		}
+		for (let i = 0; i < sourceTextureView.length; i++) {
+			if (this.#previousSourceTextureReferences[i] !== sourceTextureView[i]) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	#saveCurrentSourceTextureReferences(sourceTextureView: GPUTextureView[]) {
+		this.#previousSourceTextureReferences = [...sourceTextureView];
+	}
+
 	#createRenderTexture(view: View3D): boolean {
 		const {redGPUContext, viewRenderTextureManager} = view
 		const {colorTexture} = viewRenderTextureManager
@@ -289,7 +287,7 @@ class ASinglePassPostEffect {
 				label: `PostEffect_${this.#name}_${width}x${height}_${Date.now()}`
 			})
 			this.#outputTexture.push(newTexture)
-			this.#outputTextureView.push(newTexture.createView({label:newTexture.label}))
+			this.#outputTextureView.push(newTexture.createView({label: newTexture.label}))
 		}
 		this.#prevInfo = {
 			width,

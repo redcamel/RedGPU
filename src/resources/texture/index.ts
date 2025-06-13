@@ -4,8 +4,8 @@ import CubeTexture from "./CubeTexture";
 import CubeTextureFromSphericalSky from "./CubeTextureFromSphericalSky";
 
 export {
-    BitmapTexture,
-    CubeTexture,
-    CubeTextureFromSphericalSky,
-    loadAndCreateBitmapImage
+	BitmapTexture,
+	CubeTexture,
+	CubeTextureFromSphericalSky,
+	loadAndCreateBitmapImage
 }

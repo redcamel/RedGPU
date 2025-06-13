@@ -19,8 +19,6 @@ class DOF extends AMultiPassPostEffect {
 	#nearStrength: number = 1.0;
 	#farStrength: number = 1.0;
 
-
-
 	constructor(redGPUContext: RedGPUContext) {
 		super(
 			redGPUContext,
@@ -126,6 +124,7 @@ class DOF extends AMultiPassPostEffect {
 		this.#farStrength = value;
 		this.#effect_unified.farStrength = value;
 	}
+
 	/**
 	 * 🎮 게임 기본 프리셋 (균형잡힌 품질/성능)
 	 */

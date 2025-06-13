@@ -1,6 +1,6 @@
 import ColorRGB from "../color/ColorRGB";
-import BaseLight from "./core/BaseLight";
 import convertHexToRgb from "../utils/convertColor/convertHexToRgb";
+import BaseLight from "./core/BaseLight";
 
 class SpotLight extends BaseLight {
 	#radius: number = 1
@@ -140,7 +140,6 @@ class SpotLight extends BaseLight {
 
 	lookAt(targetX: number | [number, number, number], targetY?: number, targetZ?: number): void {
 		let tx: number, ty: number, tz: number;
-
 		if (Array.isArray(targetX)) {
 			[tx, ty, tz] = targetX;
 		} else {
@@ -148,12 +147,10 @@ class SpotLight extends BaseLight {
 			ty = targetY!;
 			tz = targetZ!;
 		}
-
 		const dx = tx - this.#x;
 		const dy = ty - this.#y;
 		const dz = tz - this.#z;
 		const length = Math.sqrt(dx * dx + dy * dy + dz * dz);
-
 		if (length > 0) {
 			this.#directionX = dx / length;
 			this.#directionY = dy / length;

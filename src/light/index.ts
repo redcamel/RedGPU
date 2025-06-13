@@ -4,8 +4,8 @@ import PointLight from "./PointLight";
 import SpotLight from "./SpotLight";
 
 export {
-    AmbientLight,
-    PointLight,
-    SpotLight,
-    DirectionalLight
+	AmbientLight,
+	PointLight,
+	SpotLight,
+	DirectionalLight
 }

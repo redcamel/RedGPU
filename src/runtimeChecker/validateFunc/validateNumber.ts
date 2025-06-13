@@ -7,10 +7,10 @@ import consoleAndThrowError from "../../utils/consoleAndThrowError";
  * @returns {boolean} - Returns true if the value is a number, false otherwise.
  */
 const validateNumber = (value: number): boolean => {
-    if (typeof value !== 'number') {
-        consoleAndThrowError('Only numbers allowed.')
-        return false
-    }
-    return true
+	if (typeof value !== 'number') {
+		consoleAndThrowError('Only numbers allowed.')
+		return false
+	}
+	return true
 }
 export default validateNumber

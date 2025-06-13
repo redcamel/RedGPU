@@ -1,12 +1,13 @@
 import DirectionalShadowManager from "./DirectionalShadowManager";
 
 class ShadowManager {
-    #directionalShadowManager: DirectionalShadowManager = new DirectionalShadowManager()
-    get directionalShadowManager(): DirectionalShadowManager {
-        return this.#directionalShadowManager;
-    }
+	#directionalShadowManager: DirectionalShadowManager = new DirectionalShadowManager()
 
-    constructor() {}
+	constructor() {}
+
+	get directionalShadowManager(): DirectionalShadowManager {
+		return this.#directionalShadowManager;
+	}
 }
 
 Object.freeze(ShadowManager)

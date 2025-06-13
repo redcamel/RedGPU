@@ -15,6 +15,11 @@ class PostEffectManager {
 	#COMPUTE_WORKGROUP_SIZE_Y = 4
 	#COMPUTE_WORKGROUP_SIZE_Z = 1
 	#fxaa: FXAA
+	#textureComputeShaderModule: GPUShaderModule
+	#textureComputeBindGroup: GPUBindGroup
+	#textureComputeBindGroupLayout: GPUBindGroupLayout
+	#textureComputePipeline: GPUComputePipeline
+	#previousDimensions: { width: number, height: number }
 
 	constructor(view: View3D) {
 		this.#view = view;
@@ -57,19 +62,15 @@ class PostEffectManager {
 	}
 
 	render() {
-
-		const { viewRenderTextureManager, redGPUContext } = this.#view;
-		const { antialiasingManager}=redGPUContext
-		const { useMSAA, useFXAA } = antialiasingManager;
-		const { colorTextureView, colorResolveTextureView, colorTexture } = viewRenderTextureManager;
-		const { width, height } = colorTexture;
-
+		const {viewRenderTextureManager, redGPUContext} = this.#view;
+		const {antialiasingManager} = redGPUContext
+		const {useMSAA, useFXAA} = antialiasingManager;
+		const {colorTextureView, colorResolveTextureView, colorTexture} = viewRenderTextureManager;
+		const {width, height} = colorTexture;
 		// 초기 텍스처 설정 (MSAA 여부에 따라 소스 결정)
 		const initialSourceView = useMSAA ? colorResolveTextureView : colorTextureView;
 		this.#sourceTextureView = this.#renderToStorageTexture(this.#view, initialSourceView);
-
 		let currentTextureView = this.#sourceTextureView;
-
 		this.#postEffects.forEach(effect => {
 			currentTextureView = effect.render(
 				this.#view,
@@ -78,7 +79,6 @@ class PostEffectManager {
 				currentTextureView
 			);
 		});
-
 		// FXAA 적용 (필요한 경우)
 		if (useFXAA) {
 			if (!this.#fxaa) {
@@ -92,7 +92,6 @@ class PostEffectManager {
 				currentTextureView
 			);
 		}
-
 		return currentTextureView;
 	}
 
@@ -101,11 +100,6 @@ class PostEffectManager {
 			effect.clear()
 		})
 	}
-
-	#textureComputeShaderModule: GPUShaderModule
-	#textureComputeBindGroup: GPUBindGroup
-	#textureComputeBindGroupLayout: GPUBindGroupLayout
-	#textureComputePipeline: GPUComputePipeline
 
 	#init() {
 		const {redGPUContext} = this.#view;
@@ -116,17 +110,13 @@ class PostEffectManager {
 		this.#textureComputePipeline = this.#createTextureComputePipeline(gpuDevice, this.#textureComputeShaderModule, this.#textureComputeBindGroupLayout)
 	}
 
-	#previousDimensions: { width: number, height: number }
-
-
 	#renderToStorageTexture(view: View3D, sourceTextureView: GPUTextureView) {
 		const {redGPUContext, viewRenderTextureManager} = view;
 		const {colorTexture} = viewRenderTextureManager;
 		const {gpuDevice, antialiasingManager} = redGPUContext;
-		const {useMSAA,changedMSAA} = antialiasingManager;
+		const {useMSAA, changedMSAA} = antialiasingManager;
 		const {width, height} = colorTexture;
 		const dimensionsChanged = width !== this.#previousDimensions?.width || height !== this.#previousDimensions?.height;
-
 		// 크기가 변경되면 텍스처 재생성
 		if (dimensionsChanged) {
 			if (this.#storageTexture) {

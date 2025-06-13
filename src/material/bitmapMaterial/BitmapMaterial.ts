@@ -9,30 +9,30 @@ import fragmentModuleSource from './fragment.wgsl';
 const SHADER_INFO = parseWGSL(fragmentModuleSource)
 
 interface BitmapMaterial {
-    diffuseTexture: BitmapTexture
-    diffuseTextureSampler: Sampler
+	diffuseTexture: BitmapTexture
+	diffuseTextureSampler: Sampler
 }
 
 class BitmapMaterial extends ABitmapBaseMaterial {
-    dirtyPipeline: boolean = false
+	dirtyPipeline: boolean = false
 
-    constructor(redGPUContext: RedGPUContext, diffuseTexture?: BitmapTexture, name?: string) {
-        super(
-            redGPUContext,
-            'BITMAP_MATERIAL',
-            SHADER_INFO,
-            2
-        )
-        if (name) this.name = name
-        this.diffuseTexture = diffuseTexture
-        this.diffuseTextureSampler = new Sampler(this.redGPUContext)
-        this.initGPURenderInfos()
-    }
+	constructor(redGPUContext: RedGPUContext, diffuseTexture?: BitmapTexture, name?: string) {
+		super(
+			redGPUContext,
+			'BITMAP_MATERIAL',
+			SHADER_INFO,
+			2
+		)
+		if (name) this.name = name
+		this.diffuseTexture = diffuseTexture
+		this.diffuseTextureSampler = new Sampler(this.redGPUContext)
+		this.initGPURenderInfos()
+	}
 }
 
 DefineForFragment.defineByPreset(BitmapMaterial, [
-    DefineForFragment.PRESET_TEXTURE.DIFFUSE_TEXTURE,
-    DefineForFragment.PRESET_SAMPLER.DIFFUSE_TEXTURE_SAMPLER,
+	DefineForFragment.PRESET_TEXTURE.DIFFUSE_TEXTURE,
+	DefineForFragment.PRESET_SAMPLER.DIFFUSE_TEXTURE_SAMPLER,
 ])
 Object.freeze(BitmapMaterial)
 export default BitmapMaterial

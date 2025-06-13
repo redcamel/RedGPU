@@ -8,6 +8,7 @@ import RenderViewStateData from "../../renderer/RenderViewStateData";
 import VertexGPURenderInfo from "../../renderInfos/VertexGPURenderInfo";
 import DefineForVertex from "../../resources/defineProperty/DefineForVertex";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
+import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import InstanceIdGenerator from "../../utils/InstanceIdGenerator";
 import uuidToUint from "../../utils/uuidToUint";
 import createMeshVertexUniformBuffers from "./core/createMeshVertexUniformBuffers";
@@ -15,7 +16,6 @@ import Object3DContainer from "./core/Object3DContainer";
 import updateMeshDirtyPipeline from "./core/pipeline/updateMeshDirtyPipeline";
 import getBasicMeshVertexBindGroupDescriptor from "./core/shader/getBasicMeshVertexBindGroupDescriptor";
 import MeshBase from "./MeshBase";
-import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 
 const VERTEX_SHADER_MODULE_NAME_PBR_SKIN = 'VERTEX_MODULE_MESH_PBR_SKIN'
 const CONVERT_RADIAN = Math.PI / 180;

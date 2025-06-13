@@ -3,7 +3,7 @@ import DepthStencilState from "./DepthStencilState";
 import PrimitiveState from "./PrimitiveState";
 
 export {
-    PrimitiveState,
-    DepthStencilState,
-    BlendState,
+	PrimitiveState,
+	DepthStencilState,
+	BlendState,
 }

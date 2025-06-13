@@ -5,9 +5,9 @@ import SpriteSheet3D from "./spriteSheets/spriteSheet3D/SpriteSheet3D";
 import SpriteSheetInfo from "./spriteSheets/SpriteSheetInfo";
 
 export {
-    SpriteSheetInfo,
-    Sprite2D,
-    SpriteSheet2D,
-    Sprite3D,
-    SpriteSheet3D
+	SpriteSheetInfo,
+	Sprite2D,
+	SpriteSheet2D,
+	Sprite3D,
+	SpriteSheet3D
 }

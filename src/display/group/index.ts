@@ -1,8 +1,7 @@
-import Group3D from "./Group3D";
 import Group2D from "./Group2D";
-
+import Group3D from "./Group3D";
 
 export {
-    Group2D,
-    Group3D
+	Group2D,
+	Group3D
 }

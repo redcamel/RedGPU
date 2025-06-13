@@ -23,103 +23,102 @@ import RedGPUContext from "./context/RedGPUContext";
  * <br/>The options for adapter request, defaults to { powerPreference: "high-performance", forceFallbackAdapter: false }.
  */
 const init = async (
-    canvas: HTMLCanvasElement,
-    onWebGPUInitialized: Function,
-    onFailInitialized?: Function,
-    onDestroy?: Function,
-    alphaMode: GPUCanvasAlphaMode = 'premultiplied',
-    requestAdapterOptions: GPURequestAdapterOptions = {
-        powerPreference: "high-performance",
-        forceFallbackAdapter: false,
-    },
+	canvas: HTMLCanvasElement,
+	onWebGPUInitialized: Function,
+	onFailInitialized?: Function,
+	onDestroy?: Function,
+	alphaMode: GPUCanvasAlphaMode = 'premultiplied',
+	requestAdapterOptions: GPURequestAdapterOptions = {
+		powerPreference: "high-performance",
+		forceFallbackAdapter: false,
+	},
 ) => {
-
-    const {gpu} = navigator
-    const errorHandler = (e: Error, defaultMsg: string) => {
-        const msg = generateErrorMessage(e, defaultMsg);
-        console.error('\n============\n', msg, '\n============\n');
-        onFailInitialized?.(msg);
-    };
-    const validateAndRequestAdapter = async (targetGPU: GPU) => {
-        if (!targetGPU) errorHandler(null, `Cannot find navigator.gpu`)
-        try {
-            const adapter: GPUAdapter = await targetGPU.requestAdapter(requestAdapterOptions)
-            console.log('PASS adapter', adapter)
-            await validateAndRequestDevice(adapter)
-        } catch (e) {
-            errorHandler(e, `Failed to request adapter or validate device with target GPU: ${targetGPU}, error message is ${e.message}`);
-        }
-    }
-    const validateAndRequestDevice = async (adapter: GPUAdapter) => {
-        const requiredFeatures = []
-        if (adapter.features.has("texture-compression-astc")) {
-            //TODO - 확장확인
-            requiredFeatures.push("texture-compression-astc");
-        }
-        const gpuDeviceDescriptor: GPUDeviceDescriptor = {
-            requiredFeatures
-        };
-        try {
-            const device: GPUDevice = await adapter.requestDevice(gpuDeviceDescriptor)
-            console.log('PASS device', device)
-            validateAndInitializeContext(canvas, adapter, device)
-        } catch (e) {
-            errorHandler(null, `Failed to request device. Adapter was ${adapter}, error message is ${e.message}`)
-        }
-    }
-    const validateAndInitializeContext = (canvas: HTMLCanvasElement, adapter: GPUAdapter, device: GPUDevice) => {
-        const context = canvas.getContext('webgpu')
-        if (!context) {
-            errorHandler(new Error(`Failed to get context from canvas: ${canvas.id || canvas}`), 'Failed to get webgpu initialize from canvas');
-            return
-        }
-        try {
-            const redGPUContext: RedGPUContext = new RedGPUContext(canvas, adapter, device, context, alphaMode)
-            onWebGPUInitialized(redGPUContext)
-            device.addEventListener('uncapturederror', (event: GPUUncapturedErrorEvent) => {
-                console.warn('TODO A WebGPU error was not captured:', event);
-                console.warn(event.error?.message);
-                // onFailInitialized?.(errorMsg);
-                window.cancelAnimationFrame(redGPUContext.currentRequestAnimationFrame)
-            });
-            device.lost.then((info: GPUDeviceLostInfo) => {
-                console.warn(info)
-                console.warn(`Device lost occurred: ${info.message}`)
-                if (info.reason === 'destroyed') onDestroy?.(info)
-            })
-        } catch (e) {
-            onFailInitialized(errorHandler(e, ''))
-            //TODO 이거 먼가 이상하다 확인해야함
-        }
-    }
-    const initializeWebGPU = async () => {
-        if (!(onWebGPUInitialized instanceof Function)) {
-            errorHandler(null, `Expected onWebGPUInitialized, but received : ${onWebGPUInitialized}`);
-            return
-        }
-        if (!(canvas instanceof HTMLCanvasElement)) {
-            errorHandler(null, `Expected HTMLCanvasElement, but received : ${canvas}`);
-            return;
-        }
-        await validateAndRequestAdapter(gpu);
-    }
-    try {
-        await initializeWebGPU()
-    } catch (e) {
-        errorHandler(e, `Unexpected error occurred during WebGPU initialization: ${e.message}`);
-    }
+	const {gpu} = navigator
+	const errorHandler = (e: Error, defaultMsg: string) => {
+		const msg = generateErrorMessage(e, defaultMsg);
+		console.error('\n============\n', msg, '\n============\n');
+		onFailInitialized?.(msg);
+	};
+	const validateAndRequestAdapter = async (targetGPU: GPU) => {
+		if (!targetGPU) errorHandler(null, `Cannot find navigator.gpu`)
+		try {
+			const adapter: GPUAdapter = await targetGPU.requestAdapter(requestAdapterOptions)
+			console.log('PASS adapter', adapter)
+			await validateAndRequestDevice(adapter)
+		} catch (e) {
+			errorHandler(e, `Failed to request adapter or validate device with target GPU: ${targetGPU}, error message is ${e.message}`);
+		}
+	}
+	const validateAndRequestDevice = async (adapter: GPUAdapter) => {
+		const requiredFeatures = []
+		if (adapter.features.has("texture-compression-astc")) {
+			//TODO - 확장확인
+			requiredFeatures.push("texture-compression-astc");
+		}
+		const gpuDeviceDescriptor: GPUDeviceDescriptor = {
+			requiredFeatures
+		};
+		try {
+			const device: GPUDevice = await adapter.requestDevice(gpuDeviceDescriptor)
+			console.log('PASS device', device)
+			validateAndInitializeContext(canvas, adapter, device)
+		} catch (e) {
+			errorHandler(null, `Failed to request device. Adapter was ${adapter}, error message is ${e.message}`)
+		}
+	}
+	const validateAndInitializeContext = (canvas: HTMLCanvasElement, adapter: GPUAdapter, device: GPUDevice) => {
+		const context = canvas.getContext('webgpu')
+		if (!context) {
+			errorHandler(new Error(`Failed to get context from canvas: ${canvas.id || canvas}`), 'Failed to get webgpu initialize from canvas');
+			return
+		}
+		try {
+			const redGPUContext: RedGPUContext = new RedGPUContext(canvas, adapter, device, context, alphaMode)
+			onWebGPUInitialized(redGPUContext)
+			device.addEventListener('uncapturederror', (event: GPUUncapturedErrorEvent) => {
+				console.warn('TODO A WebGPU error was not captured:', event);
+				console.warn(event.error?.message);
+				// onFailInitialized?.(errorMsg);
+				window.cancelAnimationFrame(redGPUContext.currentRequestAnimationFrame)
+			});
+			device.lost.then((info: GPUDeviceLostInfo) => {
+				console.warn(info)
+				console.warn(`Device lost occurred: ${info.message}`)
+				if (info.reason === 'destroyed') onDestroy?.(info)
+			})
+		} catch (e) {
+			onFailInitialized(errorHandler(e, ''))
+			//TODO 이거 먼가 이상하다 확인해야함
+		}
+	}
+	const initializeWebGPU = async () => {
+		if (!(onWebGPUInitialized instanceof Function)) {
+			errorHandler(null, `Expected onWebGPUInitialized, but received : ${onWebGPUInitialized}`);
+			return
+		}
+		if (!(canvas instanceof HTMLCanvasElement)) {
+			errorHandler(null, `Expected HTMLCanvasElement, but received : ${canvas}`);
+			return;
+		}
+		await validateAndRequestAdapter(gpu);
+	}
+	try {
+		await initializeWebGPU()
+	} catch (e) {
+		errorHandler(e, `Unexpected error occurred during WebGPU initialization: ${e.message}`);
+	}
 }
 export default init
 const generateErrorMessage = (e: any, defaultMsg: string): string => {
-    let msg = defaultMsg;
-    // Check if 'e' is an instance of Error
-    if (e instanceof Error) {
-        msg = e.message ?? defaultMsg;
-        if (typeof e.stack === 'string') {
-            msg += `\nStack Trace: ${e.stack}`;
-        }
-    } else {
-        console.warn('generateErrorMessage function expected an Error instance, but got: ', e);
-    }
-    return msg;
+	let msg = defaultMsg;
+	// Check if 'e' is an instance of Error
+	if (e instanceof Error) {
+		msg = e.message ?? defaultMsg;
+		if (typeof e.stack === 'string') {
+			msg += `\nStack Trace: ${e.stack}`;
+		}
+	} else {
+		console.warn('generateErrorMessage function expected an Error instance, but got: ', e);
+	}
+	return msg;
 }

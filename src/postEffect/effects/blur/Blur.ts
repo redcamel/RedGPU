@@ -17,7 +17,6 @@ class Blur extends AMultiPassPostEffect {
 		this.#effect_convolution.kernel = Convolution.BLUR
 	}
 
-
 	render(view: View3D, width: number, height: number, sourceTextureView: GPUTextureView) {
 		return this.#effect_convolution.render(
 			view, width, height, sourceTextureView

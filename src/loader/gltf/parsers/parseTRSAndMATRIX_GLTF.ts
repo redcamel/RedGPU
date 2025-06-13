@@ -16,11 +16,11 @@ const RAD_TO_DEG = 180 / Math.PI;
  * @returns {void}
  */
 const setMeshRotation = (tRotation: number[], mesh: Mesh) => {
-    mesh.setRotation(
-        -(tRotation[0] * RAD_TO_DEG),
-        -(tRotation[1] * RAD_TO_DEG),
-        -(tRotation[2] * RAD_TO_DEG)
-    );
+	mesh.setRotation(
+		-(tRotation[0] * RAD_TO_DEG),
+		-(tRotation[1] * RAD_TO_DEG),
+		-(tRotation[2] * RAD_TO_DEG)
+	);
 }
 /**
  * Parses the transformation and matrix information from `nodeInfo` and applies it to the `mesh`.
@@ -30,34 +30,34 @@ const setMeshRotation = (tRotation: number[], mesh: Mesh) => {
  * @returns {void}
  */
 const parseTRSAndMATRIX_GLTF = (mesh: Mesh, nodeInfo: Node) => {
-    const {matrix, rotation: quaternion, translation, scale} = nodeInfo;
-    let rotationMTX, tRotation;
-    if ('matrix' in nodeInfo) {
-        rotationMTX = mat4.create();
-        tRotation = vec3.create();
-        mat4ToEuler(matrix, tRotation);
-        setMeshRotation(tRotation, mesh);
-        mesh.setPosition(matrix[12], matrix[13], matrix[14]);
-        const tempScale = vec3.fromValues(1, 1, 1);
-        // @ts-ignore
-        mat4.getScaling(tempScale, matrix);
-        mesh.setScale(tempScale[0], tempScale[1], tempScale[2]);
-    }
-    if ('rotation' in nodeInfo) {
-        rotationMTX = mat4.create();
-        tRotation = vec3.create();
-        quaternionToRotationMat4(quaternion, rotationMTX);
-        mat4ToEuler(rotationMTX, tRotation);
-        setMeshRotation(tRotation, mesh);
-    }
-    if ('translation' in nodeInfo)
-        mesh.setPosition(translation[0], translation[1], translation[2]);
-    if ('scale' in nodeInfo) {
-        // console.log('scale', scale)
-        mesh.setScale(scale[0], scale[1], scale[2]);
-        if (scale[0] < 0 || scale[1] < 0 || scale[2] < 0) {
-            mesh.primitiveState.frontFace = GPU_FRONT_FACE.CW
-        }
-    }
+	const {matrix, rotation: quaternion, translation, scale} = nodeInfo;
+	let rotationMTX, tRotation;
+	if ('matrix' in nodeInfo) {
+		rotationMTX = mat4.create();
+		tRotation = vec3.create();
+		mat4ToEuler(matrix, tRotation);
+		setMeshRotation(tRotation, mesh);
+		mesh.setPosition(matrix[12], matrix[13], matrix[14]);
+		const tempScale = vec3.fromValues(1, 1, 1);
+		// @ts-ignore
+		mat4.getScaling(tempScale, matrix);
+		mesh.setScale(tempScale[0], tempScale[1], tempScale[2]);
+	}
+	if ('rotation' in nodeInfo) {
+		rotationMTX = mat4.create();
+		tRotation = vec3.create();
+		quaternionToRotationMat4(quaternion, rotationMTX);
+		mat4ToEuler(rotationMTX, tRotation);
+		setMeshRotation(tRotation, mesh);
+	}
+	if ('translation' in nodeInfo)
+		mesh.setPosition(translation[0], translation[1], translation[2]);
+	if ('scale' in nodeInfo) {
+		// console.log('scale', scale)
+		mesh.setScale(scale[0], scale[1], scale[2]);
+		if (scale[0] < 0 || scale[1] < 0 || scale[2] < 0) {
+			mesh.primitiveState.frontFace = GPU_FRONT_FACE.CW
+		}
+	}
 }
 export default parseTRSAndMATRIX_GLTF;

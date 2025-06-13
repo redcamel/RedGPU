@@ -18,6 +18,24 @@ const UNIFORM_STRUCT = STRUCT_INFO.uniforms.vertexUniforms;
 const BaseTextField2D = mixInMesh2D(ATextField);
 
 class TextField2D extends BaseTextField2D {
+	#width: number = 1
+	#height: number = 1
+	#useSmoothing: boolean = false;
+
+	constructor(redGPUContext: RedGPUContext, useSmoothing: boolean = false) {
+		super(redGPUContext, (width: number, height: number) => {
+			this.#width = width
+			this.#height = height
+		}, false);
+		this._geometry = new Plane(redGPUContext, 1, 1, 1, 1, 1, true);
+		this._material = new TextFieldMaterial(redGPUContext, new BitmapTexture(redGPUContext))
+		this._material.transparent = true
+		this.useSmoothing = useSmoothing;
+		this.dirtyPipeline = true
+		this.dirtyTransform = true
+		this.primitiveState.cullMode = GPU_CULL_MODE.FRONT
+	}
+
 	get useSmoothing(): boolean {
 		return this.#useSmoothing;
 	}
@@ -28,31 +46,11 @@ class TextField2D extends BaseTextField2D {
 			this._material.diffuseTextureSampler.minFilter = GPU_FILTER_MODE.LINEAR
 			this._material.diffuseTextureSampler.magFilter = GPU_FILTER_MODE.LINEAR
 			this._material.diffuseTextureSampler.mipmapFilter = GPU_MIPMAP_FILTER_MODE.LINEAR
-
 		} else {
 			this._material.diffuseTextureSampler.minFilter = GPU_FILTER_MODE.NEAREST
 			this._material.diffuseTextureSampler.magFilter = GPU_FILTER_MODE.NEAREST
 			this._material.diffuseTextureSampler.mipmapFilter = null
 		}
-	}
-
-	#width: number = 1
-	#height: number = 1
-	#useSmoothing: boolean = false;
-
-	constructor(redGPUContext: RedGPUContext,useSmoothing:boolean = false) {
-		super(redGPUContext, (width: number, height: number) => {
-			this.#width = width
-			this.#height = height
-		}, false);
-
-		this._geometry = new Plane(redGPUContext, 1, 1, 1, 1, 1, true);
-		this._material = new TextFieldMaterial(redGPUContext, new BitmapTexture(redGPUContext))
-		this._material.transparent = true
-		this.useSmoothing = useSmoothing;
-		this.dirtyPipeline = true
-		this.dirtyTransform = true
-		this.primitiveState.cullMode = GPU_CULL_MODE.FRONT
 	}
 
 	get width(): number {

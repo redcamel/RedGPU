@@ -6,9 +6,6 @@ const removeComments = (code: string): string => {
 	// console.log('출력:', result);
 	return result;
 }
-
-
-
 const createCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: string = '', useMSAA: boolean = false,) => {
 	const {WORK_SIZE_X, WORK_SIZE_Y, WORK_SIZE_Z} = effect
 	const depthTextureType = useMSAA ? 'texture_depth_multisampled_2d' : 'texture_depth_2d';

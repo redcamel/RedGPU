@@ -20,17 +20,17 @@ const MAX_UINT = 4503599627370496
  *                  or if the value is larger than the maximum value.
  */
 const validateUintRange = (value: number, min: number = 0, max: number = MAX_UINT): boolean => {
-    const passUint = isUint(value)
-    const passUintMin = isUint(min)
-    const passUintMax = isUint(max)
-    const errorStr = `is not Uint! / value : `
-    const rangeStr = `(check range : ${min}u ~ ${max}u)`
-    if (!passUint) consoleAndThrowError(`value ${errorStr}${value} / ${rangeStr}`)
-    if (!passUintMin) consoleAndThrowError(`min ${errorStr}${min} / ${rangeStr}`)
-    if (!passUintMax) consoleAndThrowError(`max ${errorStr}${max} / ${rangeStr}`)
-    if (min >= max) consoleAndThrowError(`maximum value is bigger than minimum value. / ${rangeStr}`)
-    if (min > value) consoleAndThrowError(`value is smaller than minimum value. / value : ${value} / ${rangeStr}`)
-    if (max < value) consoleAndThrowError(`value is bigger than maximum value. / value : ${value} / ${rangeStr}`)
-    return true
+	const passUint = isUint(value)
+	const passUintMin = isUint(min)
+	const passUintMax = isUint(max)
+	const errorStr = `is not Uint! / value : `
+	const rangeStr = `(check range : ${min}u ~ ${max}u)`
+	if (!passUint) consoleAndThrowError(`value ${errorStr}${value} / ${rangeStr}`)
+	if (!passUintMin) consoleAndThrowError(`min ${errorStr}${min} / ${rangeStr}`)
+	if (!passUintMax) consoleAndThrowError(`max ${errorStr}${max} / ${rangeStr}`)
+	if (min >= max) consoleAndThrowError(`maximum value is bigger than minimum value. / ${rangeStr}`)
+	if (min > value) consoleAndThrowError(`value is smaller than minimum value. / value : ${value} / ${rangeStr}`)
+	if (max < value) consoleAndThrowError(`value is bigger than maximum value. / value : ${value} / ${rangeStr}`)
+	return true
 }
 export default validateUintRange

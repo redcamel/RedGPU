@@ -10,6 +10,10 @@ class AntialiasingManager {
 	#fxaa_edgeThresholdMin: number = 0.0833
 	#changedMSAA: boolean = true
 
+	constructor(redGPUContext: RedGPUContext) {
+		this.#redGPUContext = redGPUContext;
+	}
+
 	get fxaa_subpix(): number {
 		return this.#fxaa_subpix;
 	}
@@ -57,12 +61,9 @@ class AntialiasingManager {
 	get changedMSAA(): boolean {
 		return this.#changedMSAA;
 	}
-	set changedMSAA(value) {
-		 this.#changedMSAA = value;
-	}
 
-	constructor(redGPUContext: RedGPUContext) {
-		this.#redGPUContext = redGPUContext;
+	set changedMSAA(value) {
+		this.#changedMSAA = value;
 	}
 }
 

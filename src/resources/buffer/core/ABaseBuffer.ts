@@ -7,20 +7,20 @@ import ManagedResourceBase from "../../ManagedResourceBase";
  * @extends ResourceBase
  */
 class ABaseBuffer extends ManagedResourceBase {
-    readonly #usage: GPUBufferUsageFlags
+	readonly #usage: GPUBufferUsageFlags
 
-    constructor(
-        redGPUContext: RedGPUContext,
-        managedStateKey: string,
-        usage: GPUBufferUsageFlags,
-    ) {
-        super(redGPUContext, managedStateKey)
-        this.#usage = usage
-    }
+	constructor(
+		redGPUContext: RedGPUContext,
+		managedStateKey: string,
+		usage: GPUBufferUsageFlags,
+	) {
+		super(redGPUContext, managedStateKey)
+		this.#usage = usage
+	}
 
-    get usage(): GPUBufferUsageFlags {
-        return this.#usage;
-    }
+	get usage(): GPUBufferUsageFlags {
+		return this.#usage;
+	}
 }
 
 export default ABaseBuffer

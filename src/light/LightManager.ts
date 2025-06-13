@@ -2,9 +2,9 @@ import {mat4, vec3} from "gl-matrix";
 import View3D from "../display/view/View3D";
 import consoleAndThrowError from "../utils/consoleAndThrowError";
 import AmbientLight from "./AmbientLight";
+import PassClustersLightHelper from "./clusterLight/PassClustersLightHelper";
 import DirectionalLight from "./DirectionalLight";
 import PointLight from "./PointLight";
-import PassClustersLightHelper from "./clusterLight/PassClustersLightHelper";
 import SpotLight from "./SpotLight";
 
 class LightManager {
@@ -15,7 +15,6 @@ class LightManager {
 	#spotLights: SpotLight[] = []
 	#ambientLight: AmbientLight = new AmbientLight()
 	#lightProjectionMatrix: mat4 = mat4.create()
-
 
 	get spotLights(): SpotLight[] {
 		return this.#spotLights;
@@ -69,7 +68,7 @@ class LightManager {
 
 	addPointLight(value: PointLight) {
 		if (!(value instanceof PointLight)) consoleAndThrowError('allow only PointLight instance')
-		const isOverLimit = this.#spotLights.length + this.#pointLights.length  > this.#limitClusterLightCount;
+		const isOverLimit = this.#spotLights.length + this.#pointLights.length > this.#limitClusterLightCount;
 		if (isOverLimit) {
 			consoleAndThrowError('Cannot add more cluster lights. The limit has been reached.');
 		}

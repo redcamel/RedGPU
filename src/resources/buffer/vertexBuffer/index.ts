@@ -4,6 +4,6 @@ import VertexBuffer from "./VertexBuffer";
 export * from './InterleavedStructElement'
 export * from './InterleavedStruct'
 export {
-    InterleavedStructElement,
-    VertexBuffer,
+	InterleavedStructElement,
+	VertexBuffer,
 }

@@ -8,10 +8,6 @@ class ViewRenderTextureManager {
 	#renderPath1ResultTexture: GPUTexture
 	#renderPath1ResultTextureView: GPUTextureView
 	#renderPath1ResultTextureDescriptor: GPUTextureDescriptor
-	get renderPath1ResultTextureDescriptor(): GPUTextureDescriptor {
-		return this.#renderPath1ResultTextureDescriptor;
-	}
-
 	#colorResolveTexture: GPUTexture
 	#depthTexture: GPUTexture
 	#colorTextureView: GPUTextureView
@@ -27,6 +23,10 @@ class ViewRenderTextureManager {
 		validateRedGPUContext(view.redGPUContext)
 		this.#redGPUContext = view.redGPUContext
 		this.#view = view
+	}
+
+	get renderPath1ResultTextureDescriptor(): GPUTextureDescriptor {
+		return this.#renderPath1ResultTextureDescriptor;
 	}
 
 	get colorTexture(): GPUTexture {
@@ -142,7 +142,7 @@ class ViewRenderTextureManager {
 						usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC
 					})
 					this.#colorResolveTexture = newResolveTexture
-					this.#colorResolveTextureView = newResolveTexture.createView({label:newResolveTexture.label})
+					this.#colorResolveTextureView = newResolveTexture.createView({label: newResolveTexture.label})
 				}
 			}
 		}

@@ -5,9 +5,9 @@ import BasicController from "./controller/BasicController";
 import ObitController from "./controller/ObitController";
 
 export {
-    PerspectiveCamera,
-    OrthographicCamera,
-    ObitController,
-    BasicController,
-    Camera2D
+	PerspectiveCamera,
+	OrthographicCamera,
+	ObitController,
+	BasicController,
+	Camera2D
 }
