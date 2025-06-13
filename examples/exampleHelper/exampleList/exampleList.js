@@ -350,8 +350,8 @@ const ExampleList = [
 						path: '3d/light/directionalLight',
 						thumb: '3d/light/directionalLight/thumb.png',
 						description: {
-							ko: `DirectionalLight example`,
-							en: `DirectionalLight example`
+							ko: ``,
+							en: ``
 						},
 					},
 					{
@@ -359,8 +359,17 @@ const ExampleList = [
 						path: '3d/light/pointLight',
 						thumb: '3d/light/pointLight/thumb.png',
 						description: {
-							ko: `PointLight example`,
-							en: `PointLight example`
+							ko: ``,
+							en: ``
+						},
+					},
+					{
+						name: 'SpotLight',
+						path: '3d/light/spotLight',
+						thumb: '3d/light/spotLight/thumb.png',
+						description: {
+							ko: ``,
+							en: ``
 						},
 					},
 					{
