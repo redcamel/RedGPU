@@ -50,43 +50,42 @@ struct SystemUniform {
 @group(0) @binding(8) var renderPath1ResultTexture: texture_2d<f32>;
 @group(0) @binding(9) var packedTextureSampler: sampler;
 
-const pointLight_indicesLength:u32 = u32(REDGPU_DEFINE_MAX_LIGHTS_PER_CLUSTERu * REDGPU_DEFINE_TOTAL_TILESu);
-const pointLight_tileCount = vec3<u32>(REDGPU_DEFINE_TILE_COUNT_Xu, REDGPU_DEFINE_TILE_COUNT_Yu, REDGPU_DEFINE_TILE_COUNT_Zu);
+const clusterLight_indicesLength:u32 = u32(REDGPU_DEFINE_MAX_LIGHTS_PER_CLUSTERu * REDGPU_DEFINE_TOTAL_TILESu);
+const clusterLight_tileCount = vec3<u32>(REDGPU_DEFINE_TILE_COUNT_Xu, REDGPU_DEFINE_TILE_COUNT_Yu, REDGPU_DEFINE_TILE_COUNT_Zu);
 
-struct PointLight_ClusterLights  {
+struct ClusterLights  {
     offset : u32,
     count : u32
 };
-struct PointLight_ClusterLightsGroup {
+struct ClusterLightsGroup {
     offset : atomic<u32>,
-    lights : array<PointLight_ClusterLights , REDGPU_DEFINE_TOTAL_TILES>,
-    indices : array<u32, pointLight_indicesLength>
+    lights : array<ClusterLights , REDGPU_DEFINE_TOTAL_TILES>,
+    indices : array<u32, clusterLight_indicesLength>
 };
-struct PointLight_ClusterCube {
+struct ClusterLight_ClusterCube {
     minAABB : vec4<f32>,
     maxAABB : vec4<f32>
   };
-struct PointLight_Clusters {
-    cubeList : array<PointLight_ClusterCube, REDGPU_DEFINE_TOTAL_TILES>
+struct ClusterLight_Clusters {
+    cubeList : array<ClusterLight_ClusterCube, REDGPU_DEFINE_TOTAL_TILES>
 };
 
 fn linearDepth(depthSample : f32) -> f32 {
     return systemUniforms.camera.farClipping*systemUniforms.camera.nearClipping / fma(depthSample, systemUniforms.camera.nearClipping-systemUniforms.camera.farClipping, systemUniforms.camera.farClipping);
 }
-fn getPointLightClusterIndex(fragCoord : vec4<f32>) -> u32 {
-    let tile = getPointLightTile(fragCoord);
+fn getClusterLightClusterIndex(fragCoord : vec4<f32>) -> u32 {
+    let tile = getClusterLightTile(fragCoord);
     return tile.x +
-           tile.y * pointLight_tileCount.x +
-           tile.z * pointLight_tileCount.x * pointLight_tileCount.y;
+           tile.y * clusterLight_tileCount.x +
+           tile.z * clusterLight_tileCount.x * clusterLight_tileCount.y;
 
 }
-fn getPointLightTile(fragCoord : vec4<f32>) -> vec3<u32> {
-    // TODO: scale and bias calculation can be moved outside the shader to save cycles.
-    let sliceScale = f32(pointLight_tileCount.z) / log2(systemUniforms.camera.farClipping / systemUniforms.camera.nearClipping);
-    let sliceBias = -(f32(pointLight_tileCount.z) * log2(systemUniforms.camera.nearClipping) / log2(systemUniforms.camera.farClipping / systemUniforms.camera.nearClipping));
+fn getClusterLightTile(fragCoord : vec4<f32>) -> vec3<u32> {
+    let sliceScale = f32(clusterLight_tileCount.z) / log2(systemUniforms.camera.farClipping / systemUniforms.camera.nearClipping);
+    let sliceBias = -(f32(clusterLight_tileCount.z) * log2(systemUniforms.camera.nearClipping) / log2(systemUniforms.camera.farClipping / systemUniforms.camera.nearClipping));
     let zTile = u32(max(log2(linearDepth(fragCoord.z)) * sliceScale + sliceBias, 0.0));
-    return vec3<u32>(u32(fragCoord.x / (systemUniforms.resolution.x / f32(pointLight_tileCount.x))),
-                     u32(fragCoord.y / (systemUniforms.resolution.y / f32(pointLight_tileCount.y))),
+    return vec3<u32>(u32(fragCoord.x / (systemUniforms.resolution.x / f32(clusterLight_tileCount.x))),
+                     u32(fragCoord.y / (systemUniforms.resolution.y / f32(clusterLight_tileCount.y))),
                      zTile);
 }
 
@@ -96,9 +95,9 @@ struct PointLight {
     isSpotLight:f32,    directionX:f32,    directionY:f32,    directionZ:f32,
     outerCutoff:f32,    innerCutoff:f32,
 };
-struct PointLightList {
+struct ClusterLightList {
     count:vec4<f32>,
     lights : array<PointLight>
 };
-@group(0) @binding(5) var<storage> pointLightList : PointLightList;
-@group(0) @binding(6) var<storage, read_write> pointLight_clusterLightGroup : PointLight_ClusterLightsGroup;
+@group(0) @binding(5) var<storage> pointLightList : ClusterLightList;
+@group(0) @binding(6) var<storage, read_write> clusterLightGroup : ClusterLightsGroup;

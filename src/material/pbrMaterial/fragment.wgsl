@@ -762,11 +762,11 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
 
     // ---------- 직접 조명 계산 - pointLight ----------
     {
-        let clusterIndex = getPointLightClusterIndex(inputData.position);
-        let lightOffset  = pointLight_clusterLightGroup.lights[clusterIndex].offset;
-        let lightCount:u32   = pointLight_clusterLightGroup.lights[clusterIndex].count;
+        let clusterIndex = getClusterLightClusterIndex(inputData.position);
+        let lightOffset  = clusterLightGroup.lights[clusterIndex].offset;
+        let lightCount:u32   = clusterLightGroup.lights[clusterIndex].count;
         for (var lightIndex = 0u; lightIndex < lightCount; lightIndex = lightIndex + 1u) {
-            let i = pointLight_clusterLightGroup.indices[lightOffset + lightIndex];
+            let i = clusterLightGroup.indices[lightOffset + lightIndex];
             let targetLight = pointLightList.lights[i];
             let u_pointLightPosition = targetLight.position;
             let u_pointLightRadius = targetLight.radius ;

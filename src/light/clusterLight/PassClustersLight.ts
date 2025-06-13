@@ -4,12 +4,12 @@ import View3D from "../../display/view/View3D";
 import ResourceManager from "../../resources/resourceManager/ResourceManager";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import validateRedGPUContext from "../../runtimeChecker/validateFunc/validateRedGPUContext";
-import PassLightClustersSource from "./PassPointLightClusters.wgsl";
-import PassPointLightClustersHelper from "./PassPointLightClustersHelper";
+import PassLightClustersSource from "./PassClustersLight.wgsl";
+import PassClustersLightHelper from "./PassClustersLightHelper";
 
 const emptyArray = new Uint32Array([0, 0, 0, 0]);
 
-class PassPointLightClusters {
+class PassClustersLight {
     #view: View3D
     #clusterLightBindGroup: GPUBindGroup
     #clusterLightPipeline: GPUComputePipeline
@@ -35,9 +35,9 @@ class PassPointLightClusters {
         if (systemUniformBindGroup) {
             const commandEncoder = gpuDevice.createCommandEncoder();
             const passEncoder = commandEncoder.beginComputePass({
-                label: 'PointLight cluster'
+                label: 'ClusterLight cluster'
             });
-            const DISPATCH_SIZE = PassPointLightClustersHelper.getDispatchSize();
+            const DISPATCH_SIZE = PassClustersLightHelper.getDispatchSize();
             this.#redGPUContext.gpuDevice.queue.writeBuffer(this.clusterLightsBuffer, 0, emptyArray);
             passEncoder.setPipeline(this.#clusterLightPipeline);
             passEncoder.setBindGroup(0, systemUniformBindGroup);
@@ -52,7 +52,7 @@ class PassPointLightClusters {
         const {gpuDevice, resourceManager} = this.#redGPUContext;
         const source = parseWGSL(PassLightClustersSource).shaderSource;
         this.#clusterLightsBuffer = gpuDevice.createBuffer({
-            size: PassPointLightClustersHelper.getPointLight_ClusterLightsBufferSize(),
+            size: PassClustersLightHelper.getClusterLightsBufferSize(),
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
         });
         const clusterLightBindGroupLayout = gpuDevice.createBindGroupLayout({
@@ -96,4 +96,4 @@ class PassPointLightClusters {
 }
 
 // Export the class as a default module
-export default PassPointLightClusters;
+export default PassClustersLight;

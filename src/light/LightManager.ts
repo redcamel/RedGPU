@@ -1,30 +1,21 @@
 import {mat4, vec3} from "gl-matrix";
-import {index} from "typedoc/dist/lib/output/themes/default/partials";
-import {members} from "typedoc/dist/lib/output/themes/default/partials/members";
-import scene from "../display/scene/Scene";
 import View3D from "../display/view/View3D";
-import directionalShadowManager from "../shadow/DirectionalShadowManager";
 import consoleAndThrowError from "../utils/consoleAndThrowError";
-import ambientLight from "./AmbientLight";
 import AmbientLight from "./AmbientLight";
 import DirectionalLight from "./DirectionalLight";
 import PointLight from "./PointLight";
-import PassPointLightClustersHelper from "./pointLightCluster/PassPointLightClustersHelper";
+import PassClustersLightHelper from "./clusterLight/PassClustersLightHelper";
 import SpotLight from "./SpotLight";
 
 class LightManager {
 	#limitDirectionalLightCount: number = 3
-	#limitPointLightCount: number = PassPointLightClustersHelper.MAX_POINT_LIGHTS
-	#limitSpotLightCount: number = 512
+	#limitClusterLightCount: number = PassClustersLightHelper.MAX_CLUSTER_LIGHTS
 	#directionalLights: DirectionalLight[] = []
 	#pointLights: PointLight[] = []
 	#spotLights: SpotLight[] = []
 	#ambientLight: AmbientLight = new AmbientLight()
 	#lightProjectionMatrix: mat4 = mat4.create()
 
-	get limitSpotLightCount(): number {
-		return this.#limitSpotLightCount;
-	}
 
 	get spotLights(): SpotLight[] {
 		return this.#spotLights;
@@ -34,8 +25,8 @@ class LightManager {
 		return this.#spotLights.length
 	}
 
-	get limitPointLightCount(): number {
-		return this.#limitPointLightCount;
+	get limitClusterLightCount(): number {
+		return this.#limitClusterLightCount;
 	}
 
 	get pointLights(): PointLight[] {
@@ -69,18 +60,18 @@ class LightManager {
 
 	addSpotLight(value: SpotLight) {
 		if (!(value instanceof SpotLight)) consoleAndThrowError('allow only SpotLight instance')
-		const isOverLimit = this.#spotLights.length > this.#limitSpotLightCount;
+		const isOverLimit = this.#spotLights.length + this.#pointLights.length > this.#limitClusterLightCount;
 		if (isOverLimit) {
-			consoleAndThrowError('Cannot add more spot lights. The limit has been reached.');
+			consoleAndThrowError('Cannot add more cluster lights. The limit has been reached.');
 		}
 		this.#spotLights.push(value)
 	}
 
 	addPointLight(value: PointLight) {
 		if (!(value instanceof PointLight)) consoleAndThrowError('allow only PointLight instance')
-		const isOverLimit = this.#pointLights.length > this.#limitPointLightCount;
+		const isOverLimit = this.#spotLights.length + this.#pointLights.length  > this.#limitClusterLightCount;
 		if (isOverLimit) {
-			consoleAndThrowError('Cannot add more point lights. The limit has been reached.');
+			consoleAndThrowError('Cannot add more cluster lights. The limit has been reached.');
 		}
 		this.#pointLights.push(value)
 	}

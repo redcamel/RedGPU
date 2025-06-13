@@ -3,9 +3,9 @@ import AController from "../../camera/core/AController";
 import RedGPUContext from "../../context/RedGPUContext";
 import GPU_ADDRESS_MODE from "../../gpuConst/GPU_ADDRESS_MODE";
 import GPU_COMPARE_FUNCTION from "../../gpuConst/GPU_COMPARE_FUNCTION";
-import PassPointLightClusters from "../../light/pointLightCluster/PassPointLightClusters";
-import PassPointLightClustersBound from "../../light/pointLightCluster/PassPointLightClustersBound";
-import PassPointLightClustersHelper from "../../light/pointLightCluster/PassPointLightClustersHelper";
+import PassClusterLightBound from "../../light/clusterLight/PassClusterLightBound";
+import PassClustersLight from "../../light/clusterLight/PassClustersLight";
+import PassClustersLightHelper from "../../light/clusterLight/PassClustersLightHelper";
 import PickingManager from "../../picking/PickingManager";
 import PostEffectManager from "../../postEffect/PostEffectManager";
 import RenderViewStateData from "../../renderer/RenderViewStateData";
@@ -54,10 +54,10 @@ class View3D extends ViewTransform {
     #shadowDepthSampler: GPUSampler
     #basicSampler: GPUSampler
     //
-    #clusterPointLightsBuffer: GPUBuffer
-    #clusterPointLightsBufferData: Float32Array
-    #passLightClusters: PassPointLightClusters
-    #passLightClustersBound: PassPointLightClustersBound
+    #clusterLightsBuffer: GPUBuffer
+    #clusterLightsBufferData: Float32Array
+    #passLightClusters: PassClustersLight
+    #passLightClustersBound: PassClusterLightBound
     #prevWidth: number = undefined
     #prevHeight: number = undefined
 
@@ -98,7 +98,7 @@ class View3D extends ViewTransform {
         return this.#systemUniform_Vertex_UniformBuffer;
     }
 
-    get passLightClustersBound(): PassPointLightClustersBound {
+    get passLightClustersBound(): PassClusterLightBound {
         return this.#passLightClustersBound;
     }
 
@@ -298,9 +298,9 @@ class View3D extends ViewTransform {
                 {
                     binding: 5,
                     resource: {
-                        buffer: this.#clusterPointLightsBuffer,
+                        buffer: this.#clusterLightsBuffer,
                         offset: 0,
-                        size: this.#clusterPointLightsBuffer.size
+                        size: this.#clusterLightsBuffer.size
                     }
                 },
                 {
@@ -333,15 +333,15 @@ class View3D extends ViewTransform {
         const systemUniform_Vertex_UniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength)
         this.#systemUniform_Vertex_UniformBuffer = new UniformBuffer(this.redGPUContext, systemUniform_Vertex_UniformData, '#systemUniform_Vertex_UniformBuffer');
         //
-        this.#clusterPointLightsBufferData = new Float32Array((16 * PassPointLightClustersHelper.MAX_POINT_LIGHTS) + 4)
-        this.#clusterPointLightsBuffer = this.redGPUContext.gpuDevice.createBuffer(
+        this.#clusterLightsBufferData = new Float32Array((16 * PassClustersLightHelper.MAX_CLUSTER_LIGHTS) + 4)
+        this.#clusterLightsBuffer = this.redGPUContext.gpuDevice.createBuffer(
             {
-                label: 'clusterPointLightsBuffer',
-                size: this.#clusterPointLightsBufferData.byteLength,
+                label: 'clusterLightsBuffer',
+                size: this.#clusterLightsBufferData.byteLength,
                 usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC
             }
         )
-        this.redGPUContext.gpuDevice.queue.writeBuffer(this.#clusterPointLightsBuffer, 0, this.#clusterPointLightsBufferData)
+        this.redGPUContext.gpuDevice.queue.writeBuffer(this.#clusterLightsBuffer, 0, this.#clusterLightsBufferData)
         //
         this.#shadowDepthSampler = new Sampler(this.redGPUContext, {
             addressModeU: GPU_ADDRESS_MODE.CLAMP_TO_EDGE,
@@ -352,13 +352,13 @@ class View3D extends ViewTransform {
         this.#basicSampler = new Sampler(this.redGPUContext).gpuSampler
     }
 
-    #updateClusters(calcPointLightCluster: boolean = false) {
-        if (!calcPointLightCluster) return
+    #updateClusters(calcClusterLight: boolean = false) {
+        if (!calcClusterLight) return
         const {redGPUContext, scene} = this
         // const dirtyPixelSize = this.#prevWidth == undefined || this.#prevHeight == undefined || this.#prevWidth !== this.pixelRectArray[2] || this.#prevHeight !== this.pixelRectArray[3]
         const dirtyPixelSize = true;
         if (!this.#passLightClustersBound) {
-            this.#passLightClustersBound = new PassPointLightClustersBound(redGPUContext, this)
+            this.#passLightClustersBound = new PassClusterLightBound(redGPUContext, this)
         }
         if (this.#passLightClusters && dirtyPixelSize) {
             // console.log('passLightClustersBound 재계산')
@@ -367,7 +367,7 @@ class View3D extends ViewTransform {
             this.#prevHeight = this.pixelRectArray[3]
         }
         if (!this.#passLightClusters) {
-            this.#passLightClusters = new PassPointLightClusters(redGPUContext, this)
+            this.#passLightClusters = new PassClustersLight(redGPUContext, this)
         }
         if (scene) {
             const {pointLights,spotLights} = scene.lightManager
@@ -381,7 +381,7 @@ class View3D extends ViewTransform {
                     //TODO - 프러스텀 컬링할꺼냐 말꺼냐
                     const stride = 16
                     const offset = 4 + stride * i
-                    this.#clusterPointLightsBufferData.set(
+                    this.#clusterLightsBufferData.set(
                         [
                             ...tLight.position, tLight.radius,
                             ...tLight.color.rgbNormal, tLight.intensity,0
@@ -399,10 +399,8 @@ class View3D extends ViewTransform {
                 // console.log('실행이되긴하하나2')
                 while (i--) {
                     const tLight = spotLights[i]
-                    //TODO - 프러스텀 컬링할꺼냐 말꺼냐
-
                     const offset = 4 + stride * i + prevOffset;
-                    this.#clusterPointLightsBufferData.set(
+                    this.#clusterLightsBufferData.set(
                       [
                           ...tLight.position, tLight.radius,
                           ...tLight.color.rgbNormal, tLight.intensity,1,...tLight.direction,tLight.outerCutoff,tLight.innerCutoff
@@ -413,11 +411,11 @@ class View3D extends ViewTransform {
 
 
             }
-            this.#clusterPointLightsBufferData.set(
+            this.#clusterLightsBufferData.set(
               [pointLightNum, spotLightNum, 0, 0],
               0,
             )
-            this.redGPUContext.gpuDevice.queue.writeBuffer(this.#clusterPointLightsBuffer, 0, this.#clusterPointLightsBufferData);
+            this.redGPUContext.gpuDevice.queue.writeBuffer(this.#clusterLightsBuffer, 0, this.#clusterLightsBufferData);
             this.#passLightClusters.render()
         }
     }

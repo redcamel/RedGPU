@@ -1,5 +1,5 @@
 #redgpu_include SYSTEM_UNIFORM;
-@group(1) @binding(0) var<storage, read_write> pointLight_Clusters : PointLight_Clusters;
+@group(1) @binding(0) var<storage, read_write> clusterLight_Clusters : ClusterLight_Clusters;
 
 fn lineIntersectionToZPlane(a : vec3<f32>, b : vec3<f32>, zDistance : f32) -> vec3<f32> {
     let normal = vec3<f32>(0.0, 0.0, 0.5);
@@ -26,13 +26,13 @@ const eyePos = vec3<f32>(0.0);
 fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
     // 전역 호출 ID에 기반한 현재 타일 인덱스를 계산합니다.
     let tileIndex = global_id.x +
-                    global_id.y * pointLight_tileCount.x +
-                    global_id.z * pointLight_tileCount.x * pointLight_tileCount.y;
+                    global_id.y * clusterLight_tileCount.x +
+                    global_id.z * clusterLight_tileCount.x * clusterLight_tileCount.y;
 
     // 타일의 크기를 계산합니다.
     let tileSize = vec2<f32>(
-              systemUniforms.resolution.x / f32(pointLight_tileCount.x),
-              systemUniforms.resolution.y / f32(pointLight_tileCount.y)
+              systemUniforms.resolution.x / f32(clusterLight_tileCount.x),
+              systemUniforms.resolution.y / f32(clusterLight_tileCount.y)
           );
 
     // 스크린 공간(Screen-Space)의 최대와 최소 좌표를 계산하고 View3D Space로 변환합니다.
@@ -49,8 +49,8 @@ fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
     let nearFarX = systemUniforms.camera.nearClipping;
     let nearFarY = systemUniforms.camera.farClipping;
 
-    let tileZ = f32(global_id.z) / f32(pointLight_tileCount.z);
-    let tileZ_plus_one = f32(global_id.z + 1u) / f32(pointLight_tileCount.z);
+    let tileZ = f32(global_id.z) / f32(clusterLight_tileCount.z);
+    let tileZ_plus_one = f32(global_id.z + 1u) / f32(clusterLight_tileCount.z);
 
     let tileNear = -nearFarX * pow(nearFarY / nearFarX, tileZ);
     let tileFar = -nearFarX * pow(nearFarY / nearFarX, tileZ_plus_one);
@@ -65,6 +65,6 @@ fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
     let minAABB = min(min(minPointNear, minPointFar), min(maxPointNear, maxPointFar));
     let maxAABB = max(max(minPointNear, minPointFar), max(maxPointNear, maxPointFar));
 
-    pointLight_Clusters.cubeList[tileIndex].minAABB = vec4<f32>(minAABB, 0.0);
-    pointLight_Clusters.cubeList[tileIndex].maxAABB = vec4<f32>(maxAABB, 0.0);
+    clusterLight_Clusters.cubeList[tileIndex].minAABB = vec4<f32>(minAABB, 0.0);
+    clusterLight_Clusters.cubeList[tileIndex].maxAABB = vec4<f32>(maxAABB, 0.0);
 }

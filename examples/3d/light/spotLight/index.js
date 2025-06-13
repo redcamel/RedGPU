@@ -16,11 +16,12 @@ RedGPU.init(
 		// Create a scene and add a view with the camera controller
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-    view.skybox = createSkybox(redGPUContext);
+		view.grid = true;
+		view.skybox = createSkybox(redGPUContext);
 		redGPUContext.addView(view);
 
-    const dLight = new RedGPU.Light.DirectionalLight();
-    scene.lightManager.addDirectionalLight(dLight);
+		const dLight = new RedGPU.Light.DirectionalLight();
+		scene.lightManager.addDirectionalLight(dLight);
 
 		// Add a SpotLight to the scene
 		const light = createSpotLight(scene);
@@ -47,23 +48,22 @@ RedGPU.init(
 	}
 );
 
-
 const createSkybox = (redGPUContext) => {
-  // Define texture paths for skybox
-  // 스카이박스 텍스처 경로 정의
-  const skyboxImagePaths = [
-    "../../../assets/skybox/px.jpg", // Positive X
-    "../../../assets/skybox/nx.jpg", // Negative X
-    "../../../assets/skybox/py.jpg", // Positive Y
-    "../../../assets/skybox/ny.jpg", // Negative Y
-    "../../../assets/skybox/pz.jpg", // Positive Z
-    "../../../assets/skybox/nz.jpg", // Negative Z
-  ];
+	// Define texture paths for skybox
+	// 스카이박스 텍스처 경로 정의
+	const skyboxImagePaths = [
+		"../../../assets/skybox/px.jpg", // Positive X
+		"../../../assets/skybox/nx.jpg", // Negative X
+		"../../../assets/skybox/py.jpg", // Positive Y
+		"../../../assets/skybox/ny.jpg", // Negative Y
+		"../../../assets/skybox/pz.jpg", // Positive Z
+		"../../../assets/skybox/nz.jpg", // Negative Z
+	];
 
-  const cubeTexture = new RedGPU.Resource.CubeTexture(redGPUContext, skyboxImagePaths);
+	const cubeTexture = new RedGPU.Resource.CubeTexture(redGPUContext, skyboxImagePaths);
 
-  const skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture);
-  return skybox;
+	const skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture);
+	return skybox;
 };
 const createSpotLight = (scene) => {
 	// Default position, intensity, and color for the point light
@@ -88,10 +88,11 @@ const createSampleMeshes = (redGPUContext, scene) => {
 		'../../../assets/UV_Grid_Sm.jpg'
 	);
 
-  const plane = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Plane(redGPUContext), new RedGPU.Material.PhongMaterial(redGPUContext, '#ff0000'))
-  plane.setScale(200)
-  plane.rotationX = 90
-  scene.addChild(plane)
+	const plane = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Plane(redGPUContext), new RedGPU.Material.PhongMaterial(redGPUContext, '#ff0000'))
+	plane.setScale(200)
+	plane.rotationX = 90
+	plane.y = -0.01
+	scene.addChild(plane)
 
 	const geometry = new RedGPU.Primitive.Sphere(redGPUContext, 2, 32, 32, 32);
 

@@ -163,12 +163,12 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     }
 
     // PointLight
-    let clusterIndex = getPointLightClusterIndex(inputData.position);
-    let lightOffset  = pointLight_clusterLightGroup.lights[clusterIndex].offset;
-    let lightCount:u32   = pointLight_clusterLightGroup.lights[clusterIndex].count;
+    let clusterIndex = getClusterLightClusterIndex(inputData.position);
+    let lightOffset  = clusterLightGroup.lights[clusterIndex].offset;
+    let lightCount:u32   = clusterLightGroup.lights[clusterIndex].count;
 
     for (var lightIndex = 0u; lightIndex < lightCount; lightIndex = lightIndex + 1u) {
-        let i = pointLight_clusterLightGroup.indices[lightOffset + lightIndex];
+        let i = clusterLightGroup.indices[lightOffset + lightIndex];
         let u_pointLightPosition = pointLightList.lights[i].position;
         let u_pointLightColor = pointLightList.lights[i].color;
         let u_pointLightIntensity = pointLightList.lights[i].intensity ;

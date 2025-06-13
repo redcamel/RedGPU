@@ -3,10 +3,10 @@ import View3D from "../../display/view/View3D";
 import ResourceManager from "../../resources/resourceManager/ResourceManager";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import validateRedGPUContext from "../../runtimeChecker/validateFunc/validateRedGPUContext";
-import PassLightClustersBoundSource from "./PassPointLightClustersBound.wgsl";
-import PassPointLightClustersHelper from "./PassPointLightClustersHelper";
+import PassLightClustersBoundSource from "./PassClusterLightBound.wgsl";
+import PassClustersLightHelper from "./PassClustersLightHelper";
 
-class PassPointLightClustersBound {
+class PassClusterLightBound {
     #view: View3D
     #clusterBoundBuffer: GPUBuffer
     #clusterBoundBindGroupLayout: GPUBindGroupLayout
@@ -33,7 +33,7 @@ class PassPointLightClustersBound {
             const passEncoder = commandEncoder.beginComputePass({
                 label: 'Bound cluster'
             });
-            const DISPATCH_SIZE = PassPointLightClustersHelper.getDispatchSize();
+            const DISPATCH_SIZE = PassClustersLightHelper.getDispatchSize();
             passEncoder.setPipeline(this.#clusterBoundPipeline);
             passEncoder.setBindGroup(0, sysUniformBindGroup);
             passEncoder.setBindGroup(1, this.#clusterBoundBindGroup);
@@ -47,7 +47,7 @@ class PassPointLightClustersBound {
         const {gpuDevice, resourceManager} = this.#redGPUContext;
         const source = parseWGSL(PassLightClustersBoundSource).shaderSource;
         this.#clusterBoundBuffer = gpuDevice.createBuffer({
-            size: PassPointLightClustersHelper.getTotalTileSize() * 32, // Cluster x, y, z size * 32 bytes per cluster. Why? It's to be verified.
+            size: PassClustersLightHelper.getTotalTileSize() * 32, // Cluster x, y, z size * 32 bytes per cluster. Why? It's to be verified.
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
         });
         this.#clusterBoundBindGroupLayout = gpuDevice.createBindGroupLayout({
@@ -90,4 +90,4 @@ class PassPointLightClustersBound {
     }
 }
 
-export default PassPointLightClustersBound;
+export default PassClusterLightBound;
