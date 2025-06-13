@@ -152,12 +152,14 @@ const renderTestPane = async (redGPUContext, scene) => {
 		);
 
 	const pane = new Pane();
-	pane.addBinding(scene.shadowManager, 'directionalLightShadowDepthTextureSize',{
+	const {shadowManager} = scene
+	const {directionalShadowManager} = shadowManager
+	pane.addBinding(directionalShadowManager, 'shadowDepthTextureSize',{
 		min:128,
 		max:2048,
 		step:1
 	}).on("change", (ev) => {
-		redGPUContext.viewList[0].scene.shadowManager.directionalLightShadowDepthTextureSize = ev.value
+		directionalShadowManager.shadowDepthTextureSize = ev.value
 	});
 	// pane.addBinding(scene.shadowManager, 'directionalLightShadowBias',{
 	// 	min:0,

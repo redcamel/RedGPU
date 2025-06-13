@@ -169,8 +169,8 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     // DirectionalLight
     let u_directionalLightCount = systemUniforms.directionalLightCount;
     let u_directionalLights = systemUniforms.directionalLights;
-    let u_directionalLightShadowDepthTextureSize = systemUniforms.directionalLightShadowDepthTextureSize;
-    let u_directionalLightShadowBias = systemUniforms.directionalLightShadowBias;
+    let u_shadowDepthTextureSize = systemUniforms.shadowDepthTextureSize;
+    let u_bias = systemUniforms.bias;
 
     let u_useIblTexture = systemUniforms.useIblTexture == 1u;
     // Shadow
@@ -485,8 +485,8 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
      visibility = calcDirectionalShadowVisibility(
                 directionalShadowMap,
                 directionalShadowMapSampler,
-                u_directionalLightShadowDepthTextureSize,
-                u_directionalLightShadowBias,
+                u_shadowDepthTextureSize,
+                u_bias,
                 inputData.shadowPos
             );
 

@@ -65,7 +65,8 @@ class Renderer {
         const {redGPUContext, camera, scene, pickingManager, pixelRectObject, axis, grid, debugViewRenderState} = view
         const {antialiasingManager} = redGPUContext
         const {useMSAA} = antialiasingManager
-        const {shadowManager,} = scene
+        const {shadowManager} = scene
+        const {directionalShadowManager} = shadowManager
         const {
             colorAttachment,
             depthStencilAttachment
@@ -80,11 +81,11 @@ class Renderer {
         const commandEncoder: GPUCommandEncoder = redGPUContext.gpuDevice.createCommandEncoder()
         view.debugViewRenderState.reset(null, time)
         if (pixelRectObject.width && pixelRectObject.height) {
-            if (shadowManager.directionalShadowDepthTextureView) {
+            if (directionalShadowManager.shadowDepthTextureView) {
                 const shadowPassDescriptor: GPURenderPassDescriptor = {
                     colorAttachments: [],
                     depthStencilAttachment: {
-                        view: shadowManager.directionalShadowDepthTextureView,
+                        view: directionalShadowManager.shadowDepthTextureView,
                         depthClearValue: 1.0,
                         depthLoadOp: GPU_LOAD_OP.CLEAR,
                         depthStoreOp: GPU_STORE_OP.STORE,
@@ -94,7 +95,7 @@ class Renderer {
                 this.#updateViewSystemUniforms(view, viewShadowRenderPassEncoder, true, false)
                 renderShadowLayer(view, viewShadowRenderPassEncoder)
                 viewShadowRenderPassEncoder.end()
-                shadowManager.resetCastingList()
+                directionalShadowManager.resetCastingList()
             }
             {
                 const viewRenderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass(renderPassDescriptor)
@@ -232,12 +233,13 @@ class Renderer {
         const structInfo = view.systemUniform_Vertex_StructInfo;
         const gpuBuffer = view.systemUniform_Vertex_UniformBuffer.gpuBuffer;
         const {shadowManager, lightManager} = scene
+        const {directionalShadowManager} = shadowManager
         const camera2DYn = rawCamera instanceof Camera2D;
         {
             if (shadowRender) {
                 // pixelRectObject 해당하는 크기로 뷰포트를 만들고짜른다.
-                const width = shadowManager.directionalLightShadowDepthTextureSize
-                const height = shadowManager.directionalLightShadowDepthTextureSize
+                const width = directionalShadowManager.shadowDepthTextureSize
+                const height = directionalShadowManager.shadowDepthTextureSize
                 viewRenderPassEncoder.setViewport(0, 0, width, height, 0, 1);
                 viewRenderPassEncoder.setScissorRect(0, 0, width, height);
             } else {
@@ -251,7 +253,7 @@ class Renderer {
             }
         }
         lightManager.updateViewSystemUniforms(view)
-        shadowManager.updateViewSystemUniforms(redGPUContext)
+        directionalShadowManager.updateViewSystemUniforms(redGPUContext)
         view.update(view, shadowRender, calcPointLightCluster,renderPath1ResultTexture)
         // 시스템 유니폼 업데이트
         viewRenderPassEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);

@@ -30,8 +30,8 @@ struct SystemUniform {
 	  directionalLightProjectionMatrix:mat4x4<f32>,
 	  directionalLightViewMatrix:mat4x4<f32>,
 	  //
-	  directionalLightShadowDepthTextureSize:u32,
-	  directionalLightShadowBias:f32,
+	  shadowDepthTextureSize:u32,
+	  bias:f32,
 	  //
 	  ambientLight:AmbientLight,
 

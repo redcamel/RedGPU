@@ -76,7 +76,8 @@ class InstancingMesh extends Mesh {
         const {view, currentRenderPassEncoder,} = debugViewRenderState;
         const {scene} = view
         const {shadowManager} = scene
-        const {castingList} = shadowManager
+        const {directionalShadowManager} = shadowManager
+        const {castingList} = directionalShadowManager
         const parent = this.parent
         let tempDirtyTransform = this.dirtyTransform
         if (tempDirtyTransform) {

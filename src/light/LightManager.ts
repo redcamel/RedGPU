@@ -81,14 +81,15 @@ class LightManager {
         const {systemUniform_Vertex_UniformBuffer} = view;
         const {members} = structInfo;
         const {lightManager, shadowManager} = scene
+        const {directionalShadowManager} = shadowManager
         systemUniform_Vertex_UniformBuffer.writeBuffers(
             [
                 [members.directionalLightCount, lightManager.directionalLightCount],
                 [members.directionalLightProjectionViewMatrix, this.#getDirectionalLightProjectionViewMatrix(view)],
                 [members.directionalLightProjectionMatrix, this.#getDirectionalLightProjectionMatrix(view)],
                 [members.directionalLightViewMatrix, this.#getMainDirectionalLightViewMatrix(view)],
-                [members.directionalLightShadowDepthTextureSize, shadowManager.directionalLightShadowDepthTextureSize],
-                [members.directionalLightShadowBias, shadowManager.directionalLightShadowBias],
+                [members.shadowDepthTextureSize, directionalShadowManager.shadowDepthTextureSize],
+                [members.bias, directionalShadowManager.bias],
                 //
             ]
         )
