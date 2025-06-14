@@ -1662,6 +1662,7 @@ const ExampleList = [
 					{
 						name: 'Basic Group2D',
 						path: '2d/group2D/basic',
+						thumb: '2d/group2D/basic/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -1726,6 +1727,7 @@ const ExampleList = [
 					{
 						name: 'Sprite2D',
 						path: '2d/mouseEvent/sprite2D',
+						thumb: '2d/mouseEvent/sprite2D/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -1734,6 +1736,7 @@ const ExampleList = [
 					{
 						name: 'SpriteSheet2D',
 						path: '2d/mouseEvent/spriteSheet2D',
+						thumb: '2d/mouseEvent/spriteSheet2D/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -1742,6 +1745,7 @@ const ExampleList = [
 					{
 						name: 'TextField2D',
 						path: '2d/mouseEvent/textField2D',
+						thumb: '2d/mouseEvent/textField2D/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
