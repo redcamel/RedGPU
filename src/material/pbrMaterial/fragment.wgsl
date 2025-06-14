@@ -1138,7 +1138,7 @@ fn calcLight(
     anisotropy:f32, anisotropicT:vec3<f32>, anisotropicB:vec3<f32>,
     clearcoatParameter:f32, clearcoatRoughnessParameter:f32, clearcoatNormal:vec3<f32>
 ) -> vec3<f32>{
-    let dLight = lightColor * lightIntensity * visibility;
+    let dLight = lightColor * lightIntensity ;
 
     let NdotL = max(dot(N, L), 0.04);
     let NdotV = max(dot(N, V), 0.04);
