@@ -20,8 +20,6 @@ RedGPU.init(
 		view.skybox = createSkybox(redGPUContext);
 		redGPUContext.addView(view);
 
-		const dLight = new RedGPU.Light.DirectionalLight();
-		scene.lightManager.addDirectionalLight(dLight);
 
 		// Add a SpotLight to the scene
 		const light = createSpotLight(scene);
@@ -91,8 +89,7 @@ const createSampleMeshes = (redGPUContext, scene) => {
 	const plane = new RedGPU.Display.Mesh(
 		redGPUContext,
 		new RedGPU.Primitive.Plane(redGPUContext),
-		material
-		// new RedGPU.Material.PhongMaterial(redGPUContext, '#ff0000')
+		new RedGPU.Material.PhongMaterial(redGPUContext, '#ff0000')
 	)
 	plane.setScale(200)
 	plane.rotationX = 90
@@ -155,15 +152,15 @@ const renderTestPaneWithLightControl = async (redGPUContext, light) => {
 		light.z = evt.value
 	});
 
-	lightFolder.addBinding(lightConfig, 'directionX', {min: -10, max: 10, step: 0.1}).on('change', (evt) => {
+	lightFolder.addBinding(lightConfig, 'directionX', {min: -1, max: 1, step: 0.1}).on('change', (evt) => {
 		light.directionX = evt.value
 	});
 
-	lightFolder.addBinding(lightConfig, 'directionY', {min: -10, max: 10, step: 0.1}).on('change', (evt) => {
+	lightFolder.addBinding(lightConfig, 'directionY', {min: -1, max: 1, step: 0.1}).on('change', (evt) => {
 		light.directionY = evt.value
 	});
 
-	lightFolder.addBinding(lightConfig, 'directionZ', {min: -10, max: 10, step: 0.1}).on('change', (evt) => {
+	lightFolder.addBinding(lightConfig, 'directionZ', {min: -1, max: 1, step: 0.1}).on('change', (evt) => {
 		light.directionZ = evt.value
 	});
 	lightFolder.addBinding(lightConfig, 'intensity', {min: 0, max: 5, step: 0.1}).on('change', (evt) => {
