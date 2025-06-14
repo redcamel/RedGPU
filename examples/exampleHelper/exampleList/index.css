@@ -172,7 +172,8 @@ html, body {
     width: 200px;
     max-width: 200px;
     line-height: 1;
-
+    border-radius: 8px;
+    overflow: hidden;
 }
 /* 모바일 화면 분기 처리 */
 @media screen and (max-width: 768px) {
@@ -193,25 +194,17 @@ html, body {
 }
 
 .example-name {
-    position: absolute;
-    left:0;
-    right:0;
-    bottom:0;
-    /*margin-bottom: 5px;*/
     font-size: 1.1em;
     z-index: 1;
-    border-radius: 0 0 8px 8px;
     display: flex;
     align-items: center;
     padding: 12px 12px;
-    border-top: 1px solid rgba(255, 255, 255, 0.16);
     background: #000 linear-gradient(to right, rgba(155, 155, 155, 0.1) 0%, rgba(0, 0, 0, 0.0) 100%);
     line-height: 1.4;
     word-break: keep-all;
 }
 
 .example-link {
-    display: block;
     text-decoration: none;
     color: rgb(221, 132, 80);
     transition: color 0.2s;
@@ -243,14 +236,12 @@ a:hover {
 a img {
     /*opacity: 0.75;*/
     /*transition: opacity 0.5s;*/
-    filter:grayscale(0.3);
+    /*filter:grayscale(0.3);*/
     transition: filter 0.26s ease-in-out;
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 a:hover img {
-    filter:grayscale(0);
+    /*filter:grayscale(0);*/
 }
 
 /*a div {*/

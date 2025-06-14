@@ -236,6 +236,7 @@ const ExampleList = [
 					{
 						name: 'SkyBox',
 						path: '3d/skybox/skyBox',
+						thumb: '3d/skybox/skybox/thumb.png',
 						description: {
 							ko: `SkyBox 샘플 예제입니다.`,
 							en: `This is a sample SkyBox example.`
@@ -298,6 +299,7 @@ const ExampleList = [
 					{
 						name: 'MaxAnisotropy',
 						path: '3d/texture/maxAnisotropy',
+						thumb: '3d/texture/maxAnisotropy/thumb.png',
 						description: {
 							ko: `텍스쳐의 Anisotropy 옵션을 확인할 수 있는 예제입니다.`,
 							en: `example showing the Anisotropy option for a texture.`
@@ -499,6 +501,7 @@ const ExampleList = [
 					{
 						name: 'DirectionalLight Shadow',
 						path: '3d/shadow/directionalShadow',
+						thumb: '3d/shadow/directionalShadow/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -550,6 +553,7 @@ const ExampleList = [
 					{
 						name: 'Convolution',
 						path: '3d/postEffect/convolution',
+						thumb: '3d/postEffect/convolution/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -558,6 +562,7 @@ const ExampleList = [
 					{
 						name: 'FilmGrain',
 						path: '3d/postEffect/filmGrain',
+						thumb: '3d/postEffect/filmGrain/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -566,6 +571,7 @@ const ExampleList = [
 					{
 						name: 'OldBloom',
 						path: '3d/postEffect/oldBloom',
+						thumb: '3d/postEffect/oldBloom/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -574,6 +580,7 @@ const ExampleList = [
 					{
 						name: 'Sharpen',
 						path: '3d/postEffect/sharpen',
+						thumb: '3d/postEffect/sharpen/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -585,6 +592,7 @@ const ExampleList = [
 							{
 								name: 'Grayscale',
 								path: '3d/postEffect/adjustments/grayscale',
+								thumb: '3d/postEffect/adjustments/grayscale/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -593,6 +601,7 @@ const ExampleList = [
 							{
 								name: 'Invert',
 								path: '3d/postEffect/adjustments/invert',
+								thumb: '3d/postEffect/adjustments/invert/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -601,6 +610,7 @@ const ExampleList = [
 							{
 								name: 'ColorBalance',
 								path: '3d/postEffect/adjustments/colorBalance',
+								thumb: '3d/postEffect/adjustments/colorBalance/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -609,6 +619,7 @@ const ExampleList = [
 							{
 								name: 'ColorTemperatureTint',
 								path: '3d/postEffect/adjustments/colorTemperatureTint',
+								thumb: '3d/postEffect/adjustments/colorTemperatureTint/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -618,6 +629,7 @@ const ExampleList = [
 							{
 								name: 'BrightnessContrast',
 								path: '3d/postEffect/adjustments/brightnessContrast',
+								thumb: '3d/postEffect/adjustments/brightnessContrast/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -626,6 +638,7 @@ const ExampleList = [
 							{
 								name: 'HueSaturation',
 								path: '3d/postEffect/adjustments/hueSaturation',
+								thumb: '3d/postEffect/adjustments/hueSaturation/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -634,6 +647,7 @@ const ExampleList = [
 							{
 								name: 'Threshold',
 								path: '3d/postEffect/adjustments/threshold',
+								thumb: '3d/postEffect/adjustments/threshold/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -642,6 +656,7 @@ const ExampleList = [
 							{
 								name: 'Vibrance',
 								path: '3d/postEffect/adjustments/vibrance',
+								thumb: '3d/postEffect/adjustments/vibrance/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -656,6 +671,7 @@ const ExampleList = [
 							{
 								name: 'Blur',
 								path: '3d/postEffect/blur/blur',
+								thumb: '3d/postEffect/blur/blur/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -664,6 +680,7 @@ const ExampleList = [
 							{
 								name: 'BlurX',
 								path: '3d/postEffect/blur/blurX',
+								thumb: '3d/postEffect/blur/blurX/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -672,6 +689,7 @@ const ExampleList = [
 							{
 								name: 'BlurY',
 								path: '3d/postEffect/blur/blurY',
+								thumb: '3d/postEffect/blur/blurY/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -680,6 +698,7 @@ const ExampleList = [
 							{
 								name: 'DirectionalBlur',
 								path: '3d/postEffect/blur/DirectionalBlur',
+								thumb: '3d/postEffect/blur/DirectionalBlur/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -688,6 +707,7 @@ const ExampleList = [
 							{
 								name: 'GaussianBlur',
 								path: '3d/postEffect/blur/gaussianBlur',
+								thumb: '3d/postEffect/blur/gaussianBlur/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -696,6 +716,7 @@ const ExampleList = [
 							{
 								name: 'RadialBlur',
 								path: '3d/postEffect/blur/radialBlur',
+								thumb: '3d/postEffect/blur/radialBlur/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -704,6 +725,7 @@ const ExampleList = [
 							{
 								name: 'ZoomBlur',
 								path: '3d/postEffect/blur/zoomBlur',
+								thumb: '3d/postEffect/blur/zoomBlur/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -717,6 +739,7 @@ const ExampleList = [
 							{
 								name: 'LensDistortion',
 								path: '3d/postEffect/lens/lensDistortion',
+								thumb: '3d/postEffect/lens/lensDistortion/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -725,6 +748,7 @@ const ExampleList = [
 							{
 								name: 'ChromaticAberration',
 								path: '3d/postEffect/lens/chromaticAberration',
+								thumb: '3d/postEffect/lens/chromaticAberration/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -733,6 +757,7 @@ const ExampleList = [
 							{
 								name: 'DepthOfField',
 								path: '3d/postEffect/lens/dof',
+								thumb: '3d/postEffect/lens/dof/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -741,6 +766,7 @@ const ExampleList = [
 							{
 								name: 'Vignetting',
 								path: '3d/postEffect/lens/vignetting',
+								thumb: '3d/postEffect/lens/vignetting/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -762,7 +788,7 @@ const ExampleList = [
 					{
 						name: 'TextureEncodingTest',
 						path: 'gltf/basic/textureEncodingTest',
-						thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/TextureEncodingTest/screenshot/screenshot-x150.png?raw=true',
+						thumb: 'gltf/basic/textureEncodingTest/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -771,7 +797,7 @@ const ExampleList = [
 					{
 						name: 'TextureLinear InterpolationTest',
 						path: 'gltf/basic/textureLinearInterpolationTest',
-						thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/TextureLinearInterpolationTest/screenshot/screenshot-x150.png?raw=true',
+						thumb: 'gltf/basic/textureLinearInterpolationTest/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -780,7 +806,7 @@ const ExampleList = [
 					{
 						name: 'VertexColorTest',
 						path: 'gltf/basic/vertexColorTest',
-						thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/VertexColorTest/screenshot/screenshot-x150.png?raw=true',
+						thumb: 'gltf/basic/vertexColorTest/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -789,25 +815,25 @@ const ExampleList = [
 					{
 						name: 'BoxVertexColors',
 						path: 'gltf/basic/boxVertexColors',
-						thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/BoxVertexColors/screenshot/screenshot-x150.png?raw=true',
+						thumb: 'gltf/basic/boxVertexColors/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
 						},
 					},
-					// {
-					//     name: 'OrientationTest',
-					//     path: 'gltf/basic/orientationTest',
-					//     thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/OrientationTest/screenshot/screenshot-x150.png?raw=true',
-					//     description: {
-					//         ko: ``,
-					//         en: ``
-					//     },
-					// },
+					{
+					    name: 'OrientationTest',
+					    path: 'gltf/basic/orientationTest',
+						thumb: 'gltf/basic/orientationTest/thumb.png',
+					    description: {
+					        ko: ``,
+					        en: ``
+					    },
+					},
 					{
 						name: 'TextureCoordinateTest',
 						path: 'gltf/basic/textureCoordinateTest',
-						thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/TextureCoordinateTest/screenshot/screenshot-x150.png?raw=true',
+						thumb: 'gltf/basic/textureCoordinateTest/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -816,7 +842,7 @@ const ExampleList = [
 					{
 						name: 'AlphaBlendModeTest',
 						path: 'gltf/basic/alphaBlendModeTest',
-						thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/AlphaBlendModeTest/screenshot/screenshot-x150.png?raw=true',
+						thumb: 'gltf/basic/alphaBlendModeTest/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -825,7 +851,7 @@ const ExampleList = [
 					{
 						name: 'TextureSettingsTest',
 						path: 'gltf/basic/textureSettingsTest',
-						thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/TextureSettingsTest/screenshot/screenshot-x150.png?raw=true',
+						thumb: 'gltf/basic/textureSettingsTest/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -834,7 +860,7 @@ const ExampleList = [
 					{
 						name: 'MultiUVTest',
 						path: 'gltf/basic/multiUVTest',
-						thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/MultiUVTest/screenshot/screenshot-x150.jpg?raw=true',
+						thumb: 'gltf/basic/textureEncodingTest/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -844,7 +870,7 @@ const ExampleList = [
 					{
 						name: 'MetalRoughSpheres',
 						path: 'gltf/basic/metalRoughSpheres',
-						thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/MetalRoughSpheres/screenshot/screenshot-x150.png?raw=true',
+						thumb: 'gltf/basic/metalRoughSpheres/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -853,7 +879,7 @@ const ExampleList = [
 					{
 						name: 'MetalRoughSpheresNoTextures',
 						path: 'gltf/basic/metalRoughSpheresNoTextures',
-						thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/MetalRoughSpheresNoTextures/screenshot/screenshot-x150.png?raw=true',
+						thumb: 'gltf/basic/metalRoughSpheresNoTextures/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -862,7 +888,7 @@ const ExampleList = [
 					{
 						name: 'NormalTangentTest',
 						path: 'gltf/basic/normalTangentTest',
-						thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/NormalTangentTest/screenshot/screenshot-x150.png?raw=true',
+						thumb: 'gltf/basic/normalTangentTest/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -871,7 +897,7 @@ const ExampleList = [
 					{
 						name: 'NormalTangentMirrorTest',
 						path: 'gltf/basic/normalTangentMirrorTest',
-						thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/NormalTangentMirrorTest/screenshot/screenshot-x150.png?raw=true',
+						thumb: 'gltf/basic/normalTangentMirrorTest/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -880,7 +906,7 @@ const ExampleList = [
 					{
 						name: 'NegativeScaleTest',
 						path: 'gltf/basic/negativeScaleTest',
-						thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/NegativeScaleTest/screenshot/screenshot.jpg?raw=true',
+						thumb: 'gltf/basic/negativeScaleTest/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -890,7 +916,7 @@ const ExampleList = [
 					{
 						name: 'EnvironmentTest',
 						path: 'gltf/basic/environmentTest',
-						thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/EnvironmentTest/screenshot/screenshot-x150.jpg?raw=true',
+						thumb: 'gltf/basic/environmentTest/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -904,7 +930,7 @@ const ExampleList = [
 					{
 						name: 'CompareBaseColor',
 						path: 'gltf/basic/compareBaseColor',
-						thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/CompareBaseColor/screenshot/screenshot.jpg?raw=true',
+						thumb: 'gltf/basic/compareBaseColor/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -912,7 +938,7 @@ const ExampleList = [
 					}, {
 						name: 'CompareAlphaCoverage',
 						path: 'gltf/basic/compareAlphaCoverage',
-						thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/CompareAlphaCoverage/screenshot/screenshot.jpg?raw=true',
+						thumb: 'gltf/basic/compareAlphaCoverage/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -921,7 +947,7 @@ const ExampleList = [
 					{
 						name: 'CompareMetallic',
 						path: 'gltf/basic/compareMetallic',
-						thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/CompareMetallic/screenshot/screenshot.jpg?raw=true',
+						thumb: 'gltf/basic/compareMetallic/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -930,7 +956,7 @@ const ExampleList = [
 					{
 						name: 'CompareNormal',
 						path: 'gltf/basic/compareNormal',
-						thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/CompareNormal/screenshot/screenshot.jpg?raw=true',
+						thumb: 'gltf/basic/compareNormal/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -939,7 +965,7 @@ const ExampleList = [
 					{
 						name: 'CompareRoughness',
 						path: 'gltf/basic/compareRoughness',
-						thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/CompareRoughness/screenshot/screenshot.jpg?raw=true',
+						thumb: 'gltf/basic/compareRoughness/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -948,7 +974,7 @@ const ExampleList = [
 					{
 						name: 'CompareAmbientOcclusion',
 						path: 'gltf/basic/compareAmbientOcclusion',
-						thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/CompareAmbientOcclusion/screenshot/screenshot.jpg?raw=true',
+						thumb: 'gltf/basic/compareAmbientOcclusion/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -962,12 +988,7 @@ const ExampleList = [
 					{
 						name: 'Basic Animations',
 						path: 'gltf/animation/basicAnimations',
-						thumb: [
-							'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/AnimatedCube/screenshot/screenshot.gif?raw=true',
-							'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/AnimatedMorphCube/screenshot/screenshot.gif?raw=true',
-							'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/AnimatedTriangle/screenshot/screenshot.gif?raw=true',
-							'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/BoxAnimated/screenshot/screenshot.gif?raw=true'
-						],
+						thumb: 'gltf/animation/basicAnimations/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -976,7 +997,7 @@ const ExampleList = [
 					{
 						name: 'SimpleSkin',
 						path: 'gltf/animation/simpleSkin',
-						thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/SimpleSkin/screenshot/screenshot.gif?raw=true',
+						thumb: 'gltf/animation/simpleSkin/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -985,7 +1006,7 @@ const ExampleList = [
 					{
 						name: 'SimpleMorph',
 						path: 'gltf/animation/simpleMorph',
-						thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/SimpleMorph/screenshot/screenshot-x150.png?raw=true',
+						thumb: 'gltf/animation/simpleMorph/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -994,7 +1015,7 @@ const ExampleList = [
 					{
 						name: 'RiggedSimple',
 						path: 'gltf/animation/riggedSimple',
-						thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/RiggedSimple/screenshot/screenshot.gif?raw=true',
+						thumb: 'gltf/animation/riggedSimple/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -1003,7 +1024,7 @@ const ExampleList = [
 					{
 						name: 'RiggedFigure',
 						path: 'gltf/animation/riggedFigure',
-						thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/RiggedFigure/screenshot/screenshot.gif?raw=true',
+						thumb: 'gltf/animation/riggedFigure/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -1012,7 +1033,7 @@ const ExampleList = [
 					{
 						name: 'InterpolationTest',
 						path: 'gltf/animation/interpolationTest',
-						thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/InterpolationTest/screenshot/screenshot.gif?raw=true',
+						thumb: 'gltf/animation/interpolationTest/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -1021,10 +1042,7 @@ const ExampleList = [
 					{
 						name: 'CesiumMan & MilkTruck',
 						path: 'gltf/animation/cesiumMan',
-						thumb: [
-							'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/CesiumMan/screenshot/screenshot.gif?raw=true',
-							'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/CesiumMilkTruck/screenshot/screenshot.gif?raw=true'
-						],
+						thumb: 'gltf/animation/cesiumMan/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -1034,7 +1052,7 @@ const ExampleList = [
 					{
 						name: 'BrainStem',
 						path: 'gltf/animation/brainStem',
-						thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/BrainStem/screenshot/screenshot.gif?raw=true',
+						thumb: 'gltf/animation/brainStem/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -1043,7 +1061,7 @@ const ExampleList = [
 					{
 						name: 'MorphStressTest',
 						path: 'gltf/animation/morphStressTest',
-						thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/MorphStressTest/screenshot/screenshot-x150.jpg?raw=true',
+						thumb: 'gltf/animation/morphStressTest/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -1052,7 +1070,7 @@ const ExampleList = [
 					{
 						name: 'RecursiveSkeletons',
 						path: 'gltf/animation/recursiveSkeletons',
-						thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/RecursiveSkeletons/screenshot/screenshot-x150.jpg?raw=true',
+						thumb: 'gltf/animation/recursiveSkeletons/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -1067,7 +1085,7 @@ const ExampleList = [
 					{
 						name: 'corset',
 						path: 'gltf/models/corset',
-						thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/Corset/screenshot/screenshot-x150.jpg?raw=true',
+						thumb: 'gltf/models/corset/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -1076,12 +1094,7 @@ const ExampleList = [
 					{
 						name: 'Helmets',
 						path: 'gltf/models/helmets',
-						thumb: [
-							'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/DamagedHelmet/screenshot/screenshot-x150.png?raw=true',
-							'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/FlightHelmet/screenshot/screenshot-x150.jpg?raw=true',
-							'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/SciFiHelmet/screenshot/screenshot-x150.jpg?raw=true',
-							'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/Suzanne/screenshot/screenshot-x150.jpg?raw=true',
-						],
+						thumb: 'gltf/models/helmets/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -1090,7 +1103,7 @@ const ExampleList = [
 					{
 						name: 'Sponza',
 						path: 'gltf/models/sponza',
-						thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/Sponza/screenshot/screenshot-x150.jpg?raw=true',
+						thumb: 'gltf/models/sponza/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -1099,7 +1112,7 @@ const ExampleList = [
 					{
 						name: 'Tokyo',
 						path: 'gltf/models/tokyo',
-						thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/Sponza/screenshot/screenshot-x150.jpg?raw=true',
+						thumb: 'gltf/models/tokyo/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -1116,7 +1129,7 @@ const ExampleList = [
 							{
 								name: 'CompareAnisotropy',
 								path: 'gltf/gltfExtensions/anisotropy/compareAnisotropy',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/CompareAnisotropy/screenshot/screenshot.jpg?raw=true',
+								thumb: 'gltf/gltfExtensions/anisotropy/compareAnisotropy/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1125,7 +1138,7 @@ const ExampleList = [
 							{
 								name: 'AnisotropyDiscTest',
 								path: 'gltf/gltfExtensions/anisotropy/anisotropyDiscTest',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/AnisotropyDiscTest/screenshot/screenshot.jpg?raw=true',
+								thumb: 'gltf/gltfExtensions/anisotropy/anisotropyDiscTest/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1134,7 +1147,7 @@ const ExampleList = [
 							{
 								name: 'AnisotropyRotationTest',
 								path: 'gltf/gltfExtensions/anisotropy/anisotropyRotationTest',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/AnisotropyRotationTest/screenshot/screenshot.png?raw=true',
+								thumb: 'gltf/gltfExtensions/anisotropy/anisotropyRotationTest/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1143,7 +1156,7 @@ const ExampleList = [
 							{
 								name: 'AnisotropyStrengthTest',
 								path: 'gltf/gltfExtensions/anisotropy/anisotropyStrengthTest',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/AnisotropyStrengthTest/screenshot/screenshot.png?raw=true',
+								thumb: 'gltf/gltfExtensions/anisotropy/anisotropyStrengthTest/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1152,7 +1165,7 @@ const ExampleList = [
 							{
 								name: 'AnisotropyBarnLamp',
 								path: 'gltf/gltfExtensions/anisotropy/anisotropyBarnLamp',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/AnisotropyBarnLamp/screenshot/screenshot.jpg?raw=true',
+								thumb: 'gltf/gltfExtensions/anisotropy/anisotropyBarnLamp/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1166,7 +1179,7 @@ const ExampleList = [
 							{
 								name: 'CompareClearcoat',
 								path: 'gltf/gltfExtensions/clearcoat/compareClearcoat',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/CompareClearcoat/screenshot/screenshot.jpg?raw=true',
+								thumb: 'gltf/gltfExtensions/clearcoat/compareClearcoat/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1175,7 +1188,7 @@ const ExampleList = [
 							{
 								name: 'ClearCoatTest',
 								path: 'gltf/gltfExtensions/clearcoat/clearCoatTest',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/ClearCoatTest/screenshot/screenshot.jpg?raw=true',
+								thumb: 'gltf/gltfExtensions/clearcoat/clearCoatTest/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1184,7 +1197,7 @@ const ExampleList = [
 							{
 								name: 'ClearcoatWicker',
 								path: 'gltf/gltfExtensions/clearcoat/clearcoatWicker',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/ClearcoatWicker/screenshot/screenshot.jpg?raw=true',
+								thumb: 'gltf/gltfExtensions/clearcoat/clearcoatWicker/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1193,7 +1206,7 @@ const ExampleList = [
 							{
 								name: 'ClearCoatCarPaint',
 								path: 'gltf/gltfExtensions/clearcoat/clearCoatCarPaint',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/ClearCoatCarPaint/screenshot/screenshot.jpg?raw=true',
+								thumb: 'gltf/gltfExtensions/clearcoat/clearCoatCarPaint/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1208,7 +1221,7 @@ const ExampleList = [
 							{
 								name: 'CompareDispersion',
 								path: 'gltf/gltfExtensions/dispersion/compareDispersion',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/CompareDispersion/screenshot/screenshot.jpg?raw=true',
+								thumb: 'gltf/gltfExtensions/dispersion/compareDispersion/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1217,7 +1230,7 @@ const ExampleList = [
 							{
 								name: 'DispersionTest',
 								path: 'gltf/gltfExtensions/dispersion/dispersionTest',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/DispersionTest/screenshot/screenshot.png?raw=true',
+								thumb: 'gltf/gltfExtensions/dispersion/dispersionTest/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1226,7 +1239,7 @@ const ExampleList = [
 							{
 								name: 'DragonDispersion',
 								path: 'gltf/gltfExtensions/dispersion/dragonDispersion',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/DragonDispersion/screenshot/screenshot.jpg?raw=true',
+								thumb: 'gltf/gltfExtensions/dispersion/dragonDispersion/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1240,7 +1253,7 @@ const ExampleList = [
 							{
 								name: 'CompareEmissiveStrength',
 								path: 'gltf/gltfExtensions/emissiveStrength/compareEmissiveStrength',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/CompareEmissiveStrength/screenshot/screenshot.jpg?raw=true',
+								thumb: 'gltf/gltfExtensions/emissiveStrength/compareEmissiveStrength/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1249,7 +1262,7 @@ const ExampleList = [
 							{
 								name: 'EmissiveStrengthTest',
 								path: 'gltf/gltfExtensions/emissiveStrength/emissiveStrengthTest',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/EmissiveStrengthTest/screenshot/screenshot.jpg?raw=true',
+								thumb: 'gltf/gltfExtensions/emissiveStrength/emissiveStrengthTest/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1263,7 +1276,7 @@ const ExampleList = [
 							{
 								name: 'CompareSheen',
 								path: 'gltf/gltfExtensions/sheen/compareSheen',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/CompareSheen/screenshot/screenshot.jpg?raw=true',
+								thumb: 'gltf/gltfExtensions/sheen/compareSheen/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1272,7 +1285,7 @@ const ExampleList = [
 							{
 								name: 'SheenTestGrid',
 								path: 'gltf/gltfExtensions/sheen/sheenTestGrid',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/SheenTestGrid/screenshot/screenshot.jpg?raw=true',
+								thumb: 'gltf/gltfExtensions/sheen/sheenTestGrid/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1281,7 +1294,7 @@ const ExampleList = [
 							{
 								name: 'SheenCloth',
 								path: 'gltf/gltfExtensions/sheen/sheenCloth',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/SheenCloth/screenshot/screenshot.jpg?raw=true',
+								thumb: 'gltf/gltfExtensions/sheen/sheenCloth/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1290,7 +1303,7 @@ const ExampleList = [
 							{
 								name: 'SheenChair',
 								path: 'gltf/gltfExtensions/sheen/sheenChair',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/SheenChair/screenshot/screenshot.jpg?raw=true',
+								thumb: 'gltf/gltfExtensions/sheen/sheenChair/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1299,7 +1312,7 @@ const ExampleList = [
 							{
 								name: 'GlamVelvetSofa',
 								path: 'gltf/gltfExtensions/sheen/glamVelvetSofa',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/GlamVelvetSofa/screenshot/screenshot.jpg?raw=true',
+								thumb: 'gltf/gltfExtensions/sheen/glamVelvetSofa/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1308,7 +1321,7 @@ const ExampleList = [
 							{
 								name: 'ChairDamaskPurplegold',
 								path: 'gltf/gltfExtensions/sheen/chairDamaskPurplegold',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/ChairDamaskPurplegold/screenshot/screenshot.jpg?raw=true',
+								thumb: 'gltf/gltfExtensions/sheen/chairDamaskPurplegold/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1323,7 +1336,7 @@ const ExampleList = [
 							{
 								name: 'CompareSpecular',
 								path: 'gltf/gltfExtensions/specular/compareSpecular',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/CompareSpecular/screenshot/screenshot.jpg?raw=true',
+								thumb: 'gltf/gltfExtensions/specular/compareSpecular/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1332,7 +1345,7 @@ const ExampleList = [
 							{
 								name: 'SpecularTest',
 								path: 'gltf/gltfExtensions/specular/specularTest',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/SpecularTest/screenshot/screenshot.jpg?raw=true',
+								thumb: 'gltf/gltfExtensions/specular/specularTest/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1341,7 +1354,7 @@ const ExampleList = [
 							{
 								name: 'SpecularSilkPouf',
 								path: 'gltf/gltfExtensions/specular/specularSilkPouf',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/SpecularSilkPouf/screenshot/screenshot.jpg?raw=true',
+								thumb: 'gltf/gltfExtensions/specular/specularSilkPouf/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1356,7 +1369,7 @@ const ExampleList = [
 							{
 								name: 'UnlitTest',
 								path: 'gltf/gltfExtensions/unlit/unlitTest',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/UnlitTest/screenshot/screenshot-x150.png?raw=true',
+								thumb: 'gltf/gltfExtensions/unlit/unlitTest/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1370,7 +1383,7 @@ const ExampleList = [
 							{
 								name: 'TextureTransformTest',
 								path: 'gltf/gltfExtensions/textureTransform/textureTransformTest',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/TextureTransformTest/screenshot/screenshot-x150.jpg?raw=true',
+								thumb: 'gltf/gltfExtensions/textureTransform/textureTransformTest/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1379,7 +1392,7 @@ const ExampleList = [
 							{
 								name: 'TextureTransformMultiTest',
 								path: 'gltf/gltfExtensions/textureTransform/textureTransformMultiTest',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/TextureTransformMultiTest/screenshot/screenshot-x150.jpg?raw=true',
+								thumb: 'gltf/gltfExtensions/textureTransform/textureTransformMultiTest/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1393,7 +1406,7 @@ const ExampleList = [
 							{
 								name: 'CompareTransmission',
 								path: 'gltf/gltfExtensions/transmission/compareTransmission',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/CompareTransmission/screenshot/screenshot.jpg?raw=true',
+								thumb: 'gltf/gltfExtensions/transmission/compareTransmission/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1402,7 +1415,7 @@ const ExampleList = [
 							{
 								name: 'TransmissionTest',
 								path: 'gltf/gltfExtensions/transmission/transmissionTest',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/TransmissionTest/screenshot/screenshot-x150.jpg?raw=true',
+								thumb: 'gltf/gltfExtensions/transmission/transmissionTest/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1411,7 +1424,7 @@ const ExampleList = [
 							{
 								name: 'TransmissionRoughnessTest',
 								path: 'gltf/gltfExtensions/transmission/transmissionRoughnessTest',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/TransmissionRoughnessTest/screenshot/screenshot-x150.jpg?raw=true',
+								thumb: 'gltf/gltfExtensions/transmission/transmissionRoughnessTest/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1420,7 +1433,7 @@ const ExampleList = [
 							{
 								name: 'ChronographWatch',
 								path: 'gltf/gltfExtensions/transmission/chronographWatch',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/ChronographWatch/screenshot/screenshot.jpg?raw=true',
+								thumb: 'gltf/gltfExtensions/transmission/chronographWatch/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1429,7 +1442,7 @@ const ExampleList = [
 							{
 								name: 'MosquitoInAmber',
 								path: 'gltf/gltfExtensions/transmission/mosquitoInAmber',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/MosquitoInAmber/screenshot/screenshot-x150.jpg?raw=true',
+								thumb: 'gltf/gltfExtensions/transmission/mosquitoInAmber/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1438,7 +1451,7 @@ const ExampleList = [
 							{
 								name: 'CommercialRefrigerator',
 								path: 'gltf/gltfExtensions/transmission/commercialRefrigerator',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/CommercialRefrigerator/screenshot/screenshot.jpg?raw=true',
+								thumb: 'gltf/gltfExtensions/transmission/commercialRefrigerator/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1452,7 +1465,7 @@ const ExampleList = [
 							{
 								name: 'CompareIor',
 								path: 'gltf/gltfExtensions/volume/compareIor',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/CompareIor/screenshot/screenshot.jpg?raw=true',
+								thumb: 'gltf/gltfExtensions/volume/compareIor/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1461,7 +1474,7 @@ const ExampleList = [
 							{
 								name: 'IORTestGrid',
 								path: 'gltf/gltfExtensions/volume/IORTestGrid',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/IORTestGrid/screenshot/screenshot.jpg?raw=true',
+								thumb: 'gltf/gltfExtensions/volume/IORTestGrid/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1470,7 +1483,7 @@ const ExampleList = [
 							{
 								name: 'CompareVolume',
 								path: 'gltf/gltfExtensions/volume/compareVolume',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/CompareVolume/screenshot/screenshot.jpg?raw=true',
+								thumb: 'gltf/gltfExtensions/volume/compareVolume/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1479,7 +1492,7 @@ const ExampleList = [
 							{
 								name: 'TransmissionThinwallTestGrid',
 								path: 'gltf/gltfExtensions/volume/transmissionThinwallTestGrid',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/TransmissionThinwallTestGrid/screenshot/screenshot.jpg?raw=true',
+								thumb: 'gltf/gltfExtensions/volume/transmissionThinwallTestGrid/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1488,7 +1501,7 @@ const ExampleList = [
 							{
 								name: 'AttenuationTest',
 								path: 'gltf/gltfExtensions/volume/attenuationTest',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/AttenuationTest/screenshot/screenshot.jpg?raw=true',
+								thumb: 'gltf/gltfExtensions/volume/attenuationTest/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1497,7 +1510,7 @@ const ExampleList = [
 							{
 								name: 'GlassVaseFlowers',
 								path: 'gltf/gltfExtensions/volume/glassVaseFlowers',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/GlassVaseFlowers/screenshot/screenshot.jpg?raw=true',
+								thumb: 'gltf/gltfExtensions/volume/glassVaseFlowers/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1506,7 +1519,7 @@ const ExampleList = [
 							{
 								name: 'GlassBrokenWindow',
 								path: 'gltf/gltfExtensions/volume/glassBrokenWindow',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/GlassBrokenWindow/screenshot/screenshot.jpg?raw=true',
+								thumb: 'gltf/gltfExtensions/volume/glassBrokenWindow/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1515,7 +1528,7 @@ const ExampleList = [
 							{
 								name: 'GlassHurricaneCandleHolder',
 								path: 'gltf/gltfExtensions/volume/glassHurricaneCandleHolder',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/GlassHurricaneCandleHolder/screenshot/screenshot.jpg?raw=true',
+								thumb: 'gltf/gltfExtensions/volume/glassHurricaneCandleHolder/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1524,7 +1537,7 @@ const ExampleList = [
 							{
 								name: 'DragonAttenuation',
 								path: 'gltf/gltfExtensions/volume/dragonAttenuation',
-								thumb: 'https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/DragonAttenuation/screenshot/screenshot.jpg?raw=true',
+								thumb: 'gltf/gltfExtensions/volume/dragonAttenuation/thumb.png',
 								description: {
 									ko: ``,
 									en: ``

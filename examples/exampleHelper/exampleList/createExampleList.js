@@ -89,11 +89,8 @@ const createThumbnail = (item, link) => {
     const thumbContainer = document.createElement('div');
     Object.assign(thumbContainer.style, {
         width: '100%',
-        height: item.thumb ? '170px' : '90px',
         overflow: 'hidden',
         background: '#000',
-        borderRadius: '8px',
-        border: '1px solid rgba(255,255,255,0.05)'
     });
 
     // 썸네일이 있는 경우
@@ -184,12 +181,11 @@ const createSingleThumbnail = (item, container) => {
     thumb.src = item.thumb;
 
     Object.assign(thumb.style, {
-        position: 'absolute',
-        top: '0',
-        left: '0',
+        // position: 'absolute',
+        // top: '0',
+        // left: '0',
         width: '100%',
-        height: 'calc(100% - 41px)',
-        objectFit: 'contain'
+        // objectFit: 'contain'
     });
 
     thumbWrap.appendChild(thumb);
@@ -229,8 +225,13 @@ const renderItem = (item, parent, query) => {
         const link = document.createElement('a');
         link.href = item.path;
         link.className = 'example-link';
-        link.title = `${stripTags(item.name)} sample view`
-        link.innerHTML = `<div class="example-name">${stripTags(item.name)}</div>`;
+        link.title = `${stripTags(item.name)} sample view`;
+
+        // 썸네일을 먼저 추가
+        createThumbnail(item, link);
+
+        // 이름을 나중에 추가
+        link.innerHTML += `<div class="example-name">${stripTags(item.name)}</div>`;
 
         // 샘플 페이지로 이동 시 현재 상태 저장
         link.addEventListener('click', (event) => {
@@ -238,9 +239,6 @@ const renderItem = (item, parent, query) => {
             saveState(); // 전체 상태 저장
             window.location.href = link.href;
         });
-
-        // 썸네일 추가
-        createThumbnail(item, link);
 
         itemElement.appendChild(link);
     } else {
