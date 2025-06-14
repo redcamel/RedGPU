@@ -381,6 +381,15 @@ const ExampleList = [
 							en: `PointLight supports clustered tile rendering. Supports 1024 point lights.`
 						},
 					},
+					{
+						name: 'SpotLight Performance(cluster)',
+						path: '3d/light/spotLightPerformance',
+						thumb: '3d/light/spotLightPerformance/thumb.png',
+						description: {
+							ko: ``,
+							en: ``
+						},
+					},
 				]
 			},
 			{

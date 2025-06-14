@@ -767,14 +767,14 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
         let lightCount:u32   = clusterLightGroup.lights[clusterIndex].count;
         for (var lightIndex = 0u; lightIndex < lightCount; lightIndex = lightIndex + 1u) {
             let i = clusterLightGroup.indices[lightOffset + lightIndex];
-            let targetLight = pointLightList.lights[i];
-            let u_pointLightPosition = targetLight.position;
-            let u_pointLightRadius = targetLight.radius ;
-            let lightDistance = length(u_pointLightPosition - input_vertexPosition);
-            let lightDir = normalize(u_pointLightPosition - input_vertexPosition);
-            let attenuation = clamp(1.0 - (lightDistance * lightDistance) / (u_pointLightRadius * u_pointLightRadius), 0.0, 1.0);
+            let targetLight = clusterLightList.lights[i];
+            let u_clusterLightPosition = targetLight.position;
+            let u_clusterLightRadius = targetLight.radius ;
+            let lightDistance = length(u_clusterLightPosition - input_vertexPosition);
+            let lightDir = normalize(u_clusterLightPosition - input_vertexPosition);
+            let attenuation = clamp(1.0 - (lightDistance * lightDistance) / (u_clusterLightRadius * u_clusterLightRadius), 0.0, 1.0);
 
-            if(lightDistance<=u_pointLightRadius){
+            if(lightDistance<=u_clusterLightRadius){
                totalDirectLighting += calcLight(
                   targetLight.color, targetLight.intensity * attenuation,
                   N, V, lightDir,

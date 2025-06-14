@@ -168,29 +168,69 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     let lightCount:u32   = clusterLightGroup.lights[clusterIndex].count;
 
     for (var lightIndex = 0u; lightIndex < lightCount; lightIndex = lightIndex + 1u) {
-        let i = clusterLightGroup.indices[lightOffset + lightIndex];
-        let u_pointLightPosition = pointLightList.lights[i].position;
-        let u_pointLightColor = pointLightList.lights[i].color;
-        let u_pointLightIntensity = pointLightList.lights[i].intensity ;
-        let u_pointLightRadius = pointLightList.lights[i].radius ;
+         let i = clusterLightGroup.indices[lightOffset + lightIndex];
+         let u_clusterLightPosition = clusterLightList.lights[i].position;
+         let u_clusterLightColor = clusterLightList.lights[i].color;
+         let u_clusterLightIntensity = clusterLightList.lights[i].intensity;
+         let u_clusterLightRadius = clusterLightList.lights[i].radius;
+         let u_isSpotLight = clusterLightList.lights[i].isSpotLight;
 
-        let lightDir = normalize(u_pointLightPosition - inputData.vertexPosition);
-        let lightDistance = length(u_pointLightPosition - inputData.vertexPosition);
-        let attenuation = clamp(0.0, 1.0, 1.0 - (lightDistance * lightDistance) / (u_pointLightRadius * u_pointLightRadius));
-        if(lightDistance<=u_pointLightRadius){
+         let lightDir = u_clusterLightPosition - inputData.vertexPosition;
+         let lightDistance = length(lightDir);
 
-            let L = normalize(lightDir);
-            let R = reflect(-L, N);
+         // 거리 범위 체크
+         if (lightDistance > u_clusterLightRadius) {
+             continue;
+         }
 
-            let diffuse = max(dot(N, L), 0.0);
-            let specular = pow(max(dot(R, E), 0.0), u_shininess);
+         let L = normalize(lightDir);
+         let attenuation = clamp(0.0, 1.0, 1.0 - (lightDistance * lightDistance) / (u_clusterLightRadius * u_clusterLightRadius));
 
-            let ld = (diffuseColor * u_pointLightColor * u_pointLightIntensity) * diffuse * attenuation * u_pointLightIntensity;
-            let ls = u_specularColor * u_specularStrength * specular * attenuation  * u_pointLightIntensity;
+         var finalAttenuation = attenuation;
 
-            mixColor += ld + ls;
-        }
-    }
+         // 스폿라이트 처리
+         if (u_isSpotLight > 0.0) {
+             let u_clusterLightDirection = normalize(vec3<f32>(
+                 clusterLightList.lights[i].directionX,
+                 clusterLightList.lights[i].directionY,
+                 clusterLightList.lights[i].directionZ
+             ));
+             let u_clusterLightInnerAngle = clusterLightList.lights[i].innerCutoff;
+             let u_clusterLightOuterCutoff = clusterLightList.lights[i].outerCutoff;
+
+             // 라이트에서 버텍스로의 방향
+             let lightToVertex = normalize(-lightDir);
+             let cosTheta = dot(lightToVertex, u_clusterLightDirection);
+
+             let cosOuter = cos(radians(u_clusterLightOuterCutoff));
+             let cosInner = cos(radians(u_clusterLightInnerAngle));
+
+             // 스폿라이트 외곽 범위를 벗어나면 스킵
+             if (cosTheta < cosOuter) {
+                 continue;
+             }
+
+             // 스폿라이트 강도 계산 (부드러운 페이드)
+             let epsilon = cosInner - cosOuter;
+             let spotIntensity = clamp((cosTheta - cosOuter) / epsilon, 0.0, 1.0);
+
+             finalAttenuation *= spotIntensity;
+         }
+
+         // 공통 라이팅 계산
+         let R = reflect(-L, N);
+         let diffuse = diffuseColor * max(dot(N, L), 0.0);
+         let specular = pow(max(dot(R, E), 0.0), u_shininess) * specularSamplerValue;
+
+         // 디퓨즈와 스펙큘러에 다른 감쇠 적용
+         let diffuseAttenuation = finalAttenuation;
+         let specularAttenuation = finalAttenuation * finalAttenuation; // 스펙큘러는 더 빠르게 감쇠
+
+         let ld = u_clusterLightColor * diffuse * diffuseAttenuation * u_clusterLightIntensity;
+         let ls = u_specularColor * u_specularStrength * specular * specularAttenuation * u_clusterLightIntensity;
+
+         mixColor += ld + ls;
+     }
 
 
     if(u_useAlphaTexture){

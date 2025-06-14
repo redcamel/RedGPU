@@ -10,8 +10,8 @@ class SpotLight extends BaseLight {
 	#directionX: number = 0
 	#directionY: number = -1
 	#directionZ: number = 0
-	#innerCutoff: number = Math.cos(Math.PI / 12)
-	#outerCutoff: number = Math.cos(Math.PI / 8)
+	#innerCutoff: number = 15.0  // 15도 (내부 각도)
+	#outerCutoff: number = 22.5  // 22.5도 (외부 각도)
 
 	constructor(color: string = '#fff', intensity: number = 1) {
 		super(new ColorRGB(...convertHexToRgb(color, true)), intensity)
@@ -81,36 +81,31 @@ class SpotLight extends BaseLight {
 		return [this.#directionX, this.#directionY, this.#directionZ];
 	}
 
+	// 각도를 직접 반환 (degrees)
 	get innerCutoff(): number {
 		return this.#innerCutoff;
 	}
 
-	set innerCutoff(value: number) {
-		this.#innerCutoff = value;
+	set innerCutoff(degrees: number) {
+		this.#innerCutoff = degrees;
 	}
 
 	get outerCutoff(): number {
 		return this.#outerCutoff;
 	}
 
-	set outerCutoff(value: number) {
-		this.#outerCutoff = value;
+	set outerCutoff(degrees: number) {
+		this.#outerCutoff = degrees;
 	}
 
-	get innerAngle(): number {
-		return Math.acos(this.#innerCutoff) * 180 / Math.PI;
+
+	// 코사인 값이 필요한 경우를 위한 메서드
+	get innerCutoffCos(): number {
+		return Math.cos(this.#innerCutoff * Math.PI / 180);
 	}
 
-	set innerAngle(degrees: number) {
-		this.#innerCutoff = Math.cos(degrees * Math.PI / 180);
-	}
-
-	get outerAngle(): number {
-		return Math.acos(this.#outerCutoff) * 180 / Math.PI;
-	}
-
-	set outerAngle(degrees: number) {
-		this.#outerCutoff = Math.cos(degrees * Math.PI / 180);
+	get outerCutoffCos(): number {
+		return Math.cos(this.#outerCutoff * Math.PI / 180);
 	}
 
 	setPosition(x: number | [number, number, number], y?: number, z?: number): void {
@@ -133,11 +128,6 @@ class SpotLight extends BaseLight {
 		}
 	}
 
-	setAngles(innerDegrees: number, outerDegrees: number): void {
-		this.innerAngle = innerDegrees;
-		this.outerAngle = outerDegrees;
-	}
-
 	lookAt(targetX: number | [number, number, number], targetY?: number, targetZ?: number): void {
 		let tx: number, ty: number, tz: number;
 		if (Array.isArray(targetX)) {
@@ -158,17 +148,6 @@ class SpotLight extends BaseLight {
 		}
 	}
 
-	setFlashlightStyle(): void {
-		this.setAngles(10, 15);
-	}
-
-	setStageStyle(): void {
-		this.setAngles(25, 35);
-	}
-
-	setLampStyle(): void {
-		this.setAngles(15, 25);
-	}
 }
 
 Object.freeze(SpotLight);

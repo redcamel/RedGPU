@@ -89,7 +89,7 @@ fn getClusterLightTile(fragCoord : vec4<f32>) -> vec3<u32> {
                      zTile);
 }
 
-struct PointLight {
+struct ClusterLight {
     position : vec3<f32>, radius : f32,
     color : vec3<f32>,    intensity : f32,
     isSpotLight:f32,    directionX:f32,    directionY:f32,    directionZ:f32,
@@ -97,7 +97,7 @@ struct PointLight {
 };
 struct ClusterLightList {
     count:vec4<f32>,
-    lights : array<PointLight>
+    lights : array<ClusterLight>
 };
-@group(0) @binding(5) var<storage> pointLightList : ClusterLightList;
+@group(0) @binding(5) var<storage> clusterLightList : ClusterLightList;
 @group(0) @binding(6) var<storage, read_write> clusterLightGroup : ClusterLightsGroup;

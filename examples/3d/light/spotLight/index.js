@@ -73,7 +73,7 @@ const createSpotLight = (scene) => {
 	const light = new RedGPU.Light.SpotLight('#fff', intensity);
 	light.intensity = intensity;
 	light.x = 4
-	light.y = 4
+	light.y = 8
 	light.radius = 10
 	scene.lightManager.addSpotLight(light);
 
@@ -88,7 +88,12 @@ const createSampleMeshes = (redGPUContext, scene) => {
 		'../../../assets/UV_Grid_Sm.jpg'
 	);
 
-	const plane = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Plane(redGPUContext), new RedGPU.Material.PhongMaterial(redGPUContext, '#ff0000'))
+	const plane = new RedGPU.Display.Mesh(
+		redGPUContext,
+		new RedGPU.Primitive.Plane(redGPUContext),
+		material
+		// new RedGPU.Material.PhongMaterial(redGPUContext, '#ff0000')
+	)
 	plane.setScale(200)
 	plane.rotationX = 90
 	plane.y = -0.01
@@ -128,6 +133,9 @@ const renderTestPaneWithLightControl = async (redGPUContext, light) => {
 		x: light.position[0],
 		y: light.position[1],
 		z: light.position[2],
+		directionX: light.directionX,
+		directionY: light.directionY,
+		directionZ: light.directionZ,
 		radius: light.radius,
 		innerCutoff: light.innerCutoff,
 		outerCutoff: light.outerCutoff,
@@ -146,6 +154,18 @@ const renderTestPaneWithLightControl = async (redGPUContext, light) => {
 	lightFolder.addBinding(lightConfig, 'z', {min: -10, max: 10, step: 0.1}).on('change', (evt) => {
 		light.z = evt.value
 	});
+
+	lightFolder.addBinding(lightConfig, 'directionX', {min: -10, max: 10, step: 0.1}).on('change', (evt) => {
+		light.directionX = evt.value
+	});
+
+	lightFolder.addBinding(lightConfig, 'directionY', {min: -10, max: 10, step: 0.1}).on('change', (evt) => {
+		light.directionY = evt.value
+	});
+
+	lightFolder.addBinding(lightConfig, 'directionZ', {min: -10, max: 10, step: 0.1}).on('change', (evt) => {
+		light.directionZ = evt.value
+	});
 	lightFolder.addBinding(lightConfig, 'intensity', {min: 0, max: 5, step: 0.1}).on('change', (evt) => {
 		light.intensity = evt.value;
 	});
@@ -154,11 +174,11 @@ const renderTestPaneWithLightControl = async (redGPUContext, light) => {
 	});
 
 	lightFolder.addBinding(lightConfig, 'innerCutoff', {min: 0, max: 60, step: 0.1}).on('change', (evt) => {
-		light.radius = evt.value;
+		light.innerCutoff = evt.value;
 	});
 
 	lightFolder.addBinding(lightConfig, 'outerCutoff', {min: 0, max: 60, step: 0.1}).on('change', (evt) => {
-		light.radius = evt.value;
+		light.outerCutoff = evt.value;
 	});
 	lightFolder
 		.addBinding(lightConfig, 'color', {picker: 'inline', view: 'color', expanded: true})

@@ -3,7 +3,7 @@
 
 fn pointLight_testSphereAABB(light:u32,  tile:u32) -> bool {
    // 라이트와 타일의 정보를 한 번만 획득합니다.
-   let targetLight = pointLightList.lights[light];
+   let targetLight = clusterLightList.lights[light];
    let targetTile = clusterLight_Clusters.cubeList[tile];
 
    // 라이트의 반지름과 위치를 획득하고, 위치는 World Space에서 View3D Space로 변환합니다.
@@ -37,7 +37,7 @@ fn pointLight_sqDistPointAABB(targetPoint:vec3<f32>, tile:u32, minAABB:vec3<f32>
 }
 // 스폿라이트용 구체-AABB 거리 체크 (포인트라이트와 동일)
 fn spotLight_testSphereAABB(light: u32, tile: u32) -> bool {
-    let targetLight = pointLightList.lights[light];
+    let targetLight = clusterLightList.lights[light];
     let targetTile = clusterLight_Clusters.cubeList[tile];
 
     let radius: f32 = targetLight.radius;
@@ -61,7 +61,7 @@ fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
     var clusterLightIndices : array<u32, REDGPU_DEFINE_MAX_LIGHTS_PER_CLUSTERu>;
 
     // 포인트 라이트 처리
-    for (var i = 0u; i < u32(pointLightList.count[0]); i = i + 1u) {
+    for (var i = 0u; i < u32(clusterLightList.count[0]); i = i + 1u) {
         let lightInCluster = pointLight_testSphereAABB(i, tileIndex);
 
         if (lightInCluster) {
@@ -75,8 +75,8 @@ fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
     }
 
     // 스폿 라이트 처리
-    let spotLightStartIndex = u32(pointLightList.count[0]);
-    for (var i = 0u; i < u32(pointLightList.count[1]); i = i + 1u) {
+    let spotLightStartIndex = u32(clusterLightList.count[0]);
+    for (var i = 0u; i < u32(clusterLightList.count[1]); i = i + 1u) {
         let actualLightIndex = spotLightStartIndex + i;
 
         // 포인트라이트와 동일한 방식
