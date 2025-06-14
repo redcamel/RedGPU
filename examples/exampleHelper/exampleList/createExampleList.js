@@ -90,7 +90,7 @@ const createThumbnail = (item, link) => {
     Object.assign(thumbContainer.style, {
         width: '100%',
         overflow: 'hidden',
-        background: '#000',
+
     });
 
     // 썸네일이 있는 경우

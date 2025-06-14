@@ -174,6 +174,9 @@ html, body {
     line-height: 1;
     border-radius: 8px;
     overflow: hidden;
+    height: fit-content;
+
+
 }
 /* 모바일 화면 분기 처리 */
 @media screen and (max-width: 768px) {
@@ -194,14 +197,16 @@ html, body {
 }
 
 .example-name {
-    font-size: 1.1em;
+    font-size: 1.0em;
     z-index: 1;
     display: flex;
     align-items: center;
-    padding: 12px 12px;
+    padding: 5px 12px 8px;
     background: #000 linear-gradient(to right, rgba(155, 155, 155, 0.1) 0%, rgba(0, 0, 0, 0.0) 100%);
     line-height: 1.4;
     word-break: keep-all;
+    box-shadow: 0 -30px 50px rgba(0, 0, 0, 0.5) ;
+    border-top:1px solid rgba(255, 255, 255, 0.06);
 }
 
 .example-link {
@@ -227,7 +232,9 @@ a {
     pointer-events: painted;
 }
 a img{
-
+    border-radius: 8px 8px 0 0;
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    border-bottom: none;
 }
 a:hover {
     color: #fff;
