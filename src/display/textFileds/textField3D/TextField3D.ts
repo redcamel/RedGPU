@@ -8,6 +8,7 @@ import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import ATextField from "../core/ATextField";
 import TextFieldMaterial from "../core/textFieldMaterial/TextFieldMaterial";
 import vertexModuleSource from "./shader/textField3DVertex.wgsl";
+import GPU_BLEND_FACTOR from "../../../gpuConst/GPU_BLEND_FACTOR";
 
 interface TextField3D {
 	useBillboardPerspective: boolean;
@@ -30,6 +31,8 @@ class TextField3D extends ATextField {
 		this._geometry = new Plane(redGPUContext);
 		this._material = new TextFieldMaterial(redGPUContext, new BitmapTexture(redGPUContext))
 		this._material.transparent = true
+		this._material.blendColorState.srcFactor = GPU_BLEND_FACTOR.ONE
+		this._material.blendAlphaState.srcFactor = GPU_BLEND_FACTOR.ONE
 		this.dirtyPipeline = true
 		this.dirtyTransform = true
 	}
