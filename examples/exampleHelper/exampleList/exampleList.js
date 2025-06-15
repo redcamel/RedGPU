@@ -419,6 +419,7 @@ const ExampleList = [
 			},
 			{
 				name: 'Tint',
+				experimental : true,
 				list: [
 					{
 						name: 'Tint',
@@ -1709,7 +1710,8 @@ const ExampleList = [
 				]
 			},
 			{
-				name: 'Tint',
+				name: '2D Tint',
+				experimental : true,
 				list: [
 					{
 						name: 'Tint Basic',
@@ -1731,7 +1733,7 @@ const ExampleList = [
 				]
 			},
 			{
-				name: 'MouseEvent',
+				name: '2D MouseEvent',
 				list: [
 					{
 						name: 'Sprite2D',

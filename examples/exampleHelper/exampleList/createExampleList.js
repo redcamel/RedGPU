@@ -302,6 +302,13 @@ const renderGroupContent = (item, container, query) => {
                 const subGroupTitle = document.createElement('h4');
                 subGroupTitle.className = 'subgroup-title';
                 subGroupTitle.textContent = subItem.name;
+                if (subItem.experimental) {
+                    const experimental = document.createElement('span');
+                    experimental.innerHTML = 'Experimental'
+                    experimental.className = 'experimental';
+                    subGroupTitle.appendChild(experimental)
+                }
+
                 subGroupContainer.appendChild(subGroupTitle);
 
                 // 재귀적으로 하위 그룹 내용 렌더링
@@ -473,33 +480,42 @@ const initialize = () => {
     if (savedState && savedState.scrollPosition) {
         restoreScrollPosition(container, savedState.scrollPosition);
     }
-	addMetaTags()
+    addMetaTags()
     // 페이지 이탈 시 상태 저장 (브라우저 닫기 등)
     window.addEventListener('beforeunload', saveState);
 };
 // initialize 함수 내에 메타 태그 추가
 const addMetaTags = () => {
-	// 기본 메타 태그
-	const metaTags = [
-		{ name: 'description', content: 'RedGPU - collection of examples for the JavaScript WebGPU library. Explore 2D/3D graphics rendering samples.' },
-		{ name: 'keywords', content: 'RedGPU, WebGPU, JavaScript, 3D, 2D, graphics, examples, library' },
-		{ property: 'og:title', content: 'RedGPU Examples - JavaScript WebGPU Library' },
-		{ property: 'og:description', content: 'Explore various examples and usage methods of the RedGPU JavaScript WebGPU library.' },
-		{ property: 'og:type', content: 'website' },
-		{ property: 'og:url', content: window.location.href },
-		{ name: 'twitter:card', content: 'summary_large_image' },
-		{ name: 'twitter:title', content: 'RedGPU Examples - JavaScript WebGPU Library' },
-		{ name: 'twitter:description', content: 'RedGPU - Collection of examples for the JavaScript graphics library utilizing the latest WebGPU API' }
-	];
+    // 기본 메타 태그
+    const metaTags = [
+        {
+            name: 'description',
+            content: 'RedGPU - collection of examples for the JavaScript WebGPU library. Explore 2D/3D graphics rendering samples.'
+        },
+        {name: 'keywords', content: 'RedGPU, WebGPU, JavaScript, 3D, 2D, graphics, examples, library'},
+        {property: 'og:title', content: 'RedGPU Examples - JavaScript WebGPU Library'},
+        {
+            property: 'og:description',
+            content: 'Explore various examples and usage methods of the RedGPU JavaScript WebGPU library.'
+        },
+        {property: 'og:type', content: 'website'},
+        {property: 'og:url', content: window.location.href},
+        {name: 'twitter:card', content: 'summary_large_image'},
+        {name: 'twitter:title', content: 'RedGPU Examples - JavaScript WebGPU Library'},
+        {
+            name: 'twitter:description',
+            content: 'RedGPU - Collection of examples for the JavaScript graphics library utilizing the latest WebGPU API'
+        }
+    ];
 
-	// 메타 태그 추가
-	metaTags.forEach(tag => {
-		const meta = document.createElement('meta');
-		Object.keys(tag).forEach(key => {
-			meta.setAttribute(key, tag[key]);
-		});
-		document.head.appendChild(meta);
-	});
+    // 메타 태그 추가
+    metaTags.forEach(tag => {
+        const meta = document.createElement('meta');
+        Object.keys(tag).forEach(key => {
+            meta.setAttribute(key, tag[key]);
+        });
+        document.head.appendChild(meta);
+    });
 };
 
 // initialize 함수 내에서 호출

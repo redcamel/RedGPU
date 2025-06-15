@@ -121,6 +121,22 @@ html, body {
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     padding-bottom: 5px;
     font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.experimental{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6em;
+    color: #fff;
+    padding: 4px 8px;
+    line-height: 1;
+    width: fit-content;
+    background: #c74606;
+    border-radius: 4px;
+
 }
 
 .project_title {
