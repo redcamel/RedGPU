@@ -31,8 +31,6 @@ class TextField2D extends BaseTextField2D {
 		this._geometry = new Plane(redGPUContext, 1, 1, 1, 1, 1, true);
 		this._material = new TextFieldMaterial(redGPUContext, new BitmapTexture(redGPUContext))
 		this._material.transparent = true
-		this._material.blendColorState.srcFactor = GPU_BLEND_FACTOR.ONE
-		this._material.blendAlphaState.srcFactor = GPU_BLEND_FACTOR.ONE
 		this.useSmoothing = useSmoothing;
 		this.dirtyPipeline = true
 		this.dirtyTransform = true
