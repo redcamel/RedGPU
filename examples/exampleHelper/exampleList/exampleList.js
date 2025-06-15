@@ -227,6 +227,15 @@ const ExampleList = [
 							en: `A sample example that visually demonstrates different texture combinations and effects of PhongMaterial using RedGPU.`
 						},
 					},
+					{
+						name: 'Material Opacity',
+						path: '3d/material/opacity',
+						thumb: '3d/material/opacity/thumb.png',
+						description: {
+							ko: ``,
+							en: ``
+						},
+					},
 
 				]
 			},
