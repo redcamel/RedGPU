@@ -107,7 +107,7 @@ class ATextField extends Mesh {
 		// 요소의 현재 크기 가져오기
 		const rect = this.#htmlElement.getBoundingClientRect();
 		// 확장 영역 초기화
-		let extraLeft = 2, extraRight = 2, extraTop = 2, extraBottom = 2;
+		let extraLeft = 3, extraRight = 3, extraTop = 3, extraBottom = 3;
 		// Box-Shadow와 패딩을 고려한 전체 크기
 		const renderedWidth = rect.width + extraLeft + extraRight; // 좌우 확장값 합산
 		const renderedHeight = rect.height + extraTop + extraBottom; // 상하 확장값 합산
