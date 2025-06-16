@@ -716,8 +716,8 @@ const ExampleList = [
 							},
 							{
 								name: 'DirectionalBlur',
-								path: '3d/postEffect/blur/DirectionalBlur',
-								thumb: '3d/postEffect/blur/DirectionalBlur/thumb.png',
+								path: '3d/postEffect/blur/directionalBlur',
+								thumb: '3d/postEffect/blur/directionalBlur/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
