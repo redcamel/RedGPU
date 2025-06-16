@@ -253,7 +253,7 @@ const ExampleList = [
 				list: [
 					{
 						name: 'SkyBox',
-						path: '3d/skyBox/skyBox',
+						path: '3d/skybox/skybox',
 						thumb: '3d/skybox/skybox/thumb.png',
 						description: {
 							ko: `SkyBox 샘플 예제입니다.`,

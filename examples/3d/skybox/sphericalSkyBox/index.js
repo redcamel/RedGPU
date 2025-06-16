@@ -57,7 +57,7 @@ const createSphericalSkyBox = (redGPUContext) => {
 	createDebug("../../../assets/skybox/sphericalSkyBox.jpg")
 	// Create and return the skybox
 	// 스카이박스 생성 및 반환
-	// const skyBox = new RedGPU.Display.SkyBox(redGPUContext, texture);
+	// const skybox = new RedGPU.Display.SkyBox(redGPUContext, texture);
 	const skyBox = new RedGPU.Display.SphericalSkyBox(redGPUContext, texture);
 	return skyBox;
 };
