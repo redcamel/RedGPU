@@ -8,24 +8,24 @@ import fragmentModuleSource from './fragment.wgsl'
 const SHADER_INFO = parseWGSL(fragmentModuleSource)
 
 interface ColorMaterial {
-    color: ColorRGB
+	color: ColorRGB
 }
 
 class ColorMaterial extends ABaseMaterial {
-    constructor(redGPUContext: RedGPUContext, color: string = '#fff') {
-        super(
-            redGPUContext,
-            'COLOR_MATERIAL',
-            SHADER_INFO,
-            2
-        )
-        this.initGPURenderInfos()
-        this.color.setColorByHEX(color)
-    }
+	constructor(redGPUContext: RedGPUContext, color: string = '#fff') {
+		super(
+			redGPUContext,
+			'COLOR_MATERIAL',
+			SHADER_INFO,
+			2
+		)
+		this.initGPURenderInfos()
+		this.color.setColorByHEX(color)
+	}
 }
 
 DefineForFragment.defineByPreset(ColorMaterial, [
-    DefineForFragment.PRESET_COLOR_RGB.COLOR,
+	DefineForFragment.PRESET_COLOR_RGB.COLOR,
 ])
 Object.freeze(ColorMaterial)
 export default ColorMaterial

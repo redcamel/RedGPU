@@ -13,18 +13,18 @@ import sortTransparentObjects from "./sortTransparentObjects";
 import worldToLocal from "./worldToLocal";
 
 export {
-    getScreenPoint,
-    screenToWorld,
-    localToWorld,
-    worldToLocal,
-    getMipLevelCount,
-    calculateTextureByteSize,
-    calculateVolume,
-    computeViewFrustumPlanes,
-    calculateNormals,
-    formatBytes,
-    matToEuler,
-    quaternionToRotationMat4,
-    sortTransparentObjects
+	getScreenPoint,
+	screenToWorld,
+	localToWorld,
+	worldToLocal,
+	getMipLevelCount,
+	calculateTextureByteSize,
+	calculateVolume,
+	computeViewFrustumPlanes,
+	calculateNormals,
+	formatBytes,
+	matToEuler,
+	quaternionToRotationMat4,
+	sortTransparentObjects
 }
 

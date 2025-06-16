@@ -5,7 +5,7 @@ export * from "./convertColor";
 export * from "./file";
 export * from "./math";
 export {
-    createUUID,
-    uuidToUint
+	createUUID,
+	uuidToUint
 }
 

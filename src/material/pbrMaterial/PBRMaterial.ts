@@ -25,7 +25,6 @@ const EXTENSION_LIST = [
 		textureList: [
 			'metallicRoughnessTexture',
 		],
-
 		positiveNumberList: [
 			'metallicFactor',
 			'roughnessFactor',
@@ -67,7 +66,7 @@ const EXTENSION_LIST = [
 			'KHR_sheenRoughnessTexture',
 		],
 		positiveNumberList: [
-			['KHR_sheenRoughnessFactor',0]
+			['KHR_sheenRoughnessFactor', 0]
 		],
 		vec3List: [
 			['KHR_sheenColorFactor', [0, 0, 0]]
@@ -286,23 +285,52 @@ interface PBRMaterial {
 }
 
 class PBRMaterial extends ABitmapBaseMaterial {
-	get packedKHR_iridescence(): PackedTexture {
-		return this.#packedKHR_iridescence;
-	}
-
 	#packedORMTexture: PackedTexture
-
 	#packedKHR_clearcoatTexture: PackedTexture
 	#packedKHR_transmission: PackedTexture
 	#packedKHR_diffuse_transmission: PackedTexture
 	#packedKHR_sheen: PackedTexture
 	#packedKHR_iridescence: PackedTexture
 
+	/**
+	 * @classdesc The constructor for creating an instance of the class.
+	 * @constructor
+	 * @param {RedGPUContext} redGPUContext - The RedGPUContext object.
+	 */
+	constructor(redGPUContext: RedGPUContext) {
+		super(
+			redGPUContext,
+			'PBR_MATERIAL',
+			SHADER_INFO,
+			2
+		)
+		this.initGPURenderInfos();
+		this.#packedORMTexture = new PackedTexture(redGPUContext)
+		this.#packedKHR_clearcoatTexture = new PackedTexture(redGPUContext)
+		this.#packedKHR_transmission = new PackedTexture(redGPUContext)
+		this.#packedKHR_diffuse_transmission = new PackedTexture(redGPUContext)
+		this.#packedKHR_sheen = new PackedTexture(redGPUContext)
+		this.#packedKHR_iridescence = new PackedTexture(redGPUContext)
+		this.__packingList = [
+			() => {
+				//TODO - 이거 개선해야함... 대상만 갱신되도록
+				this.setupPackORMTexture()
+				this.setupPackedKHR_clearcoatTexture()
+				this.setupPackedKHR_transmission()
+				this.setupPackedKHR_diffuse_transmission()
+				this.setupPackedKHR_sheen()
+				this.setupPackedKHR_iridescence()
+			}
+		]
+	}
+
+	get packedKHR_iridescence(): PackedTexture {
+		return this.#packedKHR_iridescence;
+	}
+
 	get packedORMTexture(): PackedTexture {
 		return this.#packedORMTexture;
 	}
-
-
 
 	get packedKHR_sheen(): PackedTexture {
 		return this.#packedKHR_sheen;
@@ -336,10 +364,10 @@ class PBRMaterial extends ABitmapBaseMaterial {
 				b: this.metallicRoughnessTexture?.gpuTexture,
 			},
 			width,
-			height
+			height,
+			'packedORMTexture'
 		)
 	}
-
 
 	async setupPackedKHR_clearcoatTexture() {
 		const width = Math.max(
@@ -356,7 +384,8 @@ class PBRMaterial extends ABitmapBaseMaterial {
 				g: this.KHR_clearcoatRoughnessTexture?.gpuTexture,
 			},
 			width,
-			height
+			height,
+			'packedKHR_clearcoatTexture'
 		)
 	}
 
@@ -375,7 +404,8 @@ class PBRMaterial extends ABitmapBaseMaterial {
 				g: this.KHR_thicknessTexture?.gpuTexture,
 			},
 			width,
-			height
+			height,
+			'packedKHR_transmission'
 		)
 	}
 
@@ -396,7 +426,8 @@ class PBRMaterial extends ABitmapBaseMaterial {
 				a: this.KHR_diffuseTransmissionTexture?.gpuTexture,
 			},
 			width,
-			height
+			height,
+			'packedKHR_diffuse_transmission'
 		)
 	}
 
@@ -417,7 +448,8 @@ class PBRMaterial extends ABitmapBaseMaterial {
 				a: this.KHR_sheenRoughnessTexture?.gpuTexture,
 			},
 			width,
-			height
+			height,
+			'packedKHR_sheen'
 		)
 	}
 
@@ -436,40 +468,9 @@ class PBRMaterial extends ABitmapBaseMaterial {
 				g: this.KHR_iridescenceThicknessTexture?.gpuTexture,
 			},
 			width,
-			height
+			height,
+			'packedKHR_iridescence'
 		)
-	}
-
-	/**
-	 * @classdesc The constructor for creating an instance of the class.
-	 * @constructor
-	 * @param {RedGPUContext} redGPUContext - The RedGPUContext object.
-	 */
-	constructor(redGPUContext: RedGPUContext) {
-		super(
-			redGPUContext,
-			'PBR_MATERIAL',
-			SHADER_INFO,
-			2
-		)
-		this.initGPURenderInfos();
-		this.#packedORMTexture = new PackedTexture(redGPUContext)
-		this.#packedKHR_clearcoatTexture = new PackedTexture(redGPUContext)
-		this.#packedKHR_transmission = new PackedTexture(redGPUContext)
-		this.#packedKHR_diffuse_transmission = new PackedTexture(redGPUContext)
-		this.#packedKHR_sheen = new PackedTexture(redGPUContext)
-		this.#packedKHR_iridescence = new PackedTexture(redGPUContext)
-		this.__packingList = [
-			() => {
-				//TODO - 이거 개선해야함... 대상만 갱신되도록
-				this.setupPackORMTexture()
-				this.setupPackedKHR_clearcoatTexture()
-				this.setupPackedKHR_transmission()
-				this.setupPackedKHR_diffuse_transmission()
-				this.setupPackedKHR_sheen()
-				this.setupPackedKHR_iridescence()
-			}
-		]
 	}
 }
 

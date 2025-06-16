@@ -7,26 +7,26 @@ import getCacheBufferFromResourceState from "../core/getCacheBufferFromResourceS
 const MANAGED_STATE_KEY = 'managedStorageBufferState'
 
 class StorageBuffer extends AUniformBaseBuffer {
-    constructor(redGPUContext: RedGPUContext, uniformData: ArrayBuffer, label: string = '', cacheKey = '') {
-        const usage: GPUBufferUsageFlags = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC
-        super(
-            redGPUContext,
-            MANAGED_STATE_KEY,
-            usage,
-            uniformData,
-            label
-        )
-        const cacheBuffer = getCacheBufferFromResourceState(this, cacheKey) as StorageBuffer
-        if (cacheBuffer) {
-            return cacheBuffer
-        } else {
-            if (cacheKey) this.name = cacheKey
-            basicRegisterResource(
-                this,
-                new ResourceStateStorageBuffer(this)
-            )
-        }
-    }
+	constructor(redGPUContext: RedGPUContext, uniformData: ArrayBuffer, label: string = '', cacheKey = '') {
+		const usage: GPUBufferUsageFlags = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC
+		super(
+			redGPUContext,
+			MANAGED_STATE_KEY,
+			usage,
+			uniformData,
+			label
+		)
+		const cacheBuffer = getCacheBufferFromResourceState(this, cacheKey) as StorageBuffer
+		if (cacheBuffer) {
+			return cacheBuffer
+		} else {
+			if (cacheKey) this.name = cacheKey
+			basicRegisterResource(
+				this,
+				new ResourceStateStorageBuffer(this)
+			)
+		}
+	}
 }
 
 Object.freeze(StorageBuffer)

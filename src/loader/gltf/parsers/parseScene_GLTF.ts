@@ -9,17 +9,17 @@ import parseNode_GLTF from "./parseNode_GLTF";
  * @param {Function} [callback] - Optional callback function to be called after parsing the scene.
  */
 const parseScene_GLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, callback?: Function) => {
-    const SCENE_INDEX = 0;
-    const {scenes: SCENES} = gltfData;
-    const nodesInScene = SCENES[SCENE_INDEX].nodes;
-    nodesInScene.forEach((nodeGlTfId: GlTfId) => {
-        parseNode_GLTF(
-            gltfLoader,
-            gltfData,
-            nodeGlTfId,
-            gltfLoader.resultMesh
-        );
-    });
-    callback?.();
+	const SCENE_INDEX = 0;
+	const {scenes: SCENES} = gltfData;
+	const nodesInScene = SCENES[SCENE_INDEX].nodes;
+	nodesInScene.forEach((nodeGlTfId: GlTfId) => {
+		parseNode_GLTF(
+			gltfLoader,
+			gltfData,
+			nodeGlTfId,
+			gltfLoader.resultMesh
+		);
+	});
+	callback?.();
 };
 export default parseScene_GLTF;

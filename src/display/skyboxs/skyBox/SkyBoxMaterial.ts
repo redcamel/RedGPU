@@ -9,43 +9,43 @@ import fragmentModuleSource from "./shader/fragment.wgsl"
 const SHADER_INFO = parseWGSL(fragmentModuleSource)
 
 interface SkyBoxMaterial {
-    skyboxTexture: CubeTexture
-    skyboxTextureSampler: Sampler
+	skyboxTexture: CubeTexture
+	skyboxTextureSampler: Sampler
 }
 
 class SkyBoxMaterial extends ABitmapBaseMaterial {
-    /**
-     * Indicates if the pipeline is dirty or not.
-     *
-     * @type {boolean}
-     */
-    dirtyPipeline: boolean = false
+	/**
+	 * Indicates if the pipeline is dirty or not.
+	 *
+	 * @type {boolean}
+	 */
+	dirtyPipeline: boolean = false
 
-    /**
-     * Creates a new instance of the class.
-     *
-     * @constructor
-     * @param {RedGPUContext} redGPUContext - The RedGPUContext object.
-     * @param {CubeTexture} cubeTexture - The cube texture object.
-     */
-    constructor(redGPUContext: RedGPUContext, cubeTexture: CubeTexture) {
-        super(
-            redGPUContext,
-            'SKYBOX_MATERIAL',
-            SHADER_INFO,
-            2
-        )
-        this.skyboxTexture = cubeTexture
-        this.skyboxTextureSampler = new Sampler(this.redGPUContext)
-        this.initGPURenderInfos()
-    }
+	/**
+	 * Creates a new instance of the class.
+	 *
+	 * @constructor
+	 * @param {RedGPUContext} redGPUContext - The RedGPUContext object.
+	 * @param {CubeTexture} cubeTexture - The cube texture object.
+	 */
+	constructor(redGPUContext: RedGPUContext, cubeTexture: CubeTexture) {
+		super(
+			redGPUContext,
+			'SKYBOX_MATERIAL',
+			SHADER_INFO,
+			2
+		)
+		this.skyboxTexture = cubeTexture
+		this.skyboxTextureSampler = new Sampler(this.redGPUContext)
+		this.initGPURenderInfos()
+	}
 }
 
 DefineForFragment.defineCubeTexture(SkyBoxMaterial, [
-    'skyboxTexture',
+	'skyboxTexture',
 ])
 DefineForFragment.defineSampler(SkyBoxMaterial, [
-    'skyboxTextureSampler',
+	'skyboxTextureSampler',
 ])
 Object.freeze(SkyBoxMaterial)
 export default SkyBoxMaterial

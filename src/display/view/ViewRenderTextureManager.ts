@@ -8,10 +8,6 @@ class ViewRenderTextureManager {
 	#renderPath1ResultTexture: GPUTexture
 	#renderPath1ResultTextureView: GPUTextureView
 	#renderPath1ResultTextureDescriptor: GPUTextureDescriptor
-	get renderPath1ResultTextureDescriptor(): GPUTextureDescriptor {
-		return this.#renderPath1ResultTextureDescriptor;
-	}
-
 	#colorResolveTexture: GPUTexture
 	#depthTexture: GPUTexture
 	#colorTextureView: GPUTextureView
@@ -27,6 +23,10 @@ class ViewRenderTextureManager {
 		validateRedGPUContext(view.redGPUContext)
 		this.#redGPUContext = view.redGPUContext
 		this.#view = view
+	}
+
+	get renderPath1ResultTextureDescriptor(): GPUTextureDescriptor {
+		return this.#renderPath1ResultTextureDescriptor;
 	}
 
 	get colorTexture(): GPUTexture {
@@ -82,16 +82,18 @@ class ViewRenderTextureManager {
 				format: navigator.gpu.getPreferredCanvasFormat(),
 				usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT
 					| GPUTextureUsage.COPY_SRC,
-				mipLevelCount: getMipLevelCount(pixelRectObjectW, pixelRectObjectH)
+				mipLevelCount: getMipLevelCount(pixelRectObjectW, pixelRectObjectH),
+				label: `renderPath1ResultTexture_${pixelRectObjectW}x${pixelRectObjectH}_${Date.now()}`
 			}
 			this.#renderPath1ResultTexture = gpuDevice.createTexture(this.#renderPath1ResultTextureDescriptor);
-			this.#renderPath1ResultTextureView = this.#renderPath1ResultTexture.createView()
+			this.#renderPath1ResultTextureView = this.#renderPath1ResultTexture.createView({label: this.#renderPath1ResultTexture.label})
 		}
 	}
 
 	#createTextureIfNeeded(textureType: 'depth' | 'color'): void {
 		const depthYn = textureType === 'depth'
-		const {useMSAA, gpuDevice} = this.#redGPUContext
+		const {antialiasingManager, gpuDevice} = this.#redGPUContext
+		const {useMSAA} = antialiasingManager
 		const currentTexture = depthYn ? this.#depthTexture : this.#colorTexture;
 		const {pixelRectObject} = this.#view
 		const {width: pixelRectObjectW, height: pixelRectObjectH} = pixelRectObject
@@ -103,7 +105,11 @@ class ViewRenderTextureManager {
 		if (needCreateTexture) {
 			if (currentTexture) {
 				currentTexture?.destroy()
-				if (!depthYn) this.#colorResolveTexture?.destroy()
+				if (!depthYn) {
+					this.#colorResolveTexture?.destroy()
+					this.#colorResolveTexture = null
+					this.#colorResolveTextureView = null
+				}
 			}
 			const newTexture = gpuDevice.createTexture({
 				size: [
@@ -112,15 +118,17 @@ class ViewRenderTextureManager {
 					1
 				],
 				sampleCount: useMSAA ? 4 : 1,
-				format: depthYn ? 'depth24plus' : navigator.gpu.getPreferredCanvasFormat(),
-				usage: GPUTextureUsage.RENDER_ATTACHMENT | (textureType === 'color' ? GPUTextureUsage.TEXTURE_BINDING : 0)
+				label: `${textureType}_${pixelRectObjectW}x${pixelRectObjectH}_${Date.now()}`,
+				format: depthYn ? 'depth32float' : navigator.gpu.getPreferredCanvasFormat(),
+				// usage: GPUTextureUsage.RENDER_ATTACHMENT | (textureType === 'color' ? GPUTextureUsage.TEXTURE_BINDING : 0)
+				usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | (!depthYn && !useMSAA ? GPUTextureUsage.COPY_SRC : 0)
 			})
 			if (depthYn) {
 				this.#depthTexture = newTexture;
-				this.#depthTextureView = newTexture.createView();
+				this.#depthTextureView = newTexture.createView({label: newTexture.label});
 			} else {
 				this.#colorTexture = newTexture;
-				this.#colorTextureView = newTexture.createView();
+				this.#colorTextureView = newTexture.createView({label: newTexture.label});
 				if (useMSAA) {
 					const newResolveTexture = gpuDevice.createTexture({
 						size: {
@@ -129,11 +137,12 @@ class ViewRenderTextureManager {
 							depthOrArrayLayers: 1
 						},
 						sampleCount: 1,
+						label: `${textureType}_resolve_${pixelRectObjectW}x${pixelRectObjectH}_${Date.now()}`,
 						format: navigator.gpu.getPreferredCanvasFormat(),
 						usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC
 					})
 					this.#colorResolveTexture = newResolveTexture
-					this.#colorResolveTextureView = newResolveTexture.createView()
+					this.#colorResolveTextureView = newResolveTexture.createView({label: newResolveTexture.label})
 				}
 			}
 		}

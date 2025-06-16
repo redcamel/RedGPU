@@ -3,6 +3,6 @@ import ABitmapBaseMaterial from "./ABitmapBaseMaterial";
 
 export * from "./getBindGroupLayoutDescriptorFromShaderInfo";
 export {
-    ABaseMaterial,
-    ABitmapBaseMaterial,
+	ABaseMaterial,
+	ABitmapBaseMaterial,
 }

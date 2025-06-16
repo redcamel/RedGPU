@@ -14,17 +14,17 @@ const VERTEX_SHADER_MODULE_NAME_BASIC = 'VERTEX_MODULE_MESH'
 const STRUCT_INFO_BASIC = parseWGSL(vertexModuleSource);
 const UNIFORM_STRUCT_BASIC = STRUCT_INFO_BASIC.uniforms.vertexUniforms;
 const createMeshVertexShaderModule = (mesh: any): GPUShaderModule => {
-    const {material} = mesh
-    let result: GPUShaderModule
-    if (material instanceof PBRMaterial) {
-        if (mesh.animationInfo.skinInfo) {
-            result = createMeshVertexShaderModulePBRSkin(VERTEX_SHADER_MODULE_NAME_PBR_SKIN, mesh)
-        } else result = mesh.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME_PBR, STRUCT_INFO_PBR, UNIFORM_STRUCT_PBR, vertexModuleSourcePbr)
-    } else {
-        if (mesh.createCustomMeshVertexShaderModule) result = mesh.createCustomMeshVertexShaderModule()
-        else result = mesh.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME_BASIC, STRUCT_INFO_BASIC, UNIFORM_STRUCT_BASIC, vertexModuleSource)
-    }
-    mesh.currentShaderModuleName = result.label
-    return result
+	const {material} = mesh
+	let result: GPUShaderModule
+	if (material instanceof PBRMaterial) {
+		if (mesh.animationInfo.skinInfo) {
+			result = createMeshVertexShaderModulePBRSkin(VERTEX_SHADER_MODULE_NAME_PBR_SKIN, mesh)
+		} else result = mesh.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME_PBR, STRUCT_INFO_PBR, UNIFORM_STRUCT_PBR, vertexModuleSourcePbr)
+	} else {
+		if (mesh.createCustomMeshVertexShaderModule) result = mesh.createCustomMeshVertexShaderModule()
+		else result = mesh.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME_BASIC, STRUCT_INFO_BASIC, UNIFORM_STRUCT_BASIC, vertexModuleSource)
+	}
+	mesh.currentShaderModuleName = result.label
+	return result
 }
 export default createMeshVertexShaderModule

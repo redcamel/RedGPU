@@ -5,8 +5,8 @@
  * @property {string} CLEAR - Represents that the GPU should clear the previous content at the specified location.
  */
 const GPU_STORE_OP = {
-    STORE: 'store',
-    DISCARD: 'discard',
+	STORE: 'store',
+	DISCARD: 'discard',
 } as const
 Object.freeze(GPU_STORE_OP)
 export default GPU_STORE_OP

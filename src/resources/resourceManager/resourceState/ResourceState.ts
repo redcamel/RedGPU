@@ -1,10 +1,10 @@
 class ResourceState {
-    table: {} = {}
-    videoMemory: number = 0;
-    length: number = 0;
+	table: {} = {}
+	videoMemory: number = 0;
+	length: number = 0;
 
-    constructor() {
-    }
+	constructor() {
+	}
 }
 
 Object.freeze(ResourceState)

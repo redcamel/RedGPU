@@ -6,5 +6,5 @@ export * from './sampler'
 export * from './resourceManager'
 export * from './wgslParser'
 export {
-    ResourceBase
+	ResourceBase
 }

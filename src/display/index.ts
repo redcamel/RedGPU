@@ -8,18 +8,17 @@ import View2D from "./view/View2D";
 import View3D from "./view/View3D";
 
 export * from "./group";
-
 export * from "./paticle";
 export * from "./sprites";
 export * from "./line";
 export * from "./textFileds";
 export {
-    Mesh,
-    InstancingMesh,
-    Object3DContainer,
-    Scene,
-    View2D,
-    View3D,
-    SkyBox,
-    SphericalSkyBox
+	Mesh,
+	InstancingMesh,
+	Object3DContainer,
+	Scene,
+	View2D,
+	View3D,
+	SkyBox,
+	SphericalSkyBox
 }

@@ -1,14 +1,14 @@
 class TotalPointInfo_OBJ {
-    position: number[] = [];
-    normal: number[] = [];
-    uv: number[] = [];
-    //
-    points: number[][] = [];
-    normalPoints: number[][] = [];
-    uvPoints: number[][] = [];
+	position: number[] = [];
+	normal: number[] = [];
+	uv: number[] = [];
+	//
+	points: number[][] = [];
+	normalPoints: number[][] = [];
+	uvPoints: number[][] = [];
 
-    constructor() {
-    }
+	constructor() {
+	}
 }
 
 Object.freeze(TotalPointInfo_OBJ)
