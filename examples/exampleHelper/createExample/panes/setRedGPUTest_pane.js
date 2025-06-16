@@ -27,17 +27,7 @@ const setRedGPUTest_pane = (pane, redGPUContext, openYn = false) => {
 		title: 'redGPUContext',
 		expanded: openYn
 	});
-	const folderDebug = folder.addFolder({
-		title: 'Debug',
-		expanded: false
-	});
-	// console.log(redGPUContext.sizeManager)
-	folderDebug.addBinding(TEST_DATA, 'debug', {
-			readonly: true,
-			multiline: true,
-			rows: 12,
-		}
-	)
+
 	pane.on('change', () => {
 		const newDebug = [
 			`renderScale : ${redGPUContext.renderScale}`,
@@ -64,7 +54,7 @@ const setRedGPUTest_pane = (pane, redGPUContext, openYn = false) => {
 
 	});
 
-	folder.addBinding(redGPUContext, 'useMSAA')
+
 	folder.addBinding(redGPUContext, 'useDebugPanel')
 	folder.addBinding(redGPUContext, 'renderScale', {min: 0.01, max: 1, step: 0.01})
 	folder.addBinding(TEST_DATA, 'backgroundColor', {
@@ -156,6 +146,17 @@ const setRedGPUTest_pane = (pane, redGPUContext, openYn = false) => {
 			title: testName
 		}).on('click', () => redGPUContext.setSize(w, h));
 	});
+	const folderDebug = folder.addFolder({
+		title: 'Debug',
+		expanded: false
+	});
+	// console.log(redGPUContext.sizeManager)
+	folderDebug.addBinding(TEST_DATA, 'debug', {
+			readonly: true,
+			multiline: true,
+			rows: 12,
+		}
+	)
 
 }
 export default setRedGPUTest_pane

@@ -8,16 +8,16 @@ import ResourceState from "./resourceManager/resourceState/ResourceState";
  * @class
  */
 class ManagedResourceBase extends ResourceBase {
-    readonly #targetResourceManagedState: ResourceState
+	readonly #targetResourceManagedState: ResourceState
 
-    constructor(redGPUContext: RedGPUContext, managedStateKey: string,) {
-        super(redGPUContext)
-        this.#targetResourceManagedState = redGPUContext.resourceManager[managedStateKey]
-    }
+	constructor(redGPUContext: RedGPUContext, managedStateKey: string,) {
+		super(redGPUContext)
+		this.#targetResourceManagedState = redGPUContext.resourceManager[managedStateKey]
+	}
 
-    get targetResourceManagedState(): ResourceState {
-        return this.#targetResourceManagedState;
-    }
+	get targetResourceManagedState(): ResourceState {
+		return this.#targetResourceManagedState;
+	}
 }
 
 export default ManagedResourceBase

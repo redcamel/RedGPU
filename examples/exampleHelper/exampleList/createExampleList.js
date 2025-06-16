@@ -89,11 +89,8 @@ const createThumbnail = (item, link) => {
     const thumbContainer = document.createElement('div');
     Object.assign(thumbContainer.style, {
         width: '100%',
-        height: item.thumb ? '170px' : '90px',
         overflow: 'hidden',
-        background: '#000',
-        borderRadius: '8px',
-        border: '1px solid rgba(255,255,255,0.05)'
+
     });
 
     // 썸네일이 있는 경우
@@ -184,12 +181,11 @@ const createSingleThumbnail = (item, container) => {
     thumb.src = item.thumb;
 
     Object.assign(thumb.style, {
-        position: 'absolute',
-        top: '0',
-        left: '0',
+        // position: 'absolute',
+        // top: '0',
+        // left: '0',
         width: '100%',
-        height: 'calc(100% - 41px)',
-        objectFit: 'contain'
+        // objectFit: 'contain'
     });
 
     thumbWrap.appendChild(thumb);
@@ -229,8 +225,13 @@ const renderItem = (item, parent, query) => {
         const link = document.createElement('a');
         link.href = item.path;
         link.className = 'example-link';
-        link.title = `${stripTags(item.name)} sample view`
-        link.innerHTML = `<div class="example-name">${stripTags(item.name)}</div>`;
+        link.title = `${stripTags(item.name)} sample view`;
+
+        // 썸네일을 먼저 추가
+        createThumbnail(item, link);
+
+        // 이름을 나중에 추가
+        link.innerHTML += `<div class="example-name">${stripTags(item.name)}</div>`;
 
         // 샘플 페이지로 이동 시 현재 상태 저장
         link.addEventListener('click', (event) => {
@@ -238,9 +239,6 @@ const renderItem = (item, parent, query) => {
             saveState(); // 전체 상태 저장
             window.location.href = link.href;
         });
-
-        // 썸네일 추가
-        createThumbnail(item, link);
 
         itemElement.appendChild(link);
     } else {
@@ -304,6 +302,13 @@ const renderGroupContent = (item, container, query) => {
                 const subGroupTitle = document.createElement('h4');
                 subGroupTitle.className = 'subgroup-title';
                 subGroupTitle.textContent = subItem.name;
+                if (subItem.experimental) {
+                    const experimental = document.createElement('span');
+                    experimental.innerHTML = 'Experimental'
+                    experimental.className = 'experimental';
+                    subGroupTitle.appendChild(experimental)
+                }
+
                 subGroupContainer.appendChild(subGroupTitle);
 
                 // 재귀적으로 하위 그룹 내용 렌더링
@@ -475,33 +480,42 @@ const initialize = () => {
     if (savedState && savedState.scrollPosition) {
         restoreScrollPosition(container, savedState.scrollPosition);
     }
-	addMetaTags()
+    addMetaTags()
     // 페이지 이탈 시 상태 저장 (브라우저 닫기 등)
     window.addEventListener('beforeunload', saveState);
 };
 // initialize 함수 내에 메타 태그 추가
 const addMetaTags = () => {
-	// 기본 메타 태그
-	const metaTags = [
-		{ name: 'description', content: 'RedGPU - collection of examples for the JavaScript WebGPU library. Explore 2D/3D graphics rendering samples.' },
-		{ name: 'keywords', content: 'RedGPU, WebGPU, JavaScript, 3D, 2D, graphics, examples, library' },
-		{ property: 'og:title', content: 'RedGPU Examples - JavaScript WebGPU Library' },
-		{ property: 'og:description', content: 'Explore various examples and usage methods of the RedGPU JavaScript WebGPU library.' },
-		{ property: 'og:type', content: 'website' },
-		{ property: 'og:url', content: window.location.href },
-		{ name: 'twitter:card', content: 'summary_large_image' },
-		{ name: 'twitter:title', content: 'RedGPU Examples - JavaScript WebGPU Library' },
-		{ name: 'twitter:description', content: 'RedGPU - Collection of examples for the JavaScript graphics library utilizing the latest WebGPU API' }
-	];
+    // 기본 메타 태그
+    const metaTags = [
+        {
+            name: 'description',
+            content: 'RedGPU - collection of examples for the JavaScript WebGPU library. Explore 2D/3D graphics rendering samples.'
+        },
+        {name: 'keywords', content: 'RedGPU, WebGPU, JavaScript, 3D, 2D, graphics, examples, library'},
+        {property: 'og:title', content: 'RedGPU Examples - JavaScript WebGPU Library'},
+        {
+            property: 'og:description',
+            content: 'Explore various examples and usage methods of the RedGPU JavaScript WebGPU library.'
+        },
+        {property: 'og:type', content: 'website'},
+        {property: 'og:url', content: window.location.href},
+        {name: 'twitter:card', content: 'summary_large_image'},
+        {name: 'twitter:title', content: 'RedGPU Examples - JavaScript WebGPU Library'},
+        {
+            name: 'twitter:description',
+            content: 'RedGPU - Collection of examples for the JavaScript graphics library utilizing the latest WebGPU API'
+        }
+    ];
 
-	// 메타 태그 추가
-	metaTags.forEach(tag => {
-		const meta = document.createElement('meta');
-		Object.keys(tag).forEach(key => {
-			meta.setAttribute(key, tag[key]);
-		});
-		document.head.appendChild(meta);
-	});
+    // 메타 태그 추가
+    metaTags.forEach(tag => {
+        const meta = document.createElement('meta');
+        Object.keys(tag).forEach(key => {
+            meta.setAttribute(key, tag[key]);
+        });
+        document.head.appendChild(meta);
+    });
 };
 
 // initialize 함수 내에서 호출

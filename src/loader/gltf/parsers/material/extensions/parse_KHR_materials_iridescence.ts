@@ -7,11 +7,13 @@ const parse_KHR_materials_iridescence = (currentMaterial: PBRMaterial, KHR_mater
 	currentMaterial.KHR_iridescenceIor = KHR_materials_iridescence.iridescenceIor || 1.3
 	currentMaterial.KHR_iridescenceThicknessMinimum = KHR_materials_iridescence.iridescenceThicknessMinimum || 100
 	currentMaterial.KHR_iridescenceThicknessMaximum = KHR_materials_iridescence.iridescenceThicknessMaximum || 400
-
 	// currentMaterial.use2PathRender = true
 	currentMaterial.transparent = true
 	{
-		const {iridescenceTexture:iridescenceTextureInfo,iridescenceThicknessTexture:iridescenceThicknessTextureInfo} = KHR_materials_iridescence;
+		const {
+			iridescenceTexture: iridescenceTextureInfo,
+			iridescenceThicknessTexture: iridescenceThicknessTextureInfo
+		} = KHR_materials_iridescence;
 		if (iridescenceTextureInfo) {
 			parseMaterialTexture(
 				gltfLoader,

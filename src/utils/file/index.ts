@@ -3,7 +3,7 @@ import getFileName from "./getFileName";
 import getFilePath from "./getFilePath";
 
 export {
-    getFileExtension,
-    getFilePath,
-    getFileName
+	getFileExtension,
+	getFilePath,
+	getFileName
 }

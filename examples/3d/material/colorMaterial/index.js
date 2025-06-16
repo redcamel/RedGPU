@@ -62,7 +62,7 @@ const createSampleMesh = (redGPUContext, scene) => {
 	return mesh;
 };
 
-// Function to render Test Pane (for controls)
+
 // 테스트용 UI를 구성하는 함수
 const renderTestPane = async (redGPUContext, mesh) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');

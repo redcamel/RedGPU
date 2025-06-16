@@ -22,8 +22,8 @@ import GLTFLoader from "./loader/gltf/GLTFLoader";
 import SystemCode from "./resources/systemCode/SystemCode";
 
 export {
-    init,
-    SystemCode,
-    GLTFLoader
+	init,
+	SystemCode,
+	GLTFLoader
 }
 

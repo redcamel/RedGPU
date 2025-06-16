@@ -121,6 +121,22 @@ html, body {
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     padding-bottom: 5px;
     font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.experimental{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6em;
+    color: #fff;
+    padding: 4px 8px;
+    line-height: 1;
+    width: fit-content;
+    background: #c74606;
+    border-radius: 4px;
+
 }
 
 .project_title {
@@ -169,9 +185,13 @@ html, body {
 
 /* 아이템 및 링크 */
 .example-item {
-    width: 22%;
-    max-width: 22%;
+    width: 200px;
+    max-width: 200px;
     line-height: 1;
+    border-radius: 8px;
+    overflow: hidden;
+    height: fit-content;
+
 
 }
 /* 모바일 화면 분기 처리 */
@@ -193,24 +213,19 @@ html, body {
 }
 
 .example-name {
-    position: absolute;
-    left:0;
-    right:0;
-    bottom:0;
-    /*margin-bottom: 5px;*/
-    font-size: 1.2em;
-    line-height: 1;
+    font-size: 1.0em;
     z-index: 1;
-    border-radius: 0 0 8px 8px;
     display: flex;
     align-items: center;
-    padding: 12px 12px;
-    border-top: 1px solid rgba(255, 255, 255, 0.16);
+    padding: 5px 12px 8px;
     background: #000 linear-gradient(to right, rgba(155, 155, 155, 0.1) 0%, rgba(0, 0, 0, 0.0) 100%);
+    line-height: 1.4;
+    word-break: keep-all;
+    box-shadow: 0 -30px 50px rgba(0, 0, 0, 0.5) ;
+    border-top:1px solid rgba(255, 255, 255, 0.06);
 }
 
 .example-link {
-    display: block;
     text-decoration: none;
     color: rgb(221, 132, 80);
     transition: color 0.2s;
@@ -233,7 +248,9 @@ a {
     pointer-events: painted;
 }
 a img{
-
+    border-radius: 8px 8px 0 0;
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    border-bottom: none;
 }
 a:hover {
     color: #fff;
@@ -242,22 +259,20 @@ a:hover {
 a img {
     /*opacity: 0.75;*/
     /*transition: opacity 0.5s;*/
-    filter:grayscale(0.3);
+    /*filter:grayscale(0.3);*/
     transition: filter 0.26s ease-in-out;
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 a:hover img {
-    filter:grayscale(0);
+    /*filter:grayscale(0);*/
 }
 
-a div {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    width: 100%;
-    white-space: nowrap;
-}
+/*a div {*/
+/*    overflow: hidden;*/
+/*    text-overflow: ellipsis;*/
+/*    width: 100%;*/
+/*    white-space: nowrap;*/
+/*}*/
 
 .footer a {
     color: rgb(242, 169, 113);

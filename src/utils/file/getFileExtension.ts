@@ -6,16 +6,16 @@
  * @throws {Error} If the URL is empty or undefined.
  */
 const getFileExtension = (url: string): string => {
-    if (!url || url.trim().length === 0) {
-        throw new Error('URL must not be empty or undefined');
-    }
-    const parts = url.split('/');
-    const fileName = parts[parts.length - 1];
-    const extensionStartIndex = fileName.lastIndexOf('.');
-    // No extension found
-    if (extensionStartIndex === -1) {
-        return '';
-    }
-    return fileName.substring(extensionStartIndex + 1).toLowerCase();
+	if (!url || url.trim().length === 0) {
+		throw new Error('URL must not be empty or undefined');
+	}
+	const parts = url.split('/');
+	const fileName = parts[parts.length - 1];
+	const extensionStartIndex = fileName.lastIndexOf('.');
+	// No extension found
+	if (extensionStartIndex === -1) {
+		return '';
+	}
+	return fileName.substring(extensionStartIndex + 1).toLowerCase();
 };
 export default getFileExtension;

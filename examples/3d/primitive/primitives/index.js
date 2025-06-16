@@ -67,9 +67,9 @@ const createPrimitive = (redGPUContext, scene) => {
 	// 정렬을 위한 중심 위치 설정
 	const gap = 3.0; // 객체 간 간격
 	const centerX = 0; // X축 중심 기준
-	const startY = 1; // 첫 번째 라인의 높이
-	const wireframeY = -2; // 두 번째 라인의 높이 설정
-	const pointY = -5; // 세 번째 라인의 높이 설정 (점 라인)
+	const startY = 2.5; // 첫 번째 라인의 높이
+	const wireframeY = -0.5; // 두 번째 라인의 높이 설정
+	const pointY = -3.5; // 세 번째 라인의 높이 설정 (점 라인)
 
 	// Create and add normal objects to the scene
 	// 기본 객체들을 씬에 추가

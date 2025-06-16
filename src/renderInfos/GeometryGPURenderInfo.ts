@@ -1,11 +1,11 @@
 class GeometryGPURenderInfo {
-    buffers: GPUVertexBufferLayout[]
+	buffers: GPUVertexBufferLayout[]
 
-    constructor(
-        buffers: GPUVertexBufferLayout[],
-    ) {
-        this.buffers = buffers;
-    }
+	constructor(
+		buffers: GPUVertexBufferLayout[],
+	) {
+		this.buffers = buffers;
+	}
 }
 
 Object.freeze(GeometryGPURenderInfo)

@@ -3,6 +3,7 @@ import createCameraTest from "./createCameraTest.js";
 import createGridTest from "./createGridTest.js";
 import setSceneListTest from "./scene/setSceneListTest.js";
 import setSingleSceneTest from "./scene/setSingleSceneTest.js";
+import setAntialiasing_pane from "./setAntialiasing_pane.js";
 import setRedGPUTest_pane from "./setRedGPUTest_pane.js";
 import setSingleViewTest from "./view/setSingleViewTest.js";
 import setViewListTest from "./view/setViewListTest.js";
@@ -29,4 +30,5 @@ export {
 	createGridTest,
 	createBitmapTextureTest,
 	setRedGPUTest_pane,
+	setAntialiasing_pane
 }

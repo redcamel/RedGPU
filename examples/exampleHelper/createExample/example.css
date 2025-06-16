@@ -19,14 +19,15 @@ html, body {
     position: relative;
 
 }
+
 .footer {
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
-    height: 72px;
-    background: rgba(0, 0, 0, 0.75);
+    height: 70px;
+    background: rgb(32, 32, 32);
     padding: 0 16px;
     display: flex;
     justify-content: space-between;
@@ -40,15 +41,18 @@ html, body {
         font-size: 14px;
     }
 }
-.footer_left{
+
+.footer_left {
     line-height: 1;
     display: flex;
     align-items: center;
     gap: 8px;
-    img{
+
+    img {
         line-height: 1;
     }
 }
+
 /* width */
 ::-webkit-scrollbar {
     width: 4px;
@@ -83,11 +87,12 @@ html, body {
     color: #fff;
 
 }
+
 .navigation-bar {
     display: flex;
     width: 100%;
     justify-content: space-between;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .nav-button {
@@ -110,7 +115,8 @@ html, body {
 .nav-button span {
     margin-left: 4px;
 }
-.nav-button.category-button{
+
+.nav-button.category-button {
     background: transparent;
 }
 
@@ -125,24 +131,25 @@ html, body {
     }
 }
 
-.item-title{
+.item-title {
     position: absolute;
-    top:50%;
-    left:50%;
-    transform: translate(-50%,-50%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     line-height: 1;
     font-size: 1.4em;
-    color:rgb(221, 132, 80);
+    color: rgb(221, 132, 80);
     font-weight: 700;
 }
-.item-description{
+
+.item-description {
     position: absolute;
-    top:96px;
-    left:50%;
-    transform: translate(-50%,-50%);
+    top: 96px;
+    left: 50%;
+    transform: translate(-50%, -50%);
     line-height: 1.4;
     font-size: 1em;
-    color:#a4a7cc;
+    color: #a4a7cc;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -153,9 +160,9 @@ html, body {
 
 @media screen and (max-width: 480px) {
     .item-description {
-        top:72px;
-        left:0;
-        right:0;
+        top: 72px;
+        left: 0;
+        right: 0;
         padding: 0 12px;
         transform: none;
         font-size: 0.8em;
@@ -163,4 +170,32 @@ html, body {
         text-align: left;
 
     }
+}
+
+.labelNormal {
+    position: absolute;
+    bottom: 0;
+    left: 25%;
+    transform: translate(-50%, 0);
+    color: #fff;
+    background: #5b52aa;
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    padding: 12px;
+    font-size: 12px;
+}
+
+.labelEffect {
+    position: absolute;
+    bottom: 0;
+    left: 75%;
+    transform: translate(-50%, 0);
+    color: #fff;
+    background: #5b52aa;
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    padding: 12px;
+    font-size: 12px;
 }
