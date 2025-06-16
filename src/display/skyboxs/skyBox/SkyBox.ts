@@ -13,6 +13,7 @@ import ResourceManager from "../../../resources/resourceManager/ResourceManager"
 import CubeTexture from "../../../resources/texture/CubeTexture";
 import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validateRedGPUContext";
+import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import vertexModuleSource from './shader/vertex.wgsl';
 import SkyBoxMaterial from "./SkyBoxMaterial";
 
@@ -41,6 +42,16 @@ class SkyBox {
 		this.#primitiveState.cullMode = GPU_CULL_MODE.NONE
 		this.#depthStencilState = new DepthStencilState(this)
 		this.#depthStencilState.depthWriteEnabled = false
+	}
+	set skyboxTexture(texture:CubeTexture) {
+		if (!texture) {
+			consoleAndThrowError('SkyBox requires a valid CubeTexture')
+		}else{
+			this._material.skyboxTexture = texture
+		}
+	}
+	get skyboxTexture():CubeTexture {
+		return this._material.skyboxTexture
 	}
 
 	render(debugViewRenderState: RenderViewStateData) {

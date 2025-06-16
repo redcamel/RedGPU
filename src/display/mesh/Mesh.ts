@@ -10,6 +10,7 @@ import DefineForVertex from "../../resources/defineProperty/DefineForVertex";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import InstanceIdGenerator from "../../utils/InstanceIdGenerator";
+import mat4ToEuler from "../../utils/math/matToEuler";
 import uuidToUint from "../../utils/uuidToUint";
 import createMeshVertexUniformBuffers from "./core/createMeshVertexUniformBuffers";
 import Object3DContainer from "./core/Object3DContainer";
@@ -284,7 +285,21 @@ class Mesh extends MeshBase {
 		this.#events[eventName] = callback
 		this.#eventsNum = Object.keys(this.#events).length
 	}
-
+	lookAt(targetX: number | [number, number, number], targetY?: number, targetZ?: number): void {
+		var up = new Float32Array([0, 1, 0]);
+		var tPosition = [];
+		var tRotation = []
+		tPosition[0] = targetX;
+		tPosition[1] = targetY;
+		tPosition[2] = targetZ;
+		//out, eye, center, up
+		mat4.identity(this.localMatrix);
+		mat4.targetTo(this.localMatrix, [this.#x, this.#y, this.#z], tPosition, up);
+		tRotation = mat4ToEuler(this.localMatrix, []);
+		this.rotationX = -tRotation[0] * 180 / Math.PI;
+		this.rotationY = -tRotation[1] * 180 / Math.PI;
+		this.rotationZ = -tRotation[2] * 180 / Math.PI;
+	}
 	setScale(x: number, y?: number, z?: number) {
 		y = y ?? x;
 		z = z ?? x;

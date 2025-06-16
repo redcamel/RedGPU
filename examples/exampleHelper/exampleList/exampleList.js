@@ -186,6 +186,15 @@ const ExampleList = [
 							en: `An example of child node management using RedGPU, showing how to dynamically control nodes by adding, deleting, changing index, replacing, and randomizing color of children.`
 						},
 					},
+					{
+						name: 'lookAt Methods',
+						path: '3d/mesh/lookAt',
+						thumb: '3d/mesh/lookAt/thumb.png',
+						description: {
+							ko: ``,
+							en: ``
+						},
+					},
 				]
 			},
 			{
