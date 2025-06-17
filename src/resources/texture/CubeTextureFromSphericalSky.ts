@@ -4,7 +4,7 @@ import basicRegisterResource from "../resourceManager/core/basicRegisterResource
 import basicUnregisterResource from "../resourceManager/core/basicUnregisterResource";
 import ResourceStateBitmapTexture from "../resourceManager/resourceState/ResourceStateBitmapTexture";
 import ResourceStateCubeTextureFromSphericalSky
-    from "../resourceManager/resourceState/ResourceStateCubeTextureFromSphericalSky";
+	from "../resourceManager/resourceState/ResourceStateCubeTextureFromSphericalSky";
 import loadAndCreateBitmapImage from "./core/loadAndCreateBitmapImage";
 
 const MANAGED_STATE_KEY = 'managedCubeTextureFromSphericalSkyState'

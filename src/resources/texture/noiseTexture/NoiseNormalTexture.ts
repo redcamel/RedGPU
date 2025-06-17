@@ -1,0 +1,128 @@
+import RedGPUContext from "../../../context/RedGPUContext";
+import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
+import validateUintRange from "../../../runtimeChecker/validateFunc/validateUintRange";
+import ANoiseTexture from "./core/ANoiseTexture";
+import NoiseTexture from "./NoiseTexture";
+
+const BASIC_OPEIONS = {
+	normalStrength:1
+}
+class NoiseNormalTexture extends NoiseTexture {
+	#normalStrength:number = BASIC_OPEIONS.normalStrength
+	constructor(
+		redGPUContext: RedGPUContext,
+		width: number = 512,
+		height: number = 512,
+	) {
+
+		const mainLogic = `
+            /* 현재 픽셀의 높이 */
+						let center_height = getNoise2D(uv, uniforms);
+						
+						/* 텍셀 크기 계산 */
+						let texel_size = 1.0 / vec2<f32>(textureDimensions(outputTexture));
+						
+						/* 주변 픽셀의 높이값 샘플링 */
+						let height_left = getNoise2D(uv + vec2<f32>(-texel_size.x, 0.0), uniforms);
+						let height_right = getNoise2D(uv + vec2<f32>(texel_size.x, 0.0), uniforms);
+						let height_up = getNoise2D(uv + vec2<f32>(0.0, -texel_size.y), uniforms);
+						let height_down = getNoise2D(uv + vec2<f32>(0.0, texel_size.y), uniforms);
+						
+						/* 그라디언트 계산 */
+						let gradient_x = (height_right - height_left) * 0.5;
+						let gradient_y = (height_down - height_up) * 0.5;
+						
+						/* 노멀 벡터 계산 */
+						let normal = normalize(vec3<f32>(
+						    gradient_x * uniforms.normalStrength,
+						    gradient_y * uniforms.normalStrength,
+						    1.0
+						));
+						
+						/* 노멀을 0~1 범위로 변환 (탄젠트 스페이스) */
+						let normal_color = normal * 0.5 + 0.5;
+						
+						/* 최종 색상 (노멀맵 RGB) */
+						let color = vec4<f32>(normal_color, 1.0);
+
+        `;
+
+		const uniformStruct = `normalStrength: f32`;
+		const uniformDefaults ={
+			...BASIC_OPEIONS
+		}
+		const helperFunctions = ``
+		super(redGPUContext, width, height,{
+			uniformStruct,
+			mainLogic,
+			uniformDefaults,
+			helperFunctions
+		});
+	}
+	/* Frequency (주파수/스케일) */
+	get normalStrength(): number {
+		return this.#normalStrength;
+	}
+
+	set normalStrength(value: number) {
+		validatePositiveNumberRange(value);
+		this.#normalStrength = value;
+		this.updateUniform('normalStrength', value);
+	}
+	applyPreset(preset: 'rock' | 'metal' | 'leather' | 'concrete' | 'water' | 'skin' | 'fabric'): void {
+		switch (preset) {
+			case 'rock':
+				this.frequency = 8.0;
+				this.octaves = 6;
+				this.persistence = 0.5;
+				this.lacunarity = 2.0;
+				this.normalStrength = 2.0;
+				break;
+			case 'metal':
+				this.frequency = 32.0;
+				this.octaves = 4;
+				this.persistence = 0.4;
+				this.lacunarity = 2.5;
+				this.normalStrength = 1.5;
+				break;
+			case 'leather':
+				this.frequency = 16.0;
+				this.octaves = 5;
+				this.persistence = 0.6;
+				this.lacunarity = 2.2;
+				this.normalStrength = 1.2;
+				break;
+			case 'concrete':
+				this.frequency = 12.0;
+				this.octaves = 7;
+				this.persistence = 0.6;
+				this.lacunarity = 2.0;
+				this.normalStrength = 1.8;
+				break;
+			case 'water':
+				this.frequency = 24.0;
+				this.octaves = 3;
+				this.persistence = 0.3;
+				this.lacunarity = 2.2;
+				this.normalStrength = 0.5;
+				break;
+			case 'skin':
+				this.frequency = 64.0;
+				this.octaves = 5;
+				this.persistence = 0.3;
+				this.lacunarity = 2.1;
+				this.normalStrength = 0.3;
+				break;
+			case 'fabric':
+				this.frequency = 20.0;
+				this.octaves = 2;
+				this.persistence = 0.3;
+				this.lacunarity = 2.0;
+				this.normalStrength = 0.8;
+				break;
+		}
+	}
+
+}
+
+export default NoiseNormalTexture;
