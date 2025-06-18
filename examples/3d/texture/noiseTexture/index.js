@@ -149,23 +149,23 @@ const renderTestPane = async (redGPUContext, targetNoiseTexture) => {
 		targetNoiseTexture.seed = evt.value;
 
 	});
-	if (targetNoiseTexture.normalStrength) {
-		pane.addBinding(targetNoiseTexture, 'normalStrength', {
+	if (targetNoiseTexture instanceof RedGPU.Resource.NoiseNormalTexture) {
+		pane.addBinding(targetNoiseTexture, 'strength', {
 			min: 0,
 			max: 5,
 			step: 0.01
 		}).on('change', (evt) => {
-			targetNoiseTexture.normalStrength = evt.value;
+			targetNoiseTexture.strength = evt.value;
 
 		});
 	}
-	if (targetNoiseTexture.displacementScale) {
-		pane.addBinding(targetNoiseTexture, 'displacementScale', {
+	if (targetNoiseTexture instanceof RedGPU.Resource.NoiseDisplacementTexture) {
+		pane.addBinding(targetNoiseTexture, 'strength', {
 			min: 0,
 			max: 5,
 			step: 0.01
 		}).on('change', (evt) => {
-			targetNoiseTexture.displacementScale = evt.value;
+			targetNoiseTexture.strength = evt.value;
 
 		});
 

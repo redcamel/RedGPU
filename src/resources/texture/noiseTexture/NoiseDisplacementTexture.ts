@@ -3,11 +3,11 @@ import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/va
 import NoiseTexture from "./NoiseTexture";
 
 const BASIC_OPEIONS = {
-	displacementScale: 1
+	strength: 1
 }
 
 class NoiseDisplacementTexture extends NoiseTexture {
-	#displacementScale: number = BASIC_OPEIONS.displacementScale
+	#strength: number = BASIC_OPEIONS.strength
 
 	constructor(
 		redGPUContext: RedGPUContext,
@@ -16,11 +16,11 @@ class NoiseDisplacementTexture extends NoiseTexture {
 	) {
 		const mainLogic = `
 					let noiseValue = getNoiseByDimension(uv, uniforms);
-					let displacement = (noiseValue - 0.5) * uniforms.displacementScale;
+					let displacement = (noiseValue - 0.5) * uniforms.strength;
 					let normalizedDisplacement = clamp(displacement * 0.5 + 0.5, 0.0, 1.0);
 					let color = vec4<f32>(normalizedDisplacement, normalizedDisplacement, normalizedDisplacement, 1.0);
         `;
-		const uniformStruct = `displacementScale: f32`;
+		const uniformStruct = `strength: f32`;
 		const uniformDefaults = {
 			...BASIC_OPEIONS
 		}
@@ -34,14 +34,14 @@ class NoiseDisplacementTexture extends NoiseTexture {
 	}
 
 	/* Frequency (주파수/스케일) */
-	get displacementScale(): number {
-		return this.#displacementScale;
+	get strength(): number {
+		return this.#strength;
 	}
 
-	set displacementScale(value: number) {
+	set strength(value: number) {
 		validatePositiveNumberRange(value);
-		this.#displacementScale = value;
-		this.updateUniform('displacementScale', value);
+		this.#strength = value;
+		this.updateUniform('strength', value);
 	}
 	applyPreset(preset: 'mountains' | 'waves' | 'crater' | 'wrinkles' | 'cobblestone' | 'dunes' | 'coral' | 'bark'): void {
 		switch (preset) {
@@ -50,7 +50,7 @@ class NoiseDisplacementTexture extends NoiseTexture {
 				this.octaves = 6;               // 복잡한 지형
 				this.persistence = 0.6;         // 강한 기복
 				this.lacunarity = 2.0;
-				this.displacementScale = 2.5;   // 극적인 높낮이
+				this.strength = 2.5;   // 극적인 높낮이
 				break;
 
 			case 'waves':
@@ -58,7 +58,7 @@ class NoiseDisplacementTexture extends NoiseTexture {
 				this.octaves = 3;               // 부드러운 곡선
 				this.persistence = 0.4;         // 자연스러운 흐름
 				this.lacunarity = 2.1;
-				this.displacementScale = 1.2;   // 부드러운 물결
+				this.strength = 1.2;   // 부드러운 물결
 				break;
 
 			case 'crater':
@@ -66,7 +66,7 @@ class NoiseDisplacementTexture extends NoiseTexture {
 				this.octaves = 4;               // 중간 복잡도
 				this.persistence = 0.8;         // 극명한 높낮이
 				this.lacunarity = 2.5;
-				this.displacementScale = 3.0;   // 깊은 크레이터
+				this.strength = 3.0;   // 깊은 크레이터
 				break;
 
 			case 'wrinkles':
@@ -74,7 +74,7 @@ class NoiseDisplacementTexture extends NoiseTexture {
 				this.octaves = 5;               // 복잡한 패턴
 				this.persistence = 0.3;         // 미묘한 변화
 				this.lacunarity = 2.2;
-				this.displacementScale = 0.8;   // 미세한 주름
+				this.strength = 0.8;   // 미세한 주름
 				break;
 
 			case 'cobblestone':
@@ -82,7 +82,7 @@ class NoiseDisplacementTexture extends NoiseTexture {
 				this.octaves = 4;               // 불규칙성
 				this.persistence = 0.5;         // 중간 높낮이
 				this.lacunarity = 2.0;
-				this.displacementScale = 1.5;   // 적당한 돌출
+				this.strength = 1.5;   // 적당한 돌출
 				break;
 
 			case 'dunes':
@@ -90,7 +90,7 @@ class NoiseDisplacementTexture extends NoiseTexture {
 				this.octaves = 3;               // 부드러운 곡선
 				this.persistence = 0.7;         // 뚜렷한 기복
 				this.lacunarity = 1.8;
-				this.displacementScale = 2.0;   // 큰 모래 언덕
+				this.strength = 2.0;   // 큰 모래 언덕
 				break;
 
 			case 'coral':
@@ -98,7 +98,7 @@ class NoiseDisplacementTexture extends NoiseTexture {
 				this.octaves = 6;               // 매우 디테일
 				this.persistence = 0.6;         // 불규칙한 성장
 				this.lacunarity = 2.3;
-				this.displacementScale = 1.8;   // 복잡한 표면
+				this.strength = 1.8;   // 복잡한 표면
 				break;
 
 			case 'bark':
@@ -106,7 +106,7 @@ class NoiseDisplacementTexture extends NoiseTexture {
 				this.octaves = 4;               // 자연스러운 패턴
 				this.persistence = 0.4;         // 미묘한 굴곡
 				this.lacunarity = 2.1;
-				this.displacementScale = 1.0;   // 자연스러운 껍질
+				this.strength = 1.0;   // 자연스러운 껍질
 				break;
 		}
 	}
