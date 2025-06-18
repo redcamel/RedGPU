@@ -1,4 +1,5 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
+import validateNumber from "../../../../runtimeChecker/validateFunc/validateNumber";
 import validatePositiveNumberRange from "../../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import validateUintRange from "../../../../runtimeChecker/validateFunc/validateUintRange";
 import consoleAndThrowError from "../../../../utils/consoleAndThrowError";
@@ -29,7 +30,9 @@ const BASIC_OPTIONS = {
 	persistence: 0.5,
 	lacunarity: 2.0,
 	seed: 0.0,
-	noiseDimension: NOISE_DIMENSION.MODE_2D
+	noiseDimension: NOISE_DIMENSION.MODE_2D,
+	animationDirectionX:1,
+	animationDirectionY:1
 }
 
 class ANoiseTexture extends ManagedResourceBase {
@@ -40,8 +43,8 @@ class ANoiseTexture extends ManagedResourceBase {
 	useMipmap;
 	src;
 	#gpuTexture: GPUTexture;
-	#COMPUTE_WORKGROUP_SIZE_X = 16;
-	#COMPUTE_WORKGROUP_SIZE_Y = 4;
+	#COMPUTE_WORKGROUP_SIZE_X = 8;
+	#COMPUTE_WORKGROUP_SIZE_Y = 8;
 	#COMPUTE_WORKGROUP_SIZE_Z = 1;
 	#textureComputeShaderModule: GPUShaderModule;
 	#textureComputeBindGroup: GPUBindGroup;
@@ -60,6 +63,10 @@ class ANoiseTexture extends ManagedResourceBase {
 	#lacunarity: number = BASIC_OPTIONS.lacunarity;     /* 각 옥타브마다 주파수 증가 비율 (값이 클수록 극명한 대비) */
 	#seed: number = BASIC_OPTIONS.seed;           /* 노이즈 패턴의 시작점 (같은 시드 = 같은 패턴) */
 	#noiseDimension: number = BASIC_OPTIONS.noiseDimension
+	//
+	#time:number=0
+	#animationDirectionX:number=BASIC_OPTIONS.animationDirectionX
+	#animationDirectionY:number=BASIC_OPTIONS.animationDirectionY
 
 	constructor(
 		redGPUContext: RedGPUContext,
@@ -107,6 +114,36 @@ class ANoiseTexture extends ManagedResourceBase {
 		this.#executeComputePass();
 	}
 
+	get time(): number {
+		return this.#time;
+	}
+
+	set time(value: number) {
+		validatePositiveNumberRange(value);
+		this.#time = value;
+		this.updateUniform('time', value);
+	}
+
+	get animationDirectionX(): number {
+		return this.#animationDirectionX;
+	}
+
+	set animationDirectionX(value: number) {
+		validateNumber(value);
+		this.#animationDirectionX = value;
+		this.updateUniform('animationDirectionX', value);
+	}
+
+	get animationDirectionY(): number {
+		return this.#animationDirectionY;
+	}
+
+	set animationDirectionY(value: number) {
+		validateNumber(value);
+		this.#animationDirectionY = value;
+		this.updateUniform('animationDirectionY', value);
+	}
+
 	/* 렌더링 */
 	render(time: number) {
 		this.updateUniform('time', time);
@@ -148,6 +185,8 @@ class ANoiseTexture extends ManagedResourceBase {
             struct Uniforms {
                 time: f32,
                 noiseDimension : f32,
+                animationDirectionX: f32,
+                animationDirectionY: f32,
 								frequency: f32,
 								amplitude: f32,
 								octaves: i32,
@@ -179,8 +218,10 @@ class ANoiseTexture extends ManagedResourceBase {
                 
                 let dimW = f32(dimensions.x);
                 let dimH = f32(dimensions.y);
-                let uv = vec2<f32>((f32(index.x) + 0.5) / dimW, (f32(index.y) + 0.5) / dimH);
+                let base_uv = vec2<f32>((f32(index.x) + 0.5) / dimW, (f32(index.y) + 0.5) / dimH);
                 
+              
+let uv = base_uv + vec2<f32>(uniforms.time * 0.001 * uniforms.animationDirectionX, uniforms.time * 0.001 * uniforms.animationDirectionY) * 0.1;
                 ${this.#currentEffect.mainLogic}
                 
                 textureStore(outputTexture, index, color);

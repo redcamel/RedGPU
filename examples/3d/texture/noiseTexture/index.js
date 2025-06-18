@@ -45,19 +45,24 @@ RedGPU.init(
 		// material.diffuseTexture = new RedGPU.Resource.NoiseTexture(redGPUContext)
 		// material.normalTexture = new RedGPU.Resource.NoiseNormalTexture(redGPUContext)
 		material.displacementTexture = new RedGPU.Resource.NoiseDisplacementTexture(redGPUContext)
-
+		material.diffuseTexture = 	material.displacementTexture
 		const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
 		mesh.primitiveState.cullMode = 'none';
 		mesh.setPosition(0, 0, 0);
 		mesh.rotationX = 90
 		scene.addChild(mesh);
 
+		const testData = {useAnimation:true}
+		renderTestPane(redGPUContext, material.displacementTexture,testData);
 		// Create a renderer and start rendering
 		// 렌더러 생성 후 렌더링 시작
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		renderer.start(redGPUContext, (time) => {
+			if(testData.useAnimation) {
+				material.displacementTexture.time = time
+			}
 		});
-		renderTestPane(redGPUContext, material.displacementTexture);
+
 	},
 	(failReason) => {
 		// Handle initialization failure
@@ -72,7 +77,7 @@ RedGPU.init(
 	}
 );
 
-const renderTestPane = async (redGPUContext, targetNoiseTexture) => {
+const renderTestPane = async (redGPUContext, targetNoiseTexture,testData) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const {setSeparator} = await import("../../../exampleHelper/createExample/panes/index.js");
 	const pane = new Pane();
@@ -90,14 +95,14 @@ const renderTestPane = async (redGPUContext, targetNoiseTexture) => {
 // 	pane.addButton({title: '🧵 skin'}).on('click', () => targetNoiseTexture.applyPreset('skin'));
 // 	pane.addButton({title: '🧵 fabric'}).on('click', () => targetNoiseTexture.applyPreset('fabric'));
 
-	pane.addButton({title: '🧵 mountains'}).on('click', () => targetNoiseTexture.applyPreset('mountains'));
-	pane.addButton({title: '🧵 waves'}).on('click', () => targetNoiseTexture.applyPreset('waves'));
-	pane.addButton({title: '🧵 crater'}).on('click', () => targetNoiseTexture.applyPreset('crater'));
-	pane.addButton({title: '🧵 wrinkles'}).on('click', () => targetNoiseTexture.applyPreset('wrinkles'));
-	pane.addButton({title: '🧵 cobblestone'}).on('click', () => targetNoiseTexture.applyPreset('cobblestone'));
-	pane.addButton({title: '🧵 dunes'}).on('click', () => targetNoiseTexture.applyPreset('dunes'));
-	pane.addButton({title: '🧵 coral'}).on('click', () => targetNoiseTexture.applyPreset('coral'));
-	pane.addButton({title: '🧵 bark'}).on('click', () => targetNoiseTexture.applyPreset('bark'));
+	pane.addButton({title: '🧵 mountains'}).on('click', () => {targetNoiseTexture.applyPreset('mountains'),pane.refresh()} );
+	pane.addButton({title: '🧵 waves'}).on('click', () => {targetNoiseTexture.applyPreset('waves'),pane.refresh()});
+	pane.addButton({title: '🧵 crater'}).on('click', () => {targetNoiseTexture.applyPreset('crater'),pane.refresh()});
+	pane.addButton({title: '🧵 wrinkles'}).on('click', () => {targetNoiseTexture.applyPreset('wrinkles'),pane.refresh()});
+	pane.addButton({title: '🧵 cobblestone'}).on('click', () => {targetNoiseTexture.applyPreset('cobblestone'),pane.refresh()});
+	pane.addButton({title: '🧵 dunes'}).on('click', () => {targetNoiseTexture.applyPreset('dunes'),pane.refresh()});
+	pane.addButton({title: '🧵 coral'}).on('click', () => {targetNoiseTexture.applyPreset('coral'),pane.refresh()});
+	pane.addButton({title: '🧵 bark'}).on('click', () => {targetNoiseTexture.applyPreset('bark'),pane.refresh()});
 	// Add a separator
 	setSeparator(pane, "Parameters");
 
@@ -184,4 +189,24 @@ const renderTestPane = async (redGPUContext, targetNoiseTexture) => {
 		targetNoiseTexture.noiseDimension = evt.value;
 
 	});
+
+	const animation = pane.addFolder({title: 'Animation', expanded: true});
+	animation.addBinding(testData, 'useAnimation', )
+	animation.addBinding(targetNoiseTexture, 'animationDirectionX', {
+		min:-1,
+		max:1,
+		step:0.001
+	}).on('change', (evt) => {
+		targetNoiseTexture.animationDirectionX = evt.value;
+
+	});
+	animation.addBinding(targetNoiseTexture, 'animationDirectionY', {
+		min:-1,
+		max:1,
+		step:0.001
+	}).on('change', (evt) => {
+		targetNoiseTexture.animationDirectionY = evt.value;
+
+	});
+
 };
