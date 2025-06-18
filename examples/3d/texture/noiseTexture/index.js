@@ -15,7 +15,8 @@ RedGPU.init(
 		const controller = new RedGPU.Camera.ObitController(redGPUContext);
 		controller.distance = 5;
 		controller.speedDistance = 0.3;
-
+		controller.distance = 55;
+		controller.speedDistance = 2;
 		// Create a scene and add a view with the camera controller
 		// 씬을 생성하고 카메라 컨트롤러와 함께 뷰 추가
 		const scene = new RedGPU.Display.Scene();
@@ -29,30 +30,34 @@ RedGPU.init(
 		// Add a view and configure it
 		// 뷰 생성 및 설정 추가
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		view.grid = true;
+		// view.grid = true;
 		redGPUContext.addView(view);
 
 		// Create a single mesh
 		// 단일 메쉬 생성
-		const geometry = new RedGPU.Primitive.Box(redGPUContext,2,2,2);
+		// const geometry = new RedGPU.Primitive.Box(redGPUContext, 2, 2, 2,32,32,32);
+		// const geometry = new RedGPU.Primitive.Sphere(redGPUContext, 5,32,32,32);
+		const geometry = new RedGPU.Primitive.Plane(redGPUContext, 50, 50, 1000,1000);
 		const material = new RedGPU.Material.PhongMaterial(redGPUContext);
 		const diffuseTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, "../../../assets/UV_Grid_Sm.jpg");
 
 		material.diffuseTexture = diffuseTexture
 		// material.diffuseTexture = new RedGPU.Resource.NoiseTexture(redGPUContext)
-		material.normalTexture = new RedGPU.Resource.NoiseNormalTexture(redGPUContext)
+		// material.normalTexture = new RedGPU.Resource.NoiseNormalTexture(redGPUContext)
+		material.displacementTexture = new RedGPU.Resource.NoiseDisplacementTexture(redGPUContext)
 
 		const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
+		mesh.primitiveState.cullMode = 'none';
 		mesh.setPosition(0, 0, 0);
+		mesh.rotationX = 90
 		scene.addChild(mesh);
 
 		// Create a renderer and start rendering
 		// 렌더러 생성 후 렌더링 시작
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		renderer.start(redGPUContext, (time) => {
-
 		});
-		renderTestPane(redGPUContext, material.normalTexture);
+		renderTestPane(redGPUContext, material.displacementTexture);
 	},
 	(failReason) => {
 		// Handle initialization failure
@@ -67,7 +72,7 @@ RedGPU.init(
 	}
 );
 
-const renderTestPane = async (redGPUContext, noiseTexture) => {
+const renderTestPane = async (redGPUContext, targetNoiseTexture) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const {setSeparator} = await import("../../../exampleHelper/createExample/panes/index.js");
 	const pane = new Pane();
@@ -76,73 +81,107 @@ const renderTestPane = async (redGPUContext, noiseTexture) => {
 	// 프리셋 버튼 추가
 	setSeparator(pane, "Presets");
 
-
 ///
-	pane.addButton({title: '☁️ rock'}).on('click', ()=>noiseTexture.applyPreset('rock'));
-	pane.addButton({title: '🏛️ metal'}).on('click', ()=>noiseTexture.applyPreset('metal'));
-	pane.addButton({title: '🪵 leather'}).on('click',()=> noiseTexture.applyPreset('leather'));
-	pane.addButton({title: '🏔️ concrete'}).on('click', ()=>noiseTexture.applyPreset('concrete'));
-	pane.addButton({title: '🧵 water'}).on('click', ()=>noiseTexture.applyPreset('water'));
-	pane.addButton({title: '🧵 skin'}).on('click', ()=>noiseTexture.applyPreset('skin'));
-	pane.addButton({title: '🧵 fabric'}).on('click', ()=>noiseTexture.applyPreset('fabric'));
+// 	pane.addButton({title: '☁️ rock'}).on('click', () => targetNoiseTexture.applyPreset('rock'));
+// 	pane.addButton({title: '🏛️ metal'}).on('click', () => targetNoiseTexture.applyPreset('metal'));
+// 	pane.addButton({title: '🪵 leather'}).on('click', () => targetNoiseTexture.applyPreset('leather'));
+// 	pane.addButton({title: '🏔️ concrete'}).on('click', () => targetNoiseTexture.applyPreset('concrete'));
+// 	pane.addButton({title: '🧵 water'}).on('click', () => targetNoiseTexture.applyPreset('water'));
+// 	pane.addButton({title: '🧵 skin'}).on('click', () => targetNoiseTexture.applyPreset('skin'));
+// 	pane.addButton({title: '🧵 fabric'}).on('click', () => targetNoiseTexture.applyPreset('fabric'));
+
+	pane.addButton({title: '🧵 mountains'}).on('click', () => targetNoiseTexture.applyPreset('mountains'));
+	pane.addButton({title: '🧵 waves'}).on('click', () => targetNoiseTexture.applyPreset('waves'));
+	pane.addButton({title: '🧵 crater'}).on('click', () => targetNoiseTexture.applyPreset('crater'));
+	pane.addButton({title: '🧵 wrinkles'}).on('click', () => targetNoiseTexture.applyPreset('wrinkles'));
+	pane.addButton({title: '🧵 cobblestone'}).on('click', () => targetNoiseTexture.applyPreset('cobblestone'));
+	pane.addButton({title: '🧵 dunes'}).on('click', () => targetNoiseTexture.applyPreset('dunes'));
+	pane.addButton({title: '🧵 coral'}).on('click', () => targetNoiseTexture.applyPreset('coral'));
+	pane.addButton({title: '🧵 bark'}).on('click', () => targetNoiseTexture.applyPreset('bark'));
 	// Add a separator
 	setSeparator(pane, "Parameters");
 
-	pane.addBinding(noiseTexture, 'frequency', {
+	pane.addBinding(targetNoiseTexture, 'frequency', {
 		min: 0,
 		max: 30,
-		step:0.01
+		step: 0.01
 	}).on('change', (evt) => {
-		noiseTexture.frequency = evt.value;
+		targetNoiseTexture.frequency = evt.value;
 
 	});
-	pane.addBinding(noiseTexture, 'amplitude', {
+	pane.addBinding(targetNoiseTexture, 'amplitude', {
 		min: 1,
 		max: 10,
-		step:0.01
+		step: 0.01
 	}).on('change', (evt) => {
-		noiseTexture.amplitude = evt.value;
+		targetNoiseTexture.amplitude = evt.value;
 
 	});
-	pane.addBinding(noiseTexture, 'octaves', {
+	pane.addBinding(targetNoiseTexture, 'octaves', {
 		min: 1,
 		max: 8,
-		step:1
+		step: 1
 	}).on('change', (evt) => {
-		noiseTexture.octaves = evt.value;
+		targetNoiseTexture.octaves = evt.value;
 
 	});
-	pane.addBinding(noiseTexture, 'persistence', {
+	pane.addBinding(targetNoiseTexture, 'persistence', {
 		min: 0,
 		max: 1,
-		step:0.01
+		step: 0.01
 	}).on('change', (evt) => {
-		noiseTexture.persistence = evt.value;
+		targetNoiseTexture.persistence = evt.value;
 
 	});
-	pane.addBinding(noiseTexture, 'lacunarity', {
+	pane.addBinding(targetNoiseTexture, 'lacunarity', {
 		min: 0,
 		max: 10,
-		step:0.01
+		step: 0.01
 	}).on('change', (evt) => {
-		noiseTexture.lacunarity = evt.value;
+		targetNoiseTexture.lacunarity = evt.value;
 
 	});
-	pane.addBinding(noiseTexture, 'seed', {
+	pane.addBinding(targetNoiseTexture, 'seed', {
 		min: 1,
 		max: 1000,
-		step:0.01
+		step: 0.01
 	}).on('change', (evt) => {
-		noiseTexture.seed = evt.value;
+		targetNoiseTexture.seed = evt.value;
 
 	});
-	pane.addBinding(noiseTexture, 'normalStrength', {
-		min: 0,
-		max: 5,
-		step:0.01
+	if (targetNoiseTexture.normalStrength) {
+		pane.addBinding(targetNoiseTexture, 'normalStrength', {
+			min: 0,
+			max: 5,
+			step: 0.01
+		}).on('change', (evt) => {
+			targetNoiseTexture.normalStrength = evt.value;
+
+		});
+	}
+	if (targetNoiseTexture.displacementScale) {
+		pane.addBinding(targetNoiseTexture, 'displacementScale', {
+			min: 0,
+			max: 5,
+			step: 0.01
+		}).on('change', (evt) => {
+			targetNoiseTexture.displacementScale = evt.value;
+
+		});
+
+		pane.addBinding(redGPUContext.viewList[0].scene.getChildAt(0).material, 'displacementScale', {
+			min: 0,
+			max: 20,
+			step: 0.01
+		}).on('change', (evt) => {
+			redGPUContext.viewList[0].scene.getChildAt(0).material.displacementScale = evt.value;
+
+		});
+	}
+	pane.addBinding(targetNoiseTexture, 'noiseDimension', {
+		options: RedGPU.Resource.NOISE_DIMENSION
 	}).on('change', (evt) => {
-		noiseTexture.normalStrength = evt.value;
+		targetNoiseTexture.noiseDimension = evt.value;
 
 	});
-
 };

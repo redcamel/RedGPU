@@ -5,28 +5,29 @@ import ANoiseTexture from "./core/ANoiseTexture";
 import NoiseTexture from "./NoiseTexture";
 
 const BASIC_OPEIONS = {
-	normalStrength:1
+	normalStrength: 1
 }
+
 class NoiseNormalTexture extends NoiseTexture {
-	#normalStrength:number = BASIC_OPEIONS.normalStrength
+	#normalStrength: number = BASIC_OPEIONS.normalStrength
+
 	constructor(
 		redGPUContext: RedGPUContext,
 		width: number = 512,
 		height: number = 512,
 	) {
-
 		const mainLogic = `
             /* 현재 픽셀의 높이 */
-						let center_height = getNoise2D(uv, uniforms);
+	          var center_height: f32 = getNoiseByDimension(uv, uniforms);
 						
 						/* 텍셀 크기 계산 */
 						let texel_size = 1.0 / vec2<f32>(textureDimensions(outputTexture));
 						
 						/* 주변 픽셀의 높이값 샘플링 */
-						let height_left = getNoise2D(uv + vec2<f32>(-texel_size.x, 0.0), uniforms);
-						let height_right = getNoise2D(uv + vec2<f32>(texel_size.x, 0.0), uniforms);
-						let height_up = getNoise2D(uv + vec2<f32>(0.0, -texel_size.y), uniforms);
-						let height_down = getNoise2D(uv + vec2<f32>(0.0, texel_size.y), uniforms);
+						let height_left = getNoiseByDimension(uv + vec2<f32>(-texel_size.x, 0.0), uniforms);
+						let height_right = getNoiseByDimension(uv + vec2<f32>(texel_size.x, 0.0), uniforms);
+						let height_up = getNoiseByDimension(uv + vec2<f32>(0.0, -texel_size.y), uniforms);
+						let height_down = getNoiseByDimension(uv + vec2<f32>(0.0, texel_size.y), uniforms);
 						
 						/* 그라디언트 계산 */
 						let gradient_x = (height_right - height_left) * 0.5;
@@ -46,19 +47,19 @@ class NoiseNormalTexture extends NoiseTexture {
 						let color = vec4<f32>(normal_color, 1.0);
 
         `;
-
 		const uniformStruct = `normalStrength: f32`;
-		const uniformDefaults ={
+		const uniformDefaults = {
 			...BASIC_OPEIONS
 		}
 		const helperFunctions = ``
-		super(redGPUContext, width, height,{
+		super(redGPUContext, width, height, {
 			uniformStruct,
 			mainLogic,
 			uniformDefaults,
 			helperFunctions
 		});
 	}
+
 	/* Frequency (주파수/스케일) */
 	get normalStrength(): number {
 		return this.#normalStrength;
@@ -69,6 +70,7 @@ class NoiseNormalTexture extends NoiseTexture {
 		this.#normalStrength = value;
 		this.updateUniform('normalStrength', value);
 	}
+
 	applyPreset(preset: 'rock' | 'metal' | 'leather' | 'concrete' | 'water' | 'skin' | 'fabric'): void {
 		switch (preset) {
 			case 'rock':
@@ -122,7 +124,6 @@ class NoiseNormalTexture extends NoiseTexture {
 				break;
 		}
 	}
-
 }
 
 export default NoiseNormalTexture;

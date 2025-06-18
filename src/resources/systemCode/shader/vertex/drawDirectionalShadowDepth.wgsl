@@ -26,7 +26,7 @@ fn drawDirectionalShadowDepth( inputData:InputData ) -> OutputShadowData {
         let distance = distance(position.xyz, u_cameraPosition);
         let mipLevel = (distance / maxDistance) * maxMipLevel;
         let displacementSample = textureSampleLevel(displacementTexture, displacementTextureSampler, input_uv, mipLevel).r;
-        let scaledDisplacement = displacementSample * u_displacementScale;
+        let scaledDisplacement = (displacementSample - 0.5) * u_displacementScale;
         let displacedPosition = input_position + input_vertexNormal * scaledDisplacement;
         position = u_modelMatrix * vec4<f32>(displacedPosition, 1.0);
     }
