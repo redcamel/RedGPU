@@ -42,10 +42,9 @@ RedGPU.init(
 		const diffuseTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, "../../../assets/UV_Grid_Sm.jpg");
 
 		material.diffuseTexture = diffuseTexture
-		// material.diffuseTexture = new RedGPU.Resource.NoiseTexture(redGPUContext)
+		material.diffuseTexture = new RedGPU.Resource.NoiseNormalTexture(redGPUContext)
 		// material.normalTexture = new RedGPU.Resource.NoiseNormalTexture(redGPUContext)
 		material.displacementTexture = new RedGPU.Resource.NoiseDisplacementTexture(redGPUContext)
-		material.diffuseTexture = 	material.displacementTexture
 		const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
 		mesh.primitiveState.cullMode = 'none';
 		mesh.setPosition(0, 0, 0);
@@ -60,6 +59,7 @@ RedGPU.init(
 		renderer.start(redGPUContext, (time) => {
 			if(testData.useAnimation) {
 				material.displacementTexture.time = time
+				material.diffuseTexture.time = time
 			}
 		});
 
