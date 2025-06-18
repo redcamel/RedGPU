@@ -20,3 +20,4 @@ fn extractScaleAndTranslation(modelMatrix: mat4x4<f32>) -> mat4x4<f32> {
         modelMatrix[3] // 이동 성분은 그대로 유지
     );
 }
+

@@ -6,10 +6,12 @@ import SYSTEM_UNIFORM from './shader/SYSTEM_UNIFORM.wgsl'
 import drawDirectionalShadowDepth from './shader/vertex/drawDirectionalShadowDepth.wgsl'
 import extractScaleAndTranslation from './shader/vertex/extractScaleAndTranslation.wgsl'
 import getBillboardMatrix from './shader/vertex/getBillboardMatrix.wgsl'
+import calcDisplacements from './shader/vertex/calcDisplacements.wgsl'
 
 const SystemCode = Object.freeze({
 	SYSTEM_UNIFORM,
 	calcTintBlendMode,
+	calcDisplacements,
 	//
 	drawDirectionalShadowDepth,
 	getBillboardMatrix,
