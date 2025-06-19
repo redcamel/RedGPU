@@ -13,8 +13,8 @@ class NoiseNormalTexture extends NoiseTexture {
 
 	constructor(
 		redGPUContext: RedGPUContext,
-		width: number = 512,
-		height: number = 512,
+		width: number = 1024,
+		height: number = 1024,
 	) {
 		const mainLogic = `
             /* 현재 픽셀의 높이 */

@@ -70,8 +70,8 @@ class ANoiseTexture extends ManagedResourceBase {
 
 	constructor(
 		redGPUContext: RedGPUContext,
-		width: number = 512,
-		height: number = 512,
+		width: number = 1024,
+		height: number = 1024,
 		effect: NoiseDefine
 	) {
 		super(redGPUContext, MANAGED_STATE_KEY);

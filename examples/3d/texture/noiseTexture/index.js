@@ -24,7 +24,7 @@ RedGPU.init(
 		// Add basic lighting
 		// 기본 조명 추가
 		const directionalLight = new RedGPU.Light.DirectionalLight();
-		directionalLight.intensity = 0.8;
+		directionalLight.intensity =2;
 		scene.lightManager.addDirectionalLight(directionalLight);
 
 		// Add a view and configure it
@@ -42,9 +42,9 @@ RedGPU.init(
 		const diffuseTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, "../../../assets/UV_Grid_Sm.jpg");
 
 		material.diffuseTexture = diffuseTexture
-		material.diffuseTexture = new RedGPU.Resource.NoiseNormalTexture(redGPUContext)
-		// material.normalTexture = new RedGPU.Resource.NoiseNormalTexture(redGPUContext)
-		material.displacementTexture = new RedGPU.Resource.NoiseDisplacementTexture(redGPUContext)
+		material.diffuseTexture = new RedGPU.Resource.NoiseTexture(redGPUContext)
+		// material.diffuseTexture = new RedGPU.Resource.NoiseNormalTexture(redGPUContext)
+		// material.displacementTexture = new RedGPU.Resource.NoiseDisplacementTexture(redGPUContext)
 		const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
 		mesh.primitiveState.cullMode = 'none';
 		mesh.setPosition(0, 0, 0);
@@ -52,14 +52,14 @@ RedGPU.init(
 		scene.addChild(mesh);
 
 		const testData = {useAnimation:true}
-		renderTestPane(redGPUContext, material.displacementTexture,testData);
+		renderTestPane(redGPUContext, material.diffuseTexture,testData);
 		// Create a renderer and start rendering
 		// 렌더러 생성 후 렌더링 시작
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		renderer.start(redGPUContext, (time) => {
 			if(testData.useAnimation) {
-				material.displacementTexture.time = time
-				material.diffuseTexture.time = time
+				if(material.displacementTexture) material.displacementTexture.time = time
+				if(material.diffuseTexture) material.diffuseTexture.time = time
 			}
 		});
 
