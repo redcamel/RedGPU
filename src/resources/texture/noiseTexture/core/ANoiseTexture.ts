@@ -21,8 +21,7 @@ export interface NoiseDefine {
 }
 
 const BASIC_OPTIONS = {
-	animationDirectionX: 1,
-	animationDirectionY: 1
+
 }
 
 class ANoiseTexture extends ManagedResourceBase {
@@ -48,8 +47,7 @@ class ANoiseTexture extends ManagedResourceBase {
 	///
 	//
 	#time: number = 0
-	#animationDirectionX: number = BASIC_OPTIONS.animationDirectionX
-	#animationDirectionY: number = BASIC_OPTIONS.animationDirectionY
+
 
 	constructor(
 		redGPUContext: RedGPUContext,
@@ -104,28 +102,9 @@ class ANoiseTexture extends ManagedResourceBase {
 	set time(value: number) {
 		validatePositiveNumberRange(value);
 		this.#time = value;
-		this.updateUniform('time', value);
+		this.updateUniform('time', value/1000);
 	}
 
-	get animationDirectionX(): number {
-		return this.#animationDirectionX;
-	}
-
-	set animationDirectionX(value: number) {
-		validateNumber(value);
-		this.#animationDirectionX = value;
-		this.updateUniform('animationDirectionX', value);
-	}
-
-	get animationDirectionY(): number {
-		return this.#animationDirectionY;
-	}
-
-	set animationDirectionY(value: number) {
-		validateNumber(value);
-		this.#animationDirectionY = value;
-		this.updateUniform('animationDirectionY', value);
-	}
 
 	/* 렌더링 */
 	render(time: number) {
@@ -167,8 +146,6 @@ class ANoiseTexture extends ManagedResourceBase {
 		const baseUniforms = `
             struct Uniforms {
                 time: f32,
-                animationDirectionX: f32,
-                animationDirectionY: f32,
                 ${this.#currentEffect.uniformStruct || ''}
             };
         `;
@@ -195,9 +172,6 @@ class ANoiseTexture extends ManagedResourceBase {
                 let dimW = f32(dimensions.x);
                 let dimH = f32(dimensions.y);
                 let base_uv = vec2<f32>((f32(index.x) + 0.5) / dimW, (f32(index.y) + 0.5) / dimH);
-                
-              
-let uv = base_uv + vec2<f32>(uniforms.time * 0.001 * uniforms.animationDirectionX, uniforms.time * 0.001 * uniforms.animationDirectionY) * 0.1;
                 ${this.#currentEffect.mainLogic}
                 
                 textureStore(outputTexture, index, color);

@@ -29,7 +29,7 @@ RedGPU.init(
 		mesh.rotationX = 90;
 		scene.addChild(mesh);
 
-		const testData = {useAnimation: false};
+		const testData = {useAnimation: true};
 		renderTestPane(redGPUContext, material.diffuseTexture, testData);
 
 		const renderer = new RedGPU.Renderer(redGPUContext);
@@ -180,12 +180,17 @@ const renderTestPane = async (redGPUContext, targetNoiseTexture, testData) => {
 
 	const animation = pane.addFolder({title: 'Animation', expanded: true});
 	animation.addBinding(testData, 'useAnimation');
-	animation.addBinding(targetNoiseTexture, 'animationDirectionX', {
+	animation.addBinding(targetNoiseTexture, 'animationSpeed', {
+		min: 0,
+		max: 1,
+		step: 0.001
+	});
+	animation.addBinding(targetNoiseTexture, 'animationX', {
 		min: -1,
 		max: 1,
 		step: 0.001
 	});
-	animation.addBinding(targetNoiseTexture, 'animationDirectionY', {
+	animation.addBinding(targetNoiseTexture, 'animationY', {
 		min: -1,
 		max: 1,
 		step: 0.001

@@ -18,6 +18,10 @@ class NoiseSimplexNormalTexture extends NoiseSimplexTexture {
 		define?:NoiseDefine
 	) {
 		const mainLogic = `
+						let uv = vec2<f32>(
+							(base_uv.x + uniforms.time * ( uniforms.animationX * uniforms.animationSpeed )) , 
+							(base_uv.y + uniforms.time * ( uniforms.animationY * uniforms.animationSpeed )) 
+						);
             /* 현재 픽셀의 높이 */
 	          var center_height: f32 = getNoiseByDimension(uv, uniforms);
 						

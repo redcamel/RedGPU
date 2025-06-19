@@ -18,6 +18,10 @@ class NoiseSimplexDisplacementTexture extends NoiseSimplexTexture {
 		define?:NoiseDefine
 	) {
 		const mainLogic = `
+					let uv = vec2<f32>(
+						(base_uv.x + uniforms.time * ( uniforms.animationX * uniforms.animationSpeed )) , 
+						(base_uv.y + uniforms.time * ( uniforms.animationY * uniforms.animationSpeed )) 
+					);
 					let noiseValue = getNoiseByDimension(uv, uniforms);
 					let displacement = (noiseValue - 0.5) * uniforms.strength;
 					let normalizedDisplacement = clamp(displacement * 0.5 + 0.5, 0.0, 1.0);
