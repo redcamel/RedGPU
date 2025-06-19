@@ -1,7 +1,7 @@
 import ANoiseTexture from "./core/ANoiseTexture";
-import NOISE_DIMENSION from "./NOISE_DIMENSION";
-import NoiseDisplacementTexture from "./NoiseDisplacementTexture";
-import NoiseNormalTexture from "./NoiseNormalTexture";
-import NoiseTexture from "./NoiseTexture";
+import NOISE_DIMENSION from "./simplex/NOISE_DIMENSION";
+import NoiseSimplexDisplacementTexture from "./simplex/NoiseSimplexDisplacementTexture";
+import NoiseSimplexNormalTexture from "./simplex/NoiseSimplexNormalTexture";
+import NoiseSimplexTexture from "./simplex/NoiseSimplexTexture";
 
-export {ANoiseTexture,NoiseNormalTexture,NoiseDisplacementTexture, NoiseTexture,NOISE_DIMENSION};
+export {ANoiseTexture,NoiseSimplexNormalTexture,NoiseSimplexDisplacementTexture, NoiseSimplexTexture,NOISE_DIMENSION};
