@@ -745,7 +745,7 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     var totalDirectLighting = vec3<f32>(0.0);
     for (var i = 0u; i < u_directionalLightCount; i++) {
         totalDirectLighting += calcLight(
-            u_directionalLights[i].color, u_directionalLights[i].intensity,
+            u_directionalLights[i].color, u_directionalLights[i].intensity * visibility,
             N, V, -normalize(u_directionalLights[i].direction),
             VdotN,
             roughnessParameter, metallicParameter, albedo,

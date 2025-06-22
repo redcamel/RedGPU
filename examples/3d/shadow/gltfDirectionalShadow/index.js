@@ -14,7 +14,8 @@ RedGPU.init(
 		// 궤도형 카메라 컨트롤러 생성
 		const controller = new RedGPU.Camera.ObitController(redGPUContext);
 		controller.tilt = -15
-		controller.distance = 30
+		controller.distance = 5
+		controller.speedDistance = 0.3
 
 		// Create a scene and add a view with the camera controller
 		// 씬을 생성하고 카메라 컨트롤러와 함께 뷰 추가
@@ -33,9 +34,10 @@ RedGPU.init(
 		// 뷰에 스카이박스 추가
 		view.skybox = createSkybox(redGPUContext);
 
-		// Add 500 random meshes to the scene
-		// 장면에 500개의 메쉬를 무작위로 추가
-		addRandomMeshes(redGPUContext, scene);
+		addGround(redGPUContext, scene);
+		// 3D 모델 로드
+		loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF/DamagedHelmet.gltf',-1,1);
+		loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF/BrainStem.gltf',1,0);
 
 		// Create a renderer and start rendering
 		// 렌더러 생성 후 렌더링 시작
@@ -48,14 +50,12 @@ RedGPU.init(
 				while (i--) {
 					if (i === 0) continue;
 					let testObj = scene.children[i]
-					testObj.rotationX += 1.5
-					testObj.rotationY += 1.5
-					testObj.y += Math.sin(time / 1000 + i * 10) / 10
-					testObj.rotationZ += 1.5
+					testObj.rotationY += 0.5
 				}
 			})
-		});
 
+		});
+		renderTestPane(redGPUContext,scene);
 	},
 	(failReason) => {
 		// Handle initialization failure
@@ -66,6 +66,21 @@ RedGPU.init(
 	}
 );
 
+function loadGLTF(redGPUContext, scene, url,xPosition,yPosition) {
+
+	let mesh
+	new RedGPU.GLTFLoader(
+		redGPUContext,
+		url,
+		(v) => {
+			mesh = scene.addChild(v['resultMesh'])
+			mesh.x = xPosition
+			mesh.y = yPosition
+			mesh.setCastShadowRecursively(true)
+			mesh.setReceiveShadowRecursively(true)
+		}
+	)
+}
 
 const createSkybox = (redGPUContext) => {
 	// Define texture paths for skybox
@@ -84,14 +99,7 @@ const createSkybox = (redGPUContext) => {
 	const skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture);
 	return skybox;
 };
-const addRandomMeshes = (redGPUContext, scene) => {
-	const geometries = [
-		new RedGPU.Primitive.Sphere(redGPUContext, 2, 16, 16),
-		new RedGPU.Primitive.Box(redGPUContext, 3, 3, 3),
-		new RedGPU.Primitive.Cylinder(redGPUContext, 2, 2, 6, 16),
-		new RedGPU.Primitive.Torus(redGPUContext, 1.5, 0.5, 16, 32),
-		new RedGPU.Primitive.TorusKnot(redGPUContext, 0.5, 0.2, 128, 64, 2, 3)
-	];
+const addGround = (redGPUContext, scene) => {
 
 	const plane = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Plane(redGPUContext), new RedGPU.Material.PhongMaterial(redGPUContext, '#ff0000'))
 	plane.setScale(200)
@@ -99,33 +107,6 @@ const addRandomMeshes = (redGPUContext, scene) => {
 	plane.receiveShadow = true
 	scene.addChild(plane)
 
-	for (let i = 0; i < 500; i++) {
-		const geometry = geometries[Math.floor(Math.random() * geometries.length)];
-
-		const x = Math.random() * 150 - 75;
-		const y = Math.random() * 3 - 1.5;
-		const z = Math.random() * 150 - 75;
-
-		const material = new RedGPU.Material.PhongMaterial(redGPUContext, getRandomHexValue());
-
-		const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
-		mesh.setScale(Math.max(Math.random() * 1.5, 0.5))
-		mesh.setPosition(x, y, z);
-		mesh.rotationX = Math.random() * 360;
-		mesh.rotationY = Math.random() * 360;
-		mesh.rotationZ = Math.random() * 360;
-		mesh.castShadow = true
-		// 메쉬를 씬에 추가
-		scene.addChild(mesh);
-
-		renderTestPane(redGPUContext,scene);
-	}
-};
-
-// 랜덤 색상 값을 반환하는 함수
-const getRandomHexValue = () => {
-	const randomColor = Math.floor(Math.random() * 0xffffff);
-	return `#${randomColor.toString(16).padStart(6, "0")}`;
 };
 
 // Function to render the UI controls for material properties
@@ -145,11 +126,5 @@ const renderTestPane = async (redGPUContext, scene) => {
 	}).on("change", (ev) => {
 		directionalShadowManager.shadowDepthTextureSize = ev.value
 	});
-	// pane.addBinding(scene.shadowManager, 'directionalLightShadowBias',{
-	// 	min:0,
-	// 	max:0.05,
-	// 	step:0.000001
-	// }).on("change", (ev) => {
-	// 	redGPUContext.viewList[0].scene.shadowManager.directionalLightShadowBias = ev.value
-	// });
+
 };
