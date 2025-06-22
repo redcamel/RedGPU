@@ -25,7 +25,7 @@ class NoiseSimplexDisplacementTexture extends NoiseSimplexTexture {
 					let noiseValue = getNoiseByDimension(uv, uniforms);
 					let displacement = (noiseValue - 0.5) * uniforms.strength;
 					let normalizedDisplacement = clamp(displacement * 0.5 + 0.5, 0.0, 1.0);
-					let color = vec4<f32>(normalizedDisplacement, normalizedDisplacement, normalizedDisplacement, 1.0);
+					let finalColor = vec4<f32>(normalizedDisplacement, normalizedDisplacement, normalizedDisplacement, 1.0);
         `;
 		const uniformStruct = mergerNoiseUniformStruct(`strength: f32`, define?.uniformStruct);
 		const uniformDefaults = mergerNoiseUniformDefault(BASIC_OPTIONS, define?.uniformDefaults)

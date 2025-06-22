@@ -174,7 +174,7 @@ class ANoiseTexture extends ManagedResourceBase {
                 let base_uv = vec2<f32>((f32(index.x) + 0.5) / dimW, (f32(index.y) + 0.5) / dimH);
                 ${this.#currentEffect.mainLogic}
                 
-                textureStore(outputTexture, index, color);
+                textureStore(outputTexture, index, finalColor);
             }
         `;
 	}

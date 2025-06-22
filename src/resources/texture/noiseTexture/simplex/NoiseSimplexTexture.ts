@@ -60,7 +60,7 @@ class NoiseSimplexTexture extends ASimplexTexture {
 						let noise = getNoiseByDimension( uv,uniforms );
             
             /* 최종 색상 (그레이스케일) */
-            let color = vec4<f32>(noise, noise, noise, 1.0);
+            let finalColor = vec4<f32>(noise, noise, noise, 1.0);
         `;
 		const uniformStruct = mergerNoiseUniformStruct(
 `

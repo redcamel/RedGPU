@@ -117,7 +117,7 @@ if (flame_heat > 0.6) {
 
 /* 투명도 (이제 올바른 방향) */
 let alpha = clamp(fire_intensity, 0.0, 1.0);
-let color = vec4<f32>(fire_color, alpha);
+let finalColor = vec4<f32>(fire_color, alpha);
 `;
 
 		const uniformStruct = mergerNoiseUniformStruct(`

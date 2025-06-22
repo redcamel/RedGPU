@@ -49,7 +49,7 @@ class NoiseSimplexNormalTexture extends NoiseSimplexTexture {
 						let normal_color = normal * 0.5 + 0.5;
 						
 						/* 최종 색상 (노멀맵 RGB) */
-						let color = vec4<f32>(normal_color, 1.0);
+						let finalColor = vec4<f32>(normal_color, 1.0);
 
         `;
 		const uniformStruct = mergerNoiseUniformStruct(`strength: f32`, define?.uniformStruct);
