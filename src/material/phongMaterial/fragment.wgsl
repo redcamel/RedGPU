@@ -184,7 +184,8 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
          }
 
          let L = normalize(lightDir);
-         let attenuation = clamp(0.0, 1.0, 1.0 - (lightDistance * lightDistance) / (u_clusterLightRadius * u_clusterLightRadius));
+//         let attenuation = clamp(0.0, 1.0, 1.0 - (lightDistance * lightDistance) / (u_clusterLightRadius * u_clusterLightRadius));
+         let attenuation = clamp(1.0 - (lightDistance * lightDistance) / (u_clusterLightRadius * u_clusterLightRadius), 0.0, 1.0);
 
          var finalAttenuation = attenuation;
 

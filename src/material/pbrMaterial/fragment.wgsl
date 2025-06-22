@@ -765,31 +765,71 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
         let clusterIndex = getClusterLightClusterIndex(inputData.position);
         let lightOffset  = clusterLightGroup.lights[clusterIndex].offset;
         let lightCount:u32   = clusterLightGroup.lights[clusterIndex].count;
+
         for (var lightIndex = 0u; lightIndex < lightCount; lightIndex = lightIndex + 1u) {
             let i = clusterLightGroup.indices[lightOffset + lightIndex];
             let targetLight = clusterLightList.lights[i];
             let u_clusterLightPosition = targetLight.position;
-            let u_clusterLightRadius = targetLight.radius ;
+            let u_clusterLightRadius = targetLight.radius;
+            let u_isSpotLight = targetLight.isSpotLight;
+
             let lightDistance = length(u_clusterLightPosition - input_vertexPosition);
+
+
+            if (lightDistance > u_clusterLightRadius) {
+                continue;
+            }
+
             let lightDir = normalize(u_clusterLightPosition - input_vertexPosition);
             let attenuation = clamp(1.0 - (lightDistance * lightDistance) / (u_clusterLightRadius * u_clusterLightRadius), 0.0, 1.0);
+//            let attenuation = clamp(0.0, 1.0, 1.0 - (lightDistance * lightDistance) / (u_clusterLightRadius * u_clusterLightRadius));
 
-            if(lightDistance<=u_clusterLightRadius){
-               totalDirectLighting += calcLight(
-                  targetLight.color, targetLight.intensity * attenuation,
-                  N, V, lightDir,
-                  VdotN,
-                  roughnessParameter, metallicParameter, albedo,
-                  F0, ior,
-                  prePathBackground,
-                  specularColor, specularParameter,
-                  u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor,
-                  transmissionParameter,
-                  sheenColor, sheenRoughnessParameter,
-                  anisotropy, anisotropicT, anisotropicB,
-                  clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal
-              );
+            var finalAttenuation = attenuation;
+
+            // 스폿라이트 처리
+            if (u_isSpotLight > 0.0) {
+                let u_clusterLightDirection = normalize(vec3<f32>(
+                    targetLight.directionX,
+                    targetLight.directionY,
+                    targetLight.directionZ
+                ));
+                let u_clusterLightInnerAngle = targetLight.innerCutoff;
+                let u_clusterLightOuterCutoff = targetLight.outerCutoff;
+
+                // 라이트에서 버텍스로의 방향
+                let lightToVertex = normalize(-lightDir);
+                let cosTheta = dot(lightToVertex, u_clusterLightDirection);
+
+                let cosOuter = cos(radians(u_clusterLightOuterCutoff));
+                let cosInner = cos(radians(u_clusterLightInnerAngle));
+
+                // 스폿라이트 외곽 범위를 벗어나면 스킵
+                if (cosTheta < cosOuter) {
+                    continue;
+                }
+
+                // 스폿라이트 강도 계산 (부드러운 페이드)
+                let epsilon = cosInner - cosOuter;
+                let spotIntensity = clamp((cosTheta - cosOuter) / epsilon, 0.0, 1.0);
+
+                finalAttenuation *= spotIntensity;
             }
+
+            // calcLight 함수 호출
+            totalDirectLighting += calcLight(
+                targetLight.color, targetLight.intensity * finalAttenuation,
+                N, V, lightDir,
+                VdotN,
+                roughnessParameter, metallicParameter, albedo,
+                F0, ior,
+                prePathBackground,
+                specularColor, specularParameter,
+                u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor,
+                transmissionParameter,
+                sheenColor, sheenRoughnessParameter,
+                anisotropy, anisotropicT, anisotropicB,
+                clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal
+            );
         }
     }
 
