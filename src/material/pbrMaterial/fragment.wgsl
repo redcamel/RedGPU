@@ -1270,8 +1270,6 @@ fn calcLight(
         let CLEARCOAT_BRDF = specular_brdf( F0, clearcoatRoughnessParameter, clearcoatNdotH, clearcoatNdotV, clearcoatNdotL, LdotH);
         directLighting = fresnel_coat(clearcoatNdotV, ior, clearcoatParameter, directLighting, CLEARCOAT_BRDF);
     }
-    directLighting *= dLight;
-
     var lightDirection: f32;
     if (u_useKHR_materials_diffuse_transmission && diffuseTransmissionParameter > 0.0) {
         lightDirection = mix(abs(dot(N, L)), 1.0, diffuseTransmissionParameter);
@@ -1280,7 +1278,7 @@ fn calcLight(
         lightDirection = NdotL;
     }
 
-    let lightContribution = directLighting * lightDirection;
+    let lightContribution = directLighting * dLight * lightDirection;
     //            + BACK_DIFFUSE_BRDF * backNdotL * backLightColor * backLightIntensity;
     return lightContribution;
 }

@@ -83,7 +83,14 @@ class LightManager {
 		}
 		this.#directionalLights.push(value)
 	}
-
+	removeSpotLight(value: SpotLight) {
+		const index = this.#spotLights.indexOf(value);
+		if (index !== -1) this.#spotLights.splice(index, 1);
+	}
+	removePointLight(value: PointLight) {
+		const index = this.#pointLights.indexOf(value);
+		if (index !== -1) this.#pointLights.splice(index, 1);
+	}
 	removeDirectionalLight(value: DirectionalLight) {
 		const index = this.#directionalLights.indexOf(value);
 		if (index !== -1) this.#directionalLights.splice(index, 1);
