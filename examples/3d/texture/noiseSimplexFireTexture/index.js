@@ -22,11 +22,12 @@ RedGPU.init(
 
 		const geometry = new RedGPU.Primitive.Plane(redGPUContext, 50, 50, 1000, 1000);
 		// const geometry = new RedGPU.Primitive.Sphere(redGPUContext, 5, 32,32,32);
+		// const geometry = new RedGPU.Primitive.Box(redGPUContext, 5, 5,5,10,10,10);
 		const material = new RedGPU.Material.PhongMaterial(redGPUContext);
-		material.diffuseTexture = new RedGPU.Resource.NoiseFireTexture(redGPUContext);
+		material.diffuseTexture = new RedGPU.Resource.NoiseSimplexFireTexture(redGPUContext);
+
 
 		const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
-		mesh.primitiveState.cullMode = 'none';
 		mesh.setPosition(0, 0, 0);
 
 		scene.addChild(mesh);

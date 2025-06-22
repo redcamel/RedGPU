@@ -22,7 +22,7 @@ class NoiseSimplexDisplacementTexture extends NoiseSimplexTexture {
 						(base_uv.x + uniforms.time * ( uniforms.animationX * uniforms.animationSpeed )) , 
 						(base_uv.y + uniforms.time * ( uniforms.animationY * uniforms.animationSpeed )) 
 					);
-					let noiseValue = getNoiseByDimension(uv, uniforms);
+					let noiseValue = getSimplexNoiseByDimension(uv, uniforms);
 					let displacement = (noiseValue - 0.5) * uniforms.strength;
 					let normalizedDisplacement = clamp(displacement * 0.5 + 0.5, 0.0, 1.0);
 					let finalColor = vec4<f32>(normalizedDisplacement, normalizedDisplacement, normalizedDisplacement, 1.0);

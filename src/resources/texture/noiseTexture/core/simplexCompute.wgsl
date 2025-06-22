@@ -194,7 +194,7 @@ fn fbm3D(pos: vec3<f32>, octaves: i32) -> f32 {
     return value / max_value;
 }
 
-fn getNoise1D(pos: f32, uniforms: Uniforms) -> f32 {
+fn getSimplexNoise1D(pos: f32, uniforms: Uniforms) -> f32 {
     var total_amplitude: f32 = 0.0;
     var noise_value: f32 = 0.0;
     var current_amplitude: f32 = 1.0;
@@ -223,7 +223,7 @@ fn getNoise1D(pos: f32, uniforms: Uniforms) -> f32 {
     return normalized_noise;
 }
 
-fn getNoise2D(uv: vec2<f32>, uniforms: Uniforms) -> f32 {
+fn getSimplexNoise2D(uv: vec2<f32>, uniforms: Uniforms) -> f32 {
     var total_amplitude: f32 = 0.0;
     var noise_value: f32 = 0.0;
     var current_amplitude: f32 = 1.0;
@@ -252,7 +252,7 @@ fn getNoise2D(uv: vec2<f32>, uniforms: Uniforms) -> f32 {
     return normalized_noise;
 }
 
-fn getNoise3D(pos: vec3<f32>, uniforms: Uniforms) -> f32 {
+fn getSimplexNoise3D(pos: vec3<f32>, uniforms: Uniforms) -> f32 {
     var total_amplitude: f32 = 0.0;
     var noise_value: f32 = 0.0;
     var current_amplitude: f32 = 1.0;
@@ -280,14 +280,14 @@ fn getNoise3D(pos: vec3<f32>, uniforms: Uniforms) -> f32 {
     let normalized_noise = (noise_value + 1.0) * 0.5;
     return normalized_noise;
 }
-fn getNoiseByDimension(uv: vec2<f32>, uniforms: Uniforms) -> f32 {
+fn getSimplexNoiseByDimension(uv: vec2<f32>, uniforms: Uniforms) -> f32 {
     if (uniforms.noiseDimension < 1.1) {
-        return getNoise1D(uv.x, uniforms);
+        return getSimplexNoise1D(uv.x, uniforms);
     } else if (uniforms.noiseDimension < 2.1) {
-        return getNoise2D(uv, uniforms);
+        return getSimplexNoise2D(uv, uniforms);
     } else if (uniforms.noiseDimension < 3.1) {
-        return getNoise3D(vec3<f32>(uv.x, uv.y, uniforms.seed * 0.1), uniforms);
+        return getSimplexNoise3D(vec3<f32>(uv.x, uv.y, uniforms.seed * 0.1), uniforms);
     } else {
-        return getNoise2D(uv, uniforms); // 기본값
+        return getSimplexNoise2D(uv, uniforms); // 기본값
     }
 }

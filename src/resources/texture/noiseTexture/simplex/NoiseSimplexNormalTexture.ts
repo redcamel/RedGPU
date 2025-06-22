@@ -23,16 +23,16 @@ class NoiseSimplexNormalTexture extends NoiseSimplexTexture {
 							(base_uv.y + uniforms.time * ( uniforms.animationY * uniforms.animationSpeed )) 
 						);
             /* 현재 픽셀의 높이 */
-	          var center_height: f32 = getNoiseByDimension(uv, uniforms);
+	          var center_height: f32 = getSimplexNoiseByDimension(uv, uniforms);
 						
 						/* 텍셀 크기 계산 */
 						let texel_size = 1.0 / vec2<f32>(textureDimensions(outputTexture));
 						
 						/* 주변 픽셀의 높이값 샘플링 */
-						let height_left = getNoiseByDimension(uv + vec2<f32>(-texel_size.x, 0.0), uniforms);
-						let height_right = getNoiseByDimension(uv + vec2<f32>(texel_size.x, 0.0), uniforms);
-						let height_up = getNoiseByDimension(uv + vec2<f32>(0.0, -texel_size.y), uniforms);
-						let height_down = getNoiseByDimension(uv + vec2<f32>(0.0, texel_size.y), uniforms);
+						let height_left = getSimplexNoiseByDimension(uv + vec2<f32>(-texel_size.x, 0.0), uniforms);
+						let height_right = getSimplexNoiseByDimension(uv + vec2<f32>(texel_size.x, 0.0), uniforms);
+						let height_up = getSimplexNoiseByDimension(uv + vec2<f32>(0.0, -texel_size.y), uniforms);
+						let height_down = getSimplexNoiseByDimension(uv + vec2<f32>(0.0, texel_size.y), uniforms);
 						
 						/* 그라디언트 계산 */
 						let gradient_x = (height_right - height_left) * 0.5;

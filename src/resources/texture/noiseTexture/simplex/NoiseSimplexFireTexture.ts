@@ -12,7 +12,7 @@ const FIRE_OPTIONS = {
 	fireSpeed: 0.8          // 화염 상승 속도
 }
 
-class NoiseFireTexture extends ASimplexTexture {
+class NoiseSimplexFireTexture extends ASimplexTexture {
 	#fireHeight:number = FIRE_OPTIONS.fireHeight;
 	get fireHeight(): number {
 		return this.#fireHeight;
@@ -80,7 +80,7 @@ let flame_uv = vec2<f32>(
 );
 
 /* 주 화염 노이즈 */
-let main_noise = getNoiseByDimension(flame_uv, uniforms);
+let main_noise = getSimplexNoiseByDimension(flame_uv, uniforms);
 
 /* 디테일 흔들림 (위로 갈수록 더 흔들림) */
 let detail_factor = base_uv.y * 0.8;
@@ -88,7 +88,7 @@ let detail_uv = vec2<f32>(
     base_uv.x * 2.0 + sin(uniforms.time  * 3.0 + base_uv.y * 8.0) * 0.05 * detail_factor,
     base_uv.y * 1.5 + uniforms.time * uniforms.fireSpeed  * 0.8
 );
-let detail_noise = getNoiseByDimension(detail_uv, uniforms) * 0.3;
+let detail_noise = getSimplexNoiseByDimension(detail_uv, uniforms) * 0.3;
 
 /* 화염 모양 마스크 (fireHeight가 클수록 화염이 높아짐) */
 let flame_shape = smoothstep(1.0 - uniforms.fireHeight, 1.0, base_uv.y);
@@ -140,4 +140,4 @@ let finalColor = vec4<f32>(fire_color, alpha);
 	}
 }
 
-export default NoiseFireTexture;
+export default NoiseSimplexFireTexture;

@@ -57,7 +57,7 @@ class NoiseSimplexTexture extends ASimplexTexture {
 							(base_uv.x + uniforms.time * ( uniforms.animationX * uniforms.animationSpeed )) , 
 							(base_uv.y + uniforms.time * ( uniforms.animationY * uniforms.animationSpeed )) 
 						);
-						let noise = getNoiseByDimension( uv,uniforms );
+						let noise = getSimplexNoiseByDimension( uv,uniforms );
             
             /* 최종 색상 (그레이스케일) */
             let finalColor = vec4<f32>(noise, noise, noise, 1.0);

@@ -22,7 +22,6 @@ RedGPU.init(
 		const geometry = new RedGPU.Primitive.Plane(redGPUContext, 50, 50, 1000, 1000);
 		const material = new RedGPU.Material.PhongMaterial(redGPUContext);
 		material.diffuseTexture = new RedGPU.Resource.NoiseSimplexNormalTexture(redGPUContext);
-		material.normalTexture = material.diffuseTexture
 		const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
 		mesh.primitiveState.cullMode = 'none';
 		mesh.setPosition(0, 0, 0);
