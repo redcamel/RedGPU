@@ -3,7 +3,11 @@ import validateNumber from "../../../../runtimeChecker/validateFunc/validateNumb
 import validatePositiveNumberRange from "../../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import {NoiseDefine} from "../core/ANoiseTexture";
 import ASimplexTexture from "../core/ASimplexTexture";
-import {mergerNoiseUniformDefault, mergerNoiseUniformStruct} from "../core/noiseDegineMerges";
+import {
+	mergerNoiseHelperFunctions,
+	mergerNoiseUniformDefault,
+	mergerNoiseUniformStruct
+} from "../core/noiseDegineMerges";
 
 const BASIC_OPTIONS = {
 	animationSpeed: 1,
@@ -71,7 +75,7 @@ class NoiseSimplexTexture extends ASimplexTexture {
 			define?.uniformStruct
 		);
 		const uniformDefaults = mergerNoiseUniformDefault(BASIC_OPTIONS, define?.uniformDefaults)
-		const helperFunctions = define?.helperFunctions || ''
+		const helperFunctions = mergerNoiseHelperFunctions('',define?.helperFunctions || '')
 		super(redGPUContext, width, height, {
 			uniformStruct,
 			mainLogic,

@@ -7,7 +7,11 @@ const mergerNoiseUniformDefault = (basicOption, addOption) => {
 		...(addOption || {}),
 	}
 }
+const mergerNoiseHelperFunctions = (baseHelperFunctions: string, addHelperFunctions: string): string => {
+	return [baseHelperFunctions, addHelperFunctions].filter(Boolean).join('\n')
+}
 export {
 	mergerNoiseUniformStruct,
-	mergerNoiseUniformDefault
+	mergerNoiseUniformDefault,
+	mergerNoiseHelperFunctions
 }
