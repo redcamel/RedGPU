@@ -2,7 +2,7 @@ import RedGPUContext from "../../../../context/RedGPUContext";
 import validatePositiveNumberRange from "../../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import validateUintRange from "../../../../runtimeChecker/validateFunc/validateUintRange";
 import consoleAndThrowError from "../../../../utils/consoleAndThrowError";
-import NOISE_DIMENSION from "../simplex/NOISE_DIMENSION";
+import NOISE_DIMENSION from "../NOISE_DIMENSION";
 import ANoiseTexture, {NoiseDefine} from "./ANoiseTexture";
 import {mergerNoiseUniformDefault, mergerNoiseUniformStruct} from "./noiseDegineMerges";
 

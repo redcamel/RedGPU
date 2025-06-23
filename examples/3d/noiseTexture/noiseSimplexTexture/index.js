@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js";
+import * as RedGPU from "../../../../dist";
 
 const canvas = document.createElement("canvas");
 document.body.appendChild(canvas);
@@ -21,14 +21,15 @@ RedGPU.init(
 
 		const geometry = new RedGPU.Primitive.Plane(redGPUContext, 50, 50, 1000, 1000);
 		const material = new RedGPU.Material.PhongMaterial(redGPUContext);
-		material.diffuseTexture = new RedGPU.Resource.NoiseSimplexNormalTexture(redGPUContext);
+		material.diffuseTexture = new RedGPU.Resource.NoiseSimplexTexture(redGPUContext);
+
 		const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
 		mesh.primitiveState.cullMode = 'none';
 		mesh.setPosition(0, 0, 0);
 		mesh.rotationX = 90;
 		scene.addChild(mesh);
 
-		const testData = {useAnimation: false};
+		const testData = {useAnimation: true};
 		renderTestPane(redGPUContext, material.diffuseTexture, testData);
 
 		const renderer = new RedGPU.Renderer(redGPUContext);
@@ -50,74 +51,74 @@ RedGPU.init(
 );
 const renderTestPane = async (redGPUContext, targetNoiseTexture, testData) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
-	const {setSeparator} = await import("../../../exampleHelper/createExample/panes/index.js");
+	const {setSeparator} = await import("../../../exampleHelper/createExample/panes");
 	const pane = new Pane();
 
 	setSeparator(pane, "Presets");
 
-	pane.addButton({title: '🏔️ Rocky Surface'}).on('click', () => {
-		targetNoiseTexture.frequency = 8.0;
-		targetNoiseTexture.amplitude = 0.3;    // 노말맵은 진폭이 작아야 함
-		targetNoiseTexture.octaves = 4;
+	pane.addButton({title: '🏔️ Mountains'}).on('click', () => {
+		targetNoiseTexture.frequency = 4.0;
+		targetNoiseTexture.amplitude = 1.5;
+		targetNoiseTexture.octaves = 6;
 		targetNoiseTexture.persistence = 0.6;
 		targetNoiseTexture.lacunarity = 2.0;
 		targetNoiseTexture.seed = 42;
 		pane.refresh();
 	});
 
-	pane.addButton({title: '🌊 Water Ripples'}).on('click', () => {
-		targetNoiseTexture.frequency = 15.0;
-		targetNoiseTexture.amplitude = 0.15;   // 물결은 부드럽게
-		targetNoiseTexture.octaves = 2;
-		targetNoiseTexture.persistence = 0.3;
+	pane.addButton({title: '🌊 Waves'}).on('click', () => {
+		targetNoiseTexture.frequency = 8.0;
+		targetNoiseTexture.amplitude = 0.8;
+		targetNoiseTexture.octaves = 3;
+		targetNoiseTexture.persistence = 0.4;
 		targetNoiseTexture.lacunarity = 2.5;
 		targetNoiseTexture.seed = 123;
 		pane.refresh();
 	});
 
-	pane.addButton({title: '🌋 Lava Bumps'}).on('click', () => {
-		targetNoiseTexture.frequency = 6.0;
-		targetNoiseTexture.amplitude = 0.4;    // 용암은 거친 표면
-		targetNoiseTexture.octaves = 5;
-		targetNoiseTexture.persistence = 0.7;
+	pane.addButton({title: '🌋 Crater'}).on('click', () => {
+		targetNoiseTexture.frequency = 2.0;
+		targetNoiseTexture.amplitude = 2.0;
+		targetNoiseTexture.octaves = 4;
+		targetNoiseTexture.persistence = 0.8;
 		targetNoiseTexture.lacunarity = 1.8;
 		targetNoiseTexture.seed = 999;
 		pane.refresh();
 	});
 
-	pane.addButton({title: '👴 Skin Wrinkles'}).on('click', () => {
-		targetNoiseTexture.frequency = 20.0;
-		targetNoiseTexture.amplitude = 0.1;    // 피부는 미세한 디테일
-		targetNoiseTexture.octaves = 6;
-		targetNoiseTexture.persistence = 0.5;
+	pane.addButton({title: '👴 Wrinkles'}).on('click', () => {
+		targetNoiseTexture.frequency = 12.0;
+		targetNoiseTexture.amplitude = 0.6;
+		targetNoiseTexture.octaves = 5;
+		targetNoiseTexture.persistence = 0.7;
 		targetNoiseTexture.lacunarity = 2.2;
 		targetNoiseTexture.seed = 666;
 		pane.refresh();
 	});
 
-	pane.addButton({title: '🪨 Stone Bricks'}).on('click', () => {
-		targetNoiseTexture.frequency = 12.0;
-		targetNoiseTexture.amplitude = 0.25;   // 벽돌의 적당한 요철
-		targetNoiseTexture.octaves = 3;
-		targetNoiseTexture.persistence = 0.4;
+	pane.addButton({title: '🪨 Cobblestone'}).on('click', () => {
+		targetNoiseTexture.frequency = 15.0;
+		targetNoiseTexture.amplitude = 1.0;
+		targetNoiseTexture.octaves = 2;
+		targetNoiseTexture.persistence = 0.3;
 		targetNoiseTexture.lacunarity = 3.0;
 		targetNoiseTexture.seed = 777;
 		pane.refresh();
 	});
 
-	pane.addButton({title: '🏜️ Sand Dunes'}).on('click', () => {
-		targetNoiseTexture.frequency = 4.0;
-		targetNoiseTexture.amplitude = 0.2;    // 모래언덕의 부드러운 곡선
-		targetNoiseTexture.octaves = 3;
-		targetNoiseTexture.persistence = 0.6;
+	pane.addButton({title: '🏜️ Dunes'}).on('click', () => {
+		targetNoiseTexture.frequency = 3.0;
+		targetNoiseTexture.amplitude = 1.2;
+		targetNoiseTexture.octaves = 4;
+		targetNoiseTexture.persistence = 0.5;
 		targetNoiseTexture.lacunarity = 1.5;
 		targetNoiseTexture.seed = 333;
 		pane.refresh();
 	});
 
-	pane.addButton({title: '🪸 Coral Bumps'}).on('click', () => {
-		targetNoiseTexture.frequency = 25.0;
-		targetNoiseTexture.amplitude = 0.35;   // 산호의 복잡한 표면
+	pane.addButton({title: '🪸 Coral'}).on('click', () => {
+		targetNoiseTexture.frequency = 20.0;
+		targetNoiseTexture.amplitude = 0.7;
 		targetNoiseTexture.octaves = 7;
 		targetNoiseTexture.persistence = 0.8;
 		targetNoiseTexture.lacunarity = 2.8;
@@ -125,11 +126,11 @@ const renderTestPane = async (redGPUContext, targetNoiseTexture, testData) => {
 		pane.refresh();
 	});
 
-	pane.addButton({title: '🌳 Tree Bark'}).on('click', () => {
-		targetNoiseTexture.frequency = 10.0;
-		targetNoiseTexture.amplitude = 0.3;    // 나무껍질의 거친 질감
+	pane.addButton({title: '🌳 Bark'}).on('click', () => {
+		targetNoiseTexture.frequency = 6.0;
+		targetNoiseTexture.amplitude = 1.3;
 		targetNoiseTexture.octaves = 5;
-		targetNoiseTexture.persistence = 0.65;
+		targetNoiseTexture.persistence = 0.6;
 		targetNoiseTexture.lacunarity = 2.1;
 		targetNoiseTexture.seed = 888;
 		pane.refresh();
@@ -172,12 +173,6 @@ const renderTestPane = async (redGPUContext, targetNoiseTexture, testData) => {
 		max: 1000,
 		step: 0.01
 	});
-	pane.addBinding(targetNoiseTexture, 'strength', {
-		min: 0,
-		max: 5,
-		step: 0.01
-	});
-
 
 	pane.addBinding(targetNoiseTexture, 'noiseDimension', {
 		options: RedGPU.Resource.NOISE_DIMENSION

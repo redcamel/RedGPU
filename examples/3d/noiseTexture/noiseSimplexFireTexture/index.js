@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js";
+import * as RedGPU from "../../../../dist";
 
 const canvas = document.createElement("canvas");
 document.body.appendChild(canvas);
@@ -21,11 +21,62 @@ RedGPU.init(
 		redGPUContext.addView(view);
 
 		const geometry = new RedGPU.Primitive.Plane(redGPUContext, 50, 50, 1000, 1000);
-		// const geometry = new RedGPU.Primitive.Sphere(redGPUContext, 5, 32,32,32);
-		// const geometry = new RedGPU.Primitive.Box(redGPUContext, 5, 5,5,10,10,10);
 		const material = new RedGPU.Material.PhongMaterial(redGPUContext);
-		material.diffuseTexture = new RedGPU.Resource.NoiseSimplexFireTexture(redGPUContext);
 
+		material.diffuseTexture = new RedGPU.Resource.NoiseSimplexTexture(redGPUContext, 1024, 1024, {
+			mainLogic: `
+				let flame_uv = vec2<f32>(
+					base_uv.x + sin(uniforms.time * uniforms.flickerSpeed + base_uv.y * 5.0) * uniforms.turbulence,
+					base_uv.y + uniforms.time * uniforms.fireSpeed 
+				);
+
+				let main_noise = getSimplexNoiseByDimension(flame_uv, uniforms);
+
+				let detail_factor = base_uv.y * 0.8;
+				let detail_uv = vec2<f32>(
+					base_uv.x * 2.0 + sin(uniforms.time * 3.0 + base_uv.y * 8.0) * 0.05 * detail_factor,
+					base_uv.y * 1.5 + uniforms.time * uniforms.fireSpeed * 0.8
+				);
+				let detail_noise = getSimplexNoiseByDimension(detail_uv, uniforms) * 0.3;
+
+				let flame_shape = smoothstep(1.0 - uniforms.fireHeight, 1.0, base_uv.y);
+
+				let combined_noise = main_noise + detail_noise;
+				let fire_intensity = combined_noise * flame_shape * uniforms.fireIntensity;
+
+				let flame_heat = fire_intensity * (1.2 - base_uv.y * 0.5);
+
+				let inner_flame = vec3<f32>(1.0, 0.8, 0.2);
+				let outer_flame = vec3<f32>(1.0, 0.4, 0.1);
+				let flame_edge = vec3<f32>(0.6, 0.1, 0.0);
+
+				var fire_color: vec3<f32>;
+				if (flame_heat > 0.6) {
+					fire_color = mix(outer_flame, inner_flame, (flame_heat - 0.6) / 0.4);
+				} else if (flame_heat > 0.2) {
+					fire_color = mix(flame_edge, outer_flame, (flame_heat - 0.2) / 0.4);
+				} else {
+					fire_color = flame_edge * (flame_heat / 0.2);
+				}
+
+				let alpha = clamp(fire_intensity, 0.0, 1.0);
+				let finalColor = vec4<f32>(fire_color, alpha);
+			`,
+			uniformStruct: `
+				fireHeight: f32,
+				fireIntensity: f32,
+				flickerSpeed: f32,
+				turbulence: f32,
+				fireSpeed: f32,
+			`,
+			uniformDefaults: {
+				fireHeight: 1,
+				fireIntensity: 1.2,
+				flickerSpeed: 1.0,
+				turbulence: 0.1,
+				fireSpeed: 0.8
+			}
+		});
 
 		const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
 		mesh.setPosition(0, 0, 0);
@@ -54,25 +105,23 @@ RedGPU.init(
 );
 
 const createSkybox = (redGPUContext) => {
-	// Define texture paths for skybox
-	// 스카이박스 텍스처 경로 정의
 	const skyboxImagePaths = [
-		"../../../assets/skybox/px.jpg", // Positive X
-		"../../../assets/skybox/nx.jpg", // Negative X
-		"../../../assets/skybox/py.jpg", // Positive Y
-		"../../../assets/skybox/ny.jpg", // Negative Y
-		"../../../assets/skybox/pz.jpg", // Positive Z
-		"../../../assets/skybox/nz.jpg", // Negative Z
+		"../../../assets/skybox/px.jpg",
+		"../../../assets/skybox/nx.jpg",
+		"../../../assets/skybox/py.jpg",
+		"../../../assets/skybox/ny.jpg",
+		"../../../assets/skybox/pz.jpg",
+		"../../../assets/skybox/nz.jpg",
 	];
 
 	const cubeTexture = new RedGPU.Resource.CubeTexture(redGPUContext, skyboxImagePaths);
-
 	const skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture);
 	return skybox;
 };
+
 const renderTestPane = async (redGPUContext, targetNoiseTexture, testData) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
-	const {setSeparator} = await import("../../../exampleHelper/createExample/panes/index.js");
+	const {setSeparator} = await import("../../../exampleHelper/createExample/panes");
 	const pane = new Pane();
 
 	setSeparator(pane, "Fire Presets");
@@ -84,11 +133,11 @@ const renderTestPane = async (redGPUContext, targetNoiseTexture, testData) => {
 		targetNoiseTexture.persistence = 0.35;
 		targetNoiseTexture.lacunarity = 1.9;
 		targetNoiseTexture.seed = 101;
-		targetNoiseTexture.fireHeight = 0.6;
-		targetNoiseTexture.fireIntensity = 0.8;
-		targetNoiseTexture.flickerSpeed = 1.8;
-		targetNoiseTexture.turbulence = 0.04;
-		targetNoiseTexture.fireSpeed = 0.5; // 촛불 - 천천히 상승
+		targetNoiseTexture.updateUniform('fireHeight', 0.6);
+		targetNoiseTexture.updateUniform('fireIntensity', 0.8);
+		targetNoiseTexture.updateUniform('flickerSpeed', 1.8);
+		targetNoiseTexture.updateUniform('turbulence', 0.04);
+		targetNoiseTexture.updateUniform('fireSpeed', 0.5);
 		pane.refresh();
 	});
 
@@ -99,11 +148,11 @@ const renderTestPane = async (redGPUContext, targetNoiseTexture, testData) => {
 		targetNoiseTexture.persistence = 0.45;
 		targetNoiseTexture.lacunarity = 2.0;
 		targetNoiseTexture.seed = 202;
-		targetNoiseTexture.fireHeight = 0.75;
-		targetNoiseTexture.fireIntensity = 1.1;
-		targetNoiseTexture.flickerSpeed = 2.5;
-		targetNoiseTexture.turbulence = 0.08;
-		targetNoiseTexture.fireSpeed = 0.8; // 횃불 - 보통 속도
+		targetNoiseTexture.updateUniform('fireHeight', 0.75);
+		targetNoiseTexture.updateUniform('fireIntensity', 1.1);
+		targetNoiseTexture.updateUniform('flickerSpeed', 2.5);
+		targetNoiseTexture.updateUniform('turbulence', 0.08);
+		targetNoiseTexture.updateUniform('fireSpeed', 0.8);
 		pane.refresh();
 	});
 
@@ -114,11 +163,11 @@ const renderTestPane = async (redGPUContext, targetNoiseTexture, testData) => {
 		targetNoiseTexture.persistence = 0.65;
 		targetNoiseTexture.lacunarity = 2.3;
 		targetNoiseTexture.seed = 303;
-		targetNoiseTexture.fireHeight = 0.85;
-		targetNoiseTexture.fireIntensity = 1.6;
-		targetNoiseTexture.flickerSpeed = 4.0;
-		targetNoiseTexture.turbulence = 0.18;
-		targetNoiseTexture.fireSpeed = 1.2; // 화산 - 빠르게 분출
+		targetNoiseTexture.updateUniform('fireHeight', 0.85);
+		targetNoiseTexture.updateUniform('fireIntensity', 1.6);
+		targetNoiseTexture.updateUniform('flickerSpeed', 4.0);
+		targetNoiseTexture.updateUniform('turbulence', 0.18);
+		targetNoiseTexture.updateUniform('fireSpeed', 1.2);
 		pane.refresh();
 	});
 
@@ -129,11 +178,11 @@ const renderTestPane = async (redGPUContext, targetNoiseTexture, testData) => {
 		targetNoiseTexture.persistence = 0.5;
 		targetNoiseTexture.lacunarity = 2.1;
 		targetNoiseTexture.seed = 404;
-		targetNoiseTexture.fireHeight = 0.68;
-		targetNoiseTexture.fireIntensity = 1.0;
-		targetNoiseTexture.flickerSpeed = 2.2;
-		targetNoiseTexture.turbulence = 0.07;
-		targetNoiseTexture.fireSpeed = 0.7; // 캠프파이어 - 편안한 속도
+		targetNoiseTexture.updateUniform('fireHeight', 0.68);
+		targetNoiseTexture.updateUniform('fireIntensity', 1.0);
+		targetNoiseTexture.updateUniform('flickerSpeed', 2.2);
+		targetNoiseTexture.updateUniform('turbulence', 0.07);
+		targetNoiseTexture.updateUniform('fireSpeed', 0.7);
 		pane.refresh();
 	});
 
@@ -144,11 +193,11 @@ const renderTestPane = async (redGPUContext, targetNoiseTexture, testData) => {
 		targetNoiseTexture.persistence = 0.7;
 		targetNoiseTexture.lacunarity = 2.5;
 		targetNoiseTexture.seed = 505;
-		targetNoiseTexture.fireHeight = 0.9;
-		targetNoiseTexture.fireIntensity = 2.2;
-		targetNoiseTexture.flickerSpeed = 5.5;
-		targetNoiseTexture.turbulence = 0.25;
-		targetNoiseTexture.fireSpeed = 1.8; // 용의 숨 - 매우 빠름
+		targetNoiseTexture.updateUniform('fireHeight', 0.9);
+		targetNoiseTexture.updateUniform('fireIntensity', 2.2);
+		targetNoiseTexture.updateUniform('flickerSpeed', 5.5);
+		targetNoiseTexture.updateUniform('turbulence', 0.25);
+		targetNoiseTexture.updateUniform('fireSpeed', 1.8);
 		pane.refresh();
 	});
 
@@ -159,11 +208,11 @@ const renderTestPane = async (redGPUContext, targetNoiseTexture, testData) => {
 		targetNoiseTexture.persistence = 0.3;
 		targetNoiseTexture.lacunarity = 1.7;
 		targetNoiseTexture.seed = 606;
-		targetNoiseTexture.fireHeight = 0.55;
-		targetNoiseTexture.fireIntensity = 0.7;
-		targetNoiseTexture.flickerSpeed = 1.2;
-		targetNoiseTexture.turbulence = 0.03;
-		targetNoiseTexture.fireSpeed = 0.3; // 영혼불 - 신비롭게 천천히
+		targetNoiseTexture.updateUniform('fireHeight', 0.55);
+		targetNoiseTexture.updateUniform('fireIntensity', 0.7);
+		targetNoiseTexture.updateUniform('flickerSpeed', 1.2);
+		targetNoiseTexture.updateUniform('turbulence', 0.03);
+		targetNoiseTexture.updateUniform('fireSpeed', 0.3);
 		pane.refresh();
 	});
 
@@ -174,11 +223,11 @@ const renderTestPane = async (redGPUContext, targetNoiseTexture, testData) => {
 		targetNoiseTexture.persistence = 0.8;
 		targetNoiseTexture.lacunarity = 3.0;
 		targetNoiseTexture.seed = 707;
-		targetNoiseTexture.fireHeight = 0.8;
-		targetNoiseTexture.fireIntensity = 1.8;
-		targetNoiseTexture.flickerSpeed = 8.0;
-		targetNoiseTexture.turbulence = 0.15;
-		targetNoiseTexture.fireSpeed = 2.5; // 번개불 - 극도로 빠름
+		targetNoiseTexture.updateUniform('fireHeight', 0.8);
+		targetNoiseTexture.updateUniform('fireIntensity', 1.8);
+		targetNoiseTexture.updateUniform('flickerSpeed', 8.0);
+		targetNoiseTexture.updateUniform('turbulence', 0.15);
+		targetNoiseTexture.updateUniform('fireSpeed', 2.5);
 		pane.refresh();
 	});
 
@@ -189,11 +238,11 @@ const renderTestPane = async (redGPUContext, targetNoiseTexture, testData) => {
 		targetNoiseTexture.persistence = 0.25;
 		targetNoiseTexture.lacunarity = 1.6;
 		targetNoiseTexture.seed = 808;
-		targetNoiseTexture.fireHeight = 0.5;
-		targetNoiseTexture.fireIntensity = 0.6;
-		targetNoiseTexture.flickerSpeed = 1.0;
-		targetNoiseTexture.turbulence = 0.02;
-		targetNoiseTexture.fireSpeed = 0.4; // 부드러운 바람 - 느리고 우아함
+		targetNoiseTexture.updateUniform('fireHeight', 0.5);
+		targetNoiseTexture.updateUniform('fireIntensity', 0.6);
+		targetNoiseTexture.updateUniform('flickerSpeed', 1.0);
+		targetNoiseTexture.updateUniform('turbulence', 0.02);
+		targetNoiseTexture.updateUniform('fireSpeed', 0.4);
 		pane.refresh();
 	});
 
@@ -235,36 +284,51 @@ const renderTestPane = async (redGPUContext, targetNoiseTexture, testData) => {
 		step: 0.01
 	});
 
-	// Fire specific parameters
 	const fireParams = pane.addFolder({title: 'Fire Settings', expanded: true});
 
-	fireParams.addBinding(targetNoiseTexture, 'fireHeight', {
+	const fireHeightBinding = pane.addBinding({fireHeight: 1}, 'fireHeight', {
 		min: 0,
 		max: 1,
 		step: 0.01
 	});
+	fireHeightBinding.on('change', (ev) => {
+		targetNoiseTexture.updateUniform('fireHeight', ev.value);
+	});
 
-	fireParams.addBinding(targetNoiseTexture, 'fireIntensity', {
+	const fireIntensityBinding = pane.addBinding({fireIntensity: 1.2}, 'fireIntensity', {
 		min: 0,
 		max: 3,
 		step: 0.01
 	});
+	fireIntensityBinding.on('change', (ev) => {
+		targetNoiseTexture.updateUniform('fireIntensity', ev.value);
+	});
 
-	fireParams.addBinding(targetNoiseTexture, 'flickerSpeed', {
+	const flickerSpeedBinding = pane.addBinding({flickerSpeed: 1.0}, 'flickerSpeed', {
 		min: 0,
 		max: 10,
 		step: 0.1
 	});
+	flickerSpeedBinding.on('change', (ev) => {
+		targetNoiseTexture.updateUniform('flickerSpeed', ev.value);
+	});
 
-	fireParams.addBinding(targetNoiseTexture, 'turbulence', {
+	const turbulenceBinding = pane.addBinding({turbulence: 0.1}, 'turbulence', {
 		min: 0,
 		max: 0.5,
 		step: 0.01
 	});
-	fireParams.addBinding(targetNoiseTexture, 'fireSpeed', {
+	turbulenceBinding.on('change', (ev) => {
+		targetNoiseTexture.updateUniform('turbulence', ev.value);
+	});
+
+	const fireSpeedBinding = pane.addBinding({fireSpeed: 0.8}, 'fireSpeed', {
 		min: 0,
 		max: 2,
 		step: 0.01
+	});
+	fireSpeedBinding.on('change', (ev) => {
+		targetNoiseTexture.updateUniform('fireSpeed', ev.value);
 	});
 
 	pane.addBinding(targetNoiseTexture, 'noiseDimension', {
@@ -273,5 +337,4 @@ const renderTestPane = async (redGPUContext, targetNoiseTexture, testData) => {
 
 	const animation = pane.addFolder({title: 'Animation', expanded: true});
 	animation.addBinding(testData, 'useAnimation');
-
 };
