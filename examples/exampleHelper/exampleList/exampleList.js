@@ -326,6 +326,60 @@ const ExampleList = [
 				]
 			},
 			{
+				name: 'Noise Texture',
+				experimental : true,
+				list: [
+					{
+						name: 'SimplexTexture',
+						experimental : true,
+						list: [
+							{
+								name: 'SimplexTexture',
+								path: '3d/noiseTexture/simplex/basic/',
+								thumb: '3d/noiseTexture/simplex/basic/thumb.png',
+								description: {
+									ko: ``,
+									en: ``
+								},
+							},
+							{
+								name: 'Custom SimplexTexture - Fire',
+								path: '3d/noiseTexture/simplex/fire/',
+								thumb: '3d/noiseTexture/simplex/fire/thumb.png',
+								description: {
+									ko: ``,
+									en: ``
+								},
+							},
+							{
+								name: 'Custom SimplexTexture - Displacement',
+								path: '3d/noiseTexture/simplex/displacement/',
+								thumb: '3d/noiseTexture/simplex/displacement/thumb.png',
+								description: {
+									ko: ``,
+									en: ``
+								},
+							},
+						]
+					},
+					{
+						name: 'VoronoiTexture',
+						experimental : true,
+						list: [
+							{
+								name: 'VoronoiTexture',
+								path: '3d/noiseTexture/voronoi/basic',
+								thumb: '3d/noiseTexture/voronoi/basic/thumb.png',
+								description: {
+									ko: ``,
+									en: ``
+								},
+							},
+						]
+					},
+				]
+			},
+			{
 				name: 'Sprite3D & SpriteSheet3D',
 				list: [
 					{

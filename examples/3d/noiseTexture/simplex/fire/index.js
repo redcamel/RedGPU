@@ -17,7 +17,7 @@ RedGPU.init(
 		scene.lightManager.addDirectionalLight(directionalLight);
 
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		view.skybox = createSkybox(redGPUContext);
+
 		redGPUContext.addView(view);
 
 		const geometry = new RedGPU.Primitive.Plane(redGPUContext, 50, 50, 1000, 1000);
@@ -104,20 +104,6 @@ RedGPU.init(
 	}
 );
 
-const createSkybox = (redGPUContext) => {
-	const skyboxImagePaths = [
-		"../../../assets/skybox/px.jpg",
-		"../../../assets/skybox/nx.jpg",
-		"../../../assets/skybox/py.jpg",
-		"../../../assets/skybox/ny.jpg",
-		"../../../assets/skybox/pz.jpg",
-		"../../../assets/skybox/nz.jpg",
-	];
-
-	const cubeTexture = new RedGPU.Resource.CubeTexture(redGPUContext, skyboxImagePaths);
-	const skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture);
-	return skybox;
-};
 
 const renderTestPane = async (redGPUContext, targetNoiseTexture, testData) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
