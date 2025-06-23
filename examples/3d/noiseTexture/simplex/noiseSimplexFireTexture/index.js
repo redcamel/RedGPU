@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist";
+import * as RedGPU from "../../../../../dist";
 
 const canvas = document.createElement("canvas");
 document.body.appendChild(canvas);
@@ -23,7 +23,7 @@ RedGPU.init(
 		const geometry = new RedGPU.Primitive.Plane(redGPUContext, 50, 50, 1000, 1000);
 		const material = new RedGPU.Material.PhongMaterial(redGPUContext);
 
-		material.diffuseTexture = new RedGPU.Resource.NoiseSimplexTexture(redGPUContext, 1024, 1024, {
+		material.diffuseTexture = new RedGPU.Resource.SimplexTexture(redGPUContext, 1024, 1024, {
 			mainLogic: `
 				let flame_uv = vec2<f32>(
 					base_uv.x + sin(uniforms.time * uniforms.flickerSpeed + base_uv.y * 5.0) * uniforms.turbulence,
@@ -121,7 +121,7 @@ const createSkybox = (redGPUContext) => {
 
 const renderTestPane = async (redGPUContext, targetNoiseTexture, testData) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
-	const {setSeparator} = await import("../../../exampleHelper/createExample/panes");
+	const {setSeparator} = await import("../../../../exampleHelper/createExample/panes");
 	const pane = new Pane();
 
 	setSeparator(pane, "Fire Presets");

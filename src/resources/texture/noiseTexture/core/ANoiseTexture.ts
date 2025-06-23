@@ -9,7 +9,6 @@ import basicRegisterResource from "../../../resourceManager/core/basicRegisterRe
 import basicUnregisterResource from "../../../resourceManager/core/basicUnregisterResource";
 import ResourceStateBitmapTexture from "../../../resourceManager/resourceState/ResourceStateBitmapTexture";
 import parseWGSL from "../../../wgslParser/parseWGSL";
-import noiseBaseFunctions from './simplexCompute.wgsl';
 
 const MANAGED_STATE_KEY = 'managedBitmapTextureState';
 
@@ -21,7 +20,9 @@ export interface NoiseDefine {
 }
 
 const BASIC_OPTIONS = {
-
+	animationSpeed: 1,
+	animationX: 0.1,
+	animationY: 0.1
 }
 
 class ANoiseTexture extends ManagedResourceBase {
@@ -47,7 +48,39 @@ class ANoiseTexture extends ManagedResourceBase {
 	///
 	//
 	#time: number = 0
+	#animationSpeed: number = 1
+	#animationX: number = BASIC_OPTIONS.animationX
+	#animationY: number = BASIC_OPTIONS.animationY
 
+	get animationSpeed(): number {
+		return this.#animationSpeed;
+	}
+
+	set animationSpeed(value: number) {
+		validatePositiveNumberRange(value);
+		this.#animationSpeed = value;
+		this.updateUniform('animationSpeed', value);
+	}
+
+	get animationX(): number {
+		return this.#animationX;
+	}
+
+	set animationX(value: number) {
+		validateNumber(value);
+		this.#animationX = value;
+		this.updateUniform('animationX', value);
+	}
+
+	get animationY(): number {
+		return this.#animationY;
+	}
+
+	set animationY(value: number) {
+		validateNumber(value);
+		this.#animationY = value;
+		this.updateUniform('animationY', value);
+	}
 
 	constructor(
 		redGPUContext: RedGPUContext,
@@ -146,6 +179,9 @@ class ANoiseTexture extends ManagedResourceBase {
 		const baseUniforms = `
             struct Uniforms {
                 time: f32,
+								animationSpeed: f32,
+								animationX: f32,
+								animationY: f32,
                 ${this.#currentEffect.uniformStruct || ''}
             };
         `;
@@ -155,7 +191,6 @@ class ANoiseTexture extends ManagedResourceBase {
             @group(0) @binding(0) var<uniform> uniforms : Uniforms;
             @group(0) @binding(1) var outputTexture : texture_storage_2d<rgba8unorm, write>;
             
-            ${noiseBaseFunctions}
             ${helperFunctions}
             @compute @workgroup_size(${this.#COMPUTE_WORKGROUP_SIZE_X},${this.#COMPUTE_WORKGROUP_SIZE_Y},${this.#COMPUTE_WORKGROUP_SIZE_Z})
             fn main (

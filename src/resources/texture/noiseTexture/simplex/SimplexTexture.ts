@@ -2,9 +2,14 @@ import RedGPUContext from "../../../../context/RedGPUContext";
 import validatePositiveNumberRange from "../../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import validateUintRange from "../../../../runtimeChecker/validateFunc/validateUintRange";
 import consoleAndThrowError from "../../../../utils/consoleAndThrowError";
-import NOISE_DIMENSION from "../NOISE_DIMENSION";
-import ANoiseTexture, {NoiseDefine} from "./ANoiseTexture";
-import {mergerNoiseUniformDefault, mergerNoiseUniformStruct} from "./noiseDegineMerges";
+import NOISE_DIMENSION from "./NOISE_DIMENSION";
+import ANoiseTexture, {NoiseDefine} from "../core/ANoiseTexture";
+import {
+	mergerNoiseHelperFunctions,
+	mergerNoiseUniformDefault,
+	mergerNoiseUniformStruct
+} from "../core/noiseDegineMerges";
+import simplexComputeFunctions from './simplexCompute.wgsl';
 
 const validDimensions = Object.values(NOISE_DIMENSION) as number[];
 const BASIC_OPTIONS = {
@@ -17,7 +22,7 @@ const BASIC_OPTIONS = {
 	noiseDimension: NOISE_DIMENSION.MODE_2D,
 }
 
-class ASimplexTexture extends ANoiseTexture {
+class SimplexTexture extends ANoiseTexture {
 	#frequency: number = BASIC_OPTIONS.frequency;      /* 노이즈 패턴의 밀도/크기 (값이 클수록 세밀함) */
 	#amplitude: number = BASIC_OPTIONS.amplitude;      /* 노이즈의 강도/대비 (값이 클수록 명암 대비 강함) */
 	#octaves: number = BASIC_OPTIONS.octaves;          /* 합성할 노이즈 레이어 개수 (값이 클수록 복잡한 디테일) */
@@ -34,6 +39,16 @@ class ASimplexTexture extends ANoiseTexture {
 	) {
 		super(redGPUContext, width, height, {
 			...define,
+			mainLogic: define?.mainLogic || `
+						let uv = vec2<f32>(
+							(base_uv.x + uniforms.time * ( uniforms.animationX * uniforms.animationSpeed )) , 
+							(base_uv.y + uniforms.time * ( uniforms.animationY * uniforms.animationSpeed )) 
+						);
+						let noise = getSimplexNoiseByDimension( uv,uniforms );
+            
+            /* 최종 색상 (그레이스케일) */
+            let finalColor = vec4<f32>(noise, noise, noise, 1.0);
+			`,
 			uniformStruct: mergerNoiseUniformStruct(`
 					noiseDimension : f32,
 					frequency: f32,
@@ -46,6 +61,7 @@ class ASimplexTexture extends ANoiseTexture {
 				define?.uniformStruct
 			),
 			uniformDefaults: mergerNoiseUniformDefault(BASIC_OPTIONS, define?.uniformDefaults),
+			helperFunctions: mergerNoiseHelperFunctions(simplexComputeFunctions, define?.helperFunctions),
 		});
 	}
 
@@ -166,4 +182,4 @@ class ASimplexTexture extends ANoiseTexture {
 	}
 }
 
-export default ASimplexTexture;
+export default SimplexTexture;
