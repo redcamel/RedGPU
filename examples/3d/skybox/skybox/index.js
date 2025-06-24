@@ -32,6 +32,7 @@ RedGPU.init(
 		renderer.start(redGPUContext, () => {
 			// 매 프레임 실행될 로직 (필요시 추가)
 		});
+		renderTestPane(redGPUContext,view)
 	},
 	(failReason) => {
 		// Handle initialization failure
@@ -68,7 +69,22 @@ const createSkybox = (redGPUContext) => {
 	const skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture);
 	return skybox;
 };
+const renderTestPane = async (redGPUContext, view) => {
+	const {Pane} = await import(
+		"https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js"
+		);
 
+	const pane = new Pane();
+	const {camera} = view.camera
+	console.log('camera',camera)
+	pane.addBinding(camera, 'fieldOfView',{
+		min:12,
+		max:100,
+		step:0.1
+	}).on("change", (ev) => {
+
+	});
+};
 const createDebug = (skyboxImagePaths) => {
 	const previewContainer = document.createElement("div");
 	previewContainer.style.position = "absolute";

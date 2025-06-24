@@ -10,12 +10,14 @@ RedGPU.init(
 		controller.tilt = 0
 		controller.pan = 85
 
+
+
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 
 		redGPUContext.addView(view);
 
-		view.skybox = createSphericalSkyBox(redGPUContext);
+		createSphericalSkyBox(view);
 
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		renderer.start(redGPUContext, () => {
@@ -29,48 +31,80 @@ RedGPU.init(
 	}
 );
 
-const createSphericalSkyBox = (redGPUContext) => {
-	const skyboxImagePaths = [
-		"../../../assets/skybox/px.jpg",
-		"../../../assets/skybox/nx.jpg",
-		"../../../assets/skybox/py.jpg",
-		"../../../assets/skybox/ny.jpg",
-		"../../../assets/skybox/pz.jpg",
-		"../../../assets/skybox/nz.jpg",
-	];
-	const texture = new RedGPU.Resource.CubeTexture(
-		redGPUContext,
-		skyboxImagePaths
-	);
+const  createSphericalSkyBox = async (view) => {
+	const {redGPUContext} = view;
 
-	const hdrTexture = new RedGPU.Resource.HDRTexture(
+
+	const hdrTexture =  new RedGPU.Resource.HDRTexture(
 		redGPUContext,
-		'../../../assets/skybox/sphericalSkyBox.hdr'
+		// '../../../assets/hdr/sphericalSkyBox.hdr'
+		'../../../assets/hdr/Cannon_Exterior.hdr'
+		// '../../../assets/hdr/field.hdr'
+		// '../../../assets/hdr/neutral.37290948.hdr'
+		// '../../../assets/hdr/pisa.hdr'
 	);
 	console.log('hdrTexture',hdrTexture)
-	createDebug("../../../assets/skybox/sphericalSkyBox.jpg")
 
-	const skyBox = new RedGPU.Display.SkyBox(redGPUContext, texture);
-	return skyBox;
+	{
+		setTimeout(()=>{
+
+			const material = new RedGPU.Material.BitmapMaterial(redGPUContext,hdrTexture); // Red material / 빨간색 재질
+			const geometry = new RedGPU.Primitive.Box(redGPUContext, 1, 1, 1); // Box geometry / 박스 형태 지오메트리
+			const childMesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
+			// view.scene.addChild(childMesh);
+			view.skybox = new RedGPU.Display.SkyBox(redGPUContext, hdrTexture.iblTextures.environmentMap)
+			view.iblTexture = hdrTexture.iblTextures.irradianceMap;
+			renderTestPane(redGPUContext,view,hdrTexture.iblTextures.irradianceMap);
+			// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Corset/glTF/Corset.gltf',);
+			loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ClearcoatWicker/glTF/ClearcoatWicker.gltf',);
+			// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ClearCoatTest/glTF/ClearCoatTest.gltf',);
+
+		},1000)
+	}
+
 };
 
-const createDebug = (skyboxImagePath) => {
-	const previewContainer = document.createElement("div");
-	previewContainer.style.position = "absolute";
-	previewContainer.style.left = "10px";
-	previewContainer.style.top = "100px";
-	previewContainer.style.zIndex = "1000";
-	previewContainer.style.display = "flex";
-	previewContainer.style.flexDirection = "column";
-	previewContainer.style.backgroundColor = "rgba(0, 0, 0, 0.16)";
-	previewContainer.style.padding = "4px";
-	previewContainer.style.borderRadius = "8px";
-	document.body.appendChild(previewContainer);
+function loadGLTF(view, url) {
+	const {redGPUContext, scene} = view
 
-	const img = document.createElement("img");
-	img.src = skyboxImagePath;
-	img.alt = skyboxImagePath;
-	img.style.maxHeight = "100px";
-	img.style.borderRadius = "8px";
-	previewContainer.appendChild(img);
+	let mesh
+	new RedGPU.GLTFLoader(
+		redGPUContext,
+		url,
+		(v) => {
+			mesh = scene.addChild(v['resultMesh'])
+			mesh.y = -1
+			// mesh.setScale(50)
+		}
+	)
 }
+
+const renderTestPane = async (redGPUContext, view,iblTexture) => {
+
+	const {Pane} = await import(
+		"https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js"
+		);
+
+	const pane = new Pane();
+	const {camera} = view.camera
+	console.log('camera',camera)
+	pane.addBinding(camera, 'fieldOfView',{
+		min:12,
+		max:100,
+		step:0.1
+	}).on("change", (ev) => {
+
+	});
+	const testData = {
+		useIBLTexture : true
+	}
+	pane.addBinding(testData, 'useIBLTexture',{
+		min:12,
+		max:100,
+		step:0.1
+	}).on("change", (ev) => {
+		if(ev.value) view.iblTexture = iblTexture
+		else view.iblTexture = null
+
+	});
+};

@@ -1,4 +1,5 @@
 import RedGPUContext from "../../context/RedGPUContext";
+import createUUID from "../../utils/createUUID";
 import calculateTextureByteSize from "../../utils/math/calculateTextureByteSize";
 import getMipLevelCount from "../../utils/math/getMipLevelCount";
 import ManagedResourceBase from "../ManagedResourceBase";
@@ -59,7 +60,9 @@ class CubeTexture extends ManagedResourceBase {
 			this.#onLoad?.(this)
 			return table[target.uuid].texture
 		} else {
-			this.srcList = srcList;
+
+				this.srcList = srcList;
+
 			this.#registerResource()
 		}
 	}
@@ -93,8 +96,8 @@ class CubeTexture extends ManagedResourceBase {
 
 	set srcList(value: string[]) {
 		this.#srcList = value
-		this.#cacheKey = value?.toString();
-		if (this.#srcList) this.#loadBitmapTexture(this.#srcList);
+		this.#cacheKey = value?.toString() || createUUID();
+		if (this.#srcList?.length) this.#loadBitmapTexture(this.#srcList);
 	}
 
 	get useMipmap(): boolean {
@@ -120,6 +123,35 @@ class CubeTexture extends ManagedResourceBase {
 	#setGpuTexture(value: GPUTexture) {
 		this.#gpuTexture = value;
 		if (!value) this.#imgBitmaps = null
+		this.__fireListenerList();
+	}
+
+	setGPUTextureDirectly(
+		gpuTexture: GPUTexture,
+		cacheKey?: string,
+		useMipmap: boolean = true
+	): void {
+		// 기존 텍스처 정리
+		if (this.#gpuTexture) {
+			this.#gpuTexture.destroy();
+			this.targetResourceManagedState.videoMemory -= this.#videoMemorySize;
+		}
+		// 새 텍스처 설정
+		this.#gpuTexture = gpuTexture;
+		this.#useMipmap = useMipmap
+		this.#mipLevelCount = getMipLevelCount(gpuTexture.width, gpuTexture.height);
+		;
+		this.#cacheKey = cacheKey || `direct_${this.uuid}`;
+		// 메모리 사용량 계산
+		const textureDescriptor: GPUTextureDescriptor = {
+			size: [gpuTexture.width, gpuTexture.height, gpuTexture.depthOrArrayLayers],
+			format: gpuTexture.format as GPUTextureFormat,
+			usage: gpuTexture.usage,
+			mipLevelCount: this.#mipLevelCount
+		};
+		this.#videoMemorySize = calculateTextureByteSize(textureDescriptor);
+		this.targetResourceManagedState.videoMemory += this.#videoMemorySize;
+		// 리스너들에게 업데이트 알림
 		this.__fireListenerList();
 	}
 

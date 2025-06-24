@@ -36,7 +36,11 @@ class SkyBoxMaterial extends ABitmapBaseMaterial {
 			2
 		)
 		this.skyboxTexture = cubeTexture
-		this.skyboxTextureSampler = new Sampler(this.redGPUContext)
+		this.skyboxTextureSampler = new Sampler(this.redGPUContext,{
+			addressModeU: 'clamp-to-edge',
+			addressModeV: 'clamp-to-edge',
+			addressModeW: 'clamp-to-edge'
+		})
 		this.initGPURenderInfos()
 	}
 }
