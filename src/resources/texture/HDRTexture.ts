@@ -17,7 +17,7 @@ interface HDRData {
 
 interface IBLTextures {
 	environmentMap: CubeTexture;
-	irradianceMap: CubeTexture;
+	iblIrradianceTexture: CubeTexture;
 	prefilterMap: GPUTexture;
 	brdfLUT: GPUTexture;
 }
@@ -155,7 +155,7 @@ class HDRTexture extends ManagedResourceBase {
 		if (this.#cubeMapTexture) this.#cubeMapTexture.destroy()
 		if (this.#iblTextures) {
 			this.#iblTextures.environmentMap?.destroy()
-			this.#iblTextures.irradianceMap?.destroy()
+			this.#iblTextures.iblIrradianceTexture?.destroy()
 			this.#iblTextures.prefilterMap?.destroy()
 			this.#iblTextures.brdfLUT?.destroy()
 		}
@@ -556,7 +556,7 @@ var texCoord = array<vec2<f32>, 6>(
 
 		this.#iblTextures = {
 			environmentMap: env,
-			irradianceMap: irradiance,
+			iblIrradianceTexture: irradiance,
 			prefilterMap,
 			brdfLUT
 		};

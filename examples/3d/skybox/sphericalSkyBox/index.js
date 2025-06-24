@@ -38,8 +38,8 @@ const  createSphericalSkyBox = async (view) => {
 	const hdrTexture =  new RedGPU.Resource.HDRTexture(
 		redGPUContext,
 		// '../../../assets/hdr/sphericalSkyBox.hdr'
-		'../../../assets/hdr/Cannon_Exterior.hdr'
-		// '../../../assets/hdr/field.hdr'
+		// '../../../assets/hdr/Cannon_Exterior.hdr'
+		'../../../assets/hdr/field.hdr'
 		// '../../../assets/hdr/neutral.37290948.hdr'
 		// '../../../assets/hdr/pisa.hdr'
 	);
@@ -53,10 +53,11 @@ const  createSphericalSkyBox = async (view) => {
 			const childMesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
 			// view.scene.addChild(childMesh);
 			view.skybox = new RedGPU.Display.SkyBox(redGPUContext, hdrTexture.iblTextures.environmentMap)
-			view.iblTexture = hdrTexture.iblTextures.irradianceMap;
-			renderTestPane(redGPUContext,view,hdrTexture.iblTextures.irradianceMap);
-			// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Corset/glTF/Corset.gltf',);
-			loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ClearcoatWicker/glTF/ClearcoatWicker.gltf',);
+			view.iblTexture = hdrTexture.iblTextures.iblIrradianceTexture;
+			view.iblIrradianceTexture = hdrTexture.iblTextures.iblIrradianceTexture;
+			renderTestPane(redGPUContext,view,hdrTexture.iblTextures.iblIrradianceTexture);
+			loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Corset/glTF/Corset.gltf',);
+			// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ClearcoatWicker/glTF/ClearcoatWicker.gltf',);
 			// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ClearCoatTest/glTF/ClearCoatTest.gltf',);
 
 		},1000)
@@ -74,7 +75,7 @@ function loadGLTF(view, url) {
 		(v) => {
 			mesh = scene.addChild(v['resultMesh'])
 			mesh.y = -1
-			// mesh.setScale(50)
+			mesh.setScale(50)
 		}
 	)
 }
