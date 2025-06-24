@@ -42,7 +42,7 @@ class ResourceManager extends ResourceBase {
 	])
 	#managedBitmapTextureState: ResourceState = new ResourceState()
 	#managedCubeTextureState: ResourceState = new ResourceState()
-	#managedCubeTextureFromSphericalSkyState: ResourceState = new ResourceState()
+	#managedHDRTextureState: ResourceState = new ResourceState()
 	#managedUniformBufferState: ResourceState = new ResourceState()
 	#managedVertexBufferState: ResourceState = new ResourceState()
 	#managedIndexBufferState: ResourceState = new ResourceState()
@@ -90,6 +90,10 @@ class ResourceManager extends ResourceBase {
 
 	get managedCubeTextureState(): ResourceState {
 		return this.#managedCubeTextureState;
+	}
+
+	get managedHDRTextureState(): ResourceState {
+		return this.#managedHDRTextureState;
 	}
 
 	get managedUniformBufferState(): ResourceState {

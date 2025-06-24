@@ -2,7 +2,7 @@ import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import ManagedResourceBase from "../../ManagedResourceBase";
 import ResourceStateBitmapTexture from "../resourceState/ResourceStateBitmapTexture";
 import ResourceStateCubeTexture from "../resourceState/ResourceStateCubeTexture";
-import ResourceStateCubeTextureFromSphericalSky from "../resourceState/ResourceStateCubeTextureFromSphericalSky";
+import ResourceStateHDRTexture from "../resourceState/ResourceStateHDRTexture";
 import ResourceStateIndexBuffer from "../resourceState/ResourceStateIndexBuffer";
 import ResourceStateStorageBuffer from "../resourceState/ResourceStateStorageBuffer";
 import ResourceStateUniformBuffer from "../resourceState/ResourceStateUniformBuffer";
@@ -16,10 +16,10 @@ const basicRegisterResource = (
 		| ResourceStateStorageBuffer
 		| ResourceStateCubeTexture
 		| ResourceStateBitmapTexture
-		| ResourceStateCubeTextureFromSphericalSky
+		| ResourceStateHDRTexture
 ) => {
 	const {uuid, targetResourceManagedState} = target
-	const textureYn = resourceState instanceof ResourceStateCubeTexture || resourceState instanceof ResourceStateBitmapTexture
+	const textureYn = resourceState instanceof ResourceStateCubeTexture || resourceState instanceof ResourceStateBitmapTexture || resourceState instanceof ResourceStateHDRTexture
 	try {
 		// 이미 등록된 버퍼인지 체크
 		if (targetResourceManagedState.table[uuid]) {
