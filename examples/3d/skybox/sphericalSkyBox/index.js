@@ -34,11 +34,11 @@ const createSphericalSkyBox = async (view) => {
 
 	const hdrTexture = new RedGPU.Resource.HDRTexture(
 		redGPUContext,
-		// '../../../assets/hdr/sphericalSkyBox.hdr'
+		'../../../assets/hdr/sphericalSkyBox.hdr'
 		// '../../../assets/hdr/Cannon_Exterior.hdr'
 		// '../../../assets/hdr/field.hdr'
 		// '../../../assets/hdr/neutral.37290948.hdr'
-		'../../../assets/hdr/pisa.hdr'
+		// '../../../assets/hdr/pisa.hdr'
 		,
 		true,
 		() => {
@@ -56,6 +56,7 @@ const createSphericalSkyBox = async (view) => {
 			// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/TransmissionRoughnessTest/glTF/TransmissionRoughnessTest.gltf',);
 			// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CommercialRefrigerator/glTF/CommercialRefrigerator.gltf',);
 			loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/TransmissionTest/glTF/TransmissionTest.gltf',);
+			loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/GlassHurricaneCandleHolder/glTF/GlassHurricaneCandleHolder.gltf',);
 			// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DragonAttenuation/glTF/DragonAttenuation.gltf',);
 			// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CompareTransmission/glTF/CompareTransmission.gltf',);
 			// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MosquitoInAmber/glTF/MosquitoInAmber.gltf',);
@@ -76,13 +77,14 @@ function loadGLTF(view, url) {
 		url,
 		(v) => {
 			mesh = scene.addChild(v['resultMesh'])
-			mesh.y = -1
+
 			if (url.includes('Corset')) mesh.setScale(50)
 			if (url.includes('ClearcoatWicker')) mesh.setScale(3)
 			if (url.includes('TransmissionTest')) mesh.setScale(5)
 			if (url.includes('MosquitoInAmber')) mesh.setScale(10)
 			if (url.includes('SheenChair')) mesh.setScale(10)
 			if (url.includes('CommercialRefrigerator')) mesh.setScale(10)
+			if (url.includes('GlassHurricaneCandleHolder')) mesh.setScale(10), mesh.x = 4, 	mesh.y = -1.5
 		}
 	)
 }

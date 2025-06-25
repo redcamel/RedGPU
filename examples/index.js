@@ -10,6 +10,7 @@ RedGPU.init(
 		const controllerTest = new RedGPU.Camera.ObitController(redGPUContext);
 		controllerTest.distance = 2
 		controllerTest.speedDistance = 0.1
+		controllerTest.camera.fieldOfView = 60
 		// controllerTest.tilt = -10
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controllerTest);
@@ -20,22 +21,21 @@ RedGPU.init(
 		directionalLightTest.color.b = 255
 		directionalLightTest.intensity = 1
 
-		scene.lightManager.addDirectionalLight(directionalLightTest)
+		// scene.lightManager.addDirectionalLight(directionalLightTest)
 
 		redGPUContext.addView(view);
 
-		///
-		const cubeTexture =
-			new RedGPU.Resource.CubeTexture(redGPUContext, [
-				"./assets/skybox/px.jpg", // Positive X
-				"./assets/skybox/nx.jpg", // Negative X
-				"./assets/skybox/py.jpg", // Positive Y
-				"./assets/skybox/ny.jpg", // Negative Y
-				"./assets/skybox/pz.jpg", // Positive Z
-				"./assets/skybox/nz.jpg", // Negative Z
-			])
-		view.iblTexture = cubeTexture
-		view.skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture)
+		const hdrTexture = new RedGPU.Resource.HDRTexture(
+			redGPUContext,
+			'./assets/hdr/sphericalSkyBox.hdr'
+			,
+			true,
+			() => {
+				const ibl = new RedGPU.Resource.IBL(redGPUContext, hdrTexture.gpuCubeTexture);
+				view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture)
+				view.ibl = ibl
+			}
+		);
 
 		const renderer = new RedGPU.Renderer(redGPUContext)
 
