@@ -286,8 +286,8 @@ interface PBRMaterial {
 
 class PBRMaterial extends ABitmapBaseMaterial {
 	#packedORMTexture: PackedTexture
-	#packedKHR_clearcoatTexture: PackedTexture
-	#packedKHR_transmission: PackedTexture
+	// #packedKHR_clearcoatTexture: PackedTexture
+	// #packedKHR_transmission: PackedTexture
 	#packedKHR_diffuse_transmission: PackedTexture
 	#packedKHR_sheen: PackedTexture
 	#packedKHR_iridescence: PackedTexture
@@ -339,17 +339,17 @@ class PBRMaterial extends ABitmapBaseMaterial {
 		return this.#packedKHR_sheen;
 	}
 
-	get packedKHR_transmission(): PackedTexture {
-		return this.#packedKHR_transmission;
-	}
+	// get packedKHR_transmission(): PackedTexture {
+	// 	return this.#packedKHR_transmission;
+	// }
 
 	get packedKHR_diffuse_transmission(): PackedTexture {
 		return this.#packedKHR_diffuse_transmission;
 	}
 
-	get packedKHR_clearcoatTexture(): PackedTexture {
-		return this.#packedKHR_clearcoatTexture;
-	}
+	// get packedKHR_clearcoatTexture(): PackedTexture {
+	// 	return this.#packedKHR_clearcoatTexture;
+	// }
 
 	async setupPackORMTexture() {
 		const width = Math.max(
