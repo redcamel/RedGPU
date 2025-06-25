@@ -292,16 +292,7 @@ class View3D extends ViewTransform {
 					binding: 3,
 					resource: this.#basicSampler
 				},
-				{
-					binding: 4,
-					resource:
-						this.iblTexture?.gpuTexture?.createView(this.iblTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor)
-						|| this.#skybox?._material?.skyboxTexture?.gpuTexture?.createView(
-							this.#skybox._material.skyboxTexture.viewDescriptor || CubeTexture.defaultViewDescriptor
-						)
-						||
-						this.redGPUContext.resourceManager.emptyCubeTextureView
-				},
+
 				{
 					binding: 5,
 					resource: {
@@ -333,6 +324,16 @@ class View3D extends ViewTransform {
 				},
 				{
 					binding: 10,
+					resource:
+						this.iblTexture?.gpuTexture?.createView(this.iblTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor)
+						|| this.#skybox?._material?.skyboxTexture?.gpuTexture?.createView(
+							this.#skybox._material.skyboxTexture.viewDescriptor || CubeTexture.defaultViewDescriptor
+						)
+						||
+						this.redGPUContext.resourceManager.emptyCubeTextureView
+				},
+				{
+					binding: 11,
 					resource:
 						this.iblTexture2?.gpuTexture?.createView(this.iblTexture2?.viewDescriptor || CubeTexture.defaultViewDescriptor)
 						|| this.#skybox?._material?.skyboxTexture?.gpuTexture?.createView(

@@ -278,7 +278,7 @@ class ResourceManager extends ResourceBase {
 						},
 						{binding: 2, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: "depth"}},
 						{binding: 3, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
-						{binding: 4, visibility: GPUShaderStage.FRAGMENT, texture: {viewDimension: "cube"}},
+
 						{
 							binding: 5,
 							visibility: GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE,
@@ -293,6 +293,7 @@ class ResourceManager extends ResourceBase {
 						{binding: 8, visibility: GPUShaderStage.FRAGMENT, texture: {}},
 						{binding: 9, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
 						{binding: 10, visibility: GPUShaderStage.FRAGMENT, texture: {viewDimension: "cube"}},
+						{binding: 11, visibility: GPUShaderStage.FRAGMENT, texture: {viewDimension: "cube"}},
 					],
 				}
 			)
