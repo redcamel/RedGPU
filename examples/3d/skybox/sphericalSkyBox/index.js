@@ -32,39 +32,32 @@ RedGPU.init(
 const createSphericalSkyBox = async (view) => {
 	const {redGPUContext} = view;
 
-	const hdrTexture = new RedGPU.Resource.HDRTexture(
-		redGPUContext,
-		'../../../assets/hdr/sphericalSkyBox.hdr'
-		// '../../../assets/hdr/Cannon_Exterior.hdr'
-		// '../../../assets/hdr/field.hdr'
-		// '../../../assets/hdr/neutral.37290948.hdr'
-		// '../../../assets/hdr/pisa.hdr'
-		,
-		true,
-		() => {
-			const ibl = new RedGPU.Resource.IBL(redGPUContext, hdrTexture.gpuCubeTexture);
-			const material = new RedGPU.Material.BitmapMaterial(redGPUContext, hdrTexture); // Red material / 빨간색 재질
-			const geometry = new RedGPU.Primitive.Box(redGPUContext, 1, 1, 1); // Box geometry / 박스 형태 지오메트리
-			const childMesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
-			// view.scene.addChild(childMesh);
-			view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture)
-			view.ibl = ibl
-			renderTestPane(redGPUContext, view, ibl,view.skybox);
-			loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/EnvironmentTest/glTF/EnvironmentTest.gltf',);
-			// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Corset/glTF/Corset.gltf',);
-			// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/SheenChair/glTF/SheenChair.gltf',);
-			// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/TransmissionRoughnessTest/glTF/TransmissionRoughnessTest.gltf',);
-			// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CommercialRefrigerator/glTF/CommercialRefrigerator.gltf',);
-			loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/TransmissionTest/glTF/TransmissionTest.gltf',);
-			loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/GlassHurricaneCandleHolder/glTF/GlassHurricaneCandleHolder.gltf',);
-			// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DragonAttenuation/glTF/DragonAttenuation.gltf',);
-			// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CompareTransmission/glTF/CompareTransmission.gltf',);
-			// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MosquitoInAmber/glTF/MosquitoInAmber.gltf',);
-			// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ClearcoatWicker/glTF/ClearcoatWicker.gltf',);
-			// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ClearCoatTest/glTF/ClearCoatTest.gltf',);
-		}
-	);
-	console.log('hdrTexture', hdrTexture)
+
+	const ibl = new RedGPU.Resource.IBL(redGPUContext, 	'../../../assets/hdr/sphericalSkyBox.hdr');
+	// const ibl = new RedGPU.Resource.IBL(redGPUContext, [
+	// 	"../../../assets/skybox/px.jpg", // Positive X
+	// 	"../../../assets/skybox/nx.jpg", // Negative X
+	// 	"../../../assets/skybox/py.jpg", // Positive Y
+	// 	"../../../assets/skybox/ny.jpg", // Negative Y
+	// 	"../../../assets/skybox/pz.jpg", // Positive Z
+	// 	"../../../assets/skybox/nz.jpg", // Negative Z
+	// ]);
+	view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture)
+	view.ibl = ibl
+	renderTestPane(redGPUContext, view, ibl,view.skybox);
+	loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/EnvironmentTest/glTF/EnvironmentTest.gltf',);
+	// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Corset/glTF/Corset.gltf',);
+	// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/SheenChair/glTF/SheenChair.gltf',);
+	// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/TransmissionRoughnessTest/glTF/TransmissionRoughnessTest.gltf',);
+	// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CommercialRefrigerator/glTF/CommercialRefrigerator.gltf',);
+	loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/TransmissionTest/glTF/TransmissionTest.gltf',);
+	loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/GlassHurricaneCandleHolder/glTF/GlassHurricaneCandleHolder.gltf',);
+	// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DragonAttenuation/glTF/DragonAttenuation.gltf',);
+	// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CompareTransmission/glTF/CompareTransmission.gltf',);
+	// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MosquitoInAmber/glTF/MosquitoInAmber.gltf',);
+	// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ClearcoatWicker/glTF/ClearcoatWicker.gltf',);
+	// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ClearCoatTest/glTF/ClearCoatTest.gltf',);
+
 
 };
 

@@ -27,9 +27,7 @@ RedGPU.init(
 
 		const hdrTexture = new RedGPU.Resource.HDRTexture(
 			redGPUContext,
-			'./assets/hdr/sphericalSkyBox.hdr'
-			,
-			true,
+			'./assets/hdr/sphericalSkyBox.hdr',
 			() => {
 				const ibl = new RedGPU.Resource.IBL(redGPUContext, hdrTexture.gpuCubeTexture);
 				view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture)

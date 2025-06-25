@@ -26,7 +26,6 @@ class HDRTexture extends ManagedResourceBase {
 	#hdrData: HDRData
 	#videoMemorySize: number = 0
 	#cubeMapSize: number = 1024
-	#generateCubeMap: boolean = true
 	#hdrLoader: HDRLoader = new HDRLoader()
 	#format: GPUTextureFormat
 	#onLoad: (textureInstance: HDRTexture) => void;
@@ -35,18 +34,16 @@ class HDRTexture extends ManagedResourceBase {
 	constructor(
 		redGPUContext: RedGPUContext,
 		src?: any,
-		useMipMap: boolean = true,
 		onLoad?: (textureInstance?: HDRTexture) => void,
 		onError?: (error: Error) => void,
-		generateCubeMap: boolean = true,
-		cubeMapSize: number = 1024
+		cubeMapSize: number = 1024,
+		useMipMap: boolean = true,
 	) {
 		super(redGPUContext, MANAGED_STATE_KEY);
 		this.#onLoad = onLoad
 		this.#onError = onError
 		this.#useMipmap = useMipMap
-		this.#format = 'rgba8unorm' // HDR용 기본 포맷
-		this.#generateCubeMap = generateCubeMap
+		this.#format = 'rgba8unorm'
 		this.#cubeMapSize = cubeMapSize
 		if (src) {
 			this.#src = src?.src || src;
@@ -165,11 +162,10 @@ class HDRTexture extends ManagedResourceBase {
 		this.targetResourceManagedState.videoMemory += this.#videoMemorySize
 		if (this.#useMipmap) mipmapGenerator.generateMipmap(newGPUTexture, textureDescriptor)
 		this.#setGpuTexture(newGPUTexture)
-		// 큐브맵 생성
-		if (this.#generateCubeMap) {
+
 			await this.#generateCubeMapFromEquirectangular()
 			await this.#generateIBLTextures()
-		}
+
 	}
 
 	#hdrDataToGPUTexture(device: GPUDevice, hdrData: HDRData, textureDescriptor: GPUTextureDescriptor): GPUTexture {

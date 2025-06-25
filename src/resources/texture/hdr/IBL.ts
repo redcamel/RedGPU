@@ -2,6 +2,7 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import createUUID from "../../../utils/createUUID";
 import getMipLevelCount from "../../../utils/math/getMipLevelCount";
 import CubeTexture from "../CubeTexture";
+import HDRTexture from "./HDRTexture";
 
 class IBL {
 	#redGPUContext: RedGPUContext
@@ -15,17 +16,35 @@ class IBL {
 	#useMipmap: boolean = true
 	#format: GPUTextureFormat = 'rgba8unorm'
 
-	constructor(redGPUContext: RedGPUContext, sourceCubeTexture: GPUTexture, useMipmap: boolean = true) {
+	constructor(redGPUContext: RedGPUContext, srcInfo: string | [string, string, string, string, string, string], useMipmap: boolean = true) {
 		this.#useMipmap = useMipmap
 		this.#redGPUContext = redGPUContext
-		this.#sourceCubeTexture = sourceCubeTexture
-		this.#format = sourceCubeTexture.format
-		console.log('sourceCubeTexture', sourceCubeTexture)
 		this.#environmentTexture = new CubeTexture(redGPUContext, [], false, undefined, undefined, this.#format)
 		this.#irradianceTexture = new CubeTexture(redGPUContext, [], false, undefined, undefined, this.#format)
-		// Environment 텍스처는 바로 설정
-		this.#environmentTexture.setGPUTextureDirectly(sourceCubeTexture, `${this.#uuid}_environmentTexture`)
-		this.#init()
+		if (typeof srcInfo === 'string') {
+			new HDRTexture(
+				redGPUContext,
+				srcInfo,
+				(v: HDRTexture) => {
+					this.#sourceCubeTexture = v.gpuCubeTexture
+					console.log('sourceCubeTexture', this.#sourceCubeTexture)
+					this.#environmentTexture.setGPUTextureDirectly(this.#sourceCubeTexture, `${this.#uuid}_environmentTexture`)
+					this.#init()
+				}
+			);
+		} else {
+			new CubeTexture(
+				redGPUContext,
+				srcInfo,
+				useMipmap,
+				(v: CubeTexture) => {
+					this.#sourceCubeTexture = v.gpuTexture
+					console.log('sourceCubeTexture', this.#sourceCubeTexture)
+					this.#environmentTexture.setGPUTextureDirectly(this.#sourceCubeTexture, `${this.#uuid}_environmentTexture`)
+					this.#init()
+				}
+			);
+		}
 	}
 
 	get irradianceTexture(): CubeTexture {
@@ -53,7 +72,6 @@ class IBL {
 			mipLevelCount: irradianceMipLevels,
 			label: `${this.#uuid}_irradianceTexture`
 		});
-
 		const irradianceShader = gpuDevice.createShaderModule({
 			code: `
       struct VertexOutput {
@@ -145,7 +163,6 @@ var texCoord = array<vec2<f32>, 6>(
       }
   `
 		});
-
 		const irradiancePipeline = gpuDevice.createRenderPipeline({
 			layout: 'auto',
 			vertex: {
@@ -161,7 +178,6 @@ var texCoord = array<vec2<f32>, 6>(
 				topology: 'triangle-list'
 			}
 		});
-
 		const sampler = gpuDevice.createSampler({
 			magFilter: 'linear',
 			minFilter: 'linear',
@@ -170,19 +186,16 @@ var texCoord = array<vec2<f32>, 6>(
 			addressModeV: 'clamp-to-edge',
 			addressModeW: 'clamp-to-edge'
 		});
-
 		const faceMatrices = this.#getCubeMapFaceMatrices();
 		const uniformBuffer = gpuDevice.createBuffer({
 			size: 64,
 			usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
 			label: 'irradiance_face_matrix_uniform'
 		});
-
 		/* 각 면마다 개별적으로 처리 */
 		for (let face = 0; face < 6; face++) {
 			/* 유니폼 버퍼에 현재 면의 매트릭스 작성 */
 			gpuDevice.queue.writeBuffer(uniformBuffer, 0, faceMatrices[face]);
-
 			const bindGroup = gpuDevice.createBindGroup({
 				layout: irradiancePipeline.getBindGroupLayout(0),
 				entries: [
@@ -191,12 +204,10 @@ var texCoord = array<vec2<f32>, 6>(
 					{binding: 2, resource: {buffer: uniformBuffer}}
 				]
 			});
-
 			/* 각 면마다 별도의 명령 인코더 생성 */
 			const commandEncoder = gpuDevice.createCommandEncoder({
 				label: `irradiance_face_${face}_encoder`
 			});
-
 			const renderPass = commandEncoder.beginRenderPass({
 				colorAttachments: [{
 					view: irradianceTexture.createView({
@@ -212,19 +223,15 @@ var texCoord = array<vec2<f32>, 6>(
 				}],
 				label: `irradiance_face_${face}_renderpass`
 			});
-
 			renderPass.setPipeline(irradiancePipeline);
 			renderPass.setBindGroup(0, bindGroup);
 			renderPass.draw(6, 1, 0, 0);
 			renderPass.end();
-
 			/* 각 면마다 개별적으로 submit */
 			gpuDevice.queue.submit([commandEncoder.finish()]);
 		}
-
 		/* 모든 작업 완료 후 유니폼 버퍼 정리 */
 		uniformBuffer.destroy();
-
 		console.log(`Irradiance Map 생성 완료: ${irradianceSize}x${irradianceSize}`);
 		return irradianceTexture;
 	}
