@@ -36,9 +36,9 @@ const createSphericalSkyBox = async (view) => {
 		redGPUContext,
 		// '../../../assets/hdr/sphericalSkyBox.hdr'
 		// '../../../assets/hdr/Cannon_Exterior.hdr'
-		'../../../assets/hdr/field.hdr'
+		// '../../../assets/hdr/field.hdr'
 		// '../../../assets/hdr/neutral.37290948.hdr'
-		// '../../../assets/hdr/pisa.hdr',
+		'../../../assets/hdr/pisa.hdr'
 		,
 		true,
 		() => {
@@ -47,12 +47,13 @@ const createSphericalSkyBox = async (view) => {
 			const geometry = new RedGPU.Primitive.Box(redGPUContext, 1, 1, 1); // Box geometry / 박스 형태 지오메트리
 			const childMesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
 			view.scene.addChild(childMesh);
-			// view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture)
+			view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.irradianceTexture)
 			view.iblTexture = ibl.environmentTexture;
+			view.iblTexture2 = ibl.irradianceTexture;
 			renderTestPane(redGPUContext, view, ibl);
 			loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/EnvironmentTest/glTF/EnvironmentTest.gltf',);
 			// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Corset/glTF/Corset.gltf',);
-			// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ClearcoatWicker/glTF/ClearcoatWicker.gltf',);
+			loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ClearcoatWicker/glTF/ClearcoatWicker.gltf',);
 			// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ClearCoatTest/glTF/ClearCoatTest.gltf',);
 
 		}
@@ -71,7 +72,8 @@ function loadGLTF(view, url) {
 		(v) => {
 			mesh = scene.addChild(v['resultMesh'])
 			mesh.y = -1
-			// mesh.setScale(50)
+			if (url.includes('Corset')) mesh.setScale(50)
+			if (url.includes('ClearcoatWicker')) mesh.setScale(3)
 		}
 	)
 }

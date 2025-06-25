@@ -112,20 +112,21 @@ struct Uniforms {
 @group(2) @binding(11) var KHR_specularColorTexture: texture_2d<f32>;
 
 // KHR_clearcoatTexture, KHR_clearcoatRoughnessTexture
-@group(2) @binding(12) var packedKHR_clearcoatTexture: texture_2d<f32>;
+//@group(2) @binding(12) var packedKHR_clearcoatTexture: texture_2d<f32>;
 
 // KHR_clearcoatNormalTexture
-@group(2) @binding(13) var KHR_clearcoatNormalTexture: texture_2d<f32>;
+@group(2) @binding(12) var KHR_clearcoatNormalTexture: texture_2d<f32>;
+@group(2) @binding(13) var packedKHR_clearcoatTexture_transmission: texture_2d<f32>;
 
-@group(2) @binding(14) var packedKHR_transmission: texture_2d<f32>;
+//@group(2) @binding(14) var packedKHR_transmission: texture_2d<f32>;
 
-@group(2) @binding(15) var packedKHR_diffuse_transmission: texture_2d<f32>;
+@group(2) @binding(14) var packedKHR_diffuse_transmission: texture_2d<f32>;
 
-@group(2) @binding(16) var packedKHR_sheen: texture_2d<f32>;
+@group(2) @binding(15) var packedKHR_sheen: texture_2d<f32>;
 
-@group(2) @binding(17) var KHR_anisotropyTexture: texture_2d<f32>;
+@group(2) @binding(16) var KHR_anisotropyTexture: texture_2d<f32>;
 
-@group(2) @binding(18) var packedKHR_iridescence: texture_2d<f32>;
+@group(2) @binding(17) var packedKHR_iridescence: texture_2d<f32>;
 
 // Input structure for model data
 struct InputData {
@@ -542,12 +543,12 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
         if(clearcoatParameter == 0.0){
         }else{
             if(u_useKHR_clearcoatTexture){
-                let clearcoatSample =  textureSample(packedKHR_clearcoatTexture, packedTextureSampler, KHR_clearcoatUV);
+                let clearcoatSample =  textureSample(packedKHR_clearcoatTexture_transmission, packedTextureSampler, KHR_clearcoatUV);
                 clearcoatParameter *= clearcoatSample.r;
             }
 
             if(u_useKHR_clearcoatRoughnessTexture){
-                let clearcoatRoughnesstSample =  textureSample(packedKHR_clearcoatTexture, packedTextureSampler, KHR_clearcoatRoughnessUV);
+                let clearcoatRoughnesstSample =  textureSample(packedKHR_clearcoatTexture_transmission, packedTextureSampler, KHR_clearcoatRoughnessUV);
                 clearcoatRoughnessParameter *= clearcoatRoughnesstSample.g;
             }
 
@@ -601,21 +602,21 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     if (u_useKHR_transmissionTexture) {
       // Transmission Texture 샘플링 적용 (균일 흐름 보장)
       let transmissionSample: vec4<f32> = textureSample(
-          packedKHR_transmission,
+          packedKHR_clearcoatTexture_transmission,
           packedTextureSampler,
           KHR_transmissionUV
       );
-      transmissionParameter *= transmissionSample.r; // 텍스처 채널 적용
+      transmissionParameter *= transmissionSample.b; // 텍스처 채널 적용
     }
     // ---------- KHR_materials_volume ----------
     var thicknessParameter: f32 = u_KHR_thicknessFactor;
     if (u_useKHR_thicknessTexture) {
         let thicknessSample: vec4<f32> = textureSample(
-            packedKHR_transmission,
+            packedKHR_clearcoatTexture_transmission,
             packedTextureSampler,
             KHR_transmissionUV
         );
-        thicknessParameter *= thicknessSample.g;
+        thicknessParameter *= thicknessSample.a;
     }
     // ---------- KHR_materials_diffuse_transmission ----------
     var diffuseTransmissionColor:vec3<f32> = u_KHR_diffuseTransmissionColorFactor;
@@ -888,8 +889,8 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
         // ---------- ibl Diffuse  ----------
         let effectiveTransmission = transmissionParameter * (1.0 - metallicParameter);
 //        var envIBL_DIFFUSE:vec3<f32> = albedo  * (vec3<f32>(1.0) - F_IBL_dielectric)  ;
-     let diffuseMipLevel = iblMipmapCount * 0.99; // diffuse는 높은 mip level 사용
-      let iblDiffuseColor = textureSampleLevel(iblTexture, iblTextureSampler, N, 0).rgb;
+
+      let iblDiffuseColor = textureSampleLevel(iblTexture2, iblTextureSampler, N,0).rgb;
       var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor * (vec3<f32>(1.0) - F_IBL_dielectric);
 
         // ---------- ibl Diffuse Transmission ----------

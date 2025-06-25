@@ -44,6 +44,7 @@ class View3D extends ViewTransform {
 	#useDistanceCulling: boolean = false
 	#distanceCulling: number = 50
 	#iblTexture: CubeTexture
+	#iblTexture2: CubeTexture
 	//
 	readonly #debugViewRenderState: RenderViewStateData
 	readonly #postEffectManager: PostEffectManager
@@ -105,9 +106,15 @@ class View3D extends ViewTransform {
 	get iblTexture(): CubeTexture {
 		return this.#iblTexture;
 	}
+	get iblTexture2(): CubeTexture {
+		return this.#iblTexture2;
+	}
 
 	set iblTexture(value: CubeTexture) {
 		this.#iblTexture = value;
+	}
+	set iblTexture2(value: CubeTexture) {
+		this.#iblTexture2 = value;
 	}
 
 	get pickingManager(): PickingManager {
@@ -323,6 +330,16 @@ class View3D extends ViewTransform {
 				{
 					binding: 9,
 					resource: this.#basicSampler
+				},
+				{
+					binding: 10,
+					resource:
+						this.iblTexture2?.gpuTexture?.createView(this.iblTexture2?.viewDescriptor || CubeTexture.defaultViewDescriptor)
+						|| this.#skybox?._material?.skyboxTexture?.gpuTexture?.createView(
+							this.#skybox._material.skyboxTexture.viewDescriptor || CubeTexture.defaultViewDescriptor
+						)
+						||
+						this.redGPUContext.resourceManager.emptyCubeTextureView
 				},
 			]
 		}
