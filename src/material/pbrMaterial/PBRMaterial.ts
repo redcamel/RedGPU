@@ -327,6 +327,9 @@ class PBRMaterial extends ABitmapBaseMaterial {
 		]
 	}
 
+	get packedKHR_clearcoatTexture_transmission(): PackedTexture {
+		return this.#packedKHR_clearcoatTexture_transmission;
+	}
 	get packedKHR_iridescence(): PackedTexture {
 		return this.#packedKHR_iridescence;
 	}
@@ -406,7 +409,10 @@ class PBRMaterial extends ABitmapBaseMaterial {
 			},
 			finalWidth,
 			finalHeight,
-			'packedKHR_transmission_clearcoat'
+			'packedKHR_clearcoatTexture_transmission',
+			{
+				b:'r',a:'g'
+			}
 		)
 	}
 	// async setupPackedKHR_clearcoatTexture() {
