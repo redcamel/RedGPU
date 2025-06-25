@@ -887,10 +887,10 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
 
         // ---------- ibl Diffuse  ----------
         let effectiveTransmission = transmissionParameter * (1.0 - metallicParameter);
-        var envIBL_DIFFUSE:vec3<f32> = albedo  * (vec3<f32>(1.0) - F_IBL_dielectric)  ;
-//     let diffuseMipLevel = iblMipmapCount * 0.99; // diffuse는 높은 mip level 사용
-//      let iblDiffuseColor = textureSampleLevel(iblTexture, iblTextureSampler, N, 0).rgb;
-//      var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor * (vec3<f32>(1.0) - F_IBL_dielectric);
+//        var envIBL_DIFFUSE:vec3<f32> = albedo  * (vec3<f32>(1.0) - F_IBL_dielectric)  ;
+     let diffuseMipLevel = iblMipmapCount * 0.99; // diffuse는 높은 mip level 사용
+      let iblDiffuseColor = textureSampleLevel(iblTexture, iblTextureSampler, N, 0).rgb;
+      var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor * (vec3<f32>(1.0) - F_IBL_dielectric);
 
         // ---------- ibl Diffuse Transmission ----------
         if (u_useKHR_materials_diffuse_transmission && diffuseTransmissionParameter > 0.0) {
