@@ -47,14 +47,16 @@ const createSphericalSkyBox = async (view) => {
 			const geometry = new RedGPU.Primitive.Box(redGPUContext, 1, 1, 1); // Box geometry / 박스 형태 지오메트리
 			const childMesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
 			view.scene.addChild(childMesh);
-			view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.irradianceTexture)
-			view.iblTexture = ibl.environmentTexture;
-			view.iblTexture2 = ibl.irradianceTexture;
+			view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture)
+			view.ibl = ibl
 			renderTestPane(redGPUContext, view, ibl);
 			loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/EnvironmentTest/glTF/EnvironmentTest.gltf',);
 			// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Corset/glTF/Corset.gltf',);
-			loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ClearcoatWicker/glTF/ClearcoatWicker.gltf',);
-			// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ClearCoatTest/glTF/ClearCoatTest.gltf',);
+			// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/TransmissionTest/glTF/TransmissionTest.gltf',);
+			// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CompareTransmission/glTF/CompareTransmission.gltf',);
+			// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MosquitoInAmber/glTF/MosquitoInAmber.gltf',);
+			// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ClearcoatWicker/glTF/ClearcoatWicker.gltf',);
+			loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ClearCoatTest/glTF/ClearCoatTest.gltf',);
 
 		}
 	);
@@ -74,6 +76,8 @@ function loadGLTF(view, url) {
 			mesh.y = -1
 			if (url.includes('Corset')) mesh.setScale(50)
 			if (url.includes('ClearcoatWicker')) mesh.setScale(3)
+			if (url.includes('TransmissionTest')) mesh.setScale(5)
+			if (url.includes('MosquitoInAmber')) mesh.setScale(10)
 		}
 	)
 }
@@ -95,15 +99,10 @@ const renderTestPane = async (redGPUContext, view, ibl) => {
 
 	});
 	const testData = {
-		environmentTexture: true,
-		irradianceTexture: false
+		useIbl: true,
 	}
-	pane.addBinding(testData, 'environmentTexture', {
-		min: 12,
-		max: 100,
-		step: 0.1
-	}).on("change", (ev) => {
-		if (ev.value) view.iblTexture = ibl.environmentTexture
-		else view.iblTexture = ibl.irradianceTexture
+	pane.addBinding(testData, 'useIbl').on("change", (ev) => {
+		if (ev.value) view.ibl = ibl
+		else view.ibl = null
 	});
 };

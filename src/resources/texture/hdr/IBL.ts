@@ -206,7 +206,7 @@ var texCoord = array<vec2<f32>, 6>(
 						baseArrayLayer: face,
 						arrayLayerCount: 1
 					}),
-					clearValue: {r: 0, g: 0, b: 0, a: 0},
+					clearValue: {r: 0, g: 0, b: 0, a: 1},
 					loadOp: 'clear',
 					storeOp: 'store'
 				}],

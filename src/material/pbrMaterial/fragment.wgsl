@@ -874,7 +874,7 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
         let a2 = roughnessParameter * roughnessParameter;
         let G_smith = NdotV / (NdotV * (1.0 - a2) + a2);
         // ---------- ibl (roughness에 따른 mipmap 레벨 사용) ----------
-        let iblMipmapCount:f32 = f32(textureNumLevels(iblTexture) - 1);
+        let iblMipmapCount:f32 = f32(textureNumLevels(ibl_environmentTexture) - 1);
 //        let mipLevel = roughnessParameter * iblMipmapCount;
 //        let mipLevel = roughnessParameter * sqrt(roughnessParameter) * iblMipmapCount;
 //        let mipLevel = max(0.0, (roughnessParameter * roughnessParameter) * iblMipmapCount);
@@ -884,19 +884,19 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
 
 
         // ---------- ibl 기본 컬러 ----------
-        var reflectedColor = textureSampleLevel(iblTexture, iblTextureSampler, R, mipLevel).rgb;
+        var reflectedColor = textureSampleLevel(ibl_environmentTexture, iblTextureSampler, R, mipLevel).rgb;
 
         // ---------- ibl Diffuse  ----------
         let effectiveTransmission = transmissionParameter * (1.0 - metallicParameter);
 //        var envIBL_DIFFUSE:vec3<f32> = albedo  * (vec3<f32>(1.0) - F_IBL_dielectric)  ;
 
-      let iblDiffuseColor = textureSampleLevel(iblTexture2, iblTextureSampler, N,0).rgb;
+      let iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, iblTextureSampler, N,0).rgb;
       var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor * (vec3<f32>(1.0) - F_IBL_dielectric);
 
         // ---------- ibl Diffuse Transmission ----------
         if (u_useKHR_materials_diffuse_transmission && diffuseTransmissionParameter > 0.0) {
             // 후면 산란을 위한 샘플링 방향 (back side)
-            var backScatteringColor = textureSampleLevel(iblTexture, iblTextureSampler, -N, mipLevel).rgb;
+            var backScatteringColor = textureSampleLevel(ibl_environmentTexture, iblTextureSampler, -N, mipLevel).rgb;
             let transmittedIBL = backScatteringColor * diffuseTransmissionColor * (vec3<f32>(1.0) - F_IBL);
             // 반사와 투과 효과 혼합
             envIBL_DIFFUSE = mix(envIBL_DIFFUSE, transmittedIBL, diffuseTransmissionParameter);
@@ -939,7 +939,7 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
             let anisotropyFactor = max(0.0, min(1.0, anisotropy));
             let finalRoughness = mix( roughnessParameter, weightedRoughness, anisotropyFactor * directionFactor );
             let anistropyMipmap = pow(finalRoughness, 0.4) * iblMipmapCount;
-            reflectedColor = textureSampleLevel( iblTexture, iblTextureSampler, anisotropicR, anistropyMipmap ).rgb;
+            reflectedColor = textureSampleLevel( ibl_environmentTexture, iblTextureSampler, anisotropicR, anistropyMipmap ).rgb;
 
             let a2 = finalRoughness * finalRoughness;
             let G_smith = NdotV / (NdotV * (1.0 - a2) + a2);
@@ -1013,7 +1013,7 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
 //            let sheenSamplingDir = normalize(mix(R, N, sheenRoughnessParameter * 0.5));
 //            // 밉맵 레벨 계산
 //            let sheenMipLevel = sheenRoughnessParameter * iblMipmapCount;
-//            let sheenRadiance = textureSampleLevel(iblTexture, iblTextureSampler, sheenSamplingDir, sheenMipLevel).rgb;
+//            let sheenRadiance = textureSampleLevel(ibl_environmentTexture, iblTextureSampler, sheenSamplingDir, sheenMipLevel).rgb;
 //
 //            let sheenFresnel = pow(1.0 - max(VdotN, 0.0), 4.0);  // 간단한 프레넬 근사
 //            let a = 1.0 - NdotV;
@@ -1031,7 +1031,7 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
 
             var sheenMipLevel = log2(sheenRoughnessParameter) * 1.2 + iblMipmapCount - 1.0;
             sheenMipLevel = clamp(sheenMipLevel, 0.0, iblMipmapCount - 1.0);
-            let sheenRadiance = textureSampleLevel(iblTexture, iblTextureSampler, sheenSamplingDir, sheenMipLevel).rgb;
+            let sheenRadiance = textureSampleLevel(ibl_environmentTexture, iblTextureSampler, sheenSamplingDir, sheenMipLevel).rgb;
 
             // 4. 물리적으로 정확한 Schlick 프레넬 계산
             // Schlick 근사는 항상 5.0의 지수를 사용 (물리적으로 정확)
@@ -1062,7 +1062,7 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
              let clearcoatR = reflect(-V, clearcoatNormal);
              let clearcoatNdotV = max(dot(clearcoatNormal, V), 0.04);
              let clearcoatMipLevel = pow(clearcoatRoughnessParameter,0.4) * iblMipmapCount;
-             let clearcoatPrefilteredColor = textureSampleLevel(iblTexture, iblTextureSampler, clearcoatR, clearcoatMipLevel).rgb;
+             let clearcoatPrefilteredColor = textureSampleLevel(ibl_environmentTexture, iblTextureSampler, clearcoatR, clearcoatMipLevel).rgb;
              let clearcoatF0 = F0;
              let clearcoatF = clearcoatF0 + (vec3<f32>(1.0) - clearcoatF0) * pow(1.0 - clearcoatNdotV, 5.0);
              let clearcoatK = (clearcoatRoughnessParameter + 1.0) * (clearcoatRoughnessParameter + 1.0) / 8.0;
