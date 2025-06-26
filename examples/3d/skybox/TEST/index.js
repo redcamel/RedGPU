@@ -12,13 +12,13 @@ RedGPU.init(
 
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		const directionalLightTest = new RedGPU.Light.DirectionalLight()
-		directionalLightTest.color.r = 255
-		directionalLightTest.color.g = 0
-		directionalLightTest.color.b = 0
-		directionalLightTest.intensity = 1
-
-		scene.lightManager.addDirectionalLight(directionalLightTest)
+		// const directionalLightTest = new RedGPU.Light.DirectionalLight()
+		// directionalLightTest.color.r = 255
+		// directionalLightTest.color.g = 0
+		// directionalLightTest.color.b = 0
+		// directionalLightTest.intensity = 1
+		//
+		// scene.lightManager.addDirectionalLight(directionalLightTest)
 		redGPUContext.addView(view);
 
 		createSphericalSkyBox(view);
@@ -64,6 +64,10 @@ const createSphericalSkyBox = async (view) => {
 
 	loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MosquitoInAmber/glTF/MosquitoInAmber.gltf',);
 	loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ClearcoatWicker/glTF/ClearcoatWicker.gltf',);
+	// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DragonAttenuation/glTF/DragonAttenuation.gltf',);
+	// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/SpecularTest/glTF/SpecularTest.gltf',);
+	loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Corset/glTF/Corset.gltf',);
+	// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Sponza/glTF/Sponza.gltf',);
 
 };
 
@@ -84,6 +88,9 @@ function loadGLTF(view, url) {
 			if (url.includes('SheenChair')) mesh.setScale(10)
 			if (url.includes('CommercialRefrigerator')) mesh.setScale(10)
 			if (url.includes('GlassHurricaneCandleHolder')) mesh.setScale(10), mesh.x = 4, mesh.y = -1.5, mesh.z = 0.5
+			if (url.includes('DragonAttenuation')) mesh.z = 2
+			if (url.includes('SpecularTest')) mesh.setScale(10),mesh.z = 2
+			if (url.includes('Corset')) mesh.setScale(50),mesh.z = 2,mesh.y = -2
 		}
 	)
 }
