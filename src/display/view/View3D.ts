@@ -14,7 +14,7 @@ import ResourceManager from "../../resources/resourceManager/ResourceManager";
 import Sampler from "../../resources/sampler/Sampler";
 import SystemCode from "../../resources/systemCode/SystemCode";
 import CubeTexture from "../../resources/texture/CubeTexture";
-import IBL from "../../resources/texture/hdr/IBL";
+import IBL from "../../resources/texture/IBL";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
 import InstanceIdGenerator from "../../utils/InstanceIdGenerator";

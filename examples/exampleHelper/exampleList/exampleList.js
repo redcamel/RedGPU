@@ -252,22 +252,22 @@ const ExampleList = [
 				name: 'SkyBox',
 				list: [
 					{
-						name: 'SkyBox',
+						name: 'Skybox using 6 assets',
 						path: '3d/skybox/skybox',
 						thumb: '3d/skybox/skybox/thumb.png',
 						description: {
-							ko: `SkyBox 샘플 예제입니다.`,
-							en: `This is a sample SkyBox example.`
+							ko: ``,
+							en: ``
 						},
 					},
-					// {
-					//     name: 'SphericalSkyBox',
-					//     path: '3d/skybox/sphericalSkyBox',
-					//     description: {
-					//         ko: `SphericalSkyBox 샘플 예제입니다.`,
-					//         en: `This is a sample SphericalSkyBox example.`
-					//     },
-					// },
+					{
+					    name: 'Skybox using IBL',
+					    path: '3d/skybox/skyboxWithIbl',
+					    description: {
+					        ko: ``,
+					        en: ``
+					    },
+					},
 				]
 			},
 			{

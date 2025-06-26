@@ -5,16 +5,19 @@ import ManagedResourceBase from "../../ManagedResourceBase";
 import basicRegisterResource from "../../resourceManager/core/basicRegisterResource";
 import basicUnregisterResource from "../../resourceManager/core/basicUnregisterResource";
 import ResourceStateHDRTexture from "../../resourceManager/resourceState/ResourceStateHDRTexture";
-import HDRLoader from "./HDRLoader";
+import HDRLoader, { HDRData, HDRLoadOptions } from "./HDRLoader";
 
 const MANAGED_STATE_KEY = 'managedHDRTextureState'
 
-interface HDRData {
-	data: Float32Array;
-	width: number;
-	height: number;
+interface LuminanceAnalysis {
+	averageLuminance: number;
+	maxLuminance: number;
+	minLuminance: number;
+	medianLuminance: number;
+	percentile95: number;
+	percentile99: number;
+	recommendedExposure: number;
 }
-
 
 class HDRTexture extends ManagedResourceBase {
 	#gpuTexture: GPUTexture
@@ -24,12 +27,16 @@ class HDRTexture extends ManagedResourceBase {
 	#mipLevelCount: number
 	#useMipmap: boolean
 	#hdrData: HDRData
+	#originalHdrData: HDRData // 원본 데이터 보존
 	#videoMemorySize: number = 0
 	#cubeMapSize: number = 1024
 	#hdrLoader: HDRLoader = new HDRLoader()
 	#format: GPUTextureFormat
+	#exposure: number = 1.0 // 자동 계산된 노출값
+	#luminanceAnalysis: LuminanceAnalysis
 	#onLoad: (textureInstance: HDRTexture) => void;
 	#onError: (error: Error) => void;
+	#hdrLoadOptions: HDRLoadOptions // 🆕 HDR 로드 옵션 저장
 
 	constructor(
 		redGPUContext: RedGPUContext,
@@ -38,6 +45,7 @@ class HDRTexture extends ManagedResourceBase {
 		onError?: (error: Error) => void,
 		cubeMapSize: number = 1024,
 		useMipMap: boolean = true,
+		hdrOptions?: HDRLoadOptions // 🆕 HDR 옵션 추가
 	) {
 		super(redGPUContext, MANAGED_STATE_KEY);
 		this.#onLoad = onLoad
@@ -45,6 +53,15 @@ class HDRTexture extends ManagedResourceBase {
 		this.#useMipmap = useMipMap
 		this.#format = 'rgba8unorm'
 		this.#cubeMapSize = cubeMapSize
+
+		// 🆕 기본 HDR 로드 옵션 설정
+		this.#hdrLoadOptions = {
+			autoExposure: true,
+			brightnessBias: 0.0,
+			preprocess: true,
+			...hdrOptions // 사용자 옵션으로 덮어쓰기
+		};
+
 		if (src) {
 			this.#src = src?.src || src;
 			this.#cacheKey = src?.cacheKey || src || this.uuid;
@@ -57,8 +74,9 @@ class HDRTexture extends ManagedResourceBase {
 				}
 			}
 			if (target) {
-				this.#onLoad?.(this)
-				return table[target.uuid].texture
+				const targetTexture = table[target.uuid].texture
+				this.#onLoad?.(targetTexture)
+				return targetTexture
 			} else {
 				this.src = src;
 				this.#registerResource()
@@ -81,6 +99,7 @@ class HDRTexture extends ManagedResourceBase {
 	get gpuCubeTexture(): GPUTexture {
 		return this.#gpuCubeTexture;
 	}
+
 	get mipLevelCount(): number {
 		return this.#mipLevelCount;
 	}
@@ -104,21 +123,48 @@ class HDRTexture extends ManagedResourceBase {
 		this.#createGPUTexture()
 	}
 
+	// 🎯 자동 계산된 노출값 (읽기 전용)
+	get exposure(): number {
+		return this.#exposure;
+	}
+
+	// 🔍 휘도 분석 결과 (읽기 전용)
+	get luminanceAnalysis(): LuminanceAnalysis {
+		return this.#luminanceAnalysis;
+	}
+
+	// 🆕 HDR 로드 옵션 getter/setter
+	get hdrLoadOptions(): HDRLoadOptions {
+		return { ...this.#hdrLoadOptions };
+	}
+
+	set hdrLoadOptions(options: HDRLoadOptions) {
+		this.#hdrLoadOptions = { ...this.#hdrLoadOptions, ...options };
+		// 옵션 변경 시 재로드
+		if (this.#src) {
+			this.#loadHDRTexture(this.#src);
+		}
+	}
+
 	destroy() {
 		const temp = this.#gpuTexture
 		this.#setGpuTexture(null);
 		this.__fireListenerList(true)
 		this.#src = null
 		this.#cacheKey = null
+		this.#originalHdrData = null
+		this.#luminanceAnalysis = null
 		this.#unregisterResource()
 		if (temp) temp.destroy()
 		if (this.#gpuCubeTexture) this.#gpuCubeTexture.destroy()
-
 	}
 
 	#setGpuTexture(value: GPUTexture) {
 		this.#gpuTexture = value;
-		if (!value) this.#hdrData = null
+		if (!value) {
+			this.#hdrData = null
+			this.#originalHdrData = null
+		}
 		this.__fireListenerList();
 	}
 
@@ -162,30 +208,36 @@ class HDRTexture extends ManagedResourceBase {
 		this.targetResourceManagedState.videoMemory += this.#videoMemorySize
 		if (this.#useMipmap) mipmapGenerator.generateMipmap(newGPUTexture, textureDescriptor)
 		this.#setGpuTexture(newGPUTexture)
-
-			await this.#generateCubeMapFromEquirectangular()
-			await this.#generateIBLTextures()
-
+		await this.#generateCubeMapFromEquirectangular()
 	}
 
 	#hdrDataToGPUTexture(device: GPUDevice, hdrData: HDRData, textureDescriptor: GPUTextureDescriptor): GPUTexture {
 		const texture = device.createTexture(textureDescriptor);
-		// ✅ 포맷별 올바른 바이트 계산
+
 		let bytesPerPixel: number;
 		let uploadData: ArrayBuffer;
+
 		switch (this.#format) {
+			case 'rgba16float':
+				bytesPerPixel = 8; // 16bit × 4 = 64bit = 8bytes
+				uploadData = this.#float32ToFloat16(hdrData.data).buffer as ArrayBuffer;
+				break;
+
 			case 'rgba8unorm':
 				bytesPerPixel = 4; // 8bit × 4 = 32bit = 4bytes
-				uploadData = this.#float32ToUint8(hdrData.data).buffer as ArrayBuffer;
+				// 🎯 개선된 톤매핑 적용
+				uploadData = this.#float32ToUint8WithToneMapping(hdrData.data).buffer as ArrayBuffer;
 				break;
-				// TODO - 일단 rgba8unorm 만 지원
+
 			default:
 				throw new Error(`지원되지 않는 텍스처 포맷: ${this.#format}`);
 		}
+
 		console.log(`텍스처 포맷: ${this.#format}`);
 		console.log(`바이트/픽셀: ${bytesPerPixel}`);
 		console.log(`업로드 데이터 크기: ${uploadData.byteLength} bytes`);
 		console.log(`예상 크기: ${hdrData.width * hdrData.height * bytesPerPixel} bytes`);
+
 		device.queue.writeTexture(
 			{texture},
 			uploadData,
@@ -198,61 +250,118 @@ class HDRTexture extends ManagedResourceBase {
 		return texture;
 	}
 
-// Float32 → Float16 변환 함수들 추가
+	// 🆕 Float32 → Float16 변환 함수
 	#float32ToFloat16(float32Data: Float32Array): Uint16Array {
-		const float16Data = new Uint16Array(float32Data.length);
+		const uint16Data = new Uint16Array(float32Data.length);
+		console.log('Float32 → Float16 변환 (HDR 정보 보존):');
+
 		for (let i = 0; i < float32Data.length; i++) {
-			float16Data[i] = this.#floatToHalf(float32Data[i]);
+			const floatVal = float32Data[i];
+			uint16Data[i] = this.#floatToHalf(floatVal);
+
+			if (i < 16) { // 첫 4픽셀만 로그
+				console.log(`  [${i}] ${floatVal.toFixed(3)} → ${this.#halfToFloat(uint16Data[i]).toFixed(3)}`);
+			}
 		}
-		return float16Data;
+
+		return uint16Data;
 	}
 
-// Float32 → Half Float (16bit) 변환
-	#floatToHalf(val: number): number {
-		const buffer = new ArrayBuffer(4);
-		const floatView = new Float32Array(buffer);
-		const intView = new Uint32Array(buffer);
-		floatView[0] = val;
-		const x = intView[0];
+	// 🎬 개선된 Float32 → Uint8 변환 (톤매핑 적용)
+	#float32ToUint8WithToneMapping(float32Data: Float32Array): Uint8Array {
+		const uint8Data = new Uint8Array(float32Data.length);
+		console.log('Float32 → Uint8 변환 (ACES 톤매핑 적용):');
+
+		for (let i = 0; i < float32Data.length; i++) {
+			const floatVal = float32Data[i];
+
+			// 🎬 ACES 톤매핑 적용
+			const toneMappedVal = this.#acesToneMapping(floatVal);
+
+			// 🔧 감마 보정 적용 (sRGB)
+			const gammaCorrectedVal = this.#linearToSRGB(toneMappedVal);
+
+			// 🎯 최종 8bit 변환
+			const uint8Val = Math.round(Math.min(1.0, Math.max(0.0, gammaCorrectedVal)) * 255);
+			uint8Data[i] = uint8Val;
+
+			if (i < 16) { // 첫 4픽셀만 로그
+				console.log(`  [${i}] ${floatVal.toFixed(3)} → ${toneMappedVal.toFixed(3)} → ${uint8Val}`);
+			}
+		}
+
+		return uint8Data;
+	}
+
+	// 🎬 ACES 톤매핑 (업계 표준)
+	#acesToneMapping(x: number): number {
+		const a = 2.51;
+		const b = 0.03;
+		const c = 2.43;
+		const d = 0.59;
+		const e = 0.14;
+
+		return Math.max(0, (x * (a * x + b)) / (x * (c * x + d) + e));
+	}
+
+	// 🔧 Linear → sRGB 감마 보정
+	#linearToSRGB(linearValue: number): number {
+		if (linearValue <= 0.0031308) {
+			return 12.92 * linearValue;
+		} else {
+			return 1.055 * Math.pow(linearValue, 1.0 / 2.4) - 0.055;
+		}
+	}
+
+	// 🔧 IEEE 754 half-precision 변환 함수들
+	#floatToHalf(value: number): number {
+		const floatView = new Float32Array(1);
+		const int32View = new Int32Array(floatView.buffer);
+		floatView[0] = value;
+		const x = int32View[0];
+
 		let bits = (x >> 16) & 0x8000; // sign bit
-		let m = (x >> 12) & 0x07ff;    // mantissa bits
-		const e = (x >> 23) & 0xff;    // exponent bits
+		let m = (x >> 12) & 0x07ff; // mantissa
+		const e = (x >> 23) & 0xff; // exponent
+
 		if (e < 103) return bits;
 		if (e > 142) {
 			bits |= 0x7c00;
-			bits |= ((x & 0x007fffff) !== 0) ? 1 : 0;
+			bits |= ((e == 255) ? 0 : 1) && (x & 0x007fffff);
 			return bits;
 		}
+
 		if (e < 113) {
 			m |= 0x0800;
 			bits |= (m >> (114 - e)) + ((m >> (113 - e)) & 1);
 			return bits;
 		}
+
 		bits |= ((e - 112) << 10) | (m >> 1);
 		bits += m & 1;
 		return bits;
 	}
 
-// Float32 → Uint8 변환 (0.0~1.0 → 0~255)
-	#float32ToUint8(float32Data: Float32Array): Uint8Array {
-		const uint8Data = new Uint8Array(float32Data.length);
-		console.log('Float32 → Uint8 변환:');
-		for (let i = 0; i < float32Data.length; i++) {
-			const floatVal = float32Data[i];
-			const uint8Val = Math.round(Math.min(1.0, Math.max(0.0, floatVal)) * 255);
-			uint8Data[i] = uint8Val;
-			if (i < 16) { // 첫 4픽셀만 로그
-				console.log(`  [${i}] ${floatVal.toFixed(3)} → ${uint8Val}`);
-			}
+	// 디버깅용 half → float 변환
+	#halfToFloat(value: number): number {
+		const s = (value & 0x8000) >> 15;
+		const e = (value & 0x7C00) >> 10;
+		const f = value & 0x03FF;
+
+		if (e === 0) {
+			return (s ? -1 : 1) * Math.pow(2, -14) * (f / Math.pow(2, 10));
+		} else if (e === 0x1F) {
+			return f ? NaN : ((s ? -1 : 1) * Infinity);
 		}
-		return uint8Data;
+
+		return (s ? -1 : 1) * Math.pow(2, e - 15) * (1 + f / Math.pow(2, 10));
 	}
 
 	// Equirectangular을 CubeMap으로 변환
 	async #generateCubeMapFromEquirectangular() {
 		const {gpuDevice, resourceManager} = this.redGPUContext;
 		const {mipmapGenerator} = resourceManager;
-		// 큐브맵 텍스처 생성
+
 		const cubeMapDescriptor: GPUTextureDescriptor = {
 			size: [this.#cubeMapSize, this.#cubeMapSize, 6],
 			format: this.#format,
@@ -264,7 +373,7 @@ class HDRTexture extends ManagedResourceBase {
 			label: `${this.#src}_cubemap`
 		};
 		this.#gpuCubeTexture = gpuDevice.createTexture(cubeMapDescriptor);
-		// ✅ 개선된 변환용 셰이더
+
 		const shaderModule = gpuDevice.createShaderModule({
 			code: `
             struct VertexOutput {
@@ -278,7 +387,6 @@ var pos = array<vec2<f32>, 6>(
     vec2<f32>(-1.0, -1.0), vec2<f32>( 1.0, -1.0), vec2<f32>(-1.0,  1.0),  
     vec2<f32>(-1.0,  1.0), vec2<f32>( 1.0, -1.0), vec2<f32>( 1.0,  1.0) 
 );
-
 
 var texCoord = array<vec2<f32>, 6>(
     vec2<f32>(1.0, 0.0), vec2<f32>(0.0, 0.0), vec2<f32>(1.0, 1.0), 
@@ -295,44 +403,29 @@ var texCoord = array<vec2<f32>, 6>(
             @group(0) @binding(2) var<uniform> faceMatrix: mat4x4<f32>;
 
             @fragment fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
-                
                 let ndc = vec2<f32>(
 								    input.texCoord.x * 2.0 - 1.0,
 								    (1.0 - input.texCoord.y) * 2.0 - 1.0  
 								);
 
-                
-              
                 var localDirection = vec3<f32>(ndc.x, ndc.y, 1.0);
-                
-           
                 let worldDirection = normalize((faceMatrix * vec4<f32>(localDirection, 0.0)).xyz);
                 
-           
                 let theta = atan2(worldDirection.z, worldDirection.x);
                 let phi = acos(clamp(worldDirection.y, -1.0, 1.0));
                 
-            
                 var u = (theta + 3.14159265359) / (2.0 * 3.14159265359);
 								var v = phi / 3.14159265359;
 								
-						
 								u = fract(u + 1.0);  
 								v = clamp(v, 0.0001, 0.9999);  
 
-                
-          
-           
                 let color = textureSample(equirectangularTexture, textureSampler, vec2<f32>(u, v));
-                
-         
-
-                
                 return color;
             }
         `
 		});
-		// 렌더 파이프라인 생성
+
 		const renderPipeline = gpuDevice.createRenderPipeline({
 			layout: 'auto',
 			vertex: {
@@ -348,7 +441,7 @@ var texCoord = array<vec2<f32>, 6>(
 				topology: 'triangle-list'
 			}
 		});
-		// 샘플러 생성
+
 		const sampler = gpuDevice.createSampler({
 			magFilter: 'linear',
 			minFilter: 'linear',
@@ -357,12 +450,13 @@ var texCoord = array<vec2<f32>, 6>(
 			addressModeV: 'clamp-to-edge',
 			addressModeW: 'clamp-to-edge'
 		});
-		// 각 큐브맵 면에 대한 변환 매트릭스
+
 		const faceMatrices = this.#getCubeMapFaceMatrices();
-		// 각 면에 대해 렌더링
+
 		for (let face = 0; face < 6; face++) {
 			await this.#renderCubeMapFace(renderPipeline, sampler, face, faceMatrices[face]);
 		}
+
 		if (this.#useMipmap) {
 			console.log('큐브맵 밉맵 생성 중...');
 			mipmapGenerator.generateMipmap(this.#gpuCubeTexture, cubeMapDescriptor);
@@ -371,7 +465,6 @@ var texCoord = array<vec2<f32>, 6>(
 	}
 
 	#getCubeMapFaceMatrices(): Float32Array[] {
-		// 큐브맵 6면에 대한 뷰 매트릭스 정의
 		return [
 			// +X (Right)
 			new Float32Array([0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1]),
@@ -422,79 +515,47 @@ var texCoord = array<vec2<f32>, 6>(
 		renderPass.setBindGroup(0, bindGroup);
 		renderPass.draw(6, 1, 0, 0);
 		renderPass.end();
-		// ✅ submit 먼저
+
 		gpuDevice.queue.submit([commandEncoder.finish()]);
-		// ✅ 그 다음 버퍼 파괴
 		uniformBuffer.destroy();
 	}
 
-	// IBL용 텍스처들 생성
-	async #generateIBLTextures() {
-		// if (!this.#gpuCubeTexture) return;
-		// const {gpuDevice} = this.redGPUContext;
-		// console.log('IBL 생성 시작 - 복사 없이 원본 사용');
-		// // ✅ 복사 없이 원본을 입력으로 사용
-		// const irradianceMap = await this.#generateIrradianceMap(this.#gpuCubeTexture);
-		// const prefilterMap = await this.#generatePrefilterMap(this.#gpuCubeTexture);
-		// const brdfLUT = await this.#generateBRDFLUT();
-		// // ✅ 독립적인 CubeTexture 래퍼 생성
-		// const irradiance = new CubeTexture(this.redGPUContext, [], false, undefined, undefined, this.#format);
-		// // ✅ 완전히 다른 GPUTexture 객체들
-		// this.#iblTextures.environmentMap.setGPUTextureDirectly(
-		// 	this.#gpuCubeTexture,     // ← 원본 큐브맵 (1024x1024)
-		// 	`${this.#src}_environmentMap_exported_cubemap`,
-		// 	this.#useMipmap
-		// );
-		// this.#iblTextures.iblIrradianceTexture.setGPUTextureDirectly(
-		// 	irradianceMap,            // ← 새로 생성된 Irradiance 맵 (32x32)
-		// 	`${this.#src}_irradianceMap_exported_cubemap`,
-		// 	false
-		// );
-		// console.log('텍스처 독립성 확인:');
-		// console.log('Environment:', this.#gpuCubeTexture.width, 'x', this.#gpuCubeTexture.height);
-		// console.log('Irradiance:', irradianceMap.width, 'x', irradianceMap.height);
-		// console.log('같은 객체?', this.#gpuCubeTexture === irradianceMap); // false여야 함
-		//
-		// console.log('IBL 생성 완료');
-	}
-
-
-
-	async #generatePrefilterMap(environmentMap: GPUTexture): Promise<GPUTexture> {
-		const {gpuDevice} = this.redGPUContext;
-		const prefilterSize = 128;
-		const maxMipLevels = 5;
-		const prefilterTexture = gpuDevice.createTexture({
-			size: [prefilterSize, prefilterSize, 6],
-			format: this.#format,
-			usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.RENDER_ATTACHMENT,
-			dimension: '2d',
-			mipLevelCount: maxMipLevels,
-			label: `${this.#src}_prefilter`
-		});
-		// 각 roughness 레벨에 대한 prefilter 계산
-		// 구현 필요...
-		return prefilterTexture;
-	}
-
-	async #generateBRDFLUT(): Promise<GPUTexture> {
-		const {gpuDevice} = this.redGPUContext;
-		const lutSize = 512;
-		const brdfTexture = gpuDevice.createTexture({
-			size: [lutSize, lutSize],
-			format: 'rg16float',
-			usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.RENDER_ATTACHMENT,
-			dimension: '2d',
-			label: `${this.#src}_brdf_lut`
-		});
-		// BRDF LUT 계산용 셰이더
-		// 구현 필요...
-		return brdfTexture;
-	}
-
+	// 🎯 수정된 HDR 로딩 메서드
 	async #loadHDRTexture(src: string) {
 		try {
-			this.#hdrData = await this.#hdrLoader.loadHDRFile(src)
+			console.log('HDR 텍스처 로딩 시작:', src, this.#hdrLoadOptions);
+
+			// 🎯 HDRLoader에서 전처리된 데이터 받기
+			const hdrData = await this.#hdrLoader.loadHDRFile(src, this.#hdrLoadOptions);
+
+			// 처리된 데이터 저장
+			this.#hdrData = hdrData;
+			this.#originalHdrData = {
+				data: new Float32Array(hdrData.data),
+				width: hdrData.width,
+				height: hdrData.height
+			};
+
+			// 노출 및 분석 결과 저장
+			this.#exposure = hdrData.recommendedExposure || 1.0;
+
+			// 🆕 휘도 분석 결과 사용
+			if (hdrData.luminanceStats) {
+				this.#luminanceAnalysis = {
+					averageLuminance: hdrData.luminanceStats.average,
+					maxLuminance: hdrData.luminanceStats.max,
+					minLuminance: hdrData.luminanceStats.min,
+					medianLuminance: hdrData.luminanceStats.median,
+					percentile95: hdrData.luminanceStats.max * 0.95, // 근사
+					percentile99: hdrData.luminanceStats.max * 0.99, // 근사
+					recommendedExposure: this.#exposure
+				};
+
+				console.log('휘도 분석 완료:', this.#luminanceAnalysis);
+			}
+
+			console.log(`HDR 데이터 로드 완료: ${hdrData.width}x${hdrData.height}, 노출: ${this.#exposure.toFixed(3)}`);
+
 			await this.#createGPUTexture();
 			this.#onLoad?.(this);
 		} catch (error) {
