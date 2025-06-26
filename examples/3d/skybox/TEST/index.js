@@ -12,7 +12,13 @@ RedGPU.init(
 
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+		const directionalLightTest = new RedGPU.Light.DirectionalLight()
+		directionalLightTest.color.r = 255
+		directionalLightTest.color.g = 0
+		directionalLightTest.color.b = 0
+		directionalLightTest.intensity = 1
 
+		scene.lightManager.addDirectionalLight(directionalLightTest)
 		redGPUContext.addView(view);
 
 		createSphericalSkyBox(view);
@@ -39,6 +45,7 @@ const createSphericalSkyBox = async (view) => {
 		"../../../assets/skybox/pz.jpg", // Positive Z
 		"../../../assets/skybox/nz.jpg", // Negative Z
 	];
+
 	const cubeTexture = new RedGPU.Resource.CubeTexture(
 		redGPUContext,
 		skyboxImagePaths

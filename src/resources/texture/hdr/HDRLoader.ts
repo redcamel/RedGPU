@@ -27,12 +27,12 @@ class HDRLoader {
 		this.#enableDebugLogs = enableDebugLogs;
 	}
 
-	set enableDebugLogs(value: boolean) {
-		this.#enableDebugLogs = value;
-	}
-
 	get enableDebugLogs(): boolean {
 		return this.#enableDebugLogs;
+	}
+
+	set enableDebugLogs(value: boolean) {
+		this.#enableDebugLogs = value;
 	}
 
 	/**
@@ -42,18 +42,14 @@ class HDRLoader {
 		if (this.#enableDebugLogs) {
 			keepLog(`HDR 파일 로딩 시작: ${src}`);
 		}
-
 		const response = await fetch(src);
 		if (!response.ok) {
 			throw new Error(`HTTP ${response.status}: ${response.statusText}`);
 		}
-
 		const buffer = await response.arrayBuffer();
 		const uint8Array = new Uint8Array(buffer);
-
 		// 🔍 기본 HDR 데이터 파싱
 		const rawHdrData = this.#parseHDRFile(uint8Array, src);
-
 		// 🎯 노출 및 전처리 자동 적용
 		return this.#preprocessHDRData(rawHdrData);
 	}
@@ -65,20 +61,15 @@ class HDRLoader {
 		if (this.#enableDebugLogs) {
 			keepLog('HDR 전처리 시작...');
 		}
-
 		// 🔍 휘도 분석
 		const luminanceStats = this.#analyzeLuminance(hdrData);
-
 		// 🎯 자동 노출 계산
 		const recommendedExposure = this.#calculateOptimalExposure(luminanceStats);
-
 		if (this.#enableDebugLogs) {
 			keepLog(`자동 노출값 계산: ${recommendedExposure.toFixed(3)}`);
 		}
-
 		// 🎞️ 노출 적용
 		const processedData = this.#applyExposureToData(hdrData.data, recommendedExposure);
-
 		return {
 			...hdrData,
 			data: processedData,
@@ -100,7 +91,6 @@ class HDRLoader {
 			max = Math.max(max, luminance);
 			sum += luminance;
 		}
-
 		return {
 			min: Math.max(0.001, min),
 			max,
@@ -114,10 +104,8 @@ class HDRLoader {
 	 */
 	#calculateOptimalExposure(stats: { min: number; max: number; average: number; median: number }): number {
 		const {average, median, max} = stats;
-
 		// 🔸 기본 키값 (라인하르트 기준)
 		let keyValue = 0.18;
-
 		// 🔸 장면 분석에 따른 키값 조정
 		if (average < 0.01) {
 			keyValue = 0.5;  // 매우 어두운 장면 (야경, 실내 등)
@@ -128,33 +116,27 @@ class HDRLoader {
 		} else if (average > 0.8) {
 			keyValue = 0.12; // 중간-밝은 장면
 		}
-
 		// 🔸 로그 평균 근사 (단순화된 기하평균)
 		const logAverage = Math.max(
 			Math.pow(average * median, 0.5), // 기하평균으로 더 안정적인 기준값
 			0.001
 		);
-
 		// 🔸 기본 노출 계산
 		let exposure = keyValue / logAverage;
-
 		// 🔸 동적 범위 분석
 		const dynamicRange = max / Math.max(stats.min, 0.001);
-
 		// 🔸 어두운 장면 부스트
 		if (average < 0.05) {
 			exposure *= 2.5; // 어두운 장면을 더 밝게
 		} else if (average < 0.1) {
 			exposure *= 1.8; // 중간-어두운 장면 약간 부스트
 		}
-
 		// 🔸 높은 동적 범위 장면 처리
 		if (dynamicRange > 1000) {
 			exposure *= 0.8; // 매우 높은 DR - 하이라이트 보존
 		} else if (dynamicRange > 100) {
 			exposure *= 0.9; // 높은 DR - 약간 억제
 		}
-
 		// 🔸 하이라이트 클리핑 방지
 		if (max > 10.0) {
 			exposure *= 0.5; // 극도로 밝은 부분
@@ -163,7 +145,6 @@ class HDRLoader {
 		} else if (max > 2.0) {
 			exposure *= 0.85; // 밝은 부분 약간 억제
 		}
-
 		// 🔸 중간값과 평균값의 차이로 분포 분석
 		const distributionRatio = median / average;
 		if (distributionRatio < 0.3) {
@@ -173,10 +154,8 @@ class HDRLoader {
 			// 어두운 쪽에 치우친 분포
 			exposure *= 1.2;
 		}
-
 		// 🔸 실용적 범위 제한
 		exposure = Math.max(0.05, Math.min(15.0, exposure));
-
 		return exposure;
 	}
 
@@ -199,29 +178,22 @@ class HDRLoader {
 	 */
 	#parseHDRFile(uint8Array: Uint8Array, src: string): HDRData {
 		const validation = this.#validateHDRFile(uint8Array);
-
 		if (this.#enableDebugLogs) {
 			keepLog(`파일 형식: ${validation.format}`);
 		}
-
 		if (!validation.isValid) {
 			throw new Error(validation.error || '지원되지 않는 파일 형식입니다');
 		}
-
 		if (src.toLowerCase().endsWith('.hdr')) {
 			if (this.#enableDebugLogs) {
 				keepLog('파일 첫 200바이트:');
 				this.#hexDump(uint8Array.slice(0, 200));
 			}
-
 			const hdrData = this.#parseRGBE(uint8Array);
-
 			if (this.#enableDebugLogs) {
 				this.#debugHDRInfo(hdrData);
 			}
-
 			return hdrData;
-
 		} else if (src.toLowerCase().endsWith('.exr')) {
 			throw new Error('EXR format not supported yet');
 		} else {
@@ -236,18 +208,15 @@ class HDRLoader {
 		let offset = 0;
 		let line = '';
 		const header: Record<string, string> = {};
-
 		// 첫 번째 라인
 		while (offset < uint8Array.length) {
 			const char = String.fromCharCode(uint8Array[offset++]);
 			if (char === '\n') break;
 			line += char;
 		}
-
 		if (!line.startsWith('#?RADIANCE') && !line.startsWith('#?RGBE')) {
 			throw new Error('Invalid HDR file header');
 		}
-
 		// 헤더 정보 파싱
 		while (offset < uint8Array.length) {
 			line = '';
@@ -256,9 +225,7 @@ class HDRLoader {
 				if (char === '\n') break;
 				line += char;
 			}
-
 			if (line.trim() === '') break;
-
 			const equalIndex = line.indexOf('=');
 			if (equalIndex > 0) {
 				const key = line.substring(0, equalIndex).trim();
@@ -266,7 +233,6 @@ class HDRLoader {
 				header[key] = value;
 			}
 		}
-
 		// 해상도 파싱
 		line = '';
 		while (offset < uint8Array.length) {
@@ -274,15 +240,12 @@ class HDRLoader {
 			if (char === '\n') break;
 			line += char;
 		}
-
 		const resolutionMatch = line.match(/-Y\s+(\d+)\s+\+X\s+(\d+)/);
 		if (!resolutionMatch) {
 			throw new Error('Invalid resolution format in HDR file');
 		}
-
 		const height = parseInt(resolutionMatch[1]);
 		const width = parseInt(resolutionMatch[2]);
-
 		// 헤더에서 노출 정보 추출
 		let fileExposure: number | undefined;
 		if (header.EXPOSURE) {
@@ -291,22 +254,18 @@ class HDRLoader {
 				keepLog(`파일 노출값: ${fileExposure.toFixed(3)}`);
 			}
 		}
-
 		// RGBE 데이터 파싱
 		const pixelData = new Float32Array(width * height * 4);
 		let pixelIndex = 0;
-
 		for (let y = 0; y < height; y++) {
 			const scanline = this.#readRGBEScanline(uint8Array, offset, width);
 			offset = scanline.nextOffset;
-
 			for (let x = 0; x < width; x++) {
 				const rgbeIndex = x * 4;
 				const r = scanline.data[rgbeIndex];
 				const g = scanline.data[rgbeIndex + 1];
 				const b = scanline.data[rgbeIndex + 2];
 				const e = scanline.data[rgbeIndex + 3];
-
 				if (e === 0) {
 					pixelData[pixelIndex++] = 0;
 					pixelData[pixelIndex++] = 0;
@@ -321,7 +280,6 @@ class HDRLoader {
 				}
 			}
 		}
-
 		return {
 			data: pixelData,
 			width,
@@ -341,18 +299,14 @@ class HDRLoader {
 				error: '파일이 너무 작습니다'
 			};
 		}
-
-		const header = new TextDecoder('ascii', { fatal: false })
+		const header = new TextDecoder('ascii', {fatal: false})
 			.decode(data.slice(0, 50));
-
 		if (header.startsWith('#?RADIANCE') || header.startsWith('#?RGBE')) {
-			return { isValid: true, format: 'RGBE/Radiance' };
+			return {isValid: true, format: 'RGBE/Radiance'};
 		}
-
 		if (header.includes('RADIANCE') || header.includes('RGBE')) {
-			return { isValid: true, format: 'RGBE/Radiance (variant)' };
+			return {isValid: true, format: 'RGBE/Radiance (variant)'};
 		}
-
 		return {
 			isValid: false,
 			format: 'unknown',
@@ -368,14 +322,11 @@ class HDRLoader {
 		nextOffset: number
 	} {
 		const scanlineData = new Uint8Array(width * 4);
-
 		// 새로운 RLE 포맷 확인
 		if (data[offset] === 0x02 && data[offset + 1] === 0x02 &&
 			data[offset + 2] === ((width >> 8) & 0xff) &&
 			data[offset + 3] === (width & 0xff)) {
-
 			offset += 4;
-
 			// 각 채널(R,G,B,E)을 개별적으로 압축 해제
 			for (let channel = 0; channel < 4; channel++) {
 				let pixelIndex = channel;
@@ -405,7 +356,6 @@ class HDRLoader {
 				scanlineData[i] = data[offset++];
 			}
 		}
-
 		return {data: scanlineData, nextOffset: offset};
 	}
 
@@ -414,12 +364,10 @@ class HDRLoader {
 	 */
 	#debugHDRInfo(hdrData: HDRData): void {
 		if (!this.#enableDebugLogs) return;
-
 		keepLog(`HDR 정보:`);
 		keepLog(`크기: ${hdrData.width} x ${hdrData.height}`);
 		keepLog(`데이터 길이: ${hdrData.data.length}`);
 		keepLog(`예상 픽셀 수: ${hdrData.width * hdrData.height * 4}`);
-
 		// 첫 몇 픽셀의 값 확인
 		keepLog('첫 4픽셀 값:');
 		for (let i = 0; i < Math.min(16, hdrData.data.length); i += 4) {
@@ -436,7 +384,6 @@ class HDRLoader {
 	 */
 	#hexDump(data: Uint8Array): void {
 		if (!this.#enableDebugLogs) return;
-
 		for (let i = 0; i < data.length; i += 16) {
 			const hex = Array.from(data.slice(i, i + 16))
 				.map(b => b.toString(16).padStart(2, '0'))

@@ -52,6 +52,24 @@ class ANoiseTexture extends ManagedResourceBase {
 	#animationX: number = BASIC_OPTIONS.animationX
 	#animationY: number = BASIC_OPTIONS.animationY
 
+	constructor(
+		redGPUContext: RedGPUContext,
+		width: number = 1024,
+		height: number = 1024,
+		define: NoiseDefine
+	) {
+		super(redGPUContext, MANAGED_STATE_KEY);
+		validateUintRange(width, 2, 2048);
+		validateUintRange(height, 2, 2048);
+		this.#width = width;
+		this.#height = height;
+		this.#currentEffect = define;
+		this.#init(redGPUContext);
+		this.#gpuTexture = this.#createStorageTexture(redGPUContext, width, height);
+		this.#executeComputePass();
+		this.#registerResource();
+	}
+
 	get animationSpeed(): number {
 		return this.#animationSpeed;
 	}
@@ -82,30 +100,22 @@ class ANoiseTexture extends ManagedResourceBase {
 		this.updateUniform('animationY', value);
 	}
 
-	constructor(
-		redGPUContext: RedGPUContext,
-		width: number = 1024,
-		height: number = 1024,
-		define: NoiseDefine
-	) {
-		super(redGPUContext, MANAGED_STATE_KEY);
-		validateUintRange(width, 2, 2048);
-		validateUintRange(height, 2, 2048);
-		this.#width = width;
-		this.#height = height;
-		this.#currentEffect = define;
-		this.#init(redGPUContext);
-		this.#gpuTexture = this.#createStorageTexture(redGPUContext, width, height);
-		this.#executeComputePass();
-		this.#registerResource();
-	}
-
 	get uniformInfo(): any {
 		return this.#uniformInfo;
 	}
 
 	get gpuTexture(): GPUTexture {
 		return this.#gpuTexture;
+	}
+
+	get time(): number {
+		return this.#time;
+	}
+
+	set time(value: number) {
+		validatePositiveNumberRange(value);
+		this.#time = value;
+		this.updateUniform('time', value / 1000);
 	}
 
 	/* 개별 파라미터 업데이트 */
@@ -127,17 +137,6 @@ class ANoiseTexture extends ManagedResourceBase {
 		});
 		this.#executeComputePass();
 	}
-
-	get time(): number {
-		return this.#time;
-	}
-
-	set time(value: number) {
-		validatePositiveNumberRange(value);
-		this.#time = value;
-		this.updateUniform('time', value/1000);
-	}
-
 
 	/* 렌더링 */
 	render(time: number) {
@@ -281,7 +280,6 @@ class ANoiseTexture extends ManagedResourceBase {
 			}
 		});
 	}
-
 
 	#registerResource() {
 		basicRegisterResource(this, new ResourceStateBitmapTexture(this));

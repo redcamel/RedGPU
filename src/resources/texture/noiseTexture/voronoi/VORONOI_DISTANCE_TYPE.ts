@@ -3,6 +3,5 @@ const VORONOI_DISTANCE_TYPE = {
 	MANHATTAN: 1,
 	CHEBYSHEV: 2,
 } as const
-
 Object.freeze(VORONOI_DISTANCE_TYPE)
 export default VORONOI_DISTANCE_TYPE

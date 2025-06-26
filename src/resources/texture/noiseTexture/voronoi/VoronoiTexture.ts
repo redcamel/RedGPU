@@ -225,7 +225,6 @@ class VoronoiTexture extends ANoiseTexture {
 	// ===========================================
 	// 거리 계산 방식 편의 메서드들
 	// ===========================================
-
 	/** 유클리드 거리 (원형 패턴) */
 	setEuclideanDistance(): void {
 		this.distanceType = VORONOI_DISTANCE_TYPE.EUCLIDEAN;
@@ -244,7 +243,6 @@ class VoronoiTexture extends ANoiseTexture {
 	// ===========================================
 	// 출력 타입 편의 메서드들
 	// ===========================================
-
 	/** F1 출력 (가장 가까운 점까지의 거리) */
 	setF1Output(): void {
 		this.outputType = VORONOI_OUTPUT_TYPE.F1;
@@ -278,7 +276,6 @@ class VoronoiTexture extends ANoiseTexture {
 	// ===========================================
 	// 프리셋 패턴 메서드들
 	// ===========================================
-
 	/** 셀룰러 패턴 프리셋 */
 	setCellularPattern(): void {
 		this.outputType = VORONOI_OUTPUT_TYPE.F1;
@@ -339,7 +336,6 @@ class VoronoiTexture extends ANoiseTexture {
 	// ===========================================
 	// 설정 관리 메서드들
 	// ===========================================
-
 	/** 현재 설정을 반환 */
 	getSettings(): VoronoiSettings {
 		return {
@@ -370,11 +366,9 @@ class VoronoiTexture extends ANoiseTexture {
 		if (settings.cellIdColorIntensity !== undefined) this.cellIdColorIntensity = settings.cellIdColorIntensity;
 	}
 
-
 	// ===========================================
 	// 정보 조회 메서드들
 	// ===========================================
-
 	/** 현재 거리 타입 이름을 반환 */
 	getDistanceTypeName(): string {
 		const names: { [key: number]: string } = {
@@ -397,9 +391,8 @@ class VoronoiTexture extends ANoiseTexture {
 		};
 		return names[this.#outputType] || 'Unknown';
 	}
-
 }
 
-export { VORONOI_DISTANCE_TYPE, VORONOI_OUTPUT_TYPE };
-export type { VoronoiSettings };
+export {VORONOI_DISTANCE_TYPE, VORONOI_OUTPUT_TYPE};
+export type {VoronoiSettings};
 export default VoronoiTexture;

@@ -2,13 +2,13 @@ import RedGPUContext from "../../../../context/RedGPUContext";
 import validatePositiveNumberRange from "../../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import validateUintRange from "../../../../runtimeChecker/validateFunc/validateUintRange";
 import consoleAndThrowError from "../../../../utils/consoleAndThrowError";
-import NOISE_DIMENSION from "./NOISE_DIMENSION";
 import ANoiseTexture, {NoiseDefine} from "../core/ANoiseTexture";
 import {
 	mergerNoiseHelperFunctions,
 	mergerNoiseUniformDefault,
 	mergerNoiseUniformStruct
 } from "../core/noiseDegineMerges";
+import NOISE_DIMENSION from "./NOISE_DIMENSION";
 import simplexComputeFunctions from './simplexCompute.wgsl';
 
 const validDimensions = Object.values(NOISE_DIMENSION) as number[];

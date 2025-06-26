@@ -40,7 +40,6 @@ class PackedTexture {
 			a: 'a',
 			...componentMapping
 		}
-
 		const textureDescriptor: GPUTextureDescriptor = {
 			size: [width, height, 1],
 			format: 'rgba8unorm',
@@ -52,20 +51,17 @@ class PackedTexture {
 			this.#gpuTexture = null
 		}
 		const packedTexture = this.#gpuDevice.createTexture(textureDescriptor);
-
 		// 컴포넌트 매핑 정보를 uniform buffer로 전달
 		const mappingBuffer = this.#gpuDevice.createBuffer({
 			size: 16, // 4개 컴포넌트 * 4바이트
 			usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
 		});
-
 		const mappingData = new Uint32Array([
 			['r', 'g', 'b', 'a'].indexOf(mapping.r),
 			['r', 'g', 'b', 'a'].indexOf(mapping.g),
 			['r', 'g', 'b', 'a'].indexOf(mapping.b),
 			['r', 'g', 'b', 'a'].indexOf(mapping.a),
 		]);
-
 		this.#gpuDevice.queue.writeBuffer(mappingBuffer, 0, mappingData);
 		const bindGroupEntries = [
 			{
@@ -87,14 +83,9 @@ class PackedTexture {
 			{binding: 4, resource: this.#sampler},
 			{
 				binding: 5,
-				resource: { buffer: mappingBuffer }
+				resource: {buffer: mappingBuffer}
 			}
 		];
-
-
-
-
-
 		const bindGroup = this.#gpuDevice.createBindGroup({
 			layout: this.#pipeline.getBindGroupLayout(0),
 			entries: bindGroupEntries,
@@ -117,7 +108,6 @@ class PackedTexture {
 		this.#gpuDevice.queue.submit([commandEncoder.finish()]);
 		console.log('packedTexture2', packedTexture)
 		this.#gpuTexture = packedTexture;
-
 		// 임시 버퍼 정리
 		mappingBuffer.destroy();
 	}

@@ -60,9 +60,7 @@ class CubeTexture extends ManagedResourceBase {
 			this.#onLoad?.(this)
 			return table[target.uuid].texture
 		} else {
-
-				this.srcList = srcList;
-
+			this.srcList = srcList;
 			this.#registerResource()
 		}
 	}
@@ -120,12 +118,6 @@ class CubeTexture extends ManagedResourceBase {
 		if (temp) temp.destroy()
 	}
 
-	#setGpuTexture(value: GPUTexture) {
-		this.#gpuTexture = value;
-		if (!value) this.#imgBitmaps = null
-		this.__fireListenerList();
-	}
-
 	setGPUTextureDirectly(
 		gpuTexture: GPUTexture,
 		cacheKey?: string,
@@ -140,7 +132,7 @@ class CubeTexture extends ManagedResourceBase {
 		this.#gpuTexture = gpuTexture;
 		this.#useMipmap = useMipmap
 		this.#mipLevelCount = getMipLevelCount(gpuTexture.width, gpuTexture.height);
-		;
+
 		this.#cacheKey = cacheKey || `direct_${this.uuid}`;
 		// 메모리 사용량 계산
 		const textureDescriptor: GPUTextureDescriptor = {
@@ -152,6 +144,12 @@ class CubeTexture extends ManagedResourceBase {
 		this.#videoMemorySize = calculateTextureByteSize(textureDescriptor);
 		this.targetResourceManagedState.videoMemory += this.#videoMemorySize;
 		// 리스너들에게 업데이트 알림
+		this.__fireListenerList();
+	}
+
+	#setGpuTexture(value: GPUTexture) {
+		this.#gpuTexture = value;
+		if (!value) this.#imgBitmaps = null
 		this.__fireListenerList();
 	}
 

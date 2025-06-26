@@ -6,6 +6,5 @@ const VORONOI_OUTPUT_TYPE = {
 	CELL_ID: 4,
 	CELL_ID_COLOR: 5,
 } as const
-
 Object.freeze(VORONOI_OUTPUT_TYPE)
 export default VORONOI_OUTPUT_TYPE
