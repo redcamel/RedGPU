@@ -51,7 +51,7 @@ class BitmapTexture extends ManagedResourceBase {
 			}
 			// console.log('target',	this.#cacheKey ,this)
 			if (target) {
-				this.#onLoad?.(this)
+				this.#onLoad?.(this) // TODO - 이거 다시확인해야함
 				return table[target.uuid].texture
 			} else {
 				this.src = src;
