@@ -185,10 +185,10 @@ class HDRTexture extends ManagedResourceBase {
 
 	async #createGPUTexture() {
 		const {gpuDevice, resourceManager} = this.redGPUContext
-		const {mipmapGenerator} = resourceManager
 		// 기존 텍스처 정리
 		if (this.#gpuTexture) {
 			this.#gpuTexture.destroy()
+			// 🔧 #setGpuTexture(null) 사용으로 일관성 확보
 			this.#gpuTexture = null
 		}
 		this.targetResourceManagedState.videoMemory -= this.#videoMemorySize
@@ -218,6 +218,54 @@ class HDRTexture extends ManagedResourceBase {
 		this.#videoMemorySize = calculateTextureByteSize(cubeDescriptor)
 		this.targetResourceManagedState.videoMemory += this.#videoMemorySize
 		console.log(`큐브맵 텍스처 생성 완료: ${this.#cubeMapSize}x${this.#cubeMapSize}x6, 밉맵: ${this.#mipLevelCount}레벨`);
+	}
+
+	async #generateCubeMapFromEquirectangular(sourceTexture: GPUTexture) {
+		const {gpuDevice, resourceManager} = this.redGPUContext;
+		const {mipmapGenerator} = resourceManager;
+		const cubeMapDescriptor: GPUTextureDescriptor = {
+			size: [this.#cubeMapSize, this.#cubeMapSize, 6],
+			format: this.#format,
+			usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_DST,
+			dimension: '2d',
+			mipLevelCount: this.#useMipmap ? getMipLevelCount(this.#cubeMapSize, this.#cubeMapSize) : 1,
+			label: `${this.#src}_cubemap`
+		};
+		// 🔧 #setGpuTexture 메서드를 사용하여 GPU 텍스처 설정
+		const newGPUTexture = gpuDevice.createTexture(cubeMapDescriptor);
+		this.#setGpuTexture(newGPUTexture);
+		const shaderModule = gpuDevice.createShaderModule({
+			code: generateCubeMapFromEquirectangularCode
+		});
+		const renderPipeline = gpuDevice.createRenderPipeline({
+			layout: 'auto',
+			vertex: {
+				module: shaderModule,
+				entryPoint: 'vs_main'
+			},
+			fragment: {
+				module: shaderModule,
+				entryPoint: 'fs_main',
+				targets: [{format: this.#format}]
+			},
+		});
+		const sampler = new Sampler(this.redGPUContext, {
+			magFilter: GPU_FILTER_MODE.LINEAR,
+			minFilter: GPU_FILTER_MODE.LINEAR,
+			mipmapFilter: GPU_MIPMAP_FILTER_MODE.LINEAR,
+			addressModeU: GPU_ADDRESS_MODE.CLAMP_TO_EDGE,
+			addressModeV: GPU_ADDRESS_MODE.CLAMP_TO_EDGE,
+			addressModeW: GPU_ADDRESS_MODE.CLAMP_TO_EDGE
+		})
+		const faceMatrices = this.#getCubeMapFaceMatrices();
+		for (let face = 0; face < 6; face++) {
+			await this.#renderCubeMapFace(renderPipeline, sampler, face, faceMatrices[face], sourceTexture);
+		}
+		if (this.#useMipmap) {
+			console.log('큐브맵 밉맵 생성 중...');
+			mipmapGenerator.generateMipmap(this.#gpuTexture, cubeMapDescriptor);
+			console.log('큐브맵 밉맵 생성 완료');
+		}
 	}
 
 	#hdrDataToGPUTexture(device: GPUDevice, hdrData: HDRData, textureDescriptor: GPUTextureDescriptor): GPUTexture {
@@ -284,54 +332,6 @@ class HDRTexture extends ManagedResourceBase {
 			return 12.92 * linearValue;
 		} else {
 			return 1.055 * Math.pow(linearValue, 1.0 / 2.4) - 0.055;
-		}
-	}
-
-	// 🎯 Equirectangular을 CubeMap으로 변환 (임시 텍스처 사용)
-	async #generateCubeMapFromEquirectangular(sourceTexture: GPUTexture) {
-		const {gpuDevice, resourceManager} = this.redGPUContext;
-		const {mipmapGenerator} = resourceManager;
-		const cubeMapDescriptor: GPUTextureDescriptor = {
-			size: [this.#cubeMapSize, this.#cubeMapSize, 6],
-			format: this.#format,
-			usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_DST,
-			dimension: '2d',
-			mipLevelCount: this.#useMipmap ? getMipLevelCount(this.#cubeMapSize, this.#cubeMapSize) : 1,
-			label: `${this.#src}_cubemap`
-		};
-		// 🎯 큐브맵을 gpuTexture로 설정
-		this.#gpuTexture = gpuDevice.createTexture(cubeMapDescriptor);
-		const shaderModule = gpuDevice.createShaderModule({
-			code: generateCubeMapFromEquirectangularCode
-		});
-		const renderPipeline = gpuDevice.createRenderPipeline({
-			layout: 'auto',
-			vertex: {
-				module: shaderModule,
-				entryPoint: 'vs_main'
-			},
-			fragment: {
-				module: shaderModule,
-				entryPoint: 'fs_main',
-				targets: [{format: this.#format}]
-			},
-		});
-		const sampler = new Sampler(this.redGPUContext, {
-			magFilter: GPU_FILTER_MODE.LINEAR,
-			minFilter: GPU_FILTER_MODE.LINEAR,
-			mipmapFilter: GPU_MIPMAP_FILTER_MODE.LINEAR,
-			addressModeU: GPU_ADDRESS_MODE.CLAMP_TO_EDGE,
-			addressModeV: GPU_ADDRESS_MODE.CLAMP_TO_EDGE,
-			addressModeW: GPU_ADDRESS_MODE.CLAMP_TO_EDGE
-		})
-		const faceMatrices = this.#getCubeMapFaceMatrices();
-		for (let face = 0; face < 6; face++) {
-			await this.#renderCubeMapFace(renderPipeline, sampler, face, faceMatrices[face], sourceTexture);
-		}
-		if (this.#useMipmap) {
-			console.log('큐브맵 밉맵 생성 중...');
-			mipmapGenerator.generateMipmap(this.#gpuTexture, cubeMapDescriptor);
-			console.log('큐브맵 밉맵 생성 완료');
 		}
 	}
 

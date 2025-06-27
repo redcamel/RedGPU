@@ -1,11 +1,11 @@
-import * as RedGPU from "../../../../dist";
+import * as RedGPU from "../../../../dist/index.js";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
 const hdrImages = [
-	{name: 'the sky is on fire', path: '../../../assets/hdr/4k/the_sky_is_on_fire_4k.hdr'},
 	{name: 'furstenstein', path: '../../../assets/hdr/4k/furstenstein.hdr'},
+	{name: 'the sky is on fire', path: '../../../assets/hdr/4k/the_sky_is_on_fire_4k.hdr'},
 	{name: 'Cannon_Exterior', path: '../../../assets/hdr/Cannon_Exterior.hdr'},
 	{name: 'field', path: '../../../assets/hdr/field.hdr'},
 	{name: 'neutral.37290948', path: '../../../assets/hdr/neutral.37290948.hdr'},
@@ -22,7 +22,7 @@ RedGPU.init(
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 
 		redGPUContext.addView(view);
-		createIBL(view, hdrImages[0].path);
+		createSkybox(view, hdrImages[0].path);
 
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		renderer.start(redGPUContext, () => {});
@@ -37,10 +37,9 @@ RedGPU.init(
 	}
 );
 
-const createIBL = (view, src) => {
-	const newIbl = new RedGPU.Resource.IBL(view.redGPUContext, src);
-	const newSkybox = new RedGPU.Display.SkyBox(view.redGPUContext, newIbl.environmentTexture);
-	view.skybox = newSkybox;
+const createSkybox = (view, src) => {
+	const herTexture = new RedGPU.Resource.HDRTexture(view.redGPUContext, src);
+	view.skybox = new RedGPU.Display.SkyBox(view.redGPUContext, herTexture);
 };
 
 const renderTestPane = async (view) => {
@@ -59,6 +58,7 @@ const renderTestPane = async (view) => {
 			return acc;
 		}, {})
 	}).on("change", (ev) => {
-		createIBL(view, ev.value);
+		createSkybox(view, ev.value);
 	});
-};
+}
+

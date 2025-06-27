@@ -249,42 +249,6 @@ const ExampleList = [
 				]
 			},
 			{
-				name: 'SkyBox',
-				list: [
-					{
-						name: 'Skybox using 6 assets',
-						path: '3d/skybox/skybox',
-						thumb: '3d/skybox/skybox/thumb.png',
-						description: {
-							ko: ``,
-							en: ``
-						},
-					},
-					{
-					    name: 'Skybox using IBL',
-					    path: '3d/skybox/skyboxWithIbl',
-					    description: {
-					        ko: ``,
-					        en: ``
-					    },
-					},
-				]
-			},
-			{
-				name: 'Transparent Sort',
-				list: [
-					{
-						name: 'Transparent Sort',
-						path: '3d/transparentSort',
-						thumb: '3d/transparentSort/thumb.png',
-						description: {
-							ko: `반투명 객체가 렌더링되는 순서를 확인하기 위해 메시의 소재에 \`transparent\` 옵션을 적용하는 방법의 예입니다. \`transparent\`를 사용하면 올바른 렌더링 결과를 확인할 수 있습니다.`,
-							en: ` example of how to apply the \`transparent\` option to the mesh's material to see the order in which translucent objects are rendered. You can use \`transparent\` to see the correct rendering results.`
-						},
-					},
-				]
-			},
-			{
 				name: 'Texture & Sampler',
 				list: [
 					{
@@ -326,12 +290,79 @@ const ExampleList = [
 				]
 			},
 			{
+				name: 'SkyBox & IBL',
+				list: [
+					{
+						name: 'SkyBox',
+						list : [
+							{
+								name: 'Skybox using 6 assets',
+								path: '3d/skybox/skybox',
+								thumb: '3d/skybox/skybox/thumb.png',
+								description: {
+									ko: ``,
+									en: ``
+								},
+							},
+							{
+								name: 'Skybox using HDRTexture',
+								path: '3d/skybox/skyboxWithHDRTexture',
+								thumb: '3d/skybox/skyboxWithHDRTexture/thumb.png',
+								description: {
+									ko: ``,
+									en: ``
+								},
+							},
+							]
+					},
+					{
+						name: 'IBL',
+						list: [
+							{
+								name: 'Skybox using IBL',
+								path: '3d/skybox/skyboxWithIbl',
+								thumb: '3d/skybox/skyboxWithIbl/thumb.png',
+								description: {
+									ko: ``,
+									en: ``
+								},
+							},
+							{
+								name: 'IBL Test',
+								path: '3d/skybox/iblTest',
+								thumb: '3d/skybox/iblTest/thumb.png',
+								description: {
+									ko: ``,
+									en: ``
+								},
+							},
+						]
+					}
+
+				]
+			},
+			{
+				name: 'Transparent Sort',
+				list: [
+					{
+						name: 'Transparent Sort',
+						path: '3d/transparentSort',
+						thumb: '3d/transparentSort/thumb.png',
+						description: {
+							ko: `반투명 객체가 렌더링되는 순서를 확인하기 위해 메시의 소재에 \`transparent\` 옵션을 적용하는 방법의 예입니다. \`transparent\`를 사용하면 올바른 렌더링 결과를 확인할 수 있습니다.`,
+							en: ` example of how to apply the \`transparent\` option to the mesh's material to see the order in which translucent objects are rendered. You can use \`transparent\` to see the correct rendering results.`
+						},
+					},
+				]
+			},
+
+			{
 				name: 'Noise Texture',
-				experimental : true,
+				experimental: true,
 				list: [
 					{
 						name: 'SimplexTexture',
-						experimental : true,
+						experimental: true,
 						list: [
 							{
 								name: 'SimplexTexture',
@@ -364,7 +395,7 @@ const ExampleList = [
 					},
 					{
 						name: 'VoronoiTexture',
-						experimental : true,
+						experimental: true,
 						list: [
 							{
 								name: 'VoronoiTexture',
@@ -482,7 +513,7 @@ const ExampleList = [
 			},
 			{
 				name: 'Tint',
-				experimental : true,
+				experimental: true,
 				list: [
 					{
 						name: 'Tint',
@@ -895,13 +926,13 @@ const ExampleList = [
 						},
 					},
 					{
-					    name: 'OrientationTest',
-					    path: 'gltf/basic/orientationTest',
+						name: 'OrientationTest',
+						path: 'gltf/basic/orientationTest',
 						thumb: 'gltf/basic/orientationTest/thumb.png',
-					    description: {
-					        ko: ``,
-					        en: ``
-					    },
+						description: {
+							ko: ``,
+							en: ``
+						},
 					},
 					{
 						name: 'TextureCoordinateTest',
@@ -933,7 +964,7 @@ const ExampleList = [
 					{
 						name: 'MultiUVTest',
 						path: 'gltf/basic/multiUVTest',
-						thumb: 'gltf/basic/textureEncodingTest/thumb.png',
+						thumb: 'gltf/basic/multiUVTest/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -1774,7 +1805,7 @@ const ExampleList = [
 			},
 			{
 				name: '2D Tint',
-				experimental : true,
+				experimental: true,
 				list: [
 					{
 						name: 'Tint Basic',

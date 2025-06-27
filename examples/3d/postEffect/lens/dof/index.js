@@ -18,16 +18,6 @@ RedGPU.init(
 		controller.speedDistance = 0.5;
 		controller.tilt = -15;
 
-		// 스카이박스 텍스처 생성
-		const cubeTexture = new RedGPU.Resource.CubeTexture(redGPUContext, [
-			"../../../../assets/skybox/px.jpg",
-			"../../../../assets/skybox/nx.jpg",
-			"../../../../assets/skybox/py.jpg",
-			"../../../../assets/skybox/ny.jpg",
-			"../../../../assets/skybox/pz.jpg",
-			"../../../../assets/skybox/nz.jpg",
-		]);
-
 		// 씬 생성
 		const scene = new RedGPU.Display.Scene();
 
@@ -35,21 +25,18 @@ RedGPU.init(
 		// 뷰 생성 및 설정
 		// ============================================
 
+		const ibl = new RedGPU.Resource.IBL(redGPUContext,'../../../../assets/hdr/4k/the_sky_is_on_fire_4k.hdr')
 		// 일반 뷰 생성
 		const viewNormal = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		viewNormal.iblTexture = cubeTexture;
-		viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture);
+		viewNormal.ibl = ibl;
+		viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 		redGPUContext.addView(viewNormal);
 
-		// 이펙트 뷰 생성 (DOF 최적화)
+		// 이펙트 뷰 생성
 		const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		viewEffect.iblTexture = cubeTexture;
-		viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture);
-
-		const dofEffect = new RedGPU.PostEffect.DOF(redGPUContext);
-
-
-		viewEffect.postEffectManager.addEffect(dofEffect);
+		viewEffect.ibl = ibl;
+		viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+		viewEffect.postEffectManager.addEffect(new RedGPU.PostEffect.DOF(redGPUContext));
 		redGPUContext.addView(viewEffect);
 
 		// ============================================
