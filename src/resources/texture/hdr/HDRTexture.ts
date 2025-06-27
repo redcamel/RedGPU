@@ -227,7 +227,6 @@ class HDRTexture extends ManagedResourceBase {
 		switch (this.#format) {
 			case 'rgba8unorm':
 				bytesPerPixel = 4; // 8bit × 4 = 32bit = 4bytes
-				// 🎯 개선된 톤매핑 적용
 				uploadData = this.#float32ToUint8WithToneMapping(hdrData.data).buffer as ArrayBuffer;
 				break;
 			default:

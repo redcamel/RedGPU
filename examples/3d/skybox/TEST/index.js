@@ -51,7 +51,7 @@ const createSphericalSkyBox = async (view) => {
 		skyboxImagePaths
 	);
 	// const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/ibl001.hdr');
-	const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/4k/furstenstein.hdr');
+	const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/4k/furstenstein.hdr', 512);
 
 	view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture)
 	// view.skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture)
@@ -138,6 +138,7 @@ const renderTestPane = async (redGPUContext, view, ibl, skybox) => {
 	}).on("change", (ev) => {
 		const newIbl = new RedGPU.Resource.IBL(redGPUContext, ev.value);
 		view.ibl = newIbl;
+		console.log('luminanceStats',newIbl)
 		if (settings.useSkyBox) {
 			const newSkybox = new RedGPU.Display.SkyBox(redGPUContext, newIbl.environmentTexture);
 			view.skybox = newSkybox;

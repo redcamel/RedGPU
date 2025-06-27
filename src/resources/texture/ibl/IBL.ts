@@ -2,8 +2,8 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import GPU_ADDRESS_MODE from "../../../gpuConst/GPU_ADDRESS_MODE";
 import GPU_FILTER_MODE from "../../../gpuConst/GPU_FILTER_MODE";
 import GPU_MIPMAP_FILTER_MODE from "../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
+import {keepLog} from "../../../utils";
 import createUUID from "../../../utils/createUUID";
-import getMipLevelCount from "../../../utils/math/getMipLevelCount";
 import Sampler from "../../sampler/Sampler";
 import CubeTexture from "../CubeTexture";
 import HDRTexture from "../hdr/HDRTexture";
@@ -15,31 +15,33 @@ class IBL {
 	//
 	#environmentTexture: CubeTexture;
 	#irradianceTexture: CubeTexture;
-	#prefilterMap: GPUTexture;
-	#brdfLUT: GPUTexture;
+	#prefilterMap: GPUTexture; //TODO - 일단없어도되니 나중에
+	#brdfLUT: GPUTexture; //TODO - 일단없어도되니 나중에
 	#uuid = createUUID()
-	#useMipmap: boolean = true
 	#format: GPUTextureFormat = 'rgba8unorm'
 
-	constructor(redGPUContext: RedGPUContext, srcInfo: string | [string, string, string, string, string, string], useMipmap: boolean = true) {
-		this.#useMipmap = useMipmap
+	constructor(redGPUContext: RedGPUContext, srcInfo: string | [string, string, string, string, string, string], cubeSize: number = 1024) {
 		this.#redGPUContext = redGPUContext
 		this.#environmentTexture = new CubeTexture(redGPUContext, [], false, undefined, undefined, this.#format)
 		this.#irradianceTexture = new CubeTexture(redGPUContext, [], false, undefined, undefined, this.#format)
 		if (typeof srcInfo === 'string') {
-			new HDRTexture(
+			const t0 = new HDRTexture(
 				redGPUContext,
 				srcInfo,
 				(v: HDRTexture) => {
 					this.#sourceCubeTexture = v.gpuTexture
 					this.#init()
 				},
+				undefined,
+				cubeSize,
+				true
 			);
+			keepLog(t0)
 		} else {
 			new CubeTexture(
 				redGPUContext,
 				srcInfo,
-				useMipmap,
+				true,
 				(v: CubeTexture) => {
 					this.#sourceCubeTexture = v.gpuTexture
 					this.#init()
@@ -66,7 +68,7 @@ class IBL {
 	async #generateIrradianceMap(sourceCubeTexture: GPUTexture): Promise<GPUTexture> {
 		const {gpuDevice} = this.#redGPUContext;
 		const irradianceSize = 32;
-		const irradianceMipLevels = this.#useMipmap ? getMipLevelCount(irradianceSize, irradianceSize) : 1;
+		const irradianceMipLevels = 1;
 		const irradianceTexture = gpuDevice.createTexture({
 			size: [irradianceSize, irradianceSize, 6],
 			format: this.#format,
