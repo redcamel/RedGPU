@@ -23,12 +23,12 @@ export function setSeparator(pane) {
 }
 
 const hdrImages = [
-	{name: 'the sky is on fire', path: '../../../assets/hdr/4k/the_sky_is_on_fire_4k.hdr'},
-	{name: 'furstenstein', path: '../../../assets/hdr/4k/furstenstein.hdr'},
-	{name: 'Cannon_Exterior', path: '../../../assets/hdr/Cannon_Exterior.hdr'},
-	{name: 'field', path: '../../../assets/hdr/field.hdr'},
-	{name: 'neutral.37290948', path: '../../../assets/hdr/neutral.37290948.hdr'},
-	{name: 'pisa', path: '../../../assets/hdr/pisa.hdr'},
+	{name: 'the sky is on fire', path: 'assets/hdr/4k/the_sky_is_on_fire_4k.hdr'},
+	{name: 'furstenstein', path: 'assets/hdr/4k/furstenstein.hdr'},
+	{name: 'Cannon_Exterior', path: 'assets/hdr/Cannon_Exterior.hdr'},
+	{name: 'field', path: 'assets/hdr/field.hdr'},
+	{name: 'neutral.37290948', path: 'assets/hdr/neutral.37290948.hdr'},
+	{name: 'pisa', path: 'assets/hdr/pisa.hdr'},
 ];
 export {
 	setViewListTest_Pane,

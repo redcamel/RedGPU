@@ -1,16 +1,21 @@
 import {hdrImages} from './index.js';
 
-const createIblHelper = (pane, view, RedGPU) => {
+const createIblHelper = (pane, view, RedGPU,option={}) => {
 	const folder = pane.addFolder({title: 'Lighting', expanded: true});
 
 	const settings = {
 		hdrImage: hdrImages[0].path,
 		useLight: false,
 		useIBL: true,
+		...option
 	};
 
 	const createIBL = (view, src) => {
-		const ibl = new RedGPU.Resource.IBL(view.redGPUContext, src);
+		const pathSegments = window.location.pathname.split('/');
+		const examplesIndex = pathSegments.indexOf('examples');
+		const currentDepth = pathSegments.length - examplesIndex - 2; // examples 이후의 깊이
+		const relativePath = '../'.repeat(currentDepth) + src;
+		const ibl = new RedGPU.Resource.IBL(view.redGPUContext, relativePath);
 		const skybox = new RedGPU.Display.SkyBox(view.redGPUContext, ibl.environmentTexture);
 		view.ibl = ibl;
 		view.skybox = skybox;
@@ -58,8 +63,9 @@ const createIblHelper = (pane, view, RedGPU) => {
 	}).on('change', (ev) => {
 		handleHDRImageChange(ev.value);
 	});
+	if(settings.useIBL) createIBL(view, hdrImages[0].path);
+	if(settings.useLight) handleLightToggle(settings.useLight);
 
-	createIBL(view, hdrImages[0].path);
 };
 
 export default createIblHelper;
