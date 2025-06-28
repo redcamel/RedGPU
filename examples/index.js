@@ -21,20 +21,13 @@ RedGPU.init(
 		directionalLightTest.color.b = 255
 		directionalLightTest.intensity = 1
 
-		// scene.lightManager.addDirectionalLight(directionalLightTest)
+		scene.lightManager.addDirectionalLight(directionalLightTest)
 
 		redGPUContext.addView(view);
 
-		const hdrTexture = new RedGPU.Resource.HDRTexture(
-			redGPUContext,
-			'./assets/hdr/ibl.hdr',
-			() => {
-				const ibl = new RedGPU.Resource.IBL(redGPUContext, hdrTexture.gpuCubeTexture);
-				view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture)
-				view.ibl = ibl
-			}
-		);
-
+		const ibl = new RedGPU.Resource.IBL(redGPUContext, './assets/hdr/4k/the_sky_is_on_fire_4k.hdr');
+		view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture)
+		view.ibl = ibl
 		const renderer = new RedGPU.Renderer(redGPUContext)
 
 		//
