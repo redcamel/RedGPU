@@ -22,7 +22,6 @@ import Axis from "../helper/asix/Axis";
 import Grid from "../helper/grid/Grid";
 import Scene from "../scene/Scene";
 import SkyBox from "../skyboxs/skyBox/SkyBox";
-import SkyBoxMaterial from "../skyboxs/skyBox/SkyBoxMaterial";
 import ViewRenderTextureManager from "./ViewRenderTextureManager";
 import ViewTransform from "./ViewTransform";
 
@@ -294,7 +293,6 @@ class View3D extends ViewTransform {
 					binding: 3,
 					resource: this.#basicSampler
 				},
-
 				{
 					binding: 5,
 					resource: {

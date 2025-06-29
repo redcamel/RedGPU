@@ -37,7 +37,7 @@ RedGPU.init(
 		scene.addChild(textField2D); // Sprite를 장면에 추가
 
 		redGPUContext.onResize = () => {
-			const { width, height } = redGPUContext.screenRectObject;
+			const {width, height} = redGPUContext.screenRectObject;
 
 			// 자식 Sprite 배치 관련 설정
 			const gap = 220; // 자식들 간 간격

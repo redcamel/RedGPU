@@ -20,7 +20,7 @@ RedGPU.init(
 		// 씬을 생성하고 카메라 컨트롤러와 함께 뷰 추가
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		view.grid=true
+		view.grid = true
 		redGPUContext.addView(view);
 
 		// Add sample mesh to the scene
@@ -38,7 +38,7 @@ RedGPU.init(
 
 		// Render Test Pane for real-time adjustments
 		// 실시간 조정을 위한 테스트 패널 렌더링
-		renderTestPane(redGPUContext,scene);
+		renderTestPane(redGPUContext, scene);
 	},
 	(failReason) => {
 		// Handle initialization failure
@@ -99,9 +99,7 @@ function getRandomHexValue() {
 	return `#${result}`;
 }
 
-
-
-const renderTestPane = async (redGPUContext,scene) => {
+const renderTestPane = async (redGPUContext, scene) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const pane = new Pane();
 	const TextField3DFolder = pane.addFolder({title: 'TextField3D', expanded: true});

@@ -31,7 +31,7 @@ RedGPU.init(
 		renderer.start(redGPUContext, render);
 
 		// 테스트 패널 생성 (실시간 제어)
-		renderTestPane(redGPUContext, parentSprite2D, [childSprite2D,childTextField2D,childSpriteSheet2D]);
+		renderTestPane(redGPUContext, parentSprite2D, [childSprite2D, childTextField2D, childSpriteSheet2D]);
 	},
 	(failReason) => {
 		console.error('Initialization failed:', failReason);

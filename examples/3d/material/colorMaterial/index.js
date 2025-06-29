@@ -62,7 +62,6 @@ const createSampleMesh = (redGPUContext, scene) => {
 	return mesh;
 };
 
-
 // 테스트용 UI를 구성하는 함수
 const renderTestPane = async (redGPUContext, mesh) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
@@ -111,11 +110,10 @@ const renderTestPane = async (redGPUContext, mesh) => {
 			});
 	})
 
-		pane.addBinding(mesh.material, 'opacity', {min: 0, max: 1, step: 0.01})
-			.on('change', (e) => {
-				mesh.material.opacity = e.value
-			});
-
+	pane.addBinding(mesh.material, 'opacity', {min: 0, max: 1, step: 0.01})
+		.on('change', (e) => {
+			mesh.material.opacity = e.value
+		});
 
 	// Add a separator
 	// 구분자 추가

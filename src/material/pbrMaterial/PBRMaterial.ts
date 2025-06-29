@@ -330,6 +330,7 @@ class PBRMaterial extends ABitmapBaseMaterial {
 	get packedKHR_clearcoatTexture_transmission(): PackedTexture {
 		return this.#packedKHR_clearcoatTexture_transmission;
 	}
+
 	get packedKHR_iridescence(): PackedTexture {
 		return this.#packedKHR_iridescence;
 	}
@@ -345,7 +346,6 @@ class PBRMaterial extends ABitmapBaseMaterial {
 	// get packedKHR_transmission(): PackedTexture {
 	// 	return this.#packedKHR_transmission;
 	// }
-
 	get packedKHR_diffuse_transmission(): PackedTexture {
 		return this.#packedKHR_diffuse_transmission;
 	}
@@ -353,7 +353,6 @@ class PBRMaterial extends ABitmapBaseMaterial {
 	// get packedKHR_clearcoatTexture(): PackedTexture {
 	// 	return this.#packedKHR_clearcoatTexture;
 	// }
-
 	async setupPackORMTexture() {
 		const width = Math.max(
 			this.occlusionTexture?.gpuTexture.width || 1,
@@ -385,7 +384,6 @@ class PBRMaterial extends ABitmapBaseMaterial {
 			this.KHR_clearcoatTexture?.gpuTexture.height || 1,
 			this.KHR_clearcoatRoughnessTexture?.gpuTexture.height || 1
 		);
-
 		const transmissionWidth = Math.max(
 			this.KHR_transmissionTexture?.gpuTexture.width || 1,
 			this.KHR_thicknessTexture?.gpuTexture.width || 1
@@ -394,11 +392,9 @@ class PBRMaterial extends ABitmapBaseMaterial {
 			this.KHR_transmissionTexture?.gpuTexture.height || 1,
 			this.KHR_thicknessTexture?.gpuTexture.height || 1
 		);
-
 		// 최종 크기는 두 그룹 중 큰 크기로 통일
 		const finalWidth = Math.max(clearcoatWidth, transmissionWidth);
 		const finalHeight = Math.max(clearcoatHeight, transmissionHeight);
-
 		// 하나의 텍스처에 4개 채널 모두 패킹
 		await this.#packedKHR_clearcoatTexture_transmission.packing(
 			{
@@ -411,10 +407,11 @@ class PBRMaterial extends ABitmapBaseMaterial {
 			finalHeight,
 			'packedKHR_clearcoatTexture_transmission',
 			{
-				b:'r',a:'g'
+				b: 'r', a: 'g'
 			}
 		)
 	}
+
 	// async setupPackedKHR_clearcoatTexture() {
 	// 	const width = Math.max(
 	// 		this.KHR_clearcoatTexture?.gpuTexture.width || 1,
@@ -454,7 +451,6 @@ class PBRMaterial extends ABitmapBaseMaterial {
 	// 		'packedKHR_transmission'
 	// 	)
 	// }
-
 	async setupPackedKHR_diffuse_transmission() {
 		const width = Math.max(
 			this.KHR_diffuseTransmissionColorTexture?.gpuTexture.width || 1,

@@ -33,7 +33,6 @@ class MeshBase extends Object3DContainer {
 	modelMatrix = mat4.create()
 	localMatrix = mat4.create()
 	normalModelMatrix = mat4.create()
-
 	readonly #redGPUContext: RedGPUContext
 	readonly #gpuDevice: GPUDevice
 	readonly #primitiveState: PrimitiveState

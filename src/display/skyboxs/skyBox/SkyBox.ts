@@ -45,16 +45,16 @@ class SkyBox {
 		this.#depthStencilState.depthWriteEnabled = false
 	}
 
+	get skyboxTexture(): CubeTexture {
+		return this._material.skyboxTexture
+	}
+
 	set skyboxTexture(texture: CubeTexture) {
 		if (!texture) {
 			consoleAndThrowError('SkyBox requires a valid CubeTexture')
 		} else {
 			this._material.skyboxTexture = texture
 		}
-	}
-
-	get skyboxTexture(): CubeTexture {
-		return this._material.skyboxTexture
 	}
 
 	render(debugViewRenderState: RenderViewStateData) {

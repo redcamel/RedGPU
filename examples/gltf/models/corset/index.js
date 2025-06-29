@@ -34,7 +34,7 @@ RedGPU.init(
 function loadGLTF(view, url) {
 	const {redGPUContext, scene} = view;
 	new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
-		const mesh =result.resultMesh
+		const mesh = result.resultMesh
 		mesh.setScale(50)
 		mesh.y = -1.2
 		scene.addChild(mesh)

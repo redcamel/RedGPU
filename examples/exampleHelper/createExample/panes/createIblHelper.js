@@ -1,6 +1,6 @@
 import {hdrImages} from './index.js';
 
-const createIblHelper = (pane, view, RedGPU,option={}) => {
+const createIblHelper = (pane, view, RedGPU, option = {}) => {
 	const folder = pane.addFolder({title: 'Lighting', expanded: true});
 
 	const settings = {
@@ -63,8 +63,8 @@ const createIblHelper = (pane, view, RedGPU,option={}) => {
 	}).on('change', (ev) => {
 		handleHDRImageChange(ev.value);
 	});
-	if(settings.useIBL) createIBL(view, hdrImages[0].path);
-	if(settings.useLight) handleLightToggle(settings.useLight);
+	if (settings.useIBL) createIBL(view, hdrImages[0].path);
+	if (settings.useLight) handleLightToggle(settings.useLight);
 
 };
 

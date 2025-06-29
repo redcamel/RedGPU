@@ -5,8 +5,8 @@ import GPU_BLEND_OPERATION from "../../gpuConst/GPU_BLEND_OPERATION";
 import GPU_LOAD_OP from "../../gpuConst/GPU_LOAD_OP";
 import GPU_STORE_OP from "../../gpuConst/GPU_STORE_OP";
 import {
-    getFragmentBindGroupLayoutDescriptorFromShaderInfo,
-    getVertexBindGroupLayoutDescriptorFromShaderInfo
+	getFragmentBindGroupLayoutDescriptorFromShaderInfo,
+	getVertexBindGroupLayoutDescriptorFromShaderInfo
 } from "../../material";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import Sampler from "../../resources/sampler/Sampler";

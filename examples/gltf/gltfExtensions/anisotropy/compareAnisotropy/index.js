@@ -34,10 +34,10 @@ RedGPU.init(
 function loadGLTF(view, url) {
 	const {redGPUContext, scene} = view;
 	new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
-    const mesh = result.resultMesh
-    mesh.y =  -.5
-    scene.addChild(mesh)
-  });
+		const mesh = result.resultMesh
+		mesh.y = -.5
+		scene.addChild(mesh)
+	});
 }
 
 const renderTestPane = async (redGPUContext, targetView) => {

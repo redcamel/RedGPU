@@ -294,7 +294,7 @@ const ExampleList = [
 				list: [
 					{
 						name: 'SkyBox',
-						list : [
+						list: [
 							{
 								name: 'Skybox using 6 assets',
 								path: '3d/skybox/skybox',
@@ -313,7 +313,7 @@ const ExampleList = [
 									en: ``
 								},
 							},
-							]
+						]
 					},
 					{
 						name: 'IBL',
@@ -1278,8 +1278,8 @@ const ExampleList = [
 						]
 					},
 					{
-						name : 'KHR_materials_iridescence',
-						list : [
+						name: 'KHR_materials_iridescence',
+						list: [
 							{
 								name: 'CompareIridescence',
 								path: 'gltf/gltfExtensions/iridescence/compareIridescence',

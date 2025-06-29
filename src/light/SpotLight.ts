@@ -12,7 +12,6 @@ class SpotLight extends BaseLight {
 	#directionZ: number = 0
 	#innerCutoff: number = 15.0  // 15도 (내부 각도)
 	#outerCutoff: number = 22.5  // 22.5도 (외부 각도)
-
 	constructor(color: string = '#fff', intensity: number = 1) {
 		super(new ColorRGB(...convertHexToRgb(color, true)), intensity)
 	}
@@ -98,7 +97,6 @@ class SpotLight extends BaseLight {
 		this.#outerCutoff = degrees;
 	}
 
-
 	// 코사인 값이 필요한 경우를 위한 메서드
 	get innerCutoffCos(): number {
 		return Math.cos(this.#innerCutoff * Math.PI / 180);
@@ -147,7 +145,6 @@ class SpotLight extends BaseLight {
 			this.#directionZ = dz / length;
 		}
 	}
-
 }
 
 Object.freeze(SpotLight);

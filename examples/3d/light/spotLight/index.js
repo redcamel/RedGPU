@@ -20,7 +20,6 @@ RedGPU.init(
 		view.skybox = createSkybox(redGPUContext);
 		redGPUContext.addView(view);
 
-
 		// Add a SpotLight to the scene
 		const light = createSpotLight(scene);
 

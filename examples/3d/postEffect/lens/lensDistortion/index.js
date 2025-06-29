@@ -20,14 +20,14 @@ RedGPU.init(
 		controller.speedDistance = 0.1;
 		controller.tilt = 0;
 
-			// 씬 생성
+		// 씬 생성
 		const scene = new RedGPU.Display.Scene();
 
 		// ============================================
 		// 뷰 생성 및 설정
 		// ============================================
 
-		const ibl = new RedGPU.Resource.IBL(redGPUContext,'../../../../assets/hdr/4k/the_sky_is_on_fire_4k.hdr')
+		const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../../assets/hdr/4k/the_sky_is_on_fire_4k.hdr')
 		// 일반 뷰 생성
 		const viewNormal = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		viewNormal.ibl = ibl;

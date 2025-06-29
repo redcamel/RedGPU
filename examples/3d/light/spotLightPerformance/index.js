@@ -34,11 +34,10 @@ RedGPU.init(
 
 			// 모든 스포트라이트 애니메이션
 			lights.forEach((lightData) => {
-				const { light, originalPos, rotationSpeed, orbitRadius } = lightData;
+				const {light, originalPos, rotationSpeed, orbitRadius} = lightData;
 
 				// 원운동 계산
 				const angle = time * rotationSpeed;
-
 
 				// 라이트 방향을 중심점을 향하도록 설정 (약간의 랜덤성 추가)
 				const centerX = originalPos.x + Math.sin(angle * 0.3) * 2;
@@ -89,8 +88,8 @@ const createSpotLight = (scene) => {
 	const lights = []; // 모든 라이트 정보를 저장할 배열
 
 	// 그리드로 조명 배치
-	for(let row = 0; row < gridSize; row++) {
-		for(let col = 0; col < gridSize; col++) {
+	for (let row = 0; row < gridSize; row++) {
+		for (let col = 0; col < gridSize; col++) {
 			const light = new RedGPU.Light.SpotLight('#fff', intensity);
 			light.intensity = intensity;
 
@@ -118,7 +117,7 @@ const createSpotLight = (scene) => {
 			// 애니메이션을 위한 추가 정보 저장
 			lights.push({
 				light: light,
-				originalPos: { x, y, z }, // 원래 위치 (원운동의 중심)
+				originalPos: {x, y, z}, // 원래 위치 (원운동의 중심)
 				rotationSpeed: 0.5 + Math.random() * 1.0, // 각각 다른 회전 속도
 				orbitRadius: 1.0 + Math.random() * 2.0 // 각각 다른 궤도 반지름
 			});

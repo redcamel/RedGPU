@@ -1,10 +1,10 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import {
-    createDebugTitle,
-    getDebugFormatValue,
-    makeBooleanDebug,
-    makeColorDebug,
-    updateDebugItemValue
+	createDebugTitle,
+	getDebugFormatValue,
+	makeBooleanDebug,
+	makeColorDebug,
+	updateDebugItemValue
 } from "../core/debugFunc";
 import DebugRender from "../DebugRender";
 import ADebugItem from "./core/ADebugItem";

@@ -38,6 +38,5 @@ const setAntialiasing_pane = (pane, redGPUContext, openYn = false) => {
 	// 	redGPUContext.edgeThresholdMin = info.value
 	// })
 
-
 }
 export default setAntialiasing_pane

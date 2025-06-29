@@ -292,7 +292,6 @@ const renderTestPane = async (redGPUContext, targetNoiseTexture, testData) => {
 		pane.refresh();
 	});
 
-
 	// 셀 ID 전용 프리셋 폴더 추가
 	const cellIdActions = pane.addFolder({title: 'Cell ID Presets', expanded: true});
 	cellIdActions.addButton({title: '🎨 Stained Glass'}).on('click', () => {
@@ -313,7 +312,6 @@ const renderTestPane = async (redGPUContext, targetNoiseTexture, testData) => {
 		targetNoiseTexture.randomizeSeed();
 		pane.refresh();
 	});
-
 
 	const animation = pane.addFolder({title: 'Animation', expanded: true});
 	animation.addBinding(testData, 'useAnimation');

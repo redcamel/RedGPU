@@ -35,7 +35,7 @@ RedGPU.init(
 );
 
 function loadGLTFGrid(view, urls, gridSize = 3, spacing = 3) {
-	const { redGPUContext, scene } = view;
+	const {redGPUContext, scene} = view;
 
 	const totalCols = Math.min(gridSize, urls.length);
 	const totalRows = Math.ceil(urls.length / gridSize);
@@ -60,8 +60,8 @@ function loadGLTFGrid(view, urls, gridSize = 3, spacing = 3) {
 }
 
 const renderTestPane = async (redGPUContext, targetView) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
-	const { createIblHelper } = await import('../../../exampleHelper/createExample/panes/index.js');
+	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+	const {createIblHelper} = await import('../../../exampleHelper/createExample/panes/index.js');
 
 	const pane = new Pane();
 	createIblHelper(pane, targetView, RedGPU);

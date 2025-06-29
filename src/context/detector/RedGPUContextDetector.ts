@@ -47,7 +47,7 @@ class RedGPUContextDetector {
 
 	#parseAdapter(gpuAdapter: GPUAdapter) {
 		if (gpuAdapter) {
-			const { limits, info} = gpuAdapter
+			const {limits, info} = gpuAdapter
 			const {isFallbackAdapter} = info
 			this.#adapterInfo = info;
 			this.#isFallbackAdapter = isFallbackAdapter

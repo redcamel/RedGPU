@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js";;
+import * as RedGPU from "../../../../dist/index.js";
 
 // 1. Create and append a canvas
 // 1. 캔버스를 생성하고 문서에 추가
@@ -53,7 +53,6 @@ RedGPU.init(
 function loadGLTFGrid(view, urls, gridSize = 4, spacing = 3) {
 	const {redGPUContext, scene} = view;
 
-
 	// 그리드 크기 계산
 	const totalCols = Math.min(gridSize, urls.length); // 한 줄의 최대 컬럼 수
 	const totalRows = Math.ceil(urls.length / gridSize); // 필요한 줄 수
@@ -86,8 +85,6 @@ function loadGLTFGrid(view, urls, gridSize = 4, spacing = 3) {
 		});
 	});
 }
-
-
 
 const renderTestPane = async (redGPUContext, targetView) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');

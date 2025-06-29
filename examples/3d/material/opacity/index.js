@@ -72,7 +72,7 @@ const createChildTextField3D = (redGPUContext, parent, x = 0, y = 0) => {
 	textField3D.x = x;
 	textField3D.y = y;
 	textField3D.fontSize = '10px';
-	textField3D.useBillboard=true
+	textField3D.useBillboard = true
 	parent.addChild(textField3D);
 
 	return textField3D;
@@ -103,7 +103,7 @@ const renderTestPane = async (redGPUContext, parent, children) => {
 
 		const objFolder = pane.addFolder({title: title, expanded: true});
 
-		const update = (obj,evt)=>{
+		const update = (obj, evt) => {
 			obj.material.opacity = evt.value;
 			if (obj instanceof RedGPU.Display.TextField3D) {
 				obj.text = `${objType} instance.material<br/>Opacity ${obj.material.opacity.toFixed(2)}`;
@@ -120,7 +120,7 @@ const renderTestPane = async (redGPUContext, parent, children) => {
 			max: 1,
 			step: 0.01
 		}).on('change', (evt) => {
-			update(obj,evt)
+			update(obj, evt)
 
 		});
 		update(obj, {value: objConfig.opacity})

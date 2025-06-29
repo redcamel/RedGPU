@@ -36,8 +36,8 @@ RedGPU.init(
 
 		addGround(redGPUContext, scene);
 		// 3D 모델 로드
-		loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF/DamagedHelmet.gltf',-1,1);
-		loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF/BrainStem.gltf',1,0);
+		loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF/DamagedHelmet.gltf', -1, 1);
+		loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF/BrainStem.gltf', 1, 0);
 
 		// Create a renderer and start rendering
 		// 렌더러 생성 후 렌더링 시작
@@ -55,7 +55,7 @@ RedGPU.init(
 			})
 
 		});
-		renderTestPane(redGPUContext,scene);
+		renderTestPane(redGPUContext, scene);
 	},
 	(failReason) => {
 		// Handle initialization failure
@@ -66,7 +66,7 @@ RedGPU.init(
 	}
 );
 
-function loadGLTF(redGPUContext, scene, url,xPosition,yPosition) {
+function loadGLTF(redGPUContext, scene, url, xPosition, yPosition) {
 
 	let mesh
 	new RedGPU.GLTFLoader(
@@ -119,10 +119,10 @@ const renderTestPane = async (redGPUContext, scene) => {
 	const pane = new Pane();
 	const {shadowManager} = scene
 	const {directionalShadowManager} = shadowManager
-	pane.addBinding(directionalShadowManager, 'shadowDepthTextureSize',{
-		min:128,
-		max:2048,
-		step:1
+	pane.addBinding(directionalShadowManager, 'shadowDepthTextureSize', {
+		min: 128,
+		max: 2048,
+		step: 1
 	}).on("change", (ev) => {
 		directionalShadowManager.shadowDepthTextureSize = ev.value
 	});

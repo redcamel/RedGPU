@@ -66,7 +66,6 @@ RedGPU.init(
 	}
 );
 
-
 const createSkybox = (redGPUContext) => {
 	// Define texture paths for skybox
 	// 스카이박스 텍스처 경로 정의
@@ -118,7 +117,7 @@ const addRandomMeshes = (redGPUContext, scene) => {
 		// 메쉬를 씬에 추가
 		scene.addChild(mesh);
 
-		renderTestPane(redGPUContext,scene);
+		renderTestPane(redGPUContext, scene);
 	}
 };
 
@@ -138,10 +137,10 @@ const renderTestPane = async (redGPUContext, scene) => {
 	const pane = new Pane();
 	const {shadowManager} = scene
 	const {directionalShadowManager} = shadowManager
-	pane.addBinding(directionalShadowManager, 'shadowDepthTextureSize',{
-		min:128,
-		max:2048,
-		step:1
+	pane.addBinding(directionalShadowManager, 'shadowDepthTextureSize', {
+		min: 128,
+		max: 2048,
+		step: 1
 	}).on("change", (ev) => {
 		directionalShadowManager.shadowDepthTextureSize = ev.value
 	});

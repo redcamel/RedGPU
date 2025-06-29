@@ -21,20 +21,19 @@ RedGPU.init(
 		view.grid = true
 		redGPUContext.addView(view);
 
-
 		createSampleMesh(redGPUContext, scene);
 
 		// Create a renderer and start rendering
 		// 렌더러 생성 후 렌더링 시작
 		const renderer = new RedGPU.Renderer(redGPUContext);
-		const targetPosition = [0,0,0]
+		const targetPosition = [0, 0, 0]
 		const targetObject = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Sphere(redGPUContext, 0.2), new RedGPU.Material.ColorMaterial(redGPUContext, 0xff0000));
 		scene.addChild(targetObject);
 		const render = (time) => {
 			scene.children.forEach(v => {
-				targetPosition[0] = Math.sin(time/1000);
-				targetPosition[1] = Math.cos(time/1000);
-				targetPosition[2] = Math.sin(time/1000);
+				targetPosition[0] = Math.sin(time / 1000);
+				targetPosition[1] = Math.cos(time / 1000);
+				targetPosition[2] = Math.sin(time / 1000);
 				targetObject.setPosition(...targetPosition)
 				v.lookAt(...targetPosition)
 			})
@@ -58,7 +57,7 @@ const createSampleMesh = (redGPUContext, scene) => {
 	const material = new RedGPU.Material.BitmapMaterial(redGPUContext, new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/texture/crate.png'))
 	const material2 = new RedGPU.Material.ColorMaterial(redGPUContext, '#00ff00')
 
-	while(i--){
+	while (i--) {
 
 		// Create a sample geometry (Box in this case)
 		// 샘플 지오메트리 생성 (예: Box)
@@ -69,7 +68,7 @@ const createSampleMesh = (redGPUContext, scene) => {
 		const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
 		const mesh2 = new RedGPU.Display.Mesh(redGPUContext, geometry, material2);
 		mesh2.setScale(0.25);
-		mesh2.setPosition(0,0.75,0);
+		mesh2.setPosition(0, 0.75, 0);
 		mesh.addChild(mesh2);
 		mesh.setPosition(Math.random() * 30 - 15, Math.random() * 30 - 15, Math.random() * 30 - 15);
 		scene.addChild(mesh);

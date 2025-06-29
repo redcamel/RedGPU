@@ -1,4 +1,3 @@
-
 import * as RedGPU from "../../../../dist/index.js";
 
 const canvas = document.createElement('canvas');
@@ -37,7 +36,7 @@ function loadGLTF(view, url) {
 	new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
 		const mesh = result.resultMesh
 		mesh.setScale(500)
-		mesh.setPosition(-1.5,-1.5,0)
+		mesh.setPosition(-1.5, -1.5, 0)
 		scene.addChild(mesh)
 	});
 }
