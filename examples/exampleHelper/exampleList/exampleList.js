@@ -1278,6 +1278,56 @@ const ExampleList = [
 						]
 					},
 					{
+						name : 'KHR_materials_iridescence',
+						list : [
+							{
+								name: 'CompareIridescence',
+								path: 'gltf/gltfExtensions/iridescence/compareIridescence',
+								thumb: 'gltf/gltfExtensions/iridescence/compareIridescence/thumb.png',
+								description: {
+									ko: ``,
+									en: ``
+								},
+							},
+							{
+								name: 'IridescenceDielectricSpheres',
+								path: 'gltf/gltfExtensions/iridescence/iridescenceDielectricSpheres',
+								thumb: 'gltf/gltfExtensions/iridescence/iridescenceDielectricSpheres/thumb.png',
+								description: {
+									ko: ``,
+									en: ``
+								},
+							},
+							{
+								name: 'IridescenceMetallicSpheres',
+								path: 'gltf/gltfExtensions/iridescence/iridescenceMetallicSpheres',
+								thumb: 'gltf/gltfExtensions/iridescence/iridescenceMetallicSpheres/thumb.png',
+								description: {
+									ko: ``,
+									en: ``
+								},
+							},
+							{
+								name: 'IridescenceSuzanne',
+								path: 'gltf/gltfExtensions/iridescence/iridescenceSuzanne',
+								thumb: 'gltf/gltfExtensions/iridescence/iridescenceSuzanne/thumb.png',
+								description: {
+									ko: ``,
+									en: ``
+								},
+							},
+							{
+								name: 'IridescenceLamp',
+								path: 'gltf/gltfExtensions/iridescence/iridescenceLamp',
+								thumb: 'gltf/gltfExtensions/iridescence/iridescenceLamp/thumb.png',
+								description: {
+									ko: ``,
+									en: ``
+								},
+							},
+						]
+					},
+					{
 						name: 'KHR_materials_clearcoat',
 						list: [
 							{
