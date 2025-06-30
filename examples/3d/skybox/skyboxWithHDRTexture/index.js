@@ -47,6 +47,7 @@ const renderTestPane = async (view) => {
 	const {createFieldOfView} = await import( "../../../exampleHelper/createExample/panes/index.js" );
 	createFieldOfView(pane, view.camera);
 
+	let currentTexture = null;
 	let exposureBinding = null;
 
 	const settings = {
@@ -62,11 +63,12 @@ const renderTestPane = async (view) => {
 		}, {})
 	}).on("change", (ev) => {
 		const hdrTexture = new RedGPU.Resource.HDRTexture(view.redGPUContext, ev.value, (loadedTexture) => {
-
+			currentTexture = loadedTexture;
 			/* HDR 이미지별 권장 노출값으로 자동 설정 */
 			settings.exposure = loadedTexture.recommendedExposure || 1.0;
 			/* UI 갱신 */
 			if (exposureBinding) {
+				exposureBinding.max = settings.exposure * 2
 				exposureBinding.refresh();
 			}
 		});
@@ -76,12 +78,11 @@ const renderTestPane = async (view) => {
 	// Exposure 슬라이더
 	exposureBinding = pane.addBinding(settings, 'exposure', {
 		min: 0.01,
-		max: 20.0,
+		max: settings.exposure * 2,
 		step: 0.01
 	}).on("change", (ev) => {
-
-		view.skybox._material.skyboxTexture.exposure = ev.value;
+		if (currentTexture) {
+			currentTexture.exposure = ev.value;
+		}
 	});
-
-
 }

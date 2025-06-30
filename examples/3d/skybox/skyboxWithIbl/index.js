@@ -40,6 +40,7 @@ RedGPU.init(
 const createIBL = (view, src) => {
 	const newIbl = new RedGPU.Resource.IBL(view.redGPUContext, src);
 	const newSkybox = new RedGPU.Display.SkyBox(view.redGPUContext, newIbl.environmentTexture);
+
 	view.skybox = newSkybox;
 };
 
@@ -50,7 +51,7 @@ const renderTestPane = async (view) => {
 	createFieldOfView(pane, view.camera)
 
 	const settings = {
-		hdrImage: hdrImages[0].path
+		hdrImage: hdrImages[0].path,
 	};
 
 	pane.addBinding(settings, 'hdrImage', {
@@ -61,4 +62,5 @@ const renderTestPane = async (view) => {
 	}).on("change", (ev) => {
 		createIBL(view, ev.value);
 	});
+
 };

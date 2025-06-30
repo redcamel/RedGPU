@@ -2,6 +2,7 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import GPU_ADDRESS_MODE from "../../../gpuConst/GPU_ADDRESS_MODE";
 import GPU_FILTER_MODE from "../../../gpuConst/GPU_FILTER_MODE";
 import GPU_MIPMAP_FILTER_MODE from "../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
+import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import {keepLog} from "../../../utils";
 import createUUID from "../../../utils/createUUID";
 import Sampler from "../../sampler/Sampler";
@@ -19,13 +20,25 @@ class IBL {
 	#brdfLUT: GPUTexture; //TODO - 일단없어도되니 나중에
 	#uuid = createUUID()
 	#format: GPUTextureFormat = 'rgba8unorm'
+	#targetTexture: HDRTexture | CubeTexture
+
+	get exposure(): number {
+		if (this.#targetTexture instanceof HDRTexture) return this.#targetTexture.exposure
+	}
+
+	set exposure(value) {
+		validatePositiveNumberRange(value)
+		if (this.#targetTexture instanceof HDRTexture) {
+			this.#targetTexture.exposure = value
+		}
+	}
 
 	constructor(redGPUContext: RedGPUContext, srcInfo: string | [string, string, string, string, string, string], cubeSize: number = 1024) {
 		this.#redGPUContext = redGPUContext
 		this.#environmentTexture = new CubeTexture(redGPUContext, [], false, undefined, undefined, this.#format)
 		this.#irradianceTexture = new CubeTexture(redGPUContext, [], false, undefined, undefined, this.#format)
 		if (typeof srcInfo === 'string') {
-			const t0 = new HDRTexture(
+			this.#targetTexture = new HDRTexture(
 				redGPUContext,
 				srcInfo,
 				(v: HDRTexture) => {
@@ -36,9 +49,8 @@ class IBL {
 				cubeSize,
 				true
 			);
-			keepLog(t0)
 		} else {
-			new CubeTexture(
+			this.#targetTexture = new CubeTexture(
 				redGPUContext,
 				srcInfo,
 				true,
