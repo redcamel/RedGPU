@@ -10,6 +10,7 @@ import basicRegisterResource from "../../resourceManager/core/basicRegisterResou
 import basicUnregisterResource from "../../resourceManager/core/basicUnregisterResource";
 import ResourceStateHDRTexture from "../../resourceManager/resourceState/ResourceStateHDRTexture";
 import Sampler from "../../sampler/Sampler";
+import {float32ToUint8WithToneMapping} from "./tone/float32ToUint8WithToneMapping";
 import generateCubeMapFromEquirectangularCode from "./generateCubeMapFromEquirectangularCode.wgsl"
 import HDRLoader, {HDRData} from "./HDRLoader";
 
@@ -118,14 +119,20 @@ class HDRTexture extends ManagedResourceBase {
 		return this.#exposure;
 	}
 
+	#exposureUpdateTimeout: number | null = null;
+
 	set exposure(value: number) {
-		if (this.#exposure !== value) {
-			this.#exposure = Math.max(0.01, Math.min(20.0, value)); // 실용적 범위 제한
+		const newExposure = Math.max(0.01, Math.min(20.0, value));
+		this.#exposure = newExposure;
+		if (this.#exposureUpdateTimeout) {
+			clearTimeout(this.#exposureUpdateTimeout);
+		}
+		this.#exposureUpdateTimeout = setTimeout(() => {
 			if (this.#hdrData) {
-				// 노출값이 변경되면 GPU 텍스처를 다시 생성
 				this.#createGPUTexture();
 			}
-		}
+			this.#exposureUpdateTimeout = null;
+		}, 50);
 	}
 
 	// 🔍 자동 계산된 권장 노출값 (읽기 전용)
@@ -208,15 +215,14 @@ class HDRTexture extends ManagedResourceBase {
 
 	async #createGPUTexture() {
 		const {gpuDevice, resourceManager} = this.redGPUContext
-		// 기존 텍스처 정리
-		if (this.#gpuTexture) {
-			this.#gpuTexture.destroy()
-			// 🔧 #setGpuTexture(null) 사용으로 일관성 확보
-			this.#gpuTexture = null
-		}
+		/* GPU 작업 완료 대기 */
+		await gpuDevice.queue.onSubmittedWorkDone();
+		/* 기존 텍스처 정리 */
+		const oldTexture = this.#gpuTexture;
+		this.#gpuTexture = null; // 먼저 참조 해제
 		this.targetResourceManagedState.videoMemory -= this.#videoMemorySize
 		this.#videoMemorySize = 0
-		// 🔥 임시 Equirectangular 텍스처 생성 (현재 노출값 적용)
+		/* 임시 Equirectangular 텍스처 생성 (현재 노출값 적용) */
 		const {width: W, height: H} = this.#hdrData
 		const tempTextureDescriptor: GPUTextureDescriptor = {
 			size: [W, H],
@@ -224,12 +230,17 @@ class HDRTexture extends ManagedResourceBase {
 			usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
 			label: `${this.#src}_temp_exp${this.#exposure.toFixed(2)}`
 		};
-		const tempTexture = this.#hdrDataToGPUTexture(gpuDevice, this.#hdrData, tempTextureDescriptor)
-		// 🎯 큐브맵 생성
+		const tempTexture = await this.#hdrDataToGPUTexture(gpuDevice, this.#hdrData, tempTextureDescriptor)
+		/* 큐브맵 생성 */
 		await this.#generateCubeMapFromEquirectangular(tempTexture)
-		// 🗑️ 임시 텍스처 즉시 삭제
+		/* 임시 텍스처 즉시 삭제 */
 		tempTexture.destroy()
-		// 🎯 큐브맵 메모리만 계산
+		/* 이전 텍스처 안전하게 파괴 */
+		if (oldTexture) {
+			await gpuDevice.queue.onSubmittedWorkDone(); // GPU 작업 완료 대기
+			oldTexture.destroy();
+		}
+		/* 큐브맵 메모리만 계산 */
 		const cubeDescriptor: GPUTextureDescriptor = {
 			size: [this.#cubeMapSize, this.#cubeMapSize, 6],
 			format: this.#format,
@@ -291,14 +302,15 @@ class HDRTexture extends ManagedResourceBase {
 		}
 	}
 
-	#hdrDataToGPUTexture(device: GPUDevice, hdrData: HDRData, textureDescriptor: GPUTextureDescriptor): GPUTexture {
+	async #hdrDataToGPUTexture(device: GPUDevice, hdrData: HDRData, textureDescriptor: GPUTextureDescriptor): Promise<GPUTexture> {
 		const texture = device.createTexture(textureDescriptor);
 		let bytesPerPixel: number;
 		let uploadData: ArrayBuffer;
 		switch (this.#format) {
 			case 'rgba8unorm':
 				bytesPerPixel = 4; // 8bit × 4 = 32bit = 4bytes
-				uploadData = this.#float32ToUint8WithToneMapping(hdrData.data).buffer as ArrayBuffer;
+				const uint8Data = await this.#float32ToUint8WithToneMapping(hdrData.data);
+				uploadData = uint8Data.buffer as ArrayBuffer;
 				break;
 			default:
 				throw new Error(`지원되지 않는 텍스처 포맷: ${this.#format}`);
@@ -319,46 +331,21 @@ class HDRTexture extends ManagedResourceBase {
 		return texture;
 	}
 
-	// 🎬 개선된 Float32 → Uint8 변환 (현재 노출값으로 톤매핑 적용)
-	#float32ToUint8WithToneMapping(float32Data: Float32Array): Uint8Array {
-		const uint8Data = new Uint8Array(float32Data.length);
-		console.log(`Float32 → Uint8 변환 (ACES 톤매핑, 노출: ${this.#exposure.toFixed(3)}):`);
-		for (let i = 0; i < float32Data.length; i++) {
-			const originalVal = float32Data[i];
-			// 🎯 현재 노출값 적용
-			const exposedVal = originalVal * this.#exposure;
-			// 🎬 ACES 톤매핑 적용
-			const toneMappedVal = this.#acesToneMapping(exposedVal);
-			// 🔧 감마 보정 적용 (sRGB)
-			const gammaCorrectedVal = this.#linearToSRGB(toneMappedVal);
-			// 🎯 최종 8bit 변환
-			const uint8Val = Math.round(Math.min(1.0, Math.max(0.0, gammaCorrectedVal)) * 255);
-			uint8Data[i] = uint8Val;
-			if (i < 16) { // 첫 4픽셀만 로그
-				console.log(`  [${i}] ${originalVal.toFixed(3)} × ${this.#exposure.toFixed(3)} = ${exposedVal.toFixed(3)} → ${toneMappedVal.toFixed(3)} → ${uint8Val}`);
+	async #float32ToUint8WithToneMapping(float32Data: Float32Array): Promise<Uint8Array> {
+		const result = await float32ToUint8WithToneMapping(
+			this.redGPUContext,
+			float32Data,
+			{
+				exposure: this.#exposure,
+				width: this.#hdrData.width,
+				height: this.#hdrData.height,
+				workgroupSize: [8, 8] // 또는 동적으로 계산
 			}
-		}
-		return uint8Data;
+		);
+
+		return result.data;
 	}
 
-	// 🎬 ACES 톤매핑 (업계 표준)
-	#acesToneMapping(x: number): number {
-		const a = 2.51;
-		const b = 0.03;
-		const c = 2.43;
-		const d = 0.59;
-		const e = 0.14;
-		return Math.max(0, (x * (a * x + b)) / (x * (c * x + d) + e));
-	}
-
-	// 🔧 Linear → sRGB 감마 보정
-	#linearToSRGB(linearValue: number): number {
-		if (linearValue <= 0.0031308) {
-			return 12.92 * linearValue;
-		} else {
-			return 1.055 * Math.pow(linearValue, 1.0 / 2.4) - 0.055;
-		}
-	}
 
 	#getCubeMapFaceMatrices(): Float32Array[] {
 		return [

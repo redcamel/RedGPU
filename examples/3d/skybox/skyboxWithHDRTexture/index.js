@@ -48,10 +48,11 @@ const renderTestPane = async (view) => {
 	createFieldOfView(pane, view.camera);
 
 	let currentTexture = null;
+	let exposureBinding = null;
 
 	const settings = {
 		hdrImage: hdrImages[0].path,
-		exposure: 1.0
+		exposure: 15
 	};
 
 	// HDR 이미지 선택
@@ -63,16 +64,20 @@ const renderTestPane = async (view) => {
 	}).on("change", (ev) => {
 		const hdrTexture = new RedGPU.Resource.HDRTexture(view.redGPUContext, ev.value, (loadedTexture) => {
 			currentTexture = loadedTexture;
+			/* HDR 이미지별 권장 노출값으로 자동 설정 */
 			settings.exposure = loadedTexture.recommendedExposure || 1.0;
-			pane.refresh();
+			/* UI 갱신 */
+			if (exposureBinding) {
+				exposureBinding.refresh();
+			}
 		});
 		view.skybox = new RedGPU.Display.SkyBox(view.redGPUContext, hdrTexture);
 	});
 
 	// Exposure 슬라이더
-	pane.addBinding(settings, 'exposure', {
+	exposureBinding = pane.addBinding(settings, 'exposure', {
 		min: 0.01,
-		max: 2.0,
+		max: 20.0,
 		step: 0.01
 	}).on("change", (ev) => {
 		if (currentTexture) {
@@ -80,10 +85,13 @@ const renderTestPane = async (view) => {
 		}
 	});
 
+	/* 초기 HDR 텍스처 로드 */
 	const initialTexture = new RedGPU.Resource.HDRTexture(view.redGPUContext, hdrImages[0].path, (loadedTexture) => {
 		currentTexture = loadedTexture;
+		/* 초기 HDR 이미지의 권장 노출값으로 설정 */
 		settings.exposure = loadedTexture.recommendedExposure || 1.0;
-		pane.refresh();
+		/* UI 갱신 */
+		exposureBinding.refresh();
 	});
 	view.skybox = new RedGPU.Display.SkyBox(view.redGPUContext, initialTexture);
 }
