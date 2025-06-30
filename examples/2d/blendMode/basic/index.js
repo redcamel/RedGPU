@@ -9,7 +9,7 @@ RedGPU.init(
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View2D(redGPUContext, scene);
 		redGPUContext.addView(view);
-		redGPUContext.backgroundColor.setColorByRGB(255, 132, 255)
+		redGPUContext.backgroundColor.setColorByRGB(255, 132, 255);
 
 		const texture_blendTest_base = new RedGPU.Resource.BitmapTexture(
 			redGPUContext,
@@ -46,43 +46,36 @@ RedGPU.init(
 
 			base_origin.x = width / 2 - 210;
 			shape_origin.x = width / 2 + 210;
-			base_origin.y = 200
-			shape_origin.y = 200
+			base_origin.y = 200;
+			shape_origin.y = 200;
 
 			{
-				const spacingX = 150; // X축 간격
-				const spacingY = 156; // Y축 간격
-				const numColumns = Math.floor(width / spacingX); // 한 줄 최대 열 개수
-				const numRows = Math.ceil(bottomGroup.children.length / numColumns); // 전체 행 개수
+				const spacingX = 150;
+				const spacingY = 156;
+				const numColumns = Math.floor(width / spacingX);
+				const numRows = Math.ceil(bottomGroup.children.length / numColumns);
 
-// bottomGroup 자체는 중심 정렬
-				bottomGroup.setPosition(Math.floor(width / 2), height - 200, 0); // 화면 중앙으로 이동
+				bottomGroup.setPosition(Math.floor(width / 2), height - 200, 0);
 
-// bottomGroup 내 자식들의 위치를 로컬 좌표로 배치
 				bottomGroup.children.forEach((item, index) => {
 					const t0 = item;
 
-					// 현재 행과 열 계산
-					const row = Math.floor(index / numColumns); // 현재 행 번호
-					const col = index % numColumns; // 현재 열 번호
+					const row = Math.floor(index / numColumns);
+					const col = index % numColumns;
 
-					// 현재 행의 실제 아이템 수 (마지막 행 처리용)
 					const itemsInRow = Math.min(bottomGroup.children.length - row * numColumns, numColumns);
 
-					// 행 중심 X 좌표 계산 (로컬 좌표)
-					const startX = -((itemsInRow - 1) * spacingX) / 2; // 로컬 좌표 기준 중심 정렬
+					const startX = -((itemsInRow - 1) * spacingX) / 2;
 
-					// Y 좌표 계산 (로컬 좌표)
-					const startY = ((numRows - 1) * spacingY) / 2 - 50; // 로컬 좌표 기준 행 중심 정렬
+					const startY = ((numRows - 1) * spacingY) / 2 - 50;
 
-					// 아이템 위치 설정 (로컬 좌표)
-					t0.x = Math.floor(startX + col * spacingX); // 열 중심 배치
-					t0.y = Math.floor(startY - row * spacingY); // 행 중심 배치
-					t0.z = 0; // 기본적으로 z는 0
+					t0.x = Math.floor(startX + col * spacingX);
+					t0.y = Math.floor(startY - row * spacingY);
+					t0.z = 0;
 				});
 			}
 		};
-		redGPUContext.onResize()
+		redGPUContext.onResize();
 
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		const render = (time) => {
@@ -102,12 +95,11 @@ RedGPU.init(
 
 function createResults(redGPUContext, scene, texture_blendTest_base, texture_blendTest_shape) {
 
-	const rootGroup = new RedGPU.Display.Group3D()
-	scene.addChild(rootGroup)
+	const rootGroup = new RedGPU.Display.Group3D();
+	scene.addChild(rootGroup);
 	Object.entries(RedGPU.Material.BLEND_MODE).map(([key, value]) => {
-		const subGroup = new RedGPU.Display.Group3D()
-		// subGroup.setScale(2,2,1)
-		rootGroup.addChild(subGroup)
+		const subGroup = new RedGPU.Display.Group3D();
+		rootGroup.addChild(subGroup);
 		const material_base_origin = new RedGPU.Material.BitmapMaterial(
 			redGPUContext,
 			texture_blendTest_base
@@ -125,17 +117,14 @@ function createResults(redGPUContext, scene, texture_blendTest_base, texture_ble
 		shape_origin.blendMode = value;
 		subGroup.addChild(shape_origin);
 
-		// Adding TextField2D titles below each texture
-
-		// Title for base_origin
 		const title = new RedGPU.Display.TextField2D(redGPUContext);
 		title.text = key;
-		title.fontSize = 12
-		title.setPosition(0, 78); // Positioned below base_origin sprite (300 + 200 + offset)
+		title.fontSize = 12;
+		title.setPosition(0, 78);
 		base_origin.addChild(title);
 
-	})
-	return rootGroup
+	});
+	return rootGroup;
 
 }
 
@@ -158,27 +147,23 @@ function createSourceView(redGPUContext, scene, texture_blendTest_base, texture_
 	shape_origin.primitiveState.cullMode = 'none';
 	scene.addChild(shape_origin);
 
-	// Adding TextField2D titles below each texture
-
-	// Title for base_origin
 	const baseTitle = new RedGPU.Display.TextField2D(redGPUContext);
 	baseTitle.text = 'Base Origin';
 	baseTitle.fontFamily = 'SUIT Variable';
-	baseTitle.fontSize = 12
-	baseTitle.setPosition(0, 78); // Positioned below base_origin sprite (300 + 200 + offset)
+	baseTitle.fontSize = 12;
+	baseTitle.setPosition(0, 78);
 	base_origin.addChild(baseTitle);
 
-	// Title for shape_origin
 	const shapeTitle = new RedGPU.Display.TextField2D(redGPUContext);
 	shapeTitle.text = 'Shape Origin';
-	shapeTitle.fontSize = 12
+	shapeTitle.fontSize = 12;
 	shapeTitle.fontFamily = 'SUIT Variable';
-	shapeTitle.setPosition(0, 78); // Positioned below shape_origin sprite
+	shapeTitle.setPosition(0, 78);
 	shape_origin.addChild(shapeTitle);
 	return {
 		base_origin,
 		shape_origin,
-	}
+	};
 }
 
 const renderTestPane = async (redGPUContext, base, shape) => {
@@ -190,24 +175,21 @@ const renderTestPane = async (redGPUContext, base, shape) => {
 	const tintSettings = {
 		blendMode: RedGPU.Material.BLEND_MODE[shape.blendMode],
 	};
-	console.log('shape', shape, shape.blendMode)
+	console.log('shape', shape, shape.blendMode);
 	const setBlendModeTest = () => {
-		const folder = pane.addFolder({title: '2D Object BlendMode'})
+		const folder = pane.addFolder({title: '2D Object BlendMode'});
 
-		// BLEND_MODE 드롭다운 추가
 		folder.addBinding(tintSettings, 'blendMode', {
 			label: 'Blend Mode',
 			options: RedGPU.Material.BLEND_MODE,
 		}).on('change', (ev) => {
-			// Find the key that corresponds to the selected value
 			const selectedKey = Object.keys(RedGPU.Material.BLEND_MODE).find(
 				(key) => RedGPU.Material.BLEND_MODE[key] === ev.value
 			);
-			console.log(`Selected Blend Mode: ${selectedKey}`); // Log the key name
+			console.log(`Selected Blend Mode: ${selectedKey}`);
 
-			// Apply the value to the material
-			shape.blendMode = ev.value; // BLEND_MODE 값 반영
+			shape.blendMode = ev.value;
 		});
-	}
-	setBlendModeTest()
+	};
+	setBlendModeTest();
 };

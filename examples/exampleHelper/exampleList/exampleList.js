@@ -1841,6 +1841,7 @@ const ExampleList = [
 			},
 			{
 				name: '2D BlendMode',
+				experimental: true,
 				list: [
 					{
 						name: 'BlendMode',

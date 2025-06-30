@@ -1,33 +1,24 @@
 import * as RedGPU from "../../../../dist/index.js";
 
-// 캔버스를 생성하고 문서에 추가
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
-// RedGPU 초기화
 RedGPU.init(
 	canvas,
 	(redGPUContext) => {
-		// 씬 및 뷰 생성
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View2D(redGPUContext, scene);
 		redGPUContext.addView(view);
 
-		// 상위 그룹(Group2D) 생성
 		const rootGroup = createRootGroup(redGPUContext, scene);
-
-		// 하위 구조 생성
 		const parentSprite2D = createParentSprite2D(redGPUContext, rootGroup);
 		const childSprite2D = createChildSprite2D(redGPUContext, parentSprite2D);
 
-		// 렌더러 생성 및 렌더링 시작
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		const render = () => {
-			// 매 프레임 실행될 로직 (필요시 추가)
 		};
 		renderer.start(redGPUContext, render);
 
-		// 테스트 패널 생성 (실시간 제어)
 		renderTestPane(redGPUContext, rootGroup, parentSprite2D, childSprite2D);
 	},
 	(failReason) => {
@@ -38,7 +29,6 @@ RedGPU.init(
 	}
 );
 
-// 상위 그룹 생성 함수
 const createRootGroup = (redGPUContext, scene) => {
 	const group = new RedGPU.Display.Group2D(redGPUContext);
 	group.x = redGPUContext.screenRectObject.width / 2;
@@ -48,7 +38,6 @@ const createRootGroup = (redGPUContext, scene) => {
 	return group;
 };
 
-// 부모 Sprite2D 생성 함수
 const createParentSprite2D = (redGPUContext, rootGroup) => {
 	const material = new RedGPU.Material.BitmapMaterial(
 		redGPUContext,
@@ -56,26 +45,24 @@ const createParentSprite2D = (redGPUContext, rootGroup) => {
 	);
 	const sprite2D = new RedGPU.Display.Sprite2D(redGPUContext, material);
 	sprite2D.setSize(100, 100);
-	sprite2D.x = 0; // RootGroup을 기준으로 위치 설정
-	sprite2D.y = 0; // RootGroup을 기준으로 위치 설정
+	sprite2D.x = 0;
+	sprite2D.y = 0;
 	rootGroup.addChild(sprite2D);
 
 	return sprite2D;
 };
 
-// 자식 Sprite2D 생성 함수
 const createChildSprite2D = (redGPUContext, parent) => {
 	const material = new RedGPU.Material.ColorMaterial(redGPUContext, '#ff0000');
 	const sprite2D = new RedGPU.Display.Sprite2D(redGPUContext, material);
 	sprite2D.setSize(100, 100);
-	sprite2D.x = 100; // ParentSprite2D를 기준으로 위치 설정
-	sprite2D.y = 100; // ParentSprite2D를 기준으로 위치 설정
+	sprite2D.x = 100;
+	sprite2D.y = 100;
 	parent.addChild(sprite2D);
 
 	return sprite2D;
 };
 
-// 테스트 패널 렌더링 함수
 const renderTestPane = async (redGPUContext, rootGroup, parent, child) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const pane = new Pane();
@@ -83,7 +70,6 @@ const renderTestPane = async (redGPUContext, rootGroup, parent, child) => {
 	const maxW = redGPUContext.screenRectObject.width;
 	const maxH = redGPUContext.screenRectObject.height;
 
-	// 상위 그룹 설정
 	const rootConfig = {
 		x: rootGroup.x,
 		y: rootGroup.y,
@@ -92,7 +78,6 @@ const renderTestPane = async (redGPUContext, rootGroup, parent, child) => {
 		scaleY: rootGroup.scaleY,
 	};
 
-	// 부모 Sprite2D 설정
 	const parentConfig = {
 		x: parent.x,
 		y: parent.y,
@@ -103,7 +88,6 @@ const renderTestPane = async (redGPUContext, rootGroup, parent, child) => {
 		scaleY: parent.scaleY,
 	};
 
-	// 자식 Sprite2D 설정
 	const childConfig = {
 		x: child.x,
 		y: child.y,
@@ -114,7 +98,6 @@ const renderTestPane = async (redGPUContext, rootGroup, parent, child) => {
 		scaleY: child.scaleY,
 	};
 
-	// 상위 그룹(Group2D) 설정 패널
 	const rootFolder = pane.addFolder({title: 'Root Group2D', expanded: true});
 	rootFolder.addBinding(rootConfig, 'x', {
 		min: 0,
@@ -142,7 +125,6 @@ const renderTestPane = async (redGPUContext, rootGroup, parent, child) => {
 		step: 0.1,
 	}).on('change', (evt) => (rootGroup.scaleY = evt.value));
 
-	// 부모 Sprite2D 설정 패널
 	const parentFolder = pane.addFolder({title: 'Parent Sprite2D', expanded: true});
 	parentFolder.addBinding(parentConfig, 'x', {
 		min: -100,
@@ -180,7 +162,6 @@ const renderTestPane = async (redGPUContext, rootGroup, parent, child) => {
 		step: 0.1,
 	}).on('change', (evt) => (parent.scaleY = evt.value));
 
-	// 자식 Sprite2D 설정 패널
 	const childFolder = pane.addFolder({title: 'Child Sprite2D', expanded: true});
 	childFolder.addBinding(childConfig, 'x', {
 		min: -100,
