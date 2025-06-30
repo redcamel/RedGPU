@@ -611,6 +611,15 @@ const ExampleList = [
 							en: ``
 						},
 					},
+					{
+						name: 'DirectionalLight Shadow - GLTF',
+						path: '3d/shadow/gltfDirectionalShadow',
+						thumb: '3d/shadow/gltfDirectionalShadow/thumb.png',
+						description: {
+							ko: ``,
+							en: ``
+						},
+					},
 				]
 			},
 			{

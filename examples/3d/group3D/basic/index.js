@@ -1,37 +1,28 @@
 import * as RedGPU from "../../../../dist/index.js";
 
-// 캔버스를 생성하고 문서에 추가
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
-// RedGPU 초기화
 RedGPU.init(
 	canvas,
 	(redGPUContext) => {
-		// 씬 및 뷰 생성
 		const controller = new RedGPU.Camera.ObitController(redGPUContext);
-		controller.distance = 10
-		controller.speedDistance = 0.1
+		controller.distance = 10;
+		controller.speedDistance = 0.1;
 
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		redGPUContext.addView(view);
 
-		// 상위 그룹(Group3D) 생성
 		const rootGroup = createRootGroup(redGPUContext, scene);
-
-		// 하위 객체 생성
 		const parentMesh = createParentMesh(redGPUContext, rootGroup);
 		const childMesh = createChildMesh(redGPUContext, parentMesh);
 
-		// 렌더러 생성 및 렌더링 시작
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		const render = () => {
-			// 매 프레임 실행될 로직 추가 가능 (애니메이션 등)
 		};
 		renderer.start(redGPUContext, render);
 
-		// 테스트 패널 생성 (실시간 제어)
 		renderTestPane(redGPUContext, rootGroup, parentMesh, childMesh);
 	},
 	(failReason) => {
@@ -42,7 +33,6 @@ RedGPU.init(
 	}
 );
 
-// 상위 그룹(Group3D) 생성 함수
 const createRootGroup = (redGPUContext, scene) => {
 	const group = new RedGPU.Display.Group3D(redGPUContext);
 	group.x = 0;
@@ -53,7 +43,6 @@ const createRootGroup = (redGPUContext, scene) => {
 	return group;
 };
 
-// 부모 Mesh 생성 함수
 const createParentMesh = (redGPUContext, rootGroup) => {
 	const material = new RedGPU.Material.BitmapMaterial(
 		redGPUContext,
@@ -61,33 +50,30 @@ const createParentMesh = (redGPUContext, rootGroup) => {
 	);
 	const geometry = new RedGPU.Primitive.Box(redGPUContext, 1, 1, 1);
 	const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
-	mesh.x = 0; // RootGroup을 기준으로 위치 설정
-	mesh.y = 0; // RootGroup을 기준으로 위치 설정
-	mesh.z = 0; // RootGroup을 기준으로 위치 설정
+	mesh.x = 0;
+	mesh.y = 0;
+	mesh.z = 0;
 	rootGroup.addChild(mesh);
 
 	return mesh;
 };
 
-// 자식 Mesh 생성 함수
 const createChildMesh = (redGPUContext, parent) => {
 	const material = new RedGPU.Material.ColorMaterial(redGPUContext, '#ff0000');
 	const geometry = new RedGPU.Primitive.Sphere(redGPUContext, 0.5);
 	const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
-	mesh.x = 1; // ParentMesh를 기준으로 위치 설정
-	mesh.y = 1; // ParentMesh를 기준으로 위치 설정
-	mesh.z = 0; // ParentMesh를 기준으로 위치 설정
+	mesh.x = 1;
+	mesh.y = 1;
+	mesh.z = 0;
 	parent.addChild(mesh);
 
 	return mesh;
 };
 
-// 테스트 패널 렌더링 함수
 const renderTestPane = async (redGPUContext, rootGroup, parent, child) => {
-	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const pane = new Pane();
 
-	// RootGroup 설정
 	const rootConfig = {
 		x: rootGroup.x,
 		y: rootGroup.y,
@@ -100,7 +86,6 @@ const renderTestPane = async (redGPUContext, rootGroup, parent, child) => {
 		scaleZ: rootGroup.scaleZ,
 	};
 
-	// 부모 Mesh 설정
 	const parentConfig = {
 		x: parent.x,
 		y: parent.y,
@@ -113,7 +98,6 @@ const renderTestPane = async (redGPUContext, rootGroup, parent, child) => {
 		rotationZ: parent.rotationZ,
 	};
 
-	// 자식 Mesh 설정
 	const childConfig = {
 		x: child.x,
 		y: child.y,
@@ -126,8 +110,7 @@ const renderTestPane = async (redGPUContext, rootGroup, parent, child) => {
 		rotationZ: child.rotationZ,
 	};
 
-	// RootGroup 설정 패널
-	const rootFolder = pane.addFolder({title: 'Root Group3D', expanded: true});
+	const rootFolder = pane.addFolder({ title: 'Root Group3D', expanded: true });
 	rootFolder.addBinding(rootConfig, 'x', {
 		min: -2,
 		max: 2,
@@ -174,8 +157,7 @@ const renderTestPane = async (redGPUContext, rootGroup, parent, child) => {
 		step: 0.1
 	}).on('change', (evt) => (rootGroup.scaleZ = evt.value));
 
-	// 부모 Mesh 설정 패널
-	const parentFolder = pane.addFolder({title: 'Parent Mesh', expanded: true});
+	const parentFolder = pane.addFolder({ title: 'Parent Mesh', expanded: true });
 	parentFolder.addBinding(parentConfig, 'x', {
 		min: -2,
 		max: 2,
@@ -222,8 +204,7 @@ const renderTestPane = async (redGPUContext, rootGroup, parent, child) => {
 		step: 0.1
 	}).on('change', (evt) => (parent.scaleZ = evt.value));
 
-	// 자식 Mesh 설정 패널
-	const childFolder = pane.addFolder({title: 'Child Mesh', expanded: true});
+	const childFolder = pane.addFolder({ title: 'Child Mesh', expanded: true });
 	childFolder.addBinding(childConfig, 'x', {
 		min: -2,
 		max: 2,
