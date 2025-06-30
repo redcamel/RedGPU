@@ -7,10 +7,8 @@ RedGPU.init(
 	canvas,
 	redGPUContext => {
 		// redGPUContext.useMSAA=false
-		const controllerTest = new RedGPU.Camera.ObitController(redGPUContext);
-		controllerTest.distance = 2
-		controllerTest.speedDistance = 0.1
-		controllerTest.camera.fieldOfView = 60
+		const controllerTest = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
+
 		// controllerTest.tilt = -10
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controllerTest);
@@ -23,6 +21,11 @@ RedGPU.init(
 
 		scene.lightManager.addDirectionalLight(directionalLightTest)
 
+		const tEffect = new RedGPU.PostEffect.HueSaturation(redGPUContext);
+		const tEffect2 =  new RedGPU.PostEffect.ZoomBlur(redGPUContext);
+		tEffect2.amount = 0
+		view.postEffectManager.addEffect(tEffect)
+		view.postEffectManager.addEffect(tEffect2)
 		redGPUContext.addView(view);
 
 		const ibl = new RedGPU.Resource.IBL(redGPUContext, './assets/hdr/4k/the_sky_is_on_fire_4k.hdr');
@@ -57,6 +60,11 @@ RedGPU.init(
 			if (model) {
 				model.rotationY += 0.5
 			}
+			controllerTest.x = Math.sin(time / 2000) * 3
+			controllerTest.y = Math.cos(time / 2500) * 2 + 1.5
+			controllerTest.z = Math.cos(time / 1500) * 2
+			controllerTest.lookAt(0,0,0)
+
 
 		}
 		renderer.start(redGPUContext, render)
