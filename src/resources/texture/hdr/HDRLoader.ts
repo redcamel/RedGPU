@@ -36,7 +36,7 @@ class HDRLoader {
 	}
 
 	/**
-	 * HDR 파일 로드 (전처리 포함)
+	 * HDR 파일 로드 (원본 데이터 보존, 분석만 수행)
 	 */
 	async loadHDRFile(src: string): Promise<HDRData> {
 		if (this.#enableDebugLogs) {
@@ -50,29 +50,27 @@ class HDRLoader {
 		const uint8Array = new Uint8Array(buffer);
 		// 🔍 기본 HDR 데이터 파싱
 		const rawHdrData = this.#parseHDRFile(uint8Array, src);
-		// 🎯 노출 및 전처리 자동 적용
-		return this.#preprocessHDRData(rawHdrData);
+		// 🎯 원본 데이터는 보존하고 분석만 수행
+		return this.#analyzeHDRData(rawHdrData);
 	}
 
 	/**
-	 * 🎯 HDR 데이터 전처리 (자동 노출 계산 및 적용)
+	 * 🔍 HDR 데이터 분석 (원본 데이터 보존)
 	 */
-	#preprocessHDRData(hdrData: HDRData): HDRData {
+	#analyzeHDRData(hdrData: HDRData): HDRData {
 		if (this.#enableDebugLogs) {
-			keepLog('HDR 전처리 시작...');
+			keepLog('HDR 데이터 분석 시작 (원본 데이터 보존)...');
 		}
 		// 🔍 휘도 분석
 		const luminanceStats = this.#analyzeLuminance(hdrData);
-		// 🎯 자동 노출 계산
+		// 🎯 자동 노출 계산 (적용하지 않고 권장값만 계산)
 		const recommendedExposure = this.#calculateOptimalExposure(luminanceStats);
 		if (this.#enableDebugLogs) {
-			keepLog(`자동 노출값 계산: ${recommendedExposure.toFixed(3)}`);
+			keepLog(`권장 노출값 계산: ${recommendedExposure.toFixed(3)} (원본 데이터는 보존)`);
 		}
-		// 🎞️ 노출 적용
-		const processedData = this.#applyExposureToData(hdrData.data, recommendedExposure);
+		// 🎯 원본 데이터는 그대로 유지, 분석 결과만 추가
 		return {
 			...hdrData,
-			data: processedData,
 			recommendedExposure,
 			luminanceStats
 		};
@@ -154,23 +152,9 @@ class HDRLoader {
 			// 어두운 쪽에 치우친 분포
 			exposure *= 1.2;
 		}
-		// 🔸 실용적 범위 제한
-		exposure = Math.max(0.05, Math.min(15.0, exposure));
+		// 🔸 실용적 범위 제한 - 최소값을 1.0으로 보장
+		exposure = Math.max(1.0, Math.min(15.0, exposure));
 		return exposure;
-	}
-
-	/**
-	 * 🎞️ 데이터에 노출 적용
-	 */
-	#applyExposureToData(data: Float32Array, exposure: number): Float32Array {
-		const result = new Float32Array(data.length);
-		for (let i = 0; i < data.length; i += 4) {
-			result[i] = data[i] * exposure;       // R
-			result[i + 1] = data[i + 1] * exposure; // G
-			result[i + 2] = data[i + 2] * exposure; // B
-			result[i + 3] = data[i + 3];          // A
-		}
-		return result;
 	}
 
 	/**
@@ -369,7 +353,7 @@ class HDRLoader {
 		keepLog(`데이터 길이: ${hdrData.data.length}`);
 		keepLog(`예상 픽셀 수: ${hdrData.width * hdrData.height * 4}`);
 		// 첫 몇 픽셀의 값 확인
-		keepLog('첫 4픽셀 값:');
+		keepLog('첫 4픽셀 값 (원본):');
 		for (let i = 0; i < Math.min(16, hdrData.data.length); i += 4) {
 			const r = hdrData.data[i];
 			const g = hdrData.data[i + 1];

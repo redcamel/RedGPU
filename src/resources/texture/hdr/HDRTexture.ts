@@ -36,7 +36,8 @@ class HDRTexture extends ManagedResourceBase {
 	#cubeMapSize: number = 1024
 	#hdrLoader: HDRLoader = new HDRLoader()
 	#format: GPUTextureFormat
-	#exposure: number = 1.0 // 자동 계산된 노출값
+	#exposure: number = 1.0 // 현재 사용자가 설정한 노출값
+	#recommendedExposure: number = 1.0 // 자동 계산된 권장 노출값 (별도 저장)
 	#luminanceAnalysis: LuminanceAnalysis
 	#onLoad: (textureInstance: HDRTexture) => void;
 	#onError: (error: Error) => void;
@@ -112,14 +113,34 @@ class HDRTexture extends ManagedResourceBase {
 		this.#createGPUTexture()
 	}
 
-	// 🎯 자동 계산된 노출값 (읽기 전용)
+	// 🎯 현재 노출값 (사용자가 설정 가능)
 	get exposure(): number {
 		return this.#exposure;
+	}
+
+	set exposure(value: number) {
+		if (this.#exposure !== value) {
+			this.#exposure = Math.max(0.01, Math.min(20.0, value)); // 실용적 범위 제한
+			if (this.#hdrData) {
+				// 노출값이 변경되면 GPU 텍스처를 다시 생성
+				this.#createGPUTexture();
+			}
+		}
+	}
+
+	// 🔍 자동 계산된 권장 노출값 (읽기 전용)
+	get recommendedExposure(): number {
+		return this.#recommendedExposure;
 	}
 
 	// 🔍 휘도 분석 결과 (읽기 전용)
 	get luminanceAnalysis(): LuminanceAnalysis {
 		return this.#luminanceAnalysis;
+	}
+
+	// 🎯 권장 노출값으로 리셋
+	resetToRecommendedExposure(): void {
+		this.exposure = this.#recommendedExposure;
 	}
 
 	destroy() {
@@ -136,12 +157,14 @@ class HDRTexture extends ManagedResourceBase {
 	async #loadHDRTexture(src: string) {
 		try {
 			console.log('HDR 텍스처 로딩 시작:', src);
-			// 🎯 HDRLoader에서 전처리된 데이터 받기
+			// 🎯 HDRLoader에서 원본 데이터와 분석 결과 받기
 			const hdrData = await this.#hdrLoader.loadHDRFile(src);
-			// 처리된 데이터 저장
+			// 원본 데이터 저장
 			this.#hdrData = hdrData;
-			// 노출 및 분석 결과 저장
-			this.#exposure = hdrData.recommendedExposure || 1.0;
+			// 권장 노출값 저장 (자동 계산된 값)
+			this.#recommendedExposure = hdrData.recommendedExposure || 1.0;
+			// 초기 노출값을 권장값으로 설정
+			this.#exposure = this.#recommendedExposure;
 			// 🆕 휘도 분석 결과 사용
 			if (hdrData.luminanceStats) {
 				this.#luminanceAnalysis = {
@@ -151,11 +174,11 @@ class HDRTexture extends ManagedResourceBase {
 					medianLuminance: hdrData.luminanceStats.median,
 					percentile95: hdrData.luminanceStats.max * 0.95, // 근사
 					percentile99: hdrData.luminanceStats.max * 0.99, // 근사
-					recommendedExposure: this.#exposure
+					recommendedExposure: this.#recommendedExposure
 				};
 				keepLog('휘도 분석 완료:', this.#luminanceAnalysis);
 			}
-			keepLog(`HDR 데이터 로드 완료: ${hdrData.width}x${hdrData.height}, 노출: ${this.#exposure.toFixed(3)}`);
+			keepLog(`HDR 데이터 로드 완료: ${hdrData.width}x${hdrData.height}, 권장 노출: ${this.#recommendedExposure.toFixed(3)}, 현재 노출: ${this.#exposure.toFixed(3)}`);
 			await this.#createGPUTexture();
 			this.#onLoad?.(this);
 		} catch (error) {
@@ -193,13 +216,13 @@ class HDRTexture extends ManagedResourceBase {
 		}
 		this.targetResourceManagedState.videoMemory -= this.#videoMemorySize
 		this.#videoMemorySize = 0
-		// 🔥 임시 Equirectangular 텍스처 생성
+		// 🔥 임시 Equirectangular 텍스처 생성 (현재 노출값 적용)
 		const {width: W, height: H} = this.#hdrData
 		const tempTextureDescriptor: GPUTextureDescriptor = {
 			size: [W, H],
 			format: this.#format,
 			usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
-			label: `${this.#src}_temp`
+			label: `${this.#src}_temp_exp${this.#exposure.toFixed(2)}`
 		};
 		const tempTexture = this.#hdrDataToGPUTexture(gpuDevice, this.#hdrData, tempTextureDescriptor)
 		// 🎯 큐브맵 생성
@@ -217,7 +240,7 @@ class HDRTexture extends ManagedResourceBase {
 		this.#mipLevelCount = cubeDescriptor.mipLevelCount || 1
 		this.#videoMemorySize = calculateTextureByteSize(cubeDescriptor)
 		this.targetResourceManagedState.videoMemory += this.#videoMemorySize
-		console.log(`큐브맵 텍스처 생성 완료: ${this.#cubeMapSize}x${this.#cubeMapSize}x6, 밉맵: ${this.#mipLevelCount}레벨`);
+		console.log(`큐브맵 텍스처 생성 완료: ${this.#cubeMapSize}x${this.#cubeMapSize}x6, 밉맵: ${this.#mipLevelCount}레벨, 노출: ${this.#exposure.toFixed(3)}`);
 	}
 
 	async #generateCubeMapFromEquirectangular(sourceTexture: GPUTexture) {
@@ -229,7 +252,7 @@ class HDRTexture extends ManagedResourceBase {
 			usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_DST,
 			dimension: '2d',
 			mipLevelCount: this.#useMipmap ? getMipLevelCount(this.#cubeMapSize, this.#cubeMapSize) : 1,
-			label: `${this.#src}_cubemap`
+			label: `${this.#src}_cubemap_exp${this.#exposure.toFixed(2)}`
 		};
 		// 🔧 #setGpuTexture 메서드를 사용하여 GPU 텍스처 설정
 		const newGPUTexture = gpuDevice.createTexture(cubeMapDescriptor);
@@ -280,7 +303,7 @@ class HDRTexture extends ManagedResourceBase {
 			default:
 				throw new Error(`지원되지 않는 텍스처 포맷: ${this.#format}`);
 		}
-		console.log(`텍스처 포맷: ${this.#format}`);
+		console.log(`텍스처 포맷: ${this.#format}, 노출값: ${this.#exposure.toFixed(3)}`);
 		console.log(`바이트/픽셀: ${bytesPerPixel}`);
 		console.log(`업로드 데이터 크기: ${uploadData.byteLength} bytes`);
 		console.log(`예상 크기: ${hdrData.width * hdrData.height * bytesPerPixel} bytes`);
@@ -296,21 +319,23 @@ class HDRTexture extends ManagedResourceBase {
 		return texture;
 	}
 
-	// 🎬 개선된 Float32 → Uint8 변환 (톤매핑 적용)
+	// 🎬 개선된 Float32 → Uint8 변환 (현재 노출값으로 톤매핑 적용)
 	#float32ToUint8WithToneMapping(float32Data: Float32Array): Uint8Array {
 		const uint8Data = new Uint8Array(float32Data.length);
-		console.log('Float32 → Uint8 변환 (ACES 톤매핑 적용):');
+		console.log(`Float32 → Uint8 변환 (ACES 톤매핑, 노출: ${this.#exposure.toFixed(3)}):`);
 		for (let i = 0; i < float32Data.length; i++) {
-			const floatVal = float32Data[i];
+			const originalVal = float32Data[i];
+			// 🎯 현재 노출값 적용
+			const exposedVal = originalVal * this.#exposure;
 			// 🎬 ACES 톤매핑 적용
-			const toneMappedVal = this.#acesToneMapping(floatVal);
+			const toneMappedVal = this.#acesToneMapping(exposedVal);
 			// 🔧 감마 보정 적용 (sRGB)
 			const gammaCorrectedVal = this.#linearToSRGB(toneMappedVal);
 			// 🎯 최종 8bit 변환
 			const uint8Val = Math.round(Math.min(1.0, Math.max(0.0, gammaCorrectedVal)) * 255);
 			uint8Data[i] = uint8Val;
 			if (i < 16) { // 첫 4픽셀만 로그
-				console.log(`  [${i}] ${floatVal.toFixed(3)} → ${toneMappedVal.toFixed(3)} → ${uint8Val}`);
+				console.log(`  [${i}] ${originalVal.toFixed(3)} × ${this.#exposure.toFixed(3)} = ${exposedVal.toFixed(3)} → ${toneMappedVal.toFixed(3)} → ${uint8Val}`);
 			}
 		}
 		return uint8Data;

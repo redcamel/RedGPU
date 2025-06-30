@@ -41,24 +41,49 @@ const createSkybox = (view, src) => {
 	const herTexture = new RedGPU.Resource.HDRTexture(view.redGPUContext, src);
 	view.skybox = new RedGPU.Display.SkyBox(view.redGPUContext, herTexture);
 };
-
 const renderTestPane = async (view) => {
 	const {Pane} = await import( "https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js" );
 	const pane = new Pane();
 	const {createFieldOfView} = await import( "../../../exampleHelper/createExample/panes/index.js" );
-	createFieldOfView(pane, view.camera)
+	createFieldOfView(pane, view.camera);
+
+	let currentTexture = null;
 
 	const settings = {
-		hdrImage: hdrImages[0].path
+		hdrImage: hdrImages[0].path,
+		exposure: 1.0
 	};
 
+	// HDR 이미지 선택
 	pane.addBinding(settings, 'hdrImage', {
 		options: hdrImages.reduce((acc, item) => {
 			acc[item.name] = item.path;
 			return acc;
 		}, {})
 	}).on("change", (ev) => {
-		createSkybox(view, ev.value);
+		const hdrTexture = new RedGPU.Resource.HDRTexture(view.redGPUContext, ev.value, (loadedTexture) => {
+			currentTexture = loadedTexture;
+			settings.exposure = loadedTexture.recommendedExposure || 1.0;
+			pane.refresh();
+		});
+		view.skybox = new RedGPU.Display.SkyBox(view.redGPUContext, hdrTexture);
 	});
-}
 
+	// Exposure 슬라이더
+	pane.addBinding(settings, 'exposure', {
+		min: 0.01,
+		max: 2.0,
+		step: 0.01
+	}).on("change", (ev) => {
+		if (currentTexture) {
+			currentTexture.exposure = ev.value;
+		}
+	});
+
+	const initialTexture = new RedGPU.Resource.HDRTexture(view.redGPUContext, hdrImages[0].path, (loadedTexture) => {
+		currentTexture = loadedTexture;
+		settings.exposure = loadedTexture.recommendedExposure || 1.0;
+		pane.refresh();
+	});
+	view.skybox = new RedGPU.Display.SkyBox(view.redGPUContext, initialTexture);
+}
