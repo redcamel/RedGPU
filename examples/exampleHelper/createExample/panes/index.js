@@ -29,6 +29,14 @@ const hdrImages = [
 	{name: 'field', path: 'assets/hdr/field.hdr'},
 	{name: 'neutral.37290948', path: 'assets/hdr/neutral.37290948.hdr'},
 	{name: 'pisa', path: 'assets/hdr/pisa.hdr'},
+	{name: '6 cube face asset', path:  [
+			"assets/skybox/px.jpg",
+			"assets/skybox/nx.jpg",
+			"assets/skybox/py.jpg",
+			"assets/skybox/ny.jpg",
+			"assets/skybox/pz.jpg",
+			"assets/skybox/nz.jpg",
+		]},
 ];
 export {
 	setViewListTest_Pane,

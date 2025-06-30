@@ -26,8 +26,12 @@ interface LuminanceAnalysis {
 	recommendedExposure: number;
 }
 
+/**
+ * HDRTexture 클래스
+ * 지원 형식: .hdr (Radiance HDR/RGBE) 형식만 지원
+ */
 class HDRTexture extends ManagedResourceBase {
-	#gpuTexture: GPUTexture // 큐브맵만 유지
+	#gpuTexture: GPUTexture
 	#src: string
 	#cacheKey: string
 	#mipLevelCount: number
@@ -37,17 +41,16 @@ class HDRTexture extends ManagedResourceBase {
 	#cubeMapSize: number = 1024
 	#hdrLoader: HDRLoader = new HDRLoader()
 	#format: GPUTextureFormat
-	#exposure: number = 1.0 // 현재 사용자가 설정한 노출값
-	#recommendedExposure: number = 1.0 // 자동 계산된 권장 노출값 (별도 저장)
+	#exposure: number = 1.0
+	#recommendedExposure: number = 1.0
 	#luminanceAnalysis: LuminanceAnalysis
 	#onLoad: (textureInstance: HDRTexture) => void;
 	#onError: (error: Error) => void;
-	// 🆕 큐브맵이 이미 생성되었는지 추적하는 플래그
 	#isCubeMapInitialized: boolean = false;
 
 	constructor(
 		redGPUContext: RedGPUContext,
-		src?: any,
+		src: string,
 		onLoad?: (textureInstance?: HDRTexture) => void,
 		onError?: (error: Error) => void,
 		cubeMapSize: number = 1024,
@@ -60,8 +63,9 @@ class HDRTexture extends ManagedResourceBase {
 		this.#format = 'rgba8unorm'
 		this.#cubeMapSize = cubeMapSize
 		if (src) {
-			this.#src = src?.src || src;
-			this.#cacheKey = src?.cacheKey || src || this.uuid;
+			this.#validateHDRFormat(src);
+			this.#src = src;
+			this.#cacheKey =  src || this.uuid;
 			const {table} = this.targetResourceManagedState
 			let target: ResourceStateHDRTexture
 			for (const k in table) {
@@ -78,6 +82,20 @@ class HDRTexture extends ManagedResourceBase {
 				this.src = src;
 				this.#registerResource()
 			}
+		}
+	}
+
+	/**
+	 * HDR 파일 형식 검증 (.hdr 형식만 허용)
+	 */
+	#validateHDRFormat(src: string): void {
+		if (!src || typeof src !== 'string') {
+			throw new Error('HDR 파일 경로가 필요합니다');
+		}
+
+		const lowerSrc = src.toLowerCase();
+		if (!lowerSrc.endsWith('.hdr')) {
+			throw new Error(`지원되지 않는 형식입니다. .hdr 형식만 지원됩니다. 입력된 파일: ${src}`);
 		}
 	}
 
@@ -102,9 +120,11 @@ class HDRTexture extends ManagedResourceBase {
 	}
 
 	set src(value: string | any) {
-		this.#src = value?.src || value;
-		this.#cacheKey = value?.cacheKey || value || this.uuid;
-		// 🔄 새로운 소스가 설정되면 큐브맵 초기화 플래그 리셋
+		const newSrc = value?.src || value;
+		this.#validateHDRFormat(newSrc);
+
+		this.#src = newSrc;
+		this.#cacheKey = value?.cacheKey || newSrc || this.uuid;
 		this.#isCubeMapInitialized = false;
 		if (this.#src) this.#loadHDRTexture(this.#src);
 	}
@@ -116,13 +136,11 @@ class HDRTexture extends ManagedResourceBase {
 	set useMipmap(value: boolean) {
 		if (this.#useMipmap !== value) {
 			this.#useMipmap = value;
-			// 🔄 밉맵 설정이 변경되면 큐브맵을 다시 생성해야 함
 			this.#isCubeMapInitialized = false;
 			this.#createGPUTexture();
 		}
 	}
 
-	// 🎯 현재 노출값 (사용자가 설정 가능)
 	get exposure(): number {
 		return this.#exposure;
 	}
@@ -131,7 +149,7 @@ class HDRTexture extends ManagedResourceBase {
 
 	set exposure(value: number) {
 		const newExposure = Math.max(0.01, Math.min(20.0, value));
-		if (this.#exposure === newExposure) return; // 동일한 값이면 무시
+		if (this.#exposure === newExposure) return;
 
 		this.#exposure = newExposure;
 
@@ -141,7 +159,6 @@ class HDRTexture extends ManagedResourceBase {
 
 		this.#exposureUpdateTimeout = setTimeout(() => {
 			if (this.#hdrData) {
-				// 🆕 큐브맵이 이미 생성되어 있으면 내용만 업데이트
 				if (this.#isCubeMapInitialized && this.#gpuTexture) {
 					this.#updateCubeMapContent();
 				} else {
@@ -152,25 +169,37 @@ class HDRTexture extends ManagedResourceBase {
 		}, 50);
 	}
 
-	// 🔍 자동 계산된 권장 노출값 (읽기 전용)
 	get recommendedExposure(): number {
 		return this.#recommendedExposure;
 	}
 
-	// 🔍 휘도 분석 결과 (읽기 전용)
 	get luminanceAnalysis(): LuminanceAnalysis {
 		return this.#luminanceAnalysis;
 	}
 
-	// 🎯 권장 노출값으로 리셋
 	resetToRecommendedExposure(): void {
 		this.exposure = this.#recommendedExposure;
+	}
+
+	/**
+	 * 지원되는 HDR 형식 확인
+	 */
+	static isSupportedFormat(src: string): boolean {
+		if (!src || typeof src !== 'string') return false;
+		return src.toLowerCase().endsWith('.hdr');
+	}
+
+	/**
+	 * 지원되는 형식 목록 반환
+	 */
+	static getSupportedFormats(): string[] {
+		return ['.hdr'];
 	}
 
 	destroy() {
 		const temp = this.#gpuTexture
 		this.#setGpuTexture(null);
-		this.#isCubeMapInitialized = false; // 🆕 플래그 리셋
+		this.#isCubeMapInitialized = false;
 		this.__fireListenerList(true)
 		this.#src = null
 		this.#cacheKey = null
@@ -181,24 +210,20 @@ class HDRTexture extends ManagedResourceBase {
 
 	async #loadHDRTexture(src: string) {
 		try {
-			console.log('HDR 텍스처 로딩 시작:', src);
-			// 🎯 HDRLoader에서 원본 데이터와 분석 결과 받기
+			console.log('HDR 텍스처 로딩 시작 (.hdr 형식):', src);
 			const hdrData = await this.#hdrLoader.loadHDRFile(src);
-			// 원본 데이터 저장
 			this.#hdrData = hdrData;
-			// 권장 노출값 저장 (자동 계산된 값)
 			this.#recommendedExposure = hdrData.recommendedExposure || 1.0;
-			// 초기 노출값을 권장값으로 설정
 			this.#exposure = this.#recommendedExposure;
-			// 🆕 휘도 분석 결과 사용
+
 			if (hdrData.luminanceStats) {
 				this.#luminanceAnalysis = {
 					averageLuminance: hdrData.luminanceStats.average,
 					maxLuminance: hdrData.luminanceStats.max,
 					minLuminance: hdrData.luminanceStats.min,
 					medianLuminance: hdrData.luminanceStats.median,
-					percentile95: hdrData.luminanceStats.max * 0.95, // 근사
-					percentile99: hdrData.luminanceStats.max * 0.99, // 근사
+					percentile95: hdrData.luminanceStats.max * 0.95,
+					percentile99: hdrData.luminanceStats.max * 0.99,
 					recommendedExposure: this.#recommendedExposure
 				};
 				keepLog('휘도 분석 완료:', this.#luminanceAnalysis);
@@ -207,7 +232,7 @@ class HDRTexture extends ManagedResourceBase {
 			await this.#createGPUTexture();
 			this.#onLoad?.(this);
 		} catch (error) {
-			console.error('HDR loading error:', error);
+			console.error('HDR loading error (.hdr 형식):', error);
 			this.#onError?.(error);
 		}
 	}
@@ -216,7 +241,7 @@ class HDRTexture extends ManagedResourceBase {
 		this.#gpuTexture = value;
 		if (!value) {
 			this.#hdrData = null
-			this.#isCubeMapInitialized = false; // 🆕 플래그 리셋
+			this.#isCubeMapInitialized = false;
 		}
 		this.__fireListenerList();
 	}
@@ -235,22 +260,18 @@ class HDRTexture extends ManagedResourceBase {
 	async #createGPUTexture() {
 		const {gpuDevice, resourceManager} = this.redGPUContext
 
-		// 🆕 이미 큐브맵이 생성되어 있으면 내용만 업데이트
 		if (this.#isCubeMapInitialized && this.#gpuTexture) {
 			await this.#updateCubeMapContent();
 			return;
 		}
 
-		/* GPU 작업 완료 대기 */
 		await gpuDevice.queue.onSubmittedWorkDone();
 
-		/* 기존 텍스처 정리 */
 		const oldTexture = this.#gpuTexture;
-		this.#gpuTexture = null; // 먼저 참조 해제
+		this.#gpuTexture = null;
 		this.targetResourceManagedState.videoMemory -= this.#videoMemorySize
 		this.#videoMemorySize = 0
 
-		/* 🆕 큐브맵 텍스처 먼저 생성 */
 		const cubeDescriptor: GPUTextureDescriptor = {
 			size: [this.#cubeMapSize, this.#cubeMapSize, 6],
 			format: this.#format,
@@ -260,31 +281,25 @@ class HDRTexture extends ManagedResourceBase {
 			label: `${this.#src}_cubemap_exp${this.#exposure.toFixed(2)}`
 		};
 
-		// 🔧 큐브맵 텍스처 생성 및 설정
 		const newGPUTexture = gpuDevice.createTexture(cubeDescriptor);
 		this.#setGpuTexture(newGPUTexture);
 
-		/* 메모리 크기 계산 */
 		this.#mipLevelCount = cubeDescriptor.mipLevelCount || 1
 		this.#videoMemorySize = calculateTextureByteSize(cubeDescriptor)
 		this.targetResourceManagedState.videoMemory += this.#videoMemorySize
 
-		/* 큐브맵 내용 생성 */
 		await this.#updateCubeMapContent();
 
-		/* 🆕 큐브맵 초기화 완료 플래그 설정 */
 		this.#isCubeMapInitialized = true;
 
-		/* 이전 텍스처 안전하게 파괴 */
 		if (oldTexture) {
-			await gpuDevice.queue.onSubmittedWorkDone(); // GPU 작업 완료 대기
+			await gpuDevice.queue.onSubmittedWorkDone();
 			oldTexture.destroy();
 		}
 
-		console.log(`큐브맵 텍스처 생성 완료: ${this.#cubeMapSize}x${this.#cubeMapSize}x6, 밉맵: ${this.#mipLevelCount}레벨, 노출: ${this.#exposure.toFixed(3)}`);
+		console.log(`HDR 큐브맵 텍스처 생성 완료: ${this.#cubeMapSize}x${this.#cubeMapSize}x6, 밉맵: ${this.#mipLevelCount}레벨, 노출: ${this.#exposure.toFixed(3)}`);
 	}
 
-	// 🆕 큐브맵 내용만 업데이트하는 새로운 메서드
 	async #updateCubeMapContent() {
 		if (!this.#gpuTexture || !this.#hdrData) {
 			console.warn('큐브맵 텍스처 또는 HDR 데이터가 없어 업데이트를 건너뜁니다.');
@@ -293,9 +308,8 @@ class HDRTexture extends ManagedResourceBase {
 
 		const {gpuDevice} = this.redGPUContext;
 
-		console.log(`큐브맵 내용 업데이트 시작 (노출: ${this.#exposure.toFixed(3)})`);
+		console.log(`HDR 큐브맵 내용 업데이트 시작 (노출: ${this.#exposure.toFixed(3)})`);
 
-		/* 임시 Equirectangular 텍스처 생성 (현재 노출값 적용) */
 		const {width: W, height: H} = this.#hdrData
 		const tempTextureDescriptor: GPUTextureDescriptor = {
 			size: [W, H],
@@ -306,13 +320,11 @@ class HDRTexture extends ManagedResourceBase {
 
 		const tempTexture = await this.#hdrDataToGPUTexture(gpuDevice, this.#hdrData, tempTextureDescriptor);
 
-		/* 기존 큐브맵에 새로운 내용 렌더링 */
 		await this.#generateCubeMapFromEquirectangular(tempTexture);
 
-		/* 임시 텍스처 즉시 삭제 */
 		tempTexture.destroy();
 
-		console.log(`큐브맵 내용 업데이트 완료 (노출: ${this.#exposure.toFixed(3)})`);
+		console.log(`HDR 큐브맵 내용 업데이트 완료 (노출: ${this.#exposure.toFixed(3)})`);
 	}
 
 	async #generateCubeMapFromEquirectangular(sourceTexture: GPUTexture) {
@@ -352,7 +364,7 @@ class HDRTexture extends ManagedResourceBase {
 		}
 
 		if (this.#useMipmap) {
-			console.log('큐브맵 밉맵 재생성 중...');
+			console.log('HDR 큐브맵 밉맵 재생성 중...');
 			mipmapGenerator.generateMipmap(this.#gpuTexture, {
 				size: [this.#cubeMapSize, this.#cubeMapSize, 6],
 				format: this.#format,
@@ -360,7 +372,7 @@ class HDRTexture extends ManagedResourceBase {
 				mipLevelCount: this.#mipLevelCount,
 				dimension: '2d'
 			});
-			console.log('큐브맵 밉맵 재생성 완료');
+			console.log('HDR 큐브맵 밉맵 재생성 완료');
 		}
 	}
 
@@ -371,7 +383,7 @@ class HDRTexture extends ManagedResourceBase {
 
 		switch (this.#format) {
 			case 'rgba8unorm':
-				bytesPerPixel = 4; // 8bit × 4 = 32bit = 4bytes
+				bytesPerPixel = 4;
 				const uint8Data = await this.#float32ToUint8WithToneMapping(hdrData.data);
 				uploadData = uint8Data.buffer as ArrayBuffer;
 				break;
@@ -379,7 +391,7 @@ class HDRTexture extends ManagedResourceBase {
 				throw new Error(`지원되지 않는 텍스처 포맷: ${this.#format}`);
 		}
 
-		console.log(`텍스처 포맷: ${this.#format}, 노출값: ${this.#exposure.toFixed(3)}`);
+		console.log(`HDR 텍스처 포맷: ${this.#format}, 노출값: ${this.#exposure.toFixed(3)}`);
 		console.log(`바이트/픽셀: ${bytesPerPixel}`);
 		console.log(`업로드 데이터 크기: ${uploadData.byteLength} bytes`);
 		console.log(`예상 크기: ${hdrData.width * hdrData.height * bytesPerPixel} bytes`);
@@ -405,7 +417,7 @@ class HDRTexture extends ManagedResourceBase {
 				exposure: this.#exposure,
 				width: this.#hdrData.width,
 				height: this.#hdrData.height,
-				workgroupSize: [8, 8] // 또는 동적으로 계산
+				workgroupSize: [8, 8]
 			}
 		);
 
@@ -414,17 +426,11 @@ class HDRTexture extends ManagedResourceBase {
 
 	#getCubeMapFaceMatrices(): Float32Array[] {
 		return [
-			// +X (Right)
 			new Float32Array([0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1]),
-			// -X (Left)
 			new Float32Array([0, 0, 1, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1]),
-			// +Y (Top)
 			new Float32Array([1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1]),
-			// -Y (Bottom)
 			new Float32Array([1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1]),
-			// +Z (Front)
 			new Float32Array([1, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1]),
-			// -Z (Back)
 			new Float32Array([-1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1])
 		];
 	}

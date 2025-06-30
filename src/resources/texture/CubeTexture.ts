@@ -58,8 +58,8 @@ class CubeTexture extends ManagedResourceBase {
 		}
 		// console.log('target',	this.#cacheKey ,this)
 		if (target) {
-			this.#onLoad?.(this) // TODO - 이거 다시확인해야함
-			return table[target.uuid].texture
+			const targetTexture = table[target.uuid].texture
+			this.#onLoad?.(targetTexture)
 		} else {
 			this.srcList = srcList;
 			this.#registerResource()
