@@ -4,8 +4,10 @@ const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
 const hdrImages = [
-	{name: 'the sky is on fire', path: '../../../assets/hdr/4k/the_sky_is_on_fire_4k.hdr'},
-	{name: 'furstenstein', path: '../../../assets/hdr/4k/furstenstein.hdr'},
+	{name: '2K - the sky is on fire', path: '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr'},
+	{name: '2K - furstenstein', path: '../../../assets/hdr/2k/furstenstein_2k.hdr'},
+	{name: '4K - the sky is on fire', path: '../../../assets/hdr/4k/the_sky_is_on_fire_4k.hdr'},
+	{name: '4K - furstenstein', path: '../../../assets/hdr/4k/furstenstein_4k.hdr'},
 	{name: 'Cannon_Exterior', path: '../../../assets/hdr/Cannon_Exterior.hdr'},
 	{name: 'field', path: '../../../assets/hdr/field.hdr'},
 	{name: 'neutral.37290948', path: '../../../assets/hdr/neutral.37290948.hdr'},
