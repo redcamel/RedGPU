@@ -30,6 +30,7 @@ interface Mesh {
 
 class Mesh extends MeshBase {
 	displacementTexture: BitmapTexture
+	castShadow: boolean = false
 	#instanceId: number
 	#name: string
 	#parent: Object3DContainer
@@ -273,6 +274,28 @@ class Mesh extends MeshBase {
 		return this.#rotationArray;
 	}
 
+	setCastShadowRecursively(castShadow: boolean = false) {
+		if (Object.hasOwn(this, 'castShadow')) {
+			this.castShadow = castShadow
+		}
+		if (this.children) {
+			this.children.forEach(child => {
+				child.setCastShadowRecursively(castShadow)
+			})
+		}
+	}
+
+	setReceiveShadowRecursively(receiveShadow: boolean = false) {
+		if (Object.hasOwn(this, 'receiveShadow')) {
+			this.receiveShadow = receiveShadow
+		}
+		if (this.children) {
+			this.children.forEach(child => {
+				child.setReceiveShadowRecursively(receiveShadow)
+			})
+		}
+	}
+
 	getCombinedOpacity(): number {
 		if (this['is2DMeshType']) {
 			const parent = this.parent as { getCombinedOpacity?: () => number } | undefined;
@@ -285,6 +308,7 @@ class Mesh extends MeshBase {
 		this.#events[eventName] = callback
 		this.#eventsNum = Object.keys(this.#events).length
 	}
+
 	lookAt(targetX: number | [number, number, number], targetY?: number, targetZ?: number): void {
 		var up = new Float32Array([0, 1, 0]);
 		var tPosition = [];
@@ -300,6 +324,7 @@ class Mesh extends MeshBase {
 		this.rotationY = -tRotation[1] * 180 / Math.PI;
 		this.rotationZ = -tRotation[2] * 180 / Math.PI;
 	}
+
 	setScale(x: number, y?: number, z?: number) {
 		y = y ?? x;
 		z = z ?? x;

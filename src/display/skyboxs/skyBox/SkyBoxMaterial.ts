@@ -3,6 +3,7 @@ import ABitmapBaseMaterial from "../../../material/core/ABitmapBaseMaterial";
 import DefineForFragment from "../../../resources/defineProperty/DefineForFragment";
 import Sampler from "../../../resources/sampler/Sampler";
 import CubeTexture from "../../../resources/texture/CubeTexture";
+import HDRTexture from "../../../resources/texture/hdr/HDRTexture";
 import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from "./shader/fragment.wgsl"
 
@@ -28,15 +29,19 @@ class SkyBoxMaterial extends ABitmapBaseMaterial {
 	 * @param {RedGPUContext} redGPUContext - The RedGPUContext object.
 	 * @param {CubeTexture} cubeTexture - The cube texture object.
 	 */
-	constructor(redGPUContext: RedGPUContext, cubeTexture: CubeTexture) {
+	constructor(redGPUContext: RedGPUContext, cubeTexture: CubeTexture | HDRTexture) {
 		super(
 			redGPUContext,
 			'SKYBOX_MATERIAL',
 			SHADER_INFO,
 			2
 		)
-		this.skyboxTexture = cubeTexture
-		this.skyboxTextureSampler = new Sampler(this.redGPUContext)
+		this.skyboxTexture = cubeTexture as CubeTexture
+		this.skyboxTextureSampler = new Sampler(this.redGPUContext, {
+			addressModeU: 'clamp-to-edge',
+			addressModeV: 'clamp-to-edge',
+			addressModeW: 'clamp-to-edge'
+		})
 		this.initGPURenderInfos()
 	}
 }

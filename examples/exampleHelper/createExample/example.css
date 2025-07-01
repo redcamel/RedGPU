@@ -148,7 +148,7 @@ html, body {
     left: 50%;
     transform: translate(-50%, -50%);
     line-height: 1.4;
-    font-size: 1em;
+    font-size: 0.9em;
     color: #a4a7cc;
     display: flex;
     align-items: center;

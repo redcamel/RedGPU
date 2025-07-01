@@ -112,20 +112,21 @@ struct Uniforms {
 @group(2) @binding(11) var KHR_specularColorTexture: texture_2d<f32>;
 
 // KHR_clearcoatTexture, KHR_clearcoatRoughnessTexture
-@group(2) @binding(12) var packedKHR_clearcoatTexture: texture_2d<f32>;
+//@group(2) @binding(12) var packedKHR_clearcoatTexture: texture_2d<f32>;
 
 // KHR_clearcoatNormalTexture
-@group(2) @binding(13) var KHR_clearcoatNormalTexture: texture_2d<f32>;
+@group(2) @binding(12) var KHR_clearcoatNormalTexture: texture_2d<f32>;
+@group(2) @binding(13) var packedKHR_clearcoatTexture_transmission: texture_2d<f32>;
 
-@group(2) @binding(14) var packedKHR_transmission: texture_2d<f32>;
+//@group(2) @binding(14) var packedKHR_transmission: texture_2d<f32>;
 
-@group(2) @binding(15) var packedKHR_diffuse_transmission: texture_2d<f32>;
+@group(2) @binding(14) var packedKHR_diffuse_transmission: texture_2d<f32>;
 
-@group(2) @binding(16) var packedKHR_sheen: texture_2d<f32>;
+@group(2) @binding(15) var packedKHR_sheen: texture_2d<f32>;
 
-@group(2) @binding(17) var KHR_anisotropyTexture: texture_2d<f32>;
+@group(2) @binding(16) var KHR_anisotropyTexture: texture_2d<f32>;
 
-@group(2) @binding(18) var packedKHR_iridescence: texture_2d<f32>;
+@group(2) @binding(17) var packedKHR_iridescence: texture_2d<f32>;
 
 // Input structure for model data
 struct InputData {
@@ -542,12 +543,12 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
         if(clearcoatParameter == 0.0){
         }else{
             if(u_useKHR_clearcoatTexture){
-                let clearcoatSample =  textureSample(packedKHR_clearcoatTexture, packedTextureSampler, KHR_clearcoatUV);
+                let clearcoatSample =  textureSample(packedKHR_clearcoatTexture_transmission, packedTextureSampler, KHR_clearcoatUV);
                 clearcoatParameter *= clearcoatSample.r;
             }
 
             if(u_useKHR_clearcoatRoughnessTexture){
-                let clearcoatRoughnesstSample =  textureSample(packedKHR_clearcoatTexture, packedTextureSampler, KHR_clearcoatRoughnessUV);
+                let clearcoatRoughnesstSample =  textureSample(packedKHR_clearcoatTexture_transmission, packedTextureSampler, KHR_clearcoatRoughnessUV);
                 clearcoatRoughnessParameter *= clearcoatRoughnesstSample.g;
             }
 
@@ -601,21 +602,21 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     if (u_useKHR_transmissionTexture) {
       // Transmission Texture 샘플링 적용 (균일 흐름 보장)
       let transmissionSample: vec4<f32> = textureSample(
-          packedKHR_transmission,
+          packedKHR_clearcoatTexture_transmission,
           packedTextureSampler,
           KHR_transmissionUV
       );
-      transmissionParameter *= transmissionSample.r; // 텍스처 채널 적용
+      transmissionParameter *= transmissionSample.b; // 텍스처 채널 적용
     }
     // ---------- KHR_materials_volume ----------
     var thicknessParameter: f32 = u_KHR_thicknessFactor;
     if (u_useKHR_thicknessTexture) {
         let thicknessSample: vec4<f32> = textureSample(
-            packedKHR_transmission,
+            packedKHR_clearcoatTexture_transmission,
             packedTextureSampler,
             KHR_transmissionUV
         );
-        thicknessParameter *= thicknessSample.g;
+        thicknessParameter *= thicknessSample.a;
     }
     // ---------- KHR_materials_diffuse_transmission ----------
     var diffuseTransmissionColor:vec3<f32> = u_KHR_diffuseTransmissionColorFactor;
@@ -745,7 +746,7 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     var totalDirectLighting = vec3<f32>(0.0);
     for (var i = 0u; i < u_directionalLightCount; i++) {
         totalDirectLighting += calcLight(
-            u_directionalLights[i].color, u_directionalLights[i].intensity,
+            u_directionalLights[i].color, u_directionalLights[i].intensity * visibility,
             N, V, -normalize(u_directionalLights[i].direction),
             VdotN,
             roughnessParameter, metallicParameter, albedo,
@@ -765,31 +766,71 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
         let clusterIndex = getClusterLightClusterIndex(inputData.position);
         let lightOffset  = clusterLightGroup.lights[clusterIndex].offset;
         let lightCount:u32   = clusterLightGroup.lights[clusterIndex].count;
+
         for (var lightIndex = 0u; lightIndex < lightCount; lightIndex = lightIndex + 1u) {
             let i = clusterLightGroup.indices[lightOffset + lightIndex];
             let targetLight = clusterLightList.lights[i];
             let u_clusterLightPosition = targetLight.position;
-            let u_clusterLightRadius = targetLight.radius ;
+            let u_clusterLightRadius = targetLight.radius;
+            let u_isSpotLight = targetLight.isSpotLight;
+
             let lightDistance = length(u_clusterLightPosition - input_vertexPosition);
+
+
+            if (lightDistance > u_clusterLightRadius) {
+                continue;
+            }
+
             let lightDir = normalize(u_clusterLightPosition - input_vertexPosition);
             let attenuation = clamp(1.0 - (lightDistance * lightDistance) / (u_clusterLightRadius * u_clusterLightRadius), 0.0, 1.0);
+//            let attenuation = clamp(0.0, 1.0, 1.0 - (lightDistance * lightDistance) / (u_clusterLightRadius * u_clusterLightRadius));
 
-            if(lightDistance<=u_clusterLightRadius){
-               totalDirectLighting += calcLight(
-                  targetLight.color, targetLight.intensity * attenuation,
-                  N, V, lightDir,
-                  VdotN,
-                  roughnessParameter, metallicParameter, albedo,
-                  F0, ior,
-                  prePathBackground,
-                  specularColor, specularParameter,
-                  u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor,
-                  transmissionParameter,
-                  sheenColor, sheenRoughnessParameter,
-                  anisotropy, anisotropicT, anisotropicB,
-                  clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal
-              );
+            var finalAttenuation = attenuation;
+
+            // 스폿라이트 처리
+            if (u_isSpotLight > 0.0) {
+                let u_clusterLightDirection = normalize(vec3<f32>(
+                    targetLight.directionX,
+                    targetLight.directionY,
+                    targetLight.directionZ
+                ));
+                let u_clusterLightInnerAngle = targetLight.innerCutoff;
+                let u_clusterLightOuterCutoff = targetLight.outerCutoff;
+
+                // 라이트에서 버텍스로의 방향
+                let lightToVertex = normalize(-lightDir);
+                let cosTheta = dot(lightToVertex, u_clusterLightDirection);
+
+                let cosOuter = cos(radians(u_clusterLightOuterCutoff));
+                let cosInner = cos(radians(u_clusterLightInnerAngle));
+
+                // 스폿라이트 외곽 범위를 벗어나면 스킵
+                if (cosTheta < cosOuter) {
+                    continue;
+                }
+
+                // 스폿라이트 강도 계산 (부드러운 페이드)
+                let epsilon = cosInner - cosOuter;
+                let spotIntensity = clamp((cosTheta - cosOuter) / epsilon, 0.0, 1.0);
+
+                finalAttenuation *= spotIntensity;
             }
+
+            // calcLight 함수 호출
+            totalDirectLighting += calcLight(
+                targetLight.color, targetLight.intensity * finalAttenuation,
+                N, V, lightDir,
+                VdotN,
+                roughnessParameter, metallicParameter, albedo,
+                F0, ior,
+                prePathBackground,
+                specularColor, specularParameter,
+                u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor,
+                transmissionParameter,
+                sheenColor, sheenRoughnessParameter,
+                anisotropy, anisotropicT, anisotropicB,
+                clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal
+            );
         }
     }
 
@@ -833,7 +874,7 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
         let a2 = roughnessParameter * roughnessParameter;
         let G_smith = NdotV / (NdotV * (1.0 - a2) + a2);
         // ---------- ibl (roughness에 따른 mipmap 레벨 사용) ----------
-        let iblMipmapCount:f32 = f32(textureNumLevels(iblTexture) - 1);
+        let iblMipmapCount:f32 = f32(textureNumLevels(ibl_environmentTexture) - 1);
 //        let mipLevel = roughnessParameter * iblMipmapCount;
 //        let mipLevel = roughnessParameter * sqrt(roughnessParameter) * iblMipmapCount;
 //        let mipLevel = max(0.0, (roughnessParameter * roughnessParameter) * iblMipmapCount);
@@ -843,17 +884,19 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
 
 
         // ---------- ibl 기본 컬러 ----------
-        var reflectedColor = textureSampleLevel(iblTexture, iblTextureSampler, R, mipLevel).rgb;
+        var reflectedColor = textureSampleLevel(ibl_environmentTexture, iblTextureSampler, R, mipLevel).rgb;
 
         // ---------- ibl Diffuse  ----------
         let effectiveTransmission = transmissionParameter * (1.0 - metallicParameter);
-        var envIBL_DIFFUSE:vec3<f32> = albedo  * (vec3<f32>(1.0) - F_IBL_dielectric)  ;
+//        var envIBL_DIFFUSE:vec3<f32> = albedo  * (vec3<f32>(1.0) - F_IBL_dielectric)  ;
 
+      let iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, iblTextureSampler, N,0).rgb;
+      var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor * (vec3<f32>(1.0) - F_IBL_dielectric);
 
         // ---------- ibl Diffuse Transmission ----------
         if (u_useKHR_materials_diffuse_transmission && diffuseTransmissionParameter > 0.0) {
             // 후면 산란을 위한 샘플링 방향 (back side)
-            var backScatteringColor = textureSampleLevel(iblTexture, iblTextureSampler, -N, mipLevel).rgb;
+            var backScatteringColor = textureSampleLevel(ibl_environmentTexture, iblTextureSampler, -N, mipLevel).rgb;
             let transmittedIBL = backScatteringColor * diffuseTransmissionColor * (vec3<f32>(1.0) - F_IBL);
             // 반사와 투과 효과 혼합
             envIBL_DIFFUSE = mix(envIBL_DIFFUSE, transmittedIBL, diffuseTransmissionParameter);
@@ -896,7 +939,7 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
             let anisotropyFactor = max(0.0, min(1.0, anisotropy));
             let finalRoughness = mix( roughnessParameter, weightedRoughness, anisotropyFactor * directionFactor );
             let anistropyMipmap = pow(finalRoughness, 0.4) * iblMipmapCount;
-            reflectedColor = textureSampleLevel( iblTexture, iblTextureSampler, anisotropicR, anistropyMipmap ).rgb;
+            reflectedColor = textureSampleLevel( ibl_environmentTexture, iblTextureSampler, anisotropicR, anistropyMipmap ).rgb;
 
             let a2 = finalRoughness * finalRoughness;
             let G_smith = NdotV / (NdotV * (1.0 - a2) + a2);
@@ -970,7 +1013,7 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
 //            let sheenSamplingDir = normalize(mix(R, N, sheenRoughnessParameter * 0.5));
 //            // 밉맵 레벨 계산
 //            let sheenMipLevel = sheenRoughnessParameter * iblMipmapCount;
-//            let sheenRadiance = textureSampleLevel(iblTexture, iblTextureSampler, sheenSamplingDir, sheenMipLevel).rgb;
+//            let sheenRadiance = textureSampleLevel(ibl_environmentTexture, iblTextureSampler, sheenSamplingDir, sheenMipLevel).rgb;
 //
 //            let sheenFresnel = pow(1.0 - max(VdotN, 0.0), 4.0);  // 간단한 프레넬 근사
 //            let a = 1.0 - NdotV;
@@ -988,7 +1031,7 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
 
             var sheenMipLevel = log2(sheenRoughnessParameter) * 1.2 + iblMipmapCount - 1.0;
             sheenMipLevel = clamp(sheenMipLevel, 0.0, iblMipmapCount - 1.0);
-            let sheenRadiance = textureSampleLevel(iblTexture, iblTextureSampler, sheenSamplingDir, sheenMipLevel).rgb;
+            let sheenRadiance = textureSampleLevel(ibl_environmentTexture, iblTextureSampler, sheenSamplingDir, sheenMipLevel).rgb;
 
             // 4. 물리적으로 정확한 Schlick 프레넬 계산
             // Schlick 근사는 항상 5.0의 지수를 사용 (물리적으로 정확)
@@ -1019,7 +1062,7 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
              let clearcoatR = reflect(-V, clearcoatNormal);
              let clearcoatNdotV = max(dot(clearcoatNormal, V), 0.04);
              let clearcoatMipLevel = pow(clearcoatRoughnessParameter,0.4) * iblMipmapCount;
-             let clearcoatPrefilteredColor = textureSampleLevel(iblTexture, iblTextureSampler, clearcoatR, clearcoatMipLevel).rgb;
+             let clearcoatPrefilteredColor = textureSampleLevel(ibl_environmentTexture, iblTextureSampler, clearcoatR, clearcoatMipLevel).rgb;
              let clearcoatF0 = F0;
              let clearcoatF = clearcoatF0 + (vec3<f32>(1.0) - clearcoatF0) * pow(1.0 - clearcoatNdotV, 5.0);
              let clearcoatK = (clearcoatRoughnessParameter + 1.0) * (clearcoatRoughnessParameter + 1.0) / 8.0;
@@ -1230,8 +1273,6 @@ fn calcLight(
         let CLEARCOAT_BRDF = specular_brdf( F0, clearcoatRoughnessParameter, clearcoatNdotH, clearcoatNdotV, clearcoatNdotL, LdotH);
         directLighting = fresnel_coat(clearcoatNdotV, ior, clearcoatParameter, directLighting, CLEARCOAT_BRDF);
     }
-    directLighting *= dLight;
-
     var lightDirection: f32;
     if (u_useKHR_materials_diffuse_transmission && diffuseTransmissionParameter > 0.0) {
         lightDirection = mix(abs(dot(N, L)), 1.0, diffuseTransmissionParameter);
@@ -1240,7 +1281,7 @@ fn calcLight(
         lightDirection = NdotL;
     }
 
-    let lightContribution = directLighting * lightDirection;
+    let lightContribution = directLighting * dLight * lightDirection;
     //            + BACK_DIFFUSE_BRDF * backNdotL * backLightColor * backLightIntensity;
     return lightContribution;
 }

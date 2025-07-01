@@ -1,4 +1,6 @@
 import RedGPUContext from "../../context/RedGPUContext";
+import {keepLog} from "../../utils";
+import createUUID from "../../utils/createUUID";
 import calculateTextureByteSize from "../../utils/math/calculateTextureByteSize";
 import getMipLevelCount from "../../utils/math/getMipLevelCount";
 import ManagedResourceBase from "../ManagedResourceBase";
@@ -56,8 +58,8 @@ class CubeTexture extends ManagedResourceBase {
 		}
 		// console.log('target',	this.#cacheKey ,this)
 		if (target) {
-			this.#onLoad?.(this)
-			return table[target.uuid].texture
+			const targetTexture = table[target.uuid].texture
+			this.#onLoad?.(targetTexture)
 		} else {
 			this.srcList = srcList;
 			this.#registerResource()
@@ -93,8 +95,8 @@ class CubeTexture extends ManagedResourceBase {
 
 	set srcList(value: string[]) {
 		this.#srcList = value
-		this.#cacheKey = value?.toString();
-		if (this.#srcList) this.#loadBitmapTexture(this.#srcList);
+		this.#cacheKey = value?.toString() || createUUID();
+		if (this.#srcList?.length) this.#loadBitmapTexture(this.#srcList);
 	}
 
 	get useMipmap(): boolean {
@@ -115,6 +117,36 @@ class CubeTexture extends ManagedResourceBase {
 		this.#cacheKey = null
 		this.#unregisterResource()
 		if (temp) temp.destroy()
+	}
+
+	setGPUTextureDirectly(
+		gpuTexture: GPUTexture,
+		cacheKey?: string,
+		useMipmap: boolean = true
+	): void {
+		// 기존 텍스처 정리
+		if (this.#gpuTexture) {
+			this.#gpuTexture.destroy();
+			this.targetResourceManagedState.videoMemory -= this.#videoMemorySize;
+		}
+		keepLog('gpuTexture', gpuTexture)
+		// 새 텍스처 설정
+		this.#gpuTexture = gpuTexture;
+		this.#useMipmap = useMipmap
+		this.#mipLevelCount = gpuTexture.mipLevelCount;
+		// this.#mipLevelCount = getMipLevelCount(gpuTexture.width, gpuTexture.height);
+		this.#cacheKey = cacheKey || `direct_${this.uuid}`;
+		// 메모리 사용량 계산
+		const textureDescriptor: GPUTextureDescriptor = {
+			size: [gpuTexture.width, gpuTexture.height, gpuTexture.depthOrArrayLayers],
+			format: gpuTexture.format as GPUTextureFormat,
+			usage: gpuTexture.usage,
+			mipLevelCount: this.#mipLevelCount
+		};
+		this.#videoMemorySize = calculateTextureByteSize(textureDescriptor);
+		this.targetResourceManagedState.videoMemory += this.#videoMemorySize;
+		// 리스너들에게 업데이트 알림
+		this.__fireListenerList();
 	}
 
 	#setGpuTexture(value: GPUTexture) {

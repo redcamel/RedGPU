@@ -10,7 +10,6 @@ RedGPU.init(
 	(redGPUContext) => {
 		const controller = new RedGPU.Camera.ObitController(redGPUContext);
 
-
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		redGPUContext.addView(view);
@@ -96,6 +95,6 @@ async function createTest(context, scene, material) {
 	initializeInstances();
 
 	const pane = new Pane();
-	pane.addBinding(mesh, 'instanceCount', { min: 100, max: 100000, step: 1 })
+	pane.addBinding(mesh, 'instanceCount', {min: 100, max: 100000, step: 1})
 		.on('change', initializeInstances);
 }

@@ -14,6 +14,7 @@ import ResourceManager from "../../resources/resourceManager/ResourceManager";
 import Sampler from "../../resources/sampler/Sampler";
 import SystemCode from "../../resources/systemCode/SystemCode";
 import CubeTexture from "../../resources/texture/CubeTexture";
+import IBL from "../../resources/texture/ibl/IBL";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
 import InstanceIdGenerator from "../../utils/InstanceIdGenerator";
@@ -21,7 +22,6 @@ import Axis from "../helper/asix/Axis";
 import Grid from "../helper/grid/Grid";
 import Scene from "../scene/Scene";
 import SkyBox from "../skyboxs/skyBox/SkyBox";
-import SkyBoxMaterial from "../skyboxs/skyBox/SkyBoxMaterial";
 import ViewRenderTextureManager from "./ViewRenderTextureManager";
 import ViewTransform from "./ViewTransform";
 
@@ -43,7 +43,7 @@ class View3D extends ViewTransform {
 	#useFrustumCulling: boolean = true
 	#useDistanceCulling: boolean = false
 	#distanceCulling: number = 50
-	#iblTexture: CubeTexture
+	#ibl: IBL
 	//
 	readonly #debugViewRenderState: RenderViewStateData
 	readonly #postEffectManager: PostEffectManager
@@ -102,12 +102,12 @@ class View3D extends ViewTransform {
 		return this.#passLightClustersBound;
 	}
 
-	get iblTexture(): CubeTexture {
-		return this.#iblTexture;
+	get ibl(): IBL {
+		return this.#ibl;
 	}
 
-	set iblTexture(value: CubeTexture) {
-		this.#iblTexture = value;
+	set ibl(value: IBL) {
+		this.#ibl = value;
 	}
 
 	get pickingManager(): PickingManager {
@@ -209,30 +209,34 @@ class View3D extends ViewTransform {
 		this.#scene = value;
 	}
 
-	update(view: View3D, shadowRender: boolean = false, calcPointLightCluster: boolean = false, renderPath1ResultTexture?: GPUTexture) {
+	update(view: View3D, shadowRender: boolean = false, calcPointLightCluster: boolean = false, renderPath1ResultTextureView?: GPUTextureView) {
 		//TODO 바인드그룹이 계속 생겨나는걸.... 막아야겠군
 		const {scene} = view
 		const {shadowManager} = scene
 		const {directionalShadowManager} = shadowManager
-		const iblTexture = view.iblTexture?.gpuTexture || (view.skybox?._material instanceof SkyBoxMaterial ? view.skybox._material.skyboxTexture?.gpuTexture : undefined)
+		const ibl = view.ibl
+		const ibl_environmentTexture = ibl?.environmentTexture?.gpuTexture
+		const ibl_irradianceTexture = ibl?.irradianceTexture?.gpuTexture
 		let shadowDepthTextureView = shadowRender ? directionalShadowManager.shadowDepthTextureViewEmpty : directionalShadowManager.shadowDepthTextureView
 		const index = view.redGPUContext.viewList.indexOf(view)
-		const key = `${index}_${shadowRender ? 'shadowRender' : 'basic'}_2path${!!renderPath1ResultTexture}`
+		const key = `${index}_${shadowRender ? 'shadowRender' : 'basic'}_2path${!!renderPath1ResultTextureView}`
 		if (index > -1) {
 			let needResetBindGroup = true
 			let prevInfo = this.#prevInfoList[key]
 			if (prevInfo) {
 				needResetBindGroup = (
-					prevInfo.iblTexture !== iblTexture ||
-					prevInfo.renderPath1ResultTexture !== renderPath1ResultTexture ||
+					prevInfo.ibl !== ibl ||
+					prevInfo.ibl_environmentTexture !== ibl_environmentTexture ||
+					prevInfo.ibl_irradianceTexture !== ibl_irradianceTexture ||
+					prevInfo.renderPath1ResultTextureView !== renderPath1ResultTextureView ||
 					prevInfo.shadowDepthTextureView !== shadowDepthTextureView
 					|| !this.#passLightClusters
 				)
 			}
-			if (needResetBindGroup) this.#createVertexUniformBindGroup(key, shadowDepthTextureView, iblTexture, renderPath1ResultTexture)
+			if (needResetBindGroup) this.#createVertexUniformBindGroup(key, shadowDepthTextureView, view.ibl, renderPath1ResultTextureView)
 			else this.#systemUniform_Vertex_UniformBindGroup = this.#prevInfoList[key].vertexUniformBindGroup;
 			[
-				{key: 'useIblTexture', value: [iblTexture ? 1 : 0]},
+				{key: 'useIblTexture', value: [ibl_environmentTexture ? 1 : 0]},
 				{key: 'time', value: [view.debugViewRenderState.timestamp || 0]},
 				{key: 'isView3D', value: [this.constructor === View3D ? 1 : 0]},
 			].forEach(({key, value}) => {
@@ -243,8 +247,10 @@ class View3D extends ViewTransform {
 				);
 			});
 			this.#prevInfoList[key] = {
-				iblTexture,
-				renderPath1ResultTexture,
+				ibl,
+				ibl_environmentTexture,
+				ibl_irradianceTexture,
+				renderPath1ResultTextureView,
 				shadowDepthTextureView,
 				vertexUniformBindGroup: this.#systemUniform_Vertex_UniformBindGroup
 			}
@@ -259,8 +265,10 @@ class View3D extends ViewTransform {
 			(0 < mouseY && mouseY < pixelRectObject.height);
 	}
 
-	#createVertexUniformBindGroup(key: string, shadowDepthTextureView: GPUTextureView, iblTexture: GPUTexture, renderPath1ResultTexture: GPUTexture) {
+	#createVertexUniformBindGroup(key: string, shadowDepthTextureView: GPUTextureView, ibl: IBL, renderPath1ResultTextureView: GPUTextureView) {
 		this.#updateClusters(true)
+		const ibl_environmentTexture = ibl?.environmentTexture
+		const ibl_irradianceTexture = ibl?.irradianceTexture
 		const systemUniform_Vertex_BindGroupDescriptor: GPUBindGroupDescriptor = {
 			layout: this.redGPUContext.resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System),
 			label: `SYSTEM_UNIFORM_bindGroup_${key}`,
@@ -286,16 +294,6 @@ class View3D extends ViewTransform {
 					resource: this.#basicSampler
 				},
 				{
-					binding: 4,
-					resource:
-						this.iblTexture?.gpuTexture?.createView(this.iblTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor)
-						|| this.#skybox?._material?.skyboxTexture?.gpuTexture?.createView(
-							this.#skybox._material.skyboxTexture.viewDescriptor || CubeTexture.defaultViewDescriptor
-						)
-						||
-						this.redGPUContext.resourceManager.emptyCubeTextureView
-				},
-				{
 					binding: 5,
 					resource: {
 						buffer: this.#clusterLightsBuffer,
@@ -317,12 +315,24 @@ class View3D extends ViewTransform {
 				},
 				{
 					binding: 8,
-					resource: this.viewRenderTextureManager.renderPath1ResultTextureView
+					resource: renderPath1ResultTextureView
 						|| this.redGPUContext.resourceManager.emptyBitmapTextureView
 				},
 				{
 					binding: 9,
 					resource: this.#basicSampler
+				},
+				{
+					binding: 10,
+					resource:
+						ibl_environmentTexture?.gpuTexture?.createView(ibl_environmentTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor)
+						|| this.redGPUContext.resourceManager.emptyCubeTextureView
+				},
+				{
+					binding: 11,
+					resource:
+						ibl_irradianceTexture?.gpuTexture?.createView(ibl_irradianceTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor)
+						|| this.redGPUContext.resourceManager.emptyCubeTextureView
 				},
 			]
 		}

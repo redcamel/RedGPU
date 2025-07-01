@@ -1,6 +1,13 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import createUUID from "../../utils/createUUID";
 
+type ComponentMapping = {
+	r?: 'r' | 'g' | 'b' | 'a';  // r 채널에서 사용할 컴포넌트
+	g?: 'r' | 'g' | 'b' | 'a';  // g 채널에서 사용할 컴포넌트
+	b?: 'r' | 'g' | 'b' | 'a';  // b 채널에서 사용할 컴포넌트
+	a?: 'r' | 'g' | 'b' | 'a';  // a 채널에서 사용할 컴포넌트
+};
+
 class PackedTexture {
 	#redGPUContext: RedGPUContext;
 	#pipeline: GPURenderPipeline;
@@ -23,8 +30,16 @@ class PackedTexture {
 		textures: { r?: GPUTexture; g?: GPUTexture; b?: GPUTexture; a?: GPUTexture },
 		width: number,
 		height: number,
-		label?: string
+		label?: string,
+		componentMapping?: ComponentMapping
 	) {
+		const mapping = {
+			r: 'r',
+			g: 'g',
+			b: 'b',
+			a: 'a',
+			...componentMapping
+		}
 		const textureDescriptor: GPUTextureDescriptor = {
 			size: [width, height, 1],
 			format: 'rgba8unorm',
@@ -36,6 +51,18 @@ class PackedTexture {
 			this.#gpuTexture = null
 		}
 		const packedTexture = this.#gpuDevice.createTexture(textureDescriptor);
+		// 컴포넌트 매핑 정보를 uniform buffer로 전달
+		const mappingBuffer = this.#gpuDevice.createBuffer({
+			size: 16, // 4개 컴포넌트 * 4바이트
+			usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+		});
+		const mappingData = new Uint32Array([
+			['r', 'g', 'b', 'a'].indexOf(mapping.r),
+			['r', 'g', 'b', 'a'].indexOf(mapping.g),
+			['r', 'g', 'b', 'a'].indexOf(mapping.b),
+			['r', 'g', 'b', 'a'].indexOf(mapping.a),
+		]);
+		this.#gpuDevice.queue.writeBuffer(mappingBuffer, 0, mappingData);
 		const bindGroupEntries = [
 			{
 				binding: 0,
@@ -54,6 +81,10 @@ class PackedTexture {
 				resource: textures.a ? textures.a.createView({label: textures.a.label}) : this.#redGPUContext.resourceManager.emptyBitmapTextureView
 			},
 			{binding: 4, resource: this.#sampler},
+			{
+				binding: 5,
+				resource: {buffer: mappingBuffer}
+			}
 		];
 		const bindGroup = this.#gpuDevice.createBindGroup({
 			layout: this.#pipeline.getBindGroupLayout(0),
@@ -77,6 +108,8 @@ class PackedTexture {
 		this.#gpuDevice.queue.submit([commandEncoder.finish()]);
 		console.log('packedTexture2', packedTexture)
 		this.#gpuTexture = packedTexture;
+		// 임시 버퍼 정리
+		mappingBuffer.destroy();
 	}
 
 	#createPipeline(): GPURenderPipeline {
@@ -112,26 +145,43 @@ class PackedTexture {
 		return output;
 	}
 
+	struct ComponentMapping {
+		r_component: u32,
+		g_component: u32,
+		b_component: u32,
+		a_component: u32,
+	};
 
 	@group(0) @binding(0) var textureR: texture_2d<f32>;
 	@group(0) @binding(1) var textureG: texture_2d<f32>;
 	@group(0) @binding(2) var textureB: texture_2d<f32>;
 	@group(0) @binding(3) var textureA: texture_2d<f32>;
 	@group(0) @binding(4) var sampler0: sampler;
+	@group(0) @binding(5) var<uniform> mapping: ComponentMapping;
+
+	fn getComponent(color: vec4<f32>, componentIndex: u32) -> f32 {
+		switch componentIndex {
+			case 0u: { return color.r; }
+			case 1u: { return color.g; }
+			case 2u: { return color.b; }
+			case 3u: { return color.a; }
+			default: { return 0.0; }
+		}
+	}
 
 	@fragment
 	fn main(input: VertexOut) -> @location(0) vec4<f32> {
-		let r = textureSample(textureR, sampler0, input.uv).r;
-		let g = textureSample(textureG, sampler0, input.uv).g;
-		let b = textureSample(textureB, sampler0, input.uv).b;
-		let a = textureSample(textureA, sampler0, input.uv).a;
+		let colorR = textureSample(textureR, sampler0, input.uv);
+		let colorG = textureSample(textureG, sampler0, input.uv);
+		let colorB = textureSample(textureB, sampler0, input.uv);
+		let colorA = textureSample(textureA, sampler0, input.uv);
 
-		return vec4(
-			r,
-			g,
-			b,
-			a
-		);
+		let r = getComponent(colorR, mapping.r_component);
+		let g = getComponent(colorG, mapping.g_component);
+		let b = getComponent(colorB, mapping.b_component);
+		let a = getComponent(colorA, mapping.a_component);
+
+		return vec4(r, g, b, a);
 	}
 	`;
 		return this.#gpuDevice.createRenderPipeline({

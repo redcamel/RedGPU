@@ -1,5 +1,6 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include drawDirectionalShadowDepth;
+#redgpu_include calcDisplacements;
 struct VertexUniforms {
       pickingId:u32,
 	  modelMatrix:mat4x4<f32>,
@@ -64,12 +65,10 @@ fn main( inputData:InputData ) -> OutputData {
     if (u_useDisplacementTexture) {
         let distance = distance(position.xyz, u_cameraPosition);
         let mipLevel = (distance / maxDistance) * maxMipLevel;
-        let displacementSample = textureSampleLevel(displacementTexture, displacementTextureSampler, input_uv, mipLevel).r;
-        let scaledDisplacement = displacementSample * u_displacementScale;
-        let displacedPosition = input_position + input_vertexNormal * scaledDisplacement;
-
+        let displacedPosition = calcDisplacementPosition(input_position,input_vertexNormal,displacementTexture, displacementTextureSampler, u_displacementScale, input_uv, mipLevel);
+        let displacedNormal = calcDisplacementNormal(input_vertexNormal, displacementTexture, displacementTextureSampler, u_displacementScale, input_uv, mipLevel);
         position = u_modelMatrix * vec4<f32>(displacedPosition, 1.0);
-        normalPosition = u_normalModelMatrix * vec4<f32>(input_vertexNormal * scaledDisplacement, 1.0);
+        normalPosition = u_normalModelMatrix * vec4<f32>(displacedNormal, 1.0);
     } else {
         normalPosition = u_normalModelMatrix * vec4<f32>(input_vertexNormal, 1.0);
     }

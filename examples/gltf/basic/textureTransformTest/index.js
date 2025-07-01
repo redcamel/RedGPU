@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js";;
+import * as RedGPU from "../../../../dist/index.js";
 
 // 1. Create and append a canvas
 // 1. 캔버스를 생성하고 문서에 추가
@@ -67,8 +67,6 @@ function loadGLTF(view, url) {
 		}
 	)
 }
-
-
 
 const renderTestPane = async (redGPUContext, mesh) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');

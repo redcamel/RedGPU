@@ -1,4 +1,5 @@
 #redgpu_include SYSTEM_UNIFORM;
+#redgpu_include calcDisplacements;
 struct VertexUniforms {
     pickingId:u32,
     localMatrix: mat4x4<f32>,

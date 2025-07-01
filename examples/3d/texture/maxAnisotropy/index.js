@@ -1,16 +1,14 @@
 import * as RedGPU from "../../../../dist/index.js";
 
-// Canvas 생성 및 추가
 const canvas = document.createElement("canvas");
 document.body.appendChild(canvas);
 
-// RedGPU 초기화
 RedGPU.init(
 	canvas,
 	(redGPUContext) => {
 		const controller = new RedGPU.Camera.ObitController(redGPUContext);
 		controller.distance = 100;
-		controller.tilt = 75
+		controller.tilt = 75;
 
 		const scene = new RedGPU.Display.Scene();
 
@@ -20,7 +18,6 @@ RedGPU.init(
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		redGPUContext.addView(view);
 
-		// Test Pane 렌더링 (maxAnisotropy 테스트)
 		renderTestPane(redGPUContext, scene);
 
 		const renderer = new RedGPU.Renderer(redGPUContext);
@@ -33,7 +30,8 @@ RedGPU.init(
 		errorMessage.innerHTML = failReason;
 		document.body.appendChild(errorMessage);
 	}
-)
+);
+
 const renderTestPane = async (redGPUContext, scene) => {
 	const maxAnisotropyValues = [1, 8, 16];
 	const spacing = 105;
@@ -58,19 +56,16 @@ const renderTestPane = async (redGPUContext, scene) => {
 			return mesh;
 		};
 
-		// 상위 라인 (기존 텍스처)
 		createMesh("../../../assets/maxAnisotropy/maxAnisotropy.jpg", yOffset);
 
-		// 하위 라인 (새로운 텍스처)
 		const bottomMesh = createMesh("../../../assets/UV_Grid_Sm.jpg", -yOffset);
 
-		// 텍스트 라벨 추가 (하위 라인 기준)
 		const textLabel = new RedGPU.Display.TextField3D(redGPUContext);
 		textLabel.text = `maxAnisotropy: ${anisotropy}`;
 		textLabel.useBillboardPerspective = false;
 		textLabel.useBillboard = true;
 		textLabel.fontSize = 26;
-		textLabel.depthStencilState.depthCompare = 'always'
+		textLabel.depthStencilState.depthCompare = 'always';
 		textLabel.setPosition(bottomMesh.x, 0, bottomMesh.z);
 		scene.addChild(textLabel);
 	}

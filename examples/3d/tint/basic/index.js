@@ -138,5 +138,4 @@ const renderTestPane = async (redGPUContext, mesh) => {
 		refresh();
 	});
 
-
 };

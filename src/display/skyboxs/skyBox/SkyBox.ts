@@ -11,6 +11,7 @@ import PrimitiveState from "../../../renderState/PrimitiveState";
 import UniformBuffer from "../../../resources/buffer/uniformBuffer/UniformBuffer";
 import ResourceManager from "../../../resources/resourceManager/ResourceManager";
 import CubeTexture from "../../../resources/texture/CubeTexture";
+import HDRTexture from "../../../resources/texture/hdr/HDRTexture";
 import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validateRedGPUContext";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
@@ -33,7 +34,7 @@ class SkyBox {
 	#primitiveState: PrimitiveState
 	#depthStencilState: DepthStencilState
 
-	constructor(redGPUContext: RedGPUContext, cubeTexture: CubeTexture) {
+	constructor(redGPUContext: RedGPUContext, cubeTexture: CubeTexture | HDRTexture) {
 		validateRedGPUContext(redGPUContext)
 		this.#redGPUContext = redGPUContext
 		this._geometry = new Box(redGPUContext)
@@ -43,15 +44,17 @@ class SkyBox {
 		this.#depthStencilState = new DepthStencilState(this)
 		this.#depthStencilState.depthWriteEnabled = false
 	}
-	set skyboxTexture(texture:CubeTexture) {
+
+	get skyboxTexture(): CubeTexture {
+		return this._material.skyboxTexture
+	}
+
+	set skyboxTexture(texture: CubeTexture) {
 		if (!texture) {
 			consoleAndThrowError('SkyBox requires a valid CubeTexture')
-		}else{
+		} else {
 			this._material.skyboxTexture = texture
 		}
-	}
-	get skyboxTexture():CubeTexture {
-		return this._material.skyboxTexture
 	}
 
 	render(debugViewRenderState: RenderViewStateData) {
