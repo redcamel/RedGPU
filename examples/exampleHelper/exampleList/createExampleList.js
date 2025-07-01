@@ -443,14 +443,23 @@ const waitForImagesToLoad = (container) => {
 		})
 	);
 };
+// ❌ 제거: waitForImagesToLoad 함수 완전 삭제
 
-// 스크롤 위치 복원
-const restoreScrollPosition = async (container, scrollPosition) => {
+// ✅ 개선: 즉시 스크롤 복원, 레이아웃 안정화는 별도 처리
+const restoreScrollPosition = (container, scrollPosition) => {
 	if (scrollPosition && (scrollPosition.x !== 0 || scrollPosition.y !== 0)) {
-		// 이미지 로드 대기
-		await waitForImagesToLoad(container);
-		// 이미지 로드 후 스크롤 복원
+		// 즉시 스크롤 복원
 		container.scrollTo(scrollPosition.x, scrollPosition.y);
+
+		// 레이아웃 안정화를 위한 지연된 재조정 (선택적)
+		setTimeout(() => {
+			container.scrollTo(scrollPosition.x, scrollPosition.y);
+		}, 100);
+
+		// 추가 안정화 (필요시)
+		setTimeout(() => {
+			container.scrollTo(scrollPosition.x, scrollPosition.y);
+		}, 500);
 	}
 };
 
@@ -475,11 +484,13 @@ const initialize = () => {
 	footer.innerHTML = `<div class="footer_left"><a href="https://github.com/redcamel/RedGPU" target="_blank"><img src="/RedGPU/examples/assets/github.png" height="32"/></a><div>This project is maintained by <a href="https://github.com/redcamel/RedGPU" target="_blank">RedCamel</a></div></div>`;
 	container.appendChild(footer);
 
-	// 저장된 스크롤 위치가 있으면 복원
+	// ✅ 수정: 즉시 스크롤 복원 (async/await 제거)
 	if (savedState && savedState.scrollPosition) {
 		restoreScrollPosition(container, savedState.scrollPosition);
 	}
-	addMetaTags()
+
+	addMetaTags();
+
 	// 페이지 이탈 시 상태 저장 (브라우저 닫기 등)
 	window.addEventListener('beforeunload', saveState);
 };
