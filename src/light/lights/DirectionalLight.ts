@@ -1,6 +1,6 @@
-import ColorRGB from "../color/ColorRGB";
-import convertHexToRgb from "../utils/convertColor/convertHexToRgb";
-import BaseLight from "./core/BaseLight";
+import ColorRGB from "../../color/ColorRGB";
+import convertHexToRgb from "../../utils/convertColor/convertHexToRgb";
+import BaseLight from "../core/BaseLight";
 
 class DirectionalLight extends BaseLight {
 	#direction: [number, number, number];

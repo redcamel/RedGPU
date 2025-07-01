@@ -24,7 +24,6 @@ type KeyNameMapper = {
 };
 
 class BasicController extends AController {
-	#needUpdate = true;
 	#targetView: View3D;
 	#keyNameMapper: KeyNameMapper = {
 		moveForward: 'w',

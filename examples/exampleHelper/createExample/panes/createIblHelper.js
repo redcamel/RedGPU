@@ -89,7 +89,7 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
 			const directionalLight = new RedGPU.Light.DirectionalLight();
 			view.scene.lightManager.addDirectionalLight(directionalLight);
 		} else {
-			view.scene.lightManager.removeAllDirectionalLight();
+			view.scene.lightManager.removeAllLight();
 		}
 	};
 
