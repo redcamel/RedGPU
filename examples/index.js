@@ -28,7 +28,7 @@ RedGPU.init(
 		view.postEffectManager.addEffect(tEffect2)
 		redGPUContext.addView(view);
 
-		const ibl = new RedGPU.Resource.IBL(redGPUContext, './assets/hdr/4k/the_sky_is_on_fire_4k.hdr');
+		const ibl = new RedGPU.Resource.IBL(redGPUContext, './assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
 		view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture)
 		view.ibl = ibl
 		const renderer = new RedGPU.Renderer(redGPUContext)

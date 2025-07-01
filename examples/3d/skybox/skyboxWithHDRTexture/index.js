@@ -4,8 +4,10 @@ const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
 const hdrImages = [
-	{name: 'furstenstein', path: '../../../assets/hdr/4k/furstenstein.hdr'},
-	{name: 'the sky is on fire', path: '../../../assets/hdr/4k/the_sky_is_on_fire_4k.hdr'},
+	{name: '2K - the sky is on fire', path: '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr'},
+	{name: '2K - furstenstein', path: '../../../assets/hdr/2k/furstenstein_2k.hdr'},
+	{name: '4K - the sky is on fire', path: '../../../assets/hdr/4k/the_sky_is_on_fire_4k.hdr'},
+	{name: '4K - furstenstein', path: '../../../assets/hdr/4k/furstenstein_4k.hdr'},
 	{name: 'Cannon_Exterior', path: '../../../assets/hdr/Cannon_Exterior.hdr'},
 	{name: 'field', path: '../../../assets/hdr/field.hdr'},
 	{name: 'neutral.37290948', path: '../../../assets/hdr/neutral.37290948.hdr'},
@@ -22,12 +24,15 @@ RedGPU.init(
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 
 		redGPUContext.addView(view);
-		createSkybox(view, hdrImages[0].path);
+		const herTexture = new RedGPU.Resource.HDRTexture(view.redGPUContext, hdrImages[0].path,()=>{
+			renderTestPane(view);
+		});
+		view.skybox = new RedGPU.Display.SkyBox(view.redGPUContext, herTexture);
 
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		renderer.start(redGPUContext, () => {});
 
-		renderTestPane(view);
+
 	},
 	(failReason) => {
 		console.error("Initialization failed:", failReason);
@@ -47,12 +52,12 @@ const renderTestPane = async (view) => {
 	const {createFieldOfView} = await import( "../../../exampleHelper/createExample/panes/index.js" );
 	createFieldOfView(pane, view.camera);
 
-	let currentTexture = null;
+	let currentTexture = view.skybox._material.skyboxTexture;
 	let exposureBinding = null;
 
 	const settings = {
 		hdrImage: hdrImages[0].path,
-		exposure: 15
+		exposure: view.skybox._material.skyboxTexture.exposure
 	};
 
 	// HDR 이미지 선택
