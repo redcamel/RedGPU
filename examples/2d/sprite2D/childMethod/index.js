@@ -1,10 +1,8 @@
 import * as RedGPU from "../../../../dist/index.js";
 
-// 캔버스를 생성하고 문서에 추가
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
-// RedGPU 초기화
 RedGPU.init(
 	canvas,
 	(redGPUContext) => {
@@ -17,17 +15,16 @@ RedGPU.init(
 
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		const render = () => {
-			// 원형 배치 업데이트
-			const radius = 250; // 원형의 반지름
+			const radius = 250;
 			const numChildren = view.scene.children.length;
 
-			const centerX = view.screenRectObject.width / 2
-			const centerY = view.screenRectObject.height / 2
-			// 원형으로 배치하면서 애니메이션 적용
+			const centerX = view.screenRectObject.width / 2;
+			const centerY = view.screenRectObject.height / 2;
+
 			view.scene.children.forEach((sprite2D, index) => {
-				const angle = (index / numChildren) * Math.PI * 2; // 각도를 계산
-				const endX = centerX + Math.cos(angle) * radius; // 목표 X 좌표
-				const endY = centerY + Math.sin(angle) * radius; // 목표 Z 좌표
+				const angle = (index / numChildren) * Math.PI * 2;
+				const endX = centerX + Math.cos(angle) * radius;
+				const endY = centerY + Math.sin(angle) * radius;
 
 				sprite2D.setPosition(
 					sprite2D.x + (endX - sprite2D.x) * 0.3,
@@ -41,19 +38,16 @@ RedGPU.init(
 		};
 		renderer.start(redGPUContext, render);
 
-		// Pane UI 생성
 		createPaneUI(redGPUContext, scene);
 	}
 );
 
-// 초기 메쉬 생성
 const createInitialObjects = (redGPUContext, scene) => {
 	for (let i = 0; i < 6; i++) {
 		addChildObject(redGPUContext, scene, '#ffffff');
 	}
 };
 
-// Pane UI 생성 및 상호작용 버튼 추가
 const createPaneUI = async (redGPUContext, scene) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const pane = new Pane();
@@ -65,16 +59,16 @@ const createPaneUI = async (redGPUContext, scene) => {
 	pane.addButton({title: 'Add Child at Index 2'}).on('click', () => {
 		const color = '#fff';
 		const sprite2D = new RedGPU.Display.Sprite2D(redGPUContext, new RedGPU.Material.ColorMaterial(redGPUContext, color));
-		sprite2D.width = 25
-		sprite2D.height = 25
+		sprite2D.width = 25;
+		sprite2D.height = 25;
 
 		const textField2D = new RedGPU.Display.TextField2D(redGPUContext);
 		textField2D.useBillboard = true;
 		textField2D.fontSize = 16;
 		textField2D.text = `Inserted Child`;
-		textField2D.color = color
-		textField2D.x = 0
-		textField2D.y = 30
+		textField2D.color = color;
+		textField2D.x = 0;
+		textField2D.y = 30;
 		sprite2D.addChild(textField2D);
 		scene.addChildAt(sprite2D, 2);
 		console.log('Added a new child at index 2');
@@ -82,9 +76,9 @@ const createPaneUI = async (redGPUContext, scene) => {
 
 	pane.addButton({title: 'Get Child at Index 1'}).on('click', () => {
 		const child = scene.getChildAt(1);
-		const color = getRandomHexColor()
-		child.material.color.setColorByHEX(color)
-		child.getChildAt(0).color = color
+		const color = getRandomHexColor();
+		child.material.color.setColorByHEX(color);
+		child.getChildAt(0).color = color;
 		console.log('Child at index 1:', child ? child.text : 'No child found');
 	});
 
@@ -92,9 +86,9 @@ const createPaneUI = async (redGPUContext, scene) => {
 		const firstChild = scene.getChildAt(0);
 		if (firstChild) {
 			const index = scene.getChildIndex(firstChild);
-			const color = getRandomHexColor()
-			scene.getChildAt(index).material.color.setColorByHEX(color)
-			scene.getChildAt(index).getChildAt(0).color = color
+			const color = getRandomHexColor();
+			scene.getChildAt(index).material.color.setColorByHEX(color);
+			scene.getChildAt(index).getChildAt(0).color = color;
 			console.log(`Index of first child: ${index}`);
 		}
 	});
@@ -136,25 +130,23 @@ const createPaneUI = async (redGPUContext, scene) => {
 		console.log('All children removed');
 	});
 };
+
 const getRandomHexColor = () => {
 	return `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
 };
 
-// 자식 메쉬 추가
 const addChildObject = (redGPUContext, scene, color = getRandomHexColor()) => {
-	// 랜덤 HEX 색상 생성 함수
-
 	const sprite2D = new RedGPU.Display.Sprite2D(redGPUContext, new RedGPU.Material.ColorMaterial(redGPUContext, color));
-	sprite2D.width = 25
-	sprite2D.height = 25
+	sprite2D.width = 25;
+	sprite2D.height = 25;
 
 	const textField2D = new RedGPU.Display.TextField2D(redGPUContext);
 	textField2D.useBillboard = true;
 	textField2D.fontSize = 16;
 	textField2D.text = `Child ${scene.numChildren}`;
-	textField2D.color = color; // 컬러가 없으면 랜덤 HEX 색상 생성
-	textField2D.x = 0
-	textField2D.y = 30
+	textField2D.color = color;
+	textField2D.x = 0;
+	textField2D.y = 30;
 	sprite2D.addChild(textField2D);
 	scene.addChild(sprite2D);
 

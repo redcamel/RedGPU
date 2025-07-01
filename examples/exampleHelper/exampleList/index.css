@@ -125,7 +125,8 @@ html, body {
     align-items: center;
     gap: 8px;
 }
-.experimental{
+
+.experimental {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -194,6 +195,7 @@ html, body {
 
 
 }
+
 /* 모바일 화면 분기 처리 */
 @media screen and (max-width: 768px) {
     .example-item {
@@ -221,8 +223,8 @@ html, body {
     background: #000 linear-gradient(to right, rgba(155, 155, 155, 0.1) 0%, rgba(0, 0, 0, 0.0) 100%);
     line-height: 1.4;
     word-break: keep-all;
-    box-shadow: 0 -30px 50px rgba(0, 0, 0, 0.5) ;
-    border-top:1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 -30px 50px rgba(0, 0, 0, 0.5);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .example-link {
@@ -247,11 +249,13 @@ a {
     text-overflow: ellipsis;
     pointer-events: painted;
 }
-a img{
+
+a img {
     border-radius: 8px 8px 0 0;
     border: 1px solid rgba(0, 0, 0, 0.3);
     border-bottom: none;
 }
+
 a:hover {
     color: #fff;
 }

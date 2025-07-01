@@ -13,7 +13,9 @@ const PIXEL_MAX = 2048;
 const setSingleViewTest = (pane, view, openYn = false, camera2DYn = false) => {
 	const TEST_DATA = createTestData(view);
 	const {scene, camera} = view
-	if (!camera2DYn) {
+	if (camera2DYn) {
+
+	}else{
 
 		pane.addBinding(view, 'useFrustumCulling')
 		pane.addBinding(view, 'useDistanceCulling')

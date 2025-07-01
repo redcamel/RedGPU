@@ -8,7 +8,6 @@ import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import ATextField from "../core/ATextField";
 import TextFieldMaterial from "../core/textFieldMaterial/TextFieldMaterial";
 import vertexModuleSource from "./shader/textField3DVertex.wgsl";
-import GPU_BLEND_FACTOR from "../../../gpuConst/GPU_BLEND_FACTOR";
 
 interface TextField3D {
 	useBillboardPerspective: boolean;

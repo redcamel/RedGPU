@@ -1,11 +1,12 @@
 import {mat4, vec3} from "gl-matrix";
+import Camera2D from "../camera/camera/Camera2D";
 import View3D from "../display/view/View3D";
 import consoleAndThrowError from "../utils/consoleAndThrowError";
-import AmbientLight from "./AmbientLight";
+import AmbientLight from "./lights/AmbientLight";
 import PassClustersLightHelper from "./clusterLight/PassClustersLightHelper";
-import DirectionalLight from "./DirectionalLight";
-import PointLight from "./PointLight";
-import SpotLight from "./SpotLight";
+import DirectionalLight from "./lights/DirectionalLight";
+import PointLight from "./lights/PointLight";
+import SpotLight from "./lights/SpotLight";
 
 class LightManager {
 	#limitDirectionalLightCount: number = 3
@@ -84,18 +85,42 @@ class LightManager {
 		this.#directionalLights.push(value)
 	}
 
+	removeSpotLight(value: SpotLight) {
+		const index = this.#spotLights.indexOf(value);
+		if (index !== -1) this.#spotLights.splice(index, 1);
+	}
+
+	removePointLight(value: PointLight) {
+		const index = this.#pointLights.indexOf(value);
+		if (index !== -1) this.#pointLights.splice(index, 1);
+	}
+
 	removeDirectionalLight(value: DirectionalLight) {
 		const index = this.#directionalLights.indexOf(value);
 		if (index !== -1) this.#directionalLights.splice(index, 1);
 	}
 
+	removeAllSpotLight() {
+		this.#spotLights = [];
+	}
+
+	removeAllPointLight() {
+		this.#pointLights = [];
+	}
+
 	removeAllDirectionalLight() {
 		this.#directionalLights = [];
+	}
+
+	removeAllLight() {
+		this.removeAllPointLight()
+		this.removeAllSpotLight()
+		this.removeAllDirectionalLight()
 		this.#ambientLight = null
 	}
 
 	updateViewSystemUniforms(view: View3D) {
-		const {redGPUContext, scene,} = view
+		const {scene} = view
 		const structInfo = view.systemUniform_Vertex_StructInfo;
 		const {systemUniform_Vertex_UniformBuffer} = view;
 		const {members} = structInfo;
@@ -142,7 +167,7 @@ class LightManager {
 
 	#getDirectionalLightProjectionMatrix(view: View3D): mat4 {
 		const lightProjectionMatrix = mat4.create()
-		const cameraPosition = vec3.fromValues(
+		const cameraPosition = view.rawCamera instanceof Camera2D ? vec3.fromValues(0, 0, 0) : vec3.fromValues(
 			view.rawCamera.x,
 			view.rawCamera.y,
 			view.rawCamera.z
@@ -160,11 +185,12 @@ class LightManager {
 
 	#getMainDirectionalLightViewMatrix(view: View3D): mat4 {
 		mat4.identity(this.#lightProjectionMatrix)
-		const distance = Math.max(vec3.distance(vec3.fromValues(
+		const cameraPosition = view.rawCamera instanceof Camera2D ? vec3.fromValues(0, 0, 0) : vec3.fromValues(
 			view.rawCamera.x,
 			view.rawCamera.y,
 			view.rawCamera.z
-		), vec3.create()), 1)
+		);
+		const distance = Math.max(vec3.distance(cameraPosition, vec3.create()), 1)
 		const upVector = vec3.fromValues(0, 1, 0);
 		const origin = vec3.fromValues(0, 0, 0);
 		const lightPosition = view.scene.lightManager.directionalLights.length ? vec3.fromValues(

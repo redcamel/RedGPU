@@ -263,15 +263,6 @@ class RedGPUContext extends RedGPUContextViewContainer {
 		this.sizeManager.setSize(w, h)
 	}
 
-	saveCanvasAsImage() {
-		const canvas = this.htmlCanvas
-		const image = canvas.toDataURL('image/png')
-		const a = document.createElement('a')
-		a.href = image
-		a.download = 'image.png'
-		a.click()
-	}
-
 	/**
 	 * Initializes the software.
 	 *
@@ -375,19 +366,6 @@ class RedGPUContext extends RedGPUContextViewContainer {
 		};
 		console.log(`configurationDescription`, this.#configurationDescription);
 		this.#gpuContext.configure(this.#configurationDescription);
-	}
-
-	/**
-	 * Resize function.
-	 *
-	 * @function resize
-	 *
-	 * @description
-	 * Method to resize the component or element based on the current size manager.
-	 *
-	 */
-	#resize = () => {
-		this.sizeManager.setSize()
 	}
 }
 

@@ -42,7 +42,7 @@ class ResourceManager extends ResourceBase {
 	])
 	#managedBitmapTextureState: ResourceState = new ResourceState()
 	#managedCubeTextureState: ResourceState = new ResourceState()
-	#managedCubeTextureFromSphericalSkyState: ResourceState = new ResourceState()
+	#managedHDRTextureState: ResourceState = new ResourceState()
 	#managedUniformBufferState: ResourceState = new ResourceState()
 	#managedVertexBufferState: ResourceState = new ResourceState()
 	#managedIndexBufferState: ResourceState = new ResourceState()
@@ -90,6 +90,10 @@ class ResourceManager extends ResourceBase {
 
 	get managedCubeTextureState(): ResourceState {
 		return this.#managedCubeTextureState;
+	}
+
+	get managedHDRTextureState(): ResourceState {
+		return this.#managedHDRTextureState;
 	}
 
 	get managedUniformBufferState(): ResourceState {
@@ -274,7 +278,6 @@ class ResourceManager extends ResourceBase {
 						},
 						{binding: 2, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: "depth"}},
 						{binding: 3, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
-						{binding: 4, visibility: GPUShaderStage.FRAGMENT, texture: {viewDimension: "cube"}},
 						{
 							binding: 5,
 							visibility: GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE,
@@ -288,6 +291,8 @@ class ResourceManager extends ResourceBase {
 						{binding: 7, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
 						{binding: 8, visibility: GPUShaderStage.FRAGMENT, texture: {}},
 						{binding: 9, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
+						{binding: 10, visibility: GPUShaderStage.FRAGMENT, texture: {viewDimension: "cube"}},
+						{binding: 11, visibility: GPUShaderStage.FRAGMENT, texture: {viewDimension: "cube"}},
 					],
 				}
 			)

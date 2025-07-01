@@ -14,12 +14,11 @@ RedGPU.init(
 
 		const bitmapSprite3D = createChildSprite3D(redGPUContext, scene, 'BitmapMaterial', 0, 4, '../../../assets/UV_Grid_Sm.jpg');
 		const childSprite3D = createChildSprite3D(redGPUContext, scene, 'ColorMaterial', 0, 1.5);
-		const childTextField3D = createChildTextField3D(redGPUContext, scene, 0, -.5);
+		const childTextField3D = createChildTextField3D(redGPUContext, scene, 0, -0.5);
 		const childSpriteSheet3D = createChildSpriteSheet3D(redGPUContext, scene, 0, -3);
 
 		const renderer = new RedGPU.Renderer(redGPUContext);
-		const render = () => {};
-		renderer.start(redGPUContext, render);
+		renderer.start(redGPUContext, () => {});
 
 		renderTestPane(redGPUContext, bitmapSprite3D, [childSprite3D, childTextField3D, childSpriteSheet3D]);
 	},
@@ -72,58 +71,58 @@ const createChildTextField3D = (redGPUContext, parent, x = 0, y = 0) => {
 	textField3D.x = x;
 	textField3D.y = y;
 	textField3D.fontSize = '10px';
-	textField3D.useBillboard=true
+	textField3D.useBillboard = true;
 	parent.addChild(textField3D);
 
 	return textField3D;
 };
 
 const renderTestPane = async (redGPUContext, parent, children) => {
-	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const pane = new Pane();
 
 	const allObjects = [parent, ...children];
 
-	allObjects.forEach((obj, index) => {
+	allObjects.forEach((obj) => {
 		let objType = '';
 		if (obj instanceof RedGPU.Display.TextField3D) {
-			objType = `TextField2D`;
+			objType = 'TextField3D';
 		} else if (obj instanceof RedGPU.Display.SpriteSheet3D) {
-			objType = `SpriteSheet3D`;
+			objType = 'SpriteSheet3D';
 		} else if (obj.material instanceof RedGPU.Material.BitmapMaterial) {
-			objType = `BitmapMaterial`;
+			objType = 'BitmapMaterial';
 		} else if (obj.material instanceof RedGPU.Material.ColorMaterial) {
-			objType = `ColorMaterial`;
+			objType = 'ColorMaterial';
 		}
-		const title = `${objType} Material`;
 
+		const title = `${objType} Material`;
 		const objConfig = {
 			opacity: obj.material.opacity,
 		};
 
-		const objFolder = pane.addFolder({title: title, expanded: true});
+		const objFolder = pane.addFolder({ title: title, expanded: true });
 
-		const update = (obj,evt)=>{
+		const update = (obj, evt) => {
 			obj.material.opacity = evt.value;
+			const opacityText = `${objType} instance.material<br/>Opacity ${obj.material.opacity.toFixed(2)}`;
+
 			if (obj instanceof RedGPU.Display.TextField3D) {
-				obj.text = `${objType} instance.material<br/>Opacity ${obj.material.opacity.toFixed(2)}`;
+				obj.text = opacityText;
 			} else if (obj instanceof RedGPU.Display.SpriteSheet3D) {
-				obj.getChildAt(0).text = `${objType} instance.material<br/>Opacity ${obj.material.opacity.toFixed(2)}`;
-			} else if (obj.material instanceof RedGPU.Material.BitmapMaterial) {
-				obj.getChildAt(0).text = `${objType} instance.material<br/>Opacity ${obj.material.opacity.toFixed(2)}`;
-			} else if (obj.material instanceof RedGPU.Material.ColorMaterial) {
-				obj.getChildAt(0).text = `${objType} instance.material<br/>Opacity ${obj.material.opacity.toFixed(2)}`;
+				obj.getChildAt(0).text = opacityText;
+			} else if (obj.material instanceof RedGPU.Material.BitmapMaterial || obj.material instanceof RedGPU.Material.ColorMaterial) {
+				obj.getChildAt(0).text = opacityText;
 			}
-		}
+		};
+
 		objFolder.addBinding(objConfig, 'opacity', {
 			min: 0,
 			max: 1,
 			step: 0.01
 		}).on('change', (evt) => {
-			update(obj,evt)
-
+			update(obj, evt);
 		});
-		update(obj, {value: objConfig.opacity})
 
+		update(obj, { value: objConfig.opacity });
 	});
 };

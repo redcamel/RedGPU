@@ -1,5 +1,5 @@
 #redgpu_include SYSTEM_UNIFORM;
-
+#redgpu_include calcDisplacements;
 struct InstanceUniforms {
       instanceGroupModelMatrix:mat4x4<f32>,
 	  instanceModelMatrixs:array<mat4x4<f32>,100000>,
@@ -89,12 +89,9 @@ output.position = clipPosition; // 정상적으로 처리
     if (u_useDisplacementTexture) {
         let distance = distance(position.xyz, u_cameraPosition);
         let mipLevel = (distance / maxDistance) * maxMipLevel;
-        let displacementSample = textureSampleLevel(displacementTexture, displacementTextureSampler, input_uv, mipLevel).r;
-        let scaledDisplacement = displacementSample * u_displacementScale;
-        let displacedPosition = input_position + input_vertexNormal * scaledDisplacement;
+        let displacedPosition = calcDisplacementPosition(input_position,input_vertexNormal,displacementTexture, displacementTextureSampler, u_displacementScale, input_uv, mipLevel);
 
         position = u_modelMatrix * vec4<f32>(displacedPosition, 1.0);
-//        normalPosition = u_normalModelMatrix * vec4<f32>(input_vertexNormal * scaledDisplacement, 1.0);
     }
 
     output.position = u_projectionMatrix * u_cameraMatrix * u_instanceGroupModelMatrix *  position;
@@ -124,10 +121,7 @@ fn drawDirectionalShadowDepth( inputData:InputData ) -> OutputShadowData {
     if (u_useDisplacementTexture) {
         let distance = distance(position.xyz, u_directionalLightProjectionViewMatrix[3].xyz);
         let mipLevel = (distance / maxDistance) * maxMipLevel;
-        let displacementSample = textureSampleLevel(displacementTexture, displacementTextureSampler, input_uv, mipLevel).r;
-        let scaledDisplacement = displacementSample * u_displacementScale;
-        let displacedPosition = input_position + input_vertexNormal * scaledDisplacement;
-
+        let displacedPosition = calcDisplacementPosition(input_position,input_vertexNormal,displacementTexture, displacementTextureSampler, u_displacementScale, input_uv, mipLevel);
         position = u_modelMatrix * vec4<f32>(displacedPosition, 1.0);
     }
 

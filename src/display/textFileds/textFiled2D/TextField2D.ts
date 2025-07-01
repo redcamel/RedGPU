@@ -11,7 +11,6 @@ import {mixInMesh2D} from "../../mesh/core/mixInMesh2D";
 import ATextField from "../core/ATextField";
 import TextFieldMaterial from "../core/textFieldMaterial/TextFieldMaterial";
 import vertexModuleSource from "./shader/textField2DVertex.wgsl";
-import GPU_BLEND_FACTOR from "../../../gpuConst/GPU_BLEND_FACTOR";
 
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_TEXT_FIELD_2D'
 const STRUCT_INFO = parseWGSL(vertexModuleSource);

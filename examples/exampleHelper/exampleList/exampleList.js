@@ -249,42 +249,6 @@ const ExampleList = [
 				]
 			},
 			{
-				name: 'SkyBox',
-				list: [
-					{
-						name: 'SkyBox',
-						path: '3d/skybox/skybox',
-						thumb: '3d/skybox/skybox/thumb.png',
-						description: {
-							ko: `SkyBox 샘플 예제입니다.`,
-							en: `This is a sample SkyBox example.`
-						},
-					},
-					// {
-					//     name: 'SphericalSkyBox',
-					//     path: '3d/skybox/sphericalSkyBox',
-					//     description: {
-					//         ko: `SphericalSkyBox 샘플 예제입니다.`,
-					//         en: `This is a sample SphericalSkyBox example.`
-					//     },
-					// },
-				]
-			},
-			{
-				name: 'Transparent Sort',
-				list: [
-					{
-						name: 'Transparent Sort',
-						path: '3d/transparentSort',
-						thumb: '3d/transparentSort/thumb.png',
-						description: {
-							ko: `반투명 객체가 렌더링되는 순서를 확인하기 위해 메시의 소재에 \`transparent\` 옵션을 적용하는 방법의 예입니다. \`transparent\`를 사용하면 올바른 렌더링 결과를 확인할 수 있습니다.`,
-							en: ` example of how to apply the \`transparent\` option to the mesh's material to see the order in which translucent objects are rendered. You can use \`transparent\` to see the correct rendering results.`
-						},
-					},
-				]
-			},
-			{
 				name: 'Texture & Sampler',
 				list: [
 					{
@@ -322,6 +286,127 @@ const ExampleList = [
 							ko: `텍스쳐의 Anisotropy 옵션을 확인할 수 있는 예제입니다.`,
 							en: `example showing the Anisotropy option for a texture.`
 						},
+					},
+				]
+			},
+			{
+				name: 'SkyBox & IBL',
+				list: [
+					{
+						name: 'SkyBox',
+						list: [
+							{
+								name: 'Skybox using 6 assets',
+								path: '3d/skybox/skybox',
+								thumb: '3d/skybox/skybox/thumb.png',
+								description: {
+									ko: ``,
+									en: ``
+								},
+							},
+							{
+								name: 'Skybox using HDRTexture',
+								path: '3d/skybox/skyboxWithHDRTexture',
+								thumb: '3d/skybox/skyboxWithHDRTexture/thumb.png',
+								description: {
+									ko: ``,
+									en: ``
+								},
+							},
+						]
+					},
+					{
+						name: 'IBL',
+						list: [
+							{
+								name: 'Skybox using IBL',
+								path: '3d/skybox/skyboxWithIbl',
+								thumb: '3d/skybox/skyboxWithIbl/thumb.png',
+								description: {
+									ko: ``,
+									en: ``
+								},
+							},
+							{
+								name: 'IBL Test',
+								path: '3d/skybox/iblTest',
+								thumb: '3d/skybox/iblTest/thumb.png',
+								description: {
+									ko: ``,
+									en: ``
+								},
+							},
+						]
+					}
+
+				]
+			},
+			{
+				name: 'Transparent Sort',
+				list: [
+					{
+						name: 'Transparent Sort',
+						path: '3d/transparentSort',
+						thumb: '3d/transparentSort/thumb.png',
+						description: {
+							ko: `반투명 객체가 렌더링되는 순서를 확인하기 위해 메시의 소재에 \`transparent\` 옵션을 적용하는 방법의 예입니다. \`transparent\`를 사용하면 올바른 렌더링 결과를 확인할 수 있습니다.`,
+							en: ` example of how to apply the \`transparent\` option to the mesh's material to see the order in which translucent objects are rendered. You can use \`transparent\` to see the correct rendering results.`
+						},
+					},
+				]
+			},
+
+			{
+				name: 'Noise Texture',
+				experimental: true,
+				list: [
+					{
+						name: 'SimplexTexture',
+						experimental: true,
+						list: [
+							{
+								name: 'SimplexTexture',
+								path: '3d/noiseTexture/simplex/basic/',
+								thumb: '3d/noiseTexture/simplex/basic/thumb.png',
+								description: {
+									ko: ``,
+									en: ``
+								},
+							},
+							{
+								name: 'Custom SimplexTexture - Fire',
+								path: '3d/noiseTexture/simplex/fire/',
+								thumb: '3d/noiseTexture/simplex/fire/thumb.png',
+								description: {
+									ko: ``,
+									en: ``
+								},
+							},
+							{
+								name: 'Custom SimplexTexture - Displacement',
+								path: '3d/noiseTexture/simplex/displacement/',
+								thumb: '3d/noiseTexture/simplex/displacement/thumb.png',
+								description: {
+									ko: ``,
+									en: ``
+								},
+							},
+						]
+					},
+					{
+						name: 'VoronoiTexture',
+						experimental: true,
+						list: [
+							{
+								name: 'VoronoiTexture',
+								path: '3d/noiseTexture/voronoi/basic',
+								thumb: '3d/noiseTexture/voronoi/basic/thumb.png',
+								description: {
+									ko: ``,
+									en: ``
+								},
+							},
+						]
 					},
 				]
 			},
@@ -428,7 +513,7 @@ const ExampleList = [
 			},
 			{
 				name: 'Tint',
-				experimental : true,
+				experimental: true,
 				list: [
 					{
 						name: 'Tint',
@@ -521,6 +606,15 @@ const ExampleList = [
 						name: 'DirectionalLight Shadow',
 						path: '3d/shadow/directionalShadow',
 						thumb: '3d/shadow/directionalShadow/thumb.png',
+						description: {
+							ko: ``,
+							en: ``
+						},
+					},
+					{
+						name: 'DirectionalLight Shadow - GLTF',
+						path: '3d/shadow/gltfDirectionalShadow',
+						thumb: '3d/shadow/gltfDirectionalShadow/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -841,13 +935,13 @@ const ExampleList = [
 						},
 					},
 					{
-					    name: 'OrientationTest',
-					    path: 'gltf/basic/orientationTest',
+						name: 'OrientationTest',
+						path: 'gltf/basic/orientationTest',
 						thumb: 'gltf/basic/orientationTest/thumb.png',
-					    description: {
-					        ko: ``,
-					        en: ``
-					    },
+						description: {
+							ko: ``,
+							en: ``
+						},
 					},
 					{
 						name: 'TextureCoordinateTest',
@@ -879,7 +973,7 @@ const ExampleList = [
 					{
 						name: 'MultiUVTest',
 						path: 'gltf/basic/multiUVTest',
-						thumb: 'gltf/basic/textureEncodingTest/thumb.png',
+						thumb: 'gltf/basic/multiUVTest/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
@@ -1185,6 +1279,56 @@ const ExampleList = [
 								name: 'AnisotropyBarnLamp',
 								path: 'gltf/gltfExtensions/anisotropy/anisotropyBarnLamp',
 								thumb: 'gltf/gltfExtensions/anisotropy/anisotropyBarnLamp/thumb.png',
+								description: {
+									ko: ``,
+									en: ``
+								},
+							},
+						]
+					},
+					{
+						name: 'KHR_materials_iridescence',
+						list: [
+							{
+								name: 'CompareIridescence',
+								path: 'gltf/gltfExtensions/iridescence/compareIridescence',
+								thumb: 'gltf/gltfExtensions/iridescence/compareIridescence/thumb.png',
+								description: {
+									ko: ``,
+									en: ``
+								},
+							},
+							{
+								name: 'IridescenceDielectricSpheres',
+								path: 'gltf/gltfExtensions/iridescence/iridescenceDielectricSpheres',
+								thumb: 'gltf/gltfExtensions/iridescence/iridescenceDielectricSpheres/thumb.png',
+								description: {
+									ko: ``,
+									en: ``
+								},
+							},
+							{
+								name: 'IridescenceMetallicSpheres',
+								path: 'gltf/gltfExtensions/iridescence/iridescenceMetallicSpheres',
+								thumb: 'gltf/gltfExtensions/iridescence/iridescenceMetallicSpheres/thumb.png',
+								description: {
+									ko: ``,
+									en: ``
+								},
+							},
+							{
+								name: 'IridescenceSuzanne',
+								path: 'gltf/gltfExtensions/iridescence/iridescenceSuzanne',
+								thumb: 'gltf/gltfExtensions/iridescence/iridescenceSuzanne/thumb.png',
+								description: {
+									ko: ``,
+									en: ``
+								},
+							},
+							{
+								name: 'IridescenceLamp',
+								path: 'gltf/gltfExtensions/iridescence/iridescenceLamp',
+								thumb: 'gltf/gltfExtensions/iridescence/iridescenceLamp/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -1706,6 +1850,7 @@ const ExampleList = [
 			},
 			{
 				name: '2D BlendMode',
+				experimental: true,
 				list: [
 					{
 						name: 'BlendMode',
@@ -1720,7 +1865,7 @@ const ExampleList = [
 			},
 			{
 				name: '2D Tint',
-				experimental : true,
+				experimental: true,
 				list: [
 					{
 						name: 'Tint Basic',

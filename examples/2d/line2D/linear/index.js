@@ -17,16 +17,16 @@ RedGPU.init(
 		let pointsPerLine = 35; // 포인트 갯수 기본값
 
 		const centerLines = [
-			{ title: "White Line", offsetX: -200, offsetY: -200, color: "#ffffff", rainbow: false },
-			{ title: "Red Line", offsetX: -200, offsetY: 200, color: "#ff0000", rainbow: false },
-			{ title: "Green Line", offsetX: 200, offsetY: -200, color: "#00ff00", rainbow: false },
-			{ title: "Blue Line", offsetX: 200, offsetY: 200, color: "#0000ff", rainbow: false },
-			{ title: "Rainbow Line", offsetX: 0, offsetY: 0, color: "#ffffff", rainbow: true },
+			{title: "White Line", offsetX: -200, offsetY: -200, color: "#ffffff", rainbow: false},
+			{title: "Red Line", offsetX: -200, offsetY: 200, color: "#ff0000", rainbow: false},
+			{title: "Green Line", offsetX: 200, offsetY: -200, color: "#00ff00", rainbow: false},
+			{title: "Blue Line", offsetX: 200, offsetY: 200, color: "#0000ff", rainbow: false},
+			{title: "Rainbow Line", offsetX: 0, offsetY: 0, color: "#ffffff", rainbow: true},
 		];
 
 		// 라인 업데이트 함수
 		const updateCenterLines = () => {
-			const { width, height } = redGPUContext.screenRectObject;
+			const {width, height} = redGPUContext.screenRectObject;
 			const centerX = width / 2;
 			const centerY = height / 2;
 
@@ -34,7 +34,7 @@ RedGPU.init(
 			groups.splice(0).forEach(group => scene.removeChild(group));
 
 			// 새로운 그룹 생성
-			centerLines.forEach(({ title, offsetX, offsetY, color, rainbow }) => {
+			centerLines.forEach(({title, offsetX, offsetY, color, rainbow}) => {
 				const group = createLineGroup(redGPUContext, title, centerX + offsetX, centerY + offsetY, color, rainbow, pointsPerLine);
 				groups.push(group);
 				scene.addChild(group);
@@ -116,7 +116,7 @@ function getRainbowColor(t) {
 
 /* 6. 디버그 UI 패널 */
 async function setupDebugPanel(redGPUContext, groups, updateLinesCallback, getPointsPerLine, setPointsPerLine) {
-	const { Pane } = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
+	const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
 	const pane = new Pane();
 
 	const debugOptions = {
@@ -149,12 +149,17 @@ async function setupDebugPanel(redGPUContext, groups, updateLinesCallback, getPo
 	};
 
 	// 디버그 옵션: 포인트 표시 토글
-	pane.addBinding(debugOptions, "showDebugPoints", { label: "Show Debug Points" }).on("change", () => {
+	pane.addBinding(debugOptions, "showDebugPoints", {label: "Show Debug Points"}).on("change", () => {
 		debugPoints.forEach(point => point.setScale(debugOptions.showDebugPoints ? 1 : 0));
 	});
 
 	// 디버그 옵션: 포인트 갯수 조정
-	pane.addBinding(debugOptions, "pointsPerLine", { label: "Points Per Line", min: 5, max: 50, step: 1 }).on("change", (ev) => {
+	pane.addBinding(debugOptions, "pointsPerLine", {
+		label: "Points Per Line",
+		min: 5,
+		max: 50,
+		step: 1
+	}).on("change", (ev) => {
 		setPointsPerLine(ev.value); // 포인트 갯수 반영
 		updateLinesCallback(); // 라인 업데이트
 		recreateDebugPoints(); // 디버그 포인트 재생성

@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js";;
+import * as RedGPU from "../../../../dist/index.js";
 
 // 1. Create and append a canvas
 // 1. 캔버스를 생성하고 문서에 추가
@@ -14,7 +14,7 @@ RedGPU.init(
 		// 궤도형 카메라 컨트롤러 생성
 		const controller = new RedGPU.Camera.ObitController(redGPUContext);
 		controller.speedDistance = 0.1
-		controller.distance = 5
+		controller.distance = 7
 		controller.tilt = 0
 
 		// Create a scene and add a view with the camera controller
@@ -23,8 +23,6 @@ RedGPU.init(
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		redGPUContext.addView(view);
 
-		const directionalLightTest = new RedGPU.Light.DirectionalLight()
-		scene.lightManager.addDirectionalLight(directionalLightTest)
 		loadGLTFGrid(view,
 			[
 				'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF/DamagedHelmet.gltf',
@@ -41,7 +39,7 @@ RedGPU.init(
 
 		};
 		renderer.start(redGPUContext, render);
-
+		renderTestPane(redGPUContext, view);
 	},
 	(failReason) => {
 		// Handle initialization failure
@@ -54,21 +52,6 @@ RedGPU.init(
 
 function loadGLTFGrid(view, urls, gridSize = 4, spacing = 3) {
 	const {redGPUContext, scene} = view;
-
-	// Skybox 설정 (한 번만 실행)
-	const cubeTexture = new RedGPU.Resource.CubeTexture(
-		redGPUContext,
-		[
-			"../../../assets/skybox/px.jpg", // Positive X
-			"../../../assets/skybox/nx.jpg", // Negative X
-			"../../../assets/skybox/py.jpg", // Positive Y
-			"../../../assets/skybox/ny.jpg", // Negative Y
-			"../../../assets/skybox/pz.jpg", // Positive Z
-			"../../../assets/skybox/nz.jpg", // Negative Z
-		]
-	);
-	view.iblTexture = cubeTexture;
-	view.skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture);
 
 	// 그리드 크기 계산
 	const totalCols = Math.min(gridSize, urls.length); // 한 줄의 최대 컬럼 수
@@ -103,10 +86,10 @@ function loadGLTFGrid(view, urls, gridSize = 4, spacing = 3) {
 	});
 }
 
-
-
-const renderTestPane = async (redGPUContext, mesh) => {
+const renderTestPane = async (redGPUContext, targetView) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
-	const pane = new Pane();
+	const {createIblHelper} = await import('../../../exampleHelper/createExample/panes/index.js');
 
+	const pane = new Pane();
+	createIblHelper(pane, targetView, RedGPU);
 };

@@ -7,45 +7,6 @@ import {createFilter} from '@rollup/pluginutils';
 import postcss from 'rollup-plugin-postcss'
 
 export default [
-	// {
-	// 	input: './src/index.ts',
-	// 	output: {
-	// 		file: './dist/index.js',
-	// 		format: 'es',
-	// 	},
-	// 	plugins: [
-	// 		stringWgsl(),
-	// 		nodeResolve(),
-	// 		json(),
-	// 		postcss({
-	// 			inject: true, // 기본값입니다. 이 결과를 JavaScript 번들에 주입합니다.
-	// 			extensions: ['.css'],
-	// 			minimize: true
-	// 		}),
-	// 		strip({
-	// 			include: ['**/*.ts'],   // 모든 TypeScript 파일을 대상으로 함
-	// 			exclude: ["./init.ts"], // 특정 파일은 제거 대상에서 제외
-	// 			functions: ['console.log'], // 제거할 함수 지정
-	// 			debugger: true,         // debugger 문 제거
-	// 		}),
-	// 		typescript({
-	// 				tsconfig: 'tsconfig.json'
-	// 			}
-	// 		),
-	// 		terser({
-	// 			format: {
-	// 				comments: false,
-	// 			},
-	// 			mangle: false,
-	// 			compress: {
-	// 				dead_code: true,
-	// 				if_return: true
-	// 			},
-	// 		}),
-	// 		removeSpacesAndTabs()
-	// 	]
-	// },
-
 	{
 		input: './src/index.ts',
 		output: {
@@ -58,7 +19,7 @@ export default [
 			nodeResolve(),
 			json(),
 			postcss({
-				inject: true, // 기본값입니다. 이 결과를 JavaScript 번들에 주입합니다.
+				inject: true,
 				extensions: ['.css'],
 				minimize: true
 			}),
@@ -66,7 +27,7 @@ export default [
 				{
 					include: ['**/*.ts'],
 					exclude: ["./init.ts"],
-					functions: ['console.log'], // 제거할 함수 지정
+					functions: ['console.log'],
 					debugger: true,
 				}
 			),
