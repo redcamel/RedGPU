@@ -24,12 +24,15 @@ RedGPU.init(
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 
 		redGPUContext.addView(view);
-		createSkybox(view, hdrImages[0].path);
+		const herTexture = new RedGPU.Resource.HDRTexture(view.redGPUContext, hdrImages[0].path,()=>{
+			renderTestPane(view);
+		});
+		view.skybox = new RedGPU.Display.SkyBox(view.redGPUContext, herTexture);
 
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		renderer.start(redGPUContext, () => {});
 
-		renderTestPane(view);
+
 	},
 	(failReason) => {
 		console.error("Initialization failed:", failReason);
@@ -49,12 +52,12 @@ const renderTestPane = async (view) => {
 	const {createFieldOfView} = await import( "../../../exampleHelper/createExample/panes/index.js" );
 	createFieldOfView(pane, view.camera);
 
-	let currentTexture = null;
+	let currentTexture = view.skybox._material.skyboxTexture;
 	let exposureBinding = null;
 
 	const settings = {
 		hdrImage: hdrImages[0].path,
-		exposure: 15
+		exposure: view.skybox._material.skyboxTexture.exposure
 	};
 
 	// HDR 이미지 선택
