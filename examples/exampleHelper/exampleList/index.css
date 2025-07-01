@@ -208,8 +208,8 @@ html, body {
 /* 작은 모바일 화면 분기 처리 */
 @media screen and (max-width: 480px) {
     .example-item {
-        width: 100%;
-        max-width: 100%;
+        width: 80%;
+        max-width: 80%;
         margin-bottom: 15px;
     }
 }
