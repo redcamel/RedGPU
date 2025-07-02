@@ -1,6 +1,6 @@
 import calculateNormals from "./calculateNormals";
 import calculateTextureByteSize from "./calculateTextureByteSize";
-import calculateVolume from "./calculateVolume";
+import calculateVolumeAABB from "./calculateVolumeAABB";
 import computeViewFrustumPlanes from "./computeViewFrustumPlanes";
 import formatBytes from "./formatBytes";
 import getMipLevelCount from "./getMipLevelCount";
@@ -19,7 +19,7 @@ export {
 	worldToLocal,
 	getMipLevelCount,
 	calculateTextureByteSize,
-	calculateVolume,
+	calculateVolumeAABB,
 	computeViewFrustumPlanes,
 	calculateNormals,
 	formatBytes,

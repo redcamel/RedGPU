@@ -1,3 +1,4 @@
+import DrawDebugger from "./drawDebugger/DrawDebugger";
 import InstancingMesh from "./instancingMesh/InstancingMesh";
 import Object3DContainer from "./mesh/core/Object3DContainer";
 import Mesh from './mesh/Mesh'
@@ -19,4 +20,5 @@ export {
 	View2D,
 	View3D,
 	SkyBox,
+	DrawDebugger
 }

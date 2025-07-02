@@ -1,13 +1,13 @@
-import {IVolume} from "../../primitive/core/Primitive";
+import {IVolumeAABB} from "../../primitive/core/Primitive";
 import VertexBuffer from "../../resources/buffer/vertexBuffer/VertexBuffer";
 
 /**
  * Calculates the volume of a given vertex buffer.
  *
  * @param {VertexBuffer} vertexBuffer - The vertex buffer representing the geometry.
- * @returns {IVolume} - An object containing the calculated volume and related properties.
+ * @returns {IVolumeAABB} - An object containing the calculated volume and related properties.
  */
-const calculateVolume = (vertexBuffer: VertexBuffer): IVolume => {
+const calculateVolumeAABB = (vertexBuffer: VertexBuffer): IVolumeAABB => {
 	const stride = vertexBuffer.stride;
 	const data = vertexBuffer.data;
 	let len = vertexBuffer.vertexCount;
@@ -51,22 +51,32 @@ const calculateVolume = (vertexBuffer: VertexBuffer): IVolume => {
 		maxY = Math.max(y, maxY);
 		maxZ = Math.max(z, maxZ);
 	}
+
+	// 중심점 계산 추가
+	const centerX = (maxX + minX) / 2;
+	const centerY = (maxY + minY) / 2;
+	const centerZ = (maxZ + minZ) / 2;
+
 	const xSize = Math.max(Math.abs(minX), Math.abs(maxX));
 	const ySize = Math.max(Math.abs(minY), Math.abs(maxY));
 	const zSize = Math.max(Math.abs(minZ), Math.abs(maxZ));
 	const geometryRadius = Math.max(xSize, ySize, zSize);
+
 	return {
-		volume: [maxX - minX, maxY - minY, maxZ - minZ],
+		// volume: [maxX - minX, maxY - minY, maxZ - minZ],
 		minX,
 		maxX,
 		minY,
 		maxY,
 		minZ,
 		maxZ,
+		centerX,
+		centerY,
+		centerZ,
 		xSize,
 		ySize,
 		zSize,
 		geometryRadius,
 	};
 }
-export default calculateVolume
+export default calculateVolumeAABB
