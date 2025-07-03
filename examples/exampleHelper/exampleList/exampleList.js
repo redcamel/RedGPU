@@ -205,9 +205,9 @@ const ExampleList = [
 						},
 					},
 					{
-						name: 'TODO - BoundingBox - intersects',
-						path: '3d/mesh/meshBoundBox',
-						thumb: '3d/mesh/meshBoundBox/thumb.png',
+						name: 'AABB - intersects',
+						path: '3d/mesh/meshBoundBoxIntersects',
+						thumb: '3d/mesh/meshBoundBoxIntersects/thumb.png',
 						description: {
 							ko: ``,
 							en: ``

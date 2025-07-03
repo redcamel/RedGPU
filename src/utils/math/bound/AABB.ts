@@ -112,16 +112,6 @@ export class AABB {
 		}
 	}
 
-	union(other: AABB): AABB {
-		if(!(other instanceof AABB)){
-			consoleAndThrowError('allow only AABB instance')
-		}
-		return new AABB(
-			Math.min(this.#minX, other.#minX), Math.max(this.#maxX, other.#maxX),
-			Math.min(this.#minY, other.#minY), Math.max(this.#maxY, other.#maxY),
-			Math.min(this.#minZ, other.#minZ), Math.max(this.#maxZ, other.#maxZ)
-		);
-	}
 	clone(): AABB {
 		return new AABB(this.#minX, this.#maxX, this.#minY, this.#maxY, this.#minZ, this.#maxZ);
 	}

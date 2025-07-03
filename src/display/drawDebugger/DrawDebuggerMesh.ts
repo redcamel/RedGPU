@@ -18,7 +18,7 @@ class DrawDebuggerMesh {
 	#vertexBuffer: VertexBuffer;
 	#material: ColorMaterial;
 	#debugMesh: Mesh;
-	#debugMode: DebugMode = 'OBB';
+	#debugMode: DebugMode = 'AABB';
 	// BOTH 모드용 추가 메시
 	#aabbMaterial: ColorMaterial;
 	#aabbDebugMesh: Mesh;
