@@ -1,5 +1,22 @@
-import {IVolumeAABB} from "../../primitive/core/Primitive";
-import VertexBuffer from "../../resources/buffer/vertexBuffer/VertexBuffer";
+
+import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
+
+export type IVolumeAABB = {
+	// volume: [number, number, number];
+	minX: number;
+	maxX: number;
+	minY: number;
+	maxY: number;
+	minZ: number;
+	maxZ: number;
+	centerX: number;
+	centerY: number;
+	centerZ: number;
+	xSize: number;
+	ySize: number;
+	zSize: number;
+	geometryRadius: number;
+}
 
 /**
  * Calculates the volume of a given vertex buffer.
@@ -7,7 +24,7 @@ import VertexBuffer from "../../resources/buffer/vertexBuffer/VertexBuffer";
  * @param {VertexBuffer} vertexBuffer - The vertex buffer representing the geometry.
  * @returns {IVolumeAABB} - An object containing the calculated volume and related properties.
  */
-const calculateVolumeAABB = (vertexBuffer: VertexBuffer): IVolumeAABB => {
+const calculateGeometryAABB = (vertexBuffer: VertexBuffer): IVolumeAABB => {
 	const stride = vertexBuffer.stride;
 	const data = vertexBuffer.data;
 	let len = vertexBuffer.vertexCount;
@@ -79,4 +96,4 @@ const calculateVolumeAABB = (vertexBuffer: VertexBuffer): IVolumeAABB => {
 		geometryRadius,
 	};
 }
-export default calculateVolumeAABB
+export default calculateGeometryAABB

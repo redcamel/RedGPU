@@ -2,12 +2,13 @@ import RedGPUContext from "../../context/RedGPUContext";
 import Geometry from "../../geometry/Geometry";
 import GPU_PRIMITIVE_TOPOLOGY from "../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
 import ColorMaterial from "../../material/colorMaterial/ColorMaterial";
-import { IVolumeAABB } from "../../primitive/core/Primitive";
 import RenderViewStateData from "../../renderer/RenderViewStateData";
 import InterleaveType from "../../resources/buffer/core/type/InterleaveType";
 import InterleavedStruct from "../../resources/buffer/vertexBuffer/InterleavedStruct";
 import VertexBuffer from "../../resources/buffer/vertexBuffer/VertexBuffer";
-import Mesh, { IVolumeOBB } from "../mesh/Mesh";
+import {IVolumeAABB} from "../../utils/math/volume/calculateGeometryAABB";
+import {IVolumeOBB} from "../../utils/math/volume/calculateMeshOBB";
+import Mesh from "../mesh/Mesh";
 
 type DebugMode = 'OBB' | 'AABB' | 'BOTH';
 

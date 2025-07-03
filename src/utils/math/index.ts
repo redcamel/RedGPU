@@ -1,6 +1,7 @@
 import calculateNormals from "./calculateNormals";
 import calculateTextureByteSize from "./calculateTextureByteSize";
-import calculateVolumeAABB from "./calculateVolumeAABB";
+import calculateMeshAABB from "./volume/calculateMeshAABB";
+import calculateGeometryAABB from "./volume/calculateGeometryAABB";
 import computeViewFrustumPlanes from "./computeViewFrustumPlanes";
 import formatBytes from "./formatBytes";
 import getMipLevelCount from "./getMipLevelCount";
@@ -10,6 +11,7 @@ import matToEuler from "./matToEuler";
 import quaternionToRotationMat4 from "./quaternionToRotationMat4";
 import screenToWorld from "./screenToWorld";
 import sortTransparentObjects from "./sortTransparentObjects";
+import calculateMeshOBB from "./volume/calculateMeshOBB";
 import worldToLocal from "./worldToLocal";
 
 export {
@@ -19,7 +21,9 @@ export {
 	worldToLocal,
 	getMipLevelCount,
 	calculateTextureByteSize,
-	calculateVolumeAABB,
+	calculateGeometryAABB,
+	calculateMeshAABB,
+	calculateMeshOBB,
 	computeViewFrustumPlanes,
 	calculateNormals,
 	formatBytes,

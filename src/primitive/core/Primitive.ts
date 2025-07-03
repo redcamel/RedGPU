@@ -6,24 +6,8 @@ import IndexBuffer from "../../resources/buffer/indexBuffer/IndexBuffer";
 import InterleavedStruct from "../../resources/buffer/vertexBuffer/InterleavedStruct";
 import VertexBuffer from "../../resources/buffer/vertexBuffer/VertexBuffer";
 import validateRedGPUContext from "../../runtimeChecker/validateFunc/validateRedGPUContext";
-import calculateVolumeAABB from "../../utils/math/calculateVolumeAABB";
+import calculateGeometryAABB, {IVolumeAABB} from "../../utils/math/volume/calculateGeometryAABB";
 
-export type IVolumeAABB = {
-	// volume: [number, number, number];
-	minX: number;
-	maxX: number;
-	minY: number;
-	maxY: number;
-	minZ: number;
-	maxZ: number;
-	centerX: number;
-	centerY: number;
-	centerZ: number;
-	xSize: number;
-	ySize: number;
-	zSize: number;
-	geometryRadius: number;
-}
 
 /**
  * Class representing a primitive geometry.
@@ -66,7 +50,7 @@ class Primitive {
 	get volume(): IVolumeAABB {
 		if (!this.#volume) {
 			//TODO vertexBuffer 내용이 변경될떄  재계산해야함
-			this.#volume = calculateVolumeAABB(this.#vertexBuffer);
+			this.#volume = calculateGeometryAABB(this.#vertexBuffer);
 		}
 		return this.#volume;
 	}
