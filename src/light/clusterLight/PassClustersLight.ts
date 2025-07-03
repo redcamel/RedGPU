@@ -95,5 +95,4 @@ class PassClustersLight {
 	}
 }
 
-// Export the class as a default module
 export default PassClustersLight;

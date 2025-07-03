@@ -15,7 +15,7 @@ import {IVolumeAABB} from "../../utils/math/volume/calculateGeometryAABB";
 import calculateMeshAABB from "../../utils/math/volume/calculateMeshAABB";
 import calculateMeshOBB, {IVolumeOBB} from "../../utils/math/volume/calculateMeshOBB";
 import uuidToUint from "../../utils/uuidToUint";
-import DrawDebugger from "../drawDebugger/DrawDebugger";
+import DrawDebuggerMesh from "../drawDebugger/DrawDebuggerMesh";
 import createMeshVertexUniformBuffers from "./core/createMeshVertexUniformBuffers";
 import Object3DContainer from "./core/Object3DContainer";
 import updateMeshDirtyPipeline from "./core/pipeline/updateMeshDirtyPipeline";
@@ -69,7 +69,7 @@ class Mesh extends MeshBase {
 	//
 	#opacity: number = 1
 	//
-	#drawDebugger:DrawDebugger
+	#drawDebugger:DrawDebuggerMesh
 	#enableDebugger:boolean=false
 	get enableDebugger(): boolean {
 		return this.#enableDebugger;
@@ -77,7 +77,7 @@ class Mesh extends MeshBase {
 
 	set enableDebugger(value: boolean) {
 		this.#enableDebugger = value;
-		if(value && !this.#drawDebugger) this.#drawDebugger = new DrawDebugger(this.redGPUContext,this)
+		if(value && !this.#drawDebugger) this.#drawDebugger = new DrawDebuggerMesh(this.redGPUContext,this)
 	}
 //
 	constructor(redGPUContext: RedGPUContext, geometry?: Geometry | Primitive, material?, name?: string) {

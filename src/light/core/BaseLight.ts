@@ -1,10 +1,11 @@
 import ColorRGB from "../../color/ColorRGB";
-import DrawDebugger from "../../display/drawDebugger/DrawDebugger";
+import ADrawDebuggerLight from "../../display/drawDebugger/light/ADrawDebuggerLight";
+
 
 class BaseLight {
 	#color: ColorRGB;
 	#intensity: number;
-	drawDebugger:DrawDebugger
+	drawDebugger:ADrawDebuggerLight
 	#enableDebugger:boolean=false
 	get enableDebugger(): boolean {
 		return this.#enableDebugger;

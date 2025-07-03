@@ -18,6 +18,9 @@ import IBL from "../../resources/texture/ibl/IBL";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
 import InstanceIdGenerator from "../../utils/InstanceIdGenerator";
+import DebuggerPointLight from "../drawDebugger/light/DebuggerPointLight";
+import DebuggerSpotLight from "../drawDebugger/light/DebuggerSpotLight";
+
 import Axis from "../helper/asix/Axis";
 import Grid from "../helper/grid/Grid";
 import Scene from "../scene/Scene";
@@ -364,7 +367,7 @@ class View3D extends ViewTransform {
 
 	#updateClusters(calcClusterLight: boolean = false) {
 		if (!calcClusterLight) return
-		const {redGPUContext, scene} = this
+		const {redGPUContext, scene,debugViewRenderState} = this
 		// const dirtyPixelSize = this.#prevWidth == undefined || this.#prevHeight == undefined || this.#prevWidth !== this.pixelRectArray[2] || this.#prevHeight !== this.pixelRectArray[3]
 		const dirtyPixelSize = true;
 		if (!this.#passLightClustersBound) {
@@ -398,6 +401,10 @@ class View3D extends ViewTransform {
 						],
 						offset,
 					)
+					if (tLight.enableDebugger) {
+						if (!tLight.drawDebugger) tLight.drawDebugger = new DebuggerPointLight(redGPUContext, tLight)
+						tLight.drawDebugger.render(debugViewRenderState)
+					}
 				}
 			}
 			if (spotLightNum) {
@@ -415,6 +422,10 @@ class View3D extends ViewTransform {
 						],
 						offset,
 					)
+					if (tLight.enableDebugger) {
+						if (!tLight.drawDebugger) tLight.drawDebugger = new DebuggerSpotLight(redGPUContext, tLight)
+						tLight.drawDebugger.render(debugViewRenderState)
+					}
 				}
 			}
 			this.#clusterLightsBufferData.set(

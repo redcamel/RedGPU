@@ -36,6 +36,7 @@ RedGPU.init(
 const createDirectionalLight = (scene) => {
 	const direction = [-1, -1, -1];
 	const light = new RedGPU.Light.DirectionalLight(direction, '#fff');
+	light.enableDebugger = true;
 	scene.lightManager.addDirectionalLight(light);
 	return light;
 };
@@ -61,6 +62,7 @@ const renderTestPaneWithLightControl = async (redGPUContext, mesh, light) => {
 		directionZ: light.direction[2],
 		intensity: light.intensity,
 		color: { r: light.color.r, g: light.color.g, b: light.color.b },
+		enableDebugger:light.enableDebugger
 	};
 
 	const lightFolder = pane.addFolder({ title: 'Directional Light', expanded: true });
@@ -81,7 +83,9 @@ const renderTestPaneWithLightControl = async (redGPUContext, mesh, light) => {
 			const { r, g, b } = ev.value;
 			light.color.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
 		});
-
+	lightFolder.addBinding(lightConfig, 'enableDebugger').on('change', (evt) => {
+		light.enableDebugger = evt.value;
+	});
 	const config = {
 		x: mesh.x,
 		y: mesh.y,
@@ -104,4 +108,5 @@ const renderTestPaneWithLightControl = async (redGPUContext, mesh, light) => {
 	positionFolder.addBinding(config, 'z', { min: -10, max: 10, step: 0.1 }).on('change', (evt) => {
 		mesh.setPosition(config.x, config.y, evt.value);
 	});
+
 };

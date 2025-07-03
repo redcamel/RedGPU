@@ -56,6 +56,7 @@ const createSpotLight = (scene) => {
 	light.x = 4;
 	light.y = 8;
 	light.radius = 10;
+	light.enableDebugger = true;
 	scene.lightManager.addSpotLight(light);
 
 	return light;
@@ -149,6 +150,7 @@ const renderTestPaneWithLightControl = async (redGPUContext, light) => {
 	lightFolder.addBinding(lightConfig, 'outerCutoff', { min: 0, max: 60, step: 0.1 }).on('change', (evt) => {
 		light.outerCutoff = evt.value;
 	});
+	lightFolder.addBinding(light, 'enableDebugger');
 	lightFolder
 		.addBinding(lightConfig, 'color', { picker: 'inline', view: 'color', expanded: true })
 		.on('change', (evt) => {

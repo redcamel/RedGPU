@@ -15,15 +15,28 @@ RedGPU.init(
 		redGPUContext.addView(view);
 
 
-		// directionalLight.enableDebugger = true;
+		const directionalLight = new RedGPU.Light.DirectionalLight();
+		directionalLight.color.setColorByRGB(255, 255, 200);
+		directionalLight.intensity = 1.0;
+		directionalLight.direction = [0.3, -1, 0.5];
+		scene.lightManager.addDirectionalLight(directionalLight);
+		directionalLight.enableDebugger = true;
 		// 포인트 라이트 추가
-		// const pointLight = new RedGPU.Light.PointLight();
-		// pointLight.color.setColorByRGB(255, 100, 100);
-		// pointLight.intensity = 2.0;
-		// pointLight.radius = 8.0;
-		// pointLight.setPosition(3, 3, 2);
-		// scene.lightManager.addPointLight(pointLight);
-		// pointLight.enableDebugger = true;
+		const pointLight = new RedGPU.Light.PointLight();
+		pointLight.color.setColorByRGB(255, 0, 0);
+		pointLight.intensity = 2.0;
+		pointLight.radius = 2.0;
+		pointLight.setPosition(0, 1, 0);
+		scene.lightManager.addPointLight(pointLight);
+		pointLight.enableDebugger = true;
+
+		const spotLight = new RedGPU.Light.SpotLight();
+		spotLight.color.setColorByRGB(255, 0, 0);
+		spotLight.intensity = 2.0;
+		spotLight.radius = 12.0;
+		spotLight.setPosition(5, 5, 0);
+		scene.lightManager.addSpotLight(spotLight);
+		spotLight.enableDebugger = true;
 
 
 		const mesh = new RedGPU.Display.Mesh(redGPUContext,new RedGPU.Primitive.Sphere(redGPUContext), new RedGPU.Material.PhongMaterial(redGPUContext))
@@ -56,18 +69,18 @@ RedGPU.init(
 			}
 
 
-			// mesh.setPosition(Math.sin(time/1000),Math.cos(time/1000),Math.sin(time/1000))
+			mesh.setPosition(Math.sin(time/1000),Math.cos(time/1000),Math.sin(time/1000))
 			//
-			// scene.children.forEach(mesh => {
-			// 	mesh.rotationX +=.1
-			// 	mesh.rotationY +=.1
-			// 	mesh.rotationZ +=.1
-			//
-			// })
+			scene.children.forEach(mesh => {
+				mesh2.rotationX +=.3
+				mesh2.rotationY +=.3
+				mesh2.rotationZ +=.3
+
+			})
 		};
 		renderer.start(redGPUContext, render);
 
-		renderTestPane(redGPUContext,view,RedGPU);
+		renderTestPane(redGPUContext,view);
 
 	},
 	(failReason) => {
@@ -117,8 +130,10 @@ function loadGLTFGrid(view, urls, gridSize = 4, spacing = 3) {
 
 const renderTestPane = async (redGPUContext, targetView) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
-	const {createIblHelper} = await import('../../../exampleHelper/createExample/panes/index.js');
-
 	const pane = new Pane();
-	createIblHelper(pane, targetView, RedGPU);
+
+	const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
+	const skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+	targetView.ibl = ibl;
+	targetView.skybox = skybox;
 };
