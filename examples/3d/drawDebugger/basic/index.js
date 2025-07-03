@@ -131,6 +131,7 @@ const renderTestPane = async (redGPUContext, targetView) => {
 	const TEST_DATA = {
 		grid : !!targetView.grid,
 		axis : !!targetView.axis,
+		volumeType:'OBB'
 	}
 	pane.addBinding(TEST_DATA, 'grid').on('change', (ev) => {
 		targetView.grid = ev.value;
@@ -138,9 +139,40 @@ const renderTestPane = async (redGPUContext, targetView) => {
 	pane.addBinding(TEST_DATA, 'axis').on('change', (ev) => {
 		targetView.axis = ev.value;
 	});
+
+	pane.addBinding(TEST_DATA, 'volumeType', {
+		label: 'Mesh Volume Type',
+		options: {
+			'OBB': 'OBB',
+			'AABB': 'AABB',
+			'BOTH': 'BOTH'
+		}
+	}).on('change', (evt) => {
+		console.log('Volume type changed to:', evt.value);
+
+		// 헬퍼 함수: 재귀적으로 모든 메시의 디버그 모드 업데이트
+		const updateDebugMode = (object, mode) => {
+			// 현재 객체가 메시이고 디버거가 활성화된 경우
+			if (object.drawDebugger && object.enableDebugger) {
+				object.drawDebugger.debugMode = mode;
+				console.log(`✅ Updated ${object.name || 'Unnamed'} to ${mode}`);
+			}
+
+			// 자식 객체들도 재귀적으로 처리
+			if (object.children && Array.isArray(object.children)) {
+				object.children.forEach(child => updateDebugMode(child, mode));
+			}
+		};
+
+		// 씬의 모든 자식 객체에 적용
+		updateDebugMode(targetView.scene, evt.value);
+	});
+
+
 	setDirectionalLightPanel(pane, targetView)
 	setPointLightPanel(pane, targetView)
 	setSpotLightPanel(pane, targetView)
+
 };
 const setSpotLightPanel = (pane, targetView) => {
 	const light = targetView.scene.lightManager.spotLights[0];

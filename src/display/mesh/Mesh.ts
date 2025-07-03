@@ -1,4 +1,4 @@
-import {mat4, vec3} from "gl-matrix";
+import {mat4} from "gl-matrix";
 import {Function} from "wgsl_reflect";
 import RedGPUContext from "../../context/RedGPUContext";
 import Geometry from "../../geometry/Geometry";
@@ -73,6 +73,10 @@ class Mesh extends MeshBase {
 	#enableDebugger:boolean=false
 	get enableDebugger(): boolean {
 		return this.#enableDebugger;
+	}
+
+	get drawDebugger(): DrawDebuggerMesh {
+		return this.#drawDebugger;
 	}
 
 	set enableDebugger(value: boolean) {
