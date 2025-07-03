@@ -181,8 +181,8 @@ class DrawDebuggerMesh {
 	render(debugViewRenderState: RenderViewStateData) {
 		if (!this.#target.enableDebugger) return;
 
-		const targetOBB = this.#target.volumeOBB;
-		const targetAABB = this.#target.volumeAABB;
+		const targetOBB = this.#target.boundingOBB;
+		const targetAABB = this.#target.boundingAABB;
 		if (!targetOBB || !targetAABB) return;
 
 		if (this.#debugMode === 'OBB') {

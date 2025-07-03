@@ -293,12 +293,12 @@ class Mesh extends MeshBase {
 		return this.#rotationArray;
 	}
 
-	get volumeOBB(): IVolumeOBB {
+	get boundingOBB(): IVolumeOBB {
 		if (!this._geometry) return null;
 		return calculateMeshOBB(this);
 	}
 
-	get volumeAABB(): IVolumeAABB{
+	get boundingAABB(): IVolumeAABB{
 		if (!this._geometry) return null;
 		return calculateMeshAABB(this);
 	}
