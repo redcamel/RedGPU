@@ -10,7 +10,7 @@ import {IVolumeAABB} from "../../utils/math/volume/calculateGeometryAABB";
 import {IVolumeOBB} from "../../utils/math/volume/calculateMeshOBB";
 import Mesh from "../mesh/Mesh";
 
-type DebugMode = 'OBB' | 'AABB' | 'BOTH';
+type DebugMode = 'OBB' | 'AABB' | 'BOTH' | 'COMBINED_AABB' ;
 
 class DrawDebuggerMesh {
 	#redGPUContext: RedGPUContext;
@@ -55,9 +55,9 @@ class DrawDebuggerMesh {
 
 	set debugMode(value: DebugMode) {
 		this.#debugMode = value;
-		if (value === 'OBB') {
+		if (value === 'OBB' ) {
 			this.#material.color.setColorByRGB(255, 0, 0);
-		} else if (value === 'AABB') {
+		} else if (value === 'AABB'||  value === 'COMBINED_AABB') {
 			this.#material.color.setColorByRGB(0, 255, 0);
 		} else if (value === 'BOTH') {
 			this.#material.color.setColorByRGB(255, 0, 0);
@@ -181,11 +181,10 @@ class DrawDebuggerMesh {
 	render(debugViewRenderState: RenderViewStateData) {
 		if (!this.#target.enableDebugger) return;
 
-		const targetOBB = this.#target.boundingOBB;
-		const targetAABB = this.#target.boundingAABB;
-		if (!targetOBB || !targetAABB) return;
 
-		if (this.#debugMode === 'OBB') {
+
+		if (this.#debugMode === 'OBB' ) {
+			const targetOBB =  this.#target.boundingOBB;
 			// OBB가 변경된 경우에만 업데이트
 			if (this.#hasOBBChanged(targetOBB)) {
 				this.#updateVertexDataFromOBB(targetOBB, this.#vertexBuffer);
@@ -197,7 +196,8 @@ class DrawDebuggerMesh {
 			this.#debugMesh.setScale(1, 1, 1);
 			this.#debugMesh.render(debugViewRenderState);
 		}
-		else if (this.#debugMode === 'AABB') {
+		else if (this.#debugMode === 'AABB'|| this.#debugMode === 'COMBINED_AABB') {
+			const targetAABB = this.#debugMode === 'COMBINED_AABB' ? this.#target.combinedBoundingAABB : this.#target.boundingAABB;
 			// AABB가 변경된 경우에만 업데이트
 			if (this.#hasAABBChanged(targetAABB)) {
 				this.#updateVertexDataFromAABB(targetAABB, this.#vertexBuffer);
@@ -210,6 +210,8 @@ class DrawDebuggerMesh {
 			this.#debugMesh.render(debugViewRenderState);
 		}
 		else if (this.#debugMode === 'BOTH') {
+			const targetOBB =  this.#target.boundingOBB;
+			const targetAABB = this.#target.boundingAABB;
 			// OBB (빨간색) - 변경된 경우에만 업데이트
 			if (this.#hasOBBChanged(targetOBB)) {
 				this.#updateVertexDataFromOBB(targetOBB, this.#vertexBuffer);

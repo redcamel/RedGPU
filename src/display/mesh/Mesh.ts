@@ -1,4 +1,4 @@
-import {mat4} from "gl-matrix";
+import {mat4, vec3} from "gl-matrix";
 import {Function} from "wgsl_reflect";
 import RedGPUContext from "../../context/RedGPUContext";
 import Geometry from "../../geometry/Geometry";
@@ -31,7 +31,6 @@ interface Mesh {
 	receiveShadow: boolean
 	meshType: string
 }
-
 
 class Mesh extends MeshBase {
 	displacementTexture: BitmapTexture
@@ -69,8 +68,8 @@ class Mesh extends MeshBase {
 	//
 	#opacity: number = 1
 	//
-	#drawDebugger:DrawDebuggerMesh
-	#enableDebugger:boolean=false
+	#drawDebugger: DrawDebuggerMesh
+	#enableDebugger: boolean = false
 	get enableDebugger(): boolean {
 		return this.#enableDebugger;
 	}
@@ -81,8 +80,9 @@ class Mesh extends MeshBase {
 
 	set enableDebugger(value: boolean) {
 		this.#enableDebugger = value;
-		if(value && !this.#drawDebugger) this.#drawDebugger = new DrawDebuggerMesh(this.redGPUContext,this)
+		if (value && !this.#drawDebugger) this.#drawDebugger = new DrawDebuggerMesh(this.redGPUContext, this)
 	}
+
 //
 	constructor(redGPUContext: RedGPUContext, geometry?: Geometry | Primitive, material?, name?: string) {
 		super(redGPUContext)
@@ -292,17 +292,6 @@ class Mesh extends MeshBase {
 	get rotation(): number[] {
 		return this.#rotationArray;
 	}
-
-	get boundingOBB(): IVolumeOBB {
-		if (!this._geometry) return null;
-		return calculateMeshOBB(this);
-	}
-
-	get boundingAABB(): IVolumeAABB{
-		if (!this._geometry) return null;
-		return calculateMeshAABB(this);
-	}
-
 
 	setEnableDebuggerRecursively(enableDebugger: boolean = false) {
 		if ('enableDebugger' in this) {
@@ -909,7 +898,7 @@ class Mesh extends MeshBase {
 			//TODO 이거 이상함 확인해야함
 			if (this.castShadow || (this.castShadow && !currentGeometry)) castingList[castingList.length] = this
 		}
-		if(this.#enableDebugger) this.#drawDebugger.render(debugViewRenderState)
+		if (this.#enableDebugger) this.#drawDebugger.render(debugViewRenderState)
 		// children render
 		const {children} = this
 		let i = 0
@@ -950,6 +939,93 @@ class Mesh extends MeshBase {
 			vModuleDescriptor
 		)
 	}
+
+	get boundingOBB(): IVolumeOBB {
+		if (!this._geometry) return null;
+		return calculateMeshOBB(this);
+	}
+
+	get boundingAABB(): IVolumeAABB {
+		if (!this._geometry) return null;
+		return calculateMeshAABB(this);
+	}
+
+	/**
+	 * 자식을 포함한 AABB(Axis-Aligned Bounding Box) 계산
+	 */
+	get combinedBoundingAABB(): IVolumeAABB {
+		const allAABBs = this.collectAllAABBs();
+		if (allAABBs.length === 0) return null;
+		return this.calculateCombinedAABBFromAABBs(allAABBs);
+	}
+
+	/**
+	 * 재귀적으로 모든 자식의 AABB를 수집
+	 */
+	private collectAllAABBs(): IVolumeAABB[] {
+		const aabbs: IVolumeAABB[] = [];
+		const collectRecursive = (mesh: Mesh) => {
+			if (!mesh._geometry) return;
+			// calculateMeshAABB를 사용해 이미 변환된 AABB 획득
+			const aabb = calculateMeshAABB(mesh);
+			if (aabb) {
+				aabbs.push(aabb);
+			}
+			// 자식들도 재귀적으로 처리
+			if (mesh.children) {
+				mesh.children.forEach(child => {
+					if (child instanceof Mesh) {
+						collectRecursive(child);
+					}
+				});
+			}
+		};
+		collectRecursive(this);
+		return aabbs;
+	}
+
+	/**
+	 * 여러 AABB를 결합하여 하나의 AABB 계산
+	 */
+	private calculateCombinedAABBFromAABBs(aabbs: IVolumeAABB[]): IVolumeAABB {
+		if (aabbs.length === 0) return null;
+		if (aabbs.length === 1) return aabbs[0];
+		let minX = Infinity, minY = Infinity, minZ = Infinity;
+		let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
+		// 모든 AABB의 min/max 값들을 비교하여 전체 범위 계산
+		aabbs.forEach(aabb => {
+			minX = Math.min(minX, aabb.minX);
+			minY = Math.min(minY, aabb.minY);
+			minZ = Math.min(minZ, aabb.minZ);
+			maxX = Math.max(maxX, aabb.maxX);
+			maxY = Math.max(maxY, aabb.maxY);
+			maxZ = Math.max(maxZ, aabb.maxZ);
+		});
+		// IVolumeAABB 형태로 반환
+		const centerX = (maxX + minX) / 2;
+		const centerY = (maxY + minY) / 2;
+		const centerZ = (maxZ + minZ) / 2;
+		const xSize = maxX - minX;
+		const ySize = maxY - minY;
+		const zSize = maxZ - minZ;
+		const geometryRadius = Math.sqrt((xSize / 2) ** 2 + (ySize / 2) ** 2 + (zSize / 2) ** 2);
+		return {
+			minX,
+			maxX,
+			minY,
+			maxY,
+			minZ,
+			maxZ,
+			centerX,
+			centerY,
+			centerZ,
+			xSize,
+			ySize,
+			zSize,
+			geometryRadius
+		};
+	}
+
 }
 
 Object.defineProperty(Mesh.prototype, 'meshType', {
