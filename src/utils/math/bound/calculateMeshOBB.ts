@@ -1,12 +1,12 @@
 import {mat4, vec3} from "gl-matrix";
 import Mesh from "../../../display/mesh/Mesh";
-export type IVolumeOBB = {
+export type IOBB = {
 	center: [number, number, number];
 	halfExtents: [number, number, number];
 	orientation: mat4;
 }
 
-const calculateMeshOBB = (mesh: Mesh): IVolumeOBB =>{
+const calculateMeshOBB = (mesh: Mesh): IOBB =>{
 	const geometryVolume = mesh._geometry.volume;
 	if (!geometryVolume) return null;
 

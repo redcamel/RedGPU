@@ -220,14 +220,14 @@ class PickingManager {
 			// 	vec3.fromValues(worldPoint[0], worldPoint[1], worldPoint[2]),
 			// 	vec3.normalize(vec3.create(), direction),
 			// 	vec3.fromValues(
-			// 		e.target.geometry.volume.minX * e.target.scaleX,
-			// 		e.target.geometry.volume.minY * e.target.scaleY,
-			// 		e.target.geometry.volume.minZ * e.target.scaleZ
+			// 		e.target.geometry.bound.minX * e.target.scaleX,
+			// 		e.target.geometry.bound.minY * e.target.scaleY,
+			// 		e.target.geometry.bound.minZ * e.target.scaleZ
 			// 	),
 			// 	vec3.fromValues(
-			// 		e.target.geometry.volume.maxX * e.target.scaleX,
-			// 		e.target.geometry.volume.maxY * e.target.scaleY,
-			// 		e.target.geometry.volume.maxZ * e.target.scaleZ
+			// 		e.target.geometry.bound.maxX * e.target.scaleX,
+			// 		e.target.geometry.bound.maxY * e.target.scaleY,
+			// 		e.target.geometry.bound.maxZ * e.target.scaleZ
 			// 	),
 			// 	mat4.invert(mat4.create(), e.target.modelMatrix)
 			// )

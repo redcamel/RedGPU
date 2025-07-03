@@ -1,4 +1,4 @@
-import {mat4, vec3} from "gl-matrix";
+import {mat4} from "gl-matrix";
 import {Function} from "wgsl_reflect";
 import RedGPUContext from "../../context/RedGPUContext";
 import Geometry from "../../geometry/Geometry";
@@ -10,10 +10,10 @@ import DefineForVertex from "../../resources/defineProperty/DefineForVertex";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import InstanceIdGenerator from "../../utils/InstanceIdGenerator";
+import AABB from "../../utils/math/bound/AABB";
+import calculateMeshAABB from "../../utils/math/bound/calculateMeshAABB";
+import calculateMeshOBB, {IOBB} from "../../utils/math/bound/calculateMeshOBB";
 import mat4ToEuler from "../../utils/math/matToEuler";
-import {IVolumeAABB} from "../../utils/math/volume/calculateGeometryAABB";
-import calculateMeshAABB from "../../utils/math/volume/calculateMeshAABB";
-import calculateMeshOBB, {IVolumeOBB} from "../../utils/math/volume/calculateMeshOBB";
 import uuidToUint from "../../utils/uuidToUint";
 import DrawDebuggerMesh from "../drawDebugger/DrawDebuggerMesh";
 import createMeshVertexUniformBuffers from "./core/createMeshVertexUniformBuffers";
@@ -940,12 +940,12 @@ class Mesh extends MeshBase {
 		)
 	}
 
-	get boundingOBB(): IVolumeOBB {
+	get boundingOBB(): IOBB {
 		if (!this._geometry) return null;
 		return calculateMeshOBB(this);
 	}
 
-	get boundingAABB(): IVolumeAABB {
+	get boundingAABB(): AABB {
 		if (!this._geometry) return null;
 		return calculateMeshAABB(this);
 	}
@@ -953,17 +953,17 @@ class Mesh extends MeshBase {
 	/**
 	 * 자식을 포함한 AABB(Axis-Aligned Bounding Box) 계산
 	 */
-	get combinedBoundingAABB(): IVolumeAABB {
-		const allAABBs = this.collectAllAABBs();
+	get combinedBoundingAABB(): AABB {
+		const allAABBs = this.#collectAllAABBs();
 		if (allAABBs.length === 0) return null;
-		return this.calculateCombinedAABBFromAABBs(allAABBs);
+		return this.#calculateCombinedAABBFromAABBs(allAABBs);
 	}
 
 	/**
 	 * 재귀적으로 모든 자식의 AABB를 수집
 	 */
-	private collectAllAABBs(): IVolumeAABB[] {
-		const aabbs: IVolumeAABB[] = [];
+	#collectAllAABBs(): AABB[] {
+		const aabbs: AABB[] = [];
 		const collectRecursive = (mesh: Mesh) => {
 			if (!mesh._geometry) return;
 			// calculateMeshAABB를 사용해 이미 변환된 AABB 획득
@@ -987,11 +987,13 @@ class Mesh extends MeshBase {
 	/**
 	 * 여러 AABB를 결합하여 하나의 AABB 계산
 	 */
-	private calculateCombinedAABBFromAABBs(aabbs: IVolumeAABB[]): IVolumeAABB {
+	#calculateCombinedAABBFromAABBs(aabbs: AABB[]): AABB | null {
 		if (aabbs.length === 0) return null;
 		if (aabbs.length === 1) return aabbs[0];
+
 		let minX = Infinity, minY = Infinity, minZ = Infinity;
 		let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
+
 		// 모든 AABB의 min/max 값들을 비교하여 전체 범위 계산
 		aabbs.forEach(aabb => {
 			minX = Math.min(minX, aabb.minX);
@@ -1001,29 +1003,8 @@ class Mesh extends MeshBase {
 			maxY = Math.max(maxY, aabb.maxY);
 			maxZ = Math.max(maxZ, aabb.maxZ);
 		});
-		// IVolumeAABB 형태로 반환
-		const centerX = (maxX + minX) / 2;
-		const centerY = (maxY + minY) / 2;
-		const centerZ = (maxZ + minZ) / 2;
-		const xSize = maxX - minX;
-		const ySize = maxY - minY;
-		const zSize = maxZ - minZ;
-		const geometryRadius = Math.sqrt((xSize / 2) ** 2 + (ySize / 2) ** 2 + (zSize / 2) ** 2);
-		return {
-			minX,
-			maxX,
-			minY,
-			maxY,
-			minZ,
-			maxZ,
-			centerX,
-			centerY,
-			centerZ,
-			xSize,
-			ySize,
-			zSize,
-			geometryRadius
-		};
+
+		return new AABB(minX, maxX, minY, maxY, minZ, maxZ);
 	}
 
 }

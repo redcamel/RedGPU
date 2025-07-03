@@ -6,8 +6,8 @@ import IndexBuffer from "../../resources/buffer/indexBuffer/IndexBuffer";
 import InterleavedStruct from "../../resources/buffer/vertexBuffer/InterleavedStruct";
 import VertexBuffer from "../../resources/buffer/vertexBuffer/VertexBuffer";
 import validateRedGPUContext from "../../runtimeChecker/validateFunc/validateRedGPUContext";
-import calculateGeometryAABB, {IVolumeAABB} from "../../utils/math/volume/calculateGeometryAABB";
-
+import AABB from "../../utils/math/bound/AABB";
+import calculateGeometryAABB from "../../utils/math/bound/calculateGeometryAABB";
 
 /**
  * Class representing a primitive geometry.
@@ -18,7 +18,7 @@ class Primitive {
 	#gpuRenderInfo: GeometryGPURenderInfo
 	#vertexBuffer: VertexBuffer
 	#indexBuffer: IndexBuffer
-	#volume: IVolumeAABB;
+	#volume: AABB;
 
 	constructor(redGPUContext: RedGPUContext) {
 		validateRedGPUContext(redGPUContext)
@@ -47,7 +47,7 @@ class Primitive {
 		return this.#indexBuffer;
 	}
 
-	get volume(): IVolumeAABB {
+	get volume(): AABB {
 		if (!this.#volume) {
 			//TODO vertexBuffer 내용이 변경될떄  재계산해야함
 			this.#volume = calculateGeometryAABB(this.#vertexBuffer);

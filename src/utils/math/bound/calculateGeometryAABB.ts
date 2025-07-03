@@ -1,36 +1,13 @@
-
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
+import AABB from "./AABB";
 
-export type IVolumeAABB = {
-	// volume: [number, number, number];
-	minX: number;
-	maxX: number;
-	minY: number;
-	maxY: number;
-	minZ: number;
-	maxZ: number;
-	centerX: number;
-	centerY: number;
-	centerZ: number;
-	xSize: number;
-	ySize: number;
-	zSize: number;
-	geometryRadius: number;
-}
-
-/**
- * Calculates the volume of a given vertex buffer.
- *
- * @param {VertexBuffer} vertexBuffer - The vertex buffer representing the geometry.
- * @returns {IVolumeAABB} - An object containing the calculated volume and related properties.
- */
-const calculateGeometryAABB = (vertexBuffer: VertexBuffer): IVolumeAABB => {
+const calculateGeometryAABB = (vertexBuffer: VertexBuffer): AABB => {
 	const stride = vertexBuffer.stride;
 	const data = vertexBuffer.data;
 	let len = vertexBuffer.vertexCount;
 	let minX = Infinity, minY = Infinity, minZ = Infinity, maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
 	let i = 0;
-	// Process 4 vertices at a time
+
 	for (; i <= len - 4; i += 4) {
 		let idx = i * stride;
 		const x1 = data[idx];
@@ -55,7 +32,7 @@ const calculateGeometryAABB = (vertexBuffer: VertexBuffer): IVolumeAABB => {
 		maxY = Math.max(y1, y2, y3, y4, maxY);
 		maxZ = Math.max(z1, z2, z3, z4, maxZ);
 	}
-	// Process remaining vertices
+
 	for (; i < len; i++) {
 		let idx = i * stride;
 		const x = data[idx];
@@ -69,31 +46,7 @@ const calculateGeometryAABB = (vertexBuffer: VertexBuffer): IVolumeAABB => {
 		maxZ = Math.max(z, maxZ);
 	}
 
-	// 중심점 계산 추가
-	const centerX = (maxX + minX) / 2;
-	const centerY = (maxY + minY) / 2;
-	const centerZ = (maxZ + minZ) / 2;
+	return new AABB(minX, maxX, minY, maxY, minZ, maxZ);
+};
 
-	const xSize = Math.max(Math.abs(minX), Math.abs(maxX));
-	const ySize = Math.max(Math.abs(minY), Math.abs(maxY));
-	const zSize = Math.max(Math.abs(minZ), Math.abs(maxZ));
-	const geometryRadius = Math.max(xSize, ySize, zSize);
-
-	return {
-		// volume: [maxX - minX, maxY - minY, maxZ - minZ],
-		minX,
-		maxX,
-		minY,
-		maxY,
-		minZ,
-		maxZ,
-		centerX,
-		centerY,
-		centerZ,
-		xSize,
-		ySize,
-		zSize,
-		geometryRadius,
-	};
-}
-export default calculateGeometryAABB
+export default calculateGeometryAABB;

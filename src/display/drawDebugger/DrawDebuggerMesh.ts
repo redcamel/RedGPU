@@ -6,8 +6,8 @@ import RenderViewStateData from "../../renderer/RenderViewStateData";
 import InterleaveType from "../../resources/buffer/core/type/InterleaveType";
 import InterleavedStruct from "../../resources/buffer/vertexBuffer/InterleavedStruct";
 import VertexBuffer from "../../resources/buffer/vertexBuffer/VertexBuffer";
-import {IVolumeAABB} from "../../utils/math/volume/calculateGeometryAABB";
-import {IVolumeOBB} from "../../utils/math/volume/calculateMeshOBB";
+import AABB from "../../utils/math/bound/AABB";
+import {IOBB} from "../../utils/math/bound/calculateMeshOBB";
 import Mesh from "../mesh/Mesh";
 
 type DebugMode = 'OBB' | 'AABB' | 'BOTH' | 'COMBINED_AABB' ;
@@ -24,8 +24,8 @@ class DrawDebuggerMesh {
 	#aabbDebugMesh: Mesh;
 
 	// 캐시된 볼륨 데이터 (변경 감지용)
-	#cachedOBB: IVolumeOBB | null = null;
-	#cachedAABB: IVolumeAABB | null = null;
+	#cachedOBB: IOBB | null = null;
+	#cachedAABB: AABB | null = null;
 
 	constructor(redGPUContext: RedGPUContext, target: Mesh) {
 		this.#redGPUContext = redGPUContext;
@@ -87,7 +87,7 @@ class DrawDebuggerMesh {
 		return new Geometry(redGPUContext, vertexBuffer);
 	}
 
-	#hasOBBChanged(currentOBB: IVolumeOBB): boolean {
+	#hasOBBChanged(currentOBB: IOBB): boolean {
 		if (!this.#cachedOBB) return true;
 
 		const cached = this.#cachedOBB;
@@ -102,7 +102,7 @@ class DrawDebuggerMesh {
 		);
 	}
 
-	#hasAABBChanged(currentAABB: IVolumeAABB): boolean {
+	#hasAABBChanged(currentAABB: AABB): boolean {
 		if (!this.#cachedAABB) return true;
 
 		const cached = this.#cachedAABB;
@@ -124,7 +124,7 @@ class DrawDebuggerMesh {
 		return true;
 	}
 
-	#cacheOBB(obb: IVolumeOBB): void {
+	#cacheOBB(obb: IOBB): void {
 		this.#cachedOBB = {
 			center: [obb.center[0], obb.center[1], obb.center[2]],
 			halfExtents: [obb.halfExtents[0], obb.halfExtents[1], obb.halfExtents[2]],
@@ -132,13 +132,11 @@ class DrawDebuggerMesh {
 		};
 	}
 
-	#cacheAABB(aabb: IVolumeAABB): void {
-		this.#cachedAABB = {
-			...aabb
-		};
+	#cacheAABB(aabb: AABB): void {
+		this.#cachedAABB = aabb.clone()
 	}
 
-	#updateVertexDataFromOBB(targetOBB: IVolumeOBB, vertexBuffer: VertexBuffer) {
+	#updateVertexDataFromOBB(targetOBB: IOBB, vertexBuffer: VertexBuffer) {
 		const { center, halfExtents, orientation } = targetOBB;
 		const localVertices = [
 			[-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1],
@@ -167,7 +165,7 @@ class DrawDebuggerMesh {
 		this.#updateVertexBuffer(transformedVertices, vertexBuffer);
 	}
 
-	#updateVertexDataFromAABB(targetAABB: IVolumeAABB, vertexBuffer: VertexBuffer) {
+	#updateVertexDataFromAABB(targetAABB: AABB, vertexBuffer: VertexBuffer) {
 		const { minX, maxX, minY, maxY, minZ, maxZ } = targetAABB;
 
 		const transformedVertices = [
