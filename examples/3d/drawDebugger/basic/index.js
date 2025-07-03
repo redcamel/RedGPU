@@ -31,10 +31,11 @@ RedGPU.init(
 		pointLight.enableDebugger = true;
 
 		const spotLight = new RedGPU.Light.SpotLight();
-		spotLight.color.setColorByRGB(255, 0, 0);
+		spotLight.color.setColorByRGB(0, 0, 255);
 		spotLight.intensity = 2.0;
 		spotLight.radius = 12.0;
-		spotLight.setPosition(5, 5, 0);
+		spotLight.setPosition(6, 6, 6);
+		spotLight.direction=[-1, -1, -1];
 		scene.lightManager.addSpotLight(spotLight);
 		spotLight.enableDebugger = true;
 
@@ -71,12 +72,13 @@ RedGPU.init(
 
 			mesh.setPosition(Math.sin(time/1000),Math.cos(time/1000),Math.sin(time/1000))
 			//
-			scene.children.forEach(mesh => {
-				mesh2.rotationX +=.3
-				mesh2.rotationY +=.3
-				mesh2.rotationZ +=.3
+			mesh.rotationX +=.3
+			mesh.rotationY +=.3
+			mesh.rotationZ +=.3
 
-			})
+			mesh2.rotationX +=.6
+			mesh2.rotationY +=.6
+			mesh2.rotationZ +=.6
 		};
 		renderer.start(redGPUContext, render);
 
