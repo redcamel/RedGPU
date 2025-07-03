@@ -6,7 +6,7 @@ import ADrawDebuggerLight from "./ADrawDebuggerLight";
 
 
 
-class DebuggerPointLight extends ADrawDebuggerLight {
+class DrawDebuggerPointLight extends ADrawDebuggerLight {
 	#target: PointLight;
 
 	constructor(redGPUContext: RedGPUContext, target: PointLight) {
@@ -97,5 +97,5 @@ class DebuggerPointLight extends ADrawDebuggerLight {
 	}
 }
 
-Object.freeze(DebuggerPointLight);
-export default DebuggerPointLight;
+Object.freeze(DrawDebuggerPointLight);
+export default DrawDebuggerPointLight;

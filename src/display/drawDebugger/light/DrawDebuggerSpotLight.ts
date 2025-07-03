@@ -4,7 +4,7 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
 import ADrawDebuggerLight from "./ADrawDebuggerLight";
 
-class DebuggerSpotLight extends ADrawDebuggerLight {
+class DrawDebuggerSpotLight extends ADrawDebuggerLight {
 	#target: SpotLight;
 
 	constructor(redGPUContext: RedGPUContext, target: SpotLight) {
@@ -172,5 +172,5 @@ class DebuggerSpotLight extends ADrawDebuggerLight {
 	}
 }
 
-Object.freeze(DebuggerSpotLight);
-export default DebuggerSpotLight;
+Object.freeze(DrawDebuggerSpotLight);
+export default DrawDebuggerSpotLight;

@@ -1,15 +1,15 @@
-import RedGPUContext from "../../../context/RedGPUContext";
-import ColorMaterial from "../../../material/colorMaterial/ColorMaterial";
-import Box from "../../../primitive/Box";
-import Cylinder from "../../../primitive/Cylinder"; // 실린더 클래스
-import Sphere from "../../../primitive/Sphere";
-import Mesh from "../../mesh/Mesh";
+import RedGPUContext from "../../context/RedGPUContext";
+import ColorMaterial from "../../material/colorMaterial/ColorMaterial";
+import Box from "../../primitive/Box";
+import Cylinder from "../../primitive/Cylinder"; // 실린더 클래스
+import Sphere from "../../primitive/Sphere";
+import Mesh from "../mesh/Mesh";
 
 /**
- * Represents the Axis class with larger cone-like indicators at the ends of each axis.
+ * Represents the DrawDebuggerAxis class with larger cone-like indicators at the ends of each axis.
  * @extends Mesh
  */
-class Axis extends Mesh {
+class DrawDebuggerAxis extends Mesh {
 	constructor(redGPUContext: RedGPUContext) {
 		super(redGPUContext, null, null);
 		// Add central sphere
@@ -63,4 +63,4 @@ class Axis extends Mesh {
 	}
 }
 
-export default Axis;
+export default DrawDebuggerAxis;

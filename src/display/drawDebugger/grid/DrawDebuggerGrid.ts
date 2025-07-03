@@ -26,7 +26,7 @@ const SHADER_MODULE_NAME = 'VERTEX_MODULE_GRID'
 const FRAGMENT_BIND_GROUP_DESCRIPTOR_NAME = 'FRAGMENT_BIND_GROUP_DESCRIPTOR_GRID'
 const PIPELINE_DESCRIPTOR_LABEL = 'PIPELINE_DESCRIPTOR_GRID'
 
-class Grid {
+class DrawDebuggerGrid {
 	#vertexBuffer: VertexBuffer
 	#indexBuffer: IndexBuffer
 	#uniformBuffer: UniformBuffer
@@ -228,4 +228,4 @@ class Grid {
 	}
 }
 
-export default Grid
+export default DrawDebuggerGrid
