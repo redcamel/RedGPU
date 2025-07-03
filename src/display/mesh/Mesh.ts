@@ -446,8 +446,19 @@ class Mesh extends MeshBase {
 		};
 	}
 
+	setEnableDebuggerRecursively(enableDebugger: boolean = false) {
+		if ('enableDebugger' in this) {
+			this.enableDebugger = enableDebugger
+		}
+		if (this.children) {
+			this.children.forEach(child => {
+				child.setEnableDebuggerRecursively(enableDebugger)
+			})
+		}
+	}
+
 	setCastShadowRecursively(castShadow: boolean = false) {
-		if (Object.hasOwn(this, 'castShadow')) {
+		if ('castShadow' in this) {
 			this.castShadow = castShadow
 		}
 		if (this.children) {
@@ -458,7 +469,7 @@ class Mesh extends MeshBase {
 	}
 
 	setReceiveShadowRecursively(receiveShadow: boolean = false) {
-		if (Object.hasOwn(this, 'receiveShadow')) {
+		if ('receiveShadow' in this) {
 			this.receiveShadow = receiveShadow
 		}
 		if (this.children) {
