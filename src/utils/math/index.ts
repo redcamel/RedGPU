@@ -1,4 +1,5 @@
 import AABB from "./bound/AABB";
+import calculateMeshCombinedAABB from "./bound/calculateMeshCombinedAABB";
 import calculateNormals from "./calculateNormals";
 import calculateTextureByteSize from "./calculateTextureByteSize";
 import calculateMeshAABB from "./bound/calculateMeshAABB";
@@ -16,16 +17,20 @@ import calculateMeshOBB from "./bound/calculateMeshOBB";
 import worldToLocal from "./worldToLocal";
 
 export {
-	AABB,
+
 	getScreenPoint,
 	screenToWorld,
 	localToWorld,
 	worldToLocal,
 	getMipLevelCount,
 	calculateTextureByteSize,
+	//
+	AABB,
 	calculateGeometryAABB,
 	calculateMeshAABB,
 	calculateMeshOBB,
+	calculateMeshCombinedAABB,
+	//
 	computeViewFrustumPlanes,
 	calculateNormals,
 	formatBytes,

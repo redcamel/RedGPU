@@ -12,6 +12,7 @@ import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/valid
 import InstanceIdGenerator from "../../utils/InstanceIdGenerator";
 import AABB from "../../utils/math/bound/AABB";
 import calculateMeshAABB from "../../utils/math/bound/calculateMeshAABB";
+import calculateMeshCombinedAABB from "../../utils/math/bound/calculateMeshCombinedAABB";
 import calculateMeshOBB, {IOBB} from "../../utils/math/bound/calculateMeshOBB";
 import mat4ToEuler from "../../utils/math/matToEuler";
 import uuidToUint from "../../utils/uuidToUint";
@@ -954,59 +955,9 @@ class Mesh extends MeshBase {
 	 * 자식을 포함한 AABB(Axis-Aligned Bounding Box) 계산
 	 */
 	get combinedBoundingAABB(): AABB {
-		const allAABBs = this.#collectAllAABBs();
-		if (allAABBs.length === 0) return null;
-		return this.#calculateCombinedAABBFromAABBs(allAABBs);
+		if (!this._geometry) return null;
+		return calculateMeshCombinedAABB(this)
 	}
-
-	/**
-	 * 재귀적으로 모든 자식의 AABB를 수집
-	 */
-	#collectAllAABBs(): AABB[] {
-		const aabbs: AABB[] = [];
-		const collectRecursive = (mesh: Mesh) => {
-			if (!mesh._geometry) return;
-			// calculateMeshAABB를 사용해 이미 변환된 AABB 획득
-			const aabb = calculateMeshAABB(mesh);
-			if (aabb) {
-				aabbs.push(aabb);
-			}
-			// 자식들도 재귀적으로 처리
-			if (mesh.children) {
-				mesh.children.forEach(child => {
-					if (child instanceof Mesh) {
-						collectRecursive(child);
-					}
-				});
-			}
-		};
-		collectRecursive(this);
-		return aabbs;
-	}
-
-	/**
-	 * 여러 AABB를 결합하여 하나의 AABB 계산
-	 */
-	#calculateCombinedAABBFromAABBs(aabbs: AABB[]): AABB | null {
-		if (aabbs.length === 0) return null;
-		if (aabbs.length === 1) return aabbs[0];
-
-		let minX = Infinity, minY = Infinity, minZ = Infinity;
-		let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
-
-		// 모든 AABB의 min/max 값들을 비교하여 전체 범위 계산
-		aabbs.forEach(aabb => {
-			minX = Math.min(minX, aabb.minX);
-			minY = Math.min(minY, aabb.minY);
-			minZ = Math.min(minZ, aabb.minZ);
-			maxX = Math.max(maxX, aabb.maxX);
-			maxY = Math.max(maxY, aabb.maxY);
-			maxZ = Math.max(maxZ, aabb.maxZ);
-		});
-
-		return new AABB(minX, maxX, minY, maxY, minZ, maxZ);
-	}
-
 }
 
 Object.defineProperty(Mesh.prototype, 'meshType', {
