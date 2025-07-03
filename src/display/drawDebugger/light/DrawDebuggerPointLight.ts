@@ -1,17 +1,22 @@
+import RedGPUContext from "../../../context/RedGPUContext";
 import PointLight from "../../../light/lights/PointLight";
 import RenderViewStateData from "../../../renderer/RenderViewStateData";
-import RedGPUContext from "../../../context/RedGPUContext";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
+import TextField3D from "../../textFileds/textField3D/TextField3D";
 import ADrawDebuggerLight from "./ADrawDebuggerLight";
-
-
 
 class DrawDebuggerPointLight extends ADrawDebuggerLight {
 	#target: PointLight;
+	#label:TextField3D
 
 	constructor(redGPUContext: RedGPUContext, target: PointLight) {
 		super(redGPUContext, [0, 255, 255], 51); // 청록색, 51개 라인 (16*3 + 3)
 		this.#target = target;
+		this.#label = new TextField3D(redGPUContext)
+		this.#label.useBillboard = true;
+		this.#label.fontSize = 40
+		this.#label.text = '💡'
+		this.lightDebugMesh.addChild(	this.#label)
 	}
 
 	#updateVertexDataFromPointLight(light: PointLight, vertexBuffer: VertexBuffer) {
@@ -94,6 +99,7 @@ class DrawDebuggerPointLight extends ADrawDebuggerLight {
 		this.lightDebugMesh.setRotation(0, 0, 0);
 		this.lightDebugMesh.setScale(1, 1, 1);
 		this.lightDebugMesh.render(debugViewRenderState);
+		this.#label.setPosition(...this.#target.position)
 	}
 }
 

@@ -8,6 +8,25 @@ import BitmapTexture from "../../../resources/texture/BitmapTexture";
 import Mesh from "../../mesh/Mesh";
 
 const TEXT_CONTAINER_STYLE = ';box-sizing:content-box;white-space:nowrap;'
+interface ATextField {
+	fontSize: number;
+	fontFamily: string;
+	fontWeight: string;
+	fontStyle: string;
+	color: string;
+	background: string;
+	padding: number;
+	letterSpacing: number;
+	wordBreak: string;
+	verticalAlign: string;
+	textAlign: string;
+	lineHeight: number;
+	border: string;
+	boxShadow: string;
+	boxSizing: string;
+	filter: string;
+}
+
 const BASE_STYLES = {
 	padding: 0,
 	background: 'transparent',

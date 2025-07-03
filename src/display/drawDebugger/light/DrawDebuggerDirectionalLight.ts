@@ -2,19 +2,26 @@ import DirectionalLight from "../../../light/lights/DirectionalLight";
 import RenderViewStateData from "../../../renderer/RenderViewStateData";
 import RedGPUContext from "../../../context/RedGPUContext";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
+import TextField3D from "../../textFileds/textField3D/TextField3D";
 import ADrawDebuggerLight from "./ADrawDebuggerLight";
 
 
 class DrawDebuggerDirectionalLight extends ADrawDebuggerLight {
 	#target: DirectionalLight;
-
+	#label:TextField3D
+	#visualPosition:[number,number,number] = [0, 10, 0];
 	constructor(redGPUContext: RedGPUContext, target: DirectionalLight) {
 		super(redGPUContext, [255, 255, 0], 8); // 노란색, 8개 라인
 		this.#target = target;
+		this.#label = new TextField3D(redGPUContext)
+		this.#label.useBillboard = true;
+		this.#label.fontSize = 40
+		this.#label.text = '☀️'
+		this.lightDebugMesh.addChild(	this.#label)
 	}
 
 	#updateVertexDataFromDirectionalLight(light: DirectionalLight, vertexBuffer: VertexBuffer) {
-		const visualPosition = [0, 5, 0];
+		const visualPosition = this.#visualPosition
 		const direction = light.direction || [0, -1, 0];
 		const length = 3.0;
 
@@ -112,6 +119,26 @@ class DrawDebuggerDirectionalLight extends ADrawDebuggerLight {
 		this.lightDebugMesh.setRotation(0, 0, 0);
 		this.lightDebugMesh.setScale(1, 1, 1);
 		this.lightDebugMesh.render(debugViewRenderState);
+		// 빛이 오는 방향 (화살표 반대편)에 레이블 배치
+		const direction = this.#target.direction ;
+		const visualPosition = this.#visualPosition;
+		const labelDistance = 0;
+
+		// 방향 벡터 정규화
+		const dirLength = Math.sqrt(direction[0] * direction[0] + direction[1] * direction[1] + direction[2] * direction[2]);
+		const normalizedDir = [
+			direction[0] / dirLength,
+			direction[1] / dirLength,
+			direction[2] / dirLength
+		];
+
+		// 빛이 오는 방향 (화살표 반대편)에 레이블 배치
+		this.#label.setPosition(
+			visualPosition[0] - normalizedDir[0] * labelDistance,
+			visualPosition[1] - normalizedDir[1] * labelDistance,
+			visualPosition[2] - normalizedDir[2] * labelDistance
+		);
+
 	}
 }
 

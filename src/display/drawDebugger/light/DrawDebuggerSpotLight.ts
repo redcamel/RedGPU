@@ -2,14 +2,20 @@ import SpotLight from "../../../light/lights/SpotLight";
 import RenderViewStateData from "../../../renderer/RenderViewStateData";
 import RedGPUContext from "../../../context/RedGPUContext";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
+import TextField3D from "../../textFileds/textField3D/TextField3D";
 import ADrawDebuggerLight from "./ADrawDebuggerLight";
 
 class DrawDebuggerSpotLight extends ADrawDebuggerLight {
 	#target: SpotLight;
-
+	#label:TextField3D
 	constructor(redGPUContext: RedGPUContext, target: SpotLight) {
 		super(redGPUContext, [255, 255, 0], 80); // 노란색, 80개 라인 (원뿔 + 방향선 + 십자가)
 		this.#target = target;
+		this.#label = new TextField3D(redGPUContext)
+		this.#label.useBillboard = true;
+		this.#label.fontSize = 40
+		this.#label.text = '🔦'
+		this.lightDebugMesh.addChild(	this.#label)
 	}
 
 	#updateVertexDataFromSpotLight(light: SpotLight, vertexBuffer: VertexBuffer) {
@@ -169,6 +175,7 @@ class DrawDebuggerSpotLight extends ADrawDebuggerLight {
 		this.lightDebugMesh.setRotation(0, 0, 0);
 		this.lightDebugMesh.setScale(1, 1, 1);
 		this.lightDebugMesh.render(debugViewRenderState);
+		this.#label.setPosition(...this.#target.position)
 	}
 }
 

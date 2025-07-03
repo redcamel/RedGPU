@@ -60,7 +60,7 @@ const createSampleSprite3D = async (redGPUContext, scene) => {
 		const label = new RedGPU.Display.TextField3D(redGPUContext);
 		label.text = eventName;
 		label.y = -1;
-		label.useBillboard = true;
+	``	label.useBillboard = true;``
 		label.useBillboardPerspective = false;
 		label.primitiveState.cullMode = 'none';
 		spriteSheet.addChild(label);

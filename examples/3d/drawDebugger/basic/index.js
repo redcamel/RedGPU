@@ -7,7 +7,6 @@ RedGPU.init(
 	canvas,
 	(redGPUContext) => {
 
-
 		const controller = new RedGPU.Camera.ObitController(redGPUContext);
 		controller.distance = 12;
 		controller.minDistance = 3;
@@ -30,7 +29,7 @@ RedGPU.init(
 		pointLight.color.setColorByRGB(255, 120, 120);
 		pointLight.intensity = 1.3;
 		pointLight.radius = 6.0;
-		pointLight.setPosition(-4, 3, 1);
+		pointLight.setPosition(-6, 4, 2);
 		scene.lightManager.addPointLight(pointLight);
 		pointLight.enableDebugger = true;
 
@@ -38,7 +37,7 @@ RedGPU.init(
 		spotLight.color.setColorByRGB(120, 160, 255);
 		spotLight.intensity = 1.6;
 		spotLight.radius = 12.0;
-		spotLight.setPosition(5, 4, 2);
+		spotLight.setPosition(6, 5, 1);
 		spotLight.direction = [-0.8, -0.7, -0.3];
 		spotLight.innerCutoff = 10.0;
 		spotLight.outerCutoff = 18.0;
@@ -89,10 +88,9 @@ RedGPU.init(
 			new RedGPU.Material.PhongMaterial(redGPUContext, '#dddddd')
 		);
 		groundPlane.enableDebugger = true;
-		groundPlane.setPosition(0, -1.5, 0);
+		groundPlane.setPosition(0, -1.5, -2);
 		groundPlane.rotationX = -Math.PI / 2;
 		scene.addChild(groundPlane);
-
 
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		const render = (time) => {
@@ -168,12 +166,12 @@ const renderTestPane = async (redGPUContext, targetView) => {
 		updateDebugMode(targetView.scene, evt.value);
 	});
 
-
 	setDirectionalLightPanel(pane, targetView)
 	setPointLightPanel(pane, targetView)
 	setSpotLightPanel(pane, targetView)
 
 };
+
 const setSpotLightPanel = (pane, targetView) => {
 	const light = targetView.scene.lightManager.spotLights[0];
 	const lightFolder = pane.addFolder({title: 'Spot Light', expanded: true});
@@ -185,7 +183,7 @@ const setSpotLightPanel = (pane, targetView) => {
 	const positionFolder = lightFolder.addFolder({title: 'Position', expanded: true});
 	['X', 'Y', 'Z'].forEach((axis) => {
 		positionFolder.addBinding(light, axis.toLowerCase(), {
-			min: -10, max: 10, step: 0.1
+			min: -15, max: 15, step: 0.1  // 범위를 늘려서 더 자유롭게 배치 가능
 		});
 	});
 
@@ -228,6 +226,7 @@ const setSpotLightPanel = (pane, targetView) => {
 	// Debug 컨트롤
 	lightFolder.addBinding(light, 'enableDebugger');
 };
+
 const setPointLightPanel = (pane, targetView) => {
 	const light = targetView.scene.lightManager.pointLights[0];
 	const lightFolder = pane.addFolder({title: 'Point Light', expanded: true});
@@ -237,7 +236,7 @@ const setPointLightPanel = (pane, targetView) => {
 
 	['X', 'Y', 'Z'].forEach((axis) => {
 		lightFolder.addBinding(light, axis.toLowerCase(), {
-			min: -10, max: 10, step: 0.01
+			min: -15, max: 15, step: 0.01  // 범위를 늘려서 더 자유롭게 배치 가능
 		});
 	});
 
@@ -260,14 +259,18 @@ const setPointLightPanel = (pane, targetView) => {
 
 	lightFolder.addBinding(light, 'enableDebugger');
 };
+
 const setDirectionalLightPanel = (pane, targetView) => {
 	const light = targetView.scene.lightManager.directionalLights[0];
 	const lightFolder = pane.addFolder({title: 'Directional Light', expanded: true});
 	const lightConfig = {
 		color: {r: light.color.r, g: light.color.g, b: light.color.b},
 	};
+
+	// Direction 컨트롤 폴더 추가로 더 명확하게 구분
+	const directionFolder = lightFolder.addFolder({title: 'Direction', expanded: true});
 	['X', 'Y', 'Z'].forEach((axis, index) => {
-		lightFolder.addBinding(light, `direction${axis}`, {
+		directionFolder.addBinding(light, `direction${axis}`, {
 			min: -3, max: 3, step: 0.01
 		});
 	});
