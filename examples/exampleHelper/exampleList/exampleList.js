@@ -342,6 +342,19 @@ const ExampleList = [
 				]
 			},
 			{
+				name: 'DrawDebugger',
+				list: [
+					{
+						name: 'DrawDebugger',
+						path: '3d/drawDebugger/basic',
+						thumb: '3d/drawDebugger/basic/thumb.png',
+						description: {
+							ko: ``,
+							en: ``
+						},
+					},
+				]
+			},		{
 				name: 'Transparent Sort',
 				list: [
 					{
