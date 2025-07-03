@@ -1,3 +1,5 @@
+import consoleAndThrowError from "../../consoleAndThrowError";
+
 export class AABB {
 	#minX: number;
 	#maxX: number;
@@ -89,6 +91,9 @@ export class AABB {
 	}
 
 	intersects(other: AABB): boolean {
+		if(!(other instanceof AABB)){
+			consoleAndThrowError('allow only AABB instance')
+		}
 		return this.#minX <= other.#maxX && this.#maxX >= other.#minX &&
 			this.#minY <= other.#maxY && this.#maxY >= other.#minY &&
 			this.#minZ <= other.#maxZ && this.#maxZ >= other.#minZ;
@@ -108,6 +113,9 @@ export class AABB {
 	}
 
 	union(other: AABB): AABB {
+		if(!(other instanceof AABB)){
+			consoleAndThrowError('allow only AABB instance')
+		}
 		return new AABB(
 			Math.min(this.#minX, other.#minX), Math.max(this.#maxX, other.#maxX),
 			Math.min(this.#minY, other.#minY), Math.max(this.#maxY, other.#maxY),
