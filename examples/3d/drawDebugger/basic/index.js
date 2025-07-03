@@ -15,6 +15,17 @@ RedGPU.init(
 		redGPUContext.addView(view);
 
 
+		// directionalLight.enableDebugger = true;
+		// 포인트 라이트 추가
+		// const pointLight = new RedGPU.Light.PointLight();
+		// pointLight.color.setColorByRGB(255, 100, 100);
+		// pointLight.intensity = 2.0;
+		// pointLight.radius = 8.0;
+		// pointLight.setPosition(3, 3, 2);
+		// scene.lightManager.addPointLight(pointLight);
+		// pointLight.enableDebugger = true;
+
+
 		const mesh = new RedGPU.Display.Mesh(redGPUContext,new RedGPU.Primitive.Sphere(redGPUContext), new RedGPU.Material.PhongMaterial(redGPUContext))
 		mesh.enableDebugger = true;
 		scene.addChild(mesh)
@@ -36,20 +47,28 @@ RedGPU.init(
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		const render = (time) => {
 			// 매 프레임 로직
+			const directionalLightTest = scene.lightManager.directionalLights[0]
+			if(	directionalLightTest) {
+				directionalLightTest.enableDebugger = true;
+				directionalLightTest.directionX= Math.sin(time / 1500)
+				directionalLightTest.directionY = -1
+				directionalLightTest.directionZ = Math.cos(time / 1500)
+			}
 
 
 			// mesh.setPosition(Math.sin(time/1000),Math.cos(time/1000),Math.sin(time/1000))
-
-			scene.children.forEach(mesh => {
-				mesh.rotationX +=.1
-				mesh.rotationY +=.1
-				mesh.rotationZ +=.1
-
-			})
+			//
+			// scene.children.forEach(mesh => {
+			// 	mesh.rotationX +=.1
+			// 	mesh.rotationY +=.1
+			// 	mesh.rotationZ +=.1
+			//
+			// })
 		};
 		renderer.start(redGPUContext, render);
 
 		renderTestPane(redGPUContext,view,RedGPU);
+
 	},
 	(failReason) => {
 		console.error('초기화 실패:', failReason);

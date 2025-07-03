@@ -1,5 +1,6 @@
 import {mat4, vec3} from "gl-matrix";
 import Camera2D from "../camera/camera/Camera2D";
+import DrawDebugger from "../display/drawDebugger/DrawDebugger";
 import View3D from "../display/view/View3D";
 import consoleAndThrowError from "../utils/consoleAndThrowError";
 import AmbientLight from "./lights/AmbientLight";
@@ -120,7 +121,7 @@ class LightManager {
 	}
 
 	updateViewSystemUniforms(view: View3D) {
-		const {scene} = view
+		const {scene,redGPUContext} = view
 		const structInfo = view.systemUniform_Vertex_StructInfo;
 		const {systemUniform_Vertex_UniformBuffer} = view;
 		const {members} = structInfo;
@@ -140,6 +141,12 @@ class LightManager {
 		lightManager.directionalLights.forEach((light: DirectionalLight, index) => {
 			const {directionalLights} = members
 			const {direction, color, intensity} = directionalLights.memberList[index]
+			if(light.enableDebugger ) {
+				if(!light.drawDebugger)				light.drawDebugger = new DrawDebugger(redGPUContext,light)
+				light.drawDebugger.render(view.debugViewRenderState)
+			}
+
+
 			systemUniform_Vertex_UniformBuffer.writeBuffers(
 				[
 					[direction, light.direction],
