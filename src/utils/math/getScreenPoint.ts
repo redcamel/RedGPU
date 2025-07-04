@@ -5,7 +5,7 @@ import consoleAndThrowError from "../consoleAndThrowError";
 const resultMTX = mat4.create();
 const resultPosition = {x: 0, y: 0, z: 0, w: 0};
 const getScreenPoint = (view: View3D, targetMatrix: mat4): [number, number] => {
-	if (!(view?.constructor?.name === 'View')) consoleAndThrowError('allow only View3D instance')
+	if (!(view?.constructor?.name === 'View3D')) consoleAndThrowError('allow only View3D instance')
 	mat4.identity(resultMTX);
 	const {projectionMatrix, rawCamera, pixelRectArray} = view;
 	mat4.multiply(resultMTX, projectionMatrix, rawCamera.modelMatrix);

@@ -269,7 +269,8 @@ class Mesh extends MeshBase {
 	}
 
 	set rotationX(value: number) {
-		this.#rotationX = this.#rotationArray[0] = value;
+		this.#rotationX = this.#rotationArray[0] = value % 360
+		;
 		this.dirtyTransform = true
 	}
 
@@ -278,7 +279,7 @@ class Mesh extends MeshBase {
 	}
 
 	set rotationY(value: number) {
-		this.#rotationY = this.#rotationArray[1] = value;
+		this.#rotationY = this.#rotationArray[1] = value% 360;
 		this.dirtyTransform = true
 	}
 
@@ -287,7 +288,7 @@ class Mesh extends MeshBase {
 	}
 
 	set rotationZ(value: number) {
-		this.#rotationZ = this.#rotationArray[2] = value;
+		this.#rotationZ = this.#rotationArray[2] = value% 360;
 		this.dirtyTransform = true
 	}
 
