@@ -7,10 +7,10 @@ let point = vec3.create();
 let pointMTX = mat4.create();
 let invViewProjection = mat4.create();
 let resultMTX;
-const screenToWorld = (rect, view: View3D,) => {
-	const {rawCamera} = view
-	x = 2.0 * rect[0] / rect[2] - 1;
-	y = -2.0 * rect[1] / rect[3] + 1;
+const screenToWorld = (screenX: number, screenY: number, view: View3D,) => {
+	const {rawCamera, pixelRectArray} = view
+	x = 2.0 * (screenX * window.devicePixelRatio) / pixelRectArray[2] - 1;
+	y = -2.0 * (screenY * window.devicePixelRatio) / pixelRectArray[3] + 1;
 	z = 1;
 	mat4.multiply(invViewProjection, view.projectionMatrix, rawCamera.modelMatrix);
 	resultMTX = mat4.clone(invViewProjection);

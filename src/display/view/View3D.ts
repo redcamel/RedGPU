@@ -18,6 +18,7 @@ import IBL from "../../resources/texture/ibl/IBL";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
 import InstanceIdGenerator from "../../utils/InstanceIdGenerator";
+import screenToWorld from "../../utils/math/screenToWorld";
 import DrawDebuggerPointLight from "../drawDebugger/light/DrawDebuggerPointLight";
 import DrawDebuggerSpotLight from "../drawDebugger/light/DrawDebuggerSpotLight";
 
@@ -139,6 +140,12 @@ class View3D extends ViewTransform {
 		return this.#grid;
 	}
 
+	screenToWorld(
+		screenX: number,
+		screenY: number,
+	) {
+		return screenToWorld(screenX, screenY, this)
+	}
 	set grid(value: DrawDebuggerGrid | boolean) {
 		if (typeof value === 'boolean') {
 			if (value === true) {

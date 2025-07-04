@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../../dist";
+import * as RedGPU from "../../../../dist";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -46,7 +46,7 @@ function createTestMeshes(redGPUContext, scene) {
     const textureMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);
     textureMaterial.diffuseTexture = new RedGPU.Resource.BitmapTexture(
       redGPUContext,
-      '../../../../assets/UV_Grid_Sm.jpg'
+      '../../../assets/UV_Grid_Sm.jpg'
     );
 
     // 🔴 부모 메시 (화면 좌표 Test용)
