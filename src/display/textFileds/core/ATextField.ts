@@ -8,6 +8,7 @@ import BitmapTexture from "../../../resources/texture/BitmapTexture";
 import Mesh from "../../mesh/Mesh";
 
 const TEXT_CONTAINER_STYLE = ';box-sizing:content-box;white-space:nowrap;'
+
 interface ATextField {
 	fontSize: number;
 	fontFamily: string;
@@ -58,11 +59,9 @@ class ATextField extends Mesh {
 	#text: string
 	#textureImgOnload: Function
 	#mode3dYn: boolean = true;
-	readonly #redGPUContext: RedGPUContext
+	#redGPUContext: RedGPUContext
 	#currentRequestAnimationFrame: number;
 	#needsUpdate: boolean = false; // 업데이트 플래그
-	#isRendering: boolean = false; // 현재 렌더링 중인지 여부
-	#pendingUpdate: boolean = false; // 렌더링 중 추가 업데이트가 발생했는지 여부
 	constructor(redGPUContext: RedGPUContext, imgOnload: Function, mode3dYn: boolean = true) {
 		super(redGPUContext);
 		this.#redGPUContext = redGPUContext
@@ -98,17 +97,19 @@ class ATextField extends Mesh {
 	}
 
 	set text(text: string) {
+		if (this.#text === text) return
 		this.#text = text
 		const svg = this.#svg;
 		const htmlContainer = svg.querySelector('foreignObject div');
 		const processedText = this.#processText(text)
 		this.#htmlElement.innerHTML = processedText;
 		htmlContainer.innerHTML = processedText;
-		this.#setSvgToImg();
+		this.#needsUpdate = true
 	}
 
 	render(debugViewRenderState: RenderViewStateData) {
 		this.#textureImgOnload(this.#textureImg.width, this.#textureImg.height)
+		this.#updateTexture()
 		super.render(debugViewRenderState);
 	}
 
@@ -153,55 +154,29 @@ class ATextField extends Mesh {
 	}
 
 	#setSvgToImg() {
-		// 플래그 설정 (업데이트 필요)
-		this.#needsUpdate = true;
-		// 이미 렌더링 중이라면 플래그만 설정하고 종료
-		if (this.#isRendering) {
-			this.#pendingUpdate = true; // 추가 요청 발생 플래그 설정
-			return;
-		}
-		// requestAnimationFrame 시작
-		this.#isRendering = true;
-		const updateFrame = () => {
-			if (this.#needsUpdate) {
-				// 현재 요청 수행
-				this.#needsUpdate = false;
-				// SVG 업데이트 작업
-				const svg = this.#svg;
-				const foreignObject = svg.querySelector('foreignObject');
-				// 크기 및 Box-Shadow 확장값 계산
-				const {width, height, extraTop, extraRight, extraBottom, extraLeft} = this.#getRenderHtmlSize();
-				// ForeignObject 크기 설정
-				foreignObject.setAttribute('width', width.toString());
-				foreignObject.setAttribute('height', height.toString());
-				// Box-Shadow 확장을 포함한 패딩 설정
-				foreignObject.style.padding = `${extraTop}px ${extraRight}px ${extraBottom}px ${extraLeft}px`;
-				// SVG 크기 설정
-				svg.setAttribute('width', width.toString());
-				svg.setAttribute('height', height.toString());
-				// 데이터를 이미지로 변환
-				this.#textureImg.src =
-					"data:image/svg+xml;charset=utf-8," +
-					encodeURIComponent(svg.outerHTML);
-				// 디버깅 정보 출력
-				console.log("Final SVG and ForeignObject Sizes:", {
-					svgWidth: svg.getAttribute('width'),
-					svgHeight: svg.getAttribute('height'),
-					padding: foreignObject.style.padding,
-				});
-			}
-			// 추가 요청이 있었는지 검사
-			if (this.#pendingUpdate) {
-				this.#needsUpdate = true; // 새 업데이트 요청 상태 반영
-				this.#pendingUpdate = false; // 추가 요청 상태 초기화
-				requestAnimationFrame(updateFrame); // 다음 프레임에서 다시 실행
-			} else {
-				// 모든 작업이 완료되었으면 렌더링 종료
-				this.#isRendering = false;
-			}
-		};
-		// 첫 번째 `requestAnimationFrame` 호출
-		requestAnimationFrame(updateFrame);
+		// SVG 업데이트 작업
+		const svg = this.#svg;
+		const foreignObject = svg.querySelector('foreignObject');
+		// 크기 및 Box-Shadow 확장값 계산
+		const {width, height, extraTop, extraRight, extraBottom, extraLeft} = this.#getRenderHtmlSize();
+		// ForeignObject 크기 설정
+		foreignObject.setAttribute('width', width.toString());
+		foreignObject.setAttribute('height', height.toString());
+		// Box-Shadow 확장을 포함한 패딩 설정
+		foreignObject.style.padding = `${extraTop}px ${extraRight}px ${extraBottom}px ${extraLeft}px`;
+		// SVG 크기 설정
+		svg.setAttribute('width', width.toString());
+		svg.setAttribute('height', height.toString());
+		// 데이터를 이미지로 변환
+		this.#textureImg.src =
+			"data:image/svg+xml;charset=utf-8," +
+			encodeURIComponent(svg.outerHTML);
+		// 디버깅 정보 출력
+		console.log("Final SVG and ForeignObject Sizes:", {
+			svgWidth: svg.getAttribute('width'),
+			svgHeight: svg.getAttribute('height'),
+			padding: foreignObject.style.padding,
+		});
 	}
 
 	#setImgElement() {
@@ -209,6 +184,7 @@ class ATextField extends Mesh {
 		this.#textureImg.style.cssText = 'position:absolute;bottom:0px;left:0;'
 		// document.body.appendChild(this.#img)
 		this.#textureImg.onload = _ => {
+			// keepLog('언제실행되나')
 			let tW: number, tH: number;
 			const {width, height} = this.#getRenderHtmlSize();
 			const multiple = this.#mode3dYn ? 2 : 2;
@@ -256,6 +232,16 @@ class ATextField extends Mesh {
 		};
 	}
 
+	#updateTexture() {
+		if (this.#needsUpdate) {
+			if (this.#currentRequestAnimationFrame) cancelAnimationFrame(this.#currentRequestAnimationFrame)
+			this.#currentRequestAnimationFrame = requestAnimationFrame(() => {
+				this.#setSvgToImg();
+			})
+		}
+		this.#needsUpdate = false
+	}
+
 	#setStyle = (key: string, baseValue: number | string) => {
 		const svgDom: HTMLElement = this.#svg.querySelector('foreignObject > div')
 		const tStyle: any = svgDom.style;
@@ -267,16 +253,20 @@ class ATextField extends Mesh {
 				return this[internalKey];
 			},
 			set: (value: number | string) => {
+				// 값이 실제로 변경되었는지 확인
+				const oldValue = this[internalKey];
 				this[internalKey] = value;
-				if (isValidNumber(value) && isPixelNeeded(key)) value = `${value}px`;
-				tStyle[key] = value;
-				tStyle2[key] = value;
-				if (this.#currentRequestAnimationFrame) cancelAnimationFrame(this.#currentRequestAnimationFrame)
-				this.#currentRequestAnimationFrame = requestAnimationFrame(() => {
-					this.#setSvgToImg();
-				})
+				// 픽셀 단위 처리
+				const processedValue = (isValidNumber(value) && isPixelNeeded(key))
+					? `${value}px`
+					: value;
+				tStyle[key] = processedValue;
+				tStyle2[key] = processedValue;
+				// 값이 변경된 경우에만 텍스처 업데이트
+				if (oldValue !== value) this.#needsUpdate = true
 			}
 		});
+		// 초기값 설정 (이때는 업데이트 호출하지 않음)
 		this[key] = baseValue;
 	};
 
@@ -304,6 +294,7 @@ class ATextField extends Mesh {
 		for (const [key, value] of Object.entries(BASE_STYLES)) {
 			this.#setStyle(key, value);
 		}
+		this.#needsUpdate = true
 	}
 }
 
