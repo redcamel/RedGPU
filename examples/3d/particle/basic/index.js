@@ -36,6 +36,7 @@ RedGPU.init(
 		const testParticle = new RedGPU.Display.ParticleEmitter(redGPUContext)
 		testParticleWrap.addChild(testParticle)
 		testParticle.material.diffuseTexture = texture_particle2
+		testParticle.material.blendColorState.dstFactor = RedGPU.GPU_BLEND_FACTOR.ONE
 
 		const renderer = new RedGPU.Renderer(redGPUContext)
 

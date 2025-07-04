@@ -22,7 +22,7 @@ class TextField3D extends ATextField {
 	#renderTextureWidth: number = 1
 	#renderTextureHeight: number = 1
 
-	constructor(redGPUContext: RedGPUContext) {
+	constructor(redGPUContext: RedGPUContext,text?:string) {
 		super(redGPUContext, (width: number, height: number) => {
 			this.#renderTextureWidth = width / 1024
 			this.#renderTextureHeight = height / 1024
@@ -32,6 +32,7 @@ class TextField3D extends ATextField {
 		this._material.transparent = true
 		this.dirtyPipeline = true
 		this.dirtyTransform = true
+		if(text) this.text = text
 	}
 
 	get geometry(): Geometry | Primitive {

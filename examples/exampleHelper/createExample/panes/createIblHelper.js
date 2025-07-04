@@ -5,7 +5,7 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
 
 	const settings = {
 		hdrImage: hdrImages[0].path,
-		useLight: true,
+		useLight: false,
 		useIBL: true,
 		...option
 	};

@@ -1,16 +1,16 @@
 import RedGPUContext from "../context/RedGPUContext";
-import {IVolume} from "../primitive/core/Primitive";
 import GeometryGPURenderInfo from "../renderInfos/GeometryGPURenderInfo";
 import IndexBuffer from "../resources/buffer/indexBuffer/IndexBuffer";
 import VertexBuffer from "../resources/buffer/vertexBuffer/VertexBuffer";
 import ResourceBase from "../resources/ResourceBase";
-import calculateVolume from "../utils/math/calculateVolume";
+import AABB from "../utils/math/bound/AABB";
+import calculateGeometryAABB from "../utils/math/bound/calculateGeometryAABB";
 
 class Geometry extends ResourceBase {
 	gpuRenderInfo: GeometryGPURenderInfo
 	#vertexBuffer: VertexBuffer
 	#indexBuffer: IndexBuffer
-	#volume: IVolume;
+	#volume: AABB;
 
 	constructor(redGPUContext: RedGPUContext, vertexBuffer: VertexBuffer, indexBuffer?: IndexBuffer) {
 		super(redGPUContext)
@@ -35,9 +35,9 @@ class Geometry extends ResourceBase {
 		return this.#indexBuffer;
 	}
 
-	get volume(): IVolume {
+	get volume(): AABB {
 		if (!this.#volume) {
-			this.#volume = calculateVolume(this.#vertexBuffer);
+			this.#volume = calculateGeometryAABB(this.#vertexBuffer);
 		}
 		return this.#volume;
 	}
