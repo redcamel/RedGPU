@@ -10,8 +10,14 @@ import DefineForVertex from "../../resources/defineProperty/DefineForVertex";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import InstanceIdGenerator from "../../utils/InstanceIdGenerator";
+import AABB from "../../utils/math/bound/AABB";
+import calculateMeshAABB from "../../utils/math/bound/calculateMeshAABB";
+import calculateMeshCombinedAABB from "../../utils/math/bound/calculateMeshCombinedAABB";
+import calculateMeshOBB from "../../utils/math/bound/calculateMeshOBB";
+import OBB from "../../utils/math/bound/OBB";
 import mat4ToEuler from "../../utils/math/matToEuler";
 import uuidToUint from "../../utils/uuidToUint";
+import DrawDebuggerMesh from "../drawDebugger/DrawDebuggerMesh";
 import createMeshVertexUniformBuffers from "./core/createMeshVertexUniformBuffers";
 import Object3DContainer from "./core/Object3DContainer";
 import updateMeshDirtyPipeline from "./core/pipeline/updateMeshDirtyPipeline";
@@ -63,6 +69,21 @@ class Mesh extends MeshBase {
 	#ignoreFrustumCulling: boolean = false
 	//
 	#opacity: number = 1
+	//
+	#drawDebugger: DrawDebuggerMesh
+	#enableDebugger: boolean = false
+	get enableDebugger(): boolean {
+		return this.#enableDebugger;
+	}
+
+	get drawDebugger(): DrawDebuggerMesh {
+		return this.#drawDebugger;
+	}
+
+	set enableDebugger(value: boolean) {
+		this.#enableDebugger = value;
+		if (value && !this.#drawDebugger) this.#drawDebugger = new DrawDebuggerMesh(this.redGPUContext, this)
+	}
 
 //
 	constructor(redGPUContext: RedGPUContext, geometry?: Geometry | Primitive, material?, name?: string) {
@@ -248,7 +269,8 @@ class Mesh extends MeshBase {
 	}
 
 	set rotationX(value: number) {
-		this.#rotationX = this.#rotationArray[0] = value;
+		this.#rotationX = this.#rotationArray[0] = value % 360
+		;
 		this.dirtyTransform = true
 	}
 
@@ -257,7 +279,7 @@ class Mesh extends MeshBase {
 	}
 
 	set rotationY(value: number) {
-		this.#rotationY = this.#rotationArray[1] = value;
+		this.#rotationY = this.#rotationArray[1] = value% 360;
 		this.dirtyTransform = true
 	}
 
@@ -266,7 +288,7 @@ class Mesh extends MeshBase {
 	}
 
 	set rotationZ(value: number) {
-		this.#rotationZ = this.#rotationArray[2] = value;
+		this.#rotationZ = this.#rotationArray[2] = value% 360;
 		this.dirtyTransform = true
 	}
 
@@ -274,8 +296,19 @@ class Mesh extends MeshBase {
 		return this.#rotationArray;
 	}
 
+	setEnableDebuggerRecursively(enableDebugger: boolean = false) {
+		if ('enableDebugger' in this) {
+			this.enableDebugger = enableDebugger
+		}
+		if (this.children) {
+			this.children.forEach(child => {
+				child.setEnableDebuggerRecursively(enableDebugger)
+			})
+		}
+	}
+
 	setCastShadowRecursively(castShadow: boolean = false) {
-		if (Object.hasOwn(this, 'castShadow')) {
+		if ('castShadow' in this) {
 			this.castShadow = castShadow
 		}
 		if (this.children) {
@@ -286,7 +319,7 @@ class Mesh extends MeshBase {
 	}
 
 	setReceiveShadowRecursively(receiveShadow: boolean = false) {
-		if (Object.hasOwn(this, 'receiveShadow')) {
+		if ('receiveShadow' in this) {
 			this.receiveShadow = receiveShadow
 		}
 		if (this.children) {
@@ -868,6 +901,7 @@ class Mesh extends MeshBase {
 			//TODO 이거 이상함 확인해야함
 			if (this.castShadow || (this.castShadow && !currentGeometry)) castingList[castingList.length] = this
 		}
+		if (this.#enableDebugger) this.#drawDebugger.render(debugViewRenderState)
 		// children render
 		const {children} = this
 		let i = 0
@@ -907,6 +941,21 @@ class Mesh extends MeshBase {
 			VERTEX_SHADER_MODULE_NAME,
 			vModuleDescriptor
 		)
+	}
+
+	get boundingOBB(): OBB {
+		if (!this._geometry) return null;
+		return calculateMeshOBB(this);
+	}
+
+	get boundingAABB(): AABB {
+		if (!this._geometry) return null;
+		return calculateMeshAABB(this);
+	}
+
+	get combinedBoundingAABB(): AABB {
+		if (!this._geometry) return null;
+		return calculateMeshCombinedAABB(this)
 	}
 }
 

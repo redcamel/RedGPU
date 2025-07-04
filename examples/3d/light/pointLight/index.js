@@ -41,6 +41,7 @@ const createPointLight = (scene) => {
 	light.x = 4;
 	light.y = 4;
 	light.radius = 10;
+	light.enableDebugger = true;
 	scene.lightManager.addPointLight(light);
 
 	return light;
@@ -99,6 +100,7 @@ const renderTestPaneWithLightControl = async (redGPUContext, light) => {
 	lightFolder.addBinding(lightConfig, 'radius', { min: 0, max: 20, step: 0.1 }).on('change', (evt) => {
 		light.radius = evt.value;
 	});
+	lightFolder.addBinding(light, 'enableDebugger');
 	lightFolder
 		.addBinding(lightConfig, 'color', { picker: 'inline', view: 'color', expanded: true })
 		.on('change', (evt) => {

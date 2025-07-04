@@ -104,7 +104,7 @@ class MeshBase extends Object3DContainer {
 	}
 
 	getScreenPoint(view: View3D): [number, number] {
-		// TODO 검증
+
 		return getScreenPoint(view, this.modelMatrix)
 	}
 

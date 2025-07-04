@@ -61,7 +61,7 @@ fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
     let maxPointNear = lineIntersectionToZPlane(eyePos, maxPoint_vS, tileNear);
     let maxPointFar = lineIntersectionToZPlane(eyePos, maxPoint_vS, tileFar);
 
-    // AABB(Axis-Aligned Bounding Box)의 최소 및 최대 좌표를 저장합니다.
+    // AABB(DrawDebuggerAxis-Aligned Bounding Box)의 최소 및 최대 좌표를 저장합니다.
     let minAABB = min(min(minPointNear, minPointFar), min(maxPointNear, maxPointFar));
     let maxAABB = max(max(minPointNear, minPointFar), max(maxPointNear, maxPointFar));
 

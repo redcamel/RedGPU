@@ -18,8 +18,12 @@ import IBL from "../../resources/texture/ibl/IBL";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
 import InstanceIdGenerator from "../../utils/InstanceIdGenerator";
-import Axis from "../helper/asix/Axis";
-import Grid from "../helper/grid/Grid";
+import screenToWorld from "../../utils/math/screenToWorld";
+import DrawDebuggerPointLight from "../drawDebugger/light/DrawDebuggerPointLight";
+import DrawDebuggerSpotLight from "../drawDebugger/light/DrawDebuggerSpotLight";
+
+import DrawDebuggerAxis from "../drawDebugger/DrawDebuggerAxis";
+import DrawDebuggerGrid from "../drawDebugger/grid/DrawDebuggerGrid";
 import Scene from "../scene/Scene";
 import SkyBox from "../skyboxs/skyBox/SkyBox";
 import ViewRenderTextureManager from "./ViewRenderTextureManager";
@@ -34,8 +38,8 @@ class View3D extends ViewTransform {
 	#systemUniform_Vertex_UniformBindGroup: GPUBindGroup;
 	#systemUniform_Vertex_UniformBuffer: UniformBuffer;
 	#instanceId: number
-	#grid: Grid
-	#axis: Axis
+	#grid: DrawDebuggerGrid
+	#axis: DrawDebuggerAxis
 	#skybox: SkyBox
 	#name: string
 	#scene: Scene
@@ -132,40 +136,46 @@ class View3D extends ViewTransform {
 	}
 
 	//
-	get grid(): Grid {
+	get grid(): DrawDebuggerGrid {
 		return this.#grid;
 	}
 
-	set grid(value: Grid | boolean) {
+	screenToWorld(
+		screenX: number,
+		screenY: number,
+	) {
+		return screenToWorld(screenX, screenY, this)
+	}
+	set grid(value: DrawDebuggerGrid | boolean) {
 		if (typeof value === 'boolean') {
 			if (value === true) {
-				value = new Grid(this.redGPUContext); // true면 Grid 생성
+				value = new DrawDebuggerGrid(this.redGPUContext); // true면 DrawDebuggerGrid 생성
 			} else {
 				value = null; // false면 null 설정
 			}
-		} else if (!(value instanceof Grid) && value !== null) {
+		} else if (!(value instanceof DrawDebuggerGrid) && value !== null) {
 			// Grid가 아닌 값이 들어오는 경우 예외 처리
-			throw new TypeError("grid must be of type 'Grid', 'boolean', or 'null'.");
+			throw new TypeError("grid must be of type 'DrawDebuggerGrid', 'boolean', or 'null'.");
 		}
-		this.#grid = value as Grid;
+		this.#grid = value as DrawDebuggerGrid;
 	}
 
-	get axis(): Axis {
+	get axis(): DrawDebuggerAxis {
 		return this.#axis;
 	}
 
-	set axis(value: Axis | boolean) {
+	set axis(value: DrawDebuggerAxis | boolean) {
 		if (typeof value === 'boolean') {
 			if (value === true) {
-				value = new Axis(this.redGPUContext); // true면 Axis 생성
+				value = new DrawDebuggerAxis(this.redGPUContext); // true면 DrawDebuggerAxis 생성
 			} else {
 				value = null; // false면 null 설정
 			}
-		} else if (!(value instanceof Axis) && value !== null) {
+		} else if (!(value instanceof DrawDebuggerAxis) && value !== null) {
 			// Axis가 아닌 값이 들어오는 경우 예외 처리
-			throw new TypeError("axis must be of type 'Axis', 'boolean', or 'null'.");
+			throw new TypeError("axis must be of type 'DrawDebuggerAxis', 'boolean', or 'null'.");
 		}
-		this.#axis = value as Axis;
+		this.#axis = value as DrawDebuggerAxis;
 	}
 
 	get skybox(): SkyBox {
@@ -364,7 +374,7 @@ class View3D extends ViewTransform {
 
 	#updateClusters(calcClusterLight: boolean = false) {
 		if (!calcClusterLight) return
-		const {redGPUContext, scene} = this
+		const {redGPUContext, scene,debugViewRenderState} = this
 		// const dirtyPixelSize = this.#prevWidth == undefined || this.#prevHeight == undefined || this.#prevWidth !== this.pixelRectArray[2] || this.#prevHeight !== this.pixelRectArray[3]
 		const dirtyPixelSize = true;
 		if (!this.#passLightClustersBound) {
@@ -398,6 +408,10 @@ class View3D extends ViewTransform {
 						],
 						offset,
 					)
+					if (tLight.enableDebugger) {
+						if (!tLight.drawDebugger) tLight.drawDebugger = new DrawDebuggerPointLight(redGPUContext, tLight)
+						tLight.drawDebugger.render(debugViewRenderState)
+					}
 				}
 			}
 			if (spotLightNum) {
@@ -415,6 +429,10 @@ class View3D extends ViewTransform {
 						],
 						offset,
 					)
+					if (tLight.enableDebugger) {
+						if (!tLight.drawDebugger) tLight.drawDebugger = new DrawDebuggerSpotLight(redGPUContext, tLight)
+						tLight.drawDebugger.render(debugViewRenderState)
+					}
 				}
 			}
 			this.#clusterLightsBufferData.set(
