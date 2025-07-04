@@ -206,8 +206,17 @@ const ExampleList = [
 					},
 					{
 						name: 'AABB - intersects',
-						path: '3d/mesh/meshBoundBoxIntersects',
-						thumb: '3d/mesh/meshBoundBoxIntersects/thumb.png',
+						path: '3d/mesh/meshAABBIntersects',
+						thumb: '3d/mesh/meshAABBIntersects/thumb.png',
+						description: {
+							ko: ``,
+							en: ``
+						},
+					},
+					{
+						name: 'OBB - intersects',
+						path: '3d/mesh/meshOBBIntersects',
+						thumb: '3d/mesh/meshOBBIntersects/thumb.png',
 						description: {
 							ko: ``,
 							en: ``

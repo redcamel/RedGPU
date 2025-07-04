@@ -18,10 +18,14 @@ RedGPU.init(
         const {mesh1, mesh2, intersectionLabel} = createIntersectionTest(redGPUContext, scene);
 
         const renderer = new RedGPU.Renderer(redGPUContext);
-        const render = () => {
-            mesh2.x = Math.sin(Date.now() * 0.001) * 5;
-            mesh2.z = Math.cos(Date.now() * 0.001) * 3;
-            checkAABBIntersection(mesh1, mesh2, intersectionLabel);
+        const render = (time) => {
+
+            mesh2.rotationX +=0.2
+            mesh2.rotationY +=0.2
+            mesh2.rotationZ +=0.2
+            mesh2.x = Math.sin(time * 0.001) * 5;
+            mesh2.z = Math.cos(time * 0.001) * 3;
+            checkOBBIntersection(mesh1, mesh2, intersectionLabel);
         };
         renderer.start(redGPUContext, render);
 
@@ -38,7 +42,7 @@ function createIntersectionTest(redGPUContext, scene) {
     const mesh1 = new RedGPU.Display.Mesh(redGPUContext, geometry1, material1);
     mesh1.setPosition(-2, 0, 0);
     mesh1.enableDebugger = true;
-    mesh1.drawDebugger.debugMode = 'AABB';
+    mesh1.drawDebugger.debugMode = 'OBB';
     scene.addChild(mesh1);
 
     const material2 = new RedGPU.Material.ColorMaterial(redGPUContext, '#2196F3');
@@ -46,7 +50,7 @@ function createIntersectionTest(redGPUContext, scene) {
     const mesh2 = new RedGPU.Display.Mesh(redGPUContext, geometry2, material2);
     mesh2.setPosition(2, 0, 0);
     mesh2.enableDebugger = true;
-    mesh2.drawDebugger.debugMode = 'AABB';
+    mesh2.drawDebugger.debugMode = 'OBB';
     scene.addChild(mesh2);
 
     const intersectionLabel = new RedGPU.Display.TextField3D(redGPUContext, 'No Intersection');
@@ -70,12 +74,12 @@ function createIntersectionTest(redGPUContext, scene) {
     return {mesh1, mesh2, intersectionLabel};
 }
 
-function checkAABBIntersection(mesh1, mesh2, label) {
-    const aabb1 = mesh1.boundingAABB;
-    const aabb2 = mesh2.boundingAABB;
+function checkOBBIntersection(mesh1, mesh2, label) {
+    const aabb1 = mesh1.boundingOBB;
+    const aabb2 = mesh2.boundingOBB;
 
     if (!aabb1 || !aabb2) {
-        label.text = 'AABB Calculation Failed';
+        label.text = 'OBB Calculation Failed';
         label.color = '#FFAA00';
         return;
     }
