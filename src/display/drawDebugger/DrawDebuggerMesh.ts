@@ -7,7 +7,7 @@ import InterleaveType from "../../resources/buffer/core/type/InterleaveType";
 import InterleavedStruct from "../../resources/buffer/vertexBuffer/InterleavedStruct";
 import VertexBuffer from "../../resources/buffer/vertexBuffer/VertexBuffer";
 import AABB from "../../utils/math/bound/AABB";
-import {IOBB} from "../../utils/math/bound/calculateMeshOBB";
+import OBB from "../../utils/math/bound/OBB";
 import Mesh from "../mesh/Mesh";
 
 type DebugMode = 'OBB' | 'AABB' | 'BOTH' | 'COMBINED_AABB' ;
@@ -24,7 +24,7 @@ class DrawDebuggerMesh {
 	#aabbDebugMesh: Mesh;
 
 	// 캐시된 볼륨 데이터 (변경 감지용)
-	#cachedOBB: IOBB | null = null;
+	#cachedOBB: OBB | null = null;
 	#cachedAABB: AABB | null = null;
 
 	constructor(redGPUContext: RedGPUContext, target: Mesh) {
@@ -87,7 +87,7 @@ class DrawDebuggerMesh {
 		return new Geometry(redGPUContext, vertexBuffer);
 	}
 
-	#hasOBBChanged(currentOBB: IOBB): boolean {
+	#hasOBBChanged(currentOBB: OBB): boolean {
 		if (!this.#cachedOBB) return true;
 
 		const cached = this.#cachedOBB;
@@ -124,19 +124,19 @@ class DrawDebuggerMesh {
 		return true;
 	}
 
-	#cacheOBB(obb: IOBB): void {
-		this.#cachedOBB = {
-			center: [obb.center[0], obb.center[1], obb.center[2]],
-			halfExtents: [obb.halfExtents[0], obb.halfExtents[1], obb.halfExtents[2]],
-			orientation: new Float32Array(obb.orientation)
-		};
+	#cacheOBB(obb: OBB): void {
+		this.#cachedOBB = new OBB(
+			obb.center,
+			obb.halfExtents,
+			obb.orientation,
+		)
 	}
 
 	#cacheAABB(aabb: AABB): void {
 		this.#cachedAABB = aabb.clone()
 	}
 
-	#updateVertexDataFromOBB(targetOBB: IOBB, vertexBuffer: VertexBuffer) {
+	#updateVertexDataFromOBB(targetOBB: OBB, vertexBuffer: VertexBuffer) {
 		const { center, halfExtents, orientation } = targetOBB;
 		const localVertices = [
 			[-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1],

@@ -1,12 +1,9 @@
 import {mat4, vec3} from "gl-matrix";
 import Mesh from "../../../display/mesh/Mesh";
-export type IOBB = {
-	center: [number, number, number];
-	halfExtents: [number, number, number];
-	orientation: mat4;
-}
+import OBB from "./OBB";
 
-const calculateMeshOBB = (mesh: Mesh): IOBB =>{
+
+const calculateMeshOBB = (mesh: Mesh): OBB =>{
 	const geometryVolume = mesh._geometry.volume;
 	if (!geometryVolume) return null;
 
@@ -84,11 +81,7 @@ const calculateMeshOBB = (mesh: Mesh): IOBB =>{
 	orientationMatrix[15] = 1;
 
 	// OBB 정보 저장
-	return {
-		center: [transformedCenter[0], transformedCenter[1], transformedCenter[2]],
-		halfExtents: transformedHalfExtents,
-		orientation: orientationMatrix
-	};
+	return new OBB([transformedCenter[0], transformedCenter[1], transformedCenter[2]], transformedHalfExtents, orientationMatrix);
 }
 
 export default calculateMeshOBB;

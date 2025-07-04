@@ -1,5 +1,6 @@
 import AABB from "./bound/AABB";
 import calculateMeshCombinedAABB from "./bound/calculateMeshCombinedAABB";
+import OBB from "./bound/OBB";
 import calculateNormals from "./calculateNormals";
 import calculateTextureByteSize from "./calculateTextureByteSize";
 import calculateMeshAABB from "./bound/calculateMeshAABB";
@@ -26,6 +27,7 @@ export {
 	calculateTextureByteSize,
 	//
 	AABB,
+	OBB,
 	calculateGeometryAABB,
 	calculateMeshAABB,
 	calculateMeshOBB,

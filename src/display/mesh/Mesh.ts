@@ -13,7 +13,8 @@ import InstanceIdGenerator from "../../utils/InstanceIdGenerator";
 import AABB from "../../utils/math/bound/AABB";
 import calculateMeshAABB from "../../utils/math/bound/calculateMeshAABB";
 import calculateMeshCombinedAABB from "../../utils/math/bound/calculateMeshCombinedAABB";
-import calculateMeshOBB, {IOBB} from "../../utils/math/bound/calculateMeshOBB";
+import calculateMeshOBB from "../../utils/math/bound/calculateMeshOBB";
+import OBB from "../../utils/math/bound/OBB";
 import mat4ToEuler from "../../utils/math/matToEuler";
 import uuidToUint from "../../utils/uuidToUint";
 import DrawDebuggerMesh from "../drawDebugger/DrawDebuggerMesh";
@@ -941,7 +942,7 @@ class Mesh extends MeshBase {
 		)
 	}
 
-	get boundingOBB(): IOBB {
+	get boundingOBB(): OBB {
 		if (!this._geometry) return null;
 		return calculateMeshOBB(this);
 	}
@@ -951,9 +952,6 @@ class Mesh extends MeshBase {
 		return calculateMeshAABB(this);
 	}
 
-	/**
-	 * 자식을 포함한 AABB(Axis-Aligned Bounding Box) 계산
-	 */
 	get combinedBoundingAABB(): AABB {
 		if (!this._geometry) return null;
 		return calculateMeshCombinedAABB(this)
