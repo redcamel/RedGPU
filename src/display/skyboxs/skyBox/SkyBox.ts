@@ -15,6 +15,7 @@ import HDRTexture from "../../../resources/texture/hdr/HDRTexture";
 import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validateRedGPUContext";
+import {keepLog} from "../../../utils";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import vertexModuleSource from './shader/vertex.wgsl';
 import SkyBoxMaterial from "./SkyBoxMaterial";
@@ -35,7 +36,8 @@ class SkyBox {
 	#primitiveState: PrimitiveState
 	#depthStencilState: DepthStencilState
 	#skyboxTexture: CubeTexture | HDRTexture
-
+	#transitionTexture: CubeTexture | HDRTexture
+	#transitionStartTime: number = 0
 	constructor(redGPUContext: RedGPUContext, cubeTexture: CubeTexture | HDRTexture) {
 		validateRedGPUContext(redGPUContext)
 		this.#redGPUContext = redGPUContext
@@ -83,17 +85,26 @@ class SkyBox {
 		return this.#skyboxTexture
 	}
 
-	set skyboxTexture(texture: CubeTexture) {
+	set skyboxTexture(texture: CubeTexture | HDRTexture) {
 		if (!texture) {
-			consoleAndThrowError('SkyBox requires a valid CubeTexture')
+			consoleAndThrowError('SkyBox requires a valid CubeTexture | HDRTexture')
 		} else {
 			this.#skyboxTexture = texture
 			this.#material.skyboxTexture = texture
 		}
 	}
+	get transitionTexture(): CubeTexture | HDRTexture {
+		return this.#transitionTexture
+	}
 
+	transition(transitionTexture:CubeTexture|HDRTexture,duration:number=1000) {
+		this.#transitionTexture = transitionTexture
+		this.#material.transitionTexture = transitionTexture
+		this.#material.transitionDuration = duration
+		this.#transitionStartTime = performance.now()
+	}
 	render(debugViewRenderState: RenderViewStateData) {
-		const {currentRenderPassEncoder,} = debugViewRenderState
+		const {currentRenderPassEncoder,startTime} = debugViewRenderState
 		this.#updateMSAAStatus();
 		if (!this.gpuRenderInfo) this.#initGPURenderInfos(this.#redGPUContext)
 		if (this.#dirtyPipeline) {
@@ -101,6 +112,18 @@ class SkyBox {
 			this.#dirtyPipeline = false
 			debugViewRenderState.numDirtyPipelines++
 		}
+
+		if(this.#transitionStartTime) {
+			this.#material.transitionElapsed = Math.max(startTime - this.#transitionStartTime, 0)
+			// keepLog(startTime, this.#transitionStartTime, this.#material.transitionElapsed / this.#material.transitionDuration)
+			if(this.#material.transitionElapsed > this.#material.transitionDuration) {
+				this.#transitionStartTime = 0
+				this.skyboxTexture = this.#transitionTexture
+				this.#material.transitionTexture = null
+				this.#dirtyPipeline = true
+			}
+		}
+
 		const {gpuRenderInfo} = this
 		const {vertexUniformBindGroup, pipeline} = gpuRenderInfo
 		const {indexBuffer} = this.#geometry

@@ -10,9 +10,12 @@ import fragmentModuleSource from "./shader/fragment.wgsl"
 const SHADER_INFO = parseWGSL(fragmentModuleSource)
 
 interface SkyBoxMaterial {
-	skyboxTexture: CubeTexture
+	skyboxTexture: CubeTexture  | HDRTexture
+	transitionTexture: CubeTexture | HDRTexture
 	skyboxTextureSampler: Sampler
 	blur:number
+	transitionDuration:number
+	transitionElapsed:number
 }
 
 class SkyBoxMaterial extends ABitmapBaseMaterial {
@@ -49,6 +52,15 @@ class SkyBoxMaterial extends ABitmapBaseMaterial {
 }
 DefineForFragment.definePositiveNumber(SkyBoxMaterial, [
 	['blur', 0],
+])
+DefineForFragment.definePositiveNumber(SkyBoxMaterial, [
+	['transitionDuration', 0],
+])
+DefineForFragment.definePositiveNumber(SkyBoxMaterial, [
+	['transitionElapsed', 0],
+])
+DefineForFragment.defineCubeTexture(SkyBoxMaterial, [
+	'transitionTexture',
 ])
 DefineForFragment.defineCubeTexture(SkyBoxMaterial, [
 	'skyboxTexture',
