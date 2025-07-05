@@ -1,5 +1,4 @@
 import * as RedGPU from "../../../../dist/index.js";
-
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -47,8 +46,9 @@ const createSkybox = (redGPUContext) => {
 const renderTestPane = async (view) => {
 	const {Pane} = await import( "https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js" );
 	const pane = new Pane();
-	const {createFieldOfView} = await import( "../../../exampleHelper/createExample/panes/index.js" );
+	const {createFieldOfView,setAntialiasing_pane} = await import( "../../../exampleHelper/createExample/panes/index.js" );
 	createFieldOfView(pane, view.camera)
+	setAntialiasing_pane(pane,view.redGPUContext,true)
 	const TEST_DATA = {
 		blur : 0
 	}
