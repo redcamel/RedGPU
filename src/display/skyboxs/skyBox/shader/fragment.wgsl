@@ -37,18 +37,16 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
   var sampleColor = skyboxColor;
   if(uniforms.transitionDuration > uniforms.transitionElapsed){
     let transitionRatio = clamp(uniforms.transitionElapsed / uniforms.transitionDuration, 0.0, 1.0);
+    let transitionSample = textureSampleLevel(transitionTexture, skyboxTextureSampler, cubemapVec, mipmapCount * blurCurve);
 
     if(uniforms.useTransitionAlphaTexture == 1u){
-        // 2D 텍스처 기반 트랜지션
-
-        let transitionColor = textureSampleLevel(transitionTexture, skyboxTextureSampler, cubemapVec, mipmapCount * blurCurve);
 
         // 큐브맵 벡터를 2D UV 좌표로 변환
         let uv = sphericalToUV(normalize(cubemapVec));
 
         // 2D 텍스처 샘플링
-        let transitionSample = textureSampleLevel(transitionAlphaTexture, skyboxTextureSampler, uv, 0.0);
-        let transitionValue = dot(transitionSample.rgb, vec3<f32>(0.299, 0.587, 0.114));
+        let transitionAlphaSample = textureSampleLevel(transitionAlphaTexture, skyboxTextureSampler, uv, 0.0);
+        let transitionAlphaValue = dot(transitionAlphaSample.rgb, vec3<f32>(0.299, 0.587, 0.114));
 
         // 노이즈 기반 트랜지션 마스크 생성
         let threshold = transitionRatio;
@@ -58,15 +56,15 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
         let maskValue = smoothstep(
             threshold - edgeSoftness,
             threshold + edgeSoftness,
-            transitionValue + (transitionRatio - 0.5) * noiseInfluence
+            transitionAlphaValue + (transitionRatio - 0.5) * noiseInfluence
         );
 
-        sampleColor = mix(transitionColor, skyboxColor, maskValue * (1.0 - transitionRatio)) ;
+        sampleColor = mix(transitionSample, skyboxColor, maskValue * (1.0 - transitionRatio)) ;
 
     }else{
         sampleColor = mix(
             skyboxColor,
-            textureSampleLevel(transitionTexture,skyboxTextureSampler, cubemapVec, mipmapCount * blurCurve),
+            transitionSample,
             transitionRatio
         );
     }
