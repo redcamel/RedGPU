@@ -26,20 +26,22 @@ const VERTEX_BIND_GROUP_DESCRIPTOR_NAME = 'VERTEX_BIND_GROUP_DESCRIPTOR_SKYBOX'
 const PIPELINE_DESCRIPTOR_LABEL = 'PIPELINE_DESCRIPTOR_SKYBOX'
 
 class SkyBox {
-	dirtyPipeline: boolean = true
+	#dirtyPipeline: boolean = true
 	modelMatrix = mat4.create()
 	gpuRenderInfo: VertexGPURenderInfo
-	_geometry: Primitive
-	_material: SkyBoxMaterial
-	readonly #redGPUContext: RedGPUContext
+	#geometry: Primitive
+	#material: SkyBoxMaterial
+	#redGPUContext: RedGPUContext
 	#primitiveState: PrimitiveState
 	#depthStencilState: DepthStencilState
+	#skyboxTexture: CubeTexture | HDRTexture
 
 	constructor(redGPUContext: RedGPUContext, cubeTexture: CubeTexture | HDRTexture) {
 		validateRedGPUContext(redGPUContext)
 		this.#redGPUContext = redGPUContext
-		this._geometry = new Box(redGPUContext)
-		this._material = new SkyBoxMaterial(redGPUContext, cubeTexture)
+		this.#geometry = new Box(redGPUContext)
+		this.#skyboxTexture = cubeTexture
+		this.#material = new SkyBoxMaterial(redGPUContext, this.#skyboxTexture)
 		this.#primitiveState = new PrimitiveState(this)
 		this.#primitiveState.cullMode = GPU_CULL_MODE.NONE
 		this.#depthStencilState = new DepthStencilState(this)
@@ -47,32 +49,46 @@ class SkyBox {
 	}
 
 	get blur(): number {
-		return this._material.blur;
+		return this.#material.blur;
 	}
 
 	set blur(value: number) {
 		validatePositiveNumberRange(1, 0, 1)
-		this._material.blur = value;
+		this.#material.blur = value;
 	}
 
+	get exposure(): number {
+		if(this.#skyboxTexture instanceof HDRTexture)	{
+			return this.#skyboxTexture.exposure;
+		}
+		return 1
+	}
+
+	set exposure(value: number) {
+		validatePositiveNumberRange(1)
+		if(this.#skyboxTexture instanceof HDRTexture)	this.#skyboxTexture.exposure = value;
+	}
+
+
 	get opacity(): number {
-		return this._material.opacity;
+		return this.#material.opacity;
 	}
 
 	set opacity(value: number) {
 		validatePositiveNumberRange(1, 0, 1)
-		this._material.opacity = value;
+		this.#material.opacity = value;
 	}
 
-	get skyboxTexture(): CubeTexture {
-		return this._material.skyboxTexture
+	get skyboxTexture(): CubeTexture | HDRTexture {
+		return this.#skyboxTexture
 	}
 
 	set skyboxTexture(texture: CubeTexture) {
 		if (!texture) {
 			consoleAndThrowError('SkyBox requires a valid CubeTexture')
 		} else {
-			this._material.skyboxTexture = texture
+			this.#skyboxTexture = texture
+			this.#material.skyboxTexture = texture
 		}
 	}
 
@@ -80,19 +96,19 @@ class SkyBox {
 		const {currentRenderPassEncoder,} = debugViewRenderState
 		this.#updateMSAAStatus();
 		if (!this.gpuRenderInfo) this.#initGPURenderInfos(this.#redGPUContext)
-		if (this.dirtyPipeline) {
+		if (this.#dirtyPipeline) {
 			this.gpuRenderInfo.pipeline = this.#updatePipeline()
-			this.dirtyPipeline = false
+			this.#dirtyPipeline = false
 			debugViewRenderState.numDirtyPipelines++
 		}
 		const {gpuRenderInfo} = this
 		const {vertexUniformBindGroup, pipeline} = gpuRenderInfo
-		const {indexBuffer} = this._geometry
+		const {indexBuffer} = this.#geometry
 		const {triangleCount, indexNum} = indexBuffer
 		currentRenderPassEncoder.setPipeline(pipeline)
-		currentRenderPassEncoder.setVertexBuffer(0, this._geometry.vertexBuffer.gpuBuffer)
+		currentRenderPassEncoder.setVertexBuffer(0, this.#geometry.vertexBuffer.gpuBuffer)
 		currentRenderPassEncoder.setBindGroup(1, vertexUniformBindGroup); // 버텍스 유니폼 버퍼 1번 고정
-		currentRenderPassEncoder.setBindGroup(2, this._material.gpuRenderInfo.fragmentUniformBindGroup)
+		currentRenderPassEncoder.setBindGroup(2, this.#material.gpuRenderInfo.fragmentUniformBindGroup)
 		currentRenderPassEncoder.setIndexBuffer(indexBuffer.gpuBuffer, 'uint32')
 		currentRenderPassEncoder.drawIndexed(indexBuffer.indexNum, 1, 0, 0, 0);
 		//
@@ -105,7 +121,7 @@ class SkyBox {
 	#updateMSAAStatus() {
 		const {changedMSAA} = this.#redGPUContext.antialiasingManager
 		if (changedMSAA) {
-			this.dirtyPipeline = true
+			this.#dirtyPipeline = true
 		}
 	}
 
@@ -157,7 +173,7 @@ class SkyBox {
 		const vertexState: GPUVertexState = {
 			module: vertexShaderModule,
 			entryPoint: 'main',
-			buffers: this._geometry.gpuRenderInfo.buffers
+			buffers: this.#geometry.gpuRenderInfo.buffers
 		}
 		// BindGroup 레이아웃을 가져온다
 		const vertex_BindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout('SKYBOX_VERTEX_BIND_GROUP_LAYOUT') || resourceManager.createBindGroupLayout(
@@ -167,7 +183,7 @@ class SkyBox {
 		const bindGroupLayouts: GPUBindGroupLayout[] = [
 			resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System),
 			vertex_BindGroupLayout,
-			this._material.gpuRenderInfo.fragmentBindGroupLayout
+			this.#material.gpuRenderInfo.fragmentBindGroupLayout
 		]
 		const pipelineLayoutDescriptor: GPUPipelineLayoutDescriptor = {bindGroupLayouts: bindGroupLayouts}
 		const pipelineLayout: GPUPipelineLayout = gpuDevice.createPipelineLayout(pipelineLayoutDescriptor);
@@ -175,7 +191,7 @@ class SkyBox {
 			label: PIPELINE_DESCRIPTOR_LABEL,
 			layout: pipelineLayout,
 			vertex: vertexState,
-			fragment: this._material.gpuRenderInfo.fragmentState,
+			fragment: this.#material.gpuRenderInfo.fragmentState,
 			primitive: this.#primitiveState.state,
 			depthStencil: this.#depthStencilState.state,
 			multisample: {
