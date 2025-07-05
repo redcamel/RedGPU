@@ -54,13 +54,6 @@ RedGPU.init(
 	}
 );
 
-const createIBL = (view, src) => {
-	const ibl = new RedGPU.Resource.IBL(view.redGPUContext, src);
-	const newSkybox = new RedGPU.Display.SkyBox(view.redGPUContext, ibl.environmentTexture);
-	view.ibl = ibl;
-	view.skybox = newSkybox;
-};
-
 function loadGLTF(view, url) {
 	const {redGPUContext, scene} = view;
 
@@ -111,13 +104,28 @@ function loadGLTF(view, url) {
 		}
 	);
 }
+const createIBL = (view, src) => {
+	const ibl = new RedGPU.Resource.IBL(view.redGPUContext, src);
+	const newSkybox = new RedGPU.Display.SkyBox(view.redGPUContext, ibl.environmentTexture);
+	view.ibl = ibl;
+	view.skybox = newSkybox;
+};
 
 const renderTestPane = async (view) => {
 	const {Pane} = await import( "https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js" );
 	const pane = new Pane();
 	const {createFieldOfView} = await import( "../../../exampleHelper/createExample/panes/index.js" );
 	createFieldOfView(pane, view.camera)
-
+	const TEST_DATA = {
+		blur : 0
+	}
+	pane.addBinding(TEST_DATA, 'blur', {
+		min:0,
+		max:1,
+		step:0.01
+	}).on("change", (ev) => {
+		view.skybox.blur = ev.value;
+	})
 	const settings = {
 		hdrImage: hdrImages[0].path
 	};
@@ -129,5 +137,6 @@ const renderTestPane = async (view) => {
 		}, {})
 	}).on("change", (ev) => {
 		createIBL(view, ev.value);
+		view.skybox.blur = TEST_DATA.blur
 	});
 };

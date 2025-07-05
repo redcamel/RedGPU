@@ -13,6 +13,7 @@ import ResourceManager from "../../../resources/resourceManager/ResourceManager"
 import CubeTexture from "../../../resources/texture/CubeTexture";
 import HDRTexture from "../../../resources/texture/hdr/HDRTexture";
 import parseWGSL from "../../../resources/wgslParser/parseWGSL";
+import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validateRedGPUContext";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import vertexModuleSource from './shader/vertex.wgsl';
@@ -43,6 +44,15 @@ class SkyBox {
 		this.#primitiveState.cullMode = GPU_CULL_MODE.NONE
 		this.#depthStencilState = new DepthStencilState(this)
 		this.#depthStencilState.depthWriteEnabled = false
+	}
+
+	get blur(): number {
+		return this._material.blur;
+	}
+
+	set blur(value: number) {
+		validatePositiveNumberRange(1,0,1)
+		this._material.blur=value;
 	}
 
 	get skyboxTexture(): CubeTexture {

@@ -49,6 +49,16 @@ const renderTestPane = async (view) => {
 	const pane = new Pane();
 	const {createFieldOfView} = await import( "../../../exampleHelper/createExample/panes/index.js" );
 	createFieldOfView(pane, view.camera)
+	const TEST_DATA = {
+		blur : 0
+	}
+	pane.addBinding(TEST_DATA, 'blur', {
+		min:0,
+		max:1,
+		step:0.01
+	}).on("change", (ev) => {
+		view.skybox.blur = ev.value;
+	})
 };
 
 const createImagePreview = (imagePaths) => {

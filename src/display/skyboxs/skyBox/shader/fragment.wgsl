@@ -1,7 +1,8 @@
 
 struct Uniforms {
     opacity : f32,
-    useSkyboxTexture:u32
+    useSkyboxTexture:u32,
+    blur:f32,
 };
 @group(2) @binding(0) var<uniform> uniforms : Uniforms;
 @group(2) @binding(1) var skyboxTextureSampler: sampler;
@@ -13,9 +14,9 @@ struct InputData {
 @fragment
 fn main(inputData:InputData) -> @location(0) vec4<f32> {
   var cubemapVec = inputData.vertexPosition.xyz - vec3<f32>(0.5);
-//  let mipmapCount:f32 = f32(textureNumLevels(skyboxTexture) - 1);
-//  var sampleColor:vec4<f32> = textureSampleLevel(skyboxTexture,skyboxTextureSampler, cubemapVec,mipmapCount);
-  var sampleColor:vec4<f32> = textureSample(skyboxTexture,skyboxTextureSampler, cubemapVec);
+  let mipmapCount:f32 = f32(textureNumLevels(skyboxTexture) - 1);
+  let blurCurve = uniforms.blur * uniforms.blur; // 제곱 곡선
+  var sampleColor:vec4<f32> = textureSampleLevel(skyboxTexture,skyboxTextureSampler, cubemapVec, mipmapCount * blurCurve);
   var outColor = vec4<f32>(sampleColor.rgb, sampleColor.a * uniforms.opacity);
   if(outColor.a == 0.0) {
     discard;
