@@ -113,13 +113,13 @@ const renderTestPane = async (view, redGPUContext) => {
 	// 현재 텍스처 표시
 	const currentTextureData = {
 		current: textureOptions[0].name,
-		transitionDuration: 1000,
+		transitionDuration: 300,
 		useTransitionAlphaTexture: true
 	};
 
 	transitionFolder.addBinding(currentTextureData, 'transitionDuration', {
 		min: 100,
-		max: 5000,
+		max: 3000,
 		step: 100
 	});
 

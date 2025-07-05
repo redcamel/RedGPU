@@ -99,7 +99,7 @@ class SkyBox {
 	}
 
 
-	transition(transitionTexture:CubeTexture|HDRTexture,duration:number=1000,transitionAlphaTexture:ANoiseTexture) {
+	transition(transitionTexture:CubeTexture|HDRTexture,duration:number=300,transitionAlphaTexture:ANoiseTexture) {
 		this.#transitionTexture = transitionTexture
 		this.#material.transitionTexture = transitionTexture
 		this.#material.transitionDuration = duration
