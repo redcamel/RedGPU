@@ -12,6 +12,7 @@ import UniformBuffer from "../../../resources/buffer/uniformBuffer/UniformBuffer
 import ResourceManager from "../../../resources/resourceManager/ResourceManager";
 import CubeTexture from "../../../resources/texture/CubeTexture";
 import HDRTexture from "../../../resources/texture/hdr/HDRTexture";
+import ANoiseTexture from "../../../resources/texture/noiseTexture/core/ANoiseTexture";
 import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validateRedGPUContext";
@@ -97,11 +98,13 @@ class SkyBox {
 		return this.#transitionTexture
 	}
 
-	transition(transitionTexture:CubeTexture|HDRTexture,duration:number=1000) {
+
+	transition(transitionTexture:CubeTexture|HDRTexture,duration:number=1000,transitionAlphaTexture:ANoiseTexture) {
 		this.#transitionTexture = transitionTexture
 		this.#material.transitionTexture = transitionTexture
 		this.#material.transitionDuration = duration
 		this.#transitionStartTime = performance.now()
+		this.#material.transitionAlphaTexture = transitionAlphaTexture
 	}
 	render(debugViewRenderState: RenderViewStateData) {
 		const {currentRenderPassEncoder,startTime} = debugViewRenderState

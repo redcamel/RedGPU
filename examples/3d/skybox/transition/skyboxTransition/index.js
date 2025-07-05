@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js";
+import * as RedGPU from "../../../../../dist/index.js";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -9,28 +9,28 @@ const textureOptions = [
 		name: 'Cube Texture',
 		type: 'cube',
 		paths: [
-			"../../../assets/skybox/px.jpg",
-			"../../../assets/skybox/nx.jpg",
-			"../../../assets/skybox/py.jpg",
-			"../../../assets/skybox/ny.jpg",
-			"../../../assets/skybox/pz.jpg",
-			"../../../assets/skybox/nz.jpg",
+			"../../../../assets/skybox/px.jpg",
+			"../../../../assets/skybox/nx.jpg",
+			"../../../../assets/skybox/py.jpg",
+			"../../../../assets/skybox/ny.jpg",
+			"../../../../assets/skybox/pz.jpg",
+			"../../../../assets/skybox/nz.jpg",
 		]
 	},
 	{
 		name: 'HDR - Cannon Exterior',
 		type: 'hdr',
-		path: '../../../assets/hdr/Cannon_Exterior.hdr'
+		path: '../../../../assets/hdr/Cannon_Exterior.hdr'
 	},
 	{
 		name: 'HDR - Field',
 		type: 'hdr',
-		path: '../../../assets/hdr/field.hdr'
+		path: '../../../../assets/hdr/field.hdr'
 	},
 	{
 		name: 'HDR - Pisa',
 		type: 'hdr',
-		path: '../../../assets/hdr/pisa.hdr'
+		path: '../../../../assets/hdr/pisa.hdr'
 	}
 ];
 
@@ -78,7 +78,7 @@ const createTexture = (redGPUContext, option) => {
 const renderTestPane = async (view, redGPUContext) => {
 	const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
 	const pane = new Pane();
-	const {createFieldOfView} = await import("../../../exampleHelper/createExample/panes/index.js");
+	const {createFieldOfView} = await import("../../../../exampleHelper/createExample/panes/index.js");
 
 	createFieldOfView(pane, view.camera);
 
@@ -104,8 +104,6 @@ const renderTestPane = async (view, redGPUContext) => {
 		view.skybox.opacity = ev.value;
 	});
 
-
-
 	// 🚀 트랜지션 폴더
 	const transitionFolder = pane.addFolder({
 		title: 'Skybox Transition',
@@ -119,7 +117,7 @@ const renderTestPane = async (view, redGPUContext) => {
 	};
 	transitionFolder.addBinding(currentTextureData, 'transitionDuration', {
 		min: 100,
-		max: 2000,
+		max: 3000,
 		step: 100
 	});
 	transitionFolder.addBinding(currentTextureData, 'current', {
@@ -128,25 +126,45 @@ const renderTestPane = async (view, redGPUContext) => {
 	});
 
 	// 🎯 각 텍스처별 트랜지션 버튼
+	const transitionButtons = []; // 버튼 참조 저장용 배열
+
 	textureOptions.forEach((option, index) => {
 		if (index === 0) return; // 첫 번째는 이미 로드된 상태
 
-		transitionFolder.addButton({
+		const button = transitionFolder.addButton({
 			title: `→ ${option.name}`,
+			disabled: currentTextureData.current === option.name // 현재 텍스처와 같으면 비활성화
 		}).on('click', () => {
 			const newTexture = createTexture(redGPUContext, option);
 
 			// 🎬 트랜지션 실행
 			view.skybox.transition(newTexture, currentTextureData.transitionDuration);
 
+			// 이전 버튼 활성화
+			updateTransitionButtonStates(currentTextureData.current);
+
 			// UI 업데이트
 			setTimeout(() => {
 				currentTextureData.current = option.name;
+				// 새로운 현재 텍스처에 해당하는 버튼 비활성화
+				updateTransitionButtonStates(option.name);
 			}, currentTextureData.transitionDuration);
 
 			console.log(`Transitioning to: ${option.name} (${currentTextureData.transitionDuration}ms)`);
 		});
+
+		// 버튼과 옵션 정보를 함께 저장
+		transitionButtons.push({
+			button: button,
+			option: option
+		});
 	});
 
+
+	function updateTransitionButtonStates(currentTextureName) {
+		transitionButtons.forEach(({button, option}) => {
+			button.disabled = (option.name === currentTextureName);
+		});
+	}
 
 };
