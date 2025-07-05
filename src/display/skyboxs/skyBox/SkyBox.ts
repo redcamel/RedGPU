@@ -51,8 +51,17 @@ class SkyBox {
 	}
 
 	set blur(value: number) {
-		validatePositiveNumberRange(1,0,1)
-		this._material.blur=value;
+		validatePositiveNumberRange(1, 0, 1)
+		this._material.blur = value;
+	}
+
+	get opacity(): number {
+		return this._material.opacity;
+	}
+
+	set opacity(value: number) {
+		validatePositiveNumberRange(1, 0, 1)
+		this._material.opacity = value;
 	}
 
 	get skyboxTexture(): CubeTexture {
@@ -126,9 +135,7 @@ class SkyBox {
 				},
 			}]
 		}
-		// GPUBindGroup
 		const vertexUniformBindGroup: GPUBindGroup = redGPUContext.gpuDevice.createBindGroup(vertexBindGroupDescriptor)
-		// 설명자를 이용해 랜더 파이프라인을 생성합니다.
 		this.gpuRenderInfo = new VertexGPURenderInfo(
 			null,
 			UNIFORM_STRUCT,
@@ -162,10 +169,8 @@ class SkyBox {
 			vertex_BindGroupLayout,
 			this._material.gpuRenderInfo.fragmentBindGroupLayout
 		]
-		// 파이프라인 레이아웃 설명자를 생성합니다.
 		const pipelineLayoutDescriptor: GPUPipelineLayoutDescriptor = {bindGroupLayouts: bindGroupLayouts}
 		const pipelineLayout: GPUPipelineLayout = gpuDevice.createPipelineLayout(pipelineLayoutDescriptor);
-		// 랜더 파이프라인 설명자를 생성합니다.
 		const pipelineDescriptor: GPURenderPipelineDescriptor = {
 			label: PIPELINE_DESCRIPTOR_LABEL,
 			layout: pipelineLayout,
