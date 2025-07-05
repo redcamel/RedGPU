@@ -82,7 +82,6 @@ const renderTestPane = async (redGPUContext, targetView) => {
 	const { shadowManager } = targetView.scene;
 	const { directionalShadowManager } = shadowManager;
 
-	createIblHelper(pane, targetView, RedGPU);
 	pane.addBinding(directionalShadowManager, 'shadowDepthTextureSize', {
 		min: 128,
 		max: 2048,
@@ -90,5 +89,6 @@ const renderTestPane = async (redGPUContext, targetView) => {
 	}).on("change", (ev) => {
 		directionalShadowManager.shadowDepthTextureSize = ev.value;
 	});
+	createIblHelper(pane, targetView, RedGPU, {useLight:true});
 
 };
