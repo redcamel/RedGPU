@@ -17,6 +17,7 @@ import RadialBlur from "./effects/blur/RadialBlur";
 import ZoomBlur from "./effects/blur/ZoomBlur";
 import Convolution from "./effects/Convolution";
 import FilmGrain from "./effects/FilmGrain";
+import Fog from "./effects/fog/Fog";
 import ChromaticAberration from "./effects/lens/ChromaticAberration";
 import DOF from "./effects/lens/dof/DOF";
 import LensDistortion from "./effects/lens/LensDistortion";
@@ -26,30 +27,45 @@ import Sharpen from "./effects/Sharpen";
 import PostEffectManager from "./PostEffectManager";
 
 export {
-	BrightnessContrast,
-	Convolution,
-	ColorBalance,
-	ChromaticAberration,
-	DOF,
-	FilmGrain,
-	ColorTemperatureTint,
-	DirectionalBlur,
+	// Core Classes
+	ASinglePassPostEffect,
+	AMultiPassPostEffect,
 	PostEffectManager,
-	OldBloom,
+
+	// Color Adjustments
+	BrightnessContrast,
+	ColorBalance,
+	ColorTemperatureTint,
+	Grayscale,
+	HueSaturation,
 	Invert,
+	Threshold,
+	Vibrance,
+
+	// Blur Effects
 	Blur,
 	BlurX,
 	BlurY,
-	Sharpen,
-	LensDistortion,
-	ZoomBlur,
-	Grayscale,
-	Threshold,
-	HueSaturation,
+	DirectionalBlur,
 	GaussianBlur,
-	ASinglePassPostEffect,
-	AMultiPassPostEffect,
-	Vibrance,
+	RadialBlur,
+	ZoomBlur,
+
+	// Lens Effects
+	ChromaticAberration,
+	DOF,
+	LensDistortion,
 	Vignetting,
-	RadialBlur
+
+	// Environmental Effects
+	Fog,
+
+	// Visual Effects
+	FilmGrain,
+	OldBloom,
+	Sharpen,
+
+	// Utility Effects
+	Convolution
+
 }
