@@ -16,7 +16,7 @@ RedGPU.init(
 
 		// 궤도형 카메라 컨트롤러 생성
 		const controller = new RedGPU.Camera.ObitController(redGPUContext);
-		controller.distance = 15; // 포그 효과를 보기 위해 거리 증가
+		controller.distance = 10; // 포그 효과를 보기 위해 거리 증가
 		controller.speedDistance = 0.5;
 		controller.tilt = -10;
 
@@ -45,8 +45,7 @@ RedGPU.init(
 		const fogEffect = new RedGPU.PostEffect.Fog(redGPUContext);
 		// 기본 Linear Fog 설정 (편의 메서드 제거로 개별 설정)
 		fogEffect.fogType = RedGPU.PostEffect.Fog.LINEAR;
-		fogEffect.nearDistance = 5;
-		fogEffect.farDistance = 50;
+
 		fogEffect.density = 0.5;
 		// 색상은 ColorRGB 객체를 직접 조작
 		fogEffect.fogColor.setColorByRGB(178, 178, 204);
@@ -122,6 +121,7 @@ function loadMultipleModels(redGPUContext, scene) {
 			const mainMesh = scene.addChild(result['resultMesh']);
 			mainMesh.x = 0;
 			mainMesh.z = 0;
+			mainMesh.y = 0; // 중앙 고정
 			mainMesh.scaleX = mainMesh.scaleY = mainMesh.scaleZ = 2;
 		}
 	);
@@ -134,42 +134,43 @@ function loadMultipleModels(redGPUContext, scene) {
 		'#2ECC71', '#F1C40F', '#E67E22', '#34495E', '#95A5A6'
 	];
 
-	// 거리별 원형 배치 설정
+	// 거리별 원형 배치 설정 (2 단위 간격, 거리 20까지, y축 고정)
 	const circleConfigs = [
-		{ radius: 5,  count: 8,  size: 0.3, height: [-0.5, 1.5] },   // 가장 가까운 원
-		{ radius: 10, count: 12, size: 0.5, height: [-1, 2] },       // 두 번째 원
-		{ radius: 15, count: 16, size: 0.7, height: [-1.5, 2.5] },   // 세 번째 원
-		{ radius: 20, count: 20, size: 0.9, height: [-2, 3] },       // 네 번째 원
-		{ radius: 30, count: 24, size: 1.2, height: [-2.5, 4] },     // 다섯 번째 원
-		{ radius: 40, count: 28, size: 1.5, height: [-3, 5] },       // 여섯 번째 원
-		{ radius: 55, count: 32, size: 2.0, height: [-3.5, 6] },     // 일곱 번째 원
-		{ radius: 70, count: 36, size: 2.5, height: [-4, 7] },       // 여덟 번째 원
-		{ radius: 90, count: 40, size: 3.0, height: [-4.5, 8] }      // 가장 먼 원
+		{ radius: 2,  count: 6,  size: 0.2 },   // 가장 가까운 원
+		{ radius: 4,  count: 8,  size: 0.3 },
+		{ radius: 6,  count: 10, size: 0.4 },
+		{ radius: 8,  count: 12, size: 0.5 },
+		{ radius: 10, count: 14, size: 0.6 },
+		{ radius: 12, count: 16, size: 0.7 },
+		{ radius: 14, count: 18, size: 0.8 },
+		{ radius: 16, count: 20, size: 0.9 },
+		{ radius: 18, count: 22, size: 1.0 },
+		{ radius: 20, count: 24, size: 1.1 }    // 가장 먼 원
 	];
 
-	console.log('🌕 거리별 Sphere 원형 배치 시작...');
+	console.log('🎯 2단위 간격 원형 배치 시작 (거리 20까지, y축 고정)...');
 
 	circleConfigs.forEach((config, circleIndex) => {
 		console.log(`📍 Circle ${circleIndex + 1}: radius=${config.radius}, count=${config.count}`);
 
 		for (let i = 0; i < config.count; i++) {
-			// 원형 배치 각도 계산
+			// 원형 배치 각도 계산 (정확한 등간격)
 			const angle = (Math.PI * 2 * i) / config.count;
 
 			// 약간의 랜덤 오프셋 추가 (자연스러운 배치)
-			const radiusOffset = config.radius + (Math.random() - 0.5) * config.radius * 0.2;
-			const angleOffset = angle + (Math.random() - 0.5) * 0.3;
+			const radiusOffset = config.radius*2 + (Math.random() - 0.5) * 0.3;
+			const angleOffset = angle + (Math.random() - 0.5) * 0.1;
 
-			// 위치 계산
+			// 위치 계산 (y축 고정)
 			const x = Math.cos(angleOffset) * radiusOffset;
 			const z = Math.sin(angleOffset) * radiusOffset;
-			const y = config.height[0] + Math.random() * (config.height[1] - config.height[0]);
+			const y = 0; // y축 고정
 
 			// Sphere 지오메트리 생성 (거리에 따라 해상도 조절)
-			const sphereDetail = Math.max(8, 16 - circleIndex * 2); // 멀수록 낮은 해상도
+			const sphereDetail = Math.max(8, 16 - circleIndex); // 멀수록 낮은 해상도
 			const geometry = new RedGPU.Primitive.Sphere(
 				redGPUContext,
-				config.size,
+				0.5,
 				sphereDetail,
 				sphereDetail
 			);
@@ -186,48 +187,12 @@ function loadMultipleModels(redGPUContext, scene) {
 			mesh.y = y;
 			mesh.z = z;
 
-			// 크기 변화 (기본 크기에서 ±30% 변화)
-			const scaleVariation = 0.7 + Math.random() * 0.6;
-			mesh.scaleX = mesh.scaleY = mesh.scaleZ = scaleVariation;
 
 			// 씬에 추가
 			scene.addChild(mesh);
 		}
 	});
 
-	// 추가 랜덤 Sphere들 (중간 거리를 채우기 위해)
-	console.log('🎲 추가 랜덤 Sphere 배치...');
-
-	for (let i = 0; i < 50; i++) {
-		// 5~100 사이의 랜덤 거리
-		const distance = 5 + Math.random() * 95;
-		const angle = Math.random() * Math.PI * 2;
-
-		const x = Math.cos(angle) * distance;
-		const z = Math.sin(angle) * distance;
-		const y = -5 + Math.random() * 10;
-
-		// 거리에 따른 크기 조절
-		const size = 0.2 + (distance / 100) * 2.5;
-		const detail = Math.max(6, 20 - Math.floor(distance / 10));
-
-		const geometry = new RedGPU.Primitive.Sphere(redGPUContext, size, detail, detail);
-		const color = colors[Math.floor(Math.random() * colors.length)];
-		const material = new RedGPU.Material.ColorMaterial(redGPUContext, color);
-
-		const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
-		mesh.x = x;
-		mesh.y = y;
-		mesh.z = z;
-
-		const scale = 0.5 + Math.random() * 1.0;
-		mesh.scaleX = mesh.scaleY = mesh.scaleZ = scale;
-
-		scene.addChild(mesh);
-	}
-
-	console.log('✨ 총 Sphere 개수:', circleConfigs.reduce((sum, config) => sum + config.count, 0) + 50);
-	console.log('🌫️ 포그 효과 테스트 준비 완료!');
 }
 
 const renderTestPane = async (redGPUContext, targetView) => {
@@ -336,7 +301,7 @@ const renderTestPane = async (redGPUContext, targetView) => {
 	});
 
 	const farControl = basicFolder.addBinding(TEST_STATE, 'farDistance', {
-		min: 10,
+		min: 1,
 		max: 200,
 		step: 0.001,
 		label: 'Far Distance'

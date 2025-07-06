@@ -12,7 +12,7 @@ class Fog extends ASinglePassPostEffect {
 	static EXPONENTIAL_SQUARED = 2;
 	#fogType: number = Fog.LINEAR;
 	#density: number = 0.5;
-	#nearDistance: number = 5.0;
+	#nearDistance: number = 4.5;
 	#farDistance: number = 50.0;
 	#fogColor: ColorRGB;
 	#cameraNear: number = 0.1;
