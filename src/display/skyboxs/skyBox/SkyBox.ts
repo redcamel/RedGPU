@@ -39,6 +39,8 @@ class SkyBox {
 	#skyboxTexture: CubeTexture | HDRTexture
 	#transitionTexture: CubeTexture | HDRTexture
 	#transitionStartTime: number = 0
+	#transitionDuration:number=0
+	#transitionElapsed:number=0
 	constructor(redGPUContext: RedGPUContext, cubeTexture: CubeTexture | HDRTexture) {
 		validateRedGPUContext(redGPUContext)
 		this.#redGPUContext = redGPUContext
@@ -49,6 +51,20 @@ class SkyBox {
 		this.#primitiveState.cullMode = GPU_CULL_MODE.NONE
 		this.#depthStencilState = new DepthStencilState(this)
 		this.#depthStencilState.depthWriteEnabled = false
+	}
+
+
+	get transitionDuration(): number {
+		return this.#transitionDuration;
+	}
+
+
+	get transitionElapsed(): number {
+		return this.#transitionElapsed;
+	}
+
+	get transitionProgress(): number {
+		return this.#material.transitionProgress;
 	}
 
 	get blur(): number {
@@ -102,7 +118,7 @@ class SkyBox {
 	transition(transitionTexture:CubeTexture|HDRTexture,duration:number=300,transitionAlphaTexture:ANoiseTexture) {
 		this.#transitionTexture = transitionTexture
 		this.#material.transitionTexture = transitionTexture
-		this.#material.transitionDuration = duration
+		this.#transitionDuration = duration
 		this.#transitionStartTime = performance.now()
 		this.#material.transitionAlphaTexture = transitionAlphaTexture
 	}
@@ -117,13 +133,16 @@ class SkyBox {
 		}
 
 		if(this.#transitionStartTime) {
-			this.#material.transitionElapsed = Math.max(startTime - this.#transitionStartTime, 0)
-			// keepLog(startTime, this.#transitionStartTime, this.#material.transitionElapsed / this.#material.transitionDuration)
-			if(this.#material.transitionElapsed > this.#material.transitionDuration) {
+			this.#transitionElapsed = Math.max(startTime - this.#transitionStartTime, 0)
+			if(this.#transitionElapsed > this.#transitionDuration) {
 				this.#transitionStartTime = 0
+				this.#material.transitionProgress = 0
 				this.skyboxTexture = this.#transitionTexture
 				this.#material.transitionTexture = null
 				this.#dirtyPipeline = true
+			}else{
+				const value = this.#transitionElapsed / this.#transitionDuration
+				this.#material.transitionProgress = value < 0 ? 0 : value > 1 ? 1 : value
 			}
 		}
 

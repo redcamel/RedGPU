@@ -17,8 +17,7 @@ interface SkyBoxMaterial {
 	transitionAlphaTexture: ANoiseTexture | BitmapTexture
 	skyboxTextureSampler: Sampler
 	blur:number
-	transitionDuration:number
-	transitionElapsed:number
+	transitionProgress:number
 }
 
 class SkyBoxMaterial extends ABitmapBaseMaterial {
@@ -28,6 +27,7 @@ class SkyBoxMaterial extends ABitmapBaseMaterial {
 	 * @type {boolean}
 	 */
 	dirtyPipeline: boolean = false
+
 
 
 	/**
@@ -57,10 +57,7 @@ DefineForFragment.definePositiveNumber(SkyBoxMaterial, [
 	['blur', 0],
 ])
 DefineForFragment.definePositiveNumber(SkyBoxMaterial, [
-	['transitionDuration', 0],
-])
-DefineForFragment.definePositiveNumber(SkyBoxMaterial, [
-	['transitionElapsed', 0],
+	['transitionProgress', 0],
 ])
 DefineForFragment.defineCubeTexture(SkyBoxMaterial, [
 	'transitionTexture',

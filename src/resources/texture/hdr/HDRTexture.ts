@@ -287,10 +287,7 @@ class HDRTexture extends ManagedResourceBase {
 	}
 
 	get viewDescriptor() {
-		keepLog({
-			...CubeTexture.defaultViewDescriptor,
-			mipLevelCount: this.#mipLevelCount
-		})
+
 		return {
 			...CubeTexture.defaultViewDescriptor,
 			mipLevelCount: this.#mipLevelCount
@@ -300,8 +297,12 @@ class HDRTexture extends ManagedResourceBase {
 	async #updateCubeMapContent() {
 		const {gpuDevice, resourceManager} = this.redGPUContext;
 		const {mipmapGenerator} = resourceManager;
-		if (!this.#gpuTexture || !this.#hdrData) {
-			console.warn('큐브맵 텍스처 또는 HDR 데이터가 없어 업데이트를 건너뜁니다.');
+		if (!this.#gpuTexture ) {
+			console.warn('큐브맵 텍스처가 없어 업데이트를 건너뜁니다.');
+			return;
+		}
+		if (!this.#hdrData) {
+			console.warn('HDR 데이터가 없어 업데이트를 건너뜁니다.');
 			return;
 		}
 		console.log(`HDR 큐브맵 내용 업데이트 시작 (노출: ${this.#exposure.toFixed(3)})`);

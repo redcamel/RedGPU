@@ -3,8 +3,7 @@ struct Uniforms {
     opacity : f32,
     useSkyboxTexture:u32,
     blur:f32,
-    transitionDuration:f32,
-    transitionElapsed:f32,
+    transitionProgress:f32,
     useTransitionAlphaTexture:u32
 };
 @group(2) @binding(0) var<uniform> uniforms : Uniforms;
@@ -35,38 +34,27 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
   let blurCurve = uniforms.blur * uniforms.blur; // 제곱 곡선
   let skyboxColor = textureSampleLevel(skyboxTexture, skyboxTextureSampler, cubemapVec, mipmapCount * blurCurve);
   var sampleColor = skyboxColor;
-  if(uniforms.transitionDuration > uniforms.transitionElapsed){
-    let transitionRatio = clamp(uniforms.transitionElapsed / uniforms.transitionDuration, 0.0, 1.0);
+  let u_transitionProgress = uniforms.transitionProgress;
+  if(u_transitionProgress > 0.0){
     let transitionSample = textureSampleLevel(transitionTexture, skyboxTextureSampler, cubemapVec, mipmapCount * blurCurve);
-
     if(uniforms.useTransitionAlphaTexture == 1u){
-
         // 큐브맵 벡터를 2D UV 좌표로 변환
         let uv = sphericalToUV(normalize(cubemapVec));
-
         // 2D 텍스처 샘플링
         let transitionAlphaSample = textureSampleLevel(transitionAlphaTexture, skyboxTextureSampler, uv, 0.0);
         let transitionAlphaValue = dot(transitionAlphaSample.rgb, vec3<f32>(0.299, 0.587, 0.114));
-
         // 노이즈 기반 트랜지션 마스크 생성
-        let threshold = transitionRatio;
+        let threshold = u_transitionProgress;
         let noiseInfluence = 0.3;
         let edgeSoftness = 0.1;
-
         let maskValue = smoothstep(
             threshold - edgeSoftness,
             threshold + edgeSoftness,
-            transitionAlphaValue + (transitionRatio - 0.5) * noiseInfluence
+            transitionAlphaValue + (u_transitionProgress - 0.5) * noiseInfluence
         );
-
-        sampleColor = mix(transitionSample, skyboxColor, maskValue * (1.0 - transitionRatio)) ;
-
+        sampleColor = mix( transitionSample, skyboxColor, maskValue * (1.0 - u_transitionProgress)) ;
     }else{
-        sampleColor = mix(
-            skyboxColor,
-            transitionSample,
-            transitionRatio
-        );
+        sampleColor = mix( skyboxColor, transitionSample, u_transitionProgress );
     }
   }
 
