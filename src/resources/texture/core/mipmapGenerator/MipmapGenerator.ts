@@ -183,8 +183,7 @@ class MipmapGenerator {
 				srcView = dstView;
 			}
 		}
-		// If we didn't render to the source texture, finish by copying the mip results from the temporary mipmap texture
-		// to the source.
+
 		if (!renderToSource) {
 			const mipLevelSize = {
 				width: Math.max(1, W >>> 1),

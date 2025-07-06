@@ -77,13 +77,13 @@ const createTestPane = async (view) => {
 		);
 		view.skybox = new RedGPU.Display.SkyBox(view.redGPUContext, newTexture);
 	});
-	// pane.addBinding(settings, 'blur', {
-	// 	min:0,
-	// 	max:1,
-	// 	step:0.01
-	// }).on("change", (ev) => {
-	// 	view.skybox.blur = ev.value;
-	// })
+	pane.addBinding(settings, 'blur', {
+		min:0,
+		max:1,
+		step:0.01
+	}).on("change", (ev) => {
+		view.skybox.blur = ev.value;
+	})
 	pane.addBinding(settings, 'opacity', {
 		min:0,
 		max:1,
