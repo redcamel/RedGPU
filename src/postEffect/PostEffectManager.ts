@@ -1,8 +1,12 @@
+import Camera2D from "../camera/camera/Camera2D";
 import RedGPUContext from "../context/RedGPUContext";
 import View3D from "../display/view/View3D";
+import UniformBuffer from "../resources/buffer/uniformBuffer/UniformBuffer";
 import Sampler from "../resources/sampler/Sampler";
+import parseWGSL from "../resources/wgslParser/parseWGSL";
 import AMultiPassPostEffect from "./core/AMultiPassPostEffect";
 import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
+import postEffectSystemUniformCode from "./core/postEffectSystemUniform.wgsl"
 import FXAA from "./FXAA";
 
 class PostEffectManager {
@@ -20,6 +24,11 @@ class PostEffectManager {
 	#textureComputeBindGroupLayout: GPUBindGroupLayout
 	#textureComputePipeline: GPUComputePipeline
 	#previousDimensions: { width: number, height: number }
+	#postEffectSystemUniformBuffer: UniformBuffer;
+	#postEffectSystemUniformBufferStructInfo;
+	get postEffectSystemUniformBuffer(): UniformBuffer {
+		return this.#postEffectSystemUniformBuffer;
+	}
 
 	constructor(view: View3D) {
 		this.#view = view;
@@ -61,12 +70,36 @@ class PostEffectManager {
 		this.#postEffects.length = 0
 	}
 
+	#updateSystemUniforms() {
+		const { redGPUContext, rawCamera} = this.#view
+		const {gpuDevice} = redGPUContext
+		const {modelMatrix: cameraMatrix, position: cameraPosition} = rawCamera
+		const structInfo = this.#postEffectSystemUniformBufferStructInfo
+		const gpuBuffer = this.#postEffectSystemUniformBuffer.gpuBuffer;
+		const camera2DYn = rawCamera instanceof Camera2D;
+		console.log(structInfo);
+		// 카메라 시스템 유니폼 업데이트
+		[
+			{key: 'cameraMatrix', value: cameraMatrix},
+			{key: 'cameraPosition', value: cameraPosition},
+			{key: 'nearClipping', value: [camera2DYn ? 0 : rawCamera.nearClipping]},
+			{key: 'farClipping', value: [camera2DYn ? 0 : rawCamera.farClipping]},
+		].forEach(({key, value}) => {
+			gpuDevice.queue.writeBuffer(
+				gpuBuffer,
+				structInfo.members.camera.members[key].uniformOffset,
+				new structInfo.members.camera.members[key].View(value)
+			);
+		})
+		// console.log('structInfo',view.scene.directionalLights)
+	}
 	render() {
 		const {viewRenderTextureManager, redGPUContext} = this.#view;
 		const {antialiasingManager} = redGPUContext
 		const {useMSAA, useFXAA} = antialiasingManager;
 		const {colorTextureView, colorResolveTextureView, colorTexture} = viewRenderTextureManager;
 		const {width, height} = colorTexture;
+		this.#updateSystemUniforms()
 		// 초기 텍스처 설정 (MSAA 여부에 따라 소스 결정)
 		const initialSourceView = useMSAA ? colorResolveTextureView : colorTextureView;
 		this.#sourceTextureView = this.#renderToStorageTexture(this.#view, initialSourceView);
@@ -76,7 +109,7 @@ class PostEffectManager {
 				this.#view,
 				width,
 				height,
-				currentTextureView
+				currentTextureView,
 			);
 		});
 		// FXAA 적용 (필요한 경우)
@@ -108,6 +141,13 @@ class PostEffectManager {
 		this.#textureComputeShaderModule = gpuDevice.createShaderModule({code: textureComputeShader,});
 		this.#textureComputeBindGroupLayout = this.#createTextureBindGroupLayout(redGPUContext);
 		this.#textureComputePipeline = this.#createTextureComputePipeline(gpuDevice, this.#textureComputeShaderModule, this.#textureComputeBindGroupLayout)
+
+		const STRUCT_INFO = parseWGSL(postEffectSystemUniformCode)
+		const UNIFORM_STRUCT = STRUCT_INFO.uniforms.systemUniforms;
+		const postEffectSystemUniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength)
+		this.#postEffectSystemUniformBufferStructInfo = UNIFORM_STRUCT;
+		this.#postEffectSystemUniformBuffer = new UniformBuffer(redGPUContext, postEffectSystemUniformData, '#postEffectSystemUniformBuffer');
+
 	}
 
 	#renderToStorageTexture(view: View3D, sourceTextureView: GPUTextureView) {
