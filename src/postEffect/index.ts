@@ -4,10 +4,10 @@ import BrightnessContrast from "./effects/adjustments/brightnessContrast/Brightn
 import ColorBalance from "./effects/adjustments/colorBalance/ColorBalance";
 import ColorTemperatureTint from "./effects/adjustments/colorTemperatureTint/ColorTemperatureTint";
 import Grayscale from "./effects/adjustments/grayscale/Grayscale";
-import HueSaturation from "./effects/adjustments/HueSaturation";
+import HueSaturation from "./effects/adjustments/hueSaturation/HueSaturation";
 import Invert from "./effects/adjustments/invert/Invert";
-import Threshold from "./effects/adjustments/Threshold";
-import Vibrance from "./effects/adjustments/Vibrance";
+import Threshold from "./effects/adjustments/threshold/Threshold";
+import Vibrance from "./effects/adjustments/vibrance/Vibrance";
 import Blur from "./effects/blur/Blur";
 import BlurX from "./effects/blur/BlurX";
 import BlurY from "./effects/blur/BlurY";
