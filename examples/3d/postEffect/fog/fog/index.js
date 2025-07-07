@@ -64,7 +64,7 @@ function createTestScene(redGPUContext, scene) {
 
 	const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD'];
 
-	// 🏔️ 높이별 오브젝트 배치 (Height Fog 테스트용)
+	// 근거리 - 구체들
 	for (let i = 0; i < 6; i++) {
 		const angle = (Math.PI * 2 * i) / 6;
 		const radius = 7;
@@ -75,12 +75,12 @@ function createTestScene(redGPUContext, scene) {
 
 		mesh.x = Math.cos(angle) * radius;
 		mesh.z = Math.sin(angle) * radius;
-		mesh.y = Math.sin(i * 0.5) * 2; // 높이 변화
+		mesh.y = Math.sin(i * 0.5) * 2;
 
 		scene.addChild(mesh);
 	}
 
-	// 중간 거리 - 다양한 높이의 박스들
+	// 중간 거리 - 박스들
 	for (let i = 0; i < 8; i++) {
 		const angle = (Math.PI * 2 * i) / 8;
 		const radius = 17;
@@ -91,12 +91,12 @@ function createTestScene(redGPUContext, scene) {
 
 		mesh.x = Math.cos(angle) * radius;
 		mesh.z = Math.sin(angle) * radius;
-		mesh.y = Math.sin(i * 0.8) * 3; // 더 큰 높이 변화
+		mesh.y = Math.sin(i * 0.8) * 3;
 
 		scene.addChild(mesh);
 	}
 
-	// 원거리 - 계단식 배치 (Height Fog 효과가 잘 보이도록)
+	// 원거리 - 원기둥들
 	for (let i = 0; i < 10; i++) {
 		const angle = (Math.PI * 2 * i) / 10;
 		const radius = 30;
@@ -107,12 +107,12 @@ function createTestScene(redGPUContext, scene) {
 
 		mesh.x = Math.cos(angle) * radius;
 		mesh.z = Math.sin(angle) * radius;
-		mesh.y = (i % 3) * 2 - 2; // -2, 0, 2 높이로 배치
+		mesh.y = (i % 3) * 2 - 2;
 
 		scene.addChild(mesh);
 	}
 
-	// 🏞️ 지면 표현용 큰 평면 추가
+	// 지면 표현용 평면
 	const groundPlane = new RedGPU.Primitive.Plane(redGPUContext, 100, 100, 1, 1);
 	const groundMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#8FBC8F');
 	const groundMesh = new RedGPU.Display.Mesh(redGPUContext, groundPlane, groundMaterial);
@@ -127,7 +127,7 @@ function createTestScene(redGPUContext, scene) {
 async function createControlPanel(redGPUContext, view, fogEffect) {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 
-	const pane = new Pane({ title: '🌫️ Enhanced Fog Test' });
+	const pane = new Pane({ title: '🌫️ Fog Test' });
 
 	const PARAMS = {
 		enabled: true,
@@ -135,11 +135,7 @@ async function createControlPanel(redGPUContext, view, fogEffect) {
 		density: fogEffect.density,
 		nearDistance: fogEffect.nearDistance,
 		farDistance: fogEffect.farDistance,
-		fogColor: { r: 200, g: 210, b: 255 },
-		// 🆕 Height Fog 파라미터
-		fogHeight: fogEffect.fogHeight,
-		fogHeightDensity: fogEffect.fogHeightDensity,
-		fogHeightFalloff: fogEffect.fogHeightFalloff
+		fogColor: { r: 200, g: 210, b: 255 }
 	};
 
 	// 기본 컨트롤
@@ -158,7 +154,6 @@ async function createControlPanel(redGPUContext, view, fogEffect) {
 		options: {
 			'Exponential': 'Exponential',
 			'Exponential Squared': 'ExponentialSquared',
-			'🏔️ Height Fog': 'HeightFog'  // 🆕 Height Fog 추가
 		}
 	}).on('change', (ev) => {
 		switch(ev.value) {
@@ -168,11 +163,7 @@ async function createControlPanel(redGPUContext, view, fogEffect) {
 			case 'ExponentialSquared':
 				fogEffect.fogType = RedGPU.PostEffect.Fog.EXPONENTIAL_SQUARED;
 				break;
-			case 'HeightFog':
-				fogEffect.fogType = RedGPU.PostEffect.Fog.HEIGHT_FOG;
-				break;
 		}
-		updateHeightFogVisibility(ev.value === 'HeightFog');
 	});
 
 	pane.addBinding(PARAMS, 'density', {
@@ -216,65 +207,9 @@ async function createControlPanel(redGPUContext, view, fogEffect) {
 
 	pane.addBlade({ view: 'separator' });
 
-	// 🆕 Height Fog 컨트롤 폴더
-	const heightFogFolder = pane.addFolder({
-		title: '🏔️ Height Fog Settings',
-		expanded: true,
-		hidden: true  // 초기에는 숨김
-	});
-
-	const heightBindings = [];
-
-	heightBindings.push(heightFogFolder.addBinding(PARAMS, 'fogHeight', {
-		label: 'Fog Height (Y)',
-		min: -10,
-		max: 10,
-		step: 0.1
-	}).on('change', (ev) => {
-		fogEffect.fogHeight = ev.value;
-	}));
-
-	heightBindings.push(heightFogFolder.addBinding(PARAMS, 'fogHeightDensity', {
-		label: 'Height Density',
-		min: 0,
-		max: 1,
-		step: 0.01
-	}).on('change', (ev) => {
-		fogEffect.fogHeightDensity = ev.value;
-	}));
-
-	heightBindings.push(heightFogFolder.addBinding(PARAMS, 'fogHeightFalloff', {
-		label: 'Height Falloff',
-		min: 0.1,
-		max: 5,
-		step: 0.1
-	}).on('change', (ev) => {
-		fogEffect.fogHeightFalloff = ev.value;
-	}));
-
-	// Height Fog 가시성 제어 함수
-	function updateHeightFogVisibility(isVisible) {
-		heightFogFolder.hidden = !isVisible;
-	}
-
-	// 🆕 Height Fog 프리셋 버튼들
-	heightFogFolder.addButton({ title: '🏞️ Valley Mist' }).on('click', () => {
-		applyHeightPreset('HeightFog', 0.15, 5, 40, { r: 200, g: 220, b: 255 }, -1, 0.4, 2.0);
-	});
-
-	heightFogFolder.addButton({ title: '🌊 Lake Fog' }).on('click', () => {
-		applyHeightPreset('HeightFog', 0.2, 3, 35, { r: 180, g: 200, b: 240 }, -2, 0.6, 1.5);
-	});
-
-	heightFogFolder.addButton({ title: '🏔️ Mountain Fog' }).on('click', () => {
-		applyHeightPreset('HeightFog', 0.1, 8, 60, { r: 220, g: 230, b: 255 }, 1, 0.3, 3.0);
-	});
-
-	pane.addBlade({ view: 'separator' });
-
-	// 기존 프리셋 폴더
+	// 프리셋 폴더
 	const presetFolder = pane.addFolder({
-		title: '🎯 Classic Presets',
+		title: '🎯 Presets',
 		expanded: true
 	});
 
@@ -294,67 +229,31 @@ async function createControlPanel(redGPUContext, view, fogEffect) {
 		applyPreset('Exponential', 0.08, 10, 60, { r: 180, g: 200, b: 255 });
 	});
 
+
+
 	function applyPreset(type, density, near, far, color) {
-		PARAMS.fogType = type === 'Exponential' ? 'Exponential' : 'ExponentialSquared';
+		PARAMS.fogType = type;
 		PARAMS.density = density;
 		PARAMS.nearDistance = near;
 		PARAMS.farDistance = far;
 		PARAMS.fogColor = color;
 
-		fogEffect.fogType = type === 'Exponential'
-			? RedGPU.PostEffect.Fog.EXPONENTIAL
-			: RedGPU.PostEffect.Fog.EXPONENTIAL_SQUARED;
+		switch(type) {
+			case 'Exponential':
+				fogEffect.fogType = RedGPU.PostEffect.Fog.EXPONENTIAL;
+				break;
+			case 'ExponentialSquared':
+				fogEffect.fogType = RedGPU.PostEffect.Fog.EXPONENTIAL_SQUARED;
+				break;
+
+		}
+
 		fogEffect.density = density;
 		fogEffect.nearDistance = near;
 		fogEffect.farDistance = far;
 		fogEffect.fogColor.setColorByRGB(color.r, color.g, color.b);
 
-		updateHeightFogVisibility(false);
 		pane.refresh();
 	}
 
-	// 🆕 Height Fog 프리셋 적용 함수
-	function applyHeightPreset(type, density, near, far, color, height, heightDensity, heightFalloff) {
-		PARAMS.fogType = 'HeightFog';
-		PARAMS.density = density;
-		PARAMS.nearDistance = near;
-		PARAMS.farDistance = far;
-		PARAMS.fogColor = color;
-		PARAMS.fogHeight = height;
-		PARAMS.fogHeightDensity = heightDensity;
-		PARAMS.fogHeightFalloff = heightFalloff;
-
-		fogEffect.fogType = RedGPU.PostEffect.Fog.HEIGHT_FOG;
-		fogEffect.density = density;
-		fogEffect.nearDistance = near;
-		fogEffect.farDistance = far;
-		fogEffect.fogColor.setColorByRGB(color.r, color.g, color.b);
-		fogEffect.fogHeight = height;
-		fogEffect.fogHeightDensity = heightDensity;
-		fogEffect.fogHeightFalloff = heightFalloff;
-
-		updateHeightFogVisibility(true);
-		pane.refresh();
-	}
-
-	const infoFolder = pane.addFolder({
-		title: 'ℹ️ Info',
-		expanded: false
-	});
-
-	infoFolder.addBlade({
-		view: 'text',
-		label: 'Objects',
-		value: '가까움: 구체 (7유닛, 높이변화)\n중간: 박스 (17유닛, 높이변화)\n멀음: 원기둥 (30유닛, 계단형)\n지면: 평면 (Y=-3)',
-		parse: (v) => String(v),
-		format: (v) => String(v)
-	});
-
-	infoFolder.addBlade({
-		view: 'text',
-		label: 'Height Fog',
-		value: 'Y좌표 기반 포그 적용\n낮은 곳에 포그가 더 짙음\n계곡/호수 효과에 적합',
-		parse: (v) => String(v),
-		format: (v) => String(v)
-	});
 }

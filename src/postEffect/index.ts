@@ -17,7 +17,7 @@ import RadialBlur from "./effects/blur/RadialBlur";
 import ZoomBlur from "./effects/blur/ZoomBlur";
 import Convolution from "./effects/Convolution";
 import FilmGrain from "./effects/FilmGrain";
-import Fog from "./effects/fog/Fog";
+import Fog from "./effects/fog/fog/Fog";
 import ChromaticAberration from "./effects/lens/ChromaticAberration";
 import DOF from "./effects/lens/dof/DOF";
 import LensDistortion from "./effects/lens/LensDistortion";
