@@ -19,7 +19,7 @@ fn calculateFogFactor(linearDepth: f32, cameraFar: f32) -> f32 {
     let u_nearDistance = uniforms.nearDistance;
     let u_farDistance = uniforms.farDistance;
 
-    /* 배경/스카이박스 감지 - 시스템 카메라 정보 사용 */
+    // 배경/스카이박스 감지 - 시스템 카메라 정보 사용
     let isBackground = linearDepth >= (cameraFar * 0.99);
 
     if (isBackground) {
