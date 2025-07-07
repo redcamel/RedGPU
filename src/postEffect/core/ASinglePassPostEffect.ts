@@ -274,7 +274,7 @@ class ASinglePassPostEffect {
 		const {colorTexture} = viewRenderTextureManager
 		const {gpuDevice} = redGPUContext
 		const {width, height} = colorTexture
-		const needChange = width !== this.#prevInfo?.width || height !== this.#prevInfo?.height
+		const needChange = width !== this.#prevInfo?.width || height !== this.#prevInfo?.height || 	this.#outputTexture.length === 0;
 		if (needChange) {
 			this.clear()
 			const newTexture = gpuDevice.createTexture({
