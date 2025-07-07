@@ -219,16 +219,18 @@ class ASinglePassPostEffect {
 			keepLog('info this.#computeBindGroupEntries0', this.#computeBindGroupEntries0, this.#computeBindGroupEntries1)
 
 			// uniform buffer는 마지막에 추가
-			this.#computeBindGroupEntries1.push(
-				{
-					binding: currentSystemUniformsInfo.binding,
-					resource: {
-						buffer:  view.postEffectManager.postEffectSystemUniformBuffer.gpuBuffer,
-						offset: 0,
-						size:  view.postEffectManager.postEffectSystemUniformBuffer.size
+			if(currentSystemUniformsInfo) {
+				this.#computeBindGroupEntries1.push(
+					{
+						binding: currentSystemUniformsInfo.binding,
+						resource: {
+							buffer: view.postEffectManager.postEffectSystemUniformBuffer.gpuBuffer,
+							offset: 0,
+							size: view.postEffectManager.postEffectSystemUniformBuffer.size
+						}
 					}
-				}
-			)
+				)
+			}
 			if (this.#uniformBuffer && currentUniformsInfo) {
 				this.#computeBindGroupEntries1.push({
 					binding: currentUniformsInfo.binding,
