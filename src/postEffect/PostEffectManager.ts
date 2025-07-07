@@ -26,13 +26,14 @@ class PostEffectManager {
 	#previousDimensions: { width: number, height: number }
 	#postEffectSystemUniformBuffer: UniformBuffer;
 	#postEffectSystemUniformBufferStructInfo;
-	get postEffectSystemUniformBuffer(): UniformBuffer {
-		return this.#postEffectSystemUniformBuffer;
-	}
 
 	constructor(view: View3D) {
 		this.#view = view;
 		this.#init()
+	}
+
+	get postEffectSystemUniformBuffer(): UniformBuffer {
+		return this.#postEffectSystemUniformBuffer;
 	}
 
 	get view(): View3D {
@@ -70,29 +71,6 @@ class PostEffectManager {
 		this.#postEffects.length = 0
 	}
 
-	#updateSystemUniforms() {
-		const { redGPUContext, rawCamera} = this.#view
-		const {gpuDevice} = redGPUContext
-		const {modelMatrix: cameraMatrix, position: cameraPosition} = rawCamera
-		const structInfo = this.#postEffectSystemUniformBufferStructInfo
-		const gpuBuffer = this.#postEffectSystemUniformBuffer.gpuBuffer;
-		const camera2DYn = rawCamera instanceof Camera2D;
-		console.log(structInfo);
-		// 카메라 시스템 유니폼 업데이트
-		[
-			{key: 'cameraMatrix', value: cameraMatrix},
-			{key: 'cameraPosition', value: cameraPosition},
-			{key: 'nearClipping', value: [camera2DYn ? 0 : rawCamera.nearClipping]},
-			{key: 'farClipping', value: [camera2DYn ? 0 : rawCamera.farClipping]},
-		].forEach(({key, value}) => {
-			gpuDevice.queue.writeBuffer(
-				gpuBuffer,
-				structInfo.members.camera.members[key].uniformOffset,
-				new structInfo.members.camera.members[key].View(value)
-			);
-		})
-		// console.log('structInfo',view.scene.directionalLights)
-	}
 	render() {
 		const {viewRenderTextureManager, redGPUContext} = this.#view;
 		const {antialiasingManager} = redGPUContext
@@ -134,6 +112,30 @@ class PostEffectManager {
 		})
 	}
 
+	#updateSystemUniforms() {
+		const {redGPUContext, rawCamera} = this.#view
+		const {gpuDevice} = redGPUContext
+		const {modelMatrix: cameraMatrix, position: cameraPosition} = rawCamera
+		const structInfo = this.#postEffectSystemUniformBufferStructInfo
+		const gpuBuffer = this.#postEffectSystemUniformBuffer.gpuBuffer;
+		const camera2DYn = rawCamera instanceof Camera2D;
+		console.log(structInfo);
+		// 카메라 시스템 유니폼 업데이트
+		[
+			{key: 'cameraMatrix', value: cameraMatrix},
+			{key: 'cameraPosition', value: cameraPosition},
+			{key: 'nearClipping', value: [camera2DYn ? 0 : rawCamera.nearClipping]},
+			{key: 'farClipping', value: [camera2DYn ? 0 : rawCamera.farClipping]},
+		].forEach(({key, value}) => {
+			gpuDevice.queue.writeBuffer(
+				gpuBuffer,
+				structInfo.members.camera.members[key].uniformOffset,
+				new structInfo.members.camera.members[key].View(value)
+			);
+		})
+		// console.log('structInfo',view.scene.directionalLights)
+	}
+
 	#init() {
 		const {redGPUContext} = this.#view;
 		const {gpuDevice, width} = redGPUContext;
@@ -141,13 +143,11 @@ class PostEffectManager {
 		this.#textureComputeShaderModule = gpuDevice.createShaderModule({code: textureComputeShader,});
 		this.#textureComputeBindGroupLayout = this.#createTextureBindGroupLayout(redGPUContext);
 		this.#textureComputePipeline = this.#createTextureComputePipeline(gpuDevice, this.#textureComputeShaderModule, this.#textureComputeBindGroupLayout)
-
 		const STRUCT_INFO = parseWGSL(postEffectSystemUniformCode)
 		const UNIFORM_STRUCT = STRUCT_INFO.uniforms.systemUniforms;
 		const postEffectSystemUniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength)
 		this.#postEffectSystemUniformBufferStructInfo = UNIFORM_STRUCT;
 		this.#postEffectSystemUniformBuffer = new UniformBuffer(redGPUContext, postEffectSystemUniformData, '#postEffectSystemUniformBuffer');
-
 	}
 
 	#renderToStorageTexture(view: View3D, sourceTextureView: GPUTextureView) {

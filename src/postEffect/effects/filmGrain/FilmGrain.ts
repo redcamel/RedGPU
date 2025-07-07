@@ -3,6 +3,7 @@ import ASinglePassPostEffect from "../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
+
 const SUBTLE = {
 	filmGrainIntensity: 0.02,
 	filmGrainResponse: 0.9,

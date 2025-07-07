@@ -4,12 +4,12 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
+
 class Threshold extends ASinglePassPostEffect {
 	#threshold: number = 128
 
 	constructor(redGPUContext: RedGPUContext) {
 		super(redGPUContext);
-
 		this.init(
 			redGPUContext,
 			'POST_EFFECT_THRESHOLD',

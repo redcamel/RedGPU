@@ -20,7 +20,6 @@ class ASinglePassPostEffect {
 	#uniformBuffer: UniformBuffer
 	#uniformsInfo
 	#systemUuniformsInfo
-
 	#storageInfo
 	#name
 	#SHADER_INFO_MSAA
@@ -68,13 +67,13 @@ class ASinglePassPostEffect {
 	}
 
 	get uniformsInfo
-      () {
+	() {
 		return this.#uniformsInfo
+	}
 
-	}	get systemUuniformsInfo
-      () {
+	get systemUuniformsInfo
+	() {
 		return this.#systemUuniformsInfo
-
 	}
 
 	get WORK_SIZE_X(): number {
@@ -180,18 +179,17 @@ class ASinglePassPostEffect {
 			const currentStorageInfo = this.storageInfo;
 			const currentUniformsInfo = this.uniformsInfo
 			const currentSystemUniformsInfo = this.systemUuniformsInfo
-      ;
+			;
 			this.#computeBindGroupEntries0 = []
 			this.#computeBindGroupEntries1 = []
 			// Group 0: source textures (outputTexture 제외)
-
-			keepLog('info',this.#SHADER_INFO_MSAA)
-			keepLog('info',this.#SHADER_INFO_MSAA.uniforms.systemUniforms)
-			keepLog('info',currentUniformsInfo)
+			keepLog('info', this.#SHADER_INFO_MSAA)
+			keepLog('info', this.#SHADER_INFO_MSAA.uniforms.systemUniforms)
+			keepLog('info', currentUniformsInfo)
 			for (const k in currentStorageInfo) {
 				const info = currentStorageInfo[k]
 				const {binding, name} = info
-				keepLog('info',name,binding,info,sourceTextureView)
+				keepLog('info', name, binding, info, sourceTextureView)
 				if (name !== 'outputTexture') {
 					this.#computeBindGroupEntries0.push(
 						{
@@ -217,9 +215,8 @@ class ASinglePassPostEffect {
 				}
 			})
 			keepLog('info this.#computeBindGroupEntries0', this.#computeBindGroupEntries0, this.#computeBindGroupEntries1)
-
 			// uniform buffer는 마지막에 추가
-			if(currentSystemUniformsInfo) {
+			if (currentSystemUniformsInfo) {
 				this.#computeBindGroupEntries1.push(
 					{
 						binding: currentSystemUniformsInfo.binding,
@@ -281,7 +278,7 @@ class ASinglePassPostEffect {
 
 	updateUniform(key: string, value: number | number[] | boolean) {
 		this.uniformBuffer.writeBuffer(this.uniformsInfo
-      .members[key], value)
+			.members[key], value)
 	}
 
 	#detectSourceTextureChange(sourceTextureView: GPUTextureView[]): boolean {
@@ -305,7 +302,7 @@ class ASinglePassPostEffect {
 		const {colorTexture} = viewRenderTextureManager
 		const {gpuDevice} = redGPUContext
 		const {width, height} = colorTexture
-		const needChange = width !== this.#prevInfo?.width || height !== this.#prevInfo?.height || 	this.#outputTexture.length === 0;
+		const needChange = width !== this.#prevInfo?.width || height !== this.#prevInfo?.height || this.#outputTexture.length === 0;
 		if (needChange) {
 			this.clear()
 			const newTexture = gpuDevice.createTexture({

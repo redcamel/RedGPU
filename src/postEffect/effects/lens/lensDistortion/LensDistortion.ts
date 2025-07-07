@@ -6,8 +6,9 @@ import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 
-class ZoomBlur extends ASinglePassPostEffect {
-	#amount: number = 64
+class LensDistortion extends ASinglePassPostEffect {
+	#barrelStrength: number = 0.1
+	#pincushionStrength: number = 0.0
 	#centerX: number = 0
 	#centerY: number = 0
 
@@ -15,10 +16,33 @@ class ZoomBlur extends ASinglePassPostEffect {
 		super(redGPUContext);
 		this.init(
 			redGPUContext,
-			'POST_EFFECT_ZOOM_BLUR',
-			createBasicPostEffectCode(this, computeCode, uniformStructCode)
+			'POST_EFFECT_LENS_DISTORTION',
+			createBasicPostEffectCode(this, computeCode, uniformStructCode),
 		)
-		this.amount = this.#amount
+		this.barrelStrength = this.#barrelStrength
+		this.pincushionStrength = this.#pincushionStrength
+		this.centerX = this.#centerX
+		this.centerY = this.#centerY
+	}
+
+	get barrelStrength(): number {
+		return this.#barrelStrength;
+	}
+
+	set barrelStrength(value: number) {
+		validateNumberRange(value, 0)
+		this.#barrelStrength = value;
+		this.updateUniform('barrelStrength', value)
+	}
+
+	get pincushionStrength(): number {
+		return this.#pincushionStrength;
+	}
+
+	set pincushionStrength(value: number) {
+		validateNumberRange(value, 0)
+		this.#pincushionStrength = value;
+		this.updateUniform('pincushionStrength', value)
 	}
 
 	get centerX(): number {
@@ -40,17 +64,7 @@ class ZoomBlur extends ASinglePassPostEffect {
 		this.#centerY = value;
 		this.updateUniform('centerY', value)
 	}
-
-	get amount(): number {
-		return this.#amount;
-	}
-
-	set amount(value: number) {
-		validateNumberRange(value, 0)
-		this.#amount = value;
-		this.updateUniform('amount', value)
-	}
 }
 
-Object.freeze(ZoomBlur)
-export default ZoomBlur
+Object.freeze(LensDistortion)
+export default LensDistortion

@@ -1,5 +1,6 @@
-import ASinglePassPostEffect from "./ASinglePassPostEffect";
 import postEffectSystemUniform from "../core/postEffectSystemUniform.wgsl"
+import ASinglePassPostEffect from "./ASinglePassPostEffect";
+
 const createCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: string = '', useMSAA: boolean = false,) => {
 	const {WORK_SIZE_X, WORK_SIZE_Y, WORK_SIZE_Z} = effect
 	const depthTextureType = useMSAA ? 'texture_depth_multisampled_2d' : 'texture_depth_2d';

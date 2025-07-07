@@ -1,24 +1,37 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import validateNumber from "../../../../runtimeChecker/validateFunc/validateNumber";
 import validateNumberRange from "../../../../runtimeChecker/validateFunc/validateNumberRange";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 
-class ZoomBlur extends ASinglePassPostEffect {
-	#amount: number = 64
-	#centerX: number = 0
-	#centerY: number = 0
+class ChromaticAberration extends ASinglePassPostEffect {
+	#strength: number = 0.015
+	#centerX: number = 0.5
+	#centerY: number = 0.5
+	#falloff: number = 1.0
 
 	constructor(redGPUContext: RedGPUContext) {
 		super(redGPUContext);
 		this.init(
 			redGPUContext,
-			'POST_EFFECT_ZOOM_BLUR',
+			'POST_EFFECT_CHROMATIC_ABERRATION',
 			createBasicPostEffectCode(this, computeCode, uniformStructCode)
 		)
-		this.amount = this.#amount
+		this.strength = this.#strength
+		this.centerX = this.#centerX
+		this.centerY = this.#centerY
+		this.falloff = this.#falloff
+	}
+
+	get strength(): number {
+		return this.#strength;
+	}
+
+	set strength(value: number) {
+		validateNumberRange(value, 0)
+		this.#strength = value;
+		this.updateUniform('strength', value)
 	}
 
 	get centerX(): number {
@@ -26,7 +39,7 @@ class ZoomBlur extends ASinglePassPostEffect {
 	}
 
 	set centerX(value: number) {
-		validateNumber(value)
+		validateNumberRange(value, 0, 1)
 		this.#centerX = value;
 		this.updateUniform('centerX', value)
 	}
@@ -36,21 +49,21 @@ class ZoomBlur extends ASinglePassPostEffect {
 	}
 
 	set centerY(value: number) {
-		validateNumber(value)
+		validateNumberRange(value, 0, 1)
 		this.#centerY = value;
 		this.updateUniform('centerY', value)
 	}
 
-	get amount(): number {
-		return this.#amount;
+	get falloff(): number {
+		return this.#falloff;
 	}
 
-	set amount(value: number) {
-		validateNumberRange(value, 0)
-		this.#amount = value;
-		this.updateUniform('amount', value)
+	set falloff(value: number) {
+		validateNumberRange(value, 0, 5)
+		this.#falloff = value;
+		this.updateUniform('falloff', value)
 	}
 }
 
-Object.freeze(ZoomBlur)
-export default ZoomBlur
+Object.freeze(ChromaticAberration)
+export default ChromaticAberration

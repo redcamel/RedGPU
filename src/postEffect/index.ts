@@ -18,10 +18,10 @@ import ZoomBlur from "./effects/blur/zoomBlur/ZoomBlur";
 import Convolution from "./effects/convolution/Convolution";
 import FilmGrain from "./effects/filmGrain/FilmGrain";
 import Fog from "./effects/fog/fog/Fog";
-import ChromaticAberration from "./effects/lens/ChromaticAberration";
+import ChromaticAberration from "./effects/lens/chromaticAberration/ChromaticAberration";
 import DOF from "./effects/lens/dof/DOF";
-import LensDistortion from "./effects/lens/LensDistortion";
-import Vignetting from "./effects/lens/Vignetting";
+import LensDistortion from "./effects/lens/lensDistortion/LensDistortion";
+import Vignetting from "./effects/lens/vignetting/Vignetting";
 import OldBloom from "./effects/oldBloom/OldBloom";
 import Sharpen from "./effects/Sharpen";
 import PostEffectManager from "./PostEffectManager";
@@ -31,7 +31,6 @@ export {
 	ASinglePassPostEffect,
 	AMultiPassPostEffect,
 	PostEffectManager,
-
 	// Color Adjustments
 	BrightnessContrast,
 	ColorBalance,
@@ -41,7 +40,6 @@ export {
 	Invert,
 	Threshold,
 	Vibrance,
-
 	// Blur Effects
 	Blur,
 	BlurX,
@@ -50,22 +48,17 @@ export {
 	GaussianBlur,
 	RadialBlur,
 	ZoomBlur,
-
 	// Lens Effects
 	ChromaticAberration,
 	DOF,
 	LensDistortion,
 	Vignetting,
-
 	// Environmental Effects
 	Fog,
-
 	// Visual Effects
 	FilmGrain,
 	OldBloom,
 	Sharpen,
-
 	// Utility Effects
 	Convolution
-
 }
