@@ -16,7 +16,6 @@ import ANoiseTexture from "../../../resources/texture/noiseTexture/core/ANoiseTe
 import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validateRedGPUContext";
-import {keepLog} from "../../../utils";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import vertexModuleSource from './shader/vertex.wgsl';
 import SkyBoxMaterial from "./SkyBoxMaterial";
@@ -50,7 +49,7 @@ class SkyBox {
 		this.#primitiveState = new PrimitiveState(this)
 		this.#primitiveState.cullMode = GPU_CULL_MODE.NONE
 		this.#depthStencilState = new DepthStencilState(this)
-		this.#depthStencilState.depthWriteEnabled = false
+		// this.#depthStencilState.depthWriteEnabled = false
 	}
 
 
