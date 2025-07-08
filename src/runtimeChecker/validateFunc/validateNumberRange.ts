@@ -8,7 +8,7 @@ import consoleAndThrowError from "../../utils/consoleAndThrowError";
  * @param {number} [maxRange=Number.MAX_VALUE] - The maximum allowable range.
  * @throws {Error} if the value is not a number or if it is outside the specified range.
  */
-const validateNumberRange = (value: number, minRange: number = 0, maxRange: number = Number.MAX_VALUE): boolean => {
+const validateNumberRange = (value: number, minRange: number = -Number.MAX_VALUE, maxRange: number = Number.MAX_VALUE): boolean => {
 	if (typeof value !== 'number') consoleAndThrowError('Only numbers allowed.');
 	if (typeof minRange !== 'number') consoleAndThrowError('Only numbers allowed.');
 	if (typeof maxRange !== 'number') consoleAndThrowError('Only numbers allowed.');

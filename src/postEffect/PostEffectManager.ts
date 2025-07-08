@@ -1,3 +1,4 @@
+import {mat4} from "gl-matrix";
 import Camera2D from "../camera/camera/Camera2D";
 import RedGPUContext from "../context/RedGPUContext";
 import View3D from "../display/view/View3D";
@@ -113,19 +114,36 @@ class PostEffectManager {
 	}
 
 	#updateSystemUniforms() {
-		const {redGPUContext, rawCamera} = this.#view
+		const {inverseProjectionMatrix, projectionMatrix, rawCamera, redGPUContext, scene} = this.#view
 		const {gpuDevice} = redGPUContext
 		const {modelMatrix: cameraMatrix, position: cameraPosition} = rawCamera
+
 		const structInfo = this.#postEffectSystemUniformBufferStructInfo
 		const gpuBuffer = this.#postEffectSystemUniformBuffer.gpuBuffer;
 		const camera2DYn = rawCamera instanceof Camera2D;
 		console.log(structInfo);
+		const projectionCameraMatrix= mat4.multiply(temp, projectionMatrix, cameraMatrix);
+		[
+			{key: 'projectionMatrix', value: projectionMatrix},
+			{key: 'projectionCameraMatrix', value: projectionCameraMatrix},
+			{key: 'inverseProjectionMatrix', value: inverseProjectionMatrix},
+			{key: 'inverseProjectionCameraMatrix', value: mat4.invert(temp2, projectionCameraMatrix)},
+
+		].forEach(({key, value}) => {
+			gpuDevice.queue.writeBuffer(
+				gpuBuffer,
+				structInfo.members[key].uniformOffset,
+				new structInfo.members[key].View(value)
+			);
+		});
 		// 카메라 시스템 유니폼 업데이트
 		[
 			{key: 'cameraMatrix', value: cameraMatrix},
 			{key: 'cameraPosition', value: cameraPosition},
 			{key: 'nearClipping', value: [camera2DYn ? 0 : rawCamera.nearClipping]},
 			{key: 'farClipping', value: [camera2DYn ? 0 : rawCamera.farClipping]},
+			//@ts-ignore
+			{key: 'fieldOfView', value: rawCamera.fieldOfView * Math.PI / 180},
 		].forEach(({key, value}) => {
 			gpuDevice.queue.writeBuffer(
 				gpuBuffer,
@@ -264,6 +282,7 @@ class PostEffectManager {
 		gpuDevice.queue.submit([commandEncoder.finish()]);
 	}
 }
-
+let temp = mat4.create()
+let temp2 = mat4.create()
 Object.freeze(PostEffectManager)
 export default PostEffectManager
