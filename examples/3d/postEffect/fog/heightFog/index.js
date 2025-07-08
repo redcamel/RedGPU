@@ -6,11 +6,16 @@ document.querySelector('#example-container').appendChild(canvas);
 RedGPU.init(
 	canvas,
 	(redGPUContext) => {
+		// 🎯 Height Fog에 최적화된 카메라 설정 (지상 관점)
 		const controller = new RedGPU.Camera.ObitController(redGPUContext);
-		controller.distance = 25;
-		controller.speedDistance = 0.3;
-		controller.tilt = -20;
-		controller.pan = 30;
+		controller.distance = 15;        // 더 가까이
+		controller.speedDistance = 0.2;
+		controller.tilt = -10;           // 거의 수평 시선
+		controller.pan = 45;
+		controller.minDistance = 5;
+		controller.maxDistance = 35;
+		// controller.minTilt = -25;        // 아래를 많이 못 보게 제한
+		// controller.maxTilt = 15;
 
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
@@ -21,281 +26,307 @@ RedGPU.init(
 
 		redGPUContext.addView(view);
 
-		// 🌫️ HeightFog 이펙트 생성 및 설정 (더 자연스러운 초기값)
+		// 🌫️ Height Fog 최적 설정 (지상 시점용)
 		const heightFog = new RedGPU.PostEffect.HeightFog(redGPUContext);
 		heightFog.fogType = RedGPU.PostEffect.HeightFog.EXPONENTIAL;
-		heightFog.density = 1.5;
-		heightFog.fogColor.setColorByRGB(210, 230, 255);
-		heightFog.baseHeight = -2.0;    // 안개 시작 높이
-		heightFog.thickness = 10.0;     // 안개 레이어 두께
-		heightFog.falloff = 1.0;        // 높이별 감쇠율
+		heightFog.density = 2.0;
+		heightFog.fogColor.setColorByRGB(190, 210, 235);
+		heightFog.baseHeight = -1.5;     // 지면 근처에서 시작
+		heightFog.thickness = 8.0;       // 적당한 두께
+		heightFog.falloff = 1.2;         // 자연스러운 감쇠
 
 		view.postEffectManager.addEffect(heightFog);
 
+		// 🌅 분위기 있는 조명 (새벽/저녁 느낌)
 		const directionalLight = new RedGPU.Light.DirectionalLight();
-		directionalLight.intensity = 0.8;
-		directionalLight.directionX = 0.3;
-		directionalLight.directionY = -0.7;
-		directionalLight.directionZ = 0.2;
+		directionalLight.intensity = 0.6;
+		directionalLight.directionX = 0.4;
+		directionalLight.directionY = -0.3;  // 낮은 각도
+		directionalLight.directionZ = 0.7;
+		directionalLight.enableDebugger=true
 		scene.lightManager.addDirectionalLight(directionalLight);
 
-		createHeightFogDemoScene(redGPUContext, scene);
+		createGroundLevelScene(redGPUContext, scene);
 
+		// 🚶‍♂️ 탐험하는 느낌의 카메라 애니메이션
+		let autoRotate = true;
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		const render = (time) => {
-			// 🌊 부유하는 객체들 애니메이션 (더 부드럽게)
+			// 🌊 안개 속 신비로운 애니메이션
 			scene.children.forEach((child, index) => {
-				if (child.userData && child.userData.isFloating) {
-					const floatSpeed = 0.0008 + (index % 3) * 0.0002;
-					const floatAmount = 0.3 + (index % 2) * 0.2;
-					child.y = child.userData.baseY + Math.sin(time * floatSpeed + index * 0.7) * floatAmount;
-				}
-				// 🔄 회전하는 객체들 (다양한 속도)
-				if (child.userData && child.userData.isRotating) {
-					const rotSpeed = 0.005 + (index % 4) * 0.003;
-					child.rotationY += rotSpeed;
+				if (child.userData) {
+					// 🎈 부유하는 오브젝트들
+					if (child.userData.isFloating) {
+						const floatSpeed = 0.001 + (index % 3) * 0.0003;
+						const floatAmount = 0.2 + (index % 2) * 0.15;
+						child.y = child.userData.baseY + Math.sin(time * floatSpeed + index) * floatAmount;
+					}
+
+					// 🔄 천천히 회전하는 구조물들
+					if (child.userData.isRotating) {
+						const rotSpeed = 0.002 + (index % 3) * 0.001;
+						child.rotationY += rotSpeed;
+					}
+
+					// 💡 깜빡이는 등불들
+					if (child.userData.isLantern) {
+						const flickerSpeed = 0.003 + (index % 4) * 0.001;
+						const brightness = 0.7 + Math.sin(time * flickerSpeed + index * 2) * 0.3;
+						child.material.emissive = brightness;
+					}
 				}
 			});
 
-			// 🌤️ 동적 안개 효과 (시간에 따른 변화)
-			if (Math.floor(time / 20000) % 30 === 0) { // 20초마다 약간의 변화
-				const baseDensity = 1.5;
-				const variation = Math.sin(time * 0.0001) * 0.3;
-				heightFog.density = baseDensity + variation;
+			// 🎬 자동 카메라 회전 (탐험 느낌)
+			if (autoRotate) {
+				controller.pan += 0.2;
 			}
 		};
+
 		renderer.start(redGPUContext, render);
 
-		createHeightFogControlPanel(redGPUContext, view, heightFog);
+		// 🎮 컨트롤 패널 생성
+		createHeightFogControlPanel(redGPUContext, view, heightFog, controller, () => {
+			autoRotate = !autoRotate;
+		});
 	},
 	(failReason) => {
 		console.error('HeightFog 초기화 실패:', failReason);
 	}
 );
 
-function createHeightFogDemoScene(redGPUContext, scene) {
-	// 🏔️ 지형 바닥 (더 큰 지형)
-	const terrain = new RedGPU.Primitive.Plane(redGPUContext, 1000, 1000, 1000, 1000);
-	const terrainMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#1e3a1e');
+function createGroundLevelScene(redGPUContext, scene) {
+	// 🏞️ 넓은 지형 (Height Fog가 빛나는 환경)
+	const terrain = new RedGPU.Primitive.Plane(redGPUContext, 200, 200, 1000, 1000);
+	const terrainMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#2d4a2d');
 
-	// 노이즈 텍스처로 높이 변화 (더 디테일하게)
-	const terrainNoise = new RedGPU.Resource.SimplexTexture(redGPUContext, 1024, 1024, {
+	// 🏔️ 지형 높낮이 (노이즈로 자연스럽게)
+	const terrainNoise = new RedGPU.Resource.SimplexTexture(redGPUContext, 512, 512, {
 		mainLogic: `
-		let noise1 = getSimplexNoiseByDimension(base_uv * 3.0, uniforms);
-		let noise2 = getSimplexNoiseByDimension(base_uv * 6.0, uniforms) * 0.5;
-		let noise3 = getSimplexNoiseByDimension(base_uv * 12.0, uniforms) * 0.25;
-		let heightValue = (noise1 + noise2 + noise3) * 0.4 + 0.6;
+		let noise1 = getSimplexNoiseByDimension(base_uv * 2.0, uniforms);
+		let noise2 = getSimplexNoiseByDimension(base_uv * 4.0, uniforms) * 0.5;
+		let heightValue = (noise1 + noise2) * 0.3 + 0.7;
 		let finalColor = vec4<f32>(heightValue, heightValue, heightValue, 1.0);
 	`
 	});
-	terrainNoise.frequency = 2.5;
-	terrainNoise.amplitude = 1.8;
-	terrainNoise.octaves = 4;
+	terrainNoise.frequency = 1.8;
+	terrainNoise.amplitude = 1.5;
+	terrainNoise.octaves = 8;
 
 	terrainMaterial.displacementTexture = terrainNoise;
-	terrainMaterial.displacementScale = 6.0;
+	terrainMaterial.displacementScale = 12.0;
 
 	const terrainMesh = new RedGPU.Display.Mesh(redGPUContext, terrain, terrainMaterial);
 	terrainMesh.rotationX = 90;
-	terrainMesh.y = -4;
+	terrainMesh.y = -3;
 	scene.addChild(terrainMesh);
 
-	// 🎯 높이별 테스트 구조물들 (더 많은 레벨)
-	const heightLevels = [
-		{ y: -3, color: '#8B0000', name: 'Deep Underground' },
-		{ y: -1, color: '#FF4444', name: 'Underground' },
-		{ y: 1, color: '#FF8844', name: 'Ground Level' },
-		{ y: 3, color: '#FFCC44', name: 'Low Height' },
-		{ y: 5, color: '#CCFF44', name: 'Medium Height' },
-		{ y: 7, color: '#44FF88', name: 'High' },
-		{ y: 9, color: '#44CCFF', name: 'Very High' },
-		{ y: 11, color: '#8844FF', name: 'Peak Level' },
-		{ y: 13, color: '#FF44FF', name: 'Above Fog' },
+	// 🌲 안개 속 숲 (Height Fog 효과 극대화)
+	const forestPositions = [
+		// 🌫️ 안개층 내부 - 완전히 숨겨짐
+		{ x: -15, z: -20, height: 3, radius: 0.3, density: 'dense' },
+		{ x: -10, z: -25, height: 4, radius: 0.4, density: 'dense' },
+		{ x: 20, z: -15, height: 3.5, radius: 0.35, density: 'dense' },
+
+		// 🌿 안개층 경계 - 부분적으로 보임
+		{ x: 0, z: -30, height: 6, radius: 0.5, density: 'medium' },
+		{ x: 25, z: 10, height: 7, radius: 0.45, density: 'medium' },
+		{ x: -30, z: 5, height: 6.5, radius: 0.4, density: 'medium' },
+
+		// 🌳 안개층 위 - 선명하게 보임
+		{ x: 15, z: 20, height: 9, radius: 0.6, density: 'sparse' },
+		{ x: -20, z: 25, height: 10, radius: 0.55, density: 'sparse' },
 	];
 
-	heightLevels.forEach((level, index) => {
-		// 🏗️ 고정 타워 (다양한 크기)
-		const towerRadius = 0.6 + (index % 3) * 0.3;
-		const towerHeight = 2.0 + (index % 4) * 0.5;
-		const tower = new RedGPU.Primitive.Cylinder(redGPUContext, towerRadius, towerHeight, 8);
-		const towerMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, level.color);
-		towerMaterial.roughness = 0.3;
-		towerMaterial.metalness = 0.1;
+	forestPositions.forEach((pos, index) => {
+		const treeHeight = pos.height + Math.random() * 2;
+		const tree = new RedGPU.Primitive.Cylinder(redGPUContext, pos.radius, treeHeight, 8);
 
-		const towerMesh = new RedGPU.Display.Mesh(redGPUContext, tower, towerMaterial);
-		towerMesh.x = -35 + index * 8;
-		towerMesh.z = -20;
-		towerMesh.y = level.y;
-		towerMesh.userData = {
-			heightLevel: level.name,
-			isRotating: true,
-			index: index
+		const treeColors = {
+			dense: '#1a3d1a',    // 어두운 녹색 (안개 속)
+			medium: '#2d5a2d',   // 중간 녹색
+			sparse: '#4a7c4a'    // 밝은 녹색 (안개 위)
 		};
-		scene.addChild(towerMesh);
 
-		// 🎈 부유하는 구체 (다양한 크기)
-		const balloonRadius = 0.5 + (index % 3) * 0.2;
-		const balloon = new RedGPU.Primitive.Sphere(redGPUContext, balloonRadius, 20, 20);
-		const balloonMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, level.color);
-		balloonMaterial.roughness = 0.1;
-		balloonMaterial.metalness = 0.8;
-
-		const balloonMesh = new RedGPU.Display.Mesh(redGPUContext, balloon, balloonMaterial);
-		balloonMesh.x = -35 + index * 8;
-		balloonMesh.z = -15;
-		balloonMesh.y = level.y;
-		balloonMesh.userData = {
-			heightLevel: level.name,
-			isFloating: true,
-			baseY: level.y,
-			index: index
-		};
-		scene.addChild(balloonMesh);
-
-		// 📊 높이 표시 라벨 (작은 박스)
-		const label = new RedGPU.Primitive.Box(redGPUContext, 1.5, 0.1, 0.5);
-		const labelMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#FFFFFF');
-		const labelMesh = new RedGPU.Display.Mesh(redGPUContext, label, labelMaterial);
-		labelMesh.x = -35 + index * 8;
-		labelMesh.z = -12;
-		labelMesh.y = level.y + 1.5;
-		scene.addChild(labelMesh);
-	});
-
-	// 🌲 숲 생성 (더 밀도 있게)
-	for (let i = 0; i < 40; i++) {
-		const treeHeight = 2 + Math.random() * 5;
-		const treeRadius = 0.2 + Math.random() * 0.3;
-		const tree = new RedGPU.Primitive.Cylinder(redGPUContext, treeRadius, treeHeight, 8);
-		const treeColor = Math.random() > 0.7 ? '#2F5F2F' : '#228B22';
-		const treeMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, treeColor);
+		const treeMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, treeColors[pos.density]);
 		const treeMesh = new RedGPU.Display.Mesh(redGPUContext, tree, treeMaterial);
 
-		treeMesh.x = (Math.random() - 0.5) * 80;
-		treeMesh.z = (Math.random() - 0.5) * 80;
+		treeMesh.x = pos.x + (Math.random() - 0.5) * 4;
+		treeMesh.z = pos.z + (Math.random() - 0.5) * 4;
 		treeMesh.y = treeHeight / 2 - 2;
+
+		treeMesh.userData = {
+			isRotating: pos.density === 'sparse',
+			heightLayer: pos.density
+		};
+
 		scene.addChild(treeMesh);
 
-		// 🌿 나무 꼭대기 (잎사귀)
-		const crown = new RedGPU.Primitive.Sphere(redGPUContext, treeRadius * 2, 12, 12);
-		const crownMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#32CD32');
+		// 🌿 나무 관목 (나무마다 다른 크기)
+		const crownSize = pos.radius * (1.5 + Math.random() * 0.5);
+		const crown = new RedGPU.Primitive.Sphere(redGPUContext, crownSize, 12, 12);
+		const crownMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#2d6b2d');
 		const crownMesh = new RedGPU.Display.Mesh(redGPUContext, crown, crownMaterial);
+
 		crownMesh.x = treeMesh.x;
 		crownMesh.z = treeMesh.z;
-		crownMesh.y = treeMesh.y + treeHeight / 2 + treeRadius;
+		crownMesh.y = treeMesh.y + treeHeight / 2 + crownSize * 0.7;
 		scene.addChild(crownMesh);
+	});
+
+	// 🏛️ 신비로운 고대 유적들 (높이별 배치)
+	const monuments = [
+		{ x: 0, z: 0, y: 1, height: 8, type: 'obelisk', name: 'Central Obelisk' },
+		{ x: -12, z: -8, y: 4, height: 5, type: 'pillar', name: 'Ancient Pillar' },
+		{ x: 18, z: -5, y: 7, height: 6, type: 'statue', name: 'Guardian Statue' },
+		{ x: -8, z: 15, y: 10, height: 4, type: 'altar', name: 'Sky Altar' },
+	];
+
+	monuments.forEach((monument, index) => {
+		let monumentGeom, monumentColor;
+
+		switch (monument.type) {
+			case 'obelisk':
+				monumentGeom = new RedGPU.Primitive.Box(redGPUContext, 1.5, monument.height, 1.5);
+				monumentColor = '#8B7355';
+				break;
+			case 'pillar':
+				monumentGeom = new RedGPU.Primitive.Cylinder(redGPUContext, 0.8, monument.height, 12);
+				monumentColor = '#A0522D';
+				break;
+			case 'statue':
+				monumentGeom = new RedGPU.Primitive.Box(redGPUContext, 2, monument.height, 1.2);
+				monumentColor = '#696969';
+				break;
+			case 'altar':
+				monumentGeom = new RedGPU.Primitive.Cylinder(redGPUContext, 2, monument.height * 0.3, 8);
+				monumentColor = '#8FBC8F';
+				break;
+		}
+
+		const monumentMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, monumentColor);
+		monumentMaterial.roughness = 0.7;
+		monumentMaterial.metalness = 0.1;
+
+		const monumentMesh = new RedGPU.Display.Mesh(redGPUContext, monumentGeom, monumentMaterial);
+		monumentMesh.x = monument.x;
+		monumentMesh.z = monument.z;
+		monumentMesh.y = monument.y;
+
+		monumentMesh.userData = {
+			monumentName: monument.name,
+			heightLevel: monument.y,
+			isRotating: monument.type === 'obelisk'
+		};
+
+		scene.addChild(monumentMesh);
+	});
+
+	// 💡 안개 속 등불들 (안개층 시각화에 도움)
+	const lanternPositions = [
+		{ x: -5, z: -10, y: 0.5 },   // 안개 깊숙이
+		{ x: 8, z: -12, y: 2.5 },    // 안개 중간
+		{ x: -15, z: 8, y: 5.5 },    // 안개 경계
+		{ x: 12, z: 15, y: 8.5 },    // 안개 위
+	];
+
+	lanternPositions.forEach((pos, index) => {
+		// 🏮 등불 기둥
+		const lanternPole = new RedGPU.Primitive.Cylinder(redGPUContext, 0.15, 3, 8);
+		const poleMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#654321');
+		const poleMesh = new RedGPU.Display.Mesh(redGPUContext, lanternPole, poleMaterial);
+		poleMesh.x = pos.x;
+		poleMesh.z = pos.z;
+		poleMesh.y = pos.y + 1.5;
+		scene.addChild(poleMesh);
+
+		// 🔥 등불 불빛
+		const lantern = new RedGPU.Primitive.Sphere(redGPUContext, 0.4, 12, 12);
+		const lanternMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#FFD700');
+		lanternMaterial.emissive = 0.8;
+
+		const lanternMesh = new RedGPU.Display.Mesh(redGPUContext, lantern, lanternMaterial);
+		lanternMesh.x = pos.x;
+		lanternMesh.z = pos.z;
+		lanternMesh.y = pos.y + 3.2;
+
+		lanternMesh.userData = {
+			isLantern: true,
+			heightLevel: pos.y
+		};
+
+		scene.addChild(lanternMesh);
+	});
+
+	// 🌉 안개를 가로지르는 다리
+	const bridge = new RedGPU.Primitive.Box(redGPUContext, 20, 0.5, 2.5);
+	const bridgeMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#8B4513');
+	const bridgeMesh = new RedGPU.Display.Mesh(redGPUContext, bridge, bridgeMaterial);
+	bridgeMesh.x = 5;
+	bridgeMesh.z = 2;
+	bridgeMesh.y = 3.5;  // 안개층을 관통
+	scene.addChild(bridgeMesh);
+
+	// 🏗️ 다리 기둥들 (안개 속에서 올라옴)
+	for (let i = -2; i <= 2; i++) {
+		const pillar = new RedGPU.Primitive.Cylinder(redGPUContext, 0.4, 6, 8);
+		const pillarMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#654321');
+		const pillarMesh = new RedGPU.Display.Mesh(redGPUContext, pillar, pillarMaterial);
+		pillarMesh.x = 5 + i * 5;
+		pillarMesh.z = 2;
+		pillarMesh.y = 0.5;  // 안개 밑에서 시작
+		scene.addChild(pillarMesh);
 	}
 
-	// 🏔️ 산 봉우리들 (더 웅장하게)
-	const mountains = [
-		{ x: 25, z: -30, height: 15, width: 5, color: '#696969' },
-		{ x: -40, z: 25, height: 18, width: 6, color: '#708090' },
-		{ x: 40, z: 20, height: 22, width: 7, color: '#778899' },
-		{ x: -20, z: -35, height: 12, width: 4, color: '#6A6A6A' },
-		{ x: 0, z: 40, height: 16, width: 5, color: '#777777' },
-	];
-
-	mountains.forEach((mountain, index) => {
-		const peak = new RedGPU.Primitive.Cylinder(redGPUContext, mountain.width, mountain.height, 12);
-		const peakMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, mountain.color);
-		peakMaterial.roughness = 0.8;
-		const peakMesh = new RedGPU.Display.Mesh(redGPUContext, peak, peakMaterial);
-		peakMesh.x = mountain.x;
-		peakMesh.z = mountain.z;
-		peakMesh.y = mountain.height / 2 - 3;
-		scene.addChild(peakMesh);
-
-		// ❄️ 산 정상 눈 덮개
-		if (mountain.height > 15) {
-			const snowCap = new RedGPU.Primitive.Sphere(redGPUContext, mountain.width * 0.8, 12, 12);
-			const snowMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#FFFAFA');
-			const snowMesh = new RedGPU.Display.Mesh(redGPUContext, snowCap, snowMaterial);
-			snowMesh.x = mountain.x;
-			snowMesh.z = mountain.z;
-			snowMesh.y = mountain.height - 2;
-			scene.addChild(snowMesh);
-		}
-	});
-
-	// 🌉 다리 구조물들 (높이 테스트용)
-	const bridges = [
-		{ x: 0, z: 8, y: 2, width: 25, height: 1, color: '#8B4513' },
-		{ x: -15, z: 15, y: 5, width: 20, height: 1, color: '#CD853F' },
-		{ x: 20, z: -10, y: 8, width: 18, height: 1, color: '#D2691E' },
-	];
-
-	bridges.forEach((bridge) => {
-		const bridgeGeom = new RedGPU.Primitive.Box(redGPUContext, bridge.width, bridge.height, 3);
-		const bridgeMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, bridge.color);
-		const bridgeMesh = new RedGPU.Display.Mesh(redGPUContext, bridgeGeom, bridgeMaterial);
-		bridgeMesh.x = bridge.x;
-		bridgeMesh.z = bridge.z;
-		bridgeMesh.y = bridge.y;
-		scene.addChild(bridgeMesh);
-
-		// 🏗️ 다리 기둥들
-		for (let i = -2; i <= 2; i++) {
-			const pillar = new RedGPU.Primitive.Cylinder(redGPUContext, 0.5, bridge.y + 2, 8);
-			const pillarMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#654321');
-			const pillarMesh = new RedGPU.Display.Mesh(redGPUContext, pillar, pillarMaterial);
-			pillarMesh.x = bridge.x + i * 6;
-			pillarMesh.z = bridge.z;
-			pillarMesh.y = (bridge.y + 2) / 2 - 3;
-			scene.addChild(pillarMesh);
-		}
-	});
-
-	// 🏠 마을 건물들
-	for (let i = 0; i < 8; i++) {
-		const buildingWidth = 2 + Math.random() * 2;
-		const buildingHeight = 3 + Math.random() * 4;
-		const building = new RedGPU.Primitive.Box(redGPUContext, buildingWidth, buildingHeight, buildingWidth);
-		const buildingColors = ['#CD853F', '#DEB887', '#F4A460', '#D2691E', '#BC8F8F'];
-		const buildingMaterial = new RedGPU.Material.PhongMaterial(
+	// 🗿 Height Fog 효과 체험용 테스트 객체들
+	const testHeights = [0, 2, 4, 6, 8, 10];
+	testHeights.forEach((height, index) => {
+		const testSphere = new RedGPU.Primitive.Sphere(redGPUContext, 0.8, 16, 16);
+		const intensity = Math.min(255, 100 + height * 20);
+		const testMaterial = new RedGPU.Material.PhongMaterial(
 			redGPUContext,
-			buildingColors[Math.floor(Math.random() * buildingColors.length)]
 		);
-		const buildingMesh = new RedGPU.Display.Mesh(redGPUContext, building, buildingMaterial);
+		testMaterial.r = intensity
+		testMaterial.g = intensity + 20
+		testMaterial.b = intensity + 40
 
-		buildingMesh.x = -10 + (i % 4) * 5;
-		buildingMesh.z = 25 + Math.floor(i / 4) * 5;
-		buildingMesh.y = buildingHeight / 2 - 1;
-		scene.addChild(buildingMesh);
+		const testMesh = new RedGPU.Display.Mesh(redGPUContext, testSphere, testMaterial);
+		testMesh.x = -25 + index * 3;
+		testMesh.z = 30;
+		testMesh.y = height;
 
-		// 🏠 지붕
-		const roof = new RedGPU.Primitive.Cylinder(redGPUContext, buildingWidth * 0.8, 0.5, 4);
-		const roofMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#8B0000');
-		const roofMesh = new RedGPU.Display.Mesh(redGPUContext, roof, roofMaterial);
-		roofMesh.x = buildingMesh.x;
-		roofMesh.z = buildingMesh.z;
-		roofMesh.y = buildingMesh.y + buildingHeight / 2 + 0.3;
-		roofMesh.rotationX = 90;
-		scene.addChild(roofMesh);
-	}
+		testMesh.userData = {
+			isFloating: true,
+			baseY: height,
+			testHeight: height
+		};
+
+		scene.addChild(testMesh);
+	});
 }
 
-async function createHeightFogControlPanel(redGPUContext, view, heightFog) {
+async function createHeightFogControlPanel(redGPUContext, view, heightFog, controller, toggleAutoRotate) {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 
-	const pane = new Pane({ title: '🌫️ Height Fog Controls', expanded: true });
+	const pane = new Pane({ title: '🌫️ Height Fog Demo', expanded: true });
 
 	const PARAMS = {
 		enabled: true,
+		autoRotate: true,
 		fogType: 'EXPONENTIAL',
 		density: heightFog.density,
 		baseHeight: heightFog.baseHeight,
 		thickness: heightFog.thickness,
 		falloff: heightFog.falloff,
-		fogColor: { r: 210, g: 230, b: 255 },
-		// 🆕 추가 컨트롤
-		animateFog: false,
-		debugMode: false
+		fogColor: { r: 190, g: 210, b: 235 },
+		// 카메라 프리셋
+		cameraPreset: 'Ground Explorer'
 	};
 
-	// 🔧 기본 컨트롤
-	const basicFolder = pane.addFolder({ title: '🔧 Basic Settings', expanded: true });
+	// 🎮 체험 컨트롤
+	const experienceFolder = pane.addFolder({ title: '🎮 Experience', expanded: true });
 
-	basicFolder.addBinding(PARAMS, 'enabled').on('change', (ev) => {
+	experienceFolder.addBinding(PARAMS, 'enabled').on('change', (ev) => {
 		if (ev.value) {
 			view.postEffectManager.addEffect(heightFog);
 		} else {
@@ -303,10 +334,54 @@ async function createHeightFogControlPanel(redGPUContext, view, heightFog) {
 		}
 	});
 
-	basicFolder.addBinding(PARAMS, 'fogType', {
+	experienceFolder.addBinding(PARAMS, 'autoRotate').on('change', toggleAutoRotate);
+
+	// 📷 카메라 프리셋 (Height Fog 최적 시점들)
+	experienceFolder.addBinding(PARAMS, 'cameraPreset', {
 		options: {
-			'EXPONENTIAL': 'EXPONENTIAL',
-			'LINEAR': 'LINEAR'
+			'🚶‍♂️ Ground Explorer': 'Ground Explorer',
+			'🌲 Forest Walker': 'Forest Walker',
+			'🏛️ Monument Viewer': 'Monument Viewer',
+			'🌉 Bridge Crosser': 'Bridge Crosser',
+			'🔍 Detail Inspector': 'Detail Inspector'
+		}
+	}).on('change', (ev) => {
+		switch (ev.value) {
+			case 'Ground Explorer':
+				controller.distance = 15;
+				controller.tilt = -10;
+				controller.pan = 45;
+				break;
+			case 'Forest Walker':
+				controller.distance = 12;
+				controller.tilt = -5;
+				controller.pan = 120;
+				break;
+			case 'Monument Viewer':
+				controller.distance = 20;
+				controller.tilt = -15;
+				controller.pan = 0;
+				break;
+			case 'Bridge Crosser':
+				controller.distance = 8;
+				controller.tilt = 0;
+				controller.pan = 90;
+				break;
+			case 'Detail Inspector':
+				controller.distance = 6;
+				controller.tilt = -20;
+				controller.pan = 60;
+				break;
+		}
+	});
+
+	// 🌫️ 안개 설정
+	const fogFolder = pane.addFolder({ title: '🌫️ Fog Settings', expanded: true });
+
+	fogFolder.addBinding(PARAMS, 'fogType', {
+		options: {
+			'🌫️ EXPONENTIAL': 'EXPONENTIAL',
+			'📏 LINEAR': 'LINEAR'
 		}
 	}).on('change', (ev) => {
 		heightFog.fogType = ev.value === 'EXPONENTIAL' ?
@@ -314,51 +389,32 @@ async function createHeightFogControlPanel(redGPUContext, view, heightFog) {
 			RedGPU.PostEffect.HeightFog.LINEAR;
 	});
 
-	basicFolder.addBinding(PARAMS, 'animateFog', {
-		label: 'Animate Fog'
-	}).on('change', (ev) => {
-		// 애니메이션은 render 루프에서 처리
-	});
-
-	// 🏔️ 높이 설정
-	const heightFolder = pane.addFolder({ title: '🏔️ Height Settings', expanded: true });
-
-	heightFolder.addBinding(PARAMS, 'baseHeight', {
-		label: 'Base Height',
-		min: -8, max: 15, step: 0.1
-	}).on('change', (ev) => {
-		heightFog.baseHeight = ev.value;
-
-	});
-
-	heightFolder.addBinding(PARAMS, 'thickness', {
-		label: 'Thickness',
-		min: 0.5, max: 30, step: 0.1
-	}).on('change', (ev) => {
-		heightFog.thickness = ev.value;
-
-	});
-
-	heightFolder.addBinding(PARAMS, 'falloff', {
-		label: 'Falloff',
-		min: 0.01, max: 2.0, step: 0.01
-	}).on('change', (ev) => {
-		heightFog.falloff = ev.value;
-	});
-
-	// 🎨 외관 설정
-	const appearanceFolder = pane.addFolder({ title: '🎨 Appearance', expanded: true });
-
-	appearanceFolder.addBinding(PARAMS, 'density', {
-		label: 'Density',
-		min: 0, max: 8, step: 0.01
+	fogFolder.addBinding(PARAMS, 'density', {
+		min: 0, max: 4, step: 0.1
 	}).on('change', (ev) => {
 		heightFog.density = ev.value;
 	});
 
-	appearanceFolder.addBinding(PARAMS, 'fogColor', {
-		label: 'Fog Color'
+	fogFolder.addBinding(PARAMS, 'baseHeight', {
+		label: 'Base Height',
+		min: -5, max: 8, step: 0.1
 	}).on('change', (ev) => {
+		heightFog.baseHeight = ev.value;
+	});
+
+	fogFolder.addBinding(PARAMS, 'thickness', {
+		min: 2, max: 20, step: 0.5
+	}).on('change', (ev) => {
+		heightFog.thickness = ev.value;
+	});
+
+	fogFolder.addBinding(PARAMS, 'falloff', {
+		min: 0.1, max: 2, step: 0.1
+	}).on('change', (ev) => {
+		heightFog.falloff = ev.value;
+	});
+
+	fogFolder.addBinding(PARAMS, 'fogColor').on('change', (ev) => {
 		heightFog.fogColor.setColorByRGB(
 			Math.round(ev.value.r),
 			Math.round(ev.value.g),
@@ -366,35 +422,23 @@ async function createHeightFogControlPanel(redGPUContext, view, heightFog) {
 		);
 	});
 
-	// 🎯 프리셋 (더 다양하게)
-	const presetFolder = pane.addFolder({ title: '🎯 Fog Presets', expanded: true });
+	// 🎯 시나리오 프리셋
+	const scenarioFolder = pane.addFolder({ title: '🎯 Scenarios', expanded: true });
 
-	presetFolder.addButton({ title: '🌊 Valley Mist' }).on('click', () => {
-		applyPreset(2.2, -3, 8, 1.2, { r: 220, g: 240, b: 255 }, 'EXPONENTIAL');
+	scenarioFolder.addButton({ title: '🌅 Dawn Valley' }).on('click', () => {
+		applyPreset(1.8, -2, 6, 1.0, { r: 255, g: 245, b: 220 }, 'EXPONENTIAL');
 	});
 
-	presetFolder.addButton({ title: '☁️ Morning Fog' }).on('click', () => {
-		applyPreset(1.8, -1, 6, 0.8, { r: 255, g: 250, b: 240 }, 'EXPONENTIAL');
+	scenarioFolder.addButton({ title: '🌲 Mysterious Forest' }).on('click', () => {
+		applyPreset(2.5, -1, 8, 1.4, { r: 180, g: 200, b: 180 }, 'EXPONENTIAL');
 	});
 
-	presetFolder.addButton({ title: '🌁 Mountain Layer' }).on('click', () => {
-		applyPreset(1.5, 6, 10, 0.6, { r: 200, g: 220, b: 255 }, 'LINEAR');
+	scenarioFolder.addButton({ title: '🏛️ Ancient Ruins' }).on('click', () => {
+		applyPreset(2.0, 0, 7, 1.2, { r: 200, g: 190, b: 160 }, 'EXPONENTIAL');
 	});
 
-	presetFolder.addButton({ title: '🌫️ Dense Low Fog' }).on('click', () => {
-		applyPreset(3.5, -2, 5, 1.8, { r: 180, g: 200, b: 220 }, 'EXPONENTIAL');
-	});
-
-	presetFolder.addButton({ title: '🌙 Night Mist' }).on('click', () => {
-		applyPreset(2.0, -1, 7, 1.0, { r: 150, g: 160, b: 200 }, 'EXPONENTIAL');
-	});
-
-	presetFolder.addButton({ title: '🔥 Heat Haze' }).on('click', () => {
-		applyPreset(1.2, -4, 4, 0.4, { r: 255, g: 240, b: 200 }, 'LINEAR');
-	});
-
-	presetFolder.addButton({ title: '❄️ Arctic Fog' }).on('click', () => {
-		applyPreset(2.8, -2, 12, 1.4, { r: 240, g: 248, b: 255 }, 'EXPONENTIAL');
+	scenarioFolder.addButton({ title: '🌙 Moonlit Mist' }).on('click', () => {
+		applyPreset(1.5, -1.5, 9, 0.8, { r: 160, g: 170, b: 200 }, 'LINEAR');
 	});
 
 	function applyPreset(density, baseHeight, thickness, falloff, fogColor, fogType) {
@@ -415,8 +459,5 @@ async function createHeightFogControlPanel(redGPUContext, view, heightFog) {
 		heightFog.fogColor.setColorByRGB(fogColor.r, fogColor.g, fogColor.b);
 
 		pane.refresh();
-
 	}
-
-
 }
