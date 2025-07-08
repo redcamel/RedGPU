@@ -149,7 +149,7 @@ class Renderer {
 						},
 					});
 					let renderPath1ResultTextureView = view.viewRenderTextureManager.renderPath1ResultTextureView
-					this.#updateViewSystemUniforms(view, renderPassEncoder, false, true, renderPath1ResultTextureView);
+					this.#updateViewSystemUniforms(view, renderPassEncoder, false, false, renderPath1ResultTextureView);
 					// 예제에서 주어진 렌더링 로직 실행
 					render2PathLayer(view, renderPassEncoder);
 					renderPassEncoder.end(); // 첫 번째 패스 종료
