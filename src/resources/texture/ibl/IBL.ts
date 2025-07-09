@@ -37,7 +37,7 @@ class IBL {
 	}
 
 	constructor(redGPUContext: RedGPUContext, srcInfo: string | [string, string, string, string, string, string],
-	            envCubeSize: number = 1024,iblCubeSize:number = 256) {
+	            envCubeSize: number = 1024,iblCubeSize:number = 512) {
 		this.#iblCubeSize = iblCubeSize
 		this.#envCubeSize = envCubeSize
 		this.#redGPUContext = redGPUContext

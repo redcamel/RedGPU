@@ -66,7 +66,8 @@ class HDRTexture extends ManagedResourceBase {
 		if (src) {
 			this.#validateHDRFormat(src);
 			this.#src = src;
-			this.#cacheKey = src || this.uuid;
+			this.#cacheKey = this.uuid;
+			// this.#cacheKey = src || this.uuid; //TODO 캐싱 망가졌는데 확인해야함... 아마도... 큐브생성된 녀석을 기준으로 키를 잡아야할듯
 			const {table} = this.targetResourceManagedState
 			let target: ResourceStateHDRTexture
 			for (const k in table) {

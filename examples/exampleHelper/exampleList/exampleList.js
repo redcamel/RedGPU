@@ -418,6 +418,15 @@ const ExampleList = [
 									en: ``
 								},
 							},
+							{
+								name: 'Custom IBL Texture Size',
+								path: '3d/skybox/iblTextureSize',
+								thumb: '3d/skybox/iblTextureSize/thumb.png',
+								description: {
+									ko: ``,
+									en: ``
+								},
+							},
 						]
 					}
 
