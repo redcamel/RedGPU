@@ -30,7 +30,7 @@ class BitmapTexture extends ManagedResourceBase {
 		onLoad?: (textureInstance?: BitmapTexture) => void,
 		onError?: (error: Error) => void,
 		format?: GPUTextureFormat,
-		usePremultiplyAlpha: boolean = true
+		usePremultiplyAlpha: boolean = false
 	) {
 		super(redGPUContext, MANAGED_STATE_KEY);
 		this.#onLoad = onLoad
