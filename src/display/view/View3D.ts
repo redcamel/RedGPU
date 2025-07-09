@@ -225,7 +225,7 @@ class View3D extends ViewTransform {
 		const {shadowManager} = scene
 		const {directionalShadowManager} = shadowManager
 		const ibl = view.ibl
-		const ibl_environmentTexture = ibl?.environmentTexture?.gpuTexture
+		const ibl_iblTexture = ibl?.iblTexture?.gpuTexture
 		const ibl_irradianceTexture = ibl?.irradianceTexture?.gpuTexture
 		let shadowDepthTextureView = shadowRender ? directionalShadowManager.shadowDepthTextureViewEmpty : directionalShadowManager.shadowDepthTextureView
 		const index = view.redGPUContext.viewList.indexOf(view)
@@ -236,7 +236,7 @@ class View3D extends ViewTransform {
 			if (prevInfo) {
 				needResetBindGroup = (
 					prevInfo.ibl !== ibl ||
-					prevInfo.ibl_environmentTexture !== ibl_environmentTexture ||
+					prevInfo.ibl_iblTexture !== ibl_iblTexture ||
 					prevInfo.ibl_irradianceTexture !== ibl_irradianceTexture ||
 					prevInfo.renderPath1ResultTextureView !== renderPath1ResultTextureView ||
 					prevInfo.shadowDepthTextureView !== shadowDepthTextureView
@@ -246,7 +246,7 @@ class View3D extends ViewTransform {
 			if (needResetBindGroup) this.#createVertexUniformBindGroup(key, shadowDepthTextureView, view.ibl, renderPath1ResultTextureView)
 			else this.#systemUniform_Vertex_UniformBindGroup = this.#prevInfoList[key].vertexUniformBindGroup;
 			[
-				{key: 'useIblTexture', value: [ibl_environmentTexture ? 1 : 0]},
+				{key: 'useIblTexture', value: [ibl_iblTexture ? 1 : 0]},
 				{key: 'time', value: [view.debugViewRenderState.timestamp || 0]},
 				{key: 'isView3D', value: [this.constructor === View3D ? 1 : 0]},
 			].forEach(({key, value}) => {
@@ -258,7 +258,7 @@ class View3D extends ViewTransform {
 			});
 			this.#prevInfoList[key] = {
 				ibl,
-				ibl_environmentTexture,
+				ibl_iblTexture,
 				ibl_irradianceTexture,
 				renderPath1ResultTextureView,
 				shadowDepthTextureView,
@@ -277,7 +277,7 @@ class View3D extends ViewTransform {
 
 	#createVertexUniformBindGroup(key: string, shadowDepthTextureView: GPUTextureView, ibl: IBL, renderPath1ResultTextureView: GPUTextureView) {
 		this.#updateClusters(true)
-		const ibl_environmentTexture = ibl?.environmentTexture
+		const ibl_iblTexture = ibl?.iblTexture
 		const ibl_irradianceTexture = ibl?.irradianceTexture
 		const systemUniform_Vertex_BindGroupDescriptor: GPUBindGroupDescriptor = {
 			layout: this.redGPUContext.resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System),
@@ -335,7 +335,7 @@ class View3D extends ViewTransform {
 				{
 					binding: 10,
 					resource:
-						ibl_environmentTexture?.gpuTexture?.createView(ibl_environmentTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor)
+						ibl_iblTexture?.gpuTexture?.createView(ibl_iblTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor)
 						|| this.redGPUContext.resourceManager.emptyCubeTextureView
 				},
 				{
