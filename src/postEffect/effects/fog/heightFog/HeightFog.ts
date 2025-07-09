@@ -10,7 +10,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 class HeightFog extends ASinglePassPostEffect {
 	// HeightFog 타입 상수
 	static EXPONENTIAL = 0;
-	static LINEAR = 1;
+	static EXPONENTIAL_SQUARED = 1;
 
 	#fogType: number = HeightFog.EXPONENTIAL;
 	#density: number = 1.0;

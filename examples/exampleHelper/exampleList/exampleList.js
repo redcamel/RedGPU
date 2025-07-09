@@ -993,6 +993,16 @@ const ExampleList = [
 									ko: ``,
 									en: ``
 								}
+							},
+							{
+								name: 'HeightFog',
+
+								path: '3d/postEffect/fog/heightFog',
+								thumb: '3d/postEffect/fog/heightFog/thumb.png',
+								description: {
+									ko: ``,
+									en: ``
+								}
 							}
 						]
 					}
