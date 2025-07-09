@@ -1968,7 +1968,7 @@ const ExampleList = [
 				]
 			},
 			{
-				name: '2D BlendMode',
+				name: '2D Object BlendMode',
 				experimental: true,
 				list: [
 					{
