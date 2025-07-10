@@ -694,67 +694,59 @@ class Mesh extends MeshBase {
 			}
 		}
 		// check distanceCulling
-		// let passFrustumCulling = this.#checkCulling(view, frustumPlanes)
 		let passFrustumCulling = true
+		// if (useDistanceCulling && currentGeometry) {
+		// 	const {rawCamera} = view
+		// 	const dx = rawCamera.x - this.#x;
+		// 	const dy = rawCamera.y - this.#y;
+		// 	const dz = rawCamera.z - this.#z;
+		// 	const MTX = this.modelMatrix
+		// 	const geoVolume = currentGeometry.volume;
+		// 	let geometryRadius: number = geoVolume.geometryRadius
+		// 	const transformedRadius0: number = geometryRadius * MTX[0];
+		// 	const transformedRadius1: number = geometryRadius * MTX[5];
+		// 	const transformedRadius2: number = geometryRadius * MTX[10];
+		// 	const radius: number = (transformedRadius0 > transformedRadius1
+		// 		? transformedRadius0
+		// 		: transformedRadius1 > transformedRadius2
+		// 			? transformedRadius1
+		// 			: transformedRadius2);
+		// 	//TODO - radius 필요없는지 확인해야함
+		// 	const dxSquared = dx * dx;
+		// 	if (dxSquared > cullingDistanceSquared) {
+		// 		passFrustumCulling = false;
+		// 	} else {
+		// 		const dySquared = dy * dy;
+		// 		if ((dxSquared + dySquared) > cullingDistanceSquared) {
+		// 			passFrustumCulling = false;
+		// 		} else {
+		// 			const dzSquared = dz * dz;
+		// 			if ((dxSquared + dySquared + dzSquared) > cullingDistanceSquared) {
+		// 				passFrustumCulling = false;
+		// 			}
+		// 		}
+		// 	}
+		// }
 		if (useDistanceCulling && currentGeometry) {
 			const {rawCamera} = view
-			const dx = rawCamera.x - this.#x;
-			const dy = rawCamera.y - this.#y;
-			const dz = rawCamera.z - this.#z;
-			const MTX = this.modelMatrix
-			const geoVolume = currentGeometry.volume;
-			let geometryRadius: number = geoVolume.geometryRadius
-			const transformedRadius0: number = geometryRadius * MTX[0];
-			const transformedRadius1: number = geometryRadius * MTX[5];
-			const transformedRadius2: number = geometryRadius * MTX[10];
-			const radius: number = (transformedRadius0 > transformedRadius1
-				? transformedRadius0
-				: transformedRadius1 > transformedRadius2
-					? transformedRadius1
-					: transformedRadius2);
-			//TODO - radius 필요없는지 확인해야함
-			const dxSquared = dx * dx;
-			if (dxSquared > cullingDistanceSquared) {
+			const aabb = this.boundingAABB;
+
+			// AABB 중심점과 카메라 위치 간의 거리 계산
+			const dx = rawCamera.x - aabb.centerX;
+			const dy = rawCamera.y - aabb.centerY;
+			const dz = rawCamera.z - aabb.centerZ;
+
+			// 거리 제곱 계산
+			const distanceSquared = dx * dx + dy * dy + dz * dz;
+
+			// AABB의 반지름을 고려한 컬링 거리 계산
+			const cullingDistanceWithRadius = cullingDistanceSquared + (aabb.geometryRadius * aabb.geometryRadius);
+
+			if (distanceSquared > cullingDistanceWithRadius) {
 				passFrustumCulling = false;
-			} else {
-				const dySquared = dy * dy;
-				if ((dxSquared + dySquared) > cullingDistanceSquared) {
-					passFrustumCulling = false;
-				} else {
-					const dzSquared = dz * dz;
-					if ((dxSquared + dySquared + dzSquared) > cullingDistanceSquared) {
-						passFrustumCulling = false;
-					}
-				}
 			}
 		}
 		// check frustumCulling
-		// if (frustumPlanes && passFrustumCulling) {
-		// 	if (currentGeometry) {
-		// 		const MTX = this.modelMatrix
-		// 		const frustumPlanes0 = frustumPlanes[0];
-		// 		const frustumPlanes1 = frustumPlanes[1];
-		// 		const frustumPlanes2 = frustumPlanes[2];
-		// 		const frustumPlanes3 = frustumPlanes[3];
-		// 		const frustumPlanes4 = frustumPlanes[4];
-		// 		const frustumPlanes5 = frustumPlanes[5];
-		// 		const geoVolume = currentGeometry.volume;
-		// 		const geometryRadius: number = geoVolume.geometryRadius
-		// 		const transformedRadius0: number = geometryRadius * MTX[0];
-		// 		const transformedRadius1: number = geometryRadius * MTX[5];
-		// 		const transformedRadius2: number = geometryRadius * MTX[10];
-		// 		const radius: number = Math.max(geometryRadius, transformedRadius0, transformedRadius1, transformedRadius2) * 2
-		// 		const a00 = MTX[12], a01 = MTX[13], a02 = MTX[14]
-		// 		frustumPlanes0[0] * a00 + frustumPlanes0[1] * a01 + frustumPlanes0[2] * a02 + frustumPlanes0[3] <= -radius ? passFrustumCulling = false
-		// 			: frustumPlanes1[0] * a00 + frustumPlanes1[1] * a01 + frustumPlanes1[2] * a02 + frustumPlanes1[3] <= -radius ? passFrustumCulling = false
-		// 				: frustumPlanes2[0] * a00 + frustumPlanes2[1] * a01 + frustumPlanes2[2] * a02 + frustumPlanes2[3] <= -radius ? passFrustumCulling = false
-		// 					: frustumPlanes3[0] * a00 + frustumPlanes3[1] * a01 + frustumPlanes3[2] * a02 + frustumPlanes3[3] <= -radius ? passFrustumCulling = false
-		// 						: frustumPlanes4[0] * a00 + frustumPlanes4[1] * a01 + frustumPlanes4[2] * a02 + frustumPlanes4[3] <= -radius ? passFrustumCulling = false
-		// 							: frustumPlanes5[0] * a00 + frustumPlanes5[1] * a01 + frustumPlanes5[2] * a02 + frustumPlanes5[3] <= -radius ? passFrustumCulling = false : 0;
-		// 	} else {
-		// 		passFrustumCulling = false
-		// 	}
-		// }
 		if (frustumPlanes && passFrustumCulling) {
 			if (currentGeometry) {
 				const combinedAABB = this.boundingAABB;
