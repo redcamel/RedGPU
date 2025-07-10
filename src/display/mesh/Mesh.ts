@@ -944,17 +944,17 @@ class Mesh extends MeshBase {
 	}
 
 	get boundingOBB(): OBB {
-		if (!this._geometry) return null;
+		// if (!this._geometry) return null;
 		return calculateMeshOBB(this);
 	}
 
 	get boundingAABB(): AABB {
-		if (!this._geometry) return null;
+		// if (!this._geometry) return null;
 		return calculateMeshAABB(this);
 	}
 
 	get combinedBoundingAABB(): AABB {
-		if (!this._geometry) return null;
+		// if (!this._geometry) return null;
 		return calculateMeshCombinedAABB(this)
 	}
 }

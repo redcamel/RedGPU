@@ -63,7 +63,8 @@ function loadGLTF(view, url) {
 		url,
 		(v) => {
 			mesh = scene.addChild(v['resultMesh']);
-
+			mesh.enableDebugger=true
+			mesh.drawDebugger.debugMode = 'COMBINED_AABB'
 			// 모델별 스케일 및 위치 설정
 			if (url.includes('Corset')) {
 				mesh.setScale(40);
@@ -103,6 +104,7 @@ function loadGLTF(view, url) {
 			}
 		}
 	);
+
 }
 const createIBL = (view, src) => {
 	const ibl = new RedGPU.Resource.IBL(view.redGPUContext, src);
