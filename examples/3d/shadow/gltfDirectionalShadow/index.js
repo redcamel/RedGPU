@@ -19,8 +19,8 @@ RedGPU.init(
 
 
 		addGround(redGPUContext, scene);
-		loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF/DamagedHelmet.gltf', -1, 1);
-		loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF/BrainStem.gltf', 1, 0);
+		loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb', -1, 1);
+		loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF-Binary/BrainStem.glb', 1, 0);
 
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		renderer.start(redGPUContext, (time) => {
@@ -82,7 +82,6 @@ const renderTestPane = async (redGPUContext, targetView) => {
 	const { shadowManager } = targetView.scene;
 	const { directionalShadowManager } = shadowManager;
 
-	createIblHelper(pane, targetView, RedGPU);
 	pane.addBinding(directionalShadowManager, 'shadowDepthTextureSize', {
 		min: 128,
 		max: 2048,
@@ -90,5 +89,6 @@ const renderTestPane = async (redGPUContext, targetView) => {
 	}).on("change", (ev) => {
 		directionalShadowManager.shadowDepthTextureSize = ev.value;
 	});
+	createIblHelper(pane, targetView, RedGPU, {useLight:true});
 
 };

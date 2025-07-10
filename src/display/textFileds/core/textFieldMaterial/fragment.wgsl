@@ -30,7 +30,7 @@ fn main(inputData: InputData) -> @location(0) vec4<f32> {
   // 텍스처 색상 샘플링
   var finalColor: vec4<f32> = textureSample(diffuseTexture, diffuseTextureSampler, inputData.uv);
 
-  finalColor = vec4<f32>(finalColor.rgb/finalColor.a, finalColor.a * uniforms.opacity * inputData.combinedOpacity);
+  finalColor = vec4<f32>(finalColor.rgb / finalColor.a, finalColor.a * uniforms.opacity * inputData.combinedOpacity);
 
   if(uniforms.useTint == 1u){
     finalColor = calcTintBlendMode(finalColor, uniforms.tintBlendMode, uniforms.tint);

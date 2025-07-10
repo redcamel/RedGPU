@@ -1,7 +1,7 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import View3D from "../../../../display/view/View3D";
 import AMultiPassPostEffect from "../../../core/AMultiPassPostEffect";
-import DOFCoC from "./DOFCoC";
+import DOFCoC from "./DOFCoC/DOFCoC";
 import DOFUnified from "./DOFUnified";
 
 class DOF extends AMultiPassPostEffect {

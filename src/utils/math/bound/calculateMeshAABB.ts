@@ -5,11 +5,20 @@ import AABB from "./AABB";
 const tempLocalVertex = vec3.create();
 const tempWorldVertex = vec3.create();
 
-const calculateMeshAABB = (mesh: Mesh): AABB | null => {
-	const geometryVolume = mesh._geometry.volume;
-	if (!geometryVolume) return null;
+const calculateMeshAABB = (mesh: Mesh): AABB => {
+	// 메시나 지오메트리가 없는 경우 빈 AABB 반환
+	if (!mesh || !mesh._geometry) {
+		return new AABB(0, 0, 0, 0, 0, 0);
+	}
 
+	const geometryVolume = mesh._geometry.volume;
+	// 이제 geometryVolume은 항상 AABB를 반환하므로 null 체크 불필요
 	const { minX, maxX, minY, maxY, minZ, maxZ } = geometryVolume;
+
+	// 지오메트리가 빈 경우 (모든 값이 0)
+	if (minX === 0 && maxX === 0 && minY === 0 && maxY === 0 && minZ === 0 && maxZ === 0) {
+		return new AABB(0, 0, 0, 0, 0, 0);
+	}
 
 	let worldMinX = Infinity, worldMinY = Infinity, worldMinZ = Infinity;
 	let worldMaxX = -Infinity, worldMaxY = -Infinity, worldMaxZ = -Infinity;

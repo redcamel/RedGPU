@@ -15,7 +15,7 @@ RedGPU.init(
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		redGPUContext.addView(view);
 
-		loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/TextureLinearInterpolationTest/glTF/TextureLinearInterpolationTest.gltf');
+		loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/TextureLinearInterpolationTest/glTF-Binary/TextureLinearInterpolationTest.glb');
 
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		const render = () => {};

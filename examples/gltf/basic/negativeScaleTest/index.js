@@ -15,7 +15,7 @@ RedGPU.init(
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		redGPUContext.addView(view);
 
-		loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/NegativeScaleTest/glTF/NegativeScaleTest.gltf');
+		loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/NegativeScaleTest/glTF-Binary/NegativeScaleTest.glb');
 
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		const render = () => {};

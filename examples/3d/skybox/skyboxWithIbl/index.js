@@ -42,7 +42,6 @@ RedGPU.init(
 const createIBL = (view, src) => {
 	const newIbl = new RedGPU.Resource.IBL(view.redGPUContext, src);
 	const newSkybox = new RedGPU.Display.SkyBox(view.redGPUContext, newIbl.environmentTexture);
-
 	view.skybox = newSkybox;
 };
 
@@ -51,6 +50,25 @@ const renderTestPane = async (view) => {
 	const pane = new Pane();
 	const {createFieldOfView} = await import( "../../../exampleHelper/createExample/panes/index.js" );
 	createFieldOfView(pane, view.camera)
+	const TEST_DATA = {
+		blur : 0,
+		opacity : 1,
+	}
+	pane.addBinding(TEST_DATA, 'blur', {
+		min:0,
+		max:1,
+		step:0.01
+	}).on("change", (ev) => {
+		view.skybox.blur = ev.value;
+	})
+	pane.addBinding(TEST_DATA, 'opacity', {
+		min:0,
+		max:1,
+		step:0.01
+	}).on("change", (ev) => {
+		view.skybox.opacity = ev.value;
+	})
+
 
 	const settings = {
 		hdrImage: hdrImages[0].path,
@@ -63,6 +81,8 @@ const renderTestPane = async (view) => {
 		}, {})
 	}).on("change", (ev) => {
 		createIBL(view, ev.value);
+		view.skybox.blur = TEST_DATA.blur
+		view.skybox.opacity = TEST_DATA.opacity
 	});
 
 };

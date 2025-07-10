@@ -129,7 +129,7 @@ class CubeTexture extends ManagedResourceBase {
 			this.#gpuTexture.destroy();
 			this.targetResourceManagedState.videoMemory -= this.#videoMemorySize;
 		}
-		keepLog('gpuTexture', gpuTexture)
+		// keepLog('gpuTexture', gpuTexture)
 		// 새 텍스처 설정
 		this.#gpuTexture = gpuTexture;
 		this.#useMipmap = useMipmap

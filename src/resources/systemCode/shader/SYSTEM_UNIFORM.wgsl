@@ -38,7 +38,7 @@ struct SystemUniform {
 	  time:f32,
 	  //
 	  useIblTexture:u32,
-	  isView3D:u32
+	  isView3D:u32,
 };
 
 @group(0) @binding(0) var<uniform> systemUniforms: SystemUniform;

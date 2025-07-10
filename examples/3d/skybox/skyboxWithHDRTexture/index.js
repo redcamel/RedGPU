@@ -22,72 +22,83 @@ RedGPU.init(
 
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-
 		redGPUContext.addView(view);
-		const herTexture = new RedGPU.Resource.HDRTexture(view.redGPUContext, hdrImages[0].path,()=>{
-			renderTestPane(view);
-		});
-		view.skybox = new RedGPU.Display.SkyBox(view.redGPUContext, herTexture);
+
+		// 초기 HDR 텍스처 생성
+		const initialTexture = new RedGPU.Resource.HDRTexture(
+			redGPUContext,
+			hdrImages[0].path,
+			() => createTestPane(view)
+		);
+		view.skybox = new RedGPU.Display.SkyBox(redGPUContext, initialTexture);
 
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		renderer.start(redGPUContext, () => {});
-
-
 	},
 	(failReason) => {
 		console.error("Initialization failed:", failReason);
-		const errorMessage = document.createElement("div");
-		errorMessage.innerHTML = failReason;
-		document.body.appendChild(errorMessage);
+		document.body.innerHTML = `<div>Error: ${failReason}</div>`;
 	}
 );
 
-const createSkybox = (view, src) => {
-	const herTexture = new RedGPU.Resource.HDRTexture(view.redGPUContext, src);
-	view.skybox = new RedGPU.Display.SkyBox(view.redGPUContext, herTexture);
-};
-const renderTestPane = async (view) => {
-	const {Pane} = await import( "https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js" );
-	const pane = new Pane();
-	const {createFieldOfView} = await import( "../../../exampleHelper/createExample/panes/index.js" );
-	createFieldOfView(pane, view.camera);
+const createTestPane = async (view) => {
+	const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
+	const {createFieldOfView} = await import("../../../exampleHelper/createExample/panes/index.js");
 
-	let currentTexture = view.skybox._material.skyboxTexture;
-	let exposureBinding = null;
+	const pane = new Pane();
+	createFieldOfView(pane, view.camera);
 
 	const settings = {
 		hdrImage: hdrImages[0].path,
-		exposure: view.skybox._material.skyboxTexture.exposure
+		exposure: view.skybox.exposure,
+		blur : 0,
+		opacity : 1,
 	};
+
+	// HDR 이미지 선택 옵션 생성
+	const hdrOptions = hdrImages.reduce((acc, item) => {
+		acc[item.name] = item.path;
+		return acc;
+	}, {});
 
 	// HDR 이미지 선택
 	pane.addBinding(settings, 'hdrImage', {
-		options: hdrImages.reduce((acc, item) => {
-			acc[item.name] = item.path;
-			return acc;
-		}, {})
+		options: hdrOptions
 	}).on("change", (ev) => {
-		const hdrTexture = new RedGPU.Resource.HDRTexture(view.redGPUContext, ev.value, (loadedTexture) => {
-			currentTexture = loadedTexture;
-			/* HDR 이미지별 권장 노출값으로 자동 설정 */
-			settings.exposure = loadedTexture.recommendedExposure || 1.0;
-			/* UI 갱신 */
-			if (exposureBinding) {
-				exposureBinding.max = settings.exposure * 2
+		const newTexture = new RedGPU.Resource.HDRTexture(
+			view.redGPUContext,
+			ev.value,
+			(loadedTexture) => {
+				// 권장 노출값으로 자동 설정
+				settings.exposure = loadedTexture.recommendedExposure || 1.0;
+				exposureBinding.max = settings.exposure * 2;
 				exposureBinding.refresh();
 			}
-		});
-		view.skybox = new RedGPU.Display.SkyBox(view.redGPUContext, hdrTexture);
+		);
+		view.skybox = new RedGPU.Display.SkyBox(view.redGPUContext, newTexture);
 	});
-
+	pane.addBinding(settings, 'blur', {
+		min:0,
+		max:1,
+		step:0.01
+	}).on("change", (ev) => {
+		view.skybox.blur = ev.value;
+	})
+	pane.addBinding(settings, 'opacity', {
+		min:0,
+		max:1,
+		step:0.01
+	}).on("change", (ev) => {
+		view.skybox.opacity = ev.value;
+	})
 	// Exposure 슬라이더
-	exposureBinding = pane.addBinding(settings, 'exposure', {
+	const exposureBinding = pane.addBinding(settings, 'exposure', {
 		min: 0.01,
 		max: settings.exposure * 2,
 		step: 0.01
 	}).on("change", (ev) => {
-		if (currentTexture) {
-			currentTexture.exposure = ev.value;
-		}
+		view.skybox.exposure = ev.value;
+		view.skybox.blur = settings.blur
+		view.skybox.opacity = settings.opacity
 	});
-}
+};
