@@ -326,7 +326,7 @@ class HDRTexture extends ManagedResourceBase {
 				mipLevelCount: this.#mipLevelCount,
 				dimension: '2d'
 			});
-			keepLog(this.#gpuTexture)
+			// keepLog(this.#gpuTexture)
 			console.log('HDR 큐브맵 밉맵 재생성 완료');
 		}
 		console.log(`HDR 큐브맵 내용 업데이트 완료 (노출: ${this.#exposure.toFixed(3)})`);

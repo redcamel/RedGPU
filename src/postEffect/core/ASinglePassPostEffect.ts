@@ -183,13 +183,13 @@ class ASinglePassPostEffect {
 			this.#computeBindGroupEntries0 = []
 			this.#computeBindGroupEntries1 = []
 			// Group 0: source textures (outputTexture 제외)
-			keepLog('info', this.#SHADER_INFO_MSAA)
-			keepLog('info', this.#SHADER_INFO_MSAA.uniforms.systemUniforms)
-			keepLog('info', currentUniformsInfo)
+			// keepLog('info', this.#SHADER_INFO_MSAA)
+			// keepLog('info', this.#SHADER_INFO_MSAA.uniforms.systemUniforms)
+			// keepLog('info', currentUniformsInfo)
 			for (const k in currentStorageInfo) {
 				const info = currentStorageInfo[k]
 				const {binding, name} = info
-				keepLog('info', name, binding, info, sourceTextureView)
+				// keepLog('info', name, binding, info, sourceTextureView)
 				if (name !== 'outputTexture') {
 					this.#computeBindGroupEntries0.push(
 						{
@@ -214,7 +214,7 @@ class ASinglePassPostEffect {
 					})
 				}
 			})
-			keepLog('info this.#computeBindGroupEntries0', this.#computeBindGroupEntries0, this.#computeBindGroupEntries1)
+			// keepLog('info this.#computeBindGroupEntries0', this.#computeBindGroupEntries0, this.#computeBindGroupEntries1)
 			// uniform buffer는 마지막에 추가
 			if (currentSystemUniformsInfo) {
 				this.#computeBindGroupEntries1.push(

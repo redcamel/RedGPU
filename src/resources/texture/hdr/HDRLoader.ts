@@ -170,7 +170,7 @@ class HDRLoader {
 		}
 		if (src.toLowerCase().endsWith('.hdr')) {
 			if (this.#enableDebugLogs) {
-				keepLog('파일 첫 200바이트:');
+				// keepLog('파일 첫 200바이트:');
 				this.#hexDump(uint8Array.slice(0, 200));
 			}
 			const hdrData = this.#parseRGBE(uint8Array);
@@ -353,13 +353,13 @@ class HDRLoader {
 		keepLog(`데이터 길이: ${hdrData.data.length}`);
 		keepLog(`예상 픽셀 수: ${hdrData.width * hdrData.height * 4}`);
 		// 첫 몇 픽셀의 값 확인
-		keepLog('첫 4픽셀 값 (원본):');
+		// keepLog('첫 4픽셀 값 (원본):');
 		for (let i = 0; i < Math.min(16, hdrData.data.length); i += 4) {
 			const r = hdrData.data[i];
 			const g = hdrData.data[i + 1];
 			const b = hdrData.data[i + 2];
 			const a = hdrData.data[i + 3];
-			keepLog(`픽셀 ${i / 4}: R=${r.toFixed(3)}, G=${g.toFixed(3)}, B=${b.toFixed(3)}, A=${a.toFixed(3)}`);
+			// keepLog(`픽셀 ${i / 4}: R=${r.toFixed(3)}, G=${g.toFixed(3)}, B=${b.toFixed(3)}, A=${a.toFixed(3)}`);
 		}
 	}
 
@@ -375,7 +375,7 @@ class HDRLoader {
 			const ascii = Array.from(data.slice(i, i + 16))
 				.map(b => (b >= 32 && b <= 126) ? String.fromCharCode(b) : '.')
 				.join('');
-			keepLog(`${i.toString(16).padStart(8, '0')}: ${hex.padEnd(48, ' ')} |${ascii}|`);
+			// keepLog(`${i.toString(16).padStart(8, '0')}: ${hex.padEnd(48, ' ')} |${ascii}|`);
 		}
 	}
 }
