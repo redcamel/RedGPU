@@ -52,7 +52,7 @@ RedGPU.init(
 function createTestScene(redGPUContext, scene) {
 	new RedGPU.GLTFLoader(
 		redGPUContext,
-		'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF/DamagedHelmet.gltf',
+		'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb',
 		(result) => {
 			const mainMesh = scene.addChild(result['resultMesh']);
 			mainMesh.x = 0;

@@ -60,7 +60,7 @@ RedGPU.init(
 		loadGLTF(
 			redGPUContext,
 			scene,
-			'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CompareMetallic/glTF/CompareMetallic.gltf'
+			'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CompareMetallic/glTF-Binary/CompareMetallic.glb'
 		);
 
 		// ============================================
