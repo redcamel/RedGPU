@@ -2,10 +2,23 @@ import {mat4, vec3} from "gl-matrix";
 import Mesh from "../../../display/mesh/Mesh";
 import OBB from "./OBB";
 
+const calculateMeshOBB = (mesh: Mesh): OBB => {
+	// 메시나 지오메트리가 없는 경우 기본 OBB 반환
+	if (!mesh || !mesh._geometry) {
+		const identityMatrix = mat4.create();
+		return new OBB([0, 0, 0], [0, 0, 0], identityMatrix);
+	}
 
-const calculateMeshOBB = (mesh: Mesh): OBB =>{
 	const geometryVolume = mesh._geometry.volume;
-	if (!geometryVolume) return null;
+	// 이제 geometryVolume은 항상 AABB를 반환하므로 null 체크 불필요
+
+	// 지오메트리가 빈 경우 (모든 값이 0)
+	if (geometryVolume.minX === 0 && geometryVolume.maxX === 0 &&
+		geometryVolume.minY === 0 && geometryVolume.maxY === 0 &&
+		geometryVolume.minZ === 0 && geometryVolume.maxZ === 0) {
+		const identityMatrix = mat4.create();
+		return new OBB([0, 0, 0], [0, 0, 0], identityMatrix);
+	}
 
 	// 원본 지오메트리의 중심점과 반크기
 	const originalCenter = [

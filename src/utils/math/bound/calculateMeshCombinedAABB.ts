@@ -15,7 +15,7 @@ const calculateMeshCombinedAABB = (mesh: Mesh): AABB => {
 const collectRecursive = (mesh: Mesh, aabbs: AABB[]) => {
 	// 지오메트리가 있는 경우에만 AABB 계산 및 추가
 	if (mesh._geometry) {
-		const aabb = calculateMeshAABB(mesh);
+		const aabb = mesh.boundingAABB
 		// 빈 AABB인지 확인 (모든 값이 0인 경우는 제외)
 		if (!(aabb.minX === 0 && aabb.maxX === 0 && aabb.minY === 0 &&
 			aabb.maxY === 0 && aabb.minZ === 0 && aabb.maxZ === 0)) {
