@@ -279,7 +279,7 @@ class Mesh extends MeshBase {
 	}
 
 	set rotationY(value: number) {
-		this.#rotationY = this.#rotationArray[1] = value% 360;
+		this.#rotationY = this.#rotationArray[1] = value % 360;
 		this.dirtyTransform = true
 	}
 
@@ -288,7 +288,7 @@ class Mesh extends MeshBase {
 	}
 
 	set rotationZ(value: number) {
-		this.#rotationZ = this.#rotationArray[2] = value% 360;
+		this.#rotationZ = this.#rotationArray[2] = value % 360;
 		this.dirtyTransform = true
 	}
 
@@ -764,13 +764,11 @@ class Mesh extends MeshBase {
 				const frustumPlanes3 = frustumPlanes[3];
 				const frustumPlanes4 = frustumPlanes[4];
 				const frustumPlanes5 = frustumPlanes[5];
-
 				// combinedBoundingAABB의 중심점과 반지름 사용
 				const centerX = combinedAABB.centerX;
 				const centerY = combinedAABB.centerY;
 				const centerZ = combinedAABB.centerZ;
 				const radius = combinedAABB.geometryRadius;
-
 				// 각 frustum plane에 대해 거리 계산
 				frustumPlanes0[0] * centerX + frustumPlanes0[1] * centerY + frustumPlanes0[2] * centerZ + frustumPlanes0[3] <= -radius ? passFrustumCulling = false
 					: frustumPlanes1[0] * centerX + frustumPlanes1[1] * centerY + frustumPlanes1[2] * centerZ + frustumPlanes1[3] <= -radius ? passFrustumCulling = false
@@ -969,28 +967,29 @@ class Mesh extends MeshBase {
 			vModuleDescriptor
 		)
 	}
-	#cachedBoundingAABB:AABB
-	#cachedBoundingOBB:OBB
+
+	#cachedBoundingAABB: AABB
+	#cachedBoundingOBB: OBB
 
 	get boundingOBB(): OBB {
-		// if (!this._geometry) return null;
-		if(this.dirtyTransform) {
+		if (!this.#cachedBoundingOBB || this.dirtyTransform) {
+			this.#cachedBoundingOBB = null
+			this.#cachedBoundingAABB = null
 			this.#cachedBoundingOBB = calculateMeshOBB(this);
 		}
 		return this.#cachedBoundingOBB
 	}
 
 	get boundingAABB(): AABB {
-		// if (!this._geometry) return null;
-		if(this.dirtyTransform) {
+		if (!this.#cachedBoundingAABB || this.dirtyTransform) {
+			this.#cachedBoundingOBB = null
+			this.#cachedBoundingAABB = null
 			this.#cachedBoundingAABB = calculateMeshAABB(this);
 		}
 		return this.#cachedBoundingAABB
 	}
 
-
 	get combinedBoundingAABB(): AABB {
-		// if (!this._geometry) return null;
 		return calculateMeshCombinedAABB(this)
 	}
 }
