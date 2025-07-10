@@ -6,7 +6,9 @@ RedGPU - Javascript WebGPU Library
 </p>
 
 
-## RedGPU V2.3.0-Alpha
+## RedGPU V2.4.0-Alpha
+- Release Note https://github.com/redcamel/RedGPU/releases/tag/V2.4.0-Alpha
+
 ## [Examples](https://redcamel.github.io/RedGPU/examples/)
    - See the [example](https://redcamel.github.io/RedGPU/examples/). Various examples are available.
 
