@@ -1,7 +1,7 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import AMultiPassPostEffect from "../../core/AMultiPassPostEffect";
-import BlurX from "./BlurX";
-import BlurY from "./BlurY";
+import BlurX from "./blurX/BlurX";
+import BlurY from "./blurY/BlurY";
 
 class GaussianBlur extends AMultiPassPostEffect {
 	#size: number = 32

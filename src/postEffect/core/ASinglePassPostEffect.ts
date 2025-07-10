@@ -4,6 +4,7 @@ import View3D from "../../display/view/View3D";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../material";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
+import {keepLog} from "../../utils";
 
 class ASinglePassPostEffect {
 	#computeShaderMSAA: GPUShaderModule
@@ -17,7 +18,8 @@ class ASinglePassPostEffect {
 	#computePipeline: GPUComputePipeline
 	///
 	#uniformBuffer: UniformBuffer
-	#uniformInfo
+	#uniformsInfo
+	#systemUuniformsInfo
 	#storageInfo
 	#name
 	#SHADER_INFO_MSAA
@@ -64,8 +66,14 @@ class ASinglePassPostEffect {
 		return this.#uniformBuffer;
 	}
 
-	get uniformInfo() {
-		return this.#uniformInfo
+	get uniformsInfo
+	() {
+		return this.#uniformsInfo
+	}
+
+	get systemUuniformsInfo
+	() {
+		return this.#systemUuniformsInfo
 	}
 
 	get WORK_SIZE_X(): number {
@@ -132,12 +140,13 @@ class ASinglePassPostEffect {
 		// console.log('Non-MSAA Shader Code:', computeCodes.nonMsaa);
 		// MSAA 정보 저장
 		const STORAGE_STRUCT = this.#SHADER_INFO_MSAA.storage;
-		const UNIFORM_STRUCT = this.#SHADER_INFO_MSAA.uniforms.uniforms;
+		const UNIFORM_STRUCT = this.#SHADER_INFO_MSAA.uniforms;
 		this.#storageInfo = STORAGE_STRUCT
-		this.#uniformInfo = UNIFORM_STRUCT
+		this.#uniformsInfo = UNIFORM_STRUCT.uniforms
+		this.#systemUuniformsInfo = UNIFORM_STRUCT.systemUniforms
 		// UniformBuffer는 구조가 동일하므로 하나만 생성 (Non-MSAA 기준)
-		if (UNIFORM_STRUCT) {
-			const uniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength)
+		if (this.#uniformsInfo) {
+			const uniformData = new ArrayBuffer(this.#uniformsInfo.arrayBufferByteLength)
 			this.#uniformBuffer = new UniformBuffer(
 				redGPUContext,
 				uniformData,
@@ -168,13 +177,19 @@ class ASinglePassPostEffect {
 		const {redGPUContext} = view
 		if (dimensionsChanged || msaaChanged || sourceTextureChanged) {
 			const currentStorageInfo = this.storageInfo;
-			const currentUniformInfo = this.uniformInfo;
+			const currentUniformsInfo = this.uniformsInfo
+			const currentSystemUniformsInfo = this.systemUuniformsInfo
+			;
 			this.#computeBindGroupEntries0 = []
 			this.#computeBindGroupEntries1 = []
 			// Group 0: source textures (outputTexture 제외)
+			// keepLog('info', this.#SHADER_INFO_MSAA)
+			// keepLog('info', this.#SHADER_INFO_MSAA.uniforms.systemUniforms)
+			// keepLog('info', currentUniformsInfo)
 			for (const k in currentStorageInfo) {
 				const info = currentStorageInfo[k]
 				const {binding, name} = info
+				// keepLog('info', name, binding, info, sourceTextureView)
 				if (name !== 'outputTexture') {
 					this.#computeBindGroupEntries0.push(
 						{
@@ -189,7 +204,6 @@ class ASinglePassPostEffect {
 				binding: 0,
 				resource: targetOutputView,
 			})
-			console.log('this.#computeBindGroupEntries0', this.#computeBindGroupEntries0, this.#computeBindGroupEntries1)
 			// Group 0에 추가 리소스들 (depth, sampler, uniform)
 			this.shaderInfo.textures.forEach(texture => {
 				const {name, binding} = texture
@@ -200,10 +214,23 @@ class ASinglePassPostEffect {
 					})
 				}
 			})
+			// keepLog('info this.#computeBindGroupEntries0', this.#computeBindGroupEntries0, this.#computeBindGroupEntries1)
 			// uniform buffer는 마지막에 추가
-			if (this.#uniformBuffer && currentUniformInfo) {
+			if (currentSystemUniformsInfo) {
+				this.#computeBindGroupEntries1.push(
+					{
+						binding: currentSystemUniformsInfo.binding,
+						resource: {
+							buffer: view.postEffectManager.postEffectSystemUniformBuffer.gpuBuffer,
+							offset: 0,
+							size: view.postEffectManager.postEffectSystemUniformBuffer.size
+						}
+					}
+				)
+			}
+			if (this.#uniformBuffer && currentUniformsInfo) {
 				this.#computeBindGroupEntries1.push({
-					binding: currentUniformInfo.binding,
+					binding: currentUniformsInfo.binding,
 					resource: {
 						buffer: this.#uniformBuffer.gpuBuffer,
 						offset: 0,
@@ -250,7 +277,8 @@ class ASinglePassPostEffect {
 	}
 
 	updateUniform(key: string, value: number | number[] | boolean) {
-		this.uniformBuffer.writeBuffer(this.uniformInfo.members[key], value)
+		this.uniformBuffer.writeBuffer(this.uniformsInfo
+			.members[key], value)
 	}
 
 	#detectSourceTextureChange(sourceTextureView: GPUTextureView[]): boolean {
@@ -274,7 +302,7 @@ class ASinglePassPostEffect {
 		const {colorTexture} = viewRenderTextureManager
 		const {gpuDevice} = redGPUContext
 		const {width, height} = colorTexture
-		const needChange = width !== this.#prevInfo?.width || height !== this.#prevInfo?.height
+		const needChange = width !== this.#prevInfo?.width || height !== this.#prevInfo?.height || this.#outputTexture.length === 0;
 		if (needChange) {
 			this.clear()
 			const newTexture = gpuDevice.createTexture({

@@ -61,7 +61,7 @@ class Renderer {
 	}
 
 	renderView(view: View3D, time: number) {
-		const {redGPUContext, camera, scene, pickingManager, pixelRectObject, axis, grid, debugViewRenderState} = view
+		const {redGPUContext, camera, scene, pickingManager, pixelRectObject, axis, grid,skybox, debugViewRenderState} = view
 		const {antialiasingManager} = redGPUContext
 		const {useMSAA} = antialiasingManager
 		const {shadowManager} = scene
@@ -99,7 +99,10 @@ class Renderer {
 			{
 				const viewRenderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass(renderPassDescriptor)
 				this.#updateViewSystemUniforms(view, viewRenderPassEncoder, false, true)
+				debugViewRenderState.currentRenderPassEncoder = viewRenderPassEncoder
+				if (skybox) skybox.render(debugViewRenderState)
 				renderBasicLayer(view, viewRenderPassEncoder)
+
 				if (axis) axis.render(debugViewRenderState)
 				if (grid) grid.render(debugViewRenderState)
 				renderAlphaLayer(view, viewRenderPassEncoder)
@@ -146,7 +149,7 @@ class Renderer {
 						},
 					});
 					let renderPath1ResultTextureView = view.viewRenderTextureManager.renderPath1ResultTextureView
-					this.#updateViewSystemUniforms(view, renderPassEncoder, false, true, renderPath1ResultTextureView);
+					this.#updateViewSystemUniforms(view, renderPassEncoder, false, false, renderPath1ResultTextureView);
 					// 예제에서 주어진 렌더링 로직 실행
 					render2PathLayer(view, renderPassEncoder);
 					renderPassEncoder.end(); // 첫 번째 패스 종료

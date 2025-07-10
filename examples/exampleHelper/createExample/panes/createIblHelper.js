@@ -7,6 +7,8 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
 		hdrImage: hdrImages[0].path,
 		useLight: false,
 		useIBL: true,
+		blur: 0,
+		opacity: 1,
 		...option
 	};
 
@@ -42,7 +44,7 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
 				.map(path => path)
 				.join('\n');
 		} else {
-			pathInfo.finalPath =src;
+			pathInfo.finalPath = src;
 		}
 
 		// 기존 바인딩 제거 후 새로운 바인딩 생성
@@ -61,6 +63,7 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
 			multiline: isMultiline,
 			rows: rows
 		});
+
 	};
 
 	const createIBL = (view, src) => {
@@ -82,6 +85,8 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
 		const skybox = new RedGPU.Display.SkyBox(view.redGPUContext, ibl.environmentTexture);
 		view.ibl = ibl;
 		view.skybox = skybox;
+		view.skybox.blur = settings.blur;
+		view.skybox.opacity = settings.opacity;
 	};
 
 	const handleLightToggle = (enabled) => {
@@ -113,7 +118,6 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
 		return acc;
 	}, {});
 
-
 	folder.addBinding(settings, 'useLight').on('change', (ev) => {
 		handleLightToggle(ev.value);
 	});
@@ -133,6 +137,22 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
 
 	if (settings.useIBL) createIBL(view, hdrImages[0].path);
 	if (settings.useLight) handleLightToggle(settings.useLight);
+
+	const skybox = pane.addFolder({title: 'SkyBox', expanded: true});
+	skybox.addBinding(settings, 'blur', {
+		min: 0,
+		max: 1,
+		step: 0.01
+	}).on("change", (ev) => {
+		view.skybox.blur = ev.value;
+	})
+	skybox.addBinding(settings, 'opacity', {
+		min: 0,
+		max: 1,
+		step: 0.01
+	}).on("change", (ev) => {
+		view.skybox.opacity = ev.value;
+	})
 };
 
 export default createIblHelper;

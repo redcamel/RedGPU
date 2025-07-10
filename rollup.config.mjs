@@ -75,7 +75,6 @@ function removeSpacesAndTabs() {
 		}
 	};
 }
-
 function stringWgsl() {
 	const filter = createFilter('**/*.wgsl');
 	return {
@@ -83,7 +82,16 @@ function stringWgsl() {
 		transform(code, id) {
 			if (filter(id)) {
 				let newCode = code
+					// 블록 주석 제거 (/* */)
+					.replace(/\/\*[\s\S]*?\*\//g, '')
+					// 라인 주석 제거 (//)
 					.replace(/\/\/.*/g, '')
+					// 캐리지 리턴 제거
+					.replace(/\r/g, '')
+					// 연속된 개행문자를 하나로 치환
+					.replace(/\n\s*\n/g, '\n')
+					// 연속된 공백을 하나로 치환
+					.replace(/[ \t]+/g, ' ')
 				newCode = JSON.stringify(newCode)
 				return {
 					code: `export default ${newCode};`,

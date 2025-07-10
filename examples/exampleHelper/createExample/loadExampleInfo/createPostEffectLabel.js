@@ -1,10 +1,10 @@
-const createPostEffectLabel = (title, isMobile) => {
+const createPostEffectLabel = (title, isMobile,normalTitle = 'Normal') => {
 
 	const exampleContainer = document.querySelector('#example-container')
 	const normalLabel = document.createElement('label');
 	const effectLabel = document.createElement('label');
 
-	normalLabel.innerHTML = 'Normal';
+	normalLabel.innerHTML = normalTitle
 	effectLabel.innerHTML = title;
 
 	const baseStyle = 'position:absolute;bottom:0;display:flex;align-items:center:justify-content:center;padding:12px;background:#5b52aa'

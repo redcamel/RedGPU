@@ -15,7 +15,7 @@ RedGPU.init(
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		redGPUContext.addView(view);
 
-		loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/SheenTestGrid/glTF/SheenTestGrid.gltf');
+		loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/SheenTestGrid/glTF-Binary/SheenTestGrid.glb');
 
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		const render = () => {};

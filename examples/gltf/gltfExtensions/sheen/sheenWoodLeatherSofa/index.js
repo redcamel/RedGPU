@@ -23,7 +23,7 @@ RedGPU.init(
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		redGPUContext.addView(view);
 
-		loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/SheenWoodLeatherSofa/glTF/SheenWoodLeatherSofa.gltf',);
+		loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/SheenWoodLeatherSofa/glTF-Binary/SheenWoodLeatherSofa.glb',);
 
 		// Create a renderer and start rendering
 		// 렌더러 생성 후 렌더링 시작

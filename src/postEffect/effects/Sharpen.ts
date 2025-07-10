@@ -1,7 +1,7 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
 import AMultiPassPostEffect from "../core/AMultiPassPostEffect";
-import Convolution from "./Convolution";
+import Convolution from "./convolution/Convolution";
 
 class Sharpen extends AMultiPassPostEffect {
 	#effect_convolution: Convolution

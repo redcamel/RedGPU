@@ -3,7 +3,6 @@ import GPU_ADDRESS_MODE from "../../../gpuConst/GPU_ADDRESS_MODE";
 import GPU_FILTER_MODE from "../../../gpuConst/GPU_FILTER_MODE";
 import GPU_MIPMAP_FILTER_MODE from "../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
-import {keepLog} from "../../../utils";
 import createUUID from "../../../utils/createUUID";
 import Sampler from "../../sampler/Sampler";
 import CubeTexture from "../CubeTexture";
@@ -16,11 +15,15 @@ class IBL {
 	//
 	#environmentTexture: CubeTexture;
 	#irradianceTexture: CubeTexture;
+	#iblTexture:CubeTexture
 	#prefilterMap: GPUTexture; //TODO - 일단없어도되니 나중에
 	#brdfLUT: GPUTexture; //TODO - 일단없어도되니 나중에
 	#uuid = createUUID()
 	#format: GPUTextureFormat = 'rgba8unorm'
 	#targetTexture: HDRTexture | CubeTexture
+
+	#envCubeSize:number
+	#iblCubeSize:number
 
 	get exposure(): number {
 		if (this.#targetTexture instanceof HDRTexture) return this.#targetTexture.exposure
@@ -33,9 +36,13 @@ class IBL {
 		}
 	}
 
-	constructor(redGPUContext: RedGPUContext, srcInfo: string | [string, string, string, string, string, string], cubeSize: number = 1024) {
+	constructor(redGPUContext: RedGPUContext, srcInfo: string | [string, string, string, string, string, string],
+	            envCubeSize: number = 1024,iblCubeSize:number = 512) {
+		this.#iblCubeSize = iblCubeSize
+		this.#envCubeSize = envCubeSize
 		this.#redGPUContext = redGPUContext
 		this.#environmentTexture = new CubeTexture(redGPUContext, [], false, undefined, undefined, this.#format)
+		this.#iblTexture = new CubeTexture(redGPUContext, [], false, undefined, undefined, this.#format)
 		this.#irradianceTexture = new CubeTexture(redGPUContext, [], false, undefined, undefined, this.#format)
 		if (typeof srcInfo === 'string') {
 			this.#targetTexture = new HDRTexture(
@@ -46,7 +53,7 @@ class IBL {
 					this.#init()
 				},
 				undefined,
-				cubeSize,
+				envCubeSize,
 				true
 			);
 		} else {
@@ -62,6 +69,14 @@ class IBL {
 		}
 	}
 
+	get envCubeSize(): number {
+		return this.#envCubeSize;
+	}
+
+	get iblCubeSize(): number {
+		return this.#iblCubeSize;
+	}
+
 	get irradianceTexture(): CubeTexture {
 		return this.#irradianceTexture;
 	}
@@ -70,9 +85,18 @@ class IBL {
 		return this.#environmentTexture;
 	}
 
+	get iblTexture(): CubeTexture {
+		return this.#iblTexture;
+	}
+
 	async #init() {
 		console.log('sourceCubeTexture', this.#sourceCubeTexture)
+		const {mipmapGenerator} = this.#redGPUContext.resourceManager
+		const iblTexture = await mipmapGenerator.downsampleCubemap(this.#sourceCubeTexture, this.#iblCubeSize)
+		this.#iblTexture.setGPUTextureDirectly(iblTexture, `${this.#uuid}_iblTexture`)
+
 		this.#environmentTexture.setGPUTextureDirectly(this.#sourceCubeTexture, `${this.#uuid}_environmentTexture`)
+
 		const irradianceGPUTexture = await this.#generateIrradianceMap(this.#sourceCubeTexture);
 		this.#irradianceTexture.setGPUTextureDirectly(irradianceGPUTexture, `${this.#uuid}_irradianceTexture`, false);
 	}

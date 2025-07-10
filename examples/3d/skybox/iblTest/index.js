@@ -38,11 +38,11 @@ RedGPU.init(
 		renderer.start(redGPUContext, () => {});
 
 		loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/EnvironmentTest/glTF/EnvironmentTest.gltf');
-		loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/TransmissionTest/glTF/TransmissionTest.gltf');
-		loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/GlassHurricaneCandleHolder/glTF/GlassHurricaneCandleHolder.gltf');
-		loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MosquitoInAmber/glTF/MosquitoInAmber.gltf');
-		loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ClearcoatWicker/glTF/ClearcoatWicker.gltf');
-		loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Corset/glTF/Corset.gltf');
+		loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/TransmissionTest/glTF-Binary/TransmissionTest.glb');
+		loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/GlassHurricaneCandleHolder/glTF-Binary/GlassHurricaneCandleHolder.glb');
+		loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MosquitoInAmber/glTF-Binary/MosquitoInAmber.glb');
+		loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ClearcoatWicker/glTF-Binary/ClearcoatWicker.glb');
+		loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Corset/glTF-Binary/Corset.glb');
 
 		renderTestPane(view);
 	},
@@ -53,13 +53,6 @@ RedGPU.init(
 		document.body.appendChild(errorMessage);
 	}
 );
-
-const createIBL = (view, src) => {
-	const ibl = new RedGPU.Resource.IBL(view.redGPUContext, src);
-	const newSkybox = new RedGPU.Display.SkyBox(view.redGPUContext, ibl.environmentTexture);
-	view.ibl = ibl;
-	view.skybox = newSkybox;
-};
 
 function loadGLTF(view, url) {
 	const {redGPUContext, scene} = view;
@@ -111,13 +104,36 @@ function loadGLTF(view, url) {
 		}
 	);
 }
+const createIBL = (view, src) => {
+	const ibl = new RedGPU.Resource.IBL(view.redGPUContext, src);
+	const newSkybox = new RedGPU.Display.SkyBox(view.redGPUContext, ibl.environmentTexture);
+	view.ibl = ibl;
+	view.skybox = newSkybox;
+};
 
 const renderTestPane = async (view) => {
 	const {Pane} = await import( "https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js" );
 	const pane = new Pane();
 	const {createFieldOfView} = await import( "../../../exampleHelper/createExample/panes/index.js" );
 	createFieldOfView(pane, view.camera)
-
+	const TEST_DATA = {
+		blur : 0,
+		opacity:1
+	}
+	pane.addBinding(TEST_DATA, 'blur', {
+		min:0,
+		max:1,
+		step:0.01
+	}).on("change", (ev) => {
+		view.skybox.blur = ev.value;
+	})
+	pane.addBinding(TEST_DATA, 'opacity', {
+		min:0,
+		max:1,
+		step:0.01
+	}).on("change", (ev) => {
+		view.skybox.opacity = ev.value;
+	})
 	const settings = {
 		hdrImage: hdrImages[0].path
 	};
@@ -129,5 +145,7 @@ const renderTestPane = async (view) => {
 		}, {})
 	}).on("change", (ev) => {
 		createIBL(view, ev.value);
+		view.skybox.blur = TEST_DATA.blur
+		view.skybox.opacity = TEST_DATA.opacity
 	});
 };

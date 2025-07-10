@@ -1,7 +1,7 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import View3D from "../../../display/view/View3D";
 import AMultiPassPostEffect from "../../core/AMultiPassPostEffect";
-import Threshold from "../adjustments/Threshold";
+import Threshold from "../adjustments/threshold/Threshold";
 import GaussianBlur from "../blur/GaussianBlur";
 import OldBloomBlend from "./OldBloomBlend";
 

@@ -15,7 +15,7 @@ RedGPU.init(
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		redGPUContext.addView(view);
 
-		loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CompareAmbientOcclusion/glTF/CompareAmbientOcclusion.gltf');
+		loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CompareAmbientOcclusion/glTF-Binary/CompareAmbientOcclusion.glb');
 
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		const render = () => {};

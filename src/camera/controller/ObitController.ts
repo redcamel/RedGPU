@@ -160,7 +160,7 @@ class ObitController extends AController {
 	}
 
 	set delayDistance(value: number) {
-		validateNumberRange(value, 0.01, 0.99);
+		validateNumberRange(value, 0.01, 1);
 		this.#delayDistance = value;
 	}
 
@@ -178,7 +178,7 @@ class ObitController extends AController {
 	}
 
 	set delayRotation(value: number) {
-		validateNumberRange(value, 0.01, 0.99);
+		validateNumberRange(value, 0.01, 1);
 		this.#delayRotation = value;
 	}
 
