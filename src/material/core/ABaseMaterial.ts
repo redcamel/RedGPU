@@ -13,6 +13,7 @@ import Sampler from "../../resources/sampler/Sampler";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import CubeTexture from "../../resources/texture/CubeTexture";
 import PackedTexture from "../../resources/texture/PackedTexture";
+import {keepLog} from "../../utils";
 import TINT_BLEND_MODE from "../TINT_BLEND_MODE";
 import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "./getBindGroupLayoutDescriptorFromShaderInfo";
 
@@ -159,6 +160,7 @@ class ABaseMaterial extends ResourceBase {
 		)
 		this.gpuRenderInfo = new FragmentGPURenderInfo(
 			shaderModule,
+			this.#SHADER_INFO.shaderSourceVariant,
 			this.#UNIFORM_STRUCT,
 			this.#bindGroupLayout,
 			uniformBuffer,
@@ -169,8 +171,87 @@ class ABaseMaterial extends ResourceBase {
 		this._updateFragmentState()
 	}
 
+	/**
+	 * 🎯 현재 머티리얼 상태에 따른 바리안트 키 생성
+	 */
+	/**
+	 * 🎯 현재 머티리얼 상태와 일치하는 바리안트 키 찾기
+	 */
+	 #findMatchingVariantKey(): string {
+		const availableVariants = Object.keys(this.gpuRenderInfo.fragmentShaderSourceVariant);
+		// 🎯 현재 활성화된 기능들 확인
+		const activeFeatures = new Set<string>();
+		// 텍스처 사용 여부 확인
+		for (const k in this.#TEXTURE_STRUCT) {
+			const info = this.#TEXTURE_STRUCT[k];
+			const {name:usePropertyName} = info;
+			// use로 시작하는 프로퍼티 확인
+			keepLog(usePropertyName,!!this[usePropertyName] )
+			if (this[usePropertyName]) {
+				activeFeatures.add(usePropertyName);
+			}
+		}
+		keepLog('activeFeatures',activeFeatures,this)
+		// 🎯 가장 적합한 바리안트 키 찾기
+		let bestMatch = 'none'; // 기본값
+		let bestScore = -1;
+		for (const variantKey of availableVariants) {
+			const variantFeatures = variantKey === 'none' ? [] : variantKey.split('_');
+			const variantFeaturesSet = new Set(variantFeatures);
+			// 🎯 정확히 일치하는 경우
+			if (this.#setsEqual(activeFeatures, variantFeaturesSet)) {
+				keepLog('🎯 완전 일치하는 바리안트 발견:', variantKey);
+				return variantKey;
+			}
+			// 🎯 부분 일치 점수 계산 (나중에 필요한 경우)
+			const intersection = new Set([...activeFeatures].filter(x => variantFeaturesSet.has(x)));
+			const score = intersection.size - Math.abs(activeFeatures.size - variantFeaturesSet.size);
+			if (score > bestScore) {
+				bestScore = score;
+				bestMatch = variantKey;
+			}
+		}
+		keepLog('🎯 선택된 바리안트:', bestMatch, '(활성 기능:', Array.from(activeFeatures), ')');
+		return bestMatch;
+	}
+
+	/**
+	 * 🎯 두 Set이 동일한지 확인
+	 */
+	 #setsEqual(a: Set<string>, b: Set<string>): boolean {
+		return a.size === b.size && [...a].every(x => b.has(x));
+	}
+
+	#checkVariant() {
+		const {gpuDevice, resourceManager} = this.redGPUContext
+		// 🎯 현재 머티리얼 상태에 맞는 바리안트 키 찾기
+		const currentVariantKey = this.#findMatchingVariantKey();
+		// 🎯 바리안트별 셰이더 모듈 확인/생성
+		const variantShaderModuleName = `${this.#FRAGMENT_SHADER_MODULE_NAME}_${currentVariantKey}`;
+		let targetShaderModule = resourceManager.getGPUShaderModule(variantShaderModuleName);
+		if (!targetShaderModule) {
+			// 🎯 바리안트 소스 코드 가져오기
+			const variantSource = this.gpuRenderInfo.fragmentShaderSourceVariant[currentVariantKey];
+			if (variantSource) {
+				console.log('🎯 바리안트 셰이더 모듈 생성:', currentVariantKey);
+				targetShaderModule = resourceManager.createGPUShaderModule(
+					variantShaderModuleName,
+					{code: variantSource}
+				);
+			} else {
+				console.warn('⚠️ 바리안트 소스를 찾을 수 없음:', currentVariantKey);
+				targetShaderModule = this.gpuRenderInfo.fragmentShaderModule; // 기본값 사용
+			}
+		} else {
+			console.log('🚀 바리안트 셰이더 모듈 캐시 히트:', currentVariantKey);
+		}
+		// 🎯 셰이더 모듈 업데이트
+		this.gpuRenderInfo.fragmentShaderModule = targetShaderModule;
+	}
+
 	_updateFragmentState() {
-		const {gpuDevice} = this.redGPUContext
+		const {gpuDevice, resourceManager} = this.redGPUContext
+		this.#checkVariant()
 		const entries: GPUBindGroupEntry[] = []
 		// for (const k in this.#storageInfo) {
 		// 	const info = this.#storageInfo[k]
@@ -236,6 +317,7 @@ class ABaseMaterial extends ResourceBase {
 		const fragmentUniformBindGroup: GPUBindGroup = gpuDevice.createBindGroup(bindGroupDescriptor)
 		this.gpuRenderInfo.fragmentState = this.getFragmentRenderState()
 		this.gpuRenderInfo.fragmentUniformBindGroup = fragmentUniformBindGroup
+		keepLog(this.gpuRenderInfo)
 	}
 
 	getFragmentRenderState(entryPoint: string = 'main'): GPUFragmentState {

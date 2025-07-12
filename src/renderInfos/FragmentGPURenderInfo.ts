@@ -5,6 +5,7 @@ import UniformBuffer from "../resources/buffer/uniformBuffer/UniformBuffer";
  */
 class FragmentGPURenderInfo {
 	fragmentShaderModule: GPUShaderModule;
+	fragmentShaderSourceVariant:Record<string, string>;
 	fragmentUniformInfo: any;
 	fragmentBindGroupLayout: GPUBindGroupLayout;
 	fragmentUniformBuffer: UniformBuffer;
@@ -13,6 +14,7 @@ class FragmentGPURenderInfo {
 
 	constructor(
 		fragmentShaderModule: GPUShaderModule,
+		fragmentShaderSourceVariant:Record<string, string>,
 		fragmentUniformInfo: any,
 		fragmentBindGroupLayout: GPUBindGroupLayout,
 		fragmentUniformBuffer: UniformBuffer,
@@ -20,6 +22,7 @@ class FragmentGPURenderInfo {
 		fragmentState?: GPUFragmentState
 	) {
 		this.fragmentShaderModule = fragmentShaderModule;
+		this.fragmentShaderSourceVariant = fragmentShaderSourceVariant;
 		this.fragmentUniformInfo = fragmentUniformInfo;
 		this.fragmentBindGroupLayout = fragmentBindGroupLayout;
 		this.fragmentUniformBuffer = fragmentUniformBuffer;
