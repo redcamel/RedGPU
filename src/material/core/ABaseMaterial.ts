@@ -161,6 +161,7 @@ class ABaseMaterial extends ResourceBase {
 		this.gpuRenderInfo = new FragmentGPURenderInfo(
 			shaderModule,
 			this.#SHADER_INFO.shaderSourceVariant,
+			this.#SHADER_INFO.conditionalBlocks,
 			this.#UNIFORM_STRUCT,
 			this.#bindGroupLayout,
 			uniformBuffer,
@@ -171,39 +172,39 @@ class ABaseMaterial extends ResourceBase {
 		this._updateFragmentState()
 	}
 
-	/**
-	 * 🎯 현재 머티리얼 상태에 따른 바리안트 키 생성
-	 */
-	/**
-	 * 🎯 현재 머티리얼 상태와 일치하는 바리안트 키 찾기
-	 */
-	 #findMatchingVariantKey(): string {
-		const availableVariants = Object.keys(this.gpuRenderInfo.fragmentShaderSourceVariant);
-		// 🎯 현재 활성화된 기능들 확인
+	#findMatchingVariantKey(): string {
+		const {fragmentShaderVariantConditionalBlocks, fragmentShaderSourceVariant} = this.gpuRenderInfo;
+		const availableVariants = Object.keys(fragmentShaderSourceVariant);
+
+		// 🎯 현재 활성화된 기능들 확인 (fragmentShaderVariantConditionalBlocks 기반)
 		const activeFeatures = new Set<string>();
-		// 텍스처 사용 여부 확인
-		for (const k in this.#TEXTURE_STRUCT) {
-			const info = this.#TEXTURE_STRUCT[k];
-			const {name:usePropertyName} = info;
-			// use로 시작하는 프로퍼티 확인
-			keepLog(usePropertyName,!!this[usePropertyName] )
-			if (this[usePropertyName]) {
-				activeFeatures.add(usePropertyName);
+
+		// 실제 셰이더에서 발견된 조건부 블록들만 체크
+		for (const uniformName of fragmentShaderVariantConditionalBlocks) {
+			keepLog(uniformName, !!this[uniformName]);
+			if (this[uniformName]) {
+				activeFeatures.add(uniformName);
 			}
 		}
-		keepLog('activeFeatures',activeFeatures,this)
+
+		keepLog('fragmentShaderVariantConditionalBlocks', fragmentShaderVariantConditionalBlocks);
+		keepLog('activeFeatures', activeFeatures, this);
+
 		// 🎯 가장 적합한 바리안트 키 찾기
-		let bestMatch = 'none'; // 기본값
+		let bestMatch = 'none';
 		let bestScore = -1;
+
 		for (const variantKey of availableVariants) {
-			const variantFeatures = variantKey === 'none' ? [] : variantKey.split('_');
+			const variantFeatures = variantKey === 'none' ? [] : variantKey.split('+');
 			const variantFeaturesSet = new Set(variantFeatures);
+
 			// 🎯 정확히 일치하는 경우
 			if (this.#setsEqual(activeFeatures, variantFeaturesSet)) {
 				keepLog('🎯 완전 일치하는 바리안트 발견:', variantKey);
 				return variantKey;
 			}
-			// 🎯 부분 일치 점수 계산 (나중에 필요한 경우)
+
+			// 🎯 부분 일치 점수 계산
 			const intersection = new Set([...activeFeatures].filter(x => variantFeaturesSet.has(x)));
 			const score = intersection.size - Math.abs(activeFeatures.size - variantFeaturesSet.size);
 			if (score > bestScore) {
@@ -211,6 +212,7 @@ class ABaseMaterial extends ResourceBase {
 				bestMatch = variantKey;
 			}
 		}
+
 		keepLog('🎯 선택된 바리안트:', bestMatch, '(활성 기능:', Array.from(activeFeatures), ')');
 		return bestMatch;
 	}
@@ -218,7 +220,7 @@ class ABaseMaterial extends ResourceBase {
 	/**
 	 * 🎯 두 Set이 동일한지 확인
 	 */
-	 #setsEqual(a: Set<string>, b: Set<string>): boolean {
+	#setsEqual(a: Set<string>, b: Set<string>): boolean {
 		return a.size === b.size && [...a].every(x => b.has(x));
 	}
 

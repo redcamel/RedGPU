@@ -192,12 +192,10 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
 
     // Base Color
     let u_baseColorFactor = uniforms.baseColorFactor;
-    let u_useBaseColorTexture = uniforms.useBaseColorTexture == 1u;
 
     // Metallic-Roughness
     let u_metallicFactor = uniforms.metallicFactor;
     let u_roughnessFactor = uniforms.roughnessFactor;
-    let u_useMetallicRoughnessTexture = uniforms.useMetallicRoughnessTexture == 1u;
 
     // Normal Map
     let u_useNormalTexture = uniforms.useNormalTexture == 1u;
@@ -504,11 +502,13 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     // Multiply vertex color if vertex colors are enabled
     baseColor *= select(vec4<f32>(1.0), input_vertexColor_0, u_useVertexColor);
     // baseColorTexture
-    if(u_useBaseColorTexture){
+
+    #redgpu_if useBaseColorTexture
        let diffuseSampleColor =  (textureSample(baseColorTexture, baseColorTextureSampler, diffuseUV));
        baseColor *= diffuseSampleColor;
        resultAlpha *= diffuseSampleColor.a;
-    }
+    #redgpu_endIf
+
     let albedo:vec3<f32> = baseColor.rgb ;
 
     // ---------- KHR_materials_unlit ----------
@@ -525,11 +525,11 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     // ---------- metallicRoughness ----------
     var metallicParameter: f32 = u_metallicFactor;
     var roughnessParameter: f32 = u_roughnessFactor;
-    if (u_useMetallicRoughnessTexture) {
+    #redgpu_if useMetallicRoughnessTexture
         let metallicRoughnessSample = (textureSample(packedORMTexture, packedTextureSampler, metallicRoughnessUV));
         metallicParameter = metallicRoughnessSample.b * metallicParameter;
         roughnessParameter = metallicRoughnessSample.g * roughnessParameter;
-    }
+    #redgpu_endIf
     roughnessParameter = max(roughnessParameter, 0.045);
     if (abs(ior - 1.0) < 0.0001) {
         roughnessParameter = 0;
@@ -579,14 +579,14 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     var specularColor = u_KHR_specularColorFactor;
 
     if(u_useKHR_materials_specular){
-        if(u_useKHR_specularColorTexture){
+        #redgpu_if useKHR_specularColorTexture
             let specularColorTextureSample = textureSample(
                 KHR_specularColorTexture,
                 KHR_specularColorTextureSampler,
                 KHR_specularColorTextureUV
             );
             specularColor *= specularColorTextureSample.rgb;
-        };
+        #redgpu_endIf
 
         if(u_useKHR_specularTexture){
             let specularTextureSample = textureSample(

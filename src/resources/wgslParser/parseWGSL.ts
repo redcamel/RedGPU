@@ -72,7 +72,7 @@ const processStorages = (storage) => {
 };
 const reflectCache = new Map<string, any>();
 const parseWGSL = (code: string) => {
-	const {defaultSource, shaderSourceVariant, cacheKey} = preprocessWGSL(code);
+	const {defaultSource, shaderSourceVariant, conditionalBlocks,cacheKey} = preprocessWGSL(code);
 	// 🎯 리플렉트 캐시 확인
 	const cachedReflect = reflectCache.get(cacheKey);
 	let reflectResult;
@@ -99,7 +99,8 @@ const parseWGSL = (code: string) => {
 	return {
 		...reflectResult,
 		defaultSource,
-		shaderSourceVariant
+		shaderSourceVariant,
+		conditionalBlocks
 	};
 };
 export default parseWGSL;

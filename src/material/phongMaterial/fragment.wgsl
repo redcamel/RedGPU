@@ -4,24 +4,17 @@
 #redgpu_include normalFunctions;
 #redgpu_include drawPicking;
 struct Uniforms {
-    useDiffuseTexture: u32,
     color: vec3<f32>,
     //
     emissiveColor: vec3<f32>,
     emissiveStrength:f32,
-    useEmissiveTexture: u32,
     //
     specularColor:vec3<f32>,
     specularStrength:f32,
-    useSpecularTexture: u32,
     shininess: f32,
     //
-    useAoTexture: u32,
     aoStrength:f32,
     //
-    useAlphaTexture: u32,
-    //
-    useNormalTexture: u32,
     normalScale:f32,
     //
     opacity: f32,
@@ -92,13 +85,7 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     let u_shininess = uniforms.shininess;
     let u_opacity = uniforms.opacity;
     let E = normalize(u_cameraPosition);
-    // Texture
-    let u_useDiffuseTexture = uniforms.useDiffuseTexture == 1;
-    let u_useAlphaTexture = uniforms.useAlphaTexture == 1;
-    let u_useSpecularTexture = uniforms.useSpecularTexture == 1;
-    let u_useEmissiveTexture = uniforms.useEmissiveTexture == 1;
-    let u_useAoTexture = uniforms.useAoTexture == 1;
-    let u_useNormalTexture = uniforms.useNormalTexture == 1;
+
     // Shadow
     let receiveShadowYn = inputData.receiveShadow != .0;
 
@@ -106,27 +93,26 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     //
 
     // Vertex Normal
-    var N = normalize(inputData.vertexNormal);
-    if(u_useNormalTexture){
+    var N = normalize(inputData.vertexNormal) * u_normalScale;
+    #redgpu_if normalTexture
         let normalSamplerColor = textureSample(normalTexture, normalTextureSampler, inputData.uv).rgb;
         N = perturb_normal( N, inputData.vertexPosition, inputData.uv, normalSamplerColor, u_normalScale ) ;
-    }else{
-        N = N * u_normalScale;
-    }
+    #redgpu_endIf
     //
     var finalColor:vec4<f32>;
     var resultAlpha:f32 = u_opacity * inputData.combinedOpacity;
     var diffuseColor:vec3<f32> = u_color;
-    if(u_useDiffuseTexture){
+
+    #redgpu_if diffuseTexture
         let diffuseSampleColor = textureSample(diffuseTexture,diffuseTextureSampler, inputData.uv);
         diffuseColor = diffuseSampleColor.rgb;
         resultAlpha = resultAlpha * diffuseSampleColor.a;
-    }
+    #redgpu_endIf
 
     var specularSamplerValue:f32 = 1;
-    if(u_useSpecularTexture){
+    #redgpu_if specularTexture
         specularSamplerValue = textureSample(specularTexture,specularTextureSampler, inputData.uv).r ;
-    }
+    #redgpu_endIf
     var mixColor:vec3<f32>;
 
     var visibility:f32 = 1.0;
@@ -231,23 +217,24 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
          let ls = u_specularColor * u_specularStrength * specular * specularAttenuation * u_clusterLightIntensity;
 
          mixColor += ld + ls;
-     }
+    }
 
 
-    if(u_useAlphaTexture){
+    #redgpu_if alphaTexture
         let alphaMapValue:f32 = textureSample(alphaTexture, alphaTextureSampler, inputData.uv).r;
         resultAlpha = alphaMapValue * resultAlpha;
-        if(resultAlpha == 0){
-            discard ;
-        }
-    }
+        if(resultAlpha == 0){ discard ; }
+    #redgpu_endIf
+    //
     var emissiveColor = u_emissiveColor  * u_emissiveStrength;
-    if(u_useEmissiveTexture){
+    #redgpu_if emissiveTexture
         emissiveColor = textureSample(emissiveTexture, emissiveTextureSampler, inputData.uv).rgb  * u_emissiveStrength;
-    }
-    if(u_useAoTexture){
+    #redgpu_endIf
+    //
+    #redgpu_if aoTexture
         mixColor = mixColor * textureSample(aoTexture, aoTextureSampler, inputData.uv).rgb * u_aoStrength;
-    }
+    #redgpu_endIf
+    //
     finalColor = vec4<f32>(mixColor + emissiveColor, resultAlpha);
     if(uniforms.useTint == 1u){
         finalColor = calcTintBlendMode(finalColor, uniforms.tintBlendMode, uniforms.tint);

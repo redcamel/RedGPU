@@ -149,7 +149,7 @@ const parseExtensionShaderCode = (source: string) => {
 		const {textureList, positiveNumberList} = v
 		const textureDefine = textureList?.map(textureName => {
 			return `
-				use${textureName.charAt(0).toUpperCase() + textureName.slice(1)}: u32,
+				use${textureName.charAt(0).toUpperCase()}${textureName.substring(1)}: u32,
     		${textureName}_texCoord_index: u32,
 				use_${textureName}_KHR_texture_transform: u32,
 				${textureName}_KHR_texture_transform_offset: vec2<f32>,
@@ -523,7 +523,7 @@ DefineForFragment.defineByPreset(PBRMaterial, [
 const defineTexture = (textureList: string[], useSampler: boolean) => {
 	textureList?.forEach(key => {
 		DefineForFragment.defineBoolean(PBRMaterial, [
-			`use_${key}`,
+			`use${key.charAt(0).toUpperCase()}${key.substring(1)}`
 		])
 		DefineForFragment.definePositiveNumber(PBRMaterial, [
 			[`${key}_KHR_texture_transform_rotation`, 0],

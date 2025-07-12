@@ -3,7 +3,6 @@
 #redgpu_include drawPicking;
 
 struct Uniforms {
-  useDiffuseTexture: u32,
   //
   opacity: f32,
   useTint:u32,

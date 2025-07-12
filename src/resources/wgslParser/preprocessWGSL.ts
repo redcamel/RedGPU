@@ -19,7 +19,7 @@ const defineValues = {
 } as const;
 const conditionalBlockPattern = /#redgpu_if\s+(\w+)\b([\s\S]*?)#redgpu_endIf/g;
 
-interface ConditionalBlock {
+ interface ConditionalBlock {
 	uniformName: string;
 	codeBlock: string;
 	fullMatch: string;
@@ -29,6 +29,7 @@ interface PreprocessedWGSLResult {
 	cacheKey: string;
 	defaultSource: string;
 	shaderSourceVariant: Record<string, string>;
+	conditionalBlocks: string[];
 }
 
 // 🎯 캐싱 시스템
@@ -45,6 +46,7 @@ const generateCodeHash = (code: string): string => {
 	}
 	return hash.toString(36);
 };
+
 const preprocessWGSL = (code: string): PreprocessedWGSLResult => {
 	// 🎯 캐시 확인
 	const cacheKey = generateCodeHash(code);
@@ -100,7 +102,7 @@ const preprocessWGSL = (code: string): PreprocessedWGSLResult => {
 			}
 		}
 		// 조합 키 생성
-		const variantKey = enabledBlocks.length > 0 ? enabledBlocks.join('_') : 'none';
+		const variantKey = enabledBlocks.length > 0 ? enabledBlocks.join('+') : 'none';
 		shaderSourceVariant[variantKey] = variantCode;
 	}
 	// 🎯 결과 생성
@@ -108,14 +110,14 @@ const preprocessWGSL = (code: string): PreprocessedWGSLResult => {
 		cacheKey,
 		defaultSource,           // 🎯 모든 조건부 블록 포함
 		shaderSourceVariant,     // 🎯 모든 조합 객체
+		conditionalBlocks : conditionalBlocks.map(v=>v.uniformName),
 	};
 	// 🎯 캐시에 저장
 	preprocessCache.set(cacheKey, result);
 	if (totalCombinations > 1) {
-		keepLog(`🎯 Variants 생성 완료 (캐시 저장):`, totalCombinations, cacheKey);
+		keepLog(`🎯 Variants 생성 완료 (캐시 저장):`, totalCombinations, cacheKey,result);
 		keepLog(result);
 	}
 	return result;
 };
 export default preprocessWGSL;
-export type {PreprocessedWGSLResult};
