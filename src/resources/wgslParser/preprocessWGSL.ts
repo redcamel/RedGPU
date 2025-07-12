@@ -26,6 +26,7 @@ interface ConditionalBlock {
 }
 
 interface PreprocessedWGSLResult {
+	cacheKey: string;
 	defaultSource: string;
 	shaderSourceVariant: Record<string, string>;
 }
@@ -104,6 +105,7 @@ const preprocessWGSL = (code: string): PreprocessedWGSLResult => {
 	}
 	// 🎯 결과 생성
 	const result: PreprocessedWGSLResult = {
+		cacheKey,
 		defaultSource,           // 🎯 모든 조건부 블록 포함
 		shaderSourceVariant,     // 🎯 모든 조합 객체
 	};
