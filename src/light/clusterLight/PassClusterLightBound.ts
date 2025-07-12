@@ -45,7 +45,7 @@ class PassClusterLightBound {
 
 	#initPipeLine() {
 		const {gpuDevice, resourceManager} = this.#redGPUContext;
-		const source = parseWGSL(PassLightClustersBoundSource).shaderSource;
+		const source = parseWGSL(PassLightClustersBoundSource).defaultSource;
 		this.#clusterBoundBuffer = gpuDevice.createBuffer({
 			size: PassClustersLightHelper.getTotalTileSize() * 32, // Cluster x, y, z size * 32 bytes per cluster. Why? It's to be verified.
 			usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST

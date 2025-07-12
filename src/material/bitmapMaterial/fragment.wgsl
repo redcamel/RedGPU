@@ -28,7 +28,11 @@ struct InputData {
 @fragment
 fn main(inputData: InputData) -> @location(0) vec4<f32> {
   // 텍스처 색상 샘플링
-  var finalColor: vec4<f32> = textureSample(diffuseTexture, diffuseTextureSampler, inputData.uv);
+  var finalColor: vec4<f32> = vec4<f32>(0.0);
+  #redgpu_if useDiffuseTexture
+  finalColor = textureSample(diffuseTexture, diffuseTextureSampler, inputData.uv);
+  #redgpu_endIf
+
   let alpha2D = select(finalColor.a, 1.0, systemUniforms.isView3D == 1u);
   finalColor = vec4<f32>(finalColor.rgb * alpha2D, finalColor.a * uniforms.opacity * inputData.combinedOpacity);
 

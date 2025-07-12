@@ -146,7 +146,7 @@ class ABaseMaterial extends ResourceBase {
 		const {resourceManager} = redGPUContext
 		const shaderModule = resourceManager.createGPUShaderModule(
 			this.#FRAGMENT_SHADER_MODULE_NAME,
-			{code: this.#SHADER_INFO.shaderSource}
+			{code: this.#SHADER_INFO.defaultSource}
 		)
 		// 데이터 작성
 		const uniformData = new ArrayBuffer(

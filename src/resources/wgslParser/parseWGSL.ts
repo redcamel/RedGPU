@@ -1,6 +1,7 @@
 import {WgslReflect} from "wgsl_reflect";
+import {keepLog} from "../../utils";
 import UniformType from "../buffer/core/type/UniformType";
-import parseIncludeWGSL from "./parseIncludeWGSL";
+import preprocessWGSL from "./preprocessWGSL";
 
 const createUniformMember = (curr, start, typeName) => {
 	const UniformTypeInfo = UniformType[typeName];
@@ -69,11 +70,11 @@ const processStorages = (storage) => {
 		return prev;
 	}, {});
 };
-const parseWGSL = (shaderSource: string) => {
-	const parsedSource = parseIncludeWGSL(shaderSource);
-	const reflect = new WgslReflect(parsedSource);
-	// console.log('reflect', reflect)
-	// console.log('parsedSource', parsedSource)
+const parseWGSL = (code: string) => {
+	const {defaultSource,shaderSourceVariant} = preprocessWGSL(code);
+	const reflect = new WgslReflect(defaultSource);
+	// keepLog('reflect', reflect)
+	// keepLog('defaultSource', defaultSource)
 	return {
 		uniforms: {...processUniforms(reflect.uniforms)},
 		storage: {...processStorages(reflect.storage)},
@@ -82,7 +83,9 @@ const parseWGSL = (shaderSource: string) => {
 		vertexEntries: reflect.entry.vertex.map(v => v.name),
 		fragmentEntries: reflect.entry.fragment.map(v => v.name),
 		computeEntries: reflect.entry.compute.map(v => v.name),
-		shaderSource: parsedSource
+		defaultSource,
+		shaderSourceVariant
+
 	};
 };
 export default parseWGSL;

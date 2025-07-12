@@ -1,7 +1,7 @@
-import parseIncludeWGSL from "./parseIncludeWGSL";
+import preprocessWGSL from "./preprocessWGSL";
 import parseWGSL from "./parseWGSL";
 
 export {
 	parseWGSL,
-	parseIncludeWGSL
+	preprocessWGSL
 }
