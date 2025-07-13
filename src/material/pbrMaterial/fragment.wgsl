@@ -184,7 +184,6 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
 
     // 유니폼 변수 뽑아서 저장
     let u_opacity = uniforms.opacity;
-    let u_doubleSided = uniforms.doubleSided == 1u;
     let u_cutOff = uniforms.cutOff;
     let u_useVertexColor = uniforms.useVertexColor == 1u;
     let u_useVertexTangent = uniforms.useVertexTangent == 1u;
@@ -197,7 +196,6 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     let u_roughnessFactor = uniforms.roughnessFactor;
 
     // Normal Map
-    let u_useNormalTexture = uniforms.useNormalTexture == 1u;
     let u_normalScale = uniforms.normalScale;
 
     // Occlusion
@@ -431,7 +429,7 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     // check vertexNormal
     var N:vec3<f32> = normalize(input_vertexNormal.xyz);
     var backFaceYn:bool = false;
-    if(u_doubleSided) {
+    #redgpu_if doubleSided
         var fdx:vec3<f32> = dpdx(input_vertexPosition);
         var fdy:vec3<f32> = dpdy(input_vertexPosition);
         var faceNormal:vec3<f32> = normalize(cross(fdy,fdx));
@@ -439,9 +437,11 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
             N = -N;
             backFaceYn = true;
         };
-    }
-    let N2 = N;
-    if(u_useNormalTexture){
+    #redgpu_endIf
+    N = N * u_normalScale;
+
+    #redgpu_if normalTexture
+    {
         var targetUv = select(normalUV, 1.0 - normalUV, backFaceYn);
         let normalSamplerColor = textureSample(normalTexture, normalTextureSampler, normalUV).rgb;
         N = perturb_normal(
@@ -452,9 +452,8 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
             u_normalScale
         ) ;
         N = select(N, select(N, -N, backFaceYn), u_useVertexTangent);
-    }else{
-        N = N * u_normalScale;
     }
+    #redgpu_endIf
     /////////////////////////////////////////////////////////////////////////////////
     // view direction vector
     let V: vec3<f32> = normalize(u_cameraPosition - input_vertexPosition);
@@ -704,7 +703,9 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     let F0_metal = baseColor.rgb; // 금속 반사율
     var F0 = mix(F0_dielectric, F0_metal, metallicParameter); // 기본 반사율
     #redgpu_if useKHR_materials_iridescence
-        F0 = iridescent_fresnel(1.0, u_KHR_iridescenceIor, F0, iridescenceThickness, iridescenceParameter, NdotV);
+        if (iridescenceParameter > 0.0) {
+            F0 = iridescent_fresnel(1.0, u_KHR_iridescenceIor, F0, iridescenceThickness, iridescenceParameter, NdotV);
+        }
     #redgpu_endIf
 
 
@@ -1271,242 +1272,103 @@ fn V_GGX_anisotropic( NdotL: f32, NdotV: f32, BdotV: f32, TdotV: f32, TdotL: f32
    let v = 0.5 / (GGXV + GGXL);
    return clamp(v, 0.0, 1.0);
 }
-
 fn iridescent_fresnel(outside_ior: f32, iridescence_ior: f32, base_f0: vec3<f32>,
                       iridescence_thickness: f32, iridescence_factor: f32, cos_theta1: f32) -> vec3<f32> {
-    // 두께가 0이면 기본 F0만 반환
+    // 조기 반환
     if (iridescence_thickness <= 0.0 || iridescence_factor <= 0.0) {
         return base_f0;
     }
 
-    // 입사각 코사인 절대값 (방향 무관)
     let cos_theta1_abs = abs(cos_theta1);
+    let safe_iridescence_ior = max(iridescence_ior, 1.01);
 
-    // 박막 IOR이 너무 낮을 때를 위한 보정
-    // 일반적인 물질의 최소 IOR은 약 1.0이지만,
-    // 안정적인 계산을 위해 최소 IOR 값을 설정
-    let min_ior = 1.01; // 최소 IOR 값
-    let safe_iridescence_ior = max(iridescence_ior, min_ior);
-
-    // 스넬의 법칙을 사용해 굴절각 계산
+    // 스넬의 법칙
     let sin_theta1 = sqrt(max(0.0, 1.0 - cos_theta1_abs * cos_theta1_abs));
     let sin_theta2 = (outside_ior / safe_iridescence_ior) * sin_theta1;
 
-    // 전반사 확인
     if (sin_theta2 >= 1.0) {
-                let total_reflection = vec3<f32>(1.0); // 전반사는 완전 반사
-                return base_f0 + iridescence_factor * (total_reflection - base_f0);
-
+        return base_f0 + iridescence_factor * (vec3<f32>(1.0) - base_f0);
     }
 
     let cos_theta2 = sqrt(max(0.0, 1.0 - sin_theta2 * sin_theta2));
 
-    // RGB 파장 대표값 (나노미터)
-    let wavelengths = vec3<f32>(650.0, 510.0, 475.0); // 표준 RGB 파장 범위
-
-    // 필름 두께가 너무 얇을 때 보정
-    // 물리적으로 실현 가능한 최소 두께(약 10nm) 이상으로 보장
-    let min_thickness = 10.0; // 나노미터 단위
-    let effective_thickness = max(iridescence_thickness, min_thickness);
-
-    // 물리적으로 정확한 광학 두께 계산
-    // 낮은 IOR에서도 충분한 위상 차이가 생기도록 스케일 조정
-    let ior_scale = max(1.0, 1.5 - 0.5 * (safe_iridescence_ior / 1.5)); // IOR이 낮을수록 스케일 증가
+    // 상수들 사전 계산
+    let wavelengths = vec3<f32>(650.0, 510.0, 475.0);
+    let effective_thickness = max(iridescence_thickness, 10.0);
+    let ior_scale = max(1.0, 1.5 - 0.5 * (safe_iridescence_ior / 1.5));
     let optical_thickness = 2.0 * effective_thickness * safe_iridescence_ior * cos_theta2 * ior_scale;
-
-    // 위상 계산 - 낮은 IOR에 더 민감하게 반응하도록 조정
     let phase = (2.0 * 3.14159265359 * optical_thickness) / wavelengths;
 
-    // 각 계면에서의 프레넬 계수 계산
-    // 공기/박막 계면
-    let r12_s = ((outside_ior * cos_theta1_abs) - (safe_iridescence_ior * cos_theta2)) /
-                ((outside_ior * cos_theta1_abs) + (safe_iridescence_ior * cos_theta2));
+    // 삼각함수 (한 번만)
+    let cos_phase = cos(phase);
+    let sin_phase = sin(phase);
 
-    let r12_p = ((safe_iridescence_ior * cos_theta1_abs) - (outside_ior * cos_theta2)) /
-                ((safe_iridescence_ior * cos_theta1_abs) + (outside_ior * cos_theta2));
+    // 공통 계산값들
+    let outside_cos1 = outside_ior * cos_theta1_abs;
+    let iridescence_cos2 = safe_iridescence_ior * cos_theta2;
+    let iridescence_cos1 = safe_iridescence_ior * cos_theta1_abs;
+    let outside_cos2 = outside_ior * cos_theta2;
 
-    let t12_s = 2.0 * outside_ior * cos_theta1_abs /
-                ((outside_ior * cos_theta1_abs) + (safe_iridescence_ior * cos_theta2));
+    // 프레넬 계수 (스칼라)
+    let r12_s = (outside_cos1 - iridescence_cos2) / (outside_cos1 + iridescence_cos2);
+    let r12_p = (iridescence_cos1 - outside_cos2) / (iridescence_cos1 + outside_cos2);
 
-    let t12_p = 2.0 * outside_ior * cos_theta1_abs /
-                ((safe_iridescence_ior * cos_theta1_abs) + (outside_ior * cos_theta2));
+    // 기본 F0에서 굴절률 추출 (벡터화)
+    let sqrt_f0 = sqrt(clamp(base_f0, vec3<f32>(0.01), vec3<f32>(0.99)));
+    let safe_n3 = max((1.0 + sqrt_f0) / (1.0 - sqrt_f0), vec3<f32>(1.2));
 
-    // 박막/기본 물질 계면
-    // 기본 F0에서 복소수 굴절률 근사 추출
-    let n3 = vec3<f32>(
-       (1.0 + sqrt(clamp(base_f0.r, 0.01, 0.99))) / (1.0 - sqrt(clamp(base_f0.r, 0.01, 0.99))),
-       (1.0 + sqrt(clamp(base_f0.g, 0.01, 0.99))) / (1.0 - sqrt(clamp(base_f0.g, 0.01, 0.99))),
-       (1.0 + sqrt(clamp(base_f0.b, 0.01, 0.99))) / (1.0 - sqrt(clamp(base_f0.b, 0.01, 0.99)))
-    );
+    // r23 계산 (벡터화)
+    let iridescence_cos2_vec = vec3<f32>(iridescence_cos2);
+    let cos_theta1_abs_vec = vec3<f32>(cos_theta1_abs);
+    let iridescence_cos1_vec = vec3<f32>(iridescence_cos1);
+    let cos_theta2_vec = vec3<f32>(cos_theta2);
 
-    // 안정성을 위해 최소값 보장
-    let safe_n3 = max(n3, vec3<f32>(1.2));
+    let r23_s = (iridescence_cos2_vec - safe_n3 * cos_theta1_abs_vec) /
+                (iridescence_cos2_vec + safe_n3 * cos_theta1_abs_vec);
+    let r23_p = (safe_n3 * cos_theta2_vec - iridescence_cos1_vec) /
+                (safe_n3 * cos_theta2_vec + iridescence_cos1_vec);
 
-    let r23_s = vec3<f32>(
-        ((safe_iridescence_ior * cos_theta2) - (safe_n3.r * cos_theta1_abs)) /
-        ((safe_iridescence_ior * cos_theta2) + (safe_n3.r * cos_theta1_abs)),
-        ((safe_iridescence_ior * cos_theta2) - (safe_n3.g * cos_theta1_abs)) /
-        ((safe_iridescence_ior * cos_theta2) + (safe_n3.g * cos_theta1_abs)),
-        ((safe_iridescence_ior * cos_theta2) - (safe_n3.b * cos_theta1_abs)) /
-        ((safe_iridescence_ior * cos_theta2) + (safe_n3.b * cos_theta1_abs))
-    );
+    // 복소수 계산을 위한 공통 값들
+    let r12_s_vec = vec3<f32>(r12_s);
+    let r12_p_vec = vec3<f32>(r12_p);
 
-    let r23_p = vec3<f32>(
-        ((safe_n3.r * cos_theta2) - (safe_iridescence_ior * cos_theta1_abs)) /
-        ((safe_n3.r * cos_theta2) + (safe_iridescence_ior * cos_theta1_abs)),
-        ((safe_n3.g * cos_theta2) - (safe_iridescence_ior * cos_theta1_abs)) /
-        ((safe_n3.g * cos_theta2) + (safe_iridescence_ior * cos_theta1_abs)),
-        ((safe_n3.b * cos_theta2) - (safe_iridescence_ior * cos_theta1_abs)) /
-        ((safe_n3.b * cos_theta2) + (safe_iridescence_ior * cos_theta1_abs))
-    );
+    // S-편광 복소수 계산
+    let num_s_real = r12_s_vec + r23_s * cos_phase;
+    let num_s_imag = r23_s * sin_phase;
+    let den_s_real = vec3<f32>(1.0) + r12_s_vec * r23_s * cos_phase;
+    let den_s_imag = r12_s_vec * r23_s * sin_phase;
 
-    // 복소수 지수항을 삼각함수로 분리
-    let cos_phase = vec3<f32>(cos(phase.r), cos(phase.g), cos(phase.b));
-    let sin_phase = vec3<f32>(sin(phase.r), sin(phase.g), sin(phase.b));
+    // P-편광 복소수 계산
+    let num_p_real = r12_p_vec + r23_p * cos_phase;
+    let num_p_imag = r23_p * sin_phase;
+    let den_p_real = vec3<f32>(1.0) + r12_p_vec * r23_p * cos_phase;
+    let den_p_imag = r12_p_vec * r23_p * sin_phase;
 
-    // 복소수를 실수부와 허수부로 분리 (복소수 대신 실수/허수 부분을 각각 계산)
-    // 분자의 실수부와 허수부
-    let numerator_s_real = vec3<f32>(
-        r12_s + r23_s.r * cos_phase.r,
-        r12_s + r23_s.g * cos_phase.g,
-        r12_s + r23_s.b * cos_phase.b
-    );
+    // 복소수 나눗셈 인라인 계산 (S-편광)
+    let den_s_squared = den_s_real * den_s_real + den_s_imag * den_s_imag + vec3<f32>(0.001);
+    let rs_real = (num_s_real * den_s_real + num_s_imag * den_s_imag) / den_s_squared;
+    let rs_imag = (num_s_imag * den_s_real - num_s_real * den_s_imag) / den_s_squared;
+    let Rs = rs_real * rs_real + rs_imag * rs_imag;
 
-    let numerator_s_imag = vec3<f32>(
-        r23_s.r * sin_phase.r,
-        r23_s.g * sin_phase.g,
-        r23_s.b * sin_phase.b
-    );
+    // 복소수 나눗셈 인라인 계산 (P-편광)
+    let den_p_squared = den_p_real * den_p_real + den_p_imag * den_p_imag + vec3<f32>(0.001);
+    let rp_real = (num_p_real * den_p_real + num_p_imag * den_p_imag) / den_p_squared;
+    let rp_imag = (num_p_imag * den_p_real - num_p_real * den_p_imag) / den_p_squared;
+    let Rp = rp_real * rp_real + rp_imag * rp_imag;
 
-    // 분모의 실수부와 허수부
-    let denominator_s_real = vec3<f32>(
-        1.0 + r12_s * r23_s.r * cos_phase.r,
-        1.0 + r12_s * r23_s.g * cos_phase.g,
-        1.0 + r12_s * r23_s.b * cos_phase.b
-    );
-
-    let denominator_s_imag = vec3<f32>(
-        r12_s * r23_s.r * sin_phase.r,
-        r12_s * r23_s.g * sin_phase.g,
-        r12_s * r23_s.b * sin_phase.b
-    );
-
-    // 복소수 나눗셈 (a+bi)/(c+di) 계산
-    // 분모 크기의 제곱: |c+di|^2 = c^2 + d^2
-    let denom_s_squared = vec3<f32>(
-        denominator_s_real.r * denominator_s_real.r + denominator_s_imag.r * denominator_s_imag.r,
-        denominator_s_real.g * denominator_s_real.g + denominator_s_imag.g * denominator_s_imag.g,
-        denominator_s_real.b * denominator_s_real.b + denominator_s_imag.b * denominator_s_imag.b
-    );
-
-    // 0으로 나누는 경우 방지를 위한 안전값 증가
-    let epsilon = 0.001;
-
-    // 결과의 실수부: (ac + bd)/(c^2 + d^2)
-    let r_s_real = vec3<f32>(
-        (numerator_s_real.r * denominator_s_real.r + numerator_s_imag.r * denominator_s_imag.r) /
-        (denom_s_squared.r + epsilon),
-        (numerator_s_real.g * denominator_s_real.g + numerator_s_imag.g * denominator_s_imag.g) /
-        (denom_s_squared.g + epsilon),
-        (numerator_s_real.b * denominator_s_real.b + numerator_s_imag.b * denominator_s_imag.b) /
-        (denom_s_squared.b + epsilon)
-    );
-
-    // 결과의 허수부: (bc - ad)/(c^2 + d^2)
-    let r_s_imag = vec3<f32>(
-        (numerator_s_imag.r * denominator_s_real.r - numerator_s_real.r * denominator_s_imag.r) /
-        (denom_s_squared.r + epsilon),
-        (numerator_s_imag.g * denominator_s_real.g - numerator_s_real.g * denominator_s_imag.g) /
-        (denom_s_squared.g + epsilon),
-        (numerator_s_imag.b * denominator_s_real.b - numerator_s_real.b * denominator_s_imag.b) /
-        (denom_s_squared.b + epsilon)
-    );
-
-    // P-편광에 대해서도 유사하게 계산
-    // 분자의 실수부와 허수부
-    let numerator_p_real = vec3<f32>(
-        r12_p + r23_p.r * cos_phase.r,
-        r12_p + r23_p.g * cos_phase.g,
-        r12_p + r23_p.b * cos_phase.b
-    );
-
-    let numerator_p_imag = vec3<f32>(
-        r23_p.r * sin_phase.r,
-        r23_p.g * sin_phase.g,
-        r23_p.b * sin_phase.b
-    );
-
-    // 분모의 실수부와 허수부
-    let denominator_p_real = vec3<f32>(
-        1.0 + r12_p * r23_p.r * cos_phase.r,
-        1.0 + r12_p * r23_p.g * cos_phase.g,
-        1.0 + r12_p * r23_p.b * cos_phase.b
-    );
-
-    let denominator_p_imag = vec3<f32>(
-        r12_p * r23_p.r * sin_phase.r,
-        r12_p * r23_p.g * sin_phase.g,
-        r12_p * r23_p.b * sin_phase.b
-    );
-
-    // 분모 크기의 제곱
-    let denom_p_squared = vec3<f32>(
-        denominator_p_real.r * denominator_p_real.r + denominator_p_imag.r * denominator_p_imag.r,
-        denominator_p_real.g * denominator_p_real.g + denominator_p_imag.g * denominator_p_imag.g,
-        denominator_p_real.b * denominator_p_real.b + denominator_p_imag.b * denominator_p_imag.b
-    );
-
-    // 결과의 실수부
-    let r_p_real = vec3<f32>(
-        (numerator_p_real.r * denominator_p_real.r + numerator_p_imag.r * denominator_p_imag.r) /
-        (denom_p_squared.r + epsilon),
-        (numerator_p_real.g * denominator_p_real.g + numerator_p_imag.g * denominator_p_imag.g) /
-        (denom_p_squared.g + epsilon),
-        (numerator_p_real.b * denominator_p_real.b + numerator_p_imag.b * denominator_p_imag.b) /
-        (denom_p_squared.b + epsilon)
-    );
-
-    // 결과의 허수부
-    let r_p_imag = vec3<f32>(
-        (numerator_p_imag.r * denominator_p_real.r - numerator_p_real.r * denominator_p_imag.r) /
-        (denom_p_squared.r + epsilon),
-        (numerator_p_imag.g * denominator_p_real.g - numerator_p_real.g * denominator_p_imag.g) /
-        (denom_p_squared.g + epsilon),
-        (numerator_p_imag.b * denominator_p_real.b - numerator_p_real.b * denominator_p_imag.b) /
-        (denom_p_squared.b + epsilon)
-    );
-
-    // 복소수 크기 계산 |a+bi|² = a² + b²
-    let Rs = vec3<f32>(
-        r_s_real.r * r_s_real.r + r_s_imag.r * r_s_imag.r,
-        r_s_real.g * r_s_real.g + r_s_imag.g * r_s_imag.g,
-        r_s_real.b * r_s_real.b + r_s_imag.b * r_s_imag.b
-    );
-
-    let Rp = vec3<f32>(
-        r_p_real.r * r_p_real.r + r_p_imag.r * r_p_imag.r,
-        r_p_real.g * r_p_real.g + r_p_imag.g * r_p_imag.g,
-        r_p_real.b * r_p_real.b + r_p_imag.b * r_p_imag.b
-    );
-
-    // 전체 반사율 (편광 평균)
+    // 전체 반사율
     let reflectance = 0.5 * (Rs + Rp);
 
-    // 낮은 IOR에서 이리데센스 효과를 강화하기 위한 조정
-    // IOR이 낮을수록 더 강한 색상 대비 제공
+    // IOR 영향 최적화
     let ior_influence = smoothstep(1.0, 2.0, safe_iridescence_ior);
     let enhanced_reflectance = mix(
-        // 낮은 IOR에서는 컬러 대비를 높이고 색상 포화도 증가
         pow(reflectance, vec3<f32>(0.8)) * 1.2,
-        // 높은 IOR에서는 원래 계산대로
         reflectance,
         ior_influence
     );
 
-    // 반사율이 유효한 범위(0-1)를 벗어나지 않도록 보장
+    // 최종 결과
     let clamped_reflectance = clamp(enhanced_reflectance, vec3<f32>(0.0), vec3<f32>(1.0));
-
-    // 최종 결과 계산 - 이리데센스와 베이스 F0 혼합
     return mix(base_f0, clamped_reflectance, iridescence_factor);
 }
 fn specular_btdf(
