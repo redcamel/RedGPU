@@ -703,13 +703,10 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     let F0_dielectric: vec3<f32> =  vec3(pow((1.0 - ior) / (1.0 + ior), 2.0)) ; // 유전체 반사율
     let F0_metal = baseColor.rgb; // 금속 반사율
     var F0 = mix(F0_dielectric, F0_metal, metallicParameter); // 기본 반사율
-    #redgpu_if useKHR_iridescenceTexture
-        F0 = mix(
-            iridescent_fresnel( 1.0, u_KHR_iridescenceIor, F0_dielectric, iridescenceThickness, iridescenceParameter, NdotV),
-            iridescent_fresnel( 1.0, u_KHR_iridescenceIor, F0_metal, iridescenceThickness, iridescenceParameter, NdotV),
-            metallicParameter
-        );
+    #redgpu_if useKHR_materials_iridescence
+        F0 = iridescent_fresnel(1.0, u_KHR_iridescenceIor, F0, iridescenceThickness, iridescenceParameter, NdotV);
     #redgpu_endIf
+
 
     // ---------- 직접 조명 계산 - directional ----------
     var totalDirectLighting = vec3<f32>(0.0);
@@ -816,27 +813,23 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
         var F_metal_iridescent = vec3<f32>(1.0);
 
         #redgpu_if useKHR_materials_iridescence
-            if (iridescenceParameter > 0.0) {
-                // -_- 이건 아직도 제대로 이해가 안감
-                let F_iridescent = iridescent_fresnel(
-                                   1.0,                   // 외부 매질 IOR (보통 공기)
-                                   u_KHR_iridescenceIor,  // 이리디센스 막의 IOR
-                                   F0_dielectric,                    // 기본 유전체 F0
-                                   iridescenceThickness,  // 이리디센스 막 두께
-                                   iridescenceParameter,  // 이리디센스 강도
-                                   NdotV              // 시야 벡터와 법선 사이의 내적
-                               );
-                let F_metal_iridescent = iridescent_fresnel(
-                                              1.0,                   // 외부 매질 IOR (보통 공기)
-                                              u_KHR_iridescenceIor,  // 이리디센스 막의 IOR
-                                              baseColor.rgb,                    // 기본 유전체 F0
-                                              iridescenceThickness,  // 이리디센스 막 두께
-                                              iridescenceParameter,  // 이리디센스 강도
-                                              NdotV              // 시야 벡터와 법선 사이의 내적
-                                          );
-                F_IBL = mix(F_iridescent, F_metal_iridescent,metallicParameter);
-            }
-        #redgpu_endIf
+             if (iridescenceParameter > 0.0) {
+                 // 베이스 F0 미리 계산 (한 번만)
+                 let base_f0 = mix(F0_dielectric, baseColor.rgb, metallicParameter);
+
+                 // 이리데센스 효과 계산 (한 번만)
+                 let iridescence_effect = iridescent_fresnel(
+                     1.0,                      // 외부 매질 IOR (공기)
+                     u_KHR_iridescenceIor,     // 이리데센스 막의 IOR
+                     base_f0,                  // 혼합된 기본 F0
+                     iridescenceThickness,     // 이리데센스 막 두께
+                     iridescenceParameter,     // 이리데센스 강도
+                     NdotV                     // 시야각 코사인
+                 );
+
+                 F_IBL = iridescence_effect;
+             }
+         #redgpu_endIf
 
         let K = (roughnessParameter + 1.0) * (roughnessParameter + 1.0) / 8.0;
         let G = NdotV / (NdotV * (1.0 - K) + K);
@@ -1278,6 +1271,7 @@ fn V_GGX_anisotropic( NdotL: f32, NdotV: f32, BdotV: f32, TdotV: f32, TdotL: f32
    let v = 0.5 / (GGXV + GGXL);
    return clamp(v, 0.0, 1.0);
 }
+
 fn iridescent_fresnel(outside_ior: f32, iridescence_ior: f32, base_f0: vec3<f32>,
                       iridescence_thickness: f32, iridescence_factor: f32, cos_theta1: f32) -> vec3<f32> {
     // 두께가 0이면 기본 F0만 반환
