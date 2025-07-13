@@ -202,7 +202,6 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     let u_normalScale = uniforms.normalScale;
 
     // Occlusion
-    let u_useOcclusionTexture = uniforms.useOcclusionTexture == 1u;
     let u_occlusionStrength = uniforms.occlusionStrength;
 
     // Emissive
@@ -219,14 +218,12 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     // KHR_materials_transmission
     let u_useKHR_materials_transmission = uniforms.useKHR_materials_transmission == 1u;
     let u_KHR_transmissionFactor = uniforms.KHR_transmissionFactor;
-    let u_useKHR_transmissionTexture = uniforms.useKHR_transmissionTexture == 1u;
 
      // KHR_materials_volume
     var u_useKHR_materials_volume = uniforms.useKHR_materials_volume == 1u;
     var u_KHR_thicknessFactor = uniforms.KHR_thicknessFactor ;
     var u_KHR_attenuationColor = uniforms.KHR_attenuationColor;
     var u_KHR_attenuationDistance = uniforms.KHR_attenuationDistance ;
-    var u_useKHR_thicknessTexture = uniforms.useKHR_thicknessTexture == 1u;
 
     // KHR_materials_diffuse_transmission
     let u_useKHR_materials_diffuse_transmission = uniforms.useKHR_materials_diffuse_transmission == 1u;
@@ -236,11 +233,9 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     let u_useKHR_diffuseTransmissionColorTexture = uniforms.useKHR_diffuseTransmissionColorTexture == 1u;
 
     // KHR_materials_specular
-    let u_useKHR_materials_specular = uniforms.useKHR_materials_specular == 1u;
     let u_KHR_specularFactor = uniforms.KHR_specularFactor;
     let u_KHR_specularColorFactor = uniforms.KHR_specularColorFactor;
-    let u_useKHR_specularTexture = uniforms.useKHR_specularTexture == 1u;
-    let u_useKHR_specularColorTexture = uniforms.useKHR_specularColorTexture == 1u;
+
 
     // KHR_materials_anisotropy
     let u_useKHR_materials_anisotropy = uniforms.useKHR_materials_anisotropy == 1u;
@@ -503,7 +498,7 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     baseColor *= select(vec4<f32>(1.0), input_vertexColor_0, u_useVertexColor);
     // baseColorTexture
 
-    #redgpu_if useBaseColorTexture
+    #redgpu_if baseColorTexture
        let diffuseSampleColor =  (textureSample(baseColorTexture, baseColorTextureSampler, diffuseUV));
        baseColor *= diffuseSampleColor;
        resultAlpha *= diffuseSampleColor.a;
@@ -518,9 +513,9 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
 
     // ---------- occlusion ----------
     var occlusionParameter:f32 = 1;
-    if(u_useOcclusionTexture){
+    #redgpu_if useOcclusionTexture
         occlusionParameter = textureSample(packedORMTexture, packedTextureSampler, occlusionUV).r * u_occlusionStrength;
-    }
+    #redgpu_endIf
 
     // ---------- metallicRoughness ----------
     var metallicParameter: f32 = u_metallicFactor;
@@ -577,47 +572,43 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     // ---------- KHR_materials_specular ----------
     var specularParameter = u_KHR_specularFactor;
     var specularColor = u_KHR_specularColorFactor;
+    #redgpu_if KHR_specularColorTexture
+        let specularColorTextureSample = textureSample(
+            KHR_specularColorTexture,
+            KHR_specularColorTextureSampler,
+            KHR_specularColorTextureUV
+        );
+        specularColor *= specularColorTextureSample.rgb;
+    #redgpu_endIf
+    #redgpu_if KHR_specularTexture
+        let specularTextureSample = textureSample(
+            KHR_specularTexture,
+            KHR_specularTextureSampler,
+            KHR_specularTextureUV
+        );
+        specularParameter *= specularTextureSample.a;
+    #redgpu_endIf
 
-    if(u_useKHR_materials_specular){
-        #redgpu_if useKHR_specularColorTexture
-            let specularColorTextureSample = textureSample(
-                KHR_specularColorTexture,
-                KHR_specularColorTextureSampler,
-                KHR_specularColorTextureUV
-            );
-            specularColor *= specularColorTextureSample.rgb;
-        #redgpu_endIf
-
-        if(u_useKHR_specularTexture){
-            let specularTextureSample = textureSample(
-                KHR_specularTexture,
-                KHR_specularTextureSampler,
-                KHR_specularTextureUV
-            );
-            specularParameter *= specularTextureSample.a;
-        };
-    }
     // ---------- KHR_materials_transmission ----------
     var transmissionParameter: f32 = u_KHR_transmissionFactor;
-    if (u_useKHR_transmissionTexture) {
-      // Transmission Texture 샘플링 적용 (균일 흐름 보장)
+    #redgpu_if useKHR_transmissionTexture
       let transmissionSample: vec4<f32> = textureSample(
           packedKHR_clearcoatTexture_transmission,
           packedTextureSampler,
           KHR_transmissionUV
       );
       transmissionParameter *= transmissionSample.b; // 텍스처 채널 적용
-    }
+    #redgpu_endIf
     // ---------- KHR_materials_volume ----------
     var thicknessParameter: f32 = u_KHR_thicknessFactor;
-    if (u_useKHR_thicknessTexture) {
+    #redgpu_if useKHR_thicknessTexture
         let thicknessSample: vec4<f32> = textureSample(
             packedKHR_clearcoatTexture_transmission,
             packedTextureSampler,
             KHR_transmissionUV
         );
         thicknessParameter *= thicknessSample.a;
-    }
+    #redgpu_endIf
     // ---------- KHR_materials_diffuse_transmission ----------
     var diffuseTransmissionColor:vec3<f32> = u_KHR_diffuseTransmissionColorFactor;
     var diffuseTransmissionParameter : f32 = u_KHR_diffuseTransmissionFactor;
@@ -721,7 +712,7 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
 
     // ---------- 2패스일경우 배경 샘플링 ----------
     var prePathBackground = vec3<f32>(0.0);
-    if(u_useKHR_materials_transmission) {
+    #redgpu_if useKHR_materials_transmission
         prePathBackground = calcPrePathBackground(
             u_useKHR_materials_volume, thicknessParameter * inputData.volumeScale , u_KHR_dispersion, u_KHR_attenuationDistance , u_KHR_attenuationColor,
             ior, roughnessParameter, albedo,
@@ -729,7 +720,7 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
             V, N,
             renderPath1ResultTexture, renderPath1ResultTextureSampler
         );
-    }
+    #redgpu_endIf
     // ---------- 기본 F0 계산 ----------
     let F0_dielectric: vec3<f32> =  vec3(pow((1.0 - ior) / (1.0 + ior), 2.0)) ; // 유전체 반사율
     let F0_metal = baseColor.rgb; // 금속 반사율
