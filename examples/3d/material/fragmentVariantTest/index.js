@@ -14,7 +14,7 @@ const texturePaths = {
 };
 
 let shaderVariantGenerator = null;
-let availableVariants = [];
+
 let variantDisplay = null;
 
 // ===== Display Functions =====
@@ -57,7 +57,6 @@ function updateVariantDisplay(variant) {
 			</div>
 			<div style="font-size: 12px; color: #E0E0E0;">
 				active features: ${featureCount} | 
-				total variants: ${availableVariants.length}
 			</div>
 		</div>
 	`;
@@ -117,9 +116,7 @@ function extractShaderVariantInfo(mesh) {
 		const fragmentInfo = mesh.material.gpuRenderInfo;
 		if (fragmentInfo && fragmentInfo.fragmentShaderSourceVariant) {
 			shaderVariantGenerator = fragmentInfo.fragmentShaderSourceVariant;
-			availableVariants = shaderVariantGenerator.getAllVariantKeys();
-			console.log('Phong variant count:', availableVariants.length);
-			console.log('Variant list:', availableVariants);
+
 		}
 	} catch (error) {
 		console.warn('Failed to extract shader variant information:', error);
@@ -152,7 +149,6 @@ const renderUI = async (redGPUContext, mesh) => {
 	const params = {
 		shaderVariants: {
 			currentVariant: 'none',
-			totalVariants: availableVariants.length,
 			cachedVariants: 0,
 		},
 		textureVariants: {
@@ -173,10 +169,7 @@ const renderUI = async (redGPUContext, mesh) => {
 	// Variant information folder
 	const variantFolder = pane.addFolder({title: "📊 Variant Information", expanded: true});
 
-	variantFolder.addBinding(params.shaderVariants, 'totalVariants', {
-		readonly: true,
-		label: 'Total Variants'
-	});
+
 
 	variantFolder.addBinding(params.shaderVariants, 'cachedVariants', {
 		readonly: true,
@@ -198,33 +191,6 @@ const renderUI = async (redGPUContext, mesh) => {
 		}
 	});
 
-	// Variant list folder
-	if (availableVariants.length > 0) {
-		const variantListFolder = variantFolder.addFolder({title: "Variant List", expanded: false});
-
-		// First 12 variant buttons
-		availableVariants.slice(0, 12).forEach((variant, index) => {
-			variantListFolder.addButton({
-				title: variant === 'none' ? '🔹 Basic (none)' : `🔸 ${variant}`
-			}).on('click', () => {
-				applyVariant(variant);
-				updateVariantInfo();
-			});
-		});
-
-		// Show all button
-		if (availableVariants.length > 12) {
-			variantListFolder.addButton({
-				title: `📋 console.log All (${availableVariants.length})`
-			}).on('click', () => {
-				console.group('Complete Phong Variant List');
-				availableVariants.forEach((variant, index) => {
-					console.log(`${index + 1}. ${variant}`);
-				});
-				console.groupEnd();
-			});
-		}
-	}
 
 	setSeparator(pane);
 
@@ -247,13 +213,6 @@ const renderUI = async (redGPUContext, mesh) => {
 	// Utility folder
 	const utilityFolder = pane.addFolder({title: "🛠️ Utilities"});
 
-	// Random variant button
-	utilityFolder.addButton({title: "🎲 Random Variant"}).on('click', () => {
-		const randomVariant = availableVariants[Math.floor(Math.random() * availableVariants.length)];
-		applyVariant(randomVariant);
-		updateVariantInfo();
-		console.log('Random variant applied:', randomVariant);
-	});
 
 	// Clear all textures button
 	utilityFolder.addButton({title: "🧹 Clear All Textures"}).on('click', () => {

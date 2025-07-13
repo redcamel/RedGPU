@@ -153,7 +153,7 @@ const preprocessWGSL = (code: string): PreprocessedWGSLResult => {
 	const uniqueKeys = [...new Set(conditionalBlocks.map(b => b.uniformName))];
 
 	// 7. 레이지 바리안트 생성기 생성
-	const shaderSourceVariant = new ShaderVariantGenerator(defines, uniqueKeys, conditionalBlocks);
+	const shaderSourceVariant = new ShaderVariantGenerator(defines, conditionalBlocks);
 
 	// 8. 결과 생성
 	const result: PreprocessedWGSLResult = {
@@ -168,11 +168,11 @@ const preprocessWGSL = (code: string): PreprocessedWGSLResult => {
 	preprocessCache.set(cacheKey, result);
 
 	if (totalCombinations > 1) {
-		keepLog(`🎯 레이지 바리안트 생성기 초기화 (캐시 저장):`, totalCombinations, cacheKey);
-		keepLog('🎯 고유 키들:', uniqueKeys);
-		keepLog('🎯 가능한 바리안트 수:', totalCombinations);
+		console.log(`🎯 레이지 바리안트 생성기 초기화 (캐시 저장):`, totalCombinations, cacheKey);
+		console.log('🎯 고유 키들:', uniqueKeys);
+		keepLog('🎯 이론적 가능한 바리안트 수:', totalCombinations);
 	}
-
+// keepLog('shaderSourceVariant',shaderSourceVariant)
 	return result;
 };
 
