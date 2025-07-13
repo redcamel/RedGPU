@@ -245,8 +245,6 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
 
     // KHR_materials_iridescence
     let u_useKHR_materials_iridescence = uniforms.useKHR_materials_iridescence == 1u;
-    let u_useKHR_iridescenceTexture = uniforms.useKHR_iridescenceTexture == 1u;
-    let u_useKHR_iridescenceThicknessTexture = uniforms.useKHR_iridescenceThicknessTexture == 1u;
     let u_KHR_iridescenceFactor = uniforms.KHR_iridescenceFactor;
     let u_KHR_iridescenceIor = uniforms.KHR_iridescenceIor;
     let u_KHR_iridescenceThicknessMinimum = uniforms.KHR_iridescenceThicknessMinimum;
@@ -465,7 +463,7 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     /////////////////////////////////////////////////////////////////////////////////
 
     var visibility:f32 = 1.0;
-     visibility = calcDirectionalShadowVisibility(
+    visibility = calcDirectionalShadowVisibility(
                 directionalShadowMap,
                 directionalShadowMapSampler,
                 u_shadowDepthTextureSize,
@@ -572,6 +570,7 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
         );
         specularParameter *= specularTextureSample.a;
     #redgpu_endIf
+
     // ---------- KHR_materials_transmission ----------
     var transmissionParameter: f32 = u_KHR_transmissionFactor;
     #redgpu_if useKHR_transmissionTexture
@@ -582,6 +581,7 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
       );
       transmissionParameter *= transmissionSample.b;
     #redgpu_endIf
+
     // ---------- KHR_materials_volume ----------
     var thicknessParameter: f32 = u_KHR_thicknessFactor;
     #redgpu_if useKHR_thicknessTexture
@@ -592,6 +592,7 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
         );
         thicknessParameter *= thicknessSample.a;
     #redgpu_endIf
+
     // ---------- KHR_materials_diffuse_transmission ----------
     var diffuseTransmissionColor:vec3<f32> = u_KHR_diffuseTransmissionColorFactor;
     var diffuseTransmissionParameter : f32 = u_KHR_diffuseTransmissionFactor;
@@ -611,6 +612,7 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
         );
         diffuseTransmissionColor *= diffuseTransmissionColorTextureSample.rgb;
     #redgpu_endIf
+
     // ---------- KHR_materials_sheen ----------
     var sheenColor = u_KHR_sheenColorFactor;
     var sheenRoughnessParameter = u_KHR_sheenRoughnessFactor;
@@ -626,24 +628,23 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     // ---------- KHR_materials_iridescence ----------
     var iridescenceParameter = u_KHR_iridescenceFactor;
     var iridescenceThickness = u_KHR_iridescenceThicknessMaximum;
-    if(u_useKHR_materials_iridescence){
-        if (u_useKHR_iridescenceTexture) {
-            let iridescenceTextureSample: vec4<f32> = textureSample(
-                packedKHR_iridescence,
-                packedTextureSampler,
-                KHR_iridescenceTextureUV
-            );
-            iridescenceParameter *= iridescenceTextureSample.r;
-        }
-        if(u_useKHR_iridescenceThicknessTexture){
-            let iridescenceTextureSample: vec4<f32> = textureSample(
-                packedKHR_iridescence,
-                packedTextureSampler,
-                KHR_iridescenceThicknessTextureUV
-            );
-            iridescenceThickness =  mix(u_KHR_iridescenceThicknessMinimum, u_KHR_iridescenceThicknessMaximum, iridescenceTextureSample.g);
-        }
-    }
+    #redgpu_if useKHR_iridescenceTexture
+        let iridescenceTextureSample: vec4<f32> = textureSample(
+            packedKHR_iridescence,
+            packedTextureSampler,
+            KHR_iridescenceTextureUV
+        );
+        iridescenceParameter *= iridescenceTextureSample.r;
+    #redgpu_endIf
+    #redgpu_if useKHR_iridescenceThicknessTexture
+        let iridescenceThicknessTextureSample: vec4<f32> = textureSample(
+            packedKHR_iridescence,
+            packedTextureSampler,
+            KHR_iridescenceThicknessTextureUV
+        );
+        iridescenceThickness =  mix(u_KHR_iridescenceThicknessMinimum, u_KHR_iridescenceThicknessMaximum, iridescenceThicknessTextureSample.g);
+    #redgpu_endIf
+
     // ---------- KHR_materials_anisotropy ----------
     var anisotropy: f32 = u_KHR_anisotropyStrength;
     var anisotropicT: vec3<f32> = vec3<f32>(1.0);
@@ -702,13 +703,13 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     let F0_dielectric: vec3<f32> =  vec3(pow((1.0 - ior) / (1.0 + ior), 2.0)) ; // 유전체 반사율
     let F0_metal = baseColor.rgb; // 금속 반사율
     var F0 = mix(F0_dielectric, F0_metal, metallicParameter); // 기본 반사율
-    if(u_useKHR_materials_iridescence){
+    #redgpu_if useKHR_iridescenceTexture
         F0 = mix(
             iridescent_fresnel( 1.0, u_KHR_iridescenceIor, F0_dielectric, iridescenceThickness, iridescenceParameter, NdotV),
             iridescent_fresnel( 1.0, u_KHR_iridescenceIor, F0_metal, iridescenceThickness, iridescenceParameter, NdotV),
             metallicParameter
-         );
-    }
+        );
+    #redgpu_endIf
 
     // ---------- 직접 조명 계산 - directional ----------
     var totalDirectLighting = vec3<f32>(0.0);
@@ -812,28 +813,30 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
         let F_IBL_dielectric = F0_dielectric + (vec3<f32>(1.0) - F0_dielectric) * pow(1.0 - NdotV_fresnel, 5.0); // 유전체
         let F_IBL_metal = F0_metal + (vec3<f32>(1.0) - F0_metal) * pow(1.0 - NdotV_fresnel, 5.0); // 금속
         var F_IBL = F0 + (vec3<f32>(1.0) - F0) * pow(1.0 - NdotV_fresnel, 5.0);
-        var F_IBL_iridescence = F_IBL;
         var F_metal_iridescent = vec3<f32>(1.0);
-        if (iridescenceParameter > 0.0) {
-            // -_- 이건 아직도 제대로 이해가 안감
-            let F_iridescent = iridescent_fresnel(
-                               1.0,                   // 외부 매질 IOR (보통 공기)
-                               u_KHR_iridescenceIor,  // 이리디센스 막의 IOR
-                               F0_dielectric,                    // 기본 유전체 F0
-                               iridescenceThickness,  // 이리디센스 막 두께
-                               iridescenceParameter,  // 이리디센스 강도
-                               NdotV              // 시야 벡터와 법선 사이의 내적
-                           );
-            let F_metal_iridescent = iridescent_fresnel(
-                                          1.0,                   // 외부 매질 IOR (보통 공기)
-                                          u_KHR_iridescenceIor,  // 이리디센스 막의 IOR
-                                          baseColor.rgb,                    // 기본 유전체 F0
-                                          iridescenceThickness,  // 이리디센스 막 두께
-                                          iridescenceParameter,  // 이리디센스 강도
-                                          NdotV              // 시야 벡터와 법선 사이의 내적
-                                      );
-            F_IBL = mix(F_iridescent, F_metal_iridescent,metallicParameter);
-        }
+
+        #redgpu_if useKHR_materials_iridescence
+            if (iridescenceParameter > 0.0) {
+                // -_- 이건 아직도 제대로 이해가 안감
+                let F_iridescent = iridescent_fresnel(
+                                   1.0,                   // 외부 매질 IOR (보통 공기)
+                                   u_KHR_iridescenceIor,  // 이리디센스 막의 IOR
+                                   F0_dielectric,                    // 기본 유전체 F0
+                                   iridescenceThickness,  // 이리디센스 막 두께
+                                   iridescenceParameter,  // 이리디센스 강도
+                                   NdotV              // 시야 벡터와 법선 사이의 내적
+                               );
+                let F_metal_iridescent = iridescent_fresnel(
+                                              1.0,                   // 외부 매질 IOR (보통 공기)
+                                              u_KHR_iridescenceIor,  // 이리디센스 막의 IOR
+                                              baseColor.rgb,                    // 기본 유전체 F0
+                                              iridescenceThickness,  // 이리디센스 막 두께
+                                              iridescenceParameter,  // 이리디센스 강도
+                                              NdotV              // 시야 벡터와 법선 사이의 내적
+                                          );
+                F_IBL = mix(F_iridescent, F_metal_iridescent,metallicParameter);
+            }
+        #redgpu_endIf
 
         let K = (roughnessParameter + 1.0) * (roughnessParameter + 1.0) / 8.0;
         let G = NdotV / (NdotV * (1.0 - K) + K);
@@ -1151,33 +1154,38 @@ fn calcLight(
     if(u_useKHR_materials_diffuse_transmission && diffuseTransmissionParameter > 0.0){
         DIFFUSE_BRDF = mix(DIFFUSE_BRDF, diffuse_btdf(N, L, diffuseTransmissionColor), diffuseTransmissionParameter);
     }
-//        let DIFFUSE_BRDF = diffuse_brdf(NdotL, albedo) ;
+
     var SPECULAR_BRDF:vec3<f32>;
+
     if (anisotropy > 0.0) {
-        var TdotL = dot(anisotropicT, L);
-        var TdotV = dot(anisotropicT, V);
-        var BdotL = dot(anisotropicB, L);
-        var TdotH = dot(anisotropicT, H);
-        var BdotH = dot(anisotropicB, H);
-        var BdotV = dot(anisotropicB, V);
-        SPECULAR_BRDF =  BRDF_specularAnisotropicGGX(
-            albedo,
-            vec3<f32>(1.0),
-            roughnessParameter * roughnessParameter,
-            VdotH, NdotL, NdotV, NdotH, BdotV, TdotV, TdotL, BdotL, TdotH, BdotH,
-            anisotropy
-        ) ;
+        #redgpu_if useKHR_materials_anisotropy
+            var TdotL = dot(anisotropicT, L);
+            var TdotV = dot(anisotropicT, V);
+            var BdotL = dot(anisotropicB, L);
+            var TdotH = dot(anisotropicT, H);
+            var BdotH = dot(anisotropicB, H);
+            var BdotV = dot(anisotropicB, V);
+            SPECULAR_BRDF =  BRDF_specularAnisotropicGGX(
+                albedo,
+                vec3<f32>(1.0),
+                roughnessParameter * roughnessParameter,
+                VdotH, NdotL, NdotV, NdotH, BdotV, TdotV, TdotL, BdotL, TdotH, BdotH,
+                anisotropy
+            ) ;
+        #redgpu_endIf
     }else{
         SPECULAR_BRDF = specular_brdf( albedo, roughnessParameter, NdotH, NdotV, NdotL, LdotH);
     }
+
     let METAL_BRDF = conductor_fresnel( albedo, SPECULAR_BRDF, VdotH);;
 
-    let transmissionWeight = transmissionParameter * (vec3<f32>(1.0) - F0);
     var SPECULAR_BTDF =  vec3<f32>(0.0);
-    if(transmissionParameter > 0.0){
-        SPECULAR_BTDF = specular_btdf( NdotV, NdotL, NdotH, VdotH, LdotH, roughnessParameter, albedo, ior);
-    }
-    // 최종 DIELECTRIC_BRDF 계산에 배경 반영
+    #redgpu_if useKHR_materials_transmission
+        if(transmissionParameter > 0.0){
+            SPECULAR_BTDF = specular_btdf( NdotV, NdotL, NdotH, VdotH, LdotH, roughnessParameter, albedo, ior);
+        }
+    #redgpu_endIf
+
     let DIELECTRIC_BRDF = fresnel_mix(
         F0 ,
         specularParameter,
@@ -1186,27 +1194,26 @@ fn calcLight(
         VdotH
     );
 
-
     var SHEEN_BRDF:vec3<f32> = vec3<f32>(0.0);
     var sheen_albedo_scaling:f32 = 1.0;
-    let maxSheenColor = max(sheenColor.x, max(sheenColor.y, sheenColor.z));
-    if(sheenRoughnessParameter > 0.0 && maxSheenColor > 0.001 && dot(N,V) > 0) {
-        let NdotV = dot(N, V);
-        let sheenRoughnessAlpha = sheenRoughnessParameter * sheenRoughnessParameter;
-        let invR = 1 / sheenRoughnessAlpha;
-        let cos2h = NdotH * NdotH;
-        let sin2h = 1 - cos2h;
-        let sheenDistribution = (2 + invR) * pow(sin2h, invR * 0.5) / (2 * pi);
-        let sheen_visibility =  1.0 / ((1.0 + lambda_sheen(NdotV, sheenRoughnessAlpha) + lambda_sheen(NdotL, sheenRoughnessAlpha)) * (4.0 * NdotV * NdotL));
-        let LdotN = max(dot(L, N), 0.04);
-        let E_LdotN = 1.0 - pow(1.0 - LdotN, 5.0);
-        let E_VdotN = 1.0 - pow(1.0 - VdotN, 5.0);
+    #redgpu_if useKHR_materials_sheen
+        let maxSheenColor = max(sheenColor.x, max(sheenColor.y, sheenColor.z));
+        if(sheenRoughnessParameter > 0.0 && maxSheenColor > 0.001 && dot(N,V) > 0) {
+            let NdotV = dot(N, V);
+            let sheenRoughnessAlpha = sheenRoughnessParameter * sheenRoughnessParameter;
+            let invR = 1 / sheenRoughnessAlpha;
+            let cos2h = NdotH * NdotH;
+            let sin2h = 1 - cos2h;
+            let sheenDistribution = (2 + invR) * pow(sin2h, invR * 0.5) / (2 * pi);
+            let sheen_visibility =  1.0 / ((1.0 + lambda_sheen(NdotV, sheenRoughnessAlpha) + lambda_sheen(NdotL, sheenRoughnessAlpha)) * (4.0 * NdotV * NdotL));
+            let LdotN = max(dot(L, N), 0.04);
+            let E_LdotN = 1.0 - pow(1.0 - LdotN, 5.0);
+            let E_VdotN = 1.0 - pow(1.0 - VdotN, 5.0);
 
-
-        sheen_albedo_scaling = max(min(1.0 - maxSheenColor * E_VdotN, 1.0 - maxSheenColor * E_LdotN),0.04);
-
-        SHEEN_BRDF = sheenColor * sheenDistribution * sheen_visibility;
-    }
+            sheen_albedo_scaling = max(min(1.0 - maxSheenColor * E_VdotN, 1.0 - maxSheenColor * E_LdotN),0.04);
+            SHEEN_BRDF = sheenColor * sheenDistribution * sheen_visibility;
+        }
+    #redgpu_endIf
 
     // 조명 계산결과
     // 금속과 유전체 부분을 각각 계산
@@ -1216,19 +1223,25 @@ fn calcLight(
 
     let sheenPart = SHEEN_BRDF;
     var directLighting = (metallicPart  + dielectricPart + sheenPart);
-    if(transmissionParameter > 0.0) {
-        // 투과 가중치에 따라 배경색 혼합
-        // Fresnel 효과에 의한 반사와 투과 균형 유지
-        directLighting = mix(directLighting, prePathBackground , transmissionWeight);
-    }
-    // 클리어코트
-    if(clearcoatParameter > 0.0){
-        let clearcoatNdotL = max(dot(clearcoatNormal, L), 0.04);
-        let clearcoatNdotV = max(dot(clearcoatNormal, V), 0.04);
-        let clearcoatNdotH = max(dot(clearcoatNormal, H), 0.0);
-        let CLEARCOAT_BRDF = specular_brdf( F0, clearcoatRoughnessParameter, clearcoatNdotH, clearcoatNdotV, clearcoatNdotL, LdotH);
-        directLighting = fresnel_coat(clearcoatNdotV, ior, clearcoatParameter, directLighting, CLEARCOAT_BRDF);
-    }
+
+    #redgpu_if useKHR_materials_transmission
+        if(transmissionParameter > 0.0) {
+            // 투과 가중치에 따라 배경색 혼합
+            let transmissionWeight = transmissionParameter * (vec3<f32>(1.0) - F0);
+            directLighting = mix(directLighting, prePathBackground , transmissionWeight);
+        }
+    #redgpu_endIf
+
+    #redgpu_if useKHR_materials_clearcoat
+        if(clearcoatParameter > 0.0){
+            let clearcoatNdotL = max(dot(clearcoatNormal, L), 0.04);
+            let clearcoatNdotV = max(dot(clearcoatNormal, V), 0.04);
+            let clearcoatNdotH = max(dot(clearcoatNormal, H), 0.0);
+            let CLEARCOAT_BRDF = specular_brdf( F0, clearcoatRoughnessParameter, clearcoatNdotH, clearcoatNdotV, clearcoatNdotL, LdotH);
+            directLighting = fresnel_coat(clearcoatNdotV, ior, clearcoatParameter, directLighting, CLEARCOAT_BRDF);
+        }
+    #redgpu_endIf
+
     var lightDirection: f32;
     if (u_useKHR_materials_diffuse_transmission && diffuseTransmissionParameter > 0.0) {
         lightDirection = mix(abs(dot(N, L)), 1.0, diffuseTransmissionParameter);
@@ -1238,7 +1251,6 @@ fn calcLight(
     }
 
     let lightContribution = directLighting * dLight * lightDirection;
-    //            + BACK_DIFFUSE_BRDF * backNdotL * backLightColor * backLightIntensity;
     return lightContribution;
 }
 const pi: f32 = 3.14159265359;
