@@ -185,7 +185,6 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     // 유니폼 변수 뽑아서 저장
     let u_opacity = uniforms.opacity;
     let u_doubleSided = uniforms.doubleSided == 1u;
-    let u_useCutOff = uniforms.useCutOff == 1u;
     let u_cutOff = uniforms.cutOff;
     let u_useVertexColor = uniforms.useVertexColor == 1u;
     let u_useVertexTangent = uniforms.useVertexTangent == 1u;
@@ -205,7 +204,6 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     let u_occlusionStrength = uniforms.occlusionStrength;
 
     // Emissive
-    let u_useEmissiveTexture = uniforms.useEmissiveTexture == 1u;
     let u_emissiveFactor = uniforms.emissiveFactor;
     let u_emissiveStrength = uniforms.emissiveStrength;
 
@@ -214,9 +212,8 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     let u_KHR_materials_ior = uniforms.KHR_materials_ior;
     let u_KHR_dispersion = uniforms.KHR_dispersion;
 
-    // 기본 텍스처 변환 속성
+
     // KHR_materials_transmission
-    let u_useKHR_materials_transmission = uniforms.useKHR_materials_transmission == 1u;
     let u_KHR_transmissionFactor = uniforms.KHR_transmissionFactor;
 
      // KHR_materials_volume
@@ -229,8 +226,6 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     let u_useKHR_materials_diffuse_transmission = uniforms.useKHR_materials_diffuse_transmission == 1u;
     let u_KHR_diffuseTransmissionFactor = uniforms.KHR_diffuseTransmissionFactor;
     let u_KHR_diffuseTransmissionColorFactor = uniforms.KHR_diffuseTransmissionColorFactor;
-    let u_useKHR_diffuseTransmissionTexture = uniforms.useKHR_diffuseTransmissionTexture == 1u;
-    let u_useKHR_diffuseTransmissionColorTexture = uniforms.useKHR_diffuseTransmissionColorTexture == 1u;
 
     // KHR_materials_specular
     let u_KHR_specularFactor = uniforms.KHR_specularFactor;
@@ -238,15 +233,13 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
 
 
     // KHR_materials_anisotropy
-    let u_useKHR_materials_anisotropy = uniforms.useKHR_materials_anisotropy == 1u;
     let u_KHR_anisotropyStrength = uniforms.KHR_anisotropyStrength;
     let u_KHR_anisotropyRotation = uniforms.KHR_anisotropyRotation;
     let u_useKHR_anisotropyTexture = uniforms.useKHR_anisotropyTexture == 1u;
 
     // KHR_materials_sheen
-    let u_useKHR_materials_sheen = uniforms.useKHR_materials_sheen == 1u;
-    let u_useKHR_sheenColorTexture = uniforms.useKHR_sheenColorTexture == 1u;
-    let u_useKHR_sheenRoughnessTexture = uniforms.useKHR_sheenRoughnessTexture == 1u;
+
+
     let u_KHR_sheenColorFactor = uniforms.KHR_sheenColorFactor;
     let u_KHR_sheenRoughnessFactor = uniforms.KHR_sheenRoughnessFactor;
 
@@ -260,12 +253,8 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     let u_KHR_iridescenceThicknessMaximum = uniforms.KHR_iridescenceThicknessMaximum;
 
     // KHR_materials_clearcoat
-    let u_useKHR_materials_clearcoat = uniforms.useKHR_materials_clearcoat == 1u;
     let u_KHR_clearcoatFactor = uniforms.KHR_clearcoatFactor;
-    let u_useKHR_clearcoatTexture = uniforms.useKHR_clearcoatTexture == 1u;
     let u_KHR_clearcoatRoughnessFactor = uniforms.KHR_clearcoatRoughnessFactor;
-    let u_useKHR_clearcoatRoughnessTexture = uniforms.useKHR_clearcoatRoughnessTexture == 1u;
-    let u_useKHR_clearcoatNormalTexture = uniforms.useKHR_clearcoatNormalTexture == 1u;
     let u_KHR_clearcoatNormalScale = uniforms.KHR_clearcoatNormalScale;
 
 
@@ -526,47 +515,42 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
         roughnessParameter = metallicRoughnessSample.g * roughnessParameter;
     #redgpu_endIf
     roughnessParameter = max(roughnessParameter, 0.045);
-    if (abs(ior - 1.0) < 0.0001) {
-        roughnessParameter = 0;
-    }
+    if (abs(ior - 1.0) < 0.0001) { roughnessParameter = 0; }
 
     // ---------- KHR_materials_clearcoat ----------
     var clearcoatParameter = u_KHR_clearcoatFactor;
     var clearcoatRoughnessParameter = u_KHR_clearcoatRoughnessFactor ;
     var clearcoatNormal:vec3<f32> = N;
-    if(u_useKHR_materials_clearcoat){
-        if(clearcoatParameter == 0.0){
-        }else{
-            if(u_useKHR_clearcoatTexture){
-                let clearcoatSample =  textureSample(packedKHR_clearcoatTexture_transmission, packedTextureSampler, KHR_clearcoatUV);
-                clearcoatParameter *= clearcoatSample.r;
+    if(clearcoatParameter != 0.0){
+        #redgpu_if useKHR_clearcoatTexture
+            let clearcoatSample =  textureSample(packedKHR_clearcoatTexture_transmission, packedTextureSampler, KHR_clearcoatUV);
+            clearcoatParameter *= clearcoatSample.r;
+        #redgpu_endIf
+        #redgpu_if useKHR_clearcoatRoughnessTexture
+            let clearcoatRoughnesstSample =  textureSample(packedKHR_clearcoatTexture_transmission, packedTextureSampler, KHR_clearcoatRoughnessUV);
+            clearcoatRoughnessParameter *= clearcoatRoughnesstSample.g;
+        #redgpu_endIf
+        var clearcoatNormalSampler =  textureSample(KHR_clearcoatNormalTexture, baseColorTextureSampler, KHR_clearcoatNormalUV);
+        #redgpu_if useKHR_clearcoatNormalTexture
+        {
+            var targetUv = KHR_clearcoatNormalUV;
+            if(backFaceYn){
+                targetUv = 1.0 - targetUv;
             }
-
-            if(u_useKHR_clearcoatRoughnessTexture){
-                let clearcoatRoughnesstSample =  textureSample(packedKHR_clearcoatTexture_transmission, packedTextureSampler, KHR_clearcoatRoughnessUV);
-                clearcoatRoughnessParameter *= clearcoatRoughnesstSample.g;
+            clearcoatNormal = clearcoatNormalSampler.rgb;
+            clearcoatNormal = perturb_normal(
+                N,
+                input_vertexPosition,
+                targetUv,
+                clearcoatNormal,
+                u_normalScale
+            ) ;
+            if(u_useVertexTangent){
+                if(backFaceYn ){ clearcoatNormal = -clearcoatNormal; }
             }
-
-            var clearcoatNormalSampler =  textureSample(KHR_clearcoatNormalTexture, baseColorTextureSampler, KHR_clearcoatNormalUV);
-            if(u_useKHR_clearcoatNormalTexture){
-                var targetUv = KHR_clearcoatNormalUV;
-                if(backFaceYn){
-                    targetUv = 1.0 - targetUv;
-                }
-                clearcoatNormal = clearcoatNormalSampler.rgb;
-                clearcoatNormal = perturb_normal(
-                    N,
-                    input_vertexPosition,
-                    targetUv,
-                    clearcoatNormal,
-                    u_normalScale
-                ) ;
-                if(u_useVertexTangent){
-                    if(backFaceYn ){ clearcoatNormal = -clearcoatNormal; }
-                }
-                clearcoatNormal = normalize(clearcoatNormal);
-            }
+            clearcoatNormal = normalize(clearcoatNormal);
         }
+        #redgpu_endIf
     }
 
     // ---------- KHR_materials_specular ----------
@@ -588,7 +572,6 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
         );
         specularParameter *= specularTextureSample.a;
     #redgpu_endIf
-
     // ---------- KHR_materials_transmission ----------
     var transmissionParameter: f32 = u_KHR_transmissionFactor;
     #redgpu_if useKHR_transmissionTexture
@@ -597,7 +580,7 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
           packedTextureSampler,
           KHR_transmissionUV
       );
-      transmissionParameter *= transmissionSample.b; // 텍스처 채널 적용
+      transmissionParameter *= transmissionSample.b;
     #redgpu_endIf
     // ---------- KHR_materials_volume ----------
     var thicknessParameter: f32 = u_KHR_thicknessFactor;
@@ -612,38 +595,34 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     // ---------- KHR_materials_diffuse_transmission ----------
     var diffuseTransmissionColor:vec3<f32> = u_KHR_diffuseTransmissionColorFactor;
     var diffuseTransmissionParameter : f32 = u_KHR_diffuseTransmissionFactor;
-    if(u_useKHR_materials_diffuse_transmission){
-        if(u_useKHR_diffuseTransmissionTexture){
-            let transmissionSample =  textureSample(
-                packedKHR_diffuse_transmission,
-                packedTextureSampler,
-                KHR_diffuseTransmissionUV
-            );
-            diffuseTransmissionParameter *= transmissionSample.a;
-        }
-        if(u_useKHR_diffuseTransmissionColorTexture){
-            let transmissionSample =  textureSample(
-                packedKHR_diffuse_transmission,
-                packedTextureSampler,
-                KHR_diffuseTransmissionColorUV
-            );
-            diffuseTransmissionColor *= transmissionSample.rgb;
-        }
-    }
-
+    #redgpu_if useKHR_diffuseTransmissionTexture
+        let diffuseTransmissionTextureSample =  textureSample(
+            packedKHR_diffuse_transmission,
+            packedTextureSampler,
+            KHR_diffuseTransmissionUV
+        );
+        diffuseTransmissionParameter *= diffuseTransmissionTextureSample.a;
+    #redgpu_endIf
+    #redgpu_if useKHR_diffuseTransmissionColorTexture
+        let diffuseTransmissionColorTextureSample =  textureSample(
+            packedKHR_diffuse_transmission,
+            packedTextureSampler,
+            KHR_diffuseTransmissionColorUV
+        );
+        diffuseTransmissionColor *= diffuseTransmissionColorTextureSample.rgb;
+    #redgpu_endIf
     // ---------- KHR_materials_sheen ----------
     var sheenColor = u_KHR_sheenColorFactor;
     var sheenRoughnessParameter = u_KHR_sheenRoughnessFactor;
-    if(u_useKHR_materials_sheen){
-        if(u_useKHR_sheenColorTexture){
-            let sheenColorSample = (textureSample(packedKHR_sheen, packedTextureSampler, KHR_sheenColorUV));
-            sheenColor *= sheenColorSample.rgb;
-        }
-        if(u_useKHR_sheenRoughnessTexture){
-            let sheenRoughnessSample = (textureSample(packedKHR_sheen, packedTextureSampler, KHR_sheenRoughnessUV));
-            sheenRoughnessParameter *= sheenRoughnessSample.a;
-        }
-    }
+    #redgpu_if useKHR_sheenColorTexture
+        let sheenColorSample = (textureSample(packedKHR_sheen, packedTextureSampler, KHR_sheenColorUV));
+        sheenColor *= sheenColorSample.rgb;
+    #redgpu_endIf
+    #redgpu_if useKHR_sheenRoughnessTexture
+        let sheenRoughnessSample = (textureSample(packedKHR_sheen, packedTextureSampler, KHR_sheenRoughnessUV));
+        sheenRoughnessParameter *= sheenRoughnessSample.a;
+    #redgpu_endIf
+
     // ---------- KHR_materials_iridescence ----------
     var iridescenceParameter = u_KHR_iridescenceFactor;
     var iridescenceThickness = u_KHR_iridescenceThicknessMaximum;
@@ -665,22 +644,19 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
             iridescenceThickness =  mix(u_KHR_iridescenceThicknessMinimum, u_KHR_iridescenceThicknessMaximum, iridescenceTextureSample.g);
         }
     }
-    // ---------- KHR_materials_iridescence ----------
+    // ---------- KHR_materials_anisotropy ----------
     var anisotropy: f32 = u_KHR_anisotropyStrength;
-    var anisotropicT: vec3<f32>;
-    var anisotropicB: vec3<f32>;
-
-    if (u_useKHR_materials_anisotropy) {
+    var anisotropicT: vec3<f32> = vec3<f32>(1.0);
+    var anisotropicB: vec3<f32>= vec3<f32>(1.0);
+    #redgpu_if useKHR_materials_anisotropy
+    {
         var anisotropicDirection: vec2<f32> = vec2<f32>(1.0,0.0);
         if(u_useKHR_anisotropyTexture){
             let anisotropyTex = textureSample(KHR_anisotropyTexture, baseColorTextureSampler, KHR_anisotropyUV).rgb;
             anisotropicDirection = anisotropyTex.rg * 2.0 - vec2<f32>(1.0, 1.0);
             var anisotropyRotation: vec2<f32>;
-            if(u_KHR_anisotropyRotation < 0.0001){
-               anisotropyRotation = vec2<f32>(1.0,0.0);
-            }else{
-               anisotropyRotation = vec2<f32>( cos(u_KHR_anisotropyRotation), sin(u_KHR_anisotropyRotation) );
-            }
+            if( u_KHR_anisotropyRotation < 0.0001 ){ anisotropyRotation = vec2<f32>(1.0,0.0); }
+            else{ anisotropyRotation = vec2<f32>( cos(u_KHR_anisotropyRotation), sin(u_KHR_anisotropyRotation) ); }
 
             let rotationMtx: mat2x2<f32> = mat2x2<f32>(
               anisotropyRotation.x, anisotropyRotation.y,
@@ -709,6 +685,7 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
         anisotropicT = normalize(TBN * vec3<f32>(anisotropicDirection, 0.0));
         anisotropicB = normalize(cross(N, anisotropicT));
     }
+    #redgpu_endIf
 
     // ---------- 2패스일경우 배경 샘플링 ----------
     var prePathBackground = vec3<f32>(0.0);
@@ -831,8 +808,6 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
         let NdotV = max(dot(N, V),0.04);
         let NdotV_fresnel = max(dot(N, V), 0.04);
 
-
-
         // ---------- ibl 프레넬 항 계산----------
         let F_IBL_dielectric = F0_dielectric + (vec3<f32>(1.0) - F0_dielectric) * pow(1.0 - NdotV_fresnel, 5.0); // 유전체
         let F_IBL_metal = F0_metal + (vec3<f32>(1.0) - F0_metal) * pow(1.0 - NdotV_fresnel, 5.0); // 금속
@@ -879,10 +854,8 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
 
         // ---------- ibl Diffuse  ----------
         let effectiveTransmission = transmissionParameter * (1.0 - metallicParameter);
-//        var envIBL_DIFFUSE:vec3<f32> = albedo  * (vec3<f32>(1.0) - F_IBL_dielectric)  ;
-
-      let iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, iblTextureSampler, N,0).rgb;
-      var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor * (vec3<f32>(1.0) - F_IBL_dielectric);
+        let iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, iblTextureSampler, N,0).rgb;
+        var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor * (vec3<f32>(1.0) - F_IBL_dielectric);
 
         // ---------- ibl Diffuse Transmission ----------
         if (u_useKHR_materials_diffuse_transmission && diffuseTransmissionParameter > 0.0) {
@@ -896,7 +869,9 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
         // ---------- ibl Specular ----------
         var envIBL_SPECULAR:vec3<f32>;
         let specularColorCorrected = max(vec3<f32>(0.16), specularColor);
-        if (u_useKHR_materials_anisotropy) {
+        envIBL_SPECULAR = reflectedColor * G_smith * specularColorCorrected * F_IBL * specularParameter ;
+        #redgpu_if useKHR_materials_anisotropy
+        {
             var bentNormal = cross(anisotropicB, V);
             bentNormal = normalize(cross(bentNormal, anisotropicB));
             let temp = 1.0 - anisotropy * (1.0 - roughnessParameter);
@@ -935,21 +910,16 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
             let a2 = finalRoughness * finalRoughness;
             let G_smith = NdotV / (NdotV * (1.0 - a2) + a2);
             envIBL_SPECULAR = reflectedColor * G_smith * specularColorCorrected * F_IBL * specularParameter;
-        } else {
-            envIBL_SPECULAR = reflectedColor * G_smith * specularColorCorrected * F_IBL * specularParameter ;
-
         }
+        #redgpu_endIf
 
         // ---------- ibl Specular BTDF ----------
         var envIBL_SPECULAR_BTDF = vec3<f32>(0.0);
-        if (u_useKHR_materials_transmission) {
+        #redgpu_if useKHR_materials_transmission
             var refractedDir: vec3<f32>;
             let eta = 1.0 / ior;
-            if (abs(ior - 1.0) < 0.0001) {
-                refractedDir = V;
-            } else {
-                refractedDir = refract(-V, -N, eta);
-            }
+            if (abs(ior - 1.0) < 0.0001) { refractedDir = V; }
+            else { refractedDir = refract(-V, -N, eta); }
 
             if(length(refractedDir) > 0.0001) {
                 let NdotT = abs(dot(N, normalize(refractedDir)));
@@ -977,17 +947,9 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
 
                 envIBL_SPECULAR_BTDF = attenuatedBackground * F_transmission * transmissionParameter + reflectedColor * G_smith * F_IBL * NdotT;
             }
-        }
+        #redgpu_endIf
 
         // ---------- ibl 유전체 합성 ----------
-//        let envIBL_DIELECTRIC = fresnel_mix_ibl(
-//            F0  ,
-//            specularParameter,
-//            mix(envIBL_DIFFUSE ,  envIBL_SPECULAR_BTDF , transmissionParameter),
-//            envIBL_SPECULAR ,
-//            NdotV
-//        );
-
 //        let envIBL_DIELECTRIC = mix(envIBL_SPECULAR_BTDF ,envIBL_DIFFUSE, 1-transmissionParameter) + envIBL_SPECULAR;
         let envIBL_DIELECTRIC = envIBL_DIFFUSE * (1.0-transmissionParameter) + envIBL_SPECULAR_BTDF + envIBL_SPECULAR;
 
@@ -995,48 +957,18 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
         var envIBL_SHEEN = vec3<f32>(0.0);
         var sheen_albedo_scaling: f32 = 1.0;
         let maxSheenColor = max(sheenColor.x, max(sheenColor.y, sheenColor.z));
-//        if (sheenRoughnessParameter > 0.0 && maxSheenColor > 0.001 && dot(N,V) > 0.0) {
-        if (u_useKHR_materials_sheen) {
-//            let NdotV = dot(N,V);
-//            let E_avg = (1.0 - pow(1.0 - VdotN, 5.0)) / 5.0;
-//            sheen_albedo_scaling = max(1.0 - maxSheenColor * E_avg,0.04);
-//            let sheenRoughnessAlpha = sheenRoughnessParameter * sheenRoughnessParameter;
-//            let sheenSamplingDir = normalize(mix(R, N, sheenRoughnessParameter * 0.5));
-//            // 밉맵 레벨 계산
-//            let sheenMipLevel = sheenRoughnessParameter * iblMipmapCount;
-//            let sheenRadiance = textureSampleLevel(ibl_environmentTexture, iblTextureSampler, sheenSamplingDir, sheenMipLevel).rgb;
-//
-//            let sheenFresnel = pow(1.0 - max(VdotN, 0.0), 4.0);  // 간단한 프레넬 근사
-//            let a = 1.0 - NdotV;
-//            let b = 1.0 - sheenRoughnessParameter;
-//            let sheenBRDF =  0.65 * (1.0 + 0.5 * sheenRoughnessParameter) * (1.0 + a * a * b * b * 2.0);
-//            envIBL_SHEEN = sheenRadiance * sheenColor * sheenBRDF * sheenFresnel;
-
-
-            let NdotV = max(dot(N, V), 0.0001);
-            let sheenRoughnessAlpha = sheenRoughnessParameter * sheenRoughnessParameter;
-            // 1. 물리적으로 정확한 반사 벡터 계산
-            let R = reflect(-V, N);
-            let sheenLobe = sheenRoughnessParameter * sheenRoughnessParameter; // GGX 기반 분포
-            let sheenSamplingDir = normalize(mix(R, N, sheenLobe));
-
-            var sheenMipLevel = log2(sheenRoughnessParameter) * 1.2 + iblMipmapCount - 1.0;
-            sheenMipLevel = clamp(sheenMipLevel, 0.0, iblMipmapCount - 1.0);
-            let sheenRadiance = textureSampleLevel(ibl_environmentTexture, iblTextureSampler, sheenSamplingDir, sheenMipLevel).rgb;
-
-            // 4. 물리적으로 정확한 Schlick 프레넬 계산
-            // Schlick 근사는 항상 5.0의 지수를 사용 (물리적으로 정확)
-            let F0 = 0.04; // 다이일렉트릭 물질의 기본 프레넬 계수
-            let sheenFresnel = F0 + (1.0 - F0) * pow(1.0 - NdotV, 5.0);
-
-
-            // 6. 에너지 보존 계산 (물리적으로 정확한 다중 산란 보상)
-            let E_VdotN = 1.0 - pow(1.0 - NdotV, 5.0);
-            sheen_albedo_scaling = max(1.0 - maxSheenColor * E_VdotN, 0.04);
-
-            envIBL_SHEEN =  sheenColor * sheenFresnel;
-
-        }
+        #redgpu_if useKHR_materials_sheen
+            let sheenResult = calcIBLSheen(
+                N,
+                V,
+                sheenColor,
+                maxSheenColor,
+                sheenRoughnessParameter,
+                iblMipmapCount
+            );
+            envIBL_SHEEN = sheenResult.envIBL_SHEEN;
+            sheen_albedo_scaling = sheenResult.sheen_albedo_scaling;
+        #redgpu_endIf
 
         // ---------- ibl Metal 계산 ----------
         let envIBL_METAL = select(reflectedColor * max(baseColor.rgb,vec3<f32>(0.04)), reflectedColor * F_IBL, iridescenceParameter>0.0);
@@ -1048,27 +980,27 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
         var indirectLighting = metallicPart + dielectricPart + envIBL_SHEEN; // sheen 파트 포함
 
         // ---------- ibl clearcoat 계산 ----------
-        if (clearcoatParameter > 0.0) {
-             // 클리어코트 반사 벡터와 뷰 각도 계산
-             let clearcoatR = reflect(-V, clearcoatNormal);
-             let clearcoatNdotV = max(dot(clearcoatNormal, V), 0.04);
-             let clearcoatMipLevel = pow(clearcoatRoughnessParameter,0.4) * iblMipmapCount;
-             let clearcoatPrefilteredColor = textureSampleLevel(ibl_environmentTexture, iblTextureSampler, clearcoatR, clearcoatMipLevel).rgb;
-             let clearcoatF0 = F0;
-             let clearcoatF = clearcoatF0 + (vec3<f32>(1.0) - clearcoatF0) * pow(1.0 - clearcoatNdotV, 5.0);
-             let clearcoatK = (clearcoatRoughnessParameter + 1.0) * (clearcoatRoughnessParameter + 1.0) / 8.0;
-             let clearcoatG = clearcoatNdotV / (clearcoatNdotV * (1.0 - clearcoatK) + clearcoatK);
-             let clearcoatBRDF = clearcoatF * clearcoatG;
-             let clearcoatSpecularIBL = clearcoatPrefilteredColor * clearcoatBRDF * clearcoatParameter;
-             let clearcoatFresnel = clearcoatF ;
-             indirectLighting = clearcoatSpecularIBL  + (vec3<f32>(1.0) - clearcoatFresnel) * indirectLighting;
-        }
+        #redgpu_if useKHR_materials_clearcoat
+            if (clearcoatParameter > 0.0) {
+                 // 클리어코트 반사 벡터와 뷰 각도 계산
+                 let clearcoatR = reflect(-V, clearcoatNormal);
+                 let clearcoatNdotV = max(dot(clearcoatNormal, V), 0.04);
+                 let clearcoatMipLevel = pow(clearcoatRoughnessParameter,0.4) * iblMipmapCount;
+                 let clearcoatPrefilteredColor = textureSampleLevel(ibl_environmentTexture, iblTextureSampler, clearcoatR, clearcoatMipLevel).rgb;
+                 let clearcoatF0 = F0;
+                 let clearcoatF = clearcoatF0 + (vec3<f32>(1.0) - clearcoatF0) * pow(1.0 - clearcoatNdotV, 5.0);
+                 let clearcoatK = (clearcoatRoughnessParameter + 1.0) * (clearcoatRoughnessParameter + 1.0) / 8.0;
+                 let clearcoatG = clearcoatNdotV / (clearcoatNdotV * (1.0 - clearcoatK) + clearcoatK);
+                 let clearcoatBRDF = clearcoatF * clearcoatG;
+                 let clearcoatSpecularIBL = clearcoatPrefilteredColor * clearcoatBRDF * clearcoatParameter;
+                 let clearcoatFresnel = clearcoatF ;
+                 indirectLighting = clearcoatSpecularIBL  + (vec3<f32>(1.0) - clearcoatFresnel) * indirectLighting;
+            }
+        #redgpu_endIf
 
         // 최종 IBL 적용
         let environmentIntensity = 1.0;
         let surfaceColor = totalDirectLighting + indirectLighting * environmentIntensity * occlusionParameter;
-
-        // 단순화된 최종 색상 계산 (트랜스미션은 이미 indirectLighting에 통합됨)
         finalColor = vec4<f32>(surfaceColor, resultAlpha);
 
     } else {
@@ -1078,25 +1010,58 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     }
 
     // ---------- emissive 합산 ----------
-    if (u_useEmissiveTexture) {
-        let emissiveSamplerColor: vec4<f32> = (textureSample(emissiveTexture, emissiveTextureSampler, emissiveUV));
-        finalColor += vec4<f32>( emissiveSamplerColor.rgb * u_emissiveFactor * u_emissiveStrength, 0);
-    } else {
-        finalColor += (vec4<f32>(u_emissiveFactor * u_emissiveStrength, 0));
-    }
+    var emissiveSamplerColor = vec3<f32>(1.0);
+    #redgpu_if emissiveTexture
+        emissiveSamplerColor = textureSample(emissiveTexture, emissiveTextureSampler, emissiveUV).rgb;
+    #redgpu_endIf
+    finalColor += vec4<f32>( emissiveSamplerColor.rgb * u_emissiveFactor * u_emissiveStrength, 0);
 
     // ---------- srgb로 변환해주어야함 ----------
     finalColor = linear_to_srgb(finalColor);
 
     // ---------- 컷오프 판단 ----------
-    if (u_useCutOff) {
-        if (resultAlpha <= u_cutOff) {
-            discard;
-        }
-    }
+    #redgpu_if useCutOff
+        if (resultAlpha <= u_cutOff) { discard; }
+    #redgpu_endIf
 
     return finalColor;
 };
+// ---------- KHR_materials_anisotropy ----------
+
+// ---------- KHR_materials_sheen ----------
+struct SheenResult {
+    envIBL_SHEEN: vec3<f32>,
+    sheen_albedo_scaling: f32
+}
+
+fn calcIBLSheen(
+    N:vec3<f32>,
+    V:vec3<f32>,
+    sheenColor:vec3<f32>,
+    maxSheenColor:f32,
+    sheenRoughnessParameter:f32,
+    iblMipmapCount:f32
+) -> SheenResult {
+    let NdotV = max(dot(N, V), 0.0001);
+    let sheenRoughnessAlpha = sheenRoughnessParameter * sheenRoughnessParameter;
+    let R = reflect(-V, N);
+    let sheenLobe = sheenRoughnessParameter * sheenRoughnessParameter; // GGX 기반 분포
+    let sheenSamplingDir = normalize(mix(R, N, sheenLobe));
+
+    var sheenMipLevel = log2(sheenRoughnessParameter) * 1.2 + iblMipmapCount - 1.0;
+    sheenMipLevel = clamp(sheenMipLevel, 0.0, iblMipmapCount - 1.0);
+    let sheenRadiance = textureSampleLevel(ibl_environmentTexture, iblTextureSampler, sheenSamplingDir, sheenMipLevel).rgb;
+
+    let F0 = 0.04;
+    let sheenFresnel = F0 + (1.0 - F0) * pow(1.0 - NdotV, 5.0);
+
+    let E_VdotN = 1.0 - pow(1.0 - NdotV, 5.0);
+    let sheen_albedo_scaling = max(1.0 - maxSheenColor * E_VdotN, 0.04);
+    let envIBL_SHEEN = sheenColor * sheenFresnel;
+
+    return SheenResult(envIBL_SHEEN, sheen_albedo_scaling);
+}
+// ---------------------------------------------
 fn calcPrePathBackground(
     u_useKHR_materials_volume:bool, thicknessParameter:f32, u_KHR_dispersion:f32, u_KHR_attenuationDistance:f32, u_KHR_attenuationColor:vec3<f32>,
     ior:f32, roughnessParameter:f32, albedo:vec3<f32>,
