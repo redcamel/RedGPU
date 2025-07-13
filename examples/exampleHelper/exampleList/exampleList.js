@@ -303,6 +303,15 @@ const ExampleList = [
 							en: ``
 						},
 					},
+					{
+						name: 'Fragment Variant Test',
+						path: '3d/material/fragmentVariantTest',
+						thumb: '3d/material/fragmentVariantTest/thumb.png',
+						description: {
+							ko: ``,
+							en: ``
+						},
+					},
 
 				]
 			},
