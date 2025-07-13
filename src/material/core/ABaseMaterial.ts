@@ -172,50 +172,6 @@ class ABaseMaterial extends ResourceBase {
 		this._updateFragmentState()
 	}
 
-	#findMatchingVariantKey(): string {
-		const {fragmentShaderVariantConditionalBlocks, fragmentShaderSourceVariant} = this.gpuRenderInfo;
-		const availableVariants = Object.keys(fragmentShaderSourceVariant);
-
-		// 🎯 현재 활성화된 기능들 확인 (fragmentShaderVariantConditionalBlocks 기반)
-		const activeFeatures = new Set<string>();
-
-		// 실제 셰이더에서 발견된 조건부 블록들만 체크
-		for (const uniformName of fragmentShaderVariantConditionalBlocks) {
-			keepLog(uniformName, !!this[uniformName]);
-			if (this[uniformName]) {
-				activeFeatures.add(uniformName);
-			}
-		}
-
-		keepLog('fragmentShaderVariantConditionalBlocks', fragmentShaderVariantConditionalBlocks);
-		keepLog('activeFeatures', activeFeatures, this);
-
-		// 🎯 가장 적합한 바리안트 키 찾기
-		let bestMatch = 'none';
-		let bestScore = -1;
-
-		for (const variantKey of availableVariants) {
-			const variantFeatures = variantKey === 'none' ? [] : variantKey.split('+');
-			const variantFeaturesSet = new Set(variantFeatures);
-
-			// 🎯 정확히 일치하는 경우
-			if (this.#setsEqual(activeFeatures, variantFeaturesSet)) {
-				keepLog('🎯 완전 일치하는 바리안트 발견:', variantKey);
-				return variantKey;
-			}
-
-			// 🎯 부분 일치 점수 계산
-			const intersection = new Set([...activeFeatures].filter(x => variantFeaturesSet.has(x)));
-			const score = intersection.size - Math.abs(activeFeatures.size - variantFeaturesSet.size);
-			if (score > bestScore) {
-				bestScore = score;
-				bestMatch = variantKey;
-			}
-		}
-
-		keepLog('🎯 선택된 바리안트:', bestMatch, '(활성 기능:', Array.from(activeFeatures), ')');
-		return bestMatch;
-	}
 
 	/**
 	 * 🎯 두 Set이 동일한지 확인
@@ -232,8 +188,8 @@ class ABaseMaterial extends ResourceBase {
 		const variantShaderModuleName = `${this.#FRAGMENT_SHADER_MODULE_NAME}_${currentVariantKey}`;
 		let targetShaderModule = resourceManager.getGPUShaderModule(variantShaderModuleName);
 		if (!targetShaderModule) {
-			// 🎯 바리안트 소스 코드 가져오기
-			const variantSource = this.gpuRenderInfo.fragmentShaderSourceVariant[currentVariantKey];
+			// 🎯 레이지 바리안트 생성기에서 바리안트 소스 코드 가져오기
+			const variantSource = this.gpuRenderInfo.fragmentShaderSourceVariant.getVariant(currentVariantKey);
 			if (variantSource) {
 				console.log('🎯 바리안트 셰이더 모듈 생성:', currentVariantKey);
 				targetShaderModule = resourceManager.createGPUShaderModule(
@@ -249,6 +205,32 @@ class ABaseMaterial extends ResourceBase {
 		}
 		// 🎯 셰이더 모듈 업데이트
 		this.gpuRenderInfo.fragmentShaderModule = targetShaderModule;
+	}
+
+	#findMatchingVariantKey(): string {
+		const {fragmentShaderVariantConditionalBlocks, fragmentShaderSourceVariant} = this.gpuRenderInfo;
+
+		// 🎯 현재 활성화된 기능들 확인 (fragmentShaderVariantConditionalBlocks 기반)
+		const activeFeatures = new Set<string>();
+
+		// 실제 셰이더에서 발견된 조건부 블록들만 체크
+		for (const uniformName of fragmentShaderVariantConditionalBlocks) {
+			if (this[uniformName]) {
+				activeFeatures.add(uniformName);
+			}
+		}
+
+		console.log('fragmentShaderVariantConditionalBlocks', fragmentShaderVariantConditionalBlocks);
+		console.log('activeFeatures', activeFeatures, this);
+
+		// 🎯 활성화된 기능들로부터 바리안트 키 생성
+		const variantKey = activeFeatures.size > 0 ?
+			Array.from(activeFeatures).sort().join('+') : 'none';
+
+		if(activeFeatures.size) {
+			keepLog('🎯 선택된 바리안트:', variantKey, '(활성 기능:', Array.from(activeFeatures), ')');
+		}
+		return variantKey;
 	}
 
 	_updateFragmentState() {
@@ -319,7 +301,7 @@ class ABaseMaterial extends ResourceBase {
 		const fragmentUniformBindGroup: GPUBindGroup = gpuDevice.createBindGroup(bindGroupDescriptor)
 		this.gpuRenderInfo.fragmentState = this.getFragmentRenderState()
 		this.gpuRenderInfo.fragmentUniformBindGroup = fragmentUniformBindGroup
-		keepLog(this.gpuRenderInfo)
+		// keepLog(this.gpuRenderInfo)
 	}
 
 	getFragmentRenderState(entryPoint: string = 'main'): GPUFragmentState {
