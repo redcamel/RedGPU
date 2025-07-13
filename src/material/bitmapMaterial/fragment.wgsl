@@ -28,7 +28,7 @@ struct InputData {
 fn main(inputData: InputData) -> @location(0) vec4<f32> {
   // 텍스처 색상 샘플링
   var finalColor: vec4<f32> = vec4<f32>(0.0);
-  #redgpu_if useDiffuseTexture
+  #redgpu_if diffuseTexture
   finalColor = textureSample(diffuseTexture, diffuseTextureSampler, inputData.uv);
   #redgpu_endIf
 
