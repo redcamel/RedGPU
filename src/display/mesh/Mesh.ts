@@ -33,7 +33,7 @@ const CPI = 3.141592653589793, CPI2 = 6.283185307179586, C225 = 0.225, C127 = 1.
 interface Mesh {
 	receiveShadow: boolean
 	meshType: string
-	useDisplacementTexture:boolean
+	useDisplacementTexture: boolean
 }
 
 class Mesh extends MeshBase {
@@ -74,20 +74,8 @@ class Mesh extends MeshBase {
 	//
 	#drawDebugger: DrawDebuggerMesh
 	#enableDebugger: boolean = false
-	//
-
-	get enableDebugger(): boolean {
-		return this.#enableDebugger;
-	}
-
-	get drawDebugger(): DrawDebuggerMesh {
-		return this.#drawDebugger;
-	}
-
-	set enableDebugger(value: boolean) {
-		this.#enableDebugger = value;
-		if (value && !this.#drawDebugger) this.#drawDebugger = new DrawDebuggerMesh(this.redGPUContext, this)
-	}
+	#cachedBoundingAABB: AABB
+	#cachedBoundingOBB: OBB
 
 //
 	constructor(redGPUContext: RedGPUContext, geometry?: Geometry | Primitive, material?, name?: string) {
@@ -98,7 +86,22 @@ class Mesh extends MeshBase {
 		this.#pickingId = uuidToUint(this.uuid)
 	}
 
+	//
+	get enableDebugger(): boolean {
+		return this.#enableDebugger;
+	}
+
+	set enableDebugger(value: boolean) {
+		this.#enableDebugger = value;
+		if (value && !this.#drawDebugger) this.#drawDebugger = new DrawDebuggerMesh(this.redGPUContext, this)
+	}
+
+	get drawDebugger(): DrawDebuggerMesh {
+		return this.#drawDebugger;
+	}
+
 	_material
+
 	get material() {
 		return this._material;
 	}
@@ -114,6 +117,7 @@ class Mesh extends MeshBase {
 
 	// 블렌드 모드 설정 함수
 	_geometry: Geometry | Primitive
+
 	get geometry(): Geometry | Primitive {
 		return this._geometry;
 	}
@@ -298,6 +302,28 @@ class Mesh extends MeshBase {
 
 	get rotation(): number[] {
 		return this.#rotationArray;
+	}
+
+	get boundingOBB(): OBB {
+		if (!this.#cachedBoundingOBB || this.dirtyTransform) {
+			this.#cachedBoundingOBB = null
+			this.#cachedBoundingAABB = null
+			this.#cachedBoundingOBB = calculateMeshOBB(this);
+		}
+		return this.#cachedBoundingOBB
+	}
+
+	get boundingAABB(): AABB {
+		if (!this.#cachedBoundingAABB || this.dirtyTransform) {
+			this.#cachedBoundingOBB = null
+			this.#cachedBoundingAABB = null
+			this.#cachedBoundingAABB = calculateMeshAABB(this);
+		}
+		return this.#cachedBoundingAABB
+	}
+
+	get combinedBoundingAABB(): AABB {
+		return calculateMeshCombinedAABB(this)
 	}
 
 	setEnableDebuggerRecursively(enableDebugger: boolean = false) {
@@ -800,7 +826,6 @@ class Mesh extends MeshBase {
 				const {gpuRenderInfo} = this
 				const {vertexUniformBuffer, vertexUniformInfo} = gpuRenderInfo
 				const {members: vertexUniformInfoMembers} = vertexUniformInfo
-
 				if (vertexUniformInfoMembers.displacementScale !== undefined &&
 					vertexUniformInfoMembers.displacementScale !== displacementScale
 				) {
@@ -941,20 +966,34 @@ class Mesh extends MeshBase {
 		updateMeshDirtyPipeline(this)
 	}
 
-	#checkVariant(moduleName:String) {
+	createMeshVertexShaderModuleBASIC = (VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT_BASIC, vertexModuleSource): GPUShaderModule => {
+		const {redGPUContext} = this
+		const {gpuRenderInfo} = this
+		if (gpuRenderInfo.vertexUniformInfo !== UNIFORM_STRUCT_BASIC) {
+			gpuRenderInfo.vertexUniformInfo = UNIFORM_STRUCT_BASIC
+			gpuRenderInfo.vertexStructInfo = SHADER_INFO
+			createMeshVertexUniformBuffers(this)
+		}
+		gpuRenderInfo.vertexShaderSourceVariant = SHADER_INFO.shaderSourceVariant
+		gpuRenderInfo.vertexShaderVariantConditionalBlocks = SHADER_INFO.conditionalBlocks
+		gpuRenderInfo.vertexUniformBindGroup = redGPUContext.gpuDevice.createBindGroup(getBasicMeshVertexBindGroupDescriptor(this));
+		this.#checkVariant(VERTEX_SHADER_MODULE_NAME)
+		return this.gpuRenderInfo.vertexShaderModule
+	}
+
+	#checkVariant(moduleName: String) {
 		const {gpuDevice, resourceManager} = this.redGPUContext
 		// 🎯 현재 머티리얼 상태에 맞는 바리안트 키 찾기
 		const currentVariantKey = this.#findMatchingVariantKey();
 		// 🎯 바리안트별 셰이더 모듈 확인/생성
 		const variantShaderModuleName = `${moduleName}_${currentVariantKey}`;
-
 		let targetShaderModule = resourceManager.getGPUShaderModule(variantShaderModuleName);
 		if (!targetShaderModule) {
 			// 🎯 레이지 바리안트 생성기에서 바리안트 소스 코드 가져오기
 			let variantSource = this.gpuRenderInfo.vertexShaderSourceVariant.getVariant(currentVariantKey);
 			if (variantSource) {
 				keepLog('🎯 버텍스 바리안트 셰이더 모듈 생성:', currentVariantKey, variantShaderModuleName);
-				if(this.animationInfo?.skinInfo){
+				if (this.animationInfo?.skinInfo) {
 					const jointNum = `${this.animationInfo.skinInfo.joints.length}`
 					variantSource = variantSource.replaceAll('#JOINT_NUM', jointNum)
 					this.gpuRenderInfo.vertexShaderSourceVariant.getVariant(currentVariantKey)
@@ -962,13 +1001,12 @@ class Mesh extends MeshBase {
 						`${variantShaderModuleName}_${jointNum}`,
 						{code: variantSource}
 					);
-				}else{
+				} else {
 					targetShaderModule = resourceManager.createGPUShaderModule(
 						variantShaderModuleName,
 						{code: variantSource}
 					);
 				}
-
 			} else {
 				console.warn('⚠️ 버텍스 바리안트 소스를 찾을 수 없음:', currentVariantKey);
 				targetShaderModule = this.gpuRenderInfo.vertexShaderModule; // 기본값 사용
@@ -1000,46 +1038,6 @@ class Mesh extends MeshBase {
 			console.log('🎯 선택된 바리안트:', variantKey, '(활성 기능:', Array.from(activeFeatures), ')');
 		}
 		return variantKey;
-	}
-
-	createMeshVertexShaderModuleBASIC=(VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT_BASIC, vertexModuleSource):GPUShaderModule => {
-		const {redGPUContext} = this
-		const {gpuRenderInfo} = this
-		if (gpuRenderInfo.vertexUniformInfo !== UNIFORM_STRUCT_BASIC) {
-			gpuRenderInfo.vertexUniformInfo = UNIFORM_STRUCT_BASIC
-			gpuRenderInfo.vertexStructInfo = SHADER_INFO
-			createMeshVertexUniformBuffers(this)
-		}
-		gpuRenderInfo.vertexShaderSourceVariant = SHADER_INFO.shaderSourceVariant
-		gpuRenderInfo.vertexShaderVariantConditionalBlocks = SHADER_INFO.conditionalBlocks
-		gpuRenderInfo.vertexUniformBindGroup = redGPUContext.gpuDevice.createBindGroup(getBasicMeshVertexBindGroupDescriptor(this));
-		this.#checkVariant(VERTEX_SHADER_MODULE_NAME)
-		return this.gpuRenderInfo.vertexShaderModule
-	}
-
-	#cachedBoundingAABB: AABB
-	#cachedBoundingOBB: OBB
-
-	get boundingOBB(): OBB {
-		if (!this.#cachedBoundingOBB || this.dirtyTransform) {
-			this.#cachedBoundingOBB = null
-			this.#cachedBoundingAABB = null
-			this.#cachedBoundingOBB = calculateMeshOBB(this);
-		}
-		return this.#cachedBoundingOBB
-	}
-
-	get boundingAABB(): AABB {
-		if (!this.#cachedBoundingAABB || this.dirtyTransform) {
-			this.#cachedBoundingOBB = null
-			this.#cachedBoundingAABB = null
-			this.#cachedBoundingAABB = calculateMeshAABB(this);
-		}
-		return this.#cachedBoundingAABB
-	}
-
-	get combinedBoundingAABB(): AABB {
-		return calculateMeshCombinedAABB(this)
 	}
 }
 

@@ -172,61 +172,6 @@ class ABaseMaterial extends ResourceBase {
 		this._updateFragmentState()
 	}
 
-
-	#checkVariant() {
-		const {gpuDevice, resourceManager} = this.redGPUContext
-		// 🎯 현재 머티리얼 상태에 맞는 바리안트 키 찾기
-		const currentVariantKey = this.#findMatchingVariantKey();
-		// 🎯 바리안트별 셰이더 모듈 확인/생성
-		const variantShaderModuleName = `${this.#FRAGMENT_SHADER_MODULE_NAME}_${currentVariantKey}`;
-		// keepLog('f_variantShaderModuleName',variantShaderModuleName)
-		let targetShaderModule = resourceManager.getGPUShaderModule(variantShaderModuleName);
-		if (!targetShaderModule) {
-			// 🎯 레이지 바리안트 생성기에서 바리안트 소스 코드 가져오기
-			const variantSource = this.gpuRenderInfo.fragmentShaderSourceVariant.getVariant(currentVariantKey);
-			if (variantSource) {
-				keepLog('🎯프레그먼트 바리안트 셰이더 모듈 생성:', currentVariantKey,variantShaderModuleName);
-				targetShaderModule = resourceManager.createGPUShaderModule(
-					variantShaderModuleName,
-					{code: variantSource}
-				);
-			} else {
-				console.warn('⚠️ 바리안트 소스를 찾을 수 없음:', currentVariantKey);
-				targetShaderModule = this.gpuRenderInfo.fragmentShaderModule; // 기본값 사용
-			}
-		} else {
-			console.log('🚀 바리안트 셰이더 모듈 캐시 히트:', currentVariantKey);
-		}
-		// 🎯 셰이더 모듈 업데이트
-		this.gpuRenderInfo.fragmentShaderModule = targetShaderModule;
-	}
-
-	#findMatchingVariantKey(): string {
-		const {fragmentShaderVariantConditionalBlocks} = this.gpuRenderInfo;
-
-		// 🎯 현재 활성화된 기능들 확인 (fragmentShaderVariantConditionalBlocks 기반)
-		const activeFeatures = new Set<string>();
-
-		// 실제 셰이더에서 발견된 조건부 블록들만 체크
-		for (const uniformName of fragmentShaderVariantConditionalBlocks) {
-			if (this[uniformName]) {
-				activeFeatures.add(uniformName);
-			}
-		}
-
-		console.log('fragmentShaderVariantConditionalBlocks', fragmentShaderVariantConditionalBlocks);
-		console.log('activeFeatures', activeFeatures, this);
-
-		// 🎯 활성화된 기능들로부터 바리안트 키 생성
-		const variantKey = activeFeatures.size > 0 ?
-			Array.from(activeFeatures).sort().join('+') : 'none';
-
-		if(activeFeatures.size) {
-			console.log('🎯 선택된 바리안트:', variantKey, '(활성 기능:', Array.from(activeFeatures), ')');
-		}
-		return variantKey;
-	}
-
 	_updateFragmentState() {
 		const {gpuDevice, resourceManager} = this.redGPUContext
 		this.#checkVariant()
@@ -340,6 +285,55 @@ class ABaseMaterial extends ResourceBase {
 
 	getGPUResourceSampler(sampler: Sampler) {
 		return sampler?.gpuSampler || this.#basicGPUSampler
+	}
+
+	#checkVariant() {
+		const {gpuDevice, resourceManager} = this.redGPUContext
+		// 🎯 현재 머티리얼 상태에 맞는 바리안트 키 찾기
+		const currentVariantKey = this.#findMatchingVariantKey();
+		// 🎯 바리안트별 셰이더 모듈 확인/생성
+		const variantShaderModuleName = `${this.#FRAGMENT_SHADER_MODULE_NAME}_${currentVariantKey}`;
+		// keepLog('f_variantShaderModuleName',variantShaderModuleName)
+		let targetShaderModule = resourceManager.getGPUShaderModule(variantShaderModuleName);
+		if (!targetShaderModule) {
+			// 🎯 레이지 바리안트 생성기에서 바리안트 소스 코드 가져오기
+			const variantSource = this.gpuRenderInfo.fragmentShaderSourceVariant.getVariant(currentVariantKey);
+			if (variantSource) {
+				keepLog('🎯프레그먼트 바리안트 셰이더 모듈 생성:', currentVariantKey, variantShaderModuleName);
+				targetShaderModule = resourceManager.createGPUShaderModule(
+					variantShaderModuleName,
+					{code: variantSource}
+				);
+			} else {
+				console.warn('⚠️ 바리안트 소스를 찾을 수 없음:', currentVariantKey);
+				targetShaderModule = this.gpuRenderInfo.fragmentShaderModule; // 기본값 사용
+			}
+		} else {
+			console.log('🚀 바리안트 셰이더 모듈 캐시 히트:', currentVariantKey);
+		}
+		// 🎯 셰이더 모듈 업데이트
+		this.gpuRenderInfo.fragmentShaderModule = targetShaderModule;
+	}
+
+	#findMatchingVariantKey(): string {
+		const {fragmentShaderVariantConditionalBlocks} = this.gpuRenderInfo;
+		// 🎯 현재 활성화된 기능들 확인 (fragmentShaderVariantConditionalBlocks 기반)
+		const activeFeatures = new Set<string>();
+		// 실제 셰이더에서 발견된 조건부 블록들만 체크
+		for (const uniformName of fragmentShaderVariantConditionalBlocks) {
+			if (this[uniformName]) {
+				activeFeatures.add(uniformName);
+			}
+		}
+		console.log('fragmentShaderVariantConditionalBlocks', fragmentShaderVariantConditionalBlocks);
+		console.log('activeFeatures', activeFeatures, this);
+		// 🎯 활성화된 기능들로부터 바리안트 키 생성
+		const variantKey = activeFeatures.size > 0 ?
+			Array.from(activeFeatures).sort().join('+') : 'none';
+		if (activeFeatures.size) {
+			console.log('🎯 선택된 바리안트:', variantKey, '(활성 기능:', Array.from(activeFeatures), ')');
+		}
+		return variantKey;
 	}
 }
 

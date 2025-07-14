@@ -4,13 +4,13 @@ class ShaderVariantGenerator {
 	#variantCache = new Map<string, string>();
 	#defines: string
 	#conditionalBlocks: ConditionalBlock[]
+
 	constructor(
 		defines: string,
 		conditionalBlocks: ConditionalBlock[]
 	) {
 		this.#defines = defines;
 		this.#conditionalBlocks = conditionalBlocks;
-
 	}
 
 	/**
@@ -22,18 +22,13 @@ class ShaderVariantGenerator {
 			console.log(' 바리안트 캐시 히트:', variantKey);
 			return this.#variantCache.get(variantKey)!;
 		}
-
 		console.log('바리안트 생성:', variantKey);
-
 		// 활성화된 키 파싱
 		const enabledKeys = variantKey === 'none' ? [] : variantKey.split('+');
-
 		// 셰이더 코드 생성
 		const variantCode = this.#processConditionalBlocks(enabledKeys);
-
 		// 캐시에 저장
 		this.#variantCache.set(variantKey, variantCode);
-
 		return variantCode;
 	}
 
@@ -49,12 +44,10 @@ class ShaderVariantGenerator {
 	 */
 	#processConditionalBlocks(enabledKeys: string[]): string {
 		let variantCode = this.#defines;
-
 		// 뒤에서부터 처리 (인덱스 변경 방지)
 		for (let blockIdx = this.#conditionalBlocks.length - 1; blockIdx >= 0; blockIdx--) {
 			const block = this.#conditionalBlocks[blockIdx];
 			const isKeyEnabled = enabledKeys.includes(block.uniformName);
-
 			if (isKeyEnabled) {
 				// 조건이 true일 때 - ifBlock 사용
 				variantCode = variantCode.replace(block.fullMatch, block.ifBlock);
@@ -63,10 +56,8 @@ class ShaderVariantGenerator {
 				variantCode = variantCode.replace(block.fullMatch, block.elseBlock || '');
 			}
 		}
-
 		return variantCode;
 	}
-
 }
 
 export default ShaderVariantGenerator;

@@ -19,11 +19,10 @@ import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
 import InstanceIdGenerator from "../../utils/InstanceIdGenerator";
 import screenToWorld from "../../utils/math/screenToWorld";
-import DrawDebuggerPointLight from "../drawDebugger/light/DrawDebuggerPointLight";
-import DrawDebuggerSpotLight from "../drawDebugger/light/DrawDebuggerSpotLight";
-
 import DrawDebuggerAxis from "../drawDebugger/DrawDebuggerAxis";
 import DrawDebuggerGrid from "../drawDebugger/grid/DrawDebuggerGrid";
+import DrawDebuggerPointLight from "../drawDebugger/light/DrawDebuggerPointLight";
+import DrawDebuggerSpotLight from "../drawDebugger/light/DrawDebuggerSpotLight";
 import Scene from "../scene/Scene";
 import SkyBox from "../skyboxs/skyBox/SkyBox";
 import ViewRenderTextureManager from "./ViewRenderTextureManager";
@@ -140,12 +139,6 @@ class View3D extends ViewTransform {
 		return this.#grid;
 	}
 
-	screenToWorld(
-		screenX: number,
-		screenY: number,
-	) {
-		return screenToWorld(screenX, screenY, this)
-	}
 	set grid(value: DrawDebuggerGrid | boolean) {
 		if (typeof value === 'boolean') {
 			if (value === true) {
@@ -217,6 +210,13 @@ class View3D extends ViewTransform {
 	set scene(value: Scene) {
 		if (!(value instanceof Scene)) consoleAndThrowError('allow only Scene instance')
 		this.#scene = value;
+	}
+
+	screenToWorld(
+		screenX: number,
+		screenY: number,
+	) {
+		return screenToWorld(screenX, screenY, this)
 	}
 
 	update(view: View3D, shadowRender: boolean = false, calcPointLightCluster: boolean = false, renderPath1ResultTextureView?: GPUTextureView) {
@@ -374,7 +374,7 @@ class View3D extends ViewTransform {
 
 	#updateClusters(calcClusterLight: boolean = false) {
 		if (!calcClusterLight) return
-		const {redGPUContext, scene,debugViewRenderState} = this
+		const {redGPUContext, scene, debugViewRenderState} = this
 		// const dirtyPixelSize = this.#prevWidth == undefined || this.#prevHeight == undefined || this.#prevWidth !== this.pixelRectArray[2] || this.#prevHeight !== this.pixelRectArray[3]
 		const dirtyPixelSize = true;
 		if (!this.#passLightClustersBound) {

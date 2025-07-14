@@ -1,10 +1,11 @@
 import AABB from "./bound/AABB";
+import calculateGeometryAABB from "./bound/calculateGeometryAABB";
+import calculateMeshAABB from "./bound/calculateMeshAABB";
 import calculateMeshCombinedAABB from "./bound/calculateMeshCombinedAABB";
+import calculateMeshOBB from "./bound/calculateMeshOBB";
 import OBB from "./bound/OBB";
 import calculateNormals from "./calculateNormals";
 import calculateTextureByteSize from "./calculateTextureByteSize";
-import calculateMeshAABB from "./bound/calculateMeshAABB";
-import calculateGeometryAABB from "./bound/calculateGeometryAABB";
 import computeViewFrustumPlanes from "./computeViewFrustumPlanes";
 import formatBytes from "./formatBytes";
 import getMipLevelCount from "./getMipLevelCount";
@@ -14,11 +15,9 @@ import matToEuler from "./matToEuler";
 import quaternionToRotationMat4 from "./quaternionToRotationMat4";
 import screenToWorld from "./screenToWorld";
 import sortTransparentObjects from "./sortTransparentObjects";
-import calculateMeshOBB from "./bound/calculateMeshOBB";
 import worldToLocal from "./worldToLocal";
 
 export {
-
 	getScreenPoint,
 	screenToWorld,
 	localToWorld,

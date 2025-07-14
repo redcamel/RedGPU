@@ -79,11 +79,13 @@ class SpotLight extends BaseLight {
 	get direction(): [number, number, number] {
 		return [this.#directionX, this.#directionY, this.#directionZ];
 	}
+
 	set direction(value: [number, number, number]) {
 		this.#directionX = value[0];
 		this.#directionY = value[1];
 		this.#directionZ = value[2];
 	}
+
 	// 각도를 직접 반환 (degrees)
 	get innerCutoff(): number {
 		return this.#innerCutoff;
@@ -119,8 +121,6 @@ class SpotLight extends BaseLight {
 			this.#z = z!;
 		}
 	}
-
-
 
 	lookAt(targetX: number | [number, number, number], targetY?: number, targetZ?: number): void {
 		let tx: number, ty: number, tz: number;

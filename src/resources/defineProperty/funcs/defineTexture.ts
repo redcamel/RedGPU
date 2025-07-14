@@ -10,18 +10,15 @@ function createSetter(propertyKey: string, symbol: symbol, isFragment: boolean) 
 		const {gpuRenderInfo} = this
 		if (isFragment) {
 			const {fragmentUniformInfo, fragmentUniformBuffer} = gpuRenderInfo
-			if(useKey in this){
+			if (useKey in this) {
 				this[useKey] = !!texture
-			}
-			else{
+			} else {
 				if (fragmentUniformInfo.members[useKey]) {
 					fragmentUniformBuffer.writeBuffer(fragmentUniformInfo.members[useKey], texture ? 1 : 0)
 				} else {
 					// console.warn(this.material, useKey, '는 fragment shader에 정의 되어있지 않습니다. 문제가 되지 않을수 있으나 확인 필요')
 				}
 			}
-
-
 		} else if (gpuRenderInfo) {
 			const {vertexUniformInfo, vertexUniformBuffer} = gpuRenderInfo;
 			if (vertexUniformInfo.members[useKey]) {

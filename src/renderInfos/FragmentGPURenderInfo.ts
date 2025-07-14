@@ -6,8 +6,8 @@ import ShaderVariantGenerator from "../resources/wgslParser/ShaderVariantGenerat
  */
 class FragmentGPURenderInfo {
 	fragmentShaderModule: GPUShaderModule;
-	fragmentShaderSourceVariant:ShaderVariantGenerator;
-	fragmentShaderVariantConditionalBlocks:string[];
+	fragmentShaderSourceVariant: ShaderVariantGenerator;
+	fragmentShaderVariantConditionalBlocks: string[];
 	fragmentUniformInfo: any;
 	fragmentBindGroupLayout: GPUBindGroupLayout;
 	fragmentUniformBuffer: UniformBuffer;
@@ -16,8 +16,8 @@ class FragmentGPURenderInfo {
 
 	constructor(
 		fragmentShaderModule: GPUShaderModule,
-		fragmentShaderSourceVariant:ShaderVariantGenerator,
-		fragmentShaderVariantConditionalBlocks:string[],
+		fragmentShaderSourceVariant: ShaderVariantGenerator,
+		fragmentShaderVariantConditionalBlocks: string[],
 		fragmentUniformInfo: any,
 		fragmentBindGroupLayout: GPUBindGroupLayout,
 		fragmentUniformBuffer: UniformBuffer,

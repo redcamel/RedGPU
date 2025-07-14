@@ -1,5 +1,4 @@
 import {WgslReflect} from "wgsl_reflect";
-import {keepLog} from "../../utils";
 import UniformType from "../buffer/core/type/UniformType";
 import preprocessWGSL from "./preprocessWGSL";
 
@@ -72,7 +71,7 @@ const processStorages = (storage) => {
 };
 const reflectCache = new Map<string, any>();
 const parseWGSL = (code: string) => {
-	const {defaultSource, shaderSourceVariant, conditionalBlocks,cacheKey} = preprocessWGSL(code);
+	const {defaultSource, shaderSourceVariant, conditionalBlocks, cacheKey} = preprocessWGSL(code);
 	// 🎯 리플렉트 캐시 확인
 	const cachedReflect = reflectCache.get(cacheKey);
 	let reflectResult;

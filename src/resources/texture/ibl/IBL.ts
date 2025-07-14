@@ -15,29 +15,17 @@ class IBL {
 	//
 	#environmentTexture: CubeTexture;
 	#irradianceTexture: CubeTexture;
-	#iblTexture:CubeTexture
+	#iblTexture: CubeTexture
 	#prefilterMap: GPUTexture; //TODO - 일단없어도되니 나중에
 	#brdfLUT: GPUTexture; //TODO - 일단없어도되니 나중에
 	#uuid = createUUID()
 	#format: GPUTextureFormat = 'rgba8unorm'
 	#targetTexture: HDRTexture | CubeTexture
-
-	#envCubeSize:number
-	#iblCubeSize:number
-
-	get exposure(): number {
-		if (this.#targetTexture instanceof HDRTexture) return this.#targetTexture.exposure
-	}
-
-	set exposure(value) {
-		validatePositiveNumberRange(value)
-		if (this.#targetTexture instanceof HDRTexture) {
-			this.#targetTexture.exposure = value
-		}
-	}
+	#envCubeSize: number
+	#iblCubeSize: number
 
 	constructor(redGPUContext: RedGPUContext, srcInfo: string | [string, string, string, string, string, string],
-	            envCubeSize: number = 1024,iblCubeSize:number = 512) {
+	            envCubeSize: number = 1024, iblCubeSize: number = 512) {
 		this.#iblCubeSize = iblCubeSize
 		this.#envCubeSize = envCubeSize
 		this.#redGPUContext = redGPUContext
@@ -69,6 +57,17 @@ class IBL {
 		}
 	}
 
+	get exposure(): number {
+		if (this.#targetTexture instanceof HDRTexture) return this.#targetTexture.exposure
+	}
+
+	set exposure(value) {
+		validatePositiveNumberRange(value)
+		if (this.#targetTexture instanceof HDRTexture) {
+			this.#targetTexture.exposure = value
+		}
+	}
+
 	get envCubeSize(): number {
 		return this.#envCubeSize;
 	}
@@ -94,9 +93,7 @@ class IBL {
 		const {mipmapGenerator} = this.#redGPUContext.resourceManager
 		const iblTexture = await mipmapGenerator.downsampleCubemap(this.#sourceCubeTexture, this.#iblCubeSize)
 		this.#iblTexture.setGPUTextureDirectly(iblTexture, `${this.#uuid}_iblTexture`)
-
 		this.#environmentTexture.setGPUTextureDirectly(this.#sourceCubeTexture, `${this.#uuid}_environmentTexture`)
-
 		const irradianceGPUTexture = await this.#generateIrradianceMap(this.#sourceCubeTexture);
 		this.#irradianceTexture.setGPUTextureDirectly(irradianceGPUTexture, `${this.#uuid}_irradianceTexture`, false);
 	}
