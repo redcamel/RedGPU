@@ -120,7 +120,8 @@ const renderTestPane = async (redGPUContext) => {
 	};
 
 	const updateCylinderGeometry = () => {
-		const meshList = redGPUContext.viewList[0].scene.children.filter(child => child.geometry);
+
+		const meshList = redGPUContext.viewList[0].scene.children.filter(child => !(child instanceof RedGPU.Display.TextField3D));
 
 		const newGeometry = new RedGPU.Primitive.Cylinder(
 			redGPUContext,

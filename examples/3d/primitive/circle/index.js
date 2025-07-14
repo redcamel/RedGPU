@@ -99,7 +99,7 @@ const renderTestPane = async (redGPUContext) => {
 		);
 
 		meshList.forEach((mesh) => {
-			if (mesh.geometry) {
+			if (!(mesh instanceof RedGPU.Display.TextField3D)) {
 				mesh.geometry = newGeometry;
 			}
 		});
