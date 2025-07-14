@@ -498,9 +498,12 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     let albedo:vec3<f32> = baseColor.rgb ;
 
     // ---------- KHR_materials_unlit ----------
+
+    #redgpu_if useKHR_materials_unlit
     if(u_useKHR_materials_unlit){
         return baseColor;
     }
+    #redgpu_endIf
 
     // ---------- occlusion ----------
     var occlusionParameter:f32 = 1;
@@ -954,9 +957,7 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
         #redgpu_endIf
 
         // ---------- ibl 유전체 합성 ----------
-//        let envIBL_DIELECTRIC = mix(envIBL_SPECULAR_BTDF ,envIBL_DIFFUSE, 1-transmissionParameter) + envIBL_SPECULAR;
-        let envIBL_DIELECTRIC = envIBL_DIFFUSE * (1.0-transmissionParameter) + envIBL_SPECULAR_BTDF + envIBL_SPECULAR;
-
+        let envIBL_DIELECTRIC = mix(envIBL_DIFFUSE ,envIBL_SPECULAR_BTDF, transmissionParameter) + envIBL_SPECULAR;
         // ---------- ibl Sheen 계산 ----------
         var envIBL_SHEEN = vec3<f32>(0.0);
         var sheen_albedo_scaling: f32 = 1.0;
