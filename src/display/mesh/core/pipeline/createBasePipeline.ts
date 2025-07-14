@@ -1,5 +1,6 @@
 import GPU_COMPARE_FUNCTION from "../../../../gpuConst/GPU_COMPARE_FUNCTION";
 import ResourceManager from "../../../../resources/resourceManager/ResourceManager";
+import {keepLog} from "../../../../utils";
 import Mesh from "../../Mesh";
 import PIPELINE_TYPE from "./PIPELINE_TYPE";
 
@@ -15,6 +16,7 @@ const createBasePipeline = (
 	const material_gpuRenderInfo = mesh.material.gpuRenderInfo
 	let entryPoint: string;
 	let pipelineLabel: string;
+	module = mesh.gpuRenderInfo.vertexShaderModule
 	switch (pipelineType) {
 		case PIPELINE_TYPE.SHADOW :
 			entryPoint = 'drawDirectionalShadowDepth'

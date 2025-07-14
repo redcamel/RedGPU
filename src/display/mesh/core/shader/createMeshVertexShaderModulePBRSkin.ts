@@ -1,5 +1,6 @@
 import StorageBuffer from "../../../../resources/buffer/storageBuffer/StorageBuffer";
 import parseWGSL from "../../../../resources/wgslParser/parseWGSL";
+import {keepLog} from "../../../../utils";
 import Mesh from "../../Mesh";
 import vertexModuleSourcePbrSkin from "../../shader/meshVertexPbrSkin.wgsl";
 import createMeshVertexUniformBuffers from "../createMeshVertexUniformBuffers";
@@ -24,7 +25,7 @@ const createMeshVertexShaderModulePBRSkin = (
 		if (mesh.animationInfo.skinInfo) {
 			createMeshVertexUniformBuffers(mesh, true)
 			mesh.animationInfo.skinInfo.vertexStorageInfo = parseWGSL(vModuleDescriptor.code).storage.vertexStorages
-			console.log('mesh.animationInfo.skinInfo.vertexStorageInfo', mesh.animationInfo.skinInfo.vertexStorageInfo)
+			keepLog('mesh.animationInfo.skinInfo.vertexStorageInfo', mesh.animationInfo.skinInfo.vertexStorageInfo)
 			const newData = new ArrayBuffer(mesh.animationInfo.skinInfo.vertexStorageInfo.arrayBufferByteLength)
 			mesh.animationInfo.skinInfo.vertexStorageBuffer = new StorageBuffer(
 				mesh.redGPUContext,
@@ -37,9 +38,11 @@ const createMeshVertexShaderModulePBRSkin = (
 			gpuRenderInfo.vertexUniformBindGroup = redGPUContext.gpuDevice.createBindGroup(getBasicMeshVertexBindGroupDescriptor(mesh));
 		}
 	}
-	return resourceManager.createGPUShaderModule(
+	const module = resourceManager.createGPUShaderModule(
 		label,
 		vModuleDescriptor
 	)
+	mesh.gpuRenderInfo.vertexShaderModule = module
+	return mesh.gpuRenderInfo.vertexShaderModule
 }
 export default createMeshVertexShaderModulePBRSkin

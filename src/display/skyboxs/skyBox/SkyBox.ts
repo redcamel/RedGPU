@@ -198,6 +198,8 @@ class SkyBox {
 		const vertexUniformBindGroup: GPUBindGroup = redGPUContext.gpuDevice.createBindGroup(vertexBindGroupDescriptor)
 		this.gpuRenderInfo = new VertexGPURenderInfo(
 			null,
+			SHADER_INFO.shaderSourceVariant,
+			SHADER_INFO.conditionalBlocks,
 			UNIFORM_STRUCT,
 			vertex_BindGroupLayout,
 			vertexUniformBuffer,

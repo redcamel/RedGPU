@@ -61,7 +61,9 @@ fn main( inputData:InputData ) -> OutputData {
     var position: vec4<f32>;
     var normalPosition: vec4<f32>;
 
-    if (u_useDisplacementTexture) {
+    position = u_modelMatrix * vec4<f32>(input_position, 1.0);
+    normalPosition = u_normalModelMatrix * vec4<f32>(input_vertexNormal, 1.0);
+    #redgpu_if useDisplacementTexture
         // 거리 계산용 임시 위치
         let tempPosition = u_modelMatrix * vec4<f32>(input_position, 1.0);
         let distance = distance(tempPosition.xyz, u_cameraPosition);
@@ -74,10 +76,7 @@ fn main( inputData:InputData ) -> OutputData {
         // 월드 스페이스로 변환
         position = u_modelMatrix * vec4<f32>(displacedPosition, 1.0);
         normalPosition = u_normalModelMatrix * vec4<f32>(displacedNormal, 1.0);
-    } else {
-        position = u_modelMatrix * vec4<f32>(input_position, 1.0);
-        normalPosition = u_normalModelMatrix * vec4<f32>(input_vertexNormal, 1.0);
-    }
+    #redgpu_endIf
 
     output.position = u_projectionMatrix * u_cameraMatrix *  position;
     output.vertexPosition = position.xyz;

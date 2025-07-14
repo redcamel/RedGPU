@@ -173,19 +173,13 @@ class ABaseMaterial extends ResourceBase {
 	}
 
 
-	/**
-	 * 🎯 두 Set이 동일한지 확인
-	 */
-	#setsEqual(a: Set<string>, b: Set<string>): boolean {
-		return a.size === b.size && [...a].every(x => b.has(x));
-	}
-
 	#checkVariant() {
 		const {gpuDevice, resourceManager} = this.redGPUContext
 		// 🎯 현재 머티리얼 상태에 맞는 바리안트 키 찾기
 		const currentVariantKey = this.#findMatchingVariantKey();
 		// 🎯 바리안트별 셰이더 모듈 확인/생성
 		const variantShaderModuleName = `${this.#FRAGMENT_SHADER_MODULE_NAME}_${currentVariantKey}`;
+		// keepLog('f_variantShaderModuleName',variantShaderModuleName)
 		let targetShaderModule = resourceManager.getGPUShaderModule(variantShaderModuleName);
 		if (!targetShaderModule) {
 			// 🎯 레이지 바리안트 생성기에서 바리안트 소스 코드 가져오기
@@ -208,7 +202,7 @@ class ABaseMaterial extends ResourceBase {
 	}
 
 	#findMatchingVariantKey(): string {
-		const {fragmentShaderVariantConditionalBlocks, fragmentShaderSourceVariant} = this.gpuRenderInfo;
+		const {fragmentShaderVariantConditionalBlocks} = this.gpuRenderInfo;
 
 		// 🎯 현재 활성화된 기능들 확인 (fragmentShaderVariantConditionalBlocks 기반)
 		const activeFeatures = new Set<string>();

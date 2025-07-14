@@ -1,8 +1,11 @@
 import StorageBuffer from "../resources/buffer/storageBuffer/StorageBuffer";
 import UniformBuffer from "../resources/buffer/uniformBuffer/UniformBuffer";
+import ShaderVariantGenerator from "../resources/wgslParser/ShaderVariantGenerator";
 
 class VertexGPURenderInfo {
 	vertexShaderModule: GPUShaderModule;
+	vertexShaderSourceVariant: ShaderVariantGenerator;
+	vertexShaderVariantConditionalBlocks: string[];
 	vertexStructInfo: any;
 	vertexUniformInfo: any;
 	vertexBindGroupLayout: GPUBindGroupLayout;
@@ -14,6 +17,8 @@ class VertexGPURenderInfo {
 
 	constructor(
 		vertexShaderModule: GPUShaderModule,
+		vertexShaderSourceVariant: ShaderVariantGenerator,
+		vertexShaderVariantConditionalBlocks: string[],
 		vertexUniformInfo: any,
 		vertexBindGroupLayout: GPUBindGroupLayout,
 		vertexUniformBuffer: UniformBuffer | StorageBuffer,
@@ -23,6 +28,8 @@ class VertexGPURenderInfo {
 		pickingPipeline?: GPURenderPipeline,
 	) {
 		this.vertexShaderModule = vertexShaderModule;
+		this.vertexShaderSourceVariant = vertexShaderSourceVariant;
+		this.vertexShaderVariantConditionalBlocks = vertexShaderVariantConditionalBlocks;
 		this.vertexUniformInfo = vertexUniformInfo;
 		this.vertexBindGroupLayout = vertexBindGroupLayout;
 		this.vertexUniformBindGroup = vertexUniformBindGroup;
