@@ -14,8 +14,6 @@ fn drawDirectionalShadowDepth(inputData: InputData) -> OutputShadowData {
 
     // Vertex별 Uniform 변수 가져오기
     let u_modelMatrix = vertexUniforms.modelMatrix;
-    let u_useDisplacementTexture = vertexUniforms.useDisplacementTexture == 1u;
-    let u_displacementScale = vertexUniforms.displacementScale;
 
     // 입력 데이터
     let input_position = inputData.position;
@@ -36,7 +34,7 @@ fn drawDirectionalShadowDepth(inputData: InputData) -> OutputShadowData {
             input_vertexNormal,
             displacementTexture,
             displacementTextureSampler,
-            u_displacementScale,
+            vertexUniforms.displacementScale,
             input_uv,
             mipLevel
         );

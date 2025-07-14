@@ -1,15 +1,12 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include drawDirectionalShadowDepth;
 #redgpu_include picking;
-#redgpu_include calcDisplacements;
 
 struct VertexUniforms {
     pickingId: u32,
     localMatrix: mat4x4<f32>,
     modelMatrix: mat4x4<f32>,
     normalModelMatrix: mat4x4<f32>,
-    useDisplacementTexture: u32,
-    displacementScale: f32,
     receiveShadow: f32
 };
 
