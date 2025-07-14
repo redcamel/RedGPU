@@ -20,9 +20,9 @@ const BaseTextField2D = mixInMesh2D(ATextField);
 class TextField2D extends BaseTextField2D {
 	#width: number = 1
 	#height: number = 1
-	#useSmoothing: boolean = false;
+	#useSmoothing: boolean = true;
 
-	constructor(redGPUContext: RedGPUContext, useSmoothing: boolean = false) {
+	constructor(redGPUContext: RedGPUContext, useSmoothing: boolean = true) {
 		super(redGPUContext, (width: number, height: number) => {
 			this.#width = width
 			this.#height = height

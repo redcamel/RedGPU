@@ -25,10 +25,13 @@ function createVariantDisplay() {
 		position: fixed;
 		bottom: 70px;
 		left: 0;
+		right:0;
 		background: rgba(0, 0, 0, 0.8);
 		display:flex;
 		flex-direction: column;
 		justify-content: center;
+		align-items: center;
+		text-align: center;
 		color: white;
 		padding: 12px 12px 16px;
 		overflow-x:hidden;
@@ -52,20 +55,14 @@ function updateVariantDisplay(variant) {
 	variantDisplay.innerHTML = `
 		<div style="display: flex;flex-direction: column;gap:6px">
 			<h3>Variant Key</h3>
-			<div style="font-size: 14px; font-weight: bold; color: ${borderColor};display: flex;word-break: keep-all">
+			<div style="font-size: 16px; font-weight: bold; color: ${borderColor};word-break: keep-all">
 				${variant === 'none' ? 'basic (none)' : `${variant}`}
 			</div>
 			<div style="font-size: 12px; color: #E0E0E0;">
-				active features: ${featureCount} | 
+				active features: ${featureCount}
 			</div>
 		</div>
 	`;
-}
-
-function toggleVariantDisplay() {
-	if (!variantDisplay) return;
-	const isVisible = variantDisplay.style.display !== 'none';
-	variantDisplay.style.display = isVisible ? 'none' : 'block';
 }
 
 // ===== 3D Scene Initialization =====
@@ -225,8 +222,7 @@ const renderUI = async (redGPUContext, mesh) => {
 		pane.refresh();
 	});
 
-	// Apply all textures button
-	utilityFolder.addButton({title: "🎨 Apply All Textures"}).on('click', () => {
+	const HD_AllTexture = () => {
 		Object.keys(params.textureVariants).forEach(key => {
 			const textureType = key.replace("use", "").toLowerCase();
 			if (textures[textureType]) {
@@ -236,8 +232,9 @@ const renderUI = async (redGPUContext, mesh) => {
 		});
 		updateVariantInfo();
 		pane.refresh();
-	});
-
+	}
+	utilityFolder.addButton({title: "🎨 Apply All Textures"}).on('click', HD_AllTexture);
+	HD_AllTexture()
 	// ===== Core Functions =====
 
 	function getCurrentVariant() {
