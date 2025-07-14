@@ -228,7 +228,7 @@ class ABaseMaterial extends ResourceBase {
 			Array.from(activeFeatures).sort().join('+') : 'none';
 
 		if(activeFeatures.size) {
-			keepLog('🎯 선택된 바리안트:', variantKey, '(활성 기능:', Array.from(activeFeatures), ')');
+			console.log('🎯 선택된 바리안트:', variantKey, '(활성 기능:', Array.from(activeFeatures), ')');
 		}
 		return variantKey;
 	}

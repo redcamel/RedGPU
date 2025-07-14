@@ -254,36 +254,6 @@ const renderUI = async (redGPUContext, mesh) => {
 		return 'none';
 	}
 
-	function applyVariant(variantKey) {
-		console.log('Applying Phong variant:', variantKey);
-
-		const features = variantKey === 'none' ? [] : variantKey.split('+');
-
-		// Reset all textures
-		Object.keys(params.textureVariants).forEach(key => {
-			params.textureVariants[key] = false;
-			const textureType = key.replace("use", "").toLowerCase();
-			material[`${textureType}Texture`] = null;
-		});
-
-		// Reset properties
-		material.emissiveStrength = 0;
-		material.specularStrength = 0;
-		material.normalScale = 1.0;
-
-		// Apply activated features
-		features.forEach(feature => {
-			if (feature.endsWith('Texture')) {
-				const textureType = feature.replace('Texture', '');
-				if (textures[textureType]) {
-					material[feature] = textures[textureType];
-					params.textureVariants[`use${textureType.charAt(0).toUpperCase() + textureType.slice(1)}`] = true;
-				}
-			}
-		});
-
-		pane.refresh();
-	}
 
 	function updateVariantInfo() {
 		const currentVariant = getCurrentVariant();
@@ -291,6 +261,7 @@ const renderUI = async (redGPUContext, mesh) => {
 
 		if (shaderVariantGenerator) {
 			params.shaderVariants.cachedVariants = shaderVariantGenerator.getCachedVariants().length;
+			console.log(shaderVariantGenerator.getCachedVariants())
 		}
 
 		updateVariantDisplay(currentVariant);

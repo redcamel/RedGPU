@@ -99,10 +99,10 @@ const logDuplicateKeys = (conditionalBlocks: ConditionalBlock[]): void => {
 
 	const duplicateKeys = Array.from(keyCount.entries()).filter(([_, count]) => count > 1);
 	if (duplicateKeys.length > 0) {
-		keepLog('🎯 중복 키 발견:', duplicateKeys.map(([key, count]) => `${key}(${count}개)`));
+		console.log('🎯 중복 키 발견:', duplicateKeys.map(([key, count]) => `${key}(${count}개)`));
 	}
 
-	console.log('🎯 발견된 조건부 블록들:', conditionalBlocks.map(b => `${b.uniformName}[${b.blockIndex}]`));
+	console.log('발견된 조건부 블록들:', conditionalBlocks.map(b => `${b.uniformName}[${b.blockIndex}]`));
 };
 
 /**
@@ -111,11 +111,10 @@ const logDuplicateKeys = (conditionalBlocks: ConditionalBlock[]): void => {
 const generateDefaultSource = (defines: string, conditionalBlocks: ConditionalBlock[]): string => {
 	let defaultSource = defines;
 
-	// 뒤에서부터 치환 (인덱스 변경 방지)
 	for (let i = conditionalBlocks.length - 1; i >= 0; i--) {
 		const block = conditionalBlocks[i];
 		defaultSource = defaultSource.replace(block.fullMatch, block.codeBlock);
-		console.log('✅ 기본 셰이더에 포함:', `${block.uniformName}[${block.blockIndex}]`);
+		// console.log('✅ 기본 셰이더에 포함:', `${block.uniformName}[${block.blockIndex}]`);
 	}
 
 	return defaultSource;
@@ -170,7 +169,7 @@ const preprocessWGSL = (code: string): PreprocessedWGSLResult => {
 	if (totalCombinations > 1) {
 		console.log(`🎯 레이지 바리안트 생성기 초기화 (캐시 저장):`, totalCombinations, cacheKey);
 		console.log('🎯 고유 키들:', uniqueKeys);
-		keepLog('🎯 이론적 가능한 바리안트 수:', totalCombinations);
+		console.log('🎯 이론적 가능한 바리안트 수:', totalCombinations);
 	}
 // keepLog('shaderSourceVariant',shaderSourceVariant)
 	return result;
