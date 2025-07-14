@@ -58,21 +58,26 @@ fn main( inputData:InputData ) -> OutputData {
   let input_vertexNormal = inputData.vertexNormal;
   let input_uv = inputData.uv;
 
-  var position:vec4<f32>;
-  var normalPosition:vec4<f32>;
-  position = u_modelMatrix * vec4<f32>(input_position, 1.0);
+    var position: vec4<f32>;
+    var normalPosition: vec4<f32>;
 
     if (u_useDisplacementTexture) {
-        let distance = distance(position.xyz, u_cameraPosition);
+        // 거리 계산용 임시 위치
+        let tempPosition = u_modelMatrix * vec4<f32>(input_position, 1.0);
+        let distance = distance(tempPosition.xyz, u_cameraPosition);
         let mipLevel = (distance / maxDistance) * maxMipLevel;
-        let displacedPosition = calcDisplacementPosition(input_position,input_vertexNormal,displacementTexture, displacementTextureSampler, u_displacementScale, input_uv, mipLevel);
+
+        // 로컬 스페이스에서 디스플레이스먼트 계산
+        let displacedPosition = calcDisplacementPosition(input_position, input_vertexNormal, displacementTexture, displacementTextureSampler, u_displacementScale, input_uv, mipLevel);
         let displacedNormal = calcDisplacementNormal(input_vertexNormal, displacementTexture, displacementTextureSampler, u_displacementScale, input_uv, mipLevel);
+
+        // 월드 스페이스로 변환
         position = u_modelMatrix * vec4<f32>(displacedPosition, 1.0);
         normalPosition = u_normalModelMatrix * vec4<f32>(displacedNormal, 1.0);
     } else {
+        position = u_modelMatrix * vec4<f32>(input_position, 1.0);
         normalPosition = u_normalModelMatrix * vec4<f32>(input_vertexNormal, 1.0);
     }
-
 
     output.position = u_projectionMatrix * u_cameraMatrix *  position;
     output.vertexPosition = position.xyz;

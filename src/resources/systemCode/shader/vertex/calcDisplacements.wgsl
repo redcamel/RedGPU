@@ -4,33 +4,23 @@ fn calcDisplacementPosition(input_position:vec3<f32>, input_vertexNormal:vec3<f3
     let displacedPosition = input_position + input_vertexNormal * scaledDisplacement;
     return displacedPosition;
 }
-fn calcDisplacementNormal(input_vertexNormal:vec3<f32>,displacementTexture:texture_2d<f32>, displacementTextureSampler:sampler, displacementScale:f32, input_uv:vec2<f32>, mipLevel:f32) -> vec3<f32> {
-    let textureSize = textureDimensions(displacementTexture);
-    let texelSizeX = 1.0 / f32(textureSize.x);
-    let texelSizeY = 1.0 / f32(textureSize.y);
+fn calcDisplacementNormal(input_vertexNormal: vec3<f32>, displacementTexture: texture_2d<f32>, displacementTextureSampler: sampler, displacementScale: f32, input_uv: vec2<f32>, mipLevel: f32) -> vec3<f32> {
+    let offset = 0.001;
 
-    let displacementRight = textureSampleLevel(displacementTexture, displacementTextureSampler,
-                                            input_uv + vec2<f32>(texelSizeX, 0.0), mipLevel).r;
-    let displacementLeft = textureSampleLevel(displacementTexture, displacementTextureSampler,
-                                           input_uv - vec2<f32>(texelSizeX, 0.0), mipLevel).r;
-    let displacementUp = textureSampleLevel(displacementTexture, displacementTextureSampler,
-                                          input_uv + vec2<f32>(0.0, texelSizeY), mipLevel).r;
-    let displacementDown = textureSampleLevel(displacementTexture, displacementTextureSampler,
-                                            input_uv - vec2<f32>(0.0, texelSizeY), mipLevel).r;
+    // MIP 레벨 고정
+    let fixedMipLevel = 0.0;
 
-    let gradientX = ((displacementRight - 0.5) - (displacementLeft - 0.5)) * displacementScale * 0.2;
-    let gradientY = ((displacementUp - 0.5) - (displacementDown - 0.5)) * displacementScale * 0.2;
+    let left = textureSampleLevel(displacementTexture, displacementTextureSampler, input_uv + vec2<f32>(-offset, 0.0), fixedMipLevel).r;
+    let right = textureSampleLevel(displacementTexture, displacementTextureSampler, input_uv + vec2<f32>(offset, 0.0), fixedMipLevel).r;
+    let down = textureSampleLevel(displacementTexture, displacementTextureSampler, input_uv + vec2<f32>(0.0, -offset), fixedMipLevel).r;
+    let up = textureSampleLevel(displacementTexture, displacementTextureSampler, input_uv + vec2<f32>(0.0, offset), fixedMipLevel).r;
 
-    let up = vec3<f32>(0.0, 1.0, 0.0);
-    let tangent = normalize(cross(up, input_vertexNormal));
-    let bitangent = normalize(cross(input_vertexNormal, tangent));
+    let ddx = ((right - 0.5) - (left - 0.5)) * displacementScale / (2.0 * offset);
+    let ddy = ((down - 0.5) - (up - 0.5)) * displacementScale / (2.0 * offset);
 
-    let tangentSpaceNormal = normalize(vec3<f32>(gradientX, gradientY, 1.0));
+    let tangentSpaceNormal = normalize(vec3<f32>(-ddx, -ddy, 1.0));
+    let worldNormal = normalize(input_vertexNormal);
+    let result = normalize(worldNormal + tangentSpaceNormal * 0.5);
 
-    let objectSpaceNormal = tangentSpaceNormal.x * tangent +
-                           tangentSpaceNormal.y * bitangent +
-                           tangentSpaceNormal.z * input_vertexNormal;
-
-    return normalize(objectSpaceNormal);
-
+    return result;
 }
