@@ -1,5 +1,4 @@
 import RedGPUContext from "../../context/RedGPUContext";
-import {keepLog} from "../../utils";
 import createUUID from "../../utils/createUUID";
 import calculateTextureByteSize from "../../utils/math/calculateTextureByteSize";
 import getMipLevelCount from "../../utils/math/getMipLevelCount";

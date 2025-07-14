@@ -9,6 +9,7 @@ import VertexGPURenderInfo from "../../renderInfos/VertexGPURenderInfo";
 import DefineForVertex from "../../resources/defineProperty/DefineForVertex";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
+import {keepLog} from "../../utils";
 import InstanceIdGenerator from "../../utils/InstanceIdGenerator";
 import AABB from "../../utils/math/bound/AABB";
 import calculateMeshAABB from "../../utils/math/bound/calculateMeshAABB";
@@ -32,6 +33,7 @@ const CPI = 3.141592653589793, CPI2 = 6.283185307179586, C225 = 0.225, C127 = 1.
 interface Mesh {
 	receiveShadow: boolean
 	meshType: string
+	useDisplacementTexture: boolean
 }
 
 class Mesh extends MeshBase {
@@ -72,18 +74,8 @@ class Mesh extends MeshBase {
 	//
 	#drawDebugger: DrawDebuggerMesh
 	#enableDebugger: boolean = false
-	get enableDebugger(): boolean {
-		return this.#enableDebugger;
-	}
-
-	get drawDebugger(): DrawDebuggerMesh {
-		return this.#drawDebugger;
-	}
-
-	set enableDebugger(value: boolean) {
-		this.#enableDebugger = value;
-		if (value && !this.#drawDebugger) this.#drawDebugger = new DrawDebuggerMesh(this.redGPUContext, this)
-	}
+	#cachedBoundingAABB: AABB
+	#cachedBoundingOBB: OBB
 
 //
 	constructor(redGPUContext: RedGPUContext, geometry?: Geometry | Primitive, material?, name?: string) {
@@ -94,7 +86,22 @@ class Mesh extends MeshBase {
 		this.#pickingId = uuidToUint(this.uuid)
 	}
 
+	//
+	get enableDebugger(): boolean {
+		return this.#enableDebugger;
+	}
+
+	set enableDebugger(value: boolean) {
+		this.#enableDebugger = value;
+		if (value && !this.#drawDebugger) this.#drawDebugger = new DrawDebuggerMesh(this.redGPUContext, this)
+	}
+
+	get drawDebugger(): DrawDebuggerMesh {
+		return this.#drawDebugger;
+	}
+
 	_material
+
 	get material() {
 		return this._material;
 	}
@@ -110,6 +117,7 @@ class Mesh extends MeshBase {
 
 	// 블렌드 모드 설정 함수
 	_geometry: Geometry | Primitive
+
 	get geometry(): Geometry | Primitive {
 		return this._geometry;
 	}
@@ -294,6 +302,28 @@ class Mesh extends MeshBase {
 
 	get rotation(): number[] {
 		return this.#rotationArray;
+	}
+
+	get boundingOBB(): OBB {
+		if (!this.#cachedBoundingOBB || this.dirtyTransform) {
+			this.#cachedBoundingOBB = null
+			this.#cachedBoundingAABB = null
+			this.#cachedBoundingOBB = calculateMeshOBB(this);
+		}
+		return this.#cachedBoundingOBB
+	}
+
+	get boundingAABB(): AABB {
+		if (!this.#cachedBoundingAABB || this.dirtyTransform) {
+			this.#cachedBoundingOBB = null
+			this.#cachedBoundingAABB = null
+			this.#cachedBoundingAABB = calculateMeshAABB(this);
+		}
+		return this.#cachedBoundingAABB
+	}
+
+	get combinedBoundingAABB(): AABB {
+		return calculateMeshCombinedAABB(this)
 	}
 
 	setEnableDebuggerRecursively(enableDebugger: boolean = false) {
@@ -730,18 +760,14 @@ class Mesh extends MeshBase {
 		if (useDistanceCulling && currentGeometry) {
 			const {rawCamera} = view
 			const aabb = this.boundingAABB;
-
 			// AABB 중심점과 카메라 위치 간의 거리 계산
 			const dx = rawCamera.x - aabb.centerX;
 			const dy = rawCamera.y - aabb.centerY;
 			const dz = rawCamera.z - aabb.centerZ;
-
 			// 거리 제곱 계산
 			const distanceSquared = dx * dx + dy * dy + dz * dz;
-
 			// AABB의 반지름을 고려한 컬링 거리 계산
 			const cullingDistanceWithRadius = cullingDistanceSquared + (aabb.geometryRadius * aabb.geometryRadius);
-
 			if (distanceSquared > cullingDistanceWithRadius) {
 				passFrustumCulling = false;
 			}
@@ -786,6 +812,11 @@ class Mesh extends MeshBase {
 				this.dirtyPipeline = true
 			}
 			if (!this.gpuRenderInfo) this.initGPURenderInfos()
+			const currentUseDisplacementTexture = !!displacementTexture
+			if (this.useDisplacementTexture !== currentUseDisplacementTexture) {
+				this.useDisplacementTexture = currentUseDisplacementTexture
+				this.dirtyPipeline = true
+			}
 			if (this.dirtyPipeline || dirtyVertexUniformFromMaterial[currentMaterialUUID]) {
 				updateMeshDirtyPipeline(this, debugViewRenderState)
 			}
@@ -793,9 +824,8 @@ class Mesh extends MeshBase {
 		if (currentGeometry && passFrustumCulling) {
 			{
 				const {gpuRenderInfo} = this
-				const {vertexUniformBuffer, vertexUniformInfo, pipeline} = gpuRenderInfo
+				const {vertexUniformBuffer, vertexUniformInfo} = gpuRenderInfo
 				const {members: vertexUniformInfoMembers} = vertexUniformInfo
-				//TODO 여기 개선 변화될떄만 처리되도록 확인
 				if (vertexUniformInfoMembers.displacementScale !== undefined &&
 					vertexUniformInfoMembers.displacementScale !== displacementScale
 				) {
@@ -803,15 +833,6 @@ class Mesh extends MeshBase {
 						vertexUniformBuffer.gpuBuffer,
 						vertexUniformInfoMembers.displacementScale.uniformOffset,
 						new vertexUniformInfoMembers.displacementScale.View([displacementScale])
-					);
-				}
-				if (vertexUniformInfoMembers.useDisplacementTexture !== undefined &&
-					vertexUniformInfoMembers.useDisplacementTexture !== displacementTexture
-				) {
-					gpuDevice.queue.writeBuffer(
-						vertexUniformBuffer.gpuBuffer,
-						vertexUniformInfoMembers.useDisplacementTexture.uniformOffset,
-						new vertexUniformInfoMembers.useDisplacementTexture.View([displacementTexture ? 1 : 0])
 					);
 				}
 			}
@@ -939,50 +960,84 @@ class Mesh extends MeshBase {
 			null,
 			null,
 			null,
+			null,
+			null,
 		)
 		updateMeshDirtyPipeline(this)
 	}
 
-	createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME, STRUCT_INFO, UNIFORM_STRUCT_BASIC, vertexModuleSource) {
+	createMeshVertexShaderModuleBASIC = (VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT_BASIC, vertexModuleSource): GPUShaderModule => {
 		const {redGPUContext} = this
-		const {resourceManager} = redGPUContext
 		const {gpuRenderInfo} = this
-		const vModuleDescriptor: GPUShaderModuleDescriptor = {code: vertexModuleSource}
 		if (gpuRenderInfo.vertexUniformInfo !== UNIFORM_STRUCT_BASIC) {
 			gpuRenderInfo.vertexUniformInfo = UNIFORM_STRUCT_BASIC
-			gpuRenderInfo.vertexStructInfo = STRUCT_INFO
+			gpuRenderInfo.vertexStructInfo = SHADER_INFO
 			createMeshVertexUniformBuffers(this)
 		}
+		gpuRenderInfo.vertexShaderSourceVariant = SHADER_INFO.shaderSourceVariant
+		gpuRenderInfo.vertexShaderVariantConditionalBlocks = SHADER_INFO.conditionalBlocks
 		gpuRenderInfo.vertexUniformBindGroup = redGPUContext.gpuDevice.createBindGroup(getBasicMeshVertexBindGroupDescriptor(this));
-		return resourceManager.createGPUShaderModule(
-			VERTEX_SHADER_MODULE_NAME,
-			vModuleDescriptor
-		)
+		this.#checkVariant(VERTEX_SHADER_MODULE_NAME)
+		return this.gpuRenderInfo.vertexShaderModule
 	}
 
-	#cachedBoundingAABB: AABB
-	#cachedBoundingOBB: OBB
-
-	get boundingOBB(): OBB {
-		if (!this.#cachedBoundingOBB || this.dirtyTransform) {
-			this.#cachedBoundingOBB = null
-			this.#cachedBoundingAABB = null
-			this.#cachedBoundingOBB = calculateMeshOBB(this);
+	#checkVariant(moduleName: String) {
+		const {gpuDevice, resourceManager} = this.redGPUContext
+		// 🎯 현재 머티리얼 상태에 맞는 바리안트 키 찾기
+		const currentVariantKey = this.#findMatchingVariantKey();
+		// 🎯 바리안트별 셰이더 모듈 확인/생성
+		const variantShaderModuleName = `${moduleName}_${currentVariantKey}`;
+		let targetShaderModule = resourceManager.getGPUShaderModule(variantShaderModuleName);
+		if (!targetShaderModule) {
+			// 🎯 레이지 바리안트 생성기에서 바리안트 소스 코드 가져오기
+			let variantSource = this.gpuRenderInfo.vertexShaderSourceVariant.getVariant(currentVariantKey);
+			if (variantSource) {
+				keepLog('🎯 버텍스 바리안트 셰이더 모듈 생성:', currentVariantKey, variantShaderModuleName);
+				if (this.animationInfo?.skinInfo) {
+					const jointNum = `${this.animationInfo.skinInfo.joints.length}`
+					variantSource = variantSource.replaceAll('#JOINT_NUM', jointNum)
+					this.gpuRenderInfo.vertexShaderSourceVariant.getVariant(currentVariantKey)
+					targetShaderModule = resourceManager.createGPUShaderModule(
+						`${variantShaderModuleName}_${jointNum}`,
+						{code: variantSource}
+					);
+				} else {
+					targetShaderModule = resourceManager.createGPUShaderModule(
+						variantShaderModuleName,
+						{code: variantSource}
+					);
+				}
+			} else {
+				console.warn('⚠️ 버텍스 바리안트 소스를 찾을 수 없음:', currentVariantKey);
+				targetShaderModule = this.gpuRenderInfo.vertexShaderModule; // 기본값 사용
+			}
+		} else {
+			console.log('🚀 버텍스 바리안트 셰이더 모듈 캐시 히트:', currentVariantKey);
 		}
-		return this.#cachedBoundingOBB
+		// 🎯 셰이더 모듈 업데이트
+		this.gpuRenderInfo.vertexShaderModule = targetShaderModule;
 	}
 
-	get boundingAABB(): AABB {
-		if (!this.#cachedBoundingAABB || this.dirtyTransform) {
-			this.#cachedBoundingOBB = null
-			this.#cachedBoundingAABB = null
-			this.#cachedBoundingAABB = calculateMeshAABB(this);
+	#findMatchingVariantKey(): string {
+		const {vertexShaderVariantConditionalBlocks} = this.gpuRenderInfo;
+		// keepLog(this.gpuRenderInfo, vertexShaderVariantConditionalBlocks)
+		// 🎯 현재 활성화된 기능들 확인 (vertexShaderVariantConditionalBlocks 기반)
+		const activeFeatures = new Set<string>();
+		// keepLog('vertexShaderVariantConditionalBlocks', vertexShaderVariantConditionalBlocks, this)
+		// 실제 셰이더에서 발견된 조건부 블록들만 체크
+		for (const uniformName of vertexShaderVariantConditionalBlocks) {
+			if (this[uniformName]) {
+				activeFeatures.add(uniformName);
+			}
 		}
-		return this.#cachedBoundingAABB
-	}
-
-	get combinedBoundingAABB(): AABB {
-		return calculateMeshCombinedAABB(this)
+		console.log('activeFeatures', activeFeatures, this);
+		// 🎯 활성화된 기능들로부터 바리안트 키 생성
+		const variantKey = activeFeatures.size > 0 ?
+			Array.from(activeFeatures).sort().join('+') : 'none';
+		if (activeFeatures.size) {
+			console.log('🎯 선택된 바리안트:', variantKey, '(활성 기능:', Array.from(activeFeatures), ')');
+		}
+		return variantKey;
 	}
 }
 
@@ -992,6 +1047,9 @@ Object.defineProperty(Mesh.prototype, 'meshType', {
 });
 DefineForVertex.defineByPreset(Mesh, [
 	DefineForVertex.PRESET_BOOLEAN.RECEIVE_SHADOW
+])
+DefineForVertex.defineBoolean(Mesh, [
+	['useDisplacementTexture', false]
 ])
 Object.freeze(Mesh)
 export default Mesh

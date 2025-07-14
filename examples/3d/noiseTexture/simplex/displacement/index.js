@@ -41,7 +41,7 @@ RedGPU.init(
 			}
 		});
 
-		material.diffuseTexture = material.displacementTexture;
+		material.color.setColorByHEX('#0a3a0a')
 
 		const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
 		mesh.primitiveState.cullMode = 'none';
@@ -49,13 +49,13 @@ RedGPU.init(
 		mesh.rotationX = 90;
 		scene.addChild(mesh);
 
-		const testData = {useAnimation: false};
-		renderTestPane(redGPUContext, material.diffuseTexture, testData);
+		const testData = {useAnimation: true};
+		renderTestPane(redGPUContext, material.displacementTexture, testData);
 
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		renderer.start(redGPUContext, (time) => {
 			if (testData.useAnimation) {
-				if (material.diffuseTexture) material.diffuseTexture.time = time;
+				if (material.displacementTexture) material.displacementTexture.time = time;
 			}
 		});
 	},

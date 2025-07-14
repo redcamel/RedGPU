@@ -2,9 +2,7 @@
 struct Uniforms {
   	opacity:f32
 };
-// Input structure for model data
 struct InputData {
-  // Built-in attributes
   @builtin(position) position : vec4<f32>,
   @location(0) vertexPosition: vec3<f32>,
   @location(1) vertexColor: vec4<f32>,

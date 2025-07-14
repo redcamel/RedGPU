@@ -61,7 +61,17 @@ class Renderer {
 	}
 
 	renderView(view: View3D, time: number) {
-		const {redGPUContext, camera, scene, pickingManager, pixelRectObject, axis, grid,skybox, debugViewRenderState} = view
+		const {
+			redGPUContext,
+			camera,
+			scene,
+			pickingManager,
+			pixelRectObject,
+			axis,
+			grid,
+			skybox,
+			debugViewRenderState
+		} = view
 		const {antialiasingManager} = redGPUContext
 		const {useMSAA} = antialiasingManager
 		const {shadowManager} = scene
@@ -102,7 +112,6 @@ class Renderer {
 				debugViewRenderState.currentRenderPassEncoder = viewRenderPassEncoder
 				if (skybox) skybox.render(debugViewRenderState)
 				renderBasicLayer(view, viewRenderPassEncoder)
-
 				if (axis) axis.render(debugViewRenderState)
 				if (grid) grid.render(debugViewRenderState)
 				renderAlphaLayer(view, viewRenderPassEncoder)

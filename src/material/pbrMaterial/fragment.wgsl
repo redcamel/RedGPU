@@ -184,31 +184,24 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
 
     // 유니폼 변수 뽑아서 저장
     let u_opacity = uniforms.opacity;
-    let u_doubleSided = uniforms.doubleSided == 1u;
-    let u_useCutOff = uniforms.useCutOff == 1u;
     let u_cutOff = uniforms.cutOff;
     let u_useVertexColor = uniforms.useVertexColor == 1u;
     let u_useVertexTangent = uniforms.useVertexTangent == 1u;
 
     // Base Color
     let u_baseColorFactor = uniforms.baseColorFactor;
-    let u_useBaseColorTexture = uniforms.useBaseColorTexture == 1u;
 
     // Metallic-Roughness
     let u_metallicFactor = uniforms.metallicFactor;
     let u_roughnessFactor = uniforms.roughnessFactor;
-    let u_useMetallicRoughnessTexture = uniforms.useMetallicRoughnessTexture == 1u;
 
     // Normal Map
-    let u_useNormalTexture = uniforms.useNormalTexture == 1u;
     let u_normalScale = uniforms.normalScale;
 
     // Occlusion
-    let u_useOcclusionTexture = uniforms.useOcclusionTexture == 1u;
     let u_occlusionStrength = uniforms.occlusionStrength;
 
     // Emissive
-    let u_useEmissiveTexture = uniforms.useEmissiveTexture == 1u;
     let u_emissiveFactor = uniforms.emissiveFactor;
     let u_emissiveStrength = uniforms.emissiveStrength;
 
@@ -217,62 +210,47 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     let u_KHR_materials_ior = uniforms.KHR_materials_ior;
     let u_KHR_dispersion = uniforms.KHR_dispersion;
 
-    // 기본 텍스처 변환 속성
+
     // KHR_materials_transmission
-    let u_useKHR_materials_transmission = uniforms.useKHR_materials_transmission == 1u;
     let u_KHR_transmissionFactor = uniforms.KHR_transmissionFactor;
-    let u_useKHR_transmissionTexture = uniforms.useKHR_transmissionTexture == 1u;
 
      // KHR_materials_volume
     var u_useKHR_materials_volume = uniforms.useKHR_materials_volume == 1u;
     var u_KHR_thicknessFactor = uniforms.KHR_thicknessFactor ;
     var u_KHR_attenuationColor = uniforms.KHR_attenuationColor;
     var u_KHR_attenuationDistance = uniforms.KHR_attenuationDistance ;
-    var u_useKHR_thicknessTexture = uniforms.useKHR_thicknessTexture == 1u;
 
     // KHR_materials_diffuse_transmission
     let u_useKHR_materials_diffuse_transmission = uniforms.useKHR_materials_diffuse_transmission == 1u;
     let u_KHR_diffuseTransmissionFactor = uniforms.KHR_diffuseTransmissionFactor;
     let u_KHR_diffuseTransmissionColorFactor = uniforms.KHR_diffuseTransmissionColorFactor;
-    let u_useKHR_diffuseTransmissionTexture = uniforms.useKHR_diffuseTransmissionTexture == 1u;
-    let u_useKHR_diffuseTransmissionColorTexture = uniforms.useKHR_diffuseTransmissionColorTexture == 1u;
 
     // KHR_materials_specular
-    let u_useKHR_materials_specular = uniforms.useKHR_materials_specular == 1u;
     let u_KHR_specularFactor = uniforms.KHR_specularFactor;
     let u_KHR_specularColorFactor = uniforms.KHR_specularColorFactor;
-    let u_useKHR_specularTexture = uniforms.useKHR_specularTexture == 1u;
-    let u_useKHR_specularColorTexture = uniforms.useKHR_specularColorTexture == 1u;
+
 
     // KHR_materials_anisotropy
-    let u_useKHR_materials_anisotropy = uniforms.useKHR_materials_anisotropy == 1u;
     let u_KHR_anisotropyStrength = uniforms.KHR_anisotropyStrength;
     let u_KHR_anisotropyRotation = uniforms.KHR_anisotropyRotation;
     let u_useKHR_anisotropyTexture = uniforms.useKHR_anisotropyTexture == 1u;
 
     // KHR_materials_sheen
-    let u_useKHR_materials_sheen = uniforms.useKHR_materials_sheen == 1u;
-    let u_useKHR_sheenColorTexture = uniforms.useKHR_sheenColorTexture == 1u;
-    let u_useKHR_sheenRoughnessTexture = uniforms.useKHR_sheenRoughnessTexture == 1u;
+
+
     let u_KHR_sheenColorFactor = uniforms.KHR_sheenColorFactor;
     let u_KHR_sheenRoughnessFactor = uniforms.KHR_sheenRoughnessFactor;
 
     // KHR_materials_iridescence
     let u_useKHR_materials_iridescence = uniforms.useKHR_materials_iridescence == 1u;
-    let u_useKHR_iridescenceTexture = uniforms.useKHR_iridescenceTexture == 1u;
-    let u_useKHR_iridescenceThicknessTexture = uniforms.useKHR_iridescenceThicknessTexture == 1u;
     let u_KHR_iridescenceFactor = uniforms.KHR_iridescenceFactor;
     let u_KHR_iridescenceIor = uniforms.KHR_iridescenceIor;
     let u_KHR_iridescenceThicknessMinimum = uniforms.KHR_iridescenceThicknessMinimum;
     let u_KHR_iridescenceThicknessMaximum = uniforms.KHR_iridescenceThicknessMaximum;
 
     // KHR_materials_clearcoat
-    let u_useKHR_materials_clearcoat = uniforms.useKHR_materials_clearcoat == 1u;
     let u_KHR_clearcoatFactor = uniforms.KHR_clearcoatFactor;
-    let u_useKHR_clearcoatTexture = uniforms.useKHR_clearcoatTexture == 1u;
     let u_KHR_clearcoatRoughnessFactor = uniforms.KHR_clearcoatRoughnessFactor;
-    let u_useKHR_clearcoatRoughnessTexture = uniforms.useKHR_clearcoatRoughnessTexture == 1u;
-    let u_useKHR_clearcoatNormalTexture = uniforms.useKHR_clearcoatNormalTexture == 1u;
     let u_KHR_clearcoatNormalScale = uniforms.KHR_clearcoatNormalScale;
 
 
@@ -451,7 +429,8 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     // check vertexNormal
     var N:vec3<f32> = normalize(input_vertexNormal.xyz);
     var backFaceYn:bool = false;
-    if(u_doubleSided) {
+    #redgpu_if doubleSided
+    {
         var fdx:vec3<f32> = dpdx(input_vertexPosition);
         var fdy:vec3<f32> = dpdy(input_vertexPosition);
         var faceNormal:vec3<f32> = normalize(cross(fdy,fdx));
@@ -460,8 +439,10 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
             backFaceYn = true;
         };
     }
-    let N2 = N;
-    if(u_useNormalTexture){
+    #redgpu_endIf
+
+    #redgpu_if normalTexture
+    {
         var targetUv = select(normalUV, 1.0 - normalUV, backFaceYn);
         let normalSamplerColor = textureSample(normalTexture, normalTextureSampler, normalUV).rgb;
         N = perturb_normal(
@@ -472,9 +453,12 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
             u_normalScale
         ) ;
         N = select(N, select(N, -N, backFaceYn), u_useVertexTangent);
-    }else{
-        N = N * u_normalScale;
     }
+    #redgpu_else
+    {
+      N = N * u_normalScale;
+    }
+    #redgpu_endIf
     /////////////////////////////////////////////////////////////////////////////////
     // view direction vector
     let V: vec3<f32> = normalize(u_cameraPosition - input_vertexPosition);
@@ -483,7 +467,7 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     /////////////////////////////////////////////////////////////////////////////////
 
     var visibility:f32 = 1.0;
-     visibility = calcDirectionalShadowVisibility(
+    visibility = calcDirectionalShadowVisibility(
                 directionalShadowMap,
                 directionalShadowMapSampler,
                 u_shadowDepthTextureSize,
@@ -504,192 +488,183 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     // Multiply vertex color if vertex colors are enabled
     baseColor *= select(vec4<f32>(1.0), input_vertexColor_0, u_useVertexColor);
     // baseColorTexture
-    if(u_useBaseColorTexture){
+
+    #redgpu_if baseColorTexture
        let diffuseSampleColor =  (textureSample(baseColorTexture, baseColorTextureSampler, diffuseUV));
        baseColor *= diffuseSampleColor;
        resultAlpha *= diffuseSampleColor.a;
-    }
+    #redgpu_endIf
+
     let albedo:vec3<f32> = baseColor.rgb ;
 
     // ---------- KHR_materials_unlit ----------
+
+    #redgpu_if useKHR_materials_unlit
     if(u_useKHR_materials_unlit){
         return baseColor;
     }
+    #redgpu_endIf
 
     // ---------- occlusion ----------
     var occlusionParameter:f32 = 1;
-    if(u_useOcclusionTexture){
+    #redgpu_if useOcclusionTexture
         occlusionParameter = textureSample(packedORMTexture, packedTextureSampler, occlusionUV).r * u_occlusionStrength;
-    }
+    #redgpu_endIf
 
     // ---------- metallicRoughness ----------
     var metallicParameter: f32 = u_metallicFactor;
     var roughnessParameter: f32 = u_roughnessFactor;
-    if (u_useMetallicRoughnessTexture) {
+    #redgpu_if useMetallicRoughnessTexture
         let metallicRoughnessSample = (textureSample(packedORMTexture, packedTextureSampler, metallicRoughnessUV));
         metallicParameter = metallicRoughnessSample.b * metallicParameter;
         roughnessParameter = metallicRoughnessSample.g * roughnessParameter;
-    }
+    #redgpu_endIf
     roughnessParameter = max(roughnessParameter, 0.045);
-    if (abs(ior - 1.0) < 0.0001) {
-        roughnessParameter = 0;
-    }
+    if (abs(ior - 1.0) < 0.0001) { roughnessParameter = 0; }
 
     // ---------- KHR_materials_clearcoat ----------
     var clearcoatParameter = u_KHR_clearcoatFactor;
     var clearcoatRoughnessParameter = u_KHR_clearcoatRoughnessFactor ;
     var clearcoatNormal:vec3<f32> = N;
-    if(u_useKHR_materials_clearcoat){
-        if(clearcoatParameter == 0.0){
-        }else{
-            if(u_useKHR_clearcoatTexture){
-                let clearcoatSample =  textureSample(packedKHR_clearcoatTexture_transmission, packedTextureSampler, KHR_clearcoatUV);
-                clearcoatParameter *= clearcoatSample.r;
+    if(clearcoatParameter != 0.0){
+        #redgpu_if useKHR_clearcoatTexture
+            let clearcoatSample =  textureSample(packedKHR_clearcoatTexture_transmission, packedTextureSampler, KHR_clearcoatUV);
+            clearcoatParameter *= clearcoatSample.r;
+        #redgpu_endIf
+        #redgpu_if useKHR_clearcoatRoughnessTexture
+            let clearcoatRoughnesstSample =  textureSample(packedKHR_clearcoatTexture_transmission, packedTextureSampler, KHR_clearcoatRoughnessUV);
+            clearcoatRoughnessParameter *= clearcoatRoughnesstSample.g;
+        #redgpu_endIf
+        var clearcoatNormalSampler =  textureSample(KHR_clearcoatNormalTexture, baseColorTextureSampler, KHR_clearcoatNormalUV);
+        #redgpu_if useKHR_clearcoatNormalTexture
+        {
+            var targetUv = KHR_clearcoatNormalUV;
+            if(backFaceYn){
+                targetUv = 1.0 - targetUv;
             }
-
-            if(u_useKHR_clearcoatRoughnessTexture){
-                let clearcoatRoughnesstSample =  textureSample(packedKHR_clearcoatTexture_transmission, packedTextureSampler, KHR_clearcoatRoughnessUV);
-                clearcoatRoughnessParameter *= clearcoatRoughnesstSample.g;
+            clearcoatNormal = clearcoatNormalSampler.rgb;
+            clearcoatNormal = perturb_normal(
+                N,
+                input_vertexPosition,
+                targetUv,
+                clearcoatNormal,
+                u_normalScale
+            ) ;
+            if(u_useVertexTangent){
+                if(backFaceYn ){ clearcoatNormal = -clearcoatNormal; }
             }
-
-            var clearcoatNormalSampler =  textureSample(KHR_clearcoatNormalTexture, baseColorTextureSampler, KHR_clearcoatNormalUV);
-            if(u_useKHR_clearcoatNormalTexture){
-                var targetUv = KHR_clearcoatNormalUV;
-                if(backFaceYn){
-                    targetUv = 1.0 - targetUv;
-                }
-                clearcoatNormal = clearcoatNormalSampler.rgb;
-                clearcoatNormal = perturb_normal(
-                    N,
-                    input_vertexPosition,
-                    targetUv,
-                    clearcoatNormal,
-                    u_normalScale
-                ) ;
-                if(u_useVertexTangent){
-                    if(backFaceYn ){ clearcoatNormal = -clearcoatNormal; }
-                }
-                clearcoatNormal = normalize(clearcoatNormal);
-            }
+            clearcoatNormal = normalize(clearcoatNormal);
         }
+        #redgpu_endIf
     }
 
     // ---------- KHR_materials_specular ----------
     var specularParameter = u_KHR_specularFactor;
     var specularColor = u_KHR_specularColorFactor;
+    #redgpu_if KHR_specularColorTexture
+        let specularColorTextureSample = textureSample(
+            KHR_specularColorTexture,
+            KHR_specularColorTextureSampler,
+            KHR_specularColorTextureUV
+        );
+        specularColor *= specularColorTextureSample.rgb;
+    #redgpu_endIf
+    #redgpu_if KHR_specularTexture
+        let specularTextureSample = textureSample(
+            KHR_specularTexture,
+            KHR_specularTextureSampler,
+            KHR_specularTextureUV
+        );
+        specularParameter *= specularTextureSample.a;
+    #redgpu_endIf
 
-    if(u_useKHR_materials_specular){
-        if(u_useKHR_specularColorTexture){
-            let specularColorTextureSample = textureSample(
-                KHR_specularColorTexture,
-                KHR_specularColorTextureSampler,
-                KHR_specularColorTextureUV
-            );
-            specularColor *= specularColorTextureSample.rgb;
-        };
-
-        if(u_useKHR_specularTexture){
-            let specularTextureSample = textureSample(
-                KHR_specularTexture,
-                KHR_specularTextureSampler,
-                KHR_specularTextureUV
-            );
-            specularParameter *= specularTextureSample.a;
-        };
-    }
     // ---------- KHR_materials_transmission ----------
     var transmissionParameter: f32 = u_KHR_transmissionFactor;
-    if (u_useKHR_transmissionTexture) {
-      // Transmission Texture 샘플링 적용 (균일 흐름 보장)
+    #redgpu_if useKHR_transmissionTexture
       let transmissionSample: vec4<f32> = textureSample(
           packedKHR_clearcoatTexture_transmission,
           packedTextureSampler,
           KHR_transmissionUV
       );
-      transmissionParameter *= transmissionSample.b; // 텍스처 채널 적용
-    }
+      transmissionParameter *= transmissionSample.b;
+    #redgpu_endIf
+
     // ---------- KHR_materials_volume ----------
     var thicknessParameter: f32 = u_KHR_thicknessFactor;
-    if (u_useKHR_thicknessTexture) {
+    #redgpu_if useKHR_thicknessTexture
         let thicknessSample: vec4<f32> = textureSample(
             packedKHR_clearcoatTexture_transmission,
             packedTextureSampler,
             KHR_transmissionUV
         );
         thicknessParameter *= thicknessSample.a;
-    }
+    #redgpu_endIf
+
     // ---------- KHR_materials_diffuse_transmission ----------
     var diffuseTransmissionColor:vec3<f32> = u_KHR_diffuseTransmissionColorFactor;
     var diffuseTransmissionParameter : f32 = u_KHR_diffuseTransmissionFactor;
-    if(u_useKHR_materials_diffuse_transmission){
-        if(u_useKHR_diffuseTransmissionTexture){
-            let transmissionSample =  textureSample(
-                packedKHR_diffuse_transmission,
-                packedTextureSampler,
-                KHR_diffuseTransmissionUV
-            );
-            diffuseTransmissionParameter *= transmissionSample.a;
-        }
-        if(u_useKHR_diffuseTransmissionColorTexture){
-            let transmissionSample =  textureSample(
-                packedKHR_diffuse_transmission,
-                packedTextureSampler,
-                KHR_diffuseTransmissionColorUV
-            );
-            diffuseTransmissionColor *= transmissionSample.rgb;
-        }
-    }
+    #redgpu_if useKHR_diffuseTransmissionTexture
+        let diffuseTransmissionTextureSample =  textureSample(
+            packedKHR_diffuse_transmission,
+            packedTextureSampler,
+            KHR_diffuseTransmissionUV
+        );
+        diffuseTransmissionParameter *= diffuseTransmissionTextureSample.a;
+    #redgpu_endIf
+    #redgpu_if useKHR_diffuseTransmissionColorTexture
+        let diffuseTransmissionColorTextureSample =  textureSample(
+            packedKHR_diffuse_transmission,
+            packedTextureSampler,
+            KHR_diffuseTransmissionColorUV
+        );
+        diffuseTransmissionColor *= diffuseTransmissionColorTextureSample.rgb;
+    #redgpu_endIf
 
     // ---------- KHR_materials_sheen ----------
     var sheenColor = u_KHR_sheenColorFactor;
     var sheenRoughnessParameter = u_KHR_sheenRoughnessFactor;
-    if(u_useKHR_materials_sheen){
-        if(u_useKHR_sheenColorTexture){
-            let sheenColorSample = (textureSample(packedKHR_sheen, packedTextureSampler, KHR_sheenColorUV));
-            sheenColor *= sheenColorSample.rgb;
-        }
-        if(u_useKHR_sheenRoughnessTexture){
-            let sheenRoughnessSample = (textureSample(packedKHR_sheen, packedTextureSampler, KHR_sheenRoughnessUV));
-            sheenRoughnessParameter *= sheenRoughnessSample.a;
-        }
-    }
+    #redgpu_if useKHR_sheenColorTexture
+        let sheenColorSample = (textureSample(packedKHR_sheen, packedTextureSampler, KHR_sheenColorUV));
+        sheenColor *= sheenColorSample.rgb;
+    #redgpu_endIf
+    #redgpu_if useKHR_sheenRoughnessTexture
+        let sheenRoughnessSample = (textureSample(packedKHR_sheen, packedTextureSampler, KHR_sheenRoughnessUV));
+        sheenRoughnessParameter *= sheenRoughnessSample.a;
+    #redgpu_endIf
+
     // ---------- KHR_materials_iridescence ----------
     var iridescenceParameter = u_KHR_iridescenceFactor;
     var iridescenceThickness = u_KHR_iridescenceThicknessMaximum;
-    if(u_useKHR_materials_iridescence){
-        if (u_useKHR_iridescenceTexture) {
-            let iridescenceTextureSample: vec4<f32> = textureSample(
-                packedKHR_iridescence,
-                packedTextureSampler,
-                KHR_iridescenceTextureUV
-            );
-            iridescenceParameter *= iridescenceTextureSample.r;
-        }
-        if(u_useKHR_iridescenceThicknessTexture){
-            let iridescenceTextureSample: vec4<f32> = textureSample(
-                packedKHR_iridescence,
-                packedTextureSampler,
-                KHR_iridescenceThicknessTextureUV
-            );
-            iridescenceThickness =  mix(u_KHR_iridescenceThicknessMinimum, u_KHR_iridescenceThicknessMaximum, iridescenceTextureSample.g);
-        }
-    }
-    // ---------- KHR_materials_iridescence ----------
-    var anisotropy: f32 = u_KHR_anisotropyStrength;
-    var anisotropicT: vec3<f32>;
-    var anisotropicB: vec3<f32>;
+    #redgpu_if useKHR_iridescenceTexture
+        let iridescenceTextureSample: vec4<f32> = textureSample(
+            packedKHR_iridescence,
+            packedTextureSampler,
+            KHR_iridescenceTextureUV
+        );
+        iridescenceParameter *= iridescenceTextureSample.r;
+    #redgpu_endIf
+    #redgpu_if useKHR_iridescenceThicknessTexture
+        let iridescenceThicknessTextureSample: vec4<f32> = textureSample(
+            packedKHR_iridescence,
+            packedTextureSampler,
+            KHR_iridescenceThicknessTextureUV
+        );
+        iridescenceThickness =  mix(u_KHR_iridescenceThicknessMinimum, u_KHR_iridescenceThicknessMaximum, iridescenceThicknessTextureSample.g);
+    #redgpu_endIf
 
-    if (u_useKHR_materials_anisotropy) {
+    // ---------- KHR_materials_anisotropy ----------
+    var anisotropy: f32 = u_KHR_anisotropyStrength;
+    var anisotropicT: vec3<f32> = vec3<f32>(1.0);
+    var anisotropicB: vec3<f32>= vec3<f32>(1.0);
+    #redgpu_if useKHR_materials_anisotropy
+    {
         var anisotropicDirection: vec2<f32> = vec2<f32>(1.0,0.0);
         if(u_useKHR_anisotropyTexture){
             let anisotropyTex = textureSample(KHR_anisotropyTexture, baseColorTextureSampler, KHR_anisotropyUV).rgb;
             anisotropicDirection = anisotropyTex.rg * 2.0 - vec2<f32>(1.0, 1.0);
             var anisotropyRotation: vec2<f32>;
-            if(u_KHR_anisotropyRotation < 0.0001){
-               anisotropyRotation = vec2<f32>(1.0,0.0);
-            }else{
-               anisotropyRotation = vec2<f32>( cos(u_KHR_anisotropyRotation), sin(u_KHR_anisotropyRotation) );
-            }
+            if( u_KHR_anisotropyRotation < 0.0001 ){ anisotropyRotation = vec2<f32>(1.0,0.0); }
+            else{ anisotropyRotation = vec2<f32>( cos(u_KHR_anisotropyRotation), sin(u_KHR_anisotropyRotation) ); }
 
             let rotationMtx: mat2x2<f32> = mat2x2<f32>(
               anisotropyRotation.x, anisotropyRotation.y,
@@ -718,10 +693,11 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
         anisotropicT = normalize(TBN * vec3<f32>(anisotropicDirection, 0.0));
         anisotropicB = normalize(cross(N, anisotropicT));
     }
+    #redgpu_endIf
 
     // ---------- 2패스일경우 배경 샘플링 ----------
     var prePathBackground = vec3<f32>(0.0);
-    if(u_useKHR_materials_transmission) {
+    #redgpu_if useKHR_materials_transmission
         prePathBackground = calcPrePathBackground(
             u_useKHR_materials_volume, thicknessParameter * inputData.volumeScale , u_KHR_dispersion, u_KHR_attenuationDistance , u_KHR_attenuationColor,
             ior, roughnessParameter, albedo,
@@ -729,18 +705,17 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
             V, N,
             renderPath1ResultTexture, renderPath1ResultTextureSampler
         );
-    }
+    #redgpu_endIf
     // ---------- 기본 F0 계산 ----------
     let F0_dielectric: vec3<f32> =  vec3(pow((1.0 - ior) / (1.0 + ior), 2.0)) ; // 유전체 반사율
     let F0_metal = baseColor.rgb; // 금속 반사율
     var F0 = mix(F0_dielectric, F0_metal, metallicParameter); // 기본 반사율
-    if(u_useKHR_materials_iridescence){
-        F0 = mix(
-            iridescent_fresnel( 1.0, u_KHR_iridescenceIor, F0_dielectric, iridescenceThickness, iridescenceParameter, NdotV),
-            iridescent_fresnel( 1.0, u_KHR_iridescenceIor, F0_metal, iridescenceThickness, iridescenceParameter, NdotV),
-            metallicParameter
-         );
-    }
+    #redgpu_if useKHR_materials_iridescence
+        if (iridescenceParameter > 0.0) {
+            F0 = iridescent_fresnel(1.0, u_KHR_iridescenceIor, F0, iridescenceThickness, iridescenceParameter, NdotV);
+        }
+    #redgpu_endIf
+
 
     // ---------- 직접 조명 계산 - directional ----------
     var totalDirectLighting = vec3<f32>(0.0);
@@ -840,34 +815,30 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
         let NdotV = max(dot(N, V),0.04);
         let NdotV_fresnel = max(dot(N, V), 0.04);
 
-
-
         // ---------- ibl 프레넬 항 계산----------
         let F_IBL_dielectric = F0_dielectric + (vec3<f32>(1.0) - F0_dielectric) * pow(1.0 - NdotV_fresnel, 5.0); // 유전체
         let F_IBL_metal = F0_metal + (vec3<f32>(1.0) - F0_metal) * pow(1.0 - NdotV_fresnel, 5.0); // 금속
         var F_IBL = F0 + (vec3<f32>(1.0) - F0) * pow(1.0 - NdotV_fresnel, 5.0);
-        var F_IBL_iridescence = F_IBL;
         var F_metal_iridescent = vec3<f32>(1.0);
-        if (iridescenceParameter > 0.0) {
-            // -_- 이건 아직도 제대로 이해가 안감
-            let F_iridescent = iridescent_fresnel(
-                               1.0,                   // 외부 매질 IOR (보통 공기)
-                               u_KHR_iridescenceIor,  // 이리디센스 막의 IOR
-                               F0_dielectric,                    // 기본 유전체 F0
-                               iridescenceThickness,  // 이리디센스 막 두께
-                               iridescenceParameter,  // 이리디센스 강도
-                               NdotV              // 시야 벡터와 법선 사이의 내적
-                           );
-            let F_metal_iridescent = iridescent_fresnel(
-                                          1.0,                   // 외부 매질 IOR (보통 공기)
-                                          u_KHR_iridescenceIor,  // 이리디센스 막의 IOR
-                                          baseColor.rgb,                    // 기본 유전체 F0
-                                          iridescenceThickness,  // 이리디센스 막 두께
-                                          iridescenceParameter,  // 이리디센스 강도
-                                          NdotV              // 시야 벡터와 법선 사이의 내적
-                                      );
-            F_IBL = mix(F_iridescent, F_metal_iridescent,metallicParameter);
-        }
+
+        #redgpu_if useKHR_materials_iridescence
+             if (iridescenceParameter > 0.0) {
+                 // 베이스 F0 미리 계산 (한 번만)
+                 let base_f0 = mix(F0_dielectric, baseColor.rgb, metallicParameter);
+
+                 // 이리데센스 효과 계산 (한 번만)
+                 let iridescence_effect = iridescent_fresnel(
+                     1.0,                      // 외부 매질 IOR (공기)
+                     u_KHR_iridescenceIor,     // 이리데센스 막의 IOR
+                     base_f0,                  // 혼합된 기본 F0
+                     iridescenceThickness,     // 이리데센스 막 두께
+                     iridescenceParameter,     // 이리데센스 강도
+                     NdotV                     // 시야각 코사인
+                 );
+
+                 F_IBL = iridescence_effect;
+             }
+         #redgpu_endIf
 
         let K = (roughnessParameter + 1.0) * (roughnessParameter + 1.0) / 8.0;
         let G = NdotV / (NdotV * (1.0 - K) + K);
@@ -888,24 +859,26 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
 
         // ---------- ibl Diffuse  ----------
         let effectiveTransmission = transmissionParameter * (1.0 - metallicParameter);
-//        var envIBL_DIFFUSE:vec3<f32> = albedo  * (vec3<f32>(1.0) - F_IBL_dielectric)  ;
-
-      let iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, iblTextureSampler, N,0).rgb;
-      var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor * (vec3<f32>(1.0) - F_IBL_dielectric);
+        let iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, iblTextureSampler, N,0).rgb;
+        var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor * (vec3<f32>(1.0) - F_IBL_dielectric);
 
         // ---------- ibl Diffuse Transmission ----------
-        if (u_useKHR_materials_diffuse_transmission && diffuseTransmissionParameter > 0.0) {
+        #redgpu_if useKHR_materials_diffuse_transmission
+        {
             // 후면 산란을 위한 샘플링 방향 (back side)
             var backScatteringColor = textureSampleLevel(ibl_environmentTexture, iblTextureSampler, -N, mipLevel).rgb;
             let transmittedIBL = backScatteringColor * diffuseTransmissionColor * (vec3<f32>(1.0) - F_IBL);
             // 반사와 투과 효과 혼합
             envIBL_DIFFUSE = mix(envIBL_DIFFUSE, transmittedIBL, diffuseTransmissionParameter);
         }
+        #redgpu_endIf
 
         // ---------- ibl Specular ----------
         var envIBL_SPECULAR:vec3<f32>;
         let specularColorCorrected = max(vec3<f32>(0.16), specularColor);
-        if (u_useKHR_materials_anisotropy) {
+        envIBL_SPECULAR = reflectedColor * G_smith * specularColorCorrected * F_IBL * specularParameter ;
+        #redgpu_if useKHR_materials_anisotropy
+        {
             var bentNormal = cross(anisotropicB, V);
             bentNormal = normalize(cross(bentNormal, anisotropicB));
             let temp = 1.0 - anisotropy * (1.0 - roughnessParameter);
@@ -944,21 +917,16 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
             let a2 = finalRoughness * finalRoughness;
             let G_smith = NdotV / (NdotV * (1.0 - a2) + a2);
             envIBL_SPECULAR = reflectedColor * G_smith * specularColorCorrected * F_IBL * specularParameter;
-        } else {
-            envIBL_SPECULAR = reflectedColor * G_smith * specularColorCorrected * F_IBL * specularParameter ;
-
         }
+        #redgpu_endIf
 
         // ---------- ibl Specular BTDF ----------
         var envIBL_SPECULAR_BTDF = vec3<f32>(0.0);
-        if (u_useKHR_materials_transmission) {
+        #redgpu_if useKHR_materials_transmission
             var refractedDir: vec3<f32>;
             let eta = 1.0 / ior;
-            if (abs(ior - 1.0) < 0.0001) {
-                refractedDir = V;
-            } else {
-                refractedDir = refract(-V, -N, eta);
-            }
+            if (abs(ior - 1.0) < 0.0001) { refractedDir = V; }
+            else { refractedDir = refract(-V, -N, eta); }
 
             if(length(refractedDir) > 0.0001) {
                 let NdotT = abs(dot(N, normalize(refractedDir)));
@@ -986,66 +954,26 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
 
                 envIBL_SPECULAR_BTDF = attenuatedBackground * F_transmission * transmissionParameter + reflectedColor * G_smith * F_IBL * NdotT;
             }
-        }
+        #redgpu_endIf
 
         // ---------- ibl 유전체 합성 ----------
-//        let envIBL_DIELECTRIC = fresnel_mix_ibl(
-//            F0  ,
-//            specularParameter,
-//            mix(envIBL_DIFFUSE ,  envIBL_SPECULAR_BTDF , transmissionParameter),
-//            envIBL_SPECULAR ,
-//            NdotV
-//        );
-
-//        let envIBL_DIELECTRIC = mix(envIBL_SPECULAR_BTDF ,envIBL_DIFFUSE, 1-transmissionParameter) + envIBL_SPECULAR;
-        let envIBL_DIELECTRIC = envIBL_DIFFUSE * (1.0-transmissionParameter) + envIBL_SPECULAR_BTDF + envIBL_SPECULAR;
-
+        let envIBL_DIELECTRIC = mix(envIBL_DIFFUSE ,envIBL_SPECULAR_BTDF, transmissionParameter) + envIBL_SPECULAR;
         // ---------- ibl Sheen 계산 ----------
         var envIBL_SHEEN = vec3<f32>(0.0);
         var sheen_albedo_scaling: f32 = 1.0;
         let maxSheenColor = max(sheenColor.x, max(sheenColor.y, sheenColor.z));
-//        if (sheenRoughnessParameter > 0.0 && maxSheenColor > 0.001 && dot(N,V) > 0.0) {
-        if (u_useKHR_materials_sheen) {
-//            let NdotV = dot(N,V);
-//            let E_avg = (1.0 - pow(1.0 - VdotN, 5.0)) / 5.0;
-//            sheen_albedo_scaling = max(1.0 - maxSheenColor * E_avg,0.04);
-//            let sheenRoughnessAlpha = sheenRoughnessParameter * sheenRoughnessParameter;
-//            let sheenSamplingDir = normalize(mix(R, N, sheenRoughnessParameter * 0.5));
-//            // 밉맵 레벨 계산
-//            let sheenMipLevel = sheenRoughnessParameter * iblMipmapCount;
-//            let sheenRadiance = textureSampleLevel(ibl_environmentTexture, iblTextureSampler, sheenSamplingDir, sheenMipLevel).rgb;
-//
-//            let sheenFresnel = pow(1.0 - max(VdotN, 0.0), 4.0);  // 간단한 프레넬 근사
-//            let a = 1.0 - NdotV;
-//            let b = 1.0 - sheenRoughnessParameter;
-//            let sheenBRDF =  0.65 * (1.0 + 0.5 * sheenRoughnessParameter) * (1.0 + a * a * b * b * 2.0);
-//            envIBL_SHEEN = sheenRadiance * sheenColor * sheenBRDF * sheenFresnel;
-
-
-            let NdotV = max(dot(N, V), 0.0001);
-            let sheenRoughnessAlpha = sheenRoughnessParameter * sheenRoughnessParameter;
-            // 1. 물리적으로 정확한 반사 벡터 계산
-            let R = reflect(-V, N);
-            let sheenLobe = sheenRoughnessParameter * sheenRoughnessParameter; // GGX 기반 분포
-            let sheenSamplingDir = normalize(mix(R, N, sheenLobe));
-
-            var sheenMipLevel = log2(sheenRoughnessParameter) * 1.2 + iblMipmapCount - 1.0;
-            sheenMipLevel = clamp(sheenMipLevel, 0.0, iblMipmapCount - 1.0);
-            let sheenRadiance = textureSampleLevel(ibl_environmentTexture, iblTextureSampler, sheenSamplingDir, sheenMipLevel).rgb;
-
-            // 4. 물리적으로 정확한 Schlick 프레넬 계산
-            // Schlick 근사는 항상 5.0의 지수를 사용 (물리적으로 정확)
-            let F0 = 0.04; // 다이일렉트릭 물질의 기본 프레넬 계수
-            let sheenFresnel = F0 + (1.0 - F0) * pow(1.0 - NdotV, 5.0);
-
-
-            // 6. 에너지 보존 계산 (물리적으로 정확한 다중 산란 보상)
-            let E_VdotN = 1.0 - pow(1.0 - NdotV, 5.0);
-            sheen_albedo_scaling = max(1.0 - maxSheenColor * E_VdotN, 0.04);
-
-            envIBL_SHEEN =  sheenColor * sheenFresnel;
-
-        }
+        #redgpu_if useKHR_materials_sheen
+            let sheenResult = calcIBLSheen(
+                N,
+                V,
+                sheenColor,
+                maxSheenColor,
+                sheenRoughnessParameter,
+                iblMipmapCount
+            );
+            envIBL_SHEEN = sheenResult.envIBL_SHEEN;
+            sheen_albedo_scaling = sheenResult.sheen_albedo_scaling;
+        #redgpu_endIf
 
         // ---------- ibl Metal 계산 ----------
         let envIBL_METAL = select(reflectedColor * max(baseColor.rgb,vec3<f32>(0.04)), reflectedColor * F_IBL, iridescenceParameter>0.0);
@@ -1057,27 +985,27 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
         var indirectLighting = metallicPart + dielectricPart + envIBL_SHEEN; // sheen 파트 포함
 
         // ---------- ibl clearcoat 계산 ----------
-        if (clearcoatParameter > 0.0) {
-             // 클리어코트 반사 벡터와 뷰 각도 계산
-             let clearcoatR = reflect(-V, clearcoatNormal);
-             let clearcoatNdotV = max(dot(clearcoatNormal, V), 0.04);
-             let clearcoatMipLevel = pow(clearcoatRoughnessParameter,0.4) * iblMipmapCount;
-             let clearcoatPrefilteredColor = textureSampleLevel(ibl_environmentTexture, iblTextureSampler, clearcoatR, clearcoatMipLevel).rgb;
-             let clearcoatF0 = F0;
-             let clearcoatF = clearcoatF0 + (vec3<f32>(1.0) - clearcoatF0) * pow(1.0 - clearcoatNdotV, 5.0);
-             let clearcoatK = (clearcoatRoughnessParameter + 1.0) * (clearcoatRoughnessParameter + 1.0) / 8.0;
-             let clearcoatG = clearcoatNdotV / (clearcoatNdotV * (1.0 - clearcoatK) + clearcoatK);
-             let clearcoatBRDF = clearcoatF * clearcoatG;
-             let clearcoatSpecularIBL = clearcoatPrefilteredColor * clearcoatBRDF * clearcoatParameter;
-             let clearcoatFresnel = clearcoatF ;
-             indirectLighting = clearcoatSpecularIBL  + (vec3<f32>(1.0) - clearcoatFresnel) * indirectLighting;
-        }
+        #redgpu_if useKHR_materials_clearcoat
+            if (clearcoatParameter > 0.0) {
+                 // 클리어코트 반사 벡터와 뷰 각도 계산
+                 let clearcoatR = reflect(-V, clearcoatNormal);
+                 let clearcoatNdotV = max(dot(clearcoatNormal, V), 0.04);
+                 let clearcoatMipLevel = pow(clearcoatRoughnessParameter,0.4) * iblMipmapCount;
+                 let clearcoatPrefilteredColor = textureSampleLevel(ibl_environmentTexture, iblTextureSampler, clearcoatR, clearcoatMipLevel).rgb;
+                 let clearcoatF0 = F0;
+                 let clearcoatF = clearcoatF0 + (vec3<f32>(1.0) - clearcoatF0) * pow(1.0 - clearcoatNdotV, 5.0);
+                 let clearcoatK = (clearcoatRoughnessParameter + 1.0) * (clearcoatRoughnessParameter + 1.0) / 8.0;
+                 let clearcoatG = clearcoatNdotV / (clearcoatNdotV * (1.0 - clearcoatK) + clearcoatK);
+                 let clearcoatBRDF = clearcoatF * clearcoatG;
+                 let clearcoatSpecularIBL = clearcoatPrefilteredColor * clearcoatBRDF * clearcoatParameter;
+                 let clearcoatFresnel = clearcoatF ;
+                 indirectLighting = clearcoatSpecularIBL  + (vec3<f32>(1.0) - clearcoatFresnel) * indirectLighting;
+            }
+        #redgpu_endIf
 
         // 최종 IBL 적용
         let environmentIntensity = 1.0;
         let surfaceColor = totalDirectLighting + indirectLighting * environmentIntensity * occlusionParameter;
-
-        // 단순화된 최종 색상 계산 (트랜스미션은 이미 indirectLighting에 통합됨)
         finalColor = vec4<f32>(surfaceColor, resultAlpha);
 
     } else {
@@ -1087,25 +1015,58 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     }
 
     // ---------- emissive 합산 ----------
-    if (u_useEmissiveTexture) {
-        let emissiveSamplerColor: vec4<f32> = (textureSample(emissiveTexture, emissiveTextureSampler, emissiveUV));
-        finalColor += vec4<f32>( emissiveSamplerColor.rgb * u_emissiveFactor * u_emissiveStrength, 0);
-    } else {
-        finalColor += (vec4<f32>(u_emissiveFactor * u_emissiveStrength, 0));
-    }
+    var emissiveSamplerColor = vec3<f32>(1.0);
+    #redgpu_if emissiveTexture
+        emissiveSamplerColor = textureSample(emissiveTexture, emissiveTextureSampler, emissiveUV).rgb;
+    #redgpu_endIf
+    finalColor += vec4<f32>( emissiveSamplerColor.rgb * u_emissiveFactor * u_emissiveStrength, 0);
 
     // ---------- srgb로 변환해주어야함 ----------
     finalColor = linear_to_srgb(finalColor);
 
     // ---------- 컷오프 판단 ----------
-    if (u_useCutOff) {
-        if (resultAlpha <= u_cutOff) {
-            discard;
-        }
-    }
+    #redgpu_if useCutOff
+        if (resultAlpha <= u_cutOff) { discard; }
+    #redgpu_endIf
 
     return finalColor;
 };
+// ---------- KHR_materials_anisotropy ----------
+
+// ---------- KHR_materials_sheen ----------
+struct SheenResult {
+    envIBL_SHEEN: vec3<f32>,
+    sheen_albedo_scaling: f32
+}
+
+fn calcIBLSheen(
+    N:vec3<f32>,
+    V:vec3<f32>,
+    sheenColor:vec3<f32>,
+    maxSheenColor:f32,
+    sheenRoughnessParameter:f32,
+    iblMipmapCount:f32
+) -> SheenResult {
+    let NdotV = max(dot(N, V), 0.0001);
+    let sheenRoughnessAlpha = sheenRoughnessParameter * sheenRoughnessParameter;
+    let R = reflect(-V, N);
+    let sheenLobe = sheenRoughnessParameter * sheenRoughnessParameter; // GGX 기반 분포
+    let sheenSamplingDir = normalize(mix(R, N, sheenLobe));
+
+    var sheenMipLevel = log2(sheenRoughnessParameter) * 1.2 + iblMipmapCount - 1.0;
+    sheenMipLevel = clamp(sheenMipLevel, 0.0, iblMipmapCount - 1.0);
+    let sheenRadiance = textureSampleLevel(ibl_environmentTexture, iblTextureSampler, sheenSamplingDir, sheenMipLevel).rgb;
+
+    let F0 = 0.04;
+    let sheenFresnel = F0 + (1.0 - F0) * pow(1.0 - NdotV, 5.0);
+
+    let E_VdotN = 1.0 - pow(1.0 - NdotV, 5.0);
+    let sheen_albedo_scaling = max(1.0 - maxSheenColor * E_VdotN, 0.04);
+    let envIBL_SHEEN = sheenColor * sheenFresnel;
+
+    return SheenResult(envIBL_SHEEN, sheen_albedo_scaling);
+}
+// ---------------------------------------------
 fn calcPrePathBackground(
     u_useKHR_materials_volume:bool, thicknessParameter:f32, u_KHR_dispersion:f32, u_KHR_attenuationDistance:f32, u_KHR_attenuationColor:vec3<f32>,
     ior:f32, roughnessParameter:f32, albedo:vec3<f32>,
@@ -1192,36 +1153,41 @@ fn calcLight(
 
 
     var DIFFUSE_BRDF:vec3<f32> = diffuse_brdf_disney(NdotL, NdotV, LdotH, roughnessParameter, albedo);
-    if(u_useKHR_materials_diffuse_transmission && diffuseTransmissionParameter > 0.0){
+    #redgpu_if useKHR_materials_diffuse_transmission
         DIFFUSE_BRDF = mix(DIFFUSE_BRDF, diffuse_btdf(N, L, diffuseTransmissionColor), diffuseTransmissionParameter);
-    }
-//        let DIFFUSE_BRDF = diffuse_brdf(NdotL, albedo) ;
+    #redgpu_endIf
+
     var SPECULAR_BRDF:vec3<f32>;
+
     if (anisotropy > 0.0) {
-        var TdotL = dot(anisotropicT, L);
-        var TdotV = dot(anisotropicT, V);
-        var BdotL = dot(anisotropicB, L);
-        var TdotH = dot(anisotropicT, H);
-        var BdotH = dot(anisotropicB, H);
-        var BdotV = dot(anisotropicB, V);
-        SPECULAR_BRDF =  BRDF_specularAnisotropicGGX(
-            albedo,
-            vec3<f32>(1.0),
-            roughnessParameter * roughnessParameter,
-            VdotH, NdotL, NdotV, NdotH, BdotV, TdotV, TdotL, BdotL, TdotH, BdotH,
-            anisotropy
-        ) ;
+        #redgpu_if useKHR_materials_anisotropy
+            var TdotL = dot(anisotropicT, L);
+            var TdotV = dot(anisotropicT, V);
+            var BdotL = dot(anisotropicB, L);
+            var TdotH = dot(anisotropicT, H);
+            var BdotH = dot(anisotropicB, H);
+            var BdotV = dot(anisotropicB, V);
+            SPECULAR_BRDF =  BRDF_specularAnisotropicGGX(
+                albedo,
+                vec3<f32>(1.0),
+                roughnessParameter * roughnessParameter,
+                VdotH, NdotL, NdotV, NdotH, BdotV, TdotV, TdotL, BdotL, TdotH, BdotH,
+                anisotropy
+            ) ;
+        #redgpu_endIf
     }else{
         SPECULAR_BRDF = specular_brdf( albedo, roughnessParameter, NdotH, NdotV, NdotL, LdotH);
     }
+
     let METAL_BRDF = conductor_fresnel( albedo, SPECULAR_BRDF, VdotH);;
 
-    let transmissionWeight = transmissionParameter * (vec3<f32>(1.0) - F0);
     var SPECULAR_BTDF =  vec3<f32>(0.0);
-    if(transmissionParameter > 0.0){
-        SPECULAR_BTDF = specular_btdf( NdotV, NdotL, NdotH, VdotH, LdotH, roughnessParameter, albedo, ior);
-    }
-    // 최종 DIELECTRIC_BRDF 계산에 배경 반영
+    #redgpu_if useKHR_materials_transmission
+        if(transmissionParameter > 0.0){
+            SPECULAR_BTDF = specular_btdf( NdotV, NdotL, NdotH, VdotH, LdotH, roughnessParameter, albedo, ior);
+        }
+    #redgpu_endIf
+
     let DIELECTRIC_BRDF = fresnel_mix(
         F0 ,
         specularParameter,
@@ -1230,27 +1196,26 @@ fn calcLight(
         VdotH
     );
 
-
     var SHEEN_BRDF:vec3<f32> = vec3<f32>(0.0);
     var sheen_albedo_scaling:f32 = 1.0;
-    let maxSheenColor = max(sheenColor.x, max(sheenColor.y, sheenColor.z));
-    if(sheenRoughnessParameter > 0.0 && maxSheenColor > 0.001 && dot(N,V) > 0) {
-        let NdotV = dot(N, V);
-        let sheenRoughnessAlpha = sheenRoughnessParameter * sheenRoughnessParameter;
-        let invR = 1 / sheenRoughnessAlpha;
-        let cos2h = NdotH * NdotH;
-        let sin2h = 1 - cos2h;
-        let sheenDistribution = (2 + invR) * pow(sin2h, invR * 0.5) / (2 * pi);
-        let sheen_visibility =  1.0 / ((1.0 + lambda_sheen(NdotV, sheenRoughnessAlpha) + lambda_sheen(NdotL, sheenRoughnessAlpha)) * (4.0 * NdotV * NdotL));
-        let LdotN = max(dot(L, N), 0.04);
-        let E_LdotN = 1.0 - pow(1.0 - LdotN, 5.0);
-        let E_VdotN = 1.0 - pow(1.0 - VdotN, 5.0);
+    #redgpu_if useKHR_materials_sheen
+        let maxSheenColor = max(sheenColor.x, max(sheenColor.y, sheenColor.z));
+        if(sheenRoughnessParameter > 0.0 && maxSheenColor > 0.001 && dot(N,V) > 0) {
+            let NdotV = dot(N, V);
+            let sheenRoughnessAlpha = sheenRoughnessParameter * sheenRoughnessParameter;
+            let invR = 1 / sheenRoughnessAlpha;
+            let cos2h = NdotH * NdotH;
+            let sin2h = 1 - cos2h;
+            let sheenDistribution = (2 + invR) * pow(sin2h, invR * 0.5) / (2 * pi);
+            let sheen_visibility =  1.0 / ((1.0 + lambda_sheen(NdotV, sheenRoughnessAlpha) + lambda_sheen(NdotL, sheenRoughnessAlpha)) * (4.0 * NdotV * NdotL));
+            let LdotN = max(dot(L, N), 0.04);
+            let E_LdotN = 1.0 - pow(1.0 - LdotN, 5.0);
+            let E_VdotN = 1.0 - pow(1.0 - VdotN, 5.0);
 
-
-        sheen_albedo_scaling = max(min(1.0 - maxSheenColor * E_VdotN, 1.0 - maxSheenColor * E_LdotN),0.04);
-
-        SHEEN_BRDF = sheenColor * sheenDistribution * sheen_visibility;
-    }
+            sheen_albedo_scaling = max(min(1.0 - maxSheenColor * E_VdotN, 1.0 - maxSheenColor * E_LdotN),0.04);
+            SHEEN_BRDF = sheenColor * sheenDistribution * sheen_visibility;
+        }
+    #redgpu_endIf
 
     // 조명 계산결과
     // 금속과 유전체 부분을 각각 계산
@@ -1260,29 +1225,34 @@ fn calcLight(
 
     let sheenPart = SHEEN_BRDF;
     var directLighting = (metallicPart  + dielectricPart + sheenPart);
-    if(transmissionParameter > 0.0) {
-        // 투과 가중치에 따라 배경색 혼합
-        // Fresnel 효과에 의한 반사와 투과 균형 유지
-        directLighting = mix(directLighting, prePathBackground , transmissionWeight);
-    }
-    // 클리어코트
-    if(clearcoatParameter > 0.0){
-        let clearcoatNdotL = max(dot(clearcoatNormal, L), 0.04);
-        let clearcoatNdotV = max(dot(clearcoatNormal, V), 0.04);
-        let clearcoatNdotH = max(dot(clearcoatNormal, H), 0.0);
-        let CLEARCOAT_BRDF = specular_brdf( F0, clearcoatRoughnessParameter, clearcoatNdotH, clearcoatNdotV, clearcoatNdotL, LdotH);
-        directLighting = fresnel_coat(clearcoatNdotV, ior, clearcoatParameter, directLighting, CLEARCOAT_BRDF);
-    }
+
+    #redgpu_if useKHR_materials_transmission
+        if(transmissionParameter > 0.0) {
+            // 투과 가중치에 따라 배경색 혼합
+            let transmissionWeight = transmissionParameter * (vec3<f32>(1.0) - F0);
+            directLighting = mix(directLighting, prePathBackground , transmissionWeight);
+        }
+    #redgpu_endIf
+
+    #redgpu_if useKHR_materials_clearcoat
+        if(clearcoatParameter > 0.0){
+            let clearcoatNdotL = max(dot(clearcoatNormal, L), 0.04);
+            let clearcoatNdotV = max(dot(clearcoatNormal, V), 0.04);
+            let clearcoatNdotH = max(dot(clearcoatNormal, H), 0.0);
+            let CLEARCOAT_BRDF = specular_brdf( F0, clearcoatRoughnessParameter, clearcoatNdotH, clearcoatNdotV, clearcoatNdotL, LdotH);
+            directLighting = fresnel_coat(clearcoatNdotV, ior, clearcoatParameter, directLighting, CLEARCOAT_BRDF);
+        }
+    #redgpu_endIf
+
     var lightDirection: f32;
-    if (u_useKHR_materials_diffuse_transmission && diffuseTransmissionParameter > 0.0) {
+    #redgpu_if useKHR_materials_diffuse_transmission
         lightDirection = mix(abs(dot(N, L)), 1.0, diffuseTransmissionParameter);
-    } else {
+    #redgpu_else
         // 투과가 없는 경우, 기존처럼 양수 값만 허용
         lightDirection = NdotL;
-    }
+    #redgpu_endIf
 
     let lightContribution = directLighting * dLight * lightDirection;
-    //            + BACK_DIFFUSE_BRDF * backNdotL * backLightColor * backLightIntensity;
     return lightContribution;
 }
 const pi: f32 = 3.14159265359;
@@ -1312,239 +1282,101 @@ fn V_GGX_anisotropic( NdotL: f32, NdotV: f32, BdotV: f32, TdotV: f32, TdotL: f32
 }
 fn iridescent_fresnel(outside_ior: f32, iridescence_ior: f32, base_f0: vec3<f32>,
                       iridescence_thickness: f32, iridescence_factor: f32, cos_theta1: f32) -> vec3<f32> {
-    // 두께가 0이면 기본 F0만 반환
+    // 조기 반환
     if (iridescence_thickness <= 0.0 || iridescence_factor <= 0.0) {
         return base_f0;
     }
 
-    // 입사각 코사인 절대값 (방향 무관)
     let cos_theta1_abs = abs(cos_theta1);
+    let safe_iridescence_ior = max(iridescence_ior, 1.01);
 
-    // 박막 IOR이 너무 낮을 때를 위한 보정
-    // 일반적인 물질의 최소 IOR은 약 1.0이지만,
-    // 안정적인 계산을 위해 최소 IOR 값을 설정
-    let min_ior = 1.01; // 최소 IOR 값
-    let safe_iridescence_ior = max(iridescence_ior, min_ior);
-
-    // 스넬의 법칙을 사용해 굴절각 계산
+    // 스넬의 법칙
     let sin_theta1 = sqrt(max(0.0, 1.0 - cos_theta1_abs * cos_theta1_abs));
     let sin_theta2 = (outside_ior / safe_iridescence_ior) * sin_theta1;
 
-    // 전반사 확인
     if (sin_theta2 >= 1.0) {
-                let total_reflection = vec3<f32>(1.0); // 전반사는 완전 반사
-                return base_f0 + iridescence_factor * (total_reflection - base_f0);
-
+        return base_f0 + iridescence_factor * (vec3<f32>(1.0) - base_f0);
     }
 
     let cos_theta2 = sqrt(max(0.0, 1.0 - sin_theta2 * sin_theta2));
 
-    // RGB 파장 대표값 (나노미터)
-    let wavelengths = vec3<f32>(650.0, 510.0, 475.0); // 표준 RGB 파장 범위
-
-    // 필름 두께가 너무 얇을 때 보정
-    // 물리적으로 실현 가능한 최소 두께(약 10nm) 이상으로 보장
-    let min_thickness = 10.0; // 나노미터 단위
-    let effective_thickness = max(iridescence_thickness, min_thickness);
-
-    // 물리적으로 정확한 광학 두께 계산
-    // 낮은 IOR에서도 충분한 위상 차이가 생기도록 스케일 조정
-    let ior_scale = max(1.0, 1.5 - 0.5 * (safe_iridescence_ior / 1.5)); // IOR이 낮을수록 스케일 증가
+    // 상수들 사전 계산
+    let wavelengths = vec3<f32>(650.0, 510.0, 475.0);
+    let effective_thickness = max(iridescence_thickness, 10.0);
+    let ior_scale = max(1.0, 1.5 - 0.5 * (safe_iridescence_ior / 1.5));
     let optical_thickness = 2.0 * effective_thickness * safe_iridescence_ior * cos_theta2 * ior_scale;
-
-    // 위상 계산 - 낮은 IOR에 더 민감하게 반응하도록 조정
     let phase = (2.0 * 3.14159265359 * optical_thickness) / wavelengths;
 
-    // 각 계면에서의 프레넬 계수 계산
-    // 공기/박막 계면
-    let r12_s = ((outside_ior * cos_theta1_abs) - (safe_iridescence_ior * cos_theta2)) /
-                ((outside_ior * cos_theta1_abs) + (safe_iridescence_ior * cos_theta2));
+    // 삼각함수 (한 번만)
+    let cos_phase = cos(phase);
+    let sin_phase = sin(phase);
 
-    let r12_p = ((safe_iridescence_ior * cos_theta1_abs) - (outside_ior * cos_theta2)) /
-                ((safe_iridescence_ior * cos_theta1_abs) + (outside_ior * cos_theta2));
+    // 공통 계산값들
+    let outside_cos1 = outside_ior * cos_theta1_abs;
+    let iridescence_cos2 = safe_iridescence_ior * cos_theta2;
+    let iridescence_cos1 = safe_iridescence_ior * cos_theta1_abs;
+    let outside_cos2 = outside_ior * cos_theta2;
 
-    let t12_s = 2.0 * outside_ior * cos_theta1_abs /
-                ((outside_ior * cos_theta1_abs) + (safe_iridescence_ior * cos_theta2));
+    // 프레넬 계수 (스칼라)
+    let r12_s = (outside_cos1 - iridescence_cos2) / (outside_cos1 + iridescence_cos2);
+    let r12_p = (iridescence_cos1 - outside_cos2) / (iridescence_cos1 + outside_cos2);
 
-    let t12_p = 2.0 * outside_ior * cos_theta1_abs /
-                ((safe_iridescence_ior * cos_theta1_abs) + (outside_ior * cos_theta2));
+    // 기본 F0에서 굴절률 추출 (벡터화)
+    let sqrt_f0 = sqrt(clamp(base_f0, vec3<f32>(0.01), vec3<f32>(0.99)));
+    let safe_n3 = max((1.0 + sqrt_f0) / (1.0 - sqrt_f0), vec3<f32>(1.2));
 
-    // 박막/기본 물질 계면
-    // 기본 F0에서 복소수 굴절률 근사 추출
-    let n3 = vec3<f32>(
-       (1.0 + sqrt(clamp(base_f0.r, 0.01, 0.99))) / (1.0 - sqrt(clamp(base_f0.r, 0.01, 0.99))),
-       (1.0 + sqrt(clamp(base_f0.g, 0.01, 0.99))) / (1.0 - sqrt(clamp(base_f0.g, 0.01, 0.99))),
-       (1.0 + sqrt(clamp(base_f0.b, 0.01, 0.99))) / (1.0 - sqrt(clamp(base_f0.b, 0.01, 0.99)))
-    );
+    // r23 계산 (벡터화)
+    let iridescence_cos2_vec = vec3<f32>(iridescence_cos2);
+    let cos_theta1_abs_vec = vec3<f32>(cos_theta1_abs);
+    let iridescence_cos1_vec = vec3<f32>(iridescence_cos1);
+    let cos_theta2_vec = vec3<f32>(cos_theta2);
 
-    // 안정성을 위해 최소값 보장
-    let safe_n3 = max(n3, vec3<f32>(1.2));
+    let r23_s = (iridescence_cos2_vec - safe_n3 * cos_theta1_abs_vec) /
+                (iridescence_cos2_vec + safe_n3 * cos_theta1_abs_vec);
+    let r23_p = (safe_n3 * cos_theta2_vec - iridescence_cos1_vec) /
+                (safe_n3 * cos_theta2_vec + iridescence_cos1_vec);
 
-    let r23_s = vec3<f32>(
-        ((safe_iridescence_ior * cos_theta2) - (safe_n3.r * cos_theta1_abs)) /
-        ((safe_iridescence_ior * cos_theta2) + (safe_n3.r * cos_theta1_abs)),
-        ((safe_iridescence_ior * cos_theta2) - (safe_n3.g * cos_theta1_abs)) /
-        ((safe_iridescence_ior * cos_theta2) + (safe_n3.g * cos_theta1_abs)),
-        ((safe_iridescence_ior * cos_theta2) - (safe_n3.b * cos_theta1_abs)) /
-        ((safe_iridescence_ior * cos_theta2) + (safe_n3.b * cos_theta1_abs))
-    );
+    // 복소수 계산을 위한 공통 값들
+    let r12_s_vec = vec3<f32>(r12_s);
+    let r12_p_vec = vec3<f32>(r12_p);
 
-    let r23_p = vec3<f32>(
-        ((safe_n3.r * cos_theta2) - (safe_iridescence_ior * cos_theta1_abs)) /
-        ((safe_n3.r * cos_theta2) + (safe_iridescence_ior * cos_theta1_abs)),
-        ((safe_n3.g * cos_theta2) - (safe_iridescence_ior * cos_theta1_abs)) /
-        ((safe_n3.g * cos_theta2) + (safe_iridescence_ior * cos_theta1_abs)),
-        ((safe_n3.b * cos_theta2) - (safe_iridescence_ior * cos_theta1_abs)) /
-        ((safe_n3.b * cos_theta2) + (safe_iridescence_ior * cos_theta1_abs))
-    );
+    // S-편광 복소수 계산
+    let num_s_real = r12_s_vec + r23_s * cos_phase;
+    let num_s_imag = r23_s * sin_phase;
+    let den_s_real = vec3<f32>(1.0) + r12_s_vec * r23_s * cos_phase;
+    let den_s_imag = r12_s_vec * r23_s * sin_phase;
 
-    // 복소수 지수항을 삼각함수로 분리
-    let cos_phase = vec3<f32>(cos(phase.r), cos(phase.g), cos(phase.b));
-    let sin_phase = vec3<f32>(sin(phase.r), sin(phase.g), sin(phase.b));
+    // P-편광 복소수 계산
+    let num_p_real = r12_p_vec + r23_p * cos_phase;
+    let num_p_imag = r23_p * sin_phase;
+    let den_p_real = vec3<f32>(1.0) + r12_p_vec * r23_p * cos_phase;
+    let den_p_imag = r12_p_vec * r23_p * sin_phase;
 
-    // 복소수를 실수부와 허수부로 분리 (복소수 대신 실수/허수 부분을 각각 계산)
-    // 분자의 실수부와 허수부
-    let numerator_s_real = vec3<f32>(
-        r12_s + r23_s.r * cos_phase.r,
-        r12_s + r23_s.g * cos_phase.g,
-        r12_s + r23_s.b * cos_phase.b
-    );
+    // 복소수 나눗셈 인라인 계산 (S-편광)
+    let den_s_squared = den_s_real * den_s_real + den_s_imag * den_s_imag + vec3<f32>(0.001);
+    let rs_real = (num_s_real * den_s_real + num_s_imag * den_s_imag) / den_s_squared;
+    let rs_imag = (num_s_imag * den_s_real - num_s_real * den_s_imag) / den_s_squared;
+    let Rs = rs_real * rs_real + rs_imag * rs_imag;
 
-    let numerator_s_imag = vec3<f32>(
-        r23_s.r * sin_phase.r,
-        r23_s.g * sin_phase.g,
-        r23_s.b * sin_phase.b
-    );
+    // 복소수 나눗셈 인라인 계산 (P-편광)
+    let den_p_squared = den_p_real * den_p_real + den_p_imag * den_p_imag + vec3<f32>(0.001);
+    let rp_real = (num_p_real * den_p_real + num_p_imag * den_p_imag) / den_p_squared;
+    let rp_imag = (num_p_imag * den_p_real - num_p_real * den_p_imag) / den_p_squared;
+    let Rp = rp_real * rp_real + rp_imag * rp_imag;
 
-    // 분모의 실수부와 허수부
-    let denominator_s_real = vec3<f32>(
-        1.0 + r12_s * r23_s.r * cos_phase.r,
-        1.0 + r12_s * r23_s.g * cos_phase.g,
-        1.0 + r12_s * r23_s.b * cos_phase.b
-    );
-
-    let denominator_s_imag = vec3<f32>(
-        r12_s * r23_s.r * sin_phase.r,
-        r12_s * r23_s.g * sin_phase.g,
-        r12_s * r23_s.b * sin_phase.b
-    );
-
-    // 복소수 나눗셈 (a+bi)/(c+di) 계산
-    // 분모 크기의 제곱: |c+di|^2 = c^2 + d^2
-    let denom_s_squared = vec3<f32>(
-        denominator_s_real.r * denominator_s_real.r + denominator_s_imag.r * denominator_s_imag.r,
-        denominator_s_real.g * denominator_s_real.g + denominator_s_imag.g * denominator_s_imag.g,
-        denominator_s_real.b * denominator_s_real.b + denominator_s_imag.b * denominator_s_imag.b
-    );
-
-    // 0으로 나누는 경우 방지를 위한 안전값 증가
-    let epsilon = 0.001;
-
-    // 결과의 실수부: (ac + bd)/(c^2 + d^2)
-    let r_s_real = vec3<f32>(
-        (numerator_s_real.r * denominator_s_real.r + numerator_s_imag.r * denominator_s_imag.r) /
-        (denom_s_squared.r + epsilon),
-        (numerator_s_real.g * denominator_s_real.g + numerator_s_imag.g * denominator_s_imag.g) /
-        (denom_s_squared.g + epsilon),
-        (numerator_s_real.b * denominator_s_real.b + numerator_s_imag.b * denominator_s_imag.b) /
-        (denom_s_squared.b + epsilon)
-    );
-
-    // 결과의 허수부: (bc - ad)/(c^2 + d^2)
-    let r_s_imag = vec3<f32>(
-        (numerator_s_imag.r * denominator_s_real.r - numerator_s_real.r * denominator_s_imag.r) /
-        (denom_s_squared.r + epsilon),
-        (numerator_s_imag.g * denominator_s_real.g - numerator_s_real.g * denominator_s_imag.g) /
-        (denom_s_squared.g + epsilon),
-        (numerator_s_imag.b * denominator_s_real.b - numerator_s_real.b * denominator_s_imag.b) /
-        (denom_s_squared.b + epsilon)
-    );
-
-    // P-편광에 대해서도 유사하게 계산
-    // 분자의 실수부와 허수부
-    let numerator_p_real = vec3<f32>(
-        r12_p + r23_p.r * cos_phase.r,
-        r12_p + r23_p.g * cos_phase.g,
-        r12_p + r23_p.b * cos_phase.b
-    );
-
-    let numerator_p_imag = vec3<f32>(
-        r23_p.r * sin_phase.r,
-        r23_p.g * sin_phase.g,
-        r23_p.b * sin_phase.b
-    );
-
-    // 분모의 실수부와 허수부
-    let denominator_p_real = vec3<f32>(
-        1.0 + r12_p * r23_p.r * cos_phase.r,
-        1.0 + r12_p * r23_p.g * cos_phase.g,
-        1.0 + r12_p * r23_p.b * cos_phase.b
-    );
-
-    let denominator_p_imag = vec3<f32>(
-        r12_p * r23_p.r * sin_phase.r,
-        r12_p * r23_p.g * sin_phase.g,
-        r12_p * r23_p.b * sin_phase.b
-    );
-
-    // 분모 크기의 제곱
-    let denom_p_squared = vec3<f32>(
-        denominator_p_real.r * denominator_p_real.r + denominator_p_imag.r * denominator_p_imag.r,
-        denominator_p_real.g * denominator_p_real.g + denominator_p_imag.g * denominator_p_imag.g,
-        denominator_p_real.b * denominator_p_real.b + denominator_p_imag.b * denominator_p_imag.b
-    );
-
-    // 결과의 실수부
-    let r_p_real = vec3<f32>(
-        (numerator_p_real.r * denominator_p_real.r + numerator_p_imag.r * denominator_p_imag.r) /
-        (denom_p_squared.r + epsilon),
-        (numerator_p_real.g * denominator_p_real.g + numerator_p_imag.g * denominator_p_imag.g) /
-        (denom_p_squared.g + epsilon),
-        (numerator_p_real.b * denominator_p_real.b + numerator_p_imag.b * denominator_p_imag.b) /
-        (denom_p_squared.b + epsilon)
-    );
-
-    // 결과의 허수부
-    let r_p_imag = vec3<f32>(
-        (numerator_p_imag.r * denominator_p_real.r - numerator_p_real.r * denominator_p_imag.r) /
-        (denom_p_squared.r + epsilon),
-        (numerator_p_imag.g * denominator_p_real.g - numerator_p_real.g * denominator_p_imag.g) /
-        (denom_p_squared.g + epsilon),
-        (numerator_p_imag.b * denominator_p_real.b - numerator_p_real.b * denominator_p_imag.b) /
-        (denom_p_squared.b + epsilon)
-    );
-
-    // 복소수 크기 계산 |a+bi|² = a² + b²
-    let Rs = vec3<f32>(
-        r_s_real.r * r_s_real.r + r_s_imag.r * r_s_imag.r,
-        r_s_real.g * r_s_real.g + r_s_imag.g * r_s_imag.g,
-        r_s_real.b * r_s_real.b + r_s_imag.b * r_s_imag.b
-    );
-
-    let Rp = vec3<f32>(
-        r_p_real.r * r_p_real.r + r_p_imag.r * r_p_imag.r,
-        r_p_real.g * r_p_real.g + r_p_imag.g * r_p_imag.g,
-        r_p_real.b * r_p_real.b + r_p_imag.b * r_p_imag.b
-    );
-
-    // 전체 반사율 (편광 평균)
+    // 전체 반사율
     let reflectance = 0.5 * (Rs + Rp);
 
-    // 낮은 IOR에서 이리데센스 효과를 강화하기 위한 조정
-    // IOR이 낮을수록 더 강한 색상 대비 제공
+    // IOR 영향 최적화
     let ior_influence = smoothstep(1.0, 2.0, safe_iridescence_ior);
     let enhanced_reflectance = mix(
-        // 낮은 IOR에서는 컬러 대비를 높이고 색상 포화도 증가
         pow(reflectance, vec3<f32>(0.8)) * 1.2,
-        // 높은 IOR에서는 원래 계산대로
         reflectance,
         ior_influence
     );
 
-    // 반사율이 유효한 범위(0-1)를 벗어나지 않도록 보장
+    // 최종 결과
     let clamped_reflectance = clamp(enhanced_reflectance, vec3<f32>(0.0), vec3<f32>(1.0));
-
-    // 최종 결과 계산 - 이리데센스와 베이스 F0 혼합
     return mix(base_f0, clamped_reflectance, iridescence_factor);
 }
 fn specular_btdf(

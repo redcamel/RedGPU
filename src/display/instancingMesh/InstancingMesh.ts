@@ -33,6 +33,8 @@ class InstancingMesh extends Mesh {
 			null,
 			null,
 			null,
+			null,
+			null,
 		)
 		this.instanceCount = instanceCount
 		this.#initGPURenderInfos(redGPUContext)

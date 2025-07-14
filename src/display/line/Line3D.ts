@@ -21,8 +21,8 @@ import LINE_TYPE from "./LINE_TYPE";
 import vertexModuleSource from "./shader/lineVertex.wgsl";
 
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_LINE_3D'
-const STRUCT_INFO = parseWGSL(vertexModuleSource);
-const UNIFORM_STRUCT = STRUCT_INFO.uniforms.vertexUniforms;
+const SHADER_INFO = parseWGSL(vertexModuleSource);
+const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
 
 class Line3D extends Mesh {
 	baseColor
@@ -123,7 +123,7 @@ class Line3D extends Mesh {
 	}
 
 	createCustomMeshVertexShaderModule() {
-		return this.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME, STRUCT_INFO, UNIFORM_STRUCT, vertexModuleSource)
+		return this.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource)
 	}
 
 	addPoint(

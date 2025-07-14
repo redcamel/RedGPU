@@ -27,19 +27,19 @@ struct InputData {
 
 @fragment
 fn main(inputData: InputData) -> @location(0) vec4<f32> {
-  // 텍스처 색상 샘플링
-  var finalColor: vec4<f32> = textureSample(diffuseTexture, diffuseTextureSampler, inputData.uv);
+    // 텍스처 색상 샘플링
+    var finalColor: vec4<f32> = textureSample(diffuseTexture, diffuseTextureSampler, inputData.uv);
 
-  finalColor = vec4<f32>(finalColor.rgb / finalColor.a, finalColor.a * uniforms.opacity * inputData.combinedOpacity);
+    finalColor = vec4<f32>(finalColor.rgb / finalColor.a, finalColor.a * uniforms.opacity * inputData.combinedOpacity);
 
-  if(uniforms.useTint == 1u){
-    finalColor = calcTintBlendMode(finalColor, uniforms.tintBlendMode, uniforms.tint);
-  }
+    #redgpu_if useTint
+        finalColor = calcTintBlendMode(finalColor, uniforms.tintBlendMode, uniforms.tint);
+    #redgpu_endIf
 
-  // alpha 값이 0일 경우 discard
-  if (finalColor.a == 0.0) {
+    // alpha 값이 0일 경우 discard
+    if (finalColor.a == 0.0) {
       discard;
-  }
+    }
 
-  return finalColor;
+    return finalColor;
 };

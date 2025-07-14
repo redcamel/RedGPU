@@ -60,7 +60,7 @@ class Fog extends ASinglePassPostEffect {
 	}
 
 	set nearDistance(value: number) {
-		validateNumberRange(value,0);
+		validateNumberRange(value, 0);
 		this.#nearDistance = Math.max(0.1, value);
 		if (this.#farDistance <= this.#nearDistance) {
 			this.#farDistance = this.#nearDistance + 0.1;
@@ -74,7 +74,7 @@ class Fog extends ASinglePassPostEffect {
 	}
 
 	set farDistance(value: number) {
-		validateNumberRange(value,0);
+		validateNumberRange(value, 0);
 		this.#farDistance = Math.max(this.#nearDistance + 0.1, value);
 		this.updateUniform('farDistance', this.#farDistance);
 	}

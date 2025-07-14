@@ -3,12 +3,12 @@ import convertHexToRgb from "../../utils/convertColor/convertHexToRgb";
 import BaseLight from "../core/BaseLight";
 
 class DirectionalLight extends BaseLight {
-	#directionX:number = -1
-	#directionY:number = -1
-	#directionZ:number = -1
+	#directionX: number = -1
+	#directionY: number = -1
+	#directionZ: number = -1
+
 	constructor(direction: [number, number, number] = [-1, -1, -1], color: string = '#fff', intensity: number = 1) {
 		super(new ColorRGB(...convertHexToRgb(color, true)), intensity)
-
 		this.#directionX = direction[0];
 		this.#directionY = direction[1];
 		this.#directionZ = direction[2];
@@ -41,6 +41,7 @@ class DirectionalLight extends BaseLight {
 	get direction(): [number, number, number] {
 		return [this.#directionX, this.#directionY, this.#directionZ];
 	}
+
 	set direction(value: [number, number, number]) {
 		this.#directionX = value[0];
 		this.#directionY = value[1];

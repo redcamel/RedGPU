@@ -1,10 +1,13 @@
 import UniformBuffer from "../resources/buffer/uniformBuffer/UniformBuffer";
+import ShaderVariantGenerator from "../resources/wgslParser/ShaderVariantGenerator";
 
 /**
  * Represents information about a GPU fragment render operation.
  */
 class FragmentGPURenderInfo {
 	fragmentShaderModule: GPUShaderModule;
+	fragmentShaderSourceVariant: ShaderVariantGenerator;
+	fragmentShaderVariantConditionalBlocks: string[];
 	fragmentUniformInfo: any;
 	fragmentBindGroupLayout: GPUBindGroupLayout;
 	fragmentUniformBuffer: UniformBuffer;
@@ -13,6 +16,8 @@ class FragmentGPURenderInfo {
 
 	constructor(
 		fragmentShaderModule: GPUShaderModule,
+		fragmentShaderSourceVariant: ShaderVariantGenerator,
+		fragmentShaderVariantConditionalBlocks: string[],
 		fragmentUniformInfo: any,
 		fragmentBindGroupLayout: GPUBindGroupLayout,
 		fragmentUniformBuffer: UniformBuffer,
@@ -20,6 +25,8 @@ class FragmentGPURenderInfo {
 		fragmentState?: GPUFragmentState
 	) {
 		this.fragmentShaderModule = fragmentShaderModule;
+		this.fragmentShaderSourceVariant = fragmentShaderSourceVariant;
+		this.fragmentShaderVariantConditionalBlocks = fragmentShaderVariantConditionalBlocks;
 		this.fragmentUniformInfo = fragmentUniformInfo;
 		this.fragmentBindGroupLayout = fragmentBindGroupLayout;
 		this.fragmentUniformBuffer = fragmentUniformBuffer;

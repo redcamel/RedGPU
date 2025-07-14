@@ -15,14 +15,14 @@ interface TextField3D {
 }
 
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_TEXT_FIELD_3D'
-const STRUCT_INFO = parseWGSL(vertexModuleSource);
-const UNIFORM_STRUCT = STRUCT_INFO.uniforms.vertexUniforms;
+const SHADER_INFO = parseWGSL(vertexModuleSource);
+const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
 
 class TextField3D extends ATextField {
 	#renderTextureWidth: number = 1
 	#renderTextureHeight: number = 1
 
-	constructor(redGPUContext: RedGPUContext,text?:string) {
+	constructor(redGPUContext: RedGPUContext, text?: string) {
 		super(redGPUContext, (width: number, height: number) => {
 			this.#renderTextureWidth = width / 1024
 			this.#renderTextureHeight = height / 1024
@@ -32,7 +32,7 @@ class TextField3D extends ATextField {
 		this._material.transparent = true
 		this.dirtyPipeline = true
 		this.dirtyTransform = true
-		if(text) this.text = text
+		if (text) this.text = text
 	}
 
 	get geometry(): Geometry | Primitive {
@@ -60,7 +60,7 @@ class TextField3D extends ATextField {
 	}
 
 	createCustomMeshVertexShaderModule() {
-		return this.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME, STRUCT_INFO, UNIFORM_STRUCT, vertexModuleSource)
+		return this.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource)
 	}
 }
 

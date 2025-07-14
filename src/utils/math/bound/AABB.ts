@@ -39,7 +39,7 @@ export class AABB {
 	}
 
 	intersects(other: AABB): boolean {
-		if(!(other instanceof AABB)){
+		if (!(other instanceof AABB)) {
 			consoleAndThrowError('allow only AABB instance')
 		}
 		return this.minX <= other.maxX && this.maxX >= other.minX &&

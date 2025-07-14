@@ -4,7 +4,6 @@ import View3D from "../../display/view/View3D";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../material";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
-import {keepLog} from "../../utils";
 
 class ASinglePassPostEffect {
 	#computeShaderMSAA: GPUShaderModule

@@ -1,7 +1,9 @@
-import parseIncludeWGSL from "./parseIncludeWGSL";
 import parseWGSL from "./parseWGSL";
+import preprocessWGSL from "./preprocessWGSL";
+import ShaderVariantGenerator from "./ShaderVariantGenerator";
 
 export {
 	parseWGSL,
-	parseIncludeWGSL
+	preprocessWGSL,
+	ShaderVariantGenerator
 }

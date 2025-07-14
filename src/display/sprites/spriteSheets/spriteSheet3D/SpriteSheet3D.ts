@@ -11,8 +11,8 @@ import SpriteSheetInfo from "../SpriteSheetInfo";
 import vertexModuleSource from "./shader/spriteSheet3DVertex.wgsl";
 
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_SPRITE_SHEET_3D'
-const STRUCT_INFO = parseWGSL(vertexModuleSource);
-const UNIFORM_STRUCT = STRUCT_INFO.uniforms.vertexUniforms;
+const SHADER_INFO = parseWGSL(vertexModuleSource);
+const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
 
 interface SpriteSheet3D extends ASpriteSheet {
 	useBillboardPerspective: boolean;
@@ -69,7 +69,7 @@ class SpriteSheet3D extends ASpriteSheet {
 	}
 
 	createCustomMeshVertexShaderModule() {
-		return this.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME, STRUCT_INFO, UNIFORM_STRUCT, vertexModuleSource)
+		return this.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource)
 	}
 }
 

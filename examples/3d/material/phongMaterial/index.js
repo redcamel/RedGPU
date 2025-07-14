@@ -6,11 +6,11 @@ document.body.appendChild(canvas);
 const texturePaths = {
 	diffuse: "../../../assets/phongMaterial/test_diffuseMap.jpg",
 	alpha: "../../../assets/phongMaterial/test_alphaMap.png",
-	ao: "../../../assets/phongMaterial/test_aoMap.png",
+	ao: "../../../assets/phongMaterial/test_aoMap.jpg",
 	normal: "../../../assets/phongMaterial/test_normalMap.jpg",
 	emissive: "../../../assets/phongMaterial/test_emissiveMap.jpg",
 	displacement: "../../../assets/phongMaterial/test_displacementMap.jpg",
-	specular: "../../../assets/phongMaterial/test_specularMap.webp",
+	specular: "../../../assets/phongMaterial/test_specularMap.jpg",
 };
 
 RedGPU.init(
@@ -25,6 +25,7 @@ RedGPU.init(
 		scene.backgroundColor.setColorByHEX('#5259c3');
 
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+		view.grid=true
 		redGPUContext.addView(view);
 
 		const directionalLight = new RedGPU.Light.DirectionalLight();
@@ -32,9 +33,9 @@ RedGPU.init(
 
 		const geometries = [
 			new RedGPU.Primitive.Sphere(redGPUContext, 2, 32, 32),
-			new RedGPU.Primitive.Box(redGPUContext, 3, 3, 3),
+			new RedGPU.Primitive.Box(redGPUContext, 3, 3, 3, 10, 10, 10),
 			new RedGPU.Primitive.Torus(redGPUContext, 1.5, 0.5, 32, 32),
-			new RedGPU.Primitive.Plane(redGPUContext, 5, 5, 2, 2),
+			new RedGPU.Primitive.Plane(redGPUContext, 5, 5, 10, 10),
 			new RedGPU.Primitive.Cylinder(redGPUContext, 2, 2, 5, 32, 2),
 			new RedGPU.Primitive.TorusKnot(redGPUContext, 1.5, 0.4, 128, 64)
 		];
@@ -45,7 +46,9 @@ RedGPU.init(
 
 		geometries.forEach((geometry, index) => {
 			const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
-			mesh.primitiveState.cullMode = "none";
+
+			// if(geometry instanceof RedGPU.Primitive.Plane) mesh.rotationX = 90
+
 
 			const angle = (Math.PI * 2 * index) / totalGeometries;
 			mesh.x = radius * Math.cos(angle);
@@ -74,19 +77,19 @@ const createTextures = (redGPUContext) => {
 };
 
 const renderUI = async (redGPUContext, mesh) => {
-	const { Pane } = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
-	const { setSeparator } = await import("../../../exampleHelper/createExample/panes/index.js");
+	const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
+	const {setSeparator} = await import("../../../exampleHelper/createExample/panes/index.js");
 
 	const pane = new Pane();
 	const material = mesh.material;
 	const textures = createTextures(redGPUContext);
 
 	const params = {
-		color: { r: material.color.r, g: material.color.g, b: material.color.b },
+		color: {r: material.color.r, g: material.color.g, b: material.color.b},
 		aoStrength: material.aoStrength,
-		emissiveColor: { r: material.emissiveColor.r, g: material.emissiveColor.g, b: material.emissiveColor.b },
+		emissiveColor: {r: material.emissiveColor.r, g: material.emissiveColor.g, b: material.emissiveColor.b},
 		emissiveStrength: material.emissiveStrength,
-		specularColor: { r: material.specularColor.r, g: material.specularColor.g, b: material.specularColor.b },
+		specularColor: {r: material.specularColor.r, g: material.specularColor.g, b: material.specularColor.b},
 		specularStrength: material.specularStrength,
 		shininess: material.shininess,
 		normalScale: material.normalScale,
@@ -108,43 +111,43 @@ const renderUI = async (redGPUContext, mesh) => {
 		pane.refresh();
 	};
 
-	pane.addBinding(params, "color", { picker: "inline", view: "color", expanded: true })
+	pane.addBinding(params, "color", {picker: "inline", view: "color", expanded: true})
 		.on("change", (ev) => {
-			const { r, g, b } = ev.value;
+			const {r, g, b} = ev.value;
 			material.color.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
 		});
 	setSeparator(pane);
 
-	pane.addBinding(params, "emissiveColor", { picker: "inline", view: "color", expanded: true })
+	pane.addBinding(params, "emissiveColor", {picker: "inline", view: "color", expanded: true})
 		.on("change", (ev) => {
-			const { r, g, b } = ev.value;
+			const {r, g, b} = ev.value;
 			material.emissiveColor.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
 		});
 
-	pane.addBinding(params, "specularColor", { picker: "inline", view: "color", expanded: true })
+	pane.addBinding(params, "specularColor", {picker: "inline", view: "color", expanded: true})
 		.on("change", (ev) => {
-			const { r, g, b } = ev.value;
+			const {r, g, b} = ev.value;
 			material.specularColor.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
 		});
 	setSeparator(pane);
 
-	pane.addBinding(mesh.material, 'opacity', { min: 0, max: 1, step: 0.01 })
+	pane.addBinding(mesh.material, 'opacity', {min: 0, max: 1, step: 0.01})
 		.on('change', (e) => {
 			mesh.material.opacity = e.value;
 		});
 	setSeparator(pane);
 
 	const properties = [
-		{ key: "aoStrength", min: 0, max: 5, step: 0.01 },
-		{ key: "emissiveStrength", min: 0, max: 1, step: 0.01 },
-		{ key: "specularStrength", min: 0, max: 20, step: 0.01 },
-		{ key: "shininess", min: 0, max: 128, step: 1 },
-		{ key: "normalScale", min: 0, max: 2, step: 0.01 },
-		{ key: "displacementScale", min: 0, max: 5, step: 0.01 },
+		{key: "aoStrength", min: 0, max: 5, step: 0.01},
+		{key: "emissiveStrength", min: 0, max: 1, step: 0.01},
+		{key: "specularStrength", min: 0, max: 20, step: 0.01},
+		{key: "shininess", min: 0, max: 128, step: 1},
+		{key: "normalScale", min: 0, max: 2, step: 0.01},
+		{key: "displacementScale", min: 0, max: 5, step: 0.01},
 	];
 
-	properties.forEach(({ key, min, max, step }) =>
-		pane.addBinding(params, key, { min, max, step }).on("change", (ev) => {
+	properties.forEach(({key, min, max, step}) =>
+		pane.addBinding(params, key, {min, max, step}).on("change", (ev) => {
 			material[key] = ev.value;
 		})
 	);
@@ -156,9 +159,10 @@ const renderUI = async (redGPUContext, mesh) => {
 			material[`${textureType}Texture`] = ev.value ? textures[textureType] : null;
 		});
 	});
+
 	setSeparator(pane);
 
-	pane.addButton({ title: "Reset All" }).on("click", () => {
+	pane.addButton({title: "Reset All"}).on("click", () => {
 		material.color.setColorByRGB(defaultValues.color.r, defaultValues.color.g, defaultValues.color.b);
 		material.aoStrength = defaultValues.aoStrength;
 		material.emissiveColor.setColorByRGB(
@@ -180,4 +184,13 @@ const renderUI = async (redGPUContext, mesh) => {
 
 		refreshUI();
 	});
+	//
+	material.diffuseTexture = textures.diffuse
+	material.displacementTexture = textures.displacement
+	material.normalTexture = textures.normal
+	params.textures.useDisplacement = true
+	params.textures.useNormal = true
+	params.textures.useDiffuse = true
+	//
+	pane.refresh();
 };
