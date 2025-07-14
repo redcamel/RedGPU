@@ -5,8 +5,8 @@ class ShaderVariantGenerator {
 	#defines: string
 	#conditionalBlocks: ConditionalBlock[]
 	constructor(
-		 defines: string,
-		 conditionalBlocks: ConditionalBlock[]
+		defines: string,
+		conditionalBlocks: ConditionalBlock[]
 	) {
 		this.#defines = defines;
 		this.#conditionalBlocks = conditionalBlocks;
@@ -56,9 +56,11 @@ class ShaderVariantGenerator {
 			const isKeyEnabled = enabledKeys.includes(block.uniformName);
 
 			if (isKeyEnabled) {
-				variantCode = variantCode.replace(block.fullMatch, block.codeBlock);
+				// 조건이 true일 때 - ifBlock 사용
+				variantCode = variantCode.replace(block.fullMatch, block.ifBlock);
 			} else {
-				variantCode = variantCode.replace(block.fullMatch, '');
+				// 조건이 false일 때 - elseBlock 사용 (없으면 빈 문자열)
+				variantCode = variantCode.replace(block.fullMatch, block.elseBlock || '');
 			}
 		}
 

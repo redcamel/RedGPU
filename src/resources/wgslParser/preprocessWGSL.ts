@@ -17,11 +17,14 @@ const defineValues = {
 	REDGPU_DEFINE_WORKGROUP_SIZE_Z: PassClustersLightHelper.WORKGROUP_SIZE_Z.toString(),
 	REDGPU_DEFINE_MAX_LIGHTS_PER_CLUSTER: PassClustersLightHelper.MAX_LIGHTS_PER_CLUSTER.toString(),
 } as const;
-const conditionalBlockPattern = /#redgpu_if\s+(\w+)\b([\s\S]*?)#redgpu_endIf/g;
+
+// #redgpu_else 지원을 위한 새로운 패턴
+const conditionalBlockPattern = /#redgpu_if\s+(\w+)\b([\s\S]*?)(?:#redgpu_else([\s\S]*?))?#redgpu_endIf/g;
 
 export interface ConditionalBlock {
 	uniformName: string;
-	codeBlock: string;
+	ifBlock: string;
+	elseBlock?: string;
 	fullMatch: string;
 	blockIndex: number;
 }
@@ -32,7 +35,6 @@ interface PreprocessedWGSLResult {
 	shaderSourceVariant: ShaderVariantGenerator;
 	conditionalBlocks: string[];
 }
-
 
 const preprocessCache = new Map<string, PreprocessedWGSLResult>();
 
@@ -66,7 +68,7 @@ const processDefines = (code: string): string => {
 };
 
 /**
- * 조건부 블록 찾기 및 파싱
+ * 조건부 블록 찾기 및 파싱 - #redgpu_else 지원
  */
 const findConditionalBlocks = (code: string): ConditionalBlock[] => {
 	const conditionalBlocks: ConditionalBlock[] = [];
@@ -75,10 +77,13 @@ const findConditionalBlocks = (code: string): ConditionalBlock[] => {
 
 	conditionalBlockPattern.lastIndex = 0;
 	while ((match = conditionalBlockPattern.exec(code)) !== null) {
+		const [fullMatch, uniformName, ifBlock, elseBlock] = match;
+
 		conditionalBlocks.push({
-			uniformName: match[1],
-			codeBlock: match[2].trim(),
-			fullMatch: match[0],
+			uniformName,
+			ifBlock: ifBlock.trim(),
+			elseBlock: elseBlock?.trim(),
+			fullMatch,
 			blockIndex: blockIndex++
 		});
 	}
@@ -102,19 +107,22 @@ const logDuplicateKeys = (conditionalBlocks: ConditionalBlock[]): void => {
 		console.log('🎯 중복 키 발견:', duplicateKeys.map(([key, count]) => `${key}(${count}개)`));
 	}
 
-	console.log('발견된 조건부 블록들:', conditionalBlocks.map(b => `${b.uniformName}[${b.blockIndex}]`));
+	console.log('발견된 조건부 블록들:', conditionalBlocks.map(b =>
+		`${b.uniformName}[${b.blockIndex}]${b.elseBlock ? ' (else 포함)' : ''}`
+	));
 };
 
 /**
- * 기본 셰이더 소스 생성 (모든 조건부 블록 포함)
+ * 기본 셰이더 소스 생성 (모든 조건부 블록의 if 부분 포함)
  */
 const generateDefaultSource = (defines: string, conditionalBlocks: ConditionalBlock[]): string => {
 	let defaultSource = defines;
 
 	for (let i = conditionalBlocks.length - 1; i >= 0; i--) {
 		const block = conditionalBlocks[i];
-		defaultSource = defaultSource.replace(block.fullMatch, block.codeBlock);
-		// console.log('✅ 기본 셰이더에 포함:', `${block.uniformName}[${block.blockIndex}]`);
+		// 기본적으로 if 블록을 포함 (조건이 true일 때의 상태)
+		defaultSource = defaultSource.replace(block.fullMatch, block.ifBlock);
+		// console.log('✅ 기본 셰이더에 포함:', `${block.uniformName}[${block.blockIndex}] - if 블록`);
 	}
 
 	return defaultSource;
@@ -169,9 +177,9 @@ const preprocessWGSL = (code: string): PreprocessedWGSLResult => {
 	if (totalCombinations > 1) {
 		console.log(`🎯 레이지 바리안트 생성기 초기화 (캐시 저장):`, totalCombinations, cacheKey);
 		console.log('🎯 고유 키들:', uniqueKeys);
-		console.log('🎯 이론적 가능한 바리안트 수:', totalCombinations);
+		keepLog('🎯 이론적 가능한 바리안트 수:', totalCombinations);
 	}
-// keepLog('shaderSourceVariant',shaderSourceVariant)
+	// keepLog('shaderSourceVariant',shaderSourceVariant)
 	return result;
 };
 
