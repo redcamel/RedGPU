@@ -50,10 +50,10 @@ RedGPU.init(
             )
         }
 
-        if (!redGPUContext.detector.isMobile) {
+
             const modelURL = redGPUContext.detector.isMobile ? 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb' : 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MosquitoInAmber/glTF-Binary/MosquitoInAmber.glb'
             loadGLTF(modelURL);
-        }
+
         // loadGLTF('./assets/gltf/busterDrone/busterDrone.gltf');
         const render = (time) => {
             directionalLightTest.direction[0] = Math.sin(time / 1500)
