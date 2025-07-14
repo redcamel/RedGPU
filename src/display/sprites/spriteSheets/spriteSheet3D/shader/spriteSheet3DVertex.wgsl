@@ -130,21 +130,8 @@ fn main(inputData: InputData) -> OutputData {
 
 @vertex
 fn drawDirectionalShadowDepth(inputData: InputData) -> OutputShadowData {
+    // TODO SpriteSheet3D drawDirectionalShadowDepth
     var output: OutputShadowData;
-
-    let u_directionalLightProjectionViewMatrix = systemUniforms.directionalLightProjectionViewMatrix;
-    let u_directionalLightProjectionMatrix = systemUniforms.directionalLightProjectionMatrix;
-    let u_directionalLightViewMatrix = systemUniforms.directionalLightViewMatrix;
-
-    let u_modelMatrix = vertexUniforms.modelMatrix;
-    let u_camera = systemUniforms.camera;
-    let u_cameraMatrix = u_camera.cameraMatrix;
-    let u_cameraPosition = u_camera.cameraPosition;
-    let u_useBillboardPerspective = vertexUniforms.useBillboardPerspective;
-    let u_useBillboard = vertexUniforms.useBillboard;
-    let input_position = inputData.position;
-    var position: vec4<f32>;
-
     return output;
 }
 

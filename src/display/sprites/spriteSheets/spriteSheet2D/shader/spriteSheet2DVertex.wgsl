@@ -30,9 +30,6 @@ struct OutputData {
     @location(15) pickingId: vec4<f32>,
 };
 
-struct OutputShadowData {
-    @builtin(position) position: vec4<f32>,
-};
 
 @vertex
 fn main(inputData: InputData) -> OutputData {
@@ -79,27 +76,6 @@ fn main(inputData: InputData) -> OutputData {
     return output;
 }
 
-@vertex
-fn drawDirectionalShadowDepth(inputData: InputData) -> OutputShadowData {
-    var output: OutputShadowData;
-
-    // 시스템 Uniform 변수 가져오기
-    let u_directionalLightProjectionViewMatrix = systemUniforms.directionalLightProjectionViewMatrix;
-    let u_directionalLightProjectionMatrix = systemUniforms.directionalLightProjectionMatrix;
-    let u_directionalLightViewMatrix = systemUniforms.directionalLightViewMatrix;
-
-    // Vertex별 Uniform 변수 가져오기
-    let u_modelMatrix = vertexUniforms.modelMatrix;
-    let u_camera = systemUniforms.camera;
-    let u_cameraMatrix = u_camera.cameraMatrix;
-    let u_cameraPosition = u_camera.cameraPosition;
-
-    // 입력 데이터
-    let input_position = inputData.position;
-    var position: vec4<f32>;
-
-    return output;
-}
 
 @vertex
 fn picking(inputData: InputData) -> OutputData {

@@ -123,6 +123,12 @@ fn main(inputData: InputData) -> OutputData {
     return output;
 }
 
+fn drawDirectionalShadowDepth(inputData: InputData) -> OutputShadowData {
+    // TODO TextField3D drawDirectionalShadowDepth
+    var output: OutputShadowData;
+    return output;
+}
+
 @vertex
 fn picking(inputData: InputData) -> OutputData {
     var output: OutputData;

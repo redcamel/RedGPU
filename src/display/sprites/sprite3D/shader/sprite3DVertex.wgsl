@@ -130,7 +130,7 @@ fn drawDirectionalShadowDepth(inputData: InputData) -> OutputShadowData {
     let input_positionVec4 = vec4<f32>(input_position, 1.0);
     var position: vec4<f32>;
 
-    // TODO: 그림자 처리 로직 구현 필요
+    // TODO Sprite drawDirectionalShadowDepth
     output.position = u_directionalLightProjectionViewMatrix * u_modelMatrix * input_positionVec4;
 
     return output;
