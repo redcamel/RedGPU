@@ -185,7 +185,7 @@ class ABaseMaterial extends ResourceBase {
 			// 🎯 레이지 바리안트 생성기에서 바리안트 소스 코드 가져오기
 			const variantSource = this.gpuRenderInfo.fragmentShaderSourceVariant.getVariant(currentVariantKey);
 			if (variantSource) {
-				console.log('🎯 바리안트 셰이더 모듈 생성:', currentVariantKey);
+				keepLog('🎯 바리안트 셰이더 모듈 생성:', currentVariantKey);
 				targetShaderModule = resourceManager.createGPUShaderModule(
 					variantShaderModuleName,
 					{code: variantSource}

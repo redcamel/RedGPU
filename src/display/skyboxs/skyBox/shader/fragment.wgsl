@@ -4,7 +4,6 @@ struct Uniforms {
     useSkyboxTexture:u32,
     blur:f32,
     transitionProgress:f32,
-    useTransitionAlphaTexture:u32
 };
 @group(2) @binding(0) var<uniform> uniforms : Uniforms;
 @group(2) @binding(1) var skyboxTextureSampler: sampler;
@@ -37,7 +36,7 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
   let u_transitionProgress = uniforms.transitionProgress;
   if(u_transitionProgress > 0.0){
     let transitionSample = textureSampleLevel(transitionTexture, skyboxTextureSampler, cubemapVec, mipmapCount * blurCurve);
-    if(uniforms.useTransitionAlphaTexture == 1u){
+    #redgpu_if transitionTexture
         // 큐브맵 벡터를 2D UV 좌표로 변환
         let uv = sphericalToUV(normalize(cubemapVec));
         // 2D 텍스처 샘플링
@@ -53,9 +52,9 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
             transitionAlphaValue + (u_transitionProgress - 0.5) * noiseInfluence
         );
         sampleColor = mix( transitionSample, skyboxColor, maskValue * (1.0 - u_transitionProgress)) ;
-    }else{
+    #redgpu_else
         sampleColor = mix( skyboxColor, transitionSample, u_transitionProgress );
-    }
+    #redgpu_endIf
   }
 
   var outColor = vec4<f32>(sampleColor.rgb, sampleColor.a * uniforms.opacity);
