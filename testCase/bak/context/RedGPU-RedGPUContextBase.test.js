@@ -1,4 +1,4 @@
-import * as RedGPU from "../../dist";
+import * as RedGPU from "../../dist/index.js";
 
 RedTest.title = 'ResourceBase Test'
 const runTest = (pass, error = null) => {
