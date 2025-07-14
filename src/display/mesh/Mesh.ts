@@ -6,10 +6,8 @@ import gltfAnimationLooper from "../../loader/gltf/animationLooper/gltfAnimation
 import Primitive from "../../primitive/core/Primitive";
 import RenderViewStateData from "../../renderer/RenderViewStateData";
 import VertexGPURenderInfo from "../../renderInfos/VertexGPURenderInfo";
-import StorageBuffer from "../../resources/buffer/storageBuffer/StorageBuffer";
 import DefineForVertex from "../../resources/defineProperty/DefineForVertex";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
-import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import {keepLog} from "../../utils";
 import InstanceIdGenerator from "../../utils/InstanceIdGenerator";
@@ -26,7 +24,6 @@ import Object3DContainer from "./core/Object3DContainer";
 import updateMeshDirtyPipeline from "./core/pipeline/updateMeshDirtyPipeline";
 import getBasicMeshVertexBindGroupDescriptor from "./core/shader/getBasicMeshVertexBindGroupDescriptor";
 import MeshBase from "./MeshBase";
-import vertexModuleSourcePbrSkin from "./shader/meshVertexPbrSkin.wgsl";
 
 const VERTEX_SHADER_MODULE_NAME_PBR_SKIN = 'VERTEX_MODULE_MESH_PBR_SKIN'
 const CONVERT_RADIAN = Math.PI / 180;
@@ -791,10 +788,8 @@ class Mesh extends MeshBase {
 			if (!this.gpuRenderInfo) this.initGPURenderInfos()
 			const currentUseDisplacementTexture = !!displacementTexture
 			if (this.useDisplacementTexture !== currentUseDisplacementTexture) {
-
 				this.useDisplacementTexture = currentUseDisplacementTexture
 				this.dirtyPipeline = true
-
 			}
 			if (this.dirtyPipeline || dirtyVertexUniformFromMaterial[currentMaterialUUID]) {
 				updateMeshDirtyPipeline(this, debugViewRenderState)
@@ -805,7 +800,7 @@ class Mesh extends MeshBase {
 				const {gpuRenderInfo} = this
 				const {vertexUniformBuffer, vertexUniformInfo} = gpuRenderInfo
 				const {members: vertexUniformInfoMembers} = vertexUniformInfo
-				//TODO 여기 개선 변화될떄만 처리되도록 확인
+
 				if (vertexUniformInfoMembers.displacementScale !== undefined &&
 					vertexUniformInfoMembers.displacementScale !== displacementScale
 				) {

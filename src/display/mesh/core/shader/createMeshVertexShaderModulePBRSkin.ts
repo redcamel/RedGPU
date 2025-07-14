@@ -1,6 +1,5 @@
 import StorageBuffer from "../../../../resources/buffer/storageBuffer/StorageBuffer";
 import parseWGSL from "../../../../resources/wgslParser/parseWGSL";
-import {keepLog} from "../../../../utils";
 import Mesh from "../../Mesh";
 import vertexModuleSourcePbrSkin from "../../shader/meshVertexPbrSkin.wgsl";
 import createMeshVertexUniformBuffers from "../createMeshVertexUniformBuffers";
@@ -25,7 +24,6 @@ const createMeshVertexShaderModulePBRSkin = (
 		if (mesh.animationInfo.skinInfo) {
 			createMeshVertexUniformBuffers(mesh, true)
 			mesh.animationInfo.skinInfo.vertexStorageInfo = parseWGSL(vModuleDescriptor.code).storage.vertexStorages
-			keepLog('mesh.animationInfo.skinInfo.vertexStorageInfo', mesh.animationInfo.skinInfo.vertexStorageInfo)
 			const newData = new ArrayBuffer(mesh.animationInfo.skinInfo.vertexStorageInfo.arrayBufferByteLength)
 			mesh.animationInfo.skinInfo.vertexStorageBuffer = new StorageBuffer(
 				mesh.redGPUContext,
