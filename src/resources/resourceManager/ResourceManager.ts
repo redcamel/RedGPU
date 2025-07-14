@@ -4,7 +4,7 @@ import Sampler from "../sampler/Sampler";
 import BitmapTexture from "../texture/BitmapTexture";
 import MipmapGenerator from "../texture/core/mipmapGenerator/MipmapGenerator";
 import CubeTexture from "../texture/CubeTexture";
-import parseIncludeWGSL from "../wgslParser/parseIncludeWGSL";
+import preprocessWGSL from "../wgslParser/preprocessWGSL";
 import ResourceState from "./resourceState/ResourceState";
 
 // Resource types
@@ -349,7 +349,7 @@ class ResourceManager extends ResourceBase {
 	 */
 	#createAndCacheModule(name: string, gpuShaderModuleDescriptor: GPUShaderModuleDescriptor) {
 		const {code} = gpuShaderModuleDescriptor
-		const newCode = parseIncludeWGSL(code)
+		const newCode = preprocessWGSL(code).defaultSource
 		///
 		const newModule: GPUShaderModule = this.redGPUContext.gpuDevice.createShaderModule({
 			...gpuShaderModuleDescriptor,

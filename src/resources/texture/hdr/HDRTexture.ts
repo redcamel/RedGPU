@@ -11,9 +11,9 @@ import basicUnregisterResource from "../../resourceManager/core/basicUnregisterR
 import ResourceStateHDRTexture from "../../resourceManager/resourceState/ResourceStateHDRTexture";
 import Sampler from "../../sampler/Sampler";
 import CubeTexture from "../CubeTexture";
-import {float32ToUint8WithToneMapping} from "./tone/float32ToUint8WithToneMapping";
 import generateCubeMapFromEquirectangularCode from "./generateCubeMapFromEquirectangularCode.wgsl"
 import HDRLoader, {HDRData} from "./HDRLoader";
+import {float32ToUint8WithToneMapping} from "./tone/float32ToUint8WithToneMapping";
 
 const MANAGED_STATE_KEY = 'managedHDRTextureState'
 
@@ -48,6 +48,7 @@ class HDRTexture extends ManagedResourceBase {
 	#onLoad: (textureInstance: HDRTexture) => void;
 	#onError: (error: Error) => void;
 	#isCubeMapInitialized: boolean = false;
+	#exposureUpdateTimeout: number | null = null;
 
 	constructor(
 		redGPUContext: RedGPUContext,
@@ -84,19 +85,6 @@ class HDRTexture extends ManagedResourceBase {
 				this.src = src;
 				this.#registerResource()
 			}
-		}
-	}
-
-	/**
-	 * HDR 파일 형식 검증 (.hdr 형식만 허용)
-	 */
-	#validateHDRFormat(src: string): void {
-		if (!src || typeof src !== 'string') {
-			throw new Error('HDR 파일 경로가 필요합니다');
-		}
-		const lowerSrc = src.toLowerCase();
-		if (!lowerSrc.endsWith('.hdr')) {
-			throw new Error(`지원되지 않는 형식입니다. .hdr 형식만 지원됩니다. 입력된 파일: ${src}`);
 		}
 	}
 
@@ -146,8 +134,6 @@ class HDRTexture extends ManagedResourceBase {
 		return this.#exposure;
 	}
 
-	#exposureUpdateTimeout: number | null = null;
-
 	set exposure(value: number) {
 		const newExposure = Math.max(0.01, Math.min(20.0, value));
 		if (this.#exposure === newExposure) return;
@@ -175,8 +161,11 @@ class HDRTexture extends ManagedResourceBase {
 		return this.#luminanceAnalysis;
 	}
 
-	resetToRecommendedExposure(): void {
-		this.exposure = this.#recommendedExposure;
+	get viewDescriptor() {
+		return {
+			...CubeTexture.defaultViewDescriptor,
+			mipLevelCount: this.#mipLevelCount
+		}
 	}
 
 	/**
@@ -194,6 +183,10 @@ class HDRTexture extends ManagedResourceBase {
 		return ['.hdr'];
 	}
 
+	resetToRecommendedExposure(): void {
+		this.exposure = this.#recommendedExposure;
+	}
+
 	destroy() {
 		const temp = this.#gpuTexture
 		this.#setGpuTexture(null);
@@ -204,6 +197,19 @@ class HDRTexture extends ManagedResourceBase {
 		this.#luminanceAnalysis = null
 		this.#unregisterResource()
 		if (temp) temp.destroy()
+	}
+
+	/**
+	 * HDR 파일 형식 검증 (.hdr 형식만 허용)
+	 */
+	#validateHDRFormat(src: string): void {
+		if (!src || typeof src !== 'string') {
+			throw new Error('HDR 파일 경로가 필요합니다');
+		}
+		const lowerSrc = src.toLowerCase();
+		if (!lowerSrc.endsWith('.hdr')) {
+			throw new Error(`지원되지 않는 형식입니다. .hdr 형식만 지원됩니다. 입력된 파일: ${src}`);
+		}
 	}
 
 	async #loadHDRTexture(src: string) {
@@ -287,18 +293,10 @@ class HDRTexture extends ManagedResourceBase {
 		console.log(`HDR 큐브맵 텍스처 생성 완료: ${this.#cubeMapSize}x${this.#cubeMapSize}x6, 밉맵: ${this.#mipLevelCount}레벨, 노출: ${this.#exposure.toFixed(3)}`);
 	}
 
-	get viewDescriptor() {
-
-		return {
-			...CubeTexture.defaultViewDescriptor,
-			mipLevelCount: this.#mipLevelCount
-		}
-	}
-
 	async #updateCubeMapContent() {
 		const {gpuDevice, resourceManager} = this.redGPUContext;
 		const {mipmapGenerator} = resourceManager;
-		if (!this.#gpuTexture ) {
+		if (!this.#gpuTexture) {
 			console.warn('큐브맵 텍스처가 없어 업데이트를 건너뜁니다.');
 			return;
 		}

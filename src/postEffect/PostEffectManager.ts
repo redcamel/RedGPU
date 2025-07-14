@@ -117,18 +117,16 @@ class PostEffectManager {
 		const {inverseProjectionMatrix, projectionMatrix, rawCamera, redGPUContext, scene} = this.#view
 		const {gpuDevice} = redGPUContext
 		const {modelMatrix: cameraMatrix, position: cameraPosition} = rawCamera
-
 		const structInfo = this.#postEffectSystemUniformBufferStructInfo
 		const gpuBuffer = this.#postEffectSystemUniformBuffer.gpuBuffer;
 		const camera2DYn = rawCamera instanceof Camera2D;
 		console.log(structInfo);
-		const projectionCameraMatrix= mat4.multiply(temp, projectionMatrix, cameraMatrix);
+		const projectionCameraMatrix = mat4.multiply(temp, projectionMatrix, cameraMatrix);
 		[
 			{key: 'projectionMatrix', value: projectionMatrix},
 			{key: 'projectionCameraMatrix', value: projectionCameraMatrix},
 			{key: 'inverseProjectionMatrix', value: inverseProjectionMatrix},
 			{key: 'inverseProjectionCameraMatrix', value: mat4.invert(temp2, projectionCameraMatrix)},
-
 		].forEach(({key, value}) => {
 			gpuDevice.queue.writeBuffer(
 				gpuBuffer,
@@ -161,8 +159,8 @@ class PostEffectManager {
 		this.#textureComputeShaderModule = gpuDevice.createShaderModule({code: textureComputeShader,});
 		this.#textureComputeBindGroupLayout = this.#createTextureBindGroupLayout(redGPUContext);
 		this.#textureComputePipeline = this.#createTextureComputePipeline(gpuDevice, this.#textureComputeShaderModule, this.#textureComputeBindGroupLayout)
-		const STRUCT_INFO = parseWGSL(postEffectSystemUniformCode)
-		const UNIFORM_STRUCT = STRUCT_INFO.uniforms.systemUniforms;
+		const SHADER_INFO = parseWGSL(postEffectSystemUniformCode)
+		const UNIFORM_STRUCT = SHADER_INFO.uniforms.systemUniforms;
 		const postEffectSystemUniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength)
 		this.#postEffectSystemUniformBufferStructInfo = UNIFORM_STRUCT;
 		this.#postEffectSystemUniformBuffer = new UniformBuffer(redGPUContext, postEffectSystemUniformData, '#postEffectSystemUniformBuffer');
@@ -282,6 +280,7 @@ class PostEffectManager {
 		gpuDevice.queue.submit([commandEncoder.finish()]);
 	}
 }
+
 let temp = mat4.create()
 let temp2 = mat4.create()
 Object.freeze(PostEffectManager)

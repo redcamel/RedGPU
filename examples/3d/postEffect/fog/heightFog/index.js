@@ -8,7 +8,7 @@ RedGPU.init(
 	(redGPUContext) => {
 		const controller = new RedGPU.Camera.ObitController(redGPUContext);
 		controller.distance = 15;
-		controller.speedDistance = 0.2;
+		controller.speedDistance = 1;
 
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
@@ -21,16 +21,15 @@ RedGPU.init(
 
 		const heightFog = new RedGPU.PostEffect.HeightFog(redGPUContext);
 		heightFog.fogType = RedGPU.PostEffect.HeightFog.EXPONENTIAL;
-		heightFog.density = 2.0;
-		heightFog.fogColor.setColorByRGB(190, 210, 235);
-		heightFog.baseHeight = -1.5;
-		heightFog.thickness = 8.0;
-		heightFog.falloff = 1.2;
-
+		heightFog.density = 1.8;
+		heightFog.fogColor.setColorByRGB(255, 245, 220);
+		heightFog.baseHeight = -2;
+		heightFog.thickness = 6;
+		heightFog.falloff = 1;
 		view.postEffectManager.addEffect(heightFog);
 
 		const directionalLight = new RedGPU.Light.DirectionalLight();
-
+		directionalLight.intensity = 0.8;
 		scene.lightManager.addDirectionalLight(directionalLight);
 
 		createGroundLevelScene(redGPUContext, scene);
@@ -79,7 +78,7 @@ function createGroundLevelScene(redGPUContext, scene) {
 	const terrain = new RedGPU.Primitive.Plane(redGPUContext, 200, 200, 1000, 1000);
 	const terrainMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#2d4a2d');
 
-	const terrainNoise = new RedGPU.Resource.SimplexTexture(redGPUContext, 512, 512, {
+	const terrainNoise = new RedGPU.Resource.SimplexTexture(redGPUContext, 1024, 1024, {
 		mainLogic: `
 		let noise1 = getSimplexNoiseByDimension(base_uv * 2.0, uniforms);
 		let noise2 = getSimplexNoiseByDimension(base_uv * 4.0, uniforms) * 0.5;
@@ -92,11 +91,11 @@ function createGroundLevelScene(redGPUContext, scene) {
 	terrainNoise.octaves = 8;
 
 	terrainMaterial.displacementTexture = terrainNoise;
-	terrainMaterial.displacementScale = 12.0;
+	terrainMaterial.displacementScale = 13.0;
 
 	const terrainMesh = new RedGPU.Display.Mesh(redGPUContext, terrain, terrainMaterial);
 	terrainMesh.rotationX = 90;
-	terrainMesh.y = -3;
+	terrainMesh.y = -4;
 	scene.addChild(terrainMesh);
 
 	const forestPositions = [

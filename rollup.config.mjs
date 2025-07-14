@@ -68,7 +68,7 @@ function removeSpacesAndTabs() {
 						.replace(/(\s?),(\s?)/g, ',')
 						.replace(/(\s?)\/(\s?)/g, '/')
 						.replace(/\s{1,}/g, ' ')
-						.replace(/\\n /g, '')
+						.replace(/\\n /g, ' ')
 					;
 				}
 			}

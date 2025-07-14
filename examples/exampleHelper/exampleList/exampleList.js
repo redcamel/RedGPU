@@ -303,6 +303,15 @@ const ExampleList = [
 							en: ``
 						},
 					},
+					{
+						name: 'Fragment Variant Test',
+						path: '3d/material/fragmentVariantTest',
+						thumb: '3d/material/fragmentVariantTest/thumb.png',
+						description: {
+							ko: ``,
+							en: ``
+						},
+					},
 
 				]
 			},
@@ -1480,6 +1489,15 @@ const ExampleList = [
 								name: 'IridescenceLamp',
 								path: 'gltf/gltfExtensions/iridescence/iridescenceLamp',
 								thumb: 'gltf/gltfExtensions/iridescence/iridescenceLamp/thumb.png',
+								description: {
+									ko: ``,
+									en: ``
+								},
+							},
+							{
+								name: 'SunglassesKhronos',
+								path: 'gltf/gltfExtensions/iridescence/sunglassesKhronos',
+								thumb: 'gltf/gltfExtensions/iridescence/sunglassesKhronos/thumb.png',
 								description: {
 									ko: ``,
 									en: ``

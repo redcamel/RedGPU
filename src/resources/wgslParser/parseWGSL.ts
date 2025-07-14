@@ -1,6 +1,6 @@
 import {WgslReflect} from "wgsl_reflect";
 import UniformType from "../buffer/core/type/UniformType";
-import parseIncludeWGSL from "./parseIncludeWGSL";
+import preprocessWGSL from "./preprocessWGSL";
 
 const createUniformMember = (curr, start, typeName) => {
 	const UniformTypeInfo = UniformType[typeName];
@@ -69,20 +69,37 @@ const processStorages = (storage) => {
 		return prev;
 	}, {});
 };
-const parseWGSL = (shaderSource: string) => {
-	const parsedSource = parseIncludeWGSL(shaderSource);
-	const reflect = new WgslReflect(parsedSource);
-	// console.log('reflect', reflect)
-	// console.log('parsedSource', parsedSource)
+const reflectCache = new Map<string, any>();
+const parseWGSL = (code: string) => {
+	const {defaultSource, shaderSourceVariant, conditionalBlocks, cacheKey} = preprocessWGSL(code);
+	// 🎯 리플렉트 캐시 확인
+	const cachedReflect = reflectCache.get(cacheKey);
+	let reflectResult;
+	if (cachedReflect) {
+		console.log('🚀 캐시에서 리플렉트 로드:', cacheKey);
+		reflectResult = cachedReflect
+	} else {
+		console.log('🔄 리플렉트 파싱 시작:', cacheKey);
+		// 🎯 새로운 리플렉트 생성
+		const reflect = new WgslReflect(defaultSource);
+		// 🎯 리플렉트 결과 처리
+		reflectResult = {
+			uniforms: {...processUniforms(reflect.uniforms)},
+			storage: {...processStorages(reflect.storage)},
+			samplers: reflect.samplers,
+			textures: reflect.textures,
+			vertexEntries: reflect.entry.vertex.map(v => v.name),
+			fragmentEntries: reflect.entry.fragment.map(v => v.name),
+			computeEntries: reflect.entry.compute.map(v => v.name),
+		};
+		// 🎯 캐시에 저장
+		reflectCache.set(cacheKey, reflectResult);
+	}
 	return {
-		uniforms: {...processUniforms(reflect.uniforms)},
-		storage: {...processStorages(reflect.storage)},
-		samplers: reflect.samplers,
-		textures: reflect.textures,
-		vertexEntries: reflect.entry.vertex.map(v => v.name),
-		fragmentEntries: reflect.entry.fragment.map(v => v.name),
-		computeEntries: reflect.entry.compute.map(v => v.name),
-		shaderSource: parsedSource
+		...reflectResult,
+		defaultSource,
+		shaderSourceVariant,
+		conditionalBlocks
 	};
 };
 export default parseWGSL;

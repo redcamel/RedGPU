@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../dist";
+import * as RedGPU from "../../../dist/index.js";
 
 RedTest.title = 'Initialize Test'
 const runTest = (pass, error = null) => {

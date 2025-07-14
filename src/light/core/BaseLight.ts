@@ -1,22 +1,23 @@
 import ColorRGB from "../../color/ColorRGB";
 import ADrawDebuggerLight from "../../display/drawDebugger/light/ADrawDebuggerLight";
 
-
 class BaseLight {
+	drawDebugger: ADrawDebuggerLight
 	#color: ColorRGB;
 	#intensity: number;
-	drawDebugger:ADrawDebuggerLight
-	#enableDebugger:boolean=false
+	#enableDebugger: boolean = false
+
+	constructor(color: ColorRGB, intensity: number = 1) {
+		this.#color = color;
+		this.#intensity = intensity;
+	}
+
 	get enableDebugger(): boolean {
 		return this.#enableDebugger;
 	}
 
 	set enableDebugger(value: boolean) {
 		this.#enableDebugger = value;
-	}
-	constructor(color: ColorRGB, intensity: number = 1) {
-		this.#color = color;
-		this.#intensity = intensity;
 	}
 
 	get color(): ColorRGB {

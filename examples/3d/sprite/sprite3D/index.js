@@ -20,6 +20,7 @@ RedGPU.init(
 		);
 
 		const sprite3D = new RedGPU.Display.Sprite3D(redGPUContext, material);
+		sprite3D.useBillboard =false
 		scene.addChild(sprite3D);
 
 		const spriteCount = 10;
@@ -31,6 +32,7 @@ RedGPU.init(
 			const z = Math.sin(angle) * radius;
 
 			const sprite3D = new RedGPU.Display.Sprite3D(redGPUContext, material);
+			sprite3D.useBillboard =false
 			sprite3D.x = x;
 			sprite3D.z = z;
 			scene.addChild(sprite3D);

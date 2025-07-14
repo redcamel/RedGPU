@@ -1,6 +1,5 @@
 import Mesh from "../../../display/mesh/Mesh";
 import AABB from "./AABB";
-import calculateMeshAABB from "./calculateMeshAABB";
 
 const calculateMeshCombinedAABB = (mesh: Mesh): AABB => {
 	const allAABBs = []
@@ -8,7 +7,6 @@ const calculateMeshCombinedAABB = (mesh: Mesh): AABB => {
 	if (allAABBs.length === 0) return new AABB(0, 0, 0, 0, 0, 0);
 	return calculateCombinedAABBFromAABBs(allAABBs);
 };
-
 /**
  * 재귀적으로 모든 자식의 AABB를 수집하는 헬퍼 함수
  */
@@ -22,7 +20,6 @@ const collectRecursive = (mesh: Mesh, aabbs: AABB[]) => {
 			aabbs.push(aabb);
 		}
 	}
-
 	// 지오메트리가 없어도 자식들은 처리해야 함
 	if (mesh.children) {
 		for (let i = 0; i < mesh.children.length; i++) {
@@ -33,14 +30,11 @@ const collectRecursive = (mesh: Mesh, aabbs: AABB[]) => {
 		}
 	}
 };
-
 const calculateCombinedAABBFromAABBs = (aabbs: AABB[]): AABB => {
 	if (aabbs.length === 0) return new AABB(0, 0, 0, 0, 0, 0);
 	if (aabbs.length === 1) return aabbs[0];
-
 	let minX = Infinity, minY = Infinity, minZ = Infinity;
 	let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
-
 	for (let i = 0; i < aabbs.length; i++) {
 		const aabb = aabbs[i];
 		if (aabb.minX < minX) minX = aabb.minX;
@@ -50,8 +44,6 @@ const calculateCombinedAABBFromAABBs = (aabbs: AABB[]): AABB => {
 		if (aabb.maxY > maxY) maxY = aabb.maxY;
 		if (aabb.maxZ > maxZ) maxZ = aabb.maxZ;
 	}
-
 	return new AABB(minX, maxX, minY, maxY, minZ, maxZ);
 };
-
 export default calculateMeshCombinedAABB;
