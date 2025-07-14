@@ -6,11 +6,11 @@ document.body.appendChild(canvas);
 const texturePaths = {
 	diffuse: "../../../assets/phongMaterial/test_diffuseMap.jpg",
 	alpha: "../../../assets/phongMaterial/test_alphaMap.png",
-	ao: "../../../assets/phongMaterial/test_aoMap.png",
+	ao: "../../../assets/phongMaterial/test_aoMap.jpg",
 	normal: "../../../assets/phongMaterial/test_normalMap.jpg",
 	emissive: "../../../assets/phongMaterial/test_emissiveMap.jpg",
 	displacement: "../../../assets/phongMaterial/test_displacementMap.jpg",
-	specular: "../../../assets/phongMaterial/test_specularMap.webp",
+	specular: "../../../assets/phongMaterial/test_specularMap.jpg",
 };
 
 RedGPU.init(
@@ -32,9 +32,9 @@ RedGPU.init(
 
 		const geometries = [
 			new RedGPU.Primitive.Sphere(redGPUContext, 2, 32, 32),
-			new RedGPU.Primitive.Box(redGPUContext, 3, 3, 3),
+			new RedGPU.Primitive.Box(redGPUContext, 3, 3, 3,10,10,10),
 			new RedGPU.Primitive.Torus(redGPUContext, 1.5, 0.5, 32, 32),
-			new RedGPU.Primitive.Plane(redGPUContext, 5, 5, 2, 2),
+			new RedGPU.Primitive.Plane(redGPUContext, 5, 5, 10, 10),
 			new RedGPU.Primitive.Cylinder(redGPUContext, 2, 2, 5, 32, 2),
 			new RedGPU.Primitive.TorusKnot(redGPUContext, 1.5, 0.4, 128, 64)
 		];

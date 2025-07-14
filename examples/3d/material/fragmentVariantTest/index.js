@@ -7,10 +7,10 @@ document.body.appendChild(canvas);
 const texturePaths = {
 	diffuse: "../../../assets/phongMaterial/test_diffuseMap.jpg",
 	alpha: "../../../assets/phongMaterial/test_alphaMap.png",
-	ao: "../../../assets/phongMaterial/test_aoMap.png",
+	ao: "../../../assets/phongMaterial/test_aoMap.jpg",
 	normal: "../../../assets/phongMaterial/test_normalMap.jpg",
 	emissive: "../../../assets/phongMaterial/test_emissiveMap.jpg",
-	specular: "../../../assets/phongMaterial/test_specularMap.webp",
+	specular: "../../../assets/phongMaterial/test_specularMap.jpg",
 };
 
 let shaderVariantGenerator = null;

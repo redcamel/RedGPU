@@ -50,11 +50,11 @@ const createTextures = (redGPUContext) => {
 	return {
 		diffuse: new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/phongMaterial/test_diffuseMap.jpg'),
 		alpha: new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/phongMaterial/test_alphaMap.png'),
-		ao: new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/phongMaterial/test_aoMap.png'),
+		ao: new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/phongMaterial/test_aoMap.jpg'),
 		normal: new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/phongMaterial/test_normalMap.jpg'),
 		emissive: new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/phongMaterial/test_emissiveMap.jpg'),
 		displacement: new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/phongMaterial/test_displacementMap.jpg'),
-		specular: new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/phongMaterial/test_specularMap.webp'),
+		specular: new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/phongMaterial/test_specularMap.jpg'),
 	};
 };
 
@@ -79,13 +79,14 @@ const createMeshesFromLines = (redGPUContext, scene, lines, spacingX, spacingY, 
 
 		additionalTextures.forEach((textureType, meshIndex) => {
 			const material = createMaterialWithTextures(redGPUContext, base, textureType, textures);
-			material.specularStrength = 10;
+
 			material.shininess = 16;
 
 			const meshYPosition = -(meshIndex * spacingY - (totalMeshes - 1) * spacingY / 2);
 
 			const geometry = new RedGPU.Primitive.Sphere(redGPUContext, 1, 32, 32, 32);
 			const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
+
 
 			mesh.setPosition(xPosition, meshYPosition, 0);
 			scene.addChild(mesh);
@@ -99,6 +100,7 @@ const createMeshesFromLines = (redGPUContext, scene, lines, spacingX, spacingY, 
 			label.useBillboardPerspective = true;
 
 			mesh.addChild(label);
+
 		});
 	});
 };
@@ -135,7 +137,6 @@ const createMaterialWithTextures = (redGPUContext, base, additional, textures) =
 			break;
 		case 'specular':
 			material.specularTexture = textures.specular;
-			material.specularStrength = 2;
 			break;
 	}
 
@@ -157,10 +158,10 @@ const createMaterialWithTextures = (redGPUContext, base, additional, textures) =
 			break;
 		case 'displacement':
 			material.displacementTexture = textures.displacement;
+			material.displacementScale = 2
 			break;
 		case 'specular':
 			material.specularTexture = textures.specular;
-			material.specularStrength = 2;
 			break;
 	}
 
