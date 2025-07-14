@@ -1,5 +1,5 @@
-import drawDirectionalShadowDepth from '../../display/mesh/shader/drawDirectionalShadowDepth.wgsl'
-import picking from '../../display/mesh/shader/picking.wgsl'
+import drawDirectionalShadowDepth from '../../display/mesh/shader/core/drawDirectionalShadowDepth.wgsl'
+import picking from '../../display/mesh/shader/core/picking.wgsl'
 import calcTintBlendMode from './shader/calcTintBlendMode.wgsl'
 import calcDirectionalShadowVisibility from './shader/fragment/calcDirectionalShadowVisibility.wgsl'
 import drawPicking from './shader/fragment/drawPicking.wgsl'

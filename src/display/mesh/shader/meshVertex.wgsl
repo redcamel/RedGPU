@@ -91,12 +91,14 @@ fn main(inputData: InputData) -> OutputData {
     output.vertexNormal = normalPosition.xyz;
     output.uv = input_uv;
 
-    var posFromLight = u_directionalLightProjectionViewMatrix * vec4(position.xyz, 1.0);
-    output.shadowPos = vec3(
-        posFromLight.xy * vec2(0.5, -0.5) + vec2(0.5),
-        posFromLight.z
-    );
-    output.receiveShadow = u_receiveShadow;
+    #redgpu_if receiveShadow
+    {
+        var posFromLight = u_directionalLightProjectionViewMatrix * vec4(position.xyz, 1.0);
+        output.shadowPos = vec3( posFromLight.xy * vec2(0.5, -0.5) + vec2(0.5), posFromLight.z );
+        output.receiveShadow = vertexUniforms.receiveShadow;
+    }
+    #redgpu_endIf
+
     output.combinedOpacity = vertexUniforms.combinedOpacity;
 
     return output;

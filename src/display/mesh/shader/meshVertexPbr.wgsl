@@ -83,12 +83,14 @@ fn main(inputData: InputData) -> OutputData {
     output.vertexColor_0 = inputData.vertexColor_0;
     output.vertexTangent = u_normalModelMatrix * inputData.vertexTangent;
 
-    var posFromLight = u_directionalLightProjectionViewMatrix * vec4(position.xyz, 1.0);
-    output.shadowPos = vec3(
-        posFromLight.xy * vec2(0.5, -0.5) + vec2(0.5),
-        posFromLight.z
-    );
-    output.receiveShadow = u_receiveShadow;
+    #redgpu_if receiveShadow
+    {
+        var posFromLight = u_directionalLightProjectionViewMatrix * vec4(position.xyz, 1.0);
+        output.shadowPos = vec3( posFromLight.xy * vec2(0.5, -0.5) + vec2(0.5), posFromLight.z );
+        output.receiveShadow = vertexUniforms.receiveShadow;
+    }
+    #redgpu_endIf
+
     output.ndcPosition = output.position.xyz / output.position.w;
 
     let nodeScaleX: f32 = length(u_localMatrix[0].xyz);
