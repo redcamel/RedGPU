@@ -11,8 +11,8 @@ import computeModuleSource from "./shader/compute.wgsl";
 import vertexModuleSource from "./shader/particleVertex.wgsl";
 
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_PARTICLE_EMITTER'
-const STRUCT_INFO = parseWGSL(vertexModuleSource);
-const UNIFORM_STRUCT = STRUCT_INFO.uniforms.vertexUniforms;
+const SHADER_INFO = parseWGSL(vertexModuleSource);
+const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
 
 interface ParticleEmitter {
 	useBillboard: boolean;
@@ -497,7 +497,7 @@ class ParticleEmitter extends Mesh {
 	}
 
 	createCustomMeshVertexShaderModule() {
-		return this.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME, STRUCT_INFO, UNIFORM_STRUCT, vertexModuleSource)
+		return this.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource)
 	}
 
 	render(debugViewRenderState: RenderViewStateData) {

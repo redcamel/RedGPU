@@ -9,8 +9,8 @@ import Mesh from "../../mesh/Mesh";
 import vertexModuleSource from "../Sprite3D/shader/Sprite3DVertex.wgsl";
 
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_SPRITE_3D'
-const STRUCT_INFO = parseWGSL(vertexModuleSource);
-const UNIFORM_STRUCT = STRUCT_INFO.uniforms.vertexUniforms;
+const SHADER_INFO = parseWGSL(vertexModuleSource);
+const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
 
 interface Sprite3D {
 	useBillboardPerspective: boolean;
@@ -30,7 +30,7 @@ class Sprite3D extends Mesh {
 	}
 
 	createCustomMeshVertexShaderModule() {
-		return this.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME, STRUCT_INFO, UNIFORM_STRUCT, vertexModuleSource)
+		return this.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource)
 	}
 }
 

@@ -161,8 +161,8 @@ class PostEffectManager {
 		this.#textureComputeShaderModule = gpuDevice.createShaderModule({code: textureComputeShader,});
 		this.#textureComputeBindGroupLayout = this.#createTextureBindGroupLayout(redGPUContext);
 		this.#textureComputePipeline = this.#createTextureComputePipeline(gpuDevice, this.#textureComputeShaderModule, this.#textureComputeBindGroupLayout)
-		const STRUCT_INFO = parseWGSL(postEffectSystemUniformCode)
-		const UNIFORM_STRUCT = STRUCT_INFO.uniforms.systemUniforms;
+		const SHADER_INFO = parseWGSL(postEffectSystemUniformCode)
+		const UNIFORM_STRUCT = SHADER_INFO.uniforms.systemUniforms;
 		const postEffectSystemUniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength)
 		this.#postEffectSystemUniformBufferStructInfo = UNIFORM_STRUCT;
 		this.#postEffectSystemUniformBuffer = new UniformBuffer(redGPUContext, postEffectSystemUniformData, '#postEffectSystemUniformBuffer');

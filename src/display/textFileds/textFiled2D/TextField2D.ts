@@ -13,8 +13,8 @@ import TextFieldMaterial from "../core/textFieldMaterial/TextFieldMaterial";
 import vertexModuleSource from "./shader/textField2DVertex.wgsl";
 
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_TEXT_FIELD_2D'
-const STRUCT_INFO = parseWGSL(vertexModuleSource);
-const UNIFORM_STRUCT = STRUCT_INFO.uniforms.vertexUniforms;
+const SHADER_INFO = parseWGSL(vertexModuleSource);
+const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
 const BaseTextField2D = mixInMesh2D(ATextField);
 
 class TextField2D extends BaseTextField2D {
@@ -78,7 +78,7 @@ class TextField2D extends BaseTextField2D {
 	}
 
 	createCustomMeshVertexShaderModule() {
-		return this.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME, STRUCT_INFO, UNIFORM_STRUCT, vertexModuleSource)
+		return this.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource)
 	}
 }
 

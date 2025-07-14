@@ -29,8 +29,8 @@ import SkyBox from "../skyboxs/skyBox/SkyBox";
 import ViewRenderTextureManager from "./ViewRenderTextureManager";
 import ViewTransform from "./ViewTransform";
 
-const STRUCT_INFO = parseWGSL(SystemCode.SYSTEM_UNIFORM)
-const UNIFORM_STRUCT = STRUCT_INFO.uniforms.systemUniforms;
+const SHADER_INFO = parseWGSL(SystemCode.SYSTEM_UNIFORM)
+const UNIFORM_STRUCT = SHADER_INFO.uniforms.systemUniforms;
 
 class View3D extends ViewTransform {
 //
