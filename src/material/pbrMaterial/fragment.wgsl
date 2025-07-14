@@ -430,6 +430,7 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     var N:vec3<f32> = normalize(input_vertexNormal.xyz);
     var backFaceYn:bool = false;
     #redgpu_if doubleSided
+    {
         var fdx:vec3<f32> = dpdx(input_vertexPosition);
         var fdy:vec3<f32> = dpdy(input_vertexPosition);
         var faceNormal:vec3<f32> = normalize(cross(fdy,fdx));
@@ -437,8 +438,8 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
             N = -N;
             backFaceYn = true;
         };
+    }
     #redgpu_endIf
-    N = N * u_normalScale;
 
     #redgpu_if normalTexture
     {
@@ -452,6 +453,10 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
             u_normalScale
         ) ;
         N = select(N, select(N, -N, backFaceYn), u_useVertexTangent);
+    }
+    #redgpu_else
+    {
+      N = N * u_normalScale;
     }
     #redgpu_endIf
     /////////////////////////////////////////////////////////////////////////////////
