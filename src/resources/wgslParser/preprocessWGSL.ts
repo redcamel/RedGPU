@@ -177,7 +177,7 @@ const preprocessWGSL = (code: string): PreprocessedWGSLResult => {
 	if (totalCombinations > 1) {
 		console.log(`🎯 레이지 바리안트 생성기 초기화 (캐시 저장):`, totalCombinations, cacheKey);
 		console.log('🎯 고유 키들:', uniqueKeys);
-		keepLog('🎯 이론적 가능한 바리안트 수:', totalCombinations);
+		console.log('🎯 이론적 가능한 바리안트 수:', totalCombinations);
 	}
 	// keepLog('shaderSourceVariant',shaderSourceVariant)
 	return result;

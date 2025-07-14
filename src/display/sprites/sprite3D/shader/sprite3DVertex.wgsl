@@ -62,9 +62,8 @@ fn main(inputData: InputData) -> OutputData {
     var position: vec4<f32>;
     var normalPosition: vec4<f32>;
 
-    // Perspective Scaling과 Billboard 처리
     #redgpu_if useBillboard
-        // 기본 position과 normalPosition 계산
+    {    // 기본 position과 normalPosition 계산
         let projectionModelMatrix = u_projectionMatrix * u_modelMatrix;
         let billboardMatrix = getBillboardMatrix(u_cameraMatrix, u_modelMatrix);
         let billboardNormalMatrix = getBillboardMatrix(u_cameraMatrix, u_normalModelMatrix);
@@ -77,7 +76,6 @@ fn main(inputData: InputData) -> OutputData {
             normalPosition = billboardNormalMatrix * input_vertexNormalVec4;
         }
 
-        // View3D-Projection Matrix 곱
         output.position = u_projectionMatrix * position;
 
         if (u_useBillboardPerspective != 1) {
@@ -95,13 +93,13 @@ fn main(inputData: InputData) -> OutputData {
                 temp.zw
             );
         }
+    }
     #redgpu_else
-        // 일반적인 변환 계산
+    {
         position = u_cameraMatrix * u_modelMatrix * input_positionVec4;
         normalPosition = u_cameraMatrix * u_normalModelMatrix * input_vertexNormalVec4;
-
-        // View3D-Projection Matrix 곱
         output.position = u_projectionMatrix * position;
+    }
     #redgpu_endIf
 
     // 출력 데이터 설정
