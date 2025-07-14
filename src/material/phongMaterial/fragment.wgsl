@@ -236,9 +236,9 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     #redgpu_endIf
     //
     finalColor = vec4<f32>(mixColor + emissiveColor, resultAlpha);
-    if(uniforms.useTint == 1u){
+    #redgpu_if useTint
         finalColor = calcTintBlendMode(finalColor, uniforms.tintBlendMode, uniforms.tint);
-    }
+    #redgpu_endIf
     // alpha 값이 0일 경우 discard
     if (systemUniforms.isView3D == 1 && finalColor.a == 0.0) {
       discard;

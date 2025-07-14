@@ -20,9 +20,9 @@ struct InputData {
 @fragment
 fn main(inputData: InputData) -> @location(0) vec4<f32> {
     var finalColor = vec4<f32>( uniforms.color.r , uniforms.color.g , uniforms.color.b , uniforms.opacity * inputData.combinedOpacity);
-    if(uniforms.useTint == 1u){
+    #redgpu_if useTint
         finalColor = calcTintBlendMode(finalColor, uniforms.tintBlendMode, uniforms.tint);
-    }
+    #redgpu_endIf
     return finalColor;
 }
 
