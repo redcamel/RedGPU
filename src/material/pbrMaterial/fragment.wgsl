@@ -855,13 +855,15 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
         var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor * (vec3<f32>(1.0) - F_IBL_dielectric);
 
         // ---------- ibl Diffuse Transmission ----------
-        if (u_useKHR_materials_diffuse_transmission && diffuseTransmissionParameter > 0.0) {
+        #redgpu_if useKHR_materials_diffuse_transmission
+        {
             // 후면 산란을 위한 샘플링 방향 (back side)
             var backScatteringColor = textureSampleLevel(ibl_environmentTexture, iblTextureSampler, -N, mipLevel).rgb;
             let transmittedIBL = backScatteringColor * diffuseTransmissionColor * (vec3<f32>(1.0) - F_IBL);
             // 반사와 투과 효과 혼합
             envIBL_DIFFUSE = mix(envIBL_DIFFUSE, transmittedIBL, diffuseTransmissionParameter);
         }
+        #redgpu_endIf
 
         // ---------- ibl Specular ----------
         var envIBL_SPECULAR:vec3<f32>;
@@ -1145,9 +1147,9 @@ fn calcLight(
 
 
     var DIFFUSE_BRDF:vec3<f32> = diffuse_brdf_disney(NdotL, NdotV, LdotH, roughnessParameter, albedo);
-    if(u_useKHR_materials_diffuse_transmission && diffuseTransmissionParameter > 0.0){
+    #redgpu_if useKHR_materials_diffuse_transmission
         DIFFUSE_BRDF = mix(DIFFUSE_BRDF, diffuse_btdf(N, L, diffuseTransmissionColor), diffuseTransmissionParameter);
-    }
+    #redgpu_endIf
 
     var SPECULAR_BRDF:vec3<f32>;
 
@@ -1237,12 +1239,12 @@ fn calcLight(
     #redgpu_endIf
 
     var lightDirection: f32;
-    if (u_useKHR_materials_diffuse_transmission && diffuseTransmissionParameter > 0.0) {
+    #redgpu_if useKHR_materials_diffuse_transmission
         lightDirection = mix(abs(dot(N, L)), 1.0, diffuseTransmissionParameter);
-    } else {
+    #redgpu_else
         // 투과가 없는 경우, 기존처럼 양수 값만 허용
         lightDirection = NdotL;
-    }
+    #redgpu_endIf
 
     let lightContribution = directLighting * dLight * lightDirection;
     return lightContribution;
