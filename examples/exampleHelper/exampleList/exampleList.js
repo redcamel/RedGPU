@@ -1494,6 +1494,15 @@ const ExampleList = [
 									en: ``
 								},
 							},
+							{
+								name: 'SunglassesKhronos',
+								path: 'gltf/gltfExtensions/iridescence/sunglassesKhronos',
+								thumb: 'gltf/gltfExtensions/iridescence/sunglassesKhronos/thumb.png',
+								description: {
+									ko: ``,
+									en: ``
+								},
+							},
 						]
 					},
 					{
