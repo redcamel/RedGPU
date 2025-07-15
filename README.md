@@ -3,11 +3,18 @@ RedGPU - Javascript WebGPU Library
 <p>
   <a href="https://twitter.com/redcamel15"><img src="https://img.shields.io/twitter/follow/redcamel15.svg?style=social" alt="Twitter Follow" /></a>
   <a href="LICENSE.md"><img src="https://img.shields.io/github/license/sourcerer-io/hall-of-fame.svg?colorB=ff0000"></a>
+  <img src="https://img.shields.io/github/last-commit/redcamel/RedGPU" alt="Last Commit">
+  <img src="https://img.shields.io/github/issues/redcamel/RedGPU" alt="Issues">
 </p>
 
 
-## RedGPU V2.5.0-Alpha
-- Release Note https://github.com/redcamel/RedGPU/releases/tag/V2.5.0-Alpha
+## Latest Release Version
+  <a href="https://github.com/redcamel/RedGPU/releases/latest">
+    <img src="https://img.shields.io/github/v/release/redcamel/RedGPU?style=for-the-badge&logo=github&label=Latest%20Release" alt="Latest Release"></a>
+
+  <a href="https://github.com/redcamel/RedGPU/releases">
+    <img src="https://img.shields.io/github/release-date/redcamel/RedGPU?style=for-the-badge&logo=github&label=Release%20Date" alt="Release Date"></a>
+
 
 ## [Examples](https://redcamel.github.io/RedGPU/examples/)
    - See the [example](https://redcamel.github.io/RedGPU/examples/). Various examples are available.
