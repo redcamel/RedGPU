@@ -265,6 +265,7 @@ class InstancingMesh extends Mesh {
 			]
 		}
 		this.gpuRenderInfo.vertexUniformBindGroup = this.redGPUContext.gpuDevice.createBindGroup(vertexBindGroupDescriptor)
+		this.gpuRenderInfo.vertexShaderModule = vertexShaderModule
 		this.gpuRenderInfo.pipeline = createBasePipeline(this, vertexShaderModule, vertexBindGroupLayout)
 		this.gpuRenderInfo.shadowPipeline = createBasePipeline(this, vertexShaderModule, vertexBindGroupLayout, PIPELINE_TYPE.SHADOW)
 	}
