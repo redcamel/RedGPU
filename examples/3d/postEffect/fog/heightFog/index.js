@@ -75,7 +75,7 @@ RedGPU.init(
 );
 
 function createGroundLevelScene(redGPUContext, scene) {
-	const terrain = new RedGPU.Primitive.Plane(redGPUContext, 200, 200, 1000, 1000);
+	const terrain = new RedGPU.Primitive.Ground(redGPUContext, 200, 200, 1000, 1000);
 	const terrainMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#2d4a2d');
 
 	const terrainNoise = new RedGPU.Resource.SimplexTexture(redGPUContext, 1024, 1024, {
@@ -94,7 +94,7 @@ function createGroundLevelScene(redGPUContext, scene) {
 	terrainMaterial.displacementScale = 13.0;
 
 	const terrainMesh = new RedGPU.Display.Mesh(redGPUContext, terrain, terrainMaterial);
-	terrainMesh.rotationX = 90;
+
 	terrainMesh.y = -4;
 	scene.addChild(terrainMesh);
 

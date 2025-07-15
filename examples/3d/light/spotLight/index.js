@@ -71,11 +71,10 @@ const createSampleMeshes = (redGPUContext, scene) => {
 
 	const plane = new RedGPU.Display.Mesh(
 		redGPUContext,
-		new RedGPU.Primitive.Plane(redGPUContext),
+		new RedGPU.Primitive.Ground(redGPUContext),
 		new RedGPU.Material.PhongMaterial(redGPUContext, '#ff0000')
 	);
 	plane.setScale(200);
-	plane.rotationX = 90;
 	plane.y = -0.01;
 	scene.addChild(plane);
 
