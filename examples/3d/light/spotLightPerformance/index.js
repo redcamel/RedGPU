@@ -104,15 +104,14 @@ const createSampleMeshes = (redGPUContext, scene) => {
 		'../../../assets/UV_Grid_Sm.jpg'
 	);
 
-	const plane = new RedGPU.Display.Mesh(
+	const ground = new RedGPU.Display.Mesh(
 		redGPUContext,
-		new RedGPU.Primitive.Plane(redGPUContext),
+		new RedGPU.Primitive.Ground(redGPUContext),
 		new RedGPU.Material.PhongMaterial(redGPUContext, '#fff')
 	);
-	plane.setScale(200);
-	plane.rotationX = 90;
-	plane.y = -0.01;
-	scene.addChild(plane);
+	ground.setScale(200);
+	ground.y = -0.01;
+	scene.addChild(ground);
 
 	const geometry = new RedGPU.Primitive.Sphere(redGPUContext, 2, 32, 32, 32);
 	const gridSize = 4;

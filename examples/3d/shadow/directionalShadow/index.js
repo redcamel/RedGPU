@@ -70,11 +70,10 @@ const addRandomMeshes = (redGPUContext, scene) => {
 		new RedGPU.Primitive.TorusKnot(redGPUContext, 0.5, 0.2, 128, 64, 2, 3)
 	];
 
-	const plane = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Plane(redGPUContext), new RedGPU.Material.PhongMaterial(redGPUContext, '#ff0000'));
-	plane.setScale(200);
-	plane.rotationX = 90;
-	plane.receiveShadow = true;
-	scene.addChild(plane);
+	const ground = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Ground(redGPUContext), new RedGPU.Material.PhongMaterial(redGPUContext, '#ff0000'));
+	ground.setScale(200);
+	ground.receiveShadow = true;
+	scene.addChild(ground);
 
 	for (let i = 0; i < 500; i++) {
 		const geometry = geometries[Math.floor(Math.random() * geometries.length)];

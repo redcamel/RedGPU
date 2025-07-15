@@ -47,7 +47,6 @@ RedGPU.init(
 		geometries.forEach((geometry, index) => {
 			const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
 
-			// if(geometry instanceof RedGPU.Primitive.Plane) mesh.rotationX = 90
 
 
 			const angle = (Math.PI * 2 * index) / totalGeometries;

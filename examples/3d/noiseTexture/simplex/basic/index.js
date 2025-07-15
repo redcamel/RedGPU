@@ -19,14 +19,12 @@ RedGPU.init(
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		redGPUContext.addView(view);
 
-		const geometry = new RedGPU.Primitive.Plane(redGPUContext, 50, 50, 1000, 1000);
+		const geometry = new RedGPU.Primitive.Ground(redGPUContext, 50, 50, 1000, 1000);
 		const material = new RedGPU.Material.PhongMaterial(redGPUContext);
 		material.diffuseTexture = new RedGPU.Resource.SimplexTexture(redGPUContext);
 
 		const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
-		mesh.primitiveState.cullMode = 'none';
 		mesh.setPosition(0, 0, 0);
-		mesh.rotationX = 90;
 		scene.addChild(mesh);
 
 		const testData = {useAnimation: true};

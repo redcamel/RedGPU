@@ -6,6 +6,8 @@ import Plane from "./Plane";
 import Sphere from "./Sphere";
 import Torus from "./Torus";
 import TorusKnot from "./TorusKnot";
+import Ground from "./Ground";
+
 
 export {
 	Primitive,
@@ -15,5 +17,6 @@ export {
 	TorusKnot,
 	Circle,
 	Cylinder,
-	Box
+	Box,
+	Ground
 }

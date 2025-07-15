@@ -62,15 +62,14 @@ function loadGLTF(redGPUContext, scene, url, xPosition, yPosition) {
 
 
 const addGround = (redGPUContext, scene) => {
-	const plane = new RedGPU.Display.Mesh(
+	const ground = new RedGPU.Display.Mesh(
 		redGPUContext,
-		new RedGPU.Primitive.Plane(redGPUContext),
+		new RedGPU.Primitive.Ground(redGPUContext),
 		new RedGPU.Material.PhongMaterial(redGPUContext, '#ff0000')
 	);
-	plane.setScale(200);
-	plane.rotationX = 90;
-	plane.receiveShadow = true;
-	scene.addChild(plane);
+	ground.setScale(200);
+	ground.receiveShadow = true;
+	scene.addChild(ground);
 };
 
 const renderTestPane = async (redGPUContext, targetView) => {
