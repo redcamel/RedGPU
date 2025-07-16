@@ -23,8 +23,8 @@ RedGPU.init(
 		view.ibl = ibl;
 		view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 
-		// const geometry = new RedGPU.Primitive.Ground(redGPUContext, 500, 500, 1000, 1000,10);
-		const geometry = new RedGPU.Primitive.Box(redGPUContext, 500, 500, 500,500,500, 500,1);
+		const geometry = new RedGPU.Primitive.Ground(redGPUContext, 500, 500, 1000, 1000,10);
+		// const geometry = new RedGPU.Primitive.Box(redGPUContext, 500, 500, 500,500,500, 500,1);
 		const material = new RedGPU.Material.WaterMaterial(redGPUContext, '#4A90E2');
 
 		// 🌊 개선된 Gerstner Wave 기반 displacement 텍스처
@@ -168,7 +168,7 @@ RedGPU.init(
 		const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
 		mesh.primitiveState.cullMode = 'none';
 		mesh.setPosition(0, 0, 0);
-		mesh.y = -250
+		// mesh.y = -250
 		scene.addChild(mesh);
 
 		const testData = {useAnimation: true};

@@ -70,18 +70,27 @@ fn main(inputData: InputData) -> OutputData {
     var normalPosition: vec4<f32>;
 
     #redgpu_if useDisplacementTexture
-        // 거리 계산용 임시 위치
         let tempPosition = u_modelMatrix * vec4<f32>(input_position, 1.0);
         let distance = distance(tempPosition.xyz, u_cameraPosition);
         let mipLevel = (distance / maxDistance) * maxMipLevel;
 
         // 로컬 스페이스에서 디스플레이스먼트 계산
         let displacedPosition = calcDisplacementPosition(input_position, input_vertexNormal, displacementTexture, displacementTextureSampler, u_displacementScale, input_uv, mipLevel);
-        let displacedNormal = calcDisplacementNormal(input_vertexNormal, displacementTexture, displacementTextureSampler, u_displacementScale, input_uv, mipLevel);
 
         // 월드 스페이스로 변환
         position = u_modelMatrix * vec4<f32>(displacedPosition, 1.0);
-        normalPosition = u_normalModelMatrix * vec4<f32>(displacedNormal, 1.0);
+
+        // 🎯 노멀은 월드 스페이스에서 직접 계산하는 것이 더 정확
+        let worldUV = input_uv; // 또는 월드 스페이스 UV 계산
+        let displacedNormal = calcDisplacementNormal(
+            normalize((u_normalModelMatrix * vec4<f32>(input_vertexNormal, 0.0)).xyz),
+            displacementTexture,
+            displacementTextureSampler,
+            u_displacementScale,
+            worldUV,
+            mipLevel
+        );
+        normalPosition = vec4<f32>(displacedNormal, 0.0);
     #redgpu_else
         position = u_modelMatrix * vec4<f32>(input_position, 1.0);
         normalPosition = u_normalModelMatrix * vec4<f32>(input_vertexNormal, 1.0);
