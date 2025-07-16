@@ -15,15 +15,13 @@ interface WaterMaterial {
 	specularStrength: number;
 	normalTexture: BitmapTexture;
 	normalTextureSampler: Sampler;
-	normalScale: number;
-	opacity: number;
-	use2PathRender:boolean
+	transmissionFactor: number;
+	use2PathRender: boolean
 }
 
 class WaterMaterial extends ABitmapBaseMaterial {
 	#displacementTexture: BitmapTexture
 	#displacementScale: number = 1
-
 	get displacementScale(): number {
 		return this.#displacementScale;
 	}
@@ -42,7 +40,8 @@ class WaterMaterial extends ABitmapBaseMaterial {
 		this.updateTexture(prevTexture, value)
 		this.dirtyPipeline = true
 	}
-	constructor(redGPUContext: RedGPUContext, color: string = '#0066cc', name?: string) {
+
+	constructor(redGPUContext: RedGPUContext, color: string = '#fff', name?: string) {
 		super(
 			redGPUContext,
 			'WATER_MATERIAL',
@@ -53,15 +52,12 @@ class WaterMaterial extends ABitmapBaseMaterial {
 		this.initGPURenderInfos()
 		this.color.setColorByHEX(color)
 		this.specularColor.setColorByHEX('#ffffff')
-
 		// 물에 적합한 기본 설정
-		this.opacity = 0.7
+		this.transmissionFactor = 0.7
 		this.specularStrength = 0.8
-		this.normalScale = 1.0
 		this.use2PathRender = true
 		//TODO 보강
 	}
-
 }
 
 DefineForFragment.defineByPreset(WaterMaterial, [
@@ -69,7 +65,6 @@ DefineForFragment.defineByPreset(WaterMaterial, [
 	//
 	DefineForFragment.PRESET_TEXTURE.NORMAL_TEXTURE,
 	DefineForFragment.PRESET_SAMPLER.NORMAL_TEXTURE_SAMPLER,
-	DefineForFragment.PRESET_POSITIVE_NUMBER.NORMAL_SCALE,
 	//
 	DefineForFragment.PRESET_POSITIVE_NUMBER.OPACITY,
 	//
@@ -79,26 +74,24 @@ DefineForFragment.defineByPreset(WaterMaterial, [
 	[DefineForFragment.PRESET_POSITIVE_NUMBER.SHININESS, 64],
 ])
 Object.freeze(WaterMaterial)
+DefineForFragment.definePositiveNumber(WaterMaterial, [
+	['transmissionFactor', 1]
+])
 export default WaterMaterial
-
 const WATER_DEFAULTS = {
 	// Transmission
 	useKHR_materials_transmission: true,
 	KHR_transmissionFactor: 0.9,
-
 	// Volume
 	useKHR_materials_volume: true,
 	KHR_thicknessFactor: 1.0,
 	KHR_attenuationDistance: 10.0,
 	KHR_attenuationColor: [0.2, 0.6, 0.8],  // 파란색 감쇠
-
 	// IOR
 	KHR_materials_ior: 1.33,                 // 물의 굴절률
-
 	// 표면 특성
 	roughnessFactor: 0.1,                    // 매끄러운 표면
 	metallicFactor: 0.0,                     // 비금속
-
 	// 베이스 컬러
 	baseColorFactor: [0.2, 0.6, 0.8, 1.0],
 };

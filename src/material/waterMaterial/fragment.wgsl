@@ -11,9 +11,7 @@ struct Uniforms {
     specularStrength:f32,
     shininess: f32,
     //
-    normalScale:f32,
-    //
-    opacity: f32,
+    transmissionFactor: f32,
     //
 };
 
@@ -33,8 +31,6 @@ struct InputData {
 }
 
 @group(2) @binding(0) var<uniform> uniforms: Uniforms;
-@group(2) @binding(1) var normalTextureSampler: sampler;
-@group(2) @binding(2) var normalTexture: texture_2d<f32>;
 
 @fragment
 fn main(inputData:InputData) -> @location(0) vec4<f32> {
@@ -57,37 +53,31 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
 
     // Uniforms
     let u_color = uniforms.color;
-    let u_normalScale = uniforms.normalScale;
     let u_specularColor = uniforms.specularColor;
     let u_specularStrength = uniforms.specularStrength;
     let u_shininess = uniforms.shininess;
-    let u_opacity = uniforms.opacity;
 
-    // 🔧 변수명 변경 (E는 WGSL 예약어일 수 있음)
-    let V = normalize(u_cameraPosition - inputData.vertexPosition);
+    // 🔧 변수명 수정 (WGSL 문법 호환성)
+    let viewDir = normalize(u_cameraPosition - inputData.vertexPosition);
 
     // Shadow
     let receiveShadowYn = inputData.receiveShadow != 0.0;
 
-    // Vertex Normal
-    var N = normalize(inputData.vertexNormal) * u_normalScale;
-    #redgpu_if normalTexture
-        let normalSamplerColor = textureSample(normalTexture, normalTextureSampler, inputData.uv).rgb;
-        N = perturb_normal( N, inputData.vertexPosition, inputData.uv, normalSamplerColor, u_normalScale ) ;
-    #redgpu_endIf
+    // 🌊 표면 노말 사용 (normalTexture 없이)
+    let surfaceNormal = normalize(inputData.vertexNormal);
 
-    var finalColor:vec4<f32>;
-    var resultAlpha:f32 = u_opacity * inputData.combinedOpacity;
-
-    let KHR_attenuationDistance = 1.0;
+    // 🌊 물의 물리적 특성 정의
+    let KHR_attenuationDistance = 10.0;
     let KHR_attenuationColor = u_color;
-    let ior = 1.33;
-    let roughnessParameter = 0.1;
-    let albedo = vec3<f32>(0.2, 0.6, 0.8);
-    let thicknessParameter = 1.0;
-    let KHR_dispersion = 0.0;
+    let ior = 1.33;                          // 물의 굴절률
+    let roughnessParameter = 0.1;            // 매끄러운 표면
+    let albedo = u_color;                    // 물의 기본 색상
+    let thicknessParameter = 1.0;            // 두께 매개변수
+    let KHR_dispersion = 0.0;                // 분산 효과
+    let transmissionFactor = uniforms.transmissionFactor;
 
-    var diffuseColor = calcPrePathBackground(
+    // 🌊 굴절된 배경 계산
+    let refractedBackground = calcPrePathBackground(
         true,
         thicknessParameter,
         KHR_dispersion,
@@ -99,15 +89,20 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
         systemUniforms.projectionCameraMatrix,
         inputData.vertexPosition,
         inputData.ndcPosition,
-        V,
-        N,
+        viewDir,
+        surfaceNormal,
         renderPath1ResultTexture,
         renderPath1ResultTextureSampler
     );
 
-    var mixColor:vec3<f32> = vec3<f32>(0.0);
+    // 🌊 디퓨즈와 스펙큘러를 분리해서 처리
+    var diffuseColor = vec3<f32>(0.0);
+    var specularColor = vec3<f32>(0.0);
 
-    var visibility:f32 = 1.0;
+    // 🌊 앰비언트 라이트 추가 (디퓨즈에만)
+    diffuseColor += u_ambientLightColor * u_ambientLightIntensity;
+
+    var visibility = 1.0;
     #redgpu_if receiveShadow
         visibility = calcDirectionalShadowVisibility(
             directionalShadowMap,
@@ -118,169 +113,183 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
         );
     #redgpu_endIf
 
-    if(!receiveShadowYn){
-       visibility = 1.0;
+    if (!receiveShadowYn) {
+        visibility = 1.0;
     }
 
+    // 🌊 디렉셔널 라이트 계산 (디퓨즈와 스펙큘러 분리)
     for (var i = 0u; i < u_directionalLightCount; i = i + 1) {
         let u_directionalLightDirection = u_directionalLights[i].direction;
         let u_directionalLightColor = u_directionalLights[i].color;
         let u_directionalLightIntensity = u_directionalLights[i].intensity;
 
-        let L = normalize(u_directionalLightDirection);
-        let R = reflect(L, N);
-        let lambertTerm = max(dot(N, -L), 0.0);
-        let specular = pow(max(dot(R, V), 0.0), u_shininess);
+        let lightDir = normalize(-u_directionalLightDirection);
+        let reflectedLight = reflect(-lightDir, surfaceNormal);
+        let lambertTerm = max(dot(surfaceNormal, lightDir), 0.0);
+        let specular = pow(max(dot(reflectedLight, viewDir), 0.0), u_shininess);
 
-        // 디렉셔널 라이트 기여도 (쉐도우 적용)
         let lightContribution = u_directionalLightColor * u_directionalLightIntensity * visibility;
-        let ld = diffuseColor * lightContribution * lambertTerm;
-        let ls = u_specularColor * u_specularStrength * lightContribution * specular;
 
-        mixColor += ld + ls;
+        // 🌊 디퓨즈는 나중에 물 색상 적용
+        diffuseColor += lightContribution * lambertTerm;
+
+        // 🌊 스펙큘러는 원래 색상 유지
+        specularColor += u_specularColor * u_specularStrength * lightContribution * specular;
     }
 
-    // PointLight
+    // 🌊 포인트 라이트 계산 (디퓨즈와 스펙큘러 분리)
     #redgpu_if clusterLight
         let clusterIndex = getClusterLightClusterIndex(inputData.position);
-        let lightOffset  = clusterLightGroup.lights[clusterIndex].offset;
-        let lightCount:u32   = clusterLightGroup.lights[clusterIndex].count;
+        let lightOffset = clusterLightGroup.lights[clusterIndex].offset;
+        let lightCount = clusterLightGroup.lights[clusterIndex].count;
 
         for (var lightIndex = 0u; lightIndex < lightCount; lightIndex = lightIndex + 1u) {
-             let i = clusterLightGroup.indices[lightOffset + lightIndex];
-             let u_clusterLightPosition = clusterLightList.lights[i].position;
-             let u_clusterLightColor = clusterLightList.lights[i].color;
-             let u_clusterLightIntensity = clusterLightList.lights[i].intensity;
-             let u_clusterLightRadius = clusterLightList.lights[i].radius;
-             let u_isSpotLight = clusterLightList.lights[i].isSpotLight;
+            let i = clusterLightGroup.indices[lightOffset + lightIndex];
+            let u_clusterLightPosition = clusterLightList.lights[i].position;
+            let u_clusterLightColor = clusterLightList.lights[i].color;
+            let u_clusterLightIntensity = clusterLightList.lights[i].intensity;
+            let u_clusterLightRadius = clusterLightList.lights[i].radius;
+            let u_isSpotLight = clusterLightList.lights[i].isSpotLight;
 
-             let lightDir = u_clusterLightPosition - inputData.vertexPosition;
-             let lightDistance = length(lightDir);
+            let lightDir = u_clusterLightPosition - inputData.vertexPosition;
+            let lightDistance = length(lightDir);
 
-             // 거리 범위 체크
-             if (lightDistance > u_clusterLightRadius) {
-                 continue;
-             }
+            if (lightDistance > u_clusterLightRadius) {
+                continue;
+            }
 
-             let L = normalize(lightDir);
-             let attenuation = clamp(1.0 - (lightDistance * lightDistance) / (u_clusterLightRadius * u_clusterLightRadius), 0.0, 1.0);
+            let lightDirNorm = normalize(lightDir);
+            let attenuation = clamp(1.0 - (lightDistance * lightDistance) / (u_clusterLightRadius * u_clusterLightRadius), 0.0, 1.0);
 
-             var finalAttenuation = attenuation;
+            var finalAttenuation = attenuation;
 
-             // 스폿라이트 처리
-             if (u_isSpotLight > 0.0) {
-                 let u_clusterLightDirection = normalize(vec3<f32>(
-                     clusterLightList.lights[i].directionX,
-                     clusterLightList.lights[i].directionY,
-                     clusterLightList.lights[i].directionZ
-                 ));
-                 let u_clusterLightInnerAngle = clusterLightList.lights[i].innerCutoff;
-                 let u_clusterLightOuterCutoff = clusterLightList.lights[i].outerCutoff;
+            if (u_isSpotLight > 0.0) {
+                let u_clusterLightDirection = normalize(vec3<f32>(
+                    clusterLightList.lights[i].directionX,
+                    clusterLightList.lights[i].directionY,
+                    clusterLightList.lights[i].directionZ
+                ));
+                let u_clusterLightInnerAngle = clusterLightList.lights[i].innerCutoff;
+                let u_clusterLightOuterCutoff = clusterLightList.lights[i].outerCutoff;
 
-                 // 라이트에서 버텍스로의 방향
-                 let lightToVertex = normalize(-lightDir);
-                 let cosTheta = dot(lightToVertex, u_clusterLightDirection);
+                let lightToVertex = normalize(-lightDir);
+                let cosTheta = dot(lightToVertex, u_clusterLightDirection);
 
-                 let cosOuter = cos(radians(u_clusterLightOuterCutoff));
-                 let cosInner = cos(radians(u_clusterLightInnerAngle));
+                let cosOuter = cos(radians(u_clusterLightOuterCutoff));
+                let cosInner = cos(radians(u_clusterLightInnerAngle));
 
-                 // 스폿라이트 외곽 범위를 벗어나면 스킵
-                 if (cosTheta < cosOuter) {
-                     continue;
-                 }
+                if (cosTheta < cosOuter) {
+                    continue;
+                }
 
-                 // 스폿라이트 강도 계산 (부드러운 페이드)
-                 let epsilon = cosInner - cosOuter;
-                 let spotIntensity = clamp((cosTheta - cosOuter) / epsilon, 0.0, 1.0);
+                let epsilon = cosInner - cosOuter;
+                let spotIntensity = clamp((cosTheta - cosOuter) / epsilon, 0.0, 1.0);
 
-                 finalAttenuation *= spotIntensity;
-             }
+                finalAttenuation *= spotIntensity;
+            }
 
-             // 공통 라이팅 계산
-             let R = reflect(-L, N);
-             let diffuse = diffuseColor * max(dot(N, L), 0.0);
-             let specular = pow(max(dot(R, V), 0.0), u_shininess);
+            let reflectedLight = reflect(-lightDirNorm, surfaceNormal);
+            let diffuse = max(dot(surfaceNormal, lightDirNorm), 0.0);
+            let specular = pow(max(dot(reflectedLight, viewDir), 0.0), u_shininess);
 
-             // 디퓨즈와 스펙큘러에 다른 감쇠 적용
-             let diffuseAttenuation = finalAttenuation;
-             let specularAttenuation = finalAttenuation * finalAttenuation; // 스펙큘러는 더 빠르게 감쇠
+            let diffuseAttenuation = finalAttenuation;
+            let specularAttenuation = finalAttenuation * finalAttenuation;
 
-             let ld = u_clusterLightColor * diffuse * diffuseAttenuation * u_clusterLightIntensity;
-             let ls = u_specularColor * u_specularStrength * specular * specularAttenuation * u_clusterLightIntensity;
+            // 🌊 디퓨즈는 나중에 물 색상 적용
+            diffuseColor += u_clusterLightColor * diffuse * diffuseAttenuation * u_clusterLightIntensity;
 
-             mixColor += ld + ls;
+            // 🌊 스펙큘러는 원래 색상 유지
+            specularColor += u_specularColor * u_specularStrength * specular * specularAttenuation * u_clusterLightIntensity;
         }
     #redgpu_endIf
 
-    finalColor = vec4<f32>(mixColor, 1.0);
+    // 🌊 디퓨즈에만 물 색상 적용, 스펙큘러는 원래 색상 유지
+    let surfaceColor = diffuseColor * albedo + specularColor;
 
-    // alpha 값이 0일 경우 discard
-    if (systemUniforms.isView3D == 1 && finalColor.a == 0.0) {
-      discard;
-    }
-    return finalColor;
+    // 🌊 투과된 배경에만 물 색상 적용
+    let tintedBackground = refractedBackground * albedo + specularColor;
+
+    let finalColor = mix(
+        tintedBackground,         // 틴팅된 배경
+        surfaceColor,             // 물 색상이 적용된 디퓨즈 + 원래 색상의 스펙큘러
+        1.0 - transmissionFactor
+    );
+
+    let result = vec4<f32>(finalColor, 1.0);
+
+    return result;
 }
 
 fn calcPrePathBackground(
-    u_useKHR_materials_volume:bool, thicknessParameter:f32, u_KHR_dispersion:f32, u_KHR_attenuationDistance:f32, u_KHR_attenuationColor:vec3<f32>,
-    ior:f32, roughnessParameter:f32, albedo:vec3<f32>,
-    projectionCameraMatrix:mat4x4<f32>, input_vertexPosition:vec3<f32>, input_ndcPosition:vec3<f32>,
-    V:vec3<f32>, N:vec3<f32>,
-    renderPath1ResultTexture:texture_2d<f32>, renderPath1ResultTextureSampler:sampler
+    u_useKHR_materials_volume: bool,
+    thicknessParameter: f32,
+    u_KHR_dispersion: f32,
+    u_KHR_attenuationDistance: f32,
+    u_KHR_attenuationColor: vec3<f32>,
+    ior: f32,
+    roughnessParameter: f32,
+    albedo: vec3<f32>,
+    projectionCameraMatrix: mat4x4<f32>,
+    input_vertexPosition: vec3<f32>,
+    input_ndcPosition: vec3<f32>,
+    viewDir: vec3<f32>,
+    surfaceNormal: vec3<f32>,
+    renderPath1ResultTexture: texture_2d<f32>,
+    renderPath1ResultTextureSampler: sampler
 ) -> vec3<f32> {
     var prePathBackground = vec3<f32>(0.0);
-    let transmissionMipLevel: f32 = roughnessParameter * f32(textureNumLevels(renderPath1ResultTexture) - 1);
+    let transmissionMipLevel = roughnessParameter * f32(textureNumLevels(renderPath1ResultTexture) - 1);
 
-    if(u_useKHR_materials_volume){
-        var iorR: f32 = ior;
-        var iorG: f32 = ior;
-        var iorB: f32 = ior;
+    if (u_useKHR_materials_volume) {
+        var iorR = ior;
+        var iorG = ior;
+        var iorB = ior;
 
-        if(u_KHR_dispersion > 0.0){
-            let halfSpread: f32 = (ior - 1.0) * 0.025 * u_KHR_dispersion;
+        if (u_KHR_dispersion > 0.0) {
+            let halfSpread = (ior - 1.0) * 0.025 * u_KHR_dispersion;
             iorR = ior + halfSpread;
             iorG = ior;
             iorB = ior - halfSpread;
         }
 
-        let refractedVecR: vec3<f32> = refract(-V, N, 1.0 / iorR);
-        let refractedVecG: vec3<f32> = refract(-V, N, 1.0 / iorG);
-        let refractedVecB: vec3<f32> = refract(-V, N, 1.0 / iorB);
+        let refractedVecR = refract(-viewDir, surfaceNormal, 1.0 / iorR);
+        let refractedVecG = refract(-viewDir, surfaceNormal, 1.0 / iorG);
+        let refractedVecB = refract(-viewDir, surfaceNormal, 1.0 / iorB);
 
-        // 각각의 굴절 벡터로 세계 좌표의 굴절 위치 계산 후 UV 좌표 계산
-        let worldPosR: vec3<f32> = input_vertexPosition + refractedVecR * thicknessParameter;
-        let worldPosG: vec3<f32> = input_vertexPosition + refractedVecG * thicknessParameter;
-        let worldPosB: vec3<f32> = input_vertexPosition + refractedVecB * thicknessParameter;
+        let worldPosR = input_vertexPosition + refractedVecR * thicknessParameter;
+        let worldPosG = input_vertexPosition + refractedVecG * thicknessParameter;
+        let worldPosB = input_vertexPosition + refractedVecB * thicknessParameter;
 
-        // 월드→뷰→프로젝션 변환 적용하여 최종 UV 좌표 계산
-        let clipPosR: vec4<f32> = projectionCameraMatrix * vec4<f32>(worldPosR, 1.0);
-        let clipPosG: vec4<f32> = projectionCameraMatrix * vec4<f32>(worldPosG, 1.0);
-        let clipPosB: vec4<f32> = projectionCameraMatrix * vec4<f32>(worldPosB, 1.0);
+        let clipPosR = projectionCameraMatrix * vec4<f32>(worldPosR, 1.0);
+        let clipPosG = projectionCameraMatrix * vec4<f32>(worldPosG, 1.0);
+        let clipPosB = projectionCameraMatrix * vec4<f32>(worldPosB, 1.0);
 
-        let ndcR: vec2<f32> = clipPosR.xy / clipPosR.w * 0.5 + 0.5;
-        let ndcG: vec2<f32> = clipPosG.xy / clipPosG.w * 0.5 + 0.5;
-        let ndcB: vec2<f32> = clipPosB.xy / clipPosB.w * 0.5 + 0.5;
+        let ndcR = clipPosR.xy / clipPosR.w * 0.5 + 0.5;
+        let ndcG = clipPosG.xy / clipPosG.w * 0.5 + 0.5;
+        let ndcB = clipPosB.xy / clipPosB.w * 0.5 + 0.5;
 
-        // Y축 좌표 변환 적용
-        let finalUV_R: vec2<f32> = vec2<f32>(ndcR.x, 1.0 - ndcR.y);
-        let finalUV_G: vec2<f32> = vec2<f32>(ndcG.x, 1.0 - ndcG.y);
-        let finalUV_B: vec2<f32> = vec2<f32>(ndcB.x, 1.0 - ndcB.y);
+        let finalUV_R = vec2<f32>(ndcR.x, 1.0 - ndcR.y);
+        let finalUV_G = vec2<f32>(ndcG.x, 1.0 - ndcG.y);
+        let finalUV_B = vec2<f32>(ndcB.x, 1.0 - ndcB.y);
 
-        // RGB 픽셀 샘플링
         prePathBackground.r = textureSampleLevel(renderPath1ResultTexture, renderPath1ResultTextureSampler, finalUV_R, transmissionMipLevel).r;
         prePathBackground.g = textureSampleLevel(renderPath1ResultTexture, renderPath1ResultTextureSampler, finalUV_G, transmissionMipLevel).g;
         prePathBackground.b = textureSampleLevel(renderPath1ResultTexture, renderPath1ResultTextureSampler, finalUV_B, transmissionMipLevel).b;
 
     } else {
-        let refractedVec: vec3<f32> = refract(-V, N, 1.0 / ior);
-        let worldPos: vec3<f32> = input_vertexPosition + refractedVec * thicknessParameter;
-        let clipPos: vec4<f32> = projectionCameraMatrix * vec4<f32>(worldPos, 1.0);
-        let ndc: vec2<f32> = clipPos.xy / clipPos.w * 0.5 + 0.5;
-        let finalUV: vec2<f32> = vec2<f32>(ndc.x, 1.0 - ndc.y);
+        let refractedVec = refract(-viewDir, surfaceNormal, 1.0 / ior);
+        let worldPos = input_vertexPosition + refractedVec * thicknessParameter;
+        let clipPos = projectionCameraMatrix * vec4<f32>(worldPos, 1.0);
+        let ndc = clipPos.xy / clipPos.w * 0.5 + 0.5;
+        let finalUV = vec2<f32>(ndc.x, 1.0 - ndc.y);
         prePathBackground = textureSampleLevel(renderPath1ResultTexture, renderPath1ResultTextureSampler, finalUV, transmissionMipLevel).rgb;
     }
 
-    // 투과 색상에 알베도 적용
-    prePathBackground *= albedo;
+    // 🌊 감쇠 효과 적용
+    if (u_KHR_attenuationDistance > 0.0) {
+        let attenuationFactor = exp(-length(vec3<f32>(1.0) - u_KHR_attenuationColor) * thicknessParameter / u_KHR_attenuationDistance);
+        prePathBackground = mix(u_KHR_attenuationColor, prePathBackground, attenuationFactor);
+    }
+
     return prePathBackground;
 }
