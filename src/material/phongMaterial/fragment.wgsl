@@ -84,7 +84,7 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     let u_specularStrength = uniforms.specularStrength;
     let u_shininess = uniforms.shininess;
     let u_opacity = uniforms.opacity;
-    let E = normalize(u_cameraPosition);
+    let E = normalize(u_cameraPosition - inputData.vertexPosition);
 
     // Shadow
     let receiveShadowYn = inputData.receiveShadow != .0;

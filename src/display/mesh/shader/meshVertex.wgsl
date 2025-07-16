@@ -31,6 +31,7 @@ struct OutputData {
     @location(0) vertexPosition: vec3<f32>,
     @location(1) vertexNormal: vec3<f32>,
     @location(2) uv: vec2<f32>,
+    @location(9) ndcPosition: vec3<f32>,
     @location(12) combinedOpacity: f32,
     @location(13) shadowPos: vec3<f32>,
     @location(14) receiveShadow: f32,
@@ -90,7 +91,7 @@ fn main(inputData: InputData) -> OutputData {
     output.vertexPosition = position.xyz;
     output.vertexNormal = normalPosition.xyz;
     output.uv = input_uv;
-
+    output.ndcPosition = output.position.xyz / output.position.w;
     #redgpu_if receiveShadow
     {
         var posFromLight = u_directionalLightProjectionViewMatrix * vec4(position.xyz, 1.0);
