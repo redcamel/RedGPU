@@ -5,21 +5,14 @@
 #redgpu_include drawPicking;
 
 struct Uniforms {
-    color: vec3<f32>,
-    //
-    specularColor:vec3<f32>,
-    specularStrength:f32,
-    shininess: f32,
-    //
-    transmissionFactor: f32,
-    //
+    opacity: f32,
+    waterIOR: f32,
+    waterColor: vec3<f32>,
+    waterColorStrength: f32,
 };
 
 struct InputData {
-    // Built-in attributes
     @builtin(position) position : vec4<f32>,
-
-    // Vertex attributes
     @location(0) vertexPosition: vec3<f32>,
     @location(1) vertexNormal: vec3<f32>,
     @location(2) uv: vec2<f32>,
@@ -33,111 +26,110 @@ struct InputData {
 @group(2) @binding(0) var<uniform> uniforms: Uniforms;
 
 @fragment
-fn main(inputData:InputData) -> @location(0) vec4<f32> {
-
-    // AmbientLight
+fn main(inputData: InputData) -> @location(0) vec4<f32> {
+    // System uniforms
     let u_ambientLight = systemUniforms.ambientLight;
-    let u_ambientLightColor = u_ambientLight.color;
-    let u_ambientLightIntensity = u_ambientLight.intensity;
-
-    // DirectionalLight
     let u_directionalLightCount = systemUniforms.directionalLightCount;
     let u_directionalLights = systemUniforms.directionalLights;
     let u_shadowDepthTextureSize = systemUniforms.shadowDepthTextureSize;
     let u_bias = systemUniforms.bias;
-
-    // Camera
     let u_camera = systemUniforms.camera;
-    let u_cameraMatrix = u_camera.cameraMatrix;
     let u_cameraPosition = u_camera.cameraPosition;
 
-    // Uniforms
-    let u_color = uniforms.color;
-    let u_specularColor = uniforms.specularColor;
-    let u_specularStrength = uniforms.specularStrength;
-    let u_shininess = uniforms.shininess;
+    // Material uniforms
+    let u_waterColor = uniforms.waterColor;
 
-    // 🔧 변수명 수정 (WGSL 문법 호환성)
+    let u_waterIOR = uniforms.waterIOR;
+    let u_opacity = uniforms.opacity;
+    let u_waterColorStrength = uniforms.waterColorStrength;
+
     let viewDir = normalize(u_cameraPosition - inputData.vertexPosition);
-
-    // Shadow
+    let surfaceNormal = normalize(inputData.vertexNormal);
     let receiveShadowYn = inputData.receiveShadow != 0.0;
 
-    // 🌊 표면 노말 사용 (normalTexture 없이)
-    let surfaceNormal = normalize(inputData.vertexNormal);
+    // 🌊 물리적 특성 정의
+    let waterF0 = 0.02;
+    let baseThickness = 2.0;
+    let viewAngle = abs(dot(viewDir, surfaceNormal));
+    let thicknessParameter = baseThickness / max(viewAngle, 0.1);
+    let roughnessParameter = 0.1;
+    let dispersion = 0.0;        // 색 분산 비활성화 (필요시 활성화)
+    let attenuationDistance = 25.0;
+    let shininess = 32.0;
 
-    // 🌊 물의 물리적 특성 정의
-    let KHR_attenuationDistance = 10.0;
-    let KHR_attenuationColor = u_color;
-    let ior = 1.33;                          // 물의 굴절률
-    let roughnessParameter = 0.1;            // 매끄러운 표면
-    let albedo = u_color;                    // 물의 기본 색상
-    let thicknessParameter = 1.0;            // 두께 매개변수
-    let KHR_dispersion = 0.0;                // 분산 효과
-    let transmissionFactor = uniforms.transmissionFactor;
+    // 🌊 Fresnel 계산
+    let VdotN = abs(dot(viewDir, surfaceNormal));
+    let fresnel = schlickFresnel(VdotN, waterF0);
 
-    // 🌊 굴절된 배경 계산
-    let refractedBackground = calcPrePathBackground(
-        true,
-        thicknessParameter,
-        KHR_dispersion,
-        KHR_attenuationDistance,
-        KHR_attenuationColor,
-        ior,
-        roughnessParameter,
-        albedo,
-        systemUniforms.projectionCameraMatrix,
-        inputData.vertexPosition,
-        inputData.ndcPosition,
-        viewDir,
-        surfaceNormal,
-        renderPath1ResultTexture,
-        renderPath1ResultTextureSampler
+
+   let neutralColor = vec3<f32>(1.0, 1.0, 1.0);
+   let effectiveAttenuationColor = mix(neutralColor, u_waterColor, u_waterColorStrength);
+
+   let refractedBackground = calcPrePathBackground(
+       true,
+       thicknessParameter,
+       dispersion,
+       attenuationDistance,
+       effectiveAttenuationColor,
+       u_waterIOR,
+       roughnessParameter,
+       effectiveAttenuationColor,
+       systemUniforms.projectionCameraMatrix,
+       inputData.vertexPosition,
+       inputData.ndcPosition,
+       viewDir,
+       surfaceNormal,
+       renderPath1ResultTexture,
+       renderPath1ResultTextureSampler
+   );
+
+
+
+    var diffuseLight = vec3<f32>(0.0);
+    var specularLight = vec3<f32>(0.0);
+
+    // 앰비언트 라이트
+    diffuseLight += u_ambientLight.color * u_ambientLight.intensity;
+
+    // 섀도우 계산
+    var visibility = 1.0;
+
+    visibility = calcDirectionalShadowVisibility(
+        directionalShadowMap,
+        directionalShadowMapSampler,
+        u_shadowDepthTextureSize,
+        u_bias,
+        inputData.shadowPos,
     );
 
-    // 🌊 디퓨즈와 스펙큘러를 분리해서 처리
-    var diffuseColor = vec3<f32>(0.0);
-    var specularColor = vec3<f32>(0.0);
-
-    // 🌊 앰비언트 라이트 추가 (디퓨즈에만)
-    diffuseColor += u_ambientLightColor * u_ambientLightIntensity;
-
-    var visibility = 1.0;
-    #redgpu_if receiveShadow
-        visibility = calcDirectionalShadowVisibility(
-            directionalShadowMap,
-            directionalShadowMapSampler,
-            u_shadowDepthTextureSize,
-            u_bias,
-            inputData.shadowPos,
-        );
-    #redgpu_endIf
 
     if (!receiveShadowYn) {
         visibility = 1.0;
     }
 
-    // 🌊 디렉셔널 라이트 계산 (디퓨즈와 스펙큘러 분리)
+    // 디렉셔널 라이트
     for (var i = 0u; i < u_directionalLightCount; i = i + 1) {
-        let u_directionalLightDirection = u_directionalLights[i].direction;
-        let u_directionalLightColor = u_directionalLights[i].color;
-        let u_directionalLightIntensity = u_directionalLights[i].intensity;
+        let lightDir = normalize(-u_directionalLights[i].direction);
+        let halfVector = normalize(lightDir + viewDir);
+        let lightColor = u_directionalLights[i].color;
+        let lightIntensity = u_directionalLights[i].intensity;
 
-        let lightDir = normalize(-u_directionalLightDirection);
-        let reflectedLight = reflect(-lightDir, surfaceNormal);
-        let lambertTerm = max(dot(surfaceNormal, lightDir), 0.0);
-        let specular = pow(max(dot(reflectedLight, viewDir), 0.0), u_shininess);
+        let NdotL = max(dot(surfaceNormal, lightDir), 0.0);
+        let NdotH = max(dot(surfaceNormal, halfVector), 0.0);
 
-        let lightContribution = u_directionalLightColor * u_directionalLightIntensity * visibility;
+        let lightContribution = lightColor * lightIntensity * visibility;
 
-        // 🌊 디퓨즈는 나중에 물 색상 적용
-        diffuseColor += lightContribution * lambertTerm;
+        // 디퓨즈
+        diffuseLight += lightContribution * NdotL;
 
-        // 🌊 스펙큘러는 원래 색상 유지
-        specularColor += u_specularColor * u_specularStrength * lightContribution * specular;
+        // 스펙큘러
+        let specularTerm = pow(NdotH, shininess);
+        let waterSpecular = fresnel * specularTerm ;
+        specularLight += lightContribution * waterSpecular * NdotL;
+
     }
 
-    // 🌊 포인트 라이트 계산 (디퓨즈와 스펙큘러 분리)
+    // 🌊 클러스터 라이트
     #redgpu_if clusterLight
         let clusterIndex = getClusterLightClusterIndex(inputData.position);
         let lightOffset = clusterLightGroup.lights[clusterIndex].offset;
@@ -159,6 +151,7 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
             }
 
             let lightDirNorm = normalize(lightDir);
+            let halfVector = normalize(lightDirNorm + viewDir);
             let attenuation = clamp(1.0 - (lightDistance * lightDistance) / (u_clusterLightRadius * u_clusterLightRadius), 0.0, 1.0);
 
             var finalAttenuation = attenuation;
@@ -173,53 +166,105 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
                 let u_clusterLightOuterCutoff = clusterLightList.lights[i].outerCutoff;
 
                 let lightToVertex = normalize(-lightDir);
-                let cosTheta = dot(lightToVertex, u_clusterLightDirection);
+                let VdotN = dot(lightToVertex, u_clusterLightDirection);
 
                 let cosOuter = cos(radians(u_clusterLightOuterCutoff));
                 let cosInner = cos(radians(u_clusterLightInnerAngle));
 
-                if (cosTheta < cosOuter) {
+                if (VdotN < cosOuter) {
                     continue;
                 }
 
                 let epsilon = cosInner - cosOuter;
-                let spotIntensity = clamp((cosTheta - cosOuter) / epsilon, 0.0, 1.0);
-
+                let spotIntensity = clamp((VdotN - cosOuter) / epsilon, 0.0, 1.0);
                 finalAttenuation *= spotIntensity;
             }
 
-            let reflectedLight = reflect(-lightDirNorm, surfaceNormal);
-            let diffuse = max(dot(surfaceNormal, lightDirNorm), 0.0);
-            let specular = pow(max(dot(reflectedLight, viewDir), 0.0), u_shininess);
+            let NdotL = max(dot(surfaceNormal, lightDirNorm), 0.0);
+            let NdotH = max(dot(surfaceNormal, halfVector), 0.0);
 
-            let diffuseAttenuation = finalAttenuation;
-            let specularAttenuation = finalAttenuation * finalAttenuation;
+            let lightContribution = u_clusterLightColor * u_clusterLightIntensity * finalAttenuation;
 
-            // 🌊 디퓨즈는 나중에 물 색상 적용
-            diffuseColor += u_clusterLightColor * diffuse * diffuseAttenuation * u_clusterLightIntensity;
+            diffuseLight += lightContribution * NdotL;
 
-            // 🌊 스펙큘러는 원래 색상 유지
-            specularColor += u_specularColor * u_specularStrength * specular * specularAttenuation * u_clusterLightIntensity;
+           let specularTerm = pow(NdotH, shininess);
+           let waterSpecular = fresnel * specularTerm ;
+           specularLight += lightContribution * waterSpecular * NdotL;
         }
     #redgpu_endIf
 
-    // 🌊 디퓨즈에만 물 색상 적용, 스펙큘러는 원래 색상 유지
-    let surfaceColor = diffuseColor * albedo + specularColor;
-
-    // 🌊 투과된 배경에만 물 색상 적용
-    let tintedBackground = refractedBackground * albedo + specularColor;
-
-    let finalColor = mix(
-        tintedBackground,         // 틴팅된 배경
-        surfaceColor,             // 물 색상이 적용된 디퓨즈 + 원래 색상의 스펙큘러
-        1.0 - transmissionFactor
+    // 🌊 최종 물 색상 계산
+    let finalColor = calculateWaterColor(
+        u_waterColor,
+        u_waterColorStrength,
+        u_opacity,
+        fresnel,
+        diffuseLight,
+        specularLight,
+        refractedBackground
     );
 
-    let result = vec4<f32>(finalColor, 1.0);
+    return vec4<f32>(finalColor, 1.0);
+}
+fn calculateWaterColor(
+      waterColor: vec3<f32>,
+      waterColorStrength: f32,
+      opacity: f32,
+      fresnel: f32,
+      diffuseLight: vec3<f32>,
+      specularLight: vec3<f32>,
+      refractedBackground: vec3<f32>
+  ) -> vec3<f32> {
 
-    return result;
+      let neutralColor = vec3<f32>(1.0, 1.0, 1.0);
+      let effectiveWaterColor = mix(neutralColor, waterColor, waterColorStrength);
+
+      let waterScattering = 0.3;
+      let waterDiffuse = diffuseLight * effectiveWaterColor * waterScattering;
+      let waterAmbient = diffuseLight * effectiveWaterColor * 0.1;
+      let waterBodyColor = waterDiffuse + waterAmbient;
+
+
+      let waterSpecular = specularLight * vec3<f32>(1.0, 1.0, 1.0);
+
+
+      let transmissionCoeff = (1.0 - fresnel) * (1.0 - opacity);
+      let reflectionCoeff = fresnel + opacity * (1.0 - fresnel);
+
+      let transmittedColor = refractedBackground * transmissionCoeff;
+      let reflectedColor = waterBodyColor * reflectionCoeff;
+
+      var finalColor = transmittedColor + reflectedColor + waterSpecular;
+
+      if (opacity >= 0.99) {
+          finalColor = waterBodyColor + waterSpecular;
+      }
+
+      finalColor = toneMapWater(finalColor, effectiveWaterColor, fresnel, opacity);
+      return max(finalColor, vec3<f32>(0.01));
+  }
+
+// 🌊 물리적 톤 매핑 함수
+fn toneMapWater(color: vec3<f32>, baseColor: vec3<f32>, fresnel: f32, opacity: f32) -> vec3<f32> {
+    let exposure = 1.0;
+    let gamma = 2.2;
+
+    let exposedColor = vec3<f32>(1.0) - exp(-color * exposure);
+    let gammaCorrected = pow(exposedColor, vec3<f32>(1.0 / gamma));
+    let colorBoost = mix(0.9, 1.1, opacity);
+
+    return gammaCorrected * colorBoost;
 }
 
+// 🌊 Fresnel 계산 (Schlick 근사)
+fn schlickFresnel(VdotN: f32, fresnel: f32) -> f32 {
+    let oneMinusCos = 1.0 - VdotN;
+    let oneMinusCos2 = oneMinusCos * oneMinusCos;
+    let oneMinusCos5 = oneMinusCos2 * oneMinusCos2 * oneMinusCos;
+    return fresnel + (1.0 - fresnel) * oneMinusCos5;
+}
+
+// 🌊 기존 calcPrePathBackground 함수 (그대로 유지)
 fn calcPrePathBackground(
     u_useKHR_materials_volume: bool,
     thicknessParameter: f32,
@@ -285,7 +330,7 @@ fn calcPrePathBackground(
         prePathBackground = textureSampleLevel(renderPath1ResultTexture, renderPath1ResultTextureSampler, finalUV, transmissionMipLevel).rgb;
     }
 
-    // 🌊 감쇠 효과 적용
+    // 🌊 물리적 감쇠 효과
     if (u_KHR_attenuationDistance > 0.0) {
         let attenuationFactor = exp(-length(vec3<f32>(1.0) - u_KHR_attenuationColor) * thicknessParameter / u_KHR_attenuationDistance);
         prePathBackground = mix(u_KHR_attenuationColor, prePathBackground, attenuationFactor);

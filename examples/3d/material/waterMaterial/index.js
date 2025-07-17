@@ -23,156 +23,27 @@ RedGPU.init(
 		view.ibl = ibl;
 		view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 
-		const geometry = new RedGPU.Primitive.Ground(redGPUContext, 500, 500, 1000, 1000,10);
-		// const geometry = new RedGPU.Primitive.Box(redGPUContext, 500, 500, 500,500,500, 500,1);
-		const material = new RedGPU.Material.WaterMaterial(redGPUContext, '#4A90E2');
+		const geometry = new RedGPU.Primitive.Ground(redGPUContext, 50, 50, 1000, 1000);
 
-		// 🌊 개선된 Gerstner Wave 기반 displacement 텍스처
-		material.displacementTexture = new RedGPU.Resource.SimplexTexture(redGPUContext, 1024, 1024, {
-			mainLogic: `
-				let time = uniforms.time;
-				
-				// 🌊 4개의 Gerstner Wave 레이어
-				let wave1 = generateGerstnerWave(base_uv, time, 
-					vec2<f32>(0.8, 0.6), uniforms.amplitude1, uniforms.frequency1, uniforms.speed1, uniforms.steepness1);
-				let wave2 = generateGerstnerWave(base_uv, time, 
-					vec2<f32>(-0.3, 0.9), uniforms.amplitude2, uniforms.frequency2, uniforms.speed2, uniforms.steepness2);
-				let wave3 = generateGerstnerWave(base_uv, time, 
-					vec2<f32>(0.5, -0.7), uniforms.amplitude3, uniforms.frequency3, uniforms.speed3, uniforms.steepness3);
-				let wave4 = generateGerstnerWave(base_uv, time, 
-					vec2<f32>(-0.9, -0.2), uniforms.amplitude4, uniforms.frequency4, uniforms.speed4, uniforms.steepness4);
-				
-				// 🎯 디테일 노이즈 레이어
-				let detailNoise1 = getSimplexNoiseByDimension(
-					base_uv * uniforms.detailScale1 + vec2<f32>(time * uniforms.detailSpeed1, 0.0), 
-					uniforms
-				) * uniforms.detailStrength1;
-				
-				let detailNoise2 = getSimplexNoiseByDimension(
-					base_uv * uniforms.detailScale2 + vec2<f32>(0.0, time * uniforms.detailSpeed2), 
-					uniforms
-				) * uniforms.detailStrength2;
-				
-				// 🌊 웨이브 합성
-				let combinedWaves = wave1 + wave2 + wave3 + wave4;
-				let combinedDetail = detailNoise1 + detailNoise2;
-				
-				// 🎯 거품 효과 계산
-				let foamThreshold = uniforms.foamThreshold;
-				let foamIntensity = smoothstep(foamThreshold - 0.1, foamThreshold + 0.1, combinedWaves);
-				
-				// 🌊 최종 높이 계산
-				let finalHeight = combinedWaves + combinedDetail * (1.0 - foamIntensity * 0.5);
-				
-				// 🎯 부드러운 정규화
-				let normalizedHeight = smoothstep(-uniforms.waveRange, uniforms.waveRange, finalHeight);
-				
-				// 🌊 최종 색상 (높이 + 거품 정보)
-				let finalColor = vec4<f32>(normalizedHeight, foamIntensity, 0.0, 1.0);
-			`,
+		// 🌊 WaterMaterial 생성
+		const material = new RedGPU.Material.WaterMaterial(redGPUContext);
 
-			helperFunctions: `
-				// 🌊 개선된 Gerstner Wave 함수
-				fn generateGerstnerWave(
-					uv: vec2<f32>, 
-					time: f32, 
-					direction: vec2<f32>, 
-					amplitude: f32, 
-					frequency: f32, 
-					speed: f32, 
-					steepness: f32
-				) -> f32 {
-					let normalizedDir = normalize(direction);
-					let phase = frequency * dot(normalizedDir, uv) + time * speed;
-					let wave = amplitude * sin(phase);
-					
-					// 🎯 Gerstner Wave의 뾰족한 형태
-					let gerstnerEffect = steepness * amplitude * cos(phase);
-					
-					return wave + gerstnerEffect * 0.5;
-				}
-				
-				// 🌊 부드러운 블렌딩 함수
-				fn smoothBlend(a: f32, b: f32, factor: f32) -> f32 {
-					let t = smoothstep(0.0, 1.0, factor);
-					return mix(a, b, t);
-				}
-			`,
-
-			uniformStruct: `
-				amplitude1: f32,
-				frequency1: f32,
-				speed1: f32,
-				steepness1: f32,
-				amplitude2: f32,
-				frequency2: f32,
-				speed2: f32,
-				steepness2: f32,
-				amplitude3: f32,
-				frequency3: f32,
-				speed3: f32,
-				steepness3: f32,
-				amplitude4: f32,
-				frequency4: f32,
-				speed4: f32,
-				steepness4: f32,
-				detailScale1: f32,
-				detailSpeed1: f32,
-				detailStrength1: f32,
-				detailScale2: f32,
-				detailSpeed2: f32,
-				detailStrength2: f32,
-				waveRange: f32,
-				foamThreshold: f32,
-			`,
-
-			uniformDefaults: {
-				// 🌊 Wave 1 - 주요 큰 파도
-				amplitude1: 0.6,
-				frequency1: 0.2,
-				speed1: 1.0,
-				steepness1: 0.4,
-				// 🌊 Wave 2 - 중간 파도
-				amplitude2: 0.4,
-				frequency2: 0.3,
-				speed2: 0.8,
-				steepness2: 0.3,
-				// 🌊 Wave 3 - 작은 파도
-				amplitude3: 0.2,
-				frequency3: 0.5,
-				speed3: 1.2,
-				steepness3: 0.2,
-				// 🌊 Wave 4 - 디테일 파도
-				amplitude4: 0.1,
-				frequency4: 0.8,
-				speed4: 1.5,
-				steepness4: 0.1,
-				// 🎯 디테일 노이즈
-				detailScale1: 8.0,
-				detailSpeed1: 0.5,
-				detailStrength1: 0.1,
-				detailScale2: 15.0,
-				detailSpeed2: 0.3,
-				detailStrength2: 0.05,
-				// 🌊 전역 설정
-				waveRange: 1.5,
-				foamThreshold: 0.8
-			}
-		});
-
-		// 🌊 물 색상 설정
-		material.color.setColorByHEX('#4A90E2');
-		material.transmissionFactor = 0.8;
-		material.specularStrength = 1.2;
-
+		// 🌊 메쉬 생성 및 displacement 설정
 		const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
 		mesh.primitiveState.cullMode = 'none';
 		mesh.setPosition(0, 0, 0);
-		// mesh.y = -250
+
+		// 🌊 displacement 속성 설정
+		mesh.useDisplacementTexture = true;
+		mesh.useDisplacementTextureNormal = true;
+
 		scene.addChild(mesh);
 
+		// 🏝️ 수면 위와 아래 오브젝트 생성
+		createWaterSceneObjects(redGPUContext, scene);
+
 		const testData = {useAnimation: true};
-		renderTestPane(redGPUContext, material.displacementTexture, testData);
+		renderTestPane(redGPUContext, material, testData);
 
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		renderer.start(redGPUContext, (time) => {
@@ -194,151 +65,468 @@ RedGPU.init(
 	}
 );
 
-const renderTestPane = async (redGPUContext, targetNoiseTexture, testData) => {
+// 🏝️ 수면 위와 아래 오브젝트 생성 함수
+function createWaterSceneObjects(redGPUContext, scene) {
+	const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#FFB347', '#98FB98'];
+
+	// 🏝️ 수면 위 오브젝트들 (y > 0)
+
+	// 1. 떠있는 부표들 (Buoys)
+	for (let i = 0; i < 4; i++) {
+		const angle = (Math.PI * 2 * i) / 4;
+		const radius = 8;
+
+		const buoyGeometry = new RedGPU.Primitive.Sphere(redGPUContext, 0.8, 16, 16);
+		const buoyMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, colors[i]);
+		const buoy = new RedGPU.Display.Mesh(redGPUContext, buoyGeometry, buoyMaterial);
+
+		buoy.setPosition(
+			Math.cos(angle) * radius,
+			1.5, // 수면 위
+			Math.sin(angle) * radius
+		);
+
+		scene.addChild(buoy);
+	}
+
+	// 2. 수면 위 건물들 (Floating structures)
+	for (let i = 0; i < 3; i++) {
+		const angle = (Math.PI * 2 * i) / 3 + Math.PI / 6;
+		const radius = 15;
+
+		const buildingGeometry = new RedGPU.Primitive.Box(redGPUContext, 2, 3, 2);
+		const buildingMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, colors[i + 4]);
+		const building = new RedGPU.Display.Mesh(redGPUContext, buildingGeometry, buildingMaterial);
+
+		building.setPosition(
+			Math.cos(angle) * radius,
+			2.5, // 수면 위
+			Math.sin(angle) * radius
+		);
+
+		scene.addChild(building);
+	}
+
+	// 3. 수면 위 보트 (Boats)
+	for (let i = 0; i < 2; i++) {
+		const boatGeometry = new RedGPU.Primitive.Cylinder(redGPUContext, 1, 0.5, 8);
+		const boatMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#8B4513');
+		const boat = new RedGPU.Display.Mesh(redGPUContext, boatGeometry, boatMaterial);
+
+		boat.setPosition(
+			i * 12 - 6,
+			1.0, // 수면 위
+			-12 + i * 6
+		);
+		boat.setRotation(0, i * 45, 0);
+
+		scene.addChild(boat);
+	}
+
+	// 🐠 수면 아래 오브젝트들 (y < 0)
+
+	// 4. 수중 암초들 (Underwater rocks)
+	for (let i = 0; i < 8; i++) {
+		const angle = (Math.PI * 2 * i) / 8;
+		const radius = 5 + Math.random() * 10;
+
+		const rockGeometry = new RedGPU.Primitive.Sphere(redGPUContext, 0.8 + Math.random() * 0.5, 12, 12);
+		const rockMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#696969');
+		const rock = new RedGPU.Display.Mesh(redGPUContext, rockGeometry, rockMaterial);
+
+		rock.setPosition(
+			Math.cos(angle) * radius,
+			-2 - Math.random() * 3, // 수면 아래
+			Math.sin(angle) * radius
+		);
+
+		// 불규칙한 모양을 위한 스케일 조정
+		rock.setScale(
+			0.8 + Math.random() * 0.4,
+			0.6 + Math.random() * 0.8,
+			0.8 + Math.random() * 0.4
+		);
+
+		scene.addChild(rock);
+	}
+
+	// 5. 수중 식물들 (Underwater plants)
+	for (let i = 0; i < 12; i++) {
+		const plantGeometry = new RedGPU.Primitive.Cylinder(redGPUContext, 0.1, 2 + Math.random() * 2, 8);
+		const plantMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#228B22');
+		const plant = new RedGPU.Display.Mesh(redGPUContext, plantGeometry, plantMaterial);
+
+		plant.setPosition(
+			Math.random() * 30 - 15,
+			-3 - Math.random() * 2, // 수면 아래
+			Math.random() * 30 - 15
+		);
+
+		// 식물이 흔들리는 효과를 위한 약간의 기울기
+		plant.setRotation(
+			Math.random() * 10 - 5,
+			Math.random() * 360,
+			Math.random() * 10 - 5
+		);
+
+		scene.addChild(plant);
+	}
+
+	// 6. 수중 물고기들 (Fish)
+	for (let i = 0; i < 15; i++) {
+		const fishGeometry = new RedGPU.Primitive.Sphere(redGPUContext, 0.3, 12, 12);
+		const fishMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, colors[i % colors.length]);
+		const fish = new RedGPU.Display.Mesh(redGPUContext, fishGeometry, fishMaterial);
+
+		fish.setPosition(
+			Math.random() * 40 - 20,
+			-1 - Math.random() * 4, // 수면 아래
+			Math.random() * 40 - 20
+		);
+
+		// 물고기 모양을 위한 스케일 조정
+		fish.setScale(1.5, 0.8, 0.6);
+
+		scene.addChild(fish);
+	}
+
+	// 7. 수중 보물상자들 (Treasure chests)
+	for (let i = 0; i < 4; i++) {
+		const chestGeometry = new RedGPU.Primitive.Box(redGPUContext, 1, 0.6, 0.8);
+		const chestMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#8B4513');
+		const chest = new RedGPU.Display.Mesh(redGPUContext, chestGeometry, chestMaterial);
+
+		chest.setPosition(
+			Math.random() * 20 - 10,
+			-4 - Math.random() * 2, // 수면 깊은 곳
+			Math.random() * 20 - 10
+		);
+
+		scene.addChild(chest);
+	}
+
+	// 8. 수중 산호초 (Coral reef)
+	for (let i = 0; i < 6; i++) {
+		const coralGeometry = new RedGPU.Primitive.Sphere(redGPUContext, 0.5, 8, 8);
+		const coralMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#FF7F50');
+		const coral = new RedGPU.Display.Mesh(redGPUContext, coralGeometry, coralMaterial);
+
+		coral.setPosition(
+			Math.random() * 16 - 8,
+			-2.5 - Math.random() * 1, // 수면 아래
+			Math.random() * 16 - 8
+		);
+
+		// 산호초 모양을 위한 불규칙한 스케일
+		coral.setScale(
+			0.6 + Math.random() * 0.8,
+			1.2 + Math.random() * 0.8,
+			0.6 + Math.random() * 0.8
+		);
+
+		scene.addChild(coral);
+	}
+
+	// 9. 수면을 관통하는 기둥들 (Pillars crossing water surface)
+	for (let i = 0; i < 4; i++) {
+		const pillarGeometry = new RedGPU.Primitive.Cylinder(redGPUContext, 0.5, 8, 12);
+		const pillarMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#708090');
+		const pillar = new RedGPU.Display.Mesh(redGPUContext, pillarGeometry, pillarMaterial);
+
+		const angle = (Math.PI * 2 * i) / 4 + Math.PI / 4;
+		const radius = 18;
+
+		pillar.setPosition(
+			Math.cos(angle) * radius,
+			0, // 수면을 관통
+			Math.sin(angle) * radius
+		);
+
+		scene.addChild(pillar);
+	}
+
+	// 10. 수면 바닥의 모래 언덕들 (Sand dunes)
+	for (let i = 0; i < 5; i++) {
+		const duneGeometry = new RedGPU.Primitive.Sphere(redGPUContext, 3, 16, 16);
+		const duneMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#F4A460');
+		const dune = new RedGPU.Display.Mesh(redGPUContext, duneGeometry, duneMaterial);
+
+		dune.setPosition(
+			Math.random() * 30 - 15,
+			-6, // 수면 바닥
+			Math.random() * 30 - 15
+		);
+
+		// 언덕 모양을 위한 스케일 조정
+		dune.setScale(
+			1.5 + Math.random(),
+			0.3 + Math.random() * 0.2,
+			1.5 + Math.random()
+		);
+
+		scene.addChild(dune);
+	}
+}
+
+const renderTestPane = async (redGPUContext, material, testData) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const {setSeparator} = await import("../../../exampleHelper/createExample/panes/index.js");
 	const pane = new Pane();
 
-	const material = redGPUContext.viewList[0].scene.children[0].material;
+	// 🌊 WaterMaterial의 정적 프리셋 사용
+	const waterPresets = RedGPU.Material.WaterMaterial.WaterPresets;
 
-	// 🌊 물 프리셋 정의
-	const waterPresets = {
-		calmOcean: {
-			amplitude1: 0.3, frequency1: 0.1, speed1: 0.8, steepness1: 0.2,
-			amplitude2: 0.2, frequency2: 0.15, speed2: 0.6, steepness2: 0.1,
-			amplitude3: 0.1, frequency3: 0.2, speed3: 1.0, steepness3: 0.05,
-			amplitude4: 0.05, frequency4: 0.3, speed4: 1.2, steepness4: 0.02,
-			detailScale1: 6.0, detailSpeed1: 0.3, detailStrength1: 0.05,
-			detailScale2: 12.0, detailSpeed2: 0.2, detailStrength2: 0.025,
-			waveRange: 1.0, foamThreshold: 0.9
-		},
-		stormyOcean: {
-			amplitude1: 1.5, frequency1: 0.08, speed1: 2.0, steepness1: 0.8,
-			amplitude2: 1.0, frequency2: 0.12, speed2: 1.8, steepness2: 0.6,
-			amplitude3: 0.8, frequency3: 0.2, speed3: 2.5, steepness3: 0.4,
-			amplitude4: 0.6, frequency4: 0.3, speed4: 3.0, steepness4: 0.3,
-			detailScale1: 10.0, detailSpeed1: 0.8, detailStrength1: 0.15,
-			detailScale2: 20.0, detailSpeed2: 0.6, detailStrength2: 0.1,
-			waveRange: 3.0, foamThreshold: 0.5
-		},
-		gentleWaves: {
-			amplitude1: 0.6, frequency1: 0.2, speed1: 1.0, steepness1: 0.4,
-			amplitude2: 0.4, frequency2: 0.3, speed2: 0.8, steepness2: 0.3,
-			amplitude3: 0.2, frequency3: 0.5, speed3: 1.2, steepness3: 0.2,
-			amplitude4: 0.1, frequency4: 0.8, speed4: 1.5, steepness4: 0.1,
-			detailScale1: 8.0, detailSpeed1: 0.5, detailStrength1: 0.1,
-			detailScale2: 15.0, detailSpeed2: 0.3, detailStrength2: 0.05,
-			waveRange: 1.5, foamThreshold: 0.8
-		},
-		lakeRipples: {
-			amplitude1: 0.2, frequency1: 0.4, speed1: 0.5, steepness1: 0.1,
-			amplitude2: 0.15, frequency2: 0.6, speed2: 0.4, steepness2: 0.08,
-			amplitude3: 0.1, frequency3: 0.8, speed3: 0.6, steepness3: 0.05,
-			amplitude4: 0.05, frequency4: 1.2, speed4: 0.8, steepness4: 0.02,
-			detailScale1: 15.0, detailSpeed1: 0.2, detailStrength1: 0.03,
-			detailScale2: 25.0, detailSpeed2: 0.15, detailStrength2: 0.015,
-			waveRange: 0.8, foamThreshold: 0.95
-		}
+	// 🌊 물 프리셋 색상 정의
+	const waterPresetColors = {
+		calmOcean: '#4A90E2',
+		stormyOcean: '#2E4F6B',
+		gentleWaves: '#87CEEB',
+		lakeRipples: '#6BB6FF'
+	};
+
+	// 컨트롤 패널 데이터 객체 생성 (wavelength 사용)
+	const controlData = {
+		// Wave 1
+		amplitude1: material.amplitude1,
+		wavelength1: material.wavelength1,
+		speed1: material.speed1,
+		steepness1: material.steepness1,
+		// Wave 2
+		amplitude2: material.amplitude2,
+		wavelength2: material.wavelength2,
+		speed2: material.speed2,
+		steepness2: material.steepness2,
+		// Wave 3
+		amplitude3: material.amplitude3,
+		wavelength3: material.wavelength3,
+		speed3: material.speed3,
+		steepness3: material.steepness3,
+		// Wave 4
+		amplitude4: material.amplitude4,
+		wavelength4: material.wavelength4,
+		speed4: material.speed4,
+		steepness4: material.steepness4,
+		// Detail
+		detailScale1: material.detailScale1,
+		detailSpeed1: material.detailSpeed1,
+		detailStrength1: material.detailStrength1,
+		detailScale2: material.detailScale2,
+		detailSpeed2: material.detailSpeed2,
+		detailStrength2: material.detailStrength2,
+		// Global
+		waveRange: material.waveRange,
+		foamThreshold: material.foamThreshold,
+		// Normal
+		normalOffset: material.normalOffset,
+		normalStrength: material.normalStrength
 	};
 
 	// 🌊 프리셋 적용 함수
-	const applyPreset = (preset) => {
-		Object.entries(preset).forEach(([key, value]) => {
-			targetNoiseTexture.updateUniform(key, value);
-		});
+	const applyPreset = (preset, colorKey) => {
+		material.applyPreset(preset);
+		waterColorData.color.r = material.waterColor.r;
+		waterColorData.color.g = material.waterColor.g;
+		waterColorData.color.b = material.waterColor.b;
+		pane.refresh()
+		// 🌊 displacementTexture 설정이 있으면 UI 업데이트
+		if (preset.displacementTexture) {
+			Object.entries(preset.displacementTexture).forEach(([key, value]) => {
+				if (key in controlData) {
+					controlData[key] = value;
+				}
+			});
+		}
+
+
 		pane.refresh();
 	};
 
 	setSeparator(pane, "🌊 Water Presets");
 
 	pane.addButton({title: '🌊 Calm Ocean'}).on('click', () => {
-		applyPreset(waterPresets.calmOcean);
-		material.color.setColorByHEX('#4A90E2');
-		material.transmissionFactor = 0.9;
+		applyPreset(waterPresets.calmOcean, 'calmOcean');
 	});
 
 	pane.addButton({title: '🌊 Stormy Ocean'}).on('click', () => {
-		applyPreset(waterPresets.stormyOcean);
-		material.color.setColorByHEX('#2E4F6B');
-		material.transmissionFactor = 0.6;
+		applyPreset(waterPresets.stormyOcean, 'stormyOcean');
 	});
 
 	pane.addButton({title: '🌊 Gentle Waves'}).on('click', () => {
-		applyPreset(waterPresets.gentleWaves);
-		material.color.setColorByHEX('#87CEEB');
-		material.transmissionFactor = 0.8;
+		applyPreset(waterPresets.gentleWaves, 'gentleWaves');
 	});
 
 	pane.addButton({title: '🏞️ Lake Ripples'}).on('click', () => {
-		applyPreset(waterPresets.lakeRipples);
-		material.color.setColorByHEX('#6BB6FF');
-		material.transmissionFactor = 0.85;
+		applyPreset(waterPresets.lakeRipples, 'lakeRipples');
 	});
 
 	setSeparator(pane, "🌊 Wave Parameters");
 
-	// 🌊 개별 웨이브 컨트롤
+	// 🌊 개별 웨이브 컨트롤 (wavelength 사용)
 	const wave1Folder = pane.addFolder({title: '🌊 Wave 1 (Primary)', expanded: false});
-	wave1Folder.addBinding({amplitude1: 0.6}, 'amplitude1', {min: 0, max: 2, step: 0.1, label: 'Amplitude'})
-		.on('change', (ev) => targetNoiseTexture.updateUniform('amplitude1', ev.value));
-	wave1Folder.addBinding({frequency1: 0.2}, 'frequency1', {min: 0, max: 1, step: 0.01, label: 'Frequency'})
-		.on('change', (ev) => targetNoiseTexture.updateUniform('frequency1', ev.value));
-	wave1Folder.addBinding({speed1: 1.0}, 'speed1', {min: 0, max: 3, step: 0.1, label: 'Speed'})
-		.on('change', (ev) => targetNoiseTexture.updateUniform('speed1', ev.value));
-	wave1Folder.addBinding({steepness1: 0.4}, 'steepness1', {min: 0, max: 1, step: 0.01, label: 'Steepness'})
-		.on('change', (ev) => targetNoiseTexture.updateUniform('steepness1', ev.value));
+	wave1Folder.addBinding(controlData, 'amplitude1', {min: 0, max: 2, step: 0.1})
+		.on('change', (ev) => {
+			material.amplitude1 = ev.value;
+		});
+	wave1Folder.addBinding(controlData, 'wavelength1', {min: 0.1, max: 20, step: 0.1})
+		.on('change', (ev) => {
+			material.wavelength1 = ev.value;
+		});
+	wave1Folder.addBinding(controlData, 'speed1', {min: 0, max: 3, step: 0.1})
+		.on('change', (ev) => {
+			material.speed1 = ev.value;
+		});
+	wave1Folder.addBinding(controlData, 'steepness1', {min: 0, max: 1, step: 0.01})
+		.on('change', (ev) => {
+			material.steepness1 = ev.value;
+		});
 
 	const wave2Folder = pane.addFolder({title: '🌊 Wave 2 (Secondary)', expanded: false});
-	wave2Folder.addBinding({amplitude2: 0.4}, 'amplitude2', {min: 0, max: 2, step: 0.1, label: 'Amplitude'})
-		.on('change', (ev) => targetNoiseTexture.updateUniform('amplitude2', ev.value));
-	wave2Folder.addBinding({frequency2: 0.3}, 'frequency2', {min: 0, max: 1, step: 0.01, label: 'Frequency'})
-		.on('change', (ev) => targetNoiseTexture.updateUniform('frequency2', ev.value));
-	wave2Folder.addBinding({speed2: 0.8}, 'speed2', {min: 0, max: 3, step: 0.1, label: 'Speed'})
-		.on('change', (ev) => targetNoiseTexture.updateUniform('speed2', ev.value));
-	wave2Folder.addBinding({steepness2: 0.3}, 'steepness2', {min: 0, max: 1, step: 0.01, label: 'Steepness'})
-		.on('change', (ev) => targetNoiseTexture.updateUniform('steepness2', ev.value));
+	wave2Folder.addBinding(controlData, 'amplitude2', {min: 0, max: 2, step: 0.1})
+		.on('change', (ev) => {
+			material.amplitude2 = ev.value;
+		});
+	wave2Folder.addBinding(controlData, 'wavelength2', {min: 0.1, max: 20, step: 0.1})
+		.on('change', (ev) => {
+			material.wavelength2 = ev.value;
+		});
+	wave2Folder.addBinding(controlData, 'speed2', {min: 0, max: 3, step: 0.1})
+		.on('change', (ev) => {
+			material.speed2 = ev.value;
+		});
+	wave2Folder.addBinding(controlData, 'steepness2', {min: 0, max: 1, step: 0.01})
+		.on('change', (ev) => {
+			material.steepness2 = ev.value;
+		});
+
+	const wave3Folder = pane.addFolder({title: '🌊 Wave 3 (Tertiary)', expanded: false});
+	wave3Folder.addBinding(controlData, 'amplitude3', {min: 0, max: 2, step: 0.1})
+		.on('change', (ev) => {
+			material.amplitude3 = ev.value;
+		});
+	wave3Folder.addBinding(controlData, 'wavelength3', {min: 0.1, max: 20, step: 0.1})
+		.on('change', (ev) => {
+			material.wavelength3 = ev.value;
+		});
+	wave3Folder.addBinding(controlData, 'speed3', {min: 0, max: 3, step: 0.1})
+		.on('change', (ev) => {
+			material.speed3 = ev.value;
+		});
+	wave3Folder.addBinding(controlData, 'steepness3', {min: 0, max: 1, step: 0.01})
+		.on('change', (ev) => {
+			material.steepness3 = ev.value;
+		});
+
+	const wave4Folder = pane.addFolder({title: '🌊 Wave 4 (Detail)', expanded: false});
+	wave4Folder.addBinding(controlData, 'amplitude4', {min: 0, max: 2, step: 0.1})
+		.on('change', (ev) => {
+			material.amplitude4 = ev.value;
+		});
+	wave4Folder.addBinding(controlData, 'wavelength4', {min: 0.1, max: 20, step: 0.1})
+		.on('change', (ev) => {
+			material.wavelength4 = ev.value;
+		});
+	wave4Folder.addBinding(controlData, 'speed4', {min: 0, max: 3, step: 0.1})
+		.on('change', (ev) => {
+			material.speed4 = ev.value;
+		});
+	wave4Folder.addBinding(controlData, 'steepness4', {min: 0, max: 1, step: 0.01})
+		.on('change', (ev) => {
+			material.steepness4 = ev.value;
+		});
 
 	// 🎯 디테일 노이즈 컨트롤
 	const detailFolder = pane.addFolder({title: '🎯 Detail Noise', expanded: false});
-	detailFolder.addBinding({detailScale1: 8.0}, 'detailScale1', {min: 1, max: 50, step: 1, label: 'Scale 1'})
-		.on('change', (ev) => targetNoiseTexture.updateUniform('detailScale1', ev.value));
-	detailFolder.addBinding({detailStrength1: 0.1}, 'detailStrength1', {min: 0, max: 0.5, step: 0.01, label: 'Strength 1'})
-		.on('change', (ev) => targetNoiseTexture.updateUniform('detailStrength1', ev.value));
-	detailFolder.addBinding({detailScale2: 15.0}, 'detailScale2', {min: 1, max: 50, step: 1, label: 'Scale 2'})
-		.on('change', (ev) => targetNoiseTexture.updateUniform('detailScale2', ev.value));
-	detailFolder.addBinding({detailStrength2: 0.05}, 'detailStrength2', {min: 0, max: 0.5, step: 0.01, label: 'Strength 2'})
-		.on('change', (ev) => targetNoiseTexture.updateUniform('detailStrength2', ev.value));
+	detailFolder.addBinding(controlData, 'detailScale1', {min: 1, max: 50, step: 1})
+		.on('change', (ev) => {
+			material.detailScale1 = ev.value;
+		});
+	detailFolder.addBinding(controlData, 'detailSpeed1', {min: 0, max: 2, step: 0.1})
+		.on('change', (ev) => {
+			material.detailSpeed1 = ev.value;
+		});
+	detailFolder.addBinding(controlData, 'detailStrength1', {min: 0, max: 0.5, step: 0.01})
+		.on('change', (ev) => {
+			material.detailStrength1 = ev.value;
+		});
+	detailFolder.addBinding(controlData, 'detailScale2', {min: 1, max: 50, step: 1})
+		.on('change', (ev) => {
+			material.detailScale2 = ev.value;
+		});
+	detailFolder.addBinding(controlData, 'detailSpeed2', {min: 0, max: 2, step: 0.1})
+		.on('change', (ev) => {
+			material.detailSpeed2 = ev.value;
+		});
+	detailFolder.addBinding(controlData, 'detailStrength2', {min: 0, max: 0.5, step: 0.01})
+		.on('change', (ev) => {
+			material.detailStrength2 = ev.value;
+		});
 
 	setSeparator(pane, "🌊 Global Settings");
 
 	// 🌊 전역 설정
-	pane.addBinding({waveRange: 1.5}, 'waveRange', {min: 0.1, max: 5, step: 0.1, label: 'Wave Range'})
-		.on('change', (ev) => targetNoiseTexture.updateUniform('waveRange', ev.value));
-	pane.addBinding({foamThreshold: 0.8}, 'foamThreshold', {min: 0, max: 1, step: 0.01, label: 'Foam Threshold'})
-		.on('change', (ev) => targetNoiseTexture.updateUniform('foamThreshold', ev.value));
+	pane.addBinding(controlData, 'waveRange', {min: 0.1, max: 5, step: 0.1})
+		.on('change', (ev) => {
+			material.waveRange = ev.value;
+		});
+	pane.addBinding(controlData, 'foamThreshold', {min: 0, max: 1, step: 0.01})
+		.on('change', (ev) => {
+			material.foamThreshold = ev.value;
+		});
+
+	// 🎯 노말 맵 설정
+	setSeparator(pane, "🎯 Normal Map");
+	pane.addBinding(controlData, 'normalOffset', {min: 0.001, max: 0.1, step: 0.001})
+		.on('change', (ev) => {
+			material.normalOffset = ev.value;
+		});
+	pane.addBinding(controlData, 'normalStrength', {min: 0, max: 3, step: 0.1})
+		.on('change', (ev) => {
+			material.normalStrength = ev.value;
+		});
 
 	// 🌊 물 외관 설정
 	setSeparator(pane, "🌊 Water Appearance");
 
-	pane.addBinding(material.color, 'hex', {label: 'Water Color'});
-	pane.addBinding(material.specularColor, 'hex', {label: 'Specular Color'});
-	pane.addBinding(material, 'transmissionFactor', {min: 0, max: 1, step: 0.01, label: 'Transparency'});
-	pane.addBinding(material, 'specularStrength', {min: 0, max: 2, step: 0.1, label: 'Specular Strength'});
+	// 🎯 ColorRGB 인스턴스의 r, g, b 값은 0-255 범위입니다
+	const waterColorData = {
+		color: {
+			r: material.waterColor.r,
+			g: material.waterColor.g,
+			b: material.waterColor.b,
+		}
+	};
 
-	// 🌊 애니메이션 컨트롤
-	const animationFolder = pane.addFolder({title: '🌊 Animation', expanded: true});
-	animationFolder.addBinding(testData, 'useAnimation', {label: 'Enable Animation'});
-	animationFolder.addBinding(targetNoiseTexture, 'animationSpeed', {min: 0, max: 0.5, step: 0.001, label: 'Animation Speed'});
-	animationFolder.addBinding(targetNoiseTexture, 'animationX', {min: -1, max: 1, step: 0.01, label: 'X Direction'});
-	animationFolder.addBinding(targetNoiseTexture, 'animationY', {min: -1, max: 1, step: 0.01, label: 'Y Direction'});
+	pane.addBinding(waterColorData, 'color', {
+		picker: 'inline',
+		view: 'color',
+		expanded: false,
+		color: {
+			alpha: false,
+		},
+	}).on('change', (ev) => {
+		const color = ev.value;
+		material.waterColor.setColorByRGB(
+			Math.floor(color.r),
+			Math.floor(color.g),
+			Math.floor(color.b)
+		);
+	});
+
+	pane.addBinding(material, 'waterIOR', {min: 1, max: 1.6, step: 0.01});
+	pane.addBinding(material, 'opacity', {min: 0, max: 1, step: 0.01});
+	pane.addBinding(material, 'waterColorStrength', {min: 0, max: 1, step: 0.01});
 
 	// 🌊 기본 SimplexTexture 컨트롤
 	setSeparator(pane, "🌊 Base Noise");
-	pane.addBinding(targetNoiseTexture, 'frequency', {min: 0, max: 20, step: 0.1, label: 'Base Frequency'});
-	pane.addBinding(targetNoiseTexture, 'amplitude', {min: 0, max: 5, step: 0.1, label: 'Base Amplitude'});
-	pane.addBinding(targetNoiseTexture, 'octaves', {min: 1, max: 8, step: 1, label: 'Octaves'});
-	pane.addBinding(targetNoiseTexture, 'persistence', {min: 0, max: 1, step: 0.01, label: 'Persistence'});
-	pane.addBinding(targetNoiseTexture, 'lacunarity', {min: 1, max: 4, step: 0.1, label: 'Lacunarity'});
-	pane.addBinding(targetNoiseTexture, 'seed', {min: 0, max: 1000, step: 1, label: 'Seed'});
-	pane.addBinding(targetNoiseTexture, 'noiseDimension', {options: RedGPU.Resource.NOISE_DIMENSION, label: 'Noise Type'});
+
+	// SimplexTexture의 기본 속성들 - material getter/setter를 통해 접근
+	pane.addBinding(material, 'noiseScale', {min: 0, max: 20, step: 0.1});
+	pane.addBinding(material, 'seed', {min: 0, max: 1000, step: 1});
+
+	// 노이즈 차원 설정 (SimplexTexture의 noiseDimension 사용)
+	if (material.displacementTexture.noiseDimension !== undefined) {
+		pane.addBinding(material.displacementTexture, 'noiseDimension', {
+			options: RedGPU.Resource.NOISE_DIMENSION,
+		});
+	}
 };
