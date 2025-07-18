@@ -24,6 +24,8 @@ struct InputData {
 }
 
 @group(2) @binding(0) var<uniform> uniforms: Uniforms;
+@group(2) @binding(1) var displacementTextureSampler: sampler;
+@group(2) @binding(2) var displacementTexture: texture_2d<f32>;
 
 @fragment
 fn main(inputData: InputData) -> @location(0) vec4<f32> {
@@ -38,7 +40,6 @@ fn main(inputData: InputData) -> @location(0) vec4<f32> {
 
     // Material uniforms
     let u_waterColor = uniforms.waterColor;
-
     let u_waterIOR = uniforms.waterIOR;
     let u_opacity = uniforms.opacity;
     let u_waterColorStrength = uniforms.waterColorStrength;
@@ -53,7 +54,7 @@ fn main(inputData: InputData) -> @location(0) vec4<f32> {
     let viewAngle = abs(dot(viewDir, surfaceNormal));
     let thicknessParameter = baseThickness / max(viewAngle, 0.1);
     let roughnessParameter = 0.1;
-    let dispersion = 0.0;        // 색 분산 비활성화 (필요시 활성화)
+    let dispersion = 0.0;
     let attenuationDistance = 25.0;
     let shininess = 32.0;
 
@@ -61,29 +62,26 @@ fn main(inputData: InputData) -> @location(0) vec4<f32> {
     let VdotN = abs(dot(viewDir, surfaceNormal));
     let fresnel = schlickFresnel(VdotN, waterF0);
 
+    let neutralColor = vec3<f32>(1.0, 1.0, 1.0);
+    let effectiveAttenuationColor = mix(neutralColor, u_waterColor, u_waterColorStrength);
 
-   let neutralColor = vec3<f32>(1.0, 1.0, 1.0);
-   let effectiveAttenuationColor = mix(neutralColor, u_waterColor, u_waterColorStrength);
-
-   let refractedBackground = calcPrePathBackground(
-       true,
-       thicknessParameter,
-       dispersion,
-       attenuationDistance,
-       effectiveAttenuationColor,
-       u_waterIOR,
-       roughnessParameter,
-       effectiveAttenuationColor,
-       systemUniforms.projectionCameraMatrix,
-       inputData.vertexPosition,
-       inputData.ndcPosition,
-       viewDir,
-       surfaceNormal,
-       renderPath1ResultTexture,
-       renderPath1ResultTextureSampler
-   );
-
-
+    // 🌊 굴절된 배경 계산
+    let refractedBackground = calcRefractionBackground(
+        true,
+        thicknessParameter,
+        dispersion,
+        attenuationDistance,
+        effectiveAttenuationColor,
+        u_waterIOR,
+        roughnessParameter,
+        systemUniforms.projectionCameraMatrix,
+        inputData.vertexPosition,
+        inputData.ndcPosition,
+        viewDir,
+        surfaceNormal,
+        renderPath1ResultTexture,
+        renderPath1ResultTextureSampler
+    );
 
     var diffuseLight = vec3<f32>(0.0);
     var specularLight = vec3<f32>(0.0);
@@ -93,7 +91,6 @@ fn main(inputData: InputData) -> @location(0) vec4<f32> {
 
     // 섀도우 계산
     var visibility = 1.0;
-
     visibility = calcDirectionalShadowVisibility(
         directionalShadowMap,
         directionalShadowMapSampler,
@@ -101,7 +98,6 @@ fn main(inputData: InputData) -> @location(0) vec4<f32> {
         u_bias,
         inputData.shadowPos,
     );
-
 
     if (!receiveShadowYn) {
         visibility = 1.0;
@@ -124,9 +120,8 @@ fn main(inputData: InputData) -> @location(0) vec4<f32> {
 
         // 스펙큘러
         let specularTerm = pow(NdotH, shininess);
-        let waterSpecular = fresnel * specularTerm ;
+        let waterSpecular = fresnel * specularTerm;
         specularLight += lightContribution * waterSpecular * NdotL;
-
     }
 
     // 🌊 클러스터 라이트
@@ -187,13 +182,13 @@ fn main(inputData: InputData) -> @location(0) vec4<f32> {
 
             diffuseLight += lightContribution * NdotL;
 
-           let specularTerm = pow(NdotH, shininess);
-           let waterSpecular = fresnel * specularTerm ;
-           specularLight += lightContribution * waterSpecular * NdotL;
+            let specularTerm = pow(NdotH, shininess);
+            let waterSpecular = fresnel * specularTerm;
+            specularLight += lightContribution * waterSpecular * NdotL;
         }
     #redgpu_endIf
 
-    // 🌊 최종 물 색상 계산
+    // 🌊 최종 물 색상 계산 (반사 제거)
     let finalColor = calculateWaterColor(
         u_waterColor,
         u_waterColorStrength,
@@ -206,43 +201,40 @@ fn main(inputData: InputData) -> @location(0) vec4<f32> {
 
     return vec4<f32>(finalColor, 1.0);
 }
+
 fn calculateWaterColor(
-      waterColor: vec3<f32>,
-      waterColorStrength: f32,
-      opacity: f32,
-      fresnel: f32,
-      diffuseLight: vec3<f32>,
-      specularLight: vec3<f32>,
-      refractedBackground: vec3<f32>
-  ) -> vec3<f32> {
+    waterColor: vec3<f32>,
+    waterColorStrength: f32,
+    opacity: f32,
+    fresnel: f32,
+    diffuseLight: vec3<f32>,
+    specularLight: vec3<f32>,
+    refractedBackground: vec3<f32>
+) -> vec3<f32> {
+    let neutralColor = vec3<f32>(1.0, 1.0, 1.0);
+    let effectiveWaterColor = mix(neutralColor, waterColor, waterColorStrength);
 
-      let neutralColor = vec3<f32>(1.0, 1.0, 1.0);
-      let effectiveWaterColor = mix(neutralColor, waterColor, waterColorStrength);
+    let waterScattering = 0.3;
+    let waterDiffuse = diffuseLight * effectiveWaterColor * waterScattering;
+    let waterAmbient = diffuseLight * effectiveWaterColor * 0.1;
+    let waterBodyColor = waterDiffuse + waterAmbient;
 
-      let waterScattering = 0.3;
-      let waterDiffuse = diffuseLight * effectiveWaterColor * waterScattering;
-      let waterAmbient = diffuseLight * effectiveWaterColor * 0.1;
-      let waterBodyColor = waterDiffuse + waterAmbient;
+    let waterSpecular = specularLight * vec3<f32>(1.0, 1.0, 1.0);
 
+    // 🌊 투과율 계산 (반사 제거)
+    let transmissionCoeff = (1.0 - fresnel) * (1.0 - opacity);
+    let transmittedColor = refractedBackground * transmissionCoeff;
+    let bodyColor = waterBodyColor * (1.0 - transmissionCoeff * 0.3);
 
-      let waterSpecular = specularLight * vec3<f32>(1.0, 1.0, 1.0);
+    var finalColor = transmittedColor + bodyColor + waterSpecular;
 
+    if (opacity >= 0.99) {
+        finalColor = waterBodyColor + waterSpecular;
+    }
 
-      let transmissionCoeff = (1.0 - fresnel) * (1.0 - opacity);
-      let reflectionCoeff = fresnel + opacity * (1.0 - fresnel);
-
-      let transmittedColor = refractedBackground * transmissionCoeff;
-      let reflectedColor = waterBodyColor * reflectionCoeff;
-
-      var finalColor = transmittedColor + reflectedColor + waterSpecular;
-
-      if (opacity >= 0.99) {
-          finalColor = waterBodyColor + waterSpecular;
-      }
-
-      finalColor = toneMapWater(finalColor, effectiveWaterColor, fresnel, opacity);
-      return max(finalColor, vec3<f32>(0.01));
-  }
+    finalColor = toneMapWater(finalColor, effectiveWaterColor, fresnel, opacity);
+    return max(finalColor, vec3<f32>(0.01));
+}
 
 // 🌊 물리적 톤 매핑 함수
 fn toneMapWater(color: vec3<f32>, baseColor: vec3<f32>, fresnel: f32, opacity: f32) -> vec3<f32> {
@@ -264,8 +256,8 @@ fn schlickFresnel(VdotN: f32, fresnel: f32) -> f32 {
     return fresnel + (1.0 - fresnel) * oneMinusCos5;
 }
 
-// 🌊 기존 calcPrePathBackground 함수 (그대로 유지)
-fn calcPrePathBackground(
+// 🌊 굴절 배경 계산
+fn calcRefractionBackground(
     u_useKHR_materials_volume: bool,
     thicknessParameter: f32,
     u_KHR_dispersion: f32,
@@ -273,7 +265,6 @@ fn calcPrePathBackground(
     u_KHR_attenuationColor: vec3<f32>,
     ior: f32,
     roughnessParameter: f32,
-    albedo: vec3<f32>,
     projectionCameraMatrix: mat4x4<f32>,
     input_vertexPosition: vec3<f32>,
     input_ndcPosition: vec3<f32>,
@@ -282,7 +273,7 @@ fn calcPrePathBackground(
     renderPath1ResultTexture: texture_2d<f32>,
     renderPath1ResultTextureSampler: sampler
 ) -> vec3<f32> {
-    var prePathBackground = vec3<f32>(0.0);
+    var refractionBackground = vec3<f32>(0.0);
     let transmissionMipLevel = roughnessParameter * f32(textureNumLevels(renderPath1ResultTexture) - 1);
 
     if (u_useKHR_materials_volume) {
@@ -317,24 +308,23 @@ fn calcPrePathBackground(
         let finalUV_G = vec2<f32>(ndcG.x, 1.0 - ndcG.y);
         let finalUV_B = vec2<f32>(ndcB.x, 1.0 - ndcB.y);
 
-        prePathBackground.r = textureSampleLevel(renderPath1ResultTexture, renderPath1ResultTextureSampler, finalUV_R, transmissionMipLevel).r;
-        prePathBackground.g = textureSampleLevel(renderPath1ResultTexture, renderPath1ResultTextureSampler, finalUV_G, transmissionMipLevel).g;
-        prePathBackground.b = textureSampleLevel(renderPath1ResultTexture, renderPath1ResultTextureSampler, finalUV_B, transmissionMipLevel).b;
-
+        refractionBackground.r = textureSampleLevel(renderPath1ResultTexture, renderPath1ResultTextureSampler, finalUV_R, transmissionMipLevel).r;
+        refractionBackground.g = textureSampleLevel(renderPath1ResultTexture, renderPath1ResultTextureSampler, finalUV_G, transmissionMipLevel).g;
+        refractionBackground.b = textureSampleLevel(renderPath1ResultTexture, renderPath1ResultTextureSampler, finalUV_B, transmissionMipLevel).b;
     } else {
         let refractedVec = refract(-viewDir, surfaceNormal, 1.0 / ior);
         let worldPos = input_vertexPosition + refractedVec * thicknessParameter;
         let clipPos = projectionCameraMatrix * vec4<f32>(worldPos, 1.0);
         let ndc = clipPos.xy / clipPos.w * 0.5 + 0.5;
         let finalUV = vec2<f32>(ndc.x, 1.0 - ndc.y);
-        prePathBackground = textureSampleLevel(renderPath1ResultTexture, renderPath1ResultTextureSampler, finalUV, transmissionMipLevel).rgb;
+        refractionBackground = textureSampleLevel(renderPath1ResultTexture, renderPath1ResultTextureSampler, finalUV, transmissionMipLevel).rgb;
     }
 
     // 🌊 물리적 감쇠 효과
     if (u_KHR_attenuationDistance > 0.0) {
         let attenuationFactor = exp(-length(vec3<f32>(1.0) - u_KHR_attenuationColor) * thicknessParameter / u_KHR_attenuationDistance);
-        prePathBackground = mix(u_KHR_attenuationColor, prePathBackground, attenuationFactor);
+        refractionBackground = mix(u_KHR_attenuationColor, refractionBackground, attenuationFactor);
     }
 
-    return prePathBackground;
+    return refractionBackground;
 }

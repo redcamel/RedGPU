@@ -23,7 +23,7 @@ RedGPU.init(
 		view.ibl = ibl;
 		view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 
-		const geometry = new RedGPU.Primitive.Ground(redGPUContext, 50, 50, 1000, 1000);
+		const geometry = new RedGPU.Primitive.Ground(redGPUContext, 50, 50, 500, 500);
 
 		// 🌊 WaterMaterial 생성
 		const material = new RedGPU.Material.WaterMaterial(redGPUContext);
@@ -436,11 +436,11 @@ const renderTestPane = async (redGPUContext, material, testData) => {
 
 	// 🎯 디테일 노이즈 컨트롤
 	const detailFolder = pane.addFolder({title: '🎯 Detail Noise', expanded: false});
-	detailFolder.addBinding(controlData, 'detailScale1', {min: 1, max: 50, step: 1})
+	detailFolder.addBinding(controlData, 'detailScale1', {min: 1, max: 50, step: 0.01})
 		.on('change', (ev) => {
 			material.detailScale1 = ev.value;
 		});
-	detailFolder.addBinding(controlData, 'detailSpeed1', {min: 0, max: 2, step: 0.1})
+	detailFolder.addBinding(controlData, 'detailSpeed1', {min: 0, max: 2, step: 0.01})
 		.on('change', (ev) => {
 			material.detailSpeed1 = ev.value;
 		});
@@ -448,11 +448,11 @@ const renderTestPane = async (redGPUContext, material, testData) => {
 		.on('change', (ev) => {
 			material.detailStrength1 = ev.value;
 		});
-	detailFolder.addBinding(controlData, 'detailScale2', {min: 1, max: 50, step: 1})
+	detailFolder.addBinding(controlData, 'detailScale2', {min: 1, max: 50, step: 0.01})
 		.on('change', (ev) => {
 			material.detailScale2 = ev.value;
 		});
-	detailFolder.addBinding(controlData, 'detailSpeed2', {min: 0, max: 2, step: 0.1})
+	detailFolder.addBinding(controlData, 'detailSpeed2', {min: 0, max: 2, step: 0.01})
 		.on('change', (ev) => {
 			material.detailSpeed2 = ev.value;
 		});
@@ -495,6 +495,40 @@ const renderTestPane = async (redGPUContext, material, testData) => {
 			b: material.waterColor.b,
 		}
 	};
+
+	setSeparator(pane, "🎯 Precise Angles");
+
+	pane.addButton({title: '🎯 0°'}).on('click', () => {
+		material.setFlowDirectionByDegrees(0);
+	});
+
+	pane.addButton({title: '🎯 45°'}).on('click', () => {
+		material.setFlowDirectionByDegrees(45);
+	});
+
+	pane.addButton({title: '🎯 90°'}).on('click', () => {
+		material.setFlowDirectionByDegrees(90);
+	});
+
+	pane.addButton({title: '🎯 135°'}).on('click', () => {
+		material.setFlowDirectionByDegrees(135);
+	});
+
+	pane.addButton({title: '🎯 180°'}).on('click', () => {
+		material.setFlowDirectionByDegrees(180);
+	});
+
+	pane.addButton({title: '🎯 225° '}).on('click', () => {
+		material.setFlowDirectionByDegrees(225);
+	});
+
+	pane.addButton({title: '🎯 270°'}).on('click', () => {
+		material.setFlowDirectionByDegrees(270);
+	});
+
+	pane.addButton({title: '🎯 315° (Southeast)'}).on('click', () => {
+		material.setFlowDirectionByDegrees(315);
+	});
 
 	pane.addBinding(waterColorData, 'color', {
 		picker: 'inline',

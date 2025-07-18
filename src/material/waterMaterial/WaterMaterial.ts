@@ -16,42 +16,38 @@ export interface WaterTextureSettings {
 	speed1: number;
 	steepness1: number;
 	direction1: number[];
-
 	// Wave 2
 	amplitude2: number;
 	wavelength2: number;
 	speed2: number;
 	steepness2: number;
 	direction2: number[];
-
 	// Wave 3
 	amplitude3: number;
 	wavelength3: number;
 	speed3: number;
 	steepness3: number;
 	direction3: number[];
-
 	// Wave 4
 	amplitude4: number;
 	wavelength4: number;
 	speed4: number;
 	steepness4: number;
 	direction4: number[];
-
-	// Detail noise
+	// Detail noise - 방향 추가
 	detailScale1: number;
 	detailSpeed1: number;
 	detailStrength1: number;
+	detailDirection1: number[];
 	detailScale2: number;
 	detailSpeed2: number;
 	detailStrength2: number;
-
+	detailDirection2: number[];
 	// Global settings
 	waveRange: number;
 	foamThreshold: number;
 	normalOffset: number;
 	normalStrength: number;
-
 	// Randomization
 	seed: number;
 	noiseScale: number;
@@ -74,16 +70,21 @@ export type WaterPreset = Partial<{
 	waterColor: string;
 	waterColorStrength: number;
 }>;
-
-const WaterPresets = {
+let WaterPresets: {
+	calmOcean: WaterPreset;
+	stormyOcean: WaterPreset;
+	gentleWaves: WaterPreset;
+	lakeRipples: WaterPreset
+};
+WaterPresets = {
 	calmOcean: {
 		displacementTexture: {
 			amplitude1: 0.3, wavelength1: 8.0, speed1: 0.8, steepness1: 0.2, direction1: [1.0, 0.0],
-			amplitude2: 0.2, wavelength2: 6.0, speed2: 0.6, steepness2: 0.15, direction2: [0.7, 0.7],
+			amplitude2: 0.2, wavelength2: 6.0, speed2: 0.6, steepness2: 0.15, direction2: [0.7, 0.7], // 정규화
 			amplitude3: 0.1, wavelength3: 4.0, speed3: 1.0, steepness3: 0.1, direction3: [0.0, 1.0],
-			amplitude4: 0.05, wavelength4: 2.0, speed4: 1.2, steepness4: 0.05, direction4: [-0.7, 0.7],
-			detailScale1: 4.0, detailSpeed1: 0.3, detailStrength1: 0.04,
-			detailScale2: 8.0, detailSpeed2: 0.2, detailStrength2: 0.02,
+			amplitude4: 0.05, wavelength4: 2.0, speed4: 1.2, steepness4: 0.05, direction4: [-0.7, 0.7], // 정규화
+			detailScale1: 4.0, detailSpeed1: 0.3, detailStrength1: 0.04, detailDirection1: [0.3, 0.1],
+			detailScale2: 8.0, detailSpeed2: 0.2, detailStrength2: 0.02, detailDirection2: [-0.2, 0.4],
 			waveRange: 1.0, foamThreshold: 0.8,
 			normalOffset: 0.01, normalStrength: 1.0,
 			seed: 42.0, noiseScale: 0.8
@@ -96,15 +97,15 @@ const WaterPresets = {
 
 	stormyOcean: {
 		displacementTexture: {
-			amplitude1: 1.5, wavelength1: 15.0, speed1: 2.0, steepness1: 0.8, direction1: [1.0, 0.0],
-			amplitude2: 1.0, wavelength2: 10.0, speed2: 1.8, steepness2: 0.6, direction2: [0.8, 0.6],
-			amplitude3: 0.8, wavelength3: 6.0, speed3: 2.5, steepness3: 0.4, direction3: [0.0, 1.0],
-			amplitude4: 0.6, wavelength4: 3.0, speed4: 3.0, steepness4: 0.3, direction4: [-0.6, 0.8],
-			detailScale1: 8.0, detailSpeed1: 0.8, detailStrength1: 0.12,
-			detailScale2: 16.0, detailSpeed2: 0.6, detailStrength2: 0.08,
-			waveRange: 3.0, foamThreshold: 0.5,
-			normalOffset: 0.008, normalStrength: 1.2,
-			seed: 123.0, noiseScale: 1.5
+			amplitude1: 1.2, wavelength1: 15.0, speed1: 2.0, steepness1: 0.4, direction1: [1.0, 0.0], // steepness 감소
+			amplitude2: 0.8, wavelength2: 10.0, speed2: 1.8, steepness2: 0.3, direction2: [0.8, 0.6], // steepness 감소
+			amplitude3: 0.6, wavelength3: 6.0, speed3: 2.5, steepness3: 0.25, direction3: [0.0, 1.0], // steepness 감소
+			amplitude4: 0.4, wavelength4: 3.0, speed4: 3.0, steepness4: 0.2, direction4: [-0.6, 0.8], // steepness 감소
+			detailScale1: 8.0, detailSpeed1: 0.8, detailStrength1: 0.1, detailDirection1: [0.6, 0.3],
+			detailScale2: 16.0, detailSpeed2: 0.6, detailStrength2: 0.06, detailDirection2: [-0.4, 0.7],
+			waveRange: 2.8, foamThreshold: 0.4,
+			normalOffset: 0.008, normalStrength: 1.4,
+			seed: 123.0, noiseScale: 1.2
 		},
 		opacity: 0.4,
 		waterIOR: 1.333,
@@ -114,38 +115,52 @@ const WaterPresets = {
 
 	gentleWaves: {
 		displacementTexture: {
-			amplitude1: 0.6, wavelength1: 6.0, speed1: 1.0, steepness1: 0.4, direction1: [1.0, 0.0],
-			amplitude2: 0.4, wavelength2: 4.5, speed2: 0.8, steepness2: 0.3, direction2: [0.7, 0.7],
-			amplitude3: 0.2, wavelength3: 3.0, speed3: 1.2, steepness3: 0.2, direction3: [0.0, 1.0],
-			amplitude4: 0.1, wavelength4: 1.8, speed4: 1.5, steepness4: 0.1, direction4: [-0.7, 0.7],
-			detailScale1: 6.0, detailSpeed1: 0.5, detailStrength1: 0.08,
-			detailScale2: 12.0, detailSpeed2: 0.3, detailStrength2: 0.04,
-			waveRange: 1.5, foamThreshold: 0.75,
-			normalOffset: 0.01, normalStrength: 1.0,
-			seed: 256.0, noiseScale: 1.0
+			amplitude1: 0.5, wavelength1: 6.0, speed1: 1.0, steepness1: 0.3, direction1: [1.0, 0.0],
+			amplitude2: 0.35, wavelength2: 4.5, speed2: 0.8, steepness2: 0.25, direction2: [0.7, 0.7],
+			amplitude3: 0.18, wavelength3: 3.0, speed3: 1.2, steepness3: 0.15, direction3: [0.0, 1.0],
+			amplitude4: 0.08, wavelength4: 1.8, speed4: 1.5, steepness4: 0.08, direction4: [-0.7, 0.7],
+			detailScale1: 6.0, detailSpeed1: 0.5, detailStrength1: 0.06, detailDirection1: [0.4, 0.2],
+			detailScale2: 12.0, detailSpeed2: 0.3, detailStrength2: 0.03, detailDirection2: [-0.3, 0.5],
+			waveRange: 1.3, foamThreshold: 0.75,
+			normalOffset: 0.01, normalStrength: 0.9,
+			seed: 256.0, noiseScale: 0.9
 		},
-		opacity: 0.5,
+		opacity: 0.55,
 		waterIOR: 1.333,
-		waterColor: '#87CEEB',
+		waterColor: '#5BA3D4',
 		waterColorStrength: 0.6
 	} as WaterPreset,
 
 	lakeRipples: {
 		displacementTexture: {
-			amplitude1: 0.2, wavelength1: 3.0, speed1: 0.5, steepness1: 0.1, direction1: [1.0, 0.0],
-			amplitude2: 0.15, wavelength2: 2.2, speed2: 0.4, steepness2: 0.08, direction2: [0.6, 0.8],
-			amplitude3: 0.1, wavelength3: 1.5, speed3: 0.6, steepness3: 0.05, direction3: [0.0, 1.0],
-			amplitude4: 0.05, wavelength4: 1.0, speed4: 0.8, steepness4: 0.02, direction4: [-0.8, 0.6],
-			detailScale1: 12.0, detailSpeed1: 0.2, detailStrength1: 0.025,
-			detailScale2: 20.0, detailSpeed2: 0.15, detailStrength2: 0.012,
-			waveRange: 0.8, foamThreshold: 0.9,
-			normalOffset: 0.012, normalStrength: 0.8,
-			seed: 512.0, noiseScale: 0.6
+			// 파도 amplitude 더 감소
+			amplitude1: 0.04, wavelength1: 3.0, speed1: 0.2, steepness1: 0.015, direction1: [1.0, 0.0],
+			amplitude2: 0.03, wavelength2: 2.0, speed2: 0.18, steepness2: 0.01, direction2: [0.6, 0.8],
+			amplitude3: 0.02, wavelength3: 1.5, speed3: 0.25, steepness3: 0.008, direction3: [0.0, 1.0],
+			amplitude4: 0.01, wavelength4: 1.0, speed4: 0.3, steepness4: 0.005, direction4: [-0.8, 0.6],
+
+			// 디테일 노이즈 최소화
+			detailScale1: 5.0,
+			detailSpeed1: 0.02,
+			detailStrength1: 0.03,
+			detailDirection1: [0.1, 0.05],
+
+			detailScale2: 10.0,
+			detailSpeed2: 0.015,
+			detailStrength2: 0.02,
+			detailDirection2: [-0.05, 0.15],
+
+			waveRange: 0.2,
+			foamThreshold: 0.99,
+			normalOffset: 0.008,
+			normalStrength: 0.2,
+			seed: 512.0,
+			noiseScale: 0.2
 		},
-		opacity: 0.7,
+		opacity: 0.85,
 		waterIOR: 1.333,
-		waterColor: '#6BB6FF',
-		waterColorStrength: 0.5
+		waterColor: '#B8E8F8',
+		waterColorStrength: 0.25
 	} as WaterPreset
 };
 
@@ -154,6 +169,9 @@ interface WaterMaterial {
 	waterIOR: number;
 	waterColor: ColorRGB;
 	waterColorStrength: number;
+	foamColor: ColorRGB;
+	foamBrightness: number;
+	foamOpacity: number;
 	use2PathRender: boolean
 }
 
@@ -161,7 +179,6 @@ class WaterMaterial extends ABitmapBaseMaterial {
 	static WaterPresets = WaterPresets
 	#displacementTexture: WaterTexture
 	#displacementScale: number = 1
-
 	get displacementScale(): number {
 		return this.#displacementScale;
 	}
@@ -374,6 +391,14 @@ class WaterMaterial extends ABitmapBaseMaterial {
 		this.#displacementTexture.setProperty('detailStrength1', value);
 	}
 
+	get detailDirection1(): number[] {
+		return this.#displacementTexture.getProperty('detailDirection1') as number[];
+	}
+
+	set detailDirection1(value: number[]) {
+		this.#displacementTexture.setProperty('detailDirection1', value);
+	}
+
 	get detailScale2(): number {
 		return this.#displacementTexture.getProperty('detailScale2') as number;
 	}
@@ -396,6 +421,14 @@ class WaterMaterial extends ABitmapBaseMaterial {
 
 	set detailStrength2(value: number) {
 		this.#displacementTexture.setProperty('detailStrength2', value);
+	}
+
+	get detailDirection2(): number[] {
+		return this.#displacementTexture.getProperty('detailDirection2') as number[];
+	}
+
+	set detailDirection2(value: number[]) {
+		this.#displacementTexture.setProperty('detailDirection2', value);
 	}
 
 	// 🌊 Global Properties
@@ -449,6 +482,36 @@ class WaterMaterial extends ABitmapBaseMaterial {
 		this.#displacementTexture.updateUniform('frequency', value)
 	}
 
+	// 🧭 물 흐름 방향 제어 메서드들
+	/**
+	 * 각도(도)로 전체 흐름 방향 설정
+	 * @param degrees 0° = 동쪽, 90° = 북쪽, 180° = 서쪽, 270° = 남쪽
+	 */
+	setFlowDirectionByDegrees(degrees: number) {
+		const radians = (degrees * Math.PI) / 180;
+		this.setNaturalFlowDirection(radians);
+	}
+
+	/**
+	 * 자연스러운 wave 방향 설정 (각 wave가 약간씩 다른 방향)
+	 * @param baseAngle 기본 방향 (라디안)
+	 * @param variation 방향 변화량 (라디안)
+	 */
+	setNaturalFlowDirection(baseAngle: number, variation: number = 0.3) {
+		// 각 wave마다 약간씩 다른 방향 설정
+		this.direction1 = this.#angleToDirection(baseAngle);
+		this.direction2 = this.#angleToDirection(baseAngle + variation * 0.5);
+		this.direction3 = this.#angleToDirection(baseAngle - variation * 0.3);
+		this.direction4 = this.#angleToDirection(baseAngle + variation * 0.8);
+		// 디테일 노이즈는 더 복잡하고 미세한 방향으로 설정
+		this.detailDirection1 = this.#angleToDirection(baseAngle + variation * 0.2);
+		this.detailDirection2 = this.#angleToDirection(baseAngle - variation * 0.4);
+	}
+
+	#angleToDirection(angle: number): number[] {
+		return [Math.cos(angle), Math.sin(angle)];
+	}
+
 	constructor(redGPUContext: RedGPUContext, color: string = '#20B2AA', name?: string) {
 		super(
 			redGPUContext,
@@ -458,12 +521,14 @@ class WaterMaterial extends ABitmapBaseMaterial {
 		)
 		if (name) this.name = name
 		this.initGPURenderInfos()
-		this.displacementTexture = new WaterTexture(redGPUContext, 1024, 1024)
+		this.displacementTexture = new WaterTexture(redGPUContext, 2048, 2048)
 		this.waterColor.setColorByHEX(color)
 		this.opacity = 0.5
 		this.waterIOR = 1.333
 		this.waterColorStrength = 0.5
 		this.use2PathRender = true
+
+		this.applyPreset(WaterPresets.calmOcean)
 	}
 
 	// 🌊 프리셋 적용
@@ -472,7 +537,6 @@ class WaterMaterial extends ABitmapBaseMaterial {
 		if (preset.displacementTexture) {
 			this.displacementTexture?.applyPreset(preset.displacementTexture);
 		}
-
 		// 🎨 Material 설정 적용
 		if (preset.waterColor !== undefined) {
 			this.waterColor.setColorByHEX(preset.waterColor);
@@ -520,14 +584,12 @@ class WaterMaterial extends ABitmapBaseMaterial {
 }
 
 DefineForFragment.defineByPreset(WaterMaterial, [
-	DefineForFragment.PRESET_COLOR_RGB.COLOR,
-	DefineForFragment.PRESET_TEXTURE.NORMAL_TEXTURE,
-	DefineForFragment.PRESET_SAMPLER.NORMAL_TEXTURE_SAMPLER,
 	DefineForFragment.PRESET_POSITIVE_NUMBER.OPACITY,
 ])
 Object.freeze(WaterMaterial)
+DefineForFragment.defineTexture(WaterMaterial, [])
 DefineForFragment.defineColorRGB(WaterMaterial, [
-	['waterColor', '#0D4F8C']
+	['waterColor', '#0D4F8C'],
 ])
 DefineForFragment.definePositiveNumber(WaterMaterial, [
 	['waterIOR', 1.333, true, 1.0, 1.8],
