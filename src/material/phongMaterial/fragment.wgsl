@@ -115,6 +115,11 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     #redgpu_endIf
     var mixColor:vec3<f32>;
 
+    // 암비안트 라이트 처리 추가
+    let ambientContribution = u_ambientLightColor * u_ambientLightIntensity;
+    let ambientDiffuse = diffuseColor * ambientContribution;
+    mixColor += ambientDiffuse;
+
     var visibility:f32 = 1.0;
      visibility = calcDirectionalShadowVisibility(
                 directionalShadowMap,
