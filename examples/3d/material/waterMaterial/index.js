@@ -27,7 +27,7 @@ RedGPU.init(
 		view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 
 		// 🌊 물 메시 생성
-		const water = new RedGPU.Display.Water(redGPUContext, 200, 200, 800);
+		const water = new RedGPU.Display.Water(redGPUContext, 2000, 2000, 1000);
 		water.setPosition(0, 0, 0);
 
 		// 🌊 재질 설정
@@ -135,15 +135,21 @@ const renderWaterPane = async (redGPUContext, water, animationData) => {
 
 	setSeparator(pane, "🎯 Global Parameters");
 
+	pane.addBinding(water.material, 'specularStrength', {
+
+		min: 0.01,
+		max: 1.0,
+		step: 0.001
+	});
 	pane.addBinding(water, 'waveScale', {
-		label: 'Wave Scale',
+
 		min: 0.01,
 		max: 1.0,
 		step: 0.001
 	});
 
 	pane.addBinding(water, 'waterLevel', {
-		label: 'Water Level',
+
 		min: -5.0,
 		max: 5.0,
 		step: 0.01
@@ -279,8 +285,8 @@ const renderWaterPane = async (redGPUContext, water, animationData) => {
 
 	pane.addButton({ title: '📐 Reset to Default' }).on('click', () => {
 		water.applyPreset(RedGPU.Display.Water.WaterPresets.calmOcean);
-		water.material.color.setColorByHEX('#4D99CC');
-		colorParams.waterColor = '#4D99CC';
+		water.material.color.setColorByHEX('#006994');
+		colorParams.waterColor = '#006994';
 		animationData.useAnimation = true;
 		animationData.autoRotateWaves = true;
 		animationData.intensityModulation = true;

@@ -11,6 +11,7 @@ interface WaterMaterial {
 	color: ColorRGB;
 	shininess: number
 	specularStrength: number
+	ior: number
 
 }
 
@@ -35,6 +36,9 @@ DefineForFragment.defineByPreset(WaterMaterial, [
 	DefineForFragment.PRESET_POSITIVE_NUMBER.SPECULAR_STRENGTH,
 	//
 	[DefineForFragment.PRESET_POSITIVE_NUMBER.SHININESS, 32],
+])
+DefineForFragment.definePositiveNumber(WaterMaterial, [
+	['ior',1.333,1,1.6]
 ])
 Object.freeze(WaterMaterial)
 export default WaterMaterial

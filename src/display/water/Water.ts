@@ -150,9 +150,6 @@ class Water extends Mesh {
 		super(redGPUContext);
 		this._geometry = new Ground(redGPUContext, width, height, subdivisions, subdivisions);
 		this._material = new WaterMaterial(redGPUContext);
-		this._material.color.setColorByHEX('#4D99CC')
-		this._material.shininess = 128
-		this._material.specularStrength = 0.8
 		this._material.transparent = true;
 		this.dirtyPipeline = true;
 		this.dirtyTransform = true;
@@ -261,6 +258,12 @@ class Water extends Mesh {
 	}
 
 	// 🌊 개별 파도 접근자들
+	getIOR():number{
+		return this._material.ior
+	}
+	setIOR(value:number){
+		this._material.ior = value
+	}
 
 	// Primary Wave Amplitude
 	get amplitude1(): number { return this.waveAmplitude[0]; }

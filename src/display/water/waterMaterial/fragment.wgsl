@@ -4,6 +4,7 @@
 #redgpu_include calcPrePathBackground
 struct Uniforms {
     color: vec3<f32>,
+    ior:f32,
     //
     specularStrength:f32,
     shininess: f32,
@@ -69,47 +70,10 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     var N = normalize(inputData.vertexNormal) ;
     //
     var finalColor:vec4<f32>;
+
     var resultAlpha:f32 = u_opacity * inputData.combinedOpacity;
 
-    // 🌊 물리 기반 물 렌더링 파라미터
-    let waterF0 = 0.02;              // 물의 기본 반사율 (정확한 값)
-    let u_waterIOR = 1.333;          // 물의 굴절률 (정확한 값)
-    let baseThickness = 0.5;         // 물 두께를 낮춰서 자연스러운 굴절
-    let roughnessParameter = 0.05;   // 더 매끄러운 물 표면 (선명한 굴절)
-    let dispersion = 0.02;           // 약간의 색분산으로 현실감 추가
-    let attenuationDistance = 5.0;   // 더 넓은 감쇠 거리로 자연스러운 색상
-    let thicknessParameter = baseThickness + inputData.waveHeight * 0.3; // 파도 높이에 따른 동적 두께
-    let u_useKHR_materials_volume = true;
-    let transmissionParameter = 1.0 - u_opacity;
-
-    // 🌊 Fresnel 계산 (시야각에 따른 반사/투과 비율)
-    let VdotN = abs(dot(V, N));
-    let fresnel = schlickFresnel(VdotN, waterF0);
-
-    // 🔥 핵심 수정: opacity에 따라 물 색상 강도를 조절하여 굴절 배경과 미리 합성
-    let opacityStrength = clamp(resultAlpha, 0.0, 1.0);
-    let effectiveWaterColor = mix(vec3<f32>(1.0), u_color, opacityStrength);
-
-    // 🌊 굴절된 배경 계산 (물 색상이 이미 적용됨)
-    let refractedBackground = calcPrePathBackground(
-        u_useKHR_materials_volume,
-        thicknessParameter,
-        dispersion,
-        attenuationDistance,
-        effectiveWaterColor,  // 투명도가 적용된 물 색상으로 굴절 계산
-        u_waterIOR,
-        roughnessParameter,
-        effectiveWaterColor,  // 투명도가 적용된 물 색상으로 굴절 계산
-        systemUniforms.projectionCameraMatrix,
-        inputData.vertexPosition,
-        inputData.ndcPosition,
-        V,
-        N,
-        renderPath1ResultTexture,
-        renderPath1ResultTextureSampler
-    );
-
-    var diffuseColor:vec3<f32> = mix(refractedBackground,u_color,u_opacity);
+    var diffuseColor:vec3<f32> = u_color;
 
     var mixColor:vec3<f32>;
 
@@ -220,8 +184,47 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
          mixColor += ld + ls;
     }
 
+
+    // 🌊 물리 기반 물 렌더링 파라미터
+        let waterF0 = 0.02;              // 물의 기본 반사율 (정확한 값)
+        let u_ior = uniforms.ior;          // 물의 굴절률 (정확한 값)
+        let roughnessParameter = 0.05;   // 더 매끄러운 물 표면 (선명한 굴절)
+        let dispersion = 0.02;           // 약간의 색분산으로 현실감 추가
+        let attenuationDistance = 5.0;   // 더 넓은 감쇠 거리로 자연스러운 색상
+        let baseThickness = 0.5;         // 물 두께를 낮춰서 자연스러운 굴절
+        let thicknessParameter = baseThickness + inputData.waveHeight * 0.3; // 파도 높이에 따른 동적 두께
+        let u_useKHR_materials_volume = true;
+        let transmissionParameter = 1.0 - resultAlpha;
+
+        // 🌊 Fresnel 계산 (시야각에 따른 반사/투과 비율)
+        let VdotN = abs(dot(V, N));
+        let fresnel = schlickFresnel(VdotN, waterF0);
+
+        // 🔥 핵심 수정: opacity에 따라 물 색상 강도를 조절하여 굴절 배경과 미리 합성
+
+        let effectiveWaterColor = mix( u_color,vec3<f32>(1.0), transmissionParameter);
+
+        // 🌊 굴절된 배경 계산 (물 색상이 이미 적용됨)
+        let refractedBackground = calcPrePathBackground(
+            u_useKHR_materials_volume,
+            thicknessParameter,
+            dispersion,
+            attenuationDistance,
+            u_color,  // 투명도가 적용된 물 색상으로 굴절 계산
+            u_ior,
+            roughnessParameter,
+            u_color,  // 투명도가 적용된 물 색상으로 굴절 계산
+            systemUniforms.projectionCameraMatrix,
+            inputData.vertexPosition,
+            inputData.ndcPosition,
+            V,
+            N,
+            renderPath1ResultTexture,
+            renderPath1ResultTextureSampler
+        );
+
     let NdotV = max(dot(N, V),0.04);
-    let F0_dielectric: vec3<f32> =  vec3(pow((1.0 - u_waterIOR) / (1.0 + u_waterIOR), 2.0)) ; // 유전체 반사율
+    let F0_dielectric: vec3<f32> =  vec3(pow((1.0 - u_ior) / (1.0 + u_ior), 2.0)) ; // 유전체 반사율
     let F0_metal = u_color; // 금속 반사율
     let metallicParameter = 0.0;
     var F0 = mix(F0_dielectric, F0_metal, metallicParameter); // 기본 반사율
@@ -241,23 +244,18 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     let a2 = roughnessParameter * roughnessParameter;
     let G_smith = NdotV / (NdotV * (1.0 - a2) + a2);
     let iblMipmapCount:f32 = f32(textureNumLevels(ibl_environmentTexture) - 1);
-
-    let mipLevel = pow(roughnessParameter,0.4) * iblMipmapCount;
-
-
-
+    let mipLevel = pow(roughnessParameter,0.6) * iblMipmapCount;
     // ---------- ibl 기본 컬러 ----------
     var reflectedColor = textureSampleLevel(ibl_irradianceTexture, iblTextureSampler, R, mipLevel).rgb;
-    let specularColor = vec3<f32>(1.0);
-    var specularParameter = 1.0;
+
+
     var envIBL_SPECULAR:vec3<f32>;
-    let specularColorCorrected = max(vec3<f32>(0.16), specularColor);
-    envIBL_SPECULAR = reflectedColor * G_smith * specularColor * F_IBL * specularParameter ;
+    envIBL_SPECULAR = G_smith * u_specularColor * F_IBL * u_specularStrength ;
 
     var envIBL_SPECULAR_BTDF = vec3<f32>(0.0);
     var refractedDir: vec3<f32>;
-    let eta = 1.0 / u_waterIOR;
-    if (abs(u_waterIOR - 1.0) < 0.0001) { refractedDir = V; }
+    let eta = 1.0 / u_ior;
+    if (abs(u_ior - 1.0) < 0.0001) { refractedDir = V; }
     else { refractedDir = refract(-V, -N, eta); }
 
     if(length(refractedDir) > 0.0001) {
@@ -265,9 +263,8 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
         let F_transmission = vec3<f32>(1.0) - F_IBL_dielectric;
 
         var attenuatedBackground = refractedBackground;
-         attenuatedBackground *= u_color;
 
-        envIBL_SPECULAR_BTDF = attenuatedBackground * F_transmission * transmissionParameter + reflectedColor * G_smith * F_IBL * NdotT;
+        envIBL_SPECULAR_BTDF = attenuatedBackground * F_transmission * transmissionParameter + G_smith * F_IBL * NdotT;
     }
 
      let envIBL_DIELECTRIC = mix(envIBL_DIFFUSE ,envIBL_SPECULAR_BTDF, transmissionParameter) + envIBL_SPECULAR;
