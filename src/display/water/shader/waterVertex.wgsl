@@ -7,18 +7,16 @@ struct VertexUniforms {
     normalModelMatrix: mat4x4<f32>,
     receiveShadow: f32,
     combinedOpacity: f32,
-    //
 
-
-    // 🌊 Gerstner Wave Parameters (4 waves)
-    waveAmplitude: vec4<f32>,      // amplitude1, amplitude2, amplitude3, amplitude4
-    waveWavelength: vec4<f32>,     // wavelength1, wavelength2, wavelength3, wavelength4
-    waveSpeed: vec4<f32>,          // speed1, speed2, speed3, speed4
-    waveSteepness: vec4<f32>,      // steepness1, steepness2, steepness3, steepness4
-    waveDirection1: vec2<f32>,     // direction1
-    waveDirection2: vec2<f32>,     // direction2
-    waveDirection3: vec2<f32>,     // direction3
-    waveDirection4: vec2<f32>,     // direction4
+    // 🌊 Gerstner Wave Parameters (4 primary waves)
+    waveAmplitude: vec4<f32>,
+    waveWavelength: vec4<f32>,
+    waveSpeed: vec4<f32>,
+    waveSteepness: vec4<f32>,
+    waveDirection1: vec2<f32>,
+    waveDirection2: vec2<f32>,
+    waveDirection3: vec2<f32>,
+    waveDirection4: vec2<f32>,
 
     // 🌊 Water visual parameters
     waveScale: f32,
@@ -27,7 +25,7 @@ struct VertexUniforms {
 
 const maxDistance: f32 = 1000.0;
 const maxMipLevel: f32 = 10.0;
-const PI: f32 = 3.14159265359;
+const PI_VALUE: f32 = 3.14159265359;
 
 @group(1) @binding(0) var<uniform> vertexUniforms: VertexUniforms;
 
@@ -42,8 +40,8 @@ struct OutputData {
     @location(0) vertexPosition: vec3<f32>,
     @location(1) vertexNormal: vec3<f32>,
     @location(2) uv: vec2<f32>,
-    @location(3) worldPosition: vec3<f32>,  // 🌊 월드 위치 추가
-    @location(4) waveHeight: f32,           // 🌊 파도 높이 정보
+    @location(3) worldPosition: vec3<f32>,
+    @location(4) waveHeight: f32,
     @location(9) ndcPosition: vec3<f32>,
     @location(12) combinedOpacity: f32,
     @location(13) shadowPos: vec3<f32>,
@@ -51,7 +49,6 @@ struct OutputData {
     @location(15) pickingId: vec4<f32>,
 };
 
-// 🌊 단일 Gerstner Wave 계산
 struct GerstnerWaveResult {
     height: f32,
     offsetX: f32,
@@ -60,6 +57,7 @@ struct GerstnerWaveResult {
     normalZ: f32,
 }
 
+// 🌊 표준 Gerstner Wave 계산
 fn calculateGerstnerWave(
     worldPos: vec2<f32>,
     time: f32,
@@ -70,24 +68,26 @@ fn calculateGerstnerWave(
     steepness: f32
 ) -> GerstnerWaveResult {
     let dir = normalize(direction);
-    let frequency = 2.0 * PI / wavelength;
+    let frequency = 2.0 * PI_VALUE / wavelength;
     let phase = frequency * dot(dir, worldPos) + time * speed;
-
-    let Q = steepness / (frequency * amplitude + 0.001); // 0으로 나누기 방지
+    let steepnessFactor = steepness / frequency;
 
     let sinPhase = sin(phase);
     let cosPhase = cos(phase);
 
     var result: GerstnerWaveResult;
-    result.height = amplitude * sinPhase;
-    result.offsetX = Q * amplitude * dir.x * cosPhase;
-    result.offsetZ = Q * amplitude * dir.y * cosPhase;
 
-    // 🌊 노말 벡터 계산 (파도의 기울기)
-    let dPhaseDx = frequency * dir.x;
-    let dPhaseDz = frequency * dir.y;
-    result.normalX = -dPhaseDx * amplitude * cosPhase * (1.0 + Q);
-    result.normalZ = -dPhaseDz * amplitude * cosPhase * (1.0 + Q);
+    // 높이 계산
+    result.height = amplitude * sinPhase;
+
+    // 수평 오프셋 계산 (Gerstner의 핵심)
+    result.offsetX = steepnessFactor * dir.x * cosPhase;
+    result.offsetZ = steepnessFactor * dir.y * cosPhase;
+
+    // 노말 벡터의 편미분 계산
+    let waveNormalFactor = frequency * amplitude * cosPhase;
+    result.normalX = -dir.x * waveNormalFactor;
+    result.normalZ = -dir.y * waveNormalFactor;
 
     return result;
 }
@@ -166,35 +166,38 @@ fn main(inputData: InputData) -> OutputData {
     var finalNormal = input_vertexNormal;
     var waveHeight: f32 = 0.0;
 
-    // 🌊 월드 위치 계산 (Gerstner Wave 계산용)
-    let worldPos4 = u_modelMatrix * vec4<f32>(input_position, 1.0);
-    let worldPos2D = worldPos4.xz * u_waveScale;
+    // 🌊 월드 위치 계산
+    let worldPos2D = input_position.xz * u_waveScale;
 
-    let gerstnerResult = calculateAllGerstnerWaves(worldPos2D, u_time);
+    // 🌊 Gerstner Waves 계산
+    let waves = calculateAllGerstnerWaves(worldPos2D, u_time);
 
-    // 🌊 버텍스 위치에 파도 효과 적용
-    finalPosition.x += gerstnerResult.offsetX;
-    finalPosition.y += gerstnerResult.height + u_waterLevel;
-    finalPosition.z += gerstnerResult.offsetZ;
-    waveHeight = gerstnerResult.height;
+    // 🌊 포지션 변환 적용
+    finalPosition.x += waves.offsetX;
+    finalPosition.y += waves.height + u_waterLevel;
+    finalPosition.z += waves.offsetZ;
+    waveHeight = waves.height;
 
     // 🌊 노말 벡터 계산
-    let normalX = gerstnerResult.normalX;
-    let normalZ = gerstnerResult.normalZ;
-    let normalY = 1.0 - sqrt(normalX * normalX + normalZ * normalZ);
+    let normalX = waves.normalX;
+    let normalZ = waves.normalZ;
+
+    // 정규화된 노말 벡터 생성 (Y는 1.0 기준으로 조정)
+    let normalMagnitude = sqrt(normalX * normalX + normalZ * normalZ);
+    let normalY = sqrt(max(1.0 - min(normalMagnitude * normalMagnitude, 0.99), 0.01));
+
     finalNormal = normalize(vec3<f32>(normalX, normalY, normalZ));
 
-    normalPosition = u_normalModelMatrix * vec4<f32>(finalNormal, 1.0);
-
-    // 🌊 최종 위치 계산
+    // 최종 변환 적용
+    normalPosition = u_normalModelMatrix * vec4<f32>(finalNormal, 0.0);
     position = u_modelMatrix * vec4<f32>(finalPosition, 1.0);
 
     output.position = u_projectionMatrix * u_cameraMatrix * position;
     output.vertexPosition = position.xyz;
-    output.vertexNormal = normalPosition.xyz;
+    output.vertexNormal = normalize(normalPosition.xyz);
     output.uv = input_uv;
-    output.worldPosition = position.xyz;  // 🌊 월드 위치
-    output.waveHeight = waveHeight;       // 🌊 파도 높이
+    output.worldPosition = position.xyz;
+    output.waveHeight = waveHeight;
     output.ndcPosition = output.position.xyz / output.position.w;
 
     #redgpu_if receiveShadow
@@ -206,15 +209,15 @@ fn main(inputData: InputData) -> OutputData {
     #redgpu_endIf
 
     output.combinedOpacity = vertexUniforms.combinedOpacity;
-
     return output;
 }
+
 struct OutputShadowData {
     @builtin(position) position : vec4<f32>,
 };
+
 @vertex
 fn drawDirectionalShadowDepth(inputData: InputData) -> OutputShadowData {
-    // TODO SpriteSheet3D drawDirectionalShadowDepth
     var output: OutputShadowData;
     return output;
 }

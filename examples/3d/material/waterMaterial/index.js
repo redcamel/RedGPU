@@ -15,6 +15,9 @@ RedGPU.init(
 
 		scene.lightManager.addDirectionalLight(directionalLight);
 
+		scene.lightManager.ambientLight	= new RedGPU.Light.AmbientLight();
+
+
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		view.grid = true;
 		redGPUContext.addView(view);
@@ -24,7 +27,7 @@ RedGPU.init(
 		view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 
 		// 🌊 물 메시 생성
-		const water = new RedGPU.Display.Water(redGPUContext, 80, 80, 800);
+		const water = new RedGPU.Display.Water(redGPUContext, 200, 200, 800);
 		water.setPosition(0, 0, 0);
 
 		// 🌊 재질 설정
@@ -65,64 +68,77 @@ RedGPU.init(
 		document.body.appendChild(errorMessage);
 	}
 );
-
 const renderWaterPane = async (redGPUContext, water, animationData) => {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const { setSeparator } = await import("../../../exampleHelper/createExample/panes/index.js");
 
 	const pane = new Pane({ title: '🌊 Water Simulation Controls' });
 
-	// 🌊 프리셋 섹션
 	setSeparator(pane, "🌊 Water Presets");
+// 🌊 프리셋 이름과 이모지 매핑
+	const PRESET_DISPLAY_CONFIG = {
+		calmOcean: { title: '🏖️ Calm Ocean', emoji: '🏖️' },
+		gentleWaves: { title: '🌊 Gentle Waves', emoji: '🌊' },
+		stormyOcean: { title: '⛈️ Stormy Ocean', emoji: '⛈️' },
+		lakeRipples: { title: '🏞️ Lake Ripples', emoji: '🏞️' },
+		deepOcean: { title: '🌀 Deep Ocean', emoji: '🌀' },
+		choppy: { title: '🌪️ Choppy Waves', emoji: '🌪️' },
+		tsunami: { title: '🌋 Tsunami Waves', emoji: '🌋' },
+		surfing: { title: '🏄‍♂️ Surfing Waves', emoji: '🏄‍♂️' }
+	};
 
-	pane.addButton({ title: '🏖️ Calm Ocean' }).on('click', () => {
-		water.applyPreset(RedGPU.Display.Water.WaterPresets.calmOcean);
-		pane.refresh();
+// 🌊 Water.WaterPresets에서 동적으로 버튼 생성
+	Object.entries(RedGPU.Display.Water.WaterPresets).forEach(([presetKey, preset]) => {
+		const config = PRESET_DISPLAY_CONFIG[presetKey];
+		const title = config ? config.title : `${presetKey.charAt(0).toUpperCase() + presetKey.slice(1)}`;
+
+		pane.addButton({ title }).on('click', () => {
+			water.applyPreset(preset);
+			pane.refresh();
+		});
 	});
 
-	pane.addButton({ title: '🌊 Gentle Waves' }).on('click', () => {
-		water.applyPreset(RedGPU.Display.Water.WaterPresets.gentleWaves);
-		pane.refresh();
+
+	setSeparator(pane, "🎯 Water Appearance");
+
+	const colorParams = {
+		waterColor: '#4D99CC'
+	};
+
+	pane.addBinding(colorParams, 'waterColor', {
+		label: 'Water Color',
+		picker: 'inline',
+		view: 'color',
+		expanded: true
+	}).on('change', (ev) => {
+		water.material.color.setColorByHEX(ev.value);
 	});
 
-	pane.addButton({ title: '⛈️ Stormy Ocean' }).on('click', () => {
-		water.applyPreset(RedGPU.Display.Water.WaterPresets.stormyOcean);
-		pane.refresh();
+	const presetColors = [
+		{ name: '🏖️ Tropical Blue', color: '#00BFFF' },
+		{ name: '🌊 Ocean Blue', color: '#006994' },
+		{ name: '🏞️ Lake Blue', color: '#4D99CC' },
+		{ name: '🌀 Deep Sea', color: '#003366' },
+		{ name: '💎 Crystal Clear', color: '#87CEEB' },
+		{ name: '🌿 Emerald Green', color: '#50C878' },
+		{ name: '🟫 Muddy Brown', color: '#8B4513' },
+		{ name: '🖤 Dark Waters', color: '#2F4F4F' }
+	];
+
+	presetColors.forEach(preset => {
+		pane.addButton({ title: preset.name }).on('click', () => {
+			water.material.color.setColorByHEX(preset.color);
+			colorParams.waterColor = preset.color;
+			pane.refresh();
+		});
 	});
 
-	pane.addButton({ title: '🏞️ Lake Ripples' }).on('click', () => {
-		water.applyPreset(RedGPU.Display.Water.WaterPresets.lakeRipples);
-		pane.refresh();
-	});
-
-	pane.addButton({ title: '🌀 Tsunami Waves' }).on('click', () => {
-		water.waveAmplitude = [2.0, 1.5, 1.0, 0.8];
-		water.waveWavelength = [20.0, 15.0, 10.0, 5.0];
-		water.waveSpeed = [3.0, 2.8, 3.5, 4.0];
-		water.waveSteepness = [0.6, 0.5, 0.4, 0.3];
-		water.waveScale = 0.05;
-		water.waterLevel = 0.5;
-		pane.refresh();
-	});
-
-	pane.addButton({ title: '🏄‍♂️ Surfing Waves' }).on('click', () => {
-		water.waveAmplitude = [1.5, 1.0, 0.7, 0.3];
-		water.waveWavelength = [12.0, 8.0, 5.0, 3.0];
-		water.waveSpeed = [2.2, 2.0, 2.8, 3.2];
-		water.waveSteepness = [0.5, 0.4, 0.3, 0.2];
-		water.setFlowDirectionByDegrees(45);
-		water.waveScale = 0.08;
-		water.waterLevel = 0.0;
-		pane.refresh();
-	});
-
-	// 🎯 전역 파라미터 섹션
 	setSeparator(pane, "🎯 Global Parameters");
 
 	pane.addBinding(water, 'waveScale', {
 		label: 'Wave Scale',
 		min: 0.01,
-		max: 0.5,
+		max: 1.0,
 		step: 0.001
 	});
 
@@ -133,27 +149,26 @@ const renderWaterPane = async (redGPUContext, water, animationData) => {
 		step: 0.01
 	});
 
-	// 🌊 Wave 1 섹션
 	const wave1Folder = pane.addFolder({ title: '🌊 Wave 1 (Primary)', expanded: false });
 
 	wave1Folder.addBinding(water, 'amplitude1', {
 		label: 'Amplitude',
 		min: 0,
-		max: 3,
+		max: 5,
 		step: 0.01
 	});
 
 	wave1Folder.addBinding(water, 'wavelength1', {
 		label: 'Wavelength',
 		min: 0.5,
-		max: 30,
+		max: 100,
 		step: 0.1
 	});
 
 	wave1Folder.addBinding(water, 'speed1', {
 		label: 'Speed',
 		min: 0,
-		max: 5,
+		max: 10,
 		step: 0.01
 	});
 
@@ -164,33 +179,26 @@ const renderWaterPane = async (redGPUContext, water, animationData) => {
 		step: 0.001
 	});
 
-	// wave1Folder.addBinding(water, 'direction1', {
-	// 	label: 'Direction',
-	// 	x: { min: -1, max: 1, step: 0.01 },
-	// 	y: { min: -1, max: 1, step: 0.01 }
-	// });
-
-	// 🌊 Wave 2 섹션
 	const wave2Folder = pane.addFolder({ title: '🌊 Wave 2 (Secondary)', expanded: false });
 
 	wave2Folder.addBinding(water, 'amplitude2', {
 		label: 'Amplitude',
 		min: 0,
-		max: 3,
+		max: 5,
 		step: 0.01
 	});
 
 	wave2Folder.addBinding(water, 'wavelength2', {
 		label: 'Wavelength',
 		min: 0.5,
-		max: 30,
+		max: 100,
 		step: 0.1
 	});
 
 	wave2Folder.addBinding(water, 'speed2', {
 		label: 'Speed',
 		min: 0,
-		max: 5,
+		max: 10,
 		step: 0.01
 	});
 
@@ -201,33 +209,26 @@ const renderWaterPane = async (redGPUContext, water, animationData) => {
 		step: 0.001
 	});
 
-	// wave2Folder.addBinding(water, 'direction2', {
-	// 	label: 'Direction',
-	// 	x: { min: -1, max: 1, step: 0.01 },
-	// 	y: { min: -1, max: 1, step: 0.01 }
-	// });
-
-	// 🌊 Wave 3 섹션
 	const wave3Folder = pane.addFolder({ title: '🌊 Wave 3 (Detail)', expanded: false });
 
 	wave3Folder.addBinding(water, 'amplitude3', {
 		label: 'Amplitude',
 		min: 0,
-		max: 3,
+		max: 5,
 		step: 0.01
 	});
 
 	wave3Folder.addBinding(water, 'wavelength3', {
 		label: 'Wavelength',
 		min: 0.5,
-		max: 30,
+		max: 100,
 		step: 0.1
 	});
 
 	wave3Folder.addBinding(water, 'speed3', {
 		label: 'Speed',
 		min: 0,
-		max: 5,
+		max: 10,
 		step: 0.01
 	});
 
@@ -238,33 +239,26 @@ const renderWaterPane = async (redGPUContext, water, animationData) => {
 		step: 0.001
 	});
 
-	// wave3Folder.addBinding(water, 'direction3', {
-	// 	label: 'Direction',
-	// 	x: { min: -1, max: 1, step: 0.01 },
-	// 	y: { min: -1, max: 1, step: 0.01 }
-	// });
-
-	// 🌊 Wave 4 섹션
 	const wave4Folder = pane.addFolder({ title: '🌊 Wave 4 (Ripples)', expanded: false });
 
 	wave4Folder.addBinding(water, 'amplitude4', {
 		label: 'Amplitude',
 		min: 0,
-		max: 3,
+		max: 5,
 		step: 0.01
 	});
 
 	wave4Folder.addBinding(water, 'wavelength4', {
 		label: 'Wavelength',
 		min: 0.5,
-		max: 30,
+		max: 100,
 		step: 0.1
 	});
 
 	wave4Folder.addBinding(water, 'speed4', {
 		label: 'Speed',
 		min: 0,
-		max: 5,
+		max: 10,
 		step: 0.01
 	});
 
@@ -275,19 +269,18 @@ const renderWaterPane = async (redGPUContext, water, animationData) => {
 		step: 0.001
 	});
 
-	// wave4Folder.addBinding(water, 'direction4', {
-	// 	label: 'Direction',
-	// 	x: { min: -1, max: 1, step: 0.01 },
-	// 	y: { min: -1, max: 1, step: 0.01 }
-	// });
+	pane.addBinding(water.material, 'opacity', {
+		min: 0,
+		max: 1,
+		step: 0.01
+	})
 
-
-
-	// 🎯 유틸리티 섹션
 	setSeparator(pane, "🎯 Utilities");
 
 	pane.addButton({ title: '📐 Reset to Default' }).on('click', () => {
 		water.applyPreset(RedGPU.Display.Water.WaterPresets.calmOcean);
+		water.material.color.setColorByHEX('#4D99CC');
+		colorParams.waterColor = '#4D99CC';
 		animationData.useAnimation = true;
 		animationData.autoRotateWaves = true;
 		animationData.intensityModulation = true;
@@ -299,7 +292,12 @@ const renderWaterPane = async (redGPUContext, water, animationData) => {
 		const presets = Object.keys(RedGPU.Display.Water.WaterPresets);
 		const randomPreset = presets[Math.floor(Math.random() * presets.length)];
 		water.applyPreset(RedGPU.Display.Water.WaterPresets[randomPreset]);
-		console.log(`🌊 Random preset applied: ${randomPreset}`);
+
+		const randomColor = presetColors[Math.floor(Math.random() * presetColors.length)];
+		water.material.color.setColorByHEX(randomColor.color);
+		colorParams.waterColor = randomColor.color;
+
+		console.log(`🌊 Random preset applied: ${randomPreset} with ${randomColor.name}`);
 		pane.refresh();
 	});
 
@@ -314,7 +312,8 @@ const renderWaterPane = async (redGPUContext, water, animationData) => {
 			waveDirection3: water.waveDirection3,
 			waveDirection4: water.waveDirection4,
 			waveScale: water.waveScale,
-			waterLevel: water.waterLevel
+			waterLevel: water.waterLevel,
+			waterColor: colorParams.waterColor
 		};
 		console.log('🌊 Water Settings:', JSON.stringify(settings, null, 2));
 		navigator.clipboard.writeText(JSON.stringify(settings, null, 2));

@@ -28,6 +28,7 @@ interface ABaseMaterial {
  * @extends ResourceBase
  */
 class ABaseMaterial extends ResourceBase {
+	use2PathRender:boolean
 	gpuRenderInfo: FragmentGPURenderInfo
 	dirtyPipeline: boolean = false
 	transparent: boolean = false
