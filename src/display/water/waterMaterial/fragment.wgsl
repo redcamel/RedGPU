@@ -210,7 +210,7 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
             thicknessParameter,
             dispersion,
             attenuationDistance,
-            u_color,  // 투명도가 적용된 물 색상으로 굴절 계산
+            vec3<f32>(1.0,0.0,0.0),  // 투명도가 적용된 물 색상으로 굴절 계산
             u_ior,
             roughnessParameter,
             u_color,  // 투명도가 적용된 물 색상으로 굴절 계산
