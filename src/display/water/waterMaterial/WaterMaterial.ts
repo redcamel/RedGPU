@@ -15,7 +15,7 @@ interface WaterMaterial {
 }
 
 class WaterMaterial extends ABitmapBaseMaterial {
-	constructor(redGPUContext: RedGPUContext, color: string = '#fff', name?: string) {
+	constructor(redGPUContext: RedGPUContext, color: string = '#006994', name?: string) {
 		super(
 			redGPUContext,
 			'WATER_MATERIAL',

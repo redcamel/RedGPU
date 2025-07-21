@@ -79,6 +79,8 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     let dispersion = 0.02;           // 약간의 색분산으로 현실감 추가
     let attenuationDistance = 5.0;   // 더 넓은 감쇠 거리로 자연스러운 색상
     let thicknessParameter = baseThickness + inputData.waveHeight * 0.3; // 파도 높이에 따른 동적 두께
+    let u_useKHR_materials_volume = true;
+    let transmissionParameter = 1.0 - u_opacity;
 
     // 🌊 Fresnel 계산 (시야각에 따른 반사/투과 비율)
     let VdotN = abs(dot(V, N));
@@ -90,7 +92,7 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
 
     // 🌊 굴절된 배경 계산 (물 색상이 이미 적용됨)
     let refractedBackground = calcPrePathBackground(
-        true,
+        u_useKHR_materials_volume,
         thicknessParameter,
         dispersion,
         attenuationDistance,
@@ -218,9 +220,59 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
          mixColor += ld + ls;
     }
 
+    let NdotV = max(dot(N, V),0.04);
+    let F0_dielectric: vec3<f32> =  vec3(pow((1.0 - u_waterIOR) / (1.0 + u_waterIOR), 2.0)) ; // 유전체 반사율
+    let F0_metal = u_color; // 금속 반사율
+    let metallicParameter = 0.0;
+    var F0 = mix(F0_dielectric, F0_metal, metallicParameter); // 기본 반사율
+
+    let F_IBL_dielectric = F0_dielectric + (vec3<f32>(1.0) - F0_dielectric) * pow(1.0 - NdotV, 5.0); // 유전
+    let F_IBL_metal = F0_metal + (vec3<f32>(1.0) - F0_metal) * pow(1.0 - NdotV, 5.0); // 금속
+    var F_IBL = F0 + (vec3<f32>(1.0) - F0) * pow(1.0 - NdotV, 5.0);
+
+    let iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, iblTextureSampler, N,0).rgb;
+    var envIBL_DIFFUSE:vec3<f32> = u_color * iblDiffuseColor * (vec3<f32>(1.0) - F_IBL_dielectric);
 
 
-    finalColor = vec4<f32>(mixColor, 1.0);
+    let R = normalize(reflect(-V, N));
+
+    let K = (roughnessParameter + 1.0) * (roughnessParameter + 1.0) / 8.0;
+    let G = NdotV / (NdotV * (1.0 - K) + K);
+    let a2 = roughnessParameter * roughnessParameter;
+    let G_smith = NdotV / (NdotV * (1.0 - a2) + a2);
+    let iblMipmapCount:f32 = f32(textureNumLevels(ibl_environmentTexture) - 1);
+
+    let mipLevel = pow(roughnessParameter,0.4) * iblMipmapCount;
+
+
+
+    // ---------- ibl 기본 컬러 ----------
+    var reflectedColor = textureSampleLevel(ibl_irradianceTexture, iblTextureSampler, R, mipLevel).rgb;
+    let specularColor = vec3<f32>(1.0);
+    var specularParameter = 1.0;
+    var envIBL_SPECULAR:vec3<f32>;
+    let specularColorCorrected = max(vec3<f32>(0.16), specularColor);
+    envIBL_SPECULAR = reflectedColor * G_smith * specularColor * F_IBL * specularParameter ;
+
+    var envIBL_SPECULAR_BTDF = vec3<f32>(0.0);
+    var refractedDir: vec3<f32>;
+    let eta = 1.0 / u_waterIOR;
+    if (abs(u_waterIOR - 1.0) < 0.0001) { refractedDir = V; }
+    else { refractedDir = refract(-V, -N, eta); }
+
+    if(length(refractedDir) > 0.0001) {
+        let NdotT = abs(dot(N, normalize(refractedDir)));
+        let F_transmission = vec3<f32>(1.0) - F_IBL_dielectric;
+
+        var attenuatedBackground = refractedBackground;
+         attenuatedBackground *= u_color;
+
+        envIBL_SPECULAR_BTDF = attenuatedBackground * F_transmission * transmissionParameter + reflectedColor * G_smith * F_IBL * NdotT;
+    }
+
+     let envIBL_DIELECTRIC = mix(envIBL_DIFFUSE ,envIBL_SPECULAR_BTDF, transmissionParameter) + envIBL_SPECULAR;
+    finalColor = vec4<f32>(envIBL_DIELECTRIC, 1.0);
+//    finalColor = vec4<f32>(mixColor, 1.0);
     // alpha 값이 0일 경우 discard
     if (systemUniforms.isView3D == 1 && finalColor.a == 0.0) {
       discard;
