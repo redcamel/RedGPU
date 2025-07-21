@@ -209,14 +209,12 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
              finalAttenuation *= spotIntensity;
          }
 
-         // 공통 라이팅 계산
          let R = reflect(-L, N);
          let diffuse = diffuseColor * max(dot(N, L), 0.0);
          let specular = pow(max(dot(R, E), 0.0), u_shininess) * specularSamplerValue;
 
-         // 디퓨즈와 스펙큘러에 다른 감쇠 적용
          let diffuseAttenuation = finalAttenuation;
-         let specularAttenuation = finalAttenuation * finalAttenuation; // 스펙큘러는 더 빠르게 감쇠
+         let specularAttenuation = finalAttenuation * finalAttenuation;
 
          let ld = u_clusterLightColor * diffuse * diffuseAttenuation * u_clusterLightIntensity;
          let ls = u_specularColor * u_specularStrength * specular * specularAttenuation * u_clusterLightIntensity;
