@@ -15,8 +15,7 @@ RedGPU.init(
 
 		scene.lightManager.addDirectionalLight(directionalLight);
 
-		scene.lightManager.ambientLight	= new RedGPU.Light.AmbientLight();
-
+		scene.lightManager.ambientLight = new RedGPU.Light.AmbientLight();
 
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		view.grid = true;
@@ -30,9 +29,66 @@ RedGPU.init(
 		// 🌊 물 메시 생성
 		const water = new RedGPU.Display.Water(redGPUContext, 200, 200, 1000);
 		water.setPosition(0, 0, 0);
+		function generateSeamlessFoamTexture(size = 512) {
+			const canvas = document.createElement('canvas');
+			const ctx = canvas.getContext('2d');
+			canvas.width = size;
+			canvas.height = size;
 
-		// 🌊 재질 설정
+			// 🌊 배경 (물색)
+			ctx.fillStyle = '#004466';
+			ctx.fillRect(0, 0, size, size);
 
+			// 🌊 거품 레이어들
+			const foamLayers = [
+				{ count: 80, minRadius: 2, maxRadius: 8, opacity: 0.9 },
+				{ count: 40, minRadius: 8, maxRadius: 16, opacity: 0.7 },
+				{ count: 20, minRadius: 16, maxRadius: 32, opacity: 0.5 }
+			];
+
+			foamLayers.forEach(layer => {
+				ctx.fillStyle = `rgba(255, 255, 255, ${layer.opacity})`;
+
+				for (let i = 0; i < layer.count; i++) {
+					// 🌊 **Seamless를 위한 wrapping 위치**
+					const x = Math.random() * size;
+					const y = Math.random() * size;
+					const radius = layer.minRadius + Math.random() * (layer.maxRadius - layer.minRadius);
+
+					// 🌊 메인 거품
+					ctx.beginPath();
+					ctx.arc(x, y, radius, 0, Math.PI * 2);
+					ctx.fill();
+
+					// 🌊 **Edge wrapping으로 seamless 보장**
+					// 우측 경계
+					if (x + radius > size) {
+						ctx.beginPath();
+						ctx.arc(x - size, y, radius, 0, Math.PI * 2);
+						ctx.fill();
+					}
+					// 하단 경계
+					if (y + radius > size) {
+						ctx.beginPath();
+						ctx.arc(x, y - size, radius, 0, Math.PI * 2);
+						ctx.fill();
+					}
+					// 코너 경계
+					if (x + radius > size && y + radius > size) {
+						ctx.beginPath();
+						ctx.arc(x - size, y - size, radius, 0, Math.PI * 2);
+						ctx.fill();
+					}
+				}
+			});
+
+			return canvas;
+		}
+		const seamlessFoamCanvas = generateSeamlessFoamTexture(1024);
+		const foamDataURL = seamlessFoamCanvas.toDataURL('image/png');
+
+		const foamTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, foamDataURL);
+		water.material.foamTexture = foamTexture;
 
 		scene.addChild(water);
 
@@ -70,24 +126,22 @@ RedGPU.init(
 	}
 );
 const renderWaterPane = async (redGPUContext, water, animationData) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
-	const { setSeparator,createIblHelper } = await import("../../../exampleHelper/createExample/panes/index.js");
+	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+	const {setSeparator, createIblHelper} = await import("../../../exampleHelper/createExample/panes/index.js");
 
-
-
-	const pane = new Pane({ title: '🌊 Water Simulation Controls' });
+	const pane = new Pane({title: '🌊 Water Simulation Controls'});
 	createIblHelper(pane, redGPUContext.viewList[0], RedGPU);
 	setSeparator(pane, "🌊 Water Presets");
 // 🌊 프리셋 이름과 이모지 매핑
 	const PRESET_DISPLAY_CONFIG = {
-		calmOcean: { title: '🏖️ Calm Ocean', emoji: '🏖️' },
-		gentleWaves: { title: '🌊 Gentle Waves', emoji: '🌊' },
-		stormyOcean: { title: '⛈️ Stormy Ocean', emoji: '⛈️' },
-		lakeRipples: { title: '🏞️ Lake Ripples', emoji: '🏞️' },
-		deepOcean: { title: '🌀 Deep Ocean', emoji: '🌀' },
-		choppy: { title: '🌪️ Choppy Waves', emoji: '🌪️' },
-		tsunami: { title: '🌋 Tsunami Waves', emoji: '🌋' },
-		surfing: { title: '🏄‍♂️ Surfing Waves', emoji: '🏄‍♂️' }
+		calmOcean: {title: '🏖️ Calm Ocean', emoji: '🏖️'},
+		gentleWaves: {title: '🌊 Gentle Waves', emoji: '🌊'},
+		stormyOcean: {title: '⛈️ Stormy Ocean', emoji: '⛈️'},
+		lakeRipples: {title: '🏞️ Lake Ripples', emoji: '🏞️'},
+		deepOcean: {title: '🌀 Deep Ocean', emoji: '🌀'},
+		choppy: {title: '🌪️ Choppy Waves', emoji: '🌪️'},
+		tsunami: {title: '🌋 Tsunami Waves', emoji: '🌋'},
+		surfing: {title: '🏄‍♂️ Surfing Waves', emoji: '🏄‍♂️'}
 	};
 
 // 🌊 Water.WaterPresets에서 동적으로 버튼 생성
@@ -95,12 +149,11 @@ const renderWaterPane = async (redGPUContext, water, animationData) => {
 		const config = PRESET_DISPLAY_CONFIG[presetKey];
 		const title = config ? config.title : `${presetKey.charAt(0).toUpperCase() + presetKey.slice(1)}`;
 
-		pane.addButton({ title }).on('click', () => {
+		pane.addButton({title}).on('click', () => {
 			water.applyPreset(preset);
 			pane.refresh();
 		});
 	});
-
 
 	setSeparator(pane, "🎯 Water Appearance");
 
@@ -118,14 +171,14 @@ const renderWaterPane = async (redGPUContext, water, animationData) => {
 	});
 
 	const presetColors = [
-		{ name: '🏖️ Tropical Blue', color: '#00BFFF' },
-		{ name: '🌊 Ocean Blue', color: '#006994' },
-		{ name: '🌀 Deep Sea', color: '#003366' },
-		{ name: '🖤 Dark Waters', color: '#2F4F4F' }
+		{name: '🏖️ Tropical Blue', color: '#00BFFF'},
+		{name: '🌊 Ocean Blue', color: '#006994'},
+		{name: '🌀 Deep Sea', color: '#003366'},
+		{name: '🖤 Dark Waters', color: '#2F4F4F'}
 	];
 
 	presetColors.forEach(preset => {
-		pane.addButton({ title: preset.name }).on('click', () => {
+		pane.addButton({title: preset.name}).on('click', () => {
 			water.material.color.setColorByHEX(preset.color);
 			colorParams.waterColor = preset.color;
 			pane.refresh();
@@ -154,7 +207,7 @@ const renderWaterPane = async (redGPUContext, water, animationData) => {
 		step: 0.01
 	});
 
-	const wave1Folder = pane.addFolder({ title: '🌊 Wave 1 (Primary)', expanded: false });
+	const wave1Folder = pane.addFolder({title: '🌊 Wave 1 (Primary)', expanded: false});
 
 	wave1Folder.addBinding(water, 'amplitude1', {
 		label: 'Amplitude',
@@ -184,7 +237,7 @@ const renderWaterPane = async (redGPUContext, water, animationData) => {
 		step: 0.001
 	});
 
-	const wave2Folder = pane.addFolder({ title: '🌊 Wave 2 (Secondary)', expanded: false });
+	const wave2Folder = pane.addFolder({title: '🌊 Wave 2 (Secondary)', expanded: false});
 
 	wave2Folder.addBinding(water, 'amplitude2', {
 		label: 'Amplitude',
@@ -214,7 +267,7 @@ const renderWaterPane = async (redGPUContext, water, animationData) => {
 		step: 0.001
 	});
 
-	const wave3Folder = pane.addFolder({ title: '🌊 Wave 3 (Detail)', expanded: false });
+	const wave3Folder = pane.addFolder({title: '🌊 Wave 3 (Detail)', expanded: false});
 
 	wave3Folder.addBinding(water, 'amplitude3', {
 		label: 'Amplitude',
@@ -244,7 +297,7 @@ const renderWaterPane = async (redGPUContext, water, animationData) => {
 		step: 0.001
 	});
 
-	const wave4Folder = pane.addFolder({ title: '🌊 Wave 4 (Ripples)', expanded: false });
+	const wave4Folder = pane.addFolder({title: '🌊 Wave 4 (Ripples)', expanded: false});
 
 	wave4Folder.addBinding(water, 'amplitude4', {
 		label: 'Amplitude',
@@ -282,7 +335,7 @@ const renderWaterPane = async (redGPUContext, water, animationData) => {
 
 	setSeparator(pane, "🎯 Utilities");
 
-	pane.addButton({ title: '📐 Reset to Default' }).on('click', () => {
+	pane.addButton({title: '📐 Reset to Default'}).on('click', () => {
 		water.applyPreset(RedGPU.Display.Water.WaterPresets.calmOcean);
 		water.material.color.setColorByHEX('#006994');
 		colorParams.waterColor = '#006994';
@@ -293,7 +346,7 @@ const renderWaterPane = async (redGPUContext, water, animationData) => {
 		pane.refresh();
 	});
 
-	pane.addButton({ title: '🔀 Random Preset' }).on('click', () => {
+	pane.addButton({title: '🔀 Random Preset'}).on('click', () => {
 		const presets = Object.keys(RedGPU.Display.Water.WaterPresets);
 		const randomPreset = presets[Math.floor(Math.random() * presets.length)];
 		water.applyPreset(RedGPU.Display.Water.WaterPresets[randomPreset]);
@@ -306,7 +359,7 @@ const renderWaterPane = async (redGPUContext, water, animationData) => {
 		pane.refresh();
 	});
 
-	pane.addButton({ title: '📋 Export Settings' }).on('click', () => {
+	pane.addButton({title: '📋 Export Settings'}).on('click', () => {
 		const settings = {
 			waveAmplitude: water.waveAmplitude,
 			waveWavelength: water.waveWavelength,

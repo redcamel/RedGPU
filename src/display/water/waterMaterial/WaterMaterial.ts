@@ -2,7 +2,10 @@ import ColorRGB from "../../../color/ColorRGB";
 import RedGPUContext from "../../../context/RedGPUContext";
 import ABitmapBaseMaterial from "../../../material/core/ABitmapBaseMaterial";
 import DefineForFragment from "../../../resources/defineProperty/DefineForFragment";
+import Sampler from "../../../resources/sampler/Sampler";
+import BitmapTexture from "../../../resources/texture/BitmapTexture";
 import parseWGSL from "../../../resources/wgslParser/parseWGSL";
+import SkyBoxMaterial from "../../skyboxs/skyBox/SkyBoxMaterial";
 import fragmentModuleSource from './fragment.wgsl'
 
 const SHADER_INFO = parseWGSL(fragmentModuleSource)
@@ -12,6 +15,8 @@ interface WaterMaterial {
 	shininess: number
 	specularStrength: number
 	ior: number
+	foamTexture: BitmapTexture
+	foamTextureSampler: Sampler
 
 }
 
@@ -36,6 +41,12 @@ DefineForFragment.defineByPreset(WaterMaterial, [
 	DefineForFragment.PRESET_POSITIVE_NUMBER.SPECULAR_STRENGTH,
 	//
 	[DefineForFragment.PRESET_POSITIVE_NUMBER.SHININESS, 32],
+])
+DefineForFragment.defineTexture(WaterMaterial,[
+	'foamTexture',
+])
+DefineForFragment.defineSampler(WaterMaterial, [
+	'foamTextureSampler',
 ])
 DefineForFragment.definePositiveNumber(WaterMaterial, [
 	['ior',1.333,1,1.6]
