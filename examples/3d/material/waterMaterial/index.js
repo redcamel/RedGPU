@@ -7,7 +7,7 @@ RedGPU.init(
 	canvas,
 	(redGPUContext) => {
 		const controller = new RedGPU.Camera.ObitController(redGPUContext);
-		controller.distance = 135;
+		controller.distance = 50;
 		controller.speedDistance = 1.5;
 
 		const scene = new RedGPU.Display.Scene();
@@ -20,6 +20,7 @@ RedGPU.init(
 
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		view.grid = true;
+		view.axis = true;
 		redGPUContext.addView(view);
 
 		const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
@@ -27,7 +28,7 @@ RedGPU.init(
 		view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 
 		// 🌊 물 메시 생성
-		const water = new RedGPU.Display.Water(redGPUContext, 200, 200, 800);
+		const water = new RedGPU.Display.Water(redGPUContext, 250, 250, 800);
 		water.setPosition(0, 0, 0);
 
 		// 🌊 재질 설정
@@ -70,10 +71,12 @@ RedGPU.init(
 );
 const renderWaterPane = async (redGPUContext, water, animationData) => {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
-	const { setSeparator } = await import("../../../exampleHelper/createExample/panes/index.js");
+	const { setSeparator,createIblHelper } = await import("../../../exampleHelper/createExample/panes/index.js");
+
+
 
 	const pane = new Pane({ title: '🌊 Water Simulation Controls' });
-
+	createIblHelper(pane, redGPUContext.viewList[0], RedGPU);
 	setSeparator(pane, "🌊 Water Presets");
 // 🌊 프리셋 이름과 이모지 매핑
 	const PRESET_DISPLAY_CONFIG = {
@@ -117,11 +120,7 @@ const renderWaterPane = async (redGPUContext, water, animationData) => {
 	const presetColors = [
 		{ name: '🏖️ Tropical Blue', color: '#00BFFF' },
 		{ name: '🌊 Ocean Blue', color: '#006994' },
-		{ name: '🏞️ Lake Blue', color: '#4D99CC' },
 		{ name: '🌀 Deep Sea', color: '#003366' },
-		{ name: '💎 Crystal Clear', color: '#87CEEB' },
-		{ name: '🌿 Emerald Green', color: '#50C878' },
-		{ name: '🟫 Muddy Brown', color: '#8B4513' },
 		{ name: '🖤 Dark Waters', color: '#2F4F4F' }
 	];
 

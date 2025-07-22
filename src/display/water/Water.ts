@@ -30,102 +30,111 @@ export interface WaterPreset {
 
 // 🌊 Water 프리셋들 (표준 Gerstner Wave 계산에 맞게 조정)
 const WaterPresets: Record<string, WaterPreset> = {
+	// 평온한 바다 - 잔잔, 롱파도
 	calmOcean: {
-		waveAmplitude: [0.3, 0.2, 0.15, 0.1],
-		waveWavelength: [20.0, 15.0, 12.0, 8.0],
-		waveSpeed: [1.0, 0.8, 1.2, 1.5],
-		waveSteepness: [0.1, 0.08, 0.06, 0.04],
-		waveDirection1: [1.0, 0.0],
+		waveAmplitude: [0.25, 0.15, 0.08, 0.05],
+		waveWavelength: [24.0, 17.0, 11.0, 7.5],
+		waveSpeed: [0.7, 0.6, 0.8, 1.0],
+		waveSteepness: [0.09, 0.06, 0.05, 0.03],
+		waveDirection1: [1, 0],
 		waveDirection2: [0.7, 0.7],
-		waveDirection3: [0.0, 1.0],
+		waveDirection3: [0, 1],
 		waveDirection4: [-0.7, 0.7],
-		waveScale: 0.8,  // 🔥 증가: 차분한 바다의 넓은 파도 패턴
+		waveScale: 1.0,
 		waterLevel: 0.0
 	},
-	gentleWaves: {
-		waveAmplitude: [0.4, 0.3, 0.2, 0.12],
-		waveWavelength: [25.0, 18.0, 14.0, 10.0],
-		waveSpeed: [1.2, 1.0, 1.4, 1.8],
-		waveSteepness: [0.12, 0.1, 0.08, 0.05],
-		waveDirection1: [1.0, 0.0],
-		waveDirection2: [0.8, 0.6],
-		waveDirection3: [-0.3, 1.0],
-		waveDirection4: [-0.6, 0.8],
-		waveScale: 0.6,  // 🔥 증가: 부드러운 파도의 자연스러운 크기
-		waterLevel: 0.0
-	},
-	stormyOcean: {
-		waveAmplitude: [1.2, 0.9, 0.6, 0.4],
-		waveWavelength: [40.0, 30.0, 20.0, 15.0],
-		waveSpeed: [2.0, 1.8, 2.2, 2.5],
-		waveSteepness: [0.15, 0.12, 0.1, 0.08],
-		waveDirection1: [1.0, 0.0],
-		waveDirection2: [0.6, 0.8],
-		waveDirection3: [-0.4, 0.9],
-		waveDirection4: [-0.8, 0.6],
-		waveScale: 0.4,  // 🔥 증가: 폭풍우 속 거대한 파도
-		waterLevel: 0.0
-	},
+	// 고요한 호수 잔물결
 	lakeRipples: {
-		waveAmplitude: [0.05, 0.04, 0.03, 0.02],
-		waveWavelength: [5.0, 4.0, 3.0, 2.0],
-		waveSpeed: [0.3, 0.25, 0.35, 0.4],
-		waveSteepness: [0.02, 0.015, 0.01, 0.008],
-		waveDirection1: [1.0, 0.0],
-		waveDirection2: [0.9, 0.4],
-		waveDirection3: [0.3, 0.95],
+		waveAmplitude: [0.04, 0.035, 0.025, 0.010],
+		waveWavelength: [4.0, 3.2, 2.5, 1.7],
+		waveSpeed: [0.25, 0.23, 0.28, 0.35],
+		waveSteepness: [0.013, 0.011, 0.009, 0.007],
+		waveDirection1: [1, 0],
+		waveDirection2: [0.75, 0.35],
+		waveDirection3: [0.12, 0.99],
 		waveDirection4: [-0.6, 0.8],
-		waveScale: 2.5,  // 🔥 증가: 호수 잔물결의 세밀한 디테일
-		waterLevel: 0.0
+		waveScale: 2.8,
+		waterLevel: 0.01
 	},
-	deepOcean: {
-		waveAmplitude: [0.8, 0.6, 0.4, 0.25],
-		waveWavelength: [60.0, 45.0, 30.0, 20.0],
-		waveSpeed: [1.5, 1.2, 1.8, 2.0],
-		waveSteepness: [0.08, 0.06, 0.05, 0.03],
-		waveDirection1: [1.0, 0.0],
-		waveDirection2: [0.8, 0.6],
-		waveDirection3: [0.0, 1.0],
-		waveDirection4: [-0.6, 0.8],
-		waveScale: 0.3,  // 🔥 증가: 깊은 바다의 장대한 파도
-		waterLevel: 0.0
-	},
-	choppy: {
-		waveAmplitude: [0.5, 0.4, 0.3, 0.2],
-		waveWavelength: [10.0, 8.0, 6.0, 4.0],
-		waveSpeed: [2.0, 2.2, 2.5, 3.0],
-		waveSteepness: [0.25, 0.2, 0.18, 0.15],
-		waveDirection1: [1.0, 0.0],
-		waveDirection2: [0.5, 0.87],
-		waveDirection3: [-0.5, 0.87],
-		waveDirection4: [0.87, -0.5],
-		waveScale: 1.2,  // 🔥 증가: 거친 파도의 복잡한 패턴
-		waterLevel: 0.0
-	},
-	tsunami: {
-		waveAmplitude: [2.0, 1.5, 1.0, 0.8],
-		waveWavelength: [80.0, 60.0, 40.0, 30.0],
-		waveSpeed: [3.0, 2.5, 3.2, 3.5],
-		waveSteepness: [0.2, 0.15, 0.12, 0.1],
-		waveDirection1: [1.0, 0.0],
-		waveDirection2: [0.9, 0.4],
-		waveDirection3: [0.7, 0.7],
-		waveDirection4: [-0.3, 0.95],
-		waveScale: 0.2,  // 🔥 증가: 쓰나미의 극대형 파도
-		waterLevel: 0.5
-	},
+	// 큰 파도가 없는 근해, 서핑에 적합
 	surfing: {
-		waveAmplitude: [1.5, 1.0, 0.7, 0.4],
-		waveWavelength: [35.0, 25.0, 18.0, 12.0],
-		waveSpeed: [2.5, 2.0, 2.8, 3.2],
-		waveSteepness: [0.2, 0.18, 0.15, 0.12],
-		waveDirection1: [0.7, 0.7],
-		waveDirection2: [0.8, 0.6],
-		waveDirection3: [0.6, 0.8],
-		waveDirection4: [0.9, 0.4],
-		waveScale: 0.5,  // 🔥 증가: 서핑하기 좋은 규칙적인 파도
+		waveAmplitude: [0.55, 0.4, 0.2, 0.08],
+		waveWavelength: [14.0, 10.5, 6.0, 4.0],
+		waveSpeed: [1.6, 1.4, 1.9, 2.05],
+		waveSteepness: [0.11, 0.09, 0.07, 0.02],
+		waveDirection1: [1, 0],
+		waveDirection2: [0.87, 0.5],
+		waveDirection3: [0.54, 0.84],
+		waveDirection4: [-0.78, 0.62],
+		waveScale: 0.7,
 		waterLevel: 0.0
-	}
+	},
+	// 멀리, 깊은 대양 - 큼직하며 느린 파동
+	deepOcean: {
+		waveAmplitude: [0.85, 0.58, 0.33, 0.22],
+		waveWavelength: [60.0, 40.0, 28.0, 19.0],
+		waveSpeed: [1.2, 1.05, 1.6, 1.85],
+		waveSteepness: [0.07, 0.05, 0.04, 0.027],
+		waveDirection1: [1, 0],
+		waveDirection2: [0.91, 0.42],
+		waveDirection3: [0, 1],
+		waveDirection4: [-0.3, 0.95],
+		waveScale: 0.7,
+		waterLevel: 0.0
+	},
+	// 바람 많은 날의 낮은 파도, 비교적 밝은 모양
+	gentleWaves: {
+		waveAmplitude: [0.36, 0.22, 0.15, 0.09],
+		waveWavelength: [21.0, 15.0, 10.5, 8.0],
+		waveSpeed: [0.9, 0.82, 1.1, 1.7],
+		waveSteepness: [0.12, 0.08, 0.06, 0.04],
+		waveDirection1: [1, 0],
+		waveDirection2: [0.88, 0.47],
+		waveDirection3: [-0.18, 0.98],
+		waveDirection4: [-0.74, 0.67],
+		waveScale: 0.65,
+		waterLevel: 0.0
+	},
+	// 아주 거칠거나 빠른 패턴. 혼란스럽고, 파도간 교차 효과가 잘 보임
+	choppy: {
+		waveAmplitude: [0.63, 0.4, 0.22, 0.13],
+		waveWavelength: [10.0, 8.0, 6.5, 3.5],
+		waveSpeed: [1.8, 2.0, 2.3, 2.7],
+		waveSteepness: [0.29, 0.21, 0.17, 0.13],
+		waveDirection1: [1, 0],
+		waveDirection2: [0.57, 0.82],
+		waveDirection3: [-0.6, 0.8],
+		waveDirection4: [0.91, -0.41],
+		waveScale: 1.25,
+		waterLevel: 0.0
+	},
+	// 난폭한 폭풍우 바다
+	stormyOcean: {
+		waveAmplitude: [1.3, 0.9, 0.7, 0.48],
+		waveWavelength: [38.0, 23.0, 19.0, 13.0],
+		waveSpeed: [2.4, 1.6, 2.0, 2.4],
+		waveSteepness: [0.18, 0.13, 0.10, 0.08],
+		waveDirection1: [1, 0],
+		waveDirection2: [0.7, 0.7],
+		waveDirection3: [-0.57, 0.82],
+		waveDirection4: [-0.84, 0.54],
+		waveScale: 0.45,
+		waterLevel: 0.0
+	},
+	// 극한 상황의 거대파, 속도와 높이 최상급 (비정상적 효과용)
+	tsunami: {
+		waveAmplitude: [2.4, 1.7, 1.08, 0.85],
+		waveWavelength: [110.0, 57.0, 41.0, 33.0],
+		waveSpeed: [3.4, 2.29, 2.9, 3.3],
+		waveSteepness: [0.195, 0.14, 0.12, 0.085],
+		waveDirection1: [1, 0],
+		waveDirection2: [0.9, 0.2],
+		waveDirection3: [0.68, 0.77],
+		waveDirection4: [-0.24, 1],
+		waveScale: 0.28,
+		waterLevel: 0.01
+	},
+
 };
 
 interface Water {
