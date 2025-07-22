@@ -28,7 +28,7 @@ RedGPU.init(
 		view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 
 		// 🌊 물 메시 생성
-		const water = new RedGPU.Display.Water(redGPUContext, 250, 250, 800);
+		const water = new RedGPU.Display.Water(redGPUContext, 200, 200, 1000);
 		water.setPosition(0, 0, 0);
 
 		// 🌊 재질 설정
