@@ -23,6 +23,13 @@ class BitmapTexture extends ManagedResourceBase {
 	readonly #onLoad: (textureInstance: BitmapTexture) => void;
 	readonly #onError: (error: Error) => void;
 
+	get width(): number {
+		return this.#imgBitmap?.width || 0
+	}
+	get height(): number {
+		return this.#imgBitmap?.height || 0
+	}
+
 	constructor(
 		redGPUContext: RedGPUContext,
 		src?: any,
@@ -87,6 +94,11 @@ class BitmapTexture extends ManagedResourceBase {
 	}
 
 	set src(value: string | any) {
+		const isObjectURL = typeof this.#src === 'string' && this.#src?.startsWith?.('blob:');
+		if (isObjectURL) {
+			// keepLog('오브젝트URL삭제',this.#src?.toString(),typeof value === 'string',value.startsWith('blob:'))
+			URL.revokeObjectURL(this.#src);
+		}
 		this.#src = value?.src || value;
 		this.#cacheKey = value?.cacheKey || value || this.uuid;
 		if (this.#src) this.#loadBitmapTexture(this.#src);
