@@ -57,7 +57,7 @@ class MipmapGenerator {
 				dimension: '2d',
 				baseArrayLayer,
 				arrayLayerCount: 1,
-				label: `mipmap_${baseMipLevel}_${baseArrayLayer}_${texture.label}`
+				label: `mipmap_${baseMipLevel}_${baseArrayLayer}`
 			});
 			arrayLayerMap.set(baseArrayLayer, view);
 		}
@@ -68,6 +68,7 @@ class MipmapGenerator {
 		if (!this.#bindGroupCache.has(textureView)) {
 			const {gpuDevice} = this.#redGPUContext;
 			const bindGroup = gpuDevice.createBindGroup({
+				label: `${textureView.label}`,
 				layout: this.#bindGroupLayout,
 				entries: [{
 					binding: 0,
@@ -128,6 +129,7 @@ class MipmapGenerator {
 				)
 			}
 			pipeline = gpuDevice.createRenderPipeline({
+				label: `MipmapGenerator_Pipeline_${format}`,
 				layout: this.#pipelineLayout,
 				vertex: {
 					module: this.#mipmapShaderModule,
@@ -434,6 +436,7 @@ class MipmapGenerator {
 				{
 					binding: 0,
 					resource: sourceCubemap.createView({
+						label:'downsampleCubeMap_source',
 						dimension: 'cube',
 						baseMipLevel: sourceMipLevel,
 						mipLevelCount: 1
@@ -442,6 +445,7 @@ class MipmapGenerator {
 				{
 					binding: 1,
 					resource: targetCubemap.createView({
+						label:'downsampleCubeMap_target',
 						dimension: '2d-array',
 						baseMipLevel: targetMipLevel,
 						mipLevelCount: 1,
@@ -480,6 +484,7 @@ class MipmapGenerator {
 		gpuDevice.queue.submit([commandBuffer]);
 		// GPU 작업 완료 대기 (중요!)
 		await gpuDevice.queue.onSubmittedWorkDone();
+
 	}
 
 	#updateCubemapUniforms(

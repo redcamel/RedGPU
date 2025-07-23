@@ -1,6 +1,7 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import {keepLog} from "../../utils";
 import createUUID from "../../utils/createUUID";
+import Sampler from "../sampler/Sampler";
 
 type ComponentMapping = {
 	r?: 'r' | 'g' | 'b' | 'a';  // r 채널에서 사용할 컴포넌트
@@ -221,26 +222,23 @@ class PackedTexture {
 		const {resourceManager} = this.#redGPUContext
 
 		return this.#gpuDevice.createRenderPipeline({
+			label : 'packedTexturePipeline',
 			layout: 'auto',
 			vertex: {
-				module: resourceManager.createGPUShaderModule('packingTexture',{code: shaderCode}),
+				module: resourceManager.createGPUShaderModule('packedTexture',{code: shaderCode}),
 				entryPoint: 'vertexMain',
 			},
 			fragment: {
-				module: resourceManager.createGPUShaderModule('packingTexture',{code: shaderCode}),
+				module: resourceManager.createGPUShaderModule('packedTexture',{code: shaderCode}),
 				entryPoint: 'fragmentMain',
 				targets: [{format: 'rgba8unorm'}],
 			},
 			primitive: {topology: 'triangle-list'},
-			label : 'packingTexturePipeline'
 		});
 	}
 
 	#createSampler(): GPUSampler {
-		return this.#gpuDevice.createSampler({
-			magFilter: 'linear',
-			minFilter: 'linear',
-		});
+		return new Sampler(this.#redGPUContext).gpuSampler
 	}
 }
 
