@@ -1,3 +1,5 @@
+import {keepLog} from "../../../../utils";
+import getAbsoluteURL from "../../../../utils/file/getAbsoluteURL";
 import getArrayBufferFromSrc from "../../core/getArrayBufferFromSrc";
 import {GLTF} from "../../GLTF";
 import GLTFLoader from "../../GLTFLoader";
@@ -31,26 +33,60 @@ const BINPACKER_CHUNK_TYPE_BINARY = 0x004e4942;
  *
  * @returns {Promise<void>} - A promise that resolves when the GLB file has been parsed.
  */
+const cacheMap: Map<string, ArrayBuffer> = new Map();
+const pendingMap: Map<string, Promise<ArrayBuffer>> = new Map();
+
 const parseFileGLB = async (gltfLoader: GLTFLoader, callBack) => {
 	console.log('GLB Model parsing has start.');
-	const loadFilePath = gltfLoader.filePath + gltfLoader.fileName;
-	await getArrayBufferFromSrc(
-		loadFilePath,
-		async (buffer) => {
-			const {content, binaryChunk} = parseBuffer(buffer);
-			if (content === null) {
-				throw new Error('JSON content not found');
+	const loadFilePath = getAbsoluteURL(window.location.href, gltfLoader.filePath + gltfLoader.fileName)
+	keepLog(loadFilePath,gltfLoader.filePath + gltfLoader.fileName)
+	if (cacheMap.has(loadFilePath)) {
+		keepLog('GLB Model parsing has cache', loadFilePath);
+		await parseArrayBuffer(gltfLoader, cacheMap.get(loadFilePath), callBack);
+		return;
+	}
+
+	if (pendingMap.has(loadFilePath)) {
+		await pendingMap.get(loadFilePath);
+
+		await parseArrayBuffer(gltfLoader, cacheMap.get(loadFilePath), callBack);
+		return;
+	}
+
+	const promise = new Promise<ArrayBuffer>((resolve, reject) => {
+		getArrayBufferFromSrc(
+			loadFilePath,
+			(buffer) => {
+				cacheMap.set(loadFilePath, buffer);
+				keepLog('GLB Model parsing set cache', loadFilePath);
+				pendingMap.delete(loadFilePath); // 진행중 목록에서 제거
+				resolve(buffer);
+			},
+			(error) => {
+				pendingMap.delete(loadFilePath);
+				reject(error);
 			}
-			const gltfData: GLTF = JSON.parse(content);
-			processImagesIfExist(gltfData, binaryChunk);
-			gltfData.buffers[0].uri = binaryChunk;
-			gltfLoader.gltfData = gltfData
-			parseGLTF(gltfLoader, gltfData, callBack)
-		},
-		(error) => {
-			console.log(error);
-		}
-	);
+		);
+	});
+	pendingMap.set(loadFilePath, promise);
+
+	try {
+		const buffer = await promise;
+		await parseArrayBuffer(gltfLoader, buffer, callBack);
+	} catch (error) {
+		console.log(error);
+	}
+}
+const parseArrayBuffer = async (gltfLoader:GLTFLoader, buffer: ArrayBuffer, callBack) => {
+	const {content, binaryChunk} = parseBuffer(buffer);
+	if (content === null) {
+		throw new Error('JSON content not found');
+	}
+	const gltfData: GLTF = JSON.parse(content);
+	processImagesIfExist(gltfData, binaryChunk);
+	gltfData.buffers[0].uri = binaryChunk;
+	gltfLoader.gltfData = gltfData
+	parseGLTF(gltfLoader, gltfData, callBack)
 }
 /**
  * Parses the given buffer and extracts content and binary chunks.
