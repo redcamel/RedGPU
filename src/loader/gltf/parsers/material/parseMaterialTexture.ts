@@ -12,6 +12,7 @@ const parseMaterialTexture = (
 	textureInfo: TextureInfo | MaterialNormalTextureInfo | MaterialOcclusionTextureInfo,
 	targetTextureKey: string,
 	format?: string,
+	useMipmap:boolean = true
 ) => {
 	const {redGPUContext, gltfData} = gltfLoader
 	const {textureRawList} = gltfLoader.parsingResult
@@ -32,7 +33,8 @@ const parseMaterialTexture = (
 				targetSamplerKey: `${targetTextureKey}Sampler`,
 				materialList: [tMaterial],
 				samplerList: [new Sampler(redGPUContext, option)],
-				format: format || navigator.gpu.getPreferredCanvasFormat()
+				format: format || navigator.gpu.getPreferredCanvasFormat(),
+				useMipmap
 			});
 		} else {
 			textureRawList[key].materialList.push(tMaterial)

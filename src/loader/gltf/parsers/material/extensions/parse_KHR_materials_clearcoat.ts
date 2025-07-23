@@ -16,6 +16,8 @@ const parse_KHR_materials_clearcoat = (currentMaterial: PBRMaterial, KHR_materia
 			currentMaterial,
 			clearcoatTextureInfo,
 			'KHR_clearcoatTexture',
+			null,
+			false
 		)
 	}
 	if (clearcoatNormalTextureInfo) {
@@ -32,6 +34,8 @@ const parse_KHR_materials_clearcoat = (currentMaterial: PBRMaterial, KHR_materia
 			currentMaterial,
 			clearcoatRoughnessTextureInfo,
 			'KHR_clearcoatRoughnessTexture',
+			null,
+			false
 		)
 	}
 }

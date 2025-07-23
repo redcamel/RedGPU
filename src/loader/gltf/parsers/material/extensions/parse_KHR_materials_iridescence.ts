@@ -20,6 +20,8 @@ const parse_KHR_materials_iridescence = (currentMaterial: PBRMaterial, KHR_mater
 				currentMaterial,
 				iridescenceTextureInfo,
 				'KHR_iridescenceTexture',
+				null,
+				false
 			)
 		}
 		if (iridescenceThicknessTextureInfo) {
@@ -28,6 +30,8 @@ const parse_KHR_materials_iridescence = (currentMaterial: PBRMaterial, KHR_mater
 				currentMaterial,
 				iridescenceThicknessTextureInfo,
 				'KHR_iridescenceThicknessTexture',
+				null,
+				false
 			)
 		}
 	}

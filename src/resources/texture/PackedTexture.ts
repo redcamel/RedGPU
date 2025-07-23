@@ -8,10 +8,11 @@ type ComponentMapping = {
 	b?: 'r' | 'g' | 'b' | 'a';  // b 채널에서 사용할 컴포넌트
 	a?: 'r' | 'g' | 'b' | 'a';  // a 채널에서 사용할 컴포넌트
 };
-
+const cacheMap: Map<string, {gpuTexture:GPUTexture,useNum:number,mappingKey:string}> = new Map()
+let pipeline:GPURenderPipeline
 class PackedTexture {
 	#redGPUContext: RedGPUContext;
-	#pipeline: GPURenderPipeline;
+
 	#sampler: GPUSampler;
 	#gpuTexture: GPUTexture
 	#gpuDevice: GPUDevice
@@ -19,18 +20,16 @@ class PackedTexture {
 	constructor(redGPUContext: RedGPUContext,) {
 		this.#redGPUContext = redGPUContext;
 		this.#gpuDevice = redGPUContext.gpuDevice;
-		this.#pipeline = this.#createPipeline();
+		if(!pipeline) pipeline = this.#createPipeline()
 		this.#sampler = this.#createSampler();
 	}
 
 	get gpuTexture(): GPUTexture {
 		return this.#gpuTexture;
 	}
-	#prevR:GPUTexture
-	#prevG:GPUTexture
-	#prevB:GPUTexture
-	#prevA:GPUTexture
-	#prevMappingJson
+
+
+	#prevMappingKey:string
 	async packing(
 		textures: { r?: GPUTexture; g?: GPUTexture; b?: GPUTexture; a?: GPUTexture },
 		width: number,
@@ -45,24 +44,27 @@ class PackedTexture {
 			a: 'a',
 			...componentMapping
 		}
-		const mappingJson = JSON.stringify(mapping)
-		if(mappingJson === this.#prevMappingJson){
-			if(
-				this.#prevR === textures.r
-				&& this.#prevG === textures.g
-				&& this.#prevB === textures.b
-				&& this.#prevA === textures.a
-			){
-				// keepLog('packing 다시하지않고 기존꺼씀')
-				return
+
+		const textureKey = `${textures.r?.label || ''}_${textures.g?.label || ''}_${textures.b?.label || ''}_${textures.a?.label || ''}`
+		const mappingKey = `${JSON.stringify(mapping)}_${textureKey}`
+		if(this.#prevMappingKey !== textureKey){
+			if(cacheMap.has(this.#prevMappingKey) ){
+				cacheMap.get(this.#prevMappingKey).useNum--
+				if(cacheMap.get(this.#prevMappingKey).useNum === 0){
+					cacheMap.delete(this.#prevMappingKey)
+					this.#gpuTexture.destroy()
+				}
+				keepLog('키가 바꼇고 기존키는 사용하는데가 없어!')
 			}
 		}
-		// keepLog('packing 함')
-		this.#prevMappingJson = mappingJson
-		this.#prevR = textures.r
-		this.#prevG = textures.g
-		this.#prevB = textures.b
-		this.#prevA = textures.a
+
+		if (cacheMap.has(mappingKey) && cacheMap.get(mappingKey).useNum) {
+			this.#gpuTexture = cacheMap.get(mappingKey).gpuTexture
+			cacheMap.get(mappingKey).useNum++
+			// keepLog('packing 기존꺼씀',cacheMap.get(mappingKey))
+			return
+		}
+
 
 		const textureDescriptor: GPUTextureDescriptor = {
 			size: [width, height, 1],
@@ -71,7 +73,6 @@ class PackedTexture {
 			label: label || `packedTexture_${createUUID()}'`
 		};
 		if (this.#gpuTexture) {
-			this.#gpuTexture.destroy()
 			this.#gpuTexture = null
 		}
 		const packedTexture = this.#gpuDevice.createTexture(textureDescriptor);
@@ -111,7 +112,7 @@ class PackedTexture {
 			}
 		];
 		const bindGroup = this.#gpuDevice.createBindGroup({
-			layout: this.#pipeline.getBindGroupLayout(0),
+			layout: pipeline.getBindGroupLayout(0),
 			entries: bindGroupEntries,
 		});
 		const commandEncoder = this.#gpuDevice.createCommandEncoder();
@@ -125,15 +126,24 @@ class PackedTexture {
 				},
 			],
 		});
-		passEncoder.setPipeline(this.#pipeline);
+		passEncoder.setPipeline(pipeline);
 		passEncoder.setBindGroup(0, bindGroup);
 		passEncoder.draw(6, 1, 0, 0);
 		passEncoder.end();
 		this.#gpuDevice.queue.submit([commandEncoder.finish()]);
 		console.log('packedTexture2', packedTexture)
-		this.#gpuTexture = packedTexture;
+		this.#gpuTexture = this.#redGPUContext.resourceManager.mipmapGenerator.generateMipmap(packedTexture,textureDescriptor);
+		// this.#gpuTexture = packedTexture;
 		// 임시 버퍼 정리
 		mappingBuffer.destroy();
+
+
+		cacheMap.set(mappingKey,{
+			gpuTexture: this.#gpuTexture,
+			useNum:1,
+			mappingKey
+		})
+		keepLog('packing 함', cacheMap.get(mappingKey))
 	}
 
 	#createPipeline(): GPURenderPipeline {
@@ -194,7 +204,7 @@ class PackedTexture {
 	}
 
 	@fragment
-	fn main(input: VertexOut) -> @location(0) vec4<f32> {
+	fn fragmentMain(input: VertexOut) -> @location(0) vec4<f32> {
 		let colorR = textureSample(textureR, sampler0, input.uv);
 		let colorG = textureSample(textureG, sampler0, input.uv);
 		let colorB = textureSample(textureB, sampler0, input.uv);
@@ -208,18 +218,21 @@ class PackedTexture {
 		return vec4(r, g, b, a);
 	}
 	`;
+		const {resourceManager} = this.#redGPUContext
+
 		return this.#gpuDevice.createRenderPipeline({
 			layout: 'auto',
 			vertex: {
-				module: this.#gpuDevice.createShaderModule({code: shaderCode}),
+				module: resourceManager.createGPUShaderModule('packingTexture',{code: shaderCode}),
 				entryPoint: 'vertexMain',
 			},
 			fragment: {
-				module: this.#gpuDevice.createShaderModule({code: shaderCode}),
-				entryPoint: 'main',
+				module: resourceManager.createGPUShaderModule('packingTexture',{code: shaderCode}),
+				entryPoint: 'fragmentMain',
 				targets: [{format: 'rgba8unorm'}],
 			},
 			primitive: {topology: 'triangle-list'},
+			label : 'packingTexturePipeline'
 		});
 	}
 

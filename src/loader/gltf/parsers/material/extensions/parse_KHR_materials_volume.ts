@@ -16,6 +16,8 @@ const parse_KHR_materials_volume = (currentMaterial: PBRMaterial, KHR_materials_
 				currentMaterial,
 				thicknessTextureInfo,
 				'KHR_thicknessTexture',
+				null,
+				false
 			)
 		}
 	}
