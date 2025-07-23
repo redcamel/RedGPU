@@ -11,7 +11,6 @@ struct VertexUniforms {
     combinedOpacity: f32,
     //
     useDisplacementTexture: u32,
-    useDisplacementTextureNormal: u32,
     displacementScale: f32,
 };
 
@@ -56,7 +55,6 @@ fn main(inputData: InputData) -> OutputData {
     let u_normalModelMatrix = vertexUniforms.normalModelMatrix;
     let u_displacementScale = vertexUniforms.displacementScale;
     let u_useDisplacementTexture = vertexUniforms.useDisplacementTexture == 1u;
-    let u_useDisplacementTextureNormal = vertexUniforms.useDisplacementTextureNormal == 1u;
     let u_receiveShadow = vertexUniforms.receiveShadow;
 
     // Light uniforms
@@ -86,16 +84,7 @@ fn main(inputData: InputData) -> OutputData {
         // 🎯 노멀은 월드 스페이스에서 직접 계산하는 것이 더 정확
         let worldUV = input_uv; // 또는 월드 스페이스 UV 계산
         var displacedNormal:vec3<f32>;
-         if(u_useDisplacementTextureNormal) {
-            displacedNormal = calcDisplacementWaterNormal(
-                normalize((u_normalModelMatrix * vec4<f32>(input_vertexNormal, 0.0)).xyz),
-                displacementTexture,
-                displacementTextureSampler,
-                u_displacementScale,
-                worldUV,
-                mipLevel
-            );
-        }else{
+
             displacedNormal = calcDisplacementNormal(
                 normalize((u_normalModelMatrix * vec4<f32>(input_vertexNormal, 0.0)).xyz),
                 displacementTexture,
@@ -104,7 +93,6 @@ fn main(inputData: InputData) -> OutputData {
                 worldUV,
                 mipLevel
             );
-        }
         normalPosition = vec4<f32>(displacedNormal, 0.0);
     #redgpu_else
         position = u_modelMatrix * vec4<f32>(input_position, 1.0);

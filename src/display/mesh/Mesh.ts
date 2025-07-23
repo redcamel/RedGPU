@@ -34,7 +34,6 @@ interface Mesh {
 	receiveShadow: boolean
 	meshType: string
 	useDisplacementTexture: boolean
-	useDisplacementTextureNormal: boolean
 }
 
 class Mesh extends MeshBase {
@@ -816,7 +815,6 @@ class Mesh extends MeshBase {
 			const currentUseDisplacementTexture = !!displacementTexture
 			if (this.useDisplacementTexture !== currentUseDisplacementTexture) {
 				this.useDisplacementTexture = currentUseDisplacementTexture
-				this.useDisplacementTextureNormal =  currentMaterial.useDisplacementTextureNormal
 				this.dirtyPipeline = true
 			}
 			if (this.dirtyPipeline || dirtyVertexUniformFromMaterial[currentMaterialUUID]) {
@@ -1052,7 +1050,6 @@ DefineForVertex.defineByPreset(Mesh, [
 ])
 DefineForVertex.defineBoolean(Mesh, [
 	['useDisplacementTexture', false],
-	['useDisplacementTextureNormal', false]
 ])
 Object.freeze(Mesh)
 export default Mesh
