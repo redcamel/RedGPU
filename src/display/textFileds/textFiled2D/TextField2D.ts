@@ -28,11 +28,7 @@ class TextField2D extends BaseTextField2D {
 			this.#height = height
 		}, false);
 		this._geometry = new Plane(redGPUContext, 1, 1, 1, 1, 1, true);
-		this._material = new TextFieldMaterial(redGPUContext, new BitmapTexture(redGPUContext))
-		this._material.transparent = true
 		this.useSmoothing = useSmoothing;
-		this.dirtyPipeline = true
-		this.dirtyTransform = true
 		this.primitiveState.cullMode = GPU_CULL_MODE.FRONT
 	}
 
