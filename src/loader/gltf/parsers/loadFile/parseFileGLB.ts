@@ -97,22 +97,51 @@ const parseBuffer = (buffer: ArrayBuffer): { content: string, binaryChunk: any }
  * @param {object} binaryChunk - The binary chunk data.
  * @returns {void}
  */
+/**
+ * GLTF 이미지 데이터를 처리하고 Object URL을 생성하는 함수
+ * 동일한 이미지 버퍼에 대해 동일한 Object URL을 재사용
+ */
 const processImagesIfExist = (gltfData: GLTF, binaryChunk: any) => {
-	const {images, bufferViews} = gltfData
+	const {images, bufferViews} = gltfData;
 	const supportedFormats = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
+
+	// 버퍼 해시를 저장할 캐시 맵
+	// 전역 변수로 선언하거나 클로저를 통해 유지할 수 있음
+	const bufferHashMap = new Map<string, string>();
+
 	if (images) {
 		for (let i = 0; i < images.length; i++) {
 			const image = images[i];
-			const {mimeType, bufferView: bufferViewGlTfId} = image
-			if (supportedFormats.includes(mimeType)) {
+			const {mimeType, bufferView: bufferViewGlTfId} = image;
+
+			if (supportedFormats.includes(mimeType) && bufferViewGlTfId !== undefined) {
 				const sliceStartIndex = bufferViews[bufferViewGlTfId].byteOffset || 0;
-				const slicedChunk = binaryChunk.slice(sliceStartIndex, sliceStartIndex + bufferViews[bufferViewGlTfId].byteLength);
-				const blob = new Blob([new Uint8Array(slicedChunk)], {type: mimeType});
-				image.uri = URL.createObjectURL(blob);
+				const byteLength = bufferViews[bufferViewGlTfId].byteLength;
+
+				// 버퍼의 고유 식별자 생성 (버퍼 위치 + 길이 + MIME 타입)
+				const bufferKey = `${sliceStartIndex}_${byteLength}_${mimeType}`;
+
+				// 이미 동일한 버퍼에 대한 URL이 생성되었는지 확인
+				if (bufferHashMap.has(bufferKey)) {
+					// 기존 URL 재사용
+					image.uri = bufferHashMap.get(bufferKey);
+				} else {
+					// 새 URL 생성
+					const slicedChunk = binaryChunk.slice(sliceStartIndex, sliceStartIndex + byteLength);
+					const blob = new Blob([new Uint8Array(slicedChunk)], {type: mimeType});
+					const objectURL = URL.createObjectURL(blob);
+
+					// 캐시에 저장
+					bufferHashMap.set(bufferKey, objectURL);
+					image.uri = objectURL;
+				}
 			}
 		}
 	}
-}
+
+	// URL 캐시 정보 반환 (나중에 정리에 사용할 수 있음)
+	return bufferHashMap;
+};
 export default parseFileGLB
 /**
  * Convert a Uint8Array to a string.
