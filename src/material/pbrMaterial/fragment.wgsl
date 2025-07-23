@@ -486,7 +486,6 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     var ior:f32 = u_KHR_materials_ior;
     var baseColor = u_baseColorFactor;
     var resultAlpha:f32 = u_opacity * baseColor.a;
-    // Multiply vertex color if vertex colors are enabled
     baseColor *= select(vec4<f32>(1.0), input_vertexColor_0, u_useVertexColor);
     // baseColorTexture
 
@@ -817,10 +816,11 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
         let NdotV_fresnel = max(dot(N, V), 0.04);
 
         // ---------- ibl 프레넬 항 계산----------
-        let F_IBL_dielectric = F0_dielectric + (vec3<f32>(1.0) - F0_dielectric) * pow(1.0 - NdotV_fresnel, 5.0); // 유전체
-        let F_IBL_metal = F0_metal + (vec3<f32>(1.0) - F0_metal) * pow(1.0 - NdotV_fresnel, 5.0); // 금속
-        var F_IBL = F0 + (vec3<f32>(1.0) - F0) * pow(1.0 - NdotV_fresnel, 5.0);
-        var F_metal_iridescent = vec3<f32>(1.0);
+        let fresnel = pow(1.0 - NdotV_fresnel, 5.0);
+        let F_IBL_dielectric = F0_dielectric + (vec3<f32>(1.0) - F0_dielectric) * fresnel;
+        let F_IBL_metal      = F0_metal      + (vec3<f32>(1.0) - F0_metal)      * fresnel;
+        var F_IBL            = F0            + (vec3<f32>(1.0) - F0)            * fresnel;
+
 
         #redgpu_if useKHR_materials_iridescence
              if (iridescenceParameter > 0.0) {
