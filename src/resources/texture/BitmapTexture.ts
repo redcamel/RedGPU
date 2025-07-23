@@ -94,11 +94,6 @@ class BitmapTexture extends ManagedResourceBase {
 	}
 
 	set src(value: string | any) {
-		const isObjectURL = typeof this.#src === 'string' && this.#src?.startsWith?.('blob:');
-		if (isObjectURL) {
-			// keepLog('오브젝트URL삭제',this.#src?.toString(),typeof value === 'string',value.startsWith('blob:'))
-			URL.revokeObjectURL(this.#src);
-		}
 		this.#src = value?.src || value;
 		this.#cacheKey = value?.cacheKey || value || this.uuid;
 		if (this.#src) this.#loadBitmapTexture(this.#src);
