@@ -223,16 +223,13 @@ class ATextField extends Mesh {
 			this.dirtyTransform = true;
 			// Blob으로 변환하여 처리
 			const callback = (blob: Blob | MediaSource) => {
+				const prevSrc = this.material.diffuseTexture.src
+				const isObjectURL = typeof prevSrc === 'string' && prevSrc?.startsWith?.('blob:');
+				if (isObjectURL) {
+					// keepLog('오브젝트URL삭제',prevSrc?.toString(),typeof prevSrc === 'string',prevSrc?.startsWith('blob:'))
+					URL.revokeObjectURL(prevSrc);
+				}
 				this.material.diffuseTexture.src = URL.createObjectURL(blob);
-
-				// keepLog(this.#renderWidth, this.#renderHeight)
-				// new BitmapTexture(this.#redGPUContext, URL.createObjectURL(blob), true, v => {
-				//         this.material.diffuseTexture?.destroy();
-				//         this.material.diffuseTexture = v;
-				//         this.dirtyTransform = true;
-				//     },
-				//     null, null, false
-				// );
 			};
 			if (this.#textureCvs instanceof OffscreenCanvas) {
 				this.#textureCvs.convertToBlob({type: 'image/png'}).then(callback);
