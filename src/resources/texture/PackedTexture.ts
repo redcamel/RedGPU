@@ -1,4 +1,5 @@
 import RedGPUContext from "../../context/RedGPUContext";
+import {keepLog} from "../../utils";
 import createUUID from "../../utils/createUUID";
 
 type ComponentMapping = {
@@ -25,7 +26,11 @@ class PackedTexture {
 	get gpuTexture(): GPUTexture {
 		return this.#gpuTexture;
 	}
-
+	#prevR:GPUTexture
+	#prevG:GPUTexture
+	#prevB:GPUTexture
+	#prevA:GPUTexture
+	#prevMappingJson
 	async packing(
 		textures: { r?: GPUTexture; g?: GPUTexture; b?: GPUTexture; a?: GPUTexture },
 		width: number,
@@ -40,6 +45,25 @@ class PackedTexture {
 			a: 'a',
 			...componentMapping
 		}
+		const mappingJson = JSON.stringify(mapping)
+		if(mappingJson === this.#prevMappingJson){
+			if(
+				this.#prevR === textures.r
+				&& this.#prevG === textures.g
+				&& this.#prevB === textures.b
+				&& this.#prevA === textures.a
+			){
+				// keepLog('packing 다시하지않고 기존꺼씀')
+				return
+			}
+		}
+		// keepLog('packing 함')
+		this.#prevMappingJson = mappingJson
+		this.#prevR = textures.r
+		this.#prevG = textures.g
+		this.#prevB = textures.b
+		this.#prevA = textures.a
+
 		const textureDescriptor: GPUTextureDescriptor = {
 			size: [width, height, 1],
 			format: 'rgba8unorm',
