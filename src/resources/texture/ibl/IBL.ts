@@ -90,8 +90,8 @@ class IBL {
 
 	async #init() {
 		console.log('sourceCubeTexture', this.#sourceCubeTexture)
-		const {mipmapGenerator} = this.#redGPUContext.resourceManager
-		const iblTexture = await mipmapGenerator.downsampleCubemap(this.#sourceCubeTexture, this.#iblCubeSize)
+		const {downSampleCubeMapGenerator} = this.#redGPUContext.resourceManager
+		const iblTexture = await downSampleCubeMapGenerator.downsampleCubemap(this.#sourceCubeTexture, this.#iblCubeSize)
 		this.#iblTexture.setGPUTextureDirectly(iblTexture, `${this.#uuid}_iblTexture`)
 		this.#environmentTexture.setGPUTextureDirectly(this.#sourceCubeTexture, `${this.#uuid}_environmentTexture`)
 		const irradianceGPUTexture = await this.#generateIrradianceMap(this.#sourceCubeTexture);
