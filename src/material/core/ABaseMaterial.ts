@@ -28,7 +28,7 @@ interface ABaseMaterial {
  * @extends ResourceBase
  */
 class ABaseMaterial extends ResourceBase {
-	use2PathRender:boolean
+	use2PathRender: boolean
 	gpuRenderInfo: FragmentGPURenderInfo
 	dirtyPipeline: boolean = false
 	transparent: boolean = false
@@ -193,14 +193,11 @@ class ABaseMaterial extends ResourceBase {
 			const {name: textureType} = type
 			console.log(this, name, this[name])
 			let resource
-			if (textureType === 'texture_cube') resource = this.getGPUResourceCubeTextureView(this[name])
+			if (textureType === 'texture_cube') resource = resourceManager.getGPUResourceCubeTextureView(this[name])
 			else if (this[name] instanceof PackedTexture) {
-				if (this[name].gpuTexture) resource = this[name].gpuTexture.createView({
-					label:  this[name].gpuTexture.label
-				})
-				else resource = this.#emptyBitmapGPUTextureView
+				resource = resourceManager.getGPUResourceBitmapTextureView(this[name])
 			} else {
-				resource = this.getGPUResourceBitmapTextureView(this[name]) || this.#emptyBitmapGPUTextureView
+				resource = resourceManager.getGPUResourceBitmapTextureView(this[name]) || this.#emptyBitmapGPUTextureView
 			}
 			if (group === 2) {
 				entries.push(
@@ -278,18 +275,13 @@ class ABaseMaterial extends ResourceBase {
 		}
 	}
 
-	getGPUResourceBitmapTextureView(texture: BitmapTexture) {
-		return texture?.gpuTexture?.createView({label: texture?.gpuTexture?.label}) || this.#emptyBitmapGPUTextureView
-	}
-
-	getGPUResourceCubeTextureView(cubeTexture: CubeTexture, viewDescriptor?: GPUTextureViewDescriptor) {
-		const targetDescriptor = {...(viewDescriptor || cubeTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor),label: cubeTexture?.gpuTexture?.label}
-		return cubeTexture?.gpuTexture?.createView(targetDescriptor) || this.#emptyCubeTextureView
-	}
-	// getGPUResourceCubeTextureView(cubeTexture: CubeTexture, viewDescriptor?: GPUTextureViewDescriptor) {
-	// 	return cubeTexture?.gpuTexture?.createView(viewDescriptor || cubeTexture.viewDescriptor || CubeTexture.defaultViewDescriptor) || this.#emptyCubeTextureView
+	// getGPUResourceBitmapTextureView(texture: BitmapTexture) {
+	// 	return texture?.gpuTexture?.createView({label: texture?.gpuTexture?.label}) || this.#emptyBitmapGPUTextureView
 	// }
-
+	// getGPUResourceCubeTextureView(cubeTexture: CubeTexture, viewDescriptor?: GPUTextureViewDescriptor) {
+	// 	const targetDescriptor = {...(viewDescriptor || cubeTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor),label: cubeTexture?.gpuTexture?.label}
+	// 	return cubeTexture?.gpuTexture?.createView(targetDescriptor) || this.#emptyCubeTextureView
+	// }
 	getGPUResourceSampler(sampler: Sampler) {
 		return sampler?.gpuSampler || this.#basicGPUSampler
 	}

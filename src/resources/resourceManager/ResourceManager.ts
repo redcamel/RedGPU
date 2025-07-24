@@ -1,10 +1,12 @@
 import RedGPUContext from "../../context/RedGPUContext";
+import {keepLog} from "../../utils";
 import ResourceBase from "../ResourceBase";
 import Sampler from "../sampler/Sampler";
 import BitmapTexture from "../texture/BitmapTexture";
 import DownSampleCubeMapGenerator from "../texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator";
 import MipmapGenerator from "../texture/core/mipmapGenerator/MipmapGenerator";
 import CubeTexture from "../texture/CubeTexture";
+import PackedTexture from "../texture/packedTexture/PackedTexture";
 import preprocessWGSL from "../wgslParser/preprocessWGSL";
 import ResourceState from "./resourceState/ResourceState";
 
@@ -19,7 +21,7 @@ enum ResourceType {
 	GPUBindGroupLayout = 'GPUBindGroupLayout',
 	GPUPipelineLayout = 'GPUPipelineLayout',
 }
-
+const textureViewCache = new WeakMap<GPUTexture, GPUTextureView>();
 /**
  * Class representing a resource manager.
  *
@@ -65,6 +67,39 @@ class ResourceManager extends ResourceBase {
 		this.#mipmapGenerator = new MipmapGenerator(redGPUContext)
 		this.#downSampleCubeMapGenerator = new DownSampleCubeMapGenerator(redGPUContext)
 		this.#initPresets()
+	}
+
+	getGPUResourceBitmapTextureView(texture: BitmapTexture | PackedTexture): GPUTextureView | null {
+		if (!texture?.gpuTexture) {
+			return this.#emptyBitmapTextureView;
+		}
+
+		let cachedView = textureViewCache.get(texture.gpuTexture);
+		if (!cachedView) {
+			// 캐시에 없으면 새로 생성하고 저장
+			cachedView = texture.gpuTexture.createView({
+				label: texture.gpuTexture.label
+			});
+			textureViewCache.set(texture.gpuTexture, cachedView);
+		}
+
+		return cachedView;
+	}
+
+	getGPUResourceCubeTextureView(cubeTexture: CubeTexture, viewDescriptor?: GPUTextureViewDescriptor): GPUTextureView | null {
+		if (!cubeTexture?.gpuTexture) {
+			return this.#emptyCubeTextureView;
+		}
+
+		let cachedView = textureViewCache.get(cubeTexture.gpuTexture);
+		if (!cachedView) {
+			// 캐시에 없으면 새로 생성하고 저장
+			const targetDescriptor = {...(viewDescriptor || cubeTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor),label: cubeTexture?.gpuTexture?.label}
+			cachedView = cubeTexture.gpuTexture.createView(targetDescriptor);
+			textureViewCache.set(cubeTexture.gpuTexture, cachedView);
+		}
+
+		return cachedView;
 	}
 
 	get basicSampler(): Sampler {

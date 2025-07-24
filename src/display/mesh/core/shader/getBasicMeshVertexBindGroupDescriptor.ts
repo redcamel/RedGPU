@@ -23,12 +23,12 @@ const getBasicMeshVertexBindGroupDescriptor = (mesh: Mesh, skin: boolean = false
 			},
 			{
 				binding: 1,
-				// TODO - displacementTextureSampler 이놈을 프레그먼트 변화를 추적하는데 현재 정의 되어있지 않음 확인해야함
+
 				resource: getGPUResourceSampler(material?.displacementTextureSampler) || basicGPUSampler
 			},
 			{
 				binding: 2,
-				resource: getGPUResourceBitmapTextureView(material?.displacementTexture) || emptyBitmapTextureView
+				resource: resourceManager.getGPUResourceBitmapTextureView(material?.displacementTexture) || emptyBitmapTextureView
 			},
 			{
 				binding: 3,
@@ -54,18 +54,13 @@ const getBasicMeshVertexBindGroupDescriptor = (mesh: Mesh, skin: boolean = false
 			},
 			{
 				binding: 2,
-				resource: getGPUResourceBitmapTextureView(material?.displacementTexture) || emptyBitmapTextureView
+				resource: resourceManager.getGPUResourceBitmapTextureView(material?.displacementTexture) || emptyBitmapTextureView
 			},
 		]
 	}
 }
 export default getBasicMeshVertexBindGroupDescriptor
-const getGPUResourceBitmapTextureView = (texture: BitmapTexture,) => {
-	return texture?.gpuTexture?.createView({label: texture.src})
-}
-const getGPUResourceCubeTextureView = (cubeTexture: CubeTexture, viewDescriptor?: GPUTextureViewDescriptor) => {
-	return cubeTexture?.gpuTexture?.createView(viewDescriptor || CubeTexture.defaultViewDescriptor)
-}
+
 const getGPUResourceSampler = (sampler: Sampler) => {
 	return sampler?.gpuSampler
 }
