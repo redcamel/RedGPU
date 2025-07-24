@@ -11,25 +11,81 @@ type ComponentMapping = {
 };
 const cacheMap: Map<string, { gpuTexture: GPUTexture, useNum: number, mappingKey: string }> = new Map()
 let pipeline: GPURenderPipeline
+let mappingBuffer: GPUBuffer;
 
 class PackedTexture {
 	#redGPUContext: RedGPUContext;
 	#sampler: GPUSampler;
 	#gpuTexture: GPUTexture
 	#gpuDevice: GPUDevice
+	#bindGroup: GPUBindGroup;
+	#prevMappingKey: string
+
+	get gpuTexture(): GPUTexture {
+		return this.#gpuTexture;
+	}
 
 	constructor(redGPUContext: RedGPUContext,) {
 		this.#redGPUContext = redGPUContext;
 		this.#gpuDevice = redGPUContext.gpuDevice;
 		if (!pipeline) pipeline = this.#createPipeline()
 		this.#sampler = this.#createSampler();
+		this.#initialize();
 	}
 
-	get gpuTexture(): GPUTexture {
-		return this.#gpuTexture;
+	#initialize() {
+		if (mappingBuffer) return
+		// 매핑 버퍼를 한 번만 생성
+		mappingBuffer = this.#gpuDevice.createBuffer({
+			label: 'packedTexture_mappingBuffer',
+			size: 16, // 4개 컴포넌트 * 4바이트
+			usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+		});
 	}
 
-	#prevMappingKey: string
+	#updateBindGroup(textures: { r?: GPUTexture; g?: GPUTexture; b?: GPUTexture; a?: GPUTexture }) {
+		// 바인드 그룹의 리소스만 업데이트
+		const bindGroupEntries = [
+			{
+				binding: 0,
+				resource: textures.r ? textures.r.createView({label: textures.r.label}) : this.#redGPUContext.resourceManager.emptyBitmapTextureView
+			},
+			{
+				binding: 1,
+				resource: textures.g ? textures.g.createView({label: textures.g.label}) : this.#redGPUContext.resourceManager.emptyBitmapTextureView
+			},
+			{
+				binding: 2,
+				resource: textures.b ? textures.b.createView({label: textures.b.label}) : this.#redGPUContext.resourceManager.emptyBitmapTextureView
+			},
+			{
+				binding: 3,
+				resource: textures.a ? textures.a.createView({label: textures.a.label}) : this.#redGPUContext.resourceManager.emptyBitmapTextureView
+			},
+			{binding: 4, resource: this.#sampler},
+			{
+				binding: 5,
+				resource: {buffer: mappingBuffer}
+			}
+		];
+		const bindGroupLayout = this.#redGPUContext.resourceManager.createBindGroupLayout(
+			'packedTexture_bindGroupLayout',{
+			entries: [
+				{ binding: 0, visibility: GPUShaderStage.FRAGMENT, texture: {} },
+				{ binding: 1, visibility: GPUShaderStage.FRAGMENT, texture: {} },
+				{ binding: 2, visibility: GPUShaderStage.FRAGMENT, texture: {} },
+				{ binding: 3, visibility: GPUShaderStage.FRAGMENT, texture: {} },
+				{ binding: 4, visibility: GPUShaderStage.FRAGMENT, sampler: {} },
+				{ binding: 5, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } }
+			]
+		});
+
+		this.#bindGroup = this.#gpuDevice.createBindGroup({
+			label: 'packedTexture_bindGroup',
+			layout: bindGroupLayout,
+			entries: bindGroupEntries,
+		});
+	}
 
 	async packing(
 		textures: { r?: GPUTexture; g?: GPUTexture; b?: GPUTexture; a?: GPUTexture },
@@ -53,7 +109,7 @@ class PackedTexture {
 			// keepLog(mappingKey)
 			return
 		}
-		if(this.#prevMappingKey){
+		if (this.#prevMappingKey) {
 			const isChangedKey = this.#prevMappingKey !== mappingKey
 			if (prevEntry && isChangedKey) {
 				prevEntry.useNum--;
@@ -65,8 +121,9 @@ class PackedTexture {
 			}
 			if (prevEntry && isChangedKey) {
 				if (prevEntry.useNum === 0) {
-					keepLog('삭제된 텍스쳐',prevEntry)
-					this.#gpuTexture?.destroy();
+					keepLog('삭제된 텍스쳐', prevEntry)
+					prevEntry.gpuTexture?.destroy();
+					this.#gpuTexture = null;
 					cacheMap.delete(this.#prevMappingKey);
 					keepLog('이전키가 더이상 사용되지 않아서 캐시에서 삭제함', prevEntry);
 				} else {
@@ -75,14 +132,13 @@ class PackedTexture {
 				keepLog('prev', prevEntry);
 			}
 			this.#prevMappingKey = mappingKey;
-		}else{
+		} else {
 			if (currEntry) {
 				this.#gpuTexture = currEntry.gpuTexture;
 				currEntry.useNum++
 				keepLog('기존 생성된 텍스쳐를 사용함', currEntry);
 			}
 		}
-
 		if (currEntry) {
 			return;
 		}
@@ -108,33 +164,7 @@ class PackedTexture {
 			['r', 'g', 'b', 'a'].indexOf(mapping.a),
 		]);
 		this.#gpuDevice.queue.writeBuffer(mappingBuffer, 0, mappingData);
-		const bindGroupEntries = [
-			{
-				binding: 0,
-				resource: textures.r ? textures.r.createView({label: textures.r.label}) : this.#redGPUContext.resourceManager.emptyBitmapTextureView
-			},
-			{
-				binding: 1,
-				resource: textures.g ? textures.g.createView({label: textures.g.label}) : this.#redGPUContext.resourceManager.emptyBitmapTextureView
-			},
-			{
-				binding: 2,
-				resource: textures.b ? textures.b.createView({label: textures.b.label}) : this.#redGPUContext.resourceManager.emptyBitmapTextureView
-			},
-			{
-				binding: 3,
-				resource: textures.a ? textures.a.createView({label: textures.a.label}) : this.#redGPUContext.resourceManager.emptyBitmapTextureView
-			},
-			{binding: 4, resource: this.#sampler},
-			{
-				binding: 5,
-				resource: {buffer: mappingBuffer}
-			}
-		];
-		const bindGroup = this.#gpuDevice.createBindGroup({
-			layout: pipeline.getBindGroupLayout(0),
-			entries: bindGroupEntries,
-		});
+		this.#updateBindGroup(textures);
 		const commandEncoder = this.#gpuDevice.createCommandEncoder();
 		const passEncoder = commandEncoder.beginRenderPass({
 			colorAttachments: [
@@ -147,7 +177,7 @@ class PackedTexture {
 			],
 		});
 		passEncoder.setPipeline(pipeline);
-		passEncoder.setBindGroup(0, bindGroup);
+		passEncoder.setBindGroup(0, this.#bindGroup);
 		passEncoder.draw(6, 1, 0, 0);
 		passEncoder.end();
 		this.#gpuDevice.queue.submit([commandEncoder.finish()]);
@@ -162,6 +192,7 @@ class PackedTexture {
 			mappingKey
 		})
 		keepLog('packing 함', cacheMap.get(mappingKey))
+		this.#bindGroup = null
 	}
 
 	#createPipeline(): GPURenderPipeline {
