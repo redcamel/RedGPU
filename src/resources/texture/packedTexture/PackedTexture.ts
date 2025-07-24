@@ -223,11 +223,12 @@ class PackedTexture {
 	}
 
 	#executeRenderPass(packedTexture: GPUTexture) {
+		const {resourceManager} = this.#redGPUContext;
 		const commandEncoder = this.#gpuDevice.createCommandEncoder();
 		const passEncoder = commandEncoder.beginRenderPass({
 			colorAttachments: [
 				{
-					view: packedTexture.createView({label: packedTexture.label}),
+					view: resourceManager.getGPUResourceBitmapTextureView(packedTexture),
 					loadOp: 'clear',
 					storeOp: 'store',
 					clearValue: [0, 0, 0, 0],
