@@ -14,9 +14,81 @@ class DownSampleCubeMapGenerator {
 	#cubemapSampler: GPUSampler | null = null;
 	readonly #COMPUTE_WORKGROUP_SIZE_X = 8;
 	readonly #COMPUTE_WORKGROUP_SIZE_Y = 8;
+	#tempViewCache: Map<string, GPUTextureView> = new Map();
+	#tempBindGroupCache: Map<string, GPUBindGroup> = new Map();
 
 	constructor(redGPUContext: RedGPUContext) {
 		this.#redGPUContext = redGPUContext
+	}
+
+	createSourceTextureView(sourceCubemap: GPUTexture, sourceMipLevel: number): GPUTextureView {
+		const key = `source_${sourceCubemap.label}_${sourceMipLevel}`;
+
+		if (!this.#tempViewCache.has(key)) {
+			const view = sourceCubemap.createView({
+				label: key,
+				dimension: 'cube',
+				baseMipLevel: sourceMipLevel,
+				mipLevelCount: 1
+			});
+			this.#tempViewCache.set(key, view);
+		}
+
+		return this.#tempViewCache.get(key)!;
+	}
+
+	createTargetTextureView(targetCubemap: GPUTexture, targetMipLevel: number): GPUTextureView {
+		const key = `target_${targetCubemap.label}_${targetMipLevel}`;
+
+		if (!this.#tempViewCache.has(key)) {
+			const view = targetCubemap.createView({
+				label: key,
+				dimension: '2d-array',
+				baseMipLevel: targetMipLevel,
+				mipLevelCount: 1,
+				arrayLayerCount: 6
+			});
+			this.#tempViewCache.set(key, view);
+		}
+
+		return this.#tempViewCache.get(key)!;
+	}
+
+	createBindGroup(
+		bindGroupLayout: GPUBindGroupLayout,
+		sourceView: GPUTextureView,
+		targetView: GPUTextureView
+	): GPUBindGroup {
+		const key = `${sourceView.label}_${targetView.label}`;
+
+		if (!this.#tempBindGroupCache.has(key)) {
+			const {gpuDevice} = this.#redGPUContext;
+			const bindGroup = gpuDevice.createBindGroup({
+				label: key,
+				layout: bindGroupLayout,
+				entries: [
+					{
+						binding: 0,
+						resource: sourceView
+					},
+					{
+						binding: 1,
+						resource: targetView
+					},
+					{
+						binding: 2,
+						resource: this.#cubemapSampler
+					},
+					{
+						binding: 3,
+						resource: {buffer: this.#cubemapUniformBuffer}
+					}
+				]
+			});
+			this.#tempBindGroupCache.set(key, bindGroup);
+		}
+
+		return this.#tempBindGroupCache.get(key)!;
 	}
 
 	/**
@@ -32,6 +104,9 @@ class DownSampleCubeMapGenerator {
 		format: GPUTextureFormat = 'rgba8unorm'
 	): Promise<GPUTexture> {
 		try {
+			// 캐시 초기화
+			this.#clearTempCaches();
+
 			// 초기화
 			this.#initCubemapDownsampler();
 			const {gpuDevice} = this.#redGPUContext;
@@ -82,9 +157,14 @@ class DownSampleCubeMapGenerator {
 			}
 
 			console.log('큐브맵 다운샘플링 완료');
+
+			// 캐시 정리
+			this.#clearTempCaches();
+
 			return targetCubemap;
 		} catch (error) {
 			console.error('큐브맵 다운샘플링 실패:', error);
+			this.#clearTempCaches();
 			throw error;
 		}
 	}
@@ -93,6 +173,9 @@ class DownSampleCubeMapGenerator {
 	 * 정리 메서드
 	 */
 	destroy() {
+		// 캐시 정리
+		this.#clearTempCaches();
+
 		if (this.#cubemapUniformBuffer) {
 			this.#cubemapUniformBuffer.destroy();
 			this.#cubemapUniformBuffer = null;
@@ -102,6 +185,14 @@ class DownSampleCubeMapGenerator {
 		this.#cubemapBindGroupLayouts.clear();
 		this.#cubemapShaderModule = null;
 		this.#cubemapSampler = null;
+	}
+
+	/**
+	 * 임시 캐시 정리
+	 */
+	#clearTempCaches() {
+		this.#tempViewCache.clear();
+		this.#tempBindGroupCache.clear();
 	}
 
 	/**
@@ -141,7 +232,7 @@ class DownSampleCubeMapGenerator {
 
 			// 포맷별 바인드 그룹 레이아웃 생성
 			const bindGroupLayout = resourceManager.createBindGroupLayout(
-				`$CUBEMAP_DOWNSAMPLER_BIND_GROUP_LAYOUT_${format}`,
+				`CUBEMAP_DOWNSAMPLER_BIND_GROUP_LAYOUT_${format}`,
 				{
 					entries: [
 						{
@@ -180,7 +271,7 @@ class DownSampleCubeMapGenerator {
 					bindGroupLayouts: [bindGroupLayout]
 				}),
 				compute: {
-					module: this.#cubemapShaderModule!,
+					module: this.#cubemapShaderModule,
 					entryPoint: 'main'
 				}
 			});
@@ -188,7 +279,7 @@ class DownSampleCubeMapGenerator {
 			this.#cubemapBindGroupLayouts.set(format, bindGroupLayout);
 			this.#cubemapComputePipelines.set(format, computePipeline);
 		}
-		return this.#cubemapComputePipelines.get(format)!;
+		return this.#cubemapComputePipelines.get(format);
 	}
 
 	#initCubemapUniforms() {
@@ -239,41 +330,12 @@ class DownSampleCubeMapGenerator {
 
 		// 포맷별 파이프라인 및 바인드 그룹 레이아웃 가져오기
 		const computePipeline = this.#getCubemapComputePipeline(format);
-		const bindGroupLayout = this.#cubemapBindGroupLayouts.get(format)!;
+		const bindGroupLayout = this.#cubemapBindGroupLayouts.get(format);
 
-		// 바인드 그룹 생성
-		const bindGroup = gpuDevice.createBindGroup({
-			layout: bindGroupLayout,
-			entries: [
-				{
-					binding: 0,
-					resource: sourceCubemap.createView({
-						label: 'downsampleCubeMap_source',
-						dimension: 'cube',
-						baseMipLevel: sourceMipLevel,
-						mipLevelCount: 1
-					})
-				},
-				{
-					binding: 1,
-					resource: targetCubemap.createView({
-						label: 'downsampleCubeMap_target',
-						dimension: '2d-array',
-						baseMipLevel: targetMipLevel,
-						mipLevelCount: 1,
-						arrayLayerCount: 6
-					})
-				},
-				{
-					binding: 2,
-					resource: this.#cubemapSampler!
-				},
-				{
-					binding: 3,
-					resource: {buffer: this.#cubemapUniformBuffer!}
-				}
-			]
-		});
+		// 캐시된 뷰와 바인드그룹 사용
+		const sourceView = this.createSourceTextureView(sourceCubemap, sourceMipLevel);
+		const targetView = this.createTargetTextureView(targetCubemap, targetMipLevel);
+		const bindGroup = this.createBindGroup(bindGroupLayout, sourceView, targetView);
 
 		// 유니폼 업데이트
 		this.#updateCubemapUniforms(sourceMipLevel, targetMipLevel, targetSize);
@@ -320,7 +382,7 @@ class DownSampleCubeMapGenerator {
 		]);
 
 		gpuDevice.queue.writeBuffer(
-			this.#cubemapUniformBuffer!,
+			this.#cubemapUniformBuffer,
 			0,
 			uniformData
 		);
