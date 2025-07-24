@@ -138,7 +138,7 @@ class PackedTexture {
 		}
 
 		// Create new texture
-		await this.#createPackedTexture(textures, width, height, label, mapping, mappingKey);
+		 this.#createPackedTexture(textures, width, height, label, mapping, mappingKey);
 	}
 
 	#handleCacheManagement(mappingKey: string, prevEntry: any, currEntry: any) {
