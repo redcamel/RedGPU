@@ -73,9 +73,9 @@ class PickingManager {
 		this.#redGPUContext = redGPUContext
 		if (this.#pickingGPUTexture?.width !== this.#view.pixelRectObject.width || this.#pickingGPUTexture?.height !== this.#view.pixelRectObject.height) {
 			this.destroy()
-			this.#pickingGPUTexture = this.#createTexture(navigator.gpu.getPreferredCanvasFormat())
+			this.#pickingGPUTexture = this.#createTexture('picking',navigator.gpu.getPreferredCanvasFormat())
 			this.#pickingGPUTextureView = this.#pickingGPUTexture.createView({label: this.#pickingGPUTexture.label})
-			this.#pickingDepthGPUTexture = this.#createTexture('depth32float')
+			this.#pickingDepthGPUTexture = this.#createTexture('pickingDepth','depth32float')
 			this.#pickingDepthGPUTextureView = this.#pickingDepthGPUTexture.createView({label: this.#pickingDepthGPUTexture.label})
 		}
 	}
@@ -88,14 +88,14 @@ class PickingManager {
 		this.resetCastingList()
 	}
 
-	#createTexture(format: GPUTextureFormat): GPUTexture {
+	#createTexture(label:string,format: GPUTextureFormat): GPUTexture {
 		const {gpuDevice} = this.#redGPUContext
 		return gpuDevice.createTexture({
 			size: [this.#view.pixelRectObject.width, this.#view.pixelRectObject.height, 1],
 			usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC,
 			format,
 			sampleCount: 1,
-			label: `pickingGPUTexture_${this.#view.pixelRectObject.width}x${this.#view.pixelRectObject.height}_${Date.now()}`,
+			label: `${label}_${this.#view.pixelRectObject.width}x${this.#view.pixelRectObject.height}_${Date.now()}`,
 		});
 	}
 
