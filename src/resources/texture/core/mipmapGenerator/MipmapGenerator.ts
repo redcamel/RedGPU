@@ -15,6 +15,8 @@ class MipmapGenerator {
 	readonly #pipelines: { [key: string]: GPURenderPipeline }
 	#bindGroupLayout: GPUBindGroupLayout
 	#mipmapShaderModule: GPUShaderModule
+	#tempViewCache: Map<string, GPUTextureView> = new Map();
+	#tempBindGroupCache: Map<string, GPUBindGroup> = new Map();
 
 	constructor(redGPUContext: RedGPUContext) {
 		this.#redGPUContext = redGPUContext
@@ -23,15 +25,23 @@ class MipmapGenerator {
 	}
 
 	createTextureView(texture: GPUTexture, baseMipLevel: number, baseArrayLayer: number): GPUTextureView {
-		return texture.createView({
-			baseMipLevel,
-			mipLevelCount: 1,
-			dimension: '2d',
-			baseArrayLayer,
-			arrayLayerCount: 1,
-			label: `mipmap_${baseMipLevel}_${baseArrayLayer}_${Date.now()}`
-		});
+		const key = `${texture.label}_${baseMipLevel}_${baseArrayLayer}`;
+
+		if (!this.#tempViewCache.has(key)) {
+			const view = texture.createView({
+				baseMipLevel,
+				mipLevelCount: 1,
+				dimension: '2d',
+				baseArrayLayer,
+				arrayLayerCount: 1,
+				label: key
+			});
+			this.#tempViewCache.set(key, view);
+		}
+
+		return this.#tempViewCache.get(key)!;
 	}
+
 
 	createBindGroup(textureView: GPUTextureView): GPUBindGroup {
 		const {gpuDevice} = this.#redGPUContext;
@@ -95,6 +105,8 @@ class MipmapGenerator {
 	 * 밉맵 생성 메서드
 	 */
 	generateMipmap(texture: GPUTexture, textureDescriptor: GPUTextureDescriptor) {
+		this.#clearTempCaches();
+
 		const {gpuDevice} = this.#redGPUContext
 		const pipeline: GPURenderPipeline = this.getMipmapPipeline(textureDescriptor.format);
 		if (textureDescriptor.dimension == '3d' || textureDescriptor.dimension == '1d') {
@@ -165,12 +177,15 @@ class MipmapGenerator {
 		if (!renderToSource) {
 			mipTexture.destroy();
 		}
+		this.#clearTempCaches();
+
 		return texture;
 	}
+	#clearTempCaches() {
+		this.#tempViewCache.clear();
+		this.#tempBindGroupCache.clear();
+	}
 
-	/**
-	 * 정리 메서드
-	 */
 	destroy() {
 	}
 }
