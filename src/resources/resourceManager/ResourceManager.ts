@@ -2,6 +2,7 @@ import RedGPUContext from "../../context/RedGPUContext";
 import ResourceBase from "../ResourceBase";
 import Sampler from "../sampler/Sampler";
 import BitmapTexture from "../texture/BitmapTexture";
+import DownSampleCubeMapGenerator from "../texture/core/mipmapGenerator/DownSampleCubeMapGenerator";
 import MipmapGenerator from "../texture/core/mipmapGenerator/MipmapGenerator";
 import CubeTexture from "../texture/CubeTexture";
 import preprocessWGSL from "../wgslParser/preprocessWGSL";
@@ -51,6 +52,7 @@ class ResourceManager extends ResourceBase {
 	#emptyBitmapTextureView: GPUTextureView
 	#emptyCubeTextureView: GPUTextureView
 	readonly #mipmapGenerator: MipmapGenerator
+	readonly #downSampleCubeMapGenerator: DownSampleCubeMapGenerator
 	#basicSampler: Sampler
 
 	/**
@@ -61,6 +63,7 @@ class ResourceManager extends ResourceBase {
 	constructor(redGPUContext: RedGPUContext) {
 		super(redGPUContext)
 		this.#mipmapGenerator = new MipmapGenerator(redGPUContext)
+		this.#downSampleCubeMapGenerator = new DownSampleCubeMapGenerator(redGPUContext)
 		this.#initPresets()
 	}
 
@@ -70,6 +73,10 @@ class ResourceManager extends ResourceBase {
 
 	get mipmapGenerator(): MipmapGenerator {
 		return this.#mipmapGenerator;
+	}
+
+	get downSampleCubeMapGenerator(): DownSampleCubeMapGenerator {
+		return this.#downSampleCubeMapGenerator
 	}
 
 	get cachedBufferState(): any {
