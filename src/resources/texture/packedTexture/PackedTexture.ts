@@ -1,7 +1,8 @@
-import RedGPUContext from "../../context/RedGPUContext";
-import {keepLog} from "../../utils";
-import createUUID from "../../utils/createUUID";
-import Sampler from "../sampler/Sampler";
+import RedGPUContext from "../../../context/RedGPUContext";
+import {keepLog} from "../../../utils";
+import createUUID from "../../../utils/createUUID";
+import Sampler from "../../sampler/Sampler";
+import computeShaderCode from "./computeShader.wgsl";
 
 type ComponentMapping = {
 	r?: 'r' | 'g' | 'b' | 'a';  // r 채널에서 사용할 컴포넌트
@@ -9,8 +10,6 @@ type ComponentMapping = {
 	b?: 'r' | 'g' | 'b' | 'a';  // b 채널에서 사용할 컴포넌트
 	a?: 'r' | 'g' | 'b' | 'a';  // a 채널에서 사용할 컴포넌트
 };
-
-
 const cacheMap: Map<string, { gpuTexture: GPUTexture, useNum: number, mappingKey: string }> = new Map();
 let globalPipeline: GPURenderPipeline;
 let globalBindGroupLayout: GPUBindGroupLayout;
@@ -35,7 +34,6 @@ class PackedTexture {
 		this.#sampler = this.#createSampler();
 	}
 
-
 	#initializeGlobals() {
 		if (!mappingBuffer) {
 			mappingBuffer = this.#gpuDevice.createBuffer({
@@ -44,28 +42,25 @@ class PackedTexture {
 				usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
 			});
 		}
-
 		if (!globalBindGroupLayout) {
 			globalBindGroupLayout = this.#redGPUContext.resourceManager.createBindGroupLayout(
 				'packedTexture_bindGroupLayout',
 				{
 					entries: [
-						{ binding: 0, visibility: GPUShaderStage.FRAGMENT, texture: {} },
-						{ binding: 1, visibility: GPUShaderStage.FRAGMENT, texture: {} },
-						{ binding: 2, visibility: GPUShaderStage.FRAGMENT, texture: {} },
-						{ binding: 3, visibility: GPUShaderStage.FRAGMENT, texture: {} },
-						{ binding: 4, visibility: GPUShaderStage.FRAGMENT, sampler: {} },
-						{ binding: 5, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } }
+						{binding: 0, visibility: GPUShaderStage.FRAGMENT, texture: {}},
+						{binding: 1, visibility: GPUShaderStage.FRAGMENT, texture: {}},
+						{binding: 2, visibility: GPUShaderStage.FRAGMENT, texture: {}},
+						{binding: 3, visibility: GPUShaderStage.FRAGMENT, texture: {}},
+						{binding: 4, visibility: GPUShaderStage.FRAGMENT, sampler: {}},
+						{binding: 5, visibility: GPUShaderStage.FRAGMENT, buffer: {type: 'uniform'}}
 					]
 				}
 			);
 		}
-
 		if (!globalPipeline) {
 			globalPipeline = this.#createPipeline();
 		}
 	}
-
 
 	#updateBindGroup(textures: { r?: GPUTexture; g?: GPUTexture; b?: GPUTexture; a?: GPUTexture }) {
 		const bindGroupEntries = [
@@ -93,17 +88,15 @@ class PackedTexture {
 					textures.a.createView({label: textures.a.label}) :
 					this.#redGPUContext.resourceManager.emptyBitmapTextureView
 			},
-			{ binding: 4, resource: this.#sampler },
-			{ binding: 5, resource: { buffer: mappingBuffer } }
+			{binding: 4, resource: this.#sampler},
+			{binding: 5, resource: {buffer: mappingBuffer}}
 		];
-
 		this.#bindGroup = this.#gpuDevice.createBindGroup({
 			label: 'packedTexture_bindGroup',
 			layout: globalBindGroupLayout,
 			entries: bindGroupEntries,
 		});
 	}
-
 
 	async packing(
 		textures: { r?: GPUTexture; g?: GPUTexture; b?: GPUTexture; a?: GPUTexture },
@@ -112,7 +105,6 @@ class PackedTexture {
 		label?: string,
 		componentMapping?: ComponentMapping
 	) {
-
 		const mapping = {
 			r: 'r',
 			g: 'g',
@@ -120,41 +112,32 @@ class PackedTexture {
 			a: 'a',
 			...componentMapping
 		};
-
 		const textureKey = `${textures.r?.label || ''}_${textures.g?.label || ''}_${textures.b?.label || ''}_${textures.a?.label || ''}`;
 		const mappingKey = `${JSON.stringify(mapping)}_${textureKey}`;
 		const prevEntry = this.#prevMappingKey ? cacheMap.get(this.#prevMappingKey) : null;
 		const currEntry = cacheMap.get(mappingKey);
-
-
 		if (!textures.r && !textures.g && !textures.b && !textures.a) {
 			return;
 		}
-
 		this.#handleCacheManagement(mappingKey, prevEntry, currEntry);
-
 		if (currEntry) {
 			return;
 		}
-
 		// Create new texture
-		 this.#createPackedTexture(textures, width, height, label, mapping, mappingKey);
+		this.#createPackedTexture(textures, width, height, label, mapping, mappingKey);
 	}
 
 	#handleCacheManagement(mappingKey: string, prevEntry: any, currEntry: any) {
 		if (this.#prevMappingKey) {
 			const isChangedKey = this.#prevMappingKey !== mappingKey;
-
 			if (prevEntry && isChangedKey) {
 				prevEntry.useNum--;
 			}
-
 			if (currEntry) {
 				this.#gpuTexture = currEntry.gpuTexture;
 				currEntry.useNum++;
 				keepLog('기존 생성된 텍스쳐를 사용함', currEntry);
 			}
-
 			if (prevEntry && isChangedKey) {
 				if (prevEntry.useNum === 0) {
 					keepLog('삭제된 텍스쳐', prevEntry);
@@ -167,7 +150,6 @@ class PackedTexture {
 				}
 				keepLog('prev', prevEntry);
 			}
-
 			this.#prevMappingKey = mappingKey;
 		} else {
 			if (currEntry) {
@@ -192,33 +174,25 @@ class PackedTexture {
 			usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC,
 			label: label || `packedTexture_${createUUID()}`
 		};
-
 		if (this.#gpuTexture) {
 			this.#gpuTexture = null;
 		}
-
 		const packedTexture = this.#gpuDevice.createTexture(textureDescriptor);
-
 		const mappingData = new Uint32Array([
 			['r', 'g', 'b', 'a'].indexOf(mapping.r),
 			['r', 'g', 'b', 'a'].indexOf(mapping.g),
 			['r', 'g', 'b', 'a'].indexOf(mapping.b),
 			['r', 'g', 'b', 'a'].indexOf(mapping.a),
 		]);
-
 		this.#gpuDevice.queue.writeBuffer(mappingBuffer, 0, mappingData);
 		this.#updateBindGroup(textures);
-
 		this.#executeRenderPass(packedTexture);
-
 		this.#gpuTexture = this.#redGPUContext.resourceManager.mipmapGenerator.generateMipmap(packedTexture, textureDescriptor);
-
 		cacheMap.set(mappingKey, {
 			gpuTexture: this.#gpuTexture,
 			useNum: 1,
 			mappingKey
 		});
-
 		keepLog('packing 함', cacheMap.get(mappingKey));
 		this.#bindGroup = null;
 	}
@@ -235,7 +209,6 @@ class PackedTexture {
 				},
 			],
 		});
-
 		passEncoder.setPipeline(globalPipeline);
 		passEncoder.setBindGroup(0, this.#bindGroup);
 		passEncoder.draw(6, 1, 0, 0);
@@ -244,85 +217,12 @@ class PackedTexture {
 	}
 
 	#createPipeline(): GPURenderPipeline {
-		const shaderCode = `
-			struct VertexOut {
-				@builtin(position) position : vec4<f32>,
-				@location(0) uv : vec2<f32>,
-			};
-
-			@vertex
-			fn vertexMain(@builtin(vertex_index) VertexIndex : u32) -> VertexOut {
-				var pos = array<vec2<f32>, 6>(
-					vec2(-1.0, -1.0),
-					vec2( 1.0, -1.0),
-					vec2(-1.0,  1.0),
-					vec2(-1.0,  1.0),
-					vec2( 1.0, -1.0),
-					vec2( 1.0,  1.0)
-				);
-
-				var uv = array<vec2<f32>, 6>(
-					vec2(0.0, 1.0),
-					vec2(1.0, 1.0),
-					vec2(0.0, 0.0),
-					vec2(0.0, 0.0),
-					vec2(1.0, 1.0),
-					vec2(1.0, 0.0)
-				);
-
-				var output : VertexOut;
-				output.position = vec4(pos[VertexIndex], 0.0, 1.0);
-				output.uv = uv[VertexIndex];
-				return output;
-			}
-
-			struct ComponentMapping {
-				r_component: u32,
-				g_component: u32,
-				b_component: u32,
-				a_component: u32,
-			};
-
-			@group(0) @binding(0) var textureR: texture_2d<f32>;
-			@group(0) @binding(1) var textureG: texture_2d<f32>;
-			@group(0) @binding(2) var textureB: texture_2d<f32>;
-			@group(0) @binding(3) var textureA: texture_2d<f32>;
-			@group(0) @binding(4) var sampler0: sampler;
-			@group(0) @binding(5) var<uniform> mapping: ComponentMapping;
-
-			fn getComponent(color: vec4<f32>, componentIndex: u32) -> f32 {
-				switch componentIndex {
-					case 0u: { return color.r; }
-					case 1u: { return color.g; }
-					case 2u: { return color.b; }
-					case 3u: { return color.a; }
-					default: { return 0.0; }
-				}
-			}
-
-			@fragment
-			fn fragmentMain(input: VertexOut) -> @location(0) vec4<f32> {
-				let colorR = textureSample(textureR, sampler0, input.uv);
-				let colorG = textureSample(textureG, sampler0, input.uv);
-				let colorB = textureSample(textureB, sampler0, input.uv);
-				let colorA = textureSample(textureA, sampler0, input.uv);
-
-				let r = getComponent(colorR, mapping.r_component);
-				let g = getComponent(colorG, mapping.g_component);
-				let b = getComponent(colorB, mapping.b_component);
-				let a = getComponent(colorA, mapping.a_component);
-
-				return vec4(r, g, b, a);
-			}
-		`;
-
+		const shaderCode = computeShaderCode;
 		const {resourceManager} = this.#redGPUContext;
-
 		const pipelineLayout = this.#gpuDevice.createPipelineLayout({
 			label: 'packedTexture_pipelineLayout',
 			bindGroupLayouts: [globalBindGroupLayout]
 		});
-
 		return this.#gpuDevice.createRenderPipeline({
 			label: 'packedTexturePipeline',
 			layout: pipelineLayout,

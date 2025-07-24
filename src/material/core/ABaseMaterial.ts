@@ -12,7 +12,7 @@ import ResourceManager from "../../resources/resourceManager/ResourceManager";
 import Sampler from "../../resources/sampler/Sampler";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import CubeTexture from "../../resources/texture/CubeTexture";
-import PackedTexture from "../../resources/texture/PackedTexture";
+import PackedTexture from "../../resources/texture/packedTexture/PackedTexture";
 import {keepLog} from "../../utils";
 import TINT_BLEND_MODE from "../TINT_BLEND_MODE";
 import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "./getBindGroupLayoutDescriptorFromShaderInfo";
