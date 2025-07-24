@@ -2,7 +2,7 @@ import RedGPUContext from "../../context/RedGPUContext";
 import ResourceBase from "../ResourceBase";
 import Sampler from "../sampler/Sampler";
 import BitmapTexture from "../texture/BitmapTexture";
-import DownSampleCubeMapGenerator from "../texture/core/mipmapGenerator/DownSampleCubeMapGenerator";
+import DownSampleCubeMapGenerator from "../texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator";
 import MipmapGenerator from "../texture/core/mipmapGenerator/MipmapGenerator";
 import CubeTexture from "../texture/CubeTexture";
 import preprocessWGSL from "../wgslParser/preprocessWGSL";

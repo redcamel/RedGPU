@@ -22,7 +22,7 @@ class DownSampleCubeMapGenerator {
 	}
 
 	createSourceTextureView(sourceCubemap: GPUTexture, sourceMipLevel: number): GPUTextureView {
-		const key = `source_${sourceCubemap.label}_${sourceMipLevel}`;
+		const key = `DOWN_SAMPLE_CUBE_GENERATOR_SOURCE_VIEW_${sourceCubemap.label}_${sourceMipLevel}`;
 
 		if (!this.#tempViewCache.has(key)) {
 			const view = sourceCubemap.createView({
@@ -38,7 +38,7 @@ class DownSampleCubeMapGenerator {
 	}
 
 	createTargetTextureView(targetCubemap: GPUTexture, targetMipLevel: number): GPUTextureView {
-		const key = `target_${targetCubemap.label}_${targetMipLevel}`;
+		const key = `DOWN_SAMPLE_CUBE_GENERATOR_TARGET_VIEW_${targetCubemap.label}_${targetMipLevel}`;
 
 		if (!this.#tempViewCache.has(key)) {
 			const view = targetCubemap.createView({
@@ -59,7 +59,7 @@ class DownSampleCubeMapGenerator {
 		sourceView: GPUTextureView,
 		targetView: GPUTextureView
 	): GPUBindGroup {
-		const key = `${sourceView.label}_${targetView.label}`;
+		const key = `DOWN_SAMPLE_CUBE_GENERATOR_BIND_GROUP_${sourceView.label}_${targetView.label}`;
 
 		if (!this.#tempBindGroupCache.has(key)) {
 			const {gpuDevice} = this.#redGPUContext;
@@ -132,7 +132,7 @@ class DownSampleCubeMapGenerator {
 					GPUTextureUsage.RENDER_ATTACHMENT,
 				dimension: '2d',
 				mipLevelCount: targetMipLevels,
-				label: `DownSampleCubeMapGenerator_${targetSize}x${targetSize}_${targetMipLevels}mips_${Date.now()}`
+				label: `DOWN_SAMPLE_CUBE_GENERATOR_TEXTURE_${targetSize}x${targetSize}_${targetMipLevels}mips_${Date.now()}`
 			});
 
 			// 각 밉맵 레벨별로 다운샘플링
@@ -215,7 +215,7 @@ class DownSampleCubeMapGenerator {
 
 		// 셰이더 모듈 생성
 		this.#cubemapShaderModule = resourceManager.createGPUShaderModule(
-			'CUBEMAP_DOWNSAMPLER_COMPUTE',
+			'DOWN_SAMPLE_CUBE_GENERATOR_COMPUTE_SHADER',
 			{code: cubemapDownsampleCode}
 		);
 
@@ -232,7 +232,7 @@ class DownSampleCubeMapGenerator {
 
 			// 포맷별 바인드 그룹 레이아웃 생성
 			const bindGroupLayout = resourceManager.createBindGroupLayout(
-				`CUBEMAP_DOWNSAMPLER_BIND_GROUP_LAYOUT_${format}`,
+				`DOWN_SAMPLE_CUBE_GENERATOR_BIND_GROUP_LAYOUT_${format}`,
 				{
 					entries: [
 						{
@@ -267,7 +267,9 @@ class DownSampleCubeMapGenerator {
 
 			// 컴퓨트 파이프라인 생성
 			const computePipeline = gpuDevice.createComputePipeline({
+				label: `DOWN_SAMPLE_CUBE_GENERATOR_COMPUTE_PIPELINE_${format}`,
 				layout: gpuDevice.createPipelineLayout({
+					label: `DOWN_SAMPLE_CUBE_GENERATOR_PIPELINE_LAYOUT_${format}`,
 					bindGroupLayouts: [bindGroupLayout]
 				}),
 				compute: {
@@ -300,7 +302,7 @@ class DownSampleCubeMapGenerator {
 		this.#cubemapUniformBuffer = gpuDevice.createBuffer({
 			size: this.#cubemapUniformStructInfo.arrayBufferByteLength,
 			usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-			label: 'DownSampleCubeMapGenerator_UniformBuffer'
+			label: 'DOWN_SAMPLE_CUBE_GENERATOR_UNIFORM_BUFFER'
 		});
 	}
 
@@ -342,11 +344,11 @@ class DownSampleCubeMapGenerator {
 
 		// 컴퓨트 패스 실행
 		const commandEncoder = gpuDevice.createCommandEncoder({
-			label: `DownSampleCubeMapGenerator_CommandEncoder_Mip${targetMipLevel}`
+			label: `DOWN_SAMPLE_CUBE_GENERATOR_COMMAND_ENCODER_MIP${targetMipLevel}`
 		});
 
 		const computePassEncoder = commandEncoder.beginComputePass({
-			label: `DownSampleCubeMapGenerator_ComputePass_Mip${targetMipLevel}`
+			label: `DOWN_SAMPLE_CUBE_GENERATOR_COMPUTE_PASS_MIP${targetMipLevel}`
 		});
 
 		computePassEncoder.setPipeline(computePipeline);
