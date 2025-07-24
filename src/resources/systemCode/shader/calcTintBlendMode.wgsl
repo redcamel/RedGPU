@@ -1,4 +1,4 @@
-// 🎯 함수 정의 순서 수정: 유틸리티 함수들을 먼저 정의
+// 함수 정의 순서 수정: 유틸리티 함수들을 먼저 정의
 fn rgbToHsl(rgb: vec3<f32>) -> vec3<f32> {
     let maxVal: f32 = max(max(rgb.r, rgb.g), rgb.b);
     let minVal: f32 = min(min(rgb.r, rgb.g), rgb.b);
@@ -102,14 +102,14 @@ fn hslToRgb(hsl: vec3<f32>) -> vec3<f32> {
     return vec3<f32>(r, g, b);
 }
 
-// 🎯 메인 함수: 이제 위의 함수들을 안전하게 사용 가능
+// 메인 함수: 이제 위의 함수들을 안전하게 사용 가능
 fn calcTintBlendMode(baseColor: vec4<f32>, tintBlendMode: u32, tint: vec4<f32>) -> vec4<f32> {
     var tintedColor: vec3<f32>;
     let eps = 1e-6; // 0으로 나누기 방지용 작은 값
 
     switch (tintBlendMode) {
         case 0u: { // NORMAL
-            // 🎯 다른 모드와 일관성 유지
+            // 다른 모드와 일관성 유지
             tintedColor = mix(baseColor.rgb, tint.rgb, tint.a);
         }
         case 1u: { // MULTIPLY
@@ -138,11 +138,11 @@ fn calcTintBlendMode(baseColor: vec4<f32>, tintBlendMode: u32, tint: vec4<f32>) 
             );
         }
         case 8u: { // COLOR_DODGE
-            // 🎯 0으로 나누기 방지
+            // 0으로 나누기 방지
             tintedColor = clamp(baseColor.rgb / (1.0 - tint.rgb + eps), vec3<f32>(0.0), vec3<f32>(1.0));
         }
         case 9u: { // COLOR_BURN
-            // 🎯 0으로 나누기 방지
+            // 0으로 나누기 방지
             tintedColor = 1.0 - clamp((1.0 - baseColor.rgb) / (tint.rgb + eps), vec3<f32>(0.0), vec3<f32>(1.0));
         }
         case 10u: { // HARD_LIGHT
@@ -166,11 +166,11 @@ fn calcTintBlendMode(baseColor: vec4<f32>, tintBlendMode: u32, tint: vec4<f32>) 
             tintedColor = baseColor.rgb + tint.rgb - 2.0 * baseColor.rgb * tint.rgb;
         }
         case 14u: { // DIVIDE
-            // 🎯 0으로 나누기 방지
+            // 0으로 나누기 방지
             tintedColor = clamp(baseColor.rgb / (tint.rgb + eps), vec3<f32>(0.0), vec3<f32>(1.0));
         }
         case 15u: { // VIVID_LIGHT
-            // 🎯 0으로 나누기 방지
+            // 0으로 나누기 방지
             tintedColor = mix(
                 clamp(baseColor.rgb / (1.0 - (tint.rgb - vec3<f32>(0.5)) * 2.0 + eps), vec3<f32>(0.0), vec3<f32>(1.0)),
                 1.0 - clamp((1.0 - baseColor.rgb) / (tint.rgb * 2.0 + eps), vec3<f32>(0.0), vec3<f32>(1.0)),
@@ -215,6 +215,6 @@ fn calcTintBlendMode(baseColor: vec4<f32>, tintBlendMode: u32, tint: vec4<f32>) 
         }
     }
 
-    // 🎯 모든 모드에서 일관된 알파 처리
+    // 모든 모드에서 일관된 알파 처리
     return vec4<f32>(tintedColor, baseColor.a * tint.a);
 }

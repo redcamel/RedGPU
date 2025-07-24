@@ -195,7 +195,9 @@ class ABaseMaterial extends ResourceBase {
 			let resource
 			if (textureType === 'texture_cube') resource = this.getGPUResourceCubeTextureView(this[name])
 			else if (this[name] instanceof PackedTexture) {
-				if (this[name].gpuTexture) resource = this[name].gpuTexture.createView({})
+				if (this[name].gpuTexture) resource = this[name].gpuTexture.createView({
+					label:  this[name].gpuTexture.label
+				})
 				else resource = this.#emptyBitmapGPUTextureView
 			} else {
 				resource = this.getGPUResourceBitmapTextureView(this[name]) || this.#emptyBitmapGPUTextureView
@@ -277,12 +279,16 @@ class ABaseMaterial extends ResourceBase {
 	}
 
 	getGPUResourceBitmapTextureView(texture: BitmapTexture) {
-		return texture?.gpuTexture?.createView({label: texture.src}) || this.#emptyBitmapGPUTextureView
+		return texture?.gpuTexture?.createView({label: texture?.gpuTexture?.label}) || this.#emptyBitmapGPUTextureView
 	}
 
 	getGPUResourceCubeTextureView(cubeTexture: CubeTexture, viewDescriptor?: GPUTextureViewDescriptor) {
-		return cubeTexture?.gpuTexture?.createView(viewDescriptor || cubeTexture.viewDescriptor || CubeTexture.defaultViewDescriptor) || this.#emptyCubeTextureView
+		const targetDescriptor = {...(viewDescriptor || cubeTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor),label: cubeTexture?.gpuTexture?.label}
+		return cubeTexture?.gpuTexture?.createView(targetDescriptor) || this.#emptyCubeTextureView
 	}
+	// getGPUResourceCubeTextureView(cubeTexture: CubeTexture, viewDescriptor?: GPUTextureViewDescriptor) {
+	// 	return cubeTexture?.gpuTexture?.createView(viewDescriptor || cubeTexture.viewDescriptor || CubeTexture.defaultViewDescriptor) || this.#emptyCubeTextureView
+	// }
 
 	getGPUResourceSampler(sampler: Sampler) {
 		return sampler?.gpuSampler || this.#basicGPUSampler
@@ -290,17 +296,17 @@ class ABaseMaterial extends ResourceBase {
 
 	#checkVariant() {
 		const {gpuDevice, resourceManager} = this.redGPUContext
-		// 🎯 현재 머티리얼 상태에 맞는 바리안트 키 찾기
+		// 현재 머티리얼 상태에 맞는 바리안트 키 찾기
 		const currentVariantKey = this.#findMatchingVariantKey();
-		// 🎯 바리안트별 셰이더 모듈 확인/생성
+		// 바리안트별 셰이더 모듈 확인/생성
 		const variantShaderModuleName = `${this.#FRAGMENT_SHADER_MODULE_NAME}_${currentVariantKey}`;
 		// keepLog('f_variantShaderModuleName',variantShaderModuleName)
 		let targetShaderModule = resourceManager.getGPUShaderModule(variantShaderModuleName);
 		if (!targetShaderModule) {
-			// 🎯 레이지 바리안트 생성기에서 바리안트 소스 코드 가져오기
+			// 레이지 바리안트 생성기에서 바리안트 소스 코드 가져오기
 			const variantSource = this.gpuRenderInfo.fragmentShaderSourceVariant.getVariant(currentVariantKey);
 			if (variantSource) {
-				keepLog('🎯프레그먼트 바리안트 셰이더 모듈 생성:', currentVariantKey, variantShaderModuleName);
+				keepLog('프레그먼트 바리안트 셰이더 모듈 생성:', currentVariantKey, variantShaderModuleName);
 				targetShaderModule = resourceManager.createGPUShaderModule(
 					variantShaderModuleName,
 					{code: variantSource}
@@ -312,13 +318,13 @@ class ABaseMaterial extends ResourceBase {
 		} else {
 			console.log('🚀 바리안트 셰이더 모듈 캐시 히트:', currentVariantKey);
 		}
-		// 🎯 셰이더 모듈 업데이트
+		// 셰이더 모듈 업데이트
 		this.gpuRenderInfo.fragmentShaderModule = targetShaderModule;
 	}
 
 	#findMatchingVariantKey(): string {
 		const {fragmentShaderVariantConditionalBlocks} = this.gpuRenderInfo;
-		// 🎯 현재 활성화된 기능들 확인 (fragmentShaderVariantConditionalBlocks 기반)
+		// 현재 활성화된 기능들 확인 (fragmentShaderVariantConditionalBlocks 기반)
 		const activeFeatures = new Set<string>();
 		// 실제 셰이더에서 발견된 조건부 블록들만 체크
 		for (const uniformName of fragmentShaderVariantConditionalBlocks) {
@@ -328,11 +334,11 @@ class ABaseMaterial extends ResourceBase {
 		}
 		console.log('fragmentShaderVariantConditionalBlocks', fragmentShaderVariantConditionalBlocks);
 		console.log('activeFeatures', activeFeatures, this);
-		// 🎯 활성화된 기능들로부터 바리안트 키 생성
+		// 활성화된 기능들로부터 바리안트 키 생성
 		const variantKey = activeFeatures.size > 0 ?
 			Array.from(activeFeatures).sort().join('+') : 'none';
 		if (activeFeatures.size) {
-			console.log('🎯 선택된 바리안트:', variantKey, '(활성 기능:', Array.from(activeFeatures), ')');
+			console.log('선택된 바리안트:', variantKey, '(활성 기능:', Array.from(activeFeatures), ')');
 		}
 		return variantKey;
 	}

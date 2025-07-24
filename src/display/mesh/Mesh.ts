@@ -983,16 +983,16 @@ class Mesh extends MeshBase {
 
 	#checkVariant(moduleName: String) {
 		const {gpuDevice, resourceManager} = this.redGPUContext
-		// 🎯 현재 머티리얼 상태에 맞는 바리안트 키 찾기
+		// 현재 머티리얼 상태에 맞는 바리안트 키 찾기
 		const currentVariantKey = this.#findMatchingVariantKey();
-		// 🎯 바리안트별 셰이더 모듈 확인/생성
+		// 바리안트별 셰이더 모듈 확인/생성
 		const variantShaderModuleName = `${moduleName}_${currentVariantKey}`;
 		let targetShaderModule = resourceManager.getGPUShaderModule(variantShaderModuleName);
 		if (!targetShaderModule) {
-			// 🎯 레이지 바리안트 생성기에서 바리안트 소스 코드 가져오기
+			// 레이지 바리안트 생성기에서 바리안트 소스 코드 가져오기
 			let variantSource = this.gpuRenderInfo.vertexShaderSourceVariant.getVariant(currentVariantKey);
 			if (variantSource) {
-				keepLog('🎯 버텍스 바리안트 셰이더 모듈 생성:', currentVariantKey, variantShaderModuleName);
+				keepLog('버텍스 바리안트 셰이더 모듈 생성:', currentVariantKey, variantShaderModuleName);
 				if (this.animationInfo?.skinInfo) {
 					const jointNum = `${this.animationInfo.skinInfo.joints.length}`
 					variantSource = variantSource.replaceAll('#JOINT_NUM', jointNum)
@@ -1014,14 +1014,14 @@ class Mesh extends MeshBase {
 		} else {
 			console.log('🚀 버텍스 바리안트 셰이더 모듈 캐시 히트:', currentVariantKey);
 		}
-		// 🎯 셰이더 모듈 업데이트
+		// 셰이더 모듈 업데이트
 		this.gpuRenderInfo.vertexShaderModule = targetShaderModule;
 	}
 
 	#findMatchingVariantKey(): string {
 		const {vertexShaderVariantConditionalBlocks} = this.gpuRenderInfo;
 		// keepLog(this.gpuRenderInfo, vertexShaderVariantConditionalBlocks)
-		// 🎯 현재 활성화된 기능들 확인 (vertexShaderVariantConditionalBlocks 기반)
+		// 현재 활성화된 기능들 확인 (vertexShaderVariantConditionalBlocks 기반)
 		const activeFeatures = new Set<string>();
 		// keepLog('vertexShaderVariantConditionalBlocks', vertexShaderVariantConditionalBlocks, this)
 		// 실제 셰이더에서 발견된 조건부 블록들만 체크
@@ -1031,11 +1031,11 @@ class Mesh extends MeshBase {
 			}
 		}
 		console.log('activeFeatures', activeFeatures, this);
-		// 🎯 활성화된 기능들로부터 바리안트 키 생성
+		// 활성화된 기능들로부터 바리안트 키 생성
 		const variantKey = activeFeatures.size > 0 ?
 			Array.from(activeFeatures).sort().join('+') : 'none';
 		if (activeFeatures.size) {
-			console.log('🎯 선택된 바리안트:', variantKey, '(활성 기능:', Array.from(activeFeatures), ')');
+			console.log('선택된 바리안트:', variantKey, '(활성 기능:', Array.from(activeFeatures), ')');
 		}
 		return variantKey;
 	}

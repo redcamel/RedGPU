@@ -50,7 +50,7 @@ class HDRLoader {
 		const uint8Array = new Uint8Array(buffer);
 		// 🔍 기본 HDR 데이터 파싱
 		const rawHdrData = this.#parseHDRFile(uint8Array, src);
-		// 🎯 원본 데이터는 보존하고 분석만 수행
+		// 원본 데이터는 보존하고 분석만 수행
 		return this.#analyzeHDRData(rawHdrData);
 	}
 
@@ -63,12 +63,12 @@ class HDRLoader {
 		}
 		// 🔍 휘도 분석
 		const luminanceStats = this.#analyzeLuminance(hdrData);
-		// 🎯 자동 노출 계산 (적용하지 않고 권장값만 계산)
+		// 자동 노출 계산 (적용하지 않고 권장값만 계산)
 		const recommendedExposure = this.#calculateOptimalExposure(luminanceStats);
 		if (this.#enableDebugLogs) {
 			keepLog(`권장 노출값 계산: ${recommendedExposure.toFixed(3)} (원본 데이터는 보존)`);
 		}
-		// 🎯 원본 데이터는 그대로 유지, 분석 결과만 추가
+		// 원본 데이터는 그대로 유지, 분석 결과만 추가
 		return {
 			...hdrData,
 			recommendedExposure,
@@ -98,7 +98,7 @@ class HDRLoader {
 	}
 
 	/**
-	 * 🎯 최적 노출값 계산
+	 * 최적 노출값 계산
 	 */
 	#calculateOptimalExposure(stats: { min: number; max: number; average: number; median: number }): number {
 		const {average, median, max} = stats;

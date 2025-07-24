@@ -133,7 +133,7 @@ class MipmapGenerator {
 		}
 		const commandEncoder = gpuDevice.createCommandEncoder({});
 		for (let arrayLayer = 0; arrayLayer < arrayLayerCount; ++arrayLayer) {
-			// 🎯 매번 새로운 뷰와 바인드그룹 생성
+			// 매번 새로운 뷰와 바인드그룹 생성
 			let srcView: GPUTextureView = this.createTextureView(texture, 0, arrayLayer);
 			let dstMipLevel = renderToSource ? 1 : 0;
 			for (let i = 1; i < textureDescriptor.mipLevelCount; ++i) {
@@ -146,7 +146,7 @@ class MipmapGenerator {
 						storeOp: GPU_STORE_OP.STORE
 					}],
 				});
-				// 🎯 매번 새로운 바인드그룹 생성
+				// 매번 새로운 바인드그룹 생성
 				const bindGroup: GPUBindGroup = this.createBindGroup(srcView);
 				passEncoder.setPipeline(pipeline);
 				passEncoder.setBindGroup(0, bindGroup);

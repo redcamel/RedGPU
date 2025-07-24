@@ -14,7 +14,7 @@ class HeightFog extends ASinglePassPostEffect {
 	#fogType: number = HeightFog.EXPONENTIAL;
 	#density: number = 1.0;
 	#fogColor: ColorRGB;
-	// 🎯 Unity 스타일 Height Fog 속성들
+	// Unity 스타일 Height Fog 속성들
 	#baseHeight: number = 0.0;        // 안개 시작 높이 (Unity: Base Height)
 	#thickness: number = 100.0;       // 안개 레이어 두께 (Unity: Thickness)
 	#falloff: number = 0.1;           // 높이별 감쇠율 (Unity: Falloff)

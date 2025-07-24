@@ -81,7 +81,7 @@ fn main(inputData: InputData) -> OutputData {
         // 월드 스페이스로 변환
         position = u_modelMatrix * vec4<f32>(displacedPosition, 1.0);
 
-        // 🎯 노멀은 월드 스페이스에서 직접 계산하는 것이 더 정확
+        // 노멀은 월드 스페이스에서 직접 계산하는 것이 더 정확
         let worldUV = input_uv; // 또는 월드 스페이스 UV 계산
         var displacedNormal:vec3<f32>;
 

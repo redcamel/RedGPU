@@ -10,7 +10,11 @@ type ComponentMapping = {
 	b?: 'r' | 'g' | 'b' | 'a';  // b 채널에서 사용할 컴포넌트
 	a?: 'r' | 'g' | 'b' | 'a';  // a 채널에서 사용할 컴포넌트
 };
+
 const cacheMap: Map<string, { gpuTexture: GPUTexture, useNum: number, mappingKey: string }> = new Map();
+// 인스턴스별 현재 사용 중인 키 추적을 위한 WeakMap
+const instanceMappingKeys: WeakMap<PackedTexture, string> = new WeakMap();
+
 let globalPipeline: GPURenderPipeline;
 let globalBindGroupLayout: GPUBindGroupLayout;
 let mappingBuffer: GPUBuffer;
@@ -21,7 +25,6 @@ class PackedTexture {
 	#gpuTexture: GPUTexture;
 	#gpuDevice: GPUDevice;
 	#bindGroup: GPUBindGroup;
-	#prevMappingKey: string;
 	#tempViewCache: Map<string, GPUTextureView> = new Map();
 	#tempBindGroupCache: Map<string, GPUBindGroup> = new Map();
 
@@ -133,58 +136,59 @@ class PackedTexture {
 		};
 		const textureKey = `${textures.r?.label || ''}_${textures.g?.label || ''}_${textures.b?.label || ''}_${textures.a?.label || ''}`;
 		const mappingKey = `${JSON.stringify(mapping)}_${textureKey}`;
-		const prevEntry = this.#prevMappingKey ? cacheMap.get(this.#prevMappingKey) : null;
-		const currEntry = cacheMap.get(mappingKey);
+
 		if (!textures.r && !textures.g && !textures.b && !textures.a) {
 			return;
 		}
-		this.#handleCacheManagement(mappingKey, prevEntry, currEntry);
+
+		// 새로운 캐시 관리 방식
+		this.#handleCacheManagement(mappingKey);
+
+		const currEntry = cacheMap.get(mappingKey);
 		if (currEntry) {
 			// 캐시 정리 (기존 텍스처 사용 시)
 			this.#clearTempCaches();
 			return;
 		}
+
 		// Create new texture
-		 this.#createPackedTexture(textures, width, height, label, mapping, mappingKey);
+		await this.#createPackedTexture(textures, width, height, label, mapping, mappingKey);
 
 		// 캐시 정리 (새 텍스처 생성 완료 후)
 		this.#clearTempCaches();
 	}
 
-	#handleCacheManagement(mappingKey: string, prevEntry: any, currEntry: any) {
-		if (this.#prevMappingKey) {
-			const isChangedKey = this.#prevMappingKey !== mappingKey;
-			if (prevEntry && isChangedKey) {
+	#handleCacheManagement(mappingKey: string) {
+		// 현재 인스턴스가 사용 중인 이전 키 확인
+		const prevMappingKey = instanceMappingKeys.get(this);
+
+		// 이전 키와 현재 키가 다른 경우에만 처리
+		if (prevMappingKey && prevMappingKey !== mappingKey) {
+			const prevEntry = cacheMap.get(prevMappingKey);
+			if (prevEntry) {
 				prevEntry.useNum--;
-			}
-			if (currEntry) {
-				this.#gpuTexture = currEntry.gpuTexture;
-				currEntry.useNum++;
-				keepLog('기존 생성된 텍스쳐를 사용함', currEntry);
-			}
-			if (prevEntry && isChangedKey) {
+				keepLog(`텍스처 사용 횟수 감소: ${prevMappingKey} (${prevEntry.useNum})`);
+
+				// 사용 횟수가 0이 되면 삭제
 				if (prevEntry.useNum === 0) {
 					keepLog('삭제된 텍스쳐', prevEntry);
 					prevEntry.gpuTexture?.destroy();
-					this.#gpuTexture = null;
-					cacheMap.delete(this.#prevMappingKey);
+					cacheMap.delete(prevMappingKey);
 					keepLog('이전키가 더이상 사용되지 않아서 캐시에서 삭제함', prevEntry);
-				} else {
-					keepLog('이전키와 현재키가 달라서 기존 캐시 정리함');
-					keepLog('prevEntry', prevEntry);
-					keepLog('currEntry', currEntry);
 				}
-				keepLog('prevEntry', prevEntry);
-			}
-
-		} else {
-			if (currEntry) {
-				this.#gpuTexture = currEntry.gpuTexture;
-				currEntry.useNum++;
-				keepLog('기존 생성된 텍스쳐를 사용함', currEntry);
 			}
 		}
-		this.#prevMappingKey = mappingKey;
+
+		// 현재 키에 대한 처리
+		const currEntry = cacheMap.get(mappingKey);
+		if (currEntry) {
+			this.#gpuTexture = currEntry.gpuTexture;
+			currEntry.useNum++;
+			keepLog('기존 생성된 텍스쳐를 사용함', currEntry);
+		}
+
+		// 현재 인스턴스의 키 업데이트
+		instanceMappingKeys.set(this, mappingKey);
 	}
 
 	async #createPackedTexture(
@@ -201,9 +205,11 @@ class PackedTexture {
 			usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC,
 			label: label || `packedTexture_${createUUID()}`
 		};
+
 		if (this.#gpuTexture) {
 			this.#gpuTexture = null;
 		}
+
 		const packedTexture = this.#gpuDevice.createTexture(textureDescriptor);
 		const mappingData = new Uint32Array([
 			['r', 'g', 'b', 'a'].indexOf(mapping.r),
@@ -211,15 +217,19 @@ class PackedTexture {
 			['r', 'g', 'b', 'a'].indexOf(mapping.b),
 			['r', 'g', 'b', 'a'].indexOf(mapping.a),
 		]);
+
 		this.#gpuDevice.queue.writeBuffer(mappingBuffer, 0, mappingData);
 		this.#updateBindGroup(textures);
 		this.#executeRenderPass(packedTexture);
 		this.#gpuTexture = this.#redGPUContext.resourceManager.mipmapGenerator.generateMipmap(packedTexture, textureDescriptor);
+
+		// 새로운 텍스처를 캐시에 등록
 		cacheMap.set(mappingKey, {
 			gpuTexture: this.#gpuTexture,
 			useNum: 1,
 			mappingKey
 		});
+
 		keepLog('packing 함', cacheMap.get(mappingKey));
 		this.#bindGroup = null;
 	}
@@ -255,8 +265,21 @@ class PackedTexture {
 	 * 인스턴스 정리 메서드
 	 */
 	destroy() {
+		// 인스턴스 삭제 시 캐시 정리
+		const currentMappingKey = instanceMappingKeys.get(this);
+		if (currentMappingKey) {
+			const entry = cacheMap.get(currentMappingKey);
+			if (entry) {
+				entry.useNum--;
+				if (entry.useNum === 0) {
+					entry.gpuTexture?.destroy();
+					cacheMap.delete(currentMappingKey);
+				}
+			}
+			instanceMappingKeys.delete(this);
+		}
+
 		this.#clearTempCaches();
-		// 기타 정리 작업...
 	}
 
 	#createPipeline(): GPURenderPipeline {
