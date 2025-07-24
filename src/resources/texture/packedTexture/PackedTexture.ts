@@ -22,6 +22,8 @@ class PackedTexture {
 	#gpuDevice: GPUDevice;
 	#bindGroup: GPUBindGroup;
 	#prevMappingKey: string;
+	#tempViewCache: Map<string, GPUTextureView> = new Map();
+	#tempBindGroupCache: Map<string, GPUBindGroup> = new Map();
 
 	get gpuTexture(): GPUTexture {
 		return this.#gpuTexture;
@@ -62,40 +64,54 @@ class PackedTexture {
 		}
 	}
 
+	#createTextureView(texture: GPUTexture, channel: string): GPUTextureView {
+		if (!texture) return this.#redGPUContext.resourceManager.emptyBitmapTextureView;
+
+		const key = `${texture.label}_${channel}`;
+
+		if (!this.#tempViewCache.has(key)) {
+			const view = texture.createView({label: key});
+			this.#tempViewCache.set(key, view);
+		}
+
+		return this.#tempViewCache.get(key)!;
+	}
+
 	#updateBindGroup(textures: { r?: GPUTexture; g?: GPUTexture; b?: GPUTexture; a?: GPUTexture }) {
-		const bindGroupEntries = [
-			{
-				binding: 0,
-				resource: textures.r ?
-					textures.r.createView({label: textures.r.label}) :
-					this.#redGPUContext.resourceManager.emptyBitmapTextureView
-			},
-			{
-				binding: 1,
-				resource: textures.g ?
-					textures.g.createView({label: textures.g.label}) :
-					this.#redGPUContext.resourceManager.emptyBitmapTextureView
-			},
-			{
-				binding: 2,
-				resource: textures.b ?
-					textures.b.createView({label: textures.b.label}) :
-					this.#redGPUContext.resourceManager.emptyBitmapTextureView
-			},
-			{
-				binding: 3,
-				resource: textures.a ?
-					textures.a.createView({label: textures.a.label}) :
-					this.#redGPUContext.resourceManager.emptyBitmapTextureView
-			},
-			{binding: 4, resource: this.#sampler},
-			{binding: 5, resource: {buffer: mappingBuffer}}
-		];
-		this.#bindGroup = this.#gpuDevice.createBindGroup({
-			label: 'packedTexture_bindGroup',
-			layout: globalBindGroupLayout,
-			entries: bindGroupEntries,
-		});
+		const textureKey = `${textures.r?.label || 'empty'}_${textures.g?.label || 'empty'}_${textures.b?.label || 'empty'}_${textures.a?.label || 'empty'}`;
+
+		if (!this.#tempBindGroupCache.has(textureKey)) {
+			const bindGroupEntries = [
+				{
+					binding: 0,
+					resource: this.#createTextureView(textures.r, 'r')
+				},
+				{
+					binding: 1,
+					resource: this.#createTextureView(textures.g, 'g')
+				},
+				{
+					binding: 2,
+					resource: this.#createTextureView(textures.b, 'b')
+				},
+				{
+					binding: 3,
+					resource: this.#createTextureView(textures.a, 'a')
+				},
+				{binding: 4, resource: this.#sampler},
+				{binding: 5, resource: {buffer: mappingBuffer}}
+			];
+
+			const bindGroup = this.#gpuDevice.createBindGroup({
+				label: `packedTexture_bindGroup_${textureKey}`,
+				layout: globalBindGroupLayout,
+				entries: bindGroupEntries,
+			});
+
+			this.#tempBindGroupCache.set(textureKey, bindGroup);
+		}
+
+		this.#bindGroup = this.#tempBindGroupCache.get(textureKey)!;
 	}
 
 	async packing(
@@ -105,6 +121,9 @@ class PackedTexture {
 		label?: string,
 		componentMapping?: ComponentMapping
 	) {
+		// 캐시 초기화 (새로운 패킹 작업 시작 시)
+		this.#clearTempCaches();
+
 		const mapping = {
 			r: 'r',
 			g: 'g',
@@ -121,10 +140,15 @@ class PackedTexture {
 		}
 		this.#handleCacheManagement(mappingKey, prevEntry, currEntry);
 		if (currEntry) {
+			// 캐시 정리 (기존 텍스처 사용 시)
+			this.#clearTempCaches();
 			return;
 		}
 		// Create new texture
-		this.#createPackedTexture(textures, width, height, label, mapping, mappingKey);
+		 this.#createPackedTexture(textures, width, height, label, mapping, mappingKey);
+
+		// 캐시 정리 (새 텍스처 생성 완료 후)
+		this.#clearTempCaches();
 	}
 
 	#handleCacheManagement(mappingKey: string, prevEntry: any, currEntry: any) {
@@ -146,11 +170,13 @@ class PackedTexture {
 					cacheMap.delete(this.#prevMappingKey);
 					keepLog('이전키가 더이상 사용되지 않아서 캐시에서 삭제함', prevEntry);
 				} else {
-					keepLog('이전키와 현재키가 달라서 기존 캐시 정리함', prevEntry);
+					keepLog('이전키와 현재키가 달라서 기존 캐시 정리함');
+					keepLog('prevEntry', prevEntry);
+					keepLog('currEntry', currEntry);
 				}
-				keepLog('prev', prevEntry);
+				keepLog('prevEntry', prevEntry);
 			}
-			this.#prevMappingKey = mappingKey;
+
 		} else {
 			if (currEntry) {
 				this.#gpuTexture = currEntry.gpuTexture;
@@ -158,6 +184,7 @@ class PackedTexture {
 				keepLog('기존 생성된 텍스쳐를 사용함', currEntry);
 			}
 		}
+		this.#prevMappingKey = mappingKey;
 	}
 
 	async #createPackedTexture(
@@ -214,6 +241,22 @@ class PackedTexture {
 		passEncoder.draw(6, 1, 0, 0);
 		passEncoder.end();
 		this.#gpuDevice.queue.submit([commandEncoder.finish()]);
+	}
+
+	/**
+	 * 임시 캐시 정리
+	 */
+	#clearTempCaches() {
+		this.#tempViewCache.clear();
+		this.#tempBindGroupCache.clear();
+	}
+
+	/**
+	 * 인스턴스 정리 메서드
+	 */
+	destroy() {
+		this.#clearTempCaches();
+		// 기타 정리 작업...
 	}
 
 	#createPipeline(): GPURenderPipeline {
