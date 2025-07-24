@@ -42,14 +42,14 @@ class PackedTexture {
 	#initializeGlobals() {
 		if (!mappingBuffer) {
 			mappingBuffer = this.#gpuDevice.createBuffer({
-				label: 'packedTexture_mappingBuffer',
+				label: 'PACK_TEXTURE_MAPPING_BUFFER',
 				size: 16, // 4개 컴포넌트 * 4바이트
 				usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
 			});
 		}
 		if (!globalBindGroupLayout) {
 			globalBindGroupLayout = this.#redGPUContext.resourceManager.createBindGroupLayout(
-				'packedTexture_bindGroupLayout',
+				'PACK_TEXTURE_BIND_GROUP_LAYOUT',
 				{
 					entries: [
 						{binding: 0, visibility: GPUShaderStage.FRAGMENT, texture: {}},
@@ -106,7 +106,7 @@ class PackedTexture {
 			];
 
 			const bindGroup = this.#gpuDevice.createBindGroup({
-				label: `packedTexture_bindGroup_${textureKey}`,
+				label: `PACK_TEXTURE_BIND_GROUP_${textureKey}`,
 				layout: globalBindGroupLayout,
 				entries: bindGroupEntries,
 			});
@@ -203,7 +203,7 @@ class PackedTexture {
 			size: [width, height, 1],
 			format: 'rgba8unorm',
 			usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC,
-			label: label || `packedTexture_${createUUID()}`
+			label: label || `PACK_TEXTURE_${createUUID()}`
 		};
 
 		if (this.#gpuTexture) {
@@ -286,18 +286,18 @@ class PackedTexture {
 		const shaderCode = computeShaderCode;
 		const {resourceManager} = this.#redGPUContext;
 		const pipelineLayout = this.#gpuDevice.createPipelineLayout({
-			label: 'packedTexture_pipelineLayout',
+			label: 'PACK_TEXTURE_PIPELINE_LAYOUT',
 			bindGroupLayouts: [globalBindGroupLayout]
 		});
 		return this.#gpuDevice.createRenderPipeline({
-			label: 'packedTexturePipeline',
+			label: 'PACK_TEXTURE_PIPELINE',
 			layout: pipelineLayout,
 			vertex: {
-				module: resourceManager.createGPUShaderModule('packedTexture', {code: shaderCode}),
+				module: resourceManager.createGPUShaderModule('PACK_TEXTURE_SHADER_MODULE', {code: shaderCode}),
 				entryPoint: 'vertexMain',
 			},
 			fragment: {
-				module: resourceManager.createGPUShaderModule('packedTexture', {code: shaderCode}),
+				module: resourceManager.createGPUShaderModule('PACK_TEXTURE_SHADER_MODULE', {code: shaderCode}),
 				entryPoint: 'fragmentMain',
 				targets: [{format: 'rgba8unorm'}],
 			},

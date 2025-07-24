@@ -4,10 +4,6 @@ import GPU_STORE_OP from "../../../../gpuConst/GPU_STORE_OP";
 import Sampler from "../../../sampler/Sampler";
 import shaderSource from "./shader.wgsl";
 
-const SHADER_MODULE_NAME = 'MODULE_MIP_MAP'
-const FRAGMENT_BIND_GROUP_LAYOUT_NAME = 'FRAGMENT_BIND_GROUP_LAYOUT_NAME_MIP_MAP'
-const PIPELINE_DESCRIPTOR_LABEL = 'PIPELINE_DESCRIPTOR_FINAL_MIP_MAP'
-
 class MipmapGenerator {
 	readonly #redGPUContext: RedGPUContext
 	readonly #sampler: GPUSampler
@@ -25,7 +21,7 @@ class MipmapGenerator {
 	}
 
 	createTextureView(texture: GPUTexture, baseMipLevel: number, baseArrayLayer: number): GPUTextureView {
-		const key = `${texture.label}_${baseMipLevel}_${baseArrayLayer}`;
+		const key = `MIPMAP_GENERATOR_${texture.label}_${baseMipLevel}_${baseArrayLayer}`;
 
 		if (!this.#tempViewCache.has(key)) {
 			const view = texture.createView({
@@ -46,7 +42,7 @@ class MipmapGenerator {
 	createBindGroup(textureView: GPUTextureView): GPUBindGroup {
 		const {gpuDevice} = this.#redGPUContext;
 		return gpuDevice.createBindGroup({
-			label: `${textureView.label}_bindGroup_${Date.now()}`,
+			label: `MIPMAP_GENERATOR_BIND_GROUP_${Date.now()}`,
 			layout: this.#bindGroupLayout,
 			entries: [{
 				binding: 0,
@@ -64,11 +60,11 @@ class MipmapGenerator {
 		if (!pipeline) {
 			if (!this.#mipmapShaderModule) {
 				this.#mipmapShaderModule = resourceManager.createGPUShaderModule(
-					SHADER_MODULE_NAME,
+					'MIPMAP_GENERATOR_SHADER_MODULE',
 					{code: shaderSource}
 				)
 				this.#bindGroupLayout = resourceManager.createBindGroupLayout(
-					FRAGMENT_BIND_GROUP_LAYOUT_NAME,
+					'MIPMAP_GENERATOR_FRAGMENT_BIND_GROUP_LAYOUT',
 					{
 						entries: [
 							{binding: 0, visibility: GPUShaderStage.FRAGMENT, sampler: {}},
@@ -77,14 +73,14 @@ class MipmapGenerator {
 					}
 				)
 				this.#pipelineLayout = resourceManager.createGPUPipelineLayout(
-					PIPELINE_DESCRIPTOR_LABEL,
+					'MIPMAP_GENERATOR_PIPELINE_LAYOUT',
 					{
 						bindGroupLayouts: [this.#bindGroupLayout],
 					}
 				)
 			}
 			pipeline = gpuDevice.createRenderPipeline({
-				label: `MipmapGenerator_Pipeline_${format}`,
+				label: `MIPMAP_GENERATOR_PIPELINE_${format}`,
 				layout: this.#pipelineLayout,
 				vertex: {
 					module: this.#mipmapShaderModule,
