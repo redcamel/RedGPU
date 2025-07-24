@@ -21,7 +21,9 @@ enum ResourceType {
 	GPUBindGroupLayout = 'GPUBindGroupLayout',
 	GPUPipelineLayout = 'GPUPipelineLayout',
 }
+
 const textureViewCache = new WeakMap<GPUTexture, GPUTextureView>();
+
 /**
  * Class representing a resource manager.
  *
@@ -69,36 +71,38 @@ class ResourceManager extends ResourceBase {
 		this.#initPresets()
 	}
 
-	getGPUResourceBitmapTextureView(texture: BitmapTexture | PackedTexture): GPUTextureView | null {
-		if (!texture?.gpuTexture) {
+	getGPUResourceBitmapTextureView(texture: BitmapTexture | PackedTexture | GPUTexture): GPUTextureView | null {
+		const targetGPUTexture = texture instanceof GPUTexture ? texture : texture?.gpuTexture
+		if (!targetGPUTexture) {
 			return this.#emptyBitmapTextureView;
 		}
-
-		let cachedView = textureViewCache.get(texture.gpuTexture);
+		let cachedView = textureViewCache.get(targetGPUTexture);
 		if (!cachedView) {
 			// 캐시에 없으면 새로 생성하고 저장
-			cachedView = texture.gpuTexture.createView({
-				label: texture.gpuTexture.label
+			cachedView = targetGPUTexture.createView({
+				label: targetGPUTexture.label
 			});
-			textureViewCache.set(texture.gpuTexture, cachedView);
+			textureViewCache.set(targetGPUTexture, cachedView);
 		}
-
 		return cachedView;
 	}
 
-	getGPUResourceCubeTextureView(cubeTexture: CubeTexture, viewDescriptor?: GPUTextureViewDescriptor): GPUTextureView | null {
-		if (!cubeTexture?.gpuTexture) {
+	getGPUResourceCubeTextureView(cubeTexture: CubeTexture | GPUTexture, viewDescriptor?: GPUTextureViewDescriptor): GPUTextureView | null {
+		const targetGPUTexture = cubeTexture instanceof GPUTexture ? cubeTexture : cubeTexture?.gpuTexture
+		const targetViewDescriptor = cubeTexture instanceof GPUTexture ? null : cubeTexture?.viewDescriptor
+		if (!targetGPUTexture) {
 			return this.#emptyCubeTextureView;
 		}
-
-		let cachedView = textureViewCache.get(cubeTexture.gpuTexture);
+		let cachedView = textureViewCache.get(targetGPUTexture);
 		if (!cachedView) {
 			// 캐시에 없으면 새로 생성하고 저장
-			const targetDescriptor = {...(viewDescriptor || cubeTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor),label: cubeTexture?.gpuTexture?.label}
-			cachedView = cubeTexture.gpuTexture.createView(targetDescriptor);
-			textureViewCache.set(cubeTexture.gpuTexture, cachedView);
+			const targetDescriptor = {
+				...(viewDescriptor || targetViewDescriptor || CubeTexture.defaultViewDescriptor),
+				label: targetGPUTexture?.label
+			}
+			cachedView = targetGPUTexture.createView(targetDescriptor);
+			textureViewCache.set(targetGPUTexture, cachedView);
 		}
-
 		return cachedView;
 	}
 

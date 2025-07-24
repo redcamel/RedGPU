@@ -25,7 +25,6 @@ class PackedTexture {
 	#gpuTexture: GPUTexture;
 	#gpuDevice: GPUDevice;
 	#bindGroup: GPUBindGroup;
-	#tempViewCache: Map<string, GPUTextureView> = new Map();
 	#tempBindGroupCache: Map<string, GPUBindGroup> = new Map();
 
 	get gpuTexture(): GPUTexture {
@@ -67,39 +66,28 @@ class PackedTexture {
 		}
 	}
 
-	#createTextureView(texture: GPUTexture, channel: string): GPUTextureView {
-		if (!texture) return this.#redGPUContext.resourceManager.emptyBitmapTextureView;
 
-		const key = `${texture.label}_${channel}`;
-
-		if (!this.#tempViewCache.has(key)) {
-			const view = texture.createView({label: key});
-			this.#tempViewCache.set(key, view);
-		}
-
-		return this.#tempViewCache.get(key)!;
-	}
 
 	#updateBindGroup(textures: { r?: GPUTexture; g?: GPUTexture; b?: GPUTexture; a?: GPUTexture }) {
 		const textureKey = `${textures.r?.label || 'empty'}_${textures.g?.label || 'empty'}_${textures.b?.label || 'empty'}_${textures.a?.label || 'empty'}`;
-
+		const {resourceManager} = this.#redGPUContext
 		if (!this.#tempBindGroupCache.has(textureKey)) {
 			const bindGroupEntries = [
 				{
 					binding: 0,
-					resource: this.#createTextureView(textures.r, 'r')
+					resource: resourceManager.getGPUResourceBitmapTextureView(textures.r)
 				},
 				{
 					binding: 1,
-					resource: this.#createTextureView(textures.g, 'g')
+					resource: resourceManager.getGPUResourceBitmapTextureView(textures.g)
 				},
 				{
 					binding: 2,
-					resource: this.#createTextureView(textures.b, 'b')
+					resource: resourceManager.getGPUResourceBitmapTextureView(textures.b)
 				},
 				{
 					binding: 3,
-					resource: this.#createTextureView(textures.a, 'a')
+					resource: resourceManager.getGPUResourceBitmapTextureView(textures.a)
 				},
 				{binding: 4, resource: this.#sampler},
 				{binding: 5, resource: {buffer: mappingBuffer}}
@@ -125,7 +113,7 @@ class PackedTexture {
 		componentMapping?: ComponentMapping
 	) {
 		// 캐시 초기화 (새로운 패킹 작업 시작 시)
-		this.#clearTempCaches();
+
 
 		const mapping = {
 			r: 'r',
@@ -147,7 +135,7 @@ class PackedTexture {
 		const currEntry = cacheMap.get(mappingKey);
 		if (currEntry) {
 			// 캐시 정리 (기존 텍스처 사용 시)
-			this.#clearTempCaches();
+
 			return;
 		}
 
@@ -155,7 +143,7 @@ class PackedTexture {
 		await this.#createPackedTexture(textures, width, height, label, mapping, mappingKey);
 
 		// 캐시 정리 (새 텍스처 생성 완료 후)
-		this.#clearTempCaches();
+
 	}
 
 	#handleCacheManagement(mappingKey: string) {
@@ -254,14 +242,6 @@ class PackedTexture {
 	}
 
 	/**
-	 * 임시 캐시 정리
-	 */
-	#clearTempCaches() {
-		this.#tempViewCache.clear();
-		this.#tempBindGroupCache.clear();
-	}
-
-	/**
 	 * 인스턴스 정리 메서드
 	 */
 	destroy() {
@@ -279,7 +259,6 @@ class PackedTexture {
 			instanceMappingKeys.delete(this);
 		}
 
-		this.#clearTempCaches();
 	}
 
 	#createPipeline(): GPURenderPipeline {
