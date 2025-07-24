@@ -1,4 +1,5 @@
 import RedGPUContext from "../../context/RedGPUContext";
+import resourceManager from "../../resources/resourceManager/ResourceManager";
 import validateRedGPUContext from "../../runtimeChecker/validateFunc/validateRedGPUContext";
 import getMipLevelCount from "../../utils/math/getMipLevelCount";
 import View3D from "./View3D";
@@ -65,7 +66,7 @@ class ViewRenderTextureManager {
 	}
 
 	#createRender2PathTexture() {
-		const {gpuDevice} = this.#redGPUContext
+		const {gpuDevice,resourceManager} = this.#redGPUContext
 		const currentTexture = this.#renderPath1ResultTexture
 		const {pixelRectObject} = this.#view
 		const {width: pixelRectObjectW, height: pixelRectObjectH} = pixelRectObject
@@ -86,13 +87,13 @@ class ViewRenderTextureManager {
 				label: `renderPath1ResultTexture_${pixelRectObjectW}x${pixelRectObjectH}_${Date.now()}`
 			}
 			this.#renderPath1ResultTexture = gpuDevice.createTexture(this.#renderPath1ResultTextureDescriptor);
-			this.#renderPath1ResultTextureView = this.#renderPath1ResultTexture.createView({label: this.#renderPath1ResultTexture.label})
+			this.#renderPath1ResultTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#renderPath1ResultTexture)
 		}
 	}
 
 	#createTextureIfNeeded(textureType: 'depth' | 'color'): void {
 		const depthYn = textureType === 'depth'
-		const {antialiasingManager, gpuDevice} = this.#redGPUContext
+		const {antialiasingManager, gpuDevice,resourceManager} = this.#redGPUContext
 		const {useMSAA} = antialiasingManager
 		const currentTexture = depthYn ? this.#depthTexture : this.#colorTexture;
 		const {pixelRectObject} = this.#view
@@ -125,10 +126,10 @@ class ViewRenderTextureManager {
 			})
 			if (depthYn) {
 				this.#depthTexture = newTexture;
-				this.#depthTextureView = newTexture.createView({label: newTexture.label});
+				this.#depthTextureView = resourceManager.getGPUResourceBitmapTextureView(newTexture);
 			} else {
 				this.#colorTexture = newTexture;
-				this.#colorTextureView = newTexture.createView({label: newTexture.label});
+				this.#colorTextureView = resourceManager.getGPUResourceBitmapTextureView(newTexture);
 				if (useMSAA) {
 					const newResolveTexture = gpuDevice.createTexture({
 						size: {
