@@ -216,7 +216,7 @@ class InstancingMesh extends Mesh {
 				},
 				{
 					binding: 2,
-					resource: material?.displacementTexture?.gpuTexture?.createView() || emptyBitmapTextureView
+					resource: resourceManager.getGPUResourceBitmapTextureView(material?.displacementTexture) || emptyBitmapTextureView
 				}
 			]
 		}
@@ -260,7 +260,7 @@ class InstancingMesh extends Mesh {
 				},
 				{
 					binding: 2,
-					resource: material?.displacementTexture?.gpuTexture?.createView() || emptyBitmapTextureView
+					resource: resourceManager.getGPUResourceBitmapTextureView(material?.displacementTexture) || emptyBitmapTextureView
 				}
 			]
 		}

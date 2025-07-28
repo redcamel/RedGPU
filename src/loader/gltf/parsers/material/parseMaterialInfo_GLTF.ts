@@ -70,6 +70,9 @@ const parseMaterialInfo_GLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, meshPrim
 					currentMaterial,
 					metallicRoughnessTextureInfo,
 					'metallicRoughnessTexture',
+					null,
+					false
+
 				)
 			}
 		}
@@ -98,6 +101,8 @@ const parseMaterialInfo_GLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, meshPrim
 				currentMaterial,
 				occlusionTextureInfo,
 				'occlusionTexture',
+				null,
+				false
 			)
 			currentMaterial.occlusionStrength = materialInfo.occlusionTexture.strength || 1;
 		}

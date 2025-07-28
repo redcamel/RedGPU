@@ -1,4 +1,3 @@
-// Import necessary modules and classes
 import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
 import ResourceManager from "../../resources/resourceManager/ResourceManager";
@@ -65,7 +64,7 @@ class PassClustersLight {
 			]
 		});
 		this.#clusterLightBindGroup = gpuDevice.createBindGroup({
-			label: 'clusterLightBindGroup',
+			label: 'CLUSTER_LIGHT_BIND_GROUP',
 			layout: clusterLightBindGroupLayout,
 			entries: [
 				{
@@ -77,8 +76,9 @@ class PassClustersLight {
 			]
 		});
 		this.#clusterLightPipeline = gpuDevice.createComputePipeline({
-			label: 'clusterLightPipeline',
+			label: 'CLUSTER_LIGHT_PIPELINE',
 			layout: gpuDevice.createPipelineLayout({
+				label: 'CLUSTER_LIGHT_PIPELINE_LAYOUT',
 				bindGroupLayouts: [
 					resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System),
 					clusterLightBindGroupLayout
@@ -87,7 +87,7 @@ class PassClustersLight {
 			compute: {
 				module: gpuDevice.createShaderModule({
 					code: source,
-					label: "Cluster Light"
+					label: "CLUSTER_LIGHTS"
 				}),
 				entryPoint: 'main'
 			}

@@ -69,7 +69,7 @@ const addRandomMeshes = (redGPUContext, scene) => {
 		new RedGPU.Primitive.Torus(redGPUContext, 1.5, 0.5, 16, 32),
 		new RedGPU.Primitive.TorusKnot(redGPUContext, 0.5, 0.2, 128, 64, 2, 3)
 	];
-
+//tt
 	const ground = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Ground(redGPUContext), new RedGPU.Material.PhongMaterial(redGPUContext, '#ff0000'));
 	ground.setScale(200);
 	ground.receiveShadow = true;

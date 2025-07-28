@@ -72,7 +72,7 @@ const processStorages = (storage) => {
 const reflectCache = new Map<string, any>();
 const parseWGSL = (code: string) => {
 	const {defaultSource, shaderSourceVariant, conditionalBlocks, cacheKey} = preprocessWGSL(code);
-	// 🎯 리플렉트 캐시 확인
+	// 리플렉트 캐시 확인
 	const cachedReflect = reflectCache.get(cacheKey);
 	let reflectResult;
 	if (cachedReflect) {
@@ -80,9 +80,9 @@ const parseWGSL = (code: string) => {
 		reflectResult = cachedReflect
 	} else {
 		console.log('🔄 리플렉트 파싱 시작:', cacheKey);
-		// 🎯 새로운 리플렉트 생성
+		// 새로운 리플렉트 생성
 		const reflect = new WgslReflect(defaultSource);
-		// 🎯 리플렉트 결과 처리
+		// 리플렉트 결과 처리
 		reflectResult = {
 			uniforms: {...processUniforms(reflect.uniforms)},
 			storage: {...processStorages(reflect.storage)},
@@ -92,7 +92,7 @@ const parseWGSL = (code: string) => {
 			fragmentEntries: reflect.entry.fragment.map(v => v.name),
 			computeEntries: reflect.entry.compute.map(v => v.name),
 		};
-		// 🎯 캐시에 저장
+		// 캐시에 저장
 		reflectCache.set(cacheKey, reflectResult);
 	}
 	return {

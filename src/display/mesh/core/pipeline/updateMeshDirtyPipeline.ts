@@ -28,8 +28,8 @@ const updateMeshDirtyPipeline = (
 	)
 	gpuRenderInfo.vertexShaderModule = vertexShader
 	gpuRenderInfo.pipeline = createBasePipeline(mesh, vertexShader, vertexBindGroupLayout)
-	gpuRenderInfo.shadowPipeline = mesh.gpuRenderInfo.vertexStructInfo.vertexEntries.includes('drawDirectionalShadowDepth') ? createBasePipeline(mesh, vertexShader, vertexBindGroupLayout, PIPELINE_TYPE.SHADOW) : null
-	gpuRenderInfo.pickingPipeline = mesh.gpuRenderInfo.vertexStructInfo.vertexEntries.includes('picking') ? createBasePipeline(mesh, vertexShader, vertexBindGroupLayout, PIPELINE_TYPE.PICKING) : null
+	gpuRenderInfo.shadowPipeline = null
+	gpuRenderInfo.pickingPipeline = null
 	const {vertexUniformInfo} = mesh.gpuRenderInfo
 	const {members} = vertexUniformInfo
 	for (const k in members) {

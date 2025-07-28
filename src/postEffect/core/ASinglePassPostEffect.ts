@@ -252,10 +252,12 @@ class ASinglePassPostEffect {
 			console.log('this.#computeBindGroupLayout0 ', this.#computeBindGroupLayout0, this.#computeBindGroupEntries0)
 			console.log('this.#computeBindGroupLayout1 ', this.#computeBindGroupLayout1, this.#computeBindGroupEntries1)
 			this.#computeBindGroup0 = gpuDevice.createBindGroup({
+				label: `${this.#name}_BIND_GROUP_0_USE_MSAA_${useMSAA}`,
 				layout: this.#computeBindGroupLayout0,
 				entries: this.#computeBindGroupEntries0
 			})
 			this.#computeBindGroup1 = gpuDevice.createBindGroup({
+				label: `${this.#name}_BIND_GROUP_1_USE_MSAA_${useMSAA}`,
 				layout: this.#computeBindGroupLayout1,
 				entries: this.#computeBindGroupEntries1
 			})

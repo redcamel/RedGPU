@@ -1,3 +1,5 @@
+import {keepLog} from "../../../utils";
+import getAbsoluteURL from "../../../utils/file/getAbsoluteURL";
 import {GLTF} from "../GLTF";
 import GLTFLoader from "../GLTFLoader";
 
@@ -48,22 +50,38 @@ const getGLTFBuffersResources = (gltfLoader: GLTFLoader, gltfData: GLTF, callbac
 	});
 };
 export default getGLTFBuffersResources
-const arrayBufferLoader = (url, onSuccess, onError) => {
-	fetch(url)
+
+const cacheMap: Map<string, ArrayBuffer> = new Map();
+const pendingMap: Map<string, Promise<ArrayBuffer>> = new Map();
+
+const arrayBufferLoader = (url: string, onSuccess, onError) => {
+	const originURL = url
+	url = getAbsoluteURL(window.location.href, url)
+	// keepLog(url,originURL)
+	if (cacheMap.has(url)) {
+		onSuccess?.(cacheMap.get(url)!);
+		return;
+	}
+
+
+	if (pendingMap.has(url)) {
+		pendingMap.get(url)!.then(data => onSuccess?.(data)).catch(err => onError?.(err));
+		return;
+	}
+
+	const promise = fetch(url)
 		.then(response => {
-			if (!response.ok) {
-				throw new Error(`Network response was not ok ${response.statusText}`);
-			}
+			if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
 			return response.arrayBuffer();
 		})
 		.then(data => {
-			if (onSuccess) {
-				onSuccess(data);
-			}
+			cacheMap.set(url, data);
+			return data;
 		})
-		.catch(error => {
-			if (onError) {
-				onError(error);
-			}
+		.finally(() => {
+			pendingMap.delete(url);
 		});
-}
+	pendingMap.set(url, promise);
+
+	promise.then(data => onSuccess?.(data)).catch(err => onError?.(err));
+};

@@ -13,6 +13,8 @@ const parse_KHR_materials_transmission = (currentMaterial: PBRMaterial, KHR_mate
 				currentMaterial,
 				transmissionTextureInfo,
 				'KHR_transmissionTexture',
+				null,
+				false
 			)
 		}
 	}

@@ -279,8 +279,9 @@ class View3D extends ViewTransform {
 		this.#updateClusters(true)
 		const ibl_iblTexture = ibl?.iblTexture
 		const ibl_irradianceTexture = ibl?.irradianceTexture
+		const {resourceManager} = this.redGPUContext;
 		const systemUniform_Vertex_BindGroupDescriptor: GPUBindGroupDescriptor = {
-			layout: this.redGPUContext.resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System),
+			layout: resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System),
 			label: `SYSTEM_UNIFORM_bindGroup_${key}`,
 			entries: [
 				{
@@ -326,7 +327,7 @@ class View3D extends ViewTransform {
 				{
 					binding: 8,
 					resource: renderPath1ResultTextureView
-						|| this.redGPUContext.resourceManager.emptyBitmapTextureView
+						|| resourceManager.emptyBitmapTextureView
 				},
 				{
 					binding: 9,
@@ -335,14 +336,12 @@ class View3D extends ViewTransform {
 				{
 					binding: 10,
 					resource:
-						ibl_iblTexture?.gpuTexture?.createView(ibl_iblTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor)
-						|| this.redGPUContext.resourceManager.emptyCubeTextureView
+						resourceManager.getGPUResourceCubeTextureView(ibl_iblTexture,ibl_iblTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor)
 				},
 				{
 					binding: 11,
 					resource:
-						ibl_irradianceTexture?.gpuTexture?.createView(ibl_irradianceTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor)
-						|| this.redGPUContext.resourceManager.emptyCubeTextureView
+						resourceManager.getGPUResourceCubeTextureView(ibl_irradianceTexture,ibl_irradianceTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor)
 				},
 			]
 		}

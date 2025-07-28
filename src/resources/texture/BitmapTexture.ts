@@ -23,6 +23,13 @@ class BitmapTexture extends ManagedResourceBase {
 	readonly #onLoad: (textureInstance: BitmapTexture) => void;
 	readonly #onError: (error: Error) => void;
 
+	get width(): number {
+		return this.#imgBitmap?.width || 0
+	}
+	get height(): number {
+		return this.#imgBitmap?.height || 0
+	}
+
 	constructor(
 		redGPUContext: RedGPUContext,
 		src?: any,

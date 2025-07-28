@@ -15,6 +15,8 @@ const parse_KHR_materials_diffuse_transmission = (currentMaterial: PBRMaterial, 
 				currentMaterial,
 				diffuseTransmissionTextureInfo,
 				'KHR_diffuseTransmissionTexture',
+				null,
+				false
 			)
 		}
 		const diffuseTransmissionColorTextureInfo = KHR_materials_diffuse_transmission.diffuseTransmissionColorTexture;
@@ -24,7 +26,8 @@ const parse_KHR_materials_diffuse_transmission = (currentMaterial: PBRMaterial, 
 				currentMaterial,
 				diffuseTransmissionColorTextureInfo,
 				'KHR_diffuseTransmissionColorTexture',
-				`${navigator.gpu.getPreferredCanvasFormat()}-srgb`
+				`${navigator.gpu.getPreferredCanvasFormat()}-srgb`,
+				false
 			)
 		}
 	}

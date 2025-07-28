@@ -1,9 +1,12 @@
 import RedGPUContext from "../../context/RedGPUContext";
+import {keepLog} from "../../utils";
 import ResourceBase from "../ResourceBase";
 import Sampler from "../sampler/Sampler";
 import BitmapTexture from "../texture/BitmapTexture";
+import DownSampleCubeMapGenerator from "../texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator";
 import MipmapGenerator from "../texture/core/mipmapGenerator/MipmapGenerator";
 import CubeTexture from "../texture/CubeTexture";
+import PackedTexture from "../texture/packedTexture/PackedTexture";
 import preprocessWGSL from "../wgslParser/preprocessWGSL";
 import ResourceState from "./resourceState/ResourceState";
 
@@ -18,6 +21,8 @@ enum ResourceType {
 	GPUBindGroupLayout = 'GPUBindGroupLayout',
 	GPUPipelineLayout = 'GPUPipelineLayout',
 }
+
+const textureViewCache = new WeakMap<GPUTexture, GPUTextureView>();
 
 /**
  * Class representing a resource manager.
@@ -51,6 +56,7 @@ class ResourceManager extends ResourceBase {
 	#emptyBitmapTextureView: GPUTextureView
 	#emptyCubeTextureView: GPUTextureView
 	readonly #mipmapGenerator: MipmapGenerator
+	readonly #downSampleCubeMapGenerator: DownSampleCubeMapGenerator
 	#basicSampler: Sampler
 
 	/**
@@ -61,7 +67,43 @@ class ResourceManager extends ResourceBase {
 	constructor(redGPUContext: RedGPUContext) {
 		super(redGPUContext)
 		this.#mipmapGenerator = new MipmapGenerator(redGPUContext)
+		this.#downSampleCubeMapGenerator = new DownSampleCubeMapGenerator(redGPUContext)
 		this.#initPresets()
+	}
+
+	getGPUResourceBitmapTextureView(texture: BitmapTexture | PackedTexture | GPUTexture): GPUTextureView | null {
+		const targetGPUTexture = texture instanceof GPUTexture ? texture : texture?.gpuTexture
+		if (!targetGPUTexture) {
+			return this.#emptyBitmapTextureView;
+		}
+		let cachedView = textureViewCache.get(targetGPUTexture);
+		if (!cachedView) {
+			// 캐시에 없으면 새로 생성하고 저장
+			cachedView = targetGPUTexture.createView({
+				label: targetGPUTexture.label
+			});
+			textureViewCache.set(targetGPUTexture, cachedView);
+		}
+		return cachedView;
+	}
+
+	getGPUResourceCubeTextureView(cubeTexture: CubeTexture | GPUTexture, viewDescriptor?: GPUTextureViewDescriptor): GPUTextureView | null {
+		const targetGPUTexture = cubeTexture instanceof GPUTexture ? cubeTexture : cubeTexture?.gpuTexture
+		const targetViewDescriptor = cubeTexture instanceof GPUTexture ? null : cubeTexture?.viewDescriptor
+		if (!targetGPUTexture) {
+			return this.#emptyCubeTextureView;
+		}
+		let cachedView = textureViewCache.get(targetGPUTexture);
+		if (!cachedView) {
+			// 캐시에 없으면 새로 생성하고 저장
+			const targetDescriptor = {
+				...(viewDescriptor || targetViewDescriptor || CubeTexture.defaultViewDescriptor),
+				label: targetGPUTexture?.label
+			}
+			cachedView = targetGPUTexture.createView(targetDescriptor);
+			textureViewCache.set(targetGPUTexture, cachedView);
+		}
+		return cachedView;
 	}
 
 	get basicSampler(): Sampler {
@@ -70,6 +112,10 @@ class ResourceManager extends ResourceBase {
 
 	get mipmapGenerator(): MipmapGenerator {
 		return this.#mipmapGenerator;
+	}
+
+	get downSampleCubeMapGenerator(): DownSampleCubeMapGenerator {
+		return this.#downSampleCubeMapGenerator
 	}
 
 	get cachedBufferState(): any {
@@ -229,7 +275,7 @@ class ResourceManager extends ResourceBase {
 				size: {width: 1, height: 1, depthOrArrayLayers: 1},
 				format: 'rgba8unorm', // RGBA 포맷으로 변경 (r8unorm은 단일 채널 미지원)
 				usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST, // 데이터 복사 가능하도록 COPY_DST 추가
-				label: 'emptyBitmapTexture',
+				label: 'EMPTY_BITMAP_TEXTURE',
 			});
 			this.#emptyBitmapTextureView = emptyBitmapTexture.createView({label: emptyBitmapTexture.label}); // 뷰 생성
 			const transparentPixel = new Uint8Array([0, 0, 0, 0]); // 투명 RGBA (1x1)
@@ -245,7 +291,7 @@ class ResourceManager extends ResourceBase {
 				size: {width: 1, height: 1, depthOrArrayLayers: 6}, // 6 레이어로 구성된 큐브 맵
 				format: 'rgba8unorm', // 큐브 맵도 RGBA 포맷 사용
 				usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST, // 복사 가능하도록 COPY_DST 포함
-				label: 'emptyCubeTexture',
+				label: 'EMPTY_CUBE_TEXTURE',
 			});
 			this.#emptyCubeTextureView = emptyCubeTexture.createView(CubeTexture.defaultViewDescriptor); // 뷰 생성
 			// 각 큐브 면 초기화 데이터 (RGBA)
