@@ -16,7 +16,8 @@ class MipmapGenerator {
 	// WeakMap을 사용한 바인드 그룹 캐시 (GPUTexture 키로 사용)
 	#persistentBindGroupCache: WeakMap<GPUTexture, {bindGroup:GPUBindGroup,textureView:GPUTextureView}> = new WeakMap();
 	// 텍스처 뷰용 persistent 캐시 추가
-	#persistentViewCache: Map<string, GPUTextureView> = new Map();
+	#persistentViewCache: WeakMap<GPUTexture, Map<string, GPUTextureView>> = new WeakMap();
+
 
 	constructor(redGPUContext: RedGPUContext) {
 		this.#redGPUContext = redGPUContext
@@ -25,12 +26,19 @@ class MipmapGenerator {
 	}
 
 	createTextureView(texture: GPUTexture, baseMipLevel: number, baseArrayLayer: number, useCache: boolean = false): GPUTextureView {
-		const key = `MIPMAP_GENERATOR_${texture.label}_${baseMipLevel}_${baseArrayLayer}`;
+		const key = `${baseMipLevel}_${baseArrayLayer}`;
 
 		if (useCache) {
-			// persistent 캐시 확인
-			if (this.#persistentViewCache.has(key)) {
-				return this.#persistentViewCache.get(key)!;
+			// WeakMap에서 해당 텍스처의 뷰 캐시 맵 가져오기
+			let textureViewMap = this.#persistentViewCache.get(texture);
+			if (!textureViewMap) {
+				textureViewMap = new Map();
+				this.#persistentViewCache.set(texture, textureViewMap);
+			}
+
+			// 캐시된 뷰가 있는지 확인
+			if (textureViewMap.has(key)) {
+				return textureViewMap.get(key)!;
 			}
 
 			const view = texture.createView({
@@ -39,28 +47,30 @@ class MipmapGenerator {
 				dimension: '2d',
 				baseArrayLayer,
 				arrayLayerCount: 1,
-				label: key
+				label: `MIPMAP_GENERATOR_CACHED_${texture.label}_${key}`
 			});
 
-			// persistent 캐시에 저장
-			this.#persistentViewCache.set(key, view);
+			// 캐시에 저장
+			textureViewMap.set(key, view);
 			return view;
 		} else {
 			// 기존 temp 캐시 로직
-			if (!this.#tempViewCache.has(key)) {
+			const tempKey = `MIPMAP_GENERATOR_${texture.label}_${baseMipLevel}_${baseArrayLayer}`;
+			if (!this.#tempViewCache.has(tempKey)) {
 				const view = texture.createView({
 					baseMipLevel,
 					mipLevelCount: 1,
 					dimension: '2d',
 					baseArrayLayer,
 					arrayLayerCount: 1,
-					label: key
+					label: tempKey
 				});
-				this.#tempViewCache.set(key, view);
+				this.#tempViewCache.set(tempKey, view);
 			}
-			return this.#tempViewCache.get(key)!;
+			return this.#tempViewCache.get(tempKey)!;
 		}
 	}
+
 
 	createBindGroup(texture: GPUTexture, textureView: GPUTextureView, useCache: boolean = false): GPUBindGroup {
 		const {gpuDevice} = this.#redGPUContext;
@@ -240,9 +250,6 @@ class MipmapGenerator {
 	}
 
 	destroy() {
-		// persistent 캐시도 정리
-		this.#persistentViewCache.clear();
-		// WeakMap은 자동으로 가비지 컬렉션되므로 별도 정리 불필요
 	}
 }
 
