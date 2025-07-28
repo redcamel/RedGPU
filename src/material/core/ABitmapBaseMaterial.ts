@@ -2,6 +2,7 @@ import RedGPUContext from "../../context/RedGPUContext";
 import Sampler from "../../resources/sampler/Sampler";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import CubeTexture from "../../resources/texture/CubeTexture";
+import ANoiseTexture from "../../resources/texture/noiseTexture/core/ANoiseTexture";
 import ABaseMaterial from "./ABaseMaterial";
 
 /**
@@ -27,7 +28,7 @@ class ABitmapBaseMaterial extends ABaseMaterial {
 	 * @param {BitmapTexture|CubeTexture} texture - The new texture to update and add listener to.
 	 *
 	 */
-	updateTexture(prevTexture: BitmapTexture | CubeTexture, texture: BitmapTexture | CubeTexture) {
+	updateTexture(prevTexture: BitmapTexture | CubeTexture | ANoiseTexture, texture: BitmapTexture | CubeTexture | ANoiseTexture) {
 		if (prevTexture) prevTexture.__removeDirtyPipelineListener(this.#updateFragmentState);
 		if (texture) texture.__addDirtyPipelineListener(this.#updateFragmentState);
 		this.#updateFragmentState()

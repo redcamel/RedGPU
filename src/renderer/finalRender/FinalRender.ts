@@ -191,7 +191,7 @@ class FinalRender {
 	#getFinalRenderPassDesc(redGPUContext: RedGPUContext): GPURenderPassDescriptor {
 		const {backgroundColor, gpuContext} = redGPUContext
 		const rgbaNormal = backgroundColor.rgbaNormal
-		const finalRenderTextureView = gpuContext.getCurrentTexture().createView({label: 'finalRenderTextureView'})
+		const finalRenderTextureView = gpuContext.getCurrentTexture().createView({label: 'FINAL_RENDER'})
 		const colorAttachment: GPURenderPassColorAttachment = {
 			view: finalRenderTextureView,
 			clearValue: {
@@ -214,6 +214,7 @@ class FinalRender {
 		if (!this.#pipeline || redGPUContext.antialiasingManager.changedMSAA) {
 			const {gpuDevice} = redGPUContext
 			const pipelineLayout: GPUPipelineLayout = gpuDevice.createPipelineLayout({
+				label:"FINAL_RENDER_PIPELINE_LAYOUT",
 				bindGroupLayouts: [
 					this.#vertexBindGroupLayout,
 					this.#fragmentBindGroupLayout

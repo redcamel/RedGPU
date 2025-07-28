@@ -120,14 +120,14 @@ function createToneMappingShaderCode(workgroupSize: [number, number]): string {
             let pixelIndex = y * constants.width + x;
             let baseIndex = pixelIndex * 4u;
             
-            /* 🎯 RGBA 각 채널 처리 */
+            /* RGBA 각 채널 처리 */
             var processedPixel = 0u;
             
             for (var channel = 0u; channel < 4u; channel++) {
                 let inputIndex = baseIndex + channel;
                 let originalVal = inputData[inputIndex];
                 
-                /* 🎯 노출값 적용 */
+                /* 노출값 적용 */
                 let exposedVal = originalVal * constants.exposure;
                 
                 /* 🎬 ACES 톤매핑 적용 */
@@ -136,7 +136,7 @@ function createToneMappingShaderCode(workgroupSize: [number, number]): string {
                 /* 🔧 감마 보정 적용 (sRGB) */
                 let gammaCorrectedVal = linearToSRGB(toneMappedVal);
                 
-                /* 🎯 최종 8bit 변환 */
+                /* 최종 8bit 변환 */
                 let uint8Val = u32(round(clamp(gammaCorrectedVal, 0.0, 1.0) * 255.0));
                 
                 /* 🔧 4개 채널을 하나의 u32에 패킹 */

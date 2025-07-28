@@ -16,7 +16,8 @@ const parse_KHR_materials_sheen = (currentMaterial: PBRMaterial, KHR_materials_s
 			currentMaterial,
 			sheenColorTextureInfo,
 			'KHR_sheenColorTexture',
-			`${navigator.gpu.getPreferredCanvasFormat()}-srgb`
+			`${navigator.gpu.getPreferredCanvasFormat()}-srgb`,
+			false
 		)
 	}
 	if (sheenRoughnessTextureInfo) {
@@ -25,6 +26,8 @@ const parse_KHR_materials_sheen = (currentMaterial: PBRMaterial, KHR_materials_s
 			currentMaterial,
 			sheenRoughnessTextureInfo,
 			'KHR_sheenRoughnessTexture',
+			null,
+			false
 		)
 	}
 }

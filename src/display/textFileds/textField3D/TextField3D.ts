@@ -24,14 +24,15 @@ class TextField3D extends ATextField {
 
 	constructor(redGPUContext: RedGPUContext, text?: string) {
 		super(redGPUContext, (width: number, height: number) => {
-			this.#renderTextureWidth = width / 1024
-			this.#renderTextureHeight = height / 1024
+			const prevWidth = this.#renderTextureWidth;
+			const prevHeight = this.#renderTextureHeight;
+			this.#renderTextureWidth = width / 1024;
+			this.#renderTextureHeight = height / 1024;
+			if (prevWidth !== this.#renderTextureWidth || prevHeight !== this.#renderTextureHeight) {
+				this.dirtyTransform = true;
+			}
 		});
 		this._geometry = new Plane(redGPUContext);
-		this._material = new TextFieldMaterial(redGPUContext, new BitmapTexture(redGPUContext))
-		this._material.transparent = true
-		this.dirtyPipeline = true
-		this.dirtyTransform = true
 		if (text) this.text = text
 	}
 

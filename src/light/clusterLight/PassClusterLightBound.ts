@@ -60,7 +60,7 @@ class PassClusterLightBound {
 			]
 		});
 		this.#clusterBoundBindGroup = gpuDevice.createBindGroup({
-			label: 'clusterBoundBindGroup',
+			label: 'CLUSTER_BOUND_BIND_GROUP',
 			layout: this.#clusterBoundBindGroupLayout,
 			entries: [
 				{
@@ -72,7 +72,7 @@ class PassClusterLightBound {
 			],
 		});
 		this.#clusterBoundPipeline = gpuDevice.createComputePipeline({
-			label: 'clusterBoundPipeline',
+			label: 'CLUSTER_BOUND_PIPELINE',
 			layout: gpuDevice.createPipelineLayout({
 				bindGroupLayouts: [
 					resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System),
@@ -82,7 +82,7 @@ class PassClusterLightBound {
 			compute: {
 				module: gpuDevice.createShaderModule({
 					code: source,
-					label: "Cluster Bounds"
+					label: "CLUSTER_BOUND"
 				}),
 				entryPoint: 'main',
 			}

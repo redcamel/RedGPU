@@ -1,11 +1,12 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import GPU_FILTER_MODE from "../../../gpuConst/GPU_FILTER_MODE";
 import GPU_MIPMAP_FILTER_MODE from "../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
-import BitmapMaterial from "../../../material/bitmapMaterial/BitmapMaterial";
 import RenderViewStateData from "../../../renderer/RenderViewStateData";
 import Sampler from "../../../resources/sampler/Sampler";
 import BitmapTexture from "../../../resources/texture/BitmapTexture";
+import {keepLog} from "../../../utils";
 import Mesh from "../../mesh/Mesh";
+import TextFieldMaterial from "./textFieldMaterial/TextFieldMaterial";
 
 const TEXT_CONTAINER_STYLE = ';box-sizing:content-box;white-space:nowrap;'
 
@@ -62,12 +63,18 @@ class ATextField extends Mesh {
 	#redGPUContext: RedGPUContext
 	#currentRequestAnimationFrame: number;
 	#needsUpdate: boolean = false; // 업데이트 플래그
+	#renderWidth: number
+	#renderHeight: number
+
 	constructor(redGPUContext: RedGPUContext, imgOnload: Function, mode3dYn: boolean = true) {
 		super(redGPUContext);
 		this.#redGPUContext = redGPUContext
 		this.#mode3dYn = mode3dYn
 		this.#textureImgOnload = imgOnload
-		this._material = new BitmapMaterial(redGPUContext, new BitmapTexture(redGPUContext))
+		this._material = new TextFieldMaterial(redGPUContext, new BitmapTexture(redGPUContext,null,true,v => {
+			this.#renderWidth = this.#textureImg.width
+			this.#renderHeight = this.#textureImg.height
+		}))
 		this._material.transparent = true
 		if (mode3dYn) {
 			this._material.diffuseTextureSampler = new Sampler(redGPUContext, {
@@ -108,7 +115,7 @@ class ATextField extends Mesh {
 	}
 
 	render(debugViewRenderState: RenderViewStateData) {
-		this.#textureImgOnload(this.#textureImg.width, this.#textureImg.height)
+		this.#textureImgOnload(this.#renderWidth, this.#renderHeight)
 		this.#updateTexture()
 		super.render(debugViewRenderState);
 	}
@@ -184,7 +191,6 @@ class ATextField extends Mesh {
 		this.#textureImg.style.cssText = 'position:absolute;bottom:0px;left:0;'
 		// document.body.appendChild(this.#img)
 		this.#textureImg.onload = _ => {
-			// keepLog('언제실행되나')
 			let tW: number, tH: number;
 			const {width, height} = this.#getRenderHtmlSize();
 			const multiple = this.#mode3dYn ? 2 : 2;
@@ -193,10 +199,12 @@ class ATextField extends Mesh {
 			tH = height * multiple;
 			this.#textureImg.width = tW / textureImgRatio;
 			this.#textureImg.height = tH / textureImgRatio;
-			console.log("Final Texture Sizes:", {
-				svgWidth: tW,
-				svgHeight: tH,
-			});
+			// keepLog("Final Texture Sizes:", {
+			// 	tW2: tW / textureImgRatio,
+			// 	tH2: tH / textureImgRatio,
+			// 	svgWidth: tW,
+			// 	svgHeight: tH,
+			// });
 			// 렌더링 크기 설정
 			this.#textureCvs.width = tW;
 			this.#textureCvs.height = tH;
@@ -215,14 +223,13 @@ class ATextField extends Mesh {
 			this.dirtyTransform = true;
 			// Blob으로 변환하여 처리
 			const callback = (blob: Blob | MediaSource) => {
+				const prevSrc = this.material.diffuseTexture.src
+				const isObjectURL = typeof prevSrc === 'string' && prevSrc?.startsWith?.('blob:');
+				if (isObjectURL) {
+					// keepLog('오브젝트URL삭제',prevSrc?.toString(),typeof prevSrc === 'string',prevSrc?.startsWith('blob:'))
+					URL.revokeObjectURL(prevSrc);
+				}
 				this.material.diffuseTexture.src = URL.createObjectURL(blob);
-				// new BitmapTexture(this.#redGPUContext, URL.createObjectURL(blob), true, v => {
-				//         this.material.diffuseTexture?.destroy();
-				//         this.material.diffuseTexture = v;
-				//         this.dirtyTransform = true;
-				//     },
-				//     null, null, false
-				// );
 			};
 			if (this.#textureCvs instanceof OffscreenCanvas) {
 				this.#textureCvs.convertToBlob({type: 'image/png'}).then(callback);

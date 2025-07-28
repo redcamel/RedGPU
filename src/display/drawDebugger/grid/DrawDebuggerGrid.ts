@@ -73,6 +73,7 @@ class DrawDebuggerGrid {
 		const basePipelineDescriptor: GPURenderPipelineDescriptor = {
 			label: PIPELINE_DESCRIPTOR_LABEL,
 			layout: gpuDevice.createPipelineLayout({
+				label: 'DRAW_DEBUGGER_GRID_PIPELINE_LAYOUT',
 				bindGroupLayouts: [
 					vertexBindGroupLayout,
 					fragmentBindGroupLayout,

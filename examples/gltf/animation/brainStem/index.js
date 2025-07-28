@@ -6,8 +6,9 @@ document.body.appendChild(canvas);
 RedGPU.init(
 	canvas,
 	(redGPUContext) => {
+		// redGPUContext.useDebugPanel = true
 		const controller = new RedGPU.Camera.ObitController(redGPUContext);
-		controller.distance = 4
+		controller.distance = 10
 		controller.speedDistance = 0.1
 		controller.tilt = 0
 
@@ -15,8 +16,18 @@ RedGPU.init(
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		redGPUContext.addView(view);
 
-		loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF-Binary/BrainStem.glb');
+		let i = 50
+		while (i--) {
+			// setTimeout(() => {
+			// 	loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb');
+				loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF/DamagedHelmet.gltf');
+			// 	loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CompareTransmission/glTF/CompareTransmission.gltf');
+			// 	loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF-Binary/BrainStem.glb');
+			// 	loadGLTF(view, '../../../assets/gltf/busterDrone/busterDrone.gltf');
+				// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/SimpleSkin/glTF/SimpleSkin.gltf');
 
+			// }, 100 * i)
+		}
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		const render = () => {};
 		renderer.start(redGPUContext, render);
@@ -31,11 +42,18 @@ RedGPU.init(
 	}
 );
 
+let num = 0
+
 function loadGLTF(view, url) {
 	const {redGPUContext, scene} = view;
 	new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
 		const mesh = result.resultMesh
 		mesh.y = -0.75
+		if (num) {
+			mesh.x = Math.random() * 10 - 5
+			mesh.z = Math.random() * 10 - 5
+		}
+		num++
 		scene.addChild(mesh)
 	});
 }

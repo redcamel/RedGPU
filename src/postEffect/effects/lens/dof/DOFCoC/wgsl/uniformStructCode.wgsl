@@ -49,14 +49,14 @@ fn calculateCoC(linearDepth: f32) -> f32 {
 
         signedCoC = -(rawCoC / uniforms.maxCoC);
 
-        /* 🎯 부드러운 강화 적용 */
+        /* 부드러운 강화 적용 */
         let absCoC = abs(signedCoC);
         if (absCoC > 0.05) {
             /* 급격한 증폭 대신 부드러운 곡선 사용 */
             signedCoC = -min(1.0, absCoC * smoothstep(0.05, 0.3, absCoC) * 1.5);
         }
 
-        /* 🎯 전환 영역에서 추가 부드러움 */
+        /* 전환 영역에서 추가 부드러움 */
         if (distanceFromFocus < transitionRange) {
             let transitionFactor = smoothstep(focusRange, transitionRange, distanceFromFocus);
             signedCoC = mix(0.0, signedCoC, transitionFactor);

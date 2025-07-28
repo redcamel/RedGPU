@@ -91,7 +91,7 @@ const logDuplicateKeys = (conditionalBlocks: ConditionalBlock[]): void => {
 	});
 	const duplicateKeys = Array.from(keyCount.entries()).filter(([_, count]) => count > 1);
 	if (duplicateKeys.length > 0) {
-		console.log('🎯 중복 키 발견:', duplicateKeys.map(([key, count]) => `${key}(${count}개)`));
+		console.log('중복 키 발견:', duplicateKeys.map(([key, count]) => `${key}(${count}개)`));
 	}
 	console.log('발견된 조건부 블록들:', conditionalBlocks.map(b =>
 		`${b.uniformName}[${b.blockIndex}]${b.elseBlock ? ' (else 포함)' : ''}`
@@ -147,9 +147,9 @@ const preprocessWGSL = (code: string): PreprocessedWGSLResult => {
 	const totalCombinations = Math.pow(2, uniqueKeys.length);
 	preprocessCache.set(cacheKey, result);
 	if (totalCombinations > 1) {
-		console.log(`🎯 레이지 바리안트 생성기 초기화 (캐시 저장):`, totalCombinations, cacheKey);
-		console.log('🎯 고유 키들:', uniqueKeys);
-		console.log('🎯 이론적 가능한 바리안트 수:', totalCombinations);
+		console.log(`레이지 바리안트 생성기 초기화 (캐시 저장):`, totalCombinations, cacheKey);
+		console.log('고유 키들:', uniqueKeys);
+		console.log('이론적 가능한 바리안트 수:', totalCombinations);
 	}
 	// keepLog('shaderSourceVariant',shaderSourceVariant)
 	return result;

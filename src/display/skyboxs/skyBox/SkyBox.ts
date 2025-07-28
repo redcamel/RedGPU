@@ -228,7 +228,7 @@ class SkyBox {
 			vertex_BindGroupLayout,
 			this.#material.gpuRenderInfo.fragmentBindGroupLayout
 		]
-		const pipelineLayoutDescriptor: GPUPipelineLayoutDescriptor = {bindGroupLayouts: bindGroupLayouts}
+		const pipelineLayoutDescriptor: GPUPipelineLayoutDescriptor = {bindGroupLayouts: bindGroupLayouts,label:'SKYBOX_PIPELINE_LAYOUT'}
 		const pipelineLayout: GPUPipelineLayout = gpuDevice.createPipelineLayout(pipelineLayoutDescriptor);
 		const pipelineDescriptor: GPURenderPipelineDescriptor = {
 			label: PIPELINE_DESCRIPTOR_LABEL,
