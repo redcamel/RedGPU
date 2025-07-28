@@ -156,7 +156,7 @@ class PostEffectManager {
 		const {redGPUContext} = this.#view;
 		const {gpuDevice, width} = redGPUContext;
 		const textureComputeShader = this.#getTextureComputeShader();
-		this.#textureComputeShaderModule = gpuDevice.createShaderModule({code: textureComputeShader,});
+		this.#textureComputeShaderModule = gpuDevice.createShaderModule({code: textureComputeShader,label: `PostEffect_Texture_ComputeShader_${Date.now()}`});
 		this.#textureComputeBindGroupLayout = this.#createTextureBindGroupLayout(redGPUContext);
 		this.#textureComputePipeline = this.#createTextureComputePipeline(gpuDevice, this.#textureComputeShaderModule, this.#textureComputeBindGroupLayout)
 		const SHADER_INFO = parseWGSL(postEffectSystemUniformCode)
@@ -258,6 +258,7 @@ class PostEffectManager {
 
 	#createTextureComputePipeline(gpuDevice: GPUDevice, shaderModule: GPUShaderModule, bindGroupLayout: GPUBindGroupLayout) {
 		return gpuDevice.createComputePipeline({
+			label: `${shaderModule.label}_${Date.now()}`,
 			layout: gpuDevice.createPipelineLayout({
 				bindGroupLayouts: [
 					bindGroupLayout,
