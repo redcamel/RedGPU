@@ -154,16 +154,19 @@ class PostEffectManager {
 
 	#init() {
 		const {redGPUContext} = this.#view;
-		const {gpuDevice, width} = redGPUContext;
+		const {gpuDevice} = redGPUContext;
 		const textureComputeShader = this.#getTextureComputeShader();
-		this.#textureComputeShaderModule = gpuDevice.createShaderModule({code: textureComputeShader,label: `PostEffect_Texture_ComputeShader_${Date.now()}`});
+		this.#textureComputeShaderModule = gpuDevice.createShaderModule({
+			code: textureComputeShader,
+			label: 'POST_EFFECT_TEXTURE_COPY_COMPUTE_SHADER'
+		});
 		this.#textureComputeBindGroupLayout = this.#createTextureBindGroupLayout(redGPUContext);
 		this.#textureComputePipeline = this.#createTextureComputePipeline(gpuDevice, this.#textureComputeShaderModule, this.#textureComputeBindGroupLayout)
 		const SHADER_INFO = parseWGSL(postEffectSystemUniformCode)
 		const UNIFORM_STRUCT = SHADER_INFO.uniforms.systemUniforms;
 		const postEffectSystemUniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength)
 		this.#postEffectSystemUniformBufferStructInfo = UNIFORM_STRUCT;
-		this.#postEffectSystemUniformBuffer = new UniformBuffer(redGPUContext, postEffectSystemUniformData, '#postEffectSystemUniformBuffer');
+		this.#postEffectSystemUniformBuffer = new UniformBuffer(redGPUContext, postEffectSystemUniformData, 'POST_EFFECT_SYSTEM_UNIFORM_BUFFER');
 	}
 
 	#renderToStorageTexture(view: View3D, sourceTextureView: GPUTextureView) {
@@ -180,7 +183,9 @@ class PostEffectManager {
 				this.#storageTexture = null;
 			}
 			this.#storageTexture = this.#createStorageTexture(gpuDevice, width, height);
-			this.#storageTextureView = this.#storageTexture.createView({label: this.#storageTexture.label});
+			this.#storageTextureView = this.#storageTexture.createView({
+				label: 'POST_EFFECT_STORAGE_TEXTURE_VIEW'
+			});
 		}
 		// 크기 변경 또는 MSAA 변경 시 BindGroup 재생성
 		if (dimensionsChanged || changedMSAA) {
@@ -227,7 +232,7 @@ class PostEffectManager {
 	}
 
 	#createTextureBindGroupLayout(redGPUContext: RedGPUContext) {
-		return redGPUContext.resourceManager.createBindGroupLayout('POST_EFFECT_COPY_TO_STORAGE', {
+		return redGPUContext.resourceManager.createBindGroupLayout('POST_EFFECT_TEXTURE_COPY_BIND_GROUP_LAYOUT', {
 			entries: [
 				{binding: 0, visibility: GPUShaderStage.COMPUTE, sampler: {type: 'filtering',}},
 				{binding: 1, visibility: GPUShaderStage.COMPUTE, texture: {}},
@@ -241,12 +246,14 @@ class PostEffectManager {
 			size: {width: width, height: height,},
 			format: 'rgba8unorm',
 			usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING,
-			label: `PostEffect_Storage_${width}x${height}_${Date.now()}`,
+			label: `POST_EFFECT_STORAGE_TEXTURE_${width}x${height}`,
 		});
 	}
 
 	#createTextureBindGroup(redGPUContext: RedGPUContext, bindGroupLayout: GPUBindGroupLayout, sourceTextureView: GPUTextureView, storageTextureView: GPUTextureView) {
+		const timestamp = Date.now();
 		return redGPUContext.gpuDevice.createBindGroup({
+			label: `POST_EFFECT_TEXTURE_COPY_BIND_GROUP_${timestamp}`,
 			layout: bindGroupLayout,
 			entries: [
 				{binding: 0, resource: new Sampler(redGPUContext).gpuSampler},
@@ -258,8 +265,9 @@ class PostEffectManager {
 
 	#createTextureComputePipeline(gpuDevice: GPUDevice, shaderModule: GPUShaderModule, bindGroupLayout: GPUBindGroupLayout) {
 		return gpuDevice.createComputePipeline({
-			label: `${shaderModule.label}_${Date.now()}`,
+			label: 'POST_EFFECT_TEXTURE_COPY_COMPUTE_PIPELINE',
 			layout: gpuDevice.createPipelineLayout({
+				label: 'POST_EFFECT_TEXTURE_COPY_PIPELINE_LAYOUT',
 				bindGroupLayouts: [
 					bindGroupLayout,
 				]
@@ -272,8 +280,12 @@ class PostEffectManager {
 	}
 
 	#executeComputePass(gpuDevice: GPUDevice, pipeline: GPUComputePipeline, bindGroup: GPUBindGroup, width: number, height: number) {
-		const commandEncoder = gpuDevice.createCommandEncoder();
-		const computePassEncoder = commandEncoder.beginComputePass();
+		const commandEncoder = gpuDevice.createCommandEncoder({
+			label: 'POST_EFFECT_TEXTURE_COPY_COMMAND_ENCODER'
+		});
+		const computePassEncoder = commandEncoder.beginComputePass({
+			label: 'POST_EFFECT_TEXTURE_COPY_COMPUTE_PASS'
+		});
 		computePassEncoder.setPipeline(pipeline);
 		computePassEncoder.setBindGroup(0, bindGroup);
 		computePassEncoder.dispatchWorkgroups(Math.ceil(width / this.#COMPUTE_WORKGROUP_SIZE_X), Math.ceil(height / this.#COMPUTE_WORKGROUP_SIZE_Y));
