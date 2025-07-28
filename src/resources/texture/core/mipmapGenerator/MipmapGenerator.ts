@@ -13,11 +13,10 @@ class MipmapGenerator {
 	#mipmapShaderModule: GPUShaderModule
 	#tempViewCache: Map<string, GPUTextureView> = new Map();
 	#tempBindGroupCache: Map<string, GPUBindGroup> = new Map();
-	// WeakMap을 사용한 바인드 그룹 캐시 (GPUTexture 키로 사용)
-	#persistentBindGroupCache: WeakMap<GPUTexture, {bindGroup:GPUBindGroup,textureView:GPUTextureView}> = new WeakMap();
-	// 텍스처 뷰용 persistent 캐시 추가
+	// WeakMap을 사용한 바인드 그룹 캐시 (GPUTexture를 키로 사용하고, textureView별 바인드 그룹 맵을 값으로 사용)
+	#persistentBindGroupCache: WeakMap<GPUTexture, Map<string, GPUBindGroup>> = new WeakMap();
+	// 텍스처 뷰용 persistent 캐시
 	#persistentViewCache: WeakMap<GPUTexture, Map<string, GPUTextureView>> = new WeakMap();
-
 
 	constructor(redGPUContext: RedGPUContext) {
 		this.#redGPUContext = redGPUContext
@@ -71,18 +70,27 @@ class MipmapGenerator {
 		}
 	}
 
-
 	createBindGroup(texture: GPUTexture, textureView: GPUTextureView, useCache: boolean = false): GPUBindGroup {
 		const {gpuDevice} = this.#redGPUContext;
 
 		if (useCache) {
-			// WeakMap에서 캐시된 바인드 그룹 확인
-			if (this.#persistentBindGroupCache.has(texture)) {
-				return this.#persistentBindGroupCache.get(texture).bindGroup;
+			// GPUTexture를 키로 바인드 그룹 캐시 맵 가져오기
+			let bindGroupMap = this.#persistentBindGroupCache.get(texture);
+			if (!bindGroupMap) {
+				bindGroupMap = new Map();
+				this.#persistentBindGroupCache.set(texture, bindGroupMap);
+			}
+
+			// textureView의 label을 키로 사용
+			const viewKey = textureView.label || 'unlabeled';
+
+			// 캐시된 바인드 그룹이 있는지 확인
+			if (bindGroupMap.has(viewKey)) {
+				return bindGroupMap.get(viewKey)!;
 			}
 
 			const bindGroup = gpuDevice.createBindGroup({
-				label: `MIPMAP_GENERATOR_BIND_GROUP_CACHED_${texture.label}`,
+				label: `MIPMAP_GENERATOR_BIND_GROUP_CACHED_${texture.label}_${viewKey}`,
 				layout: this.#bindGroupLayout,
 				entries: [{
 					binding: 0,
@@ -93,15 +101,18 @@ class MipmapGenerator {
 				}],
 			});
 
-			// WeakMap에 캐시
-			this.#persistentBindGroupCache.set(texture, {
-				bindGroup,
-				textureView,
-			});
+			// 캐시에 저장
+			bindGroupMap.set(viewKey, bindGroup);
 			return bindGroup;
 		} else {
-			return gpuDevice.createBindGroup({
-				label: `MIPMAP_GENERATOR_BIND_GROUP_${Date.now()}`,
+			// temp 캐시 사용 시에도 textureView 기반으로 키 생성
+			const tempKey = `${texture.label}_${textureView.label}`;
+			if (this.#tempBindGroupCache.has(tempKey)) {
+				return this.#tempBindGroupCache.get(tempKey)!;
+			}
+
+			const bindGroup = gpuDevice.createBindGroup({
+				label: `MIPMAP_GENERATOR_BIND_GROUP_TEMP_${tempKey}`,
 				layout: this.#bindGroupLayout,
 				entries: [{
 					binding: 0,
@@ -111,6 +122,9 @@ class MipmapGenerator {
 					resource: textureView,
 				}],
 			});
+
+			this.#tempBindGroupCache.set(tempKey, bindGroup);
+			return bindGroup;
 		}
 	}
 
@@ -204,7 +218,7 @@ class MipmapGenerator {
 						storeOp: GPU_STORE_OP.STORE
 					}],
 				});
-				// useCache 매개변수에 따라 바인드그룹 캐시 사용 여부 결정
+				// 현재 srcView에 맞는 바인드 그룹 생성 (textureView가 변경되므로 매번 새로운 바인드 그룹이 필요)
 				const bindGroup: GPUBindGroup = this.createBindGroup(texture, srcView, useCache);
 				passEncoder.setPipeline(pipeline);
 				passEncoder.setBindGroup(0, bindGroup);
@@ -250,6 +264,9 @@ class MipmapGenerator {
 	}
 
 	destroy() {
+		// WeakMap은 자동으로 정리되므로 별도 처리 불필요
+		// temp 캐시만 명시적으로 정리
+		this.#clearTempCaches();
 	}
 }
 
