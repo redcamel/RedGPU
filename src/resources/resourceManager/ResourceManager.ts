@@ -275,7 +275,7 @@ class ResourceManager extends ResourceBase {
 				size: {width: 1, height: 1, depthOrArrayLayers: 1},
 				format: 'rgba8unorm', // RGBA 포맷으로 변경 (r8unorm은 단일 채널 미지원)
 				usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST, // 데이터 복사 가능하도록 COPY_DST 추가
-				label: 'emptyBitmapTexture',
+				label: 'EMPTY_BITMAP_TEXTURE',
 			});
 			this.#emptyBitmapTextureView = emptyBitmapTexture.createView({label: emptyBitmapTexture.label}); // 뷰 생성
 			const transparentPixel = new Uint8Array([0, 0, 0, 0]); // 투명 RGBA (1x1)
@@ -291,7 +291,7 @@ class ResourceManager extends ResourceBase {
 				size: {width: 1, height: 1, depthOrArrayLayers: 6}, // 6 레이어로 구성된 큐브 맵
 				format: 'rgba8unorm', // 큐브 맵도 RGBA 포맷 사용
 				usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST, // 복사 가능하도록 COPY_DST 포함
-				label: 'emptyCubeTexture',
+				label: 'EMPTY_CUBE_TEXTURE',
 			});
 			this.#emptyCubeTextureView = emptyCubeTexture.createView(CubeTexture.defaultViewDescriptor); // 뷰 생성
 			// 각 큐브 면 초기화 데이터 (RGBA)

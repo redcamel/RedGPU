@@ -214,6 +214,7 @@ class FinalRender {
 		if (!this.#pipeline || redGPUContext.antialiasingManager.changedMSAA) {
 			const {gpuDevice} = redGPUContext
 			const pipelineLayout: GPUPipelineLayout = gpuDevice.createPipelineLayout({
+				label:"FINAL_RENDER_PIPELINE_LAYOUT",
 				bindGroupLayouts: [
 					this.#vertexBindGroupLayout,
 					this.#fragmentBindGroupLayout

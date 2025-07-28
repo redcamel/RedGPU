@@ -41,7 +41,7 @@ const createBasePipeline = (
 		vertexBindGroupLayout
 	]
 	if (pipelineType !== PIPELINE_TYPE.SHADOW) bindGroupLayouts.push(material_gpuRenderInfo.fragmentBindGroupLayout)
-	const pipelineLayoutDescriptor: GPUPipelineLayoutDescriptor = {bindGroupLayouts}
+	const pipelineLayoutDescriptor: GPUPipelineLayoutDescriptor = {bindGroupLayouts, label: `${module.label}_pipelineLayout`}
 	const pipelineLayout: GPUPipelineLayout = gpuDevice.createPipelineLayout(pipelineLayoutDescriptor);
 	const pipelineDescriptor: GPURenderPipelineDescriptor = {
 		label: pipelineLabel,
