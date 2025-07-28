@@ -275,13 +275,6 @@ class ABaseMaterial extends ResourceBase {
 		}
 	}
 
-	// getGPUResourceBitmapTextureView(texture: BitmapTexture) {
-	// 	return texture?.gpuTexture?.createView({label: texture?.gpuTexture?.label}) || this.#emptyBitmapGPUTextureView
-	// }
-	// getGPUResourceCubeTextureView(cubeTexture: CubeTexture, viewDescriptor?: GPUTextureViewDescriptor) {
-	// 	const targetDescriptor = {...(viewDescriptor || cubeTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor),label: cubeTexture?.gpuTexture?.label}
-	// 	return cubeTexture?.gpuTexture?.createView(targetDescriptor) || this.#emptyCubeTextureView
-	// }
 	getGPUResourceSampler(sampler: Sampler) {
 		return sampler?.gpuSampler || this.#basicGPUSampler
 	}

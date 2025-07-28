@@ -69,14 +69,15 @@ class PickingManager {
 
 	checkTexture(view: View3D) {
 		const {redGPUContext} = view
+		const {resourceManager} = redGPUContext
 		this.#view = view
 		this.#redGPUContext = redGPUContext
 		if (this.#pickingGPUTexture?.width !== this.#view.pixelRectObject.width || this.#pickingGPUTexture?.height !== this.#view.pixelRectObject.height) {
 			this.destroy()
 			this.#pickingGPUTexture = this.#createTexture('picking',navigator.gpu.getPreferredCanvasFormat())
-			this.#pickingGPUTextureView = this.#pickingGPUTexture.createView({label: this.#pickingGPUTexture.label})
+			this.#pickingGPUTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#pickingGPUTexture)
 			this.#pickingDepthGPUTexture = this.#createTexture('pickingDepth','depth32float')
-			this.#pickingDepthGPUTextureView = this.#pickingDepthGPUTexture.createView({label: this.#pickingDepthGPUTexture.label})
+			this.#pickingDepthGPUTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#pickingDepthGPUTexture)
 		}
 	}
 

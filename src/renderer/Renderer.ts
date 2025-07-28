@@ -26,7 +26,6 @@ class Renderer {
 		const viewList_renderPassDescriptorList: GPURenderPassDescriptor[] = []
 		/**
 		 * TODO - 단일 view를 렌더링하고, view.x,view.y가 0일때는
-		 * renderTextureView: GPUTextureView = redGPUContext.gpuContext.getCurrentTexture().createView()
 		 * 를 써도 될것 같은데... 왜냐면 뷰포트가 같으니까....
 		 */
 		{

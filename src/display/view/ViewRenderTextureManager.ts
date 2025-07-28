@@ -143,7 +143,7 @@ class ViewRenderTextureManager {
 						usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC
 					})
 					this.#colorResolveTexture = newResolveTexture
-					this.#colorResolveTextureView = newResolveTexture.createView({label: newResolveTexture.label})
+					this.#colorResolveTextureView = resourceManager.getGPUResourceBitmapTextureView(newResolveTexture)
 				}
 			}
 		}
