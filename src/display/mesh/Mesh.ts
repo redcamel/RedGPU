@@ -444,7 +444,6 @@ class Mesh extends MeshBase {
 			dirtyVertexUniformFromMaterial,
 			useDistanceCulling,
 			cullingDistanceSquared,
-			distanceCulling
 		} = debugViewRenderState
 		const {scene} = view
 		const {shadowManager} = scene
