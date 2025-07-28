@@ -3,6 +3,7 @@ import ResourceManager from "../../../../resources/resourceManager/ResourceManag
 import Mesh from "../../Mesh";
 import PIPELINE_TYPE from "./PIPELINE_TYPE";
 import resourceManager from "../../../../resources/resourceManager/ResourceManager";
+import {keepLog} from "../../../../utils";
 
 const createBasePipeline = (
 	mesh: Mesh,
@@ -20,15 +21,15 @@ const createBasePipeline = (
 	switch (pipelineType) {
 		case PIPELINE_TYPE.SHADOW :
 			entryPoint = 'drawDirectionalShadowDepth'
-			pipelineLabel = `${module.label}_shadow_pipelineDescriptor`
+			pipelineLabel = `${module.label}_shadow_pipeline`
 			break
 		case PIPELINE_TYPE.PICKING :
 			entryPoint = 'picking'
-			pipelineLabel = `${module.label}_picking_pipelineDescriptor`
+			pipelineLabel = `${module.label}_picking_pipeline`
 			break
 		default :
 			entryPoint = 'main'
-			pipelineLabel = `${module.label}_pipelineDescriptor`
+			pipelineLabel = `${module.label}_pipeline`
 	}
 	// 셰이더 모듈 설명자를 생성합니다.
 	const vertexState: GPUVertexState = {
@@ -42,8 +43,11 @@ const createBasePipeline = (
 		vertexBindGroupLayout
 	]
 	if (pipelineType !== PIPELINE_TYPE.SHADOW) bindGroupLayouts.push(material_gpuRenderInfo.fragmentBindGroupLayout)
-	const pipelineLayoutDescriptor: GPUPipelineLayoutDescriptor = {bindGroupLayouts}
-	const pipelineLayout: GPUPipelineLayout = resourceManager.createGPUPipelineLayout(`${module.label}_pipelineLayout`,pipelineLayoutDescriptor);
+	const pipelineLayoutDescriptor: GPUPipelineLayoutDescriptor = {bindGroupLayouts,label : `${pipelineLabel}_${material_gpuRenderInfo.fragmentBindGroupLayout.label}`}
+	const pipelineLayout: GPUPipelineLayout = resourceManager.createGPUPipelineLayout(`${pipelineLayoutDescriptor.label}`,pipelineLayoutDescriptor);
+	// keepLog('pipelineLayout',pipelineLayout)
+	// const pipelineLayout: GPUPipelineLayout = gpuDevice.createPipelineLayout(pipelineLayoutDescriptor);
+
 	const pipelineDescriptor: GPURenderPipelineDescriptor = {
 		label: pipelineLabel,
 		layout: pipelineLayout,
