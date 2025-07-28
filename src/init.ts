@@ -52,7 +52,7 @@ const init = async (
 	}
 	const validateAndRequestDevice = async (adapter: GPUAdapter) => {
 		const requiredFeatures = []
-		if (adapter.features.has("texture-compression-astc")) {
+		if (adapter?.features.has("texture-compression-astc")) {
 			//TODO - 확장확인
 			requiredFeatures.push("texture-compression-astc");
 		}
