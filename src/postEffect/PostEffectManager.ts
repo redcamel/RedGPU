@@ -172,7 +172,7 @@ class PostEffectManager {
 	#renderToStorageTexture(view: View3D, sourceTextureView: GPUTextureView) {
 		const {redGPUContext, viewRenderTextureManager} = view;
 		const {colorTexture} = viewRenderTextureManager;
-		const {gpuDevice, antialiasingManager} = redGPUContext;
+		const {gpuDevice, antialiasingManager,resourceManager} = redGPUContext;
 		const {useMSAA, changedMSAA} = antialiasingManager;
 		const {width, height} = colorTexture;
 		const dimensionsChanged = width !== this.#previousDimensions?.width || height !== this.#previousDimensions?.height;
@@ -183,9 +183,7 @@ class PostEffectManager {
 				this.#storageTexture = null;
 			}
 			this.#storageTexture = this.#createStorageTexture(gpuDevice, width, height);
-			this.#storageTextureView = this.#storageTexture.createView({
-				label: 'POST_EFFECT_STORAGE_TEXTURE_VIEW'
-			});
+			this.#storageTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#storageTexture);
 		}
 		// 크기 변경 또는 MSAA 변경 시 BindGroup 재생성
 		if (dimensionsChanged || changedMSAA) {

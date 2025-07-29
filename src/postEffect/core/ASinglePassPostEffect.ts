@@ -301,7 +301,7 @@ class ASinglePassPostEffect {
 	#createRenderTexture(view: View3D): boolean {
 		const {redGPUContext, viewRenderTextureManager} = view
 		const {colorTexture} = viewRenderTextureManager
-		const {gpuDevice} = redGPUContext
+		const {gpuDevice,resourceManager} = redGPUContext
 		const {width, height} = colorTexture
 		const needChange = width !== this.#prevInfo?.width || height !== this.#prevInfo?.height || this.#outputTexture.length === 0;
 		if (needChange) {
@@ -316,7 +316,7 @@ class ASinglePassPostEffect {
 				label: `PostEffect_${this.#name}_${width}x${height}_${Date.now()}`
 			})
 			this.#outputTexture.push(newTexture)
-			this.#outputTextureView.push(newTexture.createView({label: newTexture.label}))
+			this.#outputTextureView.push(resourceManager.getGPUResourceBitmapTextureView(newTexture))
 		}
 		this.#prevInfo = {
 			width,
