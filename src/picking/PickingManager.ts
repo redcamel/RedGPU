@@ -90,8 +90,8 @@ class PickingManager {
 	}
 
 	#createTexture(label:string,format: GPUTextureFormat): GPUTexture {
-		const {gpuDevice} = this.#redGPUContext
-		return gpuDevice.createTexture({
+		const {resourceManager} = this.#redGPUContext
+		return resourceManager.createManagedTexture({
 			size: [this.#view.pixelRectObject.width, this.#view.pixelRectObject.height, 1],
 			usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC,
 			format,

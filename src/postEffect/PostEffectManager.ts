@@ -239,7 +239,7 @@ class PostEffectManager {
 	}
 
 	#createStorageTexture(gpuDevice: GPUDevice, width: number, height: number) {
-		return gpuDevice.createTexture({
+		return this.#view.redGPUContext.resourceManager.createManagedTexture({
 			size: {width: width, height: height,},
 			format: 'rgba8unorm',
 			usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING,

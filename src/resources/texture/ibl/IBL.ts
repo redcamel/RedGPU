@@ -99,10 +99,10 @@ class IBL {
 	}
 
 	async #generateIrradianceMap(sourceCubeTexture: GPUTexture): Promise<GPUTexture> {
-		const {gpuDevice} = this.#redGPUContext;
+		const {gpuDevice,resourceManager} = this.#redGPUContext;
 		const irradianceSize = 32;
 		const irradianceMipLevels = 1;
-		const irradianceTexture = gpuDevice.createTexture({
+		const irradianceTexture = resourceManager.createManagedTexture({
 			size: [irradianceSize, irradianceSize, 6],
 			format: this.#format,
 			usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.RENDER_ATTACHMENT,

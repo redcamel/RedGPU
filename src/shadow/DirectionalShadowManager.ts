@@ -78,8 +78,8 @@ class DirectionalShadowManager {
 	}
 
 	#createDepthTexture() {
-		const {gpuDevice} = this.#redGPUContext
-		this.#shadowDepthTexture = gpuDevice.createTexture({
+		const {gpuDevice,resourceManager} = this.#redGPUContext
+		this.#shadowDepthTexture = resourceManager.createManagedTexture({
 			size: [this.#shadowDepthTextureSize, this.#shadowDepthTextureSize, 1],
 			usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
 			format: 'depth32float',

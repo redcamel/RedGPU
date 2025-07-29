@@ -8,6 +8,7 @@ import getMipLevelCount from "../../../utils/math/getMipLevelCount";
 import ManagedResourceBase from "../../ManagedResourceBase";
 import basicRegisterResource from "../../resourceManager/core/basicRegisterResource";
 import basicUnregisterResource from "../../resourceManager/core/basicUnregisterResource";
+import ResourceManager from "../../resourceManager/ResourceManager";
 import ResourceStateHDRTexture from "../../resourceManager/resourceState/ResourceStateHDRTexture";
 import Sampler from "../../sampler/Sampler";
 import CubeTexture from "../CubeTexture";
@@ -279,7 +280,7 @@ class HDRTexture extends ManagedResourceBase {
 			dimension: '2d',
 			label: `${this.#src}_cubemap_exp${this.#exposure.toFixed(2)}`
 		};
-		const newGPUTexture = gpuDevice.createTexture(cubeDescriptor);
+		const newGPUTexture = resourceManager.createManagedTexture(cubeDescriptor);
 		this.#setGpuTexture(newGPUTexture);
 		this.#mipLevelCount = cubeDescriptor.mipLevelCount || 1
 		this.#videoMemorySize = calculateTextureByteSize(cubeDescriptor)
@@ -312,7 +313,7 @@ class HDRTexture extends ManagedResourceBase {
 			usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
 			label: `${this.#src}_temp_exp${this.#exposure.toFixed(2)}`
 		};
-		const tempTexture = await this.#hdrDataToGPUTexture(gpuDevice, this.#hdrData, tempTextureDescriptor);
+		const tempTexture = await this.#hdrDataToGPUTexture(gpuDevice,resourceManager, this.#hdrData, tempTextureDescriptor);
 		await this.#generateCubeMapFromEquirectangular(tempTexture);
 		tempTexture.destroy();
 		if (this.#useMipmap) {
@@ -361,8 +362,8 @@ class HDRTexture extends ManagedResourceBase {
 		}
 	}
 
-	async #hdrDataToGPUTexture(device: GPUDevice, hdrData: HDRData, textureDescriptor: GPUTextureDescriptor): Promise<GPUTexture> {
-		const texture = device.createTexture(textureDescriptor);
+	async #hdrDataToGPUTexture(device:GPUDevice,resourceManager: ResourceManager, hdrData: HDRData, textureDescriptor: GPUTextureDescriptor): Promise<GPUTexture> {
+		const texture = resourceManager.createManagedTexture(textureDescriptor);
 		let bytesPerPixel: number;
 		let uploadData: ArrayBuffer;
 		switch (this.#format) {

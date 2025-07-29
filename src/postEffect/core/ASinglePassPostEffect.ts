@@ -306,7 +306,7 @@ class ASinglePassPostEffect {
 		const needChange = width !== this.#prevInfo?.width || height !== this.#prevInfo?.height || this.#outputTexture.length === 0;
 		if (needChange) {
 			this.clear()
-			const newTexture = gpuDevice.createTexture({
+			const newTexture = resourceManager.createManagedTexture({
 				size: {
 					width,
 					height,

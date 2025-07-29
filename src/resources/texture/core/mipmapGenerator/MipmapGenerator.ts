@@ -180,7 +180,7 @@ class MipmapGenerator {
 			this.#clearTempCaches();
 		}
 
-		const {gpuDevice} = this.#redGPUContext
+		const {gpuDevice,resourceManager} = this.#redGPUContext
 		const pipeline: GPURenderPipeline = this.getMipmapPipeline(textureDescriptor.format);
 		if (textureDescriptor.dimension == '3d' || textureDescriptor.dimension == '1d') {
 			throw new Error('Generating mipmaps for non-2d textures is currently unsupported!');
@@ -202,7 +202,7 @@ class MipmapGenerator {
 				usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.RENDER_ATTACHMENT,
 				mipLevelCount: textureDescriptor.mipLevelCount - 1,
 			};
-			mipTexture = gpuDevice.createTexture(mipTextureDescriptor);
+			mipTexture = resourceManager.createManagedTexture(mipTextureDescriptor);
 		}
 		const commandEncoder = gpuDevice.createCommandEncoder({});
 		for (let arrayLayer = 0; arrayLayer < arrayLayerCount; ++arrayLayer) {

@@ -109,7 +109,7 @@ class DownSampleCubeMapGenerator {
 
 			// 초기화
 			this.#initCubemapDownsampler();
-			const {gpuDevice} = this.#redGPUContext;
+			const {gpuDevice,resourceManager} = this.#redGPUContext;
 
 			// 입력 검증
 			if (!sourceCubemap) {
@@ -124,7 +124,7 @@ class DownSampleCubeMapGenerator {
 			console.log(`큐브맵 다운샘플링 시작: ${sourceCubemap.width}x${sourceCubemap.width} → ${targetSize}x${targetSize}`);
 
 			// 타겟 큐브맵 생성 (밉맵 포함)
-			const targetCubemap = gpuDevice.createTexture({
+			const targetCubemap = resourceManager.createManagedTexture({
 				size: [targetSize, targetSize, 6],
 				format: format,
 				usage: GPUTextureUsage.STORAGE_BINDING |

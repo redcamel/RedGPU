@@ -87,7 +87,7 @@ class ViewRenderTextureManager {
 				mipLevelCount: getMipLevelCount(pixelRectObjectW, pixelRectObjectH),
 				label: `${name}_renderPath1ResultTexture_${pixelRectObjectW}x${pixelRectObjectH}`
 			}
-			this.#renderPath1ResultTexture = gpuDevice.createTexture(this.#renderPath1ResultTextureDescriptor);
+			this.#renderPath1ResultTexture = resourceManager.createManagedTexture(this.#renderPath1ResultTextureDescriptor);
 			this.#renderPath1ResultTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#renderPath1ResultTexture)
 		}
 	}
@@ -107,13 +107,18 @@ class ViewRenderTextureManager {
 		if (needCreateTexture) {
 			if (currentTexture) {
 				currentTexture?.destroy()
-				if (!depthYn) {
+				if (depthYn) {
+					this.#depthTexture = null
+					this.#depthTextureView = null
+				}else{
 					this.#colorResolveTexture?.destroy()
+					this.#colorTexture = null
+					this.#colorTextureView = null
 					this.#colorResolveTexture = null
 					this.#colorResolveTextureView = null
 				}
 			}
-			const newTexture = gpuDevice.createTexture({
+			const newTexture = resourceManager.createManagedTexture({
 				size: [
 					Math.max(pixelRectObjectW, 1),
 					Math.max(pixelRectObjectH, 1),
@@ -132,7 +137,7 @@ class ViewRenderTextureManager {
 				this.#colorTexture = newTexture;
 				this.#colorTextureView = resourceManager.getGPUResourceBitmapTextureView(newTexture);
 				if (useMSAA) {
-					const newResolveTexture = gpuDevice.createTexture({
+					const newResolveTexture = resourceManager.createManagedTexture({
 						size: {
 							width: Math.max(pixelRectObjectW, 1),
 							height: Math.max(pixelRectObjectH, 1),

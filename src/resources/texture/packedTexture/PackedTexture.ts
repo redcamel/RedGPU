@@ -1,6 +1,7 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import {keepLog} from "../../../utils";
 import createUUID from "../../../utils/createUUID";
+import resourceManager from "../../resourceManager/ResourceManager";
 import Sampler from "../../sampler/Sampler";
 import computeShaderCode from "./computeShader.wgsl";
 
@@ -198,7 +199,7 @@ class PackedTexture {
 			this.#gpuTexture = null;
 		}
 
-		const packedTexture = this.#gpuDevice.createTexture(textureDescriptor);
+		const packedTexture = this.#redGPUContext.resourceManager.createManagedTexture(textureDescriptor);
 		const mappingData = new Uint32Array([
 			['r', 'g', 'b', 'a'].indexOf(mapping.r),
 			['r', 'g', 'b', 'a'].indexOf(mapping.g),

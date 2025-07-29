@@ -6,7 +6,7 @@ document.body.appendChild(canvas);
 RedGPU.init(
 	canvas,
 	(redGPUContext) => {
-		// redGPUContext.useDebugPanel = true
+		redGPUContext.useDebugPanel = true
 		const controller = new RedGPU.Camera.ObitController(redGPUContext);
 		controller.distance = 10
 		controller.speedDistance = 0.1
@@ -16,8 +16,13 @@ RedGPU.init(
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		redGPUContext.addView(view);
 
-			loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF-Binary/BrainStem.glb');
-		const renderer = new RedGPU.Renderer(redGPUContext);
+		let i = 10
+		while(i--) {
+			// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF-Binary/BrainStem.glb');
+			// loadGLTF(view, 	'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb');
+			loadGLTF(view, 	'../../../assets/gltf/busterDrone/busterDrone.gltf');
+		}
+			const renderer = new RedGPU.Renderer(redGPUContext);
 		const render = () => {};
 		renderer.start(redGPUContext, render);
 
