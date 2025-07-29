@@ -154,11 +154,10 @@ class PostEffectManager {
 
 	#init() {
 		const {redGPUContext} = this.#view;
-		const {gpuDevice} = redGPUContext;
+		const {gpuDevice,resourceManager} = redGPUContext;
 		const textureComputeShader = this.#getTextureComputeShader();
-		this.#textureComputeShaderModule = gpuDevice.createShaderModule({
+		this.#textureComputeShaderModule = resourceManager.createGPUShaderModule('POST_EFFECT_TEXTURE_COPY_COMPUTE_SHADER',{
 			code: textureComputeShader,
-			label: 'POST_EFFECT_TEXTURE_COPY_COMPUTE_SHADER'
 		});
 		this.#textureComputeBindGroupLayout = this.#createTextureBindGroupLayout(redGPUContext);
 		this.#textureComputePipeline = this.#createTextureComputePipeline(gpuDevice, this.#textureComputeShaderModule, this.#textureComputeBindGroupLayout)

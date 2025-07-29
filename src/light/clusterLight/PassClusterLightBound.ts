@@ -80,9 +80,8 @@ class PassClusterLightBound {
 				]
 			}),
 			compute: {
-				module: gpuDevice.createShaderModule({
+				module: resourceManager.createGPUShaderModule('CLUSTER_BOUND_SHADER',{
 					code: source,
-					label: "CLUSTER_BOUND"
 				}),
 				entryPoint: 'main',
 			}

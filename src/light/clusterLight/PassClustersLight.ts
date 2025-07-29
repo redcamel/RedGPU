@@ -85,9 +85,8 @@ class PassClustersLight {
 				]
 			}),
 			compute: {
-				module: gpuDevice.createShaderModule({
+				module: resourceManager.createGPUShaderModule('CLUSTER_LIGHTS_SHADER',{
 					code: source,
-					label: "CLUSTER_LIGHTS"
 				}),
 				entryPoint: 'main'
 			}
