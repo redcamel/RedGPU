@@ -166,7 +166,7 @@ class PostEffectManager {
 		const UNIFORM_STRUCT = SHADER_INFO.uniforms.systemUniforms;
 		const postEffectSystemUniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength)
 		this.#postEffectSystemUniformBufferStructInfo = UNIFORM_STRUCT;
-		this.#postEffectSystemUniformBuffer = new UniformBuffer(redGPUContext, postEffectSystemUniformData, 'POST_EFFECT_SYSTEM_UNIFORM_BUFFER');
+		this.#postEffectSystemUniformBuffer = new UniformBuffer(redGPUContext, postEffectSystemUniformData, `${this.#view.name}_POST_EFFECT_SYSTEM_UNIFORM_BUFFER`);
 	}
 
 	#renderToStorageTexture(view: View3D, sourceTextureView: GPUTextureView) {
@@ -230,7 +230,7 @@ class PostEffectManager {
 	}
 
 	#createTextureBindGroupLayout(redGPUContext: RedGPUContext) {
-		return redGPUContext.resourceManager.createBindGroupLayout('POST_EFFECT_TEXTURE_COPY_BIND_GROUP_LAYOUT', {
+		return redGPUContext.resourceManager.createBindGroupLayout(`${this.#view.name}_POST_EFFECT_TEXTURE_COPY_BIND_GROUP_LAYOUT`, {
 			entries: [
 				{binding: 0, visibility: GPUShaderStage.COMPUTE, sampler: {type: 'filtering',}},
 				{binding: 1, visibility: GPUShaderStage.COMPUTE, texture: {}},
@@ -244,14 +244,14 @@ class PostEffectManager {
 			size: {width: width, height: height,},
 			format: 'rgba8unorm',
 			usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING,
-			label: `POST_EFFECT_STORAGE_TEXTURE_${width}x${height}`,
+			label: `${this.#view.name}_POST_EFFECT_STORAGE_TEXTURE_${width}x${height}`,
 		});
 	}
 
 	#createTextureBindGroup(redGPUContext: RedGPUContext, bindGroupLayout: GPUBindGroupLayout, sourceTextureView: GPUTextureView, storageTextureView: GPUTextureView) {
 		const timestamp = Date.now();
 		return redGPUContext.gpuDevice.createBindGroup({
-			label: `POST_EFFECT_TEXTURE_COPY_BIND_GROUP_${timestamp}`,
+			label: `${this.#view.name}_POST_EFFECT_TEXTURE_COPY_BIND_GROUP_${timestamp}`,
 			layout: bindGroupLayout,
 			entries: [
 				{binding: 0, resource: new Sampler(redGPUContext).gpuSampler},

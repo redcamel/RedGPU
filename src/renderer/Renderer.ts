@@ -45,6 +45,7 @@ class Renderer {
 		cancelAnimationFrame(redGPUContext.currentRequestAnimationFrame)
 		const HD_render = (time: number) => {
 			render?.(time)
+			redGPUContext.currentTime = time
 			this.renderFrame(
 				redGPUContext,
 				time

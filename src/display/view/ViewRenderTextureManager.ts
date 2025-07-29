@@ -1,3 +1,4 @@
+import redGPUContext from "../../context/RedGPUContext";
 import RedGPUContext from "../../context/RedGPUContext";
 import resourceManager from "../../resources/resourceManager/ResourceManager";
 import validateRedGPUContext from "../../runtimeChecker/validateFunc/validateRedGPUContext";
@@ -68,7 +69,7 @@ class ViewRenderTextureManager {
 	#createRender2PathTexture() {
 		const {gpuDevice,resourceManager} = this.#redGPUContext
 		const currentTexture = this.#renderPath1ResultTexture
-		const {pixelRectObject} = this.#view
+		const {pixelRectObject,name} = this.#view
 		const {width: pixelRectObjectW, height: pixelRectObjectH} = pixelRectObject
 		const changedSize = currentTexture?.width !== pixelRectObjectW || currentTexture?.height !== pixelRectObjectH
 		const needCreateTexture = !currentTexture || changedSize
@@ -84,7 +85,7 @@ class ViewRenderTextureManager {
 				usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT
 					| GPUTextureUsage.COPY_SRC,
 				mipLevelCount: getMipLevelCount(pixelRectObjectW, pixelRectObjectH),
-				label: `renderPath1ResultTexture_${pixelRectObjectW}x${pixelRectObjectH}_${Date.now()}`
+				label: `${name}_renderPath1ResultTexture_${pixelRectObjectW}x${pixelRectObjectH}`
 			}
 			this.#renderPath1ResultTexture = gpuDevice.createTexture(this.#renderPath1ResultTextureDescriptor);
 			this.#renderPath1ResultTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#renderPath1ResultTexture)
@@ -96,7 +97,7 @@ class ViewRenderTextureManager {
 		const {antialiasingManager, gpuDevice,resourceManager} = this.#redGPUContext
 		const {useMSAA} = antialiasingManager
 		const currentTexture = depthYn ? this.#depthTexture : this.#colorTexture;
-		const {pixelRectObject} = this.#view
+		const {pixelRectObject,name} = this.#view
 		const {width: pixelRectObjectW, height: pixelRectObjectH} = pixelRectObject
 		const changedSize = currentTexture?.width !== pixelRectObjectW || currentTexture?.height !== pixelRectObjectH
 		const changeUseMSAA = depthYn ? this.#useMSAADepth !== useMSAA : this.#useMSAAColor !== useMSAA
@@ -119,7 +120,7 @@ class ViewRenderTextureManager {
 					1
 				],
 				sampleCount: useMSAA ? 4 : 1,
-				label: `${textureType}_${pixelRectObjectW}x${pixelRectObjectH}_${Date.now()}`,
+				label: `${name}_${textureType}_${pixelRectObjectW}x${pixelRectObjectH}`,
 				format: depthYn ? 'depth32float' : navigator.gpu.getPreferredCanvasFormat(),
 				// usage: GPUTextureUsage.RENDER_ATTACHMENT | (textureType === 'color' ? GPUTextureUsage.TEXTURE_BINDING : 0)
 				usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | (!depthYn && !useMSAA ? GPUTextureUsage.COPY_SRC : 0)
@@ -138,7 +139,7 @@ class ViewRenderTextureManager {
 							depthOrArrayLayers: 1
 						},
 						sampleCount: 1,
-						label: `${textureType}_resolve_${pixelRectObjectW}x${pixelRectObjectH}_${Date.now()}`,
+						label: `${name}_${textureType}_resolve_${pixelRectObjectW}x${pixelRectObjectH}`,
 						format: navigator.gpu.getPreferredCanvasFormat(),
 						usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC
 					})

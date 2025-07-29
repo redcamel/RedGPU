@@ -10,6 +10,7 @@ document.querySelector('#example-container').appendChild(canvas);
 RedGPU.init(
 	canvas,
 	(redGPUContext) => {
+		redGPUContext.useDebugPanel = true
 		// ============================================
 		// 기본 설정
 		// ============================================

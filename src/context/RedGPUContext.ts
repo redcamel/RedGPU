@@ -19,6 +19,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
 	#configurationDescription: GPUCanvasConfiguration
 	readonly #gpuAdapter: GPUAdapter
 	#alphaMode: GPUCanvasAlphaMode
+	currentTime:number
 	readonly #gpuContext: GPUCanvasContext
 	readonly #gpuDevice: GPUDevice
 	readonly #htmlCanvas: HTMLCanvasElement

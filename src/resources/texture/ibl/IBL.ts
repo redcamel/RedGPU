@@ -108,7 +108,7 @@ class IBL {
 			usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.RENDER_ATTACHMENT,
 			dimension: '2d',
 			mipLevelCount: irradianceMipLevels,
-			label: `${this.#uuid}_irradianceTexture`
+			label: `IBL_${this.#uuid}_irradianceTexture`
 		});
 		const irradianceShader = gpuDevice.createShaderModule({
 			code: irradianceShaderCode

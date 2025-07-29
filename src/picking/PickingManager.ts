@@ -96,7 +96,7 @@ class PickingManager {
 			usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC,
 			format,
 			sampleCount: 1,
-			label: `${label}_${this.#view.pixelRectObject.width}x${this.#view.pixelRectObject.height}_${Date.now()}`,
+			label: `${this.#view.name}_${label}_${this.#view.pixelRectObject.width}x${this.#view.pixelRectObject.height}`,
 		});
 	}
 

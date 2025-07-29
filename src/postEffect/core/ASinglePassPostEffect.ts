@@ -299,7 +299,7 @@ class ASinglePassPostEffect {
 	}
 
 	#createRenderTexture(view: View3D): boolean {
-		const {redGPUContext, viewRenderTextureManager} = view
+		const {redGPUContext, viewRenderTextureManager,name} = view
 		const {colorTexture} = viewRenderTextureManager
 		const {gpuDevice,resourceManager} = redGPUContext
 		const {width, height} = colorTexture
@@ -313,7 +313,7 @@ class ASinglePassPostEffect {
 				},
 				format: 'rgba8unorm',
 				usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING,
-				label: `PostEffect_${this.#name}_${width}x${height}_${Date.now()}`
+				label: `${name}_${this.#name}_${width}x${height}}`
 			})
 			this.#outputTexture.push(newTexture)
 			this.#outputTextureView.push(resourceManager.getGPUResourceBitmapTextureView(newTexture))
