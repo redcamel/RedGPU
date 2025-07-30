@@ -1,18 +1,16 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
-import ResourceStateHDRTexture from "../../resourceManager/resourceState/texture/ResourceStateHDRTexture";
 import ResourceStateIndexBuffer from "../../resourceManager/resourceState/ResourceStateIndexBuffer";
-import ABaseBuffer from "../core/ABaseBuffer";
+import ABaseBuffer, {GPU_BUFFER_DATA_SYMBOL, GPU_BUFFER_SYMBOL} from "../core/ABaseBuffer";
 import getCacheBufferFromResourceState from "../core/func/getCacheBufferFromResourceState";
 
 const MANAGED_STATE_KEY = 'managedIndexBufferState'
 type NumberArray = Array<number> | Uint32Array;
 
 class IndexBuffer extends ABaseBuffer {
-	#data: Uint32Array
+	[GPU_BUFFER_DATA_SYMBOL]: Uint32Array
 	#indexNum: number = 0
 	#triangleCount: number = 0
-	#gpuBuffer: GPUBuffer
 
 	constructor(
 		redGPUContext: RedGPUContext,
@@ -31,14 +29,6 @@ class IndexBuffer extends ABaseBuffer {
 		}
 	}
 
-	get gpuBuffer(): GPUBuffer {
-		return this.#gpuBuffer;
-	}
-
-	get size(): number {
-		return this.#data.byteLength || 0
-	}
-
 	get triangleCount(): number {
 		return this.#triangleCount;
 	}
@@ -47,50 +37,42 @@ class IndexBuffer extends ABaseBuffer {
 		return this.#indexNum;
 	}
 
-	destroy() {
-		const temp = this.#gpuBuffer
-		if (temp) {
-			this.#gpuBuffer = null
-			this.__fireListenerList(true)
-			this.redGPUContext.resourceManager.unregisterResourceOld(this)
-			if (temp) temp.destroy()
-		}
-	}
+
 
 	changeData(data: NumberArray) {
 		const {gpuDevice} = this;
 		if (Array.isArray(data)) {
 			data = new Uint32Array(data);
 		}
-		if (this.#gpuBuffer) {
-			this.targetResourceManagedState.videoMemory -= this.#data.byteLength || 0;
-			let temp = this.#gpuBuffer
+		if (this[GPU_BUFFER_SYMBOL]) {
+			this.targetResourceManagedState.videoMemory -= this[GPU_BUFFER_DATA_SYMBOL].byteLength || 0;
+			let temp = this[GPU_BUFFER_SYMBOL]
 			requestAnimationFrame(() => {
 				temp.destroy();
 			})
-			this.#gpuBuffer = null;
+			this[GPU_BUFFER_SYMBOL] = null;
 		}
-		this.#data = data;
+		this[GPU_BUFFER_DATA_SYMBOL] = data;
 		this.#indexNum = data.length;
-		this.targetResourceManagedState.videoMemory += this.#data.byteLength;
+		this.targetResourceManagedState.videoMemory += this[GPU_BUFFER_DATA_SYMBOL].byteLength;
 		const bufferDescriptor: GPUBufferDescriptor = {
-			size: this.#data.byteLength,
+			size: this[GPU_BUFFER_DATA_SYMBOL].byteLength,
 			usage: this.usage,
 			label: this.name
 		}
-		this.#gpuBuffer = gpuDevice.createBuffer(bufferDescriptor);
+		this[GPU_BUFFER_SYMBOL] = gpuDevice.createBuffer(bufferDescriptor);
 		this.#triangleCount = this.#indexNum / 3;
-		gpuDevice.queue.writeBuffer(this.#gpuBuffer, 0, this.#data);
+		gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], 0, this[GPU_BUFFER_DATA_SYMBOL]);
 	}
 
 	updatePartialData(dataStartIndex: number, data: NumberArray) {
 		const {gpuDevice} = this
-		if (dataStartIndex < 0 || dataStartIndex >= this.#data.length) {
-			consoleAndThrowError(`Offset value is out of data bounds. Tried to access index ${dataStartIndex} on data of length ${this.#data.length}`);
+		if (dataStartIndex < 0 || dataStartIndex >= this[GPU_BUFFER_DATA_SYMBOL].length) {
+			consoleAndThrowError(`Offset value is out of data bounds. Tried to access index ${dataStartIndex} on data of length ${this[GPU_BUFFER_DATA_SYMBOL].length}`);
 		}
 		if (Array.isArray(data)) data = new Uint32Array(data)
 		this.#indexNum = data.length
-		gpuDevice.queue.writeBuffer(this.#gpuBuffer, dataStartIndex, data)
+		gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], dataStartIndex, data)
 	}
 }
 

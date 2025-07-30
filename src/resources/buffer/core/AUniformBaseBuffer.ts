@@ -1,6 +1,5 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-
-import ABaseBuffer from "./ABaseBuffer";
+import ABaseBuffer, {GPU_BUFFER_DATA_SYMBOL, GPU_BUFFER_SYMBOL} from "./ABaseBuffer";
 
 /**
  * @class
@@ -8,10 +7,9 @@ import ABaseBuffer from "./ABaseBuffer";
  * @extends ResourceBase
  */
 class AUniformBaseBuffer extends ABaseBuffer {
+	[GPU_BUFFER_DATA_SYMBOL]: ArrayBuffer
 	readonly #uniformBufferDescriptor: GPUBufferDescriptor
 	readonly #size: number
-	#data: ArrayBuffer
-	#gpuBuffer: GPUBuffer
 
 	constructor(
 		redGPUContext: RedGPUContext,
@@ -28,38 +26,20 @@ class AUniformBaseBuffer extends ABaseBuffer {
 			label
 		};
 		try {
-			this.#gpuBuffer = redGPUContext.gpuDevice.createBuffer(this.#uniformBufferDescriptor);
+			this[GPU_BUFFER_SYMBOL] = redGPUContext.gpuDevice.createBuffer(this.#uniformBufferDescriptor);
 		} catch (error) {
 			console.error('GPU 버퍼 생성에 실패했습니다:', error);
 		}
-		redGPUContext.gpuDevice.queue.writeBuffer(this.#gpuBuffer, 0, data);
+		redGPUContext.gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], 0, data);
 	}
-
-	get gpuBuffer(): GPUBuffer {
-		return this.#gpuBuffer;
-	}
-
-	get data() {
-		return this.#data
-	}
-
 	get size(): number {
 		return this.#size;
 	}
-
 	get uniformBufferDescriptor(): GPUBufferDescriptor {
 		return this.#uniformBufferDescriptor;
 	}
 
-	destroy() {
-		const temp = this.#gpuBuffer
-		if (temp) {
-			this.#gpuBuffer = null
-			this.__fireListenerList(true)
-			this.redGPUContext.resourceManager.unregisterResourceOld(this)
-			if (temp) temp.destroy()
-		}
-	}
+
 
 	writeBuffers(targetList: [taregt: any, value: any][]) {
 		const {gpuDevice} = this.redGPUContext

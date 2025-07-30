@@ -1,7 +1,6 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-
 import ResourceStateVertexBuffer from "../../resourceManager/resourceState/ResourceStateVertexBuffer";
-import ABaseBuffer from "../core/ABaseBuffer";
+import ABaseBuffer, {GPU_BUFFER_DATA_SYMBOL, GPU_BUFFER_SYMBOL} from "../core/ABaseBuffer";
 import getCacheBufferFromResourceState from "../core/func/getCacheBufferFromResourceState";
 import InterleavedStruct from "./InterleavedStruct";
 import InterleavedStructElement from "./InterleavedStructElement";
@@ -9,12 +8,11 @@ import InterleavedStructElement from "./InterleavedStructElement";
 const MANAGED_STATE_KEY = 'managedVertexBufferState'
 
 class VertexBuffer extends ABaseBuffer {
+	[GPU_BUFFER_DATA_SYMBOL]: Float32Array
 	#vertexCount: number = 0
 	#stride: number = 0
 	#interleavedStruct: InterleavedStruct
-	#data: Float32Array
 	#triangleCount: number = 0
-	#gpuBuffer: GPUBuffer
 
 	constructor(
 		redGPUContext: RedGPUContext,
@@ -38,20 +36,8 @@ class VertexBuffer extends ABaseBuffer {
 		}
 	}
 
-	get gpuBuffer(): GPUBuffer {
-		return this.#gpuBuffer;
-	}
-
 	get stride(): number {
 		return this.#stride;
-	}
-
-	get data(): Float32Array {
-		return this.#data;
-	}
-
-	get size(): number {
-		return this.#data.byteLength || 0
 	}
 
 	get interleavedStruct() {
@@ -66,20 +52,12 @@ class VertexBuffer extends ABaseBuffer {
 		return this.#triangleCount;
 	}
 
-	destroy() {
-		const temp = this.#gpuBuffer
-		if (temp) {
-			this.#gpuBuffer = null
-			this.__fireListenerList(true)
-			this.redGPUContext.resourceManager.unregisterResourceOld(this)
-			if (temp) temp.destroy()
-		}
-	}
+
 
 	updateAllData(data: Array<number> | Float32Array) {
 		//TODO 체크해야함
 		const {gpuDevice} = this;
-		gpuDevice.queue.writeBuffer(this.#gpuBuffer, 0, this.#data);
+		gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], 0, this[GPU_BUFFER_DATA_SYMBOL]);
 	}
 
 	changeData(data: Array<number> | Float32Array, interleavedStruct?: InterleavedStruct) {
@@ -88,32 +66,32 @@ class VertexBuffer extends ABaseBuffer {
 		if (Array.isArray(data)) {
 			data = new Float32Array(data);
 		}
-		this.#data = data;
+		this[GPU_BUFFER_DATA_SYMBOL] = data;
 		// Update 'interleavedStruct' if provided
 		if (interleavedStruct) {
 			this.#updateInterleavedStruct(interleavedStruct);
 		}
 		// If a 'gpuBuffer' already exists, decrease the relevant memory and destroy the buffer
-		if (this.#gpuBuffer) {
-			this.targetResourceManagedState.videoMemory -= this.#data.byteLength || 0;
-			let temp = this.#gpuBuffer
+		if (this[GPU_BUFFER_SYMBOL]) {
+			this.targetResourceManagedState.videoMemory -= this[GPU_BUFFER_DATA_SYMBOL].byteLength || 0;
+			let temp = this[GPU_BUFFER_SYMBOL]
 			requestAnimationFrame(() => {
 				temp.destroy();
 			})
-			this.#gpuBuffer = null;
+			this[GPU_BUFFER_SYMBOL] = null;
 		}
 		// Increase the video memory for the new data and create new buffer
-		this.targetResourceManagedState.videoMemory += this.#data.byteLength;
+		this.targetResourceManagedState.videoMemory += this[GPU_BUFFER_DATA_SYMBOL].byteLength;
 		const bufferDescriptor: GPUBufferDescriptor = {
-			size: this.#data.byteLength,
+			size: this[GPU_BUFFER_DATA_SYMBOL].byteLength,
 			usage: this.usage,
 			label: this.name
 		};
 		// Create a new buffer and update the triangleCount
-		this.#gpuBuffer = gpuDevice.createBuffer(bufferDescriptor);
-		this.#triangleCount = this.#data.length / this.#stride;
+		this[GPU_BUFFER_SYMBOL] = gpuDevice.createBuffer(bufferDescriptor);
+		this.#triangleCount = this[GPU_BUFFER_DATA_SYMBOL].length / this.#stride;
 		// Write the new data into the buffer
-		gpuDevice.queue.writeBuffer(this.#gpuBuffer, 0, this.#data);
+		gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], 0, this[GPU_BUFFER_DATA_SYMBOL]);
 	}
 
 	#updateInterleavedStruct(interleavedStruct: InterleavedStruct) {
@@ -126,7 +104,7 @@ class VertexBuffer extends ABaseBuffer {
 			this.#vertexCount += elementCount;
 			this.#stride += elementCount;
 		}
-		this.#vertexCount = this.#data.length / this.#vertexCount;
+		this.#vertexCount = this[GPU_BUFFER_DATA_SYMBOL].length / this.#vertexCount;
 	}
 }
 
