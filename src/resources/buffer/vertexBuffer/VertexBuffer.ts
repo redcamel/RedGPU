@@ -71,7 +71,7 @@ class VertexBuffer extends ABaseBuffer {
 		if (temp) {
 			this.#gpuBuffer = null
 			this.__fireListenerList(true)
-			this.redGPUContext.resourceManager.unregisterResource(this)
+			this.redGPUContext.resourceManager.unregisterResourceOld(this)
 			if (temp) temp.destroy()
 		}
 	}

@@ -2,7 +2,7 @@ import RedGPUContext from "../../context/RedGPUContext";
 import createUUID from "../../utils/createUUID";
 import calculateTextureByteSize from "../../utils/math/calculateTextureByteSize";
 import getMipLevelCount from "../../utils/math/getMipLevelCount";
-import ManagedResourceBase from "../ManagedResourceBase";
+import TextureResourceBase from "../TextureResourceBase";
 
 import ResourceStateBitmapTexture from "../resourceManager/resourceState/ResourceStateBitmapTexture";
 import ResourceStateCubeTexture from "../resourceManager/resourceState/ResourceStateCubeTexture";
@@ -11,7 +11,7 @@ import loadAndCreateBitmapImage from "./core/loadAndCreateBitmapImage";
 
 const MANAGED_STATE_KEY = 'managedCubeTextureState'
 
-class CubeTexture extends ManagedResourceBase {
+class CubeTexture extends TextureResourceBase {
 	static defaultViewDescriptor: GPUTextureViewDescriptor = {
 		dimension: 'cube',
 		aspect: 'all',
@@ -22,7 +22,6 @@ class CubeTexture extends ManagedResourceBase {
 	}
 	#gpuTexture: GPUTexture
 	#srcList: string[]
-	#cacheKey: string
 	#mipLevelCount: number
 	#useMipmap: boolean
 	#imgBitmaps: ImageBitmap[]
@@ -30,6 +29,9 @@ class CubeTexture extends ManagedResourceBase {
 	readonly #format: GPUTextureFormat
 	readonly #onLoad: (cubeTextureInstance: CubeTexture) => void;
 	readonly #onError: (error: Error) => void;
+	#getCacheKey(srcList?: string[]): string {
+		return srcList?.toString() || this.uuid;
+	}
 
 	constructor(
 		redGPUContext: RedGPUContext,
@@ -45,11 +47,11 @@ class CubeTexture extends ManagedResourceBase {
 		this.#useMipmap = useMipMap
 		this.#format = format || navigator.gpu.getPreferredCanvasFormat()
 		this.#srcList = srcList
-		this.#cacheKey = srcList?.toString();
+		this.cacheKey = this.#getCacheKey(srcList);
 		const {table} = this.targetResourceManagedState
 		let target: ResourceStateBitmapTexture
 		for (const k in table) {
-			if (table[k].cacheKey === this.#cacheKey) {
+			if (table[k].cacheKey === this.cacheKey) {
 				target = table[k]
 				break
 			}
@@ -71,9 +73,6 @@ class CubeTexture extends ManagedResourceBase {
 		}
 	}
 
-	get cacheKey(): string {
-		return this.#cacheKey;
-	}
 
 	get videoMemorySize(): number {
 		return this.#videoMemorySize;
@@ -93,7 +92,7 @@ class CubeTexture extends ManagedResourceBase {
 
 	set srcList(value: string[]) {
 		this.#srcList = value
-		this.#cacheKey = value?.toString() || createUUID();
+		this.cacheKey = this.#getCacheKey(value);
 		if (this.#srcList?.length) this.#loadBitmapTexture(this.#srcList);
 	}
 
@@ -112,7 +111,7 @@ class CubeTexture extends ManagedResourceBase {
 		this.#setGpuTexture(null);
 		this.__fireListenerList(true)
 		this.#srcList = null
-		this.#cacheKey = null
+		this.cacheKey = null
 		this.#unregisterResource()
 		if (temp) temp.destroy()
 	}
@@ -133,7 +132,7 @@ class CubeTexture extends ManagedResourceBase {
 		this.#useMipmap = useMipmap
 		this.#mipLevelCount = gpuTexture.mipLevelCount;
 		// this.#mipLevelCount = getMipLevelCount(gpuTexture.width, gpuTexture.height);
-		this.#cacheKey = cacheKey || `direct_${this.uuid}`;
+		this.cacheKey = cacheKey || `direct_${this.uuid}`;
 		// 메모리 사용량 계산
 		const textureDescriptor: GPUTextureDescriptor = {
 			size: [gpuTexture.width, gpuTexture.height, gpuTexture.depthOrArrayLayers],
@@ -154,7 +153,7 @@ class CubeTexture extends ManagedResourceBase {
 	}
 
 	#registerResource() {
-		this.redGPUContext.resourceManager.registerResourceOld(this, new ResourceStateCubeTexture(this));
+		this.redGPUContext.resourceManager.registerResource(this, new ResourceStateCubeTexture(this));
 	}
 
 	#unregisterResource() {

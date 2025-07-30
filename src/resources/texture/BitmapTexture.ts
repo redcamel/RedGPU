@@ -1,18 +1,18 @@
 import RedGPUContext from "../../context/RedGPUContext";
+import {keepLog} from "../../utils";
+import getAbsoluteURL from "../../utils/file/getAbsoluteURL";
 import calculateTextureByteSize from "../../utils/math/calculateTextureByteSize";
 import getMipLevelCount from "../../utils/math/getMipLevelCount";
-import ManagedResourceBase from "../ManagedResourceBase";
-
+import TextureResourceBase from "../TextureResourceBase";
 import ResourceStateBitmapTexture from "../resourceManager/resourceState/ResourceStateBitmapTexture";
 import imageBitmapToGPUTexture from "./core/imageBitmapToGPUTexture";
 import loadAndCreateBitmapImage from "./core/loadAndCreateBitmapImage";
 
 const MANAGED_STATE_KEY = 'managedBitmapTextureState'
 
-class BitmapTexture extends ManagedResourceBase {
+class BitmapTexture extends TextureResourceBase {
 	#gpuTexture: GPUTexture
 	#src: string
-	#cacheKey: string
 	#mipLevelCount: number
 	#useMipmap: boolean
 	#imgBitmap: ImageBitmap
@@ -25,16 +25,18 @@ class BitmapTexture extends ManagedResourceBase {
 	get width(): number {
 		return this.#imgBitmap?.width || 0
 	}
+
 	get height(): number {
 		return this.#imgBitmap?.height || 0
 	}
 
-	#getCacheKey(src): string {
-		return src?.cacheKey || src || this.uuid;
+	#getCacheKey(src?: string): string {
+		return src ? getAbsoluteURL(window.location.href, src) : this.uuid;
 	}
+
 	constructor(
 		redGPUContext: RedGPUContext,
-		src?: any,
+		src?: string,
 		useMipMap: boolean = true,
 		onLoad?: (textureInstance?: BitmapTexture) => void,
 		onError?: (error: Error) => void,
@@ -48,12 +50,12 @@ class BitmapTexture extends ManagedResourceBase {
 		this.#useMipmap = useMipMap
 		this.#format = format || navigator.gpu.getPreferredCanvasFormat()
 		if (src) {
-			this.#src = src?.src || src;
-			this.#cacheKey = this.#getCacheKey(src)
+			this.#src = src;
+			this.cacheKey = this.#getCacheKey(src)
 			const {table} = this.targetResourceManagedState
 			let target: ResourceStateBitmapTexture
 			for (const k in table) {
-				if (table[k].cacheKey === this.#cacheKey) {
+				if (table[k].cacheKey === this.cacheKey) {
 					target = table[k]
 					break
 				}
@@ -75,10 +77,6 @@ class BitmapTexture extends ManagedResourceBase {
 		return this.#usePremultiplyAlpha;
 	}
 
-	get cacheKey(): string {
-		return this.#cacheKey;
-	}
-
 	get videoMemorySize(): number {
 		return this.#videoMemorySize;
 	}
@@ -95,9 +93,9 @@ class BitmapTexture extends ManagedResourceBase {
 		return this.#src;
 	}
 
-	set src(value: string | any) {
-		this.#src = value?.src || value;
-		this.#cacheKey = this.#getCacheKey(value);
+	set src(value: string) {
+		this.#src = value;
+		this.cacheKey = this.#getCacheKey(value);
 		if (this.#src) this.#loadBitmapTexture(this.#src);
 	}
 
@@ -116,7 +114,7 @@ class BitmapTexture extends ManagedResourceBase {
 		this.#setGpuTexture(null);
 		this.__fireListenerList(true)
 		this.#src = null
-		this.#cacheKey = null
+		this.cacheKey = null
 		this.#unregisterResource()
 		if (temp) temp.destroy()
 	}
@@ -128,7 +126,7 @@ class BitmapTexture extends ManagedResourceBase {
 	}
 
 	#registerResource() {
-		this.redGPUContext.resourceManager.registerResourceOld(this, new ResourceStateBitmapTexture(this));
+		this.redGPUContext.resourceManager.registerResource(this, new ResourceStateBitmapTexture(this));
 	}
 
 	#unregisterResource() {
@@ -200,6 +198,7 @@ class BitmapTexture extends ManagedResourceBase {
 	}
 
 	async #loadBitmapTexture(src: string) {
+		keepLog('src',src)
 		try {
 			if (src.endsWith(".svg")) {
 				// SVG 파일일 경우 변환 처리

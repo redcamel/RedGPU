@@ -4,7 +4,7 @@ import validatePositiveNumberRange from "../../../../runtimeChecker/validateFunc
 import validateUintRange from "../../../../runtimeChecker/validateFunc/validateUintRange";
 import createUUID from "../../../../utils/createUUID";
 import UniformBuffer from "../../../buffer/uniformBuffer/UniformBuffer";
-import ManagedResourceBase from "../../../ManagedResourceBase";
+import TextureResourceBase from "../../../TextureResourceBase";
 
 import ResourceStateBitmapTexture from "../../../resourceManager/resourceState/ResourceStateBitmapTexture";
 import parseWGSL from "../../../wgslParser/parseWGSL";
@@ -24,7 +24,7 @@ const BASIC_OPTIONS = {
 	animationY: 0.1
 }
 
-class ANoiseTexture extends ManagedResourceBase {
+class ANoiseTexture extends TextureResourceBase {
 	cacheKey;
 //
 	mipLevelCount;
@@ -285,7 +285,7 @@ class ANoiseTexture extends ManagedResourceBase {
 	}
 
 	#unregisterResource() {
-		this.redGPUContext.resourceManager.unregisterResource(this);
+		this.redGPUContext.resourceManager.unregisterResourceOld(this);
 	}
 }
 

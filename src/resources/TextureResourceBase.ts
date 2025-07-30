@@ -8,7 +8,7 @@ import ResourceStatusInfo from "./resourceManager/resourceState/ResourceStatusIn
  *
  * @class
  */
-class ManagedResourceBase extends ResourceBase {
+class TextureResourceBase extends ResourceBase {
 	readonly #targetResourceManagedState: ResourceStatusInfo
 
 	constructor(redGPUContext: RedGPUContext, managedStateKey: string,) {
@@ -24,6 +24,6 @@ class ManagedResourceBase extends ResourceBase {
 	}
 }
 
-export default ManagedResourceBase
+export default TextureResourceBase
 
 

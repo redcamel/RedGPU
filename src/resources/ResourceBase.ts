@@ -19,6 +19,15 @@ class ResourceBase {
 	readonly #gpuDevice: GPUDevice
 	#name: string = ''
 	#instanceId: number
+	#cacheKey: string
+	get cacheKey(): string {
+		return this.#cacheKey;
+	}
+
+	set cacheKey(value: string) {
+		this.#cacheKey = value;
+	}
+
 	/**
 	 * An array to keep track of dirty listeners.
 	 *
@@ -111,7 +120,7 @@ class ResourceBase {
 		const {resourceManager} = this.#redGPUContext;
 		// console.log('`managed${this.constructor.name}State`', `managed${this.constructor.name}State`)
 		if (resourceManager) {
-			const targetState = resourceManager[`managed${this.constructor.name}State`]?.table?.[this.#uuid];
+			const targetState = resourceManager[`managed${this.constructor.name}State`]?.table.get(this.#cacheKey);
 			if (targetState) {
 				isAddingListener ? targetState.useNum++ : targetState.useNum--;
 			}

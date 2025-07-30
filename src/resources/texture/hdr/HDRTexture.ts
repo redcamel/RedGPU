@@ -5,7 +5,7 @@ import GPU_MIPMAP_FILTER_MODE from "../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 import {keepLog} from "../../../utils";
 import calculateTextureByteSize from "../../../utils/math/calculateTextureByteSize";
 import getMipLevelCount from "../../../utils/math/getMipLevelCount";
-import ManagedResourceBase from "../../ManagedResourceBase";
+import TextureResourceBase from "../../TextureResourceBase";
 
 import ResourceManager from "../../resourceManager/ResourceManager";
 import ResourceStateCubeTexture from "../../resourceManager/resourceState/ResourceStateCubeTexture";
@@ -32,7 +32,7 @@ interface LuminanceAnalysis {
  * HDRTexture 클래스
  * 지원 형식: .hdr (Radiance HDR/RGBE) 형식만 지원
  */
-class HDRTexture extends ManagedResourceBase {
+class HDRTexture extends TextureResourceBase {
 	#gpuTexture: GPUTexture
 	#src: string
 	#cacheKey: string
@@ -256,7 +256,7 @@ class HDRTexture extends ManagedResourceBase {
 	}
 
 	#unregisterResource() {
-		this.redGPUContext.resourceManager.unregisterResource(this);
+		this.redGPUContext.resourceManager.unregisterResourceOld(this);
 	}
 	async #createGPUTexture() {
 		const {gpuDevice, resourceManager} = this.redGPUContext

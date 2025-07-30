@@ -1,8 +1,7 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import {keepLog} from "../../utils";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
-import ManagedResourceBase from "../ManagedResourceBase";
-import ResourceBase from "../ResourceBase";
+import TextureResourceBase from "../TextureResourceBase";
 import Sampler from "../sampler/Sampler";
 import BitmapTexture from "../texture/BitmapTexture";
 import DownSampleCubeMapGenerator from "../texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator";
@@ -33,7 +32,7 @@ type ResourceState = ResourceStateVertexBuffer
 	| ResourceStateBitmapTexture
 	| ResourceStateHDRTexture;
 
-class ResourceManager extends ResourceBase {
+class ResourceManager {
 	static PRESET_GPUBindGroupLayout_System = 'PRESET_GPUBindGroupLayout_System'
 	static PRESET_VERTEX_GPUBindGroupLayout_Instancing = 'PRESET_VERTEX_GPUBindGroupLayout_Instancing'
 	static PRESET_VERTEX_GPUBindGroupLayout = 'PRESET_VERTEX_GPUBindGroupLayout'
@@ -59,15 +58,67 @@ class ResourceManager extends ResourceBase {
 	#basicSampler: Sampler
 	#bitmapTextureViewCache: WeakMap<GPUTexture, Map<string, GPUTextureView>> = new WeakMap();
 	#cubeTextureViewCache: WeakMap<GPUTexture, Map<string, GPUTextureView>> = new WeakMap();
+	readonly #redGPUContext: RedGPUContext
+	readonly #gpuDevice: GPUDevice
+
 
 	constructor(redGPUContext: RedGPUContext) {
-		super(redGPUContext)
+		this.#redGPUContext = redGPUContext
+		this.#gpuDevice = redGPUContext.gpuDevice
 		this.#mipmapGenerator = new MipmapGenerator(redGPUContext)
 		this.#downSampleCubeMapGenerator = new DownSampleCubeMapGenerator(redGPUContext)
 		this.#initPresets()
 	}
+	get redGPUContext(): RedGPUContext {
+		return this.#redGPUContext
+	}
 
-	registerResourceOld(target: ManagedResourceBase, resourceState: ResourceState) {
+	get gpuDevice(): GPUDevice {
+		return this.#gpuDevice
+	}
+
+	registerResource(target: TextureResourceBase, resourceState: ResourceState) {
+		const {cacheKey, targetResourceManagedState} = target;
+		const {table} = targetResourceManagedState;
+
+		if (table.get(cacheKey)) {
+			consoleAndThrowError(`Resource with cacheKey ${cacheKey} is already registered.`);
+			return;
+		}
+
+		table.set(cacheKey, resourceState);
+
+		const isTexture = resourceState instanceof ResourceStateCubeTexture ||
+			resourceState instanceof ResourceStateBitmapTexture ||
+			resourceState instanceof ResourceStateHDRTexture;
+
+		if (!isTexture && 'size' in target && (target as any).size > 0) {
+			targetResourceManagedState.videoMemory += (target as any).size;
+		}
+		keepLog('targetResourceManagedState',targetResourceManagedState)
+	}
+
+	unregisterResource(target: TextureResourceBase) {
+		const {cacheKey, targetResourceManagedState} = target;
+		const {table} = targetResourceManagedState;
+
+		const resourceState = table.get(cacheKey);
+		if (!resourceState) {
+			return;
+		}
+
+		const isTexture = resourceState instanceof ResourceStateCubeTexture ||
+			resourceState instanceof ResourceStateBitmapTexture ||
+			resourceState instanceof ResourceStateHDRTexture;
+
+		if (!isTexture && 'size' in target && (target as any).size > 0) {
+			targetResourceManagedState.videoMemory -= (target as any).size;
+		}
+
+		table.delete(cacheKey);
+	}
+
+	registerResourceOld(target: TextureResourceBase, resourceState: ResourceState) {
 		const {uuid, targetResourceManagedState} = target;
 		const {table} = targetResourceManagedState;
 
@@ -87,7 +138,7 @@ class ResourceManager extends ResourceBase {
 		}
 	}
 
-	unregisterResource(target: ManagedResourceBase) {
+	unregisterResourceOld(target: TextureResourceBase) {
 		const {uuid, targetResourceManagedState} = target;
 		const {table} = targetResourceManagedState;
 
