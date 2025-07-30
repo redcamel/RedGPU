@@ -1,6 +1,7 @@
 import RedGPUContext from "../context/RedGPUContext";
 import BitmapTexture from "../resources/texture/BitmapTexture";
 import CubeTexture from "../resources/texture/CubeTexture";
+import {keepLog} from "../utils";
 
 export class TextureLoaderData {
 	src: any;
@@ -70,9 +71,15 @@ export default class TextureLoader {
 		};
 		// console.log('srcInfo',srcInfo)
 		if (targetClass === BitmapTexture) {
-			targetTexture.texture = new targetClass(this.#redGPUContext, srcInfo.src, srcInfo.useMipmap, onLoadHandler, onErrorHandler, srcInfo.format, false);
+			targetTexture.texture = new targetClass(this.#redGPUContext, {
+				src: srcInfo.src,
+				cacheKey: srcInfo.cacheKey
+			}, srcInfo.useMipmap, onLoadHandler, onErrorHandler, srcInfo.format, false);
 		} else {
-			targetTexture.texture = new targetClass(this.#redGPUContext, srcInfo.src, srcInfo.useMipmap, onLoadHandler, onErrorHandler, srcInfo.format);
+			targetTexture.texture = new targetClass(this.#redGPUContext, {
+				src: srcInfo.src,
+				cacheKey: srcInfo.cacheKey
+			}, srcInfo.useMipmap, onLoadHandler, onErrorHandler, srcInfo.format);
 		}
 		this.textures.push(targetTexture);
 	}

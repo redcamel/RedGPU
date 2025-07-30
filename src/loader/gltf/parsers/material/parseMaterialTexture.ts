@@ -2,6 +2,7 @@ import GPU_ADDRESS_MODE from "../../../../gpuConst/GPU_ADDRESS_MODE";
 import GPU_MIPMAP_FILTER_MODE from "../../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 import PBRMaterial from "../../../../material/pbrMaterial/PBRMaterial";
 import Sampler from "../../../../resources/sampler/Sampler";
+import {keepLog} from "../../../../utils";
 import {GLTF, GlTfId, MaterialNormalTextureInfo, MaterialOcclusionTextureInfo, TextureInfo} from "../../GLTF";
 import GLTFLoader from "../../GLTFLoader";
 import parse_KHR_texture_transform from "./extensions/parse_KHR_texture_transform";
@@ -25,6 +26,7 @@ const parseMaterialTexture = (
 		const option = getSamplerInfo(gltfLoader, gltfData, samplerGlTfId);
 		const {parsedURI, cacheKey} = tURL
 		const key = `${targetTextureKey}SourceGlTfId_${targetSourceGlTfId}`
+
 		if (!textureRawList[key]) {
 			textureRawList[key] = ({
 				src: parsedURI,

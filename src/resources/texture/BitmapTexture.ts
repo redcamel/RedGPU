@@ -9,6 +9,7 @@ import imageBitmapToGPUTexture from "./core/imageBitmapToGPUTexture";
 import loadAndCreateBitmapImage from "./core/loadAndCreateBitmapImage";
 
 const MANAGED_STATE_KEY = 'managedBitmapTextureState'
+type SrcInfo = string | { src: string, cacheKey: string }
 
 class BitmapTexture extends ManagementResourceBase {
 	#gpuTexture: GPUTexture
@@ -30,13 +31,20 @@ class BitmapTexture extends ManagementResourceBase {
 		return this.#imgBitmap?.height || 0
 	}
 
-	#getCacheKey(src?: string): string {
-		return src ? getAbsoluteURL(window.location.href, src) : this.uuid;
+	#getCacheKey(srcInfo?: SrcInfo): string {
+		if (!srcInfo) return this.uuid;
+		if (typeof srcInfo === 'string') {
+			return getAbsoluteURL(window.location.href, srcInfo);
+		} else {
+			return srcInfo.cacheKey || getAbsoluteURL(window.location.href, srcInfo.src);
+		}
 	}
-
+	#getParsedSrc(srcInfo?: SrcInfo): string {
+		return typeof srcInfo === 'string' ? srcInfo : srcInfo.src
+	}
 	constructor(
 		redGPUContext: RedGPUContext,
-		src?: string,
+		src?: SrcInfo,
 		useMipMap: boolean = true,
 		onLoad?: (textureInstance?: BitmapTexture) => void,
 		onError?: (error: Error) => void,
@@ -50,14 +58,12 @@ class BitmapTexture extends ManagementResourceBase {
 		this.#useMipmap = useMipMap
 		this.#format = format || navigator.gpu.getPreferredCanvasFormat()
 		if (src) {
-			this.#src = src;
+			this.#src = this.#getParsedSrc(src);
 			this.cacheKey = this.#getCacheKey(src)
 			const {table} = this.targetResourceManagedState
 			let target: ResourceStateBitmapTexture = table.get(this.cacheKey)
 			if (target) {
-				keepLog('target',target)
-				// this.#onLoad?.(this) // TODO - 이거 다시확인해야함
-				// return table[target.uuid].texture
+				// keepLog('cache target', target)
 				const targetTexture = target.texture as BitmapTexture
 				this.#onLoad?.(targetTexture)
 				return targetTexture
@@ -90,8 +96,8 @@ class BitmapTexture extends ManagementResourceBase {
 		return this.#src;
 	}
 
-	set src(value: string) {
-		this.#src = value;
+	set src(value: SrcInfo) {
+		this.#src = this.#getParsedSrc(value);;
 		this.cacheKey = this.#getCacheKey(value);
 		if (this.#src) this.#loadBitmapTexture(this.#src);
 	}
@@ -195,7 +201,7 @@ class BitmapTexture extends ManagementResourceBase {
 	}
 
 	async #loadBitmapTexture(src: string) {
-		keepLog('src',src)
+		keepLog('src', src)
 		try {
 			if (src.endsWith(".svg")) {
 				// SVG 파일일 경우 변환 처리
