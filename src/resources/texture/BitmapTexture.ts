@@ -3,14 +3,14 @@ import {keepLog} from "../../utils";
 import getAbsoluteURL from "../../utils/file/getAbsoluteURL";
 import calculateTextureByteSize from "../../utils/math/calculateTextureByteSize";
 import getMipLevelCount from "../../utils/math/getMipLevelCount";
-import TextureResourceBase from "../TextureResourceBase";
+import ManagementResourceBase from "../ManagementResourceBase";
 import ResourceStateBitmapTexture from "../resourceManager/resourceState/texture/ResourceStateBitmapTexture";
 import imageBitmapToGPUTexture from "./core/imageBitmapToGPUTexture";
 import loadAndCreateBitmapImage from "./core/loadAndCreateBitmapImage";
 
 const MANAGED_STATE_KEY = 'managedBitmapTextureState'
 
-class BitmapTexture extends TextureResourceBase {
+class BitmapTexture extends ManagementResourceBase {
 	#gpuTexture: GPUTexture
 	#src: string
 	#mipLevelCount: number

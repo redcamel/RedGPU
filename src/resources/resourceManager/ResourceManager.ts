@@ -1,7 +1,7 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import {keepLog} from "../../utils";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
-import TextureResourceBase from "../TextureResourceBase";
+import ManagementResourceBase from "../ManagementResourceBase";
 import Sampler from "../sampler/Sampler";
 import BitmapTexture from "../texture/BitmapTexture";
 import DownSampleCubeMapGenerator from "../texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator";
@@ -77,7 +77,7 @@ class ResourceManager {
 		return this.#gpuDevice
 	}
 
-	registerTextureResource(target: TextureResourceBase, resourceState: ResourceState) {
+	registerTextureResource(target: ManagementResourceBase, resourceState: ResourceState) {
 		const {cacheKey, targetResourceManagedState} = target;
 		const {table} = targetResourceManagedState;
 
@@ -98,7 +98,7 @@ class ResourceManager {
 		keepLog('targetResourceManagedState',target.resourceManagerKey, targetResourceManagedState)
 	}
 
-	unregisterTextureResource(target: TextureResourceBase) {
+	unregisterTextureResource(target: ManagementResourceBase) {
 		const {cacheKey, targetResourceManagedState} = target;
 		const {table} = targetResourceManagedState;
 
@@ -118,7 +118,7 @@ class ResourceManager {
 		table.delete(cacheKey);
 	}
 
-	registerResourceOld(target: TextureResourceBase, resourceState: ResourceState) {
+	registerResourceOld(target: ManagementResourceBase, resourceState: ResourceState) {
 		const {uuid, targetResourceManagedState} = target;
 		const {table} = targetResourceManagedState;
 
@@ -138,7 +138,7 @@ class ResourceManager {
 		}
 	}
 
-	unregisterResourceOld(target: TextureResourceBase) {
+	unregisterResourceOld(target: ManagementResourceBase) {
 		const {uuid, targetResourceManagedState} = target;
 		const {table} = targetResourceManagedState;
 

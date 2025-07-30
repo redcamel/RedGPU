@@ -2,7 +2,7 @@ import RedGPUContext from "../../../context/RedGPUContext";
 
 import ResourceStateUniformBuffer from "../../resourceManager/resourceState/ResourceStateUniformBuffer";
 import AUniformBaseBuffer from "../core/AUniformBaseBuffer";
-import getCacheBufferFromResourceState from "../core/getCacheBufferFromResourceState";
+import getCacheBufferFromResourceState from "../core/func/getCacheBufferFromResourceState";
 
 const MANAGED_STATE_KEY = 'managedUniformBufferState'
 

@@ -2,7 +2,7 @@ import RedGPUContext from "../../../context/RedGPUContext";
 
 import ResourceStateVertexBuffer from "../../resourceManager/resourceState/ResourceStateVertexBuffer";
 import ABaseBuffer from "../core/ABaseBuffer";
-import getCacheBufferFromResourceState from "../core/getCacheBufferFromResourceState";
+import getCacheBufferFromResourceState from "../core/func/getCacheBufferFromResourceState";
 import InterleavedStruct from "./InterleavedStruct";
 import InterleavedStructElement from "./InterleavedStructElement";
 

@@ -4,7 +4,7 @@ import validatePositiveNumberRange from "../../../../runtimeChecker/validateFunc
 import validateUintRange from "../../../../runtimeChecker/validateFunc/validateUintRange";
 import UniformBuffer from "../../../buffer/uniformBuffer/UniformBuffer";
 import ResourceStateBitmapTexture from "../../../resourceManager/resourceState/texture/ResourceStateBitmapTexture";
-import TextureResourceBase from "../../../TextureResourceBase";
+import ManagementResourceBase from "../../../ManagementResourceBase";
 import parseWGSL from "../../../wgslParser/parseWGSL";
 
 const MANAGED_STATE_KEY = 'managedBitmapTextureState';
@@ -22,7 +22,7 @@ const BASIC_OPTIONS = {
 	animationY: 0.1
 }
 
-class ANoiseTexture extends TextureResourceBase {
+class ANoiseTexture extends ManagementResourceBase {
 	get resourceManagerKey():string {
 		return MANAGED_STATE_KEY
 	}

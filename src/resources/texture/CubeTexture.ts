@@ -4,13 +4,13 @@ import calculateTextureByteSize from "../../utils/math/calculateTextureByteSize"
 import getMipLevelCount from "../../utils/math/getMipLevelCount";
 import ResourceStateBitmapTexture from "../resourceManager/resourceState/texture/ResourceStateBitmapTexture";
 import ResourceStateCubeTexture from "../resourceManager/resourceState/texture/ResourceStateCubeTexture";
-import TextureResourceBase from "../TextureResourceBase";
+import ManagementResourceBase from "../ManagementResourceBase";
 import imageBitmapToGPUTexture from "./core/imageBitmapToGPUTexture";
 import loadAndCreateBitmapImage from "./core/loadAndCreateBitmapImage";
 
 const MANAGED_STATE_KEY = 'managedCubeTextureState'
 
-class CubeTexture extends TextureResourceBase {
+class CubeTexture extends ManagementResourceBase {
 	static defaultViewDescriptor: GPUTextureViewDescriptor = {
 		dimension: 'cube',
 		aspect: 'all',

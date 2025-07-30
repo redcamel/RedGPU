@@ -1,7 +1,7 @@
-import IndexBuffer from "../indexBuffer/IndexBuffer";
-import StorageBuffer from "../storageBuffer/StorageBuffer";
-import UniformBuffer from "../uniformBuffer/UniformBuffer";
-import VertexBuffer from "../vertexBuffer/VertexBuffer";
+import IndexBuffer from "../../indexBuffer/IndexBuffer";
+import StorageBuffer from "../../storageBuffer/StorageBuffer";
+import UniformBuffer from "../../uniformBuffer/UniformBuffer";
+import VertexBuffer from "../../vertexBuffer/VertexBuffer";
 import findCacheBufferInTable from "./findCacheBufferInTable";
 
 const getCacheBufferFromResourceState =

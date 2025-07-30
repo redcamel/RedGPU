@@ -8,7 +8,7 @@ import getMipLevelCount from "../../../utils/math/getMipLevelCount";
 import ResourceManager from "../../resourceManager/ResourceManager";
 import ResourceStateHDRTexture from "../../resourceManager/resourceState/texture/ResourceStateHDRTexture";
 import Sampler from "../../sampler/Sampler";
-import TextureResourceBase from "../../TextureResourceBase";
+import ManagementResourceBase from "../../ManagementResourceBase";
 import CubeTexture from "../CubeTexture";
 import generateCubeMapFromEquirectangularCode from "./generateCubeMapFromEquirectangularCode.wgsl"
 import HDRLoader, {HDRData} from "./HDRLoader";
@@ -30,7 +30,7 @@ interface LuminanceAnalysis {
  * HDRTexture 클래스
  * 지원 형식: .hdr (Radiance HDR/RGBE) 형식만 지원
  */
-class HDRTexture extends TextureResourceBase {
+class HDRTexture extends ManagementResourceBase {
 	#gpuTexture: GPUTexture
 	#src: string
 	#cacheKey: string

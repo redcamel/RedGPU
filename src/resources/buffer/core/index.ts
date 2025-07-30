@@ -1,4 +1,4 @@
-import getUniformOffsetByRoundUp from "../core/getUniformOffsetByRoundUp";
+import getUniformOffsetByRoundUp from "./func/getUniformOffsetByRoundUp";
 
 export {
 	getUniformOffsetByRoundUp,

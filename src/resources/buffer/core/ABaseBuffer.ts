@@ -1,12 +1,12 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import TextureResourceBase from "../../TextureResourceBase";
+import ManagementResourceBase from "../../ManagementResourceBase";
 
 /**
  * @class
  * @classdesc Represents a uniform buffer in RedGPU.
  * @extends ResourceBase
  */
-class ABaseBuffer extends TextureResourceBase {
+class ABaseBuffer extends ManagementResourceBase {
 	readonly #usage: GPUBufferUsageFlags
 
 	constructor(
