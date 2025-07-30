@@ -22,11 +22,10 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
 		const {
 			table,
 			videoMemory,
-			length
 		} = this.#debugCubeTextureMode ? managedCubeTextureState : managedBitmapTextureState
 		debugRender.totalUsedVideoMemory += videoMemory
 		const tList = Object.values(table)
-		updateDebugItemValue(this.dom, 'totalCount', length)
+		updateDebugItemValue(this.dom, 'totalCount', table.size)
 		updateDebugItemValue(this.dom, 'targetVideoMemorySize', formatBytes(videoMemory))
 		this.#generateDebugItemsHtml(tList);
 	}

@@ -29,6 +29,9 @@ class BitmapTexture extends ManagedResourceBase {
 		return this.#imgBitmap?.height || 0
 	}
 
+	#getCacheKey(src): string {
+		return src?.cacheKey || src || this.uuid;
+	}
 	constructor(
 		redGPUContext: RedGPUContext,
 		src?: any,
@@ -46,7 +49,7 @@ class BitmapTexture extends ManagedResourceBase {
 		this.#format = format || navigator.gpu.getPreferredCanvasFormat()
 		if (src) {
 			this.#src = src?.src || src;
-			this.#cacheKey = src?.cacheKey || src || this.uuid;
+			this.#cacheKey = this.#getCacheKey(src)
 			const {table} = this.targetResourceManagedState
 			let target: ResourceStateBitmapTexture
 			for (const k in table) {
@@ -94,7 +97,7 @@ class BitmapTexture extends ManagedResourceBase {
 
 	set src(value: string | any) {
 		this.#src = value?.src || value;
-		this.#cacheKey = value?.cacheKey || value || this.uuid;
+		this.#cacheKey = this.#getCacheKey(value);
 		if (this.#src) this.#loadBitmapTexture(this.#src);
 	}
 
@@ -125,7 +128,7 @@ class BitmapTexture extends ManagedResourceBase {
 	}
 
 	#registerResource() {
-		this.redGPUContext.resourceManager.registerResource(this, new ResourceStateBitmapTexture(this));
+		this.redGPUContext.resourceManager.registerResourceOld(this, new ResourceStateBitmapTexture(this));
 	}
 
 	#unregisterResource() {

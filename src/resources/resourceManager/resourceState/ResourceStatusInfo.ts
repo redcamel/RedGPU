@@ -1,8 +1,6 @@
 class ResourceStatusInfo {
-	table: {} = {};
+	table: Map<string, any> = new Map();
 	videoMemory: number = 0;
-	length: number = 0;
-
 	constructor() {
 	}
 }

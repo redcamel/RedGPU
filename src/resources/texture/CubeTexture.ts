@@ -154,7 +154,7 @@ class CubeTexture extends ManagedResourceBase {
 	}
 
 	#registerResource() {
-		this.redGPUContext.resourceManager.registerResource(this, new ResourceStateCubeTexture(this));
+		this.redGPUContext.resourceManager.registerResourceOld(this, new ResourceStateCubeTexture(this));
 	}
 
 	#unregisterResource() {

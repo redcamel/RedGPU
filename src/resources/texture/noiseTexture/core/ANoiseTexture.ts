@@ -281,7 +281,7 @@ class ANoiseTexture extends ManagedResourceBase {
 	}
 
 	#registerResource() {
-		this.redGPUContext.resourceManager.registerResource(this, new ResourceStateBitmapTexture(this));
+		this.redGPUContext.resourceManager.registerResourceOld(this, new ResourceStateBitmapTexture(this));
 	}
 
 	#unregisterResource() {

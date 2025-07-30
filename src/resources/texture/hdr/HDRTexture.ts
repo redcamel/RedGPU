@@ -252,7 +252,7 @@ class HDRTexture extends ManagedResourceBase {
 
 
 	#registerResource() {
-		this.redGPUContext.resourceManager.registerResource(this, new ResourceStateHDRTexture(this));
+		this.redGPUContext.resourceManager.registerResourceOld(this, new ResourceStateHDRTexture(this));
 	}
 
 	#unregisterResource() {

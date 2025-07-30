@@ -27,7 +27,7 @@ class IndexBuffer extends ABaseBuffer {
 		} else {
 			if (cacheKey) this.name = cacheKey
 			this.changeData(data)
-			this.redGPUContext.resourceManager.registerResource(this, new ResourceStateIndexBuffer(this));
+			this.redGPUContext.resourceManager.registerResourceOld(this, new ResourceStateIndexBuffer(this));
 		}
 	}
 

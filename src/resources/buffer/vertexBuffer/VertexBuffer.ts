@@ -31,7 +31,7 @@ class VertexBuffer extends ABaseBuffer {
 			this.#interleavedStruct = interleavedStruct
 			if (cacheKey) this.name = cacheKey
 			this.changeData(data, this.#interleavedStruct)
-			this.redGPUContext.resourceManager.registerResource(
+			this.redGPUContext.resourceManager.registerResourceOld(
 				this,
 				new ResourceStateVertexBuffer(this)
 			)

@@ -20,7 +20,7 @@ class StorageBuffer extends AUniformBaseBuffer {
 			return cacheBuffer
 		} else {
 			if (cacheKey) this.name = cacheKey
-			this.redGPUContext.resourceManager.registerResource(
+			this.redGPUContext.resourceManager.registerResourceOld(
 				this,
 				new ResourceStateStorageBuffer(this)
 			)
