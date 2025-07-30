@@ -16,11 +16,13 @@ RedGPU.init(
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		redGPUContext.addView(view);
 
-		let i = 50
+		let i = 1
 		while(i--) {
-			// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF-Binary/BrainStem.glb');
-			loadGLTF(view, 	'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb');
-			// loadGLTF(view, 	'../../../assets/gltf/busterDrone/busterDrone.gltf');
+
+					loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF-Binary/BrainStem.glb');
+					// loadGLTF(view, 	'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb');
+					// loadGLTF(view, 	'../../../assets/gltf/busterDrone/busterDrone.gltf');
+
 		}
 			const renderer = new RedGPU.Renderer(redGPUContext);
 		const render = () => {};

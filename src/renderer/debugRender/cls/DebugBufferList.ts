@@ -70,9 +70,15 @@ class DebugStatisticsDomService {
 		}
 	}
 	#formatCacheKeyForDisplay(cacheKey: string): { host: string | null, filename: string } {
+		// Vertex_ 또는 Index_ 접두사 제거
+		let processedKey = cacheKey;
+		if (cacheKey.startsWith('Vertex_') || cacheKey.startsWith('Index_')) {
+			processedKey = cacheKey.substring(cacheKey.indexOf('_') + 1);
+		}
+
 		try {
-			const url = new URL(cacheKey);
-			const filename = url.pathname.split('/').pop() || cacheKey;
+			const url = new URL(processedKey);
+			const filename = url.pathname.split('/').pop() || processedKey;
 			return {
 				host: url.host,
 				filename: filename
@@ -81,7 +87,7 @@ class DebugStatisticsDomService {
 			// URL이 아닌 경우
 			return {
 				host: null,
-				filename: cacheKey
+				filename: processedKey
 			};
 		}
 	}
@@ -108,7 +114,7 @@ class DebugStatisticsDomService {
 				tDom.innerHTML = `
             <div class='debug-item'>
                 <div>
-                    <div class='debug-item-title'><span style="white-space: nowrap">${index} 
+                    <div class='debug-item-title'><span style="white-space: nowrap">
                     <span class="host"></span>
                     <div class="name"></div>
                     </span></div>
@@ -128,13 +134,14 @@ class DebugStatisticsDomService {
 			const { host, filename } = this.#formatCacheKeyForDisplay(name);
 			// 호스트가 있을 때만 호스트 정보 표시
 			if (host) {
-				updateDebugItemValue(tDom, 'host', host);
+				updateDebugItemValue(tDom, 'host', `${index} ${host}`);
 				updateDebugItemValue(tDom, 'name', filename);
 			} else {
-				updateDebugItemValue(tDom, 'name', name);
+				updateDebugItemValue(tDom, 'host', `${index} ${name}`);
+				// updateDebugItemValue(tDom, 'name', name);
 			}
 
-			updateDebugItemValue(tDom, 'useNum', useNum, true);
+			// updateDebugItemValue(tDom, 'useNum', useNum, true);
 			updateDebugItemValue(tDom, 'videoMemorySize', formatBytes(size));
 			index++;
 		});
