@@ -155,14 +155,14 @@ class PackedTexture {
 			const prevEntry = cacheMap.get(prevMappingKey);
 			if (prevEntry) {
 				prevEntry.useNum--;
-				keepLog(`텍스처 사용 횟수 감소: ${prevMappingKey} (${prevEntry.useNum})`);
+				// keepLog(`텍스처 사용 횟수 감소: ${prevMappingKey} (${prevEntry.useNum})`);
 
 				// 사용 횟수가 0이 되면 삭제
 				if (prevEntry.useNum === 0) {
-					keepLog('삭제된 텍스쳐', prevEntry);
+					// keepLog('삭제된 텍스쳐', prevEntry);
 					prevEntry.gpuTexture?.destroy();
 					cacheMap.delete(prevMappingKey);
-					keepLog('이전키가 더이상 사용되지 않아서 캐시에서 삭제함', prevEntry);
+					// keepLog('이전키가 더이상 사용되지 않아서 캐시에서 삭제함', prevEntry);
 				}
 			}
 		}
@@ -172,7 +172,7 @@ class PackedTexture {
 		if (currEntry) {
 			this.#gpuTexture = currEntry.gpuTexture;
 			currEntry.useNum++;
-			keepLog('기존 생성된 텍스쳐를 사용함', currEntry);
+			// keepLog('기존 생성된 텍스쳐를 사용함', currEntry);
 		}
 
 		// 현재 인스턴스의 키 업데이트
@@ -218,7 +218,7 @@ class PackedTexture {
 			mappingKey
 		});
 
-		keepLog('packing 함', cacheMap.get(mappingKey));
+		// keepLog('packing 함', cacheMap.get(mappingKey));
 		this.#bindGroup = null;
 	}
 

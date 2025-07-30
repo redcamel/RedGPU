@@ -24,10 +24,10 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
 			videoMemory,
 		} = this.#debugCubeTextureMode ? managedCubeTextureState : managedBitmapTextureState
 		debugRender.totalUsedVideoMemory += videoMemory
-		const tList = Object.values(table)
+
 		updateDebugItemValue(this.dom, 'totalCount', table.size)
 		updateDebugItemValue(this.dom, 'targetVideoMemorySize', formatBytes(videoMemory))
-		this.#generateDebugItemsHtml(tList);
+		this.#generateDebugItemsHtml(table);
 	}
 
 	getTargetSrc(tInfo: ResourceStateBitmapTexture | ResourceStateCubeTexture) {
@@ -47,8 +47,9 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
 			tDom.innerHTML = `
         <div class='debug-item'>
             <div>
-                <div class='debug-item-title'>${index} <span class="targetSrc">${targetSrc}</span></div> 
-                <div class='debug-item-cache-key'>cacheKey : <span class="cacheKey">Place holder for cacheKey</span></div>
+                <div class='debug-item-title'>${index} <span class="targetSrc" style="white-space: nowrap">${targetSrc}</span></div> 
+                <div class='debug-item-cache-key'>host : <span class="host">Place holder for host</span></div>
+                <div class='debug-item-cache-key'>fileName : <span class="fileName">Place holder for fileName</span></div>
                 <div>mipLevelCount : <span class="mipLevelCount"></span> / useMipmap : <span class="useMipmap"></span></div>
                 <div>width : <span class="width"></span> / height : <span class="height"></span></div>
             </div>
@@ -63,6 +64,23 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
 		}
 		return tDom;
 	}
+	#formatCacheKeyForDisplay(cacheKey: string): { host: string | null, filename: string } {
+		try {
+			const url = new URL(cacheKey);
+			const filename = url.pathname.split('/').pop() || cacheKey;
+			return {
+				host: url.host,
+				filename: filename
+			};
+		} catch {
+			// URL이 아닌 경우
+			return {
+				host: null,
+				filename: cacheKey
+			};
+		}
+	}
+
 
 	updateDebugItems(tDom, mipLevelCount, useMipmap, width, height, useNum, cacheKey, targetSrc, videoMemorySize) {
 		updateDebugItemValue(tDom, 'mipLevelCount', mipLevelCount);
@@ -70,12 +88,20 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
 		updateDebugItemValue(tDom, 'width', width);
 		updateDebugItemValue(tDom, 'height', height);
 		updateDebugItemValue(tDom, 'useNum', useNum, true);
-		updateDebugItemValue(tDom, 'cacheKey', cacheKey);
-		updateDebugItemValue(tDom, 'targetSrc', targetSrc);
+		const { host, filename } = this.#formatCacheKeyForDisplay(cacheKey);
+		// 호스트가 있을 때만 호스트 정보 표시
+		if (host) {
+			updateDebugItemValue(tDom, 'host', host);
+			updateDebugItemValue(tDom, 'fileName', filename);
+		} else {
+			updateDebugItemValue(tDom, 'fileName', cacheKey);
+		}
+
+		// updateDebugItemValue(tDom, 'targetSrc', targetSrc);
 		updateDebugItemValue(tDom, 'videoMemorySize', formatBytes(videoMemorySize));
 	}
 
-	#generateDebugItemsHtml(tList: any[]) {
+	#generateDebugItemsHtml(tList: Map<string, ResourceStateBitmapTexture | ResourceStateCubeTexture>) {
 		const rootDom = this.dom.querySelector('.item-container')
 		const initialUUIDs: Set<string> = new Set();
 		const prefix = this.#debugCubeTextureMode ? 'cube_texture' : 'bitmap_texture'
@@ -83,7 +109,8 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
 			const uuid: string = dom.className.split(' ')[1].replace(`${prefix}_`, '');
 			initialUUIDs.add(uuid);
 		})
-		tList.map((tInfo: ResourceStateBitmapTexture | ResourceStateCubeTexture, index: number) => {
+		let index = 0;
+		for (const tInfo of tList.values()) {
 			const {useNum, cacheKey, texture} = tInfo;
 			let targetSrc = this.getTargetSrc(tInfo);
 			const {mipLevelCount, useMipmap, gpuTexture, uuid, videoMemorySize} = texture;
@@ -93,7 +120,8 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
 			tDom = this.getUpdatedTdom(tDom, rootDom, domUuid, index, targetSrc, uuid);
 			initialUUIDs.delete(texture.uuid);
 			this.updateDebugItems(tDom, mipLevelCount, useMipmap, width, height, useNum, cacheKey, targetSrc, videoMemorySize);
-		})
+			index++;
+		}
 		for (let uuid of initialUUIDs) {
 			rootDom.querySelector(`.${prefix}_${uuid}`).remove();
 		}
