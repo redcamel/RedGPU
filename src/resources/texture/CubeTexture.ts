@@ -50,7 +50,7 @@ class CubeTexture extends ManagementResourceBase {
 		const {table} = this.targetResourceManagedState
 		let target: ResourceStateCubeTexture =  table.get(this.cacheKey)
 		if (target) {
-			keepLog('캐시타겟')
+
 			const targetTexture = target.texture as CubeTexture
 			this.#onLoad?.(targetTexture)
 			return targetTexture
@@ -147,11 +147,11 @@ class CubeTexture extends ManagementResourceBase {
 	}
 
 	#registerResource() {
-		this.redGPUContext.resourceManager.registerTextureResource(this, new ResourceStateCubeTexture(this));
+		this.redGPUContext.resourceManager.registerManagementResource(this, new ResourceStateCubeTexture(this));
 	}
 
 	#unregisterResource() {
-		this.redGPUContext.resourceManager.unregisterTextureResource(this);
+		this.redGPUContext.resourceManager.unregisterManagementResource(this);
 	}
 	#createGPUTexture() {
 		const {gpuDevice, resourceManager} = this.redGPUContext

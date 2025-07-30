@@ -77,7 +77,7 @@ class ResourceManager {
 		return this.#gpuDevice
 	}
 
-	registerTextureResource(target: ManagementResourceBase, resourceState: ResourceState) {
+	registerManagementResource(target: ManagementResourceBase, resourceState: ResourceState) {
 		const {cacheKey, targetResourceManagedState} = target;
 		const {table} = targetResourceManagedState;
 
@@ -95,10 +95,10 @@ class ResourceManager {
 		if (!isTexture && 'size' in target && (target as any).size > 0) {
 			targetResourceManagedState.videoMemory += (target as any).size;
 		}
-		keepLog('targetResourceManagedState',target.resourceManagerKey, targetResourceManagedState)
+		// keepLog('targetResourceManagedState',target.resourceManagerKey, targetResourceManagedState)
 	}
 
-	unregisterTextureResource(target: ManagementResourceBase) {
+	unregisterManagementResource(target: ManagementResourceBase) {
 		const {cacheKey, targetResourceManagedState} = target;
 		const {table} = targetResourceManagedState;
 

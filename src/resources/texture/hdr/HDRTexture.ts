@@ -250,11 +250,11 @@ class HDRTexture extends ManagementResourceBase {
 
 
 	#registerResource() {
-		this.redGPUContext.resourceManager.registerTextureResource(this, new ResourceStateHDRTexture(this));
+		this.redGPUContext.resourceManager.registerManagementResource(this, new ResourceStateHDRTexture(this));
 	}
 
 	#unregisterResource() {
-		this.redGPUContext.resourceManager.unregisterTextureResource(this);
+		this.redGPUContext.resourceManager.unregisterManagementResource(this);
 	}
 	async #createGPUTexture() {
 		const {gpuDevice, resourceManager} = this.redGPUContext

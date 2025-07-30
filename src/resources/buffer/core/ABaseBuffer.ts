@@ -3,6 +3,7 @@ import ManagementResourceBase from "../../ManagementResourceBase";
 
 export const GPU_BUFFER_SYMBOL = Symbol('gpuBuffer');
 export const GPU_BUFFER_DATA_SYMBOL = Symbol('gpuBufferData');
+export const GPU_BUFFER_CACHE_KEY = Symbol('gpuBufferCacheKey');
 
 /**
  * @class
@@ -11,6 +12,7 @@ export const GPU_BUFFER_DATA_SYMBOL = Symbol('gpuBufferData');
  */
 class ABaseBuffer extends ManagementResourceBase {
 	[GPU_BUFFER_SYMBOL]: GPUBuffer
+	[GPU_BUFFER_CACHE_KEY]: string
 	readonly #usage: GPUBufferUsageFlags
 
 	constructor(
@@ -22,6 +24,9 @@ class ABaseBuffer extends ManagementResourceBase {
 		this.#usage = usage
 	}
 
+	get cacheKey(): string {
+		return this[GPU_BUFFER_CACHE_KEY] || this.uuid;
+	}
 	get gpuBuffer(): GPUBuffer {
 		return this[GPU_BUFFER_SYMBOL];
 	}

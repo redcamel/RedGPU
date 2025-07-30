@@ -8,11 +8,12 @@ import InterleaveType from "../../../resources/buffer/core/type/InterleaveType";
 import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
 import InterleavedStruct from "../../../resources/buffer/vertexBuffer/InterleavedStruct";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
+import {keepLog} from "../../../utils";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import calculateNormals from "../../../utils/math/calculateNormals";
 import AccessorInfo_GLTF from "../cls/AccessorInfo_GLTF";
 import MorphInfo_GLTF from "../cls/MorphInfo_GLTF";
-import {GLTF, Mesh as GltfMesh, MeshPrimitive} from "../GLTF";
+import {GLTF, GlTfId, Mesh as GltfMesh, MeshPrimitive} from "../GLTF";
 import GLTFLoader from "../GLTFLoader";
 import parseMaterialInfo_GLTF from "./material/parseMaterialInfo_GLTF";
 import parseAttributeInfo_GLTF from "./parseAttributeInfo_GLTF";
@@ -20,8 +21,9 @@ import parseIndicesInfo_GLTF from "./parseIndicesInfo_GLTF";
 import parseInterleaveData_GLTF from "./parseInterleaveData_GLTF";
 import parseSparse_GLTF from "./parseSparse_GLTF";
 
-const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMesh: GltfMesh) {
+const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMesh: GltfMesh,nodeGlTfId:GlTfId) {
 	const {redGPUContext} = gltfLoader
+	// keepLog('gltfMesh',nodeGlTfId,gltfMesh)
 	let tName;
 	if (gltfMesh.name) tName = gltfMesh.name;
 	const tMeshList = [];
@@ -160,11 +162,15 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
 				interleaveData,
 				new InterleavedStruct(
 					tInterleaveInfoList,
-				)
+				),
+				undefined,
+				`V_${gltfLoader.url}_${nodeGlTfId}_${i}`
 			),
 			!noIndexBuffer && indices.length ? new IndexBuffer(
 				redGPUContext,
-				new Uint32Array(indices)
+				new Uint32Array(indices),
+				undefined,
+				`F_${gltfLoader.url}_${nodeGlTfId}_${i}`
 			) : null
 		);
 		// console.log(tDrawMode,indices)

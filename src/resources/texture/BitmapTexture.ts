@@ -129,11 +129,11 @@ class BitmapTexture extends ManagementResourceBase {
 	}
 
 	#registerResource() {
-		this.redGPUContext.resourceManager.registerTextureResource(this, new ResourceStateBitmapTexture(this));
+		this.redGPUContext.resourceManager.registerManagementResource(this, new ResourceStateBitmapTexture(this));
 	}
 
 	#unregisterResource() {
-		this.redGPUContext.resourceManager.unregisterTextureResource(this);
+		this.redGPUContext.resourceManager.unregisterManagementResource(this);
 	}
 
 	#createGPUTexture() {
@@ -201,7 +201,7 @@ class BitmapTexture extends ManagementResourceBase {
 	}
 
 	async #loadBitmapTexture(src: string) {
-		keepLog('src', src)
+
 		try {
 			if (src.endsWith(".svg")) {
 				// SVG 파일일 경우 변환 처리

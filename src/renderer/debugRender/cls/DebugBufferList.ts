@@ -69,7 +69,22 @@ class DebugStatisticsDomService {
 			this.#generateDebugItemsHtml(table);
 		}
 	}
-
+	#formatCacheKeyForDisplay(cacheKey: string): { host: string | null, filename: string } {
+		try {
+			const url = new URL(cacheKey);
+			const filename = url.pathname.split('/').pop() || cacheKey;
+			return {
+				host: url.host,
+				filename: filename
+			};
+		} catch {
+			// URL이 아닌 경우
+			return {
+				host: null,
+				filename: cacheKey
+			};
+		}
+	}
 	#generateDebugItemsHtml(tList: Map<string,ResourceStateVertexBuffer | ResourceStateIndexBuffer | ResourceStateUniformBuffer | ResourceStateStorageBuffer>) {
 		const rootDom = this.dom.querySelector('.item-container');
 		const initialUUIDs: Set<string> = new Set();
@@ -93,7 +108,10 @@ class DebugStatisticsDomService {
 				tDom.innerHTML = `
             <div class='debug-item'>
                 <div>
-                    <div class='debug-item-title'><span style="white-space: nowrap">${index} <span class="name"></span></span></div>
+                    <div class='debug-item-title'><span style="white-space: nowrap">${index} 
+                    <span class="host"></span>
+                    <div class="name"></div>
+                    </span></div>
                     <div style="font-size: 10px">${uuid}</div>
                 </div>
                 <div style="display: flex;flex-direction: column;align-items: center;gap:4px;width: 50px">
@@ -106,7 +124,16 @@ class DebugStatisticsDomService {
 			} else {
 				initialUUIDs.delete(uuid);
 			}
-			updateDebugItemValue(tDom, 'name', name);
+
+			const { host, filename } = this.#formatCacheKeyForDisplay(name);
+			// 호스트가 있을 때만 호스트 정보 표시
+			if (host) {
+				updateDebugItemValue(tDom, 'host', host);
+				updateDebugItemValue(tDom, 'name', filename);
+			} else {
+				updateDebugItemValue(tDom, 'name', name);
+			}
+
 			updateDebugItemValue(tDom, 'useNum', useNum, true);
 			updateDebugItemValue(tDom, 'videoMemorySize', formatBytes(size));
 			index++;

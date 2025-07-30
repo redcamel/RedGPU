@@ -1,6 +1,7 @@
 import RedGPUContext from "../../../context/RedGPUContext";
+import {keepLog} from "../../../utils";
 import ResourceStateVertexBuffer from "../../resourceManager/resourceState/ResourceStateVertexBuffer";
-import ABaseBuffer, {GPU_BUFFER_DATA_SYMBOL, GPU_BUFFER_SYMBOL} from "../core/ABaseBuffer";
+import ABaseBuffer, {GPU_BUFFER_CACHE_KEY, GPU_BUFFER_DATA_SYMBOL, GPU_BUFFER_SYMBOL} from "../core/ABaseBuffer";
 import InterleavedStruct from "./InterleavedStruct";
 import InterleavedStructElement from "./InterleavedStructElement";
 
@@ -23,13 +24,17 @@ class VertexBuffer extends ABaseBuffer {
 		super(redGPUContext, MANAGED_STATE_KEY, usage)
 		const {table} = this.targetResourceManagedState
 		const cacheBuffer = table.get(cacheKey)
+
 		if (cacheBuffer) {
-			return cacheBuffer
+			return cacheBuffer.buffer
 		} else {
 			this.#interleavedStruct = interleavedStruct
-			if (cacheKey) this.name = cacheKey
+			if (cacheKey) {
+				this.name = cacheKey
+				this[GPU_BUFFER_CACHE_KEY] = cacheKey
+			}
 			this.changeData(data, this.#interleavedStruct)
-			this.redGPUContext.resourceManager.registerResourceOld(
+			this.redGPUContext.resourceManager.registerManagementResource(
 				this,
 				new ResourceStateVertexBuffer(this)
 			)

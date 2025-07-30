@@ -1,6 +1,7 @@
 import RedGPUContext from "../../../context/RedGPUContext";
+import {keepLog} from "../../../utils";
 import ResourceStateIndexBuffer from "../../resourceManager/resourceState/ResourceStateIndexBuffer";
-import ABaseBuffer, {GPU_BUFFER_DATA_SYMBOL, GPU_BUFFER_SYMBOL} from "../core/ABaseBuffer";
+import ABaseBuffer, {GPU_BUFFER_CACHE_KEY, GPU_BUFFER_DATA_SYMBOL, GPU_BUFFER_SYMBOL} from "../core/ABaseBuffer";
 
 const MANAGED_STATE_KEY = 'managedIndexBufferState'
 type NumberArray = Array<number> | Uint32Array;
@@ -19,12 +20,16 @@ class IndexBuffer extends ABaseBuffer {
 		super(redGPUContext, MANAGED_STATE_KEY, usage)
 		const {table} = this.targetResourceManagedState
 		const cacheBuffer = table.get(cacheKey)
+
 		if (cacheBuffer) {
-			return cacheBuffer
+			return cacheBuffer.buffer
 		} else {
-			if (cacheKey) this.name = cacheKey
+			if (cacheKey) {
+				this.name = cacheKey
+				this[GPU_BUFFER_CACHE_KEY] = cacheKey
+			}
 			this.changeData(data)
-			this.redGPUContext.resourceManager.registerResourceOld(this, new ResourceStateIndexBuffer(this));
+			this.redGPUContext.resourceManager.registerManagementResource(this, new ResourceStateIndexBuffer(this));
 		}
 	}
 
