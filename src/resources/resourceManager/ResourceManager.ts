@@ -118,45 +118,6 @@ class ResourceManager {
 		table.delete(cacheKey);
 	}
 
-	registerResourceOld(target: ManagementResourceBase, resourceState: ResourceState) {
-		const {uuid, targetResourceManagedState} = target;
-		const {table} = targetResourceManagedState;
-
-		if (table[uuid]) {
-			consoleAndThrowError(`Resource with UUID ${uuid} is already registered.`);
-			return;
-		}
-
-		table.set(uuid, resourceState);
-
-		const isTexture = resourceState instanceof ResourceStateCubeTexture ||
-			resourceState instanceof ResourceStateBitmapTexture ||
-			resourceState instanceof ResourceStateHDRTexture;
-
-		if (!isTexture && 'size' in target && (target as any).size > 0) {
-			targetResourceManagedState.videoMemory += (target as any).size;
-		}
-	}
-
-	unregisterResourceOld(target: ManagementResourceBase) {
-		const {uuid, targetResourceManagedState} = target;
-		const {table} = targetResourceManagedState;
-
-		const resourceState = table[uuid];
-		if (!resourceState) {
-			return;
-		}
-
-		const isTexture = resourceState instanceof ResourceStateCubeTexture ||
-			resourceState instanceof ResourceStateBitmapTexture ||
-			resourceState instanceof ResourceStateHDRTexture;
-
-		if (!isTexture && 'size' in target && (target as any).size > 0) {
-			targetResourceManagedState.videoMemory -= (target as any).size;
-		}
-
-		table.delete(uuid);
-	}
 
 	createManagedTexture(desc: GPUTextureDescriptor): GPUTexture {
 		const texture = this.gpuDevice.createTexture(desc);

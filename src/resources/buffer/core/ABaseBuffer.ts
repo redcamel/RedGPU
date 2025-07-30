@@ -48,7 +48,7 @@ class ABaseBuffer extends ManagementResourceBase {
 		if (temp) {
 			this[GPU_BUFFER_SYMBOL] = null
 			this.__fireListenerList(true)
-			this.redGPUContext.resourceManager.unregisterResourceOld(this)
+			this.redGPUContext.resourceManager.unregisterManagementResource(this)
 			if (temp) temp.destroy()
 		}
 	}
