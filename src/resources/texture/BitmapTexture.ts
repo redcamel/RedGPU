@@ -2,8 +2,7 @@ import RedGPUContext from "../../context/RedGPUContext";
 import calculateTextureByteSize from "../../utils/math/calculateTextureByteSize";
 import getMipLevelCount from "../../utils/math/getMipLevelCount";
 import ManagedResourceBase from "../ManagedResourceBase";
-import basicRegisterResource from "../resourceManager/core/basicRegisterResource";
-import basicUnregisterResource from "../resourceManager/core/basicUnregisterResource";
+
 import ResourceStateBitmapTexture from "../resourceManager/resourceState/ResourceStateBitmapTexture";
 import imageBitmapToGPUTexture from "./core/imageBitmapToGPUTexture";
 import loadAndCreateBitmapImage from "./core/loadAndCreateBitmapImage";
@@ -126,14 +125,11 @@ class BitmapTexture extends ManagedResourceBase {
 	}
 
 	#registerResource() {
-		basicRegisterResource(
-			this,
-			new ResourceStateBitmapTexture(this)
-		)
+		this.redGPUContext.resourceManager.registerResource(this, new ResourceStateBitmapTexture(this));
 	}
 
 	#unregisterResource() {
-		basicUnregisterResource(this)
+		this.redGPUContext.resourceManager.unregisterResource(this);
 	}
 
 	#createGPUTexture() {

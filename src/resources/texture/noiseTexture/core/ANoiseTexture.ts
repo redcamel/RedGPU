@@ -5,8 +5,7 @@ import validateUintRange from "../../../../runtimeChecker/validateFunc/validateU
 import createUUID from "../../../../utils/createUUID";
 import UniformBuffer from "../../../buffer/uniformBuffer/UniformBuffer";
 import ManagedResourceBase from "../../../ManagedResourceBase";
-import basicRegisterResource from "../../../resourceManager/core/basicRegisterResource";
-import basicUnregisterResource from "../../../resourceManager/core/basicUnregisterResource";
+
 import ResourceStateBitmapTexture from "../../../resourceManager/resourceState/ResourceStateBitmapTexture";
 import parseWGSL from "../../../wgslParser/parseWGSL";
 
@@ -282,11 +281,11 @@ class ANoiseTexture extends ManagedResourceBase {
 	}
 
 	#registerResource() {
-		basicRegisterResource(this, new ResourceStateBitmapTexture(this));
+		this.redGPUContext.resourceManager.registerResource(this, new ResourceStateBitmapTexture(this));
 	}
 
 	#unregisterResource() {
-		basicUnregisterResource(this);
+		this.redGPUContext.resourceManager.unregisterResource(this);
 	}
 }
 

@@ -1,10 +1,10 @@
-import ResourceState from "../../resourceManager/resourceState/ResourceState";
+import ResourceStatusInfo from "../../resourceManager/resourceState/ResourceStatusInfo";
 import ResourceStateIndexBuffer from "../../resourceManager/resourceState/ResourceStateIndexBuffer";
 import ResourceStateStorageBuffer from "../../resourceManager/resourceState/ResourceStateStorageBuffer";
 import ResourceStateUniformBuffer from "../../resourceManager/resourceState/ResourceStateUniformBuffer";
 import ResourceStateVertexBuffer from "../../resourceManager/resourceState/ResourceStateVertexBuffer";
 
-const findCacheBufferInTable = (targetResourceManagedState: ResourceState, cacheKey: string):
+const findCacheBufferInTable = (targetResourceManagedState: ResourceStatusInfo, cacheKey: string):
 	ResourceStateIndexBuffer | ResourceStateVertexBuffer | ResourceStateUniformBuffer | ResourceStateStorageBuffer
 	| undefined => {
 	if (!cacheKey) return undefined;

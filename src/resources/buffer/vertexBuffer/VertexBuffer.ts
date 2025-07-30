@@ -1,6 +1,5 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import basicRegisterResource from "../../resourceManager/core/basicRegisterResource";
-import basicUnregisterResource from "../../resourceManager/core/basicUnregisterResource";
+
 import ResourceStateVertexBuffer from "../../resourceManager/resourceState/ResourceStateVertexBuffer";
 import ABaseBuffer from "../core/ABaseBuffer";
 import getCacheBufferFromResourceState from "../core/getCacheBufferFromResourceState";
@@ -32,7 +31,7 @@ class VertexBuffer extends ABaseBuffer {
 			this.#interleavedStruct = interleavedStruct
 			if (cacheKey) this.name = cacheKey
 			this.changeData(data, this.#interleavedStruct)
-			basicRegisterResource(
+			this.redGPUContext.resourceManager.registerResource(
 				this,
 				new ResourceStateVertexBuffer(this)
 			)
@@ -72,7 +71,7 @@ class VertexBuffer extends ABaseBuffer {
 		if (temp) {
 			this.#gpuBuffer = null
 			this.__fireListenerList(true)
-			basicUnregisterResource(this)
+			this.redGPUContext.resourceManager.unregisterResource(this)
 			if (temp) temp.destroy()
 		}
 	}

@@ -1,5 +1,4 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import basicRegisterResource from "../../resourceManager/core/basicRegisterResource";
 import ResourceStateStorageBuffer from "../../resourceManager/resourceState/ResourceStateStorageBuffer";
 import AUniformBaseBuffer from "../core/AUniformBaseBuffer";
 import getCacheBufferFromResourceState from "../core/getCacheBufferFromResourceState";
@@ -21,7 +20,7 @@ class StorageBuffer extends AUniformBaseBuffer {
 			return cacheBuffer
 		} else {
 			if (cacheKey) this.name = cacheKey
-			basicRegisterResource(
+			this.redGPUContext.resourceManager.registerResource(
 				this,
 				new ResourceStateStorageBuffer(this)
 			)

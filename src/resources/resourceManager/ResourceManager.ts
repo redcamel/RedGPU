@@ -1,5 +1,7 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import {keepLog} from "../../utils";
+import consoleAndThrowError from "../../utils/consoleAndThrowError";
+import ManagedResourceBase from "../ManagedResourceBase";
 import ResourceBase from "../ResourceBase";
 import Sampler from "../sampler/Sampler";
 import BitmapTexture from "../texture/BitmapTexture";
@@ -8,7 +10,14 @@ import MipmapGenerator from "../texture/core/mipmapGenerator/MipmapGenerator";
 import CubeTexture from "../texture/CubeTexture";
 import PackedTexture from "../texture/packedTexture/PackedTexture";
 import preprocessWGSL from "../wgslParser/preprocessWGSL";
-import ResourceState from "./resourceState/ResourceState";
+import ResourceStateBitmapTexture from "./resourceState/ResourceStateBitmapTexture";
+import ResourceStateCubeTexture from "./resourceState/ResourceStateCubeTexture";
+import ResourceStateHDRTexture from "./resourceState/ResourceStateHDRTexture";
+import ResourceStateIndexBuffer from "./resourceState/ResourceStateIndexBuffer";
+import ResourceStateStorageBuffer from "./resourceState/ResourceStateStorageBuffer";
+import ResourceStateUniformBuffer from "./resourceState/ResourceStateUniformBuffer";
+import ResourceStateVertexBuffer from "./resourceState/ResourceStateVertexBuffer";
+import ResourceStatusInfo from "./resourceState/ResourceStatusInfo";
 
 // Resource types
 /**
@@ -22,6 +31,13 @@ enum ResourceType {
 	GPUPipelineLayout = 'GPUPipelineLayout',
 }
 
+type ResourceState = ResourceStateVertexBuffer
+	| ResourceStateIndexBuffer
+	| ResourceStateUniformBuffer
+	| ResourceStateStorageBuffer
+	| ResourceStateCubeTexture
+	| ResourceStateBitmapTexture
+	| ResourceStateHDRTexture;
 /**
  * Class representing a resource manager.
  *
@@ -43,13 +59,13 @@ class ResourceManager extends ResourceBase {
 		[ResourceType.GPUBindGroupLayout, new Map()],
 		[ResourceType.GPUPipelineLayout, new Map()],
 	])
-	#managedBitmapTextureState: ResourceState = new ResourceState()
-	#managedCubeTextureState: ResourceState = new ResourceState()
-	#managedHDRTextureState: ResourceState = new ResourceState()
-	#managedUniformBufferState: ResourceState = new ResourceState()
-	#managedVertexBufferState: ResourceState = new ResourceState()
-	#managedIndexBufferState: ResourceState = new ResourceState()
-	#managedStorageBufferState: ResourceState = new ResourceState()
+	#managedBitmapTextureState: ResourceStatusInfo = new ResourceStatusInfo()
+	#managedCubeTextureState: ResourceStatusInfo = new ResourceStatusInfo()
+	#managedHDRTextureState: ResourceStatusInfo = new ResourceStatusInfo()
+	#managedUniformBufferState: ResourceStatusInfo = new ResourceStatusInfo()
+	#managedVertexBufferState: ResourceStatusInfo = new ResourceStatusInfo()
+	#managedIndexBufferState: ResourceStatusInfo = new ResourceStatusInfo()
+	#managedStorageBufferState: ResourceStatusInfo = new ResourceStatusInfo()
 	#cachedBufferState: any = {}
 	#emptyBitmapTextureView: GPUTextureView
 	#emptyCubeTextureView: GPUTextureView
@@ -57,6 +73,50 @@ class ResourceManager extends ResourceBase {
 	readonly #downSampleCubeMapGenerator: DownSampleCubeMapGenerator
 	#basicSampler: Sampler
 
+
+	registerResource(target: ManagedResourceBase, resourceState: ResourceState) {
+		const {uuid, targetResourceManagedState} = target;
+		const {table} = targetResourceManagedState;
+
+		if (table[uuid]) {
+			consoleAndThrowError(`Resource with UUID ${uuid} is already registered.`);
+			return;
+		}
+
+		table[uuid] = resourceState;
+		targetResourceManagedState.length++;
+
+		const isTexture = resourceState instanceof ResourceStateCubeTexture ||
+			resourceState instanceof ResourceStateBitmapTexture ||
+			resourceState instanceof ResourceStateHDRTexture;
+
+		if (!isTexture && 'size' in target && (target as any).size > 0) {
+			targetResourceManagedState.videoMemory += (target as any).size;
+		}
+	}
+	unregisterResource(target: ManagedResourceBase) {
+		const {uuid, targetResourceManagedState} = target;
+		const {table} = targetResourceManagedState;
+
+		const resourceState = table[uuid];
+		if (!resourceState) {
+			return;
+		}
+
+
+		const isTexture = resourceState instanceof ResourceStateCubeTexture ||
+			resourceState instanceof ResourceStateBitmapTexture ||
+			resourceState instanceof ResourceStateHDRTexture;
+
+
+		if (!isTexture && 'size' in target && (target as any).size > 0) {
+			targetResourceManagedState.videoMemory -= (target as any).size;
+		}
+
+
+		delete table[uuid];
+		targetResourceManagedState.length--;
+	}
 	/**
 	 * Create a new instance of the constructor.
 	 *
@@ -206,31 +266,31 @@ class ResourceManager extends ResourceBase {
 		return this.#emptyCubeTextureView;
 	}
 
-	get managedBitmapTextureState(): ResourceState {
+	get managedBitmapTextureState(): ResourceStatusInfo {
 		return this.#managedBitmapTextureState;
 	}
 
-	get managedCubeTextureState(): ResourceState {
+	get managedCubeTextureState(): ResourceStatusInfo {
 		return this.#managedCubeTextureState;
 	}
 
-	get managedHDRTextureState(): ResourceState {
+	get managedHDRTextureState(): ResourceStatusInfo {
 		return this.#managedHDRTextureState;
 	}
 
-	get managedUniformBufferState(): ResourceState {
+	get managedUniformBufferState(): ResourceStatusInfo {
 		return this.#managedUniformBufferState;
 	}
 
-	get managedVertexBufferState(): ResourceState {
+	get managedVertexBufferState(): ResourceStatusInfo {
 		return this.#managedVertexBufferState;
 	}
 
-	get managedIndexBufferState(): ResourceState {
+	get managedIndexBufferState(): ResourceStatusInfo {
 		return this.#managedIndexBufferState;
 	}
 
-	get managedStorageBufferState(): ResourceState {
+	get managedStorageBufferState(): ResourceStatusInfo {
 		return this.#managedStorageBufferState;
 	}
 

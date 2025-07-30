@@ -16,7 +16,7 @@ RedGPU.init(
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		redGPUContext.addView(view);
 
-		let i = 10
+		let i = 1
 		while(i--) {
 			// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF-Binary/BrainStem.glb');
 			// loadGLTF(view, 	'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb');
@@ -49,6 +49,14 @@ function loadGLTF(view, url) {
 		}
 		num++
 		scene.addChild(mesh)
+
+		let i = 10
+		while(i--){
+			let clonedMesh = mesh.clone()
+			clonedMesh.x = Math.random() * 10 - 5
+			clonedMesh.z = Math.random() * 10 - 5
+			scene.addChild(clonedMesh)
+		}
 	});
 }
 

@@ -1,5 +1,5 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import basicUnregisterResource from "../../resourceManager/core/basicUnregisterResource";
+
 import ABaseBuffer from "./ABaseBuffer";
 
 /**
@@ -56,7 +56,7 @@ class AUniformBaseBuffer extends ABaseBuffer {
 		if (temp) {
 			this.#gpuBuffer = null
 			this.__fireListenerList(true)
-			basicUnregisterResource(this)
+			this.redGPUContext.resourceManager.unregisterResource(this)
 			if (temp) temp.destroy()
 		}
 	}

@@ -3,8 +3,7 @@ import createUUID from "../../utils/createUUID";
 import calculateTextureByteSize from "../../utils/math/calculateTextureByteSize";
 import getMipLevelCount from "../../utils/math/getMipLevelCount";
 import ManagedResourceBase from "../ManagedResourceBase";
-import basicRegisterResource from "../resourceManager/core/basicRegisterResource";
-import basicUnregisterResource from "../resourceManager/core/basicUnregisterResource";
+
 import ResourceStateBitmapTexture from "../resourceManager/resourceState/ResourceStateBitmapTexture";
 import ResourceStateCubeTexture from "../resourceManager/resourceState/ResourceStateCubeTexture";
 import imageBitmapToGPUTexture from "./core/imageBitmapToGPUTexture";
@@ -155,16 +154,12 @@ class CubeTexture extends ManagedResourceBase {
 	}
 
 	#registerResource() {
-		basicRegisterResource(
-			this,
-			new ResourceStateCubeTexture(this)
-		)
+		this.redGPUContext.resourceManager.registerResource(this, new ResourceStateCubeTexture(this));
 	}
 
 	#unregisterResource() {
-		basicUnregisterResource(this)
+		this.redGPUContext.resourceManager.unregisterResource(this);
 	}
-
 	#createGPUTexture() {
 		const {gpuDevice, resourceManager} = this.redGPUContext
 		const {mipmapGenerator} = resourceManager

@@ -1,7 +1,6 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
-import basicRegisterResource from "../../resourceManager/core/basicRegisterResource";
-import basicUnregisterResource from "../../resourceManager/core/basicUnregisterResource";
+import ResourceStateHDRTexture from "../../resourceManager/resourceState/ResourceStateHDRTexture";
 import ResourceStateIndexBuffer from "../../resourceManager/resourceState/ResourceStateIndexBuffer";
 import ABaseBuffer from "../core/ABaseBuffer";
 import getCacheBufferFromResourceState from "../core/getCacheBufferFromResourceState";
@@ -28,10 +27,7 @@ class IndexBuffer extends ABaseBuffer {
 		} else {
 			if (cacheKey) this.name = cacheKey
 			this.changeData(data)
-			basicRegisterResource(
-				this,
-				new ResourceStateIndexBuffer(this)
-			)
+			this.redGPUContext.resourceManager.registerResource(this, new ResourceStateIndexBuffer(this));
 		}
 	}
 
@@ -56,7 +52,7 @@ class IndexBuffer extends ABaseBuffer {
 		if (temp) {
 			this.#gpuBuffer = null
 			this.__fireListenerList(true)
-			basicUnregisterResource(this)
+			this.redGPUContext.resourceManager.unregisterResource(this)
 			if (temp) temp.destroy()
 		}
 	}

@@ -1,7 +1,7 @@
 import ResourceManager from "./ResourceManager";
-import ResourceState from "./resourceState/ResourceState";
+import ResourceStatusInfo from "./resourceState/ResourceStatusInfo";
 
 export {
 	ResourceManager,
-	ResourceState
+	ResourceStatusInfo
 }

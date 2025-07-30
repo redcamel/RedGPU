@@ -6,9 +6,9 @@ import {keepLog} from "../../../utils";
 import calculateTextureByteSize from "../../../utils/math/calculateTextureByteSize";
 import getMipLevelCount from "../../../utils/math/getMipLevelCount";
 import ManagedResourceBase from "../../ManagedResourceBase";
-import basicRegisterResource from "../../resourceManager/core/basicRegisterResource";
-import basicUnregisterResource from "../../resourceManager/core/basicUnregisterResource";
+
 import ResourceManager from "../../resourceManager/ResourceManager";
+import ResourceStateCubeTexture from "../../resourceManager/resourceState/ResourceStateCubeTexture";
 import ResourceStateHDRTexture from "../../resourceManager/resourceState/ResourceStateHDRTexture";
 import Sampler from "../../sampler/Sampler";
 import CubeTexture from "../CubeTexture";
@@ -250,17 +250,14 @@ class HDRTexture extends ManagedResourceBase {
 		this.__fireListenerList();
 	}
 
+
 	#registerResource() {
-		basicRegisterResource(
-			this,
-			new ResourceStateHDRTexture(this)
-		)
+		this.redGPUContext.resourceManager.registerResource(this, new ResourceStateHDRTexture(this));
 	}
 
 	#unregisterResource() {
-		basicUnregisterResource(this)
+		this.redGPUContext.resourceManager.unregisterResource(this);
 	}
-
 	async #createGPUTexture() {
 		const {gpuDevice, resourceManager} = this.redGPUContext
 		if (this.#isCubeMapInitialized && this.#gpuTexture) {
