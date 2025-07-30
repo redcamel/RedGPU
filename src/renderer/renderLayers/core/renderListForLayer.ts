@@ -1,6 +1,6 @@
-import RenderViewStateData from "../../RenderViewStateData";
 import createBasePipeline from "../../../display/mesh/core/pipeline/createBasePipeline";
 import PIPELINE_TYPE from "../../../display/mesh/core/pipeline/PIPELINE_TYPE";
+import RenderViewStateData from "../../RenderViewStateData";
 
 const renderListForLayer = (list, debugViewRenderState: RenderViewStateData, pipelineKey: string = 'pipeline') => {
 	let i = 0

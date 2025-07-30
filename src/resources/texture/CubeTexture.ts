@@ -1,10 +1,8 @@
 import RedGPUContext from "../../context/RedGPUContext";
-import {keepLog} from "../../utils";
 import calculateTextureByteSize from "../../utils/math/calculateTextureByteSize";
 import getMipLevelCount from "../../utils/math/getMipLevelCount";
-import ResourceStateBitmapTexture from "../resourceManager/resourceState/texture/ResourceStateBitmapTexture";
-import ResourceStateCubeTexture from "../resourceManager/resourceState/texture/ResourceStateCubeTexture";
 import ManagementResourceBase from "../ManagementResourceBase";
+import ResourceStateCubeTexture from "../resourceManager/resourceState/texture/ResourceStateCubeTexture";
 import imageBitmapToGPUTexture from "./core/imageBitmapToGPUTexture";
 import loadAndCreateBitmapImage from "./core/loadAndCreateBitmapImage";
 

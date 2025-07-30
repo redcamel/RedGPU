@@ -3,8 +3,8 @@ import validateNumber from "../../../../runtimeChecker/validateFunc/validateNumb
 import validatePositiveNumberRange from "../../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import validateUintRange from "../../../../runtimeChecker/validateFunc/validateUintRange";
 import UniformBuffer from "../../../buffer/uniformBuffer/UniformBuffer";
-import ResourceStateBitmapTexture from "../../../resourceManager/resourceState/texture/ResourceStateBitmapTexture";
 import ManagementResourceBase from "../../../ManagementResourceBase";
+import ResourceStateBitmapTexture from "../../../resourceManager/resourceState/texture/ResourceStateBitmapTexture";
 import parseWGSL from "../../../wgslParser/parseWGSL";
 
 const MANAGED_STATE_KEY = 'managedBitmapTextureState';

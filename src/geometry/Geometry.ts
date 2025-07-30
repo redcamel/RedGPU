@@ -3,7 +3,6 @@ import GeometryGPURenderInfo from "../renderInfos/GeometryGPURenderInfo";
 import IndexBuffer from "../resources/buffer/indexBuffer/IndexBuffer";
 import VertexBuffer from "../resources/buffer/vertexBuffer/VertexBuffer";
 import ResourceBase from "../resources/ResourceBase";
-import {keepLog} from "../utils";
 import AABB from "../utils/math/bound/AABB";
 import calculateGeometryAABB from "../utils/math/bound/calculateGeometryAABB";
 

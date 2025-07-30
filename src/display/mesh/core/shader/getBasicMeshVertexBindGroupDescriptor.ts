@@ -1,6 +1,4 @@
 import Sampler from "../../../../resources/sampler/Sampler";
-import BitmapTexture from "../../../../resources/texture/BitmapTexture";
-import CubeTexture from "../../../../resources/texture/CubeTexture";
 import Mesh from "../../Mesh";
 
 const getBasicMeshVertexBindGroupDescriptor = (mesh: Mesh, skin: boolean = false): GPUBindGroupDescriptor => {

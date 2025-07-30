@@ -1,4 +1,3 @@
-
 import RedGPUContext from "../context/RedGPUContext";
 import validateRedGPUContext from "../runtimeChecker/validateFunc/validateRedGPUContext";
 import consoleAndThrowError from "../utils/consoleAndThrowError";

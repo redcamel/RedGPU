@@ -2,8 +2,6 @@ import GPU_COMPARE_FUNCTION from "../../../../gpuConst/GPU_COMPARE_FUNCTION";
 import ResourceManager from "../../../../resources/resourceManager/ResourceManager";
 import Mesh from "../../Mesh";
 import PIPELINE_TYPE from "./PIPELINE_TYPE";
-import resourceManager from "../../../../resources/resourceManager/ResourceManager";
-import {keepLog} from "../../../../utils";
 
 const createBasePipeline = (
 	mesh: Mesh,

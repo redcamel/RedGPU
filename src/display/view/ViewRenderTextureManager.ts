@@ -1,6 +1,4 @@
-import redGPUContext from "../../context/RedGPUContext";
 import RedGPUContext from "../../context/RedGPUContext";
-import resourceManager from "../../resources/resourceManager/ResourceManager";
 import validateRedGPUContext from "../../runtimeChecker/validateFunc/validateRedGPUContext";
 import getMipLevelCount from "../../utils/math/getMipLevelCount";
 import View3D from "./View3D";

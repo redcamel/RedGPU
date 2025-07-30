@@ -5,10 +5,10 @@ import GPU_MIPMAP_FILTER_MODE from "../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 import {keepLog} from "../../../utils";
 import calculateTextureByteSize from "../../../utils/math/calculateTextureByteSize";
 import getMipLevelCount from "../../../utils/math/getMipLevelCount";
+import ManagementResourceBase from "../../ManagementResourceBase";
 import ResourceManager from "../../resourceManager/ResourceManager";
 import ResourceStateHDRTexture from "../../resourceManager/resourceState/texture/ResourceStateHDRTexture";
 import Sampler from "../../sampler/Sampler";
-import ManagementResourceBase from "../../ManagementResourceBase";
 import CubeTexture from "../CubeTexture";
 import generateCubeMapFromEquirectangularCode from "./generateCubeMapFromEquirectangularCode.wgsl"
 import HDRLoader, {HDRData} from "./HDRLoader";

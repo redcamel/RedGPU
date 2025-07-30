@@ -4,7 +4,6 @@ import GPU_MIPMAP_FILTER_MODE from "../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 import RenderViewStateData from "../../../renderer/RenderViewStateData";
 import Sampler from "../../../resources/sampler/Sampler";
 import BitmapTexture from "../../../resources/texture/BitmapTexture";
-import {keepLog} from "../../../utils";
 import Mesh from "../../mesh/Mesh";
 import TextFieldMaterial from "./textFieldMaterial/TextFieldMaterial";
 

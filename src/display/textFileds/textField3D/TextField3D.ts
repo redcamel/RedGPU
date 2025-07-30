@@ -3,10 +3,8 @@ import Geometry from "../../../geometry/Geometry";
 import Primitive from "../../../primitive/core/Primitive";
 import Plane from "../../../primitive/Plane";
 import DefineForVertex from "../../../resources/defineProperty/DefineForVertex";
-import BitmapTexture from "../../../resources/texture/BitmapTexture";
 import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import ATextField from "../core/ATextField";
-import TextFieldMaterial from "../core/textFieldMaterial/TextFieldMaterial";
 import vertexModuleSource from "./shader/textField3DVertex.wgsl";
 
 interface TextField3D {

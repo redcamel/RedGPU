@@ -1,5 +1,4 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import {keepLog} from "../../../utils";
 import createUUID from "../../../utils/createUUID";
 import Sampler from "../../sampler/Sampler";
 import computeShaderCode from "./computeShader.wgsl";

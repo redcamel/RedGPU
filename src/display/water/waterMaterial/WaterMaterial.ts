@@ -5,7 +5,6 @@ import DefineForFragment from "../../../resources/defineProperty/DefineForFragme
 import Sampler from "../../../resources/sampler/Sampler";
 import BitmapTexture from "../../../resources/texture/BitmapTexture";
 import parseWGSL from "../../../resources/wgslParser/parseWGSL";
-import SkyBoxMaterial from "../../skyboxs/skyBox/SkyBoxMaterial";
 import fragmentModuleSource from './fragment.wgsl'
 
 const SHADER_INFO = parseWGSL(fragmentModuleSource)

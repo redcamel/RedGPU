@@ -1,6 +1,5 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import {keepLog} from "../../utils";
-import consoleAndThrowError from "../../utils/consoleAndThrowError";
 import ManagementResourceBase from "../ManagementResourceBase";
 import Sampler from "../sampler/Sampler";
 import BitmapTexture from "../texture/BitmapTexture";
@@ -9,14 +8,14 @@ import MipmapGenerator from "../texture/core/mipmapGenerator/MipmapGenerator";
 import CubeTexture from "../texture/CubeTexture";
 import PackedTexture from "../texture/packedTexture/PackedTexture";
 import preprocessWGSL from "../wgslParser/preprocessWGSL";
-import ResourceStateBitmapTexture from "./resourceState/texture/ResourceStateBitmapTexture";
-import ResourceStateCubeTexture from "./resourceState/texture/ResourceStateCubeTexture";
-import ResourceStateHDRTexture from "./resourceState/texture/ResourceStateHDRTexture";
 import ResourceStateIndexBuffer from "./resourceState/ResourceStateIndexBuffer";
 import ResourceStateStorageBuffer from "./resourceState/ResourceStateStorageBuffer";
 import ResourceStateUniformBuffer from "./resourceState/ResourceStateUniformBuffer";
 import ResourceStateVertexBuffer from "./resourceState/ResourceStateVertexBuffer";
 import ResourceStatusInfo from "./resourceState/ResourceStatusInfo";
+import ResourceStateBitmapTexture from "./resourceState/texture/ResourceStateBitmapTexture";
+import ResourceStateCubeTexture from "./resourceState/texture/ResourceStateCubeTexture";
+import ResourceStateHDRTexture from "./resourceState/texture/ResourceStateHDRTexture";
 
 enum ResourceType {
 	GPUShaderModule = 'GPUShaderModule',

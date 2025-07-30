@@ -1,4 +1,3 @@
-import {keepLog} from "../../../utils";
 import getAbsoluteURL from "../../../utils/file/getAbsoluteURL";
 import {GLTF} from "../GLTF";
 import GLTFLoader from "../GLTFLoader";

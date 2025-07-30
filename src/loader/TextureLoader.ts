@@ -1,7 +1,6 @@
 import RedGPUContext from "../context/RedGPUContext";
 import BitmapTexture from "../resources/texture/BitmapTexture";
 import CubeTexture from "../resources/texture/CubeTexture";
-import {keepLog} from "../utils";
 
 export class TextureLoaderData {
 	src: any;
