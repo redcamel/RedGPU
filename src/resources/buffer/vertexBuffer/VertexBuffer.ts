@@ -1,7 +1,6 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import ResourceStateVertexBuffer from "../../resourceManager/resourceState/ResourceStateVertexBuffer";
 import ABaseBuffer, {GPU_BUFFER_DATA_SYMBOL, GPU_BUFFER_SYMBOL} from "../core/ABaseBuffer";
-import getCacheBufferFromResourceState from "../core/func/getCacheBufferFromResourceState";
 import InterleavedStruct from "./InterleavedStruct";
 import InterleavedStructElement from "./InterleavedStructElement";
 
@@ -22,7 +21,8 @@ class VertexBuffer extends ABaseBuffer {
 		cacheKey: string = ''
 	) {
 		super(redGPUContext, MANAGED_STATE_KEY, usage)
-		const cacheBuffer = getCacheBufferFromResourceState(this, cacheKey) as VertexBuffer
+		const {table} = this.targetResourceManagedState
+		const cacheBuffer = table.get(cacheKey)
 		if (cacheBuffer) {
 			return cacheBuffer
 		} else {
@@ -52,26 +52,15 @@ class VertexBuffer extends ABaseBuffer {
 		return this.#triangleCount;
 	}
 
-
-
-	updateAllData(data: Array<number> | Float32Array) {
-		//TODO 체크해야함
-		const {gpuDevice} = this;
-		gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], 0, this[GPU_BUFFER_DATA_SYMBOL]);
-	}
-
 	changeData(data: Array<number> | Float32Array, interleavedStruct?: InterleavedStruct) {
 		const {gpuDevice} = this;
-		// Convert 'data' to Float32Array if it is a regular array
 		if (Array.isArray(data)) {
 			data = new Float32Array(data);
 		}
 		this[GPU_BUFFER_DATA_SYMBOL] = data;
-		// Update 'interleavedStruct' if provided
 		if (interleavedStruct) {
 			this.#updateInterleavedStruct(interleavedStruct);
 		}
-		// If a 'gpuBuffer' already exists, decrease the relevant memory and destroy the buffer
 		if (this[GPU_BUFFER_SYMBOL]) {
 			this.targetResourceManagedState.videoMemory -= this[GPU_BUFFER_DATA_SYMBOL].byteLength || 0;
 			let temp = this[GPU_BUFFER_SYMBOL]
@@ -80,17 +69,20 @@ class VertexBuffer extends ABaseBuffer {
 			})
 			this[GPU_BUFFER_SYMBOL] = null;
 		}
-		// Increase the video memory for the new data and create new buffer
 		this.targetResourceManagedState.videoMemory += this[GPU_BUFFER_DATA_SYMBOL].byteLength;
 		const bufferDescriptor: GPUBufferDescriptor = {
 			size: this[GPU_BUFFER_DATA_SYMBOL].byteLength,
 			usage: this.usage,
 			label: this.name
 		};
-		// Create a new buffer and update the triangleCount
 		this[GPU_BUFFER_SYMBOL] = gpuDevice.createBuffer(bufferDescriptor);
 		this.#triangleCount = this[GPU_BUFFER_DATA_SYMBOL].length / this.#stride;
-		// Write the new data into the buffer
+		gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], 0, this[GPU_BUFFER_DATA_SYMBOL]);
+	}
+
+	updateAllData(data: Array<number> | Float32Array) {
+		//TODO 체크해야함
+		const {gpuDevice} = this;
 		gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], 0, this[GPU_BUFFER_DATA_SYMBOL]);
 	}
 

@@ -39,8 +39,6 @@ class AUniformBaseBuffer extends ABaseBuffer {
 		return this.#uniformBufferDescriptor;
 	}
 
-
-
 	writeBuffers(targetList: [taregt: any, value: any][]) {
 		const {gpuDevice} = this.redGPUContext
 		let i = targetList.length

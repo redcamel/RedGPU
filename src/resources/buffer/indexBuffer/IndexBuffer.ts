@@ -1,8 +1,6 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import ResourceStateIndexBuffer from "../../resourceManager/resourceState/ResourceStateIndexBuffer";
 import ABaseBuffer, {GPU_BUFFER_DATA_SYMBOL, GPU_BUFFER_SYMBOL} from "../core/ABaseBuffer";
-import getCacheBufferFromResourceState from "../core/func/getCacheBufferFromResourceState";
 
 const MANAGED_STATE_KEY = 'managedIndexBufferState'
 type NumberArray = Array<number> | Uint32Array;
@@ -19,7 +17,8 @@ class IndexBuffer extends ABaseBuffer {
 		cacheKey: string = ''
 	) {
 		super(redGPUContext, MANAGED_STATE_KEY, usage)
-		const cacheBuffer = getCacheBufferFromResourceState(this, cacheKey) as IndexBuffer
+		const {table} = this.targetResourceManagedState
+		const cacheBuffer = table.get(cacheKey)
 		if (cacheBuffer) {
 			return cacheBuffer
 		} else {
@@ -65,15 +64,15 @@ class IndexBuffer extends ABaseBuffer {
 		gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], 0, this[GPU_BUFFER_DATA_SYMBOL]);
 	}
 
-	updatePartialData(dataStartIndex: number, data: NumberArray) {
-		const {gpuDevice} = this
-		if (dataStartIndex < 0 || dataStartIndex >= this[GPU_BUFFER_DATA_SYMBOL].length) {
-			consoleAndThrowError(`Offset value is out of data bounds. Tried to access index ${dataStartIndex} on data of length ${this[GPU_BUFFER_DATA_SYMBOL].length}`);
-		}
-		if (Array.isArray(data)) data = new Uint32Array(data)
-		this.#indexNum = data.length
-		gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], dataStartIndex, data)
-	}
+	// updatePartialData(dataStartIndex: number, data: NumberArray) {
+	// 	const {gpuDevice} = this
+	// 	if (dataStartIndex < 0 || dataStartIndex >= this[GPU_BUFFER_DATA_SYMBOL].length) {
+	// 		consoleAndThrowError(`Offset value is out of data bounds. Tried to access index ${dataStartIndex} on data of length ${this[GPU_BUFFER_DATA_SYMBOL].length}`);
+	// 	}
+	// 	if (Array.isArray(data)) data = new Uint32Array(data)
+	// 	this.#indexNum = data.length
+	// 	gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], dataStartIndex, data)
+	// }
 }
 
 Object.freeze(IndexBuffer)
