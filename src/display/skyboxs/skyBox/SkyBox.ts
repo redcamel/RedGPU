@@ -174,7 +174,7 @@ class SkyBox {
 		)
 		// UniformBuffer
 		const vertexUniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength)
-		const vertexUniformBuffer: UniformBuffer = new UniformBuffer(redGPUContext, vertexUniformData)
+		const vertexUniformBuffer: UniformBuffer = new UniformBuffer(redGPUContext, vertexUniformData, 'SKYBOX_VERTEX_UNIFORM_BUFFER','SKYBOX_VERTEX_UNIFORM_BUFFER')
 		// modelMatrix
 		mat4.identity(this.modelMatrix);
 		mat4.scale(this.modelMatrix, this.modelMatrix, [10000, 10000, 10000]); 	//TODO 카메라 farClip 받도록 수정

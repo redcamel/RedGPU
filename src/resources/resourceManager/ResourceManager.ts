@@ -21,6 +21,7 @@ enum ResourceType {
 	GPUShaderModule = 'GPUShaderModule',
 	GPUBindGroupLayout = 'GPUBindGroupLayout',
 	GPUPipelineLayout = 'GPUPipelineLayout',
+	GPUBuffer = 'GPUBuffer',
 }
 
 type ResourceState = ResourceStateVertexBuffer
@@ -41,6 +42,7 @@ class ResourceManager {
 		[ResourceType.GPUShaderModule, new Map()],
 		[ResourceType.GPUBindGroupLayout, new Map()],
 		[ResourceType.GPUPipelineLayout, new Map()],
+		[ResourceType.GPUBuffer, new Map()],
 	])
 	#managedBitmapTextureState: ResourceStatusInfo = new ResourceStatusInfo()
 	#managedCubeTextureState: ResourceStatusInfo = new ResourceStatusInfo()
@@ -129,6 +131,7 @@ class ResourceManager {
 
 		return texture;
 	}
+
 
 	#clearTextureCache(texture: GPUTexture, desc: GPUTextureDescriptor) {
 		const cache = desc.dimension === '3d' ?
@@ -311,6 +314,13 @@ class ResourceManager {
 				if (!descriptor.label) descriptor.label = name;
 				return this.redGPUContext.gpuDevice.createPipelineLayout(descriptor);
 			}, ResourceType.GPUPipelineLayout);
+	}
+	createGPUBuffer(name: string, gpuBufferDescriptor: GPUBufferDescriptor) {
+		return this.#createResource(name, gpuBufferDescriptor,
+			descriptor => {
+				if (!descriptor.label) descriptor.label = name;
+				return this.gpuDevice.createBuffer(descriptor);
+			}, ResourceType.GPUBuffer);
 	}
 
 	#initPresets() {

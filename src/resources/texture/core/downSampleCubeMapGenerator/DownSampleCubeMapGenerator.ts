@@ -285,7 +285,7 @@ class DownSampleCubeMapGenerator {
 	}
 
 	#initCubemapUniforms() {
-		const {gpuDevice} = this.#redGPUContext;
+		const {gpuDevice,resourceManager} = this.#redGPUContext;
 
 		// 유니폼 구조체 정의
 		this.#cubemapUniformStructInfo = {

@@ -350,12 +350,16 @@ class View3D extends ViewTransform {
 
 	#init() {
 		const systemUniform_Vertex_UniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength)
-		this.#systemUniform_Vertex_UniformBuffer = new UniformBuffer(this.redGPUContext, systemUniform_Vertex_UniformData, '#systemUniform_Vertex_UniformBuffer');
+		this.#systemUniform_Vertex_UniformBuffer = new UniformBuffer(
+			this.redGPUContext,
+			systemUniform_Vertex_UniformData,
+			'SYSTEM_UNIFORM_BUFFER_VERTEX',
+			'SYSTEM_UNIFORM_BUFFER_VERTEX',
+		);
 		//
 		this.#clusterLightsBufferData = new Float32Array((16 * PassClustersLightHelper.MAX_CLUSTER_LIGHTS) + 4)
-		this.#clusterLightsBuffer = this.redGPUContext.gpuDevice.createBuffer(
+		this.#clusterLightsBuffer = this.redGPUContext.resourceManager.createGPUBuffer(`VIEW_CLUSTER_LIGHTS_BUFFER`,
 			{
-				label: 'clusterLightsBuffer',
 				size: this.#clusterLightsBufferData.byteLength,
 				usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC
 			}

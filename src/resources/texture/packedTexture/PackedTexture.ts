@@ -38,13 +38,10 @@ class PackedTexture {
 	}
 
 	#initializeGlobals() {
-		if (!mappingBuffer) {
-			mappingBuffer = this.#gpuDevice.createBuffer({
-				label: 'PACK_TEXTURE_MAPPING_BUFFER',
-				size: 16, // 4개 컴포넌트 * 4바이트
-				usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-			});
-		}
+		mappingBuffer = this.#redGPUContext.resourceManager.createGPUBuffer('PACK_TEXTURE_MAPPING_BUFFER',{
+			size: 16, // 4개 컴포넌트 * 4바이트
+			usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+		});
 		if (!globalBindGroupLayout) {
 			globalBindGroupLayout = this.#redGPUContext.resourceManager.createBindGroupLayout(
 				'PACK_TEXTURE_BIND_GROUP_LAYOUT',

@@ -163,13 +163,13 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
 					tInterleaveInfoList,
 				),
 				undefined,
-				`V_${gltfLoader.url}_${nodeGlTfId}_${i}`
+				`Vertex_${gltfLoader.url}_${nodeGlTfId}_${i}`
 			),
 			!noIndexBuffer && indices.length ? new IndexBuffer(
 				redGPUContext,
 				new Uint32Array(indices),
 				undefined,
-				`F_${gltfLoader.url}_${nodeGlTfId}_${i}`
+				`Index_${gltfLoader.url}_${nodeGlTfId}_${i}`
 			) : null
 		);
 		// console.log(tDrawMode,indices)
