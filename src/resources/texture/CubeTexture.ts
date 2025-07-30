@@ -1,4 +1,5 @@
 import RedGPUContext from "../../context/RedGPUContext";
+import {keepLog} from "../../utils";
 import calculateTextureByteSize from "../../utils/math/calculateTextureByteSize";
 import getMipLevelCount from "../../utils/math/getMipLevelCount";
 import ResourceStateBitmapTexture from "../resourceManager/resourceState/texture/ResourceStateBitmapTexture";
@@ -47,17 +48,12 @@ class CubeTexture extends TextureResourceBase {
 		this.#srcList = srcList
 		this.cacheKey = this.#getCacheKey(srcList);
 		const {table} = this.targetResourceManagedState
-		let target: ResourceStateBitmapTexture
-		for (const k in table) {
-			if (table[k].cacheKey === this.cacheKey) {
-				target = table[k]
-				break
-			}
-		}
-		// console.log('target',	this.#cacheKey ,this)
+		let target: ResourceStateCubeTexture =  table.get(this.cacheKey)
 		if (target) {
-			const targetTexture = table[target.uuid].texture
+			keepLog('캐시타겟')
+			const targetTexture = target.texture as CubeTexture
 			this.#onLoad?.(targetTexture)
+			return targetTexture
 		} else {
 			this.srcList = srcList;
 			this.#registerResource()

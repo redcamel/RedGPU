@@ -90,7 +90,7 @@ class ResourceBase {
 	 *
 	 * @param {Function} listener - The listener function to be added.
 	 */
-	__addDirtyPipelineListener(listener: Function) {
+	__addDirtyPipelineListener(listener:  ()=>void) {
 		this.#manageResourceState(true);
 		this.#dirtyListeners.push(listener);
 	}
@@ -100,7 +100,7 @@ class ResourceBase {
 	 *
 	 * @param {Function} listener - The listener function to be removed.
 	 */
-	__removeDirtyPipelineListener(listener: Function) {
+	__removeDirtyPipelineListener(listener: ()=>void) {
 		const index = this.#dirtyListeners.indexOf(listener);
 		if (index > -1) {
 			this.#dirtyListeners.splice(index, 1);

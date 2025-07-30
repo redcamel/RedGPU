@@ -53,17 +53,14 @@ class BitmapTexture extends TextureResourceBase {
 			this.#src = src;
 			this.cacheKey = this.#getCacheKey(src)
 			const {table} = this.targetResourceManagedState
-			let target: ResourceStateBitmapTexture
-			for (const k in table) {
-				if (table[k].cacheKey === this.cacheKey) {
-					target = table[k]
-					break
-				}
-			}
-			// console.log('target',	this.#cacheKey ,this)
+			let target: ResourceStateBitmapTexture = table.get(this.cacheKey)
 			if (target) {
-				this.#onLoad?.(this) // TODO - 이거 다시확인해야함
-				return table[target.uuid].texture
+				keepLog('target',target)
+				// this.#onLoad?.(this) // TODO - 이거 다시확인해야함
+				// return table[target.uuid].texture
+				const targetTexture = target.texture as BitmapTexture
+				this.#onLoad?.(targetTexture)
+				return targetTexture
 			} else {
 				this.src = src;
 				this.#registerResource()
