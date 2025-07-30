@@ -44,45 +44,33 @@ class DebugStatisticsDomService {
 	update(debugRender: DebugRender, redGPUContext: RedGPUContext) {
 		const {resourceManager} = redGPUContext
 		const targetBufferState: any = resourceManager[`managed${this.#bufferType}State`]
-		const {table, videoMemory, length} = targetBufferState
+		const {table, videoMemory} = targetBufferState
 		debugRender.totalUsedVideoMemory += videoMemory
-		updateDebugItemValue(this.dom, 'totalCount', length)
+		updateDebugItemValue(this.dom, 'totalCount', table.size)
 		updateDebugItemValue(this.dom, 'targetVideoMemorySize', formatBytes(videoMemory))
 		// console.log(this.#bufferType)
 		let targetState
 		switch (this.#bufferType) {
 			case 'VertexBuffer' :
 				targetState = ResourceStateVertexBuffer
-				if (targetState) {
-					const {dirtyList} = targetState
-					if (dirtyList.length) {
-						this.#generateDebugItemsHtml(dirtyList);
-						dirtyList.length = 0
-					}
-				}
+
 				break
 			case 'IndexBuffer' :
 				targetState = ResourceStateIndexBuffer
-				if (targetState) {
-					const {dirtyList} = targetState
-					if (dirtyList.length) {
-						this.#generateDebugItemsHtml(dirtyList);
-						dirtyList.length = 0
-					}
-				}
 				break
 			case 'UniformBuffer' :
 				targetState = ResourceStateUniformBuffer
-				this.#generateDebugItemsHtml(Object.values(table));
 				break
 			case 'StorageBuffer' :
 				targetState = ResourceStateStorageBuffer
-				this.#generateDebugItemsHtml(Object.values(table));
 				break
+		}
+		if (targetState) {
+			this.#generateDebugItemsHtml(table);
 		}
 	}
 
-	#generateDebugItemsHtml(tList: any[]) {
+	#generateDebugItemsHtml(tList: Map<string,ResourceStateVertexBuffer | ResourceStateIndexBuffer | ResourceStateUniformBuffer | ResourceStateStorageBuffer>) {
 		const rootDom = this.dom.querySelector('.item-container');
 		const initialUUIDs: Set<string> = new Set();
 		const prefix = this.#bufferType;
@@ -92,7 +80,9 @@ class DebugStatisticsDomService {
 			initialUUIDs.add(uuid);
 			existingElements.set(uuid, dom);
 		});
-		tList.map((tInfo: any /** Replace it with accurate datatype of tInfo **/, index: number) => {
+
+		let index = 0;
+		tList.forEach((tInfo: ResourceStateVertexBuffer | ResourceStateIndexBuffer | ResourceStateUniformBuffer | ResourceStateStorageBuffer) => {
 			const {useNum, buffer} = tInfo;
 			const {uuid, size, name} = buffer;
 			const domUuid = `${prefix}_${uuid}`;
@@ -119,7 +109,9 @@ class DebugStatisticsDomService {
 			updateDebugItemValue(tDom, 'name', name);
 			updateDebugItemValue(tDom, 'useNum', useNum, true);
 			updateDebugItemValue(tDom, 'videoMemorySize', formatBytes(size));
+			index++;
 		});
+
 		for (let uuid of initialUUIDs) {
 			existingElements.get(uuid).remove();
 		}

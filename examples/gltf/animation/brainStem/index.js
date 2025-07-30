@@ -19,8 +19,8 @@ RedGPU.init(
 		let i = 10
 		while(i--) {
 			// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF-Binary/BrainStem.glb');
-			// loadGLTF(view, 	'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb');
-			loadGLTF(view, 	'../../../assets/gltf/busterDrone/busterDrone.gltf');
+			loadGLTF(view, 	'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb');
+			// loadGLTF(view, 	'../../../assets/gltf/busterDrone/busterDrone.gltf');
 		}
 			const renderer = new RedGPU.Renderer(redGPUContext);
 		const render = () => {};
