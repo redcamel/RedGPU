@@ -4,7 +4,7 @@ import getAbsoluteURL from "../../utils/file/getAbsoluteURL";
 import calculateTextureByteSize from "../../utils/math/calculateTextureByteSize";
 import getMipLevelCount from "../../utils/math/getMipLevelCount";
 import TextureResourceBase from "../TextureResourceBase";
-import ResourceStateBitmapTexture from "../resourceManager/resourceState/ResourceStateBitmapTexture";
+import ResourceStateBitmapTexture from "../resourceManager/resourceState/texture/ResourceStateBitmapTexture";
 import imageBitmapToGPUTexture from "./core/imageBitmapToGPUTexture";
 import loadAndCreateBitmapImage from "./core/loadAndCreateBitmapImage";
 
@@ -126,11 +126,11 @@ class BitmapTexture extends TextureResourceBase {
 	}
 
 	#registerResource() {
-		this.redGPUContext.resourceManager.registerResource(this, new ResourceStateBitmapTexture(this));
+		this.redGPUContext.resourceManager.registerTextureResource(this, new ResourceStateBitmapTexture(this));
 	}
 
 	#unregisterResource() {
-		this.redGPUContext.resourceManager.unregisterResource(this);
+		this.redGPUContext.resourceManager.unregisterTextureResource(this);
 	}
 
 	#createGPUTexture() {

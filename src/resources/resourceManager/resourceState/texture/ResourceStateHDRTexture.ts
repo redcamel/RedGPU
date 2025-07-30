@@ -1,6 +1,6 @@
-import HDRTexture from "../../texture/hdr/HDRTexture";
+import HDRTexture from "../../../texture/hdr/HDRTexture";
 
-class ResourceStateBitmapTexture {
+class ResourceStateHDRTexture {
 	texture: HDRTexture
 	src: string
 	cacheKey: string
@@ -16,4 +16,4 @@ class ResourceStateBitmapTexture {
 	}
 }
 
-export default ResourceStateBitmapTexture;
+export default ResourceStateHDRTexture;

@@ -2,11 +2,9 @@ import RedGPUContext from "../../../../context/RedGPUContext";
 import validateNumber from "../../../../runtimeChecker/validateFunc/validateNumber";
 import validatePositiveNumberRange from "../../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import validateUintRange from "../../../../runtimeChecker/validateFunc/validateUintRange";
-import createUUID from "../../../../utils/createUUID";
 import UniformBuffer from "../../../buffer/uniformBuffer/UniformBuffer";
+import ResourceStateBitmapTexture from "../../../resourceManager/resourceState/texture/ResourceStateBitmapTexture";
 import TextureResourceBase from "../../../TextureResourceBase";
-
-import ResourceStateBitmapTexture from "../../../resourceManager/resourceState/ResourceStateBitmapTexture";
 import parseWGSL from "../../../wgslParser/parseWGSL";
 
 const MANAGED_STATE_KEY = 'managedBitmapTextureState';
@@ -25,7 +23,9 @@ const BASIC_OPTIONS = {
 }
 
 class ANoiseTexture extends TextureResourceBase {
-	cacheKey;
+	get resourceManagerKey():string {
+		return MANAGED_STATE_KEY
+	}
 //
 	mipLevelCount;
 	videoMemorySize;
@@ -146,7 +146,7 @@ class ANoiseTexture extends TextureResourceBase {
 	#init(redGPUContext: RedGPUContext) {
 		const {gpuDevice} = redGPUContext;
 		const textureComputeShader = this.#generateShader();
-		this.cacheKey = createUUID()
+		this.cacheKey = this.uuid
 		this.#textureComputeShaderModule = gpuDevice.createShaderModule({
 			code: textureComputeShader,
 		});
@@ -279,13 +279,22 @@ class ANoiseTexture extends TextureResourceBase {
 			}
 		});
 	}
+	destroy() {
+		const temp = this.#gpuTexture
 
+		this.__fireListenerList(true)
+		this.src = null
+		this.cacheKey = null
+		this.#unregisterResource()
+		if (temp) temp.destroy()
+		this.#gpuTexture = null
+	}
 	#registerResource() {
-		this.redGPUContext.resourceManager.registerResourceOld(this, new ResourceStateBitmapTexture(this));
+		this.redGPUContext.resourceManager.registerTextureResource(this, new ResourceStateBitmapTexture(this));
 	}
 
 	#unregisterResource() {
-		this.redGPUContext.resourceManager.unregisterResourceOld(this);
+		this.redGPUContext.resourceManager.unregisterTextureResource(this);
 	}
 }
 

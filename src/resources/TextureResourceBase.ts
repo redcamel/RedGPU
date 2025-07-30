@@ -11,11 +11,14 @@ import ResourceStatusInfo from "./resourceManager/resourceState/ResourceStatusIn
 class TextureResourceBase extends ResourceBase {
 	readonly #targetResourceManagedState: ResourceStatusInfo
 
-	constructor(redGPUContext: RedGPUContext, managedStateKey: string,) {
-		super(redGPUContext)
-		this.#targetResourceManagedState = redGPUContext.resourceManager[managedStateKey]
-		if (!this.#targetResourceManagedState) {
+	constructor(redGPUContext: RedGPUContext, resourceManagerKey: string,) {
+		super(redGPUContext,resourceManagerKey)
+		if (!resourceManagerKey) {
 			consoleAndThrowError('need managedStateKey', this.constructor.name)
+		}
+		this.#targetResourceManagedState = redGPUContext.resourceManager[resourceManagerKey]
+		if (!this.#targetResourceManagedState) {
+			consoleAndThrowError(resourceManagerKey , 'is not exist in RedGPUContext.resourceManager', this.constructor.name)
 		}
 	}
 

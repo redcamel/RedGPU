@@ -5,12 +5,10 @@ import GPU_MIPMAP_FILTER_MODE from "../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 import {keepLog} from "../../../utils";
 import calculateTextureByteSize from "../../../utils/math/calculateTextureByteSize";
 import getMipLevelCount from "../../../utils/math/getMipLevelCount";
-import TextureResourceBase from "../../TextureResourceBase";
-
 import ResourceManager from "../../resourceManager/ResourceManager";
-import ResourceStateCubeTexture from "../../resourceManager/resourceState/ResourceStateCubeTexture";
-import ResourceStateHDRTexture from "../../resourceManager/resourceState/ResourceStateHDRTexture";
+import ResourceStateHDRTexture from "../../resourceManager/resourceState/texture/ResourceStateHDRTexture";
 import Sampler from "../../sampler/Sampler";
+import TextureResourceBase from "../../TextureResourceBase";
 import CubeTexture from "../CubeTexture";
 import generateCubeMapFromEquirectangularCode from "./generateCubeMapFromEquirectangularCode.wgsl"
 import HDRLoader, {HDRData} from "./HDRLoader";
@@ -252,11 +250,11 @@ class HDRTexture extends TextureResourceBase {
 
 
 	#registerResource() {
-		this.redGPUContext.resourceManager.registerResourceOld(this, new ResourceStateHDRTexture(this));
+		this.redGPUContext.resourceManager.registerTextureResource(this, new ResourceStateHDRTexture(this));
 	}
 
 	#unregisterResource() {
-		this.redGPUContext.resourceManager.unregisterResourceOld(this);
+		this.redGPUContext.resourceManager.unregisterTextureResource(this);
 	}
 	async #createGPUTexture() {
 		const {gpuDevice, resourceManager} = this.redGPUContext

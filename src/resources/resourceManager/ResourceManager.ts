@@ -9,9 +9,9 @@ import MipmapGenerator from "../texture/core/mipmapGenerator/MipmapGenerator";
 import CubeTexture from "../texture/CubeTexture";
 import PackedTexture from "../texture/packedTexture/PackedTexture";
 import preprocessWGSL from "../wgslParser/preprocessWGSL";
-import ResourceStateBitmapTexture from "./resourceState/ResourceStateBitmapTexture";
-import ResourceStateCubeTexture from "./resourceState/ResourceStateCubeTexture";
-import ResourceStateHDRTexture from "./resourceState/ResourceStateHDRTexture";
+import ResourceStateBitmapTexture from "./resourceState/texture/ResourceStateBitmapTexture";
+import ResourceStateCubeTexture from "./resourceState/texture/ResourceStateCubeTexture";
+import ResourceStateHDRTexture from "./resourceState/texture/ResourceStateHDRTexture";
 import ResourceStateIndexBuffer from "./resourceState/ResourceStateIndexBuffer";
 import ResourceStateStorageBuffer from "./resourceState/ResourceStateStorageBuffer";
 import ResourceStateUniformBuffer from "./resourceState/ResourceStateUniformBuffer";
@@ -77,12 +77,12 @@ class ResourceManager {
 		return this.#gpuDevice
 	}
 
-	registerResource(target: TextureResourceBase, resourceState: ResourceState) {
+	registerTextureResource(target: TextureResourceBase, resourceState: ResourceState) {
 		const {cacheKey, targetResourceManagedState} = target;
 		const {table} = targetResourceManagedState;
 
 		if (table.get(cacheKey)) {
-			consoleAndThrowError(`Resource with cacheKey ${cacheKey} is already registered.`);
+			keepLog(`Resource with cacheKey ${cacheKey} is already registered.`);
 			return;
 		}
 
@@ -95,10 +95,10 @@ class ResourceManager {
 		if (!isTexture && 'size' in target && (target as any).size > 0) {
 			targetResourceManagedState.videoMemory += (target as any).size;
 		}
-		keepLog('targetResourceManagedState',targetResourceManagedState)
+		keepLog('targetResourceManagedState',target.resourceManagerKey, targetResourceManagedState)
 	}
 
-	unregisterResource(target: TextureResourceBase) {
+	unregisterTextureResource(target: TextureResourceBase) {
 		const {cacheKey, targetResourceManagedState} = target;
 		const {table} = targetResourceManagedState;
 

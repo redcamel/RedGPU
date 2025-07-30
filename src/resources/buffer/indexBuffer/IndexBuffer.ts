@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
-import ResourceStateHDRTexture from "../../resourceManager/resourceState/ResourceStateHDRTexture";
+import ResourceStateHDRTexture from "../../resourceManager/resourceState/texture/ResourceStateHDRTexture";
 import ResourceStateIndexBuffer from "../../resourceManager/resourceState/ResourceStateIndexBuffer";
 import ABaseBuffer from "../core/ABaseBuffer";
 import getCacheBufferFromResourceState from "../core/getCacheBufferFromResourceState";

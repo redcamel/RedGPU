@@ -1,4 +1,4 @@
-import CubeTexture from "../../texture/CubeTexture";
+import CubeTexture from "../../../texture/CubeTexture";
 
 class ResourceStateCubeTexture {
 	texture: CubeTexture

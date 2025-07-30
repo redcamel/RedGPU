@@ -1,11 +1,9 @@
 import RedGPUContext from "../../context/RedGPUContext";
-import createUUID from "../../utils/createUUID";
 import calculateTextureByteSize from "../../utils/math/calculateTextureByteSize";
 import getMipLevelCount from "../../utils/math/getMipLevelCount";
+import ResourceStateBitmapTexture from "../resourceManager/resourceState/texture/ResourceStateBitmapTexture";
+import ResourceStateCubeTexture from "../resourceManager/resourceState/texture/ResourceStateCubeTexture";
 import TextureResourceBase from "../TextureResourceBase";
-
-import ResourceStateBitmapTexture from "../resourceManager/resourceState/ResourceStateBitmapTexture";
-import ResourceStateCubeTexture from "../resourceManager/resourceState/ResourceStateCubeTexture";
 import imageBitmapToGPUTexture from "./core/imageBitmapToGPUTexture";
 import loadAndCreateBitmapImage from "./core/loadAndCreateBitmapImage";
 
@@ -153,11 +151,11 @@ class CubeTexture extends TextureResourceBase {
 	}
 
 	#registerResource() {
-		this.redGPUContext.resourceManager.registerResource(this, new ResourceStateCubeTexture(this));
+		this.redGPUContext.resourceManager.registerTextureResource(this, new ResourceStateCubeTexture(this));
 	}
 
 	#unregisterResource() {
-		this.redGPUContext.resourceManager.unregisterResource(this);
+		this.redGPUContext.resourceManager.unregisterTextureResource(this);
 	}
 	#createGPUTexture() {
 		const {gpuDevice, resourceManager} = this.redGPUContext
