@@ -126,12 +126,7 @@ class CubeTexture extends ManagementResourceBase {
 		// this.#mipLevelCount = getMipLevelCount(gpuTexture.width, gpuTexture.height);
 		this.cacheKey = cacheKey || `direct_${this.uuid}`;
 		// 메모리 사용량 계산
-		const textureDescriptor: GPUTextureDescriptor = {
-			size: [gpuTexture.width, gpuTexture.height, gpuTexture.depthOrArrayLayers],
-			format: gpuTexture.format as GPUTextureFormat,
-			usage: gpuTexture.usage,
-			mipLevelCount: this.#mipLevelCount
-		};
+
 		this.#videoMemorySize = calculateTextureByteSize(gpuTexture);
 		this.targetResourceManagedState.videoMemory += this.#videoMemorySize;
 		// 리스너들에게 업데이트 알림

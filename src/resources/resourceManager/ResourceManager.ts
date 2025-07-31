@@ -169,7 +169,9 @@ class ResourceManager {
 			textureViewMap = new Map();
 			this.#cubeTextureViewCache.set(targetGPUTexture, textureViewMap);
 		}
-		const effectiveDescriptor = viewDescriptor || CubeTexture.defaultViewDescriptor;
+		if(cubeTexture instanceof CubeTexture && !viewDescriptor) viewDescriptor = cubeTexture.viewDescriptor;
+		const effectiveDescriptor = viewDescriptor ||  CubeTexture.defaultViewDescriptor;
+
 		const cacheKey = this.#createDescriptorKey(effectiveDescriptor);
 		let cachedView = textureViewMap.get(cacheKey);
 		if (!cachedView) {
