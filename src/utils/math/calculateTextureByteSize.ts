@@ -1,4 +1,11 @@
-function calculateTextureByteSize(descriptor: GPUTextureDescriptor): number {
+function calculateTextureByteSize(texture: GPUTexture): number {
+	const descriptor:GPUTextureDescriptor = {
+		size: [texture.width, texture.height, texture.depthOrArrayLayers],
+		format: texture.format,
+		sampleCount: texture.sampleCount,
+		usage: texture.usage
+	}
+
 	const bytesPerTexel = getTextureFormatByteSize(descriptor.format);
 	const texelCount = descriptor.size[0] * descriptor.size[1] * (descriptor.size[2] || 1)
 	const sampleCount = descriptor.sampleCount ? descriptor.sampleCount : 1;

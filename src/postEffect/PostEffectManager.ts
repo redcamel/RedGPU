@@ -5,6 +5,7 @@ import View3D from "../display/view/View3D";
 import UniformBuffer from "../resources/buffer/uniformBuffer/UniformBuffer";
 import Sampler from "../resources/sampler/Sampler";
 import parseWGSL from "../resources/wgslParser/parseWGSL";
+import calculateTextureByteSize from "../utils/math/calculateTextureByteSize";
 import AMultiPassPostEffect from "./core/AMultiPassPostEffect";
 import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
 import postEffectSystemUniformCode from "./core/postEffectSystemUniform.wgsl"
@@ -27,7 +28,7 @@ class PostEffectManager {
 	#previousDimensions: { width: number, height: number }
 	#postEffectSystemUniformBuffer: UniformBuffer;
 	#postEffectSystemUniformBufferStructInfo;
-
+	#videoMemory:number = 0
 	constructor(view: View3D) {
 		this.#view = view;
 		this.#init()
@@ -167,6 +168,15 @@ class PostEffectManager {
 		this.#postEffectSystemUniformBufferStructInfo = UNIFORM_STRUCT;
 		this.#postEffectSystemUniformBuffer = new UniformBuffer(redGPUContext, postEffectSystemUniformData, `${this.#view.name}_POST_EFFECT_SYSTEM_UNIFORM_BUFFER`);
 	}
+	#calcVideoMemory() {
+		const texture = this.#storageTexture
+		if(!texture) return 0;
+		this.#videoMemory =  calculateTextureByteSize(texture)
+	}
+
+	get videoMemory(): number {
+		return this.#videoMemory;
+	}
 
 	#renderToStorageTexture(view: View3D, sourceTextureView: GPUTextureView) {
 		const {redGPUContext, viewRenderTextureManager} = view;
@@ -183,6 +193,7 @@ class PostEffectManager {
 			}
 			this.#storageTexture = this.#createStorageTexture(gpuDevice, width, height);
 			this.#storageTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#storageTexture);
+			this.#calcVideoMemory()
 		}
 		// 크기 변경 또는 MSAA 변경 시 BindGroup 재생성
 		if (dimensionsChanged || changedMSAA) {

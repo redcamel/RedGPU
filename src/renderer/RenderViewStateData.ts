@@ -1,5 +1,6 @@
 import Camera2D from "../camera/camera/Camera2D";
 import View3D from "../display/view/View3D";
+import {keepLog} from "../utils";
 import calculateTextureByteSize from "../utils/math/calculateTextureByteSize";
 
 /**
@@ -65,8 +66,9 @@ class RenderViewStateData {
 			throw new Error('Invalid parameters provided');
 		}
 		const view = this.#view
-		const {useFrustumCulling, frustumPlanes} = view;
-		const {colorTexture, depthTexture} = view.viewRenderTextureManager;
+		const {useFrustumCulling, frustumPlanes,scene,postEffectManager} = view;
+		const {colorTexture, depthTexture, colorResolveTexture, renderPath1ResultTexture,} = view.viewRenderTextureManager;
+		const {shadowManager} = scene;
 		if (!colorTexture || !depthTexture) {
 			throw new Error('Invalid view properties');
 		}
@@ -101,17 +103,18 @@ class RenderViewStateData {
 			pixelRectArray: view.pixelRectArray
 		}
 		try {
-			this.usedVideoMemory = calculateTextureByteSize({
-				size: [colorTexture.width, colorTexture.height, colorTexture.depthOrArrayLayers],
-				format: colorTexture.format,
-				sampleCount: colorTexture.sampleCount,
-				usage: colorTexture.usage
-			}) + calculateTextureByteSize({
-				size: [depthTexture.width, depthTexture.height, depthTexture.depthOrArrayLayers],
-				format: depthTexture.format,
-				sampleCount: depthTexture.sampleCount,
-				usage: depthTexture.usage
-			});
+			const textures = [
+				colorTexture, depthTexture, colorResolveTexture, renderPath1ResultTexture
+			];
+			this.usedVideoMemory = textures.reduce((total, texture) => {
+					const videoMemory = calculateTextureByteSize(texture)
+				// keepLog(texture.label,  videoMemory)
+					return total + videoMemory
+				}
+				, 0
+			)
+				+ shadowManager.directionalShadowManager.videoMemory;
+				+ postEffectManager.videoMemory
 		} catch (e) {
 			throw new Error('Could not calculate texture size: ' + e.message);
 		}

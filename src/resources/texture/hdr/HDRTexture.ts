@@ -278,7 +278,7 @@ class HDRTexture extends ManagementResourceBase {
 		const newGPUTexture = resourceManager.createManagedTexture(cubeDescriptor);
 		this.#setGpuTexture(newGPUTexture);
 		this.#mipLevelCount = cubeDescriptor.mipLevelCount || 1
-		this.#videoMemorySize = calculateTextureByteSize(cubeDescriptor)
+		this.#videoMemorySize = calculateTextureByteSize(newGPUTexture)
 		this.targetResourceManagedState.videoMemory += this.#videoMemorySize
 		await this.#updateCubeMapContent();
 		this.#isCubeMapInitialized = true;

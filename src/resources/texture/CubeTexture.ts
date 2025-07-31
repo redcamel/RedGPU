@@ -132,7 +132,7 @@ class CubeTexture extends ManagementResourceBase {
 			usage: gpuTexture.usage,
 			mipLevelCount: this.#mipLevelCount
 		};
-		this.#videoMemorySize = calculateTextureByteSize(textureDescriptor);
+		this.#videoMemorySize = calculateTextureByteSize(gpuTexture);
 		this.targetResourceManagedState.videoMemory += this.#videoMemorySize;
 		// 리스너들에게 업데이트 알림
 		this.__fireListenerList();
@@ -179,7 +179,7 @@ class CubeTexture extends ManagementResourceBase {
 			}
 			const newGPUTexture = imageBitmapToGPUTexture(gpuDevice, imgBitmaps, textureDescriptor)
 			this.targetResourceManagedState.videoMemory -= this.#videoMemorySize
-			this.#videoMemorySize = calculateTextureByteSize(textureDescriptor)
+			this.#videoMemorySize = calculateTextureByteSize(newGPUTexture)
 			this.targetResourceManagedState.videoMemory += this.#videoMemorySize
 			if (this.#useMipmap) mipmapGenerator.generateMipmap(newGPUTexture, textureDescriptor)
 			this.#setGpuTexture(newGPUTexture)
