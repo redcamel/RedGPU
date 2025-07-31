@@ -21,11 +21,11 @@ class DebugStatisticsDomService {
   		<div class="debug-group" >
           <div class='debug-item'>
               <span class='debug-item-title'>Frame</span>
-              <span style="text-align: right">
-                  <div class="elapsedSeconds">elapsedSeconds</div>
-                  <div class="currentFps">currentFps</div>
-                  <div style="color:#fff" class="averageFps">averageFps</div>
-              </span>
+              <div style="display: flex;align-items: center;justify-content: flex-end">
+                  <div class="elapsedSeconds" style="width:45px;text-align: right">elapsedSeconds</div>
+                  <div class="currentFps" style="width:50px;text-align: right">currentFps</div>
+                  <div style="color:#fff;width: 50px;text-align: right" class="averageFps" >averageFps</div>
+              </div>
           </div>
       </div>
     `;
@@ -60,8 +60,8 @@ class Fps extends ADebugItem {
 		const {elapsedSeconds, currentFps, averageFps} = fpsDetails;
 		this.debugStatisticsDomService.update(
 			`${elapsedSeconds.toLocaleString()}ms`,
-			`${currentFps.toLocaleString()} fps`,
-			`AVG: ${averageFps} fps`
+			`${currentFps.toLocaleString()} FPS`,
+			`${averageFps} AVG`
 		);
 	}
 

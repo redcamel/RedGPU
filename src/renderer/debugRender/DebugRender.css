@@ -1,4 +1,5 @@
 .RedGPUDebugPanel {
+    width:330px;
     max-height: 100%;
     overflow-y: auto;
     background: rgba(0, 0, 0, 0.80);
@@ -106,7 +107,7 @@
     align-items: center;
     padding: 10px 8px;
     width: 100%;
-    font-size: 12px;
+    font-size: 16px;
     line-height: 1;
     justify-content: space-between;
     border-top: 1px solid rgba(255, 255, 255, 0.05);

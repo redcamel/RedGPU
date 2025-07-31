@@ -19,6 +19,7 @@ class DebugRender {
 	debugVertexBufferList: DebugBufferList;
 	debugUniformBufferList: DebugBufferList;
 	debugStorageBufferList: DebugBufferList;
+	debugBufferList: DebugBufferList;
 	//
 	totalNum3DGroups: number
 	totalNum3DObjects: number
@@ -40,6 +41,7 @@ class DebugRender {
 		this.debugVertexBufferList = new DebugBufferList('VertexBuffer')
 		this.debugUniformBufferList = new DebugBufferList('UniformBuffer')
 		this.debugStorageBufferList = new DebugBufferList('StorageBuffer')
+		this.debugBufferList = new DebugBufferList('Buffer')
 		this.#resetCounters();
 	}
 
@@ -55,6 +57,7 @@ class DebugRender {
 			this.debugVertexBufferList.update(this, redGPUContext,)
 			this.debugUniformBufferList.update(this, redGPUContext,)
 			this.debugStorageBufferList.update(this, redGPUContext,)
+			this.debugBufferList.update(this, redGPUContext,)
 			this.debugTotalState.update(this, redGPUContext, time)
 		} else {
 			this.#removeDebugPanel()
@@ -82,6 +85,7 @@ class DebugRender {
 				this.debugTotalState.debugStatisticsDomService,
 				this.debugRedGPUContext.debugStatisticsDomService,
 				this.debugViewList.debugStatisticsDomService,
+				this.debugBufferList.debugStatisticsDomService,
 				this.debugVertexBufferList.debugStatisticsDomService,
 				this.debugIndexBufferList.debugStatisticsDomService,
 				this.debugUniformBufferList.debugStatisticsDomService,
