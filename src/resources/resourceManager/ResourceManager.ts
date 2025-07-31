@@ -37,13 +37,23 @@ class ResourceManager {
 	static PRESET_VERTEX_GPUBindGroupLayout_Instancing = 'PRESET_VERTEX_GPUBindGroupLayout_Instancing'
 	static PRESET_VERTEX_GPUBindGroupLayout = 'PRESET_VERTEX_GPUBindGroupLayout'
 	static PRESET_VERTEX_GPUBindGroupLayout_SKIN = 'PRESET_VERTEX_GPUBindGroupLayout_SKIN'
+	#gpuBufferVideoMemory: number = 0;
 
 	#resources = new ImmutableKeyMap([
 		[ResourceType.GPUShaderModule, new Map()],
 		[ResourceType.GPUBindGroupLayout, new Map()],
 		[ResourceType.GPUPipelineLayout, new Map()],
-		[ResourceType.GPUBuffer, new Map()],
+		[ResourceType.GPUBuffer, new MemoryTrackingMap<string, GPUBuffer>()]
+
 	])
+	#onGPUBufferMemoryChange = (totalMemory: number) => {
+		this.#gpuBufferVideoMemory = totalMemory;
+	}
+
+	get gpuBufferVideoMemory(): number {
+		return this.#gpuBufferVideoMemory;
+	}
+
 	#managedBitmapTextureState: ResourceStatusInfo = new ResourceStatusInfo()
 	#managedCubeTextureState: ResourceStatusInfo = new ResourceStatusInfo()
 	#managedHDRTextureState: ResourceStatusInfo = new ResourceStatusInfo()
@@ -490,5 +500,54 @@ class ImmutableKeyMap extends Map {
 		} else {
 			return super.set(key, value);
 		}
+	}
+}
+class MemoryTrackingMap<K, V> extends Map<K, V> {
+	#videoMemory: number = 0;
+
+	constructor() {
+		super();
+	}
+
+	set(key: K, value: V): this {
+		// 기존 값이 있다면 메모리에서 제거
+		if (this.has(key)) {
+			const existingValue = this.get(key) as any;
+			if (existingValue && existingValue.size) {
+				this.#videoMemory -= existingValue.size;
+			}
+		}
+
+		// 새 값의 메모리 추가
+		if (value && (value as any).size) {
+			this.#videoMemory += (value as any).size;
+		}
+
+		const result = super.set(key, value);
+
+		return result;
+	}
+
+	delete(key: K): boolean {
+		if (this.has(key)) {
+			const value = this.get(key) as any;
+			if (value && value.size) {
+				this.#videoMemory -= value.size;
+			}
+		}
+
+		const result = super.delete(key);
+
+
+		return result;
+	}
+
+	clear(): void {
+		this.#videoMemory = 0;
+		super.clear();
+	}
+
+	get videoMemory(): number {
+		return this.#videoMemory;
 	}
 }
