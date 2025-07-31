@@ -3,6 +3,7 @@ import ResourceStateBitmapTexture
 	from "../../../resources/resourceManager/resourceState/texture/ResourceStateBitmapTexture";
 import ResourceStateCubeTexture
 	from "../../../resources/resourceManager/resourceState/texture/ResourceStateCubeTexture";
+import ResourceStateHDRTexture from "../../../resources/resourceManager/resourceState/texture/ResourceStateHDRTexture";
 import formatBytes from "../../../utils/math/formatBytes";
 import {createDebugTitle, updateDebugItemValue} from "../core/debugFunc";
 import DebugRender from "../DebugRender";
@@ -10,21 +11,21 @@ import ADebugItem from "./core/ADebugItem";
 import ADebugStatisticsDomService from "./core/ADebugStatisticsDomService";
 
 class DebugStatisticsDomService extends ADebugStatisticsDomService {
-	readonly #debugCubeTextureMode: boolean
+	readonly #debugCubeTextureMode:  'Bitmap' | 'Cube' | 'HDR'
 
-	constructor(debugCubeTextureMode: boolean) {
+	constructor(debugCubeTextureMode:  'Bitmap' | 'Cube' | 'HDR') {
 		super()
 		this.#debugCubeTextureMode = debugCubeTextureMode
-		this.init(`${createDebugTitle(`${debugCubeTextureMode ? 'CubeTexture' : 'BitmapTexture'} Num : <span class="totalCount"></span> (<b class="targetVideoMemorySize"></b>)`)}`)
+		this.init(`${createDebugTitle(`${debugCubeTextureMode}Texture Num : <span class="totalCount"></span> (<b class="targetVideoMemorySize"></b>)`)}`)
 	}
 
 	update(debugRender: DebugRender, redGPUContext: RedGPUContext) {
 		const {resourceManager} = redGPUContext
-		const {managedBitmapTextureState, managedCubeTextureState} = resourceManager
+		const {managedBitmapTextureState, managedCubeTextureState,managedHDRTextureState} = resourceManager
 		const {
 			table,
 			videoMemory,
-		} = this.#debugCubeTextureMode ? managedCubeTextureState : managedBitmapTextureState
+		} = this.#debugCubeTextureMode === 'Bitmap' ? managedBitmapTextureState : this.#debugCubeTextureMode === 'Cube' ? managedCubeTextureState : managedHDRTextureState
 		debugRender.totalUsedVideoMemory += videoMemory
 
 		updateDebugItemValue(this.dom, 'totalCount', table.size)
@@ -32,13 +33,13 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
 		this.#generateDebugItemsHtml(table);
 	}
 
-	getTargetSrc(tInfo: ResourceStateBitmapTexture | ResourceStateCubeTexture) {
-		if (tInfo instanceof ResourceStateBitmapTexture) {
-			const {src} = tInfo;
-			return src ? src.startsWith('data:') ? 'base64 texture' : src : 'null'
-		} else {
+	getTargetSrc(tInfo: ResourceStateBitmapTexture | ResourceStateCubeTexture | ResourceStateHDRTexture) {
+		if (tInfo instanceof ResourceStateCubeTexture) {
 			const {srcList} = tInfo;
 			return `${srcList[0]}...`
+		} else {
+			const {src} = tInfo;
+			return src ? src.startsWith('data:') ? 'base64 texture' : src : 'null'
 		}
 	}
 
@@ -106,7 +107,7 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
 	#generateDebugItemsHtml(tList: Map<string, ResourceStateBitmapTexture | ResourceStateCubeTexture>) {
 		const rootDom = this.dom.querySelector('.item-container')
 		const initialUUIDs: Set<string> = new Set();
-		const prefix = this.#debugCubeTextureMode ? 'cube_texture' : 'bitmap_texture'
+		const prefix = this.#debugCubeTextureMode === 'Bitmap' ? 'cube_texture' : this.#debugCubeTextureMode === 'Cube' ? 'bitmap_texture' :  'hdr_texture'
 		rootDom.querySelectorAll('.debug-group').forEach((dom) => {
 			const uuid: string = dom.className.split(' ')[1].replace(`${prefix}_`, '');
 			initialUUIDs.add(uuid);
@@ -131,9 +132,9 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
 }
 
 class DebugTextureList extends ADebugItem {
-	constructor(debugCubeTextureMode: boolean = false) {
+	constructor(type: 'Bitmap' | 'Cube' | 'HDR' = 'Bitmap') {
 		super()
-		this.debugStatisticsDomService = new DebugStatisticsDomService(debugCubeTextureMode);
+		this.debugStatisticsDomService = new DebugStatisticsDomService(type);
 	}
 }
 

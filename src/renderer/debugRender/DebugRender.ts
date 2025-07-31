@@ -15,6 +15,7 @@ class DebugRender {
 	debugRedGPUContext: DebugRedGPUContext;
 	debugBitmapTextureList: DebugTextureList;
 	debugCubeTextureList: DebugTextureList;
+	debugHDRTextureList: DebugTextureList;
 	debugIndexBufferList: DebugBufferList;
 	debugVertexBufferList: DebugBufferList;
 	debugUniformBufferList: DebugBufferList;
@@ -36,7 +37,8 @@ class DebugRender {
 		this.debugRedGPUContext = new DebugRedGPUContext()
 		this.debugViewList = new DebugViewList()
 		this.debugBitmapTextureList = new DebugTextureList()
-		this.debugCubeTextureList = new DebugTextureList(true)
+		this.debugCubeTextureList = new DebugTextureList('Cube')
+		this.debugHDRTextureList = new DebugTextureList('HDR')
 		this.debugIndexBufferList = new DebugBufferList('IndexBuffer')
 		this.debugVertexBufferList = new DebugBufferList('VertexBuffer')
 		this.debugUniformBufferList = new DebugBufferList('UniformBuffer')
@@ -53,6 +55,7 @@ class DebugRender {
 			this.debugViewList.update(this, redGPUContext, time)
 			this.debugBitmapTextureList.update(this, redGPUContext, time)
 			this.debugCubeTextureList.update(this, redGPUContext, time)
+			this.debugHDRTextureList.update(this, redGPUContext, time)
 			this.debugIndexBufferList.update(this, redGPUContext,)
 			this.debugVertexBufferList.update(this, redGPUContext,)
 			this.debugUniformBufferList.update(this, redGPUContext,)
@@ -91,7 +94,8 @@ class DebugRender {
 				this.debugUniformBufferList.debugStatisticsDomService,
 				this.debugStorageBufferList.debugStatisticsDomService,
 				this.debugBitmapTextureList.debugStatisticsDomService,
-				this.debugCubeTextureList.debugStatisticsDomService
+				this.debugCubeTextureList.debugStatisticsDomService,
+				this.debugHDRTextureList.debugStatisticsDomService,
 			].forEach(v => this.#domRoot.appendChild(v.dom))
 		}
 	}
