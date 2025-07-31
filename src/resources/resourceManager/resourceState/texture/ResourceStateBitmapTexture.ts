@@ -8,12 +8,12 @@ class ResourceStateBitmapTexture {
 	useNum: number = 0
 	uuid: string | number
 
-	constructor(bitmapTexture: BitmapTexture | ANoiseTexture) {
-		this.texture = bitmapTexture
-		this.src = bitmapTexture.src
-		this.cacheKey = bitmapTexture.cacheKey
+	constructor(texture: BitmapTexture | ANoiseTexture) {
+		this.texture = texture
+		this.src = texture.src
+		this.cacheKey = texture.cacheKey
 		this.useNum = 0
-		this.uuid = bitmapTexture.uuid
+		this.uuid = texture.uuid
 	}
 }
 
