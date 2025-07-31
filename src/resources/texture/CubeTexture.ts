@@ -1,4 +1,5 @@
 import RedGPUContext from "../../context/RedGPUContext";
+import {keepLog} from "../../utils";
 import calculateTextureByteSize from "../../utils/math/calculateTextureByteSize";
 import getMipLevelCount from "../../utils/math/getMipLevelCount";
 import ManagementResourceBase from "../ManagementResourceBase";
@@ -7,7 +8,7 @@ import imageBitmapToGPUTexture from "./core/imageBitmapToGPUTexture";
 import loadAndCreateBitmapImage from "./core/loadAndCreateBitmapImage";
 
 const MANAGED_STATE_KEY = 'managedCubeTextureState'
-
+type SrcInfo = string[] | { srcList: string[], cacheKey: string }
 class CubeTexture extends ManagementResourceBase {
 	static defaultViewDescriptor: GPUTextureViewDescriptor = {
 		dimension: 'cube',
@@ -26,13 +27,21 @@ class CubeTexture extends ManagementResourceBase {
 	readonly #format: GPUTextureFormat
 	readonly #onLoad: (cubeTextureInstance: CubeTexture) => void;
 	readonly #onError: (error: Error) => void;
-	#getCacheKey(srcList?: string[]): string {
-		return srcList?.toString() || this.uuid;
+	#getCacheKey(srcInfo?: SrcInfo): string {
+		if (!srcInfo) return this.uuid;
+		if (srcInfo instanceof Array) {
+			if(!srcInfo.length) return this.uuid
+			return srcInfo.toString();
+		} else {
+			return srcInfo.cacheKey || srcInfo.srcList.toString();
+		}
 	}
-
+	#getParsedSrc(srcInfo?: SrcInfo): string[] {
+		return srcInfo instanceof Array ? srcInfo : srcInfo?.srcList
+	}
 	constructor(
 		redGPUContext: RedGPUContext,
-		srcList: string[],
+		srcList: SrcInfo,
 		useMipMap: boolean = true,
 		onLoad?: (cubeTextureInstance?: CubeTexture) => void,
 		onError?: (error: Error) => void,
@@ -43,18 +52,23 @@ class CubeTexture extends ManagementResourceBase {
 		this.#onError = onError
 		this.#useMipmap = useMipMap
 		this.#format = format || navigator.gpu.getPreferredCanvasFormat()
-		this.#srcList = srcList
+		this.#srcList = this.#getParsedSrc(srcList);
 		this.cacheKey = this.#getCacheKey(srcList);
 		const {table} = this.targetResourceManagedState
-		let target: ResourceStateCubeTexture =  table.get(this.cacheKey)
-		if (target) {
+		// keepLog('srcList', srcList)
 
-			const targetTexture = target.texture as CubeTexture
-			this.#onLoad?.(targetTexture)
-			return targetTexture
-		} else {
-			this.srcList = srcList;
-			this.#registerResource()
+		if(srcList) {
+			let target: ResourceStateCubeTexture = table.get(this.cacheKey)
+			if (target) {
+				const targetTexture = target.texture as CubeTexture
+				this.#onLoad?.(targetTexture)
+				return targetTexture
+			} else {
+				this.srcList = srcList;
+				this.#registerResource()
+			}
+		}else{
+
 		}
 	}
 
@@ -82,8 +96,8 @@ class CubeTexture extends ManagementResourceBase {
 		return this.#srcList;
 	}
 
-	set srcList(value: string[]) {
-		this.#srcList = value
+	set srcList(value: SrcInfo) {
+		this.#srcList = this.#getParsedSrc(value);;
 		this.cacheKey = this.#getCacheKey(value);
 		if (this.#srcList?.length) this.#loadBitmapTexture(this.#srcList);
 	}
