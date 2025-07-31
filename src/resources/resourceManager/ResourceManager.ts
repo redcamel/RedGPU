@@ -38,13 +38,11 @@ class ResourceManager {
 	static PRESET_VERTEX_GPUBindGroupLayout = 'PRESET_VERTEX_GPUBindGroupLayout'
 	static PRESET_VERTEX_GPUBindGroupLayout_SKIN = 'PRESET_VERTEX_GPUBindGroupLayout_SKIN'
 	#gpuBufferVideoMemory: number = 0;
-
 	#resources = new ImmutableKeyMap([
 		[ResourceType.GPUShaderModule, new Map()],
 		[ResourceType.GPUBindGroupLayout, new Map()],
 		[ResourceType.GPUPipelineLayout, new Map()],
 		[ResourceType.GPUBuffer, new MemoryTrackingMap<string, GPUBuffer>()]
-
 	])
 	#onGPUBufferMemoryChange = (totalMemory: number) => {
 		this.#gpuBufferVideoMemory = totalMemory;
@@ -72,7 +70,6 @@ class ResourceManager {
 	readonly #redGPUContext: RedGPUContext
 	readonly #gpuDevice: GPUDevice
 
-
 	constructor(redGPUContext: RedGPUContext) {
 		this.#redGPUContext = redGPUContext
 		this.#gpuDevice = redGPUContext.gpuDevice
@@ -80,6 +77,7 @@ class ResourceManager {
 		this.#downSampleCubeMapGenerator = new DownSampleCubeMapGenerator(redGPUContext)
 		this.#initPresets()
 	}
+
 	get redGPUContext(): RedGPUContext {
 		return this.#redGPUContext
 	}
@@ -91,65 +89,47 @@ class ResourceManager {
 	registerManagementResource(target: ManagementResourceBase, resourceState: ResourceState) {
 		const {cacheKey, targetResourceManagedState} = target;
 		const {table} = targetResourceManagedState;
-
 		if (table.get(cacheKey)) {
 			keepLog(`Resource with cacheKey ${cacheKey} is already registered.`);
 			return;
 		}
-
 		table.set(cacheKey, resourceState);
-
 		const isTexture = resourceState instanceof ResourceStateCubeTexture ||
 			resourceState instanceof ResourceStateBitmapTexture ||
 			resourceState instanceof ResourceStateHDRTexture;
-
-		if (!isTexture && 'size' in target && (target as any).size > 0) {
-			targetResourceManagedState.videoMemory += (target as any).size;
-		}
+		targetResourceManagedState.videoMemory += (target as any).videoMemorySize;
 		// keepLog('targetResourceManagedState',target.resourceManagerKey, targetResourceManagedState)
 	}
 
 	unregisterManagementResource(target: ManagementResourceBase) {
 		const {cacheKey, targetResourceManagedState} = target;
 		const {table} = targetResourceManagedState;
-
 		const resourceState = table.get(cacheKey);
 		if (!resourceState) {
 			return;
 		}
-
 		const isTexture = resourceState instanceof ResourceStateCubeTexture ||
 			resourceState instanceof ResourceStateBitmapTexture ||
 			resourceState instanceof ResourceStateHDRTexture;
-
-		if (!isTexture && 'size' in target && (target as any).size > 0) {
-			targetResourceManagedState.videoMemory -= (target as any).size;
-		}
-
+		targetResourceManagedState.videoMemory -= (target as any).videoMemorySize;
 		table.delete(cacheKey);
 	}
 
-
 	createManagedTexture(desc: GPUTextureDescriptor): GPUTexture {
 		const texture = this.gpuDevice.createTexture(desc);
-
 		const originalDestroy = texture.destroy.bind(texture);
 		texture.destroy = () => {
 			this.#clearTextureCache(texture, desc);
 			originalDestroy();
 		};
-
 		return texture;
 	}
-
 
 	#clearTextureCache(texture: GPUTexture, desc: GPUTextureDescriptor) {
 		const cache = desc.dimension === '3d' ?
 			this.#cubeTextureViewCache :
 			this.#bitmapTextureViewCache;
-
 		cache.get(texture)?.clear();
-
 		if (cache.delete(texture)) {
 			const type = desc.dimension === '3d' ? '🧊 큐브' : '🔷 비트맵';
 			keepLog(`${type} 텍스처 뷰 캐시 정리:`, texture.label);
@@ -168,15 +148,12 @@ class ResourceManager {
 		if (!targetGPUTexture) {
 			return this.#emptyBitmapTextureView;
 		}
-
 		let textureViewMap = this.#bitmapTextureViewCache.get(targetGPUTexture);
 		if (!textureViewMap) {
 			textureViewMap = new Map();
 			this.#bitmapTextureViewCache.set(targetGPUTexture, textureViewMap);
 		}
-
 		const cacheKey = this.#createDescriptorKey(viewDescriptor);
-
 		let cachedView = textureViewMap.get(cacheKey);
 		if (!cachedView) {
 			const targetDescriptor = viewDescriptor ? {
@@ -185,15 +162,12 @@ class ResourceManager {
 			} : {
 				label: targetGPUTexture.label
 			};
-
 			cachedView = targetGPUTexture.createView(targetDescriptor);
 			textureViewMap.set(cacheKey, cachedView);
-
 			console.log('🔷 새 비트맵 텍스처 뷰 생성:', targetGPUTexture.label, cacheKey);
 		} else {
 			console.log('🎯 비트맵 텍스처 뷰 캐시 히트:', targetGPUTexture.label, cacheKey);
 		}
-
 		return cachedView;
 	}
 
@@ -205,16 +179,13 @@ class ResourceManager {
 		if (!targetGPUTexture) {
 			return this.#emptyCubeTextureView;
 		}
-
 		let textureViewMap = this.#cubeTextureViewCache.get(targetGPUTexture);
 		if (!textureViewMap) {
 			textureViewMap = new Map();
 			this.#cubeTextureViewCache.set(targetGPUTexture, textureViewMap);
 		}
-
 		const effectiveDescriptor = viewDescriptor || CubeTexture.defaultViewDescriptor;
 		const cacheKey = this.#createDescriptorKey(effectiveDescriptor);
-
 		let cachedView = textureViewMap.get(cacheKey);
 		if (!cachedView) {
 			const targetDescriptor = {
@@ -223,12 +194,10 @@ class ResourceManager {
 			};
 			cachedView = targetGPUTexture.createView(targetDescriptor);
 			textureViewMap.set(cacheKey, cachedView);
-
 			console.log('🧊 새 큐브 텍스처 뷰 생성:', targetGPUTexture.label, cacheKey);
 		} else {
 			console.log('🎯 큐브 텍스처 뷰 캐시 히트:', targetGPUTexture.label, cacheKey);
 		}
-
 		return cachedView;
 	}
 
@@ -325,6 +294,7 @@ class ResourceManager {
 				return this.redGPUContext.gpuDevice.createPipelineLayout(descriptor);
 			}, ResourceType.GPUPipelineLayout);
 	}
+
 	createGPUBuffer(name: string, gpuBufferDescriptor: GPUBufferDescriptor) {
 		return this.#createResource(name, gpuBufferDescriptor,
 			descriptor => {
@@ -350,7 +320,6 @@ class ResourceManager {
 				{bytesPerRow: 4, rowsPerImage: 1},
 				{width: 1, height: 1, depthOrArrayLayers: 1}
 			);
-
 			const emptyCubeTexture = gpuDevice.createTexture({
 				size: {width: 1, height: 1, depthOrArrayLayers: 6},
 				format: 'rgba8unorm',
@@ -445,7 +414,6 @@ class ResourceManager {
 	#createAndCacheModule(name: string, gpuShaderModuleDescriptor: GPUShaderModuleDescriptor) {
 		const {code} = gpuShaderModuleDescriptor
 		const newCode = preprocessWGSL(code).defaultSource
-
 		const newModule: GPUShaderModule = this.redGPUContext.gpuDevice.createShaderModule({
 			...gpuShaderModuleDescriptor,
 			code: newCode,
@@ -502,6 +470,7 @@ class ImmutableKeyMap extends Map {
 		}
 	}
 }
+
 class MemoryTrackingMap<K, V> extends Map<K, V> {
 	#videoMemory: number = 0;
 
@@ -511,34 +480,37 @@ class MemoryTrackingMap<K, V> extends Map<K, V> {
 
 	set(key: K, value: V): this {
 		// 기존 값이 있다면 메모리에서 제거
+		const videoMemoryKey =
+			(value && 'videoMemorySize' in (value as any)) ? 'videoMemorySize'
+				: (value && 'size' in (value as any)) ? 'size'
+					: undefined;
+
 		if (this.has(key)) {
 			const existingValue = this.get(key) as any;
-			if (existingValue && existingValue.size) {
-				this.#videoMemory -= existingValue.size;
+			if (existingValue && existingValue[videoMemoryKey]) {
+				this.#videoMemory -= existingValue[videoMemoryKey];
 			}
 		}
-
 		// 새 값의 메모리 추가
-		if (value && (value as any).size) {
-			this.#videoMemory += (value as any).size;
+		if (value && (value as any)) {
+			this.#videoMemory += (value as any)[videoMemoryKey];
 		}
-
 		const result = super.set(key, value);
-
 		return result;
 	}
 
 	delete(key: K): boolean {
 		if (this.has(key)) {
 			const value = this.get(key) as any;
-			if (value && value.size) {
-				this.#videoMemory -= value.size;
+			const videoMemoryKey =
+				(value && 'videoMemorySize' in (value as any)) ? 'videoMemorySize'
+					: (value && 'size' in (value as any)) ? 'size'
+						: undefined;
+			if (value && value[videoMemoryKey]) {
+				this.#videoMemory -= value[videoMemoryKey];
 			}
 		}
-
 		const result = super.delete(key);
-
-
 		return result;
 	}
 

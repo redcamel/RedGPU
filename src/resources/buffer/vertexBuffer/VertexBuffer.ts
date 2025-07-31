@@ -73,7 +73,6 @@ class VertexBuffer extends ABaseBuffer {
 			})
 			this[GPU_BUFFER_SYMBOL] = null;
 		}
-		this.targetResourceManagedState.videoMemory += this[GPU_BUFFER_DATA_SYMBOL].byteLength;
 		const bufferDescriptor: GPUBufferDescriptor = {
 			size: this[GPU_BUFFER_DATA_SYMBOL].byteLength,
 			usage: this.usage,

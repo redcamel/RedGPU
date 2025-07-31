@@ -43,6 +43,10 @@ class ABaseBuffer extends ManagementResourceBase {
 		return this[GPU_BUFFER_DATA_SYMBOL].byteLength || 0
 	}
 
+	get videoMemorySize(): number {
+		return this.size
+	}
+
 	destroy() {
 		const temp = this[GPU_BUFFER_SYMBOL]
 		if (temp) {

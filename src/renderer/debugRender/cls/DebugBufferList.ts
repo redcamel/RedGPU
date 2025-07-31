@@ -46,6 +46,7 @@ class DebugStatisticsDomService {
 		const {resourceManager} = redGPUContext
 		if(this.#bufferType === 'Buffer'){
 			const targetState = resourceManager.resources.get('GPUBuffer')
+			// keepLog('targetState',targetState)
 			const {videoMemory} = targetState
 			debugRender.totalUsedVideoMemory += videoMemory
 			updateDebugItemValue(this.dom, 'totalCount', targetState.size)

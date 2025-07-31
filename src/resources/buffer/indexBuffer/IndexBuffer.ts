@@ -57,7 +57,6 @@ class IndexBuffer extends ABaseBuffer {
 		}
 		this[GPU_BUFFER_DATA_SYMBOL] = data;
 		this.#indexNum = data.length;
-		this.targetResourceManagedState.videoMemory += this[GPU_BUFFER_DATA_SYMBOL].byteLength;
 		const bufferDescriptor: GPUBufferDescriptor = {
 			size: this[GPU_BUFFER_DATA_SYMBOL].byteLength,
 			usage: this.usage,
