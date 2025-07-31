@@ -28,7 +28,7 @@ class PostEffectManager {
 	#previousDimensions: { width: number, height: number }
 	#postEffectSystemUniformBuffer: UniformBuffer;
 	#postEffectSystemUniformBufferStructInfo;
-	#videoMemory:number = 0
+	#videoMemorySize:number = 0
 	constructor(view: View3D) {
 		this.#view = view;
 		this.#init()
@@ -171,11 +171,11 @@ class PostEffectManager {
 	#calcVideoMemory() {
 		const texture = this.#storageTexture
 		if(!texture) return 0;
-		this.#videoMemory =  calculateTextureByteSize(texture)
+		this.#videoMemorySize =  calculateTextureByteSize(texture)
 	}
 
-	get videoMemory(): number {
-		return this.#videoMemory;
+	get videoMemorySize(): number {
+		return this.#videoMemorySize;
 	}
 
 	#renderToStorageTexture(view: View3D, sourceTextureView: GPUTextureView) {

@@ -10,7 +10,6 @@ document.querySelector('#example-container').appendChild(canvas);
 RedGPU.init(
 	canvas,
 	(redGPUContext) => {
-		redGPUContext.useDebugPanel = true
 		// ============================================
 		// 기본 설정
 		// ============================================
@@ -51,10 +50,7 @@ RedGPU.init(
 		scene.lightManager.addDirectionalLight(directionalLight);
 
 		// 3D 모델 로드
-		// loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb');
-		loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF/DamagedHelmet.gltf');
-		loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF/DamagedHelmet.gltf');
-		loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF/DamagedHelmet.gltf');
+		loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb');
 
 		// ============================================
 		// 레이아웃 설정

@@ -2,6 +2,7 @@ import RedGPUContext from "../context/RedGPUContext";
 import InstancingMesh from "../display/instancingMesh/InstancingMesh";
 import Mesh from "../display/mesh/Mesh";
 import View3D from "../display/view/View3D";
+import calculateTextureByteSize from "../utils/math/calculateTextureByteSize";
 import PickingEvent from "./core/PickingEvent";
 import PICKING_EVENT_TYPE from "./PICKING_EVENT_TYPE";
 
@@ -19,6 +20,10 @@ class PickingManager {
 	#mouseY: number = 0
 	#prevPickingEvent: PickingEvent
 	#prevOverTarget: Mesh
+	#videoMemorySize:number = 0
+	get videoMemorySize(): number {
+		return this.#videoMemorySize;
+	}
 
 	get mouseX(): number {
 		return this.#mouseX;
@@ -66,7 +71,11 @@ class PickingManager {
 			this.#pickingDepthGPUTextureView = null
 		}
 	}
-
+	#calcVideoMemory() {
+		const texture = this.#pickingGPUTexture
+		if(!texture) return 0;
+		this.#videoMemorySize =  calculateTextureByteSize(texture) + calculateTextureByteSize(this.#pickingDepthGPUTexture)
+	}
 	checkTexture(view: View3D) {
 		const {redGPUContext} = view
 		const {resourceManager} = redGPUContext
@@ -78,6 +87,7 @@ class PickingManager {
 			this.#pickingGPUTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#pickingGPUTexture)
 			this.#pickingDepthGPUTexture = this.#createTexture('pickingDepth','depth32float')
 			this.#pickingDepthGPUTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#pickingDepthGPUTexture)
+			this.#calcVideoMemory()
 		}
 	}
 

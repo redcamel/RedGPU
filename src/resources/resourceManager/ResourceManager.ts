@@ -44,14 +44,6 @@ class ResourceManager {
 		[ResourceType.GPUPipelineLayout, new Map()],
 		[ResourceType.GPUBuffer, new MemoryTrackingMap<string, GPUBuffer>()]
 	])
-	#onGPUBufferMemoryChange = (totalMemory: number) => {
-		this.#gpuBufferVideoMemory = totalMemory;
-	}
-
-	get gpuBufferVideoMemory(): number {
-		return this.#gpuBufferVideoMemory;
-	}
-
 	#managedBitmapTextureState: ResourceStatusInfo = new ResourceStatusInfo()
 	#managedCubeTextureState: ResourceStatusInfo = new ResourceStatusInfo()
 	#managedHDRTextureState: ResourceStatusInfo = new ResourceStatusInfo()
@@ -94,11 +86,7 @@ class ResourceManager {
 			return;
 		}
 		table.set(cacheKey, resourceState);
-		const isTexture = resourceState instanceof ResourceStateCubeTexture ||
-			resourceState instanceof ResourceStateBitmapTexture ||
-			resourceState instanceof ResourceStateHDRTexture;
 		targetResourceManagedState.videoMemory += (target as any).videoMemorySize;
-		// keepLog('targetResourceManagedState',target.resourceManagerKey, targetResourceManagedState)
 	}
 
 	unregisterManagementResource(target: ManagementResourceBase) {
@@ -108,9 +96,6 @@ class ResourceManager {
 		if (!resourceState) {
 			return;
 		}
-		const isTexture = resourceState instanceof ResourceStateCubeTexture ||
-			resourceState instanceof ResourceStateBitmapTexture ||
-			resourceState instanceof ResourceStateHDRTexture;
 		targetResourceManagedState.videoMemory -= (target as any).videoMemorySize;
 		table.delete(cacheKey);
 	}
@@ -484,7 +469,6 @@ class MemoryTrackingMap<K, V> extends Map<K, V> {
 			(value && 'videoMemorySize' in (value as any)) ? 'videoMemorySize'
 				: (value && 'size' in (value as any)) ? 'size'
 					: undefined;
-
 		if (this.has(key)) {
 			const existingValue = this.get(key) as any;
 			if (existingValue && existingValue[videoMemoryKey]) {

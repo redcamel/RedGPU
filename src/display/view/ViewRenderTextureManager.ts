@@ -1,5 +1,8 @@
+import antialiasingManager from "../../context/antialiasing/AntialiasingManager";
 import RedGPUContext from "../../context/RedGPUContext";
+import resourceManager from "../../resources/resourceManager/ResourceManager";
 import validateRedGPUContext from "../../runtimeChecker/validateFunc/validateRedGPUContext";
+import calculateTextureByteSize from "../../utils/math/calculateTextureByteSize";
 import getMipLevelCount from "../../utils/math/getMipLevelCount";
 import View3D from "./View3D";
 
@@ -16,6 +19,11 @@ class ViewRenderTextureManager {
 	//
 	#useMSAAColor: boolean = true
 	#useMSAADepth: boolean = true
+	#videoMemorySize: number = 0
+	get videoMemorySize(): number {
+		return this.#videoMemorySize;
+	}
+
 	readonly #redGPUContext: RedGPUContext
 	readonly #view: View3D
 
@@ -64,6 +72,16 @@ class ViewRenderTextureManager {
 		return this.#renderPath1ResultTexture;
 	}
 
+	#checkVideoMemorySize() {
+		const textures = [
+			this.#colorTexture, this.#depthTexture, this.#colorResolveTexture, this.#renderPath1ResultTexture
+		].filter(Boolean) ;
+		this.#videoMemorySize = textures.reduce((total, texture) => {
+				const videoMemory = calculateTextureByteSize(texture)
+				return total + videoMemory
+			}, 0
+		)
+	}
 	#createRender2PathTexture() {
 		const {gpuDevice,resourceManager} = this.#redGPUContext
 		const currentTexture = this.#renderPath1ResultTexture
@@ -87,7 +105,9 @@ class ViewRenderTextureManager {
 			}
 			this.#renderPath1ResultTexture = resourceManager.createManagedTexture(this.#renderPath1ResultTextureDescriptor);
 			this.#renderPath1ResultTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#renderPath1ResultTexture)
+			this.#checkVideoMemorySize()
 		}
+
 	}
 
 	#createTextureIfNeeded(textureType: 'depth' | 'color'): void {
@@ -150,6 +170,7 @@ class ViewRenderTextureManager {
 					this.#colorResolveTextureView = resourceManager.getGPUResourceBitmapTextureView(newResolveTexture)
 				}
 			}
+			this.#checkVideoMemorySize()
 		}
 	}
 }

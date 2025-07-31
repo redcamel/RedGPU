@@ -13,9 +13,9 @@ class DirectionalShadowManager {
 	#shadowDepthTextureViewEmpty: GPUTextureView
 	#redGPUContext: RedGPUContext
 	#castingList: (Mesh | InstancingMesh)[] = []
-	#videoMemory:number=0
-	get videoMemory(): number {
-		return this.#videoMemory;
+	#videoMemorySize:number=0
+	get videoMemorySize(): number {
+		return this.#videoMemorySize;
 	}
 
 	get castingList(): (Mesh | InstancingMesh)[] {
@@ -45,7 +45,7 @@ class DirectionalShadowManager {
 	#calcVideoMemory() {
 		const texture = this.#shadowDepthTexture
 		if(!texture) return 0;
-		this.#videoMemory =  calculateTextureByteSize(texture)
+		this.#videoMemorySize =  calculateTextureByteSize(texture)
 	}
 	reset() {
 		this.destroy()
