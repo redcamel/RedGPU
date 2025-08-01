@@ -53,6 +53,7 @@ class IndexBuffer extends ABaseBuffer {
 			requestAnimationFrame(() => {
 				temp.destroy();
 			})
+
 			this[GPU_BUFFER_SYMBOL] = null;
 		}
 		this[GPU_BUFFER_DATA_SYMBOL] = data;
@@ -63,6 +64,7 @@ class IndexBuffer extends ABaseBuffer {
 			label: this.name
 		}
 		this[GPU_BUFFER_SYMBOL] = gpuDevice.createBuffer(bufferDescriptor);
+		this.targetResourceManagedState.videoMemory += this[GPU_BUFFER_DATA_SYMBOL].byteLength || 0;
 		this.#triangleCount = this.#indexNum / 3;
 		gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], 0, this[GPU_BUFFER_DATA_SYMBOL]);
 	}

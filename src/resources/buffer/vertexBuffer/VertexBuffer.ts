@@ -1,4 +1,5 @@
 import RedGPUContext from "../../../context/RedGPUContext";
+import {keepLog} from "../../../utils";
 import ResourceStateVertexBuffer from "../../resourceManager/resourceState/ResourceStateVertexBuffer";
 import ABaseBuffer, {GPU_BUFFER_CACHE_KEY, GPU_BUFFER_DATA_SYMBOL, GPU_BUFFER_SYMBOL} from "../core/ABaseBuffer";
 import InterleavedStruct from "./InterleavedStruct";
@@ -23,7 +24,7 @@ class VertexBuffer extends ABaseBuffer {
 		super(redGPUContext, MANAGED_STATE_KEY, usage)
 		const {table} = this.targetResourceManagedState
 		const cacheBuffer = table.get(cacheKey)
-
+		keepLog(this.targetResourceManagedState)
 		if (cacheBuffer) {
 			return cacheBuffer.buffer
 		} else {
@@ -73,12 +74,16 @@ class VertexBuffer extends ABaseBuffer {
 			})
 			this[GPU_BUFFER_SYMBOL] = null;
 		}
+
 		const bufferDescriptor: GPUBufferDescriptor = {
 			size: this[GPU_BUFFER_DATA_SYMBOL].byteLength,
 			usage: this.usage,
 			label: this.name
 		};
 		this[GPU_BUFFER_SYMBOL] = gpuDevice.createBuffer(bufferDescriptor);
+
+		this.targetResourceManagedState.videoMemory += this[GPU_BUFFER_DATA_SYMBOL].byteLength || 0;
+
 		this.#triangleCount = this[GPU_BUFFER_DATA_SYMBOL].length / this.#stride;
 		gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], 0, this[GPU_BUFFER_DATA_SYMBOL]);
 	}

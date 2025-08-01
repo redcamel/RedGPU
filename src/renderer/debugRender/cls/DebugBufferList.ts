@@ -46,7 +46,7 @@ class DebugStatisticsDomService {
 		const {resourceManager} = redGPUContext
 		if(this.#bufferType === 'Buffer'){
 			const targetState = resourceManager.resources.get('GPUBuffer')
-			// keepLog('targetState',targetState)
+
 			const {videoMemory} = targetState
 			debugRender.totalUsedVideoMemory += videoMemory
 			updateDebugItemValue(this.dom, 'totalCount', targetState.size)
@@ -196,7 +196,7 @@ class DebugStatisticsDomService {
                     <div style="font-size: 10px">${uuid}</div>
                 </div>
                 <div style="display: flex;flex-direction: column;align-items: center;gap:4px;width: 50px">
-                    <span class='useNum' style="padding:2px 4px;border-radius: 4px;width: 100%;text-align: center"></span>
+                    <span class='useNum' style="padding:2px 4px;border-radius: 4px;width: 100%;text-align: center">${useNum}</span>
                     <span style="white-space: nowrap"><b class="videoMemorySize"></b></span>
                 </div>
             </div>
@@ -216,7 +216,7 @@ class DebugStatisticsDomService {
 				// updateDebugItemValue(tDom, 'name', name);
 			}
 
-			// updateDebugItemValue(tDom, 'useNum', useNum, true);
+			updateDebugItemValue(tDom, 'useNum', useNum, true);
 			updateDebugItemValue(tDom, 'videoMemorySize', formatBytes(size));
 			index++;
 		});

@@ -1,5 +1,6 @@
 import RedGPUContext from "../context/RedGPUContext";
 import validateRedGPUContext from "../runtimeChecker/validateFunc/validateRedGPUContext";
+import {keepLog} from "../utils";
 import consoleAndThrowError from "../utils/consoleAndThrowError";
 import createUUID from "../utils/createUUID";
 import InstanceIdGenerator from "../utils/InstanceIdGenerator";
@@ -129,11 +130,12 @@ class ResourceBase {
 		}
 		if (resourceManager ) {
 			const targetResourceManagedState = resourceManager[this.#resourceManagerKey]
+
 			if (!targetResourceManagedState) {
 				consoleAndThrowError('need managedStateKey', this.constructor.name)
 			}
 			const targetState = targetResourceManagedState?.table.get(this.#cacheKey);
-
+			keepLog(this.#resourceManagerKey, targetState,targetResourceManagedState)
 			if (targetState) {
 				isAddingListener ? targetState.useNum++ : targetState.useNum--;
 			}
