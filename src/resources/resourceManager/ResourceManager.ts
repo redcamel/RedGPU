@@ -6,6 +6,7 @@ import BitmapTexture from "../texture/BitmapTexture";
 import DownSampleCubeMapGenerator from "../texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator";
 import MipmapGenerator from "../texture/core/mipmapGenerator/MipmapGenerator";
 import CubeTexture from "../texture/CubeTexture";
+import IBLCubeTexture from "../texture/ibl/IBLCubeTexture";
 import PackedTexture from "../texture/packedTexture/PackedTexture";
 import preprocessWGSL from "../wgslParser/preprocessWGSL";
 import ResourceStateIndexBuffer from "./resourceState/ResourceStateIndexBuffer";
@@ -157,7 +158,7 @@ class ResourceManager {
 	}
 
 	getGPUResourceCubeTextureView(
-		cubeTexture: CubeTexture | GPUTexture,
+		cubeTexture: CubeTexture | GPUTexture | IBLCubeTexture,
 		viewDescriptor?: GPUTextureViewDescriptor
 	): GPUTextureView | null {
 		const targetGPUTexture = cubeTexture instanceof GPUTexture ? cubeTexture : cubeTexture?.gpuTexture;
@@ -169,7 +170,7 @@ class ResourceManager {
 			textureViewMap = new Map();
 			this.#cubeTextureViewCache.set(targetGPUTexture, textureViewMap);
 		}
-		if(cubeTexture instanceof CubeTexture && !viewDescriptor) viewDescriptor = cubeTexture.viewDescriptor;
+		if(!(cubeTexture instanceof GPUTexture ) && !viewDescriptor) viewDescriptor = cubeTexture.viewDescriptor;
 		const effectiveDescriptor = viewDescriptor ||  CubeTexture.defaultViewDescriptor;
 
 		const cacheKey = this.#createDescriptorKey(effectiveDescriptor);
