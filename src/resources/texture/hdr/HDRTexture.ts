@@ -213,8 +213,11 @@ class HDRTexture extends ManagementResourceBase {
 		if (!src || typeof src !== 'string') {
 			throw new Error('HDR 파일 경로가 필요합니다');
 		}
-		const lowerSrc = src.toLowerCase();
-		if (!lowerSrc.endsWith('.hdr')) {
+
+		// 쿼리 파라미터와 해시를 제거한 후 확장자 검사
+		const cleanSrc = src.split('?')[0].split('#')[0].toLowerCase();
+
+		if (!cleanSrc.endsWith('.hdr')) {
 			throw new Error(`지원되지 않는 형식입니다. .hdr 형식만 지원됩니다. 입력된 파일: ${src}`);
 		}
 	}

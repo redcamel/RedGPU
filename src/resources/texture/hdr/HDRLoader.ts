@@ -168,7 +168,7 @@ class HDRLoader {
 		if (!validation.isValid) {
 			throw new Error(validation.error || '지원되지 않는 파일 형식입니다');
 		}
-		if (src.toLowerCase().endsWith('.hdr')) {
+		if (src.split('?')[0].toLowerCase().endsWith('.hdr')) {
 			if (this.#enableDebugLogs) {
 				// keepLog('파일 첫 200바이트:');
 				this.#hexDump(uint8Array.slice(0, 200));
@@ -178,13 +178,12 @@ class HDRLoader {
 				this.#debugHDRInfo(hdrData);
 			}
 			return hdrData;
-		} else if (src.toLowerCase().endsWith('.exr')) {
+		} else if (src.split('?')[0].toLowerCase().endsWith('.exr')) {
 			throw new Error('EXR format not supported yet');
 		} else {
 			throw new Error(`Unsupported HDR format: ${src}`);
 		}
 	}
-
 	/**
 	 * RGBE 데이터 파싱
 	 */
