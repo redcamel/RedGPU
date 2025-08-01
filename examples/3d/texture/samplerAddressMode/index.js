@@ -28,12 +28,17 @@ RedGPU.init(
 				}
 			});
 		});
+		renderTestPane(redGPUContext);
+
 	},
 	(failReason) => {
 		console.error("Initialization failed:", failReason);
 	}
 );
-
+const renderTestPane = async (redGPUContext,) => {
+	const {setSeparator,setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
+}
 const generateSamplerCombinations = (settings, fixedCategory, fixedValue) => {
 	const combinations = [];
 	const recursiveGenerator = (current, depth) => {
