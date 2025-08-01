@@ -32,9 +32,11 @@ class AUniformBaseBuffer extends ABaseBuffer {
 		}
 		redGPUContext.gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], 0, data);
 	}
+
 	get size(): number {
 		return this.#size;
 	}
+
 	get uniformBufferDescriptor(): GPUBufferDescriptor {
 		return this.#uniformBufferDescriptor;
 	}

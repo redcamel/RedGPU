@@ -72,9 +72,9 @@ function getRandomHexValue() {
 }
 
 const renderTestPane = async (redGPUContext, scene) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const pane = new Pane();
-	const TextField3DFolder = pane.addFolder({ title: 'TextField3D', expanded: true });
+	const TextField3DFolder = pane.addFolder({title: 'TextField3D', expanded: true});
 	const controls = {
 		useBillboardPerspective: scene.children[0].useBillboardPerspective,
 		useBillboard: scene.children[0].useBillboard,

@@ -15,7 +15,7 @@ const setSingleViewTest = (pane, view, openYn = false, camera2DYn = false) => {
 	const {scene, camera} = view
 	if (camera2DYn) {
 
-	}else{
+	} else {
 
 		pane.addBinding(view, 'useFrustumCulling')
 		pane.addBinding(view, 'useDistanceCulling')

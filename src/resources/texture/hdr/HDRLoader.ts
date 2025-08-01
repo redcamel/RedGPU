@@ -184,6 +184,7 @@ class HDRLoader {
 			throw new Error(`Unsupported HDR format: ${src}`);
 		}
 	}
+
 	/**
 	 * RGBE 데이터 파싱
 	 */

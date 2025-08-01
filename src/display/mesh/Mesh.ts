@@ -101,7 +101,6 @@ class Mesh extends MeshBase {
 	}
 
 	_material
-
 	get material() {
 		return this._material;
 	}
@@ -117,7 +116,6 @@ class Mesh extends MeshBase {
 
 	// 블렌드 모드 설정 함수
 	_geometry: Geometry | Primitive
-
 	get geometry(): Geometry | Primitive {
 		return this._geometry;
 	}

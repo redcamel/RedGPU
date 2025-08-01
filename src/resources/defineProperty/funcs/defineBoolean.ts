@@ -10,7 +10,7 @@ function createSetter(propertyKey: string, symbol: symbol, isFragment: boolean) 
 			this.dirtyPipeline = true
 		} else if (gpuRenderInfo) {
 			const {vertexUniformInfo, vertexUniformBuffer} = gpuRenderInfo;
-			if(vertexUniformInfo.members[propertyKey]) {
+			if (vertexUniformInfo.members[propertyKey]) {
 				vertexUniformBuffer.writeBuffer(vertexUniformInfo.members[propertyKey], newValue ? 1 : 0);
 				this.dirtyPipeline = true
 			}

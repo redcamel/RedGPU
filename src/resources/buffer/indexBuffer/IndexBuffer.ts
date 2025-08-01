@@ -19,7 +19,6 @@ class IndexBuffer extends ABaseBuffer {
 		super(redGPUContext, MANAGED_STATE_KEY, usage)
 		const {table} = this.targetResourceManagedState
 		const cacheBuffer = table.get(cacheKey)
-
 		if (cacheBuffer) {
 			return cacheBuffer.buffer
 		} else {
@@ -40,8 +39,6 @@ class IndexBuffer extends ABaseBuffer {
 		return this.#indexNum;
 	}
 
-
-
 	changeData(data: NumberArray) {
 		const {gpuDevice} = this;
 		if (Array.isArray(data)) {
@@ -53,7 +50,6 @@ class IndexBuffer extends ABaseBuffer {
 			requestAnimationFrame(() => {
 				temp.destroy();
 			})
-
 			this[GPU_BUFFER_SYMBOL] = null;
 		}
 		this[GPU_BUFFER_DATA_SYMBOL] = data;

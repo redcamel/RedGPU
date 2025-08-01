@@ -1,5 +1,4 @@
 import RedGPUContext from "../../context/RedGPUContext";
-import {keepLog} from "../../utils";
 import calculateTextureByteSize from "../../utils/math/calculateTextureByteSize";
 import getMipLevelCount from "../../utils/math/getMipLevelCount";
 import ManagementResourceBase from "../ManagementResourceBase";
@@ -9,6 +8,7 @@ import loadAndCreateBitmapImage from "./core/loadAndCreateBitmapImage";
 
 const MANAGED_STATE_KEY = 'managedCubeTextureState'
 type SrcInfo = string[] | { srcList: string[], cacheKey: string }
+
 class CubeTexture extends ManagementResourceBase {
 	static defaultViewDescriptor: GPUTextureViewDescriptor = {
 		dimension: 'cube',
@@ -27,18 +27,7 @@ class CubeTexture extends ManagementResourceBase {
 	readonly #format: GPUTextureFormat
 	readonly #onLoad: (cubeTextureInstance: CubeTexture) => void;
 	readonly #onError: (error: Error) => void;
-	#getCacheKey(srcInfo?: SrcInfo): string {
-		if (!srcInfo) return this.uuid;
-		if (srcInfo instanceof Array) {
-			if(!srcInfo.length) return this.uuid
-			return srcInfo.toString();
-		} else {
-			return srcInfo.cacheKey || srcInfo.srcList.toString();
-		}
-	}
-	#getParsedSrc(srcInfo?: SrcInfo): string[] {
-		return srcInfo instanceof Array ? srcInfo : srcInfo?.srcList
-	}
+
 	constructor(
 		redGPUContext: RedGPUContext,
 		srcList: SrcInfo,
@@ -56,8 +45,7 @@ class CubeTexture extends ManagementResourceBase {
 		this.cacheKey = this.#getCacheKey(srcList);
 		const {table} = this.targetResourceManagedState
 		// keepLog('srcList', srcList)
-
-		if(srcList) {
+		if (srcList) {
 			let target: ResourceStateCubeTexture = table.get(this.cacheKey)
 			if (target) {
 				const targetTexture = target.texture as CubeTexture
@@ -67,8 +55,7 @@ class CubeTexture extends ManagementResourceBase {
 				this.srcList = srcList;
 				this.#registerResource()
 			}
-		}else{
-
+		} else {
 		}
 	}
 
@@ -78,7 +65,6 @@ class CubeTexture extends ManagementResourceBase {
 			mipLevelCount: this.#mipLevelCount
 		}
 	}
-
 
 	get videoMemorySize(): number {
 		return this.#videoMemorySize;
@@ -97,7 +83,8 @@ class CubeTexture extends ManagementResourceBase {
 	}
 
 	set srcList(value: SrcInfo) {
-		this.#srcList = this.#getParsedSrc(value);;
+		this.#srcList = this.#getParsedSrc(value);
+
 		this.cacheKey = this.#getCacheKey(value);
 		if (this.#srcList?.length) this.#loadBitmapTexture(this.#srcList);
 	}
@@ -140,11 +127,24 @@ class CubeTexture extends ManagementResourceBase {
 		// this.#mipLevelCount = getMipLevelCount(gpuTexture.width, gpuTexture.height);
 		this.cacheKey = cacheKey || `direct_${this.uuid}`;
 		// 메모리 사용량 계산
-
 		this.#videoMemorySize = calculateTextureByteSize(gpuTexture);
 		this.targetResourceManagedState.videoMemory += this.#videoMemorySize;
 		// 리스너들에게 업데이트 알림
 		this.__fireListenerList();
+	}
+
+	#getCacheKey(srcInfo?: SrcInfo): string {
+		if (!srcInfo) return this.uuid;
+		if (srcInfo instanceof Array) {
+			if (!srcInfo.length) return this.uuid
+			return srcInfo.toString();
+		} else {
+			return srcInfo.cacheKey || srcInfo.srcList.toString();
+		}
+	}
+
+	#getParsedSrc(srcInfo?: SrcInfo): string[] {
+		return srcInfo instanceof Array ? srcInfo : srcInfo?.srcList
 	}
 
 	#setGpuTexture(value: GPUTexture) {
@@ -160,6 +160,7 @@ class CubeTexture extends ManagementResourceBase {
 	#unregisterResource() {
 		this.redGPUContext.resourceManager.unregisterManagementResource(this);
 	}
+
 	#createGPUTexture() {
 		const {gpuDevice, resourceManager} = this.redGPUContext
 		const {mipmapGenerator} = resourceManager

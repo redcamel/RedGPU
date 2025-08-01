@@ -41,13 +41,13 @@ const generateSamplerCombinations = (settings, fixedCategory, fixedValue) => {
 	const recursiveGenerator = (current, depth) => {
 		if (depth === settings.length) {
 			if (current[fixedCategory] === fixedValue) {
-				combinations.push({ ...current });
+				combinations.push({...current});
 			}
 			return;
 		}
-		const { name, values } = settings[depth];
+		const {name, values} = settings[depth];
 		values.forEach((value) => {
-			recursiveGenerator({ ...current, [name]: value }, depth + 1);
+			recursiveGenerator({...current, [name]: value}, depth + 1);
 		});
 	};
 	recursiveGenerator({}, 0);
@@ -64,9 +64,9 @@ const generateGroupedCombinations = (settings, category) => {
 
 const createCategoryGroups = (redGPUContext, scene) => {
 	const settings = [
-		{ name: "minFilter", values: ["nearest", "linear"] },
-		{ name: "magFilter", values: ["nearest", "linear"] },
-		{ name: "mipmapFilter", values: ["nearest", "linear"] },
+		{name: "minFilter", values: ["nearest", "linear"]},
+		{name: "magFilter", values: ["nearest", "linear"]},
+		{name: "mipmapFilter", values: ["nearest", "linear"]},
 	];
 
 	const minFilterGroups = generateGroupedCombinations(settings, "minFilter");

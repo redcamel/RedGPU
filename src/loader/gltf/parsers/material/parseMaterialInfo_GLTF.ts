@@ -72,7 +72,6 @@ const parseMaterialInfo_GLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, meshPrim
 					'metallicRoughnessTexture',
 					null,
 					false
-
 				)
 			}
 		}

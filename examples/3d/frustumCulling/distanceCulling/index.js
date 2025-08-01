@@ -72,7 +72,7 @@ const createTestMeshes = (redGPUContext, scene) => {
 };
 
 const renderTestPane = async (redGPUContext, meshes, view) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const pane = new Pane();
 
 	const config = {
@@ -83,16 +83,16 @@ const renderTestPane = async (redGPUContext, meshes, view) => {
 		drawCalls: meshes.length,
 	};
 
-	const cameraFolder = pane.addFolder({ title: 'Camera', expanded: true });
-	cameraFolder.addBinding(config, 'cameraDistance', { min: 10, max: 150, step: 1 }).on('change', (evt) => {
+	const cameraFolder = pane.addFolder({title: 'Camera', expanded: true});
+	cameraFolder.addBinding(config, 'cameraDistance', {min: 10, max: 150, step: 1}).on('change', (evt) => {
 		view.camera.distance = evt.value;
 	});
 
-	const cullingFolder = pane.addFolder({ title: 'Distance Culling', expanded: true });
+	const cullingFolder = pane.addFolder({title: 'Distance Culling', expanded: true});
 	cullingFolder.addBinding(config, 'enableDistanceCulling').on('change', (evt) => {
 		view.useDistanceCulling = evt.value;
 	});
-	cullingFolder.addBinding(config, 'cullingDistance', { min: 5, max: 200, step: 1 }).on('change', (evt) => {
+	cullingFolder.addBinding(config, 'cullingDistance', {min: 5, max: 200, step: 1}).on('change', (evt) => {
 		view.distanceCulling = evt.value;
 	});
 	cullingFolder.addBinding(config, 'showBoundingBoxes').on('change', (evt) => {
@@ -101,12 +101,11 @@ const renderTestPane = async (redGPUContext, meshes, view) => {
 		});
 	});
 
-	const statsFolder = pane.addFolder({ title: 'Statistics', expanded: true });
-	const drawCallsBinding = statsFolder.addBinding(config, 'drawCalls', { readonly: true });
+	const statsFolder = pane.addFolder({title: 'Statistics', expanded: true});
+	const drawCallsBinding = statsFolder.addBinding(config, 'drawCalls', {readonly: true});
 
 	const updateStats = () => {
 		config.drawCalls = view.debugViewRenderState.numDrawCalls;
-
 
 		drawCallsBinding.refresh();
 
@@ -115,9 +114,9 @@ const renderTestPane = async (redGPUContext, meshes, view) => {
 
 	updateStats();
 
-	const utilsFolder = pane.addFolder({ title: 'Utils', expanded: true });
+	const utilsFolder = pane.addFolder({title: 'Utils', expanded: true});
 
-	utilsFolder.addButton({ title: 'Reset Camera' }).on('click', () => {
+	utilsFolder.addButton({title: 'Reset Camera'}).on('click', () => {
 		view.camera.distance = 50;
 		view.camera.tilt = 0;
 		view.camera.pan = 0;
@@ -125,13 +124,13 @@ const renderTestPane = async (redGPUContext, meshes, view) => {
 		pane.refresh();
 	});
 
-	utilsFolder.addButton({ title: 'Move Close' }).on('click', () => {
+	utilsFolder.addButton({title: 'Move Close'}).on('click', () => {
 		view.camera.distance = 20;
 		config.cameraDistance = 20;
 		pane.refresh();
 	});
 
-	utilsFolder.addButton({ title: 'Move Far' }).on('click', () => {
+	utilsFolder.addButton({title: 'Move Far'}).on('click', () => {
 		view.camera.distance = 100;
 		config.cameraDistance = 100;
 		pane.refresh();

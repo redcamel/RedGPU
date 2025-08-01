@@ -49,13 +49,13 @@ const createPrimitive = (redGPUContext, scene) => {
 	const pointY = -3.5;
 
 	const primitives = [
-		{ constructor: RedGPU.Primitive.Box, args: [redGPUContext, 1, 1, 1, 2, 2, 2] },
-		{ constructor: RedGPU.Primitive.Circle, args: [redGPUContext, 1, 64] },
-		{ constructor: RedGPU.Primitive.Cylinder, args: [redGPUContext, 0.5, 1, 2, 64, 64] },
-		{ constructor: RedGPU.Primitive.Plane, args: [redGPUContext, 2, 2, 10, 10] },
-		{ constructor: RedGPU.Primitive.Sphere, args: [redGPUContext, 1, 32, 32] },
-		{ constructor: RedGPU.Primitive.Torus, args: [redGPUContext, 0.7, 0.3, 32, 32] },
-		{ constructor: RedGPU.Primitive.TorusKnot, args: [redGPUContext, 0.5, 0.2, 128, 64, 2, 3] }
+		{constructor: RedGPU.Primitive.Box, args: [redGPUContext, 1, 1, 1, 2, 2, 2]},
+		{constructor: RedGPU.Primitive.Circle, args: [redGPUContext, 1, 64]},
+		{constructor: RedGPU.Primitive.Cylinder, args: [redGPUContext, 0.5, 1, 2, 64, 64]},
+		{constructor: RedGPU.Primitive.Plane, args: [redGPUContext, 2, 2, 10, 10]},
+		{constructor: RedGPU.Primitive.Sphere, args: [redGPUContext, 1, 32, 32]},
+		{constructor: RedGPU.Primitive.Torus, args: [redGPUContext, 0.7, 0.3, 32, 32]},
+		{constructor: RedGPU.Primitive.TorusKnot, args: [redGPUContext, 0.5, 0.2, 128, 64, 2, 3]}
 	];
 
 	const createRow = (material, yPos, topology = null) => {
@@ -98,8 +98,8 @@ const createPrimitive = (redGPUContext, scene) => {
 };
 
 const renderTestPane = async (redGPUContext) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
-	const { setRedGPUTest_pane } = await import("../../../exampleHelper/createExample/panes/index.js");
+	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+	const {setRedGPUTest_pane} = await import("../../../exampleHelper/createExample/panes/index.js");
 
 	const pane = new Pane();
 	setRedGPUTest_pane(pane, redGPUContext, false);

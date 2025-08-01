@@ -3,7 +3,6 @@ import ResourceStateIndexBuffer from "../../../resources/resourceManager/resourc
 import ResourceStateStorageBuffer from "../../../resources/resourceManager/resourceState/ResourceStateStorageBuffer";
 import ResourceStateUniformBuffer from "../../../resources/resourceManager/resourceState/ResourceStateUniformBuffer";
 import ResourceStateVertexBuffer from "../../../resources/resourceManager/resourceState/ResourceStateVertexBuffer";
-import {keepLog} from "../../../utils";
 import formatBytes from "../../../utils/math/formatBytes";
 import {createDebugTitle, updateDebugItemValue} from "../core/debugFunc";
 import DebugRender from "../DebugRender";
@@ -44,16 +43,14 @@ class DebugStatisticsDomService {
 
 	update(debugRender: DebugRender, redGPUContext: RedGPUContext) {
 		const {resourceManager} = redGPUContext
-		if(this.#bufferType === 'Buffer'){
+		if (this.#bufferType === 'Buffer') {
 			const targetState = resourceManager.resources.get('GPUBuffer')
-
 			const {videoMemory} = targetState
 			debugRender.totalUsedVideoMemory += videoMemory
 			updateDebugItemValue(this.dom, 'totalCount', targetState.size)
 			updateDebugItemValue(this.dom, 'targetVideoMemorySize', formatBytes(videoMemory))
-
 			this.#generateDebugItemsHtmlForBuffer(targetState)
-		}else{
+		} else {
 			const targetBufferState: any = resourceManager[`managed${this.#bufferType}State`]
 			const {table, videoMemory} = targetBufferState
 			debugRender.totalUsedVideoMemory += videoMemory
@@ -64,7 +61,6 @@ class DebugStatisticsDomService {
 			switch (this.#bufferType) {
 				case 'VertexBuffer' :
 					targetState = ResourceStateVertexBuffer
-
 					break
 				case 'IndexBuffer' :
 					targetState = ResourceStateIndexBuffer
@@ -75,21 +71,19 @@ class DebugStatisticsDomService {
 				case 'StorageBuffer' :
 					targetState = ResourceStateStorageBuffer
 					break
-
 			}
 			if (targetState) {
 				this.#generateDebugItemsHtml(table);
 			}
 		}
-
 	}
+
 	#formatCacheKeyForDisplay(cacheKey: string): { host: string | null, filename: string } {
 		// Vertex_ 또는 Index_ 접두사 제거
 		let processedKey = cacheKey;
 		if (cacheKey.startsWith('Vertex_') || cacheKey.startsWith('Index_')) {
 			processedKey = cacheKey.substring(cacheKey.indexOf('_') + 1);
 		}
-
 		try {
 			const url = new URL(processedKey);
 			const filename = url.pathname.split('/').pop() || processedKey;
@@ -105,24 +99,22 @@ class DebugStatisticsDomService {
 			};
 		}
 	}
+
 	#generateDebugItemsHtmlForBuffer(bufferMap: Map<string, any>) {
 		const rootDom = this.dom.querySelector('.item-container');
 		const initialUUIDs: Set<string> = new Set();
 		const prefix = this.#bufferType;
 		const existingElements = new Map();
-
 		rootDom.querySelectorAll('.debug-group').forEach((dom) => {
 			const uuid: string = dom.className.split(' ')[1].replace(`${prefix}_`, '');
 			initialUUIDs.add(uuid);
 			existingElements.set(uuid, dom);
 		});
-
 		let index = 0;
 		bufferMap.forEach((gpuBuffer: GPUBuffer, key: string) => {
 			const uuid = key;
 			const size = gpuBuffer.size || 0;
 			const domUuid = `${prefix}_${uuid}`;
-
 			let tDom = existingElements.get(uuid);
 			if (!tDom) {
 				tDom = document.createElement('div');
@@ -145,28 +137,24 @@ class DebugStatisticsDomService {
 			} else {
 				initialUUIDs.delete(uuid);
 			}
-
 			// GPUBuffer는 이름이 key 값이므로 직접 사용
-			const { host, filename } = this.#formatCacheKeyForDisplay(key);
-
+			const {host, filename} = this.#formatCacheKeyForDisplay(key);
 			if (host) {
 				updateDebugItemValue(tDom, 'host', `${index} ${host}`);
 				updateDebugItemValue(tDom, 'name', filename);
 			} else {
 				updateDebugItemValue(tDom, 'host', `${index} ${key}`);
 			}
-
 			updateDebugItemValue(tDom, 'videoMemorySize', formatBytes(size));
 			index++;
 		});
-
 		// 더 이상 존재하지 않는 요소들 제거
 		for (let uuid of initialUUIDs) {
 			existingElements.get(uuid).remove();
 		}
 	}
 
-	#generateDebugItemsHtml(tList: Map<string,ResourceStateVertexBuffer | ResourceStateIndexBuffer | ResourceStateUniformBuffer | ResourceStateStorageBuffer>) {
+	#generateDebugItemsHtml(tList: Map<string, ResourceStateVertexBuffer | ResourceStateIndexBuffer | ResourceStateUniformBuffer | ResourceStateStorageBuffer>) {
 		const rootDom = this.dom.querySelector('.item-container');
 		const initialUUIDs: Set<string> = new Set();
 		const prefix = this.#bufferType;
@@ -176,9 +164,8 @@ class DebugStatisticsDomService {
 			initialUUIDs.add(uuid);
 			existingElements.set(uuid, dom);
 		});
-
 		let index = 0;
-		const isHideBuffer = this.#bufferType=== 'UniformBuffer' || this.#bufferType === 'StorageBuffer'
+		const isHideBuffer = this.#bufferType === 'UniformBuffer' || this.#bufferType === 'StorageBuffer'
 		tList.forEach((tInfo: ResourceStateVertexBuffer | ResourceStateIndexBuffer | ResourceStateUniformBuffer | ResourceStateStorageBuffer) => {
 			const {useNum, buffer} = tInfo;
 			const {uuid, size, name} = buffer;
@@ -206,8 +193,7 @@ class DebugStatisticsDomService {
 			} else {
 				initialUUIDs.delete(uuid);
 			}
-
-			const { host, filename } = this.#formatCacheKeyForDisplay(name);
+			const {host, filename} = this.#formatCacheKeyForDisplay(name);
 			// 호스트가 있을 때만 호스트 정보 표시
 			if (host) {
 				updateDebugItemValue(tDom, 'host', `${index} ${host}`);
@@ -216,14 +202,12 @@ class DebugStatisticsDomService {
 				updateDebugItemValue(tDom, 'host', `${index} ${name}`);
 				// updateDebugItemValue(tDom, 'name', name);
 			}
-
-		if(!isHideBuffer){
-			updateDebugItemValue(tDom, 'useNum', useNum, true);
-		}
+			if (!isHideBuffer) {
+				updateDebugItemValue(tDom, 'useNum', useNum, true);
+			}
 			updateDebugItemValue(tDom, 'videoMemorySize', formatBytes(size));
 			index++;
 		});
-
 		for (let uuid of initialUUIDs) {
 			existingElements.get(uuid).remove();
 		}

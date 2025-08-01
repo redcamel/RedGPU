@@ -26,7 +26,7 @@ RedGPU.init(
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		renderer.start(redGPUContext, (time) => {
 			redGPUContext.viewList.forEach(view => {
-				const { scene } = view;
+				const {scene} = view;
 				let i = scene.numChildren;
 				while (i--) {
 					let testObj = scene.children[i];
@@ -100,7 +100,7 @@ const getRandomHexValue = () => {
 };
 
 const renderTestPane = async (redGPUContext) => {
-	const { Pane } = await import(
+	const {Pane} = await import(
 		"https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js"
 		);
 

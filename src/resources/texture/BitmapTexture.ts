@@ -22,25 +22,6 @@ class BitmapTexture extends ManagementResourceBase {
 	readonly #onLoad: (textureInstance: BitmapTexture) => void;
 	readonly #onError: (error: Error) => void;
 
-	get width(): number {
-		return this.#imgBitmap?.width || 0
-	}
-
-	get height(): number {
-		return this.#imgBitmap?.height || 0
-	}
-
-	#getCacheKey(srcInfo?: SrcInfo): string {
-		if (!srcInfo) return this.uuid;
-		if (typeof srcInfo === 'string') {
-			return getAbsoluteURL(window.location.href, srcInfo);
-		} else {
-			return srcInfo.cacheKey || getAbsoluteURL(window.location.href, srcInfo.src);
-		}
-	}
-	#getParsedSrc(srcInfo?: SrcInfo): string {
-		return typeof srcInfo === 'string' ? srcInfo : srcInfo.src
-	}
 	constructor(
 		redGPUContext: RedGPUContext,
 		src?: SrcInfo,
@@ -75,6 +56,14 @@ class BitmapTexture extends ManagementResourceBase {
 		}
 	}
 
+	get width(): number {
+		return this.#imgBitmap?.width || 0
+	}
+
+	get height(): number {
+		return this.#imgBitmap?.height || 0
+	}
+
 	get usePremultiplyAlpha(): boolean {
 		return this.#usePremultiplyAlpha;
 	}
@@ -96,7 +85,8 @@ class BitmapTexture extends ManagementResourceBase {
 	}
 
 	set src(value: SrcInfo) {
-		this.#src = this.#getParsedSrc(value);;
+		this.#src = this.#getParsedSrc(value);
+
 		this.cacheKey = this.#getCacheKey(value);
 		if (this.#src) this.#loadBitmapTexture(this.#src);
 	}
@@ -119,6 +109,19 @@ class BitmapTexture extends ManagementResourceBase {
 		this.cacheKey = null
 		this.#unregisterResource()
 		if (temp) temp.destroy()
+	}
+
+	#getCacheKey(srcInfo?: SrcInfo): string {
+		if (!srcInfo) return this.uuid;
+		if (typeof srcInfo === 'string') {
+			return getAbsoluteURL(window.location.href, srcInfo);
+		} else {
+			return srcInfo.cacheKey || getAbsoluteURL(window.location.href, srcInfo.src);
+		}
+	}
+
+	#getParsedSrc(srcInfo?: SrcInfo): string {
+		return typeof srcInfo === 'string' ? srcInfo : srcInfo.src
 	}
 
 	#setGpuTexture(value: GPUTexture) {
@@ -200,7 +203,6 @@ class BitmapTexture extends ManagementResourceBase {
 	}
 
 	async #loadBitmapTexture(src: string) {
-
 		try {
 			if (src.endsWith(".svg")) {
 				// SVG 파일일 경우 변환 처리

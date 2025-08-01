@@ -50,14 +50,14 @@ const createInitialMeshes = (redGPUContext, scene) => {
 };
 
 const createPaneUI = async (redGPUContext, scene) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const pane = new Pane();
 
-	pane.addButton({ title: 'Add Child' }).on('click', () => {
+	pane.addButton({title: 'Add Child'}).on('click', () => {
 		addChildMesh(redGPUContext, scene);
 	});
 
-	pane.addButton({ title: 'Add Child at Index 2' }).on('click', () => {
+	pane.addButton({title: 'Add Child at Index 2'}).on('click', () => {
 		const newChild = new RedGPU.Display.TextField3D(redGPUContext);
 		newChild.useBillboard = true;
 		newChild.fontSize = 32;
@@ -68,7 +68,7 @@ const createPaneUI = async (redGPUContext, scene) => {
 		console.log('Added a new child at index 2');
 	});
 
-	pane.addButton({ title: 'Get Child at Index 1' }).on('click', () => {
+	pane.addButton({title: 'Get Child at Index 1'}).on('click', () => {
 		const child = scene.getChildAt(1);
 		if (child) {
 			child.color = getRandomHexColor();
@@ -78,7 +78,7 @@ const createPaneUI = async (redGPUContext, scene) => {
 		}
 	});
 
-	pane.addButton({ title: 'Get Index of Child 0' }).on('click', () => {
+	pane.addButton({title: 'Get Index of Child 0'}).on('click', () => {
 		const firstChild = scene.getChildAt(0);
 		if (firstChild) {
 			const index = scene.getChildIndex(firstChild);
@@ -87,7 +87,7 @@ const createPaneUI = async (redGPUContext, scene) => {
 		}
 	});
 
-	pane.addButton({ title: 'Set Index of Child 0 to 4' }).on('click', () => {
+	pane.addButton({title: 'Set Index of Child 0 to 4'}).on('click', () => {
 		if (scene.numChildren > 4) {
 			const firstChild = scene.getChildAt(0);
 			if (firstChild) {
@@ -97,12 +97,12 @@ const createPaneUI = async (redGPUContext, scene) => {
 		}
 	});
 
-	pane.addButton({ title: 'Swap Children at 0 and 1' }).on('click', () => {
+	pane.addButton({title: 'Swap Children at 0 and 1'}).on('click', () => {
 		scene.swapChildrenAt(0, 1);
 		console.log('Swapped children at indices 0 and 1');
 	});
 
-	pane.addButton({ title: 'Swap First & Last Child' }).on('click', () => {
+	pane.addButton({title: 'Swap First & Last Child'}).on('click', () => {
 		const numChildren = scene.numChildren;
 		if (numChildren > 1) {
 			const firstChild = scene.getChildAt(0);
@@ -114,12 +114,12 @@ const createPaneUI = async (redGPUContext, scene) => {
 		}
 	});
 
-	pane.addButton({ title: 'Remove Child at Index 1' }).on('click', () => {
+	pane.addButton({title: 'Remove Child at Index 1'}).on('click', () => {
 		scene.removeChildAt(1);
 		console.log('Removed child at index 1');
 	});
 
-	pane.addButton({ title: 'Remove All Children' }).on('click', () => {
+	pane.addButton({title: 'Remove All Children'}).on('click', () => {
 		scene.removeAllChildren();
 		console.log('All children removed');
 	});

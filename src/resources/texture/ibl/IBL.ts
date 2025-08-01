@@ -4,9 +4,7 @@ import GPU_FILTER_MODE from "../../../gpuConst/GPU_FILTER_MODE";
 import GPU_MIPMAP_FILTER_MODE from "../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import {keepLog} from "../../../utils";
-import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import createUUID from "../../../utils/createUUID";
-import calculateTextureByteSize from "../../../utils/math/calculateTextureByteSize";
 import Sampler from "../../sampler/Sampler";
 import CubeTexture from "../CubeTexture";
 import HDRTexture from "../hdr/HDRTexture";
@@ -96,9 +94,8 @@ class IBL {
 	async #init() {
 		keepLog('sourceCubeTexture', this.#sourceCubeTexture)
 		const {downSampleCubeMapGenerator} = this.#redGPUContext.resourceManager
-		if(this.#sourceCubeTexture) {
+		if (this.#sourceCubeTexture) {
 			if (!this.#iblTexture.gpuTexture) {
-
 				const iblTexture = await downSampleCubeMapGenerator.downsampleCubemap(this.#sourceCubeTexture, this.#iblCubeSize)
 				this.#iblTexture.gpuTexture = iblTexture
 			}

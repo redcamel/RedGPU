@@ -45,8 +45,8 @@ RedGPU.init(canvas, (redGPUContext) => {
 });
 
 const renderTestPane = async (scene, redGPUContext) => {
-	const { setSeparator } = await import("../../../exampleHelper/createExample/panes/index.js");
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+	const {setSeparator} = await import("../../../exampleHelper/createExample/panes/index.js");
+	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const pane = new Pane();
 
 	const controls = {
@@ -81,7 +81,7 @@ const renderTestPane = async (scene, redGPUContext) => {
 		new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../../assets/spriteSheet/actionTest/attack.png', 6, 1, 6, 0, true, 24)
 	];
 
-	const spriteSheet3DFolder = pane.addFolder({ title: 'SpriteSheet3D', expanded: true });
+	const spriteSheet3DFolder = pane.addFolder({title: 'SpriteSheet3D', expanded: true});
 
 	spriteSheet3DFolder.addBinding(controls, 'useBillboardPerspective').on('change', (evt) => {
 		scene.children.forEach((child) => {
@@ -98,7 +98,7 @@ const renderTestPane = async (scene, redGPUContext) => {
 	});
 
 	const billboardFixedScaleBinding = spriteSheet3DFolder
-		.addBinding(controls, 'billboardFixedScale', { min: 0.1, max: 1 })
+		.addBinding(controls, 'billboardFixedScale', {min: 0.1, max: 1})
 		.on('change', (evt) => {
 			scene.children.forEach((child) => {
 				child.billboardFixedScale = evt.value;
@@ -120,7 +120,7 @@ const renderTestPane = async (scene, redGPUContext) => {
 		});
 	});
 
-	spriteSheet3DFolder.addBinding(controls, 'frameRate', { min: 0, max: 60, step: 1 }).on('change', (evt) => {
+	spriteSheet3DFolder.addBinding(controls, 'frameRate', {min: 0, max: 60, step: 1}).on('change', (evt) => {
 		scene.children.forEach((child) => {
 			child.frameRate = evt.value;
 		});
@@ -142,43 +142,43 @@ const renderTestPane = async (scene, redGPUContext) => {
 
 	setSeparator(pane);
 
-	const playControlsFolder = pane.addFolder({ title: 'Play Controls', expanded: true });
+	const playControlsFolder = pane.addFolder({title: 'Play Controls', expanded: true});
 
-	playControlsFolder.addButton({ title: 'Play' }).on('click', () => {
+	playControlsFolder.addButton({title: 'Play'}).on('click', () => {
 		scene.children.forEach((child) => child.play());
 	});
 
-	playControlsFolder.addButton({ title: 'Pause' }).on('click', () => {
+	playControlsFolder.addButton({title: 'Pause'}).on('click', () => {
 		scene.children.forEach((child) => child.pause());
 	});
 
-	playControlsFolder.addButton({ title: 'Stop' }).on('click', () => {
+	playControlsFolder.addButton({title: 'Stop'}).on('click', () => {
 		scene.children.forEach((child) => child.stop());
 	});
 
 	setSeparator(pane);
 
-	const scaleFolder = pane.addFolder({ title: 'SpriteSheet3D Scale', expanded: true });
+	const scaleFolder = pane.addFolder({title: 'SpriteSheet3D Scale', expanded: true});
 
-	scaleFolder.addBinding(controls, 'scaleX', { min: 0.1, max: 5, step: 0.1 }).on('change', () => {
+	scaleFolder.addBinding(controls, 'scaleX', {min: 0.1, max: 5, step: 0.1}).on('change', () => {
 		scene.children.forEach((child) => {
 			child.scaleX = controls.scaleX;
 		});
 	});
 
-	scaleFolder.addBinding(controls, 'scaleY', { min: 0.1, max: 5, step: 0.1 }).on('change', () => {
+	scaleFolder.addBinding(controls, 'scaleY', {min: 0.1, max: 5, step: 0.1}).on('change', () => {
 		scene.children.forEach((child) => {
 			child.scaleY = controls.scaleY;
 		});
 	});
 
-	const monitoringFolder = pane.addFolder({ title: 'Monitoring', expanded: true });
+	const monitoringFolder = pane.addFolder({title: 'Monitoring', expanded: true});
 
-	monitoringFolder.addBinding(controls, 'state', { readonly: true });
-	monitoringFolder.addBinding(controls, 'currentIndex', { readonly: true });
-	monitoringFolder.addBinding(controls, 'totalFrame', { readonly: true });
-	monitoringFolder.addBinding(controls, 'segmentW', { readonly: true });
-	monitoringFolder.addBinding(controls, 'segmentH', { readonly: true });
+	monitoringFolder.addBinding(controls, 'state', {readonly: true});
+	monitoringFolder.addBinding(controls, 'currentIndex', {readonly: true});
+	monitoringFolder.addBinding(controls, 'totalFrame', {readonly: true});
+	monitoringFolder.addBinding(controls, 'segmentW', {readonly: true});
+	monitoringFolder.addBinding(controls, 'segmentH', {readonly: true});
 
 	const refreshMonitoringControls = () => {
 		const child = scene.children[0];

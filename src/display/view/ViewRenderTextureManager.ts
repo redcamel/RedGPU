@@ -1,6 +1,4 @@
-import antialiasingManager from "../../context/antialiasing/AntialiasingManager";
 import RedGPUContext from "../../context/RedGPUContext";
-import resourceManager from "../../resources/resourceManager/ResourceManager";
 import validateRedGPUContext from "../../runtimeChecker/validateFunc/validateRedGPUContext";
 import calculateTextureByteSize from "../../utils/math/calculateTextureByteSize";
 import getMipLevelCount from "../../utils/math/getMipLevelCount";
@@ -20,10 +18,6 @@ class ViewRenderTextureManager {
 	#useMSAAColor: boolean = true
 	#useMSAADepth: boolean = true
 	#videoMemorySize: number = 0
-	get videoMemorySize(): number {
-		return this.#videoMemorySize;
-	}
-
 	readonly #redGPUContext: RedGPUContext
 	readonly #view: View3D
 
@@ -31,6 +25,10 @@ class ViewRenderTextureManager {
 		validateRedGPUContext(view.redGPUContext)
 		this.#redGPUContext = view.redGPUContext
 		this.#view = view
+	}
+
+	get videoMemorySize(): number {
+		return this.#videoMemorySize;
 	}
 
 	get renderPath1ResultTextureDescriptor(): GPUTextureDescriptor {
@@ -75,17 +73,18 @@ class ViewRenderTextureManager {
 	#checkVideoMemorySize() {
 		const textures = [
 			this.#colorTexture, this.#depthTexture, this.#colorResolveTexture, this.#renderPath1ResultTexture
-		].filter(Boolean) ;
+		].filter(Boolean);
 		this.#videoMemorySize = textures.reduce((total, texture) => {
 				const videoMemory = calculateTextureByteSize(texture)
 				return total + videoMemory
 			}, 0
 		)
 	}
+
 	#createRender2PathTexture() {
-		const {gpuDevice,resourceManager} = this.#redGPUContext
+		const {gpuDevice, resourceManager} = this.#redGPUContext
 		const currentTexture = this.#renderPath1ResultTexture
-		const {pixelRectObject,name} = this.#view
+		const {pixelRectObject, name} = this.#view
 		const {width: pixelRectObjectW, height: pixelRectObjectH} = pixelRectObject
 		const changedSize = currentTexture?.width !== pixelRectObjectW || currentTexture?.height !== pixelRectObjectH
 		const needCreateTexture = !currentTexture || changedSize
@@ -107,15 +106,14 @@ class ViewRenderTextureManager {
 			this.#renderPath1ResultTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#renderPath1ResultTexture)
 			this.#checkVideoMemorySize()
 		}
-
 	}
 
 	#createTextureIfNeeded(textureType: 'depth' | 'color'): void {
 		const depthYn = textureType === 'depth'
-		const {antialiasingManager, gpuDevice,resourceManager} = this.#redGPUContext
+		const {antialiasingManager, gpuDevice, resourceManager} = this.#redGPUContext
 		const {useMSAA} = antialiasingManager
 		const currentTexture = depthYn ? this.#depthTexture : this.#colorTexture;
-		const {pixelRectObject,name} = this.#view
+		const {pixelRectObject, name} = this.#view
 		const {width: pixelRectObjectW, height: pixelRectObjectH} = pixelRectObject
 		const changedSize = currentTexture?.width !== pixelRectObjectW || currentTexture?.height !== pixelRectObjectH
 		const changeUseMSAA = depthYn ? this.#useMSAADepth !== useMSAA : this.#useMSAAColor !== useMSAA
@@ -128,7 +126,7 @@ class ViewRenderTextureManager {
 				if (depthYn) {
 					this.#depthTexture = null
 					this.#depthTextureView = null
-				}else{
+				} else {
 					this.#colorResolveTexture?.destroy()
 					this.#colorTexture = null
 					this.#colorTextureView = null

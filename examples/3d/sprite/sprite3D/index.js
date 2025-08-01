@@ -20,7 +20,7 @@ RedGPU.init(
 		);
 
 		const sprite3D = new RedGPU.Display.Sprite3D(redGPUContext, material);
-		sprite3D.useBillboard =false
+		sprite3D.useBillboard = false
 		scene.addChild(sprite3D);
 
 		const spriteCount = 10;
@@ -32,7 +32,7 @@ RedGPU.init(
 			const z = Math.sin(angle) * radius;
 
 			const sprite3D = new RedGPU.Display.Sprite3D(redGPUContext, material);
-			sprite3D.useBillboard =false
+			sprite3D.useBillboard = false
 			sprite3D.x = x;
 			sprite3D.z = z;
 			scene.addChild(sprite3D);
@@ -54,7 +54,7 @@ RedGPU.init(
 );
 
 const renderTestPane = async (scene) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const pane = new Pane();
 
 	const controls = {
@@ -66,7 +66,7 @@ const renderTestPane = async (scene) => {
 		scaleZ: scene.children[0].scaleZ,
 	};
 
-	const sprite3DFolder = pane.addFolder({ title: 'Sprite3D', expanded: true });
+	const sprite3DFolder = pane.addFolder({title: 'Sprite3D', expanded: true});
 
 	sprite3DFolder.addBinding(controls, 'useBillboardPerspective').on('change', (evt) => {
 		scene.children.forEach((child) => {
@@ -93,7 +93,7 @@ const renderTestPane = async (scene) => {
 	};
 
 	const billboardFixedScaleBinding = sprite3DFolder
-		.addBinding(controls, 'billboardFixedScale', { min: 0.1, max: 1 })
+		.addBinding(controls, 'billboardFixedScale', {min: 0.1, max: 1})
 		.on('change', (evt) => {
 			scene.children.forEach((child) => {
 				child.billboardFixedScale = evt.value;
@@ -102,13 +102,13 @@ const renderTestPane = async (scene) => {
 
 	updateBillboardFixedScaleBinding();
 
-	const scaleFolder = pane.addFolder({ title: 'Sprite3D Scale', expanded: true });
-	scaleFolder.addBinding(controls, 'scaleX', { min: 0.1, max: 5, step: 0.1 }).on('change', (evt) => {
+	const scaleFolder = pane.addFolder({title: 'Sprite3D Scale', expanded: true});
+	scaleFolder.addBinding(controls, 'scaleX', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
 		scene.children.forEach((child) => {
 			child.scaleX = controls.scaleX;
 		});
 	});
-	scaleFolder.addBinding(controls, 'scaleY', { min: 0.1, max: 5, step: 0.1 }).on('change', (evt) => {
+	scaleFolder.addBinding(controls, 'scaleY', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
 		scene.children.forEach((child) => {
 			child.scaleY = controls.scaleY;
 		});

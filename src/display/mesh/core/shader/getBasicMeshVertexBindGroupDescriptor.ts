@@ -21,7 +21,6 @@ const getBasicMeshVertexBindGroupDescriptor = (mesh: Mesh, skin: boolean = false
 			},
 			{
 				binding: 1,
-
 				resource: getGPUResourceSampler(material?.displacementTextureSampler) || basicGPUSampler
 			},
 			{
@@ -58,7 +57,6 @@ const getBasicMeshVertexBindGroupDescriptor = (mesh: Mesh, skin: boolean = false
 	}
 }
 export default getBasicMeshVertexBindGroupDescriptor
-
 const getGPUResourceSampler = (sampler: Sampler) => {
 	return sampler?.gpuSampler
 }

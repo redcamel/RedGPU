@@ -78,7 +78,7 @@ const createChildTextField3D = (redGPUContext, parent, x = 0, y = 0) => {
 };
 
 const renderTestPane = async (redGPUContext, parent, children) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const pane = new Pane();
 
 	const allObjects = [parent, ...children];
@@ -100,7 +100,7 @@ const renderTestPane = async (redGPUContext, parent, children) => {
 			opacity: obj.material.opacity,
 		};
 
-		const objFolder = pane.addFolder({ title: title, expanded: true });
+		const objFolder = pane.addFolder({title: title, expanded: true});
 
 		const update = (obj, evt) => {
 			obj.material.opacity = evt.value;
@@ -123,6 +123,6 @@ const renderTestPane = async (redGPUContext, parent, children) => {
 			update(obj, evt);
 		});
 
-		update(obj, { value: objConfig.opacity });
+		update(obj, {value: objConfig.opacity});
 	});
 };

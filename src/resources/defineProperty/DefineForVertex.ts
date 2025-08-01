@@ -15,17 +15,19 @@ function defineProperty_uintRange(propertyKey: string, initValue: number = 0, mi
 function defineProperty_PositiveNumberRange(propertyKey: string, initValue: number = 0, min?: number, max?: number) {
 	return definePositiveNumberRange(propertyKey, initValue, false, min, max)
 }
+
 function defineProperty_vec4(propertyKey: string, initValue: number[] = [0, 0, 0, 0]) {
-	return defineVector(propertyKey, initValue,false)
+	return defineVector(propertyKey, initValue, false)
 }
 
 function defineProperty_vec3(propertyKey: string, initValue: number[] = [0, 0, 0]) {
-	return defineVector(propertyKey, initValue,false)
+	return defineVector(propertyKey, initValue, false)
 }
 
 function defineProperty_vec2(propertyKey: string, initValue: number[] = [0, 0]) {
-	return defineVector(propertyKey, initValue,false)
+	return defineVector(propertyKey, initValue, false)
 }
+
 const PRESET_BOOLEAN = {
 	USE_BILLBOARD_PERSPECTIVE: 'useBillboardPerspective',
 	USE_BILLBOARD: 'useBillboard',

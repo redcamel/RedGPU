@@ -44,9 +44,9 @@ const createSpherePrimitive = (redGPUContext, scene) => {
 
 	const gap = 3;
 	const sphereProperties = [
-		{ material: sphereMaterials.solid, position: [0, 0, 0] },
-		{ material: sphereMaterials.wireframe, position: [-gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST },
-		{ material: sphereMaterials.point, position: [gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST },
+		{material: sphereMaterials.solid, position: [0, 0, 0]},
+		{material: sphereMaterials.wireframe, position: [-gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST},
+		{material: sphereMaterials.point, position: [gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST},
 	];
 
 	const defaultOptions = {
@@ -60,7 +60,7 @@ const createSpherePrimitive = (redGPUContext, scene) => {
 		uvSize: 1,
 	};
 
-	sphereProperties.forEach(({ material, position, topology }) => {
+	sphereProperties.forEach(({material, position, topology}) => {
 		const sphere = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Sphere(
@@ -105,7 +105,7 @@ const createSpherePrimitive = (redGPUContext, scene) => {
 };
 
 const renderTestPane = async (redGPUContext) => {
-	const { Pane } = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
+	const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
 	const pane = new Pane();
 
 	const config = {
@@ -144,13 +144,13 @@ const renderTestPane = async (redGPUContext) => {
 		});
 	};
 
-	const sphereFolder = pane.addFolder({ title: 'Sphere Properties', expanded: true });
-	addBinding(sphereFolder, 'radius', { min: 0.5, max: 5, step: 0.1 });
-	addBinding(sphereFolder, 'widthSegments', { min: 3, max: 64, step: 1 });
-	addBinding(sphereFolder, 'heightSegments', { min: 3, max: 64, step: 1 });
-	addBinding(sphereFolder, 'phiStart', { min: 0, max: Math.PI * 2, step: 0.1 });
-	addBinding(sphereFolder, 'phiLength', { min: 0, max: Math.PI * 2, step: 0.1 });
-	addBinding(sphereFolder, 'thetaStart', { min: 0, max: Math.PI, step: 0.1 });
-	addBinding(sphereFolder, 'thetaLength', { min: 0, max: Math.PI, step: 0.1 });
-	addBinding(sphereFolder, 'uvSize', { min: 0.1, max: 5, step: 0.1 });
+	const sphereFolder = pane.addFolder({title: 'Sphere Properties', expanded: true});
+	addBinding(sphereFolder, 'radius', {min: 0.5, max: 5, step: 0.1});
+	addBinding(sphereFolder, 'widthSegments', {min: 3, max: 64, step: 1});
+	addBinding(sphereFolder, 'heightSegments', {min: 3, max: 64, step: 1});
+	addBinding(sphereFolder, 'phiStart', {min: 0, max: Math.PI * 2, step: 0.1});
+	addBinding(sphereFolder, 'phiLength', {min: 0, max: Math.PI * 2, step: 0.1});
+	addBinding(sphereFolder, 'thetaStart', {min: 0, max: Math.PI, step: 0.1});
+	addBinding(sphereFolder, 'thetaLength', {min: 0, max: Math.PI, step: 0.1});
+	addBinding(sphereFolder, 'uvSize', {min: 0.1, max: 5, step: 0.1});
 };

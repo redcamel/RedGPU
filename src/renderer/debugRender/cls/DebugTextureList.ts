@@ -16,7 +16,7 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
 	constructor(debugCubeTextureMode: 'Bitmap' | 'Cube' | 'HDR') {
 		super()
 		this.#debugCubeTextureMode = debugCubeTextureMode
-		this.init(`${createDebugTitle(`${debugCubeTextureMode}Texture Num : <span class="totalCount"></span> (<b class="targetVideoMemorySize"></b>)`)}`,false,true)
+		this.init(`${createDebugTitle(`${debugCubeTextureMode}Texture Num : <span class="totalCount"></span> (<b class="targetVideoMemorySize"></b>)`)}`, false, true)
 	}
 
 	update(debugRender: DebugRender, redGPUContext: RedGPUContext) {
@@ -69,23 +69,6 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
 		return tDom;
 	}
 
-	#formatCacheKeyForDisplay(cacheKey: string): { host: string | null, filename: string } {
-		try {
-			const url = new URL(cacheKey);
-			const filename = url.pathname.split('/').pop() || cacheKey;
-			return {
-				host: url.host,
-				filename: filename
-			};
-		} catch {
-			// URL이 아닌 경우
-			return {
-				host: null,
-				filename: cacheKey
-			};
-		}
-	}
-
 	updateDebugItems(tDom, mipLevelCount, useMipmap, width, height, useNum, cacheKey, targetSrc, videoMemorySize) {
 		updateDebugItemValue(tDom, 'mipLevelCount', mipLevelCount);
 		updateDebugItemValue(tDom, 'useMipmap', useMipmap);
@@ -102,6 +85,23 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
 		}
 		// updateDebugItemValue(tDom, 'targetSrc', targetSrc);
 		updateDebugItemValue(tDom, 'videoMemorySize', formatBytes(videoMemorySize));
+	}
+
+	#formatCacheKeyForDisplay(cacheKey: string): { host: string | null, filename: string } {
+		try {
+			const url = new URL(cacheKey);
+			const filename = url.pathname.split('/').pop() || cacheKey;
+			return {
+				host: url.host,
+				filename: filename
+			};
+		} catch {
+			// URL이 아닌 경우
+			return {
+				host: null,
+				filename: cacheKey
+			};
+		}
 	}
 
 	#generateDebugItemsHtml(tList: Map<string, ResourceStateBitmapTexture | ResourceStateCubeTexture>) {

@@ -1,4 +1,4 @@
-const createPostEffectLabel = (title, isMobile,normalTitle = 'Normal') => {
+const createPostEffectLabel = (title, isMobile, normalTitle = 'Normal') => {
 
 	const exampleContainer = document.querySelector('#example-container')
 	const normalLabel = document.createElement('label');

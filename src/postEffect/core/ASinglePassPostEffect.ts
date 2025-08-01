@@ -299,9 +299,9 @@ class ASinglePassPostEffect {
 	}
 
 	#createRenderTexture(view: View3D): boolean {
-		const {redGPUContext, viewRenderTextureManager,name} = view
+		const {redGPUContext, viewRenderTextureManager, name} = view
 		const {colorTexture} = viewRenderTextureManager
-		const {gpuDevice,resourceManager} = redGPUContext
+		const {gpuDevice, resourceManager} = redGPUContext
 		const {width, height} = colorTexture
 		const needChange = width !== this.#prevInfo?.width || height !== this.#prevInfo?.height || this.#outputTexture.length === 0;
 		if (needChange) {

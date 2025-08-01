@@ -53,7 +53,7 @@ const createSampleMesh = (redGPUContext, scene) => {
 };
 
 const renderTestPaneWithLightControl = async (redGPUContext, mesh, light) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const pane = new Pane();
 
 	const lightConfig = {
@@ -61,26 +61,26 @@ const renderTestPaneWithLightControl = async (redGPUContext, mesh, light) => {
 		directionY: light.direction[1],
 		directionZ: light.direction[2],
 		intensity: light.intensity,
-		color: { r: light.color.r, g: light.color.g, b: light.color.b },
-		enableDebugger:light.enableDebugger
+		color: {r: light.color.r, g: light.color.g, b: light.color.b},
+		enableDebugger: light.enableDebugger
 	};
 
-	const lightFolder = pane.addFolder({ title: 'Directional Light', expanded: true });
-	lightFolder.addBinding(lightConfig, 'directionX', { min: -3, max: 3, step: 0.01 }).on('change', (evt) => {
+	const lightFolder = pane.addFolder({title: 'Directional Light', expanded: true});
+	lightFolder.addBinding(lightConfig, 'directionX', {min: -3, max: 3, step: 0.01}).on('change', (evt) => {
 		light.direction = [evt.value, lightConfig.directionY, lightConfig.directionZ];
 	});
-	lightFolder.addBinding(lightConfig, 'directionY', { min: -3, max: 3, step: 0.01 }).on('change', (evt) => {
+	lightFolder.addBinding(lightConfig, 'directionY', {min: -3, max: 3, step: 0.01}).on('change', (evt) => {
 		light.direction = [lightConfig.directionX, evt.value, lightConfig.directionZ];
 	});
-	lightFolder.addBinding(lightConfig, 'directionZ', { min: -3, max: 3, step: 0.01 }).on('change', (evt) => {
+	lightFolder.addBinding(lightConfig, 'directionZ', {min: -3, max: 3, step: 0.01}).on('change', (evt) => {
 		light.direction = [lightConfig.directionX, lightConfig.directionY, evt.value];
 	});
-	lightFolder.addBinding(lightConfig, 'intensity', { min: 0, max: 2, step: 0.01 }).on('change', (evt) => {
+	lightFolder.addBinding(lightConfig, 'intensity', {min: 0, max: 2, step: 0.01}).on('change', (evt) => {
 		light.intensity = evt.value;
 	});
-	lightFolder.addBinding(lightConfig, "color", { picker: "inline", view: "color", expanded: true })
+	lightFolder.addBinding(lightConfig, "color", {picker: "inline", view: "color", expanded: true})
 		.on("change", (ev) => {
-			const { r, g, b } = ev.value;
+			const {r, g, b} = ev.value;
 			light.color.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
 		});
 	lightFolder.addBinding(lightConfig, 'enableDebugger').on('change', (evt) => {
@@ -98,14 +98,14 @@ const renderTestPaneWithLightControl = async (redGPUContext, mesh, light) => {
 		rotationZ: mesh.rotationZ
 	};
 
-	const positionFolder = pane.addFolder({ title: 'Mesh Position', expanded: true });
-	positionFolder.addBinding(config, 'x', { min: -10, max: 10, step: 0.1 }).on('change', (evt) => {
+	const positionFolder = pane.addFolder({title: 'Mesh Position', expanded: true});
+	positionFolder.addBinding(config, 'x', {min: -10, max: 10, step: 0.1}).on('change', (evt) => {
 		mesh.setPosition(evt.value, config.y, config.z);
 	});
-	positionFolder.addBinding(config, 'y', { min: -10, max: 10, step: 0.1 }).on('change', (evt) => {
+	positionFolder.addBinding(config, 'y', {min: -10, max: 10, step: 0.1}).on('change', (evt) => {
 		mesh.setPosition(config.x, evt.value, config.z);
 	});
-	positionFolder.addBinding(config, 'z', { min: -10, max: 10, step: 0.1 }).on('change', (evt) => {
+	positionFolder.addBinding(config, 'z', {min: -10, max: 10, step: 0.1}).on('change', (evt) => {
 		mesh.setPosition(config.x, config.y, evt.value);
 	});
 

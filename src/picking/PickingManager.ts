@@ -20,7 +20,7 @@ class PickingManager {
 	#mouseY: number = 0
 	#prevPickingEvent: PickingEvent
 	#prevOverTarget: Mesh
-	#videoMemorySize:number = 0
+	#videoMemorySize: number = 0
 	get videoMemorySize(): number {
 		return this.#videoMemorySize;
 	}
@@ -71,11 +71,7 @@ class PickingManager {
 			this.#pickingDepthGPUTextureView = null
 		}
 	}
-	#calcVideoMemory() {
-		const texture = this.#pickingGPUTexture
-		if(!texture) return 0;
-		this.#videoMemorySize =  calculateTextureByteSize(texture) + calculateTextureByteSize(this.#pickingDepthGPUTexture)
-	}
+
 	checkTexture(view: View3D) {
 		const {redGPUContext} = view
 		const {resourceManager} = redGPUContext
@@ -83,9 +79,9 @@ class PickingManager {
 		this.#redGPUContext = redGPUContext
 		if (this.#pickingGPUTexture?.width !== this.#view.pixelRectObject.width || this.#pickingGPUTexture?.height !== this.#view.pixelRectObject.height) {
 			this.destroy()
-			this.#pickingGPUTexture = this.#createTexture('picking',navigator.gpu.getPreferredCanvasFormat())
+			this.#pickingGPUTexture = this.#createTexture('picking', navigator.gpu.getPreferredCanvasFormat())
 			this.#pickingGPUTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#pickingGPUTexture)
-			this.#pickingDepthGPUTexture = this.#createTexture('pickingDepth','depth32float')
+			this.#pickingDepthGPUTexture = this.#createTexture('pickingDepth', 'depth32float')
 			this.#pickingDepthGPUTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#pickingDepthGPUTexture)
 			this.#calcVideoMemory()
 		}
@@ -99,7 +95,13 @@ class PickingManager {
 		this.resetCastingList()
 	}
 
-	#createTexture(label:string,format: GPUTextureFormat): GPUTexture {
+	#calcVideoMemory() {
+		const texture = this.#pickingGPUTexture
+		if (!texture) return 0;
+		this.#videoMemorySize = calculateTextureByteSize(texture) + calculateTextureByteSize(this.#pickingDepthGPUTexture)
+	}
+
+	#createTexture(label: string, format: GPUTextureFormat): GPUTexture {
 		const {resourceManager} = this.#redGPUContext
 		return resourceManager.createManagedTexture({
 			size: [this.#view.pixelRectObject.width, this.#view.pixelRectObject.height, 1],

@@ -125,9 +125,9 @@ function createTestScene(redGPUContext, scene) {
 }
 
 async function createControlPanel(redGPUContext, view, fogEffect) {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 
-	const pane = new Pane({ title: '🌫️ Fog Test' });
+	const pane = new Pane({title: '🌫️ Fog Test'});
 
 	const PARAMS = {
 		enabled: true,
@@ -135,7 +135,7 @@ async function createControlPanel(redGPUContext, view, fogEffect) {
 		density: fogEffect.density,
 		nearDistance: fogEffect.nearDistance,
 		farDistance: fogEffect.farDistance,
-		fogColor: { r: 200, g: 210, b: 255 }
+		fogColor: {r: 200, g: 210, b: 255}
 	};
 
 	// 기본 컨트롤
@@ -156,7 +156,7 @@ async function createControlPanel(redGPUContext, view, fogEffect) {
 			'Exponential Squared': 'ExponentialSquared',
 		}
 	}).on('change', (ev) => {
-		switch(ev.value) {
+		switch (ev.value) {
 			case 'Exponential':
 				fogEffect.fogType = RedGPU.PostEffect.Fog.EXPONENTIAL;
 				break;
@@ -205,7 +205,7 @@ async function createControlPanel(redGPUContext, view, fogEffect) {
 		fogEffect.fogColor.setColorByRGB(Math.floor(ev.value.r), Math.floor(ev.value.g), Math.floor(ev.value.b));
 	});
 
-	pane.addBlade({ view: 'separator' });
+	pane.addBlade({view: 'separator'});
 
 	// 프리셋 폴더
 	const presetFolder = pane.addFolder({
@@ -213,23 +213,21 @@ async function createControlPanel(redGPUContext, view, fogEffect) {
 		expanded: true
 	});
 
-	presetFolder.addButton({ title: '💨 Light Mist' }).on('click', () => {
-		applyPreset('Exponential', 0.05, 8, 50, { r: 230, g: 235, b: 255 });
+	presetFolder.addButton({title: '💨 Light Mist'}).on('click', () => {
+		applyPreset('Exponential', 0.05, 8, 50, {r: 230, g: 235, b: 255});
 	});
 
-	presetFolder.addButton({ title: '🌫️ Medium Fog' }).on('click', () => {
-		applyPreset('Exponential', 0.15, 5, 35, { r: 200, g: 210, b: 230 });
+	presetFolder.addButton({title: '🌫️ Medium Fog'}).on('click', () => {
+		applyPreset('Exponential', 0.15, 5, 35, {r: 200, g: 210, b: 230});
 	});
 
-	presetFolder.addButton({ title: '☁️ Dense Fog' }).on('click', () => {
-		applyPreset('ExponentialSquared', 0.25, 3, 25, { r: 180, g: 180, b: 200 });
+	presetFolder.addButton({title: '☁️ Dense Fog'}).on('click', () => {
+		applyPreset('ExponentialSquared', 0.25, 3, 25, {r: 180, g: 180, b: 200});
 	});
 
-	presetFolder.addButton({ title: '🌊 Ocean Mist' }).on('click', () => {
-		applyPreset('Exponential', 0.08, 10, 60, { r: 180, g: 200, b: 255 });
+	presetFolder.addButton({title: '🌊 Ocean Mist'}).on('click', () => {
+		applyPreset('Exponential', 0.08, 10, 60, {r: 180, g: 200, b: 255});
 	});
-
-
 
 	function applyPreset(type, density, near, far, color) {
 		PARAMS.fogType = type;
@@ -238,7 +236,7 @@ async function createControlPanel(redGPUContext, view, fogEffect) {
 		PARAMS.farDistance = far;
 		PARAMS.fogColor = color;
 
-		switch(type) {
+		switch (type) {
 			case 'Exponential':
 				fogEffect.fogType = RedGPU.PostEffect.Fog.EXPONENTIAL;
 				break;

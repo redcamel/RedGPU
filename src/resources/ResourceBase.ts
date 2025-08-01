@@ -21,6 +21,21 @@ class ResourceBase {
 	#name: string = ''
 	#instanceId: number
 	#cacheKey: string
+	/**
+	 * An array to keep track of dirty listeners.
+	 *
+	 * @type {Array}
+	 */
+	#dirtyListeners: any[] = [];
+	#resourceManagerKey: string
+
+	constructor(redGPUContext: RedGPUContext, resourceManagerKey?: string) {
+		validateRedGPUContext(redGPUContext)
+		this.#resourceManagerKey = resourceManagerKey
+		this.#redGPUContext = redGPUContext
+		this.#gpuDevice = redGPUContext.gpuDevice
+	}
+
 	get cacheKey(): string {
 		return this.#cacheKey;
 	}
@@ -29,22 +44,8 @@ class ResourceBase {
 		this.#cacheKey = value;
 	}
 
-	/**
-	 * An array to keep track of dirty listeners.
-	 *
-	 * @type {Array}
-	 */
-	#dirtyListeners: any[] = [];
-	#resourceManagerKey: string
 	get resourceManagerKey(): string {
 		return this.#resourceManagerKey;
-	}
-
-	constructor(redGPUContext: RedGPUContext, resourceManagerKey?: string) {
-		validateRedGPUContext(redGPUContext)
-		this.#resourceManagerKey = resourceManagerKey
-		this.#redGPUContext = redGPUContext
-		this.#gpuDevice = redGPUContext.gpuDevice
 	}
 
 	get name(): string {
@@ -89,7 +90,6 @@ class ResourceBase {
 	 * @param {Function} listener - The listener function to be added.
 	 */
 	__addDirtyPipelineListener(listener: () => void) {
-
 		this.#manageResourceState(true);
 		this.#dirtyListeners.push(listener);
 	}
@@ -100,7 +100,6 @@ class ResourceBase {
 	 * @param {Function} listener - The listener function to be removed.
 	 */
 	__removeDirtyPipelineListener(listener: () => void) {
-
 		const index = this.#dirtyListeners.indexOf(listener);
 		if (index > -1) {
 			this.#dirtyListeners.splice(index, 1);
@@ -135,7 +134,6 @@ class ResourceBase {
 				consoleAndThrowError('need managedStateKey', this.constructor.name)
 			}
 			const targetState = targetResourceManagedState?.table.get(this.cacheKey);
-
 			if (targetState) {
 				isAddingListener ? targetState.useNum++ : targetState.useNum--;
 			}

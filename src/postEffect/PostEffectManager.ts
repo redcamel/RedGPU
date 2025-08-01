@@ -28,7 +28,8 @@ class PostEffectManager {
 	#previousDimensions: { width: number, height: number }
 	#postEffectSystemUniformBuffer: UniformBuffer;
 	#postEffectSystemUniformBufferStructInfo;
-	#videoMemorySize:number = 0
+	#videoMemorySize: number = 0
+
 	constructor(view: View3D) {
 		this.#view = view;
 		this.#init()
@@ -44,6 +45,10 @@ class PostEffectManager {
 
 	get effectList(): Array<ASinglePassPostEffect | AMultiPassPostEffect> {
 		return this.#postEffects;
+	}
+
+	get videoMemorySize(): number {
+		return this.#videoMemorySize;
 	}
 
 	addEffect(v: ASinglePassPostEffect | AMultiPassPostEffect) {
@@ -155,9 +160,9 @@ class PostEffectManager {
 
 	#init() {
 		const {redGPUContext} = this.#view;
-		const {gpuDevice,resourceManager} = redGPUContext;
+		const {gpuDevice, resourceManager} = redGPUContext;
 		const textureComputeShader = this.#getTextureComputeShader();
-		this.#textureComputeShaderModule = resourceManager.createGPUShaderModule('POST_EFFECT_TEXTURE_COPY_COMPUTE_SHADER',{
+		this.#textureComputeShaderModule = resourceManager.createGPUShaderModule('POST_EFFECT_TEXTURE_COPY_COMPUTE_SHADER', {
 			code: textureComputeShader,
 		});
 		this.#textureComputeBindGroupLayout = this.#createTextureBindGroupLayout(redGPUContext);
@@ -168,20 +173,17 @@ class PostEffectManager {
 		this.#postEffectSystemUniformBufferStructInfo = UNIFORM_STRUCT;
 		this.#postEffectSystemUniformBuffer = new UniformBuffer(redGPUContext, postEffectSystemUniformData, `${this.#view.name}_POST_EFFECT_SYSTEM_UNIFORM_BUFFER`);
 	}
+
 	#calcVideoMemory() {
 		const texture = this.#storageTexture
-		if(!texture) return 0;
-		this.#videoMemorySize =  calculateTextureByteSize(texture)
-	}
-
-	get videoMemorySize(): number {
-		return this.#videoMemorySize;
+		if (!texture) return 0;
+		this.#videoMemorySize = calculateTextureByteSize(texture)
 	}
 
 	#renderToStorageTexture(view: View3D, sourceTextureView: GPUTextureView) {
 		const {redGPUContext, viewRenderTextureManager} = view;
 		const {colorTexture} = viewRenderTextureManager;
-		const {gpuDevice, antialiasingManager,resourceManager} = redGPUContext;
+		const {gpuDevice, antialiasingManager, resourceManager} = redGPUContext;
 		const {useMSAA, changedMSAA} = antialiasingManager;
 		const {width, height} = colorTexture;
 		const dimensionsChanged = width !== this.#previousDimensions?.width || height !== this.#previousDimensions?.height;

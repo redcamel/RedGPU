@@ -653,7 +653,7 @@ class ParticleEmitter extends Mesh {
 			entries: computeBindGroupEntries
 		});
 		this.#computePipeline = redGPUContext.gpuDevice.createComputePipeline({
-			label : 'PARTICLE_EMITTER_PIPELINE',
+			label: 'PARTICLE_EMITTER_PIPELINE',
 			layout: computePipelineLayout,
 			compute: {
 				module: computeModule,

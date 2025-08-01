@@ -70,7 +70,7 @@ class ATextField extends Mesh {
 		this.#redGPUContext = redGPUContext
 		this.#mode3dYn = mode3dYn
 		this.#textureImgOnload = imgOnload
-		this._material = new TextFieldMaterial(redGPUContext, new BitmapTexture(redGPUContext,null,true,v => {
+		this._material = new TextFieldMaterial(redGPUContext, new BitmapTexture(redGPUContext, null, true, v => {
 			this.#renderWidth = this.#textureImg.width
 			this.#renderHeight = this.#textureImg.height
 		}))

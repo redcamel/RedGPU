@@ -74,16 +74,13 @@ class VertexBuffer extends ABaseBuffer {
 			})
 			this[GPU_BUFFER_SYMBOL] = null;
 		}
-
 		const bufferDescriptor: GPUBufferDescriptor = {
 			size: this[GPU_BUFFER_DATA_SYMBOL].byteLength,
 			usage: this.usage,
 			label: this.name
 		};
 		this[GPU_BUFFER_SYMBOL] = gpuDevice.createBuffer(bufferDescriptor);
-
 		this.targetResourceManagedState.videoMemory += this[GPU_BUFFER_DATA_SYMBOL].byteLength || 0;
-
 		this.#triangleCount = this[GPU_BUFFER_DATA_SYMBOL].length / this.#stride;
 		gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], 0, this[GPU_BUFFER_DATA_SYMBOL]);
 	}

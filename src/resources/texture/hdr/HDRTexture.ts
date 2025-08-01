@@ -50,21 +50,6 @@ class HDRTexture extends ManagementResourceBase {
 	#isCubeMapInitialized: boolean = false;
 	#exposureUpdateTimeout: number | null = null;
 
-	#getCacheKey(srcInfo?: SrcInfo): string {
-		let result
-		if (!srcInfo) result = this.uuid;
-		if (typeof srcInfo === 'string') {
-			result = getAbsoluteURL(window.location.href, srcInfo);
-		} else {
-			result = srcInfo.cacheKey || getAbsoluteURL(window.location.href, srcInfo.src);
-		}
-		return `HDRTexture_${result}`
-	}
-
-	#getParsedSrc(srcInfo?: SrcInfo): string {
-		return typeof srcInfo === 'string' ? srcInfo : srcInfo.src
-	}
-
 	constructor(
 		redGPUContext: RedGPUContext,
 		src: SrcInfo,
@@ -206,6 +191,21 @@ class HDRTexture extends ManagementResourceBase {
 		if (temp) temp.destroy()
 	}
 
+	#getCacheKey(srcInfo?: SrcInfo): string {
+		let result
+		if (!srcInfo) result = this.uuid;
+		if (typeof srcInfo === 'string') {
+			result = getAbsoluteURL(window.location.href, srcInfo);
+		} else {
+			result = srcInfo.cacheKey || getAbsoluteURL(window.location.href, srcInfo.src);
+		}
+		return `HDRTexture_${result}`
+	}
+
+	#getParsedSrc(srcInfo?: SrcInfo): string {
+		return typeof srcInfo === 'string' ? srcInfo : srcInfo.src
+	}
+
 	/**
 	 * HDR 파일 형식 검증 (.hdr 형식만 허용)
 	 */
@@ -213,10 +213,8 @@ class HDRTexture extends ManagementResourceBase {
 		if (!src || typeof src !== 'string') {
 			throw new Error('HDR 파일 경로가 필요합니다');
 		}
-
 		// 쿼리 파라미터와 해시를 제거한 후 확장자 검사
 		const cleanSrc = src.split('?')[0].split('#')[0].toLowerCase();
-
 		if (!cleanSrc.endsWith('.hdr')) {
 			throw new Error(`지원되지 않는 형식입니다. .hdr 형식만 지원됩니다. 입력된 파일: ${src}`);
 		}

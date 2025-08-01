@@ -124,7 +124,7 @@ html, body {
     display: flex;
     align-items: center;
     gap: 8px;
-    text-shadow: 1px 1px 1px rgba(0,0,0,0.16);
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.16);
 }
 
 .experimental {

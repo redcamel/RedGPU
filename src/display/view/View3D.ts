@@ -64,6 +64,8 @@ class View3D extends ViewTransform {
 	#passLightClustersBound: PassClusterLightBound
 	#prevWidth: number = undefined
 	#prevHeight: number = undefined
+	#prevIBL_iblTexture: IBLCubeTexture
+	#prevIBL_irradianceTexture: IBLCubeTexture
 
 	//
 	/**
@@ -177,13 +179,12 @@ class View3D extends ViewTransform {
 	}
 
 	set skybox(value: SkyBox) {
-		const { resourceManager} = this.redGPUContext
+		const {resourceManager} = this.redGPUContext
 		const prevTexture = this.#skybox?.skyboxTexture
 		const newTexture = value?.skyboxTexture
 		if (prevTexture && prevTexture !== newTexture) {
 			this.#manageIBLResourceState(resourceManager, prevTexture.cacheKey, false);
 		}
-
 		this.#skybox = value;
 	}
 
@@ -283,9 +284,6 @@ class View3D extends ViewTransform {
 			(0 < mouseY && mouseY < pixelRectObject.height);
 	}
 
-	#prevIBL_iblTexture: IBLCubeTexture
-	#prevIBL_irradianceTexture: IBLCubeTexture
-
 	#createVertexUniformBindGroup(key: string, shadowDepthTextureView: GPUTextureView, ibl: IBL, renderPath1ResultTextureView: GPUTextureView) {
 		this.#updateClusters(true)
 		const ibl_iblTexture = ibl?.iblTexture
@@ -360,15 +358,14 @@ class View3D extends ViewTransform {
 		this.#systemUniform_Vertex_UniformBindGroup = gpuDevice.createBindGroup(systemUniform_Vertex_BindGroupDescriptor);
 		// IBL 텍스처 리소스 상태 업데이트
 		this.#updateIBLResourceStates(resourceManager, ibl_iblTexture, ibl_irradianceTexture);
-
 	}
+
 	#updateIBLResourceStates(resourceManager: ResourceManager, ibl_iblTexture: any, ibl_irradianceTexture: any) {
 		// IBL 텍스처 쌍들을 배열로 정의
 		const textureUpdates = [
 			[this.#prevIBL_iblTexture, ibl_iblTexture],
 			[this.#prevIBL_irradianceTexture, ibl_irradianceTexture]
 		];
-
 		// 각 텍스처 쌍에 대해 리소스 상태 관리
 		textureUpdates.forEach(([prevTexture, newTexture]) => {
 			if (prevTexture && prevTexture !== newTexture) {
@@ -378,7 +375,6 @@ class View3D extends ViewTransform {
 				this.#manageIBLResourceState(resourceManager, newTexture.cacheKey, true);
 			}
 		});
-
 		// 이전 텍스처 참조 업데이트
 		this.#prevIBL_iblTexture = ibl_iblTexture;
 		this.#prevIBL_irradianceTexture = ibl_irradianceTexture;
@@ -391,7 +387,6 @@ class View3D extends ViewTransform {
 			isAddingListener ? targetState.useNum++ : targetState.useNum--;
 		}
 	}
-
 
 	#init() {
 		const systemUniform_Vertex_UniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength)

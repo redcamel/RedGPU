@@ -12,7 +12,7 @@ const parseMaterialTexture = (
 	textureInfo: TextureInfo | MaterialNormalTextureInfo | MaterialOcclusionTextureInfo,
 	targetTextureKey: string,
 	format?: string,
-	useMipmap:boolean = true
+	useMipmap: boolean = true
 ) => {
 	const {redGPUContext, gltfData} = gltfLoader
 	const {textureRawList} = gltfLoader.parsingResult
@@ -25,7 +25,6 @@ const parseMaterialTexture = (
 		const option = getSamplerInfo(gltfLoader, gltfData, samplerGlTfId);
 		const {parsedURI, cacheKey} = tURL
 		const key = `${targetTextureKey}SourceGlTfId_${targetSourceGlTfId}`
-
 		if (!textureRawList[key]) {
 			textureRawList[key] = ({
 				src: parsedURI,

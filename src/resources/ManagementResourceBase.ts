@@ -12,13 +12,13 @@ class ManagementResourceBase extends ResourceBase {
 	readonly #targetResourceManagedState: ResourceStatusInfo
 
 	constructor(redGPUContext: RedGPUContext, resourceManagerKey: string,) {
-		super(redGPUContext,resourceManagerKey)
+		super(redGPUContext, resourceManagerKey)
 		if (!resourceManagerKey) {
 			consoleAndThrowError('need managedStateKey', this.constructor.name)
 		}
 		this.#targetResourceManagedState = redGPUContext.resourceManager[resourceManagerKey]
 		if (!this.#targetResourceManagedState) {
-			consoleAndThrowError(resourceManagerKey , 'is not exist in RedGPUContext.resourceManager', this.constructor.name)
+			consoleAndThrowError(resourceManagerKey, 'is not exist in RedGPUContext.resourceManager', this.constructor.name)
 		}
 	}
 

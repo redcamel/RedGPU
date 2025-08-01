@@ -1,5 +1,5 @@
 .RedGPUDebugPanel {
-    width:330px;
+    width: 330px;
     max-height: 100%;
     overflow-y: auto;
     background: rgba(0, 0, 0, 0.9);
@@ -108,7 +108,7 @@
     padding: 10px 8px;
     width: 100%;
     font-size: 15px;
-    color:#fdb48d;
+    color: #fdb48d;
     line-height: 1;
     justify-content: space-between;
     /*border-top: 1px solid rgba(255, 255, 255, 0.05);*/
@@ -129,7 +129,7 @@
     padding: 10px 8px;
     width: 100%;
     font-size: 12px;
-    color:#fff;
+    color: #fff;
     line-height: 1;
     justify-content: space-between;
     /*border-top: 1px solid rgba(255, 255, 255, 0.05);*/
@@ -143,7 +143,8 @@
         font-size: 11px
     }
 }
-.debug-folder-title .onoff{
+
+.debug-folder-title .onoff {
     font-size: 11px;
 }
 

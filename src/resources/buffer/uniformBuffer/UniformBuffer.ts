@@ -14,7 +14,6 @@ class UniformBuffer extends AUniformBaseBuffer {
 	) {
 		const usage: GPUBufferUsageFlags = GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
 		super(redGPUContext, MANAGED_STATE_KEY, usage, uniformData, label)
-
 		const {table} = this.targetResourceManagedState
 		const cacheBuffer = table.get(cacheKey)
 		if (cacheBuffer) {

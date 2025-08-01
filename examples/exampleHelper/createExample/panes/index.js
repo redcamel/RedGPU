@@ -21,9 +21,10 @@ import setViewListTest_Pane from "./view/setViewListTest.js";
 export function setSeparator(pane) {
 	pane.addBlade({view: 'separator',});
 }
-const setDebugViewButton = (redGPUContext)=>{
+
+const setDebugViewButton = (redGPUContext) => {
 	const debugView = document.body.querySelector('.debugView');
-	if(debugView && redGPUContext){
+	if (debugView && redGPUContext) {
 		debugView.style.display = 'flex'
 		debugView.addEventListener('click', async () => {
 			redGPUContext.useDebugPanel = !redGPUContext.useDebugPanel;
@@ -39,14 +40,16 @@ const hdrImages = [
 	{name: 'field', path: 'assets/hdr/field.hdr'},
 	{name: 'neutral.37290948', path: 'assets/hdr/neutral.37290948.hdr'},
 	{name: 'pisa', path: 'assets/hdr/pisa.hdr'},
-	{name: '6 cube face asset', path:  [
+	{
+		name: '6 cube face asset', path: [
 			"assets/skybox/px.jpg",
 			"assets/skybox/nx.jpg",
 			"assets/skybox/py.jpg",
 			"assets/skybox/ny.jpg",
 			"assets/skybox/pz.jpg",
 			"assets/skybox/nz.jpg",
-		]},
+		]
+	},
 ];
 export {
 	setViewListTest_Pane,

@@ -44,9 +44,9 @@ const createTorusKnotPrimitive = (redGPUContext, scene) => {
 
 	const gap = 4;
 	const torusKnotProperties = [
-		{ material: torusKnotMaterials.solid, position: [0, 0, 0] },
-		{ material: torusKnotMaterials.wireframe, position: [-gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST },
-		{ material: torusKnotMaterials.point, position: [gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST },
+		{material: torusKnotMaterials.solid, position: [0, 0, 0]},
+		{material: torusKnotMaterials.wireframe, position: [-gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST},
+		{material: torusKnotMaterials.point, position: [gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST},
 	];
 
 	const defaultOptions = {
@@ -58,7 +58,7 @@ const createTorusKnotPrimitive = (redGPUContext, scene) => {
 		q: 3,
 	};
 
-	torusKnotProperties.forEach(({ material, position, topology }) => {
+	torusKnotProperties.forEach(({material, position, topology}) => {
 		const torusKnot = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.TorusKnot(
@@ -101,7 +101,7 @@ const createTorusKnotPrimitive = (redGPUContext, scene) => {
 };
 
 const renderTestPane = async (redGPUContext) => {
-	const { Pane } = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
+	const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
 	const pane = new Pane();
 
 	const config = {
@@ -136,11 +136,11 @@ const renderTestPane = async (redGPUContext) => {
 		});
 	};
 
-	const torusKnotFolder = pane.addFolder({ title: 'TorusKnot Properties', expanded: true });
-	addBinding(torusKnotFolder, 'radius', { min: 0.5, max: 5, step: 0.1 });
-	addBinding(torusKnotFolder, 'tube', { min: 0.1, max: 2, step: 0.1 });
-	addBinding(torusKnotFolder, 'tubularSegments', { min: 3, max: 128, step: 1 });
-	addBinding(torusKnotFolder, 'radialSegments', { min: 3, max: 32, step: 1 });
-	addBinding(torusKnotFolder, 'p', { min: 1, max: 10, step: 0.1 });
-	addBinding(torusKnotFolder, 'q', { min: 1, max: 10, step: 0.1 });
+	const torusKnotFolder = pane.addFolder({title: 'TorusKnot Properties', expanded: true});
+	addBinding(torusKnotFolder, 'radius', {min: 0.5, max: 5, step: 0.1});
+	addBinding(torusKnotFolder, 'tube', {min: 0.1, max: 2, step: 0.1});
+	addBinding(torusKnotFolder, 'tubularSegments', {min: 3, max: 128, step: 1});
+	addBinding(torusKnotFolder, 'radialSegments', {min: 3, max: 32, step: 1});
+	addBinding(torusKnotFolder, 'p', {min: 1, max: 10, step: 0.1});
+	addBinding(torusKnotFolder, 'q', {min: 1, max: 10, step: 0.1});
 };

@@ -146,7 +146,7 @@ class Renderer {
 						},
 						{width: view.pixelRectObject.width, height: view.pixelRectObject.height, depthOrArrayLayers: 1},
 					);
-					mipmapGenerator.generateMipmap(renderPath1ResultTexture, view.viewRenderTextureManager.renderPath1ResultTextureDescriptor,true)
+					mipmapGenerator.generateMipmap(renderPath1ResultTexture, view.viewRenderTextureManager.renderPath1ResultTextureDescriptor, true)
 					const renderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass({
 						colorAttachments: [{
 							...colorAttachment,

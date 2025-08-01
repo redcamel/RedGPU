@@ -17,7 +17,7 @@ class ADebugStatisticsDomService {
 		this.dom.querySelector('.onoff').innerHTML = this.openYn ? 'close' : 'open'
 	}
 
-	init(title: string, openYn: boolean = false,useSmallTitle: boolean = false) {
+	init(title: string, openYn: boolean = false, useSmallTitle: boolean = false) {
 		this.#openYn = openYn
 		this.dom = document.createElement('div');
 		this.dom.innerHTML = `

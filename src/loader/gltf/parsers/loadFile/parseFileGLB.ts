@@ -35,24 +35,20 @@ const BINPACKER_CHUNK_TYPE_BINARY = 0x004e4942;
  */
 const cacheMap: Map<string, ArrayBuffer> = new Map();
 const pendingMap: Map<string, Promise<ArrayBuffer>> = new Map();
-
 const parseFileGLB = async (gltfLoader: GLTFLoader, callBack) => {
 	console.log('GLB Model parsing has start.');
 	const loadFilePath = getAbsoluteURL(window.location.href, gltfLoader.filePath + gltfLoader.fileName)
-	keepLog(loadFilePath,gltfLoader.filePath + gltfLoader.fileName)
+	keepLog(loadFilePath, gltfLoader.filePath + gltfLoader.fileName)
 	if (cacheMap.has(loadFilePath)) {
 		keepLog('GLB Model parsing has cache', loadFilePath);
 		await parseArrayBuffer(gltfLoader, cacheMap.get(loadFilePath), callBack);
 		return;
 	}
-
 	if (pendingMap.has(loadFilePath)) {
 		await pendingMap.get(loadFilePath);
-
 		await parseArrayBuffer(gltfLoader, cacheMap.get(loadFilePath), callBack);
 		return;
 	}
-
 	const promise = new Promise<ArrayBuffer>((resolve, reject) => {
 		getArrayBufferFromSrc(
 			loadFilePath,
@@ -69,7 +65,6 @@ const parseFileGLB = async (gltfLoader: GLTFLoader, callBack) => {
 		);
 	});
 	pendingMap.set(loadFilePath, promise);
-
 	try {
 		const buffer = await promise;
 		await parseArrayBuffer(gltfLoader, buffer, callBack);
@@ -77,7 +72,7 @@ const parseFileGLB = async (gltfLoader: GLTFLoader, callBack) => {
 		console.log(error);
 	}
 }
-const parseArrayBuffer = async (gltfLoader:GLTFLoader, buffer: ArrayBuffer, callBack) => {
+const parseArrayBuffer = async (gltfLoader: GLTFLoader, buffer: ArrayBuffer, callBack) => {
 	const {content, binaryChunk} = parseBuffer(buffer);
 	if (content === null) {
 		throw new Error('JSON content not found');
@@ -140,23 +135,18 @@ const parseBuffer = (buffer: ArrayBuffer): { content: string, binaryChunk: any }
 const processImagesIfExist = (gltfData: GLTF, binaryChunk: any) => {
 	const {images, bufferViews} = gltfData;
 	const supportedFormats = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
-
 	// 버퍼 해시를 저장할 캐시 맵
 	// 전역 변수로 선언하거나 클로저를 통해 유지할 수 있음
 	const bufferHashMap = new Map<string, string>();
-
 	if (images) {
 		for (let i = 0; i < images.length; i++) {
 			const image = images[i];
 			const {mimeType, bufferView: bufferViewGlTfId} = image;
-
 			if (supportedFormats.includes(mimeType) && bufferViewGlTfId !== undefined) {
 				const sliceStartIndex = bufferViews[bufferViewGlTfId].byteOffset || 0;
 				const byteLength = bufferViews[bufferViewGlTfId].byteLength;
-
 				// 버퍼의 고유 식별자 생성 (버퍼 위치 + 길이 + MIME 타입)
 				const bufferKey = `${sliceStartIndex}_${byteLength}_${mimeType}`;
-
 				// 이미 동일한 버퍼에 대한 URL이 생성되었는지 확인
 				if (bufferHashMap.has(bufferKey)) {
 					// 기존 URL 재사용
@@ -166,7 +156,6 @@ const processImagesIfExist = (gltfData: GLTF, binaryChunk: any) => {
 					const slicedChunk = binaryChunk.slice(sliceStartIndex, sliceStartIndex + byteLength);
 					const blob = new Blob([new Uint8Array(slicedChunk)], {type: mimeType});
 					const objectURL = URL.createObjectURL(blob);
-
 					// 캐시에 저장
 					bufferHashMap.set(bufferKey, objectURL);
 					image.uri = objectURL;
@@ -174,7 +163,6 @@ const processImagesIfExist = (gltfData: GLTF, binaryChunk: any) => {
 			}
 		}
 	}
-
 	// URL 캐시 정보 반환 (나중에 정리에 사용할 수 있음)
 	return bufferHashMap;
 };

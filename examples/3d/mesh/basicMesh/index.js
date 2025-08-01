@@ -47,7 +47,7 @@ const createSampleMesh = (redGPUContext, scene) => {
 };
 
 const renderTestPane = async (redGPUContext, mesh) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const pane = new Pane();
 
 	const config = {
@@ -61,7 +61,7 @@ const renderTestPane = async (redGPUContext, mesh) => {
 		rotationX: mesh.rotationX,
 		rotationY: mesh.rotationY,
 		rotationZ: mesh.rotationZ,
-		opacity:1
+		opacity: 1
 	};
 
 	pane.addBinding(config, 'material', {
@@ -79,36 +79,36 @@ const renderTestPane = async (redGPUContext, mesh) => {
 			);
 		}
 	});
-	const positionFolder = pane.addFolder({ title: 'Position', expanded: true });
-	positionFolder.addBinding(config, 'x', { min: -10, max: 10, step: 0.1 }).on('change', (evt) => {
+	const positionFolder = pane.addFolder({title: 'Position', expanded: true});
+	positionFolder.addBinding(config, 'x', {min: -10, max: 10, step: 0.1}).on('change', (evt) => {
 		mesh.setPosition(evt.value, config.y, config.z);
 	});
-	positionFolder.addBinding(config, 'y', { min: -10, max: 10, step: 0.1 }).on('change', (evt) => {
+	positionFolder.addBinding(config, 'y', {min: -10, max: 10, step: 0.1}).on('change', (evt) => {
 		mesh.setPosition(config.x, evt.value, config.z);
 	});
-	positionFolder.addBinding(config, 'z', { min: -10, max: 10, step: 0.1 }).on('change', (evt) => {
+	positionFolder.addBinding(config, 'z', {min: -10, max: 10, step: 0.1}).on('change', (evt) => {
 		mesh.setPosition(config.x, config.y, evt.value);
 	});
 
-	const scaleFolder = pane.addFolder({ title: 'Scale', expanded: true });
-	scaleFolder.addBinding(config, 'scaleX', { min: 0.1, max: 5, step: 0.1 }).on('change', (evt) => {
+	const scaleFolder = pane.addFolder({title: 'Scale', expanded: true});
+	scaleFolder.addBinding(config, 'scaleX', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
 		mesh.setScale(evt.value, config.scaleY, config.scaleZ);
 	});
-	scaleFolder.addBinding(config, 'scaleY', { min: 0.1, max: 5, step: 0.1 }).on('change', (evt) => {
+	scaleFolder.addBinding(config, 'scaleY', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
 		mesh.setScale(config.scaleX, evt.value, config.scaleZ);
 	});
-	scaleFolder.addBinding(config, 'scaleZ', { min: 0.1, max: 5, step: 0.1 }).on('change', (evt) => {
+	scaleFolder.addBinding(config, 'scaleZ', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
 		mesh.setScale(config.scaleX, config.scaleY, evt.value);
 	});
 
-	const rotationFolder = pane.addFolder({ title: 'Rotation', expanded: true });
-	rotationFolder.addBinding(config, 'rotationX', { min: 0, max: 360, step: 0.01 }).on('change', (evt) => {
+	const rotationFolder = pane.addFolder({title: 'Rotation', expanded: true});
+	rotationFolder.addBinding(config, 'rotationX', {min: 0, max: 360, step: 0.01}).on('change', (evt) => {
 		mesh.setRotation(evt.value, config.rotationY, config.rotationZ);
 	});
-	rotationFolder.addBinding(config, 'rotationY', { min: 0, max: 360, step: 0.01 }).on('change', (evt) => {
+	rotationFolder.addBinding(config, 'rotationY', {min: 0, max: 360, step: 0.01}).on('change', (evt) => {
 		mesh.setRotation(config.rotationX, evt.value, config.rotationZ);
 	});
-	rotationFolder.addBinding(config, 'rotationZ', { min: 0, max: 360, step: 0.01 }).on('change', (evt) => {
+	rotationFolder.addBinding(config, 'rotationZ', {min: 0, max: 360, step: 0.01}).on('change', (evt) => {
 		mesh.setRotation(config.rotationX, config.rotationY, evt.value);
 	});
 };

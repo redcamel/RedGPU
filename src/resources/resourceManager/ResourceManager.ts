@@ -79,116 +79,6 @@ class ResourceManager {
 		return this.#gpuDevice
 	}
 
-	registerManagementResource(target: ManagementResourceBase, resourceState: ResourceState) {
-		const {cacheKey, targetResourceManagedState} = target;
-		const {table} = targetResourceManagedState;
-		if (table.get(cacheKey)) {
-			keepLog(`Resource with cacheKey ${cacheKey} is already registered.`);
-			return;
-		}
-		table.set(cacheKey, resourceState);
-		targetResourceManagedState.videoMemory += (target as any).videoMemorySize;
-	}
-
-	unregisterManagementResource(target: ManagementResourceBase) {
-		const {cacheKey, targetResourceManagedState} = target;
-		const {table} = targetResourceManagedState;
-		const resourceState = table.get(cacheKey);
-		if (!resourceState) {
-			return;
-		}
-		targetResourceManagedState.videoMemory -= (target as any).videoMemorySize;
-		table.delete(cacheKey);
-	}
-
-	createManagedTexture(desc: GPUTextureDescriptor): GPUTexture {
-		const texture = this.gpuDevice.createTexture(desc);
-		const originalDestroy = texture.destroy.bind(texture);
-		texture.destroy = () => {
-			this.#clearTextureCache(texture, desc);
-			originalDestroy();
-		};
-		return texture;
-	}
-
-	#clearTextureCache(texture: GPUTexture, desc: GPUTextureDescriptor) {
-		const cache = desc.dimension === '3d' ?
-			this.#cubeTextureViewCache :
-			this.#bitmapTextureViewCache;
-		cache.get(texture)?.clear();
-		if (cache.delete(texture)) {
-			const type = desc.dimension === '3d' ? '🧊 큐브' : '🔷 비트맵';
-			keepLog(`${type} 텍스처 뷰 캐시 정리:`, texture.label);
-		}
-	}
-
-	#createDescriptorKey(viewDescriptor?: GPUTextureViewDescriptor): string {
-		return viewDescriptor ? JSON.stringify(viewDescriptor) : 'default';
-	}
-
-	getGPUResourceBitmapTextureView(
-		texture: BitmapTexture | PackedTexture | GPUTexture,
-		viewDescriptor?: GPUTextureViewDescriptor
-	): GPUTextureView | null {
-		const targetGPUTexture = texture instanceof GPUTexture ? texture : texture?.gpuTexture;
-		if (!targetGPUTexture) {
-			return this.#emptyBitmapTextureView;
-		}
-		let textureViewMap = this.#bitmapTextureViewCache.get(targetGPUTexture);
-		if (!textureViewMap) {
-			textureViewMap = new Map();
-			this.#bitmapTextureViewCache.set(targetGPUTexture, textureViewMap);
-		}
-		const cacheKey = this.#createDescriptorKey(viewDescriptor);
-		let cachedView = textureViewMap.get(cacheKey);
-		if (!cachedView) {
-			const targetDescriptor = viewDescriptor ? {
-				...viewDescriptor,
-				label: viewDescriptor.label || targetGPUTexture.label
-			} : {
-				label: targetGPUTexture.label
-			};
-			cachedView = targetGPUTexture.createView(targetDescriptor);
-			textureViewMap.set(cacheKey, cachedView);
-			console.log('🔷 새 비트맵 텍스처 뷰 생성:', targetGPUTexture.label, cacheKey);
-		} else {
-			console.log('🎯 비트맵 텍스처 뷰 캐시 히트:', targetGPUTexture.label, cacheKey);
-		}
-		return cachedView;
-	}
-
-	getGPUResourceCubeTextureView(
-		cubeTexture: CubeTexture | GPUTexture | IBLCubeTexture,
-		viewDescriptor?: GPUTextureViewDescriptor
-	): GPUTextureView | null {
-		const targetGPUTexture = cubeTexture instanceof GPUTexture ? cubeTexture : cubeTexture?.gpuTexture;
-		if (!targetGPUTexture) {
-			return this.#emptyCubeTextureView;
-		}
-		let textureViewMap = this.#cubeTextureViewCache.get(targetGPUTexture);
-		if (!textureViewMap) {
-			textureViewMap = new Map();
-			this.#cubeTextureViewCache.set(targetGPUTexture, textureViewMap);
-		}
-		if(!(cubeTexture instanceof GPUTexture ) && !viewDescriptor) viewDescriptor = cubeTexture.viewDescriptor;
-		const effectiveDescriptor = viewDescriptor ||  CubeTexture.defaultViewDescriptor;
-
-		const cacheKey = this.#createDescriptorKey(effectiveDescriptor);
-		let cachedView = textureViewMap.get(cacheKey);
-		if (!cachedView) {
-			const targetDescriptor = {
-				...effectiveDescriptor,
-				label: targetGPUTexture.label
-			};
-			cachedView = targetGPUTexture.createView(targetDescriptor);
-			textureViewMap.set(cacheKey, cachedView);
-			console.log('🧊 새 큐브 텍스처 뷰 생성:', targetGPUTexture.label, cacheKey);
-		} else {
-			console.log('🎯 큐브 텍스처 뷰 캐시 히트:', targetGPUTexture.label, cacheKey);
-		}
-		return cachedView;
-	}
-
 	get basicSampler(): Sampler {
 		return this.#basicSampler;
 	}
@@ -245,6 +135,100 @@ class ResourceManager {
 		return this.#resources;
 	}
 
+	registerManagementResource(target: ManagementResourceBase, resourceState: ResourceState) {
+		const {cacheKey, targetResourceManagedState} = target;
+		const {table} = targetResourceManagedState;
+		if (table.get(cacheKey)) {
+			keepLog(`Resource with cacheKey ${cacheKey} is already registered.`);
+			return;
+		}
+		table.set(cacheKey, resourceState);
+		targetResourceManagedState.videoMemory += (target as any).videoMemorySize;
+	}
+
+	unregisterManagementResource(target: ManagementResourceBase) {
+		const {cacheKey, targetResourceManagedState} = target;
+		const {table} = targetResourceManagedState;
+		const resourceState = table.get(cacheKey);
+		if (!resourceState) {
+			return;
+		}
+		targetResourceManagedState.videoMemory -= (target as any).videoMemorySize;
+		table.delete(cacheKey);
+	}
+
+	createManagedTexture(desc: GPUTextureDescriptor): GPUTexture {
+		const texture = this.gpuDevice.createTexture(desc);
+		const originalDestroy = texture.destroy.bind(texture);
+		texture.destroy = () => {
+			this.#clearTextureCache(texture, desc);
+			originalDestroy();
+		};
+		return texture;
+	}
+
+	getGPUResourceBitmapTextureView(
+		texture: BitmapTexture | PackedTexture | GPUTexture,
+		viewDescriptor?: GPUTextureViewDescriptor
+	): GPUTextureView | null {
+		const targetGPUTexture = texture instanceof GPUTexture ? texture : texture?.gpuTexture;
+		if (!targetGPUTexture) {
+			return this.#emptyBitmapTextureView;
+		}
+		let textureViewMap = this.#bitmapTextureViewCache.get(targetGPUTexture);
+		if (!textureViewMap) {
+			textureViewMap = new Map();
+			this.#bitmapTextureViewCache.set(targetGPUTexture, textureViewMap);
+		}
+		const cacheKey = this.#createDescriptorKey(viewDescriptor);
+		let cachedView = textureViewMap.get(cacheKey);
+		if (!cachedView) {
+			const targetDescriptor = viewDescriptor ? {
+				...viewDescriptor,
+				label: viewDescriptor.label || targetGPUTexture.label
+			} : {
+				label: targetGPUTexture.label
+			};
+			cachedView = targetGPUTexture.createView(targetDescriptor);
+			textureViewMap.set(cacheKey, cachedView);
+			console.log('🔷 새 비트맵 텍스처 뷰 생성:', targetGPUTexture.label, cacheKey);
+		} else {
+			console.log('🎯 비트맵 텍스처 뷰 캐시 히트:', targetGPUTexture.label, cacheKey);
+		}
+		return cachedView;
+	}
+
+	getGPUResourceCubeTextureView(
+		cubeTexture: CubeTexture | GPUTexture | IBLCubeTexture,
+		viewDescriptor?: GPUTextureViewDescriptor
+	): GPUTextureView | null {
+		const targetGPUTexture = cubeTexture instanceof GPUTexture ? cubeTexture : cubeTexture?.gpuTexture;
+		if (!targetGPUTexture) {
+			return this.#emptyCubeTextureView;
+		}
+		let textureViewMap = this.#cubeTextureViewCache.get(targetGPUTexture);
+		if (!textureViewMap) {
+			textureViewMap = new Map();
+			this.#cubeTextureViewCache.set(targetGPUTexture, textureViewMap);
+		}
+		if (!(cubeTexture instanceof GPUTexture) && !viewDescriptor) viewDescriptor = cubeTexture.viewDescriptor;
+		const effectiveDescriptor = viewDescriptor || CubeTexture.defaultViewDescriptor;
+		const cacheKey = this.#createDescriptorKey(effectiveDescriptor);
+		let cachedView = textureViewMap.get(cacheKey);
+		if (!cachedView) {
+			const targetDescriptor = {
+				...effectiveDescriptor,
+				label: targetGPUTexture.label
+			};
+			cachedView = targetGPUTexture.createView(targetDescriptor);
+			textureViewMap.set(cacheKey, cachedView);
+			console.log('🧊 새 큐브 텍스처 뷰 생성:', targetGPUTexture.label, cacheKey);
+		} else {
+			console.log('🎯 큐브 텍스처 뷰 캐시 히트:', targetGPUTexture.label, cacheKey);
+		}
+		return cachedView;
+	}
+
 	createGPUShaderModule(name: string, gpuShaderModuleDescriptor: GPUShaderModuleDescriptor) {
 		return this.#createResource(name, gpuShaderModuleDescriptor,
 			descriptor => this.#createAndCacheModule(name, descriptor),
@@ -289,6 +273,21 @@ class ResourceManager {
 				if (!descriptor.label) descriptor.label = name;
 				return this.gpuDevice.createBuffer(descriptor);
 			}, ResourceType.GPUBuffer);
+	}
+
+	#clearTextureCache(texture: GPUTexture, desc: GPUTextureDescriptor) {
+		const cache = desc.dimension === '3d' ?
+			this.#cubeTextureViewCache :
+			this.#bitmapTextureViewCache;
+		cache.get(texture)?.clear();
+		if (cache.delete(texture)) {
+			const type = desc.dimension === '3d' ? '🧊 큐브' : '🔷 비트맵';
+			keepLog(`${type} 텍스처 뷰 캐시 정리:`, texture.label);
+		}
+	}
+
+	#createDescriptorKey(viewDescriptor?: GPUTextureViewDescriptor): string {
+		return viewDescriptor ? JSON.stringify(viewDescriptor) : 'default';
 	}
 
 	#initPresets() {
@@ -466,6 +465,10 @@ class MemoryTrackingMap<K, V> extends Map<K, V> {
 		super();
 	}
 
+	get videoMemory(): number {
+		return this.#videoMemory;
+	}
+
 	set(key: K, value: V): this {
 		// 기존 값이 있다면 메모리에서 제거
 		const videoMemoryKey =
@@ -504,9 +507,5 @@ class MemoryTrackingMap<K, V> extends Map<K, V> {
 	clear(): void {
 		this.#videoMemory = 0;
 		super.clear();
-	}
-
-	get videoMemory(): number {
-		return this.#videoMemory;
 	}
 }

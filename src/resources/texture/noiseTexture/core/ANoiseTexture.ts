@@ -23,9 +23,6 @@ const BASIC_OPTIONS = {
 }
 
 class ANoiseTexture extends ManagementResourceBase {
-	get resourceManagerKey():string {
-		return MANAGED_STATE_KEY
-	}
 //
 	mipLevelCount;
 	videoMemorySize;
@@ -44,9 +41,9 @@ class ANoiseTexture extends ManagementResourceBase {
 	#width: number;
 	#height: number;
 	#currentEffect: NoiseDefine;
-	///
 	//
 	#time: number = 0
+	///
 	#animationSpeed: number = 1
 	#animationX: number = BASIC_OPTIONS.animationX
 	#animationY: number = BASIC_OPTIONS.animationY
@@ -67,6 +64,10 @@ class ANoiseTexture extends ManagementResourceBase {
 		this.#gpuTexture = this.#createStorageTexture(redGPUContext, width, height);
 		this.#executeComputePass();
 		this.#registerResource();
+	}
+
+	get resourceManagerKey(): string {
+		return MANAGED_STATE_KEY
 	}
 
 	get animationSpeed(): number {
@@ -141,6 +142,16 @@ class ANoiseTexture extends ManagementResourceBase {
 	render(time: number) {
 		this.updateUniform('time', time);
 		this.#executeComputePass();
+	}
+
+	destroy() {
+		const temp = this.#gpuTexture
+		this.__fireListenerList(true)
+		this.src = null
+		this.cacheKey = null
+		this.#unregisterResource()
+		if (temp) temp.destroy()
+		this.#gpuTexture = null
 	}
 
 	#init(redGPUContext: RedGPUContext) {
@@ -279,16 +290,7 @@ class ANoiseTexture extends ManagementResourceBase {
 			}
 		});
 	}
-	destroy() {
-		const temp = this.#gpuTexture
 
-		this.__fireListenerList(true)
-		this.src = null
-		this.cacheKey = null
-		this.#unregisterResource()
-		if (temp) temp.destroy()
-		this.#gpuTexture = null
-	}
 	#registerResource() {
 		this.redGPUContext.resourceManager.registerManagementResource(this, new ResourceStateBitmapTexture(this));
 	}

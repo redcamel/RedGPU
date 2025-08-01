@@ -127,9 +127,9 @@ const renderTestPane = async (redGPUContext, targetView) => {
 	targetView.ibl = ibl;
 	targetView.skybox = skybox;
 	const TEST_DATA = {
-		grid : !!targetView.grid,
-		axis : !!targetView.axis,
-		volumeType:'OBB'
+		grid: !!targetView.grid,
+		axis: !!targetView.axis,
+		volumeType: 'OBB'
 	}
 	pane.addBinding(TEST_DATA, 'grid').on('change', (ev) => {
 		targetView.grid = ev.value;

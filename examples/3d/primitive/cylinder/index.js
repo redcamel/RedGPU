@@ -44,9 +44,9 @@ const createCylinderPrimitive = (redGPUContext, scene) => {
 
 	const gap = 4;
 	const cylinderProperties = [
-		{ material: cylinderMaterials.solid, position: [0, 0, 0] },
-		{ material: cylinderMaterials.wireframe, position: [-gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST },
-		{ material: cylinderMaterials.point, position: [gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST },
+		{material: cylinderMaterials.solid, position: [0, 0, 0]},
+		{material: cylinderMaterials.wireframe, position: [-gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST},
+		{material: cylinderMaterials.point, position: [gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST},
 	];
 
 	const defaultOptions = {
@@ -60,7 +60,7 @@ const createCylinderPrimitive = (redGPUContext, scene) => {
 		thetaLength: Math.PI * 2,
 	};
 
-	cylinderProperties.forEach(({ material, position, topology }) => {
+	cylinderProperties.forEach(({material, position, topology}) => {
 		const cylinder = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Cylinder(
@@ -105,7 +105,7 @@ const createCylinderPrimitive = (redGPUContext, scene) => {
 };
 
 const renderTestPane = async (redGPUContext) => {
-	const { Pane } = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
+	const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
 	const pane = new Pane();
 
 	const config = {
@@ -145,13 +145,13 @@ const renderTestPane = async (redGPUContext) => {
 		});
 	};
 
-	const cylinderFolder = pane.addFolder({ title: 'Cylinder Properties', expanded: true });
-	addBinding(cylinderFolder, 'radiusTop', { min: 0.1, max: 2, step: 0.1 });
-	addBinding(cylinderFolder, 'radiusBottom', { min: 0.1, max: 2, step: 0.1 });
-	addBinding(cylinderFolder, 'height', { min: 0.5, max: 5, step: 0.1 });
-	addBinding(cylinderFolder, 'radialSegments', { min: 3, max: 128, step: 1 });
-	addBinding(cylinderFolder, 'heightSegments', { min: 1, max: 64, step: 1 });
-	addBinding(cylinderFolder, 'openEnded', { });
-	addBinding(cylinderFolder, 'thetaStart', { min: 0, max: Math.PI * 2, step: 0.1 });
-	addBinding(cylinderFolder, 'thetaLength', { min: 0, max: Math.PI * 2, step: 0.1 });
+	const cylinderFolder = pane.addFolder({title: 'Cylinder Properties', expanded: true});
+	addBinding(cylinderFolder, 'radiusTop', {min: 0.1, max: 2, step: 0.1});
+	addBinding(cylinderFolder, 'radiusBottom', {min: 0.1, max: 2, step: 0.1});
+	addBinding(cylinderFolder, 'height', {min: 0.5, max: 5, step: 0.1});
+	addBinding(cylinderFolder, 'radialSegments', {min: 3, max: 128, step: 1});
+	addBinding(cylinderFolder, 'heightSegments', {min: 1, max: 64, step: 1});
+	addBinding(cylinderFolder, 'openEnded', {});
+	addBinding(cylinderFolder, 'thetaStart', {min: 0, max: Math.PI * 2, step: 0.1});
+	addBinding(cylinderFolder, 'thetaLength', {min: 0, max: Math.PI * 2, step: 0.1});
 };

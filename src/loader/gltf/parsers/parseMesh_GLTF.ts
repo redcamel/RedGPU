@@ -20,7 +20,7 @@ import parseIndicesInfo_GLTF from "./parseIndicesInfo_GLTF";
 import parseInterleaveData_GLTF from "./parseInterleaveData_GLTF";
 import parseSparse_GLTF from "./parseSparse_GLTF";
 
-const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMesh: GltfMesh,nodeGlTfId:GlTfId) {
+const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMesh: GltfMesh, nodeGlTfId: GlTfId) {
 	const {redGPUContext} = gltfLoader
 	// keepLog('gltfMesh',nodeGlTfId,gltfMesh)
 	let tName;

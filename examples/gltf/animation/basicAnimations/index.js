@@ -20,7 +20,7 @@ RedGPU.init(
 			'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BoxAnimated/glTF-Binary/BoxAnimated.glb',
 		];
 
-		loadGLTFGrid(view,glbUrls);
+		loadGLTFGrid(view, glbUrls);
 
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		renderer.start(redGPUContext, () => {});

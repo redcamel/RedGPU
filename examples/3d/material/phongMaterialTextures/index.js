@@ -21,16 +21,16 @@ RedGPU.init(
 		const textures = createTextures(redGPUContext);
 
 		const lines = [
-			{ base: 'color', additionalTextures: ['ao', 'diffuse', 'displacement', 'emissive', 'normal', 'specular'] },
-			{ base: 'emissiveColor', additionalTextures: ['ao', 'diffuse', 'displacement', 'emissive', 'normal', 'specular'] },
-			{ base: 'specularColor', additionalTextures: ['ao', 'diffuse', 'displacement', 'emissive', 'normal', 'specular'] },
-			{ base: 'alpha', additionalTextures: ['ao', 'diffuse', 'displacement', 'emissive', 'normal', 'specular'] },
-			{ base: 'ao', additionalTextures: ['alpha', 'diffuse', 'displacement', 'emissive', 'normal', 'specular'] },
-			{ base: 'diffuse', additionalTextures: ['alpha', 'ao', 'displacement', 'emissive', 'normal', 'specular'] },
-			{ base: 'displacement', additionalTextures: ['alpha', 'ao', 'diffuse', 'emissive', 'normal', 'specular'] },
-			{ base: 'emissive', additionalTextures: ['alpha', 'ao', 'diffuse', 'displacement', 'normal', 'specular'] },
-			{ base: 'normal', additionalTextures: ['alpha', 'ao', 'diffuse', 'displacement', 'emissive', 'specular'] },
-			{ base: 'specular', additionalTextures: ['alpha', 'ao', 'diffuse', 'displacement', 'emissive', 'normal'] },
+			{base: 'color', additionalTextures: ['ao', 'diffuse', 'displacement', 'emissive', 'normal', 'specular']},
+			{base: 'emissiveColor', additionalTextures: ['ao', 'diffuse', 'displacement', 'emissive', 'normal', 'specular']},
+			{base: 'specularColor', additionalTextures: ['ao', 'diffuse', 'displacement', 'emissive', 'normal', 'specular']},
+			{base: 'alpha', additionalTextures: ['ao', 'diffuse', 'displacement', 'emissive', 'normal', 'specular']},
+			{base: 'ao', additionalTextures: ['alpha', 'diffuse', 'displacement', 'emissive', 'normal', 'specular']},
+			{base: 'diffuse', additionalTextures: ['alpha', 'ao', 'displacement', 'emissive', 'normal', 'specular']},
+			{base: 'displacement', additionalTextures: ['alpha', 'ao', 'diffuse', 'emissive', 'normal', 'specular']},
+			{base: 'emissive', additionalTextures: ['alpha', 'ao', 'diffuse', 'displacement', 'normal', 'specular']},
+			{base: 'normal', additionalTextures: ['alpha', 'ao', 'diffuse', 'displacement', 'emissive', 'specular']},
+			{base: 'specular', additionalTextures: ['alpha', 'ao', 'diffuse', 'displacement', 'emissive', 'normal']},
 		];
 
 		const spacingX = 6;
@@ -86,7 +86,6 @@ const createMeshesFromLines = (redGPUContext, scene, lines, spacingX, spacingY, 
 
 			const geometry = new RedGPU.Primitive.Sphere(redGPUContext, 1, 32, 32, 32);
 			const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
-
 
 			mesh.setPosition(xPosition, meshYPosition, 0);
 			scene.addChild(mesh);

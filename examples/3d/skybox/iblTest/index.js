@@ -12,14 +12,16 @@ const hdrImages = [
 	{name: 'field', path: '../../../assets/hdr/field.hdr'},
 	{name: 'neutral.37290948', path: '../../../assets/hdr/neutral.37290948.hdr'},
 	{name: 'pisa', path: '../../../assets/hdr/pisa.hdr'},
-	{name: '6 cube face asset', path:  [
+	{
+		name: '6 cube face asset', path: [
 			"../../../assets/skybox/px.jpg",
 			"../../../assets/skybox/nx.jpg",
 			"../../../assets/skybox/py.jpg",
 			"../../../assets/skybox/ny.jpg",
 			"../../../assets/skybox/pz.jpg",
 			"../../../assets/skybox/nz.jpg",
-		]},
+		]
+	},
 ];
 
 RedGPU.init(
@@ -104,6 +106,7 @@ function loadGLTF(view, url) {
 		}
 	);
 }
+
 const createIBL = (view, src) => {
 	const ibl = new RedGPU.Resource.IBL(view.redGPUContext, src);
 	const newSkybox = new RedGPU.Display.SkyBox(view.redGPUContext, ibl.environmentTexture);
@@ -117,20 +120,20 @@ const renderTestPane = async (view) => {
 	const {createFieldOfView} = await import( "../../../exampleHelper/createExample/panes/index.js" );
 	createFieldOfView(pane, view.camera)
 	const TEST_DATA = {
-		blur : 0,
-		opacity:1
+		blur: 0,
+		opacity: 1
 	}
 	pane.addBinding(TEST_DATA, 'blur', {
-		min:0,
-		max:1,
-		step:0.01
+		min: 0,
+		max: 1,
+		step: 0.01
 	}).on("change", (ev) => {
 		view.skybox.blur = ev.value;
 	})
 	pane.addBinding(TEST_DATA, 'opacity', {
-		min:0,
-		max:1,
-		step:0.01
+		min: 0,
+		max: 1,
+		step: 0.01
 	}).on("change", (ev) => {
 		view.skybox.opacity = ev.value;
 	})
