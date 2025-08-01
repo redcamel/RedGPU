@@ -1,6 +1,5 @@
 import RedGPUContext from "../context/RedGPUContext";
 import validateRedGPUContext from "../runtimeChecker/validateFunc/validateRedGPUContext";
-import {keepLog} from "../utils";
 import consoleAndThrowError from "../utils/consoleAndThrowError";
 import createUUID from "../utils/createUUID";
 import InstanceIdGenerator from "../utils/InstanceIdGenerator";
@@ -36,12 +35,12 @@ class ResourceBase {
 	 * @type {Array}
 	 */
 	#dirtyListeners: any[] = [];
-	#resourceManagerKey:string
+	#resourceManagerKey: string
 	get resourceManagerKey(): string {
 		return this.#resourceManagerKey;
 	}
 
-	constructor(redGPUContext: RedGPUContext,resourceManagerKey?:string) {
+	constructor(redGPUContext: RedGPUContext, resourceManagerKey?: string) {
 		validateRedGPUContext(redGPUContext)
 		this.#resourceManagerKey = resourceManagerKey
 		this.#redGPUContext = redGPUContext
@@ -89,7 +88,8 @@ class ResourceBase {
 	 *
 	 * @param {Function} listener - The listener function to be added.
 	 */
-	__addDirtyPipelineListener(listener:  ()=>void) {
+	__addDirtyPipelineListener(listener: () => void) {
+
 		this.#manageResourceState(true);
 		this.#dirtyListeners.push(listener);
 	}
@@ -99,7 +99,8 @@ class ResourceBase {
 	 *
 	 * @param {Function} listener - The listener function to be removed.
 	 */
-	__removeDirtyPipelineListener(listener: ()=>void) {
+	__removeDirtyPipelineListener(listener: () => void) {
+
 		const index = this.#dirtyListeners.indexOf(listener);
 		if (index > -1) {
 			this.#dirtyListeners.splice(index, 1);
@@ -125,17 +126,16 @@ class ResourceBase {
 	 */
 	#manageResourceState(isAddingListener: boolean) {
 		const {resourceManager} = this.#redGPUContext;
-		if(this.constructor.name ==='Sampler'){
+		if (this.constructor.name === 'Sampler') {
 			return
 		}
-		if (resourceManager ) {
+		if (resourceManager) {
 			const targetResourceManagedState = resourceManager[this.#resourceManagerKey]
-
 			if (!targetResourceManagedState) {
 				consoleAndThrowError('need managedStateKey', this.constructor.name)
 			}
-			const targetState = targetResourceManagedState?.table.get(this.#cacheKey);
-			keepLog(this.#resourceManagerKey, targetState,targetResourceManagedState)
+			const targetState = targetResourceManagedState?.table.get(this.cacheKey);
+
 			if (targetState) {
 				isAddingListener ? targetState.useNum++ : targetState.useNum--;
 			}
