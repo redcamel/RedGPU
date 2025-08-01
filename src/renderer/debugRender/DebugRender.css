@@ -127,7 +127,7 @@
     color: #888;
     font-weight: 500;
     text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3);
-    max-width: 250px;
+    max-width: 240px;
     overflow: hidden;
     text-overflow: ellipsis;
 }

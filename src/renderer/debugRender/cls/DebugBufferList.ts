@@ -178,6 +178,7 @@ class DebugStatisticsDomService {
 		});
 
 		let index = 0;
+		const isHideBuffer = this.#bufferType=== 'UniformBuffer' || this.#bufferType === 'StorageBuffer'
 		tList.forEach((tInfo: ResourceStateVertexBuffer | ResourceStateIndexBuffer | ResourceStateUniformBuffer | ResourceStateStorageBuffer) => {
 			const {useNum, buffer} = tInfo;
 			const {uuid, size, name} = buffer;
@@ -188,15 +189,15 @@ class DebugStatisticsDomService {
 				tDom.className = `debug-group ${domUuid}`;
 				tDom.innerHTML = `
             <div class='debug-item'>
-                <div>
+                <div style="display: flex;flex-direction: column;width: 100%">
                     <div class='debug-item-title'><span style="white-space: nowrap">
                     <span class="host"></span>
                     <div class="name"></div>
                     </span></div>
                     <div style="font-size: 10px">${uuid}</div>
                 </div>
-                <div style="display: flex;flex-direction: column;align-items: center;gap:4px;width: 50px">
-                    <span class='useNum' style="padding:2px 4px;border-radius: 4px;width: 100%;text-align: center">${useNum}</span>
+                <div style="display: flex;flex-direction: column;align-items: center;gap:4px;width: 50px;min-width: 50px">
+                   <span class='useNum' style="display:${isHideBuffer ? 'none' : 'block'};padding:2px 4px;border-radius: 4px;width: 100%;text-align: center"></span>
                     <span style="white-space: nowrap"><b class="videoMemorySize"></b></span>
                 </div>
             </div>
@@ -216,7 +217,9 @@ class DebugStatisticsDomService {
 				// updateDebugItemValue(tDom, 'name', name);
 			}
 
+		if(!isHideBuffer){
 			updateDebugItemValue(tDom, 'useNum', useNum, true);
+		}
 			updateDebugItemValue(tDom, 'videoMemorySize', formatBytes(size));
 			index++;
 		});

@@ -51,14 +51,14 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
 			tDom.className = `debug-group ${domUuid}`
 			tDom.innerHTML = `
         <div class='debug-item'>
-            <div>
+          	<div style="display: flex;flex-direction: column;width: 100%">
                 <div class='debug-item-title'>${index} <span class="targetSrc" style="white-space: nowrap">${targetSrc}</span></div> 
                 <div class='debug-item-cache-key'>host : <span class="host">Place holder for host</span></div>
                 <div class='debug-item-cache-key'>fileName : <span class="fileName">Place holder for fileName</span></div>
                 <div>mipLevelCount : <span class="mipLevelCount"></span> / useMipmap : <span class="useMipmap"></span></div>
                 <div>width : <span class="width"></span> / height : <span class="height"></span></div>
             </div>
-            <div style="display: flex;flex-direction: column;align-items: center;gap:4px;width: 50px">
+            <div style="display: flex;flex-direction: column;align-items: center;gap:4px;width: 50px;min-width: 50px">
                 <span class='useNum' style="padding:2px 4px;border-radius: 4px;width: 100%;text-align: center"></span>
                 <span><b class="videoMemorySize"></b></span>
             </div>
@@ -83,7 +83,7 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
 				host: null,
 				filename: cacheKey
 			};
-		}
+	}
 	}
 
 
