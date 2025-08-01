@@ -177,6 +177,13 @@ class View3D extends ViewTransform {
 	}
 
 	set skybox(value: SkyBox) {
+		const { resourceManager} = this.redGPUContext
+		const prevTexture = this.#skybox?.skyboxTexture
+		const newTexture = value?.skyboxTexture
+		if (prevTexture && prevTexture !== newTexture) {
+			this.#manageIBLResourceState(resourceManager, prevTexture.cacheKey, false);
+		}
+
 		this.#skybox = value;
 	}
 
