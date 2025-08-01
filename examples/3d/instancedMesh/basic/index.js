@@ -62,7 +62,6 @@ RedGPU.init(
 async function createTest(context, scene, material) {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 
-
 	const {setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
 	setDebugViewButton(context);
 

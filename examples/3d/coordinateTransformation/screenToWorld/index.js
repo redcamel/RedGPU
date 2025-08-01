@@ -38,6 +38,7 @@ const renderTestPane = async (redGPUContext) => {
 	const {setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
 	setDebugViewButton(redGPUContext);
 };
+
 function setupSimpleDemo(redGPUContext, scene, view) {
 	// 🎯 단일 타겟 메시 (구체)
 	const material = new RedGPU.Material.PhongMaterial(redGPUContext);

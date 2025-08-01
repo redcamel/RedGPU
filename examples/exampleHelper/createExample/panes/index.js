@@ -23,7 +23,7 @@ export function setSeparator(pane) {
 }
 
 const setDebugViewButton = (redGPUContext) => {
-	requestAnimationFrame(()=>{
+	requestAnimationFrame(() => {
 		const debugView = document.body.querySelector('.debugView');
 		if (debugView && redGPUContext) {
 			debugView.style.display = 'flex'

@@ -45,6 +45,7 @@ const renderTestPane = async (redGPUContext) => {
 	const {setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
 	setDebugViewButton(redGPUContext);
 };
+
 function createTestMeshes(redGPUContext, scene) {
 	// 텍스처 머티리얼
 	const textureMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);

@@ -71,7 +71,7 @@ const createSampleMesh = async (redGPUContext, scene) => {
 
 const renderTestPane = async (redGPUContext) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
-	const {setRedGPUTest_pane,setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
+	const {setRedGPUTest_pane, setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
 	setDebugViewButton(redGPUContext);
 	const pane = new Pane();
 	setRedGPUTest_pane(pane, redGPUContext, true);

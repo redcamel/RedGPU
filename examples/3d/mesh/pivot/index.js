@@ -58,7 +58,7 @@ RedGPU.init(
 		};
 
 		renderer.start(redGPUContext, render);
-		renderTestPane(redGPUContext,parentMesh, childMesh, animationConfig);
+		renderTestPane(redGPUContext, parentMesh, childMesh, animationConfig);
 	},
 	(failReason) => {
 		console.error("Initialization failed:", failReason);
@@ -100,7 +100,7 @@ const createPivotMesh = (redGPUContext, targetMesh) => {
 	return pivotMesh;
 };
 
-const renderTestPane = async (redGPUContext,parentMesh, childMesh, animationConfig) => {
+const renderTestPane = async (redGPUContext, parentMesh, childMesh, animationConfig) => {
 	const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
 	const {setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
 	setDebugViewButton(redGPUContext)

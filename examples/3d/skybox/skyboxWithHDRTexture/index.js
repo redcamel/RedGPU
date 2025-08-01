@@ -43,7 +43,7 @@ RedGPU.init(
 
 const createTestPane = async (view) => {
 	const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
-	const {createFieldOfView,setDebugViewButton} = await import( "../../../exampleHelper/createExample/panes/index.js" );
+	const {createFieldOfView, setDebugViewButton} = await import( "../../../exampleHelper/createExample/panes/index.js" );
 	setDebugViewButton(view.redGPUContext);
 	const pane = new Pane();
 	createFieldOfView(pane, view.camera);

@@ -65,7 +65,7 @@ function createSampleLine3D(title, view, pointsPerLayer, posX, posZ, baseColor, 
 		);
 
 		// 3-2. 각 라인에 레이블 추가
-		if(layer === 0 ) {
+		if (layer === 0) {
 			const label = new RedGPU.Display.TextField3D(redGPUContext);
 			label.text = `${title}<br/><span style="color:#dc631d">point num : ${pointsPerLayer}</span>`;          // 라벨 텍스트 설정
 			label.fontSize = 32;         // 폰트 크기
