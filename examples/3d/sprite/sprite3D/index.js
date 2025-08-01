@@ -43,7 +43,7 @@ RedGPU.init(
 		};
 		renderer.start(redGPUContext, render);
 
-		renderTestPane(scene);
+		renderTestPane(redGPUContext,scene);
 	},
 	(failReason) => {
 		console.error('Initialization failed:', failReason);
@@ -53,8 +53,10 @@ RedGPU.init(
 	}
 );
 
-const renderTestPane = async (scene) => {
+const renderTestPane = async (redGPUContext,scene) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+	const {setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
 	const pane = new Pane();
 
 	const controls = {

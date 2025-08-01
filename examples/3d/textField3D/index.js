@@ -50,10 +50,11 @@ RedGPU.init(canvas, (redGPUContext) => {
 });
 
 const renderTestPane = async (scene, redGPUContext) => {
-	const {setSeparator} = await import("../../exampleHelper/createExample/panes/index.js");
+
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const pane = new Pane();
-
+	const {setDebugViewButton,setSeparator} = await import("../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
 	const controls = {};
 
 	const BASE_STYLES = {

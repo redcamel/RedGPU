@@ -4,49 +4,52 @@ const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
 RedGPU.init(canvas, (redGPUContext) => {
-	const controller = new RedGPU.Camera.ObitController(redGPUContext);
-	controller.speedDistance = 0.5;
+		const controller = new RedGPU.Camera.ObitController(redGPUContext);
+		controller.speedDistance = 0.5;
 
-	const scene = new RedGPU.Display.Scene();
-	const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-	view.grid = true;
-	redGPUContext.addView(view);
+		const scene = new RedGPU.Display.Scene();
+		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+		view.grid = true;
+		redGPUContext.addView(view);
 
-	const spriteSheetInfo = new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../../assets/spriteSheet/spriteSheet.png', 5, 3, 15, 0, true, 24);
-	const spriteSheet = new RedGPU.Display.SpriteSheet3D(redGPUContext, spriteSheetInfo);
-
-	scene.addChild(spriteSheet);
-
-	const spriteCount = 10;
-	const radius = 5;
-
-	for (let i = 0; i < spriteCount; i++) {
-		const angle = (i / spriteCount) * Math.PI * 2;
-		const x = Math.cos(angle) * radius;
-		const z = Math.sin(angle) * radius;
-
+		const spriteSheetInfo = new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../../assets/spriteSheet/spriteSheet.png', 5, 3, 15, 0, true, 24);
 		const spriteSheet = new RedGPU.Display.SpriteSheet3D(redGPUContext, spriteSheetInfo);
-		spriteSheet.x = x;
-		spriteSheet.z = z;
+
 		scene.addChild(spriteSheet);
+
+		const spriteCount = 10;
+		const radius = 5;
+
+		for (let i = 0; i < spriteCount; i++) {
+			const angle = (i / spriteCount) * Math.PI * 2;
+			const x = Math.cos(angle) * radius;
+			const z = Math.sin(angle) * radius;
+
+			const spriteSheet = new RedGPU.Display.SpriteSheet3D(redGPUContext, spriteSheetInfo);
+			spriteSheet.x = x;
+			spriteSheet.z = z;
+			scene.addChild(spriteSheet);
+		}
+
+		const renderer = new RedGPU.Renderer(redGPUContext);
+		const render = () => {
+		};
+		renderer.start(redGPUContext, render);
+
+		renderTestPane(redGPUContext, scene);
+	},
+	(failReason) => {
+		console.error('Initialization failed:', failReason);
+		const errorMessage = document.createElement('div');
+		errorMessage.innerHTML = failReason;
+		document.body.appendChild(errorMessage);
 	}
+);
 
-	const renderer = new RedGPU.Renderer(redGPUContext);
-	const render = () => {
-	};
-	renderer.start(redGPUContext, render);
-
-	renderTestPane(scene, redGPUContext);
-}, (failReason) => {
-	console.error('Initialization failed:', failReason);
-	const errorMessage = document.createElement('div');
-	errorMessage.innerHTML = failReason;
-	document.body.appendChild(errorMessage);
-});
-
-const renderTestPane = async (scene, redGPUContext) => {
-	const {setSeparator} = await import("../../../exampleHelper/createExample/panes/index.js");
+const renderTestPane = async (redGPUContext, scene) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+	const {setDebugViewButton,setSeparator} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
 	const pane = new Pane();
 
 	const controls = {
