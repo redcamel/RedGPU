@@ -132,7 +132,8 @@ const createTextures = (redGPUContext) => {
 // ===== UI Rendering =====
 const renderUI = async (redGPUContext, mesh) => {
 	const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
-	const {setSeparator} = await import("../../../exampleHelper/createExample/panes/index.js");
+	const {setSeparator,setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
 
 	const pane = new Pane({title: "Phong Shader Variants"});
 	const material = mesh.material;

@@ -40,12 +40,16 @@ RedGPU.init(
 
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		renderer.start(redGPUContext, () => {});
+		renderTestPane(redGPUContext);
 	},
 	(failReason) => {
 		console.error('Initialization failed:', failReason);
 	}
 );
-
+const renderTestPane = async (redGPUContext) => {
+	const {setSeparator,setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
+}
 const createTextures = (redGPUContext) => {
 	return {
 		diffuse: new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/phongMaterial/test_diffuseMap.jpg'),
