@@ -21,7 +21,15 @@ import setViewListTest_Pane from "./view/setViewListTest.js";
 export function setSeparator(pane) {
 	pane.addBlade({view: 'separator',});
 }
-
+const setDebugViewButton = (redGPUContext)=>{
+	const debugView = document.body.querySelector('.debugView');
+	if(debugView && redGPUContext){
+		debugView.style.display = 'flex'
+		debugView.addEventListener('click', async () => {
+			redGPUContext.useDebugPanel = !redGPUContext.useDebugPanel;
+		});
+	}
+}
 const hdrImages = [
 	{name: '2K - the sky is on fire', path: 'assets/hdr/2k/the_sky_is_on_fire_2k.hdr'},
 	{name: '2K - furstenstein', path: 'assets/hdr/2k/furstenstein_2k.hdr'},
@@ -53,5 +61,6 @@ export {
 	setRedGPUTest_pane,
 	setAntialiasing_pane,
 	createIblHelper,
-	hdrImages
+	hdrImages,
+	setDebugViewButton
 }

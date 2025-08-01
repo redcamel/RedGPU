@@ -12,7 +12,7 @@ RedGPU.init(
         // controllerTest.tilt = -10
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controllerTest);
-        // redGPUContext.useDebugPanel = true
+
         const directionalLightTest = new RedGPU.Light.DirectionalLight()
         directionalLightTest.color.r = 255
         directionalLightTest.color.g = 255
