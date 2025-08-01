@@ -3,7 +3,9 @@ import GPU_ADDRESS_MODE from "../../../gpuConst/GPU_ADDRESS_MODE";
 import GPU_FILTER_MODE from "../../../gpuConst/GPU_FILTER_MODE";
 import GPU_MIPMAP_FILTER_MODE from "../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
+import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import createUUID from "../../../utils/createUUID";
+import calculateTextureByteSize from "../../../utils/math/calculateTextureByteSize";
 import Sampler from "../../sampler/Sampler";
 import CubeTexture from "../CubeTexture";
 import HDRTexture from "../hdr/HDRTexture";
@@ -104,7 +106,7 @@ class IBL {
 			this.#irradianceTexture.gpuTexture = irradianceGPUTexture
 		}
 	}
-
+	
 	async #generateIrradianceMap(sourceCubeTexture: GPUTexture): Promise<GPUTexture> {
 		const {gpuDevice, resourceManager} = this.#redGPUContext;
 		const irradianceSize = 32;
