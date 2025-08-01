@@ -81,7 +81,7 @@ class Mesh extends MeshBase {
 	constructor(redGPUContext: RedGPUContext, geometry?: Geometry | Primitive, material?, name?: string) {
 		super(redGPUContext)
 		if (name) this.name = name
-		this.geometry = geometry
+		this._geometry = geometry
 		this._material = material
 		this.#pickingId = uuidToUint(this.uuid)
 	}
