@@ -11,23 +11,22 @@ import ADebugItem from "./core/ADebugItem";
 import ADebugStatisticsDomService from "./core/ADebugStatisticsDomService";
 
 class DebugStatisticsDomService extends ADebugStatisticsDomService {
-	readonly #debugCubeTextureMode:  'Bitmap' | 'Cube' | 'HDR'
+	readonly #debugCubeTextureMode: 'Bitmap' | 'Cube' | 'HDR'
 
-	constructor(debugCubeTextureMode:  'Bitmap' | 'Cube' | 'HDR') {
+	constructor(debugCubeTextureMode: 'Bitmap' | 'Cube' | 'HDR') {
 		super()
 		this.#debugCubeTextureMode = debugCubeTextureMode
-		this.init(`${createDebugTitle(`${debugCubeTextureMode}Texture Num : <span class="totalCount"></span> (<b class="targetVideoMemorySize"></b>)`)}`)
+		this.init(`${createDebugTitle(`${debugCubeTextureMode}Texture Num : <span class="totalCount"></span> (<b class="targetVideoMemorySize"></b>)`)}`,false,true)
 	}
 
 	update(debugRender: DebugRender, redGPUContext: RedGPUContext) {
 		const {resourceManager} = redGPUContext
-		const {managedBitmapTextureState, managedCubeTextureState,managedHDRTextureState} = resourceManager
+		const {managedBitmapTextureState, managedCubeTextureState, managedHDRTextureState} = resourceManager
 		const {
 			table,
 			videoMemory,
 		} = this.#debugCubeTextureMode === 'Bitmap' ? managedBitmapTextureState : this.#debugCubeTextureMode === 'Cube' ? managedCubeTextureState : managedHDRTextureState
 		debugRender.totalUsedVideoMemory += videoMemory
-
 		updateDebugItemValue(this.dom, 'totalCount', table.size)
 		updateDebugItemValue(this.dom, 'targetVideoMemorySize', formatBytes(videoMemory))
 		this.#generateDebugItemsHtml(table);
@@ -59,7 +58,7 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
                 <div>width : <span class="width"></span> / height : <span class="height"></span></div>
             </div>
             <div style="display: flex;flex-direction: column;align-items: center;gap:4px;width: 50px;min-width: 50px">
-                <span class='useNum' style="padding:2px 4px;border-radius: 4px;width: 100%;text-align: center"></span>
+                <span class='useNum' style="display:${this.#debugCubeTextureMode === 'HDR' ? 'none' : 'block'}padding:2px 4px;border-radius: 4px;width: 100%;text-align: center"></span>
                 <span><b class="videoMemorySize"></b></span>
             </div>
         </div>
@@ -69,6 +68,7 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
 		}
 		return tDom;
 	}
+
 	#formatCacheKeyForDisplay(cacheKey: string): { host: string | null, filename: string } {
 		try {
 			const url = new URL(cacheKey);
@@ -83,17 +83,16 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
 				host: null,
 				filename: cacheKey
 			};
+		}
 	}
-	}
-
 
 	updateDebugItems(tDom, mipLevelCount, useMipmap, width, height, useNum, cacheKey, targetSrc, videoMemorySize) {
 		updateDebugItemValue(tDom, 'mipLevelCount', mipLevelCount);
 		updateDebugItemValue(tDom, 'useMipmap', useMipmap);
 		updateDebugItemValue(tDom, 'width', width);
 		updateDebugItemValue(tDom, 'height', height);
-		updateDebugItemValue(tDom, 'useNum', useNum, true);
-		const { host, filename } = this.#formatCacheKeyForDisplay(cacheKey);
+		if (this.#debugCubeTextureMode !== 'HDR') updateDebugItemValue(tDom, 'useNum', useNum, true);
+		const {host, filename} = this.#formatCacheKeyForDisplay(cacheKey);
 		// 호스트가 있을 때만 호스트 정보 표시
 		if (host) {
 			updateDebugItemValue(tDom, 'host', host);
@@ -101,7 +100,6 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
 		} else {
 			updateDebugItemValue(tDom, 'fileName', cacheKey);
 		}
-
 		// updateDebugItemValue(tDom, 'targetSrc', targetSrc);
 		updateDebugItemValue(tDom, 'videoMemorySize', formatBytes(videoMemorySize));
 	}
@@ -109,7 +107,7 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
 	#generateDebugItemsHtml(tList: Map<string, ResourceStateBitmapTexture | ResourceStateCubeTexture>) {
 		const rootDom = this.dom.querySelector('.item-container')
 		const initialUUIDs: Set<string> = new Set();
-		const prefix = this.#debugCubeTextureMode === 'Bitmap' ? 'cube_texture' : this.#debugCubeTextureMode === 'Cube' ? 'bitmap_texture' :  'hdr_texture'
+		const prefix = this.#debugCubeTextureMode === 'Bitmap' ? 'cube_texture' : this.#debugCubeTextureMode === 'Cube' ? 'bitmap_texture' : 'hdr_texture'
 		rootDom.querySelectorAll('.debug-group').forEach((dom) => {
 			const uuid: string = dom.className.split(' ')[1].replace(`${prefix}_`, '');
 			initialUUIDs.add(uuid);

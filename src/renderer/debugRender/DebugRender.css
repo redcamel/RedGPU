@@ -2,7 +2,7 @@
     width:330px;
     max-height: 100%;
     overflow-y: auto;
-    background: rgba(0, 0, 0, 0.80);
+    background: rgba(0, 0, 0, 0.9);
     position: fixed;
     left: 0;
     bottom: 0;
@@ -107,11 +107,12 @@
     align-items: center;
     padding: 10px 8px;
     width: 100%;
-    font-size: 16px;
+    font-size: 15px;
+    color:#fdb48d;
     line-height: 1;
     justify-content: space-between;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.025);
+    /*border-top: 1px solid rgba(255, 255, 255, 0.05);*/
+    /*border-bottom: 1px solid rgba(255, 255, 255, 0.025);*/
     cursor: pointer;
     background: linear-gradient(0deg, rgba(0, 0, 0, 0.95), rgba(255, 255, 255, 0.055));
 
@@ -120,6 +121,30 @@
         font-weight: 700;
         font-size: 11px
     }
+}
+
+.debug-folder-small-title {
+    display: flex;
+    align-items: center;
+    padding: 10px 8px;
+    width: 100%;
+    font-size: 12px;
+    color:#fff;
+    line-height: 1;
+    justify-content: space-between;
+    /*border-top: 1px solid rgba(255, 255, 255, 0.05);*/
+    /*border-bottom: 1px solid rgba(255, 255, 255, 0.025);*/
+    cursor: pointer;
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.95), rgba(255, 255, 255, 0.055));
+
+    b {
+        color: #fdb48d;
+        font-weight: 700;
+        font-size: 11px
+    }
+}
+.debug-folder-title .onoff{
+    font-size: 11px;
 }
 
 

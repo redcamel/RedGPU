@@ -18,7 +18,7 @@ class DebugStatisticsDomService {
 		this.dom = document.createElement('div');
 		this.dom.innerHTML = `
 			<div class="debug-folder">	
-				<div class="debug-folder-title" style="display: flex;align-items: center;justify-content: space-between;cursor: pointer;">
+				<div class="debug-folder-small-title" style="display: flex;align-items: center;justify-content: space-between;cursor: pointer;">
 					${createDebugTitle(`${bufferType} Num : <span class="totalCount"></span> (<b class="targetVideoMemorySize"></b>)`)}
 					<div class="onoff">${this.#openYn ? 'close' : 'open'}</div>
 				</div>
