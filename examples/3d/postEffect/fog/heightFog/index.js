@@ -270,7 +270,8 @@ async function createHeightFogControlPanel(redGPUContext, view, heightFog, contr
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 
 	const pane = new Pane({title: 'Height Fog Demo', expanded: true});
-
+	const {setDebugViewButton} = await import("../../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
 	const PARAMS = {
 		enabled: true,
 		autoRotate: true,

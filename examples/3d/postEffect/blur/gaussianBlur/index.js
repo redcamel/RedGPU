@@ -108,6 +108,8 @@ const renderTestPane = async (redGPUContext, targetView) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const {createPostEffectLabel} = await import('../../../../exampleHelper/createExample/loadExampleInfo/createPostEffectLabel.js');
 	createPostEffectLabel('GaussianBlur', redGPUContext.detector.isMobile)
+	const {setDebugViewButton} = await import("../../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
 	const pane = new Pane();
 
 	const TEST_STATE = {
