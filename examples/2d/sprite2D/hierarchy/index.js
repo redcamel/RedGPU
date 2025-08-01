@@ -56,7 +56,8 @@ const createChildSprite2D = (redGPUContext, parent) => {
 const renderTestPane = async (redGPUContext, parent, child) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const pane = new Pane();
-
+	const {setDebugViewButton,setRedGPUTest_pane} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
 	const maxW = redGPUContext.screenRectObject.width;
 	const maxH = redGPUContext.screenRectObject.height;
 
