@@ -41,13 +41,17 @@ RedGPU.init(
 			});
 		};
 		renderer.start(redGPUContext, render);
+		renderTestPane(redGPUContext);
 	},
 	(failReason) => {
 		console.error('RedGPU 초기화 실패:', failReason);
 		document.body.innerHTML = `<div>오류: ${failReason}</div>`;
 	}
 );
-
+const renderTestPane = async (redGPUContext) => {
+	const {setDebugViewButton} = await import("../../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
+};
 // 단일 바운딩 박스 테스트 (OBB, AABB, BOTH)
 function createBoundingTestRow(redGPUContext, scene, zOffset) {
 	const configs = [

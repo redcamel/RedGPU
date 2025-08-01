@@ -81,17 +81,19 @@
 .boolean-true {
     line-height: 1;
     padding: 2px 4px;
-    border-radius: 2px;
+    border-radius: 4px;
     margin: 2px 0;
     background: green;
+    color:#fff;
 }
 
 .boolean-false {
     line-height: 1;
     padding: 2px 4px;
-    border-radius: 2px;
+    border-radius: 4px;
     margin: 2px 0;
     background: red;
+    color:#fff;
 }
 
 .debug-folder {
