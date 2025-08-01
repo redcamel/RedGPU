@@ -7,15 +7,16 @@ import createUUID from "../../../utils/createUUID";
 import Sampler from "../../sampler/Sampler";
 import CubeTexture from "../CubeTexture";
 import HDRTexture from "../hdr/HDRTexture";
+import IBLCubeTexture from "./IBLCubeTexture";
 import irradianceShaderCode from "./irradianceShaderCode.wgsl"
 
 class IBL {
 	#redGPUContext: RedGPUContext
 	#sourceCubeTexture: GPUTexture
 	//
-	#environmentTexture: CubeTexture;
-	#irradianceTexture: CubeTexture;
-	#iblTexture: CubeTexture
+	#environmentTexture: IBLCubeTexture;
+	#irradianceTexture: IBLCubeTexture;
+	#iblTexture: IBLCubeTexture
 	#prefilterMap: GPUTexture; //TODO - 일단없어도되니 나중에
 	#brdfLUT: GPUTexture; //TODO - 일단없어도되니 나중에
 	#uuid = createUUID()
@@ -29,9 +30,9 @@ class IBL {
 		this.#iblCubeSize = iblCubeSize
 		this.#envCubeSize = envCubeSize
 		this.#redGPUContext = redGPUContext
-		this.#environmentTexture = new CubeTexture(redGPUContext, [], false, undefined, undefined, this.#format)
-		this.#iblTexture = new CubeTexture(redGPUContext, [], false, undefined, undefined, this.#format)
-		this.#irradianceTexture = new CubeTexture(redGPUContext, [], false, undefined, undefined, this.#format)
+		this.#environmentTexture = new IBLCubeTexture(redGPUContext, `IBL_ENV_${srcInfo}`)
+		this.#iblTexture = new IBLCubeTexture(redGPUContext, `IBL_${srcInfo}`)
+		this.#irradianceTexture = new IBLCubeTexture(redGPUContext, `IBL_IRRADIANCE_${srcInfo}`)
 		if (typeof srcInfo === 'string') {
 			this.#targetTexture = new HDRTexture(
 				redGPUContext,
@@ -76,30 +77,36 @@ class IBL {
 		return this.#iblCubeSize;
 	}
 
-	get irradianceTexture(): CubeTexture {
+	get irradianceTexture(): IBLCubeTexture {
 		return this.#irradianceTexture;
 	}
 
-	get environmentTexture(): CubeTexture {
+	get environmentTexture(): IBLCubeTexture {
 		return this.#environmentTexture;
 	}
 
-	get iblTexture(): CubeTexture {
+	get iblTexture(): IBLCubeTexture {
 		return this.#iblTexture;
 	}
 
 	async #init() {
 		console.log('sourceCubeTexture', this.#sourceCubeTexture)
 		const {downSampleCubeMapGenerator} = this.#redGPUContext.resourceManager
-		const iblTexture = await downSampleCubeMapGenerator.downsampleCubemap(this.#sourceCubeTexture, this.#iblCubeSize)
-		this.#iblTexture.setGPUTextureDirectly(iblTexture, `${this.#uuid}_iblTexture`)
-		this.#environmentTexture.setGPUTextureDirectly(this.#sourceCubeTexture, `${this.#uuid}_environmentTexture`)
-		const irradianceGPUTexture = await this.#generateIrradianceMap(this.#sourceCubeTexture);
-		this.#irradianceTexture.setGPUTextureDirectly(irradianceGPUTexture, `${this.#uuid}_irradianceTexture`, false);
+		if (!this.#iblTexture.gpuTexture) {
+			const iblTexture = await downSampleCubeMapGenerator.downsampleCubemap(this.#sourceCubeTexture, this.#iblCubeSize)
+			this.#iblTexture.gpuTexture = iblTexture
+		}
+		if (!this.#environmentTexture.gpuTexture) {
+			this.#environmentTexture.gpuTexture = this.#sourceCubeTexture
+		}
+		if (!this.#irradianceTexture.gpuTexture) {
+			const irradianceGPUTexture = await this.#generateIrradianceMap(this.#sourceCubeTexture);
+			this.#irradianceTexture.gpuTexture = irradianceGPUTexture
+		}
 	}
 
 	async #generateIrradianceMap(sourceCubeTexture: GPUTexture): Promise<GPUTexture> {
-		const {gpuDevice,resourceManager} = this.#redGPUContext;
+		const {gpuDevice, resourceManager} = this.#redGPUContext;
 		const irradianceSize = 32;
 		const irradianceMipLevels = 1;
 		const irradianceTexture = resourceManager.createManagedTexture({
