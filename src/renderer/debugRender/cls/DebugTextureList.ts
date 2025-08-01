@@ -35,8 +35,10 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
 
 	getTargetSrc(tInfo: ResourceStateBitmapTexture | ResourceStateCubeTexture | ResourceStateHDRTexture) {
 		if (tInfo instanceof ResourceStateCubeTexture) {
-			const {srcList} = tInfo;
-			return `${srcList[0]}...`
+			const {cacheKey} = tInfo;
+			return `${cacheKey}...`
+			// const {srcList} = tInfo;
+			// return `${srcList[0]}...`
 		} else {
 			const {src} = tInfo;
 			return src ? src.startsWith('data:') ? 'base64 texture' : src : 'null'
