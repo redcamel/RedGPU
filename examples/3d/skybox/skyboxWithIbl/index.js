@@ -48,7 +48,8 @@ const createIBL = (view, src) => {
 const renderTestPane = async (view) => {
 	const {Pane} = await import( "https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js" );
 	const pane = new Pane();
-	const {createFieldOfView} = await import( "../../../exampleHelper/createExample/panes/index.js" );
+	const {createFieldOfView,setDebugViewButton} = await import( "../../../exampleHelper/createExample/panes/index.js" );
+	setDebugViewButton(view.redGPUContext);
 	createFieldOfView(pane, view.camera)
 	const TEST_DATA = {
 		blur: 0,

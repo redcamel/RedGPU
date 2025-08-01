@@ -119,5 +119,6 @@ const renderTestPane = async (redGPUContext, targetView) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const {createPostEffectLabel} = await import('../../../exampleHelper/createExample/loadExampleInfo/createPostEffectLabel.js');
 	createPostEffectLabel('Custom IBL Texture Size 32 * 32', redGPUContext.detector.isMobile, 'Basic IBL Texture Size 512 * 512')
-
+	const {setDebugViewButton} = await import( "../../../exampleHelper/createExample/panes/index.js" );
+	setDebugViewButton(redGPUContext);
 };
