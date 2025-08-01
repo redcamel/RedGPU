@@ -1,4 +1,5 @@
 import RedGPUContext from "../../../context/RedGPUContext";
+import {keepLog} from "../../../utils";
 import calculateTextureByteSize from "../../../utils/math/calculateTextureByteSize";
 import ManagementResourceBase from "../../ManagementResourceBase";
 import ResourceStateCubeTexture from "../../resourceManager/resourceState/texture/ResourceStateCubeTexture";
@@ -76,6 +77,7 @@ class IBLCubeTexture extends ManagementResourceBase {
 	}
 
 	#setGpuTexture(value: GPUTexture) {
+		this.targetResourceManagedState.videoMemory -= this.#videoMemorySize;
 		this.#gpuTexture = value;
 		if (value) {
 			this.#mipLevelCount = value.mipLevelCount
@@ -83,6 +85,7 @@ class IBLCubeTexture extends ManagementResourceBase {
 			this.#format = value.format
 			this.#videoMemorySize = calculateTextureByteSize(value)
 		}
+		this.targetResourceManagedState.videoMemory += this.#videoMemorySize;
 		this.__fireListenerList();
 	}
 
