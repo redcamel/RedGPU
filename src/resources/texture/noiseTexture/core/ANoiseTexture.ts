@@ -2,6 +2,7 @@ import RedGPUContext from "../../../../context/RedGPUContext";
 import validateNumber from "../../../../runtimeChecker/validateFunc/validateNumber";
 import validatePositiveNumberRange from "../../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import validateUintRange from "../../../../runtimeChecker/validateFunc/validateUintRange";
+import calculateTextureByteSize from "../../../../utils/math/calculateTextureByteSize";
 import UniformBuffer from "../../../buffer/uniformBuffer/UniformBuffer";
 import ManagementResourceBase from "../../../ManagementResourceBase";
 import ResourceStateBitmapTexture from "../../../resourceManager/resourceState/texture/ResourceStateBitmapTexture";
@@ -25,7 +26,6 @@ const BASIC_OPTIONS = {
 class ANoiseTexture extends ManagementResourceBase {
 //
 	mipLevelCount;
-	videoMemorySize;
 	useMipmap;
 	src;
 	#gpuTexture: GPUTexture;
@@ -47,6 +47,7 @@ class ANoiseTexture extends ManagementResourceBase {
 	#animationSpeed: number = 1
 	#animationX: number = BASIC_OPTIONS.animationX
 	#animationY: number = BASIC_OPTIONS.animationY
+	#videoMemorySize: number = 0
 
 	constructor(
 		redGPUContext: RedGPUContext,
@@ -62,8 +63,13 @@ class ANoiseTexture extends ManagementResourceBase {
 		this.#currentEffect = define;
 		this.#init(redGPUContext);
 		this.#gpuTexture = this.#createStorageTexture(redGPUContext, width, height);
+		this.#videoMemorySize = calculateTextureByteSize(this.#gpuTexture);
 		this.#executeComputePass();
 		this.#registerResource();
+	}
+
+	get videoMemorySize(): number {
+		return this.#videoMemorySize;
 	}
 
 	get resourceManagerKey(): string {
