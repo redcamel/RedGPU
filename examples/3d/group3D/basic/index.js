@@ -73,7 +73,8 @@ const createChildMesh = (redGPUContext, parent) => {
 const renderTestPane = async (redGPUContext, rootGroup, parent, child) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const pane = new Pane();
-
+	const {setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
 	const rootConfig = {
 		x: rootGroup.x,
 		y: rootGroup.y,

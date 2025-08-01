@@ -25,6 +25,8 @@ RedGPU.init(
 			animateLights(lights, initialPositions);
 		};
 		renderer.start(redGPUContext, render);
+		renderTestPane(redGPUContext);
+
 	},
 	(failReason) => {
 		console.error("Initialization failed:", failReason);
@@ -33,7 +35,10 @@ RedGPU.init(
 		document.body.appendChild(errorMessage);
 	}
 );
-
+const renderTestPane = async (redGPUContext) => {
+	const {setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
+};
 const createPointLights = (scene, count) => {
 	const lights = [];
 	const initialPositions = [];

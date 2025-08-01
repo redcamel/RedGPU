@@ -45,7 +45,6 @@ const createSampleTextField3D = async (redGPUContext, scene) => {
 		textField.x = x;
 		textField.y = y;
 		textField.useBillboard = true;
-		textField.useBillboardPerspective = false;
 		textField.text = `Hello ${eventName} Event!`;
 		textField.background = 'blue';
 		textField.color = 'white';
@@ -74,6 +73,8 @@ function getRandomHexValue() {
 const renderTestPane = async (redGPUContext, scene) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const pane = new Pane();
+	const {setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
 	const TextField3DFolder = pane.addFolder({title: 'TextField3D', expanded: true});
 	const controls = {
 		useBillboardPerspective: scene.children[0].useBillboardPerspective,

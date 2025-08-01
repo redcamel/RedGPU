@@ -65,11 +65,15 @@ function createSampleLine3D(title, view, pointsPerLayer, posX, posZ, baseColor, 
 		);
 
 		// 3-2. 각 라인에 레이블 추가
-		const label = new RedGPU.Display.TextField3D(redGPUContext);
-		label.text = `${title}<br/><span style="color:#dc631d">point num : ${pointsPerLayer}</span>`;          // 라벨 텍스트 설정
-		label.fontSize = 32;         // 폰트 크기
-		label.useBillboard = true;   // 항상 카메라를 바라보도록 설정
-		line3D.addChild(label);      // Line3D에 라벨 추가
+		if(layer === 0 ) {
+			const label = new RedGPU.Display.TextField3D(redGPUContext);
+			label.text = `${title}<br/><span style="color:#dc631d">point num : ${pointsPerLayer}</span>`;          // 라벨 텍스트 설정
+			label.fontSize = 32;         // 폰트 크기
+			label.color = baseColor
+			// label.x = Math.random() -0.5
+			label.useBillboard = true;   // 항상 카메라를 바라보도록 설정
+			line3D.addChild(label);      // Line3D에 라벨 추가
+		}
 
 		// 3-3. 반지름과 높이 계산
 		const radius = radiusBase + layer * 0.5; // 각 층마다 반지름 증가
@@ -112,7 +116,8 @@ function rainbowHex(t) {
 const renderTestPane = async (redGPUContext) => {
 	const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
 	const pane = new Pane();
-
+	const {setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
 	// 옵션 초기화
 	const debugOptions = {
 		showDebugPoints: false // 디버그 포인트 표시 여부

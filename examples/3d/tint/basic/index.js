@@ -59,7 +59,8 @@ RedGPU.init(
 const renderTestPane = async (redGPUContext, mesh) => {
 	const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
 	const pane = new Pane();
-
+	const {setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
 	// Tint 테스트 추가
 	const folder = pane.addFolder({title: "Material Tint Test"});
 	const targetTint = mesh.material.tint;
