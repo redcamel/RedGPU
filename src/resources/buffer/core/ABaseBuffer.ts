@@ -1,5 +1,12 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import ManagementResourceBase from "../../ManagementResourceBase";
+import BitmapTexture from "../../texture/BitmapTexture";
+import CubeTexture from "../../texture/CubeTexture";
+import ANoiseTexture from "../../texture/noiseTexture/core/ANoiseTexture";
+import IndexBuffer from "../indexBuffer/IndexBuffer";
+import StorageBuffer from "../storageBuffer/StorageBuffer";
+import UniformBuffer from "../uniformBuffer/UniformBuffer";
+import VertexBuffer from "../vertexBuffer/VertexBuffer";
 
 export const GPU_BUFFER_SYMBOL = Symbol('gpuBuffer');
 export const GPU_BUFFER_DATA_SYMBOL = Symbol('gpuBufferData');
