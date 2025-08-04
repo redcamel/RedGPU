@@ -62,6 +62,7 @@ class ANoiseTexture extends ManagementResourceBase {
 		this.#height = height;
 		this.#currentEffect = define;
 		this.#init(redGPUContext);
+		this.cacheKey = `NoiseTexture_${width}x${height}_${Date.now()}`
 		this.#gpuTexture = this.#createStorageTexture(redGPUContext, width, height);
 		this.#videoMemorySize = calculateTextureByteSize(this.#gpuTexture);
 		this.#executeComputePass();
@@ -257,7 +258,7 @@ class ANoiseTexture extends ManagementResourceBase {
 			size: {width: width, height: height},
 			format: 'rgba8unorm',
 			usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING,
-			label: `NoiseTexture_${width}x${height}_${Date.now()}`,
+			label: this.cacheKey,
 		});
 		const storageTextureView = storageTexture.createView();
 		this.#textureComputeBindGroup = this.#createTextureBindGroup(

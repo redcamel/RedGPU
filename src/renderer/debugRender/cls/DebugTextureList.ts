@@ -4,6 +4,7 @@ import ResourceStateBitmapTexture
 import ResourceStateCubeTexture
 	from "../../../resources/resourceManager/resourceState/texture/ResourceStateCubeTexture";
 import ResourceStateHDRTexture from "../../../resources/resourceManager/resourceState/texture/ResourceStateHDRTexture";
+import {keepLog} from "../../../utils";
 import formatBytes from "../../../utils/math/formatBytes";
 import {createDebugTitle, updateDebugItemValue} from "../core/debugFunc";
 import DebugRender from "../DebugRender";
@@ -51,9 +52,9 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
 			tDom.innerHTML = `
         <div class='debug-item'>
           	<div style="display: flex;flex-direction: column;width: 100%">
-                <div class='debug-item-title'>${index} <span class="targetSrc" style="white-space: nowrap">${targetSrc}</span></div> 
-                <div class='debug-item-cache-key'>host : <span class="host">Place holder for host</span></div>
-                <div class='debug-item-cache-key'>fileName : <span class="fileName">Place holder for fileName</span></div>
+                <div class='debug-item-title'>${index} <span class="targetSrc" style="white-space: nowrap">${targetSrc || ''}</span></div> 
+                <div class='debug-item-cache-key'><span class="host">Place holder for host</span></div>
+                <div class='debug-item-cache-key'><span class="fileName">Place holder for fileName</span></div>
                 <div>mipLevelCount : <span class="mipLevelCount"></span> / useMipmap : <span class="useMipmap"></span></div>
                 <div>width : <span class="width"></span> / height : <span class="height"></span></div>
             </div>
@@ -83,7 +84,7 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
 		} else {
 			updateDebugItemValue(tDom, 'fileName', cacheKey);
 		}
-		// updateDebugItemValue(tDom, 'targetSrc', targetSrc);
+		updateDebugItemValue(tDom, 'targetSrc', targetSrc === 'null' ? '' : targetSrc);
 		updateDebugItemValue(tDom, 'videoMemorySize', formatBytes(videoMemorySize));
 	}
 
@@ -96,10 +97,12 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
 				filename: filename
 			};
 		} catch {
-			// URL이 아닌 경우
+			const splits = cacheKey.split('_')
+			const host = splits[0];
+			const filename = splits.pop() || cacheKey;
 			return {
-				host: null,
-				filename: cacheKey
+				host,
+				filename
 			};
 		}
 	}
