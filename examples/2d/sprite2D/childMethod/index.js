@@ -64,7 +64,7 @@ const createPaneUI = async (redGPUContext, scene) => {
 		sprite2D.height = 25;
 
 		const textField2D = new RedGPU.Display.TextField2D(redGPUContext);
-		textField2D.useBillboard = true;
+
 		textField2D.fontSize = 16;
 		textField2D.text = `Inserted Child`;
 		textField2D.color = color;
@@ -142,7 +142,7 @@ const addChildObject = (redGPUContext, scene, color = getRandomHexColor()) => {
 	sprite2D.height = 25;
 
 	const textField2D = new RedGPU.Display.TextField2D(redGPUContext);
-	textField2D.useBillboard = true;
+
 	textField2D.fontSize = 16;
 	textField2D.text = `Child ${scene.numChildren}`;
 	textField2D.color = color;

@@ -4,6 +4,7 @@ import View3D from "../../display/view/View3D";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../material";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
+import calculateTextureByteSize from "../../utils/math/calculateTextureByteSize";
 
 class ASinglePassPostEffect {
 	#computeShaderMSAA: GPUShaderModule
@@ -298,6 +299,18 @@ class ASinglePassPostEffect {
 		this.#previousSourceTextureReferences = [...sourceTextureView];
 	}
 
+	#videoMemorySize: number = 0
+	get videoMemorySize(): number {
+		return this.#videoMemorySize
+	}
+
+	#calcVideoMemory() {
+		this.#videoMemorySize = 0
+		this.#outputTexture.forEach(texture => {
+			this.#videoMemorySize += calculateTextureByteSize(texture)
+		})
+	}
+
 	#createRenderTexture(view: View3D): boolean {
 		const {redGPUContext, viewRenderTextureManager, name} = view
 		const {colorTexture} = viewRenderTextureManager
@@ -322,6 +335,7 @@ class ASinglePassPostEffect {
 			width,
 			height,
 		}
+		this.#calcVideoMemory()
 		return needChange
 	}
 }

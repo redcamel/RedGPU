@@ -87,8 +87,7 @@ const renderTestPane = async (scene, redGPUContext) => {
 	const updateTestData = () => {
 		const child = scene.children[0];
 
-		controls.useBillboardPerspective = child.useBillboardPerspective;
-		controls.useBillboard = child.useBillboard;
+
 		controls.scaleX = child.scaleX;
 		controls.scaleY = child.scaleY;
 		controls.scaleZ = child.scaleZ;

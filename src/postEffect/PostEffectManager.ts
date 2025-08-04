@@ -48,6 +48,7 @@ class PostEffectManager {
 	}
 
 	get videoMemorySize(): number {
+		this.#calcVideoMemory()
 		return this.#videoMemorySize;
 	}
 
@@ -178,6 +179,9 @@ class PostEffectManager {
 		const texture = this.#storageTexture
 		if (!texture) return 0;
 		this.#videoMemorySize = calculateTextureByteSize(texture)
+		this.#postEffects.forEach(effect => {
+			this.#videoMemorySize+= effect.videoMemorySize
+		})
 	}
 
 	#renderToStorageTexture(view: View3D, sourceTextureView: GPUTextureView) {
@@ -195,7 +199,7 @@ class PostEffectManager {
 			}
 			this.#storageTexture = this.#createStorageTexture(gpuDevice, width, height);
 			this.#storageTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#storageTexture);
-			this.#calcVideoMemory()
+
 		}
 		// 크기 변경 또는 MSAA 변경 시 BindGroup 재생성
 		if (dimensionsChanged || changedMSAA) {
