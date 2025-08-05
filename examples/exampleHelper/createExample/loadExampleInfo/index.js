@@ -68,7 +68,7 @@ const loadDescription = async () => {
 			titleBox.appendChild(title);
 
 			const description = document.createElement('h2');
-			const descriptionText = matchedExample.description.en || `${matchedExample.name} | RedGPU WebGPU Examples`;
+			const descriptionText = matchedExample.description.en || `${matchedExample.name} | RedGPU Examples`;
 			description.innerHTML = matchedExample.description.en.replace(/\n/g, '<br/>');
 			description.className = 'item-description'
 			document.querySelector('.navigation-bar').appendChild(description);
