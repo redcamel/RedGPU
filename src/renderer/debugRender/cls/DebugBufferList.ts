@@ -168,7 +168,8 @@ class DebugStatisticsDomService {
 		const isHideBuffer = this.#bufferType === 'UniformBuffer' || this.#bufferType === 'StorageBuffer'
 		tList.forEach((tInfo: ResourceStateVertexBuffer | ResourceStateIndexBuffer | ResourceStateUniformBuffer | ResourceStateStorageBuffer) => {
 			const {useNum, buffer} = tInfo;
-			const {uuid, size, name} = buffer;
+			const {uuid, size, name,gpuBuffer} = buffer;
+			const {label} = gpuBuffer
 			const domUuid = `${prefix}_${uuid}`;
 			let tDom = existingElements.get(uuid);
 			if (!tDom) {
@@ -199,7 +200,7 @@ class DebugStatisticsDomService {
 				updateDebugItemValue(tDom, 'host', `${index} ${host}`);
 				updateDebugItemValue(tDom, 'name', filename);
 			} else {
-				updateDebugItemValue(tDom, 'host', `${index} ${name}`);
+				updateDebugItemValue(tDom, 'host', `${index} ${label}`);
 				// updateDebugItemValue(tDom, 'name', name);
 			}
 			if (!isHideBuffer) {
