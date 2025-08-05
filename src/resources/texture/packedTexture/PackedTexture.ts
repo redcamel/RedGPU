@@ -1,8 +1,6 @@
-import redGPUContext from "../../../context/RedGPUContext";
 import RedGPUContext from "../../../context/RedGPUContext";
 import createUUID from "../../../utils/createUUID";
 import getMipLevelCount from "../../../utils/math/getMipLevelCount";
-import resourceManager from "../../resourceManager/ResourceManager";
 import Sampler from "../../sampler/Sampler";
 import computeShaderCode from "./computeShader.wgsl";
 
@@ -13,7 +11,7 @@ type ComponentMapping = {
 	a?: 'r' | 'g' | 'b' | 'a';  // a 채널에서 사용할 컴포넌트
 };
 //TODO - 리소스 매니저로 옮겨야함
-const cacheMap: Map<string, { gpuTexture: GPUTexture, useNum: number, mappingKey: string,uuid:string }> = new Map();
+const cacheMap: Map<string, { gpuTexture: GPUTexture, useNum: number, mappingKey: string, uuid: string }> = new Map();
 // 인스턴스별 현재 사용 중인 키 추적을 위한 WeakMap
 const instanceMappingKeys: WeakMap<PackedTexture, string> = new WeakMap();
 let globalPipeline: GPURenderPipeline;
@@ -21,20 +19,13 @@ let globalBindGroupLayout: GPUBindGroupLayout;
 let mappingBuffer: GPUBuffer;
 
 class PackedTexture {
-	static getCacheMap() {
-		return cacheMap;
-	}
-	#uuid:string = createUUID();
+	#uuid: string = createUUID();
 	#redGPUContext: RedGPUContext;
 	#sampler: GPUSampler;
 	#gpuTexture: GPUTexture;
 	#gpuDevice: GPUDevice;
 	#bindGroup: GPUBindGroup;
 	#tempBindGroupCache: Map<string, GPUBindGroup> = new Map();
-
-	get uuid(): string {
-		return this.#uuid;
-	}
 
 	constructor(redGPUContext: RedGPUContext) {
 		this.#redGPUContext = redGPUContext;
@@ -43,8 +34,16 @@ class PackedTexture {
 		this.#sampler = this.#createSampler();
 	}
 
+	get uuid(): string {
+		return this.#uuid;
+	}
+
 	get gpuTexture(): GPUTexture {
 		return this.#gpuTexture;
+	}
+
+	static getCacheMap() {
+		return cacheMap;
 	}
 
 	async packing(
@@ -199,7 +198,7 @@ class PackedTexture {
 			format: 'rgba8unorm',
 			usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC,
 			label: label || `PACK_TEXTURE_${createUUID()}`,
-			mipLevelCount:getMipLevelCount(width,height)
+			mipLevelCount: getMipLevelCount(width, height)
 		};
 		if (this.#gpuTexture) {
 			this.#gpuTexture = null;
@@ -224,7 +223,7 @@ class PackedTexture {
 			gpuTexture: this.#gpuTexture,
 			useNum: 1,
 			mappingKey,
-			uuid:this.#uuid
+			uuid: this.#uuid
 		});
 		// keepLog('packing 함', cacheMap.get(mappingKey));
 		this.#bindGroup = null;
@@ -236,7 +235,7 @@ class PackedTexture {
 		const passEncoder = commandEncoder.beginRenderPass({
 			colorAttachments: [
 				{
-					view: resourceManager.getGPUResourceBitmapTextureView(packedTexture,{
+					view: resourceManager.getGPUResourceBitmapTextureView(packedTexture, {
 						baseMipLevel: 0,
 						mipLevelCount: 1,
 						dimension: '2d',

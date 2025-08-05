@@ -168,7 +168,7 @@ class DebugStatisticsDomService {
 		const isHideBuffer = this.#bufferType === 'UniformBuffer' || this.#bufferType === 'StorageBuffer'
 		tList.forEach((tInfo: ResourceStateVertexBuffer | ResourceStateIndexBuffer | ResourceStateUniformBuffer | ResourceStateStorageBuffer) => {
 			const {useNum, buffer} = tInfo;
-			const {uuid, size, name,gpuBuffer} = buffer;
+			const {uuid, size, name, gpuBuffer} = buffer;
 			const {label} = gpuBuffer
 			const domUuid = `${prefix}_${uuid}`;
 			let tDom = existingElements.get(uuid);

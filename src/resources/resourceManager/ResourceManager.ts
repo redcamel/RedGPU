@@ -154,7 +154,6 @@ class ResourceManager {
 		if (!resourceState) {
 			return;
 		}
-
 		targetResourceManagedState.videoMemory -= (target as any).videoMemorySize;
 		table.delete(cacheKey);
 	}

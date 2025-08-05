@@ -219,10 +219,9 @@ class ATextField extends Mesh {
 			this.dirtyTransform = true;
 			// Blob으로 변환하여 처리
 			const callback = (blob: Blob | MediaSource) => {
-				if(this.material.diffuseTexture){
+				if (this.material.diffuseTexture) {
 					const prevSrc = this.material.diffuseTexture.src
 					const isObjectURL = typeof prevSrc === 'string' && prevSrc?.startsWith?.('blob:');
-
 					this.material.diffuseTexture.destroy()
 					this.material.diffuseTexture = null
 					if (isObjectURL) {
@@ -230,7 +229,6 @@ class ATextField extends Mesh {
 						URL.revokeObjectURL(prevSrc);
 					}
 				}
-
 				this.material.diffuseTexture = new BitmapTexture(this.#redGPUContext, URL.createObjectURL(blob), true, v => {
 					this.#renderWidth = this.#textureImg.width
 					this.#renderHeight = this.#textureImg.height

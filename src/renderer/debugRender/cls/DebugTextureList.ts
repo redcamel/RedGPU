@@ -5,8 +5,6 @@ import ResourceStateCubeTexture
 	from "../../../resources/resourceManager/resourceState/texture/ResourceStateCubeTexture";
 import ResourceStateHDRTexture from "../../../resources/resourceManager/resourceState/texture/ResourceStateHDRTexture";
 import PackedTexture from "../../../resources/texture/packedTexture/PackedTexture";
-import createUUID from "../../../utils/createUUID";
-import {keepLog} from "../../../utils";
 import formatBytes from "../../../utils/math/formatBytes";
 import {createDebugTitle, updateDebugItemValue} from "../core/debugFunc";
 import DebugRender from "../DebugRender";
@@ -41,85 +39,11 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
 		}
 	}
 
-	#updatePackedTexture(debugRender: DebugRender, redGPUContext: RedGPUContext) {
-		// PackedTexture 캐시 정보 가져오기
-		const cacheMap = PackedTexture.getCacheMap();
-
-		// PackedTexture 데이터를 기존 시스템과 호환되는 형태로 변환
-		const convertedTable = this.#convertPackedTextureData(cacheMap);
-
-		// 총 비디오 메모리 계산
-		let totalVideoMemory = 0;
-		convertedTable.forEach((mockResourceState) => {
-			totalVideoMemory += mockResourceState.texture.videoMemorySize;
-		});
-
-		debugRender.totalUsedVideoMemory += totalVideoMemory;
-		updateDebugItemValue(this.dom, 'totalCount', convertedTable.size);
-		updateDebugItemValue(this.dom, 'targetVideoMemorySize', formatBytes(totalVideoMemory));
-
-		// 기존 렌더링 시스템 사용
-		this.#generateDebugItemsHtml(convertedTable);
-	}
-
-	#convertPackedTextureData(cacheMap: Map<string, { gpuTexture: GPUTexture, useNum: number, mappingKey: string,uuid:string }>) {
-		const convertedTable = new Map();
-
-		cacheMap.forEach((entry, mappingKey) => {
-			// 기존 ResourceState와 유사한 구조로 변환
-			const mockTexture = {
-				gpuTexture: entry.gpuTexture,
-				uuid: entry.uuid, // 고유 ID 생성
-				mipLevelCount: entry.gpuTexture.mipLevelCount || 1,
-				useMipmap: (entry.gpuTexture.mipLevelCount || 1) > 1,
-				videoMemorySize: this.#estimateTextureMemorySize(entry.gpuTexture)
-			};
-
-			const mockResourceState = {
-				useNum: entry.useNum,
-				cacheKey: mappingKey,
-				texture: mockTexture,
-				// PackedTexture는 src가 없으므로 mappingKey를 사용
-				src: `packed:${mappingKey.substring(0, 50)}${mappingKey.length > 50 ? '...' : ''}`,
-				// PackedTexture 특화 정보
-				mappingKey: entry.mappingKey
-			};
-
-			convertedTable.set(mappingKey, mockResourceState);
-		});
-
-		return convertedTable;
-	}
-
-	#estimateTextureMemorySize(texture: GPUTexture): number {
-		// GPUTexture의 실제 크기 정보를 얻기 어려우므로 추정값 사용
-
-		// texture.label에서 크기 정보를 추출할 수 있다면 더 정확한 계산 가능
-		const labelMatch = texture.label?.match(/(\d+)x(\d+)/);
-		if (labelMatch) {
-			const width = parseInt(labelMatch[1]);
-			const height = parseInt(labelMatch[2]);
-			const mipLevels = texture.mipLevelCount || 1;
-			// RGBA8 기준으로 계산, mip level도 고려
-			let totalSize = 0;
-			for (let i = 0; i < mipLevels; i++) {
-				const mipWidth = Math.max(1, width >> i);
-				const mipHeight = Math.max(1, height >> i);
-				totalSize += mipWidth * mipHeight * 4;
-			}
-			return totalSize;
-		}
-
-		// 기본적으로 1024x1024 RGBA8 텍스처로 추정 (4MB)
-		return 1024 * 1024 * 4;
-	}
-
 	getTargetSrc(tInfo: ResourceStateBitmapTexture | ResourceStateCubeTexture | ResourceStateHDRTexture | any) {
 		// PackedTexture의 경우 별도 처리
 		if (this.#debugCubeTextureMode === 'Packed') {
 			return tInfo.src || 'packed texture';
 		}
-
 		if (tInfo instanceof ResourceStateCubeTexture) {
 			const {cacheKey} = tInfo;
 			return `${cacheKey}...`
@@ -172,6 +96,74 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
 		updateDebugItemValue(tDom, 'videoMemorySize', formatBytes(videoMemorySize));
 	}
 
+	#updatePackedTexture(debugRender: DebugRender, redGPUContext: RedGPUContext) {
+		// PackedTexture 캐시 정보 가져오기
+		const cacheMap = PackedTexture.getCacheMap();
+		// PackedTexture 데이터를 기존 시스템과 호환되는 형태로 변환
+		const convertedTable = this.#convertPackedTextureData(cacheMap);
+		// 총 비디오 메모리 계산
+		let totalVideoMemory = 0;
+		convertedTable.forEach((mockResourceState) => {
+			totalVideoMemory += mockResourceState.texture.videoMemorySize;
+		});
+		debugRender.totalUsedVideoMemory += totalVideoMemory;
+		updateDebugItemValue(this.dom, 'totalCount', convertedTable.size);
+		updateDebugItemValue(this.dom, 'targetVideoMemorySize', formatBytes(totalVideoMemory));
+		// 기존 렌더링 시스템 사용
+		this.#generateDebugItemsHtml(convertedTable);
+	}
+
+	#convertPackedTextureData(cacheMap: Map<string, {
+		gpuTexture: GPUTexture,
+		useNum: number,
+		mappingKey: string,
+		uuid: string
+	}>) {
+		const convertedTable = new Map();
+		cacheMap.forEach((entry, mappingKey) => {
+			// 기존 ResourceState와 유사한 구조로 변환
+			const mockTexture = {
+				gpuTexture: entry.gpuTexture,
+				uuid: entry.uuid, // 고유 ID 생성
+				mipLevelCount: entry.gpuTexture.mipLevelCount || 1,
+				useMipmap: (entry.gpuTexture.mipLevelCount || 1) > 1,
+				videoMemorySize: this.#estimateTextureMemorySize(entry.gpuTexture)
+			};
+			const mockResourceState = {
+				useNum: entry.useNum,
+				cacheKey: mappingKey,
+				texture: mockTexture,
+				// PackedTexture는 src가 없으므로 mappingKey를 사용
+				src: `packed:${mappingKey.substring(0, 50)}${mappingKey.length > 50 ? '...' : ''}`,
+				// PackedTexture 특화 정보
+				mappingKey: entry.mappingKey
+			};
+			convertedTable.set(mappingKey, mockResourceState);
+		});
+		return convertedTable;
+	}
+
+	#estimateTextureMemorySize(texture: GPUTexture): number {
+		// GPUTexture의 실제 크기 정보를 얻기 어려우므로 추정값 사용
+		// texture.label에서 크기 정보를 추출할 수 있다면 더 정확한 계산 가능
+		const labelMatch = texture.label?.match(/(\d+)x(\d+)/);
+		if (labelMatch) {
+			const width = parseInt(labelMatch[1]);
+			const height = parseInt(labelMatch[2]);
+			const mipLevels = texture.mipLevelCount || 1;
+			// RGBA8 기준으로 계산, mip level도 고려
+			let totalSize = 0;
+			for (let i = 0; i < mipLevels; i++) {
+				const mipWidth = Math.max(1, width >> i);
+				const mipHeight = Math.max(1, height >> i);
+				totalSize += mipWidth * mipHeight * 4;
+			}
+			return totalSize;
+		}
+		// 기본적으로 1024x1024 RGBA8 텍스처로 추정 (4MB)
+		return 1024 * 1024 * 4;
+	}
+
 	#formatCacheKeyForDisplay(cacheKey: string): { host: string | null, filename: string } {
 		// PackedTexture의 경우 특별 처리
 		if (this.#debugCubeTextureMode === 'Packed') {
@@ -190,7 +182,6 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
 			} catch {
 				// JSON 파싱 실패 시 기본 처리
 			}
-
 			// 기본 PackedTexture 처리
 			const shortKey = cacheKey.length > 30 ? cacheKey.substring(0, 30) + '...' : cacheKey;
 			return {
@@ -198,7 +189,6 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
 				filename: shortKey
 			};
 		}
-
 		// 기존 처리 로직
 		try {
 			const url = new URL(cacheKey);
@@ -224,12 +214,10 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
 		const prefix = this.#debugCubeTextureMode === 'Bitmap' ? 'cube_texture' :
 			this.#debugCubeTextureMode === 'Cube' ? 'bitmap_texture' :
 				this.#debugCubeTextureMode === 'HDR' ? 'hdr_texture' : 'packed_texture';
-
 		rootDom.querySelectorAll('.debug-group').forEach((dom) => {
 			const uuid: string = dom.className.split(' ')[1].replace(`${prefix}_`, '');
 			initialUUIDs.add(uuid);
 		})
-
 		let index = 0;
 		for (const tInfo of tList.values()) {
 			const {useNum, cacheKey, texture} = tInfo;

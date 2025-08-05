@@ -11,7 +11,6 @@ import ResourceBase from "../../resources/ResourceBase";
 import ResourceManager from "../../resources/resourceManager/ResourceManager";
 import Sampler from "../../resources/sampler/Sampler";
 import PackedTexture from "../../resources/texture/packedTexture/PackedTexture";
-import {keepLog} from "../../utils";
 import TINT_BLEND_MODE from "../TINT_BLEND_MODE";
 import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "./getBindGroupLayoutDescriptorFromShaderInfo";
 

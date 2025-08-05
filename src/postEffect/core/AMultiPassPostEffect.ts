@@ -5,22 +5,17 @@ import ASinglePassPostEffect from "./ASinglePassPostEffect";
 class AMultiPassPostEffect extends ASinglePassPostEffect {
 	#passList: ASinglePassPostEffect[] = []
 	#videoMemorySize: number = 0
-	get videoMemorySize(): number {
-		this.#calcVideoMemory()
-		return this.#videoMemorySize
-	}
 
-	#calcVideoMemory() {
-		this.#videoMemorySize = 0
-		this.#passList.forEach(texture => {
-			this.#videoMemorySize += texture.videoMemorySize
-		})
-	}
 	constructor(redGPUContext: RedGPUContext, passList: ASinglePassPostEffect[]) {
 		super(redGPUContext);
 		this.#passList.push(
 			...passList
 		)
+	}
+
+	get videoMemorySize(): number {
+		this.#calcVideoMemory()
+		return this.#videoMemorySize
 	}
 
 	get passList(): ASinglePassPostEffect[] {
@@ -39,8 +34,14 @@ class AMultiPassPostEffect extends ASinglePassPostEffect {
 				view, width, height, sourceTextureView
 			)
 		})
-
 		return targetOutputView
+	}
+
+	#calcVideoMemory() {
+		this.#videoMemorySize = 0
+		this.#passList.forEach(texture => {
+			this.#videoMemorySize += texture.videoMemorySize
+		})
 	}
 }
 

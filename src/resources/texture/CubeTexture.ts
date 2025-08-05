@@ -84,7 +84,6 @@ class CubeTexture extends ManagementResourceBase {
 
 	set srcList(value: SrcInfo) {
 		this.#srcList = this.#getParsedSrc(value);
-
 		this.cacheKey = this.#getCacheKey(value);
 		if (this.#srcList?.length) this.#loadBitmapTexture(this.#srcList);
 	}
