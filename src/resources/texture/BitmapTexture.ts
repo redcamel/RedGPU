@@ -1,4 +1,5 @@
 import RedGPUContext from "../../context/RedGPUContext";
+import {keepLog} from "../../utils";
 import getAbsoluteURL from "../../utils/file/getAbsoluteURL";
 import calculateTextureByteSize from "../../utils/math/calculateTextureByteSize";
 import getMipLevelCount from "../../utils/math/getMipLevelCount";
@@ -86,7 +87,6 @@ class BitmapTexture extends ManagementResourceBase {
 
 	set src(value: SrcInfo) {
 		this.#src = this.#getParsedSrc(value);
-
 		this.cacheKey = this.#getCacheKey(value);
 		if (this.#src) this.#loadBitmapTexture(this.#src);
 	}
@@ -105,14 +105,16 @@ class BitmapTexture extends ManagementResourceBase {
 		const temp = this.#gpuTexture
 		this.#setGpuTexture(null);
 		this.__fireListenerList(true)
-		this.#src = null
-		this.cacheKey = null
 		this.#unregisterResource()
+		this.cacheKey = null
+		this.#src = null
 		if (temp) temp.destroy()
 	}
 
 	#getCacheKey(srcInfo?: SrcInfo): string {
-		if (!srcInfo) return this.uuid;
+		if (!srcInfo) {
+			return this.uuid;
+		}
 		if (typeof srcInfo === 'string') {
 			return getAbsoluteURL(window.location.href, srcInfo);
 		} else {

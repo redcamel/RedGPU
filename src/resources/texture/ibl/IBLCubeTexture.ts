@@ -70,8 +70,8 @@ class IBLCubeTexture extends ManagementResourceBase {
 		const temp = this.#gpuTexture
 		this.#setGpuTexture(null);
 		this.__fireListenerList(true)
-		this.cacheKey = null
 		this.#unregisterResource()
+		this.cacheKey = null
 		if (temp) temp.destroy()
 	}
 

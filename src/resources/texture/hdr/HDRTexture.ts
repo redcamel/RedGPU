@@ -184,10 +184,10 @@ class HDRTexture extends ManagementResourceBase {
 		this.#setGpuTexture(null);
 		this.#isCubeMapInitialized = false;
 		this.__fireListenerList(true)
-		this.#src = null
-		this.cacheKey = null
 		this.#luminanceAnalysis = null
 		this.#unregisterResource()
+		this.#src = null
+		this.cacheKey = null
 		if (temp) temp.destroy()
 	}
 

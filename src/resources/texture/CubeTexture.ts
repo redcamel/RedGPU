@@ -103,9 +103,9 @@ class CubeTexture extends ManagementResourceBase {
 		const temp = this.#gpuTexture
 		this.#setGpuTexture(null);
 		this.__fireListenerList(true)
+		this.#unregisterResource()
 		this.#srcList = null
 		this.cacheKey = null
-		this.#unregisterResource()
 		if (temp) temp.destroy()
 	}
 

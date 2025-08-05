@@ -150,9 +150,11 @@ class ResourceManager {
 		const {cacheKey, targetResourceManagedState} = target;
 		const {table} = targetResourceManagedState;
 		const resourceState = table.get(cacheKey);
+		// keepLog(target,table,'cacheKey',cacheKey,'resourceState',resourceState)
 		if (!resourceState) {
 			return;
 		}
+
 		targetResourceManagedState.videoMemory -= (target as any).videoMemorySize;
 		table.delete(cacheKey);
 	}

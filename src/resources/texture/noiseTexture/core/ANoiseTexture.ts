@@ -154,10 +154,10 @@ class ANoiseTexture extends ManagementResourceBase {
 	destroy() {
 		const temp = this.#gpuTexture
 		this.__fireListenerList(true)
-		this.src = null
-		this.cacheKey = null
 		this.#unregisterResource()
 		if (temp) temp.destroy()
+		this.src = null
+		this.cacheKey = null
 		this.#gpuTexture = null
 	}
 
