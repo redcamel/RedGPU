@@ -15,13 +15,14 @@ import renderShadowLayer from "./renderLayers/renderShadowLayer";
 class Renderer {
 	#prevViewportSize: { width: number, height: number };
 	#finalRender: FinalRender
-	#debugRender: DebugRender = new DebugRender()
+	#debugRender: DebugRender
 
 	constructor() {
 	}
 
 	renderFrame(redGPUContext: RedGPUContext, time: number) {
 		if (!this.#finalRender) this.#finalRender = new FinalRender()
+		if (!this.#debugRender) this.#debugRender = new DebugRender(redGPUContext)
 		// 오브젝트 렌더시작
 		const viewList_renderPassDescriptorList: GPURenderPassDescriptor[] = []
 		/**

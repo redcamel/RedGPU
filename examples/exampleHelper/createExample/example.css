@@ -8,7 +8,14 @@ html, body {
     background: url(../../assets/documentBody.png);
 }
 .tp-dfwv{
+    bottom: 8px;
     z-index: 1;
+    overflow-y: auto;
+    max-height: calc(100vw - 20px);
+    pointer-events: none;
+}
+.tp-dfwv *{
+    pointer-events: auto;
 }
 * {
 
