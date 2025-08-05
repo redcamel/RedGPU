@@ -286,7 +286,7 @@ const ExampleList = [
 						},
 					},
 					{
-						name: 'PhongMaterial Texture<br/>Combination',
+						name: 'PhongMaterial Texture Combination',
 						path: '3d/material/phongMaterialTextures',
 						thumb: '3d/material/phongMaterialTextures/thumb.png',
 						description: {
