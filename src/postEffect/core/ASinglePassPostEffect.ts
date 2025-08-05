@@ -4,6 +4,7 @@ import View3D from "../../display/view/View3D";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../material";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
+import calculateTextureByteSize from "../../utils/math/calculateTextureByteSize";
 
 class ASinglePassPostEffect {
 	#computeShaderMSAA: GPUShaderModule
@@ -34,10 +35,15 @@ class ASinglePassPostEffect {
 	#redGPUContext: RedGPUContext
 	#antialiasingManager: AntialiasingManager
 	#previousSourceTextureReferences: GPUTextureView[] = [];
+	#videoMemorySize: number = 0
 
 	constructor(redGPUContext: RedGPUContext) {
 		this.#redGPUContext = redGPUContext
 		this.#antialiasingManager = redGPUContext.antialiasingManager
+	}
+
+	get videoMemorySize(): number {
+		return this.#videoMemorySize
 	}
 
 	get useDepthTexture(): boolean {
@@ -282,6 +288,13 @@ class ASinglePassPostEffect {
 			.members[key], value)
 	}
 
+	#calcVideoMemory() {
+		this.#videoMemorySize = 0
+		this.#outputTexture.forEach(texture => {
+			this.#videoMemorySize += calculateTextureByteSize(texture)
+		})
+	}
+
 	#detectSourceTextureChange(sourceTextureView: GPUTextureView[]): boolean {
 		if (!this.#previousSourceTextureReferences || this.#previousSourceTextureReferences.length !== sourceTextureView.length) {
 			return true;
@@ -299,29 +312,30 @@ class ASinglePassPostEffect {
 	}
 
 	#createRenderTexture(view: View3D): boolean {
-		const {redGPUContext, viewRenderTextureManager} = view
+		const {redGPUContext, viewRenderTextureManager, name} = view
 		const {colorTexture} = viewRenderTextureManager
-		const {gpuDevice} = redGPUContext
+		const {gpuDevice, resourceManager} = redGPUContext
 		const {width, height} = colorTexture
 		const needChange = width !== this.#prevInfo?.width || height !== this.#prevInfo?.height || this.#outputTexture.length === 0;
 		if (needChange) {
 			this.clear()
-			const newTexture = gpuDevice.createTexture({
+			const newTexture = resourceManager.createManagedTexture({
 				size: {
 					width,
 					height,
 				},
 				format: 'rgba8unorm',
 				usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING,
-				label: `PostEffect_${this.#name}_${width}x${height}_${Date.now()}`
+				label: `${name}_${this.#name}_${width}x${height}}`
 			})
 			this.#outputTexture.push(newTexture)
-			this.#outputTextureView.push(newTexture.createView({label: newTexture.label}))
+			this.#outputTextureView.push(resourceManager.getGPUResourceBitmapTextureView(newTexture))
 		}
 		this.#prevInfo = {
 			width,
 			height,
 		}
+		this.#calcVideoMemory()
 		return needChange
 	}
 }

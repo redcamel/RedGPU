@@ -13,10 +13,8 @@ RedGPU.init(
 
 		const scene = new RedGPU.Display.Scene();
 
-
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		redGPUContext.addView(view);
-
 
 		addGround(redGPUContext, scene);
 		loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb', -1, 1);
@@ -25,7 +23,7 @@ RedGPU.init(
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		renderer.start(redGPUContext, (time) => {
 			redGPUContext.viewList.forEach(view => {
-				const { scene } = view;
+				const {scene} = view;
 				let i = scene.numChildren;
 				while (i--) {
 					if (i === 0) continue;
@@ -60,7 +58,6 @@ function loadGLTF(redGPUContext, scene, url, xPosition, yPosition) {
 	);
 }
 
-
 const addGround = (redGPUContext, scene) => {
 	const ground = new RedGPU.Display.Mesh(
 		redGPUContext,
@@ -73,13 +70,14 @@ const addGround = (redGPUContext, scene) => {
 };
 
 const renderTestPane = async (redGPUContext, targetView) => {
-	const { Pane } = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
-
+	const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
+	const {setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
 	const {createIblHelper} = await import('../../../exampleHelper/createExample/panes/index.js');
 
 	const pane = new Pane();
-	const { shadowManager } = targetView.scene;
-	const { directionalShadowManager } = shadowManager;
+	const {shadowManager} = targetView.scene;
+	const {directionalShadowManager} = shadowManager;
 
 	pane.addBinding(directionalShadowManager, 'shadowDepthTextureSize', {
 		min: 128,
@@ -88,6 +86,6 @@ const renderTestPane = async (redGPUContext, targetView) => {
 	}).on("change", (ev) => {
 		directionalShadowManager.shadowDepthTextureSize = ev.value;
 	});
-	createIblHelper(pane, targetView, RedGPU, {useLight:true});
+	createIblHelper(pane, targetView, RedGPU, {useLight: true});
 
 };

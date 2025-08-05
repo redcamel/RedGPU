@@ -61,7 +61,10 @@ const createChildMesh = (redGPUContext, parentMesh) => {
 };
 
 const renderTestPane = async (redGPUContext, parentMesh, childMesh) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+
+	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+	const {setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext)
 	const pane = new Pane();
 
 	const parentConfig = {
@@ -89,38 +92,38 @@ const renderTestPane = async (redGPUContext, parentMesh, childMesh) => {
 	};
 
 	const createMeshControls = (folder, config, mesh) => {
-		folder.addBinding(config, 'x', { min: -10, max: 10, step: 0.1 }).on('change', (evt) => {
+		folder.addBinding(config, 'x', {min: -10, max: 10, step: 0.1}).on('change', (evt) => {
 			mesh.setPosition(evt.value, config.y, config.z);
 		});
-		folder.addBinding(config, 'y', { min: -10, max: 10, step: 0.1 }).on('change', (evt) => {
+		folder.addBinding(config, 'y', {min: -10, max: 10, step: 0.1}).on('change', (evt) => {
 			mesh.setPosition(config.x, evt.value, config.z);
 		});
-		folder.addBinding(config, 'z', { min: -10, max: 10, step: 0.1 }).on('change', (evt) => {
+		folder.addBinding(config, 'z', {min: -10, max: 10, step: 0.1}).on('change', (evt) => {
 			mesh.setPosition(config.x, config.y, evt.value);
 		});
-		folder.addBinding(config, 'rotationX', { min: 0, max: 360, step: 0.01 }).on('change', (evt) => {
+		folder.addBinding(config, 'rotationX', {min: 0, max: 360, step: 0.01}).on('change', (evt) => {
 			mesh.setRotation(evt.value, config.rotationY, config.rotationZ);
 		});
-		folder.addBinding(config, 'rotationY', { min: 0, max: 360, step: 0.01 }).on('change', (evt) => {
+		folder.addBinding(config, 'rotationY', {min: 0, max: 360, step: 0.01}).on('change', (evt) => {
 			mesh.setRotation(config.rotationX, evt.value, config.rotationZ);
 		});
-		folder.addBinding(config, 'rotationZ', { min: 0, max: 360, step: 0.01 }).on('change', (evt) => {
+		folder.addBinding(config, 'rotationZ', {min: 0, max: 360, step: 0.01}).on('change', (evt) => {
 			mesh.setRotation(config.rotationX, config.rotationY, evt.value);
 		});
-		folder.addBinding(config, 'scaleX', { min: 0.1, max: 5, step: 0.1 }).on('change', (evt) => {
+		folder.addBinding(config, 'scaleX', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
 			mesh.setScale(evt.value, config.scaleY, config.scaleZ);
 		});
-		folder.addBinding(config, 'scaleY', { min: 0.1, max: 5, step: 0.1 }).on('change', (evt) => {
+		folder.addBinding(config, 'scaleY', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
 			mesh.setScale(config.scaleX, evt.value, config.scaleZ);
 		});
-		folder.addBinding(config, 'scaleZ', { min: 0.1, max: 5, step: 0.1 }).on('change', (evt) => {
+		folder.addBinding(config, 'scaleZ', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
 			mesh.setScale(config.scaleX, config.scaleY, evt.value);
 		});
 	};
 
-	const parentFolder = pane.addFolder({ title: 'Parent Mesh', expanded: true });
+	const parentFolder = pane.addFolder({title: 'Parent Mesh', expanded: true});
 	createMeshControls(parentFolder, parentConfig, parentMesh);
 
-	const childFolder = pane.addFolder({ title: 'Child Mesh', expanded: true });
+	const childFolder = pane.addFolder({title: 'Child Mesh', expanded: true});
 	createMeshControls(childFolder, childConfig, childMesh);
 };

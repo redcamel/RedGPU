@@ -25,7 +25,7 @@ RedGPU.init(
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		renderer.start(redGPUContext, (time) => {
 			redGPUContext.viewList.forEach(view => {
-				const { scene } = view;
+				const {scene} = view;
 				let i = scene.numChildren;
 				while (i--) {
 					if (i === 0) continue;
@@ -104,11 +104,12 @@ const getRandomHexValue = () => {
 };
 
 const renderTestPane = async (redGPUContext, scene) => {
-	const { Pane } = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
-
+	const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
+	const {setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
 	const pane = new Pane();
-	const { shadowManager } = scene;
-	const { directionalShadowManager } = shadowManager;
+	const {shadowManager} = scene;
+	const {directionalShadowManager} = shadowManager;
 
 	pane.addBinding(directionalShadowManager, 'shadowDepthTextureSize', {
 		min: 128,

@@ -1,6 +1,4 @@
 import Sampler from "../../../../resources/sampler/Sampler";
-import BitmapTexture from "../../../../resources/texture/BitmapTexture";
-import CubeTexture from "../../../../resources/texture/CubeTexture";
 import Mesh from "../../Mesh";
 
 const getBasicMeshVertexBindGroupDescriptor = (mesh: Mesh, skin: boolean = false): GPUBindGroupDescriptor => {
@@ -23,7 +21,6 @@ const getBasicMeshVertexBindGroupDescriptor = (mesh: Mesh, skin: boolean = false
 			},
 			{
 				binding: 1,
-
 				resource: getGPUResourceSampler(material?.displacementTextureSampler) || basicGPUSampler
 			},
 			{
@@ -60,7 +57,6 @@ const getBasicMeshVertexBindGroupDescriptor = (mesh: Mesh, skin: boolean = false
 	}
 }
 export default getBasicMeshVertexBindGroupDescriptor
-
 const getGPUResourceSampler = (sampler: Sampler) => {
 	return sampler?.gpuSampler
 }

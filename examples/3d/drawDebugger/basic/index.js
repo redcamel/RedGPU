@@ -121,15 +121,16 @@ RedGPU.init(
 const renderTestPane = async (redGPUContext, targetView) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const pane = new Pane();
-
+	const {setDebugViewButton} = await import( "../../../exampleHelper/createExample/panes/index.js" );
+	setDebugViewButton(redGPUContext);
 	const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
 	const skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 	targetView.ibl = ibl;
 	targetView.skybox = skybox;
 	const TEST_DATA = {
-		grid : !!targetView.grid,
-		axis : !!targetView.axis,
-		volumeType:'OBB'
+		grid: !!targetView.grid,
+		axis: !!targetView.axis,
+		volumeType: 'OBB'
 	}
 	pane.addBinding(TEST_DATA, 'grid').on('change', (ev) => {
 		targetView.grid = ev.value;

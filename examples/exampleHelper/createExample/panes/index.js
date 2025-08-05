@@ -22,6 +22,17 @@ export function setSeparator(pane) {
 	pane.addBlade({view: 'separator',});
 }
 
+const setDebugViewButton = (redGPUContext) => {
+	requestAnimationFrame(() => {
+		const debugView = document.body.querySelector('.debugView');
+		if (debugView && redGPUContext) {
+			debugView.style.display = 'flex'
+			debugView.addEventListener('click', async () => {
+				redGPUContext.useDebugPanel = !redGPUContext.useDebugPanel;
+			});
+		}
+	})
+}
 const hdrImages = [
 	{name: '2K - the sky is on fire', path: 'assets/hdr/2k/the_sky_is_on_fire_2k.hdr'},
 	{name: '2K - furstenstein', path: 'assets/hdr/2k/furstenstein_2k.hdr'},
@@ -31,14 +42,16 @@ const hdrImages = [
 	{name: 'field', path: 'assets/hdr/field.hdr'},
 	{name: 'neutral.37290948', path: 'assets/hdr/neutral.37290948.hdr'},
 	{name: 'pisa', path: 'assets/hdr/pisa.hdr'},
-	{name: '6 cube face asset', path:  [
+	{
+		name: '6 cube face asset', path: [
 			"assets/skybox/px.jpg",
 			"assets/skybox/nx.jpg",
 			"assets/skybox/py.jpg",
 			"assets/skybox/ny.jpg",
 			"assets/skybox/pz.jpg",
 			"assets/skybox/nz.jpg",
-		]},
+		]
+	},
 ];
 export {
 	setViewListTest_Pane,
@@ -53,5 +66,6 @@ export {
 	setRedGPUTest_pane,
 	setAntialiasing_pane,
 	createIblHelper,
-	hdrImages
+	hdrImages,
+	setDebugViewButton
 }

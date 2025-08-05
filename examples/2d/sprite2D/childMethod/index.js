@@ -51,7 +51,8 @@ const createInitialObjects = (redGPUContext, scene) => {
 const createPaneUI = async (redGPUContext, scene) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const pane = new Pane();
-
+	const {setDebugViewButton, setRedGPUTest_pane} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
 	pane.addButton({title: 'Add Child'}).on('click', () => {
 		addChildObject(redGPUContext, scene);
 	});
@@ -63,7 +64,7 @@ const createPaneUI = async (redGPUContext, scene) => {
 		sprite2D.height = 25;
 
 		const textField2D = new RedGPU.Display.TextField2D(redGPUContext);
-		textField2D.useBillboard = true;
+
 		textField2D.fontSize = 16;
 		textField2D.text = `Inserted Child`;
 		textField2D.color = color;
@@ -141,7 +142,7 @@ const addChildObject = (redGPUContext, scene, color = getRandomHexColor()) => {
 	sprite2D.height = 25;
 
 	const textField2D = new RedGPU.Display.TextField2D(redGPUContext);
-	textField2D.useBillboard = true;
+
 	textField2D.fontSize = 16;
 	textField2D.text = `Child ${scene.numChildren}`;
 	textField2D.color = color;

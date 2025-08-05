@@ -160,7 +160,6 @@ const renderTestPane = async (view, redGPUContext) => {
 		});
 	});
 
-
 	function updateTransitionButtonStates(currentTextureName) {
 		transitionButtons.forEach(({button, option}) => {
 			button.disabled = (option.name === currentTextureName);

@@ -1,21 +1,17 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import basicRegisterResource from "../../resourceManager/core/basicRegisterResource";
-import basicUnregisterResource from "../../resourceManager/core/basicUnregisterResource";
 import ResourceStateVertexBuffer from "../../resourceManager/resourceState/ResourceStateVertexBuffer";
-import ABaseBuffer from "../core/ABaseBuffer";
-import getCacheBufferFromResourceState from "../core/getCacheBufferFromResourceState";
+import ABaseBuffer, {GPU_BUFFER_CACHE_KEY, GPU_BUFFER_DATA_SYMBOL, GPU_BUFFER_SYMBOL} from "../core/ABaseBuffer";
 import InterleavedStruct from "./InterleavedStruct";
 import InterleavedStructElement from "./InterleavedStructElement";
 
 const MANAGED_STATE_KEY = 'managedVertexBufferState'
 
 class VertexBuffer extends ABaseBuffer {
+	[GPU_BUFFER_DATA_SYMBOL]: Float32Array
 	#vertexCount: number = 0
 	#stride: number = 0
 	#interleavedStruct: InterleavedStruct
-	#data: Float32Array
 	#triangleCount: number = 0
-	#gpuBuffer: GPUBuffer
 
 	constructor(
 		redGPUContext: RedGPUContext,
@@ -25,34 +21,27 @@ class VertexBuffer extends ABaseBuffer {
 		cacheKey: string = ''
 	) {
 		super(redGPUContext, MANAGED_STATE_KEY, usage)
-		const cacheBuffer = getCacheBufferFromResourceState(this, cacheKey) as VertexBuffer
+		const {table} = this.targetResourceManagedState
+		const cacheBuffer = table.get(cacheKey)
+		// keepLog(this.targetResourceManagedState)
 		if (cacheBuffer) {
-			return cacheBuffer
+			return cacheBuffer.buffer
 		} else {
 			this.#interleavedStruct = interleavedStruct
-			if (cacheKey) this.name = cacheKey
+			if (cacheKey) {
+				this.name = cacheKey
+				this[GPU_BUFFER_CACHE_KEY] = cacheKey
+			}
 			this.changeData(data, this.#interleavedStruct)
-			basicRegisterResource(
+			this.redGPUContext.resourceManager.registerManagementResource(
 				this,
 				new ResourceStateVertexBuffer(this)
 			)
 		}
 	}
 
-	get gpuBuffer(): GPUBuffer {
-		return this.#gpuBuffer;
-	}
-
 	get stride(): number {
 		return this.#stride;
-	}
-
-	get data(): Float32Array {
-		return this.#data;
-	}
-
-	get size(): number {
-		return this.#data.byteLength || 0
 	}
 
 	get interleavedStruct() {
@@ -67,54 +56,38 @@ class VertexBuffer extends ABaseBuffer {
 		return this.#triangleCount;
 	}
 
-	destroy() {
-		const temp = this.#gpuBuffer
-		if (temp) {
-			this.#gpuBuffer = null
-			this.__fireListenerList(true)
-			basicUnregisterResource(this)
-			if (temp) temp.destroy()
+	changeData(data: Array<number> | Float32Array, interleavedStruct?: InterleavedStruct) {
+		const {gpuDevice} = this;
+		if (Array.isArray(data)) {
+			data = new Float32Array(data);
 		}
+		this[GPU_BUFFER_DATA_SYMBOL] = data;
+		if (interleavedStruct) {
+			this.#updateInterleavedStruct(interleavedStruct);
+		}
+		if (this[GPU_BUFFER_SYMBOL]) {
+			this.targetResourceManagedState.videoMemory -= this[GPU_BUFFER_DATA_SYMBOL].byteLength || 0;
+			let temp = this[GPU_BUFFER_SYMBOL]
+			requestAnimationFrame(() => {
+				temp.destroy();
+			})
+			this[GPU_BUFFER_SYMBOL] = null;
+		}
+		const bufferDescriptor: GPUBufferDescriptor = {
+			size: this[GPU_BUFFER_DATA_SYMBOL].byteLength,
+			usage: this.usage,
+			label: this.name
+		};
+		this[GPU_BUFFER_SYMBOL] = gpuDevice.createBuffer(bufferDescriptor);
+		this.targetResourceManagedState.videoMemory += this[GPU_BUFFER_DATA_SYMBOL].byteLength || 0;
+		this.#triangleCount = this[GPU_BUFFER_DATA_SYMBOL].length / this.#stride;
+		gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], 0, this[GPU_BUFFER_DATA_SYMBOL]);
 	}
 
 	updateAllData(data: Array<number> | Float32Array) {
 		//TODO 체크해야함
 		const {gpuDevice} = this;
-		gpuDevice.queue.writeBuffer(this.#gpuBuffer, 0, this.#data);
-	}
-
-	changeData(data: Array<number> | Float32Array, interleavedStruct?: InterleavedStruct) {
-		const {gpuDevice} = this;
-		// Convert 'data' to Float32Array if it is a regular array
-		if (Array.isArray(data)) {
-			data = new Float32Array(data);
-		}
-		this.#data = data;
-		// Update 'interleavedStruct' if provided
-		if (interleavedStruct) {
-			this.#updateInterleavedStruct(interleavedStruct);
-		}
-		// If a 'gpuBuffer' already exists, decrease the relevant memory and destroy the buffer
-		if (this.#gpuBuffer) {
-			this.targetResourceManagedState.videoMemory -= this.#data.byteLength || 0;
-			let temp = this.#gpuBuffer
-			requestAnimationFrame(() => {
-				temp.destroy();
-			})
-			this.#gpuBuffer = null;
-		}
-		// Increase the video memory for the new data and create new buffer
-		this.targetResourceManagedState.videoMemory += this.#data.byteLength;
-		const bufferDescriptor: GPUBufferDescriptor = {
-			size: this.#data.byteLength,
-			usage: this.usage,
-			label: this.name
-		};
-		// Create a new buffer and update the triangleCount
-		this.#gpuBuffer = gpuDevice.createBuffer(bufferDescriptor);
-		this.#triangleCount = this.#data.length / this.#stride;
-		// Write the new data into the buffer
-		gpuDevice.queue.writeBuffer(this.#gpuBuffer, 0, this.#data);
+		gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], 0, this[GPU_BUFFER_DATA_SYMBOL]);
 	}
 
 	#updateInterleavedStruct(interleavedStruct: InterleavedStruct) {
@@ -127,7 +100,7 @@ class VertexBuffer extends ABaseBuffer {
 			this.#vertexCount += elementCount;
 			this.#stride += elementCount;
 		}
-		this.#vertexCount = this.#data.length / this.#vertexCount;
+		this.#vertexCount = this[GPU_BUFFER_DATA_SYMBOL].length / this.#vertexCount;
 	}
 }
 

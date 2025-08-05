@@ -102,7 +102,7 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
 		const {backgroundColor, useBackgroundColor} = scene
 		const {viewportSize} = debugViewRenderState;
 		const {pixelRectArray, x, y, width, height} = viewportSize;
-		updateDebugItemValue(this.dom, `view${index}_x_y`, `${x}, ${y}`);
+		updateDebugItemValue(this.dom, `view${index}_x_y`, `${formatNumber(x)}, ${formatNumber(y)}`);
 		updateDebugItemValue(this.dom, `view${index}_width_height`, `${width}, ${height}`);
 		updateDebugItemValue(this.dom, `view${index}_pixelRectArray`, pixelRectArray);
 		updateDebugItemValue(this.dom, `view${index}_useBackgroundColor`, makeBooleanDebug('useBackgroundColor', useBackgroundColor));
@@ -119,4 +119,17 @@ class DebugViewList extends ADebugItem {
 	}
 }
 
+const formatNumber = (val) => {
+	const str = String(val);
+	if (str.includes('%')) {
+		const num = parseFloat(str);
+		return isNaN(num) ? str : `${num.toFixed(2)}%`;
+	}
+	if (str.includes('px')) {
+		const num = parseFloat(str);
+		return isNaN(num) ? str : `${num.toFixed(2)}px`;
+	}
+	const num = parseFloat(str);
+	return isNaN(num) ? str : num.toFixed(2);
+};
 export default DebugViewList

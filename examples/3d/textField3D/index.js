@@ -50,10 +50,11 @@ RedGPU.init(canvas, (redGPUContext) => {
 });
 
 const renderTestPane = async (scene, redGPUContext) => {
-	const { setSeparator } = await import("../../exampleHelper/createExample/panes/index.js");
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
-	const pane = new Pane();
 
+	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+	const pane = new Pane();
+	const {setDebugViewButton, setSeparator} = await import("../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
 	const controls = {};
 
 	const BASE_STYLES = {
@@ -109,7 +110,7 @@ const renderTestPane = async (scene, redGPUContext) => {
 	console.log(controls);
 	updateTestData();
 
-	const TextField3DFolder = pane.addFolder({ title: 'TextField3D', expanded: true });
+	const TextField3DFolder = pane.addFolder({title: 'TextField3D', expanded: true});
 
 	TextField3DFolder.addBinding(controls, 'useBillboardPerspective').on('change', (evt) => {
 		scene.children.forEach((child) => {
@@ -132,29 +133,29 @@ const renderTestPane = async (scene, redGPUContext) => {
 
 	setSeparator(pane);
 
-	const scaleFolder = pane.addFolder({ title: 'TextField3D Scale', expanded: true });
+	const scaleFolder = pane.addFolder({title: 'TextField3D Scale', expanded: true});
 
-	scaleFolder.addBinding(controls, 'scaleX', { min: 0.1, max: 5, step: 0.1 }).on('change', (evt) => {
+	scaleFolder.addBinding(controls, 'scaleX', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
 		scene.children.forEach((child) => {
 			child.scaleX = evt.value;
 		});
 	});
 
-	scaleFolder.addBinding(controls, 'scaleY', { min: 0.1, max: 5, step: 0.1 }).on('change', (evt) => {
+	scaleFolder.addBinding(controls, 'scaleY', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
 		scene.children.forEach((child) => {
 			child.scaleY = evt.value;
 		});
 	});
 
-	const styleFolder = pane.addFolder({ title: 'TextField3D Styles', expanded: true });
+	const styleFolder = pane.addFolder({title: 'TextField3D Styles', expanded: true});
 
-	styleFolder.addBinding(controls, 'fontSize', { min: 12, max: 50, step: 1 }).on('change', (evt) => {
+	styleFolder.addBinding(controls, 'fontSize', {min: 12, max: 50, step: 1}).on('change', (evt) => {
 		scene.children.forEach((child) => {
 			child.fontSize = evt.value;
 		});
 	});
 
-	styleFolder.addBinding(controls, 'padding', { min: 0, max: 32, step: 1 }).on('change', (evt) => {
+	styleFolder.addBinding(controls, 'padding', {min: 0, max: 32, step: 1}).on('change', (evt) => {
 		scene.children.forEach((child) => {
 			child.padding = evt.value;
 		});

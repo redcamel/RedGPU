@@ -2,8 +2,6 @@ import GPU_COMPARE_FUNCTION from "../../../../gpuConst/GPU_COMPARE_FUNCTION";
 import ResourceManager from "../../../../resources/resourceManager/ResourceManager";
 import Mesh from "../../Mesh";
 import PIPELINE_TYPE from "./PIPELINE_TYPE";
-import resourceManager from "../../../../resources/resourceManager/ResourceManager";
-import {keepLog} from "../../../../utils";
 
 const createBasePipeline = (
 	mesh: Mesh,
@@ -13,7 +11,7 @@ const createBasePipeline = (
 ): GPURenderPipeline => {
 	// 메쉬에서 GPU 리소스 관리자와 GPU 디바이스를 가져옵니다.
 	const {redGPUContext} = mesh
-	const {gpuDevice,resourceManager} = redGPUContext
+	const {gpuDevice, resourceManager} = redGPUContext
 	const material_gpuRenderInfo = mesh.material.gpuRenderInfo
 	let entryPoint: string;
 	let pipelineLabel: string;
@@ -43,11 +41,13 @@ const createBasePipeline = (
 		vertexBindGroupLayout
 	]
 	if (pipelineType !== PIPELINE_TYPE.SHADOW) bindGroupLayouts.push(material_gpuRenderInfo.fragmentBindGroupLayout)
-	const pipelineLayoutDescriptor: GPUPipelineLayoutDescriptor = {bindGroupLayouts,label : `${pipelineLabel}_${material_gpuRenderInfo.fragmentBindGroupLayout.label}`}
-	const pipelineLayout: GPUPipelineLayout = resourceManager.createGPUPipelineLayout(`${pipelineLayoutDescriptor.label}`,pipelineLayoutDescriptor);
+	const pipelineLayoutDescriptor: GPUPipelineLayoutDescriptor = {
+		bindGroupLayouts,
+		label: `${pipelineLabel}_${material_gpuRenderInfo.fragmentBindGroupLayout.label}`
+	}
+	const pipelineLayout: GPUPipelineLayout = resourceManager.createGPUPipelineLayout(`${pipelineLayoutDescriptor.label}`, pipelineLayoutDescriptor);
 	// keepLog('pipelineLayout',pipelineLayout)
 	// const pipelineLayout: GPUPipelineLayout = gpuDevice.createPipelineLayout(pipelineLayoutDescriptor);
-
 	const pipelineDescriptor: GPURenderPipelineDescriptor = {
 		label: pipelineLabel,
 		layout: pipelineLayout,

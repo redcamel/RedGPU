@@ -17,7 +17,7 @@ RedGPU.init(
 		light.intensity = 0.1;
 		scene.lightManager.addDirectionalLight(light);
 
-		const { lights, initialPositions } = createPointLights(scene, 500);
+		const {lights, initialPositions} = createPointLights(scene, 500);
 		createSphereMeshes(redGPUContext, scene, 500);
 
 		const renderer = new RedGPU.Renderer(redGPUContext);
@@ -25,6 +25,8 @@ RedGPU.init(
 			animateLights(lights, initialPositions);
 		};
 		renderer.start(redGPUContext, render);
+		renderTestPane(redGPUContext);
+
 	},
 	(failReason) => {
 		console.error("Initialization failed:", failReason);
@@ -33,7 +35,10 @@ RedGPU.init(
 		document.body.appendChild(errorMessage);
 	}
 );
-
+const renderTestPane = async (redGPUContext) => {
+	const {setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
+};
 const createPointLights = (scene, count) => {
 	const lights = [];
 	const initialPositions = [];
@@ -53,11 +58,11 @@ const createPointLights = (scene, count) => {
 		light.y = y;
 		light.z = z;
 
-		initialPositions.push({ x, y, z });
+		initialPositions.push({x, y, z});
 		scene.lightManager.addPointLight(light);
 		lights.push(light);
 	}
-	return { lights, initialPositions };
+	return {lights, initialPositions};
 };
 
 const createSphereMeshes = (redGPUContext, scene, count) => {

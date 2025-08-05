@@ -2,6 +2,7 @@ import RedGPUContext from "../context/RedGPUContext";
 import InstancingMesh from "../display/instancingMesh/InstancingMesh";
 import Mesh from "../display/mesh/Mesh";
 import View3D from "../display/view/View3D";
+import calculateTextureByteSize from "../utils/math/calculateTextureByteSize";
 import PickingEvent from "./core/PickingEvent";
 import PICKING_EVENT_TYPE from "./PICKING_EVENT_TYPE";
 
@@ -19,6 +20,10 @@ class PickingManager {
 	#mouseY: number = 0
 	#prevPickingEvent: PickingEvent
 	#prevOverTarget: Mesh
+	#videoMemorySize: number = 0
+	get videoMemorySize(): number {
+		return this.#videoMemorySize;
+	}
 
 	get mouseX(): number {
 		return this.#mouseX;
@@ -74,10 +79,11 @@ class PickingManager {
 		this.#redGPUContext = redGPUContext
 		if (this.#pickingGPUTexture?.width !== this.#view.pixelRectObject.width || this.#pickingGPUTexture?.height !== this.#view.pixelRectObject.height) {
 			this.destroy()
-			this.#pickingGPUTexture = this.#createTexture('picking',navigator.gpu.getPreferredCanvasFormat())
+			this.#pickingGPUTexture = this.#createTexture('picking', navigator.gpu.getPreferredCanvasFormat())
 			this.#pickingGPUTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#pickingGPUTexture)
-			this.#pickingDepthGPUTexture = this.#createTexture('pickingDepth','depth32float')
+			this.#pickingDepthGPUTexture = this.#createTexture('pickingDepth', 'depth32float')
 			this.#pickingDepthGPUTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#pickingDepthGPUTexture)
+			this.#calcVideoMemory()
 		}
 	}
 
@@ -89,14 +95,20 @@ class PickingManager {
 		this.resetCastingList()
 	}
 
-	#createTexture(label:string,format: GPUTextureFormat): GPUTexture {
-		const {gpuDevice} = this.#redGPUContext
-		return gpuDevice.createTexture({
+	#calcVideoMemory() {
+		const texture = this.#pickingGPUTexture
+		if (!texture) return 0;
+		this.#videoMemorySize = calculateTextureByteSize(texture) + calculateTextureByteSize(this.#pickingDepthGPUTexture)
+	}
+
+	#createTexture(label: string, format: GPUTextureFormat): GPUTexture {
+		const {resourceManager} = this.#redGPUContext
+		return resourceManager.createManagedTexture({
 			size: [this.#view.pixelRectObject.width, this.#view.pixelRectObject.height, 1],
 			usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC,
 			format,
 			sampleCount: 1,
-			label: `${label}_${this.#view.pixelRectObject.width}x${this.#view.pixelRectObject.height}_${Date.now()}`,
+			label: `${this.#view.name}_${label}_${this.#view.pixelRectObject.width}x${this.#view.pixelRectObject.height}`,
 		});
 	}
 

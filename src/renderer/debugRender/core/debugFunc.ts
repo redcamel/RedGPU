@@ -15,7 +15,7 @@ const makeColorDebug = (key: string, color: ColorRGBA) => {
 `
 }
 const makeBooleanDebug = (key: string, value) => {
-	return `<span class="${value ? 'boolean-true' : 'boolean-false'}">${value ? 'true' : 'false'}</span>`
+	return `<span class="${value ? 'boolean-true' : 'boolean-false'}">${value ? 'TRUE' : 'FALSE'}</span>`
 }
 const getDebugFormatValue = (value: any) => {
 	return typeof value === 'boolean' ? value.toString() : typeof value === 'number' ? value.toLocaleString() : value;

@@ -47,23 +47,24 @@ const createSkybox = (redGPUContext) => {
 const renderTestPane = async (view) => {
 	const {Pane} = await import( "https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js" );
 	const pane = new Pane();
-	const {createFieldOfView} = await import( "../../../exampleHelper/createExample/panes/index.js" );
+	const {createFieldOfView, setDebugViewButton} = await import( "../../../exampleHelper/createExample/panes/index.js" );
+	setDebugViewButton(view.redGPUContext);
 	createFieldOfView(pane, view.camera)
 	const TEST_DATA = {
-		blur : 0,
-		opacity : 1,
+		blur: 0,
+		opacity: 1,
 	}
 	pane.addBinding(TEST_DATA, 'blur', {
-		min:0,
-		max:1,
-		step:0.01
+		min: 0,
+		max: 1,
+		step: 0.01
 	}).on("change", (ev) => {
 		view.skybox.blur = ev.value;
 	})
 	pane.addBinding(TEST_DATA, 'opacity', {
-		min:0,
-		max:1,
-		step:0.01
+		min: 0,
+		max: 1,
+		step: 0.01
 	}).on("change", (ev) => {
 		view.skybox.opacity = ev.value;
 	})

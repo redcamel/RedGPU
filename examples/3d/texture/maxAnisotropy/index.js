@@ -33,6 +33,8 @@ RedGPU.init(
 );
 
 const renderTestPane = async (redGPUContext, scene) => {
+	const {setSeparator, setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
 	const maxAnisotropyValues = [1, 8, 16];
 	const spacing = 105;
 	const yOffset = 55;

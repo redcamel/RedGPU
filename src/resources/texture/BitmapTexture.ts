@@ -1,19 +1,18 @@
 import RedGPUContext from "../../context/RedGPUContext";
+import getAbsoluteURL from "../../utils/file/getAbsoluteURL";
 import calculateTextureByteSize from "../../utils/math/calculateTextureByteSize";
 import getMipLevelCount from "../../utils/math/getMipLevelCount";
-import ManagedResourceBase from "../ManagedResourceBase";
-import basicRegisterResource from "../resourceManager/core/basicRegisterResource";
-import basicUnregisterResource from "../resourceManager/core/basicUnregisterResource";
-import ResourceStateBitmapTexture from "../resourceManager/resourceState/ResourceStateBitmapTexture";
+import ManagementResourceBase from "../ManagementResourceBase";
+import ResourceStateBitmapTexture from "../resourceManager/resourceState/texture/ResourceStateBitmapTexture";
 import imageBitmapToGPUTexture from "./core/imageBitmapToGPUTexture";
 import loadAndCreateBitmapImage from "./core/loadAndCreateBitmapImage";
 
 const MANAGED_STATE_KEY = 'managedBitmapTextureState'
+type SrcInfo = string | { src: string, cacheKey: string }
 
-class BitmapTexture extends ManagedResourceBase {
+class BitmapTexture extends ManagementResourceBase {
 	#gpuTexture: GPUTexture
 	#src: string
-	#cacheKey: string
 	#mipLevelCount: number
 	#useMipmap: boolean
 	#imgBitmap: ImageBitmap
@@ -23,16 +22,9 @@ class BitmapTexture extends ManagedResourceBase {
 	readonly #onLoad: (textureInstance: BitmapTexture) => void;
 	readonly #onError: (error: Error) => void;
 
-	get width(): number {
-		return this.#imgBitmap?.width || 0
-	}
-	get height(): number {
-		return this.#imgBitmap?.height || 0
-	}
-
 	constructor(
 		redGPUContext: RedGPUContext,
-		src?: any,
+		src?: SrcInfo,
 		useMipMap: boolean = true,
 		onLoad?: (textureInstance?: BitmapTexture) => void,
 		onError?: (error: Error) => void,
@@ -46,20 +38,15 @@ class BitmapTexture extends ManagedResourceBase {
 		this.#useMipmap = useMipMap
 		this.#format = format || navigator.gpu.getPreferredCanvasFormat()
 		if (src) {
-			this.#src = src?.src || src;
-			this.#cacheKey = src?.cacheKey || src || this.uuid;
+			this.#src = this.#getParsedSrc(src);
+			this.cacheKey = this.#getCacheKey(src)
 			const {table} = this.targetResourceManagedState
-			let target: ResourceStateBitmapTexture
-			for (const k in table) {
-				if (table[k].cacheKey === this.#cacheKey) {
-					target = table[k]
-					break
-				}
-			}
-			// console.log('target',	this.#cacheKey ,this)
+			let target: ResourceStateBitmapTexture = table.get(this.cacheKey)
 			if (target) {
-				this.#onLoad?.(this) // TODO - 이거 다시확인해야함
-				return table[target.uuid].texture
+				// keepLog('cache target', target)
+				const targetTexture = target.texture as BitmapTexture
+				this.#onLoad?.(targetTexture)
+				return targetTexture
 			} else {
 				this.src = src;
 				this.#registerResource()
@@ -69,12 +56,16 @@ class BitmapTexture extends ManagedResourceBase {
 		}
 	}
 
-	get usePremultiplyAlpha(): boolean {
-		return this.#usePremultiplyAlpha;
+	get width(): number {
+		return this.#imgBitmap?.width || 0
 	}
 
-	get cacheKey(): string {
-		return this.#cacheKey;
+	get height(): number {
+		return this.#imgBitmap?.height || 0
+	}
+
+	get usePremultiplyAlpha(): boolean {
+		return this.#usePremultiplyAlpha;
 	}
 
 	get videoMemorySize(): number {
@@ -93,9 +84,9 @@ class BitmapTexture extends ManagedResourceBase {
 		return this.#src;
 	}
 
-	set src(value: string | any) {
-		this.#src = value?.src || value;
-		this.#cacheKey = value?.cacheKey || value || this.uuid;
+	set src(value: SrcInfo) {
+		this.#src = this.#getParsedSrc(value);
+		this.cacheKey = this.#getCacheKey(value);
 		if (this.#src) this.#loadBitmapTexture(this.#src);
 	}
 
@@ -113,10 +104,25 @@ class BitmapTexture extends ManagedResourceBase {
 		const temp = this.#gpuTexture
 		this.#setGpuTexture(null);
 		this.__fireListenerList(true)
-		this.#src = null
-		this.#cacheKey = null
 		this.#unregisterResource()
+		this.cacheKey = null
+		this.#src = null
 		if (temp) temp.destroy()
+	}
+
+	#getCacheKey(srcInfo?: SrcInfo): string {
+		if (!srcInfo) {
+			return this.uuid;
+		}
+		if (typeof srcInfo === 'string') {
+			return getAbsoluteURL(window.location.href, srcInfo);
+		} else {
+			return srcInfo.cacheKey || getAbsoluteURL(window.location.href, srcInfo.src);
+		}
+	}
+
+	#getParsedSrc(srcInfo?: SrcInfo): string {
+		return typeof srcInfo === 'string' ? srcInfo : srcInfo.src
 	}
 
 	#setGpuTexture(value: GPUTexture) {
@@ -126,14 +132,11 @@ class BitmapTexture extends ManagedResourceBase {
 	}
 
 	#registerResource() {
-		basicRegisterResource(
-			this,
-			new ResourceStateBitmapTexture(this)
-		)
+		this.redGPUContext.resourceManager.registerManagementResource(this, new ResourceStateBitmapTexture(this));
 	}
 
 	#unregisterResource() {
-		basicUnregisterResource(this)
+		this.redGPUContext.resourceManager.unregisterManagementResource(this);
 	}
 
 	#createGPUTexture() {
@@ -161,7 +164,7 @@ class BitmapTexture extends ManagedResourceBase {
 			textureDescriptor.usage |= GPUTextureUsage.RENDER_ATTACHMENT;
 		}
 		const newGPUTexture = imageBitmapToGPUTexture(gpuDevice, [this.#imgBitmap], textureDescriptor, this.#usePremultiplyAlpha)
-		this.#videoMemorySize = calculateTextureByteSize(textureDescriptor)
+		this.#videoMemorySize = calculateTextureByteSize(newGPUTexture)
 		this.targetResourceManagedState.videoMemory += this.#videoMemorySize
 		//
 		if (this.#useMipmap) mipmapGenerator.generateMipmap(newGPUTexture, textureDescriptor)

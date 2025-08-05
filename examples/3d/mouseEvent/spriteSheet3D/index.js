@@ -61,16 +61,17 @@ const createSampleSprite3D = async (redGPUContext, scene) => {
 		label.text = eventName;
 		label.y = -1;
 		label.useBillboard = true;
-		label.useBillboardPerspective = false;
 		label.primitiveState.cullMode = 'none';
 		spriteSheet.addChild(label);
 	});
 };
 
 const renderTestPane = async (redGPUContext, scene) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const pane = new Pane();
-	const folder = pane.addFolder({ title: 'SpriteSheet3D', expanded: true });
+	const {setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
+	const folder = pane.addFolder({title: 'SpriteSheet3D', expanded: true});
 	const controls = {
 		useBillboardPerspective: scene.children[0].useBillboardPerspective,
 		useBillboard: scene.children[0].useBillboard,

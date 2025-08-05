@@ -53,11 +53,13 @@ class InstancingMesh extends Mesh {
 		const newBuffer = new StorageBuffer(
 			this.#redGPUContext,
 			newData,
-			this.name
+			`InstanceBuffer_${this.uuid}`,
 		)
 		// 기존데이터
 		const prevBuffer = this.gpuRenderInfo.vertexUniformBuffer
-		if (prevBuffer?.gpuBuffer) copyGPUBuffer(this.#redGPUContext.gpuDevice, prevBuffer.gpuBuffer, newBuffer.gpuBuffer)
+		if (prevBuffer?.gpuBuffer) {
+			copyGPUBuffer(this.#redGPUContext.gpuDevice, prevBuffer.gpuBuffer, newBuffer.gpuBuffer)
+		}
 		prevBuffer?.destroy()
 		this.gpuRenderInfo.vertexUniformBuffer = newBuffer
 		// 데이터가 없으면 채워넣음

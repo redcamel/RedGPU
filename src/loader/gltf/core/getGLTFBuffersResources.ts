@@ -1,4 +1,3 @@
-import {keepLog} from "../../../utils";
 import getAbsoluteURL from "../../../utils/file/getAbsoluteURL";
 import {GLTF} from "../GLTF";
 import GLTFLoader from "../GLTFLoader";
@@ -50,10 +49,8 @@ const getGLTFBuffersResources = (gltfLoader: GLTFLoader, gltfData: GLTF, callbac
 	});
 };
 export default getGLTFBuffersResources
-
 const cacheMap: Map<string, ArrayBuffer> = new Map();
 const pendingMap: Map<string, Promise<ArrayBuffer>> = new Map();
-
 const arrayBufferLoader = (url: string, onSuccess, onError) => {
 	const originURL = url
 	url = getAbsoluteURL(window.location.href, url)
@@ -62,13 +59,10 @@ const arrayBufferLoader = (url: string, onSuccess, onError) => {
 		onSuccess?.(cacheMap.get(url)!);
 		return;
 	}
-
-
 	if (pendingMap.has(url)) {
 		pendingMap.get(url)!.then(data => onSuccess?.(data)).catch(err => onError?.(err));
 		return;
 	}
-
 	const promise = fetch(url)
 		.then(response => {
 			if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
@@ -82,6 +76,5 @@ const arrayBufferLoader = (url: string, onSuccess, onError) => {
 			pendingMap.delete(url);
 		});
 	pendingMap.set(url, promise);
-
 	promise.then(data => onSuccess?.(data)).catch(err => onError?.(err));
 };

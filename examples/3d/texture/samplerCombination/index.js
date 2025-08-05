@@ -24,30 +24,34 @@ RedGPU.init(
 		renderer.start(redGPUContext, () => {
 			scene.children.forEach(group => {
 				if (group.geometry instanceof RedGPU.Primitive.TorusKnot) {
-					group.rotationX += 0.25;
-					group.rotationY += 0.25;
-					group.rotationZ += 0.25;
+					group.rotationX += 0.05;
+					group.rotationY += 0.05;
+					group.rotationZ += 0.05;
 				}
 			});
 		});
+		renderTestPane(redGPUContext);
 	},
 	(failReason) => {
 		console.error("Initialization failed:", failReason);
 	}
 );
-
+const renderTestPane = async (redGPUContext,) => {
+	const {setSeparator, setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
+}
 const generateSamplerCombinations = (settings, fixedCategory, fixedValue) => {
 	const combinations = [];
 	const recursiveGenerator = (current, depth) => {
 		if (depth === settings.length) {
 			if (current[fixedCategory] === fixedValue) {
-				combinations.push({ ...current });
+				combinations.push({...current});
 			}
 			return;
 		}
-		const { name, values } = settings[depth];
+		const {name, values} = settings[depth];
 		values.forEach((value) => {
-			recursiveGenerator({ ...current, [name]: value }, depth + 1);
+			recursiveGenerator({...current, [name]: value}, depth + 1);
 		});
 	};
 	recursiveGenerator({}, 0);
@@ -64,9 +68,9 @@ const generateGroupedCombinations = (settings, category) => {
 
 const createCategoryGroups = (redGPUContext, scene) => {
 	const settings = [
-		{ name: "minFilter", values: ["nearest", "linear"] },
-		{ name: "magFilter", values: ["nearest", "linear"] },
-		{ name: "mipmapFilter", values: ["nearest", "linear"] },
+		{name: "minFilter", values: ["nearest", "linear"]},
+		{name: "magFilter", values: ["nearest", "linear"]},
+		{name: "mipmapFilter", values: ["nearest", "linear"]},
 	];
 
 	const minFilterGroups = generateGroupedCombinations(settings, "minFilter");

@@ -1,5 +1,6 @@
 import RedGPUContext from "../context/RedGPUContext";
 import validateRedGPUContext from "../runtimeChecker/validateFunc/validateRedGPUContext";
+import consoleAndThrowError from "../utils/consoleAndThrowError";
 import createUUID from "../utils/createUUID";
 import InstanceIdGenerator from "../utils/InstanceIdGenerator";
 
@@ -19,17 +20,32 @@ class ResourceBase {
 	readonly #gpuDevice: GPUDevice
 	#name: string = ''
 	#instanceId: number
+	#cacheKey: string
 	/**
 	 * An array to keep track of dirty listeners.
 	 *
 	 * @type {Array}
 	 */
 	#dirtyListeners: any[] = [];
+	#resourceManagerKey: string
 
-	constructor(redGPUContext: RedGPUContext) {
+	constructor(redGPUContext: RedGPUContext, resourceManagerKey?: string) {
 		validateRedGPUContext(redGPUContext)
+		this.#resourceManagerKey = resourceManagerKey
 		this.#redGPUContext = redGPUContext
 		this.#gpuDevice = redGPUContext.gpuDevice
+	}
+
+	get cacheKey(): string {
+		return this.#cacheKey;
+	}
+
+	set cacheKey(value: string) {
+		this.#cacheKey = value;
+	}
+
+	get resourceManagerKey(): string {
+		return this.#resourceManagerKey;
 	}
 
 	get name(): string {
@@ -73,7 +89,7 @@ class ResourceBase {
 	 *
 	 * @param {Function} listener - The listener function to be added.
 	 */
-	__addDirtyPipelineListener(listener: Function) {
+	__addDirtyPipelineListener(listener: () => void) {
 		this.#manageResourceState(true);
 		this.#dirtyListeners.push(listener);
 	}
@@ -83,7 +99,7 @@ class ResourceBase {
 	 *
 	 * @param {Function} listener - The listener function to be removed.
 	 */
-	__removeDirtyPipelineListener(listener: Function) {
+	__removeDirtyPipelineListener(listener: () => void) {
 		const index = this.#dirtyListeners.indexOf(listener);
 		if (index > -1) {
 			this.#dirtyListeners.splice(index, 1);
@@ -109,9 +125,15 @@ class ResourceBase {
 	 */
 	#manageResourceState(isAddingListener: boolean) {
 		const {resourceManager} = this.#redGPUContext;
-		// console.log('`managed${this.constructor.name}State`', `managed${this.constructor.name}State`)
+		if (this.constructor.name === 'Sampler') {
+			return
+		}
 		if (resourceManager) {
-			const targetState = resourceManager[`managed${this.constructor.name}State`]?.table?.[this.#uuid];
+			const targetResourceManagedState = resourceManager[this.#resourceManagerKey]
+			if (!targetResourceManagedState) {
+				consoleAndThrowError('need managedStateKey', this.constructor.name)
+			}
+			const targetState = targetResourceManagedState?.table.get(this.cacheKey);
 			if (targetState) {
 				isAddingListener ? targetState.useNum++ : targetState.useNum--;
 			}

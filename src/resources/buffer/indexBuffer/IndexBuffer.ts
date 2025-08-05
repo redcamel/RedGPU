@@ -1,19 +1,14 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import consoleAndThrowError from "../../../utils/consoleAndThrowError";
-import basicRegisterResource from "../../resourceManager/core/basicRegisterResource";
-import basicUnregisterResource from "../../resourceManager/core/basicUnregisterResource";
 import ResourceStateIndexBuffer from "../../resourceManager/resourceState/ResourceStateIndexBuffer";
-import ABaseBuffer from "../core/ABaseBuffer";
-import getCacheBufferFromResourceState from "../core/getCacheBufferFromResourceState";
+import ABaseBuffer, {GPU_BUFFER_CACHE_KEY, GPU_BUFFER_DATA_SYMBOL, GPU_BUFFER_SYMBOL} from "../core/ABaseBuffer";
 
 const MANAGED_STATE_KEY = 'managedIndexBufferState'
 type NumberArray = Array<number> | Uint32Array;
 
 class IndexBuffer extends ABaseBuffer {
-	#data: Uint32Array
+	[GPU_BUFFER_DATA_SYMBOL]: Uint32Array
 	#indexNum: number = 0
 	#triangleCount: number = 0
-	#gpuBuffer: GPUBuffer
 
 	constructor(
 		redGPUContext: RedGPUContext,
@@ -22,25 +17,18 @@ class IndexBuffer extends ABaseBuffer {
 		cacheKey: string = ''
 	) {
 		super(redGPUContext, MANAGED_STATE_KEY, usage)
-		const cacheBuffer = getCacheBufferFromResourceState(this, cacheKey) as IndexBuffer
+		const {table} = this.targetResourceManagedState
+		const cacheBuffer = table.get(cacheKey)
 		if (cacheBuffer) {
-			return cacheBuffer
+			return cacheBuffer.buffer
 		} else {
-			if (cacheKey) this.name = cacheKey
+			if (cacheKey) {
+				this.name = cacheKey
+				this[GPU_BUFFER_CACHE_KEY] = cacheKey
+			}
 			this.changeData(data)
-			basicRegisterResource(
-				this,
-				new ResourceStateIndexBuffer(this)
-			)
+			this.redGPUContext.resourceManager.registerManagementResource(this, new ResourceStateIndexBuffer(this));
 		}
-	}
-
-	get gpuBuffer(): GPUBuffer {
-		return this.#gpuBuffer;
-	}
-
-	get size(): number {
-		return this.#data.byteLength || 0
 	}
 
 	get triangleCount(): number {
@@ -51,51 +39,41 @@ class IndexBuffer extends ABaseBuffer {
 		return this.#indexNum;
 	}
 
-	destroy() {
-		const temp = this.#gpuBuffer
-		if (temp) {
-			this.#gpuBuffer = null
-			this.__fireListenerList(true)
-			basicUnregisterResource(this)
-			if (temp) temp.destroy()
-		}
-	}
-
 	changeData(data: NumberArray) {
 		const {gpuDevice} = this;
 		if (Array.isArray(data)) {
 			data = new Uint32Array(data);
 		}
-		if (this.#gpuBuffer) {
-			this.targetResourceManagedState.videoMemory -= this.#data.byteLength || 0;
-			let temp = this.#gpuBuffer
+		if (this[GPU_BUFFER_SYMBOL]) {
+			this.targetResourceManagedState.videoMemory -= this[GPU_BUFFER_DATA_SYMBOL].byteLength || 0;
+			let temp = this[GPU_BUFFER_SYMBOL]
 			requestAnimationFrame(() => {
 				temp.destroy();
 			})
-			this.#gpuBuffer = null;
+			this[GPU_BUFFER_SYMBOL] = null;
 		}
-		this.#data = data;
+		this[GPU_BUFFER_DATA_SYMBOL] = data;
 		this.#indexNum = data.length;
-		this.targetResourceManagedState.videoMemory += this.#data.byteLength;
 		const bufferDescriptor: GPUBufferDescriptor = {
-			size: this.#data.byteLength,
+			size: this[GPU_BUFFER_DATA_SYMBOL].byteLength,
 			usage: this.usage,
 			label: this.name
 		}
-		this.#gpuBuffer = gpuDevice.createBuffer(bufferDescriptor);
+		this[GPU_BUFFER_SYMBOL] = gpuDevice.createBuffer(bufferDescriptor);
+		this.targetResourceManagedState.videoMemory += this[GPU_BUFFER_DATA_SYMBOL].byteLength || 0;
 		this.#triangleCount = this.#indexNum / 3;
-		gpuDevice.queue.writeBuffer(this.#gpuBuffer, 0, this.#data);
+		gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], 0, this[GPU_BUFFER_DATA_SYMBOL]);
 	}
 
-	updatePartialData(dataStartIndex: number, data: NumberArray) {
-		const {gpuDevice} = this
-		if (dataStartIndex < 0 || dataStartIndex >= this.#data.length) {
-			consoleAndThrowError(`Offset value is out of data bounds. Tried to access index ${dataStartIndex} on data of length ${this.#data.length}`);
-		}
-		if (Array.isArray(data)) data = new Uint32Array(data)
-		this.#indexNum = data.length
-		gpuDevice.queue.writeBuffer(this.#gpuBuffer, dataStartIndex, data)
-	}
+	// updatePartialData(dataStartIndex: number, data: NumberArray) {
+	// 	const {gpuDevice} = this
+	// 	if (dataStartIndex < 0 || dataStartIndex >= this[GPU_BUFFER_DATA_SYMBOL].length) {
+	// 		consoleAndThrowError(`Offset value is out of data bounds. Tried to access index ${dataStartIndex} on data of length ${this[GPU_BUFFER_DATA_SYMBOL].length}`);
+	// 	}
+	// 	if (Array.isArray(data)) data = new Uint32Array(data)
+	// 	this.#indexNum = data.length
+	// 	gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], dataStartIndex, data)
+	// }
 }
 
 Object.freeze(IndexBuffer)

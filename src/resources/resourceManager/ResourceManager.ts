@@ -1,109 +1,82 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import {keepLog} from "../../utils";
-import ResourceBase from "../ResourceBase";
+import ManagementResourceBase from "../ManagementResourceBase";
 import Sampler from "../sampler/Sampler";
 import BitmapTexture from "../texture/BitmapTexture";
 import DownSampleCubeMapGenerator from "../texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator";
 import MipmapGenerator from "../texture/core/mipmapGenerator/MipmapGenerator";
 import CubeTexture from "../texture/CubeTexture";
+import IBLCubeTexture from "../texture/ibl/IBLCubeTexture";
 import PackedTexture from "../texture/packedTexture/PackedTexture";
 import preprocessWGSL from "../wgslParser/preprocessWGSL";
-import ResourceState from "./resourceState/ResourceState";
+import ResourceStateIndexBuffer from "./resourceState/ResourceStateIndexBuffer";
+import ResourceStateStorageBuffer from "./resourceState/ResourceStateStorageBuffer";
+import ResourceStateUniformBuffer from "./resourceState/ResourceStateUniformBuffer";
+import ResourceStateVertexBuffer from "./resourceState/ResourceStateVertexBuffer";
+import ResourceStatusInfo from "./resourceState/ResourceStatusInfo";
+import ResourceStateBitmapTexture from "./resourceState/texture/ResourceStateBitmapTexture";
+import ResourceStateCubeTexture from "./resourceState/texture/ResourceStateCubeTexture";
+import ResourceStateHDRTexture from "./resourceState/texture/ResourceStateHDRTexture";
 
-// Resource types
-/**
- * Represents a resource type in a GPU.
- * @enum {string}
- * @typedef {('GPUShaderModule' | 'GPUBindGroupLayout' | 'GPUPipelineLayout')} ResourceType
- */
 enum ResourceType {
 	GPUShaderModule = 'GPUShaderModule',
 	GPUBindGroupLayout = 'GPUBindGroupLayout',
 	GPUPipelineLayout = 'GPUPipelineLayout',
+	GPUBuffer = 'GPUBuffer',
 }
 
-const textureViewCache = new WeakMap<GPUTexture, GPUTextureView>();
+type ResourceState = ResourceStateVertexBuffer
+	| ResourceStateIndexBuffer
+	| ResourceStateUniformBuffer
+	| ResourceStateStorageBuffer
+	| ResourceStateCubeTexture
+	| ResourceStateBitmapTexture
+	| ResourceStateHDRTexture;
 
-/**
- * Class representing a resource manager.
- *
- * @class
- * @extends ResourceBase
- */
-class ResourceManager extends ResourceBase {
+class ResourceManager {
 	static PRESET_GPUBindGroupLayout_System = 'PRESET_GPUBindGroupLayout_System'
 	static PRESET_VERTEX_GPUBindGroupLayout_Instancing = 'PRESET_VERTEX_GPUBindGroupLayout_Instancing'
 	static PRESET_VERTEX_GPUBindGroupLayout = 'PRESET_VERTEX_GPUBindGroupLayout'
 	static PRESET_VERTEX_GPUBindGroupLayout_SKIN = 'PRESET_VERTEX_GPUBindGroupLayout_SKIN'
-	/**
-	 * Represents a collection of resources for a GPU application.
-	 * @typedef {Object} Resources
-	 * @property {ImmutableKeyMap} resources - A map containing different types of resources.
-	 */
+	#gpuBufferVideoMemory: number = 0;
 	#resources = new ImmutableKeyMap([
 		[ResourceType.GPUShaderModule, new Map()],
 		[ResourceType.GPUBindGroupLayout, new Map()],
 		[ResourceType.GPUPipelineLayout, new Map()],
+		[ResourceType.GPUBuffer, new MemoryTrackingMap<string, GPUBuffer>()]
 	])
-	#managedBitmapTextureState: ResourceState = new ResourceState()
-	#managedCubeTextureState: ResourceState = new ResourceState()
-	#managedHDRTextureState: ResourceState = new ResourceState()
-	#managedUniformBufferState: ResourceState = new ResourceState()
-	#managedVertexBufferState: ResourceState = new ResourceState()
-	#managedIndexBufferState: ResourceState = new ResourceState()
-	#managedStorageBufferState: ResourceState = new ResourceState()
+	#managedBitmapTextureState: ResourceStatusInfo = new ResourceStatusInfo()
+	#managedCubeTextureState: ResourceStatusInfo = new ResourceStatusInfo()
+	#managedHDRTextureState: ResourceStatusInfo = new ResourceStatusInfo()
+	#managedUniformBufferState: ResourceStatusInfo = new ResourceStatusInfo()
+	#managedVertexBufferState: ResourceStatusInfo = new ResourceStatusInfo()
+	#managedIndexBufferState: ResourceStatusInfo = new ResourceStatusInfo()
+	#managedStorageBufferState: ResourceStatusInfo = new ResourceStatusInfo()
 	#cachedBufferState: any = {}
 	#emptyBitmapTextureView: GPUTextureView
 	#emptyCubeTextureView: GPUTextureView
 	readonly #mipmapGenerator: MipmapGenerator
 	readonly #downSampleCubeMapGenerator: DownSampleCubeMapGenerator
 	#basicSampler: Sampler
+	#bitmapTextureViewCache: WeakMap<GPUTexture, Map<string, GPUTextureView>> = new WeakMap();
+	#cubeTextureViewCache: WeakMap<GPUTexture, Map<string, GPUTextureView>> = new WeakMap();
+	readonly #redGPUContext: RedGPUContext
+	readonly #gpuDevice: GPUDevice
 
-	/**
-	 * Create a new instance of the constructor.
-	 *
-	 * @param {RedGPUContext} redGPUContext - The RedGPUContext object used for initialization.
-	 */
 	constructor(redGPUContext: RedGPUContext) {
-		super(redGPUContext)
+		this.#redGPUContext = redGPUContext
+		this.#gpuDevice = redGPUContext.gpuDevice
 		this.#mipmapGenerator = new MipmapGenerator(redGPUContext)
 		this.#downSampleCubeMapGenerator = new DownSampleCubeMapGenerator(redGPUContext)
 		this.#initPresets()
 	}
 
-	getGPUResourceBitmapTextureView(texture: BitmapTexture | PackedTexture | GPUTexture): GPUTextureView | null {
-		const targetGPUTexture = texture instanceof GPUTexture ? texture : texture?.gpuTexture
-		if (!targetGPUTexture) {
-			return this.#emptyBitmapTextureView;
-		}
-		let cachedView = textureViewCache.get(targetGPUTexture);
-		if (!cachedView) {
-			// 캐시에 없으면 새로 생성하고 저장
-			cachedView = targetGPUTexture.createView({
-				label: targetGPUTexture.label
-			});
-			textureViewCache.set(targetGPUTexture, cachedView);
-		}
-		return cachedView;
+	get redGPUContext(): RedGPUContext {
+		return this.#redGPUContext
 	}
 
-	getGPUResourceCubeTextureView(cubeTexture: CubeTexture | GPUTexture, viewDescriptor?: GPUTextureViewDescriptor): GPUTextureView | null {
-		const targetGPUTexture = cubeTexture instanceof GPUTexture ? cubeTexture : cubeTexture?.gpuTexture
-		const targetViewDescriptor = cubeTexture instanceof GPUTexture ? null : cubeTexture?.viewDescriptor
-		if (!targetGPUTexture) {
-			return this.#emptyCubeTextureView;
-		}
-		let cachedView = textureViewCache.get(targetGPUTexture);
-		if (!cachedView) {
-			// 캐시에 없으면 새로 생성하고 저장
-			const targetDescriptor = {
-				...(viewDescriptor || targetViewDescriptor || CubeTexture.defaultViewDescriptor),
-				label: targetGPUTexture?.label
-			}
-			cachedView = targetGPUTexture.createView(targetDescriptor);
-			textureViewCache.set(targetGPUTexture, cachedView);
-		}
-		return cachedView;
+	get gpuDevice(): GPUDevice {
+		return this.#gpuDevice
 	}
 
 	get basicSampler(): Sampler {
@@ -130,83 +103,147 @@ class ResourceManager extends ResourceBase {
 		return this.#emptyCubeTextureView;
 	}
 
-	get managedBitmapTextureState(): ResourceState {
+	get managedBitmapTextureState(): ResourceStatusInfo {
 		return this.#managedBitmapTextureState;
 	}
 
-	get managedCubeTextureState(): ResourceState {
+	get managedCubeTextureState(): ResourceStatusInfo {
 		return this.#managedCubeTextureState;
 	}
 
-	get managedHDRTextureState(): ResourceState {
+	get managedHDRTextureState(): ResourceStatusInfo {
 		return this.#managedHDRTextureState;
 	}
 
-	get managedUniformBufferState(): ResourceState {
+	get managedUniformBufferState(): ResourceStatusInfo {
 		return this.#managedUniformBufferState;
 	}
 
-	get managedVertexBufferState(): ResourceState {
+	get managedVertexBufferState(): ResourceStatusInfo {
 		return this.#managedVertexBufferState;
 	}
 
-	get managedIndexBufferState(): ResourceState {
+	get managedIndexBufferState(): ResourceStatusInfo {
 		return this.#managedIndexBufferState;
 	}
 
-	get managedStorageBufferState(): ResourceState {
+	get managedStorageBufferState(): ResourceStatusInfo {
 		return this.#managedStorageBufferState;
 	}
 
-	/**
-	 * Returns the resources as an ImmutableKeyMap.
-	 * @returns {ImmutableKeyMap} The resources.
-	 */
 	get resources(): ImmutableKeyMap {
 		return this.#resources;
 	}
 
-	/**
-	 * Creates a GPU shader module with the specified name and descriptor.
-	 *
-	 * @param {string} name - The name of the GPU shader module.
-	 * @param {GPUShaderModuleDescriptor} gpuShaderModuleDescriptor - The descriptor for the GPU shader module.
-	 *
-	 * @return {Promise<GPUShaderModule>} A Promise that resolves to the created GPU shader module.
-	 */
+	registerManagementResource(target: ManagementResourceBase, resourceState: ResourceState) {
+		const {cacheKey, targetResourceManagedState} = target;
+		const {table} = targetResourceManagedState;
+		if (table.get(cacheKey)) {
+			keepLog(`Resource with cacheKey ${cacheKey} is already registered.`);
+			return;
+		}
+		table.set(cacheKey, resourceState);
+		targetResourceManagedState.videoMemory += (target as any).videoMemorySize;
+	}
+
+	unregisterManagementResource(target: ManagementResourceBase) {
+		const {cacheKey, targetResourceManagedState} = target;
+		const {table} = targetResourceManagedState;
+		const resourceState = table.get(cacheKey);
+		// keepLog(target,table,'cacheKey',cacheKey,'resourceState',resourceState)
+		if (!resourceState) {
+			return;
+		}
+		targetResourceManagedState.videoMemory -= (target as any).videoMemorySize;
+		table.delete(cacheKey);
+	}
+
+	createManagedTexture(desc: GPUTextureDescriptor): GPUTexture {
+		const texture = this.gpuDevice.createTexture(desc);
+		const originalDestroy = texture.destroy.bind(texture);
+		texture.destroy = () => {
+			this.#clearTextureCache(texture, desc);
+			originalDestroy();
+		};
+		return texture;
+	}
+
+	getGPUResourceBitmapTextureView(
+		texture: BitmapTexture | PackedTexture | GPUTexture,
+		viewDescriptor?: GPUTextureViewDescriptor
+	): GPUTextureView | null {
+		const targetGPUTexture = texture instanceof GPUTexture ? texture : texture?.gpuTexture;
+		if (!targetGPUTexture) {
+			return this.#emptyBitmapTextureView;
+		}
+		let textureViewMap = this.#bitmapTextureViewCache.get(targetGPUTexture);
+		if (!textureViewMap) {
+			textureViewMap = new Map();
+			this.#bitmapTextureViewCache.set(targetGPUTexture, textureViewMap);
+		}
+		const cacheKey = this.#createDescriptorKey(viewDescriptor);
+		let cachedView = textureViewMap.get(cacheKey);
+		if (!cachedView) {
+			const targetDescriptor = viewDescriptor ? {
+				...viewDescriptor,
+				label: viewDescriptor.label || targetGPUTexture.label
+			} : {
+				label: targetGPUTexture.label
+			};
+			cachedView = targetGPUTexture.createView(targetDescriptor);
+			textureViewMap.set(cacheKey, cachedView);
+			console.log('🔷 새 비트맵 텍스처 뷰 생성:', targetGPUTexture.label, cacheKey);
+		} else {
+			console.log('🎯 비트맵 텍스처 뷰 캐시 히트:', targetGPUTexture.label, cacheKey);
+		}
+		return cachedView;
+	}
+
+	getGPUResourceCubeTextureView(
+		cubeTexture: CubeTexture | GPUTexture | IBLCubeTexture,
+		viewDescriptor?: GPUTextureViewDescriptor
+	): GPUTextureView | null {
+		const targetGPUTexture = cubeTexture instanceof GPUTexture ? cubeTexture : cubeTexture?.gpuTexture;
+		if (!targetGPUTexture) {
+			return this.#emptyCubeTextureView;
+		}
+		let textureViewMap = this.#cubeTextureViewCache.get(targetGPUTexture);
+		if (!textureViewMap) {
+			textureViewMap = new Map();
+			this.#cubeTextureViewCache.set(targetGPUTexture, textureViewMap);
+		}
+		if (!(cubeTexture instanceof GPUTexture) && !viewDescriptor) viewDescriptor = cubeTexture.viewDescriptor;
+		const effectiveDescriptor = viewDescriptor || CubeTexture.defaultViewDescriptor;
+		const cacheKey = this.#createDescriptorKey(effectiveDescriptor);
+		let cachedView = textureViewMap.get(cacheKey);
+		if (!cachedView) {
+			const targetDescriptor = {
+				...effectiveDescriptor,
+				label: targetGPUTexture.label
+			};
+			cachedView = targetGPUTexture.createView(targetDescriptor);
+			textureViewMap.set(cacheKey, cachedView);
+			console.log('🧊 새 큐브 텍스처 뷰 생성:', targetGPUTexture.label, cacheKey);
+		} else {
+			console.log('🎯 큐브 텍스처 뷰 캐시 히트:', targetGPUTexture.label, cacheKey);
+		}
+		return cachedView;
+	}
+
 	createGPUShaderModule(name: string, gpuShaderModuleDescriptor: GPUShaderModuleDescriptor) {
 		return this.#createResource(name, gpuShaderModuleDescriptor,
 			descriptor => this.#createAndCacheModule(name, descriptor),
 			ResourceType.GPUShaderModule);
 	}
 
-	/**
-	 * Retrieves a GPU shader module by its name.
-	 *
-	 * @param {string} name - The name of the shader module.
-	 *
-	 * @return {GPUShaderModule} - The requested GPU shader module.
-	 */
 	getGPUShaderModule(name: string): GPUShaderModule {
 		return this.#getResource(name, ResourceType.GPUShaderModule);
 	}
 
-	/**
-	 * Deletes a GPU shader module.
-	 *
-	 * @param {string} name - The name of the shader module to delete.
-	 */
 	deleteGPUShaderModule(name: string) {
 		this.#deleteResource(name, ResourceType.GPUShaderModule);
 	}
 
-	/**
-	 * Create a bind group layout.
-	 *
-	 * @param {string} name - The name of the bind group layout.
-	 * @param {GPUBindGroupLayoutDescriptor} bindGroupLayoutDescriptor - The descriptor for the bind group layout.
-	 * @return {GPUBindGroupLayout} - The created bind group layout.
-	 */
 	createBindGroupLayout(name: string, bindGroupLayoutDescriptor: GPUBindGroupLayoutDescriptor): GPUBindGroupLayout {
 		return this.#createResource(name, bindGroupLayoutDescriptor,
 			descriptor => {
@@ -215,35 +252,13 @@ class ResourceManager extends ResourceBase {
 			}, ResourceType.GPUBindGroupLayout);
 	}
 
-	/**
-	 * Retrieves the GPU bind group layout with the specified name.
-	 *
-	 * @param {string} name - The name of the GPU bind group layout.
-	 *
-	 * @return {GPUBindGroupLayout} - The GPU bind group layout object.
-	 */
 	getGPUBindGroupLayout(name: string): GPUBindGroupLayout {
 		return this.#getResource(name, ResourceType.GPUBindGroupLayout);
 	}
 
-	/**
-	 * Deletes the GPU bind group layout with the given name.
-	 *
-	 * @param {string} name - The name of the GPU bind group layout to delete.
-	 *
-	 */
 	deleteGPUBindGroupLayout(name: string) {
 		this.#deleteResource(name, ResourceType.GPUBindGroupLayout);
 	}
-
-	/**
-	 * Creates a GPU pipeline layout with the given name and descriptor.
-	 *
-	 * @param {string} name - The name of the GPU pipeline layout.
-	 * @param {GPUPipelineLayoutDescriptor} gpuPipelineLayoutDescriptor - The descriptor for the GPU pipeline layout.
-	 *
-	 * @return {GPUPipelineLayout} - The created GPU pipeline layout.
-	 */
 
 	createGPUPipelineLayout(name: string, gpuPipelineLayoutDescriptor: GPUPipelineLayoutDescriptor) {
 		return this.#createResource(name, gpuPipelineLayoutDescriptor,
@@ -253,56 +268,60 @@ class ResourceManager extends ResourceBase {
 			}, ResourceType.GPUPipelineLayout);
 	}
 
-	getGPUPipelineLayout(name: string) {
-		return this.#getResource(name, ResourceType.GPUPipelineLayout);
+	createGPUBuffer(name: string, gpuBufferDescriptor: GPUBufferDescriptor) {
+		return this.#createResource(name, gpuBufferDescriptor,
+			descriptor => {
+				if (!descriptor.label) descriptor.label = name;
+				return this.gpuDevice.createBuffer(descriptor);
+			}, ResourceType.GPUBuffer);
 	}
 
-	/** Deletes the GPU pipeline layout with the given name.
-	 *
-	 * @param {string} name - The name of the GPU pipeline layout to delete.
-	 *
-	 * @return {void}
-	 */
-	deleteGPUPipelineLayout(name: string) {
-		this.#deleteResource(name, ResourceType.GPUPipelineLayout);
+	#clearTextureCache(texture: GPUTexture, desc: GPUTextureDescriptor) {
+		const cache = desc.dimension === '3d' ?
+			this.#cubeTextureViewCache :
+			this.#bitmapTextureViewCache;
+		cache.get(texture)?.clear();
+		if (cache.delete(texture)) {
+			const type = desc.dimension === '3d' ? '🧊 큐브' : '🔷 비트맵';
+			// keepLog(`${type} 텍스처 뷰 캐시 정리:`, texture.label);
+		}
+	}
+
+	#createDescriptorKey(viewDescriptor?: GPUTextureViewDescriptor): string {
+		return viewDescriptor ? JSON.stringify(viewDescriptor) : 'default';
 	}
 
 	#initPresets() {
 		const {gpuDevice} = this.redGPUContext
 		{
-			// 1x1 투명 텍스처 생성 (싱글 레이어)
 			const emptyBitmapTexture = gpuDevice.createTexture({
 				size: {width: 1, height: 1, depthOrArrayLayers: 1},
-				format: 'rgba8unorm', // RGBA 포맷으로 변경 (r8unorm은 단일 채널 미지원)
-				usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST, // 데이터 복사 가능하도록 COPY_DST 추가
+				format: 'rgba8unorm',
+				usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
 				label: 'EMPTY_BITMAP_TEXTURE',
 			});
-			this.#emptyBitmapTextureView = emptyBitmapTexture.createView({label: emptyBitmapTexture.label}); // 뷰 생성
-			const transparentPixel = new Uint8Array([0, 0, 0, 0]); // 투명 RGBA (1x1)
-			// 텍스처 초기화
+			this.#emptyBitmapTextureView = emptyBitmapTexture.createView({label: emptyBitmapTexture.label});
+			const transparentPixel = new Uint8Array([0, 0, 0, 0]);
 			gpuDevice.queue.writeTexture(
-				{texture: emptyBitmapTexture}, // 텍스처 자체를 대상으로
-				transparentPixel, // 업로드할 데이터
-				{bytesPerRow: 4, rowsPerImage: 1}, // 데이터 레이아웃
-				{width: 1, height: 1, depthOrArrayLayers: 1} // 텍스처 크기
+				{texture: emptyBitmapTexture},
+				transparentPixel,
+				{bytesPerRow: 4, rowsPerImage: 1},
+				{width: 1, height: 1, depthOrArrayLayers: 1}
 			);
-			// 1x1 투명 큐브 텍스처 생성 (6개 레이어)
 			const emptyCubeTexture = gpuDevice.createTexture({
-				size: {width: 1, height: 1, depthOrArrayLayers: 6}, // 6 레이어로 구성된 큐브 맵
-				format: 'rgba8unorm', // 큐브 맵도 RGBA 포맷 사용
-				usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST, // 복사 가능하도록 COPY_DST 포함
+				size: {width: 1, height: 1, depthOrArrayLayers: 6},
+				format: 'rgba8unorm',
+				usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
 				label: 'EMPTY_CUBE_TEXTURE',
 			});
-			this.#emptyCubeTextureView = emptyCubeTexture.createView(CubeTexture.defaultViewDescriptor); // 뷰 생성
-			// 각 큐브 면 초기화 데이터 (RGBA)
-			const cubeTransparentPixels = new Uint8Array([0, 0, 0, 0]); // 동일한 데이터를 사용할 경우 1x1 픽셀만 필요
-			// 각 큐브 맵의 6면 초기화
+			this.#emptyCubeTextureView = emptyCubeTexture.createView(CubeTexture.defaultViewDescriptor);
+			const cubeTransparentPixels = new Uint8Array([0, 0, 0, 0]);
 			for (let i = 0; i < 6; i++) {
 				gpuDevice.queue.writeTexture(
-					{texture: emptyCubeTexture, origin: {x: 0, y: 0, z: i}}, // 해당 레이어 선택
-					cubeTransparentPixels, // 각 레이어에 동일한 데이터 업로드
-					{bytesPerRow: 4, rowsPerImage: 1}, // 데이터 레이아웃
-					{width: 1, height: 1, depthOrArrayLayers: 1} // 크기 설정
+					{texture: emptyCubeTexture, origin: {x: 0, y: 0, z: i}},
+					cubeTransparentPixels,
+					{bytesPerRow: 4, rowsPerImage: 1},
+					{width: 1, height: 1, depthOrArrayLayers: 1}
 				);
 			}
 			this.#basicSampler = new Sampler(this.redGPUContext)
@@ -376,27 +395,13 @@ class ResourceManager extends ResourceBase {
 		}
 	}
 
-	/**
-	 * Retrieves the target map associated with a given resource type key.
-	 *
-	 * @param {ResourceType} key - The resource type key.
-	 * @returns {Map} - The target map associated with the resource type key.
-	 */
 	#getTargetMap(key: ResourceType) {
 		return this.#resources.get(key);
 	}
 
-	/**
-	 * Creates a GPU shader module and caches it with the specified name.
-	 *
-	 * @param {string} name - The name for caching the shader module.
-	 * @param {GPUShaderModuleDescriptor} gpuShaderModuleDescriptor - The descriptor object for creating the shader module.
-	 * @return {GPUShaderModule} The created GPU shader module.
-	 */
 	#createAndCacheModule(name: string, gpuShaderModuleDescriptor: GPUShaderModuleDescriptor) {
 		const {code} = gpuShaderModuleDescriptor
 		const newCode = preprocessWGSL(code).defaultSource
-		///
 		const newModule: GPUShaderModule = this.redGPUContext.gpuDevice.createShaderModule({
 			...gpuShaderModuleDescriptor,
 			code: newCode,
@@ -406,34 +411,14 @@ class ResourceManager extends ResourceBase {
 		return newModule
 	}
 
-	/**
-	 * Retrieves the target map and verifies the given name for a specific resource type.
-	 *
-	 * @param {string} name - The name to verify.
-	 * @param {ResourceType} resourceType - The type of the resource.
-	 *
-	 * @returns {ImmutableKeyMap} - The target map associated with the resource type.
-	 *
-	 * @throws {Error} If the name parameter is empty.
-	 */
 	#getTargetMapAndVerifyName(name: string, resourceType: ResourceType): ImmutableKeyMap {
 		if (!name) throw new Error('Name is required');
 		return this.#getTargetMap(resourceType);
 	}
 
-	/**
-	 * Create a resource with the given name, descriptor, create function, and resource type.
-	 *
-	 * @param {string} name - The name of the resource.
-	 * @param {any} descriptor - The descriptor of the resource.
-	 * @param {Function} createFn - The function used to create the resource.
-	 * @param {ResourceType} resourceType - The type of the resource.
-	 * @returns {any} - The created resource.
-	 */
 	#createResource(name: string, descriptor: any, createFn: Function, resourceType: ResourceType) {
 		const targetMap = this.#getTargetMapAndVerifyName(name, resourceType);
 		if (targetMap.has(name)) {
-			// console.log(`::: ${resourceType} with name ${name} already exists. Use a cached Resource.`, targetMap.get(name));
 			return targetMap.get(name);
 		}
 		if (!descriptor.label) descriptor.label = name
@@ -447,13 +432,6 @@ class ResourceManager extends ResourceBase {
 		return targetMap.get(name);
 	}
 
-	/**
-	 * Deletes a resource with the given name and resource type.
-	 *
-	 * @param {string} name - The name of the resource to be deleted.
-	 * @param {ResourceType} resourceType - The type of the resource to be deleted.
-	 * @throws {Error} If the resource with the given name doesn't exist.
-	 */
 	#deleteResource(name: string, resourceType: ResourceType) {
 		const targetMap = this.#getTargetMapAndVerifyName(name, resourceType);
 		if (!targetMap.has(name)) {
@@ -466,17 +444,6 @@ class ResourceManager extends ResourceBase {
 Object.freeze(BitmapTexture)
 export default ResourceManager
 
-/**
- * @class ImmutableKeyMap
- * @extends Map
- *
- * @classdesc
- * A class that represents an immutable key-value map.
- * Once a key-value pair is set, it cannot be changed or removed.
- *
- * @constructor
- * @param {Array<[any, any]>} [initValues=[]] - An array of initial key-value pairs to initialize the map with.
- */
 class ImmutableKeyMap extends Map {
 	constructor(initValues: [any, any][] = []) {
 		super();
@@ -489,5 +456,57 @@ class ImmutableKeyMap extends Map {
 		} else {
 			return super.set(key, value);
 		}
+	}
+}
+
+class MemoryTrackingMap<K, V> extends Map<K, V> {
+	#videoMemory: number = 0;
+
+	constructor() {
+		super();
+	}
+
+	get videoMemory(): number {
+		return this.#videoMemory;
+	}
+
+	set(key: K, value: V): this {
+		// 기존 값이 있다면 메모리에서 제거
+		const videoMemoryKey =
+			(value && 'videoMemorySize' in (value as any)) ? 'videoMemorySize'
+				: (value && 'size' in (value as any)) ? 'size'
+					: undefined;
+		if (this.has(key)) {
+			const existingValue = this.get(key) as any;
+			if (existingValue && existingValue[videoMemoryKey]) {
+				this.#videoMemory -= existingValue[videoMemoryKey];
+			}
+		}
+		// 새 값의 메모리 추가
+		if (value && (value as any)) {
+			this.#videoMemory += (value as any)[videoMemoryKey];
+		}
+		const result = super.set(key, value);
+		return result;
+	}
+
+	delete(key: K): boolean {
+		if (this.has(key)) {
+			const value = this.get(key) as any;
+			const videoMemoryKey =
+				(value && 'videoMemorySize' in (value as any)) ? 'videoMemorySize'
+					: (value && 'size' in (value as any)) ? 'size'
+						: undefined;
+			if (value && value[videoMemoryKey]) {
+				this.#videoMemory -= value[videoMemoryKey];
+			}
+		}
+		const result = super.delete(key);
+		return result;
+	}
+
+	clear(): void {
+		this.#videoMemory = 0;
+		super.clear();
 	}
 }

@@ -106,7 +106,8 @@ RedGPU.init(
 
 const renderTestPane = async (redGPUContext, targetNoiseTexture, testData) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
-	const {setSeparator} = await import("../../../../exampleHelper/createExample/panes/index.js");
+	const {setSeparator, setDebugViewButton} = await import("../../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
 	const pane = new Pane();
 
 	setSeparator(pane, "Fire Presets");

@@ -45,25 +45,26 @@ const createSampleMesh = (redGPUContext, scene) => {
 };
 
 const renderTestPane = async (redGPUContext, mesh) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
-	const { setSeparator } = await import("../../../exampleHelper/createExample/panes/index.js");
+	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+	const {setSeparator, setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
 	const pane = new Pane();
 
-	pane.addBinding(mesh.material, 'opacity', { min: 0, max: 1, step: 0.01 })
+	pane.addBinding(mesh.material, 'opacity', {min: 0, max: 1, step: 0.01})
 		.on('change', (e) => {
 			mesh.material.opacity = e.value;
 		});
 
 	const textures = [
-		{ name: 'set diffuseTexture : png', path: '../../../assets/imageFormat/webgpu.png' },
-		{ name: 'set diffuseTexture : jpg', path: '../../../assets/imageFormat/webgpu.jpg' },
-		{ name: 'set diffuseTexture : webp', path: '../../../assets/imageFormat/webgpu.webp' },
-		{ name: 'set diffuseTexture : svg', path: '../../../assets/imageFormat/webgpu.svg' },
+		{name: 'set diffuseTexture : png', path: '../../../assets/imageFormat/webgpu.png'},
+		{name: 'set diffuseTexture : jpg', path: '../../../assets/imageFormat/webgpu.jpg'},
+		{name: 'set diffuseTexture : webp', path: '../../../assets/imageFormat/webgpu.webp'},
+		{name: 'set diffuseTexture : svg', path: '../../../assets/imageFormat/webgpu.svg'},
 	];
 
-	pane.addFolder({ title: 'Textures' });
-	textures.forEach(({ name, path }) => {
-		pane.addButton({ title: name }).on('click', () => {
+	pane.addFolder({title: 'Textures'});
+	textures.forEach(({name, path}) => {
+		pane.addButton({title: name}).on('click', () => {
 			mesh.material.diffuseTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, path);
 			console.log(`Texture applied: ${path}`);
 		});

@@ -25,7 +25,7 @@ RedGPU.init(
 		scene.backgroundColor.setColorByHEX('#5259c3');
 
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		view.grid=true
+		view.grid = true
 		redGPUContext.addView(view);
 
 		const directionalLight = new RedGPU.Light.DirectionalLight();
@@ -46,8 +46,6 @@ RedGPU.init(
 
 		geometries.forEach((geometry, index) => {
 			const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
-
-
 
 			const angle = (Math.PI * 2 * index) / totalGeometries;
 			mesh.x = radius * Math.cos(angle);
@@ -77,8 +75,8 @@ const createTextures = (redGPUContext) => {
 
 const renderUI = async (redGPUContext, mesh) => {
 	const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
-	const {setSeparator} = await import("../../../exampleHelper/createExample/panes/index.js");
-
+	const {setSeparator, setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
 	const pane = new Pane();
 	const material = mesh.material;
 	const textures = createTextures(redGPUContext);

@@ -44,9 +44,9 @@ const createPlanePrimitive = (redGPUContext, scene) => {
 
 	const gap = 5;
 	const planeProperties = [
-		{ material: planeMaterials.solid, position: [0, 0, 0] },
-		{ material: planeMaterials.wireframe, position: [-gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST },
-		{ material: planeMaterials.point, position: [gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST },
+		{material: planeMaterials.solid, position: [0, 0, 0]},
+		{material: planeMaterials.wireframe, position: [-gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST},
+		{material: planeMaterials.point, position: [gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST},
 	];
 
 	const defaultOptions = {
@@ -56,7 +56,7 @@ const createPlanePrimitive = (redGPUContext, scene) => {
 		heightSegments: 10,
 	};
 
-	planeProperties.forEach(({ material, position, topology }) => {
+	planeProperties.forEach(({material, position, topology}) => {
 		const plane = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Plane(
@@ -97,7 +97,9 @@ const createPlanePrimitive = (redGPUContext, scene) => {
 };
 
 const renderTestPane = async (redGPUContext) => {
-	const { Pane } = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
+	const {setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext)
+	const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
 	const pane = new Pane();
 
 	const config = {
@@ -128,9 +130,9 @@ const renderTestPane = async (redGPUContext) => {
 		});
 	};
 
-	const planeFolder = pane.addFolder({ title: 'Plane Properties', expanded: true });
-	addBinding(planeFolder, 'width', { min: 1, max: 10, step: 1 });
-	addBinding(planeFolder, 'height', { min: 1, max: 10, step: 1 });
-	addBinding(planeFolder, 'widthSegments', { min: 1, max: 64, step: 1 });
-	addBinding(planeFolder, 'heightSegments', { min: 1, max: 64, step: 1 });
+	const planeFolder = pane.addFolder({title: 'Plane Properties', expanded: true});
+	addBinding(planeFolder, 'width', {min: 1, max: 10, step: 1});
+	addBinding(planeFolder, 'height', {min: 1, max: 10, step: 1});
+	addBinding(planeFolder, 'widthSegments', {min: 1, max: 64, step: 1});
+	addBinding(planeFolder, 'heightSegments', {min: 1, max: 64, step: 1});
 };

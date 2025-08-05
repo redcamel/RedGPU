@@ -108,6 +108,8 @@ const renderTestPane = async (redGPUContext, targetView) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const {createPostEffectLabel} = await import('../../../../exampleHelper/createExample/loadExampleInfo/createPostEffectLabel.js');
 	createPostEffectLabel('Vignetting', redGPUContext.detector.isMobile)
+	const {setDebugViewButton} = await import("../../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
 	const pane = new Pane();
 
 	const TEST_STATE = {
@@ -130,7 +132,6 @@ const renderTestPane = async (redGPUContext, targetView) => {
 		// 조정바 활성화/비활성화
 		smoothnessControl.disabled = !v.value;
 		sizeControl.disabled = !v.value;
-		centerYControl.disabled = !v.value;
 	});
 	const smoothnessControl = folder.addBinding(TEST_STATE, 'smoothness', {min: 0, max: 1}).on('change', (v) => {
 		targetView.postEffectManager.getEffectAt(0).smoothness = v.value

@@ -11,14 +11,12 @@ const parseGLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, callBack) => {
 	//  작업을 여러 프레임에 분산
 	requestAnimationFrame(() => {
 		parseAssetVersion(gltfData);
-
 		requestAnimationFrame(() => {
 			getGLTFBuffersResources(gltfLoader, gltfData, () => {
 				requestAnimationFrame(() => {
 					parseScene_GLTF(gltfLoader, gltfData, () => {
 						requestAnimationFrame(() => {
 							parseCameras_GLTF(gltfLoader, gltfData);
-
 							// TextureLoader 실행
 							new TextureLoader(
 								gltfLoader.redGPUContext,
@@ -33,7 +31,6 @@ const parseGLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, callBack) => {
 											}
 										})
 									});
-
 									parseAnimation_GLTF(gltfLoader, gltfData).then(_ => {
 										if (callBack) callBack();
 									});

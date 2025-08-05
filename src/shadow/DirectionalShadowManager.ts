@@ -3,6 +3,7 @@ import InstancingMesh from "../display/instancingMesh/InstancingMesh";
 import Mesh from "../display/mesh/Mesh";
 import validatePositiveNumberRange from "../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import validateUintRange from "../runtimeChecker/validateFunc/validateUintRange";
+import calculateTextureByteSize from "../utils/math/calculateTextureByteSize";
 
 class DirectionalShadowManager {
 	#shadowDepthTextureSize: number = 2048
@@ -12,6 +13,11 @@ class DirectionalShadowManager {
 	#shadowDepthTextureViewEmpty: GPUTextureView
 	#redGPUContext: RedGPUContext
 	#castingList: (Mesh | InstancingMesh)[] = []
+	#videoMemorySize: number = 0
+	get videoMemorySize(): number {
+		return this.#videoMemorySize;
+	}
+
 	get castingList(): (Mesh | InstancingMesh)[] {
 		return this.#castingList;
 	}
@@ -43,6 +49,10 @@ class DirectionalShadowManager {
 		this.#checkDepthTexture()
 	}
 
+	reset() {
+		this.destroy()
+	}
+
 	resetCastingList() {
 		this.#castingList.length = 0
 	}
@@ -60,10 +70,17 @@ class DirectionalShadowManager {
 		}
 	}
 
+	#calcVideoMemory() {
+		const texture = this.#shadowDepthTexture
+		if (!texture) return 0;
+		this.#videoMemorySize = calculateTextureByteSize(texture)
+	}
+
 	#checkDepthTexture() {
 		if (this.#shadowDepthTexture?.width !== this.#shadowDepthTextureSize) {
 			this.destroy()
 			this.#createDepthTexture()
+			this.#calcVideoMemory()
 		}
 	}
 
@@ -78,8 +95,8 @@ class DirectionalShadowManager {
 	}
 
 	#createDepthTexture() {
-		const {gpuDevice} = this.#redGPUContext
-		this.#shadowDepthTexture = gpuDevice.createTexture({
+		const {gpuDevice, resourceManager} = this.#redGPUContext
+		this.#shadowDepthTexture = resourceManager.createManagedTexture({
 			size: [this.#shadowDepthTextureSize, this.#shadowDepthTextureSize, 1],
 			usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
 			format: 'depth32float',

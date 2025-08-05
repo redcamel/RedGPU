@@ -16,6 +16,7 @@ import RedGPUContextDetector from "./detector/RedGPUContextDetector";
 class RedGPUContext extends RedGPUContextViewContainer {
 	currentRequestAnimationFrame: number
 	onResize: ((width: number, height: number) => void) | null = null;
+	currentTime: number
 	#configurationDescription: GPUCanvasConfiguration
 	readonly #gpuAdapter: GPUAdapter
 	#alphaMode: GPUCanvasAlphaMode

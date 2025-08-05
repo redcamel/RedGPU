@@ -3,7 +3,6 @@ import ResourceManager from "../../../../resources/resourceManager/ResourceManag
 import Mesh from "../../Mesh";
 import createMeshVertexShaderModule from "../shader/createMeshVertexShaderModule";
 import createBasePipeline from "./createBasePipeline";
-import PIPELINE_TYPE from "./PIPELINE_TYPE";
 
 /**
  * Updates the dirty state of a mesh's pipeline and related data.

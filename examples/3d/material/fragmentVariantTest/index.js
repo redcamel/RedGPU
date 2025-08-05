@@ -132,7 +132,8 @@ const createTextures = (redGPUContext) => {
 // ===== UI Rendering =====
 const renderUI = async (redGPUContext, mesh) => {
 	const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
-	const {setSeparator} = await import("../../../exampleHelper/createExample/panes/index.js");
+	const {setSeparator, setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
 
 	const pane = new Pane({title: "Phong Shader Variants"});
 	const material = mesh.material;
@@ -166,8 +167,6 @@ const renderUI = async (redGPUContext, mesh) => {
 	// Variant information folder
 	const variantFolder = pane.addFolder({title: "📊 Variant Information", expanded: true});
 
-
-
 	variantFolder.addBinding(params.shaderVariants, 'cachedVariants', {
 		readonly: true,
 		label: 'Cached Variants'
@@ -187,7 +186,6 @@ const renderUI = async (redGPUContext, mesh) => {
 			localStorage.setItem('variantDisplayVisible', ev.value);
 		}
 	});
-
 
 	setSeparator(pane);
 
@@ -209,7 +207,6 @@ const renderUI = async (redGPUContext, mesh) => {
 
 	// Utility folder
 	const utilityFolder = pane.addFolder({title: "🛠️ Utilities"});
-
 
 	// Clear all textures button
 	utilityFolder.addButton({title: "🧹 Clear All Textures"}).on('click', () => {
@@ -235,6 +232,7 @@ const renderUI = async (redGPUContext, mesh) => {
 	}
 	utilityFolder.addButton({title: "🎨 Apply All Textures"}).on('click', HD_AllTexture);
 	HD_AllTexture()
+
 	// ===== Core Functions =====
 
 	function getCurrentVariant() {
@@ -250,7 +248,6 @@ const renderUI = async (redGPUContext, mesh) => {
 		}
 		return 'none';
 	}
-
 
 	function updateVariantInfo() {
 		const currentVariant = getCurrentVariant();

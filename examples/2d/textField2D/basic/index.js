@@ -45,7 +45,8 @@ RedGPU.init(canvas, (redGPUContext) => {
 });
 
 const renderTestPane = async (scene, redGPUContext) => {
-	const {setSeparator} = await import("../../../exampleHelper/createExample/panes/index.js");
+	const {setDebugViewButton, setSeparator} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const pane = new Pane();
 
@@ -86,8 +87,7 @@ const renderTestPane = async (scene, redGPUContext) => {
 	const updateTestData = () => {
 		const child = scene.children[0];
 
-		controls.useBillboardPerspective = child.useBillboardPerspective;
-		controls.useBillboard = child.useBillboard;
+
 		controls.scaleX = child.scaleX;
 		controls.scaleY = child.scaleY;
 		controls.scaleZ = child.scaleZ;

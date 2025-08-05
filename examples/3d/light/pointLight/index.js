@@ -72,39 +72,40 @@ const createSampleMeshes = (redGPUContext, scene) => {
 };
 
 const renderTestPaneWithLightControl = async (redGPUContext, light) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const pane = new Pane();
-
+	const {setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
 	const lightConfig = {
 		x: light.position[0],
 		y: light.position[1],
 		z: light.position[2],
 		radius: light.radius,
 		intensity: light.intensity,
-		color: { r: light.color.r, g: light.color.g, b: light.color.b },
+		color: {r: light.color.r, g: light.color.g, b: light.color.b},
 	};
 
-	const lightFolder = pane.addFolder({ title: 'Point Light', expanded: true });
-	lightFolder.addBinding(lightConfig, 'x', { min: -10, max: 10, step: 0.1 }).on('change', (evt) => {
+	const lightFolder = pane.addFolder({title: 'Point Light', expanded: true});
+	lightFolder.addBinding(lightConfig, 'x', {min: -10, max: 10, step: 0.1}).on('change', (evt) => {
 		light.x = evt.value;
 	});
-	lightFolder.addBinding(lightConfig, 'y', { min: -10, max: 10, step: 0.1 }).on('change', (evt) => {
+	lightFolder.addBinding(lightConfig, 'y', {min: -10, max: 10, step: 0.1}).on('change', (evt) => {
 		light.y = evt.value;
 	});
-	lightFolder.addBinding(lightConfig, 'z', { min: -10, max: 10, step: 0.1 }).on('change', (evt) => {
+	lightFolder.addBinding(lightConfig, 'z', {min: -10, max: 10, step: 0.1}).on('change', (evt) => {
 		light.z = evt.value;
 	});
-	lightFolder.addBinding(lightConfig, 'intensity', { min: 0, max: 5, step: 0.1 }).on('change', (evt) => {
+	lightFolder.addBinding(lightConfig, 'intensity', {min: 0, max: 5, step: 0.1}).on('change', (evt) => {
 		light.intensity = evt.value;
 	});
-	lightFolder.addBinding(lightConfig, 'radius', { min: 0, max: 20, step: 0.1 }).on('change', (evt) => {
+	lightFolder.addBinding(lightConfig, 'radius', {min: 0, max: 20, step: 0.1}).on('change', (evt) => {
 		light.radius = evt.value;
 	});
 	lightFolder.addBinding(light, 'enableDebugger');
 	lightFolder
-		.addBinding(lightConfig, 'color', { picker: 'inline', view: 'color', expanded: true })
+		.addBinding(lightConfig, 'color', {picker: 'inline', view: 'color', expanded: true})
 		.on('change', (evt) => {
-			const { r, g, b } = evt.value;
+			const {r, g, b} = evt.value;
 			light.color.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
 		});
 };
