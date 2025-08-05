@@ -38,7 +38,7 @@ fn main(inputData: InputData) -> @location(0) vec4<f32> {
     if (u_transitionProgress > 0.0) {
         let transitionSample = textureSampleLevel(transitionTexture, skyboxTextureSampler, cubemapVec, mipmapCount * blurCurve);
 
-        #redgpu_if transitionTexture
+        #redgpu_if transitionAlphaTexture
             // 큐브맵 벡터를 2D UV 좌표로 변환
             let uv = sphericalToUV(normalize(cubemapVec));
             // transitionAlphaTexture 샘플링

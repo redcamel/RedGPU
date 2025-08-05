@@ -1,6 +1,7 @@
 import redGPUContext from "../../../context/RedGPUContext";
 import RedGPUContext from "../../../context/RedGPUContext";
 import createUUID from "../../../utils/createUUID";
+import getMipLevelCount from "../../../utils/math/getMipLevelCount";
 import resourceManager from "../../resourceManager/ResourceManager";
 import Sampler from "../../sampler/Sampler";
 import computeShaderCode from "./computeShader.wgsl";
@@ -197,7 +198,8 @@ class PackedTexture {
 			size: [width, height, 1],
 			format: 'rgba8unorm',
 			usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC,
-			label: label || `PACK_TEXTURE_${createUUID()}`
+			label: label || `PACK_TEXTURE_${createUUID()}`,
+			mipLevelCount:getMipLevelCount(width,height)
 		};
 		if (this.#gpuTexture) {
 			this.#gpuTexture = null;
@@ -212,7 +214,11 @@ class PackedTexture {
 		this.#gpuDevice.queue.writeBuffer(mappingBuffer, 0, mappingData);
 		this.#updateBindGroup(textures);
 		this.#executeRenderPass(packedTexture);
-		this.#gpuTexture = this.#redGPUContext.resourceManager.mipmapGenerator.generateMipmap(packedTexture, textureDescriptor);
+		if (textureDescriptor.mipLevelCount > 1) {
+			this.#gpuTexture = this.#redGPUContext.resourceManager.mipmapGenerator.generateMipmap(packedTexture, textureDescriptor);
+		} else {
+			this.#gpuTexture = packedTexture;
+		}
 		// 새로운 텍스처를 캐시에 등록
 		cacheMap.set(mappingKey, {
 			gpuTexture: this.#gpuTexture,
@@ -230,7 +236,12 @@ class PackedTexture {
 		const passEncoder = commandEncoder.beginRenderPass({
 			colorAttachments: [
 				{
-					view: resourceManager.getGPUResourceBitmapTextureView(packedTexture),
+					view: resourceManager.getGPUResourceBitmapTextureView(packedTexture,{
+						baseMipLevel: 0,
+						mipLevelCount: 1,
+						dimension: '2d',
+						label: `${packedTexture.label}_RENDER_TARGET`
+					}),
 					loadOp: 'clear',
 					storeOp: 'store',
 					clearValue: [0, 0, 0, 0],
