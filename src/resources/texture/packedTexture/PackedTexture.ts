@@ -1,5 +1,7 @@
+import redGPUContext from "../../../context/RedGPUContext";
 import RedGPUContext from "../../../context/RedGPUContext";
 import createUUID from "../../../utils/createUUID";
+import resourceManager from "../../resourceManager/ResourceManager";
 import Sampler from "../../sampler/Sampler";
 import computeShaderCode from "./computeShader.wgsl";
 
@@ -9,7 +11,8 @@ type ComponentMapping = {
 	b?: 'r' | 'g' | 'b' | 'a';  // b 채널에서 사용할 컴포넌트
 	a?: 'r' | 'g' | 'b' | 'a';  // a 채널에서 사용할 컴포넌트
 };
-const cacheMap: Map<string, { gpuTexture: GPUTexture, useNum: number, mappingKey: string }> = new Map();
+//TODO - 리소스 매니저로 옮겨야함
+const cacheMap: Map<string, { gpuTexture: GPUTexture, useNum: number, mappingKey: string,uuid:string }> = new Map();
 // 인스턴스별 현재 사용 중인 키 추적을 위한 WeakMap
 const instanceMappingKeys: WeakMap<PackedTexture, string> = new WeakMap();
 let globalPipeline: GPURenderPipeline;
@@ -17,12 +20,20 @@ let globalBindGroupLayout: GPUBindGroupLayout;
 let mappingBuffer: GPUBuffer;
 
 class PackedTexture {
+	static getCacheMap() {
+		return cacheMap;
+	}
+	#uuid:string = createUUID();
 	#redGPUContext: RedGPUContext;
 	#sampler: GPUSampler;
 	#gpuTexture: GPUTexture;
 	#gpuDevice: GPUDevice;
 	#bindGroup: GPUBindGroup;
 	#tempBindGroupCache: Map<string, GPUBindGroup> = new Map();
+
+	get uuid(): string {
+		return this.#uuid;
+	}
 
 	constructor(redGPUContext: RedGPUContext) {
 		this.#redGPUContext = redGPUContext;
@@ -206,7 +217,8 @@ class PackedTexture {
 		cacheMap.set(mappingKey, {
 			gpuTexture: this.#gpuTexture,
 			useNum: 1,
-			mappingKey
+			mappingKey,
+			uuid:this.#uuid
 		});
 		// keepLog('packing 함', cacheMap.get(mappingKey));
 		this.#bindGroup = null;
