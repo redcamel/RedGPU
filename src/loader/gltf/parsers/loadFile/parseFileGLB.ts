@@ -38,7 +38,7 @@ const pendingMap: Map<string, Promise<ArrayBuffer>> = new Map();
 const parseFileGLB = async (gltfLoader: GLTFLoader, callBack) => {
 	console.log('GLB Model parsing has start.');
 	const loadFilePath = getAbsoluteURL(window.location.href, gltfLoader.filePath + gltfLoader.fileName)
-	keepLog(loadFilePath, gltfLoader.filePath + gltfLoader.fileName)
+	// keepLog(loadFilePath, gltfLoader.filePath + gltfLoader.fileName)
 	if (cacheMap.has(loadFilePath)) {
 		keepLog('GLB Model parsing has cache', loadFilePath);
 		await parseArrayBuffer(gltfLoader, cacheMap.get(loadFilePath), callBack);
