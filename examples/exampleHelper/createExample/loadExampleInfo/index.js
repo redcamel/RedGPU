@@ -145,7 +145,7 @@ const setTitleAndDescription = (title, description) => {
 		document.head.appendChild(metaDescription);
 	}
 
-	const keywords = ['RedGPU', title.replace('- RedGPU', '')]
+	const keywords = ['RedGPU', 'WebGPU', title.replace('- RedGPU', '')]
 	if (keywords) {
 		let metaKeywords = document.querySelector('meta[name="keywords"]');
 		if (metaKeywords) {
