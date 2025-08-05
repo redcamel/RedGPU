@@ -24,7 +24,7 @@ class VertexBuffer extends ABaseBuffer {
 		super(redGPUContext, MANAGED_STATE_KEY, usage)
 		const {table} = this.targetResourceManagedState
 		const cacheBuffer = table.get(cacheKey)
-		keepLog(this.targetResourceManagedState)
+		// keepLog(this.targetResourceManagedState)
 		if (cacheBuffer) {
 			return cacheBuffer.buffer
 		} else {

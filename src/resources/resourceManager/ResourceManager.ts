@@ -282,7 +282,7 @@ class ResourceManager {
 		cache.get(texture)?.clear();
 		if (cache.delete(texture)) {
 			const type = desc.dimension === '3d' ? '🧊 큐브' : '🔷 비트맵';
-			keepLog(`${type} 텍스처 뷰 캐시 정리:`, texture.label);
+			// keepLog(`${type} 텍스처 뷰 캐시 정리:`, texture.label);
 		}
 	}
 

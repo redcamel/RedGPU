@@ -302,7 +302,7 @@ class HDRTexture extends ManagementResourceBase {
 			return;
 		}
 		if (!this.#hdrData) {
-			console.warn('HDR 데이터가 없어 업데이트를 건너뜁니다.');
+			// console.warn('HDR 데이터가 없어 업데이트를 건너뜁니다.');
 			return;
 		}
 		console.log(`HDR 큐브맵 내용 업데이트 시작 (노출: ${this.#exposure.toFixed(3)})`);
