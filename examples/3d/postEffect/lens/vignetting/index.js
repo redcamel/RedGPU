@@ -132,7 +132,6 @@ const renderTestPane = async (redGPUContext, targetView) => {
 		// 조정바 활성화/비활성화
 		smoothnessControl.disabled = !v.value;
 		sizeControl.disabled = !v.value;
-		centerYControl.disabled = !v.value;
 	});
 	const smoothnessControl = folder.addBinding(TEST_STATE, 'smoothness', {min: 0, max: 1}).on('change', (v) => {
 		targetView.postEffectManager.getEffectAt(0).smoothness = v.value

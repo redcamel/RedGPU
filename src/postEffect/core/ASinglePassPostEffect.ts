@@ -35,7 +35,17 @@ class ASinglePassPostEffect {
 	#redGPUContext: RedGPUContext
 	#antialiasingManager: AntialiasingManager
 	#previousSourceTextureReferences: GPUTextureView[] = [];
+	#videoMemorySize: number = 0
+	get videoMemorySize(): number {
+		return this.#videoMemorySize
+	}
 
+	#calcVideoMemory() {
+		this.#videoMemorySize = 0
+		this.#outputTexture.forEach(texture => {
+			this.#videoMemorySize += calculateTextureByteSize(texture)
+		})
+	}
 	constructor(redGPUContext: RedGPUContext) {
 		this.#redGPUContext = redGPUContext
 		this.#antialiasingManager = redGPUContext.antialiasingManager
@@ -299,17 +309,7 @@ class ASinglePassPostEffect {
 		this.#previousSourceTextureReferences = [...sourceTextureView];
 	}
 
-	#videoMemorySize: number = 0
-	get videoMemorySize(): number {
-		return this.#videoMemorySize
-	}
 
-	#calcVideoMemory() {
-		this.#videoMemorySize = 0
-		this.#outputTexture.forEach(texture => {
-			this.#videoMemorySize += calculateTextureByteSize(texture)
-		})
-	}
 
 	#createRenderTexture(view: View3D): boolean {
 		const {redGPUContext, viewRenderTextureManager, name} = view
