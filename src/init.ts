@@ -34,6 +34,12 @@ const init = async (
 		forceFallbackAdapter: false,
 	},
 ) => {
+	if (isSearchEngineBot()) {
+		keepLog('🤖 Search engine bot detected - skipping WebGPU initialization');
+
+		return;
+	}
+
 	const {gpu} = navigator
 	const errorHandler = (e: Error, defaultMsg: string) => {
 		const msg = generateErrorMessage(e, defaultMsg);
@@ -160,3 +166,48 @@ const generateErrorMessage = (e: any, defaultMsg: string): string => {
 	}
 	return msg;
 }
+const isSearchEngineBot = (): boolean => {
+	if (typeof navigator === 'undefined' || typeof window === 'undefined') {
+		return true; // SSR 환경에서는 봇으로 간주
+	}
+
+	const userAgent = navigator.userAgent.toLowerCase();
+	const botPatterns = [
+		'googlebot',
+		'bingbot',
+		'slurp',
+		'duckduckbot',
+		'baiduspider',
+		'yandexbot',
+		'facebookexternalhit',
+		'twitterbot',
+		'rogerbot',
+		'linkedinbot',
+		'embedly',
+		'quora link preview',
+		'showyoubot',
+		'outbrain',
+		'pinterest/0.',
+		'developers.google.com/+/web/snippet',
+		'www.google.com/webmasters/tools/richsnippets',
+		'slackbot',
+		'vkshare',
+		'w3c_validator',
+		'redditbot',
+		'applebot',
+		'whatsapp',
+		'flipboard',
+		'tumblr',
+		'bitlybot',
+		'skypeuripreview',
+		'nuzzel',
+		'line',
+		'discordbot',
+		'telegrambot',
+		'crawler',
+		'spider',
+		'bot'
+	];
+
+	return botPatterns.some(pattern => userAgent.includes(pattern));
+};

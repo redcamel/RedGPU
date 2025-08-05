@@ -68,14 +68,17 @@ const loadDescription = async () => {
 			titleBox.appendChild(title);
 
 			const description = document.createElement('h2');
+			const descriptionText = matchedExample.description.en || `${matchedExample.name} | RedGPU WebGPU Examples`;
 			description.innerHTML = matchedExample.description.en.replace(/\n/g, '<br/>');
 			description.className = 'item-description'
 			document.querySelector('.navigation-bar').appendChild(description);
 			setTitleAndDescription(
 				`${matchedExample.name} - RedGPU`,
-				matchedExample.description.en
+				descriptionText
 					.replace(/\n/g, '')
 					.replace(/\s+/g, ' ')
+
+
 			);
 		} else {
 			console.warn('No matching createExample found for the normalized path.');
