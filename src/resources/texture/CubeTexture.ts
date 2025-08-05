@@ -1,18 +1,15 @@
 import RedGPUContext from "../../context/RedGPUContext";
-import createUUID from "../../utils/createUUID";
 import calculateTextureByteSize from "../../utils/math/calculateTextureByteSize";
 import getMipLevelCount from "../../utils/math/getMipLevelCount";
-import ManagedResourceBase from "../ManagedResourceBase";
-import basicRegisterResource from "../resourceManager/core/basicRegisterResource";
-import basicUnregisterResource from "../resourceManager/core/basicUnregisterResource";
-import ResourceStateBitmapTexture from "../resourceManager/resourceState/ResourceStateBitmapTexture";
-import ResourceStateCubeTexture from "../resourceManager/resourceState/ResourceStateCubeTexture";
+import ManagementResourceBase from "../ManagementResourceBase";
+import ResourceStateCubeTexture from "../resourceManager/resourceState/texture/ResourceStateCubeTexture";
 import imageBitmapToGPUTexture from "./core/imageBitmapToGPUTexture";
 import loadAndCreateBitmapImage from "./core/loadAndCreateBitmapImage";
 
 const MANAGED_STATE_KEY = 'managedCubeTextureState'
+type SrcInfo = string[] | { srcList: string[], cacheKey: string }
 
-class CubeTexture extends ManagedResourceBase {
+class CubeTexture extends ManagementResourceBase {
 	static defaultViewDescriptor: GPUTextureViewDescriptor = {
 		dimension: 'cube',
 		aspect: 'all',
@@ -23,7 +20,6 @@ class CubeTexture extends ManagedResourceBase {
 	}
 	#gpuTexture: GPUTexture
 	#srcList: string[]
-	#cacheKey: string
 	#mipLevelCount: number
 	#useMipmap: boolean
 	#imgBitmaps: ImageBitmap[]
@@ -34,7 +30,7 @@ class CubeTexture extends ManagedResourceBase {
 
 	constructor(
 		redGPUContext: RedGPUContext,
-		srcList: string[],
+		srcList: SrcInfo,
 		useMipMap: boolean = true,
 		onLoad?: (cubeTextureInstance?: CubeTexture) => void,
 		onError?: (error: Error) => void,
@@ -45,23 +41,21 @@ class CubeTexture extends ManagedResourceBase {
 		this.#onError = onError
 		this.#useMipmap = useMipMap
 		this.#format = format || navigator.gpu.getPreferredCanvasFormat()
-		this.#srcList = srcList
-		this.#cacheKey = srcList?.toString();
+		this.#srcList = this.#getParsedSrc(srcList);
+		this.cacheKey = this.#getCacheKey(srcList);
 		const {table} = this.targetResourceManagedState
-		let target: ResourceStateBitmapTexture
-		for (const k in table) {
-			if (table[k].cacheKey === this.#cacheKey) {
-				target = table[k]
-				break
+		// keepLog('srcList', srcList)
+		if (srcList) {
+			let target: ResourceStateCubeTexture = table.get(this.cacheKey)
+			if (target) {
+				const targetTexture = target.texture as CubeTexture
+				this.#onLoad?.(targetTexture)
+				return targetTexture
+			} else {
+				this.srcList = srcList;
+				this.#registerResource()
 			}
-		}
-		// console.log('target',	this.#cacheKey ,this)
-		if (target) {
-			const targetTexture = table[target.uuid].texture
-			this.#onLoad?.(targetTexture)
 		} else {
-			this.srcList = srcList;
-			this.#registerResource()
 		}
 	}
 
@@ -70,10 +64,6 @@ class CubeTexture extends ManagedResourceBase {
 			...CubeTexture.defaultViewDescriptor,
 			mipLevelCount: this.#mipLevelCount
 		}
-	}
-
-	get cacheKey(): string {
-		return this.#cacheKey;
 	}
 
 	get videoMemorySize(): number {
@@ -92,9 +82,9 @@ class CubeTexture extends ManagedResourceBase {
 		return this.#srcList;
 	}
 
-	set srcList(value: string[]) {
-		this.#srcList = value
-		this.#cacheKey = value?.toString() || createUUID();
+	set srcList(value: SrcInfo) {
+		this.#srcList = this.#getParsedSrc(value);
+		this.cacheKey = this.#getCacheKey(value);
 		if (this.#srcList?.length) this.#loadBitmapTexture(this.#srcList);
 	}
 
@@ -112,9 +102,9 @@ class CubeTexture extends ManagedResourceBase {
 		const temp = this.#gpuTexture
 		this.#setGpuTexture(null);
 		this.__fireListenerList(true)
-		this.#srcList = null
-		this.#cacheKey = null
 		this.#unregisterResource()
+		this.#srcList = null
+		this.cacheKey = null
 		if (temp) temp.destroy()
 	}
 
@@ -134,18 +124,26 @@ class CubeTexture extends ManagedResourceBase {
 		this.#useMipmap = useMipmap
 		this.#mipLevelCount = gpuTexture.mipLevelCount;
 		// this.#mipLevelCount = getMipLevelCount(gpuTexture.width, gpuTexture.height);
-		this.#cacheKey = cacheKey || `direct_${this.uuid}`;
+		this.cacheKey = cacheKey || `direct_${this.uuid}`;
 		// 메모리 사용량 계산
-		const textureDescriptor: GPUTextureDescriptor = {
-			size: [gpuTexture.width, gpuTexture.height, gpuTexture.depthOrArrayLayers],
-			format: gpuTexture.format as GPUTextureFormat,
-			usage: gpuTexture.usage,
-			mipLevelCount: this.#mipLevelCount
-		};
-		this.#videoMemorySize = calculateTextureByteSize(textureDescriptor);
+		this.#videoMemorySize = calculateTextureByteSize(gpuTexture);
 		this.targetResourceManagedState.videoMemory += this.#videoMemorySize;
 		// 리스너들에게 업데이트 알림
 		this.__fireListenerList();
+	}
+
+	#getCacheKey(srcInfo?: SrcInfo): string {
+		if (!srcInfo) return this.uuid;
+		if (srcInfo instanceof Array) {
+			if (!srcInfo.length) return this.uuid
+			return srcInfo.toString();
+		} else {
+			return srcInfo.cacheKey || srcInfo.srcList.toString();
+		}
+	}
+
+	#getParsedSrc(srcInfo?: SrcInfo): string[] {
+		return srcInfo instanceof Array ? srcInfo : srcInfo?.srcList
 	}
 
 	#setGpuTexture(value: GPUTexture) {
@@ -155,14 +153,11 @@ class CubeTexture extends ManagedResourceBase {
 	}
 
 	#registerResource() {
-		basicRegisterResource(
-			this,
-			new ResourceStateCubeTexture(this)
-		)
+		this.redGPUContext.resourceManager.registerManagementResource(this, new ResourceStateCubeTexture(this));
 	}
 
 	#unregisterResource() {
-		basicUnregisterResource(this)
+		this.redGPUContext.resourceManager.unregisterManagementResource(this);
 	}
 
 	#createGPUTexture() {
@@ -193,7 +188,7 @@ class CubeTexture extends ManagedResourceBase {
 			}
 			const newGPUTexture = imageBitmapToGPUTexture(gpuDevice, imgBitmaps, textureDescriptor)
 			this.targetResourceManagedState.videoMemory -= this.#videoMemorySize
-			this.#videoMemorySize = calculateTextureByteSize(textureDescriptor)
+			this.#videoMemorySize = calculateTextureByteSize(newGPUTexture)
 			this.targetResourceManagedState.videoMemory += this.#videoMemorySize
 			if (this.#useMipmap) mipmapGenerator.generateMipmap(newGPUTexture, textureDescriptor)
 			this.#setGpuTexture(newGPUTexture)

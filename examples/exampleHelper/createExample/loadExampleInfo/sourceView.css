@@ -1,9 +1,15 @@
 /* 소스 보기 버튼 스타일 */
-.helperSourceView {
+.helperButtonContainer {
     position: fixed;
     bottom: 16px;
     right: 16px;
-    z-index: 1000;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.helperSourceView {
     padding: 10px 16px;
     font-size: 16px;
     border-radius: 8px;
@@ -16,9 +22,19 @@
 }
 
 @media screen and (max-width: 480px) {
-    .helperSourceView {
+    .helperButtonContainer {
         bottom: 70px;
         right: 0;
+        gap: 1px;
+        background: black;
+        border-radius: 8px 0 0 0;
+    }
+
+    .helperSourceView {
+        border-radius: 0;
+    }
+
+    .helperSourceView:first-child {
         border-radius: 8px 0 0 0;
 
     }

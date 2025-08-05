@@ -65,7 +65,8 @@ const createTestMeshes = (redGPUContext, scene) => {
 const renderTestPane = async (redGPUContext, meshes, view) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const pane = new Pane();
-
+	const {setDebugViewButton} = await import( "../../../exampleHelper/createExample/panes/index.js" );
+	setDebugViewButton(redGPUContext);
 	const config = {
 		cameraDistance: view.camera.distance,
 		cameraFOV: view.rawCamera.fieldOfView || 60,

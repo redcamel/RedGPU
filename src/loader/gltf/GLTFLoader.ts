@@ -121,9 +121,9 @@ class GLTFLoader {
 	async #loadFile() {
 		try {
 			if (this.#fileExtension === 'glb') {
-				 parseFileGLB(this, () => this.#onLoad(this))
+				parseFileGLB(this, () => this.#onLoad(this))
 			} else if (this.#fileExtension === 'gltf') {
-				 parseFileGLTF(this, () => this.#onLoad(this))
+				parseFileGLTF(this, () => this.#onLoad(this))
 			} else {
 				consoleAndThrowError('Unknown file extension: ' + this.#fileExtension);
 			}

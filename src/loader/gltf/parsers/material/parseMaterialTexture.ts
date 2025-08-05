@@ -12,7 +12,7 @@ const parseMaterialTexture = (
 	textureInfo: TextureInfo | MaterialNormalTextureInfo | MaterialOcclusionTextureInfo,
 	targetTextureKey: string,
 	format?: string,
-	useMipmap:boolean = true
+	useMipmap: boolean = true
 ) => {
 	const {redGPUContext, gltfData} = gltfLoader
 	const {textureRawList} = gltfLoader.parsingResult

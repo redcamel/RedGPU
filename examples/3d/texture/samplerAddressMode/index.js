@@ -28,24 +28,29 @@ RedGPU.init(
 				}
 			});
 		});
+		renderTestPane(redGPUContext);
+
 	},
 	(failReason) => {
 		console.error("Initialization failed:", failReason);
 	}
 );
-
+const renderTestPane = async (redGPUContext,) => {
+	const {setSeparator, setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
+}
 const generateSamplerCombinations = (settings, fixedCategory, fixedValue) => {
 	const combinations = [];
 	const recursiveGenerator = (current, depth) => {
 		if (depth === settings.length) {
 			if (current[fixedCategory] === fixedValue) {
-				combinations.push({ ...current });
+				combinations.push({...current});
 			}
 			return;
 		}
-		const { name, values } = settings[depth];
+		const {name, values} = settings[depth];
 		values.forEach((value) => {
-			recursiveGenerator({ ...current, [name]: value }, depth + 1);
+			recursiveGenerator({...current, [name]: value}, depth + 1);
 		});
 	};
 	recursiveGenerator({}, 0);
@@ -62,8 +67,8 @@ const generateGroupedCombinations = (settings, category) => {
 
 const createCategoryGroups = (redGPUContext, scene) => {
 	const settings = [
-		{ name: "addressModeU", values: ["clamp-to-edge", "repeat", "mirror-repeat"] },
-		{ name: "addressModeV", values: ["clamp-to-edge", "repeat", "mirror-repeat"] },
+		{name: "addressModeU", values: ["clamp-to-edge", "repeat", "mirror-repeat"]},
+		{name: "addressModeV", values: ["clamp-to-edge", "repeat", "mirror-repeat"]},
 	];
 
 	const addressModeUGroups = generateGroupedCombinations(settings, "addressModeU");

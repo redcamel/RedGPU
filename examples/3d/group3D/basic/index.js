@@ -71,9 +71,10 @@ const createChildMesh = (redGPUContext, parent) => {
 };
 
 const renderTestPane = async (redGPUContext, rootGroup, parent, child) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const pane = new Pane();
-
+	const {setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
 	const rootConfig = {
 		x: rootGroup.x,
 		y: rootGroup.y,
@@ -110,7 +111,7 @@ const renderTestPane = async (redGPUContext, rootGroup, parent, child) => {
 		rotationZ: child.rotationZ,
 	};
 
-	const rootFolder = pane.addFolder({ title: 'Root Group3D', expanded: true });
+	const rootFolder = pane.addFolder({title: 'Root Group3D', expanded: true});
 	rootFolder.addBinding(rootConfig, 'x', {
 		min: -2,
 		max: 2,
@@ -157,7 +158,7 @@ const renderTestPane = async (redGPUContext, rootGroup, parent, child) => {
 		step: 0.1
 	}).on('change', (evt) => (rootGroup.scaleZ = evt.value));
 
-	const parentFolder = pane.addFolder({ title: 'Parent Mesh', expanded: true });
+	const parentFolder = pane.addFolder({title: 'Parent Mesh', expanded: true});
 	parentFolder.addBinding(parentConfig, 'x', {
 		min: -2,
 		max: 2,
@@ -204,7 +205,7 @@ const renderTestPane = async (redGPUContext, rootGroup, parent, child) => {
 		step: 0.1
 	}).on('change', (evt) => (parent.scaleZ = evt.value));
 
-	const childFolder = pane.addFolder({ title: 'Child Mesh', expanded: true });
+	const childFolder = pane.addFolder({title: 'Child Mesh', expanded: true});
 	childFolder.addBinding(childConfig, 'x', {
 		min: -2,
 		max: 2,

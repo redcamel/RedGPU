@@ -24,7 +24,7 @@ RedGPU.init(
 			time += 0.016;
 
 			lights.forEach((lightData) => {
-				const { light, originalPos, rotationSpeed, orbitRadius } = lightData;
+				const {light, originalPos, rotationSpeed, orbitRadius} = lightData;
 				const angle = time * rotationSpeed;
 				const centerX = originalPos.x + Math.sin(angle * 0.3) * 2;
 				const centerZ = originalPos.z + Math.cos(angle * 0.5) * 2;
@@ -32,6 +32,7 @@ RedGPU.init(
 			});
 		};
 		renderer.start(redGPUContext, render);
+		renderTestPane(redGPUContext);
 	},
 	(failReason) => {
 		console.error('Initialization failed:', failReason);
@@ -40,7 +41,10 @@ RedGPU.init(
 		document.body.appendChild(errorMessage);
 	}
 );
-
+const renderTestPane = async (redGPUContext) => {
+	const {setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
+};
 const createSkybox = (redGPUContext) => {
 	const skyboxImagePaths = [
 		"../../../assets/skybox/px.jpg",
@@ -87,7 +91,7 @@ const createSpotLight = (scene) => {
 
 			lights.push({
 				light: light,
-				originalPos: { x, y, z },
+				originalPos: {x, y, z},
 				rotationSpeed: 0.5 + Math.random() * 1.0,
 				orbitRadius: 1.0 + Math.random() * 2.0
 			});

@@ -1,7 +1,8 @@
 .RedGPUDebugPanel {
+    width: 330px;
     max-height: 100%;
     overflow-y: auto;
-    background: rgba(0, 0, 0, 0.80);
+    background: rgba(0, 0, 0, 0.9);
     position: fixed;
     left: 0;
     bottom: 0;
@@ -80,17 +81,19 @@
 .boolean-true {
     line-height: 1;
     padding: 2px 4px;
-    border-radius: 2px;
+    border-radius: 4px;
     margin: 2px 0;
     background: green;
+    color: #fff;
 }
 
 .boolean-false {
     line-height: 1;
     padding: 2px 4px;
-    border-radius: 2px;
+    border-radius: 4px;
     margin: 2px 0;
     background: red;
+    color: #fff;
 }
 
 .debug-folder {
@@ -106,11 +109,12 @@
     align-items: center;
     padding: 10px 8px;
     width: 100%;
-    font-size: 12px;
+    font-size: 15px;
+    color: #fdb48d;
     line-height: 1;
     justify-content: space-between;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.025);
+    /*border-top: 1px solid rgba(255, 255, 255, 0.05);*/
+    /*border-bottom: 1px solid rgba(255, 255, 255, 0.025);*/
     cursor: pointer;
     background: linear-gradient(0deg, rgba(0, 0, 0, 0.95), rgba(255, 255, 255, 0.055));
 
@@ -121,12 +125,37 @@
     }
 }
 
+.debug-folder-small-title {
+    display: flex;
+    align-items: center;
+    padding: 10px 8px;
+    width: 100%;
+    font-size: 12px;
+    color: #fff;
+    line-height: 1;
+    justify-content: space-between;
+    /*border-top: 1px solid rgba(255, 255, 255, 0.05);*/
+    /*border-bottom: 1px solid rgba(255, 255, 255, 0.025);*/
+    cursor: pointer;
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.95), rgba(255, 255, 255, 0.055));
+
+    b {
+        color: #fdb48d;
+        font-weight: 700;
+        font-size: 11px
+    }
+}
+
+.debug-folder-title .onoff {
+    font-size: 11px;
+}
+
 
 .debug-item-title {
     color: #888;
     font-weight: 500;
     text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3);
-    max-width: 250px;
+    max-width: 240px;
     overflow: hidden;
     text-overflow: ellipsis;
 }

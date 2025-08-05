@@ -43,16 +43,16 @@ RedGPU.init(
 
 const createTestPane = async (view) => {
 	const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
-	const {createFieldOfView} = await import("../../../exampleHelper/createExample/panes/index.js");
-
+	const {createFieldOfView, setDebugViewButton} = await import( "../../../exampleHelper/createExample/panes/index.js" );
+	setDebugViewButton(view.redGPUContext);
 	const pane = new Pane();
 	createFieldOfView(pane, view.camera);
 
 	const settings = {
 		hdrImage: hdrImages[0].path,
 		exposure: view.skybox.exposure,
-		blur : 0,
-		opacity : 1,
+		blur: 0,
+		opacity: 1,
 	};
 
 	// HDR 이미지 선택 옵션 생성
@@ -78,16 +78,16 @@ const createTestPane = async (view) => {
 		view.skybox = new RedGPU.Display.SkyBox(view.redGPUContext, newTexture);
 	});
 	pane.addBinding(settings, 'blur', {
-		min:0,
-		max:1,
-		step:0.01
+		min: 0,
+		max: 1,
+		step: 0.01
 	}).on("change", (ev) => {
 		view.skybox.blur = ev.value;
 	})
 	pane.addBinding(settings, 'opacity', {
-		min:0,
-		max:1,
-		step:0.01
+		min: 0,
+		max: 1,
+		step: 0.01
 	}).on("change", (ev) => {
 		view.skybox.opacity = ev.value;
 	})

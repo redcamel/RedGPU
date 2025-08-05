@@ -15,19 +15,15 @@ class Ground extends Primitive {
 			const gridY1 = gridY + 1;
 			const segment_width = width / gridX;
 			const segment_height = height / gridY;
-
 			interleaveData.length = 0;
 			indexData.length = 0;
-
 			// Ground는 XZ 평면에 배치 (Y=0이 땅 높이)
 			for (let iy = 0; iy < gridY1; iy++) {
 				const tZ = iy * segment_height - height_half;
 				const uvY = flipY ? (1 - iy / gridY) * uvSize : (iy / gridY) * uvSize;
-
 				for (let ix = 0; ix < gridX1; ix++) {
 					const tX = ix * segment_width - width_half;
 					const uvX = ix / gridX * uvSize;
-
 					interleaveData.push(
 						tX,    // x
 						0,     // y (땅 높이)
@@ -38,19 +34,16 @@ class Ground extends Primitive {
 						uvX,   // u
 						uvY    // v
 					);
-
 					if (iy < gridY && ix < gridX) {
 						const a = ix + gridX1 * iy;
 						const b = ix + gridX1 * (iy + 1);
 						const c = (ix + 1) + gridX1 * (iy + 1);
 						const d = (ix + 1) + gridX1 * iy;
-
 						indexData.push(a, b, d);
 						indexData.push(b, c, d);
 					}
 				}
 			}
-
 			return createPrimitiveGeometry(redGPUContext, interleaveData, indexData, uniqueKey);
 		};
 	})();
@@ -59,7 +52,6 @@ class Ground extends Primitive {
 		super(redGPUContext);
 		const uniqueKey = `PRIMITIVE_GROUND_W${width}_H${height}_WS${wSegments}_HS${hSegments}_UV${uvSize}_FY${flipY}`;
 		const cachedBufferState = redGPUContext.resourceManager.cachedBufferState;
-
 		let geometry = cachedBufferState[uniqueKey];
 		if (!geometry) {
 			geometry = cachedBufferState[uniqueKey] = this.#makeData(uniqueKey, redGPUContext, width, height, wSegments, hSegments, uvSize, flipY);

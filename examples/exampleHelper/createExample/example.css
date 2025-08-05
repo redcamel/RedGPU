@@ -7,7 +7,9 @@ html, body {
     overflow: hidden;
     background: url(../../assets/documentBody.png);
 }
-
+.tp-dfwv{
+    z-index: 1;
+}
 * {
 
     margin: 0;

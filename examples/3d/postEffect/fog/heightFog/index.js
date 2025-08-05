@@ -99,14 +99,14 @@ function createGroundLevelScene(redGPUContext, scene) {
 	scene.addChild(terrainMesh);
 
 	const forestPositions = [
-		{ x: -15, z: -20, height: 3, radius: 0.3, density: 'dense' },
-		{ x: -10, z: -25, height: 4, radius: 0.4, density: 'dense' },
-		{ x: 20, z: -15, height: 3.5, radius: 0.35, density: 'dense' },
-		{ x: 0, z: -30, height: 6, radius: 0.5, density: 'medium' },
-		{ x: 25, z: 10, height: 7, radius: 0.45, density: 'medium' },
-		{ x: -30, z: 5, height: 6.5, radius: 0.4, density: 'medium' },
-		{ x: 15, z: 20, height: 9, radius: 0.6, density: 'sparse' },
-		{ x: -20, z: 25, height: 10, radius: 0.55, density: 'sparse' },
+		{x: -15, z: -20, height: 3, radius: 0.3, density: 'dense'},
+		{x: -10, z: -25, height: 4, radius: 0.4, density: 'dense'},
+		{x: 20, z: -15, height: 3.5, radius: 0.35, density: 'dense'},
+		{x: 0, z: -30, height: 6, radius: 0.5, density: 'medium'},
+		{x: 25, z: 10, height: 7, radius: 0.45, density: 'medium'},
+		{x: -30, z: 5, height: 6.5, radius: 0.4, density: 'medium'},
+		{x: 15, z: 20, height: 9, radius: 0.6, density: 'sparse'},
+		{x: -20, z: 25, height: 10, radius: 0.55, density: 'sparse'},
 	];
 
 	forestPositions.forEach((pos, index) => {
@@ -145,10 +145,10 @@ function createGroundLevelScene(redGPUContext, scene) {
 	});
 
 	const monuments = [
-		{ x: 0, z: 0, y: 1, height: 8, type: 'obelisk', name: 'Central Obelisk' },
-		{ x: -12, z: -8, y: 4, height: 5, type: 'pillar', name: 'Ancient Pillar' },
-		{ x: 18, z: -5, y: 7, height: 6, type: 'statue', name: 'Guardian Statue' },
-		{ x: -8, z: 15, y: 10, height: 4, type: 'altar', name: 'Sky Altar' },
+		{x: 0, z: 0, y: 1, height: 8, type: 'obelisk', name: 'Central Obelisk'},
+		{x: -12, z: -8, y: 4, height: 5, type: 'pillar', name: 'Ancient Pillar'},
+		{x: 18, z: -5, y: 7, height: 6, type: 'statue', name: 'Guardian Statue'},
+		{x: -8, z: 15, y: 10, height: 4, type: 'altar', name: 'Sky Altar'},
 	];
 
 	monuments.forEach((monument, index) => {
@@ -192,10 +192,10 @@ function createGroundLevelScene(redGPUContext, scene) {
 	});
 
 	const lanternPositions = [
-		{ x: -5, z: -10, y: 0.5 },
-		{ x: 8, z: -12, y: 2.5 },
-		{ x: -15, z: 8, y: 5.5 },
-		{ x: 12, z: 15, y: 8.5 },
+		{x: -5, z: -10, y: 0.5},
+		{x: 8, z: -12, y: 2.5},
+		{x: -15, z: 8, y: 5.5},
+		{x: 12, z: 15, y: 8.5},
 	];
 
 	lanternPositions.forEach((pos, index) => {
@@ -267,10 +267,11 @@ function createGroundLevelScene(redGPUContext, scene) {
 }
 
 async function createHeightFogControlPanel(redGPUContext, view, heightFog, controller, toggleAutoRotate) {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 
-	const pane = new Pane({ title: 'Height Fog Demo', expanded: true });
-
+	const pane = new Pane({title: 'Height Fog Demo', expanded: true});
+	const {setDebugViewButton} = await import("../../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
 	const PARAMS = {
 		enabled: true,
 		autoRotate: true,
@@ -279,11 +280,11 @@ async function createHeightFogControlPanel(redGPUContext, view, heightFog, contr
 		baseHeight: heightFog.baseHeight,
 		thickness: heightFog.thickness,
 		falloff: heightFog.falloff,
-		fogColor: { r: 190, g: 210, b: 235 },
+		fogColor: {r: 190, g: 210, b: 235},
 		cameraPreset: 'Ground Explorer'
 	};
 
-	const experienceFolder = pane.addFolder({ title: 'Experience', expanded: true });
+	const experienceFolder = pane.addFolder({title: 'Experience', expanded: true});
 
 	experienceFolder.addBinding(PARAMS, 'enabled').on('change', (ev) => {
 		if (ev.value) {
@@ -295,7 +296,7 @@ async function createHeightFogControlPanel(redGPUContext, view, heightFog, contr
 
 	experienceFolder.addBinding(PARAMS, 'autoRotate').on('change', toggleAutoRotate);
 
-	const fogFolder = pane.addFolder({ title: 'Fog Settings', expanded: true });
+	const fogFolder = pane.addFolder({title: 'Fog Settings', expanded: true});
 
 	fogFolder.addBinding(PARAMS, 'fogType', {
 		options: {
@@ -341,22 +342,22 @@ async function createHeightFogControlPanel(redGPUContext, view, heightFog, contr
 		);
 	});
 
-	const scenarioFolder = pane.addFolder({ title: 'Scenarios', expanded: true });
+	const scenarioFolder = pane.addFolder({title: 'Scenarios', expanded: true});
 
-	scenarioFolder.addButton({ title: 'Dawn Valley' }).on('click', () => {
-		applyPreset(1.8, -2, 6, 1.0, { r: 255, g: 245, b: 220 }, 'EXPONENTIAL');
+	scenarioFolder.addButton({title: 'Dawn Valley'}).on('click', () => {
+		applyPreset(1.8, -2, 6, 1.0, {r: 255, g: 245, b: 220}, 'EXPONENTIAL');
 	});
 
-	scenarioFolder.addButton({ title: 'Mysterious Forest' }).on('click', () => {
-		applyPreset(2.5, -1, 8, 1.4, { r: 180, g: 200, b: 180 }, 'EXPONENTIAL');
+	scenarioFolder.addButton({title: 'Mysterious Forest'}).on('click', () => {
+		applyPreset(2.5, -1, 8, 1.4, {r: 180, g: 200, b: 180}, 'EXPONENTIAL');
 	});
 
-	scenarioFolder.addButton({ title: 'Ancient Ruins' }).on('click', () => {
-		applyPreset(2.0, 0, 7, 1.2, { r: 200, g: 190, b: 160 }, 'EXPONENTIAL');
+	scenarioFolder.addButton({title: 'Ancient Ruins'}).on('click', () => {
+		applyPreset(2.0, 0, 7, 1.2, {r: 200, g: 190, b: 160}, 'EXPONENTIAL');
 	});
 
-	scenarioFolder.addButton({ title: 'Moonlit Mist' }).on('click', () => {
-		applyPreset(1.5, -1.5, 9, 0.8, { r: 160, g: 170, b: 200 }, 'LINEAR');
+	scenarioFolder.addButton({title: 'Moonlit Mist'}).on('click', () => {
+		applyPreset(1.5, -1.5, 9, 0.8, {r: 160, g: 170, b: 200}, 'LINEAR');
 	});
 
 	function applyPreset(density, baseHeight, thickness, falloff, fogColor, fogType) {

@@ -20,7 +20,7 @@ RedGPU.init(
 			'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BoxAnimated/glTF-Binary/BoxAnimated.glb',
 		];
 
-		loadGLTFGrid(view,glbUrls);
+		loadGLTFGrid(view, glbUrls);
 
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		renderer.start(redGPUContext, () => {});
@@ -62,8 +62,8 @@ function loadGLTFGrid(view, urls, gridSize = 5, spacing = 5) {
 
 const renderTestPane = async (redGPUContext, targetView) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
-	const {createIblHelper} = await import('../../../exampleHelper/createExample/panes/index.js');
-
+	const {createIblHelper, setDebugViewButton} = await import('../../../exampleHelper/createExample/panes/index.js');
+	setDebugViewButton(redGPUContext);
 	const pane = new Pane();
 	createIblHelper(pane, targetView, RedGPU);
 };

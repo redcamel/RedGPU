@@ -5,6 +5,7 @@ import View3D from "../display/view/View3D";
 import UniformBuffer from "../resources/buffer/uniformBuffer/UniformBuffer";
 import Sampler from "../resources/sampler/Sampler";
 import parseWGSL from "../resources/wgslParser/parseWGSL";
+import calculateTextureByteSize from "../utils/math/calculateTextureByteSize";
 import AMultiPassPostEffect from "./core/AMultiPassPostEffect";
 import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
 import postEffectSystemUniformCode from "./core/postEffectSystemUniform.wgsl"
@@ -27,6 +28,7 @@ class PostEffectManager {
 	#previousDimensions: { width: number, height: number }
 	#postEffectSystemUniformBuffer: UniformBuffer;
 	#postEffectSystemUniformBufferStructInfo;
+	#videoMemorySize: number = 0
 
 	constructor(view: View3D) {
 		this.#view = view;
@@ -43,6 +45,11 @@ class PostEffectManager {
 
 	get effectList(): Array<ASinglePassPostEffect | AMultiPassPostEffect> {
 		return this.#postEffects;
+	}
+
+	get videoMemorySize(): number {
+		this.#calcVideoMemory()
+		return this.#videoMemorySize;
 	}
 
 	addEffect(v: ASinglePassPostEffect | AMultiPassPostEffect) {
@@ -154,11 +161,10 @@ class PostEffectManager {
 
 	#init() {
 		const {redGPUContext} = this.#view;
-		const {gpuDevice} = redGPUContext;
+		const {gpuDevice, resourceManager} = redGPUContext;
 		const textureComputeShader = this.#getTextureComputeShader();
-		this.#textureComputeShaderModule = gpuDevice.createShaderModule({
+		this.#textureComputeShaderModule = resourceManager.createGPUShaderModule('POST_EFFECT_TEXTURE_COPY_COMPUTE_SHADER', {
 			code: textureComputeShader,
-			label: 'POST_EFFECT_TEXTURE_COPY_COMPUTE_SHADER'
 		});
 		this.#textureComputeBindGroupLayout = this.#createTextureBindGroupLayout(redGPUContext);
 		this.#textureComputePipeline = this.#createTextureComputePipeline(gpuDevice, this.#textureComputeShaderModule, this.#textureComputeBindGroupLayout)
@@ -166,13 +172,22 @@ class PostEffectManager {
 		const UNIFORM_STRUCT = SHADER_INFO.uniforms.systemUniforms;
 		const postEffectSystemUniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength)
 		this.#postEffectSystemUniformBufferStructInfo = UNIFORM_STRUCT;
-		this.#postEffectSystemUniformBuffer = new UniformBuffer(redGPUContext, postEffectSystemUniformData, 'POST_EFFECT_SYSTEM_UNIFORM_BUFFER');
+		this.#postEffectSystemUniformBuffer = new UniformBuffer(redGPUContext, postEffectSystemUniformData, `${this.#view.name}_POST_EFFECT_SYSTEM_UNIFORM_BUFFER`);
+	}
+
+	#calcVideoMemory() {
+		const texture = this.#storageTexture
+		if (!texture) return 0;
+		this.#videoMemorySize = calculateTextureByteSize(texture)
+		this.#postEffects.forEach(effect => {
+			this.#videoMemorySize += effect.videoMemorySize
+		})
 	}
 
 	#renderToStorageTexture(view: View3D, sourceTextureView: GPUTextureView) {
 		const {redGPUContext, viewRenderTextureManager} = view;
 		const {colorTexture} = viewRenderTextureManager;
-		const {gpuDevice, antialiasingManager} = redGPUContext;
+		const {gpuDevice, antialiasingManager, resourceManager} = redGPUContext;
 		const {useMSAA, changedMSAA} = antialiasingManager;
 		const {width, height} = colorTexture;
 		const dimensionsChanged = width !== this.#previousDimensions?.width || height !== this.#previousDimensions?.height;
@@ -183,9 +198,7 @@ class PostEffectManager {
 				this.#storageTexture = null;
 			}
 			this.#storageTexture = this.#createStorageTexture(gpuDevice, width, height);
-			this.#storageTextureView = this.#storageTexture.createView({
-				label: 'POST_EFFECT_STORAGE_TEXTURE_VIEW'
-			});
+			this.#storageTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#storageTexture);
 		}
 		// 크기 변경 또는 MSAA 변경 시 BindGroup 재생성
 		if (dimensionsChanged || changedMSAA) {
@@ -232,7 +245,7 @@ class PostEffectManager {
 	}
 
 	#createTextureBindGroupLayout(redGPUContext: RedGPUContext) {
-		return redGPUContext.resourceManager.createBindGroupLayout('POST_EFFECT_TEXTURE_COPY_BIND_GROUP_LAYOUT', {
+		return redGPUContext.resourceManager.createBindGroupLayout(`${this.#view.name}_POST_EFFECT_TEXTURE_COPY_BIND_GROUP_LAYOUT`, {
 			entries: [
 				{binding: 0, visibility: GPUShaderStage.COMPUTE, sampler: {type: 'filtering',}},
 				{binding: 1, visibility: GPUShaderStage.COMPUTE, texture: {}},
@@ -242,18 +255,18 @@ class PostEffectManager {
 	}
 
 	#createStorageTexture(gpuDevice: GPUDevice, width: number, height: number) {
-		return gpuDevice.createTexture({
+		return this.#view.redGPUContext.resourceManager.createManagedTexture({
 			size: {width: width, height: height,},
 			format: 'rgba8unorm',
 			usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING,
-			label: `POST_EFFECT_STORAGE_TEXTURE_${width}x${height}`,
+			label: `${this.#view.name}_POST_EFFECT_STORAGE_TEXTURE_${width}x${height}`,
 		});
 	}
 
 	#createTextureBindGroup(redGPUContext: RedGPUContext, bindGroupLayout: GPUBindGroupLayout, sourceTextureView: GPUTextureView, storageTextureView: GPUTextureView) {
 		const timestamp = Date.now();
 		return redGPUContext.gpuDevice.createBindGroup({
-			label: `POST_EFFECT_TEXTURE_COPY_BIND_GROUP_${timestamp}`,
+			label: `${this.#view.name}_POST_EFFECT_TEXTURE_COPY_BIND_GROUP_${timestamp}`,
 			layout: bindGroupLayout,
 			entries: [
 				{binding: 0, resource: new Sampler(redGPUContext).gpuSampler},

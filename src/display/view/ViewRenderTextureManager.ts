@@ -1,6 +1,6 @@
 import RedGPUContext from "../../context/RedGPUContext";
-import resourceManager from "../../resources/resourceManager/ResourceManager";
 import validateRedGPUContext from "../../runtimeChecker/validateFunc/validateRedGPUContext";
+import calculateTextureByteSize from "../../utils/math/calculateTextureByteSize";
 import getMipLevelCount from "../../utils/math/getMipLevelCount";
 import View3D from "./View3D";
 
@@ -17,6 +17,7 @@ class ViewRenderTextureManager {
 	//
 	#useMSAAColor: boolean = true
 	#useMSAADepth: boolean = true
+	#videoMemorySize: number = 0
 	readonly #redGPUContext: RedGPUContext
 	readonly #view: View3D
 
@@ -24,6 +25,10 @@ class ViewRenderTextureManager {
 		validateRedGPUContext(view.redGPUContext)
 		this.#redGPUContext = view.redGPUContext
 		this.#view = view
+	}
+
+	get videoMemorySize(): number {
+		return this.#videoMemorySize;
 	}
 
 	get renderPath1ResultTextureDescriptor(): GPUTextureDescriptor {
@@ -65,10 +70,21 @@ class ViewRenderTextureManager {
 		return this.#renderPath1ResultTexture;
 	}
 
+	#checkVideoMemorySize() {
+		const textures = [
+			this.#colorTexture, this.#depthTexture, this.#colorResolveTexture, this.#renderPath1ResultTexture
+		].filter(Boolean);
+		this.#videoMemorySize = textures.reduce((total, texture) => {
+				const videoMemory = calculateTextureByteSize(texture)
+				return total + videoMemory
+			}, 0
+		)
+	}
+
 	#createRender2PathTexture() {
-		const {gpuDevice,resourceManager} = this.#redGPUContext
+		const {gpuDevice, resourceManager} = this.#redGPUContext
 		const currentTexture = this.#renderPath1ResultTexture
-		const {pixelRectObject} = this.#view
+		const {pixelRectObject, name} = this.#view
 		const {width: pixelRectObjectW, height: pixelRectObjectH} = pixelRectObject
 		const changedSize = currentTexture?.width !== pixelRectObjectW || currentTexture?.height !== pixelRectObjectH
 		const needCreateTexture = !currentTexture || changedSize
@@ -84,19 +100,20 @@ class ViewRenderTextureManager {
 				usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT
 					| GPUTextureUsage.COPY_SRC,
 				mipLevelCount: getMipLevelCount(pixelRectObjectW, pixelRectObjectH),
-				label: `renderPath1ResultTexture_${pixelRectObjectW}x${pixelRectObjectH}_${Date.now()}`
+				label: `${name}_renderPath1ResultTexture_${pixelRectObjectW}x${pixelRectObjectH}`
 			}
-			this.#renderPath1ResultTexture = gpuDevice.createTexture(this.#renderPath1ResultTextureDescriptor);
+			this.#renderPath1ResultTexture = resourceManager.createManagedTexture(this.#renderPath1ResultTextureDescriptor);
 			this.#renderPath1ResultTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#renderPath1ResultTexture)
+			this.#checkVideoMemorySize()
 		}
 	}
 
 	#createTextureIfNeeded(textureType: 'depth' | 'color'): void {
 		const depthYn = textureType === 'depth'
-		const {antialiasingManager, gpuDevice,resourceManager} = this.#redGPUContext
+		const {antialiasingManager, gpuDevice, resourceManager} = this.#redGPUContext
 		const {useMSAA} = antialiasingManager
 		const currentTexture = depthYn ? this.#depthTexture : this.#colorTexture;
-		const {pixelRectObject} = this.#view
+		const {pixelRectObject, name} = this.#view
 		const {width: pixelRectObjectW, height: pixelRectObjectH} = pixelRectObject
 		const changedSize = currentTexture?.width !== pixelRectObjectW || currentTexture?.height !== pixelRectObjectH
 		const changeUseMSAA = depthYn ? this.#useMSAADepth !== useMSAA : this.#useMSAAColor !== useMSAA
@@ -106,20 +123,25 @@ class ViewRenderTextureManager {
 		if (needCreateTexture) {
 			if (currentTexture) {
 				currentTexture?.destroy()
-				if (!depthYn) {
+				if (depthYn) {
+					this.#depthTexture = null
+					this.#depthTextureView = null
+				} else {
 					this.#colorResolveTexture?.destroy()
+					this.#colorTexture = null
+					this.#colorTextureView = null
 					this.#colorResolveTexture = null
 					this.#colorResolveTextureView = null
 				}
 			}
-			const newTexture = gpuDevice.createTexture({
+			const newTexture = resourceManager.createManagedTexture({
 				size: [
 					Math.max(pixelRectObjectW, 1),
 					Math.max(pixelRectObjectH, 1),
 					1
 				],
 				sampleCount: useMSAA ? 4 : 1,
-				label: `${textureType}_${pixelRectObjectW}x${pixelRectObjectH}_${Date.now()}`,
+				label: `${name}_${textureType}_${pixelRectObjectW}x${pixelRectObjectH}`,
 				format: depthYn ? 'depth32float' : navigator.gpu.getPreferredCanvasFormat(),
 				// usage: GPUTextureUsage.RENDER_ATTACHMENT | (textureType === 'color' ? GPUTextureUsage.TEXTURE_BINDING : 0)
 				usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | (!depthYn && !useMSAA ? GPUTextureUsage.COPY_SRC : 0)
@@ -131,14 +153,14 @@ class ViewRenderTextureManager {
 				this.#colorTexture = newTexture;
 				this.#colorTextureView = resourceManager.getGPUResourceBitmapTextureView(newTexture);
 				if (useMSAA) {
-					const newResolveTexture = gpuDevice.createTexture({
+					const newResolveTexture = resourceManager.createManagedTexture({
 						size: {
 							width: Math.max(pixelRectObjectW, 1),
 							height: Math.max(pixelRectObjectH, 1),
 							depthOrArrayLayers: 1
 						},
 						sampleCount: 1,
-						label: `${textureType}_resolve_${pixelRectObjectW}x${pixelRectObjectH}_${Date.now()}`,
+						label: `${name}_${textureType}_resolve_${pixelRectObjectW}x${pixelRectObjectH}`,
 						format: navigator.gpu.getPreferredCanvasFormat(),
 						usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC
 					})
@@ -146,6 +168,7 @@ class ViewRenderTextureManager {
 					this.#colorResolveTextureView = resourceManager.getGPUResourceBitmapTextureView(newResolveTexture)
 				}
 			}
+			this.#checkVideoMemorySize()
 		}
 	}
 }

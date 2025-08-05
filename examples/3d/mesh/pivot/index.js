@@ -58,7 +58,7 @@ RedGPU.init(
 		};
 
 		renderer.start(redGPUContext, render);
-		renderTestPane(parentMesh, childMesh, animationConfig);
+		renderTestPane(redGPUContext, parentMesh, childMesh, animationConfig);
 	},
 	(failReason) => {
 		console.error("Initialization failed:", failReason);
@@ -100,19 +100,21 @@ const createPivotMesh = (redGPUContext, targetMesh) => {
 	return pivotMesh;
 };
 
-const renderTestPane = async (parentMesh, childMesh, animationConfig) => {
-	const { Pane } = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
+const renderTestPane = async (redGPUContext, parentMesh, childMesh, animationConfig) => {
+	const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
+	const {setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext)
 	const pane = new Pane();
 
-	const parentFolder = pane.addFolder({ title: "Parent Mesh", expanded: true });
-	parentFolder.addBinding(animationConfig, "parentAnimationOn", { label: "Parent Animation" });
-	parentFolder.addBinding(parentMesh, "pivotX", { min: -2, max: 2, step: 0.1, label: "Pivot X" });
-	parentFolder.addBinding(parentMesh, "pivotY", { min: -2, max: 2, step: 0.1, label: "Pivot Y" });
-	parentFolder.addBinding(parentMesh, "pivotZ", { min: -2, max: 2, step: 0.1, label: "Pivot Z" });
+	const parentFolder = pane.addFolder({title: "Parent Mesh", expanded: true});
+	parentFolder.addBinding(animationConfig, "parentAnimationOn", {label: "Parent Animation"});
+	parentFolder.addBinding(parentMesh, "pivotX", {min: -2, max: 2, step: 0.1, label: "Pivot X"});
+	parentFolder.addBinding(parentMesh, "pivotY", {min: -2, max: 2, step: 0.1, label: "Pivot Y"});
+	parentFolder.addBinding(parentMesh, "pivotZ", {min: -2, max: 2, step: 0.1, label: "Pivot Z"});
 
-	const childFolder = pane.addFolder({ title: "Child Mesh", expanded: true });
-	childFolder.addBinding(animationConfig, "childAnimationOn", { label: "Child Animation" });
-	childFolder.addBinding(childMesh, "pivotX", { min: -2, max: 2, step: 0.1, label: "Pivot X" });
-	childFolder.addBinding(childMesh, "pivotY", { min: -2, max: 2, step: 0.1, label: "Pivot Y" });
-	childFolder.addBinding(childMesh, "pivotZ", { min: -2, max: 2, step: 0.1, label: "Pivot Z" });
+	const childFolder = pane.addFolder({title: "Child Mesh", expanded: true});
+	childFolder.addBinding(animationConfig, "childAnimationOn", {label: "Child Animation"});
+	childFolder.addBinding(childMesh, "pivotX", {min: -2, max: 2, step: 0.1, label: "Pivot X"});
+	childFolder.addBinding(childMesh, "pivotY", {min: -2, max: 2, step: 0.1, label: "Pivot Y"});
+	childFolder.addBinding(childMesh, "pivotZ", {min: -2, max: 2, step: 0.1, label: "Pivot Z"});
 };

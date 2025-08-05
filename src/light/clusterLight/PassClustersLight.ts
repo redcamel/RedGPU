@@ -50,7 +50,7 @@ class PassClustersLight {
 	#initPipeLine() {
 		const {gpuDevice, resourceManager} = this.#redGPUContext;
 		const source = parseWGSL(PassLightClustersSource).defaultSource;
-		this.#clusterLightsBuffer = gpuDevice.createBuffer({
+		this.#clusterLightsBuffer = resourceManager.createGPUBuffer(`PASS_CLUSTER_LIGHTS_BUFFER`, {
 			size: PassClustersLightHelper.getClusterLightsBufferSize(),
 			usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
 		});
@@ -85,9 +85,8 @@ class PassClustersLight {
 				]
 			}),
 			compute: {
-				module: gpuDevice.createShaderModule({
+				module: resourceManager.createGPUShaderModule('CLUSTER_LIGHTS_SHADER', {
 					code: source,
-					label: "CLUSTER_LIGHTS"
 				}),
 				entryPoint: 'main'
 			}

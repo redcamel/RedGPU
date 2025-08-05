@@ -45,12 +45,12 @@ const createPrimitive = (redGPUContext, scene) => {
 	const boxGeometry = new RedGPU.Primitive.Box(redGPUContext, 1, 1, 1, 2, 2, 2);
 
 	const boxes = [
-		{ material: boxMaterials.solid, position: [0, 0, 0] },
-		{ material: boxMaterials.wireframe, position: [-2, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST },
-		{ material: boxMaterials.point, position: [2, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST },
+		{material: boxMaterials.solid, position: [0, 0, 0]},
+		{material: boxMaterials.wireframe, position: [-2, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST},
+		{material: boxMaterials.point, position: [2, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST},
 	];
 
-	boxes.forEach(({ material, position, topology }) => {
+	boxes.forEach(({material, position, topology}) => {
 		const box = new RedGPU.Display.Mesh(redGPUContext, boxGeometry, material);
 
 		if (topology) {
@@ -81,7 +81,9 @@ const createPrimitive = (redGPUContext, scene) => {
 };
 
 const renderTestPane = async (redGPUContext) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+	const {setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext)
 	const pane = new Pane();
 
 	const config = {
@@ -119,11 +121,11 @@ const renderTestPane = async (redGPUContext) => {
 		});
 	};
 
-	const boxFolder = pane.addFolder({ title: 'Box Dimensions', expanded: true });
-	addBinding(boxFolder, 'width', { min: 0.1, max: 5, step: 0.1 });
-	addBinding(boxFolder, 'height', { min: 0.1, max: 5, step: 0.1 });
-	addBinding(boxFolder, 'depth', { min: 0.1, max: 5, step: 0.1 });
-	addBinding(boxFolder, 'segmentX', { min: 1, max: 15, step: 1 });
-	addBinding(boxFolder, 'segmentY', { min: 1, max: 15, step: 1 });
-	addBinding(boxFolder, 'segmentZ', { min: 1, max: 15, step: 1 });
+	const boxFolder = pane.addFolder({title: 'Box Dimensions', expanded: true});
+	addBinding(boxFolder, 'width', {min: 0.1, max: 5, step: 0.1});
+	addBinding(boxFolder, 'height', {min: 0.1, max: 5, step: 0.1});
+	addBinding(boxFolder, 'depth', {min: 0.1, max: 5, step: 0.1});
+	addBinding(boxFolder, 'segmentX', {min: 1, max: 15, step: 1});
+	addBinding(boxFolder, 'segmentY', {min: 1, max: 15, step: 1});
+	addBinding(boxFolder, 'segmentZ', {min: 1, max: 15, step: 1});
 };

@@ -4,7 +4,6 @@ import GPU_MIPMAP_FILTER_MODE from "../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 import RenderViewStateData from "../../../renderer/RenderViewStateData";
 import Sampler from "../../../resources/sampler/Sampler";
 import BitmapTexture from "../../../resources/texture/BitmapTexture";
-import {keepLog} from "../../../utils";
 import Mesh from "../../mesh/Mesh";
 import TextFieldMaterial from "./textFieldMaterial/TextFieldMaterial";
 
@@ -71,10 +70,7 @@ class ATextField extends Mesh {
 		this.#redGPUContext = redGPUContext
 		this.#mode3dYn = mode3dYn
 		this.#textureImgOnload = imgOnload
-		this._material = new TextFieldMaterial(redGPUContext, new BitmapTexture(redGPUContext,null,true,v => {
-			this.#renderWidth = this.#textureImg.width
-			this.#renderHeight = this.#textureImg.height
-		}))
+		this._material = new TextFieldMaterial(redGPUContext)
 		this._material.transparent = true
 		if (mode3dYn) {
 			this._material.diffuseTextureSampler = new Sampler(redGPUContext, {
@@ -223,13 +219,20 @@ class ATextField extends Mesh {
 			this.dirtyTransform = true;
 			// Blob으로 변환하여 처리
 			const callback = (blob: Blob | MediaSource) => {
-				const prevSrc = this.material.diffuseTexture.src
-				const isObjectURL = typeof prevSrc === 'string' && prevSrc?.startsWith?.('blob:');
-				if (isObjectURL) {
-					// keepLog('오브젝트URL삭제',prevSrc?.toString(),typeof prevSrc === 'string',prevSrc?.startsWith('blob:'))
-					URL.revokeObjectURL(prevSrc);
+				if (this.material.diffuseTexture) {
+					const prevSrc = this.material.diffuseTexture.src
+					const isObjectURL = typeof prevSrc === 'string' && prevSrc?.startsWith?.('blob:');
+					this.material.diffuseTexture.destroy()
+					this.material.diffuseTexture = null
+					if (isObjectURL) {
+						// keepLog('오브젝트URL삭제',prevSrc?.toString(),typeof prevSrc === 'string',prevSrc?.startsWith('blob:'))
+						URL.revokeObjectURL(prevSrc);
+					}
 				}
-				this.material.diffuseTexture.src = URL.createObjectURL(blob);
+				this.material.diffuseTexture = new BitmapTexture(this.#redGPUContext, URL.createObjectURL(blob), true, v => {
+					this.#renderWidth = this.#textureImg.width
+					this.#renderHeight = this.#textureImg.height
+				});
 			};
 			if (this.#textureCvs instanceof OffscreenCanvas) {
 				this.#textureCvs.convertToBlob({type: 'image/png'}).then(callback);

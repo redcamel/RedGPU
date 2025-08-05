@@ -138,7 +138,7 @@ const renderTestPane = async (view, redGPUContext) => {
 	const noiseToggle = noiseFolder.addBinding(currentTextureData, 'useTransitionAlphaTexture', {
 		label: 'useTransitionAlphaTexture'
 	}).on('change', (ev) => {
-		if(!ev.value) {
+		if (!ev.value) {
 			view.skybox.useTransitionAlphaTexture = null
 		}
 	});
@@ -340,7 +340,7 @@ const renderTestPane = async (view, redGPUContext) => {
 
 // 🔄 트랜지션 버튼 상태 업데이트 함수
 	function updateTransitionButtonStates(currentTextureName) {
-		transitionButtons.forEach(({ button, option }) => {
+		transitionButtons.forEach(({button, option}) => {
 			button.disabled = (option.name === currentTextureName);
 		});
 	}

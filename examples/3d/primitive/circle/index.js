@@ -45,12 +45,12 @@ const createPrimitive = (redGPUContext, scene) => {
 	const circleGeometry = new RedGPU.Primitive.Circle(redGPUContext, 1, 64);
 
 	const circles = [
-		{ material: circleMaterials.solid, position: [0, 0, 0] },
-		{ material: circleMaterials.wireframe, position: [-3, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST },
-		{ material: circleMaterials.point, position: [3, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST },
+		{material: circleMaterials.solid, position: [0, 0, 0]},
+		{material: circleMaterials.wireframe, position: [-3, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST},
+		{material: circleMaterials.point, position: [3, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST},
 	];
 
-	circles.forEach(({ material, position, topology }) => {
+	circles.forEach(({material, position, topology}) => {
 		const circle = new RedGPU.Display.Mesh(redGPUContext, circleGeometry, material);
 
 		if (topology) {
@@ -82,7 +82,9 @@ const createPrimitive = (redGPUContext, scene) => {
 };
 
 const renderTestPane = async (redGPUContext) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+	const {setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext)
 	const pane = new Pane();
 
 	const config = {
@@ -112,7 +114,7 @@ const renderTestPane = async (redGPUContext) => {
 		});
 	};
 
-	const circleFolder = pane.addFolder({ title: 'Circle Properties', expanded: true });
-	addBinding(circleFolder, 'radius', { min: 0.1, max: 5, step: 0.1 });
-	addBinding(circleFolder, 'segments', { min: 3, max: 128, step: 1 });
+	const circleFolder = pane.addFolder({title: 'Circle Properties', expanded: true});
+	addBinding(circleFolder, 'radius', {min: 0.1, max: 5, step: 0.1});
+	addBinding(circleFolder, 'segments', {min: 3, max: 128, step: 1});
 };

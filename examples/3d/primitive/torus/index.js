@@ -43,9 +43,9 @@ const createTorusPrimitive = (redGPUContext, scene) => {
 
 	const gap = 4;
 	const torusProperties = [
-		{ material: torusMaterials.solid, position: [0, 0, 0] },
-		{ material: torusMaterials.wireframe, position: [-gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST },
-		{ material: torusMaterials.point, position: [gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST },
+		{material: torusMaterials.solid, position: [0, 0, 0]},
+		{material: torusMaterials.wireframe, position: [-gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST},
+		{material: torusMaterials.point, position: [gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST},
 	];
 
 	const defaultOptions = {
@@ -57,7 +57,7 @@ const createTorusPrimitive = (redGPUContext, scene) => {
 		endAngle: Math.PI * 2,
 	};
 
-	torusProperties.forEach(({ material, position, topology }) => {
+	torusProperties.forEach(({material, position, topology}) => {
 		const torus = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Torus(
@@ -100,7 +100,9 @@ const createTorusPrimitive = (redGPUContext, scene) => {
 };
 
 const renderTestPane = async (redGPUContext) => {
-	const { Pane } = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
+	const {setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext)
+	const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
 	const pane = new Pane();
 
 	const config = {
@@ -135,11 +137,11 @@ const renderTestPane = async (redGPUContext) => {
 		});
 	};
 
-	const torusFolder = pane.addFolder({ title: 'Torus Properties', expanded: true });
-	addBinding(torusFolder, 'radius', { min: 0.5, max: 5, step: 0.1 });
-	addBinding(torusFolder, 'thickness', { min: 0.1, max: 2, step: 0.1 });
-	addBinding(torusFolder, 'radialSubdivisions', { min: 3, max: 64, step: 1 });
-	addBinding(torusFolder, 'bodySubdivisions', { min: 3, max: 64, step: 1 });
-	addBinding(torusFolder, 'startAngle', { min: 0, max: Math.PI * 2, step: 0.1 });
-	addBinding(torusFolder, 'endAngle', { min: 0, max: Math.PI * 2, step: 0.1 });
+	const torusFolder = pane.addFolder({title: 'Torus Properties', expanded: true});
+	addBinding(torusFolder, 'radius', {min: 0.5, max: 5, step: 0.1});
+	addBinding(torusFolder, 'thickness', {min: 0.1, max: 2, step: 0.1});
+	addBinding(torusFolder, 'radialSubdivisions', {min: 3, max: 64, step: 1});
+	addBinding(torusFolder, 'bodySubdivisions', {min: 3, max: 64, step: 1});
+	addBinding(torusFolder, 'startAngle', {min: 0, max: Math.PI * 2, step: 0.1});
+	addBinding(torusFolder, 'endAngle', {min: 0, max: Math.PI * 2, step: 0.1});
 };

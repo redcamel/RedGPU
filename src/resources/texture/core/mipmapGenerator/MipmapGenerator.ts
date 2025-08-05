@@ -26,7 +26,6 @@ class MipmapGenerator {
 
 	createTextureView(texture: GPUTexture, baseMipLevel: number, baseArrayLayer: number, useCache: boolean = false): GPUTextureView {
 		const key = `${baseMipLevel}_${baseArrayLayer}`;
-
 		if (useCache) {
 			// WeakMap에서 해당 텍스처의 뷰 캐시 맵 가져오기
 			let textureViewMap = this.#persistentViewCache.get(texture);
@@ -34,12 +33,10 @@ class MipmapGenerator {
 				textureViewMap = new Map();
 				this.#persistentViewCache.set(texture, textureViewMap);
 			}
-
 			// 캐시된 뷰가 있는지 확인
 			if (textureViewMap.has(key)) {
 				return textureViewMap.get(key)!;
 			}
-
 			const view = texture.createView({
 				baseMipLevel,
 				mipLevelCount: 1,
@@ -48,7 +45,6 @@ class MipmapGenerator {
 				arrayLayerCount: 1,
 				label: `MIPMAP_GENERATOR_CACHED_${texture.label}_${key}`
 			});
-
 			// 캐시에 저장
 			textureViewMap.set(key, view);
 			return view;
@@ -72,7 +68,6 @@ class MipmapGenerator {
 
 	createBindGroup(texture: GPUTexture, textureView: GPUTextureView, useCache: boolean = false): GPUBindGroup {
 		const {gpuDevice} = this.#redGPUContext;
-
 		if (useCache) {
 			// GPUTexture를 키로 바인드 그룹 캐시 맵 가져오기
 			let bindGroupMap = this.#persistentBindGroupCache.get(texture);
@@ -80,15 +75,12 @@ class MipmapGenerator {
 				bindGroupMap = new Map();
 				this.#persistentBindGroupCache.set(texture, bindGroupMap);
 			}
-
 			// textureView의 label을 키로 사용
 			const viewKey = textureView.label || 'unlabeled';
-
 			// 캐시된 바인드 그룹이 있는지 확인
 			if (bindGroupMap.has(viewKey)) {
 				return bindGroupMap.get(viewKey)!;
 			}
-
 			const bindGroup = gpuDevice.createBindGroup({
 				label: `MIPMAP_GENERATOR_BIND_GROUP_CACHED_${texture.label}_${viewKey}`,
 				layout: this.#bindGroupLayout,
@@ -100,7 +92,6 @@ class MipmapGenerator {
 					resource: textureView,
 				}],
 			});
-
 			// 캐시에 저장
 			bindGroupMap.set(viewKey, bindGroup);
 			return bindGroup;
@@ -110,7 +101,6 @@ class MipmapGenerator {
 			if (this.#tempBindGroupCache.has(tempKey)) {
 				return this.#tempBindGroupCache.get(tempKey)!;
 			}
-
 			const bindGroup = gpuDevice.createBindGroup({
 				label: `MIPMAP_GENERATOR_BIND_GROUP_TEMP_${tempKey}`,
 				layout: this.#bindGroupLayout,
@@ -122,7 +112,6 @@ class MipmapGenerator {
 					resource: textureView,
 				}],
 			});
-
 			this.#tempBindGroupCache.set(tempKey, bindGroup);
 			return bindGroup;
 		}
@@ -179,8 +168,7 @@ class MipmapGenerator {
 		if (!useCache) {
 			this.#clearTempCaches();
 		}
-
-		const {gpuDevice} = this.#redGPUContext
+		const {gpuDevice, resourceManager} = this.#redGPUContext
 		const pipeline: GPURenderPipeline = this.getMipmapPipeline(textureDescriptor.format);
 		if (textureDescriptor.dimension == '3d' || textureDescriptor.dimension == '1d') {
 			throw new Error('Generating mipmaps for non-2d textures is currently unsupported!');
@@ -202,7 +190,7 @@ class MipmapGenerator {
 				usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.RENDER_ATTACHMENT,
 				mipLevelCount: textureDescriptor.mipLevelCount - 1,
 			};
-			mipTexture = gpuDevice.createTexture(mipTextureDescriptor);
+			mipTexture = resourceManager.createManagedTexture(mipTextureDescriptor);
 		}
 		const commandEncoder = gpuDevice.createCommandEncoder({});
 		for (let arrayLayer = 0; arrayLayer < arrayLayerCount; ++arrayLayer) {
@@ -249,24 +237,22 @@ class MipmapGenerator {
 		if (!renderToSource) {
 			mipTexture.destroy();
 		}
-
 		// useCache가 false일 때만 temp 캐시 클리어
 		if (!useCache) {
 			this.#clearTempCaches();
 		}
-
 		return texture;
-	}
-
-	#clearTempCaches() {
-		this.#tempViewCache.clear();
-		this.#tempBindGroupCache.clear();
 	}
 
 	destroy() {
 		// WeakMap은 자동으로 정리되므로 별도 처리 불필요
 		// temp 캐시만 명시적으로 정리
 		this.#clearTempCaches();
+	}
+
+	#clearTempCaches() {
+		this.#tempViewCache.clear();
+		this.#tempBindGroupCache.clear();
 	}
 }
 

@@ -2,12 +2,10 @@ import RedGPUContext from "../../../../context/RedGPUContext";
 import validateNumber from "../../../../runtimeChecker/validateFunc/validateNumber";
 import validatePositiveNumberRange from "../../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import validateUintRange from "../../../../runtimeChecker/validateFunc/validateUintRange";
-import createUUID from "../../../../utils/createUUID";
+import calculateTextureByteSize from "../../../../utils/math/calculateTextureByteSize";
 import UniformBuffer from "../../../buffer/uniformBuffer/UniformBuffer";
-import ManagedResourceBase from "../../../ManagedResourceBase";
-import basicRegisterResource from "../../../resourceManager/core/basicRegisterResource";
-import basicUnregisterResource from "../../../resourceManager/core/basicUnregisterResource";
-import ResourceStateBitmapTexture from "../../../resourceManager/resourceState/ResourceStateBitmapTexture";
+import ManagementResourceBase from "../../../ManagementResourceBase";
+import ResourceStateBitmapTexture from "../../../resourceManager/resourceState/texture/ResourceStateBitmapTexture";
 import parseWGSL from "../../../wgslParser/parseWGSL";
 
 const MANAGED_STATE_KEY = 'managedBitmapTextureState';
@@ -25,11 +23,9 @@ const BASIC_OPTIONS = {
 	animationY: 0.1
 }
 
-class ANoiseTexture extends ManagedResourceBase {
-	cacheKey;
+class ANoiseTexture extends ManagementResourceBase {
 //
 	mipLevelCount;
-	videoMemorySize;
 	useMipmap;
 	src;
 	#gpuTexture: GPUTexture;
@@ -45,12 +41,13 @@ class ANoiseTexture extends ManagedResourceBase {
 	#width: number;
 	#height: number;
 	#currentEffect: NoiseDefine;
-	///
 	//
 	#time: number = 0
+	///
 	#animationSpeed: number = 1
 	#animationX: number = BASIC_OPTIONS.animationX
 	#animationY: number = BASIC_OPTIONS.animationY
+	#videoMemorySize: number = 0
 
 	constructor(
 		redGPUContext: RedGPUContext,
@@ -65,9 +62,19 @@ class ANoiseTexture extends ManagedResourceBase {
 		this.#height = height;
 		this.#currentEffect = define;
 		this.#init(redGPUContext);
+		this.cacheKey = `NoiseTexture_${width}x${height}_${Date.now()}`
 		this.#gpuTexture = this.#createStorageTexture(redGPUContext, width, height);
+		this.#videoMemorySize = calculateTextureByteSize(this.#gpuTexture);
 		this.#executeComputePass();
 		this.#registerResource();
+	}
+
+	get videoMemorySize(): number {
+		return this.#videoMemorySize;
+	}
+
+	get resourceManagerKey(): string {
+		return MANAGED_STATE_KEY
 	}
 
 	get animationSpeed(): number {
@@ -144,10 +151,20 @@ class ANoiseTexture extends ManagedResourceBase {
 		this.#executeComputePass();
 	}
 
+	destroy() {
+		const temp = this.#gpuTexture
+		this.__fireListenerList(true)
+		this.#unregisterResource()
+		if (temp) temp.destroy()
+		this.src = null
+		this.cacheKey = null
+		this.#gpuTexture = null
+	}
+
 	#init(redGPUContext: RedGPUContext) {
 		const {gpuDevice} = redGPUContext;
 		const textureComputeShader = this.#generateShader();
-		this.cacheKey = createUUID()
+		this.cacheKey = this.uuid
 		this.#textureComputeShaderModule = gpuDevice.createShaderModule({
 			code: textureComputeShader,
 		});
@@ -241,7 +258,7 @@ class ANoiseTexture extends ManagedResourceBase {
 			size: {width: width, height: height},
 			format: 'rgba8unorm',
 			usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING,
-			label: `NoiseTexture_${width}x${height}_${Date.now()}`,
+			label: this.cacheKey,
 		});
 		const storageTextureView = storageTexture.createView();
 		this.#textureComputeBindGroup = this.#createTextureBindGroup(
@@ -282,11 +299,11 @@ class ANoiseTexture extends ManagedResourceBase {
 	}
 
 	#registerResource() {
-		basicRegisterResource(this, new ResourceStateBitmapTexture(this));
+		this.redGPUContext.resourceManager.registerManagementResource(this, new ResourceStateBitmapTexture(this));
 	}
 
 	#unregisterResource() {
-		basicUnregisterResource(this);
+		this.redGPUContext.resourceManager.unregisterManagementResource(this);
 	}
 }
 

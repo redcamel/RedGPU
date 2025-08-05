@@ -15,10 +15,13 @@ class DebugRender {
 	debugRedGPUContext: DebugRedGPUContext;
 	debugBitmapTextureList: DebugTextureList;
 	debugCubeTextureList: DebugTextureList;
+	debugHDRTextureList: DebugTextureList;
+	debugPackedTextureList: DebugTextureList;
 	debugIndexBufferList: DebugBufferList;
 	debugVertexBufferList: DebugBufferList;
 	debugUniformBufferList: DebugBufferList;
 	debugStorageBufferList: DebugBufferList;
+	debugBufferList: DebugBufferList;
 	//
 	totalNum3DGroups: number
 	totalNum3DObjects: number
@@ -35,11 +38,14 @@ class DebugRender {
 		this.debugRedGPUContext = new DebugRedGPUContext()
 		this.debugViewList = new DebugViewList()
 		this.debugBitmapTextureList = new DebugTextureList()
-		this.debugCubeTextureList = new DebugTextureList(true)
+		this.debugCubeTextureList = new DebugTextureList('Cube')
+		this.debugHDRTextureList = new DebugTextureList('HDR')
+		this.debugPackedTextureList = new DebugTextureList('Packed')
 		this.debugIndexBufferList = new DebugBufferList('IndexBuffer')
 		this.debugVertexBufferList = new DebugBufferList('VertexBuffer')
 		this.debugUniformBufferList = new DebugBufferList('UniformBuffer')
 		this.debugStorageBufferList = new DebugBufferList('StorageBuffer')
+		this.debugBufferList = new DebugBufferList('Buffer')
 		this.#resetCounters();
 	}
 
@@ -51,10 +57,13 @@ class DebugRender {
 			this.debugViewList.update(this, redGPUContext, time)
 			this.debugBitmapTextureList.update(this, redGPUContext, time)
 			this.debugCubeTextureList.update(this, redGPUContext, time)
+			this.debugHDRTextureList.update(this, redGPUContext, time)
+			this.debugPackedTextureList.update(this, redGPUContext, time)
 			this.debugIndexBufferList.update(this, redGPUContext,)
 			this.debugVertexBufferList.update(this, redGPUContext,)
 			this.debugUniformBufferList.update(this, redGPUContext,)
 			this.debugStorageBufferList.update(this, redGPUContext,)
+			this.debugBufferList.update(this, redGPUContext,)
 			this.debugTotalState.update(this, redGPUContext, time)
 		} else {
 			this.#removeDebugPanel()
@@ -82,12 +91,15 @@ class DebugRender {
 				this.debugTotalState.debugStatisticsDomService,
 				this.debugRedGPUContext.debugStatisticsDomService,
 				this.debugViewList.debugStatisticsDomService,
+				this.debugBufferList.debugStatisticsDomService,
 				this.debugVertexBufferList.debugStatisticsDomService,
 				this.debugIndexBufferList.debugStatisticsDomService,
 				this.debugUniformBufferList.debugStatisticsDomService,
 				this.debugStorageBufferList.debugStatisticsDomService,
 				this.debugBitmapTextureList.debugStatisticsDomService,
-				this.debugCubeTextureList.debugStatisticsDomService
+				this.debugPackedTextureList.debugStatisticsDomService,
+				this.debugCubeTextureList.debugStatisticsDomService,
+				this.debugHDRTextureList.debugStatisticsDomService,
 			].forEach(v => this.#domRoot.appendChild(v.dom))
 		}
 	}

@@ -22,7 +22,7 @@ RedGPU.init(
 
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		renderer.start(redGPUContext, (time) => {
-			mesh.rotationY += 0.25;
+			mesh.rotationY += 0.05;
 		});
 
 		renderTestPane(redGPUContext, mesh);
@@ -49,8 +49,9 @@ const addSingleMesh = (redGPUContext, scene) => {
 };
 
 const renderTestPane = async (redGPUContext, mesh) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
-	const { setSeparator } = await import("../../../exampleHelper/createExample/panes/index.js");
+	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+	const {setSeparator, setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
 	const pane = new Pane();
 
 	setSeparator(pane);
@@ -88,12 +89,12 @@ const renderTestPane = async (redGPUContext, mesh) => {
 		pane.refresh();
 	};
 
-	const textureFolder = pane.addFolder({ title: 'Texture Option', expanded: true });
+	const textureFolder = pane.addFolder({title: 'Texture Option', expanded: true});
 	textureFolder.addBinding(samplerOptions, 'useMipmap').on('change', (evt) => {
 		mesh.material.diffuseTexture.useMipmap = evt.value;
 	});
 
-	const samplerFolder = pane.addFolder({ title: 'Sampler Option', expanded: true });
+	const samplerFolder = pane.addFolder({title: 'Sampler Option', expanded: true});
 	samplerFolder.addBinding(samplerOptions, 'minFilter', {
 		options: {
 			Nearest: 'nearest',
@@ -160,7 +161,7 @@ const renderTestPane = async (redGPUContext, mesh) => {
 	anisotropyStatusBinding = samplerFolder.addBinding(
 		samplerOptions,
 		'enableAnisotropy',
-		{ view: 'text', disabled: true }
+		{view: 'text', disabled: true}
 	);
 
 	updateAnisotropyState();

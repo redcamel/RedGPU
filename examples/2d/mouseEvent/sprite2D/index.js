@@ -71,5 +71,6 @@ const createSampleSprite2D = async (redGPUContext, scene) => {
 
 const renderTestPane = async (redGPUContext) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
-	const pane = new Pane();
+	const {setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
 };

@@ -9,7 +9,6 @@ import VertexGPURenderInfo from "../../renderInfos/VertexGPURenderInfo";
 import DefineForVertex from "../../resources/defineProperty/DefineForVertex";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
-import {keepLog} from "../../utils";
 import InstanceIdGenerator from "../../utils/InstanceIdGenerator";
 import AABB from "../../utils/math/bound/AABB";
 import calculateMeshAABB from "../../utils/math/bound/calculateMeshAABB";
@@ -101,7 +100,6 @@ class Mesh extends MeshBase {
 	}
 
 	_material
-
 	get material() {
 		return this._material;
 	}
@@ -117,7 +115,6 @@ class Mesh extends MeshBase {
 
 	// 블렌드 모드 설정 함수
 	_geometry: Geometry | Primitive
-
 	get geometry(): Geometry | Primitive {
 		return this._geometry;
 	}
@@ -991,7 +988,7 @@ class Mesh extends MeshBase {
 			// 레이지 바리안트 생성기에서 바리안트 소스 코드 가져오기
 			let variantSource = this.gpuRenderInfo.vertexShaderSourceVariant.getVariant(currentVariantKey);
 			if (variantSource) {
-				keepLog('버텍스 바리안트 셰이더 모듈 생성:', currentVariantKey, variantShaderModuleName);
+				// keepLog('버텍스 바리안트 셰이더 모듈 생성:', currentVariantKey, variantShaderModuleName);
 				if (this.animationInfo?.skinInfo) {
 					const jointNum = `${this.animationInfo.skinInfo.joints.length}`
 					variantSource = variantSource.replaceAll('#JOINT_NUM', jointNum)

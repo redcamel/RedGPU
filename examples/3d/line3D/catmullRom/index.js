@@ -59,6 +59,7 @@ function createSampleLine3D(title, view, pointsPerLayer, posX, posZ, baseColor, 
 	const label = new RedGPU.Display.TextField3D(redGPUContext);
 	label.text = `${title}<br/><span style="color:#dc631d">point num: ${pointsPerLayer}</span>`;
 	label.fontSize = 42;
+	label.color = baseColor;
 	label.useBillboard = true;   // 항상 카메라를 바라보도록 설정
 
 	line3D.addChild(label);      // 라벨을 Line3D에 추가
@@ -114,7 +115,8 @@ function rainbowHex(t) {
 const renderTestPane = async (redGPUContext) => {
 	const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
 	const pane = new Pane();
-
+	const {setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
 	// **** UI 동작 대상이 되는 Line3D 오브젝트 및 디버그 마커 모음 ****
 	const debugOptions = {
 		showDebugPoints: false, // 디버그 포인트 표시 여부
