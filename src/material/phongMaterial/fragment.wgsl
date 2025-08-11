@@ -176,7 +176,14 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
 
          let L = normalize(lightDir);
 //         let attenuation = clamp(0.0, 1.0, 1.0 - (lightDistance * lightDistance) / (u_clusterLightRadius * u_clusterLightRadius));
-         let attenuation = clamp(1.0 - (lightDistance * lightDistance) / (u_clusterLightRadius * u_clusterLightRadius), 0.0, 1.0);
+//         let attenuation = clamp(1.0 - (lightDistance * lightDistance) / (u_clusterLightRadius * u_clusterLightRadius), 0.0, 1.0);
+
+        let dist2 = max(dot(lightDir, lightDir), 0.0001);
+        let d = sqrt(dist2);
+        let rangePart = pow(clamp(1.0 - d / u_clusterLightRadius, 0.0, 1.0), 2.0);
+        // 반경 정규화로 중심부 과도한 밝기 방지 (radius^2 스케일)
+        let invSquare = (u_clusterLightRadius * u_clusterLightRadius) / dist2;
+        let attenuation = rangePart * invSquare;
 
          var finalAttenuation = attenuation;
 
