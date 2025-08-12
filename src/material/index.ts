@@ -4,6 +4,7 @@ import ColorMaterial from "./colorMaterial/ColorMaterial";
 import COMPOSITE_MODE from "./COMPOSITE_MODE";
 import PhongMaterial from "./phongMaterial/PhongMaterial";
 import TINT_BLEND_MODE from "./TINT_BLEND_MODE";
+import WaterMaterial from "./waterMaterial/WaterMaterial";
 
 export * from './core'
 export {
@@ -13,4 +14,5 @@ export {
 	ColorMaterial,
 	PhongMaterial,
 	BitmapMaterial,
+	WaterMaterial
 }

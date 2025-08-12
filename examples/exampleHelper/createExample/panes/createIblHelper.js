@@ -5,7 +5,7 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
 
 	const settings = {
 		hdrImage: hdrImages[0].path,
-		useLight: false,
+		useLight: !!view.scene.lightManager.directionalLightCount,
 		useIBL: true,
 		blur: 0,
 		opacity: 1,
