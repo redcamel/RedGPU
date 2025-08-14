@@ -252,7 +252,7 @@ class ABaseMaterial extends ResourceBase {
 						alpha: this.blendAlphaState.state
 					},
 					writeMask: this.writeMaskState,
-				}
+				},
 			]
 		}
 	}

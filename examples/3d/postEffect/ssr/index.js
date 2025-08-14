@@ -1,0 +1,240 @@
+import * as RedGPU from "../../../../dist/index.js";
+
+// 1. Create and append a canvas
+const canvas = document.createElement('canvas');
+document.querySelector('#example-container').appendChild(canvas);
+
+// 2. Initialize RedGPU
+RedGPU.init(
+	canvas,
+	(redGPUContext) => {
+		// ============================================
+		// 기본 설정
+		// ============================================
+
+		// 궤도형 카메라 컨트롤러 생성 (더 가까이 배치)
+		const controller = new RedGPU.Camera.ObitController(redGPUContext);
+		controller.distance = 8; // 더 멀리 배치하여 반사 효과 확인
+		controller.speedDistance = 0.2;
+		controller.tilt = -15; // 약간 위에서 내려다보는 각도
+
+		// 씬 생성
+		const scene = new RedGPU.Display.Scene();
+
+		// ============================================
+		// 뷰 생성 및 설정
+		// ============================================
+
+		const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
+
+		// 일반 뷰 생성
+		const viewNormal = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+		viewNormal.ibl = ibl;
+		viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+		redGPUContext.addView(viewNormal);
+
+		// SSR 이펙트 뷰 생성
+		const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+		viewEffect.ibl = ibl;
+		viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+		const ssrEffect = new RedGPU.PostEffect.SSR(redGPUContext);
+		viewEffect.postEffectManager.addEffect(ssrEffect);
+		redGPUContext.addView(viewEffect);
+
+		// ============================================
+		// 씬 설정 - SSR에 적합한 반사 물체들 추가
+		// ============================================
+
+		// 조명 추가 (더 강한 조명)
+		const directionalLight = new RedGPU.Light.DirectionalLight();
+		directionalLight.intensity = 2.0; // 더 밝게
+		scene.lightManager.addDirectionalLight(directionalLight);
+		//
+		// // 바닥 평면 추가 (반사면)
+		// const floorGeometry = new RedGPU.Primitive.Ground(redGPUContext, 10, 10);
+		// const floorMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);
+		// floorMaterial.metallicFactor = 1.0; // 완전 금속성
+		// floorMaterial.roughnessFactor = 0.1; // 매우 매끄럽게
+		// floorMaterial.color.setColorByHEX('#11332f')
+		//
+		// const floorMesh = new RedGPU.Display.Mesh(redGPUContext, floorGeometry, floorMaterial);
+		// floorMesh.rotationX = -Math.PI / 2; // 바닥으로 회전
+		// // floorMesh.y = -0.5; // 아래로 배치
+		// // scene.addChild(floorMesh);
+		//
+		// // 여러 개의 반사 구체 추가
+		// const sphereGeometry = new RedGPU.Primitive.Sphere(redGPUContext, 0.5, 32, 16);
+		//
+		// // 금속 구체
+		// const metalMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);
+		//
+		// metalMaterial.color.setColorByHEX('#af532e')
+		//
+		// const metalSphere = new RedGPU.Display.Mesh(redGPUContext, sphereGeometry, metalMaterial);
+		// metalSphere.x = -2;
+		// metalSphere.y = 0;
+		// scene.addChild(metalSphere);
+		//
+		// // 반투명 구체
+		// const glassMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);
+		// glassMaterial.opacity = 0.3;
+		//
+		// const glassSphere = new RedGPU.Display.Mesh(redGPUContext, sphereGeometry, glassMaterial);
+		// glassSphere.x = 2;
+		// glassSphere.y = 0;
+		// scene.addChild(glassSphere);
+
+		// 원래 모델도 유지
+		// loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb');
+		loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Sponza/glTF/Sponza.gltf');
+
+		// ============================================
+		// 레이아웃 설정
+		// ============================================
+
+		// if (redGPUContext.detector.isMobile) {
+		// 	// 모바일: 위아래 분할
+		// 	viewNormal.setSize('100%', '50%');
+		// 	viewNormal.setPosition(0, 0);         // 상단
+		// 	viewEffect.setSize('100%', '50%');
+		// 	viewEffect.setPosition(0, '50%');     // 하단
+		// } else {
+		// 	// 데스크톱: 좌우 분할
+		// 	viewNormal.setSize('50%', '100%');
+		// 	viewNormal.setPosition(0, 0);         // 좌측
+		// 	viewEffect.setSize('50%', '100%');
+		// 	viewEffect.setPosition('50%', 0);     // 우측
+		// }
+
+		// ============================================
+		// 애니메이션 추가 (반사 효과를 더 잘 보이게)
+		// ============================================
+
+		let time = 0;
+		const render = () => {
+			time += 0.01;
+
+			// // 구체들을 회전시키고 위아래로 움직임
+			// if (metalSphere) {
+			// 	metalSphere.rotationY += 0.02;
+			// 	metalSphere.y = Math.sin(time) * 0.5;
+			// }
+			//
+			// if (glassSphere) {
+			// 	glassSphere.rotationX += 0.015;
+			// 	glassSphere.y = Math.cos(time * 1.2) * 0.3;
+			// }
+		};
+
+		// ============================================
+		// 렌더링 시작
+		// ============================================
+
+		const renderer = new RedGPU.Renderer(redGPUContext);
+		renderer.start(redGPUContext, render);
+
+		// SSR 컨트롤 패널 생성
+		renderSSRTestPane(redGPUContext, viewEffect, ssrEffect);
+	},
+	(failReason) => {
+		console.error('Initialization failed:', failReason);
+		const errorMessage = document.createElement('div');
+		errorMessage.innerHTML = failReason;
+		document.body.appendChild(errorMessage);
+	}
+);
+
+function loadGLTF(redGPUContext, scene, url) {
+	let mesh;
+	new RedGPU.GLTFLoader(
+		redGPUContext,
+		url,
+		(v) => {
+			mesh = scene.addChild(v['resultMesh']);
+			// 모델을 약간 위로 배치
+			if (mesh) {
+				// mesh.y = 1;
+			}
+		}
+	);
+}
+
+const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect) => {
+	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+	const {createPostEffectLabel} = await import('../../../exampleHelper/createExample/loadExampleInfo/createPostEffectLabel.js');
+	createPostEffectLabel('SSR (Screen Space Reflection)', redGPUContext.detector.isMobile);
+	const {setDebugViewButton,createIblHelper} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugViewButton(redGPUContext);
+
+	const pane = new Pane({title: 'SSR Controls'});
+	createIblHelper(pane,targetView,RedGPU)
+
+	// SSR 효과 토글
+	const TEST_STATE = {
+		enableSSR: true,
+		// SSR 파라미터들
+		maxSteps: ssrEffect.maxSteps,
+		maxDistance: ssrEffect.maxDistance,
+		stepSize: ssrEffect.stepSize,
+		thickness: ssrEffect.thickness,
+		reflectionIntensity: ssrEffect.reflectionIntensity,
+		fadeDistance: ssrEffect.fadeDistance,
+		edgeFade: ssrEffect.edgeFade
+	};
+
+	const folder = pane.addFolder({title: 'SSR Settings', expanded: false});
+
+	// SSR 온/오프
+	folder.addBinding(TEST_STATE, 'enableSSR').on('change', (v) => {
+		if (v.value) {
+			targetView.postEffectManager.addEffect(ssrEffect);
+		} else {
+			targetView.postEffectManager.removeAllEffect();
+		}
+	});
+
+	// SSR 파라미터 조절
+	folder.addBinding(TEST_STATE, 'maxSteps', {min: 8, max: 128, step: 1})
+		.on('change', (v) => ssrEffect.maxSteps = v.value);
+
+	folder.addBinding(TEST_STATE, 'maxDistance', {min: 1, max: 100, step: 0.01})
+		.on('change', (v) => ssrEffect.maxDistance = v.value);
+
+	folder.addBinding(TEST_STATE, 'stepSize', {min: 0, max: 5, step: 0.001})
+		.on('change', (v) => ssrEffect.stepSize = v.value);
+
+	folder.addBinding(TEST_STATE, 'thickness', {min: 0, max: 5.0, step: 0.01})
+		.on('change', (v) => ssrEffect.thickness = v.value);
+
+	folder.addBinding(TEST_STATE, 'reflectionIntensity', {min: 0.0, max: 2.0, step: 0.01})
+		.on('change', (v) => ssrEffect.reflectionIntensity = v.value);
+
+	folder.addBinding(TEST_STATE, 'fadeDistance', {min: 1, max: 100, step: 0.01})
+		.on('change', (v) => ssrEffect.fadeDistance = v.value);
+
+	folder.addBinding(TEST_STATE, 'edgeFade', {min: 0.0, max: 0.5, step: 0.01})
+		.on('change', (v) => ssrEffect.edgeFade = v.value);
+
+	// 프리셋 버튼들
+	const presetFolder = pane.addFolder({title: 'Presets'});
+
+	presetFolder.addButton({title: 'High Quality'}).on('click', () => {
+		ssrEffect.maxSteps = 64;
+		ssrEffect.stepSize = 0.3;
+		ssrEffect.reflectionIntensity = 1.0;
+		pane.refresh(); // UI 업데이트
+	});
+
+	presetFolder.addButton({title: 'Performance'}).on('click', () => {
+		ssrEffect.maxSteps = 32;
+		ssrEffect.stepSize = 0.8;
+		ssrEffect.reflectionIntensity = 0.6;
+		pane.refresh();
+	});
+
+	presetFolder.addButton({title: 'Subtle'}).on('click', () => {
+		ssrEffect.reflectionIntensity = 0.3;
+		ssrEffect.fadeDistance = 20;
+		pane.refresh();
+	});
+};

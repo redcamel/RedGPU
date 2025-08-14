@@ -25,6 +25,7 @@ import LensDistortion from "./effects/lens/lensDistortion/LensDistortion";
 import Vignetting from "./effects/lens/vignetting/Vignetting";
 import OldBloom from "./effects/oldBloom/OldBloom";
 import Sharpen from "./effects/Sharpen";
+import SSR from "./effects/ssr/SSR";
 import PostEffectManager from "./PostEffectManager";
 
 export {
@@ -62,5 +63,7 @@ export {
 	OldBloom,
 	Sharpen,
 	// Utility Effects
-	Convolution
+	Convolution,
+	//
+	SSR
 }
