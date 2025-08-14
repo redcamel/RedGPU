@@ -8,16 +8,16 @@ struct Uniforms {
     edgeFade: f32,
     _padding: f32,
 }
-
 fn reconstructViewPosition(screenCoord: vec2<i32>, depth: f32) -> vec3<f32> {
     let texDims = textureDimensions(depthTexture);
     let texSize = vec2<f32>(texDims);
     let uv = (vec2<f32>(screenCoord) + vec2<f32>(0.5)) / texSize;
 
-    // NDC 좌표 계산
+    // NDC 좌표 계산 - Y 좌표 방향 수정
     let ndc = vec3<f32>(
-        uv * 2.0 - vec2<f32>(1.0),  // xy: 0-1 -> -1~1
-        depth          // z: 0-1 -> -1~1
+        uv.x * 2.0 - 1.0,
+        1.0 - uv.y * 2.0,  // Y 좌표 반전 (WebGPU 텍스처 좌표계 고려)
+        depth * 2.0 - 1.0  // WebGPU는 [0,1] 범위이지만 NDC는 [-1,1]
     );
 
     // 클립 공간에서 뷰 공간으로 변환
@@ -28,7 +28,6 @@ fn reconstructViewPosition(screenCoord: vec2<i32>, depth: f32) -> vec3<f32> {
     let w = max(abs(viewPos4.w), 1e-6);
     return viewPos4.xyz / w;
 }
-
 // 개선된 노멀 복원 - 올바른 방향 보장
 fn reconstructViewNormal(screenCoord: vec2<i32>) -> vec3<f32> {
     let texDims = textureDimensions(depthTexture);
@@ -104,7 +103,7 @@ fn projectViewToScreen(viewPos: vec3<f32>) -> vec2<f32> {
     // NDC를 스크린 UV로 변환
     let screenUV = vec2<f32>(
         ndc.x * 0.5 + 0.5,
-        ndc.y * 0.5 + 0.5
+        (ndc.y * 0.5 + 0.5)
     );
     return screenUV;
 }
