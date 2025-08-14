@@ -53,14 +53,14 @@ RedGPU.init(
 		const normalTexture= new RedGPU.Resource.BitmapTexture(redGPUContext, "../../../assets/phongMaterial/test_normalMap.jpg");
 		//
 		// // 바닥 평면 추가 (반사면)
-		const floorGeometry = new RedGPU.Primitive.Ground(redGPUContext, 10, 10,100,100);
+		const floorGeometry = new RedGPU.Primitive.Ground(redGPUContext, 5, 5,100,100);
 		const floorMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);
 		floorMaterial.color.setColorByHEX('#11332f')
 		//
 		const floorMesh = new RedGPU.Display.Mesh(redGPUContext, floorGeometry, floorMaterial);
 
 
-		// scene.addChild(floorMesh);
+		scene.addChild(floorMesh);
 
 		// 여러 개의 반사 구체 추가
 		const sphereGeometry = new RedGPU.Primitive.Sphere(redGPUContext, 0.5, 32, 16);
@@ -173,7 +173,6 @@ const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect) => {
 		maxSteps: ssrEffect.maxSteps,
 		maxDistance: ssrEffect.maxDistance,
 		stepSize: ssrEffect.stepSize,
-		thickness: ssrEffect.thickness,
 		reflectionIntensity: ssrEffect.reflectionIntensity,
 		fadeDistance: ssrEffect.fadeDistance,
 		edgeFade: ssrEffect.edgeFade
@@ -207,11 +206,6 @@ const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect) => {
 			TEST_STATE.stepSize = v.value;
 		});
 
-	folder.addBinding(TEST_STATE, 'thickness', {min: 0.1, max: 3.0, step: 0.05})
-		.on('change', (v) => {
-			ssrEffect.thickness = v.value;
-			TEST_STATE.thickness = v.value;
-		});
 
 	folder.addBinding(TEST_STATE, 'reflectionIntensity', {min: 0.1, max: 3.5, step: 0.01})
 		.on('change', (v) => {
@@ -236,7 +230,6 @@ const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect) => {
 	presetFolder.addButton({title: 'High Quality'}).on('click', () => {
 		TEST_STATE.maxSteps = 96;
 		TEST_STATE.stepSize = 0.05;
-		TEST_STATE.thickness = 1.0;
 		TEST_STATE.reflectionIntensity = 1.0;
 		TEST_STATE.fadeDistance = 15;
 		TEST_STATE.edgeFade = 0.15;
@@ -248,7 +241,6 @@ const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect) => {
 	presetFolder.addButton({title: 'Balanced'}).on('click', () => {
 		TEST_STATE.maxSteps = 64;
 		TEST_STATE.stepSize = 0.08;
-		TEST_STATE.thickness = 1.2;
 		TEST_STATE.reflectionIntensity = 0.8;
 		TEST_STATE.fadeDistance = 12;
 		TEST_STATE.edgeFade = 0.12;
@@ -260,7 +252,6 @@ const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect) => {
 	presetFolder.addButton({title: 'Performance'}).on('click', () => {
 		TEST_STATE.maxSteps = 32;
 		TEST_STATE.stepSize = 0.12;
-		TEST_STATE.thickness = 1.5;
 		TEST_STATE.reflectionIntensity = 0.6;
 		TEST_STATE.fadeDistance = 8;
 		TEST_STATE.edgeFade = 0.1;

@@ -9,7 +9,6 @@ class SSR extends ASinglePassPostEffect {
 	#maxSteps: number = 128;
 	#maxDistance: number = 20.0;
 	#stepSize: number = 0.08;
-	#thickness: number = 1.2;
 	#reflectionIntensity: number = 1;
 	#fadeDistance: number = 8.0;
 	#edgeFade: number = 0.1;
@@ -32,7 +31,6 @@ class SSR extends ASinglePassPostEffect {
 		this.maxSteps = this.#maxSteps;
 		this.maxDistance = this.#maxDistance;
 		this.stepSize = this.#stepSize;
-		this.thickness = this.#thickness;
 		this.reflectionIntensity = this.#reflectionIntensity;
 		this.fadeDistance = this.#fadeDistance;
 		this.edgeFade = this.#edgeFade;
@@ -66,16 +64,6 @@ class SSR extends ASinglePassPostEffect {
 		validateNumberRange(value, 0.001, 5.0);
 		this.#stepSize = value;
 		this.updateUniform('stepSize', value);
-	}
-
-	get thickness(): number {
-		return this.#thickness;
-	}
-
-	set thickness(value: number) {
-		validateNumberRange(value, 0.001, 10.0);
-		this.#thickness = value;
-		this.updateUniform('thickness', value);
 	}
 
 	get reflectionIntensity(): number {
