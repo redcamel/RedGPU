@@ -57,7 +57,7 @@ let fresnelReflectance = F0 + (1.0 - F0) * fresnel;
 // 단순화된 반사 강도 계산
 let reflectionStrength = reflectionAlpha *
                         uniforms.reflectionIntensity *
-                        fresnelReflectance;
+                        fresnelReflectance * max(0.16, 1.0 - roughness);
 
 let finalReflectionColor = reflectionColor * reflectionStrength;
 

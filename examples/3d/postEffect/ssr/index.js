@@ -58,10 +58,9 @@ RedGPU.init(
 		floorMaterial.color.setColorByHEX('#11332f')
 		//
 		const floorMesh = new RedGPU.Display.Mesh(redGPUContext, floorGeometry, floorMaterial);
-		floorMesh.rotationX = -Math.PI / 2; // 바닥으로 회전
 
 
-		scene.addChild(floorMesh);
+		// scene.addChild(floorMesh);
 
 		// 여러 개의 반사 구체 추가
 		const sphereGeometry = new RedGPU.Primitive.Sphere(redGPUContext, 0.5, 32, 16);
@@ -154,12 +153,11 @@ function loadGLTF(redGPUContext, scene, url) {
 			mesh = scene.addChild(v['resultMesh']);
 			// 모델을 약간 위로 배치
 			if (url.includes('DamagedHelmet')) {
-				// mesh.y = 1;
+				mesh.y = 1;
 			}
 		}
 	);
 }
-
 const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const {createPostEffectLabel} = await import('../../../exampleHelper/createExample/loadExampleInfo/createPostEffectLabel.js');
@@ -170,10 +168,8 @@ const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect) => {
 	const pane = new Pane({title: 'SSR Controls'});
 	createIblHelper(pane,targetView,RedGPU)
 
-	// SSR 효과 토글
 	const TEST_STATE = {
 		enableSSR: true,
-		// SSR 파라미터들
 		maxSteps: ssrEffect.maxSteps,
 		maxDistance: ssrEffect.maxDistance,
 		stepSize: ssrEffect.stepSize,
@@ -183,9 +179,8 @@ const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect) => {
 		edgeFade: ssrEffect.edgeFade
 	};
 
-	const folder = pane.addFolder({title: 'SSR Settings', expanded: false});
+	const folder = pane.addFolder({title: 'SSR Settings', expanded: true});
 
-	// SSR 온/오프
 	folder.addBinding(TEST_STATE, 'enableSSR').on('change', (v) => {
 		if (v.value) {
 			targetView.postEffectManager.addEffect(ssrEffect);
@@ -194,48 +189,83 @@ const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect) => {
 		}
 	});
 
-	// SSR 파라미터 조절
-	folder.addBinding(TEST_STATE, 'maxSteps', {min: 8, max: 128, step: 1})
-		.on('change', (v) => ssrEffect.maxSteps = v.value);
+	folder.addBinding(TEST_STATE, 'maxSteps', {min: 16, max: 128, step: 1})
+		.on('change', (v) => {
+			ssrEffect.maxSteps = v.value;
+			TEST_STATE.maxSteps = v.value;
+		});
 
-	folder.addBinding(TEST_STATE, 'maxDistance', {min: 1, max: 100, step: 0.01})
-		.on('change', (v) => ssrEffect.maxDistance = v.value);
+	folder.addBinding(TEST_STATE, 'maxDistance', {min: 5, max: 50, step: 0.5})
+		.on('change', (v) => {
+			ssrEffect.maxDistance = v.value;
+			TEST_STATE.maxDistance = v.value;
+		});
 
-	folder.addBinding(TEST_STATE, 'stepSize', {min: 0, max: 5, step: 0.001})
-		.on('change', (v) => ssrEffect.stepSize = v.value);
+	folder.addBinding(TEST_STATE, 'stepSize', {min: 0.02, max: 0.2, step: 0.005})
+		.on('change', (v) => {
+			ssrEffect.stepSize = v.value;
+			TEST_STATE.stepSize = v.value;
+		});
 
-	folder.addBinding(TEST_STATE, 'thickness', {min: 0, max: 5.0, step: 0.01})
-		.on('change', (v) => ssrEffect.thickness = v.value);
+	folder.addBinding(TEST_STATE, 'thickness', {min: 0.1, max: 3.0, step: 0.05})
+		.on('change', (v) => {
+			ssrEffect.thickness = v.value;
+			TEST_STATE.thickness = v.value;
+		});
 
-	folder.addBinding(TEST_STATE, 'reflectionIntensity', {min: 0.0, max: 2.0, step: 0.01})
-		.on('change', (v) => ssrEffect.reflectionIntensity = v.value);
+	folder.addBinding(TEST_STATE, 'reflectionIntensity', {min: 0.1, max: 3.5, step: 0.01})
+		.on('change', (v) => {
+			ssrEffect.reflectionIntensity = v.value;
+			TEST_STATE.reflectionIntensity = v.value;
+		});
 
-	folder.addBinding(TEST_STATE, 'fadeDistance', {min: 1, max: 100, step: 0.01})
-		.on('change', (v) => ssrEffect.fadeDistance = v.value);
+	folder.addBinding(TEST_STATE, 'fadeDistance', {min: 3, max: 25, step: 0.5})
+		.on('change', (v) => {
+			ssrEffect.fadeDistance = v.value;
+			TEST_STATE.fadeDistance = v.value;
+		});
 
-	folder.addBinding(TEST_STATE, 'edgeFade', {min: 0.0, max: 0.5, step: 0.01})
-		.on('change', (v) => ssrEffect.edgeFade = v.value);
+	folder.addBinding(TEST_STATE, 'edgeFade', {min: 0.05, max: 0.3, step: 0.005})
+		.on('change', (v) => {
+			ssrEffect.edgeFade = v.value;
+			TEST_STATE.edgeFade = v.value;
+		});
 
-	// 프리셋 버튼들
 	const presetFolder = pane.addFolder({title: 'Presets'});
 
 	presetFolder.addButton({title: 'High Quality'}).on('click', () => {
-		ssrEffect.maxSteps = 64;
-		ssrEffect.stepSize = 0.3;
-		ssrEffect.reflectionIntensity = 1.0;
-		pane.refresh(); // UI 업데이트
-	});
+		TEST_STATE.maxSteps = 96;
+		TEST_STATE.stepSize = 0.05;
+		TEST_STATE.thickness = 1.0;
+		TEST_STATE.reflectionIntensity = 1.0;
+		TEST_STATE.fadeDistance = 15;
+		TEST_STATE.edgeFade = 0.15;
 
-	presetFolder.addButton({title: 'Performance'}).on('click', () => {
-		ssrEffect.maxSteps = 32;
-		ssrEffect.stepSize = 0.8;
-		ssrEffect.reflectionIntensity = 0.6;
+		Object.assign(ssrEffect, TEST_STATE);
 		pane.refresh();
 	});
 
-	presetFolder.addButton({title: 'Subtle'}).on('click', () => {
-		ssrEffect.reflectionIntensity = 0.3;
-		ssrEffect.fadeDistance = 20;
+	presetFolder.addButton({title: 'Balanced'}).on('click', () => {
+		TEST_STATE.maxSteps = 64;
+		TEST_STATE.stepSize = 0.08;
+		TEST_STATE.thickness = 1.2;
+		TEST_STATE.reflectionIntensity = 0.8;
+		TEST_STATE.fadeDistance = 12;
+		TEST_STATE.edgeFade = 0.12;
+
+		Object.assign(ssrEffect, TEST_STATE);
+		pane.refresh();
+	});
+
+	presetFolder.addButton({title: 'Performance'}).on('click', () => {
+		TEST_STATE.maxSteps = 32;
+		TEST_STATE.stepSize = 0.12;
+		TEST_STATE.thickness = 1.5;
+		TEST_STATE.reflectionIntensity = 0.6;
+		TEST_STATE.fadeDistance = 8;
+		TEST_STATE.edgeFade = 0.1;
+
+		Object.assign(ssrEffect, TEST_STATE);
 		pane.refresh();
 	});
 };

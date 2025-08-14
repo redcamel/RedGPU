@@ -83,7 +83,7 @@ class SSR extends ASinglePassPostEffect {
 	}
 
 	set reflectionIntensity(value: number) {
-		validateNumberRange(value, 0.0, 2.0);
+		validateNumberRange(value, 0.0, 5.0);
 		this.#reflectionIntensity = value;
 		this.updateUniform('reflectionIntensity', value);
 	}
