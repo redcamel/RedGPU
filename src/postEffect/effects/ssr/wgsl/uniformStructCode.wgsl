@@ -8,184 +8,139 @@ struct Uniforms {
     edgeFade: f32,
     _padding: f32,
 }
+
 fn reconstructViewPosition(screenCoord: vec2<i32>, depth: f32) -> vec3<f32> {
     let texDims = textureDimensions(depthTexture);
     let texSize = vec2<f32>(texDims);
     let uv = (vec2<f32>(screenCoord) + vec2<f32>(0.5)) / texSize;
 
-    // NDC 좌표 계산 - Y 좌표 방향 수정
+    // WebGPU NDC 좌표 계산 - 올바른 변환
     let ndc = vec3<f32>(
         uv.x * 2.0 - 1.0,
-        1.0 - uv.y * 2.0,  // Y 좌표 반전 (WebGPU 텍스처 좌표계 고려)
-        depth * 2.0 - 1.0  // WebGPU는 [0,1] 범위이지만 NDC는 [-1,1]
+      (1.0 - uv.y) * 2.0 - 1.0, // WebGPU 텍스처 좌표계: 위쪽이 0
+        depth * 2.0 - 1.0   // [0,1] → [-1,1] 변환
     );
 
-    // 클립 공간에서 뷰 공간으로 변환
     let clipPos = vec4<f32>(ndc, 1.0);
     let viewPos4 = systemUniforms.inverseProjectionMatrix * clipPos;
 
-    // 수치적 안정성 개선
-    let w = max(abs(viewPos4.w), 1e-6);
-    return viewPos4.xyz / w;
+    if (abs(viewPos4.w) < 1e-6) {
+        return vec3<f32>(0.0, 0.0, -1.0);
+    }
+    return viewPos4.xyz / viewPos4.w;
 }
-// 개선된 노멀 복원 - 올바른 방향 보장
 fn reconstructViewNormal(screenCoord: vec2<i32>) -> vec3<f32> {
-    let texDims = textureDimensions(depthTexture);
-    let texSize = vec2<i32>(texDims);
+    let normalRoughnessData = textureLoad(normalRoughnessTexture, screenCoord, 0);
+    let worldNormal = normalRoughnessData.rgb;
 
-    let x = screenCoord.x;
-    let y = screenCoord.y;
-    let maxX = texSize.x - 1;
-    let maxY = texSize.y - 1;
+    // G-Buffer 노멀 디코딩
+    let decodedWorldNormal = worldNormal * 2.0 - 1.0;
 
-    // 중앙 차분법을 사용한 그래디언트 계산
-    let depthL = textureLoad(depthTexture, vec2<i32>(max(0, x - 1), y), 0);
-    let depthR = textureLoad(depthTexture, vec2<i32>(min(maxX, x + 1), y), 0);
-    let depthT = textureLoad(depthTexture, vec2<i32>(x, max(0, y - 1)), 0);
-    let depthB = textureLoad(depthTexture, vec2<i32>(x, min(maxY, y + 1)), 0);
-
-    // 뷰 포지션으로 변환
-    let viewPosL = reconstructViewPosition(vec2<i32>(max(0, x - 1), y), depthL);
-    let viewPosR = reconstructViewPosition(vec2<i32>(min(maxX, x + 1), y), depthR);
-    let viewPosT = reconstructViewPosition(vec2<i32>(x, max(0, y - 1)), depthT);
-    let viewPosB = reconstructViewPosition(vec2<i32>(x, min(maxY, y + 1)), depthB);
-
-    // 그래디언트 벡터
-    let dx = viewPosR - viewPosL;
-    let dy = viewPosB - viewPosT;
-
-    // 노멀 계산 - 올바른 방향 보장
-    let rawNormal = normalize(cross(dx, dy));
-    let normalLength = length(rawNormal);
-
-    if (normalLength < 1e-6) {
-        // fallback: 카메라를 향하는 노멀
-        let viewPos = reconstructViewPosition(screenCoord, textureLoad(depthTexture, screenCoord, 0));
-        return normalize(-viewPos);
+    let normalLength = length(decodedWorldNormal);
+    if (normalLength < 0.1) {
+        // 물 표면은 위쪽을 향하는 노멀을 가져야 함
+        return vec3<f32>(0.0, 1.0, 0.0);
     }
 
-    // 노멀이 카메라를 향하도록 보장
-    let viewPos = reconstructViewPosition(screenCoord, textureLoad(depthTexture, screenCoord, 0));
-    let viewDir = normalize(-viewPos);
+    let normalizedWorldNormal = normalize(decodedWorldNormal);
 
-    // 노멀이 카메라 반대쪽을 향하면 뒤집기
-    if (dot(rawNormal, viewDir) < 0.0) {
-        return -rawNormal;
-    }
-
-    return rawNormal;
+    // 카메라 매트릭스로 월드 노멀을 뷰 공간으로 변환 (동차좌표 사용)
+    let viewNormal4 = systemUniforms.camera.cameraMatrix * vec4<f32>(normalizedWorldNormal, 0.0);
+    return normalize(viewNormal4.xyz);
 }
 
-// 재질의 기본 반사율 추정
 fn estimateMaterialReflectance(color: vec3<f32>) -> f32 {
     let luminance = dot(color, vec3<f32>(0.299, 0.587, 0.114));
-    let metallic = smoothstep(0.2, 0.8, luminance);
-    let dielectricF0 = 0.04;
-    let metallicF0 = luminance;
-    return mix(dielectricF0, metallicF0, metallic);
+    return mix(0.04, max(0.04, luminance), step(0.5, luminance));
 }
 
-// 개선된 가장자리 페이드 함수
 fn calculateEdgeFadeImproved(screenUV: vec2<f32>) -> f32 {
     let edgeX = min(screenUV.x, 1.0 - screenUV.x);
     let edgeY = min(screenUV.y, 1.0 - screenUV.y);
     let edgeDist = min(edgeX, edgeY);
 
-    let fadeRange = max(uniforms.edgeFade, 0.02);
-    return smoothstep(-fadeRange, fadeRange, edgeDist);
+    let fadeRange = max(uniforms.edgeFade, 0.05);
+    return smoothstep(0.0, fadeRange, edgeDist);
 }
 
-// 뷰 스페이스 포지션을 스크린 좌표로 투영
 fn projectViewToScreen(viewPos: vec3<f32>) -> vec2<f32> {
     let clipPos4 = systemUniforms.projectionMatrix * vec4<f32>(viewPos, 1.0);
+
+    if (abs(clipPos4.w) < 1e-6) {
+        return vec2<f32>(-1.0, -1.0);
+    }
+
     let ndc = clipPos4.xyz / clipPos4.w;
 
-    // NDC를 스크린 UV로 변환
+    // NDC를 텍스처 UV로 변환 - Y축 방향 통일
     let screenUV = vec2<f32>(
         ndc.x * 0.5 + 0.5,
-        (ndc.y * 0.5 + 0.5)
+        1.0 - (ndc.y * 0.5 + 0.5)  // Y축 일관성 유지
     );
     return screenUV;
 }
 
-// 깔끔한 레이 마칭 함수 (지터 제거됨)
 fn performRayMarching(startViewPos: vec3<f32>, rayDir: vec3<f32>) -> vec4<f32> {
-    var currentViewPos = startViewPos;
-
-    // 일정한 스텝 크기 (지터 없음)
+    // 반사 레이 시작점 조정
+    var currentViewPos = startViewPos + rayDir * 0.02;
     let stepVec = rayDir * uniforms.stepSize;
-
     var hitColor = vec4<f32>(0.0, 0.0, 0.0, 0.0);
     let maxSteps = u32(uniforms.maxSteps);
-
-    // 시작점을 약간 앞으로 이동하여 자기 자신과의 충돌 방지
-    currentViewPos += stepVec * 0.01;
 
     for (var i = 0u; i < maxSteps; i++) {
         currentViewPos += stepVec;
 
-        // 최대 거리 체크
         let travelDistance = length(currentViewPos - startViewPos);
         if (travelDistance > uniforms.maxDistance) {
             break;
         }
 
-        // 스크린 좌표로 변환
         let screenUV = projectViewToScreen(currentViewPos);
 
-        // 화면 경계 처리
-        let margin = 0.02;
-        if (screenUV.x < margin || screenUV.x > (1.0 - margin) ||
-            screenUV.y < margin || screenUV.y > (1.0 - margin)) {
+        // 화면 경계 체크
+        if (screenUV.x < 0.0 || screenUV.x > 1.0 ||
+            screenUV.y < 0.0 || screenUV.y > 1.0) {
             break;
         }
 
-        // 텍셀 좌표 계산
         let texDims = textureDimensions(depthTexture);
         let texSizeF = vec2<f32>(texDims);
-        let exactCoord = screenUV * texSizeF;
-        let screenCoord = vec2<i32>(exactCoord);
+        let screenCoord = vec2<i32>(screenUV * texSizeF);
 
-        // 범위 체크
         let texSize = vec2<i32>(texDims);
         if (screenCoord.x < 0 || screenCoord.x >= texSize.x ||
             screenCoord.y < 0 || screenCoord.y >= texSize.y) {
             continue;
         }
 
-        let clampedCoord = clamp(screenCoord, vec2<i32>(0), texSize - vec2<i32>(1));
+        let sampledDepth = textureLoad(depthTexture, screenCoord, 0);
 
-        // 깊이 샘플링
-        let sampledDepth = textureLoad(depthTexture, clampedCoord, 0);
-
-        // 스카이박스 체크
         if (sampledDepth >= 0.999) {
             continue;
         }
 
-        let sampledViewPos = reconstructViewPosition(clampedCoord, sampledDepth);
+        let sampledViewPos = reconstructViewPosition(screenCoord, sampledDepth);
 
-        // 교차점 검사
-        let depthDiff = currentViewPos.z - sampledViewPos.z;
-        let baseThickness = uniforms.thickness;
+        // 교차점 검사 - 레이가 표면을 지나갔는지 확인
+        let rayDepth = -currentViewPos.z;  // 뷰 공간에서 Z는 음수
+        let surfaceDepth = -sampledViewPos.z;
 
-        // 거리에 따른 적응적 두께
-        let distanceFactor = travelDistance / uniforms.maxDistance;
-        let adaptiveThickness = baseThickness * (1.0 + distanceFactor * 0.3);
+        // 레이가 표면 뒤로 지나갔는지 확인
+        if (rayDepth > surfaceDepth) {
+            let depthDiff = rayDepth - surfaceDepth;
 
-        if (depthDiff > -0.02 && depthDiff < adaptiveThickness) {
-            // 색상 샘플링
-            let reflectionColor = textureLoad(sourceTexture, clampedCoord);
+            if (depthDiff < uniforms.thickness) {
+                let reflectionColor = textureLoad(sourceTexture, screenCoord);
 
-            // 페이드 계산
-            let distanceFade = 1.0 - smoothstep(0.0, uniforms.fadeDistance, travelDistance);
-            let edgeFade = calculateEdgeFadeImproved(screenUV);
-            let stepProgress = f32(i) / f32(maxSteps);
-            let rayFade = 1.0 - stepProgress * stepProgress;
+                // 페이드 계산
+                let distanceFade = 1.0 - smoothstep(0.0, uniforms.fadeDistance, travelDistance);
+                let edgeFade = calculateEdgeFadeImproved(screenUV);
+                let stepFade = 1.0 - f32(i) / f32(maxSteps);
 
-            let totalFade = distanceFade * edgeFade * rayFade;
-            hitColor = vec4<f32>(reflectionColor.rgb, totalFade);
-            break;
+                let totalFade = distanceFade * edgeFade * stepFade;
+                hitColor = vec4<f32>(reflectionColor.rgb, totalFade);
+                break;
+            }
         }
     }
 
