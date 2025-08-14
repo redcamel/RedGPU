@@ -6,13 +6,13 @@ import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 
 class SSR extends ASinglePassPostEffect {
-	#maxSteps: number = 32;           // 64 → 32 (성능 개선)
-	#maxDistance: number = 10.0;      // 50.0 → 10.0 (작은 씬에 맞춤)
-	#stepSize: number = 0.2;          // 0.5 → 0.2 (더 세밀한 스텝)
-	#thickness: number = 0.5;         // 1.0 → 0.5 (더 얇은 교차점 검사)
-	#reflectionIntensity: number = 1.2; // 0.8 → 1.2 (더 강한 반사)
-	#fadeDistance: number = 8.0;      // 30.0 → 8.0 (씬 크기에 맞춤)
-	#edgeFade: number = 0.05;         // 0.1 → 0.05 (가장자리 페이드 감소)
+	#maxSteps: number = 128;
+	#maxDistance: number = 20.0;
+	#stepSize: number = 0.08;
+	#thickness: number = 1.2;
+	#reflectionIntensity: number = 1;
+	#fadeDistance: number = 8.0;
+	#edgeFade: number = 0.1;
 
 	constructor(redGPUContext: RedGPUContext) {
 		super(redGPUContext);
@@ -23,6 +23,7 @@ class SSR extends ASinglePassPostEffect {
 		this.WORK_SIZE_Z = 1;  // 2D 텍스처이므로 1
 
 		this.useDepthTexture = true;
+		this.useNormalRougnessTexture = true;
 		this.init(
 			redGPUContext,
 			'POST_EFFECT_SSR',

@@ -3,7 +3,7 @@ import RedGPUContext from "../RedGPUContext";
 
 class AntialiasingManager {
 	#redGPUContext: RedGPUContext;
-	#useMSAA: boolean = true
+	#useMSAA: boolean = false
 	#useFXAA: boolean = false
 	#fxaa_subpix: number = 0.75
 	#fxaa_edgeThreshold: number = 0.166

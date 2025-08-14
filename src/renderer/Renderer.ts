@@ -79,11 +79,11 @@ class Renderer {
 		const {directionalShadowManager} = shadowManager
 		const {
 			colorAttachment,
-			depthStencilAttachment
+			depthStencilAttachment,
+			normalRoughnessTextureAttachment
 		} = this.#createAttachmentsForView(view)
-		// Create a timestamp query set that will store the timestamp values.
 		const renderPassDescriptor: GPURenderPassDescriptor = {
-			colorAttachments: [colorAttachment],
+			colorAttachments: [colorAttachment,normalRoughnessTextureAttachment],
 			depthStencilAttachment,
 		}
 		// @ts-ignore
@@ -200,7 +200,7 @@ class Renderer {
 
 	#createAttachmentsForView(view: View3D) {
 		const {scene, redGPUContext, viewRenderTextureManager} = view
-		const {depthTextureView, colorTextureView, colorResolveTextureView} = viewRenderTextureManager
+		const {depthTextureView, colorTextureView, colorResolveTextureView,normalRoughnessTextureView} = viewRenderTextureManager
 		const {useBackgroundColor, backgroundColor} = scene
 		const {antialiasingManager} = redGPUContext
 		const {useMSAA} = antialiasingManager
@@ -224,7 +224,13 @@ class Renderer {
 			depthLoadOp: GPU_LOAD_OP.CLEAR,
 			depthStoreOp: GPU_STORE_OP.STORE,
 		}
-		return {colorAttachment, depthStencilAttachment};
+		const normalRoughnessTextureAttachment: GPURenderPassColorAttachment = {
+			view: normalRoughnessTextureView,
+			clearValue: {r: 0, g: 0, b: 0, a: 0},
+			loadOp: GPU_LOAD_OP.CLEAR,
+			storeOp: GPU_STORE_OP.STORE
+		}
+		return {colorAttachment, depthStencilAttachment,normalRoughnessTextureAttachment};
 	}
 
 	#updateViewSystemUniforms(view: View3D, viewRenderPassEncoder: GPURenderPassEncoder, shadowRender: boolean = false, calcPointLightCluster: boolean = true,

@@ -5,6 +5,7 @@ import calcDirectionalShadowVisibility from './shader/fragment/calcDirectionalSh
 import calcPrePathBackground from './shader/fragment/calcPrePathBackground.wgsl'
 import drawPicking from './shader/fragment/drawPicking.wgsl'
 import normalFunctions from './shader/fragment/normalFunctions.wgsl'
+import FragmentOutput from './shader/fragment/FragmentOutput.wgsl'
 import SYSTEM_UNIFORM from './shader/SYSTEM_UNIFORM.wgsl'
 import calcDisplacements from './shader/vertex/calcDisplacements.wgsl'
 import extractScaleAndTranslation from './shader/vertex/extractScaleAndTranslation.wgsl'
@@ -26,7 +27,9 @@ const SystemCode = Object.freeze({
 	//
 	normalFunctions,
 	//
-	calcPrePathBackground
+	calcPrePathBackground,
+	//
+	FragmentOutput
 })
 Object.freeze(SystemCode)
 export default SystemCode

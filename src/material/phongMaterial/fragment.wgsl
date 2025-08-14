@@ -3,6 +3,7 @@
 #redgpu_include calcDirectionalShadowVisibility;
 #redgpu_include normalFunctions;
 #redgpu_include drawPicking;
+#redgpu_include FragmentOutput;
 struct Uniforms {
     color: vec3<f32>,
     //
@@ -54,8 +55,8 @@ struct InputData {
 
 
 @fragment
-fn main(inputData:InputData) -> @location(0) vec4<f32> {
-
+fn main(inputData:InputData) -> FragmentOutput {
+    var output: FragmentOutput;
     // AmbientLight
     let u_ambientLight = systemUniforms.ambientLight;
     let u_ambientLightColor = u_ambientLight.color;
@@ -93,7 +94,7 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     //
 
     // Vertex Normal
-    var N = normalize(inputData.vertexNormal) * u_normalScale;
+    var N = normalize(inputData.vertexNormal) ;
     #redgpu_if normalTexture
         let normalSamplerColor = textureSample(normalTexture, normalTextureSampler, inputData.uv).rgb;
         N = perturb_normal( N, inputData.vertexPosition, inputData.uv, normalSamplerColor, u_normalScale ) ;
@@ -253,5 +254,9 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     if (systemUniforms.isView3D == 1 && finalColor.a == 0.0) {
       discard;
     }
-    return finalColor;
+    output.color = finalColor;
+    let roughness = sqrt(2.0 / (uniforms.shininess + 2.0));
+    output.normalReflection = vec4<f32>(normalize(N) * 0.5 + 0.5, 1.0);
+
+    return output;
 }

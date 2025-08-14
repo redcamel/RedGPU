@@ -49,43 +49,44 @@ RedGPU.init(
 		const directionalLight = new RedGPU.Light.DirectionalLight();
 		directionalLight.intensity = 2.0; // 더 밝게
 		scene.lightManager.addDirectionalLight(directionalLight);
+
+		const normalTexture= new RedGPU.Resource.BitmapTexture(redGPUContext, "../../../assets/phongMaterial/test_normalMap.jpg");
 		//
 		// // 바닥 평면 추가 (반사면)
-		// const floorGeometry = new RedGPU.Primitive.Ground(redGPUContext, 10, 10);
-		// const floorMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);
-		// floorMaterial.metallicFactor = 1.0; // 완전 금속성
-		// floorMaterial.roughnessFactor = 0.1; // 매우 매끄럽게
-		// floorMaterial.color.setColorByHEX('#11332f')
+		const floorGeometry = new RedGPU.Primitive.Ground(redGPUContext, 10, 10,100,100);
+		const floorMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);
+		floorMaterial.color.setColorByHEX('#11332f')
 		//
-		// const floorMesh = new RedGPU.Display.Mesh(redGPUContext, floorGeometry, floorMaterial);
-		// floorMesh.rotationX = -Math.PI / 2; // 바닥으로 회전
-		// // floorMesh.y = -0.5; // 아래로 배치
-		// // scene.addChild(floorMesh);
-		//
-		// // 여러 개의 반사 구체 추가
-		// const sphereGeometry = new RedGPU.Primitive.Sphere(redGPUContext, 0.5, 32, 16);
-		//
-		// // 금속 구체
-		// const metalMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);
-		//
-		// metalMaterial.color.setColorByHEX('#af532e')
-		//
-		// const metalSphere = new RedGPU.Display.Mesh(redGPUContext, sphereGeometry, metalMaterial);
-		// metalSphere.x = -2;
-		// metalSphere.y = 0;
-		// scene.addChild(metalSphere);
-		//
-		// // 반투명 구체
-		// const glassMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);
-		// glassMaterial.opacity = 0.3;
-		//
-		// const glassSphere = new RedGPU.Display.Mesh(redGPUContext, sphereGeometry, glassMaterial);
-		// glassSphere.x = 2;
-		// glassSphere.y = 0;
-		// scene.addChild(glassSphere);
+		const floorMesh = new RedGPU.Display.Mesh(redGPUContext, floorGeometry, floorMaterial);
+		floorMesh.rotationX = -Math.PI / 2; // 바닥으로 회전
+
+
+		scene.addChild(floorMesh);
+
+		// 여러 개의 반사 구체 추가
+		const sphereGeometry = new RedGPU.Primitive.Sphere(redGPUContext, 0.5, 32, 16);
+
+		// 금속 구체
+		const metalMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);
+
+		metalMaterial.color.setColorByHEX('#af532e')
+
+		const metalSphere = new RedGPU.Display.Mesh(redGPUContext, sphereGeometry, metalMaterial);
+		metalSphere.x = -2;
+		metalSphere.y = 0;
+		scene.addChild(metalSphere);
+
+		// 반투명 구체
+		const glassMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);
+		glassMaterial.opacity = 0.3;
+
+		const glassSphere = new RedGPU.Display.Mesh(redGPUContext, sphereGeometry, glassMaterial);
+		glassSphere.x = 2;
+		glassSphere.y = 0;
+		scene.addChild(glassSphere);
 
 		// 원래 모델도 유지
-		// loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb');
+		loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb');
 		loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Sponza/glTF/Sponza.gltf');
 
 		// ============================================
@@ -115,15 +116,15 @@ RedGPU.init(
 			time += 0.01;
 
 			// // 구체들을 회전시키고 위아래로 움직임
-			// if (metalSphere) {
-			// 	metalSphere.rotationY += 0.02;
-			// 	metalSphere.y = Math.sin(time) * 0.5;
-			// }
-			//
-			// if (glassSphere) {
-			// 	glassSphere.rotationX += 0.015;
-			// 	glassSphere.y = Math.cos(time * 1.2) * 0.3;
-			// }
+			if (metalSphere) {
+				metalSphere.rotationY += 0.02;
+				metalSphere.y = Math.sin(time) * 0.5;
+			}
+
+			if (glassSphere) {
+				glassSphere.rotationX += 0.015;
+				glassSphere.y = Math.cos(time * 1.2) * 0.3;
+			}
 		};
 
 		// ============================================
@@ -152,7 +153,7 @@ function loadGLTF(redGPUContext, scene, url) {
 		(v) => {
 			mesh = scene.addChild(v['resultMesh']);
 			// 모델을 약간 위로 배치
-			if (mesh) {
+			if (url.includes('DamagedHelmet')) {
 				// mesh.y = 1;
 			}
 		}

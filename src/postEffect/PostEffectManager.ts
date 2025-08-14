@@ -144,6 +144,7 @@ class PostEffectManager {
 		// 카메라 시스템 유니폼 업데이트
 		[
 			{key: 'cameraMatrix', value: cameraMatrix},
+			{key: 'inverseCameraMatrix', value: mat4.invert(temp2, cameraMatrix)},
 			{key: 'cameraPosition', value: cameraPosition},
 			{key: 'nearClipping', value: [camera2DYn ? 0 : rawCamera.nearClipping]},
 			{key: 'farClipping', value: [camera2DYn ? 0 : rawCamera.farClipping]},

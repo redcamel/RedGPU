@@ -5,14 +5,19 @@ import getMipLevelCount from "../../utils/math/getMipLevelCount";
 import View3D from "./View3D";
 
 class ViewRenderTextureManager {
-	#colorTexture: GPUTexture
 	#renderPath1ResultTexture: GPUTexture
 	#renderPath1ResultTextureView: GPUTextureView
 	#renderPath1ResultTextureDescriptor: GPUTextureDescriptor
-	#colorResolveTexture: GPUTexture
-	#depthTexture: GPUTexture
+	//
+	#colorTexture: GPUTexture
 	#colorTextureView: GPUTextureView
+	#colorResolveTexture: GPUTexture
 	#colorResolveTextureView: GPUTextureView
+	//
+	#normalRoughnessTexture: GPUTexture
+	#normalRoughnessTextureView: GPUTextureView
+	//
+	#depthTexture: GPUTexture
 	#depthTextureView: GPUTextureView
 	//
 	#useMSAAColor: boolean = true
@@ -69,6 +74,14 @@ class ViewRenderTextureManager {
 		this.#createRender2PathTexture();
 		return this.#renderPath1ResultTexture;
 	}
+	get normalRoughnessTextureView(): GPUTextureView {
+		this.#createNormalRoughnessTexture();
+		return this.#normalRoughnessTextureView;
+	}
+
+	get normalRoughnessTexture(): GPUTexture {
+		return this.#normalRoughnessTexture;
+	}
 
 	#checkVideoMemorySize() {
 		const textures = [
@@ -107,7 +120,38 @@ class ViewRenderTextureManager {
 			this.#checkVideoMemorySize()
 		}
 	}
-
+	#createNormalRoughnessTexture(): void {
+		const {antialiasingManager, resourceManager} = this.#redGPUContext
+		const {useMSAA} = antialiasingManager
+		const currentTexture =  this.#normalRoughnessTexture;
+		const {pixelRectObject, name} = this.#view
+		const {width: pixelRectObjectW, height: pixelRectObjectH} = pixelRectObject
+		const changedSize = currentTexture?.width !== pixelRectObjectW || currentTexture?.height !== pixelRectObjectH
+		const changeUseMSAA =  this.#useMSAAColor !== useMSAA
+		const needCreateTexture = !currentTexture || changedSize || changeUseMSAA
+		this.#useMSAADepth = useMSAA
+		if (needCreateTexture) {
+			if (currentTexture) {
+				currentTexture?.destroy()
+				this.#normalRoughnessTexture = null
+				this.#normalRoughnessTextureView = null
+			}
+			const newTexture = resourceManager.createManagedTexture({
+				size: [
+					Math.max(pixelRectObjectW, 1),
+					Math.max(pixelRectObjectH, 1),
+					1
+				],
+				sampleCount: useMSAA ? 4 : 1,
+				label: `${name}_normalRoughnessTexture_${pixelRectObjectW}x${pixelRectObjectH}`,
+				format:  navigator.gpu.getPreferredCanvasFormat(),
+				usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING
+			})
+			this.#normalRoughnessTexture = newTexture;
+			this.#normalRoughnessTextureView = resourceManager.getGPUResourceBitmapTextureView(newTexture);
+			this.#checkVideoMemorySize()
+		}
+	}
 	#createTextureIfNeeded(textureType: 'depth' | 'color'): void {
 		const depthYn = textureType === 'depth'
 		const {antialiasingManager, gpuDevice, resourceManager} = this.#redGPUContext

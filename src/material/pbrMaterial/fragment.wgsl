@@ -4,6 +4,7 @@
 #redgpu_include normalFunctions;
 #redgpu_include drawPicking;
 #redgpu_include calcPrePathBackground
+#redgpu_include FragmentOutput
 struct Uniforms {
     useVertexColor: u32,
     useCutOff: u32,
@@ -153,7 +154,8 @@ struct InputData {
 
 
 @fragment
-fn main(inputData:InputData) -> @location(0) vec4<f32> {
+fn main(inputData:InputData) -> FragmentOutput {
+    var output: FragmentOutput;
     // 데이터 변수를 뽑아서 저장
     let input_vertexNormal = (inputData.vertexNormal.xyz);
     let input_vertexPosition = inputData.vertexPosition.xyz;
@@ -501,7 +503,8 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
 
     #redgpu_if useKHR_materials_unlit
     if(u_useKHR_materials_unlit){
-        return baseColor;
+        output.color = baseColor;
+        return output;
     }
     #redgpu_endIf
 
@@ -1038,7 +1041,9 @@ let attenuation = rangePart * invSquare;
         if (resultAlpha <= u_cutOff) { discard; }
     #redgpu_endIf
 
-    return finalColor;
+    output.color = finalColor;
+    output.normalReflection = vec4<f32>(N * 0.5 + 0.5, roughnessParameter);
+    return output;
 };
 // ---------- KHR_materials_anisotropy ----------
 

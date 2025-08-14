@@ -14,11 +14,11 @@ fn reconstructViewPosition(screenCoord: vec2<i32>, depth: f32) -> vec3<f32> {
     let texSize = vec2<f32>(texDims);
     let uv = (vec2<f32>(screenCoord) + vec2<f32>(0.5)) / texSize;
 
-    // WebGPU NDC 좌표 계산 - 올바른 변환
+    // NDC 좌표 계산
     let ndc = vec3<f32>(
         uv.x * 2.0 - 1.0,
-      (1.0 - uv.y) * 2.0 - 1.0, // WebGPU 텍스처 좌표계: 위쪽이 0
-        depth * 2.0 - 1.0   // [0,1] → [-1,1] 변환
+        (1.0 - uv.y) * 2.0 - 1.0,
+        depth * 2.0 - 1.0
     );
 
     let clipPos = vec4<f32>(ndc, 1.0);
@@ -29,24 +29,31 @@ fn reconstructViewPosition(screenCoord: vec2<i32>, depth: f32) -> vec3<f32> {
     }
     return viewPos4.xyz / viewPos4.w;
 }
+
 fn reconstructViewNormal(screenCoord: vec2<i32>) -> vec3<f32> {
-    let normalRoughnessData = textureLoad(normalRoughnessTexture, screenCoord, 0);
-    let worldNormal = normalRoughnessData.rgb;
+    let normalReflectionData = textureLoad(normalRoughnessTexture, screenCoord, 0);
+    let worldNormal = normalReflectionData.rgb;
 
     // G-Buffer 노멀 디코딩
-    let decodedWorldNormal = worldNormal * 2.0 - 1.0;
+    let decodedWorldNormal = normalize(worldNormal * 2.0 - 1.0);
 
     let normalLength = length(decodedWorldNormal);
     if (normalLength < 0.1) {
-        // 물 표면은 위쪽을 향하는 노멀을 가져야 함
-        return vec3<f32>(0.0, 1.0, 0.0);
+        return vec3<f32>(0.0, 0.0, -1.0);
     }
 
-    let normalizedWorldNormal = normalize(decodedWorldNormal);
+    // 카메라 매트릭스에서 올바른 축 추출
+    let cameraMatrix = systemUniforms.camera.cameraMatrix;
 
-    // 카메라 매트릭스로 월드 노멀을 뷰 공간으로 변환 (동차좌표 사용)
-    let viewNormal4 = systemUniforms.camera.cameraMatrix * vec4<f32>(normalizedWorldNormal, 0.0);
-    return normalize(viewNormal4.xyz);
+    // 카메라 매트릭스의 상위 3x3 부분을 사용하여 회전 변환
+    // 월드 노멀을 뷰 공간으로 변환
+    let viewNormal = mat3x3<f32>(
+        cameraMatrix[0].xyz,
+        cameraMatrix[1].xyz,
+        cameraMatrix[2].xyz
+    ) * decodedWorldNormal;
+
+    return normalize(viewNormal);
 }
 
 fn estimateMaterialReflectance(color: vec3<f32>) -> f32 {
@@ -72,17 +79,28 @@ fn projectViewToScreen(viewPos: vec3<f32>) -> vec2<f32> {
 
     let ndc = clipPos4.xyz / clipPos4.w;
 
-    // NDC를 텍스처 UV로 변환 - Y축 방향 통일
+    // NDC를 화면 UV로 변환
     let screenUV = vec2<f32>(
         ndc.x * 0.5 + 0.5,
-        1.0 - (ndc.y * 0.5 + 0.5)  // Y축 일관성 유지
+        1.0 - (ndc.y * 0.5 + 0.5)
     );
     return screenUV;
 }
 
+fn calculateReflectionRay(viewPos: vec3<f32>, viewNormal: vec3<f32>) -> vec3<f32> {
+    // 뷰 공간에서 픽셀에서 카메라로 향하는 벡터 (카메라는 원점)
+    let incident = normalize(viewPos);  // 카메라->표면 방향 (입사벡터)
+
+    // 반사 벡터 계산: R = I - 2(N·I)N
+    let reflectionDir = reflect(incident, viewNormal);
+
+    return normalize(reflectionDir);
+}
+
+// 단순화된 레이마칭 함수 - 기본 기능부터 확인
 fn performRayMarching(startViewPos: vec3<f32>, rayDir: vec3<f32>) -> vec4<f32> {
-    // 반사 레이 시작점 조정
-    var currentViewPos = startViewPos + rayDir * 0.02;
+    // 반사 레이 시작점을 약간 앞으로 이동
+    var currentViewPos = startViewPos + rayDir * 0.01;
     let stepVec = rayDir * uniforms.stepSize;
     var hitColor = vec4<f32>(0.0, 0.0, 0.0, 0.0);
     let maxSteps = u32(uniforms.maxSteps);
@@ -90,6 +108,7 @@ fn performRayMarching(startViewPos: vec3<f32>, rayDir: vec3<f32>) -> vec4<f32> {
     for (var i = 0u; i < maxSteps; i++) {
         currentViewPos += stepVec;
 
+        // 거리 체크
         let travelDistance = length(currentViewPos - startViewPos);
         if (travelDistance > uniforms.maxDistance) {
             break;
@@ -121,18 +140,18 @@ fn performRayMarching(startViewPos: vec3<f32>, rayDir: vec3<f32>) -> vec4<f32> {
 
         let sampledViewPos = reconstructViewPosition(screenCoord, sampledDepth);
 
-        // 교차점 검사 - 레이가 표면을 지나갔는지 확인
+        // 단순한 교차점 검사
         let rayDepth = -currentViewPos.z;  // 뷰 공간에서 Z는 음수
         let surfaceDepth = -sampledViewPos.z;
 
-        // 레이가 표면 뒤로 지나갔는지 확인
+        // 레이가 표면을 지나갔는지 확인
         if (rayDepth > surfaceDepth) {
             let depthDiff = rayDepth - surfaceDepth;
 
             if (depthDiff < uniforms.thickness) {
                 let reflectionColor = textureLoad(sourceTexture, screenCoord);
 
-                // 페이드 계산
+                // 간단한 페이드 계산
                 let distanceFade = 1.0 - smoothstep(0.0, uniforms.fadeDistance, travelDistance);
                 let edgeFade = calculateEdgeFadeImproved(screenUV);
                 let stepFade = 1.0 - f32(i) / f32(maxSteps);
