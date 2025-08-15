@@ -75,30 +75,63 @@ fn calculateWorldReflectionRay(worldPos: vec3<f32>, worldNormal: vec3<f32>, came
     let viewDir = normalize(cameraWorldPos - worldPos);
     return normalize(reflect(-viewDir, worldNormal));
 }
-fn performWorldRayMarching(startWorldPos: vec3<f32>, rayDir: vec3<f32>) -> vec4<f32> {
+
+fn getWorldPixelSize(worldPos: vec3<f32>) -> f32 {
+      let cameraWorldPos = systemUniforms.camera.inverseCameraMatrix[3].xyz;
+      let distance = length(worldPos - cameraWorldPos);
+
+      // 프로젝션 매트릭스에서 FOV 추출
+      // projectionMatrix[1][1] = 1/tan(fovY/2)
+      let tanHalfFovY = 1.0 / systemUniforms.projectionMatrix[1][1];
+
+      // 화면 높이 (임시로 1080 사용, 실제로는 텍스처 크기에서 가져와야 함)
+      let screenHeight = 1080.0;
+
+      // 거리에서 1픽셀이 차지하는 월드 공간 크기
+      let worldPixelSize = (2.0 * distance * tanHalfFovY) / screenHeight;
+      return worldPixelSize;
+  }
+
+  fn getAdaptiveStepSize(worldPos: vec3<f32>, screenStepSize: f32) -> f32 {
+      let worldPixelSize = getWorldPixelSize(worldPos);
+
+      // 화면 공간 stepSize를 픽셀 단위로 변환
+      let texDims = textureDimensions(depthTexture);
+      let screenPixels = screenStepSize * f32(texDims.x); // 화면 너비 기준
+
+      // 월드 공간 스텝 크기 계산
+      let worldStepSize = worldPixelSize * screenPixels;
+
+      // 실용적인 범위로 제한 (2cm ~ 50cm)
+      return clamp(worldStepSize, 0.02, 0.5);
+  }
+fn getAdaptiveFadeDistance(startWorldPos: vec3<f32>, screenFadeDistance: f32) -> f32 {
+    let worldPixelSize = getWorldPixelSize(startWorldPos);
+
+    // 화면 공간 fadeDistance를 픽셀 단위로 변환 (화면 너비 기준)
+    let texDims = textureDimensions(depthTexture);
+    let screenPixels = screenFadeDistance * f32(texDims.x);
+
+    // 월드 공간 페이드 거리 계산
+    let worldFadeDistance = worldPixelSize * screenPixels;
+
+    // 합리적인 범위로 제한 (최소 1m, 최대 50m)
+    return clamp(worldFadeDistance, 1.0, 50.0);
+}
+
+ fn performWorldRayMarching(startWorldPos: vec3<f32>, rayDir: vec3<f32>) -> vec4<f32> {
      let cameraWorldPos = systemUniforms.camera.inverseCameraMatrix[3].xyz;
 
-     // 카메라와의 거리 계산
-     let distanceToCamera = length(startWorldPos - cameraWorldPos);
+     // 적응적 페이드 거리 계산
+     let adaptiveFadeDistance = getAdaptiveFadeDistance(startWorldPos, uniforms.fadeDistance);
 
-     // 카메라 시야 방향 벡터
-     let cameraForward = normalize(systemUniforms.camera.inverseCameraMatrix[2].xyz);
-     let cameraToSurface = normalize(startWorldPos - cameraWorldPos);
-
-     // 카메라 각도에 따른 조정 (중앙에서 멀어질수록 정확도 감소)
-     let viewAngleFactor = max(0.3, abs(dot(cameraForward, cameraToSurface)));
-
-     // 거리 기반 적응적 파라미터 조정
-     let distanceScale = min(3.0, distanceToCamera / 5.0); // 5m 기준으로 스케일링
-     let adaptiveStepSize = uniforms.stepSize * mix(0.5, 2.0, distanceScale * 0.5);
-     let adaptiveTolerance = adaptiveStepSize * mix(0.2, 0.8, distanceScale * 0.3) * viewAngleFactor;
-
-     var currentWorldPos = startWorldPos + rayDir * (adaptiveStepSize * 0.5);
-     let stepVec = rayDir * adaptiveStepSize;
+     var currentWorldPos = startWorldPos;
      let maxSteps = u32(uniforms.maxSteps);
 
      for (var i = 0u; i < maxSteps; i++) {
-         currentWorldPos += stepVec;
+         // 프로젝션 기반 적응적 스텝 크기 계산
+         let adaptiveStepSize = getAdaptiveStepSize(currentWorldPos, uniforms.stepSize);
+         currentWorldPos += rayDir * adaptiveStepSize;
 
          let travelDistance = length(currentWorldPos - startWorldPos);
          if (travelDistance > uniforms.maxDistance) {
@@ -124,95 +157,27 @@ fn performWorldRayMarching(startWorldPos: vec3<f32>, rayDir: vec3<f32>) -> vec4<
          }
 
          let sampledWorldPos = reconstructWorldPosition(screenCoord, sampledDepth);
-
-         // 레이의 현재 위치와 카메라로부터의 거리 계산
          let rayDistanceFromCamera = length(currentWorldPos - cameraWorldPos);
          let surfaceDistanceFromCamera = length(sampledWorldPos - cameraWorldPos);
 
-         // 적응적 거리 비교
-         if (rayDistanceFromCamera < surfaceDistanceFromCamera - adaptiveTolerance) {
-             continue;
+         // 깊이 테스트
+         if (rayDistanceFromCamera > surfaceDistanceFromCamera) {
+             let reflectionColor = textureLoad(sourceTexture, screenCoord);
+
+             // 적응적 페이드 거리 사용
+             let distanceFade = 1.0 - smoothstep(0.0, adaptiveFadeDistance, travelDistance);
+             let edgeFade = calculateEdgeFade(screenUV);
+             let stepFade = 1.0 - pow(f32(i) / f32(maxSteps), 1.5);
+
+             let totalFade = distanceFade * edgeFade * stepFade;
+
+             return vec4<f32>(reflectionColor.rgb, totalFade);
          }
-
-         // 표면과 레이 위치의 실제 거리 확인 (적응적)
-         let rayToSurfaceDistance = length(currentWorldPos - sampledWorldPos);
-         let maxAllowedDistance = adaptiveStepSize * mix(1.5, 3.0, distanceScale * 0.4);
-
-         if (rayToSurfaceDistance > maxAllowedDistance) {
-             continue;
-         }
-
-         // 화면 공간에서의 깊이 기울기 검사 (거리에 따라 완화)
-         let depthThreshold = mix(0.005, 0.02, distanceScale * 0.5);
-         let neighborOffsets = array<vec2<i32>, 4>(
-             vec2<i32>(-1, 0), vec2<i32>(1, 0),
-             vec2<i32>(0, -1), vec2<i32>(0, 1)
-         );
-
-         var depthVariation = 0.0;
-         var validNeighbors = 0;
-
-         for (var j = 0; j < 4; j++) {
-             let neighborCoord = screenCoord + neighborOffsets[j];
-             if (neighborCoord.x >= 0 && neighborCoord.x < texSize.x &&
-                 neighborCoord.y >= 0 && neighborCoord.y < texSize.y) {
-                 let neighborDepth = textureLoad(depthTexture, neighborCoord, 0);
-                 if (neighborDepth < 0.999) {
-                     depthVariation += abs(sampledDepth - neighborDepth);
-                     validNeighbors++;
-                 }
-             }
-         }
-
-         if (validNeighbors > 0) {
-             let avgDepthVariation = depthVariation / f32(validNeighbors);
-             if (avgDepthVariation > depthThreshold) {
-                 continue;
-             }
-         }
-
-         // 반사 방향 일관성 검사 (거리와 각도에 따라 완화)
-         let surfaceToRay = normalize(currentWorldPos - sampledWorldPos);
-         let expectedDirection = normalize(rayDir);
-         let directionSimilarity = dot(surfaceToRay, expectedDirection);
-         let minSimilarity = mix(0.8, 0.5, distanceScale * 0.6); // 멀수록 완화
-
-//         if (directionSimilarity < minSimilarity) {
-//             continue;
-//         }
-
-         // 시야각 기반 추가 검증 (카메라 중심에서 멀수록 엄격하게)
-         let screenCenter = vec2<f32>(0.5, 0.5);
-         let screenDistance = length(screenUV - screenCenter);
-         let peripheralFactor = 1.0 - smoothstep(0.0, 0.7, screenDistance);
-
-         if (peripheralFactor < 0.3) {
-             // 화면 가장자리에서는 더 엄격한 검증
-             let strictTolerance = adaptiveTolerance * 0.5;
-             if (abs(rayDistanceFromCamera - surfaceDistanceFromCamera) > strictTolerance) {
-                 continue;
-             }
-         }
-
-         // 모든 조건을 통과한 경우에만 반사색 반환
-         let reflectionColor = textureLoad(sourceTexture, screenCoord);
-         let distanceFade = 1.0 - smoothstep(0.0, uniforms.fadeDistance, travelDistance);
-         let edgeFade = calculateEdgeFade(screenUV);
-         let stepFade = 1.0 - f32(i) / f32(maxSteps);
-
-         // 카메라 거리 기반 추가 페이드
-         let cameraDistanceFade = 1.0 - smoothstep(8.0, uniforms.maxDistance, distanceToCamera);
-
-         // 시야각 기반 페이드
-         let viewAngleFade = mix(0.5, 1.0, viewAngleFactor);
-
-         let totalFade = distanceFade * edgeFade * stepFade * cameraDistanceFade * viewAngleFade * peripheralFactor;
-
-         return vec4<f32>(reflectionColor.rgb, totalFade);
      }
 
      return vec4<f32>(0.0);
-}
+ }
+
 // 기존 함수들은 호환성을 위해 유지 (사용되지 않음)
 fn reconstructViewPosition(screenCoord: vec2<i32>, depth: f32) -> vec3<f32> {
     return vec3<f32>(0.0);
