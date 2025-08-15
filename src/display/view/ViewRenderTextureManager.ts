@@ -14,8 +14,10 @@ class ViewRenderTextureManager {
 	#colorResolveTexture: GPUTexture
 	#colorResolveTextureView: GPUTextureView
 	//
-	#normalRoughnessTexture: GPUTexture
-	#normalRoughnessTextureView: GPUTextureView
+	#gBufferNormalTexture: GPUTexture
+	#gBufferNormalTextureView: GPUTextureView
+	#gBufferRoughnessTexture: GPUTexture
+	#gBufferRoughnessTextureView: GPUTextureView
 	//
 	#depthTexture: GPUTexture
 	#depthTextureView: GPUTextureView
@@ -74,13 +76,21 @@ class ViewRenderTextureManager {
 		this.#createRender2PathTexture();
 		return this.#renderPath1ResultTexture;
 	}
-	get normalRoughnessTextureView(): GPUTextureView {
-		this.#createNormalRoughnessTexture();
-		return this.#normalRoughnessTextureView;
+	get gBufferNormalTextureView(): GPUTextureView {
+		this.#createGBufferNormalTexture();
+		return this.#gBufferNormalTextureView;
 	}
 
-	get normalRoughnessTexture(): GPUTexture {
-		return this.#normalRoughnessTexture;
+	get gBufferNormalTexture(): GPUTexture {
+		return this.#gBufferNormalTexture;
+	}
+	get gBufferRoughnessTextureView(): GPUTextureView {
+		this.#createGBufferRoughnessTexture();
+		return this.#gBufferRoughnessTextureView;
+	}
+
+	get gBufferRoughnessTexture(): GPUTexture {
+		return this.#gBufferRoughnessTexture;
 	}
 
 	#checkVideoMemorySize() {
@@ -120,10 +130,10 @@ class ViewRenderTextureManager {
 			this.#checkVideoMemorySize()
 		}
 	}
-	#createNormalRoughnessTexture(): void {
+	#createGBufferNormalTexture(): void {
 		const {antialiasingManager, resourceManager} = this.#redGPUContext
 		const {useMSAA} = antialiasingManager
-		const currentTexture =  this.#normalRoughnessTexture;
+		const currentTexture =  this.#gBufferNormalTexture;
 		const {pixelRectObject, name} = this.#view
 		const {width: pixelRectObjectW, height: pixelRectObjectH} = pixelRectObject
 		const changedSize = currentTexture?.width !== pixelRectObjectW || currentTexture?.height !== pixelRectObjectH
@@ -133,8 +143,8 @@ class ViewRenderTextureManager {
 		if (needCreateTexture) {
 			if (currentTexture) {
 				currentTexture?.destroy()
-				this.#normalRoughnessTexture = null
-				this.#normalRoughnessTextureView = null
+				this.#gBufferNormalTexture = null
+				this.#gBufferNormalTextureView = null
 			}
 			const newTexture = resourceManager.createManagedTexture({
 				size: [
@@ -143,12 +153,44 @@ class ViewRenderTextureManager {
 					1
 				],
 				sampleCount: useMSAA ? 4 : 1,
-				label: `${name}_normalRoughnessTexture_${pixelRectObjectW}x${pixelRectObjectH}`,
+				label: `${name}_gBufferNormalTexture_${pixelRectObjectW}x${pixelRectObjectH}`,
 				format:  navigator.gpu.getPreferredCanvasFormat(),
 				usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING
 			})
-			this.#normalRoughnessTexture = newTexture;
-			this.#normalRoughnessTextureView = resourceManager.getGPUResourceBitmapTextureView(newTexture);
+			this.#gBufferNormalTexture = newTexture;
+			this.#gBufferNormalTextureView = resourceManager.getGPUResourceBitmapTextureView(newTexture);
+			this.#checkVideoMemorySize()
+		}
+	}
+	#createGBufferRoughnessTexture(): void {
+		const {antialiasingManager, resourceManager} = this.#redGPUContext
+		const {useMSAA} = antialiasingManager
+		const currentTexture =  this.#gBufferRoughnessTexture;
+		const {pixelRectObject, name} = this.#view
+		const {width: pixelRectObjectW, height: pixelRectObjectH} = pixelRectObject
+		const changedSize = currentTexture?.width !== pixelRectObjectW || currentTexture?.height !== pixelRectObjectH
+		const changeUseMSAA =  this.#useMSAAColor !== useMSAA
+		const needCreateTexture = !currentTexture || changedSize || changeUseMSAA
+		this.#useMSAADepth = useMSAA
+		if (needCreateTexture) {
+			if (currentTexture) {
+				currentTexture?.destroy()
+				this.#gBufferRoughnessTexture = null
+				this.#gBufferRoughnessTextureView = null
+			}
+			const newTexture = resourceManager.createManagedTexture({
+				size: [
+					Math.max(pixelRectObjectW, 1),
+					Math.max(pixelRectObjectH, 1),
+					1
+				],
+				sampleCount: useMSAA ? 4 : 1,
+				label: `${name}_gBufferRoughnessTexture_${pixelRectObjectW}x${pixelRectObjectH}`,
+				format:  navigator.gpu.getPreferredCanvasFormat(),
+				usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING
+			})
+			this.#gBufferRoughnessTexture = newTexture;
+			this.#gBufferRoughnessTextureView = resourceManager.getGPUResourceBitmapTextureView(newTexture);
 			this.#checkVideoMemorySize()
 		}
 	}

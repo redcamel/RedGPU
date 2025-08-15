@@ -33,9 +33,8 @@ fn reconstructWorldPosition(screenCoord: vec2<i32>, depth: f32) -> vec3<f32> {
     return worldPos4.xyz;
 }
 
-fn reconstructWorldNormal(screenCoord: vec2<i32>) -> vec3<f32> {
-    let normalReflectionData = textureLoad(normalRoughnessTexture, screenCoord, 0);
-    let worldNormal = normalize(normalReflectionData.rgb * 2.0 - 1.0);
+fn reconstructWorldNormal(gBufferNormalData: vec4<f32>) -> vec3<f32> {
+    let worldNormal = normalize(gBufferNormalData.rgb * 2.0 - 1.0);
 
     if (length(worldNormal) < 0.1) {
         return vec3<f32>(0.0, 1.0, 0.0);

@@ -256,7 +256,8 @@ fn main(inputData:InputData) -> FragmentOutput {
     }
     output.color = finalColor;
     let roughness = sqrt(2.0 / (uniforms.shininess + 2.0));
-    output.normalReflection = vec4<f32>(normalize(N) * 0.5 + 0.5, 1);
+    output.gBufferNormal = vec4<f32>(normalize(N) * 0.5 + 0.5, 1.0);
+    output.gBufferRoughness = vec4<f32>(roughness,0.0,0.0, 1.0);
 
     return output;
 }

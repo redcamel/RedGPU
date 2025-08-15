@@ -14,12 +14,13 @@ if (depth >= 0.999) {
     return;
 }
 
-// normalRoughnessTexture에서 거칠기 값 추출
-let normalReflectionData = textureLoad(normalRoughnessTexture, screenCoord, 0);
-let roughness = normalReflectionData.a; // 알파 채널에서 거칠기 값 추출
+// gBufferNormalTexture에서 거칠기 값 추출
+let gBufferNormalData = textureLoad(gBufferNormalTexture, screenCoord, 0);
+let gBufferRoughnessData = textureLoad(gBufferRoughnessTexture, screenCoord, 0);
+let roughness = gBufferRoughnessData.r;
 
 let worldPos = reconstructWorldPosition(screenCoord, depth);
-let worldNormal = reconstructWorldNormal(screenCoord);
+let worldNormal = reconstructWorldNormal(gBufferNormalData);
 
 let normalLength = length(worldNormal);
 if (normalLength < 0.01) { // 임계값을 매우 낮춤

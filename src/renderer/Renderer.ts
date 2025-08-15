@@ -80,10 +80,11 @@ class Renderer {
 		const {
 			colorAttachment,
 			depthStencilAttachment,
-			normalRoughnessTextureAttachment
+			gBufferNormalTextureAttachment,
+			gBufferRoughnessTextureAttachment
 		} = this.#createAttachmentsForView(view)
 		const renderPassDescriptor: GPURenderPassDescriptor = {
-			colorAttachments: [colorAttachment,normalRoughnessTextureAttachment],
+			colorAttachments: [colorAttachment,gBufferNormalTextureAttachment,gBufferRoughnessTextureAttachment],
 			depthStencilAttachment,
 		}
 		// @ts-ignore
@@ -200,7 +201,7 @@ class Renderer {
 
 	#createAttachmentsForView(view: View3D) {
 		const {scene, redGPUContext, viewRenderTextureManager} = view
-		const {depthTextureView, colorTextureView, colorResolveTextureView,normalRoughnessTextureView} = viewRenderTextureManager
+		const {depthTextureView, colorTextureView, colorResolveTextureView,gBufferNormalTextureView,gBufferRoughnessTextureView} = viewRenderTextureManager
 		const {useBackgroundColor, backgroundColor} = scene
 		const {antialiasingManager} = redGPUContext
 		const {useMSAA} = antialiasingManager
@@ -224,13 +225,19 @@ class Renderer {
 			depthLoadOp: GPU_LOAD_OP.CLEAR,
 			depthStoreOp: GPU_STORE_OP.STORE,
 		}
-		const normalRoughnessTextureAttachment: GPURenderPassColorAttachment = {
-			view: normalRoughnessTextureView,
+		const gBufferNormalTextureAttachment: GPURenderPassColorAttachment = {
+			view: gBufferNormalTextureView,
 			clearValue: {r: 0, g: 0, b: 0, a: 0},
 			loadOp: GPU_LOAD_OP.CLEAR,
 			storeOp: GPU_STORE_OP.STORE
 		}
-		return {colorAttachment, depthStencilAttachment,normalRoughnessTextureAttachment};
+		const gBufferRoughnessTextureAttachment: GPURenderPassColorAttachment = {
+			view: gBufferRoughnessTextureView,
+			clearValue: {r: 0, g: 0, b: 0, a: 0},
+			loadOp: GPU_LOAD_OP.CLEAR,
+			storeOp: GPU_STORE_OP.STORE
+		}
+		return {colorAttachment, depthStencilAttachment,gBufferNormalTextureAttachment,gBufferRoughnessTextureAttachment};
 	}
 
 	#updateViewSystemUniforms(view: View3D, viewRenderPassEncoder: GPURenderPassEncoder, shadowRender: boolean = false, calcPointLightCluster: boolean = true,

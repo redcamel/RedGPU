@@ -53,7 +53,7 @@ RedGPU.init(
 		const normalTexture= new RedGPU.Resource.BitmapTexture(redGPUContext, "../../../assets/phongMaterial/test_normalMap.jpg");
 		//
 		// // 바닥 평면 추가 (반사면)
-		const floorGeometry = new RedGPU.Primitive.Ground(redGPUContext, 5, 5,100,100);
+		const floorGeometry = new RedGPU.Primitive.Ground(redGPUContext, 5, 5,1,1);
 		const floorMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);
 		floorMaterial.color.setColorByHEX('#11332f')
 		//
@@ -86,7 +86,7 @@ RedGPU.init(
 
 		// 원래 모델도 유지
 		loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb');
-		loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Sponza/glTF/Sponza.gltf');
+		// loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Sponza/glTF/Sponza.gltf');
 
 		// ============================================
 		// 레이아웃 설정

@@ -226,10 +226,16 @@ class ASinglePassPostEffect {
 						resource: view.viewRenderTextureManager.depthTextureView
 					})
 				}
-				if (name === "normalRoughnessTexture") {
+				if (name === "gBufferNormalTexture") {
 					this.#computeBindGroupEntries0.push({
 						binding: binding,
-						resource: view.viewRenderTextureManager.normalRoughnessTextureView
+						resource: view.viewRenderTextureManager.gBufferNormalTextureView
+					})
+				}
+				if (name === "gBufferRoughnessTexture") {
+					this.#computeBindGroupEntries0.push({
+						binding: binding,
+						resource: view.viewRenderTextureManager.gBufferRoughnessTextureView
 					})
 				}
 			})
