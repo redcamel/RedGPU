@@ -53,7 +53,7 @@ RedGPU.init(
 		const normalTexture= new RedGPU.Resource.BitmapTexture(redGPUContext, "../../../assets/phongMaterial/test_normalMap.jpg");
 		//
 		// // 바닥 평면 추가 (반사면)
-		const floorGeometry = new RedGPU.Primitive.Ground(redGPUContext, 5, 5,1,1);
+		const floorGeometry = new RedGPU.Primitive.Ground(redGPUContext, 15, 15,1,1);
 		const floorMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);
 		floorMaterial.color.setColorByHEX('#11332f')
 		//
@@ -162,11 +162,11 @@ const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const {createPostEffectLabel} = await import('../../../exampleHelper/createExample/loadExampleInfo/createPostEffectLabel.js');
 	createPostEffectLabel('SSR (Screen Space Reflection)', redGPUContext.detector.isMobile);
-	const {setDebugViewButton,createIblHelper} = await import("../../../exampleHelper/createExample/panes/index.js");
+	const {setDebugViewButton, createIblHelper} = await import("../../../exampleHelper/createExample/panes/index.js");
 	setDebugViewButton(redGPUContext);
 
 	const pane = new Pane({title: 'SSR Controls'});
-	createIblHelper(pane,targetView,RedGPU)
+	createIblHelper(pane, targetView, RedGPU);
 
 	const TEST_STATE = {
 		enableSSR: true,
@@ -175,9 +175,20 @@ const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect) => {
 		stepSize: ssrEffect.stepSize,
 		reflectionIntensity: ssrEffect.reflectionIntensity,
 		fadeDistance: ssrEffect.fadeDistance,
-		edgeFade: ssrEffect.edgeFade
+		edgeFade: ssrEffect.edgeFade,
+		jitterStrength: ssrEffect.jitterStrength,
+		autoUpdateFrame: true
 	};
 
+	// 프레임 자동 업데이트 설정
+	let frameUpdateEnabled = TEST_STATE.autoUpdateFrame;
+	const updateFrame = () => {
+		if (frameUpdateEnabled) {
+			ssrEffect.update();
+		}
+	};
+
+	// 기본 SSR 설정
 	const folder = pane.addFolder({title: 'SSR Settings', expanded: true});
 
 	folder.addBinding(TEST_STATE, 'enableSSR').on('change', (v) => {
@@ -188,75 +199,109 @@ const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect) => {
 		}
 	});
 
-	folder.addBinding(TEST_STATE, 'maxSteps', {min: 16, max: 128, step: 1})
+	folder.addBinding(TEST_STATE, 'maxSteps', {min: 16, max: 512, step: 1})
 		.on('change', (v) => {
 			ssrEffect.maxSteps = v.value;
 			TEST_STATE.maxSteps = v.value;
 		});
 
-	folder.addBinding(TEST_STATE, 'maxDistance', {min: 5, max: 50, step: 0.5})
+	folder.addBinding(TEST_STATE, 'maxDistance', {min: 5, max: 100, step: 0.5})
 		.on('change', (v) => {
 			ssrEffect.maxDistance = v.value;
 			TEST_STATE.maxDistance = v.value;
 		});
 
-	folder.addBinding(TEST_STATE, 'stepSize', {min: 0.001, max: 0.2, step: 0.0001})
+	folder.addBinding(TEST_STATE, 'stepSize', {min: 0.001, max: 0.1, step: 0.0001})
 		.on('change', (v) => {
 			ssrEffect.stepSize = v.value;
 			TEST_STATE.stepSize = v.value;
 		});
 
-
-	folder.addBinding(TEST_STATE, 'reflectionIntensity', {min: 0.1, max: 3.5, step: 0.01})
+	folder.addBinding(TEST_STATE, 'reflectionIntensity', {min: 0.0, max: 5.0, step: 0.01})
 		.on('change', (v) => {
 			ssrEffect.reflectionIntensity = v.value;
 			TEST_STATE.reflectionIntensity = v.value;
 		});
 
-	folder.addBinding(TEST_STATE, 'fadeDistance', {min: 3, max: 25, step: 0.5})
+	folder.addBinding(TEST_STATE, 'fadeDistance', {min: 3, max: 50, step: 0.5})
 		.on('change', (v) => {
 			ssrEffect.fadeDistance = v.value;
 			TEST_STATE.fadeDistance = v.value;
 		});
 
-	folder.addBinding(TEST_STATE, 'edgeFade', {min: 0.05, max: 0.3, step: 0.005})
+	folder.addBinding(TEST_STATE, 'edgeFade', {min: 0.05, max: 0.5, step: 0.005})
 		.on('change', (v) => {
 			ssrEffect.edgeFade = v.value;
 			TEST_STATE.edgeFade = v.value;
 		});
 
-	const presetFolder = pane.addFolder({title: 'Presets'});
+	// 지터 설정 폴더
+	const jitterFolder = pane.addFolder({title: 'Jitter Settings', expanded: true});
 
-	presetFolder.addButton({title: 'High Quality'}).on('click', () => {
-		TEST_STATE.maxSteps = 96;
-		TEST_STATE.stepSize = 0.05;
-		TEST_STATE.reflectionIntensity = 1.0;
-		TEST_STATE.fadeDistance = 15;
-		TEST_STATE.edgeFade = 0.15;
+	jitterFolder.addBinding(TEST_STATE, 'jitterStrength', {min: 0.0, max: 2.0, step: 0.01})
+		.on('change', (v) => {
+			ssrEffect.jitterStrength = v.value;
+			TEST_STATE.jitterStrength = v.value;
+		});
 
-		Object.assign(ssrEffect, TEST_STATE);
+	jitterFolder.addBinding(TEST_STATE, 'autoUpdateFrame')
+		.on('change', (v) => {
+			frameUpdateEnabled = v.value;
+		});
+
+	// 지터 품질 프리셋
+	const jitterPresetFolder = jitterFolder.addFolder({title: 'Jitter Quality'});
+
+	jitterPresetFolder.addButton({title: 'Low Jitter'}).on('click', () => {
+		ssrEffect.setJitterQuality('low');
+		TEST_STATE.jitterStrength = ssrEffect.jitterStrength;
+		pane.refresh();
+	});
+
+	jitterPresetFolder.addButton({title: 'Medium Jitter'}).on('click', () => {
+		ssrEffect.setJitterQuality('medium');
+		TEST_STATE.jitterStrength = ssrEffect.jitterStrength;
+		pane.refresh();
+	});
+
+	jitterPresetFolder.addButton({title: 'High Jitter'}).on('click', () => {
+		ssrEffect.setJitterQuality('high');
+		TEST_STATE.jitterStrength = ssrEffect.jitterStrength;
+		pane.refresh();
+	});
+
+	jitterPresetFolder.addButton({title: 'Ultra Jitter'}).on('click', () => {
+		ssrEffect.setJitterQuality('ultra');
+		TEST_STATE.jitterStrength = ssrEffect.jitterStrength;
+		pane.refresh();
+	});
+
+	// 성능/품질 프리셋
+	const presetFolder = pane.addFolder({title: 'Performance Presets'});
+
+	presetFolder.addButton({title: 'Performance'}).on('click', () => {
+		ssrEffect.setPerformancePreset('performance');
+		TEST_STATE.maxSteps = ssrEffect.maxSteps;
+		TEST_STATE.stepSize = ssrEffect.stepSize;
+		TEST_STATE.jitterStrength = ssrEffect.jitterStrength;
 		pane.refresh();
 	});
 
 	presetFolder.addButton({title: 'Balanced'}).on('click', () => {
-		TEST_STATE.maxSteps = 64;
-		TEST_STATE.stepSize = 0.08;
-		TEST_STATE.reflectionIntensity = 0.8;
-		TEST_STATE.fadeDistance = 12;
-		TEST_STATE.edgeFade = 0.12;
-
-		Object.assign(ssrEffect, TEST_STATE);
+		ssrEffect.setPerformancePreset('balanced');
+		TEST_STATE.maxSteps = ssrEffect.maxSteps;
+		TEST_STATE.stepSize = ssrEffect.stepSize;
+		TEST_STATE.jitterStrength = ssrEffect.jitterStrength;
 		pane.refresh();
 	});
 
-	presetFolder.addButton({title: 'Performance'}).on('click', () => {
-		TEST_STATE.maxSteps = 32;
-		TEST_STATE.stepSize = 0.12;
-		TEST_STATE.reflectionIntensity = 0.6;
-		TEST_STATE.fadeDistance = 8;
-		TEST_STATE.edgeFade = 0.1;
-
-		Object.assign(ssrEffect, TEST_STATE);
+	presetFolder.addButton({title: 'Quality'}).on('click', () => {
+		ssrEffect.setPerformancePreset('quality');
+		TEST_STATE.maxSteps = ssrEffect.maxSteps;
+		TEST_STATE.stepSize = ssrEffect.stepSize;
+		TEST_STATE.jitterStrength = ssrEffect.jitterStrength;
 		pane.refresh();
 	});
+
+
 };
