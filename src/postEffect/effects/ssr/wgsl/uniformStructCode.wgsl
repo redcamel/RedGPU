@@ -119,17 +119,19 @@ fn getAdaptiveFadeDistance(startWorldPos: vec3<f32>, screenFadeDistance: f32) ->
     return clamp(worldFadeDistance, 1.0, 50.0);
 }
 
- fn performWorldRayMarching(startWorldPos: vec3<f32>, rayDir: vec3<f32>) -> vec4<f32> {
+fn performWorldRayMarching(startWorldPos: vec3<f32>, rayDir: vec3<f32>) -> vec4<f32> {
      let cameraWorldPos = systemUniforms.camera.inverseCameraMatrix[3].xyz;
-
-     // 적응적 페이드 거리 계산
      let adaptiveFadeDistance = getAdaptiveFadeDistance(startWorldPos, uniforms.fadeDistance);
 
      var currentWorldPos = startWorldPos;
      let maxSteps = u32(uniforms.maxSteps);
+     var lastValidHit = vec4<f32>(0.0);
+
+     // 초기 스텝을 약간 앞으로 이동 (self-intersection 방지)
+     let initialOffset = getAdaptiveStepSize(startWorldPos, uniforms.stepSize) * 0.5;
+     currentWorldPos += rayDir * initialOffset;
 
      for (var i = 0u; i < maxSteps; i++) {
-         // 프로젝션 기반 적응적 스텝 크기 계산
          let adaptiveStepSize = getAdaptiveStepSize(currentWorldPos, uniforms.stepSize);
          currentWorldPos += rayDir * adaptiveStepSize;
 
@@ -160,19 +162,92 @@ fn getAdaptiveFadeDistance(startWorldPos: vec3<f32>, screenFadeDistance: f32) ->
          let rayDistanceFromCamera = length(currentWorldPos - cameraWorldPos);
          let surfaceDistanceFromCamera = length(sampledWorldPos - cameraWorldPos);
 
-         // 깊이 테스트
-         if (rayDistanceFromCamera > surfaceDistanceFromCamera) {
-             let reflectionColor = textureLoad(sourceTexture, screenCoord);
+         // 개선된 교차 검증 - 더 유연한 허용 오차
+         let dynamicTolerance = adaptiveStepSize * 1.5; // 스텝 크기에 비례한 허용 오차
+         let baseDepthTolerance = 0.001; // 기본 깊이 허용 오차
+         let depthTolerance = max(dynamicTolerance, baseDepthTolerance);
 
-             // 적응적 페이드 거리 사용
-             let distanceFade = 1.0 - smoothstep(0.0, adaptiveFadeDistance, travelDistance);
-             let edgeFade = calculateEdgeFade(screenUV);
-             let stepFade = 1.0 - pow(f32(i) / f32(maxSteps), 1.5);
+         // 레이가 표면 근처에 있는지 확인 (양방향 허용)
+         let depthDifference = rayDistanceFromCamera - surfaceDistanceFromCamera;
+         if (abs(depthDifference) > depthTolerance) {
+             continue;
+         }
 
-             let totalFade = distanceFade * edgeFade * stepFade;
+         // 3D 공간에서의 거리 검증 - 더 관대하게
+         let rayToSurfaceDistance = length(currentWorldPos - sampledWorldPos);
+         let maxAllowedDistance = adaptiveStepSize * 3.0; // 더 큰 허용 범위
+         if (rayToSurfaceDistance > maxAllowedDistance) {
+             continue;
+         }
 
+         // 방향 일관성 검사를 더 관대하게
+         let surfaceToRay = normalize(currentWorldPos - sampledWorldPos);
+         let expectedDirection = normalize(rayDir);
+         let directionSimilarity = dot(surfaceToRay, expectedDirection);
+
+         // 방향 유사도 조건 완화
+         if (directionSimilarity < 0.3) { // 더 넓은 각도 허용
+             continue;
+         }
+
+         // 깊이 불연속성 검사를 더 관대하게
+         let neighborOffsets = array<vec2<i32>, 4>(
+             vec2<i32>(-1, 0), vec2<i32>(1, 0),
+             vec2<i32>(0, -1), vec2<i32>(0, 1)
+         );
+
+         var depthVariation = 0.0;
+         var validNeighbors = 0;
+         let depthThreshold = 0.05; // 더 큰 임계값 사용
+
+         for (var j = 0; j < 4; j++) {
+             let neighborCoord = screenCoord + neighborOffsets[j];
+             if (neighborCoord.x >= 0 && neighborCoord.x < texSize.x &&
+                 neighborCoord.y >= 0 && neighborCoord.y < texSize.y) {
+                 let neighborDepth = textureLoad(depthTexture, neighborCoord, 0);
+                 if (neighborDepth < 0.999) {
+                     depthVariation += abs(sampledDepth - neighborDepth);
+                     validNeighbors++;
+                 }
+             }
+         }
+
+         // 깊이 불연속성 체크를 선택적으로만 적용
+         var skipDueToDiscontinuity = false;
+         if (validNeighbors > 2) { // 충분한 이웃이 있을 때만 검사
+             let avgDepthVariation = depthVariation / f32(validNeighbors);
+             if (avgDepthVariation > depthThreshold) {
+                 skipDueToDiscontinuity = true;
+             }
+         }
+
+         // 불연속성이 있어도 완전히 제외하지 않고 품질만 낮춤
+         let reflectionColor = textureLoad(sourceTexture, screenCoord);
+
+         let distanceFade = 1.0 - smoothstep(0.0, adaptiveFadeDistance, travelDistance);
+         let edgeFade = calculateEdgeFade(screenUV);
+         let stepFade = 1.0 - pow(f32(i) / f32(maxSteps), 1.2); // 더 부드러운 감쇠
+
+         // 품질에 따른 가중치
+         let qualityWeight = mix(0.3, 1.0, directionSimilarity); // 방향 유사도에 따른 가중치
+         let discontinuityPenalty = select(1.0, 0.5, skipDueToDiscontinuity); // 불연속성 패널티
+
+         let totalFade = distanceFade * edgeFade * stepFade * qualityWeight * discontinuityPenalty;
+
+         // 유효한 히트 저장 (후처리를 위해)
+         if (totalFade > 0.1) {
+             lastValidHit = vec4<f32>(reflectionColor.rgb, totalFade);
+         }
+
+         // 충분히 강한 반사를 찾으면 조기 종료
+         if (totalFade > 0.7) {
              return vec4<f32>(reflectionColor.rgb, totalFade);
          }
+     }
+
+     // 완벽한 히트를 찾지 못했지만 유효한 히트가 있다면 그것을 반환
+     if (lastValidHit.a > 0.05) {
+         return lastValidHit;
      }
 
      return vec4<f32>(0.0);
