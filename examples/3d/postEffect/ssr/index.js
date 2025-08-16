@@ -18,6 +18,8 @@ RedGPU.init(
 		controller.speedDistance = 0.2;
 		controller.tilt = -15; // 약간 위에서 내려다보는 각도
 
+		controller.centerY = 3
+
 		// 씬 생성
 		const scene = new RedGPU.Display.Scene();
 
@@ -53,7 +55,7 @@ RedGPU.init(
 		const normalTexture= new RedGPU.Resource.BitmapTexture(redGPUContext, "../../../assets/phongMaterial/test_normalMap.jpg");
 		//
 		// // 바닥 평면 추가 (반사면)
-		const floorGeometry = new RedGPU.Primitive.Circle(redGPUContext, 3.5);
+		const floorGeometry = new RedGPU.Primitive.Circle(redGPUContext, 13.5);
 		const floorMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);
 		floorMaterial.color.setColorByHEX('#11332f')
 		//
@@ -111,20 +113,23 @@ RedGPU.init(
 		// 애니메이션 추가 (반사 효과를 더 잘 보이게)
 		// ============================================
 
-		let time = 0;
-		const render = () => {
-			time += 0.01;
+		let time2 = 0;
+		const render = (time) => {
+			time2 += 0.01;
 
 			// // 구체들을 회전시키고 위아래로 움직임
 			if (metalSphere) {
 				metalSphere.rotationY += 0.02;
-				metalSphere.y = Math.sin(time) * 0.5;
+				metalSphere.y = Math.sin(time2) * 0.5;
 			}
 
 			if (glassSphere) {
 				glassSphere.rotationX += 0.015;
-				glassSphere.y = Math.cos(time * 1.2) * 0.3;
+				glassSphere.y = Math.cos(time2 * 1.2) * 0.3;
 			}
+
+
+			floorMaterial.color.g = Math.floor(Math.abs(Math.sin(time * 0.001)) * 50);
 		};
 
 		// ============================================

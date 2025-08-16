@@ -98,5 +98,8 @@ DefineForFragment.defineByPreset(PhongMaterial, [
 	//
 	[DefineForFragment.PRESET_POSITIVE_NUMBER.SHININESS, 32],
 ])
+DefineForFragment.defineBoolean(PhongMaterial, [
+	['useSSR',true]
+])
 Object.freeze(PhongMaterial)
 export default PhongMaterial
