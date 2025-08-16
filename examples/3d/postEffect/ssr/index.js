@@ -200,7 +200,7 @@ const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect) => {
 			TEST_STATE.maxDistance = v.value;
 		});
 
-	folder.addBinding(TEST_STATE, 'stepSize', {min: 0.02, max: 0.2, step: 0.005})
+	folder.addBinding(TEST_STATE, 'stepSize', {min: 0.00002, max: 0.1, step: 0.0001})
 		.on('change', (v) => {
 			ssrEffect.stepSize = v.value;
 			TEST_STATE.stepSize = v.value;

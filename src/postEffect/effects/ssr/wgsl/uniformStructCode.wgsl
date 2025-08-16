@@ -15,7 +15,7 @@ fn reconstructWorldPosition(screenCoord: vec2<i32>, depth: f32) -> vec3<f32> {
 
     // NDC 좌표 계산 (TypeScript screenToWorld 로직과 일치)
     let x = 2.0 * uv.x - 1.0;
-    let y = -2.0 * uv.y + 1.0;  // Y축 뒤집기
+    let y = -(2.0 * uv.y - 1.0);  // Y축 뒤집기
     let z = depth * 2.0 - 1.0;
 
     let ndc = vec3<f32>(x, y, z);
@@ -76,58 +76,87 @@ fn calculateWorldReflectionRay(worldPos: vec3<f32>, worldNormal: vec3<f32>, came
     return normalize(reflect(-viewDir, worldNormal));
 }
 
+
 fn performWorldRayMarching(startWorldPos: vec3<f32>, rayDir: vec3<f32>) -> vec4<f32> {
-    var currentWorldPos = startWorldPos + rayDir * 0.01;
     let stepVec = rayDir * uniforms.stepSize;
     let maxSteps = u32(uniforms.maxSteps);
     let cameraWorldPos = systemUniforms.camera.inverseCameraMatrix[3].xyz;
 
-    for (var i = 0u; i < maxSteps; i++) {
-        currentWorldPos += stepVec;
+    // 카메라 방향 확인 추가
+    let toCameraDir = normalize(cameraWorldPos - startWorldPos);
+    let rayViewAlignment = dot(rayDir, toCameraDir);
 
-        let travelDistance = length(currentWorldPos - startWorldPos);
-        if (travelDistance > uniforms.maxDistance) {
-            break;
-        }
+    // 카메라 뒤쪽으로 향하는 반사는 무시
+    if (rayViewAlignment > 0.8) {
+        return vec4<f32>(0.0);
+    }
 
-        let screenUV = worldToScreen(currentWorldPos);
-        if (screenUV.x < 0.0 || screenUV.x > 1.0 || screenUV.y < 0.0 || screenUV.y > 1.0) {
-            break;
-        }
+     // 지터 없이 시작 위치 설정
+     var currentWorldPos = startWorldPos + rayDir * 0.01;
 
-        let texDims = textureDimensions(depthTexture);
-        let screenCoord = vec2<i32>(screenUV * vec2<f32>(texDims));
-        let texSize = vec2<i32>(texDims);
+     for (var i = 0u; i < maxSteps; i++) {
+         currentWorldPos += stepVec;
 
-        if (screenCoord.x < 0 || screenCoord.x >= texSize.x || screenCoord.y < 0 || screenCoord.y >= texSize.y) {
-            continue;
-        }
+                 let travelDistance = length(currentWorldPos - startWorldPos);
+                 if (travelDistance > uniforms.maxDistance) {
+                     break;
+                 }
 
-        let sampledDepth = textureLoad(depthTexture, screenCoord, 0);
-        if (sampledDepth >= 0.999) {
-            continue;
-        }
 
-        let sampledWorldPos = reconstructWorldPosition(screenCoord, sampledDepth);
 
-        // 간단한 거리 기반 충돌 검출 - thickness 제거
+         let currentScreenUV = worldToScreen(currentWorldPos);
+         if (currentScreenUV.x < 0.0 || currentScreenUV.x > 1.0 || currentScreenUV.y < 0.0 || currentScreenUV.y > 1.0) {
+             break;
+         }
+
+         let texDims = textureDimensions(depthTexture);
+         let screenCoord = vec2<i32>(currentScreenUV * vec2<f32>(texDims));
+         let texSize = vec2<i32>(texDims);
+
+         if (screenCoord.x < 0 || screenCoord.x >= texSize.x || screenCoord.y < 0 || screenCoord.y >= texSize.y) {
+             continue;
+         }
+
+         let sampledDepth = textureLoad(depthTexture, screenCoord, 0);
+
+         if (sampledDepth >= 0.999) {
+             continue;
+         }
+
+         let sampledWorldPos = reconstructWorldPosition(screenCoord, sampledDepth);
+
+                // 카메라 거리 체크 개선
         let rayDistanceFromCamera = length(currentWorldPos - cameraWorldPos);
         let surfaceDistanceFromCamera = length(sampledWorldPos - cameraWorldPos);
 
-        // 레이가 표면 뒤에 있으면 충돌로 간주
-        if (rayDistanceFromCamera > surfaceDistanceFromCamera) {
-            let reflectionColor = textureLoad(sourceTexture, screenCoord);
-            let distanceFade = 1.0 - smoothstep(0.0, uniforms.fadeDistance, travelDistance);
-            let edgeFade = calculateEdgeFade(screenUV);
-            let stepFade = 1.0 - f32(i) / f32(maxSteps);
-            let totalFade = distanceFade * edgeFade * stepFade;
-            return vec4<f32>(reflectionColor.rgb, totalFade);
+        // 카메라 near/far 클리핑 고려
+        if (rayDistanceFromCamera < systemUniforms.camera.nearClipping ||
+            rayDistanceFromCamera > systemUniforms.camera.farClipping) {
+            continue;
         }
-    }
 
-    return vec4<f32>(0.0);
-}
 
+         let intersectionThreshold = uniforms.stepSize * 2.0;
+         let distanceDiff = rayDistanceFromCamera - surfaceDistanceFromCamera;
+
+         if (distanceDiff > 0.0 && distanceDiff < intersectionThreshold) {
+             let worldSpaceDistance = length(currentWorldPos - sampledWorldPos);
+
+             if (worldSpaceDistance < intersectionThreshold * 1.5) {
+                 let reflectionColor = textureLoad(sourceTexture, screenCoord);
+                 let distanceFade = 1.0 - smoothstep(0.0, uniforms.fadeDistance, travelDistance);
+                 let edgeFade = calculateEdgeFade(currentScreenUV);
+                 let stepFade = 1.0 - f32(i) / f32(maxSteps);
+
+                 let totalFade = distanceFade * edgeFade * stepFade;
+
+                 return vec4<f32>(reflectionColor.rgb, totalFade);
+             }
+         }
+     }
+
+     return vec4<f32>(0.0);
+ }
 // 기존 함수들은 호환성을 위해 유지 (사용되지 않음)
 fn reconstructViewPosition(screenCoord: vec2<i32>, depth: f32) -> vec3<f32> {
     return vec3<f32>(0.0);
