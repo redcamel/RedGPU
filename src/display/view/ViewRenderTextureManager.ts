@@ -16,8 +16,8 @@ class ViewRenderTextureManager {
 	//
 	#gBufferNormalTexture: GPUTexture
 	#gBufferNormalTextureView: GPUTextureView
-	#gBufferRoughnessTexture: GPUTexture
-	#gBufferRoughnessTextureView: GPUTextureView
+	#gBufferMetalTexture: GPUTexture
+	#gBufferMetalTextureView: GPUTextureView
 	//
 	#depthTexture: GPUTexture
 	#depthTextureView: GPUTextureView
@@ -84,13 +84,13 @@ class ViewRenderTextureManager {
 	get gBufferNormalTexture(): GPUTexture {
 		return this.#gBufferNormalTexture;
 	}
-	get gBufferRoughnessTextureView(): GPUTextureView {
+	get gBufferMetalTextureView(): GPUTextureView {
 		this.#createGBufferRoughnessTexture();
-		return this.#gBufferRoughnessTextureView;
+		return this.#gBufferMetalTextureView;
 	}
 
-	get gBufferRoughnessTexture(): GPUTexture {
-		return this.#gBufferRoughnessTexture;
+	get gBufferMetalTexture(): GPUTexture {
+		return this.#gBufferMetalTexture;
 	}
 
 	#checkVideoMemorySize() {
@@ -165,7 +165,7 @@ class ViewRenderTextureManager {
 	#createGBufferRoughnessTexture(): void {
 		const {antialiasingManager, resourceManager} = this.#redGPUContext
 		const {useMSAA} = antialiasingManager
-		const currentTexture =  this.#gBufferRoughnessTexture;
+		const currentTexture =  this.#gBufferMetalTexture;
 		const {pixelRectObject, name} = this.#view
 		const {width: pixelRectObjectW, height: pixelRectObjectH} = pixelRectObject
 		const changedSize = currentTexture?.width !== pixelRectObjectW || currentTexture?.height !== pixelRectObjectH
@@ -175,8 +175,8 @@ class ViewRenderTextureManager {
 		if (needCreateTexture) {
 			if (currentTexture) {
 				currentTexture?.destroy()
-				this.#gBufferRoughnessTexture = null
-				this.#gBufferRoughnessTextureView = null
+				this.#gBufferMetalTexture = null
+				this.#gBufferMetalTextureView = null
 			}
 			const newTexture = resourceManager.createManagedTexture({
 				size: [
@@ -185,12 +185,12 @@ class ViewRenderTextureManager {
 					1
 				],
 				sampleCount: useMSAA ? 4 : 1,
-				label: `${name}_gBufferRoughnessTexture_${pixelRectObjectW}x${pixelRectObjectH}`,
+				label: `${name}_gBufferMetalTexture_${pixelRectObjectW}x${pixelRectObjectH}`,
 				format:  navigator.gpu.getPreferredCanvasFormat(),
 				usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING
 			})
-			this.#gBufferRoughnessTexture = newTexture;
-			this.#gBufferRoughnessTextureView = resourceManager.getGPUResourceBitmapTextureView(newTexture);
+			this.#gBufferMetalTexture = newTexture;
+			this.#gBufferMetalTextureView = resourceManager.getGPUResourceBitmapTextureView(newTexture);
 			this.#checkVideoMemorySize()
 		}
 	}

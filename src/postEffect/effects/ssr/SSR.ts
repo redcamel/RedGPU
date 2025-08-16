@@ -13,8 +13,6 @@ class SSR extends ASinglePassPostEffect {
 	#reflectionIntensity: number = 1;
 	#fadeDistance: number = 12.0;
 	#edgeFade: number = 0.15;
-	#frameCount: number = 0;
-	#jitterStrength: number = 0.5;
 
 	constructor(redGPUContext: RedGPUContext) {
 		super(redGPUContext);
@@ -39,8 +37,6 @@ class SSR extends ASinglePassPostEffect {
 		this.reflectionIntensity = this.#reflectionIntensity;
 		this.fadeDistance = this.#fadeDistance;
 		this.edgeFade = this.#edgeFade;
-		this.frameCount = this.#frameCount;
-		this.jitterStrength = this.#jitterStrength;
 	}
 
 	/**
@@ -110,68 +106,7 @@ class SSR extends ASinglePassPostEffect {
 		this.updateUniform('edgeFade', value);
 	}
 
-	get frameCount(): number {
-		return this.#frameCount;
-	}
 
-	set frameCount(value: number) {
-		validateNumberRange(value, 0, 99999);
-		this.#frameCount = value;
-		this.updateUniform('frameCount', value);
-	}
-
-	get jitterStrength(): number {
-		return this.#jitterStrength;
-	}
-
-	set jitterStrength(value: number) {
-		validateNumberRange(value, 0.0, 2.0);
-		this.#jitterStrength = value;
-		this.updateUniform('jitterStrength', value);
-	}
-
-	/**
-	 * 지터 품질 프리셋 설정
-	 */
-	setJitterQuality(quality: 'low' | 'medium' | 'high' | 'ultra'): void {
-		switch (quality) {
-			case 'low':
-				this.jitterStrength = 0.2;
-				break;
-			case 'medium':
-				this.jitterStrength = 0.5;
-				break;
-			case 'high':
-				this.jitterStrength = 0.8;
-				break;
-			case 'ultra':
-				this.jitterStrength = 1.2;
-				break;
-		}
-	}
-
-	/**
-	 * 성능 프리셋 설정 (스텝 수와 품질의 균형)
-	 */
-	setPerformancePreset(preset: 'performance' | 'balanced' | 'quality'): void {
-		switch (preset) {
-			case 'performance':
-				this.maxSteps = 64;
-				this.stepSize = 0.025;
-				this.jitterStrength = 0.3;
-				break;
-			case 'balanced':
-				this.maxSteps = 128;
-				this.stepSize = 0.015;
-				this.jitterStrength = 0.5;
-				break;
-			case 'quality':
-				this.maxSteps = 256;
-				this.stepSize = 0.01;
-				this.jitterStrength = 0.8;
-				break;
-		}
-	}
 }
 
 Object.freeze(SSR);

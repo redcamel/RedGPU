@@ -232,10 +232,10 @@ class ASinglePassPostEffect {
 						resource: view.viewRenderTextureManager.gBufferNormalTextureView
 					})
 				}
-				if (name === "gBufferRoughnessTexture") {
+				if (name === "gBufferMetalTexture") {
 					this.#computeBindGroupEntries0.push({
 						binding: binding,
-						resource: view.viewRenderTextureManager.gBufferRoughnessTextureView
+						resource: view.viewRenderTextureManager.gBufferMetalTextureView
 					})
 				}
 			})

@@ -10,7 +10,7 @@ const createCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: 
       @group(0) @binding(0) var sourceTexture : texture_storage_2d<rgba8unorm,read>;
       ${effect.useDepthTexture ? `@group(0) @binding(1) var depthTexture : ${depthTextureType}` : ''};
       ${effect.useNormalRougnessTexture ? '@group(0) @binding(2) var gBufferNormalTexture : texture_2d<f32>' : ''};
-      ${effect.useNormalRougnessTexture ? '@group(0) @binding(3) var gBufferRoughnessTexture : texture_2d<f32>' : ''};
+      ${effect.useNormalRougnessTexture ? '@group(0) @binding(3) var gBufferMetalTexture : texture_2d<f32>' : ''};
 	
       @group(1) @binding(0) var outputTexture : texture_storage_2d<rgba8unorm, write>;
       ${postEffectSystemUniform}

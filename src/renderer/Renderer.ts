@@ -81,10 +81,10 @@ class Renderer {
 			colorAttachment,
 			depthStencilAttachment,
 			gBufferNormalTextureAttachment,
-			gBufferRoughnessTextureAttachment
+			gBufferMetalTextureAttachment
 		} = this.#createAttachmentsForView(view)
 		const renderPassDescriptor: GPURenderPassDescriptor = {
-			colorAttachments: [colorAttachment,gBufferNormalTextureAttachment,gBufferRoughnessTextureAttachment],
+			colorAttachments: [colorAttachment,gBufferNormalTextureAttachment,gBufferMetalTextureAttachment],
 			depthStencilAttachment,
 		}
 		// @ts-ignore
@@ -201,7 +201,7 @@ class Renderer {
 
 	#createAttachmentsForView(view: View3D) {
 		const {scene, redGPUContext, viewRenderTextureManager} = view
-		const {depthTextureView, colorTextureView, colorResolveTextureView,gBufferNormalTextureView,gBufferRoughnessTextureView} = viewRenderTextureManager
+		const {depthTextureView, colorTextureView, colorResolveTextureView,gBufferNormalTextureView,gBufferMetalTextureView} = viewRenderTextureManager
 		const {useBackgroundColor, backgroundColor} = scene
 		const {antialiasingManager} = redGPUContext
 		const {useMSAA} = antialiasingManager
@@ -231,13 +231,13 @@ class Renderer {
 			loadOp: GPU_LOAD_OP.CLEAR,
 			storeOp: GPU_STORE_OP.STORE
 		}
-		const gBufferRoughnessTextureAttachment: GPURenderPassColorAttachment = {
-			view: gBufferRoughnessTextureView,
+		const gBufferMetalTextureAttachment: GPURenderPassColorAttachment = {
+			view: gBufferMetalTextureView,
 			clearValue: {r: 0, g: 0, b: 0, a: 0},
 			loadOp: GPU_LOAD_OP.CLEAR,
 			storeOp: GPU_STORE_OP.STORE
 		}
-		return {colorAttachment, depthStencilAttachment,gBufferNormalTextureAttachment,gBufferRoughnessTextureAttachment};
+		return {colorAttachment, depthStencilAttachment,gBufferNormalTextureAttachment,gBufferMetalTextureAttachment};
 	}
 
 	#updateViewSystemUniforms(view: View3D, viewRenderPassEncoder: GPURenderPassEncoder, shadowRender: boolean = false, calcPointLightCluster: boolean = true,

@@ -86,6 +86,7 @@ RedGPU.init(
 
 		// 원래 모델도 유지
 		loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb');
+		loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MetalRoughSpheres/glTF-Binary/MetalRoughSpheres.glb');
 		// loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Sponza/glTF/Sponza.gltf');
 
 		// ============================================
@@ -154,6 +155,12 @@ function loadGLTF(redGPUContext, scene, url) {
 			// 모델을 약간 위로 배치
 			if (url.includes('DamagedHelmet')) {
 				mesh.y = 1;
+			}
+			if (url.includes('MetalRoughSpheres')) {
+				mesh.z = -2
+			}
+			if (url.includes('Sponza')) {
+				mesh.setScale(2)
 			}
 		}
 	);
