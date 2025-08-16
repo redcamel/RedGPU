@@ -227,13 +227,13 @@ class Renderer {
 		}
 		const gBufferNormalTextureAttachment: GPURenderPassColorAttachment = {
 			view: gBufferNormalTextureView,
-			clearValue: {r: 0, g: 0, b: 0, a: 0},
+			clearValue: {r: 0, g: 0, b: 0, a: 1},
 			loadOp: GPU_LOAD_OP.CLEAR,
 			storeOp: GPU_STORE_OP.STORE
 		}
 		const gBufferMetalTextureAttachment: GPURenderPassColorAttachment = {
 			view: gBufferMetalTextureView,
-			clearValue: {r: 0, g: 0, b: 0, a: 0},
+			clearValue: {r: 0, g: 0, b: 0, a: 1},
 			loadOp: GPU_LOAD_OP.CLEAR,
 			storeOp: GPU_STORE_OP.STORE
 		}
