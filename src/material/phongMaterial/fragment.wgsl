@@ -255,21 +255,10 @@ fn main(inputData:InputData) -> FragmentOutput {
       discard;
     }
     output.color = finalColor;
-    output.gBufferNormal = vec4<f32>(normalize(N) * 0.5 + 0.5, 1.0);
-
-    // shininess에서 올바른 roughness 계산
-    let roughnessFromShininess = sqrt(2.0 / (uniforms.shininess + 2.0));
-    let metallicFromShininess = uniforms.specularStrength;
-
-    // F0 계산
-    let F0_dielectric = 0.04;
-    let F0_metal = 0.9;
-    let F0 = mix(F0_dielectric, F0_metal, metallicFromShininess);
-
-    // 러프니스 보정 (roughness가 높을수록 반사 감소)
-    let roughnessFactor = 1.0 - (roughnessFromShininess * roughnessFromShininess);
-    let finalReflectionStrength = F0 * roughnessFactor;
-    output.gBufferMetal = vec4<f32>(finalReflectionStrength, roughnessFromShininess, metallicFromShininess, 1.0);
+    #redgpu_if useSSR
+        output.gBufferNormal = vec4<f32>(normalize(N) * 0.5 + 0.5, 1.0);
+        output.gBufferMetal = vec4<f32>(u_specularStrength,0.0,0.0, 1.0);
+    #redgpu_endIf
 
     return output;
 }

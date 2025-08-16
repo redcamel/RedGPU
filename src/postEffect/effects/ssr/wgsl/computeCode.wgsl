@@ -21,25 +21,28 @@ let gBufferMetalData = textureLoad(gBufferMetalTexture, screenCoord, 0);
 let precomputedReflectionStrength = gBufferMetalData.r;
 
 // 임계값 체크 (훨씬 단순함)
-if (precomputedReflectionStrength < 0.05) {
-    textureStore(outputTexture, screenCoord, originalColor);
-    return;
-}
+//if (precomputedReflectionStrength < 0.05) {
+//    textureStore(outputTexture, screenCoord, originalColor);
+//    return;
+//}
 
 let worldPos = reconstructWorldPosition(screenCoord, depth);
 let worldNormal = reconstructWorldNormal(gBufferNormalData);
 
 let normalLength = length(worldNormal);
-if (normalLength < 0.01) {
-    textureStore(outputTexture, screenCoord, originalColor);
-    return;
-}
+//if (normalLength < 0.01) {
+//    textureStore(outputTexture, screenCoord, originalColor);
+//    return;
+//}
 
 let normal = normalize(worldNormal);
 let cameraWorldPos = systemUniforms.camera.inverseCameraMatrix[3].xyz;
 
+// 픽셀 좌표 기반 지터 생성
+let jitter = generatePixelJitter(screenCoord);
+
 let reflectionDir = calculateWorldReflectionRay(worldPos, normal, cameraWorldPos);
-let reflection = performWorldRayMarching(worldPos, reflectionDir);
+let reflection = performWorldRayMarching(worldPos, reflectionDir, jitter);
 
 var reflectionColor = vec3<f32>(0.0);
 var reflectionAlpha = 0.0;

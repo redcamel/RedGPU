@@ -13,6 +13,7 @@ class SSR extends ASinglePassPostEffect {
 	#reflectionIntensity: number = 1;
 	#fadeDistance: number = 12.0;
 	#edgeFade: number = 0.15;
+	#jitterStrength: number = 0.8;
 
 	constructor(redGPUContext: RedGPUContext) {
 		super(redGPUContext);
@@ -37,13 +38,7 @@ class SSR extends ASinglePassPostEffect {
 		this.reflectionIntensity = this.#reflectionIntensity;
 		this.fadeDistance = this.#fadeDistance;
 		this.edgeFade = this.#edgeFade;
-	}
-
-	/**
-	 * 매 프레임마다 호출하여 지터 시스템을 위한 프레임 카운트를 업데이트
-	 */
-	update(): void {
-		// this.frameCount = (this.#frameCount + 1) % 10000; // 오버플로우 방지
+		this.jitterStrength = this.#jitterStrength;
 	}
 
 	get maxSteps(): number {
@@ -51,7 +46,7 @@ class SSR extends ASinglePassPostEffect {
 	}
 
 	set maxSteps(value: number) {
-		validateNumberRange(value, 1, 512); // 최대값을 512로 증가
+		validateNumberRange(value, 1, 512);
 		this.#maxSteps = value;
 		this.updateUniform('maxSteps', value);
 	}
@@ -106,7 +101,15 @@ class SSR extends ASinglePassPostEffect {
 		this.updateUniform('edgeFade', value);
 	}
 
+	get jitterStrength(): number {
+		return this.#jitterStrength;
+	}
 
+	set jitterStrength(value: number) {
+		validateNumberRange(value, 0.0, 2.0);
+		this.#jitterStrength = value;
+		this.updateUniform('jitterStrength', value);
+	}
 }
 
 Object.freeze(SSR);

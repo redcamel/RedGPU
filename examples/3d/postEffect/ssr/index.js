@@ -53,12 +53,12 @@ RedGPU.init(
 		const normalTexture= new RedGPU.Resource.BitmapTexture(redGPUContext, "../../../assets/phongMaterial/test_normalMap.jpg");
 		//
 		// // 바닥 평면 추가 (반사면)
-		const floorGeometry = new RedGPU.Primitive.Ground(redGPUContext, 5, 5,1,1);
+		const floorGeometry = new RedGPU.Primitive.Circle(redGPUContext, 3.5);
 		const floorMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);
 		floorMaterial.color.setColorByHEX('#11332f')
 		//
 		const floorMesh = new RedGPU.Display.Mesh(redGPUContext, floorGeometry, floorMaterial);
-
+		floorMesh.rotationX = 90
 
 		scene.addChild(floorMesh);
 
@@ -67,7 +67,7 @@ RedGPU.init(
 
 		// 금속 구체
 		const metalMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);
-
+		// metalMaterial.specularStrength = 0.1
 		metalMaterial.color.setColorByHEX('#af532e')
 
 		const metalSphere = new RedGPU.Display.Mesh(redGPUContext, sphereGeometry, metalMaterial);
@@ -182,7 +182,8 @@ const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect) => {
 		stepSize: ssrEffect.stepSize,
 		reflectionIntensity: ssrEffect.reflectionIntensity,
 		fadeDistance: ssrEffect.fadeDistance,
-		edgeFade: ssrEffect.edgeFade
+		edgeFade: ssrEffect.edgeFade,
+		jitterStrength: ssrEffect.jitterStrength
 	};
 
 	const folder = pane.addFolder({title: 'SSR Settings', expanded: true});
@@ -201,7 +202,7 @@ const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect) => {
 			TEST_STATE.maxSteps = v.value;
 		});
 
-	folder.addBinding(TEST_STATE, 'maxDistance', {min: 5, max: 50, step: 0.5})
+	folder.addBinding(TEST_STATE, 'maxDistance', {min: 1, max: 50, step: 0.01})
 		.on('change', (v) => {
 			ssrEffect.maxDistance = v.value;
 			TEST_STATE.maxDistance = v.value;
@@ -213,14 +214,13 @@ const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect) => {
 			TEST_STATE.stepSize = v.value;
 		});
 
-
 	folder.addBinding(TEST_STATE, 'reflectionIntensity', {min: 0.1, max: 3.5, step: 0.01})
 		.on('change', (v) => {
 			ssrEffect.reflectionIntensity = v.value;
 			TEST_STATE.reflectionIntensity = v.value;
 		});
 
-	folder.addBinding(TEST_STATE, 'fadeDistance', {min: 3, max: 25, step: 0.5})
+	folder.addBinding(TEST_STATE, 'fadeDistance', {min: 1, max: 25, step: 0.1})
 		.on('change', (v) => {
 			ssrEffect.fadeDistance = v.value;
 			TEST_STATE.fadeDistance = v.value;
@@ -232,6 +232,13 @@ const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect) => {
 			TEST_STATE.edgeFade = v.value;
 		});
 
+	// 🎯 지터 강도 컨트롤 추가
+	folder.addBinding(TEST_STATE, 'jitterStrength', {min: 0.0, max: 2.0, step: 0.01})
+		.on('change', (v) => {
+			ssrEffect.jitterStrength = v.value;
+			TEST_STATE.jitterStrength = v.value;
+		});
+
 	const presetFolder = pane.addFolder({title: 'Presets'});
 
 	presetFolder.addButton({title: 'High Quality'}).on('click', () => {
@@ -240,6 +247,7 @@ const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect) => {
 		TEST_STATE.reflectionIntensity = 1.0;
 		TEST_STATE.fadeDistance = 15;
 		TEST_STATE.edgeFade = 0.15;
+		TEST_STATE.jitterStrength = 0.8; // 🎯 지터 강도 추가
 
 		Object.assign(ssrEffect, TEST_STATE);
 		pane.refresh();
@@ -251,6 +259,7 @@ const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect) => {
 		TEST_STATE.reflectionIntensity = 0.8;
 		TEST_STATE.fadeDistance = 12;
 		TEST_STATE.edgeFade = 0.12;
+		TEST_STATE.jitterStrength = 0.6; // 🎯 지터 강도 추가
 
 		Object.assign(ssrEffect, TEST_STATE);
 		pane.refresh();
@@ -262,8 +271,10 @@ const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect) => {
 		TEST_STATE.reflectionIntensity = 0.6;
 		TEST_STATE.fadeDistance = 8;
 		TEST_STATE.edgeFade = 0.1;
+		TEST_STATE.jitterStrength = 0.4; // 🎯 지터 강도 추가
 
 		Object.assign(ssrEffect, TEST_STATE);
 		pane.refresh();
 	});
+
 };

@@ -1044,12 +1044,19 @@ let attenuation = rangePart * invSquare;
     output.color = finalColor;
     output.gBufferNormal = vec4<f32>(N * 0.5 + 0.5, 1.0);
 
-    let fresnel = F0 + (vec3<f32>(1.0) - F0) * pow(1.0 - NdotV, 5.0);
-    // 러프니스 보정
-    let roughnessFactor = 1.0 - smoothstep(0.0, 1.0, roughnessParameter);
-    // 최종 반사 강도 계산 (그레이스케일로 변환)
-    let reflectionStrength = dot(fresnel, vec3<f32>(0.299, 0.587, 0.114)) * roughnessFactor;
-    output.gBufferMetal = vec4<f32>(reflectionStrength,0.0,0.0, 1.0);
+    #redgpu_if useSSR
+    {
+        let smoothness = 1.0 - roughnessParameter;
+        let smoothnessCurved = smoothness * smoothness * (3.0 - 2.0 * smoothness);
+
+        let metallicWeight = metallicParameter * metallicParameter;
+        let baseReflection = 0.04 + 0.96 * metallicWeight;
+
+        let baseReflectionStrength = smoothnessCurved * baseReflection;
+        output.gBufferMetal = vec4<f32>(clamp(baseReflectionStrength, 0.0, 1.0), 1.0, 1.0, 1.0);
+    }
+    #redgpu_endIf
+
     return output;
 };
 // ---------- KHR_materials_anisotropy ----------
