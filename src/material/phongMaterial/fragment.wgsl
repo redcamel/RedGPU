@@ -272,7 +272,7 @@ fn main(inputData:InputData) -> FragmentOutput {
     // 최종 반사 강도 계산 및 저장
     let finalReflectionStrength = F0 * roughnessFactor;
 
-        output.gBufferMetal = vec4<f32>(finalReflectionStrength * (max(dot(N,E),0.04)),0.0,0.0, 1.0);
+        output.gBufferMetal = vec4<f32>(finalReflectionStrength ,0.0,0.0, 1.0);
 
     #redgpu_endIf
 

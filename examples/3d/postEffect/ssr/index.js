@@ -18,7 +18,6 @@ RedGPU.init(
 		controller.speedDistance = 0.2;
 		controller.tilt = -15; // 약간 위에서 내려다보는 각도
 
-		controller.centerY = 3
 
 		// 씬 생성
 		const scene = new RedGPU.Display.Scene();
@@ -58,6 +57,7 @@ RedGPU.init(
 		const floorGeometry = new RedGPU.Primitive.Circle(redGPUContext, 13.5);
 		const floorMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);
 		floorMaterial.color.setColorByHEX('#11332f')
+		floorMaterial.color.r = 128
 		//
 		const floorMesh = new RedGPU.Display.Mesh(redGPUContext, floorGeometry, floorMaterial);
 		floorMesh.rotationX = 90
@@ -129,7 +129,7 @@ RedGPU.init(
 			}
 
 
-			floorMaterial.color.g = Math.floor(Math.abs(Math.sin(time * 0.001)) * 50);
+			// floorMaterial.color.r = Math.floor(Math.abs(Math.sin(time * 0.001)) * 255);
 		};
 
 		// ============================================
