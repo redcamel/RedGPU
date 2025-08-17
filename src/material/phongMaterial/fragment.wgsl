@@ -256,7 +256,7 @@ fn main(inputData:InputData) -> FragmentOutput {
     }
     output.color = finalColor;
     #redgpu_if useSSR
-        output.gBufferNormal = vec4<f32>(normalize(N) * 0.5 + 0.5, 1.0);
+
 
     let metallicFromShininess = sqrt(2.0 / (uniforms.shininess + 2.0));
     let roughnessFromShininess = 1.0 - (uniforms.shininess / 128.0); // shininess를 러프니스로 변환
@@ -272,8 +272,7 @@ fn main(inputData:InputData) -> FragmentOutput {
     // 최종 반사 강도 계산 및 저장
     let finalReflectionStrength = F0 * roughnessFactor;
 
-        output.gBufferMetal = vec4<f32>(finalReflectionStrength ,0.0,0.0, 1.0);
-
+  output.gBufferNormal = vec4<f32>(normalize(N) * 0.5 + 0.5, finalReflectionStrength);
     #redgpu_endIf
 
     return output;

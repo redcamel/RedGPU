@@ -15,10 +15,9 @@ if (depth >= 0.999) {
 }
 
 let gBufferNormalData = textureLoad(gBufferNormalTexture, screenCoord, 0);
-let gBufferMetalData = textureLoad(gBufferMetalTexture, screenCoord, 0);
 
 // 이미 계산된 반사 강도 사용
-let precomputedReflectionStrength = gBufferMetalData.r;
+let precomputedReflectionStrength = gBufferNormalData.a;
 
 // 임계값 체크 (훨씬 단순함)
 //if (precomputedReflectionStrength < 0.05) {

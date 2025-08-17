@@ -255,20 +255,9 @@ class ABaseMaterial extends ResourceBase {
 				},
 				{
 					format: navigator.gpu.getPreferredCanvasFormat(),
-					blend: {
-						color: this.blendColorState.state,
-						alpha: this.blendAlphaState.state
-					},
+					blend: undefined,
 					writeMask: this.writeMaskState,
 				},
-				{
-					format: navigator.gpu.getPreferredCanvasFormat(),
-					blend: {
-						color: this.blendColorState.state,
-						alpha: this.blendAlphaState.state
-					},
-					writeMask: this.writeMaskState,
-				}
 			]
 		}
 	}

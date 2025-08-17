@@ -2,7 +2,7 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import validateNumberRange from "../../../runtimeChecker/validateFunc/validateNumberRange";
 import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import ASinglePassPostEffect from "../../core/ASinglePassPostEffect";
-import postEffectSystemUniform from "../core/postEffectSystemUniform.wgsl"
+import postEffectSystemUniform from "../../core/postEffectSystemUniform.wgsl"
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 
@@ -58,7 +58,6 @@ class SSR extends ASinglePassPostEffect {
 				@group(0) @binding(0) var sourceTexture : texture_storage_2d<rgba8unorm,read>;
 				@group(0) @binding(1) var depthTexture : ${depthTextureType};
 				@group(0) @binding(2) var gBufferNormalTexture : texture_2d<f32>;
-				@group(0) @binding(3) var gBufferMetalTexture : texture_2d<f32>;
 				
 				@group(1) @binding(0) var outputTexture : texture_storage_2d<rgba8unorm, write>;
 				${postEffectSystemUniform}

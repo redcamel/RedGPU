@@ -16,8 +16,6 @@ class ViewRenderTextureManager {
 	//
 	#gBufferNormalTexture: GPUTexture
 	#gBufferNormalTextureView: GPUTextureView
-	#gBufferMetalTexture: GPUTexture
-	#gBufferMetalTextureView: GPUTextureView
 	//
 	#depthTexture: GPUTexture
 	#depthTextureView: GPUTextureView
@@ -84,14 +82,7 @@ class ViewRenderTextureManager {
 	get gBufferNormalTexture(): GPUTexture {
 		return this.#gBufferNormalTexture;
 	}
-	get gBufferMetalTextureView(): GPUTextureView {
-		this.#createGBufferRoughnessTexture();
-		return this.#gBufferMetalTextureView;
-	}
 
-	get gBufferMetalTexture(): GPUTexture {
-		return this.#gBufferMetalTexture;
-	}
 
 	#checkVideoMemorySize() {
 		const textures = [
@@ -162,38 +153,7 @@ class ViewRenderTextureManager {
 			this.#checkVideoMemorySize()
 		}
 	}
-	#createGBufferRoughnessTexture(): void {
-		const {antialiasingManager, resourceManager} = this.#redGPUContext
-		const {useMSAA} = antialiasingManager
-		const currentTexture =  this.#gBufferMetalTexture;
-		const {pixelRectObject, name} = this.#view
-		const {width: pixelRectObjectW, height: pixelRectObjectH} = pixelRectObject
-		const changedSize = currentTexture?.width !== pixelRectObjectW || currentTexture?.height !== pixelRectObjectH
-		const changeUseMSAA =  this.#useMSAAColor !== useMSAA
-		const needCreateTexture = !currentTexture || changedSize || changeUseMSAA
-		this.#useMSAADepth = useMSAA
-		if (needCreateTexture) {
-			if (currentTexture) {
-				currentTexture?.destroy()
-				this.#gBufferMetalTexture = null
-				this.#gBufferMetalTextureView = null
-			}
-			const newTexture = resourceManager.createManagedTexture({
-				size: [
-					Math.max(pixelRectObjectW, 1),
-					Math.max(pixelRectObjectH, 1),
-					1
-				],
-				sampleCount: useMSAA ? 4 : 1,
-				label: `${name}_gBufferMetalTexture_${pixelRectObjectW}x${pixelRectObjectH}`,
-				format:  navigator.gpu.getPreferredCanvasFormat(),
-				usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING
-			})
-			this.#gBufferMetalTexture = newTexture;
-			this.#gBufferMetalTextureView = resourceManager.getGPUResourceBitmapTextureView(newTexture);
-			this.#checkVideoMemorySize()
-		}
-	}
+
 	#createTextureIfNeeded(textureType: 'depth' | 'color'): void {
 		const depthYn = textureType === 'depth'
 		const {antialiasingManager, gpuDevice, resourceManager} = this.#redGPUContext

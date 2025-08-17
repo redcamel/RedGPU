@@ -224,12 +224,6 @@ class ASinglePassPostEffect {
 						resource: view.viewRenderTextureManager.gBufferNormalTextureView
 					})
 				}
-				if (name === "gBufferMetalTexture") {
-					this.#computeBindGroupEntries0.push({
-						binding: binding,
-						resource: view.viewRenderTextureManager.gBufferMetalTextureView
-					})
-				}
 			})
 			// keepLog('info this.#computeBindGroupEntries0', this.#computeBindGroupEntries0, this.#computeBindGroupEntries1)
 			// uniform buffer는 마지막에 추가

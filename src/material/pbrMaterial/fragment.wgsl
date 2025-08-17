@@ -1042,7 +1042,7 @@ let attenuation = rangePart * invSquare;
     #redgpu_endIf
 
     output.color = finalColor;
-    output.gBufferNormal = vec4<f32>(N * 0.5 + 0.5, 1.0);
+
 
     #redgpu_if useSSR
     {
@@ -1053,7 +1053,7 @@ let attenuation = rangePart * invSquare;
         let baseReflection = 0.04 + 0.96 * metallicWeight;
 
         let baseReflectionStrength = smoothnessCurved * baseReflection;
-        output.gBufferMetal = vec4<f32>(clamp(baseReflectionStrength, 0.0, 1.0), 1.0, 1.0, 1.0);
+        output.gBufferNormal = vec4<f32>(N * 0.5 + 0.5, baseReflectionStrength);
     }
     #redgpu_endIf
 
