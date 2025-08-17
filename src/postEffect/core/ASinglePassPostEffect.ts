@@ -32,7 +32,6 @@ class ASinglePassPostEffect {
 	#WORK_SIZE_Y = 16
 	#WORK_SIZE_Z = 1
 	#useDepthTexture: boolean = false
-	#useNormalRougnessTexture: boolean = false
 	#redGPUContext: RedGPUContext
 	#antialiasingManager: AntialiasingManager
 	#previousSourceTextureReferences: GPUTextureView[] = [];
@@ -53,13 +52,6 @@ class ASinglePassPostEffect {
 
 	set useDepthTexture(value: boolean) {
 		this.#useDepthTexture = value;
-	}
-	get useNormalRougnessTexture(): boolean {
-		return this.#useNormalRougnessTexture;
-	}
-
-	set useNormalRougnessTexture(value: boolean) {
-		this.#useNormalRougnessTexture = value;
 	}
 
 	get redGPUContext(): RedGPUContext {

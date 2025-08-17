@@ -100,38 +100,28 @@ struct Uniforms {
 
 fn performWorldRayMarching(startWorldPos: vec3<f32>, rayDir: vec3<f32>, jitter: vec2<f32>) -> vec4<f32> {
     let cameraWorldPos = systemUniforms.camera.inverseCameraMatrix[3].xyz;
-    let baseStepSize = uniforms.stepSize;
-
-    // 🎯 카메라와의 거리 계산
     let cameraDistance = length(startWorldPos - cameraWorldPos);
 
-    // 🎯 거리 기반 적응형 스텝 사이즈 (멀수록 더 큰 스텝)
-    let distanceScale = 1.0 + (cameraDistance / 10.0); // 10 단위당 2배씩 증가
-    let adaptiveStepSize = baseStepSize * min(distanceScale, 4.0); // 최대 4배까지만
+    // 🎯 계산 간소화: 거리 기반 스케일링을 단순화
+    let distanceScale = 1.0 + cameraDistance * 0.1; // 나눗셈을 곱셈으로 변경
+    let adaptiveStepSize = uniforms.stepSize * min(distanceScale, 4.0);
 
-    // 🎯 거리 기반 적응형 최대 스텝 수 (멀수록 더 많은 스텝)
-    let baseMaxSteps = f32(uniforms.maxSteps);
-    let stepScale = 1.0 + (cameraDistance / 15.0); // 15 단위당 2배씩 증가
-    let adaptiveMaxSteps = u32(baseMaxSteps * min(stepScale, 2.0)); // 최대 2배까지만
+    let stepScale = 1.0 + cameraDistance * 0.067; // 1/15 ≈ 0.067
+    let adaptiveMaxSteps = u32(f32(uniforms.maxSteps) * min(stepScale, 2.0));
 
-    // 🎯 세로 방향 지터만 적용 (안정성 극대화)
+    // 🎯 지터 계산 간소화
     let cameraUp = normalize(systemUniforms.camera.inverseCameraMatrix[1].xyz);
+    let jitterStrength = uniforms.jitterStrength * 0.01 * min(1.0 + cameraDistance * 0.05, 3.0);
+    let jitteredRayDir = normalize(rayDir + cameraUp * jitter.y * jitterStrength);
 
-    let distanceJitterScale = 1.0 + (cameraDistance / 20.0);
-    let jitterStrength = uniforms.jitterStrength * 0.01 * min(distanceJitterScale, 3.0);
-
-    // 세로 방향만 적용
-    let jitteredRayDir = normalize(
-        rayDir + cameraUp * jitter.y * jitterStrength
-    );
-
-    // 🎯 공통 변수들
+    // 🎯 미리 계산된 상수들
     let maxDistanceSq = uniforms.maxDistance * uniforms.maxDistance;
     let texDims = getTextureDimensions();
     let texSizeF = vec2<f32>(texDims);
     let maxRefinementLevels = 4u;
+    let invMaxSteps = 1.0 / f32(adaptiveMaxSteps); // 나눗셈을 한 번만 계산
 
-    // 🎯 레이 마칭
+    // 🎯 레이 마칭 루프
     var currentWorldPos = startWorldPos + jitteredRayDir * 0.01;
     var currentStepSize = adaptiveStepSize;
     var refinementLevel = 0u;
@@ -139,6 +129,7 @@ fn performWorldRayMarching(startWorldPos: vec3<f32>, rayDir: vec3<f32>, jitter: 
     for (var i = 0u; i < adaptiveMaxSteps; i++) {
         currentWorldPos += jitteredRayDir * currentStepSize;
 
+        // 🎯 거리 체크 간소화
         let travelVec = currentWorldPos - startWorldPos;
         let travelDistanceSq = dot(travelVec, travelVec);
         if (travelDistanceSq > maxDistanceSq) {
@@ -146,7 +137,6 @@ fn performWorldRayMarching(startWorldPos: vec3<f32>, rayDir: vec3<f32>, jitter: 
         }
 
         let currentScreenUV = worldToScreen(currentWorldPos);
-
         if (any(currentScreenUV < vec2<f32>(0.0)) || any(currentScreenUV > vec2<f32>(1.0))) {
             break;
         }
@@ -159,13 +149,14 @@ fn performWorldRayMarching(startWorldPos: vec3<f32>, rayDir: vec3<f32>, jitter: 
         }
 
         let sampledWorldPos = reconstructWorldPosition(screenCoord, sampledDepth);
+
+        // 🎯 거리 차이 계산 간소화
         let rayDistanceFromCamera = length(currentWorldPos - cameraWorldPos);
         let surfaceDistanceFromCamera = length(sampledWorldPos - cameraWorldPos);
-
         let distanceDiff = rayDistanceFromCamera - surfaceDistanceFromCamera;
-        let baseThreshold = currentStepSize * 4.0;
-        let distanceToleranceScale = 1.0 + (cameraDistance / 30.0);
-        let intersectionThreshold = baseThreshold * distanceToleranceScale;
+
+        // 🎯 임계값 계산 간소화
+        let intersectionThreshold = currentStepSize * (4.0 + cameraDistance * 0.033); // 1/30 ≈ 0.033
 
         if (distanceDiff > 0.0 && distanceDiff < intersectionThreshold) {
             if (refinementLevel < maxRefinementLevels) {
@@ -175,23 +166,24 @@ fn performWorldRayMarching(startWorldPos: vec3<f32>, rayDir: vec3<f32>, jitter: 
                 continue;
             }
 
+            // 🎯 픽셀 지터링 간소화
             let pixelJitter = generatePixelJitter(screenCoord);
-            let samplingRadius = max(1.0, cameraDistance / 8.0);
+            let samplingRadius = max(1.0, cameraDistance * 0.125); // 1/8 = 0.125
             let verticalJitter = vec2<i32>(0, i32(pixelJitter.y * samplingRadius));
-            let jitteredScreenCoord = screenCoord + verticalJitter;
 
             let finalScreenCoord = vec2<i32>(
-                clamp(jitteredScreenCoord.x, 0, i32(texDims.x) - 1),
-                clamp(jitteredScreenCoord.y, 0, i32(texDims.y) - 1)
+                clamp(screenCoord.x + verticalJitter.x, 0, i32(texDims.x) - 1),
+                clamp(screenCoord.y + verticalJitter.y, 0, i32(texDims.y) - 1)
             );
 
-            var reflectionColor = textureLoad(sourceTexture, finalScreenCoord);
+            let reflectionColor = textureLoad(sourceTexture, finalScreenCoord);
 
-            let travelDistance = sqrt(travelDistanceSq);
+            // 🎯 페이드 계산 간소화 - sqrt 제거
+            let travelDistance = sqrt(travelDistanceSq); // 필요한 경우만 계산
             let distanceFade = 1.0 - smoothstep(0.0, uniforms.fadeDistance, travelDistance);
             let edgeFade = calculateEdgeFade(currentScreenUV);
-            let stepFade = 1.0 - f32(i) / f32(adaptiveMaxSteps);
-            let distanceCompensation = min(1.5, 1.0 + (cameraDistance / 25.0));
+            let stepFade = 1.0 - f32(i) * invMaxSteps; // 미리 계산된 역수 사용
+            let distanceCompensation = min(1.5, 1.0 + cameraDistance * 0.04); // 1/25 = 0.04
 
             let totalFade = distanceFade * edgeFade * stepFade * distanceCompensation;
 

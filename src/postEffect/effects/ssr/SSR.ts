@@ -2,7 +2,7 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import validateNumberRange from "../../../runtimeChecker/validateFunc/validateNumberRange";
 import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import ASinglePassPostEffect from "../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../core/createBasicPostEffectCode";
+import postEffectSystemUniform from "../core/postEffectSystemUniform.wgsl"
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 
@@ -19,16 +19,23 @@ class SSR extends ASinglePassPostEffect {
 		super(redGPUContext);
 
 		// SSR에 최적화된 워크그룹 크기 설정
-		this.WORK_SIZE_X = 8;  // 8x8 = 64 threads per workgroup로 변경
-		this.WORK_SIZE_Y = 8;  // GPU 웨이브프론트 크기에 최적화
-		this.WORK_SIZE_Z = 1;  // 2D 텍스처이므로 1
+		this.WORK_SIZE_X = 8;
+		this.WORK_SIZE_Y = 8;
+		this.WORK_SIZE_Z = 1;
 
 		this.useDepthTexture = true;
-		this.useNormalRougnessTexture = true;
+
+
+		// 🎯 직접 WGSL 코드 생성
+		const shaderCode = this.#createSSRShaderCode();
+
 		this.init(
 			redGPUContext,
 			'POST_EFFECT_SSR',
-			createBasicPostEffectCode(this, computeCode, uniformStructCode)
+			{
+				msaa: shaderCode.msaa,
+				nonMsaa: shaderCode.nonMsaa
+			}
 		);
 
 		// 초기값 설정
@@ -39,6 +46,35 @@ class SSR extends ASinglePassPostEffect {
 		this.fadeDistance = this.#fadeDistance;
 		this.edgeFade = this.#edgeFade;
 		this.jitterStrength = this.#jitterStrength;
+	}
+
+	#createSSRShaderCode() {
+		const createCode = (useMSAA: boolean) => {
+			const depthTextureType = useMSAA ? 'texture_depth_multisampled_2d' : 'texture_depth_2d';
+
+			return `
+				${uniformStructCode}
+				
+				@group(0) @binding(0) var sourceTexture : texture_storage_2d<rgba8unorm,read>;
+				@group(0) @binding(1) var depthTexture : ${depthTextureType};
+				@group(0) @binding(2) var gBufferNormalTexture : texture_2d<f32>;
+				@group(0) @binding(3) var gBufferMetalTexture : texture_2d<f32>;
+				
+				@group(1) @binding(0) var outputTexture : texture_storage_2d<rgba8unorm, write>;
+				${postEffectSystemUniform}
+				@group(1) @binding(2) var<uniform> uniforms: Uniforms;
+				
+				@compute @workgroup_size(${this.WORK_SIZE_X}, ${this.WORK_SIZE_Y}, ${this.WORK_SIZE_Z})
+				fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
+					${computeCode}
+				}
+			`;
+		};
+
+		return {
+			msaa: createCode(true),
+			nonMsaa: createCode(false)
+		};
 	}
 
 	get maxSteps(): number {
