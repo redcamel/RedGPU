@@ -221,7 +221,7 @@ class ASinglePassPostEffect {
 				if (name === "gBufferNormalTexture") {
 					this.#computeBindGroupEntries0.push({
 						binding: binding,
-						resource: view.viewRenderTextureManager.gBufferNormalTextureView
+						resource: view.redGPUContext.antialiasingManager.useMSAA ? view.viewRenderTextureManager.gBufferNormalResolveTextureView : view.viewRenderTextureManager.gBufferNormalTextureView
 					})
 				}
 			})

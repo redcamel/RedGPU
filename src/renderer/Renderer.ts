@@ -200,7 +200,7 @@ class Renderer {
 
 	#createAttachmentsForView(view: View3D) {
 		const {scene, redGPUContext, viewRenderTextureManager} = view
-		const {depthTextureView, colorTextureView, colorResolveTextureView,gBufferNormalTextureView,} = viewRenderTextureManager
+		const {depthTextureView, colorTextureView, colorResolveTextureView,gBufferNormalTextureView,gBufferNormalResolveTextureView} = viewRenderTextureManager
 		const {useBackgroundColor, backgroundColor} = scene
 		const {antialiasingManager} = redGPUContext
 		const {useMSAA} = antialiasingManager
@@ -216,7 +216,8 @@ class Renderer {
 			loadOp: GPU_LOAD_OP.CLEAR,
 			storeOp: GPU_STORE_OP.STORE
 		}
-		if (useMSAA) colorAttachment.resolveTarget = colorResolveTextureView
+
+
 		// console.log('depthTextureView', depthTextureView)
 		const depthStencilAttachment: GPURenderPassDepthStencilAttachment = {
 			view: depthTextureView,
@@ -229,6 +230,10 @@ class Renderer {
 			clearValue: {r: 0, g: 0, b: 0, a: 0},
 			loadOp: GPU_LOAD_OP.CLEAR,
 			storeOp: GPU_STORE_OP.STORE
+		}
+		if (useMSAA){
+			colorAttachment.resolveTarget = colorResolveTextureView
+			gBufferNormalTextureAttachment.resolveTarget = gBufferNormalResolveTextureView
 		}
 		return {colorAttachment, depthStencilAttachment,gBufferNormalTextureAttachment,};
 	}

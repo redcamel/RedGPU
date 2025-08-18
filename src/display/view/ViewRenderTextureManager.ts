@@ -16,12 +16,15 @@ class ViewRenderTextureManager {
 	//
 	#gBufferNormalTexture: GPUTexture
 	#gBufferNormalTextureView: GPUTextureView
+	#gBufferNormalResolveTexture: GPUTexture
+	#gBufferNormalResolveTextureView: GPUTextureView
 	//
 	#depthTexture: GPUTexture
 	#depthTextureView: GPUTextureView
 	//
 	#useMSAAColor: boolean = true
 	#useMSAADepth: boolean = true
+	#useMSAAGBuffer: boolean = true
 	#videoMemorySize: number = 0
 	readonly #redGPUContext: RedGPUContext
 	readonly #view: View3D
@@ -79,6 +82,13 @@ class ViewRenderTextureManager {
 		return this.#gBufferNormalTextureView;
 	}
 
+	get gBufferNormalResolveTexture(): GPUTexture {
+		return this.#gBufferNormalResolveTexture;
+	}
+	get gBufferNormalResolveTextureView(): GPUTextureView {
+		return this.#gBufferNormalResolveTextureView;
+	}
+
 	get gBufferNormalTexture(): GPUTexture {
 		return this.#gBufferNormalTexture;
 	}
@@ -128,14 +138,17 @@ class ViewRenderTextureManager {
 		const {pixelRectObject, name} = this.#view
 		const {width: pixelRectObjectW, height: pixelRectObjectH} = pixelRectObject
 		const changedSize = currentTexture?.width !== pixelRectObjectW || currentTexture?.height !== pixelRectObjectH
-		const changeUseMSAA =  this.#useMSAAColor !== useMSAA
+		const changeUseMSAA =  this.#useMSAAGBuffer !== useMSAA
 		const needCreateTexture = !currentTexture || changedSize || changeUseMSAA
-		this.#useMSAADepth = useMSAA
+		this.#useMSAAGBuffer = useMSAA
 		if (needCreateTexture) {
 			if (currentTexture) {
 				currentTexture?.destroy()
 				this.#gBufferNormalTexture = null
 				this.#gBufferNormalTextureView = null
+				this.#gBufferNormalResolveTexture?.destroy()
+				this.#gBufferNormalResolveTexture = null
+				this.#gBufferNormalResolveTextureView = null
 			}
 			const newTexture = resourceManager.createManagedTexture({
 				size: [
@@ -150,6 +163,21 @@ class ViewRenderTextureManager {
 			})
 			this.#gBufferNormalTexture = newTexture;
 			this.#gBufferNormalTextureView = resourceManager.getGPUResourceBitmapTextureView(newTexture);
+			if (useMSAA) {
+				const newResolveTexture = resourceManager.createManagedTexture({
+					size: {
+						width: Math.max(pixelRectObjectW, 1),
+						height: Math.max(pixelRectObjectH, 1),
+						depthOrArrayLayers: 1
+					},
+					sampleCount: 1,
+					label: `${name}_gBufferNormalTexture_resolve_${pixelRectObjectW}x${pixelRectObjectH}`,
+					format: navigator.gpu.getPreferredCanvasFormat(),
+					usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC
+				})
+				this.#gBufferNormalResolveTexture = newResolveTexture
+				this.#gBufferNormalResolveTextureView = resourceManager.getGPUResourceBitmapTextureView(newResolveTexture)
+			}
 			this.#checkVideoMemorySize()
 		}
 	}

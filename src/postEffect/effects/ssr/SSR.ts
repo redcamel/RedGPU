@@ -45,7 +45,6 @@ class SSR extends ASinglePassPostEffect {
 		this.reflectionIntensity = this.#reflectionIntensity;
 		this.fadeDistance = this.#fadeDistance;
 		this.edgeFade = this.#edgeFade;
-		this.jitterStrength = this.#jitterStrength;
 	}
 
 	#createSSRShaderCode() {
@@ -136,15 +135,6 @@ class SSR extends ASinglePassPostEffect {
 		this.updateUniform('edgeFade', value);
 	}
 
-	get jitterStrength(): number {
-		return this.#jitterStrength;
-	}
-
-	set jitterStrength(value: number) {
-		validateNumberRange(value, 0.0, 2.0);
-		this.#jitterStrength = value;
-		this.updateUniform('jitterStrength', value);
-	}
 }
 
 Object.freeze(SSR);

@@ -174,10 +174,10 @@ const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const {createPostEffectLabel} = await import('../../../exampleHelper/createExample/loadExampleInfo/createPostEffectLabel.js');
 	createPostEffectLabel('SSR (Screen Space Reflection)', redGPUContext.detector.isMobile);
-	const {setDebugViewButton,createIblHelper} = await import("../../../exampleHelper/createExample/panes/index.js");
+	const {setDebugViewButton,createIblHelper,setAntialiasing_pane} = await import("../../../exampleHelper/createExample/panes/index.js");
 	setDebugViewButton(redGPUContext);
-
 	const pane = new Pane({title: 'SSR Controls'});
+	setAntialiasing_pane(pane, redGPUContext, true);
 	createIblHelper(pane,targetView,RedGPU)
 
 	const TEST_STATE = {
@@ -188,7 +188,6 @@ const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect) => {
 		reflectionIntensity: ssrEffect.reflectionIntensity,
 		fadeDistance: ssrEffect.fadeDistance,
 		edgeFade: ssrEffect.edgeFade,
-		jitterStrength: ssrEffect.jitterStrength
 	};
 
 	const folder = pane.addFolder({title: 'SSR Settings', expanded: true});
@@ -237,12 +236,6 @@ const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect) => {
 			TEST_STATE.edgeFade = v.value;
 		});
 
-	// 🎯 지터 강도 컨트롤 추가
-	folder.addBinding(TEST_STATE, 'jitterStrength', {min: 0.0, max: 2.0, step: 0.01})
-		.on('change', (v) => {
-			ssrEffect.jitterStrength = v.value;
-			TEST_STATE.jitterStrength = v.value;
-		});
 
 	const presetFolder = pane.addFolder({title: 'Presets'});
 
@@ -252,7 +245,6 @@ const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect) => {
 		TEST_STATE.reflectionIntensity = 1.0;
 		TEST_STATE.fadeDistance = 15;
 		TEST_STATE.edgeFade = 0.15;
-		TEST_STATE.jitterStrength = 0.8; // 🎯 지터 강도 추가
 
 		Object.assign(ssrEffect, TEST_STATE);
 		pane.refresh();
@@ -264,7 +256,6 @@ const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect) => {
 		TEST_STATE.reflectionIntensity = 0.8;
 		TEST_STATE.fadeDistance = 12;
 		TEST_STATE.edgeFade = 0.12;
-		TEST_STATE.jitterStrength = 0.6; // 🎯 지터 강도 추가
 
 		Object.assign(ssrEffect, TEST_STATE);
 		pane.refresh();
@@ -276,7 +267,6 @@ const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect) => {
 		TEST_STATE.reflectionIntensity = 0.6;
 		TEST_STATE.fadeDistance = 8;
 		TEST_STATE.edgeFade = 0.1;
-		TEST_STATE.jitterStrength = 0.4; // 🎯 지터 강도 추가
 
 		Object.assign(ssrEffect, TEST_STATE);
 		pane.refresh();
