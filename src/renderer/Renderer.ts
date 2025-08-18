@@ -38,7 +38,19 @@ class Renderer {
 			}
 		}
 		this.#finalRender.render(redGPUContext, viewList_renderPassDescriptorList)
+		//
+		{
+			{
+				let i = 0
+				const len = redGPUContext.viewList.length
+				for (i; i < len; i++) {
+					const targetView = redGPUContext.viewList[i]
+					targetView.viewRenderTextureManager.updateHistory()
+				}
+			}
+		}
 		redGPUContext.antialiasingManager.changedMSAA = false
+
 		console.log('/////////////////// end renderFrame ///////////////////')
 	}
 
@@ -166,7 +178,7 @@ class Renderer {
 				}
 			}
 			// 포스트 이펙트 체크
-			renderPassDescriptor.colorAttachments[0].postEffectView = view.postEffectManager.render()
+
 			if (pickingManager) {
 				pickingManager.checkTexture(view)
 				const pickingPassDescriptor: GPURenderPassDescriptor = {
@@ -193,8 +205,11 @@ class Renderer {
 			}
 		}
 		redGPUContext.gpuDevice.queue.submit([commandEncoder.finish()])
+		renderPassDescriptor.colorAttachments[0].postEffectView = view.postEffectManager.render()
 		view.debugViewRenderState.viewRenderTime = (performance.now() - view.debugViewRenderState.startTime);
 		pickingManager.checkEvents(view, time)
+
+
 		return renderPassDescriptor
 	}
 
