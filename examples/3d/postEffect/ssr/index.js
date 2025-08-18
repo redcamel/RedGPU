@@ -32,7 +32,7 @@ RedGPU.init(
 		const viewNormal = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		viewNormal.ibl = ibl;
 		viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
-		redGPUContext.addView(viewNormal);
+		// redGPUContext.addView(viewNormal);
 
 		// SSR 이펙트 뷰 생성
 		const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);

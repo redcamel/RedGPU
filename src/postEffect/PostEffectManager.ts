@@ -83,11 +83,11 @@ class PostEffectManager {
 		const {viewRenderTextureManager, redGPUContext} = this.#view;
 		const {antialiasingManager} = redGPUContext
 		const {useMSAA, useFXAA} = antialiasingManager;
-		const {colorTextureView, colorResolveTextureView, colorTexture} = viewRenderTextureManager;
-		const {width, height} = colorTexture;
+		const {gBufferColorTextureView, gBufferColorResolveTextureView, gBufferColorTexture} = viewRenderTextureManager;
+		const {width, height} = gBufferColorTexture;
 		this.#updateSystemUniforms()
 		// 초기 텍스처 설정 (MSAA 여부에 따라 소스 결정)
-		const initialSourceView = useMSAA ? colorResolveTextureView : colorTextureView;
+		const initialSourceView = useMSAA ? gBufferColorResolveTextureView : gBufferColorTextureView;
 		this.#sourceTextureView = this.#renderToStorageTexture(this.#view, initialSourceView);
 		let currentTextureView = this.#sourceTextureView;
 		this.#postEffects.forEach(effect => {
@@ -187,10 +187,10 @@ class PostEffectManager {
 
 	#renderToStorageTexture(view: View3D, sourceTextureView: GPUTextureView) {
 		const {redGPUContext, viewRenderTextureManager} = view;
-		const {colorTexture} = viewRenderTextureManager;
+		const {gBufferColorTexture} = viewRenderTextureManager;
 		const {gpuDevice, antialiasingManager, resourceManager} = redGPUContext;
 		const {useMSAA, changedMSAA} = antialiasingManager;
-		const {width, height} = colorTexture;
+		const {width, height} = gBufferColorTexture;
 		const dimensionsChanged = width !== this.#previousDimensions?.width || height !== this.#previousDimensions?.height;
 		// 크기가 변경되면 텍스처 재생성
 		if (dimensionsChanged) {

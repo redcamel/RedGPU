@@ -124,13 +124,13 @@ class Renderer {
 					let renderPath1ResultTexture = view.viewRenderTextureManager.renderPath1ResultTexture
 					// useMSAA 설정에 따라 소스 텍스처 선택
 					let sourceTexture = useMSAA
-						? view.viewRenderTextureManager.colorResolveTexture
-						: view.viewRenderTextureManager.colorTexture;
+						? view.viewRenderTextureManager.gBufferColorResolveTexture
+						: view.viewRenderTextureManager.gBufferColorTexture;
 					if (!sourceTexture) {
 						if (useMSAA) {
-							console.error('MSAA가 활성화되어 있지만 colorResolveTexture가 정의되지 않았습니다');
+							console.error('MSAA가 활성화되어 있지만 gBufferColorResolveTexture가 정의되지 않았습니다');
 						} else {
-							console.error('colorTexture가 정의되지 않았습니다');
+							console.error('gBufferColorTexture가 정의되지 않았습니다');
 						}
 						console.log('view.redGPUContext.useMSAA:', useMSAA);
 						console.log('viewRenderTextureManager:', view.viewRenderTextureManager);
@@ -200,13 +200,13 @@ class Renderer {
 
 	#createAttachmentsForView(view: View3D) {
 		const {scene, redGPUContext, viewRenderTextureManager} = view
-		const {depthTextureView, colorTextureView, colorResolveTextureView,gBufferNormalTextureView,gBufferNormalResolveTextureView} = viewRenderTextureManager
+		const {depthTextureView, gBufferColorTextureView, gBufferColorResolveTextureView,gBufferNormalTextureView,gBufferNormalResolveTextureView} = viewRenderTextureManager
 		const {useBackgroundColor, backgroundColor} = scene
 		const {antialiasingManager} = redGPUContext
 		const {useMSAA} = antialiasingManager
 		const rgbaNormal = backgroundColor.rgbaNormal
 		const colorAttachment: GPURenderPassColorAttachment = {
-			view: colorTextureView,
+			view: gBufferColorTextureView,
 			clearValue: useBackgroundColor ? {
 				r: rgbaNormal[0] * rgbaNormal[3],
 				g: rgbaNormal[1] * rgbaNormal[3],
@@ -232,7 +232,7 @@ class Renderer {
 			storeOp: GPU_STORE_OP.STORE
 		}
 		if (useMSAA){
-			colorAttachment.resolveTarget = colorResolveTextureView
+			colorAttachment.resolveTarget = gBufferColorResolveTextureView
 			gBufferNormalTextureAttachment.resolveTarget = gBufferNormalResolveTextureView
 		}
 		return {colorAttachment, depthStencilAttachment,gBufferNormalTextureAttachment,};
