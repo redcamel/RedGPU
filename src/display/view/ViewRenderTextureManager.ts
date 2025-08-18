@@ -10,22 +10,20 @@ class ViewRenderTextureManager {
 	#renderPath1ResultTexture: GPUTexture
 	#renderPath1ResultTextureView: GPUTextureView
 	#renderPath1ResultTextureDescriptor: GPUTextureDescriptor
-
 	// 깊이 텍스처 관련 속성
 	#depthTexture: GPUTexture
 	#depthTextureView: GPUTextureView
-
 	// 메모리 및 컨텍스트 관련 속성
 	#videoMemorySize: number = 0
 	readonly #redGPUContext: RedGPUContext
 	readonly #view: View3D
-
 	// G-Buffer 관련 속성
 	#gBuffers: Map<string, {
 		texture: GPUTexture,
 		textureView: GPUTextureView,
 		resolveTexture: GPUTexture,
 		resolveTextureView: GPUTextureView,
+		frameIndex: number,
 	}> = new Map()
 	#gBuffersMSAAState: { [key: string]: boolean } = {}
 
@@ -66,20 +64,20 @@ class ViewRenderTextureManager {
 
 	// G-Buffer Color 텍스처 관련 getter
 	get gBufferColorTexture(): GPUTexture {
-		return this.#gBuffers.get('gBufferColor')?.texture
+		return this.#gBuffers.get('gBufferColor' + this.#frameIndex)?.texture
 	}
 
 	get gBufferColorResolveTexture(): GPUTexture {
-		return this.#gBuffers.get('gBufferColor')?.resolveTexture
+		return this.#gBuffers.get('gBufferColor' + this.#frameIndex)?.resolveTexture
 	}
 
 	get gBufferColorTextureView(): GPUTextureView {
-		this.#createGBuffer('gBufferColor');
-		return this.#gBuffers.get('gBufferColor')?.textureView
+		this.#createGBuffer('gBufferColor' + this.#frameIndex);
+		return this.#gBuffers.get('gBufferColor' + this.#frameIndex)?.textureView
 	}
 
 	get gBufferColorResolveTextureView(): GPUTextureView {
-		return this.#gBuffers.get('gBufferColor')?.resolveTextureView
+		return this.#gBuffers.get('gBufferColor' + this.#frameIndex)?.resolveTextureView
 	}
 
 	// G-Buffer Normal 텍스처 관련 getter
@@ -100,17 +98,44 @@ class ViewRenderTextureManager {
 		return this.#gBuffers.get('gBufferNormal')?.resolveTextureView
 	}
 
+	#gBufferColorHistories: Array<{
+		texture: GPUTexture,
+		textureView: GPUTextureView,
+		resolveTexture: GPUTexture,
+		resolveTextureView: GPUTextureView,
+		frameIndex: number
+	}> = []
+	#frameIndex: number = 0
+
+	updateHistory() {
+		const currentFrame = this.#gBuffers.get('gBufferColor' + this.#frameIndex)
+		if (currentFrame) {
+			// 배열 앞쪽에 추가 (0번이 최신 프레임이 되도록)
+			this.#gBufferColorHistories.unshift(currentFrame)
+		}
+		if (this.#gBufferColorHistories.length > 4) {
+			const oldFrame = this.#gBufferColorHistories.pop()
+		}
+		this.#frameIndex++
+		this.#frameIndex = this.#frameIndex % 4
+		// keepLog(
+		// 	this.#gBufferColorHistories[0]?.frameIndex, // 바로 이전 프레임
+		// 	this.#gBufferColorHistories[1]?.frameIndex, // 2프레임 전
+		// 	this.#gBufferColorHistories[2]?.frameIndex, // 3프레임 전
+		// 	this.#gBufferColorHistories[3]?.frameIndex, // 4프레임 전
+		// )
+	}
+
 	// 비디오 메모리 크기 계산
 	#checkVideoMemorySize() {
 		const textures = [
-			this.#gBuffers.get('gBufferColor')?.texture,
-			this.#gBuffers.get('gBufferColor')?.resolveTexture,
+			this.#gBuffers.get('gBufferColor' + this.#frameIndex)?.texture,
+			this.#gBuffers.get('gBufferColor' + this.#frameIndex)?.resolveTexture,
 			this.#depthTexture,
 			this.#renderPath1ResultTexture,
 			this.#gBuffers.get('gBufferNormal')?.texture,
 			this.#gBuffers.get('gBufferNormal')?.resolveTexture,
 		].filter(Boolean);
-
 		this.#videoMemorySize = textures.reduce((total, texture) => {
 			const videoMemory = calculateTextureByteSize(texture)
 			return total + videoMemory
@@ -125,14 +150,12 @@ class ViewRenderTextureManager {
 		const currentTexture = targetInfo?.texture;
 		const {pixelRectObject, name} = this.#view
 		const {width: pixelRectObjectW, height: pixelRectObjectH} = pixelRectObject
-
 		const changedSize = currentTexture?.width !== pixelRectObjectW || currentTexture?.height !== pixelRectObjectH
 		const changeUseMSAA = this.#gBuffersMSAAState[type] !== useMSAA
 		const needCreateTexture = !currentTexture || changedSize || changeUseMSAA
-
 		this.#gBuffersMSAAState[type] = useMSAA
-
 		if (needCreateTexture) {
+			keepLog(`새 텍스처 생성 중: ${type}`, this.#frameIndex)
 			// 기존 텍스처 정리
 			if (currentTexture) {
 				currentTexture?.destroy()
@@ -143,15 +166,14 @@ class ViewRenderTextureManager {
 				targetInfo.resolveTextureView = null
 				this.#gBuffers.delete(type)
 			}
-
 			// 새로운 텍스처 정보 객체 생성
 			const newInfo = {
 				texture: null,
 				textureView: null,
 				resolveTexture: null,
 				resolveTextureView: null,
+				frameIndex: this.#frameIndex,
 			}
-
 			// 메인 텍스처 생성
 			const newTexture = resourceManager.createManagedTexture({
 				size: [
@@ -160,14 +182,12 @@ class ViewRenderTextureManager {
 					1
 				],
 				sampleCount: useMSAA ? 4 : 1,
-				label: `${name}_${type}_texture_${pixelRectObjectW}x${pixelRectObjectH}`,
+				label: `${name}_${type}_texture_${this.#frameIndex}_${pixelRectObjectW}x${pixelRectObjectH}`,
 				format: navigator.gpu.getPreferredCanvasFormat(),
 				usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING
 			})
-
 			newInfo.texture = newTexture;
 			newInfo.textureView = resourceManager.getGPUResourceBitmapTextureView(newTexture);
-
 			// MSAA 사용 시 Resolve 텍스처 생성
 			if (useMSAA) {
 				const newResolveTexture = resourceManager.createManagedTexture({
@@ -177,15 +197,13 @@ class ViewRenderTextureManager {
 						depthOrArrayLayers: 1
 					},
 					sampleCount: 1,
-					label: `${name}_${type}_resolveTexture_${pixelRectObjectW}x${pixelRectObjectH}`,
+					label: `${name}_${type}_resolveTexture_${this.#frameIndex}_${pixelRectObjectW}x${pixelRectObjectH}`,
 					format: navigator.gpu.getPreferredCanvasFormat(),
 					usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC
 				})
-
 				newInfo.resolveTexture = newResolveTexture
 				newInfo.resolveTextureView = resourceManager.getGPUResourceBitmapTextureView(newResolveTexture)
 			}
-
 			this.#gBuffers.set(type, newInfo)
 			this.#checkVideoMemorySize()
 		}
@@ -197,10 +215,8 @@ class ViewRenderTextureManager {
 		const currentTexture = this.#renderPath1ResultTexture
 		const {pixelRectObject, name} = this.#view
 		const {width: pixelRectObjectW, height: pixelRectObjectH} = pixelRectObject
-
 		const changedSize = currentTexture?.width !== pixelRectObjectW || currentTexture?.height !== pixelRectObjectH
 		const needCreateTexture = !currentTexture || changedSize
-
 		if (needCreateTexture) {
 			// 기존 텍스처 정리
 			if (currentTexture) {
@@ -208,7 +224,6 @@ class ViewRenderTextureManager {
 				this.#renderPath1ResultTexture = null
 				this.#renderPath1ResultTextureView = null
 			}
-
 			// 텍스처 디스크립터 생성
 			this.#renderPath1ResultTextureDescriptor = {
 				size: {
@@ -224,11 +239,9 @@ class ViewRenderTextureManager {
 				mipLevelCount: getMipLevelCount(pixelRectObjectW, pixelRectObjectH),
 				label: `${name}_renderPath1ResultTexture_${pixelRectObjectW}x${pixelRectObjectH}`
 			}
-
 			// 텍스처 및 텍스처 뷰 생성
 			this.#renderPath1ResultTexture = resourceManager.createManagedTexture(this.#renderPath1ResultTextureDescriptor);
 			this.#renderPath1ResultTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#renderPath1ResultTexture)
-
 			this.#checkVideoMemorySize()
 		}
 	}
@@ -240,13 +253,10 @@ class ViewRenderTextureManager {
 		const currentTexture = this.#depthTexture;
 		const {pixelRectObject, name} = this.#view
 		const {width: pixelRectObjectW, height: pixelRectObjectH} = pixelRectObject
-
 		const changedSize = currentTexture?.width !== pixelRectObjectW || currentTexture?.height !== pixelRectObjectH
 		const changeUseMSAA = this.#gBuffersMSAAState['depth'] !== useMSAA
 		const needCreateTexture = !currentTexture || changedSize || changeUseMSAA
-
 		this.#gBuffersMSAAState['depth'] = useMSAA
-
 		if (needCreateTexture) {
 			// 기존 텍스처 정리
 			if (currentTexture) {
@@ -254,7 +264,6 @@ class ViewRenderTextureManager {
 				this.#depthTexture = null
 				this.#depthTextureView = null
 			}
-
 			// 새로운 깊이 텍스처 생성
 			const newTexture = resourceManager.createManagedTexture({
 				size: [
@@ -267,10 +276,8 @@ class ViewRenderTextureManager {
 				format: 'depth32float',
 				usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING
 			})
-
 			this.#depthTexture = newTexture;
 			this.#depthTextureView = resourceManager.getGPUResourceBitmapTextureView(newTexture);
-
 			this.#checkVideoMemorySize()
 		}
 	}
