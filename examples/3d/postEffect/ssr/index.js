@@ -40,6 +40,7 @@ RedGPU.init(
 		viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 		const ssrEffect = new RedGPU.PostEffect.SSR(redGPUContext);
 		viewEffect.postEffectManager.addEffect(ssrEffect);
+		viewEffect.postEffectManager.addEffect(new RedGPU.PostEffect.TAA(redGPUContext));
 		redGPUContext.addView(viewEffect);
 
 		// ============================================

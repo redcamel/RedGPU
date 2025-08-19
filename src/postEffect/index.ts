@@ -27,6 +27,7 @@ import OldBloom from "./effects/oldBloom/OldBloom";
 import Sharpen from "./effects/Sharpen";
 import SSR from "./effects/ssr/SSR";
 import PostEffectManager from "./PostEffectManager";
+import TAA from "./TAA/TAA";
 
 export {
 	// Core Classes
@@ -65,5 +66,6 @@ export {
 	// Utility Effects
 	Convolution,
 	//
-	SSR
+	SSR,
+	TAA
 }

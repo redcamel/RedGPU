@@ -297,7 +297,7 @@ class ResourceManager {
 			const emptyBitmapTexture = gpuDevice.createTexture({
 				size: {width: 1, height: 1, depthOrArrayLayers: 1},
 				format: 'rgba8unorm',
-				usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
+				usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.STORAGE_BINDING,
 				label: 'EMPTY_BITMAP_TEXTURE',
 			});
 			this.#emptyBitmapTextureView = emptyBitmapTexture.createView({label: emptyBitmapTexture.label});

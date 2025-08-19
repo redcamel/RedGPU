@@ -203,7 +203,7 @@ class PostEffectManager {
 		}
 		// 크기 변경 또는 MSAA 변경 시 BindGroup 재생성
 		//TODO 이전프레임이 필요할떄만 사용하도록 변경해야함
-		if (dimensionsChanged || changedMSAA || true) {
+		if (dimensionsChanged || changedMSAA ) {
 			this.#textureComputeBindGroup = this.#createTextureBindGroup(
 				redGPUContext,
 				this.#textureComputeBindGroupLayout,

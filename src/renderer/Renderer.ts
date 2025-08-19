@@ -4,6 +4,7 @@ import RedGPUContext from "../context/RedGPUContext";
 import View3D from "../display/view/View3D";
 import GPU_LOAD_OP from "../gpuConst/GPU_LOAD_OP";
 import GPU_STORE_OP from "../gpuConst/GPU_STORE_OP";
+import TAA from "../postEffect/TAA/TAA";
 import DebugRender from "./debugRender/DebugRender";
 import FinalRender from "./finalRender/FinalRender";
 import render2PathLayer from "./renderLayers/render2PathLayer";
@@ -39,16 +40,7 @@ class Renderer {
 		}
 		this.#finalRender.render(redGPUContext, viewList_renderPassDescriptorList)
 		//
-		{
-			{
-				let i = 0
-				const len = redGPUContext.viewList.length
-				for (i; i < len; i++) {
-					const targetView = redGPUContext.viewList[i]
-					targetView.viewRenderTextureManager.updateHistory()
-				}
-			}
-		}
+
 		redGPUContext.antialiasingManager.changedMSAA = false
 
 		console.log('/////////////////// end renderFrame ///////////////////')

@@ -23,7 +23,6 @@ class ViewRenderTextureManager {
 		textureView: GPUTextureView,
 		resolveTexture: GPUTexture,
 		resolveTextureView: GPUTextureView,
-		frameIndex: number,
 	}> = new Map()
 	#gBuffersMSAAState: { [key: string]: boolean } = {}
 
@@ -64,20 +63,20 @@ class ViewRenderTextureManager {
 
 	// G-Buffer Color 텍스처 관련 getter
 	get gBufferColorTexture(): GPUTexture {
-		return this.#gBuffers.get('gBufferColor' + this.#frameIndex)?.texture
+		return this.#gBuffers.get('gBufferColor')?.texture
 	}
 
 	get gBufferColorResolveTexture(): GPUTexture {
-		return this.#gBuffers.get('gBufferColor' + this.#frameIndex)?.resolveTexture
+		return this.#gBuffers.get('gBufferColor')?.resolveTexture
 	}
 
 	get gBufferColorTextureView(): GPUTextureView {
-		this.#createGBuffer('gBufferColor' + this.#frameIndex);
-		return this.#gBuffers.get('gBufferColor' + this.#frameIndex)?.textureView
+		this.#createGBuffer('gBufferColor');
+		return this.#gBuffers.get('gBufferColor')?.textureView
 	}
 
 	get gBufferColorResolveTextureView(): GPUTextureView {
-		return this.#gBuffers.get('gBufferColor' + this.#frameIndex)?.resolveTextureView
+		return this.#gBuffers.get('gBufferColor')?.resolveTextureView
 	}
 
 	// G-Buffer Normal 텍스처 관련 getter
@@ -98,39 +97,11 @@ class ViewRenderTextureManager {
 		return this.#gBuffers.get('gBufferNormal')?.resolveTextureView
 	}
 
-	#gBufferColorHistories: Array<{
-		texture: GPUTexture,
-		textureView: GPUTextureView,
-		resolveTexture: GPUTexture,
-		resolveTextureView: GPUTextureView,
-		frameIndex: number
-	}> = []
-	#frameIndex: number = 0
-
-	updateHistory() {
-		const currentFrame = this.#gBuffers.get('gBufferColor' + this.#frameIndex)
-		if (currentFrame) {
-			// 배열 앞쪽에 추가 (0번이 최신 프레임이 되도록)
-			this.#gBufferColorHistories.unshift(currentFrame)
-		}
-		if (this.#gBufferColorHistories.length > 4) {
-			const oldFrame = this.#gBufferColorHistories.pop()
-		}
-		this.#frameIndex++
-		this.#frameIndex = this.#frameIndex % 4
-		// keepLog(
-		// 	this.#gBufferColorHistories[0]?.frameIndex, // 바로 이전 프레임
-		// 	this.#gBufferColorHistories[1]?.frameIndex, // 2프레임 전
-		// 	this.#gBufferColorHistories[2]?.frameIndex, // 3프레임 전
-		// 	this.#gBufferColorHistories[3]?.frameIndex, // 4프레임 전
-		// )
-	}
-
 	// 비디오 메모리 크기 계산
 	#checkVideoMemorySize() {
 		const textures = [
-			this.#gBuffers.get('gBufferColor' + this.#frameIndex)?.texture,
-			this.#gBuffers.get('gBufferColor' + this.#frameIndex)?.resolveTexture,
+			this.#gBuffers.get('gBufferColor')?.texture,
+			this.#gBuffers.get('gBufferColor')?.resolveTexture,
 			this.#depthTexture,
 			this.#renderPath1ResultTexture,
 			this.#gBuffers.get('gBufferNormal')?.texture,
@@ -155,7 +126,7 @@ class ViewRenderTextureManager {
 		const needCreateTexture = !currentTexture || changedSize || changeUseMSAA
 		this.#gBuffersMSAAState[type] = useMSAA
 		if (needCreateTexture) {
-			keepLog(`새 텍스처 생성 중: ${type}`, this.#frameIndex)
+			keepLog(`새 텍스처 생성 중: ${type}`)
 			// 기존 텍스처 정리
 			if (currentTexture) {
 				currentTexture?.destroy()
@@ -172,7 +143,6 @@ class ViewRenderTextureManager {
 				textureView: null,
 				resolveTexture: null,
 				resolveTextureView: null,
-				frameIndex: this.#frameIndex,
 			}
 			// 메인 텍스처 생성
 			const newTexture = resourceManager.createManagedTexture({
@@ -182,7 +152,7 @@ class ViewRenderTextureManager {
 					1
 				],
 				sampleCount: useMSAA ? 4 : 1,
-				label: `${name}_${type}_texture_${this.#frameIndex}_${pixelRectObjectW}x${pixelRectObjectH}`,
+				label: `${name}_${type}_texture_${pixelRectObjectW}x${pixelRectObjectH}`,
 				format: navigator.gpu.getPreferredCanvasFormat(),
 				usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING
 			})
@@ -197,7 +167,7 @@ class ViewRenderTextureManager {
 						depthOrArrayLayers: 1
 					},
 					sampleCount: 1,
-					label: `${name}_${type}_resolveTexture_${this.#frameIndex}_${pixelRectObjectW}x${pixelRectObjectH}`,
+					label: `${name}_${type}_resolveTexture_${pixelRectObjectW}x${pixelRectObjectH}`,
 					format: navigator.gpu.getPreferredCanvasFormat(),
 					usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC
 				})
