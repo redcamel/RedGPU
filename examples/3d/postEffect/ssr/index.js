@@ -39,8 +39,9 @@ RedGPU.init(
 		viewEffect.ibl = ibl;
 		viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 		const ssrEffect = new RedGPU.PostEffect.SSR(redGPUContext);
+		const taaEffect = new RedGPU.PostEffect.TAA(redGPUContext)
 		viewEffect.postEffectManager.addEffect(ssrEffect);
-		viewEffect.postEffectManager.addEffect(new RedGPU.PostEffect.TAA(redGPUContext));
+		viewEffect.postEffectManager.addEffect(taaEffect);
 		redGPUContext.addView(viewEffect);
 
 		// ============================================
@@ -141,7 +142,7 @@ RedGPU.init(
 		renderer.start(redGPUContext, render);
 
 		// SSR 컨트롤 패널 생성
-		renderSSRTestPane(redGPUContext, viewEffect, ssrEffect);
+		renderSSRTestPane(redGPUContext, viewEffect, ssrEffect,taaEffect);
 	},
 	(failReason) => {
 		console.error('Initialization failed:', failReason);
@@ -171,7 +172,7 @@ function loadGLTF(redGPUContext, scene, url) {
 		}
 	);
 }
-const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect) => {
+const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect,taaEffect) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const {createPostEffectLabel} = await import('../../../exampleHelper/createExample/loadExampleInfo/createPostEffectLabel.js');
 	createPostEffectLabel('SSR (Screen Space Reflection)', redGPUContext.detector.isMobile);
@@ -183,6 +184,7 @@ const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect) => {
 
 	const TEST_STATE = {
 		enableSSR: true,
+		enableTAA: true,
 		maxSteps: ssrEffect.maxSteps,
 		maxDistance: ssrEffect.maxDistance,
 		stepSize: ssrEffect.stepSize,
@@ -196,6 +198,13 @@ const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect) => {
 	folder.addBinding(TEST_STATE, 'enableSSR').on('change', (v) => {
 		if (v.value) {
 			targetView.postEffectManager.addEffect(ssrEffect);
+		} else {
+			targetView.postEffectManager.removeAllEffect();
+		}
+	});
+	folder.addBinding(TEST_STATE, 'enableTAA').on('change', (v) => {
+		if (v.value) {
+			targetView.postEffectManager.addEffect(taaEffect);
 		} else {
 			targetView.postEffectManager.removeAllEffect();
 		}

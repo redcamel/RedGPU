@@ -78,6 +78,15 @@ class TAA extends ASinglePassPostEffect {
 	// TAA용 render 메서드 오버라이드
 	render(view:View3D, width, height, currentFrameTextureView) {
 		this.frameIndex++;
+		const jitter = this.currentJitter;
+		console.log('🎯 Current Jitter:', jitter, 'Frame:', this.frameIndex);
+
+		// 지터 값을 uniform 버퍼에 업데이트
+		if (this.uniformBuffer) {
+			this.updateUniform('currentJitterX', jitter[0]);
+			this.updateUniform('currentJitterY', jitter[1]);
+			this.updateUniform('frameIndex', this.frameIndex);
+		}
 
 		// 이전 프레임 텍스처 가져오기 (순환 버퍼에서)
 		const previousFrameTextureView = this.frameIndex > 1

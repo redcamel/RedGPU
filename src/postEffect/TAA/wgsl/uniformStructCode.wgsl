@@ -5,6 +5,7 @@ struct Uniforms {
     jitterStrength: f32,
     varianceClipping: f32,
     currentFrameIndex: f32,
-    padding1: f32,
-    padding2: f32,
+    currentJitterX: f32,
+    currentJitterY: f32,
+    frameIndex: f32,
 };
