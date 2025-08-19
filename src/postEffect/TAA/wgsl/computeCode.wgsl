@@ -42,28 +42,39 @@ if (jitteredCoord.x >= 0.0 && jitteredCoord.y >= 0.0 &&
     currentColor = textureLoad(sourceTexture, clampedCoord);
 }
 
-// 이전 프레임 텍스처 존재 여부 확인
-let previousFrameExists = textureDimensions(previousFrame).x > 1u;
-
-if (!previousFrameExists || uniforms.frameIndex < 2.0) {
-    // 첫 번째나 두 번째 프레임은 그대로 출력 (안정성)
+// 🎯 텍스처 배열에서 이전 프레임들 샘플링
+if (uniforms.frameIndex < 2.0) {
+    // 첫 번째나 두 번째 프레임은 그대로 출력
     textureStore(outputTexture, index, currentColor);
     return;
 }
 
-// 이전 프레임 색상 가져오기 (지터 보정 없이)
-let previousColor = textureLoad(previousFrame, index);
+// 8개 프레임을 사용한 고급 TAA 처리
+let currentFrameSliceIndex = i32(uniforms.currentFrameSliceIndex);
 
-// 🎯 지터 강도에 따른 TAA 블렌딩
-let colorDiff = length(currentColor.rgb - previousColor.rgb);
+// 🎯 이전 프레임들에서 색상 정보 수집 (textureLoad 사용)
+var accumulatedColor = vec3<f32>(0.0);
+var totalWeight = 0.0;
 
-// 부드러운 모션 감지
-let motionFactor = smoothstep(0.0, uniforms.motionThreshold * 2.0, colorDiff);
+// 8개 프레임에 대해 가중 평균 계산
+for (var i = 0; i < 8; i++) {
+    let frameIndex = (currentFrameSliceIndex - i - 1 + 8) % 8;
 
-// 지터 강도에 따른 블렌딩 팩터 조정
-let baseBlendFactor = uniforms.temporalBlendFactor;
-let jitterAdjustedBlend = baseBlendFactor * (1.0 + uniforms.jitterStrength * 0.5);
-let stableBlendFactor = mix(jitterAdjustedBlend, 0.3, motionFactor);
+    // 🎯 texture_2d_array에서 textureLoad 사용 (level 0 지정)
+    let previousColor = textureLoad(frameBufferArray, vec2<i32>(index), frameIndex, 0);
+
+    // 프레임 거리에 따른 가중치 (최근 프레임일수록 높은 가중치)
+    let frameDistance = f32(i + 1);
+    let weight = exp(-frameDistance * 0.3) * uniforms.temporalBlendFactor;
+
+    // 색상 차이 기반 모션 감지
+    let colorDiff = length(currentColor.rgb - previousColor.rgb);
+    let motionWeight = smoothstep(0.0, uniforms.motionThreshold, colorDiff);
+    let adjustedWeight = weight * (1.0 - motionWeight * 0.7);
+
+    accumulatedColor += previousColor.rgb * adjustedWeight;
+    totalWeight += adjustedWeight;
+}
 
 // 3x3 neighborhood clamping (고스팅 방지) - 지터된 현재 프레임 기준
 var neighborMin = currentColor.rgb;
@@ -83,16 +94,21 @@ for (var dy = -1; dy <= 1; dy++) {
     }
 }
 
-// 이전 프레임 클램핑 (고스팅 방지)
-let clampedPrevious = clamp(previousColor.rgb, neighborMin, neighborMax);
+// 최종 TAA 결과 계산
+var finalColor: vec3<f32>;
+if (totalWeight > 0.0) {
+    let temporalResult = accumulatedColor / totalWeight;
 
-// 🎯 지터 적용된 TAA 블렌딩
-let taaResult = mix(currentColor.rgb, clampedPrevious, stableBlendFactor);
+    // Variance clipping 적용
+    if (uniforms.varianceClipping > 0.5) {
+        let clampedTemporal = clamp(temporalResult, neighborMin, neighborMax);
+        finalColor = mix(currentColor.rgb, clampedTemporal, uniforms.temporalBlendFactor);
+    } else {
+        finalColor = mix(currentColor.rgb, temporalResult, uniforms.temporalBlendFactor);
+    }
+} else {
+    finalColor = currentColor.rgb;
+}
 
-// 디버그용 지터 시각화 (옵션)
-// let jitterVisualization = vec3<f32>(abs(jitterOffset.x) * 10.0, abs(jitterOffset.y) * 10.0, 0.0);
-// let finalColor = mix(taaResult, jitterVisualization, 0.1);
-
-let finalColor = taaResult;
-
+// 최종 출력
 textureStore(outputTexture, index, vec4<f32>(finalColor, currentColor.a));

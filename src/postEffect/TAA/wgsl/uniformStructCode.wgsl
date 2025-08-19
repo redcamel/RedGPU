@@ -8,4 +8,5 @@ struct Uniforms {
     currentJitterX: f32,
     currentJitterY: f32,
     frameIndex: f32,
+    currentFrameSliceIndex: f32,
 };
