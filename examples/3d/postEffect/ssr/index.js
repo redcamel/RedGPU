@@ -207,6 +207,7 @@ const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect,taaEffect)
 			targetView.postEffectManager.addEffect(taaEffect);
 		} else {
 			targetView.postEffectManager.removeAllEffect();
+			taaEffect.clear()
 		}
 	});
 
