@@ -59,7 +59,7 @@ class TAA {
 	#temporalBlendFactor: number = 0.8;
 	#motionThreshold: number =0.9;
 	#colorBoxSize: number = 0.5;
-	#jitterStrength: number = 0.75;
+	#jitterStrength: number = 1;
 	#varianceClipping: boolean = true;
 
 	constructor(redGPUContext: RedGPUContext) {
@@ -249,21 +249,22 @@ class TAA {
 		if (dimensionsChanged || msaaChanged || sourceTextureChanged) {
 			this.#createFrameBufferBindGroups(view, [currentFrameTextureView], useMSAA, this.#redGPUContext, gpuDevice);
 		}
-
-		// 실행
-		this.#execute(gpuDevice, width, height)
-
 		// 🚀 지터 적용된 프레임 히스토리 저장 - 새로운 매니저 사용
 		const currentSliceIndex = this.#frameIndex % this.#frameBufferCount;
 		const jitter = this.currentJitter;
 		this.#jitteredFrameCopyManager.copyCurrentFrameToArrayWithJitter(
-			this.#outputTextureView,
+			currentFrameTextureView,
 			this.#frameBufferArrayTexture,
 			currentSliceIndex,
-			jitter,
+			// jitter,
+			this.#jitterStrength,
 			this.#frameIndex,
 			this.#outputTexture
 		);
+		// 실행
+		this.#execute(gpuDevice, width, height)
+
+
 
 		return this.#outputTextureView
 	}
@@ -582,7 +583,7 @@ class TAA {
 	}
 
 	set jitterStrength(value: number) {
-		validateNumberRange(value, 0.0, 2.0);
+		validateNumberRange(value, 0.0, 10.0);
 		this.#jitterStrength = value;
 		this.updateUniform('jitterStrength', value);
 	}

@@ -191,6 +191,7 @@ const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect,taaEffect)
 		reflectionIntensity: ssrEffect.reflectionIntensity,
 		fadeDistance: ssrEffect.fadeDistance,
 		edgeFade: ssrEffect.edgeFade,
+		jitterStrength: taaEffect.jitterStrength,
 	};
 
 	const folder = pane.addFolder({title: 'SSR Settings', expanded: true});
@@ -211,6 +212,11 @@ const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect,taaEffect)
 		}
 	});
 
+	folder.addBinding(TEST_STATE, 'jitterStrength', {min: 0, max: 2, step: 0.01})
+		.on('change', (v) => {
+			taaEffect.jitterStrength = v.value;
+			TEST_STATE.jitterStrength = v.value;
+		});
 	folder.addBinding(TEST_STATE, 'maxSteps', {min: 16, max: 128, step: 1})
 		.on('change', (v) => {
 			ssrEffect.maxSteps = v.value;
