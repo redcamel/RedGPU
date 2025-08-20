@@ -44,7 +44,7 @@ class TAA {
 	#outputTexture: GPUTexture
 	#frameBufferBindGroup0: GPUBindGroup
 	#frameBufferBindGroup1: GPUBindGroup
-	#frameBufferCount: number = 8 // TAA는 8개 사용
+	#frameBufferCount: number = 16 // TAA는 8개 사용
 	#WORK_SIZE_X = 8
 	#WORK_SIZE_Y = 8
 	#WORK_SIZE_Z = 1
@@ -53,7 +53,7 @@ class TAA {
 	#frameIndex: number = 0
 
 	// TAA 전용 속성들
-	#jitterStrength: number = 1.2;
+	#jitterStrength: number = 1;
 	#temporalBlendFactor: number = 0.95;
 	#varianceClipping: boolean = true;
 
