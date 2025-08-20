@@ -1,7 +1,7 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import View3D from "../../../../display/view/View3D";
 import validateNumberRange from "../../../../runtimeChecker/validateFunc/validateNumberRange";
-import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
+import ASinglePassPostEffect, {ASinglePassPostEffectResult} from "../../../core/ASinglePassPostEffect";
 
 class DOFUnified extends ASinglePassPostEffect {
 	#nearBlurSize: number = 16;
@@ -207,8 +207,8 @@ class DOFUnified extends ASinglePassPostEffect {
 		this.updateUniform('farStrength', value)
 	}
 
-	render(view: View3D, width: number, height: number, sourceTextureView: GPUTextureView, cocTextureView: GPUTextureView) {
-		return super.render(view, width, height, sourceTextureView, cocTextureView);
+	render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult, cocTextureInfo: ASinglePassPostEffectResult) {
+		return super.render(view, width, height, sourceTextureInfo, cocTextureInfo);
 	}
 }
 

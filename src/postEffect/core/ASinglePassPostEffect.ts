@@ -4,11 +4,11 @@ import View3D from "../../display/view/View3D";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../material";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
-import {keepLog} from "../../utils";
 import calculateTextureByteSize from "../../utils/math/calculateTextureByteSize";
+
 export type ASinglePassPostEffectResult = {
-	outputTexture: GPUTexture
-	outputTextureView: GPUTextureView
+	texture: GPUTexture
+	textureView: GPUTextureView
 }
 class ASinglePassPostEffect {
 	#computeShaderMSAA: GPUShaderModule
@@ -170,12 +170,13 @@ class ASinglePassPostEffect {
 		gpuDevice.queue.submit([commentEncode_compute.finish()]);
 	}
 
-	render(view: View3D, width: number, height: number, ...sourceTextureView) {
+	render(view: View3D, width: number, height: number, ...sourceTextureInfo: ASinglePassPostEffectResult[]): ASinglePassPostEffectResult {
 		const {gpuDevice, antialiasingManager} = this.#redGPUContext
 		const {useMSAA} = antialiasingManager
 		const dimensionsChanged = this.#createRenderTexture(view)
 		const msaaChanged = antialiasingManager.changedMSAA;
-		// 소스 텍스처 변경 감지
+		// 소스 텍스처 변경 감지 - 첫 번째 요소만 사용
+		const sourceTextureView = sourceTextureInfo.length > 0 ? [sourceTextureInfo[0].textureView] : []
 		const sourceTextureChanged = this.#detectSourceTextureChange(sourceTextureView);
 		const targetOutputView = this.outputTextureView
 		const {redGPUContext} = view
@@ -186,7 +187,10 @@ class ASinglePassPostEffect {
 
 		this.update(performance.now())
 		this.execute(gpuDevice, width, height)
-		return targetOutputView
+		return {
+			texture:this.#outputTexture,
+			textureView:targetOutputView
+		}
 	}
 
 	#createBindGroups(view: View3D, sourceTextureView: GPUTextureView[], targetOutputView: GPUTextureView, useMSAA: boolean, redGPUContext: RedGPUContext, gpuDevice: GPUDevice) {

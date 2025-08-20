@@ -8,6 +8,7 @@ import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumbe
 import {keepLog} from "../../utils";
 import copyToTextureArray from "../../utils/copyToTextureArray";
 import calculateTextureByteSize from "../../utils/math/calculateTextureByteSize";
+import {ASinglePassPostEffectResult} from "../core/ASinglePassPostEffect";
 import postEffectSystemUniform from "../core/postEffectSystemUniform.wgsl"
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
@@ -156,7 +157,8 @@ class TAA {
 	}
 
 	// TAA용 render 메서드
-	render(view: View3D, width: number, height: number, currentFrameTextureView: GPUTextureView) {
+	render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult):ASinglePassPostEffectResult {
+		const currentFrameTextureView = sourceTextureInfo.textureView
 		const jitterX = (Math.random() - 0.5) * this.#jitterStrength;
 		const jitterY = (Math.random() - 0.5) * this.#jitterStrength;
 		view.setJitterOffset(jitterX, jitterY)
@@ -190,8 +192,8 @@ class TAA {
 
 		// TAA 처리 완료 후 현재 프레임을 배열에 저장 (다음 프레임을 위해)
 		// GPUTextureView에서 GPUTexture를 얻기 위해 currentFrameTextureView의 texture 속성 사용
-		keepLog(currentFrameTextureView)
-		const sourceTexture = (currentFrameTextureView as any).texture;
+		// keepLog(currentFrameTextureView)
+		const sourceTexture = sourceTextureInfo.texture;
 		copyToTextureArray(
 			gpuDevice,
 			sourceTexture,
@@ -204,7 +206,10 @@ class TAA {
 			console.log(`TAA Frame ${this.#frameIndex}: SliceIndex=${currentSliceIndex}, JitterStrength=${this.#jitterStrength}`);
 		}
 
-		return this.#outputTextureView
+		return {
+			texture:this.#outputTexture,
+			textureView:this.#outputTextureView
+		}
 	}
 
 	#createFrameBufferBindGroups(view: View3D, sourceTextureView: GPUTextureView[], useMSAA: boolean, redGPUContext: RedGPUContext, gpuDevice: GPUDevice) {

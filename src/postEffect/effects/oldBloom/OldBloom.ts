@@ -1,6 +1,7 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import View3D from "../../../display/view/View3D";
 import AMultiPassPostEffect from "../../core/AMultiPassPostEffect";
+import {ASinglePassPostEffectResult} from "../../core/ASinglePassPostEffect";
 import Threshold from "../adjustments/threshold/Threshold";
 import GaussianBlur from "../blur/GaussianBlur";
 import OldBloomBlend from "./OldBloomBlend";
@@ -68,15 +69,15 @@ class OldBloom extends AMultiPassPostEffect {
 		this.#effect_oldBloomBlend.bloomStrength = value
 	}
 
-	render(view: View3D, width: number, height: number, sourceTextureView: GPUTextureView) {
+	render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult) {
 		const thresholdResult = this.#effect_threshold.render(
-			view, width, height, sourceTextureView
+			view, width, height, sourceTextureInfo
 		)
 		const blurResult = this.#effect_gaussianBlur.render(
 			view, width, height, thresholdResult
 		)
 		return this.#effect_oldBloomBlend.render(
-			view, width, height, sourceTextureView, blurResult
+			view, width, height, sourceTextureInfo, blurResult
 		)
 	}
 }

@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import View3D from "../../../display/view/View3D";
-import ASinglePassPostEffect from "../../core/ASinglePassPostEffect";
+import ASinglePassPostEffect, {ASinglePassPostEffectResult} from "../../core/ASinglePassPostEffect";
 
 class OldBloomBlend extends ASinglePassPostEffect {
 	#bloomStrength: number = 1
@@ -71,8 +71,8 @@ class OldBloomBlend extends ASinglePassPostEffect {
 		this.updateUniform('exposure', value)
 	}
 
-	render(view: View3D, width: number, height: number, sourceTextureView: GPUTextureView, sourceTextureView1: GPUTextureView) {
-		return super.render(view, width, height, sourceTextureView, sourceTextureView1)
+	render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult, sourceTextureInfo1: ASinglePassPostEffectResult) {
+		return super.render(view, width, height, sourceTextureInfo, sourceTextureInfo1)
 	}
 }
 

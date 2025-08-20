@@ -89,7 +89,10 @@ class PostEffectManager {
 		// 초기 텍스처 설정 (MSAA 여부에 따라 소스 결정)
 		const initialSourceView = useMSAA ? gBufferColorResolveTextureView : gBufferColorTextureView;
 		this.#sourceTextureView = this.#renderToStorageTexture(this.#view, initialSourceView);
-		let currentTextureView = this.#sourceTextureView;
+		let currentTextureView = {
+			texture: this.#storageTexture,
+			textureView: this.#sourceTextureView,
+		};
 		this.#postEffects.forEach(effect => {
 			currentTextureView = effect.render(
 				this.#view,
@@ -260,7 +263,7 @@ class PostEffectManager {
 		return this.#view.redGPUContext.resourceManager.createManagedTexture({
 			size: {width: width, height: height,},
 			format: 'rgba8unorm',
-			usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING,
+			usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_SRC,
 			label: `${this.#view.name}_POST_EFFECT_STORAGE_TEXTURE_${width}x${height}`,
 		});
 	}

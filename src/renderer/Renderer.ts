@@ -197,7 +197,7 @@ class Renderer {
 			}
 		}
 		redGPUContext.gpuDevice.queue.submit([commandEncoder.finish()])
-		renderPassDescriptor.colorAttachments[0].postEffectView = view.postEffectManager.render()
+		renderPassDescriptor.colorAttachments[0].postEffectView = view.postEffectManager.render().textureView
 		view.debugViewRenderState.viewRenderTime = (performance.now() - view.debugViewRenderState.startTime);
 		pickingManager.checkEvents(view, time)
 
