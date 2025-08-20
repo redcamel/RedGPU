@@ -194,7 +194,7 @@ class ResourceManager {
 			textureViewMap.set(cacheKey, cachedView);
 			console.log('🔷 새 비트맵 텍스처 뷰 생성:', targetGPUTexture.label, cacheKey);
 		} else {
-			console.log('🎯 비트맵 텍스처 뷰 캐시 히트:', targetGPUTexture.label, cacheKey);
+			console.log('비트맵 텍스처 뷰 캐시 히트:', targetGPUTexture.label, cacheKey);
 		}
 		return cachedView;
 	}
@@ -225,7 +225,7 @@ class ResourceManager {
 			textureViewMap.set(cacheKey, cachedView);
 			console.log('🧊 새 큐브 텍스처 뷰 생성:', targetGPUTexture.label, cacheKey);
 		} else {
-			console.log('🎯 큐브 텍스처 뷰 캐시 히트:', targetGPUTexture.label, cacheKey);
+			console.log('큐브 텍스처 뷰 캐시 히트:', targetGPUTexture.label, cacheKey);
 		}
 		return cachedView;
 	}

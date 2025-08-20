@@ -26,7 +26,7 @@ class SSR extends ASinglePassPostEffect {
 		this.useDepthTexture = true;
 
 
-		// 🎯 직접 WGSL 코드 생성
+		// 직접 WGSL 코드 생성
 		const shaderCode = this.#createSSRShaderCode();
 
 		this.init(

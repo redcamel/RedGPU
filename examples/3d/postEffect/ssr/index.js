@@ -40,7 +40,7 @@ RedGPU.init(
 		viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 		const ssrEffect = new RedGPU.PostEffect.SSR(redGPUContext);
 		const taaEffect = new RedGPU.PostEffect.TAA(redGPUContext)
-		viewEffect.postEffectManager.addEffect(ssrEffect);
+		// viewEffect.postEffectManager.addEffect(ssrEffect);
 		viewEffect.postEffectManager.addEffect(taaEffect);
 		redGPUContext.addView(viewEffect);
 
@@ -217,6 +217,7 @@ const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect,taaEffect)
 			taaEffect.jitterStrength = v.value;
 			TEST_STATE.jitterStrength = v.value;
 		});
+	folder.addBinding(taaEffect, 'varianceClipping');
 	folder.addBinding(TEST_STATE, 'maxSteps', {min: 16, max: 128, step: 1})
 		.on('change', (v) => {
 			ssrEffect.maxSteps = v.value;

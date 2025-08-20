@@ -6,14 +6,15 @@ import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/valid
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../material";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
+import {keepLog} from "../../utils";
 import calculateTextureByteSize from "../../utils/math/calculateTextureByteSize";
-import JitteredFrameCopyManager from "./JitteredFrameCopyManager";
+import JitteredFrameCopyManager from "./JitteredFrameCopyManager/JitteredFrameCopyManager";
 import postEffectSystemUniform from "../core/postEffectSystemUniform.wgsl"
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 
 class TAA {
-	// 🎯 기본 WebGPU 관련 필드들
+	// 기본 WebGPU 관련 필드들
 	#redGPUContext: RedGPUContext
 	#antialiasingManager: AntialiasingManager
 	#computeShaderMSAA: GPUShaderModule
@@ -30,16 +31,15 @@ class TAA {
 	#SHADER_INFO_NON_MSAA: any
 	#prevInfo: any
 
-	// 🎯 캐싱 관련 필드들
+	// 캐싱 관련 필드들
 	#cachedBindGroupLayouts: Map<string, GPUBindGroupLayout> = new Map()
 	#cachedPipelineLayouts: Map<string, GPUPipelineLayout> = new Map()
 	#cachedComputePipelines: Map<string, GPUComputePipeline> = new Map()
 	#currentMSAAState: boolean | null = null
 
-	// 🎯 8개 프레임 버퍼 배열 텍스처 관련
+	// 8개 프레임 버퍼 배열 텍스처 관련
 	#frameBufferArrayTexture: GPUTexture
 	#frameBufferArrayTextureView: GPUTextureView
-	#frameBufferSliceViews: GPUTextureView[] = []
 	#outputTextureView: GPUTextureView
 	#outputTexture: GPUTexture
 	#frameBufferBindGroup0: GPUBindGroup
@@ -52,21 +52,19 @@ class TAA {
 	#videoMemorySize: number = 0
 	#frameIndex: number = 0
 
-	// 🎯 지터 적용된 복사 매니저
+	// 지터 적용된 복사 매니저
 	#jitteredFrameCopyManager: JitteredFrameCopyManager
 
-	// 🎯 TAA 전용 속성들
-	#temporalBlendFactor: number = 0.8;
-	#motionThreshold: number =0.9;
-	#colorBoxSize: number = 0.5;
-	#jitterStrength: number = 1;
+	// TAA 전용 속성들
+	#jitterStrength: number = 1.2;
+	#temporalBlendFactor: number = 0.95;
 	#varianceClipping: boolean = true;
 
 	constructor(redGPUContext: RedGPUContext) {
 		this.#redGPUContext = redGPUContext
 		this.#antialiasingManager = redGPUContext.antialiasingManager
 
-		// 🎯 직접 WGSL 코드 생성 (8개 배열 텍스처 사용)
+		// 직접 WGSL 코드 생성 (8개 배열 텍스처 사용)
 		const shaderCode = this.#createTAAShaderCode();
 
 		this.#init(
@@ -83,8 +81,6 @@ class TAA {
 
 		// 초기값 설정
 		this.temporalBlendFactor = this.#temporalBlendFactor;
-		this.motionThreshold = this.#motionThreshold;
-		this.colorBoxSize = this.#colorBoxSize;
 		this.jitterStrength = this.#jitterStrength;
 		this.varianceClipping = this.#varianceClipping;
 	}
@@ -166,79 +162,25 @@ class TAA {
 		gpuDevice.queue.submit([commentEncode_compute.finish()]);
 	}
 
-	// 현재 프레임의 지터 계산
-	// 현재 프레임의 지터 계산 - 프레임 인덱스 기반
-	get currentJitter(): number[] {
-		const frameIndex = this.#frameIndex;
-
-		const halton = (index: number, base: number): number => {
-			let result = 0;
-			let fraction = 1;
-			let i = index;
-
-			while (i > 0) {
-				fraction /= base;
-				result += (i % base) * fraction;
-				i = Math.floor(i / base);
-			}
-			return result;
-		};
-
-		// 🎯 프레임 인덱스 기반 시간 파라미터
-		const frameTime = frameIndex * 0.01;          // 느린 변화
-		const fastTime = frameIndex * 0.1;            // 빠른 변화
-		const cyclicTime = frameIndex * 0.05;         // 중간 변화
-
-		// 더 큰 주기 사용 (1024)
-		const seqIndex = (frameIndex % 1024) + 1;
-
-		// 기본 Halton 분포
-		let haltonX = halton(seqIndex, 2);
-		let haltonY = halton(seqIndex, 5);
-
-		// 추가 분포 레이어
-		const sobolX = halton(seqIndex, 3);
-		const sobolY = halton(seqIndex, 7);
-
-		// 🎯 프레임 기반 시간적 변화
-		const frameVariationX = Math.sin(frameTime) * 0.1 + Math.cos(fastTime) * 0.05;
-		const frameVariationY = Math.cos(cyclicTime) * 0.1 + Math.sin(frameTime * 1.3) * 0.05;
-
-		// 최종 지터 조합
-		const combinedX = (haltonX * 0.6 + sobolX * 0.3 + frameVariationX * 0.1) % 1.0;
-		const combinedY = (haltonY * 0.6 + sobolY * 0.3 + frameVariationY * 0.1) % 1.0;
-
-		// -1 ~ 1 범위로 변환
-		const x = (combinedX * 2 - 1) * this.#jitterStrength;
-		const y = (combinedY * 2 - 1) * this.#jitterStrength;
-
-		// 🎯 특정 프레임마다 패턴 브레이킹 (프레임 기반)
-		if (frameIndex % 128 === 0) {
-			// 프레임 인덱스 기반 의사 랜덤
-			const pseudoRandomX = Math.sin(frameIndex * 12.9898) * 43758.5453;
-			const pseudoRandomY = Math.cos(frameIndex * 78.233) * 43758.5453;
-			const randomX = (pseudoRandomX - Math.floor(pseudoRandomX)) * 2 - 1;
-			const randomY = (pseudoRandomY - Math.floor(pseudoRandomY)) * 2 - 1;
-
-			return [
-				x + randomX * this.#jitterStrength * 0.3,
-				y + randomY * this.#jitterStrength * 0.3
-			];
-		}
-
-		return [x, y];
-	}
-
+	// TAA용 render 메서드
 	// TAA용 render 메서드
 	render(view: View3D, width: number, height: number, currentFrameTextureView: GPUTextureView) {
 		const {gpuDevice, antialiasingManager} = this.#redGPUContext
 		const {useMSAA} = antialiasingManager
+
+		// 🔧 프레임 인덱스 증가를 맨 처음에 수행
 		this.#frameIndex++;
 
-		// 지터 값을 uniform 버퍼에 업데이트
+		// 🔧 현재 슬라이스 인덱스를 한 번만 계산하여 일관성 보장
+		const currentSliceIndex = this.#frameIndex % this.#frameBufferCount;
+
+		// 🔧 uniform 버퍼 업데이트 (이전 프레임 상태 기준)
 		if (this.#uniformBuffer) {
 			this.updateUniform('frameIndex', this.#frameIndex);
-			this.updateUniform('currentFrameSliceIndex', this.#frameIndex % 8);
+			this.updateUniform('currentFrameSliceIndex', currentSliceIndex);
+
+			// 🔧 초기 프레임 상태 추가
+			// this.updateUniform('isInitialFrames', this.#frameIndex <= this.#frameBufferCount ? 1.0 : 0.0);
 		}
 
 		// 텍스처 생성 및 바인드 그룹 설정
@@ -249,22 +191,24 @@ class TAA {
 		if (dimensionsChanged || msaaChanged || sourceTextureChanged) {
 			this.#createFrameBufferBindGroups(view, [currentFrameTextureView], useMSAA, this.#redGPUContext, gpuDevice);
 		}
-		// 🚀 지터 적용된 프레임 히스토리 저장 - 새로운 매니저 사용
-		const currentSliceIndex = this.#frameIndex % this.#frameBufferCount;
-		const jitter = this.currentJitter;
+
+		// 🔧 먼저 TAA 처리 수행 (이전 프레임들 사용)
+		this.#execute(gpuDevice, width, height);
+
+		// 🔧 TAA 처리 완료 후 현재 프레임을 배열에 저장 (다음 프레임을 위해)
 		this.#jitteredFrameCopyManager.copyCurrentFrameToArrayWithJitter(
 			currentFrameTextureView,
 			this.#frameBufferArrayTexture,
 			currentSliceIndex,
-			// jitter,
 			this.#jitterStrength,
 			this.#frameIndex,
 			this.#outputTexture
 		);
-		// 실행
-		this.#execute(gpuDevice, width, height)
 
-
+		// 🔧 디버깅 정보 출력 (개발용)
+		if (this.#frameIndex <= 20 || this.#frameIndex % 60 === 0) {
+			console.log(`TAA Frame ${this.#frameIndex}: SliceIndex=${currentSliceIndex}, JitterStrength=${this.#jitterStrength}`);
+		}
 
 		return this.#outputTextureView
 	}
@@ -326,7 +270,7 @@ class TAA {
 		const layoutKey0 = `${this.#name}_BIND_GROUP_LAYOUT_0_USE_MSAA_${useMSAA}`;
 		const layoutKey1 = `${this.#name}_BIND_GROUP_LAYOUT_1_USE_MSAA_${useMSAA}`;
 
-		// 🎯 바인드 그룹 레이아웃 캐싱
+		// 바인드 그룹 레이아웃 캐싱
 		if (!this.#cachedBindGroupLayouts.has(layoutKey0)) {
 			const layout0 = redGPUContext.resourceManager.getGPUBindGroupLayout(layoutKey0) ||
 				redGPUContext.resourceManager.createBindGroupLayout(layoutKey0,
@@ -364,7 +308,7 @@ class TAA {
 		const pipelineKey = `${this.#name}_COMPUTE_PIPELINE_USE_MSAA_${useMSAA}`;
 		const pipelineLayoutKey = `${this.#name}_PIPELINE_LAYOUT_USE_MSAA_${useMSAA}`;
 
-		// 🎯 MSAA 상태가 변경되었거나 캐시에 없는 경우에만 파이프라인 생성
+		// MSAA 상태가 변경되었거나 캐시에 없는 경우에만 파이프라인 생성
 		if (this.#currentMSAAState !== useMSAA || !this.#cachedComputePipelines.has(pipelineKey)) {
 
 			// 파이프라인 레이아웃 캐싱
@@ -401,10 +345,14 @@ class TAA {
 			!this.#frameBufferArrayTexture || !this.#outputTexture;
 
 		if (needChange) {
+			// 🔧 크리티컬: 프레임 인덱스 리셋 추가
+			console.log(`TAA 텍스처 재생성: ${width}x${height}, 이전 프레임 히스토리 리셋`);
+			this.#frameIndex = 0;
+
 			// 기존 텍스처들 정리
 			this.clear();
 
-			// 🎯 8개 프레임 버퍼 텍스처 배열 생성
+			// 🔧 프레임 버퍼 배열 텍스처 생성 - RENDER_ATTACHMENT 사용권한 추가
 			this.#frameBufferArrayTexture = resourceManager.createManagedTexture({
 				size: {
 					width,
@@ -412,27 +360,52 @@ class TAA {
 					depthOrArrayLayers: this.#frameBufferCount
 				},
 				format: 'rgba8unorm',
-				usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.STORAGE_BINDING,
+				usage: GPUTextureUsage.TEXTURE_BINDING |
+					GPUTextureUsage.COPY_DST |
+					GPUTextureUsage.STORAGE_BINDING |
+					GPUTextureUsage.RENDER_ATTACHMENT, // 🔧 초기화를 위해 추가
 				label: `${name}_${this.#name}_FrameBufferArray_${width}x${height}x${this.#frameBufferCount}`
 			});
 
-			// 🎯 2d-array 뷰 생성 (dimension을 명시적으로 '2d-array'로 설정)
+			// 🔧 프레임 버퍼 배열을 검은색으로 명시적 초기화
+			const {gpuDevice} = redGPUContext;
+			const initCommandEncoder = gpuDevice.createCommandEncoder({
+				label: `${this.#name}_INIT_FRAME_BUFFER_ARRAY`
+			});
+
+			// 각 슬라이스를 개별적으로 초기화
+			for (let arrayLayer = 0; arrayLayer < this.#frameBufferCount; arrayLayer++) {
+				const sliceView = this.#frameBufferArrayTexture.createView({
+					dimension: '2d',
+					baseArrayLayer: arrayLayer,
+					arrayLayerCount: 1,
+					format: 'rgba8unorm',
+					label: `${this.#name}_FrameBufferSlice_${arrayLayer}`
+				});
+
+				const renderPass = initCommandEncoder.beginRenderPass({
+					label: `${this.#name}_INIT_SLICE_${arrayLayer}`,
+					colorAttachments: [{
+						view: sliceView,
+						clearValue: [0.0, 0.0, 0.0, 0.0], // 완전히 검은색
+						loadOp: 'clear',
+						storeOp: 'store'
+					}]
+				});
+				renderPass.end();
+			}
+
+			gpuDevice.queue.submit([initCommandEncoder.finish()]);
+			console.log(`TAA 프레임 버퍼 배열 초기화 완료: ${this.#frameBufferCount}개 슬라이스`);
+
+			// 2d-array 뷰 생성 (dimension을 명시적으로 '2d-array'로 설정)
 			this.#frameBufferArrayTextureView = this.#frameBufferArrayTexture.createView({
 				dimension: '2d-array',
 				baseArrayLayer: 0,
 				arrayLayerCount: this.#frameBufferCount,
+				format: 'rgba8unorm',
+				label: `${this.#name}_FrameBufferArray_View`
 			});
-
-			// 각 슬라이스별 뷰 생성
-			this.#frameBufferSliceViews = [];
-			for (let i = 0; i < this.#frameBufferCount; i++) {
-				const sliceView = this.#frameBufferArrayTexture.createView({
-					dimension: '2d',
-					baseArrayLayer: i,
-					arrayLayerCount: 1,
-				});
-				this.#frameBufferSliceViews.push(sliceView);
-			}
 
 			// 출력용 단일 텍스처 생성
 			this.#outputTexture = resourceManager.createManagedTexture({
@@ -441,17 +414,46 @@ class TAA {
 					height,
 				},
 				format: 'rgba8unorm',
-				usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_SRC,
+				usage: GPUTextureUsage.TEXTURE_BINDING |
+					GPUTextureUsage.STORAGE_BINDING |
+					GPUTextureUsage.COPY_SRC,
 				label: `${name}_${this.#name}_Output_${width}x${height}`
 			});
-			this.#outputTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#outputTexture);
+
+			// 🔧 ResourceManager의 캐싱된 뷰 사용
+			this.#outputTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#outputTexture, {
+				dimension: '2d',
+				format: 'rgba8unorm',
+				label: `${this.#name}_Output_View`
+			});
+
+			// 🔧 디버깅: 텍스처 생성 확인
+			console.log('TAA 텍스처 생성 완료:', {
+				frameBufferArray: {
+					width,
+					height,
+					layers: this.#frameBufferCount,
+					format: this.#frameBufferArrayTexture.format,
+					usage: this.#frameBufferArrayTexture.usage
+				},
+				outputTexture: {
+					width: this.#outputTexture.width,
+					height: this.#outputTexture.height,
+					format: this.#outputTexture.format,
+					usage: this.#outputTexture.usage
+				}
+			});
 		}
 
+		// 🔧 이전 정보 업데이트
 		this.#prevInfo = {
 			width,
 			height,
 		}
+
+		// 비디오 메모리 계산
 		this.#calcVideoMemory()
+
 		return needChange
 	}
 
@@ -460,7 +462,6 @@ class TAA {
 			this.#frameBufferArrayTexture.destroy();
 			this.#frameBufferArrayTexture = null;
 			this.#frameBufferArrayTextureView = null;
-			this.#frameBufferSliceViews.length = 0;
 		}
 		if (this.#outputTexture) {
 			this.#outputTexture.destroy();
@@ -468,7 +469,7 @@ class TAA {
 			this.#outputTextureView = null;
 		}
 
-		// 🎯 캐시 정리
+		// 캐시 정리
 		this.#cachedBindGroupLayouts.clear();
 		this.#cachedPipelineLayouts.clear();
 		this.#cachedComputePipelines.clear();
@@ -505,34 +506,8 @@ class TAA {
 	}
 
 	updateUniform(key: string, value: number | number[] | boolean) {
+		// keepLog(key,value)
 		this.#uniformBuffer.writeBuffer(this.#uniformsInfo.members[key], value)
-	}
-
-	// Halton 시퀀스 생성 (지터링용)
-	#generateHaltonSequence(count: number): number[][] {
-		const sequence: number[][] = [];
-
-		const halton = (index: number, base: number): number => {
-			let result = 0;
-			let fraction = 1;
-			let i = index;
-
-			while (i > 0) {
-				fraction /= base;
-				result += (i % base) * fraction;
-				i = Math.floor(i / base);
-			}
-
-			return result;
-		};
-
-		for (let i = 0; i < count; i++) {
-			const x = halton(i + 1, 2) * 2 - 1; // -1 to 1
-			const y = halton(i + 1, 3) * 2 - 1; // -1 to 1
-			sequence.push([x, y]);
-		}
-
-		return sequence;
 	}
 
 	get frameIndex(): number {
@@ -556,26 +531,6 @@ class TAA {
 		validateNumberRange(value, 0.0, 1.0);
 		this.#temporalBlendFactor = value;
 		this.updateUniform('temporalBlendFactor', value);
-	}
-
-	get motionThreshold(): number {
-		return this.#motionThreshold;
-	}
-
-	set motionThreshold(value: number) {
-		validatePositiveNumberRange(value, 0.001, 1.0);
-		this.#motionThreshold = value;
-		this.updateUniform('motionThreshold', value);
-	}
-
-	get colorBoxSize(): number {
-		return this.#colorBoxSize;
-	}
-
-	set colorBoxSize(value: number) {
-		validatePositiveNumberRange(value, 0.1, 5.0);
-		this.#colorBoxSize = value;
-		this.updateUniform('colorBoxSize', value);
 	}
 
 	get jitterStrength(): number {
