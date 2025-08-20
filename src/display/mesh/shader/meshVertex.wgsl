@@ -99,6 +99,7 @@ fn main(inputData: InputData) -> OutputData {
         normalPosition = u_normalModelMatrix * vec4<f32>(input_vertexNormal, 1.0);
     #redgpu_endIf
 
+    // TODO - 계산 합쳐야함 u_projectionMatrix * u_cameraMatrix
     output.position = u_projectionMatrix * u_cameraMatrix * position;
     output.vertexPosition = position.xyz;
     output.vertexNormal = normalPosition.xyz;

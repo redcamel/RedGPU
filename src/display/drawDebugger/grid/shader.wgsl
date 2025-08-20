@@ -18,7 +18,7 @@ fn vertexMain(in: VertexIn) -> VertexOut {
     let u_projectionMatrix = systemUniforms.projectionMatrix;
     let u_camera = systemUniforms.camera;
     let u_cameraMatrix = u_camera.cameraMatrix;
-    //
+    // TODO - 계산 합쳐야함 u_projectionMatrix * u_cameraMatrix
     out.pos = u_projectionMatrix * u_cameraMatrix * in.pos;
     out.uv = in.uv;
     return out;

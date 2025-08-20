@@ -4,6 +4,7 @@ import View3D from "../../display/view/View3D";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../material";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
+import {keepLog} from "../../utils";
 import calculateTextureByteSize from "../../utils/math/calculateTextureByteSize";
 
 export type ASinglePassPostEffectResult = {
@@ -44,6 +45,8 @@ class ASinglePassPostEffect {
 	constructor(redGPUContext: RedGPUContext) {
 		this.#redGPUContext = redGPUContext
 		this.#antialiasingManager = redGPUContext.antialiasingManager
+
+
 	}
 
 	get videoMemorySize(): number {
@@ -67,6 +70,7 @@ class ASinglePassPostEffect {
 	}
 
 	get shaderInfo() {
+		keepLog(this)
 		const useMSAA = this.#antialiasingManager.useMSAA;
 		return useMSAA ? this.#SHADER_INFO_MSAA : this.#SHADER_INFO_NON_MSAA;
 	}

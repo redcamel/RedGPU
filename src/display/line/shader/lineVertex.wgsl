@@ -41,6 +41,7 @@
 
      var position: vec4<f32>;
      position = u_modelMatrix * vec4<f32>(input_position, 1.0);
+     // TODO - 계산 합쳐야함 u_projectionMatrix * u_cameraMatrix
      output.position = u_projectionMatrix * u_cameraMatrix * position;
      output.vertexPosition = position.xyz;
      output.vertexColor = input_vertexColor;

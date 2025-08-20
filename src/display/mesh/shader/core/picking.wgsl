@@ -7,6 +7,7 @@ fn picking(inputData: InputData) -> OutputData {
     let u_camera = systemUniforms.camera;
     let u_cameraMatrix = u_camera.cameraMatrix;
     var position: vec4<f32> = u_modelMatrix * vec4<f32>(input_position, 1.0);
+    // TODO - 계산 합쳐야함 u_projectionMatrix * u_cameraMatrix
     output.position = u_projectionMatrix * u_cameraMatrix * position;
     output.pickingId = unpack4x8unorm(vertexUniforms.pickingId);
     return output;

@@ -9,22 +9,25 @@ class AntialiasingManager {
 	#useTAA: boolean = true
 	#fxaa:FXAA
 	#taa:TAA
-	#fxaa_subpix: number = 0.75
-	#fxaa_edgeThreshold: number = 0.166
-	#fxaa_edgeThresholdMin: number = 0.0833
 	#changedMSAA: boolean = true
 
 	constructor(redGPUContext: RedGPUContext) {
 		this.#redGPUContext = redGPUContext;
-		this.#taa = new TAA(redGPUContext)
-		this.#fxaa = new FXAA(redGPUContext)
 	}
 
 	get fxaa(): FXAA {
+		if (!this.#fxaa) {
+			this.#fxaa = new FXAA(this.#redGPUContext);
+		}
+
 		return this.#fxaa;
 	}
 
 	get taa(): TAA {
+		if (!this.#taa) {
+			this.#taa = new TAA(this.#redGPUContext);
+		}
+
 		return this.#taa;
 	}
 

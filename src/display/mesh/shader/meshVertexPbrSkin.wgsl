@@ -166,6 +166,7 @@ fn picking(inputData: InputDataSkin) -> OutputDataSkin {
 
     var position: vec4<f32>;
     position = u_modelMatrix * skinMat * vec4<f32>(inputData.position, 1.0);
+    // TODO - 계산 합쳐야함 u_projectionMatrix * u_cameraMatrix
     output.position = u_projectionMatrix * u_cameraMatrix * position;
     output.pickingId = unpack4x8unorm(vertexUniforms.pickingId);
     return output;

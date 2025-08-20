@@ -65,6 +65,7 @@ fn main( inputData:InputData ) -> OutputData {
     let margin: f32 = 0.5;
 
     // 클립 좌표로 변환
+    // TODO - 계산 합쳐야함 u_projectionMatrix * u_cameraMatrix
     var clipPosition: vec4<f32> = u_projectionMatrix * u_cameraMatrix * vec4<f32>(worldPosition, 1.0);
 
     // NDC로 변환
