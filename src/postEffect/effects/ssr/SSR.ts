@@ -17,13 +17,11 @@ class SSR extends ASinglePassPostEffect {
 	constructor(redGPUContext: RedGPUContext) {
 		super(redGPUContext);
 
-		// SSR에 최적화된 워크그룹 크기 설정
 		this.WORK_SIZE_X = 8;
 		this.WORK_SIZE_Y = 8;
 		this.WORK_SIZE_Z = 1;
 
 		this.useDepthTexture = true;
-
 
 		// 직접 WGSL 코드 생성
 		const shaderCode = this.#createSSRShaderCode();

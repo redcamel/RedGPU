@@ -37,7 +37,6 @@ if (length(worldNormal) < 0.01) {
 let normal = normalize(worldNormal);
 let cameraWorldPos = systemUniforms.camera.inverseCameraMatrix[3].xyz;
 
-// 깔끔한 반사 계산 (지터 없음)
 let reflectionDir = calculateWorldReflectionRay(worldPos, normal, cameraWorldPos);
 let reflection = performWorldRayMarching(worldPos, reflectionDir);
 
