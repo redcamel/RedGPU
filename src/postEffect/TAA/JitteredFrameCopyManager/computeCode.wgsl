@@ -18,23 +18,20 @@ fn halton(index: u32, base: u32) -> f32 {
 
 // 🎯 단순하고 안정적인 지터 계산
 fn calculateSimpleTAAJitter(frameIndex: u32, jitterStrength: f32, randomSeed: f32) -> vec2<f32> {
-    // 🔧 16프레임 주기의 간단한 패턴
     let cycleIndex = (frameIndex % 16u) + 1u;
 
-    // 🔧 기본 Halton 시퀀스 (2, 3 베이스)
-    let haltonX = halton(cycleIndex, 2u) - 0.5;
-    let haltonY = halton(cycleIndex, 3u) - 0.5;
+    // 🔧 범위를 -1.0 ~ 1.0으로 확대
+    let haltonX = (halton(cycleIndex, 2u) - 0.5) * 2.0;
+    let haltonY = (halton(cycleIndex, 3u) - 0.5) * 2.0;
 
-    // 🔧 미세한 시간 기반 변동성 (5% 이하)
-    let timeNoiseX = sin(randomSeed * 0.01 + f32(frameIndex) * 0.02) * 0.05;
-    let timeNoiseY = cos(randomSeed * 0.01 + f32(frameIndex) * 0.03) * 0.05;
+    let timeNoiseX = sin(randomSeed * 0.01 + f32(frameIndex) * 0.02) * 0.1; // 노이즈도 증가
+    let timeNoiseY = cos(randomSeed * 0.01 + f32(frameIndex) * 0.03) * 0.1;
 
-    // 🔧 간단한 조합
     let finalX = haltonX + timeNoiseX;
     let finalY = haltonY + timeNoiseY;
 
-    // 🔧 범위 제한 및 강도 적용
-    return clamp(vec2<f32>(finalX, finalY) * jitterStrength, vec2<f32>(-0.4), vec2<f32>(0.4));
+    // 🔧 클램핑 범위도 확대
+    return clamp(vec2<f32>(finalX, finalY) * jitterStrength, vec2<f32>(-1.0), vec2<f32>(1.0));
 }
 
 @compute @workgroup_size(8, 8, 1)

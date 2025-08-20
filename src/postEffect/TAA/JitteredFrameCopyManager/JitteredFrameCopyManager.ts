@@ -115,7 +115,7 @@ class JitteredFrameCopyManager {
 		const frameParamsData = new Float32Array([
 			frameIndex,
 			currentSliceIndex,
-			jitterStrength * 0.5, // 지터 강도를 절반으로 줄임
+			jitterStrength,
 			combinedSeed
 		]);
 

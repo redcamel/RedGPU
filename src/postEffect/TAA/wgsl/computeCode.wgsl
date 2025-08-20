@@ -5,97 +5,56 @@ if (index.x >= dimensions.x || index.y >= dimensions.y) {
     return;
 }
 
-// 현재 프레임 샘플링
+// 현재 프레임 색상
 let currentColor = textureLoad(sourceTexture, index);
 
-// 이전 프레임들 누적
+// 🎯 단순한 이전 프레임 평균 (표준 TAA 방식)
 let currentFrameSliceIndex = i32(uniforms.currentFrameSliceIndex);
 var accumulatedColor = vec3<f32>(0.0);
-var totalWeight = 0.0;
 var validFrameCount = 0.0;
 
-// 🎯 더 강력한 8프레임 누적
+// 8개 프레임 단순 평균
 for (var i = 0; i < 8; i++) {
     let frameIndex = (currentFrameSliceIndex - i - 1 + 8) % 8;
     let previousColor = textureLoad(frameBufferArray, vec2<i32>(index), frameIndex, 0).rgb;
 
-    // 🔧 유효한 프레임인지 체크 (알파값이나 색상 합으로 판단)
+    // 유효성 체크
     let colorSum = previousColor.r + previousColor.g + previousColor.b;
-    if (colorSum > 0.001) { // 유효한 데이터가 있는지 확인
-        let frameDistance = f32(i + 1);
-        let baseWeight = pow(0.92, frameDistance); // 더 강한 가중치
-
-        // 초기 프레임에서 더 적극적인 누적
-        let frameBoost = select(1.0, 2.5, uniforms.frameIndex < 30.0);
-        let weight = baseWeight * frameBoost;
-
-        accumulatedColor += previousColor * weight;
-        totalWeight += weight;
+    if (colorSum > 0.001) {
+        accumulatedColor += previousColor;
         validFrameCount += 1.0;
     }
 }
 
-// 🔧 더 넓은 5x5 neighborhood (알리아싱 감지를 위해)
-var neighborMin = currentColor.rgb;
-var neighborMax = currentColor.rgb;
-var neighborAvg = currentColor.rgb;
-var neighborSamples = 1.0;
+// 🎯 표준 TAA 블렌딩
+var finalColor: vec3<f32>;
+if (validFrameCount >= 2.0) {
+    let historyColor = accumulatedColor / validFrameCount;
 
-for (var dy = -2; dy <= 2; dy++) {
-    for (var dx = -2; dx <= 2; dx++) {
-        if (dx == 0 && dy == 0) { continue; }
+    // 🔧 간단한 3x3 neighbor 분석 (표준)
+    var neighborMin = currentColor.rgb;
+    var neighborMax = currentColor.rgb;
 
-        let sampleCoord = vec2<i32>(i32(index.x) + dx, i32(index.y) + dy);
-        if (sampleCoord.x >= 0 && sampleCoord.y >= 0 &&
-            sampleCoord.x < i32(dimensions.x) && sampleCoord.y < i32(dimensions.y)) {
-            let neighborColor = textureLoad(sourceTexture, vec2<u32>(sampleCoord)).rgb;
-            neighborMin = min(neighborMin, neighborColor);
-            neighborMax = max(neighborMax, neighborColor);
-            neighborAvg += neighborColor;
-            neighborSamples += 1.0;
+    for (var dy = -1; dy <= 1; dy++) {
+        for (var dx = -1; dx <= 1; dx++) {
+            let sampleCoord = vec2<i32>(i32(index.x) + dx, i32(index.y) + dy);
+            if (sampleCoord.x >= 0 && sampleCoord.y >= 0 &&
+                sampleCoord.x < i32(dimensions.x) && sampleCoord.y < i32(dimensions.y)) {
+                let neighborColor = textureLoad(sourceTexture, vec2<u32>(sampleCoord)).rgb;
+                neighborMin = min(neighborMin, neighborColor);
+                neighborMax = max(neighborMax, neighborColor);
+            }
         }
     }
-}
-neighborAvg = neighborAvg / neighborSamples;
 
-// 🔧 알리아싱 감지 (고주파 변화량 측정)
-let colorVariance = length(neighborMax - neighborMin);
-let isHighFrequency = colorVariance > 0.1; // 알리아싱 가능성 높음
+    // 🔧 히스토리 클램핑 (표준 방식)
+    let clampedHistory = clamp(historyColor, neighborMin, neighborMax);
 
-// 🔧 강화된 TAA 처리
-var finalColor: vec3<f32>;
-if (totalWeight > 0.0 && validFrameCount >= 2.0) {
-    let temporalResult = accumulatedColor / totalWeight;
+    // 🔧 고정 블렌딩 비율 (표준)
+    let blendFactor = uniforms.temporalBlendFactor; // 0.95
+    finalColor = mix(currentColor.rgb, clampedHistory, blendFactor);
 
-    // 🔧 적응적 클램핑 - 고주파 영역에서 더 관대하게
-    var clampedTemporal: vec3<f32>;
-    if (uniforms.varianceClipping > 0.5) {
-        let colorRange = neighborMax - neighborMin;
-        let clampingFactor = select(0.4, 0.8, isHighFrequency); // 알리아싱 영역에서 더 관대
-        let expandedMin = neighborMin - colorRange * clampingFactor;
-        let expandedMax = neighborMax + colorRange * clampingFactor;
-        clampedTemporal = clamp(temporalResult, expandedMin, expandedMax);
-    } else {
-        clampedTemporal = temporalResult;
-    }
-
-    // 🔧 적응적 블렌딩 - 알리아싱 영역에서 더 강하게
-    let baseBlend = uniforms.temporalBlendFactor;
-    let highFreqBoost = select(1.0, 1.8, isHighFrequency); // 알리아싱 영역 부스트
-    let earlyFrameBoost = select(1.0, 1.5, uniforms.frameIndex < 50.0);
-    let adaptiveBlend = baseBlend * highFreqBoost * earlyFrameBoost;
-
-    // 최대 0.9까지 허용 (강한 TAA)
-    let finalBlend = min(adaptiveBlend, 0.9);
-
-    finalColor = mix(currentColor.rgb, clampedTemporal, finalBlend);
-
-    // 🔧 디버깅: 중앙 픽셀에 TAA 강도 표시 (개발용)
-     if (index.x == dimensions.x / 2u && index.y == dimensions.y / 2u) {
-         finalColor = vec3<f32>(finalBlend, validFrameCount / 8.0, colorVariance);
-     }
 } else {
-    // 🔧 유효한 이전 프레임이 없으면 현재 프레임 사용
     finalColor = currentColor.rgb;
 }
 
