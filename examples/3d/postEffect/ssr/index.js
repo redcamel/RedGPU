@@ -17,6 +17,7 @@ RedGPU.init(
 		controller.distance = 8; // 더 멀리 배치하여 반사 효과 확인
 		controller.speedDistance = 0.2;
 		controller.tilt = -15; // 약간 위에서 내려다보는 각도
+		controller.centerY = 1
 
 
 		// 씬 생성
