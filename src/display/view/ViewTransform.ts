@@ -21,6 +21,10 @@ class ViewTransform {
 	#height: number | string
 	#pixelRectArray: [number, number, number, number] = [0, 0, 0, 0]
 
+	// TAA 지터 관련 속성 추가
+	#jitterOffsetX: number = 0;
+	#jitterOffsetY: number = 0;
+
 	constructor(redGPUContext: RedGPUContext) {
 		validateRedGPUContext(redGPUContext)
 		this.#redGPUContext = redGPUContext
@@ -112,6 +116,31 @@ class ViewTransform {
 		return this.#camera instanceof AController ? this.#camera.camera : this.#camera
 	}
 
+	/**
+	 * TAA를 위한 지터 오프셋 설정
+	 * @param offsetX X축 지터 오프셋 (정규화된 값, 예: -0.5 ~ 0.5)
+	 * @param offsetY Y축 지터 오프셋 (정규화된 값, 예: -0.5 ~ 0.5)
+	 */
+	setJitterOffset(offsetX: number, offsetY: number) {
+		this.#jitterOffsetX = offsetX;
+		this.#jitterOffsetY = offsetY;
+	}
+
+	/**
+	 * 현재 지터 오프셋 반환
+	 */
+	get jitterOffset(): [number, number] {
+		return [this.#jitterOffsetX, this.#jitterOffsetY];
+	}
+
+	/**
+	 * 지터 오프셋 초기화
+	 */
+	clearJitterOffset() {
+		this.#jitterOffsetX = 0;
+		this.#jitterOffsetY = 0;
+	}
+
 	get projectionMatrix(): mat4 {
 		const {pixelRectObject, redGPUContext} = this
 		if (this.rawCamera instanceof OrthographicCamera) {
@@ -151,6 +180,18 @@ class ViewTransform {
 			const {fieldOfView, nearClipping, farClipping} = this.rawCamera
 			mat4.perspective(this.#projectionMatrix, (Math.PI / 180) * fieldOfView, this.aspect, nearClipping, farClipping);
 		}
+
+		// TAA 지터 오프셋 적용 (PerspectiveCamera에만 적용)
+		if (this.rawCamera instanceof PerspectiveCamera && (this.#jitterOffsetX !== 0 || this.#jitterOffsetY !== 0)) {
+			// 투영 매트릭스의 translation 부분에 지터 추가
+			// 서브픽셀 단위의 오프셋을 적용
+			const pixelWidth = 2.0 / this.#pixelRectArray[2];
+			const pixelHeight = 2.0 / this.#pixelRectArray[3];
+
+			this.#projectionMatrix[8] += this.#jitterOffsetX * pixelWidth;  // X 오프셋
+			this.#projectionMatrix[9] += this.#jitterOffsetY * pixelHeight; // Y 오프셋
+		}
+
 		return this.#projectionMatrix;
 	}
 
