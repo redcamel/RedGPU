@@ -90,13 +90,20 @@ class DrawDebuggerGrid {
 			fragment: {
 				module: shaderModule,
 				entryPoint: 'fragmentMain',
-				targets: [{
-					format: navigator.gpu.getPreferredCanvasFormat(),
-					blend: {
-						color: this.#blendColorState.state,
-						alpha: this.#blendAlphaState.state
+				targets: [
+					{
+						format: navigator.gpu.getPreferredCanvasFormat(),
+						blend: {
+							color: this.#blendColorState.state,
+							alpha: this.#blendAlphaState.state
+						},
 					},
-				}],
+					{
+						format: navigator.gpu.getPreferredCanvasFormat(),
+						blend: undefined,
+					}
+				],
+
 			},
 			depthStencil: {
 				format: 'depth32float',

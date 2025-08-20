@@ -1,5 +1,6 @@
 #redgpu_include drawPicking;
 #redgpu_include calcTintBlendMode;
+#redgpu_include FragmentOutput;
 struct Uniforms {
     color:vec3<f32>,
     //
@@ -18,12 +19,14 @@ struct InputData {
 
 @group(2) @binding(0) var<uniform> uniforms: Uniforms;
 @fragment
-fn main(inputData: InputData) -> @location(0) vec4<f32> {
+fn main(inputData: InputData) -> FragmentOutput {
+    var output: FragmentOutput;
     var finalColor = vec4<f32>( uniforms.color.r , uniforms.color.g , uniforms.color.b , uniforms.opacity * inputData.combinedOpacity);
     #redgpu_if useTint
         finalColor = calcTintBlendMode(finalColor, uniforms.tintBlendMode, uniforms.tint);
     #redgpu_endIf
-    return finalColor;
+    output.color = finalColor;
+    return output;
 }
 
 

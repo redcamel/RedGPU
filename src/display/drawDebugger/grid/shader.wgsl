@@ -1,4 +1,5 @@
 #redgpu_include SYSTEM_UNIFORM;
+#redgpu_include FragmentOutput;
 struct VertexIn {
   @location(0) pos: vec4<f32>,
   @location(1) uv: vec2<f32>,
@@ -50,7 +51,8 @@ struct GridArgs {
 @group(1) @binding(0) var<uniform> gridArgs: GridArgs;
 
 @fragment
-fn fragmentMain(in: VertexOut) -> @location(0) vec4<f32> {
+fn fragmentMain(in: VertexOut) -> FragmentOutput {
+  var output:FragmentOutput;
   var lineWidthWeight:f32 = 1;
   var color:vec4<f32> = gridArgs.lineColor;
   let DIVISION_SIZE:f32= gridArgs.size ;
@@ -70,6 +72,7 @@ fn fragmentMain(in: VertexOut) -> @location(0) vec4<f32> {
   var grid = PristineGrid(in.uv, gridArgs.lineWidth * lineWidthWeight) ;
 
 
-  return mix(gridArgs.baseColor, color, grid * gridArgs.lineColor.a);
+  output.color = mix(gridArgs.baseColor, color, grid * gridArgs.lineColor.a);
+  return output;
 ;
 }
