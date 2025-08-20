@@ -153,16 +153,7 @@ class Renderer {
 					);
 					mipmapGenerator.generateMipmap(renderPath1ResultTexture, view.viewRenderTextureManager.renderPath1ResultTextureDescriptor, true)
 					const renderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass({
-						colorAttachments: [{
-							...colorAttachment,
-							loadOp: 'load'
-						},
-							{
-								...gBufferNormalTextureAttachment,
-								loadOp: 'load'
-							}
-
-						],
+						colorAttachments: [...renderPassDescriptor.colorAttachments].map(v => ({...v,loadOp:GPU_LOAD_OP.LOAD})),
 						depthStencilAttachment: {
 							...depthStencilAttachment,
 							depthLoadOp: GPU_LOAD_OP.LOAD,
