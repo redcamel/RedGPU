@@ -20,7 +20,6 @@ class PostEffectManager {
 	#COMPUTE_WORKGROUP_SIZE_X = 16
 	#COMPUTE_WORKGROUP_SIZE_Y = 4
 	#COMPUTE_WORKGROUP_SIZE_Z = 1
-	#fxaa: FXAA
 	#textureComputeShaderModule: GPUShaderModule
 	#textureComputeBindGroup: GPUBindGroup
 	#textureComputeBindGroupLayout: GPUBindGroupLayout
@@ -82,7 +81,7 @@ class PostEffectManager {
 	render() {
 		const {viewRenderTextureManager, redGPUContext} = this.#view;
 		const {antialiasingManager} = redGPUContext
-		const {useMSAA, useFXAA} = antialiasingManager;
+		const {useMSAA, useFXAA,useTAA,fxaa,taa} = antialiasingManager;
 		const {gBufferColorTextureView, gBufferColorResolveTextureView, gBufferColorTexture} = viewRenderTextureManager;
 		const {width, height} = gBufferColorTexture;
 		this.#updateSystemUniforms()
@@ -101,13 +100,16 @@ class PostEffectManager {
 				currentTextureView,
 			);
 		});
-		// FXAA 적용 (필요한 경우)
 		if (useFXAA) {
-			if (!this.#fxaa) {
-				this.#fxaa = new FXAA(redGPUContext);
-			}
-			this.#fxaa.subpix = antialiasingManager.fxaa_subpix
-			currentTextureView = this.#fxaa.render(
+			currentTextureView = fxaa.render(
+				this.#view,
+				width,
+				height,
+				currentTextureView
+			);
+		}
+		if (useTAA) {
+			currentTextureView = taa.render(
 				this.#view,
 				width,
 				height,

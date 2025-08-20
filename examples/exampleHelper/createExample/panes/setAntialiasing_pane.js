@@ -15,6 +15,7 @@ const setAntialiasing_pane = (pane, redGPUContext, openYn = false) => {
 	});
 
 	folder.addBinding(redGPUContext.antialiasingManager, 'useMSAA')
+	////////////////////////
 	folder.addBinding(redGPUContext.antialiasingManager, 'useFXAA')
 	// folder.addBinding(redGPUContext.antialiasingManager, 'fxaa_subpix', {
 	// 	min: 0,
@@ -37,6 +38,15 @@ const setAntialiasing_pane = (pane, redGPUContext, openYn = false) => {
 	// }).on('change', (info) => {
 	// 	redGPUContext.edgeThresholdMin = info.value
 	// })
+	/////////////////////////
+
+	folder.addBinding(redGPUContext.antialiasingManager, 'useTAA')
+	const taaEffect = redGPUContext.antialiasingManager.taa;
+	folder.addBinding(taaEffect, 'jitterStrength', {min: 0, max: 1, step: 0.01})
+		.on('change', (v) => {
+			taaEffect.jitterStrength = v.value;
+		});
+	folder.addBinding(taaEffect, 'varianceClipping');
 
 }
 export default setAntialiasing_pane

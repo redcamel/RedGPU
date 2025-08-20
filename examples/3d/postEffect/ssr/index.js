@@ -40,9 +40,7 @@ RedGPU.init(
 		viewEffect.ibl = ibl;
 		viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 		const ssrEffect = new RedGPU.PostEffect.SSR(redGPUContext);
-		const taaEffect = new RedGPU.PostEffect.TAA(redGPUContext)
 		viewEffect.postEffectManager.addEffect(ssrEffect);
-		viewEffect.postEffectManager.addEffect(taaEffect);
 		redGPUContext.addView(viewEffect);
 
 		// ============================================
@@ -143,7 +141,7 @@ RedGPU.init(
 		renderer.start(redGPUContext, render);
 
 		// SSR 컨트롤 패널 생성
-		renderSSRTestPane(redGPUContext, viewEffect, ssrEffect,taaEffect);
+		renderSSRTestPane(redGPUContext, viewEffect, ssrEffect,);
 	},
 	(failReason) => {
 		console.error('Initialization failed:', failReason);
@@ -173,7 +171,7 @@ function loadGLTF(redGPUContext, scene, url) {
 		}
 	);
 }
-const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect,taaEffect) => {
+const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const {createPostEffectLabel} = await import('../../../exampleHelper/createExample/loadExampleInfo/createPostEffectLabel.js');
 	createPostEffectLabel('SSR (Screen Space Reflection)', redGPUContext.detector.isMobile);
@@ -185,14 +183,12 @@ const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect,taaEffect)
 
 	const TEST_STATE = {
 		enableSSR: true,
-		enableTAA: true,
 		maxSteps: ssrEffect.maxSteps,
 		maxDistance: ssrEffect.maxDistance,
 		stepSize: ssrEffect.stepSize,
 		reflectionIntensity: ssrEffect.reflectionIntensity,
 		fadeDistance: ssrEffect.fadeDistance,
 		edgeFade: ssrEffect.edgeFade,
-		jitterStrength: taaEffect.jitterStrength,
 	};
 
 	const folder = pane.addFolder({title: 'SSR Settings', expanded: true});
@@ -204,21 +200,6 @@ const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect,taaEffect)
 			targetView.postEffectManager.removeAllEffect();
 		}
 	});
-	folder.addBinding(TEST_STATE, 'enableTAA').on('change', (v) => {
-		if (v.value) {
-			targetView.postEffectManager.addEffect(taaEffect);
-		} else {
-			targetView.postEffectManager.removeAllEffect();
-			taaEffect.clear()
-		}
-	});
-
-	folder.addBinding(TEST_STATE, 'jitterStrength', {min: 0, max: 2, step: 0.01})
-		.on('change', (v) => {
-			taaEffect.jitterStrength = v.value;
-			TEST_STATE.jitterStrength = v.value;
-		});
-	folder.addBinding(taaEffect, 'varianceClipping');
 	folder.addBinding(TEST_STATE, 'maxSteps', {min: 16, max: 128, step: 1})
 		.on('change', (v) => {
 			ssrEffect.maxSteps = v.value;
