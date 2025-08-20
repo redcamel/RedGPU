@@ -13,7 +13,6 @@ class SSR extends ASinglePassPostEffect {
 	#reflectionIntensity: number = 1;
 	#fadeDistance: number = 12.0;
 	#edgeFade: number = 0.15;
-	#jitterStrength: number = 0.8;
 
 	constructor(redGPUContext: RedGPUContext) {
 		super(redGPUContext);

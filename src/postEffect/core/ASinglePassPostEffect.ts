@@ -38,7 +38,7 @@ class ASinglePassPostEffect {
 	#useDepthTexture: boolean = false
 	#redGPUContext: RedGPUContext
 	#antialiasingManager: AntialiasingManager
-	#previousSourceTextureReferences: GPUTextureView[] = [];
+	#previousSourceTextureReferences: ASinglePassPostEffectResult[] = [];
 	#videoMemorySize: number = 0
 
 	constructor(redGPUContext: RedGPUContext) {
@@ -176,13 +176,12 @@ class ASinglePassPostEffect {
 		const dimensionsChanged = this.#createRenderTexture(view)
 		const msaaChanged = antialiasingManager.changedMSAA;
 		// 소스 텍스처 변경 감지 - 첫 번째 요소만 사용
-		const sourceTextureView = sourceTextureInfo.length > 0 ? [sourceTextureInfo[0].textureView] : []
-		const sourceTextureChanged = this.#detectSourceTextureChange(sourceTextureView);
+		const sourceTextureChanged = this.#detectSourceTextureChange(sourceTextureInfo);
 		const targetOutputView = this.outputTextureView
 		const {redGPUContext} = view
 
 		if (dimensionsChanged || msaaChanged || sourceTextureChanged) {
-			this.#createBindGroups(view, sourceTextureView, targetOutputView, useMSAA, redGPUContext, gpuDevice);
+			this.#createBindGroups(view, sourceTextureInfo, targetOutputView, useMSAA, redGPUContext, gpuDevice);
 		}
 
 		this.update(performance.now())
@@ -192,8 +191,7 @@ class ASinglePassPostEffect {
 			textureView:targetOutputView
 		}
 	}
-
-	#createBindGroups(view: View3D, sourceTextureView: GPUTextureView[], targetOutputView: GPUTextureView, useMSAA: boolean, redGPUContext: RedGPUContext, gpuDevice: GPUDevice) {
+	#createBindGroups(view: View3D, sourceTextureInfoList: ASinglePassPostEffectResult[], targetOutputView: GPUTextureView, useMSAA: boolean, redGPUContext: RedGPUContext, gpuDevice: GPUDevice) {
 		const currentStorageInfo = this.storageInfo;
 		const currentUniformsInfo = this.uniformsInfo
 		const currentSystemUniformsInfo = this.systemUuniformsInfo;
@@ -208,7 +206,7 @@ class ASinglePassPostEffect {
 			if (name !== 'outputTexture') {
 				this.#computeBindGroupEntries0.push({
 					binding: binding,
-					resource: sourceTextureView[binding],
+					resource: sourceTextureInfoList[binding].textureView,
 				});
 			}
 		}
@@ -291,7 +289,7 @@ class ASinglePassPostEffect {
 		});
 
 		// 소스 텍스처 참조 저장
-		this.#saveCurrentSourceTextureReferences(sourceTextureView);
+		this.#saveCurrentSourceTextureReferences(sourceTextureInfoList);
 	}
 
 	update(deltaTime: number) {
@@ -309,20 +307,20 @@ class ASinglePassPostEffect {
 		}
 	}
 
-	#detectSourceTextureChange(sourceTextureView: GPUTextureView[]): boolean {
-		if (!this.#previousSourceTextureReferences || this.#previousSourceTextureReferences.length !== sourceTextureView.length) {
+	#detectSourceTextureChange(sourceTextureInfoList: ASinglePassPostEffectResult[]): boolean {
+		if (!this.#previousSourceTextureReferences || this.#previousSourceTextureReferences.length !== sourceTextureInfoList.length) {
 			return true;
 		}
-		for (let i = 0; i < sourceTextureView.length; i++) {
-			if (this.#previousSourceTextureReferences[i] !== sourceTextureView[i]) {
+		for (let i = 0; i < sourceTextureInfoList.length; i++) {
+			if (this.#previousSourceTextureReferences[i].textureView !== sourceTextureInfoList[i].textureView) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	#saveCurrentSourceTextureReferences(sourceTextureView: GPUTextureView[]) {
-		this.#previousSourceTextureReferences = [...sourceTextureView];
+	#saveCurrentSourceTextureReferences(sourceTextureInfoList: ASinglePassPostEffectResult[]) {
+		this.#previousSourceTextureReferences = [...sourceTextureInfoList];
 	}
 
 	#createRenderTexture(view: View3D): boolean {
@@ -343,7 +341,7 @@ class ASinglePassPostEffect {
 					height,
 				},
 				format: 'rgba8unorm',
-				usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING,
+				usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_SRC,
 				label: `${name}_${this.#name}_${width}x${height}}`
 			});
 			this.#outputTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#outputTexture);
