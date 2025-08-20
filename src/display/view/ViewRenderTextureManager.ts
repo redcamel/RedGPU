@@ -154,7 +154,7 @@ class ViewRenderTextureManager {
 				sampleCount: useMSAA ? 4 : 1,
 				label: `${name}_${type}_texture_${pixelRectObjectW}x${pixelRectObjectH}`,
 				format: navigator.gpu.getPreferredCanvasFormat(),
-				usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING
+				usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC
 			})
 			newInfo.texture = newTexture;
 			newInfo.textureView = resourceManager.getGPUResourceBitmapTextureView(newTexture);

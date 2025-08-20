@@ -156,7 +156,13 @@ class Renderer {
 						colorAttachments: [{
 							...colorAttachment,
 							loadOp: 'load'
-						}],
+						},
+							{
+								...gBufferNormalTextureAttachment,
+								loadOp: 'load'
+							}
+
+						],
 						depthStencilAttachment: {
 							...depthStencilAttachment,
 							depthLoadOp: GPU_LOAD_OP.LOAD,
