@@ -6,7 +6,10 @@ import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import {keepLog} from "../../utils";
 import calculateTextureByteSize from "../../utils/math/calculateTextureByteSize";
-
+export type ASinglePassPostEffectResult = {
+	outputTexture: GPUTexture
+	outputTextureView: GPUTextureView
+}
 class ASinglePassPostEffect {
 	#computeShaderMSAA: GPUShaderModule
 	#computeShaderNonMSAA: GPUShaderModule

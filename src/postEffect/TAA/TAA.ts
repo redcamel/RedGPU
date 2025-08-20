@@ -1,14 +1,13 @@
 import AntialiasingManager from "../../context/antialiasing/AntialiasingManager";
 import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
-import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumberRange";
-import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../material";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
+import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumberRange";
 import {keepLog} from "../../utils";
+import copyToTextureArray from "../../utils/copyToTextureArray";
 import calculateTextureByteSize from "../../utils/math/calculateTextureByteSize";
-import JitteredFrameCopyManager from "./JitteredFrameCopyManager/JitteredFrameCopyManager";
 import postEffectSystemUniform from "../core/postEffectSystemUniform.wgsl"
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
@@ -52,9 +51,6 @@ class TAA {
 	#videoMemorySize: number = 0
 	#frameIndex: number = 0
 
-	// 지터 적용된 복사 매니저
-	#jitteredFrameCopyManager: JitteredFrameCopyManager
-
 	// TAA 전용 속성들
 	#jitterStrength: number = 1.2;
 	#temporalBlendFactor: number = 0.95;
@@ -75,9 +71,6 @@ class TAA {
 				nonMsaa: shaderCode.nonMsaa
 			}
 		);
-
-		// 지터 적용된 복사 매니저 초기화
-		this.#jitteredFrameCopyManager = new JitteredFrameCopyManager(redGPUContext, this.#name);
 
 		// 초기값 설정
 		this.temporalBlendFactor = this.#temporalBlendFactor;
@@ -163,24 +156,24 @@ class TAA {
 	}
 
 	// TAA용 render 메서드
-	// TAA용 render 메서드
 	render(view: View3D, width: number, height: number, currentFrameTextureView: GPUTextureView) {
+		const jitterX = (Math.random() - 0.5) * this.#jitterStrength;
+		const jitterY = (Math.random() - 0.5) * this.#jitterStrength;
+		view.setJitterOffset(jitterX, jitterY)
+
 		const {gpuDevice, antialiasingManager} = this.#redGPUContext
 		const {useMSAA} = antialiasingManager
 
-		// 🔧 프레임 인덱스 증가를 맨 처음에 수행
+		// 프레임 인덱스 증가를 맨 처음에 수행
 		this.#frameIndex++;
 
-		// 🔧 현재 슬라이스 인덱스를 한 번만 계산하여 일관성 보장
+		// 현재 슬라이스 인덱스를 한 번만 계산하여 일관성 보장
 		const currentSliceIndex = this.#frameIndex % this.#frameBufferCount;
 
-		// 🔧 uniform 버퍼 업데이트 (이전 프레임 상태 기준)
+		// uniform 버퍼 업데이트 (이전 프레임 상태 기준)
 		if (this.#uniformBuffer) {
 			this.updateUniform('frameIndex', this.#frameIndex);
 			this.updateUniform('currentFrameSliceIndex', currentSliceIndex);
-
-			// 🔧 초기 프레임 상태 추가
-			// this.updateUniform('isInitialFrames', this.#frameIndex <= this.#frameBufferCount ? 1.0 : 0.0);
 		}
 
 		// 텍스처 생성 및 바인드 그룹 설정
@@ -192,20 +185,21 @@ class TAA {
 			this.#createFrameBufferBindGroups(view, [currentFrameTextureView], useMSAA, this.#redGPUContext, gpuDevice);
 		}
 
-		// 🔧 먼저 TAA 처리 수행 (이전 프레임들 사용)
+		// 먼저 TAA 처리 수행 (이전 프레임들 사용)
 		this.#execute(gpuDevice, width, height);
 
-		// 🔧 TAA 처리 완료 후 현재 프레임을 배열에 저장 (다음 프레임을 위해)
-		this.#jitteredFrameCopyManager.copyCurrentFrameToArrayWithJitter(
-			currentFrameTextureView,
+		// TAA 처리 완료 후 현재 프레임을 배열에 저장 (다음 프레임을 위해)
+		// GPUTextureView에서 GPUTexture를 얻기 위해 currentFrameTextureView의 texture 속성 사용
+		keepLog(currentFrameTextureView)
+		const sourceTexture = (currentFrameTextureView as any).texture;
+		copyToTextureArray(
+			gpuDevice,
+			sourceTexture,
 			this.#frameBufferArrayTexture,
-			currentSliceIndex,
-			this.#jitterStrength,
-			this.#frameIndex,
-			this.#outputTexture
+			currentSliceIndex
 		);
 
-		// 🔧 디버깅 정보 출력 (개발용)
+		// 디버깅 정보 출력 (개발용)
 		if (this.#frameIndex <= 20 || this.#frameIndex % 60 === 0) {
 			console.log(`TAA Frame ${this.#frameIndex}: SliceIndex=${currentSliceIndex}, JitterStrength=${this.#jitterStrength}`);
 		}
@@ -345,14 +339,14 @@ class TAA {
 			!this.#frameBufferArrayTexture || !this.#outputTexture;
 
 		if (needChange) {
-			// 🔧 크리티컬: 프레임 인덱스 리셋 추가
-			console.log(`TAA 텍스처 재생성: ${width}x${height}, 이전 프레임 히스토리 리셋`);
+			// 크리티컬: 프레임 인덱스 리셋 추가
+			keepLog(`TAA 텍스처 재생성: ${width}x${height}, 이전 프레임 히스토리 리셋`);
 			this.#frameIndex = 0;
 
 			// 기존 텍스처들 정리
 			this.clear();
 
-			// 🔧 프레임 버퍼 배열 텍스처 생성 - RENDER_ATTACHMENT 사용권한 추가
+			// 프레임 버퍼 배열 텍스처 생성 - RENDER_ATTACHMENT 사용권한 추가
 			this.#frameBufferArrayTexture = resourceManager.createManagedTexture({
 				size: {
 					width,
@@ -363,11 +357,11 @@ class TAA {
 				usage: GPUTextureUsage.TEXTURE_BINDING |
 					GPUTextureUsage.COPY_DST |
 					GPUTextureUsage.STORAGE_BINDING |
-					GPUTextureUsage.RENDER_ATTACHMENT, // 🔧 초기화를 위해 추가
+					GPUTextureUsage.RENDER_ATTACHMENT, // 초기화를 위해 추가
 				label: `${name}_${this.#name}_FrameBufferArray_${width}x${height}x${this.#frameBufferCount}`
 			});
 
-			// 🔧 프레임 버퍼 배열을 검은색으로 명시적 초기화
+			// 프레임 버퍼 배열을 검은색으로 명시적 초기화
 			const {gpuDevice} = redGPUContext;
 			const initCommandEncoder = gpuDevice.createCommandEncoder({
 				label: `${this.#name}_INIT_FRAME_BUFFER_ARRAY`
@@ -420,14 +414,14 @@ class TAA {
 				label: `${name}_${this.#name}_Output_${width}x${height}`
 			});
 
-			// 🔧 ResourceManager의 캐싱된 뷰 사용
+			// ResourceManager의 캐싱된 뷰 사용
 			this.#outputTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#outputTexture, {
 				dimension: '2d',
 				format: 'rgba8unorm',
 				label: `${this.#name}_Output_View`
 			});
 
-			// 🔧 디버깅: 텍스처 생성 확인
+			// 디버깅: 텍스처 생성 확인
 			console.log('TAA 텍스처 생성 완료:', {
 				frameBufferArray: {
 					width,
@@ -445,7 +439,7 @@ class TAA {
 			});
 		}
 
-		// 🔧 이전 정보 업데이트
+		// 이전 정보 업데이트
 		this.#prevInfo = {
 			width,
 			height,
@@ -474,11 +468,6 @@ class TAA {
 		this.#cachedPipelineLayouts.clear();
 		this.#cachedComputePipelines.clear();
 		this.#currentMSAAState = null;
-
-		// 지터 매니저 정리
-		if (this.#jitteredFrameCopyManager) {
-			this.#jitteredFrameCopyManager.destroy();
-		}
 	}
 
 	#calcVideoMemory() {
