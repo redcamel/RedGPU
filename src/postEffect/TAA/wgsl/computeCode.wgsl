@@ -1,5 +1,5 @@
 // 최대 모션 오프셋 (픽셀 단위)
-const MAX_MOTION_OFFSET: f32 = 16.0;
+const MAX_MOTION_OFFSET: f32 = 1.0;
 {
     let index = vec2<u32>(global_id.xy);
     let dims  = vec2<u32>(textureDimensions(sourceTexture));

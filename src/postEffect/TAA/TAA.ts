@@ -222,7 +222,7 @@ class TAA {
 		});
 
 		// 모션벡터 텍스처 추가
-		const motionVectorTextureView = view.viewRenderTextureManager.gBufferMotionVectorTextureView;
+		const motionVectorTextureView =useMSAA ?  view.viewRenderTextureManager.gBufferMotionVectorResolveTextureView :  view.viewRenderTextureManager.gBufferMotionVectorTextureView;
 		computeBindGroupEntries0.push({
 			binding: 2,
 			resource: motionVectorTextureView,
