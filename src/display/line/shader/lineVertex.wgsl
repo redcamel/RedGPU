@@ -28,8 +28,7 @@
  fn main(inputData: InputData) -> OutputData {
      var output: OutputData;
 
-     let u_projectionMatrix = systemUniforms.projectionMatrix;
-     let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
+     let u_noneJitterProjectionCameraMatrix = systemUniforms.noneJitterProjectionCameraMatrix;
      let u_resolution = systemUniforms.resolution;
      let u_camera = systemUniforms.camera;
      let u_cameraMatrix = u_camera.cameraMatrix;
@@ -42,7 +41,7 @@
 
      var position: vec4<f32>;
      position = u_modelMatrix * vec4<f32>(input_position, 1.0);
-     output.position = u_projectionCameraMatrix * position;
+     output.position = u_noneJitterProjectionCameraMatrix * position;
      output.vertexPosition = position.xyz;
      output.vertexColor = input_vertexColor;
 

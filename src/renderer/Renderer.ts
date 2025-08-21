@@ -244,7 +244,7 @@ class Renderer {
 
 	#updateViewSystemUniforms(view: View3D, viewRenderPassEncoder: GPURenderPassEncoder, shadowRender: boolean = false, calcPointLightCluster: boolean = true,
 	                          renderPath1ResultTextureView: GPUTextureView = null) {
-		const {inverseProjectionMatrix, pixelRectObject, projectionMatrix, rawCamera, redGPUContext, scene} = view
+		const {inverseProjectionMatrix, pixelRectObject, noneJitterProjectionMatrix,projectionMatrix, rawCamera, redGPUContext, scene} = view
 		const {gpuDevice} = redGPUContext
 		const {modelMatrix: cameraMatrix, position: cameraPosition} = rawCamera
 		const structInfo = view.systemUniform_Vertex_StructInfo;
@@ -277,6 +277,8 @@ class Renderer {
 		[
 			{key: 'projectionMatrix', value: projectionMatrix},
 			{key: 'projectionCameraMatrix', value: mat4.multiply(temp, projectionMatrix, cameraMatrix)},
+			{key: 'noneJitterProjectionMatrix', value: noneJitterProjectionMatrix},
+			{key: 'noneJitterProjectionCameraMatrix', value: mat4.multiply(temp2, noneJitterProjectionMatrix, cameraMatrix)},
 			{key: 'inverseProjectionMatrix', value: inverseProjectionMatrix},
 			{key: 'resolution', value: [view.pixelRectObject.width, view.pixelRectObject.height]},
 		].forEach(({key, value}) => {
@@ -304,4 +306,5 @@ class Renderer {
 }
 
 let temp = mat4.create()
+let temp2 = mat4.create()
 export default Renderer

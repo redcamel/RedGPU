@@ -39,6 +39,7 @@ RedGPU.init(
 		const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		viewEffect.ibl = ibl;
 		viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+		viewEffect.grid = true
 		const ssrEffect = new RedGPU.PostEffect.SSR(redGPUContext);
 		viewEffect.postEffectManager.addEffect(ssrEffect);
 		redGPUContext.addView(viewEffect);
@@ -62,6 +63,7 @@ RedGPU.init(
 		//
 		const floorMesh = new RedGPU.Display.Mesh(redGPUContext, floorGeometry, floorMaterial);
 		floorMesh.rotationX = 90
+		floorMesh.y = -1
 
 		scene.addChild(floorMesh);
 

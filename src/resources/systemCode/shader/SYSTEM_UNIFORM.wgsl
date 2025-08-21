@@ -17,10 +17,13 @@ struct Camera {
 
 struct SystemUniform {
 	  projectionMatrix:mat4x4<f32>,
-	  inverseProjectionMatrix:mat4x4<f32>,
 	  projectionCameraMatrix:mat4x4<f32>,
-	  camera:Camera,
+	  noneJitterProjectionMatrix:mat4x4<f32>,
+	  noneJitterProjectionCameraMatrix:mat4x4<f32>,
+	  inverseProjectionMatrix:mat4x4<f32>,
 	  resolution:vec2<f32>,
+	  //
+	  camera:Camera,
 	  viewPosition:vec2<f32>,
 	  //
 	  directionalLightCount:u32,

@@ -13,6 +13,7 @@ class ViewTransform {
 	onResize: ((width: number, height: number) => void) | null = null;
 	readonly #redGPUContext: RedGPUContext
 	#projectionMatrix = mat4.create()
+	#noneJitterProjectionMatrix = mat4.create()
 	#camera: PerspectiveCamera | OrthographicCamera | AController | Camera2D
 	#x: number | string = 0
 	#y: number | string = 0
@@ -140,16 +141,14 @@ class ViewTransform {
 		this.#jitterOffsetX = 0;
 		this.#jitterOffsetY = 0;
 	}
-
-	get projectionMatrix(): mat4 {
+	get noneJitterProjectionMatrix():mat4{
 		const {pixelRectObject, redGPUContext} = this
-		const {antialiasingManager}=redGPUContext
 		if (this.rawCamera instanceof OrthographicCamera) {
 			const {nearClipping, farClipping} = this.rawCamera
-			mat4.orthoZO(this.#projectionMatrix, this.rawCamera.left, this.rawCamera.right, this.rawCamera.bottom, this.rawCamera.top, nearClipping, farClipping)
+			mat4.orthoZO(this.#noneJitterProjectionMatrix, this.rawCamera.left, this.rawCamera.right, this.rawCamera.bottom, this.rawCamera.top, nearClipping, farClipping)
 		} else if (this.rawCamera instanceof Camera2D) {
 			mat4.ortho(
-				this.#projectionMatrix,
+				this.#noneJitterProjectionMatrix,
 				-0.5, // left
 				0.5, // right
 				-0.5, // bottom
@@ -158,18 +157,18 @@ class ViewTransform {
 				100000
 			);
 			mat4.scale(
-				this.#projectionMatrix,
-				this.#projectionMatrix,
+				this.#noneJitterProjectionMatrix,
+				this.#noneJitterProjectionMatrix,
 				[
 					redGPUContext.renderScale,
 					redGPUContext.renderScale,
 					1
 				]
 			)
-			mat4.translate(this.#projectionMatrix, this.#projectionMatrix, [-0.5, 0.5, 0]);
+			mat4.translate(this.#noneJitterProjectionMatrix, this.#noneJitterProjectionMatrix, [-0.5, 0.5, 0]);
 			mat4.scale(
-				this.#projectionMatrix,
-				this.#projectionMatrix,
+				this.#noneJitterProjectionMatrix,
+				this.#noneJitterProjectionMatrix,
 				[
 					1 / pixelRectObject.width * window.devicePixelRatio,
 					-1 / pixelRectObject.height * window.devicePixelRatio,
@@ -179,9 +178,15 @@ class ViewTransform {
 			mat4.identity(this.rawCamera.modelMatrix);
 		} else {
 			const {fieldOfView, nearClipping, farClipping} = this.rawCamera
-			mat4.perspective(this.#projectionMatrix, (Math.PI / 180) * fieldOfView, this.aspect, nearClipping, farClipping);
+			mat4.perspective(this.#noneJitterProjectionMatrix, (Math.PI / 180) * fieldOfView, this.aspect, nearClipping, farClipping);
 		}
 
+		return this.#noneJitterProjectionMatrix
+	}
+	get projectionMatrix(): mat4 {
+		const {redGPUContext} = this
+		const {antialiasingManager}=redGPUContext
+		this.#projectionMatrix = mat4.clone(this.noneJitterProjectionMatrix)
 		// TAA 지터 오프셋 적용 (PerspectiveCamera에만 적용)
 		if(antialiasingManager.useTAA) {
 			if (this.rawCamera instanceof PerspectiveCamera && (this.#jitterOffsetX !== 0 || this.#jitterOffsetY !== 0)) {
