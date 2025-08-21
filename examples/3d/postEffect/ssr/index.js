@@ -130,7 +130,9 @@ RedGPU.init(
 				glassSphere.y = Math.cos(time2 * 1.2) * 0.3;
 			}
 
-
+			if(test){
+				test.rotationY += 1;
+			}
 			// floorMaterial.color.r = Math.floor(Math.abs(Math.sin(time * 0.001)) * 255);
 		};
 
@@ -151,7 +153,7 @@ RedGPU.init(
 		document.body.appendChild(errorMessage);
 	}
 );
-
+var test
 function loadGLTF(redGPUContext, scene, url) {
 	let mesh;
 	new RedGPU.GLTFLoader(
@@ -162,6 +164,7 @@ function loadGLTF(redGPUContext, scene, url) {
 			// 모델을 약간 위로 배치
 			if (url.includes('DamagedHelmet')) {
 				mesh.y = 1;
+				test = mesh
 			}
 			if (url.includes('MetalRoughSpheres')) {
 				mesh.z = -2

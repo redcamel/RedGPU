@@ -40,13 +40,34 @@ const setAntialiasing_pane = (pane, redGPUContext, openYn = false) => {
 	// })
 	/////////////////////////
 
-	folder.addBinding(redGPUContext.antialiasingManager, 'useTAA')
+	const taaFolder = pane.addFolder({
+		title: 'TAA',
+		expanded: true
+	});
+	taaFolder.addBinding(redGPUContext.antialiasingManager, 'useTAA')
 	const taaEffect = redGPUContext.antialiasingManager.taa;
-	folder.addBinding(taaEffect, 'jitterStrength', {min: 0, max: 1, step: 0.01})
+	taaFolder.addBinding(taaEffect, 'jitterStrength', {min: 0, max: 1, step: 0.01})
 		.on('change', (v) => {
 			taaEffect.jitterStrength = v.value;
 		});
-	folder.addBinding(taaEffect, 'varianceClipping');
+	taaFolder.addBinding(taaEffect, 'motionVectorScale', {min: 0.1, max: 5, step: 0.01})
+		.on('change', (v) => {
+			taaEffect.motionVectorScale = v.value;
+		});
+	taaFolder.addBinding(taaEffect, 'motionBlurReduction', {min: 0.0, max: 1, step: 0.01})
+		.on('change', (v) => {
+			taaEffect.motionBlurReduction = v.value;
+		});
+	taaFolder.addBinding(taaEffect, 'disocclusionThreshold', {min: 0.1, max: 1, step: 0.01})
+		.on('change', (v) => {
+			taaEffect.disocclusionThreshold = v.value;
+		});
+	taaFolder.addBinding(taaEffect, 'motionVectorIntensity', {min: 0.1, max: 3, step: 0.01})
+		.on('change', (v) => {
+			taaEffect.motionVectorIntensity = v.value;
+		});
+	taaFolder.addBinding(taaEffect, 'varianceClipping');
+	taaFolder.addBinding(taaEffect, 'useMotionVectors');
 
 }
 export default setAntialiasing_pane
