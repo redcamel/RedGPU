@@ -40,6 +40,7 @@ fn main(inputData: InputData) -> OutputData {
     // 시스템 Uniform 변수 가져오기
     let u_resolution = systemUniforms.resolution;
     let u_projectionMatrix = systemUniforms.projectionMatrix;
+    let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
     let u_camera = systemUniforms.camera;
     let u_cameraMatrix = u_camera.cameraMatrix;
     let u_cameraPosition = u_camera.cameraPosition;

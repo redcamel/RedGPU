@@ -53,6 +53,7 @@ fn main(inputData: InputData) -> OutputData {
 
     // 카메라 매트릭스와 유니폼 매트릭스를 미리 계산
     let u_projectionMatrix = systemUniforms.projectionMatrix;
+    let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
     let u_camera = systemUniforms.camera;
     let u_cameraMatrix = u_camera.cameraMatrix;
     let u_cameraPosition = u_camera.cameraPosition;
@@ -72,7 +73,7 @@ fn main(inputData: InputData) -> OutputData {
     position = u_modelMatrix * vec4<f32>(input_position, 1.0);
     normalPosition = u_normalModelMatrix * vec4<f32>(input_vertexNormal, 1.0);
 
-    output.position = u_projectionMatrix * u_cameraMatrix * position;
+    output.position = u_projectionCameraMatrix * position;
     output.vertexPosition = position.xyz;
     output.vertexNormal = normalPosition.xyz;
     output.uv = inputData.uv;

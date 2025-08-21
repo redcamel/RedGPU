@@ -144,6 +144,7 @@ fn drawDirectionalShadowDepth(inputData: InputDataSkin) -> OutputShadowData {
 @vertex
 fn picking(inputData: InputDataSkin) -> OutputDataSkin {
     let u_projectionMatrix = systemUniforms.projectionMatrix;
+    let projectionCameraMatrix = systemUniforms.u_projectionCameraMatrix;
     let u_camera = systemUniforms.camera;
     let u_cameraMatrix = u_camera.cameraMatrix;
     let u_modelMatrix = vertexUniforms.modelMatrix;
@@ -166,8 +167,7 @@ fn picking(inputData: InputDataSkin) -> OutputDataSkin {
 
     var position: vec4<f32>;
     position = u_modelMatrix * skinMat * vec4<f32>(inputData.position, 1.0);
-    // TODO - 계산 합쳐야함 u_projectionMatrix * u_cameraMatrix
-    output.position = u_projectionMatrix * u_cameraMatrix * position;
+    output.position = u_projectionCameraMatrix * position;
     output.pickingId = unpack4x8unorm(vertexUniforms.pickingId);
     return output;
 }

@@ -46,6 +46,7 @@ fn main( inputData:InputData ) -> OutputData {
     let u_displacementScale = instanceUniforms.displacementScale;
     //
     let u_projectionMatrix = systemUniforms.projectionMatrix;
+    let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
     let u_camera = systemUniforms.camera;
     let u_cameraMatrix = u_camera.cameraMatrix;
     let u_cameraPosition = u_camera.cameraPosition;
@@ -65,8 +66,7 @@ fn main( inputData:InputData ) -> OutputData {
     let margin: f32 = 0.5;
 
     // 클립 좌표로 변환
-    // TODO - 계산 합쳐야함 u_projectionMatrix * u_cameraMatrix
-    var clipPosition: vec4<f32> = u_projectionMatrix * u_cameraMatrix * vec4<f32>(worldPosition, 1.0);
+    var clipPosition: vec4<f32> = u_projectionCameraMatrix * vec4<f32>(worldPosition, 1.0);
 
     // NDC로 변환
     let ndcPosition: vec3<f32> = clipPosition.xyz / clipPosition.w;
@@ -95,7 +95,7 @@ output.position = clipPosition; // 정상적으로 처리
         position = u_modelMatrix * vec4<f32>(displacedPosition, 1.0);
     }
 
-    output.position = u_projectionMatrix * u_cameraMatrix * u_instanceGroupModelMatrix *  position;
+    output.position = u_projectionCameraMatrix * u_instanceGroupModelMatrix *  position;
     output.vertexPosition = position.xyz;
     output.vertexNormal = normalPosition;
     output.uv = input_uv;

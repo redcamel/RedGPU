@@ -29,6 +29,7 @@
      var output: OutputData;
 
      let u_projectionMatrix = systemUniforms.projectionMatrix;
+     let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
      let u_resolution = systemUniforms.resolution;
      let u_camera = systemUniforms.camera;
      let u_cameraMatrix = u_camera.cameraMatrix;
@@ -41,8 +42,7 @@
 
      var position: vec4<f32>;
      position = u_modelMatrix * vec4<f32>(input_position, 1.0);
-     // TODO - 계산 합쳐야함 u_projectionMatrix * u_cameraMatrix
-     output.position = u_projectionMatrix * u_cameraMatrix * position;
+     output.position = u_projectionCameraMatrix * position;
      output.vertexPosition = position.xyz;
      output.vertexColor = input_vertexColor;
 

@@ -125,7 +125,8 @@ fn main( inputData:InputData) -> OutputData {
 
   //
   let u_projectionMatrix = systemUniforms.projectionMatrix;
-    let u_resolution = systemUniforms.resolution;
+  let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
+  let u_resolution = systemUniforms.resolution;
   let u_camera = systemUniforms.camera;
   let u_cameraMatrix = u_camera.cameraMatrix;
   let u_cameraPosition = u_camera.cameraPosition;
@@ -166,7 +167,7 @@ fn main( inputData:InputData) -> OutputData {
         var rotateMTX = rotationMTX( inputData.rotation ) ;
         temp = translateTX * rotateMTX * scaleMTX;
         position = temp * vec4<f32>(inputData.a_position , 1);
-        output.position = u_projectionMatrix *  u_cameraMatrix * position;
+        output.position = u_projectionCameraMatrix * position;
     }
 
   output.vertexPosition = position.xyz;

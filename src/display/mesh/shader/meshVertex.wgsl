@@ -45,6 +45,7 @@ fn main(inputData: InputData) -> OutputData {
 
     // System uniforms
     let u_projectionMatrix = systemUniforms.projectionMatrix;
+    let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
     let u_resolution = systemUniforms.resolution;
     let u_camera = systemUniforms.camera;
     let u_cameraMatrix = u_camera.cameraMatrix;
@@ -99,8 +100,7 @@ fn main(inputData: InputData) -> OutputData {
         normalPosition = u_normalModelMatrix * vec4<f32>(input_vertexNormal, 1.0);
     #redgpu_endIf
 
-    // TODO - 계산 합쳐야함 u_projectionMatrix * u_cameraMatrix
-    output.position = u_projectionMatrix * u_cameraMatrix * position;
+    output.position = u_projectionCameraMatrix * position;
     output.vertexPosition = position.xyz;
     output.vertexNormal = normalPosition.xyz;
     output.uv = input_uv;
