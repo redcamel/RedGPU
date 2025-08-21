@@ -131,7 +131,7 @@ RedGPU.init(
 			}
 
 			if(test){
-				test.rotationY += 1;
+				// test.rotationY += 1;
 			}
 			// floorMaterial.color.r = Math.floor(Math.abs(Math.sin(time * 0.001)) * 255);
 		};

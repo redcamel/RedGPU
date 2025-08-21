@@ -56,7 +56,9 @@ fn main(inputData: InputData) -> OutputData {
     // 카메라 매트릭스와 유니폼 매트릭스를 미리 계산
     let u_projectionMatrix = systemUniforms.projectionMatrix;
     let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
+    let u_noneJitterProjectionCameraMatrix = systemUniforms.noneJitterProjectionCameraMatrix;
     let u_prevProjectionCameraMatrix = systemUniforms.prevProjectionCameraMatrix;
+    let u_resolution = systemUniforms.resolution;
     let u_camera = systemUniforms.camera;
     let u_cameraMatrix = u_camera.cameraMatrix;
     let u_cameraPosition = u_camera.cameraPosition;
@@ -78,14 +80,21 @@ fn main(inputData: InputData) -> OutputData {
     normalPosition = u_normalModelMatrix * vec4<f32>(input_vertexNormal, 1.0);
 
     output.position = u_projectionCameraMatrix * position;
-    {
-        // 모션벡터 계산
-        let prevClipPos = u_prevProjectionCameraMatrix * u_prevModelMatrix * vec4<f32>(input_position, 1.0);
-        let currentScreen = output.position.xy / output.position.w;
-        let prevScreen = prevClipPos.xy / prevClipPos.w;
-        let motionVector = currentScreen - prevScreen;
-        output.motionVector = motionVector;
+
+
+ {
+    let currentClipPos = u_noneJitterProjectionCameraMatrix * position;  // jitter 제거된 위치 사용
+    let prevClipPos = u_prevProjectionCameraMatrix * u_prevModelMatrix * vec4<f32>(input_position, 1.0);
+
+    // NDC 좌표로 변환
+    let currentNDC = currentClipPos.xy / currentClipPos.w;
+    let prevNDC = prevClipPos.xy / prevClipPos.w;
+
+    // 정규화된 스크린 공간에서의 모션벡터 (-1 ~ 1 범위)
+    output.motionVector = currentNDC - prevNDC;
+
     }
+
 
 
 

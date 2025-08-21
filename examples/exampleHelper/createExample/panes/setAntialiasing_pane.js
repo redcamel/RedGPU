@@ -50,6 +50,10 @@ const setAntialiasing_pane = (pane, redGPUContext, openYn = false) => {
 		.on('change', (v) => {
 			taaEffect.jitterStrength = v.value;
 		});
+	taaFolder.addBinding(taaEffect, 'temporalBlendFactor', {min: 0, max: 1, step: 0.01})
+		.on('change', (v) => {
+			taaEffect.temporalBlendFactor = v.value;
+		});
 	taaFolder.addBinding(taaEffect, 'motionVectorScale', {min: 0.1, max: 5, step: 0.01})
 		.on('change', (v) => {
 			taaEffect.motionVectorScale = v.value;

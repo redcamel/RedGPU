@@ -53,6 +53,13 @@ class TAA {
 	#temporalBlendFactor: number = 0.95;
 	#varianceClipping: boolean = true;
 
+	// 모션벡터 기반 TAA를 위한 새로운 속성들
+	#useMotionVectors: boolean = true;
+	#motionVectorScale: number = 1.0;
+	#motionBlurReduction: number = 0.8;
+	#disocclusionThreshold: number = 0.1;
+	#motionVectorIntensity: number = 1.0;
+
 	constructor(redGPUContext: RedGPUContext) {
 		this.#redGPUContext = redGPUContext
 		this.#antialiasingManager = redGPUContext.antialiasingManager
@@ -71,6 +78,13 @@ class TAA {
 		this.temporalBlendFactor = this.#temporalBlendFactor;
 		this.jitterStrength = this.#jitterStrength;
 		this.varianceClipping = this.#varianceClipping;
+
+		// 모션벡터 관련 초기값 설정
+		this.useMotionVectors = this.#useMotionVectors;
+		this.motionVectorScale = this.#motionVectorScale;
+		this.motionBlurReduction = this.#motionBlurReduction;
+		this.disocclusionThreshold = this.#disocclusionThreshold;
+		this.motionVectorIntensity = this.#motionVectorIntensity;
 	}
 
 	#createTAAShaderCode() {
@@ -80,6 +94,7 @@ class TAA {
 				
 				@group(0) @binding(0) var sourceTexture : texture_storage_2d<rgba8unorm,read>;
 				@group(0) @binding(1) var frameBufferArray : texture_2d_array<f32>;
+				@group(0) @binding(2) var motionVectorTexture : texture_2d<f32>;
 				
 				@group(1) @binding(0) var outputTexture : texture_storage_2d<rgba8unorm, write>;
 				${postEffectSystemUniform}
@@ -183,7 +198,7 @@ class TAA {
 		);
 
 		if (this.#frameIndex <= 20 || this.#frameIndex % 60 === 0) {
-			console.log(`TAA Frame ${this.#frameIndex}: SliceIndex=${currentSliceIndex}, JitterStrength=${this.#jitterStrength}`);
+			console.log(`TAA Frame ${this.#frameIndex}: SliceIndex=${currentSliceIndex}, JitterStrength=${this.#jitterStrength}, MotionVectors=${this.#useMotionVectors}`);
 		}
 
 		return {
@@ -204,6 +219,13 @@ class TAA {
 		computeBindGroupEntries0.push({
 			binding: 1,
 			resource: this.#frameBufferArrayTextureView,
+		});
+
+		// 모션벡터 텍스처 추가
+		const motionVectorTextureView = view.viewRenderTextureManager.gBufferMotionVectorTextureView;
+		computeBindGroupEntries0.push({
+			binding: 2,
+			resource: motionVectorTextureView,
 		});
 
 		computeBindGroupEntries1.push({
@@ -498,6 +520,56 @@ class TAA {
 	set varianceClipping(value: boolean) {
 		this.#varianceClipping = value;
 		this.updateUniform('varianceClipping', value ? 1.0 : 0.0);
+	}
+
+	// 모션벡터 관련 getter/setter 추가
+	get useMotionVectors(): boolean {
+		return this.#useMotionVectors;
+	}
+
+	set useMotionVectors(value: boolean) {
+		this.#useMotionVectors = value;
+		this.updateUniform('useMotionVectors', value ? 1.0 : 0.0);
+	}
+
+	get motionVectorScale(): number {
+		return this.#motionVectorScale;
+	}
+
+	set motionVectorScale(value: number) {
+		validateNumberRange(value, 0.1, 5.0);
+		this.#motionVectorScale = value;
+		this.updateUniform('motionVectorScale', value);
+	}
+
+	get motionBlurReduction(): number {
+		return this.#motionBlurReduction;
+	}
+
+	set motionBlurReduction(value: number) {
+		validateNumberRange(value, 0.0, 1.0);
+		this.#motionBlurReduction = value;
+		this.updateUniform('motionBlurReduction', value);
+	}
+
+	get disocclusionThreshold(): number {
+		return this.#disocclusionThreshold;
+	}
+
+	set disocclusionThreshold(value: number) {
+		validateNumberRange(value, 0.01, 1.0);
+		this.#disocclusionThreshold = value;
+		this.updateUniform('disocclusionThreshold', value);
+	}
+
+	get motionVectorIntensity(): number {
+		return this.#motionVectorIntensity;
+	}
+
+	set motionVectorIntensity(value: number) {
+		validateNumberRange(value, 0.1, 3.0);
+		this.#motionVectorIntensity = value;
+		this.updateUniform('motionVectorIntensity', value);
 	}
 }
 

@@ -198,12 +198,14 @@ class Renderer {
 		view.debugViewRenderState.viewRenderTime = (performance.now() - view.debugViewRenderState.startTime);
 		pickingManager.checkEvents(view, time);
 		{
-			const {projectionMatrix,  redGPUContext, } = view
+			const {projectionMatrix, noneJitterProjectionMatrix,rawCamera, redGPUContext, } = view
+			const {modelMatrix: cameraMatrix} = rawCamera
 			const {gpuDevice} = redGPUContext;
 			const structInfo = view.systemUniform_Vertex_StructInfo;
 			const gpuBuffer = view.systemUniform_Vertex_UniformBuffer.gpuBuffer;
 			[
-				{key: 'prevProjectionCameraMatrix', value: projectionMatrix},
+				{key: 'prevProjectionCameraMatrix', value: mat4.multiply(temp3, noneJitterProjectionMatrix, cameraMatrix)},
+				// {key: 'prevProjectionCameraMatrix', value: mat4.multiply(temp3, projectionMatrix, cameraMatrix)},
 			].forEach(({key, value}) => {
 				gpuDevice.queue.writeBuffer(
 					gpuBuffer,
@@ -320,4 +322,5 @@ class Renderer {
 
 let temp = mat4.create()
 let temp2 = mat4.create()
+let temp3 = mat4.create()
 export default Renderer
