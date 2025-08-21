@@ -84,6 +84,7 @@ fn main(inputData: InputData) -> OutputData {
 
   {
      let currentClipPos = u_noneJitterProjectionCameraMatrix * position;  // jitter 제거된 위치 사용
+//     let currentClipPos = output.position;
      let prevClipPos = u_prevProjectionCameraMatrix * u_prevModelMatrix * vec4<f32>(input_position, 1.0);
 
      // 클립 공간에서 유효한 w 값 확인

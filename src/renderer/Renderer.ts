@@ -64,6 +64,19 @@ class Renderer {
 	stop(redGPUContext: RedGPUContext) {
 		cancelAnimationFrame(redGPUContext.currentRequestAnimationFrame)
 	}
+	#haltonSequence(index: number, base: number): number {
+		let result = 0;
+		let fraction = 1 / base;
+		let i = index;
+
+		while (i > 0) {
+			result += (i % base) * fraction;
+			i = Math.floor(i / base);
+			fraction /= base;
+		}
+
+		return result;
+	}
 
 	renderView(view: View3D, time: number) {
 		const {
@@ -87,6 +100,24 @@ class Renderer {
 			gBufferNormalTextureAttachment,
 			gBufferMotionVectorTextureAttachment
 		} = this.#createAttachmentsForView(view)
+
+		{
+			//TODO 이거 어디론가 이동시켜야함
+			const frameIndex = antialiasingManager.taa.frameIndex || 0;
+			const jitterScale = antialiasingManager.taa.jitterStrength;
+
+			// Halton 시퀀스 계산 (base 2, 3)
+			const haltonX = this.#haltonSequence(frameIndex + 1, 2);
+			const haltonY = this.#haltonSequence(frameIndex + 1, 3);
+
+			// -0.5 ~ 0.5 범위로 변환
+			const jitterX = (haltonX - 0.5) * jitterScale;
+			const jitterY = (haltonY - 0.5) * jitterScale;
+
+			view.setJitterOffset(jitterX, jitterY);
+
+
+		}
 		const renderPassDescriptor: GPURenderPassDescriptor = {
 			colorAttachments: [colorAttachment,gBufferNormalTextureAttachment,gBufferMotionVectorTextureAttachment],
 			depthStencilAttachment,

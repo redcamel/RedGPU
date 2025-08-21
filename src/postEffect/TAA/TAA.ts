@@ -161,12 +161,10 @@ class TAA {
 		gpuDevice.queue.submit([commentEncode_compute.finish()]);
 	}
 
+	#prevMSAA:Boolean
 	render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult):ASinglePassPostEffectResult {
 		const currentFrameTextureView = sourceTextureInfo.textureView
-		const jitterX = (Math.random() - 0.5) * this.#jitterStrength;
-		const jitterY = (Math.random() - 0.5) * this.#jitterStrength;
-		view.setJitterOffset(jitterX, jitterY)
-
+		const sourceTexture = sourceTextureInfo.texture;
 		const {gpuDevice, antialiasingManager} = this.#redGPUContext
 		const {useMSAA} = antialiasingManager
 
@@ -180,7 +178,7 @@ class TAA {
 		}
 
 		const dimensionsChanged = this.#createRenderTexture(view)
-		const msaaChanged = antialiasingManager.changedMSAA;
+		const msaaChanged = this.#prevMSAA !== useMSAA;
 		const sourceTextureChanged = this.#detectSourceTextureChange([currentFrameTextureView]);
 
 		if (dimensionsChanged || msaaChanged || sourceTextureChanged) {
@@ -189,9 +187,10 @@ class TAA {
 
 		this.#execute(gpuDevice, width, height);
 
-		const sourceTexture = sourceTextureInfo.texture;
+
 		copyToTextureArray(
 			gpuDevice,
+			// this.#outputTexture,
 			sourceTexture,
 			this.#frameBufferArrayTexture,
 			currentSliceIndex
@@ -200,7 +199,7 @@ class TAA {
 		if (this.#frameIndex <= 20 || this.#frameIndex % 60 === 0) {
 			console.log(`TAA Frame ${this.#frameIndex}: SliceIndex=${currentSliceIndex}, JitterStrength=${this.#jitterStrength}, MotionVectors=${this.#useMotionVectors}`);
 		}
-
+		this.#prevMSAA = useMSAA;
 		return {
 			texture:this.#outputTexture,
 			textureView:this.#outputTextureView

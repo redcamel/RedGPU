@@ -1058,7 +1058,7 @@ let attenuation = rangePart * invSquare;
     }
     #redgpu_endIf
     output.gBufferMotionVector = vec4<f32>(
-            inputData.motionVector,  // -1~1을 0~1로 변환
+            inputData.motionVector,
             0.0,
             1.0
         );
