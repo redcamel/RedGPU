@@ -97,6 +97,24 @@ class ViewRenderTextureManager {
 		return this.#gBuffers.get('gBufferNormal')?.resolveTextureView
 	}
 
+
+	get gBufferMotionVectorTexture(): GPUTexture {
+		return this.#gBuffers.get('gBufferMotionVector')?.texture
+	}
+
+	get gBufferMotionVectorResolveTexture(): GPUTexture {
+		return this.#gBuffers.get('gBufferMotionVector')?.resolveTexture
+	}
+
+	get gBufferMotionVectorTextureView(): GPUTextureView {
+		this.#createGBuffer('gBufferMotionVector');
+		return this.#gBuffers.get('gBufferMotionVector')?.textureView
+	}
+
+	get gBufferMotionVectorResolveTextureView(): GPUTextureView {
+		return this.#gBuffers.get('gBufferMotionVector')?.resolveTextureView
+	}
+
 	// 비디오 메모리 크기 계산
 	#checkVideoMemorySize() {
 		const textures = [

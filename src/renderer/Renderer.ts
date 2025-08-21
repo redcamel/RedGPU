@@ -196,9 +196,22 @@ class Renderer {
 		redGPUContext.gpuDevice.queue.submit([commandEncoder.finish()])
 		renderPassDescriptor.colorAttachments[0].postEffectView = view.postEffectManager.render().textureView
 		view.debugViewRenderState.viewRenderTime = (performance.now() - view.debugViewRenderState.startTime);
-		pickingManager.checkEvents(view, time)
-
-
+		pickingManager.checkEvents(view, time);
+		{
+			const {projectionMatrix,  redGPUContext, } = view
+			const {gpuDevice} = redGPUContext;
+			const structInfo = view.systemUniform_Vertex_StructInfo;
+			const gpuBuffer = view.systemUniform_Vertex_UniformBuffer.gpuBuffer;
+			[
+				{key: 'prevProjectionCameraMatrix', value: projectionMatrix},
+			].forEach(({key, value}) => {
+				gpuDevice.queue.writeBuffer(
+					gpuBuffer,
+					structInfo.members[key].uniformOffset,
+					new structInfo.members[key].View(value)
+				);
+			});
+		}
 		return renderPassDescriptor
 	}
 

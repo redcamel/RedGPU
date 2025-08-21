@@ -150,6 +150,7 @@ struct InputData {
   @location(9) ndcPosition: vec3<f32>,
   @location(10) localNodeScale: f32,
   @location(11) volumeScale: f32,
+  @location(12) motionVector: vec2<f32>,
 }
 
 
@@ -1056,7 +1057,13 @@ let attenuation = rangePart * invSquare;
         output.gBufferNormal = vec4<f32>(N * 0.5 + 0.5, baseReflectionStrength);
     }
     #redgpu_endIf
-
+    output.gBufferMotionVector = vec4<f32>(inputData.motionVector,0.0,1.0);
+//    output.color = vec4<f32>(
+//         clamp(inputData.motionVector.x + 0.5, 0.0, 1.0),  // R: X 모션 (빨강-청록)
+//         clamp(inputData.motionVector.y + 0.5, 0.0, 1.0),  // G: Y 모션 (초록-보라)
+//         0.5,  // B: 중간값
+//         1.0   // A
+//     );
     return output;
 };
 // ---------- KHR_materials_anisotropy ----------

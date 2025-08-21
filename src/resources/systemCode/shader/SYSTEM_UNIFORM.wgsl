@@ -21,6 +21,7 @@ struct SystemUniform {
 	  noneJitterProjectionMatrix:mat4x4<f32>,
 	  noneJitterProjectionCameraMatrix:mat4x4<f32>,
 	  inverseProjectionMatrix:mat4x4<f32>,
+	  prevProjectionCameraMatrix:mat4x4<f32>,
 	  resolution:vec2<f32>,
 	  //
 	  camera:Camera,

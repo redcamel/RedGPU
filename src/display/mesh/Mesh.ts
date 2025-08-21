@@ -817,6 +817,7 @@ class Mesh extends MeshBase {
 				updateMeshDirtyPipeline(this, debugViewRenderState)
 			}
 		}
+		let prevModelMatrix;
 		if (currentGeometry && passFrustumCulling) {
 			{
 				const {gpuRenderInfo} = this
@@ -835,6 +836,7 @@ class Mesh extends MeshBase {
 			const {gpuRenderInfo} = this
 			const {vertexUniformBuffer, vertexUniformBindGroup, vertexUniformInfo, pipeline,} = gpuRenderInfo
 			const {members: vertexUniformInfoMembers} = vertexUniformInfo
+
 			if (this.dirtyTransform) {
 				gpuDevice.queue.writeBuffer(
 					vertexUniformBuffer.gpuBuffer,
@@ -843,7 +845,7 @@ class Mesh extends MeshBase {
 						//TODO - Sprite2D떄문에 처리했지만 이거 일반화해야함
 						// TODO - renderTextureWidth 이놈도 같이 처리해야할듯
 						// @ts-ignore
-						this.is2DMeshType ? mat4.multiply(
+						prevModelMatrix = this.is2DMeshType ? mat4.multiply(
 							mat4.create(),
 							this.modelMatrix,
 							mat4.fromValues(
@@ -936,6 +938,19 @@ class Mesh extends MeshBase {
 			if (this.castShadow || (this.castShadow && !currentGeometry)) castingList[castingList.length] = this
 		}
 		if (this.#enableDebugger) this.#drawDebugger.render(debugViewRenderState)
+		if(prevModelMatrix){
+			const {vertexUniformBuffer, vertexUniformInfo} = this.gpuRenderInfo
+			const {members: vertexUniformInfoMembers} = vertexUniformInfo
+			//TODO - TAA 머가 빡세네...
+			if(vertexUniformInfoMembers.prevModelMatrix) {
+				gpuDevice.queue.writeBuffer(
+					vertexUniformBuffer.gpuBuffer,
+					vertexUniformInfoMembers.prevModelMatrix.uniformOffset,
+					new vertexUniformInfoMembers.prevModelMatrix.View(prevModelMatrix),
+				)
+			}
+
+		}
 		// children render
 		const {children} = this
 		let i = 0

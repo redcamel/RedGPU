@@ -6,6 +6,7 @@ struct VertexUniforms {
     pickingId: u32,
     localMatrix: mat4x4<f32>,
     modelMatrix: mat4x4<f32>,
+    prevModelMatrix: mat4x4<f32>,
     normalModelMatrix: mat4x4<f32>,
     receiveShadow: f32
 };
@@ -42,6 +43,7 @@ struct OutputData {
     @location(9) ndcPosition: vec3<f32>,
     @location(10) localNodeScale: f32,
     @location(11) volumeScale: f32,
+    @location(12) motionVector: vec2<f32>,
 };
 
 @vertex
@@ -54,6 +56,7 @@ fn main(inputData: InputData) -> OutputData {
     // 카메라 매트릭스와 유니폼 매트릭스를 미리 계산
     let u_projectionMatrix = systemUniforms.projectionMatrix;
     let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
+    let u_prevProjectionCameraMatrix = systemUniforms.prevProjectionCameraMatrix;
     let u_camera = systemUniforms.camera;
     let u_cameraMatrix = u_camera.cameraMatrix;
     let u_cameraPosition = u_camera.cameraPosition;
@@ -66,6 +69,7 @@ fn main(inputData: InputData) -> OutputData {
     let u_directionalLights = systemUniforms.directionalLights;
     let u_directionalLightProjectionViewMatrix = systemUniforms.directionalLightProjectionViewMatrix;
     let u_receiveShadow = vertexUniforms.receiveShadow;
+    let u_prevModelMatrix = vertexUniforms.prevModelMatrix;
 
     var position: vec4<f32>;
     var normalPosition: vec4<f32>;
@@ -74,6 +78,17 @@ fn main(inputData: InputData) -> OutputData {
     normalPosition = u_normalModelMatrix * vec4<f32>(input_vertexNormal, 1.0);
 
     output.position = u_projectionCameraMatrix * position;
+    {
+        // 모션벡터 계산
+        let prevClipPos = u_prevProjectionCameraMatrix * u_prevModelMatrix * vec4<f32>(input_position, 1.0);
+        let currentScreen = output.position.xy / output.position.w;
+        let prevScreen = prevClipPos.xy / prevClipPos.w;
+        let motionVector = currentScreen - prevScreen;
+        output.motionVector = motionVector;
+    }
+
+
+
     output.vertexPosition = position.xyz;
     output.vertexNormal = normalPosition.xyz;
     output.uv = inputData.uv;
