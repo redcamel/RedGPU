@@ -82,18 +82,22 @@ fn main(inputData: InputData) -> OutputData {
     output.position = u_projectionCameraMatrix * position;
 
 
- {
-    let currentClipPos = u_noneJitterProjectionCameraMatrix * position;  // jitter 제거된 위치 사용
-    let prevClipPos = u_prevProjectionCameraMatrix * u_prevModelMatrix * vec4<f32>(input_position, 1.0);
+  {
+     let currentClipPos = u_noneJitterProjectionCameraMatrix * position;  // jitter 제거된 위치 사용
+     let prevClipPos = u_prevProjectionCameraMatrix * u_prevModelMatrix * vec4<f32>(input_position, 1.0);
 
-    // NDC 좌표로 변환
-    let currentNDC = currentClipPos.xy / currentClipPos.w;
-    let prevNDC = prevClipPos.xy / prevClipPos.w;
+     // 클립 공간에서 유효한 w 값 확인
+     let currentW = max(currentClipPos.w, 0.0001);
+     let prevW = max(prevClipPos.w, 0.0001);
 
-    // 정규화된 스크린 공간에서의 모션벡터 (-1 ~ 1 범위)
-    output.motionVector = currentNDC - prevNDC;
+     // NDC 좌표로 변환
+     let currentNDC = currentClipPos.xy / currentW;
+     let prevNDC = prevClipPos.xy / prevW;
 
-    }
+     // 정규화된 스크린 공간에서의 모션벡터 (-1 ~ 1 범위)
+     output.motionVector = currentNDC - prevNDC;
+
+ }
 
 
 

@@ -85,9 +85,10 @@ class Renderer {
 			colorAttachment,
 			depthStencilAttachment,
 			gBufferNormalTextureAttachment,
+			gBufferMotionVectorTextureAttachment
 		} = this.#createAttachmentsForView(view)
 		const renderPassDescriptor: GPURenderPassDescriptor = {
-			colorAttachments: [colorAttachment,gBufferNormalTextureAttachment],
+			colorAttachments: [colorAttachment,gBufferNormalTextureAttachment,gBufferMotionVectorTextureAttachment],
 			depthStencilAttachment,
 		}
 		// @ts-ignore
@@ -219,7 +220,12 @@ class Renderer {
 
 	#createAttachmentsForView(view: View3D) {
 		const {scene, redGPUContext, viewRenderTextureManager} = view
-		const {depthTextureView, gBufferColorTextureView, gBufferColorResolveTextureView,gBufferNormalTextureView,gBufferNormalResolveTextureView} = viewRenderTextureManager
+		const {
+			depthTextureView,
+			gBufferColorTextureView, gBufferColorResolveTextureView,
+			gBufferNormalTextureView,gBufferNormalResolveTextureView,
+			 gBufferMotionVectorTextureView,gBufferMotionVectorResolveTextureView,
+		} = viewRenderTextureManager
 		const {useBackgroundColor, backgroundColor} = scene
 		const {antialiasingManager} = redGPUContext
 		const {useMSAA} = antialiasingManager
@@ -250,11 +256,18 @@ class Renderer {
 			loadOp: GPU_LOAD_OP.CLEAR,
 			storeOp: GPU_STORE_OP.STORE
 		}
+		const gBufferMotionVectorTextureAttachment: GPURenderPassColorAttachment = {
+			view: gBufferMotionVectorTextureView,
+			clearValue: {r: 0, g: 0, b: 0, a: 0},
+			loadOp: GPU_LOAD_OP.CLEAR,
+			storeOp: GPU_STORE_OP.STORE
+		}
 		if (useMSAA){
 			colorAttachment.resolveTarget = gBufferColorResolveTextureView
 			gBufferNormalTextureAttachment.resolveTarget = gBufferNormalResolveTextureView
+			gBufferMotionVectorTextureAttachment.resolveTarget = gBufferMotionVectorResolveTextureView
 		}
-		return {colorAttachment, depthStencilAttachment,gBufferNormalTextureAttachment,};
+		return {colorAttachment, depthStencilAttachment,gBufferNormalTextureAttachment,gBufferMotionVectorTextureAttachment};
 	}
 
 	#updateViewSystemUniforms(view: View3D, viewRenderPassEncoder: GPURenderPassEncoder, shadowRender: boolean = false, calcPointLightCluster: boolean = true,

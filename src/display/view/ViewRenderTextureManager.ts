@@ -107,7 +107,7 @@ class ViewRenderTextureManager {
 	}
 
 	get gBufferMotionVectorTextureView(): GPUTextureView {
-		this.#createGBuffer('gBufferMotionVector');
+		this.#createGBuffer('gBufferMotionVector','rg16float');
 		return this.#gBuffers.get('gBufferMotionVector')?.textureView
 	}
 
@@ -132,7 +132,7 @@ class ViewRenderTextureManager {
 	}
 
 	// G-Buffer 생성 메서드
-	#createGBuffer(type: string) {
+	#createGBuffer(type: string,format?:GPUTextureFormat) {
 		const {antialiasingManager, resourceManager} = this.#redGPUContext
 		const {useMSAA} = antialiasingManager
 		const targetInfo = this.#gBuffers.get(type)
@@ -171,7 +171,7 @@ class ViewRenderTextureManager {
 				],
 				sampleCount: useMSAA ? 4 : 1,
 				label: `${name}_${type}_texture_${pixelRectObjectW}x${pixelRectObjectH}`,
-				format: navigator.gpu.getPreferredCanvasFormat(),
+				format: format || navigator.gpu.getPreferredCanvasFormat(),
 				usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC
 			})
 			newInfo.texture = newTexture;
@@ -186,7 +186,7 @@ class ViewRenderTextureManager {
 					},
 					sampleCount: 1,
 					label: `${name}_${type}_resolveTexture_${pixelRectObjectW}x${pixelRectObjectH}`,
-					format: navigator.gpu.getPreferredCanvasFormat(),
+					format: format || navigator.gpu.getPreferredCanvasFormat(),
 					usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC
 				})
 				newInfo.resolveTexture = newResolveTexture

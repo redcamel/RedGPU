@@ -1057,13 +1057,20 @@ let attenuation = rangePart * invSquare;
         output.gBufferNormal = vec4<f32>(N * 0.5 + 0.5, baseReflectionStrength);
     }
     #redgpu_endIf
-    output.gBufferMotionVector = vec4<f32>(inputData.motionVector,0.0,1.0);
-//    output.color = vec4<f32>(
-//         clamp(inputData.motionVector.x + 0.5, 0.0, 1.0),  // R: X 모션 (빨강-청록)
-//         clamp(inputData.motionVector.y + 0.5, 0.0, 1.0),  // G: Y 모션 (초록-보라)
-//         0.5,  // B: 중간값
-//         1.0   // A
-//     );
+    output.gBufferMotionVector = vec4<f32>(
+            inputData.motionVector,  // -1~1을 0~1로 변환
+            0.0,
+            1.0
+        );
+
+//  // 디버깅: 모션벡터 증폭하여 확인
+//   let amplifiedMotion = inputData.motionVector * 50.0;  // 50배 증폭
+//   let clampedMotion = vec2<f32>(
+//       clamp(amplifiedMotion.x * 0.5 + 0.5, 0.0, 1.0),
+//       clamp(amplifiedMotion.y * 0.5 + 0.5, 0.0, 1.0)
+//   );
+//   output.color = vec4<f32>(clampedMotion, 0.5, 1.0);
+
     return output;
 };
 // ---------- KHR_materials_anisotropy ----------

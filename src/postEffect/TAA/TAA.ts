@@ -41,7 +41,7 @@ class TAA {
 	#outputTexture: GPUTexture
 	#frameBufferBindGroup0: GPUBindGroup
 	#frameBufferBindGroup1: GPUBindGroup
-	#frameBufferCount: number = 16
+	#frameBufferCount: number = 8
 	#WORK_SIZE_X = 8
 	#WORK_SIZE_Y = 8
 	#WORK_SIZE_Z = 1
