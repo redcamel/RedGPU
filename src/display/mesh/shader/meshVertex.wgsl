@@ -33,11 +33,13 @@ struct OutputData {
     @location(0) vertexPosition: vec3<f32>,
     @location(1) vertexNormal: vec3<f32>,
     @location(2) uv: vec2<f32>,
+    @location(3) motionVector: vec2<f32>,
     @location(9) ndcPosition: vec3<f32>,
     @location(12) combinedOpacity: f32,
     @location(13) shadowPos: vec3<f32>,
     @location(14) receiveShadow: f32,
     @location(15) pickingId: vec4<f32>,
+
 };
 
 @vertex
@@ -47,6 +49,8 @@ fn main(inputData: InputData) -> OutputData {
     // System uniforms
     let u_projectionMatrix = systemUniforms.projectionMatrix;
     let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
+    let u_prevProjectionCameraMatrix = systemUniforms.prevProjectionCameraMatrix;
+    let u_noneJitterProjectionCameraMatrix = systemUniforms.noneJitterProjectionCameraMatrix;
     let u_resolution = systemUniforms.resolution;
     let u_camera = systemUniforms.camera;
     let u_cameraMatrix = u_camera.cameraMatrix;
@@ -54,6 +58,7 @@ fn main(inputData: InputData) -> OutputData {
 
     // Vertex uniforms
     let u_modelMatrix = vertexUniforms.modelMatrix;
+    let u_prevModelMatrix = vertexUniforms.prevModelMatrix;
     let u_normalModelMatrix = vertexUniforms.normalModelMatrix;
     let u_displacementScale = vertexUniforms.displacementScale;
     let u_useDisplacementTexture = vertexUniforms.useDisplacementTexture == 1u;
@@ -115,6 +120,22 @@ fn main(inputData: InputData) -> OutputData {
     #redgpu_endIf
 
     output.combinedOpacity = vertexUniforms.combinedOpacity;
+  {
+     let currentClipPos = u_noneJitterProjectionCameraMatrix * position;  // jitter 제거된 위치 사용
+//     let currentClipPos = output.position;
+     let prevClipPos = u_prevProjectionCameraMatrix * u_prevModelMatrix * vec4<f32>(input_position, 1.0);
 
+     // 클립 공간에서 유효한 w 값 확인
+     let currentW = max(currentClipPos.w, 0.0001);
+     let prevW = max(prevClipPos.w, 0.0001);
+
+     // NDC 좌표로 변환
+     let currentNDC = currentClipPos.xy / currentW;
+     let prevNDC = prevClipPos.xy / prevW;
+
+     // 정규화된 스크린 공간에서의 모션벡터 (-1 ~ 1 범위)
+     output.motionVector = currentNDC - prevNDC;
+
+ }
     return output;
 }

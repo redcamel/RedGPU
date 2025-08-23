@@ -40,9 +40,7 @@ class Renderer {
 		}
 		this.#finalRender.render(redGPUContext, viewList_renderPassDescriptorList)
 		//
-
 		redGPUContext.antialiasingManager.changedMSAA = false
-
 		console.log('/////////////////// end renderFrame ///////////////////')
 	}
 
@@ -65,6 +63,16 @@ class Renderer {
 		cancelAnimationFrame(redGPUContext.currentRequestAnimationFrame)
 	}
 
+	#haltonSequence(index: number, base: number): number {
+		let result = 0;
+		let fraction = 1;
+		while (index > 0) {
+			fraction /= base;
+			result += fraction * (index % base);
+			index = Math.floor(index / base);
+		}
+		return result;
+	}
 
 	renderView(view: View3D, time: number) {
 		const {
@@ -88,33 +96,18 @@ class Renderer {
 			gBufferNormalTextureAttachment,
 			gBufferMotionVectorTextureAttachment
 		} = this.#createAttachmentsForView(view)
-
 		{
 			//TODO 이거 어디론가 이동시켜야함
 			const frameIndex = antialiasingManager.taa.frameIndex || 0;
 			const jitterScale = antialiasingManager.taa.jitterStrength;
-
-			//  지터 방향 으어...이거중요..
-			const crossPattern = [
-				[0.125, 0.375],    // 우하단
-				[-0.375, 0.125],   // 좌상단
-				[0.375, -0.125],   // 우상단
-				[-0.125, -0.375]   // 좌하단
-			];
-
-			const patternIndex = frameIndex % crossPattern.length;
-			const [x, y] = crossPattern[patternIndex];
-
-			const jitterX = x * jitterScale;
-			const jitterY = y * jitterScale;
-
-			view.setJitterOffset(jitterX, jitterY);
-
-
-
+			// 기본 Halton 시퀀스
+			const haltonX = this.#haltonSequence(frameIndex + 1, 2);
+			const haltonY = this.#haltonSequence(frameIndex + 1, 3);
+			// 세로 방향 강화를 위한 가중치 적용
+			view.setJitterOffset((haltonX - 0.5) * jitterScale, (haltonY - 0.5) * jitterScale );
 		}
 		const renderPassDescriptor: GPURenderPassDescriptor = {
-			colorAttachments: [colorAttachment,gBufferNormalTextureAttachment,gBufferMotionVectorTextureAttachment],
+			colorAttachments: [colorAttachment, gBufferNormalTextureAttachment, gBufferMotionVectorTextureAttachment],
 			depthStencilAttachment,
 		}
 		// @ts-ignore
@@ -180,7 +173,7 @@ class Renderer {
 					);
 					mipmapGenerator.generateMipmap(renderPath1ResultTexture, view.viewRenderTextureManager.renderPath1ResultTextureDescriptor, true)
 					const renderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass({
-						colorAttachments: [...renderPassDescriptor.colorAttachments].map(v => ({...v,loadOp:GPU_LOAD_OP.LOAD})),
+						colorAttachments: [...renderPassDescriptor.colorAttachments].map(v => ({...v, loadOp: GPU_LOAD_OP.LOAD})),
 						depthStencilAttachment: {
 							...depthStencilAttachment,
 							depthLoadOp: GPU_LOAD_OP.LOAD,
@@ -194,7 +187,6 @@ class Renderer {
 				}
 			}
 			// 포스트 이펙트 체크
-
 			if (pickingManager) {
 				pickingManager.checkTexture(view)
 				const pickingPassDescriptor: GPURenderPassDescriptor = {
@@ -225,7 +217,7 @@ class Renderer {
 		view.debugViewRenderState.viewRenderTime = (performance.now() - view.debugViewRenderState.startTime);
 		pickingManager.checkEvents(view, time);
 		{
-			const {projectionMatrix, noneJitterProjectionMatrix,rawCamera, redGPUContext, } = view
+			const {projectionMatrix, noneJitterProjectionMatrix, rawCamera, redGPUContext,} = view
 			const {modelMatrix: cameraMatrix} = rawCamera
 			const {gpuDevice} = redGPUContext;
 			const structInfo = view.systemUniform_Vertex_StructInfo;
@@ -249,8 +241,8 @@ class Renderer {
 		const {
 			depthTextureView,
 			gBufferColorTextureView, gBufferColorResolveTextureView,
-			gBufferNormalTextureView,gBufferNormalResolveTextureView,
-			 gBufferMotionVectorTextureView,gBufferMotionVectorResolveTextureView,
+			gBufferNormalTextureView, gBufferNormalResolveTextureView,
+			gBufferMotionVectorTextureView, gBufferMotionVectorResolveTextureView,
 		} = viewRenderTextureManager
 		const {useBackgroundColor, backgroundColor} = scene
 		const {antialiasingManager} = redGPUContext
@@ -267,8 +259,6 @@ class Renderer {
 			loadOp: GPU_LOAD_OP.CLEAR,
 			storeOp: GPU_STORE_OP.STORE
 		}
-
-
 		// console.log('depthTextureView', depthTextureView)
 		const depthStencilAttachment: GPURenderPassDepthStencilAttachment = {
 			view: depthTextureView,
@@ -288,17 +278,30 @@ class Renderer {
 			loadOp: GPU_LOAD_OP.CLEAR,
 			storeOp: GPU_STORE_OP.STORE
 		}
-		if (useMSAA){
+		if (useMSAA) {
 			colorAttachment.resolveTarget = gBufferColorResolveTextureView
 			gBufferNormalTextureAttachment.resolveTarget = gBufferNormalResolveTextureView
 			gBufferMotionVectorTextureAttachment.resolveTarget = gBufferMotionVectorResolveTextureView
 		}
-		return {colorAttachment, depthStencilAttachment,gBufferNormalTextureAttachment,gBufferMotionVectorTextureAttachment};
+		return {
+			colorAttachment,
+			depthStencilAttachment,
+			gBufferNormalTextureAttachment,
+			gBufferMotionVectorTextureAttachment
+		};
 	}
 
 	#updateViewSystemUniforms(view: View3D, viewRenderPassEncoder: GPURenderPassEncoder, shadowRender: boolean = false, calcPointLightCluster: boolean = true,
 	                          renderPath1ResultTextureView: GPUTextureView = null) {
-		const {inverseProjectionMatrix, pixelRectObject, noneJitterProjectionMatrix,projectionMatrix, rawCamera, redGPUContext, scene} = view
+		const {
+			inverseProjectionMatrix,
+			pixelRectObject,
+			noneJitterProjectionMatrix,
+			projectionMatrix,
+			rawCamera,
+			redGPUContext,
+			scene
+		} = view
 		const {gpuDevice} = redGPUContext
 		const {modelMatrix: cameraMatrix, position: cameraPosition} = rawCamera
 		const structInfo = view.systemUniform_Vertex_StructInfo;
