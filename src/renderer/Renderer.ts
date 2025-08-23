@@ -94,23 +94,22 @@ class Renderer {
 			const frameIndex = antialiasingManager.taa.frameIndex || 0;
 			const jitterScale = antialiasingManager.taa.jitterStrength;
 
-			const halton23 = [
-				[0, 0], [0.5, 0.333], [0.25, 0.667], [0.75, 0.111], [0.125, 0.444],
-				[0.625, 0.778], [0.375, 0.222], [0.875, 0.556], [0.0625, 0.889],
-				[0.5625, 0.037], [0.3125, 0.37], [0.8125, 0.704], [0.1875, 0.148],
-				[0.6875, 0.481], [0.4375, 0.815], [0.9375, 0.259]
+			//  지터 방향 으어...이거중요..
+			const crossPattern = [
+				[0.125, 0.375],    // 우하단
+				[-0.375, 0.125],   // 좌상단
+				[0.375, -0.125],   // 우상단
+				[-0.125, -0.375]   // 좌하단
 			];
 
-			const patternIndex = frameIndex % halton23.length;
-			const [x, y] = halton23[patternIndex];
+			const patternIndex = frameIndex % crossPattern.length;
+			const [x, y] = crossPattern[patternIndex];
 
-
-
-			// -0.5 ~ 0.5 범위로 변환
-			const jitterX = (x - 0.5) * jitterScale;
-			const jitterY = (y - 0.5) * jitterScale;
+			const jitterX = x * jitterScale;
+			const jitterY = y * jitterScale;
 
 			view.setJitterOffset(jitterX, jitterY);
+
 
 
 		}

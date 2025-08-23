@@ -9,46 +9,52 @@ if (any(index >= dims)) {
 // 현재 프레임 색상
 let currentColor = textureLoad(sourceTexture, index).rgb;
 
-// 프레임 인덱스와 히스토리 슬라이스 계산
-let currentSlice = i32(uniforms.frameIndex) % 8;
-let prevSlice = (currentSlice - 1 + 8) % 8;
-
-// 이전 누적된 히스토리 색상 로드
-var historyColor = textureLoad(frameBufferArray, vec2<i32>(index), prevSlice, 0).rgb;
-
 var finalColor = currentColor;
 
-// 디버깅: 첫 몇 프레임은 히스토리 없이 현재 프레임만 출력
-if (uniforms.frameIndex < 2) {
+// 첫 몇 프레임은 히스토리 없이 현재 프레임만 출력 (더 안전하게)
+if (uniforms.frameIndex < 3) {
     finalColor = currentColor;
 } else {
-    // 히스토리가 유효한지 더 관대하게 검사
-    if (dot(historyColor, vec3<f32>(1.0)) > 0.0001) {
+    // 이전 프레임에서 같은 위치의 색상 가져오기
+    let motionVector = textureLoad(motionVectorTexture, index, 0).xy;
+    let prevScreenPos = vec2<f32>(index) - motionVector * vec2<f32>(dims);
+    let prevIndex = vec2<i32>(prevScreenPos + 0.5);
+
+    var historyColor = textureLoad(previousFrameTexture, vec2<i32>(index)).rgb;
+
+    // 히스토리 유효성 검사 강화
+    let historySum = dot(historyColor, vec3<f32>(1.0));
+    if (historySum > 0.001 && historySum < 50.0) {  // 더 엄격한 범위
         // 네이버후드 클램핑을 위한 min/max 계산
         var minColor = currentColor;
         var maxColor = currentColor;
 
-        // 3x3 네이버후드 탐색
-        for (var dy = -1; dy <= 1; dy++) {
-            for (var dx = -1; dx <= 1; dx++) {
-                let nx = clamp(i32(index.x) + dx, 0, i32(dims.x) - 1);
-                let ny = clamp(i32(index.y) + dy, 0, i32(dims.y) - 1);
-                let neighbor = textureLoad(sourceTexture, vec2<u32>(vec2<i32>(nx, ny))).rgb;
-                minColor = min(minColor, neighbor);
-                maxColor = max(maxColor, neighbor);
-            }
+        let neighbors = array<vec2<i32>, 5>(
+            vec2<i32>(0, 0),   // 중심
+            vec2<i32>(-1, 0),  // 왼쪽
+            vec2<i32>(1, 0),   // 오른쪽
+            vec2<i32>(0, -1),  // 위
+            vec2<i32>(0, 1)    // 아래
+        );
+
+        for (var i = 0; i < 5; i++) {
+            let offset = neighbors[i];
+            let nx = clamp(i32(index.x) + offset.x, 0, i32(dims.x) - 1);
+            let ny = clamp(i32(index.y) + offset.y, 0, i32(dims.y) - 1);
+            let neighbor = textureLoad(sourceTexture, vec2<u32>(vec2<i32>(nx, ny))).rgb;
+            minColor = min(minColor, neighbor);
+            maxColor = max(maxColor, neighbor);
         }
 
-        // 히스토리 색상을 네이버후드 범위로 클램핑
+
+        // 히스토리 색상을 네이버후드 범위로 클램핑 (고스팅 방지)
         historyColor = clamp(historyColor, minColor, maxColor);
 
-        // TAA 블렌딩 (더 강한 히스토리 가중치)
+        // 단순한 템포럴 블렌딩
         finalColor = mix(historyColor, currentColor, uniforms.temporalBlendFactor);
-
-        // 디버깅: 히스토리가 적용되면 약간 틴트 추가
-        if (uniforms.frameIndex < 100) {
-            finalColor = mix(finalColor, vec3<f32>(finalColor.r, finalColor.g * 1.1, finalColor.b), 0.1);
-        }
+    } else {
+        // 히스토리가 유효하지 않으면 현재 색상만 사용
+        finalColor = currentColor;
     }
 }
 
