@@ -94,25 +94,22 @@ class Renderer {
 			const frameIndex = antialiasingManager.taa.frameIndex || 0;
 			const jitterScale = antialiasingManager.taa.jitterStrength;
 
-			//  지터 방향 으어...이거중요..
-			const crossPattern = [
-				[0.0, 0.5],        // 상단
-				[-0.5, 0.0],       // 좌측
-				[0.0, 0.0],        // 중앙
-				[0.5, 0.0],        // 우측
-				[0.0, -0.5]        // 하단
+			// MSAA 4x 샘플 패턴에 맞춘 지터 방향
+			// 표준 MSAA 4x 샘플 위치를 기반으로 함
+			const msaaSamplePattern = [
+				[-0.125, -0.375],   // 좌하단
+				[0.375, -0.125],    // 우하단
+				[-0.375, 0.125],    // 좌상단
+				[0.125, 0.375]      // 우상단
 			];
 
-			const patternIndex = frameIndex % crossPattern.length;
-			const [x, y] = crossPattern[patternIndex];
+			const patternIndex = frameIndex % msaaSamplePattern.length;
+			const [x, y] = msaaSamplePattern[patternIndex];
 
 			const jitterX = x * jitterScale;
 			const jitterY = y * jitterScale;
 
 			view.setJitterOffset(jitterX, jitterY);
-
-
-
 		}
 		const renderPassDescriptor: GPURenderPassDescriptor = {
 			colorAttachments: [colorAttachment,gBufferNormalTextureAttachment,gBufferMotionVectorTextureAttachment],

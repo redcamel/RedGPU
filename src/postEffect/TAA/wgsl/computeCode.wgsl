@@ -5,7 +5,7 @@
     let pixelIndex = vec2<u32>(global_id.xy); // 정수 인덱스는 그대로
 
     // 텍스처 경계 밖이면 종료 (0.5 기준)
-    if (any(pixelCoord >= textureSizeF + vec2<f32>(0.5))) {
+    if (any(pixelCoord >= textureSizeF)) {
         return;
     }
 
@@ -60,76 +60,40 @@
         return;
     }
 
-    // ==== 7단계: 일관성 있는 이웃 클램핑 ====
+    // ==== 7단계: 이웃 클램핑 ====
     var neighborMinColor = currentFrameColor;
     var neighborMaxColor = currentFrameColor;
 
-    // 이웃 오프셋 (픽셀 중심 기준)
-    let neighborOffsetsF = array<vec2<f32>, 4>(
+    // 이웃 오프셋 (float 좌표 기준)
+    let neighborOffsetsF = array<vec2<f32>, 5>(
         vec2<f32>(0.0, -1.0),   // 위
         vec2<f32>(0.0,  1.0),   // 아래
+        vec2<f32>(0.0,  0.0),   // 중심
         vec2<f32>(-1.0, 0.0),   // 왼쪽
         vec2<f32>(1.0,  0.0)    // 오른쪽
     );
 
-    for (var i = 0; i < 4; i++) {
-        let neighborCoordF = pixelCoord + neighborOffsetsF[i]; // 이미 0.5 오프셋 적용됨
+    for (var i = 0; i < 5; i++) {
+        let neighborCoordF = pixelCoord + neighborOffsetsF[i];
 
-        // 올바른 경계 검사 (픽셀 중심 기준)
+        // float 기반 경계 검사
         if (all(neighborCoordF >= vec2<f32>(0.5)) &&
             all(neighborCoordF < textureSizeF - vec2<f32>(0.5))) {
 
-            // 정수 인덱스로 변환
-            let neighborIdx = vec2<u32>(neighborCoordF - vec2<f32>(0.5));
+            // float 좌표를 정수 인덱스로 안전하게 변환
+            let neighborIdx = vec2<u32>(max(vec2<f32>(0.0), min(neighborCoordF - vec2<f32>(0.5), textureSizeF - vec2<f32>(1.0))));
             let neighborColor = textureLoad(sourceTexture, neighborIdx).rgb;
             neighborMinColor = min(neighborMinColor, neighborColor);
             neighborMaxColor = max(neighborMaxColor, neighborColor);
         }
     }
 
-    // ==== 나머지 단계들 (변경 없음) ====
-    let motionSpeed = length(motionVector);
-    let pixelMotionSpeed = motionSpeed * length(textureSizeF);
-    let colorVariance = length(neighborMaxColor - neighborMinColor);
-    let isSubPixelGeometry = colorVariance > 0.15;
-    let isHighMotionThinGeometry = pixelMotionSpeed > 2.0 && colorVariance > 0.1;
+    // ==== 8단계: 이전 프레임 색상 클램핑 ====
+    let clampedPreviousColor = clamp(previousFrameColor, neighborMinColor, neighborMaxColor);
 
-    var clampedPreviousColor: vec3<f32>;
-    if (isSubPixelGeometry || isHighMotionThinGeometry) {
-        let clampExpansion = vec3<f32>(0.1);
-        let expandedMin = max(neighborMinColor - clampExpansion, vec3<f32>(0.0));
-        let expandedMax = min(neighborMaxColor + clampExpansion, vec3<f32>(1.0));
-        clampedPreviousColor = clamp(previousFrameColor, expandedMin, expandedMax);
-    } else {
-        clampedPreviousColor = clamp(previousFrameColor, neighborMinColor, neighborMaxColor);
-    }
-
-    var temporalBlendRatio = uniforms.temporalBlendFactor;
-
-    let velocityClampingThreshold = 2.0;
-    if (pixelMotionSpeed > velocityClampingThreshold) {
-        temporalBlendRatio = max(temporalBlendRatio, 0.6);
-    }
-
-    if (isSubPixelGeometry) {
-        temporalBlendRatio = max(temporalBlendRatio, 0.5);
-    }
-
-    if (motionSpeed > 0.01) {
-        let motionInfluence = min(motionSpeed * 5.0, 1.0);
-        temporalBlendRatio = mix(temporalBlendRatio, 0.5, motionInfluence * 0.3);
-    }
-
-    let reprojectionDistance = length(clampedPrevCoord - previousPixelCoord);
-    if (reprojectionDistance > 1.0) {
-        temporalBlendRatio = mix(temporalBlendRatio, 0.4, 0.3);
-    }
-
-    let historyCurrentDiff = length(clampedPreviousColor - currentFrameColor);
-    if ((isSubPixelGeometry || isHighMotionThinGeometry) && historyCurrentDiff > 0.3) {
-        temporalBlendRatio = max(temporalBlendRatio, 0.8);
-    }
-
+    // ==== 9단계: Temporal Blending ====
+    let temporalBlendRatio = uniforms.temporalBlendFactor;
     let finalBlendedColor = mix(clampedPreviousColor, currentFrameColor, temporalBlendRatio);
+
     textureStore(outputTexture, pixelIndex, vec4<f32>(finalBlendedColor, 1.0));
 }
