@@ -49,7 +49,7 @@ class TAA {
 	#frameIndex: number = 0
 
 	#jitterStrength: number = 1;
-	#temporalBlendFactor: number = 0.1;
+	#temporalBlendFactor: number = 0.08;
 	#varianceClipping: boolean = true;
 
 	// 모션벡터 기반 TAA를 위한 새로운 속성들
@@ -169,6 +169,20 @@ class TAA {
 		);
 
 		gpuDevice.queue.submit([commentEncode_compute.finish()]);
+		{
+			const commentEncode_compute = gpuDevice.createCommandEncoder()
+			commentEncode_compute.copyTextureToTexture(
+				{
+					texture: this.#currentFrameTexture
+				},
+				{
+					texture: this.#previousFrameTexture
+				},
+				[width, height, 1]
+			);
+
+			gpuDevice.queue.submit([commentEncode_compute.finish()]);
+		}
 	}
 
 	#prevMSAA: Boolean
