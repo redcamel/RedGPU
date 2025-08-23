@@ -50,7 +50,7 @@ class TAA {
 	#frameIndex: number = 0
 
 	#jitterStrength: number = 1;
-	#temporalBlendFactor: number = 0.95;
+	#temporalBlendFactor: number = 0.1;
 	#varianceClipping: boolean = true;
 
 	// 모션벡터 기반 TAA를 위한 새로운 속성들
@@ -163,6 +163,7 @@ class TAA {
 
 	#prevMSAA:Boolean
 	render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult):ASinglePassPostEffectResult {
+
 		const currentFrameTextureView = sourceTextureInfo.textureView
 		const sourceTexture = sourceTextureInfo.texture;
 		const {gpuDevice, antialiasingManager} = this.#redGPUContext
@@ -190,8 +191,8 @@ class TAA {
 
 		copyToTextureArray(
 			gpuDevice,
-			// this.#outputTexture,
-			sourceTexture,
+			this.#outputTexture,
+			// sourceTexture,
 			this.#frameBufferArrayTexture,
 			currentSliceIndex
 		);

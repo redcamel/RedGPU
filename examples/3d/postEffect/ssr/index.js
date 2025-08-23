@@ -14,7 +14,7 @@ RedGPU.init(
 
 		// 궤도형 카메라 컨트롤러 생성 (더 가까이 배치)
 		const controller = new RedGPU.Camera.ObitController(redGPUContext);
-		controller.distance = 8; // 더 멀리 배치하여 반사 효과 확인
+		controller.distance = 3; // 더 멀리 배치하여 반사 효과 확인
 		controller.speedDistance = 0.2;
 		controller.tilt = -15; // 약간 위에서 내려다보는 각도
 		controller.centerY = 1

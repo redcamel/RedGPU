@@ -64,19 +64,7 @@ class Renderer {
 	stop(redGPUContext: RedGPUContext) {
 		cancelAnimationFrame(redGPUContext.currentRequestAnimationFrame)
 	}
-	#haltonSequence(index: number, base: number): number {
-		let result = 0;
-		let fraction = 1 / base;
-		let i = index;
 
-		while (i > 0) {
-			result += (i % base) * fraction;
-			i = Math.floor(i / base);
-			fraction /= base;
-		}
-
-		return result;
-	}
 
 	renderView(view: View3D, time: number) {
 		const {
@@ -106,13 +94,21 @@ class Renderer {
 			const frameIndex = antialiasingManager.taa.frameIndex || 0;
 			const jitterScale = antialiasingManager.taa.jitterStrength;
 
-			// Halton 시퀀스 계산 (base 2, 3)
-			const haltonX = this.#haltonSequence(frameIndex + 1, 2);
-			const haltonY = this.#haltonSequence(frameIndex + 1, 3);
+			const halton23 = [
+				[0, 0], [0.5, 0.333], [0.25, 0.667], [0.75, 0.111], [0.125, 0.444],
+				[0.625, 0.778], [0.375, 0.222], [0.875, 0.556], [0.0625, 0.889],
+				[0.5625, 0.037], [0.3125, 0.37], [0.8125, 0.704], [0.1875, 0.148],
+				[0.6875, 0.481], [0.4375, 0.815], [0.9375, 0.259]
+			];
+
+			const patternIndex = frameIndex % halton23.length;
+			const [x, y] = halton23[patternIndex];
+
+
 
 			// -0.5 ~ 0.5 범위로 변환
-			const jitterX = (haltonX - 0.5) * jitterScale;
-			const jitterY = (haltonY - 0.5) * jitterScale;
+			const jitterX = (x - 0.5) * jitterScale;
+			const jitterY = (y - 0.5) * jitterScale;
 
 			view.setJitterOffset(jitterX, jitterY);
 
