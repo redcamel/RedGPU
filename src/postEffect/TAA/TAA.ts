@@ -37,8 +37,6 @@ class TAA {
 	#currentFrameTextureView: GPUTextureView
 	#previousFrameTexture: GPUTexture
 	#previousFrameTextureView: GPUTextureView
-	#previousSourceTexture: GPUTexture
-	#previousSourceTextureView: GPUTextureView
 	#frameBufferBindGroup0: GPUBindGroup
 	#frameBufferBindGroup1: GPUBindGroup
 	#WORK_SIZE_X = 8
@@ -88,7 +86,6 @@ class TAA {
 				@group(0) @binding(0) var sourceTexture : texture_storage_2d<rgba8unorm,read>;
 				@group(0) @binding(1) var previousFrameTexture : texture_storage_2d<rgba8unorm,read>;
 				@group(0) @binding(2) var motionVectorTexture : texture_2d<f32>;
-				@group(0) @binding(3) var previousSourceTexture : texture_storage_2d<rgba8unorm,read>;
 				
 				@group(1) @binding(0) var outputTexture : texture_storage_2d<rgba8unorm, write>;
 				${postEffectSystemUniform}
@@ -174,11 +171,6 @@ class TAA {
 				{texture: this.#previousFrameTexture},
 				[width, height, 1]
 			);
-			commentEncode_compute.copyTextureToTexture(
-				{texture: sourceTexture},
-				{texture: this.#previousSourceTexture},
-				[width, height, 1]
-			);
 			gpuDevice.queue.submit([commentEncode_compute.finish()]);
 		}
 		if (this.#frameIndex <= 20 || this.#frameIndex % 60 === 0) {
@@ -207,10 +199,6 @@ class TAA {
 		computeBindGroupEntries0.push({
 			binding: 2,
 			resource: motionVectorTextureView,
-		});
-		computeBindGroupEntries0.push({
-			binding: 3,
-			resource: this.#previousSourceTextureView,
 		});
 		computeBindGroupEntries1.push({
 			binding: 0,
@@ -333,19 +321,7 @@ class TAA {
 				format: 'rgba8unorm',
 				label: `${this.#name}_previousFrame`
 			});
-			this.#previousSourceTexture = resourceManager.createManagedTexture({
-				size: {width, height},
-				format: 'rgba8unorm',
-				usage: GPUTextureUsage.TEXTURE_BINDING |
-					GPUTextureUsage.STORAGE_BINDING |
-					GPUTextureUsage.COPY_DST,
-				label: `${name}_${this.#name}_previousSource_${width}x${height}`
-			});
-			this.#previousSourceTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#previousSourceTexture, {
-				dimension: '2d',
-				format: 'rgba8unorm',
-				label: `${this.#name}_previousSource`
-			});
+
 			console.log('TAA 텍스처 생성 완료:', {
 				previousFrame: {
 					width,
@@ -370,11 +346,6 @@ class TAA {
 	}
 
 	clear() {
-		if (this.#previousSourceTexture) {
-			this.#previousSourceTexture.destroy();
-			this.#previousSourceTexture = null;
-			this.#previousSourceTextureView = null;
-		}
 		if (this.#previousFrameTexture) {
 			this.#previousFrameTexture.destroy();
 			this.#previousFrameTexture = null;
@@ -398,9 +369,6 @@ class TAA {
 		}
 		if (this.#previousFrameTexture) {
 			this.#videoMemorySize += calculateTextureByteSize(this.#previousFrameTexture);
-		}
-		if (this.#previousSourceTexture) {
-			this.#videoMemorySize += calculateTextureByteSize(this.#previousSourceTexture);
 		}
 	}
 

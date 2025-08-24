@@ -64,7 +64,7 @@ RedGPU.init(
 		const floorMesh = new RedGPU.Display.Mesh(redGPUContext, floorGeometry, floorMaterial);
 		floorMesh.rotationX = 90
 
-		scene.addChild(floorMesh);
+		// scene.addChild(floorMesh);
 
 		// 여러 개의 반사 구체 추가
 		const sphereGeometry = new RedGPU.Primitive.Sphere(redGPUContext, 0.5, 32, 16);
