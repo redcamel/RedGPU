@@ -56,43 +56,35 @@
     let bottomMix = mix(bl, br, prevPixelFrac.x);
     let previousFrameColor = mix(topMix, bottomMix, prevPixelFrac.y);
 
-    // *** 핵심: Neighborhood Clamping (이웃 영역 클램핑) ***
-    // 현재 프레임의 3x3 이웃 영역 분석
+    // *** 통합된 Neighborhood 계산 (한번에 min/max + 평균/분산 모두 계산) ***
     var neighborhoodMin = currentFrameColor;
     var neighborhoodMax = currentFrameColor;
+    var neighborhoodSum = vec3<f32>(0.0);
+    var neighborhoodSumSquared = vec3<f32>(0.0);
+    let neighborCount = 9.0;
 
-    // 3x3 이웃 픽셀 샘플링 - 타입 변환 수정
+    // 3x3 이웃 픽셀을 한번만 순회하며 모든 통계 계산
     for (var dy = -1; dy <= 1; dy++) {
         for (var dx = -1; dx <= 1; dx++) {
             let sampleX = u32(clamp(i32(pixelIndex.x) + dx, 0, i32(textureSizeF.x - 1.0)));
             let sampleY = u32(clamp(i32(pixelIndex.y) + dy, 0, i32(textureSizeF.y - 1.0)));
             let samplePos = vec2<u32>(sampleX, sampleY);
             let sampleColor = textureLoad(sourceTexture, samplePos).rgb;
+
+            // Min/Max 계산 (Neighborhood Clamping용)
             neighborhoodMin = min(neighborhoodMin, sampleColor);
             neighborhoodMax = max(neighborhoodMax, sampleColor);
+
+            // 평균/분산 계산 (Variance Clipping용)
+            neighborhoodSum += sampleColor;
+            neighborhoodSumSquared += sampleColor * sampleColor;
         }
     }
 
     // 이전 프레임 색상을 이웃 범위로 클램핑 (고스팅 방지의 핵심!)
     let clampedPrevColor = clamp(previousFrameColor, neighborhoodMin, neighborhoodMax);
 
-    // *** 추가: Variance Clipping ***
-    // 이웃의 평균과 분산 계산
-    var neighborhoodSum = vec3<f32>(0.0);
-    var neighborhoodSumSquared = vec3<f32>(0.0);
-    let neighborCount = 9.0;
-
-    for (var dy = -1; dy <= 1; dy++) {
-        for (var dx = -1; dx <= 1; dx++) {
-            let sampleX = u32(clamp(i32(pixelIndex.x) + dx, 0, i32(textureSizeF.x - 1.0)));
-            let sampleY = u32(clamp(i32(pixelIndex.y) + dy, 0, i32(textureSizeF.y - 1.0)));
-            let samplePos = vec2<u32>(sampleX, sampleY);
-            let sampleColor = textureLoad(sourceTexture, samplePos).rgb;
-            neighborhoodSum += sampleColor;
-            neighborhoodSumSquared += sampleColor * sampleColor;
-        }
-    }
-
+    // *** Variance Clipping ***
     let neighborhoodMean = neighborhoodSum / neighborCount;
     let neighborhoodVariance = (neighborhoodSumSquared / neighborCount) - (neighborhoodMean * neighborhoodMean);
     let neighborhoodStdDev = sqrt(max(neighborhoodVariance, vec3<f32>(0.0)));
