@@ -67,46 +67,63 @@
     let bottomMix = mix(bl, br, prevPixelFrac.x);
     let previousFrameColor = mix(topMix, bottomMix, prevPixelFrac.y);
 
-    // *** 통합된 Neighborhood 계산 (한번에 min/max + 평균/분산 모두 계산) ***
+    // *** 업계 표준 3x3 Neighborhood 샘플링 ***
     var neighborhoodMin = currentFrameColor;
     var neighborhoodMax = currentFrameColor;
     var neighborhoodSum = vec3<f32>(0.0);
     var neighborhoodSumSquared = vec3<f32>(0.0);
-    let neighborCount = 9.0;
+    let neighborCount = 9.0; // 3x3 패턴: 총 9개 샘플
 
-    // 3x3 이웃 픽셀을 한번만 순회하며 모든 통계 계산
-    for (var dy = -1; dy <= 1; dy++) {
-        for (var dx = -1; dx <= 1; dx++) {
-            let sampleX = u32(clamp(i32(pixelIndex.x) + dx, 0, i32(textureSizeF.x - 1.0)));
-            let sampleY = u32(clamp(i32(pixelIndex.y) + dy, 0, i32(textureSizeF.y - 1.0)));
-            let samplePos = vec2<u32>(sampleX, sampleY);
-            let sampleColor = textureLoad(sourceTexture, samplePos).rgb;
+    // 3x3 커널 오프셋 (업계 표준)
+    let offsets = array<vec2<i32>, 9>(
+        vec2<i32>(-1, -1), vec2<i32>(0, -1), vec2<i32>(1, -1),  // 상단 행
+        vec2<i32>(-1,  0), vec2<i32>(0,  0), vec2<i32>(1,  0),  // 중간 행
+        vec2<i32>(-1,  1), vec2<i32>(0,  1), vec2<i32>(1,  1)   // 하단 행
+    );
 
-            // Min/Max 계산 (Neighborhood Clamping용)
-            neighborhoodMin = min(neighborhoodMin, sampleColor);
-            neighborhoodMax = max(neighborhoodMax, sampleColor);
+    // 가중치 (중앙에 더 높은 가중치 - 업계 표준 Gaussian-like)
+    let weights = array<f32, 9>(
+        0.0947416,  0.118318,  0.0947416,  // 상단 행
+        0.118318,   0.147761,  0.118318,   // 중간 행 (중앙 가중치 높음)
+        0.0947416,  0.118318,  0.0947416   // 하단 행
+    );
 
-            // 평균/분산 계산 (Variance Clipping용)
-            neighborhoodSum += sampleColor;
-            neighborhoodSumSquared += sampleColor * sampleColor;
-        }
+    // 3x3 Neighborhood 샘플링
+    for (var i = 0; i < 9; i++) {
+        let offset = offsets[i];
+        let sampleX = u32(clamp(i32(pixelIndex.x) + offset.x, 0, i32(textureSizeF.x - 1.0)));
+        let sampleY = u32(clamp(i32(pixelIndex.y) + offset.y, 0, i32(textureSizeF.y - 1.0)));
+        let samplePos = vec2<u32>(sampleX, sampleY);
+        let sampleColor = textureLoad(sourceTexture, samplePos).rgb;
+        let weight = weights[i];
+
+        // Min/Max 계산 (Neighborhood Clamping용)
+        neighborhoodMin = min(neighborhoodMin, sampleColor);
+        neighborhoodMax = max(neighborhoodMax, sampleColor);
+
+        // 가중 평균/분산 계산 (Variance Clipping용)
+        let weightedColor = sampleColor * weight;
+        neighborhoodSum += weightedColor;
+        neighborhoodSumSquared += sampleColor * sampleColor * weight;
     }
 
     // 이전 프레임 색상을 이웃 범위로 클램핑 (고스팅 방지의 핵심!)
     let clampedPrevColor = clamp(previousFrameColor, neighborhoodMin, neighborhoodMax);
 
-    // *** Variance Clipping ***
-    let neighborhoodMean = neighborhoodSum / neighborCount;
-    let neighborhoodVariance = (neighborhoodSumSquared / neighborCount) - (neighborhoodMean * neighborhoodMean);
-    let neighborhoodStdDev = sqrt(max(neighborhoodVariance, vec3<f32>(0.0)));
+    // *** 개선된 Variance Clipping (업계 표준) ***
+    let neighborhoodMean = neighborhoodSum; // 이미 가중 평균됨
+    let neighborhoodVariance = neighborhoodSumSquared - (neighborhoodMean * neighborhoodMean);
+    let neighborhoodStdDev = sqrt(max(neighborhoodVariance, vec3<f32>(0.0001))); // 최소값으로 수치 안정성 확보
 
-    // 분산 기반 클램핑 (더 정교한 고스팅 방지)
-    let varianceScale = 1.25; // 조정 가능한 매개변수
-    let varianceMin = neighborhoodMean - neighborhoodStdDev * varianceScale;
-    let varianceMax = neighborhoodMean + neighborhoodStdDev * varianceScale;
+    // 적응적 분산 스케일링 (모션에 따라 조정)
+    let baseVarianceScale = 1.25;
+    let adaptiveVarianceScale = mix(baseVarianceScale, baseVarianceScale * 0.5, min(motionMagnitude * 50.0, 1.0));
+
+    let varianceMin = neighborhoodMean - neighborhoodStdDev * adaptiveVarianceScale;
+    let varianceMax = neighborhoodMean + neighborhoodStdDev * adaptiveVarianceScale;
     let varianceClampedPrevColor = clamp(clampedPrevColor, varianceMin, varianceMax);
 
-    // *** 추가: Luminance-based rejection ***
+    // *** 개선된 Luminance-based rejection ***
     let currentLuma = dot(currentFrameColor, vec3<f32>(0.299, 0.587, 0.114));
     let prevLuma = dot(varianceClampedPrevColor, vec3<f32>(0.299, 0.587, 0.114));
     let neighborLuma = dot(neighborhoodMean, vec3<f32>(0.299, 0.587, 0.114));
@@ -115,10 +132,10 @@
     let lumaDiff = abs(prevLuma - currentLuma);
     let neighborLumaDiff = abs(prevLuma - neighborLuma);
 
-    // 적응적 블렌드 팩터 계산
+    // 적응적 블렌드 팩터 계산 (더 정교한 계산)
     let colorDifference = length(currentFrameColor - varianceClampedPrevColor);
-    let rejectionFactor = smoothstep(0.02, 0.1, max(lumaDiff, colorDifference));
-    let motionRejection = smoothstep(0.003, 0.015, motionMagnitude);
+    let rejectionFactor = smoothstep(0.015, 0.08, max(lumaDiff, colorDifference));
+    let motionRejection = smoothstep(0.002, 0.012, motionMagnitude);
 
     // 최종 블렌드 팩터 - motionBlurReduction 적용
     let baseBlendFactor = uniforms.temporalBlendFactor;
@@ -126,17 +143,54 @@
     // 모션 블러 감소 효과를 추가로 적용
     let motionBlurAdjustedBlendFactor = mix(
         baseBlendFactor,
-        min(baseBlendFactor + motionBlurFactor * 0.3, 0.95), // 모션이 있으면 현재 프레임 비중 증가
+        min(baseBlendFactor + motionBlurFactor * 0.25, 0.9), // 더 보수적인 조정
         motionBlurFactor
     );
 
-    let adaptiveBlendFactor = mix(
+    var adaptiveBlendFactor = mix(
         motionBlurAdjustedBlendFactor,
-        0.95, // 거부 시 현재 프레임을 95% 사용
+        0.85, // 거부 시 현재 프레임을 85% 사용 (더 보수적)
         max(rejectionFactor, motionRejection)
     );
 
-    // 최종 색상 혼합
+    // *** 추가: 에지 검출 기반 블렌딩 조정 ***
+    let edgeStrength = length(neighborhoodMax - neighborhoodMin);
+    let isHighFrequency = smoothstep(0.1, 0.3, edgeStrength);
+
+    // 고주파 영역에서는 현재 프레임 비중을 높임
+    adaptiveBlendFactor = mix(adaptiveBlendFactor, min(adaptiveBlendFactor + 0.3, 0.95), isHighFrequency);
+
     let finalColor = mix(varianceClampedPrevColor, currentFrameColor, adaptiveBlendFactor);
     textureStore(outputTexture, pixelIndex, vec4<f32>(finalColor, 1.0));
 }
+
+
+    // Sobel edge detection
+//    var sobelX = vec3<f32>(0.0);
+//    var sobelY = vec3<f32>(0.0);
+//
+//    // Sobel kernel weights
+//    let sobelKernelX = array<f32, 9>(-1.0, 0.0, 1.0, -2.0, 0.0, 2.0, -1.0, 0.0, 1.0);
+//    let sobelKernelY = array<f32, 9>(-1.0, -2.0, -1.0, 0.0, 0.0, 0.0, 1.0, 2.0, 1.0);
+//
+//    var idx = 0;
+//    for (var dy = -1; dy <= 1; dy++) {
+//        for (var dx = -1; dx <= 1; dx++) {
+//            let sampleX = u32(clamp(i32(pixelIndex.x) + dx, 0, i32(textureSizeF.x - 1.0)));
+//            let sampleY = u32(clamp(i32(pixelIndex.y) + dy, 0, i32(textureSizeF.y - 1.0)));
+//            let samplePos = vec2<u32>(sampleX, sampleY);
+//            let sampleColor = textureLoad(sourceTexture, samplePos).rgb;
+//
+//            sobelX += sampleColor * sobelKernelX[idx];
+//            sobelY += sampleColor * sobelKernelY[idx];
+//            idx++;
+//        }
+//    }
+//
+//    let edgeStrength = length(sobelX) + length(sobelY);
+//    let isComplexEdge = step(0.3, edgeStrength); // 복잡한 에지 검출
+//
+//    // 복잡한 에지 영역에서는 TAA 완전 비활성화
+//    if (isComplexEdge > 0.5) {
+//        adaptiveBlendFactor = 0.01;
+//    }

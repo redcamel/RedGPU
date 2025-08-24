@@ -65,6 +65,19 @@ class Renderer {
 		cancelAnimationFrame(redGPUContext.currentRequestAnimationFrame)
 	}
 
+	#haltonSequence(index: number, base: number): number {
+		let result = 0;
+		let fraction = 1 / base;
+		let i = index;
+
+		while (i > 0) {
+			result += (i % base) * fraction;
+			i = Math.floor(i / base);
+			fraction /= base;
+		}
+
+		return result;
+	}
 
 	renderView(view: View3D, time: number) {
 		const {
@@ -94,22 +107,20 @@ class Renderer {
 			const frameIndex = antialiasingManager.taa.frameIndex || 0;
 			const jitterScale = antialiasingManager.taa.jitterStrength;
 
-			// MSAA 4x 샘플 패턴에 맞춘 지터 방향
-			// 표준 MSAA 4x 샘플 위치를 기반으로 함
-			const msaaSamplePattern = [
-				[-0.125, -0.375],   // 좌하단
-				[0.375, -0.125],    // 우하단
-				[-0.375, 0.125],    // 좌상단
-				[0.125, 0.375]      // 우상단
-			];
+			// Halton(2,3) 시퀀스 기반 16 샘플 패턴 (업계 표준)
+			const sampleCount = 16;
+			const currentSample = frameIndex % sampleCount;
 
-			const patternIndex = frameIndex % msaaSamplePattern.length;
-			const [x, y] = msaaSamplePattern[patternIndex];
+			// Halton 시퀀스 계산
+			const haltonX = this.#haltonSequence(currentSample + 1, 2);
+			const haltonY = this.#haltonSequence(currentSample + 1, 3);
 
-			const jitterX = x * jitterScale;
-			const jitterY = y * jitterScale;
+			// [-0.5, 0.5] 범위로 정규화하고 픽셀 단위로 변환
+			const jitterX = (haltonX - 0.5) * jitterScale;
+			const jitterY = (haltonY - 0.5) * jitterScale;
 
 			view.setJitterOffset(jitterX, jitterY);
+
 		}
 		const renderPassDescriptor: GPURenderPassDescriptor = {
 			colorAttachments: [colorAttachment,gBufferNormalTextureAttachment,gBufferMotionVectorTextureAttachment],
