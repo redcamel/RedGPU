@@ -82,7 +82,7 @@ class TAA {
 				${uniformStructCode}
 				
 				@group(0) @binding(0) var sourceTexture : texture_storage_2d<rgba8unorm,read>;
-				@group(0) @binding(1) var previousFrameTexture : texture_2d<f32>;
+				@group(0) @binding(1) var previousFrameTexture : texture_storage_2d<rgba8unorm,read>;
 				@group(0) @binding(2) var motionVectorTexture : texture_2d<f32>;
 				
 				@group(1) @binding(0) var outputTexture : texture_storage_2d<rgba8unorm, write>;

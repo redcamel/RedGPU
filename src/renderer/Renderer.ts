@@ -119,7 +119,7 @@ class Renderer {
 			const jitterX = (haltonX - 0.5) * jitterScale;
 			const jitterY = (haltonY - 0.5) * jitterScale;
 
-			view.setJitterOffset(jitterX, jitterY);
+			view.setJitterOffset(jitterX, 0);
 
 		}
 		const renderPassDescriptor: GPURenderPassDescriptor = {
