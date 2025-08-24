@@ -50,10 +50,10 @@ class TAA {
 	#varianceClipping: boolean = true;
 	// 모션벡터 기반 TAA를 위한 새로운 속성들
 	#useMotionVectors: boolean = true;
-	#motionVectorScale: number = 1.0;
+
 	#motionBlurReduction: number = 0.8;
 	#disocclusionThreshold: number = 0.1;
-	#motionVectorIntensity: number = 1.0;
+
 
 	constructor(redGPUContext: RedGPUContext) {
 		this.#redGPUContext = redGPUContext
@@ -72,10 +72,8 @@ class TAA {
 		this.varianceClipping = this.#varianceClipping;
 		// 모션벡터 관련 초기값 설정
 		this.useMotionVectors = this.#useMotionVectors;
-		this.motionVectorScale = this.#motionVectorScale;
 		this.motionBlurReduction = this.#motionBlurReduction;
 		this.disocclusionThreshold = this.#disocclusionThreshold;
-		this.motionVectorIntensity = this.#motionVectorIntensity;
 	}
 
 	#createTAAShaderCode() {
@@ -441,15 +439,6 @@ class TAA {
 		this.updateUniform('useMotionVectors', value ? 1.0 : 0.0);
 	}
 
-	get motionVectorScale(): number {
-		return this.#motionVectorScale;
-	}
-
-	set motionVectorScale(value: number) {
-		validateNumberRange(value, 0.1, 5.0);
-		this.#motionVectorScale = value;
-		this.updateUniform('motionVectorScale', value);
-	}
 
 	get motionBlurReduction(): number {
 		return this.#motionBlurReduction;
@@ -471,15 +460,6 @@ class TAA {
 		this.updateUniform('disocclusionThreshold', value);
 	}
 
-	get motionVectorIntensity(): number {
-		return this.#motionVectorIntensity;
-	}
-
-	set motionVectorIntensity(value: number) {
-		validateNumberRange(value, 0.1, 3.0);
-		this.#motionVectorIntensity = value;
-		this.updateUniform('motionVectorIntensity', value);
-	}
 }
 
 Object.freeze(TAA);

@@ -25,13 +25,24 @@
 
     // 모션 벡터 로드
     let motionVector = textureLoad(motionVectorTexture, pixelIndex, 0).xy;
-
-    // 모션 벡터가 큰 경우 현재 프레임만 사용
     let motionMagnitude = length(motionVector);
+
+    // 모션 블러 감소 효과 계산 - 모션이 클수록 현재 프레임 비중 증가
+    let motionBlurFactor = smoothstep(0.001, 0.02, motionMagnitude) * uniforms.motionBlurReduction;
+
+    // 모션 벡터가 큰 경우 현재 프레임만 사용 (기존 로직 + 모션 블러 감소 적용)
     if (motionMagnitude > 0.01) {
-        textureStore(outputTexture, pixelIndex, vec4<f32>(currentFrameColor, 1.0));
+        // motionBlurReduction이 높을수록 현재 프레임을 더 많이 사용
+        let motionBasedBlend = mix(0.1, 1.0, motionBlurFactor);
+        let blendedColor = mix(
+            textureLoad(previousFrameTexture, pixelIndex).rgb,
+            currentFrameColor,
+            motionBasedBlend
+        );
+        textureStore(outputTexture, pixelIndex, vec4<f32>(blendedColor, 1.0));
         return;
     }
+
 
     // 이전 프레임 위치 계산
     let prevPixelCoord = vec2<f32>(pixelIndex) - motionVector;
@@ -109,10 +120,18 @@
     let rejectionFactor = smoothstep(0.02, 0.1, max(lumaDiff, colorDifference));
     let motionRejection = smoothstep(0.003, 0.015, motionMagnitude);
 
-    // 최종 블렌드 팩터 (고스팅 방지를 위해 더 보수적으로)
+    // 최종 블렌드 팩터 - motionBlurReduction 적용
     let baseBlendFactor = uniforms.temporalBlendFactor;
-    let adaptiveBlendFactor = mix(
+
+    // 모션 블러 감소 효과를 추가로 적용
+    let motionBlurAdjustedBlendFactor = mix(
         baseBlendFactor,
+        min(baseBlendFactor + motionBlurFactor * 0.3, 0.95), // 모션이 있으면 현재 프레임 비중 증가
+        motionBlurFactor
+    );
+
+    let adaptiveBlendFactor = mix(
+        motionBlurAdjustedBlendFactor,
         0.95, // 거부 시 현재 프레임을 95% 사용
         max(rejectionFactor, motionRejection)
     );

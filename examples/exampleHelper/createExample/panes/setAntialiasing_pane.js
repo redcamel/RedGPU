@@ -54,10 +54,6 @@ const setAntialiasing_pane = (pane, redGPUContext, openYn = false) => {
 		.on('change', (v) => {
 			taaEffect.temporalBlendFactor = v.value;
 		});
-	taaFolder.addBinding(taaEffect, 'motionVectorScale', {min: 0.1, max: 5, step: 0.01})
-		.on('change', (v) => {
-			taaEffect.motionVectorScale = v.value;
-		});
 	taaFolder.addBinding(taaEffect, 'motionBlurReduction', {min: 0.0, max: 1, step: 0.01})
 		.on('change', (v) => {
 			taaEffect.motionBlurReduction = v.value;
@@ -65,10 +61,6 @@ const setAntialiasing_pane = (pane, redGPUContext, openYn = false) => {
 	taaFolder.addBinding(taaEffect, 'disocclusionThreshold', {min: 0.1, max: 1, step: 0.01})
 		.on('change', (v) => {
 			taaEffect.disocclusionThreshold = v.value;
-		});
-	taaFolder.addBinding(taaEffect, 'motionVectorIntensity', {min: 0.1, max: 3, step: 0.01})
-		.on('change', (v) => {
-			taaEffect.motionVectorIntensity = v.value;
 		});
 	taaFolder.addBinding(taaEffect, 'varianceClipping');
 	taaFolder.addBinding(taaEffect, 'useMotionVectors');
