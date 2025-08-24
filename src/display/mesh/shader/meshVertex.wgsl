@@ -120,22 +120,35 @@ fn main(inputData: InputData) -> OutputData {
     #redgpu_endIf
 
     output.combinedOpacity = vertexUniforms.combinedOpacity;
-  {
-     let currentClipPos = u_noneJitterProjectionCameraMatrix * position;  // jitter 제거된 위치 사용
-//     let currentClipPos = output.position;
-     let prevClipPos = u_prevProjectionCameraMatrix * u_prevModelMatrix * vec4<f32>(input_position, 1.0);
+{
+    let currentClipPos = u_noneJitterProjectionCameraMatrix * position;
+    let prevClipPos = u_prevProjectionCameraMatrix * u_prevModelMatrix * vec4<f32>(input_position, 1.0);
 
-     // 클립 공간에서 유효한 w 값 확인
-     let currentW = max(currentClipPos.w, 0.0001);
-     let prevW = max(prevClipPos.w, 0.0001);
+    // 클립 공간에서 유효한 w 값 확인
+    let currentW = max(currentClipPos.w, 0.0001);
+    let prevW = max(prevClipPos.w, 0.0001);
 
-     // NDC 좌표로 변환
-     let currentNDC = currentClipPos.xy / currentW;
-     let prevNDC = prevClipPos.xy / prevW;
+    // NDC 좌표로 변환 (-1 ~ 1 범위)
+    let currentNDC = currentClipPos.xy / currentW;
+    let prevNDC = prevClipPos.xy / prevW;
 
-     // 정규화된 스크린 공간에서의 모션벡터 (-1 ~ 1 범위)
-     output.motionVector = currentNDC - prevNDC;
+    // NDC에서 UV 좌표로 변환 (0 ~ 1 범위)
+    let currentUV = currentNDC * 0.5 + 0.5;
+    let prevUV = prevNDC * 0.5 + 0.5;
 
- }
+    // UV 공간에서의 모션벡터 계산
+    let motionUV = currentUV - prevUV;
+
+    // 🔑 핵심: 모션벡터 크기 제한 (여기서 해결!)
+    let motionLength = length(motionUV);
+    let maxMotionLength = 0.2; // 최대 허용 모션 크기 (화면의 20%)
+
+    // 큰 모션벡터를 제한
+    let clampedMotionUV = motionUV * min(1.0, maxMotionLength / max(motionLength, 0.001));
+
+    // 최종 모션벡터 출력
+    output.motionVector = clampedMotionUV;
+}
+
     return output;
 }
