@@ -92,6 +92,7 @@ RedGPU.init(
 		loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb');
 		loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MetalRoughSpheres/glTF-Binary/MetalRoughSpheres.glb');
 		loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Sponza/glTF/Sponza.gltf');
+		loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF-Binary/BrainStem.glb', 1, 0);
 
 		// ============================================
 		// 레이아웃 설정
@@ -164,6 +165,9 @@ function loadGLTF(redGPUContext, scene, url) {
 			// 모델을 약간 위로 배치
 			if (url.includes('DamagedHelmet')) {
 				mesh.y = 1;
+				test = mesh
+			}if (url.includes('BrainStem')) {
+				mesh.x = 1.5;
 				test = mesh
 			}
 			if (url.includes('MetalRoughSpheres')) {

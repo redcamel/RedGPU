@@ -46,6 +46,7 @@ struct OutputDataSkin {
     @location(9) ndcPosition: vec3<f32>,
     @location(10) localNodeScale: f32,
     @location(11) volumeScale: f32,
+    @location(12) motionVector: vec2<f32>,
 };
 
 struct OutputShadowData {
@@ -57,11 +58,14 @@ fn main(inputData: InputDataSkin) -> OutputDataSkin {
     // 카메라 매트릭스와 유니폼 매트릭스를 미리 계산
     let u_projectionMatrix = systemUniforms.projectionMatrix;
     let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
+    let u_noneJitterProjectionCameraMatrix = systemUniforms.noneJitterProjectionCameraMatrix;
+    let u_prevProjectionCameraMatrix = systemUniforms.prevProjectionCameraMatrix;
     let u_camera = systemUniforms.camera;
     let u_cameraMatrix = u_camera.cameraMatrix;
 
     let u_localMatrix = vertexUniforms.localMatrix;
     let u_modelMatrix = vertexUniforms.modelMatrix;
+    let u_prevModelMatrix = vertexUniforms.prevModelMatrix;
     let u_normalModelMatrix = vertexUniforms.normalModelMatrix;
 
     let u_directionalLightCount = systemUniforms.directionalLightCount;
@@ -110,7 +114,28 @@ fn main(inputData: InputDataSkin) -> OutputDataSkin {
     let volumeScaleY: f32 = length(u_modelMatrix[1].xyz);
     let volumeScaleZ: f32 = length(u_modelMatrix[2].xyz);
     output.volumeScale = pow(volumeScaleX * volumeScaleY * volumeScaleZ, 1.0 / 3.0);
+{
 
+    let currentClipPos = u_noneJitterProjectionCameraMatrix * position;
+    let prevClipPos = u_prevProjectionCameraMatrix * u_prevModelMatrix * vec4<f32>(inputData.position, 1.0);
+
+
+    let currentW = max(currentClipPos.w, 0.0001);
+    let prevW = max(prevClipPos.w, 0.0001);
+
+    // NDC 좌표로 변환 (-1 ~ 1 범위)
+    let currentNDC = currentClipPos.xy / currentW;
+    let prevNDC = prevClipPos.xy / prevW;
+
+    let motionVector = currentNDC - prevNDC;
+
+    let motionLength = length(motionVector);
+    let maxMotionLength = 0.1;
+    let clampedMotionVector = motionVector * min(1.0, maxMotionLength / max(motionLength, 0.001));
+
+
+    output.motionVector = clampedMotionVector;
+}
     return output;
 }
 
@@ -145,7 +170,7 @@ fn drawDirectionalShadowDepth(inputData: InputDataSkin) -> OutputShadowData {
 @vertex
 fn picking(inputData: InputDataSkin) -> OutputDataSkin {
     let u_projectionMatrix = systemUniforms.projectionMatrix;
-    let projectionCameraMatrix = systemUniforms.u_projectionCameraMatrix;
+    let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
     let u_camera = systemUniforms.camera;
     let u_cameraMatrix = u_camera.cameraMatrix;
     let u_modelMatrix = vertexUniforms.modelMatrix;

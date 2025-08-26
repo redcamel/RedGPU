@@ -143,7 +143,7 @@
     // 모션 블러 감소 효과를 추가로 적용
      let motionBlurAdjustedBlendFactor = mix(
           baseBlendFactor,
-          min(baseBlendFactor + motionBlurFactor * 0.15, 0.9), // 더 보수적인 조정
+          min(baseBlendFactor + motionBlurFactor * 0.3, 0.9), // 더 보수적인 조정
           motionBlurFactor
       );
 
