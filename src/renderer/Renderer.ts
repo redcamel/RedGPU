@@ -107,7 +107,7 @@ class Renderer {
 			const frameIndex = antialiasingManager.taa.frameIndex || 0;
 			const jitterScale = antialiasingManager.taa.jitterStrength;
 
-			// Halton(2,3) 시퀀스 기반 16 샘플 패턴 (업계 표준)
+
 			const sampleCount = 16;
 			const currentSample = frameIndex % sampleCount;
 
@@ -119,7 +119,7 @@ class Renderer {
 			const jitterX = (haltonX - 0.5) * jitterScale;
 			const jitterY = (haltonY - 0.5) * jitterScale;
 
-			view.setJitterOffset(jitterX, 0);
+			view.setJitterOffset(jitterX, jitterY);
 
 		}
 		const renderPassDescriptor: GPURenderPassDescriptor = {

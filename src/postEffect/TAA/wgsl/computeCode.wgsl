@@ -31,17 +31,17 @@
     let motionBlurFactor = smoothstep(0.001, 0.02, motionMagnitude) * uniforms.motionBlurReduction;
 
     // 모션 벡터가 큰 경우 현재 프레임만 사용 (기존 로직 + 모션 블러 감소 적용)
-    if (motionMagnitude > 0.01) {
-        // motionBlurReduction이 높을수록 현재 프레임을 더 많이 사용
-        let motionBasedBlend = mix(0.1, 1.0, motionBlurFactor);
-        let blendedColor = mix(
-            textureLoad(previousFrameTexture, pixelIndex).rgb,
-            currentFrameColor,
-            motionBasedBlend
-        );
-        textureStore(outputTexture, pixelIndex, vec4<f32>(blendedColor, 1.0));
-        return;
-    }
+//    if (motionMagnitude > 0.01) {
+//        // motionBlurReduction이 높을수록 현재 프레임을 더 많이 사용
+//        let motionBasedBlend = mix(0.1, 1.0, motionBlurFactor);
+//        let blendedColor = mix(
+//            textureLoad(previousFrameTexture, pixelIndex).rgb,
+//            currentFrameColor,
+//            motionBasedBlend
+//        );
+//        textureStore(outputTexture, pixelIndex, vec4<f32>(blendedColor, 1.0));
+//        return;
+//    }
 
 
     // 이전 프레임 위치 계산
@@ -141,26 +141,25 @@
     let baseBlendFactor = uniforms.temporalBlendFactor;
 
     // 모션 블러 감소 효과를 추가로 적용
-    let motionBlurAdjustedBlendFactor = mix(
-        baseBlendFactor,
-        min(baseBlendFactor + motionBlurFactor * 0.25, 0.9), // 더 보수적인 조정
-        motionBlurFactor
-    );
+     let motionBlurAdjustedBlendFactor = mix(
+          baseBlendFactor,
+          min(baseBlendFactor + motionBlurFactor * 0.15, 0.9), // 더 보수적인 조정
+          motionBlurFactor
+      );
+
+    let rejectionStrength = max(rejectionFactor, motionRejection);
+
 
     var adaptiveBlendFactor = mix(
         motionBlurAdjustedBlendFactor,
         0.85, // 거부 시 현재 프레임을 85% 사용 (더 보수적)
-        max(rejectionFactor, motionRejection)
+        rejectionStrength
     );
-
-    // *** 추가: 에지 검출 기반 블렌딩 조정 ***
-    let edgeStrength = length(neighborhoodMax - neighborhoodMin);
-    let isHighFrequency = smoothstep(0.1, 0.3, edgeStrength);
-
-    // 고주파 영역에서는 현재 프레임 비중을 높임
-    adaptiveBlendFactor = mix(adaptiveBlendFactor, min(adaptiveBlendFactor + 0.3, 0.95), isHighFrequency);
-
-    let finalColor = mix(varianceClampedPrevColor, currentFrameColor, adaptiveBlendFactor);
+    let finalColor = mix(
+        mix(varianceClampedPrevColor, currentFrameColor, adaptiveBlendFactor),
+        mix(varianceClampedPrevColor, currentFrameColor, baseBlendFactor),
+        adaptiveBlendFactor * adaptiveBlendFactor + 0.02
+    );
     textureStore(outputTexture, pixelIndex, vec4<f32>(finalColor, 1.0));
 }
 
