@@ -167,8 +167,9 @@
         mix(varianceClampedPrevColor, currentFrameColor, baseBlendFactor),
         adaptiveBlendFactor * adaptiveBlendFactor + 0.02
     );
-    let isLine = false;
-   if(isLine){
+    //TODO - noneJitter개념을 쉐이더에 다추가해야함...
+   let noneJitter = false;
+   if(noneJitter){
            textureStore(outputTexture, pixelIndex, vec4<f32>(currentFrameColor, 1.0));
            return;
    }else{
