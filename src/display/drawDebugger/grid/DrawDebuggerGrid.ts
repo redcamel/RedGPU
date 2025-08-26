@@ -101,7 +101,11 @@ class DrawDebuggerGrid {
 					{
 						format: navigator.gpu.getPreferredCanvasFormat(),
 						blend: undefined,
-					}
+					},
+					{
+						format: 'rg16float',
+						blend: undefined,
+					},
 				],
 
 			},

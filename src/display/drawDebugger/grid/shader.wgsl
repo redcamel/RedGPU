@@ -17,9 +17,10 @@ fn vertexMain(in: VertexIn) -> VertexOut {
     //
     let u_projectionMatrix = systemUniforms.projectionMatrix;
     let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
+    let u_noneJitterProjectionCameraMatrix = systemUniforms.noneJitterProjectionCameraMatrix;
     let u_camera = systemUniforms.camera;
     let u_cameraMatrix = u_camera.cameraMatrix;
-    out.pos = u_projectionCameraMatrix * in.pos;
+    out.pos = u_noneJitterProjectionCameraMatrix * in.pos;
     out.uv = in.uv;
     return out;
 }

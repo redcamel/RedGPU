@@ -13,9 +13,9 @@
         textureStore(outputTexture, pixelIndex, vec4<f32>(currentFrameColor, 1.0));
         return;
     }
-
     // 모션 벡터 사용 여부 확인
     if (uniforms.useMotionVectors < 0.5) {
+
         let prevFrameColor = textureLoad(previousFrameTexture, pixelIndex).rgb;
         let blendFactor = clamp(uniforms.temporalBlendFactor, 0.2, 0.8);
         let finalColor = mix(prevFrameColor, currentFrameColor, blendFactor);
@@ -76,17 +76,23 @@
 
     // 3x3 커널 오프셋 (업계 표준)
     let offsets = array<vec2<i32>, 9>(
-        vec2<i32>(-1, -1), vec2<i32>(0, -1), vec2<i32>(1, -1),  // 상단 행
-        vec2<i32>(-1,  0), vec2<i32>(0,  0), vec2<i32>(1,  0),  // 중간 행
-        vec2<i32>(-1,  1), vec2<i32>(0,  1), vec2<i32>(1,  1)   // 하단 행
-    );
+            vec2<i32>(-1, -1), vec2<i32>(0, -1), vec2<i32>(1, -1),  // 상단 행
+            vec2<i32>(-1,  0), vec2<i32>(0,  0), vec2<i32>(1,  0),  // 중간 행
+            vec2<i32>(-1,  1), vec2<i32>(0,  1), vec2<i32>(1,  1)   // 하단 행
+        );
 
     // 가중치 (중앙에 더 높은 가중치 - 업계 표준 Gaussian-like)
-    let weights = array<f32, 9>(
-        0.0947416,  0.118318,  0.0947416,  // 상단 행
-        0.118318,   0.147761,  0.118318,   // 중간 행 (중앙 가중치 높음)
-        0.0947416,  0.118318,  0.0947416   // 하단 행
-    );
+//    let weights = array<f32, 9>(
+//           0.111111,  0.111111,  0.111111,  // 상단 행
+//           0.111111,  0.111111,  0.111111,  // 중간 행
+//           0.111111,  0.111111,  0.111111   // 하단 행
+//       );
+          let weights = array<f32, 9>(
+               0.0947416,  0.118318,  0.0947416,  // 상단 행
+               0.118318,   0.147761,  0.118318,   // 중간 행 (중앙 가중치 높음)
+               0.0947416,  0.118318,  0.0947416   // 하단 행
+           );
+
 
     // 3x3 Neighborhood 샘플링
     for (var i = 0; i < 9; i++) {
@@ -147,20 +153,32 @@
           motionBlurFactor
       );
 
+
+
+
+
+
+
+    var finalColor:vec3<f32>;
     let rejectionStrength = max(rejectionFactor, motionRejection);
-
-
     var adaptiveBlendFactor = mix(
         motionBlurAdjustedBlendFactor,
         0.85, // 거부 시 현재 프레임을 85% 사용 (더 보수적)
         rejectionStrength
     );
-    let finalColor = mix(
+    finalColor = mix(
         mix(varianceClampedPrevColor, currentFrameColor, adaptiveBlendFactor),
         mix(varianceClampedPrevColor, currentFrameColor, baseBlendFactor),
         adaptiveBlendFactor * adaptiveBlendFactor + 0.02
     );
-    textureStore(outputTexture, pixelIndex, vec4<f32>(finalColor, 1.0));
+    let isLine = false;
+   if(isLine){
+           textureStore(outputTexture, pixelIndex, vec4<f32>(currentFrameColor, 1.0));
+           return;
+   }else{
+        textureStore(outputTexture, pixelIndex, vec4<f32>(finalColor, 1.0));
+    }
+
 }
 
 

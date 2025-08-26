@@ -39,6 +39,7 @@ fn main(inputData: InputData) -> OutputData {
     // 시스템 Uniform 변수 가져오기
     let u_resolution = systemUniforms.resolution;
     let u_projectionMatrix = systemUniforms.projectionMatrix;
+    let u_noneJitterProjectionMatrix = systemUniforms.noneJitterProjectionMatrix;
     let u_camera = systemUniforms.camera;
     let u_cameraMatrix = u_camera.cameraMatrix;
     let u_cameraPosition = u_camera.cameraPosition;
@@ -91,15 +92,15 @@ fn main(inputData: InputData) -> OutputData {
         normalPosition = getBillboardMatrix(u_cameraMatrix, u_normalModelMatrix) * scaleMatrix * vec4<f32>(input_vertexNormal, 1.0);
 
         // 투영 변환 적용
-        output.position = u_projectionMatrix * position;
+        output.position = u_noneJitterProjectionMatrix * position;
 
         // 추가 위치 보정 (퍼스펙티브가 비활성화된 경우)
         if (u_useBillboardPerspective != 1) {
             var temp = output.position / output.position.w;
             output.position = vec4<f32>(
                 temp.xy + objectPosition.xy * vec2<f32>(
-                    (u_projectionMatrix * u_modelMatrix)[0][0],
-                    (u_projectionMatrix * u_modelMatrix)[1][1]
+                    (u_noneJitterProjectionMatrix * u_modelMatrix)[0][0],
+                    (u_noneJitterProjectionMatrix * u_modelMatrix)[1][1]
                 ),
                 temp.zw
             );
@@ -110,7 +111,7 @@ fn main(inputData: InputData) -> OutputData {
         // 일반적인 변환 처리
         position = u_cameraMatrix * u_modelMatrix * scaleMatrix * vec4<f32>(objectPosition, 1.0);
         normalPosition = u_cameraMatrix * u_normalModelMatrix * scaleMatrix * vec4<f32>(input_vertexNormal, 1.0);
-        output.position = u_projectionMatrix * position;
+        output.position = u_noneJitterProjectionMatrix * position;
     }
     #redgpu_endIf
 
@@ -135,6 +136,7 @@ fn picking(inputData: InputData) -> OutputData {
 
     // 시스템 Uniform 변수 가져오기
     let u_projectionMatrix = systemUniforms.projectionMatrix;
+    let u_noneJitterProjectionMatrix = systemUniforms.noneJitterProjectionMatrix;
     let u_camera = systemUniforms.camera;
     let u_cameraMatrix = u_camera.cameraMatrix;
     let u_cameraPosition = u_camera.cameraPosition;
@@ -182,15 +184,15 @@ fn picking(inputData: InputData) -> OutputData {
         position = getBillboardMatrix(u_cameraMatrix, u_modelMatrix) * scaleMatrix * vec4<f32>(objectPosition, 1.0);
 
         // 투영 변환 적용
-        output.position = u_projectionMatrix * position;
+        output.position = u_noneJitterProjectionMatrix * position;
 
         // 추가 위치 보정 (퍼스펙티브가 비활성화된 경우)
         if (u_useBillboardPerspective != 1) {
             var temp = output.position / output.position.w;
             output.position = vec4<f32>(
                 temp.xy + objectPosition.xy * vec2<f32>(
-                    (u_projectionMatrix * u_modelMatrix)[0][0],
-                    (u_projectionMatrix * u_modelMatrix)[1][1]
+                    (u_noneJitterProjectionMatrix * u_modelMatrix)[0][0],
+                    (u_noneJitterProjectionMatrix * u_modelMatrix)[1][1]
                 ),
                 temp.zw
             );
@@ -198,7 +200,7 @@ fn picking(inputData: InputData) -> OutputData {
     } else {
         // 일반적인 변환 처리
         position = u_cameraMatrix * u_modelMatrix * scaleMatrix * vec4<f32>(objectPosition, 1.0);
-        output.position = u_projectionMatrix * position;
+        output.position = u_noneJitterProjectionMatrix * position;
     }
 
     // 피킹 ID 설정
