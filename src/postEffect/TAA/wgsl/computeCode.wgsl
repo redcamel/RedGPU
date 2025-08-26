@@ -155,10 +155,6 @@
 
 
 
-
-
-
-
     var finalColor:vec3<f32>;
     let rejectionStrength = max(rejectionFactor, motionRejection);
     var adaptiveBlendFactor = mix(
