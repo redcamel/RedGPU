@@ -122,24 +122,18 @@ fn main(inputData: InputDataSkin) -> OutputDataSkin {
     let currentW = max(currentClipPos.w, 0.0001);
     let prevW = max(prevClipPos.w, 0.0001);
 
-    // NDC 좌표로 변환 (-1 ~ 1 범위)
     let currentNDC = currentClipPos.xy / currentW;
     let prevNDC = prevClipPos.xy / prevW;
 
     let motionVectorNDC = currentNDC - prevNDC;
-
-    // 픽셀 단위로 모션벡터 크기 계산
     let screenMotionVector = motionVectorNDC * u_resolution * 0.5;
     let motionMagnitudePixels = length(screenMotionVector);
 
-    // 픽셀 단위 클램핑 (예: 최대 50픽셀)
     let maxMotionPixels = 16.0;
     let clampedScreenMotionVector = screenMotionVector * min(1.0, maxMotionPixels / max(motionMagnitudePixels, 0.001));
 
-    // 다시 NDC 공간으로 변환
-    let clampedMotionVectorNDC = clampedScreenMotionVector / (u_resolution * 0.5);
-
-    output.motionVector = clampedMotionVectorNDC;
+    // 픽셀 단위로 직접 출력
+    output.motionVector = clampedScreenMotionVector;
 }
     return output;
 }
