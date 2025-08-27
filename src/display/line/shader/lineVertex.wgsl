@@ -27,13 +27,7 @@
  @vertex
  fn main(inputData: InputData) -> OutputData {
      var output: OutputData;
-
      let u_noneJitterProjectionCameraMatrix = systemUniforms.noneJitterProjectionCameraMatrix;
-     let u_resolution = systemUniforms.resolution;
-     let u_camera = systemUniforms.camera;
-     let u_cameraMatrix = u_camera.cameraMatrix;
-     let u_cameraPosition = u_camera.cameraPosition;
-
      let u_modelMatrix = vertexUniforms.modelMatrix;
 
      let input_position = inputData.position;

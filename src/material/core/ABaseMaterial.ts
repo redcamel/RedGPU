@@ -259,7 +259,7 @@ class ABaseMaterial extends ResourceBase {
 					writeMask: this.writeMaskState,
 				},
 				{
-					format: 'rg16float',
+					format: 'rgba16float',
 					blend: undefined,
 					writeMask: this.writeMaskState,
 				},

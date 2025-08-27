@@ -107,7 +107,7 @@ class ViewRenderTextureManager {
 	}
 
 	get gBufferMotionVectorTextureView(): GPUTextureView {
-		this.#createGBuffer('gBufferMotionVector','rg16float');
+		this.#createGBuffer('gBufferMotionVector','rgba16float');
 		return this.#gBuffers.get('gBufferMotionVector')?.textureView
 	}
 

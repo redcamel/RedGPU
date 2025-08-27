@@ -15,6 +15,7 @@ struct InputData {
 fn main(inputData:InputData) -> FragmentOutput {
     var output:FragmentOutput;
     output.color = inputData.vertexColor;
+    output.gBufferMotionVector = vec4<f32>( 0.0, 0.0, 1.0, 1.0 );
     return output;
 }
 

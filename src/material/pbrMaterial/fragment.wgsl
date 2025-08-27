@@ -1044,7 +1044,6 @@ let attenuation = rangePart * invSquare;
 
     output.color = finalColor;
 
-
     #redgpu_if useSSR
     {
         let smoothness = 1.0 - roughnessParameter;
@@ -1057,11 +1056,7 @@ let attenuation = rangePart * invSquare;
         output.gBufferNormal = vec4<f32>(N * 0.5 + 0.5, baseReflectionStrength);
     }
     #redgpu_endIf
-    output.gBufferMotionVector = vec4<f32>(
-            inputData.motionVector,
-            0.0,
-            1.0
-        );
+    output.gBufferMotionVector = vec4<f32>( inputData.motionVector, 0.0, 1.0 );
 
 //  // 디버깅: 모션벡터 증폭하여 확인
 //   let amplifiedMotion = inputData.motionVector * 50.0;  // 50배 증폭

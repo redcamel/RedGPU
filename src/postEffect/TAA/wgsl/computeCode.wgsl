@@ -8,9 +8,11 @@
     }
 
     let currentColor = textureLoad(sourceTexture, pixelIndex).rgb;
+    let motionVector = textureLoad(motionVectorTexture, pixelIndex, 0);
+    let motionVectorXY = motionVector.xy;
 
     // jitter 비활성화 시 빠른 종료
-    let disableJitter = false;
+    let disableJitter = motionVector.z > 0.5;
     if (disableJitter) {
         textureStore(outputTexture, pixelIndex, vec4<f32>(currentColor, 1.0));
         return;
@@ -32,11 +34,10 @@
     }
 
     // 모션 벡터 계산
-    let motionVector = textureLoad(motionVectorTexture, pixelIndex, 0).xy;
-    let motionMagnitude = length(motionVector);
+    let motionMagnitude = length(motionVectorXY);
 
     let currentPixelCoord = vec2<f32>(pixelIndex) + vec2<f32>(0.5);
-    let previousPixelCoord = currentPixelCoord - motionVector;
+    let previousPixelCoord = currentPixelCoord - motionVectorXY;
 
     // 이전 픽셀 좌표가 경계를 벗어나는 경우
     if (any(previousPixelCoord < vec2<f32>(0.5)) || any(previousPixelCoord >= textureSize - vec2<f32>(0.5))) {

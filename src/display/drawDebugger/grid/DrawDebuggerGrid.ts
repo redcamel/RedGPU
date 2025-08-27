@@ -103,7 +103,7 @@ class DrawDebuggerGrid {
 						blend: undefined,
 					},
 					{
-						format: 'rg16float',
+						format: 'rgba16float',
 						blend: undefined,
 					},
 				],
