@@ -114,11 +114,10 @@ fn main(inputData: InputDataSkin) -> OutputDataSkin {
     let volumeScaleY: f32 = length(u_modelMatrix[1].xyz);
     let volumeScaleZ: f32 = length(u_modelMatrix[2].xyz);
     output.volumeScale = pow(volumeScaleX * volumeScaleY * volumeScaleZ, 1.0 / 3.0);
+
 {
-
     let currentClipPos = u_noneJitterProjectionCameraMatrix * position;
-    let prevClipPos = u_prevProjectionCameraMatrix * u_prevModelMatrix * vec4<f32>(inputData.position, 1.0);
-
+    let prevClipPos = u_prevProjectionCameraMatrix * u_prevModelMatrix * vec4<f32>(input_position, 1.0);
 
     let currentW = max(currentClipPos.w, 0.0001);
     let prevW = max(prevClipPos.w, 0.0001);
@@ -127,14 +126,20 @@ fn main(inputData: InputDataSkin) -> OutputDataSkin {
     let currentNDC = currentClipPos.xy / currentW;
     let prevNDC = prevClipPos.xy / prevW;
 
-    let motionVector = currentNDC - prevNDC;
+    let motionVectorNDC = currentNDC - prevNDC;
 
-    let motionLength = length(motionVector);
-    let maxMotionLength = 0.1;
-    let clampedMotionVector = motionVector * min(1.0, maxMotionLength / max(motionLength, 0.001));
+    // 픽셀 단위로 모션벡터 크기 계산
+    let screenMotionVector = motionVectorNDC * u_resolution * 0.5;
+    let motionMagnitudePixels = length(screenMotionVector);
 
+    // 픽셀 단위 클램핑 (예: 최대 50픽셀)
+    let maxMotionPixels = 16.0;
+    let clampedScreenMotionVector = screenMotionVector * min(1.0, maxMotionPixels / max(motionMagnitudePixels, 0.001));
 
-    output.motionVector = clampedMotionVector;
+    // 다시 NDC 공간으로 변환
+    let clampedMotionVectorNDC = clampedScreenMotionVector / (u_resolution * 0.5);
+
+    output.motionVector = clampedMotionVectorNDC;
 }
     return output;
 }
