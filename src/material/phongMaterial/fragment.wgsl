@@ -257,28 +257,24 @@ fn main(inputData:InputData) -> FragmentOutput {
     }
     output.color = finalColor;
     #redgpu_if useSSR
+    {
+        let metallicFromShininess = sqrt(2.0 / (uniforms.shininess + 2.0));
+        let roughnessFromShininess = 1.0 - (uniforms.shininess / 128.0); // shininess를 러프니스로 변환
 
+        // F0 계산 (물리 기반)
+        let F0_dielectric = 0.04;
+        let F0_metal = 0.9; // 금속의 평균 반사율
+        let F0 = mix(F0_dielectric, F0_metal, metallicFromShininess);
 
-    let metallicFromShininess = sqrt(2.0 / (uniforms.shininess + 2.0));
-    let roughnessFromShininess = 1.0 - (uniforms.shininess / 128.0); // shininess를 러프니스로 변환
+        // 러프니스 보정 (부드러운 감소 곡선)
+        let roughnessFactor = 1.0 - smoothstep(0.0, 1.0, roughnessFromShininess);
 
-    // F0 계산 (물리 기반)
-    let F0_dielectric = 0.04;
-    let F0_metal = 0.9; // 금속의 평균 반사율
-    let F0 = mix(F0_dielectric, F0_metal, metallicFromShininess);
+        // 최종 반사 강도 계산 및 저장
+        let finalReflectionStrength = F0 * roughnessFactor;
 
-    // 러프니스 보정 (부드러운 감소 곡선)
-    let roughnessFactor = 1.0 - smoothstep(0.0, 1.0, roughnessFromShininess);
-
-    // 최종 반사 강도 계산 및 저장
-    let finalReflectionStrength = F0 * roughnessFactor;
-
-  output.gBufferNormal = vec4<f32>(normalize(N) * 0.5 + 0.5, finalReflectionStrength);
+        output.gBufferNormal = vec4<f32>(normalize(N) * 0.5 + 0.5, finalReflectionStrength);
+    }
     #redgpu_endIf
-  output.gBufferMotionVector = vec4<f32>(
-            inputData.motionVector,
-            0.0,
-            1.0
-        );
+    output.gBufferMotionVector = vec4<f32>( inputData.motionVector, 0.0, 1.0 );
     return output;
 }

@@ -74,6 +74,7 @@ fn fragmentMain(in: VertexOut) -> FragmentOutput {
 
 
   output.color = mix(gridArgs.baseColor, color, grid * gridArgs.lineColor.a);
+  output.gBufferMotionVector = vec4<f32>( 0.0, 0.0, 1.0, 1.0 );
   return output;
 ;
 }

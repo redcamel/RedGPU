@@ -44,5 +44,6 @@ fn main(inputData: InputData) -> FragmentOutput {
     }
 
     output.color = finalColor;
+    output.gBufferMotionVector = vec4<f32>( 0.0, 0.0, 1.0, 1.0 );
     return output;
 };
