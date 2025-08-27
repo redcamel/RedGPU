@@ -47,7 +47,7 @@ struct OutputDataSkin {
     @location(9) ndcPosition: vec3<f32>,
     @location(10) localNodeScale: f32,
     @location(11) volumeScale: f32,
-    @location(12) motionVector: vec2<f32>,
+    @location(12) motionVector: vec3<f32>,
 };
 
 struct OutputShadowData {
@@ -122,7 +122,7 @@ fn main(inputData: InputDataSkin) -> OutputDataSkin {
     {
         let currentClipPos = u_noneJitterProjectionCameraMatrix * position;
         let prevClipPos = u_prevProjectionCameraMatrix * u_prevModelMatrix * input_position_vec4;
-        output.motionVector = calculateMotionVector(currentClipPos, prevClipPos, u_resolution);
+        output.motionVector = vec3<f32>(calculateMotionVector(currentClipPos, prevClipPos, u_resolution), 0.0);
     }
 
     // Scale calculations

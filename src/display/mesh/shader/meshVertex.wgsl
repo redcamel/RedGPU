@@ -33,7 +33,7 @@ struct OutputData {
     @location(0) vertexPosition: vec3<f32>,
     @location(1) vertexNormal: vec3<f32>,
     @location(2) uv: vec2<f32>,
-    @location(3) motionVector: vec2<f32>,
+    @location(3) motionVector: vec3<f32>,
     @location(9) ndcPosition: vec3<f32>,
     @location(12) combinedOpacity: f32,
     @location(13) shadowPos: vec3<f32>,
@@ -132,7 +132,7 @@ fn main(inputData: InputData) -> OutputData {
     {
         let currentClipPos = u_noneJitterProjectionCameraMatrix * position;
         let prevClipPos = u_prevProjectionCameraMatrix * u_prevModelMatrix * input_position_vec4;
-        output.motionVector = calculateMotionVector(currentClipPos, prevClipPos, u_resolution);
+        output.motionVector = vec3<f32>(calculateMotionVector(currentClipPos, prevClipPos, u_resolution), 0.0);
     }
 
     return output;

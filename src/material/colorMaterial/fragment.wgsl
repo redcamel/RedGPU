@@ -13,7 +13,7 @@ struct Uniforms {
 struct InputData {
   // Built-in attributes
   @builtin(position) position : vec4<f32>,
-  @location(3) motionVector: vec2<f32>,
+  @location(3) motionVector: vec3<f32>,
   @location(12) combinedOpacity: f32,
   @location(15) pickingId: vec4<f32>,
 }
@@ -27,7 +27,7 @@ fn main(inputData: InputData) -> FragmentOutput {
         finalColor = calcTintBlendMode(finalColor, uniforms.tintBlendMode, uniforms.tint);
     #redgpu_endIf
     output.color = finalColor;
-    output.gBufferMotionVector = vec4<f32>( inputData.motionVector, 0.0, 1.0 );
+    output.gBufferMotionVector = vec4<f32>( inputData.motionVector, 1.0 );
     return output;
 }
 

@@ -150,7 +150,7 @@ struct InputData {
   @location(9) ndcPosition: vec3<f32>,
   @location(10) localNodeScale: f32,
   @location(11) volumeScale: f32,
-  @location(12) motionVector: vec2<f32>,
+  @location(12) motionVector: vec3<f32>,
 }
 
 
@@ -1056,7 +1056,7 @@ let attenuation = rangePart * invSquare;
         output.gBufferNormal = vec4<f32>(N * 0.5 + 0.5, baseReflectionStrength);
     }
     #redgpu_endIf
-    output.gBufferMotionVector = vec4<f32>( inputData.motionVector, 0.0, 1.0 );
+    output.gBufferMotionVector = vec4<f32>( inputData.motionVector, 1.0 );
 
 //  // 디버깅: 모션벡터 증폭하여 확인
 //   let amplifiedMotion = inputData.motionVector * 50.0;  // 50배 증폭
