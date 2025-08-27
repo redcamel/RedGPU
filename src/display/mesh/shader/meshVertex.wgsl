@@ -2,6 +2,7 @@
 #redgpu_include drawDirectionalShadowDepth;
 #redgpu_include picking;
 #redgpu_include calcDisplacements;
+#redgpu_include calculateMotionVector;
 
 struct VertexUniforms {
     pickingId: u32,
@@ -10,7 +11,6 @@ struct VertexUniforms {
     normalModelMatrix: mat4x4<f32>,
     receiveShadow: f32,
     combinedOpacity: f32,
-    //
     useDisplacementTexture: u32,
     displacementScale: f32,
 };
@@ -39,7 +39,6 @@ struct OutputData {
     @location(13) shadowPos: vec3<f32>,
     @location(14) receiveShadow: f32,
     @location(15) pickingId: vec4<f32>,
-
 };
 
 @vertex
@@ -71,77 +70,70 @@ fn main(inputData: InputData) -> OutputData {
 
     // Input data
     let input_position = inputData.position;
+    let input_position_vec4 = vec4<f32>(input_position, 1.0);
     let input_vertexNormal = inputData.vertexNormal;
     let input_uv = inputData.uv;
 
+    // Position and normal calculation
     var position: vec4<f32>;
     var normalPosition: vec4<f32>;
 
+
     #redgpu_if useDisplacementTexture
-        let tempPosition = u_modelMatrix * vec4<f32>(input_position, 1.0);
+        let tempPosition = u_modelMatrix * input_position_vec4;
         let distance = distance(tempPosition.xyz, u_cameraPosition);
         let mipLevel = (distance / maxDistance) * maxMipLevel;
 
-        // 로컬 스페이스에서 디스플레이스먼트 계산
-        let displacedPosition = calcDisplacementPosition(input_position, input_vertexNormal, displacementTexture, displacementTextureSampler, u_displacementScale, input_uv, mipLevel);
+        let displacedPosition = calcDisplacementPosition(
+            input_position,
+            input_vertexNormal,
+            displacementTexture,
+            displacementTextureSampler,
+            u_displacementScale,
+            input_uv,
+            mipLevel
+        );
 
-        // 월드 스페이스로 변환
         position = u_modelMatrix * vec4<f32>(displacedPosition, 1.0);
 
-        // 노멀은 월드 스페이스에서 직접 계산하는 것이 더 정확
-        let worldUV = input_uv; // 또는 월드 스페이스 UV 계산
-        var displacedNormal:vec3<f32>;
-
-            displacedNormal = calcDisplacementNormal(
-                normalize((u_normalModelMatrix * vec4<f32>(input_vertexNormal, 0.0)).xyz),
-                displacementTexture,
-                displacementTextureSampler,
-                u_displacementScale,
-                worldUV,
-                mipLevel
-            );
+        let worldUV = input_uv;
+        let displacedNormal = calcDisplacementNormal(
+            normalize((u_normalModelMatrix * vec4<f32>(input_vertexNormal, 0.0)).xyz),
+            displacementTexture,
+            displacementTextureSampler,
+            u_displacementScale,
+            worldUV,
+            mipLevel
+        );
         normalPosition = vec4<f32>(displacedNormal, 0.0);
     #redgpu_else
-        position = u_modelMatrix * vec4<f32>(input_position, 1.0);
+        position = u_modelMatrix * input_position_vec4;
         normalPosition = u_normalModelMatrix * vec4<f32>(input_vertexNormal, 1.0);
     #redgpu_endIf
 
+    // Basic output assignments
     output.position = u_projectionCameraMatrix * position;
     output.vertexPosition = position.xyz;
     output.vertexNormal = normalPosition.xyz;
     output.uv = input_uv;
     output.ndcPosition = output.position.xyz / output.position.w;
+    output.combinedOpacity = vertexUniforms.combinedOpacity;
+
+    // Shadow calculation
     #redgpu_if receiveShadow
     {
-        var posFromLight = u_directionalLightProjectionViewMatrix * vec4(position.xyz, 1.0);
-        output.shadowPos = vec3( posFromLight.xy * vec2(0.5, -0.5) + vec2(0.5), posFromLight.z );
+        let posFromLight = u_directionalLightProjectionViewMatrix * vec4(position.xyz, 1.0);
+        output.shadowPos = vec3(posFromLight.xy * vec2(0.5, -0.5) + vec2(0.5), posFromLight.z);
         output.receiveShadow = vertexUniforms.receiveShadow;
     }
     #redgpu_endIf
 
-    output.combinedOpacity = vertexUniforms.combinedOpacity;
-
-{
-    let currentClipPos = u_noneJitterProjectionCameraMatrix * position;
-    let prevClipPos = u_prevProjectionCameraMatrix * u_prevModelMatrix * vec4<f32>(input_position, 1.0);
-
-    let currentW = max(currentClipPos.w, 0.0001);
-    let prevW = max(prevClipPos.w, 0.0001);
-
-    let currentNDC = currentClipPos.xy / currentW;
-    let prevNDC = prevClipPos.xy / prevW;
-
-    let motionVectorNDC = currentNDC - prevNDC;
-    let screenMotionVector = motionVectorNDC * u_resolution * 0.5;
-    let motionMagnitudePixels = length(screenMotionVector);
-
-    let maxMotionPixels = 16.0;
-    let clampedScreenMotionVector = screenMotionVector * min(1.0, maxMotionPixels / max(motionMagnitudePixels, 0.001));
-
-    // 픽셀 단위로 직접 출력
-    output.motionVector = clampedScreenMotionVector;
-}
-
+    // Motion vector calculation
+    {
+        let currentClipPos = u_noneJitterProjectionCameraMatrix * position;
+        let prevClipPos = u_prevProjectionCameraMatrix * u_prevModelMatrix * input_position_vec4;
+        output.motionVector = calculateMotionVector(currentClipPos, prevClipPos, u_resolution);
+    }
 
     return output;
 }

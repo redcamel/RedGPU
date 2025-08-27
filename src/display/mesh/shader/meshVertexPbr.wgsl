@@ -1,6 +1,7 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include drawDirectionalShadowDepth;
 #redgpu_include picking;
+#redgpu_include calculateMotionVector;
 
 struct VertexUniforms {
     pickingId: u32,
@@ -50,10 +51,12 @@ struct OutputData {
 fn main(inputData: InputData) -> OutputData {
     var output: OutputData;
 
+    // Input data
     let input_position = inputData.position;
+    let input_position_vec4 = vec4<f32>(input_position, 1.0);
     let input_vertexNormal = inputData.vertexNormal;
 
-    // 카메라 매트릭스와 유니폼 매트릭스를 미리 계산
+    // System uniforms
     let u_projectionMatrix = systemUniforms.projectionMatrix;
     let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
     let u_noneJitterProjectionCameraMatrix = systemUniforms.noneJitterProjectionCameraMatrix;
@@ -63,70 +66,59 @@ fn main(inputData: InputData) -> OutputData {
     let u_cameraMatrix = u_camera.cameraMatrix;
     let u_cameraPosition = u_camera.cameraPosition;
 
+    // Vertex uniforms
     let u_localMatrix = vertexUniforms.localMatrix;
     let u_modelMatrix = vertexUniforms.modelMatrix;
     let u_normalModelMatrix = vertexUniforms.normalModelMatrix;
+    let u_prevModelMatrix = vertexUniforms.prevModelMatrix;
+    let u_receiveShadow = vertexUniforms.receiveShadow;
 
+    // Light uniforms
     let u_directionalLightCount = systemUniforms.directionalLightCount;
     let u_directionalLights = systemUniforms.directionalLights;
     let u_directionalLightProjectionViewMatrix = systemUniforms.directionalLightProjectionViewMatrix;
-    let u_receiveShadow = vertexUniforms.receiveShadow;
-    let u_prevModelMatrix = vertexUniforms.prevModelMatrix;
 
+    // Position and normal calculation
     var position: vec4<f32>;
     var normalPosition: vec4<f32>;
 
-    position = u_modelMatrix * vec4<f32>(input_position, 1.0);
+    position = u_modelMatrix * input_position_vec4;
     normalPosition = u_normalModelMatrix * vec4<f32>(input_vertexNormal, 1.0);
 
+    // Basic output assignments
     output.position = u_projectionCameraMatrix * position;
-
-{
-    let currentClipPos = u_noneJitterProjectionCameraMatrix * position;
-    let prevClipPos = u_prevProjectionCameraMatrix * u_prevModelMatrix * vec4<f32>(input_position, 1.0);
-
-    let currentW = max(currentClipPos.w, 0.0001);
-    let prevW = max(prevClipPos.w, 0.0001);
-
-    let currentNDC = currentClipPos.xy / currentW;
-    let prevNDC = prevClipPos.xy / prevW;
-
-    let motionVectorNDC = currentNDC - prevNDC;
-    let screenMotionVector = motionVectorNDC * u_resolution * 0.5;
-    let motionMagnitudePixels = length(screenMotionVector);
-
-    let maxMotionPixels = 16.0;
-    let clampedScreenMotionVector = screenMotionVector * min(1.0, maxMotionPixels / max(motionMagnitudePixels, 0.001));
-
-    // 픽셀 단위로 직접 출력
-    output.motionVector = clampedScreenMotionVector;
-}
-
-
     output.vertexPosition = position.xyz;
     output.vertexNormal = normalPosition.xyz;
     output.uv = inputData.uv;
     output.uv1 = inputData.uv1;
     output.vertexColor_0 = inputData.vertexColor_0;
     output.vertexTangent = u_normalModelMatrix * inputData.vertexTangent;
+    output.ndcPosition = output.position.xyz / output.position.w;
 
+    // Shadow calculation
     #redgpu_if receiveShadow
     {
-        var posFromLight = u_directionalLightProjectionViewMatrix * vec4(position.xyz, 1.0);
-        output.shadowPos = vec3( posFromLight.xy * vec2(0.5, -0.5) + vec2(0.5), posFromLight.z );
+        let posFromLight = u_directionalLightProjectionViewMatrix * vec4(position.xyz, 1.0);
+        output.shadowPos = vec3(posFromLight.xy * vec2(0.5, -0.5) + vec2(0.5), posFromLight.z);
         output.receiveShadow = vertexUniforms.receiveShadow;
     }
     #redgpu_endIf
 
-    output.ndcPosition = output.position.xyz / output.position.w;
+    // Motion vector calculation
+    {
+        let currentClipPos = u_noneJitterProjectionCameraMatrix * position;
+        let prevClipPos = u_prevProjectionCameraMatrix * u_prevModelMatrix * input_position_vec4;
+        output.motionVector = calculateMotionVector(currentClipPos, prevClipPos, u_resolution);
+    }
 
-    let nodeScaleX: f32 = length(u_localMatrix[0].xyz);
-    let nodeScaleY: f32 = length(u_localMatrix[1].xyz);
+    // Scale calculations
+    let nodeScaleX = length(u_localMatrix[0].xyz);
+    let nodeScaleY = length(u_localMatrix[1].xyz);
     let nodeScaleZ = length(u_localMatrix[2].xyz);
     output.localNodeScale = pow(nodeScaleX * nodeScaleY * nodeScaleZ, 1.0 / 3.0);
 
-    let volumeScaleX: f32 = length(u_modelMatrix[0].xyz);
-    let volumeScaleY: f32 = length(u_modelMatrix[1].xyz);
+    let volumeScaleX = length(u_modelMatrix[0].xyz);
+    let volumeScaleY = length(u_modelMatrix[1].xyz);
     let volumeScaleZ = length(u_modelMatrix[2].xyz);
     output.volumeScale = pow(volumeScaleX * volumeScaleY * volumeScaleZ, 1.0 / 3.0);
 

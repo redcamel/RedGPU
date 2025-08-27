@@ -1,4 +1,5 @@
 #redgpu_include SYSTEM_UNIFORM;
+#redgpu_include calculateMotionVector;
 
 struct VertexUniforms {
     pickingId: u32,
@@ -55,38 +56,50 @@ struct OutputShadowData {
 
 @vertex
 fn main(inputData: InputDataSkin) -> OutputDataSkin {
-    // 카메라 매트릭스와 유니폼 매트릭스를 미리 계산
+    var output: OutputDataSkin;
+
+    // Input data
+    let input_position = inputData.position;
+    let input_position_vec4 = vec4<f32>(input_position, 1.0);
+    let input_vertexNormal = inputData.vertexNormal;
+
+    // System uniforms
     let u_projectionMatrix = systemUniforms.projectionMatrix;
     let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
     let u_noneJitterProjectionCameraMatrix = systemUniforms.noneJitterProjectionCameraMatrix;
     let u_prevProjectionCameraMatrix = systemUniforms.prevProjectionCameraMatrix;
+    let u_resolution = systemUniforms.resolution;
     let u_camera = systemUniforms.camera;
     let u_cameraMatrix = u_camera.cameraMatrix;
+    let u_cameraPosition = u_camera.cameraPosition;
 
+    // Vertex uniforms
     let u_localMatrix = vertexUniforms.localMatrix;
     let u_modelMatrix = vertexUniforms.modelMatrix;
     let u_prevModelMatrix = vertexUniforms.prevModelMatrix;
     let u_normalModelMatrix = vertexUniforms.normalModelMatrix;
+    let u_receiveShadow = vertexUniforms.receiveShadow;
 
+    // Light uniforms
     let u_directionalLightCount = systemUniforms.directionalLightCount;
     let u_directionalLights = systemUniforms.directionalLights;
     let u_directionalLightProjectionViewMatrix = systemUniforms.directionalLightProjectionViewMatrix;
-    let u_receiveShadow = vertexUniforms.receiveShadow;
 
-    var output: OutputDataSkin;
-    var skinMat: mat4x4<f32>;
-    let vertexJoint: vec4<f32> = inputData.vertexJoint;
-    let vertexWeight: vec4<f32> = inputData.vertexWeight;
+    // Skinning calculation
+    let vertexJoint = inputData.vertexJoint;
+    let vertexWeight = inputData.vertexWeight;
     let jointMatrix = vertexStorages.jointMatrix;
 
-    skinMat = vertexWeight.x * jointMatrix[u32(vertexJoint.x)] +
-              vertexWeight.y * jointMatrix[u32(vertexJoint.y)] +
-              vertexWeight.z * jointMatrix[u32(vertexJoint.z)] +
-              vertexWeight.w * jointMatrix[u32(vertexJoint.w)];
+    let skinMat = vertexWeight.x * jointMatrix[u32(vertexJoint.x)] +
+                  vertexWeight.y * jointMatrix[u32(vertexJoint.y)] +
+                  vertexWeight.z * jointMatrix[u32(vertexJoint.z)] +
+                  vertexWeight.w * jointMatrix[u32(vertexJoint.w)];
 
+    // Position and normal calculation
     let position = u_modelMatrix * skinMat * vec4<f32>(inputData.position, 1.0);
-    let normalPosition = u_normalModelMatrix * skinMat * vec4<f32>(inputData.vertexNormal, 1.0);
+    let normalPosition = u_normalModelMatrix * skinMat * vec4<f32>(input_vertexNormal, 1.0);
 
+    // Basic output assignments
     output.position = u_projectionCameraMatrix * position;
     output.vertexPosition = position.xyz;
     output.vertexNormal = normalPosition.xyz;
@@ -94,105 +107,103 @@ fn main(inputData: InputDataSkin) -> OutputDataSkin {
     output.uv1 = inputData.uv1;
     output.vertexColor_0 = inputData.vertexColor_0;
     output.vertexTangent = u_normalModelMatrix * inputData.vertexTangent;
+    output.ndcPosition = output.position.xyz / output.position.w;
 
+    // Shadow calculation
     #redgpu_if receiveShadow
     {
-        var posFromLight = u_directionalLightProjectionViewMatrix * vec4(position.xyz, 1.0);
-        output.shadowPos = vec3( posFromLight.xy * vec2(0.5, -0.5) + vec2(0.5), posFromLight.z );
+        let posFromLight = u_directionalLightProjectionViewMatrix * vec4(position.xyz, 1.0);
+        output.shadowPos = vec3(posFromLight.xy * vec2(0.5, -0.5) + vec2(0.5), posFromLight.z);
         output.receiveShadow = vertexUniforms.receiveShadow;
     }
     #redgpu_endIf
 
-    output.ndcPosition = output.position.xyz / output.position.w;
+    // Motion vector calculation
+    {
+        let currentClipPos = u_noneJitterProjectionCameraMatrix * position;
+        let prevClipPos = u_prevProjectionCameraMatrix * u_prevModelMatrix * input_position_vec4;
+        output.motionVector = calculateMotionVector(currentClipPos, prevClipPos, u_resolution);
+    }
 
-    let nodeScaleX: f32 = length(u_localMatrix[0].xyz);
-    let nodeScaleY: f32 = length(u_localMatrix[1].xyz);
-    let nodeScaleZ: f32 = length(u_localMatrix[2].xyz);
+    // Scale calculations
+    let nodeScaleX = length(u_localMatrix[0].xyz);
+    let nodeScaleY = length(u_localMatrix[1].xyz);
+    let nodeScaleZ = length(u_localMatrix[2].xyz);
     output.localNodeScale = pow(nodeScaleX * nodeScaleY * nodeScaleZ, 1.0 / 3.0);
 
-    let volumeScaleX: f32 = length(u_modelMatrix[0].xyz);
-    let volumeScaleY: f32 = length(u_modelMatrix[1].xyz);
-    let volumeScaleZ: f32 = length(u_modelMatrix[2].xyz);
+    let volumeScaleX = length(u_modelMatrix[0].xyz);
+    let volumeScaleY = length(u_modelMatrix[1].xyz);
+    let volumeScaleZ = length(u_modelMatrix[2].xyz);
     output.volumeScale = pow(volumeScaleX * volumeScaleY * volumeScaleZ, 1.0 / 3.0);
 
-{
-    let currentClipPos = u_noneJitterProjectionCameraMatrix * position;
-    let prevClipPos = u_prevProjectionCameraMatrix * u_prevModelMatrix * vec4<f32>(input_position, 1.0);
-
-    let currentW = max(currentClipPos.w, 0.0001);
-    let prevW = max(prevClipPos.w, 0.0001);
-
-    let currentNDC = currentClipPos.xy / currentW;
-    let prevNDC = prevClipPos.xy / prevW;
-
-    let motionVectorNDC = currentNDC - prevNDC;
-    let screenMotionVector = motionVectorNDC * u_resolution * 0.5;
-    let motionMagnitudePixels = length(screenMotionVector);
-
-    let maxMotionPixels = 16.0;
-    let clampedScreenMotionVector = screenMotionVector * min(1.0, maxMotionPixels / max(motionMagnitudePixels, 0.001));
-
-    // 픽셀 단위로 직접 출력
-    output.motionVector = clampedScreenMotionVector;
-}
     return output;
 }
 
 @vertex
 fn drawDirectionalShadowDepth(inputData: InputDataSkin) -> OutputShadowData {
     var output: OutputShadowData;
+
+    // System uniforms
     let u_directionalLightProjectionViewMatrix = systemUniforms.directionalLightProjectionViewMatrix;
     let u_modelMatrix = vertexUniforms.modelMatrix;
-    let input_position = inputData.position;
-    var position: vec4<f32>;
 
+    // Input data
+    let input_position = inputData.position;
+
+    // Skinning calculation
     var skinMat: mat4x4<f32> = mat4x4<f32>(
         1.0, 0.0, 0.0, 0.0,
         0.0, 1.0, 0.0, 0.0,
         0.0, 0.0, 1.0, 0.0,
         0.0, 0.0, 0.0, 1.0
     );
-    var vertexJoint: vec4<f32> = inputData.vertexJoint;
-    var vertexWeight: vec4<f32> = inputData.vertexWeight;
-    var jointMatrix = vertexStorages.jointMatrix;
+    let vertexJoint = inputData.vertexJoint;
+    let vertexWeight = inputData.vertexWeight;
+    let jointMatrix = vertexStorages.jointMatrix;
 
     skinMat = vertexWeight.x * jointMatrix[u32(vertexJoint.x)] +
               vertexWeight.y * jointMatrix[u32(vertexJoint.y)] +
               vertexWeight.z * jointMatrix[u32(vertexJoint.z)] +
               vertexWeight.w * jointMatrix[u32(vertexJoint.w)];
 
-    position = u_modelMatrix * skinMat * vec4<f32>(input_position, 1.0);
+    // Position calculation
+    let position = u_modelMatrix * skinMat * vec4<f32>(input_position, 1.0);
     output.position = u_directionalLightProjectionViewMatrix * position;
+
     return output;
 }
 
 @vertex
 fn picking(inputData: InputDataSkin) -> OutputDataSkin {
+    var output: OutputDataSkin;
+
+    // System uniforms
     let u_projectionMatrix = systemUniforms.projectionMatrix;
     let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
     let u_camera = systemUniforms.camera;
     let u_cameraMatrix = u_camera.cameraMatrix;
     let u_modelMatrix = vertexUniforms.modelMatrix;
 
-    var output: OutputDataSkin;
+    // Skinning calculation
     var skinMat: mat4x4<f32> = mat4x4<f32>(
         1.0, 0.0, 0.0, 0.0,
         0.0, 1.0, 0.0, 0.0,
         0.0, 0.0, 1.0, 0.0,
         0.0, 0.0, 0.0, 1.0
     );
-    var vertexJoint: vec4<f32> = inputData.vertexJoint;
-    var vertexWeight: vec4<f32> = inputData.vertexWeight;
-    var jointMatrix = vertexStorages.jointMatrix;
+    let vertexJoint = inputData.vertexJoint;
+    let vertexWeight = inputData.vertexWeight;
+    let jointMatrix = vertexStorages.jointMatrix;
 
     skinMat = vertexWeight.x * jointMatrix[u32(vertexJoint.x)] +
               vertexWeight.y * jointMatrix[u32(vertexJoint.y)] +
               vertexWeight.z * jointMatrix[u32(vertexJoint.z)] +
               vertexWeight.w * jointMatrix[u32(vertexJoint.w)];
 
-    var position: vec4<f32>;
-    position = u_modelMatrix * skinMat * vec4<f32>(inputData.position, 1.0);
+    // Position calculation
+    let position = u_modelMatrix * skinMat * vec4<f32>(inputData.position, 1.0);
     output.position = u_projectionCameraMatrix * position;
     output.pickingId = unpack4x8unorm(vertexUniforms.pickingId);
+
     return output;
 }

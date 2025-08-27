@@ -10,6 +10,7 @@ import SYSTEM_UNIFORM from './shader/SYSTEM_UNIFORM.wgsl'
 import calcDisplacements from './shader/vertex/calcDisplacements.wgsl'
 import extractScaleAndTranslation from './shader/vertex/extractScaleAndTranslation.wgsl'
 import getBillboardMatrix from './shader/vertex/getBillboardMatrix.wgsl'
+import calculateMotionVector from './shader/vertex/calculateMotionVector.wgsl'
 
 const SystemCode = Object.freeze({
 	SYSTEM_UNIFORM,
@@ -19,6 +20,7 @@ const SystemCode = Object.freeze({
 	drawDirectionalShadowDepth,
 	picking,
 	//
+	calculateMotionVector,
 	getBillboardMatrix,
 	extractScaleAndTranslation,
 	calcDirectionalShadowVisibility,
