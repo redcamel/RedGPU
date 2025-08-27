@@ -2,17 +2,27 @@
     let pixelIndex = vec2<u32>(global_id.xy);
     let textureSize = vec2<f32>(textureDimensions(sourceTexture));
 
+    // 경계 체크
     if (any(pixelIndex >= vec2<u32>(textureSize))) {
         return;
     }
 
     let currentColor = textureLoad(sourceTexture, pixelIndex).rgb;
 
+    // jitter 비활성화 시 빠른 종료
+    let disableJitter = false;
+    if (disableJitter) {
+        textureStore(outputTexture, pixelIndex, vec4<f32>(currentColor, 1.0));
+        return;
+    }
+
+    // 초기 프레임 처리
     if (uniforms.frameIndex < 3.0) {
         textureStore(outputTexture, pixelIndex, vec4<f32>(currentColor, 1.0));
         return;
     }
 
+    // 모션 벡터 사용하지 않는 경우
     if (uniforms.useMotionVectors < 0.5) {
         let previousColor = textureLoad(previousFrameTexture, pixelIndex).rgb;
         let blendFactor = clamp(uniforms.temporalBlendFactor, 0.2, 0.8);
@@ -21,19 +31,32 @@
         return;
     }
 
-    // 이미 픽셀 단위로 저장된 모션 벡터를 직접 사용
+    // 모션 벡터 계산
     let motionVector = textureLoad(motionVectorTexture, pixelIndex, 0).xy;
     let motionMagnitude = length(motionVector);
-    let motionBlurFactor = smoothstep(0.001, 0.02, motionMagnitude) * uniforms.motionBlurReduction;
 
     let currentPixelCoord = vec2<f32>(pixelIndex) + vec2<f32>(0.5);
     let previousPixelCoord = currentPixelCoord - motionVector;
 
+    // 이전 픽셀 좌표가 경계를 벗어나는 경우
     if (any(previousPixelCoord < vec2<f32>(0.5)) || any(previousPixelCoord >= textureSize - vec2<f32>(0.5))) {
         textureStore(outputTexture, pixelIndex, vec4<f32>(currentColor, 1.0));
         return;
     }
 
+//    // 모션이 거의 없는 경우 간단한 블렌딩
+//    if (motionMagnitude < 1) {
+//        let previousColor = textureLoad(previousFrameTexture, pixelIndex).rgb;
+//        let blendFactor = clamp(uniforms.temporalBlendFactor, 0.2, 0.8);
+//        let blendedColor = mix(previousColor, currentColor, blendFactor);
+//        textureStore(outputTexture, pixelIndex, vec4<f32>(blendedColor, 1.0));
+//        return;
+//    }
+
+    // 복잡한 TAA 처리
+    let motionBlurFactor = smoothstep(0.001, 0.02, motionMagnitude) * uniforms.motionBlurReduction;
+
+    // 이중선형 보간으로 이전 색상 샘플링
     let sampleCoord = previousPixelCoord - vec2<f32>(0.5);
     let floorCoord = floor(sampleCoord);
     let fracCoord = sampleCoord - floorCoord;
@@ -48,6 +71,7 @@
     let bottomMix = mix(bottomLeft, bottomRight, fracCoord.x);
     let previousColor = mix(topMix, bottomMix, fracCoord.y);
 
+    // 이웃 픽셀 분석
     var neighborMin = currentColor;
     var neighborMax = currentColor;
     var neighborSum = vec3<f32>(0.0);
@@ -66,10 +90,7 @@
     );
 
     for (var i = 0; i < 9; i++) {
-        // 정수 픽셀 오프셋을 현재 픽셀 인덱스에 직접 적용
         let neighborPixelIndex = vec2<i32>(pixelIndex) + neighborOffsets[i];
-
-        // 경계 체크 및 클램핑
         let clampedPixelIndex = clamp(
             neighborPixelIndex,
             vec2<i32>(0),
@@ -87,7 +108,6 @@
         neighborSum += weightedColor;
         neighborSumSquared += sampleColor * sampleColor * weight;
     }
-
 
     let clampedPreviousColor = clamp(previousColor, neighborMin, neighborMax);
 
@@ -131,10 +151,5 @@
         adaptiveBlendFactor * adaptiveBlendFactor  + 0.04
     );
 
-    let disableJitter = false;
-    if (disableJitter) {
-        textureStore(outputTexture, pixelIndex, vec4<f32>(currentColor, 1.0));
-    } else {
-        textureStore(outputTexture, pixelIndex, vec4<f32>(finalColor, 1.0));
-    }
+    textureStore(outputTexture, pixelIndex, vec4<f32>(finalColor, 1.0));
 }
