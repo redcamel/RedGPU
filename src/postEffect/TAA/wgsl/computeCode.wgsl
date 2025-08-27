@@ -53,23 +53,30 @@
     var neighborSum = vec3<f32>(0.0);
     var neighborSumSquared = vec3<f32>(0.0);
 
-    let neighborOffsets = array<vec2<f32>, 9>(
-        vec2<f32>(-1.0, -1.0), vec2<f32>(0.0, -1.0), vec2<f32>(1.0, -1.0),
-        vec2<f32>(-1.0,  0.0), vec2<f32>(0.0,  0.0), vec2<f32>(1.0,  0.0),
-        vec2<f32>(-1.0,  1.0), vec2<f32>(0.0,  1.0), vec2<f32>(1.0,  1.0)
+    let neighborOffsets = array<vec2<i32>, 9>(
+            vec2<i32>(-1, -1), vec2<i32>(0, -1), vec2<i32>(1, -1),
+            vec2<i32>(-1,  0), vec2<i32>(0,  0), vec2<i32>(1,  0),
+            vec2<i32>(-1,  1), vec2<i32>(0,  1), vec2<i32>(1,  1)
     );
 
     let neighborWeights = array<f32, 9>(
-        0.0947416, 0.118318, 0.0947416,
-        0.118318,  0.147761, 0.118318,
-        0.0947416, 0.118318, 0.0947416
+        0.0625, 0.125, 0.0625,
+        0.125,  0.25,  0.125,
+        0.0625, 0.125, 0.0625
     );
 
     for (var i = 0; i < 9; i++) {
-        let offset = neighborOffsets[i];
-        let sampleCoordF = vec2<f32>(pixelIndex) + offset;
-        let clampedSampleCoord = clamp(sampleCoordF, vec2<f32>(0.0), textureSize - vec2<f32>(1.0));
-        let samplePos = vec2<u32>(clampedSampleCoord);
+        // 정수 픽셀 오프셋을 현재 픽셀 인덱스에 직접 적용
+        let neighborPixelIndex = vec2<i32>(pixelIndex) + neighborOffsets[i];
+
+        // 경계 체크 및 클램핑
+        let clampedPixelIndex = clamp(
+            neighborPixelIndex,
+            vec2<i32>(0),
+            vec2<i32>(textureSize) - vec2<i32>(1)
+        );
+
+        let samplePos = vec2<u32>(clampedPixelIndex);
         let sampleColor = textureLoad(sourceTexture, samplePos).rgb;
         let weight = neighborWeights[i];
 
@@ -80,6 +87,7 @@
         neighborSum += weightedColor;
         neighborSumSquared += sampleColor * sampleColor * weight;
     }
+
 
     let clampedPreviousColor = clamp(previousColor, neighborMin, neighborMax);
 
