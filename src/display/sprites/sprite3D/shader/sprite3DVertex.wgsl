@@ -1,11 +1,9 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include getBillboardMatrix;
-#redgpu_include calculateMotionVector;
 
 struct VertexUniforms {
     pickingId: u32,
     modelMatrix: mat4x4<f32>,
-    prevModelMatrix: mat4x4<f32>,
     normalModelMatrix: mat4x4<f32>,
     useBillboardPerspective: u32,
     useBillboard: u32,
@@ -44,15 +42,12 @@ fn main(inputData: InputData) -> OutputData {
     let u_resolution = systemUniforms.resolution;
     let u_projectionMatrix = systemUniforms.projectionMatrix;
     let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
-    let u_prevProjectionCameraMatrix = systemUniforms.prevProjectionCameraMatrix;
-    let u_noneJitterProjectionCameraMatrix = systemUniforms.noneJitterProjectionCameraMatrix;
     let u_camera = systemUniforms.camera;
     let u_cameraMatrix = u_camera.cameraMatrix;
     let u_cameraPosition = u_camera.cameraPosition;
 
     // Vertex별 Uniform 변수 가져오기
     let u_modelMatrix = vertexUniforms.modelMatrix;
-    let u_prevModelMatrix = vertexUniforms.prevModelMatrix;
     let u_normalModelMatrix = vertexUniforms.normalModelMatrix;
     let u_useBillboardPerspective = vertexUniforms.useBillboardPerspective;
     let u_useBillboard = vertexUniforms.useBillboard;
@@ -61,8 +56,8 @@ fn main(inputData: InputData) -> OutputData {
     // 입력 데이터
     let input_position = inputData.position;
     let input_vertexNormal = inputData.vertexNormal;
-    let input_position_vec4 = vec4<f32>(input_position, 1.0);
-    let input_vertexNormal_vec4 = vec4<f32>(input_vertexNormal, 1.0);
+    let input_positionVec4 = vec4<f32>(input_position, 1.0);
+    let input_vertexNormalVec4 = vec4<f32>(input_vertexNormal, 1.0);
     let input_uv = inputData.uv;
 
     // 처리에 필요한 변수 초기화
@@ -76,11 +71,11 @@ fn main(inputData: InputData) -> OutputData {
         let billboardNormalMatrix = getBillboardMatrix(u_cameraMatrix, u_normalModelMatrix);
 
         if (u_useBillboardPerspective == 1) {
-            position = billboardMatrix * input_position_vec4;
-            normalPosition = billboardNormalMatrix * input_vertexNormal_vec4;
+            position = billboardMatrix * input_positionVec4;
+            normalPosition = billboardNormalMatrix * input_vertexNormalVec4;
         } else {
-            position = billboardMatrix * input_position_vec4;
-            normalPosition = billboardNormalMatrix * input_vertexNormal_vec4;
+            position = billboardMatrix * input_positionVec4;
+            normalPosition = billboardNormalMatrix * input_vertexNormalVec4;
         }
 
         output.position = u_projectionMatrix * position;
@@ -103,8 +98,8 @@ fn main(inputData: InputData) -> OutputData {
     }
     #redgpu_else
     {
-        position = u_cameraMatrix * u_modelMatrix * input_position_vec4;
-        normalPosition = u_cameraMatrix * u_normalModelMatrix * input_vertexNormal_vec4;
+        position = u_cameraMatrix * u_modelMatrix * input_positionVec4;
+        normalPosition = u_cameraMatrix * u_normalModelMatrix * input_vertexNormalVec4;
         output.position = u_projectionMatrix * position;
     }
     #redgpu_endIf
@@ -115,12 +110,6 @@ fn main(inputData: InputData) -> OutputData {
     output.uv = input_uv;
     output.combinedOpacity = vertexUniforms.combinedOpacity;
 
-    // Motion vector calculation
-    {
-        let currentClipPos = u_noneJitterProjectionCameraMatrix * position;
-        let prevClipPos = u_prevProjectionCameraMatrix * u_prevModelMatrix * input_position_vec4;
-        output.motionVector = calculateMotionVector(currentClipPos, prevClipPos, u_resolution);
-    }
     return output;
 }
 
@@ -140,11 +129,11 @@ fn drawDirectionalShadowDepth(inputData: InputData) -> OutputShadowData {
     let u_useBillboard = vertexUniforms.useBillboard;
     let u_billboardFixedScale = vertexUniforms.billboardFixedScale;
     let input_position = inputData.position;
-    let input_position_vec4 = vec4<f32>(input_position, 1.0);
+    let input_positionVec4 = vec4<f32>(input_position, 1.0);
     var position: vec4<f32>;
 
     // TODO Sprite drawDirectionalShadowDepth
-    output.position = u_directionalLightProjectionViewMatrix * u_modelMatrix * input_position_vec4;
+    output.position = u_directionalLightProjectionViewMatrix * u_modelMatrix * input_positionVec4;
 
     return output;
 }
@@ -165,7 +154,7 @@ fn picking(inputData: InputData) -> OutputData {
 
     // 입력 데이터
     let input_position = inputData.position;
-    let input_position_vec4 = vec4<f32>(input_position, 1.0);
+    let input_positionVec4 = vec4<f32>(input_position, 1.0);
     let u_resolution = systemUniforms.resolution;
 
     // 변환된 위치
@@ -177,9 +166,9 @@ fn picking(inputData: InputData) -> OutputData {
         let billboardMatrix = getBillboardMatrix(u_cameraMatrix, u_modelMatrix);
 
         if (u_useBillboardPerspective == 1) {
-            position = billboardMatrix * input_position_vec4;
+            position = billboardMatrix * input_positionVec4;
         } else {
-            position = billboardMatrix * input_position_vec4;
+            position = billboardMatrix * input_positionVec4;
         }
 
         // View3D-Projection Matrix 곱
@@ -202,7 +191,7 @@ fn picking(inputData: InputData) -> OutputData {
         }
     } else {
         // 일반적인 변환 계산
-        position = u_cameraMatrix * u_modelMatrix * input_position_vec4;
+        position = u_cameraMatrix * u_modelMatrix * input_positionVec4;
         output.position = u_projectionMatrix * position;
     }
 
