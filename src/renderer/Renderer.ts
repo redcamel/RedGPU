@@ -103,10 +103,8 @@ class Renderer {
 		} = this.#createAttachmentsForView(view)
 
 		{
-			//TODO 이거 어디론가 이동시켜야함
 			const frameIndex = antialiasingManager.taa.frameIndex || 0;
 			const jitterScale = antialiasingManager.taa.jitterStrength;
-
 
 			const sampleCount = 16;
 			const currentSample = frameIndex % sampleCount;
@@ -115,12 +113,11 @@ class Renderer {
 			const haltonX = this.#haltonSequence(currentSample + 1, 2);
 			const haltonY = this.#haltonSequence(currentSample + 1, 3);
 
-			// [-0.5, 0.5] 범위로 정규화하고 픽셀 단위로 변환
+			// 픽셀 단위 지터
 			const jitterX = (haltonX - 0.5) * jitterScale;
 			const jitterY = (haltonY - 0.5) * jitterScale;
 
 			view.setJitterOffset(jitterX, jitterY);
-
 		}
 		const renderPassDescriptor: GPURenderPassDescriptor = {
 			colorAttachments: [colorAttachment,gBufferNormalTextureAttachment,gBufferMotionVectorTextureAttachment],
