@@ -124,24 +124,26 @@
     let motionRejectionFactor = smoothstep(0.002, 0.012, motionMagnitude);
 
     let baseBlendFactor = uniforms.temporalBlendFactor;
-    let motionBlurAdjustedBlendFactor = mix(
-        baseBlendFactor,
-        min(baseBlendFactor + motionBlurFactor * 0.3, 0.9),
-        motionBlurFactor
-    );
 
+    // 모션에 따른 블렌드 팩터 조정 (모션이 클수록 현재 프레임 비중 증가)
+    let motionAdjustment = smoothstep(0.001, 0.05, motionMagnitude) * 0.4;
+    let motionAdjustedBlendFactor = clamp(baseBlendFactor + motionAdjustment, motionMagnitude, 0.95);
+
+    // 거부 강도 계산 (색상 차이나 모션에 따른 히스토리 거부)
     let rejectionStrength = max(rejectionFactor, motionRejectionFactor);
+
+    // 최종 적응형 블렌드 팩터 계산
+    // rejectionStrength가 높을수록 현재 프레임을 더 많이 사용
     let adaptiveBlendFactor = mix(
-        motionBlurAdjustedBlendFactor,
-        0.85,
+        motionAdjustedBlendFactor,
+        clamp(motionAdjustedBlendFactor + rejectionStrength * 0.6, 0.1, 0.9),
         rejectionStrength
     );
 
     let finalColor = mix(
         mix(varianceClampedPreviousColor, currentColor, adaptiveBlendFactor),
         mix(varianceClampedPreviousColor, currentColor, baseBlendFactor),
-        adaptiveBlendFactor
+        1 - adaptiveBlendFactor * adaptiveBlendFactor * adaptiveBlendFactor * adaptiveBlendFactor * adaptiveBlendFactor  + 0.04
     );
-
     textureStore(outputTexture, pixelIndex, vec4<f32>(finalColor, 1.0));
 }
