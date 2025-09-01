@@ -192,8 +192,8 @@ class ViewTransform {
 		if(antialiasingManager.useTAA) {
 			if (this.rawCamera instanceof PerspectiveCamera && (this.#jitterOffsetX !== 0 || this.#jitterOffsetY !== 0)) {
 				// devicePixelRatio를 고려한 정확한 픽셀 크기 계산
-				const logicalWidth = this.#pixelRectArray[2] / window.devicePixelRatio;
-				const logicalHeight = this.#pixelRectArray[3] / window.devicePixelRatio;
+				const logicalWidth = this.#pixelRectArray[2];
+				const logicalHeight = this.#pixelRectArray[3];
 
 				const pixelWidth = 2.0 / logicalWidth;
 				const pixelHeight = 2.0 / logicalHeight;
