@@ -187,13 +187,17 @@ class ViewTransform {
 		const {redGPUContext} = this
 		const {antialiasingManager}=redGPUContext
 		this.#projectionMatrix = mat4.clone(this.noneJitterProjectionMatrix)
+
 		// TAA 지터 오프셋 적용 (PerspectiveCamera에만 적용)
 		if(antialiasingManager.useTAA) {
 			if (this.rawCamera instanceof PerspectiveCamera && (this.#jitterOffsetX !== 0 || this.#jitterOffsetY !== 0)) {
-				// 투영 매트릭스의 translation 부분에 지터 추가
-				// 서브픽셀 단위의 오프셋을 적용
-				const pixelWidth = 2.0 / this.#pixelRectArray[2];
-				const pixelHeight = 2.0 / this.#pixelRectArray[3];
+				// devicePixelRatio를 고려한 정확한 픽셀 크기 계산
+				const logicalWidth = this.#pixelRectArray[2] / window.devicePixelRatio;
+				const logicalHeight = this.#pixelRectArray[3] / window.devicePixelRatio;
+
+				const pixelWidth = 2.0 / logicalWidth;
+				const pixelHeight = 2.0 / logicalHeight;
+
 				this.#projectionMatrix[8] += this.#jitterOffsetX * pixelWidth;  // X 오프셋
 				this.#projectionMatrix[9] += this.#jitterOffsetY * pixelHeight; // Y 오프셋
 			}

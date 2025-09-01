@@ -45,14 +45,6 @@
         return;
     }
 
-//    // 모션이 거의 없는 경우 간단한 블렌딩
-//    if (motionMagnitude < 1) {
-//        let previousColor = textureLoad(previousFrameTexture, pixelIndex).rgb;
-//        let blendFactor = clamp(uniforms.temporalBlendFactor, 0.2, 0.8);
-//        let blendedColor = mix(previousColor, currentColor, blendFactor);
-//        textureStore(outputTexture, pixelIndex, vec4<f32>(blendedColor, 1.0));
-//        return;
-//    }
     let motionBlurFactor = smoothstep(0.001, 0.02, motionMagnitude) * uniforms.motionBlurReduction;
 
     // 이중선형 보간으로 이전 색상 샘플링
