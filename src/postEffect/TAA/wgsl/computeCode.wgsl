@@ -9,7 +9,7 @@
 
     let currentColor = textureLoad(sourceTexture, pixelIndex).rgb;
     let motionVector = textureLoad(motionVectorTexture, pixelIndex, 0);
-    let motionVectorXY = motionVector.xy;
+    let motionVectorXY = motionVector.xy ;
 
     // jitter 비활성화 시 빠른 종료
     let disableJitter = motionVector.z > 0.5;
@@ -53,8 +53,6 @@
 //        textureStore(outputTexture, pixelIndex, vec4<f32>(blendedColor, 1.0));
 //        return;
 //    }
-
-    // 복잡한 TAA 처리
     let motionBlurFactor = smoothstep(0.001, 0.02, motionMagnitude) * uniforms.motionBlurReduction;
 
     // 이중선형 보간으로 이전 색상 샘플링
@@ -85,9 +83,10 @@
     );
 
     let neighborWeights = array<f32, 9>(
-        0.0625, 0.125, 0.0625,
-        0.125,  0.25,  0.125,
-        0.0625, 0.125, 0.0625
+        0.111111, 0.111111, 0.111111,
+          0.111111, 0.111111, 0.111111,
+          0.111111, 0.111111, 0.111111
+
     );
 
     for (var i = 0; i < 9; i++) {
@@ -149,7 +148,7 @@
     let finalColor = mix(
         mix(varianceClampedPreviousColor, currentColor, adaptiveBlendFactor),
         mix(varianceClampedPreviousColor, currentColor, baseBlendFactor),
-        adaptiveBlendFactor * adaptiveBlendFactor  + 0.04
+        adaptiveBlendFactor
     );
 
     textureStore(outputTexture, pixelIndex, vec4<f32>(finalColor, 1.0));

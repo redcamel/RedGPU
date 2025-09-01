@@ -89,11 +89,11 @@ RedGPU.init(
 		scene.addChild(glassSphere);
 
 		// 원래 모델도 유지
-		loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb');
+		// loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb');
 		loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MetalRoughSpheres/glTF-Binary/MetalRoughSpheres.glb');
 		loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Sponza/glTF/Sponza.gltf');
-		// loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF-Binary/BrainStem.glb', 1, 0);
-
+		loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF-Binary/BrainStem.glb', 1, 0);
+		loadGLTF(redGPUContext, scene,'../../../assets/gltf/busterDrone/busterDrone.gltf');
 		// ============================================
 		// 레이아웃 설정
 		// ============================================
@@ -175,6 +175,9 @@ function loadGLTF(redGPUContext, scene, url) {
 			}
 			if (url.includes('Sponza')) {
 				mesh.setScale(2)
+			}
+			if (url.includes('busterDrone')) {
+				mesh.y=1
 			}
 		}
 	);

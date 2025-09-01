@@ -40,7 +40,7 @@ const setAntialiasing_pane = (pane, redGPUContext, openYn = false) => {
 	// })
 	/////////////////////////
 
-	const taaFolder = pane.addFolder({
+	const taaFolder = folder.addFolder({
 		title: 'TAA',
 		expanded: true
 	});
