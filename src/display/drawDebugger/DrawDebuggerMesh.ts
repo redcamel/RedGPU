@@ -38,7 +38,7 @@ class DrawDebuggerMesh {
 		this.#debugMesh.primitiveState.cullMode = 'none';
 		this.#debugMesh.primitiveState.topology = GPU_PRIMITIVE_TOPOLOGY.LINE_LIST;
 		this.#debugMesh.depthStencilState.depthWriteEnabled = true;
-		this.#debugMesh.disableJitter=true
+		// this.#debugMesh.disableJitter=true
 		const aabbGeometry = this.#createWireframeBoxGeometry(redGPUContext);
 		this.#aabbMaterial = new ColorMaterial(redGPUContext);
 		this.#aabbMaterial.color.setColorByRGB(0, 255, 0);
@@ -46,7 +46,7 @@ class DrawDebuggerMesh {
 		this.#aabbDebugMesh.primitiveState.cullMode = 'none';
 		this.#aabbDebugMesh.primitiveState.topology = GPU_PRIMITIVE_TOPOLOGY.LINE_LIST;
 		this.#aabbDebugMesh.depthStencilState.depthWriteEnabled = true;
-		this.#aabbDebugMesh.disableJitter=true
+		// this.#aabbDebugMesh.disableJitter=true
 	}
 
 	get debugMode(): DebugMode {

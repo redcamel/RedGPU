@@ -80,8 +80,8 @@
         0.123, 0.200, 0.123,
         0.077, 0.123, 0.077
     );
-
-    let currentLum = dot(currentColor, vec3<f32>(0.299, 0.587, 0.114));
+  let lumCoeffs = vec3<f32>(0.2126, 0.7152, 0.0722);
+    let currentLum = dot(currentColor, lumCoeffs);
     var edgeStrength = 0.0;
     var totalWeight = 0.0;
 
@@ -98,7 +98,7 @@
         let weight = neighborWeights[i];
 
         // 더 부드러운 엣지 감지
-        let sampleLum = dot(sampleColor, vec3<f32>(0.299, 0.587, 0.114));
+        let sampleLum = dot(sampleColor, lumCoeffs);
         edgeStrength += abs(sampleLum - currentLum) * weight;
         totalWeight += weight;
 
@@ -121,7 +121,7 @@
     let neighborStdDev = sqrt(max(neighborVariance, vec3<f32>(0.0001)));
 
     // 더욱 부드러운 분산 스케일링
-    let baseVarianceScale = 1.4; // 더 관대한 기본값
+    let baseVarianceScale = 4.0; // 더 관대한 기본값
     let lineVarianceReduction = mix(1.0, 0.8, lineDetectionFactor * 0.5); // 더 부드러운 감소
     let motionVarianceReduction = mix(0.6, 0.5, lineDetectionFactor * 0.3);
 
@@ -135,7 +135,7 @@
     let varianceMax = neighborMean + neighborStdDev * adaptiveVarianceScale;
     let varianceClampedPreviousColor = clamp(clampedPreviousColor, varianceMin, varianceMax);
 
-    let previousLuminance = dot(varianceClampedPreviousColor, vec3<f32>(0.299, 0.587, 0.114));
+    let previousLuminance = dot(varianceClampedPreviousColor, lumCoeffs);
 
     let luminanceDiff = abs(previousLuminance - currentLum);
     let colorDifference = length(currentColor - varianceClampedPreviousColor);

@@ -153,8 +153,14 @@ class Renderer {
 				if (skybox) skybox.render(debugViewRenderState)
 				renderBasicLayer(view, viewRenderPassEncoder)
 				if (axis) axis.render(debugViewRenderState)
-				if (grid) grid.render(debugViewRenderState)
 				renderAlphaLayer(view, viewRenderPassEncoder)
+				if (grid) grid.render(debugViewRenderState)
+				{
+					let i  = view.debugViewRenderState.debugLayer.length
+					while(i--){
+						view.debugViewRenderState.debugLayer[i].render(debugViewRenderState)
+					}
+				}
 				viewRenderPassEncoder.end()
 			}
 			{
