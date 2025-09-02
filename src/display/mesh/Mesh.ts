@@ -31,6 +31,7 @@ const CPI = 3.141592653589793, CPI2 = 6.283185307179586, C225 = 0.225, C127 = 1.
 
 interface Mesh {
 	receiveShadow: boolean
+	disableJitter: boolean
 	meshType: string
 	useDisplacementTexture: boolean
 }
@@ -1063,6 +1064,7 @@ DefineForVertex.defineByPreset(Mesh, [
 ])
 DefineForVertex.defineBoolean(Mesh, [
 	['useDisplacementTexture', false],
+	['disableJitter', false],
 ])
 Object.freeze(Mesh)
 export default Mesh

@@ -298,7 +298,7 @@ class TAA {
 				format: 'rgba8unorm',
 				usage: GPUTextureUsage.TEXTURE_BINDING |
 					GPUTextureUsage.STORAGE_BINDING |
-					GPUTextureUsage.COPY_SRC,
+					GPUTextureUsage.COPY_SRC| GPUTextureUsage.RENDER_ATTACHMENT,
 				label: `${name}_${this.#name}_currentFrame_${width}x${height}`
 			});
 			this.#currentFrameTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#currentFrameTexture, {
@@ -311,7 +311,7 @@ class TAA {
 				format: 'rgba8unorm',
 				usage: GPUTextureUsage.TEXTURE_BINDING |
 					GPUTextureUsage.STORAGE_BINDING |
-					GPUTextureUsage.COPY_DST,
+					GPUTextureUsage.COPY_DST ,
 				label: `${name}_${this.#name}_previousFrame_${width}x${height}`
 			});
 			this.#previousFrameTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#previousFrameTexture, {

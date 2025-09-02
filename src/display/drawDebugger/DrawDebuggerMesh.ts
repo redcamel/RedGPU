@@ -1,5 +1,6 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import Geometry from "../../geometry/Geometry";
+import GPU_COMPARE_FUNCTION from "../../gpuConst/GPU_COMPARE_FUNCTION";
 import GPU_PRIMITIVE_TOPOLOGY from "../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
 import ColorMaterial from "../../material/colorMaterial/ColorMaterial";
 import RenderViewStateData from "../../renderer/RenderViewStateData";
@@ -36,14 +37,16 @@ class DrawDebuggerMesh {
 		this.#debugMesh = new Mesh(redGPUContext, geometry, this.#material);
 		this.#debugMesh.primitiveState.cullMode = 'none';
 		this.#debugMesh.primitiveState.topology = GPU_PRIMITIVE_TOPOLOGY.LINE_LIST;
-		this.#debugMesh.depthStencilState.depthWriteEnabled = false;
+		this.#debugMesh.depthStencilState.depthWriteEnabled = true;
+		this.#debugMesh.disableJitter=true
 		const aabbGeometry = this.#createWireframeBoxGeometry(redGPUContext);
 		this.#aabbMaterial = new ColorMaterial(redGPUContext);
 		this.#aabbMaterial.color.setColorByRGB(0, 255, 0);
 		this.#aabbDebugMesh = new Mesh(redGPUContext, aabbGeometry, this.#aabbMaterial);
 		this.#aabbDebugMesh.primitiveState.cullMode = 'none';
 		this.#aabbDebugMesh.primitiveState.topology = GPU_PRIMITIVE_TOPOLOGY.LINE_LIST;
-		this.#aabbDebugMesh.depthStencilState.depthWriteEnabled = false;
+		this.#aabbDebugMesh.depthStencilState.depthWriteEnabled = true;
+		this.#aabbDebugMesh.disableJitter=true
 	}
 
 	get debugMode(): DebugMode {

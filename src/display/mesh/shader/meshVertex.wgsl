@@ -13,6 +13,7 @@ struct VertexUniforms {
     combinedOpacity: f32,
     useDisplacementTexture: u32,
     displacementScale: f32,
+    disableJitter: u32,
 };
 
 const maxDistance: f32 = 1000.0;
@@ -46,10 +47,19 @@ fn main(inputData: InputData) -> OutputData {
     var output: OutputData;
 
     // System uniforms
-    let u_projectionMatrix = systemUniforms.projectionMatrix;
+    #redgpu_if disableJitter
+    {
+        let u_projectionMatrix = systemUniforms.noneJitterProjectionCameraMatrix;
+    }
+    #redgpu_else
+    {
+        let u_projectionMatrix = systemUniforms.projectionMatrix;
+    }
+    #redgpu_endIf
+    let u_noneJitterProjectionCameraMatrix = systemUniforms.noneJitterProjectionCameraMatrix;
+
     let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
     let u_prevProjectionCameraMatrix = systemUniforms.prevProjectionCameraMatrix;
-    let u_noneJitterProjectionCameraMatrix = systemUniforms.noneJitterProjectionCameraMatrix;
     let u_resolution = systemUniforms.resolution;
     let u_camera = systemUniforms.camera;
     let u_cameraMatrix = u_camera.cameraMatrix;
@@ -132,7 +142,7 @@ fn main(inputData: InputData) -> OutputData {
     {
         let currentClipPos = u_noneJitterProjectionCameraMatrix * position;
         let prevClipPos = u_prevProjectionCameraMatrix * u_prevModelMatrix * input_position_vec4;
-        output.motionVector = vec3<f32>(calculateMotionVector(currentClipPos, prevClipPos, u_resolution), 0.0);
+        output.motionVector = vec3<f32>(calculateMotionVector(currentClipPos, prevClipPos, u_resolution), select(0.0,1.0,vertexUniforms.disableJitter==1u));
     }
 
     return output;

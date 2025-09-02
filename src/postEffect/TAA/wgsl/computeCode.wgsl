@@ -27,7 +27,7 @@
     // 모션 벡터 사용하지 않는 경우
     if (uniforms.useMotionVectors < 0.5) {
         let previousColor = textureLoad(previousFrameTexture, pixelIndex).rgb;
-        let blendFactor = clamp(uniforms.temporalBlendFactor, 0.2, 0.8);
+        let blendFactor = clamp(uniforms.temporalBlendFactor, 0.15, 0.7);
         let blendedColor = mix(previousColor, currentColor, blendFactor);
         textureStore(outputTexture, pixelIndex, vec4<f32>(blendedColor, 1.0));
         return;
@@ -62,7 +62,7 @@
     let bottomMix = mix(bottomLeft, bottomRight, fracCoord.x);
     let previousColor = mix(topMix, bottomMix, fracCoord.y);
 
-    // 이웃 픽셀 분석
+    // 이웃 픽셀 분석 - 더 부드러운 가우시안 스타일 가중치
     var neighborMin = currentColor;
     var neighborMax = currentColor;
     var neighborSum = vec3<f32>(0.0);
@@ -74,12 +74,16 @@
             vec2<i32>(-1,  1), vec2<i32>(0,  1), vec2<i32>(1,  1)
     );
 
+    // 가우시안 스타일 가중치 (더 부드러운 블렌딩)
     let neighborWeights = array<f32, 9>(
-        0.111111, 0.111111, 0.111111,
-          0.111111, 0.111111, 0.111111,
-          0.111111, 0.111111, 0.111111
-
+        0.077, 0.123, 0.077,
+        0.123, 0.200, 0.123,
+        0.077, 0.123, 0.077
     );
+
+    let currentLum = dot(currentColor, vec3<f32>(0.299, 0.587, 0.114));
+    var edgeStrength = 0.0;
+    var totalWeight = 0.0;
 
     for (var i = 0; i < 9; i++) {
         let neighborPixelIndex = vec2<i32>(pixelIndex) + neighborOffsets[i];
@@ -93,6 +97,11 @@
         let sampleColor = textureLoad(sourceTexture, samplePos).rgb;
         let weight = neighborWeights[i];
 
+        // 더 부드러운 엣지 감지
+        let sampleLum = dot(sampleColor, vec3<f32>(0.299, 0.587, 0.114));
+        edgeStrength += abs(sampleLum - currentLum) * weight;
+        totalWeight += weight;
+
         neighborMin = min(neighborMin, sampleColor);
         neighborMax = max(neighborMax, sampleColor);
 
@@ -101,49 +110,63 @@
         neighborSumSquared += sampleColor * sampleColor * weight;
     }
 
+    // 매우 부드러운 엣지 감지
+    let normalizedEdgeStrength = clamp(edgeStrength / totalWeight, 0.0, 1.0);
+    let lineDetectionFactor = smoothstep(0.03, 0.08, normalizedEdgeStrength);
+
     let clampedPreviousColor = clamp(previousColor, neighborMin, neighborMax);
 
     let neighborMean = neighborSum;
     let neighborVariance = neighborSumSquared - (neighborMean * neighborMean);
     let neighborStdDev = sqrt(max(neighborVariance, vec3<f32>(0.0001)));
 
-    let baseVarianceScale = 1.25;
-    let adaptiveVarianceScale = mix(baseVarianceScale, baseVarianceScale * 0.5, min(motionMagnitude * 50.0, 1.0));
+    // 더욱 부드러운 분산 스케일링
+    let baseVarianceScale = 1.4; // 더 관대한 기본값
+    let lineVarianceReduction = mix(1.0, 0.8, lineDetectionFactor * 0.5); // 더 부드러운 감소
+    let motionVarianceReduction = mix(0.6, 0.5, lineDetectionFactor * 0.3);
+
+    let adaptiveVarianceScale = mix(
+        baseVarianceScale * lineVarianceReduction,
+        baseVarianceScale * lineVarianceReduction * motionVarianceReduction,
+        smoothstep(0.005, 0.08, motionMagnitude) // 더 점진적인 모션 반응
+    );
 
     let varianceMin = neighborMean - neighborStdDev * adaptiveVarianceScale;
     let varianceMax = neighborMean + neighborStdDev * adaptiveVarianceScale;
     let varianceClampedPreviousColor = clamp(clampedPreviousColor, varianceMin, varianceMax);
 
-    let currentLuminance = dot(currentColor, vec3<f32>(0.299, 0.587, 0.114));
     let previousLuminance = dot(varianceClampedPreviousColor, vec3<f32>(0.299, 0.587, 0.114));
 
-    let luminanceDiff = abs(previousLuminance - currentLuminance);
+    let luminanceDiff = abs(previousLuminance - currentLum);
     let colorDifference = length(currentColor - varianceClampedPreviousColor);
 
-    let rejectionFactor = smoothstep(0.015, 0.08, max(luminanceDiff, colorDifference));
-    let motionRejectionFactor = smoothstep(0.002, 0.012, motionMagnitude);
+    // 더 관대한 거부 임계값
+    let baseRejectionFactor = smoothstep(0.03, 0.15, max(luminanceDiff, colorDifference));
+    let motionRejectionFactor = smoothstep(1.2, 3.5, motionMagnitude);
 
-    let baseBlendFactor = uniforms.temporalBlendFactor;
+    let rejectionFactor = max(baseRejectionFactor, motionRejectionFactor);
 
-    // 모션에 따른 블렌드 팩터 조정 (모션이 클수록 현재 프레임 비중 증가)
-    let motionAdjustment = smoothstep(0.001, 0.05, motionMagnitude) * 0.4;
-    let motionAdjustedBlendFactor = clamp(baseBlendFactor + motionAdjustment, motionMagnitude, 0.95);
+    // 더 보수적인 기본 블렌드 팩터
+    let baseBlendFactor = clamp(uniforms.temporalBlendFactor, 0.08, 0.6);
 
-    // 거부 강도 계산 (색상 차이나 모션에 따른 히스토리 거부)
-    let rejectionStrength = max(rejectionFactor, motionRejectionFactor);
+    // 매우 부드러운 모션 조정
+    let motionAdjustment = smoothstep(0.005, 0.12, motionMagnitude) * mix(0.15, 0.25, lineDetectionFactor * 0.6);
+    let motionAdjustedBlendFactor = clamp(baseBlendFactor + motionAdjustment, 0.08, 0.7);
 
-    // 최종 적응형 블렌드 팩터 계산
-    // rejectionStrength가 높을수록 현재 프레임을 더 많이 사용
+    // 최종 블렌드 팩터 - 매우 부드러운 전환
+    let rejectionInfluence = mix(0.25, 0.35, lineDetectionFactor * 0.4);
+    let rejectionSmoothness = 0.5; // 더 부드러운 거부 반응
+
     let adaptiveBlendFactor = mix(
         motionAdjustedBlendFactor,
-        clamp(motionAdjustedBlendFactor + rejectionStrength * 0.6, 0.1, 0.9),
-        rejectionStrength
+        clamp(motionAdjustedBlendFactor + rejectionFactor * rejectionInfluence, 0.12, 0.65),
+        rejectionFactor * rejectionSmoothness
     );
 
-    let finalColor = mix(
-        mix(varianceClampedPreviousColor, currentColor, adaptiveBlendFactor),
-        mix(varianceClampedPreviousColor, currentColor, baseBlendFactor),
-        1 - adaptiveBlendFactor * adaptiveBlendFactor * adaptiveBlendFactor * adaptiveBlendFactor * adaptiveBlendFactor  + 0.04
-    );
+    // 추가 안정화: 극단적인 블렌드 팩터 방지
+    let stabilizedBlendFactor = clamp(adaptiveBlendFactor, 0.08, 0.6);
+
+    let finalColor = mix(varianceClampedPreviousColor, currentColor, stabilizedBlendFactor);
+
     textureStore(outputTexture, pixelIndex, vec4<f32>(finalColor, 1.0));
 }

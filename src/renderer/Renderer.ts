@@ -5,8 +5,10 @@ import View3D from "../display/view/View3D";
 import GPU_LOAD_OP from "../gpuConst/GPU_LOAD_OP";
 import GPU_STORE_OP from "../gpuConst/GPU_STORE_OP";
 import TAA from "../postEffect/TAA/TAA";
+import {keepLog} from "../utils";
 import DebugRender from "./debugRender/DebugRender";
 import FinalRender from "./finalRender/FinalRender";
+import renderListForLayer from "./renderLayers/core/renderListForLayer";
 import render2PathLayer from "./renderLayers/render2PathLayer";
 import renderAlphaLayer from "./renderLayers/renderAlphaLayer";
 import renderBasicLayer from "./renderLayers/renderBasicLayer";
@@ -106,7 +108,7 @@ class Renderer {
 			const frameIndex = antialiasingManager.taa.frameIndex || 0;
 			const jitterScale = antialiasingManager.taa.jitterStrength;
 
-			const sampleCount = 16;
+			const sampleCount = 32;
 			const currentSample = frameIndex % sampleCount;
 
 			// Halton 시퀀스 계산
@@ -200,7 +202,6 @@ class Renderer {
 				}
 			}
 			// 포스트 이펙트 체크
-
 			if (pickingManager) {
 				pickingManager.checkTexture(view)
 				const pickingPassDescriptor: GPURenderPassDescriptor = {
@@ -228,6 +229,7 @@ class Renderer {
 		}
 		redGPUContext.gpuDevice.queue.submit([commandEncoder.finish()])
 		renderPassDescriptor.colorAttachments[0].postEffectView = view.postEffectManager.render().textureView
+
 		view.debugViewRenderState.viewRenderTime = (performance.now() - view.debugViewRenderState.startTime);
 		pickingManager.checkEvents(view, time);
 		{
