@@ -34,7 +34,6 @@
     // ---------- Motion Analysis ----------
     let velocityMagnitude = length(velocity);
     let staticThreshold = 0.5;
-    // 부드러운 전환을 위한 스무딩 - 더 넓은 범위로 확장
     let staticTransition = smoothstep(0.2, 1.0, velocityMagnitude);
     let isStaticPixel = velocityMagnitude < staticThreshold;
 
@@ -68,48 +67,31 @@
     let historySample = mix(interpolated_Top, interpolated_Bottom, fracPos.y);
 
     // ---------- UE5 TSR Style Plus Pattern Neighborhood Sampling ----------
-    // 언리얼 5 스타일의 Plus 패턴 (5개 샘플만 사용 - 중앙 + 십자 형태)
     let neighbor_N = textureLoad(sourceTexture, clamp(pixelCoord + vec2<u32>(0, 1), vec2<u32>(0), vec2<u32>(screenSize) - vec2<u32>(1))).rgb;
     let neighbor_S = textureLoad(sourceTexture, clamp(pixelCoord - vec2<u32>(0, 1), vec2<u32>(0), vec2<u32>(screenSize) - vec2<u32>(1))).rgb;
     let neighbor_E = textureLoad(sourceTexture, clamp(pixelCoord + vec2<u32>(1, 0), vec2<u32>(0), vec2<u32>(screenSize) - vec2<u32>(1))).rgb;
     let neighbor_W = textureLoad(sourceTexture, clamp(pixelCoord - vec2<u32>(1, 0), vec2<u32>(0), vec2<u32>(screenSize) - vec2<u32>(1))).rgb;
 
-    // 효율적인 Min/Max 계산 (언리얼 5 스타일)
+    // UE5 TSR Style Min/Max 계산
     var neighborColorMin = min(min(currentPixelColor, neighbor_N), min(neighbor_S, min(neighbor_E, neighbor_W)));
     var neighborColorMax = max(max(currentPixelColor, neighbor_N), max(neighbor_S, max(neighbor_E, neighbor_W)));
 
-    // 가중 평균 계산 (Plus 패턴용)
-    let centerWeight = select(0.4, 0.6, isThinDetail);  // 중앙 픽셀 가중치
-    let neighborWeight = (1.0 - centerWeight) / 4.0;    // 4개 이웃 픽셀 가중치
-
-    let neighborColorSum = (currentPixelColor * centerWeight) +
-                          ((neighbor_N + neighbor_S + neighbor_E + neighbor_W) * neighborWeight);
-
-    // 간소화된 분산 계산
-    let neighborColorSumSquared = (currentPixelColor * currentPixelColor * centerWeight) +
-                                 ((neighbor_N * neighbor_N + neighbor_S * neighbor_S +
-                                   neighbor_E * neighbor_E + neighbor_W * neighbor_W) * neighborWeight);
-
-    // ---------- Statistical Analysis ----------
+    // 기본 클램핑 (UE5 TSR 스타일)
     let basicClampedHistory = clamp(historySample, neighborColorMin, neighborColorMax);
 
-    let neighborMean = neighborColorSum;
-    let neighborVariance = neighborColorSumSquared - (neighborMean * neighborMean);
-    let neighborStdDev = sqrt(max(neighborVariance, vec3<f32>(0.0001)));
+    // ---------- UE5 TSR Style Simplified Neighborhood Expansion ----------
+    // 복잡한 분산/표준편차 계산 대신 간단한 적응적 범위 확장 사용
+    let colorRange = neighborColorMax - neighborColorMin;
 
-    let baseVarianceScale = select(1.5, 5.0, isThinDetail);
-    // 얇은 디테일이면서 정적인 경우는 기존 방식 유지
-    let smoothVarianceScale = select(
-        mix(baseVarianceScale * 1.2, baseVarianceScale, staticTransition), // 일반적인 경우 부드럽게
-        select(baseVarianceScale, baseVarianceScale * 1.5, isStaticPixel),  // 얇은 디테일은 기존 방식
-        isThinDetail
-    );
+    // 언리얼 5 스타일 적응적 확장 계수
+    let baseExpansion = select(0.1, 0.3, isThinDetail);
+    let motionExpansion = clamp(velocityMagnitude / 10.0, 0.0, 0.2);
+    let staticExpansion = select(baseExpansion + motionExpansion, baseExpansion * 0.5, isStaticPixel);
 
-    let adaptiveScale = mix(smoothVarianceScale, smoothVarianceScale * 0.3, min(velocityMagnitude / 20.0, 1.0));
-
-    let varianceClampMin = neighborMean - neighborStdDev * adaptiveScale;
-    let varianceClampMax = neighborMean + neighborStdDev * adaptiveScale;
-    let finalClampedHistory = clamp(basicClampedHistory, varianceClampMin, varianceClampMax);
+    // 최종 클램핑 범위 (언리얼 5 TSR 방식)
+    let expandedMin = neighborColorMin - colorRange * staticExpansion;
+    let expandedMax = neighborColorMax + colorRange * staticExpansion;
+    let finalClampedHistory = clamp(basicClampedHistory, expandedMin, expandedMax);
 
     // ---------- Rejection Analysis ----------
     let lumaCoeffs = vec3<f32>(0.2126, 0.7152, 0.0722);
