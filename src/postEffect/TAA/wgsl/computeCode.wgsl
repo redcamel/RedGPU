@@ -138,7 +138,7 @@
     // ---------- Final Color Output ----------
     let finalOutputColor = mix(
         mix(finalClampedHistory, currentPixelColor, finalBlendFactor),
-        mix(basicClampedHistory, currentPixelColor, 0.25),
+        mix(basicClampedHistory, currentPixelColor, 0.04),
          pow(1 - staticTransition,2) * 0.5
     );
 

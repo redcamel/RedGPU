@@ -28,7 +28,7 @@ RedGPU.init(
 			checkAABBIntersection(mesh1, mesh2, intersectionLabel);
 		};
 		renderer.start(redGPUContext, render);
-		renderTestPane(redGPUContext);
+		renderTestPane(redGPUContext,view);
 
 	},
 	(failReason) => {
@@ -36,12 +36,12 @@ RedGPU.init(
 		document.body.innerHTML = `<div>오류: ${failReason}</div>`;
 	}
 );
-const renderTestPane = async (redGPUContext) => {
+const renderTestPane = async (redGPUContext,view) => {
 	const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
 	const {setDebugViewButton,setAntialiasing_pane} = await import("../../../../exampleHelper/createExample/panes/index.js");
 	setDebugViewButton(redGPUContext);
 	const pane = new Pane();
-	setAntialiasing_pane(pane, redGPUContext, true);
+	setAntialiasing_pane(pane, redGPUContext, view,true);
 };
 
 function createIntersectionTest(redGPUContext, scene) {

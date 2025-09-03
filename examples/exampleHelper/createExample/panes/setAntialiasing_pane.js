@@ -7,7 +7,7 @@
  *
  * @return {void}
  */
-const setAntialiasing_pane = (pane, redGPUContext, openYn = false) => {
+const setAntialiasing_pane = (pane, redGPUContext,view, openYn = false) => {
 
 	const folder = pane.addFolder({
 		title: 'antialiasing',
@@ -45,7 +45,7 @@ const setAntialiasing_pane = (pane, redGPUContext, openYn = false) => {
 		expanded: true
 	});
 	taaFolder.addBinding(redGPUContext.antialiasingManager, 'useTAA')
-	const taaEffect = redGPUContext.antialiasingManager.taa;
+	const taaEffect = view.taa;
 	taaFolder.addBinding(taaEffect, 'jitterStrength', {min: 0, max: 1, step: 0.01})
 		.on('change', (v) => {
 			taaEffect.jitterStrength = v.value;

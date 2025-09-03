@@ -189,7 +189,7 @@ const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect) => {
 	const {setDebugViewButton,createIblHelper,setAntialiasing_pane} = await import("../../../exampleHelper/createExample/panes/index.js");
 	setDebugViewButton(redGPUContext);
 	const pane = new Pane({title: 'SSR Controls'});
-	setAntialiasing_pane(pane, redGPUContext, true);
+	setAntialiasing_pane(pane, redGPUContext, targetView,true);
 	createIblHelper(pane,targetView,RedGPU)
 
 	const TEST_STATE = {

@@ -20,7 +20,7 @@ RedGPU.init(
 		};
 		renderer.start(redGPUContext, render);
 
-		renderTestPane(redGPUContext);
+		renderTestPane(redGPUContext,view);
 	},
 	(failReason) => {
 		console.error('초기화 실패:', failReason);
@@ -31,7 +31,7 @@ RedGPU.init(
 	}
 );
 
-const renderTestPane = async (redGPUContext) => {
+const renderTestPane = async (redGPUContext,view) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const {
 		setRedGPUTest_pane,
@@ -41,5 +41,5 @@ const renderTestPane = async (redGPUContext) => {
 	setDebugViewButton(redGPUContext)
 	const pane = new Pane();
 	setAntialiasing_pane(pane, redGPUContext, true);
-	setRedGPUTest_pane(pane, redGPUContext, true);
+	setRedGPUTest_pane(pane, redGPUContext, view,true);
 };
