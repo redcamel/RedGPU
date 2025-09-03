@@ -79,9 +79,9 @@ class PostEffectManager {
 	}
 
 	render() {
-		const {viewRenderTextureManager, redGPUContext} = this.#view;
+		const {viewRenderTextureManager, redGPUContext, taa, fxaa} = this.#view;
 		const {antialiasingManager} = redGPUContext
-		const {useMSAA, useFXAA,useTAA,fxaa,taa} = antialiasingManager;
+		const {useMSAA, useFXAA, useTAA} = antialiasingManager;
 		const {gBufferColorTextureView, gBufferColorResolveTextureView, gBufferColorTexture} = viewRenderTextureManager;
 		const {width, height} = gBufferColorTexture;
 		this.#updateSystemUniforms()
@@ -208,7 +208,7 @@ class PostEffectManager {
 		}
 		// 크기 변경 또는 MSAA 변경 시 BindGroup 재생성
 		//TODO 이전프레임이 필요할떄만 사용하도록 변경해야함
-		if (dimensionsChanged || changedMSAA ) {
+		if (dimensionsChanged || changedMSAA) {
 			this.#textureComputeBindGroup = this.#createTextureBindGroup(
 				redGPUContext,
 				this.#textureComputeBindGroupLayout,

@@ -7,7 +7,9 @@ import PassClusterLightBound from "../../light/clusterLight/PassClusterLightBoun
 import PassClustersLight from "../../light/clusterLight/PassClustersLight";
 import PassClustersLightHelper from "../../light/clusterLight/PassClustersLightHelper";
 import PickingManager from "../../picking/PickingManager";
+import FXAA from "../../postEffect/FXAA";
 import PostEffectManager from "../../postEffect/PostEffectManager";
+import TAA from "../../postEffect/TAA/TAA";
 import RenderViewStateData from "../../renderer/RenderViewStateData";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import ResourceManager from "../../resources/resourceManager/ResourceManager";
@@ -66,7 +68,22 @@ class View3D extends ViewTransform {
 	#prevHeight: number = undefined
 	#prevIBL_iblTexture: IBLCubeTexture
 	#prevIBL_irradianceTexture: IBLCubeTexture
+	#taa:TAA
+	#fxaa:FXAA
+	get fxaa(): FXAA {
+		if (!this.#fxaa) {
+			this.#fxaa = new FXAA(this.redGPUContext);
+		}
 
+		return this.#fxaa;
+	}
+	get taa(): TAA {
+		if (!this.#taa) {
+			this.#taa = new TAA(this.redGPUContext);
+		}
+
+		return this.#taa;
+	}
 	//
 	/**
 	 * Creates a new instance of the Constructor class.

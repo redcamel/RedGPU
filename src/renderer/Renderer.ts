@@ -91,7 +91,8 @@ class Renderer {
 			axis,
 			grid,
 			skybox,
-			debugViewRenderState
+			debugViewRenderState,
+			taa
 		} = view
 		const {antialiasingManager} = redGPUContext
 		const {useMSAA} = antialiasingManager
@@ -105,8 +106,8 @@ class Renderer {
 		} = this.#createAttachmentsForView(view)
 
 		{
-			const frameIndex = antialiasingManager.taa.frameIndex || 0;
-			const jitterScale = antialiasingManager.taa.jitterStrength;
+			const frameIndex = taa.frameIndex || 0;
+			const jitterScale = taa.jitterStrength;
 
 			const sampleCount = 32;
 			const currentSample = frameIndex % sampleCount;
@@ -227,8 +228,8 @@ class Renderer {
 				// renderPassDescriptor.colorAttachments[0].pickingView = pickingManager.pickingGPUTextureView
 			}
 		}
-		redGPUContext.gpuDevice.queue.submit([commandEncoder.finish()])
 		renderPassDescriptor.colorAttachments[0].postEffectView = view.postEffectManager.render().textureView
+		redGPUContext.gpuDevice.queue.submit([commandEncoder.finish()])
 
 		view.debugViewRenderState.viewRenderTime = (performance.now() - view.debugViewRenderState.startTime);
 		pickingManager.checkEvents(view, time);

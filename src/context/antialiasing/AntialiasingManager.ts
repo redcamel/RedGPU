@@ -7,29 +7,15 @@ class AntialiasingManager {
 	#useMSAA: boolean = false
 	#useFXAA: boolean = false
 	#useTAA: boolean = true
-	#fxaa:FXAA
-	#taa:TAA
+
 	#changedMSAA: boolean = true
 
 	constructor(redGPUContext: RedGPUContext) {
 		this.#redGPUContext = redGPUContext;
 	}
 
-	get fxaa(): FXAA {
-		if (!this.#fxaa) {
-			this.#fxaa = new FXAA(this.#redGPUContext);
-		}
 
-		return this.#fxaa;
-	}
 
-	get taa(): TAA {
-		if (!this.#taa) {
-			this.#taa = new TAA(this.#redGPUContext);
-		}
-
-		return this.#taa;
-	}
 
 	get useTAA(): boolean {
 		return this.#useTAA;
