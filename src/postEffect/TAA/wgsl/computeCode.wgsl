@@ -67,71 +67,30 @@
     let interpolated_Bottom = mix(sample_BL, sample_BR, fracPos.x);
     let historySample = mix(interpolated_Top, interpolated_Bottom, fracPos.y);
 
-    // ---------- Neighborhood Analysis (Optimized) ----------
-    var neighborColorMin = currentPixelColor;
-    var neighborColorMax = currentPixelColor;
-    var neighborColorSum = vec3<f32>(0.0);
-    var neighborColorSumSquared = vec3<f32>(0.0);
-    var totalWeight = 0.0;
+    // ---------- UE5 TSR Style Plus Pattern Neighborhood Sampling ----------
+    // 언리얼 5 스타일의 Plus 패턴 (5개 샘플만 사용 - 중앙 + 십자 형태)
+    let neighbor_N = textureLoad(sourceTexture, clamp(pixelCoord + vec2<u32>(0, 1), vec2<u32>(0), vec2<u32>(screenSize) - vec2<u32>(1))).rgb;
+    let neighbor_S = textureLoad(sourceTexture, clamp(pixelCoord - vec2<u32>(0, 1), vec2<u32>(0), vec2<u32>(screenSize) - vec2<u32>(1))).rgb;
+    let neighbor_E = textureLoad(sourceTexture, clamp(pixelCoord + vec2<u32>(1, 0), vec2<u32>(0), vec2<u32>(screenSize) - vec2<u32>(1))).rgb;
+    let neighbor_W = textureLoad(sourceTexture, clamp(pixelCoord - vec2<u32>(1, 0), vec2<u32>(0), vec2<u32>(screenSize) - vec2<u32>(1))).rgb;
 
-    let optimizedOffsets = array<vec2<i32>, 8>(
-        vec2<i32>(0, -1),   // 위
-        vec2<i32>(-1, 0),   // 왼쪽
-        vec2<i32>(1, 0),    // 오른쪽
-        vec2<i32>(0, 1),    // 아래
-        vec2<i32>(-1, -1),  // 왼쪽 위
-        vec2<i32>(1, -1),   // 오른쪽 위
-        vec2<i32>(-1, 1),   // 왼쪽 아래
-        vec2<i32>(1, 1)     // 오른쪽 아래
-    );
+    // 효율적인 Min/Max 계산 (언리얼 5 스타일)
+    var neighborColorMin = min(min(currentPixelColor, neighbor_N), min(neighbor_S, min(neighbor_E, neighbor_W)));
+    var neighborColorMax = max(max(currentPixelColor, neighbor_N), max(neighbor_S, max(neighbor_E, neighbor_W)));
 
-    // 중앙 픽셀 가중치 (이미 샘플링된 currentPixelColor 사용)
-    let centerSampleWeight = select(0.2, 0.4, isThinDetail);
-    let neighborWeight = 0.1;
+    // 가중 평균 계산 (Plus 패턴용)
+    let centerWeight = select(0.4, 0.6, isThinDetail);  // 중앙 픽셀 가중치
+    let neighborWeight = (1.0 - centerWeight) / 4.0;    // 4개 이웃 픽셀 가중치
 
-    // 8개 이웃 픽셀 가중치
-    let neighborWeights = array<f32, 8>(
-        neighborWeight, neighborWeight, neighborWeight, neighborWeight,
-        neighborWeight, neighborWeight, neighborWeight, neighborWeight
-    );
+    let neighborColorSum = (currentPixelColor * centerWeight) +
+                          ((neighbor_N + neighbor_S + neighbor_E + neighbor_W) * neighborWeight);
 
-    // 중앙 픽셀을 먼저 처리
-    neighborColorMin = min(neighborColorMin, currentPixelColor);
-    neighborColorMax = max(neighborColorMax, currentPixelColor);
-
-    let centerWeightedColor = currentPixelColor * centerSampleWeight;
-    neighborColorSum += centerWeightedColor;
-    neighborColorSumSquared += currentPixelColor * currentPixelColor * centerSampleWeight;
-    totalWeight += centerSampleWeight;
-
-    let lumaCoeffs = vec3<f32>(0.2126, 0.7152, 0.0722);
-
-    // 8개 이웃 픽셀만 루프 처리
-    for (var idx = 0; idx < 8; idx++) {
-        let sampleCoord = vec2<i32>(pixelCoord) + optimizedOffsets[idx];
-        let clampedCoord = clamp(
-            sampleCoord,
-            vec2<i32>(0),
-            vec2<i32>(screenSize) - vec2<i32>(1)
-        );
-
-        let neighborPos = vec2<u32>(clampedCoord);
-        let neighborColor = textureLoad(sourceTexture, neighborPos).rgb;
-        let sampleWeight = neighborWeights[idx];
-
-        neighborColorMin = min(neighborColorMin, neighborColor);
-        neighborColorMax = max(neighborColorMax, neighborColor);
-
-        let weightedSample = neighborColor * sampleWeight;
-        neighborColorSum += weightedSample;
-        neighborColorSumSquared += neighborColor * neighborColor * sampleWeight;
-        totalWeight += sampleWeight;
-    }
+    // 간소화된 분산 계산
+    let neighborColorSumSquared = (currentPixelColor * currentPixelColor * centerWeight) +
+                                 ((neighbor_N * neighbor_N + neighbor_S * neighbor_S +
+                                   neighbor_E * neighbor_E + neighbor_W * neighbor_W) * neighborWeight);
 
     // ---------- Statistical Analysis ----------
-    neighborColorSum = neighborColorSum / totalWeight;
-    neighborColorSumSquared = neighborColorSumSquared / totalWeight;
-
     let basicClampedHistory = clamp(historySample, neighborColorMin, neighborColorMax);
 
     let neighborMean = neighborColorSum;
@@ -153,6 +112,7 @@
     let finalClampedHistory = clamp(basicClampedHistory, varianceClampMin, varianceClampMax);
 
     // ---------- Rejection Analysis ----------
+    let lumaCoeffs = vec3<f32>(0.2126, 0.7152, 0.0722);
     let historyLuma = dot(finalClampedHistory, lumaCoeffs);
     let lumaDifference = abs(historyLuma - currentLuma);
     let colorDistance = length(currentPixelColor - finalClampedHistory);
