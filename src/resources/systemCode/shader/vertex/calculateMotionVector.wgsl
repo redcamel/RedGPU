@@ -12,9 +12,9 @@ fn calculateMotionVector(
     let motionVectorNDC = currentNDC - prevNDC;
     let screenMotionVector = motionVectorNDC * resolution * 0.5;
 
-    let maxMotionPixels = 16.0;
+    let maxMotionPixels = 64.0;
     let motionMagnitude = length(screenMotionVector);
-    let clampedMotionVector = screenMotionVector * min(1.0, maxMotionPixels / max(motionMagnitude, 0.00001));
+    let clampedMotionVector = screenMotionVector * min(1.0, maxMotionPixels / max(motionMagnitude, 0.000001));
 
     return clampedMotionVector / maxMotionPixels;
 }

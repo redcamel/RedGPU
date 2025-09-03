@@ -47,7 +47,6 @@ class RenderViewStateData {
 	particleLayer = []
 	instanceMeshLayer = []
 	render2PathLayer = []
-	debugLayer = []
 	startTime: number
 	isScene2DMode: boolean = false
 	readonly #view: View3D
@@ -92,7 +91,6 @@ class RenderViewStateData {
 		this.particleLayer = []
 		this.instanceMeshLayer = []
 		this.render2PathLayer = []
-		this.debugLayer = []
 		this.startTime = performance.now()
 		this.isScene2DMode = view.camera instanceof Camera2D
 		this.viewportSize = {

@@ -155,12 +155,6 @@ class Renderer {
 				if (axis) axis.render(debugViewRenderState)
 				renderAlphaLayer(view, viewRenderPassEncoder)
 				if (grid) grid.render(debugViewRenderState)
-				{
-					let i  = view.debugViewRenderState.debugLayer.length
-					while(i--){
-						view.debugViewRenderState.debugLayer[i].render(debugViewRenderState)
-					}
-				}
 				viewRenderPassEncoder.end()
 			}
 			{

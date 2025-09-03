@@ -12,7 +12,7 @@ RedGPU.init(
 
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		view.grid = true;
+		// view.grid = true;
 		redGPUContext.addView(view);
 
 		const {mesh1, mesh2, intersectionLabel} = createIntersectionTest(redGPUContext, scene);
@@ -37,8 +37,11 @@ RedGPU.init(
 	}
 );
 const renderTestPane = async (redGPUContext) => {
-	const {setDebugViewButton} = await import("../../../../exampleHelper/createExample/panes/index.js");
+	const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
+	const {setDebugViewButton,setAntialiasing_pane} = await import("../../../../exampleHelper/createExample/panes/index.js");
 	setDebugViewButton(redGPUContext);
+	const pane = new Pane();
+	setAntialiasing_pane(pane, redGPUContext, true);
 };
 
 function createIntersectionTest(redGPUContext, scene) {

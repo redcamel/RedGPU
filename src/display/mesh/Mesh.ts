@@ -952,10 +952,8 @@ class Mesh extends MeshBase {
 			//TODO 이거 이상함 확인해야함
 			if (this.castShadow || (this.castShadow && !currentGeometry)) castingList[castingList.length] = this
 		}
-		// if (this.#enableDebugger) this.#drawDebugger.render(debugViewRenderState)
-		if (this.#enableDebugger) {
-			debugViewRenderState.debugLayer[debugViewRenderState.debugLayer.length] = this.#drawDebugger
-		}
+		if (this.#enableDebugger) this.#drawDebugger.render(debugViewRenderState)
+
 
 		// children render
 		const {children} = this
