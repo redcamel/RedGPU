@@ -7,124 +7,127 @@
         return;
     }
 
-    let currentPixelColor = textureLoad(sourceTexture, pixelCoord).rgb;
+    let currentColor = textureLoad(sourceTexture, pixelCoord).rgb;
     let motionData = textureLoad(motionVectorTexture, pixelCoord, 0);
-    let velocity = motionData.xy;
+    let motionVector = motionData.xy;
 
     // ---------- Early Exit Conditions ----------
     let jitterDisabled = motionData.z > 0.5;
     if (jitterDisabled) {
-        textureStore(outputTexture, pixelCoord, vec4<f32>(currentPixelColor, 1.0));
+        textureStore(outputTexture, pixelCoord, vec4<f32>(currentColor, 1.0));
         return;
     }
 
     if (uniforms.frameIndex < 3.0) {
-        textureStore(outputTexture, pixelCoord, vec4<f32>(currentPixelColor, 1.0));
+        textureStore(outputTexture, pixelCoord, vec4<f32>(currentColor, 1.0));
         return;
     }
 
     if (uniforms.useMotionVectors < 0.5) {
         let historyColor = textureLoad(previousFrameTexture, pixelCoord).rgb;
         let blendWeight = clamp(uniforms.temporalBlendFactor, 0.05, 0.8);
-        let blendedResult = mix(historyColor, currentPixelColor, blendWeight);
+        let blendedResult = mix(historyColor, currentColor, blendWeight);
         textureStore(outputTexture, pixelCoord, vec4<f32>(blendedResult, 1.0));
         return;
     }
 
     // ---------- Motion Analysis ----------
-    let velocityMagnitude = length(velocity);
+    let motionMagnitude = length(motionVector);
     let staticThreshold = 0.5;
-    let staticTransition = smoothstep(0.2, 1.0, velocityMagnitude);
-    let isStaticPixel = velocityMagnitude < staticThreshold;
+    let motionTransition = smoothstep(0.2, 1.0, motionMagnitude);
+    let isStaticPixel = motionMagnitude < staticThreshold;
 
-    let currentLuma = dot(currentPixelColor, vec3<f32>(0.2126, 0.7152, 0.0722));
+    let currentLuma = dot(currentColor, vec3<f32>(0.2126, 0.7152, 0.0722));
     let isLowLuma = currentLuma < 0.1;
-    let isThinDetail = isLowLuma || currentLuma > 0.9;
+    let isHighLuma = currentLuma > 0.9;
+    let isThinDetail = isLowLuma || isHighLuma;
 
     // ---------- History Sampling ----------
     let currentWorldPos = vec2<f32>(pixelCoord) + vec2<f32>(0.5);
-    let historyWorldPos = currentWorldPos - velocity;
+    let historyWorldPos = currentWorldPos - motionVector;
 
     if (any(historyWorldPos < vec2<f32>(0.5)) || any(historyWorldPos >= screenSize - vec2<f32>(0.5))) {
-        textureStore(outputTexture, pixelCoord, vec4<f32>(currentPixelColor, 1.0));
+        textureStore(outputTexture, pixelCoord, vec4<f32>(currentColor, 1.0));
         return;
     }
 
-    let motionBlurWeight = smoothstep(0.5, 8.0, velocityMagnitude) * uniforms.motionBlurReduction;
+    let motionBlurWeight = smoothstep(0.5, 8.0, motionMagnitude) * uniforms.motionBlurReduction;
 
     let samplePos = historyWorldPos - vec2<f32>(0.5);
     let floorPos = floor(samplePos);
     let fracPos = samplePos - floorPos;
     let baseCoord = vec2<u32>(floorPos);
 
-    let sample_TL = textureLoad(previousFrameTexture, baseCoord).rgb;
-    let sample_TR = textureLoad(previousFrameTexture, baseCoord + vec2<u32>(1, 0)).rgb;
-    let sample_BL = textureLoad(previousFrameTexture, baseCoord + vec2<u32>(0, 1)).rgb;
-    let sample_BR = textureLoad(previousFrameTexture, baseCoord + vec2<u32>(1, 1)).rgb;
+    let historyTL = textureLoad(previousFrameTexture, baseCoord).rgb;
+    let historyTR = textureLoad(previousFrameTexture, baseCoord + vec2<u32>(1, 0)).rgb;
+    let historyBL = textureLoad(previousFrameTexture, baseCoord + vec2<u32>(0, 1)).rgb;
+    let historyBR = textureLoad(previousFrameTexture, baseCoord + vec2<u32>(1, 1)).rgb;
 
-    let interpolated_Top = mix(sample_TL, sample_TR, fracPos.x);
-    let interpolated_Bottom = mix(sample_BL, sample_BR, fracPos.x);
-    let historySample = mix(interpolated_Top, interpolated_Bottom, fracPos.y);
+    let historyTop = mix(historyTL, historyTR, fracPos.x);
+    let historyBottom = mix(historyBL, historyBR, fracPos.x);
+    let historySample = mix(historyTop, historyBottom, fracPos.y);
 
     // ---------- Neighborhood Sampling ----------
-    let neighbor_N = textureLoad(sourceTexture, clamp(pixelCoord + vec2<u32>(0, 1), vec2<u32>(0), vec2<u32>(screenSize) - vec2<u32>(1))).rgb;
-    let neighbor_S = textureLoad(sourceTexture, clamp(pixelCoord - vec2<u32>(0, 1), vec2<u32>(0), vec2<u32>(screenSize) - vec2<u32>(1))).rgb;
-    let neighbor_E = textureLoad(sourceTexture, clamp(pixelCoord + vec2<u32>(1, 0), vec2<u32>(0), vec2<u32>(screenSize) - vec2<u32>(1))).rgb;
-    let neighbor_W = textureLoad(sourceTexture, clamp(pixelCoord - vec2<u32>(1, 0), vec2<u32>(0), vec2<u32>(screenSize) - vec2<u32>(1))).rgb;
+    let neighborN = textureLoad(sourceTexture, clamp(pixelCoord + vec2<u32>(0, 1), vec2<u32>(0), vec2<u32>(screenSize) - vec2<u32>(1))).rgb;
+    let neighborS = textureLoad(sourceTexture, clamp(pixelCoord - vec2<u32>(0, 1), vec2<u32>(0), vec2<u32>(screenSize) - vec2<u32>(1))).rgb;
+    let neighborE = textureLoad(sourceTexture, clamp(pixelCoord + vec2<u32>(1, 0), vec2<u32>(0), vec2<u32>(screenSize) - vec2<u32>(1))).rgb;
+    let neighborW = textureLoad(sourceTexture, clamp(pixelCoord - vec2<u32>(1, 0), vec2<u32>(0), vec2<u32>(screenSize) - vec2<u32>(1))).rgb;
 
-    let coord_x = i32(pixelCoord.x);
-    let coord_y = i32(pixelCoord.y);
-    let screen_x = i32(screenSize.x);
-    let screen_y = i32(screenSize.y);
+    let coordX = i32(pixelCoord.x);
+    let coordY = i32(pixelCoord.y);
+    let screenX = i32(screenSize.x);
+    let screenY = i32(screenSize.y);
 
-    let neighbor_NE = textureLoad(sourceTexture, vec2<u32>(u32(clamp(coord_x + 1, 0, screen_x - 1)), u32(clamp(coord_y + 1, 0, screen_y - 1)))).rgb;
-    let neighbor_NW = textureLoad(sourceTexture, vec2<u32>(u32(clamp(coord_x - 1, 0, screen_x - 1)), u32(clamp(coord_y + 1, 0, screen_y - 1)))).rgb;
-    let neighbor_SE = textureLoad(sourceTexture, vec2<u32>(u32(clamp(coord_x + 1, 0, screen_x - 1)), u32(clamp(coord_y - 1, 0, screen_y - 1)))).rgb;
-    let neighbor_SW = textureLoad(sourceTexture, vec2<u32>(u32(clamp(coord_x - 1, 0, screen_x - 1)), u32(clamp(coord_y - 1, 0, screen_y - 1)))).rgb;
+    let neighborNE = textureLoad(sourceTexture, vec2<u32>(u32(clamp(coordX + 1, 0, screenX - 1)), u32(clamp(coordY + 1, 0, screenY - 1)))).rgb;
+    let neighborNW = textureLoad(sourceTexture, vec2<u32>(u32(clamp(coordX - 1, 0, screenX - 1)), u32(clamp(coordY + 1, 0, screenY - 1)))).rgb;
+    let neighborSE = textureLoad(sourceTexture, vec2<u32>(u32(clamp(coordX + 1, 0, screenX - 1)), u32(clamp(coordY - 1, 0, screenY - 1)))).rgb;
+    let neighborSW = textureLoad(sourceTexture, vec2<u32>(u32(clamp(coordX - 1, 0, screenX - 1)), u32(clamp(coordY - 1, 0, screenY - 1)))).rgb;
 
     // ---------- Neighborhood Clamping ----------
-    var neighborColorMin = min(min(min(currentPixelColor, neighbor_N), min(neighbor_S, neighbor_E)), min(neighbor_W, min(min(neighbor_NE, neighbor_NW), min(neighbor_SE, neighbor_SW))));
-    var neighborColorMax = max(max(max(currentPixelColor, neighbor_N), max(neighbor_S, neighbor_E)), max(neighbor_W, max(max(neighbor_NE, neighbor_NW), max(neighbor_SE, neighbor_SW))));
+    var neighborMin = min(min(min(currentColor, neighborN), min(neighborS, neighborE)),
+                         min(neighborW, min(min(neighborNE, neighborNW), min(neighborSE, neighborSW))));
+    var neighborMax = max(max(max(currentColor, neighborN), max(neighborS, neighborE)),
+                         max(neighborW, max(max(neighborNE, neighborNW), max(neighborSE, neighborSW))));
 
-    let basicClampedHistory = clamp(historySample, neighborColorMin, neighborColorMax);
+    let basicClampedHistory = clamp(historySample, neighborMin, neighborMax);
 
     // ---------- Adaptive Range Expansion ----------
-    let colorRange = neighborColorMax - neighborColorMin;
+    let colorRange = neighborMax - neighborMin;
     let baseExpansion = select(0.1, 0.3, isThinDetail);
-    let motionExpansion = clamp(velocityMagnitude / 10.0, 0.0, 0.2);
+    let motionExpansion = clamp(motionMagnitude / 10.0, 0.0, 0.2);
     let staticExpansion = select(baseExpansion + motionExpansion, baseExpansion * 0.5, isStaticPixel);
 
-    let expandedMin = neighborColorMin - colorRange * staticExpansion;
-    let expandedMax = neighborColorMax + colorRange * staticExpansion;
+    let expandedMin = neighborMin - colorRange * staticExpansion;
+    let expandedMax = neighborMax + colorRange * staticExpansion;
     let finalClampedHistory = clamp(basicClampedHistory, expandedMin, expandedMax);
 
     // ---------- Contrast Analysis ----------
     let lumaCoeffs = vec3<f32>(0.2126, 0.7152, 0.0722);
     let historyLuma = dot(finalClampedHistory, lumaCoeffs);
     let lumaDifference = abs(historyLuma - currentLuma);
-    let colorDistance = length(currentPixelColor - finalClampedHistory);
+    let colorDistance = length(currentColor - finalClampedHistory);
 
-    let neighborLuma_N = dot(neighbor_N, lumaCoeffs);
-    let neighborLuma_S = dot(neighbor_S, lumaCoeffs);
-    let neighborLuma_E = dot(neighbor_E, lumaCoeffs);
-    let neighborLuma_W = dot(neighbor_W, lumaCoeffs);
-    let neighborLuma_NE = dot(neighbor_NE, lumaCoeffs);
-    let neighborLuma_NW = dot(neighbor_NW, lumaCoeffs);
-    let neighborLuma_SE = dot(neighbor_SE, lumaCoeffs);
-    let neighborLuma_SW = dot(neighbor_SW, lumaCoeffs);
+    let neighborLumaN = dot(neighborN, lumaCoeffs);
+    let neighborLumaS = dot(neighborS, lumaCoeffs);
+    let neighborLumaE = dot(neighborE, lumaCoeffs);
+    let neighborLumaW = dot(neighborW, lumaCoeffs);
+    let neighborLumaNE = dot(neighborNE, lumaCoeffs);
+    let neighborLumaNW = dot(neighborNW, lumaCoeffs);
+    let neighborLumaSE = dot(neighborSE, lumaCoeffs);
+    let neighborLumaSW = dot(neighborSW, lumaCoeffs);
 
     let maxNeighborLumaDiff = max(
-        max(max(abs(currentLuma - neighborLuma_N), abs(currentLuma - neighborLuma_S)),
-            max(abs(currentLuma - neighborLuma_E), abs(currentLuma - neighborLuma_W))),
-        max(max(abs(currentLuma - neighborLuma_NE), abs(currentLuma - neighborLuma_NW)),
-            max(abs(currentLuma - neighborLuma_SE), abs(currentLuma - neighborLuma_SW)))
+        max(max(abs(currentLuma - neighborLumaN), abs(currentLuma - neighborLumaS)),
+            max(abs(currentLuma - neighborLumaE), abs(currentLuma - neighborLumaW))),
+        max(max(abs(currentLuma - neighborLumaNE), abs(currentLuma - neighborLumaNW)),
+            max(abs(currentLuma - neighborLumaSE), abs(currentLuma - neighborLumaSW)))
     );
 
     let maxNeighborColorDist = max(
-        max(max(length(currentPixelColor - neighbor_N), length(currentPixelColor - neighbor_S)),
-            max(length(currentPixelColor - neighbor_E), length(currentPixelColor - neighbor_W))),
-        max(max(length(currentPixelColor - neighbor_NE), length(currentPixelColor - neighbor_NW)),
-            max(length(currentPixelColor - neighbor_SE), length(currentPixelColor - neighbor_SW)))
+        max(max(length(currentColor - neighborN), length(currentColor - neighborS)),
+            max(length(currentColor - neighborE), length(currentColor - neighborW))),
+        max(max(length(currentColor - neighborNE), length(currentColor - neighborNW)),
+            max(length(currentColor - neighborSE), length(currentColor - neighborSW)))
     );
 
     let highLumaContrast = smoothstep(0.1, 0.4, max(lumaDifference, maxNeighborLumaDiff * 0.6));
@@ -134,33 +137,33 @@
     // ---------- Rejection Analysis ----------
     let thinDetailWithHighContrast = isThinDetail && (overallContrast > 0.3);
     let baseRejectionThresh = select(0.05, 0.15, isThinDetail);
-    let motionScale = clamp(velocityMagnitude / 2.0, 0.1, 1.0);
+    let motionScale = clamp(motionMagnitude / 2.0, 0.1, 1.0);
     let smoothRejectionScale = select(
-        mix(2.5, 1.0, staticTransition),
+        mix(2.5, 1.0, motionTransition),
         select(1.0, 10.0, isStaticPixel),
         isThinDetail
     );
 
     let finalRejectionThresh = baseRejectionThresh * smoothRejectionScale;
     let historyRejection = smoothstep(finalRejectionThresh * 0.2, finalRejectionThresh, max(lumaDifference, colorDistance));
-    let motionRejection = smoothstep(0.5, 4.0, velocityMagnitude);
+    let motionRejection = smoothstep(0.5, 4.0, motionMagnitude);
 
     // ---------- Blend Factor Calculation ----------
-    let baseBlend = uniforms.temporalBlendFactor;
-    let thinDetailBlend = select(baseBlend, 0.05, isThinDetail);
+    let baseBlendFactor = uniforms.temporalBlendFactor;
+    let thinDetailBlendFactor = select(baseBlendFactor, 0.05, isThinDetail);
 
-    let generalContrastBlend = mix(baseBlend, 0.35, overallContrast * 0.7);
+    let generalContrastBlend = mix(baseBlendFactor, 0.35, overallContrast * 0.7);
     let thinDetailContrastBlend = select(
-        thinDetailBlend,
-        mix(thinDetailBlend, 0.25, overallContrast),
+        thinDetailBlendFactor,
+        mix(thinDetailBlendFactor, 0.25, overallContrast),
         thinDetailWithHighContrast
     );
 
-    let contrastBlend = select(generalContrastBlend, thinDetailContrastBlend, isThinDetail);
+    let contrastBlendFactor = select(generalContrastBlend, thinDetailContrastBlend, isThinDetail);
 
     let smoothStaticBlend = select(
-        mix(0.08, contrastBlend, staticTransition),
-        select(contrastBlend, 0.01, isStaticPixel),
+        mix(0.08, contrastBlendFactor, motionTransition),
+        select(contrastBlendFactor, 0.01, isStaticPixel),
         isThinDetail
     );
 
@@ -171,17 +174,21 @@
     );
 
     let maxRejection = max(historyRejection, motionRejection);
-    let finalBlendFactor = mix(
-        motionAdjustedBlend,
-        0.75 ,
-        maxRejection
-    );
+    let finalBlendFactor = mix(motionAdjustedBlend, 0.75, maxRejection);
 
     // ---------- Final Color Output ----------
+    let primaryBlend = mix(finalClampedHistory, currentColor, finalBlendFactor);
+    let fallbackBlend = mix(basicClampedHistory, currentColor, 0.04);
     let finalOutputColor = mix(
-        mix(finalClampedHistory, currentPixelColor, finalBlendFactor),
-        mix(basicClampedHistory, currentPixelColor, 0.04),
-         pow(1 - staticTransition,2) * 0.5,
+        mix(primaryBlend, fallbackBlend, pow(1.0 - motionTransition, 2.0) * 0.5),
+        mix(
+                finalClampedHistory,
+                fallbackBlend,
+                0.01
+        ),
+        pow(thinDetailContrastBlend,2) + pow(generalContrastBlend,2) + thinDetailContrastBlend
+//        pow(1 - finalBlendFactor,2)
     );
+
     textureStore(outputTexture, pixelCoord, vec4<f32>(finalOutputColor, 1.0));
 }

@@ -12,7 +12,7 @@ RedGPU.init(
 
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		// view.grid = true;
+		view.grid = true;
 		redGPUContext.addView(view);
 
 		const {mesh1, mesh2, intersectionLabel} = createIntersectionTest(redGPUContext, scene);
