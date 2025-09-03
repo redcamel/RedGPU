@@ -13,7 +13,7 @@ fn calculateMotionVector(
     let screenMotionVector = motionVectorNDC * resolution * 0.5;
 
     // 최대 모션을 제한하되, 픽셀 단위로 반환
-    let maxMotionPixels = 32.0; // 제한값을 증가
+    let maxMotionPixels = 16.0; // 제한값을 증가
     let motionMagnitude = length(screenMotionVector);
     let clampedMotionVector = screenMotionVector * min(1.0, maxMotionPixels / max(motionMagnitude, 0.000001));
 

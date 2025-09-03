@@ -34,6 +34,8 @@
     // ---------- Motion Analysis ----------
     let velocityMagnitude = length(velocity);
     let staticThreshold = 0.5;
+    // 부드러운 전환을 위한 스무딩 - 더 넓은 범위로 확장
+    let staticTransition = smoothstep(0.2, 1.0, velocityMagnitude);
     let isStaticPixel = velocityMagnitude < staticThreshold;
 
     let currentLuma = dot(currentPixelColor, vec3<f32>(0.2126, 0.7152, 0.0722));
@@ -137,8 +139,14 @@
     let neighborStdDev = sqrt(max(neighborVariance, vec3<f32>(0.0001)));
 
     let baseVarianceScale = select(1.5, 5.0, isThinDetail);
-    let staticVarianceScale = select(baseVarianceScale, baseVarianceScale * 1.5, isStaticPixel);
-    let adaptiveScale = mix(staticVarianceScale, staticVarianceScale * 0.3, min(velocityMagnitude / 20.0, 1.0));
+    // 얇은 디테일이면서 정적인 경우는 기존 방식 유지
+    let smoothVarianceScale = select(
+        mix(baseVarianceScale * 1.2, baseVarianceScale, staticTransition), // 일반적인 경우 부드럽게
+        select(baseVarianceScale, baseVarianceScale * 1.5, isStaticPixel),  // 얇은 디테일은 기존 방식
+        isThinDetail
+    );
+
+    let adaptiveScale = mix(smoothVarianceScale, smoothVarianceScale * 0.3, min(velocityMagnitude / 20.0, 1.0));
 
     let varianceClampMin = neighborMean - neighborStdDev * adaptiveScale;
     let varianceClampMax = neighborMean + neighborStdDev * adaptiveScale;
@@ -151,32 +159,46 @@
 
     let baseRejectionThresh = select(0.05, 0.15, isThinDetail);
     let motionScale = clamp(velocityMagnitude / 2.0, 0.1, 1.0);
-    let dynamicRejectionScale = mix(10.0, 1.0, motionScale);
+    // 얇은 디테일이면서 정적인 경우는 강한 rejection 유지
+    let smoothRejectionScale = select(
+        mix(2.5, 1.0, staticTransition), // 일반적인 경우 부드럽게
+        select(1.0, 10.0, isStaticPixel), // 얇은 디테일은 기존 방식 (강한 rejection)
+        isThinDetail
+    );
 
-    let finalRejectionThresh = select(baseRejectionThresh, baseRejectionThresh * dynamicRejectionScale, isStaticPixel);
+    let finalRejectionThresh = baseRejectionThresh * smoothRejectionScale;
     let historyRejection = smoothstep(finalRejectionThresh * 0.2, finalRejectionThresh, max(lumaDifference, colorDistance));
     let motionRejection = smoothstep(0.5, 4.0, velocityMagnitude);
 
     // ---------- Blend Factor Calculation ----------
     let baseBlend = uniforms.temporalBlendFactor;
-    let thinDetailBlend = select(baseBlend, 0.03, isThinDetail);
-    let staticBlend = select(thinDetailBlend, 0.01, isStaticPixel);
+    let thinDetailBlend = select(baseBlend, 0.05, isThinDetail);
+    // 얇은 디테일이면서 정적인 경우는 매우 낮은 블렌딩 유지
+    let smoothStaticBlend = select(
+        mix(0.08, thinDetailBlend, staticTransition), // 일반적인 경우 부드럽게
+        select(thinDetailBlend, 0.01, isStaticPixel), // 얇은 디테일은 기존 방식 (매우 낮은 블렌딩)
+        isThinDetail
+    );
 
     let motionAdjustedBlend = mix(
-        staticBlend,
-        min(staticBlend + motionBlurWeight * 0.3, 0.8),
+        smoothStaticBlend,
+        min(smoothStaticBlend + motionBlurWeight * 0.3, 0.8),
         motionBlurWeight
     );
 
     let maxRejection = max(historyRejection, motionRejection);
     let finalBlendFactor = mix(
         motionAdjustedBlend,
-        0.6,
+        0.75,
         maxRejection
     );
 
     // ---------- Final Color Output ----------
-    let finalOutputColor = mix(finalClampedHistory, currentPixelColor, finalBlendFactor);
+    let finalOutputColor = mix(
+        mix(finalClampedHistory, currentPixelColor, finalBlendFactor),
+        mix(basicClampedHistory, currentPixelColor, 0.25),
+         pow(1 - staticTransition,2) * 0.5
+    );
 
     textureStore(outputTexture, pixelCoord, vec4<f32>(finalOutputColor, 1.0));
 }
