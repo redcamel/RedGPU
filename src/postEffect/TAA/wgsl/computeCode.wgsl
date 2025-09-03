@@ -1,5 +1,5 @@
 {
-    // ---------- Initialize Basic Parameters ----------
+    // ---------- Initialize Parameters ----------
     let pixelCoord = vec2<u32>(global_id.xy);
     let screenSize = vec2<f32>(textureDimensions(sourceTexture));
 
@@ -66,52 +66,78 @@
     let interpolated_Bottom = mix(sample_BL, sample_BR, fracPos.x);
     let historySample = mix(interpolated_Top, interpolated_Bottom, fracPos.y);
 
-    // ---------- UE5 TSR Style Plus Pattern Neighborhood Sampling ----------
+    // ---------- Neighborhood Sampling ----------
     let neighbor_N = textureLoad(sourceTexture, clamp(pixelCoord + vec2<u32>(0, 1), vec2<u32>(0), vec2<u32>(screenSize) - vec2<u32>(1))).rgb;
     let neighbor_S = textureLoad(sourceTexture, clamp(pixelCoord - vec2<u32>(0, 1), vec2<u32>(0), vec2<u32>(screenSize) - vec2<u32>(1))).rgb;
     let neighbor_E = textureLoad(sourceTexture, clamp(pixelCoord + vec2<u32>(1, 0), vec2<u32>(0), vec2<u32>(screenSize) - vec2<u32>(1))).rgb;
     let neighbor_W = textureLoad(sourceTexture, clamp(pixelCoord - vec2<u32>(1, 0), vec2<u32>(0), vec2<u32>(screenSize) - vec2<u32>(1))).rgb;
 
-    // UE5 TSR Style Min/Max 계산
-    var neighborColorMin = min(min(currentPixelColor, neighbor_N), min(neighbor_S, min(neighbor_E, neighbor_W)));
-    var neighborColorMax = max(max(currentPixelColor, neighbor_N), max(neighbor_S, max(neighbor_E, neighbor_W)));
+    let coord_x = i32(pixelCoord.x);
+    let coord_y = i32(pixelCoord.y);
+    let screen_x = i32(screenSize.x);
+    let screen_y = i32(screenSize.y);
 
-    // 기본 클램핑 (UE5 TSR 스타일)
+    let neighbor_NE = textureLoad(sourceTexture, vec2<u32>(u32(clamp(coord_x + 1, 0, screen_x - 1)), u32(clamp(coord_y + 1, 0, screen_y - 1)))).rgb;
+    let neighbor_NW = textureLoad(sourceTexture, vec2<u32>(u32(clamp(coord_x - 1, 0, screen_x - 1)), u32(clamp(coord_y + 1, 0, screen_y - 1)))).rgb;
+    let neighbor_SE = textureLoad(sourceTexture, vec2<u32>(u32(clamp(coord_x + 1, 0, screen_x - 1)), u32(clamp(coord_y - 1, 0, screen_y - 1)))).rgb;
+    let neighbor_SW = textureLoad(sourceTexture, vec2<u32>(u32(clamp(coord_x - 1, 0, screen_x - 1)), u32(clamp(coord_y - 1, 0, screen_y - 1)))).rgb;
+
+    // ---------- Neighborhood Clamping ----------
+    var neighborColorMin = min(min(min(currentPixelColor, neighbor_N), min(neighbor_S, neighbor_E)), min(neighbor_W, min(min(neighbor_NE, neighbor_NW), min(neighbor_SE, neighbor_SW))));
+    var neighborColorMax = max(max(max(currentPixelColor, neighbor_N), max(neighbor_S, neighbor_E)), max(neighbor_W, max(max(neighbor_NE, neighbor_NW), max(neighbor_SE, neighbor_SW))));
+
     let basicClampedHistory = clamp(historySample, neighborColorMin, neighborColorMax);
 
-    // ---------- UE5 TSR Style Simplified Neighborhood Expansion ----------
-    // 복잡한 분산/표준편차 계산 대신 간단한 적응적 범위 확장 사용
+    // ---------- Adaptive Range Expansion ----------
     let colorRange = neighborColorMax - neighborColorMin;
-
-    // 언리얼 5 스타일 적응적 확장 계수
     let baseExpansion = select(0.1, 0.3, isThinDetail);
     let motionExpansion = clamp(velocityMagnitude / 10.0, 0.0, 0.2);
     let staticExpansion = select(baseExpansion + motionExpansion, baseExpansion * 0.5, isStaticPixel);
 
-    // 최종 클램핑 범위 (언리얼 5 TSR 방식)
     let expandedMin = neighborColorMin - colorRange * staticExpansion;
     let expandedMax = neighborColorMax + colorRange * staticExpansion;
     let finalClampedHistory = clamp(basicClampedHistory, expandedMin, expandedMax);
 
-    // ---------- Rejection Analysis ----------
+    // ---------- Contrast Analysis ----------
     let lumaCoeffs = vec3<f32>(0.2126, 0.7152, 0.0722);
     let historyLuma = dot(finalClampedHistory, lumaCoeffs);
     let lumaDifference = abs(historyLuma - currentLuma);
     let colorDistance = length(currentPixelColor - finalClampedHistory);
 
-    // 루마 차이와 컬러 차이 모두 고려한 블렌딩 적용
-    let highLumaContrast = smoothstep(0.1, 0.4, lumaDifference);
-    let highColorContrast = smoothstep(0.15, 0.6, colorDistance); // 컬러 거리 기반 대비 감지
-    let overallContrast = max(highLumaContrast, highColorContrast * 0.8); // 두 대비 중 더 큰 값 사용
+    let neighborLuma_N = dot(neighbor_N, lumaCoeffs);
+    let neighborLuma_S = dot(neighbor_S, lumaCoeffs);
+    let neighborLuma_E = dot(neighbor_E, lumaCoeffs);
+    let neighborLuma_W = dot(neighbor_W, lumaCoeffs);
+    let neighborLuma_NE = dot(neighbor_NE, lumaCoeffs);
+    let neighborLuma_NW = dot(neighbor_NW, lumaCoeffs);
+    let neighborLuma_SE = dot(neighbor_SE, lumaCoeffs);
+    let neighborLuma_SW = dot(neighbor_SW, lumaCoeffs);
 
+    let maxNeighborLumaDiff = max(
+        max(max(abs(currentLuma - neighborLuma_N), abs(currentLuma - neighborLuma_S)),
+            max(abs(currentLuma - neighborLuma_E), abs(currentLuma - neighborLuma_W))),
+        max(max(abs(currentLuma - neighborLuma_NE), abs(currentLuma - neighborLuma_NW)),
+            max(abs(currentLuma - neighborLuma_SE), abs(currentLuma - neighborLuma_SW)))
+    );
+
+    let maxNeighborColorDist = max(
+        max(max(length(currentPixelColor - neighbor_N), length(currentPixelColor - neighbor_S)),
+            max(length(currentPixelColor - neighbor_E), length(currentPixelColor - neighbor_W))),
+        max(max(length(currentPixelColor - neighbor_NE), length(currentPixelColor - neighbor_NW)),
+            max(length(currentPixelColor - neighbor_SE), length(currentPixelColor - neighbor_SW)))
+    );
+
+    let highLumaContrast = smoothstep(0.1, 0.4, max(lumaDifference, maxNeighborLumaDiff * 0.6));
+    let highColorContrast = smoothstep(0.15, 0.6, max(colorDistance, maxNeighborColorDist * 0.6));
+    let overallContrast = max(highLumaContrast, highColorContrast * 0.8);
+
+    // ---------- Rejection Analysis ----------
     let thinDetailWithHighContrast = isThinDetail && (overallContrast > 0.3);
-
     let baseRejectionThresh = select(0.05, 0.15, isThinDetail);
     let motionScale = clamp(velocityMagnitude / 2.0, 0.1, 1.0);
-    // 얇은 디테일이면서 정적인 경우는 강한 rejection 유지
     let smoothRejectionScale = select(
-        mix(2.5, 1.0, staticTransition), // 일반적인 경우 부드럽게
-        select(1.0, 10.0, isStaticPixel), // 얇은 디테일은 기존 방식 (강한 rejection)
+        mix(2.5, 1.0, staticTransition),
+        select(1.0, 10.0, isStaticPixel),
         isThinDetail
     );
 
@@ -123,21 +149,18 @@
     let baseBlend = uniforms.temporalBlendFactor;
     let thinDetailBlend = select(baseBlend, 0.05, isThinDetail);
 
-    // 루마 차이와 컬러 차이 모두를 고려한 블렌딩 적용
-    let generalContrastBlend = mix(baseBlend, 0.35, overallContrast * 0.7); // 일반 픽셀용 통합 대비 기반 블렌딩
+    let generalContrastBlend = mix(baseBlend, 0.35, overallContrast * 0.7);
     let thinDetailContrastBlend = select(
         thinDetailBlend,
-        mix(thinDetailBlend, 0.25, overallContrast), // 얇은 디테일용 통합 대비에 비례한 블렌딩
+        mix(thinDetailBlend, 0.25, overallContrast),
         thinDetailWithHighContrast
     );
 
-    // 얇은 디테일 여부에 따라 적절한 대비 기반 블렌딩 선택
     let contrastBlend = select(generalContrastBlend, thinDetailContrastBlend, isThinDetail);
 
-    // 얇은 디테일이면서 정적인 경우는 매우 낮은 블렌딩 유지
     let smoothStaticBlend = select(
-        mix(0.08, contrastBlend, staticTransition), // 일반적인 경우 부드럽게
-        select(contrastBlend, 0.01, isStaticPixel), // 얇은 디테일은 기존 방식 (매우 낮은 블렌딩)
+        mix(0.08, contrastBlend, staticTransition),
+        select(contrastBlend, 0.01, isStaticPixel),
         isThinDetail
     );
 
