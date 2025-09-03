@@ -99,6 +99,13 @@
     let lumaDifference = abs(historyLuma - currentLuma);
     let colorDistance = length(currentPixelColor - finalClampedHistory);
 
+    // 루마 차이와 컬러 차이 모두 고려한 블렌딩 적용
+    let highLumaContrast = smoothstep(0.1, 0.4, lumaDifference);
+    let highColorContrast = smoothstep(0.15, 0.6, colorDistance); // 컬러 거리 기반 대비 감지
+    let overallContrast = max(highLumaContrast, highColorContrast * 0.8); // 두 대비 중 더 큰 값 사용
+
+    let thinDetailWithHighContrast = isThinDetail && (overallContrast > 0.3);
+
     let baseRejectionThresh = select(0.05, 0.15, isThinDetail);
     let motionScale = clamp(velocityMagnitude / 2.0, 0.1, 1.0);
     // 얇은 디테일이면서 정적인 경우는 강한 rejection 유지
@@ -115,23 +122,35 @@
     // ---------- Blend Factor Calculation ----------
     let baseBlend = uniforms.temporalBlendFactor;
     let thinDetailBlend = select(baseBlend, 0.05, isThinDetail);
+
+    // 루마 차이와 컬러 차이 모두를 고려한 블렌딩 적용
+    let generalContrastBlend = mix(baseBlend, 0.35, overallContrast * 0.7); // 일반 픽셀용 통합 대비 기반 블렌딩
+    let thinDetailContrastBlend = select(
+        thinDetailBlend,
+        mix(thinDetailBlend, 0.25, overallContrast), // 얇은 디테일용 통합 대비에 비례한 블렌딩
+        thinDetailWithHighContrast
+    );
+
+    // 얇은 디테일 여부에 따라 적절한 대비 기반 블렌딩 선택
+    let contrastBlend = select(generalContrastBlend, thinDetailContrastBlend, isThinDetail);
+
     // 얇은 디테일이면서 정적인 경우는 매우 낮은 블렌딩 유지
     let smoothStaticBlend = select(
-        mix(0.08, thinDetailBlend, staticTransition), // 일반적인 경우 부드럽게
-        select(thinDetailBlend, 0.01, isStaticPixel), // 얇은 디테일은 기존 방식 (매우 낮은 블렌딩)
+        mix(0.08, contrastBlend, staticTransition), // 일반적인 경우 부드럽게
+        select(contrastBlend, 0.01, isStaticPixel), // 얇은 디테일은 기존 방식 (매우 낮은 블렌딩)
         isThinDetail
     );
 
     let motionAdjustedBlend = mix(
         smoothStaticBlend,
-        min(smoothStaticBlend + motionBlurWeight * 0.3, 0.8),
+        min(smoothStaticBlend + motionBlurWeight * 0.2, 0.8),
         motionBlurWeight
     );
 
     let maxRejection = max(historyRejection, motionRejection);
     let finalBlendFactor = mix(
         motionAdjustedBlend,
-        0.75,
+        0.75 ,
         maxRejection
     );
 
@@ -139,8 +158,7 @@
     let finalOutputColor = mix(
         mix(finalClampedHistory, currentPixelColor, finalBlendFactor),
         mix(basicClampedHistory, currentPixelColor, 0.04),
-         pow(1 - staticTransition,2) * 0.5
+         pow(1 - staticTransition,2) * 0.5,
     );
-
     textureStore(outputTexture, pixelCoord, vec4<f32>(finalOutputColor, 1.0));
 }
