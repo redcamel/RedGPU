@@ -7,9 +7,9 @@ import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 
 class SSR extends ASinglePassPostEffect {
-	#maxSteps: number = 128;
+	#maxSteps: number = 64;
 	#maxDistance: number = 15.0;
-	#stepSize: number = 0.015;
+	#stepSize: number = 0.02;
 	#reflectionIntensity: number = 1;
 	#fadeDistance: number = 12.0;
 	#edgeFade: number = 0.15;

@@ -144,18 +144,19 @@ class TAA {
 	}
 
 	#prevMSAA: Boolean
+	#prevMSAAID: string
 
 	render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
 		const sourceTextureView = sourceTextureInfo.textureView
 		const sourceTexture = sourceTextureInfo.texture;
 		const {gpuDevice, antialiasingManager} = this.#redGPUContext
-		const {useMSAA} = antialiasingManager
+		const {useMSAA,msaaID} = antialiasingManager
 		this.#frameIndex++;
 		if (this.#uniformBuffer) {
 			this.updateUniform('frameIndex', this.#frameIndex);
 		}
 		const dimensionsChanged = this.#createRenderTexture(view)
-		const msaaChanged = this.#prevMSAA !== useMSAA;
+		const msaaChanged = this.#prevMSAA !== useMSAA  || this.#prevMSAAID !== msaaID;
 		const sourceTextureChanged = this.#detectSourceTextureChange([sourceTextureView]);
 		if (dimensionsChanged || msaaChanged || sourceTextureChanged) {
 			this.#createFrameBufferBindGroups(view, [sourceTextureView], useMSAA, this.#redGPUContext, gpuDevice);
@@ -175,6 +176,7 @@ class TAA {
 			console.log(`TAA Frame ${this.#frameIndex}: BuffersSwapped, JitterStrength=${this.#jitterStrength}, MotionVectors=${this.#useMotionVectors}`);
 		}
 		this.#prevMSAA = useMSAA;
+		this.#prevMSAAID = msaaID;
 		return {
 			texture: this.#currentFrameTexture,
 			textureView: this.#currentFrameTextureView
