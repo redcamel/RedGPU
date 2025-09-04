@@ -54,8 +54,6 @@ const renderTestPane = async (redGPUContext, mesh) => {
 	setDebugButtons(redGPUContext);
 	const pane = new Pane();
 
-	setSeparator(pane);
-
 	const samplerOptions = {
 		enableAnisotropy: '',
 		useMipmap: mesh.material.diffuseTexture.useMipmap,
@@ -67,8 +65,6 @@ const renderTestPane = async (redGPUContext, mesh) => {
 		addressModeW: mesh.material.diffuseTextureSampler.addressModeW,
 		maxAnisotropy: mesh.material.diffuseTextureSampler.maxAnisotropy
 	};
-
-	let anisotropyStatusBinding = null;
 
 	const updateAnisotropyState = () => {
 		const valid = mesh.material.diffuseTextureSampler.isAnisotropyValid;
@@ -158,7 +154,7 @@ const renderTestPane = async (redGPUContext, mesh) => {
 		mesh.material.diffuseTextureSampler.maxAnisotropy = Math.floor(evt.value);
 	});
 
-	anisotropyStatusBinding = samplerFolder.addBinding(
+	samplerFolder.addBinding(
 		samplerOptions,
 		'enableAnisotropy',
 		{view: 'text', disabled: true}
