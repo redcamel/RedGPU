@@ -8,10 +8,11 @@ html, body {
     background: url(../../assets/documentBody.png);
 }
 .tp-dfwv{
-    bottom: 8px;
+    top : 66px !important;
+    bottom: 12px;
     z-index: 1;
     overflow-y: auto;
-    max-height: calc(100vw - 20px);
+    /*max-height: calc(100vw - 20px);*/
     pointer-events: none;
 }
 .tp-dfwv *{
@@ -35,19 +36,19 @@ html, body {
     bottom: 0;
     left: 0;
     right: 0;
-    height: 70px;
+    height: 50px;
     background: rgb(32, 32, 32);
-    padding: 0 16px;
+    padding: 0 10px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     line-height: 1;
-    font-size: 14px;
+    font-size: 12px;
     color: rgb(177, 152, 152);
 
     a {
         color: rgb(242, 169, 113);
-        font-size: 14px;
+        font-size: 12px;
     }
 }
 
@@ -91,17 +92,19 @@ html, body {
     line-height: 1;
     display: flex;
     flex-direction: column;
-    background: rgba(0, 0, 0, 0.75);
+    background: rgb(32, 32, 32);
     word-break: keep-all;
     color: #fff;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 
 }
 
 .navigation-bar {
     display: flex;
     width: 100%;
-    justify-content: space-between;
+    /*justify-content: space-between;*/
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    gap:1px;
 }
 
 .nav-button {
@@ -110,15 +113,29 @@ html, body {
     justify-content: center;
     padding: 8px 16px;
     min-height: 56px;
-    background-color: #202020;
+    background-color: #333;
     color: white;
     text-decoration: none;
     font-size: 14px;
     transition: background-color 0.2s;
 }
+.antialiasing-button {
+    border: 0;
+    cursor: pointer;
+    padding: 0 28px 0 16px;
+    outline: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
 
+    /* 커스텀 화살표 추가 */
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 8px center; /* 화살표를 오른쪽에서 8px 떨어뜨림 */
+    background-repeat: no-repeat;
+    background-size: 16px 16px;
+}
 .nav-button:hover {
-    background-color: #333;
+    background-color: #191919;
 }
 
 .nav-button span {
@@ -131,7 +148,7 @@ html, body {
 
 @media screen and (max-width: 768px) {
     .navigation-bar {
-        gap: 8px;
+        /*gap: 8px;*/
     }
 
     .nav-button {
@@ -146,7 +163,8 @@ html, body {
     left: 50%;
     transform: translate(-50%, -50%);
     line-height: 1;
-    font-size: 1.4em;
+    font-size: 1.1em;
+    /*color: rgb(227 216 210);*/
     color: rgb(221, 132, 80);
     font-weight: 700;
 }
@@ -179,32 +197,4 @@ html, body {
         text-align: left;
 
     }
-}
-
-.labelNormal {
-    position: absolute;
-    bottom: 0;
-    left: 25%;
-    transform: translate(-50%, 0);
-    color: #fff;
-    background: #5b52aa;
-    display: flex;
-    align-content: center;
-    justify-content: center;
-    padding: 12px;
-    font-size: 12px;
-}
-
-.labelEffect {
-    position: absolute;
-    bottom: 0;
-    left: 75%;
-    transform: translate(-50%, 0);
-    color: #fff;
-    background: #5b52aa;
-    display: flex;
-    align-content: center;
-    justify-content: center;
-    padding: 12px;
-    font-size: 12px;
 }

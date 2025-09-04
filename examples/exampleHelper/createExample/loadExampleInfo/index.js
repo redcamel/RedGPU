@@ -89,6 +89,7 @@ const loadDescription = async () => {
 };
 
 const createNavigationBar = (mainCategory) => {
+
 	const navbar = document.createElement('div');
 	navbar.className = 'navigation-bar';
 
@@ -97,6 +98,7 @@ const createNavigationBar = (mainCategory) => {
 	homeButton.href = '/RedGPU/examples';
 	homeButton.innerHTML = '<span>Home</span>';
 	navbar.appendChild(homeButton);
+
 
 	return navbar;
 };
@@ -226,7 +228,7 @@ const index = async () => {
 
 	const footer = document.createElement('footer');
 	footer.className = 'footer';
-	footer.innerHTML = `<div class="footer_left"><a href="https://github.com/redcamel/RedGPU" target="_blank"><img src="/RedGPU/examples/assets/github.png" height="32"/></a><div>This project is maintained by <a href="https://github.com/redcamel/RedGPU" target="_blank">RedCamel</a></div></div>`;
+	footer.innerHTML = `<div class="footer_left"><a href="https://github.com/redcamel/RedGPU" target="_blank"><img src="/RedGPU/examples/assets/github.png" height="26"/></a><div>This project is maintained by <a href="https://github.com/redcamel/RedGPU" target="_blank">RedCamel</a></div></div>`;
 	document.body.appendChild(footer);
 };
 index();

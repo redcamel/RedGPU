@@ -30,8 +30,33 @@ const setDebugViewButton = (redGPUContext) => {
 			debugView.addEventListener('click', async () => {
 				redGPUContext.useDebugPanel = !redGPUContext.useDebugPanel;
 			});
+			setAntialiasingSelect(redGPUContext)
 		}
 	})
+}
+const setAntialiasingSelect = (redGPUContext) => {
+	const antialiasing = document.createElement('select');
+	antialiasing.className = 'nav-button antialiasing-button';
+	antialiasing.innerHTML = `
+		<option value="useMSAA">MSAA</option>
+		<option value="useFXAA">FXAA</option>
+		<option value="useTAA" selected="true">TAA</option>
+		<option value="disable" >disable</option>
+	`
+	antialiasing.addEventListener('change', (e) => {
+		const targetAntialiasing = e.target.value
+		console.log(e.target.value)
+		const {antialiasingManager} = redGPUContext
+		antialiasingManager.useMSAA = false
+		antialiasingManager.useFXAA = false
+		antialiasingManager.useTAA = false
+		if (targetAntialiasing !== 'disable') {
+			antialiasingManager[targetAntialiasing] = true
+		}
+
+	})
+	const container = document.querySelector('.navigation-bar');
+	container.appendChild(antialiasing);
 }
 const hdrImages = [
 	{name: '2K - the sky is on fire', path: 'assets/hdr/2k/the_sky_is_on_fire_2k.hdr'},
