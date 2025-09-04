@@ -36,9 +36,9 @@ const renderTestPane = async (redGPUContext,view) => {
 	const {
 		setRedGPUTest_pane,
 		setAntialiasing_pane,
-		setDebugViewButton
+		setDebugButtons
 	} = await import("../../exampleHelper/createExample/panes/index.js");
-	setDebugViewButton(redGPUContext)
+	setDebugButtons(redGPUContext)
 	const pane = new Pane();
 	setAntialiasing_pane(pane, redGPUContext, true);
 	setRedGPUTest_pane(pane, redGPUContext, view,true);

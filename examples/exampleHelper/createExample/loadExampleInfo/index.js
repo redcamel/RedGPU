@@ -61,18 +61,17 @@ const loadDescription = async () => {
 		const matchedExample = findExampleRecursively(categoryData.list);
 
 		if (matchedExample) {
-			document.title = `RedGPU - ${matchedExample.name}`;
 			const title = document.createElement('h1');
 			title.innerHTML = matchedExample.name;
 			title.className = 'item-title'
-			titleBox.appendChild(title);
+			document.querySelector('.navigation-bar').appendChild(title);
 
 			const description = document.createElement('h2');
 			const descriptionText = matchedExample.description.en || `${matchedExample.name} | RedGPU Examples`;
 			description.innerHTML = matchedExample.description.en.replace(/\n/g, '<br/>');
 			description.className = 'item-description'
 			document.querySelector('.navigation-bar').appendChild(description);
-			setTitleAndDescription(
+			setDomTitleAndDescription(
 				`${matchedExample.name} - RedGPU`,
 				descriptionText
 					.replace(/\n/g, '')
@@ -132,7 +131,7 @@ const setCanonicalLink = () => {
 	}
 };
 
-const setTitleAndDescription = (title, description) => {
+const setDomTitleAndDescription = (title, description) => {
 	if (title) {
 		document.title = title;
 	}

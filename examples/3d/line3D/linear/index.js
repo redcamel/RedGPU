@@ -116,8 +116,8 @@ function rainbowHex(t) {
 const renderTestPane = async (redGPUContext,view) => {
 	const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
 	const pane = new Pane();
-	const {setDebugViewButton,setAntialiasing_pane} = await import("../../../exampleHelper/createExample/panes/index.js");
-	setDebugViewButton(redGPUContext);
+	const {setDebugButtons,setAntialiasing_pane} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugButtons(redGPUContext);
 	// 옵션 초기화
 	const debugOptions = {
 		showDebugPoints: false // 디버그 포인트 표시 여부

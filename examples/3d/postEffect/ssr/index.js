@@ -186,8 +186,8 @@ const renderSSRTestPane = async (redGPUContext, targetView, ssrEffect) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const {createPostEffectLabel} = await import('../../../exampleHelper/createExample/loadExampleInfo/createPostEffectLabel.js');
 	createPostEffectLabel('SSR (Screen Space Reflection)', redGPUContext.detector.isMobile);
-	const {setDebugViewButton,createIblHelper,setAntialiasing_pane} = await import("../../../exampleHelper/createExample/panes/index.js");
-	setDebugViewButton(redGPUContext);
+	const {setDebugButtons,createIblHelper,setAntialiasing_pane} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugButtons(redGPUContext);
 	const pane = new Pane({title: 'SSR Controls'});
 	setAntialiasing_pane(pane, redGPUContext, targetView,true);
 	createIblHelper(pane,targetView,RedGPU)

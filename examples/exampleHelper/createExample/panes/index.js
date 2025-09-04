@@ -22,7 +22,7 @@ export function setSeparator(pane) {
 	pane.addBlade({view: 'separator',});
 }
 
-const setDebugViewButton = (redGPUContext) => {
+const setDebugButtons = (redGPUContext) => {
 	requestAnimationFrame(() => {
 		const debugView = document.body.querySelector('.debugView');
 		if (debugView && redGPUContext) {
@@ -31,8 +31,22 @@ const setDebugViewButton = (redGPUContext) => {
 				redGPUContext.useDebugPanel = !redGPUContext.useDebugPanel;
 			});
 			setAntialiasingSelect(redGPUContext)
+			setSettinView(redGPUContext)
 		}
 	})
+}
+const setSettinView = (redGPUContext) => {
+	let openYn = redGPUContext.detector.isMobile ? false : true;
+	document.querySelector('.tp-dfwv').style.right = openYn ? '8px' : 'calc(-100% - 10px)'
+	const button = document.createElement('div');
+	button.className = 'nav-button example-setting-button';
+	button.innerHTML = 'Setting'
+	button.addEventListener('click', () => {
+		openYn = !openYn;
+		document.querySelector('.tp-dfwv').style.right = openYn ? '8px' : 'calc(-100% - 10px)'
+	})
+	const container = document.querySelector('.navigation-bar');
+	container.appendChild(button);
 }
 const setAntialiasingSelect = (redGPUContext) => {
 	const antialiasing = document.createElement('select');
@@ -41,7 +55,7 @@ const setAntialiasingSelect = (redGPUContext) => {
 		<option value="useMSAA">MSAA</option>
 		<option value="useFXAA">FXAA</option>
 		<option value="useTAA" selected="true">TAA</option>
-		<option value="disable" >disable</option>
+		<option value="NONE" >NONE</option>
 	`
 	antialiasing.addEventListener('change', (e) => {
 		const targetAntialiasing = e.target.value
@@ -50,7 +64,7 @@ const setAntialiasingSelect = (redGPUContext) => {
 		antialiasingManager.useMSAA = false
 		antialiasingManager.useFXAA = false
 		antialiasingManager.useTAA = false
-		if (targetAntialiasing !== 'disable') {
+		if (targetAntialiasing !== 'NONE') {
 			antialiasingManager[targetAntialiasing] = true
 		}
 
@@ -92,5 +106,5 @@ export {
 	setAntialiasing_pane,
 	createIblHelper,
 	hdrImages,
-	setDebugViewButton
+	setDebugButtons
 }

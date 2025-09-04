@@ -14,6 +14,7 @@ html, body {
     overflow-y: auto;
     /*max-height: calc(100vw - 20px);*/
     pointer-events: none;
+    transition: right 0.26s;
 }
 .tp-dfwv *{
     pointer-events: auto;
@@ -119,6 +120,12 @@ html, body {
     font-size: 14px;
     transition: background-color 0.2s;
 }
+.example-setting-button {
+    position: absolute;
+    top:0;
+    right:0;
+    cursor: pointer;
+}
 .antialiasing-button {
     border: 0;
     cursor: pointer;
@@ -128,12 +135,15 @@ html, body {
     -moz-appearance: none;
     appearance: none;
 
-    /* 커스텀 화살표 추가 */
+    /* 기본 화살표 */
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-    background-position: right 8px center; /* 화살표를 오른쪽에서 8px 떨어뜨림 */
+    background-position: right 8px center;
     background-repeat: no-repeat;
     background-size: 16px 16px;
+    max-width: 90px;
+    width: fit-content;
 }
+
 .nav-button:hover {
     background-color: #191919;
 }
@@ -168,26 +178,37 @@ html, body {
     color: rgb(221, 132, 80);
     font-weight: 700;
 }
+@media screen and (max-width: 480px) {
+    .item-title {
+        top: 72px;
+        left: 12px;
+        right: 0;
+        transform: none;
+        justify-content: flex-start;
+        text-align: left;
+
+    }
+}
+
 
 .item-description {
     position: absolute;
-    top: 96px;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    top: 90px;
+    left: 0;
+    transform: translate(0%, -50%);
     line-height: 1.4;
     font-size: 0.9em;
     color: #a4a7cc;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     font-weight: 500;
-    text-align: center;
-    max-width: 1024px;
+    padding: 0 16px;
 }
 
 @media screen and (max-width: 480px) {
     .item-description {
-        top: 72px;
+        top: 96px;
         left: 0;
         right: 0;
         padding: 0 12px;

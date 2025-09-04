@@ -201,8 +201,8 @@ function loadGLTF(redGPUContext, scene, url) {
 const renderTestPane = async (redGPUContext, targetView) => {
 	const {createPostEffectLabel} = await import('../../../../exampleHelper/createExample/loadExampleInfo/createPostEffectLabel.js');
 	createPostEffectLabel('DOF', redGPUContext.detector.isMobile)
-	const {setDebugViewButton} = await import("../../../../exampleHelper/createExample/panes/index.js");
-	setDebugViewButton(redGPUContext);
+	const {setDebugButtons} = await import("../../../../exampleHelper/createExample/panes/index.js");
+	setDebugButtons(redGPUContext);
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const pane = new Pane();
 	const effect = targetView.postEffectManager.getEffectAt(0)
