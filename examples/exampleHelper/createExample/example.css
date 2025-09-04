@@ -8,7 +8,7 @@ html, body {
     background: url(../../assets/documentBody.png);
 }
 .tp-dfwv{
-    top : 66px !important;
+    top : 52px !important;
     bottom: 12px;
     z-index: 1;
     overflow-y: auto;
@@ -96,7 +96,7 @@ html, body {
     background: rgb(32, 32, 32);
     word-break: keep-all;
     color: #fff;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.01);
 
 }
 
@@ -104,7 +104,6 @@ html, body {
     display: flex;
     width: 100%;
     /*justify-content: space-between;*/
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     gap:1px;
 }
 
@@ -112,38 +111,14 @@ html, body {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 8px 16px;
-    min-height: 56px;
-    background-color: #333;
+    padding: 0 16px;
+    min-height: 42px;
+    background-color: #121111;
     color: white;
     text-decoration: none;
-    font-size: 14px;
+    font-size: 12px;
     transition: background-color 0.2s;
 }
-.example-setting-button {
-    position: absolute;
-    top:0;
-    right:0;
-    cursor: pointer;
-}
-.antialiasing-button {
-    border: 0;
-    cursor: pointer;
-    padding: 0 28px 0 16px;
-    outline: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-
-    /* 기본 화살표 */
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-    background-position: right 8px center;
-    background-repeat: no-repeat;
-    background-size: 16px 16px;
-    max-width: 90px;
-    width: fit-content;
-}
-
 .nav-button:hover {
     background-color: #191919;
 }
@@ -162,9 +137,36 @@ html, body {
     }
 
     .nav-button {
-        font-size: 12px;
-        padding: 6px 12px;
+        padding: 0 12px;
     }
+}
+
+.example-setting-button {
+    cursor: pointer;
+    aspect-ratio: 1;
+    padding: 0;
+    line-height: 1;
+    img{
+        line-height: 1;
+        transition: opacity 0.2s;
+    }
+}
+.antialiasing-button {
+    border: 0;
+    cursor: pointer;
+    padding: 0 28px 0 16px;
+    outline: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+
+    /* 기본 화살표 */
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 8px center;
+    background-repeat: no-repeat;
+    background-size: 16px 16px;
+    max-width: 90px;
+    width: fit-content;
 }
 
 .item-title {
@@ -193,17 +195,19 @@ html, body {
 
 .item-description {
     position: absolute;
-    top: 90px;
+    top: 66px;
     left: 0;
-    transform: translate(0%, -50%);
+    transform: translate(0%, 0%);
     line-height: 1.4;
     font-size: 0.9em;
     color: #a4a7cc;
     display: flex;
-    align-items: center;
+    text-align: left;
+    flex-direction: column;
     justify-content: flex-start;
     font-weight: 500;
     padding: 0 16px;
+    max-width: calc(100% - 260px);
 }
 
 @media screen and (max-width: 480px) {
@@ -216,6 +220,7 @@ html, body {
         font-size: 0.8em;
         justify-content: flex-start;
         text-align: left;
+        max-width: 100%;
 
     }
 }

@@ -31,22 +31,75 @@ const setDebugButtons = (redGPUContext) => {
 				redGPUContext.useDebugPanel = !redGPUContext.useDebugPanel;
 			});
 			setAntialiasingSelect(redGPUContext)
-			setSettinView(redGPUContext)
+			const container = document.querySelector('.navigation-bar');
+			const rightContainer = document.createElement('div');
+			rightContainer.style.display = 'flex';
+			rightContainer.style.alignItems = 'center';
+			rightContainer.style.gap = '1px';
+			rightContainer.style.position = 'absolute';
+			rightContainer.style.right = '0px';
+			rightContainer.style.top = '0px';
+			rightContainer.style.bottom = '0px';
+			container.appendChild(rightContainer);
+			setAxis(redGPUContext,rightContainer)
+			setGrid(redGPUContext,rightContainer)
+			setSettingView(redGPUContext,rightContainer)
 		}
 	})
 }
-const setSettinView = (redGPUContext) => {
-	let openYn = redGPUContext.detector.isMobile ? false : true;
-	document.querySelector('.tp-dfwv').style.right = openYn ? '8px' : 'calc(-100% - 10px)'
+const setGrid = (redGPUContext,rightContainer) => {
+	if(redGPUContext.viewList.length>1) return;
+	const targetView = redGPUContext.viewList[0]
+	let openYn = !!targetView.grid
 	const button = document.createElement('div');
 	button.className = 'nav-button example-setting-button';
-	button.innerHTML = 'Setting'
+	button.innerHTML = '<img src="/RedGPU/examples/assets/icons/grid.svg" width="28"/>'
 	button.addEventListener('click', () => {
 		openYn = !openYn;
-		document.querySelector('.tp-dfwv').style.right = openYn ? '8px' : 'calc(-100% - 10px)'
+		check()
 	})
-	const container = document.querySelector('.navigation-bar');
-	container.appendChild(button);
+	rightContainer.appendChild(button);
+	const check = ()=>{
+		button.children[0].style.opacity = openYn ? 1 : 0.25
+		targetView.grid = openYn
+	}
+	check()
+}
+const setAxis = (redGPUContext,rightContainer) => {
+	if(redGPUContext.viewList.length>1) return;
+	const targetView = redGPUContext.viewList[0]
+	let openYn = !!targetView.axis
+	const button = document.createElement('div');
+	button.className = 'nav-button example-setting-button';
+	button.innerHTML = '<img src="/RedGPU/examples/assets/icons/axis.svg" width="28"/>'
+	button.addEventListener('click', () => {
+		openYn = !openYn;
+		check()
+	})
+	rightContainer.appendChild(button);
+	const check = ()=>{
+		button.children[0].style.opacity = openYn ? 1 : 0.25
+		targetView.axis = openYn
+	}
+	check()
+}
+const setSettingView = (redGPUContext,rightContainer) => {
+	const panel = document.querySelector('.tp-dfwv')
+	if(!panel) return
+	let openYn = redGPUContext.detector.isMobile ? false : true;
+	const button = document.createElement('div');
+	button.className = 'nav-button example-setting-button';
+	button.innerHTML = '<img src="/RedGPU/examples/assets/icons/gears-solid-full.svg" width="28"/>'
+	button.addEventListener('click', () => {
+		openYn = !openYn;
+		check()
+	})
+	rightContainer.appendChild(button);
+	const check = ()=>{
+		button.children[0].style.opacity = openYn ? 1 : 0.25
+		panel.style.right = openYn ? '8px' : 'calc(-100% - 10px)'
+	}
+	check()
 }
 const setAntialiasingSelect = (redGPUContext) => {
 	const antialiasing = document.createElement('select');

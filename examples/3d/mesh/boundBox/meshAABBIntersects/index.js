@@ -37,11 +37,9 @@ RedGPU.init(
 	}
 );
 const renderTestPane = async (redGPUContext,view) => {
-	const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
-	const {setDebugButtons,setAntialiasing_pane} = await import("../../../../exampleHelper/createExample/panes/index.js");
+	const {setDebugButtons} = await import("../../../../exampleHelper/createExample/panes/index.js");
 	setDebugButtons(redGPUContext);
-	const pane = new Pane();
-	setAntialiasing_pane(pane, redGPUContext, view,true);
+
 };
 
 function createIntersectionTest(redGPUContext, scene) {

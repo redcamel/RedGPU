@@ -153,10 +153,8 @@ const ExampleList = [
 						path: '3d/mesh/basicMesh',
 						thumb: '3d/mesh/basicMesh/thumb.png',
 						description: {
-							ko: `이 코드는 <b>메쉬의 기본 생성 방법</b>과 주요 속성(위치, 스케일, 회전, 재질 등)을 실시간으로 조작할 수 있는 샘플입니다. 
-                                RedGPU를 사용해 Box 메쉬를 생성하고, 속성과 재질을 조정하는 방법을 보여주는 예제입니다.`,
-							en: `this code is a sample that shows <b>how to create a basic mesh</b> and how to manipulate its main properties (position, scale, rotation, material, etc.) in real time.
-                                This example shows how to create a Box mesh using RedGPU and how to adjust its properties and material.`
+							ko: ``,
+							en: `this code is a sample that shows how to create a basic mesh and how to manipulate its main properties (position, scale, rotation, material, etc.) in real time. <br/>This example shows how to create a Box mesh using RedGPU and how to adjust its properties and material.`
 						},
 					},
 					{
