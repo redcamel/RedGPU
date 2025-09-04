@@ -117,7 +117,7 @@ class Renderer {
 			const haltonY = this.#haltonSequence(currentSample + 1, 3);
 
 			// 픽셀 단위 지터
-			const jitterX = (haltonX - 0.5) * jitterScale;
+			const jitterX = (haltonX - 0.5) * jitterScale ;
 			const jitterY = (haltonY - 0.5) * jitterScale;
 
 			view.setJitterOffset(jitterX, jitterY);

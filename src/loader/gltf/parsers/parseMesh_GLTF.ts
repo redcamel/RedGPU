@@ -196,12 +196,12 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
 		}
 		if (tMesh.material.use2PathRender) {
 			tMesh.primitiveState.cullMode = GPU_CULL_MODE.NONE;
-			tMesh.depthStencilState.depthCompare = GPU_COMPARE_FUNCTION.LESS
+			tMesh.depthStencilState.depthCompare = GPU_COMPARE_FUNCTION.LESS_EQUAL
 			// tMesh.depthStencilState.depthWriteEnabled = false
 		}
 		if (tMesh.material.alphaBlend === 2) {
 			// TODO
-			tMesh.depthStencilState.depthCompare = GPU_COMPARE_FUNCTION.LESS
+			tMesh.depthStencilState.depthCompare = GPU_COMPARE_FUNCTION.LESS_EQUAL
 		}
 		/////////////////////////////////////////////////////////
 		{
