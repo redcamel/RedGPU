@@ -45,7 +45,6 @@ fn PristineGrid(uv: vec2<f32>, lineWidth: vec2<f32>) -> f32 {
     grid2 = select(grid2, 1.0 - grid2, invertLine);
     return mix(grid2.x, 1.0, grid2.y);
 }
-
 @fragment
 fn fragmentMain(in: VertexOut) -> FragmentOutput {
     var output: FragmentOutput;
@@ -75,19 +74,25 @@ fn fragmentMain(in: VertexOut) -> FragmentOutput {
         isAxisLine = true;
     }
 
+    // 모든 픽셀에서 그리드를 계산 (uniform control flow)
     let grid = PristineGrid(in.uv, gridArgs.lineWidth * lineWidthWeight);
 
-    // 그리드 라인이 없고 축 라인도 아닌 경우 픽셀 폐기
-    let gridThreshold = 0.01;
-    if (grid < gridThreshold && !isAxisLine) {
-        discard;
+    // 축 라인이 아닌 경우에만 그리드 임계값 검사
+    if (!isAxisLine) {
+        let gridThreshold = 0.1;
+        if (grid < gridThreshold) {
+            discard;
+        }
     }
 
-    // 최종 색상 계산
-    let finalColor = mix(gridArgs.baseColor, color, grid * gridArgs.lineColor.a);
+    // 축 라인인 경우 grid 값을 1.0으로 오버라이드
+    let finalGrid = select(grid, 1.0, isAxisLine);
 
-    // 투명도가 너무 낮아도 폐기
-    if (finalColor.a < 0.01) {
+    // 최종 색상 계산
+    let finalColor = mix(gridArgs.baseColor, color, finalGrid * gridArgs.lineColor.a);
+
+    // 투명도가 너무 낮아도 폐기 (축 라인이 아닌 경우만)
+    if (!isAxisLine && finalColor.a < 0.01) {
         discard;
     }
 
