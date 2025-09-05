@@ -260,16 +260,16 @@ class Renderer {
 		} = viewRenderTextureManager
 		const {useBackgroundColor, backgroundColor} = scene
 		const {antialiasingManager} = redGPUContext
-		const {useMSAA} = antialiasingManager
+		const {useMSAA,useTAA} = antialiasingManager
 		const sceneRgbaNormal = useBackgroundColor ? backgroundColor.rgbaNormal : [0, 0, 0, 0]
 		const redGPURgbaNormal = redGPUContext.backgroundColor.rgbaNormal
 
-		const finalColor = [
+		const finalColor = useTAA ?[
 			redGPURgbaNormal[0] * redGPURgbaNormal[3] * (1 - sceneRgbaNormal[3]) + sceneRgbaNormal[0] * sceneRgbaNormal[3],
 			redGPURgbaNormal[1] * redGPURgbaNormal[3] * (1 - sceneRgbaNormal[3]) + sceneRgbaNormal[1] * sceneRgbaNormal[3],
 			redGPURgbaNormal[2] * redGPURgbaNormal[3] * (1 - sceneRgbaNormal[3]) + sceneRgbaNormal[2] * sceneRgbaNormal[3],
 			redGPURgbaNormal[3] + sceneRgbaNormal[3] * (1 - redGPURgbaNormal[3])
-		]
+		] : sceneRgbaNormal
 
 		const colorAttachment: GPURenderPassColorAttachment = {
 			view: gBufferColorTextureView,
