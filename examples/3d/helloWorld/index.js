@@ -12,7 +12,6 @@ RedGPU.init(
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		view.axis = true;
 		view.grid = true;
-
 		redGPUContext.addView(view);
 
 		const renderer = new RedGPU.Renderer(redGPUContext);
@@ -21,7 +20,7 @@ RedGPU.init(
 		};
 		renderer.start(redGPUContext, render);
 
-		renderTestPane(redGPUContext, view);
+		renderTestPane(redGPUContext,view);
 	},
 	(failReason) => {
 		console.error('초기화 실패:', failReason);
@@ -32,7 +31,7 @@ RedGPU.init(
 	}
 );
 
-const renderTestPane = async (redGPUContext, view) => {
+const renderTestPane = async (redGPUContext,view) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const {
 		setRedGPUTest_pane,

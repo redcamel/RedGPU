@@ -28,6 +28,7 @@ class PostEffectManager {
 	#postEffectSystemUniformBuffer: UniformBuffer;
 	#postEffectSystemUniformBufferStructInfo;
 	#videoMemorySize: number = 0
+	#copyUniformBuffer: GPUBuffer
 
 	constructor(view: View3D) {
 		this.#view = view;
@@ -162,6 +163,20 @@ class PostEffectManager {
 				new structInfo.members.camera.members[key].View(value)
 			);
 		})
+		{
+			const {backgroundColor} = redGPUContext
+			const {rgbaNormal} = backgroundColor
+			gpuDevice.queue.writeBuffer(
+				this.#copyUniformBuffer,
+				0,
+				new Float32Array([
+					rgbaNormal[0] * rgbaNormal[3],
+					rgbaNormal[1] * rgbaNormal[3],
+					rgbaNormal[2] * rgbaNormal[3],
+					rgbaNormal[3]
+				])
+			)
+		}
 		// console.log('structInfo',view.scene.directionalLights)
 	}
 
@@ -179,6 +194,11 @@ class PostEffectManager {
 		const postEffectSystemUniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength)
 		this.#postEffectSystemUniformBufferStructInfo = UNIFORM_STRUCT;
 		this.#postEffectSystemUniformBuffer = new UniformBuffer(redGPUContext, postEffectSystemUniformData, `${this.#view.name}_POST_EFFECT_SYSTEM_UNIFORM_BUFFER`);
+		this.#copyUniformBuffer = gpuDevice.createBuffer({
+			label: 'POST_EFFECT_COPY_UNIFORM_BUFFER',
+			size: 16,
+			usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+		})
 	}
 
 	#calcVideoMemory() {
@@ -228,9 +248,14 @@ class PostEffectManager {
 
 	#getTextureComputeShader() {
 		return `
+			struct Uniforms {
+			  backgroundColor: vec4<f32>
+			}
+			
       @group(0) @binding(0) var sourceTextureSampler: sampler;
       @group(0) @binding(1) var sourceTexture : texture_2d<f32>;
       @group(0) @binding(2) var outputTexture : texture_storage_2d<rgba8unorm, write>;
+      @group(0) @binding(3) var<uniform> uniforms: Uniforms;
       @compute @workgroup_size(${this.#COMPUTE_WORKGROUP_SIZE_X},${this.#COMPUTE_WORKGROUP_SIZE_Y},${this.#COMPUTE_WORKGROUP_SIZE_Z})
       fn main (
         @builtin(global_invocation_id) global_id : vec3<u32>,
@@ -246,6 +271,8 @@ class PostEffectManager {
             uv,
             0
           );
+            color = mix(uniforms.backgroundColor, color, color.a);
+
           textureStore(outputTexture, index, color );
       };
     `;
@@ -257,6 +284,7 @@ class PostEffectManager {
 				{binding: 0, visibility: GPUShaderStage.COMPUTE, sampler: {type: 'filtering',}},
 				{binding: 1, visibility: GPUShaderStage.COMPUTE, texture: {}},
 				{binding: 2, visibility: GPUShaderStage.COMPUTE, storageTexture: {format: 'rgba8unorm'}},
+				{binding: 3, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}},
 			]
 		});
 	}
@@ -279,6 +307,7 @@ class PostEffectManager {
 				{binding: 0, resource: new Sampler(redGPUContext).gpuSampler},
 				{binding: 1, resource: sourceTextureView},
 				{binding: 2, resource: storageTextureView},
+				{binding: 3, resource: this.#copyUniformBuffer},
 			]
 		});
 	}
