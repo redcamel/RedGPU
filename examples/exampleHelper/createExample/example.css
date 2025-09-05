@@ -9,7 +9,7 @@ html, body {
 }
 .tp-dfwv{
     top : 52px !important;
-    bottom: 12px;
+    bottom: 62px;
     z-index: 1;
     overflow-y: auto;
     /*max-height: calc(100vw - 20px);*/

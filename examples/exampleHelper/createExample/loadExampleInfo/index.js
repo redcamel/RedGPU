@@ -169,11 +169,7 @@ const index = async () => {
 	helperButtonContainer.className = 'helperButtonContainer';
 	document.body.appendChild(helperButtonContainer);
 
-	const debugViewButton = document.createElement('button');
-	debugViewButton.className = 'helperSourceView debugView';
-	debugViewButton.innerText = 'Debug Panel';
-	debugViewButton.style.display = 'none';
-	helperButtonContainer.appendChild(debugViewButton);
+
 
 	const sourceViewButton = document.createElement('button');
 	sourceViewButton.className = 'helperSourceView';

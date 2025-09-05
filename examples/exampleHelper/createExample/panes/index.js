@@ -23,28 +23,42 @@ export function setSeparator(pane) {
 }
 
 const setDebugButtons = (redGPUContext) => {
+	const container = document.querySelector('.navigation-bar');
+	const rightContainer = document.createElement('div');
+	rightContainer.style.display = 'flex';
+	rightContainer.style.alignItems = 'center';
+	rightContainer.style.gap = '1px';
+	rightContainer.style.position = 'absolute';
+	rightContainer.style.right = '0px';
+	rightContainer.style.top = '0px';
+	rightContainer.style.bottom = '0px';
+	container.appendChild(rightContainer);
+
 	requestAnimationFrame(() => {
-		const debugView = document.body.querySelector('.debugView');
-		if (debugView && redGPUContext) {
-			debugView.style.display = 'flex'
-			debugView.addEventListener('click', async () => {
-				redGPUContext.useDebugPanel = !redGPUContext.useDebugPanel;
+		let openYn = redGPUContext.useDebugPanel
+		const debugViewButton = document.createElement('div');
+		debugViewButton.className = 'nav-button example-setting-button';
+		debugViewButton.innerText = 'Debug Panel';
+		debugViewButton.innerHTML = '<img src="/RedGPU/examples/assets/icons/debug.svg" width="24"/>'
+		rightContainer.appendChild(debugViewButton);
+		const check = ()=>{
+
+			redGPUContext.useDebugPanel = openYn;
+			debugViewButton.children[0].style.opacity = openYn ? 1 : 0.25
+
+		}
+		if (debugViewButton && redGPUContext) {
+			debugViewButton.addEventListener('click', async () => {
+				openYn = !redGPUContext.useDebugPanel
+				check()
 			});
 			setAntialiasingSelect(redGPUContext)
-			const container = document.querySelector('.navigation-bar');
-			const rightContainer = document.createElement('div');
-			rightContainer.style.display = 'flex';
-			rightContainer.style.alignItems = 'center';
-			rightContainer.style.gap = '1px';
-			rightContainer.style.position = 'absolute';
-			rightContainer.style.right = '0px';
-			rightContainer.style.top = '0px';
-			rightContainer.style.bottom = '0px';
-			container.appendChild(rightContainer);
+
 			setAxis(redGPUContext,rightContainer)
 			setGrid(redGPUContext,rightContainer)
 			setSettingView(redGPUContext,rightContainer)
 		}
+		check()
 	})
 }
 const setGrid = (redGPUContext,rightContainer) => {

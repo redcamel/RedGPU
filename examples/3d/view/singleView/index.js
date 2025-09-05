@@ -43,7 +43,6 @@ RedGPU.init(
 	},
 	(failReason) => {
 		console.error('초기화 실패:', failReason);
-
 		const errorMessage = document.createElement('div');
 		errorMessage.innerHTML = failReason;
 		document.body.appendChild(errorMessage);

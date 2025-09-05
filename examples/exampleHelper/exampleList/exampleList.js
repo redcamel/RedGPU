@@ -8,8 +8,7 @@ const ExampleList = [
 				path: '3d/helloWorld',
 				thumb: '3d/helloWorld/thumb.png',
 				description: {
-					ko: `이 예제는 RedGPU의 기본 초기화에 대한 샘플입니다.
-                추가로 초기화 성공시 제공되는 RedGPUContext 객체에 제공되는 기본적인 옵션에 대한 실시간 테스트를 제공합니다. `,
+					ko: ``,
 					en: `This example is a sample of the basic initialization of RedGPU. 
                 It also provides a live test of the basic options provided to the RedGPUContext object provided upon successful initialization.`
 
@@ -24,7 +23,7 @@ const ExampleList = [
 						thumb: '3d/view/singleView/thumb.png',
 
 						description: {
-							ko: `이 예제는 RedGPU의 View 객체의 대한 샘플입니다. View 객체에 제공되는 기본적인 옵션에 대한 실시간 테스트를 제공합니다.`,
+							ko: ``,
 							en: `This example is a sample for a View object in RedGPU.
                 It provides real-time testing of the basic options provided to a View object.`
 
@@ -35,9 +34,8 @@ const ExampleList = [
 						path: '3d/view/multiView',
 						thumb: '3d/view/multiView/thumb.png',
 						description: {
-							ko: `이 예제는 RedGPU의 Multi View에 대한 샘플입니다. RedGPUContext는 여러개의 멀티뷰를 소유 관리할 수 있습니다.`,
-							en: `This example is a sample of RedGPU's Multi View. 
-                RedGPUContext can own and manage multiple MultiViews.`
+							ko: ``,
+							en: `This example is a sample of RedGPU's Multi View.<br/> RedGPUContext can own and manage multiple MultiViews.`
 
 						},
 					}
@@ -51,10 +49,8 @@ const ExampleList = [
 						path: '3d/scene',
 						thumb: '3d/scene/thumb.png',
 						description: {
-							ko: `이 예제는 RedGPU의 Scene 객체의 대한 샘플입니다. Scene 객체에 제공되는 기본적인 옵션에 대한 실시간 테스트를 제공합니다.`,
-							en: `This example is a sample of a Scene object in RedGPU.
-                            It provides real-time testing of the basic options provided to the Scene object.`
-
+							ko: ``,
+							en: `This example is a sample of a Scene object in RedGPU.<br/> It provides real-time testing of the basic options provided to the Scene object.`
 						},
 					}
 				]
@@ -67,7 +63,7 @@ const ExampleList = [
 						path: '3d/primitive/primitives',
 						thumb: '3d/primitive/primitives/thumb.png',
 						description: {
-							ko: `RedGPU에서 지원하는 기본 Primitive Geometry에 대한 샘플입니다.`,
+							ko: ``,
 							en: `Samples of basic primitive geometries supported by RedGPU.`
 
 						},
@@ -77,7 +73,7 @@ const ExampleList = [
 						path: '3d/primitive/box',
 						thumb: '3d/primitive/box/thumb.png',
 						description: {
-							ko: `RedGPU에서 지원하는 기본 Box Primitive에 대한 샘플입니다. Box 설정 옵션에 대한 실시간 테스트를 제공합니다.`,
+							ko: ``,
 							en: `Samples for the basic Box Primitives supported by RedGPU. Provides real-time testing of Box configuration options.`
 
 						},
@@ -87,7 +83,7 @@ const ExampleList = [
 						path: '3d/primitive/circle',
 						thumb: '3d/primitive/circle/thumb.png',
 						description: {
-							ko: `RedGPU에서 지원하는 기본 Circle Primitive에 대한 샘플입니다. Circle 설정 옵션에 대한 실시간 테스트를 제공합니다.`,
+							ko: ``,
 							en: `Samples for the basic Circle Primitives supported by RedGPU. Provides real-time testing of Circle configuration options.`
 
 						},
@@ -97,7 +93,7 @@ const ExampleList = [
 						path: '3d/primitive/cylinder',
 						thumb: '3d/primitive/cylinder/thumb.png',
 						description: {
-							ko: `RedGPU에서 지원하는 기본 Cylinder Primitive에 대한 샘플입니다. Cylinder 설정 옵션에 대한 실시간 테스트를 제공합니다.`,
+							ko: ``,
 							en: `Samples for the basic Cylinder Primitives supported by RedGPU. Provides real-time testing of Cylinder configuration options.`
 
 						},
@@ -107,7 +103,7 @@ const ExampleList = [
 						path: '3d/primitive/plane',
 						thumb: '3d/primitive/plane/thumb.png',
 						description: {
-							ko: `RedGPU에서 지원하는 기본 Plane Primitive에 대한 샘플입니다. Plane 설정 옵션에 대한 실시간 테스트를 제공합니다.`,
+							ko: ``,
 							en: `Samples for the basic Plane Primitives supported by RedGPU. Provides real-time testing of Plane configuration options.`
 
 						},
@@ -117,7 +113,7 @@ const ExampleList = [
 						path: '3d/primitive/sphere',
 						thumb: '3d/primitive/sphere/thumb.png',
 						description: {
-							ko: `RedGPU에서 지원하는 기본 Sphere Primitive에 대한 샘플입니다. Sphere 설정 옵션에 대한 실시간 테스트를 제공합니다.`,
+							ko: ``,
 							en: `Samples for the basic Sphere Primitives supported by RedGPU. Provides real-time testing of Sphere configuration options.`
 
 						},
@@ -127,7 +123,7 @@ const ExampleList = [
 						path: '3d/primitive/torus',
 						thumb: '3d/primitive/torus/thumb.png',
 						description: {
-							ko: `RedGPU에서 지원하는 기본 Torus Primitive에 대한 샘플입니다. Torus 설정 옵션에 대한 실시간 테스트를 제공합니다.`,
+							ko: ``,
 							en: `Samples for the basic Torus Primitives supported by RedGPU. Provides real-time testing of Torus configuration options.`
 
 						},
@@ -137,7 +133,7 @@ const ExampleList = [
 						path: '3d/primitive/torusNut',
 						thumb: '3d/primitive/torusNut/thumb.png',
 						description: {
-							ko: `RedGPU에서 지원하는 기본 TorusKnot Primitive에 대한 샘플입니다. TorusKnot 설정 옵션에 대한 실시간 테스트를 제공합니다.`,
+							ko: ``,
 							en: `Samples for the basic TorusKnot Primitives supported by RedGPU. Provides real-time testing of TorusKnot configuration options.`
 
 						},
@@ -162,7 +158,7 @@ const ExampleList = [
 						path: '3d/mesh/hierarchy',
 						thumb: '3d/mesh/hierarchy/thumb.png',
 						description: {
-							ko: `RedGPU를 사용해 부모-자식 메쉬 하이라키 구조를 생성하고, 위치, 회전, 스케일을 조작할 수 있는 예제입니다.`,
+							ko: ``,
 							en: `An example of creating a parent-child mesh hierarchy using RedGPU, and manipulating its position, rotation, and scale.`
 						},
 					},
@@ -171,7 +167,7 @@ const ExampleList = [
 						path: '3d/mesh/pivot',
 						thumb: '3d/mesh/pivot/thumb.png',
 						description: {
-							ko: `RedGPU를 사용해 부모와 자식 메쉬를 생성하고, 피봇 설정을 통해 회전 중심을 변경하는 기능을 테스트할 수 있는 실습 예제입니다.`,
+							ko: ``,
 							en: `A hands-on example that demonstrates how to create parent and child meshes using RedGPU and change the center of rotation via pivot settings.`
 						},
 					},
@@ -180,7 +176,7 @@ const ExampleList = [
 						path: '3d/mesh/childMethod',
 						thumb: '3d/mesh/childMethod/thumb.png',
 						description: {
-							ko: `RedGPU를 활용한 자식 노드 관리 예제로, 자식 추가, 삭제, 인덱스 변경, 교체, 색상 랜덤화를 통해 노드들을 동적으로 제어하는 방법을 보여줍니다.`,
+							ko: ``,
 							en: `An example of child node management using RedGPU, showing how to dynamically control nodes by adding, deleting, changing index, replacing, and randomizing color of children.`
 						},
 					},
@@ -261,7 +257,7 @@ const ExampleList = [
 						path: '3d/material/colorMaterial',
 						thumb: '3d/material/colorMaterial/thumb.png',
 						description: {
-							ko: `RedGPU의 ColorMaterial의 기본 컬러조작과 컬러를 설정하기위한 편의 매서드에 대한 실시간 샘플을 제공합니다.`,
+							ko: ``,
 							en: `Provides real-time samples of the basic color manipulations of RedGPU's ColorMaterial and convenience methods for setting colors.`
 						},
 					},
@@ -270,7 +266,7 @@ const ExampleList = [
 						path: '3d/material/bitmapMaterial',
 						thumb: '3d/material/bitmapMaterial/thumb.png',
 						description: {
-							ko: `RedGPU의 BitmapMaterial 샘플로, 다양한 텍스처 포맷(PNG, JPG, WEBP, SVG)을 실시간으로 적용해 텍스처 변경을 테스트할 수 있습니다.`,
+							ko: ``,
 							en: `RedGPU's BitmapMaterial sample allows you to test texture changes in real time by applying various texture formats (PNG, JPG, WEBP, SVG).`
 						},
 					},
@@ -279,7 +275,7 @@ const ExampleList = [
 						path: '3d/material/phongMaterial',
 						thumb: '3d/material/phongMaterial/thumb.png',
 						description: {
-							ko: `RedGPU를 사용해 PhongMaterial의 기본 속성을 다루고 다양한 텍스쳐 조합을 테스트해 볼 수 있는 샘플 예제입니다.`,
+							ko: ``,
 							en: `A sample example that demonstrates how to manipulate the basic properties of PhongMaterial using RedGPU and experiment with different texture combinations.`
 						},
 					},
@@ -288,7 +284,7 @@ const ExampleList = [
 						path: '3d/material/phongMaterialTextures',
 						thumb: '3d/material/phongMaterialTextures/thumb.png',
 						description: {
-							ko: `RedGPU를 사용해 PhongMaterial의 다양한 텍스처 조합과 효과를 시각적으로 확인할 수 있는 샘플 예제입니다.`,
+							ko: ``,
 							en: `A sample example that visually demonstrates different texture combinations and effects of PhongMaterial using RedGPU.`
 						},
 					},
@@ -321,7 +317,7 @@ const ExampleList = [
 						path: '3d/texture/bitmapTextureSampler',
 						thumb: '3d/texture/bitmapTextureSampler/thumb.png',
 						description: {
-							ko: `텍스쳐 샘플러 옵션과 밉맵에 관한 지원을 확인할 수 있는 샘플입니다. `,
+							ko: ` `,
 							en: `A sample that demonstrates texture sampler options and mipmap support.`
 						},
 					},
@@ -330,7 +326,7 @@ const ExampleList = [
 						path: '3d/texture/samplerCombination',
 						thumb: '3d/texture/samplerCombination/thumb.png',
 						description: {
-							ko: `텍스쳐 샘플러의 다양한 조합을 한눈에 볼 수 있는 예제입니다.`,
+							ko: ``,
 							en: `Here's an example showing the different combinations of texture samplers at a glance.`
 						},
 					},
@@ -339,7 +335,7 @@ const ExampleList = [
 						path: '3d/texture/samplerAddressMode',
 						thumb: '3d/texture/samplerAddressMode/thumb.png',
 						description: {
-							ko: `텍스쳐 샘플러의 AddressMode 옵션의 조합을 한눈에 볼 수 있는 예제입니다.`,
+							ko: ``,
 							en: `An example showing combinations of AddressMode options for a texture sampler.`
 						},
 					},
@@ -348,7 +344,7 @@ const ExampleList = [
 						path: '3d/texture/maxAnisotropy',
 						thumb: '3d/texture/maxAnisotropy/thumb.png',
 						description: {
-							ko: `텍스쳐의 Anisotropy 옵션을 확인할 수 있는 예제입니다.`,
+							ko: ``,
 							en: `example showing the Anisotropy option for a texture.`
 						},
 					},
@@ -483,7 +479,7 @@ const ExampleList = [
 						path: '3d/transparentSort',
 						thumb: '3d/transparentSort/thumb.png',
 						description: {
-							ko: `반투명 객체가 렌더링되는 순서를 확인하기 위해 메시의 소재에 \`transparent\` 옵션을 적용하는 방법의 예입니다. \`transparent\`를 사용하면 올바른 렌더링 결과를 확인할 수 있습니다.`,
+							ko: ``,
 							en: ` example of how to apply the \`transparent\` option to the mesh's material to see the order in which translucent objects are rendered. You can use \`transparent\` to see the correct rendering results.`
 						},
 					},
@@ -552,7 +548,7 @@ const ExampleList = [
 						path: '3d/sprite/sprite3D',
 						thumb: '3d/sprite/sprite3D/thumb.png',
 						description: {
-							ko: `Sprite3D 객체에 대한 예제입니다.`,
+							ko: ``,
 							en: `example of a Sprite3D object.`
 						},
 					},
@@ -561,7 +557,7 @@ const ExampleList = [
 						path: '3d/sprite/spriteSheet3D',
 						thumb: '3d/sprite/spriteSheet3D/thumb.png',
 						description: {
-							ko: `SpriteSheet3D 객체에 대한 예제입니다.`,
+							ko: ``,
 							en: `example of a SpriteSheet3D object.`
 						},
 					},
@@ -575,7 +571,7 @@ const ExampleList = [
 						path: '3d/textField3D',
 						thumb: '3d/textField3D/thumb.png',
 						description: {
-							ko: `TextField3D 객체에 대한 예제입니다.`,
+							ko: ``,
 							en: `example of a TextField3D object.`
 						},
 					},
@@ -616,7 +612,7 @@ const ExampleList = [
 						path: '3d/light/pointLightPerformance',
 						thumb: '3d/light/pointLightPerformance/thumb.png',
 						description: {
-							ko: `포인트라이트는 클러스터드 타일 렌더를 지원합니다. 1024개의 포인트 라이트를 지원합니다.`,
+							ko: ``,
 							en: `PointLight supports clustered tile rendering. Supports 1024 point lights.`
 						},
 					},
@@ -639,7 +635,7 @@ const ExampleList = [
 						path: '3d/group3D/basic',
 						thumb: '3d/group3D/basic/thumb.png',
 						description: {
-							ko: `3D오브젝트를 그룹화 할수 있는 Group3D 객체에 대한 예제입니다. `,
+							ko: ``,
 							en: `Here's an example of a Group3D object that can group 3D objects.`
 						},
 					},
@@ -654,7 +650,7 @@ const ExampleList = [
 						path: '3d/tint/basic',
 						thumb: '3d/tint/basic/thumb.png',
 						description: {
-							ko: `재질 기반의 tint를 지원합니다. tint의 사용여부와 tintBlendMode, color 설정에 대한 예제입니다.`,
+							ko: ``,
 							en: `Supports material-based tint. Examples of using tint, setting tintBlendMode, and color.`
 						},
 					},
@@ -700,7 +696,7 @@ const ExampleList = [
 						path: '3d/mouseEvent/mesh',
 						thumb: '3d/mouseEvent/mesh/thumb.png',
 						description: {
-							ko: `Mesh에 마우스 이벤트를 설정하는 대한 예제입니다.`,
+							ko: ``,
 							en: `Here's an example of setting up mouse events on a Mesh.`
 						},
 					},
@@ -709,7 +705,7 @@ const ExampleList = [
 						path: '3d/mouseEvent/sprite3D',
 						thumb: '3d/mouseEvent/sprite3D/thumb.png',
 						description: {
-							ko: `Sprite3D에 마우스 이벤트를 설정하는 대한 예제입니다.`,
+							ko: ``,
 							en: `Here's an example of setting up mouse events on a Sprite3D.`
 						},
 					},
@@ -718,7 +714,7 @@ const ExampleList = [
 						path: '3d/mouseEvent/spriteSheet3D',
 						thumb: '3d/mouseEvent/spriteSheet3D/thumb.png',
 						description: {
-							ko: `SpriteSheet3D에 마우스 이벤트를 설정하는 대한 예제입니다.`,
+							ko: ``,
 							en: `Here's an example of setting up mouse events on a SpriteSheet3D.`
 						},
 					},
@@ -727,7 +723,7 @@ const ExampleList = [
 						path: '3d/mouseEvent/textField3D',
 						thumb: '3d/mouseEvent/textField3D/thumb.png',
 						description: {
-							ko: `TextField3D에 마우스 이벤트를 설정하는 대한 예제입니다.`,
+							ko: ``,
 							en: `Here's an example of setting up mouse events on a TextField3D.`
 						},
 					},
