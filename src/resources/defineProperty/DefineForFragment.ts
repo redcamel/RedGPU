@@ -20,6 +20,9 @@ function defineProperty_vec3(propertyKey: string, initValue: number[] = [0, 0, 0
 function defineProperty_vec2(propertyKey: string, initValue: number[] = [0, 0]) {
 	return defineVector(propertyKey, initValue)
 }
+function defineProperty_PositiveNumberRange(propertyKey: string, initValue: number = 0, min?: number, max?: number) {
+	return definePositiveNumberRange(propertyKey, initValue, true, min, max)
+}
 
 const PRESET_BOOLEAN = {};
 const PRESET_POSITIVE_NUMBER = {
@@ -76,7 +79,7 @@ const DefineForFragment = {
 	),
 	//
 	defineBoolean: defineProperties(defineBoolean),
-	definePositiveNumber: defineProperties(definePositiveNumberRange),
+	definePositiveNumber: defineProperties(defineProperty_PositiveNumberRange),
 	defineUint: defineProperties(defineUintRange),
 	defineVec2: defineProperties(defineProperty_vec2),
 	defineVec3: defineProperties(defineProperty_vec3),

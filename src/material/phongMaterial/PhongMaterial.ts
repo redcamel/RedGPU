@@ -28,6 +28,8 @@ interface PhongMaterial {
 	normalTexture: BitmapTexture
 	normalTextureSampler: Sampler
 	normalScale: number
+	metallic: number
+	useSSR: number
 }
 
 class PhongMaterial extends ABitmapBaseMaterial {
@@ -99,7 +101,10 @@ DefineForFragment.defineByPreset(PhongMaterial, [
 	[DefineForFragment.PRESET_POSITIVE_NUMBER.SHININESS, 32],
 ])
 DefineForFragment.defineBoolean(PhongMaterial, [
-	['useSSR',true]
+	['useSSR',false]
+])
+DefineForFragment.definePositiveNumber(PhongMaterial, [
+	['metallic',0,0,1]
 ])
 Object.freeze(PhongMaterial)
 export default PhongMaterial
