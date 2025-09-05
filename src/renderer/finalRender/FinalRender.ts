@@ -192,14 +192,16 @@ class FinalRender {
 		const {backgroundColor, gpuContext} = redGPUContext
 		const rgbaNormal = backgroundColor.rgbaNormal
 		const finalRenderTextureView = gpuContext.getCurrentTexture().createView({label: 'FINAL_RENDER'})
+
 		const colorAttachment: GPURenderPassColorAttachment = {
 			view: finalRenderTextureView,
-			clearValue: {
-				r: rgbaNormal[0] * rgbaNormal[3],
-				g: rgbaNormal[1] * rgbaNormal[3],
-				b: rgbaNormal[2] * rgbaNormal[3],
-				a: rgbaNormal[3]
-			},
+			// clearValue: {
+			// 	r: rgbaNormal[0] * rgbaNormal[3],
+			// 	g: rgbaNormal[1] * rgbaNormal[3],
+			// 	b: rgbaNormal[2] * rgbaNormal[3],
+			// 	a: rgbaNormal[3]
+			// },
+			clearValue: {r: 0, g: 0, b: 0, a: 0},
 			loadOp: GPU_LOAD_OP.CLEAR,
 			storeOp: GPU_STORE_OP.STORE
 		}

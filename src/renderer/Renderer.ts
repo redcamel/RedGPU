@@ -4,11 +4,8 @@ import RedGPUContext from "../context/RedGPUContext";
 import View3D from "../display/view/View3D";
 import GPU_LOAD_OP from "../gpuConst/GPU_LOAD_OP";
 import GPU_STORE_OP from "../gpuConst/GPU_STORE_OP";
-import TAA from "../postEffect/TAA/TAA";
-import {keepLog} from "../utils";
 import DebugRender from "./debugRender/DebugRender";
 import FinalRender from "./finalRender/FinalRender";
-import renderListForLayer from "./renderLayers/core/renderListForLayer";
 import render2PathLayer from "./renderLayers/render2PathLayer";
 import renderAlphaLayer from "./renderLayers/renderAlphaLayer";
 import renderBasicLayer from "./renderLayers/renderBasicLayer";
@@ -259,23 +256,33 @@ class Renderer {
 			depthTextureView,
 			gBufferColorTextureView, gBufferColorResolveTextureView,
 			gBufferNormalTextureView,gBufferNormalResolveTextureView,
-			 gBufferMotionVectorTextureView,gBufferMotionVectorResolveTextureView,
+			gBufferMotionVectorTextureView,gBufferMotionVectorResolveTextureView,
 		} = viewRenderTextureManager
 		const {useBackgroundColor, backgroundColor} = scene
 		const {antialiasingManager} = redGPUContext
 		const {useMSAA} = antialiasingManager
-		const rgbaNormal = backgroundColor.rgbaNormal
+		const sceneRgbaNormal = useBackgroundColor ? backgroundColor.rgbaNormal : [0, 0, 0, 0]
+		const redGPURgbaNormal = redGPUContext.backgroundColor.rgbaNormal
+
+		const finalColor = [
+			redGPURgbaNormal[0] * redGPURgbaNormal[3] * (1 - sceneRgbaNormal[3]) + sceneRgbaNormal[0] * sceneRgbaNormal[3],
+			redGPURgbaNormal[1] * redGPURgbaNormal[3] * (1 - sceneRgbaNormal[3]) + sceneRgbaNormal[1] * sceneRgbaNormal[3],
+			redGPURgbaNormal[2] * redGPURgbaNormal[3] * (1 - sceneRgbaNormal[3]) + sceneRgbaNormal[2] * sceneRgbaNormal[3],
+			redGPURgbaNormal[3] + sceneRgbaNormal[3] * (1 - redGPURgbaNormal[3])
+		]
+
 		const colorAttachment: GPURenderPassColorAttachment = {
 			view: gBufferColorTextureView,
-			clearValue: useBackgroundColor ? {
-				r: rgbaNormal[0] * rgbaNormal[3],
-				g: rgbaNormal[1] * rgbaNormal[3],
-				b: rgbaNormal[2] * rgbaNormal[3],
-				a: rgbaNormal[3]
-			} : {r: 0, g: 0, b: 0, a: 0},
+			clearValue: {
+				r: finalColor[0],
+				g: finalColor[1],
+				b: finalColor[2],
+				a: finalColor[3]
+			},
 			loadOp: GPU_LOAD_OP.CLEAR,
 			storeOp: GPU_STORE_OP.STORE
 		}
+
 
 
 		// console.log('depthTextureView', depthTextureView)
