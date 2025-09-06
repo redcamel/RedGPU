@@ -39,9 +39,7 @@ class Renderer {
 		}
 		this.#finalRender.render(redGPUContext, viewList_renderPassDescriptorList)
 		//
-
 		redGPUContext.antialiasingManager.changedMSAA = false
-
 		console.log('/////////////////// end renderFrame ///////////////////')
 	}
 
@@ -68,13 +66,11 @@ class Renderer {
 		let result = 0;
 		let fraction = 1 / base;
 		let i = index;
-
 		while (i > 0) {
 			result += (i % base) * fraction;
 			i = Math.floor(i / base);
 			fraction /= base;
 		}
-
 		return result;
 	}
 
@@ -101,26 +97,21 @@ class Renderer {
 			gBufferNormalTextureAttachment,
 			gBufferMotionVectorTextureAttachment
 		} = this.#createAttachmentsForView(view)
-
 		{
 			const frameIndex = taa.frameIndex || 0;
 			const jitterScale = taa.jitterStrength;
-
 			const sampleCount = 32;
 			const currentSample = frameIndex % sampleCount;
-
 			// Halton 시퀀스 계산
 			const haltonX = this.#haltonSequence(currentSample + 1, 2);
 			const haltonY = this.#haltonSequence(currentSample + 1, 3);
-
 			// 픽셀 단위 지터
-			const jitterX = (haltonX - 0.5) * jitterScale ;
+			const jitterX = (haltonX - 0.5) * jitterScale;
 			const jitterY = (haltonY - 0.5) * jitterScale;
-
 			view.setJitterOffset(jitterX, jitterY);
 		}
 		const renderPassDescriptor: GPURenderPassDescriptor = {
-			colorAttachments: [colorAttachment,gBufferNormalTextureAttachment,gBufferMotionVectorTextureAttachment],
+			colorAttachments: [colorAttachment, gBufferNormalTextureAttachment, gBufferMotionVectorTextureAttachment],
 			depthStencilAttachment,
 		}
 		// @ts-ignore
@@ -186,7 +177,7 @@ class Renderer {
 					);
 					mipmapGenerator.generateMipmap(renderPath1ResultTexture, view.viewRenderTextureManager.renderPath1ResultTextureDescriptor, true)
 					const renderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass({
-						colorAttachments: [...renderPassDescriptor.colorAttachments].map(v => ({...v,loadOp:GPU_LOAD_OP.LOAD})),
+						colorAttachments: [...renderPassDescriptor.colorAttachments].map(v => ({...v, loadOp: GPU_LOAD_OP.LOAD})),
 						depthStencilAttachment: {
 							...depthStencilAttachment,
 							depthLoadOp: GPU_LOAD_OP.LOAD,
@@ -227,11 +218,10 @@ class Renderer {
 		}
 		renderPassDescriptor.colorAttachments[0].postEffectView = view.postEffectManager.render().textureView
 		redGPUContext.gpuDevice.queue.submit([commandEncoder.finish()])
-
 		view.debugViewRenderState.viewRenderTime = (performance.now() - view.debugViewRenderState.startTime);
 		pickingManager.checkEvents(view, time);
 		{
-			const {projectionMatrix, noneJitterProjectionMatrix,rawCamera, redGPUContext, } = view
+			const {projectionMatrix, noneJitterProjectionMatrix, rawCamera, redGPUContext,} = view
 			const {modelMatrix: cameraMatrix} = rawCamera
 			const {gpuDevice} = redGPUContext;
 			const structInfo = view.systemUniform_Vertex_StructInfo;
@@ -255,22 +245,34 @@ class Renderer {
 		const {
 			depthTextureView,
 			gBufferColorTextureView, gBufferColorResolveTextureView,
-			gBufferNormalTextureView,gBufferNormalResolveTextureView,
-			gBufferMotionVectorTextureView,gBufferMotionVectorResolveTextureView,
+			gBufferNormalTextureView, gBufferNormalResolveTextureView,
+			gBufferMotionVectorTextureView, gBufferMotionVectorResolveTextureView,
 		} = viewRenderTextureManager
 		const {useBackgroundColor, backgroundColor} = scene
 		const {antialiasingManager} = redGPUContext
-		const {useMSAA,useTAA} = antialiasingManager
+		const {useMSAA, useTAA} = antialiasingManager
 		const sceneRgbaNormal = useBackgroundColor ? backgroundColor.rgbaNormal : [0, 0, 0, 0]
 		const redGPURgbaNormal = redGPUContext.backgroundColor.rgbaNormal
-
-		const finalColor = useTAA ?[
-			redGPURgbaNormal[0] * redGPURgbaNormal[3] * (1 - sceneRgbaNormal[3]) + sceneRgbaNormal[0] * sceneRgbaNormal[3],
-			redGPURgbaNormal[1] * redGPURgbaNormal[3] * (1 - sceneRgbaNormal[3]) + sceneRgbaNormal[1] * sceneRgbaNormal[3],
-			redGPURgbaNormal[2] * redGPURgbaNormal[3] * (1 - sceneRgbaNormal[3]) + sceneRgbaNormal[2] * sceneRgbaNormal[3],
-			redGPURgbaNormal[3] + sceneRgbaNormal[3] * (1 - redGPURgbaNormal[3])
-		] : sceneRgbaNormal
-
+		let finalColor
+		if(useTAA){
+			finalColor = [
+				redGPURgbaNormal[0] * redGPURgbaNormal[3] * (1 - sceneRgbaNormal[3]) + sceneRgbaNormal[0] * sceneRgbaNormal[3],
+				redGPURgbaNormal[1] * redGPURgbaNormal[3] * (1 - sceneRgbaNormal[3]) + sceneRgbaNormal[1] * sceneRgbaNormal[3],
+				redGPURgbaNormal[2] * redGPURgbaNormal[3] * (1 - sceneRgbaNormal[3]) + sceneRgbaNormal[2] * sceneRgbaNormal[3],
+				redGPURgbaNormal[3] + sceneRgbaNormal[3] * (1 - redGPURgbaNormal[3])
+			]
+		}else{
+			if(useBackgroundColor){
+				finalColor = [
+					sceneRgbaNormal[0] * sceneRgbaNormal[3],
+					sceneRgbaNormal[1] * sceneRgbaNormal[3],
+					sceneRgbaNormal[2] * sceneRgbaNormal[3],
+					sceneRgbaNormal[3]
+				]
+			}else{
+				finalColor = [0,0,0,0]
+			}
+		}
 		const colorAttachment: GPURenderPassColorAttachment = {
 			view: gBufferColorTextureView,
 			clearValue: {
@@ -282,9 +284,6 @@ class Renderer {
 			loadOp: GPU_LOAD_OP.CLEAR,
 			storeOp: GPU_STORE_OP.STORE
 		}
-
-
-
 		// console.log('depthTextureView', depthTextureView)
 		const depthStencilAttachment: GPURenderPassDepthStencilAttachment = {
 			view: depthTextureView,
@@ -304,17 +303,30 @@ class Renderer {
 			loadOp: GPU_LOAD_OP.CLEAR,
 			storeOp: GPU_STORE_OP.STORE
 		}
-		if (useMSAA){
+		if (useMSAA) {
 			colorAttachment.resolveTarget = gBufferColorResolveTextureView
 			gBufferNormalTextureAttachment.resolveTarget = gBufferNormalResolveTextureView
 			gBufferMotionVectorTextureAttachment.resolveTarget = gBufferMotionVectorResolveTextureView
 		}
-		return {colorAttachment, depthStencilAttachment,gBufferNormalTextureAttachment,gBufferMotionVectorTextureAttachment};
+		return {
+			colorAttachment,
+			depthStencilAttachment,
+			gBufferNormalTextureAttachment,
+			gBufferMotionVectorTextureAttachment
+		};
 	}
 
 	#updateViewSystemUniforms(view: View3D, viewRenderPassEncoder: GPURenderPassEncoder, shadowRender: boolean = false, calcPointLightCluster: boolean = true,
 	                          renderPath1ResultTextureView: GPUTextureView = null) {
-		const {inverseProjectionMatrix, pixelRectObject, noneJitterProjectionMatrix,projectionMatrix, rawCamera, redGPUContext, scene} = view
+		const {
+			inverseProjectionMatrix,
+			pixelRectObject,
+			noneJitterProjectionMatrix,
+			projectionMatrix,
+			rawCamera,
+			redGPUContext,
+			scene
+		} = view
 		const {gpuDevice} = redGPUContext
 		const {modelMatrix: cameraMatrix, position: cameraPosition} = rawCamera
 		const structInfo = view.systemUniform_Vertex_StructInfo;

@@ -37,6 +37,8 @@ RedGPU.init(
 		shape.y = view.screenRectObject.height / 2;
 		scene.addChild(shape);
 
+
+
 		redGPUContext.onResize = () => {
 			const {width, height} = redGPUContext.screenRectObject;
 			base.x = width / 2;
