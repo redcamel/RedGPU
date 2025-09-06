@@ -59,6 +59,7 @@ class View3D extends ViewTransform {
 	#prevInfoList = []
 	#shadowDepthSampler: GPUSampler
 	#basicSampler: GPUSampler
+	#basicPackedSampler: GPUSampler
 	//
 	#clusterLightsBuffer: GPUBuffer
 	#clusterLightsBufferData: Float32Array
@@ -358,7 +359,7 @@ class View3D extends ViewTransform {
 				},
 				{
 					binding: 9,
-					resource: this.#basicSampler
+					resource: this.#basicPackedSampler
 				},
 				{
 					binding: 10,
@@ -430,6 +431,10 @@ class View3D extends ViewTransform {
 			compare: GPU_COMPARE_FUNCTION.LESS_EQUAL,
 		}).gpuSampler
 		this.#basicSampler = new Sampler(this.redGPUContext).gpuSampler
+		this.#basicPackedSampler = new Sampler(this.redGPUContext,{
+			addressModeU: GPU_ADDRESS_MODE.REPEAT,
+			addressModeV: GPU_ADDRESS_MODE.REPEAT,
+		}).gpuSampler
 	}
 
 	#updateClusters(calcClusterLight: boolean = false) {
