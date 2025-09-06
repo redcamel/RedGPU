@@ -1,9 +1,11 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import Geometry from "../../../../geometry/Geometry";
+import GPU_ADDRESS_MODE from "../../../../gpuConst/GPU_ADDRESS_MODE";
 import BitmapMaterial from "../../../../material/bitmapMaterial/BitmapMaterial";
 import Primitive from "../../../../primitive/core/Primitive";
 import RenderViewStateData from "../../../../renderer/RenderViewStateData";
 import DefineForVertex from "../../../../resources/defineProperty/DefineForVertex";
+import Sampler from "../../../../resources/sampler/Sampler";
 import consoleAndThrowError from "../../../../utils/consoleAndThrowError";
 import Mesh from "../../../mesh/Mesh";
 import SpriteSheetInfo from "../SpriteSheetInfo";
@@ -33,6 +35,9 @@ class ASpriteSheet extends Mesh {
 		this.dirtyPipeline = true
 		this.dirtyTransform = true
 		this.spriteSheetInfo = spriteSheetInfo;
+		this._material.diffuseTextureSampler = new Sampler(redGPUContext)
+		this._material.diffuseTextureSampler.addressModeU = GPU_ADDRESS_MODE.REPEAT
+		this._material.diffuseTextureSampler.addressModeV = GPU_ADDRESS_MODE.REPEAT
 	}
 
 	get state(): string {
