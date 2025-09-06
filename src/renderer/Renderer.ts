@@ -142,8 +142,8 @@ class Renderer {
 				if (skybox) skybox.render(debugViewRenderState)
 				renderBasicLayer(view, viewRenderPassEncoder)
 				if (axis) axis.render(debugViewRenderState)
-				renderAlphaLayer(view, viewRenderPassEncoder)
 				if (grid) grid.render(debugViewRenderState)
+				renderAlphaLayer(view, viewRenderPassEncoder)
 				viewRenderPassEncoder.end()
 			}
 			{

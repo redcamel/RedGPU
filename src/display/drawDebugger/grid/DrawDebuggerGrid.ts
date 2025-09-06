@@ -111,7 +111,7 @@ class DrawDebuggerGrid {
 			},
 			depthStencil: {
 				format: 'depth32float',
-				depthWriteEnabled: false,
+				depthWriteEnabled: true,
 				depthCompare: GPU_COMPARE_FUNCTION.LESS,
 			}
 		}
