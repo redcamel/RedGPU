@@ -75,8 +75,8 @@ const createTextures = (redGPUContext) => {
 
 const renderUI = async (redGPUContext, mesh) => {
 	const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
-	const {setSeparator, setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
-	setDebugViewButton(redGPUContext);
+	const {setSeparator, setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugButtons(redGPUContext);
 	const pane = new Pane();
 	const material = mesh.material;
 	const textures = createTextures(redGPUContext);

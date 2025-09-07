@@ -2,7 +2,7 @@ import ColorRGB from "../../../../color/ColorRGB";
 import RedGPUContext from "../../../../context/RedGPUContext";
 import View3D from "../../../../display/view/View3D";
 import validateNumberRange from "../../../../runtimeChecker/validateFunc/validateNumberRange";
-import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
+import ASinglePassPostEffect, {ASinglePassPostEffectResult} from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
@@ -83,8 +83,8 @@ class Fog extends ASinglePassPostEffect {
 		return this.#fogColor;
 	}
 
-	render(view: View3D, width: number, height: number, sourceTextureView: GPUTextureView) {
-		return super.render(view, width, height, sourceTextureView);
+	render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult) {
+		return super.render(view, width, height, sourceTextureInfo);
 	}
 }
 

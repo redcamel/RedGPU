@@ -9,7 +9,7 @@ const createCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: 
 			${uniformStruct}
       @group(0) @binding(0) var sourceTexture : texture_storage_2d<rgba8unorm,read>;
       ${effect.useDepthTexture ? `@group(0) @binding(1) var depthTexture : ${depthTextureType}` : ''};
-	
+  
       @group(1) @binding(0) var outputTexture : texture_storage_2d<rgba8unorm, write>;
       ${postEffectSystemUniform}
       ${uniformStruct ? '@group(1) @binding(2) var<uniform> uniforms: Uniforms;' : ''}

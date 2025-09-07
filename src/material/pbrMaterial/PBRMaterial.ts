@@ -589,6 +589,8 @@ DefineForFragment.defineBoolean(PBRMaterial, [
 	'useVertexTangent',
 	//
 	'useKHR_materials_unlit',
+	//
+	['useSSR',true]
 ])
 Object.freeze(PBRMaterial)
 export default PBRMaterial

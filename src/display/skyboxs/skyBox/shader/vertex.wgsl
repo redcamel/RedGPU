@@ -16,9 +16,10 @@ struct VertexUniforms {
 fn main(inputData:InputData) -> OutData {
     var outData : OutData;
     let u_projectionMatrix = systemUniforms.projectionMatrix;
+    let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
     let u_camera = systemUniforms.camera;
     let u_cameraMatrix = u_camera.cameraMatrix;
-    outData.position = u_projectionMatrix * u_cameraMatrix * vertexUniforms.modelMatrix * vec4<f32>(inputData.position, 1.0);
+    outData.position = u_projectionCameraMatrix * vertexUniforms.modelMatrix * vec4<f32>(inputData.position, 1.0);
     outData.vertexPosition = 0.5 * (vec4<f32>(inputData.position, 1.0) + vec4<f32>(1.0, 1.0, 1.0, 1.0));
     return outData;
 }

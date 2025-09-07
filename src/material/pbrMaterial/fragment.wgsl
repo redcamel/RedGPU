@@ -4,6 +4,7 @@
 #redgpu_include normalFunctions;
 #redgpu_include drawPicking;
 #redgpu_include calcPrePathBackground
+#redgpu_include FragmentOutput
 struct Uniforms {
     useVertexColor: u32,
     useCutOff: u32,
@@ -149,11 +150,13 @@ struct InputData {
   @location(9) ndcPosition: vec3<f32>,
   @location(10) localNodeScale: f32,
   @location(11) volumeScale: f32,
+  @location(12) motionVector: vec3<f32>,
 }
 
 
 @fragment
-fn main(inputData:InputData) -> @location(0) vec4<f32> {
+fn main(inputData:InputData) -> FragmentOutput {
+    var output: FragmentOutput;
     // 데이터 변수를 뽑아서 저장
     let input_vertexNormal = (inputData.vertexNormal.xyz);
     let input_vertexPosition = inputData.vertexPosition.xyz;
@@ -501,7 +504,8 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
 
     #redgpu_if useKHR_materials_unlit
     if(u_useKHR_materials_unlit){
-        return baseColor;
+        output.color = baseColor;
+        return output;
     }
     #redgpu_endIf
 
@@ -1038,7 +1042,31 @@ let attenuation = rangePart * invSquare;
         if (resultAlpha <= u_cutOff) { discard; }
     #redgpu_endIf
 
-    return finalColor;
+    output.color = finalColor;
+
+    #redgpu_if useSSR
+    {
+        let smoothness = 1.0 - roughnessParameter;
+        let smoothnessCurved = smoothness * smoothness * (3.0 - 2.0 * smoothness);
+
+        let metallicWeight = metallicParameter * metallicParameter;
+        let baseReflection = 0.04 + 0.96 * metallicWeight;
+
+        let baseReflectionStrength = smoothnessCurved * baseReflection;
+        output.gBufferNormal = vec4<f32>(N * 0.5 + 0.5, baseReflectionStrength);
+    }
+    #redgpu_endIf
+    output.gBufferMotionVector = vec4<f32>( inputData.motionVector, 1.0 );
+
+//  // 디버깅: 모션벡터 증폭하여 확인
+//   let amplifiedMotion = inputData.motionVector * 50.0;  // 50배 증폭
+//   let clampedMotion = vec2<f32>(
+//       clamp(amplifiedMotion.x * 0.5 + 0.5, 0.0, 1.0),
+//       clamp(amplifiedMotion.y * 0.5 + 0.5, 0.0, 1.0)
+//   );
+//   output.color = vec4<f32>(clampedMotion, 0.5, 1.0);
+
+    return output;
 };
 // ---------- KHR_materials_anisotropy ----------
 

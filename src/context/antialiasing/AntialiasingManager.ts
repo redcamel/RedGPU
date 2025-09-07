@@ -1,51 +1,36 @@
-import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumberRange";
+import FXAA from "../../postEffect/FXAA";
+import TAA from "../../postEffect/TAA/TAA";
+import createUUID from "../../utils/createUUID";
 import RedGPUContext from "../RedGPUContext";
 
 class AntialiasingManager {
 	#redGPUContext: RedGPUContext;
-	#useMSAA: boolean = true
+	#msaaID: string
+	#useMSAA: boolean = false
 	#useFXAA: boolean = false
-	#fxaa_subpix: number = 0.75
-	#fxaa_edgeThreshold: number = 0.166
-	#fxaa_edgeThresholdMin: number = 0.0833
+	#useTAA: boolean = true
 	#changedMSAA: boolean = true
 
 	constructor(redGPUContext: RedGPUContext) {
 		this.#redGPUContext = redGPUContext;
 	}
 
-	get fxaa_subpix(): number {
-		return this.#fxaa_subpix;
+	get useTAA(): boolean {
+		return this.#useTAA;
 	}
 
-	set fxaa_subpix(value: number) {
-		validateNumberRange(value, 0, 1);
-		this.#fxaa_subpix = value;
-	}
-
-	get fxaa_edgeThreshold(): number {
-		return this.#fxaa_edgeThreshold;
-	}
-
-	set fxaa_edgeThreshold(value: number) {
-		validateNumberRange(value, 0.0001, 0.25)
-		this.#fxaa_edgeThreshold = value;
-	}
-
-	get fxaa_edgeThresholdMin(): number {
-		return this.#fxaa_edgeThresholdMin;
-	}
-
-	set fxaa_edgeThresholdMin(value: number) {
-		validateNumberRange(value, 0.00001, 0.1)
-		this.#fxaa_edgeThresholdMin = value;
+	set useTAA(value: boolean) {
+		this.#useTAA = value;
 	}
 
 	get useMSAA(): boolean {
 		return this.#useMSAA;
 	}
-
+	get msaaID(): string {
+		return this.#msaaID;
+	}
 	set useMSAA(value: boolean) {
+		if (this.#useMSAA !== value) this.#msaaID = createUUID()
 		this.#useMSAA = value;
 		this.#changedMSAA = true;
 	}

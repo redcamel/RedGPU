@@ -17,4 +17,4 @@ color += textureLoad(sourceTexture, index + vec2<i32>(1,0)) * kernel_value[1][2]
 color += textureLoad(sourceTexture, index + vec2<i32>(-1,1)) * kernel_value[2][0] ;
 color += textureLoad(sourceTexture, index + vec2<i32>(0,1)) * kernel_value[2][1] ;
 color += textureLoad(sourceTexture, index + vec2<i32>(1,1)) * kernel_value[2][2] ;
-textureStore(outputTexture, index, vec4<f32>((color / kernelWeight_value).rgb, 1.0) );
+textureStore(outputTexture, index, color / kernelWeight_value );

@@ -38,6 +38,7 @@ class Renderer {
 			}
 		}
 		this.#finalRender.render(redGPUContext, viewList_renderPassDescriptorList)
+		//
 		redGPUContext.antialiasingManager.changedMSAA = false
 		console.log('/////////////////// end renderFrame ///////////////////')
 	}
@@ -61,6 +62,18 @@ class Renderer {
 		cancelAnimationFrame(redGPUContext.currentRequestAnimationFrame)
 	}
 
+	#haltonSequence(index: number, base: number): number {
+		let result = 0;
+		let fraction = 1 / base;
+		let i = index;
+		while (i > 0) {
+			result += (i % base) * fraction;
+			i = Math.floor(i / base);
+			fraction /= base;
+		}
+		return result;
+	}
+
 	renderView(view: View3D, time: number) {
 		const {
 			redGPUContext,
@@ -71,7 +84,8 @@ class Renderer {
 			axis,
 			grid,
 			skybox,
-			debugViewRenderState
+			debugViewRenderState,
+			taa
 		} = view
 		const {antialiasingManager} = redGPUContext
 		const {useMSAA} = antialiasingManager
@@ -79,11 +93,25 @@ class Renderer {
 		const {directionalShadowManager} = shadowManager
 		const {
 			colorAttachment,
-			depthStencilAttachment
+			depthStencilAttachment,
+			gBufferNormalTextureAttachment,
+			gBufferMotionVectorTextureAttachment
 		} = this.#createAttachmentsForView(view)
-		// Create a timestamp query set that will store the timestamp values.
+		{
+			const frameIndex = taa.frameIndex || 0;
+			const jitterScale = taa.jitterStrength;
+			const sampleCount = 32;
+			const currentSample = frameIndex % sampleCount;
+			// Halton 시퀀스 계산
+			const haltonX = this.#haltonSequence(currentSample + 1, 2);
+			const haltonY = this.#haltonSequence(currentSample + 1, 3);
+			// 픽셀 단위 지터
+			const jitterX = (haltonX - 0.5) * jitterScale;
+			const jitterY = (haltonY - 0.5) * jitterScale;
+			view.setJitterOffset(jitterX, jitterY);
+		}
 		const renderPassDescriptor: GPURenderPassDescriptor = {
-			colorAttachments: [colorAttachment],
+			colorAttachments: [colorAttachment, gBufferNormalTextureAttachment, gBufferMotionVectorTextureAttachment],
 			depthStencilAttachment,
 		}
 		// @ts-ignore
@@ -124,13 +152,13 @@ class Renderer {
 					let renderPath1ResultTexture = view.viewRenderTextureManager.renderPath1ResultTexture
 					// useMSAA 설정에 따라 소스 텍스처 선택
 					let sourceTexture = useMSAA
-						? view.viewRenderTextureManager.colorResolveTexture
-						: view.viewRenderTextureManager.colorTexture;
+						? view.viewRenderTextureManager.gBufferColorResolveTexture
+						: view.viewRenderTextureManager.gBufferColorTexture;
 					if (!sourceTexture) {
 						if (useMSAA) {
-							console.error('MSAA가 활성화되어 있지만 colorResolveTexture가 정의되지 않았습니다');
+							console.error('MSAA가 활성화되어 있지만 gBufferColorResolveTexture가 정의되지 않았습니다');
 						} else {
-							console.error('colorTexture가 정의되지 않았습니다');
+							console.error('gBufferColorTexture가 정의되지 않았습니다');
 						}
 						console.log('view.redGPUContext.useMSAA:', useMSAA);
 						console.log('viewRenderTextureManager:', view.viewRenderTextureManager);
@@ -149,10 +177,7 @@ class Renderer {
 					);
 					mipmapGenerator.generateMipmap(renderPath1ResultTexture, view.viewRenderTextureManager.renderPath1ResultTextureDescriptor, true)
 					const renderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass({
-						colorAttachments: [{
-							...colorAttachment,
-							loadOp: 'load'
-						}],
+						colorAttachments: [...renderPassDescriptor.colorAttachments].map(v => ({...v, loadOp: GPU_LOAD_OP.LOAD})),
 						depthStencilAttachment: {
 							...depthStencilAttachment,
 							depthLoadOp: GPU_LOAD_OP.LOAD,
@@ -166,7 +191,6 @@ class Renderer {
 				}
 			}
 			// 포스트 이펙트 체크
-			renderPassDescriptor.colorAttachments[0].postEffectView = view.postEffectManager.render()
 			if (pickingManager) {
 				pickingManager.checkTexture(view)
 				const pickingPassDescriptor: GPURenderPassDescriptor = {
@@ -192,44 +216,89 @@ class Renderer {
 				// renderPassDescriptor.colorAttachments[0].pickingView = pickingManager.pickingGPUTextureView
 			}
 		}
+		renderPassDescriptor.colorAttachments[0].postEffectView = view.postEffectManager.render().textureView
 		redGPUContext.gpuDevice.queue.submit([commandEncoder.finish()])
 		view.debugViewRenderState.viewRenderTime = (performance.now() - view.debugViewRenderState.startTime);
-		pickingManager.checkEvents(view, time)
+		pickingManager.checkEvents(view, time);
+		{
+			const {projectionMatrix, noneJitterProjectionMatrix, rawCamera, redGPUContext,} = view
+			const {modelMatrix: cameraMatrix} = rawCamera
+			const {gpuDevice} = redGPUContext;
+			const structInfo = view.systemUniform_Vertex_StructInfo;
+			const gpuBuffer = view.systemUniform_Vertex_UniformBuffer.gpuBuffer;
+			[
+				{key: 'prevProjectionCameraMatrix', value: mat4.multiply(temp3, noneJitterProjectionMatrix, cameraMatrix)},
+				// {key: 'prevProjectionCameraMatrix', value: mat4.multiply(temp3, projectionMatrix, cameraMatrix)},
+			].forEach(({key, value}) => {
+				gpuDevice.queue.writeBuffer(
+					gpuBuffer,
+					structInfo.members[key].uniformOffset,
+					new structInfo.members[key].View(value)
+				);
+			});
+		}
 		return renderPassDescriptor
 	}
 
 	#createAttachmentsForView(view: View3D) {
 		const {scene, redGPUContext, viewRenderTextureManager} = view
-		const {depthTextureView, colorTextureView, colorResolveTextureView} = viewRenderTextureManager
-		const {useBackgroundColor, backgroundColor} = scene
+		const {
+			depthTextureView,
+			gBufferColorTextureView, gBufferColorResolveTextureView,
+			gBufferNormalTextureView, gBufferNormalResolveTextureView,
+			gBufferMotionVectorTextureView, gBufferMotionVectorResolveTextureView,
+		} = viewRenderTextureManager
 		const {antialiasingManager} = redGPUContext
 		const {useMSAA} = antialiasingManager
-		const rgbaNormal = backgroundColor.rgbaNormal
+
 		const colorAttachment: GPURenderPassColorAttachment = {
-			view: colorTextureView,
-			clearValue: useBackgroundColor ? {
-				r: rgbaNormal[0] * rgbaNormal[3],
-				g: rgbaNormal[1] * rgbaNormal[3],
-				b: rgbaNormal[2] * rgbaNormal[3],
-				a: rgbaNormal[3]
-			} : {r: 0, g: 0, b: 0, a: 0},
+			view: gBufferColorTextureView,
+			clearValue: {r: 0, g: 0, b: 0, a: 0},
 			loadOp: GPU_LOAD_OP.CLEAR,
 			storeOp: GPU_STORE_OP.STORE
 		}
-		if (useMSAA) colorAttachment.resolveTarget = colorResolveTextureView
-		// console.log('depthTextureView', depthTextureView)
 		const depthStencilAttachment: GPURenderPassDepthStencilAttachment = {
 			view: depthTextureView,
 			depthClearValue: 1.0,
 			depthLoadOp: GPU_LOAD_OP.CLEAR,
 			depthStoreOp: GPU_STORE_OP.STORE,
 		}
-		return {colorAttachment, depthStencilAttachment};
+		const gBufferNormalTextureAttachment: GPURenderPassColorAttachment = {
+			view: gBufferNormalTextureView,
+			clearValue: {r: 0, g: 0, b: 0, a: 0},
+			loadOp: GPU_LOAD_OP.CLEAR,
+			storeOp: GPU_STORE_OP.STORE
+		}
+		const gBufferMotionVectorTextureAttachment: GPURenderPassColorAttachment = {
+			view: gBufferMotionVectorTextureView,
+			clearValue: {r: 0, g: 0, b: 0, a: 0},
+			loadOp: GPU_LOAD_OP.CLEAR,
+			storeOp: GPU_STORE_OP.STORE
+		}
+		if (useMSAA) {
+			colorAttachment.resolveTarget = gBufferColorResolveTextureView
+			gBufferNormalTextureAttachment.resolveTarget = gBufferNormalResolveTextureView
+			gBufferMotionVectorTextureAttachment.resolveTarget = gBufferMotionVectorResolveTextureView
+		}
+		return {
+			colorAttachment,
+			depthStencilAttachment,
+			gBufferNormalTextureAttachment,
+			gBufferMotionVectorTextureAttachment
+		};
 	}
 
 	#updateViewSystemUniforms(view: View3D, viewRenderPassEncoder: GPURenderPassEncoder, shadowRender: boolean = false, calcPointLightCluster: boolean = true,
 	                          renderPath1ResultTextureView: GPUTextureView = null) {
-		const {inverseProjectionMatrix, pixelRectObject, projectionMatrix, rawCamera, redGPUContext, scene} = view
+		const {
+			inverseProjectionMatrix,
+			pixelRectObject,
+			noneJitterProjectionMatrix,
+			projectionMatrix,
+			rawCamera,
+			redGPUContext,
+			scene
+		} = view
 		const {gpuDevice} = redGPUContext
 		const {modelMatrix: cameraMatrix, position: cameraPosition} = rawCamera
 		const structInfo = view.systemUniform_Vertex_StructInfo;
@@ -262,6 +331,8 @@ class Renderer {
 		[
 			{key: 'projectionMatrix', value: projectionMatrix},
 			{key: 'projectionCameraMatrix', value: mat4.multiply(temp, projectionMatrix, cameraMatrix)},
+			{key: 'noneJitterProjectionMatrix', value: noneJitterProjectionMatrix},
+			{key: 'noneJitterProjectionCameraMatrix', value: mat4.multiply(temp2, noneJitterProjectionMatrix, cameraMatrix)},
 			{key: 'inverseProjectionMatrix', value: inverseProjectionMatrix},
 			{key: 'resolution', value: [view.pixelRectObject.width, view.pixelRectObject.height]},
 		].forEach(({key, value}) => {
@@ -289,4 +360,6 @@ class Renderer {
 }
 
 let temp = mat4.create()
+let temp2 = mat4.create()
+let temp3 = mat4.create()
 export default Renderer

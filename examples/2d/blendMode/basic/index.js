@@ -37,6 +37,8 @@ RedGPU.init(
 		shape.y = view.screenRectObject.height / 2;
 		scene.addChild(shape);
 
+
+
 		redGPUContext.onResize = () => {
 			const {width, height} = redGPUContext.screenRectObject;
 			base.x = width / 2;
@@ -168,8 +170,8 @@ function createSourceView(redGPUContext, scene, texture_blendTest_base, texture_
 
 const renderTestPane = async (redGPUContext, base, shape) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
-	const {setRedGPUTest_pane, setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
-	setDebugViewButton(redGPUContext);
+	const {setRedGPUTest_pane, setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugButtons(redGPUContext);
 	const pane = new Pane();
 	setRedGPUTest_pane(pane, redGPUContext, false);
 	const tintSettings = {

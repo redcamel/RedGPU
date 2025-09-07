@@ -13,6 +13,7 @@ import Sampler from "../../sampler/Sampler";
 import CubeTexture from "../CubeTexture";
 import generateCubeMapFromEquirectangularCode from "./generateCubeMapFromEquirectangularCode.wgsl"
 import HDRLoader, {HDRData} from "./HDRLoader";
+import {float32ToFloat16WithToneMapping} from "./tone/float32ToFloat16WithToneMapping";
 import {float32ToUint8WithToneMapping} from "./tone/float32ToUint8WithToneMapping";
 
 const MANAGED_STATE_KEY = 'managedHDRTextureState'
@@ -61,7 +62,8 @@ class HDRTexture extends ManagementResourceBase {
 		super(redGPUContext, MANAGED_STATE_KEY);
 		this.#onLoad = onLoad
 		this.#onError = onError
-		this.#format = 'rgba8unorm'
+		// this.#format = 'rgba8unorm'
+		this.#format = 'rgba16float'
 		this.#cubeMapSize = cubeMapSize
 		this.useMipmap = useMipMap
 		if (src) {
@@ -365,6 +367,20 @@ class HDRTexture extends ManagementResourceBase {
 			await this.#renderCubeMapFace(renderPipeline, sampler, face, faceMatrices[face], sourceTexture);
 		}
 	}
+	async #float32ToFloat16WithToneMapping(float32Data: Float32Array): Promise<Uint16Array> {
+		const result = await float32ToFloat16WithToneMapping(
+			this.redGPUContext,
+			float32Data,
+			{
+				exposure: this.#exposure,
+				width: this.#hdrData.width,
+				height: this.#hdrData.height,
+				workgroupSize: [8, 8]
+			}
+		);
+		return result.data;
+	}
+
 
 	async #hdrDataToGPUTexture(device: GPUDevice, resourceManager: ResourceManager, hdrData: HDRData, textureDescriptor: GPUTextureDescriptor): Promise<GPUTexture> {
 		// const texture = resourceManager.createManagedTexture(textureDescriptor);
@@ -372,6 +388,12 @@ class HDRTexture extends ManagementResourceBase {
 		let bytesPerPixel: number;
 		let uploadData: ArrayBuffer;
 		switch (this.#format) {
+			case 'rgba16float':
+				bytesPerPixel = 8;
+				const float16Data = await this.#float32ToFloat16WithToneMapping(hdrData.data);
+				uploadData = float16Data.buffer as ArrayBuffer;
+				break;
+
 			case 'rgba8unorm':
 				bytesPerPixel = 4;
 				const uint8Data = await this.#float32ToUint8WithToneMapping(hdrData.data);

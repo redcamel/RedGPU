@@ -1,4 +1,5 @@
 #redgpu_include drawPicking;
+#redgpu_include FragmentOutput;
 struct Uniforms {
   	opacity:f32
 };
@@ -11,8 +12,11 @@ struct InputData {
 
 @group(2) @binding(0) var<uniform> uniforms: Uniforms;
 @fragment
-fn main(inputData:InputData) -> @location(0) vec4<f32> {
-    return inputData.vertexColor;
+fn main(inputData:InputData) -> FragmentOutput {
+    var output:FragmentOutput;
+    output.color = inputData.vertexColor;
+    output.gBufferMotionVector = vec4<f32>( 0.0, 0.0, 1.0, 1.0 );
+    return output;
 }
 
 

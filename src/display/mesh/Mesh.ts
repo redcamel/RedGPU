@@ -31,6 +31,7 @@ const CPI = 3.141592653589793, CPI2 = 6.283185307179586, C225 = 0.225, C127 = 1.
 
 interface Mesh {
 	receiveShadow: boolean
+	disableJitter: boolean
 	meshType: string
 	useDisplacementTexture: boolean
 }
@@ -429,7 +430,7 @@ class Mesh extends MeshBase {
 		}
 		return cloneMesh
 	}
-
+	#prevModelMatrix:mat4
 	render(debugViewRenderState: RenderViewStateData) {
 		const {redGPUContext,} = this
 		const {
@@ -452,6 +453,19 @@ class Mesh extends MeshBase {
 		const {uuid: currentMaterialUUID} = currentMaterial || {}
 		let dirtyTransformForChildren
 		let dirtyOpacityForChildren
+		if(this.#prevModelMatrix){
+			const {vertexUniformBuffer, vertexUniformInfo} = this.gpuRenderInfo
+			const {members: vertexUniformInfoMembers} = vertexUniformInfo
+			//TODO - TAA 머가 빡세네...
+			if(vertexUniformInfoMembers.prevModelMatrix) {
+				redGPUContext.gpuDevice.queue.writeBuffer(
+					vertexUniformBuffer.gpuBuffer,
+					vertexUniformInfoMembers.prevModelMatrix.uniformOffset,
+					new vertexUniformInfoMembers.prevModelMatrix.View(this.#prevModelMatrix),
+				)
+			}
+
+		}
 		if (isScene2DMode) {
 			this.#z = 0
 			this.#pivotZ = 0
@@ -817,6 +831,7 @@ class Mesh extends MeshBase {
 				updateMeshDirtyPipeline(this, debugViewRenderState)
 			}
 		}
+
 		if (currentGeometry && passFrustumCulling) {
 			{
 				const {gpuRenderInfo} = this
@@ -835,6 +850,7 @@ class Mesh extends MeshBase {
 			const {gpuRenderInfo} = this
 			const {vertexUniformBuffer, vertexUniformBindGroup, vertexUniformInfo, pipeline,} = gpuRenderInfo
 			const {members: vertexUniformInfoMembers} = vertexUniformInfo
+
 			if (this.dirtyTransform) {
 				gpuDevice.queue.writeBuffer(
 					vertexUniformBuffer.gpuBuffer,
@@ -851,8 +867,9 @@ class Mesh extends MeshBase {
 								this.width, 0, 0, 0, 0, this.height, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
 							),
 						) : this.modelMatrix
-					),
+					)
 				)
+				this.#prevModelMatrix = mat4.clone(this.modelMatrix)
 				gpuDevice.queue.writeBuffer(
 					vertexUniformBuffer.gpuBuffer,
 					vertexUniformInfoMembers.normalModelMatrix.uniformOffset,
@@ -936,6 +953,8 @@ class Mesh extends MeshBase {
 			if (this.castShadow || (this.castShadow && !currentGeometry)) castingList[castingList.length] = this
 		}
 		if (this.#enableDebugger) this.#drawDebugger.render(debugViewRenderState)
+
+
 		// children render
 		const {children} = this
 		let i = 0
@@ -1046,6 +1065,7 @@ DefineForVertex.defineByPreset(Mesh, [
 ])
 DefineForVertex.defineBoolean(Mesh, [
 	['useDisplacementTexture', false],
+	['disableJitter', false],
 ])
 Object.freeze(Mesh)
 export default Mesh
