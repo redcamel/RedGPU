@@ -248,33 +248,15 @@ class Renderer {
 			gBufferNormalTextureView, gBufferNormalResolveTextureView,
 			gBufferMotionVectorTextureView, gBufferMotionVectorResolveTextureView,
 		} = viewRenderTextureManager
-		const {useBackgroundColor, backgroundColor} = scene
 		const {antialiasingManager} = redGPUContext
-		const {useMSAA, useTAA} = antialiasingManager
-		const sceneRgbaNormal = useBackgroundColor ? backgroundColor.rgbaNormal : [0, 0, 0, 0]
-		let finalColor
-		if(useBackgroundColor){
-			finalColor = [
-				sceneRgbaNormal[0] * sceneRgbaNormal[3],
-				sceneRgbaNormal[1] * sceneRgbaNormal[3],
-				sceneRgbaNormal[2] * sceneRgbaNormal[3],
-				sceneRgbaNormal[3]
-			]
-		}else{
-			finalColor = [0,0,0,0]
-		}
+		const {useMSAA} = antialiasingManager
+
 		const colorAttachment: GPURenderPassColorAttachment = {
 			view: gBufferColorTextureView,
-			clearValue: {
-				r: finalColor[0],
-				g: finalColor[1],
-				b: finalColor[2],
-				a: finalColor[3]
-			},
+			clearValue: {r: 0, g: 0, b: 0, a: 0},
 			loadOp: GPU_LOAD_OP.CLEAR,
 			storeOp: GPU_STORE_OP.STORE
 		}
-		// console.log('depthTextureView', depthTextureView)
 		const depthStencilAttachment: GPURenderPassDepthStencilAttachment = {
 			view: depthTextureView,
 			depthClearValue: 1.0,
