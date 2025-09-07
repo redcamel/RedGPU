@@ -9,7 +9,7 @@ const examplesDir = path.join(__dirname, 'examples');
 const categories = ['2d', '3d', 'gltf'];
 
 // 현재 날짜 가져오기 (lastmod용)
-const today = new Date().toISOString().split('T')[0];
+const today = new Date().toISOString();
 
 // URL 카운터
 let urlCount = 0;
