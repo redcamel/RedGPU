@@ -64,6 +64,20 @@ html, body {
     }
 }
 
+.experimental {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6em;
+    color: #fff;
+    padding: 4px 8px;
+    line-height: 1;
+    width: fit-content;
+    background: #c74606;
+    border-radius: 4px;
+
+}
+
 /* width */
 ::-webkit-scrollbar {
     width: 4px;
@@ -179,6 +193,9 @@ html, body {
     /*color: rgb(227 216 210);*/
     color: rgb(221, 132, 80);
     font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 @media screen and (max-width: 480px) {
     .item-title {

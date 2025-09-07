@@ -495,6 +495,7 @@ const ExampleList = [
 						experimental: true,
 						list: [
 							{
+								experimental: true,
 								name: 'SimplexTexture',
 								path: '3d/noiseTexture/simplex/basic/',
 								thumb: '3d/noiseTexture/simplex/basic/thumb.png',
@@ -504,6 +505,7 @@ const ExampleList = [
 								},
 							},
 							{
+								experimental: true,
 								name: 'Custom SimplexTexture - Fire',
 								path: '3d/noiseTexture/simplex/fire/',
 								thumb: '3d/noiseTexture/simplex/fire/thumb.png',
@@ -513,6 +515,7 @@ const ExampleList = [
 								},
 							},
 							{
+								experimental: true,
 								name: 'Custom SimplexTexture - Displacement',
 								path: '3d/noiseTexture/simplex/displacement/',
 								thumb: '3d/noiseTexture/simplex/displacement/thumb.png',
@@ -528,6 +531,7 @@ const ExampleList = [
 						experimental: true,
 						list: [
 							{
+								experimental: true,
 								name: 'VoronoiTexture',
 								path: '3d/noiseTexture/voronoi/basic',
 								thumb: '3d/noiseTexture/voronoi/basic/thumb.png',
@@ -646,6 +650,7 @@ const ExampleList = [
 				experimental: true,
 				list: [
 					{
+						experimental: true,
 						name: 'Tint',
 						path: '3d/tint/basic',
 						thumb: '3d/tint/basic/thumb.png',
@@ -1045,6 +1050,7 @@ const ExampleList = [
 						name: 'Screen Space Reflection',
 						experimental: true,
 						list : [{
+							experimental: true,
 							name: 'Screen Space Reflection',
 							path: '3d/postEffect/ssr',
 							thumb: '3d/postEffect/ssr/thumb.png',
@@ -2076,6 +2082,7 @@ const ExampleList = [
 				experimental: true,
 				list: [
 					{
+						experimental: true,
 						name: 'Tint Basic',
 						path: '2d/tint/basic',
 						thumb: '2d/tint/basic/thumb.png',
@@ -2083,7 +2090,9 @@ const ExampleList = [
 							ko: ``,
 							en: ``
 						},
-					}, {
+					},
+					{
+						experimental: true,
 						name: 'Tint Objects',
 						path: '2d/tint/2dObjectTint',
 						thumb: '2d/tint/2dObjectTint/thumb.png',

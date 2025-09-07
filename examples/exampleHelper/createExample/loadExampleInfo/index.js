@@ -63,6 +63,10 @@ const loadDescription = async () => {
 		if (matchedExample) {
 			const title = document.createElement('h1');
 			title.innerHTML = matchedExample.name;
+			if(matchedExample.experimental){
+
+				title.innerHTML += '<span class="experimental">EXPERIMENTAL</span>'
+			}
 			title.className = 'item-title'
 			document.querySelector('.navigation-bar').appendChild(title);
 
