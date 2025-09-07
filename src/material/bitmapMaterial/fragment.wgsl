@@ -1,6 +1,7 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include calcTintBlendMode;
 #redgpu_include drawPicking;
+#redgpu_include FragmentOutput;
 
 struct Uniforms {
   //
@@ -19,13 +20,15 @@ struct InputData {
   @location(0) vertexPosition: vec3<f32>,
   @location(1) vertexNormal: vec3<f32>,
   @location(2) uv: vec2<f32>,
+  @location(3) motionVector: vec3<f32>,
   @location(12) combinedOpacity: f32,
   @location(13) shadowPos: vec3<f32>,
   @location(15) pickingId: vec4<f32>,
 };
 
 @fragment
-fn main(inputData: InputData) -> @location(0) vec4<f32> {
+fn main(inputData: InputData) -> FragmentOutput {
+  var output:FragmentOutput;
   // 텍스처 색상 샘플링
   var finalColor: vec4<f32> = vec4<f32>(0.0);
   #redgpu_if diffuseTexture
@@ -43,6 +46,7 @@ fn main(inputData: InputData) -> @location(0) vec4<f32> {
   if (systemUniforms.isView3D == 1 && finalColor.a == 0.0) {
       discard;
   }
-
-  return finalColor;
+  output.color = finalColor;
+  output.gBufferMotionVector = vec4<f32>( inputData.motionVector, 1.0 );
+  return output;
 };

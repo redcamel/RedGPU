@@ -50,11 +50,9 @@ const addSingleMesh = (redGPUContext, scene) => {
 
 const renderTestPane = async (redGPUContext, mesh) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
-	const {setSeparator, setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
-	setDebugViewButton(redGPUContext);
+	const {setSeparator, setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugButtons(redGPUContext);
 	const pane = new Pane();
-
-	setSeparator(pane);
 
 	const samplerOptions = {
 		enableAnisotropy: '',
@@ -67,8 +65,6 @@ const renderTestPane = async (redGPUContext, mesh) => {
 		addressModeW: mesh.material.diffuseTextureSampler.addressModeW,
 		maxAnisotropy: mesh.material.diffuseTextureSampler.maxAnisotropy
 	};
-
-	let anisotropyStatusBinding = null;
 
 	const updateAnisotropyState = () => {
 		const valid = mesh.material.diffuseTextureSampler.isAnisotropyValid;
@@ -158,7 +154,7 @@ const renderTestPane = async (redGPUContext, mesh) => {
 		mesh.material.diffuseTextureSampler.maxAnisotropy = Math.floor(evt.value);
 	});
 
-	anisotropyStatusBinding = samplerFolder.addBinding(
+	samplerFolder.addBinding(
 		samplerOptions,
 		'enableAnisotropy',
 		{view: 'text', disabled: true}

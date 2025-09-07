@@ -21,8 +21,8 @@ class Sampler extends ResourceBase {
 	#magFilter: GPUFilterMode = GPU_FILTER_MODE.LINEAR
 	#minFilter: GPUFilterMode = GPU_FILTER_MODE.LINEAR
 	#mipmapFilter: GPUMipmapFilterMode = GPU_MIPMAP_FILTER_MODE.LINEAR
-	#addressModeU?: GPUAddressMode = GPU_ADDRESS_MODE.REPEAT
-	#addressModeV?: GPUAddressMode = GPU_ADDRESS_MODE.REPEAT;
+	#addressModeU?: GPUAddressMode = GPU_ADDRESS_MODE.CLAMP_TO_EDGE
+	#addressModeV?: GPUAddressMode = GPU_ADDRESS_MODE.CLAMP_TO_EDGE;
 	#addressModeW?: GPUAddressMode = GPU_ADDRESS_MODE.REPEAT;
 	#lodMinClamp?: number;// TODO
 	#lodMaxClamp?: number;// TODO

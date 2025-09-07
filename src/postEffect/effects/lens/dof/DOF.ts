@@ -1,6 +1,7 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import View3D from "../../../../display/view/View3D";
 import AMultiPassPostEffect from "../../../core/AMultiPassPostEffect";
+import {ASinglePassPostEffectResult} from "../../../core/ASinglePassPostEffect";
 import DOFCoC from "./DOFCoC/DOFCoC";
 import DOFUnified from "./DOFUnified";
 
@@ -216,14 +217,14 @@ class DOF extends AMultiPassPostEffect {
 		this.farStrength = 1.2;
 	}
 
-	render(view: View3D, width: number, height: number, sourceTextureView: GPUTextureView) {
+	render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult) {
 		// 1단계: CoC (Circle of Confusion) 계산
 		const cocResult = this.#effect_coc.render(
-			view, width, height, sourceTextureView
+			view, width, height, sourceTextureInfo
 		);
 		// 2단계: 통합된 DOF 블러 및 컴포지팅
 		return this.#effect_unified.render(
-			view, width, height, sourceTextureView, cocResult
+			view, width, height, sourceTextureInfo, cocResult
 		);
 	}
 }

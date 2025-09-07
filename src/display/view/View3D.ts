@@ -7,7 +7,9 @@ import PassClusterLightBound from "../../light/clusterLight/PassClusterLightBoun
 import PassClustersLight from "../../light/clusterLight/PassClustersLight";
 import PassClustersLightHelper from "../../light/clusterLight/PassClustersLightHelper";
 import PickingManager from "../../picking/PickingManager";
+import FXAA from "../../postEffect/FXAA";
 import PostEffectManager from "../../postEffect/PostEffectManager";
+import TAA from "../../postEffect/TAA/TAA";
 import RenderViewStateData from "../../renderer/RenderViewStateData";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import ResourceManager from "../../resources/resourceManager/ResourceManager";
@@ -57,6 +59,7 @@ class View3D extends ViewTransform {
 	#prevInfoList = []
 	#shadowDepthSampler: GPUSampler
 	#basicSampler: GPUSampler
+	#basicPackedSampler: GPUSampler
 	//
 	#clusterLightsBuffer: GPUBuffer
 	#clusterLightsBufferData: Float32Array
@@ -66,7 +69,22 @@ class View3D extends ViewTransform {
 	#prevHeight: number = undefined
 	#prevIBL_iblTexture: IBLCubeTexture
 	#prevIBL_irradianceTexture: IBLCubeTexture
+	#taa:TAA
+	#fxaa:FXAA
+	get fxaa(): FXAA {
+		if (!this.#fxaa) {
+			this.#fxaa = new FXAA(this.redGPUContext);
+		}
 
+		return this.#fxaa;
+	}
+	get taa(): TAA {
+		if (!this.#taa) {
+			this.#taa = new TAA(this.redGPUContext);
+		}
+
+		return this.#taa;
+	}
 	//
 	/**
 	 * Creates a new instance of the Constructor class.
@@ -341,7 +359,7 @@ class View3D extends ViewTransform {
 				},
 				{
 					binding: 9,
-					resource: this.#basicSampler
+					resource: this.#basicPackedSampler
 				},
 				{
 					binding: 10,
@@ -413,6 +431,10 @@ class View3D extends ViewTransform {
 			compare: GPU_COMPARE_FUNCTION.LESS_EQUAL,
 		}).gpuSampler
 		this.#basicSampler = new Sampler(this.redGPUContext).gpuSampler
+		this.#basicPackedSampler = new Sampler(this.redGPUContext,{
+			addressModeU: GPU_ADDRESS_MODE.REPEAT,
+			addressModeV: GPU_ADDRESS_MODE.REPEAT,
+		}).gpuSampler
 	}
 
 	#updateClusters(calcClusterLight: boolean = false) {

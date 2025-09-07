@@ -20,7 +20,6 @@ class PostEffectManager {
 	#COMPUTE_WORKGROUP_SIZE_X = 16
 	#COMPUTE_WORKGROUP_SIZE_Y = 4
 	#COMPUTE_WORKGROUP_SIZE_Z = 1
-	#fxaa: FXAA
 	#textureComputeShaderModule: GPUShaderModule
 	#textureComputeBindGroup: GPUBindGroup
 	#textureComputeBindGroupLayout: GPUBindGroupLayout
@@ -29,6 +28,7 @@ class PostEffectManager {
 	#postEffectSystemUniformBuffer: UniformBuffer;
 	#postEffectSystemUniformBufferStructInfo;
 	#videoMemorySize: number = 0
+
 
 	constructor(view: View3D) {
 		this.#view = view;
@@ -80,16 +80,19 @@ class PostEffectManager {
 	}
 
 	render() {
-		const {viewRenderTextureManager, redGPUContext} = this.#view;
+		const {viewRenderTextureManager, redGPUContext, taa, fxaa} = this.#view;
 		const {antialiasingManager} = redGPUContext
-		const {useMSAA, useFXAA} = antialiasingManager;
-		const {colorTextureView, colorResolveTextureView, colorTexture} = viewRenderTextureManager;
-		const {width, height} = colorTexture;
+		const {useMSAA, useFXAA, useTAA} = antialiasingManager;
+		const {gBufferColorTextureView, gBufferColorResolveTextureView, gBufferColorTexture} = viewRenderTextureManager;
+		const {width, height} = gBufferColorTexture;
 		this.#updateSystemUniforms()
 		// 초기 텍스처 설정 (MSAA 여부에 따라 소스 결정)
-		const initialSourceView = useMSAA ? colorResolveTextureView : colorTextureView;
+		const initialSourceView = useMSAA ? gBufferColorResolveTextureView : gBufferColorTextureView;
 		this.#sourceTextureView = this.#renderToStorageTexture(this.#view, initialSourceView);
-		let currentTextureView = this.#sourceTextureView;
+		let currentTextureView = {
+			texture: this.#storageTexture,
+			textureView: this.#sourceTextureView,
+		};
 		this.#postEffects.forEach(effect => {
 			currentTextureView = effect.render(
 				this.#view,
@@ -98,13 +101,16 @@ class PostEffectManager {
 				currentTextureView,
 			);
 		});
-		// FXAA 적용 (필요한 경우)
 		if (useFXAA) {
-			if (!this.#fxaa) {
-				this.#fxaa = new FXAA(redGPUContext);
-			}
-			this.#fxaa.subpix = antialiasingManager.fxaa_subpix
-			currentTextureView = this.#fxaa.render(
+			currentTextureView = fxaa.render(
+				this.#view,
+				width,
+				height,
+				currentTextureView
+			);
+		}
+		if (useTAA) {
+			currentTextureView = taa.render(
 				this.#view,
 				width,
 				height,
@@ -144,6 +150,7 @@ class PostEffectManager {
 		// 카메라 시스템 유니폼 업데이트
 		[
 			{key: 'cameraMatrix', value: cameraMatrix},
+			{key: 'inverseCameraMatrix', value: mat4.invert(temp2, cameraMatrix)},
 			{key: 'cameraPosition', value: cameraPosition},
 			{key: 'nearClipping', value: [camera2DYn ? 0 : rawCamera.nearClipping]},
 			{key: 'farClipping', value: [camera2DYn ? 0 : rawCamera.farClipping]},
@@ -156,6 +163,7 @@ class PostEffectManager {
 				new structInfo.members.camera.members[key].View(value)
 			);
 		})
+
 		// console.log('structInfo',view.scene.directionalLights)
 	}
 
@@ -173,6 +181,7 @@ class PostEffectManager {
 		const postEffectSystemUniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength)
 		this.#postEffectSystemUniformBufferStructInfo = UNIFORM_STRUCT;
 		this.#postEffectSystemUniformBuffer = new UniformBuffer(redGPUContext, postEffectSystemUniformData, `${this.#view.name}_POST_EFFECT_SYSTEM_UNIFORM_BUFFER`);
+
 	}
 
 	#calcVideoMemory() {
@@ -186,10 +195,10 @@ class PostEffectManager {
 
 	#renderToStorageTexture(view: View3D, sourceTextureView: GPUTextureView) {
 		const {redGPUContext, viewRenderTextureManager} = view;
-		const {colorTexture} = viewRenderTextureManager;
+		const {gBufferColorTexture} = viewRenderTextureManager;
 		const {gpuDevice, antialiasingManager, resourceManager} = redGPUContext;
 		const {useMSAA, changedMSAA} = antialiasingManager;
-		const {width, height} = colorTexture;
+		const {width, height} = gBufferColorTexture;
 		const dimensionsChanged = width !== this.#previousDimensions?.width || height !== this.#previousDimensions?.height;
 		// 크기가 변경되면 텍스처 재생성
 		if (dimensionsChanged) {
@@ -201,6 +210,7 @@ class PostEffectManager {
 			this.#storageTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#storageTexture);
 		}
 		// 크기 변경 또는 MSAA 변경 시 BindGroup 재생성
+		//TODO 이전프레임이 필요할떄만 사용하도록 변경해야함
 		if (dimensionsChanged || changedMSAA) {
 			this.#textureComputeBindGroup = this.#createTextureBindGroup(
 				redGPUContext,
@@ -221,9 +231,11 @@ class PostEffectManager {
 
 	#getTextureComputeShader() {
 		return `
+	
       @group(0) @binding(0) var sourceTextureSampler: sampler;
       @group(0) @binding(1) var sourceTexture : texture_2d<f32>;
       @group(0) @binding(2) var outputTexture : texture_storage_2d<rgba8unorm, write>;
+ 
       @compute @workgroup_size(${this.#COMPUTE_WORKGROUP_SIZE_X},${this.#COMPUTE_WORKGROUP_SIZE_Y},${this.#COMPUTE_WORKGROUP_SIZE_Z})
       fn main (
         @builtin(global_invocation_id) global_id : vec3<u32>,
@@ -239,6 +251,7 @@ class PostEffectManager {
             uv,
             0
           );
+          
           textureStore(outputTexture, index, color );
       };
     `;
@@ -258,7 +271,7 @@ class PostEffectManager {
 		return this.#view.redGPUContext.resourceManager.createManagedTexture({
 			size: {width: width, height: height,},
 			format: 'rgba8unorm',
-			usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING,
+			usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_SRC,
 			label: `${this.#view.name}_POST_EFFECT_STORAGE_TEXTURE_${width}x${height}`,
 		});
 	}

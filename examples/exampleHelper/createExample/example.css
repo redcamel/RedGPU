@@ -8,11 +8,13 @@ html, body {
     background: url(../../assets/documentBody.png);
 }
 .tp-dfwv{
-    bottom: 8px;
+    top : 52px !important;
+    bottom: 62px;
     z-index: 1;
     overflow-y: auto;
-    max-height: calc(100vw - 20px);
+    /*max-height: calc(100vw - 20px);*/
     pointer-events: none;
+    transition: right 0.26s;
 }
 .tp-dfwv *{
     pointer-events: auto;
@@ -35,19 +37,19 @@ html, body {
     bottom: 0;
     left: 0;
     right: 0;
-    height: 70px;
+    height: 50px;
     background: rgb(32, 32, 32);
-    padding: 0 16px;
+    padding: 0 10px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     line-height: 1;
-    font-size: 14px;
+    font-size: 12px;
     color: rgb(177, 152, 152);
 
     a {
         color: rgb(242, 169, 113);
-        font-size: 14px;
+        font-size: 12px;
     }
 }
 
@@ -60,6 +62,20 @@ html, body {
     img {
         line-height: 1;
     }
+}
+
+.experimental {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6em;
+    color: #fff;
+    padding: 4px 8px;
+    line-height: 1;
+    width: fit-content;
+    background: #c74606;
+    border-radius: 4px;
+
 }
 
 /* width */
@@ -91,34 +107,34 @@ html, body {
     line-height: 1;
     display: flex;
     flex-direction: column;
-    background: rgba(0, 0, 0, 0.75);
+    background: rgb(32, 32, 32);
     word-break: keep-all;
     color: #fff;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.01);
 
 }
 
 .navigation-bar {
     display: flex;
     width: 100%;
-    justify-content: space-between;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    /*justify-content: space-between;*/
+    gap:1px;
 }
 
 .nav-button {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 8px 16px;
-    min-height: 56px;
-    background-color: #202020;
+    padding: 0 16px;
+    min-height: 42px;
+    background-color: #121111;
     color: white;
     text-decoration: none;
-    font-size: 14px;
+    font-size: 12px;
     transition: background-color 0.2s;
 }
-
 .nav-button:hover {
-    background-color: #333;
+    background-color: #191919;
 }
 
 .nav-button span {
@@ -131,13 +147,40 @@ html, body {
 
 @media screen and (max-width: 768px) {
     .navigation-bar {
-        gap: 8px;
+        /*gap: 8px;*/
     }
 
     .nav-button {
-        font-size: 12px;
-        padding: 6px 12px;
+        padding: 0 12px;
     }
+}
+
+.example-setting-button {
+    cursor: pointer;
+    aspect-ratio: 1;
+    padding: 0;
+    line-height: 1;
+    img{
+        line-height: 1;
+        transition: opacity 0.2s;
+    }
+}
+.antialiasing-button {
+    border: 0;
+    cursor: pointer;
+    padding: 0 28px 0 16px;
+    outline: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+
+    /* 기본 화살표 */
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 8px center;
+    background-repeat: no-repeat;
+    background-size: 16px 16px;
+    max-width: 90px;
+    width: fit-content;
 }
 
 .item-title {
@@ -146,30 +189,47 @@ html, body {
     left: 50%;
     transform: translate(-50%, -50%);
     line-height: 1;
-    font-size: 1.4em;
+    font-size: 1.1em;
+    /*color: rgb(227 216 210);*/
     color: rgb(221, 132, 80);
     font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
+@media screen and (max-width: 480px) {
+    .item-title {
+        top: 56px;
+        left: 12px;
+        right: 0;
+        transform: none;
+        justify-content: flex-start;
+        text-align: left;
+
+    }
+}
+
 
 .item-description {
     position: absolute;
-    top: 96px;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    top: 66px;
+    left: 0;
+    transform: translate(0%, 0%);
     line-height: 1.4;
     font-size: 0.9em;
     color: #a4a7cc;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    text-align: left;
+    flex-direction: column;
+    justify-content: flex-start;
     font-weight: 500;
-    text-align: center;
-    max-width: 1024px;
+    padding: 0 16px;
+    max-width: calc(100% - 260px);
 }
 
 @media screen and (max-width: 480px) {
     .item-description {
-        top: 72px;
+        top: 76px;
         left: 0;
         right: 0;
         padding: 0 12px;
@@ -177,34 +237,7 @@ html, body {
         font-size: 0.8em;
         justify-content: flex-start;
         text-align: left;
+        max-width: 100%;
 
     }
-}
-
-.labelNormal {
-    position: absolute;
-    bottom: 0;
-    left: 25%;
-    transform: translate(-50%, 0);
-    color: #fff;
-    background: #5b52aa;
-    display: flex;
-    align-content: center;
-    justify-content: center;
-    padding: 12px;
-    font-size: 12px;
-}
-
-.labelEffect {
-    position: absolute;
-    bottom: 0;
-    left: 75%;
-    transform: translate(-50%, 0);
-    color: #fff;
-    background: #5b52aa;
-    display: flex;
-    align-content: center;
-    justify-content: center;
-    padding: 12px;
-    font-size: 12px;
 }

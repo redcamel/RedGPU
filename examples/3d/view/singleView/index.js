@@ -43,7 +43,6 @@ RedGPU.init(
 	},
 	(failReason) => {
 		console.error('초기화 실패:', failReason);
-
 		const errorMessage = document.createElement('div');
 		errorMessage.innerHTML = failReason;
 		document.body.appendChild(errorMessage);
@@ -55,9 +54,9 @@ const renderTestPane = async (redGPUContext) => {
 	const {
 		setRedGPUTest_pane,
 		setViewListTest,
-		setDebugViewButton
+		setDebugButtons
 	} = await import("../../../exampleHelper/createExample/panes/index.js");
-	setDebugViewButton(redGPUContext)
+	setDebugButtons(redGPUContext)
 	const pane = new Pane();
 	setRedGPUTest_pane(pane, redGPUContext, false);
 	setViewListTest(pane, redGPUContext.viewList, true);

@@ -1,6 +1,6 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
-import ASinglePassPostEffect from "./ASinglePassPostEffect";
+import ASinglePassPostEffect, {ASinglePassPostEffectResult} from "./ASinglePassPostEffect";
 
 class AMultiPassPostEffect extends ASinglePassPostEffect {
 	#passList: ASinglePassPostEffect[] = []
@@ -26,15 +26,15 @@ class AMultiPassPostEffect extends ASinglePassPostEffect {
 		this.#passList.forEach(v => v.clear())
 	}
 
-	render(view: View3D, width: number, height: number, sourceTextureView: GPUTextureView) {
-		let targetOutputView: GPUTextureView
+	render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult):ASinglePassPostEffectResult {
+		let targetOutputInfo: ASinglePassPostEffectResult
 		this.#passList.forEach((effect: ASinglePassPostEffect, index) => {
-			if (index) sourceTextureView = targetOutputView
-			targetOutputView = effect.render(
-				view, width, height, sourceTextureView
+			if (index) sourceTextureInfo = targetOutputInfo
+			targetOutputInfo = effect.render(
+				view, width, height, sourceTextureInfo
 			)
 		})
-		return targetOutputView
+		return targetOutputInfo
 	}
 
 	#calcVideoMemory() {

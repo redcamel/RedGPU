@@ -28,7 +28,7 @@ RedGPU.init(
 			checkAABBIntersection(mesh1, mesh2, intersectionLabel);
 		};
 		renderer.start(redGPUContext, render);
-		renderTestPane(redGPUContext);
+		renderTestPane(redGPUContext,view);
 
 	},
 	(failReason) => {
@@ -36,9 +36,10 @@ RedGPU.init(
 		document.body.innerHTML = `<div>오류: ${failReason}</div>`;
 	}
 );
-const renderTestPane = async (redGPUContext) => {
-	const {setDebugViewButton} = await import("../../../../exampleHelper/createExample/panes/index.js");
-	setDebugViewButton(redGPUContext);
+const renderTestPane = async (redGPUContext,view) => {
+	const {setDebugButtons} = await import("../../../../exampleHelper/createExample/panes/index.js");
+	setDebugButtons(redGPUContext);
+
 };
 
 function createIntersectionTest(redGPUContext, scene) {

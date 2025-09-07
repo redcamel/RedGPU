@@ -55,8 +55,8 @@ const createSampleMesh = (redGPUContext, scene) => {
 const renderTestPaneWithLightControl = async (redGPUContext, mesh, light) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const pane = new Pane();
-	const {setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
-	setDebugViewButton(redGPUContext);
+	const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugButtons(redGPUContext);
 	const lightConfig = {
 		directionX: light.direction[0],
 		directionY: light.direction[1],

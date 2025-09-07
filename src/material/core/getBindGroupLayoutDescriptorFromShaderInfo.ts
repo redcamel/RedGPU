@@ -52,7 +52,14 @@ const getBindGroupLayoutDescriptorFromShaderInfo = (
 						multisampled: useMSAA
 					} : textureType === "texture_cube" ? {
 						viewDimension: 'cube'
-					} : {}
+					} : textureType === "texture_2d_array" ? {
+						viewDimension: '2d-array',
+						sampleType: 'float',
+						multisampled: false
+					} : {
+
+					}
+
 				}
 			)
 		}

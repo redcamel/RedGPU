@@ -65,9 +65,9 @@ class RenderViewStateData {
 		}
 		const view = this.#view
 		const {useFrustumCulling, frustumPlanes, scene, postEffectManager, pickingManager, viewRenderTextureManager} = view;
-		const {colorTexture, depthTexture, colorResolveTexture, renderPath1ResultTexture,} = view.viewRenderTextureManager;
+		const {gBufferColorTexture, depthTexture, gBufferColorResolveTexture, renderPath1ResultTexture,} = view.viewRenderTextureManager;
 		const {shadowManager} = scene;
-		if (!colorTexture || !depthTexture) {
+		if (!gBufferColorTexture || !depthTexture) {
 			throw new Error('Invalid view properties');
 		}
 		this.useDistanceCulling = view.useDistanceCulling;

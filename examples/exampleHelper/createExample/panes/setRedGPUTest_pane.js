@@ -53,8 +53,8 @@ const setRedGPUTest_pane = (pane, redGPUContext, openYn = false) => {
 		}
 
 	});
-
-	folder.addBinding(redGPUContext, 'useDebugPanel')
+	//
+	// folder.addBinding(redGPUContext, 'useDebugPanel')
 	folder.addBinding(redGPUContext, 'renderScale', {min: 0.01, max: 1, step: 0.01})
 	folder.addBinding(TEST_DATA, 'backgroundColor', {
 		picker: 'inline',
@@ -69,7 +69,6 @@ const setRedGPUTest_pane = (pane, redGPUContext, openYn = false) => {
 		redGPUContext.backgroundColor.g = Math.floor(color.g)
 		redGPUContext.backgroundColor.b = Math.floor(color.b)
 		redGPUContext.backgroundColor.a = color.a
-		// console.log(redGPUContext.backgroundColor)
 	})
 	folder.addBinding(redGPUContext, 'alphaMode', {
 		options: {

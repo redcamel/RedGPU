@@ -12,7 +12,7 @@ function defineProperty_uintRange(propertyKey: string, initValue: number = 0, mi
 	return defineUintRange(propertyKey, initValue, false, min, max)
 }
 
-function defineProperty_PositiveNumberRange(propertyKey: string, initValue: number = 0, min?: number, max?: number) {
+function defineProperty_PositiveNumberRange(propertyKey: string, initValue: number = 1, min?: number, max?: number) {
 	return definePositiveNumberRange(propertyKey, initValue, false, min, max)
 }
 

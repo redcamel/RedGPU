@@ -67,8 +67,8 @@ const createSampleSprite3D = async (redGPUContext, scene) => {
 const renderTestPane = async (redGPUContext, scene) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const pane = new Pane();
-	const {setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
-	setDebugViewButton(redGPUContext);
+	const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugButtons(redGPUContext);
 	const folder = pane.addFolder({title: 'Sprite3D', expanded: true});
 	const controls = {
 		useBillboardPerspective: scene.children[0].useBillboardPerspective,

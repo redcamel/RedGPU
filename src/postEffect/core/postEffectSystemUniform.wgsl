@@ -1,5 +1,6 @@
 struct Camera {
     cameraMatrix:mat4x4<f32>,
+    inverseCameraMatrix:mat4x4<f32>,
     cameraPosition:vec3<f32>,
     nearClipping:f32,
     farClipping:f32,

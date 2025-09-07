@@ -64,11 +64,11 @@ RedGPU.init(
 const renderTestPane = async (redGPUContext) => {
 	const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
 	const {
-		setDebugViewButton,
+		setDebugButtons,
 		setRedGPUTest_pane,
 		setViewListTest
 	} = await import("../../../exampleHelper/createExample/panes/index.js");
-	setDebugViewButton(redGPUContext);
+	setDebugButtons(redGPUContext);
 	const pane = new Pane();
 	setRedGPUTest_pane(pane, redGPUContext, false);
 	setViewListTest(pane, redGPUContext.viewList, true, true);

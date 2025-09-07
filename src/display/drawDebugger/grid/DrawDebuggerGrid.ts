@@ -90,18 +90,29 @@ class DrawDebuggerGrid {
 			fragment: {
 				module: shaderModule,
 				entryPoint: 'fragmentMain',
-				targets: [{
-					format: navigator.gpu.getPreferredCanvasFormat(),
-					blend: {
-						color: this.#blendColorState.state,
-						alpha: this.#blendAlphaState.state
+				targets: [
+					{
+						format: navigator.gpu.getPreferredCanvasFormat(),
+						blend: {
+							color: this.#blendColorState.state,
+							alpha: this.#blendAlphaState.state
+						},
 					},
-				}],
+					{
+						format: navigator.gpu.getPreferredCanvasFormat(),
+						blend: undefined,
+					},
+					{
+						format: 'rgba16float',
+						blend: undefined,
+					},
+				],
+
 			},
 			depthStencil: {
 				format: 'depth32float',
-				depthWriteEnabled: false,
-				depthCompare: GPU_COMPARE_FUNCTION.LESS_EQUAL,
+				depthWriteEnabled: true,
+				depthCompare: GPU_COMPARE_FUNCTION.LESS,
 			}
 		}
 		this.#pipeline = gpuDevice.createRenderPipeline(basePipelineDescriptor)
