@@ -50,8 +50,7 @@ RedGPU.init(canvas, (redGPUContext) => {
 	const gltfModels = [
 		{ url: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb', position: {} },
 		{ url: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MetalRoughSpheres/glTF-Binary/MetalRoughSpheres.glb', position: { z: -2 } },
-		// { url: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Corset/glTF-Binary/Corset.glb', position: {x: 2, y: -1} ,scale:50},
-		{ url: '../../../assets/gltf/busterDrone/busterDrone.gltf', position: { x: 3, y: 0.5 } }
+
 	];
 
 	gltfModels.forEach(({ url, position,scale }) => {
@@ -59,7 +58,7 @@ RedGPU.init(canvas, (redGPUContext) => {
 			const mesh = scene.addChild(result.resultMesh);
 			Object.assign(mesh, position);
 		mesh.setScale(scale || 1)
-			mesh.setEnableDebuggerRecursively( true)
+
 		});
 	});
 
@@ -87,7 +86,8 @@ RedGPU.init(canvas, (redGPUContext) => {
 async function createSSRControls(redGPUContext, targetView, ssrEffect) {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const pane = new Pane({ title: 'SSR Controls' });
-
+	const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugButtons(redGPUContext);
 	const settings = {
 		enableSSR: true,
 		maxSteps: ssrEffect.maxSteps,

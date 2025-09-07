@@ -1043,12 +1043,17 @@ const ExampleList = [
 					},
 					{
 						name: 'Screen Space Reflection',
-						path: '3d/postEffect/ssr',
-						thumb: '3d/postEffect/ssr/thumb.png',
-						description: {
-							ko: ``,
-							en: ``
-						}
+						experimental: true,
+						list : [{
+							name: 'Screen Space Reflection',
+							path: '3d/postEffect/ssr',
+							thumb: '3d/postEffect/ssr/thumb.png',
+							description: {
+								ko: ``,
+								en: ``
+							}
+						},
+							]
 					},
 				],
 			},
@@ -1662,6 +1667,15 @@ const ExampleList = [
 									en: ``
 								},
 							},
+							{
+								name: 'SheenWoodLeatherSofa',
+								path: 'gltf/gltfExtensions/sheen/sheenWoodLeatherSofa',
+								thumb: 'gltf/gltfExtensions/sheen/sheenWoodLeatherSofa/thumb.png',
+								description: {
+									ko: ``,
+									en: ``
+								},
+							},
 
 						]
 					},
@@ -1728,6 +1742,29 @@ const ExampleList = [
 								name: 'TextureTransformMultiTest',
 								path: 'gltf/gltfExtensions/textureTransform/textureTransformMultiTest',
 								thumb: 'gltf/gltfExtensions/textureTransform/textureTransformMultiTest/thumb.png',
+								description: {
+									ko: ``,
+									en: ``
+								},
+							},
+						]
+					},
+					{
+						name: 'KHR_materials_diffuseTransmission',
+						list: [
+							{
+								name: 'DiffuseTransmissionTest',
+								path: 'gltf/gltfExtensions/diffuseTransmission/diffuseTransmissionTest',
+								thumb: 'gltf/gltfExtensions/diffuseTransmission/diffuseTransmissionTest/thumb.png',
+								description: {
+									ko: ``,
+									en: ``
+								},
+							},
+							{
+								name: 'DiffuseTransmissionTeacup',
+								path: 'gltf/gltfExtensions/diffuseTransmission/diffuseTransmissionTeacup',
+								thumb: 'gltf/gltfExtensions/diffuseTransmission/diffuseTransmissionTeacup/thumb.png',
 								description: {
 									ko: ``,
 									en: ``
@@ -2022,7 +2059,6 @@ const ExampleList = [
 			},
 			{
 				name: '2D Object BlendMode',
-				experimental: true,
 				list: [
 					{
 						name: 'BlendMode',
