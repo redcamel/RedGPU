@@ -41,6 +41,12 @@ const init = async (
 	}
 
 	const {gpu} = navigator
+	if (!gpu) {
+		const msg = 'WebGPU is not supported in this browser. Please use a modern browser with WebGPU enabled.';
+		onFailInitialized?.(msg);
+		return;
+	}
+
 	const errorHandler = (e: Error, defaultMsg: string) => {
 		const msg = generateErrorMessage(e, defaultMsg);
 		console.error('\n============\n', msg, '\n============\n');
