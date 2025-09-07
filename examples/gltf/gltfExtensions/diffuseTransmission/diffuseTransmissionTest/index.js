@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../../dist";
+import * as RedGPU from "../../../../../dist/index.js";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -15,7 +15,7 @@ RedGPU.init(
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		redGPUContext.addView(view);
 
-		loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DiffuseTransmissionTest/glTF-Binary/diffuseTransmissionTeacup.glb');
+		loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DiffuseTransmissionTest/glTF-Binary/DiffuseTransmissionTest.glb');
 
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		const render = () => {};
@@ -43,7 +43,7 @@ function loadGLTF(view, url) {
 
 const renderTestPane = async (redGPUContext, targetView) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
-	const {createIblHelper, setDebugButtons} = await import('../../../../exampleHelper/createExample/panes');
+	const {createIblHelper, setDebugButtons} = await import('../../../../exampleHelper/createExample/panes/index.js');
 	setDebugButtons(redGPUContext);
 	const pane = new Pane();
 	createIblHelper(pane, targetView, RedGPU);
