@@ -173,7 +173,12 @@ class FinalRender {
 					entries: [
 						{binding: 0, resource: this.#sampler.gpuSampler},
 						{binding: 1, resource: gpuTextureView},
-						{binding: 2, resource: this.#fragmentBuffer}
+						{binding: 2, resource: {
+								buffer: this.#fragmentBuffer,
+								offset: 0,
+								size: this.#fragmentBuffer.size
+							}}
+
 					]
 				}
 				//TODO gpuTextureView를 캐싱해서 안변했으면 그대로 쓰는것도 가능해보이는듯
