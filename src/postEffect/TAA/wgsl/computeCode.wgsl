@@ -13,7 +13,7 @@
     let motionData = textureLoad(motionVectorTexture, pixelCoord, 0);
     let motionVector = motionData.xy;
 
-    // ---------- Early Exit Conditions ----------
+
     let jitterDisabled = motionData.z > 0.5;
     if (jitterDisabled) {
         textureStore(outputTexture, pixelCoord, vec4<f32>(currentColor, currentAlpha));
