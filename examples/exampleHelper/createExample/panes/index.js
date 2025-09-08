@@ -35,31 +35,35 @@ const setDebugButtons = (redGPUContext) => {
 	container.appendChild(rightContainer);
 
 	requestAnimationFrame(() => {
-		let openYn = redGPUContext.useDebugPanel
-		const debugViewButton = document.createElement('div');
-		debugViewButton.className = 'nav-button example-setting-button';
-		debugViewButton.innerText = 'Debug Panel';
-		debugViewButton.innerHTML = '<img src="/RedGPU/examples/assets/icons/debug.svg" width="24"/>'
-		rightContainer.appendChild(debugViewButton);
-		const check = ()=>{
+        setAntialiasingSelect(redGPUContext,rightContainer)
+        setDebugButton(redGPUContext,rightContainer)
+        setAxis(redGPUContext,rightContainer)
+        setGrid(redGPUContext,rightContainer)
+        setSettingView(redGPUContext,rightContainer)
 
-			redGPUContext.useDebugPanel = openYn;
-			debugViewButton.children[0].style.opacity = openYn ? 1 : 0.25
-
-		}
-		if (debugViewButton && redGPUContext) {
-			debugViewButton.addEventListener('click', async () => {
-				openYn = !redGPUContext.useDebugPanel
-				check()
-			});
-			setAntialiasingSelect(redGPUContext)
-
-			setAxis(redGPUContext,rightContainer)
-			setGrid(redGPUContext,rightContainer)
-			setSettingView(redGPUContext,rightContainer)
-		}
-		check()
 	})
+}
+
+const setDebugButton = (redGPUContext,rightContainer) => {
+    let openYn = redGPUContext.useDebugPanel
+    const debugViewButton = document.createElement('div');
+    debugViewButton.className = 'nav-button example-setting-button';
+    debugViewButton.innerText = 'Debug Panel';
+    debugViewButton.innerHTML = '<img src="/RedGPU/examples/assets/icons/debug.svg" width="24"/>'
+    rightContainer.appendChild(debugViewButton);
+    const check = ()=>{
+
+        redGPUContext.useDebugPanel = openYn;
+        debugViewButton.children[0].style.opacity = openYn ? 1 : 0.25
+
+    }
+    if (debugViewButton && redGPUContext) {
+        debugViewButton.addEventListener('click', async () => {
+            openYn = !redGPUContext.useDebugPanel
+            check()
+        });
+    }
+    check()
 }
 const setGrid = (redGPUContext,rightContainer) => {
 	if(redGPUContext.viewList.length>1) return;
@@ -115,7 +119,7 @@ const setSettingView = (redGPUContext,rightContainer) => {
 	}
 	check()
 }
-const setAntialiasingSelect = (redGPUContext) => {
+const setAntialiasingSelect = (redGPUContext,rightContainer) => {
 	const antialiasing = document.createElement('select');
 	antialiasing.className = 'nav-button antialiasing-button';
 	antialiasing.innerHTML = `
@@ -136,8 +140,7 @@ const setAntialiasingSelect = (redGPUContext) => {
 		}
 
 	})
-	const container = document.querySelector('.navigation-bar');
-	container.appendChild(antialiasing);
+    rightContainer.appendChild(antialiasing);
 }
 const hdrImages = [
 	{name: '2K - the sky is on fire', path: 'assets/hdr/2k/the_sky_is_on_fire_2k.hdr'},
