@@ -78,12 +78,12 @@ fn fragmentMain(in: VertexOut) -> FragmentOutput {
     let grid = PristineGrid(in.uv, gridArgs.lineWidth * lineWidthWeight);
 
     // 축 라인이 아닌 경우에만 그리드 임계값 검사
-    if (!isAxisLine) {
-        let gridThreshold = 0.1;
-        if (grid < gridThreshold) {
-            discard;
-        }
-    }
+//    if (!isAxisLine) {
+//        let gridThreshold = 0.1;
+//        if (grid < gridThreshold) {
+//            discard;
+//        }
+//    }
 
     // 축 라인인 경우 grid 값을 1.0으로 오버라이드
     let finalGrid = select(grid, 1.0, isAxisLine);
@@ -92,9 +92,9 @@ fn fragmentMain(in: VertexOut) -> FragmentOutput {
     let finalColor = mix(gridArgs.baseColor, color, finalGrid * gridArgs.lineColor.a);
 
     // 투명도가 너무 낮아도 폐기 (축 라인이 아닌 경우만)
-    if (!isAxisLine && finalColor.a < 0.01) {
-        discard;
-    }
+//    if (!isAxisLine && finalColor.a < 0.01) {
+//        discard;
+//    }
 
     output.color = finalColor;
     output.gBufferMotionVector = vec4<f32>(0.0, 0.0, 1.0, 1.0);
