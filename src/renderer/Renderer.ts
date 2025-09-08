@@ -140,11 +140,11 @@ class Renderer {
 				this.#updateViewSystemUniforms(view, viewRenderPassEncoder, false, true)
 				debugViewRenderState.currentRenderPassEncoder = viewRenderPassEncoder
 				if (skybox) skybox.render(debugViewRenderState)
-				renderBasicLayer(view, viewRenderPassEncoder)
-				if (axis) axis.render(debugViewRenderState)
-				if (grid) grid.render(debugViewRenderState)
-				renderAlphaLayer(view, viewRenderPassEncoder)
-				viewRenderPassEncoder.end()
+                renderBasicLayer(view, viewRenderPassEncoder)
+                if (axis) axis.render(debugViewRenderState)
+                renderAlphaLayer(view, viewRenderPassEncoder)
+                if (grid) grid.render(debugViewRenderState)
+                viewRenderPassEncoder.end()
 			}
 			{
 				if (view.debugViewRenderState.render2PathLayer.length) {

@@ -111,8 +111,8 @@ class DrawDebuggerGrid {
 			},
 			depthStencil: {
 				format: 'depth32float',
-				depthWriteEnabled: true,
-				depthCompare: GPU_COMPARE_FUNCTION.LESS,
+				depthWriteEnabled: false,
+				depthCompare: GPU_COMPARE_FUNCTION.LESS_EQUAL,
 			}
 		}
 		this.#pipeline = gpuDevice.createRenderPipeline(basePipelineDescriptor)
