@@ -89,12 +89,13 @@ fn fragmentMain(in: VertexOut) -> FragmentOutput {
     let finalGrid = select(grid, 1.0, isAxisLine);
 
     // 최종 색상 계산
-    let finalColor = mix(gridArgs.baseColor, color, finalGrid * gridArgs.lineColor.a);
-
+    let alpha = finalGrid * gridArgs.lineColor.a;
+    var finalColor = mix(gridArgs.baseColor, color, alpha);
     // 투명도가 너무 낮아도 폐기 (축 라인이 아닌 경우만)
-//    if (!isAxisLine && finalColor.a < 0.01) {
-//        discard;
-//    }
+    if (!isAxisLine && finalColor.a == 0.0) {
+        // finalColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);
+        discard;
+    }
 
     output.color = finalColor;
     output.gBufferMotionVector = vec4<f32>(0.0, 0.0, 1.0, 1.0);
