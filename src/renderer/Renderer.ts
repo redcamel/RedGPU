@@ -140,11 +140,11 @@ class Renderer {
 				this.#updateViewSystemUniforms(view, viewRenderPassEncoder, false, true)
 				debugViewRenderState.currentRenderPassEncoder = viewRenderPassEncoder
 				if (skybox) skybox.render(debugViewRenderState)
-                renderBasicLayer(view, viewRenderPassEncoder)
-                if (axis) axis.render(debugViewRenderState)
-                renderAlphaLayer(view, viewRenderPassEncoder)
-                if (grid) grid.render(debugViewRenderState)
-                viewRenderPassEncoder.end()
+				renderBasicLayer(view, viewRenderPassEncoder)
+				if (axis) axis.render(debugViewRenderState)
+				if (grid) grid.render(debugViewRenderState)
+				renderAlphaLayer(view, viewRenderPassEncoder)
+				viewRenderPassEncoder.end()
 			}
 			{
 				if (view.debugViewRenderState.render2PathLayer.length) {
@@ -250,7 +250,6 @@ class Renderer {
 		} = viewRenderTextureManager
 		const {antialiasingManager} = redGPUContext
 		const {useMSAA} = antialiasingManager
-
 		const colorAttachment: GPURenderPassColorAttachment = {
 			view: gBufferColorTextureView,
 			clearValue: {r: 0, g: 0, b: 0, a: 0},
