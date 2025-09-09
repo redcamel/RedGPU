@@ -113,6 +113,7 @@ class DrawDebuggerGrid {
 				format: 'depth32float',
 				depthWriteEnabled: true,
 				depthCompare: GPU_COMPARE_FUNCTION.LESS_EQUAL,
+		
 
 			}
 		}
