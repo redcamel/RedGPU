@@ -25,6 +25,7 @@ struct Uniforms {
     //
     useSSR:u32,
     metallic:f32,
+    roughness:f32,
     //
 };
 
@@ -261,20 +262,16 @@ fn main(inputData:InputData) -> FragmentOutput {
     output.color = finalColor;
     #redgpu_if useSSR
     {
-        // 표준적인 shininess → roughness 변환
-        let roughness = sqrt(2.0 / (uniforms.shininess + 2.0));
-
-        // 직접 metallic 값 사용 (0.0 = 유전체, 1.0 = 금속)
         let metallic = uniforms.metallic;
+        let roughness = uniforms.roughness;
+        let smoothness = 1.0 - roughness;
+        let smoothnessCurved = smoothness * smoothness * (3.0 - 2.0 * smoothness);
 
-        // 표준 F0 값
-        let F0_dielectric = vec3<f32>(0.04);
-        let F0_metal = diffuseColor; // 금속의 경우 알베도가 F0
-        let F0 = mix(F0_dielectric, F0_metal, metallic);
+        let metallicWeight = metallic * metallic;
+        let baseReflection = 0.04 + 0.96 * metallicWeight;
 
-        // 간단한 반사 강도
-        let reflectionStrength = mix(F0.r, 1.0, metallic);
-        output.gBufferNormal = vec4<f32>(normalize(N) * 0.5 + 0.5, reflectionStrength);
+        let baseReflectionStrength = smoothnessCurved * baseReflection;
+        output.gBufferNormal = vec4<f32>(N * 0.5 + 0.5, baseReflectionStrength);
     }
     #redgpu_endIf
     output.gBufferMotionVector = vec4<f32>( inputData.motionVector, 1.0 );

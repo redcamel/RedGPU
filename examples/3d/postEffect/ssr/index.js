@@ -45,11 +45,23 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 	scene.addChild(metalSphere);
 
+	{
+		const sphereGeometry = new RedGPU.Primitive.Ground(redGPUContext,50,50);
+		const metalMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);
+		metalMaterial.color.setColorByHEX('#00ff00');
+		metalMaterial.useSSR = true;
+		metalMaterial.metallic = 0.5;
+		const metalSphere = new RedGPU.Display.Mesh(redGPUContext, sphereGeometry, metalMaterial);
+		metalSphere.y = -1;
+
+		scene.addChild(metalSphere);
+	}
 
 	// GLTF 모델 로딩
 	const gltfModels = [
 		{ url: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb', position: {} },
 		{ url: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MetalRoughSpheres/glTF-Binary/MetalRoughSpheres.glb', position: { z: -2 } },
+		{ url: '../../../assets/gltf/busterDrone/busterDrone.gltf', position: { x: 2,} },
 
 	];
 
@@ -96,6 +108,7 @@ async function createSSRControls(redGPUContext, targetView, ssrEffect) {
 		reflectionIntensity: ssrEffect.reflectionIntensity,
 		fadeDistance: ssrEffect.fadeDistance,
 		edgeFade: ssrEffect.edgeFade,
+
 	};
 
 	// SSR 토글
