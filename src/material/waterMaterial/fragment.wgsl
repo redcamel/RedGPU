@@ -3,7 +3,7 @@
 #redgpu_include calcDirectionalShadowVisibility;
 #redgpu_include normalFunctions;
 #redgpu_include drawPicking;
-
+#redgpu_include FragmentOutput;
 struct Uniforms {
     color: vec3<f32>,
     opacity: f32,
@@ -29,7 +29,8 @@ struct InputData {
 @group(2) @binding(2) var normalTexture: texture_2d<f32>;
 
 @fragment
-fn main(inputData: InputData) -> @location(0) vec4<f32> {
+fn main(inputData: InputData) -> FragmentOutput {
+    var output:FragmentOutput;
     // AmbientLight
     let u_ambientLight = systemUniforms.ambientLight;
     let u_ambientLightColor = u_ambientLight.color;
@@ -270,7 +271,8 @@ fn main(inputData: InputData) -> @location(0) vec4<f32> {
                 scatteringContribution +   // 산란 (직접광 강화)
                 subsurfaceComponent;       // 서브서페이스
 
-   return vec4<f32>(result, 1.0);
+   output.color = vec4<f32>(result, 1.0);
+   return output;
 
 }
 
