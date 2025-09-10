@@ -45,6 +45,21 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 	scene.addChild(metalSphere);
 
+	{
+		const sphereGeometry = new RedGPU.Primitive.Ground(redGPUContext,100,100);
+
+		// 금속 구체
+		const metalMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);
+		metalMaterial.color.setColorByHEX('#278127');
+		metalMaterial.useSSR = true;
+		metalMaterial.metallic = 0.5;
+		const metalSphere = new RedGPU.Display.Mesh(redGPUContext, sphereGeometry, metalMaterial);
+		metalSphere.y = -0.5
+		metalSphere.y = -1
+
+		scene.addChild(metalSphere);
+	}
+
 	// GLTF 모델 로딩
 	const gltfModels = [
 		{ url: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb', position: {} },
@@ -80,13 +95,13 @@ RedGPU.init(canvas, (redGPUContext) => {
 	// 컨트롤 패널 생성
 	createSSRControls(redGPUContext, view, ssrEffect);
 });
-
 // SSR 컨트롤 패널
 async function createSSRControls(redGPUContext, targetView, ssrEffect) {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const pane = new Pane({ title: 'SSR Controls' });
 	const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js");
 	setDebugButtons(redGPUContext);
+
 	const settings = {
 		enableSSR: true,
 		maxSteps: ssrEffect.maxSteps,
@@ -95,7 +110,6 @@ async function createSSRControls(redGPUContext, targetView, ssrEffect) {
 		reflectionIntensity: ssrEffect.reflectionIntensity,
 		fadeDistance: ssrEffect.fadeDistance,
 		edgeFade: ssrEffect.edgeFade,
-
 	};
 
 	// SSR 토글
@@ -107,14 +121,14 @@ async function createSSRControls(redGPUContext, targetView, ssrEffect) {
 		}
 	});
 
-	// SSR 파라미터 조절
+	// SSR 파라미터 조절 - 개선된 범위와 스텝값
 	const params = [
 		{ key: 'maxSteps', min: 16, max: 128, step: 1 },
-		{ key: 'maxDistance', min: 1, max: 50, step: 0.01 },
-		{ key: 'stepSize', min: 0.01, max: 0.1, step: 0.0001 },
-		{ key: 'reflectionIntensity', min: 0.1, max: 3.5, step: 0.01 },
+		{ key: 'maxDistance', min: 1, max: 50, step: 0.1 },
+		{ key: 'stepSize', min: 0.001, max: 0.1, step: 0.001 },
+		{ key: 'reflectionIntensity', min: 0.0, max: 3.0, step: 0.01 },
 		{ key: 'fadeDistance', min: 1, max: 25, step: 0.1 },
-		{ key: 'edgeFade', min: 0.05, max: 0.3, step: 0.005 }
+		{ key: 'edgeFade', min: 0.0, max: 0.5, step: 0.01 }
 	];
 
 	params.forEach(({ key, min, max, step }) => {
@@ -123,19 +137,39 @@ async function createSSRControls(redGPUContext, targetView, ssrEffect) {
 		});
 	});
 
-	// 프리셋 버튼들
-	const presets = {
-		'High Quality': { maxSteps: 96, stepSize: 0.05, reflectionIntensity: 1.0, fadeDistance: 15, edgeFade: 0.15 },
-		'Balanced': { maxSteps: 64, stepSize: 0.08, reflectionIntensity: 0.8, fadeDistance: 12, edgeFade: 0.12 },
-		'Performance': { maxSteps: 32, stepSize: 0.12, reflectionIntensity: 0.6, fadeDistance: 8, edgeFade: 0.1 }
-	};
+	// 내장된 품질 프리셋을 활용한 개선된 프리셋 버튼들
+	const presetFolder = pane.addFolder({ title: 'Quality Presets' });
 
-	const presetFolder = pane.addFolder({ title: 'Presets' });
-	Object.entries(presets).forEach(([name, preset]) => {
-		presetFolder.addButton({ title: name }).on('click', () => {
-			Object.assign(settings, preset);
-			Object.assign(ssrEffect, preset);
-			pane.refresh();
-		});
+	// SSR 클래스의 내장 품질 프리셋 사용
+	presetFolder.addButton({ title: 'High Quality' }).on('click', () => {
+		ssrEffect.applyQualityPreset('high');
+		updateSettingsFromEffect();
+		pane.refresh();
 	});
+
+	presetFolder.addButton({ title: 'Medium Quality' }).on('click', () => {
+		ssrEffect.applyQualityPreset('medium');
+		updateSettingsFromEffect();
+		pane.refresh();
+	});
+
+	presetFolder.addButton({ title: 'Low Quality' }).on('click', () => {
+		ssrEffect.applyQualityPreset('low');
+		updateSettingsFromEffect();
+		pane.refresh();
+	});
+
+
+
+	// 설정값을 SSR 이펙트에서 다시 읽어오는 헬퍼 함수
+	function updateSettingsFromEffect() {
+		settings.maxSteps = ssrEffect.maxSteps;
+		settings.maxDistance = ssrEffect.maxDistance;
+		settings.stepSize = ssrEffect.stepSize;
+		settings.reflectionIntensity = ssrEffect.reflectionIntensity;
+		settings.fadeDistance = ssrEffect.fadeDistance;
+		settings.edgeFade = ssrEffect.edgeFade;
+	}
+
+
 }
