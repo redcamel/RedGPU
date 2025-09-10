@@ -45,7 +45,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 	scene.addChild(metalSphere);
 
-
 	// GLTF 모델 로딩
 	const gltfModels = [
 		{ url: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb', position: {} },
@@ -96,6 +95,7 @@ async function createSSRControls(redGPUContext, targetView, ssrEffect) {
 		reflectionIntensity: ssrEffect.reflectionIntensity,
 		fadeDistance: ssrEffect.fadeDistance,
 		edgeFade: ssrEffect.edgeFade,
+
 	};
 
 	// SSR 토글

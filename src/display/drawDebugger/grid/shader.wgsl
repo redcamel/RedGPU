@@ -3,12 +3,13 @@
 
 struct VertexIn {
   @location(0) pos: vec4<f32>,
-  @location(1) uv: vec2<f32>,
+  @location(1) color: vec4<f32>,
 }
 
 struct VertexOut {
   @builtin(position) pos: vec4<f32>,
-  @location(0) uv: vec2<f32>,
+  @location(0) color: vec4<f32>,
+  @location(1) worldPos: vec3<f32>,
 }
 
 @vertex
@@ -16,86 +17,53 @@ fn vertexMain(in: VertexIn) -> VertexOut {
     var out: VertexOut;
     let u_noneJitterProjectionCameraMatrix = systemUniforms.noneJitterProjectionCameraMatrix;
     out.pos = u_noneJitterProjectionCameraMatrix * in.pos;
-    out.uv = in.uv;
+    out.color = in.color;
+    out.worldPos = in.pos.xyz;
     return out;
 }
 
 struct GridArgs {
   lineColor: vec4<f32>,
-  baseColor: vec4<f32>,
-  lineWidth: vec2<f32>,
-  size: f32,
-  distance: f32,
 }
 
 @group(1) @binding(0) var<uniform> gridArgs: GridArgs;
 
-fn PristineGrid(uv: vec2<f32>, lineWidth: vec2<f32>) -> f32 {
-    let uvDDXY = vec4<f32>(dpdx(uv), dpdy(uv));
-    let uvDeriv = vec2<f32>(length(uvDDXY.xz), length(uvDDXY.yw));
-    let invertLine: vec2<bool> = lineWidth > vec2f(0.5);
-    let targetWidth: vec2<f32> = select(lineWidth, 1.0 - lineWidth, invertLine);
-    let drawWidth: vec2<f32> = clamp(targetWidth, uvDeriv, vec2f(0.5));
-    let lineAA: vec2<f32> = uvDeriv * 1.5;
-    var gridUV: vec2<f32> = abs(fract(uv) * 2.0 - 1.0);
-    gridUV = select(1.0 - gridUV, gridUV, invertLine);
-    var grid2: vec2<f32> = smoothstep(drawWidth + lineAA, drawWidth - lineAA, gridUV);
-    grid2 *= saturate(targetWidth / drawWidth);
-    grid2 = mix(grid2, targetWidth, saturate(uvDeriv * 2.0 - 1.0));
-    grid2 = select(grid2, 1.0 - grid2, invertLine);
-    return mix(grid2.x, 1.0, grid2.y);
-}
 @fragment
 fn fragmentMain(in: VertexOut) -> FragmentOutput {
     var output: FragmentOutput;
-    var lineWidthWeight: f32 = 1.0;
-    var color: vec4<f32> = gridArgs.lineColor;
 
-    let DIVISION_SIZE: f32 = gridArgs.size;
-    let AXIS_SIZE: f32 = max(DIVISION_SIZE * gridArgs.lineWidth.x, DIVISION_SIZE / 20.0);
+    // 카메라 위치 (시스템 유니폼에서 가져오기)
+    let cameraPos = systemUniforms.camera.cameraPosition;
 
-    let HALF_DIVISION_SIZE: f32 = DIVISION_SIZE * 0.5;
-    let PER_SIZE: f32 = 1.0 / DIVISION_SIZE * AXIS_SIZE;
-    let MIN_RANGE = HALF_DIVISION_SIZE - PER_SIZE;
-    let MAX_RANGE = HALF_DIVISION_SIZE + PER_SIZE;
+    // 현재 픽셀까지의 거리 계산
+    let distance = length(in.worldPos - cameraPos);
 
-    var isAxisLine = false;
+    // 거리 기반 알파 계산 (20 단위에서 시작하여 100 단위에서 완전히 투명)
+    let fadeStart = 20.0;
+    let fadeEnd = 80.0;
+    let distanceFade = 1.0 - saturate((distance - fadeStart) / (fadeEnd - fadeStart));
 
-    // X축 (파란색) 체크
-    if (MIN_RANGE <= in.uv.x && in.uv.x <= MAX_RANGE) {
-        color = vec4<f32>(0.0, 0.0, 1.0, 1.0);
-        lineWidthWeight = AXIS_SIZE;
-        isAxisLine = true;
+    var finalColor: vec4<f32>;
+    var baseAlpha: f32;
+
+    // 축 라인인지 확인 (빨강 또는 파랑)
+    if (in.color.r > 0.8 && in.color.g < 0.2 && in.color.b < 0.2) {
+        // X축 (빨강) - 축은 좀 더 진하게
+        finalColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);
+        baseAlpha = 0.8;
+    } else if (in.color.b > 0.8 && in.color.r < 0.2 && in.color.g < 0.2) {
+        // Z축 (파랑) - 축은 좀 더 진하게
+        finalColor = vec4<f32>(0.0, 0.0, 1.0, 1.0);
+        baseAlpha = 0.8;
+    } else {
+        // 일반 그리드 라인
+        finalColor = vec4<f32>(gridArgs.lineColor.rgb, 1.0);
+        baseAlpha = gridArgs.lineColor.a;
     }
-    // Y축 (빨간색) 체크
-    else if (MIN_RANGE <= in.uv.y && in.uv.y <= MAX_RANGE) {
-        color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
-        lineWidthWeight = AXIS_SIZE;
-        isAxisLine = true;
-    }
 
-    // 모든 픽셀에서 그리드를 계산 (uniform control flow)
-    let grid = PristineGrid(in.uv, gridArgs.lineWidth * lineWidthWeight);
+    // 최종 알파 = 기본 알파 * 거리 페이드
+    finalColor.a = baseAlpha * distanceFade;
 
-    // 축 라인이 아닌 경우에만 그리드 임계값 검사
-//    if (!isAxisLine) {
-//        let gridThreshold = 0.1;
-//        if (grid < gridThreshold) {
-//            discard;
-//        }
-//    }
-
-    // 축 라인인 경우 grid 값을 1.0으로 오버라이드
-    let finalGrid = select(grid, 1.0, isAxisLine);
-
-    // 최종 색상 계산
-    let alpha = finalGrid * gridArgs.lineColor.a;
-    var finalColor = mix(gridArgs.baseColor, color, alpha);
-    // 투명도가 너무 낮아도 폐기 (축 라인이 아닌 경우만)
-    if (!isAxisLine && finalColor.a == 0.0) {
-        // finalColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);
-        discard;
-    }
 
     output.color = finalColor;
     output.gBufferMotionVector = vec4<f32>(0.0, 0.0, 1.0, 1.0);

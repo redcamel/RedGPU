@@ -14,7 +14,6 @@ import InterleavedStruct from "../../../resources/buffer/vertexBuffer/Interleave
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
 import ResourceManager from "../../../resources/resourceManager/ResourceManager";
 import parseWGSL from "../../../resources/wgslParser/parseWGSL";
-import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validateRedGPUContext";
 import InstanceIdGenerator from "../../../utils/InstanceIdGenerator";
 import shaderSource from './shader.wgsl'
@@ -36,11 +35,9 @@ class DrawDebuggerGrid {
 	#blendColorState: BlendState
 	#blendAlphaState: BlendState
 	readonly #lineColor: ColorRGBA
-	// #baseColor: ColorRGBA
 	#size: number = 100
 	#instanceId: number
 	#name: string
-	#lineWidth: number = 1
 
 	constructor(redGPUContext: RedGPUContext) {
 		validateRedGPUContext(redGPUContext)
@@ -50,8 +47,8 @@ class DrawDebuggerGrid {
 		const shaderModule: GPUShaderModule = resourceManager.createGPUShaderModule(SHADER_MODULE_NAME, moduleDescriptor)
 		this.#blendColorState = new BlendState(this, GPU_BLEND_FACTOR.SRC_ALPHA, GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA, GPU_BLEND_OPERATION.ADD)
 		this.#blendAlphaState = new BlendState(this, GPU_BLEND_FACTOR.SRC_ALPHA, GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA, GPU_BLEND_OPERATION.ADD)
-		this.#lineColor = new ColorRGBA(128, 128, 128, 1)
-		// this.#baseColor = new ColorRGBA(255, 128, 128, 0.5)
+		this.#lineColor = new ColorRGBA(128, 128, 128, 0.5)
+
 		const vertexBindGroupLayout = resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System)
 		const fragmentBindGroupLayout = redGPUContext.resourceManager.getGPUBindGroupLayout('GRID_MATERIAL_BIND_GROUP_LAYOUT') || redGPUContext.resourceManager.createBindGroupLayout(
 			'GRID_MATERIAL_BIND_GROUP_LAYOUT',
@@ -86,6 +83,9 @@ class DrawDebuggerGrid {
 					arrayStride: this.#vertexBuffer.interleavedStruct.arrayStride,
 					attributes: this.#vertexBuffer.interleavedStruct.attributes
 				}],
+			},
+			primitive: {
+				topology: 'line-list',
 			},
 			fragment: {
 				module: shaderModule,
@@ -146,15 +146,6 @@ class DrawDebuggerGrid {
 		return this.#lineColor;
 	}
 
-	get lineWidth(): number {
-		return this.#lineWidth;
-	}
-
-	set lineWidth(value: number) {
-		validatePositiveNumberRange(value)
-		this.#lineWidth = value;
-	}
-
 	render(debugViewRenderState: RenderViewStateData) {
 		const {view, currentRenderPassEncoder} = debugViewRenderState
 		const position = vec3.create()
@@ -163,80 +154,125 @@ class DrawDebuggerGrid {
 		const size = this.#size
 		debugViewRenderState.num3DObjects++
 		debugViewRenderState.numDrawCalls++
-		// const lineWidth = size / view.pixelRectObject.height * diatance / size * this.#lineWidth
-		const lineWidth = 1 / view.pixelRectObject.width * distance * this.#lineWidth
+
 		this.#uniformBuffer.writeBuffers([
 			[FRAGMENT_UNIFORM_STRUCT.members.lineColor, this.#lineColor.rgbaNormal],
-			// [FRAGMENT_UNIFORM_STRUCT2.uniforms.baseColor, this.#baseColor.rgbaNormal],
-			[FRAGMENT_UNIFORM_STRUCT.members.lineWidth, [lineWidth, lineWidth]],
-			[FRAGMENT_UNIFORM_STRUCT.members.size, size],
-			[FRAGMENT_UNIFORM_STRUCT.members.distance, distance],
 		])
-		const vertexData = [
-			// x   y   z     u  v
-			-size / 2, -0, -size / 2, 0, 0,
-			size / 2, -0, -size / 2, size, 0,
-			-size / 2, -0, size / 2, 0, size,
-			size / 2, -0, size / 2, size, size,
-		]
-		this.#vertexBuffer.changeData(vertexData)
+
 		if (this.#pipeline) {
-			const {triangleCount, indexNum} = this.#indexBuffer
+			const lineCount = (this.#size + 1) * 2; // 세로 + 가로 라인 수
+			const indexCount = lineCount * 2; // 각 라인마다 2개 인덱스
+
 			currentRenderPassEncoder.setPipeline(view.redGPUContext.antialiasingManager.useMSAA ? this.#pipelineMSAA : this.#pipeline);
 			currentRenderPassEncoder.setBindGroup(1, this.#fragmentBindGroup);
 			currentRenderPassEncoder.setVertexBuffer(0, this.#vertexBuffer.gpuBuffer);
 			currentRenderPassEncoder.setIndexBuffer(this.#indexBuffer.gpuBuffer, 'uint32');
-			currentRenderPassEncoder.drawIndexed(6);
-			debugViewRenderState.numTriangles += triangleCount
-			debugViewRenderState.numPoints += indexNum
+			currentRenderPassEncoder.drawIndexed(indexCount);
+
+			debugViewRenderState.numTriangles += 0; // 라인이므로 삼각형 수는 0
+			debugViewRenderState.numPoints += indexCount
 		}
 	}
 
+	#makeGridLineData(size: number) {
+		const interleaveData = [];
+		const indexData = [];
+
+		const halfSize = size / 2;
+		let vertexIndex = 0;
+
+		// 세로 라인들 (X축 방향) - 1단위 간격
+		for (let i = -halfSize; i <= halfSize; i += 1) {
+			// 축 라인인지 확인 (중앙)
+			const isAxisLine = (i === 0);
+			const color = isAxisLine ? [0.0, 0.0, 1.0, 1.0] : [0.5, 0.5, 0.5, 1.0]; // Z축은 파란색
+
+			// 라인의 시작점과 끝점
+			interleaveData.push(
+				i, 0, -halfSize, ...color, // 시작점
+				i, 0, halfSize, ...color   // 끝점
+			);
+
+			// 인덱스 추가
+			indexData.push(vertexIndex, vertexIndex + 1);
+			vertexIndex += 2;
+		}
+
+		// 가로 라인들 (Z축 방향) - 1단위 간격
+		for (let i = -halfSize; i <= halfSize; i += 1) {
+			// 축 라인인지 확인 (중앙)
+			const isAxisLine = (i === 0);
+			const color = isAxisLine ? [1.0, 0.0, 0.0, 1.0] : [0.5, 0.5, 0.5, 1.0]; // X축은 빨간색
+
+			// 라인의 시작점과 끝점
+			interleaveData.push(
+				-halfSize, 0, i, ...color, // 시작점
+				halfSize, 0, i, ...color   // 끝점
+			);
+
+			// 인덱스 추가
+			indexData.push(vertexIndex, vertexIndex + 1);
+			vertexIndex += 2;
+		}
+
+		return { interleaveData, indexData };
+	}
+
 	#setBuffers(redGPUContext: RedGPUContext) {
-		const size = this.#size
+		const size = this.#size;
 		const {resourceManager} = redGPUContext
 		const {cachedBufferState} = resourceManager
+
 		{
-			const uniqueKey = `VertexBuffer_Grid`;
-			const vertexBuffer = cachedBufferState[uniqueKey]
-			const vertexData = [
-				// x   y   z     u  v
-				-size, -0, -size, 0, 0,
-				size, -0, -size, size, 0,
-				-size, -0, size, 0, size,
-				size, -0, size, size, size,
-			]
-			cachedBufferState[uniqueKey] = this.#vertexBuffer = vertexBuffer || new VertexBuffer(
-				redGPUContext,
-				vertexData,
-				new InterleavedStruct({
+			const uniqueKey = `VertexBuffer_Grid_${size}`;
+			let vertexBuffer = cachedBufferState[uniqueKey];
+
+			if (!vertexBuffer) {
+				const { interleaveData } = this.#makeGridLineData(size);
+
+				vertexBuffer = new VertexBuffer(
+					redGPUContext,
+					interleaveData,
+					new InterleavedStruct({
 						position: InterleaveType.float32x3,
-						uv: InterleaveType.float32x2,
-					}
-				),
-				undefined,
-				uniqueKey
-			)
+						color: InterleaveType.float32x4,
+					}),
+					undefined,
+					uniqueKey
+				);
+				cachedBufferState[uniqueKey] = vertexBuffer;
+			}
+			this.#vertexBuffer = vertexBuffer;
 		}
+
 		{
-			const uniqueKey = `IndexBuffer_Grid`;
-			const indexBuffer = cachedBufferState[uniqueKey]
-			const indexData = [
-				0, 1, 2,
-				1, 2, 3
-			]
-			cachedBufferState[uniqueKey] = this.#indexBuffer = indexBuffer || new IndexBuffer(
-				redGPUContext,
-				indexData,
-				undefined,
-				uniqueKey
-			)
+			const uniqueKey = `IndexBuffer_Grid_${size}`;
+			let indexBuffer = cachedBufferState[uniqueKey];
+
+			if (!indexBuffer) {
+				const { indexData } = this.#makeGridLineData(size);
+
+				indexBuffer = new IndexBuffer(
+					redGPUContext,
+					indexData,
+					undefined,
+					uniqueKey
+				);
+				cachedBufferState[uniqueKey] = indexBuffer;
+			}
+			this.#indexBuffer = indexBuffer;
 		}
+
 		{
 			const uniqueKey = `UniformBuffer_Grid`;
-			const uniformBuffer = cachedBufferState[uniqueKey]
-			const uniformData = new ArrayBuffer(FRAGMENT_UNIFORM_STRUCT.arrayBufferByteLength)
-			cachedBufferState[uniqueKey] = this.#uniformBuffer = uniformBuffer || new UniformBuffer(redGPUContext, uniformData)
+			let uniformBuffer = cachedBufferState[uniqueKey];
+
+			if (!uniformBuffer) {
+				const uniformData = new ArrayBuffer(FRAGMENT_UNIFORM_STRUCT.arrayBufferByteLength);
+				uniformBuffer = new UniformBuffer(redGPUContext, uniformData);
+				cachedBufferState[uniqueKey] = uniformBuffer;
+			}
+			this.#uniformBuffer = uniformBuffer;
 		}
 	}
 }

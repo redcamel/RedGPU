@@ -23,25 +23,35 @@ export function setSeparator(pane) {
 }
 
 const setDebugButtons = (redGPUContext) => {
-	const container = document.querySelector('.navigation-bar');
-	const rightContainer = document.createElement('div');
-	rightContainer.style.display = 'flex';
-	rightContainer.style.alignItems = 'center';
-	rightContainer.style.gap = '1px';
-	rightContainer.style.position = 'absolute';
-	rightContainer.style.right = '0px';
-	rightContainer.style.top = '0px';
-	rightContainer.style.bottom = '0px';
-	container.appendChild(rightContainer);
+	const check = ()=>{
+		const container = document.querySelector('.navigation-bar');
+		if(container){
+			const rightContainer = document.createElement('div');
+			rightContainer.style.display = 'flex';
+			rightContainer.style.alignItems = 'center';
+			rightContainer.style.gap = '1px';
+			rightContainer.style.position = 'absolute';
+			rightContainer.style.right = '0px';
+			rightContainer.style.top = '0px';
+			rightContainer.style.bottom = '0px';
+			container.appendChild(rightContainer);
 
-	requestAnimationFrame(() => {
-        setAntialiasingSelect(redGPUContext,rightContainer)
-        setDebugButton(redGPUContext,rightContainer)
-        setAxis(redGPUContext,rightContainer)
-        setGrid(redGPUContext,rightContainer)
-        setSettingView(redGPUContext,rightContainer)
+			requestAnimationFrame(() => {
+				setAntialiasingSelect(redGPUContext,rightContainer)
+				setDebugButton(redGPUContext,rightContainer)
+				setAxis(redGPUContext,rightContainer)
+				setGrid(redGPUContext,rightContainer)
+				setSettingView(redGPUContext,rightContainer)
 
-	})
+			})
+		}else{
+			setTimeout(check,100)
+		}
+
+	}
+	setTimeout(check,100)
+
+
 }
 
 const setDebugButton = (redGPUContext,rightContainer) => {
