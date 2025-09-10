@@ -48,7 +48,7 @@ class DrawDebuggerGrid {
 		const {resourceManager, gpuDevice} = redGPUContext
 		const moduleDescriptor: GPUShaderModuleDescriptor = {code: shaderSource}
 		const shaderModule: GPUShaderModule = resourceManager.createGPUShaderModule(SHADER_MODULE_NAME, moduleDescriptor)
-		this.#blendColorState = new BlendState(this, GPU_BLEND_FACTOR.ONE, GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA, GPU_BLEND_OPERATION.ADD)
+		this.#blendColorState = new BlendState(this, GPU_BLEND_FACTOR.SRC_ALPHA, GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA, GPU_BLEND_OPERATION.ADD)
 		this.#blendAlphaState = new BlendState(this, GPU_BLEND_FACTOR.SRC_ALPHA, GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA, GPU_BLEND_OPERATION.ADD)
 		this.#lineColor = new ColorRGBA(128, 128, 128, 1)
 		// this.#baseColor = new ColorRGBA(255, 128, 128, 0.5)
@@ -90,18 +90,31 @@ class DrawDebuggerGrid {
 			fragment: {
 				module: shaderModule,
 				entryPoint: 'fragmentMain',
-				targets: [{
-					format: navigator.gpu.getPreferredCanvasFormat(),
-					blend: {
-						color: this.#blendColorState.state,
-						alpha: this.#blendAlphaState.state
+				targets: [
+					{
+						format: navigator.gpu.getPreferredCanvasFormat(),
+						blend: {
+							color: this.#blendColorState.state,
+							alpha: this.#blendAlphaState.state
+						},
 					},
-				}],
+					{
+						format: navigator.gpu.getPreferredCanvasFormat(),
+						blend: undefined,
+					},
+					{
+						format: 'rgba16float',
+						blend: undefined,
+					},
+				],
+
 			},
 			depthStencil: {
 				format: 'depth32float',
-				depthWriteEnabled: false,
+				depthWriteEnabled: true,
 				depthCompare: GPU_COMPARE_FUNCTION.LESS_EQUAL,
+		
+
 			}
 		}
 		this.#pipeline = gpuDevice.createRenderPipeline(basePipelineDescriptor)

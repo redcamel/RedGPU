@@ -15,7 +15,6 @@ const defineValues = {
 	REDGPU_DEFINE_WORKGROUP_SIZE_Z: PassClustersLightHelper.WORKGROUP_SIZE_Z.toString(),
 	REDGPU_DEFINE_MAX_LIGHTS_PER_CLUSTER: PassClustersLightHelper.MAX_LIGHTS_PER_CLUSTER.toString(),
 } as const;
-// #redgpu_else 지원을 위한 새로운 패턴
 const conditionalBlockPattern = /#redgpu_if\s+(\w+)\b([\s\S]*?)(?:#redgpu_else([\s\S]*?))?#redgpu_endIf/g;
 
 export interface ConditionalBlock {

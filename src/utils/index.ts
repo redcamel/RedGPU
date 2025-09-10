@@ -1,3 +1,4 @@
+import copyToTextureArray from "./copyToTextureArray";
 import createUUID from "./createUUID";
 import uuidToUint from "./uuidToUint";
 
@@ -8,6 +9,7 @@ export * from "./math";
 export {
 	keepLog,
 	createUUID,
-	uuidToUint
+	uuidToUint,
+	copyToTextureArray
 }
 

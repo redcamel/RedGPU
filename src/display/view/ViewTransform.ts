@@ -13,6 +13,7 @@ class ViewTransform {
 	onResize: ((width: number, height: number) => void) | null = null;
 	readonly #redGPUContext: RedGPUContext
 	#projectionMatrix = mat4.create()
+	#noneJitterProjectionMatrix = mat4.create()
 	#camera: PerspectiveCamera | OrthographicCamera | AController | Camera2D
 	#x: number | string = 0
 	#y: number | string = 0
@@ -20,6 +21,10 @@ class ViewTransform {
 	#width: number | string
 	#height: number | string
 	#pixelRectArray: [number, number, number, number] = [0, 0, 0, 0]
+
+	// TAA 지터 관련 속성 추가
+	#jitterOffsetX: number = 0;
+	#jitterOffsetY: number = 0;
 
 	constructor(redGPUContext: RedGPUContext) {
 		validateRedGPUContext(redGPUContext)
@@ -112,14 +117,38 @@ class ViewTransform {
 		return this.#camera instanceof AController ? this.#camera.camera : this.#camera
 	}
 
-	get projectionMatrix(): mat4 {
+	/**
+	 * TAA를 위한 지터 오프셋 설정
+	 * @param offsetX X축 지터 오프셋 (정규화된 값, 예: -0.5 ~ 0.5)
+	 * @param offsetY Y축 지터 오프셋 (정규화된 값, 예: -0.5 ~ 0.5)
+	 */
+	setJitterOffset(offsetX: number, offsetY: number) {
+		this.#jitterOffsetX = offsetX;
+		this.#jitterOffsetY = offsetY;
+	}
+
+	/**
+	 * 현재 지터 오프셋 반환
+	 */
+	get jitterOffset(): [number, number] {
+		return [this.#jitterOffsetX, this.#jitterOffsetY];
+	}
+
+	/**
+	 * 지터 오프셋 초기화
+	 */
+	clearJitterOffset() {
+		this.#jitterOffsetX = 0;
+		this.#jitterOffsetY = 0;
+	}
+	get noneJitterProjectionMatrix():mat4{
 		const {pixelRectObject, redGPUContext} = this
 		if (this.rawCamera instanceof OrthographicCamera) {
 			const {nearClipping, farClipping} = this.rawCamera
-			mat4.orthoZO(this.#projectionMatrix, this.rawCamera.left, this.rawCamera.right, this.rawCamera.bottom, this.rawCamera.top, nearClipping, farClipping)
+			mat4.orthoZO(this.#noneJitterProjectionMatrix, this.rawCamera.left, this.rawCamera.right, this.rawCamera.bottom, this.rawCamera.top, nearClipping, farClipping)
 		} else if (this.rawCamera instanceof Camera2D) {
 			mat4.ortho(
-				this.#projectionMatrix,
+				this.#noneJitterProjectionMatrix,
 				-0.5, // left
 				0.5, // right
 				-0.5, // bottom
@@ -128,18 +157,18 @@ class ViewTransform {
 				100000
 			);
 			mat4.scale(
-				this.#projectionMatrix,
-				this.#projectionMatrix,
+				this.#noneJitterProjectionMatrix,
+				this.#noneJitterProjectionMatrix,
 				[
 					redGPUContext.renderScale,
 					redGPUContext.renderScale,
 					1
 				]
 			)
-			mat4.translate(this.#projectionMatrix, this.#projectionMatrix, [-0.5, 0.5, 0]);
+			mat4.translate(this.#noneJitterProjectionMatrix, this.#noneJitterProjectionMatrix, [-0.5, 0.5, 0]);
 			mat4.scale(
-				this.#projectionMatrix,
-				this.#projectionMatrix,
+				this.#noneJitterProjectionMatrix,
+				this.#noneJitterProjectionMatrix,
 				[
 					1 / pixelRectObject.width * window.devicePixelRatio,
 					-1 / pixelRectObject.height * window.devicePixelRatio,
@@ -149,8 +178,31 @@ class ViewTransform {
 			mat4.identity(this.rawCamera.modelMatrix);
 		} else {
 			const {fieldOfView, nearClipping, farClipping} = this.rawCamera
-			mat4.perspective(this.#projectionMatrix, (Math.PI / 180) * fieldOfView, this.aspect, nearClipping, farClipping);
+			mat4.perspective(this.#noneJitterProjectionMatrix, (Math.PI / 180) * fieldOfView, this.aspect, nearClipping, farClipping);
 		}
+
+		return this.#noneJitterProjectionMatrix
+	}
+	get projectionMatrix(): mat4 {
+		const {redGPUContext} = this
+		const {antialiasingManager}=redGPUContext
+		this.#projectionMatrix = mat4.clone(this.noneJitterProjectionMatrix)
+
+		// TAA 지터 오프셋 적용 (PerspectiveCamera에만 적용)
+		if(antialiasingManager.useTAA) {
+			if (this.rawCamera instanceof PerspectiveCamera && (this.#jitterOffsetX !== 0 || this.#jitterOffsetY !== 0)) {
+				// devicePixelRatio를 고려한 정확한 픽셀 크기 계산
+				const logicalWidth = this.#pixelRectArray[2];
+				const logicalHeight = this.#pixelRectArray[3];
+
+				const pixelWidth = 2.0 / logicalWidth;
+				const pixelHeight = 2.0 / logicalHeight;
+
+				this.#projectionMatrix[8] += this.#jitterOffsetX * pixelWidth;  // X 오프셋
+				this.#projectionMatrix[9] += this.#jitterOffsetY * pixelHeight; // Y 오프셋
+			}
+		}
+
 		return this.#projectionMatrix;
 	}
 

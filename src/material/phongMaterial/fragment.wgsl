@@ -3,6 +3,7 @@
 #redgpu_include calcDirectionalShadowVisibility;
 #redgpu_include normalFunctions;
 #redgpu_include drawPicking;
+#redgpu_include FragmentOutput;
 struct Uniforms {
     color: vec3<f32>,
     //
@@ -22,6 +23,10 @@ struct Uniforms {
     tint:vec4<f32>,
     tintBlendMode:u32,
     //
+    useSSR:u32,
+    metallic:f32,
+    roughness:f32,
+    //
 };
 
 struct InputData {
@@ -32,6 +37,7 @@ struct InputData {
     @location(0) vertexPosition: vec3<f32>,
     @location(1) vertexNormal: vec3<f32>,
     @location(2) uv: vec2<f32>,
+    @location(3) motionVector: vec3<f32>,
     @location(12) combinedOpacity: f32,
     @location(13) shadowPos: vec3<f32>,
     @location(14) receiveShadow: f32,
@@ -54,8 +60,8 @@ struct InputData {
 
 
 @fragment
-fn main(inputData:InputData) -> @location(0) vec4<f32> {
-
+fn main(inputData:InputData) -> FragmentOutput {
+    var output: FragmentOutput;
     // AmbientLight
     let u_ambientLight = systemUniforms.ambientLight;
     let u_ambientLightColor = u_ambientLight.color;
@@ -93,7 +99,7 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     //
 
     // Vertex Normal
-    var N = normalize(inputData.vertexNormal) * u_normalScale;
+    var N = normalize(inputData.vertexNormal) ;
     #redgpu_if normalTexture
         let normalSamplerColor = textureSample(normalTexture, normalTextureSampler, inputData.uv).rgb;
         N = perturb_normal( N, inputData.vertexPosition, inputData.uv, normalSamplerColor, u_normalScale ) ;
@@ -253,5 +259,21 @@ fn main(inputData:InputData) -> @location(0) vec4<f32> {
     if (systemUniforms.isView3D == 1 && finalColor.a == 0.0) {
       discard;
     }
-    return finalColor;
+    output.color = finalColor;
+    #redgpu_if useSSR
+    {
+        let metallic = uniforms.metallic;
+        let roughness = uniforms.roughness;
+        let smoothness = 1.0 - roughness;
+        let smoothnessCurved = smoothness * smoothness * (3.0 - 2.0 * smoothness);
+
+        let metallicWeight = metallic * metallic;
+        let baseReflection = 0.04 + 0.96 * metallicWeight;
+
+        let baseReflectionStrength = smoothnessCurved * baseReflection;
+        output.gBufferNormal = vec4<f32>(N * 0.5 + 0.5, baseReflectionStrength);
+    }
+    #redgpu_endIf
+    output.gBufferMotionVector = vec4<f32>( inputData.motionVector, 1.0 );
+    return output;
 }

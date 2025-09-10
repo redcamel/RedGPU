@@ -7,8 +7,8 @@ const createPostEffectLabel = (title, isMobile, normalTitle = 'Normal') => {
 	normalLabel.innerHTML = normalTitle
 	effectLabel.innerHTML = title;
 
-	const baseStyle = 'position:absolute;bottom:0;display:flex;align-items:center:justify-content:center;padding:12px;background:#5b52aa'
-	const fontStyle = 'color:#fff;font-size:14px;font-weight:600'
+	const baseStyle = 'position:absolute;bottom:0;display:flex;align-items:center:justify-content:center;padding:8px 10px;background:#5b52aa'
+	const fontStyle = 'color:#fff;font-size:12px;font-weight:600'
 	if (isMobile) {
 		effectLabel.style.cssText = `${baseStyle};${fontStyle};bottom:none;`
 		normalLabel.style.cssText = `${baseStyle};${fontStyle};bottom:50%;`

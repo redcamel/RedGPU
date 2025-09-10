@@ -37,8 +37,8 @@ RedGPU.init(
 	}
 );
 const renderTestPane = async (redGPUContext,) => {
-	const {setSeparator, setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
-	setDebugViewButton(redGPUContext);
+	const {setSeparator, setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugButtons(redGPUContext);
 }
 const generateSamplerCombinations = (settings, fixedCategory, fixedValue) => {
 	const combinations = [];

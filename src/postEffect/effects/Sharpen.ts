@@ -1,6 +1,7 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
 import AMultiPassPostEffect from "../core/AMultiPassPostEffect";
+import {ASinglePassPostEffectResult} from "../core/ASinglePassPostEffect";
 import Convolution from "./convolution/Convolution";
 
 class Sharpen extends AMultiPassPostEffect {
@@ -17,9 +18,9 @@ class Sharpen extends AMultiPassPostEffect {
 		this.#effect_convolution.kernel = Convolution.SHARPEN
 	}
 
-	render(view: View3D, width: number, height: number, sourceTextureView: GPUTextureView) {
+	render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult) {
 		return this.#effect_convolution.render(
-			view, width, height, sourceTextureView
+			view, width, height, sourceTextureInfo
 		)
 	}
 }

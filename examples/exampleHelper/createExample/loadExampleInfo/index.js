@@ -61,18 +61,21 @@ const loadDescription = async () => {
 		const matchedExample = findExampleRecursively(categoryData.list);
 
 		if (matchedExample) {
-			document.title = `RedGPU - ${matchedExample.name}`;
 			const title = document.createElement('h1');
 			title.innerHTML = matchedExample.name;
+			if(matchedExample.experimental){
+
+				title.innerHTML += '<span class="experimental">EXPERIMENTAL</span>'
+			}
 			title.className = 'item-title'
-			titleBox.appendChild(title);
+			document.querySelector('.navigation-bar').appendChild(title);
 
 			const description = document.createElement('h2');
 			const descriptionText = matchedExample.description.en || `${matchedExample.name} | RedGPU Examples`;
-			description.innerHTML = matchedExample.description.en.replace(/\n/g, '<br/>');
+			description.innerHTML = descriptionText.replace(/\n/g, '<br/>');
 			description.className = 'item-description'
 			document.querySelector('.navigation-bar').appendChild(description);
-			setTitleAndDescription(
+			setDomTitleAndDescription(
 				`${matchedExample.name} - RedGPU`,
 				descriptionText
 					.replace(/\n/g, '')
@@ -89,6 +92,7 @@ const loadDescription = async () => {
 };
 
 const createNavigationBar = (mainCategory) => {
+
 	const navbar = document.createElement('div');
 	navbar.className = 'navigation-bar';
 
@@ -97,6 +101,7 @@ const createNavigationBar = (mainCategory) => {
 	homeButton.href = '/RedGPU/examples';
 	homeButton.innerHTML = '<span>Home</span>';
 	navbar.appendChild(homeButton);
+
 
 	return navbar;
 };
@@ -130,7 +135,7 @@ const setCanonicalLink = () => {
 	}
 };
 
-const setTitleAndDescription = (title, description) => {
+const setDomTitleAndDescription = (title, description) => {
 	if (title) {
 		document.title = title;
 	}
@@ -168,15 +173,11 @@ const index = async () => {
 	helperButtonContainer.className = 'helperButtonContainer';
 	document.body.appendChild(helperButtonContainer);
 
-	const debugViewButton = document.createElement('button');
-	debugViewButton.className = 'helperSourceView debugView';
-	debugViewButton.innerText = 'Debug Panel View';
-	debugViewButton.style.display = 'none';
-	helperButtonContainer.appendChild(debugViewButton);
+
 
 	const sourceViewButton = document.createElement('button');
 	sourceViewButton.className = 'helperSourceView';
-	sourceViewButton.innerText = 'Source View';
+	sourceViewButton.innerText = 'Source';
 	helperButtonContainer.appendChild(sourceViewButton);
 
 	const helperSourceViewFloatingCode = document.createElement('div');
@@ -226,7 +227,7 @@ const index = async () => {
 
 	const footer = document.createElement('footer');
 	footer.className = 'footer';
-	footer.innerHTML = `<div class="footer_left"><a href="https://github.com/redcamel/RedGPU" target="_blank"><img src="/RedGPU/examples/assets/github.png" height="32"/></a><div>This project is maintained by <a href="https://github.com/redcamel/RedGPU" target="_blank">RedCamel</a></div></div>`;
+	footer.innerHTML = `<div class="footer_left"><a href="https://github.com/redcamel/RedGPU" target="_blank"><img src="/RedGPU/examples/assets/github.png" height="26"/></a><div>This project is maintained by <a href="https://github.com/redcamel/RedGPU" target="_blank">RedCamel</a></div></div>`;
 	document.body.appendChild(footer);
 };
 index();

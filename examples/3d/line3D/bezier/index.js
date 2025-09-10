@@ -126,8 +126,8 @@ function rainbowHex(t) {
 const renderTestPane = async (redGPUContext) => {
 	const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
 	const pane = new Pane();
-	const {setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
-	setDebugViewButton(redGPUContext);
+	const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugButtons(redGPUContext);
 	// **** UI 동작 대상이 되는 Line3D 오브젝트 및 디버그 마커 모음 ****
 	const debugOptions = {
 		showDebugPoints: false, // 디버그 포인트 표시 여부

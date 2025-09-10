@@ -34,7 +34,7 @@ RedGPU.init(
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		renderer.start(redGPUContext, () => {
 		});
-		renderTestPane(redGPUContext);
+		renderTestPane(redGPUContext,view);
 	},
 	(failReason) => {
 		// 초기화 실패 시 처리
@@ -113,16 +113,15 @@ function rainbowHex(t) {
 	return RedGPU.Util.convertRgbToHex(r, g, b); // RGB를 HEX 형식으로 변환
 }
 
-const renderTestPane = async (redGPUContext) => {
+const renderTestPane = async (redGPUContext,view) => {
 	const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
 	const pane = new Pane();
-	const {setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
-	setDebugViewButton(redGPUContext);
+	const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugButtons(redGPUContext);
 	// 옵션 초기화
 	const debugOptions = {
 		showDebugPoints: false // 디버그 포인트 표시 여부
 	};
-
 	// RedGPU 뷰에서 Line3D 객체들 참조
 	const lineObjects = [];
 	redGPUContext.viewList[0].scene.children.forEach((child) => {

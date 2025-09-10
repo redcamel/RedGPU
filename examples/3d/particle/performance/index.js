@@ -90,7 +90,7 @@ RedGPU.init(
 );
 
 const renderTestPane = async (redGPUContext, mesh) => {
-	const {setDebugViewButton} = await import("../../../exampleHelper/createExample/panes/index.js");
-	setDebugViewButton(redGPUContext);
+	const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugButtons(redGPUContext);
 
 };

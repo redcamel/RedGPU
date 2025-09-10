@@ -36,8 +36,8 @@ RedGPU.init(
 	}
 );
 const renderTestPane = async (redGPUContext) => {
-	const {setDebugViewButton} = await import("../../../../exampleHelper/createExample/panes/index.js");
-	setDebugViewButton(redGPUContext);
+	const {setDebugButtons} = await import("../../../../exampleHelper/createExample/panes/index.js");
+	setDebugButtons(redGPUContext);
 };
 
 function createIntersectionTest(redGPUContext, scene) {

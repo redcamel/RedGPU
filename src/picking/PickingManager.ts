@@ -122,9 +122,10 @@ class PickingManager {
 			return;
 		}
 		const pickingTable = this.#createPickingTable();
-		const readPixelBuffer: GPUBuffer = this.#createReadPixelBuffer(gpuDevice, width, height, x, y);
+		let readPixelBuffer: GPUBuffer = this.#createReadPixelBuffer(gpuDevice, width, height, x, y);
 		const uint32Color = await this.#getUint32Color(readPixelBuffer);
 		readPixelBuffer.destroy();
+		readPixelBuffer = null
 		if (uint32Color) {
 			this.#processClickEvent(uint32Color, x, y, time, pickingTable);
 			this.#processEvent(uint32Color, x, y, time, pickingTable);
@@ -144,6 +145,7 @@ class PickingManager {
 		const readPixelBuffer = gpuDevice.createBuffer({
 			size: 16 * width * height,
 			usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
+			label:'readPixelBuffer'
 		});
 		const textureView = {texture: this.#pickingGPUTexture, origin: {x: x, y: y, z: 0}};
 		const bufferView = {buffer: readPixelBuffer, bytesPerRow: Math.max(256, 4 * width * height), rowsPerImage: 1};

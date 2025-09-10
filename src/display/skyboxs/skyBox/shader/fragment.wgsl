@@ -1,3 +1,4 @@
+#redgpu_include FragmentOutput
 struct Uniforms {
     opacity: f32,
     blur: f32,
@@ -26,8 +27,9 @@ fn sphericalToUV(dir: vec3<f32>) -> vec2<f32> {
     return vec2<f32>(u, v);
 }
 
+
 @fragment
-fn main(inputData: InputData) -> @location(0) vec4<f32> {
+fn main(inputData: InputData) -> FragmentOutput {
     var cubemapVec = inputData.vertexPosition.xyz - vec3<f32>(0.5);
     let mipmapCount: f32 = f32(textureNumLevels(skyboxTexture) - 1);
     let blurCurve = uniforms.blur * uniforms.blur; // 제곱 곡선
@@ -63,5 +65,8 @@ fn main(inputData: InputData) -> @location(0) vec4<f32> {
     if (outColor.a == 0.0) {
         discard;
     }
-    return outColor;
+    var output: FragmentOutput;
+    output.color = outColor;
+
+    return output;
 }

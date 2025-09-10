@@ -44,8 +44,8 @@ function loadGLTF(view, url) {
 
 const renderTestPane = async (redGPUContext, targetView) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
-	const {createIblHelper, setDebugViewButton} = await import('../../../../exampleHelper/createExample/panes/index.js');
-	setDebugViewButton(redGPUContext);
+	const {createIblHelper, setDebugButtons} = await import('../../../../exampleHelper/createExample/panes/index.js');
+	setDebugButtons(redGPUContext);
 	const pane = new Pane();
 	createIblHelper(pane, targetView, RedGPU);
 };

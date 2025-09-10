@@ -51,8 +51,8 @@ const createInitialObjects = (redGPUContext, scene) => {
 const createPaneUI = async (redGPUContext, scene) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const pane = new Pane();
-	const {setDebugViewButton, setRedGPUTest_pane} = await import("../../../exampleHelper/createExample/panes/index.js");
-	setDebugViewButton(redGPUContext);
+	const {setDebugButtons, setRedGPUTest_pane} = await import("../../../exampleHelper/createExample/panes/index.js");
+	setDebugButtons(redGPUContext);
 	pane.addButton({title: 'Add Child'}).on('click', () => {
 		addChildObject(redGPUContext, scene);
 	});

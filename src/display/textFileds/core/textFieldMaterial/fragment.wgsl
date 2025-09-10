@@ -1,6 +1,7 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include calcTintBlendMode;
 #redgpu_include drawPicking;
+#redgpu_include FragmentOutput;
 
 struct Uniforms {
   useDiffuseTexture: u32,
@@ -26,7 +27,8 @@ struct InputData {
 };
 
 @fragment
-fn main(inputData: InputData) -> @location(0) vec4<f32> {
+fn main(inputData: InputData) -> FragmentOutput {
+    var output:FragmentOutput;
     // 텍스처 색상 샘플링
     var finalColor: vec4<f32> = textureSample(diffuseTexture, diffuseTextureSampler, inputData.uv);
 
@@ -41,5 +43,7 @@ fn main(inputData: InputData) -> @location(0) vec4<f32> {
       discard;
     }
 
-    return finalColor;
+    output.color = finalColor;
+    output.gBufferMotionVector = vec4<f32>( 0.0, 0.0, 1.0, 1.0 );
+    return output;
 };

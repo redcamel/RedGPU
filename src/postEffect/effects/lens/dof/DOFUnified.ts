@@ -1,7 +1,7 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import View3D from "../../../../display/view/View3D";
 import validateNumberRange from "../../../../runtimeChecker/validateFunc/validateNumberRange";
-import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
+import ASinglePassPostEffect, {ASinglePassPostEffectResult} from "../../../core/ASinglePassPostEffect";
 
 class DOFUnified extends ASinglePassPostEffect {
 	#nearBlurSize: number = 16;
@@ -40,7 +40,9 @@ class DOFUnified extends ASinglePassPostEffect {
                     return;
                 }
                 
-                let originalColor = textureLoad(sourceTexture, index).rgb;
+                let originalSample = textureLoad(sourceTexture, index);
+                let originalColor = originalSample.rgb;
+                let originalAlpha = originalSample.a;
                 let encodedCoC = textureLoad(cocTexture, index).a;
                 
                 /* CoC 값 디코딩 */
@@ -48,40 +50,48 @@ class DOFUnified extends ASinglePassPostEffect {
                 
                 /* CoC 임계값 체크 */
                 if (abs(cocValue) < 0.005) {
-                    textureStore(outputTexture, index, vec4<f32>(originalColor, 1.0));
+                    textureStore(outputTexture, index, vec4<f32>(originalColor, originalAlpha));
                     return;
                 }
                 
                 var finalColor = originalColor;
+                var finalAlpha = originalAlpha;
                 
                 /* Near blur 처리 (CoC < 0) */
                 if (cocValue < 0.0) {
-                    let nearBlur = calculateBlur(index, abs(cocValue), uniforms.nearBlurSize, true);
+                    let blurResult = calculateBlur(index, abs(cocValue), uniforms.nearBlurSize, true);
+                    let nearBlur = blurResult.rgb;
+                    let nearBlurAlpha = blurResult.a;
                     /* Near strength 블렌딩 개선 - 더 강한 효과 */
                     let nearBlend = saturate(pow(abs(cocValue) * uniforms.nearStrength, 0.7));
                     finalColor = mix(originalColor, nearBlur, nearBlend);
+                    finalAlpha = mix(originalAlpha, nearBlurAlpha, nearBlend);
                 }
                 /* Far blur 처리 (CoC > 0) */
                 else if (cocValue > 0.0) {
-                    let farBlur = calculateBlur(index, cocValue, uniforms.farBlurSize, false);
+                    let blurResult = calculateBlur(index, cocValue, uniforms.farBlurSize, false);
+                    let farBlur = blurResult.rgb;
+                    let farBlurAlpha = blurResult.a;
                     let rawBlend = cocValue * uniforms.farStrength;
                     let farBlend = saturate(smoothstep(0.0, 0.8, rawBlend));
                     finalColor = mix(originalColor, farBlur, farBlend);
+                    finalAlpha = mix(originalAlpha, farBlurAlpha, farBlend);
                 }
                 
-                textureStore(outputTexture, index, vec4<f32>(finalColor, 1.0));
+                textureStore(outputTexture, index, vec4<f32>(finalColor, finalAlpha));
             }
             
-            fn calculateBlur(center: vec2<u32>, intensity: f32, maxBlurSize: f32, isNear: bool) -> vec3<f32> {
+            fn calculateBlur(center: vec2<u32>, intensity: f32, maxBlurSize: f32, isNear: bool) -> vec4<f32> {
                 let dimensions: vec2<u32> = textureDimensions(sourceTexture);
                 let blurRadius = intensity * maxBlurSize;
                 
                 /* 최소 블러 반경 조정 */
                 if (blurRadius < 0.3) {
-                    return textureLoad(sourceTexture, center).rgb;
+                    return textureLoad(sourceTexture, center);
                 }
                 
                 var sum: vec3<f32> = vec3<f32>(0.0);
+                var sumAlpha: f32 = 0.0;
                 var totalWeight = 0.0;
                 
                 let maxRadius = min(blurRadius, maxBlurSize);
@@ -89,10 +99,13 @@ class DOFUnified extends ASinglePassPostEffect {
                 let samples = select(8, 16, isNear); /* near=16, far=8 */
                 let angleStep = 6.28318530718 / f32(samples);
                 
-                let originalColor = textureLoad(sourceTexture, center).rgb;
+                let originalSample = textureLoad(sourceTexture, center);
+                let originalColor = originalSample.rgb;
+                let originalAlpha = originalSample.a;
                 /* Near blur에 더 강한 중앙 가중치 */
                 let centerWeight = select(0.4, 0.2, isNear); /* near=0.2, far=0.4 */
                 sum += originalColor * centerWeight;
+                sumAlpha += originalAlpha * centerWeight;
                 totalWeight += centerWeight;
                 
                 /* 방사형 샘플링 */
@@ -106,7 +119,9 @@ class DOFUnified extends ASinglePassPostEffect {
                             clamp(i32(f32(center.y) + offset.y), 0, i32(dimensions.y) - 1)
                         );
                         
-                        let sampleColor = textureLoad(sourceTexture, vec2<u32>(samplePos)).rgb;
+                        let sampleData = textureLoad(sourceTexture, vec2<u32>(samplePos));
+                        let sampleColor = sampleData.rgb;
+                        let sampleAlpha = sampleData.a;
                         let sampleEncodedCoC = textureLoad(cocTexture, vec2<u32>(samplePos)).a;
                         let sampleCoC = decodeCoC(sampleEncodedCoC); /* 디코딩 추가 */
                         
@@ -127,6 +142,7 @@ class DOFUnified extends ASinglePassPostEffect {
                         }
                         
                         sum += sampleColor * weight;
+                        sumAlpha += sampleAlpha * weight;
                         totalWeight += weight;
                     }
                 }
@@ -146,18 +162,21 @@ class DOFUnified extends ASinglePassPostEffect {
                             clamp(i32(f32(center.y) + offset.y), 0, i32(dimensions.y) - 1)
                         );
                         
-                        let sampleColor = textureLoad(sourceTexture, vec2<u32>(samplePos)).rgb;
+                        let sampleData = textureLoad(sourceTexture, vec2<u32>(samplePos));
+                        let sampleColor = sampleData.rgb;
+                        let sampleAlpha = sampleData.a;
                         let weight = 0.8;
                         
                         sum += sampleColor * weight;
+                        sumAlpha += sampleAlpha * weight;
                         totalWeight += weight;
                     }
                 }
                 
                 if (totalWeight > 0.0) {
-                    return sum / totalWeight;
+                    return vec4<f32>(sum / totalWeight, sumAlpha / totalWeight);
                 } else {
-                    return originalColor;
+                    return vec4<f32>(originalColor, originalAlpha);
                 }
             }
         `;
@@ -207,8 +226,8 @@ class DOFUnified extends ASinglePassPostEffect {
 		this.updateUniform('farStrength', value)
 	}
 
-	render(view: View3D, width: number, height: number, sourceTextureView: GPUTextureView, cocTextureView: GPUTextureView) {
-		return super.render(view, width, height, sourceTextureView, cocTextureView);
+	render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult, cocTextureInfo: ASinglePassPostEffectResult) {
+		return super.render(view, width, height, sourceTextureInfo, cocTextureInfo);
 	}
 }
 
