@@ -8,6 +8,7 @@ import InterleaveType from "../../../resources/buffer/core/type/InterleaveType";
 import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
 import InterleavedStruct from "../../../resources/buffer/vertexBuffer/InterleavedStruct";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
+import {keepLog} from "../../../utils";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import calculateNormals from "../../../utils/math/calculateNormals";
 import AccessorInfo_GLTF from "../cls/AccessorInfo_GLTF";
@@ -154,6 +155,21 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
 		// if (joints.length)
 		tInterleaveInfoList['aVertexJoint'] = InterleaveType.float32x4
 		tInterleaveInfoList['aVertexTangent'] = InterleaveType.float32x4
+		const weightData = []
+		parseInterleaveData_GLTF(weightData, vertices, verticesColor_0, normalData, uvs, uvs1, uvs2, jointWeights, joints, tangents,true)
+
+		const weightBuffer = new VertexBuffer(
+			redGPUContext,
+				weightData,
+			new InterleavedStruct(
+				{
+					aVertexWeight: InterleaveType.float32x4,
+					aVertexJoint: InterleaveType.float32x4
+				}
+			),
+			undefined,
+			`Weight_${gltfLoader.url}_${nodeGlTfId}_${i}`
+		)
 		tGeo = new Geometry(
 			redGPUContext,
 			new VertexBuffer(
@@ -178,6 +194,7 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
 			consoleAndThrowError('재질을 파싱할수없는경우 ', meshPrimitive);
 		}
 		tMesh = new Mesh(redGPUContext, tGeo, tMaterial);
+		tMesh.animationInfo.weightBuffer = weightBuffer
 		if (tName) {
 			tMesh.name = tName;
 			if (gltfLoader.parsingOption) {

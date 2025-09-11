@@ -17,7 +17,7 @@ class VertexBuffer extends ABaseBuffer {
 		redGPUContext: RedGPUContext,
 		data: Array<number> | Float32Array,
 		interleavedStruct: InterleavedStruct,
-		usage: GPUBufferUsageFlags = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+		usage: GPUBufferUsageFlags = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE,
 		cacheKey: string = ''
 	) {
 		super(redGPUContext, MANAGED_STATE_KEY, usage)
@@ -84,6 +84,12 @@ class VertexBuffer extends ABaseBuffer {
 		gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], 0, this[GPU_BUFFER_DATA_SYMBOL]);
 	}
 
+	updateData(data: Array<number> | Float32Array,offset:number=0) {
+		//TODO 체크해야함
+		if(data instanceof Array) data = new Float32Array(data);
+		const {gpuDevice} = this;
+		gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], offset, data,);
+	}
 	updateAllData(data: Array<number> | Float32Array) {
 		//TODO 체크해야함
 		const {gpuDevice} = this;

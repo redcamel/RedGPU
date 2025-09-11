@@ -17,7 +17,8 @@ const parseInterleaveData_GLTF = (
 	vertices: number[], verticesColor_0: number[], normalData: number[],
 	uvs: number[], uvs1: number[], uvs2: number[],
 	jointWeights: number[], joints: number[],
-	tangents: number[]
+	tangents: number[],
+	onlyWeightsJoints:boolean = false,
 ) => {
 	let i = 0, len = vertices.length / 3;
 	let idx = 0;
@@ -36,89 +37,126 @@ const parseInterleaveData_GLTF = (
 	index2D_1 = index3D_1 = index4D_1 = 1
 	index3D_2 = index4D_2 = 2
 	index4D_3 = 3
-	for (i; i < len; i++) {
-		if (has_vertices) {
-			interleaveData[idx++] = vertices[index3D];
-			interleaveData[idx++] = vertices[index3D_1];
-			interleaveData[idx++] = vertices[index3D_2];
+	if(onlyWeightsJoints){
+		for (i; i < len; i++) {
+			if (has_jointWeights) {
+				interleaveData[idx++] = jointWeights[index4D];
+				interleaveData[idx++] = jointWeights[index4D_1];
+				interleaveData[idx++] = jointWeights[index4D_2];
+				interleaveData[idx++] = jointWeights[index4D_3];
+			} else {
+				interleaveData[idx++] = 0;
+				interleaveData[idx++] = 0;
+				interleaveData[idx++] = 0;
+				interleaveData[idx++] = 0;
+			}
+			if (has_joints) {
+				interleaveData[idx++] = joints[index4D];
+				interleaveData[idx++] = joints[index4D_1];
+				interleaveData[idx++] = joints[index4D_2];
+				interleaveData[idx++] = joints[index4D_3];
+			} else {
+				interleaveData[idx++] = 0;
+				interleaveData[idx++] = 0;
+				interleaveData[idx++] = 0;
+				interleaveData[idx++] = 0;
+			}
+			index2D += 2
+			index2D_1 += 2
+			index3D += 3
+			index3D_1 += 3
+			index3D_2 += 3
+			index4D += 4
+			index4D_1 += 4
+			index4D_2 += 4
+			index4D_3 += 4
 		}
-		if (has_normalData) {
-			interleaveData[idx++] = normalData[index3D];
-			interleaveData[idx++] = normalData[index3D_1];
-			interleaveData[idx++] = normalData[index3D_2];
-		} else {
-			interleaveData[idx++] = 0;
-			interleaveData[idx++] = 0;
-			interleaveData[idx++] = 0;
+	}else{
+		for (i; i < len; i++) {
+			if (has_vertices) {
+				interleaveData[idx++] = vertices[index3D];
+				interleaveData[idx++] = vertices[index3D_1];
+				interleaveData[idx++] = vertices[index3D_2];
+			}
+			if (has_normalData) {
+				interleaveData[idx++] = normalData[index3D];
+				interleaveData[idx++] = normalData[index3D_1];
+				interleaveData[idx++] = normalData[index3D_2];
+			} else {
+				interleaveData[idx++] = 0;
+				interleaveData[idx++] = 0;
+				interleaveData[idx++] = 0;
+			}
+			if (!uvs.length) uvs.push(0, 0);
+			if (uvs.length) {
+				interleaveData[idx++] = uvs[index2D];
+				interleaveData[idx++] = uvs[index2D_1];
+			}
+			if (has_uvs2) {
+				interleaveData[idx++] = uvs2[index2D];
+				interleaveData[idx++] = uvs2[index2D_1];
+			} else if (has_uvs1) {
+				interleaveData[idx++] = uvs1[index2D];
+				interleaveData[idx++] = uvs1[index2D_1];
+			} else if (uvs.length) {
+				interleaveData[idx++] = uvs[index2D];
+				interleaveData[idx++] = uvs[index2D_1];
+			}
+			if (has_verticesColor_0) {
+				interleaveData[idx++] = verticesColor_0[index4D];
+				interleaveData[idx++] = verticesColor_0[index4D_1];
+				interleaveData[idx++] = verticesColor_0[index4D_2];
+				interleaveData[idx++] = verticesColor_0[index4D_3];
+			} else {
+				interleaveData[idx++] = 0;
+				interleaveData[idx++] = 0;
+				interleaveData[idx++] = 0;
+				interleaveData[idx++] = 0;
+			}
+			if (has_jointWeights) {
+				interleaveData[idx++] = jointWeights[index4D];
+				interleaveData[idx++] = jointWeights[index4D_1];
+				interleaveData[idx++] = jointWeights[index4D_2];
+				interleaveData[idx++] = jointWeights[index4D_3];
+			} else {
+				interleaveData[idx++] = 0;
+				interleaveData[idx++] = 0;
+				interleaveData[idx++] = 0;
+				interleaveData[idx++] = 0;
+			}
+			if (has_joints) {
+				interleaveData[idx++] = joints[index4D];
+				interleaveData[idx++] = joints[index4D_1];
+				interleaveData[idx++] = joints[index4D_2];
+				interleaveData[idx++] = joints[index4D_3];
+			} else {
+				interleaveData[idx++] = 0;
+				interleaveData[idx++] = 0;
+				interleaveData[idx++] = 0;
+				interleaveData[idx++] = 0;
+			}
+			if (has_tangents) {
+				interleaveData[idx++] = tangents[index4D];
+				interleaveData[idx++] = tangents[index4D_1];
+				interleaveData[idx++] = tangents[index4D_2];
+				interleaveData[idx++] = tangents[index4D_3];
+			} else {
+				interleaveData[idx++] = 0;
+				interleaveData[idx++] = 0;
+				interleaveData[idx++] = 0;
+				interleaveData[idx++] = 0;
+			}
+			index2D += 2
+			index2D_1 += 2
+			index3D += 3
+			index3D_1 += 3
+			index3D_2 += 3
+			index4D += 4
+			index4D_1 += 4
+			index4D_2 += 4
+			index4D_3 += 4
 		}
-		if (!uvs.length) uvs.push(0, 0);
-		if (uvs.length) {
-			interleaveData[idx++] = uvs[index2D];
-			interleaveData[idx++] = uvs[index2D_1];
-		}
-		if (has_uvs2) {
-			interleaveData[idx++] = uvs2[index2D];
-			interleaveData[idx++] = uvs2[index2D_1];
-		} else if (has_uvs1) {
-			interleaveData[idx++] = uvs1[index2D];
-			interleaveData[idx++] = uvs1[index2D_1];
-		} else if (uvs.length) {
-			interleaveData[idx++] = uvs[index2D];
-			interleaveData[idx++] = uvs[index2D_1];
-		}
-		if (has_verticesColor_0) {
-			interleaveData[idx++] = verticesColor_0[index4D];
-			interleaveData[idx++] = verticesColor_0[index4D_1];
-			interleaveData[idx++] = verticesColor_0[index4D_2];
-			interleaveData[idx++] = verticesColor_0[index4D_3];
-		} else {
-			interleaveData[idx++] = 0;
-			interleaveData[idx++] = 0;
-			interleaveData[idx++] = 0;
-			interleaveData[idx++] = 0;
-		}
-		if (has_jointWeights) {
-			interleaveData[idx++] = jointWeights[index4D];
-			interleaveData[idx++] = jointWeights[index4D_1];
-			interleaveData[idx++] = jointWeights[index4D_2];
-			interleaveData[idx++] = jointWeights[index4D_3];
-		} else {
-			interleaveData[idx++] = 0;
-			interleaveData[idx++] = 0;
-			interleaveData[idx++] = 0;
-			interleaveData[idx++] = 0;
-		}
-		if (has_joints) {
-			interleaveData[idx++] = joints[index4D];
-			interleaveData[idx++] = joints[index4D_1];
-			interleaveData[idx++] = joints[index4D_2];
-			interleaveData[idx++] = joints[index4D_3];
-		} else {
-			interleaveData[idx++] = 0;
-			interleaveData[idx++] = 0;
-			interleaveData[idx++] = 0;
-			interleaveData[idx++] = 0;
-		}
-		if (has_tangents) {
-			interleaveData[idx++] = tangents[index4D];
-			interleaveData[idx++] = tangents[index4D_1];
-			interleaveData[idx++] = tangents[index4D_2];
-			interleaveData[idx++] = tangents[index4D_3];
-		} else {
-			interleaveData[idx++] = 0;
-			interleaveData[idx++] = 0;
-			interleaveData[idx++] = 0;
-			interleaveData[idx++] = 0;
-		}
-		index2D += 2
-		index2D_1 += 2
-		index3D += 3
-		index3D_1 += 3
-		index3D_2 += 3
-		index4D += 4
-		index4D_1 += 4
-		index4D_2 += 4
-		index4D_3 += 4
 	}
+
 };
 export default parseInterleaveData_GLTF;

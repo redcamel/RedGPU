@@ -16,7 +16,17 @@ RedGPU.init(
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		redGPUContext.addView(view);
 
-		loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF-Binary/BrainStem.glb');
+		{
+			let i = 100
+			while(i--){
+				setTimeout(()=>{
+					// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF-Binary/BrainStem.glb');
+					// loadGLTF(view, 'https://redcamel.github.io/RedGL2/asset/glTF/breakDance/scene.gltf');
+					loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/SimpleMorph/glTF/SimpleMorph.gltf');
+
+				},10 * i)
+			}
+		}
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		const render = () => {};
 		renderer.start(redGPUContext, render);
@@ -37,14 +47,14 @@ function loadGLTF(view, url) {
 	const {redGPUContext, scene} = view;
 	new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
 		const mesh = result.resultMesh
-		mesh.y = -0.75
-		if (num) {
-			mesh.x = Math.random() * 10 - 5
-			mesh.z = Math.random() * 10 - 5
+		mesh.x = Math.random() * 10 - 5
+		mesh.z = Math.random() * 10- 5
+		mesh.setScale(0.1)
+		scene.addChild(mesh)
+		if(num===0){
+			console.log(result)
 		}
 		num++
-		scene.addChild(mesh)
-
 		// let i = 10
 		// while(i--){
 		// 	let clonedMesh = mesh.clone()

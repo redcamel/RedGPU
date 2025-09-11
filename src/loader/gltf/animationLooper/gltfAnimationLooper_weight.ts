@@ -1,4 +1,6 @@
 import Mesh from "../../../display/mesh/Mesh";
+import {GPU_BUFFER_DATA_SYMBOL, GPU_BUFFER_SYMBOL} from "../../../resources/buffer/core/ABaseBuffer";
+import {keepLog} from "../../../utils";
 import MorphInfo_GLTF from "../cls/MorphInfo_GLTF";
 import MorphInfoData_GLTF from "../cls/MorphInfoData_GLTF";
 
@@ -28,12 +30,14 @@ const gltfAnimationLooper_weight = (
 	let nextAnimationData;
 	let morphInterleaveData;
 	let cacheKey;
+	let arrayStride;
 	const PRIME_NUMBER = 9999991;
 	animationTargetIndex = meshArray.length;
 	while (animationTargetIndex--) {
 		targetMesh = meshArray[animationTargetIndex];
 		targetData = targetMesh.geometry.vertexBuffer.data;
 		stride = targetMesh.geometry.vertexBuffer.stride;
+		arrayStride = targetMesh.geometry.vertexBuffer.interleavedStruct.arrayStride
 		loopCount = targetData.length / stride;
 		targetMorphInfo = targetMesh.animationInfo.morphInfo;
 		originData = targetMorphInfo.origin;
@@ -74,8 +78,15 @@ const gltfAnimationLooper_weight = (
 			targetData[baseVertexIndex] = prevWeight + interpolationValue * (nextWeight - prevWeight);
 			targetData[baseVertexIndex + 1] = prevWeight1 + interpolationValue * (nextWeight1 - prevWeight1);
 			targetData[baseVertexIndex + 2] = prevWeight2 + interpolationValue * (nextWeight2 - prevWeight2);
+			targetMesh.geometry.vertexBuffer.updateData([
+				targetData[baseVertexIndex],
+				targetData[baseVertexIndex + 1],
+				targetData[baseVertexIndex + 2]
+			], arrayStride * vertexIndex )
 		}
-		targetMesh.geometry.vertexBuffer.updateAllData(targetData);
+		// keepLog('weight')
+		// targetMesh.geometry.vertexBuffer.updateAllData(targetData);
+
 	}
 }
 export default gltfAnimationLooper_weight

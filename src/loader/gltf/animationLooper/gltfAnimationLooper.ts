@@ -1,3 +1,4 @@
+import {keepLog} from "../../../utils";
 import AniTrack_GLTF from "../cls/AniTrack_GLTF";
 import {GLTFParsedSingleClip} from "../parsers/animation/parseAnimations";
 import gltfAnimationLooper_rotation from "./gltfAnimationLooper_rotation";
@@ -89,6 +90,7 @@ const gltfAnimationLooper = (time: number, animationLoopList: GLTFParsedSingleCl
 				if (interpolationValue.toString() == 'NaN') interpolationValue = 0;
 			}
 			// if (animationTargetMesh) {}
+			// keepLog(currentAniTrack.key)
 			switch (currentAniTrack.key) {
 				case 'rotation' :
 					gltfAnimationLooper_rotation(

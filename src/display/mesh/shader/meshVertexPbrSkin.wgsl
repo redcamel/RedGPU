@@ -20,7 +20,7 @@ const maxMipLevel: f32 = 10.0;
 @group(1) @binding(0) var<uniform> vertexUniforms: VertexUniforms;
 @group(1) @binding(1) var displacementTextureSampler: sampler;
 @group(1) @binding(2) var displacementTexture: texture_2d<f32>;
-@group(1) @binding(3) var<storage, read> vertexStorages: VertexStorages;
+@group(1) @binding(3) var<storage, read> vertexStorages: array<mat4x4<f32>>;
 
 struct InputDataSkin {
     @location(0) position: vec3<f32>,
@@ -55,7 +55,7 @@ struct OutputShadowData {
 };
 
 @vertex
-fn main(inputData: InputDataSkin) -> OutputDataSkin {
+fn main(inputData: InputDataSkin, @builtin(vertex_index) idx: u32) -> OutputDataSkin {
     var output: OutputDataSkin;
 
     // Input data
@@ -88,12 +88,15 @@ fn main(inputData: InputDataSkin) -> OutputDataSkin {
     // Skinning calculation
     let vertexJoint = inputData.vertexJoint;
     let vertexWeight = inputData.vertexWeight;
-    let jointMatrix = vertexStorages.jointMatrix;
+//    let jointMatrix = vertexStorages.jointMatrix;
 
-    let skinMat = vertexWeight.x * jointMatrix[u32(vertexJoint.x)] +
-                  vertexWeight.y * jointMatrix[u32(vertexJoint.y)] +
-                  vertexWeight.z * jointMatrix[u32(vertexJoint.z)] +
-                  vertexWeight.w * jointMatrix[u32(vertexJoint.w)];
+//    let skinMat = vertexWeight.x * jointMatrix[u32(vertexJoint.x)] +
+//                  vertexWeight.y * jointMatrix[u32(vertexJoint.y)] +
+//                  vertexWeight.z * jointMatrix[u32(vertexJoint.z)] +
+//                  vertexWeight.w * jointMatrix[u32(vertexJoint.w)];
+
+    let skinMat = vertexStorages[idx];
+
 
     // Position and normal calculation
     let position = u_modelMatrix * skinMat * vec4<f32>(inputData.position, 1.0);
@@ -140,7 +143,7 @@ fn main(inputData: InputDataSkin) -> OutputDataSkin {
 }
 
 @vertex
-fn drawDirectionalShadowDepth(inputData: InputDataSkin) -> OutputShadowData {
+fn drawDirectionalShadowDepth(inputData: InputDataSkin, @builtin(vertex_index) idx: u32) -> OutputShadowData {
     var output: OutputShadowData;
 
     // System uniforms
@@ -151,20 +154,21 @@ fn drawDirectionalShadowDepth(inputData: InputDataSkin) -> OutputShadowData {
     let input_position = inputData.position;
 
     // Skinning calculation
-    var skinMat: mat4x4<f32> = mat4x4<f32>(
-        1.0, 0.0, 0.0, 0.0,
-        0.0, 1.0, 0.0, 0.0,
-        0.0, 0.0, 1.0, 0.0,
-        0.0, 0.0, 0.0, 1.0
-    );
+//    var skinMat: mat4x4<f32> = mat4x4<f32>(
+//        1.0, 0.0, 0.0, 0.0,
+//        0.0, 1.0, 0.0, 0.0,
+//        0.0, 0.0, 1.0, 0.0,
+//        0.0, 0.0, 0.0, 1.0
+//    );
     let vertexJoint = inputData.vertexJoint;
     let vertexWeight = inputData.vertexWeight;
-    let jointMatrix = vertexStorages.jointMatrix;
-
-    skinMat = vertexWeight.x * jointMatrix[u32(vertexJoint.x)] +
-              vertexWeight.y * jointMatrix[u32(vertexJoint.y)] +
-              vertexWeight.z * jointMatrix[u32(vertexJoint.z)] +
-              vertexWeight.w * jointMatrix[u32(vertexJoint.w)];
+//    let jointMatrix = vertexStorages.jointMatrix;
+//
+//    skinMat = vertexWeight.x * jointMatrix[u32(vertexJoint.x)] +
+//              vertexWeight.y * jointMatrix[u32(vertexJoint.y)] +
+//              vertexWeight.z * jointMatrix[u32(vertexJoint.z)] +
+//              vertexWeight.w * jointMatrix[u32(vertexJoint.w)];
+let skinMat = vertexStorages[idx];
 
     // Position calculation
     let position = u_modelMatrix * skinMat * vec4<f32>(input_position, 1.0);
@@ -174,7 +178,7 @@ fn drawDirectionalShadowDepth(inputData: InputDataSkin) -> OutputShadowData {
 }
 
 @vertex
-fn picking(inputData: InputDataSkin) -> OutputDataSkin {
+fn picking(inputData: InputDataSkin, @builtin(vertex_index) idx: u32) -> OutputDataSkin {
     var output: OutputDataSkin;
 
     // System uniforms
@@ -185,21 +189,22 @@ fn picking(inputData: InputDataSkin) -> OutputDataSkin {
     let u_modelMatrix = vertexUniforms.modelMatrix;
 
     // Skinning calculation
-    var skinMat: mat4x4<f32> = mat4x4<f32>(
-        1.0, 0.0, 0.0, 0.0,
-        0.0, 1.0, 0.0, 0.0,
-        0.0, 0.0, 1.0, 0.0,
-        0.0, 0.0, 0.0, 1.0
-    );
+//    var skinMat: mat4x4<f32> = mat4x4<f32>(
+//        1.0, 0.0, 0.0, 0.0,
+//        0.0, 1.0, 0.0, 0.0,
+//        0.0, 0.0, 1.0, 0.0,
+//        0.0, 0.0, 0.0, 1.0
+//    );
     let vertexJoint = inputData.vertexJoint;
     let vertexWeight = inputData.vertexWeight;
-    let jointMatrix = vertexStorages.jointMatrix;
+//    let jointMatrix = vertexStorages.jointMatrix;
+//
+//    skinMat = vertexWeight.x * jointMatrix[u32(vertexJoint.x)] +
+//              vertexWeight.y * jointMatrix[u32(vertexJoint.y)] +
+//              vertexWeight.z * jointMatrix[u32(vertexJoint.z)] +
+//              vertexWeight.w * jointMatrix[u32(vertexJoint.w)];
 
-    skinMat = vertexWeight.x * jointMatrix[u32(vertexJoint.x)] +
-              vertexWeight.y * jointMatrix[u32(vertexJoint.y)] +
-              vertexWeight.z * jointMatrix[u32(vertexJoint.z)] +
-              vertexWeight.w * jointMatrix[u32(vertexJoint.w)];
-
+let skinMat = vertexStorages[idx];
     // Position calculation
     let position = u_modelMatrix * skinMat * vec4<f32>(inputData.position, 1.0);
     output.position = u_projectionCameraMatrix * position;
