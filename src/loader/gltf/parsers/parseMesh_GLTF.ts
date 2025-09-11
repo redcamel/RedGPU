@@ -10,6 +10,7 @@ import InterleavedStruct from "../../../resources/buffer/vertexBuffer/Interleave
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
 import {keepLog} from "../../../utils";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
+import createUUID from "../../../utils/createUUID";
 import calculateNormals from "../../../utils/math/calculateNormals";
 import AccessorInfo_GLTF from "../cls/AccessorInfo_GLTF";
 import MorphInfo_GLTF from "../cls/MorphInfo_GLTF";
@@ -179,7 +180,7 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
 					tInterleaveInfoList,
 				),
 				undefined,
-				`Vertex_${gltfLoader.url}_${nodeGlTfId}_${i}`
+				`Vertex_${gltfLoader.url}_${nodeGlTfId}_${i}_${createUUID()}`
 			),
 			!noIndexBuffer && indices.length ? new IndexBuffer(
 				redGPUContext,
