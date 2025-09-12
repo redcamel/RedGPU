@@ -209,6 +209,7 @@ class ParsedSkinInfo_GLTF {
 			this.#createCompute(gpuDevice,mesh.animationInfo.skinInfo.vertexStorageBuffer, mesh.animationInfo.weightBuffer, jointNodeGlobalTransform)
 		}
 		gpuDevice.queue.writeBuffer(this.#jointNodeGlobalTransformBuffer,0,jointNodeGlobalTransform)
+
 		{
 
 			const passEncoder = commandEncoder.beginComputePass();
@@ -220,17 +221,88 @@ class ParsedSkinInfo_GLTF {
 		// this.#writeBuffersToGPU(redGPUContext, mesh.animationInfo.skinInfo, this.#skinMatrixBuffer);
 	}
 
-	#getOptimizedJointNodeGlobalTransform(usedJointIndices: number[], nodeGlobalTransform): Float32Array {
-		const neededSize = this.joints.length * 16; // GPU 버퍼는 전체 크기 유지
-		if (!this.#reusableJointNodeGlobalTransform || this.#reusableJointNodeGlobalTransform.length != neededSize) {
+	// #getOptimizedJointNodeGlobalTransform(usedJointIndices: number[], nodeGlobalTransform): Float32Array {
+	// 	const neededSize = this.joints.length * 16; // GPU 버퍼는 전체 크기 유지
+	// 	if (!this.#reusableJointNodeGlobalTransform || this.#reusableJointNodeGlobalTransform.length != neededSize) {
+	// 		this.#reusableJointNodeGlobalTransform = new Float32Array(neededSize);
+	// 	}
+	// 	// 사용되는 조인트만 계산
+	// 	for (const jointIndex of usedJointIndices) {
+	// 		mat4.multiply(temp0, this.joints[jointIndex].modelMatrix, this.inverseBindMatrices[jointIndex]);
+	// 		mat4.multiply(temp1, nodeGlobalTransform, temp0);
+	// 		this.#reusableJointNodeGlobalTransform.set(temp1, jointIndex * 16);
+	// 	}
+	// 	return this.#reusableJointNodeGlobalTransform;
+	// }
+	#getOptimizedJointNodeGlobalTransform(usedJointIndices: number[], nodeGlobalTransform: Float32Array): Float32Array {
+		const neededSize = this.joints.length * 16;
+		if (!this.#reusableJointNodeGlobalTransform || this.#reusableJointNodeGlobalTransform.length !== neededSize) {
 			this.#reusableJointNodeGlobalTransform = new Float32Array(neededSize);
 		}
-		// 사용되는 조인트만 계산
+
 		for (const jointIndex of usedJointIndices) {
-			const t0 = mat4.multiply(temp0, nodeGlobalTransform, this.joints[jointIndex].modelMatrix)
-			const t1 = mat4.multiply(temp1, t0, this.inverseBindMatrices[jointIndex])
-			this.#reusableJointNodeGlobalTransform.set(t1, jointIndex * 16);
+			const jointMatrix = this.joints[jointIndex].modelMatrix;
+			const inverseBindMatrix = this.inverseBindMatrices[jointIndex];
+			const offset = jointIndex * 16;
+
+			// temp1 = nodeGlobalTransform * jointMatrix ---
+			const n00 = nodeGlobalTransform[0],  n01 = nodeGlobalTransform[1],  n02 = nodeGlobalTransform[2],  n03 = nodeGlobalTransform[3];
+			const n10 = nodeGlobalTransform[4],  n11 = nodeGlobalTransform[5],  n12 = nodeGlobalTransform[6],  n13 = nodeGlobalTransform[7];
+			const n20 = nodeGlobalTransform[8],  n21 = nodeGlobalTransform[9],  n22 = nodeGlobalTransform[10], n23 = nodeGlobalTransform[11];
+			const n30 = nodeGlobalTransform[12], n31 = nodeGlobalTransform[13], n32 = nodeGlobalTransform[14], n33 = nodeGlobalTransform[15];
+
+			const j00 = jointMatrix[0],  j01 = jointMatrix[1],  j02 = jointMatrix[2],  j03 = jointMatrix[3];
+			const j10 = jointMatrix[4],  j11 = jointMatrix[5],  j12 = jointMatrix[6],  j13 = jointMatrix[7];
+			const j20 = jointMatrix[8],  j21 = jointMatrix[9],  j22 = jointMatrix[10], j23 = jointMatrix[11];
+			const j30 = jointMatrix[12], j31 = jointMatrix[13], j32 = jointMatrix[14], j33 = jointMatrix[15];
+
+			const t00 = n00 * j00 + n10 * j01 + n20 * j02 + n30 * j03;
+			const t01 = n01 * j00 + n11 * j01 + n21 * j02 + n31 * j03;
+			const t02 = n02 * j00 + n12 * j01 + n22 * j02 + n32 * j03;
+			const t03 = n03 * j00 + n13 * j01 + n23 * j02 + n33 * j03;
+
+			const t10 = n00 * j10 + n10 * j11 + n20 * j12 + n30 * j13;
+			const t11 = n01 * j10 + n11 * j11 + n21 * j12 + n31 * j13;
+			const t12 = n02 * j10 + n12 * j11 + n22 * j12 + n32 * j13;
+			const t13 = n03 * j10 + n13 * j11 + n23 * j12 + n33 * j13;
+
+			const t20 = n00 * j20 + n10 * j21 + n20 * j22 + n30 * j23;
+			const t21 = n01 * j20 + n11 * j21 + n21 * j22 + n31 * j23;
+			const t22 = n02 * j20 + n12 * j21 + n22 * j22 + n32 * j23;
+			const t23 = n03 * j20 + n13 * j21 + n23 * j22 + n33 * j23;
+
+			const t30 = n00 * j30 + n10 * j31 + n20 * j32 + n30 * j33;
+			const t31 = n01 * j30 + n11 * j31 + n21 * j32 + n31 * j33;
+			const t32 = n02 * j30 + n12 * j31 + n22 * j32 + n32 * j33;
+			const t33 = n03 * j30 + n13 * j31 + n23 * j32 + n33 * j33;
+
+			// final = temp1 * inverseBindMatrix ---
+			const i00 = inverseBindMatrix[0],  i01 = inverseBindMatrix[1],  i02 = inverseBindMatrix[2],  i03 = inverseBindMatrix[3];
+			const i10 = inverseBindMatrix[4],  i11 = inverseBindMatrix[5],  i12 = inverseBindMatrix[6],  i13 = inverseBindMatrix[7];
+			const i20 = inverseBindMatrix[8],  i21 = inverseBindMatrix[9],  i22 = inverseBindMatrix[10], i23 = inverseBindMatrix[11];
+			const i30 = inverseBindMatrix[12], i31 = inverseBindMatrix[13], i32 = inverseBindMatrix[14], i33 = inverseBindMatrix[15];
+
+			this.#reusableJointNodeGlobalTransform[offset]     = t00 * i00 + t10 * i01 + t20 * i02 + t30 * i03;
+			this.#reusableJointNodeGlobalTransform[offset + 1] = t01 * i00 + t11 * i01 + t21 * i02 + t31 * i03;
+			this.#reusableJointNodeGlobalTransform[offset + 2] = t02 * i00 + t12 * i01 + t22 * i02 + t32 * i03;
+			this.#reusableJointNodeGlobalTransform[offset + 3] = t03 * i00 + t13 * i01 + t23 * i02 + t33 * i03;
+
+			this.#reusableJointNodeGlobalTransform[offset + 4] = t00 * i10 + t10 * i11 + t20 * i12 + t30 * i13;
+			this.#reusableJointNodeGlobalTransform[offset + 5] = t01 * i10 + t11 * i11 + t21 * i12 + t31 * i13;
+			this.#reusableJointNodeGlobalTransform[offset + 6] = t02 * i10 + t12 * i11 + t22 * i12 + t32 * i13;
+			this.#reusableJointNodeGlobalTransform[offset + 7] = t03 * i10 + t13 * i11 + t23 * i12 + t33 * i13;
+
+			this.#reusableJointNodeGlobalTransform[offset + 8]  = t00 * i20 + t10 * i21 + t20 * i22 + t30 * i23;
+			this.#reusableJointNodeGlobalTransform[offset + 9]  = t01 * i20 + t11 * i21 + t21 * i22 + t31 * i23;
+			this.#reusableJointNodeGlobalTransform[offset + 10] = t02 * i20 + t12 * i21 + t22 * i22 + t32 * i23;
+			this.#reusableJointNodeGlobalTransform[offset + 11] = t03 * i20 + t13 * i21 + t23 * i22 + t33 * i23;
+
+			this.#reusableJointNodeGlobalTransform[offset + 12] = t00 * i30 + t10 * i31 + t20 * i32 + t30 * i33;
+			this.#reusableJointNodeGlobalTransform[offset + 13] = t01 * i30 + t11 * i31 + t21 * i32 + t31 * i33;
+			this.#reusableJointNodeGlobalTransform[offset + 14] = t02 * i30 + t12 * i31 + t22 * i32 + t32 * i33;
+			this.#reusableJointNodeGlobalTransform[offset + 15] = t03 * i30 + t13 * i31 + t23 * i32 + t33 * i33;
 		}
+
 		return this.#reusableJointNodeGlobalTransform;
 	}
 
