@@ -1,9 +1,7 @@
 import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../context/RedGPUContext";
 import Mesh from "../../../display/mesh/Mesh";
-import StorageBuffer from "../../../resources/buffer/storageBuffer/StorageBuffer";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
-import {keepLog} from "../../../utils";
 
 let temp0 = new Float32Array(16)
 let temp1 = new Float32Array(16)
@@ -61,48 +59,80 @@ class ParsedSkinInfo_GLTF {
 
 	#createCompute(
 		device: GPUDevice,
-		vertexStorageBuffer:GPUBuffer,
+		vertexStorageBuffer: GPUBuffer,
 		weightBuffer: VertexBuffer,
 		jointNodeGlobalTransform: Float32Array
 	) {
-		// 1. WGSL 컴퓨트 셰이더 코드
 		const source = `
     struct VertexSkinData {
       vertexWeight: vec4<f32>,
       vertexJoint: vec4<f32>,
     };
 
+  
+    struct AlignedMatrix {
+        col0: vec4<f32>,
+        col1: vec4<f32>, 
+        col2: vec4<f32>,
+        col3: vec4<f32>,
+    };
+
     @group(0) @binding(0) var<storage, read> vertexSkinBuffer: array<VertexSkinData>;
-    @group(0) @binding(1) var<storage, read> jointMatrices: array<mat4x4<f32>>;
-    @group(0) @binding(2) var<storage, read_write> skinMatrixBuffer: array<mat4x4<f32>>;
+    @group(0) @binding(1) var<storage, read> jointMatrices: array<AlignedMatrix>;
+    @group(0) @binding(2) var<storage, read_write> skinMatrixBuffer: array<AlignedMatrix>;
 
     @compute @workgroup_size(64)
-    fn main(@builtin(global_invocation_id) id: vec3<u32>) {
-      let i = id.x;
-     if (i >= arrayLength(&vertexSkinBuffer)) {
-		    return;
-		  }
-      let skin = vertexSkinBuffer[i];
-
-      var skinMat = 
-       skin.vertexWeight.x * jointMatrices[u32(skin.vertexJoint.x)] +
-      skin.vertexWeight.y * jointMatrices[u32(skin.vertexJoint.y)] +
-      skin.vertexWeight.z * jointMatrices[u32(skin.vertexJoint.z)] +
-      skin.vertexWeight.w * jointMatrices[u32(skin.vertexJoint.w)];
-
-      skinMatrixBuffer[i] = skinMat;
+    fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
       
+      let i = global_id.x;
+      if (i >= arrayLength(&vertexSkinBuffer)) {
+          return;
+      }
+      
+      let skin = vertexSkinBuffer[i];
+      
+
+      let j0 = u32(skin.vertexJoint.x);
+      let j1 = u32(skin.vertexJoint.y);
+      let j2 = u32(skin.vertexJoint.z);
+      let j3 = u32(skin.vertexJoint.w);
+      
+  
+      let w = skin.vertexWeight;
+      
+  
+      let m0 = jointMatrices[j0];
+      let m1 = jointMatrices[j1];
+      let m2 = jointMatrices[j2];
+      let m3 = jointMatrices[j3];
+      
+
+      let result_col0 = w.x * m0.col0 + w.y * m1.col0 + w.z * m2.col0 + w.w * m3.col0;
+      let result_col1 = w.x * m0.col1 + w.y * m1.col1 + w.z * m2.col1 + w.w * m3.col1;
+      let result_col2 = w.x * m0.col2 + w.y * m1.col2 + w.z * m2.col2 + w.w * m3.col2;
+      let result_col3 = w.x * m0.col3 + w.y * m1.col3 + w.z * m2.col3 + w.w * m3.col3;
+
+   
+      skinMatrixBuffer[i] = AlignedMatrix(result_col0, result_col1, result_col2, result_col3);
     }
-  `;
-		// 2. jointNodeGlobalTransformBuffer 생성 및 데이터 업로드
+    `;
+
+		// 2. 정렬된 jointNodeGlobalTransformBuffer 생성
 		const jointSize = jointNodeGlobalTransform.byteLength;
+		// 256바이트 정렬 (GPU 캐시 라인 최적화)
+		const alignedJointSize = Math.ceil(jointSize / 256) * 256;
+
 		const jointBuffer = device.createBuffer({
-			size: jointSize,
+			size: alignedJointSize,
 			usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
 			mappedAtCreation: true,
+			label: 'OptimizedJointMatrices'
 		});
-		new Float32Array(jointBuffer.getMappedRange()).set(jointNodeGlobalTransform);
+
+		const mappedArray = new Float32Array(jointBuffer.getMappedRange());
+		mappedArray.set(jointNodeGlobalTransform);
 		jointBuffer.unmap();
+
 		this.#jointNodeGlobalTransformBuffer = jointBuffer;
 
 		// 4. 셰이더 모듈 로드 & 컴퓨트 파이프라인 생성
@@ -114,6 +144,7 @@ class ParsedSkinInfo_GLTF {
 				entryPoint: 'main',
 			},
 		});
+
 		// 5. 바인드 그룹 생성
 		this.#bindGroup = device.createBindGroup({
 			layout: this.#computePipeline.getBindGroupLayout(0),
@@ -123,7 +154,6 @@ class ParsedSkinInfo_GLTF {
 				{binding: 2, resource: {buffer: vertexStorageBuffer}},
 			],
 		});
-		// 6. 컴퓨트 패스 실행
 	}
 
 	#jointNodeGlobalTransformBuffer: GPUBuffer;
@@ -131,8 +161,41 @@ class ParsedSkinInfo_GLTF {
 	#computePipeline: GPUComputePipeline;
 	#bindGroup: GPUBindGroup;
 
+	get computePipeline(): GPUComputePipeline {
+		return this.#computePipeline;
+	}
 
-	update(redGPUContext: RedGPUContext, mesh: Mesh) {
+	get bindGroup(): GPUBindGroup {
+		return this.#bindGroup;
+	}
+
+	// update(redGPUContext: RedGPUContext, mesh: Mesh) {
+	// 	const {gpuDevice} = redGPUContext
+	// 	const usedJointIndices = this.#usedJoints === null ? this.#getUsedJointIndices(mesh) : this.#usedJoints;
+	// 	this.#usedJoints = usedJointIndices
+	// 	const nodeGlobalTransform = this.#getNodeGlobalTransform(mesh.modelMatrix);
+	// 	const jointNodeGlobalTransform = this.#getOptimizedJointNodeGlobalTransform(
+	// 		Array.from(usedJointIndices),
+	// 		nodeGlobalTransform
+	// 	);
+	//
+	// 	if (!this.#computeShader) {
+	// 		this.#createCompute(gpuDevice,mesh.animationInfo.skinInfo.vertexStorageBuffer, mesh.animationInfo.weightBuffer, jointNodeGlobalTransform)
+	// 	}
+	// 	gpuDevice.queue.writeBuffer(this.#jointNodeGlobalTransformBuffer,0,jointNodeGlobalTransform)
+	// 	{
+	// 		const commandEncoder = gpuDevice.createCommandEncoder();
+	// 		const passEncoder = commandEncoder.beginComputePass();
+	// 		passEncoder.setPipeline(this.#computePipeline);
+	// 		passEncoder.setBindGroup(0, this.#bindGroup);
+	// 		passEncoder.dispatchWorkgroups(Math.ceil(mesh.geometry.vertexBuffer.vertexCount / 64));
+	// 		passEncoder.end();
+	//
+	// 		gpuDevice.queue.submit([commandEncoder.finish()]);
+	// 	}
+	// 	// this.#writeBuffersToGPU(redGPUContext, mesh.animationInfo.skinInfo, this.#skinMatrixBuffer);
+	// }
+	update(redGPUContext,commandEncoder: GPUCommandEncoder, mesh: Mesh) {
 		const {gpuDevice} = redGPUContext
 		const usedJointIndices = this.#usedJoints === null ? this.#getUsedJointIndices(mesh) : this.#usedJoints;
 		this.#usedJoints = usedJointIndices
@@ -147,14 +210,12 @@ class ParsedSkinInfo_GLTF {
 		}
 		gpuDevice.queue.writeBuffer(this.#jointNodeGlobalTransformBuffer,0,jointNodeGlobalTransform)
 		{
-			const commandEncoder = gpuDevice.createCommandEncoder();
+
 			const passEncoder = commandEncoder.beginComputePass();
 			passEncoder.setPipeline(this.#computePipeline);
 			passEncoder.setBindGroup(0, this.#bindGroup);
 			passEncoder.dispatchWorkgroups(Math.ceil(mesh.geometry.vertexBuffer.vertexCount / 64));
 			passEncoder.end();
-
-			gpuDevice.queue.submit([commandEncoder.finish()]);
 		}
 		// this.#writeBuffersToGPU(redGPUContext, mesh.animationInfo.skinInfo, this.#skinMatrixBuffer);
 	}

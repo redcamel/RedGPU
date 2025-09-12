@@ -17,12 +17,13 @@ RedGPU.init(
 		redGPUContext.addView(view);
 
 		{
-			let i = 50
+			let i = 200
 			while(i--){
 				// setTimeout(()=>{
-					// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF-Binary/BrainStem.glb');
-					loadGLTF(view, 'https://redcamel.github.io/RedGL2/asset/glTF/breakDance/scene.gltf');
-					// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/SimpleMorph/glTF/SimpleMorph.gltf');
+				// 	loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF-Binary/BrainStem.glb');
+				// 	loadGLTF(view, 'https://redcamel.github.io/RedGL2/asset/glTF/breakDance/scene.gltf');
+				// 	loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumMan/glTF-Binary/CesiumMan.glb');
+				// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/SimpleMorph/glTF/SimpleMorph.gltf');
 
 				// },1 * i)
 			}
@@ -49,7 +50,10 @@ function loadGLTF(view, url) {
 		const mesh = result.resultMesh
 		mesh.x = Math.random() * 10 - 5
 		mesh.z = Math.random() * 10- 5
-		mesh.setScale(0.001)
+		if(url.includes('breakDance')){
+
+			mesh.setScale(0.001)
+		}
 		scene.addChild(mesh)
 		if(num===0){
 			console.log(result)

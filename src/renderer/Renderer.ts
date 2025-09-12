@@ -1,9 +1,11 @@
 import {mat4} from "gl-matrix";
 import Camera2D from "../camera/camera/Camera2D";
 import RedGPUContext from "../context/RedGPUContext";
+import Mesh from "../display/mesh/Mesh";
 import View3D from "../display/view/View3D";
 import GPU_LOAD_OP from "../gpuConst/GPU_LOAD_OP";
 import GPU_STORE_OP from "../gpuConst/GPU_STORE_OP";
+import ParsedSkinInfo_GLTF from "../loader/gltf/cls/ParsedSkinInfo_GLTF";
 import DebugRender from "./debugRender/DebugRender";
 import FinalRender from "./finalRender/FinalRender";
 import render2PathLayer from "./renderLayers/render2PathLayer";
@@ -11,6 +13,7 @@ import renderAlphaLayer from "./renderLayers/renderAlphaLayer";
 import renderBasicLayer from "./renderLayers/renderBasicLayer";
 import renderPickingLayer from "./renderLayers/renderPickingLayer";
 import renderShadowLayer from "./renderLayers/renderShadowLayer";
+import RenderViewStateData from "./RenderViewStateData";
 
 class Renderer {
 	#prevViewportSize: { width: number, height: number };
@@ -74,6 +77,21 @@ class Renderer {
 		return result;
 	}
 
+	#batchUpdateSkinMatrices(redGPUContext: RedGPUContext, meshes: Mesh[]) {
+		if (meshes.length === 0) return;
+
+		const commandEncoder = redGPUContext.gpuDevice.createCommandEncoder();
+
+		for (const mesh of meshes) {
+			if (mesh.animationInfo?.skinInfo) {
+				const skinInfo = mesh.animationInfo.skinInfo as ParsedSkinInfo_GLTF;
+				skinInfo.update(redGPUContext,commandEncoder,mesh)
+			}
+		}
+
+		// 한 번에 제출
+		redGPUContext.gpuDevice.queue.submit([commandEncoder.finish()]);
+	}
 	renderView(view: View3D, time: number) {
 		const {
 			redGPUContext,
@@ -117,6 +135,7 @@ class Renderer {
 		// @ts-ignore
 		camera.update?.(view, time)
 		const commandEncoder: GPUCommandEncoder = redGPUContext.gpuDevice.createCommandEncoder()
+		this.#batchUpdateSkinMatrices(redGPUContext, debugViewRenderState.skinList)
 		view.debugViewRenderState.reset(null, time)
 		if (pixelRectObject.width && pixelRectObject.height) {
 			if (directionalShadowManager.shadowDepthTextureView) {

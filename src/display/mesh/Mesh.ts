@@ -431,6 +431,7 @@ class Mesh extends MeshBase {
 		return cloneMesh
 	}
 	#prevModelMatrix:mat4
+
 	render(debugViewRenderState: RenderViewStateData) {
 		const {redGPUContext,} = this
 		const {
@@ -473,6 +474,8 @@ class Mesh extends MeshBase {
 				this.depthStencilState.depthWriteEnabled = false
 			}
 		}
+
+
 		if (this.dirtyTransform) {
 			dirtyTransformForChildren = true
 			{
@@ -728,7 +731,8 @@ class Mesh extends MeshBase {
 					this.dirtyPipeline = true
 				}
 				if (this.currentShaderModuleName === `${VERTEX_SHADER_MODULE_NAME_PBR_SKIN}_${this.animationInfo.skinInfo.joints?.length}`) {
-					this.animationInfo.skinInfo.update(redGPUContext, this)
+					// this.animationInfo.skinInfo.update(redGPUContext, this)
+					debugViewRenderState.skinList[debugViewRenderState.skinList.length] = this
 					dirtyTransformForChildren = false
 				}
 			}
