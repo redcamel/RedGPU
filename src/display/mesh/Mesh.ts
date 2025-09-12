@@ -723,20 +723,7 @@ class Mesh extends MeshBase {
 				}
 			}
 		}
-		{
-			// check animation
-			if (this.gltfLoaderInfo?.activeAnimations?.length) gltfAnimationLooper(timestamp, this.gltfLoaderInfo.activeAnimations)
-			if (this.animationInfo.skinInfo) {
-				if (!this.currentShaderModuleName.includes(VERTEX_SHADER_MODULE_NAME_PBR_SKIN)) {
-					this.dirtyPipeline = true
-				}
-				if (this.currentShaderModuleName === `${VERTEX_SHADER_MODULE_NAME_PBR_SKIN}_${this.animationInfo.skinInfo.joints?.length}`) {
-					// this.animationInfo.skinInfo.update(redGPUContext, this)
-					debugViewRenderState.skinList[debugViewRenderState.skinList.length] = this
-					dirtyTransformForChildren = false
-				}
-			}
-		}
+
 		// check distanceCulling
 		let passFrustumCulling = true
 		// if (useDistanceCulling && currentGeometry) {
@@ -788,6 +775,7 @@ class Mesh extends MeshBase {
 		}
 		// check frustumCulling
 		if (frustumPlanes && passFrustumCulling) {
+
 			if (currentGeometry) {
 				const combinedAABB = this.boundingAABB;
 				const frustumPlanes0 = frustumPlanes[0];
@@ -813,6 +801,20 @@ class Mesh extends MeshBase {
 			}
 		}
 		if (this.#ignoreFrustumCulling) passFrustumCulling = true
+		{
+			// check animation
+			if (this.gltfLoaderInfo?.activeAnimations?.length) gltfAnimationLooper(timestamp, this.gltfLoaderInfo.activeAnimations)
+			if (this.animationInfo.skinInfo) {
+				if (!this.currentShaderModuleName.includes(VERTEX_SHADER_MODULE_NAME_PBR_SKIN)) {
+					this.dirtyPipeline = true
+				}
+				if (this.currentShaderModuleName === `${VERTEX_SHADER_MODULE_NAME_PBR_SKIN}_${this.animationInfo.skinInfo.joints?.length}`) {
+					// this.animationInfo.skinInfo.update(redGPUContext, this)
+					debugViewRenderState.skinList[debugViewRenderState.skinList.length] = this
+					dirtyTransformForChildren = false
+				}
+			}
+		}
 		// render
 		if (currentGeometry) debugViewRenderState.num3DObjects++
 		else debugViewRenderState.num3DGroups++
