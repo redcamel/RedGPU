@@ -13,7 +13,6 @@ import renderAlphaLayer from "./renderLayers/renderAlphaLayer";
 import renderBasicLayer from "./renderLayers/renderBasicLayer";
 import renderPickingLayer from "./renderLayers/renderPickingLayer";
 import renderShadowLayer from "./renderLayers/renderShadowLayer";
-import RenderViewStateData from "./RenderViewStateData";
 
 class Renderer {
 	#prevViewportSize: { width: number, height: number };
@@ -135,6 +134,7 @@ class Renderer {
 		// @ts-ignore
 		camera.update?.(view, time)
 		const commandEncoder: GPUCommandEncoder = redGPUContext.gpuDevice.createCommandEncoder()
+
 		this.#batchUpdateSkinMatrices(redGPUContext, debugViewRenderState.skinList)
 		view.debugViewRenderState.reset(null, time)
 		if (pixelRectObject.width && pixelRectObject.height) {

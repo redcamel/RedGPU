@@ -1,4 +1,5 @@
 import * as RedGPU from "../../../../dist/index.js";
+// import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -17,16 +18,17 @@ RedGPU.init(
 		redGPUContext.addView(view);
 
 		{
-			let i = 300
+			let i = 100
 			while (i--) {
-				// setTimeout(()=>{
+				setTimeout(()=>{
 				// 	loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF-Binary/BrainStem.glb');
 					// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF/BrainStem.gltf');
-					// loadGLTF(view, 'https://redcamel.github.io/RedGL2/asset/glTF/breakDance/scene.gltf');
-				loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumMan/glTF-Binary/CesiumMan.glb');
+					loadGLTF(view, 'https://redcamel.github.io/RedGL2/asset/glTF/breakDance/scene.gltf');
+				// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumMan/glTF-Binary/CesiumMan.glb');
+				// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumMan/glTF/CesiumMan.gltf');
 				// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/SimpleMorph/glTF/SimpleMorph.gltf');
 
-				// },1 * i)
+				},1 * i)
 			}
 		}
 		const renderer = new RedGPU.Renderer(redGPUContext);
@@ -54,6 +56,7 @@ function loadGLTF(view, url) {
 		if (url.includes('breakDance')) {
 
 			mesh.setScale(0.001)
+
 		}
 		scene.addChild(mesh)
 		if (num === 0) {

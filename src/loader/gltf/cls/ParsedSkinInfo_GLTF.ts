@@ -58,6 +58,7 @@ class ParsedSkinInfo_GLTF {
 	}
 
 	#createCompute(
+		redGPUContext: RedGPUContext,
 		device: GPUDevice,
 		vertexStorageBuffer: GPUBuffer,
 		weightBuffer: VertexBuffer,
@@ -85,9 +86,7 @@ class ParsedSkinInfo_GLTF {
     fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
       
       let i = global_id.x;
-      if (i >= arrayLength(&vertexSkinBuffer)) {
-          return;
-      }
+    
       
       let skin = vertexSkinBuffer[i];
       
@@ -125,19 +124,24 @@ class ParsedSkinInfo_GLTF {
 		const jointBuffer = device.createBuffer({
 			size: alignedJointSize,
 			usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
-			mappedAtCreation: true,
 			label: 'OptimizedJointMatrices'
 		});
 
-		const mappedArray = new Float32Array(jointBuffer.getMappedRange());
-		mappedArray.set(jointNodeGlobalTransform);
-		jointBuffer.unmap();
 
 		this.#jointNodeGlobalTransformBuffer = jointBuffer;
 
 		// 4. 셰이더 모듈 로드 & 컴퓨트 파이프라인 생성
-		this.#computeShader = device.createShaderModule({code: source});
+		// this.#computeShader = device.createShaderModule({code: source});
+		// this.#computePipeline = device.createComputePipeline({
+		// 	layout: 'auto',
+		// 	compute: {
+		// 		module: this.#computeShader,
+		// 		entryPoint: 'main',
+		// 	},
+		// });
+		this.#computeShader = redGPUContext.resourceManager.createGPUShaderModule('calcSkinMatrix',{code: source})
 		this.#computePipeline = device.createComputePipeline({
+			label:'calcSkinMatrix',
 			layout: 'auto',
 			compute: {
 				module: this.#computeShader,
@@ -206,7 +210,7 @@ class ParsedSkinInfo_GLTF {
 		);
 
 		if (!this.#computeShader) {
-			this.#createCompute(gpuDevice,mesh.animationInfo.skinInfo.vertexStorageBuffer, mesh.animationInfo.weightBuffer, jointNodeGlobalTransform)
+			this.#createCompute(redGPUContext,gpuDevice,mesh.animationInfo.skinInfo.vertexStorageBuffer, mesh.animationInfo.weightBuffer, jointNodeGlobalTransform)
 		}
 		gpuDevice.queue.writeBuffer(this.#jointNodeGlobalTransformBuffer,0,jointNodeGlobalTransform)
 
