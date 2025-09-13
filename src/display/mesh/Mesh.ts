@@ -267,7 +267,7 @@ class Mesh extends MeshBase {
 	}
 
 	get scale(): number[] {
-		return this.#positionArray;
+		return this.#scaleArray;
 	}
 
 	get rotationX(): number {
@@ -776,7 +776,7 @@ class Mesh extends MeshBase {
 		// check frustumCulling
 		if (frustumPlanes && passFrustumCulling) {
 
-			if (currentGeometry) {
+			// if (currentGeometry) {
 				const combinedAABB = this.boundingAABB;
 				const frustumPlanes0 = frustumPlanes[0];
 				const frustumPlanes1 = frustumPlanes[1];
@@ -796,12 +796,12 @@ class Mesh extends MeshBase {
 							: frustumPlanes3[0] * centerX + frustumPlanes3[1] * centerY + frustumPlanes3[2] * centerZ + frustumPlanes3[3] <= -radius ? passFrustumCulling = false
 								: frustumPlanes4[0] * centerX + frustumPlanes4[1] * centerY + frustumPlanes4[2] * centerZ + frustumPlanes4[3] <= -radius ? passFrustumCulling = false
 									: frustumPlanes5[0] * centerX + frustumPlanes5[1] * centerY + frustumPlanes5[2] * centerZ + frustumPlanes5[3] <= -radius ? passFrustumCulling = false : 0;
-			} else {
-				passFrustumCulling = false
-			}
+			// } else {
+			// 	passFrustumCulling = false
+			// }
 		}
 		if (this.#ignoreFrustumCulling) passFrustumCulling = true
-		{
+		if(passFrustumCulling){
 			// check animation
 			if (this.gltfLoaderInfo?.activeAnimations?.length) gltfAnimationLooper(timestamp, this.gltfLoaderInfo.activeAnimations)
 			if (this.animationInfo.skinInfo) {

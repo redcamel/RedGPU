@@ -171,16 +171,19 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
 			undefined,
 			`Weight_${gltfLoader.url}_${nodeGlTfId}_${i}`
 		)
+		const vertexCacheKey = `Vertex_${gltfLoader.url}_${nodeGlTfId}_${i}`
+		const hasVertexBuffer = redGPUContext.resourceManager['managedVertexBufferState'].table.get(vertexCacheKey)?.buffer
+
 		tGeo = new Geometry(
 			redGPUContext,
-			new VertexBuffer(
+			hasVertexBuffer || new VertexBuffer(
 				redGPUContext,
 				interleaveData,
 				new InterleavedStruct(
 					tInterleaveInfoList,
 				),
 				undefined,
-				`Vertex_${gltfLoader.url}_${nodeGlTfId}_${i}_${createUUID()}`
+				vertexCacheKey
 			),
 			!noIndexBuffer && indices.length ? new IndexBuffer(
 				redGPUContext,
@@ -258,7 +261,7 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
 			}
 		}
 		// console.log('여긴가', NUM)
-		{
+		if(!hasVertexBuffer){
 			const list = tMesh.animationInfo.morphInfo.morphInfoDataList;
 			let index = 0;
 			const listLen = list.length
