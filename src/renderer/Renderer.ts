@@ -81,11 +81,11 @@ class Renderer {
 
 		const commandEncoder = redGPUContext.gpuDevice.createCommandEncoder();
 
-		for (const mesh of meshes) {
-			if (mesh.animationInfo?.skinInfo) {
-				const skinInfo = mesh.animationInfo.skinInfo as ParsedSkinInfo_GLTF;
-				skinInfo.update(redGPUContext,commandEncoder,mesh)
-			}
+		let i = meshes.length
+		while (i--) {
+			let mesh = meshes[i]
+			const skinInfo = mesh.animationInfo.skinInfo as ParsedSkinInfo_GLTF;
+			skinInfo.update(redGPUContext,commandEncoder,mesh)
 		}
 
 		// 한 번에 제출
