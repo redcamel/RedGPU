@@ -51,8 +51,8 @@ function loadGLTF(view, url) {
 	const {redGPUContext, scene} = view;
 	new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
 		const mesh = result.resultMesh
-		mesh.x = Math.random() * 20 - 10
-		mesh.z = Math.random() * 20 - 10
+		mesh.x = Math.random() * 30 - 15
+		mesh.z = Math.random() * 30 - 15
 		if (url.includes('breakDance')) {
 
 			mesh.setScale(0.001)
