@@ -242,7 +242,7 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
 					morph.jointWeights, morph.joints,
 					morph.tangents
 				);
-				morph.interleaveData = interleaveData;
+				morph.interleaveData = new Float32Array(interleaveData);
 				index++;
 			}
 			tMesh.animationInfo.morphInfo = morphInfo;
