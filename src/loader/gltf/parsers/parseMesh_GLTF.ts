@@ -152,9 +152,9 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
 		else if (uvs.length) tInterleaveInfoList['aTexcoord1'] = InterleaveType.float32x2
 		tInterleaveInfoList['aVertexColor_0'] = InterleaveType.float32x4
 		// if (jointWeights.length)
-		tInterleaveInfoList['aVertexWeight'] = InterleaveType.float32x4
+		// tInterleaveInfoList['aVertexWeight'] = InterleaveType.float32x4
 		// if (joints.length)
-		tInterleaveInfoList['aVertexJoint'] = InterleaveType.float32x4
+		// tInterleaveInfoList['aVertexJoint'] = InterleaveType.float32x4
 		tInterleaveInfoList['aVertexTangent'] = InterleaveType.float32x4
 		const weightData = []
 		parseInterleaveData_GLTF(weightData, vertices, verticesColor_0, normalData, uvs, uvs1, uvs2, jointWeights, joints, tangents,true)

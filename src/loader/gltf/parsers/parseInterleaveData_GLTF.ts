@@ -113,28 +113,7 @@ const parseInterleaveData_GLTF = (
 				interleaveData[idx++] = 0;
 				interleaveData[idx++] = 0;
 			}
-			if (has_jointWeights) {
-				interleaveData[idx++] = jointWeights[index4D];
-				interleaveData[idx++] = jointWeights[index4D_1];
-				interleaveData[idx++] = jointWeights[index4D_2];
-				interleaveData[idx++] = jointWeights[index4D_3];
-			} else {
-				interleaveData[idx++] = 0;
-				interleaveData[idx++] = 0;
-				interleaveData[idx++] = 0;
-				interleaveData[idx++] = 0;
-			}
-			if (has_joints) {
-				interleaveData[idx++] = joints[index4D];
-				interleaveData[idx++] = joints[index4D_1];
-				interleaveData[idx++] = joints[index4D_2];
-				interleaveData[idx++] = joints[index4D_3];
-			} else {
-				interleaveData[idx++] = 0;
-				interleaveData[idx++] = 0;
-				interleaveData[idx++] = 0;
-				interleaveData[idx++] = 0;
-			}
+		
 			if (has_tangents) {
 				interleaveData[idx++] = tangents[index4D];
 				interleaveData[idx++] = tangents[index4D_1];

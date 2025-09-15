@@ -35,11 +35,12 @@ class ParsedSkinInfo_GLTF {
 		const usedJoints = new Set<number>();
 		const geometry = mesh.geometry;
 		const vertexBuffer = geometry.vertexBuffer;
+		const {weightBuffer} = mesh.animationInfo;
 		// 인터리브된 데이터에서 joint 정보 추출
-		const interleavedStruct = vertexBuffer.interleavedStruct;
+		const interleavedStruct = weightBuffer.interleavedStruct;
 		const jointInfo = interleavedStruct.attributes.filter(v => v.attributeName === 'aVertexJoint')[0];
 		if (!jointInfo) return usedJoints;
-		const data = vertexBuffer.data;
+		const data = weightBuffer.data;
 		const stride = interleavedStruct.arrayStride / 4;
 		const jointOffset = jointInfo.offset / 4;
 		const vertexCount = data.length / stride;

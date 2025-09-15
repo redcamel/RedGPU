@@ -25,9 +25,7 @@ struct InputData {
     @location(2) uv: vec2<f32>,
     @location(3) uv1: vec2<f32>,
     @location(4) vertexColor_0: vec4<f32>,
-    @location(5) vertexWeight: vec4<f32>,
-    @location(6) vertexJoint: vec4<f32>,
-    @location(7) vertexTangent: vec4<f32>,
+    @location(5) vertexTangent: vec4<f32>,
 };
 
 struct OutputData {
