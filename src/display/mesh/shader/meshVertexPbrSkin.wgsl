@@ -16,7 +16,7 @@ const maxMipLevel: f32 = 10.0;
 @group(1) @binding(0) var<uniform> vertexUniforms: VertexUniforms;
 @group(1) @binding(1) var displacementTextureSampler: sampler;
 @group(1) @binding(2) var displacementTexture: texture_2d<f32>;
-@group(1) @binding(3) var<storage, read> vertexStorages: array<mat4x4<f32>,#JOINT_NUM>;
+@group(1) @binding(3) var<storage, read> vertexStorages: array<mat4x4<f32>>;
 
 struct InputDataSkin {
     @location(0) position: vec3<f32>,
