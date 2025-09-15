@@ -16,9 +16,9 @@ class ParsedSkinInfo_GLTF {
 	skeletonMesh: any;
 	vertexStorageInfo
 	vertexStorageBuffer: GPUBuffer
-	#nodeGlobalTransform: Float32Array
-	#reusableJointNodeGlobalTransform: Float32Array
-	#usedJoints: Set<number> = null
+	nodeGlobalTransform: Float32Array
+	reusableJointNodeGlobalTransform: Float32Array
+	usedJoints: number[] = null
 
 	/**
 	 * Constructor 클래스의 새 인스턴스를 생성합니다.
@@ -31,7 +31,7 @@ class ParsedSkinInfo_GLTF {
 		this.skeletonMesh = null;
 	}
 
-	#getUsedJointIndices(mesh: Mesh): Set<number> {
+	getUsedJointIndices(mesh: Mesh): number[] {
 		const usedJoints = new Set<number>();
 		const geometry = mesh.geometry;
 		const vertexBuffer = geometry.vertexBuffer;
@@ -39,7 +39,7 @@ class ParsedSkinInfo_GLTF {
 		// 인터리브된 데이터에서 joint 정보 추출
 		const interleavedStruct = weightBuffer.interleavedStruct;
 		const jointInfo = interleavedStruct.attributes.filter(v => v.attributeName === 'aVertexJoint')[0];
-		if (!jointInfo) return usedJoints;
+		if (!jointInfo) return [];
 		const data = weightBuffer.data;
 		const stride = interleavedStruct.arrayStride / 4;
 		const jointOffset = jointInfo.offset / 4;
@@ -55,10 +55,10 @@ class ParsedSkinInfo_GLTF {
 			}
 		}
 		// keepLog('usedJoints',usedJoints)
-		return usedJoints;
+		return Array.from(usedJoints);
 	}
 
-	#createCompute(
+	createCompute(
 		redGPUContext: RedGPUContext,
 		device: GPUDevice,
 		vertexStorageBuffer: GPUBuffer,
@@ -129,120 +129,114 @@ class ParsedSkinInfo_GLTF {
 		});
 
 
-		this.#jointNodeGlobalTransformBuffer = jointBuffer;
+		this.jointNodeGlobalTransformBuffer = jointBuffer;
 
 		// 4. 셰이더 모듈 로드 & 컴퓨트 파이프라인 생성
-		// this.#computeShader = device.createShaderModule({code: source});
-		// this.#computePipeline = device.createComputePipeline({
+		// this.computeShader = device.createShaderModule({code: source});
+		// this.computePipeline = device.createComputePipeline({
 		// 	layout: 'auto',
 		// 	compute: {
-		// 		module: this.#computeShader,
+		// 		module: this.computeShader,
 		// 		entryPoint: 'main',
 		// 	},
 		// });
-		this.#computeShader = redGPUContext.resourceManager.createGPUShaderModule('calcSkinMatrix',{code: source})
-		this.#computePipeline = device.createComputePipeline({
+		this.computeShader = redGPUContext.resourceManager.createGPUShaderModule('calcSkinMatrix',{code: source})
+		this.computePipeline = device.createComputePipeline({
 			label:'calcSkinMatrix',
 			layout: 'auto',
 			compute: {
-				module: this.#computeShader,
+				module: this.computeShader,
 				entryPoint: 'main',
 			},
 		});
 
 		// 5. 바인드 그룹 생성
-		this.#bindGroup = device.createBindGroup({
-			layout: this.#computePipeline.getBindGroupLayout(0),
+		this.bindGroup = device.createBindGroup({
+			layout: this.computePipeline.getBindGroupLayout(0),
 			entries: [
 				{binding: 0, resource: {buffer: weightBuffer.gpuBuffer}},
-				{binding: 1, resource: {buffer: this.#jointNodeGlobalTransformBuffer}},
+				{binding: 1, resource: {buffer: this.jointNodeGlobalTransformBuffer}},
 				{binding: 2, resource: {buffer: vertexStorageBuffer}},
 			],
 		});
 	}
 
-	#jointNodeGlobalTransformBuffer: GPUBuffer;
-	#computeShader: GPUShaderModule;
-	#computePipeline: GPUComputePipeline;
-	#bindGroup: GPUBindGroup;
+	jointNodeGlobalTransformBuffer: GPUBuffer;
+	computeShader: GPUShaderModule;
+	computePipeline: GPUComputePipeline;
+	bindGroup: GPUBindGroup;
 
-	get computePipeline(): GPUComputePipeline {
-		return this.#computePipeline;
-	}
 
-	get bindGroup(): GPUBindGroup {
-		return this.#bindGroup;
-	}
 
 	// update(redGPUContext: RedGPUContext, mesh: Mesh) {
 	// 	const {gpuDevice} = redGPUContext
-	// 	const usedJointIndices = this.#usedJoints === null ? this.#getUsedJointIndices(mesh) : this.#usedJoints;
-	// 	this.#usedJoints = usedJointIndices
-	// 	const nodeGlobalTransform = this.#getNodeGlobalTransform(mesh.modelMatrix);
-	// 	const jointNodeGlobalTransform = this.#getOptimizedJointNodeGlobalTransform(
+	// 	const usedJointIndices = this.usedJoints === null ? this.getUsedJointIndices(mesh) : this.usedJoints;
+	// 	this.usedJoints = usedJointIndices
+	// 	const nodeGlobalTransform = this.getNodeGlobalTransform(mesh.modelMatrix);
+	// 	const jointNodeGlobalTransform = this.getOptimizedJointNodeGlobalTransform(
 	// 		Array.from(usedJointIndices),
 	// 		nodeGlobalTransform
 	// 	);
 	//
-	// 	if (!this.#computeShader) {
-	// 		this.#createCompute(gpuDevice,mesh.animationInfo.skinInfo.vertexStorageBuffer, mesh.animationInfo.weightBuffer, jointNodeGlobalTransform)
+	// 	if (!this.computeShader) {
+	// 		this.createCompute(gpuDevice,mesh.animationInfo.skinInfo.vertexStorageBuffer, mesh.animationInfo.weightBuffer, jointNodeGlobalTransform)
 	// 	}
-	// 	gpuDevice.queue.writeBuffer(this.#jointNodeGlobalTransformBuffer,0,jointNodeGlobalTransform)
+	// 	gpuDevice.queue.writeBuffer(this.jointNodeGlobalTransformBuffer,0,jointNodeGlobalTransform)
 	// 	{
 	// 		const commandEncoder = gpuDevice.createCommandEncoder();
 	// 		const passEncoder = commandEncoder.beginComputePass();
-	// 		passEncoder.setPipeline(this.#computePipeline);
-	// 		passEncoder.setBindGroup(0, this.#bindGroup);
+	// 		passEncoder.setPipeline(this.computePipeline);
+	// 		passEncoder.setBindGroup(0, this.bindGroup);
 	// 		passEncoder.dispatchWorkgroups(Math.ceil(mesh.geometry.vertexBuffer.vertexCount / 64));
 	// 		passEncoder.end();
 	//
 	// 		gpuDevice.queue.submit([commandEncoder.finish()]);
 	// 	}
-	// 	// this.#writeBuffersToGPU(redGPUContext, mesh.animationInfo.skinInfo, this.#skinMatrixBuffer);
+	// 	// this.writeBuffersToGPU(redGPUContext, mesh.animationInfo.skinInfo, this.skinMatrixBuffer);
 	// }
 	update(redGPUContext,commandEncoder: GPUCommandEncoder, mesh: Mesh) {
 		const {gpuDevice} = redGPUContext
-		const usedJointIndices = this.#usedJoints === null ? this.#getUsedJointIndices(mesh) : this.#usedJoints;
-		this.#usedJoints = usedJointIndices
-		const nodeGlobalTransform = this.#getNodeGlobalTransform(mesh.modelMatrix);
-		const jointNodeGlobalTransform = this.#getOptimizedJointNodeGlobalTransform(
+		const usedJointIndices = this.usedJoints === null ? this.getUsedJointIndices(mesh) : this.usedJoints;
+		this.usedJoints = usedJointIndices
+		const nodeGlobalTransform = this.getNodeGlobalTransform(mesh.modelMatrix);
+		const jointNodeGlobalTransform = this.getOptimizedJointNodeGlobalTransform(
 			Array.from(usedJointIndices),
 			nodeGlobalTransform
 		);
 
-		if (!this.#computeShader) {
-			this.#createCompute(redGPUContext,gpuDevice,mesh.animationInfo.skinInfo.vertexStorageBuffer, mesh.animationInfo.weightBuffer, jointNodeGlobalTransform)
+		if (!this.computeShader) {
+			this.createCompute(redGPUContext,gpuDevice,mesh.animationInfo.skinInfo.vertexStorageBuffer, mesh.animationInfo.weightBuffer, jointNodeGlobalTransform)
 		}
-		gpuDevice.queue.writeBuffer(this.#jointNodeGlobalTransformBuffer,0,jointNodeGlobalTransform)
+		gpuDevice.queue.writeBuffer(this.jointNodeGlobalTransformBuffer,0,jointNodeGlobalTransform)
 
 		{
 
 			const passEncoder = commandEncoder.beginComputePass();
-			passEncoder.setPipeline(this.#computePipeline);
-			passEncoder.setBindGroup(0, this.#bindGroup);
+			passEncoder.setPipeline(this.computePipeline);
+			passEncoder.setBindGroup(0, this.bindGroup);
 			passEncoder.dispatchWorkgroups(Math.ceil(mesh.geometry.vertexBuffer.vertexCount / 64));
 			passEncoder.end();
 		}
-		// this.#writeBuffersToGPU(redGPUContext, mesh.animationInfo.skinInfo, this.#skinMatrixBuffer);
+		// this.writeBuffersToGPU(redGPUContext, mesh.animationInfo.skinInfo, this.skinMatrixBuffer);
 	}
 
-	// #getOptimizedJointNodeGlobalTransform(usedJointIndices: number[], nodeGlobalTransform): Float32Array {
+	// getOptimizedJointNodeGlobalTransform(usedJointIndices: number[], nodeGlobalTransform): Float32Array {
 	// 	const neededSize = this.joints.length * 16; // GPU 버퍼는 전체 크기 유지
-	// 	if (!this.#reusableJointNodeGlobalTransform || this.#reusableJointNodeGlobalTransform.length != neededSize) {
-	// 		this.#reusableJointNodeGlobalTransform = new Float32Array(neededSize);
+	// 	if (!this.reusableJointNodeGlobalTransform || this.reusableJointNodeGlobalTransform.length != neededSize) {
+	// 		this.reusableJointNodeGlobalTransform = new Float32Array(neededSize);
 	// 	}
 	// 	// 사용되는 조인트만 계산
 	// 	for (const jointIndex of usedJointIndices) {
 	// 		mat4.multiply(temp0, this.joints[jointIndex].modelMatrix, this.inverseBindMatrices[jointIndex]);
 	// 		mat4.multiply(temp1, nodeGlobalTransform, temp0);
-	// 		this.#reusableJointNodeGlobalTransform.set(temp1, jointIndex * 16);
+	// 		this.reusableJointNodeGlobalTransform.set(temp1, jointIndex * 16);
 	// 	}
-	// 	return this.#reusableJointNodeGlobalTransform;
+	// 	return this.reusableJointNodeGlobalTransform;
 	// }
-	#getOptimizedJointNodeGlobalTransform(usedJointIndices: number[], nodeGlobalTransform: Float32Array): Float32Array {
+	getOptimizedJointNodeGlobalTransform(usedJointIndices: number[], nodeGlobalTransform: Float32Array): Float32Array {
 		const neededSize = this.joints.length * 16;
-		if (!this.#reusableJointNodeGlobalTransform || this.#reusableJointNodeGlobalTransform.length !== neededSize) {
-			this.#reusableJointNodeGlobalTransform = new Float32Array(neededSize);
+		if (!this.reusableJointNodeGlobalTransform || this.reusableJointNodeGlobalTransform.length !== neededSize) {
+			this.reusableJointNodeGlobalTransform = new Float32Array(neededSize);
 		}
 
 		for (const jointIndex of usedJointIndices) {
@@ -287,44 +281,44 @@ class ParsedSkinInfo_GLTF {
 			const i20 = inverseBindMatrix[8],  i21 = inverseBindMatrix[9],  i22 = inverseBindMatrix[10], i23 = inverseBindMatrix[11];
 			const i30 = inverseBindMatrix[12], i31 = inverseBindMatrix[13], i32 = inverseBindMatrix[14], i33 = inverseBindMatrix[15];
 
-			this.#reusableJointNodeGlobalTransform[offset]     = t00 * i00 + t10 * i01 + t20 * i02 + t30 * i03;
-			this.#reusableJointNodeGlobalTransform[offset + 1] = t01 * i00 + t11 * i01 + t21 * i02 + t31 * i03;
-			this.#reusableJointNodeGlobalTransform[offset + 2] = t02 * i00 + t12 * i01 + t22 * i02 + t32 * i03;
-			this.#reusableJointNodeGlobalTransform[offset + 3] = t03 * i00 + t13 * i01 + t23 * i02 + t33 * i03;
+			this.reusableJointNodeGlobalTransform[offset]     = t00 * i00 + t10 * i01 + t20 * i02 + t30 * i03;
+			this.reusableJointNodeGlobalTransform[offset + 1] = t01 * i00 + t11 * i01 + t21 * i02 + t31 * i03;
+			this.reusableJointNodeGlobalTransform[offset + 2] = t02 * i00 + t12 * i01 + t22 * i02 + t32 * i03;
+			this.reusableJointNodeGlobalTransform[offset + 3] = t03 * i00 + t13 * i01 + t23 * i02 + t33 * i03;
 
-			this.#reusableJointNodeGlobalTransform[offset + 4] = t00 * i10 + t10 * i11 + t20 * i12 + t30 * i13;
-			this.#reusableJointNodeGlobalTransform[offset + 5] = t01 * i10 + t11 * i11 + t21 * i12 + t31 * i13;
-			this.#reusableJointNodeGlobalTransform[offset + 6] = t02 * i10 + t12 * i11 + t22 * i12 + t32 * i13;
-			this.#reusableJointNodeGlobalTransform[offset + 7] = t03 * i10 + t13 * i11 + t23 * i12 + t33 * i13;
+			this.reusableJointNodeGlobalTransform[offset + 4] = t00 * i10 + t10 * i11 + t20 * i12 + t30 * i13;
+			this.reusableJointNodeGlobalTransform[offset + 5] = t01 * i10 + t11 * i11 + t21 * i12 + t31 * i13;
+			this.reusableJointNodeGlobalTransform[offset + 6] = t02 * i10 + t12 * i11 + t22 * i12 + t32 * i13;
+			this.reusableJointNodeGlobalTransform[offset + 7] = t03 * i10 + t13 * i11 + t23 * i12 + t33 * i13;
 
-			this.#reusableJointNodeGlobalTransform[offset + 8]  = t00 * i20 + t10 * i21 + t20 * i22 + t30 * i23;
-			this.#reusableJointNodeGlobalTransform[offset + 9]  = t01 * i20 + t11 * i21 + t21 * i22 + t31 * i23;
-			this.#reusableJointNodeGlobalTransform[offset + 10] = t02 * i20 + t12 * i21 + t22 * i22 + t32 * i23;
-			this.#reusableJointNodeGlobalTransform[offset + 11] = t03 * i20 + t13 * i21 + t23 * i22 + t33 * i23;
+			this.reusableJointNodeGlobalTransform[offset + 8]  = t00 * i20 + t10 * i21 + t20 * i22 + t30 * i23;
+			this.reusableJointNodeGlobalTransform[offset + 9]  = t01 * i20 + t11 * i21 + t21 * i22 + t31 * i23;
+			this.reusableJointNodeGlobalTransform[offset + 10] = t02 * i20 + t12 * i21 + t22 * i22 + t32 * i23;
+			this.reusableJointNodeGlobalTransform[offset + 11] = t03 * i20 + t13 * i21 + t23 * i22 + t33 * i23;
 
-			this.#reusableJointNodeGlobalTransform[offset + 12] = t00 * i30 + t10 * i31 + t20 * i32 + t30 * i33;
-			this.#reusableJointNodeGlobalTransform[offset + 13] = t01 * i30 + t11 * i31 + t21 * i32 + t31 * i33;
-			this.#reusableJointNodeGlobalTransform[offset + 14] = t02 * i30 + t12 * i31 + t22 * i32 + t32 * i33;
-			this.#reusableJointNodeGlobalTransform[offset + 15] = t03 * i30 + t13 * i31 + t23 * i32 + t33 * i33;
+			this.reusableJointNodeGlobalTransform[offset + 12] = t00 * i30 + t10 * i31 + t20 * i32 + t30 * i33;
+			this.reusableJointNodeGlobalTransform[offset + 13] = t01 * i30 + t11 * i31 + t21 * i32 + t31 * i33;
+			this.reusableJointNodeGlobalTransform[offset + 14] = t02 * i30 + t12 * i31 + t22 * i32 + t32 * i33;
+			this.reusableJointNodeGlobalTransform[offset + 15] = t03 * i30 + t13 * i31 + t23 * i32 + t33 * i33;
 		}
 
-		return this.#reusableJointNodeGlobalTransform;
+		return this.reusableJointNodeGlobalTransform;
 	}
 
 	// 노드의 글로벌 변형을 가져오는 메서드입니다.
-	#getNodeGlobalTransform(matrix: Float32Array | mat4): Float32Array {
-		this.#nodeGlobalTransform = this.#nodeGlobalTransform || new Float32Array(matrix.length);
-		this.#nodeGlobalTransform.set(matrix);
-		mat4.invert(this.#nodeGlobalTransform, this.#nodeGlobalTransform)
-		return this.#nodeGlobalTransform;
+	getNodeGlobalTransform(matrix: Float32Array | mat4): Float32Array {
+		this.nodeGlobalTransform = this.nodeGlobalTransform || new Float32Array(matrix.length);
+		this.nodeGlobalTransform.set(matrix);
+		mat4.invert(this.nodeGlobalTransform, this.nodeGlobalTransform)
+		return this.nodeGlobalTransform;
 	}
 
 	//
 	// // joint의 노드 글로벌 변형을 가져옵니다.
-	// #getJointNodeGlobalTransform(joints: any[], nodeGlobalTransform): Float32Array {
+	// getJointNodeGlobalTransform(joints: any[], nodeGlobalTransform): Float32Array {
 	// 	const neededSize = joints.length * 16;
-	// 	if (!this.#reusableJointNodeGlobalTransform || this.#reusableJointNodeGlobalTransform.length != neededSize) {
-	// 		this.#reusableJointNodeGlobalTransform = new Float32Array(neededSize);
+	// 	if (!this.reusableJointNodeGlobalTransform || this.reusableJointNodeGlobalTransform.length != neededSize) {
+	// 		this.reusableJointNodeGlobalTransform = new Float32Array(neededSize);
 	// 	}
 	// 	for (let i = 0; i < joints.length; i++) {
 	// 		const t0 = mat4.multiply(temp0, nodeGlobalTransform, joints[i].modelMatrix)
@@ -333,12 +327,12 @@ class ParsedSkinInfo_GLTF {
 	// 			t0,
 	// 			this.inverseBindMatrices[i]
 	// 		)
-	// 		this.#reusableJointNodeGlobalTransform.set(t1, i * 16);
+	// 		this.reusableJointNodeGlobalTransform.set(t1, i * 16);
 	// 	}
-	// 	return this.#reusableJointNodeGlobalTransform;
+	// 	return this.reusableJointNodeGlobalTransform;
 	// }
 	// GPU로 버퍼를 작성하는 메서드입니다.
-	#writeBuffersToGPU(
+	writeBuffersToGPU(
 		redGPUContext: RedGPUContext,
 		gpuRenderInfo,
 		jointNodeGlobalTransform: Float32Array
