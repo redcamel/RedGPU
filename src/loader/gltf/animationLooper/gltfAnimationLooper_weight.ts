@@ -126,10 +126,10 @@ const gltfAnimationLooper_weight = (
             tempUpdateData[2] = targetData[baseVertexIndex + 2];
 
             // 버퍼 업데이트
-            // targetMesh.geometry.vertexBuffer.updateData(
-            //     tempUpdateData,
-            //     arrayStride * vertexIndex
-            // );
+            targetMesh.geometry.vertexBuffer.updateData(
+                tempUpdateData,
+                arrayStride * vertexIndex
+            );
         }
     }
 };
