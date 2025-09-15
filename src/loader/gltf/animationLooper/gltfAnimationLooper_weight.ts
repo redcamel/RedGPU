@@ -9,12 +9,14 @@ let targetMesh: Mesh;
 let targetData: Float32Array;
 let originData: Float32Array;
 let stride: number;
+let stride2: number;
 let vertexIndex: number;
 let loopCount: number;
 let prevWeight: number, nextWeight: number;
 let prevWeight1: number, nextWeight1: number;
 let prevWeight2: number, nextWeight2: number;
 let baseVertexIndex: number;
+let baseVertexIndex2: number;
 let morphLength: number;
 let targetMorphInfo: MorphInfo_GLTF;
 let targetMorphDataList: MorphInfoData_GLTF[];
@@ -44,6 +46,7 @@ const gltfAnimationLooper_weight = (
         targetMesh = meshArray[animationTargetIndex];
         targetData = targetMesh.geometry.vertexBuffer.data;
         stride = targetMesh.geometry.vertexBuffer.stride;
+        stride2 = 3;
         arrayStride = targetMesh.geometry.vertexBuffer.interleavedStruct.arrayStride;
         loopCount = targetData.length / stride;
         targetMorphInfo = targetMesh.animationInfo.morphInfo;
@@ -58,6 +61,7 @@ const gltfAnimationLooper_weight = (
         vertexIndex = 0;
         for (vertexIndex; vertexIndex < loopCount; vertexIndex++) {
             baseVertexIndex = vertexIndex * stride;
+            baseVertexIndex2 = vertexIndex * stride2;
 
             // 캐시 키 계산 (한 번에)
             compositeKey = baseVertexIndex * PRIME_NUMBER + prevTimeDataIndex * PRIME_NUMBER + nextTimeDataIndex;
@@ -89,17 +93,17 @@ const gltfAnimationLooper_weight = (
                     morphInterleaveData = targetMorphDataList[morphIndex].interleaveData;
 
                     // X 컴포넌트
-                    tempWeight = morphInterleaveData[baseVertexIndex];
+                    tempWeight = morphInterleaveData[baseVertexIndex2];
                     prevWeight += prevAnimationData * tempWeight;
                     nextWeight += nextAnimationData * tempWeight;
 
                     // Y 컴포넌트
-                    tempWeight = morphInterleaveData[baseVertexIndex + 1];
+                    tempWeight = morphInterleaveData[baseVertexIndex2 + 1];
                     prevWeight1 += prevAnimationData * tempWeight;
                     nextWeight1 += nextAnimationData * tempWeight;
 
                     // Z 컴포넌트
-                    tempWeight = morphInterleaveData[baseVertexIndex + 2];
+                    tempWeight = morphInterleaveData[baseVertexIndex2 + 2];
                     prevWeight2 += prevAnimationData * tempWeight;
                     nextWeight2 += nextAnimationData * tempWeight;
                 }
