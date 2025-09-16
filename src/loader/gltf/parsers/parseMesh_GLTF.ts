@@ -174,30 +174,7 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
 
 		/////////////////////////////////////////////////////////
 		let morphInfo = new MorphInfo_GLTF(gltfLoader, gltfData, meshPrimitive, gltfMesh.weights);
-		if(morphInfo.weights.length){
-			// 모프리스트 설정
 
-			let index = 0;
-			let list = morphInfo.morphInfoDataList;
-			keepLog(morphInfo)
-			const len = list.length
-			while (index < len) {
-				const morph = list[index];
-				const normalData = morph.normals.length ? morph.normals : calculateNormals(morph.vertices, indices);
-				const interleaveData = [];
-				parseInterleaveData_GLTF(
-					interleaveData,
-					morph.vertices, morph.verticesColor_0,
-					normalData, morph.uvs, morph.uvs1, morph.uvs2,
-					morph.jointWeights, morph.joints,
-					morph.tangents
-				);
-				morph.interleaveData = new Float32Array(morph.vertices);
-				index++;
-			}
-
-			// console.log('모프리스트', tMesh.animationInfo.morphInfo);
-		}
 		/////////////////////////////////////////////////////
 		const vertexCacheKey = `Vertex_${gltfLoader.url}_${nodeGlTfId}_${i}_${morphInfo.weights.length ? createUUID() :''}`
 		const hasVertexBuffer = redGPUContext.resourceManager['managedVertexBufferState'].table.get(vertexCacheKey)?.buffer

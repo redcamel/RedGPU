@@ -26,7 +26,7 @@ class MorphInfo_GLTF {
 	 * @param {MeshPrimitive} meshPrimitive - The mesh primitive.
 	 * @param {number[]} weightsValue - The weights value.
 	 */
-	constructor(gltfLoader: GLTFLoader, gltfData: GLTF, meshPrimitive: MeshPrimitive, weightsValue: number[]) {
+	constructor(gltfLoader: GLTFLoader, gltfData: GLTF, meshPrimitive: MeshPrimitive,weightsValue: number[]) {
 		if (meshPrimitive.targets) {
 			this.morphInfoDataList = meshPrimitive.targets.map((target) => {
 				const morphData = new MorphInfoData_GLTF()
@@ -44,6 +44,9 @@ class MorphInfo_GLTF {
 					);
 					// 스파스 정보도 갈굼
 					if (accessor.sparse) parseSparse_GLTF(gltfLoader, key, accessor, gltfData, vertices);
+				}
+				if(weightsValue.length) {
+					morphData.interleaveData = new Float32Array(morphData.vertices);
 				}
 				return morphData
 			});

@@ -1,27 +1,21 @@
 import {glMatrix} from "gl-matrix";
+import RedGPUContext from "../../../context/RedGPUContext";
 import AniTrack_GLTF from "../cls/AniTrack_GLTF";
 import {GLTFParsedSingleClip} from "../parsers/animation/parseAnimations";
-import gltfAnimationLooper_scale from "./gltfAnimationLooper_scale";
-import gltfAnimationLooper_transition from "./gltfAnimationLooper_transition";
-import gltfAnimationLooper_weight from "./gltfAnimationLooper_weight";
 
-const gltfAnimationLooper = (time: number, animationLoopList: GLTFParsedSingleClip[]) => {
+const gltfAnimationLooper = (redGPUContext:RedGPUContext,time: number, animationLoopList: GLTFParsedSingleClip[]) => {
 // 사전 계산된 상수들
 	const EPSILON = glMatrix.EPSILON;
 	const PI_180 = 180 / Math.PI;
-
-
 	let tempX, tempY, tempZ, tempW, tempLen, tempInvLen;
 	let prevX, prevY, prevZ, prevW, nextX, nextY, nextZ, nextW;
 	let cosom, omega, sinom, scale0, scale1;
 	let x2, y2, z2, xx, xy, xz, yy, yz, zz, wx, wy, wz;
 	let m11, m12, m13, m22, m23, m32, m33;
-	let prevIdx,nextIdx
-
+	let prevIdx, nextIdx
 	let nX, nY, nZ, pX, pY, pZ;
 	let nXOut, nYOut, nZOut, pXOut, pYOut, pZOut;
 	let startOut, endIn;
-
 	let currentTime: number, previousTimeFrame: number, nextTimeFrame: number;
 	let animationListIndex: number = animationLoopList.length;
 	let interpolationValue: number;
@@ -299,7 +293,6 @@ const gltfAnimationLooper = (time: number, animationLoopList: GLTFParsedSingleCl
 							pX = targetAnimationDataList[nextIdx + 3];
 							pY = targetAnimationDataList[nextIdx + 4];
 							pZ = targetAnimationDataList[nextIdx + 5];
-
 							// Cubic spline 보간 및 직접 할당 (X, Y, Z 동시 처리)
 							startOut = pXOut * interpolationValue;
 							endIn = nXOut * interpolationValue;
@@ -318,13 +311,11 @@ const gltfAnimationLooper = (time: number, animationLoopList: GLTFParsedSingleCl
 						nX = targetAnimationDataList[prevIdx];
 						nY = targetAnimationDataList[prevIdx + 1];
 						nZ = targetAnimationDataList[prevIdx + 2];
-
 						// 이전 키프레임 스케일
 						nextIdx = previousTimeDataIDX * 3;
 						pX = targetAnimationDataList[nextIdx];
 						pY = targetAnimationDataList[nextIdx + 1];
 						pZ = targetAnimationDataList[nextIdx + 2];
-
 						// Linear 보간 및 직접 할당 (한 번에)
 						animationTargetMesh.x = pX + interpolationValue * (nX - pX);
 						animationTargetMesh.y = pY + interpolationValue * (nY - pY);
@@ -332,8 +323,7 @@ const gltfAnimationLooper = (time: number, animationLoopList: GLTFParsedSingleCl
 					}
 					break;
 				}
-
-				case 'scale' :{
+				case 'scale' : {
 					if (interpolation === 'CUBICSPLINE') {
 						if (previousTimeDataIDX !== targetTimeDataListLength - 1) {
 							// 이전 키프레임 데이터
@@ -352,7 +342,6 @@ const gltfAnimationLooper = (time: number, animationLoopList: GLTFParsedSingleCl
 							pX = targetAnimationDataList[nextIdx + 3];
 							pY = targetAnimationDataList[nextIdx + 4];
 							pZ = targetAnimationDataList[nextIdx + 5];
-
 							// Cubic spline 보간 및 직접 할당 (X, Y, Z 동시 처리)
 							startOut = pXOut * interpolationValue;
 							endIn = nXOut * interpolationValue;
@@ -371,13 +360,11 @@ const gltfAnimationLooper = (time: number, animationLoopList: GLTFParsedSingleCl
 						nX = targetAnimationDataList[prevIdx];
 						nY = targetAnimationDataList[prevIdx + 1];
 						nZ = targetAnimationDataList[prevIdx + 2];
-
 						// 이전 키프레임 스케일
 						nextIdx = previousTimeDataIDX * 3;
 						pX = targetAnimationDataList[nextIdx];
 						pY = targetAnimationDataList[nextIdx + 1];
 						pZ = targetAnimationDataList[nextIdx + 2];
-
 						// Linear 보간 및 직접 할당 (한 번에)
 						animationTargetMesh.scaleX = pX + interpolationValue * (nX - pX);
 						animationTargetMesh.scaleY = pY + interpolationValue * (nY - pY);
@@ -386,13 +373,25 @@ const gltfAnimationLooper = (time: number, animationLoopList: GLTFParsedSingleCl
 					break;
 				}
 				case 'weights' :
-					gltfAnimationLooper_weight(
-						weightMeshes,
-						targetAnimationDataList,
-						interpolationValue,
-						previousTimeDataIDX,
-						nextTimeDataIDX
-					)
+					// gltfAnimationLooper_weight(
+					// 	weightMeshes,
+					// 	targetAnimationDataList,
+					// 	interpolationValue,
+					// 	previousTimeDataIDX,
+					// 	nextTimeDataIDX
+					// )
+					let animationTargetIndex = weightMeshes.length;
+					while (animationTargetIndex--) {
+
+						currentAniTrack.render(
+							redGPUContext,
+							weightMeshes[animationTargetIndex],
+							interpolationValue,
+							previousTimeDataIDX,
+							nextTimeDataIDX
+						)
+					}
+
 					break;
 			}
 		}
