@@ -803,7 +803,9 @@ class Mesh extends MeshBase {
 		if (this.#ignoreFrustumCulling) passFrustumCulling = true
 		if(passFrustumCulling){
 			// check animation
-			if (this.gltfLoaderInfo?.activeAnimations?.length) gltfAnimationLooper(redGPUContext,timestamp, this.gltfLoaderInfo.activeAnimations)
+			if (this.gltfLoaderInfo?.activeAnimations?.length) {
+				gltfAnimationLooper(redGPUContext,timestamp, debugViewRenderState.computeCommandEncoder,this.gltfLoaderInfo.activeAnimations)
+			}
 			if (this.animationInfo.skinInfo) {
 				if (!this.currentShaderModuleName.includes(VERTEX_SHADER_MODULE_NAME_PBR_SKIN)) {
 					this.dirtyPipeline = true

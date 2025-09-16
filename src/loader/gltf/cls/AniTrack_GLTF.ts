@@ -35,7 +35,9 @@ class AniTrack_GLTF {
 
 	}
 
-	async render(redGPUContext: RedGPUContext, targetMesh: Mesh, interpolationValue: number, prevIDX: number, nextIDX: number) {
+	async render(redGPUContext: RedGPUContext,
+	             computeCommandEncoder:GPUCommandEncoder,
+	             targetMesh: Mesh, interpolationValue: number, prevIDX: number, nextIDX: number) {
 		const { gpuDevice } = redGPUContext;
 
 		if (!this.#computeShader) {
@@ -61,8 +63,8 @@ class AniTrack_GLTF {
 
 		gpuDevice.queue.writeBuffer(this.#uniformBuffer, 0, this.#uniformData);
 
-		const encoder = gpuDevice.createCommandEncoder();
-		const pass = encoder.beginComputePass();
+
+		const pass = computeCommandEncoder.beginComputePass();
 		pass.setPipeline(this.#computePipeline);
 		pass.setBindGroup(0, resources.bindGroup);
 
@@ -70,7 +72,7 @@ class AniTrack_GLTF {
 		pass.dispatchWorkgroups(workgroupCount);
 		pass.end();
 
-		gpuDevice.queue.submit([encoder.finish()]);
+
 	}
 
 	#initCommonCompute(redGPUContext: RedGPUContext) {

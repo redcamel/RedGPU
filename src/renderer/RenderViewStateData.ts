@@ -37,6 +37,7 @@ class RenderViewStateData {
 	viewportSize: ViewportSize;
 	usedVideoMemory: number;
 	currentRenderPassEncoder: GPURenderPassEncoder
+	computeCommandEncoder: GPUCommandEncoder
 	timestamp: number
 	frustumPlanes: number[][]
 	prevVertexGpuBuffer: GPUBuffer
@@ -60,7 +61,7 @@ class RenderViewStateData {
 		return this.#view;
 	}
 
-	reset(viewRenderPassEncoder: GPURenderPassEncoder, time: number) {
+	reset(viewRenderPassEncoder: GPURenderPassEncoder,computeCommandEncoder:GPUCommandEncoder, time: number) {
 		if (!time || !this.#view) {
 			throw new Error('Invalid parameters provided');
 		}
@@ -83,6 +84,7 @@ class RenderViewStateData {
 		this.numPoints = 0;
 		this.viewRenderTime = 0;
 		this.currentRenderPassEncoder = viewRenderPassEncoder
+		this.computeCommandEncoder = computeCommandEncoder
 		this.timestamp = time
 		this.prevVertexGpuBuffer = null
 		this.prevFragmentUniformBindGroup = null

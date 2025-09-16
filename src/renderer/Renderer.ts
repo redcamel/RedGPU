@@ -79,6 +79,7 @@ class Renderer {
 	#batchUpdateSkinMatrices(redGPUContext: RedGPUContext, meshes: Mesh[]) {
 		if (meshes.length === 0) return;
 		const commandEncoder = redGPUContext.gpuDevice.createCommandEncoder();
+		const passEncoder = commandEncoder.beginComputePass();
 		const {gpuDevice} = redGPUContext;
 		let i = meshes.length;
 		while (i--) {
@@ -215,13 +216,14 @@ class Renderer {
 				skinInfo.reusableJointNodeGlobalTransform
 			);
 			{
-				const passEncoder = commandEncoder.beginComputePass();
+
 				passEncoder.setPipeline(skinInfo.computePipeline);
 				passEncoder.setBindGroup(0, skinInfo.bindGroup);
 				passEncoder.dispatchWorkgroups(Math.ceil(mesh.geometry.vertexBuffer.vertexCount / 64));
-				passEncoder.end();
+
 			}
 		}
+		passEncoder.end();
 		// 한 번에 제출
 		redGPUContext.gpuDevice.queue.submit([commandEncoder.finish()]);
 	}
@@ -269,8 +271,10 @@ class Renderer {
 		// @ts-ignore
 		camera.update?.(view, time)
 		const commandEncoder: GPUCommandEncoder = redGPUContext.gpuDevice.createCommandEncoder()
-		this.#batchUpdateSkinMatrices(redGPUContext, debugViewRenderState.skinList)
-		view.debugViewRenderState.reset(null, time)
+		const computeCommandEncoder: GPUCommandEncoder = redGPUContext.gpuDevice.createCommandEncoder()
+		this.#batchUpdateSkinMatrices(redGPUContext,debugViewRenderState.skinList)
+		view.debugViewRenderState.reset(null,computeCommandEncoder, time)
+
 		if (pixelRectObject.width && pixelRectObject.height) {
 			if (directionalShadowManager.shadowDepthTextureView) {
 				const shadowPassDescriptor: GPURenderPassDescriptor = {
@@ -290,8 +294,10 @@ class Renderer {
 			}
 			{
 				const viewRenderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass(renderPassDescriptor)
+
 				this.#updateViewSystemUniforms(view, viewRenderPassEncoder, false, true)
 				debugViewRenderState.currentRenderPassEncoder = viewRenderPassEncoder
+
 				if (skybox) skybox.render(debugViewRenderState)
 				renderBasicLayer(view, viewRenderPassEncoder)
 				if (axis) axis.render(debugViewRenderState)
@@ -390,6 +396,7 @@ class Renderer {
 				);
 			});
 		}
+		redGPUContext.gpuDevice.queue.submit([computeCommandEncoder.finish()])
 		return renderPassDescriptor
 	}
 

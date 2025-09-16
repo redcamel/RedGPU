@@ -3,7 +3,10 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import AniTrack_GLTF from "../cls/AniTrack_GLTF";
 import {GLTFParsedSingleClip} from "../parsers/animation/parseAnimations";
 
-const gltfAnimationLooper = (redGPUContext:RedGPUContext,time: number, animationLoopList: GLTFParsedSingleClip[]) => {
+const gltfAnimationLooper = (
+	redGPUContext:RedGPUContext,time: number,	computeCommandEncoder: GPUCommandEncoder, animationLoopList: GLTFParsedSingleClip[],
+
+) => {
 // 사전 계산된 상수들
 	const EPSILON = glMatrix.EPSILON;
 	const PI_180 = 180 / Math.PI;
@@ -385,6 +388,7 @@ const gltfAnimationLooper = (redGPUContext:RedGPUContext,time: number, animation
 
 						currentAniTrack.render(
 							redGPUContext,
+							computeCommandEncoder,
 							weightMeshes[animationTargetIndex],
 							interpolationValue,
 							previousTimeDataIDX,
