@@ -14,6 +14,9 @@ import renderBasicLayer from "./renderLayers/renderBasicLayer";
 import renderPickingLayer from "./renderLayers/renderPickingLayer";
 import renderShadowLayer from "./renderLayers/renderShadowLayer";
 
+let temp0 = new Float32Array(16)
+let temp1 = new Float32Array(16)
+
 class Renderer {
 	#prevViewportSize: { width: number, height: number };
 	#finalRender: FinalRender
@@ -78,155 +81,128 @@ class Renderer {
 
 	#batchUpdateSkinMatrices(redGPUContext: RedGPUContext, meshes: Mesh[]) {
 		if (meshes.length === 0) return;
-		const commandEncoder = redGPUContext.gpuDevice.createCommandEncoder();
+
+		const { gpuDevice } = redGPUContext;
+		const commandEncoder = gpuDevice.createCommandEncoder();
 		const passEncoder = commandEncoder.beginComputePass();
-		const {gpuDevice} = redGPUContext;
-		let i = meshes.length;
-		while (i--) {
+
+		for (let i = 0; i < meshes.length; i++) {
 			const mesh = meshes[i];
 			const skinInfo = mesh.animationInfo.skinInfo as ParsedSkinInfo_GLTF;
-			// skinInfo.update(redGPUContext,commandEncoder,mesh)
-			const usedJointIndices = skinInfo.usedJoints === null
-				? skinInfo.getUsedJointIndices(mesh)
-				: skinInfo.usedJoints;
-			skinInfo.usedJoints = usedJointIndices;
-			skinInfo.nodeGlobalTransform = skinInfo.nodeGlobalTransform || new Float32Array(mesh.modelMatrix.length);
+
+			// 사용된 조인트 인덱스 초기화
+			if (!skinInfo.usedJoints) {
+				skinInfo.usedJoints = skinInfo.getUsedJointIndices(mesh);
+			}
+
+			// 조인트 행렬 저장 버퍼 크기 확인 및 초기화
+			const neededSize = (1 + skinInfo.joints.length)  * 16;
+			if (!skinInfo.jointData || skinInfo.jointData.length !== neededSize) {
+				skinInfo.jointData = new Float32Array(neededSize);
+				skinInfo.computeShader = null
+			}
+
+			// 모델 행렬의 역행렬 계산
+			skinInfo.invertNodeGlobalTransform = skinInfo.invertNodeGlobalTransform || new Float32Array(mesh.modelMatrix.length);
+			// mat4.invert(skinInfo.invertNodeGlobalTransform, mesh.modelMatrix);
 			{
-				const sourceMatrix = mesh.modelMatrix;
-				const resultMatrix = skinInfo.nodeGlobalTransform;
-				const m00 = sourceMatrix[0], m01 = sourceMatrix[1], m02 = sourceMatrix[2], m03 = sourceMatrix[3];
-				const m10 = sourceMatrix[4], m11 = sourceMatrix[5], m12 = sourceMatrix[6], m13 = sourceMatrix[7];
-				const m20 = sourceMatrix[8], m21 = sourceMatrix[9], m22 = sourceMatrix[10], m23 = sourceMatrix[11];
-				const m30 = sourceMatrix[12], m31 = sourceMatrix[13], m32 = sourceMatrix[14], m33 = sourceMatrix[15];
-				const c00 = m11 * (m22 * m33 - m23 * m32) - m12 * (m21 * m33 - m23 * m31) + m13 * (m21 * m32 - m22 * m31);
-				const c01 = -(m10 * (m22 * m33 - m23 * m32) - m12 * (m20 * m33 - m23 * m30) + m13 * (m20 * m32 - m22 * m30));
-				const c02 = m10 * (m21 * m33 - m23 * m31) - m11 * (m20 * m33 - m23 * m30) + m13 * (m20 * m31 - m21 * m30);
-				const c03 = -(m10 * (m21 * m32 - m22 * m31) - m11 * (m20 * m32 - m22 * m30) + m12 * (m20 * m31 - m21 * m30));
-				const c10 = -(m01 * (m22 * m33 - m23 * m32) - m02 * (m21 * m33 - m23 * m31) + m03 * (m21 * m32 - m22 * m31));
-				const c11 = m00 * (m22 * m33 - m23 * m32) - m02 * (m20 * m33 - m23 * m30) + m03 * (m20 * m32 - m22 * m30);
-				const c12 = -(m00 * (m21 * m33 - m23 * m31) - m01 * (m20 * m33 - m23 * m30) + m03 * (m20 * m31 - m21 * m30));
-				const c13 = m00 * (m21 * m32 - m22 * m31) - m01 * (m20 * m32 - m22 * m30) + m02 * (m20 * m31 - m21 * m30);
-				const c20 = m01 * (m12 * m33 - m13 * m32) - m02 * (m11 * m33 - m13 * m31) + m03 * (m11 * m32 - m12 * m31);
-				const c21 = -(m00 * (m12 * m33 - m13 * m32) - m02 * (m10 * m33 - m13 * m30) + m03 * (m10 * m32 - m12 * m30));
-				const c22 = m00 * (m11 * m33 - m13 * m31) - m01 * (m10 * m33 - m13 * m30) + m03 * (m10 * m31 - m11 * m30);
-				const c23 = -(m00 * (m11 * m32 - m12 * m31) - m01 * (m10 * m32 - m12 * m30) + m02 * (m10 * m31 - m11 * m30));
-				const c30 = -(m01 * (m12 * m23 - m13 * m22) - m02 * (m11 * m23 - m13 * m21) + m03 * (m11 * m22 - m12 * m21));
-				const c31 = m00 * (m12 * m23 - m13 * m22) - m02 * (m10 * m23 - m13 * m20) + m03 * (m10 * m22 - m12 * m20);
-				const c32 = -(m00 * (m11 * m23 - m13 * m21) - m01 * (m10 * m23 - m13 * m20) + m03 * (m10 * m21 - m11 * m20));
-				const c33 = m00 * (m11 * m22 - m12 * m21) - m01 * (m10 * m22 - m12 * m20) + m02 * (m10 * m21 - m11 * m20);
-				const determinant = m00 * c00 + m01 * c01 + m02 * c02 + m03 * c03;
-				if (Math.abs(determinant) < 1e-10) {
-					console.error('Matrix is not invertible (determinant is zero or near zero)');
-					resultMatrix[0] = 1;
-					resultMatrix[1] = 0;
-					resultMatrix[2] = 0;
-					resultMatrix[3] = 0;
-					resultMatrix[4] = 0;
-					resultMatrix[5] = 1;
-					resultMatrix[6] = 0;
-					resultMatrix[7] = 0;
-					resultMatrix[8] = 0;
-					resultMatrix[9] = 0;
-					resultMatrix[10] = 1;
-					resultMatrix[11] = 0;
-					resultMatrix[12] = 0;
-					resultMatrix[13] = 0;
-					resultMatrix[14] = 0;
-					resultMatrix[15] = 1;
-				} else {
-					const invDet = 1.0 / determinant;
-					resultMatrix[0] = c00 * invDet;
-					resultMatrix[1] = c10 * invDet;
-					resultMatrix[2] = c20 * invDet;
-					resultMatrix[3] = c30 * invDet;
-					resultMatrix[4] = c01 * invDet;
-					resultMatrix[5] = c11 * invDet;
-					resultMatrix[6] = c21 * invDet;
-					resultMatrix[7] = c31 * invDet;
-					resultMatrix[8] = c02 * invDet;
-					resultMatrix[9] = c12 * invDet;
-					resultMatrix[10] = c22 * invDet;
-					resultMatrix[11] = c32 * invDet;
-					resultMatrix[12] = c03 * invDet;
-					resultMatrix[13] = c13 * invDet;
-					resultMatrix[14] = c23 * invDet;
-					resultMatrix[15] = c33 * invDet;
+				{
+					const sourceMatrix = mesh.modelMatrix;
+					const resultMatrix = skinInfo.invertNodeGlobalTransform;
+					const m00 = sourceMatrix[0], m01 = sourceMatrix[1], m02 = sourceMatrix[2], m03 = sourceMatrix[3];
+					const m10 = sourceMatrix[4], m11 = sourceMatrix[5], m12 = sourceMatrix[6], m13 = sourceMatrix[7];
+					const m20 = sourceMatrix[8], m21 = sourceMatrix[9], m22 = sourceMatrix[10], m23 = sourceMatrix[11];
+					const m30 = sourceMatrix[12], m31 = sourceMatrix[13], m32 = sourceMatrix[14], m33 = sourceMatrix[15];
+					const c00 = m11 * (m22 * m33 - m23 * m32) - m12 * (m21 * m33 - m23 * m31) + m13 * (m21 * m32 - m22 * m31);
+					const c01 = -(m10 * (m22 * m33 - m23 * m32) - m12 * (m20 * m33 - m23 * m30) + m13 * (m20 * m32 - m22 * m30));
+					const c02 = m10 * (m21 * m33 - m23 * m31) - m11 * (m20 * m33 - m23 * m30) + m13 * (m20 * m31 - m21 * m30);
+					const c03 = -(m10 * (m21 * m32 - m22 * m31) - m11 * (m20 * m32 - m22 * m30) + m12 * (m20 * m31 - m21 * m30));
+					const c10 = -(m01 * (m22 * m33 - m23 * m32) - m02 * (m21 * m33 - m23 * m31) + m03 * (m21 * m32 - m22 * m31));
+					const c11 = m00 * (m22 * m33 - m23 * m32) - m02 * (m20 * m33 - m23 * m30) + m03 * (m20 * m32 - m22 * m30);
+					const c12 = -(m00 * (m21 * m33 - m23 * m31) - m01 * (m20 * m33 - m23 * m30) + m03 * (m20 * m31 - m21 * m30));
+					const c13 = m00 * (m21 * m32 - m22 * m31) - m01 * (m20 * m32 - m22 * m30) + m02 * (m20 * m31 - m21 * m30);
+					const c20 = m01 * (m12 * m33 - m13 * m32) - m02 * (m11 * m33 - m13 * m31) + m03 * (m11 * m32 - m12 * m31);
+					const c21 = -(m00 * (m12 * m33 - m13 * m32) - m02 * (m10 * m33 - m13 * m30) + m03 * (m10 * m32 - m12 * m30));
+					const c22 = m00 * (m11 * m33 - m13 * m31) - m01 * (m10 * m33 - m13 * m30) + m03 * (m10 * m31 - m11 * m30);
+					const c23 = -(m00 * (m11 * m32 - m12 * m31) - m01 * (m10 * m32 - m12 * m30) + m02 * (m10 * m31 - m11 * m30));
+					const c30 = -(m01 * (m12 * m23 - m13 * m22) - m02 * (m11 * m23 - m13 * m21) + m03 * (m11 * m22 - m12 * m21));
+					const c31 = m00 * (m12 * m23 - m13 * m22) - m02 * (m10 * m23 - m13 * m20) + m03 * (m10 * m22 - m12 * m20);
+					const c32 = -(m00 * (m11 * m23 - m13 * m21) - m01 * (m10 * m23 - m13 * m20) + m03 * (m10 * m21 - m11 * m20));
+					const c33 = m00 * (m11 * m22 - m12 * m21) - m01 * (m10 * m22 - m12 * m20) + m02 * (m10 * m21 - m11 * m20);
+					const determinant = m00 * c00 + m01 * c01 + m02 * c02 + m03 * c03;
+					if (Math.abs(determinant) < 1e-10) {
+						console.error('Matrix is not invertible (determinant is zero or near zero)');
+						resultMatrix[0] = 1;
+						resultMatrix[1] = 0;
+						resultMatrix[2] = 0;
+						resultMatrix[3] = 0;
+						resultMatrix[4] = 0;
+						resultMatrix[5] = 1;
+						resultMatrix[6] = 0;
+						resultMatrix[7] = 0;
+						resultMatrix[8] = 0;
+						resultMatrix[9] = 0;
+						resultMatrix[10] = 1;
+						resultMatrix[11] = 0;
+						resultMatrix[12] = 0;
+						resultMatrix[13] = 0;
+						resultMatrix[14] = 0;
+						resultMatrix[15] = 1;
+					} else {
+						const invDet = 1.0 / determinant;
+						resultMatrix[0] = c00 * invDet;
+						resultMatrix[1] = c10 * invDet;
+						resultMatrix[2] = c20 * invDet;
+						resultMatrix[3] = c30 * invDet;
+						resultMatrix[4] = c01 * invDet;
+						resultMatrix[5] = c11 * invDet;
+						resultMatrix[6] = c21 * invDet;
+						resultMatrix[7] = c31 * invDet;
+						resultMatrix[8] = c02 * invDet;
+						resultMatrix[9] = c12 * invDet;
+						resultMatrix[10] = c22 * invDet;
+						resultMatrix[11] = c32 * invDet;
+						resultMatrix[12] = c03 * invDet;
+						resultMatrix[13] = c13 * invDet;
+						resultMatrix[14] = c23 * invDet;
+						resultMatrix[15] = c33 * invDet;
+					}
 				}
 			}
-			const nodeGlobalTransform = skinInfo.nodeGlobalTransform;
-			{
-				const neededSize = skinInfo.joints.length * 16;
-				if (!skinInfo.reusableJointNodeGlobalTransform || skinInfo.reusableJointNodeGlobalTransform.length !== neededSize) {
-					skinInfo.reusableJointNodeGlobalTransform = new Float32Array(neededSize);
-				}
-				let j = usedJointIndices.length;
-				while (j--) {
-					const jointIndex = usedJointIndices[j];
-					const jm = skinInfo.joints[jointIndex].modelMatrix;
-					const ibm = skinInfo.inverseBindMatrices[jointIndex];
-					const offset = jointIndex * 16;
-					const out = skinInfo.reusableJointNodeGlobalTransform;
-					const t00 = nodeGlobalTransform[0] * jm[0] + nodeGlobalTransform[4] * jm[1] + nodeGlobalTransform[8] * jm[2] + nodeGlobalTransform[12] * jm[3];
-					const t01 = nodeGlobalTransform[1] * jm[0] + nodeGlobalTransform[5] * jm[1] + nodeGlobalTransform[9] * jm[2] + nodeGlobalTransform[13] * jm[3];
-					const t02 = nodeGlobalTransform[2] * jm[0] + nodeGlobalTransform[6] * jm[1] + nodeGlobalTransform[10] * jm[2] + nodeGlobalTransform[14] * jm[3];
-					const t03 = nodeGlobalTransform[3] * jm[0] + nodeGlobalTransform[7] * jm[1] + nodeGlobalTransform[11] * jm[2] + nodeGlobalTransform[15] * jm[3];
-					const t10 = nodeGlobalTransform[0] * jm[4] + nodeGlobalTransform[4] * jm[5] + nodeGlobalTransform[8] * jm[6] + nodeGlobalTransform[12] * jm[7];
-					const t11 = nodeGlobalTransform[1] * jm[4] + nodeGlobalTransform[5] * jm[5] + nodeGlobalTransform[9] * jm[6] + nodeGlobalTransform[13] * jm[7];
-					const t12 = nodeGlobalTransform[2] * jm[4] + nodeGlobalTransform[6] * jm[5] + nodeGlobalTransform[10] * jm[6] + nodeGlobalTransform[14] * jm[7];
-					const t13 = nodeGlobalTransform[3] * jm[4] + nodeGlobalTransform[7] * jm[5] + nodeGlobalTransform[11] * jm[6] + nodeGlobalTransform[15] * jm[7];
-					const t20 = nodeGlobalTransform[0] * jm[8] + nodeGlobalTransform[4] * jm[9] + nodeGlobalTransform[8] * jm[10] + nodeGlobalTransform[12] * jm[11];
-					const t21 = nodeGlobalTransform[1] * jm[8] + nodeGlobalTransform[5] * jm[9] + nodeGlobalTransform[9] * jm[10] + nodeGlobalTransform[13] * jm[11];
-					const t22 = nodeGlobalTransform[2] * jm[8] + nodeGlobalTransform[6] * jm[9] + nodeGlobalTransform[10] * jm[10] + nodeGlobalTransform[14] * jm[11];
-					const t23 = nodeGlobalTransform[3] * jm[8] + nodeGlobalTransform[7] * jm[9] + nodeGlobalTransform[11] * jm[10] + nodeGlobalTransform[15] * jm[11];
-					const t30 = nodeGlobalTransform[0] * jm[12] + nodeGlobalTransform[4] * jm[13] + nodeGlobalTransform[8] * jm[14] + nodeGlobalTransform[12] * jm[15];
-					const t31 = nodeGlobalTransform[1] * jm[12] + nodeGlobalTransform[5] * jm[13] + nodeGlobalTransform[9] * jm[14] + nodeGlobalTransform[13] * jm[15];
-					const t32 = nodeGlobalTransform[2] * jm[12] + nodeGlobalTransform[6] * jm[13] + nodeGlobalTransform[10] * jm[14] + nodeGlobalTransform[14] * jm[15];
-					const t33 = nodeGlobalTransform[3] * jm[12] + nodeGlobalTransform[7] * jm[13] + nodeGlobalTransform[11] * jm[14] + nodeGlobalTransform[15] * jm[15];
-					// temp1 * inverseBindMatrix
-					out[offset] = t00 * ibm[0] + t10 * ibm[1] + t20 * ibm[2] + t30 * ibm[3];
-					out[offset + 1] = t01 * ibm[0] + t11 * ibm[1] + t21 * ibm[2] + t31 * ibm[3];
-					out[offset + 2] = t02 * ibm[0] + t12 * ibm[1] + t22 * ibm[2] + t32 * ibm[3];
-					out[offset + 3] = t03 * ibm[0] + t13 * ibm[1] + t23 * ibm[2] + t33 * ibm[3];
-					out[offset + 4] = t00 * ibm[4] + t10 * ibm[5] + t20 * ibm[6] + t30 * ibm[7];
-					out[offset + 5] = t01 * ibm[4] + t11 * ibm[5] + t21 * ibm[6] + t31 * ibm[7];
-					out[offset + 6] = t02 * ibm[4] + t12 * ibm[5] + t22 * ibm[6] + t32 * ibm[7];
-					out[offset + 7] = t03 * ibm[4] + t13 * ibm[5] + t23 * ibm[6] + t33 * ibm[7];
-					out[offset + 8] = t00 * ibm[8] + t10 * ibm[9] + t20 * ibm[10] + t30 * ibm[11];
-					out[offset + 9] = t01 * ibm[8] + t11 * ibm[9] + t21 * ibm[10] + t31 * ibm[11];
-					out[offset + 10] = t02 * ibm[8] + t12 * ibm[9] + t22 * ibm[10] + t32 * ibm[11];
-					out[offset + 11] = t03 * ibm[8] + t13 * ibm[9] + t23 * ibm[10] + t33 * ibm[11];
-					out[offset + 12] = t00 * ibm[12] + t10 * ibm[13] + t20 * ibm[14] + t30 * ibm[15];
-					out[offset + 13] = t01 * ibm[12] + t11 * ibm[13] + t21 * ibm[14] + t31 * ibm[15];
-					out[offset + 14] = t02 * ibm[12] + t12 * ibm[13] + t22 * ibm[14] + t32 * ibm[15];
-					out[offset + 15] = t03 * ibm[12] + t13 * ibm[13] + t23 * ibm[14] + t33 * ibm[15];
-				}
-			}
+
+			// Compute Shader 초기화 (최초 1회)
 			if (!skinInfo.computeShader) {
 				skinInfo.createCompute(
 					redGPUContext,
 					gpuDevice,
 					mesh.animationInfo.skinInfo.vertexStorageBuffer,
 					mesh.animationInfo.weightBuffer,
-					skinInfo.reusableJointNodeGlobalTransform
 				);
 			}
-			gpuDevice.queue.writeBuffer(
-				skinInfo.jointNodeGlobalTransformBuffer,
-				0,
-				skinInfo.reusableJointNodeGlobalTransform
-			);
+
 			{
-
-				passEncoder.setPipeline(skinInfo.computePipeline);
-				passEncoder.setBindGroup(0, skinInfo.bindGroup);
-				passEncoder.dispatchWorkgroups(Math.ceil(mesh.geometry.vertexBuffer.vertexCount / 64));
-
+				const usedJoints  = skinInfo.usedJoints
+				let i = usedJoints.length;
+				const jointData = skinInfo.jointData ;
+				while (i--) {
+					const targetJointIndex = usedJoints[i]
+					jointData.set(skinInfo.joints[targetJointIndex].modelMatrix, (targetJointIndex + 1) * 16);
+				}
+				jointData.set(skinInfo.invertNodeGlobalTransform,0)
+				gpuDevice.queue.writeBuffer(skinInfo.uniformBuffer,0,jointData)
 			}
+
+
+			// Compute Pass 설정 및 Dispatch
+			passEncoder.setPipeline(skinInfo.computePipeline);
+			passEncoder.setBindGroup(0, skinInfo.bindGroup);
+			passEncoder.dispatchWorkgroups(Math.ceil(mesh.geometry.vertexBuffer.vertexCount / skinInfo.WORK_SIZE));
 		}
+
 		passEncoder.end();
-		// 한 번에 제출
-		redGPUContext.gpuDevice.queue.submit([commandEncoder.finish()]);
+		gpuDevice.queue.submit([commandEncoder.finish()]);
 	}
+
 
 	renderView(view: View3D, time: number) {
 		const {
@@ -272,9 +248,8 @@ class Renderer {
 		camera.update?.(view, time)
 		const commandEncoder: GPUCommandEncoder = redGPUContext.gpuDevice.createCommandEncoder()
 		const computeCommandEncoder: GPUCommandEncoder = redGPUContext.gpuDevice.createCommandEncoder()
-		this.#batchUpdateSkinMatrices(redGPUContext,debugViewRenderState.skinList)
-		view.debugViewRenderState.reset(null,computeCommandEncoder, time)
-
+		this.#batchUpdateSkinMatrices(redGPUContext, debugViewRenderState.skinList)
+		view.debugViewRenderState.reset(null, computeCommandEncoder, time)
 		if (pixelRectObject.width && pixelRectObject.height) {
 			if (directionalShadowManager.shadowDepthTextureView) {
 				const shadowPassDescriptor: GPURenderPassDescriptor = {
@@ -294,10 +269,8 @@ class Renderer {
 			}
 			{
 				const viewRenderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass(renderPassDescriptor)
-
 				this.#updateViewSystemUniforms(view, viewRenderPassEncoder, false, true)
 				debugViewRenderState.currentRenderPassEncoder = viewRenderPassEncoder
-
 				if (skybox) skybox.render(debugViewRenderState)
 				renderBasicLayer(view, viewRenderPassEncoder)
 				if (axis) axis.render(debugViewRenderState)
