@@ -73,14 +73,7 @@ class ParsedSkinInfo_GLTF {
 			  vertexWeight: vec4<f32>,
 			  vertexJoint:  vec4<f32>,
 			};
-			
-			struct AlignedMatrix {
-			  col0: vec4<f32>,
-			  col1: vec4<f32>,
-			  col2: vec4<f32>,
-			  col3: vec4<f32>,
-			};
-			
+		
 			struct Uniforms {
 			  invertNodeGlobalTransform:    mat4x4<f32>,
 			  jointModelMatrices:     array<mat4x4<f32>, ${this.usedJoints.length}>,
@@ -89,7 +82,7 @@ class ParsedSkinInfo_GLTF {
 			};
 			
 			@group(0) @binding(0) var<storage, read>       vertexSkinBuffer:  array<VertexSkinData>;
-			@group(0) @binding(1) var<storage, read_write> skinMatrixBuffer:  array<AlignedMatrix>;
+			@group(0) @binding(1) var<storage, read_write> skinMatrixBuffer:  array<mat4x4<f32>>;
 			@group(0) @binding(2) var<uniform>             uniforms:          Uniforms;
 			
 			@compute @workgroup_size(${this.WORK_SIZE},1,1)
@@ -98,21 +91,27 @@ class ParsedSkinInfo_GLTF {
 			  if (idx >= arrayLength(&vertexSkinBuffer)) {
 			    return;
 			  }
-
+			
 			  let skin = vertexSkinBuffer[idx];
-			  let w    = skin.vertexWeight;
-			  let j0   = u32(skin.vertexJoint.x);
-			  let j1   = u32(skin.vertexJoint.y);
-			  let j2   = u32(skin.vertexJoint.z);
-			  let j3   = u32(skin.vertexJoint.w);
+			  let w = skin.vertexWeight;
+			  let joints = vec4<u32>(skin.vertexJoint);
 			
-			  let m0 = uniforms.invertNodeGlobalTransform * uniforms.jointModelMatrices[uniforms.searchJointIndexTable[j0].x] * uniforms.inverseBindMatrices[j0];
-			  let m1 = uniforms.invertNodeGlobalTransform * uniforms.jointModelMatrices[uniforms.searchJointIndexTable[j1].x] * uniforms.inverseBindMatrices[j1];
-			  let m2 = uniforms.invertNodeGlobalTransform * uniforms.jointModelMatrices[uniforms.searchJointIndexTable[j2].x] * uniforms.inverseBindMatrices[j2];
-			  let m3 = uniforms.invertNodeGlobalTransform * uniforms.jointModelMatrices[uniforms.searchJointIndexTable[j3].x] * uniforms.inverseBindMatrices[j3];
+			  let invTransform = uniforms.invertNodeGlobalTransform;
+			  
+			  let idx0 = uniforms.searchJointIndexTable[joints.x].x;
+			  let idx1 = uniforms.searchJointIndexTable[joints.y].x;
+			  let idx2 = uniforms.searchJointIndexTable[joints.z].x;
+			  let idx3 = uniforms.searchJointIndexTable[joints.w].x;
 			
-			  let resultMat = w.x * m0 + w.y * m1 + w.z * m2 + w.w * m3;
-			  skinMatrixBuffer[idx] = AlignedMatrix( resultMat[0], resultMat[1], resultMat[2], resultMat[3] );
+			  let m0 = uniforms.jointModelMatrices[idx0] * uniforms.inverseBindMatrices[joints.x];
+			  let m1 = uniforms.jointModelMatrices[idx1] * uniforms.inverseBindMatrices[joints.y];
+			  let m2 = uniforms.jointModelMatrices[idx2] * uniforms.inverseBindMatrices[joints.z];
+			  let m3 = uniforms.jointModelMatrices[idx3] * uniforms.inverseBindMatrices[joints.w];
+			
+			  let blendedMatrix = w.x * m0 + w.y * m1 + w.z * m2 + w.w * m3;
+			  let resultMat = invTransform * blendedMatrix;
+			  
+			  skinMatrixBuffer[idx] = resultMat;
 			}
     `;
 		// keepLog(this.joints, this.usedJoints)

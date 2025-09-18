@@ -185,9 +185,8 @@ class Renderer {
 				const usedJoints  = skinInfo.usedJoints
 				let i = usedJoints.length;
 				const jointData = skinInfo.jointData ;
-				for (let i = 0; i < usedJoints.length; i++) {
-					const targetJointIndex = usedJoints[i]
-					jointData.set(skinInfo.joints[targetJointIndex].modelMatrix, (i + 1) * 16);
+				while(i--) {
+					jointData.set(skinInfo.joints[usedJoints[i]].modelMatrix, (i + 1) * 16);
 				}
 
 				jointData.set(skinInfo.invertNodeGlobalTransform,0)
