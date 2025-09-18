@@ -6,6 +6,7 @@ import View3D from "../display/view/View3D";
 import GPU_LOAD_OP from "../gpuConst/GPU_LOAD_OP";
 import GPU_STORE_OP from "../gpuConst/GPU_STORE_OP";
 import ParsedSkinInfo_GLTF from "../loader/gltf/cls/ParsedSkinInfo_GLTF";
+import {keepLog} from "../utils";
 import DebugRender from "./debugRender/DebugRender";
 import FinalRender from "./finalRender/FinalRender";
 import render2PathLayer from "./renderLayers/render2PathLayer";
@@ -96,7 +97,7 @@ class Renderer {
 			}
 
 			// 조인트 행렬 저장 버퍼 크기 확인 및 초기화
-			const neededSize = (1 + skinInfo.joints.length)  * 16;
+			const neededSize = (1 + skinInfo.usedJoints.length)  * 16;
 			if (!skinInfo.jointData || skinInfo.jointData.length !== neededSize) {
 				skinInfo.jointData = new Float32Array(neededSize);
 				skinInfo.computeShader = null
@@ -184,13 +185,16 @@ class Renderer {
 				const usedJoints  = skinInfo.usedJoints
 				let i = usedJoints.length;
 				const jointData = skinInfo.jointData ;
-				while (i--) {
+				for (let i = 0; i < usedJoints.length; i++) {
 					const targetJointIndex = usedJoints[i]
-					jointData.set(skinInfo.joints[targetJointIndex].modelMatrix, (targetJointIndex + 1) * 16);
+					jointData.set(skinInfo.joints[targetJointIndex].modelMatrix, (i + 1) * 16);
 				}
+
 				jointData.set(skinInfo.invertNodeGlobalTransform,0)
 				gpuDevice.queue.writeBuffer(skinInfo.uniformBuffer,0,jointData)
+
 			}
+
 
 
 			// Compute Pass 설정 및 Dispatch
