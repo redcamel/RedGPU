@@ -7,6 +7,7 @@ import {GLTFParsedSingleClip} from "../../loader/gltf/parsers/animation/parseAni
 import VertexGPURenderInfo from "../../renderInfos/VertexGPURenderInfo";
 import DepthStencilState from "../../renderState/DepthStencilState";
 import PrimitiveState from "../../renderState/PrimitiveState";
+import VertexBuffer from "../../resources/buffer/vertexBuffer/VertexBuffer";
 import validateRedGPUContext from "../../runtimeChecker/validateFunc/validateRedGPUContext";
 import createUUID from "../../utils/createUUID";
 import getScreenPoint from "../../utils/math/getScreenPoint";
@@ -20,10 +21,12 @@ class MeshBase extends Object3DContainer {
 	animationInfo: {
 		morphInfo: MorphInfo_GLTF
 		skinInfo: ParsedSkinInfo_GLTF,
+		weightBuffer: VertexBuffer,
 		animationsList: GLTFParsedSingleClip[]
 	} = {
 		skinInfo: null,
 		morphInfo: null,
+		weightBuffer: null,
 		animationsList: null
 	}
 	gltfLoaderInfo: GLTFLoader

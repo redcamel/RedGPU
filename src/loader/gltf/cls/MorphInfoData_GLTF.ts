@@ -11,7 +11,7 @@ class MorphInfoData_GLTF {
 	jointWeights: number[] = [];
 	joints: number[] = [];
 	tangents: number[] = [];
-	interleaveData: number[]
+	interleaveData: Float32Array
 
 	/**
 	 * Creates a new instance of the constructor.

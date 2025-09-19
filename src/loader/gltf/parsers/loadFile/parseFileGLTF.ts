@@ -5,11 +5,19 @@ import parseGLTF from "../parseGLTF";
 
 const cacheMap: Map<string, GLTF> = new Map();
 const pendingMap: Map<string, Promise<object>> = new Map();
+const getData = (gltfData)=>{
+
+	return  {
+		...gltfData,
+		meshes:JSON.parse(JSON.stringify(gltfData.meshes)),
+	}
+
+}
 const parseFileGLTF = async (gltfLoader: GLTFLoader, callBack) => {
 	const loadFilePath = getAbsoluteURL(window.location.href, gltfLoader.filePath + gltfLoader.fileName);
 	// 캐싱된 데이터가 있으면 바로 파싱
 	if (cacheMap.has(loadFilePath)) {
-		gltfLoader.gltfData = cacheMap.get(loadFilePath);
+		gltfLoader.gltfData = getData(cacheMap.get(loadFilePath))
 		requestAnimationFrame(() => {
 			parseGLTF(gltfLoader, gltfLoader.gltfData, callBack);
 		});
@@ -18,7 +26,7 @@ const parseFileGLTF = async (gltfLoader: GLTFLoader, callBack) => {
 	// 진행 중 Promise 있으면 그것이 끝날 때까지 대기 후 파싱
 	if (pendingMap.has(loadFilePath)) {
 		await pendingMap.get(loadFilePath);
-		gltfLoader.gltfData = cacheMap.get(loadFilePath);
+		gltfLoader.gltfData = getData(cacheMap.get(loadFilePath))
 		requestAnimationFrame(() => {
 			parseGLTF(gltfLoader, gltfLoader.gltfData, callBack);
 		});
@@ -40,7 +48,7 @@ const parseFileGLTF = async (gltfLoader: GLTFLoader, callBack) => {
 	});
 	pendingMap.set(loadFilePath, promise);
 	const gltfData = await promise;
-	gltfLoader.gltfData = gltfData;
+	gltfLoader.gltfData = getData(gltfData)
 	requestAnimationFrame(() => {
 		parseGLTF(gltfLoader, gltfLoader.gltfData, callBack);
 	});

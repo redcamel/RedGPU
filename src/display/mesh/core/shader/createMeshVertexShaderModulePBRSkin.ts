@@ -10,7 +10,7 @@ const createMeshVertexShaderModulePBRSkin = (
 	mesh: Mesh,
 ): GPUShaderModule => {
 	const {redGPUContext, currentShaderModuleName} = mesh
-	const {resourceManager} = redGPUContext
+	const {resourceManager,gpuDevice} = redGPUContext
 	const {gpuRenderInfo} = mesh
 	const jointNum = `${mesh.animationInfo.skinInfo.joints.length}`
 	const label = `${VERTEX_SHADER_MODULE_NAME_PBR_SKIN}_${jointNum}`
@@ -25,11 +25,15 @@ const createMeshVertexShaderModulePBRSkin = (
 			createMeshVertexUniformBuffers(mesh, true)
 			mesh.animationInfo.skinInfo.vertexStorageInfo = parseWGSL(vModuleDescriptor.code).storage.vertexStorages
 			const newData = new ArrayBuffer(mesh.animationInfo.skinInfo.vertexStorageInfo.arrayBufferByteLength)
-			mesh.animationInfo.skinInfo.vertexStorageBuffer = new StorageBuffer(
-				mesh.redGPUContext,
-				newData,
-				mesh.name
-			)
+			// mesh.animationInfo.skinInfo.vertexStorageBuffer = new StorageBuffer(
+			// 	mesh.redGPUContext,
+			// 	newData,
+			// 	mesh.name
+			// )
+			mesh.animationInfo.skinInfo.vertexStorageBuffer =  gpuDevice.createBuffer({
+				size: mesh.geometry.vertexBuffer.vertexCount * 16 * 4 , // mat4x4<f32> = 16 floats × 4 bytes
+				usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
+			});
 			gpuRenderInfo.vertexUniformBindGroup = redGPUContext.gpuDevice.createBindGroup(getBasicMeshVertexBindGroupDescriptor(mesh, true));
 		} else {
 			createMeshVertexUniformBuffers(mesh)

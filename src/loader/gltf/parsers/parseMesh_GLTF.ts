@@ -8,7 +8,9 @@ import InterleaveType from "../../../resources/buffer/core/type/InterleaveType";
 import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
 import InterleavedStruct from "../../../resources/buffer/vertexBuffer/InterleavedStruct";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
+import {keepLog} from "../../../utils";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
+import createUUID from "../../../utils/createUUID";
 import calculateNormals from "../../../utils/math/calculateNormals";
 import AccessorInfo_GLTF from "../cls/AccessorInfo_GLTF";
 import MorphInfo_GLTF from "../cls/MorphInfo_GLTF";
@@ -150,20 +152,43 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
 		else if (uvs.length) tInterleaveInfoList['aTexcoord1'] = InterleaveType.float32x2
 		tInterleaveInfoList['aVertexColor_0'] = InterleaveType.float32x4
 		// if (jointWeights.length)
-		tInterleaveInfoList['aVertexWeight'] = InterleaveType.float32x4
+		// tInterleaveInfoList['aVertexWeight'] = InterleaveType.float32x4
 		// if (joints.length)
-		tInterleaveInfoList['aVertexJoint'] = InterleaveType.float32x4
+		// tInterleaveInfoList['aVertexJoint'] = InterleaveType.float32x4
 		tInterleaveInfoList['aVertexTangent'] = InterleaveType.float32x4
+		const weightData = []
+		parseInterleaveData_GLTF(weightData, vertices, verticesColor_0, normalData, uvs, uvs1, uvs2, jointWeights, joints, tangents,true)
+
+		const weightBuffer = new VertexBuffer(
+			redGPUContext,
+				weightData,
+			new InterleavedStruct(
+				{
+					aVertexWeight: InterleaveType.float32x4,
+					aVertexJoint: InterleaveType.float32x4
+				}
+			),
+			undefined,
+			`Weight_${gltfLoader.url}_${nodeGlTfId}_${i}`
+		)
+
+		/////////////////////////////////////////////////////////
+		let morphInfo = new MorphInfo_GLTF(gltfLoader, gltfData, meshPrimitive, gltfMesh.weights);
+
+		/////////////////////////////////////////////////////
+		const vertexCacheKey = `Vertex_${gltfLoader.url}_${nodeGlTfId}_${i}_${morphInfo.weights.length ? createUUID() :''}`
+		const hasVertexBuffer = redGPUContext.resourceManager['managedVertexBufferState'].table.get(vertexCacheKey)?.buffer
+
 		tGeo = new Geometry(
 			redGPUContext,
-			new VertexBuffer(
+			hasVertexBuffer || new VertexBuffer(
 				redGPUContext,
 				interleaveData,
 				new InterleavedStruct(
 					tInterleaveInfoList,
 				),
 				undefined,
-				`Vertex_${gltfLoader.url}_${nodeGlTfId}_${i}`
+				vertexCacheKey
 			),
 			!noIndexBuffer && indices.length ? new IndexBuffer(
 				redGPUContext,
@@ -178,6 +203,7 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
 			consoleAndThrowError('재질을 파싱할수없는경우 ', meshPrimitive);
 		}
 		tMesh = new Mesh(redGPUContext, tGeo, tMaterial);
+		tMesh.animationInfo.weightBuffer = weightBuffer
 		if (tName) {
 			tMesh.name = tName;
 			if (gltfLoader.parsingOption) {
@@ -203,31 +229,8 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
 			// TODO
 			tMesh.depthStencilState.depthCompare = GPU_COMPARE_FUNCTION.LESS_EQUAL
 		}
-		/////////////////////////////////////////////////////////
-		{
-			// 모프리스트 설정
-			let morphInfo = new MorphInfo_GLTF(gltfLoader, gltfData, meshPrimitive, gltfMesh.weights);
-			let index = 0;
-			let list = morphInfo.morphInfoDataList;
-			const len = list.length
-			while (index < len) {
-				const morph = list[index];
-				const normalData = morph.normals.length ? morph.normals : calculateNormals(morph.vertices, indices);
-				const interleaveData = [];
-				parseInterleaveData_GLTF(
-					interleaveData,
-					morph.vertices, morph.verticesColor_0,
-					normalData, morph.uvs, morph.uvs1, morph.uvs2,
-					morph.jointWeights, morph.joints,
-					morph.tangents
-				);
-				morph.interleaveData = interleaveData;
-				index++;
-			}
-			tMesh.animationInfo.morphInfo = morphInfo;
-			tMesh.animationInfo.morphInfo.origin = new Float32Array(interleaveData);
-			// console.log('모프리스트', tMesh.animationInfo.morphInfo);
-		}
+		tMesh.animationInfo.morphInfo = morphInfo;
+		tMesh.animationInfo.morphInfo.origin = new Float32Array(interleaveData);
 		/////////////////////////////////////////////////////
 		let targetGeometryData = tMesh.geometry.vertexBuffer.data
 		if (!tMesh.gpuRenderInfo) tMesh.initGPURenderInfos()
@@ -240,7 +243,7 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
 			}
 		}
 		// console.log('여긴가', NUM)
-		{
+		if(!hasVertexBuffer){
 			const list = tMesh.animationInfo.morphInfo.morphInfoDataList;
 			let index = 0;
 			const listLen = list.length

@@ -13,6 +13,7 @@ import ADebugStatisticsDomService from "./core/ADebugStatisticsDomService";
 const debugStats = [
 	"useMSAA",
 	"useFXAA",
+	"useTAA",
 	"alphaMode",
 	"renderScale",
 ];
@@ -54,9 +55,10 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
 	}
 
 	#updateDebugStat(redGPUContext: RedGPUContext, stat: string) {
-		const isAntialiasing = ['useMSAA', 'useFXAA'].includes(stat)
+		const isAntialiasing = ['useMSAA', 'useFXAA','useTAA'].includes(stat)
 		const value = isAntialiasing ? redGPUContext.antialiasingManager[stat] : redGPUContext[stat];
-		updateDebugItemValue(this.dom, `redGPUContext_${stat}`, isAntialiasing ? makeBooleanDebug('useMSAA', value) : getDebugFormatValue(value));
+
+		updateDebugItemValue(this.dom, `redGPUContext_${stat}`, isAntialiasing ? makeBooleanDebug(stat, value) : getDebugFormatValue(value));
 	}
 
 	#updateViewportSize(redGPUContext: RedGPUContext,) {
