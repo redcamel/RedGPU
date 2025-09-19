@@ -51,7 +51,6 @@ class GLTFLoader {
 	#gltfData: GLTF
 	readonly #onLoad
 	readonly #onError
-	#currentAnimationInfo: any
 
 	constructor(redGPUContext: RedGPUContext, url: string, onLoad, onError) {
 		validateRedGPUContext(redGPUContext)
@@ -103,18 +102,21 @@ class GLTFLoader {
 		return this.#url;
 	}
 
-	stopAnimation() {
+	stopAnimation(parsedSingleClip: GLTFParsedSingleClip) {
 		const {activeAnimations} = this
-		let index = activeAnimations.indexOf(this.#currentAnimationInfo);
+		let index = activeAnimations.indexOf(parsedSingleClip);
 		if (index > -1) {
 			activeAnimations.splice(index, 1);
 		}
 	};
+	stopAllAnimation(){
+		this.activeAnimations.length = 0
+	}
 
 	playAnimation(parsedSingleClip: GLTFParsedSingleClip) {
 		const {activeAnimations} = this
 		activeAnimations.push(
-			this.#currentAnimationInfo = new PlayAnimationInfo(performance.now(), parsedSingleClip)
+			new PlayAnimationInfo(performance.now(), parsedSingleClip)
 		);
 	};
 

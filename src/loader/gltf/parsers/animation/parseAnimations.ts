@@ -43,8 +43,8 @@ const parseAnimations = (gltfLoader: GLTFLoader, gltfData: GLTF) => {
 			await Promise.all(allPromises);
 			if (parsedAnimations.length) {
 				// console.log('Animation parsing has ended.');
-				// parsedAnimations.forEach(animation => gltfLoader.playAnimation(animation));
-				gltfLoader.playAnimation(parsedAnimations[0])
+				parsedAnimations.forEach(animation => gltfLoader.playAnimation(animation));
+				// gltfLoader.playAnimation(parsedAnimations[0])
 			}
 		}
 		resolve();
