@@ -19,6 +19,8 @@ RedGPU - Javascript WebGPU Library
 ## [Examples](https://redcamel.github.io/RedGPU/examples/)
    - See the [example](https://redcamel.github.io/RedGPU/examples/). Various examples are available.
 
+## [Document](https://redcamel.github.io/RedGPU/docs/)
+
 https://github.com/user-attachments/assets/bee83e4a-26d8-471e-abd0-394673bc8f0b
 
 https://user-images.githubusercontent.com/820587/172777357-32c64963-abbe-432c-80e0-7893025b58ef.mp4
