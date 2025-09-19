@@ -17,6 +17,7 @@ RedGPU.init(
 		redGPUContext.addView(view);
 
 		loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF-Binary/BrainStem.glb');
+
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		const render = () => {};
 		renderer.start(redGPUContext, render);
@@ -37,14 +38,21 @@ function loadGLTF(view, url) {
 	const {redGPUContext, scene} = view;
 	new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
 		const mesh = result.resultMesh
-		mesh.y = -0.75
-		if (num) {
-			mesh.x = Math.random() * 10 - 5
-			mesh.z = Math.random() * 10 - 5
-		}
-		num++
-		scene.addChild(mesh)
+		mesh.x = Math.random() * 30 - 15
+		mesh.z = Math.random() * 30 - 15
+		if (url.includes('breakDance')) {
 
+			mesh.setScale(0.001)
+
+		}
+		scene.addChild(mesh)
+		if (num === 0) {
+			console.log(result)
+			mesh.x = 0
+			mesh.z = 0
+		}
+		// console.log('interleaveData2',mesh.children[0].geometry.vertexBuffer.data)
+		num++
 		// let i = 10
 		// while(i--){
 		// 	let clonedMesh = mesh.clone()

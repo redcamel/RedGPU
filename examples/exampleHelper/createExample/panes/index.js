@@ -23,9 +23,9 @@ export function setSeparator(pane) {
 }
 
 const setDebugButtons = (redGPUContext) => {
-	const check = ()=>{
+	const check = () => {
 		const container = document.querySelector('.navigation-bar');
-		if(container){
+		if (container) {
 			const rightContainer = document.createElement('div');
 			rightContainer.style.display = 'flex';
 			rightContainer.style.alignItems = 'center';
@@ -37,46 +37,45 @@ const setDebugButtons = (redGPUContext) => {
 			container.appendChild(rightContainer);
 
 			requestAnimationFrame(() => {
-				setAntialiasingSelect(redGPUContext,rightContainer)
-				setDebugButton(redGPUContext,rightContainer)
-				setAxis(redGPUContext,rightContainer)
-				setGrid(redGPUContext,rightContainer)
-				setSettingView(redGPUContext,rightContainer)
+				setAntialiasingSelect(redGPUContext, rightContainer)
+				setDebugButton(redGPUContext, rightContainer)
+				setAxis(redGPUContext, rightContainer)
+				setGrid(redGPUContext, rightContainer)
+				setSettingView(redGPUContext, rightContainer)
 
 			})
-		}else{
-			setTimeout(check,100)
+		} else {
+			setTimeout(check, 100)
 		}
 
 	}
-	setTimeout(check,100)
-
+	setTimeout(check, 100)
 
 }
 
-const setDebugButton = (redGPUContext,rightContainer) => {
-    let openYn = redGPUContext.useDebugPanel
-    const debugViewButton = document.createElement('div');
-    debugViewButton.className = 'nav-button example-setting-button';
-    debugViewButton.innerText = 'Debug Panel';
-    debugViewButton.innerHTML = '<img src="/RedGPU/examples/assets/icons/debug.svg" width="24"/>'
-    rightContainer.appendChild(debugViewButton);
-    const check = ()=>{
+const setDebugButton = (redGPUContext, rightContainer) => {
+	let openYn = redGPUContext.useDebugPanel
+	const debugViewButton = document.createElement('div');
+	debugViewButton.className = 'nav-button example-setting-button';
+	debugViewButton.innerText = 'Debug Panel';
+	debugViewButton.innerHTML = '<img src="/RedGPU/examples/assets/icons/debug.svg" width="24"/>'
+	rightContainer.appendChild(debugViewButton);
+	const check = () => {
 
-        redGPUContext.useDebugPanel = openYn;
-        debugViewButton.children[0].style.opacity = openYn ? 1 : 0.25
+		redGPUContext.useDebugPanel = openYn;
+		debugViewButton.children[0].style.opacity = openYn ? 1 : 0.25
 
-    }
-    if (debugViewButton && redGPUContext) {
-        debugViewButton.addEventListener('click', async () => {
-            openYn = !redGPUContext.useDebugPanel
-            check()
-        });
-    }
-    check()
+	}
+	if (debugViewButton && redGPUContext) {
+		debugViewButton.addEventListener('click', async () => {
+			openYn = !redGPUContext.useDebugPanel
+			check()
+		});
+	}
+	check()
 }
-const setGrid = (redGPUContext,rightContainer) => {
-	if(redGPUContext.viewList.length>1) return;
+const setGrid = (redGPUContext, rightContainer) => {
+	if (redGPUContext.viewList.length > 1) return;
 	const targetView = redGPUContext.viewList[0]
 	let openYn = !!targetView.grid
 	const button = document.createElement('div');
@@ -87,14 +86,14 @@ const setGrid = (redGPUContext,rightContainer) => {
 		check()
 	})
 	rightContainer.appendChild(button);
-	const check = ()=>{
+	const check = () => {
 		button.children[0].style.opacity = openYn ? 1 : 0.25
 		targetView.grid = openYn
 	}
 	check()
 }
-const setAxis = (redGPUContext,rightContainer) => {
-	if(redGPUContext.viewList.length>1) return;
+const setAxis = (redGPUContext, rightContainer) => {
+	if (redGPUContext.viewList.length > 1) return;
 	const targetView = redGPUContext.viewList[0]
 	let openYn = !!targetView.axis
 	const button = document.createElement('div');
@@ -105,15 +104,15 @@ const setAxis = (redGPUContext,rightContainer) => {
 		check()
 	})
 	rightContainer.appendChild(button);
-	const check = ()=>{
+	const check = () => {
 		button.children[0].style.opacity = openYn ? 1 : 0.25
 		targetView.axis = openYn
 	}
 	check()
 }
-const setSettingView = (redGPUContext,rightContainer) => {
+const setSettingView = (redGPUContext, rightContainer) => {
 	const panel = document.querySelector('.tp-dfwv')
-	if(!panel) return
+	if (!panel) return
 	let openYn = redGPUContext.detector.isMobile ? false : true;
 	const button = document.createElement('div');
 	button.className = 'nav-button example-setting-button';
@@ -123,19 +122,19 @@ const setSettingView = (redGPUContext,rightContainer) => {
 		check()
 	})
 	rightContainer.appendChild(button);
-	const check = ()=>{
+	const check = () => {
 		button.children[0].style.opacity = openYn ? 1 : 0.25
 		panel.style.right = openYn ? '8px' : 'calc(-100% - 10px)'
 	}
 	check()
 }
-const setAntialiasingSelect = (redGPUContext,rightContainer) => {
+const setAntialiasingSelect = (redGPUContext, rightContainer) => {
 	const antialiasing = document.createElement('select');
 	antialiasing.className = 'nav-button antialiasing-button';
 	antialiasing.innerHTML = `
-		<option value="useMSAA">MSAA</option>
-		<option value="useFXAA">FXAA</option>
-		<option value="useTAA" selected="true">TAA</option>
+		<option value="useMSAA" ${redGPUContext.antialiasingManager.useMSAA ? 'selected="true"' : ''}>MSAA</option>
+		<option value="useFXAA" ${redGPUContext.antialiasingManager.useFXAA ? 'selected="true"' : ''}>FXAA</option>
+		<option value="useTAA" ${redGPUContext.antialiasingManager.useTAA ? 'selected="true"' : ''}>TAA</option>
 		<option value="NONE" >NONE</option>
 	`
 	antialiasing.addEventListener('change', (e) => {
@@ -150,7 +149,7 @@ const setAntialiasingSelect = (redGPUContext,rightContainer) => {
 		}
 
 	})
-    rightContainer.appendChild(antialiasing);
+	rightContainer.appendChild(antialiasing);
 }
 const hdrImages = [
 	{name: '2K - the sky is on fire', path: 'assets/hdr/2k/the_sky_is_on_fire_2k.hdr'},

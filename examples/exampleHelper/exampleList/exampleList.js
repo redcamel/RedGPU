@@ -1049,7 +1049,7 @@ const ExampleList = [
 					{
 						name: 'Screen Space Reflection',
 						experimental: true,
-						list : [{
+						list: [{
 							experimental: true,
 							name: 'Screen Space Reflection',
 							path: '3d/postEffect/ssr',
@@ -1059,7 +1059,7 @@ const ExampleList = [
 								en: ``
 							}
 						},
-							]
+						]
 					},
 				],
 			},
@@ -1363,7 +1363,40 @@ const ExampleList = [
 							en: ``
 						},
 					},
-
+					{
+						name: 'Animation Performance Test',
+						list: [
+							{
+								name: 'Medium load Skinning',
+								path: 'gltf/animation/performance/mediumLoadSkinning',
+								thumb: 'gltf/animation/performance/mediumLoadSkinning/thumb.png',
+								description: {
+									ko: ``,
+									en: `This is a performance demo that computes a large number of models with 19 joints and 57 animation channels.`
+								},
+							},
+							{
+								name: 'High vertex load Skinning',
+								path: 'gltf/animation/performance/highVertexLoadSkinning',
+								thumb: 'gltf/animation/performance/highVertexLoadSkinning/thumb.png',
+								description: {
+									ko: ``,
+									en: `perform tests to measure skinning performance for models with many vertices and joints. We monitor FPS and GPU/CPU utilization to determine performance limits for each device.`
+								},
+							},
+							{
+								name: 'Morph target load Test',
+								path: 'gltf/animation/performance/highMorphTarget',
+								thumb: 'gltf/animation/performance/highMorphTarget/thumb.png',
+								description: {
+									ko: ``,
+									en: `Perform morph stress tests by instantiating hundreds of MorphStressTest models.
+Benchmark real-time morph target skinning performance to the limit. Test the performance of the heaviest of the three animations, the morph target animation.
+Check performance limits on each device.`
+								},
+							},
+						]
+					},
 				]
 			},
 			{
