@@ -23,7 +23,7 @@ applications. Built for the next generation of web graphics.</p>
   <a href="https://github.com/redcamel/RedGPU/releases">
     <img src="https://img.shields.io/github/release-date/redcamel/RedGPU?style=for-the-badge&logo=github&label=Release%20Date" alt="Release Date"></a>
 
----
+
 
 https://github.com/user-attachments/assets/bee83e4a-26d8-471e-abd0-394673bc8f0b
 
