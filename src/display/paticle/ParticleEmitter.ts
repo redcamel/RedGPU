@@ -4,6 +4,7 @@ import Plane from "../../primitive/Plane";
 import RenderViewStateData from "../../renderer/RenderViewStateData";
 import DefineForVertex from "../../resources/defineProperty/DefineForVertex";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
+import {keepLog} from "../../utils";
 import copyGPUBuffer from "../../utils/copyGPUBuffer";
 import Mesh from "../mesh/Mesh";
 import PARTICLE_EASE from "./PARTICLE_EASE";
@@ -38,8 +39,8 @@ class ParticleEmitter extends Mesh {
 	#maxEndY: number = 5
 	#maxEndZ: number = 5
 	//
-	#minStartAlpha: number = 0
-	#maxStartAlpha: number = 0
+	#minStartAlpha: number = 1
+	#maxStartAlpha: number = 1
 	#minEndAlpha: number = 1
 	#maxEndAlpha: number = 1
 	//
@@ -157,6 +158,7 @@ class ParticleEmitter extends Mesh {
 
 	set particleNum(value: number) {
 		this.#particleNum = Math.max(Math.min(value, 500000), 1);
+		if (!this.#simParamBuffer) this.#init()
 		this.#setParticleData()
 	}
 
@@ -501,7 +503,7 @@ class ParticleEmitter extends Mesh {
 	}
 
 	render(debugViewRenderState: RenderViewStateData) {
-		if (!this.#particleBuffers) this.#init()
+		if (!this.#simParamBuffer) this.#init()
 		this.#renderComputePass(debugViewRenderState.timestamp)
 		super.render(debugViewRenderState)
 	}
@@ -589,6 +591,7 @@ class ParticleEmitter extends Mesh {
 			initialParticleInfoScale,
 			initialParticleInfoAlpha,
 		]
+		keepLog(dataList)
 		dataList.forEach((v, index) => {
 			const t0 = redGPUContext.gpuDevice.createBuffer({
 				size: v.byteLength,
