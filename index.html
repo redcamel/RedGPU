@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RedGPU - Javascript WebGPU Library</title>
+    <link href="https://redcamel.github.io/RedGPU/" rel="canonical">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            background: #0a0a0b;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 25% 25%, rgba(255, 0, 150, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 75% 75%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 50% 50%, rgba(255, 100, 0, 0.05) 0%, transparent 50%);
+            z-index: -1;
+            animation: backgroundMove 15s ease-in-out infinite;
+        }
+
+        @keyframes backgroundMove {
+            0%, 100% {
+                transform: scale(1) rotate(0deg);
+            }
+            50% {
+                transform: scale(1.1) rotate(180deg);
+            }
+        }
+
+        /* Hero Section */
+        .hero {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 5rem 2rem;
+            position: relative;
+        }
+
+        .hero-title {
+            font-size: clamp(3rem, 8vw, 8rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #ff006e, #fb5607, #ffbe0b, #8338ec);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientShift 4s ease-in-out infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1.2rem, 3vw, 2rem);
+            font-weight: 300;
+            margin-bottom: 2rem;
+            opacity: 0.8;
+            max-width: 600px;
+        }
+
+        .hero-badges {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            align-items: flex-start;
+        }
+
+        .hero-badges img {
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            filter: brightness(0.9);
+        }
+
+        .hero-badges img:hover {
+            transform: translateY(-4px);
+            filter: brightness(1.1);
+            box-shadow: 0 10px 30px rgba(255, 255, 255, 0.1);
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, #ff006e, #8338ec);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(255, 0, 110, 0.3);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(255, 0, 110, 0.4);
+        }
+
+        .cta-button-secondary {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .cta-button-secondary:hover {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.1));
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 15px 40px rgba(255, 255, 255, 0.15);
+        }
+
+        /* Content Sections */
+        .content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .section {
+            margin-bottom: 0;
+            padding: 6rem 0;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.8s ease-out forwards;
+            position: relative;
+        }
+
+        /* Section Separators */
+        .section::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.2) 20%, rgba(255, 0, 110, 0.5) 50%, rgba(255, 255, 255, 0.2) 80%, transparent 100%);
+        }
+
+        .section:last-child::after {
+            display: none;
+        }
+
+        /* Top separator for first section (Features) */
+        .section:first-child::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.2) 20%, rgba(255, 0, 110, 0.5) 50%, rgba(255, 255, 255, 0.2) 80%, transparent 100%);
+        }
+
+        /* Alternating section backgrounds */
+        .section:nth-child(even) {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 0;
+            margin: 0 -2rem;
+            padding: 6rem 2rem;
+        }
+
+        .section:nth-child(odd) {
+            background: linear-gradient(135deg, rgba(255, 0, 110, 0.03) 0%, rgba(131, 56, 236, 0.03) 100%);
+            border-radius: 0;
+            margin: 0 -2rem;
+            padding: 6rem 2rem;
+        }
+
+        .section:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .section:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        .section:nth-child(4) {
+            animation-delay: 0.6s;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-title {
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(1.5rem, 3vw, 2.25rem);
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+            background: linear-gradient(135deg, #ffffff, #a0a0a0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Feature Cards */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background: rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(255, 255, 110, 0.1);
+            box-shadow: 0 20px 40px rgba(255, 0, 110, 0.1);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #ff006e, #8338ec);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #ffffff;
+        }
+
+        .feature-description {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+        }
+
+        .feature-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #ff006e;
+            text-decoration: none;
+            font-weight: 500;
+            margin-top: 1rem;
+            transition: color 0.3s ease;
+        }
+
+        .feature-link:hover {
+            color: #8338ec;
+        }
+
+        /* Release Badges */
+        .release-section {
+            text-align: center;
+            margin-bottom: 4rem;
+            padding: 3rem 0 !important;
+        }
+
+        .release-badges {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .release-badges img {
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            filter: brightness(0.9);
+        }
+
+        .release-badges img:hover {
+            transform: translateY(-4px);
+            filter: brightness(1.1);
+            box-shadow: 0 15px 30px rgba(255, 255, 255, 0.1);
+        }
+
+        /* Video Gallery */
+        .video-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .video-card {
+            border-radius: 20px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .video-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .video-card video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 5rem 0.5rem;
+            }
+
+            .content {
+                padding: 0 0.5rem;
+            }
+
+            .section:nth-child(even),
+            .section:nth-child(odd) {
+                margin: 0 -0.5rem;
+                padding: 6rem 1.6rem;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .video-gallery {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .hero-badges {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch
+            }
+
+            .release-badges {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero {
+                padding: 5rem 0.25rem;
+            }
+
+            .content {
+                padding: 0 0.25rem;
+            }
+
+            .section:nth-child(even),
+            .section:nth-child(odd) {
+                margin: 0 -0.25rem;
+                padding: 6rem 0.8rem;
+            }
+
+            .feature-grid {
+                gap: 0.8rem;
+
+            }
+
+            .feature-card {
+                padding: 1.5rem 1rem;
+            }
+
+            .video-gallery {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+
+            .feature-card {
+                padding: 1.5rem;
+            }
+
+            .video-gallery {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+
+        /* Footer Styles */
+        .footer {
+            background: rgba(15, 15, 15, 0.95);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 3rem 2rem 2rem;
+            /*margin-top: 4rem;*/
+            backdrop-filter: blur(20px);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h3 {
+            color: #ffffff;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #ff006e, #8338ec);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .footer-section p {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .footer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: flex-start;
+
+            img {
+                border-radius: 6px;
+                height: 22px;
+            }
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .footer-links a:hover {
+            color: #ff006e;
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .footer-social a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .footer-social a:hover {
+            background: rgba(255, 0, 110, 0.1);
+            border-color: rgba(255, 0, 110, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 2rem;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+        }
+
+        .footer-bottom a {
+            color: #ff006e;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-bottom a:hover {
+            color: #8338ec;
+        }
+
+        .footer-badges {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding: 2rem 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 1rem;
+            align-items: flex-start;
+        }
+
+        .footer-badges img {
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            filter: brightness(0.9);
+        }
+
+        .footer-badges img:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+            box-shadow: 0 10px 20px rgba(255, 255, 255, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .footer {
+                padding: 2rem 1rem 1.5rem;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .footer-social {
+                justify-content: center;
+            }
+
+            .footer-badges {
+                flex-direction: column;
+                align-items: center;
+                gap: 0.8rem;
+            }
+        }
+
+        #bgCanvasWrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+    </style>
+    <script type="module">
+			const RedGPU = await import('./dist/index.js');
+			RedGPU.init(
+				document.getElementById('bgCanvas'),
+				(redGPUContext) => {
+					const controllerTest = new RedGPU.Camera.ObitController(redGPUContext);
+					controllerTest.distance = 50
+					const scene = new RedGPU.Display.Scene();
+					const view = new RedGPU.Display.View3D(redGPUContext, scene, controllerTest);
+
+					redGPUContext.addView(view);
+
+					const texture_particle1 = new RedGPU.Resource.BitmapTexture(redGPUContext, './examples/assets/particle/particle.png');
+					const texture_particle2 = new RedGPU.Resource.BitmapTexture(redGPUContext, './examples/assets/particle/particle2.png');
+					{
+						let i = 5
+						while (i--) {
+							const testParticle2 = new RedGPU.Display.ParticleEmitter(redGPUContext)
+							scene.addChild(testParticle2)
+							testParticle2.x = Math.random() * 30 - 15
+							testParticle2.y = Math.random() * 30 - 15
+							testParticle2.z = -Math.random() * 5 - 1
+							testParticle2.particleNum = 300
+							testParticle2.material.opacity = 0.3
+							testParticle2.material.diffuseTexture = [texture_particle1, texture_particle2][Math.floor(Math.random() * 2)]
+							testParticle2.material.blendColorState.dstFactor = RedGPU.GPU_BLEND_FACTOR.ONE
+						}
+					}
+					{
+						const testParticle = new RedGPU.Display.ParticleEmitter(redGPUContext)
+						scene.addChild(testParticle)
+						testParticle.material.diffuseTexture = texture_particle2
+						testParticle.material.blendColorState.dstFactor = RedGPU.GPU_BLEND_FACTOR.ONE
+
+						testParticle.easeX = RedGPU.Display.PARTICLE_EASE.ExpoOut
+						testParticle.easeY = RedGPU.Display.PARTICLE_EASE.ExpoOut
+						testParticle.easeZ = RedGPU.Display.PARTICLE_EASE.ExpoOut
+						testParticle.easeAlpha = RedGPU.Display.PARTICLE_EASE.ExpoInOut
+						// testParticle.easeScale = RedGPU.Display.PARTICLE_EASE.ExpoInOut
+						testParticle.particleNum = 500
+						testParticle.minStartScale = 0
+						testParticle.maxStartScale = 0
+						testParticle.minEndScale = 30
+						testParticle.maxEndScale = 30
+						testParticle.minStartAlpha = 0
+						testParticle.maxStartAlpha = 0.3
+						testParticle.minEndAlpha = 0
+						testParticle.maxEndAlpha = 0
+						testParticle.minEndX = -30
+						testParticle.maxEndX = 30
+						testParticle.minEndY = -30
+						testParticle.maxEndY = 30
+						testParticle.minEndZ = -30
+						testParticle.maxEndZ = 30
+					}
+
+					const renderer = new RedGPU.Renderer(redGPUContext)
+
+					const render = (time) => {
+
+					}
+					renderer.start(redGPUContext, render)
+				},
+				(failReason) => {
+					// Handle initialization failure
+					console.error('Initialization failed:', failReason); // 초기화 실패 로그 출력
+					const errorMessage = document.createElement('div');
+					errorMessage.innerHTML = failReason; // 실패 원인 메시지를 표시
+					document.body.appendChild(errorMessage);
+				}
+			)
+			;
+    </script>
+</head>
+<body>
+<div id="bgCanvasWrapper">
+    <canvas id="bgCanvas"></canvas>
+</div>
+<!-- Hero Section -->
+<section class="hero">
+    <h1 class="hero-title">RedGPU</h1>
+    <p class="hero-subtitle">A powerful JavaScript WebGPU library for creating stunning 3D graphics and high-performance
+        web applications</p>
+
+
+    <div class="hero-buttons">
+        <a href="https://redcamel.github.io/RedGPU/examples/" class="cta-button">
+            🚀 Explore Examples
+        </a>
+        <a href="https://github.com/redcamel/RedGPU" class="cta-button cta-button-secondary">
+            📦 View on GitHub
+        </a>
+    </div>
+</section>
+
+<!-- Content Sections -->
+<div class="content">
+    <!-- Features Section -->
+    <section class="section">
+        <h2 class="section-title">Features</h2>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🎮</div>
+                <h3 class="feature-title">Examples</h3>
+                <p class="feature-description">Explore a wide variety of interactive examples showcasing the power of
+                    WebGPU rendering capabilities.</p>
+                <a href="https://redcamel.github.io/RedGPU/examples/" class="feature-link">
+                    View Examples →
+                </a>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">📚</div>
+                <h3 class="feature-title">API</h3>
+                <p class="feature-description">Complete API reference and documentation to help you leverage RedGPU's
+                    powerful WebGPU capabilities.</p>
+                <a href="https://redcamel.github.io/RedGPU/docs/" class="feature-link">
+                    Browse API →
+                </a>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3 class="feature-title">High Performance</h3>
+                <p class="feature-description">Built for speed and efficiency, leveraging the power of WebGPU for
+                    next-generation web graphics.</p>
+                <a href="https://github.com/redcamel/RedGPU" class="feature-link">
+                    View on GitHub →
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Videos Section -->
+    <!--    <section class="section">-->
+    <!--        <h2 class="section-title">Demo Videos</h2>-->
+    <!--        <div class="video-gallery">-->
+    <!--            <div class="video-card">-->
+    <!--                <video controls>-->
+    <!--                    <source src="https://github.com/user-attachments/assets/bee83e4a-26d8-471e-abd0-394673bc8f0b"-->
+    <!--                            type="video/mp4">-->
+    <!--                    Your browser does not support the video tag.-->
+    <!--                </video>-->
+    <!--            </div>-->
+
+    <!--            <div class="video-card">-->
+    <!--                <video controls>-->
+    <!--                    <source src="https://user-images.githubusercontent.com/820587/172777357-32c64963-abbe-432c-80e0-7893025b58ef.mp4"-->
+    <!--                            type="video/mp4">-->
+    <!--                    Your browser does not support the video tag.-->
+    <!--                </video>-->
+    <!--            </div>-->
+    <!--        </div>-->
+    <!--    </section>-->
+    <!-- Release Section -->
+    <!--    <section class="section release-section">-->
+    <!--        <h2 class="section-title">Latest Release</h2>-->
+    <!--        <div class="release-badges">-->
+    <!--            <a href="https://github.com/redcamel/RedGPU/releases/latest">-->
+    <!--                <img src="https://img.shields.io/github/v/release/redcamel/RedGPU?style=for-the-badge&logo=github&label=Latest%20Release"-->
+    <!--                     alt="Latest Release">-->
+    <!--            </a>-->
+    <!--            <a href="https://github.com/redcamel/RedGPU/releases">-->
+    <!--                <img src="https://img.shields.io/github/release-date/redcamel/RedGPU?style=for-the-badge&logo=github&label=Release%20Date"-->
+    <!--                     alt="Release Date">-->
+    <!--            </a>-->
+    <!--        </div>-->
+    <!--    </section>-->
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="footer-content">
+        <div class="footer-section">
+            <h3>RedGPU</h3>
+            <p>A powerful JavaScript WebGPU library for creating stunning 3D graphics and high-performance web
+                applications. Built for the next generation of web graphics.</p>
+            <div class="footer-social">
+                <a href="https://github.com/redcamel/RedGPU" title="GitHub">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                </a>
+                <a href="https://twitter.com/redcamel15" title="Twitter">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff">
+                        <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+
+        <div class="footer-section">
+            <h3>Resources</h3>
+            <div class="footer-links">
+                <a href="https://redcamel.github.io/RedGPU/examples/">
+                    🎮 Examples
+                </a>
+                <a href="https://redcamel.github.io/RedGPU/docs/">
+                    📚 API Documentation
+                </a>
+                <a href="https://github.com/redcamel/RedGPU/releases">
+                    📦 Releases
+                </a>
+                <a href="https://github.com/redcamel/RedGPU/issues">
+                    🐛 Issues
+                </a>
+            </div>
+        </div>
+
+        <div class="footer-section">
+            <h3>Status</h3>
+            <div class="footer-links">
+                <a href="https://github.com/redcamel/RedGPU/releases/latest">
+                    <img src="https://img.shields.io/github/v/release/redcamel/RedGPU?style=for-the-badge&logo=github&label=Latest%20Release"
+                         alt="Latest Release">
+                </a>
+                <a href="https://github.com/redcamel/RedGPU/releases">
+                    <img src="https://img.shields.io/github/release-date/redcamel/RedGPU?style=for-the-badge&logo=github&label=Release%20Date"
+                         alt="Release Date">
+                </a>
+                <a href="LICENSE.md">
+                    <img src="https://img.shields.io/github/license/sourcerer-io/hall-of-fame.svg?colorB=ff0000"
+                         alt="License">
+                </a>
+                <img src="https://img.shields.io/github/last-commit/redcamel/RedGPU" alt="Last Commit">
+                <img src="https://img.shields.io/github/issues/redcamel/RedGPU" alt="Issues">
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer-bottom">
+        <p>Copyright © 2019–present. This project is maintained by <a href="https://github.com/redcamel">redcamel</a>
+        </p>
+    </div>
+</footer>
+</body>
+</html>

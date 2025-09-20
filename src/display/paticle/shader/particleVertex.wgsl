@@ -174,7 +174,7 @@ fn main( inputData:InputData) -> OutputData {
   output.vertexPosition = position.xyz;
   output.vertexNormal =  (transpose(mat4_inverse(temp)  ) *  vec4<f32>(inputData.a_normal,1.0)).xyz;
   output.uv = inputData.a_uv;
-  output.combinedOpacity = vertexUniforms.combinedOpacity;
+  output.combinedOpacity = inputData.alpha;
   return output;
 }
 struct OutputShadowData {
