@@ -142,12 +142,12 @@ export default GLTFLoader;
  * Represents information required to play an animation.
  * @class
  */
-class PlayAnimationInfo {
+export class PlayAnimationInfo {
 	startTime: number
-	targetAniTrackList: GLTFParsedSingleClip
+	targetGLTFParsedSingleClip: GLTFParsedSingleClip
 
 	constructor(startTime: number, targetAniTrackList: GLTFParsedSingleClip) {
 		this.startTime = startTime
-		this.targetAniTrackList = targetAniTrackList
+		this.targetGLTFParsedSingleClip = targetAniTrackList
 	}
 }

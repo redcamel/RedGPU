@@ -5,6 +5,7 @@ import Mesh from "../display/mesh/Mesh";
 import View3D from "../display/view/View3D";
 import GPU_LOAD_OP from "../gpuConst/GPU_LOAD_OP";
 import GPU_STORE_OP from "../gpuConst/GPU_STORE_OP";
+import gltfAnimationLooper from "../loader/gltf/animationLooper/gltfAnimationLooper";
 import ParsedSkinInfo_GLTF from "../loader/gltf/cls/ParsedSkinInfo_GLTF";
 import {keepLog} from "../utils";
 import DebugRender from "./debugRender/DebugRender";
@@ -14,6 +15,8 @@ import renderAlphaLayer from "./renderLayers/renderAlphaLayer";
 import renderBasicLayer from "./renderLayers/renderBasicLayer";
 import renderPickingLayer from "./renderLayers/renderPickingLayer";
 import renderShadowLayer from "./renderLayers/renderShadowLayer";
+import renderViewStateData from "./RenderViewStateData";
+import RenderViewStateData from "./RenderViewStateData";
 
 let temp0 = new Float32Array(16)
 let temp1 = new Float32Array(16)
@@ -80,15 +83,30 @@ class Renderer {
 		return result;
 	}
 
-	#batchUpdateSkinMatrices(redGPUContext: RedGPUContext, meshes: Mesh[]) {
-		if (meshes.length === 0) return;
+	#batchUpdateSkinMatrices(redGPUContext: RedGPUContext, debugViewRenderState:RenderViewStateData) {
+		const { animationList, skinList } = debugViewRenderState;
+		const skinListNum = skinList.length
+		const animationListNum = animationList.length
+		// keepLog(animationList)
 
 		const { gpuDevice } = redGPUContext;
 		const commandEncoder = gpuDevice.createCommandEncoder();
 		const passEncoder = commandEncoder.beginComputePass();
 
-		for (let i = 0; i < meshes.length; i++) {
-			const mesh = meshes[i];
+		// for (let i = 0; i < animationListNum; i++) {
+		// 	const activeAnimations = animationList[i]
+		//
+		// }
+		if(animationListNum) {
+			gltfAnimationLooper(
+				redGPUContext,
+				debugViewRenderState.timestamp,
+				passEncoder,
+				animationList.flat()
+			)
+		}
+		for (let i = 0; i < skinListNum; i++) {
+			const mesh = skinList[i];
 			const skinInfo = mesh.animationInfo.skinInfo as ParsedSkinInfo_GLTF;
 
 			// 사용된 조인트 인덱스 초기화
@@ -251,7 +269,7 @@ class Renderer {
 		camera.update?.(view, time)
 		const commandEncoder: GPUCommandEncoder = redGPUContext.gpuDevice.createCommandEncoder()
 		const computeCommandEncoder: GPUCommandEncoder = redGPUContext.gpuDevice.createCommandEncoder()
-		this.#batchUpdateSkinMatrices(redGPUContext, debugViewRenderState.skinList)
+		this.#batchUpdateSkinMatrices(redGPUContext, debugViewRenderState)
 		view.debugViewRenderState.reset(null, computeCommandEncoder, time)
 		if (pixelRectObject.width && pixelRectObject.height) {
 			if (directionalShadowManager.shadowDepthTextureView) {

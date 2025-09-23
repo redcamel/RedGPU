@@ -156,7 +156,8 @@ class FinalRender {
 			gpuDevice.queue.writeBuffer(
 				vertexUniformBuffer.gpuBuffer,
 				VERTEX_UNIFORM_STRUCT.members.modelMatrix.uniformOffset,
-				new VERTEX_UNIFORM_STRUCT.members.modelMatrix.View(projectionMatrix),
+				// new VERTEX_UNIFORM_STRUCT.members.modelMatrix.View(projectionMatrix),
+				projectionMatrix as Float32Array
 			)
 			//
 			const needNewBindGroup =

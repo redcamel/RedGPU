@@ -1,10 +1,11 @@
 import {glMatrix} from "gl-matrix";
 import RedGPUContext from "../../../context/RedGPUContext";
-import AniTrack_GLTF from "../cls/AniTrack_GLTF";
+import AniTrack_GLTF from "../cls/anitrack/AniTrack_GLTF";
+import {PlayAnimationInfo} from "../GLTFLoader";
 import {GLTFParsedSingleClip} from "../parsers/animation/parseAnimations";
 
 const gltfAnimationLooper = (
-	redGPUContext:RedGPUContext,time: number,	computeCommandEncoder: GPUCommandEncoder, animationLoopList: GLTFParsedSingleClip[],
+	redGPUContext:RedGPUContext,time: number,	computePassEncoder: GPUComputePassEncoder, playAnimationInfoList: PlayAnimationInfo[],
 
 ) => {
 // 사전 계산된 상수들
@@ -20,11 +21,11 @@ const gltfAnimationLooper = (
 	let nXOut, nYOut, nZOut, pXOut, pYOut, pZOut;
 	let startOut, endIn;
 	let currentTime: number, previousTimeFrame: number, nextTimeFrame: number;
-	let animationListIndex: number = animationLoopList.length;
+	let playAnimationInfoIDX: number = playAnimationInfoList.length;
 	let interpolationValue: number;
 	let targetAniTrackIDX: number;
-	let targetAnimationTrackList: AniTrack_GLTF[];
-	let loopListItem: GLTFParsedSingleClip;
+	let targetClip: GLTFParsedSingleClip;
+	let targetPlayAnimationInfo: PlayAnimationInfo;
 	let currentAniTrack: AniTrack_GLTF;
 	//
 	let nextTimeDataIDX: number, previousTimeDataIDX: number;
@@ -32,17 +33,17 @@ const gltfAnimationLooper = (
 	let targetAnimationDataList: number[];
 	let targetTimeDataListLength: number;
 	let targetTimeDataIDX: number;
-	// console.log('animationLoopList',animationLoopList)
-	while (animationListIndex--) {
-		loopListItem = animationLoopList[animationListIndex];
-		targetAnimationTrackList = loopListItem.targetAniTrackList;
+	// console.log('playAnimationInfoList',playAnimationInfoList)
+	while (playAnimationInfoIDX--) {
+		targetPlayAnimationInfo = playAnimationInfoList[playAnimationInfoIDX];
+		targetClip = targetPlayAnimationInfo.targetGLTFParsedSingleClip;
 		// console.log('loopListItem', loopListItem)
-		targetAniTrackIDX = targetAnimationTrackList.length;
+		targetAniTrackIDX = targetClip.length;
 		// console.log('targetAniTrackIDX',targetAniTrackIDX)
 		while (targetAniTrackIDX--) {
-			currentAniTrack = targetAnimationTrackList[targetAniTrackIDX];
+			currentAniTrack = targetClip[targetAniTrackIDX];
 			const {animationTargetMesh, timeAnimationInfo, aniDataAnimationInfo, weightMeshes} = currentAniTrack
-			currentTime = ((time - loopListItem.startTime) % (targetAnimationTrackList['maxTime'] * 1000)) / 1000;
+			currentTime = ((time - targetPlayAnimationInfo.startTime) % (targetClip['maxTime'] * 1000)) / 1000;
 			/////////////////////////////////////////////////////////////////////////////////
 			targetTimeDataList = timeAnimationInfo.dataList;
 			targetAnimationDataList = aniDataAnimationInfo.dataList;
@@ -388,7 +389,7 @@ const gltfAnimationLooper = (
 
 						currentAniTrack.render(
 							redGPUContext,
-							computeCommandEncoder,
+							computePassEncoder,
 							weightMeshes[animationTargetIndex],
 							interpolationValue,
 							previousTimeDataIDX,

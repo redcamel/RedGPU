@@ -28,7 +28,7 @@ const VERTEX_SHADER_MODULE_NAME_PBR_SKIN = 'VERTEX_MODULE_MESH_PBR_SKIN'
 const CONVERT_RADIAN = Math.PI / 180;
 const CPI = 3.141592653589793, CPI2 = 6.283185307179586, C225 = 0.225, C127 = 1.27323954, C045 = 0.405284735,
 	C157 = 1.5707963267948966;
-
+const tempFloat32_1 = new Float32Array(1);
 interface Mesh {
 	receiveShadow: boolean
 	disableJitter: boolean
@@ -430,7 +430,8 @@ class Mesh extends MeshBase {
 		}
 		return cloneMesh
 	}
-	#prevModelMatrix:mat4
+
+	#prevModelMatrix: Float32Array
 
 	render(debugViewRenderState: RenderViewStateData) {
 		const {redGPUContext,} = this
@@ -444,6 +445,7 @@ class Mesh extends MeshBase {
 			useDistanceCulling,
 			cullingDistanceSquared,
 		} = debugViewRenderState
+		const {antialiasingManager, gpuDevice} = redGPUContext
 		const {scene} = view
 		const {shadowManager} = scene
 		const {directionalShadowManager} = shadowManager
@@ -454,18 +456,20 @@ class Mesh extends MeshBase {
 		const {uuid: currentMaterialUUID} = currentMaterial || {}
 		let dirtyTransformForChildren
 		let dirtyOpacityForChildren
-		if(this.#prevModelMatrix){
+		if(!antialiasingManager.useTAA) {
+			this.#prevModelMatrix = null
+		}
+		if (this.#prevModelMatrix) {
 			const {vertexUniformBuffer, vertexUniformInfo} = this.gpuRenderInfo
 			const {members: vertexUniformInfoMembers} = vertexUniformInfo
 			//TODO - TAA 머가 빡세네...
-			if(vertexUniformInfoMembers.prevModelMatrix) {
+			if (vertexUniformInfoMembers.prevModelMatrix) {
 				redGPUContext.gpuDevice.queue.writeBuffer(
 					vertexUniformBuffer.gpuBuffer,
 					vertexUniformInfoMembers.prevModelMatrix.uniformOffset,
-					new vertexUniformInfoMembers.prevModelMatrix.View(this.#prevModelMatrix),
+					this.#prevModelMatrix,
 				)
 			}
-
 		}
 		if (isScene2DMode) {
 			this.#z = 0
@@ -474,8 +478,6 @@ class Mesh extends MeshBase {
 				this.depthStencilState.depthWriteEnabled = false
 			}
 		}
-
-
 		if (this.dirtyTransform) {
 			dirtyTransformForChildren = true
 			{
@@ -723,7 +725,6 @@ class Mesh extends MeshBase {
 				}
 			}
 		}
-
 		// check distanceCulling
 		let passFrustumCulling = true
 		// if (useDistanceCulling && currentGeometry) {
@@ -775,36 +776,40 @@ class Mesh extends MeshBase {
 		}
 		// check frustumCulling
 		if (frustumPlanes && passFrustumCulling) {
-
 			// if (currentGeometry) {
-				const combinedAABB = this.boundingAABB;
-				const frustumPlanes0 = frustumPlanes[0];
-				const frustumPlanes1 = frustumPlanes[1];
-				const frustumPlanes2 = frustumPlanes[2];
-				const frustumPlanes3 = frustumPlanes[3];
-				const frustumPlanes4 = frustumPlanes[4];
-				const frustumPlanes5 = frustumPlanes[5];
-				// combinedBoundingAABB의 중심점과 반지름 사용
-				const centerX = combinedAABB.centerX;
-				const centerY = combinedAABB.centerY;
-				const centerZ = combinedAABB.centerZ;
-				const radius = combinedAABB.geometryRadius;
-				// 각 frustum plane에 대해 거리 계산
-				frustumPlanes0[0] * centerX + frustumPlanes0[1] * centerY + frustumPlanes0[2] * centerZ + frustumPlanes0[3] <= -radius ? passFrustumCulling = false
-					: frustumPlanes1[0] * centerX + frustumPlanes1[1] * centerY + frustumPlanes1[2] * centerZ + frustumPlanes1[3] <= -radius ? passFrustumCulling = false
-						: frustumPlanes2[0] * centerX + frustumPlanes2[1] * centerY + frustumPlanes2[2] * centerZ + frustumPlanes2[3] <= -radius ? passFrustumCulling = false
-							: frustumPlanes3[0] * centerX + frustumPlanes3[1] * centerY + frustumPlanes3[2] * centerZ + frustumPlanes3[3] <= -radius ? passFrustumCulling = false
-								: frustumPlanes4[0] * centerX + frustumPlanes4[1] * centerY + frustumPlanes4[2] * centerZ + frustumPlanes4[3] <= -radius ? passFrustumCulling = false
-									: frustumPlanes5[0] * centerX + frustumPlanes5[1] * centerY + frustumPlanes5[2] * centerZ + frustumPlanes5[3] <= -radius ? passFrustumCulling = false : 0;
+			const combinedAABB = this.boundingAABB;
+			const frustumPlanes0 = frustumPlanes[0];
+			const frustumPlanes1 = frustumPlanes[1];
+			const frustumPlanes2 = frustumPlanes[2];
+			const frustumPlanes3 = frustumPlanes[3];
+			const frustumPlanes4 = frustumPlanes[4];
+			const frustumPlanes5 = frustumPlanes[5];
+			// combinedBoundingAABB의 중심점과 반지름 사용
+			const centerX = combinedAABB.centerX;
+			const centerY = combinedAABB.centerY;
+			const centerZ = combinedAABB.centerZ;
+			const radius = combinedAABB.geometryRadius;
+			// 각 frustum plane에 대해 거리 계산
+			frustumPlanes0[0] * centerX + frustumPlanes0[1] * centerY + frustumPlanes0[2] * centerZ + frustumPlanes0[3] <= -radius ? passFrustumCulling = false
+				: frustumPlanes1[0] * centerX + frustumPlanes1[1] * centerY + frustumPlanes1[2] * centerZ + frustumPlanes1[3] <= -radius ? passFrustumCulling = false
+					: frustumPlanes2[0] * centerX + frustumPlanes2[1] * centerY + frustumPlanes2[2] * centerZ + frustumPlanes2[3] <= -radius ? passFrustumCulling = false
+						: frustumPlanes3[0] * centerX + frustumPlanes3[1] * centerY + frustumPlanes3[2] * centerZ + frustumPlanes3[3] <= -radius ? passFrustumCulling = false
+							: frustumPlanes4[0] * centerX + frustumPlanes4[1] * centerY + frustumPlanes4[2] * centerZ + frustumPlanes4[3] <= -radius ? passFrustumCulling = false
+								: frustumPlanes5[0] * centerX + frustumPlanes5[1] * centerY + frustumPlanes5[2] * centerZ + frustumPlanes5[3] <= -radius ? passFrustumCulling = false : 0;
 			// } else {
 			// 	passFrustumCulling = false
 			// }
 		}
 		if (this.#ignoreFrustumCulling) passFrustumCulling = true
-		if(passFrustumCulling){
+		if (passFrustumCulling) {
 			// check animation
 			if (this.gltfLoaderInfo?.activeAnimations?.length) {
-				gltfAnimationLooper(redGPUContext,timestamp, debugViewRenderState.computeCommandEncoder,this.gltfLoaderInfo.activeAnimations)
+				// gltfAnimationLooper(
+				// 	redGPUContext, timestamp,
+				// 	debugViewRenderState.computeCommandEncoder,
+				// 	this.gltfLoaderInfo.activeAnimations
+				// )
+				debugViewRenderState.animationList[debugViewRenderState.animationList.length] = this.gltfLoaderInfo?.activeAnimations
 			}
 			if (this.animationInfo.skinInfo) {
 				if (!this.currentShaderModuleName.includes(VERTEX_SHADER_MODULE_NAME_PBR_SKIN)) {
@@ -824,7 +829,7 @@ class Mesh extends MeshBase {
 		if (this.dirtyPipeline || currentMaterial?.dirtyPipeline || dirtyVertexUniformFromMaterial[currentMaterialUUID]) {
 			dirtyVertexUniformFromMaterial[currentMaterialUUID] = true
 		}
-		const {antialiasingManager, gpuDevice} = redGPUContext
+
 		if (currentGeometry) {
 			if (antialiasingManager.changedMSAA) {
 				this.dirtyPipeline = true
@@ -839,7 +844,6 @@ class Mesh extends MeshBase {
 				updateMeshDirtyPipeline(this, debugViewRenderState)
 			}
 		}
-
 		if (currentGeometry && passFrustumCulling) {
 			{
 				const {gpuRenderInfo} = this
@@ -848,22 +852,23 @@ class Mesh extends MeshBase {
 				if (vertexUniformInfoMembers.displacementScale !== undefined &&
 					vertexUniformInfoMembers.displacementScale !== displacementScale
 				) {
+					tempFloat32_1[0] = displacementScale
 					gpuDevice.queue.writeBuffer(
 						vertexUniformBuffer.gpuBuffer,
 						vertexUniformInfoMembers.displacementScale.uniformOffset,
-						new vertexUniformInfoMembers.displacementScale.View([displacementScale])
+						// new vertexUniformInfoMembers.displacementScale.View([displacementScale])
+						tempFloat32_1
 					);
 				}
 			}
 			const {gpuRenderInfo} = this
 			const {vertexUniformBuffer, vertexUniformBindGroup, vertexUniformInfo, pipeline,} = gpuRenderInfo
 			const {members: vertexUniformInfoMembers} = vertexUniformInfo
-
 			if (this.dirtyTransform) {
 				gpuDevice.queue.writeBuffer(
 					vertexUniformBuffer.gpuBuffer,
 					vertexUniformInfoMembers.modelMatrix.uniformOffset,
-					new vertexUniformInfoMembers.modelMatrix.View(
+					(
 						//TODO - Sprite2D떄문에 처리했지만 이거 일반화해야함
 						// TODO - renderTextureWidth 이놈도 같이 처리해야할듯
 						// @ts-ignore
@@ -877,17 +882,38 @@ class Mesh extends MeshBase {
 						) : this.modelMatrix
 					)
 				)
-				this.#prevModelMatrix = mat4.clone(this.modelMatrix)
+				if(antialiasingManager.useTAA){
+					if(!this.#prevModelMatrix) this.#prevModelMatrix = new Float32Array(16)
+					this.#prevModelMatrix[0] = this.modelMatrix[0]
+					this.#prevModelMatrix[1] = this.modelMatrix[1]
+					this.#prevModelMatrix[2] = this.modelMatrix[2]
+					this.#prevModelMatrix[3] = this.modelMatrix[3]
+					this.#prevModelMatrix[4] = this.modelMatrix[4]
+					this.#prevModelMatrix[5] = this.modelMatrix[5]
+					this.#prevModelMatrix[6] = this.modelMatrix[6]
+					this.#prevModelMatrix[7] = this.modelMatrix[7]
+					this.#prevModelMatrix[8] = this.modelMatrix[8]
+					this.#prevModelMatrix[9] = this.modelMatrix[9]
+					this.#prevModelMatrix[10] = this.modelMatrix[10]
+					this.#prevModelMatrix[11] = this.modelMatrix[11]
+					this.#prevModelMatrix[12] = this.modelMatrix[12]
+					this.#prevModelMatrix[13] = this.modelMatrix[13]
+					this.#prevModelMatrix[14] = this.modelMatrix[14]
+					this.#prevModelMatrix[15] = this.modelMatrix[15]
+				}
+
 				gpuDevice.queue.writeBuffer(
 					vertexUniformBuffer.gpuBuffer,
 					vertexUniformInfoMembers.normalModelMatrix.uniformOffset,
-					new vertexUniformInfoMembers.normalModelMatrix.View(this.normalModelMatrix),
+					// new vertexUniformInfoMembers.normalModelMatrix.View(this.normalModelMatrix),
+					this.normalModelMatrix as Float32Array
 				)
 				if (vertexUniformInfoMembers.localMatrix) {
 					gpuDevice.queue.writeBuffer(
 						vertexUniformBuffer.gpuBuffer,
 						vertexUniformInfoMembers.localMatrix.uniformOffset,
-						new vertexUniformInfoMembers.localMatrix.View(this.localMatrix),
+						// new vertexUniformInfoMembers.localMatrix.View(this.localMatrix),
+						this.localMatrix as Float32Array
 					)
 				}
 				dirtyTransformForChildren = true
@@ -896,10 +922,12 @@ class Mesh extends MeshBase {
 			if (this.dirtyOpacity) {
 				dirtyOpacityForChildren = true
 				if (vertexUniformInfoMembers.combinedOpacity) {
+					tempFloat32_1[0] =this.getCombinedOpacity()
 					gpuDevice.queue.writeBuffer(
 						vertexUniformBuffer.gpuBuffer,
 						vertexUniformInfoMembers.combinedOpacity.uniformOffset,
-						new vertexUniformInfoMembers.combinedOpacity.View([this.getCombinedOpacity()])
+						// new vertexUniformInfoMembers.combinedOpacity.View([this.getCombinedOpacity()])
+						tempFloat32_1
 					);
 				}
 				this.dirtyOpacity = false
@@ -961,8 +989,6 @@ class Mesh extends MeshBase {
 			if (this.castShadow || (this.castShadow && !currentGeometry)) castingList[castingList.length] = this
 		}
 		if (this.#enableDebugger) this.#drawDebugger.render(debugViewRenderState)
-
-
 		// children render
 		const {children} = this
 		let i = 0
