@@ -1,4 +1,5 @@
 import {mat4} from "gl-matrix";
+import {navigation} from "typedoc/dist/lib/output/themes/default/partials/navigation";
 import {Function} from "wgsl_reflect";
 import RedGPUContext from "../../context/RedGPUContext";
 import Geometry from "../../geometry/Geometry";
@@ -9,6 +10,7 @@ import VertexGPURenderInfo from "../../renderInfos/VertexGPURenderInfo";
 import DefineForVertex from "../../resources/defineProperty/DefineForVertex";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
+import {keepLog} from "../../utils";
 import InstanceIdGenerator from "../../utils/InstanceIdGenerator";
 import AABB from "../../utils/math/bound/AABB";
 import calculateMeshAABB from "../../utils/math/bound/calculateMeshAABB";
@@ -29,6 +31,7 @@ const CONVERT_RADIAN = Math.PI / 180;
 const CPI = 3.141592653589793, CPI2 = 6.283185307179586, C225 = 0.225, C127 = 1.27323954, C045 = 0.405284735,
 	C157 = 1.5707963267948966;
 const tempFloat32_1 = new Float32Array(1);
+
 interface Mesh {
 	receiveShadow: boolean
 	disableJitter: boolean
@@ -456,7 +459,7 @@ class Mesh extends MeshBase {
 		const {uuid: currentMaterialUUID} = currentMaterial || {}
 		let dirtyTransformForChildren
 		let dirtyOpacityForChildren
-		if(!antialiasingManager.useTAA) {
+		if (!antialiasingManager.useTAA) {
 			this.#prevModelMatrix = null
 		}
 		if (this.#prevModelMatrix) {
@@ -796,7 +799,6 @@ class Mesh extends MeshBase {
 		if (this.dirtyPipeline || currentMaterial?.dirtyPipeline || dirtyVertexUniformFromMaterial[currentMaterialUUID]) {
 			dirtyVertexUniformFromMaterial[currentMaterialUUID] = true
 		}
-
 		if (currentGeometry) {
 			if (antialiasingManager.changedMSAA) {
 				this.dirtyPipeline = true
@@ -809,6 +811,7 @@ class Mesh extends MeshBase {
 			}
 			if (this.dirtyPipeline || dirtyVertexUniformFromMaterial[currentMaterialUUID]) {
 				updateMeshDirtyPipeline(this, debugViewRenderState)
+				this.#bundleEncoder = null
 			}
 		}
 		if (currentGeometry && passFrustumCulling) {
@@ -849,8 +852,8 @@ class Mesh extends MeshBase {
 						) : this.modelMatrix
 					)
 				)
-				if(antialiasingManager.useTAA){
-					if(!this.#prevModelMatrix) this.#prevModelMatrix = new Float32Array(16)
+				if (antialiasingManager.useTAA) {
+					if (!this.#prevModelMatrix) this.#prevModelMatrix = new Float32Array(16)
 					this.#prevModelMatrix[0] = this.modelMatrix[0]
 					this.#prevModelMatrix[1] = this.modelMatrix[1]
 					this.#prevModelMatrix[2] = this.modelMatrix[2]
@@ -868,7 +871,6 @@ class Mesh extends MeshBase {
 					this.#prevModelMatrix[14] = this.modelMatrix[14]
 					this.#prevModelMatrix[15] = this.modelMatrix[15]
 				}
-
 				gpuDevice.queue.writeBuffer(
 					vertexUniformBuffer.gpuBuffer,
 					vertexUniformInfoMembers.normalModelMatrix.uniformOffset,
@@ -889,7 +891,7 @@ class Mesh extends MeshBase {
 			if (this.dirtyOpacity) {
 				dirtyOpacityForChildren = true
 				if (vertexUniformInfoMembers.combinedOpacity) {
-					tempFloat32_1[0] =this.getCombinedOpacity()
+					tempFloat32_1[0] = this.getCombinedOpacity()
 					gpuDevice.queue.writeBuffer(
 						vertexUniformBuffer.gpuBuffer,
 						vertexUniformInfoMembers.combinedOpacity.uniformOffset,
@@ -900,49 +902,80 @@ class Mesh extends MeshBase {
 				this.dirtyOpacity = false
 			}
 			{
-				if (currentMaterial.use2PathRender) {
-					debugViewRenderState.render2PathLayer[debugViewRenderState.render2PathLayer.length] = this
-				} else if (this.meshType === 'particle') {
-					debugViewRenderState.particleLayer[debugViewRenderState.particleLayer.length] = this
-				} else if (this.meshType === 'instanceMesh') {
-					debugViewRenderState.instanceMeshLayer[debugViewRenderState.instanceMeshLayer.length] = this
-				} else if (currentMaterial.transparent) {
-					debugViewRenderState.transparentLayer[debugViewRenderState.transparentLayer.length] = this
-				} else if (currentMaterial.alphaBlend === 2 || currentMaterial.opacity < 1 || !this.depthStencilState.depthWriteEnabled) {
-					debugViewRenderState.alphaLayer[debugViewRenderState.alphaLayer.length] = this
-				} else {
-					currentRenderPassEncoder.setPipeline(pipeline)
-					const {gpuBuffer} = currentGeometry.vertexBuffer
-					const {fragmentUniformBindGroup} = currentMaterial.gpuRenderInfo
-					if (debugViewRenderState.prevVertexGpuBuffer !== gpuBuffer) {
-						currentRenderPassEncoder.setVertexBuffer(0, gpuBuffer)
-						debugViewRenderState.prevVertexGpuBuffer = gpuBuffer
-					}
-					currentRenderPassEncoder.setBindGroup(1, vertexUniformBindGroup); // 버텍스 유니폼 버퍼 1번 고정
-					if (debugViewRenderState.prevFragmentUniformBindGroup !== fragmentUniformBindGroup) {
-						currentRenderPassEncoder.setBindGroup(2, fragmentUniformBindGroup)
-						debugViewRenderState.prevFragmentUniformBindGroup = fragmentUniformBindGroup
-					}
-					//
-					debugViewRenderState.numDrawCalls++
-					//
-					if (currentGeometry.indexBuffer) {
-						const {indexBuffer} = currentGeometry
-						const {indexNum, triangleCount, gpuBuffer: indexGPUBuffer} = indexBuffer
-						currentRenderPassEncoder.setIndexBuffer(indexGPUBuffer, 'uint32')
-						// @ts-ignore
-						if (this.particleBuffers) currentRenderPassEncoder.drawIndexed(indexNum, this.particleNum, 0, 0, 0);
-						else currentRenderPassEncoder.drawIndexed(indexNum, 1, 0, 0, 0);
-						debugViewRenderState.numTriangles += triangleCount
-						debugViewRenderState.numPoints += indexNum
+
+
+					if (currentMaterial.use2PathRender) {
+						debugViewRenderState.render2PathLayer[debugViewRenderState.render2PathLayer.length] = this
+					} else if (this.meshType === 'particle') {
+						debugViewRenderState.particleLayer[debugViewRenderState.particleLayer.length] = this
+					} else if (this.meshType === 'instanceMesh') {
+						debugViewRenderState.instanceMeshLayer[debugViewRenderState.instanceMeshLayer.length] = this
+					} else if (currentMaterial.transparent) {
+						debugViewRenderState.transparentLayer[debugViewRenderState.transparentLayer.length] = this
+					} else if (currentMaterial.alphaBlend === 2 || currentMaterial.opacity < 1 || !this.depthStencilState.depthWriteEnabled) {
+						debugViewRenderState.alphaLayer[debugViewRenderState.alphaLayer.length] = this
 					} else {
-						const {vertexBuffer} = currentGeometry
-						const {vertexCount, triangleCount} = vertexBuffer
-						currentRenderPassEncoder.draw(vertexCount, 1, 0, 0);
-						debugViewRenderState.numTriangles += triangleCount;
-						debugViewRenderState.numPoints += vertexCount
+						let targetEncoder:GPURenderBundleEncoder | GPURenderPassEncoder = currentRenderPassEncoder
+						let needBundleFinish = false
+						if(!this.#bundleEncoder || this.dirtyPipeline || this.#prevSystemBindGroup !== view.systemUniform_Vertex_UniformBindGroup) {
+							this.#bundleEncoder = gpuDevice.createRenderBundleEncoder({
+								colorFormats: [navigator.gpu.getPreferredCanvasFormat(), navigator.gpu.getPreferredCanvasFormat(), 'rgba16float'],
+								depthStencilFormat: 'depth32float'
+							})
+							needBundleFinish=true
+							keepLog('갱신')
+						}
+						targetEncoder = this.#bundleEncoder
+						debugViewRenderState.numDrawCalls++
+						if (currentGeometry.indexBuffer) {
+							const {indexBuffer} = currentGeometry
+							const {indexNum, triangleCount} = indexBuffer
+							debugViewRenderState.numTriangles += triangleCount
+							debugViewRenderState.numPoints += indexNum
+						} else {
+							const {vertexBuffer} = currentGeometry
+							const {vertexCount, triangleCount} = vertexBuffer
+							debugViewRenderState.numTriangles += triangleCount;
+							debugViewRenderState.numPoints += vertexCount
+						}
+						if(needBundleFinish) {
+							this.#prevSystemBindGroup = view.systemUniform_Vertex_UniformBindGroup
+							targetEncoder.setPipeline(pipeline)
+							const {gpuBuffer} = currentGeometry.vertexBuffer
+							const {fragmentUniformBindGroup} = currentMaterial.gpuRenderInfo
+							// if (debugViewRenderState.prevVertexGpuBuffer !== gpuBuffer) {
+							targetEncoder.setVertexBuffer(0, gpuBuffer)
+							debugViewRenderState.prevVertexGpuBuffer = gpuBuffer
+							// }
+							targetEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
+							targetEncoder.setBindGroup(1, vertexUniformBindGroup); // 버텍스 유니폼 버퍼 1번 고정
+							// if (debugViewRenderState.prevFragmentUniformBindGroup !== fragmentUniformBindGroup) {
+							targetEncoder.setBindGroup(2, fragmentUniformBindGroup)
+							debugViewRenderState.prevFragmentUniformBindGroup = fragmentUniformBindGroup
+							// }
+							//
+
+							//
+							if (currentGeometry.indexBuffer) {
+								const {indexBuffer} = currentGeometry
+								const {indexNum, triangleCount, gpuBuffer: indexGPUBuffer} = indexBuffer
+								targetEncoder.setIndexBuffer(indexGPUBuffer, 'uint32')
+								// @ts-ignore
+								if (this.particleBuffers) targetEncoder.drawIndexed(indexNum, this.particleNum, 0, 0, 0);
+								else targetEncoder.drawIndexed(indexNum, 1, 0, 0, 0);
+
+							} else {
+								const {vertexBuffer} = currentGeometry
+								const {vertexCount, triangleCount} = vertexBuffer
+								targetEncoder.draw(vertexCount, 1, 0, 0);
+
+							}
+							this.#renderBundle = (targetEncoder as GPURenderBundleEncoder).finish();
+
+						}
+						debugViewRenderState.renderBundleList[debugViewRenderState.renderBundleList.length] = this.#renderBundle
 					}
-				}
+
 			}
 			{
 				if (this.#eventsNum) {
@@ -966,6 +999,10 @@ class Mesh extends MeshBase {
 			children[i].render(debugViewRenderState)
 		}
 	}
+
+	#bundleEncoder: GPURenderBundleEncoder
+	#renderBundle: GPURenderBundle
+	#prevSystemBindGroup:GPUBindGroup
 
 	initGPURenderInfos() {
 		this.gpuRenderInfo = new VertexGPURenderInfo(

@@ -294,8 +294,10 @@ class Renderer {
 				if (axis) axis.render(debugViewRenderState)
 				if (grid) grid.render(debugViewRenderState)
 				renderAlphaLayer(view, viewRenderPassEncoder)
+				viewRenderPassEncoder.executeBundles(debugViewRenderState.renderBundleList);
 				viewRenderPassEncoder.end()
 			}
+
 			{
 				if (view.debugViewRenderState.render2PathLayer.length) {
 					const {mipmapGenerator} = redGPUContext.resourceManager

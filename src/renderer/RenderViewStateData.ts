@@ -50,6 +50,7 @@ class RenderViewStateData {
 	render2PathLayer = []
 	skinList = []
 	animationList = []
+	renderBundleList = []
 	startTime: number
 	isScene2DMode: boolean = false
 	readonly #view: View3D
@@ -97,6 +98,7 @@ class RenderViewStateData {
 		this.render2PathLayer = []
 		this.skinList = []
 		this.animationList = []
+		this.renderBundleList = []
 		this.startTime = performance.now()
 		this.isScene2DMode = view.camera instanceof Camera2D
 		this.viewportSize = {

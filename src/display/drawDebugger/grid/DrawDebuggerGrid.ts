@@ -164,6 +164,7 @@ class DrawDebuggerGrid {
 			const indexCount = lineCount * 2; // 각 라인마다 2개 인덱스
 
 			currentRenderPassEncoder.setPipeline(view.redGPUContext.antialiasingManager.useMSAA ? this.#pipelineMSAA : this.#pipeline);
+			currentRenderPassEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
 			currentRenderPassEncoder.setBindGroup(1, this.#fragmentBindGroup);
 			currentRenderPassEncoder.setVertexBuffer(0, this.#vertexBuffer.gpuBuffer);
 			currentRenderPassEncoder.setIndexBuffer(this.#indexBuffer.gpuBuffer, 'uint32');
