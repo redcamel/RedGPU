@@ -17,7 +17,6 @@ class PerspectiveCamera {
 	#farClipping: number = 10000;
 	#name: string
 
-	//TODO rotationX, rotationY, rotationZ getter/setter
 	constructor() {
 	}
 
@@ -26,7 +25,6 @@ class PerspectiveCamera {
 	}
 
 	set rotationX(value: number) {
-		//TODO
 		this.#rotationX = value;
 	}
 
@@ -35,7 +33,6 @@ class PerspectiveCamera {
 	}
 
 	set rotationY(value: number) {
-		//TODO
 		this.#rotationY = value;
 	}
 
@@ -44,7 +41,6 @@ class PerspectiveCamera {
 	}
 
 	set rotationZ(value: number) {
-		//TODO
 		this.#rotationZ = value;
 	}
 

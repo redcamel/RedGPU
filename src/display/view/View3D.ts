@@ -247,7 +247,7 @@ class View3D extends ViewTransform {
 	}
 
 	update(view: View3D, shadowRender: boolean = false, calcPointLightCluster: boolean = false, renderPath1ResultTextureView?: GPUTextureView) {
-		//TODO 바인드그룹이 계속 생겨나는걸.... 막아야겠군
+
 		const {scene} = view
 		const {shadowManager} = scene
 		const {directionalShadowManager} = shadowManager
@@ -463,7 +463,6 @@ class View3D extends ViewTransform {
 				// console.log('실행이되긴하하나2')
 				while (i--) {
 					const tLight = pointLights[i]
-					//TODO - 프러스텀 컬링할꺼냐 말꺼냐
 					const stride = 16
 					const offset = 4 + stride * i
 					this.#clusterLightsBufferData.set(

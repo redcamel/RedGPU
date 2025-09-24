@@ -13,7 +13,6 @@ class Sprite2D extends BaseSprite2D {
 	#height: number = 1
 
 	constructor(redGPUContext: RedGPUContext, material?) {
-		//TODO - 재질없을떄 확인해야됨
 		super(redGPUContext, new Plane(redGPUContext, 1, 1, 1, 1, 1, true), material);
 		this.primitiveState.cullMode = GPU_CULL_MODE.FRONT
 	}

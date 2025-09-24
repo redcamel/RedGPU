@@ -462,7 +462,6 @@ class Mesh extends MeshBase {
 		if (this.#prevModelMatrix) {
 			const {vertexUniformBuffer, vertexUniformInfo} = this.gpuRenderInfo
 			const {members: vertexUniformInfoMembers} = vertexUniformInfo
-			//TODO - TAA 머가 빡세네...
 			if (vertexUniformInfoMembers.prevModelMatrix) {
 				redGPUContext.gpuDevice.queue.writeBuffer(
 					vertexUniformBuffer.gpuBuffer,
@@ -727,38 +726,6 @@ class Mesh extends MeshBase {
 		}
 		// check distanceCulling
 		let passFrustumCulling = true
-		// if (useDistanceCulling && currentGeometry) {
-		// 	const {rawCamera} = view
-		// 	const dx = rawCamera.x - this.#x;
-		// 	const dy = rawCamera.y - this.#y;
-		// 	const dz = rawCamera.z - this.#z;
-		// 	const MTX = this.modelMatrix
-		// 	const geoVolume = currentGeometry.volume;
-		// 	let geometryRadius: number = geoVolume.geometryRadius
-		// 	const transformedRadius0: number = geometryRadius * MTX[0];
-		// 	const transformedRadius1: number = geometryRadius * MTX[5];
-		// 	const transformedRadius2: number = geometryRadius * MTX[10];
-		// 	const radius: number = (transformedRadius0 > transformedRadius1
-		// 		? transformedRadius0
-		// 		: transformedRadius1 > transformedRadius2
-		// 			? transformedRadius1
-		// 			: transformedRadius2);
-		// 	//TODO - radius 필요없는지 확인해야함
-		// 	const dxSquared = dx * dx;
-		// 	if (dxSquared > cullingDistanceSquared) {
-		// 		passFrustumCulling = false;
-		// 	} else {
-		// 		const dySquared = dy * dy;
-		// 		if ((dxSquared + dySquared) > cullingDistanceSquared) {
-		// 			passFrustumCulling = false;
-		// 		} else {
-		// 			const dzSquared = dz * dz;
-		// 			if ((dxSquared + dySquared + dzSquared) > cullingDistanceSquared) {
-		// 				passFrustumCulling = false;
-		// 			}
-		// 		}
-		// 	}
-		// }
 		if (useDistanceCulling && currentGeometry) {
 			const {rawCamera} = view
 			const aabb = this.boundingAABB;
@@ -985,7 +952,6 @@ class Mesh extends MeshBase {
 		} else {
 		}
 		{
-			//TODO 이거 이상함 확인해야함
 			if (this.castShadow || (this.castShadow && !currentGeometry)) castingList[castingList.length] = this
 		}
 		if (this.#enableDebugger) this.#drawDebugger.render(debugViewRenderState)

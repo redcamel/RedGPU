@@ -138,7 +138,6 @@ class FinalRender {
 		canvasW: number, canvasH: number,
 		useMSAA: boolean
 	) {
-		//TODO - 여기도 멀티 샘플링 먹여야 되는지 체크
 		const {gpuDevice} = redGPUContext
 		resultTextureViews.forEach((gpuTextureView, index) => {
 			const targetView = redGPUContext.viewList[index]
@@ -167,7 +166,6 @@ class FinalRender {
 				|| this.#viewSizes[index].height !== viewH
 				|| this.#viewGpuTextureViews[index] !== gpuTextureView
 			if (needNewBindGroup) {
-				//TODO 포스트 이펙트 떄문에 바인드 그룹을 날려야하는건가...
 				const fragmentBindGroupDesc: GPUBindGroupDescriptor = {
 					layout: this.#fragmentBindGroupLayout,
 					label: FRAGMENT_BIND_GROUP_DESCRIPTOR_NAME,
@@ -182,7 +180,6 @@ class FinalRender {
 
 					]
 				}
-				//TODO gpuTextureView를 캐싱해서 안변했으면 그대로 쓰는것도 가능해보이는듯
 				this.#fragmentUniformBindGroups[index] = gpuDevice.createBindGroup(fragmentBindGroupDesc)
 				this.#viewSizes[index] = {width: viewW || 1, height: viewH || 1}
 				this.#viewGpuTextureViews[index] = gpuTextureView

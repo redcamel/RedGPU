@@ -97,12 +97,10 @@ class MeshBase extends Object3DContainer {
 	}
 
 	worldToLocal(x: number, y: number, z: number): [number, number, number] {
-		// TODO 검증
 		return worldToLocal(this.modelMatrix, x, y, z)
 	}
 
 	localToWorld(x: number, y: number, z: number): [number, number, number] {
-		// TODO 검증
 		return localToWorld(this.modelMatrix, x, y, z)
 	}
 

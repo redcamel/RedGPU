@@ -146,7 +146,6 @@ class RedGPUContextSizeManager {
 				validateNumber(value)
 				break;
 			case 'string':
-				//TODO - RedGPUContext 와 View에서 소수점 계산을 나눠야하나 체크해야함
 				const sizeModel = new RegExp(/^-?\d+(\.\d+)?(px|%)?$/);
 				if (!sizeModel.test(value)) consoleAndThrowError(`allow number, %, px model  / input : ${value}`);
 				break;

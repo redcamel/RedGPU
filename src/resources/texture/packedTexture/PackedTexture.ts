@@ -10,7 +10,6 @@ type ComponentMapping = {
 	b?: 'r' | 'g' | 'b' | 'a';  // b 채널에서 사용할 컴포넌트
 	a?: 'r' | 'g' | 'b' | 'a';  // a 채널에서 사용할 컴포넌트
 };
-//TODO - 리소스 매니저로 옮겨야함
 const cacheMap: Map<string, { gpuTexture: GPUTexture, useNum: number, mappingKey: string, uuid: string }> = new Map();
 // 인스턴스별 현재 사용 중인 키 추적을 위한 WeakMap
 const instanceMappingKeys: WeakMap<PackedTexture, string> = new WeakMap();

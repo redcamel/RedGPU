@@ -9,7 +9,6 @@ class Camera2D {
 	#z: number = 0
 	#name: string
 
-	//TODO rotationX, rotationY, rotationZ getter/setter
 	constructor() {
 	}
 

@@ -49,7 +49,6 @@ class Primitive {
 
 	get volume(): AABB {
 		if (!this.#volume) {
-			//TODO vertexBuffer 내용이 변경될떄  재계산해야함
 			this.#volume = calculateGeometryAABB(this.#vertexBuffer);
 		}
 		return this.#volume;

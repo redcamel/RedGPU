@@ -18,8 +18,6 @@ class IBL {
 	#environmentTexture: IBLCubeTexture;
 	#irradianceTexture: IBLCubeTexture;
 	#iblTexture: IBLCubeTexture
-	#prefilterMap: GPUTexture; //TODO - 일단없어도되니 나중에
-	#brdfLUT: GPUTexture; //TODO - 일단없어도되니 나중에
 	#uuid = createUUID()
 	#format: GPUTextureFormat = 'rgba8unorm'
 	#targetTexture: HDRTexture | CubeTexture

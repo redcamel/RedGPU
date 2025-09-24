@@ -49,7 +49,6 @@ class PhongMaterial extends ABitmapBaseMaterial {
 		this.color.setColorByHEX(color)
 		this.emissiveColor.setColorByHEX(this.emissiveColor.hex)
 		this.specularColor.setColorByHEX(this.specularColor.hex)
-		//TODO 보강
 	}
 
 	get displacementScale(): number {

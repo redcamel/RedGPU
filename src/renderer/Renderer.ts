@@ -34,10 +34,7 @@ class Renderer {
 		if (!this.#debugRender) this.#debugRender = new DebugRender(redGPUContext)
 		// 오브젝트 렌더시작
 		const viewList_renderPassDescriptorList: GPURenderPassDescriptor[] = []
-		/**
-		 * TODO - 단일 view를 렌더링하고, view.x,view.y가 0일때는
-		 * 를 써도 될것 같은데... 왜냐면 뷰포트가 같으니까....
-		 */
+
 		{
 			let i = 0
 			const len = redGPUContext.viewList.length
