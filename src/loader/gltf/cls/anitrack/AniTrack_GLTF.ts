@@ -2,6 +2,7 @@ import RedGPUContext from "../../../../context/RedGPUContext";
 import Mesh from "../../../../display/mesh/Mesh";
 import AnimationData_GLTF from "../AnimationData_GLTF";
 import shaderCode from './compute.wgsl'
+
 type MeshResources = {
 	bindGroup: GPUBindGroup;
 	originBuffer: GPUBuffer;
@@ -101,7 +102,7 @@ class AniTrack_GLTF {
 		gpuDevice.queue.writeBuffer(
 			this.#animationDataListBuffer,
 			0,
-			new Float32Array(this.aniDataAnimationInfo.dataList)
+			this.aniDataAnimationInfo.dataList
 		);
 	}
 
