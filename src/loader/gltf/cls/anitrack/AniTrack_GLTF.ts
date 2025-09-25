@@ -21,6 +21,7 @@ class AniTrack_GLTF {
 	#animationDataListBuffer: GPUBuffer;
 	#uniformBuffer: GPUBuffer;
 	#uniformData: Float32Array;
+	cacheTable={};
 
 	#meshResourcesMap: Map<Mesh, MeshResources> = new Map();
 

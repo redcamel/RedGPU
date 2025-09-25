@@ -9,7 +9,7 @@ class AnimationData_GLTF {
 	gltfLoader: GLTFLoader;
 	scenesData: GLTF;
 	accessorGlTfId: GlTfId;
-	dataList: number[]
+	dataList: Float32Array
 
 	/**
 	 * Constructs a new instance of the class.
@@ -39,11 +39,12 @@ class AnimationData_GLTF {
 			default:
 				console.log('알수없는 형식 엑세서 타입', accessor);
 		}
-		this.dataList = []
+		const temp = []
 		let offset = 0;
 		for (; offset < count * factor; i++, offset++) {
-			this.dataList[offset] = bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true);
+			temp[offset] = bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true);
 		}
+		this.dataList = new Float32Array(temp);
 	}
 }
 

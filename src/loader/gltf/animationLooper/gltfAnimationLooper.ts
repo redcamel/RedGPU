@@ -1,13 +1,24 @@
 import {glMatrix} from "gl-matrix";
 import RedGPUContext from "../../../context/RedGPUContext";
+import {keepLog} from "../../../utils";
 import AniTrack_GLTF from "../cls/anitrack/AniTrack_GLTF";
 import {PlayAnimationInfo} from "../GLTFLoader";
 import {GLTFParsedSingleClip} from "../parsers/animation/parseAnimations";
 
+let targetFps = 60;
+let frameTime = 1000 / targetFps; // 16.67ms
+let lastUpdateTime = 0;
+let frameCount = 0;
 const gltfAnimationLooper = (
-	redGPUContext:RedGPUContext,time: number,	computePassEncoder: GPUComputePassEncoder, playAnimationInfoList: PlayAnimationInfo[],
-
+	redGPUContext: RedGPUContext, timestamp: number, computePassEncoder: GPUComputePassEncoder, playAnimationInfoList: PlayAnimationInfo[],
 ) => {
+	const now = timestamp;
+	const deltaTime = now - lastUpdateTime;
+	if (deltaTime < frameTime) {
+		return;
+	}
+	lastUpdateTime = now;
+	frameCount++;
 // 사전 계산된 상수들
 	const EPSILON = glMatrix.EPSILON;
 	const PI_180 = 180 / Math.PI;
@@ -27,10 +38,11 @@ const gltfAnimationLooper = (
 	let targetClip: GLTFParsedSingleClip;
 	let targetPlayAnimationInfo: PlayAnimationInfo;
 	let currentAniTrack: AniTrack_GLTF;
+	let currentAniTrackCacheTable;
 	//
 	let nextTimeDataIDX: number, previousTimeDataIDX: number;
-	let targetTimeDataList: number[];
-	let targetAnimationDataList: number[];
+	let targetTimeDataList: Float32Array;
+	let targetAnimationDataList: Float32Array;
 	let targetTimeDataListLength: number;
 	let targetTimeDataIDX: number;
 	// console.log('playAnimationInfoList',playAnimationInfoList)
@@ -40,10 +52,12 @@ const gltfAnimationLooper = (
 		// console.log('loopListItem', loopListItem)
 		targetAniTrackIDX = targetClip.length;
 		// console.log('targetAniTrackIDX',targetAniTrackIDX)
+		const maxTime = targetClip['maxTime'];
 		while (targetAniTrackIDX--) {
 			currentAniTrack = targetClip[targetAniTrackIDX];
+			currentAniTrackCacheTable = currentAniTrack.cacheTable;
 			const {animationTargetMesh, timeAnimationInfo, aniDataAnimationInfo, weightMeshes} = currentAniTrack
-			currentTime = ((time - targetPlayAnimationInfo.startTime) % (targetClip['maxTime'] * 1000)) / 1000;
+			currentTime = ((timestamp - targetPlayAnimationInfo.startTime) % (maxTime * 1000)) / 1000;
 			/////////////////////////////////////////////////////////////////////////////////
 			targetTimeDataList = timeAnimationInfo.dataList;
 			targetAnimationDataList = aniDataAnimationInfo.dataList;
@@ -187,46 +201,69 @@ const gltfAnimationLooper = (
 							prevIdx = previousTimeDataIDX * 4;
 							nextIdx = nextTimeDataIDX * 4;
 							// 이전 키프레임 quaternion 정규화
-							tempX = targetAnimationDataList[prevIdx];
-							tempY = targetAnimationDataList[prevIdx + 1];
-							tempZ = targetAnimationDataList[prevIdx + 2];
-							tempW = targetAnimationDataList[prevIdx + 3];
-							tempLen = tempX * tempX + tempY * tempY + tempZ * tempZ + tempW * tempW;
-							if (tempLen > 0) {
-								tempInvLen = 1 / Math.sqrt(tempLen);
-								prevX = tempX * tempInvLen;
-								prevY = tempY * tempInvLen;
-								prevZ = tempZ * tempInvLen;
-								prevW = tempW * tempInvLen;
+							const cacheKey = `key_${prevIdx}_${nextIdx}`
+							if (currentAniTrackCacheTable[cacheKey]) {
+								cosom = currentAniTrackCacheTable[cacheKey][0]
+								prevX = currentAniTrackCacheTable[cacheKey][1]
+								prevY = currentAniTrackCacheTable[cacheKey][2]
+								prevZ = currentAniTrackCacheTable[cacheKey][3]
+								prevW = currentAniTrackCacheTable[cacheKey][4]
+								nextX = currentAniTrackCacheTable[cacheKey][5]
+								nextY = currentAniTrackCacheTable[cacheKey][6]
+								nextZ = currentAniTrackCacheTable[cacheKey][7]
+								nextW = currentAniTrackCacheTable[cacheKey][8]
 							} else {
-								prevX = prevY = prevZ = 0;
-								prevW = 1;
-							}
-							// 다음 키프레임 quaternion 정규화
-							tempX = targetAnimationDataList[nextIdx];
-							tempY = targetAnimationDataList[nextIdx + 1];
-							tempZ = targetAnimationDataList[nextIdx + 2];
-							tempW = targetAnimationDataList[nextIdx + 3];
-							tempLen = tempX * tempX + tempY * tempY + tempZ * tempZ + tempW * tempW;
-							if (tempLen > 0) {
-								tempInvLen = 1 / Math.sqrt(tempLen);
-								nextX = tempX * tempInvLen;
-								nextY = tempY * tempInvLen;
-								nextZ = tempZ * tempInvLen;
-								nextW = tempW * tempInvLen;
-							} else {
-								nextX = nextY = nextZ = 0;
-								nextW = 1;
-							}
-							// SLERP 보간
-							cosom = prevX * nextX + prevY * nextY + prevZ * nextZ + prevW * nextW;
-							// 최단 경로 선택
-							if (cosom < 0) {
-								cosom = -cosom;
-								nextX = -nextX;
-								nextY = -nextY;
-								nextZ = -nextZ;
-								nextW = -nextW;
+								tempX = targetAnimationDataList[prevIdx];
+								tempY = targetAnimationDataList[prevIdx + 1];
+								tempZ = targetAnimationDataList[prevIdx + 2];
+								tempW = targetAnimationDataList[prevIdx + 3];
+								tempLen = tempX * tempX + tempY * tempY + tempZ * tempZ + tempW * tempW;
+								if (tempLen > 0) {
+									tempInvLen = 1 / Math.sqrt(tempLen);
+									prevX = tempX * tempInvLen;
+									prevY = tempY * tempInvLen;
+									prevZ = tempZ * tempInvLen;
+									prevW = tempW * tempInvLen;
+								} else {
+									prevX = prevY = prevZ = 0;
+									prevW = 1;
+								}
+								// 다음 키프레임 quaternion 정규화
+								tempX = targetAnimationDataList[nextIdx];
+								tempY = targetAnimationDataList[nextIdx + 1];
+								tempZ = targetAnimationDataList[nextIdx + 2];
+								tempW = targetAnimationDataList[nextIdx + 3];
+								tempLen = tempX * tempX + tempY * tempY + tempZ * tempZ + tempW * tempW;
+								if (tempLen > 0) {
+									tempInvLen = 1 / Math.sqrt(tempLen);
+									nextX = tempX * tempInvLen;
+									nextY = tempY * tempInvLen;
+									nextZ = tempZ * tempInvLen;
+									nextW = tempW * tempInvLen;
+								} else {
+									nextX = nextY = nextZ = 0;
+									nextW = 1;
+								}
+								// SLERP 보간
+								cosom = prevX * nextX + prevY * nextY + prevZ * nextZ + prevW * nextW;
+								// 최단 경로 선택
+								if (cosom < 0) {
+									cosom = -cosom;
+									nextX = -nextX;
+									nextY = -nextY;
+									nextZ = -nextZ;
+									nextW = -nextW;
+								}
+								currentAniTrackCacheTable[cacheKey] = new Float32Array(9);
+								currentAniTrackCacheTable[cacheKey][0] = cosom;
+								currentAniTrackCacheTable[cacheKey][1] = prevX;
+								currentAniTrackCacheTable[cacheKey][2] = prevY;
+								currentAniTrackCacheTable[cacheKey][3] = prevZ;
+								currentAniTrackCacheTable[cacheKey][4] = prevW;
+								currentAniTrackCacheTable[cacheKey][5] = nextX;
+								currentAniTrackCacheTable[cacheKey][6] = nextY;
+								currentAniTrackCacheTable[cacheKey][7] = nextZ;
+								currentAniTrackCacheTable[cacheKey][8] = nextW;
 							}
 							if ((1 - cosom) > EPSILON) {
 								omega = Math.acos(cosom);
@@ -386,7 +423,6 @@ const gltfAnimationLooper = (
 					// )
 					let animationTargetIndex = weightMeshes.length;
 					while (animationTargetIndex--) {
-
 						currentAniTrack.render(
 							redGPUContext,
 							computePassEncoder,
@@ -396,7 +432,6 @@ const gltfAnimationLooper = (
 							nextTimeDataIDX
 						)
 					}
-
 					break;
 			}
 		}
