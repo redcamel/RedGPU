@@ -8,7 +8,9 @@ const renderBasicLayer = (view: View3D, viewRenderPassEncoder: GPURenderPassEnco
 	const {children} = scene
 	if (skybox) skybox.render(debugViewRenderState)
 	renderList(children, debugViewRenderState)
+	viewRenderPassEncoder.executeBundles(debugViewRenderState.renderBundleList);
 	renderList(instanceMeshLayer, debugViewRenderState)
+
 }
 export default renderBasicLayer
 const renderList = (list, debugViewRenderState: RenderViewStateData) => {

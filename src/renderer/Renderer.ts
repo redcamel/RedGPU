@@ -294,7 +294,7 @@ class Renderer {
 				if (axis) axis.render(debugViewRenderState)
 				if (grid) grid.render(debugViewRenderState)
 				renderAlphaLayer(view, viewRenderPassEncoder)
-				viewRenderPassEncoder.executeBundles(debugViewRenderState.renderBundleList);
+
 				viewRenderPassEncoder.end()
 			}
 

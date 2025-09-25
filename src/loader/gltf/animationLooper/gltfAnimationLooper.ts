@@ -15,7 +15,7 @@ const gltfAnimationLooper = (
 	const now = timestamp;
 	const deltaTime = now - lastUpdateTime;
 	if (deltaTime < frameTime) {
-		return;
+		// return;
 	}
 	lastUpdateTime = now;
 	frameCount++;

@@ -8,6 +8,7 @@ const renderListForLayer = (list, debugViewRenderState: RenderViewStateData, pip
 	const {
 		currentRenderPassEncoder,
 	} = debugViewRenderState
+	currentRenderPassEncoder.setBindGroup(0, debugViewRenderState.view.systemUniform_Vertex_UniformBindGroup)
 	for (i; i < len; i++) {
 		const target = list[i]
 		if (target.gpuRenderInfo) {

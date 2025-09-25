@@ -923,7 +923,6 @@ class Mesh extends MeshBase {
 							colorFormats: [navigator.gpu.getPreferredCanvasFormat(), navigator.gpu.getPreferredCanvasFormat(), 'rgba16float'],
 							depthStencilFormat: 'depth32float',
 							sampleCount: useMSAA ? 4 : 1,
-
 						})
 						needBundleFinish = true
 						keepLog('갱신')
