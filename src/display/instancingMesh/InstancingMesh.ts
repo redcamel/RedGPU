@@ -166,11 +166,11 @@ class InstancingMesh extends Mesh {
 			//
 			if (this.geometry.indexBuffer) {
 				const {indexBuffer} = this.geometry
-				const {indexNum, triangleCount, gpuBuffer: indexGPUBuffer} = indexBuffer
+				const {indexCount, triangleCount, gpuBuffer: indexGPUBuffer} = indexBuffer
 				currentRenderPassEncoder.setIndexBuffer(indexGPUBuffer, 'uint32')
-				currentRenderPassEncoder.drawIndexed(indexNum, this.#instanceCount, 0, 0, 0);
+				currentRenderPassEncoder.drawIndexed(indexCount, this.#instanceCount, 0, 0, 0);
 				debugViewRenderState.numTriangles += triangleCount * this.#instanceCount
-				debugViewRenderState.numPoints += indexNum * this.#instanceCount
+				debugViewRenderState.numPoints += indexCount * this.#instanceCount
 			} else {
 				const {vertexBuffer} = this.geometry
 				const {vertexCount, triangleCount} = vertexBuffer

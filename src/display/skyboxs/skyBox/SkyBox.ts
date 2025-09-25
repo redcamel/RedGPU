@@ -145,18 +145,18 @@ class SkyBox {
 		const {gpuRenderInfo} = this
 		const {vertexUniformBindGroup, pipeline} = gpuRenderInfo
 		const {indexBuffer} = this.#geometry
-		const {triangleCount, indexNum} = indexBuffer
+		const {triangleCount, indexCount} = indexBuffer
 		currentRenderPassEncoder.setPipeline(pipeline)
 		currentRenderPassEncoder.setVertexBuffer(0, this.#geometry.vertexBuffer.gpuBuffer)
 		currentRenderPassEncoder.setBindGroup(1, vertexUniformBindGroup); // 버텍스 유니폼 버퍼 1번 고정
 		currentRenderPassEncoder.setBindGroup(2, this.#material.gpuRenderInfo.fragmentUniformBindGroup)
 		currentRenderPassEncoder.setIndexBuffer(indexBuffer.gpuBuffer, 'uint32')
-		currentRenderPassEncoder.drawIndexed(indexBuffer.indexNum, 1, 0, 0, 0);
+		currentRenderPassEncoder.drawIndexed(indexBuffer.indexCount, 1, 0, 0, 0);
 		//
 		debugViewRenderState.num3DObjects++
 		debugViewRenderState.numDrawCalls++
 		debugViewRenderState.numTriangles += triangleCount
-		debugViewRenderState.numPoints += indexNum
+		debugViewRenderState.numPoints += indexCount
 	}
 
 	#updateMSAAStatus() {

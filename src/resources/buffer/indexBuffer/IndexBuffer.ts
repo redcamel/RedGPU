@@ -7,7 +7,7 @@ type NumberArray = Array<number> | Uint32Array;
 
 class IndexBuffer extends ABaseBuffer {
 	[GPU_BUFFER_DATA_SYMBOL]: Uint32Array
-	#indexNum: number = 0
+	#indexCount: number = 0
 	#triangleCount: number = 0
 
 	constructor(
@@ -35,8 +35,8 @@ class IndexBuffer extends ABaseBuffer {
 		return this.#triangleCount;
 	}
 
-	get indexNum(): number {
-		return this.#indexNum;
+	get indexCount(): number {
+		return this.#indexCount;
 	}
 
 	changeData(data: NumberArray) {
@@ -53,7 +53,7 @@ class IndexBuffer extends ABaseBuffer {
 			this[GPU_BUFFER_SYMBOL] = null;
 		}
 		this[GPU_BUFFER_DATA_SYMBOL] = data;
-		this.#indexNum = data.length;
+		this.#indexCount = data.length;
 		const bufferDescriptor: GPUBufferDescriptor = {
 			size: this[GPU_BUFFER_DATA_SYMBOL].byteLength,
 			usage: this.usage,
@@ -61,7 +61,7 @@ class IndexBuffer extends ABaseBuffer {
 		}
 		this[GPU_BUFFER_SYMBOL] = gpuDevice.createBuffer(bufferDescriptor);
 		this.targetResourceManagedState.videoMemory += this[GPU_BUFFER_DATA_SYMBOL].byteLength || 0;
-		this.#triangleCount = this.#indexNum / 3;
+		this.#triangleCount = this.#indexCount / 3;
 		gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], 0, this[GPU_BUFFER_DATA_SYMBOL]);
 	}
 
@@ -71,7 +71,7 @@ class IndexBuffer extends ABaseBuffer {
 	// 		consoleAndThrowError(`Offset value is out of data bounds. Tried to access index ${dataStartIndex} on data of length ${this[GPU_BUFFER_DATA_SYMBOL].length}`);
 	// 	}
 	// 	if (Array.isArray(data)) data = new Uint32Array(data)
-	// 	this.#indexNum = data.length
+	// 	this.#indexCount = data.length
 	// 	gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], dataStartIndex, data)
 	// }
 }

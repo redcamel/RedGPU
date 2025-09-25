@@ -49,13 +49,13 @@ const renderListForLayer = (list, debugViewRenderState: RenderViewStateData, pip
 				//
 				if (currentGeometry.indexBuffer) {
 					const {indexBuffer} = currentGeometry
-					const {indexNum, triangleCount, gpuBuffer: indexGPUBuffer} = indexBuffer
+					const {indexCount, triangleCount, gpuBuffer: indexGPUBuffer} = indexBuffer
 					currentRenderPassEncoder.setIndexBuffer(indexGPUBuffer, 'uint32')
 					// @ts-ignore
-					if (target.particleBuffers) currentRenderPassEncoder.drawIndexed(indexNum, target.particleNum, 0, 0, 0);
-					else currentRenderPassEncoder.drawIndexed(indexNum, 1, 0, 0, 0);
+					if (target.particleBuffers) currentRenderPassEncoder.drawIndexed(indexCount, target.particleNum, 0, 0, 0);
+					else currentRenderPassEncoder.drawIndexed(indexCount, 1, 0, 0, 0);
 					debugViewRenderState.numTriangles += triangleCount
-					debugViewRenderState.numPoints += indexNum
+					debugViewRenderState.numPoints += indexCount
 				} else {
 					const {vertexBuffer} = currentGeometry
 					const {vertexCount, triangleCount} = vertexBuffer
