@@ -31,7 +31,7 @@ const CONVERT_RADIAN = Math.PI / 180;
 const CPI = 3.141592653589793, CPI2 = 6.283185307179586, C225 = 0.225, C127 = 1.27323954, C045 = 0.405284735,
 	C157 = 1.5707963267948966;
 const tempFloat32_1 = new Float32Array(1);
-
+const up = new Float32Array([0, 1, 0]);
 interface Mesh {
 	receiveShadow: boolean
 	disableJitter: boolean
@@ -49,7 +49,7 @@ class Mesh extends MeshBase {
 	#x: number = 0
 	#z: number = 0
 	#y: number = 0
-	#positionArray: [number, number, number] = [0, 0, 0]
+	#positionArray: Float32Array = new Float32Array([0, 0, 0])
 	//
 	#pivotX: number = 0
 	#pivotY: number = 0
@@ -61,12 +61,12 @@ class Mesh extends MeshBase {
 	#scaleY: number = 1
 	#scaleZ: number = 1
 	//
-	#scaleArray: number[] = [1, 1, 1]
+	#scaleArray: Float32Array = new Float32Array([1, 1, 1])
 	//
 	#rotationX: number = 0
 	#rotationY: number = 0
 	#rotationZ: number = 0
-	#rotationArray: number[] = [0, 0, 0]
+	#rotationArray: Float32Array = new Float32Array([0, 0, 0])
 	//
 	#events: any = {}
 	#eventsNum: number = 0
@@ -238,7 +238,7 @@ class Mesh extends MeshBase {
 		this.dirtyTransform = true
 	}
 
-	get position(): [number, number, number] {
+	get position():Float32Array{
 		return this.#positionArray;
 	}
 
@@ -269,7 +269,7 @@ class Mesh extends MeshBase {
 		this.dirtyTransform = true
 	}
 
-	get scale(): number[] {
+	get scale(): Float32Array {
 		return this.#scaleArray;
 	}
 
@@ -301,7 +301,7 @@ class Mesh extends MeshBase {
 		this.dirtyTransform = true
 	}
 
-	get rotation(): number[] {
+	get rotation(): Float32Array{
 		return this.#rotationArray;
 	}
 
@@ -374,7 +374,7 @@ class Mesh extends MeshBase {
 	}
 
 	lookAt(targetX: number | [number, number, number], targetY?: number, targetZ?: number): void {
-		var up = new Float32Array([0, 1, 0]);
+
 		var tPosition = [];
 		var tRotation = []
 		tPosition[0] = targetX;
@@ -813,6 +813,8 @@ class Mesh extends MeshBase {
 			if (this.dirtyPipeline || dirtyVertexUniformFromMaterial[currentMaterialUUID]) {
 				updateMeshDirtyPipeline(this, debugViewRenderState)
 				this.#bundleEncoder = null
+				this.#renderBundle = null
+
 			}
 		}
 		if (currentGeometry && passFrustumCulling) {
@@ -929,9 +931,9 @@ class Mesh extends MeshBase {
 					debugViewRenderState.numDrawCalls++
 					if (currentGeometry.indexBuffer) {
 						const {indexBuffer} = currentGeometry
-						const {indexNum, triangleCount} = indexBuffer
+						const {indexCount, triangleCount} = indexBuffer
 						debugViewRenderState.numTriangles += triangleCount
-						debugViewRenderState.numPoints += indexNum
+						debugViewRenderState.numPoints += indexCount
 					} else {
 						const {vertexBuffer} = currentGeometry
 						const {vertexCount, triangleCount} = vertexBuffer
@@ -950,11 +952,12 @@ class Mesh extends MeshBase {
 						//
 						if (currentGeometry.indexBuffer) {
 							const {indexBuffer} = currentGeometry
-							const {indexNum, gpuBuffer: indexGPUBuffer} = indexBuffer
+							const {indexCount, gpuBuffer: indexGPUBuffer} = indexBuffer
 							targetEncoder.setIndexBuffer(indexGPUBuffer, 'uint32')
 							// @ts-ignore
-							if (this.particleBuffers) targetEncoder.drawIndexed(indexNum, this.particleNum, 0, 0, 0);
-							else targetEncoder.drawIndexed(indexNum, 1, 0, 0, 0);
+							if (this.particleBuffers) targetEncoder.drawIndexed(indexCount, this.particleNum, 0, 0, 0);
+							else targetEncoder.drawIndexed(indexCount, 1, 0, 0, 0);
+
 						} else {
 							const {vertexBuffer} = currentGeometry
 							const {vertexCount} = vertexBuffer
@@ -987,6 +990,7 @@ class Mesh extends MeshBase {
 			children[i].render(debugViewRenderState)
 		}
 	}
+
 
 	#bundleEncoder: GPURenderBundleEncoder
 	#renderBundle: GPURenderBundle
