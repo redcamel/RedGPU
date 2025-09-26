@@ -924,7 +924,7 @@ class Mesh extends MeshBase {
 				else {
 					let targetEncoder: GPURenderBundleEncoder | GPURenderPassEncoder = currentRenderPassEncoder
 					let needBundleFinish = false
-					keepLog(this.#bundleEncoder , this.dirtyPipeline , this.#prevSystemBindGroup !== view.systemUniform_Vertex_UniformBindGroup)
+					// keepLog(this.#bundleEncoder , this.dirtyPipeline , this.#prevSystemBindGroup !== view.systemUniform_Vertex_UniformBindGroup)
 					if (!this.#bundleEncoder || this.dirtyPipeline || this.#prevSystemBindGroup !== view.systemUniform_Vertex_UniformBindGroup) {
 						this.#bundleEncoder = null
 						this.#bundleEncoder = gpuDevice.createRenderBundleEncoder({
