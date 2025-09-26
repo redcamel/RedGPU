@@ -32,6 +32,7 @@ const CPI = 3.141592653589793, CPI2 = 6.283185307179586, C225 = 0.225, C127 = 1.
 	C157 = 1.5707963267948966;
 const tempFloat32_1 = new Float32Array(1);
 const up = new Float32Array([0, 1, 0]);
+
 interface Mesh {
 	receiveShadow: boolean
 	disableJitter: boolean
@@ -238,7 +239,7 @@ class Mesh extends MeshBase {
 		this.dirtyTransform = true
 	}
 
-	get position():Float32Array{
+	get position(): Float32Array {
 		return this.#positionArray;
 	}
 
@@ -301,7 +302,7 @@ class Mesh extends MeshBase {
 		this.dirtyTransform = true
 	}
 
-	get rotation(): Float32Array{
+	get rotation(): Float32Array {
 		return this.#rotationArray;
 	}
 
@@ -374,7 +375,6 @@ class Mesh extends MeshBase {
 	}
 
 	lookAt(targetX: number | [number, number, number], targetY?: number, targetZ?: number): void {
-
 		var tPosition = [];
 		var tRotation = []
 		tPosition[0] = targetX;
@@ -814,7 +814,6 @@ class Mesh extends MeshBase {
 				updateMeshDirtyPipeline(this, debugViewRenderState)
 				this.#bundleEncoder = null
 				this.#renderBundle = null
-
 			}
 		}
 		if (currentGeometry && passFrustumCulling) {
@@ -907,15 +906,20 @@ class Mesh extends MeshBase {
 			{
 				if (currentMaterial.use2PathRender) {
 					debugViewRenderState.render2PathLayer[debugViewRenderState.render2PathLayer.length] = this
-				} else if (this.meshType === 'particle') {
-					debugViewRenderState.particleLayer[debugViewRenderState.particleLayer.length] = this
-				} else if (this.meshType === 'instanceMesh') {
+				}
+					// else if (this.meshType === 'particle') {
+					// 	debugViewRenderState.particleLayer[debugViewRenderState.particleLayer.length] = this
+				// }
+				else if (this.meshType === 'instanceMesh') {
 					debugViewRenderState.instanceMeshLayer[debugViewRenderState.instanceMeshLayer.length] = this
-				} else if (currentMaterial.transparent) {
-					debugViewRenderState.transparentLayer[debugViewRenderState.transparentLayer.length] = this
-				} else if (currentMaterial.alphaBlend === 2 || currentMaterial.opacity < 1 || !this.depthStencilState.depthWriteEnabled) {
-					debugViewRenderState.alphaLayer[debugViewRenderState.alphaLayer.length] = this
-				} else {
+				}
+					// else if (currentMaterial.transparent) {
+					// 	debugViewRenderState.transparentLayer[debugViewRenderState.transparentLayer.length] = this
+					// }
+					// else if (currentMaterial.alphaBlend === 2 || currentMaterial.opacity < 1 || !this.depthStencilState.depthWriteEnabled) {
+					// 	debugViewRenderState.alphaLayer[debugViewRenderState.alphaLayer.length] = this
+				// }
+				else {
 					let targetEncoder: GPURenderBundleEncoder | GPURenderPassEncoder = currentRenderPassEncoder
 					let needBundleFinish = false
 					if (!this.#bundleEncoder || this.dirtyPipeline || this.#prevSystemBindGroup !== view.systemUniform_Vertex_UniformBindGroup) {
@@ -940,12 +944,20 @@ class Mesh extends MeshBase {
 						debugViewRenderState.numTriangles += triangleCount;
 						debugViewRenderState.numPoints += vertexCount
 					}
+
 					if (needBundleFinish) {
 						this.#prevSystemBindGroup = view.systemUniform_Vertex_UniformBindGroup
 						targetEncoder.setPipeline(pipeline)
 						const {gpuBuffer} = currentGeometry.vertexBuffer
 						const {fragmentUniformBindGroup} = currentMaterial.gpuRenderInfo
 						targetEncoder.setVertexBuffer(0, gpuBuffer)
+						// @ts-ignore
+						if (this.particleBuffers?.length) {
+							// @ts-ignore
+							this.particleBuffers.forEach((v, index) => {
+								targetEncoder.setVertexBuffer(index + 1, v)
+							})
+						}
 						targetEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
 						targetEncoder.setBindGroup(1, vertexUniformBindGroup);
 						targetEncoder.setBindGroup(2, fragmentUniformBindGroup)
@@ -957,7 +969,6 @@ class Mesh extends MeshBase {
 							// @ts-ignore
 							if (this.particleBuffers) targetEncoder.drawIndexed(indexCount, this.particleNum, 0, 0, 0);
 							else targetEncoder.drawIndexed(indexCount, 1, 0, 0, 0);
-
 						} else {
 							const {vertexBuffer} = currentGeometry
 							const {vertexCount} = vertexBuffer
@@ -965,7 +976,17 @@ class Mesh extends MeshBase {
 						}
 						this.#renderBundle = (targetEncoder as GPURenderBundleEncoder).finish();
 					}
-					debugViewRenderState.renderBundleList[debugViewRenderState.renderBundleList.length] = this.#renderBundle
+					if (this.meshType === 'particle') {
+						debugViewRenderState.particleLayer[debugViewRenderState.particleLayer.length] = this.#renderBundle
+					} else if (currentMaterial.transparent) {
+						debugViewRenderState.transparentLayer[debugViewRenderState.transparentLayer.length] = this.#renderBundle
+						// @ts-ignore
+						this.#renderBundle.mesh = this
+					} else if (currentMaterial.alphaBlend === 2 || currentMaterial.opacity < 1 || !this.depthStencilState.depthWriteEnabled) {
+						debugViewRenderState.alphaLayer[debugViewRenderState.alphaLayer.length] = this.#renderBundle
+					} else {
+						debugViewRenderState.renderBundleList[debugViewRenderState.renderBundleList.length] = this.#renderBundle
+					}
 				}
 			}
 			{
@@ -990,7 +1011,6 @@ class Mesh extends MeshBase {
 			children[i].render(debugViewRenderState)
 		}
 	}
-
 
 	#bundleEncoder: GPURenderBundleEncoder
 	#renderBundle: GPURenderBundle

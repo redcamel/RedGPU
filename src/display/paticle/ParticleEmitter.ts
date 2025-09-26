@@ -509,6 +509,7 @@ class ParticleEmitter extends Mesh {
 	}
 
 	#setParticleData() {
+		this.dirtyPipeline=true
 		let redGPUContext = this.redGPUContext;
 		const initialParticleData = new Float32Array(this.#particleNum * 12);
 		const initialParticleInfoPosition = new Float32Array(this.#particleNum * 12);
@@ -591,7 +592,6 @@ class ParticleEmitter extends Mesh {
 			initialParticleInfoScale,
 			initialParticleInfoAlpha,
 		]
-		keepLog(dataList)
 		dataList.forEach((v, index) => {
 			const t0 = redGPUContext.gpuDevice.createBuffer({
 				size: v.byteLength,

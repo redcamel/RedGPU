@@ -70,7 +70,7 @@ const addRandomMeshes = (redGPUContext, scene) => {
 		new RedGPU.Primitive.TorusKnot(redGPUContext, 0.5, 0.2, 128, 64, 2, 3)
 	];
 
-	for (let i = 0; i < 500; i++) {
+	for (let i = 0; i < 1000; i++) {
 		const geometry = geometries[Math.floor(Math.random() * geometries.length)];
 
 		const x = Math.random() * 150 - 75;

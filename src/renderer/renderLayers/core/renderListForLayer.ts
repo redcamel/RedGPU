@@ -33,14 +33,8 @@ const renderListForLayer = (list, debugViewRenderState: RenderViewStateData, pip
 				if (debugViewRenderState.prevVertexGpuBuffer !== gpuBuffer) {
 					currentRenderPassEncoder.setVertexBuffer(0, gpuBuffer)
 					debugViewRenderState.prevVertexGpuBuffer = gpuBuffer
-					if (target.particleBuffers) {
-						target.particleBuffers.forEach((v, index) => {
-							currentRenderPassEncoder.setVertexBuffer(index + 1, v)
-						})
-						debugViewRenderState.prevVertexGpuBuffer = null
-					}
 				}
-				currentRenderPassEncoder.setBindGroup(1, vertexUniformBindGroup); // 버텍스 유니폼 버퍼 1번 고정
+				currentRenderPassEncoder.setBindGroup(1, vertexUniformBindGroup);
 				if (debugViewRenderState.prevFragmentUniformBindGroup !== fragmentUniformBindGroup) {
 					currentRenderPassEncoder.setBindGroup(2, fragmentUniformBindGroup)
 					debugViewRenderState.prevFragmentUniformBindGroup = fragmentUniformBindGroup
@@ -52,9 +46,7 @@ const renderListForLayer = (list, debugViewRenderState: RenderViewStateData, pip
 					const {indexBuffer} = currentGeometry
 					const {indexCount, triangleCount, gpuBuffer: indexGPUBuffer} = indexBuffer
 					currentRenderPassEncoder.setIndexBuffer(indexGPUBuffer, 'uint32')
-					// @ts-ignore
-					if (target.particleBuffers) currentRenderPassEncoder.drawIndexed(indexCount, target.particleNum, 0, 0, 0);
-					else currentRenderPassEncoder.drawIndexed(indexCount, 1, 0, 0, 0);
+					currentRenderPassEncoder.drawIndexed(indexCount, 1, 0, 0, 0);
 					debugViewRenderState.numTriangles += triangleCount
 					debugViewRenderState.numPoints += indexCount
 				} else {
