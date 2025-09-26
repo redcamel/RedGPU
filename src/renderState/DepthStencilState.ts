@@ -34,6 +34,7 @@ class DepthStencilState {
 	set format(value: GPUTextureFormat) {
 		if (this.#formatValues.includes(value)) {
 			this.#format = value;
+			this.#targetObject3D.dirtyPipeline = true
 		} else consoleAndThrowError(`Invalid value for format. Received ${value}. Expected one of: ${this.#formatValues.join(", ")}`);
 	}
 
@@ -43,6 +44,7 @@ class DepthStencilState {
 
 	set depthWriteEnabled(value: boolean) {
 		this.#depthWriteEnabled = value;
+		this.#targetObject3D.dirtyPipeline = true
 	}
 
 	get depthCompare(): GPUCompareFunction {
@@ -52,6 +54,7 @@ class DepthStencilState {
 	set depthCompare(value: GPUCompareFunction) {
 		if (validateCompareList.includes(value)) {
 			this.#depthCompare = value;
+			this.#targetObject3D.dirtyPipeline = true
 		} else consoleAndThrowError(`Invalid value for depthCompare. Received ${value}. Expected one of: ${validateCompareList.join(", ")}`);
 	}
 
@@ -61,6 +64,7 @@ class DepthStencilState {
 
 	set stencilFront(value: GPUStencilFaceState) {
 		this.#stencilFront = value;
+		this.#targetObject3D.dirtyPipeline = true
 	}
 
 	get stencilBack(): GPUStencilFaceState {
@@ -69,6 +73,7 @@ class DepthStencilState {
 
 	set stencilBack(value: GPUStencilFaceState) {
 		this.#stencilBack = value;
+		this.#targetObject3D.dirtyPipeline = true
 	}
 
 	get stencilReadMask(): number {
@@ -77,6 +82,7 @@ class DepthStencilState {
 
 	set stencilReadMask(value: number) {
 		this.#stencilReadMask = value;
+		this.#targetObject3D.dirtyPipeline = true
 	}
 
 	get stencilWriteMask(): number {
@@ -85,6 +91,7 @@ class DepthStencilState {
 
 	set stencilWriteMask(value: number) {
 		this.#stencilWriteMask = value;
+		this.#targetObject3D.dirtyPipeline = true
 	}
 
 	get depthBias(): GPUDepthBias {
@@ -93,6 +100,7 @@ class DepthStencilState {
 
 	set depthBias(value: GPUDepthBias) {
 		this.#depthBias = value;
+		this.#targetObject3D.dirtyPipeline = true
 	}
 
 	get depthBiasSlopeScale(): number {
@@ -101,6 +109,7 @@ class DepthStencilState {
 
 	set depthBiasSlopeScale(value: number) {
 		this.#depthBiasSlopeScale = value;
+		this.#targetObject3D.dirtyPipeline = true
 	}
 
 	get depthBiasClamp(): number {
@@ -109,6 +118,7 @@ class DepthStencilState {
 
 	set depthBiasClamp(value: number) {
 		this.#depthBiasClamp = value;
+		this.#targetObject3D.dirtyPipeline = true
 	}
 
 	get state() {
@@ -130,7 +140,6 @@ class DepthStencilState {
 			depthBiasSlopeScale: enableBiasTopology ? this.#depthBiasSlopeScale : null,
 			depthBiasClamp: enableBiasTopology ? this.#depthBiasClamp : null
 		}
-		this.#targetObject3D.dirtyPipeline = true
 		return state
 	}
 }

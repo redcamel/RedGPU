@@ -924,14 +924,17 @@ class Mesh extends MeshBase {
 				else {
 					let targetEncoder: GPURenderBundleEncoder | GPURenderPassEncoder = currentRenderPassEncoder
 					let needBundleFinish = false
+					keepLog(this.#bundleEncoder , this.dirtyPipeline , this.#prevSystemBindGroup !== view.systemUniform_Vertex_UniformBindGroup)
 					if (!this.#bundleEncoder || this.dirtyPipeline || this.#prevSystemBindGroup !== view.systemUniform_Vertex_UniformBindGroup) {
+						this.#bundleEncoder = null
 						this.#bundleEncoder = gpuDevice.createRenderBundleEncoder({
 							colorFormats: [navigator.gpu.getPreferredCanvasFormat(), navigator.gpu.getPreferredCanvasFormat(), 'rgba16float'],
 							depthStencilFormat: 'depth32float',
 							sampleCount: useMSAA ? 4 : 1,
+							label : this.uuid
 						})
 						needBundleFinish = true
-						keepLog('갱신')
+						// keepLog('렌더번들갱신')
 					}
 					targetEncoder = this.#bundleEncoder
 					debugViewRenderState.numDrawCalls++

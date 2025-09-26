@@ -112,7 +112,6 @@ class PickingManager {
 		});
 	}
 
-	#readPixelBuffer:GPUBuffer
 	#readPixelArrayBuffer = async (view: View3D, time: number, width = 1, height = 1) => {
 		const {gpuDevice} = view.redGPUContext;
 		const {pixelRectArray} = view;
@@ -123,10 +122,10 @@ class PickingManager {
 			return;
 		}
 		const pickingTable = this.#createPickingTable();
-		this.#readPixelBuffer = this.#createReadPixelBuffer(gpuDevice, width, height, x, y);
-		const uint32Color = await this.#getUint32Color(this.#readPixelBuffer);
-		// readPixelBuffer.destroy();
-		// readPixelBuffer = null
+		let readPixelBuffer: GPUBuffer = this.#createReadPixelBuffer(gpuDevice, width, height, x, y);
+		const uint32Color = await this.#getUint32Color(readPixelBuffer);
+		readPixelBuffer.destroy();
+		readPixelBuffer = null
 		if (uint32Color) {
 			this.#processClickEvent(uint32Color, x, y, time, pickingTable);
 			this.#processEvent(uint32Color, x, y, time, pickingTable);
