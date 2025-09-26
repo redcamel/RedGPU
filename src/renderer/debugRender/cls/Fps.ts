@@ -1,4 +1,3 @@
-
 import RedGPUContext from "../../../context/RedGPUContext";
 import DebugRender from "../DebugRender";
 import ADebugItem from "./core/ADebugItem";
@@ -6,7 +5,7 @@ import ADebugItem from "./core/ADebugItem";
 class DebugStatisticsDomService {
 	dom: HTMLElement;
 
-	constructor(redGPUContext:RedGPUContext) {
+	constructor(redGPUContext: RedGPUContext) {
 		this.dom = document.createElement('div');
 		this.dom.style.cssText = 'z-index: 1;position: sticky;top:0;background:#000;border-bottom:1px solid rgba(255,255,255,0.06);box-shadow:0 10px 10px rgba(0,0,0,0.5)'
 		this.#initializeStatisticsDisplay(redGPUContext);
@@ -17,7 +16,7 @@ class DebugStatisticsDomService {
 		Object.entries(fpsDetails).forEach(([key, value]) => this.#updateElement(key, value));
 	}
 
-	#initializeStatisticsDisplay(redGPUContext:RedGPUContext) {
+	#initializeStatisticsDisplay(redGPUContext: RedGPUContext) {
 		this.dom.innerHTML = `
   		<div class="debug-group" >
           <div class='debug-item'>
@@ -31,7 +30,6 @@ class DebugStatisticsDomService {
           </div>
       </div>
     `;
-
 	}
 
 	#updateElement(selector: string, value: any) {
@@ -50,8 +48,9 @@ class Fps extends ADebugItem {
 	#previousTimeStamp: number;
 	#frameCount: number = 0;
 	#totalFps: number = 0;
-	#addedEvent:boolean = false
-	constructor(redGPUContext:RedGPUContext) {
+	#addedEvent: boolean = false
+
+	constructor(redGPUContext: RedGPUContext) {
 		super()
 		this.debugStatisticsDomService = new DebugStatisticsDomService(redGPUContext);
 		this.#previousTimeStamp = performance.now();
@@ -61,13 +60,12 @@ class Fps extends ADebugItem {
 		this.#updateElapsedTime(time);
 		const fpsDetails = this.#calculateFpsDetails();
 		const {elapsedSeconds, currentFps, averageFps} = fpsDetails;
-		if(!this.#addedEvent){
+		if (!this.#addedEvent) {
 			document.querySelector('.panel_close').addEventListener('click', () => {
 				redGPUContext.useDebugPanel = false
 			})
 			this.#addedEvent = true;
 		}
-
 		this.debugStatisticsDomService.update(
 			`${elapsedSeconds.toLocaleString()}ms`,
 			`${currentFps.toLocaleString()} FPS`,

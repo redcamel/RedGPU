@@ -8,7 +8,6 @@ import InterleaveType from "../../../resources/buffer/core/type/InterleaveType";
 import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
 import InterleavedStruct from "../../../resources/buffer/vertexBuffer/InterleavedStruct";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
-import {keepLog} from "../../../utils";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import createUUID from "../../../utils/createUUID";
 import calculateNormals from "../../../utils/math/calculateNormals";
@@ -157,11 +156,10 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
 		// tInterleaveInfoList['aVertexJoint'] = InterleaveType.float32x4
 		tInterleaveInfoList['aVertexTangent'] = InterleaveType.float32x4
 		const weightData = []
-		parseInterleaveData_GLTF(weightData, vertices, verticesColor_0, normalData, uvs, uvs1, uvs2, jointWeights, joints, tangents,true)
-
+		parseInterleaveData_GLTF(weightData, vertices, verticesColor_0, normalData, uvs, uvs1, uvs2, jointWeights, joints, tangents, true)
 		const weightBuffer = new VertexBuffer(
 			redGPUContext,
-				weightData,
+			weightData,
 			new InterleavedStruct(
 				{
 					aVertexWeight: InterleaveType.float32x4,
@@ -171,14 +169,11 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
 			undefined,
 			`Weight_${gltfLoader.url}_${nodeGlTfId}_${i}`
 		)
-
 		/////////////////////////////////////////////////////////
 		let morphInfo = new MorphInfo_GLTF(gltfLoader, gltfData, meshPrimitive, gltfMesh.weights);
-
 		/////////////////////////////////////////////////////
-		const vertexCacheKey = `Vertex_${gltfLoader.url}_${nodeGlTfId}_${i}_${morphInfo.weights.length ? createUUID() :''}`
+		const vertexCacheKey = `Vertex_${gltfLoader.url}_${nodeGlTfId}_${i}_${morphInfo.weights.length ? createUUID() : ''}`
 		const hasVertexBuffer = redGPUContext.resourceManager['managedVertexBufferState'].table.get(vertexCacheKey)?.buffer
-
 		tGeo = new Geometry(
 			redGPUContext,
 			hasVertexBuffer || new VertexBuffer(
@@ -243,7 +238,7 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
 			}
 		}
 		// console.log('여긴가', NUM)
-		if(!hasVertexBuffer){
+		if (!hasVertexBuffer) {
 			const list = tMesh.animationInfo.morphInfo.morphInfoDataList;
 			let index = 0;
 			const listLen = list.length

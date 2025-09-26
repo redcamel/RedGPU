@@ -185,7 +185,6 @@ class ATextField extends Mesh {
 	#setImgElement() {
 		this.#textureImg = new Image();
 		this.#textureImg.style.cssText = 'position:absolute;bottom:0px;left:0;'
-
 		this.#textureImg.onload = _ => {
 			let tW: number, tH: number;
 			const {width, height} = this.#getRenderHtmlSize();
@@ -232,7 +231,7 @@ class ATextField extends Mesh {
 				this.material.diffuseTexture = new BitmapTexture(this.#redGPUContext, URL.createObjectURL(blob), true, v => {
 					this.#renderWidth = this.#textureImg.width
 					this.#renderHeight = this.#textureImg.height
-				}, null,null,true);
+				}, null, null, true);
 			};
 			if (this.#textureCvs instanceof OffscreenCanvas) {
 				this.#textureCvs.convertToBlob({type: 'image/png'}).then(callback);

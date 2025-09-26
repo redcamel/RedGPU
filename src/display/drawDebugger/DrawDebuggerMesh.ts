@@ -1,6 +1,5 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import Geometry from "../../geometry/Geometry";
-import GPU_COMPARE_FUNCTION from "../../gpuConst/GPU_COMPARE_FUNCTION";
 import GPU_PRIMITIVE_TOPOLOGY from "../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
 import ColorMaterial from "../../material/colorMaterial/ColorMaterial";
 import RenderViewStateData from "../../renderer/RenderViewStateData";

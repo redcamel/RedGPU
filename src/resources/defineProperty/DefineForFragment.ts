@@ -20,6 +20,7 @@ function defineProperty_vec3(propertyKey: string, initValue: number[] = [0, 0, 0
 function defineProperty_vec2(propertyKey: string, initValue: number[] = [0, 0]) {
 	return defineVector(propertyKey, initValue)
 }
+
 function defineProperty_PositiveNumberRange(propertyKey: string, initValue: number = 1, min?: number, max?: number) {
 	return definePositiveNumberRange(propertyKey, initValue, true, min, max)
 }

@@ -63,13 +63,18 @@ class RenderViewStateData {
 		return this.#view;
 	}
 
-	reset(viewRenderPassEncoder: GPURenderPassEncoder,computeCommandEncoder:GPUCommandEncoder, time: number) {
+	reset(viewRenderPassEncoder: GPURenderPassEncoder, computeCommandEncoder: GPUCommandEncoder, time: number) {
 		if (!time || !this.#view) {
 			throw new Error('Invalid parameters provided');
 		}
 		const view = this.#view
 		const {useFrustumCulling, frustumPlanes, scene, postEffectManager, pickingManager, viewRenderTextureManager} = view;
-		const {gBufferColorTexture, depthTexture, gBufferColorResolveTexture, renderPath1ResultTexture,} = view.viewRenderTextureManager;
+		const {
+			gBufferColorTexture,
+			depthTexture,
+			gBufferColorResolveTexture,
+			renderPath1ResultTexture,
+		} = view.viewRenderTextureManager;
 		const {shadowManager} = scene;
 		if (!gBufferColorTexture || !depthTexture) {
 			throw new Error('Invalid view properties');

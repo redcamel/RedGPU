@@ -1,11 +1,12 @@
-import Mesh from "../../display/mesh/Mesh";
-import {keepLog} from "../index";
-
-function sortTransparentObjects(cameraPos: { x: number, y: number, z: number }, objects: GPURenderBundle[]): GPURenderBundle[] {
+function sortTransparentObjects(cameraPos: {
+	x: number,
+	y: number,
+	z: number
+}, objects: GPURenderBundle[]): GPURenderBundle[] {
 	const distanceCache = {};
 	// 가독성과 성능을 위해 따로 변수에 저장
 	const {x: cameraX, y: cameraY, z: cameraZ} = cameraPos;
-	return objects.sort((a:any, b:any) => {
+	return objects.sort((a: any, b: any) => {
 		a = a.mesh
 		b = b.mesh
 		// 거리 계산에 대한 중복을 방지하기 위해서 캐시 활용

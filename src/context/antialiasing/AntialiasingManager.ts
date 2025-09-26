@@ -1,5 +1,3 @@
-import FXAA from "../../postEffect/FXAA";
-import TAA from "../../postEffect/TAA/TAA";
 import createUUID from "../../utils/createUUID";
 import RedGPUContext from "../RedGPUContext";
 
@@ -13,11 +11,11 @@ class AntialiasingManager {
 
 	constructor(redGPUContext: RedGPUContext) {
 		this.#redGPUContext = redGPUContext;
-		if(window.devicePixelRatio > 1) {
+		if (window.devicePixelRatio > 1) {
 			this.useTAA = true
 			this.useMSAA = false
 			this.useFXAA = false
-		}else{
+		} else {
 			this.useTAA = false
 			this.useMSAA = true
 			this.useFXAA = false
@@ -35,13 +33,15 @@ class AntialiasingManager {
 	get useMSAA(): boolean {
 		return this.#useMSAA;
 	}
-	get msaaID(): string {
-		return this.#msaaID;
-	}
+
 	set useMSAA(value: boolean) {
 		if (this.#useMSAA !== value) this.#msaaID = createUUID()
 		this.#useMSAA = value;
 		this.#changedMSAA = true;
+	}
+
+	get msaaID(): string {
+		return this.#msaaID;
 	}
 
 	get useFXAA(): boolean {

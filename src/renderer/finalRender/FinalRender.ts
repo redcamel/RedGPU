@@ -44,8 +44,8 @@ class FinalRender {
 	#viewSizes: { width; height }[] = []
 	#viewGpuTextureViews: GPUTextureView[] = []
 	#sampler: Sampler
-	#fragmentBuffer:GPUBuffer
-	#fragmentBufferData:Float32Array
+	#fragmentBuffer: GPUBuffer
+	#fragmentBufferData: Float32Array
 
 	constructor() {
 	}
@@ -57,16 +57,14 @@ class FinalRender {
 	 * @param {GPURenderPassDescriptor[]} viewList_renderPassDescriptorList - The list of render passes to be rendered.
 	 */
 	render(redGPUContext: RedGPUContext, viewList_renderPassDescriptorList: GPURenderPassDescriptor[]) {
-		if(!this.#fragmentBuffer){
+		if (!this.#fragmentBuffer) {
 			this.#fragmentBuffer = redGPUContext.gpuDevice.createBuffer({
-				label : 'FINAL_RENDER_FRAGMENT_BUFFER',
-				size : 16,
-				usage : GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+				label: 'FINAL_RENDER_FRAGMENT_BUFFER',
+				size: 16,
+				usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
 			})
-			this.#fragmentBufferData = new Float32Array([1,0,0,1])
-
+			this.#fragmentBufferData = new Float32Array([1, 0, 0, 1])
 		}
-
 		const {sizeManager, gpuDevice, antialiasingManager} = redGPUContext
 		const {changedMSAA, useMSAA} = antialiasingManager
 		const {pixelRectObject: canvasPixelRectObject} = sizeManager
@@ -93,37 +91,32 @@ class FinalRender {
 		gpuDevice.queue.submit([finalRenderCommandEnc.finish()])
 	}
 
-	#updateFinalViewBackgroundColor(view:View3D){
+	#updateFinalViewBackgroundColor(view: View3D) {
 		{
-			const {scene,redGPUContext} = view
+			const {scene, redGPUContext} = view
 			const {gpuDevice} = redGPUContext
 			const {backgroundColor, useBackgroundColor} = scene
 			const sceneRGBANormal = useBackgroundColor ? backgroundColor.rgbaNormal : [0, 0, 0, 0]
 			const redGPUContextRGBANormal = redGPUContext.backgroundColor.rgbaNormal
-
 			let finalColor: number[]
-
 			const scenePremultiplied = [
 				sceneRGBANormal[0] * sceneRGBANormal[3],
 				sceneRGBANormal[1] * sceneRGBANormal[3],
 				sceneRGBANormal[2] * sceneRGBANormal[3],
 				sceneRGBANormal[3]
 			]
-
 			const contextPremultiplied = [
 				redGPUContextRGBANormal[0] * redGPUContextRGBANormal[3],
 				redGPUContextRGBANormal[1] * redGPUContextRGBANormal[3],
 				redGPUContextRGBANormal[2] * redGPUContextRGBANormal[3],
 				redGPUContextRGBANormal[3]
 			]
-
 			finalColor = [
 				scenePremultiplied[0] + contextPremultiplied[0] * (1 - sceneRGBANormal[3]),
 				scenePremultiplied[1] + contextPremultiplied[1] * (1 - sceneRGBANormal[3]),
 				scenePremultiplied[2] + contextPremultiplied[2] * (1 - sceneRGBANormal[3]),
 				sceneRGBANormal[3] + redGPUContextRGBANormal[3] * (1 - sceneRGBANormal[3])
 			]
-
 			this.#fragmentBufferData[0] = finalColor[0]
 			this.#fragmentBufferData[1] = finalColor[1]
 			this.#fragmentBufferData[2] = finalColor[2]
@@ -131,6 +124,7 @@ class FinalRender {
 			gpuDevice.queue.writeBuffer(this.#fragmentBuffer, 0, this.#fragmentBufferData)
 		}
 	}
+
 	#renderViewList(
 		redGPUContext: RedGPUContext,
 		finalRenderPassEnc: GPURenderPassEncoder,
@@ -172,21 +166,20 @@ class FinalRender {
 					entries: [
 						{binding: 0, resource: this.#sampler.gpuSampler},
 						{binding: 1, resource: gpuTextureView},
-						{binding: 2, resource: {
+						{
+							binding: 2, resource: {
 								buffer: this.#fragmentBuffer,
 								offset: 0,
 								size: this.#fragmentBuffer.size
-							}}
-
+							}
+						}
 					]
 				}
 				this.#fragmentUniformBindGroups[index] = gpuDevice.createBindGroup(fragmentBindGroupDesc)
 				this.#viewSizes[index] = {width: viewW || 1, height: viewH || 1}
 				this.#viewGpuTextureViews[index] = gpuTextureView
 			}
-
 			this.#updateFinalViewBackgroundColor(targetView)
-
 			finalRenderPassEnc.setPipeline(this.#getPipeline(redGPUContext))
 			finalRenderPassEnc.setBindGroup(0, vertexUniformBindGroup);
 			finalRenderPassEnc.setBindGroup(1, this.#fragmentUniformBindGroups[index])
@@ -249,7 +242,6 @@ class FinalRender {
 	#getFinalRenderPassDesc(redGPUContext: RedGPUContext): GPURenderPassDescriptor {
 		const {backgroundColor, gpuContext} = redGPUContext
 		const finalRenderTextureView = gpuContext.getCurrentTexture().createView({label: 'FINAL_RENDER'})
-
 		const colorAttachment: GPURenderPassColorAttachment = {
 			view: finalRenderTextureView,
 			clearValue: {r: 0, g: 0, b: 0, a: 0},

@@ -84,11 +84,12 @@ class VertexBuffer extends ABaseBuffer {
 		gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], 0, this[GPU_BUFFER_DATA_SYMBOL]);
 	}
 
-	updateData(data: Array<number> | Float32Array,offset:number=0) {
-		if(data instanceof Array) data = new Float32Array(data);
+	updateData(data: Array<number> | Float32Array, offset: number = 0) {
+		if (data instanceof Array) data = new Float32Array(data);
 		const {gpuDevice} = this;
 		gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], offset, data,);
 	}
+
 	updateAllData(data: Array<number> | Float32Array) {
 		const {gpuDevice} = this;
 		gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], 0, this[GPU_BUFFER_DATA_SYMBOL]);

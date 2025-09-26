@@ -145,7 +145,7 @@ class PickingManager {
 		const readPixelBuffer = gpuDevice.createBuffer({
 			size: 16 * width * height,
 			usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
-			label:'readPixelBuffer'
+			label: 'readPixelBuffer'
 		});
 		const textureView = {texture: this.#pickingGPUTexture, origin: {x: x, y: y, z: 0}};
 		const bufferView = {buffer: readPixelBuffer, bytesPerRow: Math.max(256, 4 * width * height), rowsPerImage: 1};

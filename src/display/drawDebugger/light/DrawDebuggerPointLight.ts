@@ -20,7 +20,7 @@ class DrawDebuggerPointLight extends ADrawDebuggerLight {
 	}
 
 	render(debugViewRenderState: RenderViewStateData): void {
-		if(!debugViewRenderState.view.systemUniform_Vertex_UniformBindGroup) return
+		if (!debugViewRenderState.view.systemUniform_Vertex_UniformBindGroup) return
 		if (!this.#target.enableDebugger) return;
 		this.#updateVertexDataFromPointLight(this.#target, this.lightDebugMesh.geometry.vertexBuffer);
 		this.lightDebugMesh.setPosition(0, 0, 0);

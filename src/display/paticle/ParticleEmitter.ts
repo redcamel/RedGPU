@@ -4,7 +4,6 @@ import Plane from "../../primitive/Plane";
 import RenderViewStateData from "../../renderer/RenderViewStateData";
 import DefineForVertex from "../../resources/defineProperty/DefineForVertex";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
-import {keepLog} from "../../utils";
 import copyGPUBuffer from "../../utils/copyGPUBuffer";
 import Mesh from "../mesh/Mesh";
 import PARTICLE_EASE from "./PARTICLE_EASE";
@@ -509,7 +508,7 @@ class ParticleEmitter extends Mesh {
 	}
 
 	#setParticleData() {
-		this.dirtyPipeline=true
+		this.dirtyPipeline = true
 		let redGPUContext = this.redGPUContext;
 		const initialParticleData = new Float32Array(this.#particleNum * 12);
 		const initialParticleInfoPosition = new Float32Array(this.#particleNum * 12);

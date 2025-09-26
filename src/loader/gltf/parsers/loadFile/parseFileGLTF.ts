@@ -5,13 +5,11 @@ import parseGLTF from "../parseGLTF";
 
 const cacheMap: Map<string, GLTF> = new Map();
 const pendingMap: Map<string, Promise<object>> = new Map();
-const getData = (gltfData)=>{
-
-	return  {
+const getData = (gltfData) => {
+	return {
 		...gltfData,
-		meshes:JSON.parse(JSON.stringify(gltfData.meshes)),
+		meshes: JSON.parse(JSON.stringify(gltfData.meshes)),
 	}
-
 }
 const parseFileGLTF = async (gltfLoader: GLTFLoader, callBack) => {
 	const loadFilePath = getAbsoluteURL(window.location.href, gltfLoader.filePath + gltfLoader.fileName);

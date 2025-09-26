@@ -1,9 +1,7 @@
 import {mat4} from "gl-matrix";
-import {navigation} from "typedoc/dist/lib/output/themes/default/partials/navigation";
 import {Function} from "wgsl_reflect";
 import RedGPUContext from "../../context/RedGPUContext";
 import Geometry from "../../geometry/Geometry";
-import gltfAnimationLooper from "../../loader/gltf/animationLooper/gltfAnimationLooper";
 import Primitive from "../../primitive/core/Primitive";
 import RenderViewStateData from "../../renderer/RenderViewStateData";
 import VertexGPURenderInfo from "../../renderInfos/VertexGPURenderInfo";
@@ -80,6 +78,10 @@ class Mesh extends MeshBase {
 	#enableDebugger: boolean = false
 	#cachedBoundingAABB: AABB
 	#cachedBoundingOBB: OBB
+	#prevModelMatrix: Float32Array
+	#bundleEncoder: GPURenderBundleEncoder
+	#renderBundle: GPURenderBundle
+	#prevSystemBindGroup: GPUBindGroup
 
 //
 	constructor(redGPUContext: RedGPUContext, geometry?: Geometry | Primitive, material?, name?: string) {
@@ -105,6 +107,7 @@ class Mesh extends MeshBase {
 	}
 
 	_material
+
 	get material() {
 		return this._material;
 	}
@@ -120,6 +123,7 @@ class Mesh extends MeshBase {
 
 	// 블렌드 모드 설정 함수
 	_geometry: Geometry | Primitive
+
 	get geometry(): Geometry | Primitive {
 		return this._geometry;
 	}
@@ -433,8 +437,6 @@ class Mesh extends MeshBase {
 		}
 		return cloneMesh
 	}
-
-	#prevModelMatrix: Float32Array
 
 	render(debugViewRenderState: RenderViewStateData) {
 		const {redGPUContext,} = this
@@ -944,7 +946,6 @@ class Mesh extends MeshBase {
 						debugViewRenderState.numTriangles += triangleCount;
 						debugViewRenderState.numPoints += vertexCount
 					}
-
 					if (needBundleFinish) {
 						this.#prevSystemBindGroup = view.systemUniform_Vertex_UniformBindGroup
 						targetEncoder.setPipeline(pipeline)
@@ -1011,10 +1012,6 @@ class Mesh extends MeshBase {
 			children[i].render(debugViewRenderState)
 		}
 	}
-
-	#bundleEncoder: GPURenderBundleEncoder
-	#renderBundle: GPURenderBundle
-	#prevSystemBindGroup: GPUBindGroup
 
 	initGPURenderInfos() {
 		this.gpuRenderInfo = new VertexGPURenderInfo(

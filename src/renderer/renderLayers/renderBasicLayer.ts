@@ -6,11 +6,9 @@ const renderBasicLayer = (view: View3D, viewRenderPassEncoder: GPURenderPassEnco
 	debugViewRenderState.currentRenderPassEncoder = viewRenderPassEncoder
 	const {instanceMeshLayer} = debugViewRenderState
 	const {children} = scene
-
 	renderList(children, debugViewRenderState)
 	viewRenderPassEncoder.executeBundles(debugViewRenderState.renderBundleList);
 	renderList(instanceMeshLayer, debugViewRenderState)
-
 }
 export default renderBasicLayer
 const renderList = (list, debugViewRenderState: RenderViewStateData) => {

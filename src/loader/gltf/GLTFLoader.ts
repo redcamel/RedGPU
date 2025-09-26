@@ -109,7 +109,8 @@ class GLTFLoader {
 			activeAnimations.splice(index, 1);
 		}
 	};
-	stopAllAnimation(){
+
+	stopAllAnimation() {
 		this.activeAnimations.length = 0
 	}
 

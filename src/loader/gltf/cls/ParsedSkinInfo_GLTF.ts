@@ -1,8 +1,6 @@
-import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../context/RedGPUContext";
 import Mesh from "../../../display/mesh/Mesh";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
-import {keepLog} from "../../../utils";
 
 let temp0 = new Float32Array(16)
 let temp1 = new Float32Array(16)
@@ -20,6 +18,11 @@ class ParsedSkinInfo_GLTF {
 	invertNodeGlobalTransform: Float32Array
 	usedJoints: number[] = null
 	WORK_SIZE: number = 64
+	jointData: Float32Array
+	uniformBuffer: GPUBuffer
+	computeShader: GPUShaderModule;
+	computePipeline: GPUComputePipeline;
+	bindGroup: GPUBindGroup;
 
 	/**
 	 * Constructor 클래스의 새 인스턴스를 생성합니다.
@@ -30,7 +33,6 @@ class ParsedSkinInfo_GLTF {
 		this.joints = [];
 		this.inverseBindMatrices = null;
 		this.skeletonMesh = null;
-
 	}
 
 	getUsedJointIndices(mesh: Mesh): number[] {
@@ -42,7 +44,6 @@ class ParsedSkinInfo_GLTF {
 		// 인터리브된 데이터에서 joint 정보 추출
 		const interleavedStruct = weightBuffer.interleavedStruct;
 		const jointInfo = interleavedStruct.attributes.filter(v => v.attributeName === 'aVertexJoint')[0];
-
 		if (!jointInfo) return [];
 		const data = weightBuffer.data;
 		const stride = interleavedStruct.arrayStride / 4;
@@ -58,7 +59,6 @@ class ParsedSkinInfo_GLTF {
 				}
 			}
 		}
-
 		return Array.from(usedJoints);
 	}
 
@@ -157,14 +157,7 @@ class ParsedSkinInfo_GLTF {
 				{binding: 2, resource: {buffer: this.uniformBuffer}},
 			],
 		});
-
 	}
-
-	jointData: Float32Array
-	uniformBuffer: GPUBuffer
-	computeShader: GPUShaderModule;
-	computePipeline: GPUComputePipeline;
-	bindGroup: GPUBindGroup;
 }
 
 // ParsedSkinInfo_GLTF 클래스를 export 합니다.

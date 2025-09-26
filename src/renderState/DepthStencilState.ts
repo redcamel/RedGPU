@@ -1,7 +1,6 @@
 import Mesh from "../display/mesh/Mesh";
 import GPU_COMPARE_FUNCTION from "../gpuConst/GPU_COMPARE_FUNCTION";
 import GPU_PRIMITIVE_TOPOLOGY from "../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
-import {keepLog} from "../utils";
 import consoleAndThrowError from "../utils/consoleAndThrowError";
 
 const validateCompareList: GPUCompareFunction[] = Object.values(GPU_COMPARE_FUNCTION)

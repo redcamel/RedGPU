@@ -48,7 +48,6 @@ class DrawDebuggerGrid {
 		this.#blendColorState = new BlendState(this, GPU_BLEND_FACTOR.SRC_ALPHA, GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA, GPU_BLEND_OPERATION.ADD)
 		this.#blendAlphaState = new BlendState(this, GPU_BLEND_FACTOR.SRC_ALPHA, GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA, GPU_BLEND_OPERATION.ADD)
 		this.#lineColor = new ColorRGBA(128, 128, 128, 0.5)
-
 		const vertexBindGroupLayout = resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System)
 		const fragmentBindGroupLayout = redGPUContext.resourceManager.getGPUBindGroupLayout('GRID_MATERIAL_BIND_GROUP_LAYOUT') || redGPUContext.resourceManager.createBindGroupLayout(
 			'GRID_MATERIAL_BIND_GROUP_LAYOUT',
@@ -107,13 +106,11 @@ class DrawDebuggerGrid {
 						blend: undefined,
 					},
 				],
-
 			},
 			depthStencil: {
 				format: 'depth32float',
 				depthWriteEnabled: true,
 				depthCompare: GPU_COMPARE_FUNCTION.LESS_EQUAL,
-
 			}
 		}
 		this.#pipeline = gpuDevice.createRenderPipeline(basePipelineDescriptor)
@@ -154,22 +151,18 @@ class DrawDebuggerGrid {
 		const size = this.#size
 		debugViewRenderState.num3DObjects++
 		debugViewRenderState.numDrawCalls++
-
 		this.#uniformBuffer.writeBuffers([
 			[FRAGMENT_UNIFORM_STRUCT.members.lineColor, this.#lineColor.rgbaNormal],
 		])
-
 		if (this.#pipeline) {
 			const lineCount = (this.#size + 1) * 2; // 세로 + 가로 라인 수
 			const indexCount = lineCount * 2; // 각 라인마다 2개 인덱스
-
 			currentRenderPassEncoder.setPipeline(view.redGPUContext.antialiasingManager.useMSAA ? this.#pipelineMSAA : this.#pipeline);
 			currentRenderPassEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
 			currentRenderPassEncoder.setBindGroup(1, this.#fragmentBindGroup);
 			currentRenderPassEncoder.setVertexBuffer(0, this.#vertexBuffer.gpuBuffer);
 			currentRenderPassEncoder.setIndexBuffer(this.#indexBuffer.gpuBuffer, 'uint32');
 			currentRenderPassEncoder.drawIndexed(indexCount);
-
 			debugViewRenderState.numTriangles += 0; // 라인이므로 삼각형 수는 0
 			debugViewRenderState.numPoints += indexCount
 		}
@@ -178,59 +171,48 @@ class DrawDebuggerGrid {
 	#makeGridLineData(size: number) {
 		const interleaveData = [];
 		const indexData = [];
-
 		const halfSize = size / 2;
 		let vertexIndex = 0;
-
 		// 세로 라인들 (X축 방향) - 1단위 간격
 		for (let i = -halfSize; i <= halfSize; i += 1) {
 			// 축 라인인지 확인 (중앙)
 			const isAxisLine = (i === 0);
 			const color = isAxisLine ? [0.0, 0.0, 1.0, 1.0] : [0.5, 0.5, 0.5, 1.0]; // Z축은 파란색
-
 			// 라인의 시작점과 끝점
 			interleaveData.push(
 				i, 0, -halfSize, ...color, // 시작점
 				i, 0, halfSize, ...color   // 끝점
 			);
-
 			// 인덱스 추가
 			indexData.push(vertexIndex, vertexIndex + 1);
 			vertexIndex += 2;
 		}
-
 		// 가로 라인들 (Z축 방향) - 1단위 간격
 		for (let i = -halfSize; i <= halfSize; i += 1) {
 			// 축 라인인지 확인 (중앙)
 			const isAxisLine = (i === 0);
 			const color = isAxisLine ? [1.0, 0.0, 0.0, 1.0] : [0.5, 0.5, 0.5, 1.0]; // X축은 빨간색
-
 			// 라인의 시작점과 끝점
 			interleaveData.push(
 				-halfSize, 0, i, ...color, // 시작점
 				halfSize, 0, i, ...color   // 끝점
 			);
-
 			// 인덱스 추가
 			indexData.push(vertexIndex, vertexIndex + 1);
 			vertexIndex += 2;
 		}
-
-		return { interleaveData, indexData };
+		return {interleaveData, indexData};
 	}
 
 	#setBuffers(redGPUContext: RedGPUContext) {
 		const size = this.#size;
 		const {resourceManager} = redGPUContext
 		const {cachedBufferState} = resourceManager
-
 		{
 			const uniqueKey = `VertexBuffer_Grid_${size}`;
 			let vertexBuffer = cachedBufferState[uniqueKey];
-
 			if (!vertexBuffer) {
-				const { interleaveData } = this.#makeGridLineData(size);
-
+				const {interleaveData} = this.#makeGridLineData(size);
 				vertexBuffer = new VertexBuffer(
 					redGPUContext,
 					interleaveData,
@@ -245,14 +227,11 @@ class DrawDebuggerGrid {
 			}
 			this.#vertexBuffer = vertexBuffer;
 		}
-
 		{
 			const uniqueKey = `IndexBuffer_Grid_${size}`;
 			let indexBuffer = cachedBufferState[uniqueKey];
-
 			if (!indexBuffer) {
-				const { indexData } = this.#makeGridLineData(size);
-
+				const {indexData} = this.#makeGridLineData(size);
 				indexBuffer = new IndexBuffer(
 					redGPUContext,
 					indexData,
@@ -263,11 +242,9 @@ class DrawDebuggerGrid {
 			}
 			this.#indexBuffer = indexBuffer;
 		}
-
 		{
 			const uniqueKey = `UniformBuffer_Grid`;
 			let uniformBuffer = cachedBufferState[uniqueKey];
-
 			if (!uniformBuffer) {
 				const uniformData = new ArrayBuffer(FRAGMENT_UNIFORM_STRUCT.arrayBufferByteLength);
 				uniformBuffer = new UniformBuffer(redGPUContext, uniformData);

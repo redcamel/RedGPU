@@ -367,6 +367,7 @@ class HDRTexture extends ManagementResourceBase {
 			await this.#renderCubeMapFace(renderPipeline, sampler, face, faceMatrices[face], sourceTexture);
 		}
 	}
+
 	async #float32ToFloat16WithToneMapping(float32Data: Float32Array): Promise<Uint16Array> {
 		const result = await float32ToFloat16WithToneMapping(
 			this.redGPUContext,
@@ -381,7 +382,6 @@ class HDRTexture extends ManagementResourceBase {
 		return result.data;
 	}
 
-
 	async #hdrDataToGPUTexture(device: GPUDevice, resourceManager: ResourceManager, hdrData: HDRData, textureDescriptor: GPUTextureDescriptor): Promise<GPUTexture> {
 		// const texture = resourceManager.createManagedTexture(textureDescriptor);
 		const texture = device.createTexture(textureDescriptor);
@@ -393,7 +393,6 @@ class HDRTexture extends ManagementResourceBase {
 				const float16Data = await this.#float32ToFloat16WithToneMapping(hdrData.data);
 				uploadData = float16Data.buffer as ArrayBuffer;
 				break;
-
 			case 'rgba8unorm':
 				bytesPerPixel = 4;
 				const uint8Data = await this.#float32ToUint8WithToneMapping(hdrData.data);

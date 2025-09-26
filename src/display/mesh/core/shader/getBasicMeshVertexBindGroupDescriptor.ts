@@ -1,5 +1,4 @@
 import Sampler from "../../../../resources/sampler/Sampler";
-import {keepLog} from "../../../../utils";
 import Mesh from "../../Mesh";
 
 const getBasicMeshVertexBindGroupDescriptor = (mesh: Mesh, skin: boolean = false): GPUBindGroupDescriptor => {

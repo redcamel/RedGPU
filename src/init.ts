@@ -36,17 +36,14 @@ const init = async (
 ) => {
 	if (isSearchEngineBot()) {
 		keepLog('🤖 Search engine bot detected - skipping WebGPU initialization');
-
 		return;
 	}
-
 	const {gpu} = navigator
 	if (!gpu) {
 		const msg = 'WebGPU is not supported in this browser. Please use a modern browser with WebGPU enabled.';
 		onFailInitialized?.(msg);
 		return;
 	}
-
 	const errorHandler = (e: Error, defaultMsg: string) => {
 		const msg = generateErrorMessage(e, defaultMsg);
 		console.error('\n============\n', msg, '\n============\n');
@@ -176,7 +173,6 @@ const isSearchEngineBot = (): boolean => {
 	if (typeof navigator === 'undefined' || typeof window === 'undefined') {
 		return true; // SSR 환경에서는 봇으로 간주
 	}
-
 	const userAgent = navigator.userAgent.toLowerCase();
 	const botPatterns = [
 		'googlebot',
@@ -214,6 +210,5 @@ const isSearchEngineBot = (): boolean => {
 		'spider',
 		'bot'
 	];
-
 	return botPatterns.some(pattern => userAgent.includes(pattern));
 };

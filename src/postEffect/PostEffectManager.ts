@@ -9,7 +9,6 @@ import calculateTextureByteSize from "../utils/math/calculateTextureByteSize";
 import AMultiPassPostEffect from "./core/AMultiPassPostEffect";
 import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
 import postEffectSystemUniformCode from "./core/postEffectSystemUniform.wgsl"
-import FXAA from "./FXAA";
 
 class PostEffectManager {
 	readonly #view: View3D
@@ -28,7 +27,6 @@ class PostEffectManager {
 	#postEffectSystemUniformBuffer: UniformBuffer;
 	#postEffectSystemUniformBufferStructInfo;
 	#videoMemorySize: number = 0
-
 
 	constructor(view: View3D) {
 		this.#view = view;
@@ -163,7 +161,6 @@ class PostEffectManager {
 				new structInfo.members.camera.members[key].View(value)
 			);
 		})
-
 		// console.log('structInfo',view.scene.directionalLights)
 	}
 
@@ -181,7 +178,6 @@ class PostEffectManager {
 		const postEffectSystemUniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength)
 		this.#postEffectSystemUniformBufferStructInfo = UNIFORM_STRUCT;
 		this.#postEffectSystemUniformBuffer = new UniformBuffer(redGPUContext, postEffectSystemUniformData, `${this.#view.name}_POST_EFFECT_SYSTEM_UNIFORM_BUFFER`);
-
 	}
 
 	#calcVideoMemory() {

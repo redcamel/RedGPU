@@ -69,22 +69,9 @@ class View3D extends ViewTransform {
 	#prevHeight: number = undefined
 	#prevIBL_iblTexture: IBLCubeTexture
 	#prevIBL_irradianceTexture: IBLCubeTexture
-	#taa:TAA
-	#fxaa:FXAA
-	get fxaa(): FXAA {
-		if (!this.#fxaa) {
-			this.#fxaa = new FXAA(this.redGPUContext);
-		}
+	#taa: TAA
+	#fxaa: FXAA
 
-		return this.#fxaa;
-	}
-	get taa(): TAA {
-		if (!this.#taa) {
-			this.#taa = new TAA(this.redGPUContext);
-		}
-
-		return this.#taa;
-	}
 	//
 	/**
 	 * Creates a new instance of the Constructor class.
@@ -104,6 +91,20 @@ class View3D extends ViewTransform {
 		this.#debugViewRenderState = new RenderViewStateData(this)
 		this.#postEffectManager = new PostEffectManager(this)
 		this.setSize('100%', '100%')
+	}
+
+	get fxaa(): FXAA {
+		if (!this.#fxaa) {
+			this.#fxaa = new FXAA(this.redGPUContext);
+		}
+		return this.#fxaa;
+	}
+
+	get taa(): TAA {
+		if (!this.#taa) {
+			this.#taa = new TAA(this.redGPUContext);
+		}
+		return this.#taa;
 	}
 
 	get viewRenderTextureManager(): ViewRenderTextureManager {
@@ -247,7 +248,6 @@ class View3D extends ViewTransform {
 	}
 
 	update(view: View3D, shadowRender: boolean = false, calcPointLightCluster: boolean = false, renderPath1ResultTextureView?: GPUTextureView) {
-
 		const {scene} = view
 		const {shadowManager} = scene
 		const {directionalShadowManager} = shadowManager
@@ -431,7 +431,7 @@ class View3D extends ViewTransform {
 			compare: GPU_COMPARE_FUNCTION.LESS_EQUAL,
 		}).gpuSampler
 		this.#basicSampler = new Sampler(this.redGPUContext).gpuSampler
-		this.#basicPackedSampler = new Sampler(this.redGPUContext,{
+		this.#basicPackedSampler = new Sampler(this.redGPUContext, {
 			addressModeU: GPU_ADDRESS_MODE.REPEAT,
 			addressModeV: GPU_ADDRESS_MODE.REPEAT,
 		}).gpuSampler

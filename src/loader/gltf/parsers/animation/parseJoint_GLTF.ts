@@ -1,7 +1,3 @@
-import GPU_COMPARE_FUNCTION from "../../../../gpuConst/GPU_COMPARE_FUNCTION";
-import ColorMaterial from "../../../../material/colorMaterial/ColorMaterial";
-import Sphere from "../../../../primitive/Sphere";
-import {keepLog} from "../../../../utils";
 import ParsedSkinInfo_GLTF from "../../cls/ParsedSkinInfo_GLTF";
 import {GlTfId, Node} from "../../GLTF";
 import GLTFLoader from "../../GLTFLoader";

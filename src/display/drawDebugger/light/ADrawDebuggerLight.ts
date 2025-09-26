@@ -21,8 +21,7 @@ abstract class ADrawDebuggerLight {
 		this.#lightDebugMesh = new Mesh(redGPUContext, lightGeometry, this.#lightMaterial);
 		this.#lightDebugMesh.primitiveState.cullMode = 'none';
 		this.#lightDebugMesh.primitiveState.topology = GPU_PRIMITIVE_TOPOLOGY.LINE_LIST;
-
-		this.#lightDebugMesh.disableJitter=true
+		this.#lightDebugMesh.disableJitter = true
 	}
 
 	get lightMaterial(): ColorMaterial {

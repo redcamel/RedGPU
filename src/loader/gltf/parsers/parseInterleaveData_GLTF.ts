@@ -18,7 +18,7 @@ const parseInterleaveData_GLTF = (
 	uvs: number[], uvs1: number[], uvs2: number[],
 	jointWeights: number[], joints: number[],
 	tangents: number[],
-	onlyWeightsJoints:boolean = false,
+	onlyWeightsJoints: boolean = false,
 ) => {
 	let i = 0, len = vertices.length / 3;
 	let idx = 0;
@@ -37,7 +37,7 @@ const parseInterleaveData_GLTF = (
 	index2D_1 = index3D_1 = index4D_1 = 1
 	index3D_2 = index4D_2 = 2
 	index4D_3 = 3
-	if(onlyWeightsJoints){
+	if (onlyWeightsJoints) {
 		for (i; i < len; i++) {
 			if (has_jointWeights) {
 				interleaveData[idx++] = jointWeights[index4D];
@@ -71,7 +71,7 @@ const parseInterleaveData_GLTF = (
 			index4D_2 += 4
 			index4D_3 += 4
 		}
-	}else{
+	} else {
 		for (i; i < len; i++) {
 			if (has_vertices) {
 				interleaveData[idx++] = vertices[index3D];
@@ -113,7 +113,6 @@ const parseInterleaveData_GLTF = (
 				interleaveData[idx++] = 0;
 				interleaveData[idx++] = 0;
 			}
-		
 			if (has_tangents) {
 				interleaveData[idx++] = tangents[index4D];
 				interleaveData[idx++] = tangents[index4D_1];
@@ -136,6 +135,5 @@ const parseInterleaveData_GLTF = (
 			index4D_3 += 4
 		}
 	}
-
 };
 export default parseInterleaveData_GLTF;

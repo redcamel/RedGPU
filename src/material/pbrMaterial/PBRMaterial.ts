@@ -590,7 +590,7 @@ DefineForFragment.defineBoolean(PBRMaterial, [
 	//
 	'useKHR_materials_unlit',
 	//
-	['useSSR',true]
+	['useSSR', true]
 ])
 Object.freeze(PBRMaterial)
 export default PBRMaterial

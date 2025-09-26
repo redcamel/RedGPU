@@ -26,7 +26,7 @@ class AMultiPassPostEffect extends ASinglePassPostEffect {
 		this.#passList.forEach(v => v.clear())
 	}
 
-	render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult):ASinglePassPostEffectResult {
+	render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
 		let targetOutputInfo: ASinglePassPostEffectResult
 		this.#passList.forEach((effect: ASinglePassPostEffect, index) => {
 			if (index) sourceTextureInfo = targetOutputInfo

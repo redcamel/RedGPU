@@ -56,10 +56,7 @@ const getBindGroupLayoutDescriptorFromShaderInfo = (
 						viewDimension: '2d-array',
 						sampleType: 'float',
 						multisampled: false
-					} : {
-
-					}
-
+					} : {}
 				}
 			)
 		}

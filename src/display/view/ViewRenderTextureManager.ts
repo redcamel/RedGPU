@@ -97,7 +97,6 @@ class ViewRenderTextureManager {
 		return this.#gBuffers.get('gBufferNormal')?.resolveTextureView
 	}
 
-
 	get gBufferMotionVectorTexture(): GPUTexture {
 		return this.#gBuffers.get('gBufferMotionVector')?.texture
 	}
@@ -107,7 +106,7 @@ class ViewRenderTextureManager {
 	}
 
 	get gBufferMotionVectorTextureView(): GPUTextureView {
-		this.#createGBuffer('gBufferMotionVector','rgba16float');
+		this.#createGBuffer('gBufferMotionVector', 'rgba16float');
 		return this.#gBuffers.get('gBufferMotionVector')?.textureView
 	}
 
@@ -132,7 +131,7 @@ class ViewRenderTextureManager {
 	}
 
 	// G-Buffer 생성 메서드
-	#createGBuffer(type: string,format?:GPUTextureFormat) {
+	#createGBuffer(type: string, format?: GPUTextureFormat) {
 		const {antialiasingManager, resourceManager} = this.#redGPUContext
 		const {useMSAA} = antialiasingManager
 		const targetInfo = this.#gBuffers.get(type)
