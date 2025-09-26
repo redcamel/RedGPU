@@ -112,6 +112,7 @@ class PickingManager {
 		});
 	}
 
+	#readPixelBuffer:GPUBuffer
 	#readPixelArrayBuffer = async (view: View3D, time: number, width = 1, height = 1) => {
 		const {gpuDevice} = view.redGPUContext;
 		const {pixelRectArray} = view;
@@ -122,10 +123,10 @@ class PickingManager {
 			return;
 		}
 		const pickingTable = this.#createPickingTable();
-		let readPixelBuffer: GPUBuffer = this.#createReadPixelBuffer(gpuDevice, width, height, x, y);
-		const uint32Color = await this.#getUint32Color(readPixelBuffer);
-		readPixelBuffer.destroy();
-		readPixelBuffer = null
+		this.#readPixelBuffer = this.#createReadPixelBuffer(gpuDevice, width, height, x, y);
+		const uint32Color = await this.#getUint32Color(this.#readPixelBuffer);
+		// readPixelBuffer.destroy();
+		// readPixelBuffer = null
 		if (uint32Color) {
 			this.#processClickEvent(uint32Color, x, y, time, pickingTable);
 			this.#processEvent(uint32Color, x, y, time, pickingTable);
@@ -143,13 +144,13 @@ class PickingManager {
 	#createReadPixelBuffer = (gpuDevice: GPUDevice, width: number, height: number, x: number, y: number): GPUBuffer => {
 		const readPixelCommandEncoder = gpuDevice.createCommandEncoder();
 		const readPixelBuffer = gpuDevice.createBuffer({
-			size: 16 * width * height,
+			size: 4,
 			usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
 			label: 'readPixelBuffer'
 		});
-		const textureView = {texture: this.#pickingGPUTexture, origin: {x: x, y: y, z: 0}};
-		const bufferView = {buffer: readPixelBuffer, bytesPerRow: Math.max(256, 4 * width * height), rowsPerImage: 1};
-		const textureExtent = {width: width, height: height, depthOrArrayLayers: 1};
+		const textureView = {texture: this.#pickingGPUTexture, origin: {x, y, z: 0}};
+		const bufferView = {buffer: readPixelBuffer, bytesPerRow: 256, rowsPerImage: 1};
+		const textureExtent = {width: 1, height: 1, depthOrArrayLayers: 1};
 		readPixelCommandEncoder.copyTextureToBuffer(textureView, bufferView, textureExtent);
 		gpuDevice.queue.submit([readPixelCommandEncoder.finish()]);
 		return readPixelBuffer;

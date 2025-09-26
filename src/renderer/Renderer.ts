@@ -64,42 +64,141 @@ class Renderer {
 		cancelAnimationFrame(redGPUContext.currentRequestAnimationFrame)
 	}
 
+	#renderViewShadow(view: View3D, commandEncoder: GPUCommandEncoder) {
+		const {scene} = view
+		const {shadowManager} = scene
+		const {directionalShadowManager} = shadowManager
+		if (directionalShadowManager.shadowDepthTextureView) {
+			const shadowPassDescriptor: GPURenderPassDescriptor = {
+				colorAttachments: [],
+				depthStencilAttachment: {
+					view: directionalShadowManager.shadowDepthTextureView,
+					depthClearValue: 1.0,
+					depthLoadOp: GPU_LOAD_OP.CLEAR,
+					depthStoreOp: GPU_STORE_OP.STORE,
+				},
+			};
+			const viewShadowRenderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass(shadowPassDescriptor)
+			this.#updateViewSystemUniforms(view, viewShadowRenderPassEncoder, true, false)
+			renderShadowLayer(view, viewShadowRenderPassEncoder)
+			viewShadowRenderPassEncoder.end()
+			directionalShadowManager.resetCastingList()
+		}
+	}
+
+	#renderViewBasicLayer(view: View3D, commandEncoder: GPUCommandEncoder, renderPassDescriptor: GPURenderPassDescriptor) {
+		const {debugViewRenderState, skybox, grid, axis} = view
+		const viewRenderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass(renderPassDescriptor)
+		this.#updateViewSystemUniforms(view, viewRenderPassEncoder, false, true)
+		debugViewRenderState.currentRenderPassEncoder = viewRenderPassEncoder
+		if (skybox) skybox.render(debugViewRenderState)
+		renderBasicLayer(view, viewRenderPassEncoder)
+		if (axis) axis.render(debugViewRenderState)
+		if (grid) grid.render(debugViewRenderState)
+		renderAlphaLayer(view, viewRenderPassEncoder)
+		viewRenderPassEncoder.end()
+	}
+
+	#renderView2PathLayer(view: View3D, commandEncoder: GPUCommandEncoder, renderPassDescriptor: GPURenderPassDescriptor, depthStencilAttachment: GPURenderPassDepthStencilAttachment) {
+		const {redGPUContext} = view
+		const {antialiasingManager} = redGPUContext
+		const {useMSAA} = antialiasingManager
+		if (view.debugViewRenderState.render2PathLayer.length) {
+			const {mipmapGenerator} = redGPUContext.resourceManager
+			let renderPath1ResultTexture = view.viewRenderTextureManager.renderPath1ResultTexture
+			// useMSAA 설정에 따라 소스 텍스처 선택
+			let sourceTexture = useMSAA
+				? view.viewRenderTextureManager.gBufferColorResolveTexture
+				: view.viewRenderTextureManager.gBufferColorTexture;
+			if (!sourceTexture) {
+				if (useMSAA) {
+					console.error('MSAA가 활성화되어 있지만 gBufferColorResolveTexture가 정의되지 않았습니다');
+				} else {
+					console.error('gBufferColorTexture가 정의되지 않았습니다');
+				}
+				console.log('view.redGPUContext.useMSAA:', useMSAA);
+				console.log('viewRenderTextureManager:', view.viewRenderTextureManager);
+			}
+			if (!renderPath1ResultTexture) {
+				console.error('renderPath1ResultTexture가 정의되지 않았습니다');
+			}
+			commandEncoder.copyTextureToTexture(
+				{texture: sourceTexture,},
+				{texture: renderPath1ResultTexture,},
+				{width: view.pixelRectObject.width, height: view.pixelRectObject.height, depthOrArrayLayers: 1},
+			);
+			mipmapGenerator.generateMipmap(renderPath1ResultTexture, view.viewRenderTextureManager.renderPath1ResultTextureDescriptor, true)
+			const renderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass({
+				colorAttachments: [...renderPassDescriptor.colorAttachments].map(v => ({...v, loadOp: GPU_LOAD_OP.LOAD})),
+				depthStencilAttachment: {
+					...depthStencilAttachment,
+					depthLoadOp: GPU_LOAD_OP.LOAD,
+				},
+			});
+			let renderPath1ResultTextureView = view.viewRenderTextureManager.renderPath1ResultTextureView
+			this.#updateViewSystemUniforms(view, renderPassEncoder, false, false, renderPath1ResultTextureView);
+			render2PathLayer(view, renderPassEncoder);
+			renderPassEncoder.end();
+		}
+	}
+
+	#renderViewPickingLayer(view: View3D, commandEncoder: GPUCommandEncoder,) {
+		const {pickingManager} = view
+		if (pickingManager) {
+			pickingManager.checkTexture(view)
+			const pickingPassDescriptor: GPURenderPassDescriptor = {
+				colorAttachments: [
+					{
+						view: pickingManager.pickingGPUTextureView,
+						clearValue: {r: 0.0, g: 0.0, b: 0.0, a: 0.0},
+						loadOp: GPU_LOAD_OP.CLEAR,
+						storeOp: GPU_STORE_OP.STORE
+					}
+				],
+				depthStencilAttachment: {
+					view: pickingManager.pickingDepthGPUTextureView,
+					depthClearValue: 1.0,
+					depthLoadOp: GPU_LOAD_OP.CLEAR,
+					depthStoreOp: GPU_STORE_OP.STORE,
+				},
+			};
+			const viewPickingRenderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass(pickingPassDescriptor)
+			this.#updateViewSystemUniforms(view, viewPickingRenderPassEncoder, false, false)
+			renderPickingLayer(view, viewPickingRenderPassEncoder)
+			viewPickingRenderPassEncoder.end()
+		}
+	}
+
+	#updateJitter(view: View3D,) {
+		const {taa} = view
+		const frameIndex = taa.frameIndex || 0;
+		const jitterScale = taa.jitterStrength;
+		const sampleCount = 32;
+		const currentSample = frameIndex % sampleCount;
+		// Halton 시퀀스 계산
+		const haltonX = this.#haltonSequence(currentSample + 1, 2);
+		const haltonY = this.#haltonSequence(currentSample + 1, 3);
+		// 픽셀 단위 지터
+		const jitterX = (haltonX - 0.5) * jitterScale;
+		const jitterY = (haltonY - 0.5) * jitterScale;
+		view.setJitterOffset(jitterX, jitterY);
+	}
+
 	renderView(view: View3D, time: number) {
 		const {
 			redGPUContext,
 			camera,
-			scene,
 			pickingManager,
 			pixelRectObject,
-			axis,
-			grid,
-			skybox,
-			debugViewRenderState,
-			taa
+			debugViewRenderState
 		} = view
-		const {antialiasingManager} = redGPUContext
-		const {useMSAA} = antialiasingManager
-		const {shadowManager} = scene
-		const {directionalShadowManager} = shadowManager
 		const {
 			colorAttachment,
 			depthStencilAttachment,
 			gBufferNormalTextureAttachment,
 			gBufferMotionVectorTextureAttachment
 		} = this.#createAttachmentsForView(view)
-		{
-			const frameIndex = taa.frameIndex || 0;
-			const jitterScale = taa.jitterStrength;
-			const sampleCount = 32;
-			const currentSample = frameIndex % sampleCount;
-			// Halton 시퀀스 계산
-			const haltonX = this.#haltonSequence(currentSample + 1, 2);
-			const haltonY = this.#haltonSequence(currentSample + 1, 3);
-			// 픽셀 단위 지터
-			const jitterX = (haltonX - 0.5) * jitterScale;
-			const jitterY = (haltonY - 0.5) * jitterScale;
-			view.setJitterOffset(jitterX, jitterY);
-		}
+		this.#updateJitter(view)
 		const renderPassDescriptor: GPURenderPassDescriptor = {
 			colorAttachments: [colorAttachment, gBufferNormalTextureAttachment, gBufferMotionVectorTextureAttachment],
 			depthStencilAttachment,
@@ -111,116 +210,23 @@ class Renderer {
 		this.#batchUpdateSkinMatrices(redGPUContext, debugViewRenderState)
 		view.debugViewRenderState.reset(null, computeCommandEncoder, time)
 		if (pixelRectObject.width && pixelRectObject.height) {
-			if (directionalShadowManager.shadowDepthTextureView) {
-				const shadowPassDescriptor: GPURenderPassDescriptor = {
-					colorAttachments: [],
-					depthStencilAttachment: {
-						view: directionalShadowManager.shadowDepthTextureView,
-						depthClearValue: 1.0,
-						depthLoadOp: GPU_LOAD_OP.CLEAR,
-						depthStoreOp: GPU_STORE_OP.STORE,
-					},
-				};
-				const viewShadowRenderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass(shadowPassDescriptor)
-				this.#updateViewSystemUniforms(view, viewShadowRenderPassEncoder, true, false)
-				renderShadowLayer(view, viewShadowRenderPassEncoder)
-				viewShadowRenderPassEncoder.end()
-				directionalShadowManager.resetCastingList()
-			}
-			{
-				const viewRenderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass(renderPassDescriptor)
-				this.#updateViewSystemUniforms(view, viewRenderPassEncoder, false, true)
-				debugViewRenderState.currentRenderPassEncoder = viewRenderPassEncoder
-				if (skybox) skybox.render(debugViewRenderState)
-				renderBasicLayer(view, viewRenderPassEncoder)
-				if (axis) axis.render(debugViewRenderState)
-				if (grid) grid.render(debugViewRenderState)
-				renderAlphaLayer(view, viewRenderPassEncoder)
-				viewRenderPassEncoder.end()
-			}
-			{
-				if (view.debugViewRenderState.render2PathLayer.length) {
-					const {mipmapGenerator} = redGPUContext.resourceManager
-					let renderPath1ResultTexture = view.viewRenderTextureManager.renderPath1ResultTexture
-					// useMSAA 설정에 따라 소스 텍스처 선택
-					let sourceTexture = useMSAA
-						? view.viewRenderTextureManager.gBufferColorResolveTexture
-						: view.viewRenderTextureManager.gBufferColorTexture;
-					if (!sourceTexture) {
-						if (useMSAA) {
-							console.error('MSAA가 활성화되어 있지만 gBufferColorResolveTexture가 정의되지 않았습니다');
-						} else {
-							console.error('gBufferColorTexture가 정의되지 않았습니다');
-						}
-						console.log('view.redGPUContext.useMSAA:', useMSAA);
-						console.log('viewRenderTextureManager:', view.viewRenderTextureManager);
-					}
-					if (!renderPath1ResultTexture) {
-						console.error('renderPath1ResultTexture가 정의되지 않았습니다');
-					}
-					commandEncoder.copyTextureToTexture(
-						{
-							texture: sourceTexture,
-						},
-						{
-							texture: renderPath1ResultTexture,
-						},
-						{width: view.pixelRectObject.width, height: view.pixelRectObject.height, depthOrArrayLayers: 1},
-					);
-					mipmapGenerator.generateMipmap(renderPath1ResultTexture, view.viewRenderTextureManager.renderPath1ResultTextureDescriptor, true)
-					const renderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass({
-						colorAttachments: [...renderPassDescriptor.colorAttachments].map(v => ({...v, loadOp: GPU_LOAD_OP.LOAD})),
-						depthStencilAttachment: {
-							...depthStencilAttachment,
-							depthLoadOp: GPU_LOAD_OP.LOAD,
-						},
-					});
-					let renderPath1ResultTextureView = view.viewRenderTextureManager.renderPath1ResultTextureView
-					this.#updateViewSystemUniforms(view, renderPassEncoder, false, false, renderPath1ResultTextureView);
-					// 예제에서 주어진 렌더링 로직 실행
-					render2PathLayer(view, renderPassEncoder);
-					renderPassEncoder.end(); // 첫 번째 패스 종료
-				}
-			}
-			// 포스트 이펙트 체크
-			if (pickingManager) {
-				pickingManager.checkTexture(view)
-				const pickingPassDescriptor: GPURenderPassDescriptor = {
-					colorAttachments: [
-						{
-							view: pickingManager.pickingGPUTextureView,
-							clearValue: {r: 0.0, g: 0.0, b: 0.0, a: 0.0},
-							loadOp: GPU_LOAD_OP.CLEAR,
-							storeOp: GPU_STORE_OP.STORE
-						}
-					],
-					depthStencilAttachment: {
-						view: pickingManager.pickingDepthGPUTextureView,
-						depthClearValue: 1.0,
-						depthLoadOp: GPU_LOAD_OP.CLEAR,
-						depthStoreOp: GPU_STORE_OP.STORE,
-					},
-				};
-				const viewPickingRenderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass(pickingPassDescriptor)
-				this.#updateViewSystemUniforms(view, viewPickingRenderPassEncoder, false, false)
-				renderPickingLayer(view, viewPickingRenderPassEncoder)
-				viewPickingRenderPassEncoder.end()
-				// renderPassDescriptor.colorAttachments[0].pickingView = pickingManager.pickingGPUTextureView
-			}
+			this.#renderViewShadow(view, commandEncoder)
+			this.#renderViewBasicLayer(view, commandEncoder, renderPassDescriptor)
+			this.#renderView2PathLayer(view, commandEncoder, renderPassDescriptor, depthStencilAttachment)
+			this.#renderViewPickingLayer(view, commandEncoder)
 		}
 		renderPassDescriptor.colorAttachments[0].postEffectView = view.postEffectManager.render().textureView
 		redGPUContext.gpuDevice.queue.submit([commandEncoder.finish()])
 		view.debugViewRenderState.viewRenderTime = (performance.now() - view.debugViewRenderState.startTime);
 		pickingManager.checkEvents(view, time);
 		{
-			const {projectionMatrix, noneJitterProjectionMatrix, rawCamera, redGPUContext,} = view
+			const {noneJitterProjectionMatrix, rawCamera, redGPUContext} = view
 			const {modelMatrix: cameraMatrix} = rawCamera
 			const {gpuDevice} = redGPUContext;
 			const structInfo = view.systemUniform_Vertex_StructInfo;
 			const gpuBuffer = view.systemUniform_Vertex_UniformBuffer.gpuBuffer;
 			[
 				{key: 'prevProjectionCameraMatrix', value: mat4.multiply(temp3, noneJitterProjectionMatrix, cameraMatrix)},
-				// {key: 'prevProjectionCameraMatrix', value: mat4.multiply(temp3, projectionMatrix, cameraMatrix)},
 			].forEach(({key, value}) => {
 				gpuDevice.queue.writeBuffer(
 					gpuBuffer,
