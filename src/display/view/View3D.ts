@@ -6,10 +6,7 @@ import GPU_COMPARE_FUNCTION from "../../gpuConst/GPU_COMPARE_FUNCTION";
 import PassClusterLightBound from "../../light/clusterLight/PassClusterLightBound";
 import PassClustersLight from "../../light/clusterLight/PassClustersLight";
 import PassClustersLightHelper from "../../light/clusterLight/PassClustersLightHelper";
-import PickingManager from "../../picking/PickingManager";
-import FXAA from "../../postEffect/FXAA";
 import PostEffectManager from "../../postEffect/PostEffectManager";
-import TAA from "../../postEffect/TAA/TAA";
 import RenderViewStateData from "../../renderer/RenderViewStateData";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import ResourceManager from "../../resources/resourceManager/ResourceManager";
@@ -19,42 +16,29 @@ import CubeTexture from "../../resources/texture/CubeTexture";
 import IBL from "../../resources/texture/ibl/IBL";
 import IBLCubeTexture from "../../resources/texture/ibl/IBLCubeTexture";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
-import consoleAndThrowError from "../../utils/consoleAndThrowError";
-import InstanceIdGenerator from "../../utils/InstanceIdGenerator";
-import screenToWorld from "../../utils/math/screenToWorld";
-import DrawDebuggerAxis from "../drawDebugger/DrawDebuggerAxis";
-import DrawDebuggerGrid from "../drawDebugger/grid/DrawDebuggerGrid";
 import DrawDebuggerPointLight from "../drawDebugger/light/DrawDebuggerPointLight";
 import DrawDebuggerSpotLight from "../drawDebugger/light/DrawDebuggerSpotLight";
 import Scene from "../scene/Scene";
 import SkyBox from "../skyboxs/skyBox/SkyBox";
-import ViewRenderTextureManager from "./ViewRenderTextureManager";
-import ViewTransform from "./ViewTransform";
+import AView from "./core/AView";
+import ViewRenderTextureManager from "./core/ViewRenderTextureManager";
 
 const SHADER_INFO = parseWGSL(SystemCode.SYSTEM_UNIFORM)
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.systemUniforms;
 
-class View3D extends ViewTransform {
+class View3D extends AView {
 //
 	#systemUniform_Vertex_StructInfo: any = UNIFORM_STRUCT;
 	#systemUniform_Vertex_UniformBindGroup: GPUBindGroup;
 	#systemUniform_Vertex_UniformBuffer: UniformBuffer;
-	#instanceId: number
-	#grid: DrawDebuggerGrid
-	#axis: DrawDebuggerAxis
 	#skybox: SkyBox
-	#name: string
-	#scene: Scene
 	//
-	#useFrustumCulling: boolean = true
-	#useDistanceCulling: boolean = false
-	#distanceCulling: number = 50
 	#ibl: IBL
 	//
 	readonly #debugViewRenderState: RenderViewStateData
 	readonly #postEffectManager: PostEffectManager
 	readonly #viewRenderTextureManager: ViewRenderTextureManager
-	#pickingManager: PickingManager = new PickingManager()
+
 //
 	#prevInfoList = []
 	#shadowDepthSampler: GPUSampler
@@ -69,8 +53,6 @@ class View3D extends ViewTransform {
 	#prevHeight: number = undefined
 	#prevIBL_iblTexture: IBLCubeTexture
 	#prevIBL_irradianceTexture: IBLCubeTexture
-	#taa: TAA
-	#fxaa: FXAA
 
 	//
 	/**
@@ -82,29 +64,12 @@ class View3D extends ViewTransform {
 	 * @param {string} [name] - The name of the constructor.
 	 */
 	constructor(redGPUContext: RedGPUContext, scene: Scene, camera: AController | Camera2D, name?: string) {
-		super(redGPUContext)
-		this.scene = scene
-		this.camera = camera
-		if (name) this.name = name
+		super(redGPUContext, scene, camera, name)
 		this.#init()
 		this.#viewRenderTextureManager = new ViewRenderTextureManager(this)
 		this.#debugViewRenderState = new RenderViewStateData(this)
 		this.#postEffectManager = new PostEffectManager(this)
-		this.setSize('100%', '100%')
-	}
 
-	get fxaa(): FXAA {
-		if (!this.#fxaa) {
-			this.#fxaa = new FXAA(this.redGPUContext);
-		}
-		return this.#fxaa;
-	}
-
-	get taa(): TAA {
-		if (!this.#taa) {
-			this.#taa = new TAA(this.redGPUContext);
-		}
-		return this.#taa;
 	}
 
 	get viewRenderTextureManager(): ViewRenderTextureManager {
@@ -135,21 +100,9 @@ class View3D extends ViewTransform {
 		this.#ibl = value;
 	}
 
-	get pickingManager(): PickingManager {
-		return this.#pickingManager;
-	}
 
 	get postEffectManager(): PostEffectManager {
 		return this.#postEffectManager;
-	}
-
-	get name(): string {
-		if (!this.#instanceId) this.#instanceId = InstanceIdGenerator.getNextId(this.constructor)
-		return this.#name || `${this.constructor.name} Instance ${this.#instanceId}`;
-	}
-
-	set name(value: string) {
-		this.#name = value;
 	}
 
 	get debugViewRenderState(): RenderViewStateData {
@@ -157,42 +110,6 @@ class View3D extends ViewTransform {
 	}
 
 	//
-	get grid(): DrawDebuggerGrid {
-		return this.#grid;
-	}
-
-	set grid(value: DrawDebuggerGrid | boolean) {
-		if (typeof value === 'boolean') {
-			if (value === true) {
-				value = new DrawDebuggerGrid(this.redGPUContext); // true면 DrawDebuggerGrid 생성
-			} else {
-				value = null; // false면 null 설정
-			}
-		} else if (!(value instanceof DrawDebuggerGrid) && value !== null) {
-			// Grid가 아닌 값이 들어오는 경우 예외 처리
-			throw new TypeError("grid must be of type 'DrawDebuggerGrid', 'boolean', or 'null'.");
-		}
-		this.#grid = value as DrawDebuggerGrid;
-	}
-
-	get axis(): DrawDebuggerAxis {
-		return this.#axis;
-	}
-
-	set axis(value: DrawDebuggerAxis | boolean) {
-		if (typeof value === 'boolean') {
-			if (value === true) {
-				value = new DrawDebuggerAxis(this.redGPUContext); // true면 DrawDebuggerAxis 생성
-			} else {
-				value = null; // false면 null 설정
-			}
-		} else if (!(value instanceof DrawDebuggerAxis) && value !== null) {
-			// Axis가 아닌 값이 들어오는 경우 예외 처리
-			throw new TypeError("axis must be of type 'DrawDebuggerAxis', 'boolean', or 'null'.");
-		}
-		this.#axis = value as DrawDebuggerAxis;
-	}
-
 	get skybox(): SkyBox {
 		return this.#skybox;
 	}
@@ -207,45 +124,7 @@ class View3D extends ViewTransform {
 		this.#skybox = value;
 	}
 
-	get useFrustumCulling(): boolean {
-		return this.#useFrustumCulling;
-	}
 
-	set useFrustumCulling(value: boolean) {
-		this.#useFrustumCulling = value;
-	}
-
-	get useDistanceCulling(): boolean {
-		return this.#useDistanceCulling;
-	}
-
-	set useDistanceCulling(value: boolean) {
-		this.#useDistanceCulling = value;
-	}
-
-	get distanceCulling(): number {
-		return this.#distanceCulling;
-	}
-
-	set distanceCulling(value: number) {
-		this.#distanceCulling = value;
-	}
-
-	get scene(): Scene {
-		return this.#scene;
-	}
-
-	set scene(value: Scene) {
-		if (!(value instanceof Scene)) consoleAndThrowError('allow only Scene instance')
-		this.#scene = value;
-	}
-
-	screenToWorld(
-		screenX: number,
-		screenY: number,
-	) {
-		return screenToWorld(screenX, screenY, this)
-	}
 
 	update(view: View3D, shadowRender: boolean = false, calcPointLightCluster: boolean = false, renderPath1ResultTextureView?: GPUTextureView) {
 		const {scene} = view
@@ -293,13 +172,6 @@ class View3D extends ViewTransform {
 			}
 		}
 		this.#updateClusters(calcPointLightCluster)
-	}
-
-	checkMouseInViewBounds(): boolean {
-		const {pixelRectObject, pickingManager} = this;
-		const {mouseX, mouseY} = pickingManager;
-		return (0 < mouseX && mouseX < pixelRectObject.width) &&
-			(0 < mouseY && mouseY < pixelRectObject.height);
 	}
 
 	#createVertexUniformBindGroup(key: string, shadowDepthTextureView: GPUTextureView, ibl: IBL, renderPath1ResultTextureView: GPUTextureView) {

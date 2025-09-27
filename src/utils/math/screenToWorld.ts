@@ -1,4 +1,5 @@
 import {mat4, vec3} from "gl-matrix";
+import AView from "../../display/view/core/AView";
 import View3D from "../../display/view/View3D";
 
 let x, y, z, w;
@@ -7,7 +8,7 @@ let point = vec3.create();
 let pointMTX = mat4.create();
 let invViewProjection = mat4.create();
 let resultMTX;
-const screenToWorld = (screenX: number, screenY: number, view: View3D,) => {
+const screenToWorld = (screenX: number, screenY: number, view: AView,) => {
 	const {rawCamera, pixelRectArray} = view
 	x = 2.0 * (screenX * window.devicePixelRatio + pixelRectArray[0]) / pixelRectArray[2] - 1;
 	y = -2.0 * (screenY * window.devicePixelRatio + pixelRectArray[1]) / pixelRectArray[3] + 1;
