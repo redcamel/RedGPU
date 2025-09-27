@@ -45,7 +45,7 @@ class FinalRender {
 	#viewGpuTextureViews: GPUTextureView[] = []
 	#sampler: Sampler
 	#fragmentBuffer: GPUBuffer
-	#fragmentBufferData: Float32Array
+	#fragmentBufferData: Float32Array = new Float32Array([1, 0, 0, 1])
 
 	constructor() {
 	}
@@ -63,7 +63,6 @@ class FinalRender {
 				size: 16,
 				usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
 			})
-			this.#fragmentBufferData = new Float32Array([1, 0, 0, 1])
 		}
 		const {sizeManager, gpuDevice, antialiasingManager} = redGPUContext
 		const {changedMSAA, useMSAA} = antialiasingManager
@@ -72,9 +71,7 @@ class FinalRender {
 		if (canvasW === 0 || canvasH === 0) return
 		//
 		const finalRenderPassDesc: GPURenderPassDescriptor = this.#getFinalRenderPassDesc(redGPUContext)
-		const finalRenderCommandEnc: GPUCommandEncoder = gpuDevice.createCommandEncoder({
-			label: 'FinalRender_CommandEncoder'
-		})
+		const finalRenderCommandEnc: GPUCommandEncoder = gpuDevice.createCommandEncoder()
 		const finalRenderPassEnc: GPURenderPassEncoder = finalRenderCommandEnc.beginRenderPass(finalRenderPassDesc)
 		finalRenderPassEnc.setViewport(0, 0, canvasW, canvasH, 0, 1);
 		finalRenderPassEnc.setScissorRect(0, 0, canvasW, canvasH);
