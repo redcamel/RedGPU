@@ -159,7 +159,9 @@ class ASinglePassPostEffect {
 	}
 
 	execute(gpuDevice: GPUDevice, width: number, height: number) {
-		const commentEncode_compute = gpuDevice.createCommandEncoder()
+		const commentEncode_compute = gpuDevice.createCommandEncoder({
+			label: 'ASinglePassPostEffect_Execute_CommandEncoder'
+		})
 		const computePassEncoder = commentEncode_compute.beginComputePass()
 		computePassEncoder.setPipeline(this.#computePipeline)
 		computePassEncoder.setBindGroup(0, this.#computeBindGroup0)

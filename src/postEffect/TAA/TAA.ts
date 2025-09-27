@@ -164,7 +164,9 @@ class TAA {
 		}
 		this.#execute(gpuDevice, width, height);
 		{
-			const commentEncode_compute = gpuDevice.createCommandEncoder()
+			const commentEncode_compute = gpuDevice.createCommandEncoder({
+				label: 'TAA_CopyTexture_CommandEncoder_compute'
+			})
 			commentEncode_compute.copyTextureToTexture(
 				{texture: this.#currentFrameTexture},
 				{texture: this.#previousFrameTexture},
@@ -261,7 +263,9 @@ class TAA {
 	}
 
 	#execute(gpuDevice: GPUDevice, width: number, height: number) {
-		const commentEncode_compute = gpuDevice.createCommandEncoder()
+		const commentEncode_compute = gpuDevice.createCommandEncoder({
+			label: 'TAA_Execute_CommandEncoder_compute'
+		})
 		const computePassEncoder = commentEncode_compute.beginComputePass()
 		computePassEncoder.setPipeline(this.#computePipeline)
 		computePassEncoder.setBindGroup(0, this.#frameBufferBindGroup0)

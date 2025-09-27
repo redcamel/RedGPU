@@ -205,8 +205,12 @@ class Renderer {
 		}
 		// @ts-ignore
 		camera.update?.(view, time)
-		const commandEncoder: GPUCommandEncoder = redGPUContext.gpuDevice.createCommandEncoder()
-		const computeCommandEncoder: GPUCommandEncoder = redGPUContext.gpuDevice.createCommandEncoder()
+		const commandEncoder: GPUCommandEncoder = redGPUContext.gpuDevice.createCommandEncoder({
+			label: 'ViewRender_MainCommandEncoder'
+		})
+		const computeCommandEncoder: GPUCommandEncoder = redGPUContext.gpuDevice.createCommandEncoder({
+			label: 'ViewRender_MainComputeCommandEncoder'
+		})
 		this.#batchUpdateSkinMatrices(redGPUContext, debugViewRenderState)
 		view.debugViewRenderState.reset(null, computeCommandEncoder, time)
 		if (pixelRectObject.width && pixelRectObject.height) {
@@ -257,7 +261,9 @@ class Renderer {
 		const animationListNum = animationList.length
 		// keepLog(animationList)
 		const {gpuDevice} = redGPUContext;
-		const commandEncoder = gpuDevice.createCommandEncoder();
+		const commandEncoder = gpuDevice.createCommandEncoder({
+			label: 'BatchUpdateSkinMatrices_CommandEncoder'
+		});
 		const passEncoder = commandEncoder.beginComputePass();
 		// for (let i = 0; i < animationListNum; i++) {
 		// 	const activeAnimations = animationList[i]

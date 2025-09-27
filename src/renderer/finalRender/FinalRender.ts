@@ -72,7 +72,9 @@ class FinalRender {
 		if (canvasW === 0 || canvasH === 0) return
 		//
 		const finalRenderPassDesc: GPURenderPassDescriptor = this.#getFinalRenderPassDesc(redGPUContext)
-		const finalRenderCommandEnc: GPUCommandEncoder = gpuDevice.createCommandEncoder()
+		const finalRenderCommandEnc: GPUCommandEncoder = gpuDevice.createCommandEncoder({
+			label: 'FinalRender_CommandEncoder'
+		})
 		const finalRenderPassEnc: GPURenderPassEncoder = finalRenderCommandEnc.beginRenderPass(finalRenderPassDesc)
 		finalRenderPassEnc.setViewport(0, 0, canvasW, canvasH, 0, 1);
 		finalRenderPassEnc.setScissorRect(0, 0, canvasW, canvasH);

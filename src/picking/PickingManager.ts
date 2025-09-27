@@ -141,7 +141,9 @@ class PickingManager {
 			return prev;
 		}, {});
 	#createReadPixelBuffer = (gpuDevice: GPUDevice, width: number, height: number, x: number, y: number): GPUBuffer => {
-		const readPixelCommandEncoder = gpuDevice.createCommandEncoder();
+		const readPixelCommandEncoder = gpuDevice.createCommandEncoder({
+			label: 'PickingManager_ReadPixel_CommandEncoder'
+		});
 		const readPixelBuffer = gpuDevice.createBuffer({
 			size: 4,
 			usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
