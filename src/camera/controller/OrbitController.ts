@@ -96,6 +96,8 @@ class OrbitController extends AController {
 		const HD_wheel = (e: WheelEvent) => {
 			// 현재 마우스 위치에서 해당하는 View 찾기
 			const targetView = findTargetView(e);
+			e.stopPropagation()
+			e.preventDefault()
 			if (!targetView) return;
 			// 거리 조정
 			this.#distance += e.deltaY / 100 * this.#speedDistance;

@@ -1,7 +1,9 @@
 import ColorRGB from "../../color/ColorRGB";
 import convertHexToRgb from "../../utils/convertColor/convertHexToRgb";
 import BaseLight from "../core/BaseLight";
-
+/**
+ * <iframe src="/RedGPU/examples/3d/light/directionalLight/"></iframe>
+ */
 class DirectionalLight extends BaseLight {
 	#directionX: number = -1
 	#directionY: number = -1

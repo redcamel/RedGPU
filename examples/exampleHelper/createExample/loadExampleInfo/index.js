@@ -99,6 +99,7 @@ const createNavigationBar = (mainCategory) => {
 	const homeButton = document.createElement('a');
 	homeButton.className = 'nav-button home-button';
 	homeButton.href = '/RedGPU/examples';
+	homeButton.target = (window?.self !== window?.top) ? '_blank' : '_self';
 	homeButton.innerHTML = '<span>Home</span>';
 	navbar.appendChild(homeButton);
 

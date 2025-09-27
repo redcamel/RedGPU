@@ -7,7 +7,7 @@ import OrbitController from "./controller/OrbitController";
 export {
 	PerspectiveCamera,
 	OrthographicCamera,
+	Camera2D,
 	OrbitController,
 	BasicController,
-	Camera2D
 }
