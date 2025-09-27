@@ -21,7 +21,6 @@ export * as Picking from "./picking";
 import init from "./init";
 import GLTFLoader from "./loader/gltf/GLTFLoader";
 import SystemCode from "./resources/systemCode/SystemCode";
-
 export {
 	init,
 	SystemCode,

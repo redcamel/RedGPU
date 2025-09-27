@@ -10,7 +10,7 @@ RedGPU.init(
 	canvas,
 	(redGPUContext) => {
 		// 2-1. 카메라 컨트롤 설정
-		const controller = new RedGPU.Camera.ObitController(redGPUContext);
+		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
 		controller.distance = 30; // 카메라의 줌/거리
 		controller.speed = 0.5;   // 카메라 회전 속도
 

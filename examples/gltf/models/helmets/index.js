@@ -12,7 +12,7 @@ RedGPU.init(
 	(redGPUContext) => {
 		// Create a camera controller (Orbit type)
 		// 궤도형 카메라 컨트롤러 생성
-		const controller = new RedGPU.Camera.ObitController(redGPUContext);
+		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
 		controller.speedDistance = 0.1
 		controller.distance = 7
 		controller.tilt = 0

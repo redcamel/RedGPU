@@ -7,7 +7,7 @@ const createCameraTest = (pane, camera, openYn = false) => {
 	folder.addBinding(camera, 'fov', {min: 10, max: 135, step: 0.1})
 	folder.addBinding(camera, 'nearClipping', {min: 0.1, max: 135, step: 0.1})
 	folder.addBinding(camera, 'farClipping', {min: 10, max: 10000, step: 1})
-	if (camera.constructor.name === 'ObitController') {
+	if (camera.constructor.name === 'OrbitController') {
 
 		folder.addBinding(camera, 'tilt', {min: 0, max: 360, readonly: true})
 		folder.addBinding(camera, 'pan', {min: 0, max: 360, readonly: true})

@@ -6,7 +6,7 @@ document.body.appendChild(canvas);
 RedGPU.init(
 	canvas,
 	(redGPUContext) => {
-		const controller = new RedGPU.Camera.ObitController(redGPUContext);
+		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
 		controller.speedDistance = 0.3;
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller); // 3D View로 변경

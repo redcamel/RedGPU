@@ -7,7 +7,7 @@ document.querySelector('#example-container').appendChild(canvas);
 // RedGPU 초기화
 RedGPU.init(canvas, (redGPUContext) => {
 	// 카메라 설정
-	const controller = new RedGPU.Camera.ObitController(redGPUContext);
+	const controller = new RedGPU.Camera.OrbitController(redGPUContext);
 	controller.distance = 3;
 	controller.tilt = -15;
 

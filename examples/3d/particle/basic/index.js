@@ -11,7 +11,7 @@ document.body.appendChild(canvas);
 RedGPU.init(
 	canvas,
 	(redGPUContext) => {
-		const controllerTest = new RedGPU.Camera.ObitController(redGPUContext);
+		const controllerTest = new RedGPU.Camera.OrbitController(redGPUContext);
 		controllerTest.distance = 50
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controllerTest);

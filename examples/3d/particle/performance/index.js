@@ -10,7 +10,7 @@ document.body.appendChild(canvas);
 RedGPU.init(
 	canvas,
 	(redGPUContext) => {
-		const controllerTest = new RedGPU.Camera.ObitController(redGPUContext);
+		const controllerTest = new RedGPU.Camera.OrbitController(redGPUContext);
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controllerTest);
 		const directionalLightTest = new RedGPU.Light.DirectionalLight()

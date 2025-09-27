@@ -8,7 +8,7 @@ import AController from "../core/AController";
 
 let currentEventView: View3D;
 
-class ObitController extends AController {
+class OrbitController extends AController {
 	#instanceId: number;
 	#name: string;
 	// 공통 설정값들
@@ -256,4 +256,4 @@ class ObitController extends AController {
 	}
 }
 
-export default ObitController;
+export default OrbitController;
