@@ -44,8 +44,8 @@ class FinalRender {
 	#viewSizes: { width; height }[] = []
 	#viewGpuTextureViews: GPUTextureView[] = []
 	#sampler: Sampler
-	#fragmentBuffer: GPUBuffer
-	#fragmentBufferData: Float32Array = new Float32Array([1, 0, 0, 1])
+	#fragmentBuffer: GPUBuffer[] = []
+	#fragmentBufferData: Float32Array[] = []
 
 	constructor() {
 	}
@@ -57,13 +57,7 @@ class FinalRender {
 	 * @param {GPURenderPassDescriptor[]} viewList_renderPassDescriptorList - The list of render passes to be rendered.
 	 */
 	render(redGPUContext: RedGPUContext, viewList_renderPassDescriptorList: GPURenderPassDescriptor[]) {
-		if (!this.#fragmentBuffer) {
-			this.#fragmentBuffer = redGPUContext.gpuDevice.createBuffer({
-				label: 'FINAL_RENDER_FRAGMENT_BUFFER',
-				size: 16,
-				usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-			})
-		}
+
 		const {sizeManager, gpuDevice, antialiasingManager} = redGPUContext
 		const {changedMSAA, useMSAA} = antialiasingManager
 		const {pixelRectObject: canvasPixelRectObject} = sizeManager
@@ -90,7 +84,7 @@ class FinalRender {
 		gpuDevice.queue.submit([finalRenderCommandEnc.finish()])
 	}
 
-	#updateFinalViewBackgroundColor(view: View3D) {
+	#updateFinalViewBackgroundColor(view: View3D,index:number) {
 		{
 			const {scene, redGPUContext} = view
 			const {gpuDevice} = redGPUContext
@@ -116,11 +110,11 @@ class FinalRender {
 				scenePremultiplied[2] + contextPremultiplied[2] * (1 - sceneRGBANormal[3]),
 				sceneRGBANormal[3] + redGPUContextRGBANormal[3] * (1 - sceneRGBANormal[3])
 			]
-			this.#fragmentBufferData[0] = finalColor[0]
-			this.#fragmentBufferData[1] = finalColor[1]
-			this.#fragmentBufferData[2] = finalColor[2]
-			this.#fragmentBufferData[3] = finalColor[3]
-			gpuDevice.queue.writeBuffer(this.#fragmentBuffer, 0, this.#fragmentBufferData)
+			this.#fragmentBufferData[index][0] = finalColor[0]
+			this.#fragmentBufferData[index][1] = finalColor[1]
+			this.#fragmentBufferData[index][2] = finalColor[2]
+			this.#fragmentBufferData[index][3] = finalColor[3]
+			gpuDevice.queue.writeBuffer(this.#fragmentBuffer[index], 0, this.#fragmentBufferData[index])
 		}
 	}
 
@@ -136,6 +130,9 @@ class FinalRender {
 			const targetView = redGPUContext.viewList[index]
 			const {x: viewX, y: viewY, width: viewW, height: viewH} = targetView.pixelRectObject
 			const projectionMatrix = mat4.create()
+
+
+
 			{
 				mat4.ortho(projectionMatrix, 0., 1., 0., 1., -1000, 1000);
 				mat4.scale(projectionMatrix, projectionMatrix, [1 / (canvasW), 1 / (canvasH), 1]);
@@ -158,7 +155,16 @@ class FinalRender {
 				|| this.#viewSizes[index].width !== viewW
 				|| this.#viewSizes[index].height !== viewH
 				|| this.#viewGpuTextureViews[index] !== gpuTextureView
+				|| this.#fragmentBuffer[index]
 			if (needNewBindGroup) {
+				if (!this.#fragmentBuffer[index]) {
+					this.#fragmentBuffer[index] = redGPUContext.gpuDevice.createBuffer({
+						label: `FINAL_RENDER_FRAGMENT_BUFFER_${index}`,
+						size: 16,
+						usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+					})
+					this.#fragmentBufferData[index] = new Float32Array([1, 0, 0, 1])
+				}
 				const fragmentBindGroupDesc: GPUBindGroupDescriptor = {
 					layout: this.#fragmentBindGroupLayout,
 					label: FRAGMENT_BIND_GROUP_DESCRIPTOR_NAME,
@@ -167,9 +173,9 @@ class FinalRender {
 						{binding: 1, resource: gpuTextureView},
 						{
 							binding: 2, resource: {
-								buffer: this.#fragmentBuffer,
+								buffer: this.#fragmentBuffer[index],
 								offset: 0,
-								size: this.#fragmentBuffer.size
+								size: this.#fragmentBuffer[index].size
 							}
 						}
 					]
@@ -178,7 +184,7 @@ class FinalRender {
 				this.#viewSizes[index] = {width: viewW || 1, height: viewH || 1}
 				this.#viewGpuTextureViews[index] = gpuTextureView
 			}
-			this.#updateFinalViewBackgroundColor(targetView)
+			this.#updateFinalViewBackgroundColor(targetView,index)
 			finalRenderPassEnc.setPipeline(this.#getPipeline(redGPUContext))
 			finalRenderPassEnc.setBindGroup(0, vertexUniformBindGroup);
 			finalRenderPassEnc.setBindGroup(1, this.#fragmentUniformBindGroups[index])
