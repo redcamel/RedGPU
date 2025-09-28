@@ -9,5 +9,12 @@ module.exports = {
 	customFooterHtml: footerHtml,
 	hideGenerator: true,
 	customFooterHtmlDisableWrapper:false,
+	name:"RedGPU API",
+	navigationLinks:{
+		"GitHub": "https://github.com/redcamel/RedGPU/",
+		"Examples": "https://redcamel.github.io/RedGPU/examples",
+		"Report Issue": "https://github.com/redcamel/RedGPU/issues"
+	},
+	includeVersion: true,
 
 };

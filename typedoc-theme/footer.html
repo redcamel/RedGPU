@@ -14,3 +14,31 @@
         </div>
     </div>
 </div>
+<script>
+	(function() {
+		const baseUrl = 'https://redcamel.github.io/RedGPU/';
+		const currentPath = window.location.pathname.replace(/.*\/RedGPU\//, '');
+		const fullUrl = baseUrl + currentPath;
+
+		// Canonical URL 추가
+		if (!document.querySelector('link[rel="canonical"]')) {
+			const canonical = document.createElement('link');
+			canonical.rel = 'canonical';
+			canonical.href = fullUrl;
+			document.head.appendChild(canonical);
+		}
+
+		// Open Graph 메타 태그 추가
+		if (!document.querySelector('meta[property="og:url"]')) {
+			const ogUrl = document.createElement('meta');
+			ogUrl.setAttribute('property', 'og:url');
+			ogUrl.content = fullUrl;
+			document.head.appendChild(ogUrl);
+
+			const ogTitle = document.createElement('meta');
+			ogTitle.setAttribute('property', 'og:title');
+			ogTitle.content = 'RedGPU API Documentation';
+			document.head.appendChild(ogTitle);
+		}
+	})();
+</script>
