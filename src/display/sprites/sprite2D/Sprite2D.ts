@@ -85,22 +85,22 @@ class Sprite2D extends BaseSprite2D {
 		this.dirtyTransform = true
 	}
 
-	/**
-	 * 스프라이트의 머티리얼을 반환합니다.
-	 * @returns 현재 머티리얼
-	 */
-	get material() {
-		return this._material
-	}
-
-	/**
-	 * 머티리얼 설정을 시도합니다.
-	 * @param value - 설정하려는 머티리얼
-	 * @throws {Error} Sprite2D는 머티리얼을 변경할 수 없습니다
-	 */
-	set material(value) {
-		consoleAndThrowError('Sprite2D can not change material')
-	}
+	// /**
+	//  * 스프라이트의 머티리얼을 반환합니다.
+	//  * @returns 현재 머티리얼
+	//  */
+	// get material() {
+	// 	return this._material
+	// }
+	//
+	// /**
+	//  * 머티리얼 설정을 시도합니다.
+	//  * @param value - 설정하려는 머티리얼
+	//  * @throws {Error} Sprite2D는 머티리얼을 변경할 수 없습니다
+	//  */
+	// set material(value) {
+	// 	consoleAndThrowError('Sprite2D can not change material')
+	// }
 
 	/**
 	 * 스프라이트의 크기를 설정합니다.
