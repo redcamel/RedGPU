@@ -18,10 +18,10 @@ const BaseSprite2D = mixInMesh2D(Mesh);
  *
 
  * 아래는 Sprite2D의 구조와 동작을 이해하는 데 도움이 되는 샘플 예제 목록입니다.
- * @see [Hierarchy Sprite2D example](/RedGPU/examples/2d/sprite2D/hierarchy/)
- * @see [Pivot Sprite2D example](/RedGPU/examples/2d/sprite2D/pivot/)
- * @see [Child Methods example](/RedGPU/examples/2d/sprite2D/childMethod/)
- * @see [Mouse Event example](/RedGPU/examples/2d/mouseEvent/sprite2D/)
+ * @see [Sprite2D Hierarchy example](/RedGPU/examples/2d/sprite2D/hierarchy/)
+ * @see [Sprite2D Pivot example](/RedGPU/examples/2d/sprite2D/pivot/)
+ * @see [Sprite2D Child Methods example](/RedGPU/examples/2d/sprite2D/childMethod/)
+ * @see [Sprite2D MouseEvent example](/RedGPU/examples/2d/mouseEvent/sprite2D/)
  */
 class Sprite2D extends BaseSprite2D {
 	/**

@@ -40,7 +40,7 @@ interface Sprite3D {
  * <iframe src="/RedGPU/examples/3d/sprite/sprite3D/"></iframe>
  *
  * 아래는 Sprite3D의 구조와 동작을 이해하는 데 도움이 되는 샘플 예제 목록입니다.
- * @see [Mouse Event example](/RedGPU/examples/3d/mouseEvent/sprite3D/)
+ * @see [Sprite3D MouseEvent example](/RedGPU/examples/3d/mouseEvent/sprite3D/)
  */
 class Sprite3D extends Mesh {
 	/**

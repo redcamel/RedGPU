@@ -31,7 +31,7 @@ const BaseSpriteSheet2D = mixInMesh2D(ASpriteSheet);
  * <iframe src="/RedGPU/examples/3d/sprite/spriteSheet3D/"></iframe>
  *
  * 아래는 SpriteSheet2D의 구조와 동작을 이해하는 데 도움이 되는 샘플 예제 목록입니다.
- * @see [Mouse Event example](/RedGPU/examples/2d/mouseEvent/spriteSheet2D/)
+ * @see [SpriteSheet2D MouseEvent example](/RedGPU/examples/2d/mouseEvent/spriteSheet2D/)
  */
 class SpriteSheet2D extends BaseSpriteSheet2D {
 	/**
