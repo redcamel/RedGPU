@@ -9,7 +9,7 @@ import BaseLight from "../core/BaseLight";
  * 위치 기반이 아닌 방향 기반으로 작동하며, 그림자 생성 및 광원 시뮬레이션에 적합합니다.
  *
  * @example
- * ```ts
+ * ```javascript
  * const light = new RedGPU.Light.DirectionalLight();
  * scene.lightManager.addDirectionalLight(light);
  * ```

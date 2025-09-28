@@ -3,7 +3,30 @@ import RedGPUContext from "../../context/RedGPUContext";
 import Scene from "../scene/Scene";
 import View3D from "./View3D";
 
+/**
+ * View2D 클래스는 2D 렌더링을 위한 뷰 클래스입니다.
+ * View3D를 확장하며, 내부적으로 Camera2D를 사용하여 2D 환경에 최적화된 시점을 제공합니다.
+ *
+ * 이 클래스는 AView를 기반으로 하는 View3D를 상속하며,
+ * RedGPU의 2D 시각화 및 UI 구성에 사용됩니다.
+ *
+ * ```javascript
+ * const scene = new RedGPU.Display.Scene();
+ * const view = new RedGPU.Display.View2D(redGPUContext, scene);
+ * redGPUContext.addView(view);
+ * ```
+ * <iframe src="/RedGPU/examples/2d/helloWorld2D/" width="100%" height="400" style="border:none;"></iframe>
+ * @extends View3D
+ */
 class View2D extends View3D {
+	/**
+	 * View2D 생성자입니다.
+	 * Camera2D를 자동으로 생성하여 View3D의 생성자에 전달합니다.
+	 *
+	 * @param redGPUContext - RedGPUContext 인스턴스
+	 * @param scene - Scene 인스턴스
+	 * @param name - 선택적 뷰 이름
+	 */
 	constructor(redGPUContext: RedGPUContext, scene: Scene, name?: string) {
 		const camera = new Camera2D()
 		super(redGPUContext, scene, camera, name)

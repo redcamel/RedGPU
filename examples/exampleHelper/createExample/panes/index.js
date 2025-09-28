@@ -113,7 +113,7 @@ const setAxis = (redGPUContext, rightContainer) => {
 const setSettingView = (redGPUContext, rightContainer) => {
 	const panel = document.querySelector('.tp-dfwv')
 	if (!panel) return
-	let openYn = redGPUContext.detector.isMobile ? false : true;
+	let openYn = (redGPUContext.detector.isMobile || (window?.self !== window?.top)) ? false : true;
 	const button = document.createElement('div');
 	button.className = 'nav-button example-setting-button';
 	button.innerHTML = '<img src="/RedGPU/examples/assets/icons/gears-solid-full.svg" width="28"/>'
