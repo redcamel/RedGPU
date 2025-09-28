@@ -82,6 +82,7 @@ class Mesh extends MeshBase {
 	#bundleEncoder: GPURenderBundleEncoder
 	#renderBundle: GPURenderBundle
 	#prevSystemBindGroup: GPUBindGroup
+	#prevFragmentBindGroup: GPUBindGroup
 
 //
 	constructor(redGPUContext: RedGPUContext, geometry?: Geometry | Primitive, material?, name?: string) {
@@ -925,7 +926,8 @@ class Mesh extends MeshBase {
 					let targetEncoder: GPURenderBundleEncoder | GPURenderPassEncoder = currentRenderPassEncoder
 					let needBundleFinish = false
 					// keepLog(this.#bundleEncoder , this.dirtyPipeline , this.#prevSystemBindGroup !== view.systemUniform_Vertex_UniformBindGroup)
-					if (!this.#bundleEncoder || this.dirtyPipeline || this.#prevSystemBindGroup !== view.systemUniform_Vertex_UniformBindGroup) {
+					const {fragmentUniformBindGroup} = currentMaterial.gpuRenderInfo
+					if (!this.#bundleEncoder || this.dirtyPipeline || this.#prevFragmentBindGroup !== fragmentUniformBindGroup ||  this.#prevSystemBindGroup !== view.systemUniform_Vertex_UniformBindGroup) {
 						this.#bundleEncoder = null
 						this.#bundleEncoder = gpuDevice.createRenderBundleEncoder({
 							colorFormats: [navigator.gpu.getPreferredCanvasFormat(), navigator.gpu.getPreferredCanvasFormat(), 'rgba16float'],
@@ -951,9 +953,10 @@ class Mesh extends MeshBase {
 					}
 					if (needBundleFinish) {
 						this.#prevSystemBindGroup = view.systemUniform_Vertex_UniformBindGroup
+						this.#prevFragmentBindGroup = fragmentUniformBindGroup
 						targetEncoder.setPipeline(pipeline)
 						const {gpuBuffer} = currentGeometry.vertexBuffer
-						const {fragmentUniformBindGroup} = currentMaterial.gpuRenderInfo
+
 						targetEncoder.setVertexBuffer(0, gpuBuffer)
 						// @ts-ignore
 						if (this.particleBuffers?.length) {
