@@ -5,9 +5,8 @@
   "scripts": {
     "build": "rollup -c",
     "rollup watch": "rollup -wc",
-    "build:doc": "npx typedoc src/index.ts",
+    "build:doc": "npx typedoc --options typedoc.config.js",
     "watch:doc": "npx nodemon --watch src --ext ts --exec \"npm run build:doc\""
-
   },
   "author": "",
   "license": "ISC",
