@@ -37,6 +37,11 @@ interface SpriteSheet3D extends ASpriteSheet {
  * SpriteSheet3D는 3D 공간에서 빌보드 효과를 가진 스프라이트 시트 애니메이션을 제공합니다.
  * 캐릭터나 파티클과 같은 2D 스프라이트를 3D 공간에 배치하면서도 항상 카메라를 향하도록 하여
  * 자연스러운 시각 효과를 만듭니다. 텍스처의 종횡비에 따라 자동으로 렌더링 비율이 조정됩니다.
+ *
+ * <iframe src="/RedGPU/examples/3d/sprite/spriteSheet3D/"></iframe>
+ *
+ * 아래는 SpriteSheet3D의 구조와 동작을 이해하는 데 도움이 되는 샘플 예제 목록입니다.
+ * @see [Mouse Event example](/RedGPU/examples/3d/mouseEvent/spriteSheet3D/)
  */
 class SpriteSheet3D extends ASpriteSheet {
 	/**

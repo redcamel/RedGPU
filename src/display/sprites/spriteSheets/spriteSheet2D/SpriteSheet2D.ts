@@ -27,6 +27,11 @@ const BaseSpriteSheet2D = mixInMesh2D(ASpriteSheet);
  * 하나의 텍스처에 격자 형태로 배열된 여러 프레임을 시간에 따라 순차적으로 표시하여
  * 부드러운 2D 애니메이션을 생성합니다. 텍스처의 세그먼트 크기에 따라 자동으로
  * 렌더링 크기가 조정됩니다.
+ *
+ * <iframe src="/RedGPU/examples/3d/sprite/spriteSheet3D/"></iframe>
+ *
+ * 아래는 SpriteSheet2D의 구조와 동작을 이해하는 데 도움이 되는 샘플 예제 목록입니다.
+ * @see [Mouse Event example](/RedGPU/examples/2d/mouseEvent/spriteSheet2D/)
  */
 class SpriteSheet2D extends BaseSpriteSheet2D {
 	/**
