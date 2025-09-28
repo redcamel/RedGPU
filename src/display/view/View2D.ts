@@ -15,7 +15,7 @@ import View3D from "./View3D";
  * const view = new RedGPU.Display.View2D(redGPUContext, scene);
  * redGPUContext.addView(view);
  * ```
- * <iframe src="/RedGPU/examples/2d/helloWorld2D/" width="100%" height="400" style="border:none;"></iframe>
+ * <iframe src="/RedGPU/examples/2d/helloWorld2D/" ></iframe>
  * @extends View3D
  */
 class View2D extends View3D {

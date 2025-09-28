@@ -14,7 +14,7 @@ import BaseLight from "../core/BaseLight";
  * scene.lightManager.addDirectionalLight(light);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/light/directionalLight/" width="100%" height="400" style="border:none;"></iframe>
+ * <iframe src="/RedGPU/examples/3d/light/directionalLight/" ></iframe>
  */
 class DirectionalLight extends BaseLight {
 	/**

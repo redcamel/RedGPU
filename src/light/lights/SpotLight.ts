@@ -15,7 +15,7 @@ import BaseLight from "../core/BaseLight";
  * light.lookAt(0, 0, 0);
  * scene.lightManager.addSpotLight(light);
  * ```
- * <iframe src="/RedGPU/examples/3d/light/spotLight/" width="100%" height="400" style="border:none;"></iframe>
+ * <iframe src="/RedGPU/examples/3d/light/spotLight/" ></iframe>
  */
 class SpotLight extends BaseLight {
 	/** 광원의 영향을 미치는 반경입니다. */

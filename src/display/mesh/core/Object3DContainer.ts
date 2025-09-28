@@ -1,70 +1,72 @@
-import {mat4} from "gl-matrix";
+import { mat4 } from "gl-matrix";
 import validateUintRange from "../../../runtimeChecker/validateFunc/validateUintRange";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import Mesh from "../Mesh";
 import MeshBase from "../MeshBase";
 
 /**
- * A container that holds multiple objects of type Mesh.
+ * Object3DContainer 클래스는 Mesh 객체들을 담는 시각적 컨테이너입니다.
+ *
+ * Scene의 기반이 되는 구조로, View에서 렌더링할 수 있는 3D 객체들을 계층적으로 관리합니다.
+ * 자식 객체의 추가, 제거, 위치 변경, 교환 등의 기능을 제공하며,
+ * 각 Mesh는 이 컨테이너를 통해 부모-자식 관계를 형성합니다.
+ *
+ * View와 Scene이 그려낼 공간을 구성할 때, Object3DContainer는
+ * 실제로 배치되는 시각적 요소들의 루트 역할을 합니다.
  */
 class Object3DContainer {
-	modelMatrix: mat4 = mat4.create()
 	/**
-	 * An array of Mesh elements representing the children of a parent object.
-	 *
+	 * 이 객체의 모델 행렬입니다. 위치, 회전, 스케일 변환에 사용됩니다.
+	 */
+	modelMatrix: mat4 = mat4.create();
+
+	/**
+	 * 자식 Mesh 객체들을 담는 배열입니다.
 	 * @type {Mesh[]}
 	 */
-	#children: Mesh[] = []
+	#children: Mesh[] = [];
 
 	/**
-	 * Creates a new instance of the Constructor.
-	 *
-	 * @constructor
+	 * Object3DContainer 생성자입니다.
 	 */
-	constructor() {
-	}
+	constructor() {}
 
 	/**
-	 * Retrieve the array of child objects attached to this object.
-	 *
-	 * @return {Mesh[]} The array of child objects.
+	 * 현재 컨테이너에 포함된 자식 Mesh 배열을 반환합니다.
+	 * @returns {Mesh[]} 자식 객체 배열
 	 */
 	get children(): Mesh[] {
 		return this.#children;
 	}
 
 	/**
-	 * Returns the number of children of the object.
-	 *
-	 * @returns {number} The number of children.
+	 * 자식 객체의 개수를 반환합니다.
+	 * @returns {number} 자식 수
 	 */
 	get numChildren(): number {
 		return this.#children.length;
 	}
 
 	/**
-	 * Checks if the given child Mesh is contained within the current object.
-	 *
-	 * @param {Mesh} child - The child Mesh to be checked.
-	 * @returns {boolean} - Returns true if the child Mesh is contained, otherwise returns false.
+	 * 특정 Mesh가 현재 컨테이너에 포함되어 있는지 확인합니다.
+	 * @param {Mesh} child - 확인할 자식 객체
+	 * @returns {boolean} 포함 여부
 	 */
 	contains(child: Mesh): boolean {
-		this.#checkObject3DInstance(child)
-		return this.#children.includes(child)
+		this.#checkObject3DInstance(child);
+		return this.#children.includes(child);
 	}
 
 	/**
-	 * Adds a child Mesh to the current Mesh instance.
-	 *
-	 * @param {Mesh} child - The child Mesh to be added.
-	 * @return {Mesh} - The added child Mesh if successful, null otherwise.
+	 * 자식 Mesh를 컨테이너에 추가합니다.
+	 * @param {Mesh} child - 추가할 자식 객체
+	 * @returns {Mesh} 추가된 객체 또는 실패 시 null
 	 */
 	addChild(child: Mesh): Mesh {
-		// Check if `child` is an instance of Mesh
 		this.#checkObject3DInstance(child);
 		if (this.#assignChild(child)) {
 			this.#children.push(child);
-			child.dirtyTransform = true
+			child.dirtyTransform = true;
 			return child;
 		} else {
 			console.log(`Failed to assign child. The child could not be removed from its previous parent.`);
@@ -73,54 +75,49 @@ class Object3DContainer {
 	}
 
 	/**
-	 * Add a child to the parent at a specific index.
-	 *
-	 * @param {Mesh} child - The child to be added to the parent.
-	 * @param {number} index - The index at which the child should be added.
-	 * @return {this} - The parent object.
+	 * 자식 Mesh를 특정 인덱스에 추가합니다.
+	 * @param {Mesh} child - 추가할 자식 객체
+	 * @param {number} index - 삽입 위치
+	 * @returns {this} 현재 컨테이너
 	 */
 	addChildAt(child: Mesh, index: number) {
-		validateUintRange(index)
+		validateUintRange(index);
 		if (this.#children.length < index) index = this.#children.length;
-		// Check if index is within the range [0, children.length]
 		if (index < 0 || index > this.#children.length) {
 			console.log(`Invalid index. Index should be within 0 and ${this.#children.length}.`);
 			return;
 		}
 		if (this.#assignChild(child)) {
-			this.#children.splice(index, 0, child)
+			this.#children.splice(index, 0, child);
 		} else {
 			console.log(`Failed to assign child. The child could not be removed from its previous parent.`);
 			return;
 		}
-		child.dirtyTransform = true
-		return this
+		child.dirtyTransform = true;
+		return this;
 	}
 
 	/**
-	 * Retrieves the child object at the specified index.
-	 *
-	 * @param {number} index - The index of the child object to retrieve.
-	 * @returns {Mesh} - The child object at the specified index, or null if the index is invalid.
+	 * 지정된 인덱스의 자식 Mesh를 반환합니다.
+	 * @param {number} index - 조회할 위치
+	 * @returns {Mesh} 해당 위치의 자식 객체 또는 undefined
 	 */
 	getChildAt(index: number): Mesh {
-		validateUintRange(index)
+		validateUintRange(index);
 		if (index >= this.#children.length || index < 0) {
 			console.log(`Invalid index. Index should be within 0 and ${this.#children.length - 1}.`);
 			return undefined;
 		}
-		return this.#children[index]
+		return this.#children[index];
 	}
 
 	/**
-	 * Returns the index of a child object within the container.
-	 *
-	 * @param {Mesh} child - The child object to find the index of.
-	 *
-	 * @return {number} - The index of the child object within the container. If the child is not found, -1 is returned.
+	 * 특정 자식 객체의 인덱스를 반환합니다.
+	 * @param {Mesh} child - 조회할 자식 객체
+	 * @returns {number} 인덱스 또는 -1
 	 */
 	getChildIndex(child: Mesh): number {
-		this.#checkObject3DInstance(child)
+		this.#checkObject3DInstance(child);
 		const index = this.#children.indexOf(child);
 		if (index === -1) {
 			console.log(`Given object is not a child of this container: ${child}`);
@@ -130,79 +127,72 @@ class Object3DContainer {
 	}
 
 	/**
-	 * Sets the index of a child object within the object's children array.
-	 *
-	 * @param {Mesh} child - The child object whose index will be set.
-	 * @param {number} index - The new index position for the child object.
-	 * @return {void} - This method does not return anything.
+	 * 자식 객체의 위치를 변경합니다.
+	 * @param {Mesh} child - 대상 자식 객체
+	 * @param {number} index - 새 인덱스
 	 */
 	setChildIndex(child: Mesh, index: number) {
-		this.#checkObject3DInstance(child)
-		validateUintRange(index)
-		const len = this.#children.length
+		this.#checkObject3DInstance(child);
+		validateUintRange(index);
+		const len = this.#children.length;
 		const indexIsOutOfBounds = index >= len;
-		const childIndex = this.#children.indexOf(child)
+		const childIndex = this.#children.indexOf(child);
 		if (childIndex === -1) {
 			consoleAndThrowError(`The provided is not a child of the Object3DContainer.: ${child}`);
-			return
+			return;
 		}
 		if (indexIsOutOfBounds) {
 			consoleAndThrowError(`Invalid index. Index ${index} is out of bounds. Index should be between 0 and ${len - 1}.`);
-			return
+			return;
 		}
-		// Remove the child from its current position
 		this.#children.splice(childIndex, 1);
-		// Insert the child at the new position
 		this.#children.splice(index, 0, child);
 	}
 
 	/**
-	 * Swaps the positions of two children within the Object3DContainer.
-	 *
-	 * @param {Mesh} child1 - The first child to swap.
-	 * @param {Mesh} child2 - The second child to swap.
-	 * @throws {Error} If either child is not a child of this Object3DContainer.
+	 * 두 자식 객체의 위치를 서로 바꿉니다.
+	 * @param {Mesh} child1 - 첫 번째 객체
+	 * @param {Mesh} child2 - 두 번째 객체
 	 */
 	swapChildren(child1: Mesh, child2: Mesh) {
-		this.#checkObject3DInstance(child1)
-		this.#checkObject3DInstance(child2)
+		this.#checkObject3DInstance(child1);
+		this.#checkObject3DInstance(child2);
 		if (child1 === child2) {
 			consoleAndThrowError("Error: child1 and child2 are the same. Cannot swap a child with itself.");
 			return;
 		}
-		const index1 = this.#children.indexOf(child1)
-		const index2 = this.#children.indexOf(child2)
+		const index1 = this.#children.indexOf(child1);
+		const index2 = this.#children.indexOf(child2);
 		if (index1 === -1 || index2 === -1) {
 			consoleAndThrowError(`Error: ${index1 === -1 ? 'child1' : 'child2'} is not a child of this Object3DContainer.`);
 		}
-		this.swapChildrenAt(index1, index2)
+		this.swapChildrenAt(index1, index2);
 	}
 
 	/**
-	 * Swaps the position of two child objects at the specified indices.
-	 *
-	 * @param {number} index1 - The index of the first child object.
-	 * @param {number} index2 - The index of the second child object.
-	 * @throws {Error} - If either index1 or index2 is out of range.
+	 * 두 인덱스의 자식 객체 위치를 서로 바꿉니다.
+	 * @param {number} index1 - 첫 번째 인덱스
+	 * @param {number} index2 - 두 번째 인덱스
 	 */
 	swapChildrenAt(index1: number, index2: number) {
-		validateUintRange(index1)
-		validateUintRange(index2)
+		validateUintRange(index1);
+		validateUintRange(index2);
 		if (index1 === index2) {
 			consoleAndThrowError("Error: index1 and index2 are identical. Cannot swap a child with itself.");
 		}
-		const len = this.#children.length
-		if (index1 >= len || index2 >= len) consoleAndThrowError(`Error: Both index1 and index2 should be less than the number of children. Provided index1: ${index1}, index2: ${index2}, number of children: ${len}`);
+		const len = this.#children.length;
+		if (index1 >= len || index2 >= len) {
+			consoleAndThrowError(`Error: Both index1 and index2 should be less than the number of children. Provided index1: ${index1}, index2: ${index2}, number of children: ${len}`);
+		}
 		let temp: Mesh = this.#children[index1];
 		this.#children[index1] = this.#children[index2];
 		this.#children[index2] = temp;
 	}
 
 	/**
-	 * Removes the specified child from the list of children.
-	 *
-	 * @param {Mesh} child - The child object to be removed.
-	 * @return {Mesh} - The removed child object, or null if the child was not found.
+	 * 특정 자식 객체를 제거합니다.
+	 * @param {Mesh} child - 제거할 자식 객체
+	 * @returns {Mesh} 제거된 객체
 	 */
 	removeChild(child: Mesh) {
 		this.#checkObject3DInstance(child);
@@ -216,9 +206,9 @@ class Object3DContainer {
 	}
 
 	/**
-	 * Removes a child at the specified index from the object's children array.
-	 * @param {number} index - The index of the child to be removed.
-	 * @returns {Mesh } Returns the removed child object, or null if the index is out of range or the child does not exist.
+	 * 지정된 인덱스의 자식 객체를 제거합니다.
+	 * @param {number} index - 제거할 위치
+	 * @returns {Mesh} 제거된 객체
 	 */
 	removeChildAt(index: number): Mesh {
 		validateUintRange(index);
@@ -232,43 +222,50 @@ class Object3DContainer {
 	}
 
 	/**
-	 * Remove all children from the current parent.
-	 *
-	 * @returns {Object} - The current parent object.
+	 * 모든 자식 객체를 제거합니다.
+	 * @returns {this} 현재 컨테이너
 	 */
 	removeAllChildren() {
-		let i = this.#children.length
+		let i = this.#children.length;
 		while (i--) {
-			this.#children[i].parent = null
+			this.#children[i].parent = null;
 		}
-		this.#children.length = 0
-		return this
-	}
-
-	#checkObject3DInstance(target: MeshBase) {
-		if (!(target instanceof Object3DContainer)) consoleAndThrowError('allow only Object3DContainer instance.')
+		this.#children.length = 0;
+		return this;
 	}
 
 	/**
-	 * Assigns the given child object to the current object as its parent.
-	 *
-	 * @param {Mesh} child - The child object to assign.
-	 * @returns {boolean} - Returns `true` if the child was successfully assigned, `false` otherwise.
+	 * 주어진 객체가 Object3DContainer의 인스턴스인지 확인합니다.
+	 * @param {MeshBase} target - 검사할 객체
+	 * @private
+	 */
+	#checkObject3DInstance(target: MeshBase) {
+		if (!(target instanceof Object3DContainer)) {
+			consoleAndThrowError('allow only Object3DContainer instance.');
+		}
+	}
+
+	/**
+	 * 자식 객체를 현재 컨테이너에 할당합니다.
+	 * 기존 부모가 있다면 제거 후 재할당합니다.
+	 * @param {Mesh} child - 할당할 자식 객체
+	 * @returns {boolean} 성공 여부
+	 * @private
 	 */
 	#assignChild = (child: Mesh): boolean => {
-		this.#checkObject3DInstance(child)
+		this.#checkObject3DInstance(child);
 		if (child.parent) {
 			if (child.parent?.removeChild(child)) {
-				child.parent = this
-				return true
+				child.parent = this;
+				return true;
 			} else {
-				return false
+				return false;
 			}
 		} else {
-			child.parent = this
-			return true
+			child.parent = this;
+			return true;
 		}
 	}
 }
 
-export default Object3DContainer
+export default Object3DContainer;
