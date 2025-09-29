@@ -9,7 +9,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * 임계값(Threshold) 후처리 이펙트입니다.
  * 지정한 임계값을 기준으로 픽셀을 흑백으로 변환합니다.
  *
- * @category PostEffect
+ * @category Adjustments
  *
  * @example
  * ```javascript

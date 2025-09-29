@@ -10,7 +10,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * 색온도(Kelvin), 틴트(그린/마젠타), 강도 값을 조절할 수 있습니다.
  * 다양한 조명 환경 프리셋 메서드를 제공합니다.
  *
- * @category PostEffect
+ * @category Adjustments
  *
  * @example
  * ```javascript

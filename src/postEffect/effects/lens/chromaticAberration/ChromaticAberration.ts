@@ -8,7 +8,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 /**
  * 색수차(Chromatic Aberration) 후처리 이펙트입니다.
  *
- * @category PostEffect
+ * @category Lens
  *
  * @example
  * ```javascript

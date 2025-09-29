@@ -11,7 +11,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * 안개(Fog) 후처리 이펙트입니다.
  * 지수/지수제곱 타입, 밀도, 시작/끝 거리, 색상 등 다양한 안개 효과를 지원합니다.
  *
- * @category PostEffect
+ * @category Fog
  *
  * @example
  * ```javascript

@@ -10,7 +10,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * 방향성 블러(Directional Blur) 후처리 이펙트입니다.
  * 각도와 강도를 지정해 원하는 방향으로 블러를 적용할 수 있습니다.
  *
- * @category PostEffect
+ * @category Blur
  *
  * @example
  * ```javascript

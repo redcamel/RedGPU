@@ -12,7 +12,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  *
  * 밝기 보존 옵션도 지원합니다.
  *
- * @category PostEffect
+ * @category Adjustments
  *
  * @example
  * ```javascript

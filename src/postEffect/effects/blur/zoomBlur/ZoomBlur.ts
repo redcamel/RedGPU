@@ -10,7 +10,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * 줌 블러(Zoom Blur) 후처리 이펙트입니다.
  * 중심점에서 방사형으로 퍼지는 블러 효과를 만듭니다.
  *
- * @category PostEffect
+ * @category Blur
  *
  * @example
  * ```javascript

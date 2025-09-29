@@ -12,7 +12,15 @@ export type ASinglePassPostEffectResult = {
 	textureView: GPUTextureView
 }
 
+/**
+ * 단일 패스 후처리 이펙트(ASinglePassPostEffect) 추상 클래스입니다.
+ * 한 번의 compute 패스로 동작하는 후처리 이펙트의 기반이 됩니다.
+ *
+ * @category Core
+ *
+ */
 class ASinglePassPostEffect {
+	// compute 셰이더 및 파이프라인 관련
 	#computeShaderMSAA: GPUShaderModule
 	#computeShaderNonMSAA: GPUShaderModule
 	#computeBindGroupLayout0: GPUBindGroupLayout
@@ -22,7 +30,7 @@ class ASinglePassPostEffect {
 	#computeBindGroupEntries0: GPUBindGroupEntry[]
 	#computeBindGroupEntries1: GPUBindGroupEntry[]
 	#computePipeline: GPUComputePipeline
-	///
+	// uniform 및 구조 정보
 	#uniformBuffer: UniformBuffer
 	#uniformsInfo
 	#systemUuniformsInfo
@@ -31,7 +39,7 @@ class ASinglePassPostEffect {
 	#SHADER_INFO_MSAA
 	#SHADER_INFO_NON_MSAA
 	#prevInfo
-	//
+	// 출력 텍스처
 	#outputTexture: GPUTexture
 	#outputTextureView: GPUTextureView
 	#WORK_SIZE_X = 16

@@ -9,7 +9,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * 색상/채도(Hue/Saturation) 후처리 이펙트입니다.
  * 색상(Hue)과 채도(Saturation)를 조절할 수 있습니다.
  *
- * @category PostEffect
+ * @category Adjustments
  *
  * @example
  * ```javascript

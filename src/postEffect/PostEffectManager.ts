@@ -10,22 +10,44 @@ import AMultiPassPostEffect from "./core/AMultiPassPostEffect";
 import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
 import postEffectSystemUniformCode from "./core/postEffectSystemUniform.wgsl"
 
+/**
+ * 후처리 이펙트(PostEffect) 관리 클래스입니다.
+ * 이펙트 추가/제거, 렌더링, 시스템 유니폼 관리, 비디오 메모리 계산 등 후처리 파이프라인을 통합적으로 제어합니다.
+ * @category Core
+ *
+ */
 class PostEffectManager {
+	/** 연결된 View3D 인스턴스 (읽기 전용) */
 	readonly #view: View3D
+	/** 등록된 후처리 이펙트 리스트 */
 	#postEffects: Array<ASinglePassPostEffect | AMultiPassPostEffect> = []
+	/** 내부 스토리지 텍스처 */
 	#storageTexture: GPUTexture
+	/** 소스 텍스처 뷰 */
 	#sourceTextureView: GPUTextureView
+	/** 스토리지 텍스처 뷰 */
 	#storageTextureView: GPUTextureView
+	/** Compute 워크그룹 X 크기 */
 	#COMPUTE_WORKGROUP_SIZE_X = 16
+	/** Compute 워크그룹 Y 크기 */
 	#COMPUTE_WORKGROUP_SIZE_Y = 4
+	/** Compute 워크그룹 Z 크기 */
 	#COMPUTE_WORKGROUP_SIZE_Z = 1
+	/** Compute 셰이더 모듈 */
 	#textureComputeShaderModule: GPUShaderModule
+	/** Compute 바인드 그룹 */
 	#textureComputeBindGroup: GPUBindGroup
+	/** Compute 바인드 그룹 레이아웃 */
 	#textureComputeBindGroupLayout: GPUBindGroupLayout
+	/** Compute 파이프라인 */
 	#textureComputePipeline: GPUComputePipeline
+	/** 이전 프레임 텍스처 크기 */
 	#previousDimensions: { width: number, height: number }
+	/** 시스템 유니폼 버퍼 */
 	#postEffectSystemUniformBuffer: UniformBuffer;
+	/** 시스템 유니폼 버퍼 구조 정보 */
 	#postEffectSystemUniformBufferStructInfo;
+	/** 비디오 메모리 사용량 (byte) */
 	#videoMemorySize: number = 0
 
 	constructor(view: View3D) {

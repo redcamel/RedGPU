@@ -7,7 +7,7 @@ import BlurY from "./blurY/BlurY";
  * 가우시안 블러(Gaussian Blur) 후처리 이펙트입니다.
  * X, Y 방향 블러를 적용해 부드러운 블러 효과를 만듭니다.
  *
- * @category PostEffect
+ * @category Blur
  *
  * @example
  * ```javascript

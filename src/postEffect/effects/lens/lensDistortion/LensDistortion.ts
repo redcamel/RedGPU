@@ -10,7 +10,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * 렌즈 왜곡(Lens Distortion) 후처리 이펙트입니다.
  * 배럴/핀쿠션 왜곡, 중심 위치를 조절할 수 있습니다.
  *
- * @category PostEffect
+ * @category Lens
  *
  * @example
  * ```javascript

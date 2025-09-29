@@ -7,7 +7,7 @@ import computeCode from "./wgsl/computeCode.wgsl"
  * 그레이스케일(Grayscale) 후처리 이펙트입니다.
  * 화면을 흑백으로 변환합니다.
  *
- * @category PostEffect
+ * @category Adjustments
  *
  * @example
  * ```javascript

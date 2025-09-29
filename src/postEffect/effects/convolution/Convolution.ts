@@ -35,7 +35,6 @@ const EMBOSE = ([
  *
  * 다양한 커널(NORMAL, SHARPEN, BLUR, EDGE, EMBOSE)로 이미지 효과를 줄 수 있습니다.
  *
- * @category PostEffect
  *
  * @example
  * ```javascript

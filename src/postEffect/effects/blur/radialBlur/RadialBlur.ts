@@ -10,7 +10,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * 방사형 블러(Radial Blur) 후처리 이펙트입니다.
  * 중심점, 강도, 샘플 수를 조절해 원형으로 퍼지는 블러 효과를 만듭니다.
  *
- * @category PostEffect
+ * @category Blur
  *
  * @example
  * ```javascript

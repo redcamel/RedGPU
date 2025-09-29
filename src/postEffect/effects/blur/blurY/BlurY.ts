@@ -8,7 +8,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 /**
  * Y축 방향 블러 후처리 효과를 제공하는 클래스입니다.
  *
- * @category PostEffect
+ * @category Blur
  *
  * @example
  * ```javascript

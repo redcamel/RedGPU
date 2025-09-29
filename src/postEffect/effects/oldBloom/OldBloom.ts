@@ -10,7 +10,6 @@ import OldBloomBlend from "./OldBloomBlend";
  * 올드 블룸(Old Bloom) 후처리 이펙트입니다.
  * 임계값, 가우시안 블러, 블렌드 단계를 거쳐 밝은 영역에 부드러운 빛 번짐 효과를 만듭니다.
  *
- * @category PostEffect
  *
  * @example
  * ```javascript

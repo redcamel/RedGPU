@@ -10,7 +10,7 @@ import DOFUnified from "./DOFUnified";
  * CoC(혼란 원) 계산과 블러를 결합해 사실적인 심도 효과를 제공합니다.
  * 다양한 사진/영상 스타일 프리셋 메서드를 지원합니다.
  *
- * @category PostEffect
+ * @category Lens
  *
  * @example
  * ```javascript

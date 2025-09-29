@@ -10,7 +10,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * 화면 가장자리를 어둡게 하여 집중도를 높이는 효과를 만듭니다.
  * size(범위), smoothness(부드러움)를 조절할 수 있습니다.
  *
- * @category PostEffect
+ * @category Lens
  *
  * @example
  * ```javascript

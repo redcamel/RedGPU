@@ -9,7 +9,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * 바이브런스/채도(Vibrance/Saturation) 후처리 이펙트입니다.
  * 채도와 바이브런스를 각각 조절할 수 있습니다.
  *
- * @category PostEffect
+ * @category Adjustments
  *
  * @example
  * ```javascript

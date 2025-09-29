@@ -37,7 +37,6 @@ const VINTAGE = {
  * 필름 그레인(Film Grain) 후처리 이펙트입니다.
  * 다양한 프리셋과 강도, 색상, 스케일, 채도 등 세부 조절이 가능합니다.
  *
- * @category PostEffect
  *
  * @example
  * ```javascript

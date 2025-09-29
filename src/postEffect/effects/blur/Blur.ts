@@ -9,7 +9,7 @@ import Convolution from "../convolution/Convolution";
  *
  * Convolution 기반의 블러 커널을 사용하여 단일 패스 블러를 구현합니다.
  *
- * @category PostEffect
+ * @category Blur
  *
  * @example
  * ```javascript

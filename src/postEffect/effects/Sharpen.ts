@@ -8,7 +8,6 @@ import Convolution from "./convolution/Convolution";
  * 샤픈(Sharpen) 후처리 이펙트입니다.
  * 컨볼루션 커널을 이용해 이미지의 경계와 디테일을 강조합니다.
  *
- * @category PostEffect
  *
  * @example
  * ```javascript

@@ -8,7 +8,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 /**
  * 밝기/대비 조절 후처리 이펙트입니다.
  *
- * @category PostEffect
+ * @category Adjustments
  *
  * @example
  * ```javascript
