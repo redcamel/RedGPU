@@ -1,6 +1,6 @@
 import Box from "./Box";
 import Circle from "./Circle";
-import Primitive from "./core/Primitive";
+// import Primitive from "./core/Primitive";
 import Cylinder from "./Cylinder";
 import Ground from "./Ground";
 import Plane from "./Plane";
@@ -9,7 +9,7 @@ import Torus from "./Torus";
 import TorusKnot from "./TorusKnot";
 
 export {
-	Primitive,
+	// Primitive,
 	Plane,
 	Sphere,
 	Torus,

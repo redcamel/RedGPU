@@ -10,20 +10,41 @@ import AABB from "../../utils/math/bound/AABB";
 import calculateGeometryAABB from "../../utils/math/bound/calculateGeometryAABB";
 
 /**
- * Class representing a primitive geometry.
+ * 기본 도형(Primitive) 클래스입니다.
+ * 정점 버퍼, 인덱스 버퍼, GPU 렌더 정보, AABB(바운딩 박스) 등을 관리합니다.
  *
- * @class Primitive
+ * @category Primitive
+ *
+ * @example
+ * ```javascript
+ * const primitive = new RedGPU.Primitive.Primitive(redGPUContext);
+ * primitive._setData(geometry);
+ * const vb = primitive.vertexBuffer;
+ * const ib = primitive.indexBuffer;
+ * const aabb = primitive.volume;
+ * ```
  */
 class Primitive {
+	/** GPU 렌더 정보 */
 	#gpuRenderInfo: GeometryGPURenderInfo
+	/** 정점 버퍼 */
 	#vertexBuffer: VertexBuffer
+	/** 인덱스 버퍼 */
 	#indexBuffer: IndexBuffer
+	/** AABB(바운딩 박스) */
 	#volume: AABB;
 
+	/**
+	 * Primitive 인스턴스 생성
+	 * @param redGPUContext RedGPUContext 인스턴스
+	 */
 	constructor(redGPUContext: RedGPUContext) {
 		validateRedGPUContext(redGPUContext)
 	}
 
+	/**
+	 * 기본 정점 레이아웃 구조 반환
+	 */
 	static get primitiveInterleaveStruct(): InterleavedStruct {
 		return new InterleavedStruct(
 			{
@@ -35,18 +56,22 @@ class Primitive {
 		)
 	}
 
+	/** GPU 렌더 정보 반환 */
 	get gpuRenderInfo(): { buffers: GPUVertexBufferLayout[] } {
 		return this.#gpuRenderInfo;
 	}
 
+	/** 정점 버퍼 반환 */
 	get vertexBuffer(): VertexBuffer {
 		return this.#vertexBuffer;
 	}
 
+	/** 인덱스 버퍼 반환 */
 	get indexBuffer(): IndexBuffer {
 		return this.#indexBuffer;
 	}
 
+	/** AABB(바운딩 박스) 반환 */
 	get volume(): AABB {
 		if (!this.#volume) {
 			this.#volume = calculateGeometryAABB(this.#vertexBuffer);
@@ -54,6 +79,10 @@ class Primitive {
 		return this.#volume;
 	}
 
+	/**
+	 * Geometry 데이터로 내부 버퍼/정보를 설정합니다.
+	 * @param geometry Geometry 인스턴스
+	 */
 	_setData(geometry: Geometry) {
 		this.#vertexBuffer = geometry.vertexBuffer
 		this.#indexBuffer = geometry.indexBuffer
