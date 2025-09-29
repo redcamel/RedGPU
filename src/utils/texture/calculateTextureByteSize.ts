@@ -1,3 +1,12 @@
+/**
+ * 주어진 GPUTexture 객체의 바이트 크기를 계산합니다.
+ *
+ * 텍스처의 크기, 포맷, 샘플 수를 바탕으로 전체 바이트 크기를 반환합니다.
+ *
+ * @category Texture
+ * @param texture 바이트 크기를 계산할 GPUTexture 객체
+ * @returns 계산된 텍스처의 전체 바이트 크기
+ */
 function calculateTextureByteSize(texture: GPUTexture): number {
 	const descriptor: GPUTextureDescriptor = {
 		size: [texture.width, texture.height, texture.depthOrArrayLayers],
@@ -11,6 +20,14 @@ function calculateTextureByteSize(texture: GPUTexture): number {
 	return bytesPerTexel * texelCount * sampleCount;
 }
 
+/**
+ * 주어진 GPUTextureFormat에 해당하는 텍셀의 바이트 크기를 반환합니다.
+ *
+ * @category Texture
+ * @param format GPUTextureFormat 문자열
+ * @returns 해당 포맷의 텍셀 바이트 크기
+ * @throws {Error} 인식할 수 없는 포맷일 경우 예외 발생
+ */
 function getTextureFormatByteSize(format: GPUTextureFormat): number {
 	switch (format) {
 		case 'r8unorm':

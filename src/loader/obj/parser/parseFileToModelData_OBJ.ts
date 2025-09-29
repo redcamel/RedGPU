@@ -1,5 +1,5 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import createUUID from "../../../utils/createUUID";
+import createUUID from "../../../utils/uuid/createUUID";
 import MeshInfo_OBJ from "../cls/MeshInfo_OBJ";
 import TotalPointInfo_OBJ from "../cls/TotalPointInfo_OBJ";
 import OBJLoader from "../OBJLoader";

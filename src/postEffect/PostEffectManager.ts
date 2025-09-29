@@ -5,7 +5,7 @@ import View3D from "../display/view/View3D";
 import UniformBuffer from "../resources/buffer/uniformBuffer/UniformBuffer";
 import Sampler from "../resources/sampler/Sampler";
 import parseWGSL from "../resources/wgslParser/parseWGSL";
-import calculateTextureByteSize from "../utils/math/calculateTextureByteSize";
+import calculateTextureByteSize from "../utils/texture/calculateTextureByteSize";
 import AMultiPassPostEffect from "./core/AMultiPassPostEffect";
 import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
 import postEffectSystemUniformCode from "./core/postEffectSystemUniform.wgsl"

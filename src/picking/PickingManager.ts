@@ -2,7 +2,7 @@ import RedGPUContext from "../context/RedGPUContext";
 import InstancingMesh from "../display/instancingMesh/InstancingMesh";
 import Mesh from "../display/mesh/Mesh";
 import View3D from "../display/view/View3D";
-import calculateTextureByteSize from "../utils/math/calculateTextureByteSize";
+import calculateTextureByteSize from "../utils/texture/calculateTextureByteSize";
 import PickingEvent from "./core/PickingEvent";
 import PICKING_EVENT_TYPE from "./PICKING_EVENT_TYPE";
 

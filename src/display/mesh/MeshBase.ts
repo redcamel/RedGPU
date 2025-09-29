@@ -9,10 +9,10 @@ import DepthStencilState from "../../renderState/DepthStencilState";
 import PrimitiveState from "../../renderState/PrimitiveState";
 import VertexBuffer from "../../resources/buffer/vertexBuffer/VertexBuffer";
 import validateRedGPUContext from "../../runtimeChecker/validateFunc/validateRedGPUContext";
-import createUUID from "../../utils/createUUID";
-import getScreenPoint from "../../utils/math/getScreenPoint";
-import localToWorld from "../../utils/math/localToWorld";
-import worldToLocal from "../../utils/math/worldToLocal";
+import createUUID from "../../utils/uuid/createUUID";
+import getScreenPoint from "../../utils/math/coordinates/getScreenPoint";
+import localToWorld from "../../utils/math/coordinates/localToWorld";
+import worldToLocal from "../../utils/math/coordinates/worldToLocal";
 import View3D from "../view/View3D";
 import Object3DContainer from "./core/Object3DContainer";
 

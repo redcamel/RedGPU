@@ -1,8 +1,8 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validateRedGPUContext";
 import {keepLog} from "../../../utils";
-import calculateTextureByteSize from "../../../utils/math/calculateTextureByteSize";
-import getMipLevelCount from "../../../utils/math/getMipLevelCount";
+import calculateTextureByteSize from "../../../utils/texture/calculateTextureByteSize";
+import getMipLevelCount from "../../../utils/texture/getMipLevelCount";
 import View3D from "../View3D";
 
 /**

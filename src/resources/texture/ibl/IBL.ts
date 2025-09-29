@@ -4,7 +4,7 @@ import GPU_FILTER_MODE from "../../../gpuConst/GPU_FILTER_MODE";
 import GPU_MIPMAP_FILTER_MODE from "../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import {keepLog} from "../../../utils";
-import createUUID from "../../../utils/createUUID";
+import createUUID from "../../../utils/uuid/createUUID";
 import Sampler from "../../sampler/Sampler";
 import CubeTexture from "../CubeTexture";
 import HDRTexture from "../hdr/HDRTexture";

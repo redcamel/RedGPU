@@ -3,7 +3,7 @@ import InstancingMesh from "../display/instancingMesh/InstancingMesh";
 import Mesh from "../display/mesh/Mesh";
 import validatePositiveNumberRange from "../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import validateUintRange from "../runtimeChecker/validateFunc/validateUintRange";
-import calculateTextureByteSize from "../utils/math/calculateTextureByteSize";
+import calculateTextureByteSize from "../utils/texture/calculateTextureByteSize";
 
 class DirectionalShadowManager {
 	#shadowDepthTextureSize: number = 2048

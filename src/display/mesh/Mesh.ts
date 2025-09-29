@@ -16,7 +16,7 @@ import calculateMeshCombinedAABB from "../../utils/math/bound/calculateMeshCombi
 import calculateMeshOBB from "../../utils/math/bound/calculateMeshOBB";
 import OBB from "../../utils/math/bound/OBB";
 import mat4ToEuler from "../../utils/math/matToEuler";
-import uuidToUint from "../../utils/uuidToUint";
+import uuidToUint from "../../utils/uuid/uuidToUint";
 import DrawDebuggerMesh from "../drawDebugger/DrawDebuggerMesh";
 import createMeshVertexUniformBuffers from "./core/createMeshVertexUniformBuffers";
 import Object3DContainer from "./core/Object3DContainer";

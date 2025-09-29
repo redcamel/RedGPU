@@ -5,17 +5,17 @@ import calculateMeshCombinedAABB from "./bound/calculateMeshCombinedAABB";
 import calculateMeshOBB from "./bound/calculateMeshOBB";
 import OBB from "./bound/OBB";
 import calculateNormals from "./calculateNormals";
-import calculateTextureByteSize from "./calculateTextureByteSize";
+import calculateTextureByteSize from "../texture/calculateTextureByteSize";
 import computeViewFrustumPlanes from "./computeViewFrustumPlanes";
 import formatBytes from "./formatBytes";
-import getMipLevelCount from "./getMipLevelCount";
-import getScreenPoint from "./getScreenPoint";
-import localToWorld from "./localToWorld";
+import getMipLevelCount from "../texture/getMipLevelCount";
+import getScreenPoint from "./coordinates/getScreenPoint";
+import localToWorld from "./coordinates/localToWorld";
 import matToEuler from "./matToEuler";
 import quaternionToRotationMat4 from "./quaternionToRotationMat4";
-import screenToWorld from "./screenToWorld";
+import screenToWorld from "./coordinates/screenToWorld";
 import sortTransparentObjects from "./sortTransparentObjects";
-import worldToLocal from "./worldToLocal";
+import worldToLocal from "./coordinates/worldToLocal";
 
 export {
 	getScreenPoint,

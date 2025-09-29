@@ -6,7 +6,7 @@ import FXAA from "../../../postEffect/FXAA";
 import TAA from "../../../postEffect/TAA/TAA";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import InstanceIdGenerator from "../../../utils/InstanceIdGenerator";
-import screenToWorld from "../../../utils/math/screenToWorld";
+import screenToWorld from "../../../utils/math/coordinates/screenToWorld";
 import DrawDebuggerAxis from "../../drawDebugger/DrawDebuggerAxis";
 import DrawDebuggerGrid from "../../drawDebugger/grid/DrawDebuggerGrid";
 import Scene from "../../scene/Scene";

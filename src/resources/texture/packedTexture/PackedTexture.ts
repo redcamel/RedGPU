@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import createUUID from "../../../utils/createUUID";
-import getMipLevelCount from "../../../utils/math/getMipLevelCount";
+import createUUID from "../../../utils/uuid/createUUID";
+import getMipLevelCount from "../../../utils/texture/getMipLevelCount";
 import Sampler from "../../sampler/Sampler";
 import computeShaderCode from "./computeShader.wgsl";
 

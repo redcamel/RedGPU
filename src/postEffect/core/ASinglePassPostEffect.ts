@@ -5,7 +5,7 @@ import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../material"
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import {keepLog} from "../../utils";
-import calculateTextureByteSize from "../../utils/math/calculateTextureByteSize";
+import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSize";
 
 export type ASinglePassPostEffectResult = {
 	texture: GPUTexture

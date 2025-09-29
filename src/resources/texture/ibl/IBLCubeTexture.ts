@@ -1,5 +1,5 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import calculateTextureByteSize from "../../../utils/math/calculateTextureByteSize";
+import calculateTextureByteSize from "../../../utils/texture/calculateTextureByteSize";
 import ManagementResourceBase from "../../ManagementResourceBase";
 import ResourceStateCubeTexture from "../../resourceManager/resourceState/texture/ResourceStateCubeTexture";
 import CubeTexture from "../CubeTexture";

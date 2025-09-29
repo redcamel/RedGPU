@@ -6,7 +6,7 @@ import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumberRange";
 import {keepLog} from "../../utils";
-import calculateTextureByteSize from "../../utils/math/calculateTextureByteSize";
+import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSize";
 import {ASinglePassPostEffectResult} from "../core/ASinglePassPostEffect";
 import postEffectSystemUniform from "../core/postEffectSystemUniform.wgsl"
 import computeCode from "./wgsl/computeCode.wgsl"

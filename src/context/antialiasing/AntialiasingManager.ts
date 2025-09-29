@@ -1,4 +1,4 @@
-import createUUID from "../../utils/createUUID";
+import createUUID from "../../utils/uuid/createUUID";
 import RedGPUContext from "../RedGPUContext";
 
 class AntialiasingManager {
