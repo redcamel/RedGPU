@@ -1,5 +1,5 @@
 import {WgslReflect} from "wgsl_reflect";
-import UniformType from "../buffer/core/type/UniformType";
+import UniformType from "./UniformType";
 import preprocessWGSL from "./preprocessWGSL";
 
 const createUniformMember = (curr, start, typeName) => {

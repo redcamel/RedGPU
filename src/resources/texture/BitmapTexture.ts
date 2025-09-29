@@ -5,8 +5,8 @@ import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSi
 import getMipLevelCount from "../../utils/texture/getMipLevelCount";
 import ManagementResourceBase from "../ManagementResourceBase";
 import ResourceStateBitmapTexture from "../resourceManager/resourceState/texture/ResourceStateBitmapTexture";
-import imageBitmapToGPUTexture from "./core/imageBitmapToGPUTexture";
-import loadAndCreateBitmapImage from "./core/loadAndCreateBitmapImage";
+import imageBitmapToGPUTexture from "../../utils/texture/imageBitmapToGPUTexture";
+import loadAndCreateBitmapImage from "../../utils/texture/loadAndCreateBitmapImage";
 const MANAGED_STATE_KEY = 'managedBitmapTextureState'
 type SrcInfo = string | { src: string, cacheKey: string }
 

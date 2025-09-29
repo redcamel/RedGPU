@@ -4,6 +4,7 @@ import InterleavedStructElement from "./InterleavedStructElement";
 
 /**
  * Represents a structure for interleaving vertex attributes.
+ * @category Buffer
  */
 export default class InterleavedStruct {
 	#define: Record<string, InterleavedStructElement>;

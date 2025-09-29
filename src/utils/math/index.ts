@@ -22,8 +22,6 @@ export {
 	screenToWorld,
 	localToWorld,
 	worldToLocal,
-	getMipLevelCount,
-	calculateTextureByteSize,
 	//
 	AABB,
 	OBB,

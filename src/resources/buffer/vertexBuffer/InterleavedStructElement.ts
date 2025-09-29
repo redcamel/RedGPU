@@ -1,5 +1,8 @@
 import {TypeInterleave} from "../core/type/InterleaveType";
 
+/**
+ * @category Buffer
+ */
 class InterleavedStructElement {
 	attributeName: string;
 	attributeStride: number;

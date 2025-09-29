@@ -3,8 +3,8 @@ import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSi
 import getMipLevelCount from "../../utils/texture/getMipLevelCount";
 import ManagementResourceBase from "../ManagementResourceBase";
 import ResourceStateCubeTexture from "../resourceManager/resourceState/texture/ResourceStateCubeTexture";
-import imageBitmapToGPUTexture from "./core/imageBitmapToGPUTexture";
-import loadAndCreateBitmapImage from "./core/loadAndCreateBitmapImage";
+import imageBitmapToGPUTexture from "../../utils/texture/imageBitmapToGPUTexture";
+import loadAndCreateBitmapImage from "../../utils/texture/loadAndCreateBitmapImage";
 
 const MANAGED_STATE_KEY = 'managedCubeTextureState'
 

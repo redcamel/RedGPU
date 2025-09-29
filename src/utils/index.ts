@@ -1,6 +1,5 @@
 import copyGPUBuffer from "./copyGPUBuffer";
 import InstanceIdGenerator from "./InstanceIdGenerator";
-import copyToTextureArray from "./texture/copyToTextureArray";
 import createUUID from "./uuid/createUUID";
 import uuidToUint from "./uuid/uuidToUint";
 
@@ -12,12 +11,12 @@ const keepLog = console.log.bind(console);
 export * from "./convertColor";
 export * from "./file";
 export * from "./math";
+export * from "./texture";
 export {
 	keepLog,
 	createUUID,
 	uuidToUint,
 	copyGPUBuffer,
-	copyToTextureArray,
 	InstanceIdGenerator
 }
 
