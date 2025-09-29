@@ -8,21 +8,52 @@ import AController from "../core/AController";
 
 let currentEventView: View3D;
 
+/**
+ * 오빗(Orbit) 카메라 컨트롤러 클래스입니다.
+ * 마우스/터치 드래그로 회전, 휠로 줌, 중심점/거리/회전/틸트 등 다양한 파라미터를 지원합니다.
+ * 여러 View3D에서 동시에 사용할 수 있습니다.
+ *
+ * @category Controller
+ *
+ * @example
+ * ```javascript
+ * const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+ * controller.centerX = 0;
+ * controller.centerY = 0;
+ * controller.centerZ = 0;
+ * controller.distance = 20;
+ * controller.tilt = -30;
+ * controller.pan = 45;
+ * ```
+ */
 class OrbitController extends AController {
+	/** 인스턴스 고유 ID */
 	#instanceId: number;
+	/** 컨트롤러 이름 */
 	#name: string;
-	// 공통 설정값들
+	/** 중심 X */
 	#centerX = 0;
+	/** 중심 Y */
 	#centerY = 0;
+	/** 중심 Z */
 	#centerZ = 0;
+	/** 카메라 거리. 기본값 15 */
 	#distance = 15;
+	/** 줌 속도. 기본값 2 */
 	#speedDistance = 2;
+	/** 줌 보간 딜레이. 기본값 0.1 */
 	#delayDistance = 0.1;
+	/** 회전 속도. 기본값 3 */
 	#speedRotation = 3;
+	/** 회전 보간 딜레이. 기본값 0.1 */
 	#delayRotation = 0.1;
+	/** 틸트(수직 각도). 기본값 -35 */
 	#tilt = -35;
+	/** 최소 틸트. 기본값 -90 */
 	#minTilt = -90;
+	/** 최대 틸트. 기본값 90 */
 	#maxTilt = 90;
+	/** 팬(수평 각도). 기본값 0 */
 	#pan = 0;
 	// 애니메이션용 현재 상태
 	#currentPan = 0;

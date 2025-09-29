@@ -13,6 +13,7 @@ import BaseLight from "../core/BaseLight";
  * const ambient = new RedGPU.Light.AmbientLight();
  * scene.lightManager.ambientLight = ambient;
  * ```
+ * @category Light
  */
 class AmbientLight extends BaseLight {
 	/**

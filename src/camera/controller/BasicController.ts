@@ -23,8 +23,28 @@ type KeyNameMapper = {
 	turnDown: string
 };
 
+/**
+ * 기본 3D 카메라 컨트롤러(BasicController) 클래스입니다.
+ * 키보드(WASD, QERFTG)와 마우스/터치로 카메라 이동·회전이 가능합니다.
+ * 속도, 가속도, 키 매핑 등 다양한 파라미터를 지원합니다.
+ *
+ * @category Controller
+ *
+ * @example
+ * ```javascript
+ * const controller = new RedGPU.Camera.BasicController(redGPUContext);
+ * controller.x = 10;
+ * controller.y = 5;
+ * controller.z = 20;
+ * controller.pan = 30;
+ * controller.tilt = 10;
+ * controller.setMoveForwardKey('ArrowUp');
+ * ```
+ */
 class BasicController extends AController {
+	/** 연결된 View3D 인스턴스 */
 	#targetView: View3D;
+	/** 키 매핑 정보 */
 	#keyNameMapper: KeyNameMapper = {
 		moveForward: 'w',
 		moveBack: 's',
@@ -32,24 +52,30 @@ class BasicController extends AController {
 		moveRight: 'd',
 		moveUp: 't',
 		moveDown: 'g',
-		//
 		turnLeft: 'q',
 		turnRight: 'e',
 		turnUp: 'r',
 		turnDown: 'f'
 	}
-	//
+	/** 이동 속도. 기본값 1 */
 	#speed: number = 1
+	/** 이동 보간 딜레이. 기본값 0.1 */
 	#delay: number = 0.1
+	/** 회전 속도. 기본값 1 */
 	#speedRotation: number = 1
+	/** 회전 보간 딜레이. 기본값 0.1 */
 	#delayRotation: number = 0.1
+	/** 최대 가속도. 기본값 3 */
 	#maxAcceleration: number = 3
+	/** 현재 가속도 */
 	#currentAcceleration: number = 0
-	//
+	/** 목표 위치 [x, y, z] */
 	#desirePosition: [number, number, number] = [0, 0, 0]
+	/** 목표 pan(수평 회전) */
 	#desirePan: number = 0
+	/** 목표 tilt(수직 회전) */
 	#desireTilt: number = 0
-	//
+	/** 내부 이동용 Mesh */
 	#targetMesh: Mesh
 
 	constructor(redGPUContext: RedGPUContext) {

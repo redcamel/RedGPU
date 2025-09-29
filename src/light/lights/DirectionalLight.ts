@@ -15,6 +15,8 @@ import BaseLight from "../core/BaseLight";
  * ```
  *
  * <iframe src="/RedGPU/examples/3d/light/directionalLight/" ></iframe>
+ *
+ * @category Light
  */
 class DirectionalLight extends BaseLight {
 	/**
