@@ -22,6 +22,10 @@ const BASIC_OPTIONS = {
 	noiseDimension: NOISE_DIMENSION.MODE_2D,
 }
 
+/**
+ * @category NoiseTexture
+ * @experimental
+ */
 class SimplexTexture extends ANoiseTexture {
 	#frequency: number = BASIC_OPTIONS.frequency;      /* 노이즈 패턴의 밀도/크기 (값이 클수록 세밀함) */
 	#amplitude: number = BASIC_OPTIONS.amplitude;      /* 노이즈의 강도/대비 (값이 클수록 명암 대비 강함) */

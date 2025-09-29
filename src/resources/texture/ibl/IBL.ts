@@ -11,6 +11,9 @@ import HDRTexture from "../hdr/HDRTexture";
 import IBLCubeTexture from "./IBLCubeTexture";
 import irradianceShaderCode from "./irradianceShaderCode.wgsl"
 
+/**
+ * @category IBL
+ */
 class IBL {
 	#redGPUContext: RedGPUContext
 	#sourceCubeTexture: GPUTexture

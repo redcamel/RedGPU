@@ -1,3 +1,7 @@
+/**
+ * @category NoiseTexture
+ * @experimental
+ */
 const NOISE_DIMENSION = {
 	MODE_1D: 1,
 	MODE_2D: 2,

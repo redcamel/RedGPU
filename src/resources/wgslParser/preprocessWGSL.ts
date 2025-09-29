@@ -111,6 +111,7 @@ const generateDefaultSource = (defines: string, conditionalBlocks: ConditionalBl
 };
 /**
  * WGSL 전처리 메인 함수
+ * @category WGSL
  */
 const preprocessWGSL = (code: string): PreprocessedWGSLResult => {
 	// 캐시 확인

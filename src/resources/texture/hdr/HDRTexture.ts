@@ -32,6 +32,7 @@ interface LuminanceAnalysis {
 /**
  * HDRTexture 클래스
  * 지원 형식: .hdr (Radiance HDR/RGBE) 형식만 지원
+ * @category Texture
  */
 class HDRTexture extends ManagementResourceBase {
 	#gpuTexture: GPUTexture

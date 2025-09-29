@@ -1,3 +1,4 @@
+
 import RedGPUContext from "../../context/RedGPUContext";
 import getAbsoluteURL from "../../utils/file/getAbsoluteURL";
 import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSize";
@@ -6,22 +7,45 @@ import ManagementResourceBase from "../ManagementResourceBase";
 import ResourceStateBitmapTexture from "../resourceManager/resourceState/texture/ResourceStateBitmapTexture";
 import imageBitmapToGPUTexture from "./core/imageBitmapToGPUTexture";
 import loadAndCreateBitmapImage from "./core/loadAndCreateBitmapImage";
-
 const MANAGED_STATE_KEY = 'managedBitmapTextureState'
 type SrcInfo = string | { src: string, cacheKey: string }
 
+/**
+ * BitmapTexture
+ * @category Texture
+ */
 class BitmapTexture extends ManagementResourceBase {
+	/** GPUTexture 객체 */
 	#gpuTexture: GPUTexture
+	/** 텍스처 소스 경로 */
 	#src: string
+	/** 밉맵 레벨 개수 */
 	#mipLevelCount: number
+	/** 밉맵 사용 여부 */
 	#useMipmap: boolean
+	/** 이미지 비트맵 객체 */
 	#imgBitmap: ImageBitmap
+	/** 비디오 메모리 사용량(byte) */
 	#videoMemorySize: number = 0
+	/** 프리멀티플 알파 사용 여부 */
 	#usePremultiplyAlpha: boolean = true
+	/** 텍스처 포맷 */
 	readonly #format: GPUTextureFormat
+	/** 로드 완료 콜백 */
 	readonly #onLoad: (textureInstance: BitmapTexture) => void;
+	/** 에러 콜백 */
 	readonly #onError: (error: Error) => void;
 
+	/**
+	 * BitmapTexture 생성자
+	 * @param redGPUContext - RedGPUContext 인스턴스
+	 * @param src - 텍스처 소스 정보
+	 * @param useMipMap - 밉맵 사용 여부(기본값: true)
+	 * @param onLoad - 로드 완료 콜백
+	 * @param onError - 에러 콜백
+	 * @param format - 텍스처 포맷(옵션)
+	 * @param usePremultiplyAlpha - 프리멀티플 알파 사용 여부(기본값: false)
+	 */
 	constructor(
 		redGPUContext: RedGPUContext,
 		src?: SrcInfo,
@@ -56,49 +80,60 @@ class BitmapTexture extends ManagementResourceBase {
 		}
 	}
 
+	/** 텍스처의 가로 크기 */
 	get width(): number {
 		return this.#imgBitmap?.width || 0
 	}
 
+	/** 텍스처의 세로 크기 */
 	get height(): number {
 		return this.#imgBitmap?.height || 0
 	}
 
+	/** 프리멀티플 알파 사용 여부 반환 */
 	get usePremultiplyAlpha(): boolean {
 		return this.#usePremultiplyAlpha;
 	}
 
+	/** 비디오 메모리 사용량(byte) 반환 */
 	get videoMemorySize(): number {
 		return this.#videoMemorySize;
 	}
 
+	/** GPUTexture 객체 반환 */
 	get gpuTexture(): GPUTexture {
 		return this.#gpuTexture;
 	}
 
+	/** 밉맵 레벨 개수 반환 */
 	get mipLevelCount(): number {
 		return this.#mipLevelCount;
 	}
 
+	/** 텍스처 소스 경로 반환 */
 	get src(): string {
 		return this.#src;
 	}
 
+	/** 텍스처 소스 경로 설정 및 로드 */
 	set src(value: SrcInfo) {
 		this.#src = this.#getParsedSrc(value);
 		this.cacheKey = this.#getCacheKey(value);
 		if (this.#src) this.#loadBitmapTexture(this.#src);
 	}
 
+	/** 밉맵 사용 여부 반환 */
 	get useMipmap(): boolean {
 		return this.#useMipmap;
 	}
 
+	/** 밉맵 사용 여부 설정 및 텍스처 재생성 */
 	set useMipmap(value: boolean) {
 		this.#useMipmap = value;
 		this.#createGPUTexture()
 	}
 
+	/** 텍스처와 리소스 해제 */
 	destroy() {
 		//TODO 체크
 		const temp = this.#gpuTexture
@@ -110,6 +145,12 @@ class BitmapTexture extends ManagementResourceBase {
 		if (temp) temp.destroy()
 	}
 
+	/**
+	 * SrcInfo로부터 캐시 키를 생성합니다.
+	 * @param srcInfo - 텍스처 소스 정보
+	 * @returns 캐시 키 문자열
+	 * @category Texture
+	 */
 	#getCacheKey(srcInfo?: SrcInfo): string {
 		if (!srcInfo) {
 			return this.uuid;
@@ -121,24 +162,47 @@ class BitmapTexture extends ManagementResourceBase {
 		}
 	}
 
+	/**
+	 * SrcInfo로부터 src 문자열을 추출합니다.
+	 * @param srcInfo - 텍스처 소스 정보
+	 * @returns src 문자열
+	 * @category Texture
+	 */
 	#getParsedSrc(srcInfo?: SrcInfo): string {
 		return typeof srcInfo === 'string' ? srcInfo : srcInfo.src
 	}
 
+	/**
+	 * GPUTexture 객체를 설정합니다.
+	 * @param value - GPUTexture 객체
+	 * @category Texture
+	 */
 	#setGpuTexture(value: GPUTexture) {
 		this.#gpuTexture = value;
 		if (!value) this.#imgBitmap = null
 		this.__fireListenerList();
 	}
 
+	/**
+	 * 리소스를 등록합니다.
+	 * @category Texture
+	 */
 	#registerResource() {
 		this.redGPUContext.resourceManager.registerManagementResource(this, new ResourceStateBitmapTexture(this));
 	}
 
+	/**
+	 * 리소스 등록을 해제합니다.
+	 * @category Texture
+	 */
 	#unregisterResource() {
 		this.redGPUContext.resourceManager.unregisterManagementResource(this);
 	}
 
+	/**
+	 * GPUTexture 객체를 생성합니다.
+	 * @category Texture
+	 */
 	#createGPUTexture() {
 		const {gpuDevice, resourceManager} = this.redGPUContext
 		const {mipmapGenerator} = resourceManager
@@ -172,6 +236,12 @@ class BitmapTexture extends ManagementResourceBase {
 		// console.log('오긴오나')
 	}
 
+	/**
+	 * SVG 이미지를 ImageBitmap으로 변환합니다.
+	 * @param src - SVG 이미지 경로
+	 * @returns ImageBitmap 객체
+	 * @category Texture
+	 */
 	async #convertSvgToImageBitmap(src: string): Promise<ImageBitmap> {
 		return new Promise((resolve, reject) => {
 			const svgImage = new Image();
@@ -203,6 +273,11 @@ class BitmapTexture extends ManagementResourceBase {
 		});
 	}
 
+	/**
+	 * 비트맵 텍스처를 비동기 로드합니다.
+	 * @param src - 이미지 경로
+	 * @category Texture
+	 */
 	async #loadBitmapTexture(src: string) {
 		try {
 			if (src.endsWith(".svg")) {

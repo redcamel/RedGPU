@@ -1,31 +1,56 @@
+
 import RedGPUContext from "../../../context/RedGPUContext";
 import createUUID from "../../../utils/uuid/createUUID";
 import getMipLevelCount from "../../../utils/texture/getMipLevelCount";
 import Sampler from "../../sampler/Sampler";
 import computeShaderCode from "./computeShader.wgsl";
 
+/**
+ * 컴포넌트 매핑 타입 정의 (r/g/b/a 채널별 매핑)
+ */
 type ComponentMapping = {
-	r?: 'r' | 'g' | 'b' | 'a';  // r 채널에서 사용할 컴포넌트
-	g?: 'r' | 'g' | 'b' | 'a';  // g 채널에서 사용할 컴포넌트
-	b?: 'r' | 'g' | 'b' | 'a';  // b 채널에서 사용할 컴포넌트
-	a?: 'r' | 'g' | 'b' | 'a';  // a 채널에서 사용할 컴포넌트
+	r?: 'r' | 'g' | 'b' | 'a';
+	g?: 'r' | 'g' | 'b' | 'a';
+	b?: 'r' | 'g' | 'b' | 'a';
+	a?: 'r' | 'g' | 'b' | 'a';
 };
+
+/**
+ * 패킹된 텍스처 캐시 맵
+ */
 const cacheMap: Map<string, { gpuTexture: GPUTexture, useNum: number, mappingKey: string, uuid: string }> = new Map();
-// 인스턴스별 현재 사용 중인 키 추적을 위한 WeakMap
+/**
+ * 인스턴스별 현재 사용 중인 키 추적용 WeakMap
+ */
 const instanceMappingKeys: WeakMap<PackedTexture, string> = new WeakMap();
 let globalPipeline: GPURenderPipeline;
 let globalBindGroupLayout: GPUBindGroupLayout;
 let mappingBuffer: GPUBuffer;
 
+/**
+ * 여러 텍스처의 채널을 조합해 하나의 텍스처로 패킹하는 유틸리티 클래스입니다.
+ * @category Texture
+ */
 class PackedTexture {
+	/** 인스턴스 고유 식별자 */ 
 	#uuid: string = createUUID();
+	/** RedGPUContext 인스턴스 */
 	#redGPUContext: RedGPUContext;
+	/** 샘플러 객체 */
 	#sampler: GPUSampler;
+	/** 패킹 결과 GPUTexture 객체 */
 	#gpuTexture: GPUTexture;
+	/** GPU 디바이스 객체 */
 	#gpuDevice: GPUDevice;
+	/** 바인드 그룹 객체 */
 	#bindGroup: GPUBindGroup;
+	/** 임시 바인드 그룹 캐시 */
 	#tempBindGroupCache: Map<string, GPUBindGroup> = new Map();
 
+	/**
+	 * PackedTexture 생성자
+	 * @param redGPUContext - RedGPUContext 인스턴스
+	 */
 	constructor(redGPUContext: RedGPUContext) {
 		this.#redGPUContext = redGPUContext;
 		this.#gpuDevice = redGPUContext.gpuDevice;
@@ -33,18 +58,29 @@ class PackedTexture {
 		this.#sampler = this.#createSampler();
 	}
 
+	/** 인스턴스 고유 식별자 반환 */
 	get uuid(): string {
 		return this.#uuid;
 	}
 
+	/** 패킹 결과 GPUTexture 객체 반환 */
 	get gpuTexture(): GPUTexture {
 		return this.#gpuTexture;
 	}
 
+	/** 패킹 텍스처 캐시 맵 반환 (static) */
 	static getCacheMap() {
 		return cacheMap;
 	}
 
+	/**
+	 * 여러 텍스처의 채널을 조합해 패킹 텍스처를 생성합니다.
+	 * @param textures - r/g/b/a 채널별 GPUTexture 객체
+	 * @param width - 결과 텍스처의 가로 크기
+	 * @param height - 결과 텍스처의 세로 크기
+	 * @param label - 텍스처 레이블(옵션)
+	 * @param componentMapping - 채널별 매핑 정보(옵션)
+	 */
 	async packing(
 		textures: { r?: GPUTexture; g?: GPUTexture; b?: GPUTexture; a?: GPUTexture },
 		width: number,
@@ -96,6 +132,9 @@ class PackedTexture {
 		}
 	}
 
+	/**
+	 * 글로벌 리소스(파이프라인, 레이아웃, 매핑버퍼) 초기화
+	 */
 	#initializeGlobals() {
 		mappingBuffer = this.#redGPUContext.resourceManager.createGPUBuffer('PACK_TEXTURE_MAPPING_BUFFER', {
 			size: 16, // 4개 컴포넌트 * 4바이트
@@ -121,6 +160,10 @@ class PackedTexture {
 		}
 	}
 
+	/**
+	 * 텍스처 조합에 맞는 바인드 그룹을 갱신합니다.
+	 * @param textures - r/g/b/a 채널별 GPUTexture 객체
+	 */
 	#updateBindGroup(textures: { r?: GPUTexture; g?: GPUTexture; b?: GPUTexture; a?: GPUTexture }) {
 		const textureKey = `${textures.r?.label || 'empty'}_${textures.g?.label || 'empty'}_${textures.b?.label || 'empty'}_${textures.a?.label || 'empty'}`;
 		const {resourceManager} = this.#redGPUContext
@@ -155,6 +198,10 @@ class PackedTexture {
 		this.#bindGroup = this.#tempBindGroupCache.get(textureKey)!;
 	}
 
+	/**
+	 * 캐시 관리 및 사용 횟수 갱신
+	 * @param mappingKey - 매핑 키 문자열
+	 */
 	#handleCacheManagement(mappingKey: string) {
 		// 현재 인스턴스가 사용 중인 이전 키 확인
 		const prevMappingKey = instanceMappingKeys.get(this);
@@ -184,6 +231,15 @@ class PackedTexture {
 		instanceMappingKeys.set(this, mappingKey);
 	}
 
+	/**
+	 * 실제 패킹 텍스처를 생성합니다.
+	 * @param textures - r/g/b/a 채널별 GPUTexture 객체
+	 * @param width - 결과 텍스처의 가로 크기
+	 * @param height - 결과 텍스처의 세로 크기
+	 * @param label - 텍스처 레이블
+	 * @param mapping - 채널별 매핑 정보
+	 * @param mappingKey - 매핑 키 문자열
+	 */
 	async #createPackedTexture(
 		textures: { r?: GPUTexture; g?: GPUTexture; b?: GPUTexture; a?: GPUTexture },
 		width: number,
@@ -228,6 +284,10 @@ class PackedTexture {
 		this.#bindGroup = null;
 	}
 
+	/**
+	 * 패킹 렌더 패스 실행
+	 * @param packedTexture - 결과 GPUTexture 객체
+	 */
 	#executeRenderPass(packedTexture: GPUTexture) {
 		const {resourceManager} = this.#redGPUContext;
 		const commandEncoder = this.#gpuDevice.createCommandEncoder({
@@ -255,6 +315,10 @@ class PackedTexture {
 		this.#gpuDevice.queue.submit([commandEncoder.finish()]);
 	}
 
+	/**
+	 * 패킹용 렌더 파이프라인 생성
+	 * @returns GPURenderPipeline 객체
+	 */
 	#createPipeline(): GPURenderPipeline {
 		const shaderCode = computeShaderCode;
 		const {resourceManager} = this.#redGPUContext;
@@ -278,6 +342,10 @@ class PackedTexture {
 		});
 	}
 
+	/**
+	 * 샘플러 객체 생성
+	 * @returns GPUSampler 객체
+	 */
 	#createSampler(): GPUSampler {
 		return new Sampler(this.#redGPUContext).gpuSampler;
 	}

@@ -1,10 +1,21 @@
 import {ConditionalBlock} from "./preprocessWGSL";
 
+/**
+ * 조건부 블록과 define 문자열을 기반으로 WGSL 셰이더의 다양한 변형(variant) 코드를 생성하는 유틸리티.
+ *
+ * 변형 키(variantKey)에 따라 조건부 블록을 처리하여, 각기 다른 ��이더 소스를 동적으로 생성하고 캐싱합니다.
+ * @category WGSL
+ */
 class ShaderVariantGenerator {
 	#variantCache = new Map<string, string>();
-	#defines: string
-	#conditionalBlocks: ConditionalBlock[]
+	#defines: string;
+	#conditionalBlocks: ConditionalBlock[];
 
+	/**
+	 * ShaderVariantGenerator 생성자
+	 * @param defines - WGSL 셰이더의 define 문자열(기본 소스)
+	 * @param conditionalBlocks - 조건부 블록 정보 배열
+	 */
 	constructor(
 		defines: string,
 		conditionalBlocks: ConditionalBlock[]
@@ -14,7 +25,10 @@ class ShaderVariantGenerator {
 	}
 
 	/**
-	 * 특정 변형 키에 대한 셰이더 코드를 레이지하게 생성
+	 * 특정 변형 키에 대한 셰이더 코드를 레이지하게 생성합니다.
+	 *
+	 * @param variantKey - 활성화할 조건부 키를 '+'로 연결한 문자열(예: "FOO+BAR"), 조건이 없으면 'none'
+	 * @returns 변형된 WGSL 셰이더 코드 문자열
 	 */
 	getVariant(variantKey: string): string {
 		// 캐시에서 확인
@@ -33,14 +47,19 @@ class ShaderVariantGenerator {
 	}
 
 	/**
-	 * 현재 캐시된 변형들의 정보를 반환
+	 * 현재 캐시된 변형 키 목록을 반환합니다.
+	 *
+	 * @returns 캐시된 variantKey 문자열 배열
 	 */
 	getCachedVariants(): string[] {
 		return Array.from(this.#variantCache.keys());
 	}
 
 	/**
-	 * 활성화된 키들을 기반으로 조건부 블록을 처리
+	 * 활성화된 키들을 기반으로 조건부 블록을 처리하여 WGSL 셰이더 코드를 생성합니다.
+	 *
+	 * @param enabledKeys - 활성화된 조건부 키 배열
+	 * @returns 변형된 WGSL 셰이더 코드 문자열
 	 */
 	#processConditionalBlocks(enabledKeys: string[]): string {
 		let variantCode = this.#defines;

@@ -3,6 +3,7 @@ import loadAndCreateBitmapImage from "./core/loadAndCreateBitmapImage";
 import CubeTexture from "./CubeTexture";
 import HDRTexture from "./hdr/HDRTexture";
 import IBL from "./ibl/IBL";
+import PackedTexture from "./packedTexture/PackedTexture";
 
 export * from "./noiseTexture";
 export {
@@ -10,5 +11,6 @@ export {
 	CubeTexture,
 	loadAndCreateBitmapImage,
 	IBL,
-	HDRTexture
+	HDRTexture,
+	PackedTexture
 }
