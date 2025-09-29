@@ -23,7 +23,9 @@ import vertexModuleSource from "./shader/lineVertex.wgsl";
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_LINE_3D'
 const SHADER_INFO = parseWGSL(vertexModuleSource);
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
-
+/**
+ * @category Line
+ */
 class Line3D extends Mesh {
 	baseColor
 	#type: LINE_TYPE

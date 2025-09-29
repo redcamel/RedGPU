@@ -17,6 +17,8 @@ import View3D from "./View3D";
  * ```
  * <iframe src="/RedGPU/examples/2d/helloWorld2D/" ></iframe>
  * @extends View3D
+ *
+ * @category View
  */
 class View2D extends View3D {
 	/**

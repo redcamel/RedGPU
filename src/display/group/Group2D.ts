@@ -1,6 +1,8 @@
 import InstanceIdGenerator from "../../utils/InstanceIdGenerator";
 import GroupBase from "./GroupBase";
-
+/**
+ * @category Group
+ */
 class Group2D extends GroupBase {
 	#instanceId: number
 	#name: string

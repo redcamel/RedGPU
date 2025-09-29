@@ -31,6 +31,7 @@ interface Sprite3D {
 }
 
 /**
+ *
  * 3D 공간에서 항상 카메라를 향하는 2D 스프라이트 객체
  *
  * Sprite3D는 Mesh 클래스를 상속받아 빌보드 기능을 제공하는 클래스입니다.
@@ -41,6 +42,8 @@ interface Sprite3D {
  *
  * 아래는 Sprite3D의 구조와 동작을 이해하는 데 도움이 되는 샘플 예제 목록입니다.
  * @see [Sprite3D MouseEvent example](/RedGPU/examples/3d/mouseEvent/sprite3D/)
+ *
+ * @category Sprite
  */
 class Sprite3D extends Mesh {
 	/**

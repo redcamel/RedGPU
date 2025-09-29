@@ -17,7 +17,9 @@ import vertexModuleSource from './shader/instanceMeshVertex.wgsl';
 
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_INSTANCING'
 const VERTEX_BIND_GROUP_DESCRIPTOR_NAME = 'VERTEX_BIND_GROUP_DESCRIPTOR_INSTANCING'
-
+/**
+ * @category Mesh
+ */
 class InstancingMesh extends Mesh {
 	readonly #redGPUContext: RedGPUContext
 	#instanceCount: number = 1

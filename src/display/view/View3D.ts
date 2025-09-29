@@ -39,6 +39,8 @@ const UNIFORM_STRUCT = SHADER_INFO.uniforms.systemUniforms;
  * redGPUContext.addView(view);
  * ```
  * <iframe src="/RedGPU/examples/3d/view/singleView/" ></iframe>
+ *
+ * @category View
  */
 class View3D extends AView {
 	/**

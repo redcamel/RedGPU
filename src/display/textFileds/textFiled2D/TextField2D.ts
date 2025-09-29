@@ -28,6 +28,8 @@ const BaseTextField2D = mixInMesh2D(ATextField);
  *
  * 아래는 TextField2D의 구조와 동작을 이해하는 데 도움이 되는 샘플 예제 목록입니다.
  * @see [TextField2D MouseEvent example](/RedGPU/examples/2d/mouseEvent/textField2D/)
+ *
+ * @category TextField
  */
 class TextField2D extends BaseTextField2D {
 	/**

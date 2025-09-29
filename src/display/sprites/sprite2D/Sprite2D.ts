@@ -16,12 +16,14 @@ const BaseSprite2D = mixInMesh2D(Mesh);
  * 평면 지오메트리를 기반으로 하며, 너비와 높이를 동적으로 조절할 수 있습니다
  * <iframe src="/RedGPU/examples/2d/sprite2D/basic/"></iframe>
  *
-
+ *
  * 아래는 Sprite2D의 구조와 동작을 이해하는 데 도움이 되는 샘플 예제 목록입니다.
  * @see [Sprite2D Hierarchy example](/RedGPU/examples/2d/sprite2D/hierarchy/)
  * @see [Sprite2D Pivot example](/RedGPU/examples/2d/sprite2D/pivot/)
  * @see [Sprite2D Child Methods example](/RedGPU/examples/2d/sprite2D/childMethod/)
  * @see [Sprite2D MouseEvent example](/RedGPU/examples/2d/mouseEvent/sprite2D/)
+ *
+ * @category Sprite
  */
 class Sprite2D extends BaseSprite2D {
 	/**

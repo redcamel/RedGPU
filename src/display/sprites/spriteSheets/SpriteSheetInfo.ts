@@ -9,6 +9,8 @@ import validateUintRange from "../../../runtimeChecker/validateFunc/validateUint
  * SpriteSheetInfo는 하나의 텍스처에 격자 형태로 배열된 애니메이션 프레임들의
  * 구조와 재생 설정을 정의합니다. 스프라이트 시트 인스턴스들이 공유하는
  * 애니메이션 메타데이터를 관리합니다.
+ *
+ * @category SpriteSheet
  */
 class SpriteSheetInfo {
 	/**

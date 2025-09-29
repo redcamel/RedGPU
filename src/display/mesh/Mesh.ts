@@ -37,7 +37,9 @@ interface Mesh {
 	meshType: string
 	useDisplacementTexture: boolean
 }
-
+/**
+ * @category Mesh
+ */
 class Mesh extends MeshBase {
 	displacementTexture: BitmapTexture
 	castShadow: boolean = false

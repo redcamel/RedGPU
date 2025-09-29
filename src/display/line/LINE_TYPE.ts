@@ -1,3 +1,6 @@
+/**
+ * @category Line
+ */
 const LINE_TYPE = {
 	LINEAR: 'linear',
 	CATMULL_ROM: 'catmullRom',

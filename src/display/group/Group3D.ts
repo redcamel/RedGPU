@@ -1,6 +1,9 @@
 import InstanceIdGenerator from "../../utils/InstanceIdGenerator";
 import GroupBase from "./GroupBase";
 
+/**
+ * @category Group
+ */
 class Group3D extends GroupBase {
 	#instanceId: number
 	#name: string

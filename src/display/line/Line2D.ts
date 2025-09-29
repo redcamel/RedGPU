@@ -12,6 +12,9 @@ const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_LINE_2D'
 const SHADER_INFO = parseWGSL(vertexModuleSource);
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
 
+/**
+ * @category Line
+ */
 class Line2D extends Line3D {
 	constructor(redGPUContext: RedGPUContext, type: LINE_TYPE = LINE_TYPE.LINEAR, baseColor: string = '#fff') {
 		super(redGPUContext, type, baseColor)

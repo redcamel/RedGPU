@@ -17,7 +17,9 @@ const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
 interface ParticleEmitter {
 	useBillboard: boolean;
 }
-
+/**
+ * @category Particle
+ */
 class ParticleEmitter extends Mesh {
 	#minLife: number = 1000
 	#maxLife: number = 5000
