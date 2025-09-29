@@ -92,26 +92,23 @@ class ParsedSkinInfo_GLTF {
 			    return;
 			  }
 			
-			  let skin = vertexSkinBuffer[idx];
-			  let w = skin.vertexWeight;
-			  let joints = vec4<u32>(skin.vertexJoint);
+			  let weights = vertexSkinBuffer[idx].vertexWeight;
+			  let joints = vec4<u32>(vertexSkinBuffer[idx].vertexJoint);
 			
-			  let invTransform = uniforms.invertNodeGlobalTransform;
-			  
-			  let idx0 = uniforms.searchJointIndexTable[joints.x].x;
-			  let idx1 = uniforms.searchJointIndexTable[joints.y].x;
-			  let idx2 = uniforms.searchJointIndexTable[joints.z].x;
-			  let idx3 = uniforms.searchJointIndexTable[joints.w].x;
-			
-			  let m0 = uniforms.jointModelMatrices[idx0] * uniforms.inverseBindMatrices[joints.x];
-			  let m1 = uniforms.jointModelMatrices[idx1] * uniforms.inverseBindMatrices[joints.y];
-			  let m2 = uniforms.jointModelMatrices[idx2] * uniforms.inverseBindMatrices[joints.z];
-			  let m3 = uniforms.jointModelMatrices[idx3] * uniforms.inverseBindMatrices[joints.w];
-			
-			  let blendedMatrix = w.x * m0 + w.y * m1 + w.z * m2 + w.w * m3;
-			  let resultMat = invTransform * blendedMatrix;
-			  
-			  skinMatrixBuffer[idx] = resultMat;
+			  skinMatrixBuffer[idx] = uniforms.invertNodeGlobalTransform * (
+				    weights.x * (
+				    	uniforms.jointModelMatrices[uniforms.searchJointIndexTable[joints.x].x] * uniforms.inverseBindMatrices[joints.x]
+				    ) +
+				    weights.y * (
+				    	uniforms.jointModelMatrices[uniforms.searchJointIndexTable[joints.y].x] * uniforms.inverseBindMatrices[joints.y]
+				    ) +
+				    weights.z * (
+				    	uniforms.jointModelMatrices[uniforms.searchJointIndexTable[joints.z].x] * uniforms.inverseBindMatrices[joints.z]
+				    ) +
+				    weights.w * (
+				    	uniforms.jointModelMatrices[uniforms.searchJointIndexTable[joints.w].x] * uniforms.inverseBindMatrices[joints.w]
+				    )
+				);
 			}
     `;
 		// keepLog(this.joints, this.usedJoints)
