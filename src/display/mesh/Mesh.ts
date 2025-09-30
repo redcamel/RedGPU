@@ -9,7 +9,7 @@ import DefineForVertex from "../../resources/defineProperty/DefineForVertex";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import {keepLog} from "../../utils";
-import InstanceIdGenerator from "../../utils/InstanceIdGenerator";
+import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
 import AABB from "../../utils/math/bound/AABB";
 import calculateMeshAABB from "../../utils/math/bound/calculateMeshAABB";
 import calculateMeshCombinedAABB from "../../utils/math/bound/calculateMeshCombinedAABB";

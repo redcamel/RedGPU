@@ -2,7 +2,7 @@ import {mat4} from "gl-matrix";
 import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
 import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumberRange";
-import InstanceIdGenerator from "../../utils/InstanceIdGenerator";
+import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
 import PerspectiveCamera from "../camera/PerspectiveCamera";
 import AController from "../core/AController";
 

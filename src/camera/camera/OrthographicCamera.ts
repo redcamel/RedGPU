@@ -1,5 +1,5 @@
 import validateNumber from "../../runtimeChecker/validateFunc/validateNumber";
-import InstanceIdGenerator from "../../utils/InstanceIdGenerator";
+import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
 import PerspectiveCamera from "./PerspectiveCamera";
 
 /**

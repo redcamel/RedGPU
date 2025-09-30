@@ -1,5 +1,5 @@
 import {mat4} from "gl-matrix";
-import InstanceIdGenerator from "../../utils/InstanceIdGenerator";
+import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
 
 /**
  * 2D 카메라 클래스입니다.

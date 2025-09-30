@@ -15,7 +15,7 @@ import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
 import ResourceManager from "../../../resources/resourceManager/ResourceManager";
 import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validateRedGPUContext";
-import InstanceIdGenerator from "../../../utils/InstanceIdGenerator";
+import InstanceIdGenerator from "../../../utils/uuid/InstanceIdGenerator";
 import shaderSource from './shader.wgsl'
 
 const SHADER_INFO = parseWGSL(shaderSource);

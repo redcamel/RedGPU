@@ -5,7 +5,6 @@
  *
  * getNextId(type)을 호출할 때마다 해당 타입에 대한 고유 ID(0부터 시작)를 반환합니다.
  *
- * 싱글턴 유틸리티로, Object.freeze로 불변성을 보장합니다.
  * @category UUID
  */
 class InstanceIdGenerator {

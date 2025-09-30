@@ -1,6 +1,6 @@
 import {mat4} from "gl-matrix";
 import RenderViewStateData from "../../renderer/RenderViewStateData";
-import InstanceIdGenerator from "../../utils/InstanceIdGenerator";
+import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
 import Object3DContainer from "../mesh/core/Object3DContainer";
 
 interface GroupBase {

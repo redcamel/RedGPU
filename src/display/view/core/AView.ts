@@ -5,7 +5,7 @@ import PickingManager from "../../../picking/PickingManager";
 import FXAA from "../../../postEffect/FXAA";
 import TAA from "../../../postEffect/TAA/TAA";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
-import InstanceIdGenerator from "../../../utils/InstanceIdGenerator";
+import InstanceIdGenerator from "../../../utils/uuid/InstanceIdGenerator";
 import screenToWorld from "../../../utils/math/coordinates/screenToWorld";
 import DrawDebuggerAxis from "../../drawDebugger/DrawDebuggerAxis";
 import DrawDebuggerGrid from "../../drawDebugger/grid/DrawDebuggerGrid";

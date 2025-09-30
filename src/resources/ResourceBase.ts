@@ -2,7 +2,7 @@ import RedGPUContext from "../context/RedGPUContext";
 import validateRedGPUContext from "../runtimeChecker/validateFunc/validateRedGPUContext";
 import consoleAndThrowError from "../utils/consoleAndThrowError";
 import createUUID from "../utils/uuid/createUUID";
-import InstanceIdGenerator from "../utils/InstanceIdGenerator";
+import InstanceIdGenerator from "../utils/uuid/InstanceIdGenerator";
 
 /**
  * The ResourceBase class manages the RedGPUContext instance.

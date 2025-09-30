@@ -1,6 +1,6 @@
 import {mat4} from "gl-matrix";
 import validateNumber from "../../runtimeChecker/validateFunc/validateNumber";
-import InstanceIdGenerator from "../../utils/InstanceIdGenerator";
+import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
 
 /**
  * 원근 투영 카메라(PerspectiveCamera) 클래스입니다.

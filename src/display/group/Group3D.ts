@@ -1,4 +1,4 @@
-import InstanceIdGenerator from "../../utils/InstanceIdGenerator";
+import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
 import GroupBase from "./GroupBase";
 
 /**
