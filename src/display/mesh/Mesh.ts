@@ -38,55 +38,99 @@ interface Mesh {
 	useDisplacementTexture: boolean
 }
 /**
+ * geometry와 material을 바탕으로 3D/2D 객체의 위치, 회전, 스케일, 피벗, 계층 구조, 렌더링, 그림자, 디버깅 등 다양한 기능을 제공하는 기본 메시 클래스입니다.
+ *
+ * geometry(버텍스/메시 데이터)와 머티리얼을 바탕으로 실제 화면에 렌더링되는 객체를 표현합니다.
+ *
+ * 위치, 회전, 스케일, 피벗, 계층 구조, 그림자, 디버깅, 이벤트 등 다양한 기능을 지원합니다.
+ *
+ * <iframe src="/RedGPU/examples/3d/mesh/basicMesh/"></iframe>
+ *
+ * 아래는 Mesh의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
+ * @see [Mesh Hierarchy example](/RedGPU/examples/3d/mesh/hierarchy/)
+ * @see [Mesh Pivot example](/RedGPU/examples/3d/mesh/pivot/)
+ * @see [Mesh Child Methods example](/RedGPU/examples/3d/mesh/childMethod/)
+ * @see [Mesh lookAt Methods example](/RedGPU/examples/3d/mesh/lookAt/)
+ *
  * @category Mesh
  */
 class Mesh extends MeshBase {
+	/** 메시의 디스플레이스먼트 텍스처 */
 	displacementTexture: BitmapTexture
+	/** 그림자 캐스팅 여부 */
 	castShadow: boolean = false
+	/** 인스턴스 고유 ID */
 	#instanceId: number
+	/** 메시 이름 */
 	#name: string
+	/** 부모 객체 */
 	#parent: Object3DContainer
-	//
+	/** X 좌표 */
 	#x: number = 0
-	#z: number = 0
+	/** Y 좌표 */
 	#y: number = 0
+	/** Z 좌표 */
+	#z: number = 0
+	/** 위치 배열 [x, y, z] */
 	#positionArray: Float32Array = new Float32Array([0, 0, 0])
-	//
+	/** 피벗 X */
 	#pivotX: number = 0
+	/** 피벗 Y */
 	#pivotY: number = 0
+	/** 피벗 Z */
 	#pivotZ: number = 0
-	//
+	/** 픽킹 ID */
 	readonly #pickingId: number
-	//
+	/** X 스케일 */
 	#scaleX: number = 1
+	/** Y 스케일 */
 	#scaleY: number = 1
+	/** Z 스케일 */
 	#scaleZ: number = 1
-	//
+	/** 스케일 배열 [x, y, z] */
 	#scaleArray: Float32Array = new Float32Array([1, 1, 1])
-	//
+	/** X축 회전 (deg) */
 	#rotationX: number = 0
+	/** Y축 회전 (deg) */
 	#rotationY: number = 0
+	/** Z축 회전 (deg) */
 	#rotationZ: number = 0
+	/** 회전 배열 [x, y, z] (deg) */
 	#rotationArray: Float32Array = new Float32Array([0, 0, 0])
-	//
+	/** 이벤트 핸들러 객체 */
 	#events: any = {}
+	/** 등록된 이벤트 개수 */
 	#eventsNum: number = 0
-	//
+	/** 프러스텀 컬링 무시 여부 */
 	#ignoreFrustumCulling: boolean = false
-	//
+	/** 메시 투명도 */
 	#opacity: number = 1
-	//
+	/** 디버그 메시 객체 */
 	#drawDebugger: DrawDebuggerMesh
+	/** 디버그 활성화 여부 */
 	#enableDebugger: boolean = false
+	/** 캐싱된 AABB */
 	#cachedBoundingAABB: AABB
+	/** 캐싱된 OBB */
 	#cachedBoundingOBB: OBB
+	/** 이전 프레임의 모델 행렬 */
 	#prevModelMatrix: Float32Array
+	/** 렌더 번들 인코더 */
 	#bundleEncoder: GPURenderBundleEncoder
+	/** 렌더 번들 */
 	#renderBundle: GPURenderBundle
+	/** 이전 시스템 바인드 그룹 */
 	#prevSystemBindGroup: GPUBindGroup
+	/** 이전 프래그먼트 바인드 그룹 */
 	#prevFragmentBindGroup: GPUBindGroup
 
-//
+	/**
+	 * Mesh 인스턴스를 생성합니다.
+	 * @param redGPUContext RedGPU 컨텍스트
+	 * @param geometry geometry 또는 primitive 객체(선택)
+	 * @param material 머티리얼(선택)
+	 * @param name 메시 이름(선택)
+	 */
 	constructor(redGPUContext: RedGPUContext, geometry?: Geometry | Primitive, material?, name?: string) {
 		super(redGPUContext)
 		if (name) this.name = name
@@ -176,7 +220,6 @@ class Mesh extends MeshBase {
 		return this._geometry.gpuRenderInfo.buffers
 	}
 
-	// 	this.#z = z
 	/**
 	 * 설정된 부모 객체값을 반환합니다.
 	 */
