@@ -72,7 +72,7 @@ const setDebugButton = (redGPUContext, rightContainer) => {
 			check()
 		});
 	}
-	check()
+	setTimeout(check, 1000);
 }
 const setGrid = (redGPUContext, rightContainer) => {
 	if (redGPUContext.viewList.length > 1) return;
