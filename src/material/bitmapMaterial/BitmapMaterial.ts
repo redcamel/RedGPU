@@ -23,8 +23,20 @@ interface BitmapMaterial {
 }
 
 /**
- * 비트맵 텍스처 기반의 머티리얼 클래스입니다. BitmapTexture와 Sampler를 통해 다양한 텍스처 기반 렌더링 효과를 구현할 수 있습니다.
+ * 비트맵 텍스처 기반의 머티리얼 클래스입니다.
  *
+ * BitmapTexture와 Sampler를 통해 다양한 텍스처 기반 렌더링 효과를 구현할 수 있습니다.
+ *
+ * @example
+ * ```javascript
+ * const sourceTexture = new RedGPU.Resource.BitmapTexture(
+ *    redGPUContext,
+ *    '/RedGPU/examples/assets/github.png'
+ * );
+ * const material = new RedGPU.Material.BitmapMaterial(redGPUContext, sourceTexture);
+ * ```
+ *
+ * <iframe src="/RedGPU/examples/3d/material/bitmapMaterial/"></iframe>
  * @extends ABitmapBaseMaterial
  * @category Material
  */

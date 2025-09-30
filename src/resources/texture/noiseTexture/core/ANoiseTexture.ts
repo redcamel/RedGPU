@@ -26,7 +26,7 @@ const BASIC_OPTIONS = {
  * @category NoiseTexture
  * @experimental
  */
-class ANoiseTexture extends ManagementResourceBase {
+abstract class ANoiseTexture extends ManagementResourceBase {
 //
 	mipLevelCount;
 	useMipmap;

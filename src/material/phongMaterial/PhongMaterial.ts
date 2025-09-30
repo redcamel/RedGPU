@@ -62,6 +62,20 @@ interface PhongMaterial {
  *
  * Phong 라이팅 기반의 다양한 텍스처/파라미터를 지원하는 머티리얼 클래스입니다.
  * 디퓨즈, 스펙큘러, 노멀, AO, 알파, 발광 등 다양한 텍스처와 샘플러, 파라미터를 통해 사실적인 라이팅 효과를 구현할 수 있습니다.
+ * @example
+ * ```javascript
+ * const sourceTexture = new RedGPU.Resource.BitmapTexture(
+ *    redGPUContext,
+ *    '/RedGPU/examples/assets/github.png'
+ * );
+ * const material = new RedGPU.Material.PhongMaterial(redGPUContext);
+ * material.diffuseTexture = sourceTexture;
+ * ```
+ *
+ * <iframe src="/RedGPU/examples/3d/material/phongMaterial/"></iframe>
+ *
+ * 아래는 PhongMaterial의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
+ * @see [PhongMaterial Texture Combination](/RedGPU/examples/3d/material/phongMaterialTextures/)
  *
  * @extends ABitmapBaseMaterial
  * @category Material
