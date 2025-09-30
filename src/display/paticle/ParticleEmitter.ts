@@ -18,6 +18,19 @@ interface ParticleEmitter {
 	useBillboard: boolean;
 }
 /**
+ * GPU 기반 파티클 시스템을 위한 이미터(Emitter) 클래스입니다.
+ *
+ * 다양한 파티클 속성(수명, 위치, 스케일, 회전, 알파, 이징 등)과 GPU 연산 기반의 대량 파티클 처리를 지원합니다.
+ *
+ * 파티클의 초기값/최종값 범위, 이징, 버퍼 구조, 컴퓨트 파이프라인 등 파티클 시뮬레이션에 필요한 모든 기능을 제공합니다.
+ *
+ * <iframe src="/RedGPU/examples/3d/particle/basic/"></iframe>
+ *
+ * 아래는 ParticleEmitter의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
+ * @see [ParticleEmitter Performance](/RedGPU/examples/3d/particle/performance/)
+ *
+ * ## Roadmap
+ * - **다양한 파티클 이미터 타입 지원**
  * @category Particle
  */
 class ParticleEmitter extends Mesh {
@@ -79,6 +92,10 @@ class ParticleEmitter extends Mesh {
 	#computeBindGroup: GPUBindGroup
 	#particleNum: number = 2000
 
+	/**
+	 * ParticleEmitter 인스턴스를 생성합니다.
+	 * @param redGPUContext RedGPU 컨텍스트
+	 */
 	constructor(redGPUContext: RedGPUContext) {
 		super(redGPUContext);
 		// this.primitiveState.topology = GPU_PRIMITIVE_TOPOLOGY.LINE_LIST
@@ -149,10 +166,9 @@ class ParticleEmitter extends Mesh {
 		}
 	}
 
-	get particleBuffers(): GPUBuffer[] {
-		return this.#particleBuffers;
-	}
-
+	/**
+	 * 파티클 개수 (최대 500,000, 최소 1)
+	 */
 	get particleNum(): number {
 		return this.#particleNum;
 	}
@@ -163,6 +179,9 @@ class ParticleEmitter extends Mesh {
 		this.#setParticleData()
 	}
 
+	/**
+	 * 파티클의 최소/최대 수명(ms)
+	 */
 	get minLife(): number {
 		return this.#minLife;
 	}
@@ -179,6 +198,9 @@ class ParticleEmitter extends Mesh {
 		this.#maxLife = value;
 	}
 
+	/**
+	 * 파티클의 시작/종료 위치 범위
+	 */
 	get minStartX(): number {
 		return this.#minStartX;
 	}
@@ -275,6 +297,9 @@ class ParticleEmitter extends Mesh {
 		this.#maxEndZ = value;
 	}
 
+	/**
+	 * 파티클의 시작/종료 알파(투명도) 범위
+	 */
 	get minStartAlpha(): number {
 		return this.#minStartAlpha;
 	}
@@ -307,6 +332,9 @@ class ParticleEmitter extends Mesh {
 		this.#maxEndAlpha = value;
 	}
 
+	/**
+	 * 파티클의 시작/종료 스케일 범위
+	 */
 	get minStartScale(): number {
 		return this.#minStartScale;
 	}
@@ -339,6 +367,9 @@ class ParticleEmitter extends Mesh {
 		this.#maxEndScale = value;
 	}
 
+	/**
+	 * 파티클의 시작/종료 회전(X/Y/Z) 범위
+	 */
 	get minStartRotationX(): number {
 		return this.#minStartRotationX;
 	}
@@ -435,6 +466,9 @@ class ParticleEmitter extends Mesh {
 		this.#maxEndRotationZ = value;
 	}
 
+	/**
+	 * 파티클의 위치/스케일/회전/알파에 적용할 이징 타입
+	 */
 	get easeX(): number {
 		return this.#easeX;
 	}
@@ -499,16 +533,45 @@ class ParticleEmitter extends Mesh {
 		this.#easeRotationZ = value;
 	}
 
-	createCustomMeshVertexShaderModule() {
-		return this.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource)
+	/**
+	 * 파티클 버퍼(GPUBuffer) 배열 반환
+	 */
+	get particleBuffers(): GPUBuffer[] {
+		return this.#particleBuffers;
 	}
 
+	/**
+	 * 파티클 렌더링 및 시뮬레이션을 수행합니다.
+	 * @param debugViewRenderState 렌더 상태 데이터
+	 */
 	render(debugViewRenderState: RenderViewStateData) {
 		if (!this.#simParamBuffer) this.#init()
 		this.#renderComputePass(debugViewRenderState.timestamp)
 		super.render(debugViewRenderState)
 	}
 
+	/**
+	 * 파티클 버퍼 및 파이프라인을 초기화합니다.
+	 * @private
+	 */
+	#init() {
+		this.#simParamData = new Float32Array(46);
+		let bufferDescriptor = {
+			size: this.#simParamData.byteLength,
+			usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+		};
+		const {gpuDevice} = this.redGPUContext
+		this.#simParamBuffer = gpuDevice.createBuffer(bufferDescriptor);
+		gpuDevice.queue.writeBuffer(this.#simParamBuffer, 0, this.#simParamData);
+		this.#setParticleData()
+		console.log('\t\tthis.depthStencilState', this.depthStencilState)
+		this.depthStencilState.depthWriteEnabled = false
+	}
+
+	/**
+	 * 파티클 데이터(GPUBuffer) 생성 및 갱신
+	 * @private
+	 */
 	#setParticleData() {
 		this.dirtyPipeline = true
 		let redGPUContext = this.redGPUContext;
@@ -666,20 +729,11 @@ class ParticleEmitter extends Mesh {
 		});
 	}
 
-	#init() {
-		this.#simParamData = new Float32Array(46);
-		let bufferDescriptor = {
-			size: this.#simParamData.byteLength,
-			usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-		};
-		const {gpuDevice} = this.redGPUContext
-		this.#simParamBuffer = gpuDevice.createBuffer(bufferDescriptor);
-		gpuDevice.queue.writeBuffer(this.#simParamBuffer, 0, this.#simParamData);
-		this.#setParticleData()
-		console.log('\t\tthis.depthStencilState', this.depthStencilState)
-		this.depthStencilState.depthWriteEnabled = false
-	}
-
+	/**
+	 * GPU 컴퓨트 파이프라인을 통해 파티클 시뮬레이션을 수행합니다.
+	 * @param time 현재 시간(ms)
+	 * @private
+	 */
 	#renderComputePass(time: number) {
 		const worldPosition = this.localToWorld(this.x, this.y, this.z)
 		this.#simParamData.set(
@@ -717,6 +771,14 @@ class ParticleEmitter extends Mesh {
 		passEncoder.end();
 		gpuDevice.queue.submit([commandEncoder.finish()]);
 		console.log('renderComputePass')
+	}
+
+	/**
+	 * 커스텀 버텍스 셰이더 모듈을 생성합니다.
+	 * @returns 생성된 셰이더 모듈
+	 */
+	createCustomMeshVertexShaderModule() {
+		return this.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource)
 	}
 }
 
