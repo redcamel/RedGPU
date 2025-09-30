@@ -76,7 +76,7 @@ const loadDescription = async () => {
 			description.className = 'item-description'
 			document.querySelector('.navigation-bar').appendChild(description);
 			setDomTitleAndDescription(
-				`${matchedExample.name} - RedGPU`,
+				`${matchedExample.name} | RedGPU`,
 				descriptionText
 					.replace(/\n/g, '')
 					.replace(/\s+/g, ' ')
@@ -151,7 +151,7 @@ const setDomTitleAndDescription = (title, description) => {
 		document.head.appendChild(metaDescription);
 	}
 
-	const keywords = ['RedGPU', 'WebGPU', title.replace('- RedGPU', '')]
+	const keywords = ['RedGPU', 'WebGPU', title.replace(' | RedGPU', '')]
 	if (keywords) {
 		let metaKeywords = document.querySelector('meta[name="keywords"]');
 		if (metaKeywords) {
