@@ -18,13 +18,30 @@ import vertexModuleSource from './shader/instanceMeshVertex.wgsl';
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_INSTANCING'
 const VERTEX_BIND_GROUP_DESCRIPTOR_NAME = 'VERTEX_BIND_GROUP_DESCRIPTOR_INSTANCING'
 /**
+ * GPU 인스턴싱 기반의 메시 클래스입니다.
+ *
+ * 하나의 geometry와 material을 여러 인스턴스(Instance)로 효율적으로 렌더링할 수 있습니다.
+ *
+ * 각 인스턴스는 transform(위치, 회전, 스케일)만 다르고 geometry/vertex 데이터와 머티리얼은 공유합니다.
+ *
+ * <iframe src="/RedGPU/examples/3d/instancedMesh/basic/"></iframe>
  * @category Mesh
  */
 class InstancingMesh extends Mesh {
+	/** RedGPU 컨텍스트 인스턴스 */
 	readonly #redGPUContext: RedGPUContext
+	/** 인스턴스 개수 */
 	#instanceCount: number = 1
+	/** 인스턴스별 transform/계층 구조를 관리하는 객체 배열 */
 	#instanceChildren: InstancingMeshObject3D[] = []
 
+	/**
+	 * InstancingMesh 인스턴스를 생성합니다.
+	 * @param redGPUContext RedGPU 컨텍스트
+	 * @param instanceCount 인스턴스 개수
+	 * @param geometry geometry 또는 primitive 객체(선택)
+	 * @param material 머티리얼(선택)
+	 */
 	constructor(redGPUContext: RedGPUContext, instanceCount: number, geometry?: Geometry | Primitive, material?) {
 		super(redGPUContext, geometry, material)
 		this.#redGPUContext = redGPUContext
@@ -42,10 +59,17 @@ class InstancingMesh extends Mesh {
 		this.#initGPURenderInfos(redGPUContext)
 	}
 
+	/**
+	 * 인스턴스 개수를 반환합니다.
+	 */
 	get instanceCount(): number {
 		return this.#instanceCount;
 	}
 
+	/**
+	 * 인스턴스 개수를 설정합니다. (버퍼 및 인스턴스 객체 자동 갱신)
+	 * @param count 인스턴스 개수
+	 */
 	set instanceCount(count: number) {
 		validateUintRange(count)
 		this.gpuRenderInfo.vertexUniformInfo = parseWGSL(vertexModuleSource).storage.instanceUniforms
@@ -73,10 +97,18 @@ class InstancingMesh extends Mesh {
 		this.#initGPURenderInfos(this.#redGPUContext)
 	}
 
+	/**
+	 * 인스턴스별 transform/계층 구조를 관리하는 객체 배열을 반환합니다.
+	 */
 	get instanceChildren(): InstancingMeshObject3D[] {
 		return this.#instanceChildren;
 	}
 
+	/**
+	 * 인스턴싱 메시의 렌더링을 수행합니다.
+	 * @param debugViewRenderState 렌더 상태 데이터
+	 * @param shadowRender 그림자 렌더링 여부
+	 */
 	render(debugViewRenderState: RenderViewStateData, shadowRender: boolean = false) {
 		const {view, currentRenderPassEncoder,} = debugViewRenderState;
 		const {scene} = view
@@ -192,6 +224,11 @@ class InstancingMesh extends Mesh {
 		this.dirtyTransform = false
 	}
 
+	/**
+	 * GPU 렌더링 정보 및 파이프라인을 초기화합니다.
+	 * @param redGPUContext RedGPU 컨텍스트
+	 * @private
+	 */
 	#initGPURenderInfos(redGPUContext: RedGPUContext) {
 		this.dirtyPipeline = true
 		const {resourceManager} = this.#redGPUContext
@@ -225,12 +262,15 @@ class InstancingMesh extends Mesh {
 			]
 		}
 		const vertexUniformBindGroup: GPUBindGroup = redGPUContext.gpuDevice.createBindGroup(vertexBindGroupDescriptor)
-		// 설명자를 이용해 랜더 파이프라인을 생성합니다.
 		this.#updatePipelines()
 		this.gpuRenderInfo.vertexBindGroupLayout = vertex_BindGroupLayout
 		this.gpuRenderInfo.vertexUniformBindGroup = vertexUniformBindGroup
 	}
 
+	/**
+	 * 파이프라인 및 셰이더 모듈을 갱신합니다.
+	 * @private
+	 */
 	#updatePipelines() {
 		const {resourceManager,} = this.#redGPUContext
 		// 셰이더 모듈 설명자를 생성합니다.
@@ -275,6 +315,10 @@ class InstancingMesh extends Mesh {
 	}
 }
 
+/**
+ * 이 객체가 인스턴싱 메시 타입임을 나타내는 플래그입니다.\
+ * geometry/vertex 데이터와 material을 공유하며, transform만 개별적으로 관리하는 구조임을 구분하기 위해 사용됩니다.
+ */
 Object.defineProperty(InstancingMesh.prototype, 'meshType', {
 	value: 'instanceMesh',
 	writable: false

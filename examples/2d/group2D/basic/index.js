@@ -30,7 +30,7 @@ RedGPU.init(
 );
 
 const createRootGroup = (redGPUContext, scene) => {
-	const group = new RedGPU.Display.Group2D(redGPUContext);
+	const group = new RedGPU.Display.Group2D();
 	group.x = redGPUContext.screenRectObject.width / 2;
 	group.y = redGPUContext.screenRectObject.height / 2;
 	scene.addChild(group);

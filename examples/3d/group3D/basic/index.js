@@ -34,7 +34,7 @@ RedGPU.init(
 );
 
 const createRootGroup = (redGPUContext, scene) => {
-	const group = new RedGPU.Display.Group3D(redGPUContext);
+	const group = new RedGPU.Display.Group3D();
 	group.x = 0;
 	group.y = 0;
 	group.z = 0;
