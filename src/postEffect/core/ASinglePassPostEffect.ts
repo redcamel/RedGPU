@@ -19,7 +19,7 @@ export type ASinglePassPostEffectResult = {
  * @category Core
  *
  */
-class ASinglePassPostEffect {
+abstract class ASinglePassPostEffect {
 	// compute 셰이더 및 파이프라인 관련
 	#computeShaderMSAA: GPUShaderModule
 	#computeShaderNonMSAA: GPUShaderModule

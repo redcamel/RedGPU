@@ -10,7 +10,7 @@ export const GPU_BUFFER_CACHE_KEY = Symbol('gpuBufferCacheKey');
  * @classdesc Represents a uniform buffer in RedGPU.
  * @extends ResourceBase
  */
-class ABaseBuffer extends ManagementResourceBase {
+abstract class ABaseBuffer extends ManagementResourceBase {
 	[GPU_BUFFER_SYMBOL]: GPUBuffer
 	[GPU_BUFFER_CACHE_KEY]: string
 	readonly #usage: GPUBufferUsageFlags

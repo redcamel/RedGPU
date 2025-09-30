@@ -12,7 +12,7 @@ import ABaseMaterial from "./ABaseMaterial";
  * @extends ABaseMaterial
  * @category Core
  */
-class ABitmapBaseMaterial extends ABaseMaterial {
+abstract class ABitmapBaseMaterial extends ABaseMaterial {
 	/**
 	 * 파이프라인 갱신 시 호출되는 콜백 리스트
 	 */

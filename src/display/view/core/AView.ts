@@ -23,7 +23,7 @@ import ViewTransform from "./ViewTransform";
  * 이 클래스는 직접 사용되기보다는 View3D와 View2D에서 상속되어 3D/2D 환경에 맞게 확장됩니다.
  */
 
-class AView extends ViewTransform {
+abstract class AView extends ViewTransform {
 
 	#name: string
 	#scene: Scene

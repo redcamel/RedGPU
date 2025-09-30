@@ -39,7 +39,7 @@ interface ABaseMaterial {
  * @extends ResourceBase
  * @category Core
  */
-class ABaseMaterial extends ResourceBase {
+abstract class ABaseMaterial extends ResourceBase {
 	/**
 	 * 2패스 렌더링 사용 여부
 	 */

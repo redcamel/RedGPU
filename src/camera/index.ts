@@ -11,6 +11,7 @@ import OrthographicCamera from "./camera/OrthographicCamera";
 import PerspectiveCamera from "./camera/PerspectiveCamera";
 import BasicController from "./controller/BasicController";
 import OrbitController from "./controller/OrbitController";
+import AController from "./core/AController";
 
 export {
 	PerspectiveCamera,
@@ -18,4 +19,5 @@ export {
 	Camera2D,
 	OrbitController,
 	BasicController,
+	AController
 }

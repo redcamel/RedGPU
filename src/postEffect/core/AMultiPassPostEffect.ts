@@ -9,7 +9,7 @@ import ASinglePassPostEffect, {ASinglePassPostEffectResult} from "./ASinglePassP
  * @category Core
  *
  */
-class AMultiPassPostEffect extends ASinglePassPostEffect {
+abstract class AMultiPassPostEffect extends ASinglePassPostEffect {
 	/** 내부 패스 리스트 */
 	#passList: ASinglePassPostEffect[] = []
 	/** 비디오 메모리 사용량(byte) */
