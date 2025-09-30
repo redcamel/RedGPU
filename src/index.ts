@@ -14,7 +14,7 @@ export * as Resource from "./resources";
 
 export * from "./renderer"
 export * as RuntimeChecker from "./runtimeChecker";
-export * from "./loader/obj";
+
 export * from "./gpuConst";
 export * as PostEffect from "./postEffect";
 export * as Picking from "./picking";
