@@ -284,6 +284,11 @@ interface PBRMaterial {
 	KHR_dispersion: boolean
 }
 
+/**
+ * The PBRMaterial class is a subclass of the ABitmapBaseMaterial class.
+ * It is used to create a PBR material for rendering.
+ * @extends ABitmapBaseMaterial
+ */
 class PBRMaterial extends ABitmapBaseMaterial {
 	#packedORMTexture: PackedTexture
 	// #packedKHR_clearcoatTexture: PackedTexture

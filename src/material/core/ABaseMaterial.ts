@@ -14,40 +14,129 @@ import PackedTexture from "../../resources/texture/packedTexture/PackedTexture";
 import TINT_BLEND_MODE from "../TINT_BLEND_MODE";
 import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "./getBindGroupLayoutDescriptorFromShaderInfo";
 
+
 interface ABaseMaterial {
+	/**
+	 * 머티리얼의 불투명도(0~1)
+	 */
 	opacity: number;
+	/**
+	 * 머티리얼의 틴트 컬러(RGBA)
+	 */
 	tint: ColorRGBA;
+	/**
+	 * 틴트 컬러 사용 여부
+	 */
 	useTint: boolean;
 }
 
 /**
- * ABitmapBaseMaterial is a class that represents a material with a bitmap texture.
+ *
+ * 다양한 머티리얼의 공통 기반이 되는 추상 클래스입니다. 셰이더 정보, 유니폼/텍스처/샘플러 구조, 블렌드 상태 등 렌더 파이프라인의 핵심 속성을 관리합니다.
+ *
+ * 머티리얼별로 GPU 파이프라인의 셰이더, 바인드 그룹, 블렌딩, 컬러/알파, 틴트, 투명도 등 다양한 렌더링 속성을 일관성 있게 제어할 수 있습니다.
+ *
  * @extends ResourceBase
+ * @category Core
  */
 class ABaseMaterial extends ResourceBase {
+	/**
+	 * 2패스 렌더링 사용 여부
+	 */
 	use2PathRender: boolean
+	/**
+	 * 프래그먼트 GPU 렌더 정보 객체
+	 */
 	gpuRenderInfo: FragmentGPURenderInfo
+	/**
+	 * 파이프라인 dirty 상태 플래그
+	 */
 	dirtyPipeline: boolean = false
+	/**
+	 * 머티리얼 투명도 여부
+	 */
 	transparent: boolean = false
-	#writeMaskState: GPUFlagsConstant = GPUColorWrite.ALL
+	/**
+	 * 컬러 블렌드 상태 객체
+	 */
 	readonly #blendColorState: BlendState
+	/**
+	 * 알파 블렌드 상태 객체
+	 */
 	readonly #blendAlphaState: BlendState
+	/**
+	 * 컬러 writeMask 상태
+	 */
+	#writeMaskState: GPUFlagsConstant = GPUColorWrite.ALL
+	/**
+	 * 리소스 매니저 객체
+	 */
 	#resourceManager: ResourceManager
+	/**
+	 * 기본 GPU 샘플러
+	 */
 	readonly #basicGPUSampler: GPUSampler
+	/**
+	 * 비트맵 텍스처가 없을 때 사용할 기본 GPUTextureView
+	 */
 	readonly #emptyBitmapGPUTextureView: GPUTextureView
+	/**
+	 * 큐브 텍스처가 없을 때 사용할 기본 GPUTextureView
+	 */
 	readonly #emptyCubeTextureView: GPUTextureView
+	/**
+	 * 프래그먼트 셰이더 모듈명
+	 */
 	readonly #FRAGMENT_SHADER_MODULE_NAME: string
+	/**
+	 * 프래그먼트 바인드 그룹 디스크립터명
+	 */
 	readonly #FRAGMENT_BIND_GROUP_DESCRIPTOR_NAME: string
+	/**
+	 * 프래그먼트 바인드 그룹 레이아웃명
+	 */
 	readonly #FRAGMENT_BIND_GROUP_LAYOUT_NAME: string
+	/**
+	 * 파싱된 WGSL 셰이더 정보
+	 */
 	readonly #SHADER_INFO: any
+	/**
+	 * 셰이더 storage 구조 정보
+	 */
 	readonly #STORAGE_STRUCT: any
+	/**
+	 * 셰이더 uniforms 구조 정보
+	 */
 	readonly #UNIFORM_STRUCT: any
+	/**
+	 * 셰이더 textures 구조 정보
+	 */
 	readonly #TEXTURE_STRUCT: any
+	/**
+	 * 셰이더 samplers 구조 정보
+	 */
 	readonly #SAMPLER_STRUCT: any
+	/**
+	 * 머티리얼 모듈명
+	 */
 	readonly #MODULE_NAME: string
+	/**
+	 * 바인드 그룹 레이아웃 객체
+	 */
 	readonly #bindGroupLayout: GPUBindGroupLayout
+	/**
+	 * 틴트 블렌드 모드 값
+	 */
 	#tintBlendMode: number = TINT_BLEND_MODE.MULTIPLY;
 
+	/**
+	 * ABaseMaterial 생성자
+	 * @param redGPUContext - RedGPUContext 인스턴스
+	 * @param moduleName - 머티리얼 모듈명
+	 * @param SHADER_INFO - 파싱된 WGSL 셰이더 정보
+	 * @param targetGroupIndex - 바인드 그룹 인덱스
+
+	 */
 	constructor(
 		redGPUContext: RedGPUContext,
 		moduleName: string,
@@ -124,22 +213,43 @@ class ABaseMaterial extends ResourceBase {
 		return this.#UNIFORM_STRUCT;
 	}
 
+	/**
+	 * 머티리얼의 컬러 블렌드 상태 객체 반환
+
+	 */
 	get blendColorState(): BlendState {
 		return this.#blendColorState;
 	}
 
+	/**
+	 * 머티리얼의 알파 블렌드 상태 객체 반환
+
+	 */
 	get blendAlphaState(): BlendState {
 		return this.#blendAlphaState;
 	}
 
+	/**
+	 * 머티리얼의 writeMask 상태 반환
+
+	 */
 	get writeMaskState(): GPUFlagsConstant {
 		return this.#writeMaskState;
 	}
 
+	/**
+	 * 머티리얼의 writeMask 상태 설정
+	 * @param value - GPUFlagsConstant 값
+
+	 */
 	set writeMaskState(value: GPUFlagsConstant) {
 		this.#writeMaskState = value;
 	}
 
+	/**
+	 * GPU 렌더 파이프라인 정보 및 유니폼 버퍼 초기화
+
+	 */
 	initGPURenderInfos() {
 		const {redGPUContext} = this
 		const {resourceManager} = redGPUContext
@@ -170,6 +280,10 @@ class ABaseMaterial extends ResourceBase {
 		this._updateFragmentState()
 	}
 
+	/**
+	 * 프래그먼트 셰이더 바인드 그룹/유니폼/텍스처/샘플러 등 상태 갱신
+
+	 */
 	_updateFragmentState() {
 		const {gpuDevice, resourceManager} = this.redGPUContext
 		this.#checkVariant()
@@ -240,6 +354,11 @@ class ABaseMaterial extends ResourceBase {
 		// keepLog(this.gpuRenderInfo)
 	}
 
+	/**
+	 * GPU 프래그먼트 렌더 상태 객체 반환
+	 * @param entryPoint - 셰이더 엔트리포인트(기본값: 'main')
+
+	 */
 	getFragmentRenderState(entryPoint: string = 'main'): GPUFragmentState {
 		return {
 			module: this.gpuRenderInfo.fragmentShaderModule,
@@ -267,6 +386,10 @@ class ABaseMaterial extends ResourceBase {
 		}
 	}
 
+	/**
+	 * 머티리얼의 유니폼/컬러/틴트 등 기본 속성값을 유니폼 버퍼에 반영
+
+	 */
 	_updateBaseProperty() {
 		const {fragmentUniformInfo, fragmentUniformBuffer} = this.gpuRenderInfo
 		const {members} = fragmentUniformInfo
@@ -282,10 +405,20 @@ class ABaseMaterial extends ResourceBase {
 		}
 	}
 
+	/**
+	 * 샘플러 객체에서 GPU 샘플러 반환
+	 * @param sampler - Sampler 객체
+
+	 */
 	getGPUResourceSampler(sampler: Sampler) {
 		return sampler?.gpuSampler || this.#basicGPUSampler
 	}
 
+	/**
+	 * 셰이더 바리안트(조건부 분기) 상태 체크 및 셰이더 모듈 갱신
+
+
+	 */
 	#checkVariant() {
 		const {gpuDevice, resourceManager} = this.redGPUContext
 		// 현재 머티리얼 상태에 맞는 바리안트 키 찾기
@@ -314,6 +447,11 @@ class ABaseMaterial extends ResourceBase {
 		this.gpuRenderInfo.fragmentShaderModule = targetShaderModule;
 	}
 
+	/**
+	 * 현재 머티리얼 상태에 맞는 셰이더 바리안트 키 반환
+
+
+	 */
 	#findMatchingVariantKey(): string {
 		const {fragmentShaderVariantConditionalBlocks} = this.gpuRenderInfo;
 		// 현재 활성화된 기능들 확인 (fragmentShaderVariantConditionalBlocks 기반)

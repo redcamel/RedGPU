@@ -11,7 +11,7 @@ export * as Light from "./light";
 export * as Primitive from "./primitive";
 export * as Material from "./material";
 export * as Resource from "./resources";
-export * as RenderState from './renderState'
+
 export * from "./renderer"
 export * as RuntimeChecker from "./runtimeChecker";
 export * from "./loader/obj";

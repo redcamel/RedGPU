@@ -40,7 +40,7 @@ interface SpriteSheet3D extends ASpriteSheet {
  *
  * <iframe src="/RedGPU/examples/3d/sprite/spriteSheet3D/"></iframe>
  *
- * 아래는 SpriteSheet3D의 구조와 동작을 이해하는 데 도움이 되는 샘플 예제 목록입니다.
+ * 아래는 SpriteSheet3D의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
  * @see [SpriteSheet3D MouseEvent example](/RedGPU/examples/3d/mouseEvent/spriteSheet3D/)
  * @category SpriteSheet
  */

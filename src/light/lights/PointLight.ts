@@ -16,6 +16,8 @@ import BaseLight from "../core/BaseLight";
  * ```
  * <iframe src="/RedGPU/examples/3d/light/pointLight/" ></iframe>
  *
+ * 아래는 PointLight 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
+ * @see [PointLight Cluster Performance](/RedGPU/examples/3d/light/pointLightPerformance/)
  * @category Light
  */
 class PointLight extends BaseLight {

@@ -17,6 +17,8 @@ import BaseLight from "../core/BaseLight";
  * ```
  * <iframe src="/RedGPU/examples/3d/light/spotLight/" ></iframe>
  *
+ * 아래는 SpotLight 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
+ * @see [SpotLight Cluster Performance](/RedGPU/examples/3d/light/spotLightPerformance/)
  * @category Light
  */
 class SpotLight extends BaseLight {

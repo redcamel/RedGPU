@@ -26,7 +26,7 @@ const BaseTextField2D = mixInMesh2D(ATextField);
  *
  * <iframe src="/RedGPU/examples/2d/textField2D/basic/"></iframe>
  *
- * 아래는 TextField2D의 구조와 동작을 이해하는 데 도움이 되는 샘플 예제 목록입니다.
+ * 아래는 TextField2D의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
  * @see [TextField2D MouseEvent example](/RedGPU/examples/2d/mouseEvent/textField2D/)
  *
  * @category TextField
