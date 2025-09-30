@@ -12,15 +12,6 @@ import Primitive from "./core/Primitive";
  * ```
  *
  * <iframe src="/RedGPU/examples/3d/primitive/box/"></iframe>
- *
- * @param redGPUContext RedGPUContext 인스턴스
- * @param width 박스 너비 (기본값 1)
- * @param height 박스 높이 (기본값 1)
- * @param depth 박스 깊이 (기본값 1)
- * @param wSegments X축 세그먼트 수 (기본값 1)
- * @param hSegments Y축 세그먼트 수 (기본값 1)
- * @param dSegments Z축 세그먼트 수 (기본값 1)
- * @param uvSize UV 스케일 (기본값 1)
  */
 class Box extends Primitive {
 	#makeData = (function () {
@@ -94,6 +85,17 @@ class Box extends Primitive {
 		};
 	})()
 
+	/**
+	 * Box 생성자
+	 * @param redGPUContext RedGPUContext 인스턴스
+	 * @param width 박스 너비 (기본값 1)
+	 * @param height 박스 높이 (기본값 1)
+	 * @param depth 박스 깊이 (기본값 1)
+	 * @param wSegments X축 세그먼트 수 (기본값 1)
+	 * @param hSegments Y축 세그먼트 수 (기본값 1)
+	 * @param dSegments Z축 세그먼트 수 (기본값 1)
+	 * @param uvSize UV 스케일 (기본값 1)
+	 */
 	constructor(
 		redGPUContext: RedGPUContext,
 		width: number = 1,

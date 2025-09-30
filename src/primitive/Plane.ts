@@ -10,18 +10,8 @@ import Primitive from "./core/Primitive";
  * ```javascript
  * // 5x5 크기, 8x8 세그먼트, UV 2배, Y축 뒤집기 없이 생성 및 씬에 추가
  * const plane = new RedGPU.Primitive.Plane(redGPUContext, 5, 5, 8, 8, 2, false);
-
  * ```
- *
  * <iframe src="/RedGPU/examples/3d/primitive/plane/"></iframe>
- *
- * @param redGPUContext RedGPUContext 인스턴스
- * @param width 가로 길이 (기본값 1)
- * @param height 세로 길이 (기본값 1)
- * @param wSegments X축 세그먼트 수 (기본값 1)
- * @param hSegments Y축 세그먼트 수 (기본값 1)
- * @param uvSize UV 스케일 (기본값 1)
- * @param flipY Y축 UV 뒤집기 여부 (기본값 false)
  */
 class Plane extends Primitive {
 	#makeData = (function () {
@@ -68,6 +58,16 @@ class Plane extends Primitive {
 		};
 	})();
 
+	/**
+	 * Plane 생성자
+	 * @param redGPUContext RedGPUContext 인스턴스
+	 * @param width 가로 길이 (기본값 1)
+	 * @param height 세로 길이 (기본값 1)
+	 * @param wSegments X축 세그먼트 수 (기본값 1)
+	 * @param hSegments Y축 세그먼트 수 (기본값 1)
+	 * @param uvSize UV 스케일 (기본값 1)
+	 * @param flipY Y축 UV 뒤집기 여부 (기본값 false)
+	 */
 	constructor(redGPUContext: RedGPUContext, width = 1, height = 1, wSegments = 1, hSegments = 1, uvSize = 1, flipY = false) {
 		super(redGPUContext);
 		const uniqueKey = `PRIMITIVE_PLANE_W${width}_H${height}_WS${wSegments}_HS${hSegments}_UV${uvSize}_FY${flipY}`;

@@ -12,13 +12,7 @@ import Primitive from "./core/Primitive";
  * const ground = new RedGPU.Primitive.Ground(redGPUContext, 10, 10, 10, 10, 2, false);
  * ```
  *
- * @param redGPUContext RedGPUContext 인스턴스
- * @param width 가로 길이 (기본값 1)
- * @param height 세로 길이 (기본값 1)
- * @param wSegments X축 세그먼트 수 (기본값 1)
- * @param hSegments Z축 세그먼트 수 (기본값 1)
- * @param uvSize UV 스케일 (기본값 1)
- * @param flipY Y축 UV 뒤집기 여부 (기본값 false)
+ * <iframe src="/RedGPU/examples/3d/primitive/ground/"></iframe>
  */
 class Ground extends Primitive {
 	#makeData = (function () {
@@ -66,6 +60,16 @@ class Ground extends Primitive {
 		};
 	})();
 
+	/**
+	 * Ground 생성자
+	 * @param redGPUContext RedGPUContext 인스턴스
+	 * @param width 가로 길이 (기본값 1)
+	 * @param height 세로 길이 (기본값 1)
+	 * @param wSegments X축 세그먼트 수 (기본값 1)
+	 * @param hSegments Z축 세그먼트 수 (기본값 1)
+	 * @param uvSize UV 스케일 (기본값 1)
+	 * @param flipY Y축 UV 뒤집기 여부 (기본값 false)
+	 */
 	constructor(redGPUContext: RedGPUContext, width = 1, height = 1, wSegments = 1, hSegments = 1, uvSize = 1, flipY = false) {
 		super(redGPUContext);
 		const uniqueKey = `PRIMITIVE_GROUND_W${width}_H${height}_WS${wSegments}_HS${hSegments}_UV${uvSize}_FY${flipY}`;

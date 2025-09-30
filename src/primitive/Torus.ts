@@ -10,7 +10,6 @@ import Primitive from "./core/Primitive";
  * ```javascript
  * // 반지름 2, 두께 0.5, 32x16 세그먼트 토러스 생성 및 씬에 추가
  * const torus = new RedGPU.Primitive.Torus(redGPUContext, 2, 0.5, 32, 16);
-
  * ```
  *
  * <iframe src="/RedGPU/examples/3d/primitive/torus/"></iframe>

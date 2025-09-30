@@ -109,6 +109,16 @@ const ExampleList = [
 						},
 					},
 					{
+						name: 'Ground',
+						path: '3d/primitive/ground',
+						thumb: '3d/primitive/ground/thumb.png',
+						description: {
+							ko: ``,
+							en: `Samples for the basic Ground Primitives supported by RedGPU. Provides real-time testing of Ground configuration options.`
+
+						},
+					},
+					{
 						name: 'Sphere',
 						path: '3d/primitive/sphere',
 						thumb: '3d/primitive/sphere/thumb.png',
