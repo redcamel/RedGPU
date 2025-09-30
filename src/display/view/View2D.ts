@@ -16,8 +16,12 @@ import View3D from "./View3D";
  * redGPUContext.addView(view);
  * ```
  * <iframe src="/RedGPU/examples/2d/helloWorld2D/" ></iframe>
- * @extends View3D
  *
+ * 아래는 View2D의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
+ * @see [Multi View2D(2D + 2D) example](/RedGPU/examples/2d/view/multiView/)
+ * @see [Multi View2D(2D + 3D) example](/RedGPU/examples/2d/view/multiViewWith3D/)
+ *
+ * @extends View3D
  * @category View
  */
 class View2D extends View3D {

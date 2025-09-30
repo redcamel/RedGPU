@@ -40,6 +40,8 @@ const UNIFORM_STRUCT = SHADER_INFO.uniforms.systemUniforms;
  * ```
  * <iframe src="/RedGPU/examples/3d/view/singleView/" ></iframe>
  *
+ * 아래는 View3D의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
+ * @see [Multi View3D example](/RedGPU/examples/3d/view/multiView/)
  * @category View
  */
 class View3D extends AView {

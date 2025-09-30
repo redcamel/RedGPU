@@ -75,7 +75,7 @@ interface PhongMaterial {
  * <iframe src="/RedGPU/examples/3d/material/phongMaterial/"></iframe>
  *
  * 아래는 PhongMaterial의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
- * @see [PhongMaterial Texture Combination](/RedGPU/examples/3d/material/phongMaterialTextures/)
+ * @see [PhongMaterial Texture Combination example](/RedGPU/examples/3d/material/phongMaterialTextures/)
  *
  * @extends ABitmapBaseMaterial
  * @category Material
