@@ -2,7 +2,7 @@ import { mat4 } from "gl-matrix";
 import validateUintRange from "../../../runtimeChecker/validateFunc/validateUintRange";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import Mesh from "../Mesh";
-import MeshBase from "../MeshBase";
+import MeshBase from "./MeshBase";
 
 /**
  * Object3DContainer 클래스는 Mesh 객체들을 담는 시각적 컨테이너입니다.

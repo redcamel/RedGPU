@@ -3,7 +3,7 @@ import GPU_CULL_MODE from "../../../gpuConst/GPU_CULL_MODE";
 import Plane from "../../../primitive/Plane";
 import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
-import {mixInMesh2D} from "../../mesh/core/mixInMesh2D";
+import {mixInMesh2D} from "../../mesh/core";
 import Mesh from "../../mesh/Mesh";
 
 /** 2D 메시 기능이 믹스인된 베이스 클래스 */

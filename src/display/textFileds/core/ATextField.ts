@@ -50,6 +50,14 @@ const BASE_STYLES = {
 const isValidNumber = (value: any) => typeof value == 'number';
 const isPixelNeeded = (key: string) => !['lineHeight', 'fontWeight'].includes(key);
 
+/**
+ * 텍스트 필드 객체의 추상 클래스입니다.
+ *
+ * @remarks
+ * 이 클래스는 RedGPU 시스템 내부에서 텍스트 필드를 처리하기 위해 사용됩니다.
+ * 일반 사용자나 외부 개발자가 `직접 사용할 필요는 없습니다.`
+ * @abstract
+ */
 class ATextField extends Mesh {
 	#textureCvs: OffscreenCanvas | HTMLCanvasElement;
 	#textureCtx: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D;

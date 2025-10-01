@@ -6,7 +6,8 @@ import GPU_MIPMAP_FILTER_MODE from "../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 import Primitive from "../../../primitive/core/Primitive";
 import Plane from "../../../primitive/Plane";
 import parseWGSL from "../../../resources/wgslParser/parseWGSL";
-import {mixInMesh2D} from "../../mesh/core/mixInMesh2D";
+import {keepLog} from "../../../utils";
+import {mixInMesh2D} from "../../mesh/core";
 import ATextField from "../core/ATextField";
 import vertexModuleSource from "./shader/textField2DVertex.wgsl";
 
@@ -60,6 +61,7 @@ class TextField2D extends BaseTextField2D {
 		this._geometry = new Plane(redGPUContext, 1, 1, 1, 1, 1, true);
 		this.useSmoothing = useSmoothing;
 		this.primitiveState.cullMode = GPU_CULL_MODE.FRONT;
+		keepLog(this)
 	}
 
 	/**

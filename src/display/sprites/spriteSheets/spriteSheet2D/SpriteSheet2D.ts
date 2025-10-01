@@ -6,7 +6,8 @@ import Plane from "../../../../primitive/Plane";
 import BitmapTexture from "../../../../resources/texture/BitmapTexture";
 import parseWGSL from "../../../../resources/wgslParser/parseWGSL";
 import consoleAndThrowError from "../../../../utils/consoleAndThrowError";
-import {mixInMesh2D} from "../../../mesh/core/mixInMesh2D";
+import {mixInMesh2D} from "../../../mesh/core";
+
 import ASpriteSheet from "../core/ASpriteSheet";
 import SpriteSheetInfo from "../SpriteSheetInfo";
 import vertexModuleSource from "./shader/spriteSheet2DVertex.wgsl";
