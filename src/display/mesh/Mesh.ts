@@ -1003,8 +1003,8 @@ class Mesh extends MeshBase {
 						//
 						if (currentGeometry.indexBuffer) {
 							const {indexBuffer} = currentGeometry
-							const {indexCount, gpuBuffer: indexGPUBuffer} = indexBuffer
-							targetEncoder.setIndexBuffer(indexGPUBuffer, 'uint32')
+							const {indexCount, gpuBuffer: indexGPUBuffer,format} = indexBuffer
+							targetEncoder.setIndexBuffer(indexGPUBuffer, format)
 							// @ts-ignore
 							if (this.particleBuffers) targetEncoder.drawIndexed(indexCount, this.particleNum, 0, 0, 0);
 							else targetEncoder.drawIndexed(indexCount, 1, 0, 0, 0);

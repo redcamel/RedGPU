@@ -8,7 +8,7 @@ import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "../../../mater
 import RenderViewStateData from "../../../renderer/RenderViewStateData";
 import BlendState from "../../../renderState/BlendState";
 import InterleaveType from "../../../resources/buffer/core/type/InterleaveType";
-import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
+import IndexBufferUint32 from "../../../resources/buffer/indexBuffer/IndexBufferUint32";
 import UniformBuffer from "../../../resources/buffer/uniformBuffer/UniformBuffer";
 import InterleavedStruct from "../../../resources/buffer/vertexBuffer/InterleavedStruct";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
@@ -27,7 +27,7 @@ const PIPELINE_DESCRIPTOR_LABEL = 'PIPELINE_DESCRIPTOR_GRID'
 
 class DrawDebuggerGrid {
 	#vertexBuffer: VertexBuffer
-	#indexBuffer: IndexBuffer
+	#indexBuffer: IndexBufferUint32
 	#uniformBuffer: UniformBuffer
 	readonly #fragmentBindGroup: GPUBindGroup
 	readonly #pipeline: GPURenderPipeline
@@ -161,7 +161,7 @@ class DrawDebuggerGrid {
 			currentRenderPassEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
 			currentRenderPassEncoder.setBindGroup(1, this.#fragmentBindGroup);
 			currentRenderPassEncoder.setVertexBuffer(0, this.#vertexBuffer.gpuBuffer);
-			currentRenderPassEncoder.setIndexBuffer(this.#indexBuffer.gpuBuffer, 'uint32');
+			currentRenderPassEncoder.setIndexBuffer(this.#indexBuffer.gpuBuffer, this.#indexBuffer.format);
 			currentRenderPassEncoder.drawIndexed(indexCount);
 			debugViewRenderState.numTriangles += 0; // 라인이므로 삼각형 수는 0
 			debugViewRenderState.numPoints += indexCount
@@ -232,7 +232,7 @@ class DrawDebuggerGrid {
 			let indexBuffer = cachedBufferState[uniqueKey];
 			if (!indexBuffer) {
 				const {indexData} = this.#makeGridLineData(size);
-				indexBuffer = new IndexBuffer(
+				indexBuffer = new IndexBufferUint32(
 					redGPUContext,
 					indexData,
 					undefined,

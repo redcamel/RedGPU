@@ -1,4 +1,6 @@
+import redGPUContext from "../../../context/RedGPUContext";
 import RedGPUContext from "../../../context/RedGPUContext";
+import GPU_INDEX_FORMAT from "../../../gpuConst/GPU_INDEX_FORMAT";
 import ResourceStateIndexBuffer from "../../resourceManager/resourceState/ResourceStateIndexBuffer";
 import ABaseBuffer, {GPU_BUFFER_CACHE_KEY, GPU_BUFFER_DATA_SYMBOL, GPU_BUFFER_SYMBOL} from "../core/ABaseBuffer";
 
@@ -6,10 +8,10 @@ const MANAGED_STATE_KEY = 'managedIndexBufferState'
 type NumberArray = Array<number> | Uint32Array;
 
 /**
- * IndexBuffer
+ * IndexBufferUint32
  * @category Buffer
  */
-class IndexBuffer extends ABaseBuffer {
+class IndexBufferUint32 extends ABaseBuffer {
 	/**
 	 * 인덱스 데이터가 저장되는 내부 버퍼입니다.
 
@@ -25,9 +27,13 @@ class IndexBuffer extends ABaseBuffer {
 
 	 */
 	#triangleCount: number = 0
+	#format:GPUIndexFormat = GPU_INDEX_FORMAT.UINT32
+	get format(): GPUIndexFormat {
+		return this.#format;
+	}
 
 	/**
-	 * IndexBuffer 생성자
+	 * IndexBufferUint32 생성자
 	 * @param redGPUContext - RedGPUContext 인스턴스
 	 * @param data - 인덱스 데이터 (Array<number> 또는 Uint32Array)
 	 * @param usage - GPUBufferUsageFlags (기본값: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST)
@@ -119,5 +125,5 @@ class IndexBuffer extends ABaseBuffer {
 	// }
 }
 
-Object.freeze(IndexBuffer)
-export default IndexBuffer
+Object.freeze(IndexBufferUint32)
+export default IndexBufferUint32

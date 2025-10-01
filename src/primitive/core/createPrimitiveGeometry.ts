@@ -1,6 +1,6 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import Geometry from "../../geometry/Geometry";
-import IndexBuffer from "../../resources/buffer/indexBuffer/IndexBuffer";
+import IndexBufferUint32 from "../../resources/buffer/indexBuffer/IndexBufferUint32";
 import VertexBuffer from "../../resources/buffer/vertexBuffer/VertexBuffer";
 import Primitive from "./Primitive";
 
@@ -14,7 +14,7 @@ const createPrimitiveGeometry = (redGPUContext: RedGPUContext, interleaveData: n
 			undefined,
 			`VertexBuffer_${uniqueKey}`
 		),
-		new IndexBuffer(
+		new IndexBufferUint32(
 			redGPUContext,
 			new Uint32Array(indexData),
 			undefined,

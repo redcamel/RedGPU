@@ -5,7 +5,7 @@ import GPU_CULL_MODE from "../../../gpuConst/GPU_CULL_MODE";
 import GPU_PRIMITIVE_TOPOLOGY from "../../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
 import PBRMaterial from "../../../material/pbrMaterial/PBRMaterial";
 import InterleaveType from "../../../resources/buffer/core/type/InterleaveType";
-import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
+import IndexBufferUint32 from "../../../resources/buffer/indexBuffer/IndexBufferUint32";
 import InterleavedStruct from "../../../resources/buffer/vertexBuffer/InterleavedStruct";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
@@ -185,7 +185,7 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
 				undefined,
 				vertexCacheKey
 			),
-			!noIndexBuffer && indices.length ? new IndexBuffer(
+			!noIndexBuffer && indices.length ? new IndexBufferUint32(
 				redGPUContext,
 				new Uint32Array(indices),
 				undefined,
