@@ -2,6 +2,7 @@ import {mat4} from "gl-matrix";
 import RenderViewStateData from "../../renderer/RenderViewStateData";
 import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
 import Object3DContainer from "../mesh/core/Object3DContainer";
+import MESH_TYPE from "../MESH_TYPE";
 
 /**
  * 그룹의 기본 동작과 변환(위치, 회전, 스케일, 피벗 등)을 제공하는 3D/2D 공통 베이스 클래스입니다.
@@ -442,7 +443,7 @@ class GroupBase extends Object3DContainer {
 }
 
 Object.defineProperty(GroupBase.prototype, 'meshType', {
-	value: 'mesh',
+	value: MESH_TYPE.MESH,
 	writable: false
 });
 Object.freeze(GroupBase)

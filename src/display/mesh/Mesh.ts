@@ -18,6 +18,7 @@ import OBB from "../../utils/math/bound/OBB";
 import mat4ToEuler from "../../utils/math/matToEuler";
 import uuidToUint from "../../utils/uuid/uuidToUint";
 import DrawDebuggerMesh from "../drawDebugger/DrawDebuggerMesh";
+import MESH_TYPE from "../MESH_TYPE";
 import createMeshVertexUniformBuffers from "./core/createMeshVertexUniformBuffers";
 import Object3DContainer from "./core/Object3DContainer";
 import updateMeshDirtyPipeline from "./core/pipeline/updateMeshDirtyPipeline";
@@ -37,6 +38,7 @@ interface Mesh {
 	meshType: string
 	useDisplacementTexture: boolean
 }
+
 /**
  * geometry와 material을 바탕으로 3D/2D 객체의 위치, 회전, 스케일, 피벗, 계층 구조, 렌더링, 그림자, 디버깅 등 다양한 기능을 제공하는 기본 메시 클래스입니다.
  *
@@ -154,7 +156,6 @@ class Mesh extends MeshBase {
 	}
 
 	_material
-
 	get material() {
 		return this._material;
 	}
@@ -170,7 +171,6 @@ class Mesh extends MeshBase {
 
 	// 블렌드 모드 설정 함수
 	_geometry: Geometry | Primitive
-
 	get geometry(): Geometry | Primitive {
 		return this._geometry;
 	}
@@ -864,7 +864,6 @@ class Mesh extends MeshBase {
 				this.#renderBundle = null
 			}
 		}
-
 		if (currentGeometry && passFrustumCulling) {
 			{
 				const {gpuRenderInfo} = this
@@ -952,31 +951,22 @@ class Mesh extends MeshBase {
 				}
 				this.dirtyOpacity = false
 			}
+			const {render2PathLayer, particleLayer, transparentLayer, alphaLayer, renderBundleList} = debugViewRenderState
 			{
 				if (currentMaterial.use2PathRender) {
-					debugViewRenderState.render2PathLayer[debugViewRenderState.render2PathLayer.length] = this
-				}
-					// else if (this.meshType === 'particle') {
-					// 	debugViewRenderState.particleLayer[debugViewRenderState.particleLayer.length] = this
-				// }
-					// else if (currentMaterial.transparent) {
-					// 	debugViewRenderState.transparentLayer[debugViewRenderState.transparentLayer.length] = this
-					// }
-					// else if (currentMaterial.alphaBlend === 2 || currentMaterial.opacity < 1 || !this.depthStencilState.depthWriteEnabled) {
-					// 	debugViewRenderState.alphaLayer[debugViewRenderState.alphaLayer.length] = this
-				// }
-				else {
+					render2PathLayer[render2PathLayer.length] = this
+				} else {
 					let targetEncoder: GPURenderBundleEncoder | GPURenderPassEncoder = currentRenderPassEncoder
 					let needBundleFinish = false
 					// keepLog(this.#bundleEncoder , this.dirtyPipeline , this.#prevSystemBindGroup !== view.systemUniform_Vertex_UniformBindGroup)
 					const {fragmentUniformBindGroup} = currentMaterial.gpuRenderInfo
-					if (!this.#bundleEncoder || this.dirtyPipeline || this.#prevFragmentBindGroup !== fragmentUniformBindGroup ||  this.#prevSystemBindGroup !== view.systemUniform_Vertex_UniformBindGroup) {
+					if (!this.#bundleEncoder || this.dirtyPipeline || this.#prevFragmentBindGroup !== fragmentUniformBindGroup || this.#prevSystemBindGroup !== view.systemUniform_Vertex_UniformBindGroup) {
 						this.#bundleEncoder = null
 						this.#bundleEncoder = gpuDevice.createRenderBundleEncoder({
 							colorFormats: [navigator.gpu.getPreferredCanvasFormat(), navigator.gpu.getPreferredCanvasFormat(), 'rgba16float'],
 							depthStencilFormat: 'depth32float',
 							sampleCount: useMSAA ? 4 : 1,
-							label : this.uuid
+							label: this.uuid
 						})
 						needBundleFinish = true
 						// keepLog('렌더번들갱신')
@@ -999,7 +989,6 @@ class Mesh extends MeshBase {
 						this.#prevFragmentBindGroup = fragmentUniformBindGroup
 						targetEncoder.setPipeline(pipeline)
 						const {gpuBuffer} = currentGeometry.vertexBuffer
-
 						targetEncoder.setVertexBuffer(0, gpuBuffer)
 						// @ts-ignore
 						if (this.particleBuffers?.length) {
@@ -1026,16 +1015,16 @@ class Mesh extends MeshBase {
 						}
 						this.#renderBundle = (targetEncoder as GPURenderBundleEncoder).finish();
 					}
-					if (this.meshType === 'particle') {
-						debugViewRenderState.particleLayer[debugViewRenderState.particleLayer.length] = this.#renderBundle
+					if (this.meshType === MESH_TYPE.PARTICLE) {
+						particleLayer[particleLayer.length] = this.#renderBundle
 					} else if (currentMaterial.transparent) {
-						debugViewRenderState.transparentLayer[debugViewRenderState.transparentLayer.length] = this.#renderBundle
+						transparentLayer[transparentLayer.length] = this.#renderBundle
 						// @ts-ignore
 						this.#renderBundle.mesh = this
 					} else if (currentMaterial.alphaBlend === 2 || currentMaterial.opacity < 1 || !this.depthStencilState.depthWriteEnabled) {
-						debugViewRenderState.alphaLayer[debugViewRenderState.alphaLayer.length] = this.#renderBundle
+						alphaLayer[alphaLayer.length] = this.#renderBundle
 					} else {
-						debugViewRenderState.renderBundleList[debugViewRenderState.renderBundleList.length] = this.#renderBundle
+						renderBundleList[renderBundleList.length] = this.#renderBundle
 					}
 				}
 			}
@@ -1152,7 +1141,7 @@ class Mesh extends MeshBase {
 }
 
 Object.defineProperty(Mesh.prototype, 'meshType', {
-	value: 'mesh',
+	value: MESH_TYPE.MESH,
 	writable: false
 });
 DefineForVertex.defineByPreset(Mesh, [

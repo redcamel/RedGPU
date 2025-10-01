@@ -6,6 +6,7 @@ import DefineForVertex from "../../resources/defineProperty/DefineForVertex";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import copyGPUBuffer from "../../utils/copyGPUBuffer";
 import Mesh from "../mesh/Mesh";
+import MESH_TYPE from "../MESH_TYPE";
 import PARTICLE_EASE from "./PARTICLE_EASE";
 import computeModuleSource from "./shader/compute.wgsl";
 import vertexModuleSource from "./shader/particleVertex.wgsl";
@@ -783,7 +784,7 @@ class ParticleEmitter extends Mesh {
 }
 
 Object.defineProperty(ParticleEmitter.prototype, 'meshType', {
-	value: 'particle',
+	value:MESH_TYPE.PARTICLE,
 	writable: false
 });
 DefineForVertex.defineByPreset(ParticleEmitter, [

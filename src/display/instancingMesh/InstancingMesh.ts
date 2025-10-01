@@ -12,6 +12,7 @@ import copyGPUBuffer from "../../utils/copyGPUBuffer";
 import createBasePipeline from "../mesh/core/pipeline/createBasePipeline";
 import PIPELINE_TYPE from "../mesh/core/pipeline/PIPELINE_TYPE";
 import Mesh from "../mesh/Mesh";
+import MESH_TYPE from "../MESH_TYPE";
 import InstancingMeshObject3D from "./InstancingMeshObject3D";
 import vertexModuleSource from './shader/instanceMeshVertex.wgsl';
 
@@ -320,7 +321,7 @@ class InstancingMesh extends Mesh {
  * geometry/vertex 데이터와 material을 공유하며, transform만 개별적으로 관리하는 구조임을 구분하기 위해 사용됩니다.
  */
 Object.defineProperty(InstancingMesh.prototype, 'meshType', {
-	value: 'instanceMesh',
+	value: MESH_TYPE.INSTANCED_MESH,
 	writable: false
 });
 export default InstancingMesh
