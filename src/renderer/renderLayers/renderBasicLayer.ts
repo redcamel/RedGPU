@@ -4,11 +4,9 @@ import RenderViewStateData from "../RenderViewStateData";
 const renderBasicLayer = (view: View3D, viewRenderPassEncoder: GPURenderPassEncoder) => {
 	const {debugViewRenderState, skybox, scene} = view
 	debugViewRenderState.currentRenderPassEncoder = viewRenderPassEncoder
-	const {instanceMeshLayer} = debugViewRenderState
 	const {children} = scene
 	renderList(children, debugViewRenderState)
 	viewRenderPassEncoder.executeBundles(debugViewRenderState.renderBundleList);
-	renderList(instanceMeshLayer, debugViewRenderState)
 }
 export default renderBasicLayer
 const renderList = (list, debugViewRenderState: RenderViewStateData) => {

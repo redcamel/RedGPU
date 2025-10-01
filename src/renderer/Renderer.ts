@@ -15,9 +15,6 @@ import renderPickingLayer from "./renderLayers/renderPickingLayer";
 import renderShadowLayer from "./renderLayers/renderShadowLayer";
 import RenderViewStateData from "./RenderViewStateData";
 
-let temp0 = new Float32Array(16)
-let temp1 = new Float32Array(16)
-
 class Renderer {
 	#prevViewportSize: { width: number, height: number };
 	#finalRender: FinalRender

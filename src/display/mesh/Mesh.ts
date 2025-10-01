@@ -864,6 +864,7 @@ class Mesh extends MeshBase {
 				this.#renderBundle = null
 			}
 		}
+
 		if (currentGeometry && passFrustumCulling) {
 			{
 				const {gpuRenderInfo} = this
@@ -958,9 +959,6 @@ class Mesh extends MeshBase {
 					// else if (this.meshType === 'particle') {
 					// 	debugViewRenderState.particleLayer[debugViewRenderState.particleLayer.length] = this
 				// }
-				else if (this.meshType === 'instanceMesh') {
-					debugViewRenderState.instanceMeshLayer[debugViewRenderState.instanceMeshLayer.length] = this
-				}
 					// else if (currentMaterial.transparent) {
 					// 	debugViewRenderState.transparentLayer[debugViewRenderState.transparentLayer.length] = this
 					// }
