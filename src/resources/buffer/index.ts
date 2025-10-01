@@ -1,10 +1,10 @@
 
-import IndexBufferUint32 from "./indexBuffer/IndexBufferUint32";
+import IndexBuffer from "./indexBuffer/IndexBuffer";
 import StorageBuffer from "./storageBuffer/StorageBuffer";
 
 export * from './uniformBuffer'
 export * from './vertexBuffer'
 export {
-	IndexBufferUint32,
+	IndexBuffer,
 	StorageBuffer
 }

@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import Mesh from "../../../display/mesh/Mesh";
-import IndexBufferUint32 from "../../../resources/buffer/indexBuffer/IndexBufferUint32";
+import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
 
 let temp0 = new Float32Array(16)
@@ -61,7 +61,7 @@ class ParsedSkinInfo_GLTF {
 		device: GPUDevice,
 		vertexStorageBuffer: GPUBuffer,
 		weightBuffer: VertexBuffer,
-		jointBuffer: IndexBufferUint32,
+		jointBuffer: IndexBuffer,
 	) {
 		const source = `
 			struct Uniforms {

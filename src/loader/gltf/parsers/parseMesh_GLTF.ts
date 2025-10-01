@@ -5,7 +5,7 @@ import GPU_CULL_MODE from "../../../gpuConst/GPU_CULL_MODE";
 import GPU_PRIMITIVE_TOPOLOGY from "../../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
 import PBRMaterial from "../../../material/pbrMaterial/PBRMaterial";
 import InterleaveType from "../../../resources/buffer/core/type/InterleaveType";
-import IndexBufferUint32 from "../../../resources/buffer/indexBuffer/IndexBufferUint32";
+import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
 import InterleavedStruct from "../../../resources/buffer/vertexBuffer/InterleavedStruct";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
 import {keepLog} from "../../../utils";
@@ -171,7 +171,7 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
 			undefined,
 			`Weight_${gltfLoader.url}_${nodeGlTfId}_${i}`
 		)
-		const jointBuffer = new IndexBufferUint32(
+		const jointBuffer = new IndexBuffer(
 			redGPUContext,
 			jointData,
 			GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
@@ -193,7 +193,7 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
 				undefined,
 				vertexCacheKey
 			),
-			!noIndexBuffer && indices.length ? new IndexBufferUint32(
+			!noIndexBuffer && indices.length ? new IndexBuffer(
 				redGPUContext,
 				new Uint32Array(indices),
 				undefined,

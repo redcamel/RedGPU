@@ -7,6 +7,10 @@ import parseWGSL from "../../../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from './fragment.wgsl';
 
 const SHADER_INFO = parseWGSL(fragmentModuleSource)
+interface TextFieldMaterial {
+	diffuseTexture: BitmapTexture
+	diffuseTextureSampler: Sampler
+}
 
 /**
  * 텍스트 필드 렌더링에 사용되는 머티리얼 클래스입니다.
@@ -24,16 +28,6 @@ class TextFieldMaterial extends ABitmapBaseMaterial {
 	 * 머티리얼 설정이 변경되었을 때 true로 설정되어야 합니다.
 	 */
 	dirtyPipeline: boolean = false
-
-	/**
-	 * 텍스트 필드에 사용할 비트맵 텍스처입니다.
-	 */
-	diffuseTexture: BitmapTexture
-
-	/**
-	 * 텍스처 샘플링에 사용되는 샘플러입니다.
-	 */
-	diffuseTextureSampler: Sampler
 
 	/**
 	 * `TextFieldMaterial` 인스턴스를 생성합니다.

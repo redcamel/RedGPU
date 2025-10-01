@@ -18,10 +18,16 @@ const validMipmapFilters: GPUMipmapFilterMode[] = Object.values(GPU_MIPMAP_FILTE
  * - 동일 옵션의 샘플러는 내부적으로 캐싱하여 중복 생성을 방지합니다.
  * - 옵션 변경 시 자동으로 샘플러를 갱신합니다.
  *
+ * <iframe src="/RedGPU/examples/3d/texture/bitmapTextureSampler/"></iframe>
+ *
+ * 아래는 Sampler의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
+ * @see [Sampler Combination example](/RedGPU/examples/3d/texture/samplerCombination/)
+ * @see [Sampler AddressMode example](/RedGPU/examples/3d/texture/samplerAddressMode/)
+ *
  * @category Sampler
  * @extends ResourceBase
  */
-class Sampler extends ResourceBase { 
+class Sampler extends ResourceBase {
 	/** GPU 샘플러 객체 */
 	#gpuSampler: GPUSampler
 	/** 확대 필터 모드 */

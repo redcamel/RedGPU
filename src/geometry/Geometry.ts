@@ -1,13 +1,13 @@
 import RedGPUContext from "../context/RedGPUContext";
 import GeometryGPURenderInfo from "../renderInfos/GeometryGPURenderInfo";
-import IndexBufferUint32 from "../resources/buffer/indexBuffer/IndexBufferUint32";
+import IndexBuffer from "../resources/buffer/indexBuffer/IndexBuffer";
 import VertexBuffer from "../resources/buffer/vertexBuffer/VertexBuffer";
 import ResourceBase from "../resources/ResourceBase";
 import AABB from "../utils/math/bound/AABB";
 import calculateGeometryAABB from "../utils/math/bound/calculateGeometryAABB";
 
 /**
- * Geometry 클래스는 정점 버퍼(VertexBuffer)와 인덱스 버퍼(IndexBufferUint32)를 관리하며,
+ * Geometry 클래스는 정점 버퍼(VertexBuffer)와 인덱스 버퍼(IndexBuffer)를 관리하며,
  * GPU 렌더링에 필요한 정보를 제공하는 역할을 합니다.
  *
  * - 정점 버퍼, 인덱스 버퍼, AABB(경계 상자) 정보를 캡슐화합니다.
@@ -22,7 +22,7 @@ class Geometry extends ResourceBase {
 	/** 정점 버퍼 */
 	#vertexBuffer: VertexBuffer
 	/** 인덱스 버퍼 */
-	#indexBuffer: IndexBufferUint32
+	#indexBuffer: IndexBuffer
 	/** AABB(경계 상자) 정보 */
 	#volume: AABB;
 
@@ -32,7 +32,7 @@ class Geometry extends ResourceBase {
 	 * @param vertexBuffer 정점 버퍼
 	 * @param indexBuffer 인덱스 버퍼(선택)
 	 */
-	constructor(redGPUContext: RedGPUContext, vertexBuffer: VertexBuffer, indexBuffer?: IndexBufferUint32) {
+	constructor(redGPUContext: RedGPUContext, vertexBuffer: VertexBuffer, indexBuffer?: IndexBuffer) {
 		super(redGPUContext)
 		this.#updateVertexBuffer(vertexBuffer)
 		this.#updateIndexBuffer(indexBuffer)
@@ -53,7 +53,7 @@ class Geometry extends ResourceBase {
 	}
 
 	/** 인덱스 버퍼 반환 */
-	get indexBuffer(): IndexBufferUint32 {
+	get indexBuffer(): IndexBuffer {
 		return this.#indexBuffer;
 	}
 
@@ -86,7 +86,7 @@ class Geometry extends ResourceBase {
 	 * @param indexBuffer 새 인덱스 버퍼
 	 * @private
 	 */
-	#updateIndexBuffer(indexBuffer: IndexBufferUint32) {
+	#updateIndexBuffer(indexBuffer: IndexBuffer) {
 		const prevBuffer = this.#indexBuffer
 		this.#indexBuffer = indexBuffer
 		if (prevBuffer) prevBuffer.__removeDirtyPipelineListener(this.#updateIndexBufferState);

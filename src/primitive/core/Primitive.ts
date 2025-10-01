@@ -2,7 +2,7 @@ import RedGPUContext from "../../context/RedGPUContext";
 import Geometry from "../../geometry/Geometry";
 import GeometryGPURenderInfo from "../../renderInfos/GeometryGPURenderInfo";
 import InterleaveType from "../../resources/buffer/core/type/InterleaveType";
-import IndexBufferUint32 from "../../resources/buffer/indexBuffer/IndexBufferUint32";
+import IndexBuffer from "../../resources/buffer/indexBuffer/IndexBuffer";
 import InterleavedStruct from "../../resources/buffer/vertexBuffer/InterleavedStruct";
 import VertexBuffer from "../../resources/buffer/vertexBuffer/VertexBuffer";
 import validateRedGPUContext from "../../runtimeChecker/validateFunc/validateRedGPUContext";
@@ -30,7 +30,7 @@ class Primitive {
 	/** 정점 버퍼 */
 	#vertexBuffer: VertexBuffer
 	/** 인덱스 버퍼 */
-	#indexBuffer: IndexBufferUint32
+	#indexBuffer: IndexBuffer
 	/** AABB(바운딩 박스) */
 	#volume: AABB;
 
@@ -67,7 +67,7 @@ class Primitive {
 	}
 
 	/** 인덱스 버퍼 반환 */
-	get indexBuffer(): IndexBufferUint32 {
+	get indexBuffer(): IndexBuffer {
 		return this.#indexBuffer;
 	}
 

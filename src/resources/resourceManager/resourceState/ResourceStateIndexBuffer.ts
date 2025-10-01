@@ -1,13 +1,13 @@
-import IndexBufferUint32 from "../../buffer/indexBuffer/IndexBufferUint32";
+import IndexBuffer from "../../buffer/indexBuffer/IndexBuffer";
 
 class ResourceStateIndexBuffer {
 	static dirtyList = []
-	buffer: IndexBufferUint32
+	buffer: IndexBuffer
 	label: string | number
 	uuid: string | number
 	#useNum: number = 0
 
-	constructor(buffer: IndexBufferUint32) {
+	constructor(buffer: IndexBuffer) {
 		this.buffer = buffer
 		this.label = buffer.name
 		this.uuid = buffer.uuid

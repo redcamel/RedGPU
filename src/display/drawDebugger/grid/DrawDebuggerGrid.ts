@@ -8,7 +8,7 @@ import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "../../../mater
 import RenderViewStateData from "../../../renderer/RenderViewStateData";
 import BlendState from "../../../renderState/BlendState";
 import InterleaveType from "../../../resources/buffer/core/type/InterleaveType";
-import IndexBufferUint32 from "../../../resources/buffer/indexBuffer/IndexBufferUint32";
+import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
 import UniformBuffer from "../../../resources/buffer/uniformBuffer/UniformBuffer";
 import InterleavedStruct from "../../../resources/buffer/vertexBuffer/InterleavedStruct";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
@@ -27,7 +27,7 @@ const PIPELINE_DESCRIPTOR_LABEL = 'PIPELINE_DESCRIPTOR_GRID'
 
 class DrawDebuggerGrid {
 	#vertexBuffer: VertexBuffer
-	#indexBuffer: IndexBufferUint32
+	#indexBuffer: IndexBuffer
 	#uniformBuffer: UniformBuffer
 	readonly #fragmentBindGroup: GPUBindGroup
 	readonly #pipeline: GPURenderPipeline
@@ -232,7 +232,7 @@ class DrawDebuggerGrid {
 			let indexBuffer = cachedBufferState[uniqueKey];
 			if (!indexBuffer) {
 				const {indexData} = this.#makeGridLineData(size);
-				indexBuffer = new IndexBufferUint32(
+				indexBuffer = new IndexBuffer(
 					redGPUContext,
 					indexData,
 					undefined,

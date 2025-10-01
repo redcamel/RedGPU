@@ -8,10 +8,10 @@ const MANAGED_STATE_KEY = 'managedIndexBufferState'
 type NumberArray = Array<number> | Uint32Array;
 
 /**
- * IndexBufferUint32
+ * IndexBuffer
  * @category Buffer
  */
-class IndexBufferUint32 extends ABaseBuffer {
+class IndexBuffer extends ABaseBuffer {
 	/**
 	 * 인덱스 데이터가 저장되는 내부 버퍼입니다.
 
@@ -33,7 +33,7 @@ class IndexBufferUint32 extends ABaseBuffer {
 	}
 
 	/**
-	 * IndexBufferUint32 생성자
+	 * IndexBuffer 생성자
 	 * @param redGPUContext - RedGPUContext 인스턴스
 	 * @param data - 인덱스 데이터 (Array<number> 또는 Uint32Array)
 	 * @param usage - GPUBufferUsageFlags (기본값: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST)
@@ -125,5 +125,5 @@ class IndexBufferUint32 extends ABaseBuffer {
 	// }
 }
 
-Object.freeze(IndexBufferUint32)
-export default IndexBufferUint32
+Object.freeze(IndexBuffer)
+export default IndexBuffer

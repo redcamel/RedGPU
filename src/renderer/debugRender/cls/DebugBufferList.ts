@@ -62,7 +62,7 @@ class DebugStatisticsDomService {
 				case 'VertexBuffer' :
 					targetState = ResourceStateVertexBuffer
 					break
-				case 'IndexBufferUint32' :
+				case 'IndexBuffer' :
 					targetState = ResourceStateIndexBuffer
 					break
 				case 'UniformBuffer' :
