@@ -8,6 +8,7 @@ import InterleaveType from "../../../resources/buffer/core/type/InterleaveType";
 import IndexBufferUint32 from "../../../resources/buffer/indexBuffer/IndexBufferUint32";
 import InterleavedStruct from "../../../resources/buffer/vertexBuffer/InterleavedStruct";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
+import {keepLog} from "../../../utils";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import createUUID from "../../../utils/uuid/createUUID";
 import calculateNormals from "../../../utils/math/calculateNormals";
@@ -156,18 +157,25 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
 		// tInterleaveInfoList['aVertexJoint'] = InterleaveType.float32x4
 		tInterleaveInfoList['aVertexTangent'] = InterleaveType.float32x4
 		const weightData = []
+		const jointData = []
 		parseInterleaveData_GLTF(weightData, vertices, verticesColor_0, normalData, uvs, uvs1, uvs2, jointWeights, joints, tangents, true)
+		parseInterleaveData_GLTF(jointData, vertices, verticesColor_0, normalData, uvs, uvs1, uvs2, jointWeights, joints, tangents, false,true)
 		const weightBuffer = new VertexBuffer(
 			redGPUContext,
 			weightData,
 			new InterleavedStruct(
 				{
 					aVertexWeight: InterleaveType.float32x4,
-					aVertexJoint: InterleaveType.float32x4
 				}
 			),
 			undefined,
 			`Weight_${gltfLoader.url}_${nodeGlTfId}_${i}`
+		)
+		const jointBuffer = new IndexBufferUint32(
+			redGPUContext,
+			jointData,
+			GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+			`Joint_${gltfLoader.url}_${nodeGlTfId}_${i}`
 		)
 		/////////////////////////////////////////////////////////
 		let morphInfo = new MorphInfo_GLTF(gltfLoader, gltfData, meshPrimitive, gltfMesh.weights);
@@ -199,6 +207,7 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
 		}
 		tMesh = new Mesh(redGPUContext, tGeo, tMaterial);
 		tMesh.animationInfo.weightBuffer = weightBuffer
+		tMesh.animationInfo.jointBuffer = jointBuffer
 		if (tName) {
 			tMesh.name = tName;
 			if (gltfLoader.parsingOption) {

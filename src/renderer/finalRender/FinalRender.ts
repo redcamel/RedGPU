@@ -155,7 +155,6 @@ class FinalRender {
 				|| this.#viewSizes[index].width !== viewW
 				|| this.#viewSizes[index].height !== viewH
 				|| this.#viewGpuTextureViews[index] !== gpuTextureView
-				|| this.#fragmentBuffer[index]
 			if (needNewBindGroup) {
 				if (!this.#fragmentBuffer[index]) {
 					this.#fragmentBuffer[index] = redGPUContext.gpuDevice.createBuffer({

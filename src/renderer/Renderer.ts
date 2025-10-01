@@ -361,6 +361,7 @@ class Renderer {
 					gpuDevice,
 					mesh.animationInfo.skinInfo.vertexStorageBuffer,
 					mesh.animationInfo.weightBuffer,
+					mesh.animationInfo.jointBuffer,
 				);
 			}
 			{
