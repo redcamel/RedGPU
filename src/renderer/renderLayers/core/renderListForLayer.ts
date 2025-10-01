@@ -44,8 +44,8 @@ const renderListForLayer = (list, debugViewRenderState: RenderViewStateData, pip
 				//
 				if (currentGeometry.indexBuffer) {
 					const {indexBuffer} = currentGeometry
-					const {indexCount, triangleCount, gpuBuffer: indexGPUBuffer,format} = indexBuffer
-					currentRenderPassEncoder.setIndexBuffer(indexGPUBuffer,format)
+					const {indexCount, triangleCount, gpuBuffer: indexGPUBuffer, format} = indexBuffer
+					currentRenderPassEncoder.setIndexBuffer(indexGPUBuffer, format)
 					currentRenderPassEncoder.drawIndexed(indexCount, 1, 0, 0, 0);
 					debugViewRenderState.numTriangles += triangleCount
 					debugViewRenderState.numPoints += indexCount

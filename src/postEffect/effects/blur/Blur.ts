@@ -1,7 +1,7 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import View3D from "../../../display/view/View3D";
 import AMultiPassPostEffect from "../../core/AMultiPassPostEffect";
-import { ASinglePassPostEffectResult } from "../../core/ASinglePassPostEffect";
+import {ASinglePassPostEffectResult} from "../../core/ASinglePassPostEffect";
 import Convolution from "../convolution/Convolution";
 
 /**

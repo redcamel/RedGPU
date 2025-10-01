@@ -18,6 +18,7 @@ import vertexModuleSource from './shader/instanceMeshVertex.wgsl';
 
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_INSTANCING'
 const VERTEX_BIND_GROUP_DESCRIPTOR_NAME = 'VERTEX_BIND_GROUP_DESCRIPTOR_INSTANCING'
+
 /**
  * GPU 인스턴싱 기반의 메시 클래스입니다.
  *
@@ -201,8 +202,8 @@ class InstancingMesh extends Mesh {
 			//
 			if (this.geometry.indexBuffer) {
 				const {indexBuffer} = this.geometry
-				const {indexCount, triangleCount, gpuBuffer: indexGPUBuffer,format} = indexBuffer
-				currentRenderPassEncoder.setIndexBuffer(indexGPUBuffer,format)
+				const {indexCount, triangleCount, gpuBuffer: indexGPUBuffer, format} = indexBuffer
+				currentRenderPassEncoder.setIndexBuffer(indexGPUBuffer, format)
 				currentRenderPassEncoder.drawIndexed(indexCount, this.#instanceCount, 0, 0, 0);
 				debugViewRenderState.numTriangles += triangleCount * this.#instanceCount
 				debugViewRenderState.numPoints += indexCount * this.#instanceCount

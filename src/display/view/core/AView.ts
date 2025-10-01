@@ -5,8 +5,8 @@ import PickingManager from "../../../picking/PickingManager";
 import FXAA from "../../../postEffect/FXAA";
 import TAA from "../../../postEffect/TAA/TAA";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
-import InstanceIdGenerator from "../../../utils/uuid/InstanceIdGenerator";
 import screenToWorld from "../../../utils/math/coordinates/screenToWorld";
+import InstanceIdGenerator from "../../../utils/uuid/InstanceIdGenerator";
 import DrawDebuggerAxis from "../../drawDebugger/DrawDebuggerAxis";
 import DrawDebuggerGrid from "../../drawDebugger/grid/DrawDebuggerGrid";
 import Scene from "../../scene/Scene";
@@ -25,23 +25,32 @@ import ViewTransform from "./ViewTransform";
  * 이 메서드는 렌더링 엔진 내부에서 자동으로 사용되는 기능으로, 일반적인 사용자는 직접 호출하지 않는 것이 좋습니다.
  *
  */
-
 abstract class AView extends ViewTransform {
-
 	#name: string
 	#scene: Scene
 	#instanceId: number
 	#pickingManager: PickingManager = new PickingManager()
-
 	#useFrustumCulling: boolean = true
 	#useDistanceCulling: boolean = false
 	#distanceCulling: number = 50
-
 	#grid: DrawDebuggerGrid
 	#axis: DrawDebuggerAxis
-
 	#taa: TAA
 	#fxaa: FXAA
+
+	/**
+	 * AView 생성자입니다.
+	 * @param redGPUContext - RedGPUContext 인스턴스
+	 * @param scene - Scene 인스턴스
+	 * @param camera - AController 또는 Camera2D 인스턴스
+	 * @param name - 선택적 이름
+	 */
+	constructor(redGPUContext: RedGPUContext, scene: Scene, camera: AController | Camera2D, name?: string) {
+		super(redGPUContext)
+		this.scene = scene
+		this.camera = camera
+		if (name) this.name = name
+	}
 
 	/**
 	 * 뷰의 이름입니다. 지정하지 않으면 자동으로 인스턴스 ID 기반 이름이 생성됩니다.
@@ -196,20 +205,6 @@ abstract class AView extends ViewTransform {
 			this.#taa = new TAA(this.redGPUContext);
 		}
 		return this.#taa;
-	}
-
-	/**
-	 * AView 생성자입니다.
-	 * @param redGPUContext - RedGPUContext 인스턴스
-	 * @param scene - Scene 인스턴스
-	 * @param camera - AController 또는 Camera2D 인스턴스
-	 * @param name - 선택적 이름
-	 */
-	constructor(redGPUContext: RedGPUContext, scene: Scene, camera: AController | Camera2D, name?: string) {
-		super(redGPUContext)
-		this.scene = scene
-		this.camera = camera
-		if (name) this.name = name
 	}
 
 	/**

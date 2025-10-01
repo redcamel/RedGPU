@@ -4,7 +4,6 @@ import InstanceIdGenerator from "../../../utils/uuid/InstanceIdGenerator";
 import Object3DContainer from "../../mesh/core/Object3DContainer";
 import MESH_TYPE from "../../MESH_TYPE";
 
-
 interface AGroupBase {
 }
 

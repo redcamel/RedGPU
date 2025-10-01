@@ -8,10 +8,9 @@ import InterleaveType from "../../../resources/buffer/core/type/InterleaveType";
 import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
 import InterleavedStruct from "../../../resources/buffer/vertexBuffer/InterleavedStruct";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
-import {keepLog} from "../../../utils";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
-import createUUID from "../../../utils/uuid/createUUID";
 import calculateNormals from "../../../utils/math/calculateNormals";
+import createUUID from "../../../utils/uuid/createUUID";
 import AccessorInfo_GLTF from "../cls/AccessorInfo_GLTF";
 import MorphInfo_GLTF from "../cls/MorphInfo_GLTF";
 import {GLTF, GlTfId, Mesh as GltfMesh, MeshPrimitive} from "../GLTF";
@@ -159,7 +158,7 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
 		const weightData = []
 		const jointData = []
 		parseInterleaveData_GLTF(weightData, vertices, verticesColor_0, normalData, uvs, uvs1, uvs2, jointWeights, joints, tangents, true)
-		parseInterleaveData_GLTF(jointData, vertices, verticesColor_0, normalData, uvs, uvs1, uvs2, jointWeights, joints, tangents, false,true)
+		parseInterleaveData_GLTF(jointData, vertices, verticesColor_0, normalData, uvs, uvs1, uvs2, jointWeights, joints, tangents, false, true)
 		const weightBuffer = new VertexBuffer(
 			redGPUContext,
 			weightData,

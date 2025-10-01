@@ -3,7 +3,6 @@ import validateNumber from "../../../runtimeChecker/validateFunc/validateNumber"
 
 const temp_matrix = mat4.create();
 const temp_vector = vec3.create();
-
 /**
  * 월드 좌표(x, y, z)를 주어진 변환 행렬(targetMatrix)의 역행렬을 이용해 로컬 좌표로 변환합니다.
  *

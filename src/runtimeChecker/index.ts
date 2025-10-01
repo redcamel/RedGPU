@@ -5,7 +5,6 @@
  *
  * @packageDocumentation
  */
-
 import isHexColor from "./isFunc/isHexColor";
 import isUint from "./isFunc/isUint";
 import validateNumber from "./validateFunc/validateNumber";

@@ -20,39 +20,33 @@ class LightManager {
 	 * @private
 	 */
 	#limitDirectionalLightCount: number = 3
-
 	/**
 	 * 클러스터 조명(Point + Spot)의 최대 허용 개수입니다.
 	 * PassClustersLightHelper.MAX_CLUSTER_LIGHTS 값을 사용합니다.
 	 * @private
 	 */
 	#limitClusterLightCount: number = PassClustersLightHelper.MAX_CLUSTER_LIGHTS
-
 	/**
 	 * 등록된 방향성 조명 목록입니다.
 	 * @private
 	 */
 	#directionalLights: DirectionalLight[] = []
-
 	/**
 	 * 등록된 포인트 조명 목록입니다.
 	 * @private
 	 */
 	#pointLights: PointLight[] = []
-
 	/**
 	 * 등록된 스포트 조명 목록입니다.
 	 * @private
 	 */
 	#spotLights: SpotLight[] = []
-
 	/**
 	 * 장면의 환경광(Ambient Light) 인스턴스입니다.
 	 * 기본값은 새로운 AmbientLight 인스턴스입니다.
 	 * @private
 	 */
 	#ambientLight: AmbientLight = new AmbientLight()
-
 	/**
 	 * 방향성 조명의 투영 행렬 계산에 사용되는 내부 캐시 행렬입니다.
 	 * 그림자 맵 생성 등의 연산에서 사용됩니다.

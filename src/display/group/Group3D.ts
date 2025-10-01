@@ -48,7 +48,7 @@ class Group3D extends AGroupBase {
  * geometry/vertex 데이터 없이 transform과 자식만을 가지는 구조임을 구분하기 위해 사용됩니다.
  */
 Object.defineProperty(Group3D.prototype, 'meshType', {
-	value:MESH_TYPE.MESH,
+	value: MESH_TYPE.MESH,
 	writable: false
 });
 Object.freeze(Group3D)

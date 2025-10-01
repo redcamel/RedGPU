@@ -260,5 +260,6 @@ class ColorRGB {
 		validateUintRange(b, 0, 255)
 	}
 }
+
 Object.freeze(ColorRGB)
 export default ColorRGB

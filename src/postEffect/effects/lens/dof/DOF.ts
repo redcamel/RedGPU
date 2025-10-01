@@ -76,63 +76,80 @@ class DOF extends AMultiPassPostEffect {
 	// CoC 관련 getter/setter
 	/** 초점 거리 반환 */
 	get focusDistance(): number { return this.#focusDistance; }
+
 	/** 초점 거리 설정 */
 	set focusDistance(value: number) {
 		this.#focusDistance = value;
 		this.#effect_coc.focusDistance = value;
 	}
+
 	/** 조리개 반환 */
 	get aperture(): number { return this.#aperture; }
+
 	/** 조리개 설정 */
 	set aperture(value: number) {
 		this.#aperture = value;
 		this.#effect_coc.aperture = value;
 	}
+
 	/** 최대 CoC 반환 */
 	get maxCoC(): number { return this.#maxCoC; }
+
 	/** 최대 CoC 설정 */
 	set maxCoC(value: number) {
 		this.#maxCoC = value;
 		this.#effect_coc.maxCoC = value;
 	}
+
 	/** 근평면 반환 */
 	get nearPlane(): number { return this.#nearPlane; }
+
 	/** 근평면 설정 */
 	set nearPlane(value: number) {
 		this.#nearPlane = value;
 		this.#effect_coc.nearPlane = value;
 	}
+
 	/** 원평면 반환 */
 	get farPlane(): number { return this.#farPlane; }
+
 	/** 원평면 설정 */
 	set farPlane(value: number) {
 		this.#farPlane = value;
 		this.#effect_coc.farPlane = value;
 	}
+
 	// 블러 관련 getter/setter
 	/** 근거리 블러 크기 반환 */
 	get nearBlurSize(): number { return this.#nearBlurSize; }
+
 	/** 근거리 블러 크기 설정 */
 	set nearBlurSize(value: number) {
 		this.#nearBlurSize = value;
 		this.#effect_unified.nearBlurSize = value;
 	}
+
 	/** 원거리 블러 크기 반환 */
 	get farBlurSize(): number { return this.#farBlurSize; }
+
 	/** 원거리 블러 크기 설정 */
 	set farBlurSize(value: number) {
 		this.#farBlurSize = value;
 		this.#effect_unified.farBlurSize = value;
 	}
+
 	/** 근거리 블러 강도 반환 */
 	get nearStrength(): number { return this.#nearStrength; }
+
 	/** 근거리 블러 강도 설정 */
 	set nearStrength(value: number) {
 		this.#nearStrength = value;
 		this.#effect_unified.nearStrength = value;
 	}
+
 	/** 원거리 블러 강도 반환 */
 	get farStrength(): number { return this.#farStrength; }
+
 	/** 원거리 블러 강도 설정 */
 	set farStrength(value: number) {
 		this.#farStrength = value;

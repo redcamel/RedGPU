@@ -23,6 +23,7 @@ import vertexModuleSource from "./shader/lineVertex.wgsl";
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_LINE_3D'
 const SHADER_INFO = parseWGSL(vertexModuleSource);
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
+
 /**
  * 3D 공간에서 선(라인)을 표현하는 클래스입니다.
  *
@@ -97,6 +98,7 @@ class Line3D extends Mesh {
 	get type(): LINE_TYPE {
 		return this.#type;
 	}
+
 	set type(value: LINE_TYPE) {
 		this.#type = value;
 		this.#parsePointsByType();
@@ -115,6 +117,7 @@ class Line3D extends Mesh {
 	get tension(): number {
 		return this.#tension;
 	}
+
 	set tension(value: number) {
 		validatePositiveNumberRange(value)
 		this.#tension = value;
@@ -127,6 +130,7 @@ class Line3D extends Mesh {
 	get tolerance(): number {
 		return this.#tolerance;
 	}
+
 	set tolerance(value: number) {
 		validatePositiveNumberRange(value)
 		this.#tolerance = value;
@@ -139,6 +143,7 @@ class Line3D extends Mesh {
 	get distance(): number {
 		return this.#distance;
 	}
+
 	set distance(value: number) {
 		validatePositiveNumberRange(value)
 		this.#distance = value;
@@ -158,6 +163,7 @@ class Line3D extends Mesh {
 	get geometry(): Geometry | Primitive {
 		return this._geometry;
 	}
+
 	/**
 	 * geometry를 변경할 수 없습니다.
 	 */
@@ -171,6 +177,7 @@ class Line3D extends Mesh {
 	get material() {
 		return this._material
 	}
+
 	/**
 	 * material을 변경할 수 없습니다.
 	 */

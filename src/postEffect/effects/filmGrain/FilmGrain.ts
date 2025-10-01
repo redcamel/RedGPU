@@ -87,47 +87,57 @@ class FilmGrain extends ASinglePassPostEffect {
 	get filmGrainIntensity(): number {
 		return this.#filmGrainIntensity;
 	}
+
 	/** 그레인 강도 설정. 0~1 */
 	set filmGrainIntensity(value: number) {
 		this.#filmGrainIntensity = Math.max(0.0, Math.min(1.0, value));
 		this.updateUniform('filmGrainIntensity', this.#filmGrainIntensity);
 	}
+
 	/** 밝기 반응도 반환 */
 	get filmGrainResponse(): number {
 		return this.#filmGrainResponse;
 	}
+
 	/** 밝기 반응도 설정. 0~2 */
 	set filmGrainResponse(value: number) {
 		this.#filmGrainResponse = Math.max(0.0, Math.min(2.0, value));
 		this.updateUniform('filmGrainResponse', this.#filmGrainResponse);
 	}
+
 	/** 그레인 스케일 반환 */
 	get filmGrainScale(): number {
 		return this.#filmGrainScale;
 	}
+
 	/** 그레인 스케일 설정. 0.1~20 */
 	set filmGrainScale(value: number) {
 		this.#filmGrainScale = Math.max(0.1, Math.min(20.0, value));
 		this.updateUniform('filmGrainScale', this.#filmGrainScale);
 	}
+
 	/** 컬러 그레인 비율 반환 */
 	get coloredGrain(): number {
 		return this.#coloredGrain;
 	}
+
 	/** 컬러 그레인 비율 설정. 0~1 */
 	set coloredGrain(value: number) {
 		this.#coloredGrain = Math.max(0.0, Math.min(1.0, value));
 		this.updateUniform('coloredGrain', this.#coloredGrain);
 	}
+
 	/** 그레인 채도 반환 */
 	get grainSaturation(): number {
 		return this.#grainSaturation;
 	}
+
 	/** 그레인 채도 설정. 0~2 */
 	set grainSaturation(value: number) {
 		this.#grainSaturation = Math.max(0.0, Math.min(2.0, value));
 		this.updateUniform('grainSaturation', this.#grainSaturation);
 	}
+
 	/** 프리셋 적용 */
 	applyPreset(preset: typeof SUBTLE | typeof MEDIUM | typeof HEAVY | typeof VINTAGE): void {
 		this.#filmGrainIntensity = preset.filmGrainIntensity;
@@ -137,11 +147,13 @@ class FilmGrain extends ASinglePassPostEffect {
 		this.#grainSaturation = preset.grainSaturation;
 		this.#updateUniforms();
 	}
+
 	/** 시간 업데이트(애니메이션용) */
 	update(deltaTime: number): void {
 		this.#time += deltaTime;
 		this.updateUniform('time', this.#time);
 	}
+
 	/** 내부 유니폼 일괄 갱신 */
 	#updateUniforms(): void {
 		this.updateUniform('filmGrainIntensity', this.#filmGrainIntensity);

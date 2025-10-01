@@ -37,43 +37,36 @@ class ASpriteSheet extends Mesh {
 	 * @private
 	 */
 	#frameRate: number = 0
-
 	/**
 	 * 다음 프레임 표시 시각 (밀리초)
 	 * @private
 	 */
 	#nextFrameTime: number = 0
-
 	/**
 	 * 프레임 간 간격 시간 (밀리초)
 	 * @private
 	 */
 	#perFrameTime: number = 0
-
 	/**
 	 * 재생 상태 여부
 	 * @private
 	 */
 	#playYn: boolean = true
-
 	/**
 	 * 반복 재생 여부
 	 * @private
 	 */
 	#loop: boolean = true
-
 	/**
 	 * 스프라이트 시트 정보 객체
 	 * @private
 	 */
 	#spriteSheetInfo: SpriteSheetInfo
-
 	/**
 	 * 렌더링 크기 설정 함수
 	 * @private
 	 */
 	#setRenderSize: (texture: unknown, segmentW: number, segmentH: number) => void
-
 	/**
 	 * 현재 애니메이션 상태 ('play', 'pause', 'stop')
 	 * @private
@@ -273,11 +266,9 @@ DefineForVertex.definePositiveNumber(ASpriteSheet, [
 	['totalFrame', 15],
 	['currentIndex', 0]
 ])
-
 /**
  * ASpriteSheet 클래스를 동결하여 런타임에서의 수정을 방지합니다.
  * @readonly
  */
 Object.freeze(ASpriteSheet)
-
 export default ASpriteSheet

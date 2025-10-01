@@ -57,7 +57,6 @@ class FinalRender {
 	 * @param {GPURenderPassDescriptor[]} viewList_renderPassDescriptorList - The list of render passes to be rendered.
 	 */
 	render(redGPUContext: RedGPUContext, viewList_renderPassDescriptorList: GPURenderPassDescriptor[]) {
-
 		const {sizeManager, gpuDevice, antialiasingManager} = redGPUContext
 		const {changedMSAA, useMSAA} = antialiasingManager
 		const {pixelRectObject: canvasPixelRectObject} = sizeManager
@@ -84,7 +83,7 @@ class FinalRender {
 		gpuDevice.queue.submit([finalRenderCommandEnc.finish()])
 	}
 
-	#updateFinalViewBackgroundColor(view: View3D,index:number) {
+	#updateFinalViewBackgroundColor(view: View3D, index: number) {
 		{
 			const {scene, redGPUContext} = view
 			const {gpuDevice} = redGPUContext
@@ -130,9 +129,6 @@ class FinalRender {
 			const targetView = redGPUContext.viewList[index]
 			const {x: viewX, y: viewY, width: viewW, height: viewH} = targetView.pixelRectObject
 			const projectionMatrix = mat4.create()
-
-
-
 			{
 				mat4.ortho(projectionMatrix, 0., 1., 0., 1., -1000, 1000);
 				mat4.scale(projectionMatrix, projectionMatrix, [1 / (canvasW), 1 / (canvasH), 1]);
@@ -183,7 +179,7 @@ class FinalRender {
 				this.#viewSizes[index] = {width: viewW || 1, height: viewH || 1}
 				this.#viewGpuTextureViews[index] = gpuTextureView
 			}
-			this.#updateFinalViewBackgroundColor(targetView,index)
+			this.#updateFinalViewBackgroundColor(targetView, index)
 			finalRenderPassEnc.setPipeline(this.#getPipeline(redGPUContext))
 			finalRenderPassEnc.setBindGroup(0, vertexUniformBindGroup);
 			finalRenderPassEnc.setBindGroup(1, this.#fragmentUniformBindGroups[index])

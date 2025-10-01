@@ -23,13 +23,10 @@ import BaseLight from "../core/BaseLight";
 class PointLight extends BaseLight {
 	/** 광원의 영향을 미치는 반경입니다. */
 	#radius: number = 1;
-
 	/** 광원의 X 좌표입니다. */
 	#x: number = 0;
-
 	/** 광원의 Y 좌표입니다. */
 	#y: number = 0;
-
 	/** 광원의 Z 좌표입니다. */
 	#z: number = 0;
 

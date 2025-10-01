@@ -5,7 +5,6 @@
  *
  * @packageDocumentation
  */
-
 import Camera2D from "./camera/Camera2D";
 import OrthographicCamera from "./camera/OrthographicCamera";
 import PerspectiveCamera from "./camera/PerspectiveCamera";

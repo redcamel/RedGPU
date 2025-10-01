@@ -44,6 +44,7 @@ class HeightFog extends ASinglePassPostEffect {
 	#thickness: number = 100.0;
 	/** 높이별 감쇠율. 기본값 0.1 */
 	#falloff: number = 0.1;
+
 	constructor(redGPUContext: RedGPUContext) {
 		super(redGPUContext);
 		this.useDepthTexture = true;
@@ -65,6 +66,7 @@ class HeightFog extends ASinglePassPostEffect {
 
 	// 🎨 Fog Mode (Unity: Mode)
 	get fogType(): number { return this.#fogType; }
+
 	/** 안개 타입 설정. 0 또는 1 */
 	set fogType(value: number) {
 		validateNumberRange(value, 0, 1);
@@ -74,6 +76,7 @@ class HeightFog extends ASinglePassPostEffect {
 
 	// 🌫️ Fog Density (Unity: Density)
 	get density(): number { return this.#density; }
+
 	/** 안개 밀도 설정. 0~5 */
 	set density(value: number) {
 		validateNumberRange(value, 0, 5);
@@ -86,6 +89,7 @@ class HeightFog extends ASinglePassPostEffect {
 
 	/** 안개 시작 높이 반환 */
 	get baseHeight(): number { return this.#baseHeight; }
+
 	/** 안개 시작 높이 설정 */
 	set baseHeight(value: number) {
 		validateNumberRange(value);
@@ -102,6 +106,7 @@ class HeightFog extends ASinglePassPostEffect {
 
 	// 📏 Thickness - 안개 레이어 두께 (Unity: Thickness)
 	get thickness(): number { return this.#thickness; }
+
 	/** 안개 레이어 두께 설정. 최소 0.1 */
 	set thickness(value: number) {
 		validateNumberRange(value, 0.1);
@@ -112,6 +117,7 @@ class HeightFog extends ASinglePassPostEffect {
 
 	// 📉 Falloff - 높이별 감쇠율 (Unity: Falloff)
 	get falloff(): number { return this.#falloff; }
+
 	/** 높이별 감쇠율 설정. 0.001~2 */
 	set falloff(value: number) {
 		validateNumberRange(value, 0, 2);

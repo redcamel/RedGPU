@@ -50,118 +50,99 @@ class View3D extends AView {
 	 * @private
 	 */
 	#systemUniform_Vertex_StructInfo: any = UNIFORM_STRUCT;
-
 	/**
 	 * 정점 셰이더 시스템 유니폼용 GPU 바인드 그룹
 	 * @private
 	 */
 	#systemUniform_Vertex_UniformBindGroup: GPUBindGroup;
-
 	/**
 	 * 정점 셰이더 시스템 유니폼용 유니폼 버퍼
 	 * @private
 	 */
 	#systemUniform_Vertex_UniformBuffer: UniformBuffer;
-
 	/**
 	 * 환경 렌더링을 위한 스카이박스 객체
 	 * @private
 	 */
 	#skybox: SkyBox
-
 	/**
 	 * IBL(이미지 기반 조명) 설정
 	 * @private
 	 */
 	#ibl: IBL
-
 	/**
 	 * 디버그 뷰 렌더링 상태 데이터
 	 * @private
 	 * @readonly
 	 */
 	readonly #debugViewRenderState: RenderViewStateData
-
 	/**
 	 * 포스트 이펙트 처리 매니저
 	 * @private
 	 * @readonly
 	 */
 	readonly #postEffectManager: PostEffectManager
-
 	/**
 	 * 렌더 타겟 처리를 위한 뷰 렌더 텍스처 매니저
 	 * @private
 	 * @readonly
 	 */
 	readonly #viewRenderTextureManager: ViewRenderTextureManager
-
 	/**
 	 * 바인드 그룹 생성 최적화를 위한 이전 프레임 정보 캐시
 	 * @private
 	 */
 	#prevInfoList = []
-
 	/**
 	 * 그림자 깊이 비교용 GPU 샘플러
 	 * @private
 	 */
 	#shadowDepthSampler: GPUSampler
-
 	/**
 	 * 일반적인 텍스처 샘플링용 기본 GPU 샘플러
 	 * @private
 	 */
 	#basicSampler: GPUSampler
-
 	/**
 	 * 타일링된 텍스처 샘플링용 압축 GPU 샘플러
 	 * @private
 	 */
 	#basicPackedSampler: GPUSampler
-
 	/**
 	 * 클러스터 라이트 데이터를 저장하는 GPU 버퍼
 	 * @private
 	 */
 	#clusterLightsBuffer: GPUBuffer
-
 	/**
 	 * 클러스터 라이트 데이터를 담은 Float32Array
 	 * @private
 	 */
 	#clusterLightsBufferData: Float32Array
-
 	/**
 	 * 클러스터 라이트 처리 패스
 	 * @private
 	 */
 	#passLightClusters: PassClustersLight
-
 	/**
 	 * 클러스터 라이트 경계 계산 패스
 	 * @private
 	 */
 	#passLightClustersBound: PassClusterLightBound
-
 	/**
 	 * 더티 체킹용 이전 프레임 너비
 	 * @private
 	 */
 	#prevWidth: number = undefined
-
 	/**
 	 * 더티 체킹용 이전 프레임 높이
 	 * @private
 	 */
 	#prevHeight: number = undefined
-
 	/**
 	 * 리소스 관리를 위한 이전 프레임의 IBL 텍스처
 	 * @private
 	 */
 	#prevIBL_iblTexture: IBLCubeTexture
-
 	/**
 	 * 리소스 관리를 위한 이전 프레임의 IBL 복사열 텍스처
 	 * @private

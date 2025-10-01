@@ -67,56 +67,67 @@ class SSR extends ASinglePassPostEffect {
 	get maxSteps(): number {
 		return this.#maxSteps;
 	}
+
 	/** 최대 스텝 수 설정. 1~512 */
 	set maxSteps(value: number) {
 		validateNumberRange(value, 1, 512);
 		this.#maxSteps = value;
 		this.updateUniform('maxSteps', value);
 	}
+
 	/** 최대 반사 거리 반환 */
 	get maxDistance(): number {
 		return this.#maxDistance;
 	}
+
 	/** 최대 반사 거리 설정. 1.0~200.0 */
 	set maxDistance(value: number) {
 		validatePositiveNumberRange(value, 1.0, 200.0);
 		this.#maxDistance = value;
 		this.updateUniform('maxDistance', value);
 	}
+
 	/** 스텝 크기 반환 */
 	get stepSize(): number {
 		return this.#stepSize;
 	}
+
 	/** 스텝 크기 설정. 0.001~5.0 */
 	set stepSize(value: number) {
 		validatePositiveNumberRange(value, 0.001, 5.0);
 		this.#stepSize = value;
 		this.updateUniform('stepSize', value);
 	}
+
 	/** 반사 강도 반환 */
 	get reflectionIntensity(): number {
 		return this.#reflectionIntensity;
 	}
+
 	/** 반사 강도 설정. 0.0~5.0 */
 	set reflectionIntensity(value: number) {
 		validateNumberRange(value, 0.0, 5.0);
 		this.#reflectionIntensity = value;
 		this.updateUniform('reflectionIntensity', value);
 	}
+
 	/** 페이드 거리 반환 */
 	get fadeDistance(): number {
 		return this.#fadeDistance;
 	}
+
 	/** 페이드 거리 설정. 1.0~100.0 */
 	set fadeDistance(value: number) {
 		validatePositiveNumberRange(value, 1.0, 100.0);
 		this.#fadeDistance = value;
 		this.updateUniform('fadeDistance', value);
 	}
+
 	/** 에지 페이드 반환 */
 	get edgeFade(): number {
 		return this.#edgeFade;
 	}
+
 	/** 에지 페이드 설정. 0.0~0.5 */
 	set edgeFade(value: number) {
 		validateNumberRange(value, 0.0, 0.5);

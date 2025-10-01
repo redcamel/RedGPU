@@ -1,6 +1,5 @@
 import calculateNormals from "./calculateNormals";
 import computeViewFrustumPlanes from "./computeViewFrustumPlanes";
-
 import formatBytes from "./formatBytes";
 import matToEuler from "./matToEuler";
 import quaternionToRotationMat4 from "./quaternionToRotationMat4";

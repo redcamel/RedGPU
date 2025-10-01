@@ -86,7 +86,5 @@ DefineForVertex.defineByPreset(Sprite3D, [
 	[DefineForVertex.PRESET_BOOLEAN.USE_BILLBOARD, true],
 	[DefineForVertex.PRESET_POSITIVE_NUMBER.BILLBOARD_FIXED_SCALE, 0.1, 0.1],
 ])
-
 Object.freeze(Sprite3D)
-
 export default Sprite3D

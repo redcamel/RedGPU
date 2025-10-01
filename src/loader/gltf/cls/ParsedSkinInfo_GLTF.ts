@@ -44,7 +44,7 @@ class ParsedSkinInfo_GLTF {
 		const data = jointBuffer.data;
 		const len = data.length;
 		for (let i = 0; i < len; i++) {
-			const baseIndex = i ;
+			const baseIndex = i;
 			// 각 정점마다 4개의 조인트 인덱스
 			for (let j = 0; j < 4; j++) {
 				const jointIndex = Math.floor(data[baseIndex + j]);

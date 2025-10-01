@@ -5,7 +5,6 @@
  *
  * @packageDocumentation
  */
-
 export * as Core from './core'
 import BrightnessContrast from "./effects/adjustments/brightnessContrast/BrightnessContrast";
 import ColorBalance from "./effects/adjustments/colorBalance/ColorBalance";

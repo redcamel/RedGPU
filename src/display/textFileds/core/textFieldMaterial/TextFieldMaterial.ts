@@ -7,6 +7,7 @@ import parseWGSL from "../../../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from './fragment.wgsl';
 
 const SHADER_INFO = parseWGSL(fragmentModuleSource)
+
 interface TextFieldMaterial {
 	diffuseTexture: BitmapTexture
 	diffuseTextureSampler: Sampler
@@ -57,12 +58,10 @@ DefineForFragment.defineByPreset(TextFieldMaterial, [
 	DefineForFragment.PRESET_TEXTURE.DIFFUSE_TEXTURE,
 	DefineForFragment.PRESET_SAMPLER.DIFFUSE_TEXTURE_SAMPLER,
 ])
-
 /**
  * `TextFieldMaterial` 클래스의 속성을 변경할 수 없도록 고정합니다.
  */
 Object.freeze(TextFieldMaterial)
-
 /**
  * `TextFieldMaterial` 클래스를 기본 export로 내보냅니다.
  */

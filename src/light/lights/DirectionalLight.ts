@@ -24,13 +24,11 @@ class DirectionalLight extends BaseLight {
 	 * 기본값은 -1이며, 광원이 왼쪽 방향으로 향하도록 설정됩니다.
 	 */
 	#directionX: number = -1;
-
 	/**
 	 * 광원의 Y 방향 벡터 값입니다.
 	 * 기본값은 -1이며, 광원이 아래 방향으로 향하도록 설정됩니다.
 	 */
 	#directionY: number = -1;
-
 	/**
 	 * 광원의 Z 방향 벡터 값입니다.
 	 * 기본값은 -1이며, 광원이 뒤쪽 방향으로 향하도록 설정됩니다.

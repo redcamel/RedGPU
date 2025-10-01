@@ -61,11 +61,72 @@ class Renderer {
 		cancelAnimationFrame(redGPUContext.currentRequestAnimationFrame)
 	}
 
+	renderView(view: View3D, time: number) {
+		const {
+			redGPUContext,
+			camera,
+			pickingManager,
+			pixelRectObject,
+			debugViewRenderState
+		} = view
+		const {
+			colorAttachment,
+			depthStencilAttachment,
+			gBufferNormalTextureAttachment,
+			gBufferMotionVectorTextureAttachment
+		} = this.#createAttachmentsForView(view)
+		this.#updateJitter(view)
+		const renderPassDescriptor: GPURenderPassDescriptor = {
+			colorAttachments: [colorAttachment, gBufferNormalTextureAttachment, gBufferMotionVectorTextureAttachment],
+			depthStencilAttachment,
+		}
+		// @ts-ignore
+		camera.update?.(view, time)
+		const commandEncoder: GPUCommandEncoder = redGPUContext.gpuDevice.createCommandEncoder({
+			label: 'ViewRender_MainCommandEncoder'
+		})
+		const computeCommandEncoder: GPUCommandEncoder = redGPUContext.gpuDevice.createCommandEncoder({
+			label: 'ViewRender_MainComputeCommandEncoder'
+		})
+		this.#batchUpdateSkinMatrices(redGPUContext, debugViewRenderState)
+		view.debugViewRenderState.reset(null, computeCommandEncoder, time)
+		if (pixelRectObject.width && pixelRectObject.height) {
+			this.#renderViewShadow(view, commandEncoder)
+			this.#renderViewBasicLayer(view, commandEncoder, renderPassDescriptor)
+			this.#renderView2PathLayer(view, commandEncoder, renderPassDescriptor, depthStencilAttachment)
+			this.#renderViewPickingLayer(view, commandEncoder)
+		}
+		renderPassDescriptor.colorAttachments[0].postEffectView = view.postEffectManager.render().textureView
+		redGPUContext.gpuDevice.queue.submit([commandEncoder.finish()])
+		view.debugViewRenderState.viewRenderTime = (performance.now() - view.debugViewRenderState.startTime);
+		if (pickingManager?.castingList.length) {
+			pickingManager.checkEvents(view, time);
+		}
+		{
+			const {noneJitterProjectionMatrix, rawCamera, redGPUContext} = view
+			const {modelMatrix: cameraMatrix} = rawCamera
+			const {gpuDevice} = redGPUContext;
+			const structInfo = view.systemUniform_Vertex_StructInfo;
+			const gpuBuffer = view.systemUniform_Vertex_UniformBuffer.gpuBuffer;
+			[
+				{key: 'prevProjectionCameraMatrix', value: mat4.multiply(temp3, noneJitterProjectionMatrix, cameraMatrix)},
+			].forEach(({key, value}) => {
+				gpuDevice.queue.writeBuffer(
+					gpuBuffer,
+					structInfo.members[key].uniformOffset,
+					new structInfo.members[key].View(value)
+				);
+			});
+		}
+		redGPUContext.gpuDevice.queue.submit([computeCommandEncoder.finish()])
+		return renderPassDescriptor
+	}
+
 	#renderViewShadow(view: View3D, commandEncoder: GPUCommandEncoder) {
 		const {scene} = view
 		const {shadowManager} = scene
 		const {directionalShadowManager} = shadowManager
-		if (directionalShadowManager.shadowDepthTextureView ) {
+		if (directionalShadowManager.shadowDepthTextureView) {
 			const shadowPassDescriptor: GPURenderPassDescriptor = {
 				colorAttachments: [],
 				depthStencilAttachment: {
@@ -77,7 +138,7 @@ class Renderer {
 			};
 			const viewShadowRenderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass(shadowPassDescriptor)
 			this.#updateViewSystemUniforms(view, viewShadowRenderPassEncoder, true, false)
-			if(directionalShadowManager.castingList.length) {
+			if (directionalShadowManager.castingList.length) {
 				renderShadowLayer(view, viewShadowRenderPassEncoder)
 			}
 			viewShadowRenderPassEncoder.end()
@@ -183,67 +244,6 @@ class Renderer {
 		view.setJitterOffset(jitterX, jitterY);
 	}
 
-	renderView(view: View3D, time: number) {
-		const {
-			redGPUContext,
-			camera,
-			pickingManager,
-			pixelRectObject,
-			debugViewRenderState
-		} = view
-		const {
-			colorAttachment,
-			depthStencilAttachment,
-			gBufferNormalTextureAttachment,
-			gBufferMotionVectorTextureAttachment
-		} = this.#createAttachmentsForView(view)
-		this.#updateJitter(view)
-		const renderPassDescriptor: GPURenderPassDescriptor = {
-			colorAttachments: [colorAttachment, gBufferNormalTextureAttachment, gBufferMotionVectorTextureAttachment],
-			depthStencilAttachment,
-		}
-		// @ts-ignore
-		camera.update?.(view, time)
-		const commandEncoder: GPUCommandEncoder = redGPUContext.gpuDevice.createCommandEncoder({
-			label: 'ViewRender_MainCommandEncoder'
-		})
-		const computeCommandEncoder: GPUCommandEncoder = redGPUContext.gpuDevice.createCommandEncoder({
-			label: 'ViewRender_MainComputeCommandEncoder'
-		})
-		this.#batchUpdateSkinMatrices(redGPUContext, debugViewRenderState)
-		view.debugViewRenderState.reset(null, computeCommandEncoder, time)
-		if (pixelRectObject.width && pixelRectObject.height) {
-			this.#renderViewShadow(view, commandEncoder)
-			this.#renderViewBasicLayer(view, commandEncoder, renderPassDescriptor)
-			this.#renderView2PathLayer(view, commandEncoder, renderPassDescriptor, depthStencilAttachment)
-			this.#renderViewPickingLayer(view, commandEncoder)
-		}
-		renderPassDescriptor.colorAttachments[0].postEffectView = view.postEffectManager.render().textureView
-		redGPUContext.gpuDevice.queue.submit([commandEncoder.finish()])
-		view.debugViewRenderState.viewRenderTime = (performance.now() - view.debugViewRenderState.startTime);
-		if (pickingManager?.castingList.length) {
-			pickingManager.checkEvents(view, time);
-		}
-		{
-			const {noneJitterProjectionMatrix, rawCamera, redGPUContext} = view
-			const {modelMatrix: cameraMatrix} = rawCamera
-			const {gpuDevice} = redGPUContext;
-			const structInfo = view.systemUniform_Vertex_StructInfo;
-			const gpuBuffer = view.systemUniform_Vertex_UniformBuffer.gpuBuffer;
-			[
-				{key: 'prevProjectionCameraMatrix', value: mat4.multiply(temp3, noneJitterProjectionMatrix, cameraMatrix)},
-			].forEach(({key, value}) => {
-				gpuDevice.queue.writeBuffer(
-					gpuBuffer,
-					structInfo.members[key].uniformOffset,
-					new structInfo.members[key].View(value)
-				);
-			});
-		}
-		redGPUContext.gpuDevice.queue.submit([computeCommandEncoder.finish()])
-		return renderPassDescriptor
-	}
-
 	#haltonSequence(index: number, base: number): number {
 		let result = 0;
 		let fraction = 1 / base;
@@ -265,7 +265,6 @@ class Renderer {
 			label: 'BatchUpdateSkinMatrices_CommandEncoder'
 		});
 		const passEncoder = commandEncoder.beginComputePass();
-
 		if (animationListNum) {
 			gltfAnimationLooper(
 				redGPUContext,

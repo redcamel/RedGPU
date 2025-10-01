@@ -27,6 +27,7 @@ class DirectionalBlur extends ASinglePassPostEffect {
 	#amount: number = 15
 	/** 블러 각도(도). 기본값 0, 0=오른쪽 */
 	#angle: number = 0
+
 	/**
 	 * DirectionalBlur 인스턴스 생성
 	 * @param redGPUContext 렌더링 컨텍스트

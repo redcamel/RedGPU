@@ -1,12 +1,12 @@
-
 import RedGPUContext from "../../context/RedGPUContext";
 import getAbsoluteURL from "../../utils/file/getAbsoluteURL";
 import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSize";
 import getMipLevelCount from "../../utils/texture/getMipLevelCount";
-import ManagementResourceBase from "../ManagementResourceBase";
-import ResourceStateBitmapTexture from "../resourceManager/resourceState/texture/ResourceStateBitmapTexture";
 import imageBitmapToGPUTexture from "../../utils/texture/imageBitmapToGPUTexture";
 import loadAndCreateBitmapImage from "../../utils/texture/loadAndCreateBitmapImage";
+import ManagementResourceBase from "../ManagementResourceBase";
+import ResourceStateBitmapTexture from "../resourceManager/resourceState/texture/ResourceStateBitmapTexture";
+
 const MANAGED_STATE_KEY = 'managedBitmapTextureState'
 type SrcInfo = string | { src: string, cacheKey: string }
 

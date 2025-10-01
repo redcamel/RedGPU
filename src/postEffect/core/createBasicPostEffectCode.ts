@@ -44,5 +44,4 @@ const createBasicPostEffectCode = (effect: ASinglePassPostEffect, code: string, 
 	}
 }
 Object.freeze(createBasicPostEffectCode)
-
 export default createBasicPostEffectCode

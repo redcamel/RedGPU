@@ -5,7 +5,6 @@
  *
  * @packageDocumentation
  */
-
 import LightManager from "./LightManager";
 import AmbientLight from "./lights/AmbientLight";
 import DirectionalLight from "./lights/DirectionalLight";

@@ -65,26 +65,31 @@ class Fog extends ASinglePassPostEffect {
 	get fogType(): number {
 		return this.#fogType;
 	}
+
 	/** 안개 타입 설정. 0 또는 1 */
 	set fogType(value: number) {
 		validateNumberRange(value, 0, 1);
 		this.#fogType = Math.floor(value);
 		this.updateUniform('fogType', this.#fogType);
 	}
+
 	/** 안개 밀도 반환 */
 	get density(): number {
 		return this.#density;
 	}
+
 	/** 안개 밀도 설정. 0~1 */
 	set density(value: number) {
 		validateNumberRange(value, 0, 1);
 		this.#density = Math.max(0, Math.min(1, value));
 		this.updateUniform('density', this.#density);
 	}
+
 	/** 안개 시작 거리 반환 */
 	get nearDistance(): number {
 		return this.#nearDistance;
 	}
+
 	/** 안개 시작 거리 설정. 최소 0.1 */
 	set nearDistance(value: number) {
 		validateNumberRange(value, 0);
@@ -95,16 +100,19 @@ class Fog extends ASinglePassPostEffect {
 		}
 		this.updateUniform('nearDistance', this.#nearDistance);
 	}
+
 	/** 안개 끝 거리 반환 */
 	get farDistance(): number {
 		return this.#farDistance;
 	}
+
 	/** 안개 끝 거리 설정. nearDistance+0.1 이상 */
 	set farDistance(value: number) {
 		validateNumberRange(value, 0);
 		this.#farDistance = Math.max(this.#nearDistance + 0.1, value);
 		this.updateUniform('farDistance', this.#farDistance);
 	}
+
 	/** 안개 색상 반환 (ColorRGB) */
 	get fogColor(): ColorRGB {
 		return this.#fogColor;

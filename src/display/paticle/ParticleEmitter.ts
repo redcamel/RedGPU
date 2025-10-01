@@ -18,6 +18,7 @@ const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
 interface ParticleEmitter {
 	useBillboard: boolean;
 }
+
 /**
  * GPU 기반 파티클 시스템을 위한 이미터(Emitter) 클래스입니다.
  *
@@ -552,6 +553,14 @@ class ParticleEmitter extends Mesh {
 	}
 
 	/**
+	 * 커스텀 버텍스 셰이더 모듈을 생성합니다.
+	 * @returns 생성된 셰이더 모듈
+	 */
+	createCustomMeshVertexShaderModule() {
+		return this.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource)
+	}
+
+	/**
 	 * 파티클 버퍼 및 파이프라인을 초기화합니다.
 	 * @private
 	 */
@@ -773,18 +782,10 @@ class ParticleEmitter extends Mesh {
 		gpuDevice.queue.submit([commandEncoder.finish()]);
 		console.log('renderComputePass')
 	}
-
-	/**
-	 * 커스텀 버텍스 셰이더 모듈을 생성합니다.
-	 * @returns 생성된 셰이더 모듈
-	 */
-	createCustomMeshVertexShaderModule() {
-		return this.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource)
-	}
 }
 
 Object.defineProperty(ParticleEmitter.prototype, 'meshType', {
-	value:MESH_TYPE.PARTICLE,
+	value: MESH_TYPE.PARTICLE,
 	writable: false
 });
 DefineForVertex.defineByPreset(ParticleEmitter, [

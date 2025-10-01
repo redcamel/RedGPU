@@ -1,4 +1,3 @@
-import redGPUContext from "../../../context/RedGPUContext";
 import RedGPUContext from "../../../context/RedGPUContext";
 import GPU_INDEX_FORMAT from "../../../gpuConst/GPU_INDEX_FORMAT";
 import ResourceStateIndexBuffer from "../../resourceManager/resourceState/ResourceStateIndexBuffer";
@@ -27,10 +26,7 @@ class IndexBuffer extends ABaseBuffer {
 
 	 */
 	#triangleCount: number = 0
-	#format:GPUIndexFormat = GPU_INDEX_FORMAT.UINT32
-	get format(): GPUIndexFormat {
-		return this.#format;
-	}
+	#format: GPUIndexFormat = GPU_INDEX_FORMAT.UINT32
 
 	/**
 	 * IndexBuffer 생성자
@@ -58,6 +54,10 @@ class IndexBuffer extends ABaseBuffer {
 			this.changeData(data)
 			this.redGPUContext.resourceManager.registerManagementResource(this, new ResourceStateIndexBuffer(this));
 		}
+	}
+
+	get format(): GPUIndexFormat {
+		return this.#format;
 	}
 
 	/**

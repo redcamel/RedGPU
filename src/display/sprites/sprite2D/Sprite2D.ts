@@ -2,7 +2,6 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import GPU_CULL_MODE from "../../../gpuConst/GPU_CULL_MODE";
 import Plane from "../../../primitive/Plane";
 import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
-import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import {mixInMesh2D} from "../../mesh/core";
 import Mesh from "../../mesh/Mesh";
 
@@ -31,7 +30,6 @@ class Sprite2D extends BaseSprite2D {
 	 * @private
 	 */
 	#width: number = 1
-
 	/**
 	 * 스프라이트의 높이
 	 * @private
@@ -103,7 +101,6 @@ class Sprite2D extends BaseSprite2D {
 	// set material(value) {
 	// 	consoleAndThrowError('Sprite2D can not change material')
 	// }
-
 	/**
 	 * 스프라이트의 크기를 설정합니다.
 	 *
@@ -117,5 +114,4 @@ class Sprite2D extends BaseSprite2D {
 }
 
 Object.freeze(Sprite2D)
-
 export default Sprite2D

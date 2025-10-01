@@ -37,12 +37,10 @@ class TextField2D extends BaseTextField2D {
 	 * 텍스트 렌더링 결과의 너비 (픽셀 단위)
 	 */
 	#width: number = 1;
-
 	/**
 	 * 텍스트 렌더링 결과의 높이 (픽셀 단위)
 	 */
 	#height: number = 1;
-
 	/**
 	 * 텍스처 필터링에 smoothing을 사용할지 여부
 	 */

@@ -1,3 +1,3 @@
 import ASpriteSheet from "./ASpriteSheet";
 
-export { ASpriteSheet };
+export {ASpriteSheet};

@@ -1,13 +1,12 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSize";
 import getMipLevelCount from "../../utils/texture/getMipLevelCount";
-import ManagementResourceBase from "../ManagementResourceBase";
-import ResourceStateCubeTexture from "../resourceManager/resourceState/texture/ResourceStateCubeTexture";
 import imageBitmapToGPUTexture from "../../utils/texture/imageBitmapToGPUTexture";
 import loadAndCreateBitmapImage from "../../utils/texture/loadAndCreateBitmapImage";
+import ManagementResourceBase from "../ManagementResourceBase";
+import ResourceStateCubeTexture from "../resourceManager/resourceState/texture/ResourceStateCubeTexture";
 
 const MANAGED_STATE_KEY = 'managedCubeTextureState'
-
 type SrcInfo = string[] | { srcList: string[], cacheKey: string }
 
 /**

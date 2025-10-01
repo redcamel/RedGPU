@@ -18,37 +18,31 @@ class SpriteSheetInfo {
 	 * @private
 	 */
 	#segmentW: number = 0
-
 	/**
 	 * 세로 세그먼트 수 (텍스처를 세로로 몇 개로 나눌지)
 	 * @private
 	 */
 	#segmentH: number = 0
-
 	/**
 	 * 총 애니메이션 프레임 수
 	 * @private
 	 */
 	#totalFrame: number = 0
-
 	/**
 	 * 시작 프레임 인덱스
 	 * @private
 	 */
 	#startIndex: number = 0
-
 	/**
 	 * 애니메이션 프레임 레이트 (FPS)
 	 * @private
 	 */
 	#frameRate: number = 0
-
 	/**
 	 * 반복 재생 여부
 	 * @private
 	 */
 	#loop: boolean = true
-
 	/**
 	 * 스프라이트 시트 텍스처
 	 * @private
@@ -154,5 +148,4 @@ class SpriteSheetInfo {
  * @readonly
  */
 Object.freeze(SpriteSheetInfo)
-
 export default SpriteSheetInfo

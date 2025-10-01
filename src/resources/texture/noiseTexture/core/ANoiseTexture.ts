@@ -22,6 +22,7 @@ const BASIC_OPTIONS = {
 	animationX: 0.1,
 	animationY: 0.1
 }
+
 /**
  * @category NoiseTexture
  * @experimental

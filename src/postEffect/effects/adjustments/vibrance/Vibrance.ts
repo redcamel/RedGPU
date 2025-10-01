@@ -26,6 +26,7 @@ class Vibrance extends ASinglePassPostEffect {
 	#vibrance: number = 0
 	/** 채도. 기본값 0, 범위 -100~100 */
 	#saturation: number = 0
+
 	constructor(redGPUContext: RedGPUContext) {
 		super(redGPUContext);
 		this.init(

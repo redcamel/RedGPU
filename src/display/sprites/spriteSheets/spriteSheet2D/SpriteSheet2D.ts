@@ -7,7 +7,6 @@ import BitmapTexture from "../../../../resources/texture/BitmapTexture";
 import parseWGSL from "../../../../resources/wgslParser/parseWGSL";
 import consoleAndThrowError from "../../../../utils/consoleAndThrowError";
 import {mixInMesh2D} from "../../../mesh/core";
-
 import ASpriteSheet from "../core/ASpriteSheet";
 import SpriteSheetInfo from "../SpriteSheetInfo";
 import vertexModuleSource from "./shader/spriteSheet2DVertex.wgsl";
@@ -42,7 +41,6 @@ class SpriteSheet2D extends BaseSpriteSheet2D {
 	 * @private
 	 */
 	#width: number = 1
-
 	/**
 	 * 스프라이트 시트 세그먼트의 실제 높이
 	 * @private
@@ -89,7 +87,6 @@ class SpriteSheet2D extends BaseSpriteSheet2D {
 	//     this.#width = value;
 	//     this.dirtyTransform = true
 	// }
-
 	/**
 	 * 스프라이트 시트 세그먼트의 높이를 반환합니다.
 	 * 텍스처 전체 높이를 세그먼트 수로 나눈 값입니다.
@@ -105,7 +102,6 @@ class SpriteSheet2D extends BaseSpriteSheet2D {
 	//     this.dirtyTransform = true
 	// }
 	/////////////////////////////////////////
-
 	/**
 	 * 지오메트리를 반환합니다.
 	 * @returns 현재 지오메트리 (고정된 Plane)
@@ -159,5 +155,4 @@ class SpriteSheet2D extends BaseSpriteSheet2D {
  * @readonly
  */
 Object.freeze(SpriteSheet2D)
-
 export default SpriteSheet2D

@@ -8,22 +8,21 @@ import VertexGPURenderInfo from "../../renderInfos/VertexGPURenderInfo";
 import DefineForVertex from "../../resources/defineProperty/DefineForVertex";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
-import {keepLog} from "../../utils";
-import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
 import AABB from "../../utils/math/bound/AABB";
 import calculateMeshAABB from "../../utils/math/bound/calculateMeshAABB";
 import calculateMeshCombinedAABB from "../../utils/math/bound/calculateMeshCombinedAABB";
 import calculateMeshOBB from "../../utils/math/bound/calculateMeshOBB";
 import OBB from "../../utils/math/bound/OBB";
 import mat4ToEuler from "../../utils/math/matToEuler";
+import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
 import uuidToUint from "../../utils/uuid/uuidToUint";
 import DrawDebuggerMesh from "../drawDebugger/DrawDebuggerMesh";
 import MESH_TYPE from "../MESH_TYPE";
 import createMeshVertexUniformBuffers from "./core/createMeshVertexUniformBuffers";
+import MeshBase from "./core/MeshBase";
 import Object3DContainer from "./core/Object3DContainer";
 import updateMeshDirtyPipeline from "./core/pipeline/updateMeshDirtyPipeline";
 import getBasicMeshVertexBindGroupDescriptor from "./core/shader/getBasicMeshVertexBindGroupDescriptor";
-import MeshBase from "./core/MeshBase";
 
 const VERTEX_SHADER_MODULE_NAME_PBR_SKIN = 'VERTEX_MODULE_MESH_PBR_SKIN'
 const CONVERT_RADIAN = Math.PI / 180;
@@ -1003,7 +1002,7 @@ class Mesh extends MeshBase {
 						//
 						if (currentGeometry.indexBuffer) {
 							const {indexBuffer} = currentGeometry
-							const {indexCount, gpuBuffer: indexGPUBuffer,format} = indexBuffer
+							const {indexCount, gpuBuffer: indexGPUBuffer, format} = indexBuffer
 							targetEncoder.setIndexBuffer(indexGPUBuffer, format)
 							// @ts-ignore
 							if (this.particleBuffers) targetEncoder.drawIndexed(indexCount, this.particleNum, 0, 0, 0);

@@ -13,13 +13,10 @@ class BaseLight {
 	 * 외부에서 설정되며, 광원의 위치나 방향을 시각적으로 표시할 수 있습니다.
 	 */
 	drawDebugger: ADrawDebuggerLight;
-
 	/** 광원의 색상 정보입니다. */
 	#color: ColorRGB;
-
 	/** 광원의 세기(intensity)를 나타냅니다. */
 	#intensity: number;
-
 	/** 디버깅 시각화 기능의 활성화 여부입니다. */
 	#enableDebugger: boolean = false;
 

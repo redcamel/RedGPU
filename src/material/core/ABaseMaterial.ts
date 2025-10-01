@@ -14,7 +14,6 @@ import PackedTexture from "../../resources/texture/packedTexture/PackedTexture";
 import TINT_BLEND_MODE from "../TINT_BLEND_MODE";
 import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "./getBindGroupLayoutDescriptorFromShaderInfo";
 
-
 interface ABaseMaterial {
 	/**
 	 * 머티리얼의 불투명도(0~1)

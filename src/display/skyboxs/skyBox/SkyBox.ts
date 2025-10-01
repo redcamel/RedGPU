@@ -17,8 +17,8 @@ import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validateRedGPUContext";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
-import vertexModuleSource from './shader/vertex.wgsl';
 import SkyBoxMaterial from "./core/SkyBoxMaterial";
+import vertexModuleSource from './shader/vertex.wgsl';
 
 /** 파싱된 WGSL 셰이더 정보 */
 const SHADER_INFO = parseWGSL(vertexModuleSource)
@@ -56,73 +56,61 @@ class SkyBox {
 	 * @public
 	 */
 	modelMatrix = mat4.create()
-
 	/**
 	 * GPU 렌더링 정보 객체
 	 * @public
 	 */
 	gpuRenderInfo: VertexGPURenderInfo
-
 	/**
 	 * 파이프라인 재생성이 필요한지 나타내는 플래그
 	 * @private
 	 */
 	#dirtyPipeline: boolean = true
-
 	/**
 	 * 스카이박스의 기하학적 형태 (박스)
 	 * @private
 	 */
 	#geometry: Primitive
-
 	/**
 	 * 스카이박스 머티리얼
 	 * @private
 	 */
 	#material: SkyBoxMaterial
-
 	/**
 	 * RedGPU 컨텍스트 참조
 	 * @private
 	 */
 	#redGPUContext: RedGPUContext
-
 	/**
 	 * 프리미티브 렌더링 상태
 	 * @private
 	 */
 	#primitiveState: PrimitiveState
-
 	/**
 	 * 깊이 스텐실 상태
 	 * @private
 	 */
 	#depthStencilState: DepthStencilState
-
 	/**
 	 * 현재 스카이박스 텍스처
 	 * @private
 	 */
 	#skyboxTexture: CubeTexture | HDRTexture
-
 	/**
 	 * 전환 대상 텍스처
 	 * @private
 	 */
 	#transitionTexture: CubeTexture | HDRTexture
-
 	/**
 	 * 전환 시작 시간 (밀리초)
 	 * @private
 	 */
 	#transitionStartTime: number = 0
-
 	/**
 	 * 전환 지속 시간 (밀리초)
 	 * @private
 	 */
 	#transitionDuration: number = 0
-
 	/**
 	 * 전환 경과 시간 (밀리초)
 	 * @private
@@ -327,7 +315,7 @@ class SkyBox {
 		const {gpuRenderInfo} = this
 		const {vertexUniformBindGroup, pipeline} = gpuRenderInfo
 		const {indexBuffer} = this.#geometry
-		const {triangleCount, indexCount,format} = indexBuffer
+		const {triangleCount, indexCount, format} = indexBuffer
 		currentRenderPassEncoder.setPipeline(pipeline)
 		currentRenderPassEncoder.setVertexBuffer(0, this.#geometry.vertexBuffer.gpuBuffer)
 		currentRenderPassEncoder.setBindGroup(1, vertexUniformBindGroup); // 버텍스 유니폼 버퍼 1번 고정
@@ -448,5 +436,6 @@ class SkyBox {
 		return gpuDevice.createRenderPipeline(pipelineDescriptor)
 	}
 }
+
 Object.freeze(SkyBox)
 export default SkyBox

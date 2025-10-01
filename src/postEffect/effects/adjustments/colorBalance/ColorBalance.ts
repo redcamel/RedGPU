@@ -46,6 +46,7 @@ class ColorBalance extends ASinglePassPostEffect {
 	#highlightYellowBlue: number = 0
 	/** 밝기 보존. 기본값 true */
 	#preserveLuminosity: boolean = true
+
 	constructor(redGPUContext: RedGPUContext) {
 		super(redGPUContext);
 		this.init(
@@ -59,6 +60,7 @@ class ColorBalance extends ASinglePassPostEffect {
 	get shadowCyanRed(): number {
 		return this.#shadowCyanRed;
 	}
+
 	/** 그림자 시안-레드 설정. 범위 -100~100 */
 	set shadowCyanRed(value: number) {
 		validateNumberRange(value, -100, 100)
@@ -70,6 +72,7 @@ class ColorBalance extends ASinglePassPostEffect {
 	get shadowMagentaGreen(): number {
 		return this.#shadowMagentaGreen;
 	}
+
 	/** 그림자 마젠타-그린 설정. 범위 -100~100 */
 	set shadowMagentaGreen(value: number) {
 		validateNumberRange(value, -100, 100)
@@ -81,6 +84,7 @@ class ColorBalance extends ASinglePassPostEffect {
 	get shadowYellowBlue(): number {
 		return this.#shadowYellowBlue;
 	}
+
 	/** 그림자 옐로우-블루 설정. 범위 -100~100 */
 	set shadowYellowBlue(value: number) {
 		validateNumberRange(value, -100, 100)
@@ -92,6 +96,7 @@ class ColorBalance extends ASinglePassPostEffect {
 	get midtoneCyanRed(): number {
 		return this.#midtoneCyanRed;
 	}
+
 	/** 미드톤 시안-레드 설정. 범위 -100~100 */
 	set midtoneCyanRed(value: number) {
 		validateNumberRange(value, -100, 100)
@@ -103,6 +108,7 @@ class ColorBalance extends ASinglePassPostEffect {
 	get midtoneMagentaGreen(): number {
 		return this.#midtoneMagentaGreen;
 	}
+
 	/** 미드톤 마젠타-그린 설정. 범위 -100~100 */
 	set midtoneMagentaGreen(value: number) {
 		validateNumberRange(value, -100, 100)
@@ -114,6 +120,7 @@ class ColorBalance extends ASinglePassPostEffect {
 	get midtoneYellowBlue(): number {
 		return this.#midtoneYellowBlue;
 	}
+
 	/** 미드톤 옐로우-블루 설정. 범위 -100~100 */
 	set midtoneYellowBlue(value: number) {
 		validateNumberRange(value, -100, 100)
@@ -125,6 +132,7 @@ class ColorBalance extends ASinglePassPostEffect {
 	get highlightCyanRed(): number {
 		return this.#highlightCyanRed;
 	}
+
 	/** 하이라이트 시안-레드 설정. 범위 -100~100 */
 	set highlightCyanRed(value: number) {
 		validateNumberRange(value, -100, 100)
@@ -136,6 +144,7 @@ class ColorBalance extends ASinglePassPostEffect {
 	get highlightMagentaGreen(): number {
 		return this.#highlightMagentaGreen;
 	}
+
 	/** 하이라이트 마젠타-그린 설정. 범위 -100~100 */
 	set highlightMagentaGreen(value: number) {
 		validateNumberRange(value, -100, 100)
@@ -147,6 +156,7 @@ class ColorBalance extends ASinglePassPostEffect {
 	get highlightYellowBlue(): number {
 		return this.#highlightYellowBlue;
 	}
+
 	/** 하이라이트 옐로우-블루 설정. 범위 -100~100 */
 	set highlightYellowBlue(value: number) {
 		validateNumberRange(value, -100, 100)
@@ -158,6 +168,7 @@ class ColorBalance extends ASinglePassPostEffect {
 	get preserveLuminosity(): boolean {
 		return this.#preserveLuminosity;
 	}
+
 	/** 밝기 보존 설정 */
 	set preserveLuminosity(value: boolean) {
 		this.#preserveLuminosity = value;

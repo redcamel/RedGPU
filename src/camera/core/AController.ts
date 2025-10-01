@@ -1,4 +1,3 @@
-
 import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
 import OrthographicCamera from "../camera/OrthographicCamera";
@@ -17,7 +16,6 @@ import PerspectiveCamera from "../camera/PerspectiveCamera";
  * @category Core
  *
  */
-
 abstract class AController {
 	/**
 	 * 현재 컨트롤러가 제어하는 카메라 인스턴스

@@ -37,7 +37,6 @@ class TextField3D extends ATextField {
 	 * 렌더링된 텍스트 텍스처의 너비 (정규화된 값)
 	 */
 	#renderTextureWidth: number = 1;
-
 	/**
 	 * 렌더링된 텍스트 텍스처의 높이 (정규화된 값)
 	 */
@@ -127,6 +126,5 @@ DefineForVertex.defineByPreset(TextField3D, [
 	[DefineForVertex.PRESET_BOOLEAN.USE_BILLBOARD_PERSPECTIVE, true],
 	DefineForVertex.PRESET_BOOLEAN.USE_BILLBOARD,
 ]);
-
 Object.freeze(TextField3D);
 export default TextField3D;

@@ -25,7 +25,6 @@ class ViewTransform {
 	 * @type {((width: number, height: number) => void) | null}
 	 */
 	onResize: ((width: number, height: number) => void) | null = null;
-
 	/**
 	 * 연결된 RedGPUContext 인스턴스(읽기 전용).
 	 * @private
@@ -33,73 +32,61 @@ class ViewTransform {
 	 * @type {RedGPUContext}
 	 */
 	readonly #redGPUContext: RedGPUContext
-
 	/**
 	 * 현재 적용된(지터 포함) 프로젝션 행렬 캐시입니다.
 	 * @private
 	 * @type {mat4}
 	 */
 	#projectionMatrix = mat4.create()
-
 	/**
 	 * 지터가 적용되지 않은 원본 프로젝션 행렬 캐시입니다.
 	 * @private
 	 * @type {mat4}
 	 */
 	#noneJitterProjectionMatrix = mat4.create()
-
 	/**
 	 * 이 뷰에 연결된 카메라 인스턴스(Perspective | Orthographic | AController | Camera2D).
 	 * @private
 	 */
 	#camera: PerspectiveCamera | OrthographicCamera | AController | Camera2D
-
 	/**
 	 * 뷰의 X 위치 값(픽셀 또는 퍼센트 문자열).
 	 * @private
 	 * @type {number | string}
 	 */
 	#x: number | string = 0
-
 	/**
 	 * 뷰의 Y 위치 값(픽셀 또는 퍼센트 문자열).
 	 * @private
 	 * @type {number | string}
 	 */
 	#y: number | string = 0
-
 	//TODO rotationX,rotationY,rotationZ를 가질수 있도록 할수 있는가?
-
 	/**
 	 * 뷰의 너비 값(픽셀 또는 퍼센트 문자열).
 	 * @private
 	 * @type {number | string}
 	 */
 	#width: number | string
-
 	/**
 	 * 뷰의 높이 값(픽셀 또는 퍼센트 문자열).
 	 * @private
 	 * @type {number | string}
 	 */
 	#height: number | string
-
 	/**
 	 * 픽셀 단위 사각형 [x, y, width, height] (device pixel 단위).
 	 * @private
 	 * @type {[number, number, number, number]}
 	 */
 	#pixelRectArray: [number, number, number, number] = [0, 0, 0, 0]
-
 	// TAA 지터 관련 속성 추가
-
 	/**
 	 * 현재 적용된 지터 오프셋 X 값 (정규화된 값).
 	 * @private
 	 * @type {number}
 	 */
 	#jitterOffsetX: number = 0;
-
 	/**
 	 * 현재 적용된 지터 오프셋 Y 값 (정규화된 값).
 	 * @private
@@ -231,7 +218,6 @@ class ViewTransform {
 	// Returns an object representing the screen rectangle
 	// The x, y, width, and height values are calculated by dividing the pixel rectangle values
 	// by the device's pixel ratio for proper scaling on high-DPI screens.
-
 	/**
 	 * 스크린 기준 사각형을 반환합니다 (devicePixelRatio로 나눔).
 	 * @returns {{x:number,y:number,width:number,height:number}}
@@ -425,5 +411,6 @@ class ViewTransform {
 		}
 	}
 }
+
 Object.freeze(ViewTransform)
 export default ViewTransform

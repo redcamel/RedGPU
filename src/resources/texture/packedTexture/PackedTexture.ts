@@ -1,7 +1,6 @@
-
 import RedGPUContext from "../../../context/RedGPUContext";
-import createUUID from "../../../utils/uuid/createUUID";
 import getMipLevelCount from "../../../utils/texture/getMipLevelCount";
+import createUUID from "../../../utils/uuid/createUUID";
 import Sampler from "../../sampler/Sampler";
 import computeShaderCode from "./computeShader.wgsl";
 
@@ -14,7 +13,6 @@ type ComponentMapping = {
 	b?: 'r' | 'g' | 'b' | 'a';
 	a?: 'r' | 'g' | 'b' | 'a';
 };
-
 /**
  * 패킹된 텍스처 캐시 맵
  */
@@ -32,7 +30,7 @@ let mappingBuffer: GPUBuffer;
  * @category Texture
  */
 class PackedTexture {
-	/** 인스턴스 고유 식별자 */ 
+	/** 인스턴스 고유 식별자 */
 	#uuid: string = createUUID();
 	/** RedGPUContext 인스턴스 */
 	#redGPUContext: RedGPUContext;

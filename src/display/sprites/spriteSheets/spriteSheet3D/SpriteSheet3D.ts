@@ -50,7 +50,6 @@ class SpriteSheet3D extends ASpriteSheet {
 	 * @private
 	 */
 	#renderTextureWidth: number = 1
-
 	/**
 	 * 렌더링될 텍스처 세그먼트의 실제 높이
 	 * @private
@@ -146,7 +145,6 @@ DefineForVertex.definePositiveNumber(SpriteSheet3D, [
 	['_renderRatioX', 1],
 	['_renderRatioY', 1],
 ])
-
 /**
  * SpriteSheet3D 클래스에 빌보드 관련 속성들을 정의합니다.
  */
@@ -155,11 +153,9 @@ DefineForVertex.defineByPreset(SpriteSheet3D, [
 	[DefineForVertex.PRESET_BOOLEAN.USE_BILLBOARD, true],
 	[DefineForVertex.PRESET_POSITIVE_NUMBER.BILLBOARD_FIXED_SCALE, 0.1, 0.1],
 ])
-
 /**
  * SpriteSheet3D 클래스를 동결하여 런타임에서의 수정을 방지합니다.
  * @readonly
  */
 Object.freeze(SpriteSheet3D)
-
 export default SpriteSheet3D

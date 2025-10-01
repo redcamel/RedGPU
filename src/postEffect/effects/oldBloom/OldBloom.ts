@@ -61,33 +61,40 @@ class OldBloom extends AMultiPassPostEffect {
 	get threshold(): number {
 		return this.#threshold;
 	}
+
 	/** 밝기 임계값 설정 */
 	set threshold(value: number) {
 		this.#threshold = value;
 		this.#effect_threshold.threshold = value
 	}
+
 	/** 블러 강도 반환 */
 	get gaussianBlurSize(): number {
 		return this.#gaussianBlurSize;
 	}
+
 	/** 블러 강도 설정 */
 	set gaussianBlurSize(value: number) {
 		this.#gaussianBlurSize = value;
 		this.#effect_gaussianBlur.size = value
 	}
+
 	/** 노출 반환 */
 	get exposure(): number {
 		return this.#exposure;
 	}
+
 	/** 노출 설정 */
 	set exposure(value: number) {
 		this.#exposure = value;
 		this.#effect_oldBloomBlend.exposure = value
 	}
+
 	/** 블룸 강도 반환 */
 	get bloomStrength(): number {
 		return this.#bloomStrength;
 	}
+
 	/** 블룸 강도 설정 */
 	set bloomStrength(value: number) {
 		this.#bloomStrength = value;

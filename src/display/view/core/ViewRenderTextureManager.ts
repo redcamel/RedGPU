@@ -14,7 +14,7 @@ import View3D from "../View3D";
  * `시스템 전용 클래스입니다.`\
  * 이 메서드는 렌더링 엔진 내부에서 자동으로 사용되는 기능으로, 일반적인 사용자는 직접 호출하지 않는 것이 좋습니다.
  *
-*/
+ */
 class ViewRenderTextureManager {
 	/**
 	 * 렌더 패스 1 결과 텍스처
@@ -95,7 +95,6 @@ class ViewRenderTextureManager {
 	/* ----------------------------------------
 	 * Public getters (메모리/텍스처 접근)
 	 * ---------------------------------------- */
-
 	/**
 	 * 현재 계산된 비디오 메모리 사용량(바이트)을 반환합니다.
 	 * @returns {number}
@@ -150,7 +149,6 @@ class ViewRenderTextureManager {
 	 * G-Buffer 관련 getters (컬러/노멀/모션 등)
 	 * 각 getter는 필요 시 #createGBuffer를 호출하여 생성 보장
 	 * ---------------------------------------- */
-
 	/**
 	 * G-Buffer color 텍스처 반환 (미리 생성되지 않았으면 undefined)
 	 * @returns {GPUTexture}
@@ -253,7 +251,6 @@ class ViewRenderTextureManager {
 	/* ----------------------------------------
 	 * Private helpers
 	 * ---------------------------------------- */
-
 	/**
 	 * 현재 관리 중인 텍스처들을 기반으로 비디오 메모리 사용량을 계산하여 #videoMemorySize를 업데이트합니다.
 	 * @private

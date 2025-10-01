@@ -31,5 +31,4 @@ const validateUintRange = (value: number, min: number = 0, max: number = MAX_UIN
 	if (max < value) consoleAndThrowError(`value is bigger than maximum value. / value : ${value} / ${rangeStr}`)
 	return true
 }
-
 export default validateUintRange

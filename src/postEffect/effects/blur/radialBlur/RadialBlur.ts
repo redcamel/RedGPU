@@ -44,40 +44,48 @@ class RadialBlur extends ASinglePassPostEffect {
 		this.amount = this.#amount
 		this.sampleCount = this.#sampleCount
 	}
+
 	/** 중심 X 반환 */
 	get centerX(): number {
 		return this.#centerX;
 	}
+
 	/** 중심 X 설정 */
 	set centerX(value: number) {
 		validateNumber(value)
 		this.#centerX = value;
 		this.updateUniform('centerX', value)
 	}
+
 	/** 중심 Y 반환 */
 	get centerY(): number {
 		return this.#centerY;
 	}
+
 	/** 중심 Y 설정 */
 	set centerY(value: number) {
 		validateNumber(value)
 		this.#centerY = value;
 		this.updateUniform('centerY', value)
 	}
+
 	/** 블러 강도 반환 */
 	get amount(): number {
 		return this.#amount;
 	}
+
 	/** 블러 강도 설정. 최소 0 */
 	set amount(value: number) {
 		validateNumberRange(value, 0)
 		this.#amount = value;
 		this.updateUniform('amount', value)
 	}
+
 	/** 샘플 수 반환 */
 	get sampleCount(): number {
 		return this.#sampleCount;
 	}
+
 	/** 샘플 수 설정. 최소 4 */
 	set sampleCount(value: number) {
 		validateNumberRange(value, 4)

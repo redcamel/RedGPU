@@ -1,6 +1,5 @@
 import {mat4, vec3} from "gl-matrix";
 import AView from "../../../display/view/core/AView";
-import View3D from "../../../display/view/View3D";
 
 let x, y, z, w;
 let invW;

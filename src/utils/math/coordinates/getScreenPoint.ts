@@ -4,7 +4,6 @@ import consoleAndThrowError from "../../consoleAndThrowError";
 
 const resultMTX = mat4.create();
 const resultPosition = {x: 0, y: 0, z: 0, w: 0};
-
 /**
  * 3D 객체의 변환 행렬을 이용해 화면 상의 2D 좌표(픽셀 위치)를 계산합니다.
  *
