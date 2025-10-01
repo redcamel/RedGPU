@@ -1,7 +1,7 @@
 import AntialiasingManager from "../../context/antialiasing/AntialiasingManager";
 import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
-import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../material";
+import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../material/core";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import {keepLog} from "../../utils";
@@ -16,7 +16,6 @@ export type ASinglePassPostEffectResult = {
  * 단일 패스 후처리 이펙트(ASinglePassPostEffect) 추상 클래스입니다.
  * 한 번의 compute 패스로 동작하는 후처리 이펙트의 기반이 됩니다.
  *
- * @category Core
  *
  */
 abstract class ASinglePassPostEffect {

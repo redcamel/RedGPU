@@ -13,7 +13,7 @@ import createBasePipeline from "../mesh/core/pipeline/createBasePipeline";
 import PIPELINE_TYPE from "../mesh/core/pipeline/PIPELINE_TYPE";
 import Mesh from "../mesh/Mesh";
 import MESH_TYPE from "../MESH_TYPE";
-import InstancingMeshObject3D from "./InstancingMeshObject3D";
+import InstancingMeshObject3D from "./core/InstancingMeshObject3D";
 import vertexModuleSource from './shader/instanceMeshVertex.wgsl';
 
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_INSTANCING'

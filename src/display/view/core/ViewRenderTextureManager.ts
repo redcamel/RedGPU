@@ -10,8 +10,11 @@ import View3D from "../View3D";
  *
  * View3D/2D의 렌더 타깃(컬러, 깊이, G-Buffer 등)을 생성·관리합니다.
  *
- * @param {View3D} view - 관리 대상 View3D 인스턴스
- */
+ * @remarks
+ * `시스템 전용 클래스입니다.`\
+ * 이 메서드는 렌더링 엔진 내부에서 자동으로 사용되는 기능으로, 일반적인 사용자는 직접 호출하지 않는 것이 좋습니다.
+ *
+*/
 class ViewRenderTextureManager {
 	/**
 	 * 렌더 패스 1 결과 텍스처

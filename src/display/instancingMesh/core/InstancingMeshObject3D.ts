@@ -1,8 +1,8 @@
 import {mat4} from "gl-matrix";
-import RedGPUContext from "../../context/RedGPUContext";
-import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
-import validateRedGPUContext from "../../runtimeChecker/validateFunc/validateRedGPUContext";
-import InstancingMesh from "./InstancingMesh";
+import RedGPUContext from "../../../context/RedGPUContext";
+import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
+import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validateRedGPUContext";
+import InstancingMesh from "../InstancingMesh";
 
 /**
  * The CPI2 variable represents the value of 2 times PI (π).
@@ -19,6 +19,7 @@ import InstancingMesh from "./InstancingMesh";
  * @createExample
  * // Calculate the circumference of a circle with a radius of 5 units
  * const circumference = CPI2 * 5;
+ *
  */
 const CPI = 3.141592653589793,
 	CPI2 = 6.283185307179586,

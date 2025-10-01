@@ -1,7 +1,7 @@
 import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../context/RedGPUContext";
 import GPU_CULL_MODE from "../../../gpuConst/GPU_CULL_MODE";
-import {getVertexBindGroupLayoutDescriptorFromShaderInfo} from "../../../material";
+import {getVertexBindGroupLayoutDescriptorFromShaderInfo} from "../../../material/core";
 import Box from "../../../primitive/Box";
 import Primitive from "../../../primitive/core/Primitive";
 import RenderViewStateData from "../../../renderer/RenderViewStateData";
@@ -18,7 +18,7 @@ import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/va
 import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validateRedGPUContext";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import vertexModuleSource from './shader/vertex.wgsl';
-import SkyBoxMaterial from "./SkyBoxMaterial";
+import SkyBoxMaterial from "./core/SkyBoxMaterial";
 
 /** 파싱된 WGSL 셰이더 정보 */
 const SHADER_INFO = parseWGSL(vertexModuleSource)
@@ -48,6 +48,7 @@ const PIPELINE_DESCRIPTOR_LABEL = 'PIPELINE_DESCRIPTOR_SKYBOX'
  * @see [Skybox using HDRTexture](/RedGPU/examples/3d/skybox/skyboxWithHDRTexture/)
  * @see [Skybox using IBL](/RedGPU/examples/3d/skybox/skyboxWithIbl/)
  *
+ * @category SkyBox
  */
 class SkyBox {
 	/**

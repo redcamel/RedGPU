@@ -6,11 +6,10 @@
  * @packageDocumentation
  */
 
-import InstancingMesh from "./instancingMesh/InstancingMesh";
 
 
 import Scene from "./scene/Scene";
-import SkyBox from "./skyboxs/skyBox/SkyBox";
+export * from "./skyboxs/skyBox";
 export * from './mesh'
 export * from "./view";
 export * from "./group";
@@ -18,8 +17,7 @@ export * from "./paticle";
 export * from "./sprites";
 export * from "./line";
 export * from "./textFileds";
+export * from "./instancingMesh";
 export {
-	InstancingMesh,
 	Scene,
-	SkyBox,
 }

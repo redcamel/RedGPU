@@ -10,7 +10,6 @@ import ABaseMaterial from "./ABaseMaterial";
  * 텍스처/샘플러의 변경 감지 및 파이프라인 갱신, 텍스처 리스너 관리 등 텍스처 기반 머티리얼의 핵심 로직을 구현합니다.
  *
  * @extends ABaseMaterial
- * @category Core
  */
 abstract class ABitmapBaseMaterial extends ABaseMaterial {
 	/**

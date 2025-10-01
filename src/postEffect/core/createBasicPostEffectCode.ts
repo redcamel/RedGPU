@@ -27,7 +27,6 @@ const createCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: 
  * - MSAA/Non-MSAA, 유니폼 구조, 딥스 텍스처 등 옵션에 따라 WGSL 코드를 자동 생성합니다.
  * - 내부적으로 시스템 유니폼, 소스/출력 텍스처, 워크그룹 크기 등을 자동으로 포함합니다.
  *
- * @category Core
  *
  * @param effect ASinglePassPostEffect 인스턴스
  * @param code WGSL 메인 코드 (main 함수 내부)

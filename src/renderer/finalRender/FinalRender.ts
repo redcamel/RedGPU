@@ -8,7 +8,7 @@ import GPU_STORE_OP from "../../gpuConst/GPU_STORE_OP";
 import {
 	getFragmentBindGroupLayoutDescriptorFromShaderInfo,
 	getVertexBindGroupLayoutDescriptorFromShaderInfo
-} from "../../material";
+} from "../../material/core";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import Sampler from "../../resources/sampler/Sampler";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";

@@ -6,9 +6,7 @@
  * @packageDocumentation
  */
 
-import AMultiPassPostEffect from "./core/AMultiPassPostEffect";
-import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "./core/createBasicPostEffectCode";
+export * as Core from './core'
 import BrightnessContrast from "./effects/adjustments/brightnessContrast/BrightnessContrast";
 import ColorBalance from "./effects/adjustments/colorBalance/ColorBalance";
 import ColorTemperatureTint from "./effects/adjustments/colorTemperatureTint/ColorTemperatureTint";
@@ -38,10 +36,6 @@ import SSR from "./effects/ssr/SSR";
 import PostEffectManager from "./PostEffectManager";
 
 export {
-	// Core Classes
-	createBasicPostEffectCode,
-	ASinglePassPostEffect,
-	AMultiPassPostEffect,
 	PostEffectManager,
 	// Color Adjustments
 	BrightnessContrast,

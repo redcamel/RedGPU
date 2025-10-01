@@ -7,10 +7,9 @@
  *
  * <iframe src="/RedGPU/examples/3d/primitive/primitives/"></iframe>
  */
-
+export * as Core from './core'
 import Box from "./Box";
 import Circle from "./Circle";
-// import Primitive from "./core/Primitive";
 import Cylinder from "./Cylinder";
 import Ground from "./Ground";
 import Plane from "./Plane";

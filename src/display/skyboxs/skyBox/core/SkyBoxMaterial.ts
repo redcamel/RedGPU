@@ -1,13 +1,13 @@
-import RedGPUContext from "../../../context/RedGPUContext";
-import ABitmapBaseMaterial from "../../../material/core/ABitmapBaseMaterial";
-import DefineForFragment from "../../../resources/defineProperty/DefineForFragment";
-import Sampler from "../../../resources/sampler/Sampler";
-import BitmapTexture from "../../../resources/texture/BitmapTexture";
-import CubeTexture from "../../../resources/texture/CubeTexture";
-import HDRTexture from "../../../resources/texture/hdr/HDRTexture";
-import ANoiseTexture from "../../../resources/texture/noiseTexture/core/ANoiseTexture";
-import parseWGSL from "../../../resources/wgslParser/parseWGSL";
-import fragmentModuleSource from "./shader/fragment.wgsl"
+import RedGPUContext from "../../../../context/RedGPUContext";
+import ABitmapBaseMaterial from "../../../../material/core/ABitmapBaseMaterial";
+import DefineForFragment from "../../../../resources/defineProperty/DefineForFragment";
+import Sampler from "../../../../resources/sampler/Sampler";
+import BitmapTexture from "../../../../resources/texture/BitmapTexture";
+import CubeTexture from "../../../../resources/texture/CubeTexture";
+import HDRTexture from "../../../../resources/texture/hdr/HDRTexture";
+import ANoiseTexture from "../../../../resources/texture/noiseTexture/core/ANoiseTexture";
+import parseWGSL from "../../../../resources/wgslParser/parseWGSL";
+import fragmentModuleSource from "../shader/fragment.wgsl"
 
 const SHADER_INFO = parseWGSL(fragmentModuleSource)
 

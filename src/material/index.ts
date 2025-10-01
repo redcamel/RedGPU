@@ -15,7 +15,7 @@ import PhongMaterial from "./phongMaterial/PhongMaterial";
 
 import TINT_BLEND_MODE from "./TINT_BLEND_MODE";
 
-export * from './core'
+export * as Core from './core'
 
 export {
 	TINT_BLEND_MODE,

@@ -1,27 +1,24 @@
 import {mat4} from "gl-matrix";
-import RenderViewStateData from "../../renderer/RenderViewStateData";
-import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
-import Object3DContainer from "../mesh/core/Object3DContainer";
-import MESH_TYPE from "../MESH_TYPE";
+import RenderViewStateData from "../../../renderer/RenderViewStateData";
+import InstanceIdGenerator from "../../../utils/uuid/InstanceIdGenerator";
+import Object3DContainer from "../../mesh/core/Object3DContainer";
+import MESH_TYPE from "../../MESH_TYPE";
 
-/**
- * 그룹의 기본 동작과 변환(위치, 회전, 스케일, 피벗 등)을 제공하는 3D/2D 공통 베이스 클래스입니다.
- * @category Group
- */
-interface GroupBase {
+
+interface AGroupBase {
 }
 
-/**
- * 라디안 변환 상수 (deg → rad)
- * @internal
- */
 const CONVERT_RADIAN = Math.PI / 180;
 
 /**
- * 그룹의 변환, 계층, 렌더링 관련 기능을 제공하는 베이스 클래스입니다.
- * @category Group
+ * 그룹의 기본 동작과 변환(위치, 회전, 스케일, 피벗 등)을 제공하는 3D/2D 공통 베이스 클래스입니다.
+ *
+ * @remarks
+ * `시스템 전용 클래스입니다.`\
+ * 이 메서드는 렌더링 엔진 내부에서 자동으로 사용되는 기능으로, 일반적인 사용자는 직접 호출하지 않는 것이 좋습니다.
+
  */
-class GroupBase extends Object3DContainer {
+abstract class GroupBase extends Object3DContainer {
 	/** 모델 변환 행렬 */
 	modelMatrix = mat4.create()
 	/** 로컬 변환 행렬 */

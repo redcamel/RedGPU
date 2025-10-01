@@ -1,5 +1,5 @@
 import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
-import GroupBase from "./GroupBase";
+import AGroupBase from "./core/AGroupBase";
 
 /**
  * 2D 공간에서의 그룹(계층) 노드로, 변환(transform)과 자식 객체만을 관리하는 구조체입니다.
@@ -11,7 +11,7 @@ import GroupBase from "./GroupBase";
  * <iframe src="/RedGPU/examples/2d/group2D/basic/" ></iframe>
  * @category Group
  */
-class Group2D extends GroupBase {
+class Group2D extends AGroupBase {
 	/** 인스턴스 고유 ID */
 	#instanceId: number;
 	/** 그룹 이름 */

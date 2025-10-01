@@ -14,6 +14,10 @@ import computeViewFrustumPlanes from "../../../utils/math/computeViewFrustumPlan
  *
  * 이 클래스는 카메라 타입(Perspective, Orthographic, Camera2D, AController)을 받아
  * 해당 카메라에 맞는 투영 행렬을 생성하고, 화면 내 위치 및 크기(pixel rect)등을 계산을 담당합니다.
+ *
+ * @remarks
+ * `시스템 전용 클래스입니다.`\
+ * 이 메서드는 렌더링 엔진 내부에서 자동으로 사용되는 기능으로, 일반적인 사용자는 직접 호출하지 않는 것이 좋습니다.
  */
 class ViewTransform {
 	/**

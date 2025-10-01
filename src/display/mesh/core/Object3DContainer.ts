@@ -13,7 +13,13 @@ import MeshBase from "./MeshBase";
  *
  * View와 Scene이 그려낼 공간을 구성할 때, Object3DContainer는
  * 실제로 배치되는 시각적 요소들의 루트 역할을 합니다.
+ * 
+ * @remarks
+ * `시스템 전용 클래스입니다.`\
+ * 이 메서드는 렌더링 엔진 내부에서 자동으로 사용되는 기능으로, 일반적인 사용자는 직접 호출하지 않는 것이 좋습니다.
  */
+
+
 class Object3DContainer {
 	/**
 	 * 이 객체의 모델 행렬입니다. 위치, 회전, 스케일 변환에 사용됩니다.

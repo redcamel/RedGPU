@@ -37,7 +37,6 @@ interface ABaseMaterial {
  * 머티리얼별로 GPU 파이프라인의 셰이더, 바인드 그룹, 블렌딩, 컬러/알파, 틴트, 투명도 등 다양한 렌더링 속성을 일관성 있게 제어할 수 있습니다.
  *
  * @extends ResourceBase
- * @category Core
  */
 abstract class ABaseMaterial extends ResourceBase {
 	/**

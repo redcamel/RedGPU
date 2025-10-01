@@ -14,8 +14,9 @@ const SHADER_INFO = parseWGSL(fragmentModuleSource)
  * `ABitmapBaseMaterial`을 확장하며, 텍스처와 샘플러를 기반으로 GPU 렌더링 정보를 초기화합니다.
  *
  * @remarks
- * 이 클래스는 RedGPU 시스템 내부에서 텍스트 필드를 처리하기 위해 사용됩니다.
- * 일반 사용자나 외부 개발자가 `직접 사용할 필요는 없습니다.`
+ * `시스템 전용 클래스입니다.`\
+ * 이 메서드는 렌더링 엔진 내부에서 자동으로 사용되는 기능으로, 일반적인 사용자는 직접 호출하지 않는 것이 좋습니다.
+ *
  */
 class TextFieldMaterial extends ABitmapBaseMaterial {
 	/**

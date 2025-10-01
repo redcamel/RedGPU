@@ -28,6 +28,6 @@
     "@webgpu/types": "^0.1.63"
   },
   "dependencies": {
-    "wgsl_reflect": "^1.2.1"
+    "wgsl_reflect": "1.2.1"
   }
 }

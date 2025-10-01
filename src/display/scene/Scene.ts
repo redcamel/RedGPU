@@ -19,6 +19,8 @@ import Object3DContainer from "../mesh/core/Object3DContainer";
  * ```
  *
  * <iframe src="/RedGPU/examples/3d/scene/" ></iframe>
+ *
+ * @category Scene
  * @extends Object3DContainer
  */
 class Scene extends Object3DContainer {

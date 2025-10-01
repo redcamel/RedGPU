@@ -20,7 +20,10 @@ import ViewTransform from "./ViewTransform";
  * ViewTransform을 확장하며 화면 좌표 변환, 마우스 경계 체크, Culling 설정 등
  * 뷰 렌더링에 필요한 공통 기능을 제공합니다.
  *
- * 이 클래스는 직접 사용되기보다는 View3D와 View2D에서 상속되어 3D/2D 환경에 맞게 확장됩니다.
+ * @remarks
+ * `시스템 전용 클래스입니다.`\
+ * 이 메서드는 렌더링 엔진 내부에서 자동으로 사용되는 기능으로, 일반적인 사용자는 직접 호출하지 않는 것이 좋습니다.
+ *
  */
 
 abstract class AView extends ViewTransform {

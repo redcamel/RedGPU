@@ -6,7 +6,6 @@ import ASinglePassPostEffect, {ASinglePassPostEffectResult} from "./ASinglePassP
  * 다중 패스 후처리 이펙트(AMultiPassPostEffect) 추상 클래스입니다.
  * 여러 개의 단일 패스 이펙트를 순차적으로 적용할 수 있습니다.
  *
- * @category Core
  *
  */
 abstract class AMultiPassPostEffect extends ASinglePassPostEffect {
