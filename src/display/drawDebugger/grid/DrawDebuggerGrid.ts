@@ -5,7 +5,7 @@ import GPU_BLEND_FACTOR from "../../../gpuConst/GPU_BLEND_FACTOR";
 import GPU_BLEND_OPERATION from "../../../gpuConst/GPU_BLEND_OPERATION";
 import GPU_COMPARE_FUNCTION from "../../../gpuConst/GPU_COMPARE_FUNCTION";
 import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "../../../material/core";
-import RenderViewStateData from "../../../renderer/RenderViewStateData";
+import RenderViewStateData from "../../view/core/RenderViewStateData";
 import BlendState from "../../../renderState/BlendState";
 import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
 import UniformBuffer from "../../../resources/buffer/uniformBuffer/UniformBuffer";

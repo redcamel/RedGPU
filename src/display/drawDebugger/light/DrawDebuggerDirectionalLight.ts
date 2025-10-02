@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import DirectionalLight from "../../../light/lights/DirectionalLight";
-import RenderViewStateData from "../../../renderer/RenderViewStateData";
+import RenderViewStateData from "../../view/core/RenderViewStateData";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
 import TextField3D from "../../textFileds/textField3D/TextField3D";
 import ADrawDebuggerLight from "./ADrawDebuggerLight";

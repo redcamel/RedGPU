@@ -13,7 +13,7 @@ import renderAlphaLayer from "./renderLayers/renderAlphaLayer";
 import renderBasicLayer from "./renderLayers/renderBasicLayer";
 import renderPickingLayer from "./renderLayers/renderPickingLayer";
 import renderShadowLayer from "./renderLayers/renderShadowLayer";
-import RenderViewStateData from "./RenderViewStateData";
+import RenderViewStateData from "../display/view/core/RenderViewStateData";
 
 class Renderer {
 	#prevViewportSize: { width: number, height: number };

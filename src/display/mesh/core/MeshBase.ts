@@ -4,7 +4,7 @@ import MorphInfo_GLTF from "../../../loader/gltf/cls/MorphInfo_GLTF";
 import ParsedSkinInfo_GLTF from "../../../loader/gltf/cls/ParsedSkinInfo_GLTF";
 import GLTFLoader from "../../../loader/gltf/GLTFLoader";
 import {GLTFParsedSingleClip} from "../../../loader/gltf/parsers/animation/parseAnimations";
-import VertexGPURenderInfo from "../../../renderInfos/VertexGPURenderInfo";
+import VertexGPURenderInfo from "./VertexGPURenderInfo";
 import DepthStencilState from "../../../renderState/DepthStencilState";
 import PrimitiveState from "../../../renderState/PrimitiveState";
 import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";

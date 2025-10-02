@@ -7,7 +7,7 @@ import PassClusterLightBound from "../../light/clusterLight/PassClusterLightBoun
 import PassClustersLight from "../../light/clusterLight/PassClustersLight";
 import PassClustersLightHelper from "../../light/clusterLight/PassClustersLightHelper";
 import PostEffectManager from "../../postEffect/PostEffectManager";
-import RenderViewStateData from "../../renderer/RenderViewStateData";
+import RenderViewStateData from "./core/RenderViewStateData";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
 import Sampler from "../../resources/sampler/Sampler";

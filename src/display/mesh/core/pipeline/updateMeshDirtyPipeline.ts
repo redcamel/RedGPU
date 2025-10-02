@@ -1,4 +1,4 @@
-import RenderViewStateData from "../../../../renderer/RenderViewStateData";
+import RenderViewStateData from "../../../view/core/RenderViewStateData";
 import ResourceManager from "../../../../resources/core/resourceManager/ResourceManager";
 import Mesh from "../../Mesh";
 import createMeshVertexShaderModule from "../shader/createMeshVertexShaderModule";

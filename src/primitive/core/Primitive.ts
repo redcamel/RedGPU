@@ -1,6 +1,6 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import Geometry from "../../geometry/Geometry";
-import GeometryGPURenderInfo from "../../renderInfos/GeometryGPURenderInfo";
+import GeometryGPURenderInfo from "./GeometryGPURenderInfo";
 import IndexBuffer from "../../resources/buffer/indexBuffer/IndexBuffer";
 import VertexBuffer from "../../resources/buffer/vertexBuffer/VertexBuffer";
 import VertexInterleavedStruct from "../../resources/buffer/vertexBuffer/VertexInterleavedStruct";

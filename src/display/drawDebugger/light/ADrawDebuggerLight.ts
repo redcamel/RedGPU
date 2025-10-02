@@ -2,7 +2,7 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import Geometry from "../../../geometry/Geometry";
 import GPU_PRIMITIVE_TOPOLOGY from "../../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
 import ColorMaterial from "../../../material/colorMaterial/ColorMaterial";
-import RenderViewStateData from "../../../renderer/RenderViewStateData";
+import RenderViewStateData from "../../view/core/RenderViewStateData";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
 import VertexInterleavedStruct from "../../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
 import VertexInterleaveType from "../../../resources/buffer/vertexBuffer/VertexInterleaveType";

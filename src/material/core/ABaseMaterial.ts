@@ -4,7 +4,7 @@ import RedGPUContext from "../../context/RedGPUContext";
 import DefineForFragment from "../../defineProperty/DefineForFragment";
 import GPU_BLEND_FACTOR from "../../gpuConst/GPU_BLEND_FACTOR";
 import GPU_BLEND_OPERATION from "../../gpuConst/GPU_BLEND_OPERATION";
-import FragmentGPURenderInfo from "../../renderInfos/FragmentGPURenderInfo";
+import FragmentGPURenderInfo from "./FragmentGPURenderInfo";
 import BlendState from "../../renderState/BlendState";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import ResourceBase from "../../resources/core/ResourceBase";

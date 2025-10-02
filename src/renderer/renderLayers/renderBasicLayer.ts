@@ -1,5 +1,5 @@
 import View3D from "../../display/view/View3D";
-import RenderViewStateData from "../RenderViewStateData";
+import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 
 const renderBasicLayer = (view: View3D, viewRenderPassEncoder: GPURenderPassEncoder) => {
 	const {renderViewStateData, skybox, scene} = view

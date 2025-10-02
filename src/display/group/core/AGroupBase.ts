@@ -1,5 +1,5 @@
 import {mat4} from "gl-matrix";
-import RenderViewStateData from "../../../renderer/RenderViewStateData";
+import RenderViewStateData from "../../view/core/RenderViewStateData";
 import InstanceIdGenerator from "../../../utils/uuid/InstanceIdGenerator";
 import Object3DContainer from "../../mesh/core/Object3DContainer";
 import MESH_TYPE from "../../MESH_TYPE";

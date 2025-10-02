@@ -1,5 +1,5 @@
 import RedGPUContext from "../context/RedGPUContext";
-import GeometryGPURenderInfo from "../renderInfos/GeometryGPURenderInfo";
+import GeometryGPURenderInfo from "../primitive/core/GeometryGPURenderInfo";
 import IndexBuffer from "../resources/buffer/indexBuffer/IndexBuffer";
 import VertexBuffer from "../resources/buffer/vertexBuffer/VertexBuffer";
 import ResourceBase from "../resources/core/ResourceBase";
