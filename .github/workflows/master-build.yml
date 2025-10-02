@@ -19,4 +19,12 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
-
+      - name: Verify build output
+        run: |
+          if [ -d "dist" ]; then
+            echo "✅ Build successful - dist folder created"
+            ls -la dist/
+          else
+            echo "❌ Build failed - no dist folder"
+            exit 1
+          fi
