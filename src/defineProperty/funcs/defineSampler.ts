@@ -1,4 +1,4 @@
-import Sampler from "../../sampler/Sampler";
+import Sampler from "../../resources/sampler/Sampler";
 import defineProperty_SETTING from "./defineProperty_SETTING";
 
 function defineSampler(propertyKey: string) {

@@ -4,7 +4,7 @@ import GPU_FILTER_MODE from "../../gpuConst/GPU_FILTER_MODE";
 import GPU_MIPMAP_FILTER_MODE from "../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 import validateUintRange from "../../runtimeChecker/validateFunc/validateUintRange";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
-import ResourceBase from "../ResourceBase";
+import ResourceBase from "../core/ResourceBase";
 
 const samplerCache: Map<string, GPUSampler> = new Map()
 const validFilters: GPUFilterMode[] = Object.values(GPU_FILTER_MODE);

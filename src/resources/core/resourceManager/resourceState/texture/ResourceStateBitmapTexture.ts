@@ -1,5 +1,5 @@
-import BitmapTexture from "../../../texture/BitmapTexture";
-import ANoiseTexture from "../../../texture/noiseTexture/core/ANoiseTexture";
+import BitmapTexture from "../../../../texture/BitmapTexture";
+import ANoiseTexture from "../../../../texture/noiseTexture/core/ANoiseTexture";
 
 class ResourceStateBitmapTexture {
 	texture: BitmapTexture | ANoiseTexture

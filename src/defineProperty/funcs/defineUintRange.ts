@@ -1,4 +1,4 @@
-import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
+import validateUintRange from "../../runtimeChecker/validateFunc/validateUintRange";
 import defineProperty_SETTING from "./defineProperty_SETTING";
 
 function createSetter(
@@ -9,7 +9,9 @@ function createSetter(
 	max?: number
 ) {
 	return function (newValue: number) {
-		// `min`/`max` 범위 확인 및 경고 출력
+		// 검증: Uint 범위 확인
+		validateUintRange(newValue);
+		// min/max 범위 확인 및 경고 출력
 		if (min !== undefined && newValue < min) {
 			console.warn(
 				`Value for ${propertyKey} is below the minimum (${min}). Received: ${newValue}. Adjusted to ${min}.`
@@ -22,11 +24,9 @@ function createSetter(
 			);
 			newValue = max; // 최대값으로 조정
 		}
-		// 양수 범위 검증
-		validatePositiveNumberRange(newValue);
 		// 값 설정
 		this[symbol] = newValue;
-		// GPU Uniform 버퍼 업데이트
+		// GPU 업데이트
 		const {gpuRenderInfo} = this;
 		if (isFragment) {
 			const {fragmentUniformInfo, fragmentUniformBuffer} = gpuRenderInfo;
@@ -44,23 +44,27 @@ function createSetter(
 	};
 }
 
-function definePositiveNumberRange(
+function defineUintRange(
 	propertyKey: string,
-	initValue: number = 1,
+	initValue: number = 0,
 	forFragment: boolean = true,
 	min: number = 0,
 	max?: number
 ) {
-	const symbol = Symbol(propertyKey); // 고유 심볼 생성
+	// 고유 심볼 생성
+	const symbol = Symbol(propertyKey);
 	return {
+		// getter: 초기값 설정 및 반환
 		get: function (): number {
 			if (this[symbol] === undefined) this[symbol] = initValue;
 			return this[symbol];
 		},
+		// setter: 값 변경 로직 정의
 		set: createSetter(propertyKey, symbol, forFragment, min, max),
+		// 기타 설정 병합
 		...defineProperty_SETTING,
 	};
 }
 
-Object.freeze(definePositiveNumberRange);
-export default definePositiveNumberRange;
+Object.freeze(defineUintRange);
+export default defineUintRange;

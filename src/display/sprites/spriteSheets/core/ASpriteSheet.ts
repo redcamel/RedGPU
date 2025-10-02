@@ -4,7 +4,7 @@ import GPU_ADDRESS_MODE from "../../../../gpuConst/GPU_ADDRESS_MODE";
 import BitmapMaterial from "../../../../material/bitmapMaterial/BitmapMaterial";
 import Primitive from "../../../../primitive/core/Primitive";
 import RenderViewStateData from "../../../../renderer/RenderViewStateData";
-import DefineForVertex from "../../../../resources/defineProperty/DefineForVertex";
+import DefineForVertex from "../../../../defineProperty/DefineForVertex";
 import Sampler from "../../../../resources/sampler/Sampler";
 import consoleAndThrowError from "../../../../utils/consoleAndThrowError";
 import Mesh from "../../../mesh/Mesh";

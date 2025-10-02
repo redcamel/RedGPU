@@ -1,13 +1,13 @@
-import IndexBuffer from "../../buffer/indexBuffer/IndexBuffer";
+import VertexBuffer from "../../../buffer/vertexBuffer/VertexBuffer";
 
-class ResourceStateIndexBuffer {
+class ResourceStateVertexBuffer {
 	static dirtyList = []
-	buffer: IndexBuffer
+	buffer: VertexBuffer
 	label: string | number
 	uuid: string | number
 	#useNum: number = 0
 
-	constructor(buffer: IndexBuffer) {
+	constructor(buffer: VertexBuffer) {
 		this.buffer = buffer
 		this.label = buffer.name
 		this.uuid = buffer.uuid
@@ -19,8 +19,8 @@ class ResourceStateIndexBuffer {
 
 	set useNum(value: number) {
 		this.#useNum = value;
-		ResourceStateIndexBuffer.dirtyList.push(this)
+		ResourceStateVertexBuffer.dirtyList.push(this)
 	}
 }
 
-export default ResourceStateIndexBuffer;
+export default ResourceStateVertexBuffer;

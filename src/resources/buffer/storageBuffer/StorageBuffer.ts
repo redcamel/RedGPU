@@ -1,5 +1,5 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import ResourceStateStorageBuffer from "../../resourceManager/resourceState/ResourceStateStorageBuffer";
+import ResourceStateStorageBuffer from "../../core/resourceManager/resourceState/ResourceStateStorageBuffer";
 import {GPU_BUFFER_CACHE_KEY} from "../core/ABaseBuffer";
 import AUniformBaseBuffer from "../core/AUniformBaseBuffer";
 

@@ -1,9 +1,9 @@
 import {WgslReflect} from "wgsl_reflect";
-import preprocessWGSL from "./preprocessWGSL";
-import UniformType from "./UniformType";
+import preprocessWGSL from "./core/preprocessWGSL";
+import WGSLUniformTypes from "./core/WGSLUniformTypes";
 
 const createUniformMember = (curr, start, typeName) => {
-	const UniformTypeInfo = UniformType[typeName];
+	const UniformTypeInfo = WGSLUniformTypes[typeName];
 	return {
 		uniformOffset: curr.offset + start,
 		stride: curr.stride,

@@ -2,7 +2,7 @@ import RedGPUContext from "../../context/RedGPUContext";
 import BitmapMaterial from "../../material/bitmapMaterial/BitmapMaterial";
 import Plane from "../../primitive/Plane";
 import RenderViewStateData from "../../renderer/RenderViewStateData";
-import DefineForVertex from "../../resources/defineProperty/DefineForVertex";
+import DefineForVertex from "../../defineProperty/DefineForVertex";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import copyGPUBuffer from "../../utils/copyGPUBuffer";
 import Mesh from "../mesh/Mesh";

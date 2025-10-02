@@ -4,8 +4,8 @@ import validatePositiveNumberRange from "../../../../runtimeChecker/validateFunc
 import validateUintRange from "../../../../runtimeChecker/validateFunc/validateUintRange";
 import calculateTextureByteSize from "../../../../utils/texture/calculateTextureByteSize";
 import UniformBuffer from "../../../buffer/uniformBuffer/UniformBuffer";
-import ManagementResourceBase from "../../../ManagementResourceBase";
-import ResourceStateBitmapTexture from "../../../resourceManager/resourceState/texture/ResourceStateBitmapTexture";
+import ManagementResourceBase from "../../../core/ManagementResourceBase";
+import ResourceStateBitmapTexture from "../../../core/resourceManager/resourceState/texture/ResourceStateBitmapTexture";
 import parseWGSL from "../../../wgslParser/parseWGSL";
 
 const MANAGED_STATE_KEY = 'managedBitmapTextureState';
@@ -24,7 +24,6 @@ const BASIC_OPTIONS = {
 }
 
 /**
- * @category NoiseTexture
  * @experimental
  */
 abstract class ANoiseTexture extends ManagementResourceBase {

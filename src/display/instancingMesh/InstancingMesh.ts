@@ -5,7 +5,7 @@ import Primitive from "../../primitive/core/Primitive";
 import RenderViewStateData from "../../renderer/RenderViewStateData";
 import VertexGPURenderInfo from "../../renderInfos/VertexGPURenderInfo";
 import StorageBuffer from "../../resources/buffer/storageBuffer/StorageBuffer";
-import ResourceManager from "../../resources/resourceManager/ResourceManager";
+import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import validateUintRange from "../../runtimeChecker/validateFunc/validateUintRange";
 import copyGPUBuffer from "../../utils/copyGPUBuffer";

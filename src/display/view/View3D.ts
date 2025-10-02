@@ -9,7 +9,7 @@ import PassClustersLightHelper from "../../light/clusterLight/PassClustersLightH
 import PostEffectManager from "../../postEffect/PostEffectManager";
 import RenderViewStateData from "../../renderer/RenderViewStateData";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
-import ResourceManager from "../../resources/resourceManager/ResourceManager";
+import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
 import Sampler from "../../resources/sampler/Sampler";
 import SystemCode from "../../resources/systemCode/SystemCode";
 import CubeTexture from "../../resources/texture/CubeTexture";

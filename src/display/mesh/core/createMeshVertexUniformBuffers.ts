@@ -1,5 +1,5 @@
 import UniformBuffer from "../../../resources/buffer/uniformBuffer/UniformBuffer";
-import ResourceManager from "../../../resources/resourceManager/ResourceManager";
+import ResourceManager from "../../../resources/core/resourceManager/ResourceManager";
 import Mesh from "../Mesh";
 
 /**

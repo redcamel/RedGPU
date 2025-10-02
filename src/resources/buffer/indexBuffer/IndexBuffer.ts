@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import GPU_INDEX_FORMAT from "../../../gpuConst/GPU_INDEX_FORMAT";
-import ResourceStateIndexBuffer from "../../resourceManager/resourceState/ResourceStateIndexBuffer";
+import ResourceStateIndexBuffer from "../../core/resourceManager/resourceState/ResourceStateIndexBuffer";
 import ABaseBuffer, {GPU_BUFFER_CACHE_KEY, GPU_BUFFER_DATA_SYMBOL, GPU_BUFFER_SYMBOL} from "../core/ABaseBuffer";
 
 const MANAGED_STATE_KEY = 'managedIndexBufferState'

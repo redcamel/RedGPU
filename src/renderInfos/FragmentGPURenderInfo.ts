@@ -1,5 +1,5 @@
 import UniformBuffer from "../resources/buffer/uniformBuffer/UniformBuffer";
-import ShaderVariantGenerator from "../resources/wgslParser/ShaderVariantGenerator";
+import ShaderVariantGenerator from "../resources/wgslParser/core/ShaderVariantGenerator";
 
 /**
  * Represents information about a GPU fragment render operation.

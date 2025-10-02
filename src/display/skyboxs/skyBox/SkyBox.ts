@@ -9,7 +9,7 @@ import VertexGPURenderInfo from "../../../renderInfos/VertexGPURenderInfo";
 import DepthStencilState from "../../../renderState/DepthStencilState";
 import PrimitiveState from "../../../renderState/PrimitiveState";
 import UniformBuffer from "../../../resources/buffer/uniformBuffer/UniformBuffer";
-import ResourceManager from "../../../resources/resourceManager/ResourceManager";
+import ResourceManager from "../../../resources/core/resourceManager/ResourceManager";
 import CubeTexture from "../../../resources/texture/CubeTexture";
 import HDRTexture from "../../../resources/texture/hdr/HDRTexture";
 import ANoiseTexture from "../../../resources/texture/noiseTexture/core/ANoiseTexture";

@@ -1,6 +1,6 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
-import ResourceManager from "../../resources/resourceManager/ResourceManager";
+import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import validateRedGPUContext from "../../runtimeChecker/validateFunc/validateRedGPUContext";
 import PassLightClustersBoundSource from "./PassClusterLightBound.wgsl";

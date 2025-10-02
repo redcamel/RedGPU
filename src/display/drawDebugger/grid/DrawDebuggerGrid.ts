@@ -12,7 +12,7 @@ import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
 import UniformBuffer from "../../../resources/buffer/uniformBuffer/UniformBuffer";
 import VertexInterleavedStruct from "../../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
-import ResourceManager from "../../../resources/resourceManager/ResourceManager";
+import ResourceManager from "../../../resources/core/resourceManager/ResourceManager";
 import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validateRedGPUContext";
 import InstanceIdGenerator from "../../../utils/uuid/InstanceIdGenerator";

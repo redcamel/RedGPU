@@ -1,5 +1,5 @@
 import RenderViewStateData from "../../../../renderer/RenderViewStateData";
-import ResourceManager from "../../../../resources/resourceManager/ResourceManager";
+import ResourceManager from "../../../../resources/core/resourceManager/ResourceManager";
 import Mesh from "../../Mesh";
 import createMeshVertexShaderModule from "../shader/createMeshVertexShaderModule";
 import createBasePipeline from "./createBasePipeline";

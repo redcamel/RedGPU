@@ -1,6 +1,6 @@
 import ColorRGB from "../../color/ColorRGB";
 import RedGPUContext from "../../context/RedGPUContext";
-import DefineForFragment from "../../resources/defineProperty/DefineForFragment";
+import DefineForFragment from "../../defineProperty/DefineForFragment";
 import Sampler from "../../resources/sampler/Sampler";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";

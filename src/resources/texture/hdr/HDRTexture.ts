@@ -6,9 +6,9 @@ import {keepLog} from "../../../utils";
 import getAbsoluteURL from "../../../utils/file/getAbsoluteURL";
 import calculateTextureByteSize from "../../../utils/texture/calculateTextureByteSize";
 import getMipLevelCount from "../../../utils/texture/getMipLevelCount";
-import ManagementResourceBase from "../../ManagementResourceBase";
-import ResourceManager from "../../resourceManager/ResourceManager";
-import ResourceStateHDRTexture from "../../resourceManager/resourceState/texture/ResourceStateHDRTexture";
+import ManagementResourceBase from "../../core/ManagementResourceBase";
+import ResourceManager from "../../core/resourceManager/ResourceManager";
+import ResourceStateHDRTexture from "../../core/resourceManager/resourceState/texture/ResourceStateHDRTexture";
 import Sampler from "../../sampler/Sampler";
 import CubeTexture from "../CubeTexture";
 import generateCubeMapFromEquirectangularCode from "./generateCubeMapFromEquirectangularCode.wgsl"

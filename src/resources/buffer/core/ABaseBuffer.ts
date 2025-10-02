@@ -1,5 +1,5 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import ManagementResourceBase from "../../ManagementResourceBase";
+import ManagementResourceBase from "../../core/ManagementResourceBase";
 
 export const GPU_BUFFER_SYMBOL = Symbol('gpuBuffer');
 export const GPU_BUFFER_DATA_SYMBOL = Symbol('gpuBufferData');

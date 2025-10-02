@@ -1,5 +1,5 @@
-import PassClustersLightHelper from "../../light/clusterLight/PassClustersLightHelper";
-import SystemCode from "../systemCode/SystemCode";
+import PassClustersLightHelper from "../../../light/clusterLight/PassClustersLightHelper";
+import SystemCode from "../../systemCode/SystemCode";
 import ShaderVariantGenerator from "./ShaderVariantGenerator";
 
 const shaderCodeKeys = Object.keys(SystemCode).join('|');
@@ -111,7 +111,6 @@ const generateDefaultSource = (defines: string, conditionalBlocks: ConditionalBl
 };
 /**
  * WGSL 전처리 메인 함수
- * @category WGSL
  */
 const preprocessWGSL = (code: string): PreprocessedWGSLResult => {
 	// 캐시 확인

@@ -1,9 +1,9 @@
-import ColorRGB from "../../../color/ColorRGB";
-import isHexColor from "../../../runtimeChecker/isFunc/isHexColor";
-import convertHexToRgb from "../../../utils/convertColor/convertHexToRgb";
+import ColorRGBA from "../../color/ColorRGBA";
+import isHexColor from "../../runtimeChecker/isFunc/isHexColor";
+import convertHexToRgb from "../../utils/convertColor/convertHexToRgb";
 import defineProperty_SETTING from "./defineProperty_SETTING";
 
-function defineColorRGB(propertyKey: string, initValue: string = '#fff', forFragment: boolean = true) {
+function defineColorRGBA(propertyKey: string, initValue: string = '#fff', forFragment: boolean = true) {
 	const symbol = Symbol(propertyKey);
 	return {
 		get: function (): number {
@@ -11,21 +11,22 @@ function defineColorRGB(propertyKey: string, initValue: string = '#fff', forFrag
 				let r = 255
 				let g = 255
 				let b = 255
+				let a = 1
 				if (isHexColor(initValue)) {
 					const t0 = convertHexToRgb(initValue)
 					r = t0.r
 					g = t0.g
 					b = t0.b
 				}
-				this[symbol] = new ColorRGB(r, g, b, () => {
+				this[symbol] = new ColorRGBA(r, g, b, a, () => {
 					const {gpuRenderInfo} = this
 					if (gpuRenderInfo) {
 						if (forFragment) {
 							const {fragmentUniformInfo, fragmentUniformBuffer} = gpuRenderInfo
-							fragmentUniformBuffer.writeBuffer(fragmentUniformInfo.members[propertyKey], this[symbol].rgbNormal)
+							fragmentUniformBuffer.writeBuffer(fragmentUniformInfo.members[propertyKey], this[symbol].rgbaNormal)
 						} else {
 							const {vertexUniformInfo, vertexUniformBuffer} = gpuRenderInfo
-							vertexUniformBuffer.writeBuffer(vertexUniformInfo.members[propertyKey], this[symbol].rgbNormal)
+							vertexUniformBuffer.writeBuffer(vertexUniformInfo.members[propertyKey], this[symbol].rgbaNormal)
 						}
 					}
 				})
@@ -36,5 +37,5 @@ function defineColorRGB(propertyKey: string, initValue: string = '#fff', forFrag
 	}
 }
 
-Object.freeze(defineColorRGB)
-export default defineColorRGB;
+Object.freeze(defineColorRGBA)
+export default defineColorRGBA;

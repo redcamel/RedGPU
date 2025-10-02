@@ -1,4 +1,4 @@
-import UniformBuffer from "../../buffer/uniformBuffer/UniformBuffer";
+import UniformBuffer from "../../../buffer/uniformBuffer/UniformBuffer";
 
 class ResourceStateUniformBuffer {
 	static dirtyList = []

@@ -1,4 +1,4 @@
-import StorageBuffer from "../../buffer/storageBuffer/StorageBuffer";
+import StorageBuffer from "../../../buffer/storageBuffer/StorageBuffer";
 
 class ResourceStateStorageBuffer {
 	static dirtyList = []

@@ -2,7 +2,7 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import Geometry from "../../../geometry/Geometry";
 import Primitive from "../../../primitive/core/Primitive";
 import Plane from "../../../primitive/Plane";
-import DefineForVertex from "../../../resources/defineProperty/DefineForVertex";
+import DefineForVertex from "../../../defineProperty/DefineForVertex";
 import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import ATextField from "../core/ATextField";
 import vertexModuleSource from "./shader/textField3DVertex.wgsl";

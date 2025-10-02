@@ -1,7 +1,6 @@
 import {TypeInterleave} from "../VertexInterleaveType";
 
 /**
- * @category Buffer
  */
 class VertexInterleavedStructElement {
 	attributeName: string;

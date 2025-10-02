@@ -7,7 +7,7 @@ import {
 	mergerNoiseHelperFunctions,
 	mergerNoiseUniformDefault,
 	mergerNoiseUniformStruct
-} from "../core/noiseDegineMerges";
+} from "../core/noiseDefineMerges";
 import VORONOI_DISTANCE_TYPE from "./VORONOI_DISTANCE_TYPE";
 import VORONOI_OUTPUT_TYPE from "./VORONOI_OUTPUT_TYPE";
 import voronoiComputeFunctions from './voronoiCompute.wgsl';

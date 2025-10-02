@@ -1,5 +1,5 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import ResourceStateVertexBuffer from "../../resourceManager/resourceState/ResourceStateVertexBuffer";
+import ResourceStateVertexBuffer from "../../core/resourceManager/resourceState/ResourceStateVertexBuffer";
 import ABaseBuffer, {GPU_BUFFER_CACHE_KEY, GPU_BUFFER_DATA_SYMBOL, GPU_BUFFER_SYMBOL} from "../core/ABaseBuffer";
 import VertexInterleavedStruct from "./VertexInterleavedStruct";
 import VertexInterleavedStructElement from "./core/VertexInterleavedStructElement";

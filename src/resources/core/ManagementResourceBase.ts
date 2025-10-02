@@ -1,5 +1,5 @@
-import RedGPUContext from "../context/RedGPUContext";
-import consoleAndThrowError from "../utils/consoleAndThrowError";
+import RedGPUContext from "../../context/RedGPUContext";
+import consoleAndThrowError from "../../utils/consoleAndThrowError";
 import ResourceBase from "./ResourceBase";
 import ResourceStatusInfo from "./resourceManager/resourceState/ResourceStatusInfo";
 

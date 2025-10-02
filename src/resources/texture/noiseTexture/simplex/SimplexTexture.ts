@@ -7,7 +7,7 @@ import {
 	mergerNoiseHelperFunctions,
 	mergerNoiseUniformDefault,
 	mergerNoiseUniformStruct
-} from "../core/noiseDegineMerges";
+} from "../core/noiseDefineMerges";
 import NOISE_DIMENSION from "./NOISE_DIMENSION";
 import simplexComputeFunctions from './simplexCompute.wgsl';
 

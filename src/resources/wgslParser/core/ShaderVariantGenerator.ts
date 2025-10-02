@@ -4,7 +4,7 @@ import {ConditionalBlock} from "./preprocessWGSL";
  * 조건부 블록과 define 문자열을 기반으로 WGSL 셰이더의 다양한 변형(variant) 코드를 생성하는 유틸리티.
  *
  * 변형 키(variantKey)에 따라 조건부 블록을 처리하여, 각기 다른 쉐이더 소스를 동적으로 생성하고 캐싱합니다.
- * @category WGSL
+
  */
 class ShaderVariantGenerator {
 	#variantCache = new Map<string, string>();

@@ -1,6 +1,6 @@
 import StorageBuffer from "../resources/buffer/storageBuffer/StorageBuffer";
 import UniformBuffer from "../resources/buffer/uniformBuffer/UniformBuffer";
-import ShaderVariantGenerator from "../resources/wgslParser/ShaderVariantGenerator";
+import ShaderVariantGenerator from "../resources/wgslParser/core/ShaderVariantGenerator";
 
 class VertexGPURenderInfo {
 	vertexShaderModule: GPUShaderModule;

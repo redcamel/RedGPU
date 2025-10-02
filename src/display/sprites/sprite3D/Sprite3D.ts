@@ -3,7 +3,7 @@ import Geometry from "../../../geometry/Geometry";
 import GPU_CULL_MODE from "../../../gpuConst/GPU_CULL_MODE";
 import Primitive from "../../../primitive/core/Primitive";
 import Plane from "../../../primitive/Plane";
-import DefineForVertex from "../../../resources/defineProperty/DefineForVertex";
+import DefineForVertex from "../../../defineProperty/DefineForVertex";
 import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import Mesh from "../../mesh/Mesh";
 import vertexModuleSource from "../Sprite3D/shader/Sprite3DVertex.wgsl";

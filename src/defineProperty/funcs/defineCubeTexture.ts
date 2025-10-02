@@ -1,10 +1,10 @@
-import BitmapTexture from "../../texture/BitmapTexture";
+import CubeTexture from "../../resources/texture/CubeTexture";
 import defineProperty_SETTING from "./defineProperty_SETTING";
 
 function createSetter(propertyKey: string, symbol: symbol, isFragment: boolean) {
 	const useKey = `use${propertyKey.charAt(0).toUpperCase()}${propertyKey.substring(1)}`
-	return function (texture: BitmapTexture) {
-		const prevTexture: BitmapTexture = this[symbol]
+	return function (texture: CubeTexture) {
+		const prevTexture: CubeTexture = this[symbol]
 		this[symbol] = texture
 		this.updateTexture(prevTexture, texture)
 		const {gpuRenderInfo} = this
@@ -30,10 +30,10 @@ function createSetter(propertyKey: string, symbol: symbol, isFragment: boolean) 
 	}
 }
 
-function defineTexture(propertyKey: string, forFragment: boolean = true) {
+function defineCubeTexture(propertyKey: string, forFragment: boolean = true) {
 	const symbol = Symbol(propertyKey);
 	return {
-		get: function (): BitmapTexture {
+		get: function (): CubeTexture {
 			return this[symbol]
 		},
 		set: createSetter(propertyKey, symbol, forFragment),
@@ -41,5 +41,5 @@ function defineTexture(propertyKey: string, forFragment: boolean = true) {
 	}
 }
 
-Object.freeze(defineTexture)
-export default defineTexture;
+Object.freeze(defineCubeTexture)
+export default defineCubeTexture;

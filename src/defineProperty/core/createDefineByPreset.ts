@@ -1,4 +1,4 @@
-import consoleAndThrowError from "../../../utils/consoleAndThrowError";
+import consoleAndThrowError from "../../utils/consoleAndThrowError";
 
 const defineProperty = (
 	classObject,

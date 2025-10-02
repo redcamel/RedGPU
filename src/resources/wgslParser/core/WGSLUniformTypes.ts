@@ -18,9 +18,9 @@ export type TypeUniform = {
 };
 
 /**
- * @category WGSL
+
  */
-class UniformType {
+class WGSLUniformTypes {
 	static get i32(): TypeUniform {
 		return {numElements: 1, align: 4, size: 4, type: 'i32', wgslType: 'i32', View: Int32Array}
 	}
@@ -135,5 +135,5 @@ class UniformType {
 	}
 }
 
-Object.freeze(UniformType)
-export default UniformType
+Object.freeze(WGSLUniformTypes)
+export default WGSLUniformTypes

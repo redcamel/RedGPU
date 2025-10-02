@@ -1,4 +1,4 @@
-import HDRTexture from "../../../texture/hdr/HDRTexture";
+import HDRTexture from "../../../../texture/hdr/HDRTexture";
 
 class ResourceStateHDRTexture {
 	texture: HDRTexture

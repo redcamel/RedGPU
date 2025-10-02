@@ -20,7 +20,7 @@ export * as RenderState from "./renderState";
 import init from "./init";
 import GLTFLoader from "./loader/gltf/GLTFLoader";
 import SystemCode from "./resources/systemCode/SystemCode";
-
+export * as Define from "./defineProperty"
 export {
 	init,
 	SystemCode,
