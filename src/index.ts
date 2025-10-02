@@ -1,4 +1,13 @@
-// Exports
+
+import init from "./init";
+import GLTFLoader from "./loader/gltf/GLTFLoader";
+import SystemCode from "./resources/systemCode/SystemCode";
+export {
+	init,
+	SystemCode,
+	GLTFLoader
+}
+
 export * as Camera from "./camera/";
 export * from "./context";
 export * from "./color";
@@ -17,15 +26,7 @@ export * from "./gpuConst";
 export * as PostEffect from "./postEffect";
 export * as Picking from "./picking";
 export * as RenderState from "./renderState";
-export *  from "./shadow";
-import init from "./init";
-import GLTFLoader from "./loader/gltf/GLTFLoader";
-import SystemCode from "./resources/systemCode/SystemCode";
+export * as Shadow from "./shadow";
 
-export * as Define from "./defineProperty"
-export {
-	init,
-	SystemCode,
-	GLTFLoader
-}
+export * from "./defineProperty"
 

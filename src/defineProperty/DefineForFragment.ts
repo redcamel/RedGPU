@@ -63,6 +63,9 @@ const PRESET_COLOR_RGB = {
 	EMISSIVE_COLOR: 'emissiveColor',
 	SPECULAR_COLOR: 'specularColor',
 };
+/**
+ * @namespace DefineForFragment
+ */
 const DefineForFragment = {
 	...createDefineByPreset(
 		{

@@ -22,6 +22,7 @@ import {keepLog} from "./utils";
  *
  * @param {GPURequestAdapterOptions} requestAdapterOptions - 어댑터 요청에 대한 옵션으로써 기본 값은 { powerPreference: "high-performance", forceFallbackAdapter: false }입니다.
  * <br/>The options for adapter request, defaults to { powerPreference: "high-performance", forceFallbackAdapter: false }.
+ *
  */
 const init = async (
 	canvas: HTMLCanvasElement,

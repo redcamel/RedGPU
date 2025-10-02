@@ -44,6 +44,9 @@ const PRESET_VEC3 = {};
 const PRESET_VEC4 = {};
 const PRESET_TEXTURE = {};
 const PRESET_COLOR_RGB = {};
+/**
+ * @namespace DefineForVertex
+ */
 const DefineForVertex = {
 	...createDefineByPreset(
 		{

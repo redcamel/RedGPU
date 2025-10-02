@@ -16,5 +16,4 @@ module.exports = {
 		"Report Issue": "https://github.com/redcamel/RedGPU/issues"
 	},
 	includeVersion: true,
-
 };
