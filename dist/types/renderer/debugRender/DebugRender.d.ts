@@ -1,0 +1,34 @@
+import RedGPUContext from "../../context/RedGPUContext";
+import './DebugRender.css';
+import DebugBufferList from "./cls/DebugBufferList";
+import DebugRedGPUContext from "./cls/DebugRedGPUContext";
+import DebugTextureList from "./cls/DebugTextureList";
+import DebugTotalState from "./cls/DebugTotalState";
+import DebugViewList from "./cls/DebugViewList";
+import Fps from './cls/Fps';
+declare class DebugRender {
+    #private;
+    fps: Fps;
+    debugTotalState: DebugTotalState;
+    debugViewList: DebugViewList;
+    debugRedGPUContext: DebugRedGPUContext;
+    debugBitmapTextureList: DebugTextureList;
+    debugCubeTextureList: DebugTextureList;
+    debugHDRTextureList: DebugTextureList;
+    debugPackedTextureList: DebugTextureList;
+    debugIndexBufferList: DebugBufferList;
+    debugVertexBufferList: DebugBufferList;
+    debugUniformBufferList: DebugBufferList;
+    debugStorageBufferList: DebugBufferList;
+    debugBufferList: DebugBufferList;
+    totalNum3DGroups: number;
+    totalNum3DObjects: number;
+    totalNumDrawCalls: number;
+    totalNumInstances: number;
+    totalNumTriangles: number;
+    totalNumPoints: number;
+    totalUsedVideoMemory: number;
+    constructor(redGPUContext: RedGPUContext);
+    render(redGPUContext: RedGPUContext, time: number): void;
+}
+export default DebugRender;

@@ -1,0 +1,40 @@
+import RedGPUContext from "../../context/RedGPUContext";
+import Sampler from "../../resources/sampler/Sampler";
+import BitmapTexture from "../../resources/texture/BitmapTexture";
+import CubeTexture from "../../resources/texture/CubeTexture";
+import ANoiseTexture from "../../resources/texture/noiseTexture/core/ANoiseTexture";
+import ABaseMaterial from "./ABaseMaterial";
+/**
+ * 비트맵/큐브/노이즈 텍스처 기반 머티리얼의 공통 속성 및 기능을 제공하는 추상 클래스입니다.
+ * 텍스처/샘플러의 변경 감지 및 파이프라인 갱신, 텍스처 리스너 관리 등 텍스처 기반 머티리얼의 핵심 로직을 구현합니다.
+ *
+ * @extends ABaseMaterial
+ */
+declare abstract class ABitmapBaseMaterial extends ABaseMaterial {
+    #private;
+    /**
+     * 파이프라인 갱신 시 호출되는 콜백 리스트
+     */
+    __packingList: any[];
+    /**
+     * ABitmapBaseMaterial 생성자
+     * @param redGPUContext - RedGPUContext 인스턴스
+     * @param moduleName - 머티리얼 모듈명
+     * @param SHADER_INFO - 파싱된 WGSL 셰이더 정보
+     * @param targetGroupIndex - 바인드 그룹 인덱스
+     */
+    constructor(redGPUContext: RedGPUContext, moduleName: string, SHADER_INFO: any, targetGroupIndex: number);
+    /**
+     * 텍스처 객체 변경 및 DirtyPipeline 리스너 관리
+     * @param prevTexture - 이전 텍스처(BitmapTexture|CubeTexture|ANoiseTexture)
+     * @param texture - 새 텍스처(BitmapTexture|CubeTexture|ANoiseTexture)
+     */
+    updateTexture(prevTexture: BitmapTexture | CubeTexture | ANoiseTexture, texture: BitmapTexture | CubeTexture | ANoiseTexture): void;
+    /**
+     * 샘플러 객체 변경 및 DirtyPipeline 리스너 관리
+     * @param prevSampler - 이전 샘플러
+     * @param newSampler - 새 샘플러
+     */
+    updateSampler(prevSampler: Sampler, newSampler: Sampler): void;
+}
+export default ABitmapBaseMaterial;
