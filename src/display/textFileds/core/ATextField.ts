@@ -119,10 +119,10 @@ class ATextField extends Mesh {
 		this.#needsUpdate = true
 	}
 
-	render(debugViewRenderState: RenderViewStateData) {
+	render(renderViewStateData: RenderViewStateData) {
 		this.#textureImgOnload(this.#renderWidth, this.#renderHeight)
 		this.#updateTexture()
-		super.render(debugViewRenderState);
+		super.render(renderViewStateData);
 	}
 
 	#processText(input: string): string {

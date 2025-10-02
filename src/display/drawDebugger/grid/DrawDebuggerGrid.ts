@@ -7,11 +7,11 @@ import GPU_COMPARE_FUNCTION from "../../../gpuConst/GPU_COMPARE_FUNCTION";
 import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "../../../material/core";
 import RenderViewStateData from "../../../renderer/RenderViewStateData";
 import BlendState from "../../../renderState/BlendState";
-import VertexInterleaveType from "../../../resources/buffer/vertexBuffer/VertexInterleaveType";
 import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
 import UniformBuffer from "../../../resources/buffer/uniformBuffer/UniformBuffer";
-import VertexInterleavedStruct from "../../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
+import VertexInterleavedStruct from "../../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
+import VertexInterleaveType from "../../../resources/buffer/vertexBuffer/VertexInterleaveType";
 import ResourceManager from "../../../resources/core/resourceManager/ResourceManager";
 import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validateRedGPUContext";
@@ -143,14 +143,14 @@ class DrawDebuggerGrid {
 		return this.#lineColor;
 	}
 
-	render(debugViewRenderState: RenderViewStateData) {
-		const {view, currentRenderPassEncoder} = debugViewRenderState
+	render(renderViewStateData: RenderViewStateData) {
+		const {view, currentRenderPassEncoder} = renderViewStateData
 		const position = vec3.create()
 		vec3.set(position, view.rawCamera.x, view.rawCamera.y, view.rawCamera.z)
 		const distance = vec3.distance(position, [0, 0, 0])
 		const size = this.#size
-		debugViewRenderState.num3DObjects++
-		debugViewRenderState.numDrawCalls++
+		renderViewStateData.num3DObjects++
+		renderViewStateData.numDrawCalls++
 		this.#uniformBuffer.writeBuffers([
 			[FRAGMENT_UNIFORM_STRUCT.members.lineColor, this.#lineColor.rgbaNormal],
 		])
@@ -163,8 +163,8 @@ class DrawDebuggerGrid {
 			currentRenderPassEncoder.setVertexBuffer(0, this.#vertexBuffer.gpuBuffer);
 			currentRenderPassEncoder.setIndexBuffer(this.#indexBuffer.gpuBuffer, this.#indexBuffer.format);
 			currentRenderPassEncoder.drawIndexed(indexCount);
-			debugViewRenderState.numTriangles += 0; // 라인이므로 삼각형 수는 0
-			debugViewRenderState.numPoints += indexCount
+			renderViewStateData.numTriangles += 0; // 라인이므로 삼각형 수는 0
+			renderViewStateData.numPoints += indexCount
 		}
 	}
 

@@ -282,7 +282,7 @@ class SkyBox {
 	 * - 텍스처 전환 진행 상황 업데이트
 	 * - 실제 렌더링 명령 실행
 	 *
-	 * @param debugViewRenderState - 렌더링 상태 및 디버그 정보
+	 * @param renderViewStateData - 렌더링 상태 및 디버그 정보
 	 *
 	 * @example
 	 * ```typescript
@@ -290,14 +290,14 @@ class SkyBox {
 	 * skybox.render(renderViewState);
 	 * ```
 	 */
-	render(debugViewRenderState: RenderViewStateData) {
-		const {currentRenderPassEncoder, startTime} = debugViewRenderState
+	render(renderViewStateData: RenderViewStateData) {
+		const {currentRenderPassEncoder, startTime} = renderViewStateData
 		this.#updateMSAAStatus();
 		if (!this.gpuRenderInfo) this.#initGPURenderInfos(this.#redGPUContext)
 		if (this.#dirtyPipeline) {
 			this.gpuRenderInfo.pipeline = this.#updatePipeline()
 			this.#dirtyPipeline = false
-			debugViewRenderState.numDirtyPipelines++
+			renderViewStateData.numDirtyPipelines++
 		}
 		if (this.#transitionStartTime) {
 			this.#transitionElapsed = Math.max(startTime - this.#transitionStartTime, 0)
@@ -323,10 +323,10 @@ class SkyBox {
 		currentRenderPassEncoder.setIndexBuffer(indexBuffer.gpuBuffer, format)
 		currentRenderPassEncoder.drawIndexed(indexBuffer.indexCount, 1, 0, 0, 0);
 		//
-		debugViewRenderState.num3DObjects++
-		debugViewRenderState.numDrawCalls++
-		debugViewRenderState.numTriangles += triangleCount
-		debugViewRenderState.numPoints += indexCount
+		renderViewStateData.num3DObjects++
+		renderViewStateData.numDrawCalls++
+		renderViewStateData.numTriangles += triangleCount
+		renderViewStateData.numPoints += indexCount
 	}
 
 	/**

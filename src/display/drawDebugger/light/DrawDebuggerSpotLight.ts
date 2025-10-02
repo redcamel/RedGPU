@@ -19,14 +19,14 @@ class DrawDebuggerSpotLight extends ADrawDebuggerLight {
 		this.lightDebugMesh.addChild(this.#label)
 	}
 
-	render(debugViewRenderState: RenderViewStateData): void {
-		if (!debugViewRenderState.view.systemUniform_Vertex_UniformBindGroup) return
+	render(renderViewStateData: RenderViewStateData): void {
+		if (!renderViewStateData.view.systemUniform_Vertex_UniformBindGroup) return
 		if (!this.#target.enableDebugger) return;
 		this.#updateVertexDataFromSpotLight(this.#target, this.lightDebugMesh.geometry.vertexBuffer);
 		this.lightDebugMesh.setPosition(0, 0, 0);
 		this.lightDebugMesh.setRotation(0, 0, 0);
 		this.lightDebugMesh.setScale(1, 1, 1);
-		this.lightDebugMesh.render(debugViewRenderState);
+		this.lightDebugMesh.render(renderViewStateData);
 		this.#label.setPosition(...this.#target.position)
 	}
 

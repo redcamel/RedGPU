@@ -1,6 +1,5 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import {keepLog} from "../../../utils";
-import ManagementResourceBase from "../ManagementResourceBase";
 import Sampler from "../../sampler/Sampler";
 import BitmapTexture from "../../texture/BitmapTexture";
 import DownSampleCubeMapGenerator from "../../texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator";
@@ -9,6 +8,7 @@ import CubeTexture from "../../texture/CubeTexture";
 import IBLCubeTexture from "../../texture/ibl/IBLCubeTexture";
 import PackedTexture from "../../texture/packedTexture/PackedTexture";
 import preprocessWGSL from "../../wgslParser/core/preprocessWGSL";
+import ManagementResourceBase from "../ManagementResourceBase";
 import ResourceStateIndexBuffer from "./resourceState/ResourceStateIndexBuffer";
 import ResourceStateStorageBuffer from "./resourceState/ResourceStateStorageBuffer";
 import ResourceStateUniformBuffer from "./resourceState/ResourceStateUniformBuffer";

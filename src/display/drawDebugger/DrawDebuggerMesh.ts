@@ -3,9 +3,9 @@ import Geometry from "../../geometry/Geometry";
 import GPU_PRIMITIVE_TOPOLOGY from "../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
 import ColorMaterial from "../../material/colorMaterial/ColorMaterial";
 import RenderViewStateData from "../../renderer/RenderViewStateData";
-import VertexInterleaveType from "../../resources/buffer/vertexBuffer/VertexInterleaveType";
-import VertexInterleavedStruct from "../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
 import VertexBuffer from "../../resources/buffer/vertexBuffer/VertexBuffer";
+import VertexInterleavedStruct from "../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
+import VertexInterleaveType from "../../resources/buffer/vertexBuffer/VertexInterleaveType";
 import AABB from "../../utils/math/bound/AABB";
 import OBB from "../../utils/math/bound/OBB";
 import Mesh from "../mesh/Mesh";
@@ -65,7 +65,7 @@ class DrawDebuggerMesh {
 		this.#cachedAABB = null;
 	}
 
-	render(debugViewRenderState: RenderViewStateData) {
+	render(renderViewStateData: RenderViewStateData) {
 		if (!this.#target.enableDebugger) return;
 		if (this.#debugMode === 'OBB') {
 			const targetOBB = this.#target.boundingOBB;
@@ -77,7 +77,7 @@ class DrawDebuggerMesh {
 			this.#debugMesh.setPosition(0, 0, 0);
 			this.#debugMesh.setRotation(0, 0, 0);
 			this.#debugMesh.setScale(1, 1, 1);
-			this.#debugMesh.render(debugViewRenderState);
+			this.#debugMesh.render(renderViewStateData);
 		} else if (this.#debugMode === 'AABB' || this.#debugMode === 'COMBINED_AABB') {
 			const targetAABB = this.#debugMode === 'COMBINED_AABB' ? this.#target.combinedBoundingAABB : this.#target.boundingAABB;
 			// AABB가 변경된 경우에만 업데이트
@@ -88,7 +88,7 @@ class DrawDebuggerMesh {
 			this.#debugMesh.setPosition(0, 0, 0);
 			this.#debugMesh.setRotation(0, 0, 0);
 			this.#debugMesh.setScale(1, 1, 1);
-			this.#debugMesh.render(debugViewRenderState);
+			this.#debugMesh.render(renderViewStateData);
 		} else if (this.#debugMode === 'BOTH') {
 			const targetOBB = this.#target.boundingOBB;
 			const targetAABB = this.#target.boundingAABB;
@@ -100,7 +100,7 @@ class DrawDebuggerMesh {
 			this.#debugMesh.setPosition(0, 0, 0);
 			this.#debugMesh.setRotation(0, 0, 0);
 			this.#debugMesh.setScale(1, 1, 1);
-			this.#debugMesh.render(debugViewRenderState);
+			this.#debugMesh.render(renderViewStateData);
 			// AABB (초록색) - 변경된 경우에만 업데이트
 			if (this.#hasAABBChanged(targetAABB)) {
 				this.#updateVertexDataFromAABB(targetAABB, this.#aabbDebugMesh.geometry.vertexBuffer);
@@ -109,7 +109,7 @@ class DrawDebuggerMesh {
 			this.#aabbDebugMesh.setPosition(0, 0, 0);
 			this.#aabbDebugMesh.setRotation(0, 0, 0);
 			this.#aabbDebugMesh.setScale(1, 1, 1);
-			this.#aabbDebugMesh.render(debugViewRenderState);
+			this.#aabbDebugMesh.render(renderViewStateData);
 		}
 	}
 

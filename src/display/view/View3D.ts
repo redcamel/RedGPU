@@ -75,7 +75,7 @@ class View3D extends AView {
 	 * @private
 	 * @readonly
 	 */
-	readonly #debugViewRenderState: RenderViewStateData
+	readonly #renderViewStateData: RenderViewStateData
 	/**
 	 * 포스트 이펙트 처리 매니저
 	 * @private
@@ -162,7 +162,7 @@ class View3D extends AView {
 		super(redGPUContext, scene, camera, name)
 		this.#init()
 		this.#viewRenderTextureManager = new ViewRenderTextureManager(this)
-		this.#debugViewRenderState = new RenderViewStateData(this)
+		this.#renderViewStateData = new RenderViewStateData(this)
 		this.#postEffectManager = new PostEffectManager(this)
 	}
 
@@ -234,8 +234,8 @@ class View3D extends AView {
 	 * 디버그 뷰 렌더링 상태를 가져옵니다.
 	 * @returns RenderViewStateData 인스턴스
 	 */
-	get debugViewRenderState(): RenderViewStateData {
-		return this.#debugViewRenderState;
+	get renderViewStateData(): RenderViewStateData {
+		return this.#renderViewStateData;
 	}
 
 	/**
@@ -297,7 +297,7 @@ class View3D extends AView {
 			else this.#systemUniform_Vertex_UniformBindGroup = this.#prevInfoList[key].vertexUniformBindGroup;
 			[
 				{key: 'useIblTexture', value: [ibl_iblTexture ? 1 : 0]},
-				{key: 'time', value: [view.debugViewRenderState.timestamp || 0]},
+				{key: 'time', value: [view.renderViewStateData.timestamp || 0]},
 				{key: 'isView3D', value: [this.constructor === View3D ? 1 : 0]},
 			].forEach(({key, value}) => {
 				this.redGPUContext.gpuDevice.queue.writeBuffer(
@@ -495,7 +495,7 @@ class View3D extends AView {
 	 */
 	#updateClusters(calcClusterLight: boolean = false) {
 		if (!calcClusterLight) return
-		const {redGPUContext, scene, debugViewRenderState} = this
+		const {redGPUContext, scene, renderViewStateData} = this
 		// const dirtyPixelSize = this.#prevWidth == undefined || this.#prevHeight == undefined || this.#prevWidth !== this.pixelRectArray[2] || this.#prevHeight !== this.pixelRectArray[3]
 		const dirtyPixelSize = true;
 		if (!this.#passLightClustersBound) {
@@ -530,7 +530,7 @@ class View3D extends AView {
 					)
 					if (tLight.enableDebugger) {
 						if (!tLight.drawDebugger) tLight.drawDebugger = new DrawDebuggerPointLight(redGPUContext, tLight)
-						tLight.drawDebugger.render(debugViewRenderState)
+						tLight.drawDebugger.render(renderViewStateData)
 					}
 				}
 			}
@@ -551,7 +551,7 @@ class View3D extends AView {
 					)
 					if (tLight.enableDebugger) {
 						if (!tLight.drawDebugger) tLight.drawDebugger = new DrawDebuggerSpotLight(redGPUContext, tLight)
-						tLight.drawDebugger.render(debugViewRenderState)
+						tLight.drawDebugger.render(renderViewStateData)
 					}
 				}
 			}

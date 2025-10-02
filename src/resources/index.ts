@@ -6,7 +6,6 @@
  * @packageDocumentation
  */
 export * as Core from "./core";
-
 export * from './buffer'
 export * from './texture'
 export * from './sampler'

@@ -3,9 +3,9 @@ import Geometry from "../../../geometry/Geometry";
 import GPU_PRIMITIVE_TOPOLOGY from "../../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
 import ColorMaterial from "../../../material/colorMaterial/ColorMaterial";
 import RenderViewStateData from "../../../renderer/RenderViewStateData";
-import VertexInterleaveType from "../../../resources/buffer/vertexBuffer/VertexInterleaveType";
-import VertexInterleavedStruct from "../../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
+import VertexInterleavedStruct from "../../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
+import VertexInterleaveType from "../../../resources/buffer/vertexBuffer/VertexInterleaveType";
 import Mesh from "../../mesh/Mesh";
 
 abstract class ADrawDebuggerLight {
@@ -60,7 +60,7 @@ abstract class ADrawDebuggerLight {
 		vertexBuffer.updateAllData(vertexData);
 	}
 
-	abstract render(debugViewRenderState: RenderViewStateData): void;
+	abstract render(renderViewStateData: RenderViewStateData): void;
 
 	private createLightDebugGeometry(redGPUContext: RedGPUContext, maxLines: number): Geometry {
 		const vertices = new Float32Array(maxLines * 2 * 8); // maxLines * 2개 점 * 8개 데이터

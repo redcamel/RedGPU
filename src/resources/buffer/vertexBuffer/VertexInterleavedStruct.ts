@@ -1,6 +1,6 @@
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
-import {TypeInterleave} from "./VertexInterleaveType";
 import VertexInterleavedStructElement from "./core/VertexInterleavedStructElement";
+import {TypeInterleave} from "./VertexInterleaveType";
 
 /**
  * Represents a structure for interleaving vertex attributes.

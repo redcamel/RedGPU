@@ -1,10 +1,10 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
+import DefineForVertex from "../../../../defineProperty/DefineForVertex";
 import Geometry from "../../../../geometry/Geometry";
 import GPU_ADDRESS_MODE from "../../../../gpuConst/GPU_ADDRESS_MODE";
 import BitmapMaterial from "../../../../material/bitmapMaterial/BitmapMaterial";
 import Primitive from "../../../../primitive/core/Primitive";
 import RenderViewStateData from "../../../../renderer/RenderViewStateData";
-import DefineForVertex from "../../../../defineProperty/DefineForVertex";
 import Sampler from "../../../../resources/sampler/Sampler";
 import consoleAndThrowError from "../../../../utils/consoleAndThrowError";
 import Mesh from "../../../mesh/Mesh";
@@ -230,13 +230,13 @@ class ASpriteSheet extends Mesh {
 	 *
 	 * 시간에 따른 프레임 업데이트와 애니메이션 로직을 처리한 후 렌더링을 수행합니다.
 	 *
-	 * @param debugViewRenderState - 렌더링 상태 및 디버그 정보
+	 * @param renderViewStateData - 렌더링 상태 및 디버그 정보
 	 */
-	render(debugViewRenderState: RenderViewStateData) {
+	render(renderViewStateData: RenderViewStateData) {
 		// console.log(this._material.diffuseTexture)
 		const {diffuseTexture} = this._material;
 		this.#setRenderSize(diffuseTexture, this.segmentW, this.segmentH)
-		const {timestamp} = debugViewRenderState;
+		const {timestamp} = renderViewStateData;
 		if (!this.#nextFrameTime) this.#nextFrameTime = this.#perFrameTime + timestamp;
 		if (this.#playYn && this.#nextFrameTime < timestamp && this.#frameRate) {
 			const rawGapFrame = Math.floor((timestamp - this.#nextFrameTime) / this.#perFrameTime);
@@ -253,7 +253,7 @@ class ASpriteSheet extends Mesh {
 				}
 			}
 		}
-		super.render(debugViewRenderState);
+		super.render(renderViewStateData);
 	}
 }
 

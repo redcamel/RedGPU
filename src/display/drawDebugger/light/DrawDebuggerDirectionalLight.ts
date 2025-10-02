@@ -20,14 +20,14 @@ class DrawDebuggerDirectionalLight extends ADrawDebuggerLight {
 		this.lightDebugMesh.addChild(this.#label)
 	}
 
-	render(debugViewRenderState: RenderViewStateData): void {
-		if (!debugViewRenderState.view.systemUniform_Vertex_UniformBindGroup) return
+	render(renderViewStateData: RenderViewStateData): void {
+		if (!renderViewStateData.view.systemUniform_Vertex_UniformBindGroup) return
 		if (!this.#target.enableDebugger) return;
 		this.#updateVertexDataFromDirectionalLight(this.#target, this.lightDebugMesh.geometry.vertexBuffer);
 		this.lightDebugMesh.setPosition(0, 0, 0);
 		this.lightDebugMesh.setRotation(0, 0, 0);
 		this.lightDebugMesh.setScale(1, 1, 1);
-		this.lightDebugMesh.render(debugViewRenderState);
+		this.lightDebugMesh.render(renderViewStateData);
 		// 빛이 오는 방향 (화살표 반대편)에 레이블 배치
 		const direction = this.#target.direction;
 		const visualPosition = this.#visualPosition;

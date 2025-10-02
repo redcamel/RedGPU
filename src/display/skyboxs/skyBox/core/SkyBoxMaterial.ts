@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import ABitmapBaseMaterial from "../../../../material/core/ABitmapBaseMaterial";
 import DefineForFragment from "../../../../defineProperty/DefineForFragment";
+import ABitmapBaseMaterial from "../../../../material/core/ABitmapBaseMaterial";
 import Sampler from "../../../../resources/sampler/Sampler";
 import BitmapTexture from "../../../../resources/texture/BitmapTexture";
 import CubeTexture from "../../../../resources/texture/CubeTexture";

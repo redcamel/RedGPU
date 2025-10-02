@@ -365,14 +365,14 @@ abstract class GroupBase extends Object3DContainer {
 
 	/**
 	 * 렌더링 및 변환 행렬 계산을 수행합니다.
-	 * @param debugViewRenderState 렌더 상태 데이터
+	 * @param renderViewStateData 렌더 상태 데이터
 	 */
-	render(debugViewRenderState: RenderViewStateData) {
+	render(renderViewStateData: RenderViewStateData) {
 		const {} = this
 		const {
 			view,
 			isScene2DMode,
-		} = debugViewRenderState
+		} = renderViewStateData
 		let dirtyTransformForChildren
 		if (isScene2DMode) {
 			this.#z = 0
@@ -425,7 +425,7 @@ abstract class GroupBase extends Object3DContainer {
 			dirtyTransformForChildren = true
 			this.dirtyTransform = false
 		}
-		debugViewRenderState.num3DGroups++
+		renderViewStateData.num3DGroups++
 		// children render
 		const {children} = this
 		let i = 0
@@ -433,7 +433,7 @@ abstract class GroupBase extends Object3DContainer {
 		// while (i--) {
 		for (; i < childNum; i++) {
 			if (dirtyTransformForChildren) children[i].dirtyTransform = dirtyTransformForChildren
-			children[i].render(debugViewRenderState)
+			children[i].render(renderViewStateData)
 		}
 	}
 }

@@ -262,7 +262,7 @@ class LightManager {
 			const {direction, color, intensity} = directionalLights.memberList[index]
 			if (light.enableDebugger) {
 				if (!light.drawDebugger) light.drawDebugger = new DrawDebuggerDirectionalLight(redGPUContext, light)
-				light.drawDebugger.render(view.debugViewRenderState)
+				light.drawDebugger.render(view.renderViewStateData)
 			}
 			systemUniform_Vertex_UniformBuffer.writeBuffers(
 				[

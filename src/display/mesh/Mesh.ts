@@ -1,11 +1,11 @@
 import {mat4} from "gl-matrix";
 import {Function} from "wgsl_reflect";
 import RedGPUContext from "../../context/RedGPUContext";
+import DefineForVertex from "../../defineProperty/DefineForVertex";
 import Geometry from "../../geometry/Geometry";
 import Primitive from "../../primitive/core/Primitive";
 import RenderViewStateData from "../../renderer/RenderViewStateData";
 import VertexGPURenderInfo from "../../renderInfos/VertexGPURenderInfo";
-import DefineForVertex from "../../defineProperty/DefineForVertex";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import AABB from "../../utils/math/bound/AABB";
@@ -483,7 +483,7 @@ class Mesh extends MeshBase {
 		return cloneMesh
 	}
 
-	render(debugViewRenderState: RenderViewStateData) {
+	render(renderViewStateData: RenderViewStateData) {
 		const {redGPUContext,} = this
 		const {
 			view,
@@ -494,7 +494,7 @@ class Mesh extends MeshBase {
 			dirtyVertexUniformFromMaterial,
 			useDistanceCulling,
 			cullingDistanceSquared,
-		} = debugViewRenderState
+		} = renderViewStateData
 		const {antialiasingManager, gpuDevice} = redGPUContext
 		const {useMSAA} = antialiasingManager
 		const {scene} = view
@@ -824,10 +824,10 @@ class Mesh extends MeshBase {
 			if (this.gltfLoaderInfo?.activeAnimations?.length) {
 				// gltfAnimationLooper(
 				// 	redGPUContext, timestamp,
-				// 	debugViewRenderState.computeCommandEncoder,
+				// 	renderViewStateData.computeCommandEncoder,
 				// 	this.gltfLoaderInfo.activeAnimations
 				// )
-				debugViewRenderState.animationList[debugViewRenderState.animationList.length] = this.gltfLoaderInfo?.activeAnimations
+				renderViewStateData.animationList[renderViewStateData.animationList.length] = this.gltfLoaderInfo?.activeAnimations
 			}
 			if (this.animationInfo.skinInfo) {
 				if (!this.currentShaderModuleName.includes(VERTEX_SHADER_MODULE_NAME_PBR_SKIN)) {
@@ -835,14 +835,14 @@ class Mesh extends MeshBase {
 				}
 				if (this.currentShaderModuleName === `${VERTEX_SHADER_MODULE_NAME_PBR_SKIN}_${this.animationInfo.skinInfo.joints?.length}`) {
 					// this.animationInfo.skinInfo.update(redGPUContext, this)
-					debugViewRenderState.skinList[debugViewRenderState.skinList.length] = this
+					renderViewStateData.skinList[renderViewStateData.skinList.length] = this
 					dirtyTransformForChildren = false
 				}
 			}
 		}
 		// render
-		if (currentGeometry) debugViewRenderState.num3DObjects++
-		else debugViewRenderState.num3DGroups++
+		if (currentGeometry) renderViewStateData.num3DObjects++
+		else renderViewStateData.num3DGroups++
 		const {displacementTexture, displacementScale} = currentMaterial || {}
 		if (this.dirtyPipeline || currentMaterial?.dirtyPipeline || dirtyVertexUniformFromMaterial[currentMaterialUUID]) {
 			dirtyVertexUniformFromMaterial[currentMaterialUUID] = true
@@ -858,7 +858,7 @@ class Mesh extends MeshBase {
 				this.dirtyPipeline = true
 			}
 			if (this.dirtyPipeline || dirtyVertexUniformFromMaterial[currentMaterialUUID]) {
-				updateMeshDirtyPipeline(this, debugViewRenderState)
+				updateMeshDirtyPipeline(this, renderViewStateData)
 				this.#bundleEncoder = null
 				this.#renderBundle = null
 			}
@@ -950,7 +950,7 @@ class Mesh extends MeshBase {
 				}
 				this.dirtyOpacity = false
 			}
-			const {render2PathLayer, particleLayer, transparentLayer, alphaLayer, renderBundleList} = debugViewRenderState
+			const {render2PathLayer, particleLayer, transparentLayer, alphaLayer, renderBundleList} = renderViewStateData
 			{
 				if (currentMaterial.use2PathRender) {
 					render2PathLayer[render2PathLayer.length] = this
@@ -971,17 +971,17 @@ class Mesh extends MeshBase {
 						// keepLog('렌더번들갱신')
 					}
 					targetEncoder = this.#bundleEncoder
-					debugViewRenderState.numDrawCalls++
+					renderViewStateData.numDrawCalls++
 					if (currentGeometry.indexBuffer) {
 						const {indexBuffer} = currentGeometry
 						const {indexCount, triangleCount} = indexBuffer
-						debugViewRenderState.numTriangles += triangleCount
-						debugViewRenderState.numPoints += indexCount
+						renderViewStateData.numTriangles += triangleCount
+						renderViewStateData.numPoints += indexCount
 					} else {
 						const {vertexBuffer} = currentGeometry
 						const {vertexCount, triangleCount} = vertexBuffer
-						debugViewRenderState.numTriangles += triangleCount;
-						debugViewRenderState.numPoints += vertexCount
+						renderViewStateData.numTriangles += triangleCount;
+						renderViewStateData.numPoints += vertexCount
 					}
 					if (needBundleFinish) {
 						this.#prevSystemBindGroup = view.systemUniform_Vertex_UniformBindGroup
@@ -1037,7 +1037,7 @@ class Mesh extends MeshBase {
 		{
 			if (this.castShadow || (this.castShadow && !currentGeometry)) castingList[castingList.length] = this
 		}
-		if (this.#enableDebugger) this.#drawDebugger.render(debugViewRenderState)
+		if (this.#enableDebugger) this.#drawDebugger.render(renderViewStateData)
 		// children render
 		const {children} = this
 		let i = 0
@@ -1046,7 +1046,7 @@ class Mesh extends MeshBase {
 		for (; i < childNum; i++) {
 			if (dirtyTransformForChildren) children[i].dirtyTransform = dirtyTransformForChildren
 			if (dirtyOpacityForChildren) children[i].dirtyOpacity = dirtyOpacityForChildren
-			children[i].render(debugViewRenderState)
+			children[i].render(renderViewStateData)
 		}
 	}
 

@@ -1,8 +1,8 @@
 import RedGPUContext from "../../context/RedGPUContext";
+import DefineForVertex from "../../defineProperty/DefineForVertex";
 import BitmapMaterial from "../../material/bitmapMaterial/BitmapMaterial";
 import Plane from "../../primitive/Plane";
 import RenderViewStateData from "../../renderer/RenderViewStateData";
-import DefineForVertex from "../../defineProperty/DefineForVertex";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import copyGPUBuffer from "../../utils/copyGPUBuffer";
 import Mesh from "../mesh/Mesh";
@@ -544,12 +544,12 @@ class ParticleEmitter extends Mesh {
 
 	/**
 	 * 파티클 렌더링 및 시뮬레이션을 수행합니다.
-	 * @param debugViewRenderState 렌더 상태 데이터
+	 * @param renderViewStateData 렌더 상태 데이터
 	 */
-	render(debugViewRenderState: RenderViewStateData) {
+	render(renderViewStateData: RenderViewStateData) {
 		if (!this.#simParamBuffer) this.#init()
-		this.#renderComputePass(debugViewRenderState.timestamp)
-		super.render(debugViewRenderState)
+		this.#renderComputePass(renderViewStateData.timestamp)
+		super.render(renderViewStateData)
 	}
 
 	/**

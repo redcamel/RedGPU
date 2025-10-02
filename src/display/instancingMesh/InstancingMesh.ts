@@ -108,11 +108,11 @@ class InstancingMesh extends Mesh {
 
 	/**
 	 * 인스턴싱 메시의 렌더링을 수행합니다.
-	 * @param debugViewRenderState 렌더 상태 데이터
+	 * @param renderViewStateData 렌더 상태 데이터
 	 * @param shadowRender 그림자 렌더링 여부
 	 */
-	render(debugViewRenderState: RenderViewStateData, shadowRender: boolean = false) {
-		const {view, currentRenderPassEncoder,} = debugViewRenderState;
+	render(renderViewStateData: RenderViewStateData, shadowRender: boolean = false) {
+		const {view, currentRenderPassEncoder,} = renderViewStateData;
 		const {scene} = view
 		const {shadowManager} = scene
 		const {directionalShadowManager} = shadowManager
@@ -134,8 +134,8 @@ class InstancingMesh extends Mesh {
 				}
 			}
 		}
-		if (this.geometry) debugViewRenderState.num3DObjects++
-		else debugViewRenderState.num3DGroups++
+		if (this.geometry) renderViewStateData.num3DObjects++
+		else renderViewStateData.num3DGroups++
 		const redGPUContext = this.#redGPUContext
 		if (this.geometry) {
 			const {antialiasingManager, gpuDevice} = redGPUContext
@@ -151,7 +151,7 @@ class InstancingMesh extends Mesh {
 				this.#updatePipelines()
 				this.material.dirtyPipeline = false
 				this.dirtyPipeline = false
-				debugViewRenderState.numDirtyPipelines++
+				renderViewStateData.numDirtyPipelines++
 			}
 			const {gpuRenderInfo} = this
 			const {
@@ -190,29 +190,29 @@ class InstancingMesh extends Mesh {
 			currentRenderPassEncoder.setPipeline(shadowRender ? shadowPipeline : pipeline)
 			const {gpuBuffer} = this.geometry.vertexBuffer
 			const {fragmentUniformBindGroup} = this.material.gpuRenderInfo
-			if (debugViewRenderState.prevVertexGpuBuffer !== gpuBuffer) {
+			if (renderViewStateData.prevVertexGpuBuffer !== gpuBuffer) {
 				currentRenderPassEncoder.setVertexBuffer(0, gpuBuffer)
-				debugViewRenderState.prevVertexGpuBuffer = gpuBuffer
+				renderViewStateData.prevVertexGpuBuffer = gpuBuffer
 			}
 			currentRenderPassEncoder.setBindGroup(1, vertexUniformBindGroup); // 버텍스 유니폼 버퍼 1번 고정
 			currentRenderPassEncoder.setBindGroup(2, fragmentUniformBindGroup)
 			//
-			debugViewRenderState.numDrawCalls++
-			debugViewRenderState.numInstances++
+			renderViewStateData.numDrawCalls++
+			renderViewStateData.numInstances++
 			//
 			if (this.geometry.indexBuffer) {
 				const {indexBuffer} = this.geometry
 				const {indexCount, triangleCount, gpuBuffer: indexGPUBuffer, format} = indexBuffer
 				currentRenderPassEncoder.setIndexBuffer(indexGPUBuffer, format)
 				currentRenderPassEncoder.drawIndexed(indexCount, this.#instanceCount, 0, 0, 0);
-				debugViewRenderState.numTriangles += triangleCount * this.#instanceCount
-				debugViewRenderState.numPoints += indexCount * this.#instanceCount
+				renderViewStateData.numTriangles += triangleCount * this.#instanceCount
+				renderViewStateData.numPoints += indexCount * this.#instanceCount
 			} else {
 				const {vertexBuffer} = this.geometry
 				const {vertexCount, triangleCount} = vertexBuffer
 				currentRenderPassEncoder.draw(vertexCount, this.#instanceCount, 0, 0);
-				debugViewRenderState.numTriangles += triangleCount;
-				debugViewRenderState.numPoints += vertexCount
+				renderViewStateData.numTriangles += triangleCount;
+				renderViewStateData.numPoints += vertexCount
 			}
 		} else {
 		}
@@ -221,7 +221,7 @@ class InstancingMesh extends Mesh {
 		let i = children.length
 		while (i--) {
 			children[i].dirtyTransform = tempDirtyTransform
-			children[i].render(debugViewRenderState)
+			children[i].render(renderViewStateData)
 		}
 		this.dirtyTransform = false
 	}

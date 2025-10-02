@@ -67,7 +67,7 @@ class Renderer {
 			camera,
 			pickingManager,
 			pixelRectObject,
-			debugViewRenderState
+			renderViewStateData
 		} = view
 		const {
 			colorAttachment,
@@ -88,8 +88,8 @@ class Renderer {
 		const computeCommandEncoder: GPUCommandEncoder = redGPUContext.gpuDevice.createCommandEncoder({
 			label: 'ViewRender_MainComputeCommandEncoder'
 		})
-		this.#batchUpdateSkinMatrices(redGPUContext, debugViewRenderState)
-		view.debugViewRenderState.reset(null, computeCommandEncoder, time)
+		this.#batchUpdateSkinMatrices(redGPUContext, renderViewStateData)
+		view.renderViewStateData.reset(null, computeCommandEncoder, time)
 		if (pixelRectObject.width && pixelRectObject.height) {
 			this.#renderViewShadow(view, commandEncoder)
 			this.#renderViewBasicLayer(view, commandEncoder, renderPassDescriptor)
@@ -98,7 +98,7 @@ class Renderer {
 		}
 		renderPassDescriptor.colorAttachments[0].postEffectView = view.postEffectManager.render().textureView
 		redGPUContext.gpuDevice.queue.submit([commandEncoder.finish()])
-		view.debugViewRenderState.viewRenderTime = (performance.now() - view.debugViewRenderState.startTime);
+		view.renderViewStateData.viewRenderTime = (performance.now() - view.renderViewStateData.startTime);
 		if (pickingManager?.castingList.length) {
 			pickingManager.checkEvents(view, time);
 		}
@@ -147,13 +147,13 @@ class Renderer {
 	}
 
 	#renderViewBasicLayer(view: View3D, commandEncoder: GPUCommandEncoder, renderPassDescriptor: GPURenderPassDescriptor) {
-		const {debugViewRenderState, skybox, grid, axis} = view
+		const {renderViewStateData, skybox, grid, axis} = view
 		const viewRenderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass(renderPassDescriptor)
 		this.#updateViewSystemUniforms(view, viewRenderPassEncoder, false, true)
-		debugViewRenderState.currentRenderPassEncoder = viewRenderPassEncoder
-		if (skybox) skybox.render(debugViewRenderState)
-		if (axis) axis.render(debugViewRenderState)
-		if (grid) grid.render(debugViewRenderState)
+		renderViewStateData.currentRenderPassEncoder = viewRenderPassEncoder
+		if (skybox) skybox.render(renderViewStateData)
+		if (axis) axis.render(renderViewStateData)
+		if (grid) grid.render(renderViewStateData)
 		renderBasicLayer(view, viewRenderPassEncoder)
 		renderAlphaLayer(view, viewRenderPassEncoder)
 		viewRenderPassEncoder.end()
@@ -163,7 +163,7 @@ class Renderer {
 		const {redGPUContext} = view
 		const {antialiasingManager} = redGPUContext
 		const {useMSAA} = antialiasingManager
-		if (view.debugViewRenderState.render2PathLayer.length) {
+		if (view.renderViewStateData.render2PathLayer.length) {
 			const {mipmapGenerator} = redGPUContext.resourceManager
 			let renderPath1ResultTexture = view.viewRenderTextureManager.renderPath1ResultTexture
 			// useMSAA 설정에 따라 소스 텍스처 선택
@@ -256,8 +256,8 @@ class Renderer {
 		return result;
 	}
 
-	#batchUpdateSkinMatrices(redGPUContext: RedGPUContext, debugViewRenderState: RenderViewStateData) {
-		const {animationList, skinList} = debugViewRenderState;
+	#batchUpdateSkinMatrices(redGPUContext: RedGPUContext, renderViewStateData: RenderViewStateData) {
+		const {animationList, skinList} = renderViewStateData;
 		const skinListNum = skinList.length
 		const animationListNum = animationList.length
 		const {gpuDevice} = redGPUContext;
@@ -268,7 +268,7 @@ class Renderer {
 		if (animationListNum) {
 			gltfAnimationLooper(
 				redGPUContext,
-				debugViewRenderState.timestamp,
+				renderViewStateData.timestamp,
 				passEncoder,
 				animationList.flat()
 			)
