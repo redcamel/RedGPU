@@ -6,7 +6,7 @@ document.querySelector('#example-container').appendChild(canvas);
 RedGPU.init(
 	canvas,
 	(redGPUContext) => {
-		const controller = new RedGPU.Camera.ObitController(redGPUContext);
+		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
 		controller.distance = 15;
 		controller.speedDistance = 0.3;
 		controller.tilt = -10;

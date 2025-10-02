@@ -6,19 +6,19 @@ document.body.appendChild(canvas);
 RedGPU.init(
 	canvas,
 	(redGPUContext) => {
-		const controller = new RedGPU.Camera.ObitController(redGPUContext);
+		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		view.grid = true;
 		redGPUContext.addView(view);
 
-		const controller2 = new RedGPU.Camera.ObitController(redGPUContext);
+		const controller2 = new RedGPU.Camera.OrbitController(redGPUContext);
 		const scene2 = new RedGPU.Display.Scene();
 		const view2 = new RedGPU.Display.View3D(redGPUContext, scene2, controller2);
 		view2.grid = true;
 		redGPUContext.addView(view2);
 
-		const controller3 = new RedGPU.Camera.ObitController(redGPUContext);
+		const controller3 = new RedGPU.Camera.OrbitController(redGPUContext);
 		const scene3 = new RedGPU.Display.Scene();
 		const view3 = new RedGPU.Display.View3D(redGPUContext, scene3, controller3);
 		view3.axis = true;

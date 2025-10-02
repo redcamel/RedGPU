@@ -55,9 +55,8 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
 	}
 
 	#updateDebugStat(redGPUContext: RedGPUContext, stat: string) {
-		const isAntialiasing = ['useMSAA', 'useFXAA','useTAA'].includes(stat)
+		const isAntialiasing = ['useMSAA', 'useFXAA', 'useTAA'].includes(stat)
 		const value = isAntialiasing ? redGPUContext.antialiasingManager[stat] : redGPUContext[stat];
-
 		updateDebugItemValue(this.dom, `redGPUContext_${stat}`, isAntialiasing ? makeBooleanDebug(stat, value) : getDebugFormatValue(value));
 	}
 

@@ -2,7 +2,7 @@ import RedGPUContext from "../context/RedGPUContext";
 import InstancingMesh from "../display/instancingMesh/InstancingMesh";
 import Mesh from "../display/mesh/Mesh";
 import View3D from "../display/view/View3D";
-import calculateTextureByteSize from "../utils/math/calculateTextureByteSize";
+import calculateTextureByteSize from "../utils/texture/calculateTextureByteSize";
 import PickingEvent from "./core/PickingEvent";
 import PICKING_EVENT_TYPE from "./PICKING_EVENT_TYPE";
 
@@ -141,15 +141,17 @@ class PickingManager {
 			return prev;
 		}, {});
 	#createReadPixelBuffer = (gpuDevice: GPUDevice, width: number, height: number, x: number, y: number): GPUBuffer => {
-		const readPixelCommandEncoder = gpuDevice.createCommandEncoder();
-		const readPixelBuffer = gpuDevice.createBuffer({
-			size: 16 * width * height,
-			usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
-			label:'readPixelBuffer'
+		const readPixelCommandEncoder = gpuDevice.createCommandEncoder({
+			label: 'PickingManager_ReadPixel_CommandEncoder'
 		});
-		const textureView = {texture: this.#pickingGPUTexture, origin: {x: x, y: y, z: 0}};
-		const bufferView = {buffer: readPixelBuffer, bytesPerRow: Math.max(256, 4 * width * height), rowsPerImage: 1};
-		const textureExtent = {width: width, height: height, depthOrArrayLayers: 1};
+		const readPixelBuffer = gpuDevice.createBuffer({
+			size: 4,
+			usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
+			label: 'readPixelBuffer'
+		});
+		const textureView = {texture: this.#pickingGPUTexture, origin: {x, y, z: 0}};
+		const bufferView = {buffer: readPixelBuffer, bytesPerRow: 256, rowsPerImage: 1};
+		const textureExtent = {width: 1, height: 1, depthOrArrayLayers: 1};
 		readPixelCommandEncoder.copyTextureToBuffer(textureView, bufferView, textureExtent);
 		gpuDevice.queue.submit([readPixelCommandEncoder.finish()]);
 		return readPixelBuffer;

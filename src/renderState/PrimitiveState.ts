@@ -11,7 +11,11 @@ const validateCullModes = Object.values(GPU_CULL_MODE)
 const validatePrimitiveTopology = ['point-list', 'line-list', 'line-strip', 'triangle-list', 'triangle-strip']
 
 /**
- * Represents the renderState of a primitive used for rendering.
+ * PrimitiveState
+ *
+ * Mesh 등 Object3D의 GPU 렌더 파이프라인에서 도형(Primitive) 렌더링 방식, 컬링, 프론트페이스 등 원시 렌더 상태를 관리하는 객체입니다.
+ * 각종 도형 렌더링 관련 설정을 통해 삼각형/라인/포인트 등 다양한 토폴로지, 컬링 모드, 프론트페이스, 인덱스 포맷, unclippedDepth 등 렌더링 동작을 제어할 수 있습니다.
+ *
  */
 class PrimitiveState {
 	dirtyPipeline: boolean = false
@@ -44,6 +48,8 @@ class PrimitiveState {
 	 * Creates a new instance of the Constructor class.
 	 *
 	 * @constructor
+	 * @param targetObject3D - 상태가 적용될 Mesh 또는 Object3D 객체
+	 * @category Buffer
 	 */
 	constructor(targetObject3D: any) {
 		this.#targetObject3D = targetObject3D
@@ -51,22 +57,19 @@ class PrimitiveState {
 	}
 
 	/**
-	 * Get the GPU primitive topology.
-	 *
-	 * @returns {GPUPrimitiveTopology} The GPU primitive topology.
+	 * GPU 도형 토폴로지 반환
+	 * @category Buffer
 	 */
 	get topology(): GPUPrimitiveTopology {
 		return this.#topology;
 	}
 
 	/**
-	 * Setter method to set the GPU primitive topology.
-	 *
-	 * @param {GPUPrimitiveTopology} value - The value to set the topology to.
-	 * @throws {Error} If the value is not a valid GPU primitive topology.
+	 * GPU 도형 토폴로지 설정
+	 * @param value - GPUPrimitiveTopology 값
+	 * @category Buffer
 	 */
 	set topology(value: GPUPrimitiveTopology) {
-		// set topology(value:  'point-list' | 'line-list'|'triangle-list' ) {
 		if (validatePrimitiveTopology.includes(value)) {
 			this.#topology = value;
 			this.#update()
@@ -74,18 +77,17 @@ class PrimitiveState {
 	}
 
 	/**
-	 * Retrieves the strip index format.
-	 *
-	 * @return {GPUIndexFormat} The strip index format.
+	 * 스트립 인덱스 포맷 반환
+	 * @category Buffer
 	 */
 	get stripIndexFormat(): GPUIndexFormat {
 		return this.#stripIndexFormat;
 	}
 
 	/**
-	 * Sets the index format for strip indices.
-	 *
-	 * @param {GPUIndexFormat} format - The new index format to set.
+	 * 스트립 인덱스 포맷 설정
+	 * @param format - GPUIndexFormat 값
+	 * @category Buffer
 	 */
 	set stripIndexFormat(format: GPUIndexFormat) {
 		if (validateStripIndex.includes(format)) {
@@ -95,19 +97,17 @@ class PrimitiveState {
 	}
 
 	/**
-	 * Returns the front face configuration of the GPU.
-	 *
-	 * @returns {GPUFrontFace} The front face configuration.
+	 * 프론트페이스(FrontFace) 반환
+	 * @category Buffer
 	 */
 	get frontFace(): GPUFrontFace {
 		return this.#frontFace;
 	}
 
 	/**
-	 * Sets the front face of the GPU rendering.
-	 *
-	 * @param {GPUFrontFace} face - The front face value to be set.
-	 * @throws {Error} if the given `face` value is not valid.
+	 * 프론트페이스(FrontFace) 설정
+	 * @param face - GPUFrontFace 값
+	 * @category Buffer
 	 */
 	set frontFace(face: GPUFrontFace) {
 		if (validateFrontFaces.includes(face)) {
@@ -117,19 +117,17 @@ class PrimitiveState {
 	}
 
 	/**
-	 * Retrieves the cull mode used for GPU rendering.
-	 *
-	 * @returns {GPUCullMode} The cull mode currently set.
+	 * 컬링 모드 반환
+	 * @category Buffer
 	 */
 	get cullMode(): GPUCullMode {
 		return this.#cullMode;
 	}
 
 	/**
-	 * Sets the cull mode for the GPU.
-	 *
-	 * @param {GPUCullMode} mode - The cull mode to be set for the GPU.
-	 * @throws {Error} - Invalid value for cullMode. Received [mode]. Expected one of: [cullModeValues].
+	 * 컬링 모드 설정
+	 * @param mode - GPUCullMode 값
+	 * @category Buffer
 	 */
 	set cullMode(mode: GPUCullMode) {
 		if (validateCullModes.includes(mode)) {
@@ -139,19 +137,17 @@ class PrimitiveState {
 	}
 
 	/**
-	 * Retrieves the value of the unclippedDepth property.
-	 *
-	 * @returns {boolean} The value of the unclippedDepth property.
+	 * unclippedDepth 반환
+	 * @category Buffer
 	 */
 	get unclippedDepth(): boolean {
 		return this.#unclippedDepth;
 	}
 
 	/**
-	 * Set the unclippedDepth renderState.
-	 *
-	 * @param {boolean} state - The new value for the unclippedDepth renderState.
-	 * @throws {Error} If the renderState parameter is not of type boolean.
+	 * unclippedDepth 설정
+	 * @param state - boolean 값
+	 * @category Buffer
 	 */
 	set unclippedDepth(state: boolean) {
 		if (typeof state === 'boolean') {
@@ -160,6 +156,11 @@ class PrimitiveState {
 		} else consoleAndThrowError(`Invalid type for unclippedDepth. Received ${typeof state}. Expected type: boolean.`);
 	}
 
+	/**
+	 * 내부 상태를 갱신하고, Object3D의 파이프라인을 dirty 상태로 표시
+	 * @private
+	 * @category Buffer
+	 */
 	#update() {
 		this.state = {
 			topology: this.#topology,

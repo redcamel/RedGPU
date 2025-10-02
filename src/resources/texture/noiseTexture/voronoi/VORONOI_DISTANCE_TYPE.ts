@@ -1,3 +1,7 @@
+/**
+ * @category NoiseTexture
+ * @experimental
+ */
 const VORONOI_DISTANCE_TYPE = {
 	EUCLIDEAN: 0,
 	MANHATTAN: 1,

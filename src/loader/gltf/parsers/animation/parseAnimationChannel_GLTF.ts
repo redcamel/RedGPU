@@ -1,6 +1,6 @@
 import Mesh from "../../../../display/mesh/Mesh";
 import parseAnimationInfo_GLTF from "../../cls/AnimationData_GLTF";
-import AniTrack_GLTF from "../../cls/AniTrack_GLTF";
+import AniTrack_GLTF from "../../cls/anitrack/AniTrack_GLTF";
 import {AnimationChannel, AnimationSampler, GLTF} from "../../GLTF";
 import GLTFLoader from "../../GLTFLoader";
 import {GLTFParsedSingleClip} from "./parseAnimations";

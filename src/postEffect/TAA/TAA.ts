@@ -1,12 +1,12 @@
 import AntialiasingManager from "../../context/antialiasing/AntialiasingManager";
 import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
-import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../material";
+import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../material/core";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumberRange";
 import {keepLog} from "../../utils";
-import calculateTextureByteSize from "../../utils/math/calculateTextureByteSize";
+import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSize";
 import {ASinglePassPostEffectResult} from "../core/ASinglePassPostEffect";
 import postEffectSystemUniform from "../core/postEffectSystemUniform.wgsl"
 import computeCode from "./wgsl/computeCode.wgsl"
@@ -50,10 +50,10 @@ class TAA {
 	#varianceClipping: boolean = true;
 	// 모션벡터 기반 TAA를 위한 새로운 속성들
 	#useMotionVectors: boolean = true;
-
 	#motionBlurReduction: number = 0.8;
 	#disocclusionThreshold: number = 0.1;
-
+	#prevMSAA: Boolean
+	#prevMSAAID: string
 
 	constructor(redGPUContext: RedGPUContext) {
 		this.#redGPUContext = redGPUContext
@@ -74,6 +74,136 @@ class TAA {
 		this.useMotionVectors = this.#useMotionVectors;
 		this.motionBlurReduction = this.#motionBlurReduction;
 		this.disocclusionThreshold = this.#disocclusionThreshold;
+	}
+
+	get frameIndex(): number {
+		return this.#frameIndex;
+	}
+
+	get videoMemorySize(): number {
+		return this.#videoMemorySize
+	}
+
+	get currentFrameTextureView(): GPUTextureView {
+		return this.#currentFrameTextureView;
+	}
+
+	get temporalBlendFactor(): number {
+		return this.#temporalBlendFactor;
+	}
+
+	set temporalBlendFactor(value: number) {
+		validateNumberRange(value, 0.0, 1.0);
+		this.#temporalBlendFactor = value;
+		this.updateUniform('temporalBlendFactor', value);
+	}
+
+	get jitterStrength(): number {
+		return this.#jitterStrength;
+	}
+
+	set jitterStrength(value: number) {
+		validateNumberRange(value, 0.0, 1.0);
+		this.#jitterStrength = value;
+		this.updateUniform('jitterStrength', value);
+	}
+
+	get varianceClipping(): boolean {
+		return this.#varianceClipping;
+	}
+
+	set varianceClipping(value: boolean) {
+		this.#varianceClipping = value;
+		this.updateUniform('varianceClipping', value ? 1.0 : 0.0);
+	}
+
+	// 모션벡터 관련 getter/setter 추가
+	get useMotionVectors(): boolean {
+		return this.#useMotionVectors;
+	}
+
+	set useMotionVectors(value: boolean) {
+		this.#useMotionVectors = value;
+		this.updateUniform('useMotionVectors', value ? 1.0 : 0.0);
+	}
+
+	get motionBlurReduction(): number {
+		return this.#motionBlurReduction;
+	}
+
+	set motionBlurReduction(value: number) {
+		validateNumberRange(value, 0.0, 1.0);
+		this.#motionBlurReduction = value;
+		this.updateUniform('motionBlurReduction', value);
+	}
+
+	get disocclusionThreshold(): number {
+		return this.#disocclusionThreshold;
+	}
+
+	set disocclusionThreshold(value: number) {
+		validateNumberRange(value, 0.01, 1.0);
+		this.#disocclusionThreshold = value;
+		this.updateUniform('disocclusionThreshold', value);
+	}
+
+	render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
+		const sourceTextureView = sourceTextureInfo.textureView
+		const sourceTexture = sourceTextureInfo.texture;
+		const {gpuDevice, antialiasingManager} = this.#redGPUContext
+		const {useMSAA, msaaID} = antialiasingManager
+		this.#frameIndex++;
+		if (this.#uniformBuffer) {
+			this.updateUniform('frameIndex', this.#frameIndex);
+		}
+		const dimensionsChanged = this.#createRenderTexture(view)
+		const msaaChanged = this.#prevMSAA !== useMSAA || this.#prevMSAAID !== msaaID;
+		const sourceTextureChanged = this.#detectSourceTextureChange([sourceTextureView]);
+		if (dimensionsChanged || msaaChanged || sourceTextureChanged) {
+			this.#createFrameBufferBindGroups(view, [sourceTextureView], useMSAA, this.#redGPUContext, gpuDevice);
+		}
+		this.#execute(gpuDevice, width, height);
+		{
+			const commentEncode_compute = gpuDevice.createCommandEncoder({
+				label: 'TAA_CopyTexture_CommandEncoder_compute'
+			})
+			commentEncode_compute.copyTextureToTexture(
+				{texture: this.#currentFrameTexture},
+				{texture: this.#previousFrameTexture},
+				[width, height, 1]
+			);
+			gpuDevice.queue.submit([commentEncode_compute.finish()]);
+		}
+		if (this.#frameIndex <= 20 || this.#frameIndex % 60 === 0) {
+			console.log(`TAA Frame ${this.#frameIndex}: BuffersSwapped, JitterStrength=${this.#jitterStrength}, MotionVectors=${this.#useMotionVectors}`);
+		}
+		this.#prevMSAA = useMSAA;
+		this.#prevMSAAID = msaaID;
+		return {
+			texture: this.#currentFrameTexture,
+			textureView: this.#currentFrameTextureView
+		}
+	}
+
+	clear() {
+		if (this.#previousFrameTexture) {
+			this.#previousFrameTexture.destroy();
+			this.#previousFrameTexture = null;
+			this.#previousFrameTextureView = null;
+		}
+		if (this.#currentFrameTexture) {
+			this.#currentFrameTexture.destroy();
+			this.#currentFrameTexture = null;
+			this.#currentFrameTextureView = null;
+		}
+		this.#cachedBindGroupLayouts.clear();
+		this.#cachedPipelineLayouts.clear();
+		this.#cachedComputePipelines.clear();
+		this.#currentMSAAState = null;
+	}
+
+	updateUniform(key: string, value: number | number[] | boolean) {
+		this.#uniformBuffer.writeBuffer(this.#uniformsInfo.members[key], value)
 	}
 
 	#createTAAShaderCode() {
@@ -133,7 +263,9 @@ class TAA {
 	}
 
 	#execute(gpuDevice: GPUDevice, width: number, height: number) {
-		const commentEncode_compute = gpuDevice.createCommandEncoder()
+		const commentEncode_compute = gpuDevice.createCommandEncoder({
+			label: 'TAA_Execute_CommandEncoder_compute'
+		})
 		const computePassEncoder = commentEncode_compute.beginComputePass()
 		computePassEncoder.setPipeline(this.#computePipeline)
 		computePassEncoder.setBindGroup(0, this.#frameBufferBindGroup0)
@@ -141,46 +273,6 @@ class TAA {
 		computePassEncoder.dispatchWorkgroups(Math.ceil(width / this.#WORK_SIZE_X), Math.ceil(height / this.#WORK_SIZE_Y));
 		computePassEncoder.end();
 		gpuDevice.queue.submit([commentEncode_compute.finish()]);
-	}
-
-	#prevMSAA: Boolean
-	#prevMSAAID: string
-
-	render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
-		const sourceTextureView = sourceTextureInfo.textureView
-		const sourceTexture = sourceTextureInfo.texture;
-		const {gpuDevice, antialiasingManager} = this.#redGPUContext
-		const {useMSAA,msaaID} = antialiasingManager
-		this.#frameIndex++;
-		if (this.#uniformBuffer) {
-			this.updateUniform('frameIndex', this.#frameIndex);
-		}
-		const dimensionsChanged = this.#createRenderTexture(view)
-		const msaaChanged = this.#prevMSAA !== useMSAA  || this.#prevMSAAID !== msaaID;
-		const sourceTextureChanged = this.#detectSourceTextureChange([sourceTextureView]);
-		if (dimensionsChanged || msaaChanged || sourceTextureChanged) {
-			this.#createFrameBufferBindGroups(view, [sourceTextureView], useMSAA, this.#redGPUContext, gpuDevice);
-		}
-		this.#execute(gpuDevice, width, height);
-		{
-
-			const commentEncode_compute = gpuDevice.createCommandEncoder()
-			commentEncode_compute.copyTextureToTexture(
-				{texture: this.#currentFrameTexture},
-				{texture: this.#previousFrameTexture},
-				[width, height, 1]
-			);
-			gpuDevice.queue.submit([commentEncode_compute.finish()]);
-		}
-		if (this.#frameIndex <= 20 || this.#frameIndex % 60 === 0) {
-			console.log(`TAA Frame ${this.#frameIndex}: BuffersSwapped, JitterStrength=${this.#jitterStrength}, MotionVectors=${this.#useMotionVectors}`);
-		}
-		this.#prevMSAA = useMSAA;
-		this.#prevMSAAID = msaaID;
-		return {
-			texture: this.#currentFrameTexture,
-			textureView: this.#currentFrameTextureView
-		}
 	}
 
 	#createFrameBufferBindGroups(view: View3D, sourceTextureView: GPUTextureView[], useMSAA: boolean, redGPUContext: RedGPUContext, gpuDevice: GPUDevice) {
@@ -300,7 +392,7 @@ class TAA {
 				format: 'rgba8unorm',
 				usage: GPUTextureUsage.TEXTURE_BINDING |
 					GPUTextureUsage.STORAGE_BINDING |
-					GPUTextureUsage.COPY_SRC| GPUTextureUsage.RENDER_ATTACHMENT,
+					GPUTextureUsage.COPY_SRC | GPUTextureUsage.RENDER_ATTACHMENT,
 				label: `${name}_${this.#name}_currentFrame_${width}x${height}`
 			});
 			this.#currentFrameTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#currentFrameTexture, {
@@ -313,7 +405,7 @@ class TAA {
 				format: 'rgba8unorm',
 				usage: GPUTextureUsage.TEXTURE_BINDING |
 					GPUTextureUsage.STORAGE_BINDING |
-					GPUTextureUsage.COPY_DST ,
+					GPUTextureUsage.COPY_DST,
 				label: `${name}_${this.#name}_previousFrame_${width}x${height}`
 			});
 			this.#previousFrameTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#previousFrameTexture, {
@@ -321,7 +413,6 @@ class TAA {
 				format: 'rgba8unorm',
 				label: `${this.#name}_previousFrame`
 			});
-
 			console.log('TAA 텍스처 생성 완료:', {
 				previousFrame: {
 					width,
@@ -343,23 +434,6 @@ class TAA {
 		}
 		this.#calcVideoMemory()
 		return needChange
-	}
-
-	clear() {
-		if (this.#previousFrameTexture) {
-			this.#previousFrameTexture.destroy();
-			this.#previousFrameTexture = null;
-			this.#previousFrameTextureView = null;
-		}
-		if (this.#currentFrameTexture) {
-			this.#currentFrameTexture.destroy();
-			this.#currentFrameTexture = null;
-			this.#currentFrameTextureView = null;
-		}
-		this.#cachedBindGroupLayouts.clear();
-		this.#cachedPipelineLayouts.clear();
-		this.#cachedComputePipelines.clear();
-		this.#currentMSAAState = null;
 	}
 
 	#calcVideoMemory() {
@@ -385,83 +459,6 @@ class TAA {
 		}
 		return false;
 	}
-
-	updateUniform(key: string, value: number | number[] | boolean) {
-		this.#uniformBuffer.writeBuffer(this.#uniformsInfo.members[key], value)
-	}
-
-	get frameIndex(): number {
-		return this.#frameIndex;
-	}
-
-	get videoMemorySize(): number {
-		return this.#videoMemorySize
-	}
-
-	get currentFrameTextureView(): GPUTextureView {
-		return this.#currentFrameTextureView;
-	}
-
-	get temporalBlendFactor(): number {
-		return this.#temporalBlendFactor;
-	}
-
-	set temporalBlendFactor(value: number) {
-		validateNumberRange(value, 0.0, 1.0);
-		this.#temporalBlendFactor = value;
-		this.updateUniform('temporalBlendFactor', value);
-	}
-
-	get jitterStrength(): number {
-		return this.#jitterStrength;
-	}
-
-	set jitterStrength(value: number) {
-		validateNumberRange(value, 0.0, 1.0);
-		this.#jitterStrength = value;
-		this.updateUniform('jitterStrength', value);
-	}
-
-	get varianceClipping(): boolean {
-		return this.#varianceClipping;
-	}
-
-	set varianceClipping(value: boolean) {
-		this.#varianceClipping = value;
-		this.updateUniform('varianceClipping', value ? 1.0 : 0.0);
-	}
-
-	// 모션벡터 관련 getter/setter 추가
-	get useMotionVectors(): boolean {
-		return this.#useMotionVectors;
-	}
-
-	set useMotionVectors(value: boolean) {
-		this.#useMotionVectors = value;
-		this.updateUniform('useMotionVectors', value ? 1.0 : 0.0);
-	}
-
-
-	get motionBlurReduction(): number {
-		return this.#motionBlurReduction;
-	}
-
-	set motionBlurReduction(value: number) {
-		validateNumberRange(value, 0.0, 1.0);
-		this.#motionBlurReduction = value;
-		this.updateUniform('motionBlurReduction', value);
-	}
-
-	get disocclusionThreshold(): number {
-		return this.#disocclusionThreshold;
-	}
-
-	set disocclusionThreshold(value: number) {
-		validateNumberRange(value, 0.01, 1.0);
-		this.#disocclusionThreshold = value;
-		this.updateUniform('disocclusionThreshold', value);
-	}
-
 }
 
 Object.freeze(TAA);

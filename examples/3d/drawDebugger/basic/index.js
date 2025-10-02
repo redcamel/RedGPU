@@ -7,7 +7,7 @@ RedGPU.init(
 	canvas,
 	(redGPUContext) => {
 
-		const controller = new RedGPU.Camera.ObitController(redGPUContext);
+		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
 		controller.distance = 12;
 		controller.minDistance = 3;
 		controller.maxDistance = 50;

@@ -4,7 +4,7 @@ const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
 RedGPU.init(canvas, (redGPUContext) => {
-	const controller = new RedGPU.Camera.Camera2D(redGPUContext);
+	const controller = new RedGPU.Camera.Camera2D();
 
 	const scene = new RedGPU.Display.Scene();
 	const view = new RedGPU.Display.View2D(redGPUContext, scene, controller);

@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import PointLight from "../../../light/lights/PointLight";
-import RenderViewStateData from "../../../renderer/RenderViewStateData";
+import RenderViewStateData from "../../view/core/RenderViewStateData";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
 import TextField3D from "../../textFileds/textField3D/TextField3D";
 import ADrawDebuggerLight from "./ADrawDebuggerLight";
@@ -19,13 +19,14 @@ class DrawDebuggerPointLight extends ADrawDebuggerLight {
 		this.lightDebugMesh.addChild(this.#label)
 	}
 
-	render(debugViewRenderState: RenderViewStateData): void {
+	render(renderViewStateData: RenderViewStateData): void {
+		if (!renderViewStateData.view.systemUniform_Vertex_UniformBindGroup) return
 		if (!this.#target.enableDebugger) return;
 		this.#updateVertexDataFromPointLight(this.#target, this.lightDebugMesh.geometry.vertexBuffer);
 		this.lightDebugMesh.setPosition(0, 0, 0);
 		this.lightDebugMesh.setRotation(0, 0, 0);
 		this.lightDebugMesh.setScale(1, 1, 1);
-		this.lightDebugMesh.render(debugViewRenderState);
+		this.lightDebugMesh.render(renderViewStateData);
 		this.#label.setPosition(...this.#target.position)
 	}
 

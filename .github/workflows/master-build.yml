@@ -1,0 +1,37 @@
+name: Build on master
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Verify build output
+        run: |
+          if [ -d "dist" ]; then
+            echo "✅ Build successful - dist folder created"
+            ls -la dist/
+          else
+            echo "❌ Build failed - no dist folder"
+            exit 1
+          fi
+      - name: Commit and push build files
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add dist/ -f
+          git diff --staged --quiet || git commit -m "chore: auto-build dist files"
+          git push

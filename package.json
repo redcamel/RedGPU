@@ -1,11 +1,12 @@
 {
   "name": "redgpu",
-  "version": "1.0.0",
+  "version": "3.0.0-Alpha",
   "description": "RedGPU Helper",
   "scripts": {
     "build": "rollup -c",
     "rollup watch": "rollup -wc",
-    "build doc": "npx typedoc src/index.ts"
+    "build:doc": "npx typedoc --options typedoc.config.js",
+    "watch:doc": "npx nodemon --watch src --ext ts --exec \"npm run build:doc\""
   },
   "author": "",
   "license": "ISC",
@@ -22,11 +23,11 @@
     "rollup-plugin-postcss": "^4.0.2",
     "rollup-plugin-string": "^3.0.0",
     "tslib": "^2.8.1",
-    "typedoc": "^0.27.6",
+    "typedoc": "^0.28.13",
     "typescript": "^5.8.3",
     "@webgpu/types": "^0.1.63"
   },
   "dependencies": {
-    "wgsl_reflect": "^1.2.1"
+    "wgsl_reflect": "1.2.1"
   }
 }

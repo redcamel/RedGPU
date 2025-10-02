@@ -76,7 +76,7 @@ const loadDescription = async () => {
 			description.className = 'item-description'
 			document.querySelector('.navigation-bar').appendChild(description);
 			setDomTitleAndDescription(
-				`${matchedExample.name} - RedGPU`,
+				`${matchedExample.name} | RedGPU`,
 				descriptionText
 					.replace(/\n/g, '')
 					.replace(/\s+/g, ' ')
@@ -99,9 +99,20 @@ const createNavigationBar = (mainCategory) => {
 	const homeButton = document.createElement('a');
 	homeButton.className = 'nav-button home-button';
 	homeButton.href = '/RedGPU/examples';
-	homeButton.innerHTML = '<span>Home</span>';
+	homeButton.alt = 'Home';
+	homeButton.target = (window?.self !== window?.top) ? '_blank' : '_self';
+	// homeButton.innerHTML = '<span>Home</span>';
+	homeButton.innerHTML = '<img src="/RedGPU/examples/assets/icons/home.svg" width="20"/>';
 	navbar.appendChild(homeButton);
 
+	if(window?.self !== window?.top){
+		const openInNewTabButton = document.createElement('a');
+		openInNewTabButton.className = 'nav-button open-in-new-tab-button';
+		openInNewTabButton.href = window.location.href;
+		openInNewTabButton.target = '_blank';
+		openInNewTabButton.innerHTML = '<img src="/RedGPU/examples/assets/icons/outLink.svg" width="20"/>';
+		navbar.appendChild(openInNewTabButton);
+	}
 
 	return navbar;
 };
@@ -150,7 +161,7 @@ const setDomTitleAndDescription = (title, description) => {
 		document.head.appendChild(metaDescription);
 	}
 
-	const keywords = ['RedGPU', 'WebGPU', title.replace('- RedGPU', '')]
+	const keywords = ['RedGPU', 'WebGPU', title.replace(' | RedGPU', '')]
 	if (keywords) {
 		let metaKeywords = document.querySelector('meta[name="keywords"]');
 		if (metaKeywords) {

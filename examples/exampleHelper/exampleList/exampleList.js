@@ -109,6 +109,16 @@ const ExampleList = [
 						},
 					},
 					{
+						name: 'Ground',
+						path: '3d/primitive/ground',
+						thumb: '3d/primitive/ground/thumb.png',
+						description: {
+							ko: ``,
+							en: `Samples for the basic Ground Primitives supported by RedGPU. Provides real-time testing of Ground configuration options.`
+
+						},
+					},
+					{
 						name: 'Sphere',
 						path: '3d/primitive/sphere',
 						thumb: '3d/primitive/sphere/thumb.png',
@@ -663,8 +673,10 @@ const ExampleList = [
 			},
 			{
 				name: 'Line3D',
+				experimental: true,
 				list: [
 					{
+						experimental: true,
 						name: 'Linear Type',
 						path: '3d/line3D/linear',
 						thumb: '3d/line3D/linear/thumb.png',
@@ -674,6 +686,7 @@ const ExampleList = [
 						},
 					},
 					{
+						experimental: true,
 						name: 'Bezier Type',
 						path: '3d/line3D/bezier',
 						thumb: '3d/line3D/bezier/thumb.png',
@@ -683,6 +696,7 @@ const ExampleList = [
 						},
 					},
 					{
+						experimental: true,
 						name: 'CatmullRom Type',
 						path: '3d/line3D/catmullRom',
 						thumb: '3d/line3D/catmullRom/thumb.png',

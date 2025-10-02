@@ -7,7 +7,7 @@ RedGPU.init(
 	canvas,
 	(redGPUContext) => {
 
-		const controller = new RedGPU.Camera.ObitController(redGPUContext);
+		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
 		controller.distance = 10
 		controller.speedDistance = 0.1
 
@@ -25,6 +25,8 @@ RedGPU.init(
 			let i = redGPUContext.detector.isMobile ? 200 : 500
 			while (i--) {
 				loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumMan/glTF/CesiumMan.gltf');
+				// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF-Binary/BrainStem.glb');
+
 			}
 		}
 		const renderer = new RedGPU.Renderer(redGPUContext);

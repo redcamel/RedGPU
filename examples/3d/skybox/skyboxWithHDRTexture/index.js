@@ -17,7 +17,7 @@ const hdrImages = [
 RedGPU.init(
 	canvas,
 	(redGPUContext) => {
-		const controller = new RedGPU.Camera.ObitController(redGPUContext);
+		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
 		controller.tilt = 0;
 
 		const scene = new RedGPU.Display.Scene();

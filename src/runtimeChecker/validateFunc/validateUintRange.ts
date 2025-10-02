@@ -3,21 +3,19 @@ import isUint from "../isFunc/isUint";
 
 const MAX_UINT = 4503599627370496
 /**
- * Validates if a given value falls within a specified range.
- * This function checks if the value is a positive integer and within the specified range.
- * If the value or the range values are not positive integers, an error is thrown.
- * If the maximum value is smaller than the minimum value, an error is thrown.
- * If the value is smaller than the minimum value, an error is thrown.
- * If the value is larger than the maximum value, an error is thrown.
+ * 주어진 값이 부호 없는 정수(unsigned integer) 범위 내에 있는지 검증합니다.
  *
- * @param {number} value - The value to be validated.
- * @param {number} [min=0] - The minimum value of the range.
- * @param {number} [max=Number.MAX_SAFE_INTEGER] - The maximum value of the range.
- * @returns {boolean} - Returns true if the value is within the specified range.
- * @throws {Error} - Throws an error if the value or the range values are not positive integers,
- *                  if the maximum value is smaller than the minimum value,
- *                  if the value is smaller than the minimum value,
- *                  or if the value is larger than the maximum value.
+ * value, min, max가 모두 0 이상의 정수(Uint)인지 확인하며,
+ *
+ * min이 max보다 크거나 같으면 예외를 발생시킵니다.
+ *
+ * value가 min보다 작거나 max보다 크면 예외를 발생시킵니다.
+ *
+ * @param {number} value 검증할 값
+ * @param {number} [min=0] 허용되는 최소값 (기본값: 0)
+ * @param {number} [max=4503599627370496] 허용되는 최대값 (기본값: 4503599627370496)
+ * @returns {boolean} 값이 Uint 범위 내에 있으면 true
+ * @throws {Error} 값 또는 범위가 Uint가 아니거나, 범위를 벗어나면 예외 발생
  */
 const validateUintRange = (value: number, min: number = 0, max: number = MAX_UINT): boolean => {
 	const passUint = isUint(value)

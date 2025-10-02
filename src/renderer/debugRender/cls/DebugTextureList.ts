@@ -1,9 +1,10 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import ResourceStateBitmapTexture
-	from "../../../resources/resourceManager/resourceState/texture/ResourceStateBitmapTexture";
+	from "../../../resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture";
 import ResourceStateCubeTexture
-	from "../../../resources/resourceManager/resourceState/texture/ResourceStateCubeTexture";
-import ResourceStateHDRTexture from "../../../resources/resourceManager/resourceState/texture/ResourceStateHDRTexture";
+	from "../../../resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture";
+import ResourceStateHDRTexture
+	from "../../../resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture";
 import PackedTexture from "../../../resources/texture/packedTexture/PackedTexture";
 import formatBytes from "../../../utils/math/formatBytes";
 import {createDebugTitle, updateDebugItemValue} from "../core/debugFunc";

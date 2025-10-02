@@ -1,5 +1,4 @@
 import Sampler from "../../../../resources/sampler/Sampler";
-import {keepLog} from "../../../../utils";
 import Mesh from "../../Mesh";
 
 const getBasicMeshVertexBindGroupDescriptor = (mesh: Mesh, skin: boolean = false): GPUBindGroupDescriptor => {
@@ -50,7 +49,6 @@ const getBasicMeshVertexBindGroupDescriptor = (mesh: Mesh, skin: boolean = false
 			},
 			{
 				binding: 1,
-				// TODO - displacementTextureSampler 이놈을 프레그먼트 변화를 추적하는데 현재 정의 되어있지 않음 확인해야함
 				resource: getGPUResourceSampler(material?.displacementTextureSampler) || basicGPUSampler
 			},
 			{

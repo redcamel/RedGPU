@@ -1,33 +1,35 @@
 import {mat4} from "gl-matrix";
 import {Function} from "wgsl_reflect";
 import RedGPUContext from "../../context/RedGPUContext";
+import DefineForVertex from "../../defineProperty/DefineForVertex";
 import Geometry from "../../geometry/Geometry";
-import gltfAnimationLooper from "../../loader/gltf/animationLooper/gltfAnimationLooper";
 import Primitive from "../../primitive/core/Primitive";
-import RenderViewStateData from "../../renderer/RenderViewStateData";
-import VertexGPURenderInfo from "../../renderInfos/VertexGPURenderInfo";
-import DefineForVertex from "../../resources/defineProperty/DefineForVertex";
+import RenderViewStateData from "../view/core/RenderViewStateData";
+import VertexGPURenderInfo from "./core/VertexGPURenderInfo";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
-import InstanceIdGenerator from "../../utils/InstanceIdGenerator";
 import AABB from "../../utils/math/bound/AABB";
 import calculateMeshAABB from "../../utils/math/bound/calculateMeshAABB";
 import calculateMeshCombinedAABB from "../../utils/math/bound/calculateMeshCombinedAABB";
 import calculateMeshOBB from "../../utils/math/bound/calculateMeshOBB";
 import OBB from "../../utils/math/bound/OBB";
 import mat4ToEuler from "../../utils/math/matToEuler";
-import uuidToUint from "../../utils/uuidToUint";
+import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
+import uuidToUint from "../../utils/uuid/uuidToUint";
 import DrawDebuggerMesh from "../drawDebugger/DrawDebuggerMesh";
+import MESH_TYPE from "../MESH_TYPE";
 import createMeshVertexUniformBuffers from "./core/createMeshVertexUniformBuffers";
+import MeshBase from "./core/MeshBase";
 import Object3DContainer from "./core/Object3DContainer";
 import updateMeshDirtyPipeline from "./core/pipeline/updateMeshDirtyPipeline";
 import getBasicMeshVertexBindGroupDescriptor from "./core/shader/getBasicMeshVertexBindGroupDescriptor";
-import MeshBase from "./MeshBase";
 
 const VERTEX_SHADER_MODULE_NAME_PBR_SKIN = 'VERTEX_MODULE_MESH_PBR_SKIN'
 const CONVERT_RADIAN = Math.PI / 180;
 const CPI = 3.141592653589793, CPI2 = 6.283185307179586, C225 = 0.225, C127 = 1.27323954, C045 = 0.405284735,
 	C157 = 1.5707963267948966;
+const tempFloat32_1 = new Float32Array(1);
+const up = new Float32Array([0, 1, 0]);
 
 interface Mesh {
 	receiveShadow: boolean
@@ -36,48 +38,100 @@ interface Mesh {
 	useDisplacementTexture: boolean
 }
 
+/**
+ * geometry와 material을 바탕으로 3D/2D 객체의 위치, 회전, 스케일, 피벗, 계층 구조, 렌더링, 그림자, 디버깅 등 다양한 기능을 제공하는 기본 메시 클래스입니다.
+ *
+ * geometry(버텍스/메시 데이터)와 머티리얼을 바탕으로 실제 화면에 렌더링되는 객체를 표현합니다.
+ *
+ * 위치, 회전, 스케일, 피벗, 계층 구조, 그림자, 디버깅, 이벤트 등 다양한 기능을 지원합니다.
+ *
+ * <iframe src="/RedGPU/examples/3d/mesh/basicMesh/"></iframe>
+ *
+ * 아래는 Mesh의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
+ * @see [Mesh Hierarchy example](/RedGPU/examples/3d/mesh/hierarchy/)
+ * @see [Mesh Pivot example](/RedGPU/examples/3d/mesh/pivot/)
+ * @see [Mesh Child Methods example](/RedGPU/examples/3d/mesh/childMethod/)
+ * @see [Mesh lookAt Methods example](/RedGPU/examples/3d/mesh/lookAt/)
+ *
+ * @category Mesh
+ */
 class Mesh extends MeshBase {
+	/** 메시의 디스플레이스먼트 텍스처 */
 	displacementTexture: BitmapTexture
+	/** 그림자 캐스팅 여부 */
 	castShadow: boolean = false
+	/** 인스턴스 고유 ID */
 	#instanceId: number
+	/** 메시 이름 */
 	#name: string
+	/** 부모 객체 */
 	#parent: Object3DContainer
-	//
+	/** X 좌표 */
 	#x: number = 0
-	#z: number = 0
+	/** Y 좌표 */
 	#y: number = 0
-	#positionArray: [number, number, number] = [0, 0, 0]
-	//
+	/** Z 좌표 */
+	#z: number = 0
+	/** 위치 배열 [x, y, z] */
+	#positionArray: Float32Array = new Float32Array([0, 0, 0])
+	/** 피벗 X */
 	#pivotX: number = 0
+	/** 피벗 Y */
 	#pivotY: number = 0
+	/** 피벗 Z */
 	#pivotZ: number = 0
-	//
+	/** 픽킹 ID */
 	readonly #pickingId: number
-	//
+	/** X 스케일 */
 	#scaleX: number = 1
+	/** Y 스케일 */
 	#scaleY: number = 1
+	/** Z 스케일 */
 	#scaleZ: number = 1
-	//
-	#scaleArray: number[] = [1, 1, 1]
-	//
+	/** 스케일 배열 [x, y, z] */
+	#scaleArray: Float32Array = new Float32Array([1, 1, 1])
+	/** X축 회전 (deg) */
 	#rotationX: number = 0
+	/** Y축 회전 (deg) */
 	#rotationY: number = 0
+	/** Z축 회전 (deg) */
 	#rotationZ: number = 0
-	#rotationArray: number[] = [0, 0, 0]
-	//
+	/** 회전 배열 [x, y, z] (deg) */
+	#rotationArray: Float32Array = new Float32Array([0, 0, 0])
+	/** 이벤트 핸들러 객체 */
 	#events: any = {}
+	/** 등록된 이벤트 개수 */
 	#eventsNum: number = 0
-	//
+	/** 프러스텀 컬링 무시 여부 */
 	#ignoreFrustumCulling: boolean = false
-	//
+	/** 메시 투명도 */
 	#opacity: number = 1
-	//
+	/** 디버그 메시 객체 */
 	#drawDebugger: DrawDebuggerMesh
+	/** 디버그 활성화 여부 */
 	#enableDebugger: boolean = false
+	/** 캐싱된 AABB */
 	#cachedBoundingAABB: AABB
+	/** 캐싱된 OBB */
 	#cachedBoundingOBB: OBB
+	/** 이전 프레임의 모델 행렬 */
+	#prevModelMatrix: Float32Array
+	/** 렌더 번들 인코더 */
+	#bundleEncoder: GPURenderBundleEncoder
+	/** 렌더 번들 */
+	#renderBundle: GPURenderBundle
+	/** 이전 시스템 바인드 그룹 */
+	#prevSystemBindGroup: GPUBindGroup
+	/** 이전 프래그먼트 바인드 그룹 */
+	#prevFragmentBindGroup: GPUBindGroup
 
-//
+	/**
+	 * Mesh 인스턴스를 생성합니다.
+	 * @param redGPUContext RedGPU 컨텍스트
+	 * @param geometry geometry 또는 primitive 객체(선택)
+	 * @param material 머티리얼(선택)
+	 * @param name 메시 이름(선택)
+	 */
 	constructor(redGPUContext: RedGPUContext, geometry?: Geometry | Primitive, material?, name?: string) {
 		super(redGPUContext)
 		if (name) this.name = name
@@ -165,7 +219,6 @@ class Mesh extends MeshBase {
 		return this._geometry.gpuRenderInfo.buffers
 	}
 
-	// 	this.#z = z
 	/**
 	 * 설정된 부모 객체값을 반환합니다.
 	 */
@@ -235,7 +288,7 @@ class Mesh extends MeshBase {
 		this.dirtyTransform = true
 	}
 
-	get position(): [number, number, number] {
+	get position(): Float32Array {
 		return this.#positionArray;
 	}
 
@@ -266,7 +319,7 @@ class Mesh extends MeshBase {
 		this.dirtyTransform = true
 	}
 
-	get scale(): number[] {
+	get scale(): Float32Array {
 		return this.#scaleArray;
 	}
 
@@ -298,7 +351,7 @@ class Mesh extends MeshBase {
 		this.dirtyTransform = true
 	}
 
-	get rotation(): number[] {
+	get rotation(): Float32Array {
 		return this.#rotationArray;
 	}
 
@@ -371,7 +424,6 @@ class Mesh extends MeshBase {
 	}
 
 	lookAt(targetX: number | [number, number, number], targetY?: number, targetZ?: number): void {
-		var up = new Float32Array([0, 1, 0]);
 		var tPosition = [];
 		var tRotation = []
 		tPosition[0] = targetX;
@@ -430,9 +482,8 @@ class Mesh extends MeshBase {
 		}
 		return cloneMesh
 	}
-	#prevModelMatrix:mat4
 
-	render(debugViewRenderState: RenderViewStateData) {
+	render(renderViewStateData: RenderViewStateData) {
 		const {redGPUContext,} = this
 		const {
 			view,
@@ -443,7 +494,9 @@ class Mesh extends MeshBase {
 			dirtyVertexUniformFromMaterial,
 			useDistanceCulling,
 			cullingDistanceSquared,
-		} = debugViewRenderState
+		} = renderViewStateData
+		const {antialiasingManager, gpuDevice} = redGPUContext
+		const {useMSAA} = antialiasingManager
 		const {scene} = view
 		const {shadowManager} = scene
 		const {directionalShadowManager} = shadowManager
@@ -454,18 +507,19 @@ class Mesh extends MeshBase {
 		const {uuid: currentMaterialUUID} = currentMaterial || {}
 		let dirtyTransformForChildren
 		let dirtyOpacityForChildren
-		if(this.#prevModelMatrix){
+		if (!antialiasingManager.useTAA) {
+			this.#prevModelMatrix = null
+		}
+		if (this.#prevModelMatrix) {
 			const {vertexUniformBuffer, vertexUniformInfo} = this.gpuRenderInfo
 			const {members: vertexUniformInfoMembers} = vertexUniformInfo
-			//TODO - TAA 머가 빡세네...
-			if(vertexUniformInfoMembers.prevModelMatrix) {
+			if (vertexUniformInfoMembers.prevModelMatrix) {
 				redGPUContext.gpuDevice.queue.writeBuffer(
 					vertexUniformBuffer.gpuBuffer,
 					vertexUniformInfoMembers.prevModelMatrix.uniformOffset,
-					new vertexUniformInfoMembers.prevModelMatrix.View(this.#prevModelMatrix),
+					this.#prevModelMatrix,
 				)
 			}
-
 		}
 		if (isScene2DMode) {
 			this.#z = 0
@@ -474,8 +528,6 @@ class Mesh extends MeshBase {
 				this.depthStencilState.depthWriteEnabled = false
 			}
 		}
-
-
 		if (this.dirtyTransform) {
 			dirtyTransformForChildren = true
 			{
@@ -723,41 +775,8 @@ class Mesh extends MeshBase {
 				}
 			}
 		}
-
 		// check distanceCulling
 		let passFrustumCulling = true
-		// if (useDistanceCulling && currentGeometry) {
-		// 	const {rawCamera} = view
-		// 	const dx = rawCamera.x - this.#x;
-		// 	const dy = rawCamera.y - this.#y;
-		// 	const dz = rawCamera.z - this.#z;
-		// 	const MTX = this.modelMatrix
-		// 	const geoVolume = currentGeometry.volume;
-		// 	let geometryRadius: number = geoVolume.geometryRadius
-		// 	const transformedRadius0: number = geometryRadius * MTX[0];
-		// 	const transformedRadius1: number = geometryRadius * MTX[5];
-		// 	const transformedRadius2: number = geometryRadius * MTX[10];
-		// 	const radius: number = (transformedRadius0 > transformedRadius1
-		// 		? transformedRadius0
-		// 		: transformedRadius1 > transformedRadius2
-		// 			? transformedRadius1
-		// 			: transformedRadius2);
-		// 	//TODO - radius 필요없는지 확인해야함
-		// 	const dxSquared = dx * dx;
-		// 	if (dxSquared > cullingDistanceSquared) {
-		// 		passFrustumCulling = false;
-		// 	} else {
-		// 		const dySquared = dy * dy;
-		// 		if ((dxSquared + dySquared) > cullingDistanceSquared) {
-		// 			passFrustumCulling = false;
-		// 		} else {
-		// 			const dzSquared = dz * dz;
-		// 			if ((dxSquared + dySquared + dzSquared) > cullingDistanceSquared) {
-		// 				passFrustumCulling = false;
-		// 			}
-		// 		}
-		// 	}
-		// }
 		if (useDistanceCulling && currentGeometry) {
 			const {rawCamera} = view
 			const aabb = this.boundingAABB;
@@ -775,36 +794,40 @@ class Mesh extends MeshBase {
 		}
 		// check frustumCulling
 		if (frustumPlanes && passFrustumCulling) {
-
 			// if (currentGeometry) {
-				const combinedAABB = this.boundingAABB;
-				const frustumPlanes0 = frustumPlanes[0];
-				const frustumPlanes1 = frustumPlanes[1];
-				const frustumPlanes2 = frustumPlanes[2];
-				const frustumPlanes3 = frustumPlanes[3];
-				const frustumPlanes4 = frustumPlanes[4];
-				const frustumPlanes5 = frustumPlanes[5];
-				// combinedBoundingAABB의 중심점과 반지름 사용
-				const centerX = combinedAABB.centerX;
-				const centerY = combinedAABB.centerY;
-				const centerZ = combinedAABB.centerZ;
-				const radius = combinedAABB.geometryRadius;
-				// 각 frustum plane에 대해 거리 계산
-				frustumPlanes0[0] * centerX + frustumPlanes0[1] * centerY + frustumPlanes0[2] * centerZ + frustumPlanes0[3] <= -radius ? passFrustumCulling = false
-					: frustumPlanes1[0] * centerX + frustumPlanes1[1] * centerY + frustumPlanes1[2] * centerZ + frustumPlanes1[3] <= -radius ? passFrustumCulling = false
-						: frustumPlanes2[0] * centerX + frustumPlanes2[1] * centerY + frustumPlanes2[2] * centerZ + frustumPlanes2[3] <= -radius ? passFrustumCulling = false
-							: frustumPlanes3[0] * centerX + frustumPlanes3[1] * centerY + frustumPlanes3[2] * centerZ + frustumPlanes3[3] <= -radius ? passFrustumCulling = false
-								: frustumPlanes4[0] * centerX + frustumPlanes4[1] * centerY + frustumPlanes4[2] * centerZ + frustumPlanes4[3] <= -radius ? passFrustumCulling = false
-									: frustumPlanes5[0] * centerX + frustumPlanes5[1] * centerY + frustumPlanes5[2] * centerZ + frustumPlanes5[3] <= -radius ? passFrustumCulling = false : 0;
+			const combinedAABB = this.boundingAABB;
+			const frustumPlanes0 = frustumPlanes[0];
+			const frustumPlanes1 = frustumPlanes[1];
+			const frustumPlanes2 = frustumPlanes[2];
+			const frustumPlanes3 = frustumPlanes[3];
+			const frustumPlanes4 = frustumPlanes[4];
+			const frustumPlanes5 = frustumPlanes[5];
+			// combinedBoundingAABB의 중심점과 반지름 사용
+			const centerX = combinedAABB.centerX;
+			const centerY = combinedAABB.centerY;
+			const centerZ = combinedAABB.centerZ;
+			const radius = combinedAABB.geometryRadius;
+			// 각 frustum plane에 대해 거리 계산
+			frustumPlanes0[0] * centerX + frustumPlanes0[1] * centerY + frustumPlanes0[2] * centerZ + frustumPlanes0[3] <= -radius ? passFrustumCulling = false
+				: frustumPlanes1[0] * centerX + frustumPlanes1[1] * centerY + frustumPlanes1[2] * centerZ + frustumPlanes1[3] <= -radius ? passFrustumCulling = false
+					: frustumPlanes2[0] * centerX + frustumPlanes2[1] * centerY + frustumPlanes2[2] * centerZ + frustumPlanes2[3] <= -radius ? passFrustumCulling = false
+						: frustumPlanes3[0] * centerX + frustumPlanes3[1] * centerY + frustumPlanes3[2] * centerZ + frustumPlanes3[3] <= -radius ? passFrustumCulling = false
+							: frustumPlanes4[0] * centerX + frustumPlanes4[1] * centerY + frustumPlanes4[2] * centerZ + frustumPlanes4[3] <= -radius ? passFrustumCulling = false
+								: frustumPlanes5[0] * centerX + frustumPlanes5[1] * centerY + frustumPlanes5[2] * centerZ + frustumPlanes5[3] <= -radius ? passFrustumCulling = false : 0;
 			// } else {
 			// 	passFrustumCulling = false
 			// }
 		}
 		if (this.#ignoreFrustumCulling) passFrustumCulling = true
-		if(passFrustumCulling){
+		if (passFrustumCulling) {
 			// check animation
 			if (this.gltfLoaderInfo?.activeAnimations?.length) {
-				gltfAnimationLooper(redGPUContext,timestamp, debugViewRenderState.computeCommandEncoder,this.gltfLoaderInfo.activeAnimations)
+				// gltfAnimationLooper(
+				// 	redGPUContext, timestamp,
+				// 	renderViewStateData.computeCommandEncoder,
+				// 	this.gltfLoaderInfo.activeAnimations
+				// )
+				renderViewStateData.animationList[renderViewStateData.animationList.length] = this.gltfLoaderInfo?.activeAnimations
 			}
 			if (this.animationInfo.skinInfo) {
 				if (!this.currentShaderModuleName.includes(VERTEX_SHADER_MODULE_NAME_PBR_SKIN)) {
@@ -812,19 +835,18 @@ class Mesh extends MeshBase {
 				}
 				if (this.currentShaderModuleName === `${VERTEX_SHADER_MODULE_NAME_PBR_SKIN}_${this.animationInfo.skinInfo.joints?.length}`) {
 					// this.animationInfo.skinInfo.update(redGPUContext, this)
-					debugViewRenderState.skinList[debugViewRenderState.skinList.length] = this
+					renderViewStateData.skinList[renderViewStateData.skinList.length] = this
 					dirtyTransformForChildren = false
 				}
 			}
 		}
 		// render
-		if (currentGeometry) debugViewRenderState.num3DObjects++
-		else debugViewRenderState.num3DGroups++
+		if (currentGeometry) renderViewStateData.num3DObjects++
+		else renderViewStateData.num3DGroups++
 		const {displacementTexture, displacementScale} = currentMaterial || {}
 		if (this.dirtyPipeline || currentMaterial?.dirtyPipeline || dirtyVertexUniformFromMaterial[currentMaterialUUID]) {
 			dirtyVertexUniformFromMaterial[currentMaterialUUID] = true
 		}
-		const {antialiasingManager, gpuDevice} = redGPUContext
 		if (currentGeometry) {
 			if (antialiasingManager.changedMSAA) {
 				this.dirtyPipeline = true
@@ -836,10 +858,11 @@ class Mesh extends MeshBase {
 				this.dirtyPipeline = true
 			}
 			if (this.dirtyPipeline || dirtyVertexUniformFromMaterial[currentMaterialUUID]) {
-				updateMeshDirtyPipeline(this, debugViewRenderState)
+				updateMeshDirtyPipeline(this, renderViewStateData)
+				this.#bundleEncoder = null
+				this.#renderBundle = null
 			}
 		}
-
 		if (currentGeometry && passFrustumCulling) {
 			{
 				const {gpuRenderInfo} = this
@@ -848,22 +871,23 @@ class Mesh extends MeshBase {
 				if (vertexUniformInfoMembers.displacementScale !== undefined &&
 					vertexUniformInfoMembers.displacementScale !== displacementScale
 				) {
+					tempFloat32_1[0] = displacementScale
 					gpuDevice.queue.writeBuffer(
 						vertexUniformBuffer.gpuBuffer,
 						vertexUniformInfoMembers.displacementScale.uniformOffset,
-						new vertexUniformInfoMembers.displacementScale.View([displacementScale])
+						// new vertexUniformInfoMembers.displacementScale.View([displacementScale])
+						tempFloat32_1
 					);
 				}
 			}
 			const {gpuRenderInfo} = this
 			const {vertexUniformBuffer, vertexUniformBindGroup, vertexUniformInfo, pipeline,} = gpuRenderInfo
 			const {members: vertexUniformInfoMembers} = vertexUniformInfo
-
 			if (this.dirtyTransform) {
 				gpuDevice.queue.writeBuffer(
 					vertexUniformBuffer.gpuBuffer,
 					vertexUniformInfoMembers.modelMatrix.uniformOffset,
-					new vertexUniformInfoMembers.modelMatrix.View(
+					(
 						//TODO - Sprite2D떄문에 처리했지만 이거 일반화해야함
 						// TODO - renderTextureWidth 이놈도 같이 처리해야할듯
 						// @ts-ignore
@@ -877,17 +901,37 @@ class Mesh extends MeshBase {
 						) : this.modelMatrix
 					)
 				)
-				this.#prevModelMatrix = mat4.clone(this.modelMatrix)
+				if (antialiasingManager.useTAA) {
+					if (!this.#prevModelMatrix) this.#prevModelMatrix = new Float32Array(16)
+					this.#prevModelMatrix[0] = this.modelMatrix[0]
+					this.#prevModelMatrix[1] = this.modelMatrix[1]
+					this.#prevModelMatrix[2] = this.modelMatrix[2]
+					this.#prevModelMatrix[3] = this.modelMatrix[3]
+					this.#prevModelMatrix[4] = this.modelMatrix[4]
+					this.#prevModelMatrix[5] = this.modelMatrix[5]
+					this.#prevModelMatrix[6] = this.modelMatrix[6]
+					this.#prevModelMatrix[7] = this.modelMatrix[7]
+					this.#prevModelMatrix[8] = this.modelMatrix[8]
+					this.#prevModelMatrix[9] = this.modelMatrix[9]
+					this.#prevModelMatrix[10] = this.modelMatrix[10]
+					this.#prevModelMatrix[11] = this.modelMatrix[11]
+					this.#prevModelMatrix[12] = this.modelMatrix[12]
+					this.#prevModelMatrix[13] = this.modelMatrix[13]
+					this.#prevModelMatrix[14] = this.modelMatrix[14]
+					this.#prevModelMatrix[15] = this.modelMatrix[15]
+				}
 				gpuDevice.queue.writeBuffer(
 					vertexUniformBuffer.gpuBuffer,
 					vertexUniformInfoMembers.normalModelMatrix.uniformOffset,
-					new vertexUniformInfoMembers.normalModelMatrix.View(this.normalModelMatrix),
+					// new vertexUniformInfoMembers.normalModelMatrix.View(this.normalModelMatrix),
+					this.normalModelMatrix as Float32Array
 				)
 				if (vertexUniformInfoMembers.localMatrix) {
 					gpuDevice.queue.writeBuffer(
 						vertexUniformBuffer.gpuBuffer,
 						vertexUniformInfoMembers.localMatrix.uniformOffset,
-						new vertexUniformInfoMembers.localMatrix.View(this.localMatrix),
+						// new vertexUniformInfoMembers.localMatrix.View(this.localMatrix),
+						this.localMatrix as Float32Array
 					)
 				}
 				dirtyTransformForChildren = true
@@ -896,56 +940,90 @@ class Mesh extends MeshBase {
 			if (this.dirtyOpacity) {
 				dirtyOpacityForChildren = true
 				if (vertexUniformInfoMembers.combinedOpacity) {
+					tempFloat32_1[0] = this.getCombinedOpacity()
 					gpuDevice.queue.writeBuffer(
 						vertexUniformBuffer.gpuBuffer,
 						vertexUniformInfoMembers.combinedOpacity.uniformOffset,
-						new vertexUniformInfoMembers.combinedOpacity.View([this.getCombinedOpacity()])
+						// new vertexUniformInfoMembers.combinedOpacity.View([this.getCombinedOpacity()])
+						tempFloat32_1
 					);
 				}
 				this.dirtyOpacity = false
 			}
+			const {render2PathLayer, particleLayer, transparentLayer, alphaLayer, renderBundleList} = renderViewStateData
 			{
 				if (currentMaterial.use2PathRender) {
-					debugViewRenderState.render2PathLayer[debugViewRenderState.render2PathLayer.length] = this
-				} else if (this.meshType === 'particle') {
-					debugViewRenderState.particleLayer[debugViewRenderState.particleLayer.length] = this
-				} else if (this.meshType === 'instanceMesh') {
-					debugViewRenderState.instanceMeshLayer[debugViewRenderState.instanceMeshLayer.length] = this
-				} else if (currentMaterial.transparent) {
-					debugViewRenderState.transparentLayer[debugViewRenderState.transparentLayer.length] = this
-				} else if (currentMaterial.alphaBlend === 2 || currentMaterial.opacity < 1 || !this.depthStencilState.depthWriteEnabled) {
-					debugViewRenderState.alphaLayer[debugViewRenderState.alphaLayer.length] = this
+					render2PathLayer[render2PathLayer.length] = this
 				} else {
-					currentRenderPassEncoder.setPipeline(pipeline)
-					const {gpuBuffer} = currentGeometry.vertexBuffer
+					let targetEncoder: GPURenderBundleEncoder | GPURenderPassEncoder = currentRenderPassEncoder
+					let needBundleFinish = false
+					// keepLog(this.#bundleEncoder , this.dirtyPipeline , this.#prevSystemBindGroup !== view.systemUniform_Vertex_UniformBindGroup)
 					const {fragmentUniformBindGroup} = currentMaterial.gpuRenderInfo
-					if (debugViewRenderState.prevVertexGpuBuffer !== gpuBuffer) {
-						currentRenderPassEncoder.setVertexBuffer(0, gpuBuffer)
-						debugViewRenderState.prevVertexGpuBuffer = gpuBuffer
+					if (!this.#bundleEncoder || this.dirtyPipeline || this.#prevFragmentBindGroup !== fragmentUniformBindGroup || this.#prevSystemBindGroup !== view.systemUniform_Vertex_UniformBindGroup) {
+						this.#bundleEncoder = null
+						this.#bundleEncoder = gpuDevice.createRenderBundleEncoder({
+							colorFormats: [navigator.gpu.getPreferredCanvasFormat(), navigator.gpu.getPreferredCanvasFormat(), 'rgba16float'],
+							depthStencilFormat: 'depth32float',
+							sampleCount: useMSAA ? 4 : 1,
+							label: this.uuid
+						})
+						needBundleFinish = true
+						// keepLog('렌더번들갱신')
 					}
-					currentRenderPassEncoder.setBindGroup(1, vertexUniformBindGroup); // 버텍스 유니폼 버퍼 1번 고정
-					if (debugViewRenderState.prevFragmentUniformBindGroup !== fragmentUniformBindGroup) {
-						currentRenderPassEncoder.setBindGroup(2, fragmentUniformBindGroup)
-						debugViewRenderState.prevFragmentUniformBindGroup = fragmentUniformBindGroup
-					}
-					//
-					debugViewRenderState.numDrawCalls++
-					//
+					targetEncoder = this.#bundleEncoder
+					renderViewStateData.numDrawCalls++
 					if (currentGeometry.indexBuffer) {
 						const {indexBuffer} = currentGeometry
-						const {indexNum, triangleCount, gpuBuffer: indexGPUBuffer} = indexBuffer
-						currentRenderPassEncoder.setIndexBuffer(indexGPUBuffer, 'uint32')
-						// @ts-ignore
-						if (this.particleBuffers) currentRenderPassEncoder.drawIndexed(indexNum, this.particleNum, 0, 0, 0);
-						else currentRenderPassEncoder.drawIndexed(indexNum, 1, 0, 0, 0);
-						debugViewRenderState.numTriangles += triangleCount
-						debugViewRenderState.numPoints += indexNum
+						const {indexCount, triangleCount} = indexBuffer
+						renderViewStateData.numTriangles += triangleCount
+						renderViewStateData.numPoints += indexCount
 					} else {
 						const {vertexBuffer} = currentGeometry
 						const {vertexCount, triangleCount} = vertexBuffer
-						currentRenderPassEncoder.draw(vertexCount, 1, 0, 0);
-						debugViewRenderState.numTriangles += triangleCount;
-						debugViewRenderState.numPoints += vertexCount
+						renderViewStateData.numTriangles += triangleCount;
+						renderViewStateData.numPoints += vertexCount
+					}
+					if (needBundleFinish) {
+						this.#prevSystemBindGroup = view.systemUniform_Vertex_UniformBindGroup
+						this.#prevFragmentBindGroup = fragmentUniformBindGroup
+						targetEncoder.setPipeline(pipeline)
+						const {gpuBuffer} = currentGeometry.vertexBuffer
+						targetEncoder.setVertexBuffer(0, gpuBuffer)
+						// @ts-ignore
+						if (this.particleBuffers?.length) {
+							// @ts-ignore
+							this.particleBuffers.forEach((v, index) => {
+								targetEncoder.setVertexBuffer(index + 1, v)
+							})
+						}
+						targetEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
+						targetEncoder.setBindGroup(1, vertexUniformBindGroup);
+						targetEncoder.setBindGroup(2, fragmentUniformBindGroup)
+						//
+						if (currentGeometry.indexBuffer) {
+							const {indexBuffer} = currentGeometry
+							const {indexCount, gpuBuffer: indexGPUBuffer, format} = indexBuffer
+							targetEncoder.setIndexBuffer(indexGPUBuffer, format)
+							// @ts-ignore
+							if (this.particleBuffers) targetEncoder.drawIndexed(indexCount, this.particleNum, 0, 0, 0);
+							else targetEncoder.drawIndexed(indexCount, 1, 0, 0, 0);
+						} else {
+							const {vertexBuffer} = currentGeometry
+							const {vertexCount} = vertexBuffer
+							targetEncoder.draw(vertexCount, 1, 0, 0);
+						}
+						this.#renderBundle = (targetEncoder as GPURenderBundleEncoder).finish();
+					}
+					if (this.meshType === MESH_TYPE.PARTICLE) {
+						particleLayer[particleLayer.length] = this.#renderBundle
+					} else if (currentMaterial.transparent) {
+						transparentLayer[transparentLayer.length] = this.#renderBundle
+						// @ts-ignore
+						this.#renderBundle.mesh = this
+					} else if (currentMaterial.alphaBlend === 2 || currentMaterial.opacity < 1 || !this.depthStencilState.depthWriteEnabled) {
+						alphaLayer[alphaLayer.length] = this.#renderBundle
+					} else {
+						renderBundleList[renderBundleList.length] = this.#renderBundle
 					}
 				}
 			}
@@ -957,12 +1035,9 @@ class Mesh extends MeshBase {
 		} else {
 		}
 		{
-			//TODO 이거 이상함 확인해야함
 			if (this.castShadow || (this.castShadow && !currentGeometry)) castingList[castingList.length] = this
 		}
-		if (this.#enableDebugger) this.#drawDebugger.render(debugViewRenderState)
-
-
+		if (this.#enableDebugger) this.#drawDebugger.render(renderViewStateData)
 		// children render
 		const {children} = this
 		let i = 0
@@ -971,7 +1046,7 @@ class Mesh extends MeshBase {
 		for (; i < childNum; i++) {
 			if (dirtyTransformForChildren) children[i].dirtyTransform = dirtyTransformForChildren
 			if (dirtyOpacityForChildren) children[i].dirtyOpacity = dirtyOpacityForChildren
-			children[i].render(debugViewRenderState)
+			children[i].render(renderViewStateData)
 		}
 	}
 
@@ -1065,7 +1140,7 @@ class Mesh extends MeshBase {
 }
 
 Object.defineProperty(Mesh.prototype, 'meshType', {
-	value: 'mesh',
+	value: MESH_TYPE.MESH,
 	writable: false
 });
 DefineForVertex.defineByPreset(Mesh, [

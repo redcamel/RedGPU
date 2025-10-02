@@ -1,3 +1,6 @@
+/**
+ * @category Particle
+ */
 const PARTICLE_EASE = {
 	Linear: 0,
 	QuintIn: 1,

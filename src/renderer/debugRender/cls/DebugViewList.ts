@@ -88,9 +88,9 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
 	}
 
 	#updateDebugStat(view: View3D, index: number, stat: string, debugRender: DebugRender) {
-		const {debugViewRenderState} = view;
+		const {renderViewStateData} = view;
 		const totalKey = `total${stat.charAt(0).toUpperCase()}${stat.substring(1)}`;
-		const value = debugViewRenderState[stat];
+		const value = renderViewStateData[stat];
 		const formatValue = stat === 'usedVideoMemory' ? `<b>${formatBytes(value)}</b>` : value;
 		const unit = debugStatsUnit[stat];
 		debugRender[totalKey] += value;
@@ -98,9 +98,9 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
 	}
 
 	#updateViewportSize(view: View3D, index: number) {
-		const {debugViewRenderState, rawCamera, scene} = view
+		const {renderViewStateData, rawCamera, scene} = view
 		const {backgroundColor, useBackgroundColor} = scene
-		const {viewportSize} = debugViewRenderState;
+		const {viewportSize} = renderViewStateData;
 		const {pixelRectArray, x, y, width, height} = viewportSize;
 		updateDebugItemValue(this.dom, `view${index}_x_y`, `${formatNumber(x)}, ${formatNumber(y)}`);
 		updateDebugItemValue(this.dom, `view${index}_width_height`, `${width}, ${height}`);

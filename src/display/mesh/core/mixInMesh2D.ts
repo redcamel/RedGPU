@@ -10,7 +10,12 @@ interface Mesh2DBase {
 	setPosition(x: number, y: number): void;
 }
 
-export function mixInMesh2D<TBase extends new (...args: any[]) => Mesh2DBase>(Base: TBase) {
+/**
+ * @remarks
+ * `시스템 전용 클래스입니다.`\
+ * 이 메서드는 렌더링 엔진 내부에서 자동으로 사용되는 기능으로, 일반적인 사용자는 직접 호출하지 않는 것이 좋습니다.
+ */
+function mixInMesh2D<TBase extends new (...args: any[]) => Mesh2DBase>(Base: TBase) {
 	const resultClass = class extends Base {
 		#rotation: number = 0
 		#blendMode: number = BLEND_MODE.NORMAL;
@@ -158,3 +163,6 @@ export function mixInMesh2D<TBase extends new (...args: any[]) => Mesh2DBase>(Ba
 	return resultClass
 }
 
+export {
+	mixInMesh2D
+}

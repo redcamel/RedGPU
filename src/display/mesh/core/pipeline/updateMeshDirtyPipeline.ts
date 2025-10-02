@@ -1,5 +1,5 @@
-import RenderViewStateData from "../../../../renderer/RenderViewStateData";
-import ResourceManager from "../../../../resources/resourceManager/ResourceManager";
+import RenderViewStateData from "../../../view/core/RenderViewStateData";
+import ResourceManager from "../../../../resources/core/resourceManager/ResourceManager";
 import Mesh from "../../Mesh";
 import createMeshVertexShaderModule from "../shader/createMeshVertexShaderModule";
 import createBasePipeline from "./createBasePipeline";
@@ -8,13 +8,13 @@ import createBasePipeline from "./createBasePipeline";
  * Updates the dirty state of a mesh's pipeline and related data.
  *
  * @param {Mesh} mesh - The mesh to update.
- * @param {RenderViewStateData} debugViewRenderState - The render state data used for debugging.
+ * @param {RenderViewStateData} renderViewStateData - The render state data used for debugging.
  *
 
  */
 const updateMeshDirtyPipeline = (
 	mesh: Mesh,
-	debugViewRenderState?: RenderViewStateData
+	renderViewStateData?: RenderViewStateData
 ) => {
 	console.log('updateMeshDirtyPipeline')
 	const {material, gpuRenderInfo, redGPUContext} = mesh
@@ -39,6 +39,6 @@ const updateMeshDirtyPipeline = (
 	}
 	material.dirtyPipeline = false
 	mesh.dirtyPipeline = false
-	if (debugViewRenderState) debugViewRenderState.numDirtyPipelines++
+	if (renderViewStateData) renderViewStateData.numDirtyPipelines++
 }
 export default updateMeshDirtyPipeline

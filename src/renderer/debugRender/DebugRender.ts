@@ -32,7 +32,7 @@ class DebugRender {
 	totalUsedVideoMemory: number
 	#domRoot: HTMLElement
 
-	constructor(redGPUContext:RedGPUContext) {
+	constructor(redGPUContext: RedGPUContext) {
 		this.fps = new Fps(redGPUContext)
 		this.debugTotalState = new DebugTotalState()
 		this.debugRedGPUContext = new DebugRedGPUContext()

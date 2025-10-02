@@ -4,13 +4,16 @@ import GPU_FILTER_MODE from "../../../gpuConst/GPU_FILTER_MODE";
 import GPU_MIPMAP_FILTER_MODE from "../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import {keepLog} from "../../../utils";
-import createUUID from "../../../utils/createUUID";
+import createUUID from "../../../utils/uuid/createUUID";
 import Sampler from "../../sampler/Sampler";
 import CubeTexture from "../CubeTexture";
 import HDRTexture from "../hdr/HDRTexture";
 import IBLCubeTexture from "./IBLCubeTexture";
 import irradianceShaderCode from "./irradianceShaderCode.wgsl"
 
+/**
+ * @category IBL
+ */
 class IBL {
 	#redGPUContext: RedGPUContext
 	#sourceCubeTexture: GPUTexture
@@ -18,8 +21,6 @@ class IBL {
 	#environmentTexture: IBLCubeTexture;
 	#irradianceTexture: IBLCubeTexture;
 	#iblTexture: IBLCubeTexture
-	#prefilterMap: GPUTexture; //TODO - 일단없어도되니 나중에
-	#brdfLUT: GPUTexture; //TODO - 일단없어도되니 나중에
 	#uuid = createUUID()
 	#format: GPUTextureFormat = 'rgba8unorm'
 	#targetTexture: HDRTexture | CubeTexture

@@ -1,9 +1,10 @@
 /**
- * Retrieves the file name from a given URL.
+ * 주어진 URL에서 파일 이름을 추출합니다.
  *
- * @param {string} url - The URL from which to retrieve the file name.
- * @param {boolean} [withExtension=true] - Indicates whether the file name should include the extension.
- * @returns {string} - The file name extracted from the URL.
+ * @category File
+ * @param {string} url 파일 이름을 추출할 대상 URL
+ * @param {boolean} [withExtension=true] 파일 확장자를 포함할지 여부
+ * @returns {string} 추출된 파일 이름
  */
 const getFileName = (url: string, withExtension: boolean = true): string => {
 	const fullFileName = url.substring(url.lastIndexOf('/') + 1);

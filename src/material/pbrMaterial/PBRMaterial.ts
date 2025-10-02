@@ -1,5 +1,5 @@
 import RedGPUContext from "../../context/RedGPUContext";
-import DefineForFragment from "../../resources/defineProperty/DefineForFragment";
+import DefineForFragment from "../../defineProperty/DefineForFragment";
 import Sampler from "../../resources/sampler/Sampler";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import PackedTexture from "../../resources/texture/packedTexture/PackedTexture";
@@ -284,6 +284,11 @@ interface PBRMaterial {
 	KHR_dispersion: boolean
 }
 
+/**
+ * The PBRMaterial class is a subclass of the ABitmapBaseMaterial class.
+ * It is used to create a PBR material for rendering.
+ * @extends ABitmapBaseMaterial
+ */
 class PBRMaterial extends ABitmapBaseMaterial {
 	#packedORMTexture: PackedTexture
 	// #packedKHR_clearcoatTexture: PackedTexture
@@ -590,7 +595,7 @@ DefineForFragment.defineBoolean(PBRMaterial, [
 	//
 	'useKHR_materials_unlit',
 	//
-	['useSSR',true]
+	['useSSR', true]
 ])
 Object.freeze(PBRMaterial)
 export default PBRMaterial

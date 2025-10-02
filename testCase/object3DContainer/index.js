@@ -8,14 +8,14 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 	redUnit.testGroup('Object3DContainer - addChild Tests', (runner) => {
 		runner.defineTest('Object3DContainer - addChild', function (run) {
 			console.log(RedGPU)
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child = new RedGPU.Display.Mesh(redGPUContext);
 			object3DContainer.addChild(child);
 			run(object3DContainer.children.includes(child));
 		}, true);
 		runner.defineTest('object3DContainer - addChild', function (run) {
 			console.log(RedGPU)
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child1 = new RedGPU.Display.Mesh(redGPUContext);
 			const child2 = new RedGPU.Display.Mesh(redGPUContext);
 
@@ -36,7 +36,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 		}, true);
 
 		runner.defineTest('Object3DContainer - addChild order', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child1 = new RedGPU.Display.Mesh(redGPUContext);
 			const child2 = new RedGPU.Display.Mesh(redGPUContext);
 
@@ -55,7 +55,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 		}, true);
 
 		runner.defineTest('Object3DContainer - addChild parent', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child = new RedGPU.Display.Mesh(redGPUContext);
 
 			// Add child
@@ -68,8 +68,8 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 		}, true);
 
 		runner.defineTest('Object3DContainer - addChild moves child', function (run) {
-			const firstParent = new RedGPU.Display.Object3DContainer();
-			const secondParent = new RedGPU.Display.Object3DContainer();
+			const firstParent = new RedGPU.Display.CoreMesh.Object3DContainer();
+			const secondParent = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child = new RedGPU.Display.Mesh(redGPUContext);
 
 			// Add the child to the first parent
@@ -86,7 +86,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 		}, true);
 
 		runner.defineTest('Object3DContainer - addChild prevents duplication', function (run) {
-			const parent = new RedGPU.Display.Object3DContainer();
+			const parent = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child = new RedGPU.Display.Mesh(redGPUContext);
 
 			// Add the child multiple times
@@ -99,7 +99,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 			run(childrenCountIsCorrect);
 		}, true);
 		runner.defineTest('Object3DContainer - addChild maintains hierarchy', function (run) {
-			const grandParent = new RedGPU.Display.Object3DContainer();
+			const grandParent = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const parent = new RedGPU.Display.Mesh(redGPUContext);
 			const child = new RedGPU.Display.Mesh(redGPUContext);
 
@@ -112,8 +112,8 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 			run(hierarchyIsCorrect);
 		}, true);
 		runner.defineTest('Object3DContainer - addChild maintains hierarchy', function (run) {
-			const grandParent = new RedGPU.Display.Object3DContainer();
-			const parent = new RedGPU.Display.Object3DContainer();
+			const grandParent = new RedGPU.Display.CoreMesh.Object3DContainer();
+			const parent = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child = new RedGPU.Display.Mesh(redGPUContext);
 
 			grandParent.addChild(parent);
@@ -125,7 +125,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 			run(hierarchyIsCorrect);
 		}, true);
 		runner.defineTest('Object3DContainer - removeChild clears parent', function (run) {
-			const parent = new RedGPU.Display.Object3DContainer();
+			const parent = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child = new RedGPU.Display.Mesh(redGPUContext);
 
 			// Add and remove the child
@@ -141,7 +141,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 
 	redUnit.testGroup('Object3DContainer - addChildAt Tests', (runner) => {
 		runner.defineTest('Object3DContainer - addChildAt correct order', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child1 = new RedGPU.Display.Mesh(redGPUContext);
 			const child2 = new RedGPU.Display.Mesh(redGPUContext);
 			const child3 = new RedGPU.Display.Mesh(redGPUContext);
@@ -165,7 +165,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 		}, true);
 
 		runner.defineTest('Object3DContainer - addChildAt at zero index', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child1 = new RedGPU.Display.Mesh(redGPUContext);
 			const child2 = new RedGPU.Display.Mesh(redGPUContext);
 
@@ -182,7 +182,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 		}, true);
 
 		runner.defineTest('Object3DContainer - addChildAt with same child', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child = new RedGPU.Display.Mesh(redGPUContext);
 
 			// Expect an error when adding same child
@@ -196,7 +196,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 		}, true);
 
 		runner.defineTest('Object3DContainer - addChildAt with same child', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child = new RedGPU.Display.Mesh(redGPUContext);
 			object3DContainer.addChildAt(child, 0);
 			object3DContainer.addChildAt(child, 1);
@@ -205,7 +205,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 		}, true);
 
 		runner.defineTest('Object3DContainer - addChildAt with index larger than children count', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child1 = new RedGPU.Display.Mesh(redGPUContext);
 			const child2 = new RedGPU.Display.Mesh(redGPUContext);
 
@@ -221,7 +221,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 			run(isLastChild);
 		}, true);
 		runner.defineTest('Object3DContainer - addChildAt with index larger than children count', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child1 = new RedGPU.Display.Mesh(redGPUContext);
 			const child2 = new RedGPU.Display.Mesh(redGPUContext);
 
@@ -235,7 +235,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 		}, true);
 
 		runner.defineTest('Object3DContainer - addChildAt and removeChild', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child = new RedGPU.Display.Mesh(redGPUContext);
 
 			// Add child
@@ -250,7 +250,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 		}, true);
 
 		runner.defineTest('Object3DContainer - multiple addChildAt operations', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child1 = new RedGPU.Display.Mesh(redGPUContext);
 			const child2 = new RedGPU.Display.Mesh(redGPUContext);
 			const child3 = new RedGPU.Display.Mesh(redGPUContext);
@@ -276,7 +276,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 	redUnit.testGroup('Object3DContainer - addChildAt Tests - Failure Cases', (runner) => {
 
 		runner.defineTest('Object3DContainer - addChildAt negative index', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child = new RedGPU.Display.Mesh(redGPUContext);
 
 			// Expect an error when adding a child at a negative index
@@ -289,7 +289,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 		}, false);
 
 		runner.defineTest('Object3DContainer - addChildAt with non-Mesh/Container', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const notChild = {};
 
 			try {
@@ -303,7 +303,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 
 	redUnit.testGroup('Object3DContainer - getChildAt Tests', (runner) => {
 		runner.defineTest('Object3DContainer - getChildAt valid index', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child = new RedGPU.Display.Mesh(redGPUContext);
 
 			// Add child at index 0
@@ -314,7 +314,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 			run(getChild === child);
 		}, true);
 		runner.defineTest('getChildAt return value - multiple children', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child1 = new RedGPU.Display.Mesh(redGPUContext);
 			const child2 = new RedGPU.Display.Mesh(redGPUContext);
 
@@ -329,7 +329,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 			run(getChild1 === child1 && getChild2 === child2); // Test if the children retrieved are as per the order they were added.
 		}, true);
 		runner.defineTest('getChildAt invalid index', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child = new RedGPU.Display.Mesh(redGPUContext);
 
 			// Add child at index 0
@@ -345,7 +345,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 		// The following test sets are meant to check cases where getChildAt is supposed to fail.
 
 		runner.defineTest('getChildAt - undefined index', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child = new RedGPU.Display.Mesh(redGPUContext);
 
 			// Add a child
@@ -361,7 +361,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 		}, false);
 
 		runner.defineTest('getChildAt - negative index', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child = new RedGPU.Display.Mesh(redGPUContext);
 
 			// Add a child
@@ -377,7 +377,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 		}, false);
 
 		runner.defineTest('getChildAt - string index', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child = new RedGPU.Display.Mesh(redGPUContext);
 
 			// Add a child
@@ -395,7 +395,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 
 	redUnit.testGroup('Object3DContainer - getChildIndex Success Cases', (runner) => {
 		runner.defineTest('getChildIndex - valid child', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child = new RedGPU.Display.Mesh(redGPUContext);
 
 			// Add the child
@@ -408,7 +408,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 		}, true);
 
 		runner.defineTest('getChildIndex - multiple children', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child1 = new RedGPU.Display.Mesh(redGPUContext);
 			const child2 = new RedGPU.Display.Mesh(redGPUContext);
 
@@ -424,7 +424,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 		}, true);
 
 		runner.defineTest('getChildIndex - after removeChild', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child1 = new RedGPU.Display.Mesh(redGPUContext);
 			const child2 = new RedGPU.Display.Mesh(redGPUContext);
 
@@ -442,7 +442,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 		}, true);
 
 		runner.defineTest('getChildIndex - not added child', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child = new RedGPU.Display.Mesh(redGPUContext);
 
 			// Do not add the child
@@ -454,8 +454,8 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 		}, -1);
 
 		runner.defineTest('getChildIndex - child not in this container', function (run) {
-			const object3DContainer1 = new RedGPU.Display.Object3DContainer();
-			const object3DContainer2 = new RedGPU.Display.Object3DContainer();
+			const object3DContainer1 = new RedGPU.Display.CoreMesh.Object3DContainer();
+			const object3DContainer2 = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child = new RedGPU.Display.Mesh(redGPUContext);
 
 			// Add child to the first container
@@ -470,7 +470,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 	redUnit.testGroup('Object3DContainer - getChildIndex Failure Cases', (runner) => {
 
 		runner.defineTest('getChildIndex - null child', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 
 			// Expect an error when getting the index of null
 			try {
@@ -482,7 +482,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 		}, false);
 
 		runner.defineTest('getChildIndex - undefined child', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 
 			// Expect an error when getting the index of undefined
 			try {
@@ -498,7 +498,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 	redUnit.testGroup('Object3DContainer - setChildIndex Success Cases', (runner) => {
 
 		runner.defineTest('setChildIndex - move first child to the end', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child1 = new RedGPU.Display.Mesh(redGPUContext);
 			const child2 = new RedGPU.Display.Mesh(redGPUContext);
 
@@ -516,7 +516,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 		}, true);
 
 		runner.defineTest('setChildIndex - move last child to the beginning', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child1 = new RedGPU.Display.Mesh(redGPUContext);
 			const child2 = new RedGPU.Display.Mesh(redGPUContext);
 
@@ -533,7 +533,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 			run(index1 === 1 && index2 === 0); // Test if the child has been moved to the beginning correctly
 		}, true);
 		runner.defineTest('setChildIndex - change index of added child', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child = new RedGPU.Display.Mesh(redGPUContext);
 
 			// Add the child and change its index
@@ -546,7 +546,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 		}, true);
 
 		runner.defineTest('setChildIndex - setting index 0 does not move child', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child1 = new RedGPU.Display.Mesh(redGPUContext);
 
 			// Add a child
@@ -564,7 +564,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 	redUnit.testGroup('Object3DContainer - setChildIndex Failure Cases', (runner) => {
 
 		runner.defineTest('setChildIndex - set index out of range', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child = new RedGPU.Display.Mesh(redGPUContext);
 
 			// Add the child
@@ -580,7 +580,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 		}, false);
 
 		runner.defineTest('setChildIndex - set index for not added child', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child = new RedGPU.Display.Mesh(redGPUContext);
 
 			// Attempt to set an index for a child not added
@@ -593,7 +593,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 		}, false);
 
 		runner.defineTest('setChildIndex - set negative index', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child = new RedGPU.Display.Mesh(redGPUContext);
 
 			object3DContainer.addChild(child);
@@ -612,7 +612,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 	redUnit.testGroup('Object3DContainer - swapChildren Success Cases', (runner) => {
 
 		runner.defineTest('swapChildren - swap two children successfully', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child1 = new RedGPU.Display.Mesh(redGPUContext);
 			const child2 = new RedGPU.Display.Mesh(redGPUContext);
 
@@ -633,7 +633,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 	redUnit.testGroup('Object3DContainer - swapChildren Failure Cases', (runner) => {
 
 		runner.defineTest('swapChildren - swap a not added child', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child1 = new RedGPU.Display.Mesh(redGPUContext);
 			const child2 = new RedGPU.Display.Mesh(redGPUContext);
 
@@ -650,7 +650,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 		}, false);
 
 		runner.defineTest('swapChildren - swap the same child', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child = new RedGPU.Display.Mesh(redGPUContext);
 
 			// Add a child
@@ -665,7 +665,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 			}
 		}, false);
 		runner.defineTest('swapChildren - first child not added', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child1 = new RedGPU.Display.Mesh(redGPUContext);
 			const child2 = new RedGPU.Display.Mesh(redGPUContext);
 
@@ -680,7 +680,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 		}, false);
 
 		runner.defineTest('swapChildren - second child not added', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child1 = new RedGPU.Display.Mesh(redGPUContext);
 			const child2 = new RedGPU.Display.Mesh(redGPUContext);
 
@@ -695,7 +695,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 		}, false);
 
 		runner.defineTest('swapChildren - both children not added', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child1 = new RedGPU.Display.Mesh(redGPUContext);
 			const child2 = new RedGPU.Display.Mesh(redGPUContext);
 
@@ -711,7 +711,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 	redUnit.testGroup('Object3DContainer - swapChildrenAt Success Cases', (runner) => {
 
 		runner.defineTest('swapChildrenAt - Swap first child with the last', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child1 = new RedGPU.Display.Mesh(redGPUContext);
 			const child2 = new RedGPU.Display.Mesh(redGPUContext);
 
@@ -729,7 +729,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 		}, true);
 
 		runner.defineTest('swapChildrenAt - Swap two children in the middle', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child1 = new RedGPU.Display.Mesh(redGPUContext);
 			const child2 = new RedGPU.Display.Mesh(redGPUContext);
 			const child3 = new RedGPU.Display.Mesh(redGPUContext);
@@ -754,7 +754,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 	redUnit.testGroup('Object3DContainer - swapChildrenAt Failure Cases', (runner) => {
 
 		runner.defineTest('swapChildrenAt - invalid index provided', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child = new RedGPU.Display.Mesh(redGPUContext);
 
 			object3DContainer.addChild(child);
@@ -768,7 +768,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 		}, false);
 
 		runner.defineTest('swapChildrenAt - same index passed twice', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child1 = new RedGPU.Display.Mesh(redGPUContext);
 			const child2 = new RedGPU.Display.Mesh(redGPUContext);
 
@@ -784,7 +784,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 		}, false);
 
 		runner.defineTest('swapChildrenAt - index out of bounds', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child = new RedGPU.Display.Mesh(redGPUContext);
 
 			object3DContainer.addChild(child);
@@ -800,7 +800,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 	redUnit.testGroup('Object3DContainer - removeChild Success Cases', (runner) => {
 
 		runner.defineTest('removeChild - child successfully removed', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child = new RedGPU.Display.Mesh(redGPUContext);
 
 			object3DContainer.addChild(child);
@@ -822,7 +822,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 	redUnit.testGroup('Object3DContainer - removeChild Failure Cases', (runner) => {
 
 		runner.defineTest('removeChild - non-child object passed', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child = new RedGPU.Display.Mesh(redGPUContext);
 			const notAChild = new RedGPU.Display.Mesh(redGPUContext);
 
@@ -839,7 +839,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 	redUnit.testGroup('Object3DContainer - removeChildAt Success Cases', (runner) => {
 
 		runner.defineTest('removeChildAt - child successfully removed', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child = new RedGPU.Display.Mesh(redGPUContext);
 
 			// Add child to container
@@ -864,7 +864,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 	redUnit.testGroup('Object3DContainer - removeChildAt Failure Cases', (runner) => {
 
 		runner.defineTest('removeChildAt - invalid index passed', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child = new RedGPU.Display.Mesh(redGPUContext);
 
 			// Add child to container
@@ -884,7 +884,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 	redUnit.testGroup('Object3DContainer - removeAllChildren Success Cases', (runner) => {
 
 		runner.defineTest('removeAllChildren - all children successfully removed', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child1 = new RedGPU.Display.Mesh(redGPUContext);
 			const child2 = new RedGPU.Display.Mesh(redGPUContext);
 
@@ -907,7 +907,7 @@ RedGPU.init(document.createElement('canvas'), (redGPUContext) => {
 		}, true);
 
 		runner.defineTest('removeAllChildren - all children successfully removed', function (run) {
-			const object3DContainer = new RedGPU.Display.Object3DContainer();
+			const object3DContainer = new RedGPU.Display.CoreMesh.Object3DContainer();
 			const child1 = new RedGPU.Display.Mesh(redGPUContext);
 			const child2 = new RedGPU.Display.Mesh(redGPUContext);
 
