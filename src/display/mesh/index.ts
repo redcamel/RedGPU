@@ -1,4 +1,4 @@
-import * as MeshCore from "./core";
+import * as CoreMesh from "./core";
 import Mesh from "./Mesh";
 
-export {Mesh, MeshCore};
+export {Mesh, CoreMesh};

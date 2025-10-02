@@ -1,6 +1,6 @@
 import ColorRGB from "../../color/ColorRGB";
 import convertHexToRgb from "../../utils/convertColor/convertHexToRgb";
-import BaseLight from "../core/BaseLight";
+import ABaseLight from "../core/ABaseLight";
 
 /**
  * 방향성 광원을 정의하는 클래스입니다.
@@ -18,7 +18,7 @@ import BaseLight from "../core/BaseLight";
  *
  * @category Light
  */
-class DirectionalLight extends BaseLight {
+class DirectionalLight extends ABaseLight {
 	/**
 	 * 광원의 X 방향 벡터 값입니다.
 	 * 기본값은 -1이며, 광원이 왼쪽 방향으로 향하도록 설정됩니다.

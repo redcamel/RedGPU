@@ -1,4 +1,4 @@
 import SkyBox from "./SkyBox";
 
-export * as SkyBoxCore from "./core";
+export * as CoreSkyBox from "./core";
 export {SkyBox};

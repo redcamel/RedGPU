@@ -7,7 +7,7 @@ import ADrawDebuggerLight from "../../display/drawDebugger/light/ADrawDebuggerLi
  * 색상, 세기(intensity), 디버깅 시각화 기능 등을 포함하며,
  * DirectionalLight, PointLight 등 다양한 조명 클래스의 기반으로 사용됩니다.
  */
-class BaseLight {
+abstract class ABaseLight {
 	/**
 	 * 광원의 디버깅 시각화를 위한 도우미 객체입니다. sdfsdf
 	 * 외부에서 설정되며, 광원의 위치나 방향을 시각적으로 표시할 수 있습니다.
@@ -21,7 +21,7 @@ class BaseLight {
 	#enableDebugger: boolean = false;
 
 	/**
-	 * 새로운 BaseLight 인스턴스를 생성합니다.
+	 * 새로운 ABaseLight 인스턴스를 생성합니다.
 	 *
 	 * @param color - 광원의 색상 (ColorRGB 객체)
 	 * @param intensity - 광원의 세기 (기본값: 1)
@@ -80,5 +80,5 @@ class BaseLight {
 	}
 }
 
-Object.freeze(BaseLight);
-export default BaseLight;
+Object.freeze(ABaseLight);
+export default ABaseLight;

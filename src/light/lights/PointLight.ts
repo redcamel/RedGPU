@@ -1,6 +1,6 @@
 import ColorRGB from "../../color/ColorRGB";
 import convertHexToRgb from "../../utils/convertColor/convertHexToRgb";
-import BaseLight from "../core/BaseLight";
+import ABaseLight from "../core/ABaseLight";
 
 /**
  * 점광원(PointLight)을 정의하는 클래스입니다.
@@ -20,7 +20,7 @@ import BaseLight from "../core/BaseLight";
  * @see [PointLight Cluster Performance example](/RedGPU/examples/3d/light/pointLightPerformance/)
  * @category Light
  */
-class PointLight extends BaseLight {
+class PointLight extends ABaseLight {
 	/** 광원의 영향을 미치는 반경입니다. */
 	#radius: number = 1;
 	/** 광원의 X 좌표입니다. */

@@ -1,5 +1,5 @@
 import ColorRGB from "../../color/ColorRGB";
-import BaseLight from "../core/BaseLight";
+import ABaseLight from "../core/ABaseLight";
 
 /**
  * 환경광(AmbientLight)을 정의하는 클래스입니다.
@@ -15,7 +15,7 @@ import BaseLight from "../core/BaseLight";
  * ```
  * @category Light
  */
-class AmbientLight extends BaseLight {
+class AmbientLight extends ABaseLight {
 	/**
 	 * 새로운 AmbientLight 인스턴스를 생성합니다.
 	 *

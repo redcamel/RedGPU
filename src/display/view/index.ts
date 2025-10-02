@@ -1,9 +1,9 @@
-import * as ViewCore from "./core";
+import * as CoreView from "./core";
 import View2D from "./View2D";
 import View3D from "./View3D";
 
 export {
-	ViewCore,
+	CoreView,
 	View2D,
 	View3D
 }

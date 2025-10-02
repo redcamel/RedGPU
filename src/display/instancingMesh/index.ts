@@ -1,4 +1,4 @@
-import * as instancingMeshCore from "./core";
+import * as CoreInstancingMesh from "./core";
 import InstancingMesh from "./InstancingMesh";
 
-export {InstancingMesh, instancingMeshCore};
+export {InstancingMesh, CoreInstancingMesh};

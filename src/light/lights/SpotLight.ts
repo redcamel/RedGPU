@@ -1,6 +1,6 @@
 import ColorRGB from "../../color/ColorRGB";
 import convertHexToRgb from "../../utils/convertColor/convertHexToRgb";
-import BaseLight from "../core/BaseLight";
+import ABaseLight from "../core/ABaseLight";
 
 /**
  * 스포트라이트(SpotLight)를 정의하는 클래스입니다.
@@ -21,7 +21,7 @@ import BaseLight from "../core/BaseLight";
  * @see [SpotLight Cluster Performance example](/RedGPU/examples/3d/light/spotLightPerformance/)
  * @category Light
  */
-class SpotLight extends BaseLight {
+class SpotLight extends ABaseLight {
 	/** 광원의 영향을 미치는 반경입니다. */
 	#radius: number = 1;
 	/** 광원의 X 좌표입니다. */
