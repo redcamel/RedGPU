@@ -1,8 +1,8 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import ResourceStateVertexBuffer from "../../resourceManager/resourceState/ResourceStateVertexBuffer";
 import ABaseBuffer, {GPU_BUFFER_CACHE_KEY, GPU_BUFFER_DATA_SYMBOL, GPU_BUFFER_SYMBOL} from "../core/ABaseBuffer";
-import InterleavedStruct from "./InterleavedStruct";
-import InterleavedStructElement from "./InterleavedStructElement";
+import VertexInterleavedStruct from "./VertexInterleavedStruct";
+import VertexInterleavedStructElement from "./core/VertexInterleavedStructElement";
 
 const MANAGED_STATE_KEY = 'managedVertexBufferState'
 
@@ -30,7 +30,7 @@ class VertexBuffer extends ABaseBuffer {
 	 * 버텍스 데이터의 구조를 정의하는 객체입니다.
 	 * @category Buffer
 	 */
-	#interleavedStruct: InterleavedStruct
+	#interleavedStruct: VertexInterleavedStruct
 	/**
 	 * 삼각형 개수입니다.
 	 * @category Buffer
@@ -48,7 +48,7 @@ class VertexBuffer extends ABaseBuffer {
 	constructor(
 		redGPUContext: RedGPUContext,
 		data: Array<number> | Float32Array,
-		interleavedStruct: InterleavedStruct,
+		interleavedStruct: VertexInterleavedStruct,
 		usage: GPUBufferUsageFlags = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE,
 		cacheKey: string = ''
 	) {
@@ -110,7 +110,7 @@ class VertexBuffer extends ABaseBuffer {
 	 * @param interleavedStruct - 버텍스 데이터 구조 정의(옵션)
 	 * @category Buffer
 	 */
-	changeData(data: Array<number> | Float32Array, interleavedStruct?: InterleavedStruct) {
+	changeData(data: Array<number> | Float32Array, interleavedStruct?: VertexInterleavedStruct) {
 		const {gpuDevice} = this;
 		if (Array.isArray(data)) {
 			data = new Float32Array(data);
@@ -165,12 +165,12 @@ class VertexBuffer extends ABaseBuffer {
 	 * @param interleavedStruct - 버텍스 데이터 구조 정의
 	 * @category Buffer
 	 */
-	#updateInterleavedStruct(interleavedStruct: InterleavedStruct) {
+	#updateInterleavedStruct(interleavedStruct: VertexInterleavedStruct) {
 		this.#interleavedStruct = interleavedStruct;
 		this.#vertexCount = 0;
 		this.#stride = 0;
 		for (const k in this.#interleavedStruct.define) {
-			const value: InterleavedStructElement = this.#interleavedStruct.define[k];
+			const value: VertexInterleavedStructElement = this.#interleavedStruct.define[k];
 			const elementCount = value.attributeStride / Float32Array.BYTES_PER_ELEMENT;
 			this.#vertexCount += elementCount;
 			this.#stride += elementCount;

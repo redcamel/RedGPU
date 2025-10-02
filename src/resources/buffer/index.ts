@@ -1,9 +1,10 @@
 import IndexBuffer from "./indexBuffer/IndexBuffer";
 import StorageBuffer from "./storageBuffer/StorageBuffer";
-
-export * from './uniformBuffer'
+import UniformBuffer from "./uniformBuffer/UniformBuffer";
+export * as CoreBuffer from './core'
 export * from './vertexBuffer'
 export {
 	IndexBuffer,
-	StorageBuffer
+	StorageBuffer,
+	UniformBuffer
 }

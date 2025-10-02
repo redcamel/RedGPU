@@ -1,13 +1,13 @@
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
-import {TypeInterleave} from "../core/type/InterleaveType";
-import InterleavedStructElement from "./InterleavedStructElement";
+import {TypeInterleave} from "./VertexInterleaveType";
+import VertexInterleavedStructElement from "./core/VertexInterleavedStructElement";
 
 /**
  * Represents a structure for interleaving vertex attributes.
  * @category Buffer
  */
-export default class InterleavedStruct {
-	#define: Record<string, InterleavedStructElement>;
+export default class VertexInterleavedStruct {
+	#define: Record<string, VertexInterleavedStructElement>;
 	readonly #name: string = ''
 	#attributes = []
 	#arrayStride: number = 0
@@ -30,7 +30,7 @@ export default class InterleavedStruct {
 		return this.#arrayStride;
 	}
 
-	get define(): Record<string, InterleavedStructElement> {
+	get define(): Record<string, VertexInterleavedStructElement> {
 		return {...this.#define};
 	}
 
@@ -49,7 +49,7 @@ export default class InterleavedStruct {
 			// 	consoleAndThrowError(`Invalid vertex format: ${gpuVertexFormat}`);
 			// }
 			const attributeStride = gpuVertexFormat.stride;
-			temp[attributeName] = new InterleavedStructElement(attributeName, attributeStride, gpuVertexFormat)
+			temp[attributeName] = new VertexInterleavedStructElement(attributeName, attributeStride, gpuVertexFormat)
 			if (attributeStride % 4 !== 0) {
 				consoleAndThrowError(`Invalid attribute stride: ${attributeStride}`);
 			}

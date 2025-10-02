@@ -3,7 +3,7 @@
  *
  * 각 상태 객체를 통해 머티리얼, 메쉬 등 Object3D의 GPU 파이프라인 렌더 동작을 세밀하게 제어할 수 있습니다.
  *
- * @packageDocumentation
+ *  @packageDocumentation
  */
 import BlendState from "./BlendState";
 import DepthStencilState from "./DepthStencilState";

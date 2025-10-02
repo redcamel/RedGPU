@@ -7,10 +7,10 @@ import GPU_COMPARE_FUNCTION from "../../../gpuConst/GPU_COMPARE_FUNCTION";
 import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "../../../material/core";
 import RenderViewStateData from "../../../renderer/RenderViewStateData";
 import BlendState from "../../../renderState/BlendState";
-import InterleaveType from "../../../resources/buffer/core/type/InterleaveType";
+import VertexInterleaveType from "../../../resources/buffer/vertexBuffer/VertexInterleaveType";
 import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
 import UniformBuffer from "../../../resources/buffer/uniformBuffer/UniformBuffer";
-import InterleavedStruct from "../../../resources/buffer/vertexBuffer/InterleavedStruct";
+import VertexInterleavedStruct from "../../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
 import ResourceManager from "../../../resources/resourceManager/ResourceManager";
 import parseWGSL from "../../../resources/wgslParser/parseWGSL";
@@ -216,9 +216,9 @@ class DrawDebuggerGrid {
 				vertexBuffer = new VertexBuffer(
 					redGPUContext,
 					interleaveData,
-					new InterleavedStruct({
-						position: InterleaveType.float32x3,
-						color: InterleaveType.float32x4,
+					new VertexInterleavedStruct({
+						position: VertexInterleaveType.float32x3,
+						color: VertexInterleaveType.float32x4,
 					}),
 					undefined,
 					uniqueKey

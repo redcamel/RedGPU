@@ -1,9 +1,9 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import Geometry from "../../geometry/Geometry";
 import GeometryGPURenderInfo from "../../renderInfos/GeometryGPURenderInfo";
-import InterleaveType from "../../resources/buffer/core/type/InterleaveType";
+import VertexInterleaveType from "../../resources/buffer/vertexBuffer/VertexInterleaveType";
 import IndexBuffer from "../../resources/buffer/indexBuffer/IndexBuffer";
-import InterleavedStruct from "../../resources/buffer/vertexBuffer/InterleavedStruct";
+import VertexInterleavedStruct from "../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
 import VertexBuffer from "../../resources/buffer/vertexBuffer/VertexBuffer";
 import validateRedGPUContext from "../../runtimeChecker/validateFunc/validateRedGPUContext";
 import AABB from "../../utils/math/bound/AABB";
@@ -45,12 +45,12 @@ class Primitive {
 	/**
 	 * 기본 정점 레이아웃 구조 반환
 	 */
-	static get primitiveInterleaveStruct(): InterleavedStruct {
-		return new InterleavedStruct(
+	static get primitiveInterleaveStruct(): VertexInterleavedStruct {
+		return new VertexInterleavedStruct(
 			{
-				vertexPosition: InterleaveType.float32x3,
-				vertexNormal: InterleaveType.float32x3,
-				texcoord: InterleaveType.float32x2,
+				vertexPosition: VertexInterleaveType.float32x3,
+				vertexNormal: VertexInterleaveType.float32x3,
+				texcoord: VertexInterleaveType.float32x2,
 			},
 			`primitiveInterleaveStruct`
 		)

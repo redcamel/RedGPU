@@ -1,9 +1,9 @@
-import {TypeInterleave} from "../core/type/InterleaveType";
+import {TypeInterleave} from "../VertexInterleaveType";
 
 /**
  * @category Buffer
  */
-class InterleavedStructElement {
+class VertexInterleavedStructElement {
 	attributeName: string;
 	attributeStride: number;
 	interleaveType: TypeInterleave;
@@ -15,4 +15,4 @@ class InterleavedStructElement {
 	}
 }
 
-export default InterleavedStructElement
+export default VertexInterleavedStructElement

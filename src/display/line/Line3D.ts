@@ -2,8 +2,8 @@ import RedGPUContext from "../../context/RedGPUContext";
 import Geometry from "../../geometry/Geometry";
 import GPU_PRIMITIVE_TOPOLOGY from "../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
 import Primitive from "../../primitive/core/Primitive";
-import InterleaveType from "../../resources/buffer/core/type/InterleaveType";
-import InterleavedStruct from "../../resources/buffer/vertexBuffer/InterleavedStruct";
+import VertexInterleaveType from "../../resources/buffer/vertexBuffer/VertexInterleaveType";
+import VertexInterleavedStruct from "../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
 import VertexBuffer from "../../resources/buffer/vertexBuffer/VertexBuffer";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
@@ -74,10 +74,10 @@ class Line3D extends Mesh {
 			new VertexBuffer(
 				redGPUContext,
 				this.#interleaveData,
-				new InterleavedStruct(
+				new VertexInterleavedStruct(
 					{
-						vertexPosition: InterleaveType.float32x3,
-						vertexColor: InterleaveType.float32x4,
+						vertexPosition: VertexInterleaveType.float32x3,
+						vertexColor: VertexInterleaveType.float32x4,
 					}
 				)
 			),
@@ -285,10 +285,10 @@ class Line3D extends Mesh {
 				new VertexBuffer(
 					redGPUContext,
 					this.#interleaveData,
-					new InterleavedStruct(
+					new VertexInterleavedStruct(
 						{
-							vertexPosition: InterleaveType.float32x3,
-							vertexColor: InterleaveType.float32x4,
+							vertexPosition: VertexInterleaveType.float32x3,
+							vertexColor: VertexInterleaveType.float32x4,
 						}
 					)
 				),

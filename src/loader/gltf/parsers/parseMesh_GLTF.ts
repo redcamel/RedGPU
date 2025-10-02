@@ -4,9 +4,9 @@ import GPU_COMPARE_FUNCTION from "../../../gpuConst/GPU_COMPARE_FUNCTION";
 import GPU_CULL_MODE from "../../../gpuConst/GPU_CULL_MODE";
 import GPU_PRIMITIVE_TOPOLOGY from "../../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
 import PBRMaterial from "../../../material/pbrMaterial/PBRMaterial";
-import InterleaveType from "../../../resources/buffer/core/type/InterleaveType";
+import VertexInterleaveType from "../../../resources/buffer/vertexBuffer/VertexInterleaveType";
 import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
-import InterleavedStruct from "../../../resources/buffer/vertexBuffer/InterleavedStruct";
+import VertexInterleavedStruct from "../../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import calculateNormals from "../../../utils/math/calculateNormals";
@@ -143,18 +143,18 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
 		// 메쉬 생성
 		let tGeo: Geometry;
 		let tInterleaveInfoList = {};
-		if (vertices.length) tInterleaveInfoList['aVertexPosition'] = InterleaveType.float32x3
-		if (normalData.length) tInterleaveInfoList['aVertexNormal'] = InterleaveType.float32x3
-		if (uvs.length) tInterleaveInfoList['aTexcoord'] = InterleaveType.float32x2
-		if (uvs2.length) tInterleaveInfoList['aTexcoord1'] = InterleaveType.float32x2
-		else if (uvs1.length) tInterleaveInfoList['aTexcoord1'] = InterleaveType.float32x2
-		else if (uvs.length) tInterleaveInfoList['aTexcoord1'] = InterleaveType.float32x2
-		tInterleaveInfoList['aVertexColor_0'] = InterleaveType.float32x4
+		if (vertices.length) tInterleaveInfoList['aVertexPosition'] = VertexInterleaveType.float32x3
+		if (normalData.length) tInterleaveInfoList['aVertexNormal'] = VertexInterleaveType.float32x3
+		if (uvs.length) tInterleaveInfoList['aTexcoord'] = VertexInterleaveType.float32x2
+		if (uvs2.length) tInterleaveInfoList['aTexcoord1'] = VertexInterleaveType.float32x2
+		else if (uvs1.length) tInterleaveInfoList['aTexcoord1'] = VertexInterleaveType.float32x2
+		else if (uvs.length) tInterleaveInfoList['aTexcoord1'] = VertexInterleaveType.float32x2
+		tInterleaveInfoList['aVertexColor_0'] = VertexInterleaveType.float32x4
 		// if (jointWeights.length)
-		// tInterleaveInfoList['aVertexWeight'] = InterleaveType.float32x4
+		// tInterleaveInfoList['aVertexWeight'] = VertexInterleaveType.float32x4
 		// if (joints.length)
-		// tInterleaveInfoList['aVertexJoint'] = InterleaveType.float32x4
-		tInterleaveInfoList['aVertexTangent'] = InterleaveType.float32x4
+		// tInterleaveInfoList['aVertexJoint'] = VertexInterleaveType.float32x4
+		tInterleaveInfoList['aVertexTangent'] = VertexInterleaveType.float32x4
 		const weightData = []
 		const jointData = []
 		parseInterleaveData_GLTF(weightData, vertices, verticesColor_0, normalData, uvs, uvs1, uvs2, jointWeights, joints, tangents, true)
@@ -162,9 +162,9 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
 		const weightBuffer = new VertexBuffer(
 			redGPUContext,
 			weightData,
-			new InterleavedStruct(
+			new VertexInterleavedStruct(
 				{
-					aVertexWeight: InterleaveType.float32x4,
+					aVertexWeight: VertexInterleaveType.float32x4,
 				}
 			),
 			undefined,
@@ -186,7 +186,7 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
 			hasVertexBuffer || new VertexBuffer(
 				redGPUContext,
 				interleaveData,
-				new InterleavedStruct(
+				new VertexInterleavedStruct(
 					tInterleaveInfoList,
 				),
 				undefined,
@@ -239,7 +239,7 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
 		if (!tMesh.gpuRenderInfo) tMesh.initGPURenderInfos()
 		let NUM = 0;
 		{
-			// console.log('여긴가',new InterleavedStruct(tInterleaveInfoList),tMesh.geometry.vertexBuffer)
+			// console.log('여긴가',new VertexInterleavedStruct(tInterleaveInfoList),tMesh.geometry.vertexBuffer)
 			for (const k in tInterleaveInfoList) {
 				// console.log('여긴가', k, tInterleaveInfoList[k],)
 				NUM += tInterleaveInfoList[k].numElements

@@ -5,7 +5,6 @@ import ABaseBuffer, {GPU_BUFFER_DATA_SYMBOL, GPU_BUFFER_SYMBOL} from "./ABaseBuf
  * @class
  * @classdesc Represents a uniform buffer in RedGPU.
  * @extends ResourceBase
- * @category Buffer
  */
 abstract class AUniformBaseBuffer extends ABaseBuffer {
 	[GPU_BUFFER_DATA_SYMBOL]: ArrayBuffer

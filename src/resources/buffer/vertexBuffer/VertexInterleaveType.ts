@@ -3,7 +3,7 @@ export type TypeInterleave = { numElements: number; stride: number, gpuVertexFor
 /**
  * @category Buffer
  */
-class InterleaveType {
+class VertexInterleaveType {
 	static get float32(): TypeInterleave {
 		return {numElements: 1, stride: Float32Array.BYTES_PER_ELEMENT, gpuVertexFormat: 'float32', offset: 0};
 	}
@@ -21,5 +21,5 @@ class InterleaveType {
 	}
 }
 
-Object.freeze(InterleaveType)
-export default InterleaveType
+Object.freeze(VertexInterleaveType)
+export default VertexInterleaveType

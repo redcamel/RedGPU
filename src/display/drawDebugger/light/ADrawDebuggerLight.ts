@@ -3,8 +3,8 @@ import Geometry from "../../../geometry/Geometry";
 import GPU_PRIMITIVE_TOPOLOGY from "../../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
 import ColorMaterial from "../../../material/colorMaterial/ColorMaterial";
 import RenderViewStateData from "../../../renderer/RenderViewStateData";
-import InterleaveType from "../../../resources/buffer/core/type/InterleaveType";
-import InterleavedStruct from "../../../resources/buffer/vertexBuffer/InterleavedStruct";
+import VertexInterleaveType from "../../../resources/buffer/vertexBuffer/VertexInterleaveType";
+import VertexInterleavedStruct from "../../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
 import Mesh from "../../mesh/Mesh";
 
@@ -64,11 +64,11 @@ abstract class ADrawDebuggerLight {
 
 	private createLightDebugGeometry(redGPUContext: RedGPUContext, maxLines: number): Geometry {
 		const vertices = new Float32Array(maxLines * 2 * 8); // maxLines * 2개 점 * 8개 데이터
-		const interleavedStruct = new InterleavedStruct(
+		const interleavedStruct = new VertexInterleavedStruct(
 			{
-				vertexPosition: InterleaveType.float32x3,
-				vertexNormal: InterleaveType.float32x3,
-				texcoord: InterleaveType.float32x2,
+				vertexPosition: VertexInterleaveType.float32x3,
+				vertexNormal: VertexInterleaveType.float32x3,
+				texcoord: VertexInterleaveType.float32x2,
 			},
 			`lightDebugStruct_${Math.random()}`
 		);

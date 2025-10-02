@@ -1,11 +1,11 @@
-import InterleavedStruct from "./InterleavedStruct";
-import InterleavedStructElement from "./InterleavedStructElement";
 import VertexBuffer from "./VertexBuffer";
+import VertexInterleavedStruct from "./VertexInterleavedStruct";
+import VertexInterleaveType from "./VertexInterleaveType";
 
-export * from './InterleavedStructElement'
-export * from './InterleavedStruct'
+
+export * as CoreVertexBuffer from './core/'
 export {
-	InterleavedStruct,
-	InterleavedStructElement,
 	VertexBuffer,
+	VertexInterleavedStruct,
+	VertexInterleaveType
 }

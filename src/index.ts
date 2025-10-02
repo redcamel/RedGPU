@@ -16,6 +16,7 @@ export * as RuntimeChecker from "./runtimeChecker";
 export * from "./gpuConst";
 export * as PostEffect from "./postEffect";
 export * as Picking from "./picking";
+export * as RenderState from "./renderState";
 import init from "./init";
 import GLTFLoader from "./loader/gltf/GLTFLoader";
 import SystemCode from "./resources/systemCode/SystemCode";
