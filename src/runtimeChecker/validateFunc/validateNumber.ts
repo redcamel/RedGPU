@@ -1,10 +1,14 @@
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
 
 /**
- * Validates a number value.
+ * 주어진 값이 숫자인지 검증합니다.
  *
- * @param {number} value - The value to be validated.
- * @returns {boolean} - Returns true if the value is a number, false otherwise.
+ * 값이 number 타입이 아니면 예외를 발생시키고 false를 반환합니다.
+ *
+ * number 타입이면 true를 반환합니다.
+ *
+ * @param {number} value 검증할 값
+ * @returns {boolean} 값이 숫자이면 true, 아니면 false
  */
 const validateNumber = (value: number): boolean => {
 	if (typeof value !== 'number') {

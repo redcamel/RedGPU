@@ -1,5 +1,5 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import getMipLevelCount from "../../../../utils/math/getMipLevelCount";
+import getMipLevelCount from "../../../../utils/texture/getMipLevelCount";
 import Sampler from "../../../sampler/Sampler";
 import cubemapDownsampleCode from "./cubemapDownsample.wgsl";
 

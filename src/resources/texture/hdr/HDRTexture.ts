@@ -4,11 +4,11 @@ import GPU_FILTER_MODE from "../../../gpuConst/GPU_FILTER_MODE";
 import GPU_MIPMAP_FILTER_MODE from "../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 import {keepLog} from "../../../utils";
 import getAbsoluteURL from "../../../utils/file/getAbsoluteURL";
-import calculateTextureByteSize from "../../../utils/math/calculateTextureByteSize";
-import getMipLevelCount from "../../../utils/math/getMipLevelCount";
-import ManagementResourceBase from "../../ManagementResourceBase";
-import ResourceManager from "../../resourceManager/ResourceManager";
-import ResourceStateHDRTexture from "../../resourceManager/resourceState/texture/ResourceStateHDRTexture";
+import calculateTextureByteSize from "../../../utils/texture/calculateTextureByteSize";
+import getMipLevelCount from "../../../utils/texture/getMipLevelCount";
+import ManagementResourceBase from "../../core/ManagementResourceBase";
+import ResourceManager from "../../core/resourceManager/ResourceManager";
+import ResourceStateHDRTexture from "../../core/resourceManager/resourceState/texture/ResourceStateHDRTexture";
 import Sampler from "../../sampler/Sampler";
 import CubeTexture from "../CubeTexture";
 import generateCubeMapFromEquirectangularCode from "./generateCubeMapFromEquirectangularCode.wgsl"
@@ -32,6 +32,7 @@ interface LuminanceAnalysis {
 /**
  * HDRTexture 클래스
  * 지원 형식: .hdr (Radiance HDR/RGBE) 형식만 지원
+ * @category Texture
  */
 class HDRTexture extends ManagementResourceBase {
 	#gpuTexture: GPUTexture
@@ -367,6 +368,7 @@ class HDRTexture extends ManagementResourceBase {
 			await this.#renderCubeMapFace(renderPipeline, sampler, face, faceMatrices[face], sourceTexture);
 		}
 	}
+
 	async #float32ToFloat16WithToneMapping(float32Data: Float32Array): Promise<Uint16Array> {
 		const result = await float32ToFloat16WithToneMapping(
 			this.redGPUContext,
@@ -381,7 +383,6 @@ class HDRTexture extends ManagementResourceBase {
 		return result.data;
 	}
 
-
 	async #hdrDataToGPUTexture(device: GPUDevice, resourceManager: ResourceManager, hdrData: HDRData, textureDescriptor: GPUTextureDescriptor): Promise<GPUTexture> {
 		// const texture = resourceManager.createManagedTexture(textureDescriptor);
 		const texture = device.createTexture(textureDescriptor);
@@ -393,7 +394,6 @@ class HDRTexture extends ManagementResourceBase {
 				const float16Data = await this.#float32ToFloat16WithToneMapping(hdrData.data);
 				uploadData = float16Data.buffer as ArrayBuffer;
 				break;
-
 			case 'rgba8unorm':
 				bytesPerPixel = 4;
 				const uint8Data = await this.#float32ToUint8WithToneMapping(hdrData.data);

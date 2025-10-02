@@ -1,23 +1,52 @@
 import {mat4} from "gl-matrix";
 import validateNumber from "../../runtimeChecker/validateFunc/validateNumber";
-import InstanceIdGenerator from "../../utils/InstanceIdGenerator";
+import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
 
+/**
+ * 원근 투영 카메라(PerspectiveCamera) 클래스입니다.
+ * x, y, z 위치, 회전, 시야각, 클리핑, 모델 행렬, 이름 등을 관리합니다.
+ * lookAt, setPosition 등 카메라 제어 기능을 제공합니다.
+ *
+ * @category Camera
+ *
+ * @example
+ * ```javascript
+ * const camera = new RedGPU.Camera.PerspectiveCamera();
+ * camera.x = 10;
+ * camera.y = 5;
+ * camera.z = 20;
+ * camera.fieldOfView = 75;
+ * camera.lookAt(0, 0, 0);
+ * ```
+ */
 class PerspectiveCamera {
+	/** 인스턴스 고유 ID */
 	#instanceId: number
+	/** up 벡터 (기본값 [0, 1, 0]) */
 	#up = new Float32Array([0, 1, 0]);
+	/** 모델 행렬(mat4) */
 	#modelMatrix: mat4 = mat4.create()
+	/** X 좌표 */
 	#x: number = 0
+	/** Z 좌표 */
 	#z: number = 0
+	/** Y 좌표 */
 	#y: number = 0
+	/** X축 회전(라디안) */
 	#rotationX: number = 0
+	/** Y축 회전(라디안) */
 	#rotationY: number = 0
+	/** Z축 회전(라디안) */
 	#rotationZ: number = 0
+	/** 시야각(FOV, 도) */
 	#fieldOfView: number = 60;
+	/** 근평면(near) */
 	#nearClipping: number = 0.01
+	/** 원평면(far) */
 	#farClipping: number = 10000;
+	/** 카메라 이름 */
 	#name: string
 
-	//TODO rotationX, rotationY, rotationZ getter/setter
 	constructor() {
 	}
 
@@ -26,7 +55,6 @@ class PerspectiveCamera {
 	}
 
 	set rotationX(value: number) {
-		//TODO
 		this.#rotationX = value;
 	}
 
@@ -35,7 +63,6 @@ class PerspectiveCamera {
 	}
 
 	set rotationY(value: number) {
-		//TODO
 		this.#rotationY = value;
 	}
 
@@ -44,7 +71,6 @@ class PerspectiveCamera {
 	}
 
 	set rotationZ(value: number) {
-		//TODO
 		this.#rotationZ = value;
 	}
 

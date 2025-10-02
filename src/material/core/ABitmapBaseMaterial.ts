@@ -6,12 +6,24 @@ import ANoiseTexture from "../../resources/texture/noiseTexture/core/ANoiseTextu
 import ABaseMaterial from "./ABaseMaterial";
 
 /**
- * Represents a material with a bitmap texture.
+ * 비트맵/큐브/노이즈 텍스처 기반 머티리얼의 공통 속성 및 기능을 제공하는 추상 클래스입니다.
+ * 텍스처/샘플러의 변경 감지 및 파이프라인 갱신, 텍스처 리스너 관리 등 텍스처 기반 머티리얼의 핵심 로직을 구현합니다.
+ *
  * @extends ABaseMaterial
  */
-class ABitmapBaseMaterial extends ABaseMaterial {
+abstract class ABitmapBaseMaterial extends ABaseMaterial {
+	/**
+	 * 파이프라인 갱신 시 호출되는 콜백 리스트
+	 */
 	__packingList: any[]
 
+	/**
+	 * ABitmapBaseMaterial 생성자
+	 * @param redGPUContext - RedGPUContext 인스턴스
+	 * @param moduleName - 머티리얼 모듈명
+	 * @param SHADER_INFO - 파싱된 WGSL 셰이더 정보
+	 * @param targetGroupIndex - 바인드 그룹 인덱스
+	 */
 	constructor(
 		redGPUContext: RedGPUContext,
 		moduleName: string,
@@ -22,11 +34,9 @@ class ABitmapBaseMaterial extends ABaseMaterial {
 	}
 
 	/**
-	 * Updates the texture and its listener.
-	 *
-	 * @param {BitmapTexture|CubeTexture} prevTexture - The previous texture to remove listener from.
-	 * @param {BitmapTexture|CubeTexture} texture - The new texture to update and add listener to.
-	 *
+	 * 텍스처 객체 변경 및 DirtyPipeline 리스너 관리
+	 * @param prevTexture - 이전 텍스처(BitmapTexture|CubeTexture|ANoiseTexture)
+	 * @param texture - 새 텍스처(BitmapTexture|CubeTexture|ANoiseTexture)
 	 */
 	updateTexture(prevTexture: BitmapTexture | CubeTexture | ANoiseTexture, texture: BitmapTexture | CubeTexture | ANoiseTexture) {
 		if (prevTexture) prevTexture.__removeDirtyPipelineListener(this.#updateFragmentState);
@@ -34,6 +44,11 @@ class ABitmapBaseMaterial extends ABaseMaterial {
 		this.#updateFragmentState()
 	}
 
+	/**
+	 * 샘플러 객체 변경 및 DirtyPipeline 리스너 관리
+	 * @param prevSampler - 이전 샘플러
+	 * @param newSampler - 새 샘플러
+	 */
 	updateSampler(prevSampler: Sampler, newSampler: Sampler) {
 		if (prevSampler) prevSampler.__removeDirtyPipelineListener(this.#updateFragmentState);
 		if (newSampler) newSampler.__addDirtyPipelineListener(this.#updateFragmentState);
@@ -41,11 +56,9 @@ class ABitmapBaseMaterial extends ABaseMaterial {
 	}
 
 	/**
-	 * Updates the fragment state.
-	 *
-	 * This method sets the 'dirtyPipeline' flag to true, indicating that the pipeline needs to be updated.
-	 * If the 'shaderModule' property of the 'gpuRenderInfo' object is not null or undefined, the '_updateFragmentState()' method is called.
-	 * Otherwise, the 'initGPURenderInfos()' method is called with the 'redGPUContext' parameter to initialize the GPU render infos.
+	 * 파이프라인 갱신 및 fragmentState/유니폼 갱신
+	 * 내부적으로 packingList 콜백 실행, fragmentShaderModule 유무에 따라 _updateFragmentState 또는 initGPURenderInfos 호출
+	 * @private
 	 */
 	#updateFragmentState = () => {
 		this.dirtyPipeline = true;

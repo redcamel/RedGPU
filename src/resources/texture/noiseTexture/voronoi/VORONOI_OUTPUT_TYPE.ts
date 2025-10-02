@@ -1,3 +1,7 @@
+/**
+ * @category NoiseTexture
+ * @experimental
+ */
 const VORONOI_OUTPUT_TYPE = {
 	F1: 0,        /* 첫 번째 가까운 점까지의 거리 */
 	F2: 1,        /* 두 번째 가까운 점까지의 거리 */

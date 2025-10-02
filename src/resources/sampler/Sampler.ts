@@ -4,7 +4,7 @@ import GPU_FILTER_MODE from "../../gpuConst/GPU_FILTER_MODE";
 import GPU_MIPMAP_FILTER_MODE from "../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 import validateUintRange from "../../runtimeChecker/validateFunc/validateUintRange";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
-import ResourceBase from "../ResourceBase";
+import ResourceBase from "../core/ResourceBase";
 
 const samplerCache: Map<string, GPUSampler> = new Map()
 const validFilters: GPUFilterMode[] = Object.values(GPU_FILTER_MODE);
@@ -12,27 +12,49 @@ const validUVW: GPUAddressMode[] = Object.values(GPU_ADDRESS_MODE);
 const validMipmapFilters: GPUMipmapFilterMode[] = Object.values(GPU_MIPMAP_FILTER_MODE);
 
 /**
- * Class representing a sampler for GPU textures.
+ * GPU 텍스처 샘플러를 관리하는 클래스입니다.
  *
+ * - 샘플러의 필터, 어드레스 모드, 애니소트로피 등 다양한 옵션을 설정할 수 있습니다.
+ * - 동일 옵션의 샘플러는 내부적으로 캐싱하여 중복 생성을 방지합니다.
+ * - 옵션 변경 시 자동으로 샘플러를 갱신합니다.
+ *
+ * <iframe src="/RedGPU/examples/3d/texture/bitmapTextureSampler/"></iframe>
+ *
+ * 아래는 Sampler의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
+ * @see [Sampler Combination example](/RedGPU/examples/3d/texture/samplerCombination/)
+ * @see [Sampler AddressMode example](/RedGPU/examples/3d/texture/samplerAddressMode/)
+ *
+ * @category Sampler
  * @extends ResourceBase
  */
 class Sampler extends ResourceBase {
+	/** GPU 샘플러 객체 */
 	#gpuSampler: GPUSampler
+	/** 확대 필터 모드 */
 	#magFilter: GPUFilterMode = GPU_FILTER_MODE.LINEAR
+	/** 축소 필터 모드 */
 	#minFilter: GPUFilterMode = GPU_FILTER_MODE.LINEAR
+	/** 밉맵 필터 모드 */
 	#mipmapFilter: GPUMipmapFilterMode = GPU_MIPMAP_FILTER_MODE.LINEAR
+	/** U축 어드레스 모드 */
 	#addressModeU?: GPUAddressMode = GPU_ADDRESS_MODE.CLAMP_TO_EDGE
+	/** V축 어드레스 모드 */
 	#addressModeV?: GPUAddressMode = GPU_ADDRESS_MODE.CLAMP_TO_EDGE;
+	/** W축 어드레스 모드 */
 	#addressModeW?: GPUAddressMode = GPU_ADDRESS_MODE.REPEAT;
-	#lodMinClamp?: number;// TODO
-	#lodMaxClamp?: number;// TODO
+	/** LOD 최소값 */
+	#lodMinClamp?: number;
+	/** LOD 최대값 */
+	#lodMaxClamp?: number;
+	/** 비교 함수 */
 	#compare?: GPUCompareFunction;
+	/** 최대 애니소트로피 */
 	#maxAnisotropy: number = 1;
 
 	/**
-	 *
-	 * @param redGPUContext
-	 * @param options
+	 * Sampler 인스턴스를 생성합니다.
+	 * @param redGPUContext RedGPUContext 인스턴스
+	 * @param options GPUSamplerDescriptor 옵션 객체
 	 */
 	constructor(redGPUContext: RedGPUContext, options?: GPUSamplerDescriptor) {
 		super(redGPUContext)

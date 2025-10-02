@@ -56,10 +56,7 @@ const getBindGroupLayoutDescriptorFromShaderInfo = (
 						viewDimension: '2d-array',
 						sampleType: 'float',
 						multisampled: false
-					} : {
-
-					}
-
+					} : {}
 				}
 			)
 		}
@@ -87,12 +84,31 @@ const getBindGroupLayoutDescriptorFromShaderInfo = (
 		entries
 	}
 }
+/**
+ *
+ * @param SHADER_INFO
+ * @param targetGroupIndex
+
+ */
 const getFragmentBindGroupLayoutDescriptorFromShaderInfo = (SHADER_INFO, targetGroupIndex: number) => {
 	return getBindGroupLayoutDescriptorFromShaderInfo(SHADER_INFO, targetGroupIndex, GPUShaderStage.FRAGMENT)
 }
+/**
+ *
+ * @param SHADER_INFO
+ * @param targetGroupIndex
+
+ */
 const getVertexBindGroupLayoutDescriptorFromShaderInfo = (SHADER_INFO, targetGroupIndex: number) => {
 	return getBindGroupLayoutDescriptorFromShaderInfo(SHADER_INFO, targetGroupIndex, GPUShaderStage.VERTEX)
 }
+/**
+ *
+ * @param SHADER_INFO
+ * @param targetGroupIndex
+ * @param useMSAA
+
+ */
 const getComputeBindGroupLayoutDescriptorFromShaderInfo = (SHADER_INFO, targetGroupIndex: number, useMSAA: boolean) => {
 	return getBindGroupLayoutDescriptorFromShaderInfo(SHADER_INFO, targetGroupIndex, GPUShaderStage.COMPUTE, useMSAA)
 }

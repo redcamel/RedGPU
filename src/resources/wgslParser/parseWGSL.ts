@@ -1,9 +1,9 @@
 import {WgslReflect} from "wgsl_reflect";
-import UniformType from "../buffer/core/type/UniformType";
-import preprocessWGSL from "./preprocessWGSL";
+import preprocessWGSL from "./core/preprocessWGSL";
+import WGSLUniformTypes from "./core/WGSLUniformTypes";
 
 const createUniformMember = (curr, start, typeName) => {
-	const UniformTypeInfo = UniformType[typeName];
+	const UniformTypeInfo = WGSLUniformTypes[typeName];
 	return {
 		uniformOffset: curr.offset + start,
 		stride: curr.stride,
@@ -70,6 +70,25 @@ const processStorages = (storage) => {
 	}, {});
 };
 const reflectCache = new Map<string, any>();
+/**
+ * WGSL 코드를 파싱하고 리플렉션 정보를 반환합니다.
+ *
+ * @category WGSL
+ *
+ * @param code - 파싱할 WGSL 셰이더 코드 문자열
+ * @returns {
+ *   uniforms: Uniform 변수 정보,
+ *   storage: Storage 변수 정보,
+ *   samplers: 샘플러 정보,
+ *   textures: 텍스처 정보,
+ *   vertexEntries: 버텍스 엔트리 포인트 이름 배열,
+ *   fragmentEntries: 프래그먼트 엔트리 포인트 이름 배열,
+ *   computeEntries: 컴퓨트 엔트리 포인트 이름 배열,
+ *   defaultSource: 전처리된 WGSL 소스,
+ *   shaderSourceVariant: 조건부 분기별 WGSL 소스,
+ *   conditionalBlocks: 조건부 분기 정보
+ * }
+ */
 const parseWGSL = (code: string) => {
 	const {defaultSource, shaderSourceVariant, conditionalBlocks, cacheKey} = preprocessWGSL(code);
 	// 리플렉트 캐시 확인

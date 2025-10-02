@@ -7,7 +7,7 @@ import {
 	mergerNoiseHelperFunctions,
 	mergerNoiseUniformDefault,
 	mergerNoiseUniformStruct
-} from "../core/noiseDegineMerges";
+} from "../core/noiseDefineMerges";
 import VORONOI_DISTANCE_TYPE from "./VORONOI_DISTANCE_TYPE";
 import VORONOI_OUTPUT_TYPE from "./VORONOI_OUTPUT_TYPE";
 import voronoiComputeFunctions from './voronoiCompute.wgsl';
@@ -47,6 +47,8 @@ const BASIC_OPTIONS: VoronoiSettings = {
 /**
  * Voronoi 노이즈 텍스처 생성 클래스
  * 셀룰러 패턴, 돌 텍스처, 크랙 패턴, 셀 ID 출력 등을 생성할 수 있습니다.
+ * @category NoiseTexture
+ * @experimental
  */
 class VoronoiTexture extends ANoiseTexture {
 	/** 노이즈 패턴의 밀도/크기 (값이 클수록 세밀함) */

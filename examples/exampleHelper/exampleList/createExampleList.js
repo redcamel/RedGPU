@@ -396,10 +396,31 @@ const addSearchBar = () => {
 	container.className = 'top_container';
 	document.body.appendChild(container);
 
-	const project_title = document.createElement('project_title');
+	const project_title = document.createElement('div');
 	project_title.className = 'project_title';
 	project_title.innerHTML = `<div>RedGPU Examples</div><span>JavaScript WebGPU library</span>`;
 	container.appendChild(project_title);
+
+	{
+		const project_right = document.createElement('div');
+		project_right.className = 'project_right';
+		container.appendChild(project_right)
+
+		const project_home = document.createElement('div');
+		project_home.className = 'project_home';
+		project_home.innerHTML = `<a href="/RedGPU/"><div><img src="/RedGPU/examples/assets/icons/home.svg" width="20" /></div></a>`;
+		project_right.appendChild(project_home);
+		const project_github = document.createElement('div');
+		project_github.className = 'project_github';
+		project_github.innerHTML = `<a href="https://github.com/redcamel/RedGPU"><img src="/RedGPU/examples/assets/github.png" width="22" style="transform:translateY(-2px)"/></a>`;
+		project_right.appendChild(project_github);
+		const project_doc = document.createElement('div');
+		project_doc.className = 'project_doc';
+		project_doc.innerHTML = `<a href="/RedGPU/docs/"><div>API</div></a>`;
+		project_right.appendChild(project_doc);
+
+
+	}
 
 	const searchContainer = document.createElement('div');
 	searchContainer.className = 'search-container';
@@ -481,7 +502,7 @@ const initialize = () => {
 	// 하단 카피라이트 추가
 	const footer = document.createElement('footer');
 	footer.className = 'footer';
-	footer.innerHTML = `<div class="footer_left"><a href="https://github.com/redcamel/RedGPU" target="_blank"><img src="/RedGPU/examples/assets/github.png" height="32"/></a><div>This project is maintained by <a href="https://github.com/redcamel/RedGPU" target="_blank">RedCamel</a></div></div>`;
+	footer.innerHTML = `<div class="footer_left"><div>This project is maintained by <a href="https://github.com/redcamel/RedGPU" target="_blank">RedCamel</a></div></div>`;
 	container.appendChild(footer);
 
 	// ✅ 수정: 즉시 스크롤 복원 (async/await 제거)

@@ -6,7 +6,7 @@ document.body.appendChild(canvas);
 RedGPU.init(
 	canvas,
 	(redGPUContext) => {
-		const controller = new RedGPU.Camera.ObitController(redGPUContext);
+		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
 		controller.distance = 10;
 		controller.speedDistance = 0.1;
 
@@ -34,7 +34,7 @@ RedGPU.init(
 );
 
 const createRootGroup = (redGPUContext, scene) => {
-	const group = new RedGPU.Display.Group3D(redGPUContext);
+	const group = new RedGPU.Display.Group3D();
 	group.x = 0;
 	group.y = 0;
 	group.z = 0;

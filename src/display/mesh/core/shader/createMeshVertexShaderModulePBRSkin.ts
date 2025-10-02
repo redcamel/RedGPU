@@ -1,4 +1,3 @@
-import StorageBuffer from "../../../../resources/buffer/storageBuffer/StorageBuffer";
 import parseWGSL from "../../../../resources/wgslParser/parseWGSL";
 import Mesh from "../../Mesh";
 import vertexModuleSourcePbrSkin from "../../shader/meshVertexPbrSkin.wgsl";
@@ -10,7 +9,7 @@ const createMeshVertexShaderModulePBRSkin = (
 	mesh: Mesh,
 ): GPUShaderModule => {
 	const {redGPUContext, currentShaderModuleName} = mesh
-	const {resourceManager,gpuDevice} = redGPUContext
+	const {resourceManager, gpuDevice} = redGPUContext
 	const {gpuRenderInfo} = mesh
 	const jointNum = `${mesh.animationInfo.skinInfo.joints.length}`
 	const label = `${VERTEX_SHADER_MODULE_NAME_PBR_SKIN}_${jointNum}`
@@ -30,8 +29,8 @@ const createMeshVertexShaderModulePBRSkin = (
 			// 	newData,
 			// 	mesh.name
 			// )
-			mesh.animationInfo.skinInfo.vertexStorageBuffer =  gpuDevice.createBuffer({
-				size: mesh.geometry.vertexBuffer.vertexCount * 16 * 4 , // mat4x4<f32> = 16 floats × 4 bytes
+			mesh.animationInfo.skinInfo.vertexStorageBuffer = gpuDevice.createBuffer({
+				size: mesh.geometry.vertexBuffer.vertexCount * 16 * 4, // mat4x4<f32> = 16 floats × 4 bytes
 				usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
 			});
 			gpuRenderInfo.vertexUniformBindGroup = redGPUContext.gpuDevice.createBindGroup(getBasicMeshVertexBindGroupDescriptor(mesh, true));

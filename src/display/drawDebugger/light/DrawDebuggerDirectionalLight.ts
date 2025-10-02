@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import DirectionalLight from "../../../light/lights/DirectionalLight";
-import RenderViewStateData from "../../../renderer/RenderViewStateData";
+import RenderViewStateData from "../../view/core/RenderViewStateData";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
 import TextField3D from "../../textFileds/textField3D/TextField3D";
 import ADrawDebuggerLight from "./ADrawDebuggerLight";
@@ -20,13 +20,14 @@ class DrawDebuggerDirectionalLight extends ADrawDebuggerLight {
 		this.lightDebugMesh.addChild(this.#label)
 	}
 
-	render(debugViewRenderState: RenderViewStateData): void {
+	render(renderViewStateData: RenderViewStateData): void {
+		if (!renderViewStateData.view.systemUniform_Vertex_UniformBindGroup) return
 		if (!this.#target.enableDebugger) return;
 		this.#updateVertexDataFromDirectionalLight(this.#target, this.lightDebugMesh.geometry.vertexBuffer);
 		this.lightDebugMesh.setPosition(0, 0, 0);
 		this.lightDebugMesh.setRotation(0, 0, 0);
 		this.lightDebugMesh.setScale(1, 1, 1);
-		this.lightDebugMesh.render(debugViewRenderState);
+		this.lightDebugMesh.render(renderViewStateData);
 		// 빛이 오는 방향 (화살표 반대편)에 레이블 배치
 		const direction = this.#target.direction;
 		const visualPosition = this.#visualPosition;

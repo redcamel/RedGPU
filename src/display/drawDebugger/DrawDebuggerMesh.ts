@@ -1,12 +1,11 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import Geometry from "../../geometry/Geometry";
-import GPU_COMPARE_FUNCTION from "../../gpuConst/GPU_COMPARE_FUNCTION";
 import GPU_PRIMITIVE_TOPOLOGY from "../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
 import ColorMaterial from "../../material/colorMaterial/ColorMaterial";
-import RenderViewStateData from "../../renderer/RenderViewStateData";
-import InterleaveType from "../../resources/buffer/core/type/InterleaveType";
-import InterleavedStruct from "../../resources/buffer/vertexBuffer/InterleavedStruct";
+import RenderViewStateData from "../view/core/RenderViewStateData";
 import VertexBuffer from "../../resources/buffer/vertexBuffer/VertexBuffer";
+import VertexInterleavedStruct from "../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
+import VertexInterleaveType from "../../resources/buffer/vertexBuffer/VertexInterleaveType";
 import AABB from "../../utils/math/bound/AABB";
 import OBB from "../../utils/math/bound/OBB";
 import Mesh from "../mesh/Mesh";
@@ -37,7 +36,6 @@ class DrawDebuggerMesh {
 		this.#debugMesh = new Mesh(redGPUContext, geometry, this.#material);
 		this.#debugMesh.primitiveState.cullMode = 'none';
 		this.#debugMesh.primitiveState.topology = GPU_PRIMITIVE_TOPOLOGY.LINE_LIST;
-		this.#debugMesh.depthStencilState.depthWriteEnabled = false;
 		// this.#debugMesh.disableJitter=true
 		const aabbGeometry = this.#createWireframeBoxGeometry(redGPUContext);
 		this.#aabbMaterial = new ColorMaterial(redGPUContext);
@@ -45,7 +43,6 @@ class DrawDebuggerMesh {
 		this.#aabbDebugMesh = new Mesh(redGPUContext, aabbGeometry, this.#aabbMaterial);
 		this.#aabbDebugMesh.primitiveState.cullMode = 'none';
 		this.#aabbDebugMesh.primitiveState.topology = GPU_PRIMITIVE_TOPOLOGY.LINE_LIST;
-		this.#aabbDebugMesh.depthStencilState.depthWriteEnabled = false;
 		// this.#aabbDebugMesh.disableJitter=true
 	}
 
@@ -68,7 +65,7 @@ class DrawDebuggerMesh {
 		this.#cachedAABB = null;
 	}
 
-	render(debugViewRenderState: RenderViewStateData) {
+	render(renderViewStateData: RenderViewStateData) {
 		if (!this.#target.enableDebugger) return;
 		if (this.#debugMode === 'OBB') {
 			const targetOBB = this.#target.boundingOBB;
@@ -80,7 +77,7 @@ class DrawDebuggerMesh {
 			this.#debugMesh.setPosition(0, 0, 0);
 			this.#debugMesh.setRotation(0, 0, 0);
 			this.#debugMesh.setScale(1, 1, 1);
-			this.#debugMesh.render(debugViewRenderState);
+			this.#debugMesh.render(renderViewStateData);
 		} else if (this.#debugMode === 'AABB' || this.#debugMode === 'COMBINED_AABB') {
 			const targetAABB = this.#debugMode === 'COMBINED_AABB' ? this.#target.combinedBoundingAABB : this.#target.boundingAABB;
 			// AABB가 변경된 경우에만 업데이트
@@ -91,7 +88,7 @@ class DrawDebuggerMesh {
 			this.#debugMesh.setPosition(0, 0, 0);
 			this.#debugMesh.setRotation(0, 0, 0);
 			this.#debugMesh.setScale(1, 1, 1);
-			this.#debugMesh.render(debugViewRenderState);
+			this.#debugMesh.render(renderViewStateData);
 		} else if (this.#debugMode === 'BOTH') {
 			const targetOBB = this.#target.boundingOBB;
 			const targetAABB = this.#target.boundingAABB;
@@ -103,7 +100,7 @@ class DrawDebuggerMesh {
 			this.#debugMesh.setPosition(0, 0, 0);
 			this.#debugMesh.setRotation(0, 0, 0);
 			this.#debugMesh.setScale(1, 1, 1);
-			this.#debugMesh.render(debugViewRenderState);
+			this.#debugMesh.render(renderViewStateData);
 			// AABB (초록색) - 변경된 경우에만 업데이트
 			if (this.#hasAABBChanged(targetAABB)) {
 				this.#updateVertexDataFromAABB(targetAABB, this.#aabbDebugMesh.geometry.vertexBuffer);
@@ -112,17 +109,17 @@ class DrawDebuggerMesh {
 			this.#aabbDebugMesh.setPosition(0, 0, 0);
 			this.#aabbDebugMesh.setRotation(0, 0, 0);
 			this.#aabbDebugMesh.setScale(1, 1, 1);
-			this.#aabbDebugMesh.render(debugViewRenderState);
+			this.#aabbDebugMesh.render(renderViewStateData);
 		}
 	}
 
 	#createWireframeBoxGeometry(redGPUContext: RedGPUContext): Geometry {
 		const vertices = new Float32Array(24 * 8);
-		const interleavedStruct = new InterleavedStruct(
+		const interleavedStruct = new VertexInterleavedStruct(
 			{
-				vertexPosition: InterleaveType.float32x3,
-				vertexNormal: InterleaveType.float32x3,
-				texcoord: InterleaveType.float32x2,
+				vertexPosition: VertexInterleaveType.float32x3,
+				vertexNormal: VertexInterleaveType.float32x3,
+				texcoord: VertexInterleaveType.float32x2,
 			},
 			`wireframeBoxStruct_${Math.random()}`
 		);

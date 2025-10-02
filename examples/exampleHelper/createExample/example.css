@@ -14,7 +14,7 @@ html, body {
     overflow-y: auto;
     /*max-height: calc(100vw - 20px);*/
     pointer-events: none;
-    transition: right 0.26s;
+    transition: right 0.36s;
 }
 .tp-dfwv *{
     pointer-events: auto;
@@ -225,6 +225,7 @@ html, body {
     font-weight: 500;
     padding: 0 16px;
     max-width: calc(100% - 260px);
+    pointer-events: none;
 }
 
 @media screen and (max-width: 480px) {

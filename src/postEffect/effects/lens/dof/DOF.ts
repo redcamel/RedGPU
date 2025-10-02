@@ -5,19 +5,49 @@ import {ASinglePassPostEffectResult} from "../../../core/ASinglePassPostEffect";
 import DOFCoC from "./DOFCoC/DOFCoC";
 import DOFUnified from "./DOFUnified";
 
+/**
+ * 피사계 심도(DOF, Depth of Field) 후처리 이펙트입니다.
+ * CoC(혼란 원) 계산과 블러를 결합해 사실적인 심도 효과를 제공합니다.
+ * 다양한 사진/영상 스타일 프리셋 메서드를 지원합니다.
+ *
+ * @category Lens
+ *
+ * @example
+ * ```javascript
+ * const effect = new RedGPU.PostEffect.DOF(redGPUContext);
+ * effect.focusDistance = 10;
+ * effect.aperture = 2.0;
+ * effect.maxCoC = 30;
+ * effect.setCinematic(); // 시네마틱 프리셋 적용
+ * view.postEffectManager.addEffect(effect);
+ * ```
+ *
+ * <iframe src="/RedGPU/examples/3d/postEffect/lens/dof/"></iframe>
+ */
 class DOF extends AMultiPassPostEffect {
+	/** CoC 계산용 이펙트 */
 	#effect_coc: DOFCoC;
+	/** 블러/합성용 이펙트 */
 	#effect_unified: DOFUnified;
-	// CoC 관련 파라미터
+	// CoC 파라미터
+	/** 초점 거리. 기본값 15.0 */
 	#focusDistance: number = 15.0;
+	/** 조리개(F값). 기본값 2.8 */
 	#aperture: number = 2.8;
+	/** 최대 CoC. 기본값 25.0 */
 	#maxCoC: number = 25.0;
+	/** 근평면. 기본값 0.1 */
 	#nearPlane: number = 0.1;
+	/** 원평면. 기본값 1000.0 */
 	#farPlane: number = 1000.0;
-	// 블러 관련 파라미터
+	// 블러 파라미터
+	/** 근거리 블러 크기. 기본값 15 */
 	#nearBlurSize: number = 15;
+	/** 원거리 블러 크기. 기본값 15 */
 	#farBlurSize: number = 15;
+	/** 근거리 블러 강도. 기본값 1.0 */
 	#nearStrength: number = 1.0;
+	/** 원거리 블러 강도. 기본값 1.0 */
 	#farStrength: number = 1.0;
 
 	constructor(redGPUContext: RedGPUContext) {
@@ -44,83 +74,83 @@ class DOF extends AMultiPassPostEffect {
 	}
 
 	// CoC 관련 getter/setter
-	get focusDistance(): number {
-		return this.#focusDistance;
-	}
+	/** 초점 거리 반환 */
+	get focusDistance(): number { return this.#focusDistance; }
 
+	/** 초점 거리 설정 */
 	set focusDistance(value: number) {
 		this.#focusDistance = value;
 		this.#effect_coc.focusDistance = value;
 	}
 
-	get aperture(): number {
-		return this.#aperture;
-	}
+	/** 조리개 반환 */
+	get aperture(): number { return this.#aperture; }
 
+	/** 조리개 설정 */
 	set aperture(value: number) {
 		this.#aperture = value;
 		this.#effect_coc.aperture = value;
 	}
 
-	get maxCoC(): number {
-		return this.#maxCoC;
-	}
+	/** 최대 CoC 반환 */
+	get maxCoC(): number { return this.#maxCoC; }
 
+	/** 최대 CoC 설정 */
 	set maxCoC(value: number) {
 		this.#maxCoC = value;
 		this.#effect_coc.maxCoC = value;
 	}
 
-	get nearPlane(): number {
-		return this.#nearPlane;
-	}
+	/** 근평면 반환 */
+	get nearPlane(): number { return this.#nearPlane; }
 
+	/** 근평면 설정 */
 	set nearPlane(value: number) {
 		this.#nearPlane = value;
 		this.#effect_coc.nearPlane = value;
 	}
 
-	get farPlane(): number {
-		return this.#farPlane;
-	}
+	/** 원평면 반환 */
+	get farPlane(): number { return this.#farPlane; }
 
+	/** 원평면 설정 */
 	set farPlane(value: number) {
 		this.#farPlane = value;
 		this.#effect_coc.farPlane = value;
 	}
 
 	// 블러 관련 getter/setter
-	get nearBlurSize(): number {
-		return this.#nearBlurSize;
-	}
+	/** 근거리 블러 크기 반환 */
+	get nearBlurSize(): number { return this.#nearBlurSize; }
 
+	/** 근거리 블러 크기 설정 */
 	set nearBlurSize(value: number) {
 		this.#nearBlurSize = value;
 		this.#effect_unified.nearBlurSize = value;
 	}
 
-	get farBlurSize(): number {
-		return this.#farBlurSize;
-	}
+	/** 원거리 블러 크기 반환 */
+	get farBlurSize(): number { return this.#farBlurSize; }
 
+	/** 원거리 블러 크기 설정 */
 	set farBlurSize(value: number) {
 		this.#farBlurSize = value;
 		this.#effect_unified.farBlurSize = value;
 	}
 
-	get nearStrength(): number {
-		return this.#nearStrength;
-	}
+	/** 근거리 블러 강도 반환 */
+	get nearStrength(): number { return this.#nearStrength; }
 
+	/** 근거리 블러 강도 설정 */
 	set nearStrength(value: number) {
 		this.#nearStrength = value;
 		this.#effect_unified.nearStrength = value;
 	}
 
-	get farStrength(): number {
-		return this.#farStrength;
-	}
+	/** 원거리 블러 강도 반환 */
+	get farStrength(): number { return this.#farStrength; }
 
+	/** 원거리 블러 강도 설정 */
 	set farStrength(value: number) {
 		this.#farStrength = value;
 		this.#effect_unified.farStrength = value;
@@ -217,6 +247,10 @@ class DOF extends AMultiPassPostEffect {
 		this.farStrength = 1.2;
 	}
 
+	/**
+	 * DOF 효과를 렌더링합니다.
+	 * @returns 최종 DOF 처리 결과
+	 */
 	render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult) {
 		// 1단계: CoC (Circle of Confusion) 계산
 		const cocResult = this.#effect_coc.render(

@@ -1,7 +1,7 @@
 import ColorRGBA from "../color/ColorRGBA";
 import View3D from "../display/view/View3D";
 import PICKING_EVENT_TYPE from "../picking/PICKING_EVENT_TYPE";
-import ResourceManager from "../resources/resourceManager/ResourceManager";
+import ResourceManager from "../resources/core/resourceManager/ResourceManager";
 import consoleAndThrowError from "../utils/consoleAndThrowError";
 import AntialiasingManager from "./antialiasing/AntialiasingManager";
 import RedGPUContextSizeManager from "./core/RedGPUContextSizeManager";
@@ -9,26 +9,46 @@ import RedGPUContextViewContainer from "./core/RedGPUContextViewContainer";
 import RedGPUContextDetector from "./detector/RedGPUContextDetector";
 
 /**
- * RedGPU.initialize 실행이후 생성 제공되는 객체.
- * - WebGPU 초기화시 얻어낸 기본 정보들을 속성으로 가진다
- * - View3D 객체를 소유하며 실제 최상위 컨테이너 역활을 한다.
+ * RedGPUContext 클래스는 WebGPU 초기화 후 제공되는 최상위 컨텍스트 객체입니다.
+ *
+ * - GPU, 캔버스, 디바이스, 어댑터 등 WebGPU의 핵심 정보를 속성으로 가집니다.
+ * - View3D 객체를 소유하며, 실제 최상위 컨테이너 역할을 합니다.
+ * - 리사이즈, 배경색, 디버그 패널, 안티앨리어싱, 리소스 관리 등 다양한 기능을 제공합니다.
+ *
+ * @extends RedGPUContextViewContainer
  */
 class RedGPUContext extends RedGPUContextViewContainer {
+	/** 현재 requestAnimationFrame ID (프레임 루프 관리용) */
 	currentRequestAnimationFrame: number
+	/** 리사이즈 이벤트 핸들러 (캔버스 크기 변경 시 호출) */
 	onResize: ((width: number, height: number) => void) | null = null;
+	/** 현재 시간(프레임 기준, ms) */
 	currentTime: number
+	/** GPU 캔버스 구성 정보 (WebGPU 설정용) */
 	#configurationDescription: GPUCanvasConfiguration
+	/** GPU 어댑터 (WebGPU 하드웨어 정보) */
 	readonly #gpuAdapter: GPUAdapter
+	/** 알파 모드 (WebGPU 캔버스 알파 설정) */
 	#alphaMode: GPUCanvasAlphaMode
+	/** GPU 캔버스 컨텍스트 (WebGPU 렌더링 대상) */
 	readonly #gpuContext: GPUCanvasContext
+	/** GPU 디바이스 (WebGPU 연산/리소스 관리) */
 	readonly #gpuDevice: GPUDevice
+	/** HTML 캔버스 요소 (렌더링 대상 DOM) */
 	readonly #htmlCanvas: HTMLCanvasElement
+	/** 크기 관리 매니저 (캔버스/뷰 크기 관리) */
 	readonly #sizeManager: RedGPUContextSizeManager
+	/** 디바이스/브라우저 환경 감지 매니저 */
 	readonly #detector: RedGPUContextDetector
+	/** 리소스 매니저 (GPU 리소스 관리) */
 	readonly #resourceManager: ResourceManager
+	/** 배경색 */
 	#backgroundColor: ColorRGBA = new ColorRGBA(0, 0, 0, 1)
+	/** 디버그 패널 사용 여부 */
 	#useDebugPanel: boolean = false
+	/** 키보드 입력 버퍼 */
 	#keyboardKeyBuffer: { [key: string]: boolean } = {}
+	/** 안티앨리어싱 매니저 */
 	#antialiasingManager: AntialiasingManager
 
 	constructor(

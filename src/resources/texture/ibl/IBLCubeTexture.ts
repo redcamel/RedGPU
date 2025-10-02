@@ -1,7 +1,7 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import calculateTextureByteSize from "../../../utils/math/calculateTextureByteSize";
-import ManagementResourceBase from "../../ManagementResourceBase";
-import ResourceStateCubeTexture from "../../resourceManager/resourceState/texture/ResourceStateCubeTexture";
+import calculateTextureByteSize from "../../../utils/texture/calculateTextureByteSize";
+import ManagementResourceBase from "../../core/ManagementResourceBase";
+import ResourceStateCubeTexture from "../../core/resourceManager/resourceState/texture/ResourceStateCubeTexture";
 import CubeTexture from "../CubeTexture";
 
 const MANAGED_STATE_KEY = 'managedCubeTextureState'

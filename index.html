@@ -599,7 +599,7 @@
 			RedGPU.init(
 				document.getElementById('bgCanvas'),
 				(redGPUContext) => {
-					const controllerTest = new RedGPU.Camera.ObitController(redGPUContext);
+					const controllerTest = new RedGPU.Camera.OrbitController(redGPUContext);
 					controllerTest.distance = 50
 					const scene = new RedGPU.Display.Scene();
 					const view = new RedGPU.Display.View3D(redGPUContext, scene, controllerTest);
@@ -680,7 +680,7 @@
 
 
     <div class="hero-buttons">
-        <a href="https://redcamel.github.io/RedGPU/examples/" class="cta-button">
+        <a href="/RedGPU/examples/" class="cta-button">
             🚀 Explore Examples
         </a>
         <a href="https://github.com/redcamel/RedGPU" class="cta-button cta-button-secondary">
@@ -700,7 +700,7 @@
                 <h3 class="feature-title">Examples</h3>
                 <p class="feature-description">Explore a wide variety of interactive examples showcasing the power of
                     WebGPU rendering capabilities.</p>
-                <a href="https://redcamel.github.io/RedGPU/examples/" class="feature-link">
+                <a href="/RedGPU/examples/" class="feature-link">
                     View Examples →
                 </a>
             </div>
@@ -710,7 +710,7 @@
                 <h3 class="feature-title">API</h3>
                 <p class="feature-description">Complete API reference and documentation to help you leverage RedGPU's
                     powerful WebGPU capabilities.</p>
-                <a href="https://redcamel.github.io/RedGPU/docs/" class="feature-link">
+                <a href="/RedGPU/docs/" class="feature-link">
                     Browse API →
                 </a>
             </div>
@@ -788,10 +788,10 @@
         <div class="footer-section">
             <h3>Resources</h3>
             <div class="footer-links">
-                <a href="https://redcamel.github.io/RedGPU/examples/">
+                <a href="/RedGPU/examples/">
                     🎮 Examples
                 </a>
-                <a href="https://redcamel.github.io/RedGPU/docs/">
+                <a href="/RedGPU/docs/">
                     📚 API Documentation
                 </a>
                 <a href="https://github.com/redcamel/RedGPU/releases">

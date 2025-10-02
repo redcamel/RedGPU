@@ -1,7 +1,7 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import GPU_FILTER_MODE from "../../../gpuConst/GPU_FILTER_MODE";
 import GPU_MIPMAP_FILTER_MODE from "../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
-import RenderViewStateData from "../../../renderer/RenderViewStateData";
+import RenderViewStateData from "../../view/core/RenderViewStateData";
 import Sampler from "../../../resources/sampler/Sampler";
 import BitmapTexture from "../../../resources/texture/BitmapTexture";
 import Mesh from "../../mesh/Mesh";
@@ -50,6 +50,15 @@ const BASE_STYLES = {
 const isValidNumber = (value: any) => typeof value == 'number';
 const isPixelNeeded = (key: string) => !['lineHeight', 'fontWeight'].includes(key);
 
+/**
+ * 텍스트 필드 객체의 추상 클래스입니다.
+ *
+ * @remarks
+ * `시스템 전용 클래스입니다.`\
+ * 이 메서드는 렌더링 엔진 내부에서 자동으로 사용되는 기능으로, 일반적인 사용자는 직접 호출하지 않는 것이 좋습니다.
+ *
+ * @abstract
+ */
 class ATextField extends Mesh {
 	#textureCvs: OffscreenCanvas | HTMLCanvasElement;
 	#textureCtx: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D;
@@ -110,10 +119,10 @@ class ATextField extends Mesh {
 		this.#needsUpdate = true
 	}
 
-	render(debugViewRenderState: RenderViewStateData) {
+	render(renderViewStateData: RenderViewStateData) {
 		this.#textureImgOnload(this.#renderWidth, this.#renderHeight)
 		this.#updateTexture()
-		super.render(debugViewRenderState);
+		super.render(renderViewStateData);
 	}
 
 	#processText(input: string): string {
@@ -185,7 +194,6 @@ class ATextField extends Mesh {
 	#setImgElement() {
 		this.#textureImg = new Image();
 		this.#textureImg.style.cssText = 'position:absolute;bottom:0px;left:0;'
-
 		this.#textureImg.onload = _ => {
 			let tW: number, tH: number;
 			const {width, height} = this.#getRenderHtmlSize();
@@ -232,7 +240,7 @@ class ATextField extends Mesh {
 				this.material.diffuseTexture = new BitmapTexture(this.#redGPUContext, URL.createObjectURL(blob), true, v => {
 					this.#renderWidth = this.#textureImg.width
 					this.#renderHeight = this.#textureImg.height
-				}, null,null,true);
+				}, null, null, true);
 			};
 			if (this.#textureCvs instanceof OffscreenCanvas) {
 				this.#textureCvs.convertToBlob({type: 'image/png'}).then(callback);

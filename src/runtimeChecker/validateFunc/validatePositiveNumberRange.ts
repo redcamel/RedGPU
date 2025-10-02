@@ -1,13 +1,19 @@
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
 
 /**
- * Validates if a number is within a positive range.
+ * 주어진 값이 0 이상의 양의 숫자이며, 지정한 범위 내에 있는지 검증합니다.
  *
- * @param {number} value - The number to validate.
- * @param {number} [minRange=0] - The minimum range allowed. Default is 0.
- * @param {number} [maxRange=Number.MAX_VALUE] - The maximum range allowed. Default is Number.MAX_VALUE.
- * @returns {boolean} - Returns true if the number is within the specified range, otherwise throws an error.
- * @throws {Error} - Throws an error if the value is not a number or if it is outside the specified range.
+ * value, minRange, maxRange가 모두 number 타입인지 확인하며,
+ *
+ * minRange와 value가 0 미만이 아니고, value가 minRange 이상 maxRange 이하인지 검사합니다.
+ *
+ * 조건을 만족하지 않으면 예외를 발생시킵니다.
+ *
+ * @param {number} value 검증할 값
+ * @param {number} [minRange=0] 허용되는 최소값 (기본값: 0)
+ * @param {number} [maxRange=Number.MAX_VALUE] 허용되는 최대값 (기본값: Number.MAX_VALUE)
+ * @returns {boolean} 값이 범위 내의 양의 숫자이면 true
+ * @throws {Error} 값이 숫자가 아니거나, 0 미만이거나, 범위를 벗어나면 예외 발생
  */
 const validatePositiveNumberRange = (value: number, minRange: number = 0, maxRange: number = Number.MAX_VALUE): boolean => {
 	if (typeof value !== 'number') consoleAndThrowError('Only numbers allowed.');

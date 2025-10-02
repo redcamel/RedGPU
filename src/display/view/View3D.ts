@@ -6,196 +6,251 @@ import GPU_COMPARE_FUNCTION from "../../gpuConst/GPU_COMPARE_FUNCTION";
 import PassClusterLightBound from "../../light/clusterLight/PassClusterLightBound";
 import PassClustersLight from "../../light/clusterLight/PassClustersLight";
 import PassClustersLightHelper from "../../light/clusterLight/PassClustersLightHelper";
-import PickingManager from "../../picking/PickingManager";
-import FXAA from "../../postEffect/FXAA";
 import PostEffectManager from "../../postEffect/PostEffectManager";
-import TAA from "../../postEffect/TAA/TAA";
-import RenderViewStateData from "../../renderer/RenderViewStateData";
+import RenderViewStateData from "./core/RenderViewStateData";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
-import ResourceManager from "../../resources/resourceManager/ResourceManager";
+import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
 import Sampler from "../../resources/sampler/Sampler";
 import SystemCode from "../../resources/systemCode/SystemCode";
 import CubeTexture from "../../resources/texture/CubeTexture";
 import IBL from "../../resources/texture/ibl/IBL";
 import IBLCubeTexture from "../../resources/texture/ibl/IBLCubeTexture";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
-import consoleAndThrowError from "../../utils/consoleAndThrowError";
-import InstanceIdGenerator from "../../utils/InstanceIdGenerator";
-import screenToWorld from "../../utils/math/screenToWorld";
-import DrawDebuggerAxis from "../drawDebugger/DrawDebuggerAxis";
-import DrawDebuggerGrid from "../drawDebugger/grid/DrawDebuggerGrid";
 import DrawDebuggerPointLight from "../drawDebugger/light/DrawDebuggerPointLight";
 import DrawDebuggerSpotLight from "../drawDebugger/light/DrawDebuggerSpotLight";
 import Scene from "../scene/Scene";
 import SkyBox from "../skyboxs/skyBox/SkyBox";
-import ViewRenderTextureManager from "./ViewRenderTextureManager";
-import ViewTransform from "./ViewTransform";
+import AView from "./core/AView";
+import ViewRenderTextureManager from "./core/ViewRenderTextureManager";
 
 const SHADER_INFO = parseWGSL(SystemCode.SYSTEM_UNIFORM)
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.systemUniforms;
 
-class View3D extends ViewTransform {
-//
-	#systemUniform_Vertex_StructInfo: any = UNIFORM_STRUCT;
-	#systemUniform_Vertex_UniformBindGroup: GPUBindGroup;
-	#systemUniform_Vertex_UniformBuffer: UniformBuffer;
-	#instanceId: number
-	#grid: DrawDebuggerGrid
-	#axis: DrawDebuggerAxis
-	#skybox: SkyBox
-	#name: string
-	#scene: Scene
-	//
-	#useFrustumCulling: boolean = true
-	#useDistanceCulling: boolean = false
-	#distanceCulling: number = 50
-	#ibl: IBL
-	//
-	readonly #debugViewRenderState: RenderViewStateData
-	readonly #postEffectManager: PostEffectManager
-	readonly #viewRenderTextureManager: ViewRenderTextureManager
-	#pickingManager: PickingManager = new PickingManager()
-//
-	#prevInfoList = []
-	#shadowDepthSampler: GPUSampler
-	#basicSampler: GPUSampler
-	#basicPackedSampler: GPUSampler
-	//
-	#clusterLightsBuffer: GPUBuffer
-	#clusterLightsBufferData: Float32Array
-	#passLightClusters: PassClustersLight
-	#passLightClustersBound: PassClusterLightBound
-	#prevWidth: number = undefined
-	#prevHeight: number = undefined
-	#prevIBL_iblTexture: IBLCubeTexture
-	#prevIBL_irradianceTexture: IBLCubeTexture
-	#taa:TAA
-	#fxaa:FXAA
-	get fxaa(): FXAA {
-		if (!this.#fxaa) {
-			this.#fxaa = new FXAA(this.redGPUContext);
-		}
-
-		return this.#fxaa;
-	}
-	get taa(): TAA {
-		if (!this.#taa) {
-			this.#taa = new TAA(this.redGPUContext);
-		}
-
-		return this.#taa;
-	}
-	//
+/**
+ * 3D 렌더링 뷰 클래스입니다. AView를 확장하여 3D 장면 렌더링 기능을 제공합니다.
+ *
+ * 3D 장면 렌더링, 조명, 그림자, 포스트 이펙트, IBL(이미지 기반 조명) 처리를 담당합니다.
+ *
+ * @example
+ * ```javascript
+ * const scene = new RedGPU.Display.Scene();
+ * const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+ * view.grid = true;
+ * redGPUContext.addView(view);
+ * ```
+ * <iframe src="/RedGPU/examples/3d/view/singleView/" ></iframe>
+ *
+ * 아래는 View3D의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
+ * @see [Multi View3D example](/RedGPU/examples/3d/view/multiView/)
+ * @category View
+ */
+class View3D extends AView {
 	/**
-	 * Creates a new instance of the Constructor class.
+	 * 정점 셰이더용 시스템 유니폼 구조 정보
+	 * @private
+	 */
+	#systemUniform_Vertex_StructInfo: any = UNIFORM_STRUCT;
+	/**
+	 * 정점 셰이더 시스템 유니폼용 GPU 바인드 그룹
+	 * @private
+	 */
+	#systemUniform_Vertex_UniformBindGroup: GPUBindGroup;
+	/**
+	 * 정점 셰이더 시스템 유니폼용 유니폼 버퍼
+	 * @private
+	 */
+	#systemUniform_Vertex_UniformBuffer: UniformBuffer;
+	/**
+	 * 환경 렌더링을 위한 스카이박스 객체
+	 * @private
+	 */
+	#skybox: SkyBox
+	/**
+	 * IBL(이미지 기반 조명) 설정
+	 * @private
+	 */
+	#ibl: IBL
+	/**
+	 * 디버그 뷰 렌더링 상태 데이터
+	 * @private
+	 * @readonly
+	 */
+	readonly #renderViewStateData: RenderViewStateData
+	/**
+	 * 포스트 이펙트 처리 매니저
+	 * @private
+	 * @readonly
+	 */
+	readonly #postEffectManager: PostEffectManager
+	/**
+	 * 렌더 타겟 처리를 위한 뷰 렌더 텍스처 매니저
+	 * @private
+	 * @readonly
+	 */
+	readonly #viewRenderTextureManager: ViewRenderTextureManager
+	/**
+	 * 바인드 그룹 생성 최적화를 위한 이전 프레임 정보 캐시
+	 * @private
+	 */
+	#prevInfoList = []
+	/**
+	 * 그림자 깊이 비교용 GPU 샘플러
+	 * @private
+	 */
+	#shadowDepthSampler: GPUSampler
+	/**
+	 * 일반적인 텍스처 샘플링용 기본 GPU 샘플러
+	 * @private
+	 */
+	#basicSampler: GPUSampler
+	/**
+	 * 타일링된 텍스처 샘플링용 압축 GPU 샘플러
+	 * @private
+	 */
+	#basicPackedSampler: GPUSampler
+	/**
+	 * 클러스터 라이트 데이터를 저장하는 GPU 버퍼
+	 * @private
+	 */
+	#clusterLightsBuffer: GPUBuffer
+	/**
+	 * 클러스터 라이트 데이터를 담은 Float32Array
+	 * @private
+	 */
+	#clusterLightsBufferData: Float32Array
+	/**
+	 * 클러스터 라이트 처리 패스
+	 * @private
+	 */
+	#passLightClusters: PassClustersLight
+	/**
+	 * 클러스터 라이트 경계 계산 패스
+	 * @private
+	 */
+	#passLightClustersBound: PassClusterLightBound
+	/**
+	 * 더티 체킹용 이전 프레임 너비
+	 * @private
+	 */
+	#prevWidth: number = undefined
+	/**
+	 * 더티 체킹용 이전 프레임 높이
+	 * @private
+	 */
+	#prevHeight: number = undefined
+	/**
+	 * 리소스 관리를 위한 이전 프레임의 IBL 텍스처
+	 * @private
+	 */
+	#prevIBL_iblTexture: IBLCubeTexture
+	/**
+	 * 리소스 관리를 위한 이전 프레임의 IBL 복사열 텍스처
+	 * @private
+	 */
+	#prevIBL_irradianceTexture: IBLCubeTexture
+
+	/**
+	 * View3D 인스턴스를 생성합니다.
+	 * 3D 렌더링에 필요한 모든 컴포넌트(조명, 포스트 이펙트, 리소스 관리)를 초기화합니다.
 	 *
-	 * @param {RedGPUContext} redGPUContext - The RedGPUContext.
-	 * @param {Scene} scene - The scene to render the constructor in.
-	 * @param {AController | Camera2D} camera - The camera used for rendering.
-	 * @param {string} [name] - The name of the constructor.
+	 * @param redGPUContext - 렌더링 작업을 위한 WebGPU 컨텍스트
+	 * @param scene - 렌더링할 3D 장면
+	 * @param camera - 카메라 컨트롤러 (3D 또는 2D 카메라)
+	 * @param name - 뷰의 선택적 이름 식별자
 	 */
 	constructor(redGPUContext: RedGPUContext, scene: Scene, camera: AController | Camera2D, name?: string) {
-		super(redGPUContext)
-		this.scene = scene
-		this.camera = camera
-		if (name) this.name = name
+		super(redGPUContext, scene, camera, name)
 		this.#init()
 		this.#viewRenderTextureManager = new ViewRenderTextureManager(this)
-		this.#debugViewRenderState = new RenderViewStateData(this)
+		this.#renderViewStateData = new RenderViewStateData(this)
 		this.#postEffectManager = new PostEffectManager(this)
-		this.setSize('100%', '100%')
 	}
 
+	/**
+	 * 뷰 렌더 텍스처 매니저를 가져옵니다.
+	 * @returns ViewRenderTextureManager 인스턴스
+	 */
 	get viewRenderTextureManager(): ViewRenderTextureManager {
 		return this.#viewRenderTextureManager;
 	}
 
+	/**
+	 * 정점 셰이더용 시스템 유니폼 구조 정보를 가져옵니다.
+	 * @returns 유니폼 구조 정보 객체
+	 */
 	get systemUniform_Vertex_StructInfo(): any {
 		return this.#systemUniform_Vertex_StructInfo;
 	}
 
+	/**
+	 * 정점 셰이더 시스템 유니폼용 GPU 바인드 그룹을 가져옵니다.
+	 * @returns 정점 유니폼용 GPUBindGroup
+	 */
 	get systemUniform_Vertex_UniformBindGroup(): GPUBindGroup {
 		return this.#systemUniform_Vertex_UniformBindGroup;
 	}
 
+	/**
+	 * 정점 셰이더 시스템 유니폼용 유니폼 버퍼를 가져옵니다.
+	 * @returns UniformBuffer 인스턴스
+	 */
 	get systemUniform_Vertex_UniformBuffer(): UniformBuffer {
 		return this.#systemUniform_Vertex_UniformBuffer;
 	}
 
+	/**
+	 * 클러스터 라이트 경계 패스를 가져옵니다.
+	 * @returns PassClusterLightBound 인스턴스
+	 */
 	get passLightClustersBound(): PassClusterLightBound {
 		return this.#passLightClustersBound;
 	}
 
+	/**
+	 * IBL(이미지 기반 조명) 설정을 가져옵니다.
+	 * @returns IBL 인스턴스
+	 */
 	get ibl(): IBL {
 		return this.#ibl;
 	}
 
+	/**
+	 * IBL(이미지 기반 조명) 설정을 설정합니다.
+	 * @param value - 설정할 IBL 인스턴스
+	 */
 	set ibl(value: IBL) {
 		this.#ibl = value;
 	}
 
-	get pickingManager(): PickingManager {
-		return this.#pickingManager;
-	}
-
+	/**
+	 * 포스트 이펙트 매니저를 가져옵니다.
+	 * @returns PostEffectManager 인스턴스
+	 */
 	get postEffectManager(): PostEffectManager {
 		return this.#postEffectManager;
 	}
 
-	get name(): string {
-		if (!this.#instanceId) this.#instanceId = InstanceIdGenerator.getNextId(this.constructor)
-		return this.#name || `${this.constructor.name} Instance ${this.#instanceId}`;
+	/**
+	 * 디버그 뷰 렌더링 상태를 가져옵니다.
+	 * @returns RenderViewStateData 인스턴스
+	 */
+	get renderViewStateData(): RenderViewStateData {
+		return this.#renderViewStateData;
 	}
 
-	set name(value: string) {
-		this.#name = value;
-	}
-
-	get debugViewRenderState(): RenderViewStateData {
-		return this.#debugViewRenderState;
-	}
-
-	//
-	get grid(): DrawDebuggerGrid {
-		return this.#grid;
-	}
-
-	set grid(value: DrawDebuggerGrid | boolean) {
-		if (typeof value === 'boolean') {
-			if (value === true) {
-				value = new DrawDebuggerGrid(this.redGPUContext); // true면 DrawDebuggerGrid 생성
-			} else {
-				value = null; // false면 null 설정
-			}
-		} else if (!(value instanceof DrawDebuggerGrid) && value !== null) {
-			// Grid가 아닌 값이 들어오는 경우 예외 처리
-			throw new TypeError("grid must be of type 'DrawDebuggerGrid', 'boolean', or 'null'.");
-		}
-		this.#grid = value as DrawDebuggerGrid;
-	}
-
-	get axis(): DrawDebuggerAxis {
-		return this.#axis;
-	}
-
-	set axis(value: DrawDebuggerAxis | boolean) {
-		if (typeof value === 'boolean') {
-			if (value === true) {
-				value = new DrawDebuggerAxis(this.redGPUContext); // true면 DrawDebuggerAxis 생성
-			} else {
-				value = null; // false면 null 설정
-			}
-		} else if (!(value instanceof DrawDebuggerAxis) && value !== null) {
-			// Axis가 아닌 값이 들어오는 경우 예외 처리
-			throw new TypeError("axis must be of type 'DrawDebuggerAxis', 'boolean', or 'null'.");
-		}
-		this.#axis = value as DrawDebuggerAxis;
-	}
-
+	/**
+	 * 스카이박스를 가져옵니다.
+	 * @returns SkyBox 인스턴스
+	 */
 	get skybox(): SkyBox {
 		return this.#skybox;
 	}
 
+	/**
+	 * 스카이박스를 설정합니다.
+	 * 이전 텍스처의 리소스 상태를 관리하고 새 텍스처로 교체합니다.
+	 * @param value - 설정할 SkyBox 인스턴스
+	 */
 	set skybox(value: SkyBox) {
 		const {resourceManager} = this.redGPUContext
 		const prevTexture = this.#skybox?.skyboxTexture
@@ -206,48 +261,16 @@ class View3D extends ViewTransform {
 		this.#skybox = value;
 	}
 
-	get useFrustumCulling(): boolean {
-		return this.#useFrustumCulling;
-	}
-
-	set useFrustumCulling(value: boolean) {
-		this.#useFrustumCulling = value;
-	}
-
-	get useDistanceCulling(): boolean {
-		return this.#useDistanceCulling;
-	}
-
-	set useDistanceCulling(value: boolean) {
-		this.#useDistanceCulling = value;
-	}
-
-	get distanceCulling(): number {
-		return this.#distanceCulling;
-	}
-
-	set distanceCulling(value: number) {
-		this.#distanceCulling = value;
-	}
-
-	get scene(): Scene {
-		return this.#scene;
-	}
-
-	set scene(value: Scene) {
-		if (!(value instanceof Scene)) consoleAndThrowError('allow only Scene instance')
-		this.#scene = value;
-	}
-
-	screenToWorld(
-		screenX: number,
-		screenY: number,
-	) {
-		return screenToWorld(screenX, screenY, this)
-	}
-
+	/**
+	 * 뷰를 업데이트하고 렌더링 준비를 수행합니다.
+	 * 유니폼 데이터 업데이트, 바인드 그룹 생성, 클러스터 라이트 계산을 처리합니다.
+	 *
+	 * @param view - 업데이트할 View3D 인스턴스
+	 * @param shadowRender - 그림자 렌더링 여부 (기본값: false)
+	 * @param calcPointLightCluster - 포인트 라이트 클러스터 계산 여부 (기본값: false)
+	 * @param renderPath1ResultTextureView - 렌더 패스 1 결과 텍스처 뷰 (선택사항)
+	 */
 	update(view: View3D, shadowRender: boolean = false, calcPointLightCluster: boolean = false, renderPath1ResultTextureView?: GPUTextureView) {
-		//TODO 바인드그룹이 계속 생겨나는걸.... 막아야겠군
 		const {scene} = view
 		const {shadowManager} = scene
 		const {directionalShadowManager} = shadowManager
@@ -274,7 +297,7 @@ class View3D extends ViewTransform {
 			else this.#systemUniform_Vertex_UniformBindGroup = this.#prevInfoList[key].vertexUniformBindGroup;
 			[
 				{key: 'useIblTexture', value: [ibl_iblTexture ? 1 : 0]},
-				{key: 'time', value: [view.debugViewRenderState.timestamp || 0]},
+				{key: 'time', value: [view.renderViewStateData.timestamp || 0]},
 				{key: 'isView3D', value: [this.constructor === View3D ? 1 : 0]},
 			].forEach(({key, value}) => {
 				this.redGPUContext.gpuDevice.queue.writeBuffer(
@@ -295,13 +318,16 @@ class View3D extends ViewTransform {
 		this.#updateClusters(calcPointLightCluster)
 	}
 
-	checkMouseInViewBounds(): boolean {
-		const {pixelRectObject, pickingManager} = this;
-		const {mouseX, mouseY} = pickingManager;
-		return (0 < mouseX && mouseX < pixelRectObject.width) &&
-			(0 < mouseY && mouseY < pixelRectObject.height);
-	}
-
+	/**
+	 * 정점 유니폼 바인드 그룹을 생성합니다.
+	 * 시스템 유니폼, 샘플러, 텍스처 등의 리소스를 바인딩합니다.
+	 *
+	 * @param key - 캐시 키
+	 * @param shadowDepthTextureView - 그림자 깊이 텍스처 뷰
+	 * @param ibl - IBL 설정
+	 * @param renderPath1ResultTextureView - 렌더 패스 1 결과 텍스처 뷰
+	 * @private
+	 */
 	#createVertexUniformBindGroup(key: string, shadowDepthTextureView: GPUTextureView, ibl: IBL, renderPath1ResultTextureView: GPUTextureView) {
 		this.#updateClusters(true)
 		const ibl_iblTexture = ibl?.iblTexture
@@ -378,6 +404,15 @@ class View3D extends ViewTransform {
 		this.#updateIBLResourceStates(resourceManager, ibl_iblTexture, ibl_irradianceTexture);
 	}
 
+	/**
+	 * IBL 텍스처 리소스 상태를 업데이트합니다.
+	 * 이전 텍스처와 새 텍스처의 사용 횟수를 관리하여 메모리를 효율적으로 관리합니다.
+	 *
+	 * @param resourceManager - 리소스 매니저 인스턴스
+	 * @param ibl_iblTexture - IBL 텍스처
+	 * @param ibl_irradianceTexture - IBL 복사열 텍스처
+	 * @private
+	 */
 	#updateIBLResourceStates(resourceManager: ResourceManager, ibl_iblTexture: any, ibl_irradianceTexture: any) {
 		// IBL 텍스처 쌍들을 배열로 정의
 		const textureUpdates = [
@@ -398,6 +433,15 @@ class View3D extends ViewTransform {
 		this.#prevIBL_irradianceTexture = ibl_irradianceTexture;
 	}
 
+	/**
+	 * IBL 리소스 상태를 관리합니다.
+	 * 텍스처의 사용 횟수를 증가 또는 감소시켜 리소스 생명주기를 관리합니다.
+	 *
+	 * @param resourceManager - 리소스 매니저 인스턴스
+	 * @param cacheKey - 텍스처 캐시 키
+	 * @param isAddingListener - 리스너 추가 여부 (true: 사용 횟수 증가, false: 사용 횟수 감소)
+	 * @private
+	 */
 	#manageIBLResourceState(resourceManager: ResourceManager, cacheKey: string, isAddingListener: boolean) {
 		const targetResourceManagedState = resourceManager['managedCubeTextureState']
 		const targetState = targetResourceManagedState?.table.get(cacheKey);
@@ -406,6 +450,11 @@ class View3D extends ViewTransform {
 		}
 	}
 
+	/**
+	 * View3D를 초기화합니다.
+	 * 시스템 유니폼 버퍼, 클러스터 라이트 버퍼, 샘플러들을 생성하고 설정합니다.
+	 * @private
+	 */
 	#init() {
 		const systemUniform_Vertex_UniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength)
 		this.#systemUniform_Vertex_UniformBuffer = new UniformBuffer(
@@ -431,15 +480,22 @@ class View3D extends ViewTransform {
 			compare: GPU_COMPARE_FUNCTION.LESS_EQUAL,
 		}).gpuSampler
 		this.#basicSampler = new Sampler(this.redGPUContext).gpuSampler
-		this.#basicPackedSampler = new Sampler(this.redGPUContext,{
+		this.#basicPackedSampler = new Sampler(this.redGPUContext, {
 			addressModeU: GPU_ADDRESS_MODE.REPEAT,
 			addressModeV: GPU_ADDRESS_MODE.REPEAT,
 		}).gpuSampler
 	}
 
+	/**
+	 * 클러스터 라이트를 업데이트합니다.
+	 * 포인트 라이트와 스팟 라이트 데이터를 계산하고 GPU 버퍼에 업로드합니다.
+	 *
+	 * @param calcClusterLight - 클러스터 라이트 계산 여부 (기본값: false)
+	 * @private
+	 */
 	#updateClusters(calcClusterLight: boolean = false) {
 		if (!calcClusterLight) return
-		const {redGPUContext, scene, debugViewRenderState} = this
+		const {redGPUContext, scene, renderViewStateData} = this
 		// const dirtyPixelSize = this.#prevWidth == undefined || this.#prevHeight == undefined || this.#prevWidth !== this.pixelRectArray[2] || this.#prevHeight !== this.pixelRectArray[3]
 		const dirtyPixelSize = true;
 		if (!this.#passLightClustersBound) {
@@ -463,7 +519,6 @@ class View3D extends ViewTransform {
 				// console.log('실행이되긴하하나2')
 				while (i--) {
 					const tLight = pointLights[i]
-					//TODO - 프러스텀 컬링할꺼냐 말꺼냐
 					const stride = 16
 					const offset = 4 + stride * i
 					this.#clusterLightsBufferData.set(
@@ -475,7 +530,7 @@ class View3D extends ViewTransform {
 					)
 					if (tLight.enableDebugger) {
 						if (!tLight.drawDebugger) tLight.drawDebugger = new DrawDebuggerPointLight(redGPUContext, tLight)
-						tLight.drawDebugger.render(debugViewRenderState)
+						tLight.drawDebugger.render(renderViewStateData)
 					}
 				}
 			}
@@ -496,7 +551,7 @@ class View3D extends ViewTransform {
 					)
 					if (tLight.enableDebugger) {
 						if (!tLight.drawDebugger) tLight.drawDebugger = new DrawDebuggerSpotLight(redGPUContext, tLight)
-						tLight.drawDebugger.render(debugViewRenderState)
+						tLight.drawDebugger.render(renderViewStateData)
 					}
 				}
 			}

@@ -58,7 +58,7 @@ RedGPU.init(
 
 /* 3. Group2D 기반 라인 및 텍스트 생성 함수 */
 function createLineGroup(redGPUContext, title, posX, posY, baseColor, useRainbow, pointsPerLine) {
-	const group = new RedGPU.Display.Group2D(redGPUContext);
+	const group = new RedGPU.Display.Group2D();
 
 	// 라인 생성
 	const line2D = new RedGPU.Display.Line2D(redGPUContext, RedGPU.Display.LINE_TYPE.LINEAR, baseColor);
