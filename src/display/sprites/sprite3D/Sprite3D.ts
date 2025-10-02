@@ -6,7 +6,7 @@ import Primitive from "../../../primitive/core/Primitive";
 import Plane from "../../../primitive/Plane";
 import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import Mesh from "../../mesh/Mesh";
-import vertexModuleSource from "../Sprite3D/shader/Sprite3DVertex.wgsl";
+import vertexModuleSource from "./shader/sprite3DVertex.wgsl";
 
 /** Sprite3D 전용 버텍스 셰이더 모듈 이름 */
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_SPRITE_3D'
