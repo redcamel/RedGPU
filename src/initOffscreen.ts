@@ -24,7 +24,7 @@ import {keepLog} from "./utils";
  * <br/>The options for adapter request, defaults to { powerPreference: "high-performance", forceFallbackAdapter: false }.
  *
  */
-const init = async (
+const initOffscreen = async (
 	canvas: HTMLCanvasElement,
 	onWebGPUInitialized: Function,
 	onFailInitialized?: Function,
@@ -78,13 +78,14 @@ const init = async (
 		}
 	}
 	const validateAndInitializeContext = (canvas: HTMLCanvasElement, adapter: GPUAdapter, device: GPUDevice) => {
-		const context = canvas.getContext('webgpu')
+		const offscreenCanvas = new OffscreenCanvas(canvas.width, canvas.height);
+		const context = offscreenCanvas.getContext('webgpu')
 		if (!context) {
 			errorHandler(new Error(`Failed to get context from canvas: ${canvas.id || canvas}`), 'Failed to get webgpu initialize from canvas');
 			return
 		}
 		try {
-			const redGPUContext: RedGPUContext = new RedGPUContext(canvas,null, adapter, device, context, alphaMode)
+			const redGPUContext: RedGPUContext = new RedGPUContext(canvas, offscreenCanvas,adapter, device, context, alphaMode)
 			onWebGPUInitialized(redGPUContext)
 			device.addEventListener('uncapturederror', (event: GPUUncapturedErrorEvent) => {
 				console.warn('TODO A WebGPU error was not captured:', event);
@@ -156,7 +157,7 @@ const init = async (
 		errorHandler(e, `Unexpected error occurred during WebGPU initialization: ${e.message}`);
 	}
 }
-export default init
+export default initOffscreen
 const generateErrorMessage = (e: any, defaultMsg: string): string => {
 	let msg = defaultMsg;
 	// Check if 'e' is an instance of Error

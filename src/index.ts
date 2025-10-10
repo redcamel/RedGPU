@@ -1,9 +1,11 @@
 
 import init from "./init";
+import initOffscreen from "./initOffscreen";
 import GLTFLoader from "./loader/gltf/GLTFLoader";
 import SystemCode from "./resources/systemCode/SystemCode";
 export {
 	init,
+	initOffscreen,
 	SystemCode,
 	GLTFLoader
 }

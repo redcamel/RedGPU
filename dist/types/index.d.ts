@@ -1,7 +1,8 @@
 import init from "./init";
+import initOffscreen from "./initOffscreen";
 import GLTFLoader from "./loader/gltf/GLTFLoader";
 import SystemCode from "./resources/systemCode/SystemCode";
-export { init, SystemCode, GLTFLoader };
+export { init, initOffscreen, SystemCode, GLTFLoader };
 export * as Camera from "./camera/";
 export * from "./context";
 export * from "./color";

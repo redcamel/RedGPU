@@ -36,6 +36,8 @@ class RedGPUContext extends RedGPUContextViewContainer {
 	readonly #gpuDevice: GPUDevice
 	/** HTML 캔버스 요소 (렌더링 대상 DOM) */
 	readonly #htmlCanvas: HTMLCanvasElement
+	readonly #offscreenCanvas: OffscreenCanvas
+	readonly #bitmaprenderer: ImageBitmapRenderingContext | null
 	/** 크기 관리 매니저 (캔버스/뷰 크기 관리) */
 	readonly #sizeManager: RedGPUContextSizeManager
 	/** 디바이스/브라우저 환경 감지 매니저 */
@@ -53,6 +55,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
 
 	constructor(
 		htmlCanvas: HTMLCanvasElement,
+		offscreenCanvas: OffscreenCanvas,
 		gpuAdapter: GPUAdapter,
 		gpuDevice: GPUDevice,
 		gpuContext: GPUCanvasContext,
@@ -64,6 +67,8 @@ class RedGPUContext extends RedGPUContextViewContainer {
 		this.#gpuContext = gpuContext
 		this.#alphaMode = alphaMode
 		this.#htmlCanvas = htmlCanvas
+		this.#offscreenCanvas = offscreenCanvas
+		this.#bitmaprenderer = htmlCanvas.getContext('bitmaprenderer')
 		this.#sizeManager = new RedGPUContextSizeManager(this)
 		this.#detector = new RedGPUContextDetector(this)
 		this.#resourceManager = new ResourceManager(this)
@@ -174,6 +179,14 @@ class RedGPUContext extends RedGPUContextViewContainer {
 	 */
 	get htmlCanvas(): HTMLCanvasElement {
 		return this.#htmlCanvas;
+	}
+
+	get offscreenCanvas(): OffscreenCanvas {
+		return this.#offscreenCanvas;
+	}
+
+	get bitmaprenderer(): ImageBitmapRenderingContext | null {
+		return this.#bitmaprenderer;
 	}
 
 	get keyboardKeyBuffer(): { [p: string]: boolean } {

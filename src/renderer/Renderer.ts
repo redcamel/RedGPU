@@ -37,6 +37,12 @@ class Renderer {
 			}
 		}
 		this.#finalRender.render(redGPUContext, viewList_renderPassDescriptorList)
+		if (redGPUContext.offscreenCanvas && redGPUContext.bitmaprenderer) {
+			const imageBitmap = redGPUContext.offscreenCanvas.transferToImageBitmap()
+			redGPUContext.bitmaprenderer.transferFromImageBitmap(imageBitmap)
+		}
+
+
 		//
 		redGPUContext.antialiasingManager.changedMSAA = false
 		console.log('/////////////////// end renderFrame ///////////////////')

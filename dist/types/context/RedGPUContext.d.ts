@@ -21,7 +21,7 @@ declare class RedGPUContext extends RedGPUContextViewContainer {
     onResize: ((width: number, height: number) => void) | null;
     /** 현재 시간(프레임 기준, ms) */
     currentTime: number;
-    constructor(htmlCanvas: HTMLCanvasElement, gpuAdapter: GPUAdapter, gpuDevice: GPUDevice, gpuContext: GPUCanvasContext, alphaMode: GPUCanvasAlphaMode);
+    constructor(htmlCanvas: HTMLCanvasElement, offscreenCanvas: OffscreenCanvas, gpuAdapter: GPUAdapter, gpuDevice: GPUDevice, gpuContext: GPUCanvasContext, alphaMode: GPUCanvasAlphaMode);
     get antialiasingManager(): AntialiasingManager;
     get useDebugPanel(): boolean;
     set useDebugPanel(value: boolean);
@@ -86,6 +86,8 @@ declare class RedGPUContext extends RedGPUContextViewContainer {
      * @returns {HTMLCanvasElement} The HTML canvas element.
      */
     get htmlCanvas(): HTMLCanvasElement;
+    get offscreenCanvas(): OffscreenCanvas;
+    get bitmaprenderer(): ImageBitmapRenderingContext | null;
     get keyboardKeyBuffer(): {
         [p: string]: boolean;
     };
