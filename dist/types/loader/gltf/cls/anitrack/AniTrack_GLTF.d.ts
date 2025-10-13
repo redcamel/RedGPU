@@ -3,6 +3,7 @@ import Mesh from "../../../../display/mesh/Mesh";
 import AnimationData_GLTF from "../AnimationData_GLTF";
 declare class AniTrack_GLTF {
     #private;
+    lastPrevIdx: number;
     key: any;
     timeAnimationInfo: AnimationData_GLTF;
     aniDataAnimationInfo: AnimationData_GLTF;
