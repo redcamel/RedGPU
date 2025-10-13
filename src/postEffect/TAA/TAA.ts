@@ -1,4 +1,4 @@
-import AntialiasingManager from "../../context/antialiasing/AntialiasingManager";
+import AntialiasingManager from "../../context/core/AntialiasingManager";
 import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../material/core";

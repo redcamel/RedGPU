@@ -1,6 +1,10 @@
 import createUUID from "../../utils/uuid/createUUID";
 import RedGPUContext from "../RedGPUContext";
 
+/**
+ * @description `AntialiasingManager` 클래스는 안티앨리어싱 설정을 관리한다.
+ * 현재 MSAA, FXAA, TAA 설정을 지원하며, 각 설정의 활성화 여부를 제어할 수 있다.
+ */
 class AntialiasingManager {
 	#redGPUContext: RedGPUContext;
 	#msaaID: string

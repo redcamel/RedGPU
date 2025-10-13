@@ -11,7 +11,7 @@ export {
 }
 
 export * as Camera from "./camera/";
-export * from "./context";
+export * as RedGPUContext from "./context";
 export * from "./color";
 export * from "./geometry";
 export * as Util from "./utils";

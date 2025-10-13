@@ -3,7 +3,9 @@ import validateUintRange from "../../runtimeChecker/validateFunc/validateUintRan
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
 
 /**
- * Represents a container class for managing a list of View3D objects in RedGPUContext.
+ * `RedGPUContextViewContainer` 클래스는 RedGPUContext의 뷰(View3D) 관리를 담당합니다.
+ * - 뷰 추가, 제거, 조회 및 순서 변경 등의 기능을 제공합니다.
+ * - 각 뷰는 RedGPUContext에 종속되며, 뷰 리스트를 통해 관리됩니다.
  */
 class RedGPUContextViewContainer {
 	/**
