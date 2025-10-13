@@ -76,6 +76,9 @@ class IndexBuffer extends ABaseBuffer {
 		return this.#indexCount;
 	}
 
+    get data(): NumberArray {
+        return this[GPU_BUFFER_DATA_SYMBOL];
+    }
 	/**
 	 * 인덱스 버퍼의 데이터를 변경합니다.
 	 *

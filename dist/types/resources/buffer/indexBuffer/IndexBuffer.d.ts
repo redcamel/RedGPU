@@ -31,6 +31,7 @@ declare class IndexBuffer extends ABaseBuffer {
      * @category Buffer
      */
     get indexCount(): number;
+    get data(): NumberArray;
     /**
      * 인덱스 버퍼의 데이터를 변경합니다.
      *

@@ -36,9 +36,6 @@ abstract class ABaseBuffer extends ManagementResourceBase {
 		return this.#usage;
 	}
 
-	get data(): Float32Array {
-		return this[GPU_BUFFER_DATA_SYMBOL];
-	}
 
 	get size(): number {
 		return this[GPU_BUFFER_DATA_SYMBOL].byteLength || 0

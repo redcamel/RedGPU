@@ -72,6 +72,9 @@ class VertexBuffer extends ABaseBuffer {
 		}
 	}
 
+    get data(): Float32Array {
+        return this[GPU_BUFFER_DATA_SYMBOL];
+    }
 	/**
 	 * stride(버텍스 당 바이트 수)를 반환합니다.
 	 * @category Buffer

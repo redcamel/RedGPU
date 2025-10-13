@@ -16,7 +16,6 @@ declare abstract class ABaseBuffer extends ManagementResourceBase {
     get cacheKey(): string;
     get gpuBuffer(): GPUBuffer;
     get usage(): GPUBufferUsageFlags;
-    get data(): Float32Array;
     get size(): number;
     get videoMemorySize(): number;
     destroy(): void;
