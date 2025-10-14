@@ -1,10 +1,11 @@
 import {mat4} from "gl-matrix";
 import Camera2D from "../camera/camera/Camera2D";
 import RedGPUContext from "../context/RedGPUContext";
+import RenderViewStateData from "../display/view/core/RenderViewStateData";
 import View3D from "../display/view/View3D";
 import GPU_LOAD_OP from "../gpuConst/GPU_LOAD_OP";
 import GPU_STORE_OP from "../gpuConst/GPU_STORE_OP";
-import gltfAnimationLooper from "../loader/gltf/animationLooper/gltfAnimationLooper";
+import GltfAnimationLooperManager from "../loader/gltf/animationLooper/GltfAnimationLooperManager";
 import ParsedSkinInfo_GLTF from "../loader/gltf/cls/ParsedSkinInfo_GLTF";
 import DebugRender from "./debugRender/DebugRender";
 import FinalRender from "./finalRender/FinalRender";
@@ -13,13 +14,12 @@ import renderAlphaLayer from "./renderLayers/renderAlphaLayer";
 import renderBasicLayer from "./renderLayers/renderBasicLayer";
 import renderPickingLayer from "./renderLayers/renderPickingLayer";
 import renderShadowLayer from "./renderLayers/renderShadowLayer";
-import RenderViewStateData from "../display/view/core/RenderViewStateData";
 
 class Renderer {
 	#prevViewportSize: { width: number, height: number };
 	#finalRender: FinalRender
 	#debugRender: DebugRender
-
+	#gltfAnimationLooperManager:GltfAnimationLooperManager = new GltfAnimationLooperManager()
 	constructor() {
 	}
 
@@ -272,7 +272,7 @@ class Renderer {
 		});
 		const passEncoder = commandEncoder.beginComputePass();
 		if (animationListNum) {
-			gltfAnimationLooper(
+			this.#gltfAnimationLooperManager.render(
 				redGPUContext,
 				renderViewStateData.timestamp,
 				passEncoder,

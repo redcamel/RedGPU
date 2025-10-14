@@ -1,0 +1,160 @@
+import Camera2D from "../../../camera/camera/Camera2D";
+/**
+ * 3D 뷰의 렌더링 상태 데이터를 관리하고 추적합니다.
+ *
+ * 이 클래스는 렌더링 프로세스 중에 필요한 모든 상태 정보를 캡슐화합니다.
+ * 컬링 설정, 성능 메트릭, GPU 리소스, 레이어 관리 등을 포함합니다.
+ *
+ * @remarks
+ * `시스템 전용 클래스입니다.`\
+ * 이 메서드는 렌더링 엔진 내부에서 자동으로 사용되는 기능으로, 일반적인 사용자는 직접 호출하지 않는 것이 좋습니다.
+ */
+class RenderViewStateData {
+    /** 이 뷰에 대해 거리 컬링이 활성화되어 있는지 여부 */
+    useDistanceCulling;
+    /** 컬링 계산에 사용되는 거리의 제곱 값 */
+    cullingDistanceSquared;
+    /** 객체를 컬링하기 위한 거리 임계값 */
+    distanceCulling;
+    /** 현재 프레임에서 렌더링된 3D 그룹의 수 */
+    num3DGroups;
+    /** 현재 프레임에서 렌더링된 3D 객체의 수 */
+    num3DObjects;
+    /** 현재 프레임에서 발행된 드로우 콜의 수 */
+    numDrawCalls;
+    /** 업데이트가 필요했던 더티 파이프라인의 수 */
+    numDirtyPipelines;
+    /** 렌더링된 총 인스턴스 수 */
+    numInstances;
+    /** 렌더링된 총 삼각형 수 */
+    numTriangles;
+    /** 렌더링된 총 포인트 수 */
+    numPoints;
+    /** 뷰 렌더링에 소요된 시간 (밀리초) */
+    viewRenderTime;
+    /** 현재 뷰포트 크기 및 위치 정보 */
+    viewportSize;
+    /** 렌더 텍스처가 사용하는 비디오 메모리 양 (바이트) */
+    usedVideoMemory;
+    /** 현재 사용 중인 GPU 렌더 패스 인코더 */
+    currentRenderPassEncoder;
+    /** 컴퓨트 작업을 위한 GPU 커맨드 인코더 */
+    computeCommandEncoder;
+    /** 렌더링 프레임의 현재 타임스탬프 */
+    timestamp;
+    /** 컬링을 위한 프러스텀 평면 배열, 프러스텀 컬링이 비활성화된 경우 null */
+    frustumPlanes;
+    /** 최적화를 위해 이전에 사용한 버텍스 GPU 버퍼 */
+    prevVertexGpuBuffer;
+    /** 최적화를 위해 이전에 사용한 프래그먼트 유니폼 바인드 그룹 */
+    prevFragmentUniformBindGroup;
+    /** 머티리얼로부터 변경된 버텍스 유니폼의 맵 */
+    dirtyVertexUniformFromMaterial = {};
+    /** 알파 렌더링 레이어의 객체 배열 */
+    alphaLayer = [];
+    /** 투명 렌더링 레이어의 객체 배열 */
+    transparentLayer = [];
+    /** 파티클 렌더링 레이어의 객체 배열 */
+    particleLayer = [];
+    /** 2D 패스 렌더링 레이어의 객체 배열 */
+    render2PathLayer = [];
+    /** 처리할 스킨 메시 목록 */
+    skinList = [];
+    /** 처리할 애니메이션 목록 */
+    animationList = [];
+    /** 효율적인 렌더링을 위한 렌더 번들 목록 */
+    renderBundleList = [];
+    /** 렌더링 시작을 표시하는 성능 타임스탬프 */
+    startTime;
+    /** 씬이 2D 모드인지 여부 */
+    isScene2DMode = false;
+    /** 연결된 View3D 인스턴스 (private) */
+    #view;
+    /**
+     * 새로운 RenderViewStateData 인스턴스를 생성합니다.
+     *
+     * @param {View3D} view - 이 상태 데이터가 연결될 View3D 인스턴스
+     */
+    constructor(view) {
+        this.#view = view;
+    }
+    /**
+     * 연결된 View3D 인스턴스를 가져옵니다.
+     *
+     * @readonly
+     * @returns {View3D} View3D 인스턴스
+     */
+    get view() {
+        return this.#view;
+    }
+    /**
+     * 새로운 프레임을 위해 렌더 상태 데이터를 초기화합니다.
+     *
+     * 이 메서드는 모든 카운터를 초기화하고, 레이어 배열을 비우며,
+     * 현재 렌더링 패스를 위한 GPU 리소스를 설정합니다.
+     * 또한 비디오 메모리 사용량을 계산하고 뷰 설정에 따라 컬링 매개변수를 구성합니다.
+     *
+     * @param {GPURenderPassEncoder} viewRenderPassEncoder - 현재 프레임의 렌더 패스 인코더
+     * @param {GPUCommandEncoder} computeCommandEncoder - 컴퓨트 작업을 위한 커맨드 인코더
+     * @param {number} time - 프레임의 현재 타임스탬프
+     *
+     * @throws {Error} 잘못된 매개변수가 제공되거나 필수 뷰 속성이 없는 경우
+     * @throws {Error} 텍스처 크기 계산이 실패한 경우
+     */
+    reset(viewRenderPassEncoder, computeCommandEncoder, time) {
+        if (!time || !this.#view) {
+            throw new Error('Invalid parameters provided');
+        }
+        const view = this.#view;
+        const { useFrustumCulling, frustumPlanes, scene, postEffectManager, pickingManager, viewRenderTextureManager } = view;
+        const { gBufferColorTexture, depthTexture, gBufferColorResolveTexture, renderPath1ResultTexture, } = view.viewRenderTextureManager;
+        const { shadowManager } = scene;
+        if (!gBufferColorTexture || !depthTexture) {
+            throw new Error('Invalid view properties');
+        }
+        this.useDistanceCulling = view.useDistanceCulling;
+        this.distanceCulling = view.distanceCulling;
+        this.cullingDistanceSquared = this.distanceCulling * this.distanceCulling;
+        this.num3DGroups = 0;
+        this.num3DObjects = 0;
+        this.numDrawCalls = 0;
+        this.numInstances = 0;
+        this.numDirtyPipelines = 0;
+        this.numTriangles = 0;
+        this.numPoints = 0;
+        this.viewRenderTime = 0;
+        this.currentRenderPassEncoder = viewRenderPassEncoder;
+        this.computeCommandEncoder = computeCommandEncoder;
+        this.timestamp = time;
+        this.prevVertexGpuBuffer = null;
+        this.prevFragmentUniformBindGroup = null;
+        this.dirtyVertexUniformFromMaterial = {};
+        this.alphaLayer = [];
+        this.transparentLayer = [];
+        this.particleLayer = [];
+        this.render2PathLayer = [];
+        this.skinList = [];
+        this.animationList = [];
+        this.renderBundleList = [];
+        this.startTime = performance.now();
+        this.isScene2DMode = view.camera instanceof Camera2D;
+        this.viewportSize = {
+            x: view.x,
+            y: view.y,
+            width: view.width,
+            height: view.height,
+            pixelRectArray: view.pixelRectArray
+        };
+        try {
+            this.usedVideoMemory = viewRenderTextureManager.videoMemorySize
+                + shadowManager.directionalShadowManager.videoMemorySize
+                + postEffectManager.videoMemorySize
+                + pickingManager.videoMemorySize;
+        }
+        catch (e) {
+            throw new Error('Could not calculate texture size: ' + e.message);
+        }
+        this.frustumPlanes = useFrustumCulling ? frustumPlanes : null;
+    }
+}
+export default RenderViewStateData;
