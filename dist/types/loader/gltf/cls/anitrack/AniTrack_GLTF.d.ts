@@ -12,6 +12,6 @@ declare class AniTrack_GLTF {
     animationTargetMesh: Mesh;
     cacheTable: {};
     constructor(key: any, time: any, data: any, interpolation: any, targetMesh: Mesh, weightMeshes: any);
-    render(redGPUContext: RedGPUContext, computePassEncoder: GPUComputePassEncoder, targetMesh: Mesh, interpolationValue: number, prevIDX: number, nextIDX: number): Promise<void>;
+    renderWeight(redGPUContext: RedGPUContext, computePassEncoder: GPUComputePassEncoder, targetMesh: Mesh, interpolationValue: number, prevIDX: number, nextIDX: number): Promise<void>;
 }
 export default AniTrack_GLTF;

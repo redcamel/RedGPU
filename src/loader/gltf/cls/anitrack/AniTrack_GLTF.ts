@@ -35,9 +35,9 @@ class AniTrack_GLTF {
 		this.#uniformData = new Float32Array(8);
 	}
 
-	async render(redGPUContext: RedGPUContext,
-	             computePassEncoder: GPUComputePassEncoder,
-	             targetMesh: Mesh, interpolationValue: number, prevIDX: number, nextIDX: number) {
+	async renderWeight(redGPUContext: RedGPUContext,
+	                   computePassEncoder: GPUComputePassEncoder,
+	                   targetMesh: Mesh, interpolationValue: number, prevIDX: number, nextIDX: number) {
 		const {gpuDevice} = redGPUContext;
 		if (!this.#computeShader) {
 			this.#initCommonCompute(redGPUContext);
