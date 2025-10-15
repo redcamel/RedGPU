@@ -7,6 +7,8 @@ import GPU_LOAD_OP from "../gpuConst/GPU_LOAD_OP";
 import GPU_STORE_OP from "../gpuConst/GPU_STORE_OP";
 import GltfAnimationLooperManager from "../loader/gltf/animationLooper/GltfAnimationLooperManager";
 import ParsedSkinInfo_GLTF from "../loader/gltf/cls/ParsedSkinInfo_GLTF";
+import {keepLog} from "../utils";
+import DrawBufferManager from "./core/DrawBufferManager";
 import DebugRender from "./debugRender/DebugRender";
 import FinalRender from "./finalRender/FinalRender";
 import render2PathLayer from "./renderLayers/render2PathLayer";
@@ -95,6 +97,10 @@ class Renderer {
 			label: 'ViewRender_MainComputeCommandEncoder'
 		})
 		this.#batchUpdateSkinMatrices(redGPUContext, renderViewStateData)
+
+
+		// const memoryInfo = drawBufferManager.getMemoryUsage()
+		// keepLog('드로우 버퍼 상태:', memoryInfo)
 		view.renderViewStateData.reset(null, computeCommandEncoder, time)
 		if (pixelRectObject.width && pixelRectObject.height) {
 			this.#renderViewShadow(view, commandEncoder)
@@ -162,6 +168,8 @@ class Renderer {
 		if (grid) grid.render(renderViewStateData)
 		renderBasicLayer(view, viewRenderPassEncoder)
 		renderAlphaLayer(view, viewRenderPassEncoder)
+
+
 		viewRenderPassEncoder.end()
 	}
 

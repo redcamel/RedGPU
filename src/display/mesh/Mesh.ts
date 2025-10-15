@@ -4,6 +4,8 @@ import RedGPUContext from "../../context/RedGPUContext";
 import DefineForVertex from "../../defineProperty/DefineForVertex";
 import Geometry from "../../geometry/Geometry";
 import Primitive from "../../primitive/core/Primitive";
+import DrawBufferManager, {DrawCommandSlot} from "../../renderer/core/DrawBufferManager";
+import {keepLog} from "../../utils";
 import RenderViewStateData from "../view/core/RenderViewStateData";
 import VertexGPURenderInfo from "./core/VertexGPURenderInfo";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
@@ -124,7 +126,7 @@ class Mesh extends MeshBase {
 	#prevSystemBindGroup: GPUBindGroup
 	/** 이전 프래그먼트 바인드 그룹 */
 	#prevFragmentBindGroup: GPUBindGroup
-
+	#drawCommandSlot: DrawCommandSlot | null = null
 	/**
 	 * Mesh 인스턴스를 생성합니다.
 	 * @param redGPUContext RedGPU 컨텍스트
@@ -138,6 +140,8 @@ class Mesh extends MeshBase {
 		this._geometry = geometry
 		this._material = material
 		this.#pickingId = uuidToUint(this.uuid)
+
+
 	}
 
 	//
@@ -835,6 +839,7 @@ class Mesh extends MeshBase {
 				}
 				if (this.currentShaderModuleName === `${VERTEX_SHADER_MODULE_NAME_PBR_SKIN}_${this.animationInfo.skinInfo.joints?.length}`) {
 					// this.animationInfo.skinInfo.update(redGPUContext, this)
+
 					renderViewStateData.skinList[renderViewStateData.skinList.length] = this
 					dirtyTransformForChildren = false
 				}
@@ -959,7 +964,75 @@ class Mesh extends MeshBase {
 					let needBundleFinish = false
 					// keepLog(this.#bundleEncoder , this.dirtyPipeline , this.#prevSystemBindGroup !== view.systemUniform_Vertex_UniformBindGroup)
 					const {fragmentUniformBindGroup} = currentMaterial.gpuRenderInfo
-					if (!this.#bundleEncoder || this.dirtyPipeline || this.#prevFragmentBindGroup !== fragmentUniformBindGroup || this.#prevSystemBindGroup !== view.systemUniform_Vertex_UniformBindGroup) {
+					if (
+						!this.#bundleEncoder
+						|| this.dirtyPipeline
+						|| this.#prevFragmentBindGroup !== fragmentUniformBindGroup
+						|| this.#prevSystemBindGroup !== view.systemUniform_Vertex_UniformBindGroup
+					) {
+						// keepLog(`🎬 렌더 번들 갱신 이유: ${this.name}`, {
+						// 	noBundleEncoder: !this.#bundleEncoder,
+						// 	dirtyPipeline: this.dirtyPipeline,
+						// 	fragmentBindGroupChanged: this.#prevFragmentBindGroup !== fragmentUniformBindGroup,
+						// 	systemBindGroupChanged: this.#prevSystemBindGroup !== view.systemUniform_Vertex_UniformBindGroup
+						// })
+						if (!this.#drawCommandSlot) {
+							const drawBufferManager = DrawBufferManager.getInstance(redGPUContext)
+							this.#drawCommandSlot = drawBufferManager.allocateDrawCommand(this.name)
+						}
+						if (currentGeometry.indexBuffer) {
+
+							const {indexBuffer} = currentGeometry
+							const {indexCount, gpuBuffer: indexGPUBuffer, format} = indexBuffer
+							// @ts-ignore
+							if (this.particleBuffers) {}
+							else {
+								// targetEncoder.drawIndexed(indexCount, 1, 0, 0, 0);
+								const drawBufferManager = DrawBufferManager.getInstance(redGPUContext)
+								drawBufferManager.setIndexedDrawCommand(
+									this.#drawCommandSlot,
+									indexCount,  // indexCount
+									1,           // instanceCount
+									0,           // firstIndex
+									0,           // baseVertex
+									0            // firstInstance
+								)
+
+								const data = this.#drawCommandSlot.dataArray
+								const offset = this.#drawCommandSlot.commandOffset
+								keepLog(`📊 드로우 데이터 설정: ${this.name}`, {
+									meshName: this.name,
+									indexCount,
+									actualData: [
+										data[offset],     // indexCount
+										data[offset + 1], // instanceCount
+										data[offset + 2], // firstIndex
+										data[offset + 3], // baseVertex
+										data[offset + 4]  // firstInstance
+									]
+								})
+								//  즉시 해당 커맨드만 GPU로 업데이트
+								drawBufferManager.updateSingleCommand(this.#drawCommandSlot)
+
+
+
+							}
+						} else {
+							const {vertexBuffer} = currentGeometry
+							const {vertexCount} = vertexBuffer
+							// targetEncoder.draw(vertexCount, 1, 0, 0);
+							const drawBufferManager = DrawBufferManager.getInstance(redGPUContext)
+							drawBufferManager.setDirectDrawCommand(
+								this.#drawCommandSlot,
+								vertexCount, // vertexCount
+								1,           // instanceCount
+								0,           // firstVertex
+								0            // firstInstance
+							)
+							//  즉시 해당 커맨드만 GPU로 업데이트
+							drawBufferManager.updateSingleCommand(this.#drawCommandSlot)
+
+						}
 						this.#bundleEncoder = null
 						this.#bundleEncoder = gpuDevice.createRenderBundleEncoder({
 							colorFormats: [navigator.gpu.getPreferredCanvasFormat(), navigator.gpu.getPreferredCanvasFormat(), 'rgba16float'],
@@ -968,7 +1041,8 @@ class Mesh extends MeshBase {
 							label: this.uuid
 						})
 						needBundleFinish = true
-						// keepLog('렌더번들갱신')
+
+						keepLog('렌더번들갱신',this.name)
 					}
 					targetEncoder = this.#bundleEncoder
 					renderViewStateData.numDrawCalls++
@@ -989,6 +1063,7 @@ class Mesh extends MeshBase {
 						targetEncoder.setPipeline(pipeline)
 						const {gpuBuffer} = currentGeometry.vertexBuffer
 						targetEncoder.setVertexBuffer(0, gpuBuffer)
+
 						// @ts-ignore
 						if (this.particleBuffers?.length) {
 							// @ts-ignore
@@ -1001,18 +1076,37 @@ class Mesh extends MeshBase {
 						targetEncoder.setBindGroup(2, fragmentUniformBindGroup)
 						//
 						if (currentGeometry.indexBuffer) {
+
 							const {indexBuffer} = currentGeometry
 							const {indexCount, gpuBuffer: indexGPUBuffer, format} = indexBuffer
 							targetEncoder.setIndexBuffer(indexGPUBuffer, format)
 							// @ts-ignore
 							if (this.particleBuffers) targetEncoder.drawIndexed(indexCount, this.particleNum, 0, 0, 0);
-							else targetEncoder.drawIndexed(indexCount, 1, 0, 0, 0);
+							else {
+								// drawIndexedIndirect 실행
+								targetEncoder.drawIndexedIndirect(
+									this.#drawCommandSlot.buffer,
+									this.#drawCommandSlot.commandOffset * 4
+								)
+								keepLog(`🎬 drawIndexedIndirect 호출: ${this.name}`, {
+									meshName: this.name,
+									bufferLabel: this.#drawCommandSlot.buffer.label,
+									byteOffset: this.#drawCommandSlot.commandOffset * 4,
+									expectedIndexCount: indexCount
+								})
+
+
+							}
 						} else {
-							const {vertexBuffer} = currentGeometry
-							const {vertexCount} = vertexBuffer
-							targetEncoder.draw(vertexCount, 1, 0, 0);
+							// drawIndirect 실행
+							targetEncoder.drawIndirect(
+								this.#drawCommandSlot.buffer,
+								this.#drawCommandSlot.commandOffset * 4
+							)
 						}
+
 						this.#renderBundle = (targetEncoder as GPURenderBundleEncoder).finish();
+
 					}
 					if (this.meshType === MESH_TYPE.PARTICLE) {
 						particleLayer[particleLayer.length] = this.#renderBundle

@@ -22,10 +22,10 @@ RedGPU.init(
 		view.skybox = newSkybox;
 
 		{
-			let i = redGPUContext.detector.isMobile ? 200 : 1
+			let i = redGPUContext.detector.isMobile ? 200 : 500
 			while (i--) {
 				loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumMan/glTF/CesiumMan.gltf');
-				// loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF-Binary/BrainStem.glb');
+				// ;loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF-Binary/BrainStem.glb')
 
 			}
 		}
