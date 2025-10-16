@@ -955,7 +955,7 @@ class Mesh extends MeshBase {
 				}
 				this.dirtyOpacity = false
 			}
-			const {render2PathLayer, particleLayer, transparentLayer, alphaLayer, renderBundleList} = renderViewStateData
+			const {render2PathLayer, particleLayer, transparentLayer, alphaLayer, renderBundleList,skinRenderBundleList} = renderViewStateData
 			{
 				if (currentMaterial.use2PathRender) {
 					render2PathLayer[render2PathLayer.length] = this
@@ -1108,7 +1108,9 @@ class Mesh extends MeshBase {
 						this.#renderBundle = (targetEncoder as GPURenderBundleEncoder).finish();
 
 					}
-					if (this.meshType === MESH_TYPE.PARTICLE) {
+					if(this.animationInfo?.skinInfo){
+						skinRenderBundleList[skinRenderBundleList.length] = this.#renderBundle
+					}else if (this.meshType === MESH_TYPE.PARTICLE) {
 						particleLayer[particleLayer.length] = this.#renderBundle
 					} else if (currentMaterial.transparent) {
 						transparentLayer[transparentLayer.length] = this.#renderBundle

@@ -14,5 +14,6 @@ const renderBasicLayer = (view: View3D, viewRenderPassEncoder: GPURenderPassEnco
 	renderViewStateData.prevFragmentUniformBindGroup = null
 	renderViewStateData.prevVertexGpuBuffer = null
 	viewRenderPassEncoder.executeBundles(renderViewStateData.renderBundleList);
+
 }
 export default renderBasicLayer

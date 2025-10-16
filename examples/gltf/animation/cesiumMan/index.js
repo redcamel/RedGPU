@@ -15,27 +15,29 @@ RedGPU.init(
 		redGPUContext.addView(view);
 
 		const glbUrls = [
-			// 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumMan/glTF-Binary/CesiumMan.glb',
 			'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BoxVertexColors/glTF-Binary/BoxVertexColors.glb',
-			// 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumMilkTruck/glTF-Binary/CesiumMilkTruck.glb',
-			// 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF-Binary/BrainStem.glb'
+			'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumMan/glTF/CesiumMan.gltf',
+			'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumMilkTruck/glTF-Binary/CesiumMilkTruck.glb',
+			// 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumMan/glTF-Binary/CesiumMan.glb',
+			'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF-Binary/BrainStem.glb'
 		];
+
+		createSampleMesh(redGPUContext, scene);
 
 		loadGLTFGrid(view, glbUrls);
 
 		setTimeout(() => {
 			const glbUrls = [
-				'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumMan/glTF-Binary/CesiumMan.glb',
-				// 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumMilkTruck/glTF-Binary/CesiumMilkTruck.glb',
+				// 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumMan/glTF-Binary/CesiumMan.glb',
+				// 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumMan/glTF-Binary/CesiumMan.glb',
+				// 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumMilkTruck/glTF/CesiumMilkTruck.gltf',
 				// 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF-Binary/BrainStem.glb'
 			];
 
 			loadGLTFGrid(view, glbUrls);
 		},2000)
-
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		renderer.start(redGPUContext, () => {});
-
 		renderTestPane(redGPUContext, view);
 	},
 	(failReason) => {
@@ -45,6 +47,15 @@ RedGPU.init(
 		document.body.appendChild(errorDiv);
 	}
 );
+const createSampleMesh = (redGPUContext, scene) => {
+	const material = new RedGPU.Material.ColorMaterial(redGPUContext, '#ff0000');
+	const geometry = new RedGPU.Primitive.Box(redGPUContext, 2, 2, 2);
+	const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
+	scene.addChild(mesh);
+	mesh.z = -20
+
+	return mesh;
+};
 
 function loadGLTFGrid(view, urls, gridSize = 3, spacing = 3) {
 	const {redGPUContext, scene} = view;
@@ -67,6 +78,10 @@ function loadGLTFGrid(view, urls, gridSize = 3, spacing = 3) {
 			mesh.x = x;
 			mesh.y = -0.5;
 			mesh.z = z;
+
+			// if(url.includes('CesiumMilkTruck')){
+			// 	mesh.z = -100
+			// }
 		});
 	});
 }
