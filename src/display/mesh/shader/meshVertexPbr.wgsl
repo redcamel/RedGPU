@@ -1,6 +1,4 @@
 #redgpu_include SYSTEM_UNIFORM;
-#redgpu_include drawDirectionalShadowDepth;
-#redgpu_include picking;
 #redgpu_include calculateMotionVector;
 
 struct VertexUniforms {

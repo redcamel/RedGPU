@@ -43,7 +43,7 @@ struct OutputData {
 };
 
 @vertex
-fn main(inputData: InputData) -> OutputData {
+fn main(inputData: InputData, @builtin(vertex_index) idx: u32) -> OutputData {
     var output: OutputData;
 
     // System uniforms

@@ -41,7 +41,7 @@ struct OutputShadowData {
 };
 
 @vertex
-fn main(inputData: InputData) -> OutputData {
+fn main(inputData: InputData, @builtin(vertex_index) idx: u32) -> OutputData {
     var output: OutputData;
 
     // 시스템 Uniform 변수 가져오기
