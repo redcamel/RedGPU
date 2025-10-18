@@ -103,10 +103,10 @@ class Renderer {
 		// keepLog('드로우 버퍼 상태:', memoryInfo)
 		view.renderViewStateData.reset(null, computeCommandEncoder, time)
 		if (pixelRectObject.width && pixelRectObject.height) {
-			this.#renderViewShadow(view, commandEncoder)
+			// this.#renderViewShadow(view, commandEncoder)
 			this.#renderViewBasicLayer(view, commandEncoder, renderPassDescriptor)
-			this.#renderView2PathLayer(view, commandEncoder, renderPassDescriptor, depthStencilAttachment)
-			this.#renderViewPickingLayer(view, commandEncoder)
+			// this.#renderView2PathLayer(view, commandEncoder, renderPassDescriptor, depthStencilAttachment)
+			// this.#renderViewPickingLayer(view, commandEncoder)
 		}
 		renderPassDescriptor.colorAttachments[0].postEffectView = view.postEffectManager.render().textureView
 		redGPUContext.gpuDevice.queue.submit([commandEncoder.finish()])
@@ -167,31 +167,33 @@ class Renderer {
 		if (axis) axis.render(renderViewStateData)
 		if (grid) grid.render(renderViewStateData)
 		renderBasicLayer(view, viewRenderPassEncoder)
-		viewRenderPassEncoder.end()
-		{
-			const viewRenderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass({
-				colorAttachments: [...renderPassDescriptor.colorAttachments].map(v => ({...v, loadOp: GPU_LOAD_OP.LOAD})),
-				depthStencilAttachment: {
-					...renderPassDescriptor.depthStencilAttachment,
-					depthLoadOp: GPU_LOAD_OP.LOAD,
-				},
-			})
-			viewRenderPassEncoder.executeBundles(renderViewStateData.skinRenderBundleList);
-			viewRenderPassEncoder.end()
-		}
-		{
-			const viewRenderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass({
-				colorAttachments: [...renderPassDescriptor.colorAttachments].map(v => ({...v, loadOp: GPU_LOAD_OP.LOAD})),
-				depthStencilAttachment: {
-					...renderPassDescriptor.depthStencilAttachment,
-					depthLoadOp: GPU_LOAD_OP.LOAD,
-				},
-			})
-			renderAlphaLayer(view, viewRenderPassEncoder)
-			viewRenderPassEncoder.end()
-		}
+		// viewRenderPassEncoder.end()
+		// {
+		// 	const viewRenderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass({
+		// 		colorAttachments: [...renderPassDescriptor.colorAttachments].map(v => ({...v, loadOp: GPU_LOAD_OP.LOAD})),
+		// 		depthStencilAttachment: {
+		// 			...renderPassDescriptor.depthStencilAttachment,
+		// 			depthLoadOp: GPU_LOAD_OP.LOAD,
+		// 		},
+		// 	})
+		// 	viewRenderPassEncoder.executeBundles(renderViewStateData.skinRenderBundleList);
+		// 	viewRenderPassEncoder.end()
+		// }
+		// {
+		// 	const viewRenderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass({
+		// 		colorAttachments: [...renderPassDescriptor.colorAttachments].map(v => ({...v, loadOp: GPU_LOAD_OP.LOAD})),
+		// 		depthStencilAttachment: {
+		// 			...renderPassDescriptor.depthStencilAttachment,
+		// 			depthLoadOp: GPU_LOAD_OP.LOAD,
+		// 		},
+		// 	})
+		// 	renderAlphaLayer(view, viewRenderPassEncoder)
+		// 	viewRenderPassEncoder.end()
+		// }
 
-
+        viewRenderPassEncoder.executeBundles(renderViewStateData.skinRenderBundleList);
+        renderAlphaLayer(view, viewRenderPassEncoder)
+        viewRenderPassEncoder.end()
 
 	}
 
