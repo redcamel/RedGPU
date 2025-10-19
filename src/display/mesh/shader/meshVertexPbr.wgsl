@@ -1,4 +1,6 @@
 #redgpu_include SYSTEM_UNIFORM;
+#redgpu_include drawDirectionalShadowDepth;
+#redgpu_include picking;
 #redgpu_include calculateMotionVector;
 
 struct VertexUniforms {
@@ -44,7 +46,7 @@ struct OutputData {
 };
 
 @vertex
-fn main(inputData: InputData) -> OutputData {
+fn main(inputData: InputData, @builtin(vertex_index) idx: u32) -> OutputData {
     var output: OutputData;
 
     // Input data
