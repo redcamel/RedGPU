@@ -19,6 +19,7 @@ const maxMipLevel: f32 = 10.0;
 @group(1) @binding(3) var<storage, read> vertexStorages: array<mat4x4<f32>>;
 
 struct InputDataSkin {
+    @builtin(vertex_index) idx: u32,
     @location(0) position: vec3<f32>,
     @location(1) vertexNormal: vec3<f32>,
     @location(2) uv: vec2<f32>,
@@ -49,7 +50,7 @@ struct OutputShadowData {
 };
 
 @vertex
-fn main(inputData: InputDataSkin, @builtin(vertex_index) idx: u32) -> OutputDataSkin {
+fn main(inputData: InputDataSkin) -> OutputDataSkin {
     var output: OutputDataSkin;
 
     // Input data
@@ -80,7 +81,7 @@ fn main(inputData: InputDataSkin, @builtin(vertex_index) idx: u32) -> OutputData
     let u_directionalLightProjectionViewMatrix = systemUniforms.directionalLightProjectionViewMatrix;
 
     // Skinning calculation
-    let skinMat = vertexStorages[idx];
+    let skinMat = vertexStorages[inputData.idx];
 
 
     // Position and normal calculation
@@ -128,7 +129,7 @@ fn main(inputData: InputDataSkin, @builtin(vertex_index) idx: u32) -> OutputData
 }
 
 @vertex
-fn drawDirectionalShadowDepth(inputData: InputDataSkin, @builtin(vertex_index) idx: u32) -> OutputShadowData {
+fn drawDirectionalShadowDepth(inputData: InputDataSkin) -> OutputShadowData {
     var output: OutputShadowData;
 
     // System uniforms
@@ -139,7 +140,7 @@ fn drawDirectionalShadowDepth(inputData: InputDataSkin, @builtin(vertex_index) i
     let input_position = inputData.position;
 
     // Skinning calculation
-let skinMat = vertexStorages[idx];
+let skinMat = vertexStorages[inputData.idx];
 
     // Position calculation
     let position = u_modelMatrix * skinMat * vec4<f32>(input_position, 1.0);
@@ -149,7 +150,7 @@ let skinMat = vertexStorages[idx];
 }
 
 @vertex
-fn picking(inputData: InputDataSkin, @builtin(vertex_index) idx: u32) -> OutputDataSkin {
+fn picking(inputData: InputDataSkin) -> OutputDataSkin {
     var output: OutputDataSkin;
 
     // System uniforms
@@ -160,7 +161,7 @@ fn picking(inputData: InputDataSkin, @builtin(vertex_index) idx: u32) -> OutputD
     let u_modelMatrix = vertexUniforms.modelMatrix;
 
     // Skinning calculation
-let skinMat = vertexStorages[idx];
+let skinMat = vertexStorages[inputData.idx];
     // Position calculation
     let position = u_modelMatrix * skinMat * vec4<f32>(inputData.position, 1.0);
     output.position = u_projectionCameraMatrix * position;

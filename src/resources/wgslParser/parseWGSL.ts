@@ -89,7 +89,36 @@ const reflectCache = new Map<string, any>();
  *   conditionalBlocks: 조건부 분기 정보
  * }
  */
+
+
+function ensureVertexIndexBuiltin(shaderSource: string): string {
+    // 공백이 섞여도 잡아내는 정규식
+    const builtinRegex = /@builtin\s*\(\s*vertex_index\s*\)/;
+
+    // 이미 vertex_index builtin이 있으면 그대로 반환
+    if (builtinRegex.test(shaderSource)) {
+        return shaderSource;
+    }
+
+    // @vertex fn main(...) 패턴을 찾아서 인자 추가
+    const define = 'redgpu_auto_builtin_vertex_index: u32'
+    return shaderSource.replace(
+        /(@vertex\s+fn\s+main\s*\()([^)]*)(\))/,
+        (_, prefix, args, suffix) => {
+            const trimmedArgs = args.trim();
+            // 인자가 비어 있으면 그냥 builtin만 추가
+            if (trimmedArgs.length === 0) {
+                return `${prefix}@builtin(vertex_index) ${define}${suffix}`;
+            }
+            // 인자가 이미 있으면 뒤에 추가
+            return `${prefix}${trimmedArgs}, @builtin(vertex_index) ${define}${suffix}`;
+        }
+    );
+}
+
+
 const parseWGSL = (code: string) => {
+    code = ensureVertexIndexBuiltin(code)
 	const {defaultSource, shaderSourceVariant, conditionalBlocks, cacheKey} = preprocessWGSL(code);
 	// 리플렉트 캐시 확인
 	const cachedReflect = reflectCache.get(cacheKey);
@@ -101,8 +130,10 @@ const parseWGSL = (code: string) => {
 		console.log('🔄 리플렉트 파싱 시작:', cacheKey);
 		// 새로운 리플렉트 생성
 		const reflect = new WgslReflect(defaultSource);
+        keepLog('reflectResult',reflect);
 		// 리플렉트 결과 처리
 		reflectResult = {
+            // signatureKey : makeSignatureKey(reflect.entry.vertex),
 			uniforms: {...processUniforms(reflect.uniforms)},
 			storage: {...processStorages(reflect.storage)},
 			samplers: reflect.samplers,
@@ -113,7 +144,9 @@ const parseWGSL = (code: string) => {
 		};
 		// 캐시에 저장
 		reflectCache.set(cacheKey, reflectResult);
+        keepLog('reflectResult',reflectResult);
 	}
+
 	return {
 		...reflectResult,
 		defaultSource,
@@ -121,4 +154,6 @@ const parseWGSL = (code: string) => {
 		conditionalBlocks
 	};
 };
+
+const keepLog = console.log.bind(console);
 export default parseWGSL;

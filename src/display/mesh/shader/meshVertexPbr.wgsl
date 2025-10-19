@@ -46,7 +46,7 @@ struct OutputData {
 };
 
 @vertex
-fn main(inputData: InputData, @builtin(vertex_index) idx: u32) -> OutputData {
+fn main(inputData: InputData) -> OutputData {
     var output: OutputData;
 
     // Input data
