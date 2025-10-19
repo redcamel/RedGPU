@@ -475,6 +475,9 @@ class Mesh extends MeshBase {
         this.dirtyTransform = true
     }
 
+    /**
+     * @experimental
+     */
     clone() {
         const cloneMesh = new Mesh(this.redGPUContext, this._geometry, this._material)
         cloneMesh.setPosition(this.#x, this.#y, this.#z)
