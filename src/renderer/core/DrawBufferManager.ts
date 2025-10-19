@@ -1,6 +1,4 @@
 import RedGPUContext from "../../context/RedGPUContext";
-import RenderViewStateData from "../../display/view/core/RenderViewStateData";
-import {keepLog} from "../../utils";
 import formatBytes from "../../utils/math/formatBytes";
 
 /**
@@ -44,11 +42,11 @@ class DrawBufferManager {
 		this.#calculateDeviceLimits()
 		this.#createInitialBuffer()
 
-		keepLog(`🚀 DrawBufferManager 초기화 완료:`, {
-			maxBufferSize: `${formatBytes(this.#deviceMaxBufferSize)}`,
-			maxCommandsPerBuffer: this.#maxCommandsPerBuffer.toLocaleString(),
-			estimatedCapacity: '무제한 (동적 확장)'
-		})
+		// keepLog(`🚀 DrawBufferManager 초기화 완료:`, {
+		// 	maxBufferSize: `${formatBytes(this.#deviceMaxBufferSize)}`,
+		// 	maxCommandsPerBuffer: this.#maxCommandsPerBuffer.toLocaleString(),
+		// 	estimatedCapacity: '무제한 (동적 확장)'
+		// })
 	}
 
 	/**
@@ -118,12 +116,12 @@ class DrawBufferManager {
 			buffer: this.#bufferPool[this.#currentBufferIndex],
 			dataArray: this.#dataPool[this.#currentBufferIndex]
 		}
-		keepLog(`🎯 드로우 슬롯 할당:`, {
-			bufferIndex: slot.bufferIndex,
-			commandOffset: slot.commandOffset,
-			currentCommandIndex: this.#currentCommandIndex,
-			meshInfo: name || 'unknown' // 나중에 메시 이름 추가 가능
-		})
+		// keepLog(`🎯 드로우 슬롯 할당:`, {
+		// 	bufferIndex: slot.bufferIndex,
+		// 	commandOffset: slot.commandOffset,
+		// 	currentCommandIndex: this.#currentCommandIndex,
+		// 	meshInfo: name || 'unknown' // 나중에 메시 이름 추가 가능
+		// })
 		this.#currentCommandIndex++
 		return slot
 	}
@@ -131,7 +129,7 @@ class DrawBufferManager {
 	/**
 	 * drawIndexedIndirect 커맨드를 설정합니다.
 	 */
-	setIndexedDrawCommand(
+	setIndexedIndirectCommand(
 		slot: DrawCommandSlot,
 		indexCount: number,
 		instanceCount: number = 1,
@@ -152,7 +150,7 @@ class DrawBufferManager {
 	/**
 	 * drawIndirect 커맨드를 설정합니다.
 	 */
-	setDirectDrawCommand(
+	setIndirectCommand(
 		slot: DrawCommandSlot,
 		vertexCount: number,
 		instanceCount: number = 1,
@@ -232,14 +230,14 @@ class DrawBufferManager {
 	// 	})
 	// }
 
-	/**
-	 * 다음 프레임을 위해 상태를 리셋합니다.
-	 */
-	resetForNextFrame(): void {
-		this.#usedBufferIndices.clear()
-		this.#currentBufferIndex = 0
-		this.#currentCommandIndex = 0
-	}
+	// /**
+	//  * 다음 프레임을 위해 상태를 리셋합니다.
+	//  */
+	// resetForNextFrame(): void {
+	// 	this.#usedBufferIndices.clear()
+	// 	this.#currentBufferIndex = 0
+	// 	this.#currentCommandIndex = 0
+	// }
 
 	/**
 	 * 현재 할당된 총 커맨드 개수를 반환합니다.
