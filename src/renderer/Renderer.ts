@@ -167,31 +167,6 @@ class Renderer {
 		if (axis) axis.render(renderViewStateData)
 		if (grid) grid.render(renderViewStateData)
 		renderBasicLayer(view, viewRenderPassEncoder)
-		// viewRenderPassEncoder.end()
-		// {
-		// 	const viewRenderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass({
-		// 		colorAttachments: [...renderPassDescriptor.colorAttachments].map(v => ({...v, loadOp: GPU_LOAD_OP.LOAD})),
-		// 		depthStencilAttachment: {
-		// 			...renderPassDescriptor.depthStencilAttachment,
-		// 			depthLoadOp: GPU_LOAD_OP.LOAD,
-		// 		},
-		// 	})
-		// 	viewRenderPassEncoder.executeBundles(renderViewStateData.skinRenderBundleList);
-		// 	viewRenderPassEncoder.end()
-		// }
-		// {
-		// 	const viewRenderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass({
-		// 		colorAttachments: [...renderPassDescriptor.colorAttachments].map(v => ({...v, loadOp: GPU_LOAD_OP.LOAD})),
-		// 		depthStencilAttachment: {
-		// 			...renderPassDescriptor.depthStencilAttachment,
-		// 			depthLoadOp: GPU_LOAD_OP.LOAD,
-		// 		},
-		// 	})
-		// 	renderAlphaLayer(view, viewRenderPassEncoder)
-		// 	viewRenderPassEncoder.end()
-		// }
-
-        viewRenderPassEncoder.executeBundles(renderViewStateData.skinRenderBundleList);
         renderAlphaLayer(view, viewRenderPassEncoder)
         viewRenderPassEncoder.end()
 

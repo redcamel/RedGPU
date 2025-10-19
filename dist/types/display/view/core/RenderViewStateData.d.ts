@@ -82,7 +82,6 @@ declare class RenderViewStateData {
     animationList: any[];
     /** 효율적인 렌더링을 위한 렌더 번들 목록 */
     renderBundleList: any[];
-    skinRenderBundleList: any[];
     /** 렌더링 시작을 표시하는 성능 타임스탬프 */
     startTime: number;
     /** 씬이 2D 모드인지 여부 */

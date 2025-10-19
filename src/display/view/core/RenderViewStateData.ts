@@ -110,7 +110,6 @@ class RenderViewStateData {
 
 	/** 효율적인 렌더링을 위한 렌더 번들 목록 */
 	renderBundleList = [];
-	skinRenderBundleList = [];
 
 	/** 렌더링 시작을 표시하는 성능 타임스탬프 */
 	startTime: number;
@@ -194,7 +193,6 @@ class RenderViewStateData {
 		this.skinList = [];
 		this.animationList = [];
 		this.renderBundleList = [];
-		this.skinRenderBundleList = [];
 		this.startTime = performance.now();
 		this.isScene2DMode = view.camera instanceof Camera2D;
 		this.viewportSize = {
