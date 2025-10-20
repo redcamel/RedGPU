@@ -7,8 +7,6 @@ import GPU_LOAD_OP from "../gpuConst/GPU_LOAD_OP";
 import GPU_STORE_OP from "../gpuConst/GPU_STORE_OP";
 import GltfAnimationLooperManager from "../loader/gltf/animationLooper/GltfAnimationLooperManager";
 import ParsedSkinInfo_GLTF from "../loader/gltf/cls/ParsedSkinInfo_GLTF";
-import {keepLog} from "../utils";
-import DrawBufferManager from "./core/DrawBufferManager";
 import DebugRender from "./debugRender/DebugRender";
 import FinalRender from "./finalRender/FinalRender";
 import render2PathLayer from "./renderLayers/render2PathLayer";
@@ -21,7 +19,8 @@ class Renderer {
 	#prevViewportSize: { width: number, height: number };
 	#finalRender: FinalRender
 	#debugRender: DebugRender
-	#gltfAnimationLooperManager:GltfAnimationLooperManager = new GltfAnimationLooperManager()
+	#gltfAnimationLooperManager: GltfAnimationLooperManager = new GltfAnimationLooperManager()
+
 	constructor() {
 	}
 
@@ -43,8 +42,6 @@ class Renderer {
 			const imageBitmap = redGPUContext.offscreenCanvas.transferToImageBitmap()
 			redGPUContext.bitmaprenderer.transferFromImageBitmap(imageBitmap)
 		}
-
-
 		//
 		redGPUContext.antialiasingManager.changedMSAA = false
 		console.log('/////////////////// end renderFrame ///////////////////')
@@ -97,8 +94,6 @@ class Renderer {
 			label: 'ViewRender_MainComputeCommandEncoder'
 		})
 		this.#batchUpdateSkinMatrices(redGPUContext, renderViewStateData)
-
-
 		// const memoryInfo = drawBufferManager.getMemoryUsage()
 		// keepLog('드로우 버퍼 상태:', memoryInfo)
 		view.renderViewStateData.reset(null, computeCommandEncoder, time)
@@ -135,6 +130,7 @@ class Renderer {
 	}
 
 	#renderViewShadow(view: View3D, commandEncoder: GPUCommandEncoder) {
+		//TODO - 이것도 ShadowManager가 책임지도록 변경
 		const {scene} = view
 		const {shadowManager} = scene
 		const {directionalShadowManager} = shadowManager
@@ -149,7 +145,10 @@ class Renderer {
 				},
 			};
 			const viewShadowRenderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass(shadowPassDescriptor)
-			this.#updateViewSystemUniforms(view, viewShadowRenderPassEncoder, true, false)
+			{
+				this.#updateViewportAndScissor(view, viewShadowRenderPassEncoder)
+				this.#updateViewSystemUniforms(view, viewShadowRenderPassEncoder, true, false)
+			}
 			if (directionalShadowManager.castingList.length) {
 				renderShadowLayer(view, viewShadowRenderPassEncoder)
 			}
@@ -161,15 +160,17 @@ class Renderer {
 	#renderViewBasicLayer(view: View3D, commandEncoder: GPUCommandEncoder, renderPassDescriptor: GPURenderPassDescriptor) {
 		const {renderViewStateData, skybox, grid, axis} = view
 		const viewRenderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass(renderPassDescriptor)
-		this.#updateViewSystemUniforms(view, viewRenderPassEncoder, false, true)
+		{
+			this.#updateViewportAndScissor(view, viewRenderPassEncoder)
+			this.#updateViewSystemUniforms(view, viewRenderPassEncoder, false, true)
+		}
 		renderViewStateData.currentRenderPassEncoder = viewRenderPassEncoder
 		if (skybox) skybox.render(renderViewStateData)
 		if (axis) axis.render(renderViewStateData)
 		if (grid) grid.render(renderViewStateData)
 		renderBasicLayer(view, viewRenderPassEncoder)
-        renderAlphaLayer(view, viewRenderPassEncoder)
-        viewRenderPassEncoder.end()
-
+		renderAlphaLayer(view, viewRenderPassEncoder)
+		viewRenderPassEncoder.end()
 	}
 
 	#renderView2PathLayer(view: View3D, commandEncoder: GPUCommandEncoder, renderPassDescriptor: GPURenderPassDescriptor, depthStencilAttachment: GPURenderPassDepthStencilAttachment) {
@@ -209,13 +210,17 @@ class Renderer {
 				},
 			});
 			let renderPath1ResultTextureView = view.viewRenderTextureManager.renderPath1ResultTextureView
-			this.#updateViewSystemUniforms(view, renderPassEncoder, false, false, renderPath1ResultTextureView);
+			{
+				this.#updateViewportAndScissor(view, renderPassEncoder)
+				this.#updateViewSystemUniforms(view, renderPassEncoder, false, false, renderPath1ResultTextureView);
+			}
 			render2PathLayer(view, renderPassEncoder);
 			renderPassEncoder.end();
 		}
 	}
 
 	#renderViewPickingLayer(view: View3D, commandEncoder: GPUCommandEncoder,) {
+		//TODO - 이건  pickingManager가 권한을 가지도록 변경
 		const {pickingManager} = view
 		if (pickingManager && pickingManager.castingList.length) {
 			pickingManager.checkTexture(view)
@@ -236,7 +241,10 @@ class Renderer {
 				},
 			};
 			const viewPickingRenderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass(pickingPassDescriptor)
-			this.#updateViewSystemUniforms(view, viewPickingRenderPassEncoder, false, false)
+			{
+				this.#updateViewportAndScissor(view, viewPickingRenderPassEncoder)
+				this.#updateViewSystemUniforms(view, viewPickingRenderPassEncoder, false, false)
+			}
 			renderPickingLayer(view, viewPickingRenderPassEncoder)
 			viewPickingRenderPassEncoder.end()
 		}
@@ -442,6 +450,31 @@ class Renderer {
 		};
 	}
 
+	#updateViewportAndScissor(
+		view: View3D,
+		viewRenderPassEncoder: GPURenderPassEncoder,
+		shadowRender: boolean = false,
+	) {
+		const {scene, pixelRectObject} = view
+		const {shadowManager} = scene
+		const {directionalShadowManager} = shadowManager
+		if (shadowRender) {
+			// pixelRectObject 해당하는 크기로 뷰포트를 만들고짜른다.
+			const width = directionalShadowManager.shadowDepthTextureSize
+			const height = directionalShadowManager.shadowDepthTextureSize
+			viewRenderPassEncoder.setViewport(0, 0, width, height, 0, 1);
+			viewRenderPassEncoder.setScissorRect(0, 0, width, height);
+		} else {
+			// pixelRectObject 해당하는 크기로 뷰포트를 만들고짜른다.
+			const {width, height} = pixelRectObject
+			if (!this.#prevViewportSize || this.#prevViewportSize.width !== width || this.#prevViewportSize.height !== height) {
+				viewRenderPassEncoder.setViewport(0, 0, width, height, 0, 1);
+				viewRenderPassEncoder.setScissorRect(0, 0, width, height);
+				this.#prevViewportSize = {width, height};
+			}
+		}
+	}
+
 	#updateViewSystemUniforms(
 		view: View3D,
 		viewRenderPassEncoder: GPURenderPassEncoder,
@@ -449,76 +482,19 @@ class Renderer {
 		calcPointLightCluster: boolean = true,
 		renderPath1ResultTextureView: GPUTextureView = null
 	) {
+		//TODO - 업데이트 한번만 하도록 분리
 		const {
-			inverseProjectionMatrix,
-			pixelRectObject,
-			noneJitterProjectionMatrix,
-			projectionMatrix,
-			rawCamera,
 			redGPUContext,
 			scene
 		} = view
-		const {gpuDevice} = redGPUContext
-		const {modelMatrix: cameraMatrix, position: cameraPosition} = rawCamera
-		const structInfo = view.systemUniform_Vertex_StructInfo;
-		const gpuBuffer = view.systemUniform_Vertex_UniformBuffer.gpuBuffer;
 		const {shadowManager, lightManager} = scene
-		const {directionalShadowManager} = shadowManager
-		const camera2DYn = rawCamera instanceof Camera2D;
-		{
-			if (shadowRender) {
-				// pixelRectObject 해당하는 크기로 뷰포트를 만들고짜른다.
-				const width = directionalShadowManager.shadowDepthTextureSize
-				const height = directionalShadowManager.shadowDepthTextureSize
-				viewRenderPassEncoder.setViewport(0, 0, width, height, 0, 1);
-				viewRenderPassEncoder.setScissorRect(0, 0, width, height);
-			} else {
-				// pixelRectObject 해당하는 크기로 뷰포트를 만들고짜른다.
-				const {width, height} = pixelRectObject
-				if (!this.#prevViewportSize || this.#prevViewportSize.width !== width || this.#prevViewportSize.height !== height) {
-					viewRenderPassEncoder.setViewport(0, 0, width, height, 0, 1);
-					viewRenderPassEncoder.setScissorRect(0, 0, width, height);
-					this.#prevViewportSize = {width, height};
-				}
-			}
-		}
 		lightManager.updateViewSystemUniforms(view)
-		directionalShadowManager.updateViewSystemUniforms(redGPUContext)
-		view.update(view, shadowRender, calcPointLightCluster, renderPath1ResultTextureView)
-		// 시스템 유니폼 업데이트
+		shadowManager.updateViewSystemUniforms(redGPUContext)
+		view.update(shadowRender, calcPointLightCluster, renderPath1ResultTextureView)
+		// 시스템 유니폼 바인딩
 		viewRenderPassEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
-		[
-			{key: 'projectionMatrix', value: projectionMatrix},
-			{key: 'projectionCameraMatrix', value: mat4.multiply(temp, projectionMatrix, cameraMatrix)},
-			{key: 'noneJitterProjectionMatrix', value: noneJitterProjectionMatrix},
-			{key: 'noneJitterProjectionCameraMatrix', value: mat4.multiply(temp2, noneJitterProjectionMatrix, cameraMatrix)},
-			{key: 'inverseProjectionMatrix', value: inverseProjectionMatrix},
-			{key: 'resolution', value: [view.pixelRectObject.width, view.pixelRectObject.height]},
-		].forEach(({key, value}) => {
-			gpuDevice.queue.writeBuffer(
-				gpuBuffer,
-				structInfo.members[key].uniformOffset,
-				new structInfo.members[key].View(value)
-			);
-		});
-		// 카메라 시스템 유니폼 업데이트
-		[
-			{key: 'cameraMatrix', value: cameraMatrix},
-			{key: 'cameraPosition', value: cameraPosition},
-			{key: 'nearClipping', value: [camera2DYn ? 0 : rawCamera.nearClipping]},
-			{key: 'farClipping', value: [camera2DYn ? 0 : rawCamera.farClipping]},
-		].forEach(({key, value}) => {
-			gpuDevice.queue.writeBuffer(
-				gpuBuffer,
-				structInfo.members.camera.members[key].uniformOffset,
-				new structInfo.members.camera.members[key].View(value)
-			);
-		})
-		// console.log('structInfo',view.scene.directionalLights)
 	}
 }
 
-let temp = mat4.create()
-let temp2 = mat4.create()
 let temp3 = mat4.create()
 export default Renderer

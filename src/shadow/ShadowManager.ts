@@ -1,3 +1,4 @@
+import RedGPUContext from "../context/RedGPUContext";
 import DirectionalShadowManager from "./DirectionalShadowManager";
 
 class ShadowManager {
@@ -7,6 +8,9 @@ class ShadowManager {
 
 	get directionalShadowManager(): DirectionalShadowManager {
 		return this.#directionalShadowManager;
+	}
+	updateViewSystemUniforms(redGPUContext:RedGPUContext){
+		this.#directionalShadowManager.updateViewSystemUniforms(redGPUContext)
 	}
 }
 

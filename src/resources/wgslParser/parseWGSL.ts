@@ -103,7 +103,7 @@ function ensureVertexIndexBuiltin(shaderSource: string): string {
 
     const define = 'redgpu_auto_builtin_vertex_index: u32';
 
-    return shaderSource.replace(
+    const result =  shaderSource.replace(
         vertexFnRegex,
         (_, prefix, fnName, args, suffix) => {
             const trimmedArgs = args.trim();
@@ -114,8 +114,10 @@ function ensureVertexIndexBuiltin(shaderSource: string): string {
             return `${prefix}${fnName}(${newArgs}${suffix}`;
         }
     );
+		// keepLog(result)
+		return result;
 }
-
+const keepLog = console.log.bind(console);
 
 const parseWGSL = (code: string) => {
     code = ensureVertexIndexBuiltin(code)

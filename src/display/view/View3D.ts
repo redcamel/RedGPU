@@ -1,3 +1,4 @@
+import {mat4} from "gl-matrix";
 import Camera2D from "../../camera/camera/Camera2D";
 import AController from "../../camera/core/AController";
 import RedGPUContext from "../../context/RedGPUContext";
@@ -25,7 +26,8 @@ import ViewRenderTextureManager from "./core/ViewRenderTextureManager";
 
 const SHADER_INFO = parseWGSL(SystemCode.SYSTEM_UNIFORM)
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.systemUniforms;
-
+let temp = mat4.create()
+let temp2 = mat4.create()
 /**
  * 3D 렌더링 뷰 클래스입니다. AView를 확장하여 3D 장면 렌더링 기능을 제공합니다.
  *
@@ -270,15 +272,15 @@ class View3D extends AView {
 	 * @param calcPointLightCluster - 포인트 라이트 클러스터 계산 여부 (기본값: false)
 	 * @param renderPath1ResultTextureView - 렌더 패스 1 결과 텍스처 뷰 (선택사항)
 	 */
-	update(view: View3D, shadowRender: boolean = false, calcPointLightCluster: boolean = false, renderPath1ResultTextureView?: GPUTextureView) {
-		const {scene} = view
+	update(shadowRender: boolean = false, calcPointLightCluster: boolean = false, renderPath1ResultTextureView?: GPUTextureView) {
+		const {scene} = this
 		const {shadowManager} = scene
 		const {directionalShadowManager} = shadowManager
-		const ibl = view.ibl
+		const ibl = this.ibl
 		const ibl_iblTexture = ibl?.iblTexture?.gpuTexture
 		const ibl_irradianceTexture = ibl?.irradianceTexture?.gpuTexture
 		let shadowDepthTextureView = shadowRender ? directionalShadowManager.shadowDepthTextureViewEmpty : directionalShadowManager.shadowDepthTextureView
-		const index = view.redGPUContext.viewList.indexOf(view)
+		const index = this.redGPUContext.viewList.indexOf(this)
 		const key = `${index}_${shadowRender ? 'shadowRender' : 'basic'}_2path${!!renderPath1ResultTextureView}`
 		if (index > -1) {
 			let needResetBindGroup = true
@@ -293,11 +295,11 @@ class View3D extends AView {
 					|| !this.#passLightClusters
 				)
 			}
-			if (needResetBindGroup) this.#createVertexUniformBindGroup(key, shadowDepthTextureView, view.ibl, renderPath1ResultTextureView)
+			if (needResetBindGroup) this.#createVertexUniformBindGroup(key, shadowDepthTextureView, this.ibl, renderPath1ResultTextureView)
 			else this.#systemUniform_Vertex_UniformBindGroup = this.#prevInfoList[key].vertexUniformBindGroup;
 			[
 				{key: 'useIblTexture', value: [ibl_iblTexture ? 1 : 0]},
-				{key: 'time', value: [view.renderViewStateData.timestamp || 0]},
+				{key: 'time', value: [this.renderViewStateData.timestamp || 0]},
 				{key: 'isView3D', value: [this.constructor === View3D ? 1 : 0]},
 			].forEach(({key, value}) => {
 				this.redGPUContext.gpuDevice.queue.writeBuffer(
@@ -315,9 +317,50 @@ class View3D extends AView {
 				vertexUniformBindGroup: this.#systemUniform_Vertex_UniformBindGroup
 			}
 		}
-		this.#updateClusters(calcPointLightCluster)
+		this.#updateClusters(calcPointLightCluster);
+		this.#updateSystemUniform();
 	}
-
+	#updateSystemUniform(){
+		// 시스템 유니폼 업데이트
+		const {
+			inverseProjectionMatrix,
+			noneJitterProjectionMatrix,
+			projectionMatrix,
+			rawCamera,
+		} = this;
+		const {gpuDevice} = this.redGPUContext
+		const {modelMatrix: cameraMatrix, position: cameraPosition} = rawCamera
+		const structInfo = this.systemUniform_Vertex_StructInfo;
+		const gpuBuffer = this.systemUniform_Vertex_UniformBuffer.gpuBuffer;
+		const camera2DYn = rawCamera instanceof Camera2D;
+		[
+			{key: 'projectionMatrix', value: projectionMatrix},
+			{key: 'projectionCameraMatrix', value: mat4.multiply(temp, projectionMatrix, cameraMatrix)},
+			{key: 'noneJitterProjectionMatrix', value: noneJitterProjectionMatrix},
+			{key: 'noneJitterProjectionCameraMatrix', value: mat4.multiply(temp2, noneJitterProjectionMatrix, cameraMatrix)},
+			{key: 'inverseProjectionMatrix', value: inverseProjectionMatrix},
+			{key: 'resolution', value: [this.pixelRectObject.width, this.pixelRectObject.height]},
+		].forEach(({key, value}) => {
+			gpuDevice.queue.writeBuffer(
+				gpuBuffer,
+				structInfo.members[key].uniformOffset,
+				new structInfo.members[key].View(value)
+			);
+		});
+		// 카메라 시스템 유니폼 업데이트
+		[
+			{key: 'cameraMatrix', value: cameraMatrix},
+			{key: 'cameraPosition', value: cameraPosition},
+			{key: 'nearClipping', value: [camera2DYn ? 0 : rawCamera.nearClipping]},
+			{key: 'farClipping', value: [camera2DYn ? 0 : rawCamera.farClipping]},
+		].forEach(({key, value}) => {
+			gpuDevice.queue.writeBuffer(
+				gpuBuffer,
+				structInfo.members.camera.members[key].uniformOffset,
+				new structInfo.members.camera.members[key].View(value)
+			);
+		})
+	}
 	/**
 	 * 정점 유니폼 바인드 그룹을 생성합니다.
 	 * 시스템 유니폼, 샘플러, 텍스처 등의 리소스를 바인딩합니다.
