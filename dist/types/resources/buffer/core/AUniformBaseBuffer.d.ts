@@ -10,9 +10,8 @@ declare abstract class AUniformBaseBuffer extends ABaseBuffer {
     [GPU_BUFFER_DATA_SYMBOL]: ArrayBuffer;
     constructor(redGPUContext: RedGPUContext, MANAGED_STATE_KEY: string, usage: GPUBufferUsageFlags, data: ArrayBuffer, label?: string);
     get data(): ArrayBuffer;
-    get dataView(): DataView;
     get size(): number;
     get uniformBufferDescriptor(): GPUBufferDescriptor;
-    writeBuffer(target: any, value: any): void;
+    writeOnlyBuffer(target: any, value: any): void;
 }
 export default AUniformBaseBuffer;

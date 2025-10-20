@@ -35,9 +35,9 @@ abstract class AUniformBaseBuffer extends ABaseBuffer {
 	}
 
 	get data(): ArrayBuffer {
+		// TODO 굳이 열어주긴했따만... 유니폼버퍼의 데이터를 열어줄 필요가 있는가?
 		return this[GPU_BUFFER_DATA_SYMBOL];
 	}
-
 
 	get size(): number {
 		return this.#size;
