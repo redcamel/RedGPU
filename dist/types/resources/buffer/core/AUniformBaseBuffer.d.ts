@@ -13,7 +13,6 @@ declare abstract class AUniformBaseBuffer extends ABaseBuffer {
     get dataView(): DataView;
     get size(): number;
     get uniformBufferDescriptor(): GPUBufferDescriptor;
-    writeBuffers(targetList: [taregt: any, value: any][]): void;
     writeBuffer(target: any, value: any): void;
 }
 export default AUniformBaseBuffer;

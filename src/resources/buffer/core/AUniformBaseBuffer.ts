@@ -52,18 +52,6 @@ abstract class AUniformBaseBuffer extends ABaseBuffer {
 		return this.#uniformBufferDescriptor;
 	}
 
-	writeBuffers(targetList: [taregt: any, value: any][]) {
-		const {gpuDevice} = this.redGPUContext
-		let i = targetList.length
-		while (i--) {
-			const [target, value] = targetList[i]
-			gpuDevice.queue.writeBuffer(
-				this.gpuBuffer,
-				target.uniformOffset,
-				new target.View(typeof value === "number" ? [value] : value),
-			)
-		}
-	}
 
 	writeBuffer(target: any, value: any) {
 		this.redGPUContext.gpuDevice.queue.writeBuffer(

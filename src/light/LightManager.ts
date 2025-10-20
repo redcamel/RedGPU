@@ -245,18 +245,18 @@ class LightManager {
 		const {systemUniform_Vertex_UniformBuffer} = view;
 		const {members} = structInfo;
 		const {lightManager, shadowManager} = scene
-		const {directionalShadowManager} = shadowManager
-		systemUniform_Vertex_UniformBuffer.writeBuffers(
-			[
-				[members.directionalLightCount, lightManager.directionalLightCount],
-				[members.directionalLightProjectionViewMatrix, this.#getDirectionalLightProjectionViewMatrix(view)],
-				[members.directionalLightProjectionMatrix, this.#getDirectionalLightProjectionMatrix(view)],
-				[members.directionalLightViewMatrix, this.#getMainDirectionalLightViewMatrix(view)],
-				[members.shadowDepthTextureSize, directionalShadowManager.shadowDepthTextureSize],
-				[members.bias, directionalShadowManager.bias],
-				//
-			]
-		)
+		const {directionalShadowManager} = shadowManager;
+		[
+			[members.directionalLightCount, lightManager.directionalLightCount],
+			[members.directionalLightProjectionViewMatrix, this.#getDirectionalLightProjectionViewMatrix(view)],
+			[members.directionalLightProjectionMatrix, this.#getDirectionalLightProjectionMatrix(view)],
+			[members.directionalLightViewMatrix, this.#getMainDirectionalLightViewMatrix(view)],
+			[members.shadowDepthTextureSize, directionalShadowManager.shadowDepthTextureSize],
+			[members.bias, directionalShadowManager.bias],
+			//
+		].forEach(v => {
+			systemUniform_Vertex_UniformBuffer.writeBuffer(v[0], v[1])
+		});
 		lightManager.directionalLights.forEach((light: DirectionalLight, index) => {
 			const {directionalLights} = members
 			const {direction, color, intensity} = directionalLights.memberList[index]
@@ -264,24 +264,24 @@ class LightManager {
 				if (!light.drawDebugger) light.drawDebugger = new DrawDebuggerDirectionalLight(redGPUContext, light)
 				light.drawDebugger.render(view.renderViewStateData)
 			}
-			systemUniform_Vertex_UniformBuffer.writeBuffers(
-				[
-					[direction, light.direction],
-					[color, light.color.rgbNormal],
-					[intensity, light.intensity],
-				]
-			)
+			[
+				[direction, light.direction],
+				[color, light.color.rgbNormal],
+				[intensity, light.intensity],
+			].forEach(v => {
+				systemUniform_Vertex_UniformBuffer.writeBuffer(v[0], v[1])
+			});
 		})
 		if (lightManager.ambientLight) {
 			const light = view.scene.lightManager.ambientLight
 			const {ambientLight} = members
-			const {color, intensity} = ambientLight.members
-			systemUniform_Vertex_UniformBuffer.writeBuffers(
-				[
-					[color, light.color.rgbNormal],
-					[intensity, light.intensity],
-				]
-			)
+			const {color, intensity} = ambientLight.members;
+			[
+				[color, light.color.rgbNormal],
+				[intensity, light.intensity],
+			].forEach(v => {
+				systemUniform_Vertex_UniformBuffer.writeBuffer(v[0], v[1])
+			})
 		}
 	}
 
