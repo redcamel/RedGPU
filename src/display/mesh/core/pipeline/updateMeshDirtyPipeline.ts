@@ -35,7 +35,7 @@ const updateMeshDirtyPipeline = (
 		if (k !== 'pickingId') mesh[k] = mesh[k]
 	}
 	if (mesh.gpuRenderInfo.vertexUniformInfo.members.pickingId) {
-		mesh.gpuRenderInfo.vertexUniformBuffer.writeBuffer(mesh.gpuRenderInfo.vertexUniformInfo.members.pickingId, mesh.pickingId)
+		mesh.gpuRenderInfo.vertexUniformBuffer.writeOnlyBuffer(mesh.gpuRenderInfo.vertexUniformInfo.members.pickingId, mesh.pickingId)
 	}
 	material.dirtyPipeline = false
 	mesh.dirtyPipeline = false

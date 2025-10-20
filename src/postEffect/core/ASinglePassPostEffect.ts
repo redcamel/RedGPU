@@ -202,7 +202,7 @@ abstract class ASinglePassPostEffect {
 	}
 
 	updateUniform(key: string, value: number | number[] | boolean) {
-		this.uniformBuffer.writeBuffer(this.uniformsInfo
+		this.uniformBuffer.writeOnlyBuffer(this.uniformsInfo
 			.members[key], value)
 	}
 

@@ -203,7 +203,7 @@ class TAA {
 	}
 
 	updateUniform(key: string, value: number | number[] | boolean) {
-		this.#uniformBuffer.writeBuffer(this.#uniformsInfo.members[key], value)
+		this.#uniformBuffer.writeOnlyBuffer(this.#uniformsInfo.members[key], value)
 	}
 
 	#createTAAShaderCode() {

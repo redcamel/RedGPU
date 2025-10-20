@@ -151,7 +151,7 @@ class DrawDebuggerGrid {
 		const size = this.#size
 		renderViewStateData.num3DObjects++
 		renderViewStateData.numDrawCalls++
-		this.#uniformBuffer.writeBuffer(FRAGMENT_UNIFORM_STRUCT.members.lineColor, this.#lineColor.rgbaNormal)
+		this.#uniformBuffer.writeOnlyBuffer(FRAGMENT_UNIFORM_STRUCT.members.lineColor, this.#lineColor.rgbaNormal)
 		if (this.#pipeline) {
 			const lineCount = (this.#size + 1) * 2; // 세로 + 가로 라인 수
 			const indexCount = lineCount * 2; // 각 라인마다 2개 인덱스

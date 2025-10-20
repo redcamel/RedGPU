@@ -255,7 +255,7 @@ class LightManager {
 			[members.bias, directionalShadowManager.bias],
 			//
 		].forEach(v => {
-			systemUniform_Vertex_UniformBuffer.writeBuffer(v[0], v[1])
+			systemUniform_Vertex_UniformBuffer.writeOnlyBuffer(v[0], v[1])
 		});
 		lightManager.directionalLights.forEach((light: DirectionalLight, index) => {
 			const {directionalLights} = members
@@ -269,7 +269,7 @@ class LightManager {
 				[color, light.color.rgbNormal],
 				[intensity, light.intensity],
 			].forEach(v => {
-				systemUniform_Vertex_UniformBuffer.writeBuffer(v[0], v[1])
+				systemUniform_Vertex_UniformBuffer.writeOnlyBuffer(v[0], v[1])
 			});
 		})
 		if (lightManager.ambientLight) {
@@ -280,7 +280,7 @@ class LightManager {
 				[color, light.color.rgbNormal],
 				[intensity, light.intensity],
 			].forEach(v => {
-				systemUniform_Vertex_UniformBuffer.writeBuffer(v[0], v[1])
+				systemUniform_Vertex_UniformBuffer.writeOnlyBuffer(v[0], v[1])
 			})
 		}
 	}

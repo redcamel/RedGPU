@@ -187,7 +187,7 @@ abstract class ABaseMaterial extends ResourceBase {
 		} else {
 			throw new Error(`Invalid tint mode: ${value}`);
 		}
-		fragmentUniformBuffer.writeBuffer(fragmentUniformInfo.members.tintBlendMode, valueIdx);
+		fragmentUniformBuffer.writeOnlyBuffer(fragmentUniformInfo.members.tintBlendMode, valueIdx);
 		this.#tintBlendMode = valueIdx;
 	}
 
@@ -394,9 +394,9 @@ abstract class ABaseMaterial extends ResourceBase {
 		for (const k in members) {
 			const property = this[k]
 			if (property instanceof ColorRGBA) {
-				fragmentUniformBuffer.writeBuffer(fragmentUniformInfo.members[k], property.rgbaNormal)
+				fragmentUniformBuffer.writeOnlyBuffer(fragmentUniformInfo.members[k], property.rgbaNormal)
 			} else if (property instanceof ColorRGB) {
-				fragmentUniformBuffer.writeBuffer(fragmentUniformInfo.members[k], property.rgbNormal)
+				fragmentUniformBuffer.writeOnlyBuffer(fragmentUniformInfo.members[k], property.rgbNormal)
 			} else {
 				if (!pattern.test(k)) this[k] = property
 			}

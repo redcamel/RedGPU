@@ -131,7 +131,7 @@ abstract class ANoiseTexture extends ManagementResourceBase {
 	/* 개별 파라미터 업데이트 */
 	updateUniform(name: string, value: any) {
 		if (this.#uniformInfo.members[name]) {
-			this.#uniformBuffer.writeBuffer(this.#uniformInfo.members[name], value);
+			this.#uniformBuffer.writeOnlyBuffer(this.#uniformInfo.members[name], value);
 			this.#currentEffect[name] = value
 		}
 		this.#executeComputePass();
@@ -141,7 +141,7 @@ abstract class ANoiseTexture extends ManagementResourceBase {
 	updateUniforms(uniforms: Record<string, any>) {
 		Object.entries(uniforms).forEach(([name, value]) => {
 			if (this.#uniformInfo.members[name]) {
-				this.#uniformBuffer.writeBuffer(this.#uniformInfo.members[name], value);
+				this.#uniformBuffer.writeOnlyBuffer(this.#uniformInfo.members[name], value);
 				this.#currentEffect[name] = value
 			}
 		});
