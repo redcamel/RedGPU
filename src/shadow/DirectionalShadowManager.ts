@@ -57,7 +57,7 @@ class DirectionalShadowManager {
 		this.#castingList.length = 0
 	}
 
-	updateViewSystemUniforms(redGPUContext: RedGPUContext) {
+	update(redGPUContext: RedGPUContext) {
 		this.#redGPUContext = redGPUContext
 		this.#checkDepthTexture()
 	}

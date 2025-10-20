@@ -273,8 +273,11 @@ class View3D extends AView {
 	 * @param renderPath1ResultTextureView - 렌더 패스 1 결과 텍스처 뷰 (선택사항)
 	 */
 	update(shadowRender: boolean = false, calcPointLightCluster: boolean = false, renderPath1ResultTextureView?: GPUTextureView) {
-		const {scene} = this
-		const {shadowManager} = scene
+		const {scene,redGPUContext} = this
+		const {shadowManager, lightManager} = scene
+		lightManager.updateViewSystemUniforms(this)
+		shadowManager.updateViewSystemUniforms(redGPUContext)
+
 		const {directionalShadowManager} = shadowManager
 		const ibl = this.ibl
 		const ibl_iblTexture = ibl?.iblTexture?.gpuTexture
@@ -282,6 +285,7 @@ class View3D extends AView {
 		let shadowDepthTextureView = shadowRender ? directionalShadowManager.shadowDepthTextureViewEmpty : directionalShadowManager.shadowDepthTextureView
 		const index = this.redGPUContext.viewList.indexOf(this)
 		const key = `${index}_${shadowRender ? 'shadowRender' : 'basic'}_2path${!!renderPath1ResultTextureView}`
+
 		if (index > -1) {
 			let needResetBindGroup = true
 			let prevInfo = this.#prevInfoList[key]

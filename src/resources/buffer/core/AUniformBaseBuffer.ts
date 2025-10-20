@@ -8,7 +8,7 @@ import ABaseBuffer, {GPU_BUFFER_DATA_SYMBOL, GPU_BUFFER_SYMBOL} from "./ABaseBuf
  */
 abstract class AUniformBaseBuffer extends ABaseBuffer {
 	[GPU_BUFFER_DATA_SYMBOL]: ArrayBuffer
-    #dataView: DataView
+	#dataView: DataView
 	readonly #uniformBufferDescriptor: GPUBufferDescriptor
 	readonly #size: number
 
@@ -32,18 +32,17 @@ abstract class AUniformBaseBuffer extends ABaseBuffer {
 			console.error('GPU 버퍼 생성에 실패했습니다:', error);
 		}
 		redGPUContext.gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], 0, data);
-        this[GPU_BUFFER_DATA_SYMBOL] = data;
-        this.#dataView = new DataView(this[GPU_BUFFER_DATA_SYMBOL]);
+		this[GPU_BUFFER_DATA_SYMBOL] = data;
+		this.#dataView = new DataView(this[GPU_BUFFER_DATA_SYMBOL]);
 	}
 
+	get data(): ArrayBuffer {
+		return this[GPU_BUFFER_DATA_SYMBOL];
+	}
 
-    get data(): ArrayBuffer {
-        return this[GPU_BUFFER_DATA_SYMBOL];
-    }
-
-    get dataView(): DataView {
-        return this.#dataView
-    }
+	get dataView(): DataView {
+		return this.#dataView
+	}
 
 	get size(): number {
 		return this.#size;

@@ -483,13 +483,7 @@ class Renderer {
 		renderPath1ResultTextureView: GPUTextureView = null
 	) {
 		//TODO - 업데이트 한번만 하도록 분리
-		const {
-			redGPUContext,
-			scene
-		} = view
-		const {shadowManager, lightManager} = scene
-		lightManager.updateViewSystemUniforms(view)
-		shadowManager.updateViewSystemUniforms(redGPUContext)
+
 		view.update(shadowRender, calcPointLightCluster, renderPath1ResultTextureView)
 		// 시스템 유니폼 바인딩
 		viewRenderPassEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
