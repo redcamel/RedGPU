@@ -52,6 +52,7 @@ declare class RenderViewStateData {
     viewRenderTime: number;
     /** 현재 뷰포트 크기 및 위치 정보 */
     viewportSize: ViewportSize;
+    viewIndex: number;
     /** 렌더 텍스처가 사용하는 비디오 메모리 양 (바이트) */
     usedVideoMemory: number;
     /** 현재 사용 중인 GPU 렌더 패스 인코더 */

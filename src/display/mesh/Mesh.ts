@@ -123,7 +123,7 @@ class Mesh extends MeshBase {
     /** 렌더 번들 */
     #renderBundle: GPURenderBundle
     /** 이전 시스템 바인드 그룹 */
-    #prevSystemBindGroup: GPUBindGroup
+    #prevSystemBindGroupList: GPUBindGroup[] = []
     /** 이전 프래그먼트 바인드 그룹 */
     #prevFragmentBindGroup: GPUBindGroup
 
@@ -966,7 +966,7 @@ class Mesh extends MeshBase {
                         !this.#bundleEncoder
                         || this.dirtyPipeline
                         || this.#prevFragmentBindGroup !== fragmentUniformBindGroup
-                        || this.#prevSystemBindGroup !== view.systemUniform_Vertex_UniformBindGroup
+                        || this.#prevSystemBindGroupList[renderViewStateData.viewIndex] !== view.systemUniform_Vertex_UniformBindGroup
                     ) {
                         this.#setDrawBuffer()
                         this.#setRenderBundle(renderViewStateData)
@@ -1045,7 +1045,7 @@ class Mesh extends MeshBase {
         const bundleEncoder = this.#bundleEncoder
         {
             const {gpuBuffer} = vertexBuffer
-            this.#prevSystemBindGroup = view.systemUniform_Vertex_UniformBindGroup
+            this.#prevSystemBindGroupList[renderViewStateData.viewIndex] = view.systemUniform_Vertex_UniformBindGroup
             this.#prevFragmentBindGroup = fragmentUniformBindGroup
             bundleEncoder.setPipeline(pipeline)
             bundleEncoder.setVertexBuffer(0, gpuBuffer)
