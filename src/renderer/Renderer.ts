@@ -24,29 +24,6 @@ class Renderer {
 	constructor() {
 	}
 
-	renderFrame(redGPUContext: RedGPUContext, time: number) {
-		if (!this.#finalRender) this.#finalRender = new FinalRender()
-		if (!this.#debugRender) this.#debugRender = new DebugRender(redGPUContext)
-		// 오브젝트 렌더시작
-		const viewList_renderPassDescriptorList: GPURenderPassDescriptor[] = []
-		{
-			let i = 0
-			const len = redGPUContext.viewList.length
-			for (i; i < len; i++) {
-				const targetView = redGPUContext.viewList[i]
-				viewList_renderPassDescriptorList.push(this.renderView(targetView, time));
-			}
-		}
-		this.#finalRender.render(redGPUContext, viewList_renderPassDescriptorList)
-		if (redGPUContext.offscreenCanvas && redGPUContext.bitmaprenderer) {
-			const imageBitmap = redGPUContext.offscreenCanvas.transferToImageBitmap()
-			redGPUContext.bitmaprenderer.transferFromImageBitmap(imageBitmap)
-		}
-		//
-		redGPUContext.antialiasingManager.changedMSAA = false
-		console.log('/////////////////// end renderFrame ///////////////////')
-	}
-
 	start(redGPUContext: RedGPUContext, render: Function) {
 		cancelAnimationFrame(redGPUContext.currentRequestAnimationFrame)
 		const HD_render = (time: number) => {
@@ -64,6 +41,31 @@ class Renderer {
 
 	stop(redGPUContext: RedGPUContext) {
 		cancelAnimationFrame(redGPUContext.currentRequestAnimationFrame)
+		redGPUContext.currentRequestAnimationFrame = null
+	}
+
+	renderFrame(redGPUContext: RedGPUContext, time: number) {
+		if (!this.#finalRender) this.#finalRender = new FinalRender()
+		if (!this.#debugRender) this.#debugRender = new DebugRender(redGPUContext)
+		// 오브젝트 렌더시작
+		const viewList_renderPassDescriptorList: GPURenderPassDescriptor[] = []
+		{
+			let i = 0
+			const len = redGPUContext.viewList.length
+			for (i; i < len; i++) {
+				const targetView = redGPUContext.viewList[i]
+				viewList_renderPassDescriptorList.push(this.renderView(targetView, time));
+			}
+		}
+		this.#finalRender.render(redGPUContext, viewList_renderPassDescriptorList)
+		if (redGPUContext.offscreenCanvas && redGPUContext.bitmaprenderer) {
+			//TODO 이거 삭제하자...의미가 ㅇ벗다
+			const imageBitmap = redGPUContext.offscreenCanvas.transferToImageBitmap()
+			redGPUContext.bitmaprenderer.transferFromImageBitmap(imageBitmap)
+		}
+		//
+		redGPUContext.antialiasingManager.changedMSAA = false
+		console.log('/////////////////// end renderFrame ///////////////////')
 	}
 
 	renderView(view: View3D, time: number) {
@@ -90,13 +92,10 @@ class Renderer {
 		const commandEncoder: GPUCommandEncoder = redGPUContext.gpuDevice.createCommandEncoder({
 			label: 'ViewRender_MainCommandEncoder'
 		})
-		const computeCommandEncoder: GPUCommandEncoder = redGPUContext.gpuDevice.createCommandEncoder({
-			label: 'ViewRender_MainComputeCommandEncoder'
-		})
 		this.#batchUpdateSkinMatrices(redGPUContext, renderViewStateData)
 		// const memoryInfo = drawBufferManager.getMemoryUsage()
 		// keepLog('드로우 버퍼 상태:', memoryInfo)
-		view.renderViewStateData.reset(null, computeCommandEncoder, time)
+		view.renderViewStateData.reset(null, time)
 		if (pixelRectObject.width && pixelRectObject.height) {
 			this.#renderViewShadow(view, commandEncoder)
 			this.#renderViewBasicLayer(view, commandEncoder, renderPassDescriptor)
@@ -125,7 +124,6 @@ class Renderer {
 				);
 			});
 		}
-		redGPUContext.gpuDevice.queue.submit([computeCommandEncoder.finish()])
 		return renderPassDescriptor
 	}
 
@@ -483,7 +481,6 @@ class Renderer {
 		renderPath1ResultTextureView: GPUTextureView = null
 	) {
 		//TODO - 업데이트 한번만 하도록 분리
-
 		view.update(shadowRender, calcPointLightCluster, renderPath1ResultTextureView)
 		// 시스템 유니폼 바인딩
 		viewRenderPassEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
