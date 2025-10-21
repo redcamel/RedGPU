@@ -512,6 +512,7 @@ class Mesh extends MeshBase {
 		const {uuid: currentMaterialUUID} = currentMaterial || {}
 		let dirtyTransformForChildren
 		let dirtyOpacityForChildren
+		const {skinInfo} = this.animationInfo
 		if (!antialiasingManager.useTAA) {
 			this.#prevModelMatrix = null
 		}
@@ -668,17 +669,26 @@ class Mesh extends MeshBase {
 						out[1] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
 						out[2] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
 						out[3] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
-						b0 = l[4];b1 = l[5];b2 = l[6];b3 = l[7];
+						b0 = l[4];
+						b1 = l[5];
+						b2 = l[6];
+						b3 = l[7];
 						out[4] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
 						out[5] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
 						out[6] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
 						out[7] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
-						b0 = l[8];b1 = l[9];b2 = l[10];b3 = l[11];
+						b0 = l[8];
+						b1 = l[9];
+						b2 = l[10];
+						b3 = l[11];
 						out[8] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
 						out[9] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
 						out[10] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
 						out[11] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
-						b0 = l[12];b1 = l[13];b2 = l[14];b3 = l[15];
+						b0 = l[12];
+						b1 = l[13];
+						b2 = l[14];
+						b3 = l[15];
 						out[12] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
 						out[13] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
 						out[14] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
@@ -702,52 +712,6 @@ class Mesh extends MeshBase {
 						modelMatrix[13] = localMatrix[13]
 						modelMatrix[14] = localMatrix[14]
 						modelMatrix[15] = localMatrix[15]
-					}
-				}
-				{
-					// calculate NormalMatrix
-					const m = this.modelMatrix;
-					const n = this.normalModelMatrix;
-
-					const a00 = m[0], a01 = m[1], a02 = m[2];
-					const a10 = m[4], a11 = m[5], a12 = m[6];
-					const a20 = m[8], a21 = m[9], a22 = m[10];
-
-					const det =
-						a00 * (a11 * a22 - a12 * a21) -
-						a01 * (a10 * a22 - a12 * a20) +
-						a02 * (a10 * a21 - a11 * a20);
-
-					if (det === 0) {
-						// 역행렬 없음 → 단위 행렬로 대체
-						n[0] = 1; n[1] = 0; n[2] = 0; n[3] = 0;
-						n[4] = 0; n[5] = 1; n[6] = 0; n[7] = 0;
-						n[8] = 0; n[9] = 0; n[10] = 1; n[11] = 0;
-						n[12] = 0; n[13] = 0; n[14] = 0; n[15] = 1;
-					} else {
-						const invDet = 1 / det;
-
-						// 역행렬의 전치 (transpose of inverse)
-						n[0] = (a11 * a22 - a12 * a21) * invDet;
-						n[1] = (a12 * a20 - a10 * a22) * invDet;
-						n[2] = (a10 * a21 - a11 * a20) * invDet;
-						n[3] = 0;
-
-						n[4] = (a02 * a21 - a01 * a22) * invDet;
-						n[5] = (a00 * a22 - a02 * a20) * invDet;
-						n[6] = (a01 * a20 - a00 * a21) * invDet;
-						n[7] = 0;
-
-						n[8] = (a01 * a12 - a02 * a11) * invDet;
-						n[9] = (a02 * a10 - a00 * a12) * invDet;
-						n[10] = (a00 * a11 - a01 * a10) * invDet;
-						n[11] = 0;
-
-						// 하단 행은 단위 행렬처럼 설정
-						n[12] = 0;
-						n[13] = 0;
-						n[14] = 0;
-						n[15] = 1;
 					}
 				}
 			}
@@ -800,11 +764,11 @@ class Mesh extends MeshBase {
 			if (this.gltfLoaderInfo?.activeAnimations?.length) {
 				renderViewStateData.animationList[renderViewStateData.animationList.length] = this.gltfLoaderInfo?.activeAnimations
 			}
-			if (this.animationInfo.skinInfo) {
+			if (skinInfo) {
 				if (!this.currentShaderModuleName.includes(VERTEX_SHADER_MODULE_NAME_PBR_SKIN)) {
 					this.dirtyPipeline = true
 				}
-				if (this.currentShaderModuleName === `${VERTEX_SHADER_MODULE_NAME_PBR_SKIN}_${this.animationInfo.skinInfo.joints?.length}`) {
+				if (this.currentShaderModuleName === `${VERTEX_SHADER_MODULE_NAME_PBR_SKIN}_${skinInfo.joints?.length}`) {
 					renderViewStateData.skinList[renderViewStateData.skinList.length] = this
 					dirtyTransformForChildren = false
 				}
@@ -890,12 +854,65 @@ class Mesh extends MeshBase {
 					this.#prevModelMatrix[14] = this.modelMatrix[14]
 					this.#prevModelMatrix[15] = this.modelMatrix[15]
 				}
-				gpuDevice.queue.writeBuffer(
-					vertexUniformBuffer.gpuBuffer,
-					vertexUniformInfoMembers.normalModelMatrix.uniformOffset,
-					// new vertexUniformInfoMembers.normalModelMatrix.View(this.normalModelMatrix),
-					this.normalModelMatrix as Float32Array
-				)
+				{
+					{
+						// calculate NormalMatrix
+						const m = this.modelMatrix;
+						const n = this.normalModelMatrix;
+						const a00 = m[0], a01 = m[1], a02 = m[2];
+						const a10 = m[4], a11 = m[5], a12 = m[6];
+						const a20 = m[8], a21 = m[9], a22 = m[10];
+						const det =
+							a00 * (a11 * a22 - a12 * a21) -
+							a01 * (a10 * a22 - a12 * a20) +
+							a02 * (a10 * a21 - a11 * a20);
+						if (det === 0) {
+							// 역행렬 없음 → 단위 행렬로 대체
+							n[0] = 1;
+							n[1] = 0;
+							n[2] = 0;
+							n[3] = 0;
+							n[4] = 0;
+							n[5] = 1;
+							n[6] = 0;
+							n[7] = 0;
+							n[8] = 0;
+							n[9] = 0;
+							n[10] = 1;
+							n[11] = 0;
+							n[12] = 0;
+							n[13] = 0;
+							n[14] = 0;
+							n[15] = 1;
+						} else {
+							const invDet = 1 / det;
+							// 역행렬의 전치 (transpose of inverse)
+							n[0] = (a11 * a22 - a12 * a21) * invDet;
+							n[1] = (a12 * a20 - a10 * a22) * invDet;
+							n[2] = (a10 * a21 - a11 * a20) * invDet;
+							n[3] = 0;
+							n[4] = (a02 * a21 - a01 * a22) * invDet;
+							n[5] = (a00 * a22 - a02 * a20) * invDet;
+							n[6] = (a01 * a20 - a00 * a21) * invDet;
+							n[7] = 0;
+							n[8] = (a01 * a12 - a02 * a11) * invDet;
+							n[9] = (a02 * a10 - a00 * a12) * invDet;
+							n[10] = (a00 * a11 - a01 * a10) * invDet;
+							n[11] = 0;
+							// 하단 행은 단위 행렬처럼 설정
+							n[12] = 0;
+							n[13] = 0;
+							n[14] = 0;
+							n[15] = 1;
+						}
+					}
+					gpuDevice.queue.writeBuffer(
+						vertexUniformBuffer.gpuBuffer,
+						vertexUniformInfoMembers.normalModelMatrix.uniformOffset,
+						// new vertexUniformInfoMembers.normalModelMatrix.View(this.normalModelMatrix),
+						this.normalModelMatrix as Float32Array
+					)
+				}
 				if (vertexUniformInfoMembers.localMatrix) {
 					gpuDevice.queue.writeBuffer(
 						vertexUniformBuffer.gpuBuffer,
