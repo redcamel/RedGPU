@@ -799,7 +799,7 @@ class Mesh extends MeshBase {
 		}
 		// check frustumCulling
 		if (frustumPlanes && passFrustumCulling) {
-			// if (currentGeometry) {
+			// if (currentGeometry) {boundingAABB
 			const combinedAABB = this.boundingAABB;
 			const frustumPlanes0 = frustumPlanes[0];
 			const frustumPlanes1 = frustumPlanes[1];

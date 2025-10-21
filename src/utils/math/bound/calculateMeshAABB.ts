@@ -39,11 +39,19 @@ const calculateMeshAABB = (mesh: Mesh): AABB => {
 	];
 	for (let i = 0; i < 8; i++) {
 		const corner = corners[i];
-		vec3.set(tempLocalVertex, corner[0], corner[1], corner[2]);
-		vec3.transformMat4(tempWorldVertex, tempLocalVertex, mesh.modelMatrix);
-		const wx = tempWorldVertex[0];
-		const wy = tempWorldVertex[1];
-		const wz = tempWorldVertex[2];
+		// vec3.set(tempLocalVertex, corner[0], corner[1], corner[2]);
+		// vec3.transformMat4(tempWorldVertex, tempLocalVertex, mesh.modelMatrix);
+		// const wx = tempWorldVertex[0];
+		// const wy = tempWorldVertex[1];
+		// const wz = tempWorldVertex[2];
+
+		const [x, y, z] = corners[i];
+		const m = mesh.modelMatrix;
+		const wx = m[0]*x + m[4]*y + m[8]*z + m[12];
+		const wy = m[1]*x + m[5]*y + m[9]*z + m[13];
+		const wz = m[2]*x + m[6]*y + m[10]*z + m[14];
+
+
 		if (wx < worldMinX) worldMinX = wx;
 		if (wy < worldMinY) worldMinY = wy;
 		if (wz < worldMinZ) worldMinZ = wz;
