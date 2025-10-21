@@ -207,7 +207,6 @@ class Renderer {
 				},
 			});
 
-
 			renderPassEncoder.executeBundles(renderViewStateData.render2PathLayer);
 			renderPassEncoder.end();
 		}

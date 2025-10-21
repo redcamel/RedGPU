@@ -366,7 +366,7 @@ class ViewRenderTextureManager {
 		if (needCreateTexture) {
 			// 기존 텍스처 정리
 			if (currentTexture) {
-				currentTexture?.destroy()
+
 				this.#renderPath1ResultTexture = null
 				this.#renderPath1ResultTextureView = null
 			}
@@ -389,6 +389,9 @@ class ViewRenderTextureManager {
 			this.#renderPath1ResultTexture = resourceManager.createManagedTexture(this.#renderPath1ResultTextureDescriptor);
 			this.#renderPath1ResultTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#renderPath1ResultTexture)
 			this.#checkVideoMemorySize()
+			requestAnimationFrame(()=>{
+				currentTexture?.destroy()
+			})
 		}
 	}
 
