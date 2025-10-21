@@ -30,13 +30,13 @@ function createSetter(
 		const {gpuRenderInfo} = this;
 		if (isFragment) {
 			const {fragmentUniformInfo, fragmentUniformBuffer} = gpuRenderInfo;
-			fragmentUniformBuffer.writeBuffer(
+			fragmentUniformBuffer.writeOnlyBuffer(
 				fragmentUniformInfo.members[propertyKey],
 				this[symbol]
 			);
 		} else if (gpuRenderInfo) {
 			const {vertexUniformInfo, vertexUniformBuffer} = gpuRenderInfo;
-			vertexUniformBuffer.writeBuffer(
+			vertexUniformBuffer.writeOnlyBuffer(
 				vertexUniformInfo.members[propertyKey],
 				this[symbol]
 			);
