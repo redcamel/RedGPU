@@ -655,54 +655,30 @@ class Mesh extends MeshBase {
 				{
 					if (parent?.modelMatrix) {
 						// mat4.multiply(this.modelMatrix, parent.modelMatrix, this.localMatrix);
-						let parentModelMatrix = parent.modelMatrix
-						let localMatrix = this.localMatrix
-						let out = this.modelMatrix
-						let a00 = parentModelMatrix[0],
-							a01 = parentModelMatrix[1],
-							a02 = parentModelMatrix[2],
-							a03 = parentModelMatrix[3];
-						let a10 = parentModelMatrix[4],
-							a11 = parentModelMatrix[5],
-							a12 = parentModelMatrix[6],
-							a13 = parentModelMatrix[7];
-						let a20 = parentModelMatrix[8],
-							a21 = parentModelMatrix[9],
-							a22 = parentModelMatrix[10],
-							a23 = parentModelMatrix[11];
-						let a30 = parentModelMatrix[12],
-							a31 = parentModelMatrix[13],
-							a32 = parentModelMatrix[14],
-							a33 = parentModelMatrix[15];
+						const p = parent.modelMatrix
+						const l = this.localMatrix
+						const out = this.modelMatrix
+						const a00 = p[0], a01 = p[1], a02 = p[2], a03 = p[3];
+						const a10 = p[4], a11 = p[5], a12 = p[6], a13 = p[7];
+						const a20 = p[8], a21 = p[9], a22 = p[10], a23 = p[11];
+						const a30 = p[12], a31 = p[13], a32 = p[14], a33 = p[15];
 						// Cache only the current line of the second matrix
-						let b0 = localMatrix[0],
-							b1 = localMatrix[1],
-							b2 = localMatrix[2],
-							b3 = localMatrix[3];
+						let b0 = l[0], b1 = l[1], b2 = l[2], b3 = l[3];
 						out[0] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
 						out[1] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
 						out[2] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
 						out[3] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
-						b0 = localMatrix[4];
-						b1 = localMatrix[5];
-						b2 = localMatrix[6];
-						b3 = localMatrix[7];
+						b0 = l[4];b1 = l[5];b2 = l[6];b3 = l[7];
 						out[4] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
 						out[5] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
 						out[6] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
 						out[7] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
-						b0 = localMatrix[8];
-						b1 = localMatrix[9];
-						b2 = localMatrix[10];
-						b3 = localMatrix[11];
+						b0 = l[8];b1 = l[9];b2 = l[10];b3 = l[11];
 						out[8] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
 						out[9] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
 						out[10] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
 						out[11] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
-						b0 = localMatrix[12];
-						b1 = localMatrix[13];
-						b2 = localMatrix[14];
-						b3 = localMatrix[15];
+						b0 = l[12];b1 = l[13];b2 = l[14];b3 = l[15];
 						out[12] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
 						out[13] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
 						out[14] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
@@ -730,53 +706,49 @@ class Mesh extends MeshBase {
 				}
 				{
 					// calculate NormalMatrix
-					let normalModelMatrix = this.normalModelMatrix;
-					let modelMatrix = this.modelMatrix;
-					let a00 = modelMatrix[0];
-					let a01 = modelMatrix[1];
-					let a02 = modelMatrix[2];
-					let a03 = modelMatrix[3];
-					let a10 = modelMatrix[4];
-					let a11 = modelMatrix[5];
-					let a12 = modelMatrix[6];
-					let a13 = modelMatrix[7];
-					let a20 = modelMatrix[8];
-					let a21 = modelMatrix[9];
-					let a22 = modelMatrix[10];
-					let a23 = modelMatrix[11];
-					let a31 = modelMatrix[12];
-					let a32 = modelMatrix[13];
-					let a33 = modelMatrix[14];
-					let b0 = modelMatrix[15];
-					let a30 = a00 * a11 - a01 * a10;
-					let b1 = a00 * a12 - a02 * a10;
-					let b2 = a00 * a13 - a03 * a10;
-					let b3 = a01 * a12 - a02 * a11;
-					let b00 = a01 * a13 - a03 * a11;
-					let b01 = a02 * a13 - a03 * a12;
-					let b02 = a20 * a32 - a21 * a31;
-					let b10 = a20 * a33 - a22 * a31;
-					let b11 = a20 * b0 - a23 * a31;
-					let b12 = a22 * b0 - a23 * a33
-					let b20 = a21 * b0 - a23 * a32;
-					let b22 = a30 * b12 - b1 * b20 + b2 * b12 + b3 * b11 - b00 * b10 + b01 * b02;
-					b22 = 1 / b22;
-					normalModelMatrix[0] = (a11 * b12 - a12 * b20 + a13 * b12) * b22;
-					normalModelMatrix[4] = (-a01 * b12 + a02 * b20 - a03 * b12) * b22;
-					normalModelMatrix[8] = (a32 * b01 - a33 * b00 + b0 * b3) * b22;
-					normalModelMatrix[12] = (-a21 * b01 + a22 * b00 - a23 * b3) * b22;
-					normalModelMatrix[1] = (-a10 * b12 + a12 * b11 - a13 * b10) * b22;
-					normalModelMatrix[5] = (a00 * b12 - a02 * b11 + a03 * b10) * b22;
-					normalModelMatrix[9] = (-a31 * b01 + a33 * b2 - b0 * b1) * b22;
-					normalModelMatrix[13] = (a20 * b01 - a22 * b2 + a23 * b1) * b22;
-					normalModelMatrix[2] = (a10 * b20 - a11 * b11 + a13 * b02) * b22;
-					normalModelMatrix[6] = (-a00 * b20 + a01 * b11 - a03 * b02) * b22;
-					normalModelMatrix[10] = (a31 * b00 - a32 * b2 + b0 * a30) * b22;
-					normalModelMatrix[14] = (-a20 * b00 + a21 * b2 - a23 * a30) * b22;
-					normalModelMatrix[3] = (-a10 * b12 + a11 * b10 - a12 * b02) * b22;
-					normalModelMatrix[7] = (a00 * b12 - a01 * b10 + a02 * b02) * b22;
-					normalModelMatrix[11] = (-a31 * b3 + a32 * b1 - a33 * a30) * b22;
-					normalModelMatrix[15] = (a20 * b3 - a21 * b1 + a22 * a30) * b22;
+					const m = this.modelMatrix;
+					const n = this.normalModelMatrix;
+
+					const a00 = m[0], a01 = m[1], a02 = m[2];
+					const a10 = m[4], a11 = m[5], a12 = m[6];
+					const a20 = m[8], a21 = m[9], a22 = m[10];
+
+					const det =
+						a00 * (a11 * a22 - a12 * a21) -
+						a01 * (a10 * a22 - a12 * a20) +
+						a02 * (a10 * a21 - a11 * a20);
+
+					if (det === 0) {
+						// 역행렬 없음 → 단위 행렬로 대체
+						n[0] = 1; n[1] = 0; n[2] = 0; n[3] = 0;
+						n[4] = 0; n[5] = 1; n[6] = 0; n[7] = 0;
+						n[8] = 0; n[9] = 0; n[10] = 1; n[11] = 0;
+						n[12] = 0; n[13] = 0; n[14] = 0; n[15] = 1;
+					} else {
+						const invDet = 1 / det;
+
+						// 역행렬의 전치 (transpose of inverse)
+						n[0] = (a11 * a22 - a12 * a21) * invDet;
+						n[1] = (a12 * a20 - a10 * a22) * invDet;
+						n[2] = (a10 * a21 - a11 * a20) * invDet;
+						n[3] = 0;
+
+						n[4] = (a02 * a21 - a01 * a22) * invDet;
+						n[5] = (a00 * a22 - a02 * a20) * invDet;
+						n[6] = (a01 * a20 - a00 * a21) * invDet;
+						n[7] = 0;
+
+						n[8] = (a01 * a12 - a02 * a11) * invDet;
+						n[9] = (a02 * a10 - a00 * a12) * invDet;
+						n[10] = (a00 * a11 - a01 * a10) * invDet;
+						n[11] = 0;
+
+						// 하단 행은 단위 행렬처럼 설정
+						n[12] = 0;
+						n[13] = 0;
+						n[14] = 0;
+						n[15] = 1;
+					}
 				}
 			}
 		}
