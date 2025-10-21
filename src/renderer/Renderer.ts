@@ -1,5 +1,4 @@
 import {mat4} from "gl-matrix";
-import Camera2D from "../camera/camera/Camera2D";
 import RedGPUContext from "../context/RedGPUContext";
 import RenderViewStateData from "../display/view/core/RenderViewStateData";
 import View3D from "../display/view/View3D";
@@ -9,7 +8,6 @@ import GltfAnimationLooperManager from "../loader/gltf/animationLooper/GltfAnima
 import ParsedSkinInfo_GLTF from "../loader/gltf/cls/ParsedSkinInfo_GLTF";
 import DebugRender from "./debugRender/DebugRender";
 import FinalRender from "./finalRender/FinalRender";
-import render2PathLayer from "./renderLayers/render2PathLayer";
 import renderAlphaLayer from "./renderLayers/renderAlphaLayer";
 import renderBasicLayer from "./renderLayers/renderBasicLayer";
 import renderPickingLayer from "./renderLayers/renderPickingLayer";
@@ -159,8 +157,9 @@ class Renderer {
 		const {renderViewStateData, skybox, grid, axis} = view
 		const viewRenderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass(renderPassDescriptor)
 		{
+			const renderPath1ResultTextureView = view.viewRenderTextureManager.renderPath1ResultTextureView
 			this.#updateViewportAndScissor(view, viewRenderPassEncoder)
-			this.#updateViewSystemUniforms(view, viewRenderPassEncoder, false, true)
+			this.#updateViewSystemUniforms(view, viewRenderPassEncoder, false, true,renderPath1ResultTextureView)
 		}
 		renderViewStateData.currentRenderPassEncoder = viewRenderPassEncoder
 		if (skybox) skybox.render(renderViewStateData)
@@ -172,7 +171,7 @@ class Renderer {
 	}
 
 	#renderPassView2Path(view: View3D, commandEncoder: GPUCommandEncoder, renderPassDescriptor: GPURenderPassDescriptor, depthStencilAttachment: GPURenderPassDepthStencilAttachment) {
-		const {redGPUContext} = view
+		const {redGPUContext,renderViewStateData} = view
 		const {antialiasingManager} = redGPUContext
 		const {useMSAA} = antialiasingManager
 		if (view.renderViewStateData.render2PathLayer.length) {
@@ -207,12 +206,9 @@ class Renderer {
 					depthLoadOp: GPU_LOAD_OP.LOAD,
 				},
 			});
-			const renderPath1ResultTextureView = view.viewRenderTextureManager.renderPath1ResultTextureView
-			{
-				this.#updateViewportAndScissor(view, renderPassEncoder)
-				this.#updateViewSystemUniforms(view, renderPassEncoder, false, false, renderPath1ResultTextureView);
-			}
-			render2PathLayer(view, renderPassEncoder);
+
+
+			renderPassEncoder.executeBundles(renderViewStateData.render2PathLayer);
 			renderPassEncoder.end();
 		}
 	}
