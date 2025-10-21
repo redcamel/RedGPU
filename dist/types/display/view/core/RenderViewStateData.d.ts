@@ -57,8 +57,6 @@ declare class RenderViewStateData {
     usedVideoMemory: number;
     /** 현재 사용 중인 GPU 렌더 패스 인코더 */
     currentRenderPassEncoder: GPURenderPassEncoder;
-    /** 컴퓨트 작업을 위한 GPU 커맨드 인코더 */
-    computeCommandEncoder: GPUCommandEncoder;
     /** 렌더링 프레임의 현재 타임스탬프 */
     timestamp: number;
     /** 컬링을 위한 프러스텀 평면 배열, 프러스텀 컬링이 비활성화된 경우 null */
@@ -108,12 +106,11 @@ declare class RenderViewStateData {
      * 또한 비디오 메모리 사용량을 계산하고 뷰 설정에 따라 컬링 매개변수를 구성합니다.
      *
      * @param {GPURenderPassEncoder} viewRenderPassEncoder - 현재 프레임의 렌더 패스 인코더
-     * @param {GPUCommandEncoder} computeCommandEncoder - 컴퓨트 작업을 위한 커맨드 인코더
      * @param {number} time - 프레임의 현재 타임스탬프
      *
      * @throws {Error} 잘못된 매개변수가 제공되거나 필수 뷰 속성이 없는 경우
      * @throws {Error} 텍스처 크기 계산이 실패한 경우
      */
-    reset(viewRenderPassEncoder: GPURenderPassEncoder, computeCommandEncoder: GPUCommandEncoder, time: number): void;
+    reset(viewRenderPassEncoder: GPURenderPassEncoder, time: number): void;
 }
 export default RenderViewStateData;

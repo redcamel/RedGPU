@@ -97,10 +97,10 @@ class Renderer {
 		// keepLog('드로우 버퍼 상태:', memoryInfo)
 		view.renderViewStateData.reset(null, time)
 		if (pixelRectObject.width && pixelRectObject.height) {
-			this.#renderViewShadow(view, commandEncoder)
-			this.#renderViewBasicLayer(view, commandEncoder, renderPassDescriptor)
-			this.#renderView2PathLayer(view, commandEncoder, renderPassDescriptor, depthStencilAttachment)
-			this.#renderViewPickingLayer(view, commandEncoder)
+			this.#renderPassViewShadow(view, commandEncoder)
+			this.#renderPassViewBasicLayer(view, commandEncoder, renderPassDescriptor)
+			this.#renderPassView2Path(view, commandEncoder, renderPassDescriptor, depthStencilAttachment)
+			this.#renderPassViewPickingLayer(view, commandEncoder)
 		}
 		renderPassDescriptor.colorAttachments[0].postEffectView = view.postEffectManager.render().textureView
 		redGPUContext.gpuDevice.queue.submit([commandEncoder.finish()])
@@ -127,7 +127,7 @@ class Renderer {
 		return renderPassDescriptor
 	}
 
-	#renderViewShadow(view: View3D, commandEncoder: GPUCommandEncoder) {
+	#renderPassViewShadow(view: View3D, commandEncoder: GPUCommandEncoder) {
 		//TODO - 이것도 ShadowManager가 책임지도록 변경
 		const {scene} = view
 		const {shadowManager} = scene
@@ -144,7 +144,7 @@ class Renderer {
 			};
 			const viewShadowRenderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass(shadowPassDescriptor)
 			{
-				this.#updateViewportAndScissor(view, viewShadowRenderPassEncoder)
+				this.#updateViewportAndScissor(view, viewShadowRenderPassEncoder,true)
 				this.#updateViewSystemUniforms(view, viewShadowRenderPassEncoder, true, false)
 			}
 			if (directionalShadowManager.castingList.length) {
@@ -155,7 +155,7 @@ class Renderer {
 		}
 	}
 
-	#renderViewBasicLayer(view: View3D, commandEncoder: GPUCommandEncoder, renderPassDescriptor: GPURenderPassDescriptor) {
+	#renderPassViewBasicLayer(view: View3D, commandEncoder: GPUCommandEncoder, renderPassDescriptor: GPURenderPassDescriptor) {
 		const {renderViewStateData, skybox, grid, axis} = view
 		const viewRenderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass(renderPassDescriptor)
 		{
@@ -171,7 +171,7 @@ class Renderer {
 		viewRenderPassEncoder.end()
 	}
 
-	#renderView2PathLayer(view: View3D, commandEncoder: GPUCommandEncoder, renderPassDescriptor: GPURenderPassDescriptor, depthStencilAttachment: GPURenderPassDepthStencilAttachment) {
+	#renderPassView2Path(view: View3D, commandEncoder: GPUCommandEncoder, renderPassDescriptor: GPURenderPassDescriptor, depthStencilAttachment: GPURenderPassDepthStencilAttachment) {
 		const {redGPUContext} = view
 		const {antialiasingManager} = redGPUContext
 		const {useMSAA} = antialiasingManager
@@ -207,7 +207,7 @@ class Renderer {
 					depthLoadOp: GPU_LOAD_OP.LOAD,
 				},
 			});
-			let renderPath1ResultTextureView = view.viewRenderTextureManager.renderPath1ResultTextureView
+			const renderPath1ResultTextureView = view.viewRenderTextureManager.renderPath1ResultTextureView
 			{
 				this.#updateViewportAndScissor(view, renderPassEncoder)
 				this.#updateViewSystemUniforms(view, renderPassEncoder, false, false, renderPath1ResultTextureView);
@@ -217,7 +217,7 @@ class Renderer {
 		}
 	}
 
-	#renderViewPickingLayer(view: View3D, commandEncoder: GPUCommandEncoder,) {
+	#renderPassViewPickingLayer(view: View3D, commandEncoder: GPUCommandEncoder,) {
 		//TODO - 이건  pickingManager가 권한을 가지도록 변경
 		const {pickingManager} = view
 		if (pickingManager && pickingManager.castingList.length) {

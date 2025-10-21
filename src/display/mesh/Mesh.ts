@@ -926,14 +926,14 @@ class Mesh extends MeshBase {
                     // new vertexUniformInfoMembers.normalModelMatrix.View(this.normalModelMatrix),
                     this.normalModelMatrix as Float32Array
                 )
-                if (vertexUniformInfoMembers.localMatrix) {
-                    gpuDevice.queue.writeBuffer(
-                        vertexUniformBuffer.gpuBuffer,
-                        vertexUniformInfoMembers.localMatrix.uniformOffset,
-                        // new vertexUniformInfoMembers.localMatrix.View(this.localMatrix),
-                        this.localMatrix as Float32Array
-                    )
-                }
+                // if (vertexUniformInfoMembers.localMatrix) {
+                //     gpuDevice.queue.writeBuffer(
+                //         vertexUniformBuffer.gpuBuffer,
+                //         vertexUniformInfoMembers.localMatrix.uniformOffset,
+                //         // new vertexUniformInfoMembers.localMatrix.View(this.localMatrix),
+                //         this.localMatrix as Float32Array
+                //     )
+                // }
                 dirtyTransformForChildren = true
                 this.dirtyTransform = false
             }
