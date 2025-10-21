@@ -1076,6 +1076,8 @@ class Mesh extends MeshBase {
 				bundleEncoder.drawIndirect(this.#drawCommandSlot.buffer, this.#drawCommandSlot.commandOffset * 4)
 			}
 			this.#renderBundle = (bundleEncoder as GPURenderBundleEncoder).finish();
+			// @ts-ignore
+			this.#renderBundle.mesh = null
 		}
 		keepLog('렌더번들갱신', this.name)
 	}

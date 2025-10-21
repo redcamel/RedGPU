@@ -160,8 +160,6 @@ class RenderViewStateData {
 		const {
 			gBufferColorTexture,
 			depthTexture,
-			gBufferColorResolveTexture,
-			renderPath1ResultTexture,
 		} = view.viewRenderTextureManager;
 		const {shadowManager} = scene;
 		if (!gBufferColorTexture || !depthTexture) {
@@ -184,13 +182,13 @@ class RenderViewStateData {
 		this.prevVertexGpuBuffer = null;
 		this.prevFragmentUniformBindGroup = null;
 		this.dirtyVertexUniformFromMaterial = {};
-		this.alphaLayer = [];
-		this.transparentLayer = [];
-		this.particleLayer = [];
-		this.render2PathLayer = [];
-		this.skinList = [];
-		this.animationList = [];
-		this.renderBundleList = [];
+		this.alphaLayer.length = 0;
+		this.transparentLayer.length = 0;
+		this.particleLayer.length = 0;
+		this.render2PathLayer.length = 0;
+		this.skinList.length = 0;
+		this.animationList.length = 0;
+		this.renderBundleList.length = 0;
 		this.startTime = performance.now();
 		this.isScene2DMode = view.camera instanceof Camera2D;
 		this.viewIndex = view.redGPUContext.getViewIndex(view);
