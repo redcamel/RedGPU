@@ -837,22 +837,24 @@ class Mesh extends MeshBase {
 				)
 				if (antialiasingManager.useTAA) {
 					if (!this.#prevModelMatrix) this.#prevModelMatrix = new Float32Array(16)
-					this.#prevModelMatrix[0] = this.modelMatrix[0]
-					this.#prevModelMatrix[1] = this.modelMatrix[1]
-					this.#prevModelMatrix[2] = this.modelMatrix[2]
-					this.#prevModelMatrix[3] = this.modelMatrix[3]
-					this.#prevModelMatrix[4] = this.modelMatrix[4]
-					this.#prevModelMatrix[5] = this.modelMatrix[5]
-					this.#prevModelMatrix[6] = this.modelMatrix[6]
-					this.#prevModelMatrix[7] = this.modelMatrix[7]
-					this.#prevModelMatrix[8] = this.modelMatrix[8]
-					this.#prevModelMatrix[9] = this.modelMatrix[9]
-					this.#prevModelMatrix[10] = this.modelMatrix[10]
-					this.#prevModelMatrix[11] = this.modelMatrix[11]
-					this.#prevModelMatrix[12] = this.modelMatrix[12]
-					this.#prevModelMatrix[13] = this.modelMatrix[13]
-					this.#prevModelMatrix[14] = this.modelMatrix[14]
-					this.#prevModelMatrix[15] = this.modelMatrix[15]
+					const prev = this.#prevModelMatrix
+					const current = this.modelMatrix
+					prev[0] = current[0]
+					prev[1] = current[1]
+					prev[2] = current[2]
+					prev[3] = current[3]
+					prev[4] = current[4]
+					prev[5] = current[5]
+					prev[6] = current[6]
+					prev[7] = current[7]
+					prev[8] = current[8]
+					prev[9] = current[9]
+					prev[10] = current[10]
+					prev[11] = current[11]
+					prev[12] = current[12]
+					prev[13] = current[13]
+					prev[14] = current[14]
+					prev[15] = current[15]
 				}
 				{
 					{
