@@ -130,7 +130,7 @@ class Mesh extends MeshBase {
 	#drawBufferManager: DrawBufferManager | null = null
 	#needUpdateNormal: boolean = true
 
-	#matrixData:Float32Array
+	#uniformDataMatrixList:Float32Array
 	/**
 	 * Mesh 인스턴스를 생성합니다.
 	 * @param redGPUContext RedGPU 컨텍스트
@@ -775,9 +775,9 @@ class Mesh extends MeshBase {
 			const {members: vertexUniformInfoMembers} = vertexUniformInfo
 			const {members: vertexUniformInfoMatrixListMembers} = vertexUniformInfoMembers.matrixList
 			const {gpuBuffer: vertexUniformGPUBuffer} = vertexUniformBuffer
-			if(!this.#matrixData){
+			if(!this.#uniformDataMatrixList){
 
-				this.#matrixData = new Float32Array(vertexUniformInfoMembers.matrixList.endOffset / Float32Array.BYTES_PER_ELEMENT)
+				this.#uniformDataMatrixList = new Float32Array(vertexUniformInfoMembers.matrixList.endOffset / Float32Array.BYTES_PER_ELEMENT)
 			}
 			{
 				if (vertexUniformInfoMembers.displacementScale !== undefined &&
@@ -814,13 +814,13 @@ class Mesh extends MeshBase {
 					// 	vertexUniformInfoMatrixListMembers.modelMatrix.uniformOffset,
 					// 	modelMatrix
 					// )
-					this.#matrixData.set(modelMatrix,vertexUniformInfoMatrixListMembers.modelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
+					this.#uniformDataMatrixList.set(modelMatrix,vertexUniformInfoMatrixListMembers.modelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
 
 				}
 				{
 					if (antialiasingManager.useTAA && currentDirtyTransform) {
 						if (this.#prevModelMatrix && vertexUniformInfoMatrixListMembers.prevModelMatrix) {
-							this.#matrixData.set(this.#prevModelMatrix,vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
+							this.#uniformDataMatrixList.set(this.#prevModelMatrix,vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
 							// if (vertexUniformInfoMatrixListMembers.prevModelMatrix) {
 							// 	redGPUContext.gpuDevice.queue.writeBuffer(
 							// 		vertexUniformGPUBuffer,
@@ -881,7 +881,7 @@ class Mesh extends MeshBase {
 					// 	// new vertexUniformInfoMatrixListMembers.normalModelMatrix.View(this.normalModelMatrix),
 					// 	this.normalModelMatrix as Float32Array
 					// )
-					this.#matrixData.set(this.normalModelMatrix,vertexUniformInfoMatrixListMembers.normalModelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
+					this.#uniformDataMatrixList.set(this.normalModelMatrix,vertexUniformInfoMatrixListMembers.normalModelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
 
 				}
 				if (vertexUniformInfoMatrixListMembers.localMatrix) {
@@ -891,7 +891,7 @@ class Mesh extends MeshBase {
 					// 	// new vertexUniformInfoMatrixListMembers.localMatrix.View(this.localMatrix),
 					// 	this.localMatrix as Float32Array
 					// )
-					this.#matrixData.set(this.localMatrix,vertexUniformInfoMatrixListMembers.localMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
+					this.#uniformDataMatrixList.set(this.localMatrix,vertexUniformInfoMatrixListMembers.localMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
 
 				}
 				dirtyTransformForChildren = true
@@ -899,7 +899,7 @@ class Mesh extends MeshBase {
 				gpuDevice.queue.writeBuffer(
 					vertexUniformGPUBuffer,
 					vertexUniformInfoMembers.matrixList.startOffset,
-					this.#matrixData
+					this.#uniformDataMatrixList
 				)
 
 			}
@@ -980,9 +980,10 @@ class Mesh extends MeshBase {
 		const childNum = children.length
 		// while (i--) {
 		for (; i < childNum; i++) {
-			if (dirtyTransformForChildren) children[i].dirtyTransform = dirtyTransformForChildren
-			if (dirtyOpacityForChildren) children[i].dirtyOpacity = dirtyOpacityForChildren
-			children[i].render(renderViewStateData)
+			const child = children[i]
+			if (dirtyTransformForChildren) child.dirtyTransform = dirtyTransformForChildren
+			if (dirtyOpacityForChildren) child.dirtyOpacity = dirtyOpacityForChildren
+			child.render(renderViewStateData)
 		}
 	}
 
