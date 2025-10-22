@@ -130,6 +130,7 @@ class Mesh extends MeshBase {
 	#drawBufferManager: DrawBufferManager | null = null
 	#needUpdateNormal: boolean = true
 
+	#matrixData:Float32Array
 	/**
 	 * Mesh 인스턴스를 생성합니다.
 	 * @param redGPUContext RedGPU 컨텍스트
@@ -772,7 +773,11 @@ class Mesh extends MeshBase {
 			const {gpuRenderInfo} = this
 			const {vertexUniformBuffer, vertexUniformInfo} = gpuRenderInfo
 			const {members: vertexUniformInfoMembers} = vertexUniformInfo
+			const {members: vertexUniformInfoMatrixListMembers} = vertexUniformInfoMembers.matrixList
 			const {gpuBuffer: vertexUniformGPUBuffer} = vertexUniformBuffer
+			if(!this.#matrixData){
+				this.#matrixData = new Float32Array(vertexUniformInfoMembers.matrixList.endOffset / Float32Array.BYTES_PER_ELEMENT)
+			}
 			{
 				if (vertexUniformInfoMembers.displacementScale !== undefined &&
 					vertexUniformInfoMembers.displacementScale !== displacementScale
@@ -788,10 +793,8 @@ class Mesh extends MeshBase {
 			}
 
 			if (currentDirtyTransform) {
-				gpuDevice.queue.writeBuffer(
-					vertexUniformGPUBuffer,
-					vertexUniformInfoMembers.modelMatrix.uniformOffset,
-					(
+				{
+					const modelMatrix = (
 						//TODO - Sprite2D떄문에 처리했지만 이거 일반화해야함
 						// TODO - renderTextureWidth 이놈도 같이 처리해야할듯
 						// @ts-ignore
@@ -804,17 +807,26 @@ class Mesh extends MeshBase {
 							),
 						) : this.modelMatrix
 					)
-				)
+					//
+					// gpuDevice.queue.writeBuffer(
+					// 	vertexUniformGPUBuffer,
+					// 	vertexUniformInfoMatrixListMembers.modelMatrix.uniformOffset,
+					// 	modelMatrix
+					// )
+					this.#matrixData.set(modelMatrix,vertexUniformInfoMatrixListMembers.modelMatrix.uniformOffset / Float32Array.BYTES_PER_ELEMENT)
+
+				}
 				{
 					if (antialiasingManager.useTAA && currentDirtyTransform) {
 						if (this.#prevModelMatrix) {
-							if (vertexUniformInfoMembers.prevModelMatrix) {
-								redGPUContext.gpuDevice.queue.writeBuffer(
-									vertexUniformGPUBuffer,
-									vertexUniformInfoMembers.prevModelMatrix.uniformOffset,
-									this.#prevModelMatrix,
-								)
-							}
+							this.#matrixData.set(this.#prevModelMatrix,vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffset / Float32Array.BYTES_PER_ELEMENT)
+							// if (vertexUniformInfoMatrixListMembers.prevModelMatrix) {
+							// 	redGPUContext.gpuDevice.queue.writeBuffer(
+							// 		vertexUniformGPUBuffer,
+							// 		vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffset,
+							// 		this.#prevModelMatrix,
+							// 	)
+							// }
 						}
 						{
 							if (!this.#prevModelMatrix) this.#prevModelMatrix = new Float32Array(16)
@@ -830,7 +842,7 @@ class Mesh extends MeshBase {
 					}
 				}
 				{
-					if (this.#needUpdateNormal && vertexUniformInfoMembers.normalModelMatrix) {
+					if (this.#needUpdateNormal && vertexUniformInfoMatrixListMembers.normalModelMatrix) {
 						this.#needUpdateNormal = false
 						// calculate NormalMatrix
 						const m = this.modelMatrix;
@@ -861,23 +873,33 @@ class Mesh extends MeshBase {
 							n[12] = 0, n[13] = 0, n[14] = 0, n[15] = 1;
 						}
 					}
-					gpuDevice.queue.writeBuffer(
-						vertexUniformGPUBuffer,
-						vertexUniformInfoMembers.normalModelMatrix.uniformOffset,
-						// new vertexUniformInfoMembers.normalModelMatrix.View(this.normalModelMatrix),
-						this.normalModelMatrix as Float32Array
-					)
+					// gpuDevice.queue.writeBuffer(
+					// 	vertexUniformGPUBuffer,
+					// 	vertexUniformInfoMatrixListMembers.normalModelMatrix.uniformOffset,
+					// 	// new vertexUniformInfoMatrixListMembers.normalModelMatrix.View(this.normalModelMatrix),
+					// 	this.normalModelMatrix as Float32Array
+					// )
+					this.#matrixData.set(this.normalModelMatrix,vertexUniformInfoMatrixListMembers.normalModelMatrix.uniformOffset / Float32Array.BYTES_PER_ELEMENT)
+
 				}
-				if (vertexUniformInfoMembers.localMatrix) {
-					gpuDevice.queue.writeBuffer(
-						vertexUniformGPUBuffer,
-						vertexUniformInfoMembers.localMatrix.uniformOffset,
-						// new vertexUniformInfoMembers.localMatrix.View(this.localMatrix),
-						this.localMatrix as Float32Array
-					)
+				if (vertexUniformInfoMatrixListMembers.localMatrix) {
+					// gpuDevice.queue.writeBuffer(
+					// 	vertexUniformGPUBuffer,
+					// 	vertexUniformInfoMatrixListMembers.localMatrix.uniformOffset,
+					// 	// new vertexUniformInfoMatrixListMembers.localMatrix.View(this.localMatrix),
+					// 	this.localMatrix as Float32Array
+					// )
+					this.#matrixData.set(this.localMatrix,vertexUniformInfoMatrixListMembers.localMatrix.uniformOffset / Float32Array.BYTES_PER_ELEMENT)
+
 				}
 				dirtyTransformForChildren = true
 				this.dirtyTransform = false
+				gpuDevice.queue.writeBuffer(
+					vertexUniformGPUBuffer,
+					vertexUniformInfoMembers.matrixList.startOffset,
+					this.#matrixData
+				)
+
 			}
 			if (this.dirtyOpacity) {
 				dirtyOpacityForChildren = true

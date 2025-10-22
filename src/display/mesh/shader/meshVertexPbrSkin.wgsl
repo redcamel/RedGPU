@@ -1,12 +1,15 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include calculateMotionVector;
 
-struct VertexUniforms {
-    pickingId: u32,
+struct MatrixList{
     localMatrix: mat4x4<f32>,
     modelMatrix: mat4x4<f32>,
     prevModelMatrix: mat4x4<f32>,
     normalModelMatrix: mat4x4<f32>,
+}
+struct VertexUniforms {
+    matrixList:MatrixList,
+    pickingId: u32,
     receiveShadow: f32
 };
 
@@ -69,10 +72,11 @@ fn main(inputData: InputDataSkin) -> OutputDataSkin {
     let u_cameraPosition = u_camera.cameraPosition;
 
     // Vertex uniforms
-    let u_localMatrix = vertexUniforms.localMatrix;
-    let u_modelMatrix = vertexUniforms.modelMatrix;
-    let u_prevModelMatrix = vertexUniforms.prevModelMatrix;
-    let u_normalModelMatrix = vertexUniforms.normalModelMatrix;
+    let u_matrixList = vertexUniforms.matrixList;
+    let u_localMatrix = u_matrixList.localMatrix;
+    let u_modelMatrix = u_matrixList.modelMatrix;
+    let u_prevModelMatrix = u_matrixList.prevModelMatrix;
+    let u_normalModelMatrix = u_matrixList.normalModelMatrix;
     let u_receiveShadow = vertexUniforms.receiveShadow;
 
     // Light uniforms
@@ -134,7 +138,7 @@ fn drawDirectionalShadowDepth(inputData: InputDataSkin) -> OutputShadowData {
 
     // System uniforms
     let u_directionalLightProjectionViewMatrix = systemUniforms.directionalLightProjectionViewMatrix;
-    let u_modelMatrix = vertexUniforms.modelMatrix;
+    let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
 
     // Input data
     let input_position = inputData.position;
@@ -158,7 +162,7 @@ fn picking(inputData: InputDataSkin) -> OutputDataSkin {
     let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
     let u_camera = systemUniforms.camera;
     let u_cameraMatrix = u_camera.cameraMatrix;
-    let u_modelMatrix = vertexUniforms.modelMatrix;
+    let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
 
     // Skinning calculation
 let skinMat = vertexStorages[inputData.idx];
