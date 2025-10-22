@@ -90,16 +90,16 @@ class RenderViewStateData {
 	dirtyVertexUniformFromMaterial = {};
 
 	/** 알파 렌더링 레이어의 객체 배열 */
-	alphaLayer = [];
+	bundleListAlphaLayer = [];
 
 	/** 투명 렌더링 레이어의 객체 배열 */
-	transparentLayer = [];
+	bundleListTransparentLayer = [];
 
 	/** 파티클 렌더링 레이어의 객체 배열 */
-	particleLayer = [];
+	bundleListParticleLayer = [];
 
 	/** 2D 패스 렌더링 레이어의 객체 배열 */
-	render2PathLayer = [];
+	bundleListRender2PathLayer = [];
 
 	/** 처리할 스킨 메시 목록 */
 	skinList = [];
@@ -108,7 +108,7 @@ class RenderViewStateData {
 	animationList = [];
 
 	/** 효율적인 렌더링을 위한 렌더 번들 목록 */
-	renderBundleList = [];
+	bundleListBasicList = [];
 
 	/** 렌더링 시작을 표시하는 성능 타임스탬프 */
 	startTime: number;
@@ -182,13 +182,16 @@ class RenderViewStateData {
 		this.prevVertexGpuBuffer = null;
 		this.prevFragmentUniformBindGroup = null;
 		this.dirtyVertexUniformFromMaterial = {};
-		this.alphaLayer.length = 0;
-		this.transparentLayer.length = 0;
-		this.particleLayer.length = 0;
-		this.render2PathLayer.length = 0;
+		//
+		this.bundleListAlphaLayer.length = 0;
+		this.bundleListTransparentLayer.length = 0;
+		this.bundleListParticleLayer.length = 0;
+		this.bundleListRender2PathLayer.length = 0;
+		this.bundleListBasicList.length = 0;
+		//
 		this.skinList.length = 0;
 		this.animationList.length = 0;
-		this.renderBundleList.length = 0;
+		//
 		this.startTime = performance.now();
 		this.isScene2DMode = view.camera instanceof Camera2D;
 		this.viewIndex = view.redGPUContext.getViewIndex(view);

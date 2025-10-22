@@ -174,7 +174,7 @@ class Renderer {
 		const {redGPUContext,renderViewStateData} = view
 		const {antialiasingManager} = redGPUContext
 		const {useMSAA} = antialiasingManager
-		if (view.renderViewStateData.render2PathLayer.length) {
+		if (view.renderViewStateData.bundleListRender2PathLayer.length) {
 			const {mipmapGenerator} = redGPUContext.resourceManager
 			let renderPath1ResultTexture = view.viewRenderTextureManager.renderPath1ResultTexture
 			// useMSAA 설정에 따라 소스 텍스처 선택
@@ -207,7 +207,7 @@ class Renderer {
 				},
 			});
 
-			renderPassEncoder.executeBundles(renderViewStateData.render2PathLayer);
+			renderPassEncoder.executeBundles(renderViewStateData.bundleListRender2PathLayer);
 			renderPassEncoder.end();
 		}
 	}

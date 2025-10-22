@@ -128,8 +128,7 @@ class Mesh extends MeshBase {
 	#prevFragmentBindGroup: GPUBindGroup
 	#drawCommandSlot: DrawCommandSlot | null = null
 	#drawBufferManager: DrawBufferManager | null = null
-
-	#needUpdateNormal:boolean=true
+	#needUpdateNormal: boolean = true
 
 	/**
 	 * Mesh 인스턴스를 생성합니다.
@@ -514,21 +513,9 @@ class Mesh extends MeshBase {
 		const {uuid: currentMaterialUUID} = currentMaterial || {}
 		let dirtyTransformForChildren
 		let dirtyOpacityForChildren
+		let currentDirtyPipeline = this.dirtyPipeline
+		const currentDirtyTransform = this.dirtyTransform
 		const {skinInfo} = this.animationInfo
-		if (!antialiasingManager.useTAA) {
-			this.#prevModelMatrix = null
-		}
-		if (this.#prevModelMatrix) {
-			const {vertexUniformBuffer, vertexUniformInfo} = this.gpuRenderInfo
-			const {members: vertexUniformInfoMembers} = vertexUniformInfo
-			if (vertexUniformInfoMembers.prevModelMatrix) {
-				redGPUContext.gpuDevice.queue.writeBuffer(
-					vertexUniformBuffer.gpuBuffer,
-					vertexUniformInfoMembers.prevModelMatrix.uniformOffset,
-					this.#prevModelMatrix,
-				)
-			}
-		}
 		if (isScene2DMode) {
 			this.#z = 0
 			this.#pivotZ = 0
@@ -536,7 +523,7 @@ class Mesh extends MeshBase {
 				this.depthStencilState.depthWriteEnabled = false
 			}
 		}
-		if (this.dirtyTransform) {
+		if (currentDirtyTransform) {
 			dirtyTransformForChildren = true
 			this.#needUpdateNormal = true
 			{
@@ -672,26 +659,17 @@ class Mesh extends MeshBase {
 						out[1] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
 						out[2] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
 						out[3] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
-						b0 = l[4];
-						b1 = l[5];
-						b2 = l[6];
-						b3 = l[7];
+						b0 = l[4], b1 = l[5], b2 = l[6], b3 = l[7];
 						out[4] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
 						out[5] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
 						out[6] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
 						out[7] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
-						b0 = l[8];
-						b1 = l[9];
-						b2 = l[10];
-						b3 = l[11];
+						b0 = l[8], b1 = l[9], b2 = l[10], b3 = l[11];
 						out[8] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
 						out[9] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
 						out[10] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
 						out[11] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
-						b0 = l[12];
-						b1 = l[13];
-						b2 = l[14];
-						b3 = l[15];
+						b0 = l[12], b1 = l[13], b2 = l[14], b3 = l[15];
 						out[12] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
 						out[13] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
 						out[14] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
@@ -699,22 +677,10 @@ class Mesh extends MeshBase {
 					} else {
 						// this.modelMatrix = mat4.clone(this.localMatrix)
 						const {modelMatrix, localMatrix} = this
-						modelMatrix[0] = localMatrix[0]
-						modelMatrix[1] = localMatrix[1]
-						modelMatrix[2] = localMatrix[2]
-						modelMatrix[3] = localMatrix[3]
-						modelMatrix[4] = localMatrix[4]
-						modelMatrix[5] = localMatrix[5]
-						modelMatrix[6] = localMatrix[6]
-						modelMatrix[7] = localMatrix[7]
-						modelMatrix[8] = localMatrix[8]
-						modelMatrix[9] = localMatrix[9]
-						modelMatrix[10] = localMatrix[10]
-						modelMatrix[11] = localMatrix[11]
-						modelMatrix[12] = localMatrix[12]
-						modelMatrix[13] = localMatrix[13]
-						modelMatrix[14] = localMatrix[14]
-						modelMatrix[15] = localMatrix[15]
+						modelMatrix[0] = localMatrix[0], modelMatrix[1] = localMatrix[1], modelMatrix[2] = localMatrix[2], modelMatrix[3] = localMatrix[3];
+						modelMatrix[4] = localMatrix[4], modelMatrix[5] = localMatrix[5], modelMatrix[6] = localMatrix[6], modelMatrix[7] = localMatrix[7];
+						modelMatrix[8] = localMatrix[8], modelMatrix[9] = localMatrix[9], modelMatrix[10] = localMatrix[10], modelMatrix[11] = localMatrix[11];
+						modelMatrix[12] = localMatrix[12], modelMatrix[13] = localMatrix[13], modelMatrix[14] = localMatrix[14], modelMatrix[15] = localMatrix[15];
 					}
 				}
 			}
@@ -730,8 +696,9 @@ class Mesh extends MeshBase {
 			const dz = rawCamera.z - aabb.centerZ;
 			// 거리 제곱 계산
 			const distanceSquared = dx * dx + dy * dy + dz * dz;
+			const geometryRadius = aabb.geometryRadius;
 			// AABB의 반지름을 고려한 컬링 거리 계산
-			const cullingDistanceWithRadius = cullingDistanceSquared + (aabb.geometryRadius * aabb.geometryRadius);
+			const cullingDistanceWithRadius = cullingDistanceSquared + (geometryRadius * geometryRadius);
 			if (distanceSquared > cullingDistanceWithRadius) {
 				passFrustumCulling = false;
 			}
@@ -769,7 +736,7 @@ class Mesh extends MeshBase {
 			}
 			if (skinInfo) {
 				if (!this.currentShaderModuleName.includes(VERTEX_SHADER_MODULE_NAME_PBR_SKIN)) {
-					this.dirtyPipeline = true
+					currentDirtyPipeline = true
 				}
 				if (this.currentShaderModuleName === `${VERTEX_SHADER_MODULE_NAME_PBR_SKIN}_${skinInfo.joints?.length}`) {
 					renderViewStateData.skinList[renderViewStateData.skinList.length] = this
@@ -778,51 +745,51 @@ class Mesh extends MeshBase {
 			}
 		}
 		// render
-		if (currentGeometry) renderViewStateData.num3DObjects++
-		else renderViewStateData.num3DGroups++
 		const {displacementTexture, displacementScale} = currentMaterial || {}
-		if (this.dirtyPipeline || currentMaterial?.dirtyPipeline || dirtyVertexUniformFromMaterial[currentMaterialUUID]) {
+		if (currentDirtyPipeline || currentMaterial?.dirtyPipeline || dirtyVertexUniformFromMaterial[currentMaterialUUID]) {
 			dirtyVertexUniformFromMaterial[currentMaterialUUID] = true
 		}
 		if (currentGeometry) {
+			renderViewStateData.num3DObjects++
 			if (antialiasingManager.changedMSAA) {
-				this.dirtyPipeline = true
+				currentDirtyPipeline = true
 			}
 			if (!this.gpuRenderInfo) this.initGPURenderInfos()
 			const currentUseDisplacementTexture = !!displacementTexture
 			if (this.useDisplacementTexture !== currentUseDisplacementTexture) {
 				this.useDisplacementTexture = currentUseDisplacementTexture
-				this.dirtyPipeline = true
+				currentDirtyPipeline = true
 			}
-			if (this.dirtyPipeline || dirtyVertexUniformFromMaterial[currentMaterialUUID]) {
+			if (currentDirtyPipeline || dirtyVertexUniformFromMaterial[currentMaterialUUID]) {
 				updateMeshDirtyPipeline(this, renderViewStateData)
 				this.#bundleEncoder = null
 				this.#renderBundle = null
 			}
+		} else {
+			renderViewStateData.num3DGroups++
 		}
 		if (currentGeometry && passFrustumCulling) {
+			const {gpuRenderInfo} = this
+			const {vertexUniformBuffer, vertexUniformInfo} = gpuRenderInfo
+			const {members: vertexUniformInfoMembers} = vertexUniformInfo
+			const {gpuBuffer: vertexUniformGPUBuffer} = vertexUniformBuffer
 			{
-				const {gpuRenderInfo} = this
-				const {vertexUniformBuffer, vertexUniformInfo} = gpuRenderInfo
-				const {members: vertexUniformInfoMembers} = vertexUniformInfo
 				if (vertexUniformInfoMembers.displacementScale !== undefined &&
 					vertexUniformInfoMembers.displacementScale !== displacementScale
 				) {
 					tempFloat32_1[0] = displacementScale
 					gpuDevice.queue.writeBuffer(
-						vertexUniformBuffer.gpuBuffer,
+						vertexUniformGPUBuffer,
 						vertexUniformInfoMembers.displacementScale.uniformOffset,
 						// new vertexUniformInfoMembers.displacementScale.View([displacementScale])
 						tempFloat32_1
 					);
 				}
 			}
-			const {gpuRenderInfo} = this
-			const {vertexUniformBuffer, vertexUniformInfo} = gpuRenderInfo
-			const {members: vertexUniformInfoMembers} = vertexUniformInfo
-			if (this.dirtyTransform) {
+
+			if (currentDirtyTransform) {
 				gpuDevice.queue.writeBuffer(
-					vertexUniformBuffer.gpuBuffer,
+					vertexUniformGPUBuffer,
 					vertexUniformInfoMembers.modelMatrix.uniformOffset,
 					(
 						//TODO - Sprite2D떄문에 처리했지만 이거 일반화해야함
@@ -838,29 +805,32 @@ class Mesh extends MeshBase {
 						) : this.modelMatrix
 					)
 				)
-				if (antialiasingManager.useTAA) {
-					if (!this.#prevModelMatrix) this.#prevModelMatrix = new Float32Array(16)
-					const prev = this.#prevModelMatrix
-					const current = this.modelMatrix
-					prev[0] = current[0]
-					prev[1] = current[1]
-					prev[2] = current[2]
-					prev[3] = current[3]
-					prev[4] = current[4]
-					prev[5] = current[5]
-					prev[6] = current[6]
-					prev[7] = current[7]
-					prev[8] = current[8]
-					prev[9] = current[9]
-					prev[10] = current[10]
-					prev[11] = current[11]
-					prev[12] = current[12]
-					prev[13] = current[13]
-					prev[14] = current[14]
-					prev[15] = current[15]
+				{
+					if (antialiasingManager.useTAA) {
+						if (this.#prevModelMatrix) {
+							if (vertexUniformInfoMembers.prevModelMatrix) {
+								redGPUContext.gpuDevice.queue.writeBuffer(
+									vertexUniformGPUBuffer,
+									vertexUniformInfoMembers.prevModelMatrix.uniformOffset,
+									this.#prevModelMatrix,
+								)
+							}
+						}
+						{
+							if (!this.#prevModelMatrix) this.#prevModelMatrix = new Float32Array(16)
+							const prev = this.#prevModelMatrix
+							const current = this.modelMatrix
+							prev[0] = current[0], prev[1] = current[1], prev[2] = current[2], prev[3] = current[3];
+							prev[4] = current[4], prev[5] = current[5], prev[6] = current[6], prev[7] = current[7];
+							prev[8] = current[8], prev[9] = current[9], prev[10] = current[10], prev[11] = current[11];
+							prev[12] = current[12], prev[13] = current[13], prev[14] = current[14], prev[15] = current[15];
+						}
+					} else {
+						this.#prevModelMatrix = null
+					}
 				}
 				{
-					if(this.#needUpdateNormal){
+					if (this.#needUpdateNormal && vertexUniformInfoMembers.normalModelMatrix) {
 						this.#needUpdateNormal = false
 						// calculate NormalMatrix
 						const m = this.modelMatrix;
@@ -868,28 +838,10 @@ class Mesh extends MeshBase {
 						const a00 = m[0], a01 = m[1], a02 = m[2];
 						const a10 = m[4], a11 = m[5], a12 = m[6];
 						const a20 = m[8], a21 = m[9], a22 = m[10];
-						const det =
-							a00 * (a11 * a22 - a12 * a21) -
-							a01 * (a10 * a22 - a12 * a20) +
-							a02 * (a10 * a21 - a11 * a20);
+						const det = a00 * (a11 * a22 - a12 * a21) - a01 * (a10 * a22 - a12 * a20) + a02 * (a10 * a21 - a11 * a20);
 						if (det === 0) {
 							// 역행렬 없음 → 단위 행렬로 대체
-							n[0] = 1;
-							n[1] = 0;
-							n[2] = 0;
-							n[3] = 0;
-							n[4] = 0;
-							n[5] = 1;
-							n[6] = 0;
-							n[7] = 0;
-							n[8] = 0;
-							n[9] = 0;
-							n[10] = 1;
-							n[11] = 0;
-							n[12] = 0;
-							n[13] = 0;
-							n[14] = 0;
-							n[15] = 1;
+							n[0] = 1, n[1] = 0, n[2] = 0, n[3] = 0, n[4] = 0, n[5] = 1, n[6] = 0, n[7] = 0, n[8] = 0, n[9] = 0, n[10] = 1, n[11] = 0, n[12] = 0, n[13] = 0, n[14] = 0, n[15] = 1;
 						} else {
 							const invDet = 1 / det;
 							// 역행렬의 전치 (transpose of inverse)
@@ -906,14 +858,11 @@ class Mesh extends MeshBase {
 							n[10] = (a00 * a11 - a01 * a10) * invDet;
 							n[11] = 0;
 							// 하단 행은 단위 행렬처럼 설정
-							n[12] = 0;
-							n[13] = 0;
-							n[14] = 0;
-							n[15] = 1;
+							n[12] = 0, n[13] = 0, n[14] = 0, n[15] = 1;
 						}
 					}
 					gpuDevice.queue.writeBuffer(
-						vertexUniformBuffer.gpuBuffer,
+						vertexUniformGPUBuffer,
 						vertexUniformInfoMembers.normalModelMatrix.uniformOffset,
 						// new vertexUniformInfoMembers.normalModelMatrix.View(this.normalModelMatrix),
 						this.normalModelMatrix as Float32Array
@@ -921,7 +870,7 @@ class Mesh extends MeshBase {
 				}
 				if (vertexUniformInfoMembers.localMatrix) {
 					gpuDevice.queue.writeBuffer(
-						vertexUniformBuffer.gpuBuffer,
+						vertexUniformGPUBuffer,
 						vertexUniformInfoMembers.localMatrix.uniformOffset,
 						// new vertexUniformInfoMembers.localMatrix.View(this.localMatrix),
 						this.localMatrix as Float32Array
@@ -935,7 +884,7 @@ class Mesh extends MeshBase {
 				if (vertexUniformInfoMembers.combinedOpacity) {
 					tempFloat32_1[0] = this.getCombinedOpacity()
 					gpuDevice.queue.writeBuffer(
-						vertexUniformBuffer.gpuBuffer,
+						vertexUniformGPUBuffer,
 						vertexUniformInfoMembers.combinedOpacity.uniformOffset,
 						// new vertexUniformInfoMembers.combinedOpacity.View([this.getCombinedOpacity()])
 						tempFloat32_1
@@ -944,18 +893,18 @@ class Mesh extends MeshBase {
 				this.dirtyOpacity = false
 			}
 			const {
-				render2PathLayer,
-				particleLayer,
-				transparentLayer,
-				alphaLayer,
-				renderBundleList
+				bundleListRender2PathLayer,
+				bundleListParticleLayer,
+				bundleListTransparentLayer,
+				bundleListAlphaLayer,
+				bundleListBasicList
 			} = renderViewStateData
 			{
 				{
 					const {fragmentUniformBindGroup} = currentMaterial.gpuRenderInfo
 					if (
 						!this.#bundleEncoder
-						|| this.dirtyPipeline
+						|| currentDirtyPipeline
 						|| this.#prevFragmentBindGroup !== fragmentUniformBindGroup
 						|| this.#prevSystemBindGroupList[renderViewStateData.viewIndex] !== view.systemUniform_Vertex_UniformBindGroup
 					) {
@@ -974,18 +923,19 @@ class Mesh extends MeshBase {
 						renderViewStateData.numTriangles += triangleCount;
 						renderViewStateData.numPoints += vertexCount
 					}
+					const renderBundle = this.#renderBundle
 					if (currentMaterial.use2PathRender) {
-						render2PathLayer[render2PathLayer.length] = this.#renderBundle
+						bundleListRender2PathLayer[bundleListRender2PathLayer.length] = renderBundle
 					} else if (this.meshType === MESH_TYPE.PARTICLE) {
-						particleLayer[particleLayer.length] = this.#renderBundle
+						bundleListParticleLayer[bundleListParticleLayer.length] = renderBundle
 					} else if (currentMaterial.transparent) {
-						transparentLayer[transparentLayer.length] = this.#renderBundle
+						bundleListTransparentLayer[bundleListTransparentLayer.length] = renderBundle
 						// @ts-ignore
-						this.#renderBundle.mesh = this
+						renderBundle.mesh = this
 					} else if (currentMaterial.alphaBlend === 2 || currentMaterial.opacity < 1 || !this.depthStencilState.depthWriteEnabled) {
-						alphaLayer[alphaLayer.length] = this.#renderBundle
+						bundleListAlphaLayer[bundleListAlphaLayer.length] = renderBundle
 					} else {
-						renderBundleList[renderBundleList.length] = this.#renderBundle
+						bundleListBasicList[bundleListBasicList.length] = renderBundle
 					}
 				}
 			}
@@ -1022,7 +972,7 @@ class Mesh extends MeshBase {
 		const {fragmentUniformBindGroup} = this._material.gpuRenderInfo
 		// keepLog(`🎬 렌더 번들 갱신 이유: ${this.name}`, {
 		// 	noBundleEncoder: !this.#bundleEncoder,
-		// 	dirtyPipeline: this.dirtyPipeline,
+		// 	dirtyPipeline: currentDirtyPipeline,
 		// 	fragmentBindGroupChanged: this.#prevFragmentBindGroup !== fragmentUniformBindGroup,
 		// 	systemBindGroupChanged: this.#prevSystemBindGroup !== view.systemUniform_Vertex_UniformBindGroup
 		// })

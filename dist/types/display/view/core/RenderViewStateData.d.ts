@@ -68,19 +68,19 @@ declare class RenderViewStateData {
     /** 머티리얼로부터 변경된 버텍스 유니폼의 맵 */
     dirtyVertexUniformFromMaterial: {};
     /** 알파 렌더링 레이어의 객체 배열 */
-    alphaLayer: any[];
+    bundleListAlphaLayer: any[];
     /** 투명 렌더링 레이어의 객체 배열 */
-    transparentLayer: any[];
+    bundleListTransparentLayer: any[];
     /** 파티클 렌더링 레이어의 객체 배열 */
-    particleLayer: any[];
+    bundleListParticleLayer: any[];
     /** 2D 패스 렌더링 레이어의 객체 배열 */
-    render2PathLayer: any[];
+    bundleListRender2PathLayer: any[];
     /** 처리할 스킨 메시 목록 */
     skinList: any[];
     /** 처리할 애니메이션 목록 */
     animationList: any[];
     /** 효율적인 렌더링을 위한 렌더 번들 목록 */
-    renderBundleList: any[];
+    bundleListBasicList: any[];
     /** 렌더링 시작을 표시하는 성능 타임스탬프 */
     startTime: number;
     /** 씬이 2D 모드인지 여부 */

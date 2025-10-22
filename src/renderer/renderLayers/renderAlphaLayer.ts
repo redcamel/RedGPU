@@ -5,18 +5,18 @@ const renderAlphaLayer = (view: View3D, viewRenderPassEncoder: GPURenderPassEnco
 	const {renderViewStateData, rawCamera,} = view
 	renderViewStateData.currentRenderPassEncoder = viewRenderPassEncoder
 	// renderAlphaLayer
-	const {alphaLayer, transparentLayer, particleLayer} = renderViewStateData
-	if(alphaLayer.length) {
-		viewRenderPassEncoder.executeBundles(alphaLayer);
+	const {bundleListAlphaLayer, bundleListTransparentLayer, bundleListParticleLayer} = renderViewStateData
+	if(bundleListAlphaLayer.length) {
+		viewRenderPassEncoder.executeBundles(bundleListAlphaLayer);
 	}
 	// renderTransparentLayer
 	const {x, y, z} = rawCamera
-	if(transparentLayer.length) {
-		viewRenderPassEncoder.executeBundles(sortTransparentObjects({x, y, z}, transparentLayer))
+	if(bundleListTransparentLayer.length) {
+		viewRenderPassEncoder.executeBundles(sortTransparentObjects({x, y, z}, bundleListTransparentLayer))
 	}
 	// particleLayer
-	if(particleLayer.length) {
-		viewRenderPassEncoder.executeBundles(particleLayer);
+	if(bundleListParticleLayer.length) {
+		viewRenderPassEncoder.executeBundles(bundleListParticleLayer);
 	}
 }
 export default renderAlphaLayer
