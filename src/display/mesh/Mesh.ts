@@ -806,7 +806,7 @@ class Mesh extends MeshBase {
 					)
 				)
 				{
-					if (antialiasingManager.useTAA) {
+					if (antialiasingManager.useTAA && currentDirtyTransform) {
 						if (this.#prevModelMatrix) {
 							if (vertexUniformInfoMembers.prevModelMatrix) {
 								redGPUContext.gpuDevice.queue.writeBuffer(
