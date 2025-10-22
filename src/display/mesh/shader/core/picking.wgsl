@@ -2,7 +2,7 @@
 fn picking(inputData: InputData) -> OutputData {
     var output: OutputData;
     let input_position = inputData.position;
-    let u_modelMatrix = vertexUniforms.modelMatrix;
+    let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
     let u_projectionMatrix = systemUniforms.projectionMatrix;
     let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
     let u_camera = systemUniforms.camera;

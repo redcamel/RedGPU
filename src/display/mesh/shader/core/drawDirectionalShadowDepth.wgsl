@@ -13,7 +13,7 @@ fn drawDirectionalShadowDepth(inputData: InputData) -> OutputShadowData {
     let u_cameraPosition = u_camera.cameraPosition;
 
     // Vertex별 Uniform 변수 가져오기
-    let u_modelMatrix = vertexUniforms.modelMatrix;
+    let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
 
     // 입력 데이터
     let input_position = inputData.position;

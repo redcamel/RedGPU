@@ -776,6 +776,7 @@ class Mesh extends MeshBase {
 			const {members: vertexUniformInfoMatrixListMembers} = vertexUniformInfoMembers.matrixList
 			const {gpuBuffer: vertexUniformGPUBuffer} = vertexUniformBuffer
 			if(!this.#matrixData){
+
 				this.#matrixData = new Float32Array(vertexUniformInfoMembers.matrixList.endOffset / Float32Array.BYTES_PER_ELEMENT)
 			}
 			{
@@ -813,13 +814,13 @@ class Mesh extends MeshBase {
 					// 	vertexUniformInfoMatrixListMembers.modelMatrix.uniformOffset,
 					// 	modelMatrix
 					// )
-					this.#matrixData.set(modelMatrix,vertexUniformInfoMatrixListMembers.modelMatrix.uniformOffset / Float32Array.BYTES_PER_ELEMENT)
+					this.#matrixData.set(modelMatrix,vertexUniformInfoMatrixListMembers.modelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
 
 				}
 				{
 					if (antialiasingManager.useTAA && currentDirtyTransform) {
-						if (this.#prevModelMatrix) {
-							this.#matrixData.set(this.#prevModelMatrix,vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffset / Float32Array.BYTES_PER_ELEMENT)
+						if (this.#prevModelMatrix && vertexUniformInfoMatrixListMembers.prevModelMatrix) {
+							this.#matrixData.set(this.#prevModelMatrix,vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
 							// if (vertexUniformInfoMatrixListMembers.prevModelMatrix) {
 							// 	redGPUContext.gpuDevice.queue.writeBuffer(
 							// 		vertexUniformGPUBuffer,
@@ -841,6 +842,7 @@ class Mesh extends MeshBase {
 						this.#prevModelMatrix = null
 					}
 				}
+
 				{
 					if (this.#needUpdateNormal && vertexUniformInfoMatrixListMembers.normalModelMatrix) {
 						this.#needUpdateNormal = false
@@ -879,7 +881,7 @@ class Mesh extends MeshBase {
 					// 	// new vertexUniformInfoMatrixListMembers.normalModelMatrix.View(this.normalModelMatrix),
 					// 	this.normalModelMatrix as Float32Array
 					// )
-					this.#matrixData.set(this.normalModelMatrix,vertexUniformInfoMatrixListMembers.normalModelMatrix.uniformOffset / Float32Array.BYTES_PER_ELEMENT)
+					this.#matrixData.set(this.normalModelMatrix,vertexUniformInfoMatrixListMembers.normalModelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
 
 				}
 				if (vertexUniformInfoMatrixListMembers.localMatrix) {
@@ -889,7 +891,7 @@ class Mesh extends MeshBase {
 					// 	// new vertexUniformInfoMatrixListMembers.localMatrix.View(this.localMatrix),
 					// 	this.localMatrix as Float32Array
 					// )
-					this.#matrixData.set(this.localMatrix,vertexUniformInfoMatrixListMembers.localMatrix.uniformOffset / Float32Array.BYTES_PER_ELEMENT)
+					this.#matrixData.set(this.localMatrix,vertexUniformInfoMatrixListMembers.localMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
 
 				}
 				dirtyTransformForChildren = true
