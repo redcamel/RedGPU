@@ -8,6 +8,7 @@ import PassClusterLightBound from "../../light/clusterLight/PassClusterLightBoun
 import PassClustersLight from "../../light/clusterLight/PassClustersLight";
 import PassClustersLightHelper from "../../light/clusterLight/PassClustersLightHelper";
 import PostEffectManager from "../../postEffect/PostEffectManager";
+import {keepLog} from "../../utils";
 import RenderViewStateData from "./core/RenderViewStateData";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
@@ -28,6 +29,7 @@ const SHADER_INFO = parseWGSL(SystemCode.SYSTEM_UNIFORM)
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.systemUniforms;
 let temp = mat4.create()
 let temp2 = mat4.create()
+
 /**
  * 3D 렌더링 뷰 클래스입니다. AView를 확장하여 3D 장면 렌더링 기능을 제공합니다.
  *
@@ -150,6 +152,7 @@ class View3D extends AView {
 	 * @private
 	 */
 	#prevIBL_irradianceTexture: IBLCubeTexture
+	#uniformDataCamera: Float32Array
 
 	/**
 	 * View3D 인스턴스를 생성합니다.
@@ -166,6 +169,7 @@ class View3D extends AView {
 		this.#viewRenderTextureManager = new ViewRenderTextureManager(this)
 		this.#renderViewStateData = new RenderViewStateData(this)
 		this.#postEffectManager = new PostEffectManager(this)
+		this.#uniformDataCamera = new Float32Array(this.systemUniform_Vertex_StructInfo.members.camera.endOffset / Float32Array.BYTES_PER_ELEMENT)
 	}
 
 	/**
@@ -273,11 +277,10 @@ class View3D extends AView {
 	 * @param renderPath1ResultTextureView - 렌더 패스 1 결과 텍스처 뷰 (선택사항)
 	 */
 	update(shadowRender: boolean = false, calcPointLightCluster: boolean = false, renderPath1ResultTextureView?: GPUTextureView) {
-		const {scene,redGPUContext} = this
+		const {scene, redGPUContext} = this
 		const {shadowManager, lightManager} = scene
 		lightManager.updateViewSystemUniforms(this)
 		shadowManager.updateViewSystemUniforms(redGPUContext)
-
 		const {directionalShadowManager} = shadowManager
 		const ibl = this.ibl
 		const ibl_iblTexture = ibl?.iblTexture?.gpuTexture
@@ -285,7 +288,6 @@ class View3D extends AView {
 		let shadowDepthTextureView = shadowRender ? directionalShadowManager.shadowDepthTextureViewEmpty : directionalShadowManager.shadowDepthTextureView
 		const index = this.redGPUContext.viewList.indexOf(this)
 		const key = `${index}_${shadowRender ? 'shadowRender' : 'basic'}_2path${!!renderPath1ResultTextureView}`
-
 		if (index > -1) {
 			let needResetBindGroup = true
 			let prevInfo = this.#prevInfoList[key]
@@ -301,17 +303,7 @@ class View3D extends AView {
 			}
 			if (needResetBindGroup) this.#createVertexUniformBindGroup(key, shadowDepthTextureView, this.ibl, renderPath1ResultTextureView)
 			else this.#systemUniform_Vertex_UniformBindGroup = this.#prevInfoList[key].vertexUniformBindGroup;
-			[
-				{key: 'useIblTexture', value: [ibl_iblTexture ? 1 : 0]},
-				{key: 'time', value: [this.renderViewStateData.timestamp || 0]},
-				{key: 'isView3D', value: [this.constructor === View3D ? 1 : 0]},
-			].forEach(({key, value}) => {
-				this.redGPUContext.gpuDevice.queue.writeBuffer(
-					this.#systemUniform_Vertex_UniformBuffer.gpuBuffer,
-					this.#systemUniform_Vertex_StructInfo.members[key].uniformOffset,
-					new this.#systemUniform_Vertex_StructInfo.members[key].View(value)
-				);
-			});
+
 			this.#prevInfoList[key] = {
 				ibl,
 				ibl_iblTexture,
@@ -324,7 +316,8 @@ class View3D extends AView {
 		this.#updateClusters(calcPointLightCluster);
 		this.#updateSystemUniform();
 	}
-	#updateSystemUniform(){
+
+	#updateSystemUniform() {
 		// 시스템 유니폼 업데이트
 		const {
 			inverseProjectionMatrix,
@@ -337,34 +330,61 @@ class View3D extends AView {
 		const structInfo = this.systemUniform_Vertex_StructInfo;
 		const gpuBuffer = this.systemUniform_Vertex_UniformBuffer.gpuBuffer;
 		const camera2DYn = rawCamera instanceof Camera2D;
-		[
-			{key: 'projectionMatrix', value: projectionMatrix},
-			{key: 'projectionCameraMatrix', value: mat4.multiply(temp, projectionMatrix, cameraMatrix)},
-			{key: 'noneJitterProjectionMatrix', value: noneJitterProjectionMatrix},
-			{key: 'noneJitterProjectionCameraMatrix', value: mat4.multiply(temp2, noneJitterProjectionMatrix, cameraMatrix)},
-			{key: 'inverseProjectionMatrix', value: inverseProjectionMatrix},
-			{key: 'resolution', value: [this.pixelRectObject.width, this.pixelRectObject.height]},
-		].forEach(({key, value}) => {
-			gpuDevice.queue.writeBuffer(
-				gpuBuffer,
-				structInfo.members[key].uniformOffset,
-				new structInfo.members[key].View(value)
-			);
-		});
-		// 카메라 시스템 유니폼 업데이트
-		[
-			{key: 'cameraMatrix', value: cameraMatrix},
-			{key: 'cameraPosition', value: cameraPosition},
-			{key: 'nearClipping', value: [camera2DYn ? 0 : rawCamera.nearClipping]},
-			{key: 'farClipping', value: [camera2DYn ? 0 : rawCamera.farClipping]},
-		].forEach(({key, value}) => {
-			gpuDevice.queue.writeBuffer(
-				gpuBuffer,
-				structInfo.members.camera.members[key].uniformOffset,
-				new structInfo.members.camera.members[key].View(value)
-			);
-		})
+		{
+			[
+				{key: 'projectionMatrix', value: projectionMatrix},
+				{key: 'projectionCameraMatrix', value: mat4.multiply(temp, projectionMatrix, cameraMatrix)},
+				{key: 'noneJitterProjectionMatrix', value: noneJitterProjectionMatrix},
+				{key: 'noneJitterProjectionCameraMatrix', value: mat4.multiply(temp2, noneJitterProjectionMatrix, cameraMatrix)},
+				{key: 'inverseProjectionMatrix', value: inverseProjectionMatrix},
+				{key: 'resolution', value: [this.pixelRectObject.width, this.pixelRectObject.height]},
+			].forEach(({key, value}) => {
+				gpuDevice.queue.writeBuffer(
+					gpuBuffer,
+					structInfo.members[key].uniformOffset,
+					new structInfo.members[key].View(value)
+				);
+			});
+
+		}
+		{
+			// 카메라 시스템 유니폼 업데이트
+			// [
+			// 	{key: 'cameraMatrix', value: cameraMatrix},
+			// 	{key: 'cameraPosition', value: cameraPosition},
+			// 	{key: 'nearClipping', value: [camera2DYn ? 0 : rawCamera.nearClipping]},
+			// 	{key: 'farClipping', value: [camera2DYn ? 0 : rawCamera.farClipping]},
+			// ].forEach(({key, value}) => {
+			// 	gpuDevice.queue.writeBuffer(
+			// 		gpuBuffer,
+			// 		structInfo.members.camera.members[key].uniformOffset,
+			// 		new structInfo.members.camera.members[key].View(value)
+			// 	);
+			// })
+			keepLog(structInfo)
+			const camera = structInfo.members.camera
+			const cameraMembers = camera.members
+			this.#uniformDataCamera.set(cameraMatrix,cameraMembers.cameraMatrix.uniformOffsetForData/Float32Array.BYTES_PER_ELEMENT)
+			this.#uniformDataCamera.set(cameraPosition,cameraMembers.cameraPosition.uniformOffsetForData/Float32Array.BYTES_PER_ELEMENT)
+			this.#uniformDataCamera.set([camera2DYn ? 0 : rawCamera.nearClipping],cameraMembers.nearClipping.uniformOffsetForData/Float32Array.BYTES_PER_ELEMENT)
+			this.#uniformDataCamera.set([camera2DYn ? 0 : rawCamera.farClipping],cameraMembers.farClipping.uniformOffsetForData/Float32Array.BYTES_PER_ELEMENT)
+			gpuDevice.queue.writeBuffer(gpuBuffer, camera.startOffset, this.#uniformDataCamera);
+		}
+		{
+			[
+				{key: 'useIblTexture', value: [ this.ibl?.iblTexture?.gpuTexture ? 1 : 0]},
+				{key: 'time', value: [this.renderViewStateData.timestamp || 0]},
+				{key: 'isView3D', value: [this.constructor === View3D ? 1 : 0]},
+			].forEach(({key, value}) => {
+				this.redGPUContext.gpuDevice.queue.writeBuffer(
+					this.#systemUniform_Vertex_UniformBuffer.gpuBuffer,
+					this.#systemUniform_Vertex_StructInfo.members[key].uniformOffset,
+					new this.#systemUniform_Vertex_StructInfo.members[key].View(value)
+				);
+			});
+		}
 	}
+
 	/**
 	 * 정점 유니폼 바인드 그룹을 생성합니다.
 	 * 시스템 유니폼, 샘플러, 텍스처 등의 리소스를 바인딩합니다.
