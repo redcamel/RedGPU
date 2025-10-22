@@ -129,6 +129,8 @@ class Mesh extends MeshBase {
 	#drawCommandSlot: DrawCommandSlot | null = null
 	#drawBufferManager: DrawBufferManager | null = null
 
+	#needUpdateNormal:boolean=true
+
 	/**
 	 * Mesh 인스턴스를 생성합니다.
 	 * @param redGPUContext RedGPU 컨텍스트
@@ -536,6 +538,7 @@ class Mesh extends MeshBase {
 		}
 		if (this.dirtyTransform) {
 			dirtyTransformForChildren = true
+			this.#needUpdateNormal = true
 			{
 				const {pixelRectObject} = view
 				const parent = this.parent
@@ -857,7 +860,8 @@ class Mesh extends MeshBase {
 					prev[15] = current[15]
 				}
 				{
-					{
+					if(this.#needUpdateNormal){
+						this.#needUpdateNormal = false
 						// calculate NormalMatrix
 						const m = this.modelMatrix;
 						const n = this.normalModelMatrix;
