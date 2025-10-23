@@ -3,7 +3,7 @@ import PICKING_EVENT_TYPE from "./PICKING_EVENT_TYPE";
 import PickingManager from "./PickingManager";
 
 export {
-	PICKING_EVENT_TYPE,
-	PickingEvent,
-	PickingManager
+    PICKING_EVENT_TYPE,
+    PickingEvent,
+    PickingManager
 }

@@ -14,13 +14,13 @@ import validateRedGPUContext from "./validateFunc/validateRedGPUContext";
 import validateUintRange from "./validateFunc/validateUintRange";
 
 export {
-	isHexColor,
-	isUint
+    isHexColor,
+    isUint
 }
 export {
-	validateRedGPUContext,
-	validateNumber,
-	validateNumberRange,
-	validatePositiveNumberRange,
-	validateUintRange
+    validateRedGPUContext,
+    validateNumber,
+    validateNumberRange,
+    validatePositiveNumberRange,
+    validateUintRange
 }

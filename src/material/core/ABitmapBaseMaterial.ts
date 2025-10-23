@@ -12,66 +12,66 @@ import ABaseMaterial from "./ABaseMaterial";
  * @extends ABaseMaterial
  */
 abstract class ABitmapBaseMaterial extends ABaseMaterial {
-	/**
-	 * 파이프라인 갱신 시 호출되는 콜백 리스트
-	 */
-	__packingList: any[]
+    /**
+     * 파이프라인 갱신 시 호출되는 콜백 리스트
+     */
+    __packingList: any[]
 
-	/**
-	 * ABitmapBaseMaterial 생성자
-	 * @param redGPUContext - RedGPUContext 인스턴스
-	 * @param moduleName - 머티리얼 모듈명
-	 * @param SHADER_INFO - 파싱된 WGSL 셰이더 정보
-	 * @param targetGroupIndex - 바인드 그룹 인덱스
-	 */
-	constructor(
-		redGPUContext: RedGPUContext,
-		moduleName: string,
-		SHADER_INFO: any,
-		targetGroupIndex: number
-	) {
-		super(redGPUContext, moduleName, SHADER_INFO, targetGroupIndex)
-	}
+    /**
+     * ABitmapBaseMaterial 생성자
+     * @param redGPUContext - RedGPUContext 인스턴스
+     * @param moduleName - 머티리얼 모듈명
+     * @param SHADER_INFO - 파싱된 WGSL 셰이더 정보
+     * @param targetGroupIndex - 바인드 그룹 인덱스
+     */
+    constructor(
+        redGPUContext: RedGPUContext,
+        moduleName: string,
+        SHADER_INFO: any,
+        targetGroupIndex: number
+    ) {
+        super(redGPUContext, moduleName, SHADER_INFO, targetGroupIndex)
+    }
 
-	/**
-	 * 텍스처 객체 변경 및 DirtyPipeline 리스너 관리
-	 * @param prevTexture - 이전 텍스처(BitmapTexture|CubeTexture|ANoiseTexture)
-	 * @param texture - 새 텍스처(BitmapTexture|CubeTexture|ANoiseTexture)
-	 */
-	updateTexture(prevTexture: BitmapTexture | CubeTexture | ANoiseTexture, texture: BitmapTexture | CubeTexture | ANoiseTexture) {
-		if (prevTexture) prevTexture.__removeDirtyPipelineListener(this.#updateFragmentState);
-		if (texture) texture.__addDirtyPipelineListener(this.#updateFragmentState);
-		this.#updateFragmentState()
-	}
+    /**
+     * 텍스처 객체 변경 및 DirtyPipeline 리스너 관리
+     * @param prevTexture - 이전 텍스처(BitmapTexture|CubeTexture|ANoiseTexture)
+     * @param texture - 새 텍스처(BitmapTexture|CubeTexture|ANoiseTexture)
+     */
+    updateTexture(prevTexture: BitmapTexture | CubeTexture | ANoiseTexture, texture: BitmapTexture | CubeTexture | ANoiseTexture) {
+        if (prevTexture) prevTexture.__removeDirtyPipelineListener(this.#updateFragmentState);
+        if (texture) texture.__addDirtyPipelineListener(this.#updateFragmentState);
+        this.#updateFragmentState()
+    }
 
-	/**
-	 * 샘플러 객체 변경 및 DirtyPipeline 리스너 관리
-	 * @param prevSampler - 이전 샘플러
-	 * @param newSampler - 새 샘플러
-	 */
-	updateSampler(prevSampler: Sampler, newSampler: Sampler) {
-		if (prevSampler) prevSampler.__removeDirtyPipelineListener(this.#updateFragmentState);
-		if (newSampler) newSampler.__addDirtyPipelineListener(this.#updateFragmentState);
-		this.#updateFragmentState()
-	}
+    /**
+     * 샘플러 객체 변경 및 DirtyPipeline 리스너 관리
+     * @param prevSampler - 이전 샘플러
+     * @param newSampler - 새 샘플러
+     */
+    updateSampler(prevSampler: Sampler, newSampler: Sampler) {
+        if (prevSampler) prevSampler.__removeDirtyPipelineListener(this.#updateFragmentState);
+        if (newSampler) newSampler.__addDirtyPipelineListener(this.#updateFragmentState);
+        this.#updateFragmentState()
+    }
 
-	/**
-	 * 파이프라인 갱신 및 fragmentState/유니폼 갱신
-	 * 내부적으로 packingList 콜백 실행, fragmentShaderModule 유무에 따라 _updateFragmentState 또는 initGPURenderInfos 호출
-	 * @private
-	 */
-	#updateFragmentState = () => {
-		this.dirtyPipeline = true;
-		// console.log('this.__packingList',this.__packingList)
-		{
-			let i = (this.__packingList || []).length
-			while (i--) {
-				this.__packingList[i]()
-			}
-		}
-		if (this.gpuRenderInfo?.fragmentShaderModule) this._updateFragmentState()
-		else this.initGPURenderInfos();
-	}
+    /**
+     * 파이프라인 갱신 및 fragmentState/유니폼 갱신
+     * 내부적으로 packingList 콜백 실행, fragmentShaderModule 유무에 따라 _updateFragmentState 또는 initGPURenderInfos 호출
+     * @private
+     */
+    #updateFragmentState = () => {
+        this.dirtyPipeline = true;
+        // console.log('this.__packingList',this.__packingList)
+        {
+            let i = (this.__packingList || []).length
+            while (i--) {
+                this.__packingList[i]()
+            }
+        }
+        if (this.gpuRenderInfo?.fragmentShaderModule) this._updateFragmentState()
+        else this.initGPURenderInfos();
+    }
 }
 
 Object.freeze(ABitmapBaseMaterial)

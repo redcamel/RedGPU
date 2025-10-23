@@ -70,6 +70,7 @@ class RedGPUContextDetector {
     }
 
     /* -------------------------------------------------------------------------- */
+
     /* 내부 유틸리티 메서드 */
 
     /**
@@ -89,8 +90,8 @@ class RedGPUContextDetector {
      * @param {GPUAdapter} gpuAdapter - 현재 사용중인 GPU Adapter 객체. */
     #parseAdapter(gpuAdapter: GPUAdapter) {
         if (gpuAdapter) {
-            const { limits, info } = gpuAdapter;
-            const { isFallbackAdapter } = info;
+            const {limits, info} = gpuAdapter;
+            const {isFallbackAdapter} = info;
 
             this.#adapterInfo = info;
             this.#isFallbackAdapter = isFallbackAdapter;

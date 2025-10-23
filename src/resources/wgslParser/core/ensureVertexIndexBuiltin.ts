@@ -14,7 +14,7 @@ function ensureVertexIndexBuiltin(shaderSource: string): string {
 
     const define = 'redgpu_auto_builtin_vertex_index: u32';
 
-    const result =  shaderSource.replace(
+    const result = shaderSource.replace(
         vertexFnRegex,
         (_, prefix, fnName, args, suffix) => {
             const trimmedArgs = args.trim();

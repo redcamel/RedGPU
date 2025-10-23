@@ -16,13 +16,13 @@ import {GLTF} from "../GLTF";
  * @throws {Error} - If the asset version is invalid or lower than the required version.
  */
 const parseAssetVersion = (gltfData: GLTF) => {
-	const requiredAssetVersion = 2;
-	const asset = gltfData?.asset;
-	if (!asset) consoleAndThrowError('GLTFLoader - asset must be defined');
-	if (!asset.version) consoleAndThrowError('GLTFLoader - asset version must be defined');
-	const versionNumber = parseFloat(asset.version);
-	if (isNaN(versionNumber)) consoleAndThrowError('GLTFLoader - asset version must be a numerical value');
-	if (versionNumber < requiredAssetVersion) consoleAndThrowError('GLTFLoader - asset version must be 2.0 or higher');
-	return versionNumber;
+    const requiredAssetVersion = 2;
+    const asset = gltfData?.asset;
+    if (!asset) consoleAndThrowError('GLTFLoader - asset must be defined');
+    if (!asset.version) consoleAndThrowError('GLTFLoader - asset version must be defined');
+    const versionNumber = parseFloat(asset.version);
+    if (isNaN(versionNumber)) consoleAndThrowError('GLTFLoader - asset version must be a numerical value');
+    if (versionNumber < requiredAssetVersion) consoleAndThrowError('GLTFLoader - asset version must be 2.0 or higher');
+    return versionNumber;
 }
 export default parseAssetVersion
