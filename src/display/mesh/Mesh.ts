@@ -131,6 +131,7 @@ class Mesh extends MeshBase {
 	#needUpdateNormal: boolean = true
 
 	#uniformDataMatrixList:Float32Array
+    #displacementScale:number
 	/**
 	 * Mesh 인스턴스를 생성합니다.
 	 * @param redGPUContext RedGPU 컨텍스트
@@ -750,6 +751,7 @@ class Mesh extends MeshBase {
 		if (currentDirtyPipeline || currentMaterial?.dirtyPipeline || dirtyVertexUniformFromMaterial[currentMaterialUUID]) {
 			dirtyVertexUniformFromMaterial[currentMaterialUUID] = true
 		}
+        keepLog(this.gpuRenderInfo?.vertexStructInfo)
 		if (currentGeometry) {
 			renderViewStateData.num3DObjects++
 			if (antialiasingManager.changedMSAA) {
@@ -757,11 +759,12 @@ class Mesh extends MeshBase {
 			}
 			if (!this.gpuRenderInfo) this.initGPURenderInfos()
 			const currentUseDisplacementTexture = !!displacementTexture
-			if (this.useDisplacementTexture !== currentUseDisplacementTexture) {
+          	if (this.useDisplacementTexture !== currentUseDisplacementTexture) {
 				this.useDisplacementTexture = currentUseDisplacementTexture
 				currentDirtyPipeline = true
 			}
-			if (currentDirtyPipeline || dirtyVertexUniformFromMaterial[currentMaterialUUID]) {
+
+            if (currentDirtyPipeline || dirtyVertexUniformFromMaterial[currentMaterialUUID]) {
 				updateMeshDirtyPipeline(this, renderViewStateData)
 				this.#bundleEncoder = null
 				this.#renderBundle = null
@@ -781,8 +784,10 @@ class Mesh extends MeshBase {
 			}
 			{
 				if (vertexUniformInfoMembers.displacementScale !== undefined &&
-					vertexUniformInfoMembers.displacementScale !== displacementScale
+					this.#displacementScale !== displacementScale
 				) {
+                    this.#displacementScale = displacementScale
+                    // keepLog('실행을 하나보네',displacementScale)
 					tempFloat32_1[0] = displacementScale
 					gpuDevice.queue.writeBuffer(
 						vertexUniformGPUBuffer,
