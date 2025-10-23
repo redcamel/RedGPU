@@ -128,7 +128,8 @@ class Mesh extends MeshBase {
     #prevFragmentBindGroup: GPUBindGroup
     #drawCommandSlot: DrawCommandSlot | null = null
     #drawBufferManager: DrawBufferManager | null = null
-    #needUpdateNormal: boolean = true
+    #needUpdateUniformNormal: boolean = true
+    #needUpdateUniform: boolean = true
 
     #uniformDataMatrixList: Float32Array
     #displacementScale: number
@@ -517,7 +518,6 @@ class Mesh extends MeshBase {
         let dirtyTransformForChildren
         let dirtyOpacityForChildren
         let currentDirtyPipeline = this.dirtyPipeline
-        const currentDirtyTransform = this.dirtyTransform
         const {skinInfo} = this.animationInfo
         if (isScene2DMode) {
             this.#z = 0
@@ -526,9 +526,10 @@ class Mesh extends MeshBase {
                 this.depthStencilState.depthWriteEnabled = false
             }
         }
-        if (currentDirtyTransform) {
+        if (this.dirtyTransform) {
             dirtyTransformForChildren = true
-            this.#needUpdateNormal = true
+            this.#needUpdateUniformNormal = true
+            this.#needUpdateUniform = true
             {
                 const {pixelRectObject} = view
                 const parent = this.parent
@@ -687,6 +688,8 @@ class Mesh extends MeshBase {
                     }
                 }
             }
+            if (!currentGeometry) this.#needUpdateUniform = false
+            this.dirtyTransform = false
         }
         // check distanceCulling
         let passFrustumCulling = true
@@ -799,7 +802,7 @@ class Mesh extends MeshBase {
                 }
             }
 
-            if (currentDirtyTransform) {
+            if (this.#needUpdateUniform) {
                 {
                     const modelMatrix = (
                         //TODO - Sprite2D떄문에 처리했지만 이거 일반화해야함
@@ -824,7 +827,7 @@ class Mesh extends MeshBase {
 
                 }
                 {
-                    if (antialiasingManager.useTAA && currentDirtyTransform) {
+                    if (antialiasingManager.useTAA && this.#needUpdateUniform) {
                         if (this.#prevModelMatrix && vertexUniformInfoMatrixListMembers.prevModelMatrix) {
                             this.#uniformDataMatrixList.set(this.#prevModelMatrix, vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
                             // if (vertexUniformInfoMatrixListMembers.prevModelMatrix) {
@@ -850,8 +853,8 @@ class Mesh extends MeshBase {
                 }
 
                 {
-                    if (this.#needUpdateNormal && vertexUniformInfoMatrixListMembers.normalModelMatrix) {
-                        this.#needUpdateNormal = false
+                    if (this.#needUpdateUniformNormal && vertexUniformInfoMatrixListMembers.normalModelMatrix) {
+                        this.#needUpdateUniformNormal = false
                         // calculate NormalMatrix
                         const m = this.modelMatrix;
                         const n = this.normalModelMatrix;
@@ -901,13 +904,13 @@ class Mesh extends MeshBase {
 
                 }
                 dirtyTransformForChildren = true
-                this.dirtyTransform = false
+                this.#needUpdateUniform = false
+                // keepLog('진짜 버퍼업로드', this.dirtyTransform)
                 gpuDevice.queue.writeBuffer(
                     vertexUniformGPUBuffer,
                     vertexUniformInfoMembers.matrixList.startOffset,
                     this.#uniformDataMatrixList
                 )
-
             }
             if (this.dirtyOpacity) {
                 dirtyOpacityForChildren = true
@@ -985,6 +988,7 @@ class Mesh extends MeshBase {
         let i = 0
         const childNum = children.length
         // while (i--) {
+        this.dirtyTransform = false
         for (; i < childNum; i++) {
             const child = children[i]
             if (dirtyTransformForChildren) child.dirtyTransform = dirtyTransformForChildren
@@ -1055,7 +1059,7 @@ class Mesh extends MeshBase {
             // @ts-ignore
             this.#renderBundle.mesh = null
         }
-        keepLog('렌더번들갱신', this.name)
+        // keepLog('렌더번들갱신', this.name)
     }
 
     #setDrawBuffer() {
