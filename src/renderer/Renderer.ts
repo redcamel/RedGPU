@@ -82,6 +82,7 @@ class Renderer {
 		} = this.#createAttachmentsForView(view)
 		this.#updateJitter(view)
 		const renderPassDescriptor: GPURenderPassDescriptor = {
+            label: `${view.name} Basic Render Pass`,
 			colorAttachments: [colorAttachment, gBufferNormalTextureAttachment, gBufferMotionVectorTextureAttachment],
 			depthStencilAttachment,
 		}
@@ -117,6 +118,7 @@ class Renderer {
 		const {directionalShadowManager} = shadowManager
 		if (directionalShadowManager.shadowDepthTextureView) {
 			const shadowPassDescriptor: GPURenderPassDescriptor = {
+                label: `${view.name} Shadow Render Pass`,
 				colorAttachments: [],
 				depthStencilAttachment: {
 					view: directionalShadowManager.shadowDepthTextureView,
@@ -185,6 +187,7 @@ class Renderer {
 			);
 			mipmapGenerator.generateMipmap(renderPath1ResultTexture, view.viewRenderTextureManager.renderPath1ResultTextureDescriptor, true)
 			const renderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass({
+                label: `${view.name} 2Path Render Pass`,
 				colorAttachments: [...renderPassDescriptor.colorAttachments].map(v => ({...v, loadOp: GPU_LOAD_OP.LOAD})),
 				depthStencilAttachment: {
 					...depthStencilAttachment,
@@ -203,6 +206,7 @@ class Renderer {
 		if (pickingManager && pickingManager.castingList.length) {
 			pickingManager.checkTexture(view)
 			const pickingPassDescriptor: GPURenderPassDescriptor = {
+                label : `${view.name} Picking Render Pass`,
 				colorAttachments: [
 					{
 						view: pickingManager.pickingGPUTextureView,

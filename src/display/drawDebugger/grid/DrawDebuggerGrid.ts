@@ -17,6 +17,8 @@ import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validateRedGPUContext";
 import InstanceIdGenerator from "../../../utils/uuid/InstanceIdGenerator";
 import shaderSource from './shader.wgsl'
+import DrawBufferManager, {DrawCommandSlot} from "../../../renderer/core/DrawBufferManager";
+import {keepLog} from "../../../utils";
 
 const SHADER_INFO = parseWGSL(shaderSource);
 const FRAGMENT_UNIFORM_STRUCT = SHADER_INFO.uniforms.gridArgs;
@@ -38,12 +40,17 @@ class DrawDebuggerGrid {
 	#size: number = 100
 	#instanceId: number
 	#name: string
+    #drawBufferManager: DrawBufferManager
+    #drawCommandSlot: DrawCommandSlot
+    #bundleEncoder: GPURenderBundleEncoder
+    #renderBundle: GPURenderBundle
 
 	constructor(redGPUContext: RedGPUContext) {
 		validateRedGPUContext(redGPUContext)
+        this.#drawBufferManager = DrawBufferManager.getInstance(redGPUContext)
 		this.#instanceId = InstanceIdGenerator.getNextId(this.constructor)
 		const {resourceManager, gpuDevice} = redGPUContext
-		const moduleDescriptor: GPUShaderModuleDescriptor = {code: shaderSource}
+		const moduleDescriptor: GPUShaderModuleDescriptor = {code: SHADER_INFO.defaultSource}
 		const shaderModule: GPUShaderModule = resourceManager.createGPUShaderModule(SHADER_MODULE_NAME, moduleDescriptor)
 		this.#blendColorState = new BlendState(this, GPU_BLEND_FACTOR.SRC_ALPHA, GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA, GPU_BLEND_OPERATION.ADD)
 		this.#blendAlphaState = new BlendState(this, GPU_BLEND_FACTOR.SRC_ALPHA, GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA, GPU_BLEND_OPERATION.ADD)
@@ -120,6 +127,14 @@ class DrawDebuggerGrid {
 				count: 4
 			}
 		})
+        const drawBufferManager = this.#drawBufferManager
+        if (!this.#drawCommandSlot) {
+            this.#drawCommandSlot = drawBufferManager.allocateDrawCommand(this.name)
+            drawBufferManager.setIndexedIndirectCommand(this.#drawCommandSlot, this.#indexBuffer.indexCount, 1, 0, 0, 0)
+            drawBufferManager.updateSingleCommand(this.#drawCommandSlot)
+        }
+
+
 	}
 
 	get name(): string {
@@ -145,24 +160,38 @@ class DrawDebuggerGrid {
 
 	render(renderViewStateData: RenderViewStateData) {
 		const {view, currentRenderPassEncoder} = renderViewStateData
+        const {redGPUContext} =view
+        const {gpuDevice, antialiasingManager} = redGPUContext
+        const {useMSAA,changedMSAA} = antialiasingManager
 		const position = vec3.create()
 		vec3.set(position, view.rawCamera.x, view.rawCamera.y, view.rawCamera.z)
-		const distance = vec3.distance(position, [0, 0, 0])
-		const size = this.#size
 		renderViewStateData.num3DObjects++
 		renderViewStateData.numDrawCalls++
-		this.#uniformBuffer.writeOnlyBuffer(FRAGMENT_UNIFORM_STRUCT.members.lineColor, this.#lineColor.rgbaNormal)
+
 		if (this.#pipeline) {
-			const lineCount = (this.#size + 1) * 2; // 세로 + 가로 라인 수
-			const indexCount = lineCount * 2; // 각 라인마다 2개 인덱스
-			currentRenderPassEncoder.setPipeline(view.redGPUContext.antialiasingManager.useMSAA ? this.#pipelineMSAA : this.#pipeline);
-			currentRenderPassEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
-			currentRenderPassEncoder.setBindGroup(1, this.#fragmentBindGroup);
-			currentRenderPassEncoder.setVertexBuffer(0, this.#vertexBuffer.gpuBuffer);
-			currentRenderPassEncoder.setIndexBuffer(this.#indexBuffer.gpuBuffer, this.#indexBuffer.format);
-			currentRenderPassEncoder.drawIndexed(indexCount);
-			renderViewStateData.numTriangles += 0; // 라인이므로 삼각형 수는 0
-			renderViewStateData.numPoints += indexCount
+            const lineCount = (this.#size + 1) * 2; // 세로 + 가로 라인 수
+            const indexCount = lineCount * 2; // 각 라인마다 2개 인덱스
+            if(!this.#bundleEncoder || changedMSAA){
+                // keepLog('렌더번들갱신', this.name, useMSAA,changedMSAA)
+                this.#bundleEncoder = gpuDevice.createRenderBundleEncoder({
+                    colorFormats: [navigator.gpu.getPreferredCanvasFormat(), navigator.gpu.getPreferredCanvasFormat(), 'rgba16float'],
+                    depthStencilFormat: 'depth32float',
+                    sampleCount: useMSAA ? 4 : 1,
+                    label: this.name
+                })
+                this.#bundleEncoder.setPipeline(view.redGPUContext.antialiasingManager.useMSAA ? this.#pipelineMSAA : this.#pipeline);
+                this.#bundleEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
+                this.#bundleEncoder.setBindGroup(1, this.#fragmentBindGroup);
+                this.#bundleEncoder.setVertexBuffer(0, this.#vertexBuffer.gpuBuffer);
+                this.#bundleEncoder.setIndexBuffer(this.#indexBuffer.gpuBuffer, this.#indexBuffer.format);
+                // this.#bundleEncoder.drawIndexed(indexCount);
+                this.#bundleEncoder.drawIndexedIndirect(this.#drawCommandSlot.buffer, this.#drawCommandSlot.commandOffset * 4)
+                this.#renderBundle = this.#bundleEncoder.finish();
+            }
+            renderViewStateData.numTriangles += 0; // 라인이므로 삼각형 수는 0
+            renderViewStateData.numPoints += indexCount
+
+			currentRenderPassEncoder.executeBundles([this.#renderBundle])
 		}
 	}
 
@@ -250,6 +279,7 @@ class DrawDebuggerGrid {
 			}
 			this.#uniformBuffer = uniformBuffer;
 		}
+        this.#uniformBuffer.writeOnlyBuffer(FRAGMENT_UNIFORM_STRUCT.members.lineColor, this.#lineColor.rgbaNormal)
 	}
 }
 
