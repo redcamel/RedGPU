@@ -24,9 +24,6 @@ class ABaseBuffer extends ManagementResourceBase {
     get usage() {
         return this.#usage;
     }
-    get data() {
-        return this[GPU_BUFFER_DATA_SYMBOL];
-    }
     get size() {
         return this[GPU_BUFFER_DATA_SYMBOL].byteLength || 0;
     }

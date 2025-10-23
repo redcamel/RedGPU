@@ -1,6 +1,5 @@
 import { mat4, vec3 } from "gl-matrix";
 import Camera2D from "../camera/camera/Camera2D";
-import DrawDebuggerDirectionalLight from "../display/drawDebugger/light/DrawDebuggerDirectionalLight";
 import consoleAndThrowError from "../utils/consoleAndThrowError";
 import PassClustersLightHelper from "./clusterLight/PassClustersLightHelper";
 import AmbientLight from "./lights/AmbientLight";
@@ -219,58 +218,13 @@ class LightManager {
         this.#ambientLight = null;
     }
     /**
-     * View3D에 필요한 시스템 유니폼 버퍼를 업데이트합니다.
-     *
-     * @param view 업데이트 대상 View3D 인스턴스
-     */
-    updateViewSystemUniforms(view) {
-        const { scene, redGPUContext } = view;
-        const structInfo = view.systemUniform_Vertex_StructInfo;
-        const { systemUniform_Vertex_UniformBuffer } = view;
-        const { members } = structInfo;
-        const { lightManager, shadowManager } = scene;
-        const { directionalShadowManager } = shadowManager;
-        systemUniform_Vertex_UniformBuffer.writeBuffers([
-            [members.directionalLightCount, lightManager.directionalLightCount],
-            [members.directionalLightProjectionViewMatrix, this.#getDirectionalLightProjectionViewMatrix(view)],
-            [members.directionalLightProjectionMatrix, this.#getDirectionalLightProjectionMatrix(view)],
-            [members.directionalLightViewMatrix, this.#getMainDirectionalLightViewMatrix(view)],
-            [members.shadowDepthTextureSize, directionalShadowManager.shadowDepthTextureSize],
-            [members.bias, directionalShadowManager.bias],
-            //
-        ]);
-        lightManager.directionalLights.forEach((light, index) => {
-            const { directionalLights } = members;
-            const { direction, color, intensity } = directionalLights.memberList[index];
-            if (light.enableDebugger) {
-                if (!light.drawDebugger)
-                    light.drawDebugger = new DrawDebuggerDirectionalLight(redGPUContext, light);
-                light.drawDebugger.render(view.renderViewStateData);
-            }
-            systemUniform_Vertex_UniformBuffer.writeBuffers([
-                [direction, light.direction],
-                [color, light.color.rgbNormal],
-                [intensity, light.intensity],
-            ]);
-        });
-        if (lightManager.ambientLight) {
-            const light = view.scene.lightManager.ambientLight;
-            const { ambientLight } = members;
-            const { color, intensity } = ambientLight.members;
-            systemUniform_Vertex_UniformBuffer.writeBuffers([
-                [color, light.color.rgbNormal],
-                [intensity, light.intensity],
-            ]);
-        }
-    }
-    /**
      * 방향성 조명의 투영-뷰 행렬을 반환합니다.
      * @param view View3D 인스턴스
      * @returns mat4 투영-뷰 행렬
      * @private
      */
-    #getDirectionalLightProjectionViewMatrix(view) {
-        return mat4.multiply(mat4.create(), this.#getDirectionalLightProjectionMatrix(view), this.#getMainDirectionalLightViewMatrix(view));
+    getDirectionalLightProjectionViewMatrix(view) {
+        return mat4.multiply(mat4.create(), this.getDirectionalLightProjectionMatrix(view), this.getDirectionalLightViewMatrix(view));
     }
     /**
      * 방향성 조명의 투영(orthographic) 행렬을 계산하여 반환합니다.
@@ -279,7 +233,7 @@ class LightManager {
      * @returns mat4 투영 행렬
      * @private
      */
-    #getDirectionalLightProjectionMatrix(view) {
+    getDirectionalLightProjectionMatrix(view) {
         const lightProjectionMatrix = mat4.create();
         const cameraPosition = view.rawCamera instanceof Camera2D ? vec3.fromValues(0, 0, 0) : vec3.fromValues(view.rawCamera.x, view.rawCamera.y, view.rawCamera.z);
         const distance = Math.max(vec3.distance(cameraPosition, vec3.create()), 1);
@@ -299,7 +253,7 @@ class LightManager {
      * @returns mat4 뷰 행렬
      * @private
      */
-    #getMainDirectionalLightViewMatrix(view) {
+    getDirectionalLightViewMatrix(view) {
         mat4.identity(this.#lightProjectionMatrix);
         const cameraPosition = view.rawCamera instanceof Camera2D ? vec3.fromValues(0, 0, 0) : vec3.fromValues(view.rawCamera.x, view.rawCamera.y, view.rawCamera.z);
         const distance = Math.max(vec3.distance(cameraPosition, vec3.create()), 1);

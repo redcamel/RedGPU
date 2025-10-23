@@ -1,5 +1,6 @@
 import RedGPUContext from "./context/RedGPUContext";
 import {keepLog} from "./utils";
+import ensureVertexIndexBuiltin from "./resources/wgslParser/core/ensureVertexIndexBuiltin";
 
 /**
  * WebGPU를 비동기적으로 초기화합니다. 초기화에 실패한 경우 선택적으로 제공된 콜백 함수를 호출합니다.
@@ -84,7 +85,8 @@ const init = async (
 			return
 		}
 		try {
-			const redGPUContext: RedGPUContext = new RedGPUContext(canvas,null, adapter, device, context, alphaMode)
+
+            const redGPUContext: RedGPUContext = new RedGPUContext(canvas,adapter, device, context, alphaMode)
 			onWebGPUInitialized(redGPUContext)
 			device.addEventListener('uncapturederror', (event: GPUUncapturedErrorEvent) => {
 				console.warn('TODO A WebGPU error was not captured:', event);

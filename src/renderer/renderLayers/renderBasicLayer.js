@@ -1,5 +1,5 @@
 const renderBasicLayer = (view, viewRenderPassEncoder) => {
-    const { renderViewStateData, skybox, scene } = view;
+    const { renderViewStateData, scene } = view;
     renderViewStateData.currentRenderPassEncoder = viewRenderPassEncoder;
     const { children } = scene;
     let i = 0;
@@ -10,6 +10,6 @@ const renderBasicLayer = (view, viewRenderPassEncoder) => {
     renderViewStateData.prevVertexGpuBuffer = null;
     renderViewStateData.prevFragmentUniformBindGroup = null;
     renderViewStateData.prevVertexGpuBuffer = null;
-    viewRenderPassEncoder.executeBundles(renderViewStateData.renderBundleList);
+    viewRenderPassEncoder.executeBundles(renderViewStateData.bundleListBasicList);
 };
 export default renderBasicLayer;

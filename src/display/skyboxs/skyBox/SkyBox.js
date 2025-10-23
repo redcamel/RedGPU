@@ -338,7 +338,7 @@ class SkyBox {
         // modelMatrix
         mat4.identity(this.modelMatrix);
         mat4.scale(this.modelMatrix, this.modelMatrix, [10000, 10000, 10000]); //TODO 카메라 farClip 받도록 수정
-        vertexUniformBuffer.writeBuffer(UNIFORM_STRUCT.members.modelMatrix, this.modelMatrix);
+        vertexUniformBuffer.writeOnlyBuffer(UNIFORM_STRUCT.members.modelMatrix, this.modelMatrix);
         // GPUBindGroupDescriptor
         const vertexBindGroupDescriptor = {
             layout: vertex_BindGroupLayout,

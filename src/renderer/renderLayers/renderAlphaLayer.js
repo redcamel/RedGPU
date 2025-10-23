@@ -3,12 +3,18 @@ const renderAlphaLayer = (view, viewRenderPassEncoder) => {
     const { renderViewStateData, rawCamera, } = view;
     renderViewStateData.currentRenderPassEncoder = viewRenderPassEncoder;
     // renderAlphaLayer
-    const { alphaLayer, transparentLayer, particleLayer } = renderViewStateData;
-    viewRenderPassEncoder.executeBundles(alphaLayer);
+    const { bundleListAlphaLayer, bundleListTransparentLayer, bundleListParticleLayer } = renderViewStateData;
+    if (bundleListAlphaLayer.length) {
+        viewRenderPassEncoder.executeBundles(bundleListAlphaLayer);
+    }
     // renderTransparentLayer
     const { x, y, z } = rawCamera;
-    viewRenderPassEncoder.executeBundles(sortTransparentObjects({ x, y, z }, transparentLayer));
+    if (bundleListTransparentLayer.length) {
+        viewRenderPassEncoder.executeBundles(sortTransparentObjects({ x, y, z }, bundleListTransparentLayer));
+    }
     // particleLayer
-    viewRenderPassEncoder.executeBundles(particleLayer);
+    if (bundleListParticleLayer.length) {
+        viewRenderPassEncoder.executeBundles(bundleListParticleLayer);
+    }
 };
 export default renderAlphaLayer;

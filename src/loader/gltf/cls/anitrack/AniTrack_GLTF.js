@@ -1,5 +1,6 @@
 import shaderCode from './compute.wgsl';
 class AniTrack_GLTF {
+    lastPrevIdx;
     key;
     timeAnimationInfo;
     aniDataAnimationInfo;
@@ -22,7 +23,7 @@ class AniTrack_GLTF {
         this.weightMeshes = weightMeshes;
         this.#uniformData = new Float32Array(8);
     }
-    async render(redGPUContext, computePassEncoder, targetMesh, interpolationValue, prevIDX, nextIDX) {
+    async renderWeight(redGPUContext, computePassEncoder, targetMesh, interpolationValue, prevIDX, nextIDX) {
         const { gpuDevice } = redGPUContext;
         if (!this.#computeShader) {
             this.#initCommonCompute(redGPUContext);

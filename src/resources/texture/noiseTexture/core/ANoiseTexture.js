@@ -101,7 +101,7 @@ class ANoiseTexture extends ManagementResourceBase {
     /* 개별 파라미터 업데이트 */
     updateUniform(name, value) {
         if (this.#uniformInfo.members[name]) {
-            this.#uniformBuffer.writeBuffer(this.#uniformInfo.members[name], value);
+            this.#uniformBuffer.writeOnlyBuffer(this.#uniformInfo.members[name], value);
             this.#currentEffect[name] = value;
         }
         this.#executeComputePass();
@@ -110,7 +110,7 @@ class ANoiseTexture extends ManagementResourceBase {
     updateUniforms(uniforms) {
         Object.entries(uniforms).forEach(([name, value]) => {
             if (this.#uniformInfo.members[name]) {
-                this.#uniformBuffer.writeBuffer(this.#uniformInfo.members[name], value);
+                this.#uniformBuffer.writeOnlyBuffer(this.#uniformInfo.members[name], value);
                 this.#currentEffect[name] = value;
             }
         });

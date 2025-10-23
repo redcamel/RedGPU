@@ -57,6 +57,9 @@ class VertexBuffer extends ABaseBuffer {
             this.redGPUContext.resourceManager.registerManagementResource(this, new ResourceStateVertexBuffer(this));
         }
     }
+    get data() {
+        return this[GPU_BUFFER_DATA_SYMBOL];
+    }
     /**
      * stride(버텍스 당 바이트 수)를 반환합니다.
      * @category Buffer

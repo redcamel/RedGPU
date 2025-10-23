@@ -1,11 +1,9 @@
 import { mat4 } from "gl-matrix";
-import Camera2D from "../camera/camera/Camera2D";
 import GPU_LOAD_OP from "../gpuConst/GPU_LOAD_OP";
 import GPU_STORE_OP from "../gpuConst/GPU_STORE_OP";
-import gltfAnimationLooper from "../loader/gltf/animationLooper/gltfAnimationLooper";
+import GltfAnimationLooperManager from "../loader/gltf/animationLooper/GltfAnimationLooperManager";
 import DebugRender from "./debugRender/DebugRender";
 import FinalRender from "./finalRender/FinalRender";
-import render2PathLayer from "./renderLayers/render2PathLayer";
 import renderAlphaLayer from "./renderLayers/renderAlphaLayer";
 import renderBasicLayer from "./renderLayers/renderBasicLayer";
 import renderPickingLayer from "./renderLayers/renderPickingLayer";
@@ -14,7 +12,23 @@ class Renderer {
     #prevViewportSize;
     #finalRender;
     #debugRender;
+    #gltfAnimationLooperManager = new GltfAnimationLooperManager();
     constructor() {
+    }
+    start(redGPUContext, render) {
+        cancelAnimationFrame(redGPUContext.currentRequestAnimationFrame);
+        const HD_render = (time) => {
+            render?.(time);
+            redGPUContext.currentTime = time;
+            this.renderFrame(redGPUContext, time);
+            this.#debugRender.render(redGPUContext, time);
+            redGPUContext.currentRequestAnimationFrame = requestAnimationFrame(HD_render);
+        };
+        redGPUContext.currentRequestAnimationFrame = requestAnimationFrame(HD_render);
+    }
+    stop(redGPUContext) {
+        cancelAnimationFrame(redGPUContext.currentRequestAnimationFrame);
+        redGPUContext.currentRequestAnimationFrame = null;
     }
     renderFrame(redGPUContext, time) {
         if (!this.#finalRender)
@@ -32,33 +46,15 @@ class Renderer {
             }
         }
         this.#finalRender.render(redGPUContext, viewList_renderPassDescriptorList);
-        if (redGPUContext.offscreenCanvas && redGPUContext.bitmaprenderer) {
-            const imageBitmap = redGPUContext.offscreenCanvas.transferToImageBitmap();
-            redGPUContext.bitmaprenderer.transferFromImageBitmap(imageBitmap);
-        }
-        //
         redGPUContext.antialiasingManager.changedMSAA = false;
         console.log('/////////////////// end renderFrame ///////////////////');
-    }
-    start(redGPUContext, render) {
-        cancelAnimationFrame(redGPUContext.currentRequestAnimationFrame);
-        const HD_render = (time) => {
-            render?.(time);
-            redGPUContext.currentTime = time;
-            this.renderFrame(redGPUContext, time);
-            this.#debugRender.render(redGPUContext, time);
-            redGPUContext.currentRequestAnimationFrame = requestAnimationFrame(HD_render);
-        };
-        redGPUContext.currentRequestAnimationFrame = requestAnimationFrame(HD_render);
-    }
-    stop(redGPUContext) {
-        cancelAnimationFrame(redGPUContext.currentRequestAnimationFrame);
     }
     renderView(view, time) {
         const { redGPUContext, camera, pickingManager, pixelRectObject, renderViewStateData } = view;
         const { colorAttachment, depthStencilAttachment, gBufferNormalTextureAttachment, gBufferMotionVectorTextureAttachment } = this.#createAttachmentsForView(view);
         this.#updateJitter(view);
         const renderPassDescriptor = {
+            label: `${view.name} Basic Render Pass`,
             colorAttachments: [colorAttachment, gBufferNormalTextureAttachment, gBufferMotionVectorTextureAttachment],
             depthStencilAttachment,
         };
@@ -67,16 +63,15 @@ class Renderer {
         const commandEncoder = redGPUContext.gpuDevice.createCommandEncoder({
             label: 'ViewRender_MainCommandEncoder'
         });
-        const computeCommandEncoder = redGPUContext.gpuDevice.createCommandEncoder({
-            label: 'ViewRender_MainComputeCommandEncoder'
-        });
         this.#batchUpdateSkinMatrices(redGPUContext, renderViewStateData);
-        view.renderViewStateData.reset(null, computeCommandEncoder, time);
+        // const memoryInfo = drawBufferManager.getMemoryUsage()
+        // keepLog('드로우 버퍼 상태:', memoryInfo)
+        view.renderViewStateData.reset(null, time);
         if (pixelRectObject.width && pixelRectObject.height) {
-            this.#renderViewShadow(view, commandEncoder);
-            this.#renderViewBasicLayer(view, commandEncoder, renderPassDescriptor);
-            this.#renderView2PathLayer(view, commandEncoder, renderPassDescriptor, depthStencilAttachment);
-            this.#renderViewPickingLayer(view, commandEncoder);
+            this.#renderPassViewShadow(view, commandEncoder);
+            this.#renderPassViewBasicLayer(view, commandEncoder, renderPassDescriptor);
+            this.#renderPassView2Path(view, commandEncoder, renderPassDescriptor, depthStencilAttachment);
+            this.#renderPassViewPickingLayer(view, commandEncoder);
         }
         renderPassDescriptor.colorAttachments[0].postEffectView = view.postEffectManager.render().textureView;
         redGPUContext.gpuDevice.queue.submit([commandEncoder.finish()]);
@@ -84,27 +79,16 @@ class Renderer {
         if (pickingManager?.castingList.length) {
             pickingManager.checkEvents(view, time);
         }
-        {
-            const { noneJitterProjectionMatrix, rawCamera, redGPUContext } = view;
-            const { modelMatrix: cameraMatrix } = rawCamera;
-            const { gpuDevice } = redGPUContext;
-            const structInfo = view.systemUniform_Vertex_StructInfo;
-            const gpuBuffer = view.systemUniform_Vertex_UniformBuffer.gpuBuffer;
-            [
-                { key: 'prevProjectionCameraMatrix', value: mat4.multiply(temp3, noneJitterProjectionMatrix, cameraMatrix) },
-            ].forEach(({ key, value }) => {
-                gpuDevice.queue.writeBuffer(gpuBuffer, structInfo.members[key].uniformOffset, new structInfo.members[key].View(value));
-            });
-        }
-        redGPUContext.gpuDevice.queue.submit([computeCommandEncoder.finish()]);
         return renderPassDescriptor;
     }
-    #renderViewShadow(view, commandEncoder) {
+    #renderPassViewShadow(view, commandEncoder) {
+        //TODO - 이것도 ShadowManager가 책임지도록 변경
         const { scene } = view;
         const { shadowManager } = scene;
         const { directionalShadowManager } = shadowManager;
         if (directionalShadowManager.shadowDepthTextureView) {
             const shadowPassDescriptor = {
+                label: `${view.name} Shadow Render Pass`,
                 colorAttachments: [],
                 depthStencilAttachment: {
                     view: directionalShadowManager.shadowDepthTextureView,
@@ -114,7 +98,10 @@ class Renderer {
                 },
             };
             const viewShadowRenderPassEncoder = commandEncoder.beginRenderPass(shadowPassDescriptor);
-            this.#updateViewSystemUniforms(view, viewShadowRenderPassEncoder, true, false);
+            {
+                this.#updateViewportAndScissor(view, viewShadowRenderPassEncoder, true);
+                this.#updateViewSystemUniforms(view, viewShadowRenderPassEncoder, true, false);
+            }
             if (directionalShadowManager.castingList.length) {
                 renderShadowLayer(view, viewShadowRenderPassEncoder);
             }
@@ -122,10 +109,14 @@ class Renderer {
             directionalShadowManager.resetCastingList();
         }
     }
-    #renderViewBasicLayer(view, commandEncoder, renderPassDescriptor) {
+    #renderPassViewBasicLayer(view, commandEncoder, renderPassDescriptor) {
         const { renderViewStateData, skybox, grid, axis } = view;
         const viewRenderPassEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
-        this.#updateViewSystemUniforms(view, viewRenderPassEncoder, false, true);
+        {
+            const renderPath1ResultTextureView = view.viewRenderTextureManager.renderPath1ResultTextureView;
+            this.#updateViewportAndScissor(view, viewRenderPassEncoder);
+            this.#updateViewSystemUniforms(view, viewRenderPassEncoder, false, true, renderPath1ResultTextureView);
+        }
         renderViewStateData.currentRenderPassEncoder = viewRenderPassEncoder;
         if (skybox)
             skybox.render(renderViewStateData);
@@ -137,11 +128,11 @@ class Renderer {
         renderAlphaLayer(view, viewRenderPassEncoder);
         viewRenderPassEncoder.end();
     }
-    #renderView2PathLayer(view, commandEncoder, renderPassDescriptor, depthStencilAttachment) {
-        const { redGPUContext } = view;
+    #renderPassView2Path(view, commandEncoder, renderPassDescriptor, depthStencilAttachment) {
+        const { redGPUContext, renderViewStateData } = view;
         const { antialiasingManager } = redGPUContext;
         const { useMSAA } = antialiasingManager;
-        if (view.renderViewStateData.render2PathLayer.length) {
+        if (view.renderViewStateData.bundleListRender2PathLayer.length) {
             const { mipmapGenerator } = redGPUContext.resourceManager;
             let renderPath1ResultTexture = view.viewRenderTextureManager.renderPath1ResultTexture;
             // useMSAA 설정에 따라 소스 텍스처 선택
@@ -164,23 +155,24 @@ class Renderer {
             commandEncoder.copyTextureToTexture({ texture: sourceTexture, }, { texture: renderPath1ResultTexture, }, { width: view.pixelRectObject.width, height: view.pixelRectObject.height, depthOrArrayLayers: 1 });
             mipmapGenerator.generateMipmap(renderPath1ResultTexture, view.viewRenderTextureManager.renderPath1ResultTextureDescriptor, true);
             const renderPassEncoder = commandEncoder.beginRenderPass({
+                label: `${view.name} 2Path Render Pass`,
                 colorAttachments: [...renderPassDescriptor.colorAttachments].map(v => ({ ...v, loadOp: GPU_LOAD_OP.LOAD })),
                 depthStencilAttachment: {
                     ...depthStencilAttachment,
                     depthLoadOp: GPU_LOAD_OP.LOAD,
                 },
             });
-            let renderPath1ResultTextureView = view.viewRenderTextureManager.renderPath1ResultTextureView;
-            this.#updateViewSystemUniforms(view, renderPassEncoder, false, false, renderPath1ResultTextureView);
-            render2PathLayer(view, renderPassEncoder);
+            renderPassEncoder.executeBundles(renderViewStateData.bundleListRender2PathLayer);
             renderPassEncoder.end();
         }
     }
-    #renderViewPickingLayer(view, commandEncoder) {
+    #renderPassViewPickingLayer(view, commandEncoder) {
+        //TODO - 이건  pickingManager가 권한을 가지도록 변경
         const { pickingManager } = view;
         if (pickingManager && pickingManager.castingList.length) {
             pickingManager.checkTexture(view);
             const pickingPassDescriptor = {
+                label: `${view.name} Picking Render Pass`,
                 colorAttachments: [
                     {
                         view: pickingManager.pickingGPUTextureView,
@@ -197,7 +189,10 @@ class Renderer {
                 },
             };
             const viewPickingRenderPassEncoder = commandEncoder.beginRenderPass(pickingPassDescriptor);
-            this.#updateViewSystemUniforms(view, viewPickingRenderPassEncoder, false, false);
+            {
+                this.#updateViewportAndScissor(view, viewPickingRenderPassEncoder);
+                this.#updateViewSystemUniforms(view, viewPickingRenderPassEncoder, false, false);
+            }
             renderPickingLayer(view, viewPickingRenderPassEncoder);
             viewPickingRenderPassEncoder.end();
         }
@@ -237,7 +232,7 @@ class Renderer {
         });
         const passEncoder = commandEncoder.beginComputePass();
         if (animationListNum) {
-            gltfAnimationLooper(redGPUContext, renderViewStateData.timestamp, passEncoder, animationList.flat());
+            this.#gltfAnimationLooperManager.render(redGPUContext, renderViewStateData.timestamp, passEncoder, animationList.flat());
         }
         for (let i = 0; i < skinListNum; i++) {
             const mesh = skinList[i];
@@ -383,61 +378,33 @@ class Renderer {
             gBufferMotionVectorTextureAttachment
         };
     }
-    #updateViewSystemUniforms(view, viewRenderPassEncoder, shadowRender = false, calcPointLightCluster = true, renderPath1ResultTextureView = null) {
-        const { inverseProjectionMatrix, pixelRectObject, noneJitterProjectionMatrix, projectionMatrix, rawCamera, redGPUContext, scene } = view;
-        const { gpuDevice } = redGPUContext;
-        const { modelMatrix: cameraMatrix, position: cameraPosition } = rawCamera;
-        const structInfo = view.systemUniform_Vertex_StructInfo;
-        const gpuBuffer = view.systemUniform_Vertex_UniformBuffer.gpuBuffer;
-        const { shadowManager, lightManager } = scene;
+    #updateViewportAndScissor(view, viewRenderPassEncoder, shadowRender = false) {
+        const { scene, pixelRectObject } = view;
+        const { shadowManager } = scene;
         const { directionalShadowManager } = shadowManager;
-        const camera2DYn = rawCamera instanceof Camera2D;
-        {
-            if (shadowRender) {
-                // pixelRectObject 해당하는 크기로 뷰포트를 만들고짜른다.
-                const width = directionalShadowManager.shadowDepthTextureSize;
-                const height = directionalShadowManager.shadowDepthTextureSize;
+        if (shadowRender) {
+            // pixelRectObject 해당하는 크기로 뷰포트를 만들고짜른다.
+            const width = directionalShadowManager.shadowDepthTextureSize;
+            const height = directionalShadowManager.shadowDepthTextureSize;
+            viewRenderPassEncoder.setViewport(0, 0, width, height, 0, 1);
+            viewRenderPassEncoder.setScissorRect(0, 0, width, height);
+        }
+        else {
+            // pixelRectObject 해당하는 크기로 뷰포트를 만들고짜른다.
+            const { width, height } = pixelRectObject;
+            if (!this.#prevViewportSize || this.#prevViewportSize.width !== width || this.#prevViewportSize.height !== height) {
                 viewRenderPassEncoder.setViewport(0, 0, width, height, 0, 1);
                 viewRenderPassEncoder.setScissorRect(0, 0, width, height);
-            }
-            else {
-                // pixelRectObject 해당하는 크기로 뷰포트를 만들고짜른다.
-                const { width, height } = pixelRectObject;
-                if (!this.#prevViewportSize || this.#prevViewportSize.width !== width || this.#prevViewportSize.height !== height) {
-                    viewRenderPassEncoder.setViewport(0, 0, width, height, 0, 1);
-                    viewRenderPassEncoder.setScissorRect(0, 0, width, height);
-                    this.#prevViewportSize = { width, height };
-                }
+                this.#prevViewportSize = { width, height };
             }
         }
-        lightManager.updateViewSystemUniforms(view);
-        directionalShadowManager.updateViewSystemUniforms(redGPUContext);
-        view.update(view, shadowRender, calcPointLightCluster, renderPath1ResultTextureView);
-        // 시스템 유니폼 업데이트
+    }
+    #updateViewSystemUniforms(view, viewRenderPassEncoder, shadowRender = false, calcPointLightCluster = true, renderPath1ResultTextureView = null) {
+        //TODO - 업데이트 한번만 하도록 분리
+        view.update(shadowRender, calcPointLightCluster, renderPath1ResultTextureView);
+        // 시스템 유니폼 바인딩
         viewRenderPassEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
-        [
-            { key: 'projectionMatrix', value: projectionMatrix },
-            { key: 'projectionCameraMatrix', value: mat4.multiply(temp, projectionMatrix, cameraMatrix) },
-            { key: 'noneJitterProjectionMatrix', value: noneJitterProjectionMatrix },
-            { key: 'noneJitterProjectionCameraMatrix', value: mat4.multiply(temp2, noneJitterProjectionMatrix, cameraMatrix) },
-            { key: 'inverseProjectionMatrix', value: inverseProjectionMatrix },
-            { key: 'resolution', value: [view.pixelRectObject.width, view.pixelRectObject.height] },
-        ].forEach(({ key, value }) => {
-            gpuDevice.queue.writeBuffer(gpuBuffer, structInfo.members[key].uniformOffset, new structInfo.members[key].View(value));
-        });
-        // 카메라 시스템 유니폼 업데이트
-        [
-            { key: 'cameraMatrix', value: cameraMatrix },
-            { key: 'cameraPosition', value: cameraPosition },
-            { key: 'nearClipping', value: [camera2DYn ? 0 : rawCamera.nearClipping] },
-            { key: 'farClipping', value: [camera2DYn ? 0 : rawCamera.farClipping] },
-        ].forEach(({ key, value }) => {
-            gpuDevice.queue.writeBuffer(gpuBuffer, structInfo.members.camera.members[key].uniformOffset, new structInfo.members.camera.members[key].View(value));
-        });
-        // console.log('structInfo',view.scene.directionalLights)
     }
 }
-let temp = mat4.create();
-let temp2 = mat4.create();
 let temp3 = mat4.create();
 export default Renderer;

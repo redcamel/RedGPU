@@ -1,5 +1,7 @@
 import { mat4 } from "gl-matrix";
 import DefineForVertex from "../../defineProperty/DefineForVertex";
+import DrawBufferManager from "../../renderer/core/DrawBufferManager";
+import { keepLog } from "../../utils";
 import VertexGPURenderInfo from "./core/VertexGPURenderInfo";
 import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import calculateMeshAABB from "../../utils/math/bound/calculateMeshAABB";
@@ -102,9 +104,14 @@ class Mesh extends MeshBase {
     /** 렌더 번들 */
     #renderBundle;
     /** 이전 시스템 바인드 그룹 */
-    #prevSystemBindGroup;
+    #prevSystemBindGroupList = [];
     /** 이전 프래그먼트 바인드 그룹 */
     #prevFragmentBindGroup;
+    #drawCommandSlot = null;
+    #drawBufferManager = null;
+    #needUpdateNormal = true;
+    #uniformDataMatrixList;
+    #displacementScale;
     /**
      * Mesh 인스턴스를 생성합니다.
      * @param redGPUContext RedGPU 컨텍스트
@@ -119,6 +126,7 @@ class Mesh extends MeshBase {
         this._geometry = geometry;
         this._material = material;
         this.#pickingId = uuidToUint(this.uuid);
+        this.#drawBufferManager = DrawBufferManager.getInstance(redGPUContext);
     }
     //
     get enableDebugger() {
@@ -392,6 +400,9 @@ class Mesh extends MeshBase {
         this.#rotationZ = rotationArray[2] = rotationZ;
         this.dirtyTransform = true;
     }
+    /**
+     * @experimental
+     */
     clone() {
         const cloneMesh = new Mesh(this.redGPUContext, this._geometry, this._material);
         cloneMesh.setPosition(this.#x, this.#y, this.#z);
@@ -408,9 +419,8 @@ class Mesh extends MeshBase {
     }
     render(renderViewStateData) {
         const { redGPUContext, } = this;
-        const { view, isScene2DMode, currentRenderPassEncoder, timestamp, frustumPlanes, dirtyVertexUniformFromMaterial, useDistanceCulling, cullingDistanceSquared, } = renderViewStateData;
+        const { view, isScene2DMode, frustumPlanes, dirtyVertexUniformFromMaterial, useDistanceCulling, cullingDistanceSquared, } = renderViewStateData;
         const { antialiasingManager, gpuDevice } = redGPUContext;
-        const { useMSAA } = antialiasingManager;
         const { scene } = view;
         const { shadowManager } = scene;
         const { directionalShadowManager } = shadowManager;
@@ -421,16 +431,9 @@ class Mesh extends MeshBase {
         const { uuid: currentMaterialUUID } = currentMaterial || {};
         let dirtyTransformForChildren;
         let dirtyOpacityForChildren;
-        if (!antialiasingManager.useTAA) {
-            this.#prevModelMatrix = null;
-        }
-        if (this.#prevModelMatrix) {
-            const { vertexUniformBuffer, vertexUniformInfo } = this.gpuRenderInfo;
-            const { members: vertexUniformInfoMembers } = vertexUniformInfo;
-            if (vertexUniformInfoMembers.prevModelMatrix) {
-                redGPUContext.gpuDevice.queue.writeBuffer(vertexUniformBuffer.gpuBuffer, vertexUniformInfoMembers.prevModelMatrix.uniformOffset, this.#prevModelMatrix);
-            }
-        }
+        let currentDirtyPipeline = this.dirtyPipeline;
+        const currentDirtyTransform = this.dirtyTransform;
+        const { skinInfo } = this.animationInfo;
         if (isScene2DMode) {
             this.#z = 0;
             this.#pivotZ = 0;
@@ -438,8 +441,9 @@ class Mesh extends MeshBase {
                 this.depthStencilState.depthWriteEnabled = false;
             }
         }
-        if (this.dirtyTransform) {
+        if (currentDirtyTransform) {
             dirtyTransformForChildren = true;
+            this.#needUpdateNormal = true;
             {
                 const { pixelRectObject } = view;
                 const parent = this.parent;
@@ -557,39 +561,30 @@ class Mesh extends MeshBase {
                 {
                     if (parent?.modelMatrix) {
                         // mat4.multiply(this.modelMatrix, parent.modelMatrix, this.localMatrix);
-                        let parentModelMatrix = parent.modelMatrix;
-                        let localMatrix = this.localMatrix;
-                        let out = this.modelMatrix;
-                        let a00 = parentModelMatrix[0], a01 = parentModelMatrix[1], a02 = parentModelMatrix[2], a03 = parentModelMatrix[3];
-                        let a10 = parentModelMatrix[4], a11 = parentModelMatrix[5], a12 = parentModelMatrix[6], a13 = parentModelMatrix[7];
-                        let a20 = parentModelMatrix[8], a21 = parentModelMatrix[9], a22 = parentModelMatrix[10], a23 = parentModelMatrix[11];
-                        let a30 = parentModelMatrix[12], a31 = parentModelMatrix[13], a32 = parentModelMatrix[14], a33 = parentModelMatrix[15];
+                        const p = parent.modelMatrix;
+                        const l = this.localMatrix;
+                        const out = this.modelMatrix;
+                        const a00 = p[0], a01 = p[1], a02 = p[2], a03 = p[3];
+                        const a10 = p[4], a11 = p[5], a12 = p[6], a13 = p[7];
+                        const a20 = p[8], a21 = p[9], a22 = p[10], a23 = p[11];
+                        const a30 = p[12], a31 = p[13], a32 = p[14], a33 = p[15];
                         // Cache only the current line of the second matrix
-                        let b0 = localMatrix[0], b1 = localMatrix[1], b2 = localMatrix[2], b3 = localMatrix[3];
+                        let b0 = l[0], b1 = l[1], b2 = l[2], b3 = l[3];
                         out[0] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
                         out[1] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
                         out[2] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
                         out[3] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
-                        b0 = localMatrix[4];
-                        b1 = localMatrix[5];
-                        b2 = localMatrix[6];
-                        b3 = localMatrix[7];
+                        b0 = l[4], b1 = l[5], b2 = l[6], b3 = l[7];
                         out[4] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
                         out[5] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
                         out[6] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
                         out[7] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
-                        b0 = localMatrix[8];
-                        b1 = localMatrix[9];
-                        b2 = localMatrix[10];
-                        b3 = localMatrix[11];
+                        b0 = l[8], b1 = l[9], b2 = l[10], b3 = l[11];
                         out[8] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
                         out[9] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
                         out[10] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
                         out[11] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
-                        b0 = localMatrix[12];
-                        b1 = localMatrix[13];
-                        b2 = localMatrix[14];
-                        b3 = localMatrix[15];
+                        b0 = l[12], b1 = l[13], b2 = l[14], b3 = l[15];
                         out[12] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
                         out[13] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
                         out[14] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
@@ -598,73 +593,11 @@ class Mesh extends MeshBase {
                     else {
                         // this.modelMatrix = mat4.clone(this.localMatrix)
                         const { modelMatrix, localMatrix } = this;
-                        modelMatrix[0] = localMatrix[0];
-                        modelMatrix[1] = localMatrix[1];
-                        modelMatrix[2] = localMatrix[2];
-                        modelMatrix[3] = localMatrix[3];
-                        modelMatrix[4] = localMatrix[4];
-                        modelMatrix[5] = localMatrix[5];
-                        modelMatrix[6] = localMatrix[6];
-                        modelMatrix[7] = localMatrix[7];
-                        modelMatrix[8] = localMatrix[8];
-                        modelMatrix[9] = localMatrix[9];
-                        modelMatrix[10] = localMatrix[10];
-                        modelMatrix[11] = localMatrix[11];
-                        modelMatrix[12] = localMatrix[12];
-                        modelMatrix[13] = localMatrix[13];
-                        modelMatrix[14] = localMatrix[14];
-                        modelMatrix[15] = localMatrix[15];
+                        modelMatrix[0] = localMatrix[0], modelMatrix[1] = localMatrix[1], modelMatrix[2] = localMatrix[2], modelMatrix[3] = localMatrix[3];
+                        modelMatrix[4] = localMatrix[4], modelMatrix[5] = localMatrix[5], modelMatrix[6] = localMatrix[6], modelMatrix[7] = localMatrix[7];
+                        modelMatrix[8] = localMatrix[8], modelMatrix[9] = localMatrix[9], modelMatrix[10] = localMatrix[10], modelMatrix[11] = localMatrix[11];
+                        modelMatrix[12] = localMatrix[12], modelMatrix[13] = localMatrix[13], modelMatrix[14] = localMatrix[14], modelMatrix[15] = localMatrix[15];
                     }
-                }
-                {
-                    // calculate NormalMatrix
-                    let normalModelMatrix = this.normalModelMatrix;
-                    let modelMatrix = this.modelMatrix;
-                    let a00 = modelMatrix[0];
-                    let a01 = modelMatrix[1];
-                    let a02 = modelMatrix[2];
-                    let a03 = modelMatrix[3];
-                    let a10 = modelMatrix[4];
-                    let a11 = modelMatrix[5];
-                    let a12 = modelMatrix[6];
-                    let a13 = modelMatrix[7];
-                    let a20 = modelMatrix[8];
-                    let a21 = modelMatrix[9];
-                    let a22 = modelMatrix[10];
-                    let a23 = modelMatrix[11];
-                    let a31 = modelMatrix[12];
-                    let a32 = modelMatrix[13];
-                    let a33 = modelMatrix[14];
-                    let b0 = modelMatrix[15];
-                    let a30 = a00 * a11 - a01 * a10;
-                    let b1 = a00 * a12 - a02 * a10;
-                    let b2 = a00 * a13 - a03 * a10;
-                    let b3 = a01 * a12 - a02 * a11;
-                    let b00 = a01 * a13 - a03 * a11;
-                    let b01 = a02 * a13 - a03 * a12;
-                    let b02 = a20 * a32 - a21 * a31;
-                    let b10 = a20 * a33 - a22 * a31;
-                    let b11 = a20 * b0 - a23 * a31;
-                    let b12 = a22 * b0 - a23 * a33;
-                    let b20 = a21 * b0 - a23 * a32;
-                    let b22 = a30 * b12 - b1 * b20 + b2 * b12 + b3 * b11 - b00 * b10 + b01 * b02;
-                    b22 = 1 / b22;
-                    normalModelMatrix[0] = (a11 * b12 - a12 * b20 + a13 * b12) * b22;
-                    normalModelMatrix[4] = (-a01 * b12 + a02 * b20 - a03 * b12) * b22;
-                    normalModelMatrix[8] = (a32 * b01 - a33 * b00 + b0 * b3) * b22;
-                    normalModelMatrix[12] = (-a21 * b01 + a22 * b00 - a23 * b3) * b22;
-                    normalModelMatrix[1] = (-a10 * b12 + a12 * b11 - a13 * b10) * b22;
-                    normalModelMatrix[5] = (a00 * b12 - a02 * b11 + a03 * b10) * b22;
-                    normalModelMatrix[9] = (-a31 * b01 + a33 * b2 - b0 * b1) * b22;
-                    normalModelMatrix[13] = (a20 * b01 - a22 * b2 + a23 * b1) * b22;
-                    normalModelMatrix[2] = (a10 * b20 - a11 * b11 + a13 * b02) * b22;
-                    normalModelMatrix[6] = (-a00 * b20 + a01 * b11 - a03 * b02) * b22;
-                    normalModelMatrix[10] = (a31 * b00 - a32 * b2 + b0 * a30) * b22;
-                    normalModelMatrix[14] = (-a20 * b00 + a21 * b2 - a23 * a30) * b22;
-                    normalModelMatrix[3] = (-a10 * b12 + a11 * b10 - a12 * b02) * b22;
-                    normalModelMatrix[7] = (a00 * b12 - a01 * b10 + a02 * b02) * b22;
-                    normalModelMatrix[11] = (-a31 * b3 + a32 * b1 - a33 * a30) * b22;
-                    normalModelMatrix[15] = (a20 * b3 - a21 * b1 + a22 * a30) * b22;
                 }
             }
         }
@@ -679,15 +612,16 @@ class Mesh extends MeshBase {
             const dz = rawCamera.z - aabb.centerZ;
             // 거리 제곱 계산
             const distanceSquared = dx * dx + dy * dy + dz * dz;
+            const geometryRadius = aabb.geometryRadius;
             // AABB의 반지름을 고려한 컬링 거리 계산
-            const cullingDistanceWithRadius = cullingDistanceSquared + (aabb.geometryRadius * aabb.geometryRadius);
+            const cullingDistanceWithRadius = cullingDistanceSquared + (geometryRadius * geometryRadius);
             if (distanceSquared > cullingDistanceWithRadius) {
                 passFrustumCulling = false;
             }
         }
         // check frustumCulling
         if (frustumPlanes && passFrustumCulling) {
-            // if (currentGeometry) {
+            // if (currentGeometry) {boundingAABB
             const combinedAABB = this.boundingAABB;
             const frustumPlanes0 = frustumPlanes[0];
             const frustumPlanes1 = frustumPlanes[1];
@@ -714,139 +648,185 @@ class Mesh extends MeshBase {
         if (this.#ignoreFrustumCulling)
             passFrustumCulling = true;
         if (passFrustumCulling) {
-            // check animation
             if (this.gltfLoaderInfo?.activeAnimations?.length) {
-                // gltfAnimationLooper(
-                // 	redGPUContext, timestamp,
-                // 	renderViewStateData.computeCommandEncoder,
-                // 	this.gltfLoaderInfo.activeAnimations
-                // )
                 renderViewStateData.animationList[renderViewStateData.animationList.length] = this.gltfLoaderInfo?.activeAnimations;
             }
-            if (this.animationInfo.skinInfo) {
+            if (skinInfo) {
                 if (!this.currentShaderModuleName.includes(VERTEX_SHADER_MODULE_NAME_PBR_SKIN)) {
-                    this.dirtyPipeline = true;
+                    currentDirtyPipeline = true;
                 }
-                if (this.currentShaderModuleName === `${VERTEX_SHADER_MODULE_NAME_PBR_SKIN}_${this.animationInfo.skinInfo.joints?.length}`) {
-                    // this.animationInfo.skinInfo.update(redGPUContext, this)
+                if (this.currentShaderModuleName === `${VERTEX_SHADER_MODULE_NAME_PBR_SKIN}_${skinInfo.joints?.length}`) {
                     renderViewStateData.skinList[renderViewStateData.skinList.length] = this;
                     dirtyTransformForChildren = false;
                 }
             }
         }
         // render
-        if (currentGeometry)
-            renderViewStateData.num3DObjects++;
-        else
-            renderViewStateData.num3DGroups++;
         const { displacementTexture, displacementScale } = currentMaterial || {};
-        if (this.dirtyPipeline || currentMaterial?.dirtyPipeline || dirtyVertexUniformFromMaterial[currentMaterialUUID]) {
+        if (currentDirtyPipeline || currentMaterial?.dirtyPipeline || dirtyVertexUniformFromMaterial[currentMaterialUUID]) {
             dirtyVertexUniformFromMaterial[currentMaterialUUID] = true;
         }
+        // keepLog(this.gpuRenderInfo?.vertexStructInfo)
         if (currentGeometry) {
+            renderViewStateData.num3DObjects++;
             if (antialiasingManager.changedMSAA) {
-                this.dirtyPipeline = true;
+                currentDirtyPipeline = true;
             }
             if (!this.gpuRenderInfo)
                 this.initGPURenderInfos();
             const currentUseDisplacementTexture = !!displacementTexture;
             if (this.useDisplacementTexture !== currentUseDisplacementTexture) {
                 this.useDisplacementTexture = currentUseDisplacementTexture;
-                this.dirtyPipeline = true;
+                currentDirtyPipeline = true;
             }
-            if (this.dirtyPipeline || dirtyVertexUniformFromMaterial[currentMaterialUUID]) {
+            if (currentDirtyPipeline || dirtyVertexUniformFromMaterial[currentMaterialUUID]) {
                 updateMeshDirtyPipeline(this, renderViewStateData);
                 this.#bundleEncoder = null;
                 this.#renderBundle = null;
             }
         }
+        else {
+            renderViewStateData.num3DGroups++;
+        }
         if (currentGeometry && passFrustumCulling) {
+            const { gpuRenderInfo } = this;
+            const { vertexUniformBuffer, vertexUniformInfo } = gpuRenderInfo;
+            const { members: vertexUniformInfoMembers } = vertexUniformInfo;
+            const { members: vertexUniformInfoMatrixListMembers } = vertexUniformInfoMembers.matrixList;
+            const { gpuBuffer: vertexUniformGPUBuffer } = vertexUniformBuffer;
+            if (!this.#uniformDataMatrixList) {
+                this.#uniformDataMatrixList = new Float32Array(vertexUniformInfoMembers.matrixList.endOffset / Float32Array.BYTES_PER_ELEMENT);
+            }
             {
-                const { gpuRenderInfo } = this;
-                const { vertexUniformBuffer, vertexUniformInfo } = gpuRenderInfo;
-                const { members: vertexUniformInfoMembers } = vertexUniformInfo;
                 if (vertexUniformInfoMembers.displacementScale !== undefined &&
-                    vertexUniformInfoMembers.displacementScale !== displacementScale) {
+                    this.#displacementScale !== displacementScale) {
+                    this.#displacementScale = displacementScale;
+                    // keepLog('실행을 하나보네',displacementScale)
                     tempFloat32_1[0] = displacementScale;
-                    gpuDevice.queue.writeBuffer(vertexUniformBuffer.gpuBuffer, vertexUniformInfoMembers.displacementScale.uniformOffset, 
+                    gpuDevice.queue.writeBuffer(vertexUniformGPUBuffer, vertexUniformInfoMembers.displacementScale.uniformOffset, 
                     // new vertexUniformInfoMembers.displacementScale.View([displacementScale])
                     tempFloat32_1);
                 }
             }
-            const { gpuRenderInfo } = this;
-            const { vertexUniformBuffer, vertexUniformBindGroup, vertexUniformInfo, pipeline, } = gpuRenderInfo;
-            const { members: vertexUniformInfoMembers } = vertexUniformInfo;
-            if (this.dirtyTransform) {
-                gpuDevice.queue.writeBuffer(vertexUniformBuffer.gpuBuffer, vertexUniformInfoMembers.modelMatrix.uniformOffset, (
-                //TODO - Sprite2D떄문에 처리했지만 이거 일반화해야함
-                // TODO - renderTextureWidth 이놈도 같이 처리해야할듯
-                // @ts-ignore
-                this.is2DMeshType ? mat4.multiply(mat4.create(), this.modelMatrix, mat4.fromValues(
-                // @ts-ignore
-                this.width, 0, 0, 0, 0, this.height, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)) : this.modelMatrix));
-                if (antialiasingManager.useTAA) {
-                    if (!this.#prevModelMatrix)
-                        this.#prevModelMatrix = new Float32Array(16);
-                    this.#prevModelMatrix[0] = this.modelMatrix[0];
-                    this.#prevModelMatrix[1] = this.modelMatrix[1];
-                    this.#prevModelMatrix[2] = this.modelMatrix[2];
-                    this.#prevModelMatrix[3] = this.modelMatrix[3];
-                    this.#prevModelMatrix[4] = this.modelMatrix[4];
-                    this.#prevModelMatrix[5] = this.modelMatrix[5];
-                    this.#prevModelMatrix[6] = this.modelMatrix[6];
-                    this.#prevModelMatrix[7] = this.modelMatrix[7];
-                    this.#prevModelMatrix[8] = this.modelMatrix[8];
-                    this.#prevModelMatrix[9] = this.modelMatrix[9];
-                    this.#prevModelMatrix[10] = this.modelMatrix[10];
-                    this.#prevModelMatrix[11] = this.modelMatrix[11];
-                    this.#prevModelMatrix[12] = this.modelMatrix[12];
-                    this.#prevModelMatrix[13] = this.modelMatrix[13];
-                    this.#prevModelMatrix[14] = this.modelMatrix[14];
-                    this.#prevModelMatrix[15] = this.modelMatrix[15];
+            if (currentDirtyTransform) {
+                {
+                    const modelMatrix = (
+                    //TODO - Sprite2D떄문에 처리했지만 이거 일반화해야함
+                    // TODO - renderTextureWidth 이놈도 같이 처리해야할듯
+                    // @ts-ignore
+                    this.is2DMeshType ? mat4.multiply(mat4.create(), this.modelMatrix, mat4.fromValues(
+                    // @ts-ignore
+                    this.width, 0, 0, 0, 0, this.height, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)) : this.modelMatrix);
+                    //
+                    // gpuDevice.queue.writeBuffer(
+                    // 	vertexUniformGPUBuffer,
+                    // 	vertexUniformInfoMatrixListMembers.modelMatrix.uniformOffset,
+                    // 	modelMatrix
+                    // )
+                    this.#uniformDataMatrixList.set(modelMatrix, vertexUniformInfoMatrixListMembers.modelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT);
                 }
-                gpuDevice.queue.writeBuffer(vertexUniformBuffer.gpuBuffer, vertexUniformInfoMembers.normalModelMatrix.uniformOffset, 
-                // new vertexUniformInfoMembers.normalModelMatrix.View(this.normalModelMatrix),
-                this.normalModelMatrix);
-                if (vertexUniformInfoMembers.localMatrix) {
-                    gpuDevice.queue.writeBuffer(vertexUniformBuffer.gpuBuffer, vertexUniformInfoMembers.localMatrix.uniformOffset, 
-                    // new vertexUniformInfoMembers.localMatrix.View(this.localMatrix),
-                    this.localMatrix);
+                {
+                    if (antialiasingManager.useTAA && currentDirtyTransform) {
+                        if (this.#prevModelMatrix && vertexUniformInfoMatrixListMembers.prevModelMatrix) {
+                            this.#uniformDataMatrixList.set(this.#prevModelMatrix, vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT);
+                            // if (vertexUniformInfoMatrixListMembers.prevModelMatrix) {
+                            // 	redGPUContext.gpuDevice.queue.writeBuffer(
+                            // 		vertexUniformGPUBuffer,
+                            // 		vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffset,
+                            // 		this.#prevModelMatrix,
+                            // 	)
+                            // }
+                        }
+                        {
+                            if (!this.#prevModelMatrix)
+                                this.#prevModelMatrix = new Float32Array(16);
+                            const prev = this.#prevModelMatrix;
+                            const current = this.modelMatrix;
+                            prev[0] = current[0], prev[1] = current[1], prev[2] = current[2], prev[3] = current[3];
+                            prev[4] = current[4], prev[5] = current[5], prev[6] = current[6], prev[7] = current[7];
+                            prev[8] = current[8], prev[9] = current[9], prev[10] = current[10], prev[11] = current[11];
+                            prev[12] = current[12], prev[13] = current[13], prev[14] = current[14], prev[15] = current[15];
+                        }
+                    }
+                    else {
+                        this.#prevModelMatrix = null;
+                    }
+                }
+                {
+                    if (this.#needUpdateNormal && vertexUniformInfoMatrixListMembers.normalModelMatrix) {
+                        this.#needUpdateNormal = false;
+                        // calculate NormalMatrix
+                        const m = this.modelMatrix;
+                        const n = this.normalModelMatrix;
+                        const a00 = m[0], a01 = m[1], a02 = m[2];
+                        const a10 = m[4], a11 = m[5], a12 = m[6];
+                        const a20 = m[8], a21 = m[9], a22 = m[10];
+                        const det = a00 * (a11 * a22 - a12 * a21) - a01 * (a10 * a22 - a12 * a20) + a02 * (a10 * a21 - a11 * a20);
+                        if (det === 0) {
+                            // 역행렬 없음 → 단위 행렬로 대체
+                            n[0] = 1, n[1] = 0, n[2] = 0, n[3] = 0, n[4] = 0, n[5] = 1, n[6] = 0, n[7] = 0, n[8] = 0, n[9] = 0, n[10] = 1, n[11] = 0, n[12] = 0, n[13] = 0, n[14] = 0, n[15] = 1;
+                        }
+                        else {
+                            const invDet = 1 / det;
+                            // 역행렬의 전치 (transpose of inverse)
+                            n[0] = (a11 * a22 - a12 * a21) * invDet;
+                            n[1] = (a12 * a20 - a10 * a22) * invDet;
+                            n[2] = (a10 * a21 - a11 * a20) * invDet;
+                            n[3] = 0;
+                            n[4] = (a02 * a21 - a01 * a22) * invDet;
+                            n[5] = (a00 * a22 - a02 * a20) * invDet;
+                            n[6] = (a01 * a20 - a00 * a21) * invDet;
+                            n[7] = 0;
+                            n[8] = (a01 * a12 - a02 * a11) * invDet;
+                            n[9] = (a02 * a10 - a00 * a12) * invDet;
+                            n[10] = (a00 * a11 - a01 * a10) * invDet;
+                            n[11] = 0;
+                            // 하단 행은 단위 행렬처럼 설정
+                            n[12] = 0, n[13] = 0, n[14] = 0, n[15] = 1;
+                        }
+                    }
+                    // gpuDevice.queue.writeBuffer(
+                    // 	vertexUniformGPUBuffer,
+                    // 	vertexUniformInfoMatrixListMembers.normalModelMatrix.uniformOffset,
+                    // 	// new vertexUniformInfoMatrixListMembers.normalModelMatrix.View(this.normalModelMatrix),
+                    // 	this.normalModelMatrix as Float32Array
+                    // )
+                    this.#uniformDataMatrixList.set(this.normalModelMatrix, vertexUniformInfoMatrixListMembers.normalModelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT);
+                }
+                if (vertexUniformInfoMatrixListMembers.localMatrix) {
+                    // gpuDevice.queue.writeBuffer(
+                    // 	vertexUniformGPUBuffer,
+                    // 	vertexUniformInfoMatrixListMembers.localMatrix.uniformOffset,
+                    // 	// new vertexUniformInfoMatrixListMembers.localMatrix.View(this.localMatrix),
+                    // 	this.localMatrix as Float32Array
+                    // )
+                    this.#uniformDataMatrixList.set(this.localMatrix, vertexUniformInfoMatrixListMembers.localMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT);
                 }
                 dirtyTransformForChildren = true;
                 this.dirtyTransform = false;
+                gpuDevice.queue.writeBuffer(vertexUniformGPUBuffer, vertexUniformInfoMembers.matrixList.startOffset, this.#uniformDataMatrixList);
             }
             if (this.dirtyOpacity) {
                 dirtyOpacityForChildren = true;
                 if (vertexUniformInfoMembers.combinedOpacity) {
                     tempFloat32_1[0] = this.getCombinedOpacity();
-                    gpuDevice.queue.writeBuffer(vertexUniformBuffer.gpuBuffer, vertexUniformInfoMembers.combinedOpacity.uniformOffset, 
+                    gpuDevice.queue.writeBuffer(vertexUniformGPUBuffer, vertexUniformInfoMembers.combinedOpacity.uniformOffset, 
                     // new vertexUniformInfoMembers.combinedOpacity.View([this.getCombinedOpacity()])
                     tempFloat32_1);
                 }
                 this.dirtyOpacity = false;
             }
-            const { render2PathLayer, particleLayer, transparentLayer, alphaLayer, renderBundleList } = renderViewStateData;
+            const { bundleListRender2PathLayer, bundleListParticleLayer, bundleListTransparentLayer, bundleListAlphaLayer, bundleListBasicList } = renderViewStateData;
             {
-                if (currentMaterial.use2PathRender) {
-                    render2PathLayer[render2PathLayer.length] = this;
-                }
-                else {
-                    let targetEncoder = currentRenderPassEncoder;
-                    let needBundleFinish = false;
-                    // keepLog(this.#bundleEncoder , this.dirtyPipeline , this.#prevSystemBindGroup !== view.systemUniform_Vertex_UniformBindGroup)
+                {
                     const { fragmentUniformBindGroup } = currentMaterial.gpuRenderInfo;
-                    if (!this.#bundleEncoder || this.dirtyPipeline || this.#prevFragmentBindGroup !== fragmentUniformBindGroup || this.#prevSystemBindGroup !== view.systemUniform_Vertex_UniformBindGroup) {
-                        this.#bundleEncoder = null;
-                        this.#bundleEncoder = gpuDevice.createRenderBundleEncoder({
-                            colorFormats: [navigator.gpu.getPreferredCanvasFormat(), navigator.gpu.getPreferredCanvasFormat(), 'rgba16float'],
-                            depthStencilFormat: 'depth32float',
-                            sampleCount: useMSAA ? 4 : 1,
-                            label: this.uuid
-                        });
-                        needBundleFinish = true;
-                        // keepLog('렌더번들갱신')
+                    if (!this.#bundleEncoder
+                        || currentDirtyPipeline
+                        || this.#prevFragmentBindGroup !== fragmentUniformBindGroup
+                        || this.#prevSystemBindGroupList[renderViewStateData.viewIndex] !== view.systemUniform_Vertex_UniformBindGroup) {
+                        this.#setDrawBuffer();
+                        this.#setRenderBundle(renderViewStateData);
                     }
-                    targetEncoder = this.#bundleEncoder;
                     renderViewStateData.numDrawCalls++;
                     if (currentGeometry.indexBuffer) {
                         const { indexBuffer } = currentGeometry;
@@ -860,53 +840,23 @@ class Mesh extends MeshBase {
                         renderViewStateData.numTriangles += triangleCount;
                         renderViewStateData.numPoints += vertexCount;
                     }
-                    if (needBundleFinish) {
-                        this.#prevSystemBindGroup = view.systemUniform_Vertex_UniformBindGroup;
-                        this.#prevFragmentBindGroup = fragmentUniformBindGroup;
-                        targetEncoder.setPipeline(pipeline);
-                        const { gpuBuffer } = currentGeometry.vertexBuffer;
-                        targetEncoder.setVertexBuffer(0, gpuBuffer);
-                        // @ts-ignore
-                        if (this.particleBuffers?.length) {
-                            // @ts-ignore
-                            this.particleBuffers.forEach((v, index) => {
-                                targetEncoder.setVertexBuffer(index + 1, v);
-                            });
-                        }
-                        targetEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
-                        targetEncoder.setBindGroup(1, vertexUniformBindGroup);
-                        targetEncoder.setBindGroup(2, fragmentUniformBindGroup);
-                        //
-                        if (currentGeometry.indexBuffer) {
-                            const { indexBuffer } = currentGeometry;
-                            const { indexCount, gpuBuffer: indexGPUBuffer, format } = indexBuffer;
-                            targetEncoder.setIndexBuffer(indexGPUBuffer, format);
-                            // @ts-ignore
-                            if (this.particleBuffers)
-                                targetEncoder.drawIndexed(indexCount, this.particleNum, 0, 0, 0);
-                            else
-                                targetEncoder.drawIndexed(indexCount, 1, 0, 0, 0);
-                        }
-                        else {
-                            const { vertexBuffer } = currentGeometry;
-                            const { vertexCount } = vertexBuffer;
-                            targetEncoder.draw(vertexCount, 1, 0, 0);
-                        }
-                        this.#renderBundle = targetEncoder.finish();
+                    const renderBundle = this.#renderBundle;
+                    if (currentMaterial.use2PathRender) {
+                        bundleListRender2PathLayer[bundleListRender2PathLayer.length] = renderBundle;
                     }
-                    if (this.meshType === MESH_TYPE.PARTICLE) {
-                        particleLayer[particleLayer.length] = this.#renderBundle;
+                    else if (this.meshType === MESH_TYPE.PARTICLE) {
+                        bundleListParticleLayer[bundleListParticleLayer.length] = renderBundle;
                     }
                     else if (currentMaterial.transparent) {
-                        transparentLayer[transparentLayer.length] = this.#renderBundle;
+                        bundleListTransparentLayer[bundleListTransparentLayer.length] = renderBundle;
                         // @ts-ignore
-                        this.#renderBundle.mesh = this;
+                        renderBundle.mesh = this;
                     }
                     else if (currentMaterial.alphaBlend === 2 || currentMaterial.opacity < 1 || !this.depthStencilState.depthWriteEnabled) {
-                        alphaLayer[alphaLayer.length] = this.#renderBundle;
+                        bundleListAlphaLayer[bundleListAlphaLayer.length] = renderBundle;
                     }
                     else {
-                        renderBundleList[renderBundleList.length] = this.#renderBundle;
+                        bundleListBasicList[bundleListBasicList.length] = renderBundle;
                     }
                 }
             }
@@ -921,20 +871,119 @@ class Mesh extends MeshBase {
         {
             if (this.castShadow || (this.castShadow && !currentGeometry))
                 castingList[castingList.length] = this;
+            if (this.#enableDebugger)
+                this.#drawDebugger.render(renderViewStateData);
         }
-        if (this.#enableDebugger)
-            this.#drawDebugger.render(renderViewStateData);
         // children render
         const { children } = this;
         let i = 0;
         const childNum = children.length;
         // while (i--) {
         for (; i < childNum; i++) {
+            const child = children[i];
             if (dirtyTransformForChildren)
-                children[i].dirtyTransform = dirtyTransformForChildren;
+                child.dirtyTransform = dirtyTransformForChildren;
             if (dirtyOpacityForChildren)
-                children[i].dirtyOpacity = dirtyOpacityForChildren;
-            children[i].render(renderViewStateData);
+                child.dirtyOpacity = dirtyOpacityForChildren;
+            child.render(renderViewStateData);
+        }
+    }
+    #setRenderBundle(renderViewStateData) {
+        const { redGPUContext, geometry } = this;
+        const { gpuDevice, antialiasingManager } = redGPUContext;
+        const { useMSAA } = antialiasingManager;
+        const { view } = renderViewStateData;
+        const { pipeline, vertexUniformBindGroup } = this.gpuRenderInfo;
+        const { vertexBuffer, indexBuffer } = this._geometry;
+        const { fragmentUniformBindGroup } = this._material.gpuRenderInfo;
+        // keepLog(`🎬 렌더 번들 갱신 이유: ${this.name}`, {
+        // 	noBundleEncoder: !this.#bundleEncoder,
+        // 	dirtyPipeline: currentDirtyPipeline,
+        // 	fragmentBindGroupChanged: this.#prevFragmentBindGroup !== fragmentUniformBindGroup,
+        // 	systemBindGroupChanged: this.#prevSystemBindGroup !== view.systemUniform_Vertex_UniformBindGroup
+        // })
+        this.#bundleEncoder = null;
+        this.#bundleEncoder = gpuDevice.createRenderBundleEncoder({
+            colorFormats: [navigator.gpu.getPreferredCanvasFormat(), navigator.gpu.getPreferredCanvasFormat(), 'rgba16float'],
+            depthStencilFormat: 'depth32float',
+            sampleCount: useMSAA ? 4 : 1,
+            label: this.uuid
+        });
+        const bundleEncoder = this.#bundleEncoder;
+        {
+            const { gpuBuffer } = vertexBuffer;
+            this.#prevSystemBindGroupList[renderViewStateData.viewIndex] = view.systemUniform_Vertex_UniformBindGroup;
+            this.#prevFragmentBindGroup = fragmentUniformBindGroup;
+            bundleEncoder.setPipeline(pipeline);
+            bundleEncoder.setVertexBuffer(0, gpuBuffer);
+            // @ts-ignore
+            if (this.particleBuffers?.length) {
+                // @ts-ignore
+                this.particleBuffers.forEach((v, index) => {
+                    bundleEncoder.setVertexBuffer(index + 1, v);
+                });
+            }
+            bundleEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
+            bundleEncoder.setBindGroup(1, vertexUniformBindGroup);
+            bundleEncoder.setBindGroup(2, fragmentUniformBindGroup);
+            //
+            if (indexBuffer) {
+                const { indexBuffer } = geometry;
+                const { indexCount, gpuBuffer: indexGPUBuffer, format } = indexBuffer;
+                bundleEncoder.setIndexBuffer(indexGPUBuffer, format);
+                // @ts-ignore
+                if (this.particleBuffers)
+                    bundleEncoder.drawIndexed(indexCount, this.particleNum, 0, 0, 0);
+                else {
+                    bundleEncoder.drawIndexedIndirect(this.#drawCommandSlot.buffer, this.#drawCommandSlot.commandOffset * 4);
+                    // {
+                    //     keepLog(`🎬 drawIndexedIndirect 호출: ${this.name}`, {
+                    //         bufferLabel: this.#drawCommandSlot.buffer.label,
+                    //         byteOffset: this.#drawCommandSlot.commandOffset * 4,
+                    //         expectedIndexCount: indexCount
+                    //     })
+                    // }
+                }
+            }
+            else {
+                bundleEncoder.drawIndirect(this.#drawCommandSlot.buffer, this.#drawCommandSlot.commandOffset * 4);
+            }
+            this.#renderBundle = bundleEncoder.finish();
+            // @ts-ignore
+            this.#renderBundle.mesh = null;
+        }
+        keepLog('렌더번들갱신', this.name);
+    }
+    #setDrawBuffer() {
+        const { geometry } = this;
+        const { vertexBuffer, indexBuffer } = geometry;
+        const drawBufferManager = this.#drawBufferManager;
+        if (!this.#drawCommandSlot) {
+            this.#drawCommandSlot = drawBufferManager.allocateDrawCommand(this.name);
+        }
+        if (indexBuffer) {
+            const { indexCount } = indexBuffer;
+            // @ts-ignore
+            if (this.particleBuffers) {
+                //TODO Buffers로 변경해야하나
+            }
+            else {
+                drawBufferManager.setIndexedIndirectCommand(this.#drawCommandSlot, indexCount, 1, 0, 0, 0);
+                drawBufferManager.updateSingleCommand(this.#drawCommandSlot);
+                // {
+                //     const data = this.#drawCommandSlot.dataArray
+                //     const offset = this.#drawCommandSlot.commandOffset
+                //     keepLog(`📊 드로우 데이터 설정: ${this.name}`, {
+                //         indexCount,
+                //         actualData: [data[offset], data[offset + 1], data[offset + 2], data[offset + 3], data[offset + 4]]
+                //     })
+                // }
+            }
+        }
+        else {
+            const { vertexCount } = vertexBuffer;
+            drawBufferManager.setIndirectCommand(this.#drawCommandSlot, vertexCount, 1, 0, 0);
+            drawBufferManager.updateSingleCommand(this.#drawCommandSlot);
         }
     }
     initGPURenderInfos() {

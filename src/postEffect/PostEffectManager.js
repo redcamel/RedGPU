@@ -44,6 +44,9 @@ class PostEffectManager {
     #postEffectSystemUniformBufferStructInfo;
     /** 비디오 메모리 사용량 (byte) */
     #videoMemorySize = 0;
+    #uniformData;
+    #uniformDataF32;
+    #uniformDataU32;
     constructor(view) {
         this.#view = view;
         this.#init();
@@ -112,6 +115,12 @@ class PostEffectManager {
             effect.clear();
         });
     }
+    #updateSystemUniformData(valueLust) {
+        valueLust.forEach(({ key, value, dataView, targetMembers }) => {
+            const info = targetMembers[key];
+            dataView.set(typeof value === 'number' ? [value] : value, info.uniformOffset / info.View.BYTES_PER_ELEMENT);
+        });
+    }
     #updateSystemUniforms() {
         const { inverseProjectionMatrix, projectionMatrix, rawCamera, redGPUContext, scene } = this.#view;
         const { gpuDevice } = redGPUContext;
@@ -119,28 +128,77 @@ class PostEffectManager {
         const structInfo = this.#postEffectSystemUniformBufferStructInfo;
         const gpuBuffer = this.#postEffectSystemUniformBuffer.gpuBuffer;
         const camera2DYn = rawCamera instanceof Camera2D;
-        console.log(structInfo);
+        // console.log(structInfo);
         const projectionCameraMatrix = mat4.multiply(temp, projectionMatrix, cameraMatrix);
-        [
-            { key: 'projectionMatrix', value: projectionMatrix },
-            { key: 'projectionCameraMatrix', value: projectionCameraMatrix },
-            { key: 'inverseProjectionMatrix', value: inverseProjectionMatrix },
-            { key: 'inverseProjectionCameraMatrix', value: mat4.invert(temp2, projectionCameraMatrix) },
-        ].forEach(({ key, value }) => {
-            gpuDevice.queue.writeBuffer(gpuBuffer, structInfo.members[key].uniformOffset, new structInfo.members[key].View(value));
-        });
-        // 카메라 시스템 유니폼 업데이트
-        [
-            { key: 'cameraMatrix', value: cameraMatrix },
-            { key: 'inverseCameraMatrix', value: mat4.invert(temp2, cameraMatrix) },
-            { key: 'cameraPosition', value: cameraPosition },
-            { key: 'nearClipping', value: [camera2DYn ? 0 : rawCamera.nearClipping] },
-            { key: 'farClipping', value: [camera2DYn ? 0 : rawCamera.farClipping] },
-            //@ts-ignore
-            { key: 'fieldOfView', value: rawCamera.fieldOfView * Math.PI / 180 },
-        ].forEach(({ key, value }) => {
-            gpuDevice.queue.writeBuffer(gpuBuffer, structInfo.members.camera.members[key].uniformOffset, new structInfo.members.camera.members[key].View(value));
-        });
+        {
+            const { members } = structInfo;
+            const cameraMembers = members.camera.members;
+            this.#updateSystemUniformData([
+                {
+                    key: 'projectionMatrix',
+                    value: projectionMatrix,
+                    dataView: this.#uniformDataF32,
+                    targetMembers: members
+                },
+                {
+                    key: 'projectionCameraMatrix',
+                    value: projectionCameraMatrix,
+                    dataView: this.#uniformDataF32,
+                    targetMembers: members
+                },
+                {
+                    key: 'inverseProjectionMatrix',
+                    value: inverseProjectionMatrix,
+                    dataView: this.#uniformDataF32,
+                    targetMembers: members
+                },
+                {
+                    key: 'inverseProjectionCameraMatrix',
+                    value: mat4.invert(temp2, projectionCameraMatrix),
+                    dataView: this.#uniformDataF32,
+                    targetMembers: members
+                },
+                // 카메라 시스템 유니폼 업데이트
+                {
+                    key: 'cameraMatrix',
+                    value: cameraMatrix,
+                    dataView: this.#uniformDataF32,
+                    targetMembers: cameraMembers
+                },
+                {
+                    key: 'inverseCameraMatrix',
+                    value: mat4.invert(temp2, cameraMatrix),
+                    dataView: this.#uniformDataF32,
+                    targetMembers: cameraMembers
+                },
+                {
+                    key: 'cameraPosition',
+                    value: cameraPosition,
+                    dataView: this.#uniformDataF32,
+                    targetMembers: cameraMembers
+                },
+                {
+                    key: 'nearClipping',
+                    value: camera2DYn ? 0 : rawCamera.nearClipping,
+                    dataView: this.#uniformDataF32,
+                    targetMembers: cameraMembers
+                },
+                {
+                    key: 'farClipping',
+                    value: camera2DYn ? 0 : rawCamera.farClipping,
+                    dataView: this.#uniformDataF32,
+                    targetMembers: cameraMembers
+                },
+                {
+                    key: 'fieldOfView',
+                    //@ts-ignore
+                    value: rawCamera.fieldOfView * Math.PI / 180,
+                    dataView: this.#uniformDataF32,
+                    targetMembers: cameraMembers
+                },
+            ]);
+        }
+        gpuDevice.queue.writeBuffer(gpuBuffer, 0, this.#uniformData);
         // console.log('structInfo',view.scene.directionalLights)
     }
     #init() {
@@ -157,6 +215,9 @@ class PostEffectManager {
         const postEffectSystemUniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength);
         this.#postEffectSystemUniformBufferStructInfo = UNIFORM_STRUCT;
         this.#postEffectSystemUniformBuffer = new UniformBuffer(redGPUContext, postEffectSystemUniformData, `${this.#view.name}_POST_EFFECT_SYSTEM_UNIFORM_BUFFER`);
+        this.#uniformData = new ArrayBuffer(this.#postEffectSystemUniformBufferStructInfo.endOffset);
+        this.#uniformDataF32 = new Float32Array(this.#uniformData);
+        this.#uniformDataU32 = new Uint32Array(this.#uniformData);
     }
     #calcVideoMemory() {
         const texture = this.#storageTexture;

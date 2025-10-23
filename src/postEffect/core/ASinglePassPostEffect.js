@@ -157,7 +157,7 @@ class ASinglePassPostEffect {
     update(deltaTime) {
     }
     updateUniform(key, value) {
-        this.uniformBuffer.writeBuffer(this.uniformsInfo
+        this.uniformBuffer.writeOnlyBuffer(this.uniformsInfo
             .members[key], value);
     }
     #createBindGroups(view, sourceTextureInfoList, targetOutputView, useMSAA, redGPUContext, gpuDevice) {

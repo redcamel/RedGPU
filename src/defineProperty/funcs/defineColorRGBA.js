@@ -22,11 +22,11 @@ function defineColorRGBA(propertyKey, initValue = '#fff', forFragment = true) {
                     if (gpuRenderInfo) {
                         if (forFragment) {
                             const { fragmentUniformInfo, fragmentUniformBuffer } = gpuRenderInfo;
-                            fragmentUniformBuffer.writeBuffer(fragmentUniformInfo.members[propertyKey], this[symbol].rgbaNormal);
+                            fragmentUniformBuffer.writeOnlyBuffer(fragmentUniformInfo.members[propertyKey], this[symbol].rgbaNormal);
                         }
                         else {
                             const { vertexUniformInfo, vertexUniformBuffer } = gpuRenderInfo;
-                            vertexUniformBuffer.writeBuffer(vertexUniformInfo.members[propertyKey], this[symbol].rgbaNormal);
+                            vertexUniformBuffer.writeOnlyBuffer(vertexUniformInfo.members[propertyKey], this[symbol].rgbaNormal);
                         }
                     }
                 });

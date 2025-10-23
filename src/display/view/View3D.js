@@ -1,9 +1,12 @@
+import { mat4 } from "gl-matrix";
+import Camera2D from "../../camera/camera/Camera2D";
 import GPU_ADDRESS_MODE from "../../gpuConst/GPU_ADDRESS_MODE";
 import GPU_COMPARE_FUNCTION from "../../gpuConst/GPU_COMPARE_FUNCTION";
 import PassClusterLightBound from "../../light/clusterLight/PassClusterLightBound";
 import PassClustersLight from "../../light/clusterLight/PassClustersLight";
 import PassClustersLightHelper from "../../light/clusterLight/PassClustersLightHelper";
 import PostEffectManager from "../../postEffect/PostEffectManager";
+import { keepLog } from "../../utils";
 import RenderViewStateData from "./core/RenderViewStateData";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
@@ -15,8 +18,12 @@ import DrawDebuggerPointLight from "../drawDebugger/light/DrawDebuggerPointLight
 import DrawDebuggerSpotLight from "../drawDebugger/light/DrawDebuggerSpotLight";
 import AView from "./core/AView";
 import ViewRenderTextureManager from "./core/ViewRenderTextureManager";
+import DrawDebuggerDirectionalLight from "../drawDebugger/light/DrawDebuggerDirectionalLight";
 const SHADER_INFO = parseWGSL(SystemCode.SYSTEM_UNIFORM);
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.systemUniforms;
+let temp = mat4.create();
+let temp2 = mat4.create();
+let temp3 = mat4.create();
 /**
  * 3D 렌더링 뷰 클래스입니다. AView를 확장하여 3D 장면 렌더링 기능을 제공합니다.
  *
@@ -139,6 +146,9 @@ class View3D extends AView {
      * @private
      */
     #prevIBL_irradianceTexture;
+    #uniformData;
+    #uniformDataF32;
+    #uniformDataU32;
     /**
      * View3D 인스턴스를 생성합니다.
      * 3D 렌더링에 필요한 모든 컴포넌트(조명, 포스트 이펙트, 리소스 관리)를 초기화합니다.
@@ -154,6 +164,10 @@ class View3D extends AView {
         this.#viewRenderTextureManager = new ViewRenderTextureManager(this);
         this.#renderViewStateData = new RenderViewStateData(this);
         this.#postEffectManager = new PostEffectManager(this);
+        keepLog(this.systemUniform_Vertex_StructInfo);
+        this.#uniformData = new ArrayBuffer(this.systemUniform_Vertex_StructInfo.endOffset);
+        this.#uniformDataF32 = new Float32Array(this.#uniformData);
+        this.#uniformDataU32 = new Uint32Array(this.#uniformData);
     }
     /**
      * 뷰 렌더 텍스처 매니저를 가져옵니다.
@@ -248,15 +262,16 @@ class View3D extends AView {
      * @param calcPointLightCluster - 포인트 라이트 클러스터 계산 여부 (기본값: false)
      * @param renderPath1ResultTextureView - 렌더 패스 1 결과 텍스처 뷰 (선택사항)
      */
-    update(view, shadowRender = false, calcPointLightCluster = false, renderPath1ResultTextureView) {
-        const { scene } = view;
+    update(shadowRender = false, calcPointLightCluster = false, renderPath1ResultTextureView) {
+        const { scene, redGPUContext } = this;
         const { shadowManager } = scene;
+        shadowManager.update(redGPUContext);
         const { directionalShadowManager } = shadowManager;
-        const ibl = view.ibl;
+        const ibl = this.ibl;
         const ibl_iblTexture = ibl?.iblTexture?.gpuTexture;
         const ibl_irradianceTexture = ibl?.irradianceTexture?.gpuTexture;
         let shadowDepthTextureView = shadowRender ? directionalShadowManager.shadowDepthTextureViewEmpty : directionalShadowManager.shadowDepthTextureView;
-        const index = view.redGPUContext.viewList.indexOf(view);
+        const index = this.redGPUContext.viewList.indexOf(this);
         const key = `${index}_${shadowRender ? 'shadowRender' : 'basic'}_2path${!!renderPath1ResultTextureView}`;
         if (index > -1) {
             let needResetBindGroup = true;
@@ -270,16 +285,9 @@ class View3D extends AView {
                     || !this.#passLightClusters);
             }
             if (needResetBindGroup)
-                this.#createVertexUniformBindGroup(key, shadowDepthTextureView, view.ibl, renderPath1ResultTextureView);
+                this.#createVertexUniformBindGroup(key, shadowDepthTextureView, this.ibl, renderPath1ResultTextureView);
             else
                 this.#systemUniform_Vertex_UniformBindGroup = this.#prevInfoList[key].vertexUniformBindGroup;
-            [
-                { key: 'useIblTexture', value: [ibl_iblTexture ? 1 : 0] },
-                { key: 'time', value: [view.renderViewStateData.timestamp || 0] },
-                { key: 'isView3D', value: [this.constructor === View3D ? 1 : 0] },
-            ].forEach(({ key, value }) => {
-                this.redGPUContext.gpuDevice.queue.writeBuffer(this.#systemUniform_Vertex_UniformBuffer.gpuBuffer, this.#systemUniform_Vertex_StructInfo.members[key].uniformOffset, new this.#systemUniform_Vertex_StructInfo.members[key].View(value));
-            });
             this.#prevInfoList[key] = {
                 ibl,
                 ibl_iblTexture,
@@ -290,6 +298,206 @@ class View3D extends AView {
             };
         }
         this.#updateClusters(calcPointLightCluster);
+        this.#updateSystemUniform();
+    }
+    #updateSystemUniformData(valueLust) {
+        valueLust.forEach(({ key, value, dataView, targetMembers }) => {
+            const info = targetMembers[key];
+            dataView.set(typeof value === 'number' ? [value] : value, info.uniformOffset / info.View.BYTES_PER_ELEMENT);
+        });
+    }
+    #updateSystemUniform() {
+        // 시스템 유니폼 업데이트
+        const { inverseProjectionMatrix, noneJitterProjectionMatrix, projectionMatrix, rawCamera, } = this;
+        const { redGPUContext, systemUniform_Vertex_UniformBuffer } = this;
+        const { gpuDevice } = redGPUContext;
+        const { lightManager, shadowManager } = this.scene;
+        const { modelMatrix: cameraMatrix, position: cameraPosition } = rawCamera;
+        const structInfo = this.systemUniform_Vertex_StructInfo;
+        const { gpuBuffer } = systemUniform_Vertex_UniformBuffer;
+        const camera2DYn = rawCamera instanceof Camera2D;
+        const { members } = structInfo;
+        {
+            const { members } = structInfo;
+            const cameraMembers = members.camera.members;
+            this.#updateSystemUniformData([
+                {
+                    key: 'projectionMatrix',
+                    value: projectionMatrix,
+                    dataView: this.#uniformDataF32,
+                    targetMembers: members
+                },
+                {
+                    key: 'projectionCameraMatrix',
+                    value: mat4.multiply(temp, projectionMatrix, cameraMatrix),
+                    dataView: this.#uniformDataF32,
+                    targetMembers: members
+                },
+                {
+                    key: 'noneJitterProjectionMatrix',
+                    value: noneJitterProjectionMatrix,
+                    dataView: this.#uniformDataF32,
+                    targetMembers: members
+                },
+                {
+                    key: 'noneJitterProjectionCameraMatrix',
+                    value: mat4.multiply(temp2, noneJitterProjectionMatrix, cameraMatrix),
+                    dataView: this.#uniformDataF32,
+                    targetMembers: members
+                },
+                {
+                    key: 'inverseProjectionMatrix',
+                    value: inverseProjectionMatrix,
+                    dataView: this.#uniformDataF32,
+                    targetMembers: members
+                },
+                {
+                    key: 'prevProjectionCameraMatrix',
+                    value: mat4.multiply(temp3, noneJitterProjectionMatrix, cameraMatrix),
+                    dataView: this.#uniformDataF32,
+                    targetMembers: members
+                },
+                {
+                    key: 'resolution',
+                    value: [this.pixelRectObject.width, this.pixelRectObject.height],
+                    dataView: this.#uniformDataF32,
+                    targetMembers: members
+                },
+                // 카메라 시스템 유니폼 업데이트
+                {
+                    key: 'cameraMatrix',
+                    value: cameraMatrix,
+                    dataView: this.#uniformDataF32,
+                    targetMembers: cameraMembers
+                },
+                {
+                    key: 'cameraPosition',
+                    value: cameraPosition,
+                    dataView: this.#uniformDataF32,
+                    targetMembers: cameraMembers
+                },
+                {
+                    key: 'nearClipping',
+                    value: camera2DYn ? 0 : rawCamera.nearClipping,
+                    dataView: this.#uniformDataF32,
+                    targetMembers: cameraMembers
+                },
+                {
+                    key: 'farClipping',
+                    value: camera2DYn ? 0 : rawCamera.farClipping,
+                    dataView: this.#uniformDataF32,
+                    targetMembers: cameraMembers
+                },
+                //
+                {
+                    key: 'useIblTexture',
+                    value: this.ibl?.iblTexture?.gpuTexture ? 1 : 0,
+                    dataView: this.#uniformDataU32,
+                    targetMembers: members
+                },
+                {
+                    key: 'time',
+                    value: this.renderViewStateData.timestamp || 0,
+                    dataView: this.#uniformDataF32,
+                    targetMembers: members
+                },
+                {
+                    key: 'isView3D',
+                    value: this.constructor === View3D ? 1 : 0,
+                    dataView: this.#uniformDataU32,
+                    targetMembers: members
+                },
+                // shadow
+                {
+                    key: 'shadowDepthTextureSize',
+                    value: shadowManager.directionalShadowManager.shadowDepthTextureSize,
+                    dataView: this.#uniformDataU32,
+                    targetMembers: members
+                },
+                {
+                    key: 'bias',
+                    value: shadowManager.directionalShadowManager.bias,
+                    dataView: this.#uniformDataF32,
+                    targetMembers: members
+                },
+                // directionalLight
+                {
+                    key: 'directionalLightCount',
+                    value: lightManager.directionalLightCount,
+                    dataView: this.#uniformDataU32,
+                    targetMembers: members
+                },
+                {
+                    key: 'directionalLightProjectionViewMatrix',
+                    value: lightManager.getDirectionalLightProjectionViewMatrix(this),
+                    dataView: this.#uniformDataF32,
+                    targetMembers: members
+                },
+                {
+                    key: 'directionalLightProjectionMatrix',
+                    value: lightManager.getDirectionalLightProjectionMatrix(this),
+                    dataView: this.#uniformDataF32,
+                    targetMembers: members
+                },
+                {
+                    key: 'directionalLightViewMatrix',
+                    value: lightManager.getDirectionalLightViewMatrix(this),
+                    dataView: this.#uniformDataF32,
+                    targetMembers: members
+                },
+            ]);
+        }
+        {
+            lightManager.directionalLights.forEach((light, index) => {
+                const { directionalLights } = members;
+                if (light.enableDebugger) {
+                    if (!light.drawDebugger)
+                        light.drawDebugger = new DrawDebuggerDirectionalLight(redGPUContext, light);
+                    light.drawDebugger.render(this.renderViewStateData);
+                }
+                const targetMembers = directionalLights.memberList[index];
+                this.#updateSystemUniformData([
+                    {
+                        key: 'direction',
+                        value: light.direction,
+                        dataView: this.#uniformDataF32,
+                        targetMembers
+                    },
+                    {
+                        key: 'color',
+                        value: light.color.rgbNormal,
+                        dataView: this.#uniformDataF32,
+                        targetMembers
+                    },
+                    {
+                        key: 'intensity',
+                        value: light.intensity,
+                        dataView: this.#uniformDataF32,
+                        targetMembers
+                    }
+                ]);
+            });
+        }
+        {
+            const light = lightManager.ambientLight;
+            const { ambientLight } = members;
+            const targetMembers = ambientLight.members;
+            this.#updateSystemUniformData([
+                {
+                    key: 'color',
+                    value: light.color.rgbNormal,
+                    dataView: this.#uniformDataF32,
+                    targetMembers
+                },
+                {
+                    key: 'intensity',
+                    value: light.intensity,
+                    dataView: this.#uniformDataF32,
+                    targetMembers
+                },
+            ]);
+        }
+        gpuDevice.queue.writeBuffer(gpuBuffer, 0, this.#uniformData);
     }
     /**
      * 정점 유니폼 바인드 그룹을 생성합니다.

@@ -2,7 +2,10 @@ import validateNumber from "../../runtimeChecker/validateFunc/validateNumber";
 import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
 /**
- * The RedGPUContextSizeManager class manages the size and scale of the RedGPUContext.
+ * `RedGPUContextSizeManager` 클래스는 RedGPUContext의 캔버스 크기 및 렌더링 스케일을 관리합니다.
+ * - width, height는 픽셀(px) 또는 백분율(%)로 설정할 수 있습니다.
+ * - 렌더링 스케일(renderScale)은 렌더링 해상도를 조정하는 데 사용됩니다.
+ * - 캔버스 크기 변경 시 관련 뷰(View3D)들의 크기도 자동으로 업데이트됩니다.
  */
 class RedGPUContextSizeManager {
     #width;
@@ -10,12 +13,10 @@ class RedGPUContextSizeManager {
     #redGPUContext;
     #pixelRectArray = [0, 0, 0, 0];
     #htmlCanvas;
-    #offscreenCanvas;
     #renderScale = 1;
     constructor(redGPUContext, width = '100%', height = '100%') {
         this.#redGPUContext = redGPUContext;
         this.#htmlCanvas = redGPUContext.htmlCanvas;
-        this.#offscreenCanvas = redGPUContext.offscreenCanvas;
         this.#htmlCanvas.style.boxSizing = 'border-box';
         this.#width = width;
         this.#height = height;
@@ -214,10 +215,6 @@ class RedGPUContextSizeManager {
         cvs.height = height * this.#renderScale * window.devicePixelRatio;
         style.width = `${width}px`;
         style.height = `${height}px`;
-        if (this.#offscreenCanvas) {
-            this.#offscreenCanvas.width = cvs.width;
-            this.#offscreenCanvas.height = cvs.height;
-        }
     }
 }
 export default RedGPUContextSizeManager;

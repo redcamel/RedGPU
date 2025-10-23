@@ -1,6 +1,12 @@
 import calculateTextureByteSize from "../utils/texture/calculateTextureByteSize";
 import PickingEvent from "./core/PickingEvent";
 import PICKING_EVENT_TYPE from "./PICKING_EVENT_TYPE";
+/**
+ * `PickingManager` 클래스는 마우스 이벤트를 처리하고, 특정 객체에 대한 상호작용을 관리합니다.
+ * - 마우스 클릭, 이동, 오버 등의 이벤트를 감지하고 처리합니다.
+ * - GPU 텍스처를 사용하여 픽셀 단위의 객체 선택을 구현합니다.
+ * - 이벤트 발생 시 해당 객체에 이벤트를 전달합니다.
+ */
 class PickingManager {
     lastMouseEvent;
     lastMouseClickEvent;

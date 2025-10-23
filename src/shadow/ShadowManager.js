@@ -5,6 +5,9 @@ class ShadowManager {
     get directionalShadowManager() {
         return this.#directionalShadowManager;
     }
+    update(redGPUContext) {
+        this.#directionalShadowManager.update(redGPUContext);
+    }
 }
 Object.freeze(ShadowManager);
 export default ShadowManager;

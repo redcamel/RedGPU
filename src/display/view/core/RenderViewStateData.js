@@ -34,12 +34,11 @@ class RenderViewStateData {
     viewRenderTime;
     /** 현재 뷰포트 크기 및 위치 정보 */
     viewportSize;
+    viewIndex;
     /** 렌더 텍스처가 사용하는 비디오 메모리 양 (바이트) */
     usedVideoMemory;
     /** 현재 사용 중인 GPU 렌더 패스 인코더 */
     currentRenderPassEncoder;
-    /** 컴퓨트 작업을 위한 GPU 커맨드 인코더 */
-    computeCommandEncoder;
     /** 렌더링 프레임의 현재 타임스탬프 */
     timestamp;
     /** 컬링을 위한 프러스텀 평면 배열, 프러스텀 컬링이 비활성화된 경우 null */
@@ -51,19 +50,19 @@ class RenderViewStateData {
     /** 머티리얼로부터 변경된 버텍스 유니폼의 맵 */
     dirtyVertexUniformFromMaterial = {};
     /** 알파 렌더링 레이어의 객체 배열 */
-    alphaLayer = [];
+    bundleListAlphaLayer = [];
     /** 투명 렌더링 레이어의 객체 배열 */
-    transparentLayer = [];
+    bundleListTransparentLayer = [];
     /** 파티클 렌더링 레이어의 객체 배열 */
-    particleLayer = [];
+    bundleListParticleLayer = [];
     /** 2D 패스 렌더링 레이어의 객체 배열 */
-    render2PathLayer = [];
+    bundleListRender2PathLayer = [];
     /** 처리할 스킨 메시 목록 */
     skinList = [];
     /** 처리할 애니메이션 목록 */
     animationList = [];
     /** 효율적인 렌더링을 위한 렌더 번들 목록 */
-    renderBundleList = [];
+    bundleListBasicList = [];
     /** 렌더링 시작을 표시하는 성능 타임스탬프 */
     startTime;
     /** 씬이 2D 모드인지 여부 */
@@ -95,19 +94,18 @@ class RenderViewStateData {
      * 또한 비디오 메모리 사용량을 계산하고 뷰 설정에 따라 컬링 매개변수를 구성합니다.
      *
      * @param {GPURenderPassEncoder} viewRenderPassEncoder - 현재 프레임의 렌더 패스 인코더
-     * @param {GPUCommandEncoder} computeCommandEncoder - 컴퓨트 작업을 위한 커맨드 인코더
      * @param {number} time - 프레임의 현재 타임스탬프
      *
      * @throws {Error} 잘못된 매개변수가 제공되거나 필수 뷰 속성이 없는 경우
      * @throws {Error} 텍스처 크기 계산이 실패한 경우
      */
-    reset(viewRenderPassEncoder, computeCommandEncoder, time) {
+    reset(viewRenderPassEncoder, time) {
         if (!time || !this.#view) {
             throw new Error('Invalid parameters provided');
         }
         const view = this.#view;
         const { useFrustumCulling, frustumPlanes, scene, postEffectManager, pickingManager, viewRenderTextureManager } = view;
-        const { gBufferColorTexture, depthTexture, gBufferColorResolveTexture, renderPath1ResultTexture, } = view.viewRenderTextureManager;
+        const { gBufferColorTexture, depthTexture, } = view.viewRenderTextureManager;
         const { shadowManager } = scene;
         if (!gBufferColorTexture || !depthTexture) {
             throw new Error('Invalid view properties');
@@ -124,20 +122,23 @@ class RenderViewStateData {
         this.numPoints = 0;
         this.viewRenderTime = 0;
         this.currentRenderPassEncoder = viewRenderPassEncoder;
-        this.computeCommandEncoder = computeCommandEncoder;
         this.timestamp = time;
         this.prevVertexGpuBuffer = null;
         this.prevFragmentUniformBindGroup = null;
         this.dirtyVertexUniformFromMaterial = {};
-        this.alphaLayer = [];
-        this.transparentLayer = [];
-        this.particleLayer = [];
-        this.render2PathLayer = [];
-        this.skinList = [];
-        this.animationList = [];
-        this.renderBundleList = [];
+        //
+        this.bundleListAlphaLayer.length = 0;
+        this.bundleListTransparentLayer.length = 0;
+        this.bundleListParticleLayer.length = 0;
+        this.bundleListRender2PathLayer.length = 0;
+        this.bundleListBasicList.length = 0;
+        //
+        this.skinList.length = 0;
+        this.animationList.length = 0;
+        //
         this.startTime = performance.now();
         this.isScene2DMode = view.camera instanceof Camera2D;
+        this.viewIndex = view.redGPUContext.getViewIndex(view);
         this.viewportSize = {
             x: view.x,
             y: view.y,

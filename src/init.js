@@ -79,7 +79,7 @@ const init = async (canvas, onWebGPUInitialized, onFailInitialized, onDestroy, a
             return;
         }
         try {
-            const redGPUContext = new RedGPUContext(canvas, null, adapter, device, context, alphaMode);
+            const redGPUContext = new RedGPUContext(canvas, adapter, device, context, alphaMode);
             onWebGPUInitialized(redGPUContext);
             device.addEventListener('uncapturederror', (event) => {
                 console.warn('TODO A WebGPU error was not captured:', event);

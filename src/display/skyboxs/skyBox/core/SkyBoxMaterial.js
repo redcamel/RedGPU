@@ -4,6 +4,12 @@ import Sampler from "../../../../resources/sampler/Sampler";
 import parseWGSL from "../../../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from "../shader/fragment.wgsl";
 const SHADER_INFO = parseWGSL(fragmentModuleSource);
+/**
+ * SkyBoxMaterial - SkyBox 렌더링용 Material
+ *
+ * @class
+ * @extends {ABitmapBaseMaterial}
+ */
 class SkyBoxMaterial extends ABitmapBaseMaterial {
     /**
      * Indicates if the pipeline is dirty or not.

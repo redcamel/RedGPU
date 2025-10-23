@@ -1,10 +1,12 @@
 import { WgslReflect } from "wgsl_reflect";
 import preprocessWGSL from "./core/preprocessWGSL";
 import WGSLUniformTypes from "./core/WGSLUniformTypes";
+import ensureVertexIndexBuiltin from "./core/ensureVertexIndexBuiltin";
 const createUniformMember = (curr, start, typeName) => {
     const UniformTypeInfo = WGSLUniformTypes[typeName];
     return {
         uniformOffset: curr.offset + start,
+        uniformOffsetForData: curr.offset,
         stride: curr.stride,
         isArray: curr.isArray,
         typeInfo: UniformTypeInfo,
@@ -18,8 +20,7 @@ const processMembers = (members, start = 0, end = 0) => {
         const { type, offset, size, stride, count, isArray } = curr;
         const { format } = type;
         const typeName = type.name === 'array' ? `${format.name}${format.format ? `${format.format.name}` : ''}` : `${type.name}${format ? `${format.name}` : ''}`;
-        if (index === 0)
-            startOffset = offset;
+        startOffset = start;
         endOffset = offset + size;
         prev[curr.name] = createUniformMember(curr, start, typeName);
         if (isArray && format.members) {
@@ -90,7 +91,10 @@ const reflectCache = new Map();
  *   conditionalBlocks: 조건부 분기 정보
  * }
  */
+const keepLog = console.log.bind(console);
 const parseWGSL = (code) => {
+    code = ensureVertexIndexBuiltin(code);
+    // keepLog('WGSL 코드 (vertex_index 보장됨):', code);
     const { defaultSource, shaderSourceVariant, conditionalBlocks, cacheKey } = preprocessWGSL(code);
     // 리플렉트 캐시 확인
     const cachedReflect = reflectCache.get(cacheKey);
@@ -105,6 +109,7 @@ const parseWGSL = (code) => {
         const reflect = new WgslReflect(defaultSource);
         // 리플렉트 결과 처리
         reflectResult = {
+            // signatureKey : makeSignatureKey(reflect.entry.vertex),
             uniforms: { ...processUniforms(reflect.uniforms) },
             storage: { ...processStorages(reflect.storage) },
             samplers: reflect.samplers,

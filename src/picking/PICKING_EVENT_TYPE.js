@@ -1,3 +1,6 @@
+/**
+ * Picking event types
+ */
 const PICKING_EVENT_TYPE = {
     MOVE: 'move',
     DOWN: 'down',

@@ -171,7 +171,7 @@ class TAA {
         this.#currentMSAAState = null;
     }
     updateUniform(key, value) {
-        this.#uniformBuffer.writeBuffer(this.#uniformsInfo.members[key], value);
+        this.#uniformBuffer.writeOnlyBuffer(this.#uniformsInfo.members[key], value);
     }
     #createTAAShaderCode() {
         const createCode = (useMSAA) => {

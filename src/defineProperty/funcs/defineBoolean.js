@@ -5,13 +5,13 @@ function createSetter(propertyKey, symbol, isFragment) {
         const { gpuRenderInfo } = this;
         if (isFragment) {
             const { fragmentUniformInfo, fragmentUniformBuffer } = gpuRenderInfo;
-            fragmentUniformBuffer.writeBuffer(fragmentUniformInfo.members[propertyKey], newValue ? 1 : 0);
+            fragmentUniformBuffer.writeOnlyBuffer(fragmentUniformInfo.members[propertyKey], newValue ? 1 : 0);
             this.dirtyPipeline = true;
         }
         else if (gpuRenderInfo) {
             const { vertexUniformInfo, vertexUniformBuffer } = gpuRenderInfo;
             if (vertexUniformInfo.members[propertyKey]) {
-                vertexUniformBuffer.writeBuffer(vertexUniformInfo.members[propertyKey], newValue ? 1 : 0);
+                vertexUniformBuffer.writeOnlyBuffer(vertexUniformInfo.members[propertyKey], newValue ? 1 : 0);
                 this.dirtyPipeline = true;
             }
         }

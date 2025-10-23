@@ -23,13 +23,11 @@ class RedGPUContextSizeManager {
 	#redGPUContext: RedGPUContext
 	#pixelRectArray: [number, number, number, number] = [0, 0, 0, 0]
 	readonly #htmlCanvas: HTMLCanvasElement
-	readonly #offscreenCanvas: OffscreenCanvas
 	#renderScale: number = 1
 
 	constructor(redGPUContext: RedGPUContext, width: number | string = '100%', height: number | string = '100%') {
 		this.#redGPUContext = redGPUContext
 		this.#htmlCanvas = redGPUContext.htmlCanvas
-		this.#offscreenCanvas = redGPUContext.offscreenCanvas
 		this.#htmlCanvas.style.boxSizing = 'border-box'
 		this.#width = width
 		this.#height = height
@@ -248,10 +246,7 @@ class RedGPUContextSizeManager {
 		cvs.height = height * this.#renderScale * window.devicePixelRatio;
 		style.width = `${width}px`;
 		style.height = `${height}px`;
-		if(	this.#offscreenCanvas) {
-			this.#offscreenCanvas.width = cvs.width;
-			this.#offscreenCanvas.height = cvs.height;
-		}
+
 	}
 }
 
