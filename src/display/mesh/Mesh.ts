@@ -905,7 +905,7 @@ class Mesh extends MeshBase {
                 }
                 dirtyTransformForChildren = true
                 this.#needUpdateUniform = false
-                keepLog('진짜 버퍼업로드', this.name)
+                // keepLog('진짜 버퍼업로드', this.name)
                 gpuDevice.queue.writeBuffer(
                     vertexUniformGPUBuffer,
                     vertexUniformInfoMembers.matrixList.startOffset,
