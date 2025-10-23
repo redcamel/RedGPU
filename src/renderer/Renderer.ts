@@ -145,8 +145,8 @@ class Renderer {
         renderViewStateData.currentRenderPassEncoder = viewRenderPassEncoder
         if (skybox) skybox.render(renderViewStateData)
         if (axis) axis.render(renderViewStateData)
-        if (grid) grid.render(renderViewStateData)
         renderBasicLayer(view, viewRenderPassEncoder)
+        if (grid) grid.render(renderViewStateData)
         renderAlphaLayer(view, viewRenderPassEncoder)
         viewRenderPassEncoder.end()
     }
