@@ -23,9 +23,8 @@ struct SystemUniform {
 	  inverseProjectionMatrix:mat4x4<f32>,
 	  prevProjectionCameraMatrix:mat4x4<f32>,
 	  resolution:vec2<f32>,
-	  viewPosition:vec2<f32>,
-	  //
-	  camera:Camera,
+      //
+      camera:Camera,
 	  //
 	  time:f32,
 	  useIblTexture:u32,
@@ -33,12 +32,14 @@ struct SystemUniform {
 	  //
 	  shadowDepthTextureSize:u32,
 	  bias:f32,
+
+
       //
       directionalLightCount:u32,
-      directionalLights:array<DirectionalLight,3>,
       directionalLightProjectionViewMatrix:mat4x4<f32>,
       directionalLightProjectionMatrix:mat4x4<f32>,
       directionalLightViewMatrix:mat4x4<f32>,
+      directionalLights:array<DirectionalLight,3>,
 	  //
 	  ambientLight:AmbientLight,
 

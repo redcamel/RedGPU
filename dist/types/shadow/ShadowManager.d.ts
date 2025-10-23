@@ -4,6 +4,6 @@ declare class ShadowManager {
     #private;
     constructor();
     get directionalShadowManager(): DirectionalShadowManager;
-    updateViewSystemUniforms(redGPUContext: RedGPUContext): void;
+    update(redGPUContext: RedGPUContext): void;
 }
 export default ShadowManager;

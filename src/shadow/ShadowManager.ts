@@ -9,7 +9,7 @@ class ShadowManager {
 	get directionalShadowManager(): DirectionalShadowManager {
 		return this.#directionalShadowManager;
 	}
-	updateViewSystemUniforms(redGPUContext:RedGPUContext){
+	update(redGPUContext:RedGPUContext){
 		this.#directionalShadowManager.update(redGPUContext)
 	}
 }

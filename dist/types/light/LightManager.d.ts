@@ -1,3 +1,4 @@
+import { mat4 } from "gl-matrix";
 import View3D from "../display/view/View3D";
 import AmbientLight from "./lights/AmbientLight";
 import DirectionalLight from "./lights/DirectionalLight";
@@ -108,10 +109,27 @@ declare class LightManager {
      */
     removeAllLight(): void;
     /**
-     * View3D에 필요한 시스템 유니폼 버퍼를 업데이트합니다.
-     *
-     * @param view 업데이트 대상 View3D 인스턴스
+     * 방향성 조명의 투영-뷰 행렬을 반환합니다.
+     * @param view View3D 인스턴스
+     * @returns mat4 투영-뷰 행렬
+     * @private
      */
-    updateViewSystemUniforms(view: View3D): void;
+    getDirectionalLightProjectionViewMatrix(view: View3D): mat4;
+    /**
+     * 방향성 조명의 투영(orthographic) 행렬을 계산하여 반환합니다.
+     * 카메라 위치와의 거리를 기반으로 ortho 영역( left, right, bottom, top, near, far )을 결정합니다.
+     * @param view View3D 인스턴스
+     * @returns mat4 투영 행렬
+     * @private
+     */
+    getDirectionalLightProjectionMatrix(view: View3D): mat4;
+    /**
+     * 메인 방향성 조명의 뷰(lookAt) 행렬을 계산하여 반환합니다.
+     * 씬에서 첫 번째 DirectionalLight의 방향을 사용하여 라이트 위치를 계산하고, 원점(origin)을 바라보도록 합니다.
+     * @param view View3D 인스턴스
+     * @returns mat4 뷰 행렬
+     * @private
+     */
+    getDirectionalLightViewMatrix(view: View3D): mat4;
 }
 export default LightManager;

@@ -234,56 +234,7 @@ class LightManager {
 		this.#ambientLight = null
 	}
 
-	/**
-	 * View3D에 필요한 시스템 유니폼 버퍼를 업데이트합니다.
-	 *
-	 * @param view 업데이트 대상 View3D 인스턴스
-	 */
-	updateViewSystemUniforms(view: View3D) {
-		const {scene, redGPUContext} = view
-		const structInfo = view.systemUniform_Vertex_StructInfo;
-		const {systemUniform_Vertex_UniformBuffer} = view;
-		const {members} = structInfo;
-		const {lightManager, shadowManager} = scene
-		const {directionalShadowManager} = shadowManager;
-		[
-			[members.directionalLightCount, lightManager.directionalLightCount],
-			[members.directionalLightProjectionViewMatrix, this.#getDirectionalLightProjectionViewMatrix(view)],
-			[members.directionalLightProjectionMatrix, this.#getDirectionalLightProjectionMatrix(view)],
-			[members.directionalLightViewMatrix, this.#getMainDirectionalLightViewMatrix(view)],
-			[members.shadowDepthTextureSize, directionalShadowManager.shadowDepthTextureSize],
-			[members.bias, directionalShadowManager.bias],
-			//
-		].forEach(v => {
-			systemUniform_Vertex_UniformBuffer.writeOnlyBuffer(v[0], v[1])
-		});
-		lightManager.directionalLights.forEach((light: DirectionalLight, index) => {
-			const {directionalLights} = members
-			const {direction, color, intensity} = directionalLights.memberList[index]
-			if (light.enableDebugger) {
-				if (!light.drawDebugger) light.drawDebugger = new DrawDebuggerDirectionalLight(redGPUContext, light)
-				light.drawDebugger.render(view.renderViewStateData)
-			}
-			[
-				[direction, light.direction],
-				[color, light.color.rgbNormal],
-				[intensity, light.intensity],
-			].forEach(v => {
-				systemUniform_Vertex_UniformBuffer.writeOnlyBuffer(v[0], v[1])
-			});
-		})
-		if (lightManager.ambientLight) {
-			const light = view.scene.lightManager.ambientLight
-			const {ambientLight} = members
-			const {color, intensity} = ambientLight.members;
-			[
-				[color, light.color.rgbNormal],
-				[intensity, light.intensity],
-			].forEach(v => {
-				systemUniform_Vertex_UniformBuffer.writeOnlyBuffer(v[0], v[1])
-			})
-		}
-	}
+
 
 	/**
 	 * 방향성 조명의 투영-뷰 행렬을 반환합니다.
@@ -291,8 +242,8 @@ class LightManager {
 	 * @returns mat4 투영-뷰 행렬
 	 * @private
 	 */
-	#getDirectionalLightProjectionViewMatrix(view: View3D): mat4 {
-		return mat4.multiply(mat4.create(), this.#getDirectionalLightProjectionMatrix(view), this.#getMainDirectionalLightViewMatrix(view));
+	getDirectionalLightProjectionViewMatrix(view: View3D): mat4 {
+		return mat4.multiply(mat4.create(), this.getDirectionalLightProjectionMatrix(view), this.getDirectionalLightViewMatrix(view));
 	}
 
 	/**
@@ -302,7 +253,7 @@ class LightManager {
 	 * @returns mat4 투영 행렬
 	 * @private
 	 */
-	#getDirectionalLightProjectionMatrix(view: View3D): mat4 {
+	getDirectionalLightProjectionMatrix(view: View3D): mat4 {
 		const lightProjectionMatrix = mat4.create()
 		const cameraPosition = view.rawCamera instanceof Camera2D ? vec3.fromValues(0, 0, 0) : vec3.fromValues(
 			view.rawCamera.x,
@@ -327,7 +278,7 @@ class LightManager {
 	 * @returns mat4 뷰 행렬
 	 * @private
 	 */
-	#getMainDirectionalLightViewMatrix(view: View3D): mat4 {
+	getDirectionalLightViewMatrix(view: View3D): mat4 {
 		mat4.identity(this.#lightProjectionMatrix)
 		const cameraPosition = view.rawCamera instanceof Camera2D ? vec3.fromValues(0, 0, 0) : vec3.fromValues(
 			view.rawCamera.x,
