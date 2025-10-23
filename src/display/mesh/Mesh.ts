@@ -751,7 +751,7 @@ class Mesh extends MeshBase {
 		if (currentDirtyPipeline || currentMaterial?.dirtyPipeline || dirtyVertexUniformFromMaterial[currentMaterialUUID]) {
 			dirtyVertexUniformFromMaterial[currentMaterialUUID] = true
 		}
-        keepLog(this.gpuRenderInfo?.vertexStructInfo)
+        // keepLog(this.gpuRenderInfo?.vertexStructInfo)
 		if (currentGeometry) {
 			renderViewStateData.num3DObjects++
 			if (antialiasingManager.changedMSAA) {
