@@ -31,6 +31,7 @@ const SHADER_INFO = parseWGSL(SystemCode.SYSTEM_UNIFORM)
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.systemUniforms;
 let temp = mat4.create()
 let temp2 = mat4.create()
+let temp3 = mat4.create()
 
 /**
  * 3D 렌더링 뷰 클래스입니다. AView를 확장하여 3D 장면 렌더링 기능을 제공합니다.
@@ -381,6 +382,13 @@ class View3D extends AView {
                     dataView: this.#uniformDataF32,
                     targetMembers: members
                 },
+                {
+                    key: 'prevProjectionCameraMatrix',
+                    value: mat4.multiply(temp3, noneJitterProjectionMatrix, cameraMatrix),
+                    dataView: this.#uniformDataF32,
+                    targetMembers: members
+                },
+
                 {
                     key: 'resolution',
                     value: [this.pixelRectObject.width, this.pixelRectObject.height],

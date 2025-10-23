@@ -106,22 +106,7 @@ class Renderer {
 		if (pickingManager?.castingList.length) {
 			pickingManager.checkEvents(view, time);
 		}
-		{
-			const {noneJitterProjectionMatrix, rawCamera, redGPUContext} = view
-			const {modelMatrix: cameraMatrix} = rawCamera
-			const {gpuDevice} = redGPUContext;
-			const structInfo = view.systemUniform_Vertex_StructInfo;
-			const gpuBuffer = view.systemUniform_Vertex_UniformBuffer.gpuBuffer;
-			[
-				{key: 'prevProjectionCameraMatrix', value: mat4.multiply(temp3, noneJitterProjectionMatrix, cameraMatrix)},
-			].forEach(({key, value}) => {
-				gpuDevice.queue.writeBuffer(
-					gpuBuffer,
-					structInfo.members[key].uniformOffset,
-					new structInfo.members[key].View(value)
-				);
-			});
-		}
+
 		return renderPassDescriptor
 	}
 
