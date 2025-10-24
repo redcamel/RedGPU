@@ -94,11 +94,10 @@ class PickingManager {
     }
 
     checkEvents(view: View3D, time: number) {
-        this.#readPixelArrayBuffer(
-            view,
-            time
-        )
-        this.resetCastingList()
+			if(this.castingList.length) {
+				this.#readPixelArrayBuffer(view, time)
+				this.resetCastingList()
+			}
     }
 
     #calcVideoMemory() {

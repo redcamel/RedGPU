@@ -71,7 +71,6 @@ class Renderer {
 			gBufferNormalTextureAttachment,
 			gBufferMotionVectorTextureAttachment
 		} = this.#createAttachmentsForView(view)
-
 		const commandEncoder: GPUCommandEncoder = redGPUContext.gpuDevice.createCommandEncoder({
 			label: 'ViewRender_MainCommandEncoder'
 		})
@@ -80,24 +79,28 @@ class Renderer {
 			colorAttachments: [colorAttachment, gBufferNormalTextureAttachment, gBufferMotionVectorTextureAttachment],
 			depthStencilAttachment,
 		}
-
-
 		view.renderViewStateData.reset(null, time)
 		if (pixelRectObject.width && pixelRectObject.height) {
 			// @ts-ignore
 			camera.update?.(view, time)
 			this.#updateJitter(view)
 			this.#renderPassViewShadow(view, commandEncoder)
-			this.#renderPassViewBasicLayer(view, commandEncoder, renderPassDescriptor)
-			this.#renderPassView2Path(view, commandEncoder, renderPassDescriptor, depthStencilAttachment)
 			this.#renderPassViewPickingLayer(view, commandEncoder)
+			this.#renderPassViewBasicLayer(view, commandEncoder, renderPassDescriptor)
+			this.#renderPassView2PathLayer(view, commandEncoder, renderPassDescriptor, depthStencilAttachment)
 		}
-		renderPassDescriptor.colorAttachments[0].postEffectView = view.postEffectManager.render().textureView
-		redGPUContext.gpuDevice.queue.submit([commandEncoder.finish(),	this.#batchUpdateSkinMatrices(redGPUContext, renderViewStateData)])
+		{
+			//TODO 포스트이펙트를 실행을 완전히 안해도 될 조것 같은걸 체크해야함
+			renderPassDescriptor.colorAttachments[0].postEffectView = view.postEffectManager.render().textureView
+		}
+		redGPUContext.gpuDevice.queue.submit(
+			[
+				commandEncoder.finish(),
+				this.#batchUpdateSkinMatrices(redGPUContext, renderViewStateData)
+			]
+		)
 		view.renderViewStateData.viewRenderTime = (performance.now() - view.renderViewStateData.startTime);
-		if (pickingManager?.castingList.length) {
-			pickingManager.checkEvents(view, time);
-		}
+		pickingManager?.checkEvents(view, time);
 		return renderPassDescriptor
 	}
 
@@ -147,7 +150,7 @@ class Renderer {
 		viewRenderPassEncoder.end()
 	}
 
-	#renderPassView2Path(view: View3D, commandEncoder: GPUCommandEncoder, renderPassDescriptor: GPURenderPassDescriptor, depthStencilAttachment: GPURenderPassDepthStencilAttachment) {
+	#renderPassView2PathLayer(view: View3D, commandEncoder: GPUCommandEncoder, renderPassDescriptor: GPURenderPassDescriptor, depthStencilAttachment: GPURenderPassDepthStencilAttachment) {
 		const {redGPUContext, renderViewStateData} = view
 		const {antialiasingManager} = redGPUContext
 		const {useMSAA} = antialiasingManager
