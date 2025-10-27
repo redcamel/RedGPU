@@ -136,6 +136,7 @@ class Renderer {
 	#renderPassViewBasicLayer(view: View3D, commandEncoder: GPUCommandEncoder, renderPassDescriptor: GPURenderPassDescriptor) {
 		const {renderViewStateData, skybox, grid, axis} = view
 		const viewRenderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass(renderPassDescriptor)
+
 		{
 			const renderPath1ResultTextureView = view.viewRenderTextureManager.renderPath1ResultTextureView
 			this.#updateViewportAndScissor(view, viewRenderPassEncoder)
@@ -144,6 +145,7 @@ class Renderer {
 		renderViewStateData.currentRenderPassEncoder = viewRenderPassEncoder
 		if (skybox) skybox.render(renderViewStateData)
 		if (axis) axis.render(renderViewStateData)
+        viewRenderPassEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
 		renderBasicLayer(view, viewRenderPassEncoder)
 		if (grid) grid.render(renderViewStateData)
 		renderAlphaLayer(view, viewRenderPassEncoder)
@@ -462,8 +464,6 @@ class Renderer {
 	) {
 		//TODO - 업데이트 한번만 하도록 분리
 		view.update(shadowRender, calcPointLightCluster, renderPath1ResultTextureView)
-		// 시스템 유니폼 바인딩
-		viewRenderPassEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
 	}
 }
 

@@ -15,6 +15,7 @@ import Mesh from "../mesh/Mesh";
 import MESH_TYPE from "../MESH_TYPE";
 import InstancingMeshObject3D from "./core/InstancingMeshObject3D";
 import vertexModuleSource from './shader/instanceMeshVertex.wgsl';
+import {keepLog} from "../../utils";
 
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_INSTANCING'
 const VERTEX_BIND_GROUP_DESCRIPTOR_NAME = 'VERTEX_BIND_GROUP_DESCRIPTOR_INSTANCING'
@@ -36,7 +37,8 @@ class InstancingMesh extends Mesh {
     #instanceCount: number = 1
     /** 인스턴스별 transform/계층 구조를 관리하는 객체 배열 */
     #instanceChildren: InstancingMeshObject3D[] = []
-
+    #displacementScale:number
+    #useDisplacementTexture:boolean
     /**
      * InstancingMesh 인스턴스를 생성합니다.
      * @param redGPUContext RedGPU 컨텍스트
@@ -163,14 +165,16 @@ class InstancingMesh extends Mesh {
             } = gpuRenderInfo
             {
                 //TODO 여기 개선
-                if (vertexUniformInfo.members.displacementScale !== undefined) {
+                if (vertexUniformInfo.members.displacementScale !== undefined &&  this.#displacementScale !== displacementScale) {
+                    this.#displacementScale !== displacementScale
                     gpuDevice.queue.writeBuffer(
                         vertexUniformBuffer.gpuBuffer,
                         vertexUniformInfo.members.displacementScale.uniformOffset,
                         new vertexUniformInfo.members.displacementScale.View([displacementScale])
                     );
                 }
-                if (vertexUniformInfo.members.useDisplacementTexture !== undefined) {
+                if (vertexUniformInfo.members.useDisplacementTexture !== undefined && this.#useDisplacementTexture !== !!displacementTexture) {
+                    this.#useDisplacementTexture = !!displacementTexture
                     gpuDevice.queue.writeBuffer(
                         vertexUniformBuffer.gpuBuffer,
                         vertexUniformInfo.members.useDisplacementTexture.uniformOffset,
@@ -194,6 +198,7 @@ class InstancingMesh extends Mesh {
                 currentRenderPassEncoder.setVertexBuffer(0, gpuBuffer)
                 renderViewStateData.prevVertexGpuBuffer = gpuBuffer
             }
+
             currentRenderPassEncoder.setBindGroup(1, vertexUniformBindGroup); // 버텍스 유니폼 버퍼 1번 고정
             currentRenderPassEncoder.setBindGroup(2, fragmentUniformBindGroup)
             //
