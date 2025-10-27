@@ -174,9 +174,7 @@ class DrawDebuggerGrid {
             if (!this.#bundleEncoder || changedMSAA) {
                 // keepLog('렌더번들갱신', this.name, useMSAA,changedMSAA)
                 this.#bundleEncoder = gpuDevice.createRenderBundleEncoder({
-                    colorFormats: [navigator.gpu.getPreferredCanvasFormat(), navigator.gpu.getPreferredCanvasFormat(), 'rgba16float'],
-                    depthStencilFormat: 'depth32float',
-                    sampleCount: useMSAA ? 4 : 1,
+                    ...view.basicRenderBundleEncoderDescriptor,
                     label: this.name
                 })
                 this.#bundleEncoder.setPipeline(view.redGPUContext.antialiasingManager.useMSAA ? this.#pipelineMSAA : this.#pipeline);

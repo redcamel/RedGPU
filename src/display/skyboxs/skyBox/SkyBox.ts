@@ -322,9 +322,7 @@ class SkyBox {
             {
                 this.#material.dirtyPipeline = false
                 const bundleEncoder = gpuDevice.createRenderBundleEncoder({
-                    colorFormats: [navigator.gpu.getPreferredCanvasFormat(), navigator.gpu.getPreferredCanvasFormat(), 'rgba16float'],
-                    depthStencilFormat: 'depth32float',
-                    sampleCount: useMSAA ? 4 : 1,
+                    ...view.basicRenderBundleEncoderDescriptor,
                     label: 'skybox'
                 })
                 const {gpuRenderInfo} = this

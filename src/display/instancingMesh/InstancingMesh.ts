@@ -227,17 +227,22 @@ class InstancingMesh extends Mesh {
         const {gpuDevice, antialiasingManager} = redGPUContext
         const {useMSAA} = antialiasingManager
         const {gpuRenderInfo} = this
+        const {view} = renderViewStateData
         const {
             vertexUniformBindGroup,
             pipeline,
             shadowPipeline
         } = gpuRenderInfo
-        const renderBundleEncoder = gpuDevice.createRenderBundleEncoder({
-            colorFormats:shadowRender ?  [] :  [navigator.gpu.getPreferredCanvasFormat(), navigator.gpu.getPreferredCanvasFormat(), 'rgba16float'],
+        const renderBundleEncoder = gpuDevice.createRenderBundleEncoder(shadowRender ? {
+            colorFormats:[],
             depthStencilFormat: 'depth32float',
-            sampleCount: shadowRender ? 1 : useMSAA ? 4 : 1,
+            sampleCount: 1,
             label: this.uuid
-        })
+        }:
+            {
+               ...view.basicRenderBundleEncoderDescriptor,
+                label: this.uuid
+            })
         const {gpuBuffer} = geometry.vertexBuffer
         const {fragmentUniformBindGroup} = this.material.gpuRenderInfo
         renderBundleEncoder.setPipeline(shadowRender ? shadowPipeline : pipeline)

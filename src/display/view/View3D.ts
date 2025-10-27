@@ -275,6 +275,16 @@ class View3D extends AView {
         this.#skybox = value;
     }
 
+    get basicRenderBundleEncoderDescriptor(): GPURenderBundleEncoderDescriptor {
+        const {antialiasingManager} = this.redGPUContext
+        const {useMSAA} = antialiasingManager
+        return {
+            colorFormats: [navigator.gpu.getPreferredCanvasFormat(), navigator.gpu.getPreferredCanvasFormat(), 'rgba16float'],
+            depthStencilFormat: 'depth32float',
+            sampleCount: useMSAA ? 4 : 1
+        }
+    }
+
     /**
      * 뷰를 업데이트하고 렌더링 준비를 수행합니다.
      * 유니폼 데이터 업데이트, 바인드 그룹 생성, 클러스터 라이트 계산을 처리합니다.

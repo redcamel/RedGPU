@@ -1027,9 +1027,7 @@ class Mesh extends MeshBase {
         // })
         this.#bundleEncoder = null
         this.#bundleEncoder = gpuDevice.createRenderBundleEncoder({
-            colorFormats: [navigator.gpu.getPreferredCanvasFormat(), navigator.gpu.getPreferredCanvasFormat(), 'rgba16float'],
-            depthStencilFormat: 'depth32float',
-            sampleCount: useMSAA ? 4 : 1,
+            ...view.basicRenderBundleEncoderDescriptor,
             label: this.uuid
         })
         const bundleEncoder = this.#bundleEncoder
