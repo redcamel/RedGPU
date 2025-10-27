@@ -49,8 +49,8 @@ class DrawDebuggerGrid {
         this.#drawBufferManager = DrawBufferManager.getInstance(redGPUContext)
         this.#instanceId = InstanceIdGenerator.getNextId(this.constructor)
         const {resourceManager, gpuDevice} = redGPUContext
-        // const moduleDescriptor: GPUShaderModuleDescriptor = {code: shaderSource}
-        const moduleDescriptor: GPUShaderModuleDescriptor = {code: SHADER_INFO.defaultSource}
+        const moduleDescriptor: GPUShaderModuleDescriptor = {code: shaderSource}
+        // const moduleDescriptor: GPUShaderModuleDescriptor = {code: SHADER_INFO.defaultSource}
         const shaderModule: GPUShaderModule = resourceManager.createGPUShaderModule(SHADER_MODULE_NAME, moduleDescriptor)
         this.#blendColorState = new BlendState(this, GPU_BLEND_FACTOR.SRC_ALPHA, GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA, GPU_BLEND_OPERATION.ADD)
         this.#blendAlphaState = new BlendState(this, GPU_BLEND_FACTOR.SRC_ALPHA, GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA, GPU_BLEND_OPERATION.ADD)
