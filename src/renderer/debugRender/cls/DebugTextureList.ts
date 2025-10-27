@@ -111,7 +111,7 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
         updateDebugItemValue(this.dom, 'totalCount', convertedTable.size);
         updateDebugItemValue(this.dom, 'targetVideoMemorySize', formatBytes(totalVideoMemory));
         // 기존 렌더링 시스템 사용
-        this.#generateDebugItemsHtml(convertedTable);
+        // this.#generateDebugItemsHtml(convertedTable);
     }
 
     #convertPackedTextureData(cacheMap: Map<string, {
