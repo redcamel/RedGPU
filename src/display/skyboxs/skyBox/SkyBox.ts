@@ -301,6 +301,19 @@ class SkyBox {
         this.#updateMSAAStatus();
         if (!this.gpuRenderInfo) this.#initGPURenderInfos(this.#redGPUContext)
         keepLog(this.#dirtyPipeline , this.#material.dirtyPipeline)
+        if (this.#transitionStartTime) {
+            this.#transitionElapsed = Math.max(startTime - this.#transitionStartTime, 0)
+            if (this.#transitionElapsed > this.#transitionDuration) {
+                this.#transitionStartTime = 0
+                this.#material.transitionProgress = 0
+                this.skyboxTexture = this.#transitionTexture
+                this.#material.transitionTexture = null
+                this.#dirtyPipeline = true
+            } else {
+                const value = this.#transitionElapsed / this.#transitionDuration
+                this.#material.transitionProgress = value < 0 ? 0 : value > 1 ? 1 : value
+            }
+        }
         if (this.#dirtyPipeline || this.#material.dirtyPipeline) {
             this.gpuRenderInfo.pipeline = this.#updatePipeline()
             this.#dirtyPipeline = false
@@ -327,20 +340,8 @@ class SkyBox {
                 this.#renderBundle = bundleEncoder.finish()
             }
         }
+
         currentRenderPassEncoder.executeBundles([this.#renderBundle])
-        if (this.#transitionStartTime) {
-            this.#transitionElapsed = Math.max(startTime - this.#transitionStartTime, 0)
-            if (this.#transitionElapsed > this.#transitionDuration) {
-                this.#transitionStartTime = 0
-                this.#material.transitionProgress = 0
-                this.skyboxTexture = this.#transitionTexture
-                this.#material.transitionTexture = null
-                this.#dirtyPipeline = true
-            } else {
-                const value = this.#transitionElapsed / this.#transitionDuration
-                this.#material.transitionProgress = value < 0 ? 0 : value > 1 ? 1 : value
-            }
-        }
 
         //
         renderViewStateData.num3DObjects++
