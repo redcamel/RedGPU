@@ -36,7 +36,7 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
             debugRender.totalUsedVideoMemory += videoMemory
             updateDebugItemValue(this.dom, 'totalCount', table.size)
             updateDebugItemValue(this.dom, 'targetVideoMemorySize', formatBytes(videoMemory))
-            this.#generateDebugItemsHtml(table);
+            // this.#generateDebugItemsHtml(table);
         }
     }
 

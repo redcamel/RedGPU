@@ -406,6 +406,7 @@ class ResourceManager {
             ...gpuShaderModuleDescriptor,
             code: newCode,
         })
+        keepLog(newModule)
         const targetMap = this.#getTargetMap(ResourceType.GPUShaderModule);
         targetMap.set(name, newModule)
         return newModule

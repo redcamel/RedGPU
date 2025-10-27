@@ -21,17 +21,17 @@ class DebugStatisticsDomService {
 			<div class="debug-folder">	
 				<div class="debug-folder-small-title" style="display: flex;align-items: center;justify-content: space-between;cursor: pointer;">
 					${createDebugTitle(`${bufferType} Num : <span class="totalCount"></span> (<b class="targetVideoMemorySize"></b>)`)}
-					<div class="onoff">${this.#openYn ? 'close' : 'open'}</div>
+<!--					<div class="onoff">${this.#openYn ? 'close' : 'open'}</div>-->
 				</div>
 				<div class="item-container" style="display: none"></div>
 			</div>
 `
-        const itemContainerOnOff: HTMLDivElement = this.dom.querySelector(`.debug-folder`)
-        const itemContainer: HTMLDivElement = this.dom.querySelector(`.item-container`)
-        itemContainerOnOff.addEventListener('click', () => {
-            this.openYn = !this.openYn
-            itemContainer.style.display = this.#openYn ? '' : 'none'
-        })
+        // const itemContainerOnOff: HTMLDivElement = this.dom.querySelector(`.debug-folder`)
+        // const itemContainer: HTMLDivElement = this.dom.querySelector(`.item-container`)
+        // itemContainerOnOff.addEventListener('click', () => {
+        //     this.openYn = !this.openYn
+        //     itemContainer.style.display = this.#openYn ? '' : 'none'
+        // })
     }
 
     get openYn(): boolean {
@@ -51,7 +51,7 @@ class DebugStatisticsDomService {
             debugRender.totalUsedVideoMemory += videoMemory
             updateDebugItemValue(this.dom, 'totalCount', targetState.size)
             updateDebugItemValue(this.dom, 'targetVideoMemorySize', formatBytes(videoMemory))
-            this.#generateDebugItemsHtmlForBuffer(targetState)
+            // this.#generateDebugItemsHtmlForBuffer(targetState)
         } else {
             const targetBufferState: any = resourceManager[`managed${this.#bufferType}State`]
             const {table, videoMemory} = targetBufferState
@@ -75,7 +75,7 @@ class DebugStatisticsDomService {
                     break
             }
             if (targetState) {
-                this.#generateDebugItemsHtml(table);
+                // this.#generateDebugItemsHtml(table);
             }
         }
     }
