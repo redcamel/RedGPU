@@ -19,6 +19,7 @@ import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validate
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import SkyBoxMaterial from "./core/SkyBoxMaterial";
 import vertexModuleSource from './shader/vertex.wgsl';
+import {keepLog} from "../../../utils";
 
 /** 파싱된 WGSL 셰이더 정보 */
 const SHADER_INFO = parseWGSL(vertexModuleSource)
@@ -66,6 +67,7 @@ class SkyBox {
      * @private
      */
     #dirtyPipeline: boolean = true
+    #renderBundle:GPURenderBundle
     /**
      * 스카이박스의 기하학적 형태 (박스)
      * @private
@@ -291,14 +293,41 @@ class SkyBox {
      * ```
      */
     render(renderViewStateData: RenderViewStateData) {
-        const {currentRenderPassEncoder, startTime} = renderViewStateData
+        const {currentRenderPassEncoder, startTime,view} = renderViewStateData
+        const {indexBuffer} = this.#geometry
+        const {triangleCount, indexCount, format} = indexBuffer
+        const {gpuDevice, antialiasingManager} = this.#redGPUContext
+        const {useMSAA, changedMSAA} = antialiasingManager
         this.#updateMSAAStatus();
         if (!this.gpuRenderInfo) this.#initGPURenderInfos(this.#redGPUContext)
-        if (this.#dirtyPipeline) {
+        keepLog(this.#dirtyPipeline , this.#material.dirtyPipeline)
+        if (this.#dirtyPipeline || this.#material.dirtyPipeline) {
             this.gpuRenderInfo.pipeline = this.#updatePipeline()
             this.#dirtyPipeline = false
             renderViewStateData.numDirtyPipelines++
+
+            {
+                this.#material.dirtyPipeline = false
+                const bundleEncoder = gpuDevice.createRenderBundleEncoder({
+                    colorFormats: [navigator.gpu.getPreferredCanvasFormat(), navigator.gpu.getPreferredCanvasFormat(), 'rgba16float'],
+                    depthStencilFormat: 'depth32float',
+                    sampleCount: useMSAA ? 4 : 1,
+                    label: 'skybox'
+                })
+                const {gpuRenderInfo} = this
+                const {vertexUniformBindGroup, pipeline} = gpuRenderInfo
+
+                bundleEncoder.setPipeline(pipeline)
+                bundleEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
+                bundleEncoder.setVertexBuffer(0, this.#geometry.vertexBuffer.gpuBuffer)
+                bundleEncoder.setBindGroup(1, vertexUniformBindGroup); // 버텍스 유니폼 버퍼 1번 고정
+                bundleEncoder.setBindGroup(2, this.#material.gpuRenderInfo.fragmentUniformBindGroup)
+                bundleEncoder.setIndexBuffer(indexBuffer.gpuBuffer, format)
+                bundleEncoder.drawIndexed(indexBuffer.indexCount, 1, 0, 0, 0);
+                this.#renderBundle = bundleEncoder.finish()
+            }
         }
+        currentRenderPassEncoder.executeBundles([this.#renderBundle])
         if (this.#transitionStartTime) {
             this.#transitionElapsed = Math.max(startTime - this.#transitionStartTime, 0)
             if (this.#transitionElapsed > this.#transitionDuration) {
@@ -312,16 +341,7 @@ class SkyBox {
                 this.#material.transitionProgress = value < 0 ? 0 : value > 1 ? 1 : value
             }
         }
-        const {gpuRenderInfo} = this
-        const {vertexUniformBindGroup, pipeline} = gpuRenderInfo
-        const {indexBuffer} = this.#geometry
-        const {triangleCount, indexCount, format} = indexBuffer
-        currentRenderPassEncoder.setPipeline(pipeline)
-        currentRenderPassEncoder.setVertexBuffer(0, this.#geometry.vertexBuffer.gpuBuffer)
-        currentRenderPassEncoder.setBindGroup(1, vertexUniformBindGroup); // 버텍스 유니폼 버퍼 1번 고정
-        currentRenderPassEncoder.setBindGroup(2, this.#material.gpuRenderInfo.fragmentUniformBindGroup)
-        currentRenderPassEncoder.setIndexBuffer(indexBuffer.gpuBuffer, format)
-        currentRenderPassEncoder.drawIndexed(indexBuffer.indexCount, 1, 0, 0, 0);
+
         //
         renderViewStateData.num3DObjects++
         renderViewStateData.numDrawCalls++
