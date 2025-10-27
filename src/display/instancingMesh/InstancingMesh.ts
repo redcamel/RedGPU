@@ -37,8 +37,11 @@ class InstancingMesh extends Mesh {
     #instanceCount: number = 1
     /** 인스턴스별 transform/계층 구조를 관리하는 객체 배열 */
     #instanceChildren: InstancingMeshObject3D[] = []
-    #displacementScale:number
-    #useDisplacementTexture:boolean
+    #displacementScale: number
+    #useDisplacementTexture: boolean
+    #renderBundle: GPURenderBundle
+    #shadowRenderBundle: GPURenderBundle
+
     /**
      * InstancingMesh 인스턴스를 생성합니다.
      * @param redGPUContext RedGPU 컨텍스트
@@ -111,7 +114,6 @@ class InstancingMesh extends Mesh {
     /**
      * 인스턴싱 메시의 렌더링을 수행합니다.
      * @param renderViewStateData 렌더 상태 데이터
-     * @param shadowRender 그림자 렌더링 여부
      */
     render(renderViewStateData: RenderViewStateData, shadowRender: boolean = false) {
         const {view, currentRenderPassEncoder,} = renderViewStateData;
@@ -154,6 +156,8 @@ class InstancingMesh extends Mesh {
                 this.material.dirtyPipeline = false
                 this.dirtyPipeline = false
                 renderViewStateData.numDirtyPipelines++
+                this.#createRenderBundle(renderViewStateData)
+                this.#createRenderBundle(renderViewStateData, true)
             }
             const {gpuRenderInfo} = this
             const {
@@ -165,7 +169,7 @@ class InstancingMesh extends Mesh {
             } = gpuRenderInfo
             {
                 //TODO 여기 개선
-                if (vertexUniformInfo.members.displacementScale !== undefined &&  this.#displacementScale !== displacementScale) {
+                if (vertexUniformInfo.members.displacementScale !== undefined && this.#displacementScale !== displacementScale) {
                     this.#displacementScale !== displacementScale
                     gpuDevice.queue.writeBuffer(
                         vertexUniformBuffer.gpuBuffer,
@@ -191,34 +195,21 @@ class InstancingMesh extends Mesh {
             }
             this.dirtyTransform = false
             //
-            currentRenderPassEncoder.setPipeline(shadowRender ? shadowPipeline : pipeline)
-            const {gpuBuffer} = this.geometry.vertexBuffer
-            const {fragmentUniformBindGroup} = this.material.gpuRenderInfo
-            if (renderViewStateData.prevVertexGpuBuffer !== gpuBuffer) {
-                currentRenderPassEncoder.setVertexBuffer(0, gpuBuffer)
-                renderViewStateData.prevVertexGpuBuffer = gpuBuffer
-            }
-
-            currentRenderPassEncoder.setBindGroup(1, vertexUniformBindGroup); // 버텍스 유니폼 버퍼 1번 고정
-            currentRenderPassEncoder.setBindGroup(2, fragmentUniformBindGroup)
-            //
             renderViewStateData.numDrawCalls++
             renderViewStateData.numInstances++
             //
             if (this.geometry.indexBuffer) {
                 const {indexBuffer} = this.geometry
-                const {indexCount, triangleCount, gpuBuffer: indexGPUBuffer, format} = indexBuffer
-                currentRenderPassEncoder.setIndexBuffer(indexGPUBuffer, format)
-                currentRenderPassEncoder.drawIndexed(indexCount, this.#instanceCount, 0, 0, 0);
+                const {indexCount, triangleCount} = indexBuffer
                 renderViewStateData.numTriangles += triangleCount * this.#instanceCount
                 renderViewStateData.numPoints += indexCount * this.#instanceCount
             } else {
                 const {vertexBuffer} = this.geometry
                 const {vertexCount, triangleCount} = vertexBuffer
-                currentRenderPassEncoder.draw(vertexCount, this.#instanceCount, 0, 0);
                 renderViewStateData.numTriangles += triangleCount;
                 renderViewStateData.numPoints += vertexCount
             }
+            currentRenderPassEncoder.executeBundles([shadowRender ? this.#shadowRenderBundle : this.#renderBundle])
         } else {
         }
         if (this.castShadow) castingList[castingList.length] = this
@@ -229,6 +220,52 @@ class InstancingMesh extends Mesh {
             children[i].render(renderViewStateData)
         }
         this.dirtyTransform = false
+    }
+
+    #createRenderBundle(renderViewStateData: RenderViewStateData, shadowRender: boolean = false) {
+        const {redGPUContext, geometry} = this
+        const {gpuDevice, antialiasingManager} = redGPUContext
+        const {useMSAA} = antialiasingManager
+        const {gpuRenderInfo} = this
+        const {
+            vertexUniformBindGroup,
+            pipeline,
+            shadowPipeline
+        } = gpuRenderInfo
+        const renderBundleEncoder = gpuDevice.createRenderBundleEncoder({
+            colorFormats:shadowRender ?  [] :  [navigator.gpu.getPreferredCanvasFormat(), navigator.gpu.getPreferredCanvasFormat(), 'rgba16float'],
+            depthStencilFormat: 'depth32float',
+            sampleCount: shadowRender ? 1 : useMSAA ? 4 : 1,
+            label: this.uuid
+        })
+        const {gpuBuffer} = geometry.vertexBuffer
+        const {fragmentUniformBindGroup} = this.material.gpuRenderInfo
+        renderBundleEncoder.setPipeline(shadowRender ? shadowPipeline : pipeline)
+        renderBundleEncoder.setBindGroup(0, renderViewStateData.view.systemUniform_Vertex_UniformBindGroup);
+        renderBundleEncoder.setVertexBuffer(0, gpuBuffer)
+        renderBundleEncoder.setBindGroup(1, vertexUniformBindGroup); // 버텍스 유니폼 버퍼 1번 고정
+        renderBundleEncoder.setBindGroup(2, fragmentUniformBindGroup)
+
+        if (this.geometry.indexBuffer) {
+            const {indexBuffer} = this.geometry
+            const {indexCount, gpuBuffer: indexGPUBuffer, format} = indexBuffer
+            renderBundleEncoder.setIndexBuffer(indexGPUBuffer, format)
+            renderBundleEncoder.drawIndexed(indexCount, this.#instanceCount, 0, 0, 0);
+        } else {
+            const {vertexBuffer} = this.geometry
+            const {vertexCount} = vertexBuffer
+            renderBundleEncoder.draw(vertexCount, this.#instanceCount, 0, 0);
+        }
+        if (shadowRender) {
+            this.#shadowRenderBundle = renderBundleEncoder.finish({
+                label: 'InstancingMesh Shadow RenderBundle'
+            })
+        } else {
+            this.#renderBundle = renderBundleEncoder.finish({
+                label: 'InstancingMesh RenderBundle'
+            })
+        }
+
     }
 
     /**
