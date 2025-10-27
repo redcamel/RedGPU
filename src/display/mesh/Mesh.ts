@@ -1038,20 +1038,16 @@ class Mesh extends MeshBase {
             //
             if (indexBuffer) {
                 const {indexBuffer} = geometry
-                const {indexCount, gpuBuffer: indexGPUBuffer, format} = indexBuffer
+                const {gpuBuffer: indexGPUBuffer, format} = indexBuffer
                 bundleEncoder.setIndexBuffer(indexGPUBuffer, format)
-                // @ts-ignore
-                if (this.particleBuffers) bundleEncoder.drawIndexed(indexCount, this.particleNum, 0, 0, 0);
-                else {
-                    bundleEncoder.drawIndexedIndirect(this.#drawCommandSlot.buffer, this.#drawCommandSlot.commandOffset * 4)
-                    // {
-                    //     keepLog(`🎬 drawIndexedIndirect 호출: ${this.name}`, {
-                    //         bufferLabel: this.#drawCommandSlot.buffer.label,
-                    //         byteOffset: this.#drawCommandSlot.commandOffset * 4,
-                    //         expectedIndexCount: indexCount
-                    //     })
-                    // }
-                }
+                bundleEncoder.drawIndexedIndirect(this.#drawCommandSlot.buffer, this.#drawCommandSlot.commandOffset * 4)
+                // {
+                //     keepLog(`🎬 drawIndexedIndirect 호출: ${this.name}`, {
+                //         bufferLabel: this.#drawCommandSlot.buffer.label,
+                //         byteOffset: this.#drawCommandSlot.commandOffset * 4,
+                //         expectedIndexCount: indexCount
+                //     })
+                // }
             } else {
                 bundleEncoder.drawIndirect(this.#drawCommandSlot.buffer, this.#drawCommandSlot.commandOffset * 4)
             }
@@ -1073,10 +1069,10 @@ class Mesh extends MeshBase {
             const {indexCount} = indexBuffer
             // @ts-ignore
             if (this.particleBuffers) {
-                //TODO Buffers로 변경해야하나
+                // @ts-ignore
+                drawBufferManager.setIndexedIndirectCommand(this.#drawCommandSlot, indexCount, this.particleNum, 0, 0, 0)
             } else {
                 drawBufferManager.setIndexedIndirectCommand(this.#drawCommandSlot, indexCount, 1, 0, 0, 0)
-                drawBufferManager.updateSingleCommand(this.#drawCommandSlot)
                 // {
                 //     const data = this.#drawCommandSlot.dataArray
                 //     const offset = this.#drawCommandSlot.commandOffset
@@ -1086,6 +1082,7 @@ class Mesh extends MeshBase {
                 //     })
                 // }
             }
+            drawBufferManager.updateSingleCommand(this.#drawCommandSlot)
         } else {
             const {vertexCount} = vertexBuffer
             drawBufferManager.setIndirectCommand(this.#drawCommandSlot, vertexCount, 1, 0, 0)

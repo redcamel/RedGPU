@@ -167,6 +167,7 @@ class DrawBufferManager {
         // data[offset + 4] = 미사용 (direct draw는 4개 값만 사용)
     }
 
+
     /**
      * 슬롯의 드로우 커맨드를 즉시 GPU로 업데이트합니다.
      */

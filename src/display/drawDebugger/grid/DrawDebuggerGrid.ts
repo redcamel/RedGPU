@@ -184,7 +184,6 @@ class DrawDebuggerGrid {
                 this.#bundleEncoder.setBindGroup(1, this.#fragmentBindGroup);
                 this.#bundleEncoder.setVertexBuffer(0, this.#vertexBuffer.gpuBuffer);
                 this.#bundleEncoder.setIndexBuffer(this.#indexBuffer.gpuBuffer, this.#indexBuffer.format);
-                // this.#bundleEncoder.drawIndexed(indexCount);
                 this.#bundleEncoder.drawIndexedIndirect(this.#drawCommandSlot.buffer, this.#drawCommandSlot.commandOffset * 4)
                 this.#renderBundle = this.#bundleEncoder.finish();
             }

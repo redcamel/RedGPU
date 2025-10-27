@@ -726,6 +726,7 @@ class ParticleEmitter extends Mesh {
             bindGroupLayouts: [computeBindGroupLayout],
         });
         this.#computeBindGroup = redGPUContext.gpuDevice.createBindGroup({
+            label: 'PARTICLE_EMITTER_BIND_GROUP',
             layout: computeBindGroupLayout,
             entries: computeBindGroupEntries
         });
@@ -773,8 +774,14 @@ class ParticleEmitter extends Mesh {
         const {gpuDevice} = this.redGPUContext
         gpuDevice.queue.writeBuffer(this.#simParamBuffer, 0, this.#simParamData);
         //
-        const commandEncoder = gpuDevice.createCommandEncoder({});
-        const passEncoder = commandEncoder.beginComputePass();
+        const commandEncoder = gpuDevice.createCommandEncoder({
+            label: 'PARTICLE_EMITTER_COMPUTE_COMMAND_ENCODER'
+        });
+        const passEncoder = commandEncoder.beginComputePass(
+            {
+                label: 'PARTICLE_EMITTER_COMPUTE_PASS',
+            }
+        );
         passEncoder.setPipeline(this.#computePipeline);
         passEncoder.setBindGroup(0, this.#computeBindGroup);
         passEncoder.dispatchWorkgroups(Math.ceil(this.#particleNum / 256));

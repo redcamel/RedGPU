@@ -300,7 +300,7 @@ class SkyBox {
         const {useMSAA, changedMSAA} = antialiasingManager
         this.#updateMSAAStatus();
         if (!this.gpuRenderInfo) this.#initGPURenderInfos(this.#redGPUContext)
-        keepLog(this.#dirtyPipeline , this.#material.dirtyPipeline)
+        // keepLog(this.#dirtyPipeline , this.#material.dirtyPipeline)
         if (this.#transitionStartTime) {
             this.#transitionElapsed = Math.max(startTime - this.#transitionStartTime, 0)
             if (this.#transitionElapsed > this.#transitionDuration) {
@@ -337,7 +337,9 @@ class SkyBox {
                 bundleEncoder.setBindGroup(2, this.#material.gpuRenderInfo.fragmentUniformBindGroup)
                 bundleEncoder.setIndexBuffer(indexBuffer.gpuBuffer, format)
                 bundleEncoder.drawIndexed(indexBuffer.indexCount, 1, 0, 0, 0);
-                this.#renderBundle = bundleEncoder.finish()
+                this.#renderBundle = bundleEncoder.finish({
+                    label : 'renderBundle skybox',
+                })
             }
         }
 
