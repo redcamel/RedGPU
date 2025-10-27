@@ -9,22 +9,22 @@ import ResourceStatusInfo from "./resourceManager/resourceState/ResourceStatusIn
  * @class
  */
 class ManagementResourceBase extends ResourceBase {
-	readonly #targetResourceManagedState: ResourceStatusInfo
+    readonly #targetResourceManagedState: ResourceStatusInfo
 
-	constructor(redGPUContext: RedGPUContext, resourceManagerKey: string,) {
-		super(redGPUContext, resourceManagerKey)
-		if (!resourceManagerKey) {
-			consoleAndThrowError('need managedStateKey', this.constructor.name)
-		}
-		this.#targetResourceManagedState = redGPUContext.resourceManager[resourceManagerKey]
-		if (!this.#targetResourceManagedState) {
-			consoleAndThrowError(resourceManagerKey, 'is not exist in RedGPUContext.resourceManager', this.constructor.name)
-		}
-	}
+    constructor(redGPUContext: RedGPUContext, resourceManagerKey: string,) {
+        super(redGPUContext, resourceManagerKey)
+        if (!resourceManagerKey) {
+            consoleAndThrowError('need managedStateKey', this.constructor.name)
+        }
+        this.#targetResourceManagedState = redGPUContext.resourceManager[resourceManagerKey]
+        if (!this.#targetResourceManagedState) {
+            consoleAndThrowError(resourceManagerKey, 'is not exist in RedGPUContext.resourceManager', this.constructor.name)
+        }
+    }
 
-	get targetResourceManagedState(): ResourceStatusInfo {
-		return this.#targetResourceManagedState;
-	}
+    get targetResourceManagedState(): ResourceStatusInfo {
+        return this.#targetResourceManagedState;
+    }
 }
 
 export default ManagementResourceBase

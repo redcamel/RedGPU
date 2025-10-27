@@ -11,23 +11,23 @@
  * @param {number} sliceIndex 복사할 배열 텍스처의 슬라이스 인덱스
  */
 function copyToTextureArray(
-	gpuDevice: GPUDevice,
-	sourceTexture: GPUTexture,
-	targetArrayTexture: GPUTexture,
-	sliceIndex: number
+    gpuDevice: GPUDevice,
+    sourceTexture: GPUTexture,
+    targetArrayTexture: GPUTexture,
+    sliceIndex: number
 ) {
-	const encoder = gpuDevice.createCommandEncoder({
-		label: 'COPY_TO_TEXTURE_ARRAY'
-	});
-	encoder.copyTextureToTexture(
-		{texture: sourceTexture},
-		{
-			texture: targetArrayTexture,
-			origin: [0, 0, sliceIndex]
-		},
-		[sourceTexture.width, sourceTexture.height, 1]
-	);
-	gpuDevice.queue.submit([encoder.finish()]);
+    const encoder = gpuDevice.createCommandEncoder({
+        label: 'COPY_TO_TEXTURE_ARRAY'
+    });
+    encoder.copyTextureToTexture(
+        {texture: sourceTexture},
+        {
+            texture: targetArrayTexture,
+            origin: [0, 0, sliceIndex]
+        },
+        [sourceTexture.width, sourceTexture.height, 1]
+    );
+    gpuDevice.queue.submit([encoder.finish()]);
 }
 
 export default copyToTextureArray;

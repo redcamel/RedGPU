@@ -13,7 +13,7 @@ declare class DirectionalShadowManager {
     set shadowDepthTextureSize(value: number);
     reset(): void;
     resetCastingList(): void;
-    updateViewSystemUniforms(redGPUContext: RedGPUContext): void;
+    update(redGPUContext: RedGPUContext): void;
     destroy(): void;
 }
 export default DirectionalShadowManager;

@@ -22,6 +22,7 @@ RedGPU.init(
 
 		// 씬 생성
 		const scene = new RedGPU.Display.Scene();
+		const scene2 = new RedGPU.Display.Scene();
 
 		// ============================================
 		// 뷰 생성 및 설정
@@ -39,7 +40,7 @@ RedGPU.init(
 		redGPUContext.addView(viewBasic);
 
 		// 이펙트 뷰 생성
-		const viewCustom = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+		const viewCustom = new RedGPU.Display.View3D(redGPUContext, scene2, controller);
 		const ibl_adjustSize = new RedGPU.Resource.IBL(
 			redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr',
 			1024, 32
@@ -55,6 +56,7 @@ RedGPU.init(
 		// 조명 추가
 		const directionalLight = new RedGPU.Light.DirectionalLight();
 		scene.lightManager.addDirectionalLight(directionalLight);
+		scene2.lightManager.addDirectionalLight(directionalLight);
 
 		// 3D 모델 로드
 		loadGLTF(
@@ -62,6 +64,11 @@ RedGPU.init(
 			scene,
 			'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CompareMetallic/glTF-Binary/CompareMetallic.glb'
 		);
+        loadGLTF(
+            redGPUContext,
+            scene2,
+            'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CompareMetallic/glTF-Binary/CompareMetallic.glb'
+        );
 
 		// ============================================
 		// 레이아웃 설정

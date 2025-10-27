@@ -1,9 +1,9 @@
 import ColorRGBA from "../color/ColorRGBA";
 import ResourceManager from "../resources/core/resourceManager/ResourceManager";
-import AntialiasingManager from "./antialiasing/AntialiasingManager";
+import AntialiasingManager from "./core/AntialiasingManager";
 import RedGPUContextSizeManager from "./core/RedGPUContextSizeManager";
 import RedGPUContextViewContainer from "./core/RedGPUContextViewContainer";
-import RedGPUContextDetector from "./detector/RedGPUContextDetector";
+import RedGPUContextDetector from "./core/RedGPUContextDetector";
 /**
  * RedGPUContext 클래스는 WebGPU 초기화 후 제공되는 최상위 컨텍스트 객체입니다.
  *

@@ -7,12 +7,12 @@
  * @returns {boolean} 유효한 hex 색상 문자열이면 true, 아니면 false
  */
 const isHexColor = (hex: string): boolean => {
-	const regex = /^([A-Fa-f0-9]{3}){1,2}$/;
-	if (hex.startsWith('#')) {
-		return regex.test(hex.substring(1));
-	} else if (hex.startsWith('0x')) {
-		return regex.test(hex.substring(2));
-	}
-	return false;
+    const regex = /^([A-Fa-f0-9]{3}){1,2}$/;
+    if (hex.startsWith('#')) {
+        return regex.test(hex.substring(1));
+    } else if (hex.startsWith('0x')) {
+        return regex.test(hex.substring(2));
+    }
+    return false;
 }
 export default isHexColor

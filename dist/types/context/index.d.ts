@@ -1,2 +1,3 @@
 import RedGPUContext from "./RedGPUContext";
-export { RedGPUContext, };
+import * as Core from "./core";
+export { RedGPUContext, Core, };

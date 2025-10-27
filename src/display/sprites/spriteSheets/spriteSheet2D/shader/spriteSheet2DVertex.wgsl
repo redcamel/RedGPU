@@ -1,10 +1,12 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include getBillboardMatrix;
-
-struct VertexUniforms {
-    pickingId: u32,
+struct MatrixList{
     modelMatrix: mat4x4<f32>,
     normalModelMatrix: mat4x4<f32>,
+}
+struct VertexUniforms {
+    matrixList:MatrixList,
+    pickingId: u32,
     segmentW: f32,
     segmentH: f32,
     totalFrame: f32,
@@ -43,8 +45,8 @@ fn main(inputData: InputData) -> OutputData {
     let u_cameraPosition = u_camera.cameraPosition;
 
     // Vertex별 Uniform 변수 가져오기
-    let u_modelMatrix = vertexUniforms.modelMatrix;
-    let u_normalModelMatrix = vertexUniforms.normalModelMatrix;
+    let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
+    let u_normalModelMatrix = vertexUniforms.matrixList.normalModelMatrix;
 
     // 입력 데이터
     let input_position = inputData.position;
@@ -89,8 +91,8 @@ fn picking(inputData: InputData) -> OutputData {
     let u_cameraPosition = u_camera.cameraPosition;
 
     // Vertex별 Uniform 변수 가져오기
-    let u_modelMatrix = vertexUniforms.modelMatrix;
-    let u_normalModelMatrix = vertexUniforms.normalModelMatrix;
+    let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
+    let u_normalModelMatrix = vertexUniforms.matrixList.normalModelMatrix;
 
     // 입력 데이터
     let input_position = inputData.position;

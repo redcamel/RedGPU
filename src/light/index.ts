@@ -13,9 +13,9 @@ import SpotLight from "./lights/SpotLight";
 
 export * as Core from "./core";
 export {
-	AmbientLight,
-	PointLight,
-	SpotLight,
-	DirectionalLight,
-	LightManager
+    AmbientLight,
+    PointLight,
+    SpotLight,
+    DirectionalLight,
+    LightManager
 }

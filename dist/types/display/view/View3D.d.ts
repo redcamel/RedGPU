@@ -96,6 +96,7 @@ declare class View3D extends AView {
      * @param value - 설정할 SkyBox 인스턴스
      */
     set skybox(value: SkyBox);
+    get basicRenderBundleEncoderDescriptor(): GPURenderBundleEncoderDescriptor;
     /**
      * 뷰를 업데이트하고 렌더링 준비를 수행합니다.
      * 유니폼 데이터 업데이트, 바인드 그룹 생성, 클러스터 라이트 계산을 처리합니다.
@@ -105,6 +106,6 @@ declare class View3D extends AView {
      * @param calcPointLightCluster - 포인트 라이트 클러스터 계산 여부 (기본값: false)
      * @param renderPath1ResultTextureView - 렌더 패스 1 결과 텍스처 뷰 (선택사항)
      */
-    update(view: View3D, shadowRender?: boolean, calcPointLightCluster?: boolean, renderPath1ResultTextureView?: GPUTextureView): void;
+    update(shadowRender?: boolean, calcPointLightCluster?: boolean, renderPath1ResultTextureView?: GPUTextureView): void;
 }
 export default View3D;

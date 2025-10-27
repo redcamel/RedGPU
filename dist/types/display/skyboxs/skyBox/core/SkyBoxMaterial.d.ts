@@ -13,6 +13,12 @@ interface SkyBoxMaterial {
     blur: number;
     transitionProgress: number;
 }
+/**
+ * SkyBoxMaterial - SkyBox 렌더링용 Material
+ *
+ * @class
+ * @extends {ABitmapBaseMaterial}
+ */
 declare class SkyBoxMaterial extends ABitmapBaseMaterial {
     /**
      * Indicates if the pipeline is dirty or not.

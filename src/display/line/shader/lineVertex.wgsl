@@ -1,9 +1,11 @@
 #redgpu_include SYSTEM_UNIFORM;
-
-struct VertexUniforms {
-    pickingId: u32,
+struct MatrixList{
     modelMatrix: mat4x4<f32>,
     normalModelMatrix: mat4x4<f32>,
+}
+struct VertexUniforms {
+    matrixList:MatrixList,
+    pickingId: u32,
 };
 
 @group(1) @binding(0) var<uniform> vertexUniforms: VertexUniforms;
@@ -28,7 +30,7 @@ struct OutputShadowData {
 fn main(inputData: InputData) -> OutputData {
     var output: OutputData;
     let u_noneJitterProjectionCameraMatrix = systemUniforms.noneJitterProjectionCameraMatrix;
-    let u_modelMatrix = vertexUniforms.modelMatrix;
+    let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
 
     let input_position = inputData.position;
     let input_vertexColor = inputData.vertexColor;

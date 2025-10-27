@@ -7,8 +7,8 @@
  * @returns {boolean} 부호 없는 정수이면 true, 아니면 false
  */
 const isUint = (value: number): boolean => {
-	const passInteger = Number.isInteger(value)
-	const passNaturalNumber = value >= 0
-	return passInteger && passNaturalNumber
+    const passInteger = Number.isInteger(value)
+    const passNaturalNumber = value >= 0
+    return passInteger && passNaturalNumber
 }
 export default isUint

@@ -8,22 +8,20 @@ RedGPU.init(
 	(redGPUContext) => {
 		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
 		controller.distance = 8;
-		controller.speedDistance = 0.1;
+		controller.speedDistance = 0.3;
 
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		redGPUContext.addView(view);
 
 		const glbUrls = [
-			'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumMan/glTF-Binary/CesiumMan.glb',
+			'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumMan/glTF/CesiumMan.gltf',
 			'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumMilkTruck/glTF-Binary/CesiumMilkTruck.glb',
 		];
 
 		loadGLTFGrid(view, glbUrls);
-
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		renderer.start(redGPUContext, () => {});
-
 		renderTestPane(redGPUContext, view);
 	},
 	(failReason) => {
@@ -33,7 +31,6 @@ RedGPU.init(
 		document.body.appendChild(errorDiv);
 	}
 );
-
 function loadGLTFGrid(view, urls, gridSize = 3, spacing = 3) {
 	const {redGPUContext, scene} = view;
 
@@ -55,6 +52,7 @@ function loadGLTFGrid(view, urls, gridSize = 3, spacing = 3) {
 			mesh.x = x;
 			mesh.y = -0.5;
 			mesh.z = z;
+
 		});
 	});
 }

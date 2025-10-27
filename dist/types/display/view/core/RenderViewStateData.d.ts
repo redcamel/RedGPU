@@ -52,12 +52,11 @@ declare class RenderViewStateData {
     viewRenderTime: number;
     /** 현재 뷰포트 크기 및 위치 정보 */
     viewportSize: ViewportSize;
+    viewIndex: number;
     /** 렌더 텍스처가 사용하는 비디오 메모리 양 (바이트) */
     usedVideoMemory: number;
     /** 현재 사용 중인 GPU 렌더 패스 인코더 */
     currentRenderPassEncoder: GPURenderPassEncoder;
-    /** 컴퓨트 작업을 위한 GPU 커맨드 인코더 */
-    computeCommandEncoder: GPUCommandEncoder;
     /** 렌더링 프레임의 현재 타임스탬프 */
     timestamp: number;
     /** 컬링을 위한 프러스텀 평면 배열, 프러스텀 컬링이 비활성화된 경우 null */
@@ -69,19 +68,19 @@ declare class RenderViewStateData {
     /** 머티리얼로부터 변경된 버텍스 유니폼의 맵 */
     dirtyVertexUniformFromMaterial: {};
     /** 알파 렌더링 레이어의 객체 배열 */
-    alphaLayer: any[];
+    bundleListAlphaLayer: any[];
     /** 투명 렌더링 레이어의 객체 배열 */
-    transparentLayer: any[];
+    bundleListTransparentLayer: any[];
     /** 파티클 렌더링 레이어의 객체 배열 */
-    particleLayer: any[];
+    bundleListParticleLayer: any[];
     /** 2D 패스 렌더링 레이어의 객체 배열 */
-    render2PathLayer: any[];
+    bundleListRender2PathLayer: any[];
     /** 처리할 스킨 메시 목록 */
     skinList: any[];
     /** 처리할 애니메이션 목록 */
     animationList: any[];
     /** 효율적인 렌더링을 위한 렌더 번들 목록 */
-    renderBundleList: any[];
+    bundleListBasicList: any[];
     /** 렌더링 시작을 표시하는 성능 타임스탬프 */
     startTime: number;
     /** 씬이 2D 모드인지 여부 */
@@ -107,12 +106,11 @@ declare class RenderViewStateData {
      * 또한 비디오 메모리 사용량을 계산하고 뷰 설정에 따라 컬링 매개변수를 구성합니다.
      *
      * @param {GPURenderPassEncoder} viewRenderPassEncoder - 현재 프레임의 렌더 패스 인코더
-     * @param {GPUCommandEncoder} computeCommandEncoder - 컴퓨트 작업을 위한 커맨드 인코더
      * @param {number} time - 프레임의 현재 타임스탬프
      *
      * @throws {Error} 잘못된 매개변수가 제공되거나 필수 뷰 속성이 없는 경우
      * @throws {Error} 텍스처 크기 계산이 실패한 경우
      */
-    reset(viewRenderPassEncoder: GPURenderPassEncoder, computeCommandEncoder: GPUCommandEncoder, time: number): void;
+    reset(viewRenderPassEncoder: GPURenderPassEncoder, time: number): void;
 }
 export default RenderViewStateData;

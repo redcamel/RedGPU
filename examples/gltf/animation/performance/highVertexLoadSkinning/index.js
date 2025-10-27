@@ -9,7 +9,6 @@ RedGPU.init(
 
 		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
 		controller.distance = 10
-		controller.speedDistance = 0.1
 
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
@@ -60,7 +59,7 @@ const renderTestPane = async (redGPUContext, targetView) => {
 	setDebugButtons(redGPUContext);
 	 pane = new Pane();
 
-	const moreNum = redGPUContext.detector.isMobile ? 5 : 5
+	const moreNum = redGPUContext.detector.isMobile ? 5 : 10
 	pane.addButton({
 		title: `Add ${moreNum} BreakDance`,
 	}).on('click', () => {
