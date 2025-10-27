@@ -128,8 +128,8 @@ class Mesh extends MeshBase {
     #prevFragmentBindGroup: GPUBindGroup
     #drawCommandSlot: DrawCommandSlot | null = null
     #drawBufferManager: DrawBufferManager | null = null
-    #needUpdateUniformNormal: boolean = true
-    #needUpdateUniform: boolean = true
+    #needUpdateNormalMatrixUniform: boolean = true
+    #needUpdateMatrixUniform: boolean = true
 
     #uniformDataMatrixList: Float32Array
     #displacementScale: number
@@ -528,8 +528,8 @@ class Mesh extends MeshBase {
         }
         if (this.dirtyTransform) {
             dirtyTransformForChildren = true
-            this.#needUpdateUniformNormal = true
-            this.#needUpdateUniform = true
+            this.#needUpdateNormalMatrixUniform = true
+            this.#needUpdateMatrixUniform = true
             {
                 const {pixelRectObject} = view
                 const parent = this.parent
@@ -688,7 +688,7 @@ class Mesh extends MeshBase {
                     }
                 }
             }
-            if (!currentGeometry) this.#needUpdateUniform = false
+            if (!currentGeometry) this.#needUpdateMatrixUniform = false
             this.dirtyTransform = false
         }
         // check distanceCulling
@@ -777,8 +777,8 @@ class Mesh extends MeshBase {
             renderViewStateData.num3DGroups++
         }
         {
-            if (antialiasingManager.useTAA && this.gpuRenderInfo?.vertexUniformInfo) {
-                keepLog('도냐')
+            if (antialiasingManager.useTAA && this.#uniformDataMatrixList) {
+
                 const {gpuRenderInfo} = this
                 const {vertexUniformBuffer, vertexUniformInfo} = gpuRenderInfo
                 const {members: vertexUniformInfoMembers} = vertexUniformInfo
@@ -801,6 +801,14 @@ class Mesh extends MeshBase {
                     prev[4] = current[4], prev[5] = current[5], prev[6] = current[6], prev[7] = current[7];
                     prev[8] = current[8], prev[9] = current[9], prev[10] = current[10], prev[11] = current[11];
                     prev[12] = current[12], prev[13] = current[13], prev[14] = current[14], prev[15] = current[15];
+                }
+                if(!this.#needUpdateMatrixUniform){
+                    // keepLog('도냐')
+                    redGPUContext.gpuDevice.queue.writeBuffer(
+                        vertexUniformBuffer.gpuBuffer,
+                        vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffset,
+                        this.#prevModelMatrix,
+                    )
                 }
             } else {
                 this.#prevModelMatrix = null
@@ -832,7 +840,7 @@ class Mesh extends MeshBase {
                 }
             }
 
-            if (this.#needUpdateUniform) {
+            if (this.#needUpdateMatrixUniform) {
                 {
                     const modelMatrix = (
                         //TODO - Sprite2D떄문에 처리했지만 이거 일반화해야함
@@ -859,8 +867,8 @@ class Mesh extends MeshBase {
 
 
                 {
-                    if (this.#needUpdateUniformNormal && vertexUniformInfoMatrixListMembers.normalModelMatrix) {
-                        this.#needUpdateUniformNormal = false
+                    if (this.#needUpdateNormalMatrixUniform && vertexUniformInfoMatrixListMembers.normalModelMatrix) {
+                        this.#needUpdateNormalMatrixUniform = false
                         // calculate NormalMatrix
                         const m = this.modelMatrix;
                         const n = this.normalModelMatrix;
@@ -910,7 +918,7 @@ class Mesh extends MeshBase {
 
                 }
                 dirtyTransformForChildren = true
-                this.#needUpdateUniform = false
+                this.#needUpdateMatrixUniform = false
                 // keepLog('진짜 버퍼업로드', this.name)
                 gpuDevice.queue.writeBuffer(
                     vertexUniformGPUBuffer,

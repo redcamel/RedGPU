@@ -11,17 +11,3 @@ struct Uniforms {
     motionBlurReduction: f32,
     disocclusionThreshold: f32,
 };
-
- fn haltonSequence(index: f32, base: f32) -> f32 {
-        var result: f32 = 0.0;
-        var fraction: f32 = 1.0 / base;
-        var i: f32 = index;
-
-        for (var iter = 0; iter < 10 && i > 0.0; iter++) {
-            result += (i % base) * fraction;
-            i = floor(i / base);
-            fraction /= base;
-        }
-
-        return result;
-    }
