@@ -776,6 +776,36 @@ class Mesh extends MeshBase {
         } else {
             renderViewStateData.num3DGroups++
         }
+        {
+            if (antialiasingManager.useTAA && this.gpuRenderInfo?.vertexUniformInfo) {
+                keepLog('도냐')
+                const {gpuRenderInfo} = this
+                const {vertexUniformBuffer, vertexUniformInfo} = gpuRenderInfo
+                const {members: vertexUniformInfoMembers} = vertexUniformInfo
+                const {members: vertexUniformInfoMatrixListMembers} = vertexUniformInfoMembers.matrixList
+                if (this.#prevModelMatrix && vertexUniformInfoMatrixListMembers.prevModelMatrix) {
+                    this.#uniformDataMatrixList.set(this.#prevModelMatrix, vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
+                    // if (vertexUniformInfoMatrixListMembers.prevModelMatrix) {
+                    // 	redGPUContext.gpuDevice.queue.writeBuffer(
+                    // 		vertexUniformGPUBuffer,
+                    // 		vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffset,
+                    // 		this.#prevModelMatrix,
+                    // 	)
+                    // }
+                }
+                {
+                    if (!this.#prevModelMatrix) this.#prevModelMatrix = new Float32Array(16)
+                    const prev = this.#prevModelMatrix
+                    const current = this.modelMatrix
+                    prev[0] = current[0], prev[1] = current[1], prev[2] = current[2], prev[3] = current[3];
+                    prev[4] = current[4], prev[5] = current[5], prev[6] = current[6], prev[7] = current[7];
+                    prev[8] = current[8], prev[9] = current[9], prev[10] = current[10], prev[11] = current[11];
+                    prev[12] = current[12], prev[13] = current[13], prev[14] = current[14], prev[15] = current[15];
+                }
+            } else {
+                this.#prevModelMatrix = null
+            }
+        }
         if (currentGeometry && passFrustumCulling) {
             const {gpuRenderInfo} = this
             const {vertexUniformBuffer, vertexUniformInfo} = gpuRenderInfo
@@ -826,31 +856,7 @@ class Mesh extends MeshBase {
                     this.#uniformDataMatrixList.set(modelMatrix, vertexUniformInfoMatrixListMembers.modelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
 
                 }
-                {
-                    if (antialiasingManager.useTAA && this.#needUpdateUniform) {
-                        if (this.#prevModelMatrix && vertexUniformInfoMatrixListMembers.prevModelMatrix) {
-                            this.#uniformDataMatrixList.set(this.#prevModelMatrix, vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
-                            // if (vertexUniformInfoMatrixListMembers.prevModelMatrix) {
-                            // 	redGPUContext.gpuDevice.queue.writeBuffer(
-                            // 		vertexUniformGPUBuffer,
-                            // 		vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffset,
-                            // 		this.#prevModelMatrix,
-                            // 	)
-                            // }
-                        }
-                        {
-                            if (!this.#prevModelMatrix) this.#prevModelMatrix = new Float32Array(16)
-                            const prev = this.#prevModelMatrix
-                            const current = this.modelMatrix
-                            prev[0] = current[0], prev[1] = current[1], prev[2] = current[2], prev[3] = current[3];
-                            prev[4] = current[4], prev[5] = current[5], prev[6] = current[6], prev[7] = current[7];
-                            prev[8] = current[8], prev[9] = current[9], prev[10] = current[10], prev[11] = current[11];
-                            prev[12] = current[12], prev[13] = current[13], prev[14] = current[14], prev[15] = current[15];
-                        }
-                    } else {
-                        this.#prevModelMatrix = null
-                    }
-                }
+
 
                 {
                     if (this.#needUpdateUniformNormal && vertexUniformInfoMatrixListMembers.normalModelMatrix) {

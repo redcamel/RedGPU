@@ -177,17 +177,17 @@ class PostEffectManager {
 						targetMembers: members
 					},
 					{
-						key: 'projectionCameraMatrix',
-						value: projectionCameraMatrix,
-						dataView: this.#uniformDataF32,
-						targetMembers: members
-					},
-					{
 						key: 'inverseProjectionMatrix',
 						value: inverseProjectionMatrix,
 						dataView: this.#uniformDataF32,
 						targetMembers: members
 					},
+                    {
+                        key: 'projectionCameraMatrix',
+                        value: projectionCameraMatrix,
+                        dataView: this.#uniformDataF32,
+                        targetMembers: members
+                    },
 					{
 						key: 'inverseProjectionCameraMatrix',
 						value: mat4.invert(temp2, projectionCameraMatrix),
