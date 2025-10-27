@@ -20,9 +20,9 @@ class AntialiasingManager {
         //     this.useMSAA = false
         //     this.useFXAA = false
         // } else {
-            this.useTAA = false
-            this.useMSAA = true
-            this.useFXAA = false
+        this.useTAA = false
+        this.useMSAA = true
+        this.useFXAA = false
         // }
     }
 

@@ -87,7 +87,7 @@ const init = async (
         try {
             {
                 const originalCreateShaderModule = device.createShaderModule.bind(device);
-                device.createShaderModule = function(descriptor) {
+                device.createShaderModule = function (descriptor) {
                     descriptor.code = ensureVertexIndexBuiltin(descriptor.code)
                     const result = originalCreateShaderModule(descriptor);
                     return result

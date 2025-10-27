@@ -15,7 +15,6 @@ import Mesh from "../mesh/Mesh";
 import MESH_TYPE from "../MESH_TYPE";
 import InstancingMeshObject3D from "./core/InstancingMeshObject3D";
 import vertexModuleSource from './shader/instanceMeshVertex.wgsl';
-import {keepLog} from "../../utils";
 
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_INSTANCING'
 const VERTEX_BIND_GROUP_DESCRIPTOR_NAME = 'VERTEX_BIND_GROUP_DESCRIPTOR_INSTANCING'
@@ -234,13 +233,13 @@ class InstancingMesh extends Mesh {
             shadowPipeline
         } = gpuRenderInfo
         const renderBundleEncoder = gpuDevice.createRenderBundleEncoder(shadowRender ? {
-            colorFormats:[],
-            depthStencilFormat: 'depth32float',
-            sampleCount: 1,
-            label: this.uuid
-        }:
+                colorFormats: [],
+                depthStencilFormat: 'depth32float',
+                sampleCount: 1,
+                label: this.uuid
+            } :
             {
-               ...view.basicRenderBundleEncoderDescriptor,
+                ...view.basicRenderBundleEncoderDescriptor,
                 label: this.uuid
             })
         const {gpuBuffer} = geometry.vertexBuffer

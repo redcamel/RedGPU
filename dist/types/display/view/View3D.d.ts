@@ -96,6 +96,7 @@ declare class View3D extends AView {
      * @param value - 설정할 SkyBox 인스턴스
      */
     set skybox(value: SkyBox);
+    get basicRenderBundleEncoderDescriptor(): GPURenderBundleEncoderDescriptor;
     /**
      * 뷰를 업데이트하고 렌더링 준비를 수행합니다.
      * 유니폼 데이터 업데이트, 바인드 그룹 생성, 클러스터 라이트 계산을 처리합니다.

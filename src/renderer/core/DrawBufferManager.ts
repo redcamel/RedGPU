@@ -7,7 +7,8 @@ import formatBytes from "../../utils/math/formatBytes";
  */
 class DrawBufferManager {
     static #instance: DrawBufferManager
-
+    // 드로우 커맨드 타입별 크기
+    static readonly #INDEXED_COMMAND_SIZE = 5  // drawIndexedIndirect
     #redGPUContext: RedGPUContext
     #bufferPool: GPUBuffer[] = []
     #dataPool: Uint32Array[] = []
@@ -16,9 +17,6 @@ class DrawBufferManager {
     #currentCommandIndex: number = 0
     #deviceMaxBufferSize: number
     #usedBufferIndices: Set<number> = new Set()
-
-    // 드로우 커맨드 타입별 크기
-    static readonly #INDEXED_COMMAND_SIZE = 5  // drawIndexedIndirect
 
     constructor(redGPUContext: RedGPUContext) {
         this.#redGPUContext = redGPUContext
@@ -33,68 +31,6 @@ class DrawBufferManager {
             DrawBufferManager.#instance = new DrawBufferManager(redGPUContext)
         }
         return DrawBufferManager.#instance
-    }
-
-    /**
-     * 드로우 버퍼 시스템을 초기화합니다.
-     */
-    #initializeSystem(): void {
-        this.#calculateDeviceLimits()
-        this.#createInitialBuffer()
-
-        // keepLog(`🚀 DrawBufferManager 초기화 완료:`, {
-        // 	maxBufferSize: `${formatBytes(this.#deviceMaxBufferSize)}`,
-        // 	maxCommandsPerBuffer: this.#maxCommandsPerBuffer.toLocaleString(),
-        // 	estimatedCapacity: '무제한 (동적 확장)'
-        // })
-    }
-
-    /**
-     * 디바이스의 실제 버퍼 크기 제한을 계산합니다.
-     */
-    #calculateDeviceLimits(): void {
-        const limits = this.#redGPUContext.gpuDevice.limits
-        // 안전한 최대 크기 계산 (실제 제한의 90% 사용)
-        this.#deviceMaxBufferSize = Math.floor(
-            Math.min(
-                limits.maxBufferSize || 268435456,           // 256MB
-                limits.maxStorageBufferBindingSize || 134217728  // 128MB
-            ) * 0.9
-        )
-
-        // 버퍼당 최대 커맨드 수 (가장 큰 커맨드 크기 기준)
-        this.#maxCommandsPerBuffer = Math.floor(
-            this.#deviceMaxBufferSize / (DrawBufferManager.#INDEXED_COMMAND_SIZE * 4)
-        )
-    }
-
-    /**
-     * 첫 번째 드로우 버퍼를 생성합니다.
-     */
-    #createInitialBuffer(): void {
-        this.#createNewBuffer()
-    }
-
-    /**
-     * 새로운 드로우 버퍼를 생성하고 풀에 추가합니다.
-     */
-    #createNewBuffer(): number {
-        const bufferSize = this.#maxCommandsPerBuffer * DrawBufferManager.#INDEXED_COMMAND_SIZE * 4
-
-        const buffer = this.#redGPUContext.gpuDevice.createBuffer({
-            size: bufferSize,
-            usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.COPY_DST,
-            label: `DrawBuffer_${this.#bufferPool.length}`
-        })
-
-        const data = new Uint32Array(this.#maxCommandsPerBuffer * DrawBufferManager.#INDEXED_COMMAND_SIZE)
-
-        this.#bufferPool.push(buffer)
-        this.#dataPool.push(data)
-
-        console.log(`📦 새 드로우 버퍼 생성: #${this.#bufferPool.length - 1} (총 ${this.#bufferPool.length}개)`)
-
-        return this.#bufferPool.length - 1
     }
 
     /**
@@ -167,7 +103,6 @@ class DrawBufferManager {
         // data[offset + 4] = 미사용 (direct draw는 4개 값만 사용)
     }
 
-
     /**
      * 슬롯의 드로우 커맨드를 즉시 GPU로 업데이트합니다.
      */
@@ -186,6 +121,73 @@ class DrawBufferManager {
             data,
             slot.commandOffset,
             elementCount
+        )
+    }
+
+    /**
+     * 현재 할당된 총 커맨드 개수를 반환합니다.
+     */
+    getTotalCommandCount(): number {
+        let total = 0
+        for (const bufferIndex of this.#usedBufferIndices) {
+            if (bufferIndex === this.#currentBufferIndex) {
+                total += this.#currentCommandIndex
+            } else {
+                total += this.#maxCommandsPerBuffer
+            }
+        }
+        return total
+    }
+
+    /**
+     * 메모리 사용량 정보를 반환합니다.
+     */
+    getMemoryUsage(): DrawBufferMemoryInfo {
+        const totalBuffers = this.#bufferPool.length
+        const usedBuffers = this.#usedBufferIndices.size
+        const totalMemory = totalBuffers * this.#deviceMaxBufferSize
+        const usedMemory = usedBuffers * this.#deviceMaxBufferSize
+
+        return {
+            totalBuffers,
+            usedBuffers,
+            maxCommandsPerBuffer: this.#maxCommandsPerBuffer,
+            totalMemory: formatBytes(totalMemory),
+            usedMemory: formatBytes(usedMemory),
+            totalCommands: this.getTotalCommandCount()
+        }
+    }
+
+    /**
+     * 드로우 버퍼 시스템을 초기화합니다.
+     */
+    #initializeSystem(): void {
+        this.#calculateDeviceLimits()
+        this.#createInitialBuffer()
+
+        // keepLog(`🚀 DrawBufferManager 초기화 완료:`, {
+        // 	maxBufferSize: `${formatBytes(this.#deviceMaxBufferSize)}`,
+        // 	maxCommandsPerBuffer: this.#maxCommandsPerBuffer.toLocaleString(),
+        // 	estimatedCapacity: '무제한 (동적 확장)'
+        // })
+    }
+
+    /**
+     * 디바이스의 실제 버퍼 크기 제한을 계산합니다.
+     */
+    #calculateDeviceLimits(): void {
+        const limits = this.#redGPUContext.gpuDevice.limits
+        // 안전한 최대 크기 계산 (실제 제한의 90% 사용)
+        this.#deviceMaxBufferSize = Math.floor(
+            Math.min(
+                limits.maxBufferSize || 268435456,           // 256MB
+                limits.maxStorageBufferBindingSize || 134217728  // 128MB
+            ) * 0.9
+        )
+
+        // 버퍼당 최대 커맨드 수 (가장 큰 커맨드 크기 기준)
+        this.#maxCommandsPerBuffer = Math.floor(
+            this.#deviceMaxBufferSize / (DrawBufferManager.#INDEXED_COMMAND_SIZE * 4)
         )
     }
 
@@ -243,37 +245,32 @@ class DrawBufferManager {
     // }
 
     /**
-     * 현재 할당된 총 커맨드 개수를 반환합니다.
+     * 첫 번째 드로우 버퍼를 생성합니다.
      */
-    getTotalCommandCount(): number {
-        let total = 0
-        for (const bufferIndex of this.#usedBufferIndices) {
-            if (bufferIndex === this.#currentBufferIndex) {
-                total += this.#currentCommandIndex
-            } else {
-                total += this.#maxCommandsPerBuffer
-            }
-        }
-        return total
+    #createInitialBuffer(): void {
+        this.#createNewBuffer()
     }
 
     /**
-     * 메모리 사용량 정보를 반환합니다.
+     * 새로운 드로우 버퍼를 생성하고 풀에 추가합니다.
      */
-    getMemoryUsage(): DrawBufferMemoryInfo {
-        const totalBuffers = this.#bufferPool.length
-        const usedBuffers = this.#usedBufferIndices.size
-        const totalMemory = totalBuffers * this.#deviceMaxBufferSize
-        const usedMemory = usedBuffers * this.#deviceMaxBufferSize
+    #createNewBuffer(): number {
+        const bufferSize = this.#maxCommandsPerBuffer * DrawBufferManager.#INDEXED_COMMAND_SIZE * 4
 
-        return {
-            totalBuffers,
-            usedBuffers,
-            maxCommandsPerBuffer: this.#maxCommandsPerBuffer,
-            totalMemory: formatBytes(totalMemory),
-            usedMemory: formatBytes(usedMemory),
-            totalCommands: this.getTotalCommandCount()
-        }
+        const buffer = this.#redGPUContext.gpuDevice.createBuffer({
+            size: bufferSize,
+            usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.COPY_DST,
+            label: `DrawBuffer_${this.#bufferPool.length}`
+        })
+
+        const data = new Uint32Array(this.#maxCommandsPerBuffer * DrawBufferManager.#INDEXED_COMMAND_SIZE)
+
+        this.#bufferPool.push(buffer)
+        this.#dataPool.push(data)
+
+        console.log(`📦 새 드로우 버퍼 생성: #${this.#bufferPool.length - 1} (총 ${this.#bufferPool.length}개)`)
+
+        return this.#bufferPool.length - 1
     }
 
     //

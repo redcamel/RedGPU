@@ -19,7 +19,6 @@ import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validate
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import SkyBoxMaterial from "./core/SkyBoxMaterial";
 import vertexModuleSource from './shader/vertex.wgsl';
-import {keepLog} from "../../../utils";
 
 /** 파싱된 WGSL 셰이더 정보 */
 const SHADER_INFO = parseWGSL(vertexModuleSource)
@@ -67,7 +66,7 @@ class SkyBox {
      * @private
      */
     #dirtyPipeline: boolean = true
-    #renderBundle:GPURenderBundle
+    #renderBundle: GPURenderBundle
     /**
      * 스카이박스의 기하학적 형태 (박스)
      * @private
@@ -293,7 +292,7 @@ class SkyBox {
      * ```
      */
     render(renderViewStateData: RenderViewStateData) {
-        const {currentRenderPassEncoder, startTime,view} = renderViewStateData
+        const {currentRenderPassEncoder, startTime, view} = renderViewStateData
         const {indexBuffer} = this.#geometry
         const {triangleCount, indexCount, format} = indexBuffer
         const {gpuDevice, antialiasingManager} = this.#redGPUContext
@@ -336,7 +335,7 @@ class SkyBox {
                 bundleEncoder.setIndexBuffer(indexBuffer.gpuBuffer, format)
                 bundleEncoder.drawIndexed(indexBuffer.indexCount, 1, 0, 0, 0);
                 this.#renderBundle = bundleEncoder.finish({
-                    label : 'renderBundle skybox',
+                    label: 'renderBundle skybox',
                 })
             }
         }

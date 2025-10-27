@@ -8,6 +8,7 @@ import ResourceStateVertexBuffer from "../../../resources/core/resourceManager/r
 import formatBytes from "../../../utils/math/formatBytes";
 import {createDebugTitle, updateDebugItemValue} from "../core/debugFunc";
 import DebugRender from "../DebugRender";
+
 //TODO - 디버거를 워커로 보내야하나
 class DebugStatisticsDomService {
     dom: HTMLElement;
