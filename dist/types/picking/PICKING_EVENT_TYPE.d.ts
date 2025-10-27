@@ -1,3 +1,6 @@
+/**
+ * Picking event types
+ */
 declare const PICKING_EVENT_TYPE: {
     readonly MOVE: "move";
     readonly DOWN: "down";

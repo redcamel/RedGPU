@@ -481,7 +481,8 @@ const ExampleList = [
 						},
 					},
 				]
-			}, {
+			},
+            {
 				name: 'Transparent Sort',
 				list: [
 					{
@@ -806,6 +807,20 @@ const ExampleList = [
 							en: ``
 						},
 					},
+				]
+			},
+            {
+				name: 'Indirect Draw Test',
+				list: [
+					{
+						name: 'drawIndexedIndirect Test',
+						path: '3d/indirectDrawTest',
+						thumb: '3d/indirectDrawTest/thumb.png',
+						description: {
+							ko: ``,
+							en: ``
+						},
+					}
 				]
 			},
 			{

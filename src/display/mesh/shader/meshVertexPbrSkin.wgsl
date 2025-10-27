@@ -1,12 +1,15 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include calculateMotionVector;
 
-struct VertexUniforms {
-    pickingId: u32,
+struct MatrixList{
     localMatrix: mat4x4<f32>,
     modelMatrix: mat4x4<f32>,
     prevModelMatrix: mat4x4<f32>,
     normalModelMatrix: mat4x4<f32>,
+}
+struct VertexUniforms {
+    matrixList:MatrixList,
+    pickingId: u32,
     receiveShadow: f32
 };
 
@@ -19,6 +22,7 @@ const maxMipLevel: f32 = 10.0;
 @group(1) @binding(3) var<storage, read> vertexStorages: array<mat4x4<f32>>;
 
 struct InputDataSkin {
+    @builtin(vertex_index) idx: u32,
     @location(0) position: vec3<f32>,
     @location(1) vertexNormal: vec3<f32>,
     @location(2) uv: vec2<f32>,
@@ -49,7 +53,7 @@ struct OutputShadowData {
 };
 
 @vertex
-fn main(inputData: InputDataSkin, @builtin(vertex_index) idx: u32) -> OutputDataSkin {
+fn main(inputData: InputDataSkin) -> OutputDataSkin {
     var output: OutputDataSkin;
 
     // Input data
@@ -68,10 +72,11 @@ fn main(inputData: InputDataSkin, @builtin(vertex_index) idx: u32) -> OutputData
     let u_cameraPosition = u_camera.cameraPosition;
 
     // Vertex uniforms
-    let u_localMatrix = vertexUniforms.localMatrix;
-    let u_modelMatrix = vertexUniforms.modelMatrix;
-    let u_prevModelMatrix = vertexUniforms.prevModelMatrix;
-    let u_normalModelMatrix = vertexUniforms.normalModelMatrix;
+    let u_matrixList = vertexUniforms.matrixList;
+    let u_localMatrix = u_matrixList.localMatrix;
+    let u_modelMatrix = u_matrixList.modelMatrix;
+    let u_prevModelMatrix = u_matrixList.prevModelMatrix;
+    let u_normalModelMatrix = u_matrixList.normalModelMatrix;
     let u_receiveShadow = vertexUniforms.receiveShadow;
 
     // Light uniforms
@@ -80,7 +85,7 @@ fn main(inputData: InputDataSkin, @builtin(vertex_index) idx: u32) -> OutputData
     let u_directionalLightProjectionViewMatrix = systemUniforms.directionalLightProjectionViewMatrix;
 
     // Skinning calculation
-    let skinMat = vertexStorages[idx];
+    let skinMat = vertexStorages[inputData.idx];
 
 
     // Position and normal calculation
@@ -128,18 +133,18 @@ fn main(inputData: InputDataSkin, @builtin(vertex_index) idx: u32) -> OutputData
 }
 
 @vertex
-fn drawDirectionalShadowDepth(inputData: InputDataSkin, @builtin(vertex_index) idx: u32) -> OutputShadowData {
+fn drawDirectionalShadowDepth(inputData: InputDataSkin) -> OutputShadowData {
     var output: OutputShadowData;
 
     // System uniforms
     let u_directionalLightProjectionViewMatrix = systemUniforms.directionalLightProjectionViewMatrix;
-    let u_modelMatrix = vertexUniforms.modelMatrix;
+    let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
 
     // Input data
     let input_position = inputData.position;
 
     // Skinning calculation
-let skinMat = vertexStorages[idx];
+let skinMat = vertexStorages[inputData.idx];
 
     // Position calculation
     let position = u_modelMatrix * skinMat * vec4<f32>(input_position, 1.0);
@@ -149,7 +154,7 @@ let skinMat = vertexStorages[idx];
 }
 
 @vertex
-fn picking(inputData: InputDataSkin, @builtin(vertex_index) idx: u32) -> OutputDataSkin {
+fn picking(inputData: InputDataSkin) -> OutputDataSkin {
     var output: OutputDataSkin;
 
     // System uniforms
@@ -157,10 +162,10 @@ fn picking(inputData: InputDataSkin, @builtin(vertex_index) idx: u32) -> OutputD
     let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
     let u_camera = systemUniforms.camera;
     let u_cameraMatrix = u_camera.cameraMatrix;
-    let u_modelMatrix = vertexUniforms.modelMatrix;
+    let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
 
     // Skinning calculation
-let skinMat = vertexStorages[idx];
+let skinMat = vertexStorages[inputData.idx];
     // Position calculation
     let position = u_modelMatrix * skinMat * vec4<f32>(inputData.position, 1.0);
     output.position = u_projectionCameraMatrix * position;

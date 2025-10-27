@@ -2,13 +2,15 @@
 #redgpu_include drawDirectionalShadowDepth;
 #redgpu_include picking;
 #redgpu_include calculateMotionVector;
-
-struct VertexUniforms {
-    pickingId: u32,
+struct MatrixList{
     localMatrix: mat4x4<f32>,
     modelMatrix: mat4x4<f32>,
     prevModelMatrix: mat4x4<f32>,
     normalModelMatrix: mat4x4<f32>,
+}
+struct VertexUniforms {
+    matrixList:MatrixList,
+    pickingId: u32,
     receiveShadow: f32
 };
 
@@ -65,10 +67,11 @@ fn main(inputData: InputData) -> OutputData {
     let u_cameraPosition = u_camera.cameraPosition;
 
     // Vertex uniforms
-    let u_localMatrix = vertexUniforms.localMatrix;
-    let u_modelMatrix = vertexUniforms.modelMatrix;
-    let u_normalModelMatrix = vertexUniforms.normalModelMatrix;
-    let u_prevModelMatrix = vertexUniforms.prevModelMatrix;
+    let u_matrixList = vertexUniforms.matrixList;
+    let u_localMatrix = u_matrixList.localMatrix;
+    let u_modelMatrix = u_matrixList.modelMatrix;
+    let u_normalModelMatrix = u_matrixList.normalModelMatrix;
+    let u_prevModelMatrix = u_matrixList.prevModelMatrix;
     let u_receiveShadow = vertexUniforms.receiveShadow;
 
     // Light uniforms

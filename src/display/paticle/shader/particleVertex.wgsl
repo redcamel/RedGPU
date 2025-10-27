@@ -1,12 +1,15 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include getBillboardMatrix;
+struct MatrixList{
+    modelMatrix: mat4x4<f32>,
+    normalModelMatrix: mat4x4<f32>,
+}
 struct VertexUniforms {
-      pickingId:u32,
-	  modelMatrix:mat4x4<f32>,
-	  normalModelMatrix:mat4x4<f32>,
-	  useBillboardPerspective:u32,
-	  useBillboard:u32,
-	  combinedOpacity:f32,
+    matrixList:MatrixList,
+    pickingId:u32,
+    useBillboardPerspective:u32,
+    useBillboard:u32,
+    combinedOpacity:f32,
 };
 
 @group(1) @binding(0) var<uniform> vertexUniforms: VertexUniforms;
@@ -132,8 +135,8 @@ fn main( inputData:InputData) -> OutputData {
   let u_cameraMatrix = u_camera.cameraMatrix;
   let u_cameraPosition = u_camera.cameraPosition;
   //
-  let u_modelMatrix = vertexUniforms.modelMatrix;
-  let u_normalModelMatrix = vertexUniforms.normalModelMatrix;
+  let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
+  let u_normalModelMatrix = vertexUniforms.matrixList.normalModelMatrix;
 //
   let u_useBillboardPerspective = vertexUniforms.useBillboardPerspective == 1u;
   let u_useBillboard = vertexUniforms.useBillboard == 1u;

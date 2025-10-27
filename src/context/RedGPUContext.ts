@@ -3,10 +3,10 @@ import View3D from "../display/view/View3D";
 import PICKING_EVENT_TYPE from "../picking/PICKING_EVENT_TYPE";
 import ResourceManager from "../resources/core/resourceManager/ResourceManager";
 import consoleAndThrowError from "../utils/consoleAndThrowError";
-import AntialiasingManager from "./antialiasing/AntialiasingManager";
+import AntialiasingManager from "./core/AntialiasingManager";
 import RedGPUContextSizeManager from "./core/RedGPUContextSizeManager";
 import RedGPUContextViewContainer from "./core/RedGPUContextViewContainer";
-import RedGPUContextDetector from "./detector/RedGPUContextDetector";
+import RedGPUContextDetector from "./core/RedGPUContextDetector";
 
 /**
  * RedGPUContext 클래스는 WebGPU 초기화 후 제공되는 최상위 컨텍스트 객체입니다.
@@ -18,376 +18,377 @@ import RedGPUContextDetector from "./detector/RedGPUContextDetector";
  * @extends RedGPUContextViewContainer
  */
 class RedGPUContext extends RedGPUContextViewContainer {
-	/** 현재 requestAnimationFrame ID (프레임 루프 관리용) */
-	currentRequestAnimationFrame: number
-	/** 리사이즈 이벤트 핸들러 (캔버스 크기 변경 시 호출) */
-	onResize: ((width: number, height: number) => void) | null = null;
-	/** 현재 시간(프레임 기준, ms) */
-	currentTime: number
-	/** GPU 캔버스 구성 정보 (WebGPU 설정용) */
-	#configurationDescription: GPUCanvasConfiguration
-	/** GPU 어댑터 (WebGPU 하드웨어 정보) */
-	readonly #gpuAdapter: GPUAdapter
-	/** 알파 모드 (WebGPU 캔버스 알파 설정) */
-	#alphaMode: GPUCanvasAlphaMode
-	/** GPU 캔버스 컨텍스트 (WebGPU 렌더링 대상) */
-	readonly #gpuContext: GPUCanvasContext
-	/** GPU 디바이스 (WebGPU 연산/리소스 관리) */
-	readonly #gpuDevice: GPUDevice
-	/** HTML 캔버스 요소 (렌더링 대상 DOM) */
-	readonly #htmlCanvas: HTMLCanvasElement
-	/** 크기 관리 매니저 (캔버스/뷰 크기 관리) */
-	readonly #sizeManager: RedGPUContextSizeManager
-	/** 디바이스/브라우저 환경 감지 매니저 */
-	readonly #detector: RedGPUContextDetector
-	/** 리소스 매니저 (GPU 리소스 관리) */
-	readonly #resourceManager: ResourceManager
-	/** 배경색 */
-	#backgroundColor: ColorRGBA = new ColorRGBA(0, 0, 0, 1)
-	/** 디버그 패널 사용 여부 */
-	#useDebugPanel: boolean = false
-	/** 키보드 입력 버퍼 */
-	#keyboardKeyBuffer: { [key: string]: boolean } = {}
-	/** 안티앨리어싱 매니저 */
-	#antialiasingManager: AntialiasingManager
+    /** 현재 requestAnimationFrame ID (프레임 루프 관리용) */
+    currentRequestAnimationFrame: number
+    /** 리사이즈 이벤트 핸들러 (캔버스 크기 변경 시 호출) */
+    onResize: ((width: number, height: number) => void) | null = null;
+    /** 현재 시간(프레임 기준, ms) */
+    currentTime: number
+    /** GPU 캔버스 구성 정보 (WebGPU 설정용) */
+    #configurationDescription: GPUCanvasConfiguration
+    /** GPU 어댑터 (WebGPU 하드웨어 정보) */
+    readonly #gpuAdapter: GPUAdapter
+    /** 알파 모드 (WebGPU 캔버스 알파 설정) */
+    #alphaMode: GPUCanvasAlphaMode
+    /** GPU 캔버스 컨텍스트 (WebGPU 렌더링 대상) */
+    readonly #gpuContext: GPUCanvasContext
+    /** GPU 디바이스 (WebGPU 연산/리소스 관리) */
+    readonly #gpuDevice: GPUDevice
+    /** HTML 캔버스 요소 (렌더링 대상 DOM) */
+    readonly #htmlCanvas: HTMLCanvasElement
+    /** 크기 관리 매니저 (캔버스/뷰 크기 관리) */
+    readonly #sizeManager: RedGPUContextSizeManager
+    /** 디바이스/브라우저 환경 감지 매니저 */
+    readonly #detector: RedGPUContextDetector
+    /** 리소스 매니저 (GPU 리소스 관리) */
+    readonly #resourceManager: ResourceManager
+    /** 배경색 */
+    #backgroundColor: ColorRGBA = new ColorRGBA(0, 0, 0, 1)
+    /** 디버그 패널 사용 여부 */
+    #useDebugPanel: boolean = false
+    /** 키보드 입력 버퍼 */
+    #keyboardKeyBuffer: { [key: string]: boolean } = {}
+    /** 안티앨리어싱 매니저 */
+    #antialiasingManager: AntialiasingManager
 
-	constructor(
-		htmlCanvas: HTMLCanvasElement,
-		gpuAdapter: GPUAdapter,
-		gpuDevice: GPUDevice,
-		gpuContext: GPUCanvasContext,
-		alphaMode: GPUCanvasAlphaMode
-	) {
-		super()
-		this.#gpuAdapter = gpuAdapter
-		this.#gpuDevice = gpuDevice
-		this.#gpuContext = gpuContext
-		this.#alphaMode = alphaMode
-		this.#htmlCanvas = htmlCanvas
-		this.#sizeManager = new RedGPUContextSizeManager(this)
-		this.#detector = new RedGPUContextDetector(this)
-		this.#resourceManager = new ResourceManager(this)
-		this.#antialiasingManager = new AntialiasingManager(this)
-		this.#initialize()
-	}
+    constructor(
+        htmlCanvas: HTMLCanvasElement,
+        gpuAdapter: GPUAdapter,
+        gpuDevice: GPUDevice,
+        gpuContext: GPUCanvasContext,
+        alphaMode: GPUCanvasAlphaMode
+    ) {
+        super()
+        this.#gpuAdapter = gpuAdapter
+        this.#gpuDevice = gpuDevice
+        this.#gpuContext = gpuContext
+        this.#alphaMode = alphaMode
+        this.#htmlCanvas = htmlCanvas
+        this.#sizeManager = new RedGPUContextSizeManager(this)
+        this.#detector = new RedGPUContextDetector(this)
+        this.#resourceManager = new ResourceManager(this)
+        this.#antialiasingManager = new AntialiasingManager(this)
+        this.#initialize()
+    }
 
-	get antialiasingManager(): AntialiasingManager {
-		return this.#antialiasingManager;
-	}
+    get antialiasingManager(): AntialiasingManager {
+        return this.#antialiasingManager;
+    }
 
-	get useDebugPanel(): boolean {
-		return this.#useDebugPanel;
-	}
+    get useDebugPanel(): boolean {
+        return this.#useDebugPanel;
+    }
 
-	set useDebugPanel(value: boolean) {
-		this.#useDebugPanel = value;
-	}
+    set useDebugPanel(value: boolean) {
+        this.#useDebugPanel = value;
+    }
 
-	/**
-	 * Get the background color.
-	 *
-	 * @return {ColorRGBA} The background color.
-	 */
-	get backgroundColor(): ColorRGBA {
-		return this.#backgroundColor;
-	}
+    /**
+     * Get the background color.
+     *
+     * @return {ColorRGBA} The background color.
+     */
+    get backgroundColor(): ColorRGBA {
+        return this.#backgroundColor;
+    }
 
-	/**
-	 * Sets the background color of the element.
-	 *
-	 * @param {ColorRGBA} value - The color value to set as the background color.
-	 * @throws {TypeError} If the value parameter is not an instance of ColorRGBA.
-	 */
-	set backgroundColor(value: ColorRGBA) {
-		if (!(value instanceof ColorRGBA)) consoleAndThrowError('allow only ColorRGBA instance')
-		this.#backgroundColor = value;
-	}
+    /**
+     * Sets the background color of the element.
+     *
+     * @param {ColorRGBA} value - The color value to set as the background color.
+     * @throws {TypeError} If the value parameter is not an instance of ColorRGBA.
+     */
+    set backgroundColor(value: ColorRGBA) {
+        if (!(value instanceof ColorRGBA)) consoleAndThrowError('allow only ColorRGBA instance')
+        this.#backgroundColor = value;
+    }
 
-	/**
-	 * Retrieves the RedGPUContextDetector instance.
-	 *
-	 * @returns {RedGPUContextDetector} The RedGPUContextDetector instance.
-	 */
-	get detector(): RedGPUContextDetector {
-		return this.#detector;
-	}
+    /**
+     * Retrieves the RedGPUContextDetector instance.
+     *
+     * @returns {RedGPUContextDetector} The RedGPUContextDetector instance.
+     */
+    get detector(): RedGPUContextDetector {
+        return this.#detector;
+    }
 
-	/**
-	 * Retrieves the GPU canvas configuration description.
-	 *
-	 * @returns {GPUCanvasConfiguration} The configuration description.
-	 */
-	get configurationDescription(): GPUCanvasConfiguration {
-		return this.#configurationDescription;
-	}
+    /**
+     * Retrieves the GPU canvas configuration description.
+     *
+     * @returns {GPUCanvasConfiguration} The configuration description.
+     */
+    get configurationDescription(): GPUCanvasConfiguration {
+        return this.#configurationDescription;
+    }
 
-	/**
-	 * Retrieves the GPU adapter.
-	 *
-	 * @returns {GPUAdapter} The GPU adapter object.
-	 */
-	get gpuAdapter(): GPUAdapter {
-		return this.#gpuAdapter;
-	}
+    /**
+     * Retrieves the GPU adapter.
+     *
+     * @returns {GPUAdapter} The GPU adapter object.
+     */
+    get gpuAdapter(): GPUAdapter {
+        return this.#gpuAdapter;
+    }
 
-	/**
-	 * Retrieves the alpha mode of the GPUCanvas object.
-	 *
-	 * @return {GPUCanvasAlphaMode} The alpha mode of the GPUCanvas.
-	 */
-	get alphaMode(): GPUCanvasAlphaMode {
-		return this.#alphaMode;
-	}
+    /**
+     * Retrieves the alpha mode of the GPUCanvas object.
+     *
+     * @return {GPUCanvasAlphaMode} The alpha mode of the GPUCanvas.
+     */
+    get alphaMode(): GPUCanvasAlphaMode {
+        return this.#alphaMode;
+    }
 
-	/**
-	 * Sets the alpha mode of the GPUCanvas.
-	 *
-	 * @param {GPUCanvasAlphaMode} value - The new alpha mode value to be set.
-	 */
-	set alphaMode(value: GPUCanvasAlphaMode) {
-		this.#alphaMode = value;
-		this.#configure()
-	}
+    /**
+     * Sets the alpha mode of the GPUCanvas.
+     *
+     * @param {GPUCanvasAlphaMode} value - The new alpha mode value to be set.
+     */
+    set alphaMode(value: GPUCanvasAlphaMode) {
+        this.#alphaMode = value;
+        this.#configure()
+    }
 
-	/**
-	 * Returns the GPU canvas context.
-	 *
-	 * @returns {GPUCanvasContext} The GPU canvas context.
-	 */
-	get gpuContext(): GPUCanvasContext {
-		return this.#gpuContext;
-	}
+    /**
+     * Returns the GPU canvas context.
+     *
+     * @returns {GPUCanvasContext} The GPU canvas context.
+     */
+    get gpuContext(): GPUCanvasContext {
+        return this.#gpuContext;
+    }
 
-	/**
-	 * Retrieves the GPU device associated with this object.
-	 *
-	 * @returns {GPUDevice} The GPU device.
-	 */
-	get gpuDevice(): GPUDevice {
-		return this.#gpuDevice;
-	}
+    /**
+     * Retrieves the GPU device associated with this object.
+     *
+     * @returns {GPUDevice} The GPU device.
+     */
+    get gpuDevice(): GPUDevice {
+        return this.#gpuDevice;
+    }
 
-	/**
-	 * Retrieves the HTML canvas element associated with the current instance of the class.
-	 *
-	 * @returns {HTMLCanvasElement} The HTML canvas element.
-	 */
-	get htmlCanvas(): HTMLCanvasElement {
-		return this.#htmlCanvas;
-	}
+    /**
+     * Retrieves the HTML canvas element associated with the current instance of the class.
+     *
+     * @returns {HTMLCanvasElement} The HTML canvas element.
+     */
+    get htmlCanvas(): HTMLCanvasElement {
+        return this.#htmlCanvas;
+    }
 
-	get keyboardKeyBuffer(): { [p: string]: boolean } {
-		return this.#keyboardKeyBuffer;
-	}
 
-	set keyboardKeyBuffer(value: { [p: string]: boolean }) {
-		this.#keyboardKeyBuffer = value;
-	}
+    get keyboardKeyBuffer(): { [p: string]: boolean } {
+        return this.#keyboardKeyBuffer;
+    }
 
-	/**
-	 * Returns the resource manager.
-	 *
-	 * @return {ResourceManager} The resource manager object.
-	 */
-	get resourceManager(): ResourceManager {
-		return this.#resourceManager;
-	}
+    set keyboardKeyBuffer(value: { [p: string]: boolean }) {
+        this.#keyboardKeyBuffer = value;
+    }
 
-	/**
-	 * Retrieves the size manager of the RedGPU context.
-	 *
-	 * @returns {RedGPUContextSizeManager} The size manager of the RedGPU context.
-	 */
-	get sizeManager(): RedGPUContextSizeManager {
-		return this.#sizeManager;
-	}
+    /**
+     * Returns the resource manager.
+     *
+     * @return {ResourceManager} The resource manager object.
+     */
+    get resourceManager(): ResourceManager {
+        return this.#resourceManager;
+    }
 
-	/**
-	 * Retrieves the width of the object.
-	 *
-	 * @returns {number} The width of the object.
-	 */
-	get width(): number | string {
-		return this.#sizeManager.width;
-	}
+    /**
+     * Retrieves the size manager of the RedGPU context.
+     *
+     * @returns {RedGPUContextSizeManager} The size manager of the RedGPU context.
+     */
+    get sizeManager(): RedGPUContextSizeManager {
+        return this.#sizeManager;
+    }
 
-	/**
-	 * Sets the width value for the size manager.
-	 *
-	 * @param {number | string} value - The width value to set. It can be either a number or a string.
-	 */
-	set width(value: number | string) {
-		this.#sizeManager.width = value;
-	}
+    /**
+     * Retrieves the width of the object.
+     *
+     * @returns {number} The width of the object.
+     */
+    get width(): number | string {
+        return this.#sizeManager.width;
+    }
 
-	/**
-	 * Retrieves the height of the sizeManager.
-	 *
-	 * @returns {number | string} The height of the sizeManager.
-	 */
-	get height(): number | string {
-		return this.#sizeManager.height;
-	}
+    /**
+     * Sets the width value for the size manager.
+     *
+     * @param {number | string} value - The width value to set. It can be either a number or a string.
+     */
+    set width(value: number | string) {
+        this.#sizeManager.width = value;
+    }
 
-	/**
-	 * Sets the height value of the element.
-	 *
-	 * @param {number | string} value - The height value to set. It can be either a number or a string.
-	 */
-	set height(value: number | string) {
-		this.#sizeManager.height = value;
-	}
+    /**
+     * Retrieves the height of the sizeManager.
+     *
+     * @returns {number | string} The height of the sizeManager.
+     */
+    get height(): number | string {
+        return this.#sizeManager.height;
+    }
 
-	get screenRectObject() {
-		return this.#sizeManager.screenRectObject
-	}
+    /**
+     * Sets the height value of the element.
+     *
+     * @param {number | string} value - The height value to set. It can be either a number or a string.
+     */
+    set height(value: number | string) {
+        this.#sizeManager.height = value;
+    }
 
-	/**
-	 * Retrieves the render scale value from the size manager.
-	 *
-	 * @return {number} The render scale value.
-	 */
-	get renderScale(): number {
-		return this.#sizeManager.renderScale;
-	}
+    get screenRectObject() {
+        return this.#sizeManager.screenRectObject
+    }
 
-	/**
-	 * Sets the render scale for the size manager.
-	 *
-	 * @param {number} value - The render scale value to set.
-	 */
-	set renderScale(value: number) {
-		this.#sizeManager.renderScale = value;
-		this.viewList.forEach((view: View3D) => {
-			view.setPosition()
-			view.setSize()
-		})
-	}
+    /**
+     * Retrieves the render scale value from the size manager.
+     *
+     * @return {number} The render scale value.
+     */
+    get renderScale(): number {
+        return this.#sizeManager.renderScale;
+    }
 
-	/**
-	 * Destroys the GPU device.
-	 * It releases any allocated resources and cleans up the GPU device.
-	 *
-	 */
-	destroy() {
-		this.#gpuDevice.destroy()
-	}
+    /**
+     * Sets the render scale for the size manager.
+     *
+     * @param {number} value - The render scale value to set.
+     */
+    set renderScale(value: number) {
+        this.#sizeManager.renderScale = value;
+        this.viewList.forEach((view: View3D) => {
+            view.setPosition()
+            view.setSize()
+        })
+    }
 
-	/**
-	 * Sets the size of the element.
-	 *
-	 * @param {string | number} [w=this.width] - The width of the element. It can be either a string or a number. Defaults to the current width.
-	 * @param {string | number} [h=this.height] - The height of the element. It can be either a string or a number. Defaults to the current height.
+    /**
+     * Destroys the GPU device.
+     * It releases any allocated resources and cleans up the GPU device.
+     *
+     */
+    destroy() {
+        this.#gpuDevice.destroy()
+    }
 
-	 */
-	setSize(w: string | number = this.width, h: string | number = this.height) {
-		this.sizeManager.setSize(w, h)
-	}
+    /**
+     * Sets the size of the element.
+     *
+     * @param {string | number} [w=this.width] - The width of the element. It can be either a string or a number. Defaults to the current width.
+     * @param {string | number} [h=this.height] - The height of the element. It can be either a string or a number. Defaults to the current height.
 
-	/**
-	 * Initializes the software.
-	 *
-	 * @function initialize
-	 */
-	#initialize() {
-		this.#configure()
-		this.sizeManager.setSize('100%', '100%')
-		window?.addEventListener('resize', () => {
-			this.sizeManager.setSize()
-			this.viewList.forEach((view: View3D) => {
-				view.setSize()
-				view.setPosition()
-			})
-		});
-		const eventList = this.detector.isMobile ?
-			[
-				'click',
-				'touchmove',
-				'touchstart',
-				'touchend'
-			]
-			:
-			[
-				'click',
-				'mousemove',
-				'mousedown',
-				'mouseup'
-			]
-		eventList.forEach((eventName) => {
-			const eventMap = (
-				this.detector.isMobile
-					?
-					{
-						click: PICKING_EVENT_TYPE.CLICK,
-						touchmove: PICKING_EVENT_TYPE.MOVE,
-						touchstart: PICKING_EVENT_TYPE.DOWN,
-						touchend: PICKING_EVENT_TYPE.UP,
-					} :
-					{
-						click: PICKING_EVENT_TYPE.CLICK,
-						mousemove: PICKING_EVENT_TYPE.MOVE,
-						mousedown: PICKING_EVENT_TYPE.DOWN,
-						mouseup: PICKING_EVENT_TYPE.UP,
-					}
-			)
-			this.#htmlCanvas.addEventListener(eventName, (e: MouseEvent) => {
-				const eventTypeForDevice = eventMap[e.type]
-				// console.log('eventTypeForDevice',e.type)
-				this.viewList.forEach((view: View3D) => {
-					if (this.detector.isMobile && e instanceof TouchEvent && e.touches.length > 0) {
-						// Touch event
-						view.pickingManager.mouseX = e.touches[0].clientX * devicePixelRatio - view.pixelRectObject.x;
-						view.pickingManager.mouseY = e.touches[0].clientY * devicePixelRatio - view.pixelRectObject.y;
-					} else if (e instanceof MouseEvent) {
-						// Mouse event
-						view.pickingManager.mouseX = e.offsetX * devicePixelRatio - view.pixelRectObject.x;
-						view.pickingManager.mouseY = e.offsetY * devicePixelRatio - view.pixelRectObject.y;
-					}
-					if (eventTypeForDevice === PICKING_EVENT_TYPE.CLICK) {
-						view.pickingManager.lastMouseClickEvent = {...e, type: eventTypeForDevice}
-					} else {
-						view.pickingManager.lastMouseEvent = {...e, type: eventTypeForDevice}
-					}
-				})
-			})
-		})
-		{
-			// 키보드 이벤트 설정
-			const HD_keyDown = (e: KeyboardEvent) => {
-				this.#keyboardKeyBuffer[e.key] = true
-			};
-			const HD_keyUp = (e: KeyboardEvent) => {
-				this.#keyboardKeyBuffer[e.key] = false
-			};
-			window?.addEventListener('keyup', HD_keyUp);
-			window?.addEventListener('keydown', HD_keyDown);
-		}
-		const resizeObserver = new ResizeObserver(entries => {
-			// for (const entry of entries) {
-			// 	if (entry.target != canvas) { continue; }
-			// 	canvas.width = entry.devicePixelContentBoxSize[0].inlineSize;
-			// 	canvas.height = entry.devicePixelContentBoxSize[0].blockSize;
-			// }
-			// this.sizeManager.setSize()
-			console.log('entries', entries)
-		});
-		resizeObserver.observe(this.#htmlCanvas);
-	}
+     */
+    setSize(w: string | number = this.width, h: string | number = this.height) {
+        this.sizeManager.setSize(w, h)
+    }
 
-	/**
-	 * Configures the GPU context with the specified configuration settings.
-	 *
-	 */
-	#configure() {
-		const presentationFormat: GPUTextureFormat = navigator.gpu.getPreferredCanvasFormat();
-		this.#configurationDescription = {
-			device: this.#gpuDevice,
-			format: presentationFormat,
-			alphaMode: this.#alphaMode,
-		};
-		console.log(`configurationDescription`, this.#configurationDescription);
-		this.#gpuContext.configure(this.#configurationDescription);
-	}
+    /**
+     * Initializes the software.
+     *
+     * @function initialize
+     */
+    #initialize() {
+        this.#configure()
+        this.sizeManager.setSize('100%', '100%')
+        window?.addEventListener('resize', () => {
+            this.sizeManager.setSize()
+            this.viewList.forEach((view: View3D) => {
+                view.setSize()
+                view.setPosition()
+            })
+        });
+        const eventList = this.detector.isMobile ?
+            [
+                'click',
+                'touchmove',
+                'touchstart',
+                'touchend'
+            ]
+            :
+            [
+                'click',
+                'mousemove',
+                'mousedown',
+                'mouseup'
+            ]
+        eventList.forEach((eventName) => {
+            const eventMap = (
+                this.detector.isMobile
+                    ?
+                    {
+                        click: PICKING_EVENT_TYPE.CLICK,
+                        touchmove: PICKING_EVENT_TYPE.MOVE,
+                        touchstart: PICKING_EVENT_TYPE.DOWN,
+                        touchend: PICKING_EVENT_TYPE.UP,
+                    } :
+                    {
+                        click: PICKING_EVENT_TYPE.CLICK,
+                        mousemove: PICKING_EVENT_TYPE.MOVE,
+                        mousedown: PICKING_EVENT_TYPE.DOWN,
+                        mouseup: PICKING_EVENT_TYPE.UP,
+                    }
+            )
+            this.#htmlCanvas.addEventListener(eventName, (e: MouseEvent) => {
+                const eventTypeForDevice = eventMap[e.type]
+                // console.log('eventTypeForDevice',e.type)
+                this.viewList.forEach((view: View3D) => {
+                    if (this.detector.isMobile && e instanceof TouchEvent && e.touches.length > 0) {
+                        // Touch event
+                        view.pickingManager.mouseX = e.touches[0].clientX * devicePixelRatio - view.pixelRectObject.x;
+                        view.pickingManager.mouseY = e.touches[0].clientY * devicePixelRatio - view.pixelRectObject.y;
+                    } else if (e instanceof MouseEvent) {
+                        // Mouse event
+                        view.pickingManager.mouseX = e.offsetX * devicePixelRatio - view.pixelRectObject.x;
+                        view.pickingManager.mouseY = e.offsetY * devicePixelRatio - view.pixelRectObject.y;
+                    }
+                    if (eventTypeForDevice === PICKING_EVENT_TYPE.CLICK) {
+                        view.pickingManager.lastMouseClickEvent = {...e, type: eventTypeForDevice}
+                    } else {
+                        view.pickingManager.lastMouseEvent = {...e, type: eventTypeForDevice}
+                    }
+                })
+            })
+        })
+        {
+            // 키보드 이벤트 설정
+            const HD_keyDown = (e: KeyboardEvent) => {
+                this.#keyboardKeyBuffer[e.key] = true
+            };
+            const HD_keyUp = (e: KeyboardEvent) => {
+                this.#keyboardKeyBuffer[e.key] = false
+            };
+            window?.addEventListener('keyup', HD_keyUp);
+            window?.addEventListener('keydown', HD_keyDown);
+        }
+        const resizeObserver = new ResizeObserver(entries => {
+            // for (const entry of entries) {
+            // 	if (entry.target != canvas) { continue; }
+            // 	canvas.width = entry.devicePixelContentBoxSize[0].inlineSize;
+            // 	canvas.height = entry.devicePixelContentBoxSize[0].blockSize;
+            // }
+            // this.sizeManager.setSize()
+            console.log('entries', entries)
+        });
+        resizeObserver.observe(this.#htmlCanvas);
+    }
+
+    /**
+     * Configures the GPU context with the specified configuration settings.
+     *
+     */
+    #configure() {
+        const presentationFormat: GPUTextureFormat = navigator.gpu.getPreferredCanvasFormat();
+        this.#configurationDescription = {
+            device: this.#gpuDevice,
+            format: presentationFormat,
+            alphaMode: this.#alphaMode,
+        };
+        console.log(`configurationDescription`, this.#configurationDescription);
+        this.#gpuContext.configure(this.#configurationDescription);
+    }
 }
 
 Object.freeze(RedGPUContext)

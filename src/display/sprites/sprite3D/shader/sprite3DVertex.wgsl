@@ -1,10 +1,12 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include getBillboardMatrix;
-
-struct VertexUniforms {
-    pickingId: u32,
+struct MatrixList{
     modelMatrix: mat4x4<f32>,
     normalModelMatrix: mat4x4<f32>,
+}
+struct VertexUniforms {
+    matrixList:MatrixList,
+    pickingId: u32,
     useBillboardPerspective: u32,
     useBillboard: u32,
     billboardFixedScale: f32,
@@ -47,8 +49,8 @@ fn main(inputData: InputData) -> OutputData {
     let u_cameraPosition = u_camera.cameraPosition;
 
     // Vertex별 Uniform 변수 가져오기
-    let u_modelMatrix = vertexUniforms.modelMatrix;
-    let u_normalModelMatrix = vertexUniforms.normalModelMatrix;
+    let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
+    let u_normalModelMatrix = vertexUniforms.matrixList.normalModelMatrix;
     let u_useBillboardPerspective = vertexUniforms.useBillboardPerspective;
     let u_useBillboard = vertexUniforms.useBillboard;
     let u_billboardFixedScale = vertexUniforms.billboardFixedScale;
@@ -121,7 +123,7 @@ fn drawDirectionalShadowDepth(inputData: InputData) -> OutputShadowData {
     let u_directionalLightProjectionMatrix = systemUniforms.directionalLightProjectionMatrix;
     let u_directionalLightViewMatrix = systemUniforms.directionalLightViewMatrix;
 
-    let u_modelMatrix = vertexUniforms.modelMatrix;
+    let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
     let u_camera = systemUniforms.camera;
     let u_cameraMatrix = u_camera.cameraMatrix;
     let u_cameraPosition = u_camera.cameraPosition;
@@ -145,7 +147,7 @@ fn picking(inputData: InputData) -> OutputData {
     // 시스템 및 버텍스 유니폼 매트릭스
     let u_projectionMatrix = systemUniforms.projectionMatrix;
     let u_cameraMatrix = systemUniforms.camera.cameraMatrix;
-    let u_modelMatrix = vertexUniforms.modelMatrix;
+    let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
 
     // 빌보드와 기타 처리 플래그
     let u_useBillboardPerspective = vertexUniforms.useBillboardPerspective;

@@ -112,6 +112,9 @@ declare class Mesh extends MeshBase {
     setScale(x: number, y?: number, z?: number): void;
     setPosition(x: number, y?: number, z?: number): void;
     setRotation(rotationX: number, rotationY?: number, rotationZ?: number): void;
+    /**
+     * @experimental
+     */
     clone(): Mesh;
     render(renderViewStateData: RenderViewStateData): void;
     initGPURenderInfos(): void;

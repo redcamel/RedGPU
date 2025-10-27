@@ -40,7 +40,6 @@ declare class InstancingMesh extends Mesh {
     /**
      * 인스턴싱 메시의 렌더링을 수행합니다.
      * @param renderViewStateData 렌더 상태 데이터
-     * @param shadowRender 그림자 렌더링 여부
      */
     render(renderViewStateData: RenderViewStateData, shadowRender?: boolean): void;
 }

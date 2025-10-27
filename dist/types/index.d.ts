@@ -3,7 +3,7 @@ import GLTFLoader from "./loader/gltf/GLTFLoader";
 import SystemCode from "./resources/systemCode/SystemCode";
 export { init, SystemCode, GLTFLoader };
 export * as Camera from "./camera/";
-export * from "./context";
+export * as RedGPUContext from "./context";
 export * from "./color";
 export * from "./geometry";
 export * as Util from "./utils";
