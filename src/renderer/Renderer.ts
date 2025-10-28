@@ -90,10 +90,10 @@ class Renderer {
 				shadowManager.update(redGPUContext)
 			}
 			this.#renderPassViewShadow(view, commandEncoder)
-			this.#renderPassViewPickingLayer(view, commandEncoder)
 			this.#renderPassViewBasicLayer(view, commandEncoder, renderPassDescriptor)
-			this.#renderPassView2PathLayer(view, commandEncoder, renderPassDescriptor, depthStencilAttachment)
-		}
+            this.#renderPassView2PathLayer(view, commandEncoder, renderPassDescriptor, depthStencilAttachment)
+            this.#renderPassViewPickingLayer(view, commandEncoder)
+        }
 		{
 			//TODO 포스트이펙트를 실행을 완전히 안해도 될 조것 같은걸 체크해야함
 			renderPassDescriptor.colorAttachments[0].postEffectView = view.postEffectManager.render().textureView
