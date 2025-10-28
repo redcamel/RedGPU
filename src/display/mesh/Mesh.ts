@@ -801,7 +801,7 @@ class Mesh extends MeshBase {
                     prev[8] = current[8], prev[9] = current[9], prev[10] = current[10], prev[11] = current[11];
                     prev[12] = current[12], prev[13] = current[13], prev[14] = current[14], prev[15] = current[15];
                 }
-                if (!this.#needUpdateMatrixUniform) {
+                if (!this.#needUpdateMatrixUniform && vertexUniformInfoMatrixListMembers.prevModelMatrix) {
                     // keepLog('도냐')
                     redGPUContext.gpuDevice.queue.writeBuffer(
                         vertexUniformBuffer.gpuBuffer,
