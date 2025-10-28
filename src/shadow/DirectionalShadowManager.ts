@@ -3,6 +3,7 @@ import InstancingMesh from "../display/instancingMesh/InstancingMesh";
 import Mesh from "../display/mesh/Mesh";
 import validatePositiveNumberRange from "../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import validateUintRange from "../runtimeChecker/validateFunc/validateUintRange";
+import {keepLog} from "../utils";
 import calculateTextureByteSize from "../utils/texture/calculateTextureByteSize";
 
 class DirectionalShadowManager {
@@ -46,7 +47,6 @@ class DirectionalShadowManager {
     set shadowDepthTextureSize(value: number) {
         validateUintRange(value, 1)
         this.#shadowDepthTextureSize = value;
-        this.#checkDepthTexture()
     }
 
     reset() {
@@ -95,6 +95,7 @@ class DirectionalShadowManager {
     }
 
     #createDepthTexture() {
+			// keepLog('생성',this.#redGPUContext)
         const {gpuDevice, resourceManager} = this.#redGPUContext
         this.#shadowDepthTexture = resourceManager.createManagedTexture({
             size: [this.#shadowDepthTextureSize, this.#shadowDepthTextureSize, 1],

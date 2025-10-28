@@ -272,7 +272,7 @@ class SkyBox {
         this.#transitionStartTime = performance.now()
         this.#material.transitionAlphaTexture = transitionAlphaTexture
     }
-
+	#prevSystemUniform_Vertex_UniformBindGroup:GPUBindGroup
     /**
      * 스카이박스를 렌더링합니다.
      *
@@ -313,11 +313,11 @@ class SkyBox {
                 this.#material.transitionProgress = value < 0 ? 0 : value > 1 ? 1 : value
             }
         }
-        if (this.#dirtyPipeline || this.#material.dirtyPipeline) {
+        if (this.#dirtyPipeline || this.#material.dirtyPipeline || this.#prevSystemUniform_Vertex_UniformBindGroup !== view.systemUniform_Vertex_UniformBindGroup) {
             this.gpuRenderInfo.pipeline = this.#updatePipeline()
             this.#dirtyPipeline = false
             renderViewStateData.numDirtyPipelines++
-
+	        this.#prevSystemUniform_Vertex_UniformBindGroup = view.systemUniform_Vertex_UniformBindGroup
             {
                 this.#material.dirtyPipeline = false
                 const bundleEncoder = gpuDevice.createRenderBundleEncoder({
