@@ -95,7 +95,7 @@ class DirectionalShadowManager {
     }
 
     #createDepthTexture() {
-			keepLog('생성',this.#redGPUContext)
+			// keepLog('생성',this.#redGPUContext)
         const {gpuDevice, resourceManager} = this.#redGPUContext
         this.#shadowDepthTexture = resourceManager.createManagedTexture({
             size: [this.#shadowDepthTextureSize, this.#shadowDepthTextureSize, 1],

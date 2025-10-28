@@ -174,7 +174,7 @@ class View3D extends AView {
 		this.#viewRenderTextureManager = new ViewRenderTextureManager(this)
 		this.#renderViewStateData = new RenderViewStateData(this)
 		this.#postEffectManager = new PostEffectManager(this)
-		keepLog(this.systemUniform_Vertex_StructInfo)
+		// keepLog(this.systemUniform_Vertex_StructInfo)
 		this.#uniformData = new ArrayBuffer(this.systemUniform_Vertex_StructInfo.endOffset)
 		this.#uniformDataF32 = new Float32Array(this.#uniformData)
 		this.#uniformDataU32 = new Uint32Array(this.#uniformData)
@@ -329,7 +329,7 @@ class View3D extends AView {
 				shadowDepthTextureView,
 				vertexUniformBindGroup: this.#systemUniform_Vertex_UniformBindGroup
 			}
-			keepLog(this.#prevInfoList)
+			// keepLog(this.#prevInfoList)
 		}
 		this.#updateClusters(calcPointLightCluster);
 		this.#updateSystemUniform();
