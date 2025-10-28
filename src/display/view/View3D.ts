@@ -99,7 +99,7 @@ class View3D extends AView {
 	 * 바인드 그룹 생성 최적화를 위한 이전 프레임 정보 캐시
 	 * @private
 	 */
-	#prevInfoList = []
+	#prevInfoList = {}
 	/**
 	 * 그림자 깊이 비교용 GPU 샘플러
 	 * @private
@@ -305,6 +305,7 @@ class View3D extends AView {
 		let shadowDepthTextureView = shadowRender ? directionalShadowManager.shadowDepthTextureViewEmpty : directionalShadowManager.shadowDepthTextureView
 		const index = this.redGPUContext.viewList.indexOf(this)
 		const key = `${index}_${shadowRender ? 'shadowRender' : 'basic'}_2path${!!renderPath1ResultTextureView}`
+
 		if (index > -1) {
 			let needResetBindGroup = true
 			let prevInfo = this.#prevInfoList[key]
@@ -328,6 +329,7 @@ class View3D extends AView {
 				shadowDepthTextureView,
 				vertexUniformBindGroup: this.#systemUniform_Vertex_UniformBindGroup
 			}
+			keepLog(this.#prevInfoList)
 		}
 		this.#updateClusters(calcPointLightCluster);
 		this.#updateSystemUniform();
