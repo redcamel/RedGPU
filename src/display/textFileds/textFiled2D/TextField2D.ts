@@ -53,6 +53,9 @@ class TextField2D extends BaseTextField2D {
      */
     constructor(redGPUContext: RedGPUContext, useSmoothing: boolean = true) {
         super(redGPUContext, (width: number, height: number) => {
+            if(this.#width !== width || this.#height !== height) {
+                this.dirtyTransform = true
+            }
             this.#width = width;
             this.#height = height;
         }, false);
