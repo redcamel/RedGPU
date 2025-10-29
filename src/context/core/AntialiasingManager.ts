@@ -15,15 +15,15 @@ class AntialiasingManager {
 
     constructor(redGPUContext: RedGPUContext) {
         this.#redGPUContext = redGPUContext;
-        // if (window.devicePixelRatio > 1) {
-        //     this.useTAA = true
-        //     this.useMSAA = false
-        //     this.useFXAA = false
-        // } else {
+        if (window.devicePixelRatio > 1) {
+            this.useTAA = true
+            this.useMSAA = false
+            this.useFXAA = false
+        } else {
         this.useTAA = false
         this.useMSAA = true
         this.useFXAA = false
-        // }
+        }
     }
 
     get useTAA(): boolean {
