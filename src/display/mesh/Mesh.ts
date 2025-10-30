@@ -4,7 +4,7 @@ import RedGPUContext from "../../context/RedGPUContext";
 import DefineForVertex from "../../defineProperty/DefineForVertex";
 import Geometry from "../../geometry/Geometry";
 import Primitive from "../../primitive/core/Primitive";
-import DrawBufferManager, {DrawCommandSlot} from "../../renderer/core/DrawBufferManager";
+import DrawBufferManager, {DrawCommandSlot} from "../../renderer/core/drawBufferManager/DrawBufferManager";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import {keepLog} from "../../utils";
@@ -705,7 +705,7 @@ class Mesh extends MeshBase {
 		}
 		// check distanceCulling
 		let passFrustumCulling = true
-		// if (!this.#isStatic) {
+		if (!this.#isStatic) {
 			if (useDistanceCulling && currentGeometry) {
 				const {rawCamera} = view
 				const aabb = this.boundingAABB;
@@ -748,7 +748,7 @@ class Mesh extends MeshBase {
 				// 	passFrustumCulling = false
 				// }
 			}
-		// }
+		}
 		if (passFrustumCulling) {
 			if (this.gltfLoaderInfo?.activeAnimations?.length) {
 				renderViewStateData.animationList[renderViewStateData.animationList.length] = this.gltfLoaderInfo?.activeAnimations
@@ -762,18 +762,18 @@ class Mesh extends MeshBase {
 					dirtyTransformForChildren = false
 				}
 			}
-			if (!this.#drawCommandSlot.dataArray[this.#drawCommandSlot.commandOffset + 1] && currentGeometry) {
-				// keepLog(this.name,'1')
-				const {indexCount, triangleCount} = currentGeometry.indexBuffer
-				this.#drawBufferManager.setInstanceNum(this.#drawCommandSlot,1)
-			}
+			// if (!this.#drawCommandSlot.dataArray[this.#drawCommandSlot.commandOffset + 1] && currentGeometry) {
+			// 	// keepLog(this.name,'1')
+			// 	const {indexCount, triangleCount} = currentGeometry.indexBuffer
+			// 	this.#drawBufferManager.setInstanceNum(this.#drawCommandSlot,1)
+			// }
 		}else{
-
-			if (this.#drawCommandSlot.dataArray[this.#drawCommandSlot.commandOffset + 1] && currentGeometry) {
-				// keepLog(this.name,'0')
-				const {indexCount, triangleCount} = currentGeometry.indexBuffer
-				this.#drawBufferManager.setInstanceNum(this.#drawCommandSlot,0)
-			}
+			//
+			// if (this.#drawCommandSlot.dataArray[this.#drawCommandSlot.commandOffset + 1] && currentGeometry) {
+			// 	// keepLog(this.name,'0')
+			// 	const {indexCount, triangleCount} = currentGeometry.indexBuffer
+			// 	this.#drawBufferManager.setInstanceNum(this.#drawCommandSlot,0)
+			// }
 		}
 		// render
 		const {displacementTexture, displacementScale} = currentMaterial || {}

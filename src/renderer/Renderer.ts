@@ -6,7 +6,7 @@ import GPU_LOAD_OP from "../gpuConst/GPU_LOAD_OP";
 import GPU_STORE_OP from "../gpuConst/GPU_STORE_OP";
 import GltfAnimationLooperManager from "../loader/gltf/animationLooper/GltfAnimationLooperManager";
 import ParsedSkinInfo_GLTF from "../loader/gltf/cls/ParsedSkinInfo_GLTF";
-import DrawBufferManager from "./core/DrawBufferManager";
+import DrawBufferManager from "./core/drawBufferManager/DrawBufferManager";
 import DebugRender from "./debugRender/DebugRender";
 import FinalRender from "./finalRender/FinalRender";
 import renderAlphaLayer from "./renderLayers/renderAlphaLayer";
@@ -91,7 +91,9 @@ class Renderer {
 				shadowManager.update(redGPUContext)
 			}
 			{
-				DrawBufferManager.getInstance(redGPUContext).flushAllCommands(renderViewStateData)
+				const drawBufferManager = DrawBufferManager.getInstance(redGPUContext)
+				drawBufferManager.flushAllCommands(renderViewStateData)
+				drawBufferManager.render()
 			}
 			this.#renderPassViewShadow(view, commandEncoder)
 			this.#renderPassViewBasicLayer(view, commandEncoder, renderPassDescriptor)

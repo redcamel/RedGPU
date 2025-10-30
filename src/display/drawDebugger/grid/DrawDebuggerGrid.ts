@@ -17,7 +17,7 @@ import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validateRedGPUContext";
 import InstanceIdGenerator from "../../../utils/uuid/InstanceIdGenerator";
 import shaderSource from './shader.wgsl'
-import DrawBufferManager, {DrawCommandSlot} from "../../../renderer/core/DrawBufferManager";
+import DrawBufferManager, {DrawCommandSlot} from "../../../renderer/core/drawBufferManager/DrawBufferManager";
 
 const SHADER_INFO = parseWGSL(shaderSource);
 const FRAGMENT_UNIFORM_STRUCT = SHADER_INFO.uniforms.gridArgs;
