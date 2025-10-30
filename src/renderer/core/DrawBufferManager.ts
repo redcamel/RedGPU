@@ -81,6 +81,7 @@ class DrawBufferManager {
         data[offset + 2] = firstIndex
         data[offset + 3] = baseVertex
         data[offset + 4] = firstInstance
+	    this.updateSingleCommand(slot)
     }
 
     /**
@@ -101,6 +102,7 @@ class DrawBufferManager {
         data[offset + 2] = firstVertex
         data[offset + 3] = firstInstance
         // data[offset + 4] = 미사용 (direct draw는 4개 값만 사용)
+	    this.updateSingleCommand(slot)
     }
 
     /**

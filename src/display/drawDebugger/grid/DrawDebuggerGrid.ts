@@ -131,7 +131,7 @@ class DrawDebuggerGrid {
 		if (!this.#drawCommandSlot) {
 			this.#drawCommandSlot = drawBufferManager.allocateDrawCommand(this.name)
 			drawBufferManager.setIndexedIndirectCommand(this.#drawCommandSlot, this.#indexBuffer.indexCount, 1, 0, 0, 0)
-			drawBufferManager.updateSingleCommand(this.#drawCommandSlot)
+
 		}
 	}
 

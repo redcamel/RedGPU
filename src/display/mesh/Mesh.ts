@@ -1098,13 +1098,16 @@ class Mesh extends MeshBase {
         // keepLog('렌더번들갱신', this.name)
     }
 
+		#checkDrawCommandSlot(){
+			if (!this.#drawCommandSlot) {
+				this.#drawCommandSlot = this.#drawBufferManager.allocateDrawCommand(this.name)
+			}
+		}
     #setDrawBuffer() {
         const {geometry} = this
         const {vertexBuffer, indexBuffer} = geometry
         const drawBufferManager = this.#drawBufferManager
-        if (!this.#drawCommandSlot) {
-            this.#drawCommandSlot = drawBufferManager.allocateDrawCommand(this.name)
-        }
+        this.#checkDrawCommandSlot()
         if (indexBuffer) {
             const {indexCount} = indexBuffer
             // @ts-ignore
@@ -1122,11 +1125,11 @@ class Mesh extends MeshBase {
                 //     })
                 // }
             }
-            drawBufferManager.updateSingleCommand(this.#drawCommandSlot)
+
         } else {
             const {vertexCount} = vertexBuffer
             drawBufferManager.setIndirectCommand(this.#drawCommandSlot, vertexCount, 1, 0, 0)
-            drawBufferManager.updateSingleCommand(this.#drawCommandSlot)
+
         }
     }
 
