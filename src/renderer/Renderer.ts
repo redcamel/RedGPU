@@ -6,6 +6,7 @@ import GPU_LOAD_OP from "../gpuConst/GPU_LOAD_OP";
 import GPU_STORE_OP from "../gpuConst/GPU_STORE_OP";
 import GltfAnimationLooperManager from "../loader/gltf/animationLooper/GltfAnimationLooperManager";
 import ParsedSkinInfo_GLTF from "../loader/gltf/cls/ParsedSkinInfo_GLTF";
+import DrawBufferManager from "./core/DrawBufferManager";
 import DebugRender from "./debugRender/DebugRender";
 import FinalRender from "./finalRender/FinalRender";
 import renderAlphaLayer from "./renderLayers/renderAlphaLayer";
@@ -89,11 +90,14 @@ class Renderer {
 				const {shadowManager} = scene
 				shadowManager.update(redGPUContext)
 			}
+			{
+				DrawBufferManager.getInstance(redGPUContext).flushAllCommands(renderViewStateData)
+			}
 			this.#renderPassViewShadow(view, commandEncoder)
 			this.#renderPassViewBasicLayer(view, commandEncoder, renderPassDescriptor)
-            this.#renderPassView2PathLayer(view, commandEncoder, renderPassDescriptor, depthStencilAttachment)
-            this.#renderPassViewPickingLayer(view, commandEncoder)
-        }
+			this.#renderPassView2PathLayer(view, commandEncoder, renderPassDescriptor, depthStencilAttachment)
+			this.#renderPassViewPickingLayer(view, commandEncoder)
+		}
 		{
 			//TODO 포스트이펙트를 실행을 완전히 안해도 될 조것 같은걸 체크해야함
 			renderPassDescriptor.colorAttachments[0].postEffectView = view.postEffectManager.render().textureView
@@ -127,7 +131,7 @@ class Renderer {
 		const viewShadowRenderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass(shadowPassDescriptor)
 		{
 			this.#updateViewportAndScissor(view, viewShadowRenderPassEncoder, true)
-			this.#updateViewSystemUniforms(view, viewShadowRenderPassEncoder,true, false)
+			this.#updateViewSystemUniforms(view, viewShadowRenderPassEncoder, true, false)
 		}
 		if (directionalShadowManager.castingList.length) {
 			renderShadowLayer(view, viewShadowRenderPassEncoder)
@@ -142,7 +146,7 @@ class Renderer {
 		{
 			const renderPath1ResultTextureView = view.viewRenderTextureManager.renderPath1ResultTextureView
 			this.#updateViewportAndScissor(view, viewRenderPassEncoder)
-			this.#updateViewSystemUniforms(view, viewRenderPassEncoder,false, true, renderPath1ResultTextureView)
+			this.#updateViewSystemUniforms(view, viewRenderPassEncoder, false, true, renderPath1ResultTextureView)
 		}
 		renderViewStateData.currentRenderPassEncoder = viewRenderPassEncoder
 		viewRenderPassEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
@@ -224,7 +228,7 @@ class Renderer {
 			const viewPickingRenderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass(pickingPassDescriptor)
 			{
 				this.#updateViewportAndScissor(view, viewPickingRenderPassEncoder)
-				this.#updateViewSystemUniforms(view, viewPickingRenderPassEncoder,false, false)
+				this.#updateViewSystemUniforms(view, viewPickingRenderPassEncoder, false, false)
 			}
 			renderPickingLayer(view, viewPickingRenderPassEncoder)
 			viewPickingRenderPassEncoder.end()

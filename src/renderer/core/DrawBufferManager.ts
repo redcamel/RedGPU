@@ -1,4 +1,5 @@
 import RedGPUContext from "../../context/RedGPUContext";
+import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 import formatBytes from "../../utils/math/formatBytes";
 
 /**
@@ -8,7 +9,7 @@ import formatBytes from "../../utils/math/formatBytes";
 class DrawBufferManager {
     static #instance: DrawBufferManager
     // 드로우 커맨드 타입별 크기
-    static readonly #INDEXED_COMMAND_SIZE = 5  // drawIndexedIndirect
+    static readonly #INDEXED_COMMAND_SIZE = 6  // drawIndexedIndirect
     #redGPUContext: RedGPUContext
     #bufferPool: GPUBuffer[] = []
     #dataPool: Uint32Array[] = []
@@ -71,7 +72,8 @@ class DrawBufferManager {
         instanceCount: number = 1,
         firstIndex: number = 0,
         baseVertex: number = 0,
-        firstInstance: number = 0
+        firstInstance: number = 0,
+        isStatic: boolean = false,
     ): void {
         const offset = slot.commandOffset
         const data = slot.dataArray
@@ -81,18 +83,25 @@ class DrawBufferManager {
         data[offset + 2] = firstIndex
         data[offset + 3] = baseVertex
         data[offset + 4] = firstInstance
-	    this.updateSingleCommand(slot)
-    }
+        data[offset + 5] = isStatic ? 1 : 0
 
+    }
+		setInstanceNum(slot:DrawCommandSlot,instanceCount:number=0){
+			const offset = slot.commandOffset
+			const data = slot.dataArray
+			data[offset + 1] = instanceCount
+
+		}
     /**
      * drawIndirect 커맨드를 설정합니다.
      */
     setIndirectCommand(
-        slot: DrawCommandSlot,
-        vertexCount: number,
-        instanceCount: number = 1,
-        firstVertex: number = 0,
-        firstInstance: number = 0
+				slot: DrawCommandSlot,
+				vertexCount: number,
+				instanceCount: number = 1,
+				firstVertex: number = 0,
+				firstInstance: number = 0,
+				isStatic: boolean = false,
     ): void {
         const offset = slot.commandOffset
         const data = slot.dataArray
@@ -102,7 +111,8 @@ class DrawBufferManager {
         data[offset + 2] = firstVertex
         data[offset + 3] = firstInstance
         // data[offset + 4] = 미사용 (direct draw는 4개 값만 사용)
-	    this.updateSingleCommand(slot)
+	      data[offset + 5] = isStatic ? 1 : 0
+
     }
 
     /**
@@ -196,46 +206,46 @@ class DrawBufferManager {
     // /**
     //  * 모든 사용된 버퍼의 데이터를 GPU로 업로드합니다.
     //  */
-    // flushAllCommands(renderViewStateData:RenderViewStateData): void {
-    // 	if(!renderViewStateData.rebuildRenderBundleNum){
-    // 		// keepLog('⚡ 드로우 커맨드 변경사항없음')
-    // 		return
-    // 	}
-    // 	const startTime = performance.now()
-    // 	let totalUploaded = 0
-    //
-    // 	for (const bufferIndex of this.#usedBufferIndices) {
-    // 		const buffer = this.#bufferPool[bufferIndex]
-    // 		const data = this.#dataPool[bufferIndex]
-    //
-    // 		// 실제 사용된 부분만 업로드
-    // 		const usedCommands = bufferIndex === this.#currentBufferIndex ?
-    // 			this.#currentCommandIndex :
-    // 			this.#maxCommandsPerBuffer
-    //
-    // 		const uploadSize = usedCommands * DrawBufferManager.#INDEXED_COMMAND_SIZE * 4
-    //
-    // 		this.#redGPUContext.gpuDevice.queue.writeBuffer(
-    // 			buffer,
-    // 			0,
-    // 			data,
-    // 			0,
-    // 			uploadSize / 4
-    // 		)
-    //
-    // 		totalUploaded += uploadSize
-    // 	}
-    //
-    // 	const endTime = performance.now()
-    //
-    // 	keepLog(`⚡ 드로우 커맨드 업로드 완료:`, {
-    // 		changedRenderBundleNum: renderViewStateData.rebuildRenderBundleNum,
-    // 		buffersUpdated: this.#usedBufferIndices.size,
-    // 		totalCommands: this.getTotalCommandCount(),
-    // 		uploadedSize: formatBytes(totalUploaded),
-    // 		uploadTime: `${(endTime - startTime).toFixed(2)}ms`
-    // 	})
-    // }
+    flushAllCommands(renderViewStateData:RenderViewStateData): void {
+    	// if(!renderViewStateData.rebuildRenderBundleNum){
+    	// 	// keepLog('⚡ 드로우 커맨드 변경사항없음')
+    	// 	return
+    	// }
+    	const startTime = performance.now()
+    	let totalUploaded = 0
+
+    	for (const bufferIndex of this.#usedBufferIndices) {
+    		const buffer = this.#bufferPool[bufferIndex]
+    		const data = this.#dataPool[bufferIndex]
+
+    		// 실제 사용된 부분만 업로드
+    		const usedCommands = bufferIndex === this.#currentBufferIndex ?
+    			this.#currentCommandIndex :
+    			this.#maxCommandsPerBuffer
+
+    		const uploadSize = usedCommands * DrawBufferManager.#INDEXED_COMMAND_SIZE * 4
+
+    		this.#redGPUContext.gpuDevice.queue.writeBuffer(
+    			buffer,
+    			0,
+    			data,
+    			0,
+    			uploadSize / 4
+    		)
+
+    		totalUploaded += uploadSize
+    	}
+
+    	const endTime = performance.now()
+
+    	// keepLog(`⚡ 드로우 커맨드 업로드 완료:`, {
+    	// 	changedRenderBundleNum: renderViewStateData.rebuildRenderBundleNum,
+    	// 	buffersUpdated: this.#usedBufferIndices.size,
+    	// 	totalCommands: this.getTotalCommandCount(),
+    	// 	uploadedSize: formatBytes(totalUploaded),
+    	// 	uploadTime: `${(endTime - startTime).toFixed(2)}ms`
+    	// })
+    }
 
     // /**
     //  * 다음 프레임을 위해 상태를 리셋합니다.
