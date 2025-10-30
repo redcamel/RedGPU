@@ -1,5 +1,6 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import RenderViewStateData from "../../../display/view/core/RenderViewStateData";
+import View3D from "../../../display/view/View3D";
 import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import {keepLog} from "../../../utils";
 import formatBytes from "../../../utils/math/formatBytes";
@@ -15,10 +16,13 @@ class DrawBufferManager {
 	static readonly #INDEXED_COMMAND_SIZE = 12
 	#redGPUContext: RedGPUContext
 	#bufferPool: GPUBuffer[] = []
-	#dataPool: Uint32Array[] = []
+	#dataPool: ArrayBuffer[] = []
+	#dataPoolU32: Uint32Array[] = []
+	#dataPoolF32: Float32Array[] = []
 	#maxCommandsPerBuffer: number
 	#currentBufferIndex: number = 0
 	#currentCommandIndex: number = 0
+	#prevCommandIndex: number = null
 	#deviceMaxBufferSize: number
 	#usedBufferIndices: Set<number> = new Set()
 	#computeShaderModule: GPUShaderModule
@@ -91,17 +95,19 @@ class DrawBufferManager {
 
 	}
 
-	render() {
-
+	render(view:View3D) {
 		if(!this.#bufferPool.length) return
 		if(!this.#computeBindGroup){
 			this.#createCompute()
 		}
 
+
 		const {gpuDevice} = this.#redGPUContext
-
-
-
+		gpuDevice.queue.writeBuffer(
+			this.#uniformBuffer,
+			0,
+			new Float32Array(view.frustumPlanes.flat()),
+		)
 		const commandEncoder = gpuDevice.createCommandEncoder({
 			label: 'DrawBuffer Culling Compute',
 		});
@@ -136,7 +142,9 @@ class DrawBufferManager {
 			bufferIndex: this.#currentBufferIndex,
 			commandOffset: this.#currentCommandIndex * DrawBufferManager.#INDEXED_COMMAND_SIZE,
 			buffer: this.#bufferPool[this.#currentBufferIndex],
-			dataArray: this.#dataPool[this.#currentBufferIndex]
+			dataArray: this.#dataPool[this.#currentBufferIndex],
+			dataArrayU32: this.#dataPoolU32[this.#currentBufferIndex],
+			dataArrayF32: this.#dataPoolF32[this.#currentBufferIndex]
 		}
 		// keepLog(`🎯 드로우 슬롯 할당:`, {
 		// 	bufferIndex: slot.bufferIndex,
@@ -161,19 +169,21 @@ class DrawBufferManager {
 		isStatic: boolean = false,
 	): void {
 		const offset = slot.commandOffset
-		const data = slot.dataArray
+		const data = slot.dataArrayU32
 		data[offset] = indexCount
 		data[offset + 1] = instanceCount
 		data[offset + 2] = firstIndex
 		data[offset + 3] = baseVertex
 		data[offset + 4] = firstInstance
-		data[offset + 5] = isStatic ? 1 : 0
+		data[offset + 5] = instanceCount
+		data[offset + 6] = isStatic ? 1 : 0
 	}
 
 	setInstanceNum(slot: DrawCommandSlot, instanceCount: number = 0) {
 		const offset = slot.commandOffset
-		const data = slot.dataArray
+		const data = slot.dataArrayU32
 		data[offset + 1] = instanceCount
+		data[offset + 5] = instanceCount
 	}
 
 	/**
@@ -188,13 +198,14 @@ class DrawBufferManager {
 		isStatic: boolean = false,
 	): void {
 		const offset = slot.commandOffset
-		const data = slot.dataArray
+		const data = slot.dataArrayU32
 		data[offset] = vertexCount
 		data[offset + 1] = instanceCount
 		data[offset + 2] = firstVertex
 		data[offset + 3] = firstInstance
 		// data[offset + 4] = 미사용 (direct draw는 4개 값만 사용)
-		data[offset + 5] = isStatic ? 1 : 0
+		data[offset + 5] = instanceCount
+		data[offset + 6] = isStatic ? 1 : 0
 	}
 
 	/**
@@ -211,7 +222,7 @@ class DrawBufferManager {
 			buffer,
 			byteOffset,
 			data,
-			slot.commandOffset,
+			byteOffset,
 			elementCount
 		)
 	}
@@ -303,7 +314,7 @@ class DrawBufferManager {
 				0,
 				data,
 				0,
-				uploadSize / 4
+				uploadSize
 			)
 			totalUploaded += uploadSize
 		}
@@ -342,9 +353,11 @@ class DrawBufferManager {
 			usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE,
 			label: `DrawBuffer_${this.#bufferPool.length}`
 		})
-		const data = new Uint32Array(this.#maxCommandsPerBuffer * DrawBufferManager.#INDEXED_COMMAND_SIZE)
+		const data = new ArrayBuffer(bufferSize)
 		this.#bufferPool.push(buffer)
 		this.#dataPool.push(data)
+		this.#dataPoolU32.push(new Uint32Array(data))
+		this.#dataPoolF32.push(new Float32Array(data))
 		console.log(`📦 새 드로우 버퍼 생성: #${this.#bufferPool.length - 1} (총 ${this.#bufferPool.length}개)`)
 		return this.#bufferPool.length - 1
 	}
@@ -379,7 +392,9 @@ interface DrawCommandSlot {
 	bufferIndex: number
 	commandOffset: number
 	buffer: GPUBuffer
-	dataArray: Uint32Array
+	dataArray: ArrayBuffer
+	dataArrayU32: Uint32Array,
+	dataArrayF32:Float32Array
 }
 
 /**

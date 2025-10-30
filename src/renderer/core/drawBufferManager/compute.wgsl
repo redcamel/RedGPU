@@ -4,8 +4,9 @@ struct DrawCommand {
     firstVertex: u32,
     baseVertex: u32,
     firstInstance: u32,
+    originInstanceCount: u32,
     isStatic:u32,
-     _padding: vec2<u32>,
+     _padding: u32,
     boundingSphere: vec4<f32>, // xyz: center, w: radius
 };
 
@@ -36,7 +37,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let cmd = drawCommands[index];
 
     if (isVisible(cmd.boundingSphere, cameraFrustum)) {
-        drawCommands[index].instanceCount = 1u; // 보임 → 활성화
+        drawCommands[index].instanceCount = drawCommands[index].originInstanceCount; // 보임 → 활성화
     } else {
         drawCommands[index].instanceCount = 0u; // 안 보임 → 무효화
     }

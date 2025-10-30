@@ -132,7 +132,7 @@ class Mesh extends MeshBase {
 	#needUpdateMatrixUniform: boolean = true
 	#uniformDataMatrixList: Float32Array
 	#displacementScale: number
-	#isStatic: boolean = true
+	#isStatic: boolean = false
 	get isStatic(): boolean {
 		return this.#isStatic;
 	}
@@ -701,6 +701,13 @@ class Mesh extends MeshBase {
 				}
 			}
 			if (!currentGeometry) this.#needUpdateMatrixUniform = false
+			if (this.#isStatic){
+				const boundBox = this.boundingAABB
+				this.#drawCommandSlot.dataArrayF32[this.#drawCommandSlot.commandOffset + 8] = boundBox.centerX
+				this.#drawCommandSlot.dataArrayF32[this.#drawCommandSlot.commandOffset + 9] = boundBox.centerY
+				this.#drawCommandSlot.dataArrayF32[this.#drawCommandSlot.commandOffset + 10] = boundBox.centerZ
+				this.#drawCommandSlot.dataArrayF32[this.#drawCommandSlot.commandOffset + 11] = boundBox.geometryRadius
+			}
 			this.dirtyTransform = false
 		}
 		// check distanceCulling

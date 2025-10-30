@@ -93,7 +93,7 @@ class Renderer {
 			{
 				const drawBufferManager = DrawBufferManager.getInstance(redGPUContext)
 				drawBufferManager.flushAllCommands(renderViewStateData)
-				drawBufferManager.render()
+				drawBufferManager.render(view)
 			}
 			this.#renderPassViewShadow(view, commandEncoder)
 			this.#renderPassViewBasicLayer(view, commandEncoder, renderPassDescriptor)
