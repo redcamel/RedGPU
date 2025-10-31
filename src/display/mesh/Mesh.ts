@@ -132,7 +132,7 @@ class Mesh extends MeshBase {
 	#needUpdateMatrixUniform: boolean = true
 	#uniformDataMatrixList: Float32Array
 	#displacementScale: number
-	#isStatic: boolean = false
+	#isStatic: boolean = true
 	get isStatic(): boolean {
 		return this.#isStatic;
 	}
@@ -140,6 +140,7 @@ class Mesh extends MeshBase {
 	set isStatic(value: boolean) {
 		this.#checkDrawCommandSlot()
 		this.#isStatic = value;
+		this.dirtyTransform = true
 	}
 
 	/**
@@ -701,7 +702,7 @@ class Mesh extends MeshBase {
 				}
 			}
 			if (!currentGeometry) this.#needUpdateMatrixUniform = false
-			if (this.#isStatic){
+			{
 				const boundBox = this.boundingAABB
 				this.#drawCommandSlot.dataArrayF32[this.#drawCommandSlot.commandOffset + 8] = boundBox.centerX
 				this.#drawCommandSlot.dataArrayF32[this.#drawCommandSlot.commandOffset + 9] = boundBox.centerY
@@ -807,43 +808,43 @@ class Mesh extends MeshBase {
 		} else {
 			renderViewStateData.num3DGroups++
 		}
-		{
-			if (passFrustumCulling &&antialiasingManager.useTAA && this.#uniformDataMatrixList) {
-				const {gpuRenderInfo} = this
-				const {vertexUniformBuffer, vertexUniformInfo} = gpuRenderInfo
-				const {members: vertexUniformInfoMembers} = vertexUniformInfo
-				const {members: vertexUniformInfoMatrixListMembers} = vertexUniformInfoMembers.matrixList
-				if (this.#prevModelMatrix && vertexUniformInfoMatrixListMembers.prevModelMatrix) {
-					this.#uniformDataMatrixList.set(this.#prevModelMatrix, vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
-					// if (vertexUniformInfoMatrixListMembers.prevModelMatrix) {
-					// 	redGPUContext.gpuDevice.queue.writeBuffer(
-					// 		vertexUniformGPUBuffer,
-					// 		vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffset,
-					// 		this.#prevModelMatrix,
-					// 	)
-					// }
-				}
-				{
-					if (!this.#prevModelMatrix) this.#prevModelMatrix = new Float32Array(16)
-					const prev = this.#prevModelMatrix
-					const current = this.modelMatrix
-					prev[0] = current[0], prev[1] = current[1], prev[2] = current[2], prev[3] = current[3];
-					prev[4] = current[4], prev[5] = current[5], prev[6] = current[6], prev[7] = current[7];
-					prev[8] = current[8], prev[9] = current[9], prev[10] = current[10], prev[11] = current[11];
-					prev[12] = current[12], prev[13] = current[13], prev[14] = current[14], prev[15] = current[15];
-				}
-				if (!this.#needUpdateMatrixUniform && vertexUniformInfoMatrixListMembers.prevModelMatrix) {
-					// keepLog('도냐')
-					redGPUContext.gpuDevice.queue.writeBuffer(
-						vertexUniformBuffer.gpuBuffer,
-						vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffset,
-						this.#prevModelMatrix,
-					)
-				}
-			} else {
-				this.#prevModelMatrix = null
-			}
-		}
+		// {
+		// 	if (passFrustumCulling &&antialiasingManager.useTAA && this.#uniformDataMatrixList) {
+		// 		const {gpuRenderInfo} = this
+		// 		const {vertexUniformBuffer, vertexUniformInfo} = gpuRenderInfo
+		// 		const {members: vertexUniformInfoMembers} = vertexUniformInfo
+		// 		const {members: vertexUniformInfoMatrixListMembers} = vertexUniformInfoMembers.matrixList
+		// 		if (this.#prevModelMatrix && vertexUniformInfoMatrixListMembers.prevModelMatrix) {
+		// 			this.#uniformDataMatrixList.set(this.#prevModelMatrix, vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
+		// 			// if (vertexUniformInfoMatrixListMembers.prevModelMatrix) {
+		// 			// 	redGPUContext.gpuDevice.queue.writeBuffer(
+		// 			// 		vertexUniformGPUBuffer,
+		// 			// 		vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffset,
+		// 			// 		this.#prevModelMatrix,
+		// 			// 	)
+		// 			// }
+		// 		}
+		// 		{
+		// 			if (!this.#prevModelMatrix) this.#prevModelMatrix = new Float32Array(16)
+		// 			const prev = this.#prevModelMatrix
+		// 			const current = this.modelMatrix
+		// 			prev[0] = current[0], prev[1] = current[1], prev[2] = current[2], prev[3] = current[3];
+		// 			prev[4] = current[4], prev[5] = current[5], prev[6] = current[6], prev[7] = current[7];
+		// 			prev[8] = current[8], prev[9] = current[9], prev[10] = current[10], prev[11] = current[11];
+		// 			prev[12] = current[12], prev[13] = current[13], prev[14] = current[14], prev[15] = current[15];
+		// 		}
+		// 		if (!this.#needUpdateMatrixUniform && vertexUniformInfoMatrixListMembers.prevModelMatrix) {
+		// 			// keepLog('도냐')
+		// 			redGPUContext.gpuDevice.queue.writeBuffer(
+		// 				vertexUniformBuffer.gpuBuffer,
+		// 				vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffset,
+		// 				this.#prevModelMatrix,
+		// 			)
+		// 		}
+		// 	} else {
+		// 		this.#prevModelMatrix = null
+		// 	}
+		// }
 		if (currentGeometry && passFrustumCulling) {
 			const {gpuRenderInfo} = this
 			const {vertexUniformBuffer, vertexUniformInfo} = gpuRenderInfo

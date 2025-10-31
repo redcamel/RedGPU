@@ -1,11 +1,13 @@
 import {mat4} from "gl-matrix";
 import RedGPUContext from "../context/RedGPUContext";
+import scene from "../display/scene/Scene";
 import RenderViewStateData from "../display/view/core/RenderViewStateData";
 import View3D from "../display/view/View3D";
 import GPU_LOAD_OP from "../gpuConst/GPU_LOAD_OP";
 import GPU_STORE_OP from "../gpuConst/GPU_STORE_OP";
 import GltfAnimationLooperManager from "../loader/gltf/animationLooper/GltfAnimationLooperManager";
 import ParsedSkinInfo_GLTF from "../loader/gltf/cls/ParsedSkinInfo_GLTF";
+import {keepLog} from "../utils";
 import DrawBufferManager from "./core/drawBufferManager/DrawBufferManager";
 import DebugRender from "./debugRender/DebugRender";
 import FinalRender from "./finalRender/FinalRender";
@@ -40,7 +42,7 @@ class Renderer {
 		redGPUContext.currentRequestAnimationFrame = null
 	}
 
-	renderFrame(redGPUContext: RedGPUContext, time: number) {
+	 renderFrame(redGPUContext: RedGPUContext, time: number) {
 		if (!this.#finalRender) this.#finalRender = new FinalRender()
 		if (!this.#debugRender) this.#debugRender = new DebugRender(redGPUContext)
 		// 오브젝트 렌더시작
@@ -50,7 +52,7 @@ class Renderer {
 			const len = redGPUContext.viewList.length
 			for (i; i < len; i++) {
 				const targetView = redGPUContext.viewList[i];
-				viewList_renderPassDescriptorList.push(this.renderView(targetView, time));
+				viewList_renderPassDescriptorList.push( this.renderView(targetView, time));
 			}
 		}
 		this.#finalRender.render(redGPUContext, viewList_renderPassDescriptorList)
@@ -58,7 +60,7 @@ class Renderer {
 		console.log('/////////////////// end renderFrame ///////////////////')
 	}
 
-	renderView(view: View3D, time: number) {
+	 renderView(view: View3D, time: number) {
 		const {
 			redGPUContext,
 			camera,
@@ -93,7 +95,9 @@ class Renderer {
 			{
 				const drawBufferManager = DrawBufferManager.getInstance(redGPUContext)
 				drawBufferManager.flushAllCommands(renderViewStateData)
-				drawBufferManager.render(view)
+				if(view.scene.children[0].isStatic) {
+					 drawBufferManager.render(view)
+				}
 			}
 			this.#renderPassViewShadow(view, commandEncoder)
 			this.#renderPassViewBasicLayer(view, commandEncoder, renderPassDescriptor)
