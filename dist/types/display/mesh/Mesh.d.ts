@@ -38,8 +38,9 @@ declare class Mesh extends MeshBase {
     displacementTexture: BitmapTexture;
     /** 그림자 캐스팅 여부 */
     castShadow: boolean;
-    get isStatic(): boolean;
-    set isStatic(value: boolean);
+    get isGPUCulling(): boolean;
+    set isGPUCulling(value: boolean);
+    get renderBundle(): GPURenderBundle;
     /**
      * Mesh 인스턴스를 생성합니다.
      * @param redGPUContext RedGPU 컨텍스트

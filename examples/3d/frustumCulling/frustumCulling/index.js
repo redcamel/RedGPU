@@ -39,7 +39,7 @@ const createTestMeshes = (redGPUContext, scene) => {
 	);
 
 	const meshes = [];
-	const gridSize = 30;
+	const gridSize = 60;
 
 	for (let x = -gridSize; x <= gridSize; x++) {
 		for (let z = -gridSize; z <= gridSize; z++) {
@@ -77,7 +77,7 @@ const renderTestPane = async (redGPUContext, meshes, view) => {
 		drawCalls: meshes.length,
 		totalMeshes: meshes.length,
 		culledMeshes: 0,
-		isStatic:true
+		isGPUCulling:true
 	};
 
 	const cameraFolder = pane.addFolder({title: 'Camera', expanded: true});
@@ -98,6 +98,7 @@ const renderTestPane = async (redGPUContext, meshes, view) => {
 
 	const statsFolder = pane.addFolder({title: 'Statistics', expanded: true});
 	const drawCallsBinding = statsFolder.addBinding(config, 'drawCalls', {readonly: true});
+	statsFolder.addBinding(view.renderViewStateData, 'needResetRenderLayer', {readonly: true});
 
 	const updateStats = () => {
 		config.drawCalls = view.renderViewStateData.numDrawCalls;
@@ -133,11 +134,11 @@ const renderTestPane = async (redGPUContext, meshes, view) => {
 		config.cameraDistance = 300;
 		pane.refresh();
 	});
-	utilsFolder.addBinding(config,'isStatic').on('change', (e) => {
+	utilsFolder.addBinding(config,'isGPUCulling').on('change', (e) => {
 console.log(e.value)
 		// config.isStatic = !config.isStatic;
 		view.scene.children.forEach(child => {
-			child.isStatic = config.isStatic;
+			child.isGPUCulling = config.isGPUCulling;
 		})
 	});
 };

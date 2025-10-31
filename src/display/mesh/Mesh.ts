@@ -7,7 +7,6 @@ import Primitive from "../../primitive/core/Primitive";
 import DrawBufferManager, {DrawCommandSlot} from "../../renderer/core/drawBufferManager/DrawBufferManager";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
-import {keepLog} from "../../utils";
 import AABB from "../../utils/math/bound/AABB";
 import calculateMeshAABB from "../../utils/math/bound/calculateMeshAABB";
 import calculateMeshCombinedAABB from "../../utils/math/bound/calculateMeshCombinedAABB";
@@ -132,15 +131,19 @@ class Mesh extends MeshBase {
 	#needUpdateMatrixUniform: boolean = true
 	#uniformDataMatrixList: Float32Array
 	#displacementScale: number
-	#isStatic: boolean = true
-	get isStatic(): boolean {
-		return this.#isStatic;
+	#isGPUCulling: boolean = true
+	get isGPUCulling(): boolean {
+		return this.#isGPUCulling;
 	}
 
-	set isStatic(value: boolean) {
+	set isGPUCulling(value: boolean) {
 		this.#checkDrawCommandSlot()
-		this.#isStatic = value;
+		this.#isGPUCulling = value;
 		this.dirtyTransform = true
+	}
+
+	get renderBundle(): GPURenderBundle {
+		return this.#renderBundle;
 	}
 
 	/**
@@ -530,7 +533,7 @@ class Mesh extends MeshBase {
 		let currentDirtyPipeline = this.dirtyPipeline
 		const {skinInfo} = this.animationInfo
 		if(this.gltfLoaderInfo?.activeAnimations?.length || skinInfo){
-			this.isStatic = false
+			this.isGPUCulling = false
 		}
 		if (isScene2DMode) {
 			this.#z = 0
@@ -713,7 +716,7 @@ class Mesh extends MeshBase {
 		}
 		// check distanceCulling
 		let passFrustumCulling = true
-		if (!this.#isStatic) {
+		if (!this.#isGPUCulling) {
 			if (useDistanceCulling && currentGeometry) {
 				const {rawCamera} = view
 				const aabb = this.boundingAABB;
@@ -981,6 +984,7 @@ class Mesh extends MeshBase {
 					) {
 						this.#setDrawBuffer()
 						this.#setRenderBundle(renderViewStateData)
+						renderViewStateData.needResetRenderLayer = true
 					}
 					renderViewStateData.numDrawCalls++
 					if (currentGeometry.indexBuffer) {

@@ -95,7 +95,7 @@ class Renderer {
 			{
 				const drawBufferManager = DrawBufferManager.getInstance(redGPUContext)
 				drawBufferManager.flushAllCommands(renderViewStateData)
-				if(view.scene.children[0].isStatic) {
+				if(view.scene.children[0].isGPUCulling) {
 					 drawBufferManager.render(view)
 				}
 			}
