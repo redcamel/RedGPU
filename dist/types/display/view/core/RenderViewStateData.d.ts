@@ -85,6 +85,7 @@ declare class RenderViewStateData {
     startTime: number;
     /** 씬이 2D 모드인지 여부 */
     isScene2DMode: boolean;
+    needResetRenderLayer: boolean;
     /**
      * 새로운 RenderViewStateData 인스턴스를 생성합니다.
      *
