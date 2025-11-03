@@ -9,16 +9,20 @@ RedGPU.init(
 	canvas,
 	(redGPUContext) => {
 		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-
+		controller.speedDistance = 0.3;
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		redGPUContext.addView(view);
+
+		const light = new RedGPU.Light.DirectionalLight()
+		scene.lightManager.addDirectionalLight(light)
 
 		const texture = new RedGPU.Resource.BitmapTexture(
 			redGPUContext,
 			'../../../assets/UV_Grid_Sm.jpg'
 		);
-		const material = new RedGPU.Material.BitmapMaterial(redGPUContext, texture);
+		const material = new RedGPU.Material.PhongMaterial(redGPUContext);
+		material.diffuseTexture = texture;
 
 		const skyboxTexture = new RedGPU.Resource.CubeTexture(
 			redGPUContext,
@@ -32,6 +36,7 @@ RedGPU.init(
 			]
 		);
 		view.skybox = new RedGPU.Display.SkyBox(redGPUContext, skyboxTexture);
+		view.grid = true
 
 		createTest(redGPUContext, scene, material);
 
@@ -69,11 +74,12 @@ async function createTest(context, scene, material) {
 	const mesh = new RedGPU.Display.InstancingMesh(
 		context,
 		instanceCount,
-		new RedGPU.Primitive.Plane(context),
+		// new RedGPU.Primitive.Plane(context),
+		new RedGPU.Primitive.Sphere(context),
 		material
 	);
 
-	mesh.primitiveState.cullMode = 'none';
+	// mesh.primitiveState.cullMode = 'none';
 
 	scene.addChild(mesh);
 
@@ -81,10 +87,11 @@ async function createTest(context, scene, material) {
 		for (let i = 0; i < mesh.instanceCount; i++) {
 			if (!mesh.instanceChildren[i]?.inited) {
 				mesh.instanceChildren[i].setPosition(
-					Math.random() * 300 - 150,
-					Math.random() * 300 - 150,
-					Math.random() * 300 - 150
+					Math.random() * 900 - 450,
+					Math.random() * 900 - 450,
+					Math.random() * 900 - 450
 				);
+				mesh.instanceChildren[i].setScale(Math.random() * 2 + 1);
 				mesh.instanceChildren[i].setRotation(
 					Math.random() * 360,
 					Math.random() * 360,

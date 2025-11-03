@@ -1,4 +1,4 @@
-import {mat4} from "gl-matrix";
+import {mat4, vec4} from "gl-matrix";
 
 const tempMTX = mat4.create();
 /**
@@ -28,8 +28,36 @@ const computeViewFrustumPlanes = (projectionMatrix: mat4, cameraMatrix: mat4): n
         plane[0] /= norm;
         plane[1] /= norm;
         plane[2] /= norm;
-        plane[3] /= norm;
+        plane[3] /= norm ;
     }
     return planes;
 }
+
+// const computeViewFrustumPlanes = (
+// 	projectionMatrix: mat4,
+// 	viewMatrix: mat4 // 카메라의 viewMatrix (world → camera)
+// ): vec4[] => {
+// 	// 클립 공간 변환 행렬: projection × view
+// 	const clipMatrix = mat4.create();
+// 	mat4.multiply(clipMatrix, projectionMatrix, viewMatrix);
+//
+// 	// 프러스텀 평면 추출 (Ax + By + Cz + D = 0)
+// 	const planes: vec4[] = [
+// 		vec4.fromValues(clipMatrix[3] - clipMatrix[0], clipMatrix[7] - clipMatrix[4], clipMatrix[11] - clipMatrix[8], clipMatrix[15] - clipMatrix[12]), // Left
+// 		vec4.fromValues(clipMatrix[3] + clipMatrix[0], clipMatrix[7] + clipMatrix[4], clipMatrix[11] + clipMatrix[8], clipMatrix[15] + clipMatrix[12]), // Right
+// 		vec4.fromValues(clipMatrix[3] + clipMatrix[1], clipMatrix[7] + clipMatrix[5], clipMatrix[11] + clipMatrix[9], clipMatrix[15] + clipMatrix[13]), // Bottom
+// 		vec4.fromValues(clipMatrix[3] - clipMatrix[1], clipMatrix[7] - clipMatrix[5], clipMatrix[11] - clipMatrix[9], clipMatrix[15] - clipMatrix[13]), // Top
+// 		vec4.fromValues(clipMatrix[3] - clipMatrix[2], clipMatrix[7] - clipMatrix[6], clipMatrix[11] - clipMatrix[10], clipMatrix[15] - clipMatrix[14]), // Near
+// 		vec4.fromValues(clipMatrix[3] + clipMatrix[2], clipMatrix[7] + clipMatrix[6], clipMatrix[11] + clipMatrix[10], clipMatrix[15] + clipMatrix[14]) // Far
+// 	];
+//
+// 	// 각 평면 정규화
+// 	for (let i = 0; i < 6; i++) {
+// 		const plane = planes[i];
+// 		const length = Math.hypot(plane[0], plane[1], plane[2]);
+// 		vec4.scale(plane, plane, 1 / length);
+// 	}
+//
+// 	return planes;
+// };
 export default computeViewFrustumPlanes

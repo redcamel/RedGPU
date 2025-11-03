@@ -47,7 +47,7 @@ const createTestMeshes = (redGPUContext, scene) => {
 			// const geometry = new RedGPU.Primitive.Sphere(redGPUContext, 1, 32,32);
 			const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
 
-			mesh.setPosition(x * 10, 0, z * 10);
+			mesh.setPosition(x * 15, 0, z * 15);
 			mesh.setScale(2)
 
 			if (x === 0 && z === 0) {

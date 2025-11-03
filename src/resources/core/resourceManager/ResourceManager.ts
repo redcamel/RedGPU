@@ -388,7 +388,8 @@ class ResourceManager {
                     entries: [
                         {binding: 0, visibility: GPUShaderStage.VERTEX, buffer: {type: 'read-only-storage'}},
                         {binding: 1, visibility: GPUShaderStage.VERTEX, sampler: {type: 'filtering'}},
-                        {binding: 2, visibility: GPUShaderStage.VERTEX, texture: {}}
+                        {binding: 2, visibility: GPUShaderStage.VERTEX, texture: {}},
+                        {binding: 3, visibility: GPUShaderStage.VERTEX, buffer: {type: 'read-only-storage'}},
                     ],
                 }
             )
