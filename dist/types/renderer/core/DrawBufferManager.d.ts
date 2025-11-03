@@ -18,12 +18,12 @@ declare class DrawBufferManager {
     /**
      * drawIndexedIndirect 커맨드를 설정합니다.
      */
-    setIndexedIndirectCommand(slot: DrawCommandSlot, indexCount: number, instanceCount?: number, firstIndex?: number, baseVertex?: number, firstInstance?: number, isStatic?: boolean): void;
+    setIndexedIndirectCommand(slot: DrawCommandSlot, indexCount: number, instanceCount?: number, firstIndex?: number, baseVertex?: number, firstInstance?: number): void;
     setInstanceNum(slot: DrawCommandSlot, instanceCount?: number): void;
     /**
      * drawIndirect 커맨드를 설정합니다.
      */
-    setIndirectCommand(slot: DrawCommandSlot, vertexCount: number, instanceCount?: number, firstVertex?: number, firstInstance?: number, isStatic?: boolean): void;
+    setIndirectCommand(slot: DrawCommandSlot, vertexCount: number, instanceCount?: number, firstVertex?: number, firstInstance?: number): void;
     /**
      * 슬롯의 드로우 커맨드를 즉시 GPU로 업데이트합니다.
      */

@@ -39,7 +39,7 @@ const createTestMeshes = (redGPUContext, scene) => {
 	);
 
 	const meshes = [];
-	const gridSize = 40;
+	const gridSize = 60;
 
 	for (let x = -gridSize; x <= gridSize; x++) {
 		for (let z = -gridSize; z <= gridSize; z++) {

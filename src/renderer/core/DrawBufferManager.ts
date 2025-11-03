@@ -9,7 +9,7 @@ import formatBytes from "../../utils/math/formatBytes";
 class DrawBufferManager {
     static #instance: DrawBufferManager
     // 드로우 커맨드 타입별 크기
-    static readonly #INDEXED_COMMAND_SIZE = 6  // drawIndexedIndirect
+    static readonly #INDEXED_COMMAND_SIZE = 5  // drawIndexedIndirect
     #redGPUContext: RedGPUContext
     #bufferPool: GPUBuffer[] = []
     #dataPool: Uint32Array[] = []
@@ -73,7 +73,6 @@ class DrawBufferManager {
         firstIndex: number = 0,
         baseVertex: number = 0,
         firstInstance: number = 0,
-        isStatic: boolean = false,
     ): void {
         const offset = slot.commandOffset
         const data = slot.dataArray
@@ -83,7 +82,6 @@ class DrawBufferManager {
         data[offset + 2] = firstIndex
         data[offset + 3] = baseVertex
         data[offset + 4] = firstInstance
-        data[offset + 5] = isStatic ? 1 : 0
 
     }
 		setInstanceNum(slot:DrawCommandSlot,instanceCount:number=0){
@@ -101,7 +99,6 @@ class DrawBufferManager {
 				instanceCount: number = 1,
 				firstVertex: number = 0,
 				firstInstance: number = 0,
-				isStatic: boolean = false,
     ): void {
         const offset = slot.commandOffset
         const data = slot.dataArray
@@ -111,7 +108,6 @@ class DrawBufferManager {
         data[offset + 2] = firstVertex
         data[offset + 3] = firstInstance
         // data[offset + 4] = 미사용 (direct draw는 4개 값만 사용)
-	      data[offset + 5] = isStatic ? 1 : 0
 
     }
 
