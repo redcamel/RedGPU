@@ -39,7 +39,7 @@ const createTestMeshes = (redGPUContext, scene) => {
 	);
 
 	const meshes = [];
-	const gridSize = 60;
+	const gridSize = 30;
 
 	for (let x = -gridSize; x <= gridSize; x++) {
 		for (let z = -gridSize; z <= gridSize; z++) {
@@ -47,8 +47,8 @@ const createTestMeshes = (redGPUContext, scene) => {
 			// const geometry = new RedGPU.Primitive.Sphere(redGPUContext, 1, 32,32);
 			const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
 
-			mesh.setPosition(x * 5, 0, z * 5);
-			mesh.scaleY = 2
+			mesh.setPosition(x * 10, 0, z * 10);
+			mesh.setScale(2)
 
 			if (x === 0 && z === 0) {
 				mesh.material = new RedGPU.Material.ColorMaterial(redGPUContext);

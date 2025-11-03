@@ -783,18 +783,8 @@ class Mesh extends MeshBase {
 					dirtyTransformForChildren = false
 				}
 			}
-			if (!this.#drawCommandSlot.dataArray[this.#drawCommandSlot.commandOffset + 1] && currentGeometry) {
-				// keepLog(this.name,'1')
-				const {indexCount, triangleCount} = currentGeometry.indexBuffer
-				this.#drawBufferManager.setInstanceNum(this.#drawCommandSlot,1)
-			}
 		}else{
 
-			if (this.#drawCommandSlot.dataArray[this.#drawCommandSlot.commandOffset + 1] && currentGeometry) {
-				// keepLog(this.name,'0')
-				const {indexCount, triangleCount} = currentGeometry.indexBuffer
-				this.#drawBufferManager.setInstanceNum(this.#drawCommandSlot,0)
-			}
 		}
 		// render
 		const {displacementTexture, displacementScale} = currentMaterial || {}
