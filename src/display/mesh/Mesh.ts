@@ -707,6 +707,7 @@ class Mesh extends MeshBase {
 						// 	)
 						// }
 					}
+					// 브랜치가 먼가 꼬였네
 					{
 						if (!this.#prevModelMatrix) this.#prevModelMatrix = new Float32Array(16)
 						const prev = this.#prevModelMatrix
@@ -827,7 +828,7 @@ class Mesh extends MeshBase {
 		} else {
 			renderViewStateData.num3DGroups++
 		}
-		
+
 		if (currentGeometry && passFrustumCulling) {
 			const {gpuRenderInfo} = this
 			const {vertexUniformBuffer, vertexUniformInfo} = gpuRenderInfo
