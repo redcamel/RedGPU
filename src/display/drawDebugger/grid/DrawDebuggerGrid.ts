@@ -5,7 +5,7 @@ import GPU_BLEND_FACTOR from "../../../gpuConst/GPU_BLEND_FACTOR";
 import GPU_BLEND_OPERATION from "../../../gpuConst/GPU_BLEND_OPERATION";
 import GPU_COMPARE_FUNCTION from "../../../gpuConst/GPU_COMPARE_FUNCTION";
 import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "../../../material/core";
-import RenderViewStateData from "../../view/core/RenderViewStateData";
+import DrawBufferManager, {DrawCommandSlot} from "../../../renderer/core/DrawBufferManager";
 import BlendState from "../../../renderState/BlendState";
 import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
 import UniformBuffer from "../../../resources/buffer/uniformBuffer/UniformBuffer";
@@ -16,8 +16,8 @@ import ResourceManager from "../../../resources/core/resourceManager/ResourceMan
 import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validateRedGPUContext";
 import InstanceIdGenerator from "../../../utils/uuid/InstanceIdGenerator";
+import RenderViewStateData from "../../view/core/RenderViewStateData";
 import shaderSource from './shader.wgsl'
-import DrawBufferManager, {DrawCommandSlot} from "../../../renderer/core/drawBufferManager/DrawBufferManager";
 
 const SHADER_INFO = parseWGSL(shaderSource);
 const FRAGMENT_UNIFORM_STRUCT = SHADER_INFO.uniforms.gridArgs;

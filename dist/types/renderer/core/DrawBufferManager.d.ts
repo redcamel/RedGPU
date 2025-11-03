@@ -11,7 +11,6 @@ declare class DrawBufferManager {
      * DrawBufferManager 싱글톤 인스턴스를 가져옵니다.
      */
     static getInstance(redGPUContext: RedGPUContext): DrawBufferManager;
-    render(): void;
     /**
      * 새로운 드로우 커맨드 슬롯을 할당합니다.
      */

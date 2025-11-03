@@ -43,8 +43,8 @@ const createTestMeshes = (redGPUContext, scene) => {
 
 	for (let x = -gridSize; x <= gridSize; x++) {
 		for (let z = -gridSize; z <= gridSize; z++) {
-			// const geometry = new RedGPU.Primitive.Box(redGPUContext, 2, 2, 2);
-			const geometry = new RedGPU.Primitive.Sphere(redGPUContext, 1, 32,32);
+			const geometry = new RedGPU.Primitive.Box(redGPUContext, 2, 2, 2);
+			// const geometry = new RedGPU.Primitive.Sphere(redGPUContext, 1, 32,32);
 			const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
 
 			mesh.setPosition(x * 5, 0, z * 5);
@@ -77,7 +77,6 @@ const renderTestPane = async (redGPUContext, meshes, view) => {
 		drawCalls: meshes.length,
 		totalMeshes: meshes.length,
 		culledMeshes: 0,
-		isGPUCulling:true
 	};
 
 	const cameraFolder = pane.addFolder({title: 'Camera', expanded: true});
@@ -134,11 +133,5 @@ const renderTestPane = async (redGPUContext, meshes, view) => {
 		config.cameraDistance = 300;
 		pane.refresh();
 	});
-	utilsFolder.addBinding(config,'isGPUCulling').on('change', (e) => {
-console.log(e.value)
-		// config.isStatic = !config.isStatic;
-		view.scene.children.forEach(child => {
-			child.isGPUCulling = config.isGPUCulling;
-		})
-	});
+
 };
