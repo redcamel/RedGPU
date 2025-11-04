@@ -29,8 +29,8 @@ struct IndirectDrawArgs {
 const BOUNDING_RADIUS: f32 = 1;
 
 // 점과 평면 사이의 거리 계산
-fn distanceToPlane(point: vec3<f32>, plane: vec4<f32>) -> f32 {
-    return dot(vec4<f32>(point, 1.0), plane);
+fn distanceToPlane(position: vec3<f32>, plane: vec4<f32>) -> f32 {
+    return dot(vec4<f32>(position, 1.0), plane);
 }
 
 // 프러스텀 컬링 테스트
@@ -64,7 +64,7 @@ fn calculateLODLevel(distanceToCamera: f32) -> u32 {
 @compute @workgroup_size(64)
 fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     let instanceIdx = globalId.x;
-   if (instanceIdx >= __INSTANCE_COUNT__) {
+   if (instanceIdx >= 100000) {
             return;
         }
 
