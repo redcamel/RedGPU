@@ -64,6 +64,9 @@ fn calculateLODLevel(distanceToCamera: f32) -> u32 {
 @compute @workgroup_size(64)
 fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     let instanceIdx = globalId.x;
+   if (instanceIdx >= __INSTANCE_COUNT__) {
+            return;
+        }
 
 
     // 인스턴스의 월드 위치 추출
