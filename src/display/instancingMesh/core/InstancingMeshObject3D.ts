@@ -361,25 +361,10 @@ class InstancingMeshObject3D {
 		if (this.#instancingMesh.gpuRenderInfo) {
 			const {vertexUniformBuffer, vertexUniformInfo} = this.#instancingMesh.gpuRenderInfo
 			const {dataViewF32} = vertexUniformBuffer
-			const dateByLocation = vertexUniformInfo.members.instanceModelMatrixs
-			const dateByLocation2 = vertexUniformInfo.members.instanceNormalModelMatrix
-			const dateByLocation3 = vertexUniformInfo.members.instanceOpacity
-			//TODO 이걸한방에 해봐야할듯
-			// this.#redGPUContext.gpuDevice.queue.writeBuffer(
-			//     vertexUniformBuffer.gpuBuffer,
-			//     dateByLocation.uniformOffset + dateByLocation.stride * this.#location,
-			//     new dateByLocation.View(this.modelMatrix)
-			// )
-			// this.#redGPUContext.gpuDevice.queue.writeBuffer(
-			//     vertexUniformBuffer.gpuBuffer,
-			//     dateByLocation2.uniformOffset + dateByLocation2.stride * this.#location,
-			//     new dateByLocation2.View(this.normalModelMatrix),
-			// )
-			// this.#redGPUContext.gpuDevice.queue.writeBuffer(
-			//     vertexUniformBuffer.gpuBuffer,
-			//     dateByLocation3.uniformOffset + dateByLocation3.stride * this.#location,
-			//     new dateByLocation3.View([this.opacity]),
-			// )
+			const {members} = vertexUniformInfo
+			const dateByLocation = members.instanceModelMatrixs
+			const dateByLocation2 = members.instanceNormalModelMatrix
+			const dateByLocation3 = members.instanceOpacity
 			dataViewF32.set(this.modelMatrix, (dateByLocation.uniformOffset + dateByLocation.stride * this.#location) / 4)
 			dataViewF32.set(this.normalModelMatrix, (dateByLocation2.uniformOffset + dateByLocation2.stride * this.#location) / 4)
 			dataViewF32.set([this.opacity], (dateByLocation3.uniformOffset + dateByLocation3.stride * this.#location) / 4)
