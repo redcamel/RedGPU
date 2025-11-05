@@ -1,6 +1,6 @@
 struct InstanceUniforms {
-     useDisplacementTexture: u32,
-        displacementScale: f32,
+    useDisplacementTexture: u32,
+    displacementScale: f32,
     instanceGroupModelMatrix: mat4x4<f32>,
     instanceModelMatrixs: array<mat4x4<f32>, __INSTANCE_COUNT__>,
     instanceNormalModelMatrix: array<mat4x4<f32>, __INSTANCE_COUNT__>,
@@ -9,6 +9,7 @@ struct InstanceUniforms {
 };
 
 struct CullingUniforms {
+    instanceNum: f32,
     frustumPlanes: array<vec4<f32>, 6>, // Left, Right, Bottom, Top, Near, Far
 };
 
@@ -65,7 +66,7 @@ fn calculateLODLevel(distanceToCamera: f32) -> u32 {
 @compute @workgroup_size(64)
 fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     let instanceIdx = globalId.x;
-   if (instanceIdx >= __INSTANCE_COUNT__) {
+   if (instanceIdx >= u32(cullingUniforms.instanceNum)) {
             return;
         }
 

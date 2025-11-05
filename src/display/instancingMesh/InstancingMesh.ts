@@ -346,8 +346,13 @@ class InstancingMesh extends Mesh {
 		const {view} = renderViewStateData
 		this.#redGPUContext.gpuDevice.queue.writeBuffer(
 			this.#cullingUniformBuffer.gpuBuffer,
-			0,
+			16,
 			new Float32Array(view.frustumPlanes.flat())
+		)
+		this.#redGPUContext.gpuDevice.queue.writeBuffer(
+			this.#cullingUniformBuffer.gpuBuffer,
+			0,
+			new Float32Array([this.#instanceCount])
 		)
 	}
 
