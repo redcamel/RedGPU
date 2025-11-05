@@ -1,6 +1,4 @@
 import Camera2D from "../../../camera/camera/Camera2D";
-import {keepLog} from "../../../utils";
-import MESH_TYPE from "../../MESH_TYPE";
 import View3D from "../View3D";
 
 /**
@@ -92,6 +90,7 @@ class RenderViewStateData {
 	needResetRenderLayer: boolean = false;
 	/** 연결된 View3D 인스턴스 (private) */
 	readonly #view: View3D;
+	#prev_msaaID
 
 	/**
 	 * 새로운 RenderViewStateData 인스턴스를 생성합니다.
@@ -112,7 +111,6 @@ class RenderViewStateData {
 		return this.#view;
 	}
 
-	#prev_msaaID
 	/**
 	 * 새로운 프레임을 위해 렌더 상태 데이터를 초기화합니다.
 	 *
@@ -166,11 +164,11 @@ class RenderViewStateData {
 		//
 		// keepLog('this.needResetRenderLayer', this.needResetRenderLayer)
 		// if (this.needResetRenderLayer || this.#view.redGPUContext.antialiasingManager.msaaID !== this.#prev_msaaID) {
-			this.bundleListAlphaLayer.length = 0;
-			this.bundleListTransparentLayer.length = 0;
-			this.bundleListParticleLayer.length = 0;
-			this.bundleListRender2PathLayer.length = 0;
-			this.bundleListBasicList.length = 0;
+		this.bundleListAlphaLayer.length = 0;
+		this.bundleListTransparentLayer.length = 0;
+		this.bundleListParticleLayer.length = 0;
+		this.bundleListRender2PathLayer.length = 0;
+		this.bundleListBasicList.length = 0;
 		// 	requestAnimationFrame(()=>{
 		// 		const {children} = this.#view.scene
 		// 		let i = children.length
@@ -219,8 +217,6 @@ class RenderViewStateData {
 		}
 		this.frustumPlanes = useFrustumCulling ? frustumPlanes : null;
 	}
-
-
 }
 
 export default RenderViewStateData;

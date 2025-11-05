@@ -365,7 +365,6 @@ class InstancingMeshObject3D {
 			const dateByLocation2 = vertexUniformInfo.members.instanceNormalModelMatrix
 			const dateByLocation3 = vertexUniformInfo.members.instanceOpacity
 			//TODO 이걸한방에 해봐야할듯
-
 			// this.#redGPUContext.gpuDevice.queue.writeBuffer(
 			//     vertexUniformBuffer.gpuBuffer,
 			//     dateByLocation.uniformOffset + dateByLocation.stride * this.#location,

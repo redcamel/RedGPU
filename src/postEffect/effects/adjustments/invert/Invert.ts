@@ -18,19 +18,19 @@ import computeCode from "./wgsl/computeCode.wgsl"
  * <iframe src="/RedGPU/examples/3d/postEffect/adjustments/invert/"></iframe>
  */
 class Invert extends ASinglePassPostEffect {
-    /**
-     * Invert 인스턴스 생성
-     * @param redGPUContext 렌더링 컨텍스트
-     */
-    constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext);
-        const uniformStructCode = ''
-        this.init(
-            redGPUContext,
-            'POST_EFFECT_INVERT',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode)
-        )
-    }
+	/**
+	 * Invert 인스턴스 생성
+	 * @param redGPUContext 렌더링 컨텍스트
+	 */
+	constructor(redGPUContext: RedGPUContext) {
+		super(redGPUContext);
+		const uniformStructCode = ''
+		this.init(
+			redGPUContext,
+			'POST_EFFECT_INVERT',
+			createBasicPostEffectCode(this, computeCode, uniformStructCode)
+		)
+	}
 }
 
 Object.freeze(Invert)

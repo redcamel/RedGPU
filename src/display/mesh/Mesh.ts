@@ -7,7 +7,6 @@ import Primitive from "../../primitive/core/Primitive";
 import DrawBufferManager, {DrawCommandSlot} from "../../renderer/core/DrawBufferManager";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
-import {keepLog} from "../../utils";
 import AABB from "../../utils/math/bound/AABB";
 import calculateMeshAABB from "../../utils/math/bound/calculateMeshAABB";
 import calculateMeshCombinedAABB from "../../utils/math/bound/calculateMeshCombinedAABB";
@@ -519,7 +518,6 @@ class Mesh extends MeshBase {
 		let dirtyOpacityForChildren
 		let currentDirtyPipeline = this.dirtyPipeline
 		const {skinInfo} = this.animationInfo
-
 		if (isScene2DMode) {
 			this.#z = 0
 			this.#pivotZ = 0
@@ -717,7 +715,6 @@ class Mesh extends MeshBase {
 						prev[8] = current[8], prev[9] = current[9], prev[10] = current[10], prev[11] = current[11];
 						prev[12] = current[12], prev[13] = current[13], prev[14] = current[14], prev[15] = current[15];
 					}
-
 				} else {
 					this.#prevModelMatrix = null
 				}
@@ -726,50 +723,48 @@ class Mesh extends MeshBase {
 		}
 		// check distanceCulling
 		let passFrustumCulling = true
-
-			if (useDistanceCulling && currentGeometry) {
-				const {rawCamera} = view
-				const aabb = this.boundingAABB;
-				// AABB 중심점과 카메라 위치 간의 거리 계산
-				const dx = rawCamera.x - aabb.centerX;
-				const dy = rawCamera.y - aabb.centerY;
-				const dz = rawCamera.z - aabb.centerZ;
-				// 거리 제곱 계산
-				const distanceSquared = dx * dx + dy * dy + dz * dz;
-				const geometryRadius = aabb.geometryRadius;
-				// AABB의 반지름을 고려한 컬링 거리 계산
-				const cullingDistanceWithRadius = cullingDistanceSquared + (geometryRadius * geometryRadius);
-				if (distanceSquared > cullingDistanceWithRadius) {
-					passFrustumCulling = false;
-				}
+		if (useDistanceCulling && currentGeometry) {
+			const {rawCamera} = view
+			const aabb = this.boundingAABB;
+			// AABB 중심점과 카메라 위치 간의 거리 계산
+			const dx = rawCamera.x - aabb.centerX;
+			const dy = rawCamera.y - aabb.centerY;
+			const dz = rawCamera.z - aabb.centerZ;
+			// 거리 제곱 계산
+			const distanceSquared = dx * dx + dy * dy + dz * dz;
+			const geometryRadius = aabb.geometryRadius;
+			// AABB의 반지름을 고려한 컬링 거리 계산
+			const cullingDistanceWithRadius = cullingDistanceSquared + (geometryRadius * geometryRadius);
+			if (distanceSquared > cullingDistanceWithRadius) {
+				passFrustumCulling = false;
 			}
-			// check frustumCulling
-			if (frustumPlanes && passFrustumCulling && !this.#ignoreFrustumCulling) {
-				// if (currentGeometry) {boundingAABB
-				const combinedAABB = this.boundingAABB;
-				const frustumPlanes0 = frustumPlanes[0];
-				const frustumPlanes1 = frustumPlanes[1];
-				const frustumPlanes2 = frustumPlanes[2];
-				const frustumPlanes3 = frustumPlanes[3];
-				const frustumPlanes4 = frustumPlanes[4];
-				const frustumPlanes5 = frustumPlanes[5];
-				// combinedBoundingAABB의 중심점과 반지름 사용
-				const centerX = combinedAABB.centerX;
-				const centerY = combinedAABB.centerY;
-				const centerZ = combinedAABB.centerZ;
-				const radius = combinedAABB.geometryRadius;
-				// 각 frustum plane에 대해 거리 계산
-				frustumPlanes0[0] * centerX + frustumPlanes0[1] * centerY + frustumPlanes0[2] * centerZ + frustumPlanes0[3] <= -radius ? passFrustumCulling = false
-					: frustumPlanes1[0] * centerX + frustumPlanes1[1] * centerY + frustumPlanes1[2] * centerZ + frustumPlanes1[3] <= -radius ? passFrustumCulling = false
-						: frustumPlanes2[0] * centerX + frustumPlanes2[1] * centerY + frustumPlanes2[2] * centerZ + frustumPlanes2[3] <= -radius ? passFrustumCulling = false
-							: frustumPlanes3[0] * centerX + frustumPlanes3[1] * centerY + frustumPlanes3[2] * centerZ + frustumPlanes3[3] <= -radius ? passFrustumCulling = false
-								: frustumPlanes4[0] * centerX + frustumPlanes4[1] * centerY + frustumPlanes4[2] * centerZ + frustumPlanes4[3] <= -radius ? passFrustumCulling = false
-									: frustumPlanes5[0] * centerX + frustumPlanes5[1] * centerY + frustumPlanes5[2] * centerZ + frustumPlanes5[3] <= -radius ? passFrustumCulling = false : 0;
-				// } else {
-				// 	passFrustumCulling = false
-				// }
-			}
-
+		}
+		// check frustumCulling
+		if (frustumPlanes && passFrustumCulling && !this.#ignoreFrustumCulling) {
+			// if (currentGeometry) {boundingAABB
+			const combinedAABB = this.boundingAABB;
+			const frustumPlanes0 = frustumPlanes[0];
+			const frustumPlanes1 = frustumPlanes[1];
+			const frustumPlanes2 = frustumPlanes[2];
+			const frustumPlanes3 = frustumPlanes[3];
+			const frustumPlanes4 = frustumPlanes[4];
+			const frustumPlanes5 = frustumPlanes[5];
+			// combinedBoundingAABB의 중심점과 반지름 사용
+			const centerX = combinedAABB.centerX;
+			const centerY = combinedAABB.centerY;
+			const centerZ = combinedAABB.centerZ;
+			const radius = combinedAABB.geometryRadius;
+			// 각 frustum plane에 대해 거리 계산
+			frustumPlanes0[0] * centerX + frustumPlanes0[1] * centerY + frustumPlanes0[2] * centerZ + frustumPlanes0[3] <= -radius ? passFrustumCulling = false
+				: frustumPlanes1[0] * centerX + frustumPlanes1[1] * centerY + frustumPlanes1[2] * centerZ + frustumPlanes1[3] <= -radius ? passFrustumCulling = false
+					: frustumPlanes2[0] * centerX + frustumPlanes2[1] * centerY + frustumPlanes2[2] * centerZ + frustumPlanes2[3] <= -radius ? passFrustumCulling = false
+						: frustumPlanes3[0] * centerX + frustumPlanes3[1] * centerY + frustumPlanes3[2] * centerZ + frustumPlanes3[3] <= -radius ? passFrustumCulling = false
+							: frustumPlanes4[0] * centerX + frustumPlanes4[1] * centerY + frustumPlanes4[2] * centerZ + frustumPlanes4[3] <= -radius ? passFrustumCulling = false
+								: frustumPlanes5[0] * centerX + frustumPlanes5[1] * centerY + frustumPlanes5[2] * centerZ + frustumPlanes5[3] <= -radius ? passFrustumCulling = false : 0;
+			// } else {
+			// 	passFrustumCulling = false
+			// }
+		}
 		if (passFrustumCulling) {
 			if (this.gltfLoaderInfo?.activeAnimations?.length) {
 				renderViewStateData.animationList[renderViewStateData.animationList.length] = this.gltfLoaderInfo?.activeAnimations
@@ -783,8 +778,7 @@ class Mesh extends MeshBase {
 					dirtyTransformForChildren = false
 				}
 			}
-		}else{
-
+		} else {
 		}
 		// render
 		const {displacementTexture, displacementScale} = currentMaterial || {}
@@ -811,7 +805,6 @@ class Mesh extends MeshBase {
 		} else {
 			renderViewStateData.num3DGroups++
 		}
-
 		if (currentGeometry && passFrustumCulling) {
 			const {gpuRenderInfo} = this
 			const {vertexUniformBuffer, vertexUniformInfo} = gpuRenderInfo

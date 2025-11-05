@@ -25,103 +25,103 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * <iframe src="/RedGPU/examples/3d/postEffect/adjustments/colorTemperatureTint/"></iframe>
  */
 class ColorTemperatureTint extends ASinglePassPostEffect {
-    /** 색온도(K). 기본값 6500, 범위 1000~20000 */
-    #temperature: number = 6500
-    /** 틴트. 기본값 0, 범위 -100~100 */
-    #tint: number = 0
-    /** 효과 강도. 기본값 100, 범위 0~100 */
-    #strength: number = 100
+	/** 색온도(K). 기본값 6500, 범위 1000~20000 */
+	#temperature: number = 6500
+	/** 틴트. 기본값 0, 범위 -100~100 */
+	#tint: number = 0
+	/** 효과 강도. 기본값 100, 범위 0~100 */
+	#strength: number = 100
 
-    constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext);
-        this.init(
-            redGPUContext,
-            'POST_EFFECT_COLOR_TEMPERATURE_TINT',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode)
-        )
-        this.strength = this.#strength
-        this.tint = this.#tint
-        this.temperature = this.#temperature
-    }
+	constructor(redGPUContext: RedGPUContext) {
+		super(redGPUContext);
+		this.init(
+			redGPUContext,
+			'POST_EFFECT_COLOR_TEMPERATURE_TINT',
+			createBasicPostEffectCode(this, computeCode, uniformStructCode)
+		)
+		this.strength = this.#strength
+		this.tint = this.#tint
+		this.temperature = this.#temperature
+	}
 
-    /** 색온도 반환 */
-    get temperature(): number {
-        return this.#temperature;
-    }
+	/** 색온도 반환 */
+	get temperature(): number {
+		return this.#temperature;
+	}
 
-    /** 색온도 설정. 범위 1000~20000 */
-    set temperature(value: number) {
-        validateNumberRange(value, 1000, 20000)
-        this.#temperature = value;
-        this.updateUniform('temperature', value)
-    }
+	/** 색온도 설정. 범위 1000~20000 */
+	set temperature(value: number) {
+		validateNumberRange(value, 1000, 20000)
+		this.#temperature = value;
+		this.updateUniform('temperature', value)
+	}
 
-    /** 틴트 반환 */
-    get tint(): number {
-        return this.#tint;
-    }
+	/** 틴트 반환 */
+	get tint(): number {
+		return this.#tint;
+	}
 
-    /** 틴트 설정. 범위 -100~100 */
-    set tint(value: number) {
-        validateNumberRange(value, -100, 100)
-        this.#tint = value;
-        this.updateUniform('tint', value)
-    }
+	/** 틴트 설정. 범위 -100~100 */
+	set tint(value: number) {
+		validateNumberRange(value, -100, 100)
+		this.#tint = value;
+		this.updateUniform('tint', value)
+	}
 
-    /** 효과 강도 반환 */
-    get strength(): number {
-        return this.#strength;
-    }
+	/** 효과 강도 반환 */
+	get strength(): number {
+		return this.#strength;
+	}
 
-    /** 효과 강도 설정. 범위 0~100 */
-    set strength(value: number) {
-        validateNumberRange(value, 0, 100)
-        this.#strength = value;
-        this.updateUniform('strength', value)
-    }
+	/** 효과 강도 설정. 범위 0~100 */
+	set strength(value: number) {
+		validateNumberRange(value, 0, 100)
+		this.#strength = value;
+		this.updateUniform('strength', value)
+	}
 
-    // 편의 메서드들
-    /** 따뜻한 색감 프리셋 */
-    setWarmTone() {
-        this.temperature = 3200;
-        this.tint = -10;
-    }
+	// 편의 메서드들
+	/** 따뜻한 색감 프리셋 */
+	setWarmTone() {
+		this.temperature = 3200;
+		this.tint = -10;
+	}
 
-    /** 차가운 색감 프리셋 */
-    setCoolTone() {
-        this.temperature = 8000;
-        this.tint = 10;
-    }
+	/** 차가운 색감 프리셋 */
+	setCoolTone() {
+		this.temperature = 8000;
+		this.tint = 10;
+	}
 
-    /** 뉴트럴 프리셋 */
-    setNeutral() {
-        this.temperature = 6500;
-        this.tint = 0;
-    }
+	/** 뉴트럴 프리셋 */
+	setNeutral() {
+		this.temperature = 6500;
+		this.tint = 0;
+	}
 
-    /** 촛불 조명 프리셋 */
-    setCandleLight() {
-        this.temperature = 1900;
-        this.tint = -5;
-    }
+	/** 촛불 조명 프리셋 */
+	setCandleLight() {
+		this.temperature = 1900;
+		this.tint = -5;
+	}
 
-    /** 주간광 프리셋 */
-    setDaylight() {
-        this.temperature = 5600;
-        this.tint = 0;
-    }
+	/** 주간광 프리셋 */
+	setDaylight() {
+		this.temperature = 5600;
+		this.tint = 0;
+	}
 
-    /** 흐린날 프리셋 */
-    setCloudyDay() {
-        this.temperature = 7500;
-        this.tint = 5;
-    }
+	/** 흐린날 프리셋 */
+	setCloudyDay() {
+		this.temperature = 7500;
+		this.tint = 5;
+	}
 
-    /** 네온 조명 프리셋 */
-    setNeonLight() {
-        this.temperature = 9000;
-        this.tint = 15;
-    }
+	/** 네온 조명 프리셋 */
+	setNeonLight() {
+		this.temperature = 9000;
+		this.tint = 15;
+	}
 }
 
 Object.freeze(ColorTemperatureTint)

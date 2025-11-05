@@ -6,11 +6,11 @@ import VoronoiTexture from "./voronoi/VoronoiTexture";
 
 export * as CoreNoiseTexture from './core'
 export {
-    //
-    NOISE_DIMENSION,
-    SimplexTexture,
-    //
-    VoronoiTexture,
-    VORONOI_OUTPUT_TYPE,
-    VORONOI_DISTANCE_TYPE
+	//
+	NOISE_DIMENSION,
+	SimplexTexture,
+	//
+	VoronoiTexture,
+	VORONOI_OUTPUT_TYPE,
+	VORONOI_DISTANCE_TYPE
 };

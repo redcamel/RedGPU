@@ -2,13 +2,13 @@ import RedGPUContext from "../../context/RedGPUContext";
 import Geometry from "../../geometry/Geometry";
 import GPU_PRIMITIVE_TOPOLOGY from "../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
 import ColorMaterial from "../../material/colorMaterial/ColorMaterial";
-import RenderViewStateData from "../view/core/RenderViewStateData";
 import VertexBuffer from "../../resources/buffer/vertexBuffer/VertexBuffer";
 import VertexInterleavedStruct from "../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
 import VertexInterleaveType from "../../resources/buffer/vertexBuffer/VertexInterleaveType";
 import AABB from "../../utils/math/bound/AABB";
 import OBB from "../../utils/math/bound/OBB";
 import Mesh from "../mesh/Mesh";
+import RenderViewStateData from "../view/core/RenderViewStateData";
 
 type DebugMode = 'OBB' | 'AABB' | 'BOTH' | 'COMBINED_AABB';
 
@@ -66,7 +66,6 @@ class DrawDebuggerMesh {
 	}
 
 	render(renderViewStateData: RenderViewStateData) {
-
 		if (!this.#target.enableDebugger) return;
 		if (this.#debugMode === 'OBB') {
 			const targetOBB = this.#target.boundingOBB;
@@ -112,8 +111,6 @@ class DrawDebuggerMesh {
 		let passFrustumOBBCulling = true
 		{
 			const {frustumPlanes} = renderViewStateData
-
-
 			const frustumPlanes0 = frustumPlanes[0];
 			const frustumPlanes1 = frustumPlanes[1];
 			const frustumPlanes2 = frustumPlanes[2];
@@ -133,7 +130,6 @@ class DrawDebuggerMesh {
 							: frustumPlanes3[0] * centerX + frustumPlanes3[1] * centerY + frustumPlanes3[2] * centerZ + frustumPlanes3[3] <= -radius ? passFrustumAABBCulling = false
 								: frustumPlanes4[0] * centerX + frustumPlanes4[1] * centerY + frustumPlanes4[2] * centerZ + frustumPlanes4[3] <= -radius ? passFrustumAABBCulling = false
 									: frustumPlanes5[0] * centerX + frustumPlanes5[1] * centerY + frustumPlanes5[2] * centerZ + frustumPlanes5[3] <= -radius ? passFrustumAABBCulling = false : 0;
-
 			}
 			{
 				const boundBox = this.#target.boundingOBB;
@@ -148,16 +144,15 @@ class DrawDebuggerMesh {
 							: frustumPlanes3[0] * centerX + frustumPlanes3[1] * centerY + frustumPlanes3[2] * centerZ + frustumPlanes3[3] <= -radius ? passFrustumOBBCulling = false
 								: frustumPlanes4[0] * centerX + frustumPlanes4[1] * centerY + frustumPlanes4[2] * centerZ + frustumPlanes4[3] <= -radius ? passFrustumOBBCulling = false
 									: frustumPlanes5[0] * centerX + frustumPlanes5[1] * centerY + frustumPlanes5[2] * centerZ + frustumPlanes5[3] <= -radius ? passFrustumOBBCulling = false : 0;
-
 			}
 		}
 		if (this.#debugMode === 'OBB') {
-			if(passFrustumOBBCulling) this.#debugMesh.render(renderViewStateData);
+			if (passFrustumOBBCulling) this.#debugMesh.render(renderViewStateData);
 		} else if (this.#debugMode === 'AABB' || this.#debugMode === 'COMBINED_AABB') {
-			if(passFrustumAABBCulling) this.#debugMesh.render(renderViewStateData);
+			if (passFrustumAABBCulling) this.#debugMesh.render(renderViewStateData);
 		} else if (this.#debugMode === 'BOTH') {
-			if(passFrustumOBBCulling) this.#debugMesh.render(renderViewStateData);
-			if(passFrustumAABBCulling) this.#aabbDebugMesh.render(renderViewStateData);
+			if (passFrustumOBBCulling) this.#debugMesh.render(renderViewStateData);
+			if (passFrustumAABBCulling) this.#aabbDebugMesh.render(renderViewStateData);
 		}
 	}
 

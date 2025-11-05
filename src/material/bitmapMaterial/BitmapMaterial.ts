@@ -12,14 +12,14 @@ const SHADER_INFO = parseWGSL(fragmentModuleSource)
  * 비트맵 텍스처 기반 머티리얼의 공통 속성 인터페이스
  */
 interface BitmapMaterial {
-    /**
-     * 머티리얼에 적용할 비트맵 텍스처
-     */
-    diffuseTexture: BitmapTexture
-    /**
-     * 비트맵 텍스처 샘플러
-     */
-    diffuseTextureSampler: Sampler
+	/**
+	 * 머티리얼에 적용할 비트맵 텍스처
+	 */
+	diffuseTexture: BitmapTexture
+	/**
+	 * 비트맵 텍스처 샘플러
+	 */
+	diffuseTextureSampler: Sampler
 }
 
 /**
@@ -41,34 +41,34 @@ interface BitmapMaterial {
  * @category Material
  */
 class BitmapMaterial extends ABitmapBaseMaterial {
-    /**
-     * 파이프라인 dirty 상태 플래그
-     */
-    dirtyPipeline: boolean = false
+	/**
+	 * 파이프라인 dirty 상태 플래그
+	 */
+	dirtyPipeline: boolean = false
 
-    /**
-     * BitmapMaterial 생성자
-     * @param redGPUContext - RedGPUContext 인스턴스
-     * @param diffuseTexture - 적용할 비트맵 텍스처
-     * @param name - 머티리얼 이름(옵션)
-     */
-    constructor(redGPUContext: RedGPUContext, diffuseTexture?: BitmapTexture, name?: string) {
-        super(
-            redGPUContext,
-            'BITMAP_MATERIAL',
-            SHADER_INFO,
-            2
-        )
-        if (name) this.name = name
-        this.diffuseTexture = diffuseTexture
-        this.diffuseTextureSampler = new Sampler(this.redGPUContext)
-        this.initGPURenderInfos()
-    }
+	/**
+	 * BitmapMaterial 생성자
+	 * @param redGPUContext - RedGPUContext 인스턴스
+	 * @param diffuseTexture - 적용할 비트맵 텍스처
+	 * @param name - 머티리얼 이름(옵션)
+	 */
+	constructor(redGPUContext: RedGPUContext, diffuseTexture?: BitmapTexture, name?: string) {
+		super(
+			redGPUContext,
+			'BITMAP_MATERIAL',
+			SHADER_INFO,
+			2
+		)
+		if (name) this.name = name
+		this.diffuseTexture = diffuseTexture
+		this.diffuseTextureSampler = new Sampler(this.redGPUContext)
+		this.initGPURenderInfos()
+	}
 }
 
 DefineForFragment.defineByPreset(BitmapMaterial, [
-    DefineForFragment.PRESET_TEXTURE.DIFFUSE_TEXTURE,
-    DefineForFragment.PRESET_SAMPLER.DIFFUSE_TEXTURE_SAMPLER,
+	DefineForFragment.PRESET_TEXTURE.DIFFUSE_TEXTURE,
+	DefineForFragment.PRESET_SAMPLER.DIFFUSE_TEXTURE_SAMPLER,
 ])
 Object.freeze(BitmapMaterial)
 export default BitmapMaterial

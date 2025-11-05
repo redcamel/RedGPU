@@ -26,12 +26,12 @@ type ErrorCallback = (err: any) => void;
  */
 const getArrayBufferFromSrc = async (src: string, onLoad: LoaderCallback, onError: ErrorCallback = () => {
 }) => {
-    try {
-        const response = await fetch(src);
-        const arrayBuffer = await response.arrayBuffer();
-        onLoad(arrayBuffer);
-    } catch (error) {
-        onError(error);
-    }
+	try {
+		const response = await fetch(src);
+		const arrayBuffer = await response.arrayBuffer();
+		onLoad(arrayBuffer);
+	} catch (error) {
+		onError(error);
+	}
 }
 export default getArrayBufferFromSrc;

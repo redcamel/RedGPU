@@ -4,8 +4,8 @@ import getFileName from "./getFileName";
 import getFilePath from "./getFilePath";
 
 export {
-    getFileExtension,
-    getFilePath,
-    getFileName,
-    getAbsoluteURL
+	getFileExtension,
+	getFilePath,
+	getFileName,
+	getAbsoluteURL
 }

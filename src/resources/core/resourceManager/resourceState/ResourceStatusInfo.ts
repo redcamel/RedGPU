@@ -1,9 +1,9 @@
 class ResourceStatusInfo {
-    table: Map<string, any> = new Map();
-    videoMemory: number = 0;
+	table: Map<string, any> = new Map();
+	videoMemory: number = 0;
 
-    constructor() {
-    }
+	constructor() {
+	}
 }
 
 Object.freeze(ResourceStatusInfo);

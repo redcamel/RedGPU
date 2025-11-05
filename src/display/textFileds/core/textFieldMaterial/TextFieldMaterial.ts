@@ -9,8 +9,8 @@ import fragmentModuleSource from './fragment.wgsl';
 const SHADER_INFO = parseWGSL(fragmentModuleSource)
 
 interface TextFieldMaterial {
-    diffuseTexture: BitmapTexture
-    diffuseTextureSampler: Sampler
+	diffuseTexture: BitmapTexture
+	diffuseTextureSampler: Sampler
 }
 
 /**
@@ -24,39 +24,39 @@ interface TextFieldMaterial {
  *
  */
 class TextFieldMaterial extends ABitmapBaseMaterial {
-    /**
-     * 파이프라인 재생성 여부를 나타냅니다.
-     * 머티리얼 설정이 변경되었을 때 true로 설정되어야 합니다.
-     */
-    dirtyPipeline: boolean = false
+	/**
+	 * 파이프라인 재생성 여부를 나타냅니다.
+	 * 머티리얼 설정이 변경되었을 때 true로 설정되어야 합니다.
+	 */
+	dirtyPipeline: boolean = false
 
-    /**
-     * `TextFieldMaterial` 인스턴스를 생성합니다.
-     *
-     * @param redGPUContext - RedGPU 렌더링 컨텍스트
-     * @param diffuseTexture - 텍스트 필드에 사용할 비트맵 텍스처 (선택 사항)
-     * @param name - 머티리얼의 이름 (선택 사항)
-     */
-    constructor(redGPUContext: RedGPUContext, diffuseTexture?: BitmapTexture, name?: string) {
-        super(
-            redGPUContext,
-            'TEXT_FILED_MATERIAL',
-            SHADER_INFO,
-            2
-        )
-        if (name) this.name = name
-        this.diffuseTexture = diffuseTexture
-        this.diffuseTextureSampler = new Sampler(this.redGPUContext)
-        this.initGPURenderInfos()
-    }
+	/**
+	 * `TextFieldMaterial` 인스턴스를 생성합니다.
+	 *
+	 * @param redGPUContext - RedGPU 렌더링 컨텍스트
+	 * @param diffuseTexture - 텍스트 필드에 사용할 비트맵 텍스처 (선택 사항)
+	 * @param name - 머티리얼의 이름 (선택 사항)
+	 */
+	constructor(redGPUContext: RedGPUContext, diffuseTexture?: BitmapTexture, name?: string) {
+		super(
+			redGPUContext,
+			'TEXT_FILED_MATERIAL',
+			SHADER_INFO,
+			2
+		)
+		if (name) this.name = name
+		this.diffuseTexture = diffuseTexture
+		this.diffuseTextureSampler = new Sampler(this.redGPUContext)
+		this.initGPURenderInfos()
+	}
 }
 
 /**
  * 프래그먼트 셰이더에서 사용할 텍스처 및 샘플러 속성을 정의합니다.
  */
 DefineForFragment.defineByPreset(TextFieldMaterial, [
-    DefineForFragment.PRESET_TEXTURE.DIFFUSE_TEXTURE,
-    DefineForFragment.PRESET_SAMPLER.DIFFUSE_TEXTURE_SAMPLER,
+	DefineForFragment.PRESET_TEXTURE.DIFFUSE_TEXTURE,
+	DefineForFragment.PRESET_SAMPLER.DIFFUSE_TEXTURE_SAMPLER,
 ])
 /**
  * `TextFieldMaterial` 클래스의 속성을 변경할 수 없도록 고정합니다.

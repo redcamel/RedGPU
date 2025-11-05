@@ -9,9 +9,9 @@
  * @throws {Error} URL이 비어 있거나 undefined인 경우 예외 발생
  */
 const getFilePath = (url: string): string => {
-    if (!url || url.trim().length === 0) {
-        throw new Error('URL must not be empty or undefined');
-    }
-    return url.substring(0, url.lastIndexOf('/') + 1);
+	if (!url || url.trim().length === 0) {
+		throw new Error('URL must not be empty or undefined');
+	}
+	return url.substring(0, url.lastIndexOf('/') + 1);
 };
 export default getFilePath;

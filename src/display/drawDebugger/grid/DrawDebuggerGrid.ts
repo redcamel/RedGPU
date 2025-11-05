@@ -43,6 +43,7 @@ class DrawDebuggerGrid {
 	#drawCommandSlot: DrawCommandSlot
 	#bundleEncoder: GPURenderBundleEncoder
 	#renderBundle: GPURenderBundle
+	#prevSystemUniform_Vertex_UniformBindGroup: GPUBindGroup
 
 	constructor(redGPUContext: RedGPUContext) {
 		validateRedGPUContext(redGPUContext)
@@ -131,7 +132,6 @@ class DrawDebuggerGrid {
 		if (!this.#drawCommandSlot) {
 			this.#drawCommandSlot = drawBufferManager.allocateDrawCommand(this.name)
 			drawBufferManager.setIndexedIndirectCommand(this.#drawCommandSlot, this.#indexBuffer.indexCount, 1, 0, 0, 0)
-
 		}
 	}
 
@@ -155,8 +155,6 @@ class DrawDebuggerGrid {
 	get lineColor(): ColorRGBA {
 		return this.#lineColor;
 	}
-
-	#prevSystemUniform_Vertex_UniformBindGroup: GPUBindGroup
 
 	render(renderViewStateData: RenderViewStateData) {
 		const {view, currentRenderPassEncoder} = renderViewStateData

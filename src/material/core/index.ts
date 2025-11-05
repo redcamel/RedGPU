@@ -4,7 +4,7 @@ import FragmentGPURenderInfo from "./FragmentGPURenderInfo";
 
 export * from "./getBindGroupLayoutDescriptorFromShaderInfo";
 export {
-    ABaseMaterial,
-    ABitmapBaseMaterial,
-    FragmentGPURenderInfo
+	ABaseMaterial,
+	ABitmapBaseMaterial,
+	FragmentGPURenderInfo
 }

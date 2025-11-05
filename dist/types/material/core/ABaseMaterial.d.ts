@@ -1,10 +1,10 @@
 import ColorRGBA from "../../color/ColorRGBA";
 import RedGPUContext from "../../context/RedGPUContext";
-import FragmentGPURenderInfo from "./FragmentGPURenderInfo";
 import BlendState from "../../renderState/BlendState";
 import ResourceBase from "../../resources/core/ResourceBase";
 import Sampler from "../../resources/sampler/Sampler";
 import TINT_BLEND_MODE from "../TINT_BLEND_MODE";
+import FragmentGPURenderInfo from "./FragmentGPURenderInfo";
 interface ABaseMaterial {
     /**
      * 머티리얼의 불투명도(0~1)

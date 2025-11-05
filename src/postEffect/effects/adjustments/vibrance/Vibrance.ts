@@ -22,49 +22,49 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * <iframe src="/RedGPU/examples/3d/postEffect/adjustments/vibrance/"></iframe>
  */
 class Vibrance extends ASinglePassPostEffect {
-    /** 바이브런스. 기본값 0, 범위 -100~100 */
-    #vibrance: number = 0
-    /** 채도. 기본값 0, 범위 -100~100 */
-    #saturation: number = 0
+	/** 바이브런스. 기본값 0, 범위 -100~100 */
+	#vibrance: number = 0
+	/** 채도. 기본값 0, 범위 -100~100 */
+	#saturation: number = 0
 
-    constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext);
-        this.init(
-            redGPUContext,
-            'POST_EFFECT_VIBRANCE',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode)
-        )
-    }
+	constructor(redGPUContext: RedGPUContext) {
+		super(redGPUContext);
+		this.init(
+			redGPUContext,
+			'POST_EFFECT_VIBRANCE',
+			createBasicPostEffectCode(this, computeCode, uniformStructCode)
+		)
+	}
 
-    /** 바이브런스 반환 */
-    get vibrance(): number {
-        return this.#vibrance;
-    }
+	/** 바이브런스 반환 */
+	get vibrance(): number {
+		return this.#vibrance;
+	}
 
-    /**
-     * 바이브런스 설정
-     * 범위 -100~100
-     */
-    set vibrance(value: number) {
-        validateNumberRange(value, -100, 100)
-        this.#vibrance = value;
-        this.updateUniform('vibrance', value)
-    }
+	/**
+	 * 바이브런스 설정
+	 * 범위 -100~100
+	 */
+	set vibrance(value: number) {
+		validateNumberRange(value, -100, 100)
+		this.#vibrance = value;
+		this.updateUniform('vibrance', value)
+	}
 
-    /** 채도 반환 */
-    get saturation(): number {
-        return this.#saturation;
-    }
+	/** 채도 반환 */
+	get saturation(): number {
+		return this.#saturation;
+	}
 
-    /**
-     * 채도 설정
-     * 범위 -100~100
-     */
-    set saturation(value: number) {
-        validateNumberRange(value, -100, 100)
-        this.#saturation = value;
-        this.updateUniform('saturation', value)
-    }
+	/**
+	 * 채도 설정
+	 * 범위 -100~100
+	 */
+	set saturation(value: number) {
+		validateNumberRange(value, -100, 100)
+		this.#saturation = value;
+		this.updateUniform('saturation', value)
+	}
 }
 
 Object.freeze(Vibrance)

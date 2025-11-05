@@ -9,15 +9,15 @@
  * @throws {Error} URL이 비어 있거나 undefined인 경우 예외 발생
  */
 const getFileExtension = (url: string): string => {
-    if (!url || url.trim().length === 0) {
-        throw new Error('URL must not be empty or undefined');
-    }
-    const parts = url.split('/');
-    const fileName = parts[parts.length - 1];
-    const extensionStartIndex = fileName.lastIndexOf('.');
-    if (extensionStartIndex === -1) {
-        return '';
-    }
-    return fileName.substring(extensionStartIndex + 1).toLowerCase();
+	if (!url || url.trim().length === 0) {
+		throw new Error('URL must not be empty or undefined');
+	}
+	const parts = url.split('/');
+	const fileName = parts[parts.length - 1];
+	const extensionStartIndex = fileName.lastIndexOf('.');
+	if (extensionStartIndex === -1) {
+		return '';
+	}
+	return fileName.substring(extensionStartIndex + 1).toLowerCase();
 };
 export default getFileExtension;

@@ -2,21 +2,20 @@ import {mat4} from "gl-matrix";
 import RedGPUContext from "../../context/RedGPUContext";
 import Geometry from "../../geometry/Geometry";
 import Primitive from "../../primitive/core/Primitive";
-import {keepLog} from "../../utils";
-import RenderViewStateData from "../view/core/RenderViewStateData";
-import VertexGPURenderInfo from "../mesh/core/VertexGPURenderInfo";
 import StorageBuffer from "../../resources/buffer/storageBuffer/StorageBuffer";
 import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import validateUintRange from "../../runtimeChecker/validateFunc/validateUintRange";
-import copyGPUBuffer from "../../utils/copyGPUBuffer";
+import {keepLog} from "../../utils";
 import createBasePipeline from "../mesh/core/pipeline/createBasePipeline";
 import PIPELINE_TYPE from "../mesh/core/pipeline/PIPELINE_TYPE";
+import VertexGPURenderInfo from "../mesh/core/VertexGPURenderInfo";
 import Mesh from "../mesh/Mesh";
 import MESH_TYPE from "../MESH_TYPE";
+import RenderViewStateData from "../view/core/RenderViewStateData";
 import InstancingMeshObject3D from "./core/InstancingMeshObject3D";
-import vertexModuleSource from './shader/instanceMeshVertex.wgsl';
 import cullingComputeSource from './shader/instanceCullingCompute.wgsl';
+import vertexModuleSource from './shader/instanceMeshVertex.wgsl';
 
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_INSTANCING'
 const VERTEX_BIND_GROUP_DESCRIPTOR_NAME = 'VERTEX_BIND_GROUP_DESCRIPTOR_INSTANCING'
@@ -33,6 +32,8 @@ const CULLING_COMPUTE_MODULE_NAME = 'CULLING_COMPUTE_MODULE_INSTANCING'
  * @category Mesh
  */
 class InstancingMesh extends Mesh {
+	dirtyInstanceMeshObject3D: boolean = true
+	dirtyInstanceNum: boolean = true
 	/** RedGPU 컨텍스트 인스턴스 */
 	readonly #redGPUContext: RedGPUContext
 	/** 인스턴스 개수 */
@@ -48,8 +49,6 @@ class InstancingMesh extends Mesh {
 	#visibilityBuffer: StorageBuffer
 	#indirectDrawBuffer: GPUBuffer
 	#cullingUniformBuffer: StorageBuffer
-	dirtyInstanceMeshObject3D: boolean = true
-	dirtyInstanceNum: boolean = true
 
 	/**
 	 * InstancingMesh 인스턴스를 생성합니다.
@@ -83,18 +82,6 @@ class InstancingMesh extends Mesh {
 		return this.#instanceCount;
 	}
 
-	get maxInstanceCount(): number {
-		return this.#maxInstanceCount;
-	}
-
-	#getVertexModuleSource() {
-		return vertexModuleSource.replaceAll(/__INSTANCE_COUNT__/g, this.#maxInstanceCount.toString())
-	}
-
-	#getCullingComputeSource() {
-		return cullingComputeSource.replaceAll(/__INSTANCE_COUNT__/g, this.#maxInstanceCount.toString())
-	}
-
 	/**
 	 * 인스턴스 개수를 설정합니다. (버퍼 및 인스턴스 객체 자동 갱신)
 	 * @param count 인스턴스 개수
@@ -115,10 +102,9 @@ class InstancingMesh extends Mesh {
 		const prevBuffer = this.gpuRenderInfo.vertexUniformBuffer
 		if (prevBuffer?.gpuBuffer) {
 			// copyGPUBuffer(this.#redGPUContext.gpuDevice, prevBuffer.gpuBuffer, newBuffer.gpuBuffer)
-			newBuffer.dataViewF32.set(prevBuffer.dataViewF32,0)
-			newBuffer.dataViewU32.set([prevBuffer.dataViewU32[0]],0)
-			newBuffer.dataViewU32.set([prevBuffer.dataViewU32[1]],4)
-
+			newBuffer.dataViewF32.set(prevBuffer.dataViewF32, 0)
+			newBuffer.dataViewU32.set([prevBuffer.dataViewU32[0]], 0)
+			newBuffer.dataViewU32.set([prevBuffer.dataViewU32[1]], 4)
 		}
 		// keepLog(newBuffer)
 		prevBuffer?.destroy()
@@ -132,10 +118,13 @@ class InstancingMesh extends Mesh {
 		while (i--) {
 			if (!this.#instanceChildren[i]) this.#instanceChildren[i] = new InstancingMeshObject3D(this.#redGPUContext, i, this)
 		}
-
 		this.#initGPURenderInfos(this.#redGPUContext)
 		this.#initGPUCulling(this.#redGPUContext)
 		this.dirtyInstanceNum = true
+	}
+
+	get maxInstanceCount(): number {
+		return this.#maxInstanceCount;
 	}
 
 	set maxInstanceCount(count: number) {
@@ -146,6 +135,13 @@ class InstancingMesh extends Mesh {
 		if (this.#instanceCount > this.#maxInstanceCount) {
 			this.instanceCount = this.#maxInstanceCount
 		}
+	}
+
+	/**
+	 * 인스턴스별 transform/계층 구조를 관리하는 객체 배열을 반환합니다.
+	 */
+	get instanceChildren(): InstancingMeshObject3D[] {
+		return this.#instanceChildren;
 	}
 
 	static getLimitSize() {
@@ -160,10 +156,132 @@ class InstancingMesh extends Mesh {
 	}
 
 	/**
-	 * 인스턴스별 transform/계층 구조를 관리하는 객체 배열을 반환합니다.
+	 * 인스턴싱 메시의 렌더링을 수행합니다.
+	 * @param renderViewStateData 렌더 상태 데이터
 	 */
-	get instanceChildren(): InstancingMeshObject3D[] {
-		return this.#instanceChildren;
+	render(renderViewStateData: RenderViewStateData, shadowRender: boolean = false) {
+		const {view, currentRenderPassEncoder,} = renderViewStateData;
+		const {scene} = view
+		const {shadowManager} = scene
+		const {directionalShadowManager} = shadowManager
+		const {castingList} = directionalShadowManager
+		const parent = this.parent
+		let tempDirtyTransform = this.dirtyTransform
+		if (tempDirtyTransform) {
+			mat4.identity(this.localMatrix);
+			mat4.translate(this.localMatrix, this.localMatrix, [this.x, this.y, this.z]);
+			mat4.rotateX(this.localMatrix, this.localMatrix, this.rotationX);
+			mat4.rotateY(this.localMatrix, this.localMatrix, this.rotationY);
+			mat4.rotateZ(this.localMatrix, this.localMatrix, this.rotationZ);
+			mat4.scale(this.localMatrix, this.localMatrix, [this.scaleX, this.scaleY, this.scaleZ]);
+			{
+				if (parent?.modelMatrix) {
+					mat4.multiply(this.modelMatrix, this.localMatrix, parent.modelMatrix);
+				} else {
+					this.modelMatrix = mat4.clone(this.localMatrix)
+				}
+			}
+		}
+		if (this.geometry) renderViewStateData.num3DObjects++
+		else renderViewStateData.num3DGroups++
+		const redGPUContext = this.#redGPUContext
+		if (this.geometry) {
+			const {antialiasingManager, gpuDevice} = redGPUContext
+			if (antialiasingManager.changedMSAA) {
+				this.dirtyPipeline = true
+			}
+			if (!this.gpuRenderInfo) this.#initGPURenderInfos(redGPUContext)
+			const dirtyPipeline: boolean = this.dirtyPipeline || this.material.dirtyPipeline
+			const {displacementTexture, displacementScale} = this.material || {}
+			if (dirtyPipeline) {
+				this.dirtyTransform = true
+				if (this.material.dirtyPipeline) this.material._updateFragmentState()
+				this.#updatePipelines()
+				this.material.dirtyPipeline = false
+				this.dirtyPipeline = false
+				renderViewStateData.numDirtyPipelines++
+			}
+			// GPU Culling 수행
+			if (!shadowRender) {
+				this.#performGPUCulling(renderViewStateData)
+			}
+			const {gpuRenderInfo} = this
+			const {
+				vertexUniformBuffer,
+				vertexUniformBindGroup,
+				vertexUniformInfo,
+				pipeline,
+				shadowPipeline
+			} = gpuRenderInfo
+			{
+				if (vertexUniformInfo.members.displacementScale !== undefined && this.#displacementScale !== displacementScale) {
+					this.#displacementScale !== displacementScale
+					vertexUniformBuffer.dataViewF32.set(
+						new vertexUniformInfo.members.displacementScale.View([displacementScale]),
+						vertexUniformInfo.members.displacementScale.uniformOffset / 4
+					)
+				}
+				if (vertexUniformInfo.members.useDisplacementTexture !== undefined && this.#useDisplacementTexture !== !!displacementTexture) {
+					this.#useDisplacementTexture = !!displacementTexture
+					vertexUniformBuffer.dataViewF32.set(
+						new vertexUniformInfo.members.useDisplacementTexture.View([displacementTexture ? 1 : 0]),
+						vertexUniformInfo.members.useDisplacementTexture.uniformOffset / 4
+					)
+				}
+			}
+			if (this.dirtyTransform) {
+				vertexUniformBuffer.dataViewF32.set(this.modelMatrix, vertexUniformInfo.members.instanceGroupModelMatrix.uniformOffset / 4)
+				gpuDevice.queue.writeBuffer(
+					vertexUniformBuffer.gpuBuffer,
+					vertexUniformInfo.members.instanceGroupModelMatrix.uniformOffset,
+					new vertexUniformInfo.members.instanceGroupModelMatrix.View(this.modelMatrix),
+				)
+			}
+			if (this.dirtyInstanceMeshObject3D || this.dirtyInstanceNum) {
+				this.#redGPUContext.gpuDevice.queue.writeBuffer(
+					this.gpuRenderInfo.vertexUniformBuffer.gpuBuffer,
+					0,
+					this.gpuRenderInfo.vertexUniformBuffer.data,
+				)
+				keepLog('실행되냐')
+				this.dirtyInstanceMeshObject3D = false
+				this.dirtyInstanceNum = false
+			}
+			renderViewStateData.numDrawCalls++
+			renderViewStateData.numInstances++
+			// Indirect Draw 사용
+			const {gpuBuffer} = this.geometry.vertexBuffer
+			const {fragmentUniformBindGroup} = this.material.gpuRenderInfo
+			currentRenderPassEncoder.setPipeline(shadowRender ? shadowPipeline : pipeline)
+			currentRenderPassEncoder.setBindGroup(0, renderViewStateData.view.systemUniform_Vertex_UniformBindGroup);
+			currentRenderPassEncoder.setVertexBuffer(0, gpuBuffer)
+			currentRenderPassEncoder.setBindGroup(1, vertexUniformBindGroup);
+			currentRenderPassEncoder.setBindGroup(2, fragmentUniformBindGroup)
+			if (this.geometry.indexBuffer) {
+				const {indexBuffer} = this.geometry
+				const {gpuBuffer: indexGPUBuffer, format} = indexBuffer
+				currentRenderPassEncoder.setIndexBuffer(indexGPUBuffer, format)
+				currentRenderPassEncoder.drawIndexedIndirect(this.#indirectDrawBuffer, 0);
+			} else {
+				currentRenderPassEncoder.drawIndirect(this.#indirectDrawBuffer, 0);
+			}
+		}
+		if (this.castShadow) castingList[castingList.length] = this
+		const {children} = this
+		let i = children.length
+		while (i--) {
+			children[i].dirtyTransform = tempDirtyTransform
+			children[i].render(renderViewStateData)
+		}
+		this.dirtyTransform = false
+	}
+
+	#getVertexModuleSource() {
+		return vertexModuleSource.replaceAll(/__INSTANCE_COUNT__/g, this.#maxInstanceCount.toString())
+	}
+
+	#getCullingComputeSource() {
+		return cullingComputeSource.replaceAll(/__INSTANCE_COUNT__/g, this.#maxInstanceCount.toString())
 	}
 
 	/**
@@ -254,127 +372,6 @@ class InstancingMesh extends Mesh {
 		computePass.dispatchWorkgroups(workgroupCount)
 		computePass.end()
 		gpuDevice.queue.submit([commandEncoder.finish()])
-	}
-
-	/**
-	 * 인스턴싱 메시의 렌더링을 수행합니다.
-	 * @param renderViewStateData 렌더 상태 데이터
-	 */
-	render(renderViewStateData: RenderViewStateData, shadowRender: boolean = false) {
-		const {view, currentRenderPassEncoder,} = renderViewStateData;
-		const {scene} = view
-		const {shadowManager} = scene
-		const {directionalShadowManager} = shadowManager
-		const {castingList} = directionalShadowManager
-		const parent = this.parent
-		let tempDirtyTransform = this.dirtyTransform
-		if (tempDirtyTransform) {
-			mat4.identity(this.localMatrix);
-			mat4.translate(this.localMatrix, this.localMatrix, [this.x, this.y, this.z]);
-			mat4.rotateX(this.localMatrix, this.localMatrix, this.rotationX);
-			mat4.rotateY(this.localMatrix, this.localMatrix, this.rotationY);
-			mat4.rotateZ(this.localMatrix, this.localMatrix, this.rotationZ);
-			mat4.scale(this.localMatrix, this.localMatrix, [this.scaleX, this.scaleY, this.scaleZ]);
-			{
-				if (parent?.modelMatrix) {
-					mat4.multiply(this.modelMatrix, this.localMatrix, parent.modelMatrix);
-				} else {
-					this.modelMatrix = mat4.clone(this.localMatrix)
-				}
-			}
-		}
-		if (this.geometry) renderViewStateData.num3DObjects++
-		else renderViewStateData.num3DGroups++
-		const redGPUContext = this.#redGPUContext
-		if (this.geometry) {
-			const {antialiasingManager, gpuDevice} = redGPUContext
-			if (antialiasingManager.changedMSAA) {
-				this.dirtyPipeline = true
-			}
-			if (!this.gpuRenderInfo) this.#initGPURenderInfos(redGPUContext)
-			const dirtyPipeline: boolean = this.dirtyPipeline || this.material.dirtyPipeline
-			const {displacementTexture, displacementScale} = this.material || {}
-			if (dirtyPipeline) {
-				this.dirtyTransform = true
-				if (this.material.dirtyPipeline) this.material._updateFragmentState()
-				this.#updatePipelines()
-				this.material.dirtyPipeline = false
-				this.dirtyPipeline = false
-				renderViewStateData.numDirtyPipelines++
-			}
-			// GPU Culling 수행
-			if (!shadowRender) {
-				this.#performGPUCulling(renderViewStateData)
-			}
-			const {gpuRenderInfo} = this
-			const {
-				vertexUniformBuffer,
-				vertexUniformBindGroup,
-				vertexUniformInfo,
-				pipeline,
-				shadowPipeline
-			} = gpuRenderInfo
-			{
-				if (vertexUniformInfo.members.displacementScale !== undefined && this.#displacementScale !== displacementScale) {
-					this.#displacementScale !== displacementScale
-					vertexUniformBuffer.dataViewF32.set(
-						new vertexUniformInfo.members.displacementScale.View([displacementScale]),
-						vertexUniformInfo.members.displacementScale.uniformOffset / 4
-					)
-				}
-				if (vertexUniformInfo.members.useDisplacementTexture !== undefined && this.#useDisplacementTexture !== !!displacementTexture) {
-					this.#useDisplacementTexture = !!displacementTexture
-					vertexUniformBuffer.dataViewF32.set(
-						new vertexUniformInfo.members.useDisplacementTexture.View([displacementTexture ? 1 : 0]),
-						vertexUniformInfo.members.useDisplacementTexture.uniformOffset / 4
-					)
-				}
-			}
-			if(this.dirtyTransform){
-				vertexUniformBuffer.dataViewF32.set(this.modelMatrix, vertexUniformInfo.members.instanceGroupModelMatrix.uniformOffset / 4)
-				gpuDevice.queue.writeBuffer(
-					vertexUniformBuffer.gpuBuffer,
-					vertexUniformInfo.members.instanceGroupModelMatrix.uniformOffset,
-					new vertexUniformInfo.members.instanceGroupModelMatrix.View(this.modelMatrix),
-				)
-			}
-			if (this.dirtyInstanceMeshObject3D || this.dirtyInstanceNum) {
-				this.#redGPUContext.gpuDevice.queue.writeBuffer(
-					this.gpuRenderInfo.vertexUniformBuffer.gpuBuffer,
-					0,
-					this.gpuRenderInfo.vertexUniformBuffer.data,
-				)
-				keepLog('실행되냐')
-				this.dirtyInstanceMeshObject3D = false
-				this.dirtyInstanceNum = false
-			}
-			renderViewStateData.numDrawCalls++
-			renderViewStateData.numInstances++
-			// Indirect Draw 사용
-			const {gpuBuffer} = this.geometry.vertexBuffer
-			const {fragmentUniformBindGroup} = this.material.gpuRenderInfo
-			currentRenderPassEncoder.setPipeline(shadowRender ? shadowPipeline : pipeline)
-			currentRenderPassEncoder.setBindGroup(0, renderViewStateData.view.systemUniform_Vertex_UniformBindGroup);
-			currentRenderPassEncoder.setVertexBuffer(0, gpuBuffer)
-			currentRenderPassEncoder.setBindGroup(1, vertexUniformBindGroup);
-			currentRenderPassEncoder.setBindGroup(2, fragmentUniformBindGroup)
-			if (this.geometry.indexBuffer) {
-				const {indexBuffer} = this.geometry
-				const {gpuBuffer: indexGPUBuffer, format} = indexBuffer
-				currentRenderPassEncoder.setIndexBuffer(indexGPUBuffer, format)
-				currentRenderPassEncoder.drawIndexedIndirect(this.#indirectDrawBuffer, 0);
-			} else {
-				currentRenderPassEncoder.drawIndirect(this.#indirectDrawBuffer, 0);
-			}
-		}
-		if (this.castShadow) castingList[castingList.length] = this
-		const {children} = this
-		let i = children.length
-		while (i--) {
-			children[i].dirtyTransform = tempDirtyTransform
-			children[i].render(renderViewStateData)
-		}
-		this.dirtyTransform = false
 	}
 
 	/**
