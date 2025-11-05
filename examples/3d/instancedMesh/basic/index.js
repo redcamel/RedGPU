@@ -90,18 +90,19 @@ async function createTest(context, scene, material) {
 
 	const initializeInstances = () => {
 		for (let i = 0; i < mesh.instanceCount; i++) {
-
-			mesh.instanceChildren[i].setPosition(
-				Math.random() * 900 - 450,
-				Math.random() * 900 - 450,
-				Math.random() * 900 - 450
-			);
-			mesh.instanceChildren[i].setScale(Math.random() * 2 + 1);
-			mesh.instanceChildren[i].setRotation(
-				Math.random() * 360,
-				Math.random() * 360,
-				Math.random() * 360
-			);
+			if(mesh.instanceChildren[i].x ===0) {
+				mesh.instanceChildren[i].setPosition(
+					Math.random() * 900 - 450,
+					Math.random() * 900 - 450,
+					Math.random() * 900 - 450
+				);
+				mesh.instanceChildren[i].setScale(Math.random() * 2 + 1);
+				mesh.instanceChildren[i].setRotation(
+					Math.random() * 360,
+					Math.random() * 360,
+					Math.random() * 360
+				);
+			}
 
 			// mesh.instanceChildren[i].opacity = Math.random();
 

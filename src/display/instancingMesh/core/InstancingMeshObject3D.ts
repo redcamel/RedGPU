@@ -74,6 +74,7 @@ class InstancingMeshObject3D {
 		this.#redGPUContext = redGPUContext
 		this.#instancingMesh = instancingMesh
 		this.#location = location
+		this.#updateMatrix()
 	}
 
 	get opacity(): number {

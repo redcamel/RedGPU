@@ -49,6 +49,7 @@ class InstancingMesh extends Mesh {
 	#indirectDrawBuffer: GPUBuffer
 	#cullingUniformBuffer: StorageBuffer
 	dirtyInstanceMeshObject3D: boolean = true
+	dirtyInstanceNum: boolean = true
 
 	/**
 	 * InstancingMesh 인스턴스를 생성합니다.
@@ -113,7 +114,11 @@ class InstancingMesh extends Mesh {
 		// 기존데이터
 		const prevBuffer = this.gpuRenderInfo.vertexUniformBuffer
 		if (prevBuffer?.gpuBuffer) {
-			copyGPUBuffer(this.#redGPUContext.gpuDevice, prevBuffer.gpuBuffer, newBuffer.gpuBuffer)
+			// copyGPUBuffer(this.#redGPUContext.gpuDevice, prevBuffer.gpuBuffer, newBuffer.gpuBuffer)
+			newBuffer.dataViewF32.set(prevBuffer.dataViewF32,0)
+			newBuffer.dataViewU32.set([prevBuffer.dataViewU32[0]],0)
+			newBuffer.dataViewU32.set([prevBuffer.dataViewU32[1]],4)
+
 		}
 		// keepLog(newBuffer)
 		prevBuffer?.destroy()
@@ -130,6 +135,7 @@ class InstancingMesh extends Mesh {
 
 		this.#initGPURenderInfos(this.#redGPUContext)
 		this.#initGPUCulling(this.#redGPUContext)
+		this.dirtyInstanceNum = true
 	}
 
 	set maxInstanceCount(count: number) {
@@ -332,7 +338,7 @@ class InstancingMesh extends Mesh {
 					new vertexUniformInfo.members.instanceGroupModelMatrix.View(this.modelMatrix),
 				)
 			}
-			if (this.dirtyInstanceMeshObject3D) {
+			if (this.dirtyInstanceMeshObject3D || this.dirtyInstanceNum) {
 				this.#redGPUContext.gpuDevice.queue.writeBuffer(
 					this.gpuRenderInfo.vertexUniformBuffer.gpuBuffer,
 					0,
@@ -340,6 +346,7 @@ class InstancingMesh extends Mesh {
 				)
 				keepLog('실행되냐')
 				this.dirtyInstanceMeshObject3D = false
+				this.dirtyInstanceNum = false
 			}
 			renderViewStateData.numDrawCalls++
 			renderViewStateData.numInstances++

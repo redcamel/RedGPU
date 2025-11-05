@@ -188,8 +188,10 @@ class DrawBufferManager {
         // 안전한 최대 크기 계산 (실제 제한의 90% 사용)
         this.#deviceMaxBufferSize = Math.floor(
             Math.min(
-                limits.maxBufferSize || 268435456,           // 256MB
-                limits.maxStorageBufferBindingSize || 134217728  // 128MB
+                // limits.maxBufferSize || 268435456,           // 256MB
+                // limits.maxStorageBufferBindingSize || 134217728  // 128MB
+	            268435456,           // 256MB
+	            134217728  // 128MB
             ) * 0.9
         )
 

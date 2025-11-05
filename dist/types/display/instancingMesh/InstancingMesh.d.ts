@@ -17,6 +17,7 @@ import InstancingMeshObject3D from "./core/InstancingMeshObject3D";
 declare class InstancingMesh extends Mesh {
     #private;
     dirtyInstanceMeshObject3D: boolean;
+    dirtyInstanceNum: boolean;
     /**
      * InstancingMesh 인스턴스를 생성합니다.
      * @param redGPUContext RedGPU 컨텍스트
