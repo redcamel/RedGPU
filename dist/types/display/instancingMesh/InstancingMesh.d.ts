@@ -23,16 +23,19 @@ declare class InstancingMesh extends Mesh {
      * @param geometry geometry 또는 primitive 객체(선택)
      * @param material 머티리얼(선택)
      */
-    constructor(redGPUContext: RedGPUContext, instanceCount: number, geometry?: Geometry | Primitive, material?: any);
+    constructor(redGPUContext: RedGPUContext, maxInstanceCount: number, instanceCount: number, geometry?: Geometry | Primitive, material?: any);
     /**
      * 인스턴스 개수를 반환합니다.
      */
     get instanceCount(): number;
+    get maxInstanceCount(): number;
     /**
      * 인스턴스 개수를 설정합니다. (버퍼 및 인스턴스 객체 자동 갱신)
      * @param count 인스턴스 개수
      */
     set instanceCount(count: number);
+    set maxInstanceCount(count: number);
+    static getLimitSize(): number;
     /**
      * 인스턴스별 transform/계층 구조를 관리하는 객체 배열을 반환합니다.
      */

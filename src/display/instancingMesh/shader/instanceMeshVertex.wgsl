@@ -3,11 +3,12 @@
 
 struct InstanceUniforms {
     instanceGroupModelMatrix: mat4x4<f32>,
-    instanceModelMatrixs: array<mat4x4<f32>, 100000>,
-    instanceNormalModelMatrix: array<mat4x4<f32>, 100000>,
-    instanceOpacity: array<f32, 100000>,
-    useDisplacementTexture: u32,
-    displacementScale: f32,
+       useDisplacementTexture: u32,
+        displacementScale: f32,
+    instanceModelMatrixs: array<mat4x4<f32>, __INSTANCE_COUNT__>,
+    instanceNormalModelMatrix: array<mat4x4<f32>, __INSTANCE_COUNT__>,
+    instanceOpacity: array<f32, __INSTANCE_COUNT__>,
+
 };
 
 @group(1) @binding(0) var<storage, read> instanceUniforms: InstanceUniforms;

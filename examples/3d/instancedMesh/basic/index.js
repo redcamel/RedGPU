@@ -9,7 +9,7 @@ RedGPU.init(
 	canvas,
 	(redGPUContext) => {
 		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-		controller.speedDistance = 0.3;
+		controller.speedDistance = 10;
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		redGPUContext.addView(view);
@@ -70,9 +70,11 @@ async function createTest(context, scene, material) {
 	const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js");
 	setDebugButtons(context);
 
+	const maxInstanceCount = Math.min(200000, RedGPU.Display.InstancingMesh.getLimitSize());
 	const instanceCount = 10000;
 	const mesh = new RedGPU.Display.InstancingMesh(
 		context,
+		maxInstanceCount,
 		instanceCount,
 		// new RedGPU.Primitive.Plane(context),
 		new RedGPU.Primitive.Sphere(context),
@@ -105,6 +107,6 @@ async function createTest(context, scene, material) {
 	initializeInstances();
 
 	const pane = new Pane();
-	pane.addBinding(mesh, 'instanceCount', {min: 100, max: 100000, step: 1})
+	pane.addBinding(mesh, 'instanceCount', {min: 100, max: maxInstanceCount, step: 1})
 		.on('change', initializeInstances);
 }
