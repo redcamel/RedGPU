@@ -73,14 +73,14 @@ async function createTest(context, scene, material) {
 	const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js");
 	setDebugButtons(context);
 
-	const maxInstanceCount = Math.min(500000, RedGPU.Display.InstancingMesh.getLimitSize());
+	const maxInstanceCount = RedGPU.Display.InstancingMesh.getLimitSize();
 	const instanceCount = 10000;
 	const mesh = new RedGPU.Display.InstancingMesh(
 		context,
 		maxInstanceCount,
 		instanceCount,
-		// new RedGPU.Primitive.Plane(context),
-		new RedGPU.Primitive.Sphere(context),
+		new RedGPU.Primitive.Plane(context),
+		// new RedGPU.Primitive.Sphere(context),
 		material
 	);
 
@@ -114,4 +114,5 @@ async function createTest(context, scene, material) {
 	const pane = new Pane();
 	pane.addBinding(mesh, 'instanceCount', {min: 100, max: maxInstanceCount, step: 1})
 		.on('change', initializeInstances);
+	pane.addBinding({maxInstanceCount:maxInstanceCount}, 'maxInstanceCount', {readonly: true, format: (v) => `${Math.floor(v).toLocaleString()}`});
 }
