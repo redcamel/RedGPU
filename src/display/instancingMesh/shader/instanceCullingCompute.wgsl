@@ -71,7 +71,8 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
 
 
     // 인스턴스의 월드 위치 추출
-    let modelMatrix = instanceUniforms.instanceModelMatrixs[instanceIdx];
+      let u_instanceGroupModelMatrix = instanceUniforms.instanceGroupModelMatrix;
+    let modelMatrix = u_instanceGroupModelMatrix * instanceUniforms.instanceModelMatrixs[instanceIdx] ;
     let worldPosition = vec3<f32>(
         modelMatrix[3][0],
         modelMatrix[3][1],

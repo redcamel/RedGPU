@@ -48,6 +48,7 @@ class InstancingMesh extends Mesh {
 	#visibilityBuffer: StorageBuffer
 	#indirectDrawBuffer: GPUBuffer
 	#cullingUniformBuffer: StorageBuffer
+	dirtyInstanceMeshObject3D: boolean = true
 
 	/**
 	 * InstancingMesh 인스턴스를 생성합니다.
@@ -117,11 +118,16 @@ class InstancingMesh extends Mesh {
 		// keepLog(newBuffer)
 		prevBuffer?.destroy()
 		this.gpuRenderInfo.vertexUniformBuffer = newBuffer
+		// 기존 인스턴스 삭제
+		if (this.#instanceChildren.length > this.#instanceCount) {
+			this.#instanceChildren.length = this.#instanceCount
+		}
 		// 데이터가 없으면 채워넣음
 		let i = this.#instanceCount
 		while (i--) {
 			if (!this.#instanceChildren[i]) this.#instanceChildren[i] = new InstancingMeshObject3D(this.#redGPUContext, i, this)
 		}
+
 		this.#initGPURenderInfos(this.#redGPUContext)
 		this.#initGPUCulling(this.#redGPUContext)
 	}
@@ -305,29 +311,36 @@ class InstancingMesh extends Mesh {
 			{
 				if (vertexUniformInfo.members.displacementScale !== undefined && this.#displacementScale !== displacementScale) {
 					this.#displacementScale !== displacementScale
-					gpuDevice.queue.writeBuffer(
-						vertexUniformBuffer.gpuBuffer,
-						vertexUniformInfo.members.displacementScale.uniformOffset,
-						new vertexUniformInfo.members.displacementScale.View([displacementScale])
-					);
+					vertexUniformBuffer.dataViewF32.set(
+						new vertexUniformInfo.members.displacementScale.View([displacementScale]),
+						vertexUniformInfo.members.displacementScale.uniformOffset / 4
+					)
 				}
 				if (vertexUniformInfo.members.useDisplacementTexture !== undefined && this.#useDisplacementTexture !== !!displacementTexture) {
 					this.#useDisplacementTexture = !!displacementTexture
-					gpuDevice.queue.writeBuffer(
-						vertexUniformBuffer.gpuBuffer,
-						vertexUniformInfo.members.useDisplacementTexture.uniformOffset,
-						new vertexUniformInfo.members.useDisplacementTexture.View([displacementTexture ? 1 : 0])
-					);
+					vertexUniformBuffer.dataViewF32.set(
+						new vertexUniformInfo.members.useDisplacementTexture.View([displacementTexture ? 1 : 0]),
+						vertexUniformInfo.members.useDisplacementTexture.uniformOffset / 4
+					)
 				}
 			}
-			if (this.dirtyTransform) {
+			if(this.dirtyTransform){
+				vertexUniformBuffer.dataViewF32.set(this.modelMatrix, vertexUniformInfo.members.instanceGroupModelMatrix.uniformOffset / 4)
 				gpuDevice.queue.writeBuffer(
 					vertexUniformBuffer.gpuBuffer,
 					vertexUniformInfo.members.instanceGroupModelMatrix.uniformOffset,
 					new vertexUniformInfo.members.instanceGroupModelMatrix.View(this.modelMatrix),
 				)
 			}
-			this.dirtyTransform = false
+			if (this.dirtyInstanceMeshObject3D) {
+				this.#redGPUContext.gpuDevice.queue.writeBuffer(
+					this.gpuRenderInfo.vertexUniformBuffer.gpuBuffer,
+					0,
+					this.gpuRenderInfo.vertexUniformBuffer.data,
+				)
+				keepLog('실행되냐')
+				this.dirtyInstanceMeshObject3D = false
+			}
 			renderViewStateData.numDrawCalls++
 			renderViewStateData.numInstances++
 			// Indirect Draw 사용

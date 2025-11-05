@@ -3,6 +3,8 @@ import ManagementResourceBase from "../../core/ManagementResourceBase";
 
 export const GPU_BUFFER_SYMBOL = Symbol('gpuBuffer');
 export const GPU_BUFFER_DATA_SYMBOL = Symbol('gpuBufferData');
+export const GPU_BUFFER_DATA_SYMBOL_F32 = Symbol('gpuBufferDataViewF32');
+export const GPU_BUFFER_DATA_SYMBOL_U32 = Symbol('gpuBufferDataViewU32');
 export const GPU_BUFFER_CACHE_KEY = Symbol('gpuBufferCacheKey');
 
 /**

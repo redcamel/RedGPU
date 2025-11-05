@@ -44,6 +44,9 @@ RedGPU.init(
 		const render = (time) => {
 			// Logic for every frame goes here
 			// 매 프레임마다 실행될 로직 추가
+			if (scene.children[0]) {
+				// scene.children[0].rotationY += 0.001;
+			}
 		};
 		renderer.start(redGPUContext, render);
 
@@ -70,7 +73,7 @@ async function createTest(context, scene, material) {
 	const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js");
 	setDebugButtons(context);
 
-	const maxInstanceCount = Math.min(200000, RedGPU.Display.InstancingMesh.getLimitSize());
+	const maxInstanceCount = Math.min(500000, RedGPU.Display.InstancingMesh.getLimitSize());
 	const instanceCount = 10000;
 	const mesh = new RedGPU.Display.InstancingMesh(
 		context,
@@ -87,20 +90,21 @@ async function createTest(context, scene, material) {
 
 	const initializeInstances = () => {
 		for (let i = 0; i < mesh.instanceCount; i++) {
-			if (!mesh.instanceChildren[i]?.inited) {
-				mesh.instanceChildren[i].setPosition(
-					Math.random() * 900 - 450,
-					Math.random() * 900 - 450,
-					Math.random() * 900 - 450
-				);
-				mesh.instanceChildren[i].setScale(Math.random() * 2 + 1);
-				mesh.instanceChildren[i].setRotation(
-					Math.random() * 360,
-					Math.random() * 360,
-					Math.random() * 360
-				);
-				// mesh.instanceChildren[i].opacity = Math.random();
-			}
+
+			mesh.instanceChildren[i].setPosition(
+				Math.random() * 900 - 450,
+				Math.random() * 900 - 450,
+				Math.random() * 900 - 450
+			);
+			mesh.instanceChildren[i].setScale(Math.random() * 2 + 1);
+			mesh.instanceChildren[i].setRotation(
+				Math.random() * 360,
+				Math.random() * 360,
+				Math.random() * 360
+			);
+
+			// mesh.instanceChildren[i].opacity = Math.random();
+
 		}
 	};
 
