@@ -9,7 +9,7 @@
  * @category UUID
  */
 const uuidToUint = (uuid: string): number => {
-    const shortUuid = uuid.replace(/-/g, '').substring(0, 8); // 하이픈 제거 후 앞 8자리 추출
-    return parseInt(shortUuid, 16); // 16진수 문자열을 10진수로 변환
+	const shortUuid = uuid.replace(/-/g, '').substring(0, 8); // 하이픈 제거 후 앞 8자리 추출
+	return parseInt(shortUuid, 16); // 16진수 문자열을 10진수로 변환
 }
 export default uuidToUint

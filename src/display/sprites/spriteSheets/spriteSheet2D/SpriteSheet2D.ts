@@ -36,118 +36,118 @@ const BaseSpriteSheet2D = mixInMesh2D(ASpriteSheet);
  * @category SpriteSheet
  */
 class SpriteSheet2D extends BaseSpriteSheet2D {
-    /**
-     * 스프라이트 시트 세그먼트의 실제 너비
-     * @private
-     */
-    #width: number = 1
-    /**
-     * 스프라이트 시트 세그먼트의 실제 높이
-     * @private
-     */
-    #height: number = 1
+	/**
+	 * 스프라이트 시트 세그먼트의 실제 너비
+	 * @private
+	 */
+	#width: number = 1
+	/**
+	 * 스프라이트 시트 세그먼트의 실제 높이
+	 * @private
+	 */
+	#height: number = 1
 
-    /**
-     * 새로운 SpriteSheet2D 인스턴스를 생성합니다.
-     *
-     * @param redGPUContext - RedGPU 렌더링 컨텍스트
-     * @param spriteSheetInfo - 스프라이트 시트 정보 객체 (텍스처, 세그먼트 정보, 애니메이션 설정 포함)
-     */
-    constructor(redGPUContext: RedGPUContext, spriteSheetInfo: SpriteSheetInfo) {
-        super(redGPUContext, spriteSheetInfo, (diffuseTexture: BitmapTexture, segmentW: number, segmentH: number) => {
-            if (diffuseTexture) {
-                const {gpuTexture} = diffuseTexture;
-                const tW = gpuTexture?.width / segmentW
-                const tH = gpuTexture?.height / segmentH
-                if (tW !== this.#width || tH !== this.#height) {
-                    this.#width = gpuTexture?.width / segmentW
-                    this.#height = gpuTexture?.height / segmentH
-                    this.dirtyTransform = true
-                }
-            } else {
-                this.#width = 1
-                this.#height = 1
-            }
-        });
-        this._geometry = new Plane(redGPUContext, 1, 1, 1, 1, 1, true);
-        this.primitiveState.cullMode = GPU_CULL_MODE.FRONT
-    }
+	/**
+	 * 새로운 SpriteSheet2D 인스턴스를 생성합니다.
+	 *
+	 * @param redGPUContext - RedGPU 렌더링 컨텍스트
+	 * @param spriteSheetInfo - 스프라이트 시트 정보 객체 (텍스처, 세그먼트 정보, 애니메이션 설정 포함)
+	 */
+	constructor(redGPUContext: RedGPUContext, spriteSheetInfo: SpriteSheetInfo) {
+		super(redGPUContext, spriteSheetInfo, (diffuseTexture: BitmapTexture, segmentW: number, segmentH: number) => {
+			if (diffuseTexture) {
+				const {gpuTexture} = diffuseTexture;
+				const tW = gpuTexture?.width / segmentW
+				const tH = gpuTexture?.height / segmentH
+				if (tW !== this.#width || tH !== this.#height) {
+					this.#width = gpuTexture?.width / segmentW
+					this.#height = gpuTexture?.height / segmentH
+					this.dirtyTransform = true
+				}
+			} else {
+				this.#width = 1
+				this.#height = 1
+			}
+		});
+		this._geometry = new Plane(redGPUContext, 1, 1, 1, 1, 1, true);
+		this.primitiveState.cullMode = GPU_CULL_MODE.FRONT
+	}
 
-    /**
-     * 스프라이트 시트 세그먼트의 너비를 반환합니다.
-     * 텍스처 전체 너비를 세그먼트 수로 나눈 값입니다.
-     * @returns 세그먼트 너비 (픽셀 단위)
-     */
-    get width(): number {
-        return this.#width;
-    }
+	/**
+	 * 스프라이트 시트 세그먼트의 너비를 반환합니다.
+	 * 텍스처 전체 너비를 세그먼트 수로 나눈 값입니다.
+	 * @returns 세그먼트 너비 (픽셀 단위)
+	 */
+	get width(): number {
+		return this.#width;
+	}
 
-    // set width(value: number) {
-    //     validatePositiveNumberRange(value)
-    //     this.#width = value;
-    //     this.dirtyTransform = true
-    // }
-    /**
-     * 스프라이트 시트 세그먼트의 높이를 반환합니다.
-     * 텍스처 전체 높이를 세그먼트 수로 나눈 값입니다.
-     * @returns 세그먼트 높이 (픽셀 단위)
-     */
-    get height(): number {
-        return this.#height;
-    }
+	// set width(value: number) {
+	//     validatePositiveNumberRange(value)
+	//     this.#width = value;
+	//     this.dirtyTransform = true
+	// }
+	/**
+	 * 스프라이트 시트 세그먼트의 높이를 반환합니다.
+	 * 텍스처 전체 높이를 세그먼트 수로 나눈 값입니다.
+	 * @returns 세그먼트 높이 (픽셀 단위)
+	 */
+	get height(): number {
+		return this.#height;
+	}
 
-    // set height(value: number) {
-    //     validatePositiveNumberRange(value)
-    //     this.#height = value;
-    //     this.dirtyTransform = true
-    // }
-    /////////////////////////////////////////
-    /**
-     * 지오메트리를 반환합니다.
-     * @returns 현재 지오메트리 (고정된 Plane)
-     */
-    get geometry(): Geometry | Primitive {
-        return this._geometry;
-    }
+	// set height(value: number) {
+	//     validatePositiveNumberRange(value)
+	//     this.#height = value;
+	//     this.dirtyTransform = true
+	// }
+	/////////////////////////////////////////
+	/**
+	 * 지오메트리를 반환합니다.
+	 * @returns 현재 지오메트리 (고정된 Plane)
+	 */
+	get geometry(): Geometry | Primitive {
+		return this._geometry;
+	}
 
-    /**
-     * SpriteSheet2D는 지오메트리를 변경할 수 없습니다
-     * @param value - 설정하려는 지오메트리
-     * @throws {Error} SpriteSheet2D는 지오메트리를 변경할 수 없습니다
-     */
-    set geometry(value: Geometry | Primitive) {
-        consoleAndThrowError('SpriteSheet2D can not change geometry')
-    }
+	/**
+	 * SpriteSheet2D는 지오메트리를 변경할 수 없습니다
+	 * @param value - 설정하려는 지오메트리
+	 * @throws {Error} SpriteSheet2D는 지오메트리를 변경할 수 없습니다
+	 */
+	set geometry(value: Geometry | Primitive) {
+		consoleAndThrowError('SpriteSheet2D can not change geometry')
+	}
 
-    /**
-     * 머티리얼을 반환합니다.
-     * @returns 현재 머티리얼 (BitmapMaterial)
-     */
-    get material() {
-        return this._material
-    }
+	/**
+	 * 머티리얼을 반환합니다.
+	 * @returns 현재 머티리얼 (BitmapMaterial)
+	 */
+	get material() {
+		return this._material
+	}
 
-    /**
-     * SpriteSheet2D는 머티리얼을 변경할 수 없습니다
-     * @param value - 설정하려는 머티리얼
-     * @throws {Error} SpriteSheet2D는 머티리얼을 변경할 수 없습니다
-     */
-    set material(value) {
-        consoleAndThrowError('SpriteSheet2D can not change material')
-    }
+	/**
+	 * SpriteSheet2D는 머티리얼을 변경할 수 없습니다
+	 * @param value - 설정하려는 머티리얼
+	 * @throws {Error} SpriteSheet2D는 머티리얼을 변경할 수 없습니다
+	 */
+	set material(value) {
+		consoleAndThrowError('SpriteSheet2D can not change material')
+	}
 
-    /**
-     * SpriteSheet2D 전용 커스텀 버텍스 셰이더 모듈을 생성합니다.
-     *
-     * 2D 스프라이트 시트 렌더링에 최적화된 버텍스 셰이더를 생성하며,
-     * UV 좌표 계산과 프레임 인덱싱 로직이 포함되어 있습니다.
-     *
-     * @returns 생성된 버텍스 셰이더 모듈 정보
-     * @protected
-     */
-    createCustomMeshVertexShaderModule() {
-        return this.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource)
-    }
+	/**
+	 * SpriteSheet2D 전용 커스텀 버텍스 셰이더 모듈을 생성합니다.
+	 *
+	 * 2D 스프라이트 시트 렌더링에 최적화된 버텍스 셰이더를 생성하며,
+	 * UV 좌표 계산과 프레임 인덱싱 로직이 포함되어 있습니다.
+	 *
+	 * @returns 생성된 버텍스 셰이더 모듈 정보
+	 * @protected
+	 */
+	createCustomMeshVertexShaderModule() {
+		return this.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource)
+	}
 }
 
 /**

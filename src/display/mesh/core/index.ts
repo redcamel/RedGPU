@@ -5,9 +5,9 @@ import Object3DContainer from "./Object3DContainer";
 import VertexGPURenderInfo from "./VertexGPURenderInfo";
 
 export {
-    createMeshVertexUniformBuffers,
-    MeshBase,
-    mixInMesh2D,
-    Object3DContainer,
-    VertexGPURenderInfo
+	createMeshVertexUniformBuffers,
+	MeshBase,
+	mixInMesh2D,
+	Object3DContainer,
+	VertexGPURenderInfo
 }

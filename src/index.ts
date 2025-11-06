@@ -3,11 +3,10 @@ import GLTFLoader from "./loader/gltf/GLTFLoader";
 import SystemCode from "./resources/systemCode/SystemCode";
 
 export {
-    init,
-    SystemCode,
-    GLTFLoader
+	init,
+	SystemCode,
+	GLTFLoader
 }
-
 export * as Camera from "./camera/";
 export * as RedGPUContext from "./context";
 export * from "./color";
@@ -27,6 +26,5 @@ export * as PostEffect from "./postEffect";
 export * as Picking from "./picking";
 export * as RenderState from "./renderState";
 export * as Shadow from "./shadow";
-
 export * from "./defineProperty"
 

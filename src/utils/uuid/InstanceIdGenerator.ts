@@ -8,19 +8,19 @@
  * @category UUID
  */
 class InstanceIdGenerator {
-    /** 타입별 현재 ID 맵 */
-    private static idMaps: Map<Function, number> = new Map();
+	/** 타입별 현재 ID 맵 */
+	private static idMaps: Map<Function, number> = new Map();
 
-    /**
-     * 지정한 타입(생성자 함수)에 대해 다음 인스턴스 ID를 반환합니다.
-     * @param type 고유 ID를 생성할 타입(생성자 함수)
-     * @returns 해당 타입에 대한 고유 인스턴스 ID(0부터 시작)
-     */
-    static getNextId(type: Function): number {
-        let currentId = this.idMaps.get(type) || 0;
-        this.idMaps.set(type, currentId + 1);
-        return currentId;
-    }
+	/**
+	 * 지정한 타입(생성자 함수)에 대해 다음 인스턴스 ID를 반환합니다.
+	 * @param type 고유 ID를 생성할 타입(생성자 함수)
+	 * @returns 해당 타입에 대한 고유 인스턴스 ID(0부터 시작)
+	 */
+	static getNextId(type: Function): number {
+		let currentId = this.idMaps.get(type) || 0;
+		this.idMaps.set(type, currentId + 1);
+		return currentId;
+	}
 }
 
 Object.freeze(InstanceIdGenerator);

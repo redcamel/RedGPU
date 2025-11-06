@@ -23,66 +23,66 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * <iframe src="/RedGPU/examples/3d/postEffect/blur/directionalBlur/"></iframe>
  */
 class DirectionalBlur extends ASinglePassPostEffect {
-    /** 블러 강도. 기본값 15, 최소 0 */
-    #amount: number = 15
-    /** 블러 각도(도). 기본값 0, 0=오른쪽 */
-    #angle: number = 0
+	/** 블러 강도. 기본값 15, 최소 0 */
+	#amount: number = 15
+	/** 블러 각도(도). 기본값 0, 0=오른쪽 */
+	#angle: number = 0
 
-    /**
-     * DirectionalBlur 인스턴스 생성
-     * @param redGPUContext 렌더링 컨텍스트
-     */
-    constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext);
-        this.init(
-            redGPUContext,
-            'POST_EFFECT_DIRECTIONAL_BLUR',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode)
-        )
-        this.amount = this.#amount
-        this.angle = this.#angle
-    }
+	/**
+	 * DirectionalBlur 인스턴스 생성
+	 * @param redGPUContext 렌더링 컨텍스트
+	 */
+	constructor(redGPUContext: RedGPUContext) {
+		super(redGPUContext);
+		this.init(
+			redGPUContext,
+			'POST_EFFECT_DIRECTIONAL_BLUR',
+			createBasicPostEffectCode(this, computeCode, uniformStructCode)
+		)
+		this.amount = this.#amount
+		this.angle = this.#angle
+	}
 
-    /** 블러 각도 반환 */
-    get angle(): number {
-        return this.#angle;
-    }
+	/** 블러 각도 반환 */
+	get angle(): number {
+		return this.#angle;
+	}
 
-    /**
-     * 블러 각도 설정(도)
-     * 0=오른쪽, 360도로 정규화
-     * @param value 각도
-     */
-    set angle(value: number) {
-        validateNumber(value)
-        this.#angle = value % 360; // 360도로 정규화
-        this.#updateDirection();
-    }
+	/**
+	 * 블러 각도 설정(도)
+	 * 0=오른쪽, 360도로 정규화
+	 * @param value 각도
+	 */
+	set angle(value: number) {
+		validateNumber(value)
+		this.#angle = value % 360; // 360도로 정규화
+		this.#updateDirection();
+	}
 
-    /** 블러 강도 반환 */
-    get amount(): number {
-        return this.#amount;
-    }
+	/** 블러 강도 반환 */
+	get amount(): number {
+		return this.#amount;
+	}
 
-    /**
-     * 블러 강도 설정
-     * 최소값 0
-     * @param value 강도
-     */
-    set amount(value: number) {
-        validateNumberRange(value, 0)
-        this.#amount = value;
-        this.updateUniform('amount', value)
-    }
+	/**
+	 * 블러 강도 설정
+	 * 최소값 0
+	 * @param value 강도
+	 */
+	set amount(value: number) {
+		validateNumberRange(value, 0)
+		this.#amount = value;
+		this.updateUniform('amount', value)
+	}
 
-    // 내부 메서드: 각도를 방향 벡터로 변환
-    #updateDirection() {
-        const radians = this.#angle * Math.PI / 180;
-        const directionX = Math.cos(radians);
-        const directionY = Math.sin(radians);
-        this.updateUniform('directionX', directionX)
-        this.updateUniform('directionY', directionY)
-    }
+	// 내부 메서드: 각도를 방향 벡터로 변환
+	#updateDirection() {
+		const radians = this.#angle * Math.PI / 180;
+		const directionX = Math.cos(radians);
+		const directionY = Math.sin(radians);
+		this.updateUniform('directionX', directionX)
+		this.updateUniform('directionY', directionY)
+	}
 }
 
 Object.freeze(DirectionalBlur)

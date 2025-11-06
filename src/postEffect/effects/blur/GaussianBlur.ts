@@ -19,36 +19,36 @@ import BlurY from "./blurY/BlurY";
  * <iframe src="/RedGPU/examples/3d/postEffect/blur/gaussianBlur/"></iframe>
  */
 class GaussianBlur extends AMultiPassPostEffect {
-    /** 블러 강도(커널 크기). 기본값 32 */
-    #size: number = 32
+	/** 블러 강도(커널 크기). 기본값 32 */
+	#size: number = 32
 
-    /**
-     * GaussianBlur 인스턴스 생성
-     * @param redGPUContext 렌더링 컨텍스트
-     */
-    constructor(redGPUContext: RedGPUContext) {
-        super(
-            redGPUContext,
-            [
-                new BlurX(redGPUContext),
-                new BlurY(redGPUContext)
-            ],
-        );
-    }
+	/**
+	 * GaussianBlur 인스턴스 생성
+	 * @param redGPUContext 렌더링 컨텍스트
+	 */
+	constructor(redGPUContext: RedGPUContext) {
+		super(
+			redGPUContext,
+			[
+				new BlurX(redGPUContext),
+				new BlurY(redGPUContext)
+			],
+		);
+	}
 
-    /** 블러 강도 반환 */
-    get size(): number {
-        return this.#size;
-    }
+	/** 블러 강도 반환 */
+	get size(): number {
+		return this.#size;
+	}
 
-    /**
-     * 블러 강도 설정
-     * 최소값 0
-     */
-    set size(value: number) {
-        this.#size = value;
-        this.passList.forEach((v: BlurX | BlurY) => v.size = value)
-    }
+	/**
+	 * 블러 강도 설정
+	 * 최소값 0
+	 */
+	set size(value: number) {
+		this.#size = value;
+		this.passList.forEach((v: BlurX | BlurY) => v.size = value)
+	}
 }
 
 Object.freeze(GaussianBlur)

@@ -18,13 +18,13 @@ import Torus from "./Torus";
 import TorusKnot from "./TorusKnot";
 
 export {
-    // Primitive,
-    Plane,
-    Sphere,
-    Torus,
-    TorusKnot,
-    Circle,
-    Cylinder,
-    Box,
-    Ground
+	// Primitive,
+	Plane,
+	Sphere,
+	Torus,
+	TorusKnot,
+	Circle,
+	Cylinder,
+	Box,
+	Ground
 }

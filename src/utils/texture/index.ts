@@ -5,9 +5,9 @@ import imageBitmapToGPUTexture from "./imageBitmapToGPUTexture";
 import loadAndCreateBitmapImage from "./loadAndCreateBitmapImage";
 
 export {
-    calculateTextureByteSize,
-    copyToTextureArray,
-    getMipLevelCount,
-    imageBitmapToGPUTexture,
-    loadAndCreateBitmapImage
+	calculateTextureByteSize,
+	copyToTextureArray,
+	getMipLevelCount,
+	imageBitmapToGPUTexture,
+	loadAndCreateBitmapImage
 }

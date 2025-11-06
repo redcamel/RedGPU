@@ -2,9 +2,9 @@ import postEffectSystemUniform from "../core/postEffectSystemUniform.wgsl"
 import ASinglePassPostEffect from "./ASinglePassPostEffect";
 
 const createCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: string = '', useMSAA: boolean = false,) => {
-    const {WORK_SIZE_X, WORK_SIZE_Y, WORK_SIZE_Z} = effect
-    const depthTextureType = useMSAA ? 'texture_depth_multisampled_2d' : 'texture_depth_2d';
-    return `
+	const {WORK_SIZE_X, WORK_SIZE_Y, WORK_SIZE_Z} = effect
+	const depthTextureType = useMSAA ? 'texture_depth_multisampled_2d' : 'texture_depth_2d';
+	return `
 
 			${uniformStruct}
       @group(0) @binding(0) var sourceTexture : texture_storage_2d<rgba8unorm,read>;
@@ -38,10 +38,10 @@ const createCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: 
  * // shader.msaa, shader.nonMsaa 사용
  */
 const createBasicPostEffectCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: string = '') => {
-    return {
-        msaa: createCode(effect, code, uniformStruct, true),
-        nonMsaa: createCode(effect, code, uniformStruct, false)
-    }
+	return {
+		msaa: createCode(effect, code, uniformStruct, true),
+		nonMsaa: createCode(effect, code, uniformStruct, false)
+	}
 }
 Object.freeze(createBasicPostEffectCode)
 export default createBasicPostEffectCode

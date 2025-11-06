@@ -35,38 +35,38 @@ import SSR from "./effects/ssr/SSR";
 import PostEffectManager from "./PostEffectManager";
 
 export {
-    PostEffectManager,
-    // Color Adjustments
-    BrightnessContrast,
-    ColorBalance,
-    ColorTemperatureTint,
-    Grayscale,
-    HueSaturation,
-    Invert,
-    Threshold,
-    Vibrance,
-    // Blur Effects
-    Blur,
-    BlurX,
-    BlurY,
-    DirectionalBlur,
-    GaussianBlur,
-    RadialBlur,
-    ZoomBlur,
-    // Lens Effects
-    ChromaticAberration,
-    DOF,
-    LensDistortion,
-    Vignetting,
-    // Environmental Effects
-    Fog,
-    HeightFog,
-    // Visual Effects
-    FilmGrain,
-    OldBloom,
-    Sharpen,
-    // Utility Effects
-    Convolution,
-    //
-    SSR,
+	PostEffectManager,
+	// Color Adjustments
+	BrightnessContrast,
+	ColorBalance,
+	ColorTemperatureTint,
+	Grayscale,
+	HueSaturation,
+	Invert,
+	Threshold,
+	Vibrance,
+	// Blur Effects
+	Blur,
+	BlurX,
+	BlurY,
+	DirectionalBlur,
+	GaussianBlur,
+	RadialBlur,
+	ZoomBlur,
+	// Lens Effects
+	ChromaticAberration,
+	DOF,
+	LensDistortion,
+	Vignetting,
+	// Environmental Effects
+	Fog,
+	HeightFog,
+	// Visual Effects
+	FilmGrain,
+	OldBloom,
+	Sharpen,
+	// Utility Effects
+	Convolution,
+	//
+	SSR,
 }

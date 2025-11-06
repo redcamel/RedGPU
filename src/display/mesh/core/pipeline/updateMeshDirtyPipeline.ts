@@ -1,5 +1,5 @@
-import RenderViewStateData from "../../../view/core/RenderViewStateData";
 import ResourceManager from "../../../../resources/core/resourceManager/ResourceManager";
+import RenderViewStateData from "../../../view/core/RenderViewStateData";
 import Mesh from "../../Mesh";
 import createMeshVertexShaderModule from "../shader/createMeshVertexShaderModule";
 import createBasePipeline from "./createBasePipeline";
@@ -13,32 +13,32 @@ import createBasePipeline from "./createBasePipeline";
 
  */
 const updateMeshDirtyPipeline = (
-    mesh: Mesh,
-    renderViewStateData?: RenderViewStateData
+	mesh: Mesh,
+	renderViewStateData?: RenderViewStateData
 ) => {
-    console.log('updateMeshDirtyPipeline')
-    const {material, gpuRenderInfo, redGPUContext} = mesh
-    const {resourceManager} = redGPUContext
-    mesh.dirtyTransform = true
-    if (material.dirtyPipeline) material._updateFragmentState()
-    const vertexShader = createMeshVertexShaderModule(mesh)
-    const vertexBindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout(
-        mesh.animationInfo.skinInfo ? ResourceManager.PRESET_VERTEX_GPUBindGroupLayout_SKIN : ResourceManager.PRESET_VERTEX_GPUBindGroupLayout
-    )
-    gpuRenderInfo.vertexShaderModule = vertexShader
-    gpuRenderInfo.pipeline = createBasePipeline(mesh, vertexShader, vertexBindGroupLayout)
-    gpuRenderInfo.shadowPipeline = null
-    gpuRenderInfo.pickingPipeline = null
-    const {vertexUniformInfo} = mesh.gpuRenderInfo
-    const {members} = vertexUniformInfo
-    for (const k in members) {
-        if (k !== 'pickingId') mesh[k] = mesh[k]
-    }
-    if (mesh.gpuRenderInfo.vertexUniformInfo.members.pickingId) {
-        mesh.gpuRenderInfo.vertexUniformBuffer.writeOnlyBuffer(mesh.gpuRenderInfo.vertexUniformInfo.members.pickingId, mesh.pickingId)
-    }
-    material.dirtyPipeline = false
-    mesh.dirtyPipeline = false
-    if (renderViewStateData) renderViewStateData.numDirtyPipelines++
+	console.log('updateMeshDirtyPipeline')
+	const {material, gpuRenderInfo, redGPUContext} = mesh
+	const {resourceManager} = redGPUContext
+	mesh.dirtyTransform = true
+	if (material.dirtyPipeline) material._updateFragmentState()
+	const vertexShader = createMeshVertexShaderModule(mesh)
+	const vertexBindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout(
+		mesh.animationInfo.skinInfo ? ResourceManager.PRESET_VERTEX_GPUBindGroupLayout_SKIN : ResourceManager.PRESET_VERTEX_GPUBindGroupLayout
+	)
+	gpuRenderInfo.vertexShaderModule = vertexShader
+	gpuRenderInfo.pipeline = createBasePipeline(mesh, vertexShader, vertexBindGroupLayout)
+	gpuRenderInfo.shadowPipeline = null
+	gpuRenderInfo.pickingPipeline = null
+	const {vertexUniformInfo} = mesh.gpuRenderInfo
+	const {members} = vertexUniformInfo
+	for (const k in members) {
+		if (k !== 'pickingId') mesh[k] = mesh[k]
+	}
+	if (mesh.gpuRenderInfo.vertexUniformInfo.members.pickingId) {
+		mesh.gpuRenderInfo.vertexUniformBuffer.writeOnlyBuffer(mesh.gpuRenderInfo.vertexUniformInfo.members.pickingId, mesh.pickingId)
+	}
+	material.dirtyPipeline = false
+	mesh.dirtyPipeline = false
+	if (renderViewStateData) renderViewStateData.numDirtyPipelines++
 }
 export default updateMeshDirtyPipeline

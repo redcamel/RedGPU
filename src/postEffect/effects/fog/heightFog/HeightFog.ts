@@ -28,118 +28,118 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * <iframe src="/RedGPU/examples/3d/postEffect/fog/heightFog/"></iframe>
  */
 class HeightFog extends ASinglePassPostEffect {
-    /** 지수 안개 타입 */
-    static EXPONENTIAL = 0;
-    /** 지수제곱 안개 타입 */
-    static EXPONENTIAL_SQUARED = 1;
-    /** 안개 타입. 0=지수, 1=지수제곱. 기본값 0 */
-    #fogType: number = HeightFog.EXPONENTIAL;
-    /** 안개 밀도. 0~5, 기본값 1.0 */
-    #density: number = 1.0;
-    /** 안개 색상(RGB) */
-    #fogColor: ColorRGB;
-    /** 안개 시작 높이. 기본값 0.0 */
-    #baseHeight: number = 0.0;
-    /** 안개 레이어 두께. 기본값 100.0 */
-    #thickness: number = 100.0;
-    /** 높이별 감쇠율. 기본값 0.1 */
-    #falloff: number = 0.1;
+	/** 지수 안개 타입 */
+	static EXPONENTIAL = 0;
+	/** 지수제곱 안개 타입 */
+	static EXPONENTIAL_SQUARED = 1;
+	/** 안개 타입. 0=지수, 1=지수제곱. 기본값 0 */
+	#fogType: number = HeightFog.EXPONENTIAL;
+	/** 안개 밀도. 0~5, 기본값 1.0 */
+	#density: number = 1.0;
+	/** 안개 색상(RGB) */
+	#fogColor: ColorRGB;
+	/** 안개 시작 높이. 기본값 0.0 */
+	#baseHeight: number = 0.0;
+	/** 안개 레이어 두께. 기본값 100.0 */
+	#thickness: number = 100.0;
+	/** 높이별 감쇠율. 기본값 0.1 */
+	#falloff: number = 0.1;
 
-    constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext);
-        this.useDepthTexture = true;
-        this.init(
-            redGPUContext,
-            'POST_EFFECT_HEIGHT_FOG',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode)
-        );
-        this.#fogColor = new ColorRGB(178, 178, 204, () => {
-            this.updateUniform('fogColor', this.#fogColor.rgbNormal);
-        });
-        // 초기값 설정
-        this.fogType = this.#fogType;
-        this.density = this.#density;
-        this.baseHeight = this.#baseHeight;
-        this.thickness = this.#thickness;
-        this.falloff = this.#falloff;
-    }
+	constructor(redGPUContext: RedGPUContext) {
+		super(redGPUContext);
+		this.useDepthTexture = true;
+		this.init(
+			redGPUContext,
+			'POST_EFFECT_HEIGHT_FOG',
+			createBasicPostEffectCode(this, computeCode, uniformStructCode)
+		);
+		this.#fogColor = new ColorRGB(178, 178, 204, () => {
+			this.updateUniform('fogColor', this.#fogColor.rgbNormal);
+		});
+		// 초기값 설정
+		this.fogType = this.#fogType;
+		this.density = this.#density;
+		this.baseHeight = this.#baseHeight;
+		this.thickness = this.#thickness;
+		this.falloff = this.#falloff;
+	}
 
-    // 🎨 Fog Mode (Unity: Mode)
-    get fogType(): number {
-        return this.#fogType;
-    }
+	// 🎨 Fog Mode (Unity: Mode)
+	get fogType(): number {
+		return this.#fogType;
+	}
 
-    /** 안개 타입 설정. 0 또는 1 */
-    set fogType(value: number) {
-        validateNumberRange(value, 0, 1);
-        this.#fogType = Math.floor(value);
-        this.updateUniform('fogType', this.#fogType);
-    }
+	/** 안개 타입 설정. 0 또는 1 */
+	set fogType(value: number) {
+		validateNumberRange(value, 0, 1);
+		this.#fogType = Math.floor(value);
+		this.updateUniform('fogType', this.#fogType);
+	}
 
-    // 🌫️ Fog Density (Unity: Density)
-    get density(): number {
-        return this.#density;
-    }
+	// 🌫️ Fog Density (Unity: Density)
+	get density(): number {
+		return this.#density;
+	}
 
-    /** 안개 밀도 설정. 0~5 */
-    set density(value: number) {
-        validateNumberRange(value, 0, 5);
-        this.#density = Math.max(0, Math.min(5, value));
-        this.updateUniform('density', this.#density);
-    }
+	/** 안개 밀도 설정. 0~5 */
+	set density(value: number) {
+		validateNumberRange(value, 0, 5);
+		this.#density = Math.max(0, Math.min(5, value));
+		this.updateUniform('density', this.#density);
+	}
 
-    /** 안개 색상 반환 (ColorRGB) */
-    get fogColor(): ColorRGB {
-        return this.#fogColor;
-    }
+	/** 안개 색상 반환 (ColorRGB) */
+	get fogColor(): ColorRGB {
+		return this.#fogColor;
+	}
 
-    /** 안개 시작 높이 반환 */
-    get baseHeight(): number {
-        return this.#baseHeight;
-    }
+	/** 안개 시작 높이 반환 */
+	get baseHeight(): number {
+		return this.#baseHeight;
+	}
 
-    /** 안개 시작 높이 설정 */
-    set baseHeight(value: number) {
-        validateNumberRange(value);
-        this.#baseHeight = value;
-        this.updateUniform('baseHeight', this.#baseHeight);
-        // thickness 기반으로 maxHeight 자동 계산
-        this.updateUniform('maxHeight', this.maxHeight);
-    }
+	/** 안개 시작 높이 설정 */
+	set baseHeight(value: number) {
+		validateNumberRange(value);
+		this.#baseHeight = value;
+		this.updateUniform('baseHeight', this.#baseHeight);
+		// thickness 기반으로 maxHeight 자동 계산
+		this.updateUniform('maxHeight', this.maxHeight);
+	}
 
-    /** 안개 최대 높이 반환 (baseHeight+thickness) */
-    get maxHeight(): number {
-        return this.#baseHeight + this.#thickness
-    }
+	/** 안개 최대 높이 반환 (baseHeight+thickness) */
+	get maxHeight(): number {
+		return this.#baseHeight + this.#thickness
+	}
 
-    // 📏 Thickness - 안개 레이어 두께 (Unity: Thickness)
-    get thickness(): number {
-        return this.#thickness;
-    }
+	// 📏 Thickness - 안개 레이어 두께 (Unity: Thickness)
+	get thickness(): number {
+		return this.#thickness;
+	}
 
-    /** 안개 레이어 두께 설정. 최소 0.1 */
-    set thickness(value: number) {
-        validateNumberRange(value, 0.1);
-        this.#thickness = Math.max(0.1, value);
-        // baseHeight + thickness로 maxHeight 계산
-        this.updateUniform('maxHeight', this.#baseHeight + this.#thickness);
-    }
+	/** 안개 레이어 두께 설정. 최소 0.1 */
+	set thickness(value: number) {
+		validateNumberRange(value, 0.1);
+		this.#thickness = Math.max(0.1, value);
+		// baseHeight + thickness로 maxHeight 계산
+		this.updateUniform('maxHeight', this.#baseHeight + this.#thickness);
+	}
 
-    // 📉 Falloff - 높이별 감쇠율 (Unity: Falloff)
-    get falloff(): number {
-        return this.#falloff;
-    }
+	// 📉 Falloff - 높이별 감쇠율 (Unity: Falloff)
+	get falloff(): number {
+		return this.#falloff;
+	}
 
-    /** 높이별 감쇠율 설정. 0.001~2 */
-    set falloff(value: number) {
-        validateNumberRange(value, 0, 2);
-        this.#falloff = Math.max(0.001, Math.min(2, value));
-        this.updateUniform('falloff', this.#falloff);
-    }
+	/** 높이별 감쇠율 설정. 0.001~2 */
+	set falloff(value: number) {
+		validateNumberRange(value, 0, 2);
+		this.#falloff = Math.max(0.001, Math.min(2, value));
+		this.updateUniform('falloff', this.#falloff);
+	}
 
-    render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult) {
-        return super.render(view, width, height, sourceTextureInfo);
-    }
+	render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult) {
+		return super.render(view, width, height, sourceTextureInfo);
+	}
 }
 
 Object.freeze(HeightFog);

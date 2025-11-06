@@ -18,18 +18,18 @@ const resultPosition = {x: 0, y: 0, z: 0, w: 0};
  * @throws {Error} view가 View3D 인스턴스가 아니면 예외 발생
  */
 const getScreenPoint = (view: View3D, targetMatrix: mat4): [number, number] => {
-    if (!(view?.constructor?.name === 'View3D')) consoleAndThrowError('allow only View3D instance')
-    mat4.identity(resultMTX);
-    const {noneJitterProjectionMatrix, rawCamera, pixelRectArray} = view;
-    mat4.multiply(resultMTX, noneJitterProjectionMatrix, rawCamera.modelMatrix);
-    mat4.multiply(resultMTX, resultMTX, targetMatrix);
-    resultPosition.z = resultMTX[14];
-    resultPosition.w = resultMTX[15];
-    resultPosition.x = resultMTX[12] * 0.5 / resultPosition.w + 0.5;
-    resultPosition.y = resultMTX[13] * 0.5 / resultPosition.w + 0.5;
-    return [
-        (pixelRectArray[0] + resultPosition.x * pixelRectArray[2]) / window.devicePixelRatio,
-        (pixelRectArray[1] + (1 - resultPosition.y) * pixelRectArray[3]) / window.devicePixelRatio
-    ]
+	if (!(view?.constructor?.name === 'View3D')) consoleAndThrowError('allow only View3D instance')
+	mat4.identity(resultMTX);
+	const {noneJitterProjectionMatrix, rawCamera, pixelRectArray} = view;
+	mat4.multiply(resultMTX, noneJitterProjectionMatrix, rawCamera.modelMatrix);
+	mat4.multiply(resultMTX, resultMTX, targetMatrix);
+	resultPosition.z = resultMTX[14];
+	resultPosition.w = resultMTX[15];
+	resultPosition.x = resultMTX[12] * 0.5 / resultPosition.w + 0.5;
+	resultPosition.y = resultMTX[13] * 0.5 / resultPosition.w + 0.5;
+	return [
+		(pixelRectArray[0] + resultPosition.x * pixelRectArray[2]) / window.devicePixelRatio,
+		(pixelRectArray[1] + (1 - resultPosition.y) * pixelRectArray[3]) / window.devicePixelRatio
+	]
 }
 export default getScreenPoint

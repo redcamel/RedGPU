@@ -18,32 +18,32 @@ import Convolution from "./convolution/Convolution";
  * <iframe src="/RedGPU/examples/3d/postEffect/sharpen/"></iframe>
  */
 class Sharpen extends AMultiPassPostEffect {
-    #effect_convolution: Convolution
+	#effect_convolution: Convolution
 
-    /**
-     * Sharpen 인스턴스 생성
-     * @param redGPUContext 렌더링 컨텍스트
-     */
-    constructor(redGPUContext: RedGPUContext) {
-        super(
-            redGPUContext,
-            [
-                new Convolution(redGPUContext),
-            ],
-        );
-        this.#effect_convolution = this.passList[0] as Convolution
-        this.#effect_convolution.kernel = Convolution.SHARPEN
-    }
+	/**
+	 * Sharpen 인스턴스 생성
+	 * @param redGPUContext 렌더링 컨텍스트
+	 */
+	constructor(redGPUContext: RedGPUContext) {
+		super(
+			redGPUContext,
+			[
+				new Convolution(redGPUContext),
+			],
+		);
+		this.#effect_convolution = this.passList[0] as Convolution
+		this.#effect_convolution.kernel = Convolution.SHARPEN
+	}
 
-    /**
-     * 샤픈 효과를 렌더링합니다.
-     * @returns 샤픈 처리된 텍스처 결과
-     */
-    render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult) {
-        return this.#effect_convolution.render(
-            view, width, height, sourceTextureInfo
-        )
-    }
+	/**
+	 * 샤픈 효과를 렌더링합니다.
+	 * @returns 샤픈 처리된 텍스처 결과
+	 */
+	render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult) {
+		return this.#effect_convolution.render(
+			view, width, height, sourceTextureInfo
+		)
+	}
 }
 
 Object.freeze(Sharpen)

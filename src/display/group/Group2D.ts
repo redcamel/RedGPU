@@ -12,84 +12,84 @@ import AGroupBase from "./core/AGroupBase";
  * @category Group
  */
 class Group2D extends AGroupBase {
-    /** 인스턴스 고유 ID */
-    #instanceId: number;
-    /** 그룹 이름 */
-    #name: string;
-    /** 그룹의 회전 값 (라디안) */
-    #rotation: number = 0;
+	/** 인스턴스 고유 ID */
+	#instanceId: number;
+	/** 그룹 이름 */
+	#name: string;
+	/** 그룹의 회전 값 (라디안) */
+	#rotation: number = 0;
 
-    /**
-     * Group2D 인스턴스를 생성합니다.
-     * @param name 그룹 이름(선택)
-     */
-    constructor(name?: string) {
-        super();
-        if (name) this.name = name;
-    }
+	/**
+	 * Group2D 인스턴스를 생성합니다.
+	 * @param name 그룹 이름(선택)
+	 */
+	constructor(name?: string) {
+		super();
+		if (name) this.name = name;
+	}
 
-    /**
-     * 그룹 이름을 반환합니다.
-     */
-    get name(): string {
-        if (!this.#instanceId) this.#instanceId = InstanceIdGenerator.getNextId(this.constructor);
-        return this.#name || `${this.constructor.name} Instance ${this.#instanceId}`;
-    }
+	/**
+	 * 그룹 이름을 반환합니다.
+	 */
+	get name(): string {
+		if (!this.#instanceId) this.#instanceId = InstanceIdGenerator.getNextId(this.constructor);
+		return this.#name || `${this.constructor.name} Instance ${this.#instanceId}`;
+	}
 
-    /**
-     * 그룹 이름을 설정합니다.
-     */
-    set name(value: string) {
-        this.#name = value;
-    }
+	/**
+	 * 그룹 이름을 설정합니다.
+	 */
+	set name(value: string) {
+		this.#name = value;
+	}
 
-    /**
-     * 그룹의 회전 값을 반환합니다.
-     */
-    // @ts-ignore
-    get rotation(): number {
-        return this.#rotation;
-    }
+	/**
+	 * 그룹의 회전 값을 반환합니다.
+	 */
+	// @ts-ignore
+	get rotation(): number {
+		return this.#rotation;
+	}
 
-    /**
-     * 그룹의 회전 값을 설정합니다.
-     * @param value 회전 값(라디안)
-     */
-    // @ts-ignore
-    set rotation(value: number) {
-        this.#rotation = value;
-        super.rotationZ = value;
-    }
+	/**
+	 * 그룹의 회전 값을 설정합니다.
+	 * @param value 회전 값(라디안)
+	 */
+	// @ts-ignore
+	set rotation(value: number) {
+		this.#rotation = value;
+		super.rotationZ = value;
+	}
 
-    /**
-     * 그룹의 스케일을 설정합니다.
-     * @param x X축 스케일
-     * @param y Y축 스케일(생략 시 x와 동일)
-     */
-    setScale(x: number, y?: number) {
-        y = y ?? x;
-        // @ts-ignore
-        super.setScale(x, y, 1);
-    }
+	/**
+	 * 그룹의 스케일을 설정합니다.
+	 * @param x X축 스케일
+	 * @param y Y축 스케일(생략 시 x와 동일)
+	 */
+	setScale(x: number, y?: number) {
+		y = y ?? x;
+		// @ts-ignore
+		super.setScale(x, y, 1);
+	}
 
-    /**
-     * 그룹의 위치를 설정합니다.
-     * @param x X 좌표
-     * @param y Y 좌표(생략 시 x와 동일)
-     */
-    setPosition(x: number, y?: number) {
-        y = y ?? x;
-        // @ts-ignore
-        super.setPosition(x, y, 0);
-    }
+	/**
+	 * 그룹의 위치를 설정합니다.
+	 * @param x X 좌표
+	 * @param y Y 좌표(생략 시 x와 동일)
+	 */
+	setPosition(x: number, y?: number) {
+		y = y ?? x;
+		// @ts-ignore
+		super.setPosition(x, y, 0);
+	}
 
-    /**
-     * 그룹의 회전 값을 설정합니다.
-     * @param value 회전 값(라디안)
-     */
-    setRotation(value: number) {
-        this.rotation = value;
-    }
+	/**
+	 * 그룹의 회전 값을 설정합니다.
+	 * @param value 회전 값(라디안)
+	 */
+	setRotation(value: number) {
+		this.rotation = value;
+	}
 }
 
 /**
@@ -97,8 +97,8 @@ class Group2D extends AGroupBase {
  * geometry/vertex 데이터 없이 transform과 자식만을 가지는 구조임을 구분하기 위해 사용됩니다.
  */
 Object.defineProperty(Group2D.prototype, 'is2DMeshType', {
-    value: true,
-    writable: false
+	value: true,
+	writable: false
 });
 Object.freeze(Group2D);
 export default Group2D;

@@ -1,8 +1,8 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import ColorMaterial from "../../../material/colorMaterial/ColorMaterial";
-import RenderViewStateData from "../../view/core/RenderViewStateData";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
 import Mesh from "../../mesh/Mesh";
+import RenderViewStateData from "../../view/core/RenderViewStateData";
 declare abstract class ADrawDebuggerLight {
     #private;
     constructor(redGPUContext: RedGPUContext, color: [number, number, number], maxLines?: number);

@@ -1,8 +1,8 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import Geometry from "../../geometry/Geometry";
 import Primitive from "../../primitive/core/Primitive";
-import RenderViewStateData from "../view/core/RenderViewStateData";
 import Mesh from "../mesh/Mesh";
+import RenderViewStateData from "../view/core/RenderViewStateData";
 import InstancingMeshObject3D from "./core/InstancingMeshObject3D";
 /**
  * GPU 인스턴싱 기반의 메시 클래스입니다.
@@ -16,6 +16,8 @@ import InstancingMeshObject3D from "./core/InstancingMeshObject3D";
  */
 declare class InstancingMesh extends Mesh {
     #private;
+    dirtyInstanceMeshObject3D: boolean;
+    dirtyInstanceNum: boolean;
     /**
      * InstancingMesh 인스턴스를 생성합니다.
      * @param redGPUContext RedGPU 컨텍스트
@@ -23,7 +25,7 @@ declare class InstancingMesh extends Mesh {
      * @param geometry geometry 또는 primitive 객체(선택)
      * @param material 머티리얼(선택)
      */
-    constructor(redGPUContext: RedGPUContext, instanceCount: number, geometry?: Geometry | Primitive, material?: any);
+    constructor(redGPUContext: RedGPUContext, maxInstanceCount: number, instanceCount: number, geometry?: Geometry | Primitive, material?: any);
     /**
      * 인스턴스 개수를 반환합니다.
      */
@@ -33,10 +35,13 @@ declare class InstancingMesh extends Mesh {
      * @param count 인스턴스 개수
      */
     set instanceCount(count: number);
+    get maxInstanceCount(): number;
+    set maxInstanceCount(count: number);
     /**
      * 인스턴스별 transform/계층 구조를 관리하는 객체 배열을 반환합니다.
      */
     get instanceChildren(): InstancingMeshObject3D[];
+    static getLimitSize(): number;
     /**
      * 인스턴싱 메시의 렌더링을 수행합니다.
      * @param renderViewStateData 렌더 상태 데이터

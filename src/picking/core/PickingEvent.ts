@@ -6,32 +6,32 @@ import Mesh from "../../display/mesh/Mesh";
  * - 마우스 이벤트 처리 시 유용한 정보를 제공합니다.
  */
 class PickingEvent {
-    pickingId: number;
-    mouseX: number;
-    mouseY: number;
-    target: Mesh;
-    time: number;
-    type: string;
-    movementX: number = 0;
-    movementY: number = 0;
-    localX: number = 0;
-    localY: number = 0;
-    localZ: number = 0;
-    altKey: boolean = false;
-    ctrlKey: boolean = false;
-    shiftKey: boolean = false;
+	pickingId: number;
+	mouseX: number;
+	mouseY: number;
+	target: Mesh;
+	time: number;
+	type: string;
+	movementX: number = 0;
+	movementY: number = 0;
+	localX: number = 0;
+	localY: number = 0;
+	localZ: number = 0;
+	altKey: boolean = false;
+	ctrlKey: boolean = false;
+	shiftKey: boolean = false;
 
-    constructor(pickingId: number, mouseX: number, mouseY: number, target: Mesh, time: number, type: string, nativeEvent: MouseEvent) {
-        this.pickingId = pickingId;
-        this.mouseX = mouseX;
-        this.mouseY = mouseY;
-        this.target = target;
-        this.time = time;
-        this.type = type;
-        this.altKey = nativeEvent.altKey;
-        this.ctrlKey = nativeEvent.ctrlKey;
-        this.shiftKey = nativeEvent.shiftKey;
-    }
+	constructor(pickingId: number, mouseX: number, mouseY: number, target: Mesh, time: number, type: string, nativeEvent: MouseEvent) {
+		this.pickingId = pickingId;
+		this.mouseX = mouseX;
+		this.mouseY = mouseY;
+		this.target = target;
+		this.time = time;
+		this.type = type;
+		this.altKey = nativeEvent.altKey;
+		this.ctrlKey = nativeEvent.ctrlKey;
+		this.shiftKey = nativeEvent.shiftKey;
+	}
 }
 
 export default PickingEvent;

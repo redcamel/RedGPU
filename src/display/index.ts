@@ -17,5 +17,5 @@ export * from "./line";
 export * from "./textFileds";
 export * from "./instancingMesh";
 export {
-    Scene,
+	Scene,
 }

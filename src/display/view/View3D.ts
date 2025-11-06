@@ -7,9 +7,8 @@ import GPU_COMPARE_FUNCTION from "../../gpuConst/GPU_COMPARE_FUNCTION";
 import PassClusterLightBound from "../../light/clusterLight/PassClusterLightBound";
 import PassClustersLight from "../../light/clusterLight/PassClustersLight";
 import PassClustersLightHelper from "../../light/clusterLight/PassClustersLightHelper";
+import DirectionalLight from "../../light/lights/DirectionalLight";
 import PostEffectManager from "../../postEffect/PostEffectManager";
-import {keepLog} from "../../utils";
-import RenderViewStateData from "./core/RenderViewStateData";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
 import Sampler from "../../resources/sampler/Sampler";
@@ -18,14 +17,14 @@ import CubeTexture from "../../resources/texture/CubeTexture";
 import IBL from "../../resources/texture/ibl/IBL";
 import IBLCubeTexture from "../../resources/texture/ibl/IBLCubeTexture";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
+import DrawDebuggerDirectionalLight from "../drawDebugger/light/DrawDebuggerDirectionalLight";
 import DrawDebuggerPointLight from "../drawDebugger/light/DrawDebuggerPointLight";
 import DrawDebuggerSpotLight from "../drawDebugger/light/DrawDebuggerSpotLight";
 import Scene from "../scene/Scene";
 import SkyBox from "../skyboxs/skyBox/SkyBox";
 import AView from "./core/AView";
+import RenderViewStateData from "./core/RenderViewStateData";
 import ViewRenderTextureManager from "./core/ViewRenderTextureManager";
-import DirectionalLight from "../../light/lights/DirectionalLight";
-import DrawDebuggerDirectionalLight from "../drawDebugger/light/DrawDebuggerDirectionalLight";
 
 const SHADER_INFO = parseWGSL(SystemCode.SYSTEM_UNIFORM)
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.systemUniforms;
@@ -305,7 +304,6 @@ class View3D extends AView {
 		let shadowDepthTextureView = shadowRender ? directionalShadowManager.shadowDepthTextureViewEmpty : directionalShadowManager.shadowDepthTextureView
 		const index = this.redGPUContext.viewList.indexOf(this)
 		const key = `${index}_${shadowRender ? 'shadowRender' : 'basic'}_2path${!!renderPath1ResultTextureView}`
-
 		if (index > -1) {
 			let needResetBindGroup = true
 			let prevInfo = this.#prevInfoList[key]

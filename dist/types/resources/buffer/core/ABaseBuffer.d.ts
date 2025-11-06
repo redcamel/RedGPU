@@ -2,6 +2,8 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import ManagementResourceBase from "../../core/ManagementResourceBase";
 export declare const GPU_BUFFER_SYMBOL: unique symbol;
 export declare const GPU_BUFFER_DATA_SYMBOL: unique symbol;
+export declare const GPU_BUFFER_DATA_SYMBOL_F32: unique symbol;
+export declare const GPU_BUFFER_DATA_SYMBOL_U32: unique symbol;
 export declare const GPU_BUFFER_CACHE_KEY: unique symbol;
 /**
  * @class

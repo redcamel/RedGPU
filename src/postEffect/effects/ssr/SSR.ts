@@ -26,119 +26,119 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * <iframe src="/RedGPU/examples/3d/postEffect/ssr/ssr/"></iframe>
  */
 class SSR extends ASinglePassPostEffect {
-    /** 최대 스텝 수. 기본값 64, 범위 1~512 */
-    #maxSteps: number = 64;
-    /** 최대 반사 거리. 기본값 15.0, 범위 1.0~200.0 */
-    #maxDistance: number = 15.0;
-    /** 스텝 크기. 기본값 0.02, 범위 0.001~5.0 */
-    #stepSize: number = 0.02;
-    /** 반사 강도. 기본값 1, 범위 0.0~5.0 */
-    #reflectionIntensity: number = 1;
-    /** 페이드 거리. 기본값 12.0, 범위 1.0~100.0 */
-    #fadeDistance: number = 12.0;
-    /** 에지 페이드. 기본값 0.15, 범위 0.0~0.5 */
-    #edgeFade: number = 0.15;
+	/** 최대 스텝 수. 기본값 64, 범위 1~512 */
+	#maxSteps: number = 64;
+	/** 최대 반사 거리. 기본값 15.0, 범위 1.0~200.0 */
+	#maxDistance: number = 15.0;
+	/** 스텝 크기. 기본값 0.02, 범위 0.001~5.0 */
+	#stepSize: number = 0.02;
+	/** 반사 강도. 기본값 1, 범위 0.0~5.0 */
+	#reflectionIntensity: number = 1;
+	/** 페이드 거리. 기본값 12.0, 범위 1.0~100.0 */
+	#fadeDistance: number = 12.0;
+	/** 에지 페이드. 기본값 0.15, 범위 0.0~0.5 */
+	#edgeFade: number = 0.15;
 
-    constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext);
-        this.WORK_SIZE_X = 8;
-        this.WORK_SIZE_Y = 8;
-        this.WORK_SIZE_Z = 1;
-        this.useDepthTexture = true;
-        const shaderCode = this.#createSSRShaderCode();
-        this.init(
-            redGPUContext,
-            'POST_EFFECT_SSR',
-            {
-                msaa: shaderCode.msaa,
-                nonMsaa: shaderCode.nonMsaa
-            }
-        );
-        // 초기값 설정
-        this.maxSteps = this.#maxSteps;
-        this.maxDistance = this.#maxDistance;
-        this.stepSize = this.#stepSize;
-        this.reflectionIntensity = this.#reflectionIntensity;
-        this.fadeDistance = this.#fadeDistance;
-        this.edgeFade = this.#edgeFade;
-    }
+	constructor(redGPUContext: RedGPUContext) {
+		super(redGPUContext);
+		this.WORK_SIZE_X = 8;
+		this.WORK_SIZE_Y = 8;
+		this.WORK_SIZE_Z = 1;
+		this.useDepthTexture = true;
+		const shaderCode = this.#createSSRShaderCode();
+		this.init(
+			redGPUContext,
+			'POST_EFFECT_SSR',
+			{
+				msaa: shaderCode.msaa,
+				nonMsaa: shaderCode.nonMsaa
+			}
+		);
+		// 초기값 설정
+		this.maxSteps = this.#maxSteps;
+		this.maxDistance = this.#maxDistance;
+		this.stepSize = this.#stepSize;
+		this.reflectionIntensity = this.#reflectionIntensity;
+		this.fadeDistance = this.#fadeDistance;
+		this.edgeFade = this.#edgeFade;
+	}
 
-    /** 최대 스텝 수 반환 */
-    get maxSteps(): number {
-        return this.#maxSteps;
-    }
+	/** 최대 스텝 수 반환 */
+	get maxSteps(): number {
+		return this.#maxSteps;
+	}
 
-    /** 최대 스텝 수 설정. 1~512 */
-    set maxSteps(value: number) {
-        validateNumberRange(value, 1, 512);
-        this.#maxSteps = value;
-        this.updateUniform('maxSteps', value);
-    }
+	/** 최대 스텝 수 설정. 1~512 */
+	set maxSteps(value: number) {
+		validateNumberRange(value, 1, 512);
+		this.#maxSteps = value;
+		this.updateUniform('maxSteps', value);
+	}
 
-    /** 최대 반사 거리 반환 */
-    get maxDistance(): number {
-        return this.#maxDistance;
-    }
+	/** 최대 반사 거리 반환 */
+	get maxDistance(): number {
+		return this.#maxDistance;
+	}
 
-    /** 최대 반사 거리 설정. 1.0~200.0 */
-    set maxDistance(value: number) {
-        validatePositiveNumberRange(value, 1.0, 200.0);
-        this.#maxDistance = value;
-        this.updateUniform('maxDistance', value);
-    }
+	/** 최대 반사 거리 설정. 1.0~200.0 */
+	set maxDistance(value: number) {
+		validatePositiveNumberRange(value, 1.0, 200.0);
+		this.#maxDistance = value;
+		this.updateUniform('maxDistance', value);
+	}
 
-    /** 스텝 크기 반환 */
-    get stepSize(): number {
-        return this.#stepSize;
-    }
+	/** 스텝 크기 반환 */
+	get stepSize(): number {
+		return this.#stepSize;
+	}
 
-    /** 스텝 크기 설정. 0.001~5.0 */
-    set stepSize(value: number) {
-        validatePositiveNumberRange(value, 0.001, 5.0);
-        this.#stepSize = value;
-        this.updateUniform('stepSize', value);
-    }
+	/** 스텝 크기 설정. 0.001~5.0 */
+	set stepSize(value: number) {
+		validatePositiveNumberRange(value, 0.001, 5.0);
+		this.#stepSize = value;
+		this.updateUniform('stepSize', value);
+	}
 
-    /** 반사 강도 반환 */
-    get reflectionIntensity(): number {
-        return this.#reflectionIntensity;
-    }
+	/** 반사 강도 반환 */
+	get reflectionIntensity(): number {
+		return this.#reflectionIntensity;
+	}
 
-    /** 반사 강도 설정. 0.0~5.0 */
-    set reflectionIntensity(value: number) {
-        validateNumberRange(value, 0.0, 5.0);
-        this.#reflectionIntensity = value;
-        this.updateUniform('reflectionIntensity', value);
-    }
+	/** 반사 강도 설정. 0.0~5.0 */
+	set reflectionIntensity(value: number) {
+		validateNumberRange(value, 0.0, 5.0);
+		this.#reflectionIntensity = value;
+		this.updateUniform('reflectionIntensity', value);
+	}
 
-    /** 페이드 거리 반환 */
-    get fadeDistance(): number {
-        return this.#fadeDistance;
-    }
+	/** 페이드 거리 반환 */
+	get fadeDistance(): number {
+		return this.#fadeDistance;
+	}
 
-    /** 페이드 거리 설정. 1.0~100.0 */
-    set fadeDistance(value: number) {
-        validatePositiveNumberRange(value, 1.0, 100.0);
-        this.#fadeDistance = value;
-        this.updateUniform('fadeDistance', value);
-    }
+	/** 페이드 거리 설정. 1.0~100.0 */
+	set fadeDistance(value: number) {
+		validatePositiveNumberRange(value, 1.0, 100.0);
+		this.#fadeDistance = value;
+		this.updateUniform('fadeDistance', value);
+	}
 
-    /** 에지 페이드 반환 */
-    get edgeFade(): number {
-        return this.#edgeFade;
-    }
+	/** 에지 페이드 반환 */
+	get edgeFade(): number {
+		return this.#edgeFade;
+	}
 
-    /** 에지 페이드 설정. 0.0~0.5 */
-    set edgeFade(value: number) {
-        validateNumberRange(value, 0.0, 0.5);
-        this.#edgeFade = value;
-        this.updateUniform('edgeFade', value);
-    }
+	/** 에지 페이드 설정. 0.0~0.5 */
+	set edgeFade(value: number) {
+		validateNumberRange(value, 0.0, 0.5);
+		this.#edgeFade = value;
+		this.updateUniform('edgeFade', value);
+	}
 
-    #createSSRShaderCode() {
-        const createCode = (useMSAA: boolean) => {
-            const depthTextureType = useMSAA ? 'texture_depth_multisampled_2d' : 'texture_depth_2d';
-            return `
+	#createSSRShaderCode() {
+		const createCode = (useMSAA: boolean) => {
+			const depthTextureType = useMSAA ? 'texture_depth_multisampled_2d' : 'texture_depth_2d';
+			return `
 				${uniformStructCode}
 				
 				@group(0) @binding(0) var sourceTexture : texture_storage_2d<rgba8unorm,read>;
@@ -154,12 +154,12 @@ class SSR extends ASinglePassPostEffect {
 					${computeCode}
 				}
 			`;
-        };
-        return {
-            msaa: createCode(true),
-            nonMsaa: createCode(false)
-        };
-    }
+		};
+		return {
+			msaa: createCode(true),
+			nonMsaa: createCode(false)
+		};
+	}
 }
 
 Object.freeze(SSR);

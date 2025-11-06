@@ -7,7 +7,7 @@ RedGPU.init(
 	canvas,
 	(redGPUContext) => {
 		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-		controller.speedDistance = 0.3;
+		controller.speedDistance = 10;
 		controller.distance = 20;
 
 		const scene = new RedGPU.Display.Scene();
@@ -39,14 +39,16 @@ const createTestMeshes = (redGPUContext, scene) => {
 	);
 
 	const meshes = [];
-	const gridSize = 10;
+	const gridSize = 30;
 
 	for (let x = -gridSize; x <= gridSize; x++) {
 		for (let z = -gridSize; z <= gridSize; z++) {
 			const geometry = new RedGPU.Primitive.Box(redGPUContext, 2, 2, 2);
+			// const geometry = new RedGPU.Primitive.Sphere(redGPUContext, 1, 32,32);
 			const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
 
-			mesh.setPosition(x * 10, 0, z * 10);
+			mesh.setPosition(x * 15, 0, z * 15);
+			mesh.setScale(2)
 
 			if (x === 0 && z === 0) {
 				mesh.material = new RedGPU.Material.ColorMaterial(redGPUContext);
@@ -74,11 +76,11 @@ const renderTestPane = async (redGPUContext, meshes, view) => {
 		showBoundingBoxes: false,
 		drawCalls: meshes.length,
 		totalMeshes: meshes.length,
-		culledMeshes: 0
+		culledMeshes: 0,
 	};
 
 	const cameraFolder = pane.addFolder({title: 'Camera', expanded: true});
-	cameraFolder.addBinding(config, 'cameraDistance', {min: 5, max: 50, step: 0.5}).on('change', (evt) => {
+	cameraFolder.addBinding(config, 'cameraDistance', {min: 5, max: 300, step: 0.5}).on('change', (evt) => {
 		view.camera.distance = evt.value;
 	});
 	cameraFolder.addBinding(config, 'cameraFOV', {min: 10, max: 120, step: 1}).on('change', (evt) => {
@@ -95,6 +97,7 @@ const renderTestPane = async (redGPUContext, meshes, view) => {
 
 	const statsFolder = pane.addFolder({title: 'Statistics', expanded: true});
 	const drawCallsBinding = statsFolder.addBinding(config, 'drawCalls', {readonly: true});
+	statsFolder.addBinding(view.renderViewStateData, 'needResetRenderLayer', {readonly: true});
 
 	const updateStats = () => {
 		config.drawCalls = view.renderViewStateData.numDrawCalls;
@@ -123,4 +126,12 @@ const renderTestPane = async (redGPUContext, meshes, view) => {
 		config.cameraDistance = 15;
 		pane.refresh();
 	});
+	utilsFolder.addButton({title: 'Move Out'}).on('click', () => {
+		view.camera.distance = 300;
+		view.camera.pan = 45;
+		view.camera.tilt = -30;
+		config.cameraDistance = 300;
+		pane.refresh();
+	});
+
 };

@@ -10,7 +10,7 @@
  * <br/>Returns the rounded up offset.
  */
 const getUniformOffsetByRoundUp = (
-    previousOffsetAndSize: number,
-    requiredAlignment: number
+	previousOffsetAndSize: number,
+	requiredAlignment: number
 ): number => (((previousOffsetAndSize + requiredAlignment - 1) / requiredAlignment) | 0) * requiredAlignment;
 export default getUniformOffsetByRoundUp;

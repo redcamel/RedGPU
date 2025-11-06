@@ -9,11 +9,11 @@
  * @returns {string} 변환된 절대 URL, 실패 시 입력된 relative 값 반환
  */
 function getAbsoluteURL(base: string, relative: string): string {
-    try {
-        return new URL(relative, base).href;
-    } catch (e) {
-        return relative;
-    }
+	try {
+		return new URL(relative, base).href;
+	} catch (e) {
+		return relative;
+	}
 }
 
 export default getAbsoluteURL

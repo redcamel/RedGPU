@@ -776,14 +776,23 @@ const ExampleList = [
 				name: 'InstancedMesh',
 				list: [
 					{
-						name: 'InstancedMesh',
-						path: '3d/instancedMesh/basic',
-						thumb: '3d/instancedMesh/basic/thumb.png',
+						name: 'InstancedMesh Simple',
+						path: '3d/instancedMesh/simple',
+						thumb: '3d/instancedMesh/simple/thumb.png',
 						description: {
-							ko: `InstancedMesh를 지원합니다.`,
-							en: `Supports InstancedMesh.`
+							ko: ``,
+							en: `This demo demonstrates instance performance testing using a simple Plane. This demo maximizes the WebGPU's minimum safe memory of 128 MB buffer (1 million instances).`
 						},
 					},
+                    {
+                        name: 'InstancedMesh Sphere',
+                        path: '3d/instancedMesh/sphere',
+                        thumb: '3d/instancedMesh/sphere/thumb.png',
+                        description: {
+                            ko: ``,
+                            en: `This demo demonstrates instance performance testing using Sphere. This demo maximizes the WebGPU's minimum safe memory of 128 MB buffer (1 million instances).`
+                        },
+                    },
 				]
 			},
 			{

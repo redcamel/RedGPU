@@ -18,6 +18,6 @@ export * from "./math";
 export * from "./texture";
 export * from "./uuid";
 export {
-    keepLog,
-    copyGPUBuffer,
+	keepLog,
+	copyGPUBuffer,
 }

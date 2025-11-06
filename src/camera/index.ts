@@ -13,10 +13,10 @@ import OrbitController from "./controller/OrbitController";
 import * as Core from "./core";
 
 export {
-    PerspectiveCamera,
-    OrthographicCamera,
-    Camera2D,
-    OrbitController,
-    BasicController,
-    Core
+	PerspectiveCamera,
+	OrthographicCamera,
+	Camera2D,
+	OrbitController,
+	BasicController,
+	Core
 }

@@ -17,67 +17,67 @@ import PerspectiveCamera from "../camera/PerspectiveCamera";
  *
  */
 abstract class AController {
-    /**
-     * 현재 컨트롤러가 제어하는 카메라 인스턴스
-     */
-    #camera: PerspectiveCamera | OrthographicCamera
+	/**
+	 * 현재 컨트롤러가 제어하는 카메라 인스턴스
+	 */
+	#camera: PerspectiveCamera | OrthographicCamera
 
-    /**
-     * AController 생성자
-     */
-    constructor() {
-    }
+	/**
+	 * AController 생성자
+	 */
+	constructor() {
+	}
 
-    /**
-     * 현재 연결된 카메라를 반환합니다.
-     */
-    get camera(): PerspectiveCamera | OrthographicCamera {
-        return this.#camera;
-    }
+	/**
+	 * 현재 연결된 카메라를 반환합니다.
+	 */
+	get camera(): PerspectiveCamera | OrthographicCamera {
+		return this.#camera;
+	}
 
-    /**
-     * 컨트롤러에 카메라를 할당합니다.
-     */
-    set camera(value: PerspectiveCamera | OrthographicCamera) {
-        this.#camera = value;
-    }
+	/**
+	 * 컨트롤러에 카메라를 할당합니다.
+	 */
+	set camera(value: PerspectiveCamera | OrthographicCamera) {
+		this.#camera = value;
+	}
 
-    /**
-     * 컨트롤러 상태를 갱신합니다. (파생 클래스에서 override)
-     * @param view - View3D 인스턴스
-     * @param time - 시간값(ms)
-     */
-    update(view: View3D, time: number): void {
-    }
+	/**
+	 * 컨트롤러 상태를 갱신합니다. (파생 클래스에서 override)
+	 * @param view - View3D 인스턴스
+	 * @param time - 시간값(ms)
+	 */
+	update(view: View3D, time: number): void {
+	}
 
-    /**
-     * 마우스/터치 이벤트에서 캔버스 내 좌표를 반환합니다.
-     * @param e - MouseEvent 또는 TouchEvent
-     * @param redGPUContext - RedGPUContext 인스턴스
-     * @returns 캔버스 내 상대 좌표 객체 { x, y }
-     */
-    getCanvasEventPoint = (e: MouseEvent | TouchEvent, redGPUContext: RedGPUContext) => {
-        const canvas = redGPUContext.htmlCanvas;
-        const isMobile = redGPUContext.detector.isMobile;
-        const rect = canvas.getBoundingClientRect();
-        const tX_key = 'clientX';
-        const tY_key = 'clientY';
-        let clientX: number;
-        let clientY: number;
-        if (isMobile) {
-            const touch = (e as TouchEvent).changedTouches[0];
-            clientX = touch[tX_key];
-            clientY = touch[tY_key];
-        } else {
-            const mouseEvent = e as MouseEvent;
-            clientX = mouseEvent[tX_key];
-            clientY = mouseEvent[tY_key];
-        }
-        return {
-            x: clientX - rect.left,
-            y: clientY - rect.top
-        };
-    }
+	/**
+	 * 마우스/터치 이벤트에서 캔버스 내 좌표를 반환합니다.
+	 * @param e - MouseEvent 또는 TouchEvent
+	 * @param redGPUContext - RedGPUContext 인스턴스
+	 * @returns 캔버스 내 상대 좌표 객체 { x, y }
+	 */
+	getCanvasEventPoint = (e: MouseEvent | TouchEvent, redGPUContext: RedGPUContext) => {
+		const canvas = redGPUContext.htmlCanvas;
+		const isMobile = redGPUContext.detector.isMobile;
+		const rect = canvas.getBoundingClientRect();
+		const tX_key = 'clientX';
+		const tY_key = 'clientY';
+		let clientX: number;
+		let clientY: number;
+		if (isMobile) {
+			const touch = (e as TouchEvent).changedTouches[0];
+			clientX = touch[tX_key];
+			clientY = touch[tY_key];
+		} else {
+			const mouseEvent = e as MouseEvent;
+			clientX = mouseEvent[tX_key];
+			clientY = mouseEvent[tY_key];
+		}
+		return {
+			x: clientX - rect.left,
+			y: clientY - rect.top
+		};
+	}
 }
 
 export default AController

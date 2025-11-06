@@ -6,16 +6,16 @@ import fragmentModuleSource from '../shader/fragment.wgsl'
 const SHADER_INFO = parseWGSL(fragmentModuleSource)
 
 class LineMaterial extends ABaseMaterial {
-    constructor(redGPUContext: RedGPUContext, name?: string) {
-        super(
-            redGPUContext,
-            'LINE_MATERIAL',
-            SHADER_INFO,
-            2
-        )
-        if (name) this.name = name
-        this.initGPURenderInfos()
-    }
+	constructor(redGPUContext: RedGPUContext, name?: string) {
+		super(
+			redGPUContext,
+			'LINE_MATERIAL',
+			SHADER_INFO,
+			2
+		)
+		if (name) this.name = name
+		this.initGPURenderInfos()
+	}
 }
 
 Object.freeze(LineMaterial)
