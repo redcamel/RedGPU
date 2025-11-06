@@ -9,7 +9,6 @@ declare class InstancingMeshObject3D {
     modelMatrix: mat4;
     localMatrix: mat4;
     normalModelMatrix: mat4;
-    inited: boolean;
     /**
      *
      * @param {RedGPUContext} redGPUContext - The RedGPUContext of the instance.

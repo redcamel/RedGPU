@@ -10,6 +10,6 @@
  * @returns {number} 생성 가능한 mipmap 레벨의 개수
  */
 const getMipLevelCount = (width: number, height: number): number => {
-    return Math.floor(Math.log2(Math.max(width, height))) + 1;
+	return Math.floor(Math.log2(Math.max(width, height))) + 1;
 }
 export default getMipLevelCount

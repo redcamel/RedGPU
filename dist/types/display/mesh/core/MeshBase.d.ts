@@ -4,13 +4,13 @@ import MorphInfo_GLTF from "../../../loader/gltf/cls/MorphInfo_GLTF";
 import ParsedSkinInfo_GLTF from "../../../loader/gltf/cls/ParsedSkinInfo_GLTF";
 import GLTFLoader from "../../../loader/gltf/GLTFLoader";
 import { GLTFParsedSingleClip } from "../../../loader/gltf/parsers/animation/parseAnimations";
-import VertexGPURenderInfo from "./VertexGPURenderInfo";
 import DepthStencilState from "../../../renderState/DepthStencilState";
 import PrimitiveState from "../../../renderState/PrimitiveState";
 import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
 import View3D from "../../view/View3D";
 import Object3DContainer from "./Object3DContainer";
+import VertexGPURenderInfo from "./VertexGPURenderInfo";
 /**
  * @remarks
  * `시스템 전용 클래스입니다.`\

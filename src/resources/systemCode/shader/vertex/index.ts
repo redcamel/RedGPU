@@ -4,10 +4,10 @@ import extractScaleAndTranslation from './extractScaleAndTranslation.wgsl'
 import getBillboardMatrix from './getBillboardMatrix.wgsl'
 
 const SystemVertexCode = Object.freeze({
-    calcDisplacements,
-    calculateMotionVector,
-    getBillboardMatrix,
-    extractScaleAndTranslation,
+	calcDisplacements,
+	calculateMotionVector,
+	getBillboardMatrix,
+	extractScaleAndTranslation,
 })
 Object.freeze(SystemVertexCode)
 export default SystemVertexCode

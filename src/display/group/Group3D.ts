@@ -13,34 +13,34 @@ import AGroupBase from "./core/AGroupBase";
  * @category Group
  */
 class Group3D extends AGroupBase {
-    /** 인스턴스 고유 ID */
-    #instanceId: number
-    /** 그룹 이름 */
-    #name: string
+	/** 인스턴스 고유 ID */
+	#instanceId: number
+	/** 그룹 이름 */
+	#name: string
 
-    /**
-     * Group3D 인스턴스를 생성합니다.
-     * @param name 그룹 이름(선택)
-     */
-    constructor(name?: string) {
-        super()
-        if (name) this.name = name
-    }
+	/**
+	 * Group3D 인스턴스를 생성합니다.
+	 * @param name 그룹 이름(선택)
+	 */
+	constructor(name?: string) {
+		super()
+		if (name) this.name = name
+	}
 
-    /**
-     * 그룹 이름을 반환합니다.
-     */
-    get name(): string {
-        if (!this.#instanceId) this.#instanceId = InstanceIdGenerator.getNextId(this.constructor)
-        return this.#name || `${this.constructor.name} Instance ${this.#instanceId}`;
-    }
+	/**
+	 * 그룹 이름을 반환합니다.
+	 */
+	get name(): string {
+		if (!this.#instanceId) this.#instanceId = InstanceIdGenerator.getNextId(this.constructor)
+		return this.#name || `${this.constructor.name} Instance ${this.#instanceId}`;
+	}
 
-    /**
-     * 그룹 이름을 설정합니다.
-     */
-    set name(value: string) {
-        this.#name = value;
-    }
+	/**
+	 * 그룹 이름을 설정합니다.
+	 */
+	set name(value: string) {
+		this.#name = value;
+	}
 }
 
 /**
@@ -48,8 +48,8 @@ class Group3D extends AGroupBase {
  * geometry/vertex 데이터 없이 transform과 자식만을 가지는 구조임을 구분하기 위해 사용됩니다.
  */
 Object.defineProperty(Group3D.prototype, 'meshType', {
-    value: MESH_TYPE.MESH,
-    writable: false
+	value: MESH_TYPE.MESH,
+	writable: false
 });
 Object.freeze(Group3D)
 export default Group3D

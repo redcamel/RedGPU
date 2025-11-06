@@ -4,8 +4,8 @@ import screenToWorld from "./screenToWorld";
 import worldToLocal from "./worldToLocal";
 
 export {
-    getScreenPoint,
-    screenToWorld,
-    localToWorld,
-    worldToLocal,
+	getScreenPoint,
+	screenToWorld,
+	localToWorld,
+	worldToLocal,
 }

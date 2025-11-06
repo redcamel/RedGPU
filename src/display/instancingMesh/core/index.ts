@@ -1,5 +1,5 @@
 import instancingMeshObject3D from "./InstancingMeshObject3D";
 
 export {
-    instancingMeshObject3D
+	instancingMeshObject3D
 }

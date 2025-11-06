@@ -20,44 +20,44 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * <iframe src="/RedGPU/examples/3d/postEffect/blur/blurY/"></iframe>
  */
 class BlurY extends ASinglePassPostEffect {
-    /**
-     * 블러 강도입니다. 기본값은 32입니다.
-     * @private
-     */
-    #size: number = 32
+	/**
+	 * 블러 강도입니다. 기본값은 32입니다.
+	 * @private
+	 */
+	#size: number = 32
 
-    /**
-     * BlurY 인스턴스를 생성합니다.
-     *
-     * @param redGPUContext - RedGPU 렌더링 컨텍스트
-     */
-    constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext);
-        this.init(
-            redGPUContext,
-            'POST_EFFECT_BLUR_Y',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode)
-        )
-        this.size = this.#size
-    }
+	/**
+	 * BlurY 인스턴스를 생성합니다.
+	 *
+	 * @param redGPUContext - RedGPU 렌더링 컨텍스트
+	 */
+	constructor(redGPUContext: RedGPUContext) {
+		super(redGPUContext);
+		this.init(
+			redGPUContext,
+			'POST_EFFECT_BLUR_Y',
+			createBasicPostEffectCode(this, computeCode, uniformStructCode)
+		)
+		this.size = this.#size
+	}
 
-    /**
-     * 블러 강도를 반환합니다.
-     */
-    get size(): number {
-        return this.#size;
-    }
+	/**
+	 * 블러 강도를 반환합니다.
+	 */
+	get size(): number {
+		return this.#size;
+	}
 
-    /**
-     * 블러 강도를 설정합니다.
-     * 최소값은 0입니다.
-     * @param value - 블러 강도
-     */
-    set size(value: number) {
-        validateNumberRange(value, 0)
-        this.#size = value;
-        this.updateUniform('size', value)
-    }
+	/**
+	 * 블러 강도를 설정합니다.
+	 * 최소값은 0입니다.
+	 * @param value - 블러 강도
+	 */
+	set size(value: number) {
+		validateNumberRange(value, 0)
+		this.#size = value;
+		this.updateUniform('size', value)
+	}
 }
 
 Object.freeze(BlurY)

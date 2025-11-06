@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import RenderViewStateData from "../../view/core/RenderViewStateData";
 import Mesh from "../../mesh/Mesh";
+import RenderViewStateData from "../../view/core/RenderViewStateData";
 interface ATextField {
     fontSize: number;
     fontFamily: string;

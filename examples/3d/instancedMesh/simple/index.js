@@ -9,16 +9,20 @@ RedGPU.init(
 	canvas,
 	(redGPUContext) => {
 		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-
+		controller.speedDistance = 10;
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		redGPUContext.addView(view);
+
+		const light = new RedGPU.Light.DirectionalLight()
+		scene.lightManager.addDirectionalLight(light)
 
 		const texture = new RedGPU.Resource.BitmapTexture(
 			redGPUContext,
 			'../../../assets/UV_Grid_Sm.jpg'
 		);
-		const material = new RedGPU.Material.BitmapMaterial(redGPUContext, texture);
+		const material = new RedGPU.Material.PhongMaterial(redGPUContext);
+		material.diffuseTexture = texture;
 
 		const skyboxTexture = new RedGPU.Resource.CubeTexture(
 			redGPUContext,
@@ -32,6 +36,7 @@ RedGPU.init(
 			]
 		);
 		view.skybox = new RedGPU.Display.SkyBox(redGPUContext, skyboxTexture);
+		view.grid = true
 
 		createTest(redGPUContext, scene, material);
 
@@ -39,6 +44,9 @@ RedGPU.init(
 		const render = (time) => {
 			// Logic for every frame goes here
 			// 매 프레임마다 실행될 로직 추가
+			if (scene.children[0]) {
+				// scene.children[0].rotationY += 0.001;
+			}
 		};
 		renderer.start(redGPUContext, render);
 
@@ -65,39 +73,45 @@ async function createTest(context, scene, material) {
 	const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js");
 	setDebugButtons(context);
 
+	const maxInstanceCount = RedGPU.Display.InstancingMesh.getLimitSize();
 	const instanceCount = 10000;
 	const mesh = new RedGPU.Display.InstancingMesh(
 		context,
+		maxInstanceCount,
 		instanceCount,
 		new RedGPU.Primitive.Plane(context),
 		material
 	);
 
-	mesh.primitiveState.cullMode = 'none';
+	// mesh.primitiveState.cullMode = 'none';
 
 	scene.addChild(mesh);
 
 	const initializeInstances = () => {
 		for (let i = 0; i < mesh.instanceCount; i++) {
-			if (!mesh.instanceChildren[i]?.inited) {
+			if(mesh.instanceChildren[i].x ===0) {
 				mesh.instanceChildren[i].setPosition(
-					Math.random() * 300 - 150,
-					Math.random() * 300 - 150,
-					Math.random() * 300 - 150
+					Math.random() * 900 - 450,
+					Math.random() * 900 - 450,
+					Math.random() * 900 - 450
 				);
+				mesh.instanceChildren[i].setScale(Math.random() * 2 + 1);
 				mesh.instanceChildren[i].setRotation(
 					Math.random() * 360,
 					Math.random() * 360,
 					Math.random() * 360
 				);
-				// mesh.instanceChildren[i].opacity = Math.random();
 			}
+
+			// mesh.instanceChildren[i].opacity = Math.random();
+
 		}
 	};
 
 	initializeInstances();
 
 	const pane = new Pane();
-	pane.addBinding(mesh, 'instanceCount', {min: 100, max: 100000, step: 1})
+	pane.addBinding(mesh, 'instanceCount', {min: 100, max: maxInstanceCount, step: 1})
 		.on('change', initializeInstances);
+	pane.addBinding({maxInstanceCount:maxInstanceCount}, 'maxInstanceCount', {readonly: true, format: (v) => `${Math.floor(v).toLocaleString()}`});
 }

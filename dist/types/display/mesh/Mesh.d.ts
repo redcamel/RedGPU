@@ -2,11 +2,11 @@ import { Function } from "wgsl_reflect";
 import RedGPUContext from "../../context/RedGPUContext";
 import Geometry from "../../geometry/Geometry";
 import Primitive from "../../primitive/core/Primitive";
-import RenderViewStateData from "../view/core/RenderViewStateData";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import AABB from "../../utils/math/bound/AABB";
 import OBB from "../../utils/math/bound/OBB";
 import DrawDebuggerMesh from "../drawDebugger/DrawDebuggerMesh";
+import RenderViewStateData from "../view/core/RenderViewStateData";
 import MeshBase from "./core/MeshBase";
 import Object3DContainer from "./core/Object3DContainer";
 interface Mesh {

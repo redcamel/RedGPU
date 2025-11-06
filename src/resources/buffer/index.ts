@@ -5,7 +5,7 @@ import UniformBuffer from "./uniformBuffer/UniformBuffer";
 export * as CoreBuffer from './core'
 export * from './vertexBuffer'
 export {
-    IndexBuffer,
-    StorageBuffer,
-    UniformBuffer
+	IndexBuffer,
+	StorageBuffer,
+	UniformBuffer
 }
