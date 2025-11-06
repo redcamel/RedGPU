@@ -79,9 +79,7 @@ async function createTest(context, scene, material) {
 		context,
 		maxInstanceCount,
 		instanceCount,
-		// new RedGPU.Primitive.Plane(context),
-		new RedGPU.Primitive.Box(context),
-		// new RedGPU.Primitive.Sphere(context),
+		new RedGPU.Primitive.Plane(context),
 		material
 	);
 

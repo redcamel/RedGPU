@@ -290,6 +290,7 @@ class InstancingMesh extends Mesh {
 	#initGPUCulling(redGPUContext: RedGPUContext) {
 		const {gpuDevice, resourceManager} = redGPUContext
 		// Indirect Draw 버퍼 생성
+        this.#indirectDrawBuffer?.destroy()
 		this.#indirectDrawBuffer = gpuDevice.createBuffer({
 			size: 20, // 5 * 4 bytes (vertexCount, instanceCount, firstVertex, firstInstance, padding)
 			usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
@@ -395,7 +396,8 @@ class InstancingMesh extends Mesh {
 		const {vertexUniformBuffer} = this.gpuRenderInfo
 		const {material} = this
 		const visibilityData = new Uint32Array(this.#instanceCount)
-		this.#visibilityBuffer = new StorageBuffer(
+        this.#visibilityBuffer?.destroy()
+        this.#visibilityBuffer = new StorageBuffer(
 			redGPUContext,
 			visibilityData.buffer,
 			`VisibilityBuffer_${this.uuid}`
