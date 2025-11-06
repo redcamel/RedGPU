@@ -6,15 +6,15 @@ import SpriteSheetInfo from "../SpriteSheetInfo";
 /** 2D 메시 기능이 믹스인된 베이스 스프라이트 시트 클래스 */
 declare const BaseSpriteSheet2D: {
     new (...args: any[]): {
-        "__#20738@#rotation": number;
-        "__#20738@#blendMode": number;
+        "__#92@#rotation": number;
+        "__#92@#blendMode": number;
         get blendMode(): string;
         set blendMode(value: import("../../../../material").BLEND_MODE | keyof typeof import("../../../../material").BLEND_MODE);
         rotation: number;
         setScale(x: number, y?: number): void;
         setPosition(x: number, y?: number): void;
         setRotation(value: number): void;
-        "__#20738@#setBlendFactor"(mode: number): void;
+        "__#92@#setBlendFactor"(mode: number): void;
         rotationZ: number;
     };
 } & typeof ASpriteSheet;
