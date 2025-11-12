@@ -28,7 +28,10 @@ struct IndirectDrawArgs {
 @group(0) @binding(1) var<storage, read> cullingUniforms: CullingUniforms;
 @group(0) @binding(2) var<storage, read_write> visibilityBuffer: array<u32>;
 @group(0) @binding(3) var<storage, read_write> indirectDrawArgs: IndirectDrawArgs;
-@group(0) @binding(4) var<storage, read_write> indirectDrawArgs1: IndirectDrawArgs;
+@group(0) @binding(4) var<storage, read_write> indirectDrawArgs_LOD0: IndirectDrawArgs;
+@group(0) @binding(5) var<storage, read_write> indirectDrawArgs_LOD1: IndirectDrawArgs;
+@group(0) @binding(6) var<storage, read_write> indirectDrawArgs_LOD2: IndirectDrawArgs;
+@group(0) @binding(7) var<storage, read_write> indirectDrawArgs_LOD3: IndirectDrawArgs;
 
 const BOUNDING_RADIUS: f32 = 1.0;
 
@@ -48,10 +51,12 @@ fn isInsideFrustum(position: vec3<f32>, radius: f32) -> bool {
 }
 
 fn calculateLODLevel(distanceToCamera: f32) -> u32 {
-    if (distanceToCamera < 20.0) {
+    if (distanceToCamera < 10.0) {
         return 0u;
-    } else {
+    } else if(distanceToCamera < 30.0){
         return 1u;
+    }else {
+        return 2u;
     }
 }
 
@@ -81,16 +86,19 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     if (isVisible) {
         let distanceToCamera = distance(worldPosition, cullingUniforms.cameraPosition);
         let lodLevel = calculateLODLevel(distanceToCamera);
-
+         let strideOffset = cullingUniforms.stride;
         if (lodLevel == 0u) {
             // LOD 0: 첫 번째 stride 영역에 저장
             let aliveIndex = atomicAdd(&indirectDrawArgs.instanceCount, 1u);
             visibilityBuffer[aliveIndex] = instanceIdx;
+        } else if(lodLevel == 1u) {
+            // LOD 1: stride 오프셋을 적용하여 두 번째 영역에 저장
+            let aliveIndex = atomicAdd(&indirectDrawArgs_LOD0.instanceCount, 1u);
+            visibilityBuffer[strideOffset + aliveIndex] = instanceIdx;
         } else {
             // LOD 1: stride 오프셋을 적용하여 두 번째 영역에 저장
-            let aliveIndex = atomicAdd(&indirectDrawArgs1.instanceCount, 1u);
-            let strideOffset = cullingUniforms.stride;
-            visibilityBuffer[strideOffset + aliveIndex] = instanceIdx;
-        }
+            let aliveIndex = atomicAdd(&indirectDrawArgs_LOD1.instanceCount, 1u);
+            visibilityBuffer[strideOffset * 2 + aliveIndex] = instanceIdx;
+          }
     }
 }

@@ -79,12 +79,13 @@ async function createTest(context, scene, material) {
 		context,
 		maxInstanceCount,
 		instanceCount,
-		new RedGPU.Primitive.Sphere(context, 0.5),
+		new RedGPU.Primitive.Sphere(context, 0.5, 32, 32, 32),
 		material
 	);
 	// instancingMesh.material.opacity = 0.5
-	instancingMesh.lodManager.addLOD(30, new RedGPU.Primitive.Box(context))
-	instancingMesh.instanceCount = 10001
+	instancingMesh.lodManager.addLOD(50, new RedGPU.Primitive.Sphere(context, 0.5, 8, 8, 8))
+	instancingMesh.lodManager.addLOD(100, new RedGPU.Primitive.Box(context))
+	instancingMesh.dirtyLOD = true
 	// instancingMesh.lodManager.addLOD(30, new RedGPU.Primitive.Sphere(context,0.5,4,4,4))
 
 	scene.addChild(instancingMesh);
@@ -96,6 +97,9 @@ async function createTest(context, scene, material) {
 					Math.random() * 500 - 250,
 					Math.random() * 500 - 250,
 					Math.random() * 500 - 250,
+					// Math.random() * 100 - 50,
+					// Math.random() * 100 - 50,
+					// Math.random() * 100 - 50,
 					// Math.random() * 900 - 450,
 					// Math.random() * 900 - 450,
 					// Math.random() * 900 - 450
