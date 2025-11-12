@@ -323,12 +323,14 @@ class InstancingMesh extends Mesh {
 			usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
 			label: `IndirectDrawBuffer1_${this.uuid}`
 		})
-		const stride = Math.ceil((this.#instanceCount * 4) / 256) * 256 / 4; // u32 인덱스로 변환
+		const rawStride = this.#instanceCount * 4; // 바이트
+		const strideBytes = Math.ceil(rawStride / 256) * 256; // 바이트 (256 정렬)
+		const strideU32 = strideBytes / 4;
 
 		const cullingUniformData = new Float32Array(32);
 		cullingUniformData[0] = this.#instanceCount; // instanceNum
 		const u32View = new Uint32Array(cullingUniformData.buffer);
-		u32View[1] = stride; // st
+		u32View[1] = strideU32; // st
 		this.#cullingUniformBuffer = new StorageBuffer(
 			redGPUContext,
 			cullingUniformData.buffer,
@@ -433,16 +435,16 @@ class InstancingMesh extends Mesh {
 			ResourceManager.PRESET_VERTEX_GPUBindGroupLayout_Instancing
 		)
 		{
-			const lodCount = this.#lodManager.lodList.length;
+			const lodCount = 1;
 			const instanceCount = this.#instanceCount;
 			const bytesPerInstance = 4; // Uint32 = 4 bytes
 
-// LOD별 stride 계산 (256바이트 정렬)
+			// LOD별 stride 계산 (256바이트 정렬)
 			const rawStride = instanceCount * bytesPerInstance;
 			const stride = Math.ceil(rawStride / 256) * 256;
 
-// 전체 버퍼 크기
-			const totalSize = stride * (lodCount + 2); // +1은 여유분 또는 fallback용
+			const lodSize = stride * lodCount; // LOD들을 위한 추가 공간
+			const totalSize = stride + lodSize;
 
 // Uint32Array로 생성 (주의: stride는 바이트 단위이므로 요소 수로 변환)
 			const visibilityData = new ArrayBuffer(totalSize);
@@ -469,9 +471,10 @@ class InstancingMesh extends Mesh {
 		const vertexBindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout(
 			ResourceManager.PRESET_VERTEX_GPUBindGroupLayout_Instancing
 		)
-		const stride = Math.ceil((this.#instanceCount * 4) / 256) * 256; // 256바이트 정렬
-		const offset = stride * index;
-		const size = stride;
+		const rawStride = this.#instanceCount * 4; // 4 bytes per instance
+		const stride = Math.ceil(rawStride / 256) * 256; // 바이트 단위
+		const offset = stride * index; // 바이트 단위
+		const size = stride; // 바이트 단위
 
 		if (offset + size > this.#visibilityBuffer.size) {
 			throw new Error("Binding range exceeds visibility buffer size.");
