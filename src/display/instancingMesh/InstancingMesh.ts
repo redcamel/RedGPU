@@ -14,6 +14,7 @@ import Mesh from "../mesh/Mesh";
 import MESH_TYPE from "../MESH_TYPE";
 import RenderViewStateData from "../view/core/RenderViewStateData";
 import InstancingMeshObject3D from "./core/InstancingMeshObject3D";
+import LODManager from "./LODManager";
 import cullingComputeSource from './shader/instanceCullingCompute.wgsl';
 import vertexModuleSource from './shader/instanceMeshVertex.wgsl';
 
@@ -48,8 +49,10 @@ class InstancingMesh extends Mesh {
 	#cullingBindGroup: GPUBindGroup
 	#visibilityBuffer: StorageBuffer
 	#indirectDrawBuffer: GPUBuffer
+	#indirectDrawBuffer1: GPUBuffer
 	#cullingUniformBuffer: StorageBuffer
-
+	#lodManager: LODManager = new LODManager()
+	#vertexUniformBindGroup1:GPUBindGroup
 	/**
 	 * InstancingMesh 인스턴스를 생성합니다.
 	 * @param redGPUContext RedGPU 컨텍스트
@@ -73,6 +76,10 @@ class InstancingMesh extends Mesh {
 		this.#instanceCount = maxInstanceCount
 		this.maxInstanceCount = maxInstanceCount
 		this.instanceCount = instanceCount
+	}
+
+	get lodManager(): LODManager {
+		return this.#lodManager;
 	}
 
 	/**
@@ -254,9 +261,9 @@ class InstancingMesh extends Mesh {
 			const {fragmentUniformBindGroup} = this.material.gpuRenderInfo
 			currentRenderPassEncoder.setPipeline(shadowRender ? shadowPipeline : pipeline)
 			currentRenderPassEncoder.setBindGroup(0, renderViewStateData.view.systemUniform_Vertex_UniformBindGroup);
-			currentRenderPassEncoder.setVertexBuffer(0, gpuBuffer)
 			currentRenderPassEncoder.setBindGroup(1, vertexUniformBindGroup);
 			currentRenderPassEncoder.setBindGroup(2, fragmentUniformBindGroup)
+			currentRenderPassEncoder.setVertexBuffer(0, gpuBuffer)
 			if (this.geometry.indexBuffer) {
 				const {indexBuffer} = this.geometry
 				const {gpuBuffer: indexGPUBuffer, format} = indexBuffer
@@ -264,6 +271,20 @@ class InstancingMesh extends Mesh {
 				currentRenderPassEncoder.drawIndexedIndirect(this.#indirectDrawBuffer, 0);
 			} else {
 				currentRenderPassEncoder.drawIndirect(this.#indirectDrawBuffer, 0);
+			}
+			{
+				this.lodManager.lodList.forEach(((lod, index) => {
+					const {vertexBuffer, indexBuffer} = lod.geometry
+					currentRenderPassEncoder.setVertexBuffer(0, vertexBuffer.gpuBuffer)
+					currentRenderPassEncoder.setBindGroup(1, this.#vertexUniformBindGroup1);
+					if (indexBuffer) {
+						const {gpuBuffer: indexGPUBuffer, format} = indexBuffer
+						currentRenderPassEncoder.setIndexBuffer(indexGPUBuffer, format)
+						currentRenderPassEncoder.drawIndexedIndirect(this.#indirectDrawBuffer1, 0);
+					} else {
+						currentRenderPassEncoder.drawIndirect(this.#indirectDrawBuffer1, 0);
+					}
+				}))
 			}
 		}
 		if (this.castShadow) castingList[castingList.length] = this
@@ -291,17 +312,29 @@ class InstancingMesh extends Mesh {
 		const {gpuDevice, resourceManager} = redGPUContext
 		// Indirect Draw 버퍼 생성
 		this.#indirectDrawBuffer?.destroy()
+		this.#indirectDrawBuffer1?.destroy()
 		this.#indirectDrawBuffer = gpuDevice.createBuffer({
 			size: 20, // 5 * 4 bytes (vertexCount, instanceCount, firstVertex, firstInstance, padding)
 			usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
 			label: `IndirectDrawBuffer_${this.uuid}`
 		})
-		const cullingUniformData = new Float32Array(28)
+		this.#indirectDrawBuffer1 = gpuDevice.createBuffer({
+			size: 20, // 5 * 4 bytes (vertexCount, instanceCount, firstVertex, firstInstance, padding)
+			usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+			label: `IndirectDrawBuffer1_${this.uuid}`
+		})
+		const stride = Math.ceil((this.#instanceCount * 4) / 256) * 256 / 4; // u32 인덱스로 변환
+
+		const cullingUniformData = new Float32Array(32);
+		cullingUniformData[0] = this.#instanceCount; // instanceNum
+		const u32View = new Uint32Array(cullingUniformData.buffer);
+		u32View[1] = stride; // st
 		this.#cullingUniformBuffer = new StorageBuffer(
 			redGPUContext,
 			cullingUniformData.buffer,
 			`CullingUniformBuffer_${this.uuid}`
 		)
+
 		// Compute 쉐이더 모듈 생성
 		const computeModuleDescriptor: GPUShaderModuleDescriptor = {code: this.#getCullingComputeSource()}
 		const computeShaderModule = resourceManager.createGPUShaderModule(
@@ -315,6 +348,7 @@ class InstancingMesh extends Mesh {
 				{binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}}, // cullingUniforms
 				{binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}}, // visibilityBuffer
 				{binding: 3, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}}, // indirectDrawBuffer
+				{binding: 4, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}}, // indirectDrawBuffer1
 			]
 		})
 		this.#cullingComputePipeline = gpuDevice.createComputePipeline({
@@ -334,6 +368,7 @@ class InstancingMesh extends Mesh {
 				{binding: 1, resource: {buffer: this.#cullingUniformBuffer.gpuBuffer}},
 				{binding: 2, resource: {buffer: this.#visibilityBuffer.gpuBuffer}},
 				{binding: 3, resource: {buffer: this.#indirectDrawBuffer}},
+				{binding: 4, resource: {buffer: this.#indirectDrawBuffer1}},
 			]
 		})
 	}
@@ -345,8 +380,13 @@ class InstancingMesh extends Mesh {
 		const {view} = renderViewStateData
 		this.#redGPUContext.gpuDevice.queue.writeBuffer(
 			this.#cullingUniformBuffer.gpuBuffer,
-			16,
+			32,
 			new Float32Array(view.frustumPlanes.flat())
+		)
+		this.#redGPUContext.gpuDevice.queue.writeBuffer(
+			this.#cullingUniformBuffer.gpuBuffer,
+			16,
+			new Float32Array(view.rawCamera.position)
 		)
 		this.#redGPUContext.gpuDevice.queue.writeBuffer(
 			this.#cullingUniformBuffer.gpuBuffer,
@@ -359,13 +399,16 @@ class InstancingMesh extends Mesh {
 	 * Compute Shader를 통한 GPU Culling 실행
 	 */
 	#performGPUCulling(renderViewStateData: RenderViewStateData) {
+
 		const {gpuDevice} = this.#redGPUContext
 		// Culling 유니폼 업데이트
 		this.#updateCullingUniforms(renderViewStateData)
 		// Indirect Draw 버퍼 초기화
 		const indexCount = this.geometry.indexBuffer ? this.geometry.indexBuffer.indexCount : this.geometry.vertexBuffer.vertexCount
 		const indirectDrawData = new Uint32Array([indexCount, 0, 0, 0, 0])
+		const indirectDrawData1 = new Uint32Array([this.lodManager.lodList[0].geometry.indexBuffer.indexCount, 0, 0, 0, 0])
 		gpuDevice.queue.writeBuffer(this.#indirectDrawBuffer, 0, indirectDrawData)
+		gpuDevice.queue.writeBuffer(this.#indirectDrawBuffer1, 0, indirectDrawData1)
 		// Compute Pass 생성
 		const commandEncoder = gpuDevice.createCommandEncoder()
 		const computePass = commandEncoder.beginComputePass()
@@ -389,20 +432,35 @@ class InstancingMesh extends Mesh {
 		const vertex_BindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout(
 			ResourceManager.PRESET_VERTEX_GPUBindGroupLayout_Instancing
 		)
-		const visibilityData = new Uint32Array(this.#instanceCount)
-		this.#visibilityBuffer?.destroy()
-		this.#visibilityBuffer = new StorageBuffer(
-			redGPUContext,
-			visibilityData.buffer,
-			`VisibilityBuffer_${this.uuid}`
-		)
+		{
+			const lodCount = this.#lodManager.lodList.length;
+			const instanceCount = this.#instanceCount;
+			const bytesPerInstance = 4; // Uint32 = 4 bytes
+
+// LOD별 stride 계산 (256바이트 정렬)
+			const rawStride = instanceCount * bytesPerInstance;
+			const stride = Math.ceil(rawStride / 256) * 256;
+
+// 전체 버퍼 크기
+			const totalSize = stride * (lodCount + 2); // +1은 여유분 또는 fallback용
+
+// Uint32Array로 생성 (주의: stride는 바이트 단위이므로 요소 수로 변환)
+			const visibilityData = new ArrayBuffer(totalSize);
+
+			this.#visibilityBuffer?.destroy();
+			this.#visibilityBuffer = new StorageBuffer(
+				redGPUContext,
+				visibilityData, // ArrayBuffer 전달
+				`VisibilityBuffer_${this.uuid}`
+			);
+		}
 		const vertexUniformBindGroup: GPUBindGroup = redGPUContext.gpuDevice.createBindGroup(this.#getVertexBindGroupDescriptor())
 		this.#updatePipelines()
 		this.gpuRenderInfo.vertexBindGroupLayout = vertex_BindGroupLayout
 		this.gpuRenderInfo.vertexUniformBindGroup = vertexUniformBindGroup
 	}
 
-	#getVertexBindGroupDescriptor(): GPUBindGroupDescriptor {
+	#getVertexBindGroupDescriptor(index:number=0): GPUBindGroupDescriptor {
 		const {resourceManager,} = this.#redGPUContext
 		const {vertexUniformBuffer} = this.gpuRenderInfo
 		const {material} = this
@@ -411,6 +469,14 @@ class InstancingMesh extends Mesh {
 		const vertexBindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout(
 			ResourceManager.PRESET_VERTEX_GPUBindGroupLayout_Instancing
 		)
+		const stride = Math.ceil((this.#instanceCount * 4) / 256) * 256; // 256바이트 정렬
+		const offset = stride * index;
+		const size = stride;
+
+		if (offset + size > this.#visibilityBuffer.size) {
+			throw new Error("Binding range exceeds visibility buffer size.");
+		}
+
 		const vertexBindGroupDescriptor: GPUBindGroupDescriptor = {
 			layout: vertexBindGroupLayout,
 			label: VERTEX_BIND_GROUP_DESCRIPTOR_NAME,
@@ -435,8 +501,9 @@ class InstancingMesh extends Mesh {
 					binding: 3,
 					resource: {
 						buffer: this.#visibilityBuffer.gpuBuffer,
-						offset: 0,
-						size: this.#visibilityBuffer.size
+						offset,
+						size
+
 					}
 				}
 			]
@@ -459,6 +526,7 @@ class InstancingMesh extends Mesh {
 			ResourceManager.PRESET_VERTEX_GPUBindGroupLayout_Instancing
 		)
 		this.gpuRenderInfo.vertexUniformBindGroup = this.redGPUContext.gpuDevice.createBindGroup(this.#getVertexBindGroupDescriptor())
+		this.#vertexUniformBindGroup1 = this.redGPUContext.gpuDevice.createBindGroup(this.#getVertexBindGroupDescriptor(1))
 		this.gpuRenderInfo.vertexShaderModule = vertexShaderModule
 		this.gpuRenderInfo.pipeline = createBasePipeline(this, vertexShaderModule, vertexBindGroupLayout)
 		this.gpuRenderInfo.shadowPipeline = createBasePipeline(this, vertexShaderModule, vertexBindGroupLayout, PIPELINE_TYPE.SHADOW)
