@@ -290,14 +290,12 @@ class InstancingMesh extends Mesh {
 	#initGPUCulling(redGPUContext: RedGPUContext) {
 		const {gpuDevice, resourceManager} = redGPUContext
 		// Indirect Draw 버퍼 생성
-        this.#indirectDrawBuffer?.destroy()
+		this.#indirectDrawBuffer?.destroy()
 		this.#indirectDrawBuffer = gpuDevice.createBuffer({
 			size: 20, // 5 * 4 bytes (vertexCount, instanceCount, firstVertex, firstInstance, padding)
 			usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
 			label: `IndirectDrawBuffer_${this.uuid}`
 		})
-		// Culling 유니폼 버퍼 (프러스텀 평면 정보 + instanceCount)
-		// 6 planes * 4 components + 1 instanceCount + 3 padding = 28 floats = 112 bytes
 		const cullingUniformData = new Float32Array(28)
 		this.#cullingUniformBuffer = new StorageBuffer(
 			redGPUContext,
@@ -391,64 +389,21 @@ class InstancingMesh extends Mesh {
 		const vertex_BindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout(
 			ResourceManager.PRESET_VERTEX_GPUBindGroupLayout_Instancing
 		)
-		const {basicSampler, emptyBitmapTextureView, emptyCubeTextureView} = resourceManager
-		const {gpuSampler: basicGPUSampler} = basicSampler
-		const {vertexUniformBuffer} = this.gpuRenderInfo
-		const {material} = this
 		const visibilityData = new Uint32Array(this.#instanceCount)
-        this.#visibilityBuffer?.destroy()
-        this.#visibilityBuffer = new StorageBuffer(
+		this.#visibilityBuffer?.destroy()
+		this.#visibilityBuffer = new StorageBuffer(
 			redGPUContext,
 			visibilityData.buffer,
 			`VisibilityBuffer_${this.uuid}`
 		)
-		const vertexBindGroupDescriptor: GPUBindGroupDescriptor = {
-			layout: vertex_BindGroupLayout,
-			label: VERTEX_BIND_GROUP_DESCRIPTOR_NAME,
-			entries: [
-				{
-					binding: 0,
-					resource: {
-						buffer: vertexUniformBuffer.gpuBuffer,
-						offset: 0,
-						size: vertexUniformBuffer.size
-					},
-				},
-				{
-					binding: 1,
-					resource: material?.displacementTextureSampler?.gpuSampler || basicGPUSampler
-				},
-				{
-					binding: 2,
-					resource: resourceManager.getGPUResourceBitmapTextureView(material?.displacementTexture) || emptyBitmapTextureView
-				},
-				{
-					binding: 3,
-					resource: {
-						buffer: this.#visibilityBuffer.gpuBuffer,
-						offset: 0,
-						size: this.#visibilityBuffer.size
-					}
-				}
-			]
-		}
-		const vertexUniformBindGroup: GPUBindGroup = redGPUContext.gpuDevice.createBindGroup(vertexBindGroupDescriptor)
+		const vertexUniformBindGroup: GPUBindGroup = redGPUContext.gpuDevice.createBindGroup(this.#getVertexBindGroupDescriptor())
 		this.#updatePipelines()
 		this.gpuRenderInfo.vertexBindGroupLayout = vertex_BindGroupLayout
 		this.gpuRenderInfo.vertexUniformBindGroup = vertexUniformBindGroup
 	}
 
-	/**
-	 * 파이프라인 및 쉐이더 모듈을 갱신합니다.
-	 * @private
-	 */
-	#updatePipelines() {
+	#getVertexBindGroupDescriptor(): GPUBindGroupDescriptor {
 		const {resourceManager,} = this.#redGPUContext
-		const vModuleDescriptor: GPUShaderModuleDescriptor = {code: this.#getVertexModuleSource()}
-		const vertexShaderModule: GPUShaderModule = resourceManager.createGPUShaderModule(
-			`${VERTEX_SHADER_MODULE_NAME}_${this.#maxInstanceCount}_${this.uuid}`,
-			vModuleDescriptor
-		)
 		const {vertexUniformBuffer} = this.gpuRenderInfo
 		const {material} = this
 		const {basicSampler, emptyBitmapTextureView, emptyCubeTextureView} = resourceManager
@@ -486,7 +441,24 @@ class InstancingMesh extends Mesh {
 				}
 			]
 		}
-		this.gpuRenderInfo.vertexUniformBindGroup = this.redGPUContext.gpuDevice.createBindGroup(vertexBindGroupDescriptor)
+		return vertexBindGroupDescriptor
+	}
+
+	/**
+	 * 파이프라인 및 쉐이더 모듈을 갱신합니다.
+	 * @private
+	 */
+	#updatePipelines() {
+		const {resourceManager,} = this.#redGPUContext
+		const vModuleDescriptor: GPUShaderModuleDescriptor = {code: this.#getVertexModuleSource()}
+		const vertexShaderModule: GPUShaderModule = resourceManager.createGPUShaderModule(
+			`${VERTEX_SHADER_MODULE_NAME}_${this.#maxInstanceCount}_${this.uuid}`,
+			vModuleDescriptor
+		)
+		const vertexBindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout(
+			ResourceManager.PRESET_VERTEX_GPUBindGroupLayout_Instancing
+		)
+		this.gpuRenderInfo.vertexUniformBindGroup = this.redGPUContext.gpuDevice.createBindGroup(this.#getVertexBindGroupDescriptor())
 		this.gpuRenderInfo.vertexShaderModule = vertexShaderModule
 		this.gpuRenderInfo.pipeline = createBasePipeline(this, vertexShaderModule, vertexBindGroupLayout)
 		this.gpuRenderInfo.shadowPipeline = createBasePipeline(this, vertexShaderModule, vertexBindGroupLayout, PIPELINE_TYPE.SHADOW)
