@@ -83,8 +83,8 @@ async function createTest(context, scene, material) {
 		material
 	);
 	// instancingMesh.material.opacity = 0.5
-	instancingMesh.lodManager.addLOD(50, new RedGPU.Primitive.Sphere(context, 0.5, 8, 8, 8))
-	instancingMesh.lodManager.addLOD(100, new RedGPU.Primitive.Box(context))
+	instancingMesh.lodManager.addLOD(50, new RedGPU.Primitive.Box(context))
+	instancingMesh.lodManager.addLOD(100, new RedGPU.Primitive.Plane(context))
 	instancingMesh.dirtyLOD = true
 	// instancingMesh.lodManager.addLOD(30, new RedGPU.Primitive.Sphere(context,0.5,4,4,4))
 
