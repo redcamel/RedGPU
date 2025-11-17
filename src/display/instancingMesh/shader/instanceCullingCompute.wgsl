@@ -13,7 +13,8 @@ struct CullingUniforms {
     padding: vec2<f32>,
     cameraPosition:vec3<f32>,
     frustumPlanes: array<vec4<f32>, 6>,
-
+    lodDistanceList:array<f32,7>,
+    lodNum:u32,
 };
 
 struct IndirectDrawArgs {
@@ -47,13 +48,25 @@ fn isInsideFrustum(position: vec3<f32>, radius: f32) -> bool {
 }
 
 fn calculateLODLevel(distanceToCamera: f32) -> u32 {
-    if (distanceToCamera < 50.0) {
+    if(cullingUniforms.lodNum == 0u){
         return 0u;
-    } else if(distanceToCamera < 100.0){
-        return 1u;
-    }else {
-        return 2u;
     }
+    if (cullingUniforms.lodNum > 0u && distanceToCamera < cullingUniforms.lodDistanceList[0]) {
+        return 0u;
+    } else if (cullingUniforms.lodNum > 1u && distanceToCamera < cullingUniforms.lodDistanceList[1]) {
+        return 1u;
+    } else if (cullingUniforms.lodNum > 2u && distanceToCamera < cullingUniforms.lodDistanceList[2]) {
+        return 2u;
+    } else if (cullingUniforms.lodNum > 3u && distanceToCamera < cullingUniforms.lodDistanceList[3]) {
+        return 3u;
+    } else if (cullingUniforms.lodNum > 4u && distanceToCamera < cullingUniforms.lodDistanceList[4]) {
+        return 4u;
+    } else if (cullingUniforms.lodNum > 5u && distanceToCamera < cullingUniforms.lodDistanceList[5]) {
+        return 5u;
+    } else if (cullingUniforms.lodNum > 6u && distanceToCamera < cullingUniforms.lodDistanceList[6]) {
+         return 6u;
+    }
+    return cullingUniforms.lodNum ;
 }
 
 @compute @workgroup_size(64)
@@ -92,10 +105,30 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
             // LOD 1: 두 번째 영역
             let aliveIndex = atomicAdd(&indirectDrawBuffer[1].instanceCount, 1u);
             visibilityBuffer[visibilityStride + aliveIndex] = instanceIdx;
-        } else {
-            // LOD 2: 세 번째 영역
+        } else if(lodLevel == 2u) {
+            // LOD 1: 두 번째 영역
             let aliveIndex = atomicAdd(&indirectDrawBuffer[2].instanceCount, 1u);
             visibilityBuffer[visibilityStride * 2 + aliveIndex] = instanceIdx;
+        } else if(lodLevel == 3u) {
+            // LOD 1: 두 번째 영역
+            let aliveIndex = atomicAdd(&indirectDrawBuffer[3].instanceCount, 1u);
+            visibilityBuffer[visibilityStride * 3 + aliveIndex] = instanceIdx;
+        } else if(lodLevel == 4u) {
+            // LOD 1: 두 번째 영역
+            let aliveIndex = atomicAdd(&indirectDrawBuffer[4].instanceCount, 1u);
+            visibilityBuffer[visibilityStride * 4 + aliveIndex] = instanceIdx;
+        } else if(lodLevel == 5u) {
+            // LOD 1: 두 번째 영역
+            let aliveIndex = atomicAdd(&indirectDrawBuffer[5].instanceCount, 1u);
+            visibilityBuffer[visibilityStride * 5 + aliveIndex] = instanceIdx;
+        } else if(lodLevel == 6u) {
+          // LOD 1: 두 번째 영역
+          let aliveIndex = atomicAdd(&indirectDrawBuffer[5].instanceCount, 1u);
+          visibilityBuffer[visibilityStride * 6 + aliveIndex] = instanceIdx;
+        } else {
+            // LOD 2: 세 번째 영역
+            let aliveIndex = atomicAdd(&indirectDrawBuffer[6].instanceCount, 1u);
+            visibilityBuffer[visibilityStride * 7 + aliveIndex] = instanceIdx;
         }
     }
 }

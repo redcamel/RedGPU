@@ -339,7 +339,7 @@ class InstancingMesh extends Mesh {
         const rawStride = this.#instanceCount * 4; // 바이트
         const strideBytes = Math.ceil(rawStride / 256) * 256; // 바이트 (256 정렬)
         const strideU32 = strideBytes / 4;
-        const cullingUniformData = new Float32Array(32);
+        const cullingUniformData = new Float32Array(41);
         cullingUniformData[0] = this.#instanceCount; // instanceNum
         const u32View = new Uint32Array(cullingUniformData.buffer);
         u32View[1] = strideU32; // visibility stride
@@ -404,6 +404,18 @@ class InstancingMesh extends Mesh {
 			0,
 			new Float32Array([this.#instanceCount])
 		)
+
+        this.#redGPUContext.gpuDevice.queue.writeBuffer(
+            this.#cullingUniformBuffer.gpuBuffer,
+            128,
+            new Float32Array([...this.#lodManager.lodList.map(lod=> lod.distance)])
+        )
+        this.#redGPUContext.gpuDevice.queue.writeBuffer(
+            this.#cullingUniformBuffer.gpuBuffer,
+            156,
+            new Uint32Array([this.#lodManager.lodList.length])
+        )
+
 	}
 
 
