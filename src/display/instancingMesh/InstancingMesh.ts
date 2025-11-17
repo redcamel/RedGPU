@@ -341,27 +341,29 @@ class InstancingMesh extends Mesh {
         }
     }
 
+    #calcVisibilityBufferStride(): { strideBytes: number, strideU32: number } {
+        const rawStride = this.#instanceCount * 4
+        const strideBytes = Math.ceil(rawStride / 256) * 256
+        const strideU32 = strideBytes / 4
+        return {strideBytes, strideU32}
+    }
 
     #initGPUCulling(redGPUContext: RedGPUContext) {
         const {gpuDevice, resourceManager} = redGPUContext
+        // indirectDrawBuffer 생성
         this.#indirectDrawBuffer?.destroy()
-
         const totalIndirectSize = INDIRECT_ARGS_SIZE * (1 + this.#lodManager.lodList.length)
-
         this.#indirectDrawBuffer = gpuDevice.createBuffer({
             size: totalIndirectSize,
             usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
             label: `IndirectDrawBuffer_${this.uuid}`
         })
 
-        const rawStride = this.#instanceCount * 4
-        const strideBytes = Math.ceil(rawStride / 256) * 256
-        const strideU32 = strideBytes / 4
-
-        const cullingUniformData = new Float32Array(41)
+        // cullingUniformBuffer 생성
+        const cullingUniformData = new Float32Array(40)
         cullingUniformData[0] = this.#instanceCount
         const u32View = new Uint32Array(cullingUniformData.buffer)
-        u32View[1] = strideU32
+        u32View[1] = this.#calcVisibilityBufferStride().strideU32
 
         this.#cullingUniformBuffer = new StorageBuffer(
             redGPUContext,
@@ -369,6 +371,7 @@ class InstancingMesh extends Mesh {
             `CullingUniformBuffer_${this.uuid}`
         )
 
+        // 컴퓨트 쉐이더 생ㅅ어
         const computeModuleDescriptor: GPUShaderModuleDescriptor = {code: this.#getCullingComputeSource()}
         const computeShaderModule = resourceManager.createGPUShaderModule(
             `${CULLING_COMPUTE_MODULE_NAME}_${this.#maxInstanceCount}_${this.uuid}`,
@@ -411,6 +414,11 @@ class InstancingMesh extends Mesh {
         )
         gpuDevice.queue.writeBuffer(
             this.#cullingUniformBuffer.gpuBuffer,
+            8,
+            new Uint32Array([this.#lodManager.lodList.length])
+        )
+        gpuDevice.queue.writeBuffer(
+            this.#cullingUniformBuffer.gpuBuffer,
             16,
             new Float32Array(view.rawCamera.position)
         )
@@ -424,11 +432,7 @@ class InstancingMesh extends Mesh {
             128,
             new Float32Array([...this.#lodManager.lodList.map(lod => lod.distance)])
         )
-        gpuDevice.queue.writeBuffer(
-            this.#cullingUniformBuffer.gpuBuffer,
-            156,
-            new Uint32Array([this.#lodManager.lodList.length])
-        )
+
     }
 
     #performGPUCulling(renderViewStateData: RenderViewStateData) {
@@ -471,15 +475,7 @@ class InstancingMesh extends Mesh {
             ResourceManager.PRESET_VERTEX_GPUBindGroupLayout_Instancing
         )
 
-        const lodCount = this.#lodManager.lodList.length
-        const instanceCount = this.#instanceCount
-        const bytesPerInstance = 4
-        const rawStride = instanceCount * bytesPerInstance
-        const stride = Math.ceil(rawStride / 256) * 256
-        const lodSize = stride * lodCount
-        const totalSize = stride + lodSize
-
-        const visibilityData = new ArrayBuffer(totalSize)
+        const visibilityData = new ArrayBuffer(this.#calcVisibilityBufferStride().strideBytes * (this.#lodManager.lodList.length + 1))
         this.#visibilityBuffer?.destroy()
         this.#visibilityBuffer = new StorageBuffer(
             redGPUContext,
@@ -503,8 +499,7 @@ class InstancingMesh extends Mesh {
             ResourceManager.PRESET_VERTEX_GPUBindGroupLayout_Instancing
         )
 
-        const rawStride = this.#instanceCount * 4
-        const stride = Math.ceil(rawStride / 256) * 256
+        const stride = this.#calcVisibilityBufferStride().strideBytes
         const offset = stride * index
         const size = stride
 
@@ -519,11 +514,7 @@ class InstancingMesh extends Mesh {
             entries: [
                 {
                     binding: 0,
-                    resource: {
-                        buffer: vertexUniformBuffer.gpuBuffer,
-                        offset: 0,
-                        size: vertexUniformBuffer.size
-                    },
+                    resource: {buffer: vertexUniformBuffer.gpuBuffer, offset: 0, size: vertexUniformBuffer.size},
                 },
                 {
                     binding: 1,
@@ -535,11 +526,7 @@ class InstancingMesh extends Mesh {
                 },
                 {
                     binding: 3,
-                    resource: {
-                        buffer: this.#visibilityBuffer.gpuBuffer,
-                        offset,
-                        size
-                    }
+                    resource: {buffer: this.#visibilityBuffer.gpuBuffer, offset, size}
                 }
             ]
         }

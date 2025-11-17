@@ -8,13 +8,14 @@ struct InstanceUniforms {
 };
 
 struct CullingUniforms {
-    instanceNum: f32,
+    instanceCount: f32,
     stride: u32,
-    padding: vec2<f32>,
+    lodNum: u32,
+    padding: f32,
     cameraPosition: vec3<f32>,
     frustumPlanes: array<vec4<f32>, 6>,
     lodDistanceList: array<f32, 7>,
-    lodNum: u32,
+
 };
 
 struct IndirectDrawArgs {
@@ -64,7 +65,7 @@ fn calculateLODLevel(distanceToCamera: f32) -> u32 {
 @compute @workgroup_size(64)
 fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     let instanceIdx = globalId.x;
-    if (instanceIdx >= u32(cullingUniforms.instanceNum)) {
+    if (instanceIdx >= u32(cullingUniforms.instanceCount)) {
         return;
     }
 
