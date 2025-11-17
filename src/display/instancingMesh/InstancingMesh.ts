@@ -47,7 +47,9 @@ class InstancingMesh extends Mesh {
     #visibilityBuffer: StorageBuffer
     #indirectDrawBuffer: GPUBuffer
     #cullingUniformBuffer: StorageBuffer
-    #lodManager: LODManager = new LODManager()
+    #lodManager: LODManager = new LODManager(()=>{
+        this.dirtyLOD = true
+    })
     #vertexUniformBindGroup_LODList: GPUBindGroup[] = []
     dirtyLOD: boolean
 
@@ -105,7 +107,6 @@ class InstancingMesh extends Mesh {
         }
 
         this.#initGPURenderInfos(this.#redGPUContext)
-        this.#initGPUCulling(this.#redGPUContext)
         this.dirtyInstanceNum = true
     }
 
@@ -138,7 +139,6 @@ class InstancingMesh extends Mesh {
     render(renderViewStateData: RenderViewStateData, shadowRender: boolean = false) {
         if (this.dirtyLOD) {
             this.#initGPURenderInfos(this.#redGPUContext)
-            this.#initGPUCulling(this.#redGPUContext)
             this.dirtyInstanceNum = true
             this.dirtyLOD = false
             return
@@ -431,7 +431,6 @@ class InstancingMesh extends Mesh {
             ? this.geometry.indexBuffer.indexCount
             : this.geometry.vertexBuffer.vertexCount
 
-
         // LOD 0 초기화
         const indirectDrawData = new Uint32Array([indexCount, 0, 0, 0, 0])
         gpuDevice.queue.writeBuffer(this.#indirectDrawBuffer, 0, indirectDrawData)
@@ -495,6 +494,8 @@ class InstancingMesh extends Mesh {
         this.#updatePipelines()
         this.gpuRenderInfo.vertexBindGroupLayout = vertex_BindGroupLayout
         this.gpuRenderInfo.vertexUniformBindGroup = vertexUniformBindGroup
+
+        this.#initGPUCulling(this.#redGPUContext)
     }
 
     #getVertexBindGroupDescriptor(index: number = 0): GPUBindGroupDescriptor {

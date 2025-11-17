@@ -82,11 +82,9 @@ async function createTest(context, scene, material) {
 		new RedGPU.Primitive.Sphere(context, 0.5, 32, 32, 32),
 		material
 	);
-	instancingMesh.lodManager.addLOD(50, new RedGPU.Primitive.Sphere(context,0.5,8,8,8))
-	instancingMesh.lodManager.addLOD(75, new RedGPU.Primitive.Sphere(context,0.5,4,4,4))
-	instancingMesh.lodManager.addLOD(100, new RedGPU.Primitive.Box(context))
-	instancingMesh.lodManager.addLOD(150, new RedGPU.Primitive.Plane(context))
-    instancingMesh.dirtyLOD = true
+	instancingMesh.lodManager.addLOD(25, new RedGPU.Primitive.Sphere(context,0.5,8,8,8))
+	instancingMesh.lodManager.addLOD(50, new RedGPU.Primitive.Box(context))
+	instancingMesh.lodManager.addLOD(75, new RedGPU.Primitive.Circle(context,0.5))
 
 	scene.addChild(instancingMesh);
 

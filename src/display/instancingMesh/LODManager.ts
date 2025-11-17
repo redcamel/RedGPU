@@ -11,7 +11,10 @@ type LODEntry = {
 
 class LODManager {
 	#lodList: LODEntry[] = [];
-
+    #callback:()=>void;
+    constructor(callback:()=>void) {
+        this.#callback = callback;
+    }
 	addLOD(distance: number, geometry: LODGeometry) {
 		validatePositiveNumberRange(distance,1)
 		if (this.#lodList.length >= 8) {
@@ -24,6 +27,7 @@ class LODManager {
 
 		this.#lodList.push({ distance, geometry });
 		this.#lodList.sort((a, b) => a.distance - b.distance);
+        this.#callback?.()
 	}
 
 	getLOD(currentDistance: number): LODGeometry | undefined {
@@ -35,9 +39,11 @@ class LODManager {
 
 	removeLOD(distance: number) {
 		this.#lodList = this.#lodList.filter(lod => lod.distance !== distance);
+        this.#callback?.()
 	}
 	clearLOD() {
 		this.#lodList.length = 0
+        this.#callback?.()
 	}
 
 	get lodList(): LODEntry[] {
