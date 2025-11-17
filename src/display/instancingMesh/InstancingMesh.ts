@@ -21,6 +21,7 @@ import vertexModuleSource from './shader/instanceMeshVertex.wgsl';
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_INSTANCING'
 const VERTEX_BIND_GROUP_DESCRIPTOR_NAME = 'VERTEX_BIND_GROUP_DESCRIPTOR_INSTANCING'
 const CULLING_COMPUTE_MODULE_NAME = 'CULLING_COMPUTE_MODULE_INSTANCING'
+const INDIRECT_ARGS_SIZE = 20
 
 /**
  * GPU 인스턴싱 기반의 메시 클래스입니다.
@@ -284,50 +285,68 @@ class InstancingMesh extends Mesh {
         const indirectArgsSize = 20
         const {indexBuffer} = this.geometry
 
-        this.#renderMainGeometry(renderPassEncoder, indexBuffer, indirectArgsSize)
-        this.#renderLODGeometries(renderPassEncoder, indirectArgsSize)
+        // 메인 지오메트리 렌더링 (LOD 0)
+        this.#renderGeometryWithBuffer(
+            renderPassEncoder,
+            this.geometry,
+            this.gpuRenderInfo.vertexUniformBindGroup,
+            0,
+            indirectArgsSize
+        )
+
+        // LOD 지오메트리 렌더링
+        this.#lodManager.lodList.forEach((lod, index) => {
+            this.#renderGeometryWithBuffer(
+                renderPassEncoder,
+                lod.geometry,
+                this.#vertexUniformBindGroup_LODList[index],
+                index + 1,
+                indirectArgsSize
+            )
+        })
 
         renderViewStateData.numDrawCalls++
         renderViewStateData.numInstances++
     }
 
-    #renderMainGeometry(renderPassEncoder: GPURenderPassEncoder, indexBuffer: any, indirectArgsSize: number) {
+    /**
+     * 공통 지오메트리 렌더링 로직
+     * @param renderPassEncoder - GPU 렌더 패스 인코더
+     * @param geometry - 렌더링할 지오메트리
+     * @param vertexUniformBindGroup - 버텍스 유니폼 바인드 그룹
+     * @param lodIndex - LOD 인덱스
+     * @param indirectArgsSize - 간접 렌더 인수 크기
+     */
+    #renderGeometryWithBuffer(
+        renderPassEncoder: GPURenderPassEncoder,
+        geometry: Geometry | Primitive,
+        vertexUniformBindGroup: GPUBindGroup,
+        lodIndex: number,
+        indirectArgsSize: number
+    ) {
+        const {vertexBuffer, indexBuffer} = geometry
+        const offsetInBuffer = indirectArgsSize * lodIndex
 
-        const {gpuBuffer: vertexGPUBuffer} = this.geometry.vertexBuffer
-        const {vertexUniformBindGroup} = this.gpuRenderInfo
+        // 바인드 그룹 및 버텍스 버퍼 설정
         renderPassEncoder.setBindGroup(1, vertexUniformBindGroup)
-        renderPassEncoder.setVertexBuffer(0, vertexGPUBuffer)
+        renderPassEncoder.setVertexBuffer(0, vertexBuffer.gpuBuffer)
+
+        // 인덱스 버퍼 설정 및 드로우
         if (indexBuffer) {
             const {gpuBuffer: indexGPUBuffer, format} = indexBuffer
             renderPassEncoder.setIndexBuffer(indexGPUBuffer, format)
-            renderPassEncoder.drawIndexedIndirect(this.#indirectDrawBuffer, 0)
+            renderPassEncoder.drawIndexedIndirect(this.#indirectDrawBuffer, offsetInBuffer)
         } else {
-            renderPassEncoder.drawIndirect(this.#indirectDrawBuffer, 0)
+            renderPassEncoder.drawIndirect(this.#indirectDrawBuffer, offsetInBuffer)
         }
     }
 
-    #renderLODGeometries(renderPassEncoder: GPURenderPassEncoder, indirectArgsSize: number) {
-        this.#lodManager.lodList.forEach((lod, index) => {
-            const {vertexBuffer, indexBuffer} = lod.geometry
-            const lodOffset = indirectArgsSize * (index + 1)
-            renderPassEncoder.setBindGroup(1, this.#vertexUniformBindGroup_LODList[index])
-            renderPassEncoder.setVertexBuffer(0, vertexBuffer.gpuBuffer)
-            if (indexBuffer) {
-                const {gpuBuffer: indexGPUBuffer, format} = indexBuffer
-                renderPassEncoder.setIndexBuffer(indexGPUBuffer, format)
-                renderPassEncoder.drawIndexedIndirect(this.#indirectDrawBuffer, lodOffset)
-            } else {
-                renderPassEncoder.drawIndirect(this.#indirectDrawBuffer, lodOffset)
-            }
-        })
-    }
 
     #initGPUCulling(redGPUContext: RedGPUContext) {
         const {gpuDevice, resourceManager} = redGPUContext
         this.#indirectDrawBuffer?.destroy()
 
-        const indirectDrawArgsSize = 20
-        const totalIndirectSize = indirectDrawArgsSize * (1 + this.#lodManager.lodList.length)
+        const totalIndirectSize = INDIRECT_ARGS_SIZE * (1 + this.#lodManager.lodList.length)
 
         this.#indirectDrawBuffer = gpuDevice.createBuffer({
             size: totalIndirectSize,
@@ -420,7 +439,6 @@ class InstancingMesh extends Mesh {
             ? this.geometry.indexBuffer.indexCount
             : this.geometry.vertexBuffer.vertexCount
 
-        const indirectArgsSize = 20
 
         // LOD 0 초기화
         const indirectDrawData = new Uint32Array([indexCount, 0, 0, 0, 0])
@@ -430,7 +448,7 @@ class InstancingMesh extends Mesh {
         this.#lodManager.lodList.forEach((lod, index) => {
             const lodIndexCount = lod.geometry.indexBuffer.indexCount
             const lodIndirectData = new Uint32Array([lodIndexCount, 0, 0, 0, 0])
-            const offset = indirectArgsSize * (index + 1)
+            const offset = INDIRECT_ARGS_SIZE * (index + 1)
             gpuDevice.queue.writeBuffer(this.#indirectDrawBuffer, offset, lodIndirectData)
         })
 
