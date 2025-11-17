@@ -8,7 +8,7 @@ struct InstanceUniforms {
 };
 
 struct CullingUniforms {
-    instanceCount: f32,
+    instanceCount: u32,
     stride: u32,
     lodNum: u32,
     padding: f32,
@@ -65,7 +65,7 @@ fn calculateLODLevel(distanceToCamera: f32) -> u32 {
 @compute @workgroup_size(64)
 fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     let instanceIdx = globalId.x;
-    if (instanceIdx >= u32(cullingUniforms.instanceCount)) {
+    if (instanceIdx >= (cullingUniforms.instanceCount)) {
         return;
     }
 

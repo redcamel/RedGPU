@@ -9,7 +9,6 @@ import LODManager from "./LODManager";
  * GPU 인스턴싱 기반의 메시 클래스입니다.
  *
  * 하나의 geometry와 material을 여러 인스턴스(Instance)로 효율적으로 렌더링할 수 있습니다.
- *
  * 각 인스턴스는 transform(위치, 회전, 스케일)만 다르고 geometry/vertex 데이터와 머티리얼은 공유합니다.
  *
  * <iframe src="/RedGPU/examples/3d/instancedMesh/basic/"></iframe>
