@@ -74,7 +74,7 @@ async function createTest(context, scene, material) {
 	setDebugButtons(context);
 
     const maxInstanceCount = context.detector.isMobile ? 100000 : RedGPU.Display.InstancingMesh.getLimitSize();
-	const instanceCount = 10000;
+	const instanceCount = context.detector.isMobile ? 20000 : 200000;
 	const instancingMesh = new RedGPU.Display.InstancingMesh(
 		context,
 		maxInstanceCount,
@@ -82,16 +82,11 @@ async function createTest(context, scene, material) {
 		new RedGPU.Primitive.Sphere(context, 0.5, 32, 32, 32),
 		material
 	);
-	// instancingMesh.material.opacity = 0.5
-	instancingMesh.lodManager.addLOD(20, new RedGPU.Primitive.Sphere(context,0.5,8,8,8))
-	instancingMesh.lodManager.addLOD(30, new RedGPU.Primitive.Box(context))
-    instancingMesh.lodManager.addLOD(50, new RedGPU.Primitive.Circle(context))
-    instancingMesh.lodManager.addLOD(100, new RedGPU.Primitive.Plane(context))
-    // instancingMesh.lodManager.addLOD(120, new RedGPU.Primitive.Circle(context))
-    // instancingMesh.lodManager.addLOD(130, new RedGPU.Primitive.Circle(context))
-    // instancingMesh.lodManager.addLOD(170, new RedGPU.Primitive.Plane(context))
+	instancingMesh.lodManager.addLOD(50, new RedGPU.Primitive.Sphere(context,0.5,8,8,8))
+	instancingMesh.lodManager.addLOD(75, new RedGPU.Primitive.Sphere(context,0.5,4,4,4))
+	instancingMesh.lodManager.addLOD(100, new RedGPU.Primitive.Box(context))
+	instancingMesh.lodManager.addLOD(150, new RedGPU.Primitive.Plane(context))
     instancingMesh.dirtyLOD = true
-	// instancingMesh.lodManager.addLOD(30, new RedGPU.Primitive.Sphere(context,0.5,4,4,4))
 
 	scene.addChild(instancingMesh);
 
@@ -102,12 +97,6 @@ async function createTest(context, scene, material) {
 					Math.random() * 500 - 250,
 					Math.random() * 500 - 250,
 					Math.random() * 500 - 250,
-					// Math.random() * 100 - 50,
-					// Math.random() * 100 - 50,
-					// Math.random() * 100 - 50,
-					// Math.random() * 900 - 450,
-					// Math.random() * 900 - 450,
-					// Math.random() * 900 - 450
 				);
 				instancingMesh.instanceChildren[i].setScale(Math.random() * 2 + 1);
 				instancingMesh.instanceChildren[i].setRotation(
