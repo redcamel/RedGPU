@@ -51,6 +51,10 @@ class InstancingMesh extends Mesh {
     #indirectDrawBuffer: GPUBuffer;
     #cullingUniformBuffer: StorageBuffer;
 
+    // visibilityBuffer stride 캐시
+    #visibilityStrideBytes: number = 0;
+    #visibilityStrideU32: number = 0;
+
     #lodManager: LODManager = new LODManager(() => {
         this.dirtyLOD = true;
     });
@@ -70,20 +74,10 @@ class InstancingMesh extends Mesh {
 
         this.#redGPUContext = redGPUContext;
 
-        this.gpuRenderInfo = new VertexGPURenderInfo(
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-        );
-
+        // 인스턴스 생명주기 동안 한 번만 생성하면 되는 리소스
         this.#init();
 
-        this.#instanceCount = maxInstanceCount;
+        // 최대 인스턴스 수 / 실제 인스턴스 수 설정
         this.maxInstanceCount = maxInstanceCount;
         this.instanceCount = instanceCount;
     }
@@ -101,25 +95,13 @@ class InstancingMesh extends Mesh {
 
         this.#instanceCount = Math.min(count, this.#maxInstanceCount);
 
+        // WGSL 파싱 (instanceCount / maxInstanceCount 결정 이후)
         this.gpuRenderInfo.vertexUniformInfo = parseWGSL(this.#getVertexModuleSource()).storage.instanceUniforms;
-        console.log(this.gpuRenderInfo.vertexUniformInfo);
 
-        const newData = new ArrayBuffer(this.gpuRenderInfo.vertexUniformInfo.arrayBufferByteLength);
-        const newBuffer = new StorageBuffer(
-            this.#redGPUContext,
-            newData,
-            `InstanceBuffer_${this.uuid}`,
-        );
+        // 인스턴스 유니폼 버퍼 재구성 (기존 데이터 보존)
+        this.#rebuildInstanceUniformBuffer();
 
-        const prevBuffer = this.gpuRenderInfo.vertexUniformBuffer;
-        if (prevBuffer?.gpuBuffer) {
-            newBuffer.dataViewF32.set(prevBuffer.dataViewF32, 0);
-            newBuffer.dataViewU32.set([prevBuffer.dataViewU32[0]], 0);
-            newBuffer.dataViewU32.set([prevBuffer.dataViewU32[1]], 4);
-        }
-        prevBuffer?.destroy();
-        this.gpuRenderInfo.vertexUniformBuffer = newBuffer;
-
+        // 자식 인스턴스 개수 맞추기
         if (this.#instanceChildren.length > this.#instanceCount) {
             this.#instanceChildren.length = this.#instanceCount;
         }
@@ -131,7 +113,10 @@ class InstancingMesh extends Mesh {
             }
         }
 
+        // visibility stride 갱신 후 관련 GPU 리소스 재생성
+        this.#updateVisibilityStride();
         this.#initGPURenderInfos(this.#redGPUContext);
+
         this.dirtyInstanceNum = true;
     }
 
@@ -166,6 +151,7 @@ class InstancingMesh extends Mesh {
 
     render(renderViewStateData: RenderViewStateData, shadowRender: boolean = false): void {
         if (this.dirtyLOD) {
+            this.#updateVisibilityStride();
             this.#initGPURenderInfos(this.#redGPUContext);
             this.dirtyInstanceNum = true;
             this.dirtyLOD = false;
@@ -191,7 +177,7 @@ class InstancingMesh extends Mesh {
         const redGPUContext = this.#redGPUContext;
 
         if (this.geometry) {
-            const {antialiasingManager, gpuDevice} = redGPUContext;
+            const {antialiasingManager} = redGPUContext;
 
             if (antialiasingManager.changedMSAA) {
                 this.dirtyPipeline = true;
@@ -332,7 +318,6 @@ class InstancingMesh extends Mesh {
         renderPassEncoder: GPURenderPassEncoder
     ): void {
         const indirectArgsSize = INDIRECT_ARGS_SIZE;
-        const {indexBuffer} = this.geometry;
 
         // 메인 지오메트리 렌더링 (LOD 0)
         this.#renderGeometryWithBuffer(
@@ -376,11 +361,9 @@ class InstancingMesh extends Mesh {
         const {vertexBuffer, indexBuffer} = geometry;
         const offsetInBuffer = indirectArgsSize * lodIndex;
 
-        // 바인드 그룹 및 버텍스 버퍼 설정
         renderPassEncoder.setBindGroup(1, vertexUniformBindGroup);
         renderPassEncoder.setVertexBuffer(0, vertexBuffer.gpuBuffer);
 
-        // 인덱스 버퍼 설정 및 드로우
         if (indexBuffer) {
             const {gpuBuffer: indexGPUBuffer, format} = indexBuffer;
             renderPassEncoder.setIndexBuffer(indexGPUBuffer, format);
@@ -390,18 +373,69 @@ class InstancingMesh extends Mesh {
         }
     }
 
-    #calcVisibilityBufferStride(): { strideBytes: number; strideU32: number } {
-        const rawStride = this.#instanceCount * 4;
-        const strideBytes = Math.ceil(rawStride / 256) * 256;
-        const strideU32 = strideBytes / 4;
-        return {strideBytes, strideU32};
+    /**
+     * 인스턴스 생명주기 동안 한 번만 생성해도 되는 리소스들 초기화
+     * - gpuRenderInfo 기본 구조
+     * - indirectDrawBuffer
+     * - cullingUniformBuffer
+     */
+    #init(): void {
+        const {gpuDevice} = this.#redGPUContext;
+
+        // gpuRenderInfo 기본 틀
+        this.gpuRenderInfo = new VertexGPURenderInfo(
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+        );
+
+        // indirectDrawBuffer 생성 (LOD별 인수를 위한 여유 공간)
+        const totalIndirectSize = INDIRECT_ARGS_SIZE * 8;
+        this.#indirectDrawBuffer = gpuDevice.createBuffer({
+            size: totalIndirectSize,
+            usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+            label: `IndirectDrawBuffer_${this.uuid}`,
+        });
+
+        // cullingUniformBuffer 생성 (고정 크기, 내용만 매 프레임 변경)
+        const cullingUniformData = new Float32Array(40);
+        this.#cullingUniformBuffer = new StorageBuffer(
+            this.#redGPUContext,
+            cullingUniformData.buffer,
+            `CullingUniformBuffer_${this.uuid}`,
+        );
+    }
+
+    /**
+     * instanceCount / LOD 수에 따라 달라지는 GPU 리소스 초기화
+     */
+    #initGPURenderInfos(redGPUContext: RedGPUContext): void {
+        this.dirtyPipeline = true;
+
+        const visibilityData = new ArrayBuffer(
+            this.#visibilityStrideBytes * (this.#lodManager.lodList.length + 1),
+        );
+
+        this.#visibilityBuffer?.destroy();
+        this.#visibilityBuffer = new StorageBuffer(
+            redGPUContext,
+            visibilityData,
+            `VisibilityBuffer_${this.uuid}`,
+        );
+
+        this.#updatePipelines();
+        this.#initGPUCulling(this.#redGPUContext);
     }
 
     #initGPUCulling(redGPUContext: RedGPUContext): void {
         const {gpuDevice, resourceManager} = redGPUContext;
 
-
-        // 컴퓨트 쉐이더 생성
+        // 컴퓨트 쉐이더 생성 (maxInstanceCount에 의존)
         const computeModuleDescriptor: GPUShaderModuleDescriptor = {
             code: this.#getCullingComputeSource(),
         };
@@ -469,13 +503,15 @@ class InstancingMesh extends Mesh {
     #updateCullingUniforms(renderViewStateData: RenderViewStateData): void {
         const {view} = renderViewStateData;
         const {gpuDevice} = this.#redGPUContext;
-        const {data, dataViewU32, dataViewF32} = this.#cullingUniformBuffer
-        dataViewU32.set([this.#instanceCount], 0)
-        dataViewU32.set([this.#calcVisibilityBufferStride().strideU32], 1)
-        dataViewU32.set([this.#lodManager.lodList.length], 2)
-        dataViewF32.set(view.rawCamera.position, 4)
-        dataViewF32.set(view.frustumPlanes.flat(), 8)
-        dataViewF32.set([...this.#lodManager.lodList.map(lod => lod.distance)], 32)
+        const {data, dataViewU32, dataViewF32} = this.#cullingUniformBuffer;
+
+        dataViewU32.set([this.#instanceCount], 0);
+        dataViewU32.set([this.#visibilityStrideU32], 1);
+        dataViewU32.set([this.#lodManager.lodList.length], 2);
+        dataViewF32.set(view.rawCamera.position, 4);
+        dataViewF32.set(view.frustumPlanes.flat(), 8);
+        dataViewF32.set([...this.#lodManager.lodList.map(lod => lod.distance)], 32);
+
         gpuDevice.queue.writeBuffer(
             this.#cullingUniformBuffer.gpuBuffer,
             0,
@@ -519,60 +555,18 @@ class InstancingMesh extends Mesh {
         gpuDevice.queue.submit([commandEncoder.finish()]);
     }
 
-    #init(): void {
-        const {gpuDevice} = this.#redGPUContext;
-
-        // indirectDrawBuffer 생성
-        const totalIndirectSize = INDIRECT_ARGS_SIZE * 8;
-        this.#indirectDrawBuffer = gpuDevice.createBuffer({
-            size: totalIndirectSize,
-            usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
-            label: `IndirectDrawBuffer_${this.uuid}`,
-        });
-
-        // cullingUniformBuffer 생성
-        const cullingUniformData = new Float32Array(40);
-        this.#cullingUniformBuffer = new StorageBuffer(
-            this.#redGPUContext,
-            cullingUniformData.buffer,
-            `CullingUniformBuffer_${this.uuid}`,
-        );
-    }
-
-    #initGPURenderInfos(redGPUContext: RedGPUContext): void {
-        this.dirtyPipeline = true;
-
-        const visibilityStrideInfo = this.#calcVisibilityBufferStride();
-        const visibilityData = new ArrayBuffer(
-            visibilityStrideInfo.strideBytes * (this.#lodManager.lodList.length + 1),
-        );
-
-        this.#visibilityBuffer?.destroy();
-        this.#visibilityBuffer = new StorageBuffer(
-            redGPUContext,
-            visibilityData,
-            `VisibilityBuffer_${this.uuid}`,
-        );
-
-
-        this.#updatePipelines();
-
-
-        this.#initGPUCulling(this.#redGPUContext);
-    }
-
     #getVertexBindGroupDescriptor(index: number = 0): GPUBindGroupDescriptor {
         const {resourceManager} = this.#redGPUContext;
         const {vertexUniformBuffer} = this.gpuRenderInfo;
         const {material} = this;
-        const {basicSampler, emptyBitmapTextureView, emptyCubeTextureView} = resourceManager; // emptyCubeTextureView는 향후 사용 가능
+        const {basicSampler, emptyBitmapTextureView} = resourceManager;
         const {gpuSampler: basicGPUSampler} = basicSampler;
 
         const vertexBindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout(
             ResourceManager.PRESET_VERTEX_GPUBindGroupLayout_Instancing,
         );
 
-        const stride = this.#calcVisibilityBufferStride().strideBytes;
+        const stride = this.#visibilityStrideBytes;
         const offset = stride * index;
         const size = stride;
 
@@ -616,7 +610,7 @@ class InstancingMesh extends Mesh {
     }
 
     #updatePipelines(): void {
-        const {resourceManager, gpuDevice} = this.#redGPUContext;
+        const {resourceManager} = this.#redGPUContext;
 
         const vModuleDescriptor: GPUShaderModuleDescriptor = {
             code: this.#getVertexModuleSource(),
@@ -629,24 +623,38 @@ class InstancingMesh extends Mesh {
         const vertexBindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout(
             ResourceManager.PRESET_VERTEX_GPUBindGroupLayout_Instancing,
         );
-        const vertexUniformBindGroup: GPUBindGroup = gpuDevice.createBindGroup(
-            this.#getVertexBindGroupDescriptor(),
-        );
 
-        this.gpuRenderInfo.vertexBindGroupLayout = vertexBindGroupLayout;
-        this.gpuRenderInfo.vertexUniformBindGroup = vertexUniformBindGroup;
+        this.#buildVertexBindGroups();
+        this.#createPipelines(vertexShaderModule, vertexBindGroupLayout);
+    }
+
+    /**
+     * vertexUniformBindGroup 및 LOD용 BindGroup들을 생성
+     */
+    #buildVertexBindGroups(): void {
+        const {gpuDevice} = this.#redGPUContext;
+
         // 기본 인스턴스용 바인드 그룹
-        this.gpuRenderInfo.vertexUniformBindGroup = this.redGPUContext.gpuDevice.createBindGroup(
+        this.gpuRenderInfo.vertexUniformBindGroup = gpuDevice.createBindGroup(
             this.#getVertexBindGroupDescriptor(),
         );
 
         // LOD 별 바인드 그룹 생성
+        this.#vertexUniformBindGroup_LODList.length = 0;
         this.#lodManager.lodList.forEach((lod, index) => {
-            this.#vertexUniformBindGroup_LODList[index] = this.redGPUContext.gpuDevice.createBindGroup(
+            this.#vertexUniformBindGroup_LODList[index] = gpuDevice.createBindGroup(
                 this.#getVertexBindGroupDescriptor(index + 1),
             );
         });
+    }
 
+    /**
+     * vertex / shadow 파이프라인 생성
+     */
+    #createPipelines(
+        vertexShaderModule: GPUShaderModule,
+        vertexBindGroupLayout: GPUBindGroupLayout
+    ): void {
         this.gpuRenderInfo.vertexShaderModule = vertexShaderModule;
         this.gpuRenderInfo.pipeline = createBasePipeline(
             this,
@@ -661,12 +669,52 @@ class InstancingMesh extends Mesh {
         );
     }
 
+    /**
+     * instanceCount에 따라 visibilityBuffer stride 캐시 갱신
+     */
+    #updateVisibilityStride(): void {
+        const rawStride = this.#instanceCount * 4;
+        this.#visibilityStrideBytes = Math.ceil(rawStride / 256) * 256;
+        this.#visibilityStrideU32 = this.#visibilityStrideBytes / 4;
+    }
+
+    /**
+     * 인스턴스 유니폼 버퍼 재구성 (기존 데이터 최대한 유지)
+     */
+    #rebuildInstanceUniformBuffer(): void {
+        const info = this.gpuRenderInfo.vertexUniformInfo;
+        const newData = new ArrayBuffer(info.arrayBufferByteLength);
+        const newBuffer = new StorageBuffer(
+            this.#redGPUContext,
+            newData,
+            `InstanceBuffer_${this.uuid}`,
+        );
+
+        const prevBuffer = this.gpuRenderInfo.vertexUniformBuffer;
+        if (prevBuffer?.gpuBuffer) {
+            newBuffer.dataViewF32.set(prevBuffer.dataViewF32, 0);
+            // 헤더 영역 U32 값 유지 (0, 1 인덱스를 그대로 복사)
+            newBuffer.dataViewU32.set([prevBuffer.dataViewU32[0]], 0);
+            newBuffer.dataViewU32.set([prevBuffer.dataViewU32[1]], 4);
+            prevBuffer.destroy();
+        }
+
+        this.gpuRenderInfo.vertexUniformBuffer = newBuffer;
+    }
+
+    /**
+     * WGSL 소스에 __INSTANCE_COUNT__ 치환
+     */
+    #injectInstanceCount(source: string): string {
+        return source.replaceAll(/__INSTANCE_COUNT__/g, this.#maxInstanceCount.toString());
+    }
+
     #getVertexModuleSource(): string {
-        return vertexModuleSource.replaceAll(/__INSTANCE_COUNT__/g, this.#maxInstanceCount.toString());
+        return this.#injectInstanceCount(vertexModuleSource);
     }
 
     #getCullingComputeSource(): string {
-        return cullingComputeSource.replaceAll(/__INSTANCE_COUNT__/g, this.#maxInstanceCount.toString());
+        return this.#injectInstanceCount(cullingComputeSource);
     }
 }
 
