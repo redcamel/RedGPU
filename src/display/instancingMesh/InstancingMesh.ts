@@ -542,12 +542,6 @@ class InstancingMesh extends Mesh {
     #initGPURenderInfos(redGPUContext: RedGPUContext): void {
         this.dirtyPipeline = true;
 
-        const {resourceManager} = this.#redGPUContext;
-
-        const vertexBindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout(
-            ResourceManager.PRESET_VERTEX_GPUBindGroupLayout_Instancing,
-        );
-
         const visibilityStrideInfo = this.#calcVisibilityBufferStride();
         const visibilityData = new ArrayBuffer(
             visibilityStrideInfo.strideBytes * (this.#lodManager.lodList.length + 1),
@@ -560,14 +554,9 @@ class InstancingMesh extends Mesh {
             `VisibilityBuffer_${this.uuid}`,
         );
 
-        const vertexUniformBindGroup: GPUBindGroup = redGPUContext.gpuDevice.createBindGroup(
-            this.#getVertexBindGroupDescriptor(),
-        );
 
         this.#updatePipelines();
 
-        this.gpuRenderInfo.vertexBindGroupLayout = vertexBindGroupLayout;
-        this.gpuRenderInfo.vertexUniformBindGroup = vertexUniformBindGroup;
 
         this.#initGPUCulling(this.#redGPUContext);
     }
@@ -627,7 +616,7 @@ class InstancingMesh extends Mesh {
     }
 
     #updatePipelines(): void {
-        const {resourceManager} = this.#redGPUContext;
+        const {resourceManager, gpuDevice} = this.#redGPUContext;
 
         const vModuleDescriptor: GPUShaderModuleDescriptor = {
             code: this.#getVertexModuleSource(),
@@ -637,11 +626,15 @@ class InstancingMesh extends Mesh {
             `${VERTEX_SHADER_MODULE_NAME}_${this.#maxInstanceCount}_${this.uuid}`,
             vModuleDescriptor,
         );
-
         const vertexBindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout(
             ResourceManager.PRESET_VERTEX_GPUBindGroupLayout_Instancing,
         );
+        const vertexUniformBindGroup: GPUBindGroup = gpuDevice.createBindGroup(
+            this.#getVertexBindGroupDescriptor(),
+        );
 
+        this.gpuRenderInfo.vertexBindGroupLayout = vertexBindGroupLayout;
+        this.gpuRenderInfo.vertexUniformBindGroup = vertexUniformBindGroup;
         // 기본 인스턴스용 바인드 그룹
         this.gpuRenderInfo.vertexUniformBindGroup = this.redGPUContext.gpuDevice.createBindGroup(
             this.#getVertexBindGroupDescriptor(),
