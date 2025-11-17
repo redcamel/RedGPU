@@ -57,6 +57,7 @@ class InstancingMesh extends Mesh {
         this.gpuRenderInfo = new VertexGPURenderInfo(
             null, null, null, null, null, null, null, null,
         )
+        this.#init()
         this.#instanceCount = maxInstanceCount
         this.maxInstanceCount = maxInstanceCount
         this.instanceCount = instanceCount
@@ -350,26 +351,13 @@ class InstancingMesh extends Mesh {
 
     #initGPUCulling(redGPUContext: RedGPUContext) {
         const {gpuDevice, resourceManager} = redGPUContext
-        // indirectDrawBuffer 생성
-        this.#indirectDrawBuffer?.destroy()
-        const totalIndirectSize = INDIRECT_ARGS_SIZE * (1 + this.#lodManager.lodList.length)
-        this.#indirectDrawBuffer = gpuDevice.createBuffer({
-            size: totalIndirectSize,
-            usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
-            label: `IndirectDrawBuffer_${this.uuid}`
-        })
-
-        // cullingUniformBuffer 생성
-        const cullingUniformData = new Float32Array(40)
-        cullingUniformData[0] = this.#instanceCount
-        const u32View = new Uint32Array(cullingUniformData.buffer)
-        u32View[1] = this.#calcVisibilityBufferStride().strideU32
-
-        this.#cullingUniformBuffer = new StorageBuffer(
-            redGPUContext,
-            cullingUniformData.buffer,
-            `CullingUniformBuffer_${this.uuid}`
-        )
+        {
+            // 인스턴스 카운트가 적용
+            this.#cullingUniformBuffer.dataViewU32[0] = this.#instanceCount
+            // 인스턴스 갯수와 lod레벨에 따른 visibilityBuffer 인덱싱에 사용할 스트라이드 수정
+            this.#cullingUniformBuffer.dataViewU32[1] = this.#calcVisibilityBufferStride().strideU32
+            gpuDevice.queue.writeBuffer(this.#cullingUniformBuffer.gpuBuffer, 0, this.#cullingUniformBuffer.data)
+        }
 
         // 컴퓨트 쉐이더 생ㅅ어
         const computeModuleDescriptor: GPUShaderModuleDescriptor = {code: this.#getCullingComputeSource()}
@@ -466,6 +454,26 @@ class InstancingMesh extends Mesh {
         computePass.dispatchWorkgroups(workgroupCount)
         computePass.end()
         gpuDevice.queue.submit([commandEncoder.finish()])
+    }
+
+    #init() {
+        const {gpuDevice} = this.#redGPUContext
+        // indirectDrawBuffer 생성
+        const totalIndirectSize = INDIRECT_ARGS_SIZE * 8
+        this.#indirectDrawBuffer = gpuDevice.createBuffer({
+            size: totalIndirectSize,
+            usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+            label: `IndirectDrawBuffer_${this.uuid}`
+        })
+
+        // cullingUniformBuffer 생성
+        const cullingUniformData = new Float32Array(40)
+        this.#cullingUniformBuffer = new StorageBuffer(
+            this.#redGPUContext,
+            cullingUniformData.buffer,
+            `CullingUniformBuffer_${this.uuid}`
+        )
+
     }
 
     #initGPURenderInfos(redGPUContext: RedGPUContext) {
