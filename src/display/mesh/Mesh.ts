@@ -24,6 +24,7 @@ import Object3DContainer from "./core/Object3DContainer";
 import updateMeshDirtyPipeline from "./core/pipeline/updateMeshDirtyPipeline";
 import getBasicMeshVertexBindGroupDescriptor from "./core/shader/getBasicMeshVertexBindGroupDescriptor";
 import VertexGPURenderInfo from "./core/VertexGPURenderInfo";
+import LODManager from "../instancingMesh/LODManager";
 
 const VERTEX_SHADER_MODULE_NAME_PBR_SKIN = 'VERTEX_MODULE_MESH_PBR_SKIN'
 const CONVERT_RADIAN = Math.PI / 180;
@@ -131,8 +132,15 @@ class Mesh extends MeshBase {
 	#needUpdateMatrixUniform: boolean = true
 	#uniformDataMatrixList: Float32Array
 	#displacementScale: number
+    dirtyLOD:boolean=false
+    #LODManager: LODManager = new LODManager(() => {
+        this.dirtyLOD = true;
+    });
+    get LODManager(): LODManager {
+        return this.#LODManager;
+    }
 
-	/**
+    /**
 	 * Mesh 인스턴스를 생성합니다.
 	 * @param redGPUContext RedGPU 컨텍스트
 	 * @param geometry geometry 또는 primitive 객체(선택)

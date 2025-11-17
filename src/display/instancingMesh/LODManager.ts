@@ -46,7 +46,7 @@ class LODManager {
         this.#callback?.()
 	}
 
-	get lodList(): LODEntry[] {
+	get LODList(): LODEntry[] {
 		return [...this.#lodList];
 	}
 }

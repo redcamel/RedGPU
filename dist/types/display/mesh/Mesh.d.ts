@@ -9,6 +9,7 @@ import DrawDebuggerMesh from "../drawDebugger/DrawDebuggerMesh";
 import RenderViewStateData from "../view/core/RenderViewStateData";
 import MeshBase from "./core/MeshBase";
 import Object3DContainer from "./core/Object3DContainer";
+import LODManager from "../instancingMesh/LODManager";
 interface Mesh {
     receiveShadow: boolean;
     disableJitter: boolean;
@@ -38,6 +39,8 @@ declare class Mesh extends MeshBase {
     displacementTexture: BitmapTexture;
     /** 그림자 캐스팅 여부 */
     castShadow: boolean;
+    dirtyLOD: boolean;
+    get LODManager(): LODManager;
     /**
      * Mesh 인스턴스를 생성합니다.
      * @param redGPUContext RedGPU 컨텍스트

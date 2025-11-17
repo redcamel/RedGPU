@@ -55,13 +55,8 @@ class InstancingMesh extends Mesh {
     #visibilityStrideBytes: number = 0;
     #visibilityStrideU32: number = 0;
 
-    #lodManager: LODManager = new LODManager(() => {
-        this.dirtyLOD = true;
-    });
 
     #vertexUniformBindGroup_LODList: GPUBindGroup[] = [];
-
-    dirtyLOD: boolean;
 
     constructor(
         redGPUContext: RedGPUContext,
@@ -82,9 +77,7 @@ class InstancingMesh extends Mesh {
         this.instanceCount = instanceCount;
     }
 
-    get lodManager(): LODManager {
-        return this.#lodManager;
-    }
+   
 
     get instanceCount(): number {
         return this.#instanceCount;
@@ -329,7 +322,7 @@ class InstancingMesh extends Mesh {
         );
 
         // LOD 지오메트리 렌더링
-        this.#lodManager.lodList.forEach((lod, index) => {
+        this.LODManager.LODList.forEach((lod, index) => {
             this.#renderGeometryWithBuffer(
                 renderPassEncoder,
                 lod.geometry,
@@ -418,7 +411,7 @@ class InstancingMesh extends Mesh {
         this.dirtyPipeline = true;
 
         const visibilityData = new ArrayBuffer(
-            this.#visibilityStrideBytes * (this.#lodManager.lodList.length + 1),
+            this.#visibilityStrideBytes * (this.LODManager.LODList.length + 1),
         );
 
         this.#visibilityBuffer?.destroy();
@@ -507,10 +500,10 @@ class InstancingMesh extends Mesh {
 
         dataViewU32.set([this.#instanceCount], 0);
         dataViewU32.set([this.#visibilityStrideU32], 1);
-        dataViewU32.set([this.#lodManager.lodList.length], 2);
+        dataViewU32.set([this.LODManager.LODList.length], 2);
         dataViewF32.set(view.rawCamera.position, 4);
         dataViewF32.set(view.frustumPlanes.flat(), 8);
-        dataViewF32.set([...this.#lodManager.lodList.map(lod => lod.distance)], 32);
+        dataViewF32.set([...this.LODManager.LODList.map(lod => lod.distance)], 32);
 
         gpuDevice.queue.writeBuffer(
             this.#cullingUniformBuffer.gpuBuffer,
@@ -533,7 +526,7 @@ class InstancingMesh extends Mesh {
         gpuDevice.queue.writeBuffer(this.#indirectDrawBuffer, 0, indirectDrawData);
 
         // LOD 리스트 초기화
-        this.#lodManager.lodList.forEach((lod, index) => {
+        this.LODManager.LODList.forEach((lod, index) => {
             const lodIndexCount = lod.geometry.indexBuffer.indexCount;
             const lodIndirectData = new Uint32Array([lodIndexCount, 0, 0, 0, 0]);
             const offset = INDIRECT_ARGS_SIZE * (index + 1);
@@ -570,7 +563,7 @@ class InstancingMesh extends Mesh {
         const offset = stride * index;
         const size = stride;
 
-        keepLog(this.#lodManager.lodList.length);
+        keepLog(this.LODManager.LODList.length);
 
         if (offset + size > this.#visibilityBuffer.size) {
             throw new Error("Binding range exceeds visibility buffer size.");
@@ -641,7 +634,7 @@ class InstancingMesh extends Mesh {
 
         // LOD 별 바인드 그룹 생성
         this.#vertexUniformBindGroup_LODList.length = 0;
-        this.#lodManager.lodList.forEach((lod, index) => {
+        this.LODManager.LODList.forEach((lod, index) => {
             this.#vertexUniformBindGroup_LODList[index] = gpuDevice.createBindGroup(
                 this.#getVertexBindGroupDescriptor(index + 1),
             );

@@ -4,7 +4,6 @@ import Primitive from "../../primitive/core/Primitive";
 import Mesh from "../mesh/Mesh";
 import RenderViewStateData from "../view/core/RenderViewStateData";
 import InstancingMeshObject3D from "./core/InstancingMeshObject3D";
-import LODManager from "./LODManager";
 /**
  * GPU 인스턴싱 기반의 메시 클래스입니다.
  *
@@ -18,9 +17,7 @@ declare class InstancingMesh extends Mesh {
     #private;
     dirtyInstanceMeshObject3D: boolean;
     dirtyInstanceNum: boolean;
-    dirtyLOD: boolean;
     constructor(redGPUContext: RedGPUContext, maxInstanceCount: number, instanceCount: number, geometry?: Geometry | Primitive, material?: any);
-    get lodManager(): LODManager;
     get instanceCount(): number;
     set instanceCount(count: number);
     get maxInstanceCount(): number;
