@@ -807,6 +807,15 @@ const ExampleList = [
                             en: `This demo demonstrates GPU LOD performance testing for instanced meshes. It fully utilizes WebGPU's minimum safe memory of 128MB buffer (1 million instances).`
                         },
                     },
+                    {
+                        name: 'Mesh CPU LOD',
+                        path: '3d/lod/MeshCPULOD',
+                        thumb: '3d/lod/MeshCPULOD/thumb.png',
+                        description: {
+                            ko: ``,
+                            en: `This demo demonstrates CPU LOD performance testing for instanced meshes. It fully utilizes WebGPU's minimum safe memory of 128MB buffer (1 million instances).`
+                        },
+                    },
                 ]
             },
 			{

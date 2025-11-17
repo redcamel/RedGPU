@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js";
+import * as RedGPU from "../../../../dist";
 
 // 1. Create and append a canvas
 const canvas = document.createElement('canvas');
@@ -70,33 +70,34 @@ RedGPU.init(
 async function createTest(context, scene, material) {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 
-	const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js");
+	const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes");
 	setDebugButtons(context);
 
     const maxInstanceCount = context.detector.isMobile ? 100000 : RedGPU.Display.InstancingMesh.getLimitSize();
-    const instanceCount = context.detector.isMobile ? 20000 : 200000;
-	const mesh = new RedGPU.Display.InstancingMesh(
+	const instanceCount = context.detector.isMobile ? 20000 : 200000;
+	const instancingMesh = new RedGPU.Display.InstancingMesh(
 		context,
 		maxInstanceCount,
 		instanceCount,
-		new RedGPU.Primitive.Plane(context),
+		new RedGPU.Primitive.Sphere(context, 0.5, 32, 32, 32),
 		material
 	);
+	instancingMesh.lodManager.addLOD(25, new RedGPU.Primitive.Sphere(context,0.5,8,8,8))
+	instancingMesh.lodManager.addLOD(50, new RedGPU.Primitive.Box(context))
+	instancingMesh.lodManager.addLOD(75, new RedGPU.Primitive.Circle(context,0.5))
 
-	// mesh.primitiveState.cullMode = 'none';
-
-	scene.addChild(mesh);
+	scene.addChild(instancingMesh);
 
 	const initializeInstances = () => {
-		for (let i = 0; i < mesh.instanceCount; i++) {
-			if(mesh.instanceChildren[i].x ===0) {
-				mesh.instanceChildren[i].setPosition(
-					Math.random() * 900 - 450,
-					Math.random() * 900 - 450,
-					Math.random() * 900 - 450
+		for (let i = 0; i < instancingMesh.instanceCount; i++) {
+			if (instancingMesh.instanceChildren[i].x === 0) {
+				instancingMesh.instanceChildren[i].setPosition(
+					Math.random() * 500 - 250,
+					Math.random() * 500 - 250,
+					Math.random() * 500 - 250,
 				);
-				mesh.instanceChildren[i].setScale(Math.random() * 2 + 1);
-				mesh.instanceChildren[i].setRotation(
+				instancingMesh.instanceChildren[i].setScale(Math.random() * 2 + 1);
+				instancingMesh.instanceChildren[i].setRotation(
 					Math.random() * 360,
 					Math.random() * 360,
 					Math.random() * 360
@@ -111,7 +112,10 @@ async function createTest(context, scene, material) {
 	initializeInstances();
 
 	const pane = new Pane();
-	pane.addBinding(mesh, 'instanceCount', {min: 100, max: maxInstanceCount, step: 1})
+	pane.addBinding(instancingMesh, 'instanceCount', {min: 100, max: maxInstanceCount, step: 1})
 		.on('change', initializeInstances);
-	pane.addBinding({maxInstanceCount:maxInstanceCount}, 'maxInstanceCount', {readonly: true, format: (v) => `${Math.floor(v).toLocaleString()}`});
+	pane.addBinding({maxInstanceCount: maxInstanceCount}, 'maxInstanceCount', {
+		readonly: true,
+		format: (v) => `${Math.floor(v).toLocaleString()}`
+	});
 }
