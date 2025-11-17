@@ -49,7 +49,6 @@ class InstancingMesh extends Mesh {
 	#cullingBindGroup: GPUBindGroup
 	#visibilityBuffer: StorageBuffer
 	#indirectDrawBuffer: GPUBuffer
-	#indirectDrawBuffer_LODList: GPUBuffer[] = []
 	#cullingUniformBuffer: StorageBuffer
 	#lodManager: LODManager = new LODManager()
 	#vertexUniformBindGroup_LODList: GPUBindGroup[] = []
@@ -273,28 +272,31 @@ class InstancingMesh extends Mesh {
 			currentRenderPassEncoder.setBindGroup(1, vertexUniformBindGroup);
 			currentRenderPassEncoder.setBindGroup(2, fragmentUniformBindGroup)
 			currentRenderPassEncoder.setVertexBuffer(0, gpuBuffer)
-			if (this.geometry.indexBuffer) {
-				const {indexBuffer} = this.geometry
-				const {gpuBuffer: indexGPUBuffer, format} = indexBuffer
-				currentRenderPassEncoder.setIndexBuffer(indexGPUBuffer, format)
-				currentRenderPassEncoder.drawIndexedIndirect(this.#indirectDrawBuffer, 0);
-			} else {
-				currentRenderPassEncoder.drawIndirect(this.#indirectDrawBuffer, 0);
-			}
-			{
-				this.lodManager.lodList.forEach(((lod, index) => {
-					const {vertexBuffer, indexBuffer} = lod.geometry
-					currentRenderPassEncoder.setVertexBuffer(0, vertexBuffer.gpuBuffer)
-					currentRenderPassEncoder.setBindGroup(1, this.#vertexUniformBindGroup_LODList[index]);
-					if (indexBuffer) {
-						const {gpuBuffer: indexGPUBuffer, format} = indexBuffer
-						currentRenderPassEncoder.setIndexBuffer(indexGPUBuffer, format)
-						currentRenderPassEncoder.drawIndexedIndirect(this.#indirectDrawBuffer_LODList[index], 0);
-					} else {
-						currentRenderPassEncoder.drawIndirect(this.#indirectDrawBuffer_LODList[index], 0);
-					}
-				}))
-			}
+
+            const indirectArgsSize = 20;
+            if (this.geometry.indexBuffer) {
+                const {indexBuffer} = this.geometry
+                const {gpuBuffer: indexGPUBuffer, format} = indexBuffer
+                currentRenderPassEncoder.setIndexBuffer(indexGPUBuffer, format)
+                currentRenderPassEncoder.drawIndexedIndirect(this.#indirectDrawBuffer, 0);
+            } else {
+                currentRenderPassEncoder.drawIndirect(this.#indirectDrawBuffer, 0);
+            }
+            {
+                this.lodManager.lodList.forEach(((lod, index) => {
+                    const {vertexBuffer, indexBuffer} = lod.geometry
+                    const lodOffset = indirectArgsSize * (index + 1);
+                    currentRenderPassEncoder.setVertexBuffer(0, vertexBuffer.gpuBuffer)
+                    currentRenderPassEncoder.setBindGroup(1, this.#vertexUniformBindGroup_LODList[index]);
+                    if (indexBuffer) {
+                        const {gpuBuffer: indexGPUBuffer, format} = indexBuffer
+                        currentRenderPassEncoder.setIndexBuffer(indexGPUBuffer, format)
+                        currentRenderPassEncoder.drawIndexedIndirect(this.#indirectDrawBuffer, lodOffset);
+                    } else {
+                        currentRenderPassEncoder.drawIndirect(this.#indirectDrawBuffer, lodOffset);
+                    }
+                }))
+            }
 		}
 		if (this.castShadow) castingList[castingList.length] = this
 		const {children} = this
@@ -314,89 +316,73 @@ class InstancingMesh extends Mesh {
 		return cullingComputeSource.replaceAll(/__INSTANCE_COUNT__/g, this.#maxInstanceCount.toString())
 	}
 
-	/**
-	 * GPU Culling 초기화
-	 */
-	#initGPUCulling(redGPUContext: RedGPUContext) {
-		const {gpuDevice, resourceManager} = redGPUContext
-		// Indirect Draw 버퍼 생성
-		this.#indirectDrawBuffer?.destroy()
-		this.#indirectDrawBuffer_LODList.forEach(v => v.destroy())
-		this.#indirectDrawBuffer_LODList.length = 0
-		this.#indirectDrawBuffer = gpuDevice.createBuffer({
-			size: 20, // 5 * 4 bytes (vertexCount, instanceCount, firstVertex, firstInstance, padding)
-			usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
-			label: `IndirectDrawBuffer_${this.uuid}`
-		});
-		[0,0,0,0,0,0,0,0].forEach((lod,index) => {
-			this.#indirectDrawBuffer_LODList.push(gpuDevice.createBuffer({
-					size: 20, // 5 * 4 bytes (vertexCount, instanceCount, firstVertex, firstInstance, padding)
-					usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
-					label: `IndirectDrawBuffer_LOD${index}_${this.uuid}`
-				})
-			)
-		})
-		const rawStride = this.#instanceCount * 4; // 바이트
-		const strideBytes = Math.ceil(rawStride / 256) * 256; // 바이트 (256 정렬)
-		const strideU32 = strideBytes / 4;
-		const cullingUniformData = new Float32Array(32);
-		cullingUniformData[0] = this.#instanceCount; // instanceNum
-		const u32View = new Uint32Array(cullingUniformData.buffer);
-		u32View[1] = strideU32; // st
-		this.#cullingUniformBuffer = new StorageBuffer(
-			redGPUContext,
-			cullingUniformData.buffer,
-			`CullingUniformBuffer_${this.uuid}`
-		)
-		// Compute 쉐이더 모듈 생성
-		const computeModuleDescriptor: GPUShaderModuleDescriptor = {code: this.#getCullingComputeSource()}
-		const computeShaderModule = resourceManager.createGPUShaderModule(
-			`${CULLING_COMPUTE_MODULE_NAME}_${this.#maxInstanceCount}_${this.uuid}`,
-			computeModuleDescriptor
-		)
-		// Compute 파이프라인 생성
-		const computeBindGroupLayoutEntries: GPUBindGroupLayoutEntry[] = [
-			{binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}}, // instanceUniforms
-			{binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}}, // cullingUniforms
-			{binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}}, // visibilityBuffer
-			{binding: 3, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}}, // indirectDrawBuffer
-		]
-		const computeBindGroupLayout = gpuDevice.createBindGroupLayout({
-			entries: [
-				{binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}}, // instanceUniforms
-				{binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}}, // cullingUniforms
-				{binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}}, // visibilityBuffer
-				{binding: 3, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}}, // indirectDrawBuffer
-				{binding: 4, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}}, // indirectDrawBuffer_LODList[0]
-				{binding: 5, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}}, // indirectDrawBuffer_LODList[1]
-				{binding: 6, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}}, // indirectDrawBuffer_LODList[2]
-				{binding: 7, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}}, // indirectDrawBuffer_LODList[3]
-			]
-		})
-		this.#cullingComputePipeline = gpuDevice.createComputePipeline({
-			layout: gpuDevice.createPipelineLayout({
-				bindGroupLayouts: [computeBindGroupLayout]
-			}),
-			compute: {
-				module: computeShaderModule,
-				entryPoint: 'main'
-			}
-		})
-		// Compute 바인드 그룹 생성
-		this.#cullingBindGroup = gpuDevice.createBindGroup({
-			layout: computeBindGroupLayout,
-			entries: [
-				{binding: 0, resource: {buffer: this.gpuRenderInfo.vertexUniformBuffer.gpuBuffer}},
-				{binding: 1, resource: {buffer: this.#cullingUniformBuffer.gpuBuffer}},
-				{binding: 2, resource: {buffer: this.#visibilityBuffer.gpuBuffer}},
-				{binding: 3, resource: {buffer: this.#indirectDrawBuffer}},
-				{binding: 4, resource: {buffer: this.#indirectDrawBuffer_LODList[0]}},
-				{binding: 5, resource: {buffer: this.#indirectDrawBuffer_LODList[1]}},
-				{binding: 6, resource: {buffer: this.#indirectDrawBuffer_LODList[2]}},
-				{binding: 7, resource: {buffer: this.#indirectDrawBuffer_LODList[3]}},
-			]
-		})
-	}
+
+    /**
+     * GPU Culling 초기화
+     */
+    #initGPUCulling(redGPUContext: RedGPUContext) {
+        const {gpuDevice, resourceManager} = redGPUContext
+        // Indirect Draw 버퍼 생성 (통합된 버퍼)
+        this.#indirectDrawBuffer?.destroy()
+
+        // 각 IndirectDrawArgs는 5개의 u32 (20 bytes)
+        const indirectDrawArgsSize = 20;
+        // 기본(LOD 0) + LOD 개수만큼 공간 확보
+        const totalIndirectSize = indirectDrawArgsSize * (1 + this.#lodManager.lodList.length);
+
+        this.#indirectDrawBuffer = gpuDevice.createBuffer({
+            size: totalIndirectSize,
+            usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+            label: `IndirectDrawBuffer_${this.uuid}`
+        });
+
+        const rawStride = this.#instanceCount * 4; // 바이트
+        const strideBytes = Math.ceil(rawStride / 256) * 256; // 바이트 (256 정렬)
+        const strideU32 = strideBytes / 4;
+        const cullingUniformData = new Float32Array(32);
+        cullingUniformData[0] = this.#instanceCount; // instanceNum
+        const u32View = new Uint32Array(cullingUniformData.buffer);
+        u32View[1] = strideU32; // visibility stride
+        this.#cullingUniformBuffer = new StorageBuffer(
+            redGPUContext,
+            cullingUniformData.buffer,
+            `CullingUniformBuffer_${this.uuid}`
+        )
+        // Compute 쉐이더 모듈 생성
+        const computeModuleDescriptor: GPUShaderModuleDescriptor = {code: this.#getCullingComputeSource()}
+        const computeShaderModule = resourceManager.createGPUShaderModule(
+            `${CULLING_COMPUTE_MODULE_NAME}_${this.#maxInstanceCount}_${this.uuid}`,
+            computeModuleDescriptor
+        )
+        // Compute 파이프라인 생성
+        const computeBindGroupLayout = gpuDevice.createBindGroupLayout({
+            entries: [
+                {binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}}, // instanceUniforms
+                {binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}}, // cullingUniforms
+                {binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}}, // visibilityBuffer
+                {binding: 3, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}}, // indirectDrawBuffer (통합)
+            ]
+        })
+        this.#cullingComputePipeline = gpuDevice.createComputePipeline({
+            layout: gpuDevice.createPipelineLayout({
+                bindGroupLayouts: [computeBindGroupLayout]
+            }),
+            compute: {
+                module: computeShaderModule,
+                entryPoint: 'main'
+            }
+        })
+        // Compute 바인드 그룹 생성
+        this.#cullingBindGroup = gpuDevice.createBindGroup({
+            layout: computeBindGroupLayout,
+            entries: [
+                {binding: 0, resource: {buffer: this.gpuRenderInfo.vertexUniformBuffer.gpuBuffer}},
+                {binding: 1, resource: {buffer: this.#cullingUniformBuffer.gpuBuffer}},
+                {binding: 2, resource: {buffer: this.#visibilityBuffer.gpuBuffer}},
+                {binding: 3, resource: {buffer: this.#indirectDrawBuffer}},
+            ]
+        })
+    }
 
 	/**
 	 * 프러스텀 평면 계산 및 업데이트
@@ -420,34 +406,44 @@ class InstancingMesh extends Mesh {
 		)
 	}
 
-	/**
-	 * Compute Shader를 통한 GPU Culling 실행
-	 */
-	#performGPUCulling(renderViewStateData: RenderViewStateData) {
-		const {gpuDevice} = this.#redGPUContext
-		// Culling 유니폼 업데이트
-		this.#updateCullingUniforms(renderViewStateData)
-		// Indirect Draw 버퍼 초기화
-		const indexCount = this.geometry.indexBuffer ? this.geometry.indexBuffer.indexCount : this.geometry.vertexBuffer.vertexCount
-		const indirectDrawData = new Uint32Array([indexCount, 0, 0, 0, 0])
 
-		gpuDevice.queue.writeBuffer(this.#indirectDrawBuffer, 0, indirectDrawData);
-		this.#lodManager.lodList.forEach((lod, index) => {
-			const indirectDrawData1 = new Uint32Array([lod.geometry.indexBuffer.indexCount, 0, 0, 0, 0])
-			gpuDevice.queue.writeBuffer(this.#indirectDrawBuffer_LODList[index], 0, indirectDrawData1)
-		})
+    /**
+     * Compute Shader를 통한 GPU Culling 실행
+     */
+    #performGPUCulling(renderViewStateData: RenderViewStateData) {
+        const {gpuDevice} = this.#redGPUContext
+        // Culling 유니폼 업데이트
+        this.#updateCullingUniforms(renderViewStateData)
 
-		// Compute Pass 생성
-		const commandEncoder = gpuDevice.createCommandEncoder()
-		const computePass = commandEncoder.beginComputePass()
-		computePass.setPipeline(this.#cullingComputePipeline)
-		computePass.setBindGroup(0, this.#cullingBindGroup)
-		const workgroupSize = 64
-		const workgroupCount = Math.ceil(this.#instanceCount / workgroupSize)
-		computePass.dispatchWorkgroups(workgroupCount)
-		computePass.end()
-		gpuDevice.queue.submit([commandEncoder.finish()])
-	}
+        // Indirect Draw 버퍼 초기화
+        const indexCount = this.geometry.indexBuffer ? this.geometry.indexBuffer.indexCount : this.geometry.vertexBuffer.vertexCount
+        const indirectDrawData = new Uint32Array([indexCount, 0, 0, 0, 0])
+
+        // 각 IndirectDrawArgs 크기 (20 bytes)
+        const indirectArgsSize = 20;
+
+        // LOD 0 (기본) 초기화
+        gpuDevice.queue.writeBuffer(this.#indirectDrawBuffer, 0, indirectDrawData);
+
+        // LOD 리스트 초기화
+        this.#lodManager.lodList.forEach((lod, index) => {
+            const lodIndexCount = lod.geometry.indexBuffer.indexCount
+            const lodIndirectData = new Uint32Array([lodIndexCount, 0, 0, 0, 0])
+            const offset = indirectArgsSize * (index + 1);
+            gpuDevice.queue.writeBuffer(this.#indirectDrawBuffer, offset, lodIndirectData)
+        })
+
+        // Compute Pass 생성
+        const commandEncoder = gpuDevice.createCommandEncoder()
+        const computePass = commandEncoder.beginComputePass()
+        computePass.setPipeline(this.#cullingComputePipeline)
+        computePass.setBindGroup(0, this.#cullingBindGroup)
+        const workgroupSize = 64
+        const workgroupCount = Math.ceil(this.#instanceCount / workgroupSize)
+        computePass.dispatchWorkgroups(workgroupCount)
+        computePass.end()
+        gpuDevice.queue.submit([commandEncoder.finish()])
+    }
 
 	/**
 	 * GPU 렌더링 정보 및 파이프라인을 초기화합니다.
