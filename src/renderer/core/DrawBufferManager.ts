@@ -208,7 +208,6 @@ class DrawBufferManager {
 
 	// /**
 	//  * 모든 사용된 버퍼의 데이터를 GPU로 업로드합니다.
-
 	/**
 	 * 디바이스의 실제 버퍼 크기 제한을 계산합니다.
 	 */
@@ -236,7 +235,6 @@ class DrawBufferManager {
 	// 	this.#usedBufferIndices.clear()
 	// 	this.#currentBufferIndex = 0
 	// 	this.#currentCommandIndex = 0
-
 	// }
 	/**
 	 * 첫 번째 드로우 버퍼를 생성합니다.
