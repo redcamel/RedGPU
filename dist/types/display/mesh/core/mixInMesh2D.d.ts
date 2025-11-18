@@ -11,15 +11,15 @@ interface Mesh2DBase {
  */
 declare function mixInMesh2D<TBase extends new (...args: any[]) => Mesh2DBase>(Base: TBase): {
     new (...args: any[]): {
-        "__#92@#rotation": number;
-        "__#92@#blendMode": number;
+        "__#93@#rotation": number;
+        "__#93@#blendMode": number;
         get blendMode(): string;
         set blendMode(value: BLEND_MODE | keyof typeof BLEND_MODE);
         rotation: number;
         setScale(x: number, y?: number): void;
         setPosition(x: number, y?: number): void;
         setRotation(value: number): void;
-        "__#92@#setBlendFactor"(mode: number): void;
+        "__#93@#setBlendFactor"(mode: number): void;
         rotationZ: number;
     };
 } & TBase;

@@ -1,4 +1,5 @@
 import createMeshVertexUniformBuffers from "./createMeshVertexUniformBuffers";
+import LODManager from "./LODManager";
 import MeshBase from "./MeshBase";
 import {mixInMesh2D} from "./mixInMesh2D";
 import Object3DContainer from "./Object3DContainer";
@@ -9,5 +10,6 @@ export {
 	MeshBase,
 	mixInMesh2D,
 	Object3DContainer,
-	VertexGPURenderInfo
+	VertexGPURenderInfo,
+	LODManager
 }

@@ -73,8 +73,8 @@ async function createTest(context, scene, material) {
 	const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js");
 	setDebugButtons(context);
 
-	const maxInstanceCount = RedGPU.Display.InstancingMesh.getLimitSize();
-	const instanceCount = 10000;
+    const maxInstanceCount = context.detector.isMobile ? 100000 : RedGPU.Display.InstancingMesh.getLimitSize();
+    const instanceCount = context.detector.isMobile ? 20000 : 200000;
 	const mesh = new RedGPU.Display.InstancingMesh(
 		context,
 		maxInstanceCount,

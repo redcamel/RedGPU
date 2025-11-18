@@ -7,6 +7,7 @@ import AABB from "../../utils/math/bound/AABB";
 import OBB from "../../utils/math/bound/OBB";
 import DrawDebuggerMesh from "../drawDebugger/DrawDebuggerMesh";
 import RenderViewStateData from "../view/core/RenderViewStateData";
+import LODManager from "./core/LODManager";
 import MeshBase from "./core/MeshBase";
 import Object3DContainer from "./core/Object3DContainer";
 interface Mesh {
@@ -29,7 +30,7 @@ interface Mesh {
  * @see [Mesh Pivot example](/RedGPU/examples/3d/mesh/pivot/)
  * @see [Mesh Child Methods example](/RedGPU/examples/3d/mesh/childMethod/)
  * @see [Mesh lookAt Methods example](/RedGPU/examples/3d/mesh/lookAt/)
- *
+ * @see [Mesh CPU LOD](/RedGPU/examples/3d/lod/MeshCPULOD/)
  * @category Mesh
  */
 declare class Mesh extends MeshBase {
@@ -38,6 +39,7 @@ declare class Mesh extends MeshBase {
     displacementTexture: BitmapTexture;
     /** 그림자 캐스팅 여부 */
     castShadow: boolean;
+    dirtyLOD: boolean;
     /**
      * Mesh 인스턴스를 생성합니다.
      * @param redGPUContext RedGPU 컨텍스트
@@ -46,6 +48,7 @@ declare class Mesh extends MeshBase {
      * @param name 메시 이름(선택)
      */
     constructor(redGPUContext: RedGPUContext, geometry?: Geometry | Primitive, material?: any, name?: string);
+    get LODManager(): LODManager;
     get enableDebugger(): boolean;
     set enableDebugger(value: boolean);
     get drawDebugger(): DrawDebuggerMesh;
