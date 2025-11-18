@@ -1,4 +1,3 @@
-
 import Geometry from "../../../geometry/Geometry";
 import Primitive from "../../../primitive/core/Primitive";
 import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
@@ -9,7 +8,6 @@ import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/va
  * Geometry 또는 Primitive를 LOD 단계에 사용할 수 있습니다.
  */
 type LODGeometry = Geometry | Primitive;
-
 /**
  * 단일 LOD(Level of Detail) 레벨을 나타내는 정보입니다.
  *
@@ -52,6 +50,19 @@ class LODManager {
 	 */
 	constructor(callback: () => void) {
 		this.#callback = callback;
+	}
+
+	/**
+	 * 현재 등록된 모든 LOD 레벨 목록을 반환합니다.
+	 *
+	 * @returns LOD 레벨 정보 배열(복사본)
+	 *
+	 * @remarks
+	 * 반환되는 배열은 내부 배열의 복사본이므로, 외부에서 수정해도
+	 * LODManager 내부 상태에는 영향을 주지 않습니다.
+	 */
+	get LODList(): LODEntry[] {
+		return [...this.#lodList];
 	}
 
 	/**
@@ -121,19 +132,6 @@ class LODManager {
 	clearLOD() {
 		this.#lodList.length = 0
 		this.#callback?.()
-	}
-
-	/**
-	 * 현재 등록된 모든 LOD 레벨 목록을 반환합니다.
-	 *
-	 * @returns LOD 레벨 정보 배열(복사본)
-	 *
-	 * @remarks
-	 * 반환되는 배열은 내부 배열의 복사본이므로, 외부에서 수정해도
-	 * LODManager 내부 상태에는 영향을 주지 않습니다.
-	 */
-	get LODList(): LODEntry[] {
-		return [...this.#lodList];
 	}
 }
 
