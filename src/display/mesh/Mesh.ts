@@ -57,7 +57,7 @@ interface Mesh {
  * @see [Mesh Pivot example](/RedGPU/examples/3d/mesh/pivot/)
  * @see [Mesh Child Methods example](/RedGPU/examples/3d/mesh/childMethod/)
  * @see [Mesh lookAt Methods example](/RedGPU/examples/3d/mesh/lookAt/)
- *
+ * @see [Mesh CPU LOD](/RedGPU/examples/3d/lod/MeshCPULOD/)
  * @category Mesh
  */
 class Mesh extends MeshBase {

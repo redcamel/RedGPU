@@ -29,7 +29,11 @@ const INDIRECT_ARGS_SIZE = 20;
  * 하나의 geometry와 material을 여러 인스턴스(Instance)로 효율적으로 렌더링할 수 있습니다.
  * 각 인스턴스는 transform(위치, 회전, 스케일)만 다르고 geometry/vertex 데이터와 머티리얼은 공유합니다.
  *
- * <iframe src="/RedGPU/examples/3d/instancedMesh/basic/"></iframe>
+ * <iframe src="/RedGPU/examples/3d/instancedMesh/simple/"></iframe>
+ *
+ * 아래는 instancedMesh의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
+ * @see [instancedMesh GPU LOD](/RedGPU/examples/3d/lod/InstanceMeshGPULOD/)
+ *
  * @category Mesh
  */
 class InstancingMesh extends Mesh {
