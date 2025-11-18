@@ -141,6 +141,7 @@ class Mesh extends MeshBase {
 	#LODManager: LODManager = new LODManager(() => {
 		this.dirtyLOD = true;
 	});
+	#currentLODIndex:number=-1
 	get LODManager(): LODManager {
 		return this.#LODManager;
 	}
@@ -976,22 +977,51 @@ class Mesh extends MeshBase {
 					}
 					let renderBundle = this.#renderBundle;
 					{
-
-
 						if (lodLen) {
-							let findIndex = -1;
-							for (let i = 0; i < lodLen; i++) {
-								if (distanceSquared < lodList[i].distanceSquared) {
-									findIndex = i;
-									break;
+							let idx = this.#currentLODIndex;
+							let needFullSearch = false
+							if (idx < -1 || idx >= lodLen) idx = -1;
+
+							if (idx === -1) {
+								// 기본 번들 → 첫 LOD 경계만 보면 됨
+								if (distanceSquared >= lodList[0].distanceSquared) {
+									// 위로 올라감 → 어느 LOD인지 찾기 위해 한 번만 전체 검색
+									needFullSearch = true
+								}
+							} else if (idx === lodLen - 1) {
+								// 마지막 LOD → 아래로 내려가는지만 체크
+								if (distanceSquared < lodList[idx].distanceSquared) {
+									needFullSearch = true
+								}
+							} else {
+								// 중간 LOD i (0 <= i < lodLen-1)
+								const lowerBoundary = lodList[idx].distanceSquared;
+								const upperBoundary = lodList[idx + 1].distanceSquared;
+
+								if (distanceSquared < lowerBoundary || distanceSquared >= upperBoundary) {
+									// 자기 구간에서 벗어남 → 전체 검색 (실제로는 주변만 스캔해도 됨)
+									needFullSearch = true
 								}
 							}
-							if (findIndex > 0) {
-								// 0보다 크면, 그 이전 인덱스가 선택된 LOD
-								renderBundle = this.#renderBundle_LODList[findIndex - 1];
-							} else if (findIndex === -1 && lodLen > 0) {
-								// 어떤 임계값보다도 멀면, 마지막 LOD 사용
-								renderBundle = this.#renderBundle_LODList[lodLen - 1];
+
+							if (idx !== this.#currentLODIndex) {
+								this.#currentLODIndex = idx;
+							}
+							if(needFullSearch) {
+								let findIndex = -1;
+								for (let i = 0; i < lodLen; i++) {
+									if (distanceSquared < lodList[i].distanceSquared) {
+										findIndex = i;
+										break;
+									}
+								}
+								if (findIndex > 0) {
+									// 0보다 크면, 그 이전 인덱스가 선택된 LOD
+									renderBundle = this.#renderBundle_LODList[findIndex - 1];
+								} else if (findIndex === -1 && lodLen > 0) {
+									// 어떤 임계값보다도 멀면, 마지막 LOD 사용
+									renderBundle = this.#renderBundle_LODList[lodLen - 1];
+								}
 							}
 						}
 					}

@@ -9,7 +9,7 @@ RedGPU.init(
 	canvas,
 	(redGPUContext) => {
 		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-		controller.speedDistance = 1;
+		controller.speedDistance = 3;
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		redGPUContext.addView(view);
@@ -80,8 +80,7 @@ async function createTest(context, scene, material) {
 			new RedGPU.Primitive.Sphere(context, 0.5, 32, 32, 32),
 			material
 		);
-		mesh.setPosition(Math.random() * 100 - 50, Math.random() * 100 - 50, Math.random() * 100 - 50);
-		// mesh.setPosition(Math.random() * 30 - 15, Math.random() * 30 - 15, Math.random() * 30 - 15);
+		mesh.setPosition(Math.random() * 140 - 70, Math.random() * 140 - 70, Math.random() * 140 - 70);
 		mesh.setRotation(Math.random() * 360, Math.random() * 360, Math.random() * 360);
 		scene.addChild(mesh);
 
