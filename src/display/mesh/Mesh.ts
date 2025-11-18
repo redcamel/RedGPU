@@ -736,7 +736,10 @@ class Mesh extends MeshBase {
 		}
 		// check distanceCulling
 		let passFrustumCulling = true
-		if (useDistanceCulling && currentGeometry) {
+		let distanceSquared = 0
+		const lodList = this.#LODManager.LODList;
+		const lodLen = lodList.length;
+		if(useDistanceCulling && currentGeometry || this.#LODManager.LODList.length){
 			const {rawCamera} = view
 			const aabb = this.boundingAABB;
 			// AABB 중심점과 카메라 위치 간의 거리 계산
@@ -744,8 +747,10 @@ class Mesh extends MeshBase {
 			const dy = rawCamera.y - aabb.centerY;
 			const dz = rawCamera.z - aabb.centerZ;
 			// 거리 제곱 계산
-			const distanceSquared = dx * dx + dy * dy + dz * dz;
-			const geometryRadius = aabb.geometryRadius;
+			distanceSquared = dx * dx + dy * dy + dz * dz;
+		}
+		if (useDistanceCulling && currentGeometry) {
+			const geometryRadius = this.boundingAABB.geometryRadius;
 			// AABB의 반지름을 고려한 컬링 거리 계산
 			const cullingDistanceWithRadius = cullingDistanceSquared + (geometryRadius * geometryRadius);
 			if (distanceSquared > cullingDistanceWithRadius) {
@@ -970,34 +975,24 @@ class Mesh extends MeshBase {
 						renderViewStateData.numPoints += vertexCount
 					}
 					let renderBundle = this.#renderBundle;
+					{
 
-					if (this.LODManager.LODList.length) {
-						const { rawCamera } = view;
-						const aabb = this.boundingAABB;
 
-						const dx = rawCamera.x - aabb.centerX;
-						const dy = rawCamera.y - aabb.centerY;
-						const dz = rawCamera.z - aabb.centerZ;
-
-						const distanceSquared = dx * dx + dy * dy + dz * dz;
-
-						let findIndex = -1;
-						const lodList = this.LODManager.LODList;
-						const lodLen = lodList.length;
-
-						for (let i = 0; i < lodLen; i++) {
-							if (distanceSquared < lodList[i].distanceSquared) {
-								findIndex = i;
-								break;
+						if (lodLen) {
+							let findIndex = -1;
+							for (let i = 0; i < lodLen; i++) {
+								if (distanceSquared < lodList[i].distanceSquared) {
+									findIndex = i;
+									break;
+								}
 							}
-						}
-
-						if (findIndex > 0) {
-							// 0보다 크면, 그 이전 인덱스가 선택된 LOD
-							renderBundle = this.#renderBundle_LODList[findIndex - 1];
-						} else if (findIndex === -1 && lodLen > 0) {
-							// 어떤 임계값보다도 멀면, 마지막 LOD 사용
-							renderBundle = this.#renderBundle_LODList[lodLen - 1];
+							if (findIndex > 0) {
+								// 0보다 크면, 그 이전 인덱스가 선택된 LOD
+								renderBundle = this.#renderBundle_LODList[findIndex - 1];
+							} else if (findIndex === -1 && lodLen > 0) {
+								// 어떤 임계값보다도 멀면, 마지막 LOD 사용
+								renderBundle = this.#renderBundle_LODList[lodLen - 1];
+							}
 						}
 					}
 					if (currentMaterial.use2PathRender) {

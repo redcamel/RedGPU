@@ -134,16 +134,16 @@ async function createTest(context, scene, material) {
 	};
 
 	// 초기 LOD 3개 활성화
-	addLODIfNeeded(25, () => new RedGPU.Primitive.Sphere(context, 0.5, 6, 6, 6));
+	addLODIfNeeded(25, () => new RedGPU.Primitive.Sphere(context, 0.5, 5, 5, 5));
 	addLODIfNeeded(50, () => new RedGPU.Primitive.Box(context));
 	addLODIfNeeded(70, () => new RedGPU.Primitive.Circle(context, 0.5));
 	updateLODInfo();
 
 	// 25 LOD 토글
-	pane.addBinding(lodState, 'lod25', {label: 'LOD 25 (Sphere 8x8)'})
+	pane.addBinding(lodState, 'lod25', {label: 'LOD 25 (Sphere 5x5x5)'})
 		.on('change', (ev) => {
 			if (ev.value) {
-				addLODIfNeeded(25, () => new RedGPU.Primitive.Sphere(context, 0.5, 8, 8, 8));
+				addLODIfNeeded(25, () => new RedGPU.Primitive.Sphere(context, 0.5, 5, 5, 5));
 			} else {
 				removeLODIfExists(25);
 			}
