@@ -7,9 +7,9 @@ import AABB from "../../utils/math/bound/AABB";
 import OBB from "../../utils/math/bound/OBB";
 import DrawDebuggerMesh from "../drawDebugger/DrawDebuggerMesh";
 import RenderViewStateData from "../view/core/RenderViewStateData";
+import LODManager from "./core/LODManager";
 import MeshBase from "./core/MeshBase";
 import Object3DContainer from "./core/Object3DContainer";
-import LODManager from "./core/LODManager";
 interface Mesh {
     receiveShadow: boolean;
     disableJitter: boolean;
@@ -40,7 +40,6 @@ declare class Mesh extends MeshBase {
     /** 그림자 캐스팅 여부 */
     castShadow: boolean;
     dirtyLOD: boolean;
-    get LODManager(): LODManager;
     /**
      * Mesh 인스턴스를 생성합니다.
      * @param redGPUContext RedGPU 컨텍스트
@@ -49,6 +48,7 @@ declare class Mesh extends MeshBase {
      * @param name 메시 이름(선택)
      */
     constructor(redGPUContext: RedGPUContext, geometry?: Geometry | Primitive, material?: any, name?: string);
+    get LODManager(): LODManager;
     get enableDebugger(): boolean;
     set enableDebugger(value: boolean);
     get drawDebugger(): DrawDebuggerMesh;
