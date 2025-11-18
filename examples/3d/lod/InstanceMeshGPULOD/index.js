@@ -126,7 +126,6 @@ async function createTest(context, scene, material) {
     const addLODIfNeeded = (distance, createGeometry) => {
         if (!hasLOD(distance)) {
             instancingMesh.LODManager.addLOD(distance, createGeometry());
-            // LODManager 내부에서 콜백으로 dirtyLOD를 세팅해주므로 여기서 안 건드려도 됨
         }
     };
 
@@ -203,7 +202,7 @@ async function createTest(context, scene, material) {
         readonly: true,
     });
 
-    // ---- 기존 인스턴스 컨트롤 ----
+
     pane.addBinding(instancingMesh, 'instanceCount', {min: 100, max: maxInstanceCount, step: 1})
         .on('change', initializeInstances);
     pane.addBinding({maxInstanceCount: maxInstanceCount}, 'maxInstanceCount', {

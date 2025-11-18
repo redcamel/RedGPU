@@ -5,8 +5,10 @@ import DefineForVertex from "../../defineProperty/DefineForVertex";
 import Geometry from "../../geometry/Geometry";
 import Primitive from "../../primitive/core/Primitive";
 import DrawBufferManager, {DrawCommandSlot} from "../../renderer/core/DrawBufferManager";
+import VertexBuffer from "../../resources/buffer/vertexBuffer/VertexBuffer";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
+import {keepLog} from "../../utils";
 import AABB from "../../utils/math/bound/AABB";
 import calculateMeshAABB from "../../utils/math/bound/calculateMeshAABB";
 import calculateMeshCombinedAABB from "../../utils/math/bound/calculateMeshCombinedAABB";
@@ -18,13 +20,14 @@ import uuidToUint from "../../utils/uuid/uuidToUint";
 import DrawDebuggerMesh from "../drawDebugger/DrawDebuggerMesh";
 import MESH_TYPE from "../MESH_TYPE";
 import RenderViewStateData from "../view/core/RenderViewStateData";
+import View3D from "../view/View3D";
 import createMeshVertexUniformBuffers from "./core/createMeshVertexUniformBuffers";
 import MeshBase from "./core/MeshBase";
 import Object3DContainer from "./core/Object3DContainer";
 import updateMeshDirtyPipeline from "./core/pipeline/updateMeshDirtyPipeline";
 import getBasicMeshVertexBindGroupDescriptor from "./core/shader/getBasicMeshVertexBindGroupDescriptor";
 import VertexGPURenderInfo from "./core/VertexGPURenderInfo";
-import LODManager from "../instancingMesh/LODManager";
+import LODManager from "./core/LODManager";
 
 const VERTEX_SHADER_MODULE_NAME_PBR_SKIN = 'VERTEX_MODULE_MESH_PBR_SKIN'
 const CONVERT_RADIAN = Math.PI / 180;
@@ -122,25 +125,27 @@ class Mesh extends MeshBase {
 	#bundleEncoder: GPURenderBundleEncoder
 	/** 렌더 번들 */
 	#renderBundle: GPURenderBundle
+	#renderBundle_LODList: GPURenderBundle[] = [];
 	/** 이전 시스템 바인드 그룹 */
 	#prevSystemBindGroupList: GPUBindGroup[] = []
 	/** 이전 프래그먼트 바인드 그룹 */
 	#prevFragmentBindGroup: GPUBindGroup
 	#drawCommandSlot: DrawCommandSlot | null = null
+	#drawCommandSlot_LODList: DrawCommandSlot[] =[]
 	#drawBufferManager: DrawBufferManager | null = null
 	#needUpdateNormalMatrixUniform: boolean = true
 	#needUpdateMatrixUniform: boolean = true
 	#uniformDataMatrixList: Float32Array
 	#displacementScale: number
-    dirtyLOD:boolean=false
-    #LODManager: LODManager = new LODManager(() => {
-        this.dirtyLOD = true;
-    });
-    get LODManager(): LODManager {
-        return this.#LODManager;
-    }
+	dirtyLOD: boolean = false
+	#LODManager: LODManager = new LODManager(() => {
+		this.dirtyLOD = true;
+	});
+	get LODManager(): LODManager {
+		return this.#LODManager;
+	}
 
-    /**
+	/**
 	 * Mesh 인스턴스를 생성합니다.
 	 * @param redGPUContext RedGPU 컨텍스트
 	 * @param geometry geometry 또는 primitive 객체(선택)
@@ -946,9 +951,11 @@ class Mesh extends MeshBase {
 						|| currentDirtyPipeline
 						|| this.#prevFragmentBindGroup !== fragmentUniformBindGroup
 						|| this.#prevSystemBindGroupList[renderViewStateData.viewIndex] !== view.systemUniform_Vertex_UniformBindGroup
+						|| this.dirtyLOD
 					) {
-						this.#setDrawBuffer()
+
 						this.#setRenderBundle(renderViewStateData)
+						this.dirtyLOD = false
 					}
 					renderViewStateData.numDrawCalls++
 					if (currentGeometry.indexBuffer) {
@@ -962,7 +969,37 @@ class Mesh extends MeshBase {
 						renderViewStateData.numTriangles += triangleCount;
 						renderViewStateData.numPoints += vertexCount
 					}
-					const renderBundle = this.#renderBundle
+					let renderBundle = this.#renderBundle;
+
+					if (this.LODManager.LODList.length) {
+						const { rawCamera } = view;
+						const aabb = this.boundingAABB;
+
+						const dx = rawCamera.x - aabb.centerX;
+						const dy = rawCamera.y - aabb.centerY;
+						const dz = rawCamera.z - aabb.centerZ;
+
+						const distanceSquared = dx * dx + dy * dy + dz * dz;
+
+						let findIndex = -1;
+						const lodList = this.LODManager.LODList;
+						const lodLen = lodList.length;
+
+						for (let i = 0; i < lodLen; i++) {
+							if (distanceSquared < lodList[i].distanceSquared) {
+								findIndex = i;
+								break;
+							}
+						}
+
+						if (findIndex > 0) {
+							// 0보다 크면, 그 이전 인덱스가 선택된 LOD
+							renderBundle = this.#renderBundle_LODList[findIndex - 1];
+						} else if (findIndex === -1 && lodLen > 0) {
+							// 어떤 임계값보다도 멀면, 마지막 LOD 사용
+							renderBundle = this.#renderBundle_LODList[lodLen - 1];
+						}
+					}
 					if (currentMaterial.use2PathRender) {
 						bundleListRender2PathLayer[bundleListRender2PathLayer.length] = renderBundle
 					} else if (this.meshType === MESH_TYPE.PARTICLE) {
@@ -1033,62 +1070,65 @@ class Mesh extends MeshBase {
 	}
 
 	#setRenderBundle(renderViewStateData: RenderViewStateData) {
-		const {redGPUContext, geometry} = this
-		const {gpuDevice, antialiasingManager} = redGPUContext
-		const {useMSAA} = antialiasingManager
 		const {view} = renderViewStateData
+		this.#renderBundle = this.#createRenderBundle(view,this._geometry)
+
+		this.LODManager.LODList.forEach((lod, index) => {
+			this.#renderBundle_LODList[index] = this.#createRenderBundle(view,lod.geometry,index)
+
+		});
+		// keepLog('렌더번들갱신', this.name)
+		// keepLog(this.#renderBundle_LODList)
+	}
+
+	#createRenderBundle(view: View3D,geometry:Geometry|Primitive,lodIndex:number=null): GPURenderBundle {
+		const {gpuDevice} = this.redGPUContext
+		const {renderViewStateData} = view
 		const {pipeline, vertexUniformBindGroup} = this.gpuRenderInfo
-		const {vertexBuffer, indexBuffer} = this._geometry
+		const {vertexBuffer, indexBuffer} = geometry
 		const {fragmentUniformBindGroup} = this._material.gpuRenderInfo
-		// keepLog(`🎬 렌더 번들 갱신 이유: ${this.name}`, {
-		// 	noBundleEncoder: !this.#bundleEncoder,
-		// 	dirtyPipeline: currentDirtyPipeline,
-		// 	fragmentBindGroupChanged: this.#prevFragmentBindGroup !== fragmentUniformBindGroup,
-		// 	systemBindGroupChanged: this.#prevSystemBindGroup !== view.systemUniform_Vertex_UniformBindGroup
-		// })
+		this.#setDrawBuffer(geometry,lodIndex)
 		this.#bundleEncoder = null
 		this.#bundleEncoder = gpuDevice.createRenderBundleEncoder({
 			...view.basicRenderBundleEncoderDescriptor,
-			label: this.uuid
+			label: this.uuid,
 		})
 		const bundleEncoder = this.#bundleEncoder
-		{
-			const {gpuBuffer} = vertexBuffer
-			this.#prevSystemBindGroupList[renderViewStateData.viewIndex] = view.systemUniform_Vertex_UniformBindGroup
-			this.#prevFragmentBindGroup = fragmentUniformBindGroup
-			bundleEncoder.setPipeline(pipeline)
-			bundleEncoder.setVertexBuffer(0, gpuBuffer)
+		const {gpuBuffer} = vertexBuffer
+		this.#prevSystemBindGroupList[renderViewStateData.viewIndex] = view.systemUniform_Vertex_UniformBindGroup
+		this.#prevFragmentBindGroup = fragmentUniformBindGroup
+		bundleEncoder.setPipeline(pipeline)
+		bundleEncoder.setVertexBuffer(0, gpuBuffer)
+		// @ts-ignore
+		if (this.particleBuffers?.length) {
 			// @ts-ignore
-			if (this.particleBuffers?.length) {
-				// @ts-ignore
-				this.particleBuffers.forEach((v, index) => {
-					bundleEncoder.setVertexBuffer(index + 1, v)
-				})
-			}
-			bundleEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
-			bundleEncoder.setBindGroup(1, vertexUniformBindGroup);
-			bundleEncoder.setBindGroup(2, fragmentUniformBindGroup)
-			//
-			if (indexBuffer) {
-				const {indexBuffer} = geometry
-				const {gpuBuffer: indexGPUBuffer, format} = indexBuffer
-				bundleEncoder.setIndexBuffer(indexGPUBuffer, format)
-				bundleEncoder.drawIndexedIndirect(this.#drawCommandSlot.buffer, this.#drawCommandSlot.commandOffset * 4)
-				// {
-				//     keepLog(`🎬 drawIndexedIndirect 호출: ${this.name}`, {
-				//         bufferLabel: this.#drawCommandSlot.buffer.label,
-				//         byteOffset: this.#drawCommandSlot.commandOffset * 4,
-				//         expectedIndexCount: indexCount
-				//     })
-				// }
-			} else {
-				bundleEncoder.drawIndirect(this.#drawCommandSlot.buffer, this.#drawCommandSlot.commandOffset * 4)
-			}
-			this.#renderBundle = (bundleEncoder as GPURenderBundleEncoder).finish();
-			// @ts-ignore
-			this.#renderBundle.mesh = null
+			this.particleBuffers.forEach((v, index) => {
+				bundleEncoder.setVertexBuffer(index + 1, v)
+			})
 		}
-		// keepLog('렌더번들갱신', this.name)
+		bundleEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
+		bundleEncoder.setBindGroup(1, vertexUniformBindGroup);
+		bundleEncoder.setBindGroup(2, fragmentUniformBindGroup)
+		//
+		let drawCommandSlot = this.#drawCommandSlot
+		if(lodIndex !== null){
+			drawCommandSlot = this.#drawCommandSlot_LODList[lodIndex]
+
+			// keepLog('걸리냐',lodIndex,this.#LODManager.LODList[lodIndex])
+		}
+		if (indexBuffer) {
+			const {gpuBuffer: indexGPUBuffer, format} = indexBuffer
+			bundleEncoder.setIndexBuffer(indexGPUBuffer, format)
+			bundleEncoder.drawIndexedIndirect(drawCommandSlot.buffer, drawCommandSlot.commandOffset * 4)
+		} else {
+			bundleEncoder.drawIndirect(drawCommandSlot.buffer, drawCommandSlot.commandOffset * 4)
+		}
+		const renderBundle = (bundleEncoder as GPURenderBundleEncoder).finish({
+			label: `${this.name}_LOD${lodIndex || 0}`
+		});
+		// @ts-ignore
+		renderBundle.mesh = null
+		return renderBundle
 	}
 
 	#checkDrawCommandSlot() {
@@ -1097,19 +1137,26 @@ class Mesh extends MeshBase {
 		}
 	}
 
-	#setDrawBuffer() {
-		const {geometry} = this
+	#setDrawBuffer(geometry:Geometry|Primitive,lodIndex:number=null) {
 		const {vertexBuffer, indexBuffer} = geometry
 		const drawBufferManager = this.#drawBufferManager
+		let drawCommandSlot = this.#drawCommandSlot
+		if(lodIndex !== null){
+			if(!this.#drawCommandSlot_LODList[lodIndex]) {
+				this.#drawCommandSlot_LODList[lodIndex] = this.#drawBufferManager.allocateDrawCommand(`${this.name}_LOD${lodIndex}`)
+			}
+			drawCommandSlot = this.#drawCommandSlot_LODList[lodIndex]
+
+		}
 		this.#checkDrawCommandSlot()
 		if (indexBuffer) {
 			const {indexCount} = indexBuffer
 			// @ts-ignore
 			if (this.particleBuffers) {
 				// @ts-ignore
-				drawBufferManager.setIndexedIndirectCommand(this.#drawCommandSlot, indexCount, this.particleNum, 0, 0, 0)
+				drawBufferManager.setIndexedIndirectCommand(drawCommandSlot, indexCount, this.particleNum, 0, 0, 0)
 			} else {
-				drawBufferManager.setIndexedIndirectCommand(this.#drawCommandSlot, indexCount, 1, 0, 0, 0)
+				drawBufferManager.setIndexedIndirectCommand(drawCommandSlot, indexCount, 1, 0, 0, 0)
 				// {
 				//     const data = this.#drawCommandSlot.dataArray
 				//     const offset = this.#drawCommandSlot.commandOffset
@@ -1121,7 +1168,7 @@ class Mesh extends MeshBase {
 			}
 		} else {
 			const {vertexCount} = vertexBuffer
-			drawBufferManager.setIndirectCommand(this.#drawCommandSlot, vertexCount, 1, 0, 0)
+			drawBufferManager.setIndirectCommand(drawCommandSlot, vertexCount, 1, 0, 0)
 		}
 	}
 

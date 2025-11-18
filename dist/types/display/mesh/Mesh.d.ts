@@ -9,7 +9,7 @@ import DrawDebuggerMesh from "../drawDebugger/DrawDebuggerMesh";
 import RenderViewStateData from "../view/core/RenderViewStateData";
 import MeshBase from "./core/MeshBase";
 import Object3DContainer from "./core/Object3DContainer";
-import LODManager from "../instancingMesh/LODManager";
+import LODManager from "./core/LODManager";
 interface Mesh {
     receiveShadow: boolean;
     disableJitter: boolean;

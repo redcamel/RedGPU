@@ -1,33 +1,33 @@
-import Geometry from "../../geometry/Geometry";
-import Primitive from "../../primitive/core/Primitive";
-import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
+import Geometry from "../../../geometry/Geometry";
+import Primitive from "../../../primitive/core/Primitive";
+import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 
 type LODGeometry = Geometry | Primitive;
-
 type LODEntry = {
 	distance: number;
+	distanceSquared: number;
 	geometry: LODGeometry;
 };
 
 class LODManager {
 	#lodList: LODEntry[] = [];
-    #callback:()=>void;
-    constructor(callback:()=>void) {
-        this.#callback = callback;
-    }
+	#callback: () => void;
+
+	constructor(callback: () => void) {
+		this.#callback = callback;
+	}
+
 	addLOD(distance: number, geometry: LODGeometry) {
-		validatePositiveNumberRange(distance,1)
+		validatePositiveNumberRange(distance, 1)
 		if (this.#lodList.length >= 8) {
 			throw new Error("Maximum of 8 LOD levels allowed.");
 		}
-
 		if (this.#lodList.some(lod => lod.distance === distance)) {
 			throw new Error(`LOD with distance ${distance} already exists.`);
 		}
-
-		this.#lodList.push({ distance, geometry });
+		this.#lodList.push({distance, distanceSquared: distance * distance, geometry});
 		this.#lodList.sort((a, b) => a.distance - b.distance);
-        this.#callback?.()
+		this.#callback?.()
 	}
 
 	getLOD(currentDistance: number): LODGeometry | undefined {
@@ -39,11 +39,12 @@ class LODManager {
 
 	removeLOD(distance: number) {
 		this.#lodList = this.#lodList.filter(lod => lod.distance !== distance);
-        this.#callback?.()
+		this.#callback?.()
 	}
+
 	clearLOD() {
 		this.#lodList.length = 0
-        this.#callback?.()
+		this.#callback?.()
 	}
 
 	get LODList(): LODEntry[] {

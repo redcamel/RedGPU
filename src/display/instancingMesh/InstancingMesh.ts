@@ -14,7 +14,7 @@ import Mesh from "../mesh/Mesh";
 import MESH_TYPE from "../MESH_TYPE";
 import RenderViewStateData from "../view/core/RenderViewStateData";
 import InstancingMeshObject3D from "./core/InstancingMeshObject3D";
-import LODManager from "./LODManager";
+import LODManager from "../mesh/core/LODManager";
 import cullingComputeSource from "./shader/instanceCullingCompute.wgsl";
 import vertexModuleSource from "./shader/instanceMeshVertex.wgsl";
 
@@ -77,7 +77,7 @@ class InstancingMesh extends Mesh {
         this.instanceCount = instanceCount;
     }
 
-   
+
 
     get instanceCount(): number {
         return this.#instanceCount;
