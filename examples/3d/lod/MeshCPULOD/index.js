@@ -70,7 +70,7 @@ RedGPU.init(
 async function createTest(context, scene, material) {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 
-	const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes");
+	const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js");
 	setDebugButtons(context);
 
 	const maxNum = context.detector.isMobile ? 1000 : 5000;
