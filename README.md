@@ -13,7 +13,7 @@ applications. Built for the next generation of web graphics.</p>
 ## [Examples](https://redcamel.github.io/RedGPU/examples/)
 - Explore a wide variety of interactive examples showcasing the power of WebGPU rendering capabilities.
 
-## [API](https://redcamel.github.io/RedGPU/docs/)
+## [API](https://redcamel.github.io/RedGPU/docs/) 
 - Complete API reference and documentation to help you leverage RedGPU's powerful WebGPU capabilities.
 
 ## Latest Release Version
