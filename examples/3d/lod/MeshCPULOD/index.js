@@ -73,11 +73,11 @@ async function createTest(context, scene, material) {
 	const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes");
 	setDebugButtons(context);
 
-	const maxNum = context.detector.isMobile ? 1000 : 10000;
+	const maxNum = context.detector.isMobile ? 1000 : 5000;
 	for (let i = 0; i < maxNum; i++) {
 		const mesh = new RedGPU.Display.Mesh(
 			context,
-			new RedGPU.Primitive.Sphere(context, 0.5, 32, 32, 32),
+			new RedGPU.Primitive.Sphere(context, 1, 32, 32, 32),
 			material
 		);
 		mesh.setPosition(Math.random() * 140 - 70, Math.random() * 140 - 70, Math.random() * 140 - 70);
@@ -106,7 +106,6 @@ async function createTest(context, scene, material) {
 		if (!hasLOD(distance)) {
 			scene.children.forEach(mesh => mesh.LODManager.addLOD(distance, createGeometry()));
 		}
-		console.log(scene.children[0].LODManager.LODList)
 	};
 
 	const removeLODIfExists = (distance) => {
@@ -133,16 +132,16 @@ async function createTest(context, scene, material) {
 	};
 
 	// 초기 LOD 3개 활성화
-	addLODIfNeeded(25, () => new RedGPU.Primitive.Sphere(context, 0.5, 5, 5, 5));
+	addLODIfNeeded(25, () => new RedGPU.Primitive.Sphere(context, 1, 5, 5, 5));
 	addLODIfNeeded(50, () => new RedGPU.Primitive.Box(context));
-	addLODIfNeeded(70, () => new RedGPU.Primitive.Circle(context, 0.5));
+	addLODIfNeeded(70, () => new RedGPU.Primitive.Circle(context, 1));
 	updateLODInfo();
 
 	// 25 LOD 토글
 	pane.addBinding(lodState, 'lod25', {label: 'LOD 25 (Sphere 5x5x5)'})
 		.on('change', (ev) => {
 			if (ev.value) {
-				addLODIfNeeded(25, () => new RedGPU.Primitive.Sphere(context, 0.5, 5, 5, 5));
+				addLODIfNeeded(25, () => new RedGPU.Primitive.Sphere(context, 1, 5, 5, 5));
 			} else {
 				removeLODIfExists(25);
 			}
@@ -153,7 +152,7 @@ async function createTest(context, scene, material) {
 	pane.addBinding(lodState, 'lod50', {label: 'LOD 50 (Box)'})
 		.on('change', (ev) => {
 			if (ev.value) {
-				addLODIfNeeded(50, () => new RedGPU.Primitive.Box(context));
+				addLODIfNeeded(50, () => new RedGPU.Primitive.Box(context,2,2,2));
 			} else {
 				removeLODIfExists(50);
 			}
@@ -161,10 +160,10 @@ async function createTest(context, scene, material) {
 		});
 
 	// 70 LOD 토글
-	pane.addBinding(lodState, 'lod70', {label: 'LOD 70 (Circle 0.5)'})
+	pane.addBinding(lodState, 'lod70', {label: 'LOD 70 (Circle)'})
 		.on('change', (ev) => {
 			if (ev.value) {
-				addLODIfNeeded(70, () => new RedGPU.Primitive.Circle(context, 0.5));
+				addLODIfNeeded(70, () => new RedGPU.Primitive.Circle(context,1));
 			} else {
 				removeLODIfExists(70);
 			}
