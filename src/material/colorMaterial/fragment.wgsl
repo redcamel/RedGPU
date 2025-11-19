@@ -16,7 +16,7 @@ struct InputData {
   @location(3) combinedOpacity: f32,
   //
   @location(12) motionVector: vec3<f32>,
-  @location(15) pickingId: vec4<f32>,
+  @location(15) @interpolate(flat) pickingId: vec4<f32>,
 }
 
 @group(2) @binding(0) var<uniform> uniforms: Uniforms;
