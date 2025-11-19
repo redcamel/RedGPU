@@ -23,6 +23,8 @@ jobs:
         run: npm run build
       - name: Build documentation
         run: npm run build:doc
+      - name: Build sitemap
+        run: npm run generate-sitemap
       - name: Commit and push build files
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
