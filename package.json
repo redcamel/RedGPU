@@ -6,7 +6,8 @@
     "build": "rollup -c",
     "rollup watch": "rollup -wc",
     "build:doc": "npx typedoc --options typedoc.config.js",
-    "watch:doc": "npx nodemon --watch src --ext ts --exec \"npm run build:doc\""
+    "watch:doc": "npx nodemon --watch src --ext ts --exec \"npm run build:doc\"",
+    "generate-sitemap": "node generate-sitemap.js"
   },
   "author": "",
   "license": "ISC",
