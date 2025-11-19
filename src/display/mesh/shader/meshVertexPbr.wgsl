@@ -38,13 +38,13 @@ struct OutputData {
     @location(3) uv1: vec2<f32>,
     @location(4) vertexColor_0: vec4<f32>,
     @location(5) vertexTangent: vec4<f32>,
-    @location(6) shadowPos: vec3<f32>,
-    @location(7) receiveShadow: f32,
-    @location(8) pickingId: vec4<f32>,
     @location(9) ndcPosition: vec3<f32>,
     @location(10) localNodeScale: f32,
     @location(11) volumeScale: f32,
     @location(12) motionVector: vec3<f32>,
+    @location(13) shadowPos: vec3<f32>,
+    @location(14) receiveShadow: f32,
+    @location(15) pickingId: vec4<f32>,
 };
 
 @vertex
