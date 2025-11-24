@@ -103,7 +103,7 @@ async function createTest(context, scene, material) {
 						Math.random() * 2000 - 1000,
 					);
 					instancingMesh.instanceChildren[i].rotationX = 90
-					instancingMesh.instanceChildren[i].setScale(Math.random() * 5);
+					instancingMesh.instanceChildren[i].setScale(Math.random() * 6);
 				}
 
 				// mesh.instanceChildren[i].opacity = Math.random();
@@ -139,11 +139,13 @@ async function createTest(context, scene, material) {
 				instancingMesh.LODManager.removeLOD(distance);
 			}
 		};
-
+        const distanceLOD0 = 300
+        const distanceLOD1 = 600
+        const distanceLOD2 = 900
 		const lodState = {
-			lod25: true,
-			lod50: true,
-			lod70: true,
+			[`lod${distanceLOD0}`]: true,
+            [`lod${distanceLOD1}`]: true,
+            [`lod${distanceLOD2}`]: true,
 			lodCount: 0,
 			lodDistances: '',
 		};
@@ -158,40 +160,41 @@ async function createTest(context, scene, material) {
 		};
 
 		// 초기 LOD 3개 활성화
-		addLODIfNeeded(25, () => new RedGPU.Primitive.Sphere(context, 0.5, 8, 8, 8), materialLOD0);
-		addLODIfNeeded(50, () => new RedGPU.Primitive.Box(context), materialLOD1);
-		addLODIfNeeded(70, () => new RedGPU.Primitive.Circle(context, 0.5), materialLOD2);
+
+		addLODIfNeeded(distanceLOD0, () => mesh.geometry, materialLOD0);
+		addLODIfNeeded(distanceLOD1, () => new RedGPU.Primitive.Sphere(context, 0.5, 8, 8, 8), materialLOD1);
+		addLODIfNeeded(distanceLOD2, () => new RedGPU.Primitive.Circle(context, 0.5), materialLOD2);
 		updateLODInfo();
 
-		// 25 LOD 토글
-		pane.addBinding(lodState, 'lod25', {label: 'LOD 25 (Sphere 8x8)'})
+		// 100 LOD 토글
+		pane.addBinding(lodState, `lod${distanceLOD0}`, {label: `LOD ${distanceLOD0}`})
 			.on('change', (ev) => {
 				if (ev.value) {
-					addLODIfNeeded(25, () => new RedGPU.Primitive.Sphere(context, 0.5, 8, 8, 8), materialLOD0);
+					addLODIfNeeded(distanceLOD0, () => mesh.geometry, materialLOD0);
 				} else {
-					removeLODIfExists(25);
+					removeLODIfExists(distanceLOD0);
 				}
 				updateLODInfo();
 			});
 
 		// 50 LOD 토글
-		pane.addBinding(lodState, 'lod50', {label: 'LOD 50 (Box)'})
+		pane.addBinding(lodState, `lod${distanceLOD1}`, {label: `LOD ${distanceLOD1}`})
 			.on('change', (ev) => {
 				if (ev.value) {
-					addLODIfNeeded(50, () => new RedGPU.Primitive.Box(context), materialLOD1);
+					addLODIfNeeded(distanceLOD1, () => new RedGPU.Primitive.Sphere(context, 0.5, 8, 8, 8), materialLOD1);
 				} else {
-					removeLODIfExists(50);
+					removeLODIfExists(distanceLOD1);
 				}
 				updateLODInfo();
 			});
 
 		// 70 LOD 토글
-		pane.addBinding(lodState, 'lod70', {label: 'LOD 70 (Circle 0.5)'})
+		pane.addBinding(lodState, `lod${distanceLOD2}`, {label: `LOD ${distanceLOD2}`})
 			.on('change', (ev) => {
 				if (ev.value) {
-					addLODIfNeeded(70, () => new RedGPU.Primitive.Circle(context, 0.5), materialLOD2);
+					addLODIfNeeded(distanceLOD2, () => new RedGPU.Primitive.Circle(context, 0.5), materialLOD2);
 				} else {
-					removeLODIfExists(70);
+					removeLODIfExists(distanceLOD2);
 				}
 				updateLODInfo();
 			});
