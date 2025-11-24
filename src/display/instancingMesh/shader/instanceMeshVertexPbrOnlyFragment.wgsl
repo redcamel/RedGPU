@@ -28,8 +28,14 @@ struct OutputData {
     @location(0) vertexPosition: vec3<f32>,
     @location(1) vertexNormal: vec3<f32>,
     @location(2) uv: vec2<f32>,
+    @location(3) uv1: vec2<f32>,
+    @location(4) vertexColor_0: vec4<f32>,
+    @location(5) vertexTangent: vec4<f32>,
+    @location(9) ndcPosition: vec3<f32>,
+    @location(10) localNodeScale: f32,
+    @location(11) volumeScale: f32,
+
     //
-    @location(11) instanceOpacity: f32,
     @location(12) motionVector: vec3<f32>,
     @location(13) shadowPos: vec3<f32>,
     @location(14) @interpolate(flat) receiveShadow: f32,
@@ -97,7 +103,6 @@ fn main(inputData: InputData) -> OutputData {
     output.vertexNormal = normalPosition;
 
     output.uv = input_uv;
-    output.instanceOpacity = instanceUniforms.instanceOpacity[input_instanceIdx];
 
     return output;
 }

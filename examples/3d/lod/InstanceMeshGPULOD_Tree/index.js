@@ -11,6 +11,7 @@ RedGPU.init(
         // 카메라 설정
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.speedDistance = 10;
+        controller.maxTilt = 0
 
         // 씬 및 뷰 설정
         const scene = new RedGPU.Display.Scene();
@@ -21,19 +22,10 @@ RedGPU.init(
         const light = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(light);
 
-        // 스카이박스 설정
-        const skyboxTexture = new RedGPU.Resource.CubeTexture(
-            redGPUContext,
-            [
-                "../../../assets/skybox/px.jpg", // Positive X
-                "../../../assets/skybox/nx.jpg", // Negative X
-                "../../../assets/skybox/py.jpg", // Positive Y
-                "../../../assets/skybox/ny.jpg", // Negative Y
-                "../../../assets/skybox/pz.jpg", // Positive Z
-                "../../../assets/skybox/nz.jpg", // Negative Z
-            ]
-        );
-        view.skybox = new RedGPU.Display.SkyBox(redGPUContext, skyboxTexture);
+        const ibl = new RedGPU.Resource.IBL(view.redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
+        const newSkybox = new RedGPU.Display.SkyBox(view.redGPUContext, ibl.environmentTexture);
+        view.ibl = ibl;
+        view.skybox = newSkybox;
         view.grid = true;
 
         // 기본 머티리얼 생성 (초기 테스트용)
@@ -101,6 +93,7 @@ async function createTest(context, scene, material) {
             maxInstanceCount,
             instanceCount,
             mesh.geometry,
+            // new RedGPU.Primitive.Sphere(context, 0.5, 8, 8, 8),
             mesh.material
         );
         mesh.primitiveState.cullMode = 'none';
