@@ -74,7 +74,7 @@ async function createTest(context, scene, material) {
 	setDebugButtons(context);
 
 	const maxInstanceCount = context.detector.isMobile ? 100000 : RedGPU.Display.InstancingMesh.getLimitSize();
-	const instanceCount = context.detector.isMobile ? 20000 : 20000;
+	const instanceCount = context.detector.isMobile ? 20000 : 200000;
 
 	const url = '../../../assets/gltf/lod/scene.gltf';
 	new RedGPU.GLTFLoader(context, url, (result) => {

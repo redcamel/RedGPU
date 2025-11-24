@@ -53,6 +53,7 @@ class InstancingMesh extends Mesh {
 	#visibilityStrideBytes: number = 0;
 	#visibilityStrideU32: number = 0;
 	#vertexUniformBindGroup_LODList: GPUBindGroup[] = [];
+	#pipeline_LODList: GPURenderPipeline[] = [];
 
 	constructor(
 		redGPUContext: RedGPUContext,
@@ -205,15 +206,13 @@ class InstancingMesh extends Mesh {
 		shadowRender: boolean,
 		renderPassEncoder: GPURenderPassEncoder
 	): void {
-		const {gpuRenderInfo} = this;
-		const {pipeline, shadowPipeline} = gpuRenderInfo;
+
 		this.#updateDisplacementUniforms();
 		this.#updateInstanceUniforms();
 		const {fragmentUniformBindGroup} = this.material.gpuRenderInfo;
-		renderPassEncoder.setPipeline(shadowRender ? shadowPipeline : pipeline);
 		renderPassEncoder.setBindGroup(0, renderViewStateData.view.systemUniform_Vertex_UniformBindGroup);
 		renderPassEncoder.setBindGroup(2, fragmentUniformBindGroup);
-		this.#renderIndirectDraws(renderViewStateData, renderPassEncoder);
+		this.#renderIndirectDraws(renderViewStateData, renderPassEncoder,shadowRender);
 	}
 
 	#updateDisplacementUniforms(): void {
@@ -264,8 +263,12 @@ class InstancingMesh extends Mesh {
 
 	#renderIndirectDraws(
 		renderViewStateData: RenderViewStateData,
-		renderPassEncoder: GPURenderPassEncoder
+		renderPassEncoder: GPURenderPassEncoder,
+        shadowRender: boolean,
 	): void {
+        const {gpuRenderInfo} = this;
+        const {pipeline, shadowPipeline} = gpuRenderInfo;
+        renderPassEncoder.setPipeline(shadowRender ? shadowPipeline : pipeline);
 		const indirectArgsSize = INDIRECT_ARGS_SIZE;
 		// 메인 지오메트리 렌더링 (LOD 0)
 		this.#renderGeometryWithBuffer(
@@ -277,6 +280,7 @@ class InstancingMesh extends Mesh {
 		);
 		// LOD 지오메트리 렌더링
 		this.LODManager.LODList.forEach((lod, index) => {
+            renderPassEncoder.setPipeline(this.#pipeline_LODList[index]);
 			this.#renderGeometryWithBuffer(
 				renderPassEncoder,
 				lod.geometry,
@@ -529,7 +533,8 @@ class InstancingMesh extends Mesh {
 	}
 
 	#updatePipelines(): void {
-		const {resourceManager} = this.#redGPUContext;
+		const {resourceManager,gpuDevice} = this.#redGPUContext;
+        this.#buildVertexBindGroups();
 		const vModuleDescriptor: GPUShaderModuleDescriptor = {
 			code: this.#getVertexModuleSource(),
 		};
@@ -540,8 +545,37 @@ class InstancingMesh extends Mesh {
 		const vertexBindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout(
 			ResourceManager.PRESET_VERTEX_GPUBindGroupLayout_Instancing,
 		);
-		this.#buildVertexBindGroups();
-		this.#createPipelines(vertexShaderModule, vertexBindGroupLayout);
+
+        this.gpuRenderInfo.vertexShaderModule = vertexShaderModule;
+        this.gpuRenderInfo.pipeline = createBasePipeline(
+            this,
+            vertexShaderModule,
+            vertexBindGroupLayout,
+        );
+        this.gpuRenderInfo.shadowPipeline = createBasePipeline(
+            this,
+            vertexShaderModule,
+            vertexBindGroupLayout,
+            PIPELINE_TYPE.SHADOW,
+        );
+
+        this.#pipeline_LODList.length = 0;
+        this.LODManager.LODList.forEach((lod, index) => {
+            this.#pipeline_LODList[index] = createBasePipeline(
+                //@ts-ignore
+                {
+                    vertexStateBuffers : lod.geometry.gpuRenderInfo.buffers,
+                    primitiveState:this.primitiveState,
+                    depthStencilState:this.depthStencilState,
+                    geometry : lod.geometry,
+                    material : this.material,
+                    redGPUContext:this.#redGPUContext,
+                    gpuRenderInfo : this.gpuRenderInfo
+                },
+                vertexShaderModule,
+                vertexBindGroupLayout,
+            );
+        });
 	}
 
 	/**
@@ -562,26 +596,6 @@ class InstancingMesh extends Mesh {
 		});
 	}
 
-	/**
-	 * vertex / shadow 파이프라인 생성
-	 */
-	#createPipelines(
-		vertexShaderModule: GPUShaderModule,
-		vertexBindGroupLayout: GPUBindGroupLayout
-	): void {
-		this.gpuRenderInfo.vertexShaderModule = vertexShaderModule;
-		this.gpuRenderInfo.pipeline = createBasePipeline(
-			this,
-			vertexShaderModule,
-			vertexBindGroupLayout,
-		);
-		this.gpuRenderInfo.shadowPipeline = createBasePipeline(
-			this,
-			vertexShaderModule,
-			vertexBindGroupLayout,
-			PIPELINE_TYPE.SHADOW,
-		);
-	}
 
 	/**
 	 * instanceCount에 따라 visibilityBuffer stride 캐시 갱신
