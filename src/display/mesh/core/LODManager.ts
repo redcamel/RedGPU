@@ -1,6 +1,7 @@
 import Geometry from "../../../geometry/Geometry";
 import Primitive from "../../../primitive/core/Primitive";
 import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
+import ABaseMaterial from "../../../material/core/ABaseMaterial";
 
 /**
  * LOD에 사용되는 지오메트리 타입입니다.
@@ -20,6 +21,7 @@ type LODEntry = {
 	distance: number;
 	distanceSquared: number;
 	geometry: LODGeometry;
+    material?: ABaseMaterial;
 };
 
 /**
@@ -70,6 +72,7 @@ class LODManager {
 	 *
 	 * @param distance 이 LOD가 사용될 기준 거리(양수)
 	 * @param geometry 해당 LOD 거리에서 사용할 지오메트리
+	 * @param material
 	 *
 	 * @remarks
 	 * - LOD 레벨은 최대 8개까지만 허용됩니다.
@@ -78,7 +81,7 @@ class LODManager {
 	 * @throws {Error} LOD 레벨이 8개를 초과하는 경우
 	 * @throws {Error} 동일한 거리의 LOD가 이미 존재하는 경우
 	 */
-	addLOD(distance: number, geometry: LODGeometry) {
+	addLOD(distance: number, geometry: LODGeometry,material:ABaseMaterial) {
 		validatePositiveNumberRange(distance, 1)
 		if (this.#lodList.length >= 8) {
 			throw new Error("Maximum of 8 LOD levels allowed.");
@@ -86,7 +89,7 @@ class LODManager {
 		if (this.#lodList.some(lod => lod.distance === distance)) {
 			throw new Error(`LOD with distance ${distance} already exists.`);
 		}
-		this.#lodList.push({distance, distanceSquared: distance * distance, geometry});
+		this.#lodList.push({distance, distanceSquared: distance * distance, geometry,material});
 		this.#lodList.sort((a, b) => a.distance - b.distance);
 		this.#callback?.()
 	}

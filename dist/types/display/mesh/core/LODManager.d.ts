@@ -1,5 +1,6 @@
 import Geometry from "../../../geometry/Geometry";
 import Primitive from "../../../primitive/core/Primitive";
+import ABaseMaterial from "../../../material/core/ABaseMaterial";
 /**
  * LOD에 사용되는 지오메트리 타입입니다.
  *
@@ -18,6 +19,7 @@ type LODEntry = {
     distance: number;
     distanceSquared: number;
     geometry: LODGeometry;
+    material?: ABaseMaterial;
 };
 /**
  * 거리 기반 LOD(Level of Detail) 관리를 담당하는 매니저 클래스입니다.
@@ -59,6 +61,7 @@ declare class LODManager {
      *
      * @param distance 이 LOD가 사용될 기준 거리(양수)
      * @param geometry 해당 LOD 거리에서 사용할 지오메트리
+     * @param material
      *
      * @remarks
      * - LOD 레벨은 최대 8개까지만 허용됩니다.
@@ -67,7 +70,7 @@ declare class LODManager {
      * @throws {Error} LOD 레벨이 8개를 초과하는 경우
      * @throws {Error} 동일한 거리의 LOD가 이미 존재하는 경우
      */
-    addLOD(distance: number, geometry: LODGeometry): void;
+    addLOD(distance: number, geometry: LODGeometry, material: ABaseMaterial): void;
     /**
      * 현재 거리 값에 대해 가장 적절한 LOD 엔트리를 반환합니다.
      *

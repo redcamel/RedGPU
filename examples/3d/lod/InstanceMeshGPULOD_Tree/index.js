@@ -128,9 +128,9 @@ async function createTest(context, scene, material) {
 			return instancingMesh.LODManager.LODList.some(lod => lod.distance === distance);
 		};
 
-		const addLODIfNeeded = (distance, createGeometry) => {
+		const addLODIfNeeded = (distance, createGeometry,material) => {
 			if (!hasLOD(distance)) {
-				instancingMesh.LODManager.addLOD(distance, createGeometry());
+				instancingMesh.LODManager.addLOD(distance, createGeometry(),material);
 			}
 		};
 

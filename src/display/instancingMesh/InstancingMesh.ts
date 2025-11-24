@@ -275,6 +275,7 @@ class InstancingMesh extends Mesh {
 			renderPassEncoder,
 			this.geometry,
 			this.gpuRenderInfo.vertexUniformBindGroup,
+			this.material.gpuRenderInfo.fragmentUniformBindGroup,
 			0,
 			indirectArgsSize,
 		);
@@ -285,6 +286,7 @@ class InstancingMesh extends Mesh {
 				renderPassEncoder,
 				lod.geometry,
 				this.#vertexUniformBindGroup_LODList[index],
+                lod.material? lod.material.gpuRenderInfo.fragmentUniformBindGroup : this.material.gpuRenderInfo.fragmentUniformBindGroup,
 				index + 1,
 				indirectArgsSize,
 			);
@@ -298,6 +300,7 @@ class InstancingMesh extends Mesh {
 	 * @param renderPassEncoder - GPU 렌더 패스 인코더
 	 * @param geometry - 렌더링할 지오메트리
 	 * @param vertexUniformBindGroup - 버텍스 유니폼 바인드 그룹
+	 * @param fragmentUniformBindGroup -
 	 * @param lodIndex - LOD 인덱스
 	 * @param indirectArgsSize - 간접 렌더 인수 크기
 	 */
@@ -305,12 +308,14 @@ class InstancingMesh extends Mesh {
 		renderPassEncoder: GPURenderPassEncoder,
 		geometry: Geometry | Primitive,
 		vertexUniformBindGroup: GPUBindGroup,
+        fragmentUniformBindGroup: GPUBindGroup,
 		lodIndex: number,
 		indirectArgsSize: number
 	): void {
 		const {vertexBuffer, indexBuffer} = geometry;
 		const offsetInBuffer = indirectArgsSize * lodIndex;
 		renderPassEncoder.setBindGroup(1, vertexUniformBindGroup);
+		renderPassEncoder.setBindGroup(2, fragmentUniformBindGroup);
 		renderPassEncoder.setVertexBuffer(0, vertexBuffer.gpuBuffer);
 		if (indexBuffer) {
 			const {gpuBuffer: indexGPUBuffer, format} = indexBuffer;
@@ -568,7 +573,7 @@ class InstancingMesh extends Mesh {
                     primitiveState:this.primitiveState,
                     depthStencilState:this.depthStencilState,
                     geometry : lod.geometry,
-                    material : this.material,
+                    material : lod.material || this.material,
                     redGPUContext:this.#redGPUContext,
                     gpuRenderInfo : this.gpuRenderInfo
                 },
