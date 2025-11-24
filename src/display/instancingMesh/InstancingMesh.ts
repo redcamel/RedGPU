@@ -16,6 +16,9 @@ import RenderViewStateData from "../view/core/RenderViewStateData";
 import InstancingMeshObject3D from "./core/InstancingMeshObject3D";
 import cullingComputeSource from "./shader/instanceCullingCompute.wgsl";
 import vertexModuleSource from "./shader/instanceMeshVertex.wgsl";
+import vertexModuleSourcePbr from "./shader/instanceMeshVertexPbr.wgsl";
+import PBRMaterial from "../../material/pbrMaterial/PBRMaterial";
+import {ABaseMaterial} from "../../material/core";
 
 const VERTEX_SHADER_MODULE_NAME = "VERTEX_MODULE_INSTANCING";
 const VERTEX_BIND_GROUP_DESCRIPTOR_NAME = "VERTEX_BIND_GROUP_DESCRIPTOR_INSTANCING";
@@ -79,7 +82,7 @@ class InstancingMesh extends Mesh {
 		validateUintRange(count);
 		this.#instanceCount = Math.min(count, this.#maxInstanceCount);
 		// WGSL 파싱 (instanceCount / maxInstanceCount 결정 이후)
-		this.gpuRenderInfo.vertexUniformInfo = parseWGSL(this.#getVertexModuleSource()).storage.instanceUniforms;
+		this.gpuRenderInfo.vertexUniformInfo = parseWGSL(this.#getVertexModuleSource(this.geometry,this.material)).storage.instanceUniforms;
 		// 인스턴스 유니폼 버퍼 재구성 (기존 데이터 보존)
 		this.#rebuildInstanceUniformBuffer();
 		// 자식 인스턴스 개수 맞추기
@@ -541,7 +544,7 @@ class InstancingMesh extends Mesh {
 		const {resourceManager,gpuDevice} = this.#redGPUContext;
         this.#buildVertexBindGroups();
 		const vModuleDescriptor: GPUShaderModuleDescriptor = {
-			code: this.#getVertexModuleSource(),
+			code: this.#getVertexModuleSource(this.geometry,this.material),
 		};
 		const vertexShaderModule: GPUShaderModule = resourceManager.createGPUShaderModule(
 			`${VERTEX_SHADER_MODULE_NAME}_${this.#maxInstanceCount}_${this.uuid}`,
@@ -566,6 +569,13 @@ class InstancingMesh extends Mesh {
 
         this.#pipeline_LODList.length = 0;
         this.LODManager.LODList.forEach((lod, index) => {
+            const vModuleDescriptor: GPUShaderModuleDescriptor = {
+                code: this.#getVertexModuleSource(lod.geometry,lod.material),
+            };
+            const vertexShaderModule: GPUShaderModule = resourceManager.createGPUShaderModule(
+                `${VERTEX_SHADER_MODULE_NAME}_${this.#maxInstanceCount}_LOD${index}_${this.uuid}`,
+                vModuleDescriptor,
+            );
             this.#pipeline_LODList[index] = createBasePipeline(
                 //@ts-ignore
                 {
@@ -640,8 +650,10 @@ class InstancingMesh extends Mesh {
 		return source.replaceAll(/__INSTANCE_COUNT__/g, this.#maxInstanceCount.toString());
 	}
 
-	#getVertexModuleSource(): string {
-		return this.#injectInstanceCount(vertexModuleSource);
+	#getVertexModuleSource(geometry: Geometry|Primitive,material:ABaseMaterial): string {
+        keepLog(geometry.vertexBuffer.interleavedStruct)
+        const isPBR = geometry.vertexBuffer.interleavedStruct.label ==='PBR' && material instanceof PBRMaterial
+		return this.#injectInstanceCount(isPBR ? vertexModuleSourcePbr : vertexModuleSource);
 	}
 
 	#getCullingComputeSource(): string {

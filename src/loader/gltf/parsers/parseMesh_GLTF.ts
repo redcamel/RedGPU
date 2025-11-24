@@ -188,6 +188,7 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
 				interleaveData,
 				new VertexInterleavedStruct(
 					tInterleaveInfoList,
+                    'PBR'
 				),
 				undefined,
 				vertexCacheKey

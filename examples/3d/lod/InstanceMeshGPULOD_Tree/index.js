@@ -89,7 +89,7 @@ async function createTest(context, scene, material) {
 			maxInstanceCount,
 			instanceCount,
 			mesh.geometry,
-			material
+            mesh.material
 		);
 		mesh.primitiveState.cullMode = 'none'
 		scene.addChild(instancingMesh);
@@ -98,9 +98,9 @@ async function createTest(context, scene, material) {
 			for (let i = 0; i < instancingMesh.instanceCount; i++) {
 				if (instancingMesh.instanceChildren[i].x === 0) {
 					instancingMesh.instanceChildren[i].setPosition(
-						Math.random() * 5000 - 2500,
+						Math.random() * 2000 - 1000,
 						0,
-						Math.random() * 5000 - 2500,
+						Math.random() * 2000 - 1000,
 					);
 					instancingMesh.instanceChildren[i].rotationX = 90
 					instancingMesh.instanceChildren[i].setScale(Math.random() * 5);
