@@ -12,6 +12,7 @@ RedGPU.init(
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.speedDistance = 10;
         controller.maxTilt = 0
+        controller.distance = 300
 
         // 씬 및 뷰 설정
         const scene = new RedGPU.Display.Scene();
@@ -147,9 +148,9 @@ async function createTest(context, scene, material) {
         };
 
         // 3. LOD 상태 및 제어
-        const distanceLOD0 = 300;
-        const distanceLOD1 = 600;
-        const distanceLOD2 = 900;
+        const distanceLOD0 = 500;
+        const distanceLOD1 = 750;
+        const distanceLOD2 = 1000;
 
         const lodState = {
             [`lod${distanceLOD0}`]: true,

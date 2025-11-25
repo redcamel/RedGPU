@@ -816,6 +816,15 @@ const ExampleList = [
                             en: `This demo demonstrates CPU LOD performance testing for meshes.`
                         },
                     },
+                    {
+                        name: 'MultiMaterial GPU LOD',
+                        path: '3d/lod/InstanceMeshGPULOD_material',
+                        thumb: '3d/lod/InstanceMeshGPULOD_material/thumb.png',
+                        description: {
+                            ko: ``,
+                            en: `This demo demonstrates GPU LOD performance testing for meshes.`
+                        },
+                    },
                 ]
             },
 			{

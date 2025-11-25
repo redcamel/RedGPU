@@ -6,7 +6,6 @@ import StorageBuffer from "../../resources/buffer/storageBuffer/StorageBuffer";
 import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import validateUintRange from "../../runtimeChecker/validateFunc/validateUintRange";
-import {keepLog} from "../../utils";
 import createBasePipeline from "../mesh/core/pipeline/createBasePipeline";
 import PIPELINE_TYPE from "../mesh/core/pipeline/PIPELINE_TYPE";
 import VertexGPURenderInfo from "../mesh/core/VertexGPURenderInfo";
@@ -15,10 +14,13 @@ import MESH_TYPE from "../MESH_TYPE";
 import RenderViewStateData from "../view/core/RenderViewStateData";
 import InstancingMeshObject3D from "./core/InstancingMeshObject3D";
 import cullingComputeSource from "./shader/instanceCullingCompute.wgsl";
-import vertexModuleSource from "./shader/instanceMeshVertex.wgsl";
-import vertexModuleSourcePbr from "./shader/instanceMeshVertexPbr.wgsl";
-import vertexModuleSourcePbrOnlyVertex from "./shader/instanceMeshVertexPbrOnlyVertex.wgsl";
-import vertexModuleSourcePbrOnlyFragment from "./shader/instanceMeshVertexPbrOnlyFragment.wgsl";
+import vertexModuleSourceHead from "./shader/instanceMeshVertex_head.wgsl";
+import vertexModuleSourceBasic from "./shader/instanceMeshVertex_basic.wgsl";
+import vertexModuleSourceInputBasic from "./shader/instanceMeshVertex_input_basic.wgsl";
+import vertexModuleSourceOutputBasic from "./shader/instanceMeshVertex_output_basic.wgsl";
+import vertexModuleSourceInputPbr from "./shader/instanceMeshVertex_input_Pbr.wgsl";
+import vertexModuleSourceOutputPbr from "./shader/instanceMeshVertex_output_Pbr.wgsl";
+import vertexModuleSourceShadow from "./shader/instanceMeshVertex_shadow.wgsl";
 import PBRMaterial from "../../material/pbrMaterial/PBRMaterial";
 import {ABaseMaterial} from "../../material/core";
 
@@ -634,19 +636,37 @@ class InstancingMesh extends Mesh {
         this.gpuRenderInfo.vertexUniformBuffer = newBuffer;
     }
 
-    #injectInstanceCount(source: string): string {
-        return source.replaceAll(/__INSTANCE_COUNT__/g, this.#maxInstanceCount.toString());
+    #injectInstanceCount(source: string, headSource: string = '', inputSource: string = '', outputSource: string = '', shadowSource: string = ''): string {
+        return [
+            headSource,
+            inputSource,
+            outputSource,
+            source.replaceAll(/__INSTANCE_COUNT__/g, this.#maxInstanceCount.toString()),
+            shadowSource
+        ].join('\n');
     }
 
     #getVertexModuleSource(geometry: Geometry | Primitive, material: ABaseMaterial): string {
+        const label = geometry.vertexBuffer.interleavedStruct.label;
+        const isPbrMaterial = material instanceof PBRMaterial;
 
-        const isBasic = (geometry.vertexBuffer.interleavedStruct.label !== 'PBR' && !(material instanceof PBRMaterial))
-        const isPBR = (geometry.vertexBuffer.interleavedStruct.label === 'PBR' && material instanceof PBRMaterial)
-        const isPBROnyVertex = (geometry.vertexBuffer.interleavedStruct.label === 'PBR' && !(material instanceof PBRMaterial))
-        const isPBROnyFragment = (geometry.vertexBuffer.interleavedStruct.label !== 'PBR' && (material instanceof PBRMaterial))
+        const isPBR = label === 'PBR' && isPbrMaterial;
+        const isPBROnyFragment = label !== 'PBR' && isPbrMaterial;
 
-        return this.#injectInstanceCount(isBasic ? vertexModuleSource : isPBR ?  vertexModuleSourcePbr :isPBROnyFragment  ?vertexModuleSourcePbrOnlyFragment : vertexModuleSourcePbrOnlyVertex);
+        const input = isPBR ? vertexModuleSourceInputPbr : vertexModuleSourceInputBasic;
+        const output = isPBROnyFragment ? vertexModuleSourceOutputPbr :
+            isPBR ? vertexModuleSourceOutputPbr :
+                vertexModuleSourceOutputBasic;
+
+        return this.#injectInstanceCount(
+            vertexModuleSourceHead,
+            vertexModuleSourceBasic,
+            input,
+            output,
+            vertexModuleSourceShadow
+        );
     }
+
 
     #getCullingComputeSource(): string {
         return this.#injectInstanceCount(cullingComputeSource);

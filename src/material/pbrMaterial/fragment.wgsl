@@ -146,8 +146,8 @@ struct InputData {
     @location(5) vertexTangent: vec4<f32>,
 
     @location(9) ndcPosition: vec3<f32>,
-    @location(10) localNodeScale: f32,
-    @location(11) volumeScale: f32,
+    @location(10) localNodeScale_volumeScale: vec2<f32>,
+    @location(11) combinedOpacity: f32,
 
     //
     @location(12) motionVector: vec3<f32>,
@@ -706,7 +706,7 @@ fn main(inputData:InputData) -> FragmentOutput {
     var prePathBackground = vec3<f32>(0.0);
     #redgpu_if useKHR_materials_transmission
         prePathBackground = calcPrePathBackground(
-            u_useKHR_materials_volume, thicknessParameter * inputData.volumeScale , u_KHR_dispersion, u_KHR_attenuationDistance , u_KHR_attenuationColor,
+            u_useKHR_materials_volume, thicknessParameter * inputData.localNodeScale_volumeScale[1] , u_KHR_dispersion, u_KHR_attenuationDistance , u_KHR_attenuationColor,
             ior, roughnessParameter, albedo,
             systemUniforms.projectionCameraMatrix, input_vertexPosition, input_ndcPosition,
             V, N,
@@ -950,8 +950,8 @@ let attenuation = rangePart * invSquare;
 
                 var attenuatedBackground = prePathBackground;
                  if (u_useKHR_materials_volume) {
-                     let localNodeScale = inputData.localNodeScale;
-                     let volumeScale = inputData.volumeScale;
+                     let localNodeScale = inputData.localNodeScale_volumeScale[0];
+                     let volumeScale = inputData.localNodeScale_volumeScale[1];
 
                      let scaledThickness = thicknessParameter * localNodeScale ;
                      // 유효한 색상 및 거리 값 확보 (물리적으로 의미 있는 범위)
