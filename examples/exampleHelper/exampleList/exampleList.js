@@ -825,6 +825,15 @@ const ExampleList = [
                             en: `This demo demonstrates testing utilizing different materials in GPU LOD.`
                         },
                     },
+                    {
+                        name: 'Multi Material CPU LOD',
+                        path: '3d/lod/MeshCPULOD_material',
+                        thumb: '3d/lod/MeshCPULOD_material/thumb.png',
+                        description: {
+                            ko: ``,
+                            en: `This demo demonstrates testing utilizing different materials in CPU LOD.`
+                        },
+                    },
                 ]
             },
 			{

@@ -113,7 +113,7 @@ async function createTest(context, scene, material) {
                     const z = Math.sin(angle) * distance;
 
                     instancingMesh.instanceChildren[i].setPosition(x, 0, z);
-                    instancingMesh.instanceChildren[i].setScale(Math.random() * 6);
+                    instancingMesh.instanceChildren[i].setScale(Math.random() * 8 + 1);
                 }
             }
         };
