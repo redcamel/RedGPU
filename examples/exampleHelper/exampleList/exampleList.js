@@ -817,12 +817,12 @@ const ExampleList = [
                         },
                     },
                     {
-                        name: 'MultiMaterial GPU LOD',
+                        name: 'Multi Material GPU LOD',
                         path: '3d/lod/InstanceMeshGPULOD_material',
                         thumb: '3d/lod/InstanceMeshGPULOD_material/thumb.png',
                         description: {
                             ko: ``,
-                            en: `This demo demonstrates GPU LOD performance testing for meshes.`
+                            en: `This demo demonstrates testing utilizing different materials in GPU LOD.`
                         },
                     },
                 ]

@@ -69,16 +69,16 @@ async function createTest(context, scene, material) {
     setDebugButtons(context);
 
     // 인스턴스 수 설정 (모바일/PC 구분)
-    const maxInstanceCount = context.detector.isMobile ? 100000 : RedGPU.Display.InstancingMesh.getLimitSize();
-    const instanceCount = context.detector.isMobile ? 20000 : 200000;
+    const maxInstanceCount = 20000;
+    const instanceCount = 20000;
 
     // GLTF 모델 로드
-    const url = '../../../assets/gltf/lod/scene.gltf';
+    const url = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Suzanne/glTF/Suzanne.gltf';
     new RedGPU.GLTFLoader(context, url, (result) => {
         console.log(result.resultMesh);
 
         // GLTF 구조에서 대상 메쉬 추출
-        const mesh = result.resultMesh.children[0].children[0].children[0].children[0];
+        const mesh = result.resultMesh.children[0];
 
         // LOD별 머티리얼 준비
         const materialLOD0 = new RedGPU.Material.PhongMaterial(context, '#ff0000');
@@ -97,25 +97,26 @@ async function createTest(context, scene, material) {
             // new RedGPU.Primitive.Sphere(context, 0.5, 8, 8, 8),
             mesh.material
         );
-        mesh.primitiveState.cullMode = 'none';
         scene.addChild(instancingMesh);
 
         // 인스턴스 배치 초기화 함수
         const initializeInstances = () => {
+            const radius = 1000;
+
             for (let i = 0; i < instancingMesh.instanceCount; i++) {
                 if (instancingMesh.instanceChildren[i].x === 0) {
-                    instancingMesh.instanceChildren[i].setPosition(
-                        Math.random() * 2000 - 1000,
-                        0,
-                        Math.random() * 2000 - 1000,
-                    );
-                    instancingMesh.instanceChildren[i].rotationX = 90;
+                    const angle = Math.random() * Math.PI * 2; // 0 ~ 2π
+                    const randomValue = Math.random();
+                    const distance = Math.sqrt(randomValue) * radius; // 0 ~ radius
+
+                    const x = Math.cos(angle) * distance;
+                    const z = Math.sin(angle) * distance;
+
+                    instancingMesh.instanceChildren[i].setPosition(x, 0, z);
                     instancingMesh.instanceChildren[i].setScale(Math.random() * 6);
                 }
-                // mesh.instanceChildren[i].opacity = Math.random();
             }
         };
-
         initializeInstances();
 
         // --- Tweakpane UI 설정 ---
@@ -171,15 +172,25 @@ async function createTest(context, scene, material) {
 
         // 초기 LOD 설정
         addLODIfNeeded(distanceLOD0, () => mesh.geometry, materialLOD0);
-        addLODIfNeeded(distanceLOD1, () => new RedGPU.Primitive.Sphere(context, 0.5, 8, 8, 8), materialLOD1);
-        addLODIfNeeded(distanceLOD2, () => new RedGPU.Primitive.Circle(context, 0.5), materialLOD2);
+        addLODIfNeeded(distanceLOD1, () => new RedGPU.Primitive.Box(context), materialLOD1);
+        addLODIfNeeded(distanceLOD2, () => new RedGPU.Primitive.Ground(context), materialLOD2);
         updateLODInfo();
 
         // LOD 토글 컨트롤 추가
         [
-            { dist: distanceLOD0, label: `LOD ${distanceLOD0}`, createGeo: () => mesh.geometry, mat: materialLOD0 },
-            { dist: distanceLOD1, label: `LOD ${distanceLOD1}`, createGeo: () => new RedGPU.Primitive.Sphere(context, 0.5, 8, 8, 8), mat: materialLOD1 },
-            { dist: distanceLOD2, label: `LOD ${distanceLOD2}`, createGeo: () => new RedGPU.Primitive.Circle(context, 0.5), mat: materialLOD2 }
+            {dist: distanceLOD0, label: `LOD ${distanceLOD0}`, createGeo: () => mesh.geometry, mat: materialLOD0},
+            {
+                dist: distanceLOD1,
+                label: `LOD ${distanceLOD1}`,
+                createGeo: () => new RedGPU.Primitive.Box(context),
+                mat: materialLOD1
+            },
+            {
+                dist: distanceLOD2,
+                label: `LOD ${distanceLOD2}`,
+                createGeo: () => new RedGPU.Primitive.Ground(context),
+                mat: materialLOD2
+            }
         ].forEach(config => {
             pane.addBinding(lodState, `lod${config.dist}`, {label: config.label})
                 .on('change', (ev) => {
