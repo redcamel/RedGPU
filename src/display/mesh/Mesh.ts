@@ -9,7 +9,9 @@ import Primitive from "../../primitive/core/Primitive";
 import DrawBufferManager, {DrawCommandSlot} from "../../renderer/core/DrawBufferManager";
 import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
+import ParseWGSL from "../../resources/wgslParser/parseWGSL";
 import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
+import {createUUID} from "../../utils";
 import AABB from "../../utils/math/bound/AABB";
 import calculateMeshAABB from "../../utils/math/bound/calculateMeshAABB";
 import calculateMeshCombinedAABB from "../../utils/math/bound/calculateMeshCombinedAABB";
@@ -31,6 +33,7 @@ import updateMeshDirtyPipeline from "./core/pipeline/updateMeshDirtyPipeline";
 import getBasicMeshVertexBindGroupDescriptor from "./core/shader/getBasicMeshVertexBindGroupDescriptor";
 import VertexGPURenderInfo from "./core/VertexGPURenderInfo";
 import meshVertexSource from './shader/meshVertex.wgsl';
+import meshVertexSourcePbr from './shader/meshVertexPbr.wgsl';
 
 const VERTEX_SHADER_MODULE_NAME_PBR_SKIN = 'VERTEX_MODULE_MESH_PBR_SKIN'
 const CONVERT_RADIAN = Math.PI / 180;
@@ -969,13 +972,11 @@ class Mesh extends MeshBase {
 						|| this.#prevSystemBindGroupList[renderViewStateData.viewIndex] !== view.systemUniform_Vertex_UniformBindGroup
 						|| this.dirtyLOD
 					) {
+
 						this.#setRenderBundle(renderViewStateData)
 
 					}
-					if(this.dirtyLOD){
-						this.#updateLODPipeline()
-						this.dirtyLOD = false
-					}
+
 					renderViewStateData.numDrawCalls++
 					if (currentGeometry.indexBuffer) {
 						const {indexBuffer} = currentGeometry
@@ -992,46 +993,55 @@ class Mesh extends MeshBase {
 					{
 						if (lodLen) {
 							let idx = this.#currentLODIndex;
-							let needFullSearch = false
-							if (idx < -1 || idx >= lodLen) idx = -1;
+
+							// 인덱스 범위 검증 수정
+							if (idx < 0 || idx >= lodLen) {
+								idx = -1;
+							}
+
+							let needUpdate = false;
+
 							if (idx === -1) {
-								// 기본 번들 → 첫 LOD 경계만 보면 됨
+								// 기본 번들 → 첫 LOD 경계 체크
 								if (distanceSquared >= lodList[0].distanceSquared) {
-									// 위로 올라감 → 어느 LOD인지 찾기 위해 한 번만 전체 검색
-									needFullSearch = true
+									needUpdate = true;
 								}
 							} else if (idx === lodLen - 1) {
-								// 마지막 LOD → 아래로 내려가는지만 체크
+								// 마지막 LOD → 아래로 내려가는지 체크
 								if (distanceSquared < lodList[idx].distanceSquared) {
-									needFullSearch = true
+									needUpdate = true;
 								}
 							} else {
-								// 중간 LOD i (0 <= i < lodLen-1)
+								// 중간 LOD
 								const lowerBoundary = lodList[idx].distanceSquared;
 								const upperBoundary = lodList[idx + 1].distanceSquared;
 								if (distanceSquared < lowerBoundary || distanceSquared >= upperBoundary) {
-									// 자기 구간에서 벗어남 → 전체 검색 (실제로는 주변만 스캔해도 됨)
-									needFullSearch = true
+									needUpdate = true;
 								}
 							}
-							if (idx !== this.#currentLODIndex) {
-								this.#currentLODIndex = idx;
-							}
-							if (needFullSearch) {
-								let findIndex = -1;
+
+							if (needUpdate) {
+								// LOD 인덱스 재계산
+								let newIdx = -1;
 								for (let i = 0; i < lodLen; i++) {
-									if (distanceSquared < lodList[i].distanceSquared) {
-										findIndex = i;
+									if (distanceSquared >= lodList[i].distanceSquared) {
+										newIdx = i;
+									} else {
 										break;
 									}
 								}
-								if (findIndex > 0) {
-									// 0보다 크면, 그 이전 인덱스가 선택된 LOD
-									renderBundle = this.#renderBundle_LODList[findIndex - 1];
-								} else if (findIndex === -1 && lodLen > 0) {
-									// 어떤 임계값보다도 멀면, 마지막 LOD 사용
-									renderBundle = this.#renderBundle_LODList[lodLen - 1];
+
+								// 인덱스 업데이트 및 번들 선택
+								if (newIdx !== idx) {
+									this.#currentLODIndex = newIdx;
+									if (newIdx >= 0 && newIdx < lodLen) {
+										renderBundle = this.#renderBundle_LODList[newIdx];
+									}
+									// newIdx가 -1이면 기본 renderBundle 사용 (이미 설정됨)
 								}
+							} else if (idx >= 0 && idx < lodLen) {
+								// 현재 LOD 유지
+								renderBundle = this.#renderBundle_LODList[idx];
 							}
 						}
 					}
@@ -1102,7 +1112,7 @@ class Mesh extends MeshBase {
 				code: this.#getLODVertexModuleSource(lod.geometry, lod.material),
 			};
 			const vertexShaderModule: GPUShaderModule = resourceManager.createGPUShaderModule(
-				`${lod.label}`,
+				`${createUUID()}_${this.name}_${index}`,
 				vModuleDescriptor,
 			);
 			this.#lodGPURenderInfoList[index] = {
@@ -1131,6 +1141,7 @@ class Mesh extends MeshBase {
 				}))
 			};
 		});
+		this.#currentLODIndex = -1;
 	}
 	#getLODVertexModuleSource(geometry: Geometry | Primitive, material: ABaseMaterial): string {
 		const label = geometry.vertexBuffer.interleavedStruct.label;
@@ -1143,8 +1154,8 @@ class Mesh extends MeshBase {
 		// const output = isPBROnyFragment ? vertexModuleSourceOutputPbr :
 		// 	isPBR ? vertexModuleSourceOutputPbr :
 		// 		vertexModuleSourceOutputBasic;
-
-		return meshVertexSource
+		const source = isPBR ? meshVertexSourcePbr : meshVertexSource
+		return ParseWGSL(source).shaderSourceVariant.getVariant('none')
 	}
 	createMeshVertexShaderModuleBASIC = (VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT_BASIC, vertexModuleSource): GPUShaderModule => {
 		const {redGPUContext} = this
@@ -1164,6 +1175,11 @@ class Mesh extends MeshBase {
 	#setRenderBundle(renderViewStateData: RenderViewStateData) {
 		const {view} = renderViewStateData
 		this.#renderBundle = this.#createRenderBundle(view, this._geometry,this._material)
+		if(this.dirtyLOD){
+			this.#updateLODPipeline()
+			this.dirtyLOD = false
+		}
+		this.#renderBundle_LODList.length = 0;
 		this.LODManager.LODList.forEach((lod, index) => {
 			this.#renderBundle_LODList[index] = this.#createRenderBundle(view, lod.geometry, lod.material || this._material,index)
 		});
@@ -1174,7 +1190,7 @@ class Mesh extends MeshBase {
 	#createRenderBundle(view: View3D, geometry: Geometry | Primitive,material:ABaseMaterial, lodIndex: number = null): GPURenderBundle {
 		const {gpuDevice} = this.redGPUContext
 		const {renderViewStateData} = view
-		const {pipeline, vertexUniformBindGroup} = this.gpuRenderInfo
+
 		const {vertexBuffer, indexBuffer} = geometry
 		const {fragmentUniformBindGroup} = material.gpuRenderInfo
 		this.#setDrawBuffer(geometry, lodIndex)
@@ -1192,6 +1208,9 @@ class Mesh extends MeshBase {
 		}
 
 		const {gpuBuffer} = vertexBuffer
+
+		const pipeline = isLOD ? this.#lodGPURenderInfoList[lodIndex].pipeline : this.gpuRenderInfo.pipeline
+		const vertexUniformBindGroup = isLOD ? this.#lodGPURenderInfoList[lodIndex].vertexUniformBindGroup : this.gpuRenderInfo.vertexUniformBindGroup
 
 		bundleEncoder.setPipeline(pipeline)
 		bundleEncoder.setVertexBuffer(0, gpuBuffer)

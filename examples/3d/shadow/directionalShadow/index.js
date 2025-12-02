@@ -66,7 +66,7 @@ const addRandomMeshes = (redGPUContext, scene) => {
 		new RedGPU.Primitive.Sphere(redGPUContext, 2, 16, 16),
 		new RedGPU.Primitive.Box(redGPUContext, 3, 3, 3),
 		new RedGPU.Primitive.Cylinder(redGPUContext, 2, 2, 6, 16),
-		new RedGPU.Primitive.Torus(redGPUContext, 1.5, 0.5, 16, 32),
+		new RedGPU.Primitive.Torus(redGPUContext,` 1.5, 0.5, 16, 32`),
 		new RedGPU.Primitive.TorusKnot(redGPUContext, 0.5, 0.2, 128, 64, 2, 3)
 	];
 //tt
