@@ -162,7 +162,7 @@ async function createTest(context, scene, material) {
         pane.addBinding(lodState, 'lod50', {label: 'LOD 50 (Box)'})
             .on('change', (ev) => {
                 if (ev.value) {
-                    addLODIfNeeded(50, () => new RedGPU.Primitive.Sphere(context, 1, 5, 5, 5), materialLOD1);
+                    addLODIfNeeded(50, () => new RedGPU.Primitive.Box(context), materialLOD1);
                 } else {
                     removeLODIfExists(50);
                 }
@@ -173,7 +173,7 @@ async function createTest(context, scene, material) {
         pane.addBinding(lodState, 'lod70', {label: 'LOD 70 (Circle)'})
             .on('change', (ev) => {
                 if (ev.value) {
-                    addLODIfNeeded(70, () => new RedGPU.Primitive.Box(context), materialLOD2);
+                    addLODIfNeeded(70, () => new RedGPU.Primitive.Ground(context), materialLOD2);
                 } else {
                     removeLODIfExists(70);
                 }

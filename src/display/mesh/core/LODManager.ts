@@ -1,4 +1,5 @@
 import Geometry from "../../../geometry/Geometry";
+import PBRMaterial from "../../../material/pbrMaterial/PBRMaterial";
 import Primitive from "../../../primitive/core/Primitive";
 import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import ABaseMaterial from "../../../material/core/ABaseMaterial";
@@ -21,7 +22,10 @@ type LODEntry = {
 	distance: number;
 	distanceSquared: number;
 	geometry: LODGeometry;
-    material?: ABaseMaterial;
+	materialIsPBR:boolean;
+	geometryIsPBR:boolean;
+	label: string;
+	material?: ABaseMaterial;
 };
 
 /**
@@ -81,7 +85,7 @@ class LODManager {
 	 * @throws {Error} LOD 레벨이 8개를 초과하는 경우
 	 * @throws {Error} 동일한 거리의 LOD가 이미 존재하는 경우
 	 */
-	addLOD(distance: number, geometry: LODGeometry,material:ABaseMaterial) {
+	addLOD(distance: number, geometry: LODGeometry, material: ABaseMaterial) {
 		validatePositiveNumberRange(distance, 1)
 		if (this.#lodList.length >= 8) {
 			throw new Error("Maximum of 8 LOD levels allowed.");
@@ -89,7 +93,17 @@ class LODManager {
 		if (this.#lodList.some(lod => lod.distance === distance)) {
 			throw new Error(`LOD with distance ${distance} already exists.`);
 		}
-		this.#lodList.push({distance, distanceSquared: distance * distance, geometry,material});
+		const geometryIsPBR = geometry.vertexBuffer.interleavedStruct.label==='PBR'
+		const materialIsPBR = material instanceof PBRMaterial
+		this.#lodList.push({
+			distance,
+			distanceSquared: distance * distance,
+			geometry,
+			material,
+			geometryIsPBR,
+			materialIsPBR ,
+			label:`${geometryIsPBR?'pbr':'pbr_no_pbr'}_${materialIsPBR?'pbr':'pbr_no_pbr'}}`
+		});
 		this.#lodList.sort((a, b) => a.distance - b.distance);
 		this.#callback?.()
 	}

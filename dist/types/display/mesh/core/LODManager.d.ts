@@ -19,6 +19,9 @@ type LODEntry = {
     distance: number;
     distanceSquared: number;
     geometry: LODGeometry;
+    materialIsPBR: boolean;
+    geometryIsPBR: boolean;
+    label: string;
     material?: ABaseMaterial;
 };
 /**

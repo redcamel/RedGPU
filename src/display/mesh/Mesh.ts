@@ -3,8 +3,11 @@ import {Function} from "wgsl_reflect";
 import RedGPUContext from "../../context/RedGPUContext";
 import DefineForVertex from "../../defineProperty/DefineForVertex";
 import Geometry from "../../geometry/Geometry";
+import {ABaseMaterial} from "../../material/core";
+import PBRMaterial from "../../material/pbrMaterial/PBRMaterial";
 import Primitive from "../../primitive/core/Primitive";
 import DrawBufferManager, {DrawCommandSlot} from "../../renderer/core/DrawBufferManager";
+import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import AABB from "../../utils/math/bound/AABB";
@@ -23,9 +26,11 @@ import createMeshVertexUniformBuffers from "./core/createMeshVertexUniformBuffer
 import LODManager from "./core/LODManager";
 import MeshBase from "./core/MeshBase";
 import Object3DContainer from "./core/Object3DContainer";
+import createBasePipeline from "./core/pipeline/createBasePipeline";
 import updateMeshDirtyPipeline from "./core/pipeline/updateMeshDirtyPipeline";
 import getBasicMeshVertexBindGroupDescriptor from "./core/shader/getBasicMeshVertexBindGroupDescriptor";
 import VertexGPURenderInfo from "./core/VertexGPURenderInfo";
+import meshVertexSource from './shader/meshVertex.wgsl';
 
 const VERTEX_SHADER_MODULE_NAME_PBR_SKIN = 'VERTEX_MODULE_MESH_PBR_SKIN'
 const CONVERT_RADIAN = Math.PI / 180;
@@ -39,6 +44,10 @@ interface Mesh {
 	disableJitter: boolean
 	meshType: string
 	useDisplacementTexture: boolean
+}
+interface LODGPURenderInfo {
+	vertexUniformBindGroup: GPUBindGroup;
+	pipeline: GPURenderPipeline;
 }
 
 /**
@@ -139,6 +148,7 @@ class Mesh extends MeshBase {
 	#LODManager: LODManager = new LODManager(() => {
 		this.dirtyLOD = true;
 	});
+	#lodGPURenderInfoList: LODGPURenderInfo[] = [];
 	#currentLODIndex: number = -1
 
 	/**
@@ -819,6 +829,7 @@ class Mesh extends MeshBase {
 				updateMeshDirtyPipeline(this, renderViewStateData)
 				this.#bundleEncoder = null
 				this.#renderBundle = null
+
 			}
 		} else {
 			renderViewStateData.num3DGroups++
@@ -959,6 +970,10 @@ class Mesh extends MeshBase {
 						|| this.dirtyLOD
 					) {
 						this.#setRenderBundle(renderViewStateData)
+
+					}
+					if(this.dirtyLOD){
+						this.#updateLODPipeline()
 						this.dirtyLOD = false
 					}
 					renderViewStateData.numDrawCalls++
@@ -1073,7 +1088,64 @@ class Mesh extends MeshBase {
 		)
 		updateMeshDirtyPipeline(this)
 	}
+	#updateLODPipeline = () => {
 
+		const {gpuDevice,redGPUContext} = this
+		const {resourceManager} = redGPUContext
+		this.#lodGPURenderInfoList.length = 0;
+		const vertexBindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout(
+			ResourceManager.PRESET_VERTEX_GPUBindGroupLayout,
+		);
+
+		this.LODManager.LODList.forEach((lod, index) => {
+			const vModuleDescriptor: GPUShaderModuleDescriptor = {
+				code: this.#getLODVertexModuleSource(lod.geometry, lod.material),
+			};
+			const vertexShaderModule: GPUShaderModule = resourceManager.createGPUShaderModule(
+				`${lod.label}`,
+				vModuleDescriptor,
+			);
+			this.#lodGPURenderInfoList[index] = {
+				pipeline: createBasePipeline(
+					//@ts-ignore
+					{
+						vertexStateBuffers: lod.geometry.gpuRenderInfo.buffers,
+						primitiveState: this.primitiveState,
+						depthStencilState: this.depthStencilState,
+						geometry: lod.geometry,
+						material: lod.material || this.material,
+						redGPUContext: redGPUContext,
+						gpuRenderInfo: this.gpuRenderInfo
+					},
+					vertexShaderModule,
+					vertexBindGroupLayout,
+				),
+				vertexUniformBindGroup: redGPUContext.gpuDevice.createBindGroup(getBasicMeshVertexBindGroupDescriptor({
+					redGPUContext : redGPUContext,
+					material : lod.material || this.material,
+					//@ts-ignore
+					gpuRenderInfo : {
+						vertexBindGroupLayout,
+						vertexUniformBuffer : this.gpuRenderInfo.vertexUniformBuffer
+					}
+				}))
+			};
+		});
+	}
+	#getLODVertexModuleSource(geometry: Geometry | Primitive, material: ABaseMaterial): string {
+		const label = geometry.vertexBuffer.interleavedStruct.label;
+		const isPbrMaterial = material instanceof PBRMaterial;
+
+		const isPBR = label === 'PBR' && isPbrMaterial;
+		const isPBROnyFragment = label !== 'PBR' && isPbrMaterial;
+
+		// const input = isPBR ? vertexModuleSourceInputPbr : vertexModuleSourceInputBasic;
+		// const output = isPBROnyFragment ? vertexModuleSourceOutputPbr :
+		// 	isPBR ? vertexModuleSourceOutputPbr :
+		// 		vertexModuleSourceOutputBasic;
+
+		return meshVertexSource
+	}
 	createMeshVertexShaderModuleBASIC = (VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT_BASIC, vertexModuleSource): GPUShaderModule => {
 		const {redGPUContext} = this
 		const {gpuRenderInfo} = this
@@ -1091,30 +1163,36 @@ class Mesh extends MeshBase {
 
 	#setRenderBundle(renderViewStateData: RenderViewStateData) {
 		const {view} = renderViewStateData
-		this.#renderBundle = this.#createRenderBundle(view, this._geometry)
+		this.#renderBundle = this.#createRenderBundle(view, this._geometry,this._material)
 		this.LODManager.LODList.forEach((lod, index) => {
-			this.#renderBundle_LODList[index] = this.#createRenderBundle(view, lod.geometry, index)
+			this.#renderBundle_LODList[index] = this.#createRenderBundle(view, lod.geometry, lod.material || this._material,index)
 		});
 		// keepLog('렌더번들갱신', this.name)
 		// keepLog(this.#renderBundle_LODList)
 	}
 
-	#createRenderBundle(view: View3D, geometry: Geometry | Primitive, lodIndex: number = null): GPURenderBundle {
+	#createRenderBundle(view: View3D, geometry: Geometry | Primitive,material:ABaseMaterial, lodIndex: number = null): GPURenderBundle {
 		const {gpuDevice} = this.redGPUContext
 		const {renderViewStateData} = view
 		const {pipeline, vertexUniformBindGroup} = this.gpuRenderInfo
 		const {vertexBuffer, indexBuffer} = geometry
-		const {fragmentUniformBindGroup} = this._material.gpuRenderInfo
+		const {fragmentUniformBindGroup} = material.gpuRenderInfo
 		this.#setDrawBuffer(geometry, lodIndex)
-		this.#bundleEncoder = null
-		this.#bundleEncoder = gpuDevice.createRenderBundleEncoder({
+		const isLOD = lodIndex !== null
+		const bundleEncoder = gpuDevice.createRenderBundleEncoder({
 			...view.basicRenderBundleEncoderDescriptor,
 			label: this.uuid,
 		})
-		const bundleEncoder = this.#bundleEncoder
+		if(isLOD){
+
+		}else{
+			this.#bundleEncoder = bundleEncoder
+			this.#prevSystemBindGroupList[renderViewStateData.viewIndex] = view.systemUniform_Vertex_UniformBindGroup
+			this.#prevFragmentBindGroup = fragmentUniformBindGroup
+		}
+
 		const {gpuBuffer} = vertexBuffer
-		this.#prevSystemBindGroupList[renderViewStateData.viewIndex] = view.systemUniform_Vertex_UniformBindGroup
-		this.#prevFragmentBindGroup = fragmentUniformBindGroup
+
 		bundleEncoder.setPipeline(pipeline)
 		bundleEncoder.setVertexBuffer(0, gpuBuffer)
 		// @ts-ignore
