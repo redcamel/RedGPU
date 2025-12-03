@@ -4,14 +4,11 @@ import RedGPUContext from "../../context/RedGPUContext";
 import DefineForVertex from "../../defineProperty/DefineForVertex";
 import Geometry from "../../geometry/Geometry";
 import {ABaseMaterial} from "../../material/core";
-import PBRMaterial from "../../material/pbrMaterial/PBRMaterial";
 import Primitive from "../../primitive/core/Primitive";
 import DrawBufferManager, {DrawCommandSlot} from "../../renderer/core/DrawBufferManager";
 import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
-import ParseWGSL from "../../resources/wgslParser/parseWGSL";
 import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
-import {createUUID, keepLog} from "../../utils";
 import AABB from "../../utils/math/bound/AABB";
 import calculateMeshAABB from "../../utils/math/bound/calculateMeshAABB";
 import calculateMeshCombinedAABB from "../../utils/math/bound/calculateMeshCombinedAABB";
@@ -32,8 +29,6 @@ import createBasePipeline from "./core/pipeline/createBasePipeline";
 import updateMeshDirtyPipeline from "./core/pipeline/updateMeshDirtyPipeline";
 import getBasicMeshVertexBindGroupDescriptor from "./core/shader/getBasicMeshVertexBindGroupDescriptor";
 import VertexGPURenderInfo from "./core/VertexGPURenderInfo";
-import meshVertexSource from './shader/meshVertex.wgsl';
-import meshVertexSourcePbr from './shader/meshVertexPbr.wgsl';
 
 const VERTEX_SHADER_MODULE_NAME_PBR_SKIN = 'VERTEX_MODULE_MESH_PBR_SKIN'
 const CONVERT_RADIAN = Math.PI / 180;
@@ -1100,6 +1095,21 @@ class Mesh extends MeshBase {
         updateMeshDirtyPipeline(this)
     }
 
+    createMeshVertexShaderModuleBASIC = (VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT_BASIC, vertexModuleSource): GPUShaderModule => {
+        const {redGPUContext} = this
+        const {gpuRenderInfo} = this
+        if (gpuRenderInfo.vertexUniformInfo !== UNIFORM_STRUCT_BASIC) {
+            gpuRenderInfo.vertexUniformInfo = UNIFORM_STRUCT_BASIC
+            gpuRenderInfo.vertexStructInfo = SHADER_INFO
+            createMeshVertexUniformBuffers(this)
+        }
+        gpuRenderInfo.vertexShaderSourceVariant = SHADER_INFO.shaderSourceVariant
+        gpuRenderInfo.vertexShaderVariantConditionalBlocks = SHADER_INFO.conditionalBlocks
+        gpuRenderInfo.vertexUniformBindGroup = redGPUContext.gpuDevice.createBindGroup(getBasicMeshVertexBindGroupDescriptor(this));
+        this.#checkVariant(VERTEX_SHADER_MODULE_NAME)
+        return this.gpuRenderInfo.vertexShaderModule
+    }
+
     #updateLODPipeline = () => {
 
         const {gpuDevice, redGPUContext} = this
@@ -1144,22 +1154,6 @@ class Mesh extends MeshBase {
             };
         });
         this.#currentLODIndex = -1;
-    }
-
-
-    createMeshVertexShaderModuleBASIC = (VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT_BASIC, vertexModuleSource): GPUShaderModule => {
-        const {redGPUContext} = this
-        const {gpuRenderInfo} = this
-        if (gpuRenderInfo.vertexUniformInfo !== UNIFORM_STRUCT_BASIC) {
-            gpuRenderInfo.vertexUniformInfo = UNIFORM_STRUCT_BASIC
-            gpuRenderInfo.vertexStructInfo = SHADER_INFO
-            createMeshVertexUniformBuffers(this)
-        }
-        gpuRenderInfo.vertexShaderSourceVariant = SHADER_INFO.shaderSourceVariant
-        gpuRenderInfo.vertexShaderVariantConditionalBlocks = SHADER_INFO.conditionalBlocks
-        gpuRenderInfo.vertexUniformBindGroup = redGPUContext.gpuDevice.createBindGroup(getBasicMeshVertexBindGroupDescriptor(this));
-        this.#checkVariant(VERTEX_SHADER_MODULE_NAME)
-        return this.gpuRenderInfo.vertexShaderModule
     }
 
     #setRenderBundle(renderViewStateData: RenderViewStateData) {

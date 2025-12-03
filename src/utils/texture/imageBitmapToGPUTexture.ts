@@ -9,32 +9,32 @@
  * @category Texture
  */
 const imageBitmapToGPUTexture = (
-	gpuDevice: GPUDevice,
-	imageBitmaps: ImageBitmap[],
-	textureDescriptor: GPUTextureDescriptor,
-	usePremultiplyAlpha: boolean = true
+    gpuDevice: GPUDevice,
+    imageBitmaps: ImageBitmap[],
+    textureDescriptor: GPUTextureDescriptor,
+    usePremultiplyAlpha: boolean = true
 ) => {
-	const newGPUTexture = gpuDevice.createTexture(textureDescriptor);
-	//
-	for (let i = 0; i < imageBitmaps.length; i++) {
-		const targetImgBitmap = imageBitmaps[i]
-		const source: GPUCopyExternalImageSourceInfo = {source: targetImgBitmap}
-		const destination: GPUCopyExternalImageDestInfo = {
-			texture: newGPUTexture,
-			origin: [0, 0, i],
-			premultipliedAlpha: usePremultiplyAlpha
-		}
-		if (textureDescriptor.format.includes('srgb')) {
-			destination.colorSpace = 'srgb'
-		}
-		const copySize: GPUExtent3DStrict = [targetImgBitmap.width, targetImgBitmap.height]
-		// 생성한 텍스쳐에 데이터를 밀어넣는다.
-		gpuDevice.queue.copyExternalImageToTexture(
-			source,
-			destination,
-			copySize
-		);
-	}
-	return newGPUTexture
+    const newGPUTexture = gpuDevice.createTexture(textureDescriptor);
+    //
+    for (let i = 0; i < imageBitmaps.length; i++) {
+        const targetImgBitmap = imageBitmaps[i]
+        const source: GPUCopyExternalImageSourceInfo = {source: targetImgBitmap}
+        const destination: GPUCopyExternalImageDestInfo = {
+            texture: newGPUTexture,
+            origin: [0, 0, i],
+            premultipliedAlpha: usePremultiplyAlpha
+        }
+        if (textureDescriptor.format.includes('srgb')) {
+            destination.colorSpace = 'srgb'
+        }
+        const copySize: GPUExtent3DStrict = [targetImgBitmap.width, targetImgBitmap.height]
+        // 생성한 텍스쳐에 데이터를 밀어넣는다.
+        gpuDevice.queue.copyExternalImageToTexture(
+            source,
+            destination,
+            copySize
+        );
+    }
+    return newGPUTexture
 }
 export default imageBitmapToGPUTexture

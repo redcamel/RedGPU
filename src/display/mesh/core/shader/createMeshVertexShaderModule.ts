@@ -10,7 +10,6 @@ import vertexModuleSourcePbrOutput from "../../shader/meshVertexPbr_output.wgsl"
 
 import createMeshVertexShaderModulePBRSkin from "./createMeshVertexShaderModulePBRSkin";
 import Mesh from "../../Mesh";
-import {keepLog} from "../../../../utils";
 
 const VERTEX_SHADER_MODULE_NAME_PBR_SKIN = 'VERTEX_MODULE_MESH_PBR_SKIN'
 //

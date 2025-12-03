@@ -8,11 +8,11 @@ import sortTransparentObjects from "./sortTransparentObjects";
 export * from "./bound";
 export * from "./coordinates";
 export {
-	calculateNormals,
-	computeViewFrustumPlanes,
-	formatBytes,
-	matToEuler,
-	quaternionToRotationMat4,
-	sortTransparentObjects
+    calculateNormals,
+    computeViewFrustumPlanes,
+    formatBytes,
+    matToEuler,
+    quaternionToRotationMat4,
+    sortTransparentObjects
 }
 

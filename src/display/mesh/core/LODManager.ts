@@ -140,17 +140,6 @@ class LODManager {
         this.#callback?.()
     }
 
-    #getLODVertexModuleSource(geometry: Geometry | Primitive, material: ABaseMaterial): string {
-        const isPbrVertex = geometry.vertexBuffer.interleavedStruct.label=== 'PBR';
-        const isPbrMaterial = material instanceof PBRMaterial;
-
-        const isPBR = isPbrVertex && isPbrMaterial;
-        const isPBROnyFragment = !isPbrVertex && isPbrMaterial;
-        const isPBROnyVertex = isPbrVertex && !isPbrMaterial;
-
-        return isPBR ? SHADER_INFO_PBR : isPBROnyFragment ? SHADER_INFO_ONLY_FRAGMENT_PBR : isPBROnyVertex ? SHADER_INFO_ONLY_VERTEX_PBR : SHADER_INFO_BASIC
-    }
-
     /**
      * 현재 거리 값에 대해 가장 적절한 LOD 엔트리를 반환합니다.
      *
@@ -192,6 +181,17 @@ class LODManager {
     clearLOD() {
         this.#lodList.length = 0
         this.#callback?.()
+    }
+
+    #getLODVertexModuleSource(geometry: Geometry | Primitive, material: ABaseMaterial): string {
+        const isPbrVertex = geometry.vertexBuffer.interleavedStruct.label === 'PBR';
+        const isPbrMaterial = material instanceof PBRMaterial;
+
+        const isPBR = isPbrVertex && isPbrMaterial;
+        const isPBROnyFragment = !isPbrVertex && isPbrMaterial;
+        const isPBROnyVertex = isPbrVertex && !isPbrMaterial;
+
+        return isPBR ? SHADER_INFO_PBR : isPBROnyFragment ? SHADER_INFO_ONLY_FRAGMENT_PBR : isPBROnyVertex ? SHADER_INFO_ONLY_VERTEX_PBR : SHADER_INFO_BASIC
     }
 }
 

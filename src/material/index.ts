@@ -15,11 +15,11 @@ import TINT_BLEND_MODE from "./TINT_BLEND_MODE";
 
 export * as Core from './core'
 export {
-	TINT_BLEND_MODE,
-	BLEND_MODE,
-	COMPOSITE_MODE,
-	ColorMaterial,
-	PhongMaterial,
-	BitmapMaterial,
-	PBRMaterial
+    TINT_BLEND_MODE,
+    BLEND_MODE,
+    COMPOSITE_MODE,
+    ColorMaterial,
+    PhongMaterial,
+    BitmapMaterial,
+    PBRMaterial
 }
