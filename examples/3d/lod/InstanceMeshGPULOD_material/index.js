@@ -51,8 +51,8 @@ async function createTest(context, scene, material) {
     const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js");
 
 
-    const maxInstanceCount = 20000;
-    const instanceCount = 20000;
+    const maxInstanceCount = context.detector.isMobile ? 5000 : 20000;
+    const instanceCount =  context.detector.isMobile ? 5000 : 20000;
     const url = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Suzanne/glTF/Suzanne.gltf';
 
     new RedGPU.GLTFLoader(context, url, (result) => {
