@@ -12,11 +12,11 @@ import View3D from "../View3D";
  * @property {[number, number, number, number]} pixelRectArray - 뷰포트의 픽셀 좌표를 나타내는 배열 ([x, y, width, height])
  */
 interface ViewportSize {
-	x: number | string;
-	y: number | string;
-	width: number | string;
-	height: number | string;
-	pixelRectArray: [number, number, number, number];
+    x: number | string;
+    y: number | string;
+    width: number | string;
+    height: number | string;
+    pixelRectArray: [number, number, number, number];
 }
 
 /**
@@ -30,193 +30,193 @@ interface ViewportSize {
  * 이 메서드는 렌더링 엔진 내부에서 자동으로 사용되는 기능으로, 일반적인 사용자는 직접 호출하지 않는 것이 좋습니다.
  */
 class RenderViewStateData {
-	/** 이 뷰에 대해 거리 컬링이 활성화되어 있는지 여부 */
-	useDistanceCulling: boolean;
-	/** 컬링 계산에 사용되는 거리의 제곱 값 */
-	cullingDistanceSquared: number;
-	/** 객체를 컬링하기 위한 거리 임계값 */
-	distanceCulling: number;
-	/** 현재 프레임에서 렌더링된 3D 그룹의 수 */
-	num3DGroups: number;
-	/** 현재 프레임에서 렌더링된 3D 객체의 수 */
-	num3DObjects: number;
-	/** 현재 프레임에서 발행된 드로우 콜의 수 */
-	numDrawCalls: number;
-	/** 업데이트가 필요했던 더티 파이프라인의 수 */
-	numDirtyPipelines: number;
-	/** 렌더링된 총 인스턴스 수 */
-	numInstances: number;
-	/** 렌더링된 총 삼각형 수 */
-	numTriangles: number;
-	/** 렌더링된 총 포인트 수 */
-	numPoints: number;
-	/** 뷰 렌더링에 소요된 시간 (밀리초) */
-	viewRenderTime: number;
-	/** 현재 뷰포트 크기 및 위치 정보 */
-	viewportSize: ViewportSize;
-	viewIndex: number;
-	/** 렌더 텍스처가 사용하는 비디오 메모리 양 (바이트) */
-	usedVideoMemory: number;
-	/** 현재 사용 중인 GPU 렌더 패스 인코더 */
-	currentRenderPassEncoder: GPURenderPassEncoder;
-	/** 렌더링 프레임의 현재 타임스탬프 */
-	timestamp: number;
-	/** 컬링을 위한 프러스텀 평면 배열, 프러스텀 컬링이 비활성화된 경우 null */
-	frustumPlanes: number[][];
-	/** 최적화를 위해 이전에 사용한 버텍스 GPU 버퍼 */
-	prevVertexGpuBuffer: GPUBuffer;
-	/** 최적화를 위해 이전에 사용한 프래그먼트 유니폼 바인드 그룹 */
-	prevFragmentUniformBindGroup: GPUBindGroup;
-	/** 머티리얼로부터 변경된 버텍스 유니폼의 맵 */
-	dirtyVertexUniformFromMaterial = {};
-	/** 알파 렌더링 레이어의 객체 배열 */
-	bundleListAlphaLayer = [];
-	/** 투명 렌더링 레이어의 객체 배열 */
-	bundleListTransparentLayer = [];
-	/** 파티클 렌더링 레이어의 객체 배열 */
-	bundleListParticleLayer = [];
-	/** 2D 패스 렌더링 레이어의 객체 배열 */
-	bundleListRender2PathLayer = [];
-	/** 처리할 스킨 메시 목록 */
-	skinList = [];
-	/** 처리할 애니메이션 목록 */
-	animationList = [];
-	/** 효율적인 렌더링을 위한 렌더 번들 목록 */
-	bundleListBasicList = [];
-	/** 렌더링 시작을 표시하는 성능 타임스탬프 */
-	startTime: number;
-	/** 씬이 2D 모드인지 여부 */
-	isScene2DMode: boolean = false;
-	needResetRenderLayer: boolean = false;
-	/** 연결된 View3D 인스턴스 (private) */
-	readonly #view: View3D;
-	#prev_msaaID
+    /** 이 뷰에 대해 거리 컬링이 활성화되어 있는지 여부 */
+    useDistanceCulling: boolean;
+    /** 컬링 계산에 사용되는 거리의 제곱 값 */
+    cullingDistanceSquared: number;
+    /** 객체를 컬링하기 위한 거리 임계값 */
+    distanceCulling: number;
+    /** 현재 프레임에서 렌더링된 3D 그룹의 수 */
+    num3DGroups: number;
+    /** 현재 프레임에서 렌더링된 3D 객체의 수 */
+    num3DObjects: number;
+    /** 현재 프레임에서 발행된 드로우 콜의 수 */
+    numDrawCalls: number;
+    /** 업데이트가 필요했던 더티 파이프라인의 수 */
+    numDirtyPipelines: number;
+    /** 렌더링된 총 인스턴스 수 */
+    numInstances: number;
+    /** 렌더링된 총 삼각형 수 */
+    numTriangles: number;
+    /** 렌더링된 총 포인트 수 */
+    numPoints: number;
+    /** 뷰 렌더링에 소요된 시간 (밀리초) */
+    viewRenderTime: number;
+    /** 현재 뷰포트 크기 및 위치 정보 */
+    viewportSize: ViewportSize;
+    viewIndex: number;
+    /** 렌더 텍스처가 사용하는 비디오 메모리 양 (바이트) */
+    usedVideoMemory: number;
+    /** 현재 사용 중인 GPU 렌더 패스 인코더 */
+    currentRenderPassEncoder: GPURenderPassEncoder;
+    /** 렌더링 프레임의 현재 타임스탬프 */
+    timestamp: number;
+    /** 컬링을 위한 프러스텀 평면 배열, 프러스텀 컬링이 비활성화된 경우 null */
+    frustumPlanes: number[][];
+    /** 최적화를 위해 이전에 사용한 버텍스 GPU 버퍼 */
+    prevVertexGpuBuffer: GPUBuffer;
+    /** 최적화를 위해 이전에 사용한 프래그먼트 유니폼 바인드 그룹 */
+    prevFragmentUniformBindGroup: GPUBindGroup;
+    /** 머티리얼로부터 변경된 버텍스 유니폼의 맵 */
+    dirtyVertexUniformFromMaterial = {};
+    /** 알파 렌더링 레이어의 객체 배열 */
+    bundleListAlphaLayer = [];
+    /** 투명 렌더링 레이어의 객체 배열 */
+    bundleListTransparentLayer = [];
+    /** 파티클 렌더링 레이어의 객체 배열 */
+    bundleListParticleLayer = [];
+    /** 2D 패스 렌더링 레이어의 객체 배열 */
+    bundleListRender2PathLayer = [];
+    /** 처리할 스킨 메시 목록 */
+    skinList = [];
+    /** 처리할 애니메이션 목록 */
+    animationList = [];
+    /** 효율적인 렌더링을 위한 렌더 번들 목록 */
+    bundleListBasicList = [];
+    /** 렌더링 시작을 표시하는 성능 타임스탬프 */
+    startTime: number;
+    /** 씬이 2D 모드인지 여부 */
+    isScene2DMode: boolean = false;
+    needResetRenderLayer: boolean = false;
+    /** 연결된 View3D 인스턴스 (private) */
+    readonly #view: View3D;
+    #prev_msaaID
 
-	/**
-	 * 새로운 RenderViewStateData 인스턴스를 생성합니다.
-	 *
-	 * @param {View3D} view - 이 상태 데이터가 연결될 View3D 인스턴스
-	 */
-	constructor(view: View3D) {
-		this.#view = view;
-	}
+    /**
+     * 새로운 RenderViewStateData 인스턴스를 생성합니다.
+     *
+     * @param {View3D} view - 이 상태 데이터가 연결될 View3D 인스턴스
+     */
+    constructor(view: View3D) {
+        this.#view = view;
+    }
 
-	/**
-	 * 연결된 View3D 인스턴스를 가져옵니다.
-	 *
-	 * @readonly
-	 * @returns {View3D} View3D 인스턴스
-	 */
-	get view(): View3D {
-		return this.#view;
-	}
+    /**
+     * 연결된 View3D 인스턴스를 가져옵니다.
+     *
+     * @readonly
+     * @returns {View3D} View3D 인스턴스
+     */
+    get view(): View3D {
+        return this.#view;
+    }
 
-	/**
-	 * 새로운 프레임을 위해 렌더 상태 데이터를 초기화합니다.
-	 *
-	 * 이 메서드는 모든 카운터를 초기화하고, 레이어 배열을 비우며,
-	 * 현재 렌더링 패스를 위한 GPU 리소스를 설정합니다.
-	 * 또한 비디오 메모리 사용량을 계산하고 뷰 설정에 따라 컬링 매개변수를 구성합니다.
-	 *
-	 * @param {GPURenderPassEncoder} viewRenderPassEncoder - 현재 프레임의 렌더 패스 인코더
-	 * @param {number} time - 프레임의 현재 타임스탬프
-	 *
-	 * @throws {Error} 잘못된 매개변수가 제공되거나 필수 뷰 속성이 없는 경우
-	 * @throws {Error} 텍스처 크기 계산이 실패한 경우
-	 */
-	reset(viewRenderPassEncoder: GPURenderPassEncoder, time: number) {
-		if (!time || !this.#view) {
-			throw new Error('Invalid parameters provided');
-		}
-		const view = this.#view;
-		const {
-			useFrustumCulling,
-			frustumPlanes,
-			scene,
-			postEffectManager,
-			pickingManager,
-			viewRenderTextureManager
-		} = view;
-		const {
-			gBufferColorTexture,
-			depthTexture,
-		} = view.viewRenderTextureManager;
-		const {shadowManager} = scene;
-		if (!gBufferColorTexture || !depthTexture) {
-			throw new Error('Invalid view properties');
-		}
-		this.useDistanceCulling = view.useDistanceCulling;
-		this.distanceCulling = view.distanceCulling;
-		this.cullingDistanceSquared = this.distanceCulling * this.distanceCulling;
-		this.num3DGroups = 0;
-		this.num3DObjects = 0;
-		this.numDrawCalls = 0;
-		this.numInstances = 0;
-		this.numDirtyPipelines = 0;
-		this.numTriangles = 0;
-		this.numPoints = 0;
-		this.viewRenderTime = 0;
-		this.currentRenderPassEncoder = viewRenderPassEncoder;
-		this.timestamp = time;
-		this.prevVertexGpuBuffer = null;
-		this.prevFragmentUniformBindGroup = null;
-		this.dirtyVertexUniformFromMaterial = {};
-		//
-		// keepLog('this.needResetRenderLayer', this.needResetRenderLayer)
-		// if (this.needResetRenderLayer || this.#view.redGPUContext.antialiasingManager.msaaID !== this.#prev_msaaID) {
-		this.bundleListAlphaLayer.length = 0;
-		this.bundleListTransparentLayer.length = 0;
-		this.bundleListParticleLayer.length = 0;
-		this.bundleListRender2PathLayer.length = 0;
-		this.bundleListBasicList.length = 0;
-		// 	requestAnimationFrame(()=>{
-		// 		const {children} = this.#view.scene
-		// 		let i = children.length
-		// 		while (i--) {
-		// 			const mesh = children[i]
-		// 			const {renderBundle, material} = mesh
-		// 			if (material.use2PathRender) {
-		// 				this.bundleListRender2PathLayer[this.bundleListRender2PathLayer.length] = renderBundle
-		// 			} else if (mesh.meshType === MESH_TYPE.PARTICLE) {
-		// 				this.bundleListParticleLayer[this.bundleListParticleLayer.length] = renderBundle
-		// 			} else if (material.transparent) {
-		// 				this.bundleListTransparentLayer[this.bundleListTransparentLayer.length] = renderBundle
-		// 				// @ts-ignore
-		// 				renderBundle.mesh = this
-		// 			} else if (material.alphaBlend === 2 || material.opacity < 1 || !mesh.depthStencilState.depthWriteEnabled) {
-		// 				this.bundleListAlphaLayer[this.bundleListAlphaLayer.length] = renderBundle
-		// 			} else {
-		// 				this.bundleListBasicList[this.bundleListBasicList.length] = renderBundle
-		// 			}
-		// 		}
-		// 	})
-		// }
-		this.needResetRenderLayer = false
-		this.#prev_msaaID = this.#view.redGPUContext.antialiasingManager.msaaID
-		//
-		this.skinList.length = 0;
-		this.animationList.length = 0;
-		//
-		this.startTime = performance.now();
-		this.isScene2DMode = view.camera instanceof Camera2D;
-		this.viewIndex = view.redGPUContext.getViewIndex(view);
-		this.viewportSize = {
-			x: view.x,
-			y: view.y,
-			width: view.width,
-			height: view.height,
-			pixelRectArray: view.pixelRectArray
-		};
-		try {
-			this.usedVideoMemory = viewRenderTextureManager.videoMemorySize
-				+ shadowManager.directionalShadowManager.videoMemorySize
-				+ postEffectManager.videoMemorySize
-				+ pickingManager.videoMemorySize;
-		} catch (e) {
-			throw new Error('Could not calculate texture size: ' + e.message);
-		}
-		this.frustumPlanes = useFrustumCulling ? frustumPlanes : null;
-	}
+    /**
+     * 새로운 프레임을 위해 렌더 상태 데이터를 초기화합니다.
+     *
+     * 이 메서드는 모든 카운터를 초기화하고, 레이어 배열을 비우며,
+     * 현재 렌더링 패스를 위한 GPU 리소스를 설정합니다.
+     * 또한 비디오 메모리 사용량을 계산하고 뷰 설정에 따라 컬링 매개변수를 구성합니다.
+     *
+     * @param {GPURenderPassEncoder} viewRenderPassEncoder - 현재 프레임의 렌더 패스 인코더
+     * @param {number} time - 프레임의 현재 타임스탬프
+     *
+     * @throws {Error} 잘못된 매개변수가 제공되거나 필수 뷰 속성이 없는 경우
+     * @throws {Error} 텍스처 크기 계산이 실패한 경우
+     */
+    reset(viewRenderPassEncoder: GPURenderPassEncoder, time: number) {
+        if (!time || !this.#view) {
+            throw new Error('Invalid parameters provided');
+        }
+        const view = this.#view;
+        const {
+            useFrustumCulling,
+            frustumPlanes,
+            scene,
+            postEffectManager,
+            pickingManager,
+            viewRenderTextureManager
+        } = view;
+        const {
+            gBufferColorTexture,
+            depthTexture,
+        } = view.viewRenderTextureManager;
+        const {shadowManager} = scene;
+        if (!gBufferColorTexture || !depthTexture) {
+            throw new Error('Invalid view properties');
+        }
+        this.useDistanceCulling = view.useDistanceCulling;
+        this.distanceCulling = view.distanceCulling;
+        this.cullingDistanceSquared = this.distanceCulling * this.distanceCulling;
+        this.num3DGroups = 0;
+        this.num3DObjects = 0;
+        this.numDrawCalls = 0;
+        this.numInstances = 0;
+        this.numDirtyPipelines = 0;
+        this.numTriangles = 0;
+        this.numPoints = 0;
+        this.viewRenderTime = 0;
+        this.currentRenderPassEncoder = viewRenderPassEncoder;
+        this.timestamp = time;
+        this.prevVertexGpuBuffer = null;
+        this.prevFragmentUniformBindGroup = null;
+        this.dirtyVertexUniformFromMaterial = {};
+        //
+        // keepLog('this.needResetRenderLayer', this.needResetRenderLayer)
+        // if (this.needResetRenderLayer || this.#view.redGPUContext.antialiasingManager.msaaID !== this.#prev_msaaID) {
+        this.bundleListAlphaLayer.length = 0;
+        this.bundleListTransparentLayer.length = 0;
+        this.bundleListParticleLayer.length = 0;
+        this.bundleListRender2PathLayer.length = 0;
+        this.bundleListBasicList.length = 0;
+        // 	requestAnimationFrame(()=>{
+        // 		const {children} = this.#view.scene
+        // 		let i = children.length
+        // 		while (i--) {
+        // 			const mesh = children[i]
+        // 			const {renderBundle, material} = mesh
+        // 			if (material.use2PathRender) {
+        // 				this.bundleListRender2PathLayer[this.bundleListRender2PathLayer.length] = renderBundle
+        // 			} else if (mesh.meshType === MESH_TYPE.PARTICLE) {
+        // 				this.bundleListParticleLayer[this.bundleListParticleLayer.length] = renderBundle
+        // 			} else if (material.transparent) {
+        // 				this.bundleListTransparentLayer[this.bundleListTransparentLayer.length] = renderBundle
+        // 				// @ts-ignore
+        // 				renderBundle.mesh = this
+        // 			} else if (material.alphaBlend === 2 || material.opacity < 1 || !mesh.depthStencilState.depthWriteEnabled) {
+        // 				this.bundleListAlphaLayer[this.bundleListAlphaLayer.length] = renderBundle
+        // 			} else {
+        // 				this.bundleListBasicList[this.bundleListBasicList.length] = renderBundle
+        // 			}
+        // 		}
+        // 	})
+        // }
+        this.needResetRenderLayer = false
+        this.#prev_msaaID = this.#view.redGPUContext.antialiasingManager.msaaID
+        //
+        this.skinList.length = 0;
+        this.animationList.length = 0;
+        //
+        this.startTime = performance.now();
+        this.isScene2DMode = view.camera instanceof Camera2D;
+        this.viewIndex = view.redGPUContext.getViewIndex(view);
+        this.viewportSize = {
+            x: view.x,
+            y: view.y,
+            width: view.width,
+            height: view.height,
+            pixelRectArray: view.pixelRectArray
+        };
+        try {
+            this.usedVideoMemory = viewRenderTextureManager.videoMemorySize
+                + shadowManager.directionalShadowManager.videoMemorySize
+                + postEffectManager.videoMemorySize
+                + pickingManager.videoMemorySize;
+        } catch (e) {
+            throw new Error('Could not calculate texture size: ' + e.message);
+        }
+        this.frustumPlanes = useFrustumCulling ? frustumPlanes : null;
+    }
 }
 
 export default RenderViewStateData;

@@ -7,18 +7,18 @@
  * @constant
  */
 const GPU_FRONT_FACE = {
-	/**
-	 * 시계 방향(Clockwise) 와인딩을 앞면으로 정의합니다.
-	 *
-	 * 정점이 시계 방향으로 배치된 삼각형을 앞면으로 간주합니다.
-	 */
-	CW: 'cw',
-	/**
-	 * 반시계 방향(Counter-Clockwise) 와인딩을 앞면으로 정의합니다.
-	 *
-	 * 정점이 반시계 방향으로 배치된 삼각형을 앞면으로 간주합니다. 일반적으로 기본값으로 사용됩니다.
-	 */
-	CCW: 'ccw'
+    /**
+     * 시계 방향(Clockwise) 와인딩을 앞면으로 정의합니다.
+     *
+     * 정점이 시계 방향으로 배치된 삼각형을 앞면으로 간주합니다.
+     */
+    CW: 'cw',
+    /**
+     * 반시계 방향(Counter-Clockwise) 와인딩을 앞면으로 정의합니다.
+     *
+     * 정점이 반시계 방향으로 배치된 삼각형을 앞면으로 간주합니다. 일반적으로 기본값으로 사용됩니다.
+     */
+    CCW: 'ccw'
 } as const
 Object.freeze(GPU_FRONT_FACE)
 export default GPU_FRONT_FACE

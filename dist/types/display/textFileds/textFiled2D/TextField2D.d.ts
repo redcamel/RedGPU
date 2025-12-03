@@ -4,15 +4,15 @@ import Primitive from "../../../primitive/core/Primitive";
 import ATextField from "../core/ATextField";
 declare const BaseTextField2D: {
     new (...args: any[]): {
-        "__#93@#rotation": number;
-        "__#93@#blendMode": number;
+        "__#86373@#rotation": number;
+        "__#86373@#blendMode": number;
         get blendMode(): string;
         set blendMode(value: import("../../../material").BLEND_MODE | keyof typeof import("../../../material").BLEND_MODE);
         rotation: number;
         setScale(x: number, y?: number): void;
         setPosition(x: number, y?: number): void;
         setRotation(value: number): void;
-        "__#93@#setBlendFactor"(mode: number): void;
+        "__#86373@#setBlendFactor"(mode: number): void;
         rotationZ: number;
     };
 } & typeof ATextField;
@@ -77,6 +77,6 @@ declare class TextField2D extends BaseTextField2D {
      * TextField2D 전용 버텍스 셰이더 모듈을 생성합니다.
      * @returns {GPUShaderModule}
      */
-    createCustomMeshVertexShaderModule(): GPUShaderModule;
+    createCustomMeshVertexShaderModule: () => GPUShaderModule;
 }
 export default TextField2D;

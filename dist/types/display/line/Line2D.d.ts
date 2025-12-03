@@ -39,7 +39,7 @@ declare class Line2D extends Line3D {
      * 커스텀 버텍스 셰이더 모듈을 생성합니다.
      * @returns 생성된 셰이더 모듈
      */
-    createCustomMeshVertexShaderModule(): GPUShaderModule;
+    createCustomMeshVertexShaderModule: () => GPUShaderModule;
     /**
      * 2D 평면상에 점을 추가합니다.
      * @param x X 좌표

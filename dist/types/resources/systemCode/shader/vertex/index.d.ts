@@ -3,5 +3,6 @@ declare const SystemVertexCode: Readonly<{
     calculateMotionVector: "string";
     getBillboardMatrix: "string";
     extractScaleAndTranslation: "string";
+    meshVertexBasicUniform: "string";
 }>;
 export default SystemVertexCode;
