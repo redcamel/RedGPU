@@ -145,7 +145,7 @@ class SpriteSheet2D extends BaseSpriteSheet2D {
      * @returns 생성된 버텍스 셰이더 모듈 정보
      * @protected
      */
-    createCustomMeshVertexShaderModule() {
+    createCustomMeshVertexShaderModule= ():GPUShaderModule => {
         return this.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource)
     }
 }

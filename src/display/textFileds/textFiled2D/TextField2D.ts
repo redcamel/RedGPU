@@ -135,7 +135,7 @@ class TextField2D extends BaseTextField2D {
      * TextField2D 전용 버텍스 셰이더 모듈을 생성합니다.
      * @returns {GPUShaderModule}
      */
-    createCustomMeshVertexShaderModule() {
+    createCustomMeshVertexShaderModule= ():GPUShaderModule => {
         return this.createMeshVertexShaderModuleBASIC(
             VERTEX_SHADER_MODULE_NAME,
             SHADER_INFO,

@@ -149,7 +149,7 @@ class Mesh extends MeshBase {
     });
     #lodGPURenderInfoList: LODGPURenderInfo[] = [];
     #currentLODIndex: number = -1
-
+    createCustomMeshVertexShaderModule?: () => GPUShaderModule
     /**
      * Mesh 인스턴스를 생성합니다.
      * @param redGPUContext RedGPU 컨텍스트
@@ -817,6 +817,7 @@ class Mesh extends MeshBase {
             renderViewStateData.num3DObjects++
             if (antialiasingManager.changedMSAA) {
                 currentDirtyPipeline = true
+                this.dirtyLOD = true
             }
             if (!this.gpuRenderInfo) this.initGPURenderInfos()
             const currentUseDisplacementTexture = !!displacementTexture
@@ -968,9 +969,7 @@ class Mesh extends MeshBase {
                         || this.#prevSystemBindGroupList[renderViewStateData.viewIndex] !== view.systemUniform_Vertex_UniformBindGroup
                         || this.dirtyLOD
                     ) {
-
                         this.#setRenderBundle(renderViewStateData)
-
                     }
 
                     renderViewStateData.numDrawCalls++
@@ -1094,6 +1093,7 @@ class Mesh extends MeshBase {
         )
         updateMeshDirtyPipeline(this)
     }
+
 
     createMeshVertexShaderModuleBASIC = (VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT_BASIC, vertexModuleSource): GPUShaderModule => {
         const {redGPUContext} = this

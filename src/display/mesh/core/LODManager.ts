@@ -3,37 +3,19 @@ import PBRMaterial from "../../../material/pbrMaterial/PBRMaterial";
 import Primitive from "../../../primitive/core/Primitive";
 import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import ABaseMaterial from "../../../material/core/ABaseMaterial";
-import vertexModuleSource from '../shader/meshVertex.wgsl';
-import vertexModuleSourcePbr from '../shader/meshVertexPbr.wgsl';
-import ParseWGSL from "../../../resources/wgslParser/parseWGSL";
-import vertexModuleSourcePbrInput from "../shader/meshVertexPbr_input.wgsl";
-import vertexModuleSourcePbrOutput from "../shader/meshVertexPbr_output.wgsl";
-import vertexModuleSourceInput from "../shader/meshVertex_input.wgsl";
-import vertexModuleSourceOutput from "../shader/meshVertex_output.wgsl";
+import MESH_SHADER_INFO from "./shader/MESH_SHADER_INFO";
 
-const SHADER_INFO_BASIC = ParseWGSL([
-    vertexModuleSourceInput,
-    vertexModuleSourceOutput,
-    vertexModuleSource
-].join("\n")).shaderSourceVariant.getVariant('none')
+const {
+    SHADER_INFO_PBR,
+    SHADER_INFO_BASIC,
+    SHADER_INFO_ONLY_FRAGMENT_PBR,
+    SHADER_INFO_ONLY_VERTEX_PBR,
+} = MESH_SHADER_INFO;
 
-const SHADER_INFO_PBR = ParseWGSL([
-    vertexModuleSourcePbrInput,
-    vertexModuleSourcePbrOutput,
-    vertexModuleSourcePbr,
-].join("\n")).shaderSourceVariant.getVariant('none')
-
-const SHADER_INFO_ONLY_VERTEX_PBR = ParseWGSL([
-    vertexModuleSourcePbrInput,
-    vertexModuleSourceOutput,
-    vertexModuleSource,
-].join("\n")).shaderSourceVariant.getVariant('none')
-
-const SHADER_INFO_ONLY_FRAGMENT_PBR = ParseWGSL([
-    vertexModuleSourceInput,
-    vertexModuleSourcePbrOutput,
-    vertexModuleSource,
-].join("\n")).shaderSourceVariant.getVariant('none')
+const SOURCE_PBR = SHADER_INFO_PBR.shaderSourceVariant.getVariant('none')
+const SOURCE_BASIC = SHADER_INFO_BASIC.shaderSourceVariant.getVariant('none')
+const SOURCE_ONLY_FRAGMENT_PBR = SHADER_INFO_ONLY_FRAGMENT_PBR.shaderSourceVariant.getVariant('none')
+const SOURCE_ONLY_VERTEX_PBR = SHADER_INFO_ONLY_VERTEX_PBR.shaderSourceVariant.getVariant('none')
 /**
  * LOD에 사용되는 지오메트리 타입입니다.
  *
@@ -133,7 +115,7 @@ class LODManager {
             material,
             geometryIsPBR,
             materialIsPBR,
-            label: `${geometryIsPBR ? 'pbr' : 'noPbr'}_${material?.constructor.name}_${materialIsPBR ? 'pbr' : 'noPbr'}`,
+            label: `vertex_${geometryIsPBR ? 'pbr' : 'noPbr'}_fragment_${materialIsPBR ? 'pbr' : 'noPbr'}`,
             source: this.#getLODVertexModuleSource(geometry, material)
         });
         this.#lodList.sort((a, b) => a.distance - b.distance);
@@ -186,12 +168,10 @@ class LODManager {
     #getLODVertexModuleSource(geometry: Geometry | Primitive, material: ABaseMaterial): string {
         const isPbrVertex = geometry.vertexBuffer.interleavedStruct.label === 'PBR';
         const isPbrMaterial = material instanceof PBRMaterial;
-
         const isPBR = isPbrVertex && isPbrMaterial;
         const isPBROnyFragment = !isPbrVertex && isPbrMaterial;
         const isPBROnyVertex = isPbrVertex && !isPbrMaterial;
-
-        return isPBR ? SHADER_INFO_PBR : isPBROnyFragment ? SHADER_INFO_ONLY_FRAGMENT_PBR : isPBROnyVertex ? SHADER_INFO_ONLY_VERTEX_PBR : SHADER_INFO_BASIC
+        return isPBR ? SOURCE_PBR : isPBROnyFragment ? SOURCE_ONLY_FRAGMENT_PBR : isPBROnyVertex ? SOURCE_ONLY_VERTEX_PBR : SOURCE_BASIC
     }
 }
 
