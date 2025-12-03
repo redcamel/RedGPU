@@ -49,7 +49,7 @@ RedGPU.init(
 async function createTest(context, scene, material) {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
     const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js");
-    setDebugButtons(context);
+
 
     const maxInstanceCount = 20000;
     const instanceCount = 20000;
@@ -91,7 +91,7 @@ async function createTest(context, scene, material) {
             }
         };
         initializeInstances();
-
+        setDebugButtons(context);
         const pane = new Pane();
 
         pane.addBinding({baseMesh: "Base Mesh"}, "baseMesh", {

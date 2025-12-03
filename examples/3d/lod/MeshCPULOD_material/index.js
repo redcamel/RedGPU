@@ -50,7 +50,7 @@ RedGPU.init(
 async function createTest(context, scene) {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
     const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js");
-    setDebugButtons(context);
+
 
     const url = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Suzanne/glTF/Suzanne.gltf';
 
@@ -75,7 +75,7 @@ async function createTest(context, scene) {
             );
             scene.addChild(mesh);
         }
-
+        setDebugButtons(context);
         const pane = new Pane();
 
         const baseInfo = {baseMesh: "Base Mesh (Sphere 32x32)"};
