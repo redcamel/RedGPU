@@ -2,21 +2,7 @@
 #redgpu_include drawDirectionalShadowDepth;
 #redgpu_include picking;
 #redgpu_include calculateMotionVector;
-struct MatrixList{
-    localMatrix: mat4x4<f32>,
-    modelMatrix: mat4x4<f32>,
-    prevModelMatrix: mat4x4<f32>,
-    normalModelMatrix: mat4x4<f32>,
-}
-struct VertexUniforms {
-    matrixList:MatrixList,
-    pickingId: u32,
-    receiveShadow: f32,
-    combinedOpacity: f32,
-    useDisplacementTexture: u32,
-    displacementScale: f32,
-    disableJitter: u32,
-};
+#redgpu_include meshVertexBasicUniform;
 
 const maxDistance: f32 = 1000.0;
 const maxMipLevel: f32 = 10.0;
