@@ -30,14 +30,14 @@ const SHADER_INFO_BASIC = parseWGSL([
 ].join("\n"));
 const UNIFORM_STRUCT_BASIC = SHADER_INFO_BASIC.uniforms.vertexUniforms;
 
-const VERTEX_SHADER_MODULE_NAME_IN_BASIC_OUT_PBR = 'VERTEX_MODULE_MESH_IN_BASIC_OUT_PBR'
-const SHADER_INFO_IN_BASIC_OUT_PBR = parseWGSL([
+const VERTEX_SHADER_MODULE_NAME_ONLY_FRAGMENT_PBR = 'VERTEX_MODULE_MESH_IN_ONLY_FRAGMENT_PBR'
+const SHADER_INFO_ONLY_FRAGMENT_PBR = parseWGSL([
     vertexModuleSourceInput,
     vertexModuleSourcePbrOutput,
     vertexModuleSource,
 ].join("\n"));
-const VERTEX_SHADER_MODULE_NAME_PBR_OUT_BASIC = 'VERTEX_MODULE_MESH_PBR_OUT_BASIC'
-const SHADER_INFO_IN_PBR_OUT_BASIC = parseWGSL([
+const VERTEX_SHADER_MODULE_NAME_ONLY_VERTEX_PBR = 'VERTEX_MODULE_MESH_ONLY_VERTEX_PBR'
+const SHADER_INFO_ONLY_VERTEX_PBR = parseWGSL([
     vertexModuleSourcePbrInput,
     vertexModuleSourceOutput,
     vertexModuleSource,
@@ -58,8 +58,8 @@ const createMeshVertexShaderModule = (mesh: any): GPUShaderModule => {
     return result
 }
 
-const getVertexModuleSource = (mesh:Mesh)=>{
-    const {geometry,material} = mesh
+const getVertexModuleSource = (mesh: Mesh) => {
+    const {geometry, material} = mesh
     const vertexIsPBR = geometry.vertexBuffer.interleavedStruct.label === 'PBR';
     const isPbrMaterial = material instanceof PBRMaterial;
 
@@ -69,9 +69,9 @@ const getVertexModuleSource = (mesh:Mesh)=>{
 
 
     return {
-        source : isPBR ? SHADER_INFO_PBR.defaultSource : isPBROnyFragment ? SHADER_INFO_IN_BASIC_OUT_PBR.defaultSource : isPBROnyVertex ? SHADER_INFO_IN_PBR_OUT_BASIC.defaultSource : SHADER_INFO_BASIC.defaultSource,
-        shaderInfo : isPBR ? SHADER_INFO_PBR : isPBROnyFragment ? SHADER_INFO_IN_BASIC_OUT_PBR : isPBROnyVertex ? SHADER_INFO_IN_PBR_OUT_BASIC : SHADER_INFO_BASIC,
-        name : isPBR ? VERTEX_SHADER_MODULE_NAME_PBR : isPBROnyFragment ? VERTEX_SHADER_MODULE_NAME_IN_BASIC_OUT_PBR : isPBROnyVertex ? VERTEX_SHADER_MODULE_NAME_PBR_OUT_BASIC : VERTEX_SHADER_MODULE_NAME_BASIC,
+        source: isPBR ? SHADER_INFO_PBR.defaultSource : isPBROnyFragment ? SHADER_INFO_ONLY_FRAGMENT_PBR.defaultSource : isPBROnyVertex ? SHADER_INFO_ONLY_VERTEX_PBR.defaultSource : SHADER_INFO_BASIC.defaultSource,
+        shaderInfo: isPBR ? SHADER_INFO_PBR : isPBROnyFragment ? SHADER_INFO_ONLY_FRAGMENT_PBR : isPBROnyVertex ? SHADER_INFO_ONLY_VERTEX_PBR : SHADER_INFO_BASIC,
+        name: isPBR ? VERTEX_SHADER_MODULE_NAME_PBR : isPBROnyFragment ? VERTEX_SHADER_MODULE_NAME_ONLY_FRAGMENT_PBR : isPBROnyVertex ? VERTEX_SHADER_MODULE_NAME_ONLY_VERTEX_PBR : VERTEX_SHADER_MODULE_NAME_BASIC,
     }
 }
 export default createMeshVertexShaderModule

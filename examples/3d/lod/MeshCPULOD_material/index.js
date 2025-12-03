@@ -87,10 +87,10 @@ async function createTest(context, scene, material) {
             const mesh = new RedGPU.Display.Mesh(
                 context,
                 gltf.geometry,
-                // gltf.material
+                gltf.material
                 // new RedGPU.Primitive.Sphere(context, 1,),
                 // materialLOD2
-                gltf.material
+                // gltf.material
             );
             mesh.setPosition(Math.random() * 140 - 70, Math.random() * 140 - 70, Math.random() * 140 - 70);
             scene.addChild(mesh);
@@ -118,7 +118,6 @@ async function createTest(context, scene, material) {
                 scene.children.forEach(mesh => mesh.LODManager.addLOD(distance,
                     createGeometry(),
                     material
-                    // gltf.material
 	                ));
             }
         };
@@ -147,9 +146,9 @@ async function createTest(context, scene, material) {
         };
 
         // 초기 LOD 3개 활성화
-        addLODIfNeeded(25, () => gltf.geometry, materialLOD0);
+        // addLODIfNeeded(25, () => gltf.geometry, materialLOD0);
         addLODIfNeeded(50, () => new RedGPU.Primitive.Box(context), materialLOD1);
-        addLODIfNeeded(70, () => new RedGPU.Primitive.Ground(context), materialLOD2);
+        // addLODIfNeeded(70, () => new RedGPU.Primitive.Ground(context), materialLOD2);
         updateLODInfo();
 
         // 25 LOD 토글

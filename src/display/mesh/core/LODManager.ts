@@ -3,15 +3,13 @@ import PBRMaterial from "../../../material/pbrMaterial/PBRMaterial";
 import Primitive from "../../../primitive/core/Primitive";
 import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import ABaseMaterial from "../../../material/core/ABaseMaterial";
-import meshVertexSource from '../shader/meshVertex.wgsl';
-import meshVertexSourcePbr from '../shader/meshVertexPbr.wgsl';
+import vertexModuleSource from '../shader/meshVertex.wgsl';
+import vertexModuleSourcePbr from '../shader/meshVertexPbr.wgsl';
 import ParseWGSL from "../../../resources/wgslParser/parseWGSL";
 import vertexModuleSourcePbrInput from "../shader/meshVertexPbr_input.wgsl";
 import vertexModuleSourcePbrOutput from "../shader/meshVertexPbr_output.wgsl";
-import vertexModuleSourcePbr from "../shader/meshVertexPbr.wgsl";
 import vertexModuleSourceInput from "../shader/meshVertex_input.wgsl";
 import vertexModuleSourceOutput from "../shader/meshVertex_output.wgsl";
-import vertexModuleSource from "../shader/meshVertex.wgsl";
 
 const SHADER_INFO_BASIC = ParseWGSL([
     vertexModuleSourceInput,
