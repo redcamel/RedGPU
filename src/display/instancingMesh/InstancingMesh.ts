@@ -16,7 +16,7 @@ import InstancingMeshObject3D from "./core/InstancingMeshObject3D";
 import cullingComputeSource from "./shader/instanceCullingCompute.wgsl";
 import vertexModuleSourceHead from "./shader/instanceMeshVertex_head.wgsl";
 import vertexModuleSourceBasic from "./shader/instanceMeshVertex_basic.wgsl";
-import vertexModuleSourcePbr from "./shader/instanceMeshVertex_pbr.wgsl";
+import vertexModuleSourcePbr from "./shader/instanceMeshVertex_Pbr.wgsl";
 import vertexModuleSourceInputBasic from "./shader/instanceMeshVertex_input_basic.wgsl";
 import vertexModuleSourceOutputBasic from "./shader/instanceMeshVertex_output_basic.wgsl";
 import vertexModuleSourceInputPbr from "./shader/instanceMeshVertex_input_Pbr.wgsl";
