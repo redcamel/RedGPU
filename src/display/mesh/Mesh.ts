@@ -29,6 +29,7 @@ import createBasePipeline from "./core/pipeline/createBasePipeline";
 import updateMeshDirtyPipeline from "./core/pipeline/updateMeshDirtyPipeline";
 import getBasicMeshVertexBindGroupDescriptor from "./core/shader/getBasicMeshVertexBindGroupDescriptor";
 import VertexGPURenderInfo from "./core/VertexGPURenderInfo";
+import {keepLog} from "../../utils";
 
 const VERTEX_SHADER_MODULE_NAME_PBR_SKIN = 'VERTEX_MODULE_MESH_PBR_SKIN'
 const CONVERT_RADIAN = Math.PI / 180;
@@ -144,9 +145,7 @@ class Mesh extends MeshBase {
     #needUpdateMatrixUniform: boolean = true
     #uniformDataMatrixList: Float32Array
     #displacementScale: number
-    #LODManager: LODManager = new LODManager(() => {
-        this.dirtyLOD = true;
-    });
+    #LODManager: LODManager
     #lodGPURenderInfoList: LODGPURenderInfo[] = [];
     #currentLODIndex: number = -1
     createCustomMeshVertexShaderModule?: () => GPUShaderModule
@@ -165,6 +164,9 @@ class Mesh extends MeshBase {
         this.#pickingId = uuidToUint(this.uuid)
         this.#drawBufferManager = DrawBufferManager.getInstance(redGPUContext)
         this.#checkDrawCommandSlot()
+        this.#LODManager = new LODManager(this,() => {
+            this.dirtyLOD = true;
+        })
     }
 
     get LODManager(): LODManager {

@@ -36,9 +36,9 @@ type LODEntry = {
     geometry: LODGeometry;
     materialIsPBR: boolean;
     geometryIsPBR: boolean;
-    label: string;
     material?: ABaseMaterial;
-    source: string;
+    label?: string;
+    source?: string;
 };
 
 /**
@@ -61,13 +61,17 @@ type LODEntry = {
 class LODManager {
     #lodList: LODEntry[] = [];
     #callback: () => void;
+    #isInstanceMode: boolean = false
 
     /**
      * LODManager 인스턴스를 생성합니다.
      *
      * @param callback LOD 목록이 변경될 때마다 호출되는 콜백 함수
      */
-    constructor(callback: () => void) {
+    constructor(ownner: any, callback: () => void) {
+        if (ownner.constructor.name === 'InstancingMesh') {
+            this.#isInstanceMode = true
+        }
         this.#callback = callback;
     }
 
@@ -108,16 +112,21 @@ class LODManager {
         }
         const geometryIsPBR = geometry.vertexBuffer.interleavedStruct.label === 'PBR'
         const materialIsPBR = material instanceof PBRMaterial
-        this.#lodList.push({
+        const info = {
             distance,
             distanceSquared: distance * distance,
             geometry,
             material,
             geometryIsPBR,
             materialIsPBR,
-            label: `vertex_${geometryIsPBR ? 'pbr' : 'noPbr'}_fragment_${materialIsPBR ? 'pbr' : 'noPbr'}`,
-            source: this.#getLODVertexModuleSource(geometry, material)
-        });
+        }
+        this.#lodList.push({
+            ...info,
+            ...(this.#isInstanceMode ? {} : {
+                label: `vertex_${geometryIsPBR ? 'pbr' : 'noPbr'}_fragment_${materialIsPBR ? 'pbr' : 'noPbr'}`,
+                source: this.#getLODVertexModuleSource(geometry, material)
+            })
+        })
         this.#lodList.sort((a, b) => a.distance - b.distance);
         this.#callback?.()
     }

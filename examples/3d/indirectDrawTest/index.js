@@ -93,7 +93,7 @@ const createSampleMesh = (redGPUContext, scene) => {
 
     return mesh;
 };
-const createSampleMesh2= (redGPUContext, scene) => {
+const createSampleMesh2 = (redGPUContext, scene) => {
     const material = new RedGPU.Material.PhongMaterial(redGPUContext, '#ff0000');
     const geometry = new RedGPU.Primitive.Sphere(redGPUContext);
     const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);

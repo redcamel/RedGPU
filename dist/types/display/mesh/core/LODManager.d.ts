@@ -21,9 +21,9 @@ type LODEntry = {
     geometry: LODGeometry;
     materialIsPBR: boolean;
     geometryIsPBR: boolean;
-    label: string;
     material?: ABaseMaterial;
-    source: string;
+    label?: string;
+    source?: string;
 };
 /**
  * 거리 기반 LOD(Level of Detail) 관리를 담당하는 매니저 클래스입니다.
@@ -49,7 +49,7 @@ declare class LODManager {
      *
      * @param callback LOD 목록이 변경될 때마다 호출되는 콜백 함수
      */
-    constructor(callback: () => void);
+    constructor(ownner: any, callback: () => void);
     /**
      * 현재 등록된 모든 LOD 레벨 목록을 반환합니다.
      *

@@ -1,124 +1,98 @@
 import * as RedGPU from "../../../../dist/index.js";
 
-// 1. Create and append a canvas
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
-// 2. Initialize RedGPU
 RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.speedDistance = 3;
+
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
 
-        const light = new RedGPU.Light.DirectionalLight()
-        scene.lightManager.addDirectionalLight(light)
-
-        const texture = new RedGPU.Resource.BitmapTexture(
-            redGPUContext,
-            '../../../assets/UV_Grid_Sm.jpg'
-        );
-        const material = new RedGPU.Material.PhongMaterial(redGPUContext);
-        material.diffuseTexture = texture;
+        const light = new RedGPU.Light.DirectionalLight();
+        scene.lightManager.addDirectionalLight(light);
 
         const skyboxTexture = new RedGPU.Resource.CubeTexture(
             redGPUContext,
             [
-                "../../../assets/skybox/px.jpg", // Positive X
-                "../../../assets/skybox/nx.jpg", // Negative X
-                "../../../assets/skybox/py.jpg", // Positive Y
-                "../../../assets/skybox/ny.jpg", // Negative Y
-                "../../../assets/skybox/pz.jpg", // Positive Z
-                "../../../assets/skybox/nz.jpg", // Negative Z
+                "../../../assets/skybox/px.jpg",
+                "../../../assets/skybox/nx.jpg",
+                "../../../assets/skybox/py.jpg",
+                "../../../assets/skybox/ny.jpg",
+                "../../../assets/skybox/pz.jpg",
+                "../../../assets/skybox/nz.jpg",
             ]
         );
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, skyboxTexture);
-        view.grid = true
+        view.grid = true;
 
-        createTest(redGPUContext, scene, material);
+        createTest(redGPUContext, scene);
 
         const renderer = new RedGPU.Renderer(redGPUContext);
-        const render = (time) => {
-            // Logic for every frame goes here
-            // 매 프레임마다 실행될 로직 추가
+        renderer.start(redGPUContext, () => {
             if (scene.children[0]) {
                 // scene.children[0].rotationY += 0.001;
             }
-        };
-        renderer.start(redGPUContext, render);
-
+        });
     },
     (failReason) => {
-        // Show the error if initialization fails
-        // 초기화 실패 시 에러 표시
         console.error('초기화 실패:', failReason);
-
-        // Create an element for the error message
-        // 에러 메시지 표시용 요소 생성
         const errorMessage = document.createElement('div');
         errorMessage.innerHTML = failReason;
-
-        // Append the error message to the document body
-        // 문서 본문에 에러 메시지 추가
         document.body.appendChild(errorMessage);
     }
 );
 
-async function createTest(context, scene, material) {
+async function createTest(context, scene) {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
-
     const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js");
     setDebugButtons(context);
+
     const url = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Suzanne/glTF/Suzanne.gltf';
+
     new RedGPU.GLTFLoader(context, url, (result) => {
-        console.log(result.resultMesh);
-        // LOD별 머티리얼 준비
         const materialLOD0 = new RedGPU.Material.PhongMaterial(context, '#ff0000');
         const materialLOD1 = new RedGPU.Material.PhongMaterial(context, '#00ff00');
         const materialLOD2 = new RedGPU.Material.PhongMaterial(context, '#0000ff');
 
-        // GLTF 구조에서 대상 메쉬 추출
         const gltf = result.resultMesh.children[0];
-        const maxNum = context.detector.isMobile ? 1000 : 5000;
+        const maxNum = context.detector.isMobile ? 1000 : 10000;
+
         for (let i = 0; i < maxNum; i++) {
             const mesh = new RedGPU.Display.Mesh(
                 context,
                 gltf.geometry,
                 gltf.material
-                // new RedGPU.Primitive.Sphere(context, 1,),
-                // materialLOD2
-                // gltf.material
             );
-            mesh.setPosition(Math.random() * 140 - 70, Math.random() * 140 - 70, Math.random() * 140 - 70);
+            mesh.setPosition(
+                Math.random() * 140 - 70,
+                Math.random() * 140 - 70,
+                Math.random() * 140 - 70
+            );
             scene.addChild(mesh);
-
         }
 
         const pane = new Pane();
 
-        // ---- 기본 메쉬 (LOD 0) 표시용 - 토글 불가 ----
-        const baseInfo = {
-            baseMesh: "Base Mesh (Sphere 32x32)",
-        };
+        const baseInfo = {baseMesh: "Base Mesh (Sphere 32x32)"};
         pane.addBinding(baseInfo, "baseMesh", {
             label: "Base Mesh",
             readonly: true,
         });
 
-        // ---- LOD 토글용 유틸 ----
         const hasLOD = (distance) => {
             return scene.children[0].LODManager.LODList.some(lod => lod.distance === distance);
         };
 
         const addLODIfNeeded = (distance, createGeometry, material) => {
             if (!hasLOD(distance)) {
-                scene.children.forEach(mesh => mesh.LODManager.addLOD(distance,
-                    createGeometry(),
-                    material
-	                ));
+                scene.children.forEach(mesh =>
+                    mesh.LODManager.addLOD(distance, createGeometry(), material)
+                );
             }
         };
 
@@ -128,10 +102,14 @@ async function createTest(context, scene, material) {
             }
         };
 
+        const distanceLOD0 = 25;
+        const distanceLOD1 = 50;
+        const distanceLOD2 = 70;
+
         const lodState = {
-            lod25: true,
-            lod50: true,
-            lod70: true,
+            [`lod${distanceLOD0}`]: true,
+            [`lod${distanceLOD1}`]: true,
+            [`lod${distanceLOD2}`]: true,
             lodCount: 0,
             lodDistances: '',
         };
@@ -145,54 +123,46 @@ async function createTest(context, scene, material) {
                 .join(', ');
         };
 
-        // 초기 LOD 3개 활성화
-        // addLODIfNeeded(25, () => gltf.geometry, materialLOD0);
-        addLODIfNeeded(50, () => new RedGPU.Primitive.Box(context), materialLOD1);
-        // addLODIfNeeded(70, () => new RedGPU.Primitive.Ground(context), materialLOD2);
+        addLODIfNeeded(distanceLOD0, () => gltf.geometry, materialLOD0);
+        addLODIfNeeded(distanceLOD1, () => new RedGPU.Primitive.Sphere(context), materialLOD1);
+        addLODIfNeeded(distanceLOD2, () => new RedGPU.Primitive.Box(context), materialLOD2);
         updateLODInfo();
 
-        // 25 LOD 토글
-        pane.addBinding(lodState, 'lod25', {label: 'LOD 25 (Sphere 5x5x5)'})
-            .on('change', (ev) => {
-                if (ev.value) {
-                    addLODIfNeeded(25, () => new RedGPU.Primitive.Sphere(context, 1, 5, 5, 5), materialLOD0);
-                } else {
-                    removeLODIfExists(25);
-                }
-                updateLODInfo();
-            });
+        [
+            {dist: distanceLOD0, label: `LOD ${distanceLOD0}`, createGeo: () => gltf.geometry, mat: materialLOD0},
+            {
+                dist: distanceLOD1,
+                label: `LOD ${distanceLOD1}`,
+                createGeo: () => new RedGPU.Primitive.Box(context),
+                mat: materialLOD1
+            },
+            {
+                dist: distanceLOD2,
+                label: `LOD ${distanceLOD2}`,
+                createGeo: () => new RedGPU.Primitive.Ground(context),
+                mat: materialLOD2
+            }
+        ].forEach(config => {
+            pane.addBinding(lodState, `lod${config.dist}`, {label: config.label})
+                .on('change', (ev) => {
+                    if (ev.value) {
+                        addLODIfNeeded(config.dist, config.createGeo, config.mat);
+                    } else {
+                        removeLODIfExists(config.dist);
+                    }
+                    updateLODInfo();
+                });
+        });
 
-        // 50 LOD 토글
-        pane.addBinding(lodState, 'lod50', {label: 'LOD 50 (Box)'})
-            .on('change', (ev) => {
-                if (ev.value) {
-                    addLODIfNeeded(50, () => new RedGPU.Primitive.Box(context), materialLOD1);
-                } else {
-                    removeLODIfExists(50);
-                }
-                updateLODInfo();
-            });
-
-        // 70 LOD 토글
-        pane.addBinding(lodState, 'lod70', {label: 'LOD 70 (Circle)'})
-            .on('change', (ev) => {
-                if (ev.value) {
-                    addLODIfNeeded(70, () => new RedGPU.Primitive.Ground(context), materialLOD2);
-                } else {
-                    removeLODIfExists(70);
-                }
-                updateLODInfo();
-            });
-
-        // 현재 LOD 상태 표시
         pane.addBinding(lodState, 'lodCount', {
             label: 'LOD Count',
             readonly: true,
             format: (v) => `${Math.floor(v).toLocaleString()}`
         });
+
         pane.addBinding(lodState, 'lodDistances', {
             label: 'LOD Distances',
             readonly: true,
         });
-    })
+    });
 }
