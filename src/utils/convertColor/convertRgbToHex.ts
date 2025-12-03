@@ -13,12 +13,12 @@ import validateUintRange from "../../runtimeChecker/validateFunc/validateUintRan
  * @throws {Error} r, g, b 값이 0~255 범위를 벗어나면 예외 발생
  */
 const convertRgbToHex = (r: number, g: number, b: number): string => {
-	validateUintRange(r, 0, 255)
-	validateUintRange(g, 0, 255)
-	validateUintRange(b, 0, 255)
-	const r2 = r.toString(16).padStart(2, '0').toUpperCase();
-	const g2 = g.toString(16).padStart(2, '0').toUpperCase();
-	const b2 = b.toString(16).padStart(2, '0').toUpperCase();
-	return `#${r2}${g2}${b2}`;
+    validateUintRange(r, 0, 255)
+    validateUintRange(g, 0, 255)
+    validateUintRange(b, 0, 255)
+    const r2 = r.toString(16).padStart(2, '0').toUpperCase();
+    const g2 = g.toString(16).padStart(2, '0').toUpperCase();
+    const b2 = b.toString(16).padStart(2, '0').toUpperCase();
+    return `#${r2}${g2}${b2}`;
 }
 export default convertRgbToHex

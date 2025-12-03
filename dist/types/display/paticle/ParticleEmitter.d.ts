@@ -146,8 +146,9 @@ declare class ParticleEmitter extends Mesh {
     render(renderViewStateData: RenderViewStateData): void;
     /**
      * 커스텀 버텍스 셰이더 모듈을 생성합니다.
+     *
      * @returns 생성된 셰이더 모듈
      */
-    createCustomMeshVertexShaderModule(): GPUShaderModule;
+    createCustomMeshVertexShaderModule: () => GPUShaderModule;
 }
 export default ParticleEmitter;

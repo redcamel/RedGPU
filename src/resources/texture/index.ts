@@ -6,9 +6,9 @@ import PackedTexture from "./packedTexture/PackedTexture";
 
 export * from "./noiseTexture";
 export {
-	BitmapTexture,
-	CubeTexture,
-	IBL,
-	HDRTexture,
-	PackedTexture
+    BitmapTexture,
+    CubeTexture,
+    IBL,
+    HDRTexture,
+    PackedTexture
 }

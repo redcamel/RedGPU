@@ -4,113 +4,113 @@ const canvas = document.createElement("canvas");
 document.body.appendChild(canvas);
 
 RedGPU.init(
-	canvas,
-	(redGPUContext) => {
-		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-		controller.tilt = -15;
-		controller.distance = 30;
+    canvas,
+    (redGPUContext) => {
+        const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+        controller.tilt = -15;
+        controller.distance = 30;
 
-		const scene = new RedGPU.Display.Scene();
+        const scene = new RedGPU.Display.Scene();
 
-		const directionalLight = new RedGPU.Light.DirectionalLight();
-		scene.lightManager.addDirectionalLight(directionalLight);
+        const directionalLight = new RedGPU.Light.DirectionalLight();
+        scene.lightManager.addDirectionalLight(directionalLight);
 
-		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		view.grid = true;
-		redGPUContext.addView(view);
+        const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+        view.grid = true;
+        redGPUContext.addView(view);
 
-		view.skybox = createSkybox(redGPUContext);
+        view.skybox = createSkybox(redGPUContext);
 
-		addRandomMeshes(redGPUContext, scene);
+        addRandomMeshes(redGPUContext, scene);
 
-		const renderer = new RedGPU.Renderer(redGPUContext);
-		renderer.start(redGPUContext, (time) => {
-			redGPUContext.viewList.forEach(view => {
-				const {scene} = view;
-				let i = scene.numChildren;
-				while (i--) {
-					let testObj = scene.children[i];
-					testObj.rotationX += 1.5;
-					testObj.rotationY += 1.5;
-					testObj.y += Math.sin(time / 1000 + i * 10) / 10;
-					testObj.rotationZ += 1.5;
-				}
-			});
-		});
-	},
-	(failReason) => {
-		console.error("Initialization failed:", failReason);
-		const errorMessage = document.createElement("div");
-		errorMessage.innerHTML = failReason;
-		document.body.appendChild(errorMessage);
-	}
+        const renderer = new RedGPU.Renderer(redGPUContext);
+        renderer.start(redGPUContext, (time) => {
+            redGPUContext.viewList.forEach(view => {
+                const {scene} = view;
+                let i = scene.numChildren;
+                while (i--) {
+                    let testObj = scene.children[i];
+                    testObj.rotationX += 1.5;
+                    testObj.rotationY += 1.5;
+                    testObj.y += Math.sin(time / 1000 + i * 10) / 10;
+                    testObj.rotationZ += 1.5;
+                }
+            });
+        });
+    },
+    (failReason) => {
+        console.error("Initialization failed:", failReason);
+        const errorMessage = document.createElement("div");
+        errorMessage.innerHTML = failReason;
+        document.body.appendChild(errorMessage);
+    }
 );
 
 const createSkybox = (redGPUContext) => {
-	const skyboxImagePaths = [
-		"../../assets/skybox/px.jpg",
-		"../../assets/skybox/nx.jpg",
-		"../../assets/skybox/py.jpg",
-		"../../assets/skybox/ny.jpg",
-		"../../assets/skybox/pz.jpg",
-		"../../assets/skybox/nz.jpg",
-	];
+    const skyboxImagePaths = [
+        "../../assets/skybox/px.jpg",
+        "../../assets/skybox/nx.jpg",
+        "../../assets/skybox/py.jpg",
+        "../../assets/skybox/ny.jpg",
+        "../../assets/skybox/pz.jpg",
+        "../../assets/skybox/nz.jpg",
+    ];
 
-	const cubeTexture = new RedGPU.Resource.CubeTexture(redGPUContext, skyboxImagePaths);
-	const skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture);
-	return skybox;
+    const cubeTexture = new RedGPU.Resource.CubeTexture(redGPUContext, skyboxImagePaths);
+    const skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture);
+    return skybox;
 };
 
 const addRandomMeshes = (redGPUContext, scene) => {
-	const geometries = [
-		new RedGPU.Primitive.Sphere(redGPUContext, 2, 16, 16),
-		new RedGPU.Primitive.Box(redGPUContext, 3, 3, 3),
-		new RedGPU.Primitive.Cylinder(redGPUContext, 2, 2, 6, 16),
-		new RedGPU.Primitive.Torus(redGPUContext, 1.5, 0.5, 16, 32),
-		new RedGPU.Primitive.TorusKnot(redGPUContext, 0.5, 0.2, 128, 64, 2, 3)
-	];
+    const geometries = [
+        new RedGPU.Primitive.Sphere(redGPUContext, 2, 16, 16),
+        new RedGPU.Primitive.Box(redGPUContext, 3, 3, 3),
+        new RedGPU.Primitive.Cylinder(redGPUContext, 2, 2, 6, 16),
+        new RedGPU.Primitive.Torus(redGPUContext, 1.5, 0.5, 16, 32),
+        new RedGPU.Primitive.TorusKnot(redGPUContext, 0.5, 0.2, 128, 64, 2, 3)
+    ];
 
-	for (let i = 0; i < 1000; i++) {
-		const geometry = geometries[Math.floor(Math.random() * geometries.length)];
+    for (let i = 0; i < 1000; i++) {
+        const geometry = geometries[Math.floor(Math.random() * geometries.length)];
 
-		const x = Math.random() * 150 - 75;
-		const y = Math.random() * 3 - 1.5;
-		const z = Math.random() * 150 - 75;
+        const x = Math.random() * 150 - 75;
+        const y = Math.random() * 3 - 1.5;
+        const z = Math.random() * 150 - 75;
 
-		const material = new RedGPU.Material.PhongMaterial(redGPUContext, getRandomHexValue());
-		material.opacity = Math.random();
-		material.transparent = true;
+        const material = new RedGPU.Material.PhongMaterial(redGPUContext, getRandomHexValue());
+        material.opacity = Math.random();
+        material.transparent = true;
 
-		const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
-		mesh.setScale(Math.max(Math.random() * 1.5, 0.5));
-		mesh.setPosition(x, y, z);
-		mesh.rotationX = Math.random() * 360;
-		mesh.rotationY = Math.random() * 360;
-		mesh.rotationZ = Math.random() * 360;
+        const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
+        mesh.setScale(Math.max(Math.random() * 1.5, 0.5));
+        mesh.setPosition(x, y, z);
+        mesh.rotationX = Math.random() * 360;
+        mesh.rotationY = Math.random() * 360;
+        mesh.rotationZ = Math.random() * 360;
 
-		scene.addChild(mesh);
-	}
+        scene.addChild(mesh);
+    }
 
-	renderTestPane(redGPUContext);
+    renderTestPane(redGPUContext);
 };
 
 const getRandomHexValue = () => {
-	const randomColor = Math.floor(Math.random() * 0xffffff);
-	return `#${randomColor.toString(16).padStart(6, "0")}`;
+    const randomColor = Math.floor(Math.random() * 0xffffff);
+    return `#${randomColor.toString(16).padStart(6, "0")}`;
 };
 
 const renderTestPane = async (redGPUContext) => {
-	const {Pane} = await import(
-		"https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js"
-		);
-	const {setDebugButtons} = await import( "../../exampleHelper/createExample/panes/index.js" );
-	setDebugButtons(redGPUContext);
-	const pane = new Pane();
-	const params = {
-		transparent: true,
-	};
+    const {Pane} = await import(
+        "https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js"
+        );
+    const {setDebugButtons} = await import( "../../exampleHelper/createExample/panes/index.js" );
+    setDebugButtons(redGPUContext);
+    const pane = new Pane();
+    const params = {
+        transparent: true,
+    };
 
-	pane.addBinding(params, 'transparent').on("change", (ev) => {
-		redGPUContext.viewList[0].scene.children.forEach(v => v.material.transparent = ev.value);
-	});
+    pane.addBinding(params, 'transparent').on("change", (ev) => {
+        redGPUContext.viewList[0].scene.children.forEach(v => v.material.transparent = ev.value);
+    });
 };

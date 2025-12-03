@@ -40,6 +40,7 @@ declare class Mesh extends MeshBase {
     /** 그림자 캐스팅 여부 */
     castShadow: boolean;
     dirtyLOD: boolean;
+    createCustomMeshVertexShaderModule?: () => GPUShaderModule;
     /**
      * Mesh 인스턴스를 생성합니다.
      * @param redGPUContext RedGPU 컨텍스트

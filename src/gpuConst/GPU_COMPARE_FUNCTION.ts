@@ -7,54 +7,54 @@
  * @constant
  */
 const GPU_COMPARE_FUNCTION = {
-	/**
-	 * 항상 실패합니다.
-	 *
-	 * 모든 값에 대해 false를 반환합니다.
-	 */
-	NEVER: 'never',
-	/**
-	 * reference < target일 때 통과합니다.
-	 *
-	 * reference 값이 target 값보다 작으면 true를 반환합니다.
-	 */
-	LESS: 'less',
-	/**
-	 * reference == target일 때 통과합니다.
-	 *
-	 * reference 값과 target 값이 같으면 true를 반환합니다.
-	 */
-	EQUAL: 'equal',
-	/**
-	 * reference <= target일 때 통과합니다.
-	 *
-	 * reference 값이 target 값보다 작거나 같으면 true를 반환합니다.
-	 */
-	LESS_EQUAL: 'less-equal',
-	/**
-	 * reference > target일 때 통과합니다.
-	 *
-	 * reference 값이 target 값보다 크면 true를 반환합니다.
-	 */
-	GREATER: 'greater',
-	/**
-	 * reference != target일 때 통과합니다.
-	 *
-	 * reference 값과 target 값이 다르면 true를 반환합니다.
-	 */
-	NOT_EQUAL: 'not-equal',
-	/**
-	 * reference >= target일 때 통과합니다.
-	 *
-	 * reference 값이 target 값보다 크거나 같으면 true를 반환합니다.
-	 */
-	GREATER_EQUAL: 'greater-equal',
-	/**
-	 * 항상 통과합니다.
-	 *
-	 * 모든 값에 대해 true를 반환합니다.
-	 */
-	ALWAYS: 'always',
+    /**
+     * 항상 실패합니다.
+     *
+     * 모든 값에 대해 false를 반환합니다.
+     */
+    NEVER: 'never',
+    /**
+     * reference < target일 때 통과합니다.
+     *
+     * reference 값이 target 값보다 작으면 true를 반환합니다.
+     */
+    LESS: 'less',
+    /**
+     * reference == target일 때 통과합니다.
+     *
+     * reference 값과 target 값이 같으면 true를 반환합니다.
+     */
+    EQUAL: 'equal',
+    /**
+     * reference <= target일 때 통과합니다.
+     *
+     * reference 값이 target 값보다 작거나 같으면 true를 반환합니다.
+     */
+    LESS_EQUAL: 'less-equal',
+    /**
+     * reference > target일 때 통과합니다.
+     *
+     * reference 값이 target 값보다 크면 true를 반환합니다.
+     */
+    GREATER: 'greater',
+    /**
+     * reference != target일 때 통과합니다.
+     *
+     * reference 값과 target 값이 다르면 true를 반환합니다.
+     */
+    NOT_EQUAL: 'not-equal',
+    /**
+     * reference >= target일 때 통과합니다.
+     *
+     * reference 값이 target 값보다 크거나 같으면 true를 반환합니다.
+     */
+    GREATER_EQUAL: 'greater-equal',
+    /**
+     * 항상 통과합니다.
+     *
+     * 모든 값에 대해 true를 반환합니다.
+     */
+    ALWAYS: 'always',
 } as const
 Object.freeze(GPU_COMPARE_FUNCTION)
 export default GPU_COMPARE_FUNCTION

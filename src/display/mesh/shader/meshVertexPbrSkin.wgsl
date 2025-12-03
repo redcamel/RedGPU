@@ -1,18 +1,6 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include calculateMotionVector;
-
-struct MatrixList{
-    localMatrix: mat4x4<f32>,
-    modelMatrix: mat4x4<f32>,
-    prevModelMatrix: mat4x4<f32>,
-    normalModelMatrix: mat4x4<f32>,
-}
-struct VertexUniforms {
-    matrixList:MatrixList,
-    pickingId: u32,
-    receiveShadow: f32
-};
-
+#redgpu_include meshVertexBasicUniform;
 const maxDistance: f32 = 1000.0;
 const maxMipLevel: f32 = 10.0;
 
@@ -39,13 +27,15 @@ struct OutputDataSkin {
     @location(3) uv1: vec2<f32>,
     @location(4) vertexColor_0: vec4<f32>,
     @location(5) vertexTangent: vec4<f32>,
-    @location(6) shadowPos: vec3<f32>,
-    @location(7) receiveShadow: f32,
-    @location(8) pickingId: vec4<f32>,
     @location(9) ndcPosition: vec3<f32>,
-    @location(10) localNodeScale: f32,
-    @location(11) volumeScale: f32,
+    @location(10) localNodeScale_volumeScale: vec2<f32>,
+    @location(11) combinedOpacity: f32,
+
+    //
     @location(12) motionVector: vec3<f32>,
+    @location(13) shadowPos: vec3<f32>,
+    @location(14) @interpolate(flat) receiveShadow: f32,
+    @location(15) @interpolate(flat) pickingId: vec4<f32>,
 };
 
 struct OutputShadowData {
@@ -122,12 +112,14 @@ fn main(inputData: InputDataSkin) -> OutputDataSkin {
     let nodeScaleX = length(u_localMatrix[0].xyz);
     let nodeScaleY = length(u_localMatrix[1].xyz);
     let nodeScaleZ = length(u_localMatrix[2].xyz);
-    output.localNodeScale = pow(nodeScaleX * nodeScaleY * nodeScaleZ, 1.0 / 3.0);
-
     let volumeScaleX = length(u_modelMatrix[0].xyz);
     let volumeScaleY = length(u_modelMatrix[1].xyz);
     let volumeScaleZ = length(u_modelMatrix[2].xyz);
-    output.volumeScale = pow(volumeScaleX * volumeScaleY * volumeScaleZ, 1.0 / 3.0);
+
+    output.localNodeScale_volumeScale = vec2<f32>(
+        pow(nodeScaleX * nodeScaleY * nodeScaleZ, 1.0 / 3.0),
+        pow(volumeScaleX * volumeScaleY * volumeScaleZ, 1.0 / 3.0)
+    );
 
     return output;
 }

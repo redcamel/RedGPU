@@ -8,10 +8,10 @@ import fragmentModuleSource from './fragment.wgsl'
 const SHADER_INFO = parseWGSL(fragmentModuleSource)
 
 interface ColorMaterial {
-	/**
-	 * 머티리얼의 단색 컬러(ColorRGB)
-	 */
-	color: ColorRGB
+    /**
+     * 머티리얼의 단색 컬러(ColorRGB)
+     */
+    color: ColorRGB
 }
 
 /**
@@ -30,25 +30,25 @@ interface ColorMaterial {
  *
  */
 class ColorMaterial extends ABaseMaterial {
-	/**
-	 * ColorMaterial 생성자
-	 * @param redGPUContext - RedGPUContext 인스턴스
-	 * @param color - HEX 문자열 또는 컬러 코드(기본값: '#fff')
-	 */
-	constructor(redGPUContext: RedGPUContext, color: string = '#fff') {
-		super(
-			redGPUContext,
-			'COLOR_MATERIAL',
-			SHADER_INFO,
-			2
-		)
-		this.initGPURenderInfos()
-		this.color.setColorByHEX(color)
-	}
+    /**
+     * ColorMaterial 생성자
+     * @param redGPUContext - RedGPUContext 인스턴스
+     * @param color - HEX 문자열 또는 컬러 코드(기본값: '#fff')
+     */
+    constructor(redGPUContext: RedGPUContext, color: string = '#fff') {
+        super(
+            redGPUContext,
+            'COLOR_MATERIAL',
+            SHADER_INFO,
+            2
+        )
+        this.initGPURenderInfos()
+        this.color.setColorByHEX(color)
+    }
 }
 
 DefineForFragment.defineByPreset(ColorMaterial, [
-	DefineForFragment.PRESET_COLOR_RGB.COLOR,
+    DefineForFragment.PRESET_COLOR_RGB.COLOR,
 ])
 Object.freeze(ColorMaterial)
 export default ColorMaterial

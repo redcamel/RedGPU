@@ -4,15 +4,15 @@ import validateNumberRange from "../../../../runtimeChecker/validateFunc/validat
 import ASinglePassPostEffect, {ASinglePassPostEffectResult} from "../../../core/ASinglePassPostEffect";
 
 class DOFUnified extends ASinglePassPostEffect {
-	#nearBlurSize: number = 16;
-	#farBlurSize: number = 24;
-	#nearStrength: number = 1.0;
-	#farStrength: number = 1.0;
+    #nearBlurSize: number = 16;
+    #farBlurSize: number = 24;
+    #nearStrength: number = 1.0;
+    #farStrength: number = 1.0;
 
-	constructor(redGPUContext: RedGPUContext) {
-		super(redGPUContext);
-		const {WORK_SIZE_X, WORK_SIZE_Y, WORK_SIZE_Z} = this;
-		const computeCode = `
+    constructor(redGPUContext: RedGPUContext) {
+        super(redGPUContext);
+        const {WORK_SIZE_X, WORK_SIZE_Y, WORK_SIZE_Z} = this;
+        const computeCode = `
             struct Uniforms {
                 nearBlurSize: f32,
                 farBlurSize: f32,
@@ -180,63 +180,63 @@ class DOFUnified extends ASinglePassPostEffect {
                 }
             }
         `;
-		this.init(
-			redGPUContext,
-			'POST_EFFECT_DOF_UNIFIED',
-			{
-				msaa: computeCode,
-				nonMsaa: computeCode
-			}
-		);
-		this.nearBlurSize = this.#nearBlurSize;
-		this.farBlurSize = this.#farBlurSize;
-		this.nearStrength = this.#nearStrength;
-		this.farStrength = this.#farStrength;
-	}
+        this.init(
+            redGPUContext,
+            'POST_EFFECT_DOF_UNIFIED',
+            {
+                msaa: computeCode,
+                nonMsaa: computeCode
+            }
+        );
+        this.nearBlurSize = this.#nearBlurSize;
+        this.farBlurSize = this.#farBlurSize;
+        this.nearStrength = this.#nearStrength;
+        this.farStrength = this.#farStrength;
+    }
 
-	get nearBlurSize(): number {
-		return this.#nearBlurSize;
-	}
+    get nearBlurSize(): number {
+        return this.#nearBlurSize;
+    }
 
-	set nearBlurSize(value: number) {
-		validateNumberRange(value);
-		this.#nearBlurSize = value;
-		this.updateUniform('nearBlurSize', value)
-	}
+    set nearBlurSize(value: number) {
+        validateNumberRange(value);
+        this.#nearBlurSize = value;
+        this.updateUniform('nearBlurSize', value)
+    }
 
-	get farBlurSize(): number {
-		return this.#farBlurSize;
-	}
+    get farBlurSize(): number {
+        return this.#farBlurSize;
+    }
 
-	set farBlurSize(value: number) {
-		validateNumberRange(value);
-		this.#farBlurSize = value;
-		this.updateUniform('farBlurSize', value)
-	}
+    set farBlurSize(value: number) {
+        validateNumberRange(value);
+        this.#farBlurSize = value;
+        this.updateUniform('farBlurSize', value)
+    }
 
-	get nearStrength(): number {
-		return this.#nearStrength;
-	}
+    get nearStrength(): number {
+        return this.#nearStrength;
+    }
 
-	set nearStrength(value: number) {
-		validateNumberRange(value);
-		this.#nearStrength = value;
-		this.updateUniform('nearStrength', value)
-	}
+    set nearStrength(value: number) {
+        validateNumberRange(value);
+        this.#nearStrength = value;
+        this.updateUniform('nearStrength', value)
+    }
 
-	get farStrength(): number {
-		return this.#farStrength;
-	}
+    get farStrength(): number {
+        return this.#farStrength;
+    }
 
-	set farStrength(value: number) {
-		validateNumberRange(value);
-		this.#farStrength = value;
-		this.updateUniform('farStrength', value)
-	}
+    set farStrength(value: number) {
+        validateNumberRange(value);
+        this.#farStrength = value;
+        this.updateUniform('farStrength', value)
+    }
 
-	render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult, cocTextureInfo: ASinglePassPostEffectResult) {
-		return super.render(view, width, height, sourceTextureInfo, cocTextureInfo);
-	}
+    render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult, cocTextureInfo: ASinglePassPostEffectResult) {
+        return super.render(view, width, height, sourceTextureInfo, cocTextureInfo);
+    }
 }
 
 Object.freeze(DOFUnified);

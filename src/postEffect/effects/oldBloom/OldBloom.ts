@@ -24,94 +24,94 @@ import OldBloomBlend from "./OldBloomBlend";
  * <iframe src="/RedGPU/examples/3d/postEffect/oldBloom/"></iframe>
  */
 class OldBloom extends AMultiPassPostEffect {
-	/** 임계값 이펙트 */
-	#effect_threshold: Threshold
-	/** 가우시안 블러 이펙트 */
-	#effect_gaussianBlur: GaussianBlur
-	/** 블렌드 이펙트 */
-	#effect_oldBloomBlend: OldBloomBlend
-	/** 밝기 임계값. 기본값 156 */
-	#threshold: number = 156
-	/** 블러 강도. 기본값 32 */
-	#gaussianBlurSize: number = 32
-	/** 노출. 기본값 1 */
-	#exposure: number = 1
-	/** 블룸 강도. 기본값 1.2 */
-	#bloomStrength: number = 1.2
+    /** 임계값 이펙트 */
+    #effect_threshold: Threshold
+    /** 가우시안 블러 이펙트 */
+    #effect_gaussianBlur: GaussianBlur
+    /** 블렌드 이펙트 */
+    #effect_oldBloomBlend: OldBloomBlend
+    /** 밝기 임계값. 기본값 156 */
+    #threshold: number = 156
+    /** 블러 강도. 기본값 32 */
+    #gaussianBlurSize: number = 32
+    /** 노출. 기본값 1 */
+    #exposure: number = 1
+    /** 블룸 강도. 기본값 1.2 */
+    #bloomStrength: number = 1.2
 
-	constructor(redGPUContext: RedGPUContext) {
-		super(
-			redGPUContext,
-			[
-				new Threshold(redGPUContext),
-				new GaussianBlur(redGPUContext),
-				new OldBloomBlend(redGPUContext),
-			],
-		);
-		this.#effect_threshold = this.passList[0] as Threshold
-		this.#effect_gaussianBlur = this.passList[1] as GaussianBlur
-		this.#effect_oldBloomBlend = this.passList[2] as OldBloomBlend
-		this.#effect_threshold.threshold = this.#threshold
-		this.#effect_gaussianBlur.size = this.#gaussianBlurSize
-		this.#effect_oldBloomBlend.exposure = this.#exposure
-		this.#effect_oldBloomBlend.bloomStrength = this.#bloomStrength
-	}
+    constructor(redGPUContext: RedGPUContext) {
+        super(
+            redGPUContext,
+            [
+                new Threshold(redGPUContext),
+                new GaussianBlur(redGPUContext),
+                new OldBloomBlend(redGPUContext),
+            ],
+        );
+        this.#effect_threshold = this.passList[0] as Threshold
+        this.#effect_gaussianBlur = this.passList[1] as GaussianBlur
+        this.#effect_oldBloomBlend = this.passList[2] as OldBloomBlend
+        this.#effect_threshold.threshold = this.#threshold
+        this.#effect_gaussianBlur.size = this.#gaussianBlurSize
+        this.#effect_oldBloomBlend.exposure = this.#exposure
+        this.#effect_oldBloomBlend.bloomStrength = this.#bloomStrength
+    }
 
-	/** 밝기 임계값 반환 */
-	get threshold(): number {
-		return this.#threshold;
-	}
+    /** 밝기 임계값 반환 */
+    get threshold(): number {
+        return this.#threshold;
+    }
 
-	/** 밝기 임계값 설정 */
-	set threshold(value: number) {
-		this.#threshold = value;
-		this.#effect_threshold.threshold = value
-	}
+    /** 밝기 임계값 설정 */
+    set threshold(value: number) {
+        this.#threshold = value;
+        this.#effect_threshold.threshold = value
+    }
 
-	/** 블러 강도 반환 */
-	get gaussianBlurSize(): number {
-		return this.#gaussianBlurSize;
-	}
+    /** 블러 강도 반환 */
+    get gaussianBlurSize(): number {
+        return this.#gaussianBlurSize;
+    }
 
-	/** 블러 강도 설정 */
-	set gaussianBlurSize(value: number) {
-		this.#gaussianBlurSize = value;
-		this.#effect_gaussianBlur.size = value
-	}
+    /** 블러 강도 설정 */
+    set gaussianBlurSize(value: number) {
+        this.#gaussianBlurSize = value;
+        this.#effect_gaussianBlur.size = value
+    }
 
-	/** 노출 반환 */
-	get exposure(): number {
-		return this.#exposure;
-	}
+    /** 노출 반환 */
+    get exposure(): number {
+        return this.#exposure;
+    }
 
-	/** 노출 설정 */
-	set exposure(value: number) {
-		this.#exposure = value;
-		this.#effect_oldBloomBlend.exposure = value
-	}
+    /** 노출 설정 */
+    set exposure(value: number) {
+        this.#exposure = value;
+        this.#effect_oldBloomBlend.exposure = value
+    }
 
-	/** 블룸 강도 반환 */
-	get bloomStrength(): number {
-		return this.#bloomStrength;
-	}
+    /** 블룸 강도 반환 */
+    get bloomStrength(): number {
+        return this.#bloomStrength;
+    }
 
-	/** 블룸 강도 설정 */
-	set bloomStrength(value: number) {
-		this.#bloomStrength = value;
-		this.#effect_oldBloomBlend.bloomStrength = value
-	}
+    /** 블룸 강도 설정 */
+    set bloomStrength(value: number) {
+        this.#bloomStrength = value;
+        this.#effect_oldBloomBlend.bloomStrength = value
+    }
 
-	render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult) {
-		const thresholdResult = this.#effect_threshold.render(
-			view, width, height, sourceTextureInfo
-		)
-		const blurResult = this.#effect_gaussianBlur.render(
-			view, width, height, thresholdResult
-		)
-		return this.#effect_oldBloomBlend.render(
-			view, width, height, sourceTextureInfo, blurResult
-		)
-	}
+    render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult) {
+        const thresholdResult = this.#effect_threshold.render(
+            view, width, height, sourceTextureInfo
+        )
+        const blurResult = this.#effect_gaussianBlur.render(
+            view, width, height, thresholdResult
+        )
+        return this.#effect_oldBloomBlend.render(
+            view, width, height, sourceTextureInfo, blurResult
+        )
+    }
 }
 
 Object.freeze(OldBloom)

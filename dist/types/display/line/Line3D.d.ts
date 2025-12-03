@@ -81,9 +81,9 @@ declare class Line3D extends Mesh {
     set material(value: any);
     /**
      * 커스텀 버텍스 셰이더 모듈을 생성합니다.
-     * @returns 생성된 셰이더 모듈
+     *
      */
-    createCustomMeshVertexShaderModule(): GPUShaderModule;
+    createCustomMeshVertexShaderModule: () => GPUShaderModule;
     /**
      * 3D 공간상에 점을 추가합니다.
      * @param x X 좌표

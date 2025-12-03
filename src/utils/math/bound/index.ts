@@ -6,10 +6,10 @@ import calculateMeshOBB from "./calculateMeshOBB";
 import OBB from "./OBB";
 
 export {
-	AABB,
-	calculateGeometryAABB,
-	calculateMeshAABB,
-	calculateMeshCombinedAABB,
-	calculateMeshOBB,
-	OBB
+    AABB,
+    calculateGeometryAABB,
+    calculateMeshAABB,
+    calculateMeshCombinedAABB,
+    calculateMeshOBB,
+    OBB
 }

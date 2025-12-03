@@ -3,6 +3,6 @@ import Group3D from "./Group3D";
 
 export * as CoreGroup from './core'
 export {
-	Group2D,
-	Group3D
+    Group2D,
+    Group3D
 }

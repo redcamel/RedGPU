@@ -11,6 +11,7 @@ declare const SystemCode: Readonly<{
     calculateMotionVector: "string";
     getBillboardMatrix: "string";
     extractScaleAndTranslation: "string";
+    meshVertexBasicUniform: "string";
     SYSTEM_UNIFORM: "string";
 }>;
 export default SystemCode;

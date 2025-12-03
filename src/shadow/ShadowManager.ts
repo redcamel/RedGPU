@@ -2,18 +2,18 @@ import RedGPUContext from "../context/RedGPUContext";
 import DirectionalShadowManager from "./DirectionalShadowManager";
 
 class ShadowManager {
-	#directionalShadowManager: DirectionalShadowManager = new DirectionalShadowManager()
+    #directionalShadowManager: DirectionalShadowManager = new DirectionalShadowManager()
 
-	constructor() {
-	}
+    constructor() {
+    }
 
-	get directionalShadowManager(): DirectionalShadowManager {
-		return this.#directionalShadowManager;
-	}
+    get directionalShadowManager(): DirectionalShadowManager {
+        return this.#directionalShadowManager;
+    }
 
-	update(redGPUContext: RedGPUContext) {
-		this.#directionalShadowManager.update(redGPUContext)
-	}
+    update(redGPUContext: RedGPUContext) {
+        this.#directionalShadowManager.update(redGPUContext)
+    }
 }
 
 Object.freeze(ShadowManager)

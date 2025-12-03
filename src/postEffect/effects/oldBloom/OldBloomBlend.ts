@@ -3,14 +3,14 @@ import View3D from "../../../display/view/View3D";
 import ASinglePassPostEffect, {ASinglePassPostEffectResult} from "../../core/ASinglePassPostEffect";
 
 class OldBloomBlend extends ASinglePassPostEffect {
-	#bloomStrength: number = 1
-	#exposure: number = 1
+    #bloomStrength: number = 1
+    #exposure: number = 1
 
-	constructor(redGPUContext: RedGPUContext) {
-		super(redGPUContext);
-		const {WORK_SIZE_X, WORK_SIZE_Y, WORK_SIZE_Z} = this
-		const computeCode =
-			`
+    constructor(redGPUContext: RedGPUContext) {
+        super(redGPUContext);
+        const {WORK_SIZE_X, WORK_SIZE_Y, WORK_SIZE_Z} = this
+        const computeCode =
+            `
 				struct Uniforms {
 					bloomStrength:f32,
 					exposure:f32
@@ -41,39 +41,39 @@ class OldBloomBlend extends ASinglePassPostEffect {
 						textureStore(outputTexture, index, finalColor );
 				};
 			`
-		this.init(
-			redGPUContext,
-			'POST_EFFECT_OLD_BLOOM',
-			{
-				msaa: computeCode,
-				nonMsaa: computeCode
-			},
-		)
-		this.exposure = this.#exposure
-		this.bloomStrength = this.#bloomStrength
-	}
+        this.init(
+            redGPUContext,
+            'POST_EFFECT_OLD_BLOOM',
+            {
+                msaa: computeCode,
+                nonMsaa: computeCode
+            },
+        )
+        this.exposure = this.#exposure
+        this.bloomStrength = this.#bloomStrength
+    }
 
-	get bloomStrength(): number {
-		return this.#bloomStrength;
-	}
+    get bloomStrength(): number {
+        return this.#bloomStrength;
+    }
 
-	set bloomStrength(value: number) {
-		this.#bloomStrength = value;
-		this.updateUniform('bloomStrength', value)
-	}
+    set bloomStrength(value: number) {
+        this.#bloomStrength = value;
+        this.updateUniform('bloomStrength', value)
+    }
 
-	get exposure(): number {
-		return this.#exposure;
-	}
+    get exposure(): number {
+        return this.#exposure;
+    }
 
-	set exposure(value: number) {
-		this.#exposure = value;
-		this.updateUniform('exposure', value)
-	}
+    set exposure(value: number) {
+        this.#exposure = value;
+        this.updateUniform('exposure', value)
+    }
 
-	render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult, sourceTextureInfo1: ASinglePassPostEffectResult) {
-		return super.render(view, width, height, sourceTextureInfo, sourceTextureInfo1)
-	}
+    render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult, sourceTextureInfo1: ASinglePassPostEffectResult) {
+        return super.render(view, width, height, sourceTextureInfo, sourceTextureInfo1)
+    }
 }
 
 Object.freeze(OldBloomBlend)

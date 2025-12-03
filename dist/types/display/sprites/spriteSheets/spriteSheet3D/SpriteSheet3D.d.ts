@@ -70,6 +70,6 @@ declare class SpriteSheet3D extends ASpriteSheet {
      * @returns 생성된 버텍스 셰이더 모듈 정보
      * @protected
      */
-    createCustomMeshVertexShaderModule(): GPUShaderModule;
+    createCustomMeshVertexShaderModule: () => GPUShaderModule;
 }
 export default SpriteSheet3D;

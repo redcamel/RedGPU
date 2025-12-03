@@ -18,19 +18,19 @@ import computeCode from "./wgsl/computeCode.wgsl"
  * <iframe src="/RedGPU/examples/3d/postEffect/adjustments/grayscale/"></iframe>
  */
 class Grayscale extends ASinglePassPostEffect {
-	/**
-	 * Grayscale 인스턴스 생성
-	 * @param redGPUContext 렌더링 컨텍스트
-	 */
-	constructor(redGPUContext: RedGPUContext) {
-		super(redGPUContext);
-		const uniformStructCode = ''
-		this.init(
-			redGPUContext,
-			'POST_EFFECT_GRAYSCALE',
-			createBasicPostEffectCode(this, computeCode, uniformStructCode)
-		)
-	}
+    /**
+     * Grayscale 인스턴스 생성
+     * @param redGPUContext 렌더링 컨텍스트
+     */
+    constructor(redGPUContext: RedGPUContext) {
+        super(redGPUContext);
+        const uniformStructCode = ''
+        this.init(
+            redGPUContext,
+            'POST_EFFECT_GRAYSCALE',
+            createBasicPostEffectCode(this, computeCode, uniformStructCode)
+        )
+    }
 }
 
 Object.freeze(Grayscale)

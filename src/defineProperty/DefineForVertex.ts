@@ -5,36 +5,36 @@ import defineUintRange from "./funcs/defineUintRange";
 import defineVector from "./funcs/defineVector";
 
 function defineProperty_boolean(propertyKey: string, initValue: boolean = false) {
-	return defineBoolean(propertyKey, initValue, false)
+    return defineBoolean(propertyKey, initValue, false)
 }
 
 function defineProperty_uintRange(propertyKey: string, initValue: number = 0, min?: number, max?: number) {
-	return defineUintRange(propertyKey, initValue, false, min, max)
+    return defineUintRange(propertyKey, initValue, false, min, max)
 }
 
 function defineProperty_PositiveNumberRange(propertyKey: string, initValue: number = 1, min?: number, max?: number) {
-	return definePositiveNumberRange(propertyKey, initValue, false, min, max)
+    return definePositiveNumberRange(propertyKey, initValue, false, min, max)
 }
 
 function defineProperty_vec4(propertyKey: string, initValue: number[] = [0, 0, 0, 0]) {
-	return defineVector(propertyKey, initValue, false)
+    return defineVector(propertyKey, initValue, false)
 }
 
 function defineProperty_vec3(propertyKey: string, initValue: number[] = [0, 0, 0]) {
-	return defineVector(propertyKey, initValue, false)
+    return defineVector(propertyKey, initValue, false)
 }
 
 function defineProperty_vec2(propertyKey: string, initValue: number[] = [0, 0]) {
-	return defineVector(propertyKey, initValue, false)
+    return defineVector(propertyKey, initValue, false)
 }
 
 const PRESET_BOOLEAN = {
-	USE_BILLBOARD_PERSPECTIVE: 'useBillboardPerspective',
-	USE_BILLBOARD: 'useBillboard',
-	RECEIVE_SHADOW: 'receiveShadow',
+    USE_BILLBOARD_PERSPECTIVE: 'useBillboardPerspective',
+    USE_BILLBOARD: 'useBillboard',
+    RECEIVE_SHADOW: 'receiveShadow',
 };
 const PRESET_POSITIVE_NUMBER = {
-	BILLBOARD_FIXED_SCALE: 'billboardFixedScale',
+    BILLBOARD_FIXED_SCALE: 'billboardFixedScale',
 };
 const PRESET_UINT = {};
 const PRESET_SAMPLER = {};
@@ -48,31 +48,31 @@ const PRESET_COLOR_RGB = {};
  * @namespace DefineForVertex
  */
 const DefineForVertex = {
-	...createDefineByPreset(
-		{
-			defineBoolean: [defineProperty_boolean, PRESET_BOOLEAN],
-			defineUint: [defineProperty_uintRange, PRESET_UINT],
-			definePositiveNumber: [defineProperty_PositiveNumberRange, PRESET_POSITIVE_NUMBER],
-		}
-	),
-	//
-	defineBoolean: defineProperties(defineProperty_boolean),
-	defineUint: defineProperties(defineProperty_uintRange),
-	definePositiveNumber: defineProperties(defineProperty_PositiveNumberRange),
-	defineVec4: defineProperties(defineProperty_vec4),
-	defineVec3: defineProperties(defineProperty_vec3),
-	defineVec2: defineProperties(defineProperty_vec2),
-	//
-	PRESET_BOOLEAN,
-	PRESET_POSITIVE_NUMBER,
-	PRESET_UINT,
-	PRESET_SAMPLER,
-	PRESET_TEXTURE,
-	PRESET_CUBE_TEXTURE,
-	PRESET_VEC2,
-	PRESET_VEC3,
-	PRESET_VEC4,
-	PRESET_COLOR_RGB
+    ...createDefineByPreset(
+        {
+            defineBoolean: [defineProperty_boolean, PRESET_BOOLEAN],
+            defineUint: [defineProperty_uintRange, PRESET_UINT],
+            definePositiveNumber: [defineProperty_PositiveNumberRange, PRESET_POSITIVE_NUMBER],
+        }
+    ),
+    //
+    defineBoolean: defineProperties(defineProperty_boolean),
+    defineUint: defineProperties(defineProperty_uintRange),
+    definePositiveNumber: defineProperties(defineProperty_PositiveNumberRange),
+    defineVec4: defineProperties(defineProperty_vec4),
+    defineVec3: defineProperties(defineProperty_vec3),
+    defineVec2: defineProperties(defineProperty_vec2),
+    //
+    PRESET_BOOLEAN,
+    PRESET_POSITIVE_NUMBER,
+    PRESET_UINT,
+    PRESET_SAMPLER,
+    PRESET_TEXTURE,
+    PRESET_CUBE_TEXTURE,
+    PRESET_VEC2,
+    PRESET_VEC3,
+    PRESET_VEC4,
+    PRESET_COLOR_RGB
 }
 Object.freeze(DefineForVertex)
 export default DefineForVertex

@@ -8,15 +8,15 @@ import FragmentOutput from './fragmentOutput.wgsl'
 import normalFunctions from './normalFunctions.wgsl'
 
 const SystemFragmentCode = Object.freeze({
-	calcTintBlendMode,
-	calcDirectionalShadowVisibility,
-	drawDirectionalShadowDepth,
-	normalFunctions,
-	calcPrePathBackground,
-	FragmentOutput,
-	//
-	picking,
-	drawPicking,
+    calcTintBlendMode,
+    calcDirectionalShadowVisibility,
+    drawDirectionalShadowDepth,
+    normalFunctions,
+    calcPrePathBackground,
+    FragmentOutput,
+    //
+    picking,
+    drawPicking,
 })
 Object.freeze(SystemFragmentCode)
 export default SystemFragmentCode

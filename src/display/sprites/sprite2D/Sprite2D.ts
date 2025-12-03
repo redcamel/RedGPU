@@ -25,92 +25,92 @@ const BaseSprite2D = mixInMesh2D(Mesh);
  * @category Sprite
  */
 class Sprite2D extends BaseSprite2D {
-	/**
-	 * 스프라이트의 너비
-	 * @private
-	 */
-	#width: number = 1
-	/**
-	 * 스프라이트의 높이
-	 * @private
-	 */
-	#height: number = 1
+    /**
+     * 스프라이트의 너비
+     * @private
+     */
+    #width: number = 1
+    /**
+     * 스프라이트의 높이
+     * @private
+     */
+    #height: number = 1
 
-	/**
-	 * 새로운 Sprite2D 인스턴스를 생성합니다.
-	 *
-	 * @param redGPUContext - RedGPU 렌더링 컨텍스트
-	 * @param material - 스프라이트에 적용할 머티리얼 (옵션)
-	 */
-	constructor(redGPUContext: RedGPUContext, material?) {
-		super(redGPUContext, new Plane(redGPUContext, 1, 1, 1, 1, 1, true), material);
-		this.primitiveState.cullMode = GPU_CULL_MODE.FRONT
-	}
+    /**
+     * 새로운 Sprite2D 인스턴스를 생성합니다.
+     *
+     * @param redGPUContext - RedGPU 렌더링 컨텍스트
+     * @param material - 스프라이트에 적용할 머티리얼 (옵션)
+     */
+    constructor(redGPUContext: RedGPUContext, material?) {
+        super(redGPUContext, new Plane(redGPUContext, 1, 1, 1, 1, 1, true), material);
+        this.primitiveState.cullMode = GPU_CULL_MODE.FRONT
+    }
 
-	/**
-	 * 스프라이트의 너비를 반환합니다.
-	 * @returns 현재 너비 값
-	 */
-	get width(): number {
-		return this.#width;
-	}
+    /**
+     * 스프라이트의 너비를 반환합니다.
+     * @returns 현재 너비 값
+     */
+    get width(): number {
+        return this.#width;
+    }
 
-	/**
-	 * 스프라이트의 너비를 설정합니다.
-	 * @param value - 설정할 너비 값 (양수)
-	 * @throws {Error} 값이 양수가 아닌 경우
-	 */
-	set width(value: number) {
-		validatePositiveNumberRange(value)
-		this.#width = value;
-		this.dirtyTransform = true
-	}
+    /**
+     * 스프라이트의 너비를 설정합니다.
+     * @param value - 설정할 너비 값 (양수)
+     * @throws {Error} 값이 양수가 아닌 경우
+     */
+    set width(value: number) {
+        validatePositiveNumberRange(value)
+        this.#width = value;
+        this.dirtyTransform = true
+    }
 
-	/**
-	 * 스프라이트의 높이를 반환합니다.
-	 * @returns 현재 높이 값
-	 */
-	get height(): number {
-		return this.#height;
-	}
+    /**
+     * 스프라이트의 높이를 반환합니다.
+     * @returns 현재 높이 값
+     */
+    get height(): number {
+        return this.#height;
+    }
 
-	/**
-	 * 스프라이트의 높이를 설정합니다.
-	 * @param value - 설정할 높이 값 (양수)
-	 * @throws {Error} 값이 양수가 아닌 경우
-	 */
-	set height(value: number) {
-		validatePositiveNumberRange(value)
-		this.#height = value;
-		this.dirtyTransform = true
-	}
+    /**
+     * 스프라이트의 높이를 설정합니다.
+     * @param value - 설정할 높이 값 (양수)
+     * @throws {Error} 값이 양수가 아닌 경우
+     */
+    set height(value: number) {
+        validatePositiveNumberRange(value)
+        this.#height = value;
+        this.dirtyTransform = true
+    }
 
-	// /**
-	//  * 스프라이트의 머티리얼을 반환합니다.
-	//  * @returns 현재 머티리얼
-	//  */
-	// get material() {
-	// 	return this._material
-	// }
-	//
-	// /**
-	//  * 머티리얼 설정을 시도합니다.
-	//  * @param value - 설정하려는 머티리얼
-	//  * @throws {Error} Sprite2D는 머티리얼을 변경할 수 없습니다
-	//  */
-	// set material(value) {
-	// 	consoleAndThrowError('Sprite2D can not change material')
-	// }
-	/**
-	 * 스프라이트의 크기를 설정합니다.
-	 *
-	 * @param width - 설정할 너비 값
-	 * @param height - 설정할 높이 값 (옵션, 생략 시 너비와 같은 값 사용)
-	 */
-	setSize(width: number, height?: number) {
-		this.width = width;
-		this.height = height !== undefined ? height : width;
-	}
+    // /**
+    //  * 스프라이트의 머티리얼을 반환합니다.
+    //  * @returns 현재 머티리얼
+    //  */
+    // get material() {
+    // 	return this._material
+    // }
+    //
+    // /**
+    //  * 머티리얼 설정을 시도합니다.
+    //  * @param value - 설정하려는 머티리얼
+    //  * @throws {Error} Sprite2D는 머티리얼을 변경할 수 없습니다
+    //  */
+    // set material(value) {
+    // 	consoleAndThrowError('Sprite2D can not change material')
+    // }
+    /**
+     * 스프라이트의 크기를 설정합니다.
+     *
+     * @param width - 설정할 너비 값
+     * @param height - 설정할 높이 값 (옵션, 생략 시 너비와 같은 값 사용)
+     */
+    setSize(width: number, height?: number) {
+        this.width = width;
+        this.height = height !== undefined ? height : width;
+    }
 }
 
 Object.freeze(Sprite2D)

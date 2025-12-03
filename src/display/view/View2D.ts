@@ -25,18 +25,18 @@ import View3D from "./View3D";
  * @category View
  */
 class View2D extends View3D {
-	/**
-	 * View2D 생성자입니다.
-	 * Camera2D를 자동으로 생성하여 View3D의 생성자에 전달합니다.
-	 *
-	 * @param redGPUContext - RedGPUContext 인스턴스
-	 * @param scene - Scene 인스턴스
-	 * @param name - 선택적 뷰 이름
-	 */
-	constructor(redGPUContext: RedGPUContext, scene: Scene, name?: string) {
-		const camera = new Camera2D()
-		super(redGPUContext, scene, camera, name)
-	}
+    /**
+     * View2D 생성자입니다.
+     * Camera2D를 자동으로 생성하여 View3D의 생성자에 전달합니다.
+     *
+     * @param redGPUContext - RedGPUContext 인스턴스
+     * @param scene - Scene 인스턴스
+     * @param name - 선택적 뷰 이름
+     */
+    constructor(redGPUContext: RedGPUContext, scene: Scene, name?: string) {
+        const camera = new Camera2D()
+        super(redGPUContext, scene, camera, name)
+    }
 }
 
 Object.freeze(View2D)

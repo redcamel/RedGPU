@@ -4,8 +4,8 @@ import ViewRenderTextureManager from "./ViewRenderTextureManager";
 import ViewTransform from "./ViewTransform";
 
 export {
-	ViewTransform,
-	ViewRenderTextureManager,
-	AView,
-	RenderViewStateData
+    ViewTransform,
+    ViewRenderTextureManager,
+    AView,
+    RenderViewStateData
 }

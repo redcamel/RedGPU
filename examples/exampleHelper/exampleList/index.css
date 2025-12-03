@@ -154,7 +154,8 @@ html, body {
     text-shadow: 0 0 10px #000;
     line-height: 1;
 }
-.project_right{
+
+.project_right {
     position: absolute;
     top: 16px;
     right: 16px;
@@ -164,6 +165,7 @@ html, body {
     z-index: 1;
     font-size: 12px;
     font-weight: bold;
+
     a {
         min-width: initial;
         display: flex;
@@ -177,13 +179,16 @@ html, body {
         background: #111;
         cursor: pointer;
     }
-    div{
+
+    div {
         line-height: 1;
-        img{
+
+        img {
             line-height: 1;
         }
     }
 }
+
 .project_title span {
     font-size: 12px;
     color: #fff;

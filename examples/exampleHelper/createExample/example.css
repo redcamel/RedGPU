@@ -7,8 +7,9 @@ html, body {
     overflow: hidden;
     background: url(../../assets/documentBody.png);
 }
-.tp-dfwv{
-    top : 52px !important;
+
+.tp-dfwv {
+    top: 52px !important;
     bottom: 62px;
     z-index: 1;
     overflow-y: auto;
@@ -16,9 +17,11 @@ html, body {
     pointer-events: none;
     transition: right 0.36s;
 }
-.tp-dfwv *{
+
+.tp-dfwv * {
     pointer-events: auto;
 }
+
 * {
 
     margin: 0;
@@ -118,7 +121,7 @@ html, body {
     display: flex;
     width: 100%;
     /*justify-content: space-between;*/
-    gap:1px;
+    gap: 1px;
 }
 
 .nav-button {
@@ -133,6 +136,7 @@ html, body {
     font-size: 12px;
     transition: background-color 0.2s;
 }
+
 .nav-button:hover {
     background-color: #191919;
 }
@@ -160,11 +164,13 @@ html, body {
     aspect-ratio: 1;
     padding: 0;
     line-height: 1;
-    img{
+
+    img {
         line-height: 1;
         transition: opacity 0.2s;
     }
 }
+
 .antialiasing-button {
     border: 0;
     cursor: pointer;
@@ -197,6 +203,7 @@ html, body {
     align-items: center;
     gap: 8px;
 }
+
 @media screen and (max-width: 480px) {
     .item-title {
         top: 56px;

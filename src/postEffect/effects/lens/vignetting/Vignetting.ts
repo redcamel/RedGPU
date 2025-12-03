@@ -23,49 +23,49 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * <iframe src="/RedGPU/examples/3d/postEffect/lens/vignetting/"></iframe>
  */
 class Vignetting extends ASinglePassPostEffect {
-	#smoothness: number = 0.2
-	#size: number = 0.5
+    #smoothness: number = 0.2
+    #size: number = 0.5
 
-	constructor(redGPUContext: RedGPUContext) {
-		super(redGPUContext);
-		this.init(
-			redGPUContext,
-			'POST_EFFECT_VIGNETTING',
-			createBasicPostEffectCode(this, computeCode, uniformStructCode),
-		)
-		this.smoothness = this.#smoothness
-		this.size = this.#size
-	}
+    constructor(redGPUContext: RedGPUContext) {
+        super(redGPUContext);
+        this.init(
+            redGPUContext,
+            'POST_EFFECT_VIGNETTING',
+            createBasicPostEffectCode(this, computeCode, uniformStructCode),
+        )
+        this.smoothness = this.#smoothness
+        this.size = this.#size
+    }
 
-	/** 비네팅 범위 반환 */
-	get size(): number {
-		return this.#size;
-	}
+    /** 비네팅 범위 반환 */
+    get size(): number {
+        return this.#size;
+    }
 
-	/**
-	 * 비네팅 범위 설정
-	 * 최소값 0
-	 */
-	set size(value: number) {
-		validateNumberRange(value, 0,)
-		this.#size = value;
-		this.updateUniform('size', value)
-	}
+    /**
+     * 비네팅 범위 설정
+     * 최소값 0
+     */
+    set size(value: number) {
+        validateNumberRange(value, 0,)
+        this.#size = value;
+        this.updateUniform('size', value)
+    }
 
-	/** 비네팅 부드러움 반환 */
-	get smoothness(): number {
-		return this.#smoothness;
-	}
+    /** 비네팅 부드러움 반환 */
+    get smoothness(): number {
+        return this.#smoothness;
+    }
 
-	/**
-	 * 비네팅 부드러움 설정
-	 * 범위 0~1
-	 */
-	set smoothness(value: number) {
-		validateNumberRange(value, 0, 1)
-		this.#smoothness = value;
-		this.updateUniform('smoothness', value)
-	}
+    /**
+     * 비네팅 부드러움 설정
+     * 범위 0~1
+     */
+    set smoothness(value: number) {
+        validateNumberRange(value, 0, 1)
+        this.#smoothness = value;
+        this.updateUniform('smoothness', value)
+    }
 }
 
 Object.freeze(Vignetting)

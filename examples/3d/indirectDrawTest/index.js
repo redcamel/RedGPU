@@ -15,7 +15,8 @@ RedGPU.init(
         view.grid = true
         view.axis = true
         redGPUContext.addView(view);
-
+        const light = new RedGPU.Light.DirectionalLight()
+        scene.lightManager.addDirectionalLight(light)
         const glbUrls = [
             'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BoxVertexColors/glTF-Binary/BoxVertexColors.glb',
             'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumMan/glTF/CesiumMan.gltf',
@@ -24,6 +25,7 @@ RedGPU.init(
         ];
         loadGLTFGrid(view, glbUrls);
         createSampleMesh(redGPUContext, scene);
+        createSampleMesh2(redGPUContext, scene);
         createSampleText(redGPUContext, scene)
         createSampleSprite3D(redGPUContext, scene)
         createSampleSpriteSheet3D(redGPUContext, scene)
@@ -88,6 +90,16 @@ const createSampleMesh = (redGPUContext, scene) => {
     const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
     scene.addChild(mesh);
     mesh.z = -20
+
+    return mesh;
+};
+const createSampleMesh2 = (redGPUContext, scene) => {
+    const material = new RedGPU.Material.PhongMaterial(redGPUContext, '#ff0000');
+    const geometry = new RedGPU.Primitive.Sphere(redGPUContext);
+    const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
+    scene.addChild(mesh);
+    mesh.z = -20
+    mesh.x = -5
 
     return mesh;
 };

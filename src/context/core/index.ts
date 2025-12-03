@@ -4,8 +4,8 @@ import RedGPUContextSizeManager from "./RedGPUContextSizeManager";
 import RedGPUContextViewContainer from "./RedGPUContextViewContainer";
 
 export {
-	RedGPUContextDetector,
-	RedGPUContextSizeManager,
-	RedGPUContextViewContainer,
-	AntialiasingManager
+    RedGPUContextDetector,
+    RedGPUContextSizeManager,
+    RedGPUContextViewContainer,
+    AntialiasingManager
 }

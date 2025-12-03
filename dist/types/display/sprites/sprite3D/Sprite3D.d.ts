@@ -50,6 +50,6 @@ declare class Sprite3D extends Mesh {
      * @returns 생성된 버텍스 셰이더 모듈 정보
      *
      */
-    createCustomMeshVertexShaderModule(): GPUShaderModule;
+    createCustomMeshVertexShaderModule: () => GPUShaderModule;
 }
 export default Sprite3D;

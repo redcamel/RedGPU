@@ -132,25 +132,28 @@ struct Uniforms {
 
 // Input structure for model data
 struct InputData {
-  // Built-in attributes
-  @builtin(position) position : vec4<f32>,
-  // Vertex attributes
-  @location(0) vertexPosition: vec3<f32>,
-  @location(1) vertexNormal: vec3<f32>,
-  // Texture coordinates
-  @location(2) uv: vec2<f32>,
-  @location(3) uv1: vec2<f32>,
-  // ColorRGBA
-  @location(4) vertexColor_0: vec4<f32>,
-  // Tangent vector
-  @location(5) vertexTangent: vec4<f32>,
-  @location(6) shadowPos: vec3<f32>,
-  @location(7) receiveShadow: f32,
-  @location(8) pickingId: vec4<f32>,
-  @location(9) ndcPosition: vec3<f32>,
-  @location(10) localNodeScale: f32,
-  @location(11) volumeScale: f32,
-  @location(12) motionVector: vec3<f32>,
+    // Built-in attributes
+    @builtin(position) position : vec4<f32>,
+    // Vertex attributes
+    @location(0) vertexPosition: vec3<f32>,
+    @location(1) vertexNormal: vec3<f32>,
+    // Texture coordinates
+    @location(2) uv: vec2<f32>,
+    @location(3) uv1: vec2<f32>,
+    // ColorRGBA
+    @location(4) vertexColor_0: vec4<f32>,
+    // Tangent vector
+    @location(5) vertexTangent: vec4<f32>,
+
+    @location(9) ndcPosition: vec3<f32>,
+    @location(10) localNodeScale_volumeScale: vec2<f32>,
+    @location(11) combinedOpacity: f32,
+
+    //
+    @location(12) motionVector: vec3<f32>,
+    @location(13) shadowPos: vec3<f32>,
+    @location(14) @interpolate(flat) receiveShadow: f32,
+    @location(15) @interpolate(flat) pickingId: vec4<f32>,
 }
 
 
@@ -703,7 +706,7 @@ fn main(inputData:InputData) -> FragmentOutput {
     var prePathBackground = vec3<f32>(0.0);
     #redgpu_if useKHR_materials_transmission
         prePathBackground = calcPrePathBackground(
-            u_useKHR_materials_volume, thicknessParameter * inputData.volumeScale , u_KHR_dispersion, u_KHR_attenuationDistance , u_KHR_attenuationColor,
+            u_useKHR_materials_volume, thicknessParameter * inputData.localNodeScale_volumeScale[1] , u_KHR_dispersion, u_KHR_attenuationDistance , u_KHR_attenuationColor,
             ior, roughnessParameter, albedo,
             systemUniforms.projectionCameraMatrix, input_vertexPosition, input_ndcPosition,
             V, N,
@@ -947,8 +950,8 @@ let attenuation = rangePart * invSquare;
 
                 var attenuatedBackground = prePathBackground;
                  if (u_useKHR_materials_volume) {
-                     let localNodeScale = inputData.localNodeScale;
-                     let volumeScale = inputData.volumeScale;
+                     let localNodeScale = inputData.localNodeScale_volumeScale[0];
+                     let volumeScale = inputData.localNodeScale_volumeScale[1];
 
                      let scaledThickness = thicknessParameter * localNodeScale ;
                      // 유효한 색상 및 거리 값 확보 (물리적으로 의미 있는 범위)

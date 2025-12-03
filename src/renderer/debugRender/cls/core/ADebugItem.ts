@@ -2,18 +2,18 @@ import RedGPUContext from "../../../../context/RedGPUContext";
 import DebugRender from "../../DebugRender";
 
 class ADebugItem {
-	debugStatisticsDomService;
+    debugStatisticsDomService;
 
-	constructor() {
-	}
+    constructor() {
+    }
 
-	get dom() {
-		return this.debugStatisticsDomService.dom;
-	}
+    get dom() {
+        return this.debugStatisticsDomService.dom;
+    }
 
-	update(debugRender: DebugRender, redGPUContext: RedGPUContext, time: number) {
-		this.debugStatisticsDomService.update(debugRender, redGPUContext);
-	}
+    update(debugRender: DebugRender, redGPUContext: RedGPUContext, time: number) {
+        this.debugStatisticsDomService.update(debugRender, redGPUContext);
+    }
 }
 
 export default ADebugItem
