@@ -82,14 +82,14 @@ async function createTest(context, scene, material) {
 
         // GLTF 구조에서 대상 메쉬 추출
         const gltf = result.resultMesh.children[0];
-        const maxNum = context.detector.isMobile ? 1000 : 1000;
+        const maxNum = context.detector.isMobile ? 1000 : 5000;
         for (let i = 0; i < maxNum; i++) {
             const mesh = new RedGPU.Display.Mesh(
                 context,
                 gltf.geometry,
-                gltf.material
+                // gltf.material
                 // new RedGPU.Primitive.Sphere(context, 1,),
-                // materialLOD2
+                materialLOD2
             );
             mesh.setPosition(Math.random() * 140 - 70, Math.random() * 140 - 70, Math.random() * 140 - 70);
             scene.addChild(mesh);

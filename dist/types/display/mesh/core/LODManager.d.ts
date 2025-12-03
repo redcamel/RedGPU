@@ -23,6 +23,7 @@ type LODEntry = {
     geometryIsPBR: boolean;
     label: string;
     material?: ABaseMaterial;
+    source: string;
 };
 /**
  * 거리 기반 LOD(Level of Detail) 관리를 담당하는 매니저 클래스입니다.

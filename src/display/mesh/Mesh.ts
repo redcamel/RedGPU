@@ -34,7 +34,6 @@ import getBasicMeshVertexBindGroupDescriptor from "./core/shader/getBasicMeshVer
 import VertexGPURenderInfo from "./core/VertexGPURenderInfo";
 import meshVertexSource from './shader/meshVertex.wgsl';
 import meshVertexSourcePbr from './shader/meshVertexPbr.wgsl';
-import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 
 const VERTEX_SHADER_MODULE_NAME_PBR_SKIN = 'VERTEX_MODULE_MESH_PBR_SKIN'
 const CONVERT_RADIAN = Math.PI / 180;
@@ -1112,22 +1111,12 @@ class Mesh extends MeshBase {
 
         this.LODManager.LODList.forEach((lod, index) => {
             const vModuleDescriptor: GPUShaderModuleDescriptor = {
-                code: this.#getLODVertexModuleSource(lod.geometry, lod.material),
+                code: lod.source
             };
             const vertexShaderModule: GPUShaderModule = resourceManager.createGPUShaderModule(
-                `${createUUID()}_${this.name}_${index}`,
+                lod.label,
                 vModuleDescriptor,
             );
-            const vertexUniformData = new ArrayBuffer(
-                ParseWGSL(meshVertexSource).uniforms.vertexUniforms.arrayBufferByteLength
-            );
-            const vertexUniformBuffer =
-                lod.geometry.vertexBuffer.interleavedStruct.label === this.geometry.vertexBuffer.interleavedStruct.label
-                    ? this.gpuRenderInfo.vertexUniformBuffer
-                    : new UniformBuffer(
-                        redGPUContext,
-                        vertexUniformData,
-                    );
             this.#lodGPURenderInfoList[index] = {
                 pipeline: createBasePipeline(
                     //@ts-ignore
@@ -1149,7 +1138,7 @@ class Mesh extends MeshBase {
                     //@ts-ignore
                     gpuRenderInfo: {
                         vertexBindGroupLayout,
-                        vertexUniformBuffer : this.gpuRenderInfo.vertexUniformBuffer
+                        vertexUniformBuffer: this.gpuRenderInfo.vertexUniformBuffer
                     }
                 }))
             };
@@ -1157,20 +1146,6 @@ class Mesh extends MeshBase {
         this.#currentLODIndex = -1;
     }
 
-    #getLODVertexModuleSource(geometry: Geometry | Primitive, material: ABaseMaterial): string {
-        const label = geometry.vertexBuffer.interleavedStruct.label;
-        const isPbrMaterial = material instanceof PBRMaterial;
-
-        const isPBR = label === 'PBR' && isPbrMaterial;
-        const isPBROnyFragment = label !== 'PBR' && isPbrMaterial;
-
-        // const input = isPBR ? vertexModuleSourceInputPbr : vertexModuleSourceInputBasic;
-        // const output = isPBROnyFragment ? vertexModuleSourceOutputPbr :
-        // 	isPBR ? vertexModuleSourceOutputPbr :
-        // 		vertexModuleSourceOutputBasic;
-        const source = isPBR ? meshVertexSourcePbr : meshVertexSource
-        return ParseWGSL(source).shaderSourceVariant.getVariant('none')
-    }
 
     createMeshVertexShaderModuleBASIC = (VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT_BASIC, vertexModuleSource): GPUShaderModule => {
         const {redGPUContext} = this
