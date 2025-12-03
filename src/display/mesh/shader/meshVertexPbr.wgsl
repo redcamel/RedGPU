@@ -11,7 +11,11 @@ struct MatrixList{
 struct VertexUniforms {
     matrixList:MatrixList,
     pickingId: u32,
-    receiveShadow: f32
+    receiveShadow: f32,
+    combinedOpacity: f32,
+    useDisplacementTexture: u32,
+    displacementScale: f32,
+    disableJitter: u32,
 };
 
 const maxDistance: f32 = 1000.0;

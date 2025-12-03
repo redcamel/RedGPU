@@ -4,6 +4,7 @@
 #redgpu_include calcDisplacements;
 #redgpu_include calculateMotionVector;
 struct MatrixList{
+    localMatrix: mat4x4<f32>,
     modelMatrix: mat4x4<f32>,
     prevModelMatrix: mat4x4<f32>,
     normalModelMatrix: mat4x4<f32>,
