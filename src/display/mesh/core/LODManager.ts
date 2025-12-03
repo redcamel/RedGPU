@@ -6,9 +6,36 @@ import ABaseMaterial from "../../../material/core/ABaseMaterial";
 import meshVertexSource from '../shader/meshVertex.wgsl';
 import meshVertexSourcePbr from '../shader/meshVertexPbr.wgsl';
 import ParseWGSL from "../../../resources/wgslParser/parseWGSL";
+import vertexModuleSourcePbrInput from "../shader/meshVertexPbr_input.wgsl";
+import vertexModuleSourcePbrOutput from "../shader/meshVertexPbr_output.wgsl";
+import vertexModuleSourcePbr from "../shader/meshVertexPbr.wgsl";
+import vertexModuleSourceInput from "../shader/meshVertex_input.wgsl";
+import vertexModuleSourceOutput from "../shader/meshVertex_output.wgsl";
+import vertexModuleSource from "../shader/meshVertex.wgsl";
 
-const SHADER_INFO_BASIC = ParseWGSL(meshVertexSource).shaderSourceVariant.getVariant('none')
-const SHADER_INFO_PBR = ParseWGSL(meshVertexSourcePbr).shaderSourceVariant.getVariant('none')
+const SHADER_INFO_BASIC = ParseWGSL([
+    vertexModuleSourceInput,
+    vertexModuleSourceOutput,
+    vertexModuleSource
+].join("\n")).shaderSourceVariant.getVariant('none')
+
+const SHADER_INFO_PBR = ParseWGSL([
+    vertexModuleSourcePbrInput,
+    vertexModuleSourcePbrOutput,
+    vertexModuleSourcePbr,
+].join("\n")).shaderSourceVariant.getVariant('none')
+
+const SHADER_INFO_ONLY_VERTEX_PBR = ParseWGSL([
+    vertexModuleSourcePbrInput,
+    vertexModuleSourceOutput,
+    vertexModuleSource,
+].join("\n")).shaderSourceVariant.getVariant('none')
+
+const SHADER_INFO_ONLY_FRAGMENT_PBR = ParseWGSL([
+    vertexModuleSourceInput,
+    vertexModuleSourcePbrOutput,
+    vertexModuleSource,
+].join("\n")).shaderSourceVariant.getVariant('none')
 /**
  * LOD에 사용되는 지오메트리 타입입니다.
  *
@@ -116,17 +143,14 @@ class LODManager {
     }
 
     #getLODVertexModuleSource(geometry: Geometry | Primitive, material: ABaseMaterial): string {
-        const label = geometry.vertexBuffer.interleavedStruct.label;
+        const isPbrVertex = geometry.vertexBuffer.interleavedStruct.label=== 'PBR';
         const isPbrMaterial = material instanceof PBRMaterial;
 
-        const isPBR = label === 'PBR' && isPbrMaterial;
-        const isPBROnyFragment = label !== 'PBR' && isPbrMaterial;
+        const isPBR = isPbrVertex && isPbrMaterial;
+        const isPBROnyFragment = !isPbrVertex && isPbrMaterial;
+        const isPBROnyVertex = isPbrVertex && !isPbrMaterial;
 
-        // const input = isPBR ? vertexModuleSourceInputPbr : vertexModuleSourceInputBasic;
-        // const output = isPBROnyFragment ? vertexModuleSourceOutputPbr :
-        // 	isPBR ? vertexModuleSourceOutputPbr :
-        // 		vertexModuleSourceOutputBasic;
-        return isPBR ? SHADER_INFO_PBR : SHADER_INFO_BASIC
+        return isPBR ? SHADER_INFO_PBR : isPBROnyFragment ? SHADER_INFO_ONLY_FRAGMENT_PBR : isPBROnyVertex ? SHADER_INFO_ONLY_VERTEX_PBR : SHADER_INFO_BASIC
     }
 
     /**

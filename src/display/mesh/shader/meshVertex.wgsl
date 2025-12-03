@@ -12,26 +12,6 @@ const maxMipLevel: f32 = 10.0;
 @group(1) @binding(1) var displacementTextureSampler: sampler;
 @group(1) @binding(2) var displacementTexture: texture_2d<f32>;
 
-struct InputData {
-    @location(0) position: vec3<f32>,
-    @location(1) vertexNormal: vec3<f32>,
-    @location(2) uv: vec2<f32>,
-};
-
-struct OutputData {
-    @builtin(position) position: vec4<f32>,
-    @location(0) vertexPosition: vec3<f32>,
-    @location(1) vertexNormal: vec3<f32>,
-    @location(2) uv: vec2<f32>,
-    @location(9) ndcPosition: vec3<f32>,
-
-    //
-    @location(11) combinedOpacity: f32,
-    @location(12) motionVector: vec3<f32>,
-    @location(13) shadowPos: vec3<f32>,
-    @location(14) @interpolate(flat) receiveShadow: f32,
-    @location(15) @interpolate(flat) pickingId: vec4<f32>,
-};
 
 @vertex
 fn main(inputData: InputData) -> OutputData {
