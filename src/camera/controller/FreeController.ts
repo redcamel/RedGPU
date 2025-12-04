@@ -24,7 +24,7 @@ type KeyNameMapper = {
 };
 
 /**
- * 기본 3D 카메라 컨트롤러(BasicController) 클래스입니다.
+ * 기본 3D 카메라 컨트롤러(FreeController) 클래스입니다.
  * 키보드(WASD, QERFTG)와 마우스/터치로 카메라 이동·회전이 가능합니다.
  * 속도, 가속도, 키 매핑 등 다양한 파라미터를 지원합니다.
  *
@@ -32,7 +32,7 @@ type KeyNameMapper = {
  *
  * @example
  * ```javascript
- * const controller = new RedGPU.Camera.BasicController(redGPUContext);
+ * const controller = new RedGPU.Camera.FreeController(redGPUContext);
  * controller.x = 10;
  * controller.y = 5;
  * controller.z = 20;
@@ -41,7 +41,7 @@ type KeyNameMapper = {
  * controller.setMoveForwardKey('ArrowUp');
  * ```
  */
-class BasicController extends AController {
+class FreeController extends AController {
     /** 연결된 View3D 인스턴스 */
     #targetView: View3D;
     /** 키 매핑 정보 */
@@ -349,4 +349,4 @@ class BasicController extends AController {
     }
 }
 
-export default BasicController
+export default FreeController
