@@ -17,15 +17,24 @@ import PerspectiveCamera from "../camera/PerspectiveCamera";
  *
  */
 abstract class AController {
+    #redGPUContext: RedGPUContext;
     /**
      * 현재 컨트롤러가 제어하는 카메라 인스턴스
      */
     #camera: PerspectiveCamera | OrthographicCamera
+    // 현재 프레임에서 활성화된 View 목록
+    #lastUpdateTime = -1;
+    #currentFrameViews = new Set<View3D>();
 
     /**
      * AController 생성자
      */
-    constructor() {
+    constructor(redGPUContext: RedGPUContext) {
+        this.#redGPUContext = redGPUContext
+    }
+
+    get redGPUContext(): RedGPUContext {
+        return this.#redGPUContext;
     }
 
     /**
@@ -47,7 +56,18 @@ abstract class AController {
      * @param view - View3D 인스턴스
      * @param time - 시간값(ms)
      */
-    update(view: View3D, time: number): void {
+    update(view: View3D, time: number, updateAnimation: () => void): void {
+        // 새로운 프레임이 시작되면 View 목록 초기화
+        if (this.#lastUpdateTime !== time) {
+            this.#lastUpdateTime = time;
+            this.#currentFrameViews.clear();
+        }
+        // 현재 프레임에서 사용되는 View 추가
+        this.#currentFrameViews.add(view);
+        // 첫 번째 View에서만 애니메이션 업데이트 실행
+        if (this.#currentFrameViews.size === 1) {
+            updateAnimation?.();
+        }
     }
 
     /**
@@ -78,6 +98,28 @@ abstract class AController {
             y: clientY - rect.top
         };
     }
+    findTargetViewByInputEvent = (e: MouseEvent | TouchEvent): View3D | null => {
+        const redGPUContext = this.#redGPUContext;
+        const isMobile = redGPUContext.detector.isMobile;
+        const {x, y} = this.getCanvasEventPoint(e, redGPUContext);
+        let tX: number, tY: number;
+        if (isMobile) {
+            tX = x * window.devicePixelRatio * redGPUContext.renderScale;
+            tY = y * window.devicePixelRatio * redGPUContext.renderScale;
+        } else {
+            tX = x * window.devicePixelRatio * redGPUContext.renderScale;
+            tY = y * window.devicePixelRatio * redGPUContext.renderScale;
+        }
+        // 현재 프레임에서 활성화된 View들을 검사하여 마우스/터치 위치에 해당하는 View 찾기
+        for (const view of this.#currentFrameViews) {
+            const tViewRect = view.pixelRectObject;
+            if (tViewRect.x < tX && tX < tViewRect.x + tViewRect.width &&
+                tViewRect.y < tY && tY < tViewRect.y + tViewRect.height) {
+                return view;
+            }
+        }
+        return null;
+    };
 }
 
 export default AController

@@ -8,8 +8,6 @@ RedGPU.init(
     (redGPUContext) => {
         const controller = new RedGPU.Camera.FreeController(redGPUContext);
         const controller2 = new RedGPU.Camera.FreeController(redGPUContext);
-        // const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        // const controller2 = new RedGPU.Camera.OrbitController(redGPUContext);
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         view.axis = true;
@@ -60,7 +58,7 @@ RedGPU.init(
         };
         renderer.start(redGPUContext, render);
 
-        // renderTestPane(redGPUContext, controller);
+        renderTestPane(redGPUContext, controller);
     },
     (failReason) => {
         console.error('초기화 실패:', failReason);

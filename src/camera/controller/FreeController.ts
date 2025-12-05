@@ -6,8 +6,9 @@ import validateNumber from "../../runtimeChecker/validateFunc/validateNumber";
 import PerspectiveCamera from "../camera/PerspectiveCamera";
 import AController from "../core/AController";
 import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumberRange";
+import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
 
-let currentEventView: View3D;
+let currentMouseEventView: View3D
 let tMTX0 = mat4.create();
 const displacementMTX = mat4.create();
 const displacementVec3 = vec3.create();
@@ -44,8 +45,10 @@ type KeyNameMapper = {
  * <iframe src="/RedGPU/examples/3d/controller/freeController/"></iframe>
  */
 class FreeController extends AController {
-    /** 연결된 View3D 인스턴스 */
-    #targetView: View3D;
+    /** 인스턴스 고유 ID */
+    #instanceId: number;
+    /** 컨트롤러 이름 */
+    #name: string;
     /** 키 매핑 정보 */
     #keyNameMapper: KeyNameMapper = {
         moveForward: 'w',
@@ -81,7 +84,7 @@ class FreeController extends AController {
     #targetMesh: Mesh
 
     constructor(redGPUContext: RedGPUContext) {
-        super();
+        super(redGPUContext);
         this.#targetMesh = new Mesh(redGPUContext)
         this.camera = new PerspectiveCamera()
         const isMobile = redGPUContext.detector.isMobile
@@ -91,29 +94,15 @@ class FreeController extends AController {
             down: isMobile ? 'touchstart' : 'mousedown',
         }
         let sX, sY;
-        const checkArea = e => {
-            let targetView = this.#targetView;
-            if (currentEventView && targetView === currentEventView) {
-                let tX, tY;
-                let tViewRect = targetView.pixelRectObject;
-                const {x, y} = this.getCanvasEventPoint(e, redGPUContext)
-                if (isMobile) {
-                    tX = x * window.devicePixelRatio * redGPUContext.renderScale;
-                    tY = y * window.devicePixelRatio * redGPUContext.renderScale;
-                } else {
-                    tX = x * window.devicePixelRatio * redGPUContext.renderScale;
-                    tY = y * window.devicePixelRatio * redGPUContext.renderScale;
-                }
-                if (!(tViewRect.x < tX && tX < tViewRect.x + tViewRect.width)) return;
-                if (!(tViewRect.y < tY && tY < tViewRect.y + tViewRect.height)) return;
-            }
-            return true;
-        };
+
+
         sX = 0;
         sY = 0;
         const HD_down = e => {
-            currentEventView = this.#targetView;
-            if (!checkArea(e)) return;
+            const targetView = this.findTargetViewByInputEvent(e);
+            if (!targetView) return;
+            // 찾은 View를 현재 이벤트 View로 설정
+            currentMouseEventView = targetView;
             const {x, y} = this.getCanvasEventPoint(e, redGPUContext)
             sX = x
             sY = y
@@ -130,13 +119,21 @@ class FreeController extends AController {
             this.#desireTilt -= deltaY * this.#speedRotation * 0.1;
         };
         const HD_up = () => {
-            currentEventView = null
+            currentMouseEventView = null
             redGPUContext.htmlCanvas.removeEventListener(detector.move, HD_Move);
             window.removeEventListener(detector.up, HD_up);
         };
         redGPUContext.htmlCanvas.addEventListener(detector.down, HD_down);
     };
 
+    get name(): string {
+        if (!this.#instanceId) this.#instanceId = InstanceIdGenerator.getNextId(this.constructor);
+        return this.#name || `${this.constructor.name} Instance ${this.#instanceId}`;
+    }
+
+    set name(value: string) {
+        this.#name = value;
+    }
 
     get x(): number {
         return this.#targetMesh.x;
@@ -279,7 +276,14 @@ class FreeController extends AController {
     }
 
     update(view: View3D, time: number) {
-        this.#targetView = view
+        super.update(view, time, () => {
+            this.#updateAnimation(view)
+        })
+
+    }
+
+    #updateAnimation(view: View3D) {
+
         const tDelay = this.#delay;
         const tDelayRotation = this.#delayRotation;
         const tDesirePosition = this.#desirePosition;
@@ -326,8 +330,15 @@ class FreeController extends AController {
 
     #checkKeyboardKeyBuffer(view: View3D) {
         // 키보드 이벤트 체크
-        if (!view.checkMouseInViewBounds()) return
+        // if (!view.checkMouseInViewBounds()) return
         //
+
+        if (currentMouseEventView) {
+            if (currentMouseEventView !== view) return
+        } else {
+            if (!view.checkMouseInViewBounds()) return
+        }
+
         const tSpeed = this.#speed;
         const tSpeedRotation = this.#speedRotation;
         const {keyboardKeyBuffer} = view.redGPUContext;

@@ -59,12 +59,10 @@ class OrbitController extends AController {
     #currentPan = 0;
     #currentTilt = 0;
     #currentDistance = 0;
-    // 현재 프레임에서 활성화된 View 목록
-    #currentFrameViews = new Set<View3D>();
-    #lastUpdateTime = -1;
+
 
     constructor(redGPUContext: RedGPUContext) {
-        super();
+        super(redGPUContext);
         this.camera = new PerspectiveCamera();
         const isMobile = redGPUContext.detector.isMobile;
         const detector = {
@@ -73,32 +71,12 @@ class OrbitController extends AController {
             down: isMobile ? 'touchstart' : 'mousedown',
         };
         let sX: number, sY: number;
-        // 현재 마우스/터치 위치에서 해당하는 View를 찾는 함수
-        const findTargetView = (e: MouseEvent | TouchEvent): View3D | null => {
-            const {x, y} = this.getCanvasEventPoint(e, redGPUContext);
-            let tX: number, tY: number;
-            if (isMobile) {
-                tX = x * window.devicePixelRatio * redGPUContext.renderScale;
-                tY = y * window.devicePixelRatio * redGPUContext.renderScale;
-            } else {
-                tX = x * window.devicePixelRatio * redGPUContext.renderScale;
-                tY = y * window.devicePixelRatio * redGPUContext.renderScale;
-            }
-            // 현재 프레임에서 활성화된 View들을 검사하여 마우스/터치 위치에 해당하는 View 찾기
-            for (const view of this.#currentFrameViews) {
-                const tViewRect = view.pixelRectObject;
-                if (tViewRect.x < tX && tX < tViewRect.x + tViewRect.width &&
-                    tViewRect.y < tY && tY < tViewRect.y + tViewRect.height) {
-                    return view;
-                }
-            }
-            return null;
-        };
+
         sX = 0;
         sY = 0;
         const HD_down = (e: MouseEvent | TouchEvent) => {
             // 현재 마우스/터치 위치에서 해당하는 View 찾기
-            const targetView = findTargetView(e);
+            const targetView = this.findTargetViewByInputEvent(e);
             if (!targetView) return;
             // 찾은 View를 현재 이벤트 View로 설정
             currentEventView = targetView;
@@ -126,7 +104,7 @@ class OrbitController extends AController {
         };
         const HD_wheel = (e: WheelEvent) => {
             // 현재 마우스 위치에서 해당하는 View 찾기
-            const targetView = findTargetView(e);
+            const targetView = this.findTargetViewByInputEvent(e);
             e.stopPropagation()
             e.preventDefault()
             if (!targetView) return;
@@ -251,17 +229,9 @@ class OrbitController extends AController {
     }
 
     update(view: View3D, time: number): void {
-        // 새로운 프레임이 시작되면 View 목록 초기화
-        if (this.#lastUpdateTime !== time) {
-            this.#lastUpdateTime = time;
-            this.#currentFrameViews.clear();
-        }
-        // 현재 프레임에서 사용되는 View 추가
-        this.#currentFrameViews.add(view);
-        // 첫 번째 View에서만 애니메이션 업데이트 실행
-        if (this.#currentFrameViews.size === 1) {
-            this.#updateAnimation();
-        }
+        super.update(view, time, () => {
+            this.#updateAnimation()
+        })
     }
 
     #updateAnimation(): void {
