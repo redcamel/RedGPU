@@ -2,6 +2,7 @@ import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
 import OrthographicCamera from "../camera/OrthographicCamera";
 import PerspectiveCamera from "../camera/PerspectiveCamera";
+import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
 
 /**
  * 카메라 컨트롤러의 추상 클래스입니다.
@@ -17,6 +18,10 @@ import PerspectiveCamera from "../camera/PerspectiveCamera";
  *
  */
 abstract class AController {
+    /** 인스턴스 고유 ID */
+    #instanceId: number;
+    /** 컨트롤러 이름 */
+    #name: string;
     #redGPUContext: RedGPUContext;
     /**
      * 현재 컨트롤러가 제어하는 카메라 인스턴스
@@ -31,6 +36,15 @@ abstract class AController {
      */
     constructor(redGPUContext: RedGPUContext) {
         this.#redGPUContext = redGPUContext
+    }
+
+    get name(): string {
+        if (!this.#instanceId) this.#instanceId = InstanceIdGenerator.getNextId(this.constructor);
+        return this.#name || `${this.constructor.name} Instance ${this.#instanceId}`;
+    }
+
+    set name(value: string) {
+        this.#name = value;
     }
 
     get redGPUContext(): RedGPUContext {

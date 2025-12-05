@@ -6,7 +6,6 @@ import validateNumber from "../../runtimeChecker/validateFunc/validateNumber";
 import PerspectiveCamera from "../camera/PerspectiveCamera";
 import AController from "../core/AController";
 import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumberRange";
-import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
 
 let currentMouseEventView: View3D
 let tMTX0 = mat4.create();
@@ -45,10 +44,7 @@ type KeyNameMapper = {
  * <iframe src="/RedGPU/examples/3d/controller/freeController/"></iframe>
  */
 class FreeController extends AController {
-    /** 인스턴스 고유 ID */
-    #instanceId: number;
-    /** 컨트롤러 이름 */
-    #name: string;
+
     /** 키 매핑 정보 */
     #keyNameMapper: KeyNameMapper = {
         moveForward: 'w',
@@ -126,14 +122,6 @@ class FreeController extends AController {
         redGPUContext.htmlCanvas.addEventListener(detector.down, HD_down);
     };
 
-    get name(): string {
-        if (!this.#instanceId) this.#instanceId = InstanceIdGenerator.getNextId(this.constructor);
-        return this.#name || `${this.constructor.name} Instance ${this.#instanceId}`;
-    }
-
-    set name(value: string) {
-        this.#name = value;
-    }
 
     get x(): number {
         return this.#targetMesh.x;

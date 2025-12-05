@@ -2,7 +2,6 @@ import {mat4} from "gl-matrix";
 import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
 import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumberRange";
-import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
 import PerspectiveCamera from "../camera/PerspectiveCamera";
 import AController from "../core/AController";
 
@@ -27,10 +26,6 @@ let currentEventView: View3D;
  * ```
  */
 class OrbitController extends AController {
-    /** 인스턴스 고유 ID */
-    #instanceId: number;
-    /** 컨트롤러 이름 */
-    #name: string;
     /** 중심 X */
     #centerX = 0;
     /** 중심 Y */
@@ -115,14 +110,6 @@ class OrbitController extends AController {
         redGPUContext.htmlCanvas.addEventListener('wheel', HD_wheel);
     }
 
-    get name(): string {
-        if (!this.#instanceId) this.#instanceId = InstanceIdGenerator.getNextId(this.constructor);
-        return this.#name || `${this.constructor.name} Instance ${this.#instanceId}`;
-    }
-
-    set name(value: string) {
-        this.#name = value;
-    }
 
     get centerX(): number {
         return this.#centerX;

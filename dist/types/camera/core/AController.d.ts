@@ -20,7 +20,10 @@ declare abstract class AController {
     /**
      * AController 생성자
      */
-    constructor();
+    constructor(redGPUContext: RedGPUContext);
+    get name(): string;
+    set name(value: string);
+    get redGPUContext(): RedGPUContext;
     /**
      * 현재 연결된 카메라를 반환합니다.
      */
@@ -34,7 +37,7 @@ declare abstract class AController {
      * @param view - View3D 인스턴스
      * @param time - 시간값(ms)
      */
-    update(view: View3D, time: number): void;
+    update(view: View3D, time: number, updateAnimation: () => void): void;
     /**
      * 마우스/터치 이벤트에서 캔버스 내 좌표를 반환합니다.
      * @param e - MouseEvent 또는 TouchEvent
@@ -45,5 +48,6 @@ declare abstract class AController {
         x: number;
         y: number;
     };
+    findTargetViewByInputEvent: (e: MouseEvent | TouchEvent) => View3D | null;
 }
 export default AController;
