@@ -5,6 +5,7 @@ import View3D from "../../display/view/View3D";
 import validateNumber from "../../runtimeChecker/validateFunc/validateNumber";
 import PerspectiveCamera from "../camera/PerspectiveCamera";
 import AController from "../core/AController";
+import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumberRange";
 
 let currentEventView: View3D;
 let tMTX0 = mat4.create();
@@ -38,8 +39,9 @@ type KeyNameMapper = {
  * controller.z = 20;
  * controller.pan = 30;
  * controller.tilt = 10;
- * controller.setMoveForwardKey('ArrowUp');
+ * controller.setMoveForwardKey('w');
  * ```
+ * <iframe src="/RedGPU/examples/3d/controller/freeController/"></iframe>
  */
 class FreeController extends AController {
     /** 연결된 View3D 인스턴스 */
@@ -135,6 +137,7 @@ class FreeController extends AController {
         redGPUContext.htmlCanvas.addEventListener(detector.down, HD_down);
     };
 
+
     get x(): number {
         return this.#targetMesh.x;
     }
@@ -171,8 +174,9 @@ class FreeController extends AController {
 
     set tilt(value: number) {
         validateNumber(value)
-        this.#targetMesh.rotationX = value;
-        this.#desireTilt = value;
+        const clampedTilt = Math.max(-90, Math.min(90, value));
+        this.#targetMesh.rotationX = clampedTilt;
+        this.#desireTilt = clampedTilt;
     }
 
     get pan(): number {
@@ -183,6 +187,51 @@ class FreeController extends AController {
         validateNumber(value)
         this.#targetMesh.rotationY = value;
         this.#desirePan = value;
+    }
+
+
+    get speed(): number {
+        return this.#speed;
+    }
+
+    set speed(value: number) {
+        validateNumberRange(value, 0.01);
+        this.#speed = value;
+    }
+
+    get delay(): number {
+        return this.#delay;
+    }
+
+    set delay(value: number) {
+        validateNumberRange(value, 0.01, 1);
+        this.#delay = value;
+    }
+
+    get speedRotation(): number {
+        return this.#speedRotation;
+    }
+
+    set speedRotation(value: number) {
+        validateNumberRange(value, 0.01);
+        this.#speedRotation = value;
+    }
+
+    get delayRotation(): number {
+        return this.#delayRotation;
+    }
+
+    set delayRotation(value: number) {
+        validateNumberRange(value, 0.01, 1);
+        this.#delayRotation = value;
+    }
+
+    get maxAcceleration(): number {
+        return this.#maxAcceleration;
+    }
+
+    set maxAcceleration(value: number) {
+        this.#maxAcceleration = value;
     }
 
     get keyNameMapper(): KeyNameMapper {
