@@ -22,6 +22,8 @@ RedGPU.init(
         view2.grid = true;
         redGPUContext.addView(view2);
 
+
+
         if (redGPUContext.detector.isMobile) {
             // 모바일: 위아래 분할
             view.setSize('100%', '50%');

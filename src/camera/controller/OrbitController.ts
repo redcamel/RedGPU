@@ -5,8 +5,6 @@ import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumbe
 import PerspectiveCamera from "../camera/PerspectiveCamera";
 import AController from "../core/AController";
 
-let currentEventView: View3D;
-
 /**
  * 오빗(Orbit) 카메라 컨트롤러 클래스입니다.
  * 마우스/터치 드래그로 회전, 휠로 줌, 중심점/거리/회전/틸트 등 다양한 파라미터를 지원합니다.
@@ -74,7 +72,7 @@ class OrbitController extends AController {
             const targetView = this.findTargetViewByInputEvent(e);
             if (!targetView) return;
             // 찾은 View를 현재 이벤트 View로 설정
-            currentEventView = targetView;
+            AController.currentMouseEventView = targetView;
             const {x, y} = this.getCanvasEventPoint(e, redGPUContext);
             sX = x;
             sY = y;
@@ -83,7 +81,7 @@ class OrbitController extends AController {
         };
         const HD_Move = (e: MouseEvent | TouchEvent) => {
             // 현재 이벤트가 진행 중인 View가 있는지 확인
-            if (!currentEventView) return;
+            if (!AController.currentMouseEventView) return;
             const {x, y} = this.getCanvasEventPoint(e, redGPUContext);
             const deltaX = x - sX;
             const deltaY = y - sY;
@@ -93,7 +91,7 @@ class OrbitController extends AController {
             this.#tilt -= deltaY * this.#speedRotation * 0.1;
         };
         const HD_up = () => {
-            currentEventView = null;
+            AController.currentMouseEventView = null;
             redGPUContext.htmlCanvas.removeEventListener(detector.move, HD_Move);
             window.removeEventListener(detector.up, HD_up);
         };
