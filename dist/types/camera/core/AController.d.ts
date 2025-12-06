@@ -1,6 +1,7 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
 import PerspectiveCamera from "../camera/PerspectiveCamera";
+import OrthographicCamera from "../camera/OrthographicCamera";
 /**
  * 카메라 컨트롤러의 추상 클래스입니다.
  *
@@ -20,7 +21,12 @@ declare abstract class AController {
     /**
      * AController 생성자
      */
-    constructor(redGPUContext: RedGPUContext);
+    constructor(redGPUContext: RedGPUContext, camera?: PerspectiveCamera | OrthographicCamera);
+    get detectorEventKey(): {
+        moveKey: string;
+        upKey: string;
+        downKey: string;
+    };
     get name(): string;
     set name(value: string);
     get redGPUContext(): RedGPUContext;

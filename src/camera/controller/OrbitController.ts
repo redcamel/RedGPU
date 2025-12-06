@@ -54,7 +54,7 @@ class OrbitController extends AController {
     // ==================== 입력 관련 ====================
     #startX = 0;
     #startY = 0;
-    #detectorEventKey: { moveKey: string; upKey: string; downKey: string };
+    
 
     // ==================== 라이프사이클 ====================
     constructor(redGPUContext: RedGPUContext) {
@@ -63,22 +63,14 @@ class OrbitController extends AController {
     }
 
     #initListener() {
-        const isMobile = this.redGPUContext.detector.isMobile;
         const {htmlCanvas} = this.redGPUContext;
-
-        this.#detectorEventKey = {
-            moveKey: isMobile ? 'touchmove' : 'mousemove',
-            upKey: isMobile ? 'touchend' : 'mouseup',
-            downKey: isMobile ? 'touchstart' : 'mousedown',
-        };
-
-        const {downKey} = this.#detectorEventKey;
+        const {downKey} = this.detectorEventKey;
         htmlCanvas.addEventListener(downKey, this.#HD_down);
         htmlCanvas.addEventListener('wheel', this.#HD_wheel, {passive: false});
     }
 
     override destroy() {
-        const {moveKey, upKey, downKey} = this.#detectorEventKey;
+        const {moveKey, upKey, downKey} = this.detectorEventKey;
         const {htmlCanvas} = this.redGPUContext;
 
         htmlCanvas.removeEventListener(downKey, this.#HD_down);
@@ -94,7 +86,7 @@ class OrbitController extends AController {
 
         AController.currentMouseEventView = targetView;
         const {redGPUContext} = this;
-        const {moveKey, upKey} = this.#detectorEventKey;
+        const {moveKey, upKey} = this.detectorEventKey;
         const {x, y} = this.getCanvasEventPoint(e, redGPUContext);
 
         this.#startX = x;
@@ -121,7 +113,7 @@ class OrbitController extends AController {
 
     #HD_up = () => {
         const {redGPUContext} = this;
-        const {moveKey, upKey} = this.#detectorEventKey;
+        const {moveKey, upKey} = this.detectorEventKey;
 
         AController.currentMouseEventView = null;
         redGPUContext.htmlCanvas.removeEventListener(moveKey, this.#HD_Move);

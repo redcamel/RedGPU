@@ -1,8 +1,8 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
-import OrthographicCamera from "../camera/OrthographicCamera";
 import PerspectiveCamera from "../camera/PerspectiveCamera";
 import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
+import OrthographicCamera from "../camera/OrthographicCamera";
 
 /**
  * 카메라 컨트롤러의 추상 클래스입니다.
@@ -27,17 +27,27 @@ abstract class AController {
     /**
      * 현재 컨트롤러가 제어하는 카메라 인스턴스
      */
-    #camera: PerspectiveCamera
+    #camera: PerspectiveCamera|OrthographicCamera
     // 현재 프레임에서 활성화된 View 목록
     #lastUpdateTime = -1;
     #currentFrameViews = new Set<View3D>();
-
+    #detectorEventKey: { moveKey: string; upKey: string; downKey: string };
     /**
      * AController 생성자
      */
-    constructor(redGPUContext: RedGPUContext) {
+    constructor(redGPUContext: RedGPUContext,camera?:PerspectiveCamera|OrthographicCamera) {
         this.#redGPUContext = redGPUContext
-        this.#camera = new PerspectiveCamera()
+        this.#camera = camera || new PerspectiveCamera()
+        const isMobile = this.#redGPUContext.detector.isMobile;
+        this.#detectorEventKey = {
+            moveKey: isMobile ? 'touchmove' : 'mousemove',
+            upKey: isMobile ? 'touchend' : 'mouseup',
+            downKey: isMobile ? 'touchstart' : 'mousedown',
+        };
+    }
+
+    get detectorEventKey(): { moveKey: string; upKey: string; downKey: string } {
+        return this.#detectorEventKey;
     }
 
     get name(): string {
