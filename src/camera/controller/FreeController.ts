@@ -7,7 +7,7 @@ import PerspectiveCamera from "../camera/PerspectiveCamera";
 import AController from "../core/AController";
 import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumberRange";
 
-let currentMouseEventView: View3D
+
 let tMTX0 = mat4.create();
 const displacementMTX = mat4.create();
 const displacementVec3 = vec3.create();
@@ -98,7 +98,7 @@ class FreeController extends AController {
             const targetView = this.findTargetViewByInputEvent(e);
             if (!targetView) return;
             // 찾은 View를 현재 이벤트 View로 설정
-            currentMouseEventView = targetView;
+            AController.currentMouseEventView = targetView;
             const {x, y} = this.getCanvasEventPoint(e, redGPUContext)
             sX = x
             sY = y
@@ -115,7 +115,7 @@ class FreeController extends AController {
             this.#desireTilt -= deltaY * this.#speedRotation * 0.1;
         };
         const HD_up = () => {
-            currentMouseEventView = null
+            AController.currentMouseEventView = null
             redGPUContext.htmlCanvas.removeEventListener(detector.move, HD_Move);
             window.removeEventListener(detector.up, HD_up);
         };
@@ -267,11 +267,9 @@ class FreeController extends AController {
         super.update(view, time, () => {
             this.#updateAnimation(view)
         })
-
     }
 
     #updateAnimation(view: View3D) {
-
         const tDelay = this.#delay;
         const tDelayRotation = this.#delayRotation;
         const tDesirePosition = this.#desirePosition;
@@ -321,8 +319,8 @@ class FreeController extends AController {
         // if (!view.checkMouseInViewBounds()) return
         //
 
-        if (currentMouseEventView) {
-            if (currentMouseEventView !== view) return
+        if (AController.currentMouseEventView) {
+            if (AController.currentMouseEventView !== view) return
         } else {
             if (!view.checkMouseInViewBounds()) return
         }

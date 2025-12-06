@@ -18,6 +18,7 @@ import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
  *
  */
 abstract class AController {
+    static currentMouseEventView: View3D
     /** 인스턴스 고유 ID */
     #instanceId: number;
     /** 컨트롤러 이름 */
@@ -71,13 +72,14 @@ abstract class AController {
      * @param time - 시간값(ms)
      */
     update(view: View3D, time: number, updateAnimation: () => void): void {
+        const targetView = AController.currentMouseEventView || view
         // 새로운 프레임이 시작되면 View 목록 초기화
         if (this.#lastUpdateTime !== time) {
             this.#lastUpdateTime = time;
             this.#currentFrameViews.clear();
         }
         // 현재 프레임에서 사용되는 View 추가
-        this.#currentFrameViews.add(view);
+        this.#currentFrameViews.add(targetView);
         // 첫 번째 View에서만 애니메이션 업데이트 실행
         if (this.#currentFrameViews.size === 1) {
             updateAnimation?.();

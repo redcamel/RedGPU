@@ -17,6 +17,7 @@ import PerspectiveCamera from "../camera/PerspectiveCamera";
  */
 declare abstract class AController {
     #private;
+    static currentMouseEventView: View3D;
     /**
      * AController 생성자
      */
