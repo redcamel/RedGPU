@@ -82,7 +82,6 @@ class FreeController extends AController {
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
         this.#targetMesh = new Mesh(redGPUContext)
-        this.camera = new PerspectiveCamera()
         const isMobile = redGPUContext.detector.isMobile
         const detector = {
             move: isMobile ? 'touchmove' : 'mousemove',

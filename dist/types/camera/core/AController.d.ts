@@ -1,6 +1,5 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
-import OrthographicCamera from "../camera/OrthographicCamera";
 import PerspectiveCamera from "../camera/PerspectiveCamera";
 /**
  * 카메라 컨트롤러의 추상 클래스입니다.
@@ -28,11 +27,7 @@ declare abstract class AController {
     /**
      * 현재 연결된 카메라를 반환합니다.
      */
-    get camera(): PerspectiveCamera | OrthographicCamera;
-    /**
-     * 컨트롤러에 카메라를 할당합니다.
-     */
-    set camera(value: PerspectiveCamera | OrthographicCamera);
+    get camera(): PerspectiveCamera;
     /**
      * 컨트롤러 상태를 갱신합니다. (파생 클래스에서 override)
      * @param view - View3D 인스턴스
@@ -50,5 +45,6 @@ declare abstract class AController {
         y: number;
     };
     findTargetViewByInputEvent: (e: MouseEvent | TouchEvent) => View3D | null;
+    destroy(): void;
 }
 export default AController;

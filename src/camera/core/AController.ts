@@ -27,7 +27,7 @@ abstract class AController {
     /**
      * 현재 컨트롤러가 제어하는 카메라 인스턴스
      */
-    #camera: PerspectiveCamera | OrthographicCamera
+    #camera: PerspectiveCamera
     // 현재 프레임에서 활성화된 View 목록
     #lastUpdateTime = -1;
     #currentFrameViews = new Set<View3D>();
@@ -37,6 +37,7 @@ abstract class AController {
      */
     constructor(redGPUContext: RedGPUContext) {
         this.#redGPUContext = redGPUContext
+        this.#camera = new PerspectiveCamera()
     }
 
     get name(): string {
@@ -55,16 +56,11 @@ abstract class AController {
     /**
      * 현재 연결된 카메라를 반환합니다.
      */
-    get camera(): PerspectiveCamera | OrthographicCamera {
+    get camera(): PerspectiveCamera  {
         return this.#camera;
     }
 
-    /**
-     * 컨트롤러에 카메라를 할당합니다.
-     */
-    set camera(value: PerspectiveCamera | OrthographicCamera) {
-        this.#camera = value;
-    }
+
 
     /**
      * 컨트롤러 상태를 갱신합니다. (파생 클래스에서 override)
@@ -95,6 +91,7 @@ abstract class AController {
     getCanvasEventPoint = (e: MouseEvent | TouchEvent, redGPUContext: RedGPUContext) => {
         const canvas = redGPUContext.htmlCanvas;
         const isMobile = redGPUContext.detector.isMobile;
+        //TODO getBoundingClientRect 를 redGPUContext 쪽에서 캐싱 관리하는 방안 고려
         const rect = canvas.getBoundingClientRect();
         const tX_key = 'clientX';
         const tY_key = 'clientY';
@@ -119,13 +116,9 @@ abstract class AController {
         const isMobile = redGPUContext.detector.isMobile;
         const {x, y} = this.getCanvasEventPoint(e, redGPUContext);
         let tX: number, tY: number;
-        if (isMobile) {
-            tX = x * window.devicePixelRatio * redGPUContext.renderScale;
-            tY = y * window.devicePixelRatio * redGPUContext.renderScale;
-        } else {
-            tX = x * window.devicePixelRatio * redGPUContext.renderScale;
-            tY = y * window.devicePixelRatio * redGPUContext.renderScale;
-        }
+        const scale = window.devicePixelRatio * redGPUContext.renderScale
+        tX = x * scale;
+        tY = y * scale;
         // 현재 프레임에서 활성화된 View들을 검사하여 마우스/터치 위치에 해당하는 View 찾기
         for (const view of this.#currentFrameViews) {
             const tViewRect = view.pixelRectObject;
@@ -136,6 +129,9 @@ abstract class AController {
         }
         return null;
     };
+    destroy(){
+
+    }
 }
 
 export default AController

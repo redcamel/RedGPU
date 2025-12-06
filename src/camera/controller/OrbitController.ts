@@ -2,8 +2,12 @@ import {mat4} from "gl-matrix";
 import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
 import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumberRange";
-import PerspectiveCamera from "../camera/PerspectiveCamera";
 import AController from "../core/AController";
+
+const PER_PI = Math.PI / 180;
+const ROTATION_THRESHOLD = 0.01;
+const DISTANCE_THRESHOLD = 0.01;
+const tempMatrix = mat4.create();
 
 /**
  * 오빗(Orbit) 카메라 컨트롤러 클래스입니다.
@@ -24,91 +28,117 @@ import AController from "../core/AController";
  * ```
  */
 class OrbitController extends AController {
-    /** 중심 X */
+    // ==================== 카메라 위치 및 중심점 ====================
     #centerX = 0;
-    /** 중심 Y */
     #centerY = 0;
-    /** 중심 Z */
     #centerZ = 0;
-    /** 카메라 거리. 기본값 15 */
+
+    // ==================== 거리(줌) 관련 ====================
     #distance = 15;
-    /** 줌 속도. 기본값 2 */
     #speedDistance = 2;
-    /** 줌 보간 딜레이. 기본값 0.1 */
     #delayDistance = 0.1;
-    /** 회전 속도. 기본값 3 */
-    #speedRotation = 3;
-    /** 회전 보간 딜레이. 기본값 0.1 */
-    #delayRotation = 0.1;
-    /** 틸트(수직 각도). 기본값 -35 */
-    #tilt = -35;
-    /** 최소 틸트. 기본값 -90 */
-    #minTilt = -90;
-    /** 최대 틸트. 기본값 90 */
-    #maxTilt = 90;
-    /** 팬(수평 각도). 기본값 0 */
+
+    // ==================== 회전(팬/틸트) 관련 ====================
     #pan = 0;
-    // 애니메이션용 현재 상태
+    #tilt = -35;
+    #speedRotation = 3;
+    #delayRotation = 0.1;
+    #minTilt = -90;
+    #maxTilt = 90;
+
+    // ==================== 애니메이션 상태 ====================
     #currentPan = 0;
     #currentTilt = 0;
     #currentDistance = 0;
 
+    // ==================== 입력 관련 ====================
+    #startX = 0;
+    #startY = 0;
+    #detectorEventKey: { moveKey: string; upKey: string; downKey: string };
 
+    // ==================== 라이프사이클 ====================
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
-        this.camera = new PerspectiveCamera();
-        const isMobile = redGPUContext.detector.isMobile;
-        const detector = {
-            move: isMobile ? 'touchmove' : 'mousemove',
-            up: isMobile ? 'touchend' : 'mouseup',
-            down: isMobile ? 'touchstart' : 'mousedown',
-        };
-        let sX: number, sY: number;
-
-        sX = 0;
-        sY = 0;
-        const HD_down = (e: MouseEvent | TouchEvent) => {
-            // 현재 마우스/터치 위치에서 해당하는 View 찾기
-            const targetView = this.findTargetViewByInputEvent(e);
-            if (!targetView) return;
-            // 찾은 View를 현재 이벤트 View로 설정
-            AController.currentMouseEventView = targetView;
-            const {x, y} = this.getCanvasEventPoint(e, redGPUContext);
-            sX = x;
-            sY = y;
-            redGPUContext.htmlCanvas.addEventListener(detector.move, HD_Move);
-            window.addEventListener(detector.up, HD_up);
-        };
-        const HD_Move = (e: MouseEvent | TouchEvent) => {
-            // 현재 이벤트가 진행 중인 View가 있는지 확인
-            if (!AController.currentMouseEventView) return;
-            const {x, y} = this.getCanvasEventPoint(e, redGPUContext);
-            const deltaX = x - sX;
-            const deltaY = y - sY;
-            sX = x;
-            sY = y;
-            this.#pan -= deltaX * this.#speedRotation * 0.1;
-            this.#tilt -= deltaY * this.#speedRotation * 0.1;
-        };
-        const HD_up = () => {
-            AController.currentMouseEventView = null;
-            redGPUContext.htmlCanvas.removeEventListener(detector.move, HD_Move);
-            window.removeEventListener(detector.up, HD_up);
-        };
-        const HD_wheel = (e: WheelEvent) => {
-            // 현재 마우스 위치에서 해당하는 View 찾기
-            const targetView = this.findTargetViewByInputEvent(e);
-            e.stopPropagation()
-            e.preventDefault()
-            if (!targetView) return;
-            // 거리 조정
-            this.#distance += e.deltaY / 100 * this.#speedDistance;
-        };
-        redGPUContext.htmlCanvas.addEventListener(detector.down, HD_down);
-        redGPUContext.htmlCanvas.addEventListener('wheel', HD_wheel);
+        this.#initListener();
     }
 
+    #initListener() {
+        const isMobile = this.redGPUContext.detector.isMobile;
+        const {htmlCanvas} = this.redGPUContext;
 
+        this.#detectorEventKey = {
+            moveKey: isMobile ? 'touchmove' : 'mousemove',
+            upKey: isMobile ? 'touchend' : 'mouseup',
+            downKey: isMobile ? 'touchstart' : 'mousedown',
+        };
+
+        const {downKey} = this.#detectorEventKey;
+        htmlCanvas.addEventListener(downKey, this.#HD_down);
+        htmlCanvas.addEventListener('wheel', this.#HD_wheel, {passive: false});
+    }
+
+    override destroy() {
+        const {moveKey, upKey, downKey} = this.#detectorEventKey;
+        const {htmlCanvas} = this.redGPUContext;
+
+        htmlCanvas.removeEventListener(downKey, this.#HD_down);
+        htmlCanvas.removeEventListener(moveKey, this.#HD_Move);
+        htmlCanvas.removeEventListener('wheel', this.#HD_wheel);
+        window.removeEventListener(upKey, this.#HD_up);
+    }
+
+    // ==================== 이벤트 핸들러 ====================
+    #HD_down = (e: MouseEvent | TouchEvent) => {
+        const targetView = this.findTargetViewByInputEvent(e);
+        if (!targetView) return;
+
+        AController.currentMouseEventView = targetView;
+        const {redGPUContext} = this;
+        const {moveKey, upKey} = this.#detectorEventKey;
+        const {x, y} = this.getCanvasEventPoint(e, redGPUContext);
+
+        this.#startX = x;
+        this.#startY = y;
+
+        redGPUContext.htmlCanvas.addEventListener(moveKey, this.#HD_Move);
+        window.addEventListener(upKey, this.#HD_up);
+    }
+
+    #HD_Move = (e: MouseEvent | TouchEvent) => {
+        if (!AController.currentMouseEventView) return;
+
+        const {redGPUContext} = this;
+        const {x, y} = this.getCanvasEventPoint(e, redGPUContext);
+        const deltaX = x - this.#startX;
+        const deltaY = y - this.#startY;
+
+        this.#startX = x;
+        this.#startY = y;
+
+        this.#pan -= deltaX * this.#speedRotation * 0.1;
+        this.#tilt -= deltaY * this.#speedRotation * 0.1;
+    }
+
+    #HD_up = () => {
+        const {redGPUContext} = this;
+        const {moveKey, upKey} = this.#detectorEventKey;
+
+        AController.currentMouseEventView = null;
+        redGPUContext.htmlCanvas.removeEventListener(moveKey, this.#HD_Move);
+        window.removeEventListener(upKey, this.#HD_up);
+    }
+
+    #HD_wheel = (e: WheelEvent) => {
+        const targetView = this.findTargetViewByInputEvent(e);
+        if (!targetView) return;
+
+        e.stopPropagation();
+        e.preventDefault();
+
+        this.#distance += e.deltaY / 100 * this.#speedDistance;
+    }
+
+    // ==================== 센터 좌표 Getter/Setter ====================
     get centerX(): number {
         return this.#centerX;
     }
@@ -133,6 +163,7 @@ class OrbitController extends AController {
         this.#centerZ = value;
     }
 
+    // ==================== 거리(줌) Getter/Setter ====================
     get distance(): number {
         return this.#distance;
     }
@@ -160,6 +191,7 @@ class OrbitController extends AController {
         this.#delayDistance = value;
     }
 
+    // ==================== 회전 속도 Getter/Setter ====================
     get speedRotation(): number {
         return this.#speedRotation;
     }
@@ -176,6 +208,24 @@ class OrbitController extends AController {
     set delayRotation(value: number) {
         validateNumberRange(value, 0.01, 1);
         this.#delayRotation = value;
+    }
+
+    // ==================== 팬/틸트 Getter/Setter ====================
+    get pan(): number {
+        return this.#pan;
+    }
+
+    set pan(value: number) {
+        this.#pan = value;
+    }
+
+    get tilt(): number {
+        return this.#tilt;
+    }
+
+    set tilt(value: number) {
+        validateNumberRange(value, -90, 90);
+        this.#tilt = value;
     }
 
     get minTilt(): number {
@@ -196,50 +246,53 @@ class OrbitController extends AController {
         this.#maxTilt = value;
     }
 
-    get pan(): number {
-        return this.#pan;
-    }
-
-    set pan(value: number) {
-        this.#pan = value;
-    }
-
-    get tilt(): number {
-        return this.#tilt;
-    }
-
-    set tilt(value: number) {
-        validateNumberRange(value, -90, 90);
-        this.#tilt = value;
-    }
-
+    // ==================== 업데이트 및 애니메이션 ====================
     update(view: View3D, time: number): void {
         super.update(view, time, () => {
-            this.#updateAnimation()
-        })
+            this.#updateAnimation();
+        });
     }
 
     #updateAnimation(): void {
-        const PER_PI = Math.PI / 180;
-        // tilt 범위 제한
+        // 틸트 범위 제한
         if (this.#tilt < this.#minTilt) this.#tilt = this.#minTilt;
         if (this.#tilt > this.#maxTilt) this.#tilt = this.#maxTilt;
+
         const {camera} = this;
-        // 공통 현재 상태를 목표값으로 애니메이션
-        this.#currentPan += (this.#pan - this.#currentPan) * this.#delayRotation;
-        this.#currentTilt += (this.#tilt - this.#currentTilt) * this.#delayRotation;
+
+        // 현재 값을 목표값으로 부드럽게 보간
+        const panDelta = this.#pan - this.#currentPan;
+        if (Math.abs(panDelta) > ROTATION_THRESHOLD) {
+            this.#currentPan += panDelta * this.#delayRotation;
+        }
+
+        // 틸트 보간
+        const tiltDelta = this.#tilt - this.#currentTilt;
+        if (Math.abs(tiltDelta) > ROTATION_THRESHOLD) {
+            this.#currentTilt += tiltDelta * this.#delayRotation;
+        }
+
+        // 거리(줌) 범위 및 보간
         if (this.#distance < camera.nearClipping) this.#distance = camera.nearClipping;
-        this.#currentDistance += (this.#distance - this.#currentDistance) * this.#delayDistance;
+
+        const distanceDelta = this.#distance - this.#currentDistance;
+        if (Math.abs(distanceDelta) > DISTANCE_THRESHOLD) {
+            this.#currentDistance += distanceDelta * this.#delayDistance;
+        }
         if (this.#currentDistance < camera.nearClipping) this.#currentDistance = camera.nearClipping;
-        const tMTX0 = camera.modelMatrix;
-        mat4.identity(tMTX0);
-        mat4.translate(tMTX0, tMTX0, [this.#centerX, this.#centerY, this.#centerZ]);
-        mat4.rotateY(tMTX0, tMTX0, this.#currentPan * PER_PI);
-        mat4.rotateX(tMTX0, tMTX0, this.#currentTilt * PER_PI);
-        mat4.translate(tMTX0, tMTX0, [0, 0, this.#currentDistance]);
-        camera.x = tMTX0[12];
-        camera.y = tMTX0[13];
-        camera.z = tMTX0[14];
+
+
+        // 카메라 위치 계산
+        mat4.identity(tempMatrix);
+        mat4.translate(tempMatrix, tempMatrix, [this.#centerX, this.#centerY, this.#centerZ]);
+        mat4.rotateY(tempMatrix, tempMatrix, this.#currentPan * PER_PI);
+        mat4.rotateX(tempMatrix, tempMatrix, this.#currentTilt * PER_PI);
+        mat4.translate(tempMatrix, tempMatrix, [0, 0, this.#currentDistance]);
+
+        // 카메라에 적용
+        camera.x = tempMatrix[12];
+        camera.y = tempMatrix[13];
+        camera.z = tempMatrix[14];
         this.camera.lookAt(this.#centerX, this.#centerY, this.#centerZ);
     }
 }

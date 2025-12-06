@@ -22,6 +22,7 @@ import AController from "../core/AController";
 declare class OrbitController extends AController {
     #private;
     constructor(redGPUContext: RedGPUContext);
+    destroy(): void;
     get centerX(): number;
     set centerX(value: number);
     get centerY(): number;
@@ -38,14 +39,14 @@ declare class OrbitController extends AController {
     set speedRotation(value: number);
     get delayRotation(): number;
     set delayRotation(value: number);
-    get minTilt(): number;
-    set minTilt(value: number);
-    get maxTilt(): number;
-    set maxTilt(value: number);
     get pan(): number;
     set pan(value: number);
     get tilt(): number;
     set tilt(value: number);
+    get minTilt(): number;
+    set minTilt(value: number);
+    get maxTilt(): number;
+    set maxTilt(value: number);
     update(view: View3D, time: number): void;
 }
 export default OrbitController;
