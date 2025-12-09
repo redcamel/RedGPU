@@ -1,4 +1,5 @@
 import {mat4} from "gl-matrix";
+import IsometricController from "../camera/controller/IsometricController";
 import RedGPUContext from "../context/RedGPUContext";
 import RenderViewStateData from "../display/view/core/RenderViewStateData";
 import View3D from "../display/view/View3D";
@@ -43,6 +44,19 @@ class Renderer {
     renderFrame(redGPUContext: RedGPUContext, time: number) {
         if (!this.#finalRender) this.#finalRender = new FinalRender()
         if (!this.#debugRender) this.#debugRender = new DebugRender(redGPUContext)
+
+		    {
+			    let i = 0
+			    const len = redGPUContext.viewList.length
+			    for (i; i < len; i++) {
+				    const targetView = redGPUContext.viewList[i];
+				    if(targetView.camera instanceof IsometricController && redGPUContext.antialiasingManager.useTAA){
+					    redGPUContext.antialiasingManager.useTAA=false
+					    redGPUContext.antialiasingManager.useMSAA=true
+					    break
+				    }
+			    }
+		    }
         // 오브젝트 렌더시작
         const viewList_renderPassDescriptorList: GPURenderPassDescriptor[] = []
         {
@@ -94,6 +108,7 @@ class Renderer {
                 const drawBufferManager = DrawBufferManager.getInstance(redGPUContext)
                 drawBufferManager.flushAllCommands(renderViewStateData)
             }
+
             this.#renderPassViewShadow(view, commandEncoder)
             this.#renderPassViewBasicLayer(view, commandEncoder, renderPassDescriptor)
             this.#renderPassView2PathLayer(view, commandEncoder, renderPassDescriptor, depthStencilAttachment)

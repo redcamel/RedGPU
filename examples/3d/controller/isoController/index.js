@@ -4,168 +4,188 @@ const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
 RedGPU.init(
-    canvas,
-    (redGPUContext) => {
-        const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        const controller2 = new RedGPU.Camera.OrbitController(redGPUContext);
-        console.log(controller.name,controller2.name);
-        const scene = new RedGPU.Display.Scene();
-        const view = new RedGPU.Display.View3D(redGPUContext, scene, controller2);
-        view.axis = true;
-        view.grid = true;
-        redGPUContext.addView(view);
+	canvas,
+	(redGPUContext) => {
+		// 타겟 메시 생성
+		const targetGeometry = new RedGPU.Primitive.Box(redGPUContext);
+		const targetMaterial = new RedGPU.Material.ColorMaterial(redGPUContext);
+		targetMaterial.color.setColorByRGB(255, 0, 0); // 빨간색
+		// targetMaterial.color.setColorByHEX('#ff0000'); // 빨간색
+		const targetMesh = new RedGPU.Display.Mesh(redGPUContext, targetGeometry, targetMaterial);
+		targetMesh.setPosition(0, 0, 0);
 
-        const view2 = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-        view2.axis = true;
-        view2.grid = true;
-        redGPUContext.addView(view2);
+		// IsometricController 생성
+		const isometricController = new RedGPU.Camera.IsometricController(redGPUContext, targetMesh);
+		isometricController.name = "IsometricController Instance";
+		console.log(isometricController.name);
 
+		const scene = new RedGPU.Display.Scene();
+		scene.addChild(targetMesh);
 
+		const view = new RedGPU.Display.View3D(redGPUContext, scene, isometricController);
+		view.axis = true;
+		view.grid = true;
+		redGPUContext.addView(view);
 
-        if (redGPUContext.detector.isMobile) {
-            // 모바일: 위아래 분할
-            view.setSize('100%', '50%');
-            view.setPosition(0, 0);         // 상단
-            view2.setSize('100%', '50%');
-            view2.setPosition(0, '50%');     // 하단
-        } else {
-            // 데스크톱: 좌우 분할
-            view.setSize('50%', '100%');
-            view.setPosition(0, 0);         // 좌측
-            view2.setSize('50%', '100%');
-            view2.setPosition('50%', 0);     // 우측
-        }
+		view.setSize('100%', '100%');
+		view.setPosition(0, 0);
 
-        const addMeshesToScene = (scene, count = 500) => {
-            const geometry = new RedGPU.Primitive.Sphere(redGPUContext);
-            const material = new RedGPU.Material.ColorMaterial(redGPUContext);
+		const addMeshesToScene = (scene, count = 500) => {
+			const geometry = new RedGPU.Primitive.Sphere(redGPUContext);
+			const material = new RedGPU.Material.ColorMaterial(redGPUContext);
 
-            for (let i = 0; i < count; i++) {
-                const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
+			for (let i = 0; i < count; i++) {
+				const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
 
-                mesh.setPosition(
-                    Math.random() * 500 - 250,
-                    Math.random() * 500 - 250,
-                    Math.random() * 500 - 250
-                );
+				mesh.setPosition(
+					Math.random() * 50 - 25,
+					0,
+					Math.random() * 50 - 25
+				);
 
-                scene.addChild(mesh);
-            }
-        };
+				scene.addChild(mesh);
+			}
+		};
 
-        addMeshesToScene(scene, 1000);
+		addMeshesToScene(scene, 100);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
-        const render = (time) => {
-            // 매 프레임 로직
-        };
-        renderer.start(redGPUContext, render);
+		const renderer = new RedGPU.Renderer(redGPUContext);
 
-        // renderTestPane(redGPUContext, controller);
-    },
-    (failReason) => {
-        console.error('초기화 실패:', failReason);
-        const errorMessage = document.createElement('div');
-        errorMessage.innerHTML = failReason;
-        document.body.appendChild(errorMessage);
-    }
+		let targetX = 0;
+		let targetZ = 0;
+		const moveSpeed = 0.5;
+
+		const render = (time) => {
+		};
+
+		renderer.start(redGPUContext, render);
+
+		renderTestPane(redGPUContext, isometricController, targetMesh);
+	},
+	(failReason) => {
+		console.error('초기화 실패:', failReason);
+		const errorMessage = document.createElement('div');
+		errorMessage.innerHTML = failReason;
+		document.body.appendChild(errorMessage);
+	}
 );
-const renderTestPane = async (redGPUContext, controller) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
-    const {
-        setDebugButtons
-    } = await import("../../../exampleHelper/createExample/panes/index.js");
 
-    setDebugButtons(redGPUContext);
-    const pane = new Pane();
+const renderTestPane = async (redGPUContext, controller, targetMesh) => {
+	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+	const {
+		setDebugButtons
+	} = await import("../../../exampleHelper/createExample/panes/index.js");
 
-    // 카메라 위치 조정
-    const cameraFolder = pane.addFolder({
-        title: 'Camera',
-    });
+	setDebugButtons(redGPUContext);
+	const pane = new Pane();
 
-    const positionParams = {
-        x: controller.x,
-        y: controller.y,
-        z: controller.z,
-    };
-
-    cameraFolder.addButton({
-        title: 'Reset Position',
-    }).on('click', () => {
-        controller.x = 0;
-        controller.y = 0;
-        controller.z = 0;
-        positionParams.x = 0;
-        positionParams.y = 0;
-        positionParams.z = 0;
-        pane.refresh();
-    });
-
-    const rotationParams = {
-        pan: controller.pan,
-        tilt: controller.tilt,
-    };
-
-    cameraFolder.addButton({
-        title: 'Reset Rotation',
-    }).on('click', () => {
-        controller.pan = 0;
-        controller.tilt = 0;
-        rotationParams.pan = 0;
-        rotationParams.tilt = 0;
-        pane.refresh();
-    });
-
-    // 조작 파라미터 조정
-    const controlsFolder = pane.addFolder({
-        title: 'Control Parameters',
-    });
-
-    controlsFolder.addBinding(controller, 'speed', {
-        min: 0.1,
-        max: 5,
-        step: 0.1,
-    });
-
-    controlsFolder.addBinding(controller, 'delay', {
-        min: 0.01,
-        max: 0.5,
-        step: 0.01,
-    });
-
-    controlsFolder.addBinding(controller, 'speedRotation', {
-        min: 0.1,
-        max: 5,
-        step: 0.1,
-    });
-
-    controlsFolder.addBinding(controller, 'delayRotation', {
-        min: 0.01,
-        max: 0.5,
-        step: 0.01,
-    });
-
-    controlsFolder.addBinding(controller, 'maxAcceleration', {
-        min: 1,
-        max: 10,
-        step: 0.5,
-    });
+	// 카메라 설정 폴더
+	const cameraFolder = pane.addFolder({
+		title: 'Camera Settings',
+	});
 
 
-    const keyBindings = controller.keyNameMapper;
+	cameraFolder.addBinding(controller, 'cameraAngle', {
+		min: 0,
+		max: 360,
+		step: 1,
+	});
 
-    // 이동 키
-    const moveFolder = pane.addFolder({
-        title: 'Movement Keys',
-    });
+	// 줌 설정 폴더
+	const zoomFolder = pane.addFolder({
+		title: 'Zoom Settings',
+	});
 
-    for (const key in keyBindings) {
-        moveFolder.addBinding(keyBindings, key, {
-            label: key,
-        }).on('change', (ev) => {
-            controller[`set${key.charAt(0).toUpperCase()}${key.substr(1)}`](ev.value);
-        });
-    }
+	zoomFolder.addBinding(controller, 'zoom', {
+		min: controller.minZoom,
+		max: controller.maxZoom,
+		step: 0.1,
+	});
 
+	zoomFolder.addBinding(controller, 'speedZoom', {
+		min: 0.01,
+		max: 0.5,
+		step: 0.01,
+	});
+
+	zoomFolder.addBinding(controller, 'minZoom', {
+		min: 0.1,
+		max: 2,
+		step: 0.1,
+	});
+
+	zoomFolder.addBinding(controller, 'maxZoom', {
+		min: 1,
+		max: 10,
+		step: 0.1,
+	});
+
+	// 뷰 설정 폴더
+	const viewFolder = pane.addFolder({
+		title: 'View Settings',
+	});
+
+
+
+	viewFolder.addBinding(controller, 'viewHeight', {
+		min: 5,
+		max: 100,
+		step: 1,
+	});
+
+	// 타겟 위치 폴더
+	const targetFolder = pane.addFolder({
+		title: 'Target Position',
+	});
+
+	const targetPos = {
+		x: targetMesh.x,
+		y: targetMesh.y,
+		z: targetMesh.z,
+	};
+
+	targetFolder.addBinding(targetPos, 'x', {
+		min: -500,
+		max: 500,
+		step: 1,
+	}).on('change', (ev) => {
+		targetMesh.x = ev.value;
+	});
+
+	targetFolder.addBinding(targetPos, 'y', {
+		min: -500,
+		max: 500,
+		step: 1,
+	}).on('change', (ev) => {
+		targetMesh.y = ev.value;
+	});
+
+	targetFolder.addBinding(targetPos, 'z', {
+		min: -500,
+		max: 500,
+		step: 1,
+	}).on('change', (ev) => {
+		targetMesh.z = ev.value;
+	});
+
+	targetFolder.addButton({
+		title: 'Reset Target Position',
+	}).on('click', () => {
+		targetMesh.setPosition(0, 0, 0);
+		targetPos.x = 0;
+		targetPos.y = 0;
+		targetPos.z = 0;
+		pane.refresh();
+	});
+
+	// 카메라 리셋 버튼
+	cameraFolder.addButton({
+		title: 'Reset Camera',
+	}).on('click', () => {
+		controller.cameraDistance = 15;
+		controller.cameraHeight = 12;
+		controller.cameraAngle = 45;
+		controller.zoom = 1;
+		pane.refresh();
+	});
 };
