@@ -5,6 +5,7 @@ import PerspectiveCamera from "../camera/PerspectiveCamera";
 export type controllerInit = {
     HD_Move?: (deltaX: number, deltaY: number) => void;
     HD_Wheel?: (e: WheelEvent) => void;
+    HD_TouchPinch?: (deltaScale: number) => void;
     useKeyboard?: boolean;
     camera?: PerspectiveCamera | OrthographicCamera;
 };
@@ -55,7 +56,7 @@ declare abstract class AController {
      * @param redGPUContext - RedGPUContext 인스턴스
      * @returns 캔버스 내 상대 좌표 객체 { x, y }
      */
-    getCanvasEventPoint: (e: MouseEvent | TouchEvent, redGPUContext: RedGPUContext) => {
+    getCanvasEventPoint: (e: MouseEvent | TouchEvent | WheelEvent, redGPUContext: RedGPUContext) => {
         x: number;
         y: number;
     };

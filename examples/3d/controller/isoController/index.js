@@ -7,8 +7,8 @@ RedGPU.init(
 	canvas,
 	(redGPUContext) => {
 		// 타겟 메시 생성
-		const targetGeometry = new RedGPU.Primitive.Box(redGPUContext);
-		const targetMaterial = new RedGPU.Material.ColorMaterial(redGPUContext);
+		const targetGeometry = new RedGPU.Primitive.Sphere(redGPUContext, 0.5);
+		const targetMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);
 		targetMaterial.color.setColorByRGB(255, 0, 0); // 빨간색
 		// targetMaterial.color.setColorByHEX('#ff0000'); // 빨간색
 		const targetMesh = new RedGPU.Display.Mesh(redGPUContext, targetGeometry, targetMaterial);
@@ -32,7 +32,7 @@ RedGPU.init(
 		view.setPosition(0, 0);
 
 		const addMeshesToScene = (scene, count = 500) => {
-			const geometry = new RedGPU.Primitive.Sphere(redGPUContext,0.5);
+			const geometry = new RedGPU.Primitive.Sphere(redGPUContext, 0.5);
 			const material = new RedGPU.Material.PhongMaterial(redGPUContext);
 
 			for (let i = 0; i < count; i++) {
@@ -41,7 +41,7 @@ RedGPU.init(
 				mesh.setPosition(
 					Math.ceil(Math.random() * 300 - 150) - 0.5,
 					0.5,
-					Math.ceil(Math.random() * 300 - 150)- 0.5,
+					Math.ceil(Math.random() * 300 - 150) - 0.5,
 				);
 				scene.addChild(mesh);
 			}

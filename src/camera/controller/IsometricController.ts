@@ -72,6 +72,9 @@ class IsometricController extends AController {
 				this.#targetMesh.x += worldDeltaX;
 				this.#targetMesh.z += worldDeltaZ;
 			},
+			HD_TouchPinch: (deltaScale: number) => {
+				this.zoom /= deltaScale
+			},
 			useKeyboard: true
 		});
 		this.#targetMesh = targetMesh || new Mesh(redGPUContext);

@@ -58,7 +58,11 @@ class OrbitController extends AController {
 				},
 				HD_Wheel: (e: WheelEvent) => {
 					this.#distance += e.deltaY / 100 * this.#speedDistance;
-				}
+				},
+				HD_TouchPinch: (deltaScale: number) => {
+					const scaleChange = (deltaScale - 1) * this.#speedDistance;
+					this.#distance -= scaleChange * this.#distance;
+				},
 			}
 		)
 		;

@@ -1,5 +1,6 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
+import {keepLog} from "../../utils";
 import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
 import OrthographicCamera from "../camera/OrthographicCamera";
 import PerspectiveCamera from "../camera/PerspectiveCamera";
@@ -7,6 +8,7 @@ import PerspectiveCamera from "../camera/PerspectiveCamera";
 export type controllerInit = {
 	HD_Move?: (deltaX: number, deltaY: number) => void
 	HD_Wheel?: (e: WheelEvent) => void
+	HD_TouchPinch?: (deltaScale:number) => void
 	useKeyboard?: boolean,
 	camera?: PerspectiveCamera | OrthographicCamera
 }
@@ -43,6 +45,10 @@ abstract class AController {
 	#startY: number = 0;
 	#initInfo: controllerInit;
 
+	// 멀티터치 관련
+	#touchStartDistance: number = 0;
+	#isMultiTouch: boolean = false;
+
 	/**
 	 * AController 생성자
 	 */
@@ -56,6 +62,7 @@ abstract class AController {
 			upKey: isMobile ? 'touchend' : 'mouseup',
 			downKey: isMobile ? 'touchstart' : 'mousedown',
 		};
+
 		this.#initListener();
 	}
 
@@ -130,12 +137,24 @@ abstract class AController {
 	}
 
 	/**
+	 * 두 터치 포인트 간의 거리를 계산합니다.
+	 * @param touches - TouchList
+	 * @returns 두 포인트 간 거리
+	 */
+	#getTouchDistance = (touches: TouchList): number => {
+		if (touches.length < 2) return 0;
+		const dx = touches[0].clientX - touches[1].clientX;
+		const dy = touches[0].clientY - touches[1].clientY;
+		return Math.sqrt(dx * dx + dy * dy);
+	}
+
+	/**
 	 * 마우스/터치 이벤트에서 캔버스 내 좌표를 반환합니다.
 	 * @param e - MouseEvent 또는 TouchEvent
 	 * @param redGPUContext - RedGPUContext 인스턴스
 	 * @returns 캔버스 내 상대 좌표 객체 { x, y }
 	 */
-	getCanvasEventPoint = (e: MouseEvent | TouchEvent, redGPUContext: RedGPUContext) => {
+	getCanvasEventPoint = (e: MouseEvent | TouchEvent | WheelEvent, redGPUContext: RedGPUContext) => {
 		const canvas = redGPUContext.htmlCanvas;
 		const isMobile = redGPUContext.detector.isMobile;
 		//TODO getBoundingClientRect 를 redGPUContext 쪽에서 캐싱 관리하는 방안 고려
@@ -145,7 +164,7 @@ abstract class AController {
 		let clientX: number;
 		let clientY: number;
 		if (isMobile) {
-			const touch = (e as TouchEvent).changedTouches[0];
+			const touch = e instanceof WheelEvent ? e : (e as TouchEvent).changedTouches[0];
 			clientX = touch[tX_key];
 			clientY = touch[tY_key];
 		} else {
@@ -160,6 +179,7 @@ abstract class AController {
 	}
 
 	findTargetViewByInputEvent = (e: MouseEvent | TouchEvent): View3D | null => {
+
 		const redGPUContext = this.#redGPUContext;
 		const isMobile = redGPUContext.detector.isMobile;
 		const {x, y} = this.getCanvasEventPoint(e, redGPUContext);
@@ -167,14 +187,18 @@ abstract class AController {
 		const scale = window.devicePixelRatio * redGPUContext.renderScale
 		tX = x * scale;
 		tY = y * scale;
+
 		// 현재 프레임에서 활성화된 View들을 검사하여 마우스/터치 위치에 해당하는 View 찾기
-		for (const view of this.#currentFrameViews) {
+		// for (const view of this.#currentFrameViews) {
+		for (const view of this.redGPUContext.viewList) { // TODO 이거 다시확인
 			const tViewRect = view.pixelRectObject;
 			if (tViewRect.x < tX && tX < tViewRect.x + tViewRect.width &&
 				tViewRect.y < tY && tY < tViewRect.y + tViewRect.height) {
+
 				return view;
 			}
 		}
+		keepLog(e,tX,tY,null)
 		return null;
 	};
 
@@ -187,6 +211,9 @@ abstract class AController {
 		if (this.#initInfo.HD_Wheel) {
 			htmlCanvas.addEventListener('wheel', this.#HD_wheel, {passive: false});
 		}
+		if (this.#initInfo.HD_TouchPinch) {
+			htmlCanvas.addEventListener('touchmove', this.#HD_touchPinch, {passive: false});
+		}
 	}
 
 	#HD_down = (e: MouseEvent | TouchEvent) => {
@@ -198,12 +225,34 @@ abstract class AController {
 		const {x, y} = this.getCanvasEventPoint(e, redGPUContext);
 		this.#startX = x;
 		this.#startY = y;
+
+		// 터치 멀티터치 감지
+		if (e instanceof TouchEvent) {
+			if (e.touches.length >= 2) {
+				this.#isMultiTouch = true;
+				this.#touchStartDistance = this.#getTouchDistance(e.touches);
+			} else {
+				this.#isMultiTouch = false;
+				this.#touchStartDistance = 0;
+			}
+		}
+
 		redGPUContext.htmlCanvas.addEventListener(moveKey, this.#HD_Move);
 		window.addEventListener(upKey, this.#HD_up);
+		keepLog('down')
 	}
 
 	#HD_Move = (e: MouseEvent | TouchEvent) => {
 		const {redGPUContext} = this;
+
+		// 멀티터치 상태에서는 드래그 무시
+		if (e instanceof TouchEvent && e.touches.length >= 2) {
+			this.#isMultiTouch = true;
+			return;
+		}
+
+		this.#isMultiTouch = false;
+
 		const {x, y} = this.getCanvasEventPoint(e, redGPUContext);
 		const deltaX = x - this.#startX;
 		const deltaY = y - this.#startY;
@@ -212,10 +261,29 @@ abstract class AController {
 		this.#initInfo.HD_Move?.(deltaX, deltaY)
 	}
 
+	#HD_touchPinch = (e: TouchEvent) => {
+		if (e.touches.length < 2 || !this.#initInfo.HD_TouchPinch) return;
+		if (!this.#isMultiTouch) return;
+
+		e.preventDefault();
+		const currentDistance = this.#getTouchDistance(e.touches);
+
+		if (this.#touchStartDistance === 0) {
+			this.#touchStartDistance = currentDistance;
+			return;
+		}
+
+		const deltaScale = currentDistance / this.#touchStartDistance;
+		this.#initInfo.HD_TouchPinch?.(deltaScale);
+		this.#touchStartDistance = currentDistance;
+	}
+
 	#HD_up = () => {
 		const {redGPUContext} = this;
 		const {moveKey, upKey} = this.detectorEventKey;
 		AController.currentMouseEventView = null;
+		this.#isMultiTouch = false;
+		this.#touchStartDistance = 0;
 		redGPUContext.htmlCanvas.removeEventListener(moveKey, this.#HD_Move);
 		window.removeEventListener(upKey, this.#HD_up);
 	}
