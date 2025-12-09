@@ -21,7 +21,8 @@ RedGPU.init(
 
 		const scene = new RedGPU.Display.Scene();
 		scene.addChild(targetMesh);
-
+		const directionalLight = new RedGPU.Light.DirectionalLight();
+		scene.lightManager.addDirectionalLight(directionalLight);
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, isometricController);
 		view.axis = true;
 		view.grid = true;
@@ -31,16 +32,16 @@ RedGPU.init(
 		view.setPosition(0, 0);
 
 		const addMeshesToScene = (scene, count = 500) => {
-			const geometry = new RedGPU.Primitive.Sphere(redGPUContext);
-			const material = new RedGPU.Material.ColorMaterial(redGPUContext);
+			const geometry = new RedGPU.Primitive.Sphere(redGPUContext,0.5);
+			const material = new RedGPU.Material.PhongMaterial(redGPUContext);
 
 			for (let i = 0; i < count; i++) {
 				const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
 
 				mesh.setPosition(
-					Math.random() * 300 - 150,
-					0,
-					Math.random() * 300 - 150,
+					Math.ceil(Math.random() * 300 - 150) - 0.5,
+					0.5,
+					Math.ceil(Math.random() * 300 - 150)- 0.5,
 				);
 				scene.addChild(mesh);
 			}
@@ -85,7 +86,17 @@ const renderTestPane = async (redGPUContext, controller, targetMesh) => {
 
 	cameraFolder.addBinding(controller, 'cameraAngle', {
 		readonly: true,
-		step:1
+		step: 1
+	});
+	cameraFolder.addBinding(controller, 'moveSpeed', {
+		min: 0.01,
+		max: 2,
+		step: 0.01
+	});
+	cameraFolder.addBinding(controller, 'mouseMoveSpeed', {
+		min: 0.01,
+		max: 0.1,
+		step: 0.01
 	});
 
 	// 줌 설정 폴더
