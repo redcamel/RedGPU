@@ -257,7 +257,7 @@ class ViewTransform {
      * AController가 연결된 경우 내부 camera를 반환합니다.
      * @returns {PerspectiveCamera | Camera2D}
      */
-    get rawCamera(): PerspectiveCamera | Camera2D {
+    get rawCamera(): PerspectiveCamera | Camera2D | OrthographicCamera{
         return this.#camera instanceof AController ? this.#camera.camera : this.#camera
     }
 

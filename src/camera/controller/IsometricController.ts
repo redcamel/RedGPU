@@ -38,7 +38,7 @@ class IsometricController extends AController {
 	#viewHeight: number = 15;
 
 	// ==================== 타겟 추적 ====================
-	#targetObject: Mesh | null = null;
+	#targetMesh: Mesh | null = null;
 
 	// ==================== 이동 관련 ====================
 	#moveSpeed: number = 1;
@@ -53,19 +53,20 @@ class IsometricController extends AController {
 	/**
 	 * IsometricController 생성자
 	 * @param redGPUContext - RedGPUContext 인스턴스
-	 * @param targetObject - 추적할 타겟 메시
+	 * @param targetMesh - 추적할 타겟 메시
 	 */
-	constructor(redGPUContext: RedGPUContext, targetObject: Mesh) {
+	constructor(redGPUContext: RedGPUContext, targetMesh: Mesh) {
 		super(redGPUContext, {
 			camera: new OrthographicCamera(),
 			HD_Wheel: (e: WheelEvent) => {
 				// 줌 처리
-				this.#zoom -= (e.deltaY / 100) * this.#speedZoom;
-				this.#zoom = Math.max(this.#minZoom, Math.min(this.#maxZoom, this.#zoom));
+				this.zoom -= (e.deltaY / 100) * this.#speedZoom;
 			},
 			useKeyboard: true
 		});
-		this.#targetObject = targetObject;
+		this.#targetMesh = targetMesh;
+		targetMesh.setReceiveIgnoreFrustumCulling(true)
+
 	}
 
 
@@ -75,19 +76,15 @@ class IsometricController extends AController {
 		return this.#cameraAngle;
 	}
 
-	set cameraAngle(value: number) {
-		validateNumber(value);
-		this.#cameraAngle = value;
-	}
-
 	// ==================== 줌 Getter/Setter ====================
 	get zoom(): number {
 		return this.#zoom;
 	}
 
 	set zoom(value: number) {
-		validateNumberRange(value, this.#minZoom, this.#maxZoom);
-		this.#zoom = value;
+		validateNumberRange(value);
+		value = Math.max(this.#minZoom, Math.min(this.#maxZoom, value))
+		this.#zoom = value
 	}
 
 	get speedZoom(): number {
@@ -106,6 +103,7 @@ class IsometricController extends AController {
 	set minZoom(value: number) {
 		validateNumberRange(value, 0.01);
 		this.#minZoom = value;
+		this.zoom = this.#zoom;
 	}
 
 	get maxZoom(): number {
@@ -115,6 +113,7 @@ class IsometricController extends AController {
 	set maxZoom(value: number) {
 		validateNumberRange(value, 0.01);
 		this.#maxZoom = value;
+		this.zoom = this.#zoom;
 	}
 
 	// ==================== 뷰 높이 Getter/Setter ====================
@@ -159,12 +158,12 @@ class IsometricController extends AController {
 	}
 
 	// ==================== 타겟 관련 ====================
-	get targetObject(): Mesh | null {
-		return this.#targetObject;
+	get targetMesh(): Mesh | null {
+		return this.#targetMesh;
 	}
 
 	setTargetObject(target: Mesh): void {
-		this.#targetObject = target;
+		this.#targetMesh = target;
 	}
 
 	// ==================== 업데이트 및 애니메이션 ====================
@@ -178,9 +177,9 @@ class IsometricController extends AController {
 
 
 	#updateAnimation(view: View3D): void {
-		if (!this.#targetObject) return;
+		if (!this.#targetMesh) return;
 
-		const targetPos = this.#targetObject.position;
+		const targetPos = this.#targetMesh.position;
 		const angleRad = this.#cameraAngle * PER_PI;
 
 		// ==================== 직교 투영 뷰 계산 ====================
@@ -190,7 +189,6 @@ class IsometricController extends AController {
 		const effectiveHeight = this.#viewHeight / this.#zoom;
 		const effectiveWidth = effectiveHeight * aspectRatio;
 
-		// ✅ 줌을 고려한 스케일 계산
 		const scaleFactor = this.#viewHeight / 15;  // viewHeight 기준
 		const baseDistance = 15;  // 기본 거리 (viewHeight 기본값과 동일)
 		const baseHeight = 12;    // 기본 높이
@@ -217,7 +215,7 @@ class IsometricController extends AController {
 	}
 
 	#handleKeyboardInput(view: View3D): void {
-		if (!this.#targetObject) return;
+		if (!this.#targetMesh) return;
 
 		const {keyboardKeyBuffer} = view.redGPUContext;
 		const tKeyNameMapper = this.#keyNameMapper;
@@ -261,8 +259,8 @@ class IsometricController extends AController {
 		const worldDeltaZ = upDownDeltaZ + leftRightDeltaZ;
 
 		// ==================== 타겟 위치 업데이트 ====================
-		this.#targetObject.x += worldDeltaX;
-		this.#targetObject.z += worldDeltaZ;
+		this.#targetMesh.x += worldDeltaX;
+		this.#targetMesh.z += worldDeltaZ;
 	}
 }
 

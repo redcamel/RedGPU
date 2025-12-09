@@ -123,7 +123,7 @@ declare class ViewTransform {
      * AController가 연결된 경우 내부 camera를 반환합니다.
      * @returns {PerspectiveCamera | Camera2D}
      */
-    get rawCamera(): PerspectiveCamera | Camera2D;
+    get rawCamera(): PerspectiveCamera | Camera2D | OrthographicCamera;
     /**
      * 현재 적용된 지터 오프셋 [offsetX, offsetY]를 반환합니다.
      * @returns {[number, number]}

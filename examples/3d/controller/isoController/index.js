@@ -38,16 +38,15 @@ RedGPU.init(
 				const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
 
 				mesh.setPosition(
-					Math.random() * 50 - 25,
+					Math.random() * 300 - 150,
 					0,
-					Math.random() * 50 - 25
+					Math.random() * 300 - 150,
 				);
-
 				scene.addChild(mesh);
 			}
 		};
 
-		addMeshesToScene(scene, 100);
+		addMeshesToScene(scene, 500);
 
 		const renderer = new RedGPU.Renderer(redGPUContext);
 
@@ -84,11 +83,9 @@ const renderTestPane = async (redGPUContext, controller, targetMesh) => {
 		title: 'Camera Settings',
 	});
 
-
 	cameraFolder.addBinding(controller, 'cameraAngle', {
-		min: 0,
-		max: 360,
-		step: 1,
+		readonly: true,
+		step:1
 	});
 
 	// 줌 설정 폴더
@@ -125,8 +122,6 @@ const renderTestPane = async (redGPUContext, controller, targetMesh) => {
 		title: 'View Settings',
 	});
 
-
-
 	viewFolder.addBinding(controller, 'viewHeight', {
 		min: 5,
 		max: 100,
@@ -138,43 +133,23 @@ const renderTestPane = async (redGPUContext, controller, targetMesh) => {
 		title: 'Target Position',
 	});
 
-	const targetPos = {
-		x: targetMesh.x,
-		y: targetMesh.y,
-		z: targetMesh.z,
-	};
+	targetFolder.addBinding(targetMesh, 'x', {
+		readonly: true,
+	})
 
-	targetFolder.addBinding(targetPos, 'x', {
-		min: -500,
-		max: 500,
-		step: 1,
-	}).on('change', (ev) => {
-		targetMesh.x = ev.value;
-	});
+	targetFolder.addBinding(targetMesh, 'y', {
+		readonly: true,
+	})
 
-	targetFolder.addBinding(targetPos, 'y', {
-		min: -500,
-		max: 500,
-		step: 1,
-	}).on('change', (ev) => {
-		targetMesh.y = ev.value;
-	});
-
-	targetFolder.addBinding(targetPos, 'z', {
-		min: -500,
-		max: 500,
-		step: 1,
-	}).on('change', (ev) => {
-		targetMesh.z = ev.value;
-	});
+	targetFolder.addBinding(targetMesh, 'z', {
+		readonly: true,
+	})
 
 	targetFolder.addButton({
 		title: 'Reset Target Position',
 	}).on('click', () => {
 		targetMesh.setPosition(0, 0, 0);
-		targetPos.x = 0;
-		targetPos.y = 0;
-		targetPos.z = 0;
+
 		pane.refresh();
 	});
 
