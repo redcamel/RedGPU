@@ -3,15 +3,15 @@ import Mesh from "../../mesh/Mesh";
 /** 2D 메시 기능이 믹스인된 베이스 클래스 */
 declare const BaseSprite2D: {
     new (...args: any[]): {
-        "__#59916@#rotation": number;
-        "__#59916@#blendMode": number;
+        "__#93@#rotation": number;
+        "__#93@#blendMode": number;
         get blendMode(): string;
         set blendMode(value: import("../../../material").BLEND_MODE | keyof typeof import("../../../material").BLEND_MODE);
         rotation: number;
         setScale(x: number, y?: number): void;
         setPosition(x: number, y?: number): void;
         setRotation(value: number): void;
-        "__#59916@#setBlendFactor"(mode: number): void;
+        "__#93@#setBlendFactor"(mode: number): void;
         rotationZ: number;
     };
 } & typeof Mesh;

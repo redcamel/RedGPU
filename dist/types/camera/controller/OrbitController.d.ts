@@ -22,7 +22,6 @@ import AController from "../core/AController";
 declare class OrbitController extends AController {
     #private;
     constructor(redGPUContext: RedGPUContext);
-    destroy(): void;
     get centerX(): number;
     set centerX(value: number);
     get centerY(): number;
