@@ -70,6 +70,8 @@ class FreeController extends AController {
 	#tilt: number = 0;
 	// ==================== 메시 및 입력 관련 ====================
 	#targetMesh: Mesh;
+	#keyboardProcessedThisFrame: boolean = false;
+	#lastProcessedTime: number = -1;
 
 	// ==================== 라이프사이클 ====================
 	constructor(redGPUContext: RedGPUContext) {
@@ -232,8 +234,17 @@ class FreeController extends AController {
 
 	// ==================== 업데이트 및 애니메이션 ====================
 	update(view: View3D, time: number): void {
+		// 새로운 프레임이 시작되면 키보드 처리 플래그 초기화
+		if (this.#lastProcessedTime !== time) {
+			this.#lastProcessedTime = time;
+			this.#keyboardProcessedThisFrame = false;
+		}
 		super.update(view, time, () => {
-			this.#updateAnimation(view);
+			// 키보드 활성 View가 있고, 현재 View가 활성 View가 아니면 업데이트 스킵
+			if (this.keyboardActiveView && this.keyboardActiveView !== view) {
+				return;
+			}
+			this.#updateAnimation(view, time);
 		});
 	}
 
@@ -242,7 +253,9 @@ class FreeController extends AController {
 		this.#targetMesh = new Mesh(redGPUContext);
 	}
 
-	#updateAnimation(view: View3D) {
+	#updateAnimation(view: View3D, time: number) {
+
+
 		const tDelay = this.#delay;
 		const tDelayRotation = this.#delayRotation;
 		const tDesirePosition = this.#desirePosition;
@@ -250,8 +263,8 @@ class FreeController extends AController {
 		// 회전 보간
 		targetMesh.rotationY += (this.#pan - targetMesh.rotationY) * tDelayRotation;
 		targetMesh.rotationX += (this.#tilt - targetMesh.rotationX) * tDelayRotation;
-		// 키보드 입력 체크 및 이동 계산
-		if (this.#checkKeyboardKeyBuffer(view)) {
+		// 키보드 입력 체크 및 이동 계산 (프레임당 한 번만 처리)
+		if (this.#checkKeyboardKeyBuffer(view, time)) {
 			tMTX0 = targetMesh.modelMatrix;
 			// 이동 방향 계산 (회전 고려)
 			mat4.identity(displacementMTX);
@@ -287,12 +300,46 @@ class FreeController extends AController {
 		this.camera.lookAt(targetMesh.x, targetMesh.y, targetMesh.z);
 	}
 
-	#checkKeyboardKeyBuffer(view: View3D): boolean {
-		// View 범위 체크
+	#checkKeyboardKeyBuffer(view: View3D, time: number): boolean {
+		// 이미 이번 프레임에서 키보드 입력을 처리했으면 스킵
+		if (this.#keyboardProcessedThisFrame) return false;
+
 		const tSpeed = this.#speed;
 		const tSpeedRotation = this.#speedRotation;
 		const {keyboardKeyBuffer} = view.redGPUContext;
 		const tKeyNameMapper = this.#keyNameMapper;
+
+		// 현재 키보드 입력이 있는지 체크
+		let hasAnyKeyInput = false;
+		for (const key in tKeyNameMapper) {
+			if (keyboardKeyBuffer[tKeyNameMapper[key as keyof KeyNameMapper]]) {
+				hasAnyKeyInput = true;
+				break;
+			}
+		}
+
+		// 키보드 입력이 없으면 활성 View 초기화
+		if (!hasAnyKeyInput) {
+			this.keyboardActiveView = null;
+			return false;
+		}
+
+		// 키보드 입력이 있을 때:
+		// 1. 활성 View가 없으면 현재 hover된 View를 활성 View로 설정
+		if (!this.keyboardActiveView) {
+			if (this.hoveredView === view) {
+				this.keyboardActiveView = view;
+			} else {
+				return false;
+			}
+		}
+
+		// 2. 현재 View가 활성 View가 아니면 스킵
+		if (this.keyboardActiveView !== view) return false;
+
+		// 키보드 입력 처리 플래그 설정
+		this.#keyboardProcessedThisFrame = true;
+
 		let move = false;
 		let rotate = false;
 		let pan = 0;

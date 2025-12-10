@@ -24,7 +24,6 @@ export type controllerInit = {
  */
 declare abstract class AController {
     #private;
-    static currentMouseEventView: View3D;
     /**
      * AController 생성자
      */
@@ -36,6 +35,9 @@ declare abstract class AController {
         upKey: string;
         downKey: string;
     };
+    get hoveredView(): View3D | null;
+    get keyboardActiveView(): View3D | null;
+    set keyboardActiveView(value: View3D | null);
     get name(): string;
     set name(value: string);
     get redGPUContext(): RedGPUContext;

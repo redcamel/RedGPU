@@ -10,7 +10,7 @@ RedGPU.init(
         const controller2 = new RedGPU.Camera.OrbitController(redGPUContext);
         console.log(controller.name,controller2.name);
         const scene = new RedGPU.Display.Scene();
-        const view = new RedGPU.Display.View3D(redGPUContext, scene, controller2);
+        const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         view.axis = true;
         view.grid = true;
         redGPUContext.addView(view);

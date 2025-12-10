@@ -59,6 +59,9 @@ RedGPU.init(
         const renderer = new RedGPU.Renderer(redGPUContext);
         const render = (time) => {
             // 매 프레임 로직
+            redGPUContext.viewList.forEach((view) => {
+                console.log(view.name,view.camera.startX)
+            })
         };
         renderer.start(redGPUContext, render);
 

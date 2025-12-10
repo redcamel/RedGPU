@@ -8,7 +8,7 @@ import PerspectiveCamera from "../camera/PerspectiveCamera";
 export type controllerInit = {
 	HD_Move?: (deltaX: number, deltaY: number) => void
 	HD_Wheel?: (e: WheelEvent) => void
-	HD_TouchPinch?: (deltaScale:number) => void
+	HD_TouchPinch?: (deltaScale: number) => void
 	useKeyboard?: boolean,
 	camera?: PerspectiveCamera | OrthographicCamera
 }
@@ -27,7 +27,9 @@ export type controllerInit = {
  *
  */
 abstract class AController {
-	static currentMouseEventView: View3D
+	/** 전역 키보드 활성 View - 모든 컨트롤러 인스턴스에서 공유 */
+	static #globalKeyboardActiveView: View3D | null = null;
+
 	/** 인스턴스 고유 ID */
 	#instanceId: number;
 	/** 컨트롤러 이름 */
@@ -40,11 +42,13 @@ abstract class AController {
 	// 현재 프레임에서 활성화된 View 목록
 	#lastUpdateTime = -1;
 	#currentFrameViews = new Set<View3D>();
+	#animationUpdatedThisFrame: boolean = false
+	#hoveredView: View3D | null = null
+	#keyboardProcessedThisFrame: boolean = false
 	#detectorEventKey: { moveKey: string; upKey: string; downKey: string };
 	#startX: number = 0;
 	#startY: number = 0;
 	#initInfo: controllerInit;
-
 	// 멀티터치 관련
 	#touchStartDistance: number = 0;
 	#isMultiTouch: boolean = false;
@@ -62,7 +66,6 @@ abstract class AController {
 			upKey: isMobile ? 'touchend' : 'mouseup',
 			downKey: isMobile ? 'touchstart' : 'mousedown',
 		};
-
 		this.#initListener();
 	}
 
@@ -76,6 +79,18 @@ abstract class AController {
 
 	get detectorEventKey(): { moveKey: string; upKey: string; downKey: string } {
 		return this.#detectorEventKey;
+	}
+
+	get hoveredView(): View3D | null {
+		return this.#hoveredView;
+	}
+
+	get keyboardActiveView(): View3D | null {
+		return AController.#globalKeyboardActiveView;
+	}
+
+	set keyboardActiveView(value: View3D | null) {
+		AController.#globalKeyboardActiveView = value;
 	}
 
 	get name(): string {
@@ -102,6 +117,7 @@ abstract class AController {
 		const {moveKey, upKey, downKey} = this.detectorEventKey;
 		const {htmlCanvas} = this.redGPUContext;
 		htmlCanvas.removeEventListener(downKey, this.#HD_down);
+		htmlCanvas.removeEventListener(moveKey, this.#HD_hover);
 		htmlCanvas.removeEventListener(moveKey, this.#HD_Move);
 		window.removeEventListener(upKey, this.#HD_up);
 		if (this.#initInfo.HD_Wheel) {
@@ -115,25 +131,17 @@ abstract class AController {
 	 * @param time - 시간값(ms)
 	 */
 	update(view: View3D, time: number, updateAnimation: () => void): void {
-		const targetView = AController.currentMouseEventView || view
-		// 새로운 프레임이 시작되면 View 목록 초기화
+
+		const targetView = view
+		// 새로운 프레임이 시작되면 View 목록 및 키보드 처리 플래그 초기화
 		if (this.#lastUpdateTime !== time) {
 			this.#lastUpdateTime = time;
 			this.#currentFrameViews.clear();
+			this.#keyboardProcessedThisFrame = false;
 		}
-		if (this.#initInfo.useKeyboard) {
-			if (AController.currentMouseEventView) {
-				if (AController.currentMouseEventView !== view) return;
-			} else {
-				if (!view.checkMouseInViewBounds()) return;
-			}
-		}
-		// 현재 프레임에서 사용되는 View 추가
+		if (this.#currentFrameViews.has(targetView)) return;
 		this.#currentFrameViews.add(targetView);
-		// 첫 번째 View에서만 애니메이션 업데이트 실행
-		if (this.#currentFrameViews.size === 1) {
-			updateAnimation?.();
-		}
+		updateAnimation?.();
 	}
 
 	/**
@@ -147,7 +155,6 @@ abstract class AController {
 		const dy = touches[0].clientY - touches[1].clientY;
 		return Math.sqrt(dx * dx + dy * dy);
 	}
-
 	/**
 	 * 마우스/터치 이벤트에서 캔버스 내 좌표를 반환합니다.
 	 * @param e - MouseEvent 또는 TouchEvent
@@ -177,9 +184,7 @@ abstract class AController {
 			y: clientY - rect.top
 		};
 	}
-
 	findTargetViewByInputEvent = (e: MouseEvent | TouchEvent): View3D | null => {
-
 		const redGPUContext = this.#redGPUContext;
 		const isMobile = redGPUContext.detector.isMobile;
 		const {x, y} = this.getCanvasEventPoint(e, redGPUContext);
@@ -187,18 +192,16 @@ abstract class AController {
 		const scale = window.devicePixelRatio * redGPUContext.renderScale
 		tX = x * scale;
 		tY = y * scale;
-
 		// 현재 프레임에서 활성화된 View들을 검사하여 마우스/터치 위치에 해당하는 View 찾기
 		// for (const view of this.#currentFrameViews) {
 		for (const view of this.redGPUContext.viewList) { // TODO 이거 다시확인
 			const tViewRect = view.pixelRectObject;
 			if (tViewRect.x < tX && tX < tViewRect.x + tViewRect.width &&
 				tViewRect.y < tY && tY < tViewRect.y + tViewRect.height) {
-
 				return view;
 			}
 		}
-		keepLog(e,tX,tY,null)
+		keepLog(e, tX, tY, null)
 		return null;
 	};
 
@@ -206,8 +209,9 @@ abstract class AController {
 	#initListener() {
 		const {redGPUContext} = this;
 		const {htmlCanvas} = redGPUContext;
-		const {downKey} = this.detectorEventKey;
+		const {downKey, moveKey} = this.detectorEventKey;
 		htmlCanvas.addEventListener(downKey, this.#HD_down);
+		htmlCanvas.addEventListener(moveKey, this.#HD_hover);
 		if (this.#initInfo.HD_Wheel) {
 			htmlCanvas.addEventListener('wheel', this.#HD_wheel, {passive: false});
 		}
@@ -216,16 +220,22 @@ abstract class AController {
 		}
 	}
 
+	#HD_hover = (e: MouseEvent | TouchEvent) => {
+		// 전역 키보드 활성 View가 있으면 hover 갱신 차단
+		if (AController.#globalKeyboardActiveView) {
+			return;
+		}
+		const targetView = this.findTargetViewByInputEvent(e);
+		this.#hoveredView = targetView;
+	}
 	#HD_down = (e: MouseEvent | TouchEvent) => {
 		const targetView = this.findTargetViewByInputEvent(e);
 		if (!targetView) return;
-		AController.currentMouseEventView = targetView;
 		const {redGPUContext} = this;
 		const {moveKey, upKey} = this.detectorEventKey;
 		const {x, y} = this.getCanvasEventPoint(e, redGPUContext);
 		this.#startX = x;
 		this.#startY = y;
-
 		// 터치 멀티터치 감지
 		if (e instanceof TouchEvent) {
 			if (e.touches.length >= 2) {
@@ -236,23 +246,19 @@ abstract class AController {
 				this.#touchStartDistance = 0;
 			}
 		}
-
-		redGPUContext.htmlCanvas.addEventListener(moveKey, this.#HD_Move);
-		window.addEventListener(upKey, this.#HD_up);
-		keepLog('down')
+		if (this.#currentFrameViews.has(targetView)) {
+			redGPUContext.htmlCanvas.addEventListener(moveKey, this.#HD_Move);
+			window.addEventListener(upKey, this.#HD_up);
+		}
 	}
-
 	#HD_Move = (e: MouseEvent | TouchEvent) => {
 		const {redGPUContext} = this;
-
 		// 멀티터치 상태에서는 드래그 무시
 		if (e instanceof TouchEvent && e.touches.length >= 2) {
 			this.#isMultiTouch = true;
 			return;
 		}
-
 		this.#isMultiTouch = false;
-
 		const {x, y} = this.getCanvasEventPoint(e, redGPUContext);
 		const deltaX = x - this.#startX;
 		const deltaY = y - this.#startY;
@@ -260,37 +266,31 @@ abstract class AController {
 		this.#startY = y;
 		this.#initInfo.HD_Move?.(deltaX, deltaY)
 	}
-
 	#HD_touchPinch = (e: TouchEvent) => {
 		if (e.touches.length < 2 || !this.#initInfo.HD_TouchPinch) return;
 		if (!this.#isMultiTouch) return;
-
 		e.preventDefault();
 		const currentDistance = this.#getTouchDistance(e.touches);
-
 		if (this.#touchStartDistance === 0) {
 			this.#touchStartDistance = currentDistance;
 			return;
 		}
-
 		const deltaScale = currentDistance / this.#touchStartDistance;
 		this.#initInfo.HD_TouchPinch?.(deltaScale);
 		this.#touchStartDistance = currentDistance;
 	}
-
 	#HD_up = () => {
 		const {redGPUContext} = this;
 		const {moveKey, upKey} = this.detectorEventKey;
-		AController.currentMouseEventView = null;
 		this.#isMultiTouch = false;
 		this.#touchStartDistance = 0;
 		redGPUContext.htmlCanvas.removeEventListener(moveKey, this.#HD_Move);
 		window.removeEventListener(upKey, this.#HD_up);
 	}
-
 	#HD_wheel = (e: WheelEvent) => {
 		const targetView = this.findTargetViewByInputEvent(e);
 		if (!targetView) return;
+		if (targetView.rawCamera !== this.#camera) return;
 		e.stopPropagation();
 		e.preventDefault();
 		this.#initInfo.HD_Wheel?.(e);
