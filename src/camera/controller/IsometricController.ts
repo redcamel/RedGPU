@@ -78,7 +78,7 @@ class IsometricController extends AController {
 			useKeyboard: true
 		});
 		this.#targetMesh = targetMesh || new Mesh(redGPUContext);
-		targetMesh.setReceiveIgnoreFrustumCulling(true)
+		this.#targetMesh .setIgnoreFrustumCulling(true)
 	}
 
 	// ==================== 카메라 각도 Getter/Setter ====================
@@ -187,6 +187,7 @@ class IsometricController extends AController {
 
 	// ==================== 업데이트 및 애니메이션 ====================
 	update(view: View3D, time: number): void {
+		if (this.keyboardActiveView && this.keyboardActiveView !== view) return;
 		super.update(view, time, () => {
 			this.#handleKeyboardInput(view);
 		});

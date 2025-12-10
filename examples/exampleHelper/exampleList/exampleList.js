@@ -86,9 +86,9 @@ const ExampleList = [
 				        },
 			        },
 			        {
-				        name: 'ISOController',
-				        path: '3d/controller/isoController',
-				        thumb: '3d/controller/isoController/thumb.png',
+				        name: 'IsometricController',
+				        path: '3d/controller/isometricController',
+				        thumb: '3d/controller/isometricController/thumb.png',
 				        description: {
 					        ko: ``,
 					        en: `TODO`

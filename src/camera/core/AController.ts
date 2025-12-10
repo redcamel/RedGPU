@@ -30,6 +30,8 @@ abstract class AController {
 	// ==================== Static - 전역 상태 ====================
 	/** 전역 키보드 활성 View - 모든 컨트롤러 인스턴스에서 공유 */
 	static #globalKeyboardActiveView: View3D | null = null;
+	/** 전역 키보드 활성 컨트롤러 - 어떤 컨트롤러가 키보드를 사용 중인지 추적 */
+	static #globalKeyboardActiveController: AController | null = null;
 
 	// ==================== 인스턴스 정보 ====================
 	#instanceId: number;
@@ -99,6 +101,17 @@ abstract class AController {
 
 	set keyboardActiveView(value: View3D | null) {
 		AController.#globalKeyboardActiveView = value;
+		// View가 null이면 컨트롤러도 null로 설정
+		if (value === null) {
+			AController.#globalKeyboardActiveController = null;
+		} else {
+			// View가 설정되면 현재 컨트롤러를 활성 컨트롤러로 설정
+			AController.#globalKeyboardActiveController = this;
+		}
+	}
+
+	get isKeyboardActiveController(): boolean {
+		return AController.#globalKeyboardActiveController === this;
 	}
 
 	get keyboardProcessedThisFrame(): boolean {
@@ -211,6 +224,12 @@ abstract class AController {
 	#HD_down = (e: MouseEvent | TouchEvent) => {
 		const targetView = this.findTargetViewByInputEvent(e);
 		if (!targetView) return;
+
+		// hover 업데이트 (모바일에서 hover가 설정되지 않는 문제 해결)
+		if (!AController.#globalKeyboardActiveView && !this.#isDragging) {
+			this.#hoveredView = targetView;
+		}
+
 		const {redGPUContext} = this;
 		const {moveKey, upKey} = this.#eventTypeKeys;
 		const {x, y} = this.getCanvasEventPoint(e, redGPUContext);

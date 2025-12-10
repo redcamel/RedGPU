@@ -443,13 +443,13 @@ class Mesh extends MeshBase {
             })
         }
     }
-		setReceiveIgnoreFrustumCulling(value: boolean = false) {
+    setIgnoreFrustumCulling(value: boolean = false) {
         if ('ignoreFrustumCulling' in this) {
             this.ignoreFrustumCulling = value
         }
         if (this.children) {
             this.children.forEach(child => {
-                child.setReceiveIgnoreFrustumCulling(value)
+                child.setIgnoreFrustumCulling(value)
             })
         }
     }

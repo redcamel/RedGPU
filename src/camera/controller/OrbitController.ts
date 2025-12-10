@@ -47,7 +47,7 @@ class OrbitController extends AController {
 	#currentPan = 0;
 	#currentTilt = 0;
 	#currentDistance = 0;
-	// ==================== 입력 관련 ====================
+
 	// ==================== 라이프사이클 ====================
 	constructor(redGPUContext: RedGPUContext) {
 		super(redGPUContext,
@@ -68,7 +68,6 @@ class OrbitController extends AController {
 		;
 	}
 
-	// ==================== 이벤트 핸들러 ====================
 	// ==================== 센터 좌표 Getter/Setter ====================
 	get centerX(): number {
 		return this.#centerX;

@@ -35,6 +35,7 @@ declare abstract class AController {
     get hoveredView(): View3D | null;
     get keyboardActiveView(): View3D | null;
     set keyboardActiveView(value: View3D | null);
+    get isKeyboardActiveController(): boolean;
     get keyboardProcessedThisFrame(): boolean;
     set keyboardProcessedThisFrame(value: boolean);
     destroy(): void;

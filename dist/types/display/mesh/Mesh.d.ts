@@ -110,7 +110,7 @@ declare class Mesh extends MeshBase {
     setEnableDebuggerRecursively(enableDebugger?: boolean): void;
     setCastShadowRecursively(value?: boolean): void;
     setReceiveShadowRecursively(value?: boolean): void;
-    setReceiveIgnoreFrustumCulling(value?: boolean): void;
+    setIgnoreFrustumCulling(value?: boolean): void;
     getCombinedOpacity(): number;
     addListener(eventName: string, callback: Function): void;
     lookAt(targetX: number | [number, number, number], targetY?: number, targetZ?: number): void;
