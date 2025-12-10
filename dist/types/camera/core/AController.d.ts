@@ -40,6 +40,13 @@ declare abstract class AController {
     set keyboardProcessedThisFrame(value: boolean);
     destroy(): void;
     update(view: View3D, time: number, updateAnimation: () => void): void;
+    /**
+     * 키보드 입력이 있는지 체크하고 활성 View를 설정합니다.
+     * @param view 현재 View
+     * @param keyNameMapper 키 매핑 객체
+     * @returns 키보드 입력 처리가 가능하면 true, 아니면 false
+     */
+    checkKeyboardInput<T extends Record<string, string>>(view: View3D, keyNameMapper: T): boolean;
     getCanvasEventPoint: (e: MouseEvent | TouchEvent | WheelEvent, redGPUContext: RedGPUContext) => {
         x: number;
         y: number;

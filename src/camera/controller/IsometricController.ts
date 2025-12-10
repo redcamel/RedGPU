@@ -12,6 +12,7 @@ type KeyNameMapper = {
 	moveUp: string;
 	moveDown: string;
 };
+
 /**
  * 아이소메트릭(Isometric) 카메라 컨트롤러 클래스입니다.
  * 고정된 각도의 직교 투영 카메라로 타겟 오브젝트를 추적합니다.
@@ -83,7 +84,7 @@ class IsometricController extends AController {
 			useKeyboard: true
 		});
 		this.#targetMesh = targetMesh || new Mesh(redGPUContext);
-		this.#targetMesh .setIgnoreFrustumCulling(true)
+		this.#targetMesh.setIgnoreFrustumCulling(true)
 	}
 
 	// ==================== 카메라 각도 Getter/Setter ====================
@@ -193,12 +194,12 @@ class IsometricController extends AController {
 	// ==================== 업데이트 및 애니메이션 ====================
 	update(view: View3D, time: number): void {
 		super.update(view, time, () => {
-			this.#handleKeyboardInput(view);
+			this.#updateAnimation(view);
 		});
-		this.#updateAnimation(view);
 	}
 
 	#updateAnimation(view: View3D): void {
+		this.#handleKeyboardInput(view);
 		if (!this.#targetMesh) return;
 		const targetPos = this.#targetMesh.position;
 		const angleRad = this.#cameraAngle * PER_PI;
@@ -228,37 +229,11 @@ class IsometricController extends AController {
 	}
 
 	#handleKeyboardInput(view: View3D): boolean {
-		if (this.keyboardProcessedThisFrame) return false;
+		if (!this.checkKeyboardInput(view, this.#keyNameMapper)) return false;
+		if (!this.#targetMesh) return false;
 
 		const {keyboardKeyBuffer} = view.redGPUContext;
 		const tKeyNameMapper = this.#keyNameMapper;
-
-		// 키보드 입력 체크
-		let hasAnyKeyInput = false;
-		for (const key in tKeyNameMapper) {
-			if (keyboardKeyBuffer[tKeyNameMapper[key as keyof KeyNameMapper]]) {
-				hasAnyKeyInput = true;
-				break;
-			}
-		}
-
-		if (!hasAnyKeyInput) {
-			this.keyboardActiveView = null;
-			return false;
-		}
-
-		// 활성 View 설정
-		if (!this.keyboardActiveView) {
-			if (this.hoveredView === view) {
-				this.keyboardActiveView = view;
-			} else {
-				return false;
-			}
-		}
-
-		if (this.keyboardActiveView !== view) return false;
-		this.keyboardProcessedThisFrame = true;
-		if (!this.#targetMesh) return;
 		// ==================== 입력 수집 ====================
 		let inputUp = 0;
 		let inputDown = 0;

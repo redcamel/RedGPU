@@ -149,6 +149,45 @@ abstract class AController {
 		updateAnimation?.();
 	}
 
+	// ==================== 키보드 입력 처리 ====================
+	/**
+	 * 키보드 입력이 있는지 체크하고 활성 View를 설정합니다.
+	 * @param view 현재 View
+	 * @param keyNameMapper 키 매핑 객체
+	 * @returns 키보드 입력 처리가 가능하면 true, 아니면 false
+	 */
+	checkKeyboardInput<T extends Record<string, string>>(view: View3D, keyNameMapper: T): boolean {
+		if (this.keyboardProcessedThisFrame) return false;
+		const {keyboardKeyBuffer} = view.redGPUContext;
+
+		// 키보드 입력 체크
+		let hasAnyKeyInput = false;
+		for (const key in keyNameMapper) {
+			if (keyboardKeyBuffer[keyNameMapper[key]]) {
+				hasAnyKeyInput = true;
+				break;
+			}
+		}
+
+		if (!hasAnyKeyInput) {
+			this.keyboardActiveView = null;
+			return false;
+		}
+
+		// 활성 View 설정
+		if (!this.keyboardActiveView) {
+			if (this.hoveredView === view) {
+				this.keyboardActiveView = view;
+			} else {
+				return false;
+			}
+		}
+
+		if (this.keyboardActiveView !== view) return false;
+		this.keyboardProcessedThisFrame = true;
+		return true;
+	}
+
 	// ==================== Private Helpers ====================
 	#getTouchDistance = (touches: TouchList): number => {
 		if (touches.length < 2) return 0;

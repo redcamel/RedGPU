@@ -295,38 +295,12 @@ class FreeController extends AController {
 	}
 
 	#checkKeyboardKeyBuffer(view: View3D): boolean {
-		if (this.keyboardProcessedThisFrame) return false;
+		if (!this.checkKeyboardInput(view, this.#keyNameMapper)) return false;
 
 		const {keyboardKeyBuffer} = view.redGPUContext;
 		const tSpeed = this.#speed;
 		const tSpeedRotation = this.#speedRotation;
 		const tKeyNameMapper = this.#keyNameMapper;
-
-		// 키보드 입력 체크
-		let hasAnyKeyInput = false;
-		for (const key in tKeyNameMapper) {
-			if (keyboardKeyBuffer[tKeyNameMapper[key as keyof KeyNameMapper]]) {
-				hasAnyKeyInput = true;
-				break;
-			}
-		}
-
-		if (!hasAnyKeyInput) {
-			this.keyboardActiveView = null;
-			return false;
-		}
-
-		// 활성 View 설정
-		if (!this.keyboardActiveView) {
-			if (this.hoveredView === view) {
-				this.keyboardActiveView = view;
-			} else {
-				return false;
-			}
-		}
-
-		if (this.keyboardActiveView !== view) return false;
-		this.keyboardProcessedThisFrame = true;
 
 		let move = false;
 		let rotate = false;
