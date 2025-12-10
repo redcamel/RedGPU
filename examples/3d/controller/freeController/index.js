@@ -11,7 +11,7 @@ RedGPU.init(
 
         console.log(controller.name,controller2.name);
         const scene = new RedGPU.Display.Scene();
-        const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+        const view = new RedGPU.Display.View3D(redGPUContext, scene, controller2);
         view.axis = true;
         view.grid = true;
         redGPUContext.addView(view);

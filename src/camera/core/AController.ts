@@ -264,6 +264,8 @@ abstract class AController {
 			this.#pinchStartDistance = currentDistance;
 			return;
 		}
+		const targetView = this.findTargetViewByInputEvent(e);
+		if (targetView.rawCamera !== this.#camera) return;
 		const deltaScale = currentDistance / this.#pinchStartDistance;
 		this.#initInfo.HD_TouchPinch?.(deltaScale);
 		this.#pinchStartDistance = currentDistance;
