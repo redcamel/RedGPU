@@ -166,6 +166,15 @@ class IsometricController extends AController {
 		return {...this.#keyNameMapper};
 	}
 
+	// ==================== 타겟 관련 ====================
+	get targetMesh(): Mesh | null {
+		return this.#targetMesh;
+	}
+
+	set targetObject(target: Mesh) {
+		this.#targetMesh = target || new Mesh(this.redGPUContext);
+	}
+
 	setMoveUpKey(value: string) {
 		this.#keyNameMapper.moveUp = value;
 	}
@@ -180,15 +189,6 @@ class IsometricController extends AController {
 
 	setMoveRightKey(value: string) {
 		this.#keyNameMapper.moveRight = value;
-	}
-
-	// ==================== 타겟 관련 ====================
-	get targetMesh(): Mesh | null {
-		return this.#targetMesh;
-	}
-
-	set targetObject(target: Mesh) {
-		this.#targetMesh = target || new Mesh(this.redGPUContext);
 	}
 
 	// ==================== 업데이트 및 애니메이션 ====================
@@ -231,7 +231,6 @@ class IsometricController extends AController {
 	#handleKeyboardInput(view: View3D): boolean {
 		if (!this.checkKeyboardInput(view, this.#keyNameMapper)) return false;
 		if (!this.#targetMesh) return false;
-
 		const {keyboardKeyBuffer} = view.redGPUContext;
 		const tKeyNameMapper = this.#keyNameMapper;
 		// ==================== 입력 수집 ====================

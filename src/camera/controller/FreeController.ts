@@ -248,11 +248,9 @@ class FreeController extends AController {
 		const tDelayRotation = this.#delayRotation;
 		const tDesirePosition = this.#desirePosition;
 		const targetMesh = this.#targetMesh;
-
 		// 회전 보간
 		targetMesh.rotationY += (this.#pan - targetMesh.rotationY) * tDelayRotation;
 		targetMesh.rotationX += (this.#tilt - targetMesh.rotationX) * tDelayRotation;
-
 		// 키보드 입력 체크 및 이동 계산
 		if (this.#checkKeyboardKeyBuffer(view)) {
 			tMTX0 = targetMesh.modelMatrix;
@@ -261,7 +259,6 @@ class FreeController extends AController {
 			mat4.rotateY(displacementMTX, displacementMTX, targetMesh.rotationY * PER_PI);
 			mat4.rotateX(displacementMTX, displacementMTX, targetMesh.rotationX * PER_PI);
 			mat4.translate(displacementMTX, displacementMTX, displacementVec3);
-
 			// 최종 위치 계산
 			mat4.identity(tMTX0);
 			mat4.translate(tMTX0, tMTX0, targetMesh.position);
@@ -270,23 +267,19 @@ class FreeController extends AController {
 			tDesirePosition[1] = tMTX0[13];
 			tDesirePosition[2] = tMTX0[14];
 		}
-
 		// 위치 보간
 		targetMesh.x += (tDesirePosition[0] - targetMesh.x) * tDelay;
 		targetMesh.y += (tDesirePosition[1] - targetMesh.y) * tDelay;
 		targetMesh.z += (tDesirePosition[2] - targetMesh.z) * tDelay;
-
 		// 회전 재적용
 		targetMesh.rotationY += (this.#pan - targetMesh.rotationY) * tDelayRotation;
 		targetMesh.rotationX += (this.#tilt - targetMesh.rotationX) * tDelayRotation;
-
 		// 메시 모델 매트릭스 생성
 		tMTX0 = targetMesh.modelMatrix;
 		mat4.identity(tMTX0);
 		mat4.translate(tMTX0, tMTX0, targetMesh.position);
 		mat4.rotateY(tMTX0, tMTX0, targetMesh.rotationY * PER_PI);
 		mat4.rotateX(tMTX0, tMTX0, targetMesh.rotationX * PER_PI);
-
 		// 카메라를 메시 바로 뒤에 위치
 		const tMTX1 = mat4.clone(tMTX0);
 		mat4.translate(tMTX1, tMTX1, [0, 0, 0.01]);
@@ -296,23 +289,18 @@ class FreeController extends AController {
 
 	#checkKeyboardKeyBuffer(view: View3D): boolean {
 		if (!this.checkKeyboardInput(view, this.#keyNameMapper)) return false;
-
 		const {keyboardKeyBuffer} = view.redGPUContext;
 		const tSpeed = this.#speed;
 		const tSpeedRotation = this.#speedRotation;
 		const tKeyNameMapper = this.#keyNameMapper;
-
 		let move = false;
 		let rotate = false;
 		let pan = 0;
 		let tilt = 0;
-
 		displacementVec3[0] = 0;
 		displacementVec3[1] = 0;
 		displacementVec3[2] = 0;
-
 		const tempAccelerationValue = this.#currentAcceleration * tSpeed;
-
 		// 회전 입력
 		if (keyboardKeyBuffer[tKeyNameMapper.turnLeft]) {
 			rotate = true;
@@ -330,7 +318,6 @@ class FreeController extends AController {
 			rotate = true;
 			tilt = -tSpeedRotation;
 		}
-
 		// 이동 입력
 		if (keyboardKeyBuffer[tKeyNameMapper.moveForward]) {
 			move = true;
@@ -356,7 +343,6 @@ class FreeController extends AController {
 			move = true;
 			displacementVec3[1] = -tempAccelerationValue;
 		}
-
 		// 가속도 계산
 		if (rotate || move) {
 			this.#currentAcceleration += 0.1;
@@ -369,7 +355,6 @@ class FreeController extends AController {
 				this.#currentAcceleration = 0;
 			}
 		}
-
 		if (rotate) {
 			this.#pan += pan;
 			this.#tilt += tilt;
