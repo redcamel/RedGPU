@@ -233,9 +233,6 @@ class FreeController extends AController {
 	// ==================== 업데이트 ====================
 	update(view: View3D, time: number): void {
 		super.update(view, time, () => {
-			// 키보드 활성 View가 있고 현재 View가 아니면 스킵
-			if (this.keyboardActiveView && this.keyboardActiveView !== view) return;
-
 			this.#updateAnimation(view, time);
 		});
 	}

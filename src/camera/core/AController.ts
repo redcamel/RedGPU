@@ -145,6 +145,7 @@ abstract class AController {
 		// 중복 업데이트 방지
 		if (this.#currentFrameViews.has(view)) return;
 		this.#currentFrameViews.add(view);
+		if (this.#initInfo.useKeyboard && this.keyboardActiveView && this.keyboardActiveView !== view) return;
 		updateAnimation?.();
 	}
 
