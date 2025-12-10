@@ -28,38 +28,17 @@ declare abstract class AController {
      * AController 생성자
      */
     constructor(redGPUContext: RedGPUContext, initInfo: controllerInit);
-    get startX(): number;
-    get startY(): number;
-    get detectorEventKey(): {
-        moveKey: string;
-        upKey: string;
-        downKey: string;
-    };
+    get name(): string;
+    set name(value: string);
+    get redGPUContext(): RedGPUContext;
+    get camera(): PerspectiveCamera;
     get hoveredView(): View3D | null;
     get keyboardActiveView(): View3D | null;
     set keyboardActiveView(value: View3D | null);
     get keyboardProcessedThisFrame(): boolean;
     set keyboardProcessedThisFrame(value: boolean);
-    get name(): string;
-    set name(value: string);
-    get redGPUContext(): RedGPUContext;
-    /**
-     * 현재 연결된 카메라를 반환합니다.
-     */
-    get camera(): PerspectiveCamera;
     destroy(): void;
-    /**
-     * 컨트롤러 상태를 갱신합니다. (파생 클래스에서 override)
-     * @param view - View3D 인스턴스
-     * @param time - 시간값(ms)
-     */
     update(view: View3D, time: number, updateAnimation: () => void): void;
-    /**
-     * 마우스/터치 이벤트에서 캔버스 내 좌표를 반환합니다.
-     * @param e - MouseEvent 또는 TouchEvent
-     * @param redGPUContext - RedGPUContext 인스턴스
-     * @returns 캔버스 내 상대 좌표 객체 { x, y }
-     */
     getCanvasEventPoint: (e: MouseEvent | TouchEvent | WheelEvent, redGPUContext: RedGPUContext) => {
         x: number;
         y: number;
