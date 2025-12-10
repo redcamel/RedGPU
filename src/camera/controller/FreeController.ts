@@ -70,8 +70,6 @@ class FreeController extends AController {
 	#tilt: number = 0;
 	// ==================== 메시 및 입력 관련 ====================
 	#targetMesh: Mesh;
-	#keyboardProcessedThisFrame: boolean = false;
-	#lastProcessedTime: number = -1;
 
 	// ==================== 라이프사이클 ====================
 	constructor(redGPUContext: RedGPUContext) {
@@ -234,11 +232,6 @@ class FreeController extends AController {
 
 	// ==================== 업데이트 및 애니메이션 ====================
 	update(view: View3D, time: number): void {
-		// 새로운 프레임이 시작되면 키보드 처리 플래그 초기화
-		if (this.#lastProcessedTime !== time) {
-			this.#lastProcessedTime = time;
-			this.#keyboardProcessedThisFrame = false;
-		}
 		super.update(view, time, () => {
 			// 키보드 활성 View가 있고, 현재 View가 활성 View가 아니면 업데이트 스킵
 			if (this.keyboardActiveView && this.keyboardActiveView !== view) {
@@ -302,7 +295,7 @@ class FreeController extends AController {
 
 	#checkKeyboardKeyBuffer(view: View3D, time: number): boolean {
 		// 이미 이번 프레임에서 키보드 입력을 처리했으면 스킵
-		if (this.#keyboardProcessedThisFrame) return false;
+		if (this.keyboardProcessedThisFrame) return false;
 
 		const tSpeed = this.#speed;
 		const tSpeedRotation = this.#speedRotation;
@@ -338,7 +331,7 @@ class FreeController extends AController {
 		if (this.keyboardActiveView !== view) return false;
 
 		// 키보드 입력 처리 플래그 설정
-		this.#keyboardProcessedThisFrame = true;
+		this.keyboardProcessedThisFrame = true;
 
 		let move = false;
 		let rotate = false;

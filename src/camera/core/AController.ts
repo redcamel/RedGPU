@@ -45,6 +45,8 @@ abstract class AController {
 	#animationUpdatedThisFrame: boolean = false
 	#hoveredView: View3D | null = null
 	#keyboardProcessedThisFrame: boolean = false
+	#isDragging: boolean = false
+	#draggingView: View3D | null = null
 	#detectorEventKey: { moveKey: string; upKey: string; downKey: string };
 	#startX: number = 0;
 	#startY: number = 0;
@@ -91,6 +93,14 @@ abstract class AController {
 
 	set keyboardActiveView(value: View3D | null) {
 		AController.#globalKeyboardActiveView = value;
+	}
+
+	get keyboardProcessedThisFrame(): boolean {
+		return this.#keyboardProcessedThisFrame;
+	}
+
+	set keyboardProcessedThisFrame(value: boolean) {
+		this.#keyboardProcessedThisFrame = value;
 	}
 
 	get name(): string {
@@ -221,8 +231,8 @@ abstract class AController {
 	}
 
 	#HD_hover = (e: MouseEvent | TouchEvent) => {
-		// 전역 키보드 활성 View가 있으면 hover 갱신 차단
-		if (AController.#globalKeyboardActiveView) {
+		// 전역 키보드 활성 View가 있거나 드래그 중이면 hover 갱신 차단
+		if (AController.#globalKeyboardActiveView || this.#isDragging) {
 			return;
 		}
 		const targetView = this.findTargetViewByInputEvent(e);
@@ -247,6 +257,11 @@ abstract class AController {
 			}
 		}
 		if (this.#currentFrameViews.has(targetView)) {
+			// 드래그 시작 - View 고정
+			this.#isDragging = true;
+			this.#draggingView = targetView;
+			// 드래그 중인 View를 키보드 활성 View로도 설정
+			AController.#globalKeyboardActiveView = targetView;
 			redGPUContext.htmlCanvas.addEventListener(moveKey, this.#HD_Move);
 			window.addEventListener(upKey, this.#HD_up);
 		}
@@ -284,6 +299,11 @@ abstract class AController {
 		const {moveKey, upKey} = this.detectorEventKey;
 		this.#isMultiTouch = false;
 		this.#touchStartDistance = 0;
+		// 드래그 종료
+		this.#isDragging = false;
+		this.#draggingView = null;
+		// 키보드 활성 View도 해제 (드래그만 끝나고 키보드가 눌려있지 않다면)
+		// 주의: 키보드가 눌려있는 상태에서 마우스를 놓으면 키보드 활성 View는 유지됨
 		redGPUContext.htmlCanvas.removeEventListener(moveKey, this.#HD_Move);
 		window.removeEventListener(upKey, this.#HD_up);
 	}

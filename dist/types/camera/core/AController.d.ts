@@ -38,6 +38,8 @@ declare abstract class AController {
     get hoveredView(): View3D | null;
     get keyboardActiveView(): View3D | null;
     set keyboardActiveView(value: View3D | null);
+    get keyboardProcessedThisFrame(): boolean;
+    set keyboardProcessedThisFrame(value: boolean);
     get name(): string;
     set name(value: string);
     get redGPUContext(): RedGPUContext;
