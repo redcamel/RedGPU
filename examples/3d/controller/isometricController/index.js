@@ -19,8 +19,8 @@ RedGPU.init(
 		targetMesh2.setPosition(0, 0, 0);
 
 		// IsometricController 생성
-		const isometricController = new RedGPU.Camera.IsometricController(redGPUContext, targetMesh);
-		const isometricController2 = new RedGPU.Camera.IsometricController(redGPUContext, targetMesh2);
+		const isometricController = new RedGPU.Camera.IsometricController(redGPUContext);
+		const isometricController2 = new RedGPU.Camera.IsometricController(redGPUContext);
 		isometricController.name = "IsometricController Instance";
 		console.log(isometricController.name);
 
