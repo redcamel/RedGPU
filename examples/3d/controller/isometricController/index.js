@@ -72,7 +72,7 @@ RedGPU.init(
 			}
 		};
 
-		addMeshesToScene(scene, 500);
+		addMeshesToScene(scene, 1000);
 
 		const renderer = new RedGPU.Renderer(redGPUContext);
 
@@ -198,5 +198,16 @@ const renderTestPane = async (redGPUContext, controller, targetMesh) => {
 	targetFolder.addBinding(targetMesh, 'z', {
 		readonly: true,
 	})
+	const moveFolder = pane.addFolder({
+		title: 'Movement Keys',
+	});
+	const keyBindings = controller.keyNameMapper;
 
+	for (const key in keyBindings) {
+		moveFolder.addBinding(keyBindings, key, {
+			label: key,
+		}).on('change', (ev) => {
+			controller[`set${key.charAt(0).toUpperCase()}${key.substr(1)}`](ev.value);
+		});
+	}
 };

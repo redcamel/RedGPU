@@ -65,7 +65,7 @@ RedGPU.init(
         };
         renderer.start(redGPUContext, render);
 
-        // renderTestPane(redGPUContext, controller);
+        renderTestPane(redGPUContext, controller);
     },
     (failReason) => {
         console.error('초기화 실패:', failReason);
