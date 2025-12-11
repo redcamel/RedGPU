@@ -37,8 +37,6 @@ RedGPU.init(
 		view.setSize('100%', '100%');
 		view.setPosition(0, 0);
 
-
-
 		const view2 = new RedGPU.Display.View3D(redGPUContext, scene, isometricController2);
 		view2.axis = true;
 		view2.grid = true;
@@ -57,7 +55,6 @@ RedGPU.init(
 			view2.setSize('50%', '100%');
 			view2.setPosition('50%', 0);     // 우측
 		}
-
 
 		const addMeshesToScene = (scene, count = 500) => {
 			const geometry = new RedGPU.Primitive.Sphere(redGPUContext, 0.5);
@@ -78,10 +75,6 @@ RedGPU.init(
 		addMeshesToScene(scene, 500);
 
 		const renderer = new RedGPU.Renderer(redGPUContext);
-
-		let targetX = 0;
-		let targetZ = 0;
-		const moveSpeed = 0.5;
 
 		const render = (time) => {
 		};
@@ -121,9 +114,19 @@ const renderTestPane = async (redGPUContext, controller, targetMesh) => {
 		max: 2,
 		step: 0.01
 	});
+	cameraFolder.addBinding(controller, 'delayMoveSpeed', {
+		min: 0.01,
+		max: 1,
+		step: 0.01
+	});
 	cameraFolder.addBinding(controller, 'mouseMoveSpeed', {
 		min: 0.01,
 		max: 0.1,
+		step: 0.01
+	});
+	cameraFolder.addBinding(controller, 'delayMouseMoveSpeed', {
+		min: 0.01,
+		max: 1,
 		step: 0.01
 	});
 
@@ -136,6 +139,12 @@ const renderTestPane = async (redGPUContext, controller, targetMesh) => {
 		min: controller.minZoom,
 		max: controller.maxZoom,
 		step: 0.1,
+	});
+
+	zoomFolder.addBinding(controller, 'delayZoom', {
+		min: 0.01,
+		max: 1,
+		step: 0.01,
 	});
 
 	zoomFolder.addBinding(controller, 'speedZoom', {
@@ -167,6 +176,12 @@ const renderTestPane = async (redGPUContext, controller, targetMesh) => {
 		step: 1,
 	});
 
+	viewFolder.addBinding(controller, 'delayViewHeight', {
+		min: 0.01,
+		max: 1,
+		step: 0.01,
+	});
+
 	// 타겟 위치 폴더
 	const targetFolder = pane.addFolder({
 		title: 'Target Position',
@@ -184,22 +199,4 @@ const renderTestPane = async (redGPUContext, controller, targetMesh) => {
 		readonly: true,
 	})
 
-	targetFolder.addButton({
-		title: 'Reset Target Position',
-	}).on('click', () => {
-		targetMesh.setPosition(0, 0, 0);
-
-		pane.refresh();
-	});
-
-	// 카메라 리셋 버튼
-	cameraFolder.addButton({
-		title: 'Reset Camera',
-	}).on('click', () => {
-		controller.cameraDistance = 15;
-		controller.cameraHeight = 12;
-		controller.cameraAngle = 45;
-		controller.zoom = 1;
-		pane.refresh();
-	});
 };

@@ -27,16 +27,23 @@ class IsometricController extends AController {
 	// ==================== 카메라 위치 및 각도 ====================
 	#cameraAngle: number = 45;
 	// ==================== 줌 관련 ====================
-	#zoom: number = 1;
+	#currentZoom: number = 1;
+	#targetZoom: number = 1;
+	#delayZoom: number = 0.1;
 	#speedZoom: number = 0.1;
 	#minZoom: number = 0.5;
 	#maxZoom: number = 3;
 	// ==================== 카메라 뷰 (OrthographicCamera) ====================
-	#viewHeight: number = 15;
+	#currentViewHeight: number = 15;
+	#targetViewHeight: number = 15;
+	#delayViewHeight: number = 0.1;
 	// ==================== 타겟 추적 ====================
 	#targetMesh: Mesh | null = null;
+	#targetX: number = 0;
+	#targetZ: number = 0;
 	// ==================== 이동 관련 ====================
 	#moveSpeed: number = 0.2;
+	#delayMoveSpeed: number = 0.2;
 	#keyNameMapper = {
 		moveUp: 'w',
 		moveDown: 's',
@@ -44,6 +51,7 @@ class IsometricController extends AController {
 		moveRight: 'd'
 	};
 	#mouseMoveSpeed: number = 0.05;
+	#delayMouseMoveSpeed: number = 0.2;
 
 	// ==================== 라이프사이클 ====================
 	/**
@@ -56,7 +64,8 @@ class IsometricController extends AController {
 			camera: new OrthographicCamera(),
 			HD_Wheel: (e: WheelEvent) => {
 				// 줌 처리
-				this.zoom -= (e.deltaY / 100) * this.#speedZoom;
+				this.#targetZoom -= (e.deltaY / 100) * this.#speedZoom;
+				this.#targetZoom = Math.max(this.#minZoom, Math.min(this.#maxZoom, this.#targetZoom));
 			},
 			HD_Move: (deltaX: number, deltaY: number) => {
 				if (!this.#targetMesh) return;
@@ -69,12 +78,13 @@ class IsometricController extends AController {
 // 카메라 각도 기반 좌표 변환
 				const worldDeltaX = -(mouseDeltaX * cos) - (mouseDeltaY * sin);
 				const worldDeltaZ = -(mouseDeltaX * (-sin)) - (mouseDeltaY * cos);
-// 타겟 위치 업데이트
-				this.#targetMesh.x += worldDeltaX;
-				this.#targetMesh.z += worldDeltaZ;
+// 목표 위치 업데이트
+				this.#targetX += worldDeltaX;
+				this.#targetZ += worldDeltaZ;
 			},
 			HD_TouchPinch: (deltaScale: number) => {
-				this.zoom /= deltaScale
+				this.#targetZoom /= deltaScale;
+				this.#targetZoom = Math.max(this.#minZoom, Math.min(this.#maxZoom, this.#targetZoom));
 			},
 			useKeyboard: true
 		});
@@ -89,13 +99,22 @@ class IsometricController extends AController {
 
 	// ==================== 줌 Getter/Setter ====================
 	get zoom(): number {
-		return this.#zoom;
+		return this.#targetZoom;
 	}
 
 	set zoom(value: number) {
 		validateNumberRange(value);
-		value = Math.max(this.#minZoom, Math.min(this.#maxZoom, value))
-		this.#zoom = value
+		value = Math.max(this.#minZoom, Math.min(this.#maxZoom, value));
+		this.#targetZoom = value;
+	}
+
+	get delayZoom(): number {
+		return this.#delayZoom;
+	}
+
+	set delayZoom(value: number) {
+		validateNumberRange(value, 0.01, 1);
+		this.#delayZoom = value;
 	}
 
 	get speedZoom(): number {
@@ -114,7 +133,7 @@ class IsometricController extends AController {
 	set minZoom(value: number) {
 		validateNumberRange(value, 0.01);
 		this.#minZoom = value;
-		this.zoom = this.#zoom;
+		this.zoom = this.#targetZoom;
 	}
 
 	get maxZoom(): number {
@@ -124,17 +143,26 @@ class IsometricController extends AController {
 	set maxZoom(value: number) {
 		validateNumberRange(value, 0.01);
 		this.#maxZoom = value;
-		this.zoom = this.#zoom;
+		this.zoom = this.#targetZoom;
 	}
 
 	// ==================== 뷰 높이 Getter/Setter ====================
 	get viewHeight(): number {
-		return this.#viewHeight;
+		return this.#targetViewHeight;
 	}
 
 	set viewHeight(value: number) {
 		validateNumberRange(value, 0.1);
-		this.#viewHeight = value;
+		this.#targetViewHeight = value;
+	}
+
+	get delayViewHeight(): number {
+		return this.#delayViewHeight;
+	}
+
+	set delayViewHeight(value: number) {
+		validateNumberRange(value, 0.01, 1);
+		this.#delayViewHeight = value;
 	}
 
 	// ==================== 이동 속도 Getter/Setter ====================
@@ -147,6 +175,15 @@ class IsometricController extends AController {
 		this.#moveSpeed = value;
 	}
 
+	get delayMoveSpeed(): number {
+		return this.#delayMoveSpeed;
+	}
+
+	set delayMoveSpeed(value: number) {
+		validateNumberRange(value, 0.01, 1);
+		this.#delayMoveSpeed = value;
+	}
+
 	get mouseMoveSpeed(): number {
 		return this.#mouseMoveSpeed;
 	}
@@ -154,6 +191,15 @@ class IsometricController extends AController {
 	set mouseMoveSpeed(value: number) {
 		validateNumberRange(value, 0.01);
 		this.#mouseMoveSpeed = value;
+	}
+
+	get delayMouseMoveSpeed(): number {
+		return this.#delayMouseMoveSpeed;
+	}
+
+	set delayMouseMoveSpeed(value: number) {
+		validateNumberRange(value, 0.01, 1);
+		this.#delayMouseMoveSpeed = value;
 	}
 
 	// ==================== 키 매핑 Getter/Setter ====================
@@ -195,20 +241,28 @@ class IsometricController extends AController {
 
 	#updateAnimation(view: View3D): void {
 		this.#handleKeyboardInput(view);
+		// 줌 보간 처리
+		this.#currentZoom += (this.#targetZoom - this.#currentZoom) * this.#delayZoom;
+		// viewHeight 보간 처리
+		this.#currentViewHeight += (this.#targetViewHeight - this.#currentViewHeight) * this.#delayViewHeight;
 		if (!this.#targetMesh) return;
+
+		// 타겟 메시 위치 보간 처리 (키보드와 마우스 모두 동일한 보간 사용)
+		this.#targetMesh.x += (this.#targetX - this.#targetMesh.x) * this.#delayMoveSpeed;
+		this.#targetMesh.z += (this.#targetZ - this.#targetMesh.z) * this.#delayMoveSpeed;
 		const targetPos = this.#targetMesh.position;
 		const angleRad = this.#cameraAngle * PER_PI;
 		// ==================== 직교 투영 뷰 계산 ====================
 		const {width, height} = view.pixelRectObject;
 		const aspectRatio = width / height;
-		const effectiveHeight = this.#viewHeight / this.#zoom;
+		const effectiveHeight = this.#currentViewHeight / this.#currentZoom;
 		const effectiveWidth = effectiveHeight * aspectRatio;
-		const scaleFactor = this.#viewHeight / 15;  // viewHeight 기준
+		const scaleFactor = this.#currentViewHeight / 15;  // viewHeight 기준
 		const baseDistance = 15;  // 기본 거리 (viewHeight 기본값과 동일)
 		const baseHeight = 12;    // 기본 높이
 		// zoom과 viewHeight 변화에 모두 대응
-		const cameraDistance = (baseDistance * scaleFactor) / this.#zoom;
-		const cameraHeight = (baseHeight * scaleFactor) / this.#zoom;
+		const cameraDistance = (baseDistance * scaleFactor) / this.#currentZoom;
+		const cameraHeight = (baseHeight * scaleFactor) / this.#currentZoom;
 		// ==================== 카메라 위치 계산 ====================
 		const cameraX = targetPos[0] + Math.cos(angleRad) * cameraDistance;
 		const cameraY = targetPos[1] + cameraHeight;
@@ -259,9 +313,9 @@ class IsometricController extends AController {
 		// ==================== 최종 이동량 계산 ====================
 		const worldDeltaX = upDownDeltaX + leftRightDeltaX;
 		const worldDeltaZ = upDownDeltaZ + leftRightDeltaZ;
-		// ==================== 타겟 위치 업데이트 ====================
-		this.#targetMesh.x += worldDeltaX;
-		this.#targetMesh.z += worldDeltaZ;
+		// ==================== 목표 위치 업데이트 ====================
+		this.#targetX += worldDeltaX;
+		this.#targetZ += worldDeltaZ;
 	}
 }
 
