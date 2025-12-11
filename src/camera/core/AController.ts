@@ -228,15 +228,16 @@ abstract class AController {
 		const tX = x * scale;
 		const tY = y * scale;
 
+		let targetView = null
 		for (const view of this.redGPUContext.viewList) {
 			const tViewRect = view.pixelRectObject;
 			if (tViewRect.x < tX && tX < tViewRect.x + tViewRect.width &&
 				tViewRect.y < tY && tY < tViewRect.y + tViewRect.height) {
-				return view;
+				targetView =  view;
 			}
 		}
-		keepLog(e, tX, tY, null)
-		return null;
+		// keepLog(e, tX, tY, targetView)
+		return targetView;
 	};
 
 	// ==================== 마우스/터치 이벤트 핸들러 ====================
