@@ -21,6 +21,7 @@ RedGPU.init(
 
       // FollowController 생성
       const controller = new RedGPU.Camera.FollowController(redGPUContext, targetMesh);
+      const controller2 = new RedGPU.Camera.FollowController(redGPUContext, targetMesh2);
 
       const scene = new RedGPU.Display.Scene();
       scene.addChild(targetMesh);
@@ -32,6 +33,28 @@ RedGPU.init(
       view.axis = true;
       view.grid = true;
       redGPUContext.addView(view);
+
+
+      const view2 = new RedGPU.Display.View3D(redGPUContext, scene, controller2);
+      view2.axis = true;
+      view2.grid = true;
+      redGPUContext.addView(view2);
+
+
+
+      if (redGPUContext.detector.isMobile) {
+          // 모바일: 위아래 분할
+          view.setSize('100%', '50%');
+          view.setPosition(0, 0);         // 상단
+          view2.setSize('100%', '50%');
+          view2.setPosition(0, '50%');     // 하단
+      } else {
+          // 데스크톱: 좌우 분할
+          view.setSize('50%', '100%');
+          view.setPosition(0, 0);         // 좌측
+          view2.setSize('50%', '100%');
+          view2.setPosition('50%', 0);     // 우측
+      }
 
       // 배경 메시 추가 (환경 표시용)
       const addMeshesToScene = (scene, count = 100) => {
@@ -97,13 +120,22 @@ const renderTestPane = async (redGPUContext, controller) => {
         max: 50,
         step: 0.5,
     });
+    followFolder.addBinding(controller, 'delayDistance', {
+        min: 0.01,
+        max: 1,
+        step: 0.01,
+    });
 
     followFolder.addBinding(controller, 'height',{
         min: -10,
         max: 20,
         step: 0.5,
     });
-
+    followFolder.addBinding(controller, 'delayHeight', {
+        min: 0.01,
+        max: 1,
+        step: 0.01,
+    });
     followFolder.addBinding(controller, 'delay', {
         min: 0.01,
         max: 1,
@@ -121,11 +153,21 @@ const renderTestPane = async (redGPUContext, controller) => {
         max: 180,
         step: 1,
     });
+    rotationFolder.addBinding(controller, 'delayPan', {
+        min: 0.01,
+        max: 1,
+        step: 0.01,
+    });
 
     rotationFolder.addBinding(controller, 'tilt', {
         min: -89,
         max: 89,
         step: 1,
+    });
+    rotationFolder.addBinding(controller, 'delayTilt', {
+        min: 0.01,
+        max: 1,
+        step: 0.01,
     });
 
     rotationFolder.addBinding(controller, 'followTargetRotation', {
@@ -172,13 +214,24 @@ const renderTestPane = async (redGPUContext, controller) => {
     });
 
     presetFolder.addButton({
+        title: 'Reset All Delays',
+    }).on('click', () => {
+        controller.delay = 1;
+        controller.delayDistance = 0.1;
+        controller.delayHeight = 0.1;
+        controller.delayPan = 0.1;
+        controller.delayTilt = 0.1;
+        pane.refresh();
+    });
+
+    presetFolder.addButton({
         title: 'Behind View',
     }).on('click', () => {
         controller.distance = 15;
         controller.height = 5;
         controller.pan = 0;
         controller.tilt = 20;
-        controller.setTargetOffset(0, 0.5, 0);
+        controller.setTargetOffset(0, 0, 0);
         pane.refresh();
     });
 
@@ -200,7 +253,7 @@ const renderTestPane = async (redGPUContext, controller) => {
         controller.height = 5;
         controller.pan = 90;
         controller.tilt = 10;
-        controller.setTargetOffset(0, 0.5, 0);
+        controller.setTargetOffset(0, 0, 0);
         pane.refresh();
     });
 

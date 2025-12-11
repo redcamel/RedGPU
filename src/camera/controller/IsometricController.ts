@@ -6,12 +6,7 @@ import OrthographicCamera from "../camera/OrthographicCamera";
 import AController from "../core/AController";
 
 const PER_PI = Math.PI / 180;
-type KeyNameMapper = {
-	moveLeft: string;
-	moveRight: string;
-	moveUp: string;
-	moveDown: string;
-};
+
 
 /**
  * 아이소메트릭(Isometric) 카메라 컨트롤러 클래스입니다.
