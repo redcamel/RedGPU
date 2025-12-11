@@ -10,6 +10,7 @@ const PER_PI = Math.PI / 180;
 const tempMat4 = mat4.create();
 const localOffset = vec3.create();
 const worldOffset = vec3.create();
+const targetLookAtOffset = vec3.create();
 
 /**
  * 타겟 메시를 따라다니는 카메라 컨트롤러(FollowController) 클래스입니다.
@@ -33,10 +34,14 @@ class FollowController extends AController {
 	// ==================== Follow 관련 설정 ====================
 	#distance: number = 10; // 타겟으로부터의 거리
 	#height: number = 5;    // 타겟으로부터의 높이 오프셋
-	#delay: number = 0.1;   // 카메라 이동 부드러움
+	#delay: number = 1;   // 카메라 이동 부드러움
 	#pan: number = 0;       // 수평 회전 각도 오프셋
 	#tilt: number = 20;     // 수직 회전 각도 (기본 20도)
 	#followTargetRotation: boolean = true; // 타겟의 회전을 따라갈지 여부
+	// ==================== 타겟 오프셋 (카메라가 바라볼 지점) ====================
+	#targetOffsetX: number = 0; // 타겟의 로컬 X 오프셋
+	#targetOffsetY: number = 0; // 타겟의 로컬 Y 오프셋
+	#targetOffsetZ: number = 0; // 타겟의 로컬 Z 오프셋
 	// ==================== 메시 관련 ====================
 	#targetMesh: Mesh;
 	// ==================== 카메라 현재 위치 (부드러운 이동용) ====================
@@ -167,6 +172,49 @@ class FollowController extends AController {
 		this.#followTargetRotation = value;
 	}
 
+	// ==================== 타겟 오프셋 Getter/Setter ====================
+	get targetOffsetX(): number {
+		return this.#targetOffsetX;
+	}
+
+	set targetOffsetX(value: number) {
+		validateNumber(value);
+		this.#targetOffsetX = value;
+	}
+
+	get targetOffsetY(): number {
+		return this.#targetOffsetY;
+	}
+
+	set targetOffsetY(value: number) {
+		validateNumber(value);
+		this.#targetOffsetY = value;
+	}
+
+	get targetOffsetZ(): number {
+		return this.#targetOffsetZ;
+	}
+
+	set targetOffsetZ(value: number) {
+		validateNumber(value);
+		this.#targetOffsetZ = value;
+	}
+
+	/**
+	 * 타겟 오프셋을 한 번에 설정합니다 (타겟의 로컬 좌표계 기준)
+	 * @param x - X 오프셋
+	 * @param y - Y 오프셋 (기본값: 0)
+	 * @param z - Z 오프셋 (기본값: 0)
+	 */
+	setTargetOffset(x: number, y: number = 0, z: number = 0): void {
+		validateNumber(x);
+		validateNumber(y);
+		validateNumber(z);
+		this.#targetOffsetX = x;
+		this.#targetOffsetY = y;
+		this.#targetOffsetZ = z;
+	}
+
 	// ==================== 타겟 메시 Getter/Setter ====================
 	get targetMesh(): Mesh {
 		return this.#targetMesh;
@@ -193,7 +241,6 @@ class FollowController extends AController {
 	// ==================== Private Methods ====================
 	#updateAnimation(view: View3D, time: number) {
 		const targetMesh = this.#targetMesh;
-		const height = this.#height;
 		const delay = this.#delay;
 
 		// 카메라의 목표 위치 계산 (매트릭스 기반)
@@ -207,8 +254,38 @@ class FollowController extends AController {
 		// 카메라 위치 설정
 		this.camera.setPosition(this.#currentCameraX, this.#currentCameraY, this.#currentCameraZ);
 
+		// 카메라가 바라볼 타겟 위치 계산 (오프셋 적용)
+		const lookAtTarget = this.#calculateLookAtTarget();
+
 		// 카메라가 타겟을 바라보도록 설정
-		this.camera.lookAt(targetMesh.x, targetMesh.y + height * 0.5, targetMesh.z);
+		this.camera.lookAt(lookAtTarget[0], lookAtTarget[1], lookAtTarget[2]);
+	}
+
+	#calculateLookAtTarget(): vec3 {
+		const targetMesh = this.#targetMesh;
+
+		// 타겟 오프셋을 로컬 좌표로 설정
+		vec3.set(targetLookAtOffset, this.#targetOffsetX, this.#targetOffsetY, this.#targetOffsetZ);
+
+		// followTargetRotation이 true면 타겟의 회전을 적용
+		if (this.#followTargetRotation && (this.#targetOffsetX !== 0 || this.#targetOffsetY !== 0 || this.#targetOffsetZ !== 0)) {
+			// 타겟의 회전만 추출 (위치 제외)
+			mat4.copy(tempMat4, targetMesh.modelMatrix);
+			// 위치 성분 제거
+			tempMat4[12] = 0;
+			tempMat4[13] = 0;
+			tempMat4[14] = 0;
+
+			// 로컬 오프셋을 월드 좌표로 변환
+			vec3.transformMat4(targetLookAtOffset, targetLookAtOffset, tempMat4);
+		}
+
+		// 타겟의 월드 위치에 오프셋 추가
+		return vec3.fromValues(
+			targetMesh.x + targetLookAtOffset[0],
+			targetMesh.y + targetLookAtOffset[1],
+			targetMesh.z + targetLookAtOffset[2]
+		);
 	}
 
 }
