@@ -4,73 +4,89 @@ const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
 RedGPU.init(
-    canvas,
-    (redGPUContext) => {
-        const controller = new RedGPU.Camera.FreeController(redGPUContext);
-        const controller2 = new RedGPU.Camera.FreeController(redGPUContext);
-        // const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        // const controller2 = new RedGPU.Camera.OrbitController(redGPUContext);
-        console.log(controller.name,controller2.name);
-        const scene = new RedGPU.Display.Scene();
-        const view = new RedGPU.Display.View3D(redGPUContext, scene, controller2);
-        view.axis = true;
-        view.grid = true;
-        redGPUContext.addView(view);
+  canvas,
+  (redGPUContext) => {
+      const targetMesh = new RedGPU.Display.Mesh(redGPUContext);
+      targetMesh.material = new RedGPU.Material.PhongMaterial(redGPUContext,'#ff0000');
+      targetMesh.geometry = new RedGPU.Primitive.Box(redGPUContext);
+      const targetMesh2 = new RedGPU.Display.Mesh(redGPUContext);
+      targetMesh2.material = new RedGPU.Material.PhongMaterial(redGPUContext,'#00ff00');
+      targetMesh2.geometry = new RedGPU.Primitive.Box(redGPUContext);
+      targetMesh2.z = 1
+      targetMesh.addChild(targetMesh2);
+      const controller = new RedGPU.Camera.FollowController(redGPUContext,targetMesh);
+      const controller2 = new RedGPU.Camera.FollowController(redGPUContext,targetMesh);
 
-        const view2 = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-        view2.axis = true;
-        view2.grid = true;
-        redGPUContext.addView(view2);
+      console.log(controller.name,controller2.name);
+      const scene = new RedGPU.Display.Scene();
+      scene.addChild(targetMesh);
+
+      const directionalLight = new RedGPU.Light.DirectionalLight();
+      scene.lightManager.addDirectionalLight(directionalLight);
+
+      const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+      view.axis = true;
+      view.grid = true;
+      redGPUContext.addView(view);
+
+      const view2 = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+      view2.axis = true;
+      view2.grid = true;
+      // redGPUContext.addView(view2);
 
 
 
-        if (redGPUContext.detector.isMobile) {
-            // 모바일: 위아래 분할
-            view.setSize('100%', '50%');
-            view.setPosition(0, 0);         // 상단
-            view2.setSize('100%', '50%');
-            view2.setPosition(0, '50%');     // 하단
-        } else {
-            // 데스크톱: 좌우 분할
-            view.setSize('50%', '100%');
-            view.setPosition(0, 0);         // 좌측
-            view2.setSize('50%', '100%');
-            view2.setPosition('50%', 0);     // 우측
-        }
+      // if (redGPUContext.detector.isMobile) {
+      //     // 모바일: 위아래 분할
+      //     view.setSize('100%', '50%');
+      //     view.setPosition(0, 0);         // 상단
+      //     view2.setSize('100%', '50%');
+      //     view2.setPosition(0, '50%');     // 하단
+      // } else {
+      //     // 데스크톱: 좌우 분할
+      //     view.setSize('50%', '100%');
+      //     view.setPosition(0, 0);         // 좌측
+      //     view2.setSize('50%', '100%');
+      //     view2.setPosition('50%', 0);     // 우측
+      // }
 
-        const addMeshesToScene = (scene, count = 500) => {
-            const geometry = new RedGPU.Primitive.Sphere(redGPUContext);
-            const material = new RedGPU.Material.ColorMaterial(redGPUContext);
+      const addMeshesToScene = (scene, count = 500) => {
+          const geometry = new RedGPU.Primitive.Sphere(redGPUContext);
+          const material = new RedGPU.Material.ColorMaterial(redGPUContext);
 
-            for (let i = 0; i < count; i++) {
-                const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
+          for (let i = 0; i < count; i++) {
+              const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
 
-                mesh.setPosition(
-                    Math.random() * 500 - 250,
-                    Math.random() * 500 - 250,
-                    Math.random() * 500 - 250
-                );
+              mesh.setPosition(
+                Math.random() * 500 - 250,
+                Math.random() * 500 - 250,
+                Math.random() * 500 - 250
+              );
 
-                scene.addChild(mesh);
-            }
-        };
+              scene.addChild(mesh);
+          }
+      };
 
-        addMeshesToScene(scene, 1000);
+      addMeshesToScene(scene, 1000);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
-        const render = (time) => {
-            // 매 프레임 로직
-        };
-        renderer.start(redGPUContext, render);
+      const renderer = new RedGPU.Renderer(redGPUContext);
+      const render = (time) => {
+          // 매 프레임 로직
+          const t = time * 0.001;
+          targetMesh.x = Math.sin(t) * 20;
+          targetMesh.z = Math.cos(t) * 20;
+          targetMesh.lookAt(0,0,0);
+      };
+      renderer.start(redGPUContext, render);
 
-        // renderTestPane(redGPUContext, controller);
-    },
-    (failReason) => {
-        console.error('초기화 실패:', failReason);
-        const errorMessage = document.createElement('div');
-        errorMessage.innerHTML = failReason;
-        document.body.appendChild(errorMessage);
-    }
+      // renderTestPane(redGPUContext, controller);
+  },
+  (failReason) => {
+      console.error('초기화 실패:', failReason);
+      const errorMessage = document.createElement('div');
+      errorMessage.innerHTML = failReason;
+      document.body.appendChild(errorMessage);
+  }
 );
 const renderTestPane = async (redGPUContext, controller) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');

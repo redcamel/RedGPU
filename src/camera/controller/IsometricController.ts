@@ -22,7 +22,7 @@ type KeyNameMapper = {
  *
  * @example
  * ```javascript
- * const controller = new RedGPU.Camera.IsometricController(redGPUContext, targetMesh);
+ * const controller = new RedGPU.Camera.IsometricController(redGPUContext);
  * controller.cameraDistance = 15;
  * controller.cameraAngle = 45;
  * controller.zoom = 1;
@@ -84,7 +84,7 @@ class IsometricController extends AController {
 			useKeyboard: true
 		});
 		this.#targetMesh = targetMesh || new Mesh(redGPUContext);
-		this.#targetMesh.setIgnoreFrustumCulling(true)
+		this.#targetMesh.setIgnoreFrustumCullingRecursively(true)
 	}
 
 	// ==================== 카메라 각도 Getter/Setter ====================

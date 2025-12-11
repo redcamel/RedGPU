@@ -443,13 +443,13 @@ class Mesh extends MeshBase {
             })
         }
     }
-    setIgnoreFrustumCulling(value: boolean = false) {
+    setIgnoreFrustumCullingRecursively(value: boolean = false) {
         if ('ignoreFrustumCulling' in this) {
             this.ignoreFrustumCulling = value
         }
         if (this.children) {
             this.children.forEach(child => {
-                child.setIgnoreFrustumCulling(value)
+                child.setIgnoreFrustumCullingRecursively(value)
             })
         }
     }
@@ -468,18 +468,43 @@ class Mesh extends MeshBase {
     }
 
     lookAt(targetX: number | [number, number, number], targetY?: number, targetZ?: number): void {
-        var tPosition = [];
-        var tRotation = []
+        const tPosition = [];
         tPosition[0] = targetX;
         tPosition[1] = targetY;
         tPosition[2] = targetZ;
-        //out, eye, center, up
+
+        // 이전 각도 저장
+        const prevRotX = this.rotationX;
+        const prevRotY = this.rotationY;
+        const prevRotZ = this.rotationZ;
+
+        // 새로운 각도 계산
         mat4.identity(this.localMatrix);
         mat4.targetTo(this.localMatrix, [this.#x, this.#y, this.#z], tPosition, up);
-        tRotation = mat4ToEuler(this.localMatrix, []);
-        this.rotationX = -tRotation[0] * 180 / Math.PI;
-        this.rotationY = -tRotation[1] * 180 / Math.PI;
-        this.rotationZ = -tRotation[2] * 180 / Math.PI;
+        const tRotation = mat4ToEuler(this.localMatrix, []);
+
+        let newRotX = -tRotation[0] * 180 / Math.PI;
+        let newRotY = -tRotation[1] * 180 / Math.PI;
+        let newRotZ = -tRotation[2] * 180 / Math.PI;
+
+        // 각도 연속성 보정 (360도 점프 방지)
+        newRotX = this.#normalizeRotationDelta(prevRotX, newRotX);
+        newRotY = this.#normalizeRotationDelta(prevRotY, newRotY);
+        newRotZ = this.#normalizeRotationDelta(prevRotZ, newRotZ);
+
+        this.rotationX = newRotX;
+        this.rotationY = newRotY;
+        this.rotationZ = newRotZ;
+    }
+
+    #normalizeRotationDelta(prevAngle: number, newAngle: number): number {
+        let delta = newAngle - prevAngle;
+
+        // delta가 180도보다 크면 반대 방향으로 회전
+        while (delta > 180) delta -= 360;
+        while (delta < -180) delta += 360;
+
+        return prevAngle + delta;
     }
 
     setScale(x: number, y?: number, z?: number) {

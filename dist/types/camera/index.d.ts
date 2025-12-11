@@ -8,8 +8,6 @@
 import Camera2D from "./camera/Camera2D";
 import OrthographicCamera from "./camera/OrthographicCamera";
 import PerspectiveCamera from "./camera/PerspectiveCamera";
-import FreeController from "./controller/FreeController";
-import IsometricController from "./controller/IsometricController";
-import OrbitController from "./controller/OrbitController";
 import * as Core from "./core";
-export { PerspectiveCamera, OrthographicCamera, IsometricController, Camera2D, OrbitController, FreeController, Core };
+export * from "./controller";
+export { PerspectiveCamera, OrthographicCamera, Camera2D, Core };
