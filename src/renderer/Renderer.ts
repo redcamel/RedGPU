@@ -45,18 +45,7 @@ class Renderer {
         if (!this.#finalRender) this.#finalRender = new FinalRender()
         if (!this.#debugRender) this.#debugRender = new DebugRender(redGPUContext)
 
-		    {
-			    let i = 0
-			    const len = redGPUContext.viewList.length
-			    for (i; i < len; i++) {
-				    const targetView = redGPUContext.viewList[i];
-				    if(targetView.camera instanceof IsometricController && redGPUContext.antialiasingManager.useTAA){
-					    redGPUContext.antialiasingManager.useTAA=false
-					    redGPUContext.antialiasingManager.useMSAA=true
-					    break
-				    }
-			    }
-		    }
+
         // 오브젝트 렌더시작
         const viewList_renderPassDescriptorList: GPURenderPassDescriptor[] = []
         {

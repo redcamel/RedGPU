@@ -2,6 +2,7 @@ import {mat4} from "gl-matrix";
 import Camera2D from "../../../camera/camera/Camera2D";
 import OrthographicCamera from "../../../camera/camera/OrthographicCamera";
 import PerspectiveCamera from "../../../camera/camera/PerspectiveCamera";
+import IsometricController from "../../../camera/controller/IsometricController";
 import AController from "../../../camera/core/AController";
 import RedGPUContextSizeManager from "../../../context/core/RedGPUContextSizeManager";
 import RedGPUContext from "../../../context/RedGPUContext";
@@ -326,13 +327,16 @@ class ViewTransform {
         const {antialiasingManager} = redGPUContext
         this.#projectionMatrix = mat4.clone(this.noneJitterProjectionMatrix)
         // TAA 지터 오프셋 적용 (PerspectiveCamera에만 적용)
-        if (antialiasingManager.useTAA) {
+        const needJitter = !(this.camera instanceof IsometricController) && antialiasingManager.useTAA
+
+        if (needJitter) {
             if (this.rawCamera instanceof PerspectiveCamera && (this.#jitterOffsetX !== 0 || this.#jitterOffsetY !== 0)) {
                 // devicePixelRatio를 고려한 정확한 픽셀 크기 계산
                 const logicalWidth = this.#pixelRectArray[2];
                 const logicalHeight = this.#pixelRectArray[3];
-                const pixelWidth = 2.0 / logicalWidth;
-                const pixelHeight = 2.0 / logicalHeight;
+                const pixelHeight = window.devicePixelRatio / logicalHeight;
+                // const pixelWidth = window.devicePixelRatio / logicalWidth;
+                const pixelWidth = pixelHeight * this.aspect;
                 this.#projectionMatrix[8] += this.#jitterOffsetX * pixelWidth;  // X 오프셋
                 this.#projectionMatrix[9] += this.#jitterOffsetY * pixelHeight; // Y 오프셋
             }
