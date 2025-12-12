@@ -335,8 +335,8 @@ class ViewTransform {
                 const logicalWidth = this.#pixelRectArray[2];
                 const logicalHeight = this.#pixelRectArray[3];
                 const pixelHeight = window.devicePixelRatio / logicalHeight;
-                // const pixelWidth = window.devicePixelRatio / logicalWidth;
-                const pixelWidth = pixelHeight * this.aspect;
+                const pixelWidth = window.devicePixelRatio / logicalWidth;
+                // const pixelWidth = pixelHeight * this.aspect;
                 this.#projectionMatrix[8] += this.#jitterOffsetX * pixelWidth;  // X 오프셋
                 this.#projectionMatrix[9] += this.#jitterOffsetY * pixelHeight; // Y 오프셋
             }

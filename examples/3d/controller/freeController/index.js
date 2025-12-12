@@ -3,173 +3,172 @@ import * as RedGPU from "../../../../dist/index.js";
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
-RedGPU.init(
-    canvas,
-    (redGPUContext) => {
-        const controller = new RedGPU.Camera.FreeController(redGPUContext);
-        const controller2 = new RedGPU.Camera.FreeController(redGPUContext);
+RedGPU.init(canvas, (redGPUContext) => {
+	const controller = new RedGPU.Camera.FreeController(redGPUContext);
+	controller.z = 10;
+	controller.y = 10;
+	controller.tilt = -45;
 
-        console.log(controller.name,controller2.name);
-        const scene = new RedGPU.Display.Scene();
-        const view = new RedGPU.Display.View3D(redGPUContext, scene, controller2);
-        view.axis = true;
-        view.grid = true;
-        redGPUContext.addView(view);
+	const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
+	const skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+	const scene = new RedGPU.Display.Scene();
+	const directionalLight = new RedGPU.Light.DirectionalLight();
+	scene.lightManager.addDirectionalLight(directionalLight);
 
-        const view2 = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-        view2.axis = true;
-        view2.grid = true;
-        redGPUContext.addView(view2);
+	const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+	view.axis = true;
+	view.grid = true;
+	view.skybox = skybox;
+	redGPUContext.addView(view);
 
+	const addMeshesToScene = (scene, count = 500) => {
+		const geometry = new RedGPU.Primitive.Sphere(redGPUContext);
+		const material = new RedGPU.Material.PhongMaterial(redGPUContext);
 
+		for (let i = 0; i < count; i++) {
+			const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
+			mesh.setPosition(
+				Math.random() * 500 - 250,
+				Math.random() * 500 - 250,
+				Math.random() * 500 - 250
+			);
+			scene.addChild(mesh);
+		}
+	};
 
-        if (redGPUContext.detector.isMobile) {
-            // 모바일: 위아래 분할
-            view.setSize('100%', '50%');
-            view.setPosition(0, 0);         // 상단
-            view2.setSize('100%', '50%');
-            view2.setPosition(0, '50%');     // 하단
-        } else {
-            // 데스크톱: 좌우 분할
-            view.setSize('50%', '100%');
-            view.setPosition(0, 0);         // 좌측
-            view2.setSize('50%', '100%');
-            view2.setPosition('50%', 0);     // 우측
-        }
+	addMeshesToScene(scene, 1000);
 
-        const addMeshesToScene = (scene, count = 500) => {
-            const geometry = new RedGPU.Primitive.Sphere(redGPUContext);
-            const material = new RedGPU.Material.ColorMaterial(redGPUContext);
+	const renderer = new RedGPU.Renderer(redGPUContext);
+	const render = (time) => {
+		// 매 프레임 로직
+	};
+	renderer.start(redGPUContext, render);
 
-            for (let i = 0; i < count; i++) {
-                const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
-
-                mesh.setPosition(
-                    Math.random() * 500 - 250,
-                    Math.random() * 500 - 250,
-                    Math.random() * 500 - 250
-                );
-
-                scene.addChild(mesh);
-            }
-        };
-
-        addMeshesToScene(scene, 1000);
-
-        const renderer = new RedGPU.Renderer(redGPUContext);
-        const render = (time) => {
-            // 매 프레임 로직
-            redGPUContext.viewList.forEach((view) => {
-                console.log(view.name,view.camera.startX)
-            })
-        };
-        renderer.start(redGPUContext, render);
-
-        renderTestPane(redGPUContext, controller);
-    },
-    (failReason) => {
-        console.error('초기화 실패:', failReason);
-        const errorMessage = document.createElement('div');
-        errorMessage.innerHTML = failReason;
-        document.body.appendChild(errorMessage);
-    }
-);
+	renderTestPane(redGPUContext, controller);
+}, (failReason) => {
+	console.error('초기화 실패:', failReason);
+	const errorMessage = document.createElement('div');
+	errorMessage.innerHTML = failReason;
+	document.body.appendChild(errorMessage);
+});
 const renderTestPane = async (redGPUContext, controller) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
-    const {
-        setDebugButtons
-    } = await import("../../../exampleHelper/createExample/panes/index.js");
+	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+	const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js");
 
-    setDebugButtons(redGPUContext);
-    const pane = new Pane();
+	setDebugButtons(redGPUContext);
+	const pane = new Pane();
 
-    // 카메라 위치 조정
-    const cameraFolder = pane.addFolder({
-        title: 'Camera',
-    });
+	{
+		// 두 번째 컨트롤러 및 뷰 설정
+		const controller2 = new RedGPU.Camera.FreeController(redGPUContext);
+		const view1 = redGPUContext.viewList[0];
+		const view2 = new RedGPU.Display.View3D(redGPUContext, view1.scene, controller2);
+		view2.axis = true;
+		view2.grid = true;
+		view2.skybox = view1.skybox;
 
-    const positionParams = {
-        x: controller.x,
-        y: controller.y,
-        z: controller.z,
-    };
+		// 뷰 레이아웃 설정 유틸리티
+		const ViewLayoutManager = {
+			setSingleView: (view) => {
+				view.setSize('100%', '100%');
+				view.setPosition(0, 0);
+			},
+			setSplitView: (view1, view2, isMobile) => {
+				if (isMobile) {
+					view1.setSize('100%', '50%');
+					view1.setPosition(0, 0);
+					view2.setSize('100%', '50%');
+					view2.setPosition(0, '50%');
+				} else {
+					view1.setSize('50%', '100%');
+					view1.setPosition(0, 0);
+					view2.setSize('50%', '100%');
+					view2.setPosition('50%', 0);
+				}
+			}
+		};
 
-    cameraFolder.addButton({
-        title: 'Reset Position',
-    }).on('click', () => {
-        controller.x = 0;
-        controller.y = 0;
-        controller.z = 0;
-        positionParams.x = 0;
-        positionParams.y = 0;
-        positionParams.z = 0;
-        pane.refresh();
-    });
+		// 컨트롤러 동기화 유틸리티
+		const syncControllers = (source, target) => {
+			['x', 'y', 'z', 'tilt', 'pan'].forEach(prop => target[prop] = source[prop]);
+		};
 
-    const rotationParams = {
-        pan: controller.pan,
-        tilt: controller.tilt,
-    };
+		// 테스트 모드 핸들러 맵
+		const testModeHandlers = {
+			singleView: (controlsFolder) => {
+				ViewLayoutManager.setSingleView(view1);
+				controlsFolder.hidden = false;
+			},
+			multiViewSharedControl: (controlsFolder) => {
+				ViewLayoutManager.setSplitView(view1, view2, redGPUContext.detector.isMobile);
+				redGPUContext.addView(view2);
+				view2.camera = controller;
+				controlsFolder.hidden = false;
+			},
+			multiViewIndependentControl: (controlsFolder) => {
+				ViewLayoutManager.setSplitView(view1, view2, redGPUContext.detector.isMobile);
+				redGPUContext.addView(view2);
+				view2.camera = controller2;
+				syncControllers(controller, controller2);
+				controlsFolder.hidden = true;
+			}
+		};
 
-    cameraFolder.addButton({
-        title: 'Reset Rotation',
-    }).on('click', () => {
-        controller.pan = 0;
-        controller.tilt = 0;
-        rotationParams.pan = 0;
-        rotationParams.tilt = 0;
-        pane.refresh();
-    });
+		// 테스트 모드 폴더 설정
+		const folder = pane.addFolder({title: 'Test Mode'});
+		const testModes = {testMode: 'singleView'};
+		folder.addBinding(testModes, 'testMode', {
+			label: 'Test Mode',
+			options: {
+				singleView: 'singleView',
+				multiViewSharedControl: 'multiViewSharedControl',
+				multiViewIndependentControl: 'multiViewIndependentControl'
+			}
+		}).on('change', (ev) => {
+			redGPUContext.removeAllViews();
+			redGPUContext.addView(view1);
+			view1.camera = controller;
+			testModeHandlers[ev.value](controlsFolder);
+		});
+	}
+	// 조작 파라미터 조정
+	const controlsFolder = pane.addFolder({
+		title: 'Control Parameters'
+	});
 
-    // 조작 파라미터 조정
-    const controlsFolder = pane.addFolder({
-        title: 'Control Parameters',
-    });
+	controlsFolder.addBinding(controller, 'speed', {
+		min: 0.1, max: 5, step: 0.1
+	});
 
-    controlsFolder.addBinding(controller, 'speed', {
-        min: 0.1,
-        max: 5,
-        step: 0.1,
-    });
+	controlsFolder.addBinding(controller, 'delay', {
+		min: 0.01, max: 0.5, step: 0.01
+	});
 
-    controlsFolder.addBinding(controller, 'delay', {
-        min: 0.01,
-        max: 0.5,
-        step: 0.01,
-    });
+	controlsFolder.addBinding(controller, 'speedRotation', {
+		min: 0.1, max: 5, step: 0.1
+	});
 
-    controlsFolder.addBinding(controller, 'speedRotation', {
-        min: 0.1,
-        max: 5,
-        step: 0.1,
-    });
+	controlsFolder.addBinding(controller, 'delayRotation', {
+		min: 0.01, max: 0.5, step: 0.01
+	});
 
-    controlsFolder.addBinding(controller, 'delayRotation', {
-        min: 0.01,
-        max: 0.5,
-        step: 0.01,
-    });
+	controlsFolder.addBinding(controller, 'maxAcceleration', {
+		min: 1, max: 10, step: 0.5
+	});
 
-    controlsFolder.addBinding(controller, 'maxAcceleration', {
-        min: 1,
-        max: 10,
-        step: 0.5,
-    });
+	const keyBindings = controller.keyNameMapper;
 
+	// 이동 키
+	const moveFolder = pane.addFolder({
+		title: 'Movement Keys'
+	});
 
-    const keyBindings = controller.keyNameMapper;
-
-    // 이동 키
-    const moveFolder = pane.addFolder({
-        title: 'Movement Keys',
-    });
-
-    for (const key in keyBindings) {
-        moveFolder.addBinding(keyBindings, key, {
-            label: key,
-        }).on('change', (ev) => {
-            controller[`set${key.charAt(0).toUpperCase()}${key.substr(1)}`](ev.value);
-        });
-    }
+	for (const key in keyBindings) {
+		moveFolder.addBinding(keyBindings, key, {
+			label: key
+		}).on('change', (ev) => {
+			controller[`set${key.charAt(0).toUpperCase()}${key.substr(1)}`](ev.value);
+		});
+	}
 
 };

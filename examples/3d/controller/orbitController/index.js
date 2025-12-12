@@ -4,168 +4,232 @@ const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
 RedGPU.init(
-    canvas,
-    (redGPUContext) => {
-        const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        const controller2 = new RedGPU.Camera.OrbitController(redGPUContext);
-        console.log(controller.name,controller2.name);
-        const scene = new RedGPU.Display.Scene();
-        const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-        view.axis = true;
-        view.grid = true;
-        redGPUContext.addView(view);
+	canvas,
+	(redGPUContext) => {
+		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+		const scene = new RedGPU.Display.Scene();
+		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+		view.axis = true;
+		view.grid = true;
+		redGPUContext.addView(view);
 
-        const view2 = new RedGPU.Display.View3D(redGPUContext, scene, controller2);
-        view2.axis = true;
-        view2.grid = true;
-        redGPUContext.addView(view2);
+		const addMeshesToScene = (scene, count = 500) => {
+			const geometry = new RedGPU.Primitive.Sphere(redGPUContext);
+			const material = new RedGPU.Material.ColorMaterial(redGPUContext);
 
+			for (let i = 0; i < count; i++) {
+				const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
 
+				mesh.setPosition(
+					Math.random() * 500 - 250,
+					Math.random() * 500 - 250,
+					Math.random() * 500 - 250
+				);
 
-        if (redGPUContext.detector.isMobile) {
-            // 모바일: 위아래 분할
-            view.setSize('100%', '50%');
-            view.setPosition(0, 0);         // 상단
-            view2.setSize('100%', '50%');
-            view2.setPosition(0, '50%');     // 하단
-        } else {
-            // 데스크톱: 좌우 분할
-            view.setSize('50%', '100%');
-            view.setPosition(0, 0);         // 좌측
-            view2.setSize('50%', '100%');
-            view2.setPosition('50%', 0);     // 우측
-        }
+				scene.addChild(mesh);
+			}
+		};
 
-        const addMeshesToScene = (scene, count = 500) => {
-            const geometry = new RedGPU.Primitive.Sphere(redGPUContext);
-            const material = new RedGPU.Material.ColorMaterial(redGPUContext);
+		addMeshesToScene(scene, 1000);
 
-            for (let i = 0; i < count; i++) {
-                const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
+		const renderer = new RedGPU.Renderer(redGPUContext);
+		const render = (time) => {
+			// 매 프레임 로직
+		};
+		renderer.start(redGPUContext, render);
 
-                mesh.setPosition(
-                    Math.random() * 500 - 250,
-                    Math.random() * 500 - 250,
-                    Math.random() * 500 - 250
-                );
-
-                scene.addChild(mesh);
-            }
-        };
-
-        addMeshesToScene(scene, 1000);
-
-        const renderer = new RedGPU.Renderer(redGPUContext);
-        const render = (time) => {
-            // 매 프레임 로직
-        };
-        renderer.start(redGPUContext, render);
-
-        // renderTestPane(redGPUContext, controller);
-    },
-    (failReason) => {
-        console.error('초기화 실패:', failReason);
-        const errorMessage = document.createElement('div');
-        errorMessage.innerHTML = failReason;
-        document.body.appendChild(errorMessage);
-    }
+		renderTestPane(redGPUContext, controller);
+	},
+	(failReason) => {
+		console.error('초기화 실패:', failReason);
+		const errorMessage = document.createElement('div');
+		errorMessage.innerHTML = failReason;
+		document.body.appendChild(errorMessage);
+	}
 );
 const renderTestPane = async (redGPUContext, controller) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
-    const {
-        setDebugButtons
-    } = await import("../../../exampleHelper/createExample/panes/index.js");
+	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+	const {
+		setDebugButtons
+	} = await import("../../../exampleHelper/createExample/panes/index.js");
 
-    setDebugButtons(redGPUContext);
-    const pane = new Pane();
+	setDebugButtons(redGPUContext);
+	const pane = new Pane();
+	{
+		// 두 번째 컨트롤러 및 뷰 설정
+		const controller2 = new RedGPU.Camera.OrbitController(redGPUContext);
+		const view1 = redGPUContext.viewList[0];
+		const view2 = new RedGPU.Display.View3D(redGPUContext, view1.scene, controller2);
+		view2.axis = true;
+		view2.grid = true;
+		view2.skybox = view1.skybox;
 
-    // 카메라 위치 조정
-    const cameraFolder = pane.addFolder({
-        title: 'Camera',
-    });
+		// 뷰 레이아웃 설정 유틸리티
+		const ViewLayoutManager = {
+			setSingleView: (view) => {
+				view.setSize('100%', '100%');
+				view.setPosition(0, 0);
+			},
+			setSplitView: (view1, view2, isMobile) => {
+				if (isMobile) {
+					view1.setSize('100%', '50%');
+					view1.setPosition(0, 0);
+					view2.setSize('100%', '50%');
+					view2.setPosition(0, '50%');
+				} else {
+					view1.setSize('50%', '100%');
+					view1.setPosition(0, 0);
+					view2.setSize('50%', '100%');
+					view2.setPosition('50%', 0);
+				}
+			}
+		};
 
-    const positionParams = {
-        x: controller.x,
-        y: controller.y,
-        z: controller.z,
-    };
+		// 컨트롤러 동기화 유틸리티
+		const syncControllers = (source, target) => {
+			[ 'tilt', 'pan','distance','centerX','centerY','centerZ'].forEach(prop => target[prop] = source[prop]);
+		};
 
-    cameraFolder.addButton({
-        title: 'Reset Position',
-    }).on('click', () => {
-        controller.x = 0;
-        controller.y = 0;
-        controller.z = 0;
-        positionParams.x = 0;
-        positionParams.y = 0;
-        positionParams.z = 0;
-        pane.refresh();
-    });
+		// 테스트 모드 핸들러 맵
+		const testModeHandlers = {
+			singleView: (controlsFolder) => {
+				ViewLayoutManager.setSingleView(view1);
+				controlsFolder.hidden = false;
+			},
+			multiViewSharedControl: (controlsFolder) => {
+				ViewLayoutManager.setSplitView(view1, view2, redGPUContext.detector.isMobile);
+				redGPUContext.addView(view2);
+				view2.camera = controller;
+				controlsFolder.hidden = false;
+			},
+			multiViewIndependentControl: (controlsFolder) => {
+				ViewLayoutManager.setSplitView(view1, view2, redGPUContext.detector.isMobile);
+				redGPUContext.addView(view2);
+				view2.camera = controller2;
+				syncControllers(controller, controller2);
+				controlsFolder.hidden = true;
+			}
+		};
 
-    const rotationParams = {
-        pan: controller.pan,
-        tilt: controller.tilt,
-    };
+		// 테스트 모드 폴더 설정
+		const folder = pane.addFolder({title: 'Test Mode'});
+		const testModes = {testMode: 'singleView'};
+		folder.addBinding(testModes, 'testMode', {
+			label: 'Test Mode',
+			options: {
+				singleView: 'singleView',
+				multiViewSharedControl: 'multiViewSharedControl',
+				multiViewIndependentControl: 'multiViewIndependentControl'
+			}
+		}).on('change', (ev) => {
+			redGPUContext.removeAllViews();
+			redGPUContext.addView(view1);
+			view1.camera = controller;
+			testModeHandlers[ev.value](controlsFolder);
+		});
+	}
+	// 중심점 (Center) 설정
+	const centerFolder = pane.addFolder({
+		title: 'Center Position'
+	});
 
-    cameraFolder.addButton({
-        title: 'Reset Rotation',
-    }).on('click', () => {
-        controller.pan = 0;
-        controller.tilt = 0;
-        rotationParams.pan = 0;
-        rotationParams.tilt = 0;
-        pane.refresh();
-    });
+	centerFolder.addBinding(controller, 'centerX', {
+		label: 'Center X',
+		min: -50,
+		max: 50,
+		step: 0.5
+	});
 
-    // 조작 파라미터 조정
-    const controlsFolder = pane.addFolder({
-        title: 'Control Parameters',
-    });
+	centerFolder.addBinding(controller, 'centerY', {
+		label: 'Center Y',
+		min: -50,
+		max: 50,
+		step: 0.5
+	});
 
-    controlsFolder.addBinding(controller, 'speed', {
-        min: 0.1,
-        max: 5,
-        step: 0.1,
-    });
+	centerFolder.addBinding(controller, 'centerZ', {
+		label: 'Center Z',
+		min: -50,
+		max: 50,
+		step: 0.5
+	});
 
-    controlsFolder.addBinding(controller, 'delay', {
-        min: 0.01,
-        max: 0.5,
-        step: 0.01,
-    });
+	// 거리 및 줌 설정
+	const distanceFolder = pane.addFolder({
+		title: 'Distance & Zoom'
+	});
 
-    controlsFolder.addBinding(controller, 'speedRotation', {
-        min: 0.1,
-        max: 5,
-        step: 0.1,
-    });
+	distanceFolder.addBinding(controller, 'distance', {
+		label: 'Distance',
+		min: 0.1,
+		max: 100,
+		step: 0.5
+	});
 
-    controlsFolder.addBinding(controller, 'delayRotation', {
-        min: 0.01,
-        max: 0.5,
-        step: 0.01,
-    });
+	distanceFolder.addBinding(controller, 'speedDistance', {
+		label: 'Speed Distance',
+		min: 0.01,
+		max: 10,
+		step: 0.1
+	});
 
-    controlsFolder.addBinding(controller, 'maxAcceleration', {
-        min: 1,
-        max: 10,
-        step: 0.5,
-    });
+	distanceFolder.addBinding(controller, 'delayDistance', {
+		label: 'Delay Distance',
+		min: 0.01,
+		max: 1,
+		step: 0.01
+	});
 
+	// 회전 (Pan & Tilt) 설정
+	const rotationFolder = pane.addFolder({
+		title: 'Rotation'
+	});
 
-    const keyBindings = controller.keyNameMapper;
+	rotationFolder.addBinding(controller, 'pan', {
+		label: 'Pan',
+		min: -360,
+		max: 360,
+		step: 1
+	});
 
-    // 이동 키
-    const moveFolder = pane.addFolder({
-        title: 'Movement Keys',
-    });
+	rotationFolder.addBinding(controller, 'tilt', {
+		label: 'Tilt',
+		min: -90,
+		max: 90,
+		step: 1
+	});
 
-    for (const key in keyBindings) {
-        moveFolder.addBinding(keyBindings, key, {
-            label: key,
-        }).on('change', (ev) => {
-            controller[`set${key.charAt(0).toUpperCase()}${key.substr(1)}`](ev.value);
-        });
-    }
+	rotationFolder.addBinding(controller, 'minTilt', {
+		label: 'Min Tilt',
+		min: -90,
+		max: 90,
+		step: 1
+	});
+
+	rotationFolder.addBinding(controller, 'maxTilt', {
+		label: 'Max Tilt',
+		min: -90,
+		max: 90,
+		step: 1
+	});
+
+	rotationFolder.addBinding(controller, 'speedRotation', {
+		label: 'Speed Rotation',
+		min: 0.01,
+		max: 10,
+		step: 0.1
+	});
+
+	rotationFolder.addBinding(controller, 'delayRotation', {
+		label: 'Delay Rotation',
+		min: 0.01,
+		max: 1,
+		step: 0.01
+	});
+
+	// 조작 파라미터 조정
+	const controlsFolder = pane.addFolder({
+		title: 'Control Parameters'
+	});
 
 };
