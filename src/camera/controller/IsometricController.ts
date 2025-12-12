@@ -29,21 +29,21 @@ class IsometricController extends AController {
 	// ==================== 줌 관련 ====================
 	#currentZoom: number = 1;
 	#targetZoom: number = 1;
-	#delayZoom: number = 0.1;
+	#zoomInterpolation: number = 0.1;
 	#speedZoom: number = 0.1;
 	#minZoom: number = 0.5;
 	#maxZoom: number = 3;
 	// ==================== 카메라 뷰 (OrthographicCamera) ====================
 	#currentViewHeight: number = 15;
 	#targetViewHeight: number = 15;
-	#delayViewHeight: number = 0.1;
+	#viewHeightInterpolation: number = 0.1;
 	// ==================== 타겟 추적 ====================
 	#targetMesh: Mesh | null = null;
 	#targetX: number = 0;
 	#targetZ: number = 0;
 	// ==================== 이동 관련 ====================
 	#moveSpeed: number = 0.2;
-	#delayMoveSpeed: number = 0.2;
+	#moveSpeedInterpolation: number = 0.2;
 	#keyNameMapper = {
 		moveUp: 'w',
 		moveDown: 's',
@@ -51,7 +51,7 @@ class IsometricController extends AController {
 		moveRight: 'd'
 	};
 	#mouseMoveSpeed: number = 0.05;
-	#delayMouseMoveSpeed: number = 0.2;
+	#mouseMoveSpeedInterpolation: number = 0.2;
 
 	// ==================== 라이프사이클 ====================
 	/**
@@ -106,13 +106,13 @@ class IsometricController extends AController {
 		this.#targetZoom = value;
 	}
 
-	get delayZoom(): number {
-		return this.#delayZoom;
+	get zoomInterpolation(): number {
+		return this.#zoomInterpolation;
 	}
 
-	set delayZoom(value: number) {
+	set zoomInterpolation(value: number) {
 		validateNumberRange(value, 0.01, 1);
-		this.#delayZoom = value;
+		this.#zoomInterpolation = value;
 	}
 
 	get speedZoom(): number {
@@ -154,13 +154,13 @@ class IsometricController extends AController {
 		this.#targetViewHeight = value;
 	}
 
-	get delayViewHeight(): number {
-		return this.#delayViewHeight;
+	get viewHeightInterpolation(): number {
+		return this.#viewHeightInterpolation;
 	}
 
-	set delayViewHeight(value: number) {
+	set viewHeightInterpolation(value: number) {
 		validateNumberRange(value, 0.01, 1);
-		this.#delayViewHeight = value;
+		this.#viewHeightInterpolation = value;
 	}
 
 	// ==================== 이동 속도 Getter/Setter ====================
@@ -173,13 +173,13 @@ class IsometricController extends AController {
 		this.#moveSpeed = value;
 	}
 
-	get delayMoveSpeed(): number {
-		return this.#delayMoveSpeed;
+	get moveSpeedInterpolation(): number {
+		return this.#moveSpeedInterpolation;
 	}
 
-	set delayMoveSpeed(value: number) {
+	set moveSpeedInterpolation(value: number) {
 		validateNumberRange(value, 0.01, 1);
-		this.#delayMoveSpeed = value;
+		this.#moveSpeedInterpolation = value;
 	}
 
 	get mouseMoveSpeed(): number {
@@ -191,13 +191,13 @@ class IsometricController extends AController {
 		this.#mouseMoveSpeed = value;
 	}
 
-	get delayMouseMoveSpeed(): number {
-		return this.#delayMouseMoveSpeed;
+	get mouseMoveSpeedInterpolation(): number {
+		return this.#mouseMoveSpeedInterpolation;
 	}
 
-	set delayMouseMoveSpeed(value: number) {
+	set mouseMoveSpeedInterpolation(value: number) {
 		validateNumberRange(value, 0.01, 1);
-		this.#delayMouseMoveSpeed = value;
+		this.#mouseMoveSpeedInterpolation = value;
 	}
 
 	// ==================== 키 매핑 Getter/Setter ====================
@@ -243,14 +243,14 @@ class IsometricController extends AController {
 	#updateAnimation(view: View3D): void {
 		this.#handleKeyboardInput(view);
 		// 줌 보간 처리
-		this.#currentZoom += (this.#targetZoom - this.#currentZoom) * this.#delayZoom;
+		this.#currentZoom += (this.#targetZoom - this.#currentZoom) * this.#zoomInterpolation;
 		// viewHeight 보간 처리
-		this.#currentViewHeight += (this.#targetViewHeight - this.#currentViewHeight) * this.#delayViewHeight;
+		this.#currentViewHeight += (this.#targetViewHeight - this.#currentViewHeight) * this.#viewHeightInterpolation;
 		if (!this.#targetMesh) return;
 
 		// 타겟 메시 위치 보간 처리 (키보드와 마우스 모두 동일한 보간 사용)
-		this.#targetMesh.x += (this.#targetX - this.#targetMesh.x) * this.#delayMoveSpeed;
-		this.#targetMesh.z += (this.#targetZ - this.#targetMesh.z) * this.#delayMoveSpeed;
+		this.#targetMesh.x += (this.#targetX - this.#targetMesh.x) * this.#moveSpeedInterpolation;
+		this.#targetMesh.z += (this.#targetZ - this.#targetMesh.z) * this.#moveSpeedInterpolation;
 		const targetPos = this.#targetMesh.position;
 		const angleRad = this.#cameraAngle * PER_PI;
 		// ==================== 직교 투영 뷰 계산 ====================

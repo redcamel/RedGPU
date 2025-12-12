@@ -156,7 +156,7 @@ const renderTestPane = async (redGPUContext, controller, targetMesh) => {
 		max: 2,
 		step: 0.01
 	});
-	cameraFolder.addBinding(controller, 'delayMoveSpeed', {
+	cameraFolder.addBinding(controller, 'moveSpeedInterpolation', {
 		min: 0.01,
 		max: 1,
 		step: 0.01
@@ -166,7 +166,7 @@ const renderTestPane = async (redGPUContext, controller, targetMesh) => {
 		max: 0.1,
 		step: 0.01
 	});
-	cameraFolder.addBinding(controller, 'delayMouseMoveSpeed', {
+	cameraFolder.addBinding(controller, 'mouseMoveSpeedInterpolation', {
 		min: 0.01,
 		max: 1,
 		step: 0.01
@@ -183,7 +183,7 @@ const renderTestPane = async (redGPUContext, controller, targetMesh) => {
 		step: 0.1,
 	});
 
-	zoomFolder.addBinding(controller, 'delayZoom', {
+	zoomFolder.addBinding(controller, 'zoomInterpolation', {
 		min: 0.01,
 		max: 1,
 		step: 0.01,
@@ -218,7 +218,7 @@ const renderTestPane = async (redGPUContext, controller, targetMesh) => {
 		step: 1,
 	});
 
-	viewFolder.addBinding(controller, 'delayViewHeight', {
+	viewFolder.addBinding(controller, 'viewHeightInterpolation', {
 		min: 0.01,
 		max: 1,
 		step: 0.01,
@@ -252,4 +252,7 @@ const renderTestPane = async (redGPUContext, controller, targetMesh) => {
 			controller[`set${key.charAt(0).toUpperCase()}${key.substr(1)}`](ev.value);
 		});
 	}
+	setInterval(()=>{
+		pane.refresh()
+	})
 };

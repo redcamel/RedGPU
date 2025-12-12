@@ -16,21 +16,21 @@ const tempVec3 = vec3.create();
 class FollowController extends AController {
 	#currentDistance: number = 10;
 	#targetDistance: number = 10;
-	#delayDistance: number = 0.1;
+	#distanceInterpolation: number = 0.1;
 
 	#currentHeight: number = 5;
 	#targetHeight: number = 5;
-	#delayHeight: number = 0.1;
+	#heightInterpolation: number = 0.1;
 
-	#delay: number = 1;
+	#interpolation: number = 1;
 
 	#currentPan: number = 0;
 	#targetPan: number = 0;
-	#delayPan: number = 0.1;
+	#panInterpolation: number = 0.1;
 
 	#currentTilt: number = 20;
 	#targetTilt: number = 20;
-	#delayTilt: number = 0.1;
+	#tiltInterpolation: number = 0.1;
 
 	#followTargetRotation: boolean = true;
 	#targetOffsetX: number = 0;
@@ -99,10 +99,10 @@ class FollowController extends AController {
 		validateNumberRange(value, 0.1);
 		this.#targetDistance = value;
 	}
-	get delayDistance(): number { return this.#delayDistance; }
-	set delayDistance(value: number) {
+	get distanceInterpolation(): number { return this.#distanceInterpolation; }
+	set distanceInterpolation(value: number) {
 		validateNumberRange(value, 0.01, 1);
-		this.#delayDistance = value;
+		this.#distanceInterpolation = value;
 	}
 
 	get height(): number { return this.#targetHeight; }
@@ -110,10 +110,10 @@ class FollowController extends AController {
 		validateNumber(value);
 		this.#targetHeight = value;
 	}
-	get delayHeight(): number { return this.#delayHeight; }
-	set delayHeight(value: number) {
+	get heightInterpolation(): number { return this.#heightInterpolation; }
+	set heightInterpolation(value: number) {
 		validateNumberRange(value, 0.01, 1);
-		this.#delayHeight = value;
+		this.#heightInterpolation = value;
 	}
 
 	get pan(): number { return this.#targetPan; }
@@ -121,10 +121,10 @@ class FollowController extends AController {
 		validateNumber(value);
 		this.#targetPan = value;
 	}
-	get delayPan(): number { return this.#delayPan; }
-	set delayPan(value: number) {
+	get panInterpolation(): number { return this.#panInterpolation; }
+	set panInterpolation(value: number) {
 		validateNumberRange(value, 0.01, 1);
-		this.#delayPan = value;
+		this.#panInterpolation = value;
 	}
 
 	get tilt(): number { return this.#targetTilt; }
@@ -132,16 +132,16 @@ class FollowController extends AController {
 		validateNumber(value);
 		this.#targetTilt = Math.max(-89, Math.min(89, value));
 	}
-	get delayTilt(): number { return this.#delayTilt; }
-	set delayTilt(value: number) {
+	get tiltInterpolation(): number { return this.#tiltInterpolation; }
+	set tiltInterpolation(value: number) {
 		validateNumberRange(value, 0.01, 1);
-		this.#delayTilt = value;
+		this.#tiltInterpolation = value;
 	}
 
-	get delay(): number { return this.#delay; }
-	set delay(value: number) {
+	get interpolation(): number { return this.#interpolation; }
+	set interpolation(value: number) {
 		validateNumberRange(value, 0.01, 1);
-		this.#delay = value;
+		this.#interpolation = value;
 	}
 
 
@@ -185,11 +185,11 @@ class FollowController extends AController {
 
 	update(view: View3D, time: number): void {
 		super.update(view, time, () => {
-			this.#currentDistance += (this.#targetDistance - this.#currentDistance) * this.#delayDistance;
-			this.#currentHeight += (this.#targetHeight - this.#currentHeight) * this.#delayHeight;
-			this.#currentPan += (this.#targetPan - this.#currentPan) * this.#delayPan;
-			this.#currentTilt += (this.#targetTilt - this.#currentTilt) * this.#delayTilt;
-			vec3.lerp(this.#currentPos, this.#currentPos, this.#calculateCameraPosition(), this.#delay);
+			this.#currentDistance += (this.#targetDistance - this.#currentDistance) * this.#distanceInterpolation;
+			this.#currentHeight += (this.#targetHeight - this.#currentHeight) * this.#heightInterpolation;
+			this.#currentPan += (this.#targetPan - this.#currentPan) * this.#panInterpolation;
+			this.#currentTilt += (this.#targetTilt - this.#currentTilt) * this.#tiltInterpolation;
+			vec3.lerp(this.#currentPos, this.#currentPos, this.#calculateCameraPosition(), this.#interpolation);
 			this.camera.setPosition(this.#currentPos[0], this.#currentPos[1], this.#currentPos[2]);
 
 			const lookAt = this.#calculateLookAtTarget();

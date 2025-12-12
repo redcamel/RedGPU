@@ -120,7 +120,7 @@ const renderTestPane = async (redGPUContext, controller) => {
 		max: 50,
 		step: 0.5,
 	});
-	followFolder.addBinding(controller, 'delayDistance', {
+	followFolder.addBinding(controller, 'distanceInterpolation', {
 		min: 0.01,
 		max: 1,
 		step: 0.01,
@@ -131,12 +131,12 @@ const renderTestPane = async (redGPUContext, controller) => {
 		max: 20,
 		step: 0.5,
 	});
-	followFolder.addBinding(controller, 'delayHeight', {
+	followFolder.addBinding(controller, 'heightInterpolation', {
 		min: 0.01,
 		max: 1,
 		step: 0.01,
 	});
-	followFolder.addBinding(controller, 'delay', {
+	followFolder.addBinding(controller, 'interpolation', {
 		min: 0.01,
 		max: 1,
 		step: 0.01,
@@ -153,7 +153,7 @@ const renderTestPane = async (redGPUContext, controller) => {
 		max: 180,
 		step: 1,
 	});
-	rotationFolder.addBinding(controller, 'delayPan', {
+	rotationFolder.addBinding(controller, 'panInterpolation', {
 		min: 0.01,
 		max: 1,
 		step: 0.01,
@@ -164,7 +164,7 @@ const renderTestPane = async (redGPUContext, controller) => {
 		max: 89,
 		step: 1,
 	});
-	rotationFolder.addBinding(controller, 'delayTilt', {
+	rotationFolder.addBinding(controller, 'tiltInterpolation', {
 		min: 0.01,
 		max: 1,
 		step: 0.01,
