@@ -57,9 +57,8 @@ class IsometricController extends AController {
 	/**
 	 * IsometricController 생성자
 	 * @param redGPUContext - RedGPUContext 인스턴스
-	 * @param targetMesh - 추적할 타겟 메시
 	 */
-	constructor(redGPUContext: RedGPUContext, targetMesh?: Mesh) {
+	constructor(redGPUContext: RedGPUContext, ) {
 		super(redGPUContext, {
 			camera: new OrthographicCamera(),
 			HD_Wheel: (e: WheelEvent) => {
@@ -88,8 +87,7 @@ class IsometricController extends AController {
 			},
 			useKeyboard: true
 		});
-		this.#targetMesh = targetMesh || new Mesh(redGPUContext);
-		this.#targetMesh.setIgnoreFrustumCullingRecursively(true)
+		this.#targetMesh = new Mesh(redGPUContext);
 	}
 
 	// ==================== 카메라 각도 Getter/Setter ====================
@@ -208,13 +206,16 @@ class IsometricController extends AController {
 	}
 
 	// ==================== 타겟 관련 ====================
-	get targetMesh(): Mesh | null {
-		return this.#targetMesh;
+	get x(): number {
+		return this.#targetMesh.x;
+	}
+	get y(): number {
+		return this.#targetMesh.y;
+	}
+	get z(): number {
+		return this.#targetMesh.z;
 	}
 
-	set targetObject(target: Mesh) {
-		this.#targetMesh = target || new Mesh(this.redGPUContext);
-	}
 
 	setMoveUpKey(value: string) {
 		this.#keyNameMapper.moveUp = value;

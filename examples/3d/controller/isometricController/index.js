@@ -105,7 +105,7 @@ const renderTestPane = async (redGPUContext, controller, targetMesh) => {
 
 		// 컨트롤러 동기화 유틸리티
 		const syncControllers = (source, target) => {
-			['x', 'y', 'z', 'tilt', 'pan'].forEach(prop => target[prop] = source[prop]);
+			[].forEach(prop => target[prop] = source[prop]);
 		};
 
 		// 테스트 모드 핸들러 맵
@@ -229,15 +229,15 @@ const renderTestPane = async (redGPUContext, controller, targetMesh) => {
 		title: 'Target Position',
 	});
 
-	targetFolder.addBinding(targetMesh, 'x', {
+	targetFolder.addBinding(controller, 'x', {
 		readonly: true,
 	})
 
-	targetFolder.addBinding(targetMesh, 'y', {
+	targetFolder.addBinding(controller, 'y', {
 		readonly: true,
 	})
 
-	targetFolder.addBinding(targetMesh, 'z', {
+	targetFolder.addBinding(controller, 'z', {
 		readonly: true,
 	})
 	const moveFolder = pane.addFolder({
