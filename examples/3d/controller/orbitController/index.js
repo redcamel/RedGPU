@@ -7,15 +7,22 @@ RedGPU.init(
 	canvas,
 	(redGPUContext) => {
 		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+
+		const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
+		const skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 		const scene = new RedGPU.Display.Scene();
+		const directionalLight = new RedGPU.Light.DirectionalLight();
+		scene.lightManager.addDirectionalLight(directionalLight);
+
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		view.axis = true;
 		view.grid = true;
+		view.skybox = skybox;
 		redGPUContext.addView(view);
 
 		const addMeshesToScene = (scene, count = 500) => {
 			const geometry = new RedGPU.Primitive.Sphere(redGPUContext);
-			const material = new RedGPU.Material.ColorMaterial(redGPUContext);
+			const material = new RedGPU.Material.PhongMaterial(redGPUContext);
 
 			for (let i = 0; i < count; i++) {
 				const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
@@ -87,7 +94,7 @@ const renderTestPane = async (redGPUContext, controller) => {
 
 		// 컨트롤러 동기화 유틸리티
 		const syncControllers = (source, target) => {
-			[ 'tilt', 'pan','distance','centerX','centerY','centerZ'].forEach(prop => target[prop] = source[prop]);
+			['tilt', 'pan', 'distance', 'centerX', 'centerY', 'centerZ'].forEach(prop => target[prop] = source[prop]);
 		};
 
 		// 테스트 모드 핸들러 맵

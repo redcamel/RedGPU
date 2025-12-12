@@ -23,20 +23,23 @@ RedGPU.init(
 		const controller = new RedGPU.Camera.FollowController(redGPUContext, targetMesh);
 		const controller2 = new RedGPU.Camera.FollowController(redGPUContext, targetMesh2);
 
+		const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
+		const skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 		const scene = new RedGPU.Display.Scene();
-		scene.addChild(targetMesh);
-
 		const directionalLight = new RedGPU.Light.DirectionalLight();
 		scene.lightManager.addDirectionalLight(directionalLight);
+		scene.addChild(targetMesh);
 
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		view.axis = true;
 		view.grid = true;
+		view.skybox = skybox;
 		redGPUContext.addView(view);
 
 		const view2 = new RedGPU.Display.View3D(redGPUContext, scene, controller2);
 		view2.axis = true;
 		view2.grid = true;
+		view2.skybox = skybox;
 		redGPUContext.addView(view2);
 
 		if (redGPUContext.detector.isMobile) {
