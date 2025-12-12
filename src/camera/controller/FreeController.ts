@@ -57,13 +57,13 @@ class FreeController extends AController {
 		turnDown: 'f'
 	};
 	// ==================== 이동 관련 설정 ====================
-	#speed: number = 1;
-	#delay: number = 0.1;
+	#moveSpeed: number = 1;
+	#moveDelayInterpolation: number = 0.1;
 	#maxAcceleration: number = 3;
 	#currentAcceleration: number = 0;
 	// ==================== 회전 관련 설정 ====================
-	#speedRotation: number = 1;
-	#delayRotation: number = 0.1;
+	#rotationSpeed: number = 1;
+	#rotationInterpolation: number = 0.1;
 	// ==================== 위치 및 회전 상태 ====================
 	#desirePosition: [number, number, number] = [0, 0, 0];
 	#pan: number = 0;
@@ -77,8 +77,8 @@ class FreeController extends AController {
 			redGPUContext,
 			{
 				HD_Move: (deltaX: number, deltaY: number) => {
-					this.#pan -= deltaX * this.#speedRotation * 0.1;
-					this.#tilt -= deltaY * this.#speedRotation * 0.1;
+					this.#pan -= deltaX * this.#rotationSpeed * 0.1;
+					this.#tilt -= deltaY * this.#rotationSpeed * 0.1;
 				},
 				useKeyboard: true
 			});
@@ -139,41 +139,41 @@ class FreeController extends AController {
 	}
 
 	// ==================== 이동 속도 Getter/Setter ====================
-	get speed(): number {
-		return this.#speed;
+	get moveSpeed(): number {
+		return this.#moveSpeed;
 	}
 
-	set speed(value: number) {
+	set moveSpeed(value: number) {
 		validateNumberRange(value, 0.01);
-		this.#speed = value;
+		this.#moveSpeed = value;
 	}
 
-	get delay(): number {
-		return this.#delay;
+	get moveSpeedInterpolation(): number {
+		return this.#moveDelayInterpolation;
 	}
 
-	set delay(value: number) {
+	set moveSpeedInterpolation(value: number) {
 		validateNumberRange(value, 0.01, 1);
-		this.#delay = value;
+		this.#moveDelayInterpolation = value;
 	}
 
 	// ==================== 회전 속도 Getter/Setter ====================
-	get speedRotation(): number {
-		return this.#speedRotation;
+	get rotationSpeed(): number {
+		return this.#rotationSpeed;
 	}
 
-	set speedRotation(value: number) {
+	set rotationSpeed(value: number) {
 		validateNumberRange(value, 0.01);
-		this.#speedRotation = value;
+		this.#rotationSpeed = value;
 	}
 
-	get delayRotation(): number {
-		return this.#delayRotation;
+	get rotationSpeedInterpolation(): number {
+		return this.#rotationInterpolation;
 	}
 
-	set delayRotation(value: number) {
+	set rotationSpeedInterpolation(value: number) {
 		validateNumberRange(value, 0.01, 1);
-		this.#delayRotation = value;
+		this.#rotationInterpolation = value;
 	}
 
 	// ==================== 가속도 Getter/Setter ====================
@@ -244,8 +244,8 @@ class FreeController extends AController {
 	}
 
 	#updateAnimation(view: View3D, time: number) {
-		const tDelay = this.#delay;
-		const tDelayRotation = this.#delayRotation;
+		const tDelay = this.#moveDelayInterpolation;
+		const tDelayRotation = this.#rotationInterpolation;
 		const tDesirePosition = this.#desirePosition;
 		const targetMesh = this.#targetMesh;
 		// 회전 보간
@@ -290,8 +290,8 @@ class FreeController extends AController {
 	#checkKeyboardKeyBuffer(view: View3D): boolean {
 		if (!this.checkKeyboardInput(view, this.#keyNameMapper)) return false;
 		const {keyboardKeyBuffer} = view.redGPUContext;
-		const tSpeed = this.#speed;
-		const tSpeedRotation = this.#speedRotation;
+		const tSpeed = this.#moveSpeed;
+		const tSpeedRotation = this.#rotationSpeed;
 		const tKeyNameMapper = this.#keyNameMapper;
 		let move = false;
 		let rotate = false;

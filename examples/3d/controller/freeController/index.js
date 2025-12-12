@@ -136,19 +136,19 @@ const renderTestPane = async (redGPUContext, controller) => {
 		title: 'Control Parameters'
 	});
 
-	controlsFolder.addBinding(controller, 'speed', {
+	controlsFolder.addBinding(controller, 'moveSpeed', {
 		min: 0.1, max: 5, step: 0.1
 	});
 
-	controlsFolder.addBinding(controller, 'delay', {
+	controlsFolder.addBinding(controller, 'moveSpeedInterpolation', {
 		min: 0.01, max: 0.5, step: 0.01
 	});
 
-	controlsFolder.addBinding(controller, 'speedRotation', {
+	controlsFolder.addBinding(controller, 'rotationSpeed', {
 		min: 0.1, max: 5, step: 0.1
 	});
 
-	controlsFolder.addBinding(controller, 'delayRotation', {
+	controlsFolder.addBinding(controller, 'rotationSpeedInterpolation', {
 		min: 0.01, max: 0.5, step: 0.01
 	});
 
