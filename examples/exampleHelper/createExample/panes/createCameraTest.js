@@ -15,9 +15,9 @@ const createCameraTest = (pane, camera, openYn = false) => {
         folder.addBinding(camera, 'maxTilt', {min: -90, max: 90})
         folder.addBinding(camera, 'distance', {min: 1, max: 100})
         folder.addBinding(camera, 'speedRotation', {min: 1, max: 5})
-        folder.addBinding(camera, 'delayRotation', {min: 0.01, max: 0.99, step: 0.0001})
+        folder.addBinding(camera, 'rotationInterpolation', {min: 0.01, max: 0.99, step: 0.0001})
         folder.addBinding(camera, 'speedDistance', {min: 1, max: 10})
-        folder.addBinding(camera, 'delayDistance', {min: 0.01, max: 0.99, step: 0.0001})
+        folder.addBinding(camera, 'distanceInterpolation', {min: 0.01, max: 0.99, step: 0.0001})
     } else {
         folder.addBinding(camera, 'x', {readonly: true,})
         folder.addBinding(camera, 'y', {readonly: true,})

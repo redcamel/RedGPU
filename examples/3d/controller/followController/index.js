@@ -216,11 +216,11 @@ const renderTestPane = async (redGPUContext, controller) => {
 	presetFolder.addButton({
 		title: 'Reset All Delays',
 	}).on('click', () => {
-		controller.delay = 1;
-		controller.delayDistance = 0.1;
-		controller.delayHeight = 0.1;
-		controller.delayPan = 0.1;
-		controller.delayTilt = 0.1;
+		controller.interpolation = 1;
+		controller.distanceInterpolation = 0.1;
+		controller.heightInterpolation = 0.1;
+		controller.panInterpolation = 0.1;
+		controller.tiltInterpolation = 0.1;
 		pane.refresh();
 	});
 

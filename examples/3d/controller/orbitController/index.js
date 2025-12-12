@@ -180,7 +180,7 @@ const renderTestPane = async (redGPUContext, controller) => {
 		step: 0.1
 	});
 
-	distanceFolder.addBinding(controller, 'delayDistance', {
+	distanceFolder.addBinding(controller, 'distanceInterpolation', {
 		label: 'Delay Distance',
 		min: 0.01,
 		max: 1,
@@ -227,7 +227,7 @@ const renderTestPane = async (redGPUContext, controller) => {
 		step: 0.1
 	});
 
-	rotationFolder.addBinding(controller, 'delayRotation', {
+	rotationFolder.addBinding(controller, 'rotationInterpolation', {
 		label: 'Delay Rotation',
 		min: 0.01,
 		max: 1,

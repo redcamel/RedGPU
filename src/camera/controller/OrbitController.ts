@@ -35,12 +35,12 @@ class OrbitController extends AController {
 	// ==================== 거리(줌) 관련 ====================
 	#distance = 15;
 	#speedDistance = 2;
-	#delayDistance = 0.1;
+	#distanceInterpolation = 0.1;
 	// ==================== 회전(팬/틸트) 관련 ====================
 	#pan = 0;
 	#tilt = -35;
 	#speedRotation = 3;
-	#delayRotation = 0.1;
+	#rotationInterpolation = 0.1;
 	#minTilt = -90;
 	#maxTilt = 90;
 	// ==================== 애니메이션 상태 ====================
@@ -112,13 +112,13 @@ class OrbitController extends AController {
 		this.#speedDistance = value;
 	}
 
-	get delayDistance(): number {
-		return this.#delayDistance;
+	get distanceInterpolation(): number {
+		return this.#distanceInterpolation;
 	}
 
-	set delayDistance(value: number) {
+	set distanceInterpolation(value: number) {
 		validateNumberRange(value, 0.01, 1);
-		this.#delayDistance = value;
+		this.#distanceInterpolation = value;
 	}
 
 	// ==================== 회전 속도 Getter/Setter ====================
@@ -131,13 +131,13 @@ class OrbitController extends AController {
 		this.#speedRotation = value;
 	}
 
-	get delayRotation(): number {
-		return this.#delayRotation;
+	get rotationInterpolation(): number {
+		return this.#rotationInterpolation;
 	}
 
-	set delayRotation(value: number) {
+	set rotationInterpolation(value: number) {
 		validateNumberRange(value, 0.01, 1);
-		this.#delayRotation = value;
+		this.#rotationInterpolation = value;
 	}
 
 	// ==================== 팬/틸트 Getter/Setter ====================
@@ -191,18 +191,18 @@ class OrbitController extends AController {
 		// 현재 값을 목표값으로 부드럽게 보간
 		const panDelta = this.#pan - this.#currentPan;
 		if (Math.abs(panDelta) > ROTATION_THRESHOLD) {
-			this.#currentPan += panDelta * this.#delayRotation;
+			this.#currentPan += panDelta * this.#rotationInterpolation;
 		}
 		// 틸트 보간
 		const tiltDelta = this.#tilt - this.#currentTilt;
 		if (Math.abs(tiltDelta) > ROTATION_THRESHOLD) {
-			this.#currentTilt += tiltDelta * this.#delayRotation;
+			this.#currentTilt += tiltDelta * this.#rotationInterpolation;
 		}
 		// 거리(줌) 범위 및 보간
 		if (this.#distance < camera.nearClipping) this.#distance = camera.nearClipping;
 		const distanceDelta = this.#distance - this.#currentDistance;
 		if (Math.abs(distanceDelta) > DISTANCE_THRESHOLD) {
-			this.#currentDistance += distanceDelta * this.#delayDistance;
+			this.#currentDistance += distanceDelta * this.#distanceInterpolation;
 		}
 		if (this.#currentDistance < camera.nearClipping) this.#currentDistance = camera.nearClipping;
 		// 카메라 위치 계산

@@ -32,12 +32,12 @@ declare class OrbitController extends AController {
     set distance(value: number);
     get speedDistance(): number;
     set speedDistance(value: number);
-    get delayDistance(): number;
-    set delayDistance(value: number);
+    get distanceInterpolation(): number;
+    set distanceInterpolation(value: number);
     get speedRotation(): number;
     set speedRotation(value: number);
-    get delayRotation(): number;
-    set delayRotation(value: number);
+    get rotationInterpolation(): number;
+    set rotationInterpolation(value: number);
     get pan(): number;
     set pan(value: number);
     get tilt(): number;
