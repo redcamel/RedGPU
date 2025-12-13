@@ -26,6 +26,7 @@ const tempMatrix = mat4.create();
  * controller.tilt = -30;
  * controller.pan = 45;
  * ```
+ * <iframe src="/RedGPU/examples/3d/controller/orbitController/"></iframe>
  */
 class OrbitController extends AController {
 	// ==================== 카메라 위치 및 중심점 ====================
@@ -69,120 +70,229 @@ class OrbitController extends AController {
 	}
 
 	// ==================== 센터 좌표 Getter/Setter ====================
+	/**
+	 * 회전 중심의 X축 좌표를 가져옵니다.
+	 * @returns {number} 중심점 X축 좌표
+	 */
 	get centerX(): number {
 		return this.#centerX;
 	}
 
+	/**
+	 * 회전 중심의 X축 좌표를 설정합니다.
+	 * @param {number} value - 중심점 X축 좌표
+	 */
 	set centerX(value: number) {
 		this.#centerX = value;
 	}
 
+	/**
+	 * 회전 중심의 Y축 좌표를 가져옵니다.
+	 * @returns {number} 중심점 Y축 좌표
+	 */
 	get centerY(): number {
 		return this.#centerY;
 	}
 
+	/**
+	 * 회전 중심의 Y축 좌표를 설정합니다.
+	 * @param {number} value - 중심점 Y축 좌표
+	 */
 	set centerY(value: number) {
 		this.#centerY = value;
 	}
 
+	/**
+	 * 회전 중심의 Z축 좌표를 가져옵니다.
+	 * @returns {number} 중심점 Z축 좌표
+	 */
 	get centerZ(): number {
 		return this.#centerZ;
 	}
 
+	/**
+	 * 회전 중심의 Z축 좌표를 설정합니다.
+	 * @param {number} value - 중심점 Z축 좌표
+	 */
 	set centerZ(value: number) {
 		this.#centerZ = value;
 	}
 
 	// ==================== 거리(줌) Getter/Setter ====================
+	/**
+	 * 중심점으로부터 카메라까지의 거리를 가져옵니다.
+	 * @returns {number} 거리 값
+	 */
 	get distance(): number {
 		return this.#distance;
 	}
 
+	/**
+	 * 중심점으로부터 카메라까지의 거리를 설정합니다.
+	 * @param {number} value - 거리 값 (0 이상)
+	 */
 	set distance(value: number) {
 		validateNumberRange(value, 0);
 		this.#distance = value;
 	}
 
+	/**
+	 * 거리 조절 속도를 가져옵니다.
+	 * @returns {number} 거리 변화 속도
+	 */
 	get speedDistance(): number {
 		return this.#speedDistance;
 	}
 
+	/**
+	 * 거리 조절 속도를 설정합니다. 높을수록 빠른 줌 속도
+	 * @param {number} value - 거리 변화 속도 (0.01 이상)
+	 */
 	set speedDistance(value: number) {
 		validateNumberRange(value, 0.01);
 		this.#speedDistance = value;
 	}
 
+	/**
+	 * 거리 보간 계수를 가져옵니다.
+	 * @returns {number} 거리 보간 계수 (0.01 ~ 1)
+	 */
 	get distanceInterpolation(): number {
 		return this.#distanceInterpolation;
 	}
 
+	/**
+	 * 거리 보간 계수를 설정합니다. 낮을수록 부드러운 줌 이동
+	 * @param {number} value - 보간 계수 (0.01 ~ 1)
+	 */
 	set distanceInterpolation(value: number) {
 		validateNumberRange(value, 0.01, 1);
 		this.#distanceInterpolation = value;
 	}
 
 	// ==================== 회전 속도 Getter/Setter ====================
+	/**
+	 * 회전 속도를 가져옵니다.
+	 * @returns {number} 회전 속도 값
+	 */
 	get speedRotation(): number {
 		return this.#speedRotation;
 	}
 
+	/**
+	 * 회전 속도를 설정합니다. 높을수록 빠른 회전 속도
+	 * @param {number} value - 회전 속도 값 (0.01 이상)
+	 */
 	set speedRotation(value: number) {
 		validateNumberRange(value, 0.01);
 		this.#speedRotation = value;
 	}
 
+	/**
+	 * 회전 보간 계수를 가져옵니다.
+	 * @returns {number} 회전 보간 계수 (0.01 ~ 1)
+	 */
 	get rotationInterpolation(): number {
 		return this.#rotationInterpolation;
 	}
 
+	/**
+	 * 회전 보간 계수를 설정합니다. 낮을수록 부드러운 회전
+	 * @param {number} value - 보간 계수 (0.01 ~ 1)
+	 */
 	set rotationInterpolation(value: number) {
 		validateNumberRange(value, 0.01, 1);
 		this.#rotationInterpolation = value;
 	}
 
 	// ==================== 팬/틸트 Getter/Setter ====================
+	/**
+	 * 카메라의 팬(가로 회전) 각도를 가져옵니다. (단위: 도)
+	 * @returns {number} 팬 각도 값
+	 */
 	get pan(): number {
 		return this.#pan;
 	}
 
+	/**
+	 * 카메라의 팬(가로 회전) 각도를 설정합니다. (단위: 도)
+	 * @param {number} value - 팬 각도 값
+	 */
 	set pan(value: number) {
 		this.#pan = value;
 	}
 
+	/**
+	 * 카메라의 틸트(세로 회전) 각도를 가져옵니다. (단위: 도, 범위: -90 ~ 90)
+	 * @returns {number} 틸트 각도 값
+	 */
 	get tilt(): number {
 		return this.#tilt;
 	}
 
+	/**
+	 * 카메라의 틸트(세로 회전) 각도를 설정합니다. (단위: 도)
+	 * @param {number} value - 틸트 각도 값 (-90 ~ 90 범위로 제한됨)
+	 */
 	set tilt(value: number) {
 		validateNumberRange(value, -90, 90);
 		this.#tilt = value;
 	}
 
+	/**
+	 * 최소 틸트 각도를 가져옵니다.
+	 * @returns {number} 최소 틸트 각도
+	 */
 	get minTilt(): number {
 		return this.#minTilt;
 	}
 
+	/**
+	 * 최소 틸트 각도를 설정합니다.
+	 * @param {number} value - 최소 틸트 각도 (-90 ~ 90)
+	 */
 	set minTilt(value: number) {
 		validateNumberRange(value, -90, 90);
 		this.#minTilt = value;
 	}
 
+	/**
+	 * 최대 틸트 각도를 가져옵니다.
+	 * @returns {number} 최대 틸트 각도
+	 */
 	get maxTilt(): number {
 		return this.#maxTilt;
 	}
 
+	/**
+	 * 최대 틸트 각도를 설정합니다.
+	 * @param {number} value - 최대 틸트 각도 (-90 ~ 90)
+	 */
 	set maxTilt(value: number) {
 		validateNumberRange(value, -90, 90);
 		this.#maxTilt = value;
 	}
 
 	// ==================== 업데이트 및 애니메이션 ====================
+	/**
+	 * 매 프레임마다 오빗 카메라를 업데이트합니다.
+	 * 회전(팬/틸트), 거리, 보간을 처리하고 카메라 위치를 계산합니다.
+	 *
+	 * @param {View3D} view - 카메라가 속한 3D 뷰
+	 * @param {number} time - 현재 시간 (ms)
+	 */
 	update(view: View3D, time: number): void {
 		super.update(view, time, () => {
 			this.#updateAnimation();
 		});
 	}
 
+	/**
+	 * 카메라 애니메이션을 업데이트합니다.
+	 * 팬, 틸트, 거리를 부드럽게 보간하고 카메라 위치를 계산합니다.
+	 *
+	 * @private
+	 */
 	#updateAnimation(): void {
 		// 틸트 범위 제한
 		if (this.#tilt < this.#minTilt) this.#tilt = this.#minTilt;

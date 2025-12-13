@@ -22,6 +22,7 @@ const PER_PI = Math.PI / 180;
  * controller.cameraAngle = 45;
  * controller.zoom = 1;
  * ```
+ * <iframe src="/RedGPU/examples/3d/controller/isometricController/"></iframe>
  */
 class IsometricController extends AController {
 	// ==================== 카메라 위치 및 각도 ====================
@@ -91,53 +92,105 @@ class IsometricController extends AController {
 	}
 
 	// ==================== 카메라 각도 Getter/Setter ====================
+	/**
+	 * 아이소메트릭 카메라의 각도를 가져옵니다. (단위: 도)
+	 * @returns {number} 카메라 각도 (기본값: 45도)
+	 */
 	get cameraAngle(): number {
 		return this.#cameraAngle;
 	}
 
+	/**
+	 * 아이소메트릭 카메라의 각도를 설정합니다.
+	 * @param {number} value - 카메라 각도 (단위: 도)
+	 */
+	set cameraAngle(value: number) {
+		this.#cameraAngle = value;
+	}
+
 	// ==================== 줌 Getter/Setter ====================
+	/**
+	 * 줌 레벨을 가져옵니다.
+	 * @returns {number} 줌 레벨 (기본값: 1)
+	 */
 	get zoom(): number {
 		return this.#targetZoom;
 	}
 
+	/**
+	 * 줌 레벨을 설정합니다. minZoom ~ maxZoom 범위로 제한됩니다.
+	 * @param {number} value - 줌 레벨 값
+	 */
 	set zoom(value: number) {
 		validateNumberRange(value);
 		value = Math.max(this.#minZoom, Math.min(this.#maxZoom, value));
 		this.#targetZoom = value;
 	}
 
+	/**
+	 * 줌 보간 계수를 가져옵니다.
+	 * @returns {number} 줌 보간 계수 (0.01 ~ 1)
+	 */
 	get zoomInterpolation(): number {
 		return this.#zoomInterpolation;
 	}
 
+	/**
+	 * 줌 보간 계수를 설정합니다. 낮을수록 부드러운 줌 이동
+	 * @param {number} value - 보간 계수 (0.01 ~ 1)
+	 */
 	set zoomInterpolation(value: number) {
 		validateNumberRange(value, 0.01, 1);
 		this.#zoomInterpolation = value;
 	}
 
+	/**
+	 * 줌 속도를 가져옵니다.
+	 * @returns {number} 줌 속도
+	 */
 	get speedZoom(): number {
 		return this.#speedZoom;
 	}
 
+	/**
+	 * 줌 속도를 설정합니다. 높을수록 빠른 줌 속도
+	 * @param {number} value - 줌 속도 (0.01 이상)
+	 */
 	set speedZoom(value: number) {
 		validateNumberRange(value, 0.01);
 		this.#speedZoom = value;
 	}
 
+	/**
+	 * 최소 줌 레벨을 가져옵니다.
+	 * @returns {number} 최소 줌 레벨
+	 */
 	get minZoom(): number {
 		return this.#minZoom;
 	}
 
+	/**
+	 * 최소 줌 레벨을 설정합니다.
+	 * @param {number} value - 최소 줌 레벨 (0.01 이상)
+	 */
 	set minZoom(value: number) {
 		validateNumberRange(value, 0.01);
 		this.#minZoom = value;
 		this.zoom = this.#targetZoom;
 	}
 
+	/**
+	 * 최대 줌 레벨을 가져옵니다.
+	 * @returns {number} 최대 줌 레벨
+	 */
 	get maxZoom(): number {
 		return this.#maxZoom;
 	}
 
+	/**
+	 * 최대 줌 레벨을 설정합니다.
+	 * @param {number} value - 최대 줌 레벨 (0.01 이상)
+	 */
 	set maxZoom(value: number) {
 		validateNumberRange(value, 0.01);
 		this.#maxZoom = value;
@@ -145,101 +198,196 @@ class IsometricController extends AController {
 	}
 
 	// ==================== 뷰 높이 Getter/Setter ====================
+	/**
+	 * 직교 투영 카메라의 뷰 높이를 가져옵니다.
+	 * @returns {number} 뷰 높이
+	 */
 	get viewHeight(): number {
 		return this.#targetViewHeight;
 	}
 
+	/**
+	 * 직교 투영 카메라의 뷰 높이를 설정합니다.
+	 * @param {number} value - 뷰 높이 (0.1 이상)
+	 */
 	set viewHeight(value: number) {
 		validateNumberRange(value, 0.1);
 		this.#targetViewHeight = value;
 	}
 
+	/**
+	 * 뷰 높이 보간 계수를 가져옵니다.
+	 * @returns {number} 뷰 높이 보간 계수 (0.01 ~ 1)
+	 */
 	get viewHeightInterpolation(): number {
 		return this.#viewHeightInterpolation;
 	}
 
+	/**
+	 * 뷰 높이 보간 계수를 설정합니다. 낮을수록 부드러운 변화
+	 * @param {number} value - 보간 계수 (0.01 ~ 1)
+	 */
 	set viewHeightInterpolation(value: number) {
 		validateNumberRange(value, 0.01, 1);
 		this.#viewHeightInterpolation = value;
 	}
 
 	// ==================== 이동 속도 Getter/Setter ====================
+	/**
+	 * 키보드 이동 속도를 가져옵니다.
+	 * @returns {number} 이동 속도
+	 */
 	get moveSpeed(): number {
 		return this.#moveSpeed;
 	}
 
+	/**
+	 * 키보드 이동 속도를 설정합니다.
+	 * @param {number} value - 이동 속도 (0.01 이상)
+	 */
 	set moveSpeed(value: number) {
 		validateNumberRange(value, 0.01);
 		this.#moveSpeed = value;
 	}
 
+	/**
+	 * 키보드 이동 보간 계수를 가져옵니다.
+	 * @returns {number} 이동 보간 계수 (0.01 ~ 1)
+	 */
 	get moveSpeedInterpolation(): number {
 		return this.#moveSpeedInterpolation;
 	}
 
+	/**
+	 * 키보드 이동 보간 계수를 설정합니다. 낮을수록 부드러운 움직임
+	 * @param {number} value - 보간 계수 (0.01 ~ 1)
+	 */
 	set moveSpeedInterpolation(value: number) {
 		validateNumberRange(value, 0.01, 1);
 		this.#moveSpeedInterpolation = value;
 	}
 
+	/**
+	 * 마우스 이동 속도를 가져옵니다.
+	 * @returns {number} 마우스 이동 속도
+	 */
 	get mouseMoveSpeed(): number {
 		return this.#mouseMoveSpeed;
 	}
 
+	/**
+	 * 마우스 이동 속도를 설정합니다.
+	 * @param {number} value - 마우스 이동 속도 (0.01 이상)
+	 */
 	set mouseMoveSpeed(value: number) {
 		validateNumberRange(value, 0.01);
 		this.#mouseMoveSpeed = value;
 	}
 
+	/**
+	 * 마우스 이동 보간 계수를 가져옵니다.
+	 * @returns {number} 마우스 이동 보간 계수 (0.01 ~ 1)
+	 */
 	get mouseMoveSpeedInterpolation(): number {
 		return this.#mouseMoveSpeedInterpolation;
 	}
 
+	/**
+	 * 마우스 이동 보간 계수를 설정합니다. 낮을수록 부드러운 움직임
+	 * @param {number} value - 보간 계수 (0.01 ~ 1)
+	 */
 	set mouseMoveSpeedInterpolation(value: number) {
 		validateNumberRange(value, 0.01, 1);
 		this.#mouseMoveSpeedInterpolation = value;
 	}
 
 	// ==================== 키 매핑 Getter/Setter ====================
+	/**
+	 * 현재 키 매핑 설정을 가져옵니다.
+	 * @returns {Object} 키 매핑 객체의 복사본
+	 */
 	get keyNameMapper() {
 		return {...this.#keyNameMapper};
 	}
 
-	// ==================== 타겟 관련 ====================
-	get x(): number {
-		return this.#targetMesh.x;
-	}
-	get y(): number {
-		return this.#targetMesh.y;
-	}
-	get z(): number {
-		return this.#targetMesh.z;
-	}
-
-
+	/**
+	 * 상향 이동 키를 설정합니다.
+	 * @param {string} value - 설정할 키 이름
+	 */
 	setMoveUpKey(value: string) {
 		this.#keyNameMapper.moveUp = value;
 	}
 
+	/**
+	 * 하향 이동 키를 설정합니다.
+	 * @param {string} value - 설정할 키 이름
+	 */
 	setMoveDownKey(value: string) {
 		this.#keyNameMapper.moveDown = value;
 	}
 
+	/**
+	 * 좌측 이동 키를 설정합니다.
+	 * @param {string} value - 설정할 키 이름
+	 */
 	setMoveLeftKey(value: string) {
 		this.#keyNameMapper.moveLeft = value;
 	}
 
+	/**
+	 * 우측 이동 키를 설정합니다.
+	 * @param {string} value - 설정할 키 이름
+	 */
 	setMoveRightKey(value: string) {
 		this.#keyNameMapper.moveRight = value;
 	}
 
+	// ==================== 타겟 관련 ====================
+	/**
+	 * 타겟의 X축 위치를 가져옵니다.
+	 * @returns {number} X축 좌표
+	 */
+	get x(): number {
+		return this.#targetMesh.x;
+	}
+
+	/**
+	 * 타겟의 Y축 위치를 가져옵니다.
+	 * @returns {number} Y축 좌표
+	 */
+	get y(): number {
+		return this.#targetMesh.y;
+	}
+
+	/**
+	 * 타겟의 Z축 위치를 가져옵니다.
+	 * @returns {number} Z축 좌표
+	 */
+	get z(): number {
+		return this.#targetMesh.z;
+	}
+
 	// ==================== 업데이트 및 애니메이션 ====================
+	/**
+	 * 매 프레임마다 아이소메트릭 카메라를 업데이트합니다.
+	 * 줌, 뷰 높이, 타겟 위치를 보간하고 카메라 위치를 계산합니다.
+	 *
+	 * @param {View3D} view - 카메라가 속한 3D 뷰
+	 * @param {number} time - 현재 시간 (ms)
+	 */
 	update(view: View3D, time: number): void {
 		super.update(view, time, () => {
 			this.#updateAnimation(view);
 		});
 	}
 
+	/**
+	 * 카메라 애니메이션을 업데이트합니다.
+	 * 줌, 뷰 높이, 타겟 위치를 보간하고 직교 투영 뷰를 설정합니다.
+	 *
+	 * @private
+	 * @param {View3D} view - 3D 뷰 객체
+	 */
 	#updateAnimation(view: View3D): void {
 		this.#handleKeyboardInput(view);
 		// 줌 보간 처리
@@ -278,6 +426,14 @@ class IsometricController extends AController {
 		orthoCamera.bottom = -effectiveHeight / 2;
 	}
 
+	/**
+	 * 키보드 입력을 처리합니다.
+	 * WASD 키 입력을 읽어 타겟 메시의 이동 목표를 업데이트합니다.
+	 *
+	 * @private
+	 * @param {View3D} view - 3D 뷰 객체
+	 * @returns {boolean} 입력이 있었는지 여부
+	 */
 	#handleKeyboardInput(view: View3D): boolean {
 		if (!this.checkKeyboardInput(view, this.#keyNameMapper)) return false;
 		if (!this.#targetMesh) return false;
