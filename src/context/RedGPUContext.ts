@@ -51,6 +51,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
     /** 안티앨리어싱 매니저 */
     #antialiasingManager: AntialiasingManager
 
+    #boundingClientRect:DOMRect
     constructor(
         htmlCanvas: HTMLCanvasElement,
         gpuAdapter: GPUAdapter,
@@ -71,6 +72,9 @@ class RedGPUContext extends RedGPUContextViewContainer {
         this.#initialize()
     }
 
+    get boundingClientRect(): DOMRect {
+        return this.#boundingClientRect
+    }
     get antialiasingManager(): AntialiasingManager {
         return this.#antialiasingManager;
     }
@@ -293,12 +297,16 @@ class RedGPUContext extends RedGPUContextViewContainer {
         this.#configure()
         this.sizeManager.setSize('100%', '100%')
         window?.addEventListener('resize', () => {
+            this.#boundingClientRect = this.#htmlCanvas.getBoundingClientRect();
             this.sizeManager.setSize()
             this.viewList.forEach((view: View3D) => {
                 view.setSize()
                 view.setPosition()
+
             })
+
         });
+        this.#boundingClientRect = this.#htmlCanvas.getBoundingClientRect();
         const eventList = this.detector.isMobile ?
             [
                 'click',

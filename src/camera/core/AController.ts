@@ -200,7 +200,8 @@ abstract class AController {
 		const canvas = redGPUContext.htmlCanvas;
 		const isMobile = redGPUContext.detector.isMobile;
 		//TODO getBoundingClientRect 를 redGPUContext 쪽에서 캐싱 관리하는 방안 고려
-		const rect = canvas.getBoundingClientRect();
+		// const rect = canvas.getBoundingClientRect();
+		const rect = redGPUContext.boundingClientRect
 		const tX_key = 'clientX';
 		const tY_key = 'clientY';
 		let clientX: number;

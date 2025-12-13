@@ -22,6 +22,7 @@ declare class RedGPUContext extends RedGPUContextViewContainer {
     /** 현재 시간(프레임 기준, ms) */
     currentTime: number;
     constructor(htmlCanvas: HTMLCanvasElement, gpuAdapter: GPUAdapter, gpuDevice: GPUDevice, gpuContext: GPUCanvasContext, alphaMode: GPUCanvasAlphaMode);
+    get boundingClientRect(): DOMRect;
     get antialiasingManager(): AntialiasingManager;
     get useDebugPanel(): boolean;
     set useDebugPanel(value: boolean);
