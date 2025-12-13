@@ -21,7 +21,7 @@ RedGPU.init(
         controllerTest.distance = 100
         controllerTest.tilt = -15
         // controllerTest.speedDistance =0.2
-        controllerTest.delayDistance = 0.7
+        controllerTest.distanceInterpolation = 0.7
 
         scene.lightManager.addDirectionalLight(directionalLightTest)
         view.axis = null

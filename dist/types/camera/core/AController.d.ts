@@ -2,6 +2,13 @@ import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
 import OrthographicCamera from "../camera/OrthographicCamera";
 import PerspectiveCamera from "../camera/PerspectiveCamera";
+export type controllerInit = {
+    HD_Move?: (deltaX: number, deltaY: number) => void;
+    HD_Wheel?: (e: WheelEvent) => void;
+    HD_TouchPinch?: (deltaScale: number) => void;
+    useKeyboard?: boolean;
+    camera?: PerspectiveCamera | OrthographicCamera;
+};
 /**
  * 카메라 컨트롤러의 추상 클래스입니다.
  *
@@ -20,30 +27,30 @@ declare abstract class AController {
     /**
      * AController 생성자
      */
-    constructor();
+    constructor(redGPUContext: RedGPUContext, initInfo: controllerInit);
+    get name(): string;
+    set name(value: string);
+    get redGPUContext(): RedGPUContext;
+    get camera(): PerspectiveCamera;
+    get hoveredView(): View3D | null;
+    get keyboardActiveView(): View3D | null;
+    set keyboardActiveView(value: View3D | null);
+    get isKeyboardActiveController(): boolean;
+    get keyboardProcessedThisFrame(): boolean;
+    set keyboardProcessedThisFrame(value: boolean);
+    destroy(): void;
+    update(view: View3D, time: number, updateAnimation: () => void): void;
     /**
-     * 현재 연결된 카메라를 반환합니다.
+     * 키보드 입력이 있는지 체크하고 활성 View를 설정합니다.
+     * @param view 현재 View
+     * @param keyNameMapper 키 매핑 객체
+     * @returns 키보드 입력 처리가 가능하면 true, 아니면 false
      */
-    get camera(): PerspectiveCamera | OrthographicCamera;
-    /**
-     * 컨트롤러에 카메라를 할당합니다.
-     */
-    set camera(value: PerspectiveCamera | OrthographicCamera);
-    /**
-     * 컨트롤러 상태를 갱신합니다. (파생 클래스에서 override)
-     * @param view - View3D 인스턴스
-     * @param time - 시간값(ms)
-     */
-    update(view: View3D, time: number): void;
-    /**
-     * 마우스/터치 이벤트에서 캔버스 내 좌표를 반환합니다.
-     * @param e - MouseEvent 또는 TouchEvent
-     * @param redGPUContext - RedGPUContext 인스턴스
-     * @returns 캔버스 내 상대 좌표 객체 { x, y }
-     */
-    getCanvasEventPoint: (e: MouseEvent | TouchEvent, redGPUContext: RedGPUContext) => {
+    checkKeyboardInput<T extends Record<string, string>>(view: View3D, keyNameMapper: T): boolean;
+    getCanvasEventPoint: (e: MouseEvent | TouchEvent | WheelEvent, redGPUContext: RedGPUContext) => {
         x: number;
         y: number;
     };
+    findTargetViewByInputEvent: (e: MouseEvent | TouchEvent) => View3D | null;
 }
 export default AController;

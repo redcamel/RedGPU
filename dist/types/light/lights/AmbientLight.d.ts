@@ -1,4 +1,3 @@
-import ColorRGB from "../../color/ColorRGB";
 import ABaseLight from "../core/ABaseLight";
 /**
  * 환경광(AmbientLight)을 정의하는 클래스입니다.
@@ -18,9 +17,9 @@ declare class AmbientLight extends ABaseLight {
     /**
      * 새로운 AmbientLight 인스턴스를 생성합니다.
      *
-     * @param color - 광원의 색상 (기본값: 연한 하늘색 RGB(173, 216, 230))
+     * @param color - 광원의 색상 (기본값: 연한 하늘색 #ADD8E6)
      * @param intensity - 광원의 세기 (기본값: 0.1)
      */
-    constructor(color?: ColorRGB, intensity?: number);
+    constructor(color?: string, intensity?: number);
 }
 export default AmbientLight;

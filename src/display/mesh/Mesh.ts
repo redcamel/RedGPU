@@ -1,5 +1,7 @@
 import {mat4} from "gl-matrix";
 import {Function} from "wgsl_reflect";
+import {OrthographicCamera} from "../../camera";
+import IsometricController from "../../camera/controller/IsometricController";
 import RedGPUContext from "../../context/RedGPUContext";
 import DefineForVertex from "../../defineProperty/DefineForVertex";
 import Geometry from "../../geometry/Geometry";
@@ -29,7 +31,6 @@ import createBasePipeline from "./core/pipeline/createBasePipeline";
 import updateMeshDirtyPipeline from "./core/pipeline/updateMeshDirtyPipeline";
 import getBasicMeshVertexBindGroupDescriptor from "./core/shader/getBasicMeshVertexBindGroupDescriptor";
 import VertexGPURenderInfo from "./core/VertexGPURenderInfo";
-import {keepLog} from "../../utils";
 
 const VERTEX_SHADER_MODULE_NAME_PBR_SKIN = 'VERTEX_MODULE_MESH_PBR_SKIN'
 const CONVERT_RADIAN = Math.PI / 180;
@@ -421,24 +422,34 @@ class Mesh extends MeshBase {
         }
     }
 
-    setCastShadowRecursively(castShadow: boolean = false) {
+    setCastShadowRecursively(value: boolean = false) {
         if ('castShadow' in this) {
-            this.castShadow = castShadow
+            this.castShadow = value
         }
         if (this.children) {
             this.children.forEach(child => {
-                child.setCastShadowRecursively(castShadow)
+                child.setCastShadowRecursively(value)
             })
         }
     }
 
-    setReceiveShadowRecursively(receiveShadow: boolean = false) {
+    setReceiveShadowRecursively(value: boolean = false) {
         if ('receiveShadow' in this) {
-            this.receiveShadow = receiveShadow
+            this.receiveShadow = value
         }
         if (this.children) {
             this.children.forEach(child => {
-                child.setReceiveShadowRecursively(receiveShadow)
+                child.setReceiveShadowRecursively(value)
+            })
+        }
+    }
+    setIgnoreFrustumCullingRecursively(value: boolean = false) {
+        if ('ignoreFrustumCulling' in this) {
+            this.ignoreFrustumCulling = value
+        }
+        if (this.children) {
+            this.children.forEach(child => {
+                child.setIgnoreFrustumCullingRecursively(value)
             })
         }
     }
@@ -457,18 +468,43 @@ class Mesh extends MeshBase {
     }
 
     lookAt(targetX: number | [number, number, number], targetY?: number, targetZ?: number): void {
-        var tPosition = [];
-        var tRotation = []
+        const tPosition = [];
         tPosition[0] = targetX;
         tPosition[1] = targetY;
         tPosition[2] = targetZ;
-        //out, eye, center, up
+
+        // 이전 각도 저장
+        const prevRotX = this.rotationX;
+        const prevRotY = this.rotationY;
+        const prevRotZ = this.rotationZ;
+
+        // 새로운 각도 계산
         mat4.identity(this.localMatrix);
         mat4.targetTo(this.localMatrix, [this.#x, this.#y, this.#z], tPosition, up);
-        tRotation = mat4ToEuler(this.localMatrix, []);
-        this.rotationX = -tRotation[0] * 180 / Math.PI;
-        this.rotationY = -tRotation[1] * 180 / Math.PI;
-        this.rotationZ = -tRotation[2] * 180 / Math.PI;
+        const tRotation = mat4ToEuler(this.localMatrix, []);
+
+        let newRotX = -tRotation[0] * 180 / Math.PI;
+        let newRotY = -tRotation[1] * 180 / Math.PI;
+        let newRotZ = -tRotation[2] * 180 / Math.PI;
+
+        // 각도 연속성 보정 (360도 점프 방지)
+        newRotX = this.#normalizeRotationDelta(prevRotX, newRotX);
+        newRotY = this.#normalizeRotationDelta(prevRotY, newRotY);
+        newRotZ = this.#normalizeRotationDelta(prevRotZ, newRotZ);
+
+        this.rotationX = newRotX;
+        this.rotationY = newRotY;
+        this.rotationZ = newRotZ;
+    }
+
+    #normalizeRotationDelta(prevAngle: number, newAngle: number): number {
+        let delta = newAngle - prevAngle;
+
+        // delta가 180도보다 크면 반대 방향으로 회전
+        while (delta > 180) delta -= 360;
+        while (delta < -180) delta += 360;
+
+        return prevAngle + delta;
     }
 
     setScale(x: number, y?: number, z?: number) {
@@ -769,31 +805,73 @@ class Mesh extends MeshBase {
             }
         }
         // check frustumCulling
-        if (frustumPlanes && passFrustumCulling && !this.#ignoreFrustumCulling) {
-            // if (currentGeometry) {boundingAABB
-            const combinedAABB = this.boundingAABB;
-            const frustumPlanes0 = frustumPlanes[0];
-            const frustumPlanes1 = frustumPlanes[1];
-            const frustumPlanes2 = frustumPlanes[2];
-            const frustumPlanes3 = frustumPlanes[3];
-            const frustumPlanes4 = frustumPlanes[4];
-            const frustumPlanes5 = frustumPlanes[5];
-            // combinedBoundingAABB의 중심점과 반지름 사용
-            const centerX = combinedAABB.centerX;
-            const centerY = combinedAABB.centerY;
-            const centerZ = combinedAABB.centerZ;
-            const radius = combinedAABB.geometryRadius;
-            // 각 frustum plane에 대해 거리 계산
-            frustumPlanes0[0] * centerX + frustumPlanes0[1] * centerY + frustumPlanes0[2] * centerZ + frustumPlanes0[3] <= -radius ? passFrustumCulling = false
-                : frustumPlanes1[0] * centerX + frustumPlanes1[1] * centerY + frustumPlanes1[2] * centerZ + frustumPlanes1[3] <= -radius ? passFrustumCulling = false
-                    : frustumPlanes2[0] * centerX + frustumPlanes2[1] * centerY + frustumPlanes2[2] * centerZ + frustumPlanes2[3] <= -radius ? passFrustumCulling = false
-                        : frustumPlanes3[0] * centerX + frustumPlanes3[1] * centerY + frustumPlanes3[2] * centerZ + frustumPlanes3[3] <= -radius ? passFrustumCulling = false
-                            : frustumPlanes4[0] * centerX + frustumPlanes4[1] * centerY + frustumPlanes4[2] * centerZ + frustumPlanes4[3] <= -radius ? passFrustumCulling = false
-                                : frustumPlanes5[0] * centerX + frustumPlanes5[1] * centerY + frustumPlanes5[2] * centerZ + frustumPlanes5[3] <= -radius ? passFrustumCulling = false : 0;
-            // } else {
-            // 	passFrustumCulling = false
-            // }
-        }
+	    if (frustumPlanes && passFrustumCulling && !this.#ignoreFrustumCulling) {
+		    const {rawCamera} = view
+		    const combinedAABB = this.boundingAABB;
+
+		    const isIsometricController = rawCamera instanceof IsometricController;
+
+		    if (isIsometricController) {
+			    // ==================== AABB 정보 추출 ====================
+			    const {centerX, centerY, centerZ, geometryRadius: radius} = combinedAABB;
+
+					// ==================== 카메라 정보 추출 ====================
+			    const orthoCamera = rawCamera as OrthographicCamera;
+			    const {left, right, top, bottom, nearClipping: near, farClipping: far} = orthoCamera;
+			    const {x: camX, y: camY, z: camZ} = orthoCamera;
+
+				// ==================== 각도 기반 컬링 ====================
+			    const cameraAngle = 45;
+
+			    if (cameraAngle ) {
+				    // 상대 좌표 계산
+				    const relX = centerX - camX;
+				    const relY = centerY - camY;
+				    const relZ = centerZ - camZ;
+
+				    // 회전 적용
+				    const angleRad = cameraAngle * (Math.PI / 180);
+				    const cos = Math.cos(angleRad);
+				    const sin = Math.sin(angleRad);
+
+				    const rotatedX = relX * cos + relZ * sin;
+				    const rotatedZ = -relX * sin + relZ * cos;
+
+				    // 뷰 범위 확인
+				    if (rotatedX + radius < left || rotatedX - radius > right ||
+					    relY + radius < bottom || relY - radius > top ||
+					    rotatedZ + radius < near || rotatedZ - radius > far) {
+					    passFrustumCulling = false;
+				    }
+			    } else {
+				    // 각도 없음 (기본 처리)
+				    if (centerX + radius < left || centerX - radius > right ||
+					    centerY + radius < bottom || centerY - radius > top ||
+					    centerZ + radius < near || centerZ - radius > far) {
+					    passFrustumCulling = false;
+				    }
+			    }
+		    } else {
+			    const frustumPlanes0 = frustumPlanes[0];
+			    const frustumPlanes1 = frustumPlanes[1];
+			    const frustumPlanes2 = frustumPlanes[2];
+			    const frustumPlanes3 = frustumPlanes[3];
+			    const frustumPlanes4 = frustumPlanes[4];
+			    const frustumPlanes5 = frustumPlanes[5];
+
+			    const centerX = combinedAABB.centerX;
+			    const centerY = combinedAABB.centerY;
+			    const centerZ = combinedAABB.centerZ;
+			    const radius = combinedAABB.geometryRadius;
+
+			    frustumPlanes0[0] * centerX + frustumPlanes0[1] * centerY + frustumPlanes0[2] * centerZ + frustumPlanes0[3] <= -radius ? passFrustumCulling = false
+				    : frustumPlanes1[0] * centerX + frustumPlanes1[1] * centerY + frustumPlanes1[2] * centerZ + frustumPlanes1[3] <= -radius ? passFrustumCulling = false
+					    : frustumPlanes2[0] * centerX + frustumPlanes2[1] * centerY + frustumPlanes2[2] * centerZ + frustumPlanes2[3] <= -radius ? passFrustumCulling = false
+						    : frustumPlanes3[0] * centerX + frustumPlanes3[1] * centerY + frustumPlanes3[2] * centerZ + frustumPlanes3[3] <= -radius ? passFrustumCulling = false
+							    : frustumPlanes4[0] * centerX + frustumPlanes4[1] * centerY + frustumPlanes4[2] * centerZ + frustumPlanes4[3] <= -radius ? passFrustumCulling = false
+								    : frustumPlanes5[0] * centerX + frustumPlanes5[1] * centerY + frustumPlanes5[2] * centerZ + frustumPlanes5[3] <= -radius ? passFrustumCulling = false : 0;
+		    }
+	    }
         if (passFrustumCulling) {
             if (this.gltfLoaderInfo?.activeAnimations?.length) {
                 renderViewStateData.animationList[renderViewStateData.animationList.length] = this.gltfLoaderInfo?.activeAnimations

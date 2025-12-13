@@ -2,11 +2,12 @@ import {mat4} from "gl-matrix";
 import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
 import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumberRange";
-import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
-import PerspectiveCamera from "../camera/PerspectiveCamera";
 import AController from "../core/AController";
 
-let currentEventView: View3D;
+const PER_PI = Math.PI / 180;
+const ROTATION_THRESHOLD = 0.01;
+const DISTANCE_THRESHOLD = 0.01;
+const tempMatrix = mat4.create();
 
 /**
  * 오빗(Orbit) 카메라 컨트롤러 클래스입니다.
@@ -25,268 +26,307 @@ let currentEventView: View3D;
  * controller.tilt = -30;
  * controller.pan = 45;
  * ```
+ * <iframe src="/RedGPU/examples/3d/controller/orbitController/"></iframe>
  */
 class OrbitController extends AController {
-    /** 인스턴스 고유 ID */
-    #instanceId: number;
-    /** 컨트롤러 이름 */
-    #name: string;
-    /** 중심 X */
-    #centerX = 0;
-    /** 중심 Y */
-    #centerY = 0;
-    /** 중심 Z */
-    #centerZ = 0;
-    /** 카메라 거리. 기본값 15 */
-    #distance = 15;
-    /** 줌 속도. 기본값 2 */
-    #speedDistance = 2;
-    /** 줌 보간 딜레이. 기본값 0.1 */
-    #delayDistance = 0.1;
-    /** 회전 속도. 기본값 3 */
-    #speedRotation = 3;
-    /** 회전 보간 딜레이. 기본값 0.1 */
-    #delayRotation = 0.1;
-    /** 틸트(수직 각도). 기본값 -35 */
-    #tilt = -35;
-    /** 최소 틸트. 기본값 -90 */
-    #minTilt = -90;
-    /** 최대 틸트. 기본값 90 */
-    #maxTilt = 90;
-    /** 팬(수평 각도). 기본값 0 */
-    #pan = 0;
-    // 애니메이션용 현재 상태
-    #currentPan = 0;
-    #currentTilt = 0;
-    #currentDistance = 0;
-    // 현재 프레임에서 활성화된 View 목록
-    #currentFrameViews = new Set<View3D>();
-    #lastUpdateTime = -1;
+	// ==================== 카메라 위치 및 중심점 ====================
+	#centerX = 0;
+	#centerY = 0;
+	#centerZ = 0;
+	// ==================== 거리(줌) 관련 ====================
+	#distance = 15;
+	#speedDistance = 2;
+	#distanceInterpolation = 0.1;
+	// ==================== 회전(팬/틸트) 관련 ====================
+	#pan = 0;
+	#tilt = -35;
+	#speedRotation = 3;
+	#rotationInterpolation = 0.1;
+	#minTilt = -90;
+	#maxTilt = 90;
+	// ==================== 애니메이션 상태 ====================
+	#currentPan = 0;
+	#currentTilt = 0;
+	#currentDistance = 0;
 
-    constructor(redGPUContext: RedGPUContext) {
-        super();
-        this.camera = new PerspectiveCamera();
-        const isMobile = redGPUContext.detector.isMobile;
-        const detector = {
-            move: isMobile ? 'touchmove' : 'mousemove',
-            up: isMobile ? 'touchend' : 'mouseup',
-            down: isMobile ? 'touchstart' : 'mousedown',
-        };
-        let sX: number, sY: number;
-        // 현재 마우스/터치 위치에서 해당하는 View를 찾는 함수
-        const findTargetView = (e: MouseEvent | TouchEvent): View3D | null => {
-            const {x, y} = this.getCanvasEventPoint(e, redGPUContext);
-            let tX: number, tY: number;
-            if (isMobile) {
-                tX = x * window.devicePixelRatio * redGPUContext.renderScale;
-                tY = y * window.devicePixelRatio * redGPUContext.renderScale;
-            } else {
-                tX = x * window.devicePixelRatio * redGPUContext.renderScale;
-                tY = y * window.devicePixelRatio * redGPUContext.renderScale;
-            }
-            // 현재 프레임에서 활성화된 View들을 검사하여 마우스/터치 위치에 해당하는 View 찾기
-            for (const view of this.#currentFrameViews) {
-                const tViewRect = view.pixelRectObject;
-                if (tViewRect.x < tX && tX < tViewRect.x + tViewRect.width &&
-                    tViewRect.y < tY && tY < tViewRect.y + tViewRect.height) {
-                    return view;
-                }
-            }
-            return null;
-        };
-        sX = 0;
-        sY = 0;
-        const HD_down = (e: MouseEvent | TouchEvent) => {
-            // 현재 마우스/터치 위치에서 해당하는 View 찾기
-            const targetView = findTargetView(e);
-            if (!targetView) return;
-            // 찾은 View를 현재 이벤트 View로 설정
-            currentEventView = targetView;
-            const {x, y} = this.getCanvasEventPoint(e, redGPUContext);
-            sX = x;
-            sY = y;
-            redGPUContext.htmlCanvas.addEventListener(detector.move, HD_Move);
-            window.addEventListener(detector.up, HD_up);
-        };
-        const HD_Move = (e: MouseEvent | TouchEvent) => {
-            // 현재 이벤트가 진행 중인 View가 있는지 확인
-            if (!currentEventView) return;
-            const {x, y} = this.getCanvasEventPoint(e, redGPUContext);
-            const deltaX = x - sX;
-            const deltaY = y - sY;
-            sX = x;
-            sY = y;
-            this.#pan -= deltaX * this.#speedRotation * 0.1;
-            this.#tilt -= deltaY * this.#speedRotation * 0.1;
-        };
-        const HD_up = () => {
-            currentEventView = null;
-            redGPUContext.htmlCanvas.removeEventListener(detector.move, HD_Move);
-            window.removeEventListener(detector.up, HD_up);
-        };
-        const HD_wheel = (e: WheelEvent) => {
-            // 현재 마우스 위치에서 해당하는 View 찾기
-            const targetView = findTargetView(e);
-            e.stopPropagation()
-            e.preventDefault()
-            if (!targetView) return;
-            // 거리 조정
-            this.#distance += e.deltaY / 100 * this.#speedDistance;
-        };
-        redGPUContext.htmlCanvas.addEventListener(detector.down, HD_down);
-        redGPUContext.htmlCanvas.addEventListener('wheel', HD_wheel);
-    }
+	// ==================== 라이프사이클 ====================
+	constructor(redGPUContext: RedGPUContext) {
+		super(redGPUContext,
+			{
+				HD_Move: (deltaX: number, deltaY: number) => {
+					this.#pan -= deltaX * this.#speedRotation * 0.1;
+					this.#tilt -= deltaY * this.#speedRotation * 0.1;
+				},
+				HD_Wheel: (e: WheelEvent) => {
+					this.#distance += e.deltaY / 100 * this.#speedDistance;
+				},
+				HD_TouchPinch: (deltaScale: number) => {
+					const scaleChange = (deltaScale - 1) * this.#speedDistance;
+					this.#distance -= scaleChange * this.#distance;
+				},
+			}
+		)
+		;
+	}
 
-    get name(): string {
-        if (!this.#instanceId) this.#instanceId = InstanceIdGenerator.getNextId(this.constructor);
-        return this.#name || `${this.constructor.name} Instance ${this.#instanceId}`;
-    }
+	// ==================== 센터 좌표 Getter/Setter ====================
+	/**
+	 * 회전 중심의 X축 좌표를 가져옵니다.
+	 * @returns {number} 중심점 X축 좌표
+	 */
+	get centerX(): number {
+		return this.#centerX;
+	}
 
-    set name(value: string) {
-        this.#name = value;
-    }
+	/**
+	 * 회전 중심의 X축 좌표를 설정합니다.
+	 * @param {number} value - 중심점 X축 좌표
+	 */
+	set centerX(value: number) {
+		this.#centerX = value;
+	}
 
-    get centerX(): number {
-        return this.#centerX;
-    }
+	/**
+	 * 회전 중심의 Y축 좌표를 가져옵니다.
+	 * @returns {number} 중심점 Y축 좌표
+	 */
+	get centerY(): number {
+		return this.#centerY;
+	}
 
-    set centerX(value: number) {
-        this.#centerX = value;
-    }
+	/**
+	 * 회전 중심의 Y축 좌표를 설정합니다.
+	 * @param {number} value - 중심점 Y축 좌표
+	 */
+	set centerY(value: number) {
+		this.#centerY = value;
+	}
 
-    get centerY(): number {
-        return this.#centerY;
-    }
+	/**
+	 * 회전 중심의 Z축 좌표를 가져옵니다.
+	 * @returns {number} 중심점 Z축 좌표
+	 */
+	get centerZ(): number {
+		return this.#centerZ;
+	}
 
-    set centerY(value: number) {
-        this.#centerY = value;
-    }
+	/**
+	 * 회전 중심의 Z축 좌표를 설정합니다.
+	 * @param {number} value - 중심점 Z축 좌표
+	 */
+	set centerZ(value: number) {
+		this.#centerZ = value;
+	}
 
-    get centerZ(): number {
-        return this.#centerZ;
-    }
+	// ==================== 거리(줌) Getter/Setter ====================
+	/**
+	 * 중심점으로부터 카메라까지의 거리를 가져옵니다.
+	 * @returns {number} 거리 값
+	 */
+	get distance(): number {
+		return this.#distance;
+	}
 
-    set centerZ(value: number) {
-        this.#centerZ = value;
-    }
+	/**
+	 * 중심점으로부터 카메라까지의 거리를 설정합니다.
+	 * @param {number} value - 거리 값 (0 이상)
+	 */
+	set distance(value: number) {
+		validateNumberRange(value, 0);
+		this.#distance = value;
+	}
 
-    get distance(): number {
-        return this.#distance;
-    }
+	/**
+	 * 거리 조절 속도를 가져옵니다.
+	 * @returns {number} 거리 변화 속도
+	 */
+	get speedDistance(): number {
+		return this.#speedDistance;
+	}
 
-    set distance(value: number) {
-        validateNumberRange(value, 0);
-        this.#distance = value;
-    }
+	/**
+	 * 거리 조절 속도를 설정합니다. 높을수록 빠른 줌 속도
+	 * @param {number} value - 거리 변화 속도 (0.01 이상)
+	 */
+	set speedDistance(value: number) {
+		validateNumberRange(value, 0.01);
+		this.#speedDistance = value;
+	}
 
-    get speedDistance(): number {
-        return this.#speedDistance;
-    }
+	/**
+	 * 거리 보간 계수를 가져옵니다.
+	 * @returns {number} 거리 보간 계수 (0.01 ~ 1)
+	 */
+	get distanceInterpolation(): number {
+		return this.#distanceInterpolation;
+	}
 
-    set speedDistance(value: number) {
-        validateNumberRange(value, 0.01);
-        this.#speedDistance = value;
-    }
+	/**
+	 * 거리 보간 계수를 설정합니다. 낮을수록 부드러운 줌 이동
+	 * @param {number} value - 보간 계수 (0.01 ~ 1)
+	 */
+	set distanceInterpolation(value: number) {
+		validateNumberRange(value, 0.01, 1);
+		this.#distanceInterpolation = value;
+	}
 
-    get delayDistance(): number {
-        return this.#delayDistance;
-    }
+	// ==================== 회전 속도 Getter/Setter ====================
+	/**
+	 * 회전 속도를 가져옵니다.
+	 * @returns {number} 회전 속도 값
+	 */
+	get speedRotation(): number {
+		return this.#speedRotation;
+	}
 
-    set delayDistance(value: number) {
-        validateNumberRange(value, 0.01, 1);
-        this.#delayDistance = value;
-    }
+	/**
+	 * 회전 속도를 설정합니다. 높을수록 빠른 회전 속도
+	 * @param {number} value - 회전 속도 값 (0.01 이상)
+	 */
+	set speedRotation(value: number) {
+		validateNumberRange(value, 0.01);
+		this.#speedRotation = value;
+	}
 
-    get speedRotation(): number {
-        return this.#speedRotation;
-    }
+	/**
+	 * 회전 보간 계수를 가져옵니다.
+	 * @returns {number} 회전 보간 계수 (0.01 ~ 1)
+	 */
+	get rotationInterpolation(): number {
+		return this.#rotationInterpolation;
+	}
 
-    set speedRotation(value: number) {
-        validateNumberRange(value, 0.01);
-        this.#speedRotation = value;
-    }
+	/**
+	 * 회전 보간 계수를 설정합니다. 낮을수록 부드러운 회전
+	 * @param {number} value - 보간 계수 (0.01 ~ 1)
+	 */
+	set rotationInterpolation(value: number) {
+		validateNumberRange(value, 0.01, 1);
+		this.#rotationInterpolation = value;
+	}
 
-    get delayRotation(): number {
-        return this.#delayRotation;
-    }
+	// ==================== 팬/틸트 Getter/Setter ====================
+	/**
+	 * 카메라의 팬(가로 회전) 각도를 가져옵니다. (단위: 도)
+	 * @returns {number} 팬 각도 값
+	 */
+	get pan(): number {
+		return this.#pan;
+	}
 
-    set delayRotation(value: number) {
-        validateNumberRange(value, 0.01, 1);
-        this.#delayRotation = value;
-    }
+	/**
+	 * 카메라의 팬(가로 회전) 각도를 설정합니다. (단위: 도)
+	 * @param {number} value - 팬 각도 값
+	 */
+	set pan(value: number) {
+		this.#pan = value;
+	}
 
-    get minTilt(): number {
-        return this.#minTilt;
-    }
+	/**
+	 * 카메라의 틸트(세로 회전) 각도를 가져옵니다. (단위: 도, 범위: -90 ~ 90)
+	 * @returns {number} 틸트 각도 값
+	 */
+	get tilt(): number {
+		return this.#tilt;
+	}
 
-    set minTilt(value: number) {
-        validateNumberRange(value, -90, 90);
-        this.#minTilt = value;
-    }
+	/**
+	 * 카메라의 틸트(세로 회전) 각도를 설정합니다. (단위: 도)
+	 * @param {number} value - 틸트 각도 값 (-90 ~ 90 범위로 제한됨)
+	 */
+	set tilt(value: number) {
+		validateNumberRange(value, -90, 90);
+		this.#tilt = value;
+	}
 
-    get maxTilt(): number {
-        return this.#maxTilt;
-    }
+	/**
+	 * 최소 틸트 각도를 가져옵니다.
+	 * @returns {number} 최소 틸트 각도
+	 */
+	get minTilt(): number {
+		return this.#minTilt;
+	}
 
-    set maxTilt(value: number) {
-        validateNumberRange(value, -90, 90);
-        this.#maxTilt = value;
-    }
+	/**
+	 * 최소 틸트 각도를 설정합니다.
+	 * @param {number} value - 최소 틸트 각도 (-90 ~ 90)
+	 */
+	set minTilt(value: number) {
+		validateNumberRange(value, -90, 90);
+		this.#minTilt = value;
+	}
 
-    get pan(): number {
-        return this.#pan;
-    }
+	/**
+	 * 최대 틸트 각도를 가져옵니다.
+	 * @returns {number} 최대 틸트 각도
+	 */
+	get maxTilt(): number {
+		return this.#maxTilt;
+	}
 
-    set pan(value: number) {
-        this.#pan = value;
-    }
+	/**
+	 * 최대 틸트 각도를 설정합니다.
+	 * @param {number} value - 최대 틸트 각도 (-90 ~ 90)
+	 */
+	set maxTilt(value: number) {
+		validateNumberRange(value, -90, 90);
+		this.#maxTilt = value;
+	}
 
-    get tilt(): number {
-        return this.#tilt;
-    }
+	// ==================== 업데이트 및 애니메이션 ====================
+	/**
+	 * 매 프레임마다 오빗 카메라를 업데이트합니다.
+	 * 회전(팬/틸트), 거리, 보간을 처리하고 카메라 위치를 계산합니다.
+	 *
+	 * @param {View3D} view - 카메라가 속한 3D 뷰
+	 * @param {number} time - 현재 시간 (ms)
+	 */
+	update(view: View3D, time: number): void {
+		super.update(view, time, () => {
+			this.#updateAnimation();
+		});
+	}
 
-    set tilt(value: number) {
-        validateNumberRange(value, -90, 90);
-        this.#tilt = value;
-    }
-
-    update(view: View3D, time: number): void {
-        // 새로운 프레임이 시작되면 View 목록 초기화
-        if (this.#lastUpdateTime !== time) {
-            this.#lastUpdateTime = time;
-            this.#currentFrameViews.clear();
-        }
-        // 현재 프레임에서 사용되는 View 추가
-        this.#currentFrameViews.add(view);
-        // 첫 번째 View에서만 애니메이션 업데이트 실행
-        if (this.#currentFrameViews.size === 1) {
-            this.#updateAnimation();
-        }
-    }
-
-    #updateAnimation(): void {
-        const PER_PI = Math.PI / 180;
-        // tilt 범위 제한
-        if (this.#tilt < this.#minTilt) this.#tilt = this.#minTilt;
-        if (this.#tilt > this.#maxTilt) this.#tilt = this.#maxTilt;
-        const {camera} = this;
-        // 공통 현재 상태를 목표값으로 애니메이션
-        this.#currentPan += (this.#pan - this.#currentPan) * this.#delayRotation;
-        this.#currentTilt += (this.#tilt - this.#currentTilt) * this.#delayRotation;
-        if (this.#distance < camera.nearClipping) this.#distance = camera.nearClipping;
-        this.#currentDistance += (this.#distance - this.#currentDistance) * this.#delayDistance;
-        if (this.#currentDistance < camera.nearClipping) this.#currentDistance = camera.nearClipping;
-        const tMTX0 = camera.modelMatrix;
-        mat4.identity(tMTX0);
-        mat4.translate(tMTX0, tMTX0, [this.#centerX, this.#centerY, this.#centerZ]);
-        mat4.rotateY(tMTX0, tMTX0, this.#currentPan * PER_PI);
-        mat4.rotateX(tMTX0, tMTX0, this.#currentTilt * PER_PI);
-        mat4.translate(tMTX0, tMTX0, [0, 0, this.#currentDistance]);
-        camera.x = tMTX0[12];
-        camera.y = tMTX0[13];
-        camera.z = tMTX0[14];
-        this.camera.lookAt(this.#centerX, this.#centerY, this.#centerZ);
-    }
+	/**
+	 * 카메라 애니메이션을 업데이트합니다.
+	 * 팬, 틸트, 거리를 부드럽게 보간하고 카메라 위치를 계산합니다.
+	 *
+	 * @private
+	 */
+	#updateAnimation(): void {
+		// 틸트 범위 제한
+		if (this.#tilt < this.#minTilt) this.#tilt = this.#minTilt;
+		if (this.#tilt > this.#maxTilt) this.#tilt = this.#maxTilt;
+		const {camera} = this;
+		// 현재 값을 목표값으로 부드럽게 보간
+		const panDelta = this.#pan - this.#currentPan;
+		if (Math.abs(panDelta) > ROTATION_THRESHOLD) {
+			this.#currentPan += panDelta * this.#rotationInterpolation;
+		}
+		// 틸트 보간
+		const tiltDelta = this.#tilt - this.#currentTilt;
+		if (Math.abs(tiltDelta) > ROTATION_THRESHOLD) {
+			this.#currentTilt += tiltDelta * this.#rotationInterpolation;
+		}
+		// 거리(줌) 범위 및 보간
+		if (this.#distance < camera.nearClipping) this.#distance = camera.nearClipping;
+		const distanceDelta = this.#distance - this.#currentDistance;
+		if (Math.abs(distanceDelta) > DISTANCE_THRESHOLD) {
+			this.#currentDistance += distanceDelta * this.#distanceInterpolation;
+		}
+		if (this.#currentDistance < camera.nearClipping) this.#currentDistance = camera.nearClipping;
+		// 카메라 위치 계산
+		mat4.identity(tempMatrix);
+		mat4.translate(tempMatrix, tempMatrix, [this.#centerX, this.#centerY, this.#centerZ]);
+		mat4.rotateY(tempMatrix, tempMatrix, this.#currentPan * PER_PI);
+		mat4.rotateX(tempMatrix, tempMatrix, this.#currentTilt * PER_PI);
+		mat4.translate(tempMatrix, tempMatrix, [0, 0, this.#currentDistance]);
+		// 카메라에 적용
+		camera.x = tempMatrix[12];
+		camera.y = tempMatrix[13];
+		camera.z = tempMatrix[14];
+		this.camera.lookAt(this.#centerX, this.#centerY, this.#centerZ);
+	}
 }
 
 export default OrbitController;

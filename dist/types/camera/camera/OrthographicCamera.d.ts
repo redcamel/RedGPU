@@ -35,9 +35,26 @@ declare class OrthographicCamera extends PerspectiveCamera {
     get right(): number;
     /** 투영 우측 설정 */
     set right(value: number);
+    /** 줌 레벨 반환 */
+    get zoom(): number;
+    /** 줌 레벨 설정 */
+    set zoom(value: number);
+    /** 최소 줌 반환 */
+    get minZoom(): number;
+    /** 최소 줌 설정 */
+    set minZoom(value: number);
+    /** 최대 줌 반환 */
+    get maxZoom(): number;
+    /** 최대 줌 설정 */
+    set maxZoom(value: number);
     /** 카메라 이름 반환 */
     get name(): string;
     /** 카메라 이름 설정 */
     set name(value: string);
+    /**
+     * 줌을 설정합니다
+     * @param zoom - 줌 레벨 (0.1 ~ 10)
+     */
+    setZoom(zoom: number): void;
 }
 export default OrthographicCamera;
