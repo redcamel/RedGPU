@@ -146,16 +146,17 @@ const renderTestPane = async (redGPUContext, controller, targetMesh) => {
 			testModeHandlers[ev.value]([cameraFolder, zoomFolder, viewFolder, targetFolder]);
 		});
 	}
+
 	// 카메라 설정 폴더
 	const cameraFolder = pane.addFolder({
 		title: 'Camera Settings',
 	});
-
 	cameraFolder.addBinding(controller, 'moveSpeed', {
 		min: 0.01,
 		max: 2,
 		step: 0.01
 	});
+
 	cameraFolder.addBinding(controller, 'moveSpeedInterpolation', {
 		min: 0.01,
 		max: 1,

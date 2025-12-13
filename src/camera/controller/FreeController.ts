@@ -91,7 +91,7 @@ class FreeController extends AController {
 	 * FreeController의 생성자입니다.
 	 * 마우스/터치 드래그(HD_Move) 이벤트 핸들러와 키보드 입력을 초기화합니다.
 	 *
-	 * @param redGPUContext - RedGPU 컨텍스트 객체
+	 * @param {RedGPUContext} redGPUContext - RedGPU 컨텍스트 객체
 	 */
 	constructor(redGPUContext: RedGPUContext) {
 		super(
@@ -380,8 +380,8 @@ class FreeController extends AController {
 	 * 매 프레임마다 카메라 컨트롤러를 업데이트합니다.
 	 * 키보드/마우스 입력을 처리하고 카메라 위치와 회전을 계산합니다.
 	 *
-	 * @param view - 3D 뷰 객체
-	 * @param time - 현재 경과 시간 (밀리초)
+	 * @param {View3D} view - 3D 뷰 객체
+	 * @param {number} time - 현재 경과 시간 (밀리초)
 	 */
 	update(view: View3D, time: number): void {
 		super.update(view, time, () => {
@@ -390,25 +390,11 @@ class FreeController extends AController {
 	}
 
 	// ==================== Private Methods ====================
-	/**
-	 * 초기화 리스너를 설정합니다.
-	 * 내부 타겟 메시를 생성합니다.
-	 *
-	 * @private
-	 */
 	#initListener() {
 		const {redGPUContext} = this;
 		this.#targetMesh = new Mesh(redGPUContext);
 	}
 
-	/**
-	 * 카메라 애니메이션을 업데이트합니다.
-	 * 회전 보간, 키보드 입력 처리, 위치 계산을 수행합니다.
-	 *
-	 * @private
-	 * @param {View3D} view - 3D 뷰 객체
-	 * @param {number} time - 현재 시간 (ms)
-	 */
 	#updateAnimation(view: View3D, time: number) {
 		const tDelay = this.#moveDelayInterpolation;
 		const tDelayRotation = this.#rotationInterpolation;

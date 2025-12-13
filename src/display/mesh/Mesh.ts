@@ -816,15 +816,14 @@ class Mesh extends MeshBase {
 			    const {centerX, centerY, centerZ, geometryRadius: radius} = combinedAABB;
 
 					// ==================== 카메라 정보 추출 ====================
-			    const controller = view.camera as IsometricController;
 			    const orthoCamera = rawCamera as OrthographicCamera;
 			    const {left, right, top, bottom, nearClipping: near, farClipping: far} = orthoCamera;
 			    const {x: camX, y: camY, z: camZ} = orthoCamera;
 
 				// ==================== 각도 기반 컬링 ====================
-			    const cameraAngle = controller.cameraAngle;
+			    const cameraAngle = 45;
 
-			    if (cameraAngle && cameraAngle !== 0) {
+			    if (cameraAngle ) {
 				    // 상대 좌표 계산
 				    const relX = centerX - camX;
 				    const relY = centerY - camY;

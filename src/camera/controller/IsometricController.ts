@@ -92,21 +92,6 @@ class IsometricController extends AController {
 	}
 
 	// ==================== 카메라 각도 Getter/Setter ====================
-	/**
-	 * 아이소메트릭 카메라의 각도를 가져옵니다. (단위: 도)
-	 * @returns {number} 카메라 각도 (기본값: 45도)
-	 */
-	get cameraAngle(): number {
-		return this.#cameraAngle;
-	}
-
-	/**
-	 * 아이소메트릭 카메라의 각도를 설정합니다.
-	 * @param {number} value - 카메라 각도 (단위: 도)
-	 */
-	set cameraAngle(value: number) {
-		this.#cameraAngle = value;
-	}
 
 	// ==================== 줌 Getter/Setter ====================
 	/**
