@@ -108,8 +108,9 @@ declare class Mesh extends MeshBase {
     get boundingAABB(): AABB;
     get combinedBoundingAABB(): AABB;
     setEnableDebuggerRecursively(enableDebugger?: boolean): void;
-    setCastShadowRecursively(castShadow?: boolean): void;
-    setReceiveShadowRecursively(receiveShadow?: boolean): void;
+    setCastShadowRecursively(value?: boolean): void;
+    setReceiveShadowRecursively(value?: boolean): void;
+    setIgnoreFrustumCullingRecursively(value?: boolean): void;
     getCombinedOpacity(): number;
     addListener(eventName: string, callback: Function): void;
     lookAt(targetX: number | [number, number, number], targetY?: number, targetZ?: number): void;

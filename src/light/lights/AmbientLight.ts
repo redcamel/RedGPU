@@ -1,4 +1,5 @@
 import ColorRGB from "../../color/ColorRGB";
+import convertHexToRgb from "../../utils/convertColor/convertHexToRgb";
 import ABaseLight from "../core/ABaseLight";
 
 /**
@@ -19,11 +20,11 @@ class AmbientLight extends ABaseLight {
     /**
      * 새로운 AmbientLight 인스턴스를 생성합니다.
      *
-     * @param color - 광원의 색상 (기본값: 연한 하늘색 RGB(173, 216, 230))
+     * @param color - 광원의 색상 (기본값: 연한 하늘색 #ADD8E6)
      * @param intensity - 광원의 세기 (기본값: 0.1)
      */
-    constructor(color: ColorRGB = new ColorRGB(173, 216, 230), intensity: number = 0.1) {
-        super(color, intensity);
+    constructor(color: string = '#ADD8E6', intensity: number = 0.1) {
+        super(new ColorRGB(...convertHexToRgb(color, true)), intensity);
     }
 }
 
