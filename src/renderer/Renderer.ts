@@ -1,5 +1,4 @@
 import {mat4} from "gl-matrix";
-import IsometricController from "../camera/controller/IsometricController";
 import RedGPUContext from "../context/RedGPUContext";
 import RenderViewStateData from "../display/view/core/RenderViewStateData";
 import View3D from "../display/view/View3D";
@@ -85,8 +84,7 @@ class Renderer {
         }
         view.renderViewStateData.reset(null, time)
         if (pixelRectObject.width && pixelRectObject.height) {
-            // @ts-ignore
-            camera.update?.(view, time)
+
             this.#updateJitter(view)
             {
                 const {scene} = view
@@ -99,6 +97,8 @@ class Renderer {
             }
 
             this.#renderPassViewShadow(view, commandEncoder)
+            // @ts-ignore
+            camera.update?.(view, time)
             this.#renderPassViewBasicLayer(view, commandEncoder, renderPassDescriptor)
             this.#renderPassView2PathLayer(view, commandEncoder, renderPassDescriptor, depthStencilAttachment)
             this.#renderPassViewPickingLayer(view, commandEncoder)

@@ -468,33 +468,18 @@ class Mesh extends MeshBase {
     }
 
     lookAt(targetX: number | [number, number, number], targetY?: number, targetZ?: number): void {
-        const tPosition = [];
+        var tPosition = [];
+        var tRotation = []
         tPosition[0] = targetX;
         tPosition[1] = targetY;
         tPosition[2] = targetZ;
-
-        // 이전 각도 저장
-        const prevRotX = this.rotationX;
-        const prevRotY = this.rotationY;
-        const prevRotZ = this.rotationZ;
-
-        // 새로운 각도 계산
+        //out, eye, center, up
         mat4.identity(this.localMatrix);
         mat4.targetTo(this.localMatrix, [this.#x, this.#y, this.#z], tPosition, up);
-        const tRotation = mat4ToEuler(this.localMatrix, []);
-
-        let newRotX = -tRotation[0] * 180 / Math.PI;
-        let newRotY = -tRotation[1] * 180 / Math.PI;
-        let newRotZ = -tRotation[2] * 180 / Math.PI;
-
-        // 각도 연속성 보정 (360도 점프 방지)
-        newRotX = this.#normalizeRotationDelta(prevRotX, newRotX);
-        newRotY = this.#normalizeRotationDelta(prevRotY, newRotY);
-        newRotZ = this.#normalizeRotationDelta(prevRotZ, newRotZ);
-
-        this.rotationX = newRotX;
-        this.rotationY = newRotY;
-        this.rotationZ = newRotZ;
+        tRotation = mat4ToEuler(this.localMatrix, []);
+        this.rotationX = -tRotation[0] * 180 / Math.PI;
+        this.rotationY = -tRotation[1] * 180 / Math.PI;
+        this.rotationZ = -tRotation[2] * 180 / Math.PI;
     }
 
     #normalizeRotationDelta(prevAngle: number, newAngle: number): number {
