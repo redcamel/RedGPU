@@ -83,7 +83,7 @@ RedGPU.init(
 			const radius = 20;
 			targetMesh.x = Math.sin(t * 0.5) * radius;
 			targetMesh.z = Math.cos(t * 0.5) * radius;
-			targetMesh.y = Math.sin(t * 0.3) * 5; // 위아래로도 움직임
+			targetMesh.y = Math.sin(t * 0.5) * 5;
 
 			// 타겟이 원점을 바라봄
 			targetMesh.lookAt(0, 0, 0);
@@ -256,5 +256,9 @@ const renderTestPane = async (redGPUContext, controller) => {
 		controller.setTargetOffset(0, 0, 0);
 		pane.refresh();
 	});
+
+	setInterval(()=>{
+		pane.refresh();
+	})
 
 };
