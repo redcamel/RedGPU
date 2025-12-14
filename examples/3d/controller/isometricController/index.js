@@ -253,7 +253,9 @@ const renderTestPane = async (redGPUContext, controller, targetMesh) => {
 			controller[`set${key.charAt(0).toUpperCase()}${key.substr(1)}`](ev.value);
 		});
 	}
-	setInterval(()=>{
+	const update = ()=>{
 		pane.refresh()
-	})
+		requestAnimationFrame(update);
+	}
+	requestAnimationFrame(update);
 };
