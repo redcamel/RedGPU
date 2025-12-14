@@ -164,7 +164,7 @@ const renderTestPane = async (redGPUContext, controller, targetMesh) => {
 	});
 	cameraFolder.addBinding(controller, 'mouseMoveSpeed', {
 		min: 0.01,
-		max: 0.1,
+		max: 1,
 		step: 0.01
 	});
 	cameraFolder.addBinding(controller, 'mouseMoveSpeedInterpolation', {
@@ -253,7 +253,9 @@ const renderTestPane = async (redGPUContext, controller, targetMesh) => {
 			controller[`set${key.charAt(0).toUpperCase()}${key.substr(1)}`](ev.value);
 		});
 	}
-	setInterval(()=>{
+	const update = ()=>{
 		pane.refresh()
-	})
+		requestAnimationFrame(update);
+	}
+	requestAnimationFrame(update);
 };

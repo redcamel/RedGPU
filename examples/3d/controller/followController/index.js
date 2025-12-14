@@ -257,8 +257,10 @@ const renderTestPane = async (redGPUContext, controller) => {
 		pane.refresh();
 	});
 
-	setInterval(()=>{
-		pane.refresh();
-	})
+	const update = ()=>{
+		pane.refresh()
+		requestAnimationFrame(update);
+	}
+	requestAnimationFrame(update);
 
 };
