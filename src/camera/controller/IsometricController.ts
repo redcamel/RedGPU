@@ -43,7 +43,7 @@ class IsometricController extends AController {
 	#targetX: number = 0;
 	#targetZ: number = 0;
 	// ==================== 이동 관련 ====================
-	#moveSpeed: number = 0.2;
+	#moveSpeed: number = 0.25;
 	#moveSpeedInterpolation: number = 0.2;
 	#keyNameMapper = {
 		moveUp: 'w',
@@ -51,7 +51,7 @@ class IsometricController extends AController {
 		moveLeft: 'a',
 		moveRight: 'd'
 	};
-	#mouseMoveSpeed: number = 0.05;
+	#mouseMoveSpeed: number = 1;
 	#mouseMoveSpeedInterpolation: number = 0.2;
 
 	// ==================== 라이프사이클 ====================
@@ -72,13 +72,21 @@ class IsometricController extends AController {
 				const angleRad = this.#cameraAngle * PER_PI;
 				const cos = Math.cos(angleRad);
 				const sin = Math.sin(angleRad);
-// 마우스 이동량을 월드 좌표로 변환
-				const mouseDeltaX = deltaX * this.#mouseMoveSpeed;
-				const mouseDeltaY = deltaY * this.#mouseMoveSpeed;
-// 카메라 각도 기반 좌표 변환
+
+				const effectiveHeight = this.#currentViewHeight / this.#currentZoom;
+
+				// 픽셀당 월드 단위 계산
+				const worldPerPixel = effectiveHeight / redGPUContext.boundingClientRect.height;
+
+				// 마우스 이동량을 월드 좌표로 변환
+				const mouseDeltaX = deltaX * worldPerPixel;
+				const mouseDeltaY = deltaY * worldPerPixel;
+
+				// 카메라 각도 기반 좌표 변환
 				const worldDeltaX = -(mouseDeltaX * cos) - (mouseDeltaY * sin);
 				const worldDeltaZ = -(mouseDeltaX * (-sin)) - (mouseDeltaY * cos);
-// 목표 위치 업데이트
+
+				// 목표 위치 업데이트
 				this.#targetX += worldDeltaX;
 				this.#targetZ += worldDeltaZ;
 			},
