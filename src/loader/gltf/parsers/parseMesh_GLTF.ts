@@ -149,14 +149,15 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
         let normalData;
         if (normals.length) normalData = normals;
         else normalData = calculateNormals(vertices, indices);
-        // {
-        //     if (tangents.length > 0) {
-        //         tangents = calculateTangents(vertices, normalData, uvs, indices, tangents);
-        //     } else {
-        //         tangents = calculateTangents(vertices, normalData, uvs, indices);
-        //     }
-        //     tMaterial.useVertexTangent = true;
-        // }
+        {
+            keepLog(tangents)
+            // if (tangents.length > 0) {
+            //     // tangents = calculateTangents(vertices, normalData, uvs, indices, tangents);
+            // } else {
+            //     tangents = calculateTangents(vertices, normalData, uvs, indices);
+            // }
+            // tMaterial.useVertexTangent = true;
+        }
         if (tangents.length) tMaterial.useVertexTangent = true;
         let interleaveData = [];
         parseInterleaveData_GLTF(interleaveData, vertices, verticesColor_0, normalData, uvs, uvs1, uvs2, jointWeights, joints, tangents);
