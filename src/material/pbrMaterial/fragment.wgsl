@@ -973,14 +973,14 @@ let attenuation = rangePart * invSquare;
         #redgpu_endIf
 
         // ---------- ibl 유전체 합성 ----------
-//        let envIBL_DIELECTRIC = mix(envIBL_DIFFUSE ,envIBL_SPECULAR_BTDF, transmissionParameter) + envIBL_SPECULAR * (1-transmissionParameter) ;
-       let envIBL_DIELECTRIC =
-           // Diffuse (반사 안된 부분만)
-           envIBL_DIFFUSE * (1.0 - F_IBL) * (1.0 - transmissionParameter)
-           // Transmission
-           + envIBL_SPECULAR_BTDF * transmissionParameter * (1.0 - F_IBL)
-           // Specular reflection (항상 존재)
-           + envIBL_SPECULAR;
+        let envIBL_DIELECTRIC = mix(envIBL_DIFFUSE ,envIBL_SPECULAR_BTDF, transmissionParameter) + envIBL_SPECULAR * (1-transmissionParameter) ;
+//       let envIBL_DIELECTRIC =
+//           // Diffuse (반사 안된 부분만)
+//           envIBL_DIFFUSE * (1.0 - F_IBL) * (1.0 - transmissionParameter)
+//           // Transmission
+//           + envIBL_SPECULAR_BTDF * transmissionParameter * (1.0 - F_IBL)
+//           // Specular reflection (항상 존재)
+//           + envIBL_SPECULAR;
         // ---------- ibl Sheen 계산 ----------
         var envIBL_SHEEN = vec3<f32>(0.0);
         var sheen_albedo_scaling: f32 = 1.0;
