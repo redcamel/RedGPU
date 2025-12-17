@@ -102,15 +102,15 @@ class GLTFLoader {
         return this.#url;
     }
 
-    stopAnimation(parsedSingleClip: GLTFParsedSingleClip) {
-        const {activeAnimations} = this
-        let index = activeAnimations.indexOf(parsedSingleClip);
-        if (index > -1) {
-            activeAnimations.splice(index, 1);
-        }
-    };
+    // stopAnimation(parsedSingleClip: GLTFParsedSingleClip) {
+    //     const {activeAnimations} = this
+    //     let index = activeAnimations.indexOf(parsedSingleClip);
+    //     if (index > -1) {
+    //         activeAnimations.splice(index, 1);
+    //     }
+    // };
 
-    stopAllAnimation() {
+    stopAnimation() {
         this.activeAnimations.length = 0
     }
 
