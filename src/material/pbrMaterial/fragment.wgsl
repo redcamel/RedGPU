@@ -976,7 +976,7 @@ let attenuation = rangePart * invSquare;
         #redgpu_endIf
 
         // ---------- ibl 유전체 합성 ----------
-        let envIBL_DIELECTRIC = mix(envIBL_DIFFUSE ,envIBL_SPECULAR_BTDF, transmissionParameter) + envIBL_SPECULAR * (1-transmissionParameter) ;
+        let envIBL_DIELECTRIC = mix(envIBL_DIFFUSE ,envIBL_SPECULAR_BTDF, transmissionParameter) + envIBL_SPECULAR  ;
 
         // ---------- ibl Sheen 계산 ----------
         var envIBL_SHEEN = vec3<f32>(0.0);
