@@ -864,6 +864,7 @@ let attenuation = rangePart * invSquare;
         let K = (roughnessParameter + 1.0) * (roughnessParameter + 1.0) / 8.0;
         let G = NdotV / (NdotV * (1.0 - K) + K);
         let a2 = roughnessParameter * roughnessParameter;
+
         let G_smith = NdotV / (NdotV * (1.0 - a2) + a2);
         // ---------- ibl (roughness에 따른 mipmap 레벨 사용) ----------
         let iblMipmapCount:f32 = f32(textureNumLevels(ibl_environmentTexture) - 1);
@@ -881,14 +882,16 @@ let attenuation = rangePart * invSquare;
         // ---------- ibl Diffuse  ----------
         let effectiveTransmission = transmissionParameter * (1.0 - metallicParameter);
         let iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, iblTextureSampler, N,0).rgb;
-        var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor ;
+        let kd = mix(1.0 - F_IBL_dielectric, vec3<f32>(1.0), roughnessParameter);
+        var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor * kd;
+//        var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor;
 
         // ---------- ibl Diffuse Transmission ----------
         #redgpu_if useKHR_materials_diffuse_transmission
         {
             // 후면 산란을 위한 샘플링 방향 (back side)
             var backScatteringColor = textureSampleLevel(ibl_environmentTexture, iblTextureSampler, -N, mipLevel).rgb;
-            let transmittedIBL = backScatteringColor * diffuseTransmissionColor * (vec3<f32>(1.0) - F_IBL);
+            let transmittedIBL = backScatteringColor * diffuseTransmissionColor * (vec3<f32>(1.0) - F_IBL_dielectric);
             // 반사와 투과 효과 혼합
             envIBL_DIFFUSE = mix(envIBL_DIFFUSE, transmittedIBL, diffuseTransmissionParameter);
         }
@@ -896,7 +899,8 @@ let attenuation = rangePart * invSquare;
 
         // ---------- ibl Specular ----------
         var envIBL_SPECULAR:vec3<f32>;
-        envIBL_SPECULAR = reflectedColor * G_smith * F_IBL * specularParameter ;
+//        envIBL_SPECULAR = reflectedColor * G_smith * F_IBL_dielectric * specularParameter ;
+        envIBL_SPECULAR = reflectedColor * G_smith * mix(F_IBL_dielectric,F_IBL_metal,metallicParameter) * specularParameter ;
         #redgpu_if useKHR_materials_anisotropy
         {
             var bentNormal = cross(anisotropicB, V);
@@ -949,7 +953,7 @@ let attenuation = rangePart * invSquare;
 
             if(length(refractedDir) > 0.0001) {
                 let NdotT = abs(dot(N, normalize(refractedDir)));
-                let F_transmission = vec3<f32>(1.0) - F_IBL_dielectric;
+                let F_transmission = vec3<f32>(1.0) - mix(F_IBL_dielectric,F_IBL_metal,metallicParameter);
 
                 var attenuatedBackground = prePathBackground;
                  if (u_useKHR_materials_volume) {
@@ -971,7 +975,7 @@ let attenuation = rangePart * invSquare;
                      attenuatedBackground *= albedo;
                  }
 
-                envIBL_SPECULAR_BTDF = attenuatedBackground * F_transmission * transmissionParameter + reflectedColor * G_smith * F_IBL * NdotT;
+                envIBL_SPECULAR_BTDF = attenuatedBackground * F_transmission * transmissionParameter + reflectedColor * G_smith * mix(F_IBL_dielectric,F_IBL_metal,metallicParameter) * NdotT;
             }
         #redgpu_endIf
 
@@ -996,31 +1000,34 @@ let attenuation = rangePart * invSquare;
         #redgpu_endIf
 
         // ---------- ibl Metal 계산 ----------
-        let envIBL_METAL = select(reflectedColor * max(baseColor.rgb,vec3<f32>(0.04)), reflectedColor * F_IBL, iridescenceParameter>0.0);
-//        let envIBL_METAL = select(reflectedColor * baseColor.rgb, reflectedColor * F_IBL, iridescenceParameter>0.0);
-//        let envIBL_METAL = reflectedColor * F0 * F_IBL ;
+        let envIBL_METAL = reflectedColor * F0 ;
         // ---------- ibl 기본 혼합 ----------
         let metallicPart = envIBL_METAL * metallicParameter * sheen_albedo_scaling; // 금속 파트 계산
         let dielectricPart = envIBL_DIELECTRIC * (1.0 - metallicParameter) ; // 유전체 파트 계산
         var indirectLighting = metallicPart + dielectricPart + envIBL_SHEEN; // sheen 파트 포함
-
         // ---------- ibl clearcoat 계산 ----------
         #redgpu_if useKHR_materials_clearcoat
             if (clearcoatParameter > 0.0) {
                  // 클리어코트 반사 벡터와 뷰 각도 계산
+                 let clearcoatF0 = 0.04;
                  let clearcoatR = reflect(-V, clearcoatNormal);
                  let clearcoatNdotV = max(dot(clearcoatNormal, V), 0.04);
-                 let clearcoatMipLevel = pow(clearcoatRoughnessParameter,0.4) * iblMipmapCount;
+                 let clearcoatMipLevel = clearcoatRoughnessParameter * iblMipmapCount;
                  let clearcoatPrefilteredColor = textureSampleLevel(ibl_environmentTexture, iblTextureSampler, clearcoatR, clearcoatMipLevel).rgb;
-                 let clearcoatF0 = F0;
+
                  let clearcoatF = clearcoatF0 + (vec3<f32>(1.0) - clearcoatF0) * pow(1.0 - clearcoatNdotV, 5.0);
-                 let clearcoatK = (clearcoatRoughnessParameter + 1.0) * (clearcoatRoughnessParameter + 1.0) / 8.0;
+                 let clearcoatAlpha = clearcoatRoughnessParameter * clearcoatRoughnessParameter;
+                 let clearcoatK = clearcoatAlpha / 2.0;
                  let clearcoatG = clearcoatNdotV / (clearcoatNdotV * (1.0 - clearcoatK) + clearcoatK);
                  let clearcoatBRDF = clearcoatF * clearcoatG;
-                 let clearcoatSpecularIBL = clearcoatPrefilteredColor * clearcoatBRDF * clearcoatParameter;
-                 let clearcoatFresnel = clearcoatF ;
-                 indirectLighting = clearcoatSpecularIBL  + (vec3<f32>(1.0) - clearcoatFresnel) * indirectLighting;
+
+                  // Specular IBL
+                let clearcoatSpecularIBL = clearcoatPrefilteredColor * clearcoatBRDF * clearcoatParameter;
+
+                // 최종 합산 (추가 레이어로 더함)
+                indirectLighting = clearcoatSpecularIBL + (vec3<f32>(1.0) - clearcoatF ) * indirectLighting;
             }
+
         #redgpu_endIf
 
         // 최종 IBL 적용
@@ -1089,7 +1096,7 @@ fn calcIBLSheen(
     sheenColor:vec3<f32>,
     maxSheenColor:f32,
     sheenRoughnessParameter:f32,
-    iblMipmapCount:f32
+    iblMipmapCount:f32,
 ) -> SheenResult {
     let NdotV = max(dot(N, V), 0.0001);
     let sheenRoughnessAlpha = sheenRoughnessParameter * sheenRoughnessParameter;
