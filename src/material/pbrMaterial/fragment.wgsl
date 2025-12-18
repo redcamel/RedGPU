@@ -714,7 +714,12 @@ fn main(inputData:InputData) -> FragmentOutput {
         );
     #redgpu_endIf
     // ---------- 기본 F0 계산 ----------
-    let F0_dielectric: vec3<f32> =  vec3(pow((1.0 - ior) / (1.0 + ior), 2.0)) ; // 유전체 반사율
+//    let F0_dielectric: vec3<f32> =  vec3(pow((1.0 - ior) / (1.0 + ior), 2.0)) ; // 유전체 반사율
+//    let F0_metal = baseColor.rgb; // 금속 반사율
+//    var F0 = mix(F0_dielectric, F0_metal, metallicParameter); // 기본 반사율
+    let F0_dielectric_base = vec3(pow((1.0 - ior) / (1.0 + ior), 2.0));
+    // KHR_materials_specular 적용
+    let F0_dielectric = F0_dielectric_base *  specularColor;
     let F0_metal = baseColor.rgb; // 금속 반사율
     var F0 = mix(F0_dielectric, F0_metal, metallicParameter); // 기본 반사율
     #redgpu_if useKHR_materials_iridescence
@@ -862,11 +867,11 @@ let attenuation = rangePart * invSquare;
         let G_smith = NdotV / (NdotV * (1.0 - a2) + a2);
         // ---------- ibl (roughness에 따른 mipmap 레벨 사용) ----------
         let iblMipmapCount:f32 = f32(textureNumLevels(ibl_environmentTexture) - 1);
-//        let mipLevel = roughnessParameter * iblMipmapCount;
+        let mipLevel = roughnessParameter * iblMipmapCount;
 //        let mipLevel = roughnessParameter * sqrt(roughnessParameter) * iblMipmapCount;
 //        let mipLevel = max(0.0, (roughnessParameter * roughnessParameter) * iblMipmapCount);
 //        let mipLevel = pow(roughnessParameter,0.5) * iblMipmapCount;
-        let mipLevel = pow(roughnessParameter,0.4) * iblMipmapCount;
+//        let mipLevel = pow(roughnessParameter,0.4) * iblMipmapCount;
 //        let mipLevel = (roughnessParameter * roughnessParameter) * iblMipmapCount;
 
 
@@ -876,7 +881,7 @@ let attenuation = rangePart * invSquare;
         // ---------- ibl Diffuse  ----------
         let effectiveTransmission = transmissionParameter * (1.0 - metallicParameter);
         let iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, iblTextureSampler, N,0).rgb;
-        var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor * (vec3<f32>(1.0) - F_IBL_dielectric);
+        var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor ;
 
         // ---------- ibl Diffuse Transmission ----------
         #redgpu_if useKHR_materials_diffuse_transmission
@@ -891,8 +896,7 @@ let attenuation = rangePart * invSquare;
 
         // ---------- ibl Specular ----------
         var envIBL_SPECULAR:vec3<f32>;
-        let specularColorCorrected = max(vec3<f32>(0.04), specularColor);
-        envIBL_SPECULAR = reflectedColor * G_smith * specularColorCorrected * F_IBL * specularParameter ;
+        envIBL_SPECULAR = reflectedColor * G_smith * F_IBL * specularParameter ;
         #redgpu_if useKHR_materials_anisotropy
         {
             var bentNormal = cross(anisotropicB, V);
@@ -932,7 +936,6 @@ let attenuation = rangePart * invSquare;
 
             let a2 = finalRoughness * finalRoughness;
             let G_smith = NdotV / (NdotV * (1.0 - a2) + a2);
-            envIBL_SPECULAR = reflectedColor * G_smith * specularColorCorrected * F_IBL * specularParameter;
         }
         #redgpu_endIf
 
@@ -973,14 +976,8 @@ let attenuation = rangePart * invSquare;
         #redgpu_endIf
 
         // ---------- ibl 유전체 합성 ----------
-//        let envIBL_DIELECTRIC = mix(envIBL_DIFFUSE ,envIBL_SPECULAR_BTDF, transmissionParameter) + envIBL_SPECULAR * (1-transmissionParameter) ;
-       let envIBL_DIELECTRIC =
-           // Diffuse (반사 안된 부분만)
-           envIBL_DIFFUSE * (1.0 - F_IBL) * (1.0 - transmissionParameter)
-           // Transmission
-           + envIBL_SPECULAR_BTDF * transmissionParameter * (1.0 - F_IBL)
-           // Specular reflection (항상 존재)
-           + envIBL_SPECULAR;
+        let envIBL_DIELECTRIC = mix(envIBL_DIFFUSE ,envIBL_SPECULAR_BTDF, transmissionParameter) + envIBL_SPECULAR * (1-transmissionParameter) ;
+
         // ---------- ibl Sheen 계산 ----------
         var envIBL_SHEEN = vec3<f32>(0.0);
         var sheen_albedo_scaling: f32 = 1.0;
