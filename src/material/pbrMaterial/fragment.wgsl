@@ -867,11 +867,11 @@ let attenuation = rangePart * invSquare;
         let G_smith = NdotV / (NdotV * (1.0 - a2) + a2);
         // ---------- ibl (roughness에 따른 mipmap 레벨 사용) ----------
         let iblMipmapCount:f32 = f32(textureNumLevels(ibl_environmentTexture) - 1);
-        let mipLevel = roughnessParameter * iblMipmapCount;
+//        let mipLevel = roughnessParameter * iblMipmapCount;
 //        let mipLevel = roughnessParameter * sqrt(roughnessParameter) * iblMipmapCount;
 //        let mipLevel = max(0.0, (roughnessParameter * roughnessParameter) * iblMipmapCount);
 //        let mipLevel = pow(roughnessParameter,0.5) * iblMipmapCount;
-//        let mipLevel = pow(roughnessParameter,0.4) * iblMipmapCount;
+        let mipLevel = pow(roughnessParameter,0.4) * iblMipmapCount;
 //        let mipLevel = (roughnessParameter * roughnessParameter) * iblMipmapCount;
 
 
