@@ -16,7 +16,8 @@ RedGPU.init(
     redGPUContext.addView(view);
 
     // loadGLTF(view, 'https://threejs.org/examples/models/gltf/LittlestTokyo.glb');
-    loadGLTF(view, 'https://threejs.org/examples/models/gltf/Soldier.glb');
+    // loadGLTF(view, 'https://threejs.org/examples/models/gltf/Soldier.glb');
+    loadGLTF(view, 'https://raw.GithubUserContent.com/KhronosGroup/glTF-Sample-Assets/main/./Models/Fox/glTF-Binary/Fox.glb');
 
     const renderer = new RedGPU.Renderer(redGPUContext);
     const render = () => {
@@ -36,8 +37,11 @@ RedGPU.init(
 function loadGLTF(view, url) {
   const {redGPUContext, scene} = view;
   new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
-
     const mesh = result.resultMesh
+    if(url.includes('Fox')){
+      mesh.setScale(0.01)
+    }
+
     mesh.y = -1
     // mesh.setScale(0.02)
     scene.addChild(mesh)

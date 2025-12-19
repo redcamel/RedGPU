@@ -64,7 +64,7 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
                 if(isTexcoord) {
                     const name = `TEXCOORD_${temp.size}`
                     temp.set(key, name)
-                    keepLog(name)
+                    // keepLog(name)
                 }
 
                 parseAttributeInfo_GLTF(
@@ -93,7 +93,7 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
             let accessorInfo = new AccessorInfo_GLTF(gltfLoader, gltfData, accessorGlTfId);
             parseIndicesInfo_GLTF(accessorInfo, indices);
         }
-        keepLog('-----')
+        // keepLog('-----')
         // 재질파싱
         tMaterial = parseMaterialInfo_GLTF(gltfLoader, gltfData, meshPrimitive);
         if (tMaterial instanceof PBRMaterial) {
@@ -147,10 +147,15 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
         if (verticesColor_0.length) tMaterial.useVertexColor_0 = true;
 
         let normalData;
-        if (normals.length) normalData = normals;
-        else normalData = calculateNormals(vertices, indices);
+        // keepLog('normals',normals,vertices,indices)
+        if(!normals.length) {
+            normalData = calculateNormals(vertices, indices);
+
+        }else normalData = normals;;
+        // keepLog('normalData',normalData)
         {
-            keepLog(tangents)
+
+            // keepLog(tangents)
             // if (tangents.length > 0) {
             //     // tangents = calculateTangents(vertices, normalData, uvs, indices, tangents);
             // } else {

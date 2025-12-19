@@ -884,7 +884,7 @@ let attenuation = rangePart * invSquare;
         let iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, iblTextureSampler, N,0).rgb;
         let kd = mix(1.0 - F_IBL_dielectric, vec3<f32>(1.0), roughnessParameter);
         var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor * kd;
-//        var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor;
+//        var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor* (vec3<f32>(1.0) - F_IBL_dielectric)
 
         // ---------- ibl Diffuse Transmission ----------
         #redgpu_if useKHR_materials_diffuse_transmission
