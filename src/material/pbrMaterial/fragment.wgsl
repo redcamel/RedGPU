@@ -1002,9 +1002,9 @@ let attenuation = rangePart * invSquare;
         // ---------- ibl Metal 계산 ----------
         let envIBL_METAL = reflectedColor * F0 ;
         // ---------- ibl 기본 혼합 ----------
-        let metallicPart = envIBL_METAL * metallicParameter * sheen_albedo_scaling; // 금속 파트 계산
+        let metallicPart = envIBL_METAL * metallicParameter ; // 금속 파트 계산
         let dielectricPart = envIBL_DIELECTRIC * (1.0 - metallicParameter) ; // 유전체 파트 계산
-        var indirectLighting = metallicPart + dielectricPart + envIBL_SHEEN; // sheen 파트 포함
+        var indirectLighting = (metallicPart + dielectricPart) * sheen_albedo_scaling + envIBL_SHEEN; // sheen 파트 포함
         // ---------- ibl clearcoat 계산 ----------
         #redgpu_if useKHR_materials_clearcoat
             if (clearcoatParameter > 0.0) {
@@ -1089,33 +1089,54 @@ struct SheenResult {
     envIBL_SHEEN: vec3<f32>,
     sheen_albedo_scaling: f32
 }
-
 fn calcIBLSheen(
-    N:vec3<f32>,
-    V:vec3<f32>,
-    sheenColor:vec3<f32>,
-    maxSheenColor:f32,
-    sheenRoughnessParameter:f32,
-    iblMipmapCount:f32,
+    N: vec3<f32>,
+    V: vec3<f32>,
+    sheenColor: vec3<f32>,
+    maxSheenColor: f32,
+    sheenRoughness: f32,
+    iblMipmapCount: f32,
 ) -> SheenResult {
-    let NdotV = max(dot(N, V), 0.0001);
-    let sheenRoughnessAlpha = sheenRoughnessParameter * sheenRoughnessParameter;
+    let NdotV = clamp(dot(N, V), 0.0001, 1.0);
     let R = reflect(-V, N);
-    let sheenLobe = sheenRoughnessParameter * sheenRoughnessParameter; // GGX 기반 분포
-    let sheenSamplingDir = normalize(mix(R, N, sheenLobe));
 
-    var sheenMipLevel = log2(sheenRoughnessParameter) * 1.2 + iblMipmapCount - 1.0;
-    sheenMipLevel = clamp(sheenMipLevel, 0.0, iblMipmapCount - 1.0);
-    let sheenRadiance = textureSampleLevel(ibl_environmentTexture, iblTextureSampler, sheenSamplingDir, sheenMipLevel).rgb;
+    let mipLevel = sheenRoughness * iblMipmapCount;
 
-    let F0 = 0.04;
-    let sheenFresnel = F0 + (1.0 - F0) * pow(1.0 - NdotV, 5.0);
+    let sheenRadiance = textureSampleLevel( ibl_irradianceTexture, iblTextureSampler, R, mipLevel ).rgb;
 
-    let E_VdotN = 1.0 - pow(1.0 - NdotV, 5.0);
-    let sheen_albedo_scaling = max(1.0 - maxSheenColor * E_VdotN, 0.04);
-    let envIBL_SHEEN = sheenColor * sheenFresnel;
+    let sheenDFG = charlieSheenDFG(NdotV, sheenRoughness);
+    let envIBL_SHEEN = sheenRadiance * sheenColor * sheenDFG;
+
+    let E = charlieSheenE(NdotV, sheenRoughness);
+    let sheen_albedo_scaling = 1.0 - maxSheenColor * E;
 
     return SheenResult(envIBL_SHEEN, sheen_albedo_scaling);
+}
+
+fn charlieSheenDFG(NdotV: f32, roughness: f32) -> f32 {
+    if (roughness < 0.01) {
+        return 0.0;
+    }
+
+    let r = clamp(roughness, 0.01, 1.0);
+    let grazingFactor = 1.0 - NdotV;
+    let roughnessExp = 1.0 / max(r, 0.1);
+    let distribution = pow(grazingFactor, roughnessExp);
+    let intensity = pow(roughnessExp, 0.5);
+
+    return distribution * intensity * 0.5;
+}
+
+fn charlieSheenE(NdotV: f32, roughness: f32) -> f32 {
+    if (roughness < 0.01) {
+        return 0.0;
+    }
+
+    let r = clamp(roughness, 0.01, 1.0);
+    let grazingFactor = 1.0 - NdotV;
+    let roughnessExp = 1.0 / max(r, 0.1);
+
+    return pow(grazingFactor, roughnessExp) * pow(r, 0.5);
 }
 // ---------------------------------------------
 
