@@ -837,8 +837,8 @@ let attenuation = rangePart * invSquare;
 
         // ---------- ibl 프레넬 항 계산----------
         let fresnel = pow(1.0 - NdotV_fresnel, 5.0);
-        let F_IBL_dielectric = F0_dielectric + (vec3<f32>(1.0) - F0_dielectric) * fresnel;
-        let F_IBL_metal      = F0_metal      + (vec3<f32>(1.0) - F0_metal)      * fresnel;
+        var F_IBL_dielectric = F0_dielectric + (vec3<f32>(1.0) - F0_dielectric) * fresnel;
+        var F_IBL_metal      = F0_metal      + (vec3<f32>(1.0) - F0_metal)      * fresnel;
         var F_IBL            = F0            + (vec3<f32>(1.0) - F0)            * fresnel;
 
 
@@ -899,8 +899,13 @@ let attenuation = rangePart * invSquare;
 
         // ---------- ibl Specular ----------
         var envIBL_SPECULAR:vec3<f32>;
-//        envIBL_SPECULAR = reflectedColor * G_smith * F_IBL_dielectric * specularParameter ;
-        envIBL_SPECULAR = reflectedColor * G_smith * mix(F_IBL_dielectric,F_IBL_metal,metallicParameter) * specularParameter ;
+//        envIBL_SPECULAR = reflectedColor * G_smith * F_IBL * specularParameter ;
+//        envIBL_SPECULAR = reflectedColor * G_smith * mix(F_IBL_dielectric,F_IBL_metal,metallicParameter) * specularParameter ;
+        envIBL_SPECULAR = reflectedColor * G_smith * select(
+            mix(F_IBL_dielectric,F_IBL_metal,metallicParameter),
+            F_IBL,
+            u_useKHR_materials_iridescence && iridescenceParameter > 0.0
+        ) * specularParameter ;
         #redgpu_if useKHR_materials_anisotropy
         {
             var bentNormal = cross(anisotropicB, V);
