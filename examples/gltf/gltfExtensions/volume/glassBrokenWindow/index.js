@@ -7,8 +7,6 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 1
-        controller.speedDistance = 0.1
         controller.tilt = 0
 
         const scene = new RedGPU.Display.Scene();
@@ -31,16 +29,13 @@ RedGPU.init(
         document.body.appendChild(errorDiv);
     }
 );
-
 function loadGLTF(view, url) {
-    const {redGPUContext, scene} = view;
-    new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
-        const mesh = result.resultMesh
-        mesh.y = -0.25
-        scene.addChild(mesh)
-    });
+  const {redGPUContext, scene} = view;
+  new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
+    const mesh = result.resultMesh
+    scene.addChild(mesh)
+  });
 }
-
 const renderTestPane = async (redGPUContext, targetView) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
     const {createIblHelper, setDebugButtons} = await import('../../../../exampleHelper/createExample/panes/index.js');
