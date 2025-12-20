@@ -1,7 +1,10 @@
 import {mat4} from "gl-matrix";
 import RedGPUContext from "../../context/RedGPUContext";
+import Mesh from "../../display/mesh/Mesh";
 import View3D from "../../display/view/View3D";
 import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumberRange";
+import {keepLog} from "../../utils";
+import AABB from "../../utils/math/bound/AABB";
 import AController from "../core/AController";
 
 const PER_PI = Math.PI / 180;
@@ -67,6 +70,61 @@ class OrbitController extends AController {
 			}
 		)
 		;
+	}
+
+	#calcTargetMeshMatrix(mesh: Mesh, view: View3D, parentMesh?: Mesh) {
+		// 1. 새로운 행렬을 생성하거나 기존 고유 행렬 가져오기
+		const localMatrix = mesh.modelMatrix;
+		// 2. 로컬 변환 계산 (TRS: Translate -> Rotate -> Scale)
+		mat4.identity(localMatrix)
+		mat4.translate(localMatrix, localMatrix, [mesh.x, mesh.y, mesh.z]);
+		mat4.rotateX(localMatrix, localMatrix, mesh.rotationX * Math.PI / 180);
+		mat4.rotateY(localMatrix, localMatrix, mesh.rotationY * Math.PI / 180);
+		mat4.rotateZ(localMatrix, localMatrix, mesh.rotationZ * Math.PI / 180);
+		mat4.scale(localMatrix, localMatrix, [mesh.scaleX, mesh.scaleY, mesh.scaleZ]);
+		mat4.copy(mesh.localMatrix, localMatrix);
+		// 3. 부모 행렬이 있으면 곱함 (World Matrix = ParentWorld * Local)
+		if (parentMesh) {
+			mat4.multiply(mesh.modelMatrix, parentMesh.modelMatrix, localMatrix);
+		} else {
+			// 최상위 루트 노드인 경우
+			mat4.copy(mesh.modelMatrix, localMatrix);
+		}
+		// 4. 자식들에게 '나(mesh)'를 부모로 전달 (핵심 수정 사항)
+		mesh.children.forEach((child: Mesh) => {
+			this.#calcTargetMeshMatrix(child, view, mesh);
+		});
+	}
+
+	fitMeshToScreenCenter(mesh: Mesh, view: View3D): void {
+		this.#calcTargetMeshMatrix(mesh, view);
+
+		const bounds = mesh.combinedBoundingAABB;
+		const sizeX = Math.abs(bounds.maxX - bounds.minX);
+		const sizeY = Math.abs(bounds.maxY - bounds.minY);
+		const sizeZ = Math.abs(bounds.maxZ - bounds.minZ);
+
+		// 3. 모델의 실제 월드 중심점 계산 (메시를 이동시키는 대신 이 좌표를 타겟으로 사용)
+		const centerX = (bounds.minX + bounds.maxX) / 2;
+		const centerY = (bounds.minY + bounds.maxY) / 2;
+		const centerZ = (bounds.minZ + bounds.maxZ) / 2;
+		//
+		//@ts-ignore
+		const fovY = view.rawCamera.fieldOfView * Math.PI / 180;
+		const tanHalfFovY = Math.tan(fovY / 2);
+		const tanHalfFovX = tanHalfFovY * view.aspect;
+
+		const padding = 1.1; // 10% 정도의 여유 공간 추가
+		const distToFitX = (sizeX / 2) / tanHalfFovX;
+		const distToFitY = (sizeY / 2) / tanHalfFovY;
+
+		const requiredDistance = Math.max(distToFitX, distToFitY) * padding + (sizeZ / 2);
+
+		this.centerX = centerX;
+		this.centerY = centerY;
+		this.centerZ = centerZ;
+		this.distance = this.#currentDistance = requiredDistance;
+
 	}
 
 	// ==================== 센터 좌표 Getter/Setter ====================

@@ -65,6 +65,7 @@ export class AABB {
         this.centerX = (maxX + minX) / 2;
         this.centerY = (maxY + minY) / 2;
         this.centerZ = (maxZ + minZ) / 2;
+        //TODO size에 절대값을 보장해야하나?
         this.xSize = maxX - minX;
         this.ySize = maxY - minY;
         this.zSize = maxZ - minZ;
