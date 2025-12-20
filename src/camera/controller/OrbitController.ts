@@ -74,6 +74,7 @@ class OrbitController extends AController {
 
 	#calcTargetMeshMatrix(mesh: Mesh, view: View3D, parentMesh?: Mesh) {
 		//
+		mesh.dirtyTransform = true
 		const localMatrix = mesh.modelMatrix;
 		//
 		mat4.identity(localMatrix)
@@ -99,40 +100,42 @@ class OrbitController extends AController {
 		this.#calcTargetMeshMatrix(mesh, view);
 		const bounds = mesh.combinedBoundingAABB;
 
-		// 1. 유효성 검사 (데이터가 없으면 중단)
-		if (!bounds || bounds.minX === Infinity) return;
+		// 데이터 유효성 검사 (0,0,0 반환 방지)
+		if (!bounds || bounds.minX === Infinity || isNaN(bounds.centerX)) return;
 
-		const sizeX = Math.abs(bounds.maxX - bounds.minX);
-		const sizeY = Math.abs(bounds.maxY - bounds.minY);
-		const sizeZ = Math.abs(bounds.maxZ - bounds.minZ);
-
-		const centerX = (bounds.minX + bounds.maxX) / 2;
-		const centerY = (bounds.minY + bounds.maxY) / 2;
-		const centerZ = (bounds.minZ + bounds.maxZ) / 2;
-
-		// 2. 화각 계산
+		// 1. 화각 정보 추출
 		//@ts-ignore
-		const fovY = view.rawCamera.fieldOfView * Math.PI / 180;
+		const fovY = view.rawCamera.fieldOfView * Math.PI / 180; // Radian 변환
 		const tanHalfFovY = Math.tan(fovY / 2);
 		const tanHalfFovX = tanHalfFovY * view.aspect;
 
-		// 3. 배율 기반 패딩 적용 (예: 1.1은 10%의 여유 공간을 의미)
-		const padding = 1.1;
+		// 2. 모델의 실제 크기 (절대값 보장)
+		const xSize = Math.abs(bounds.xSize);
+		const ySize = Math.abs(bounds.ySize);
+		const zSize = Math.abs(bounds.zSize);
 
-		// 각 축별로 화면에 꽉 차기 위한 거리 계산
-		const distToFitX = (sizeX / 2) / tanHalfFovX;
-		const distToFitY = (sizeY / 2) / tanHalfFovY;
+		// 3. 거리 계산 (수학적 정석)
+		// 각 축의 절반 크기를 해당 축의 fov 탄젠트로 나누어 거리를 구합니다.
+		const distToFitX = (xSize / 2) / tanHalfFovX;
+		const distToFitY = (ySize / 2) / tanHalfFovY;
 
-		// 4. 최종 거리 계산
-		// - Math.max를 통해 가로/세로 중 더 큰 범위를 수용하는 거리를 선택합니다.
-		// - 여기에 배율(padding)을 곱하여 모델 크기에 비례하는 여백을 둡니다.
-		// - sizeZ / 2를 더해 카메라가 모델의 앞면을 뚫지 않도록 보정합니다.
-		const requiredDistance = (Math.max(distToFitX, distToFitY) * padding) + (sizeZ );
+		// 4. 최종 거리 결정
+		// - Math.max: 가로/세로 중 더 멀리 떨어져야 하는 축을 선택
+		// - padding: 1.15 정도로 설정하여 모델이 테두리에 닿지 않게 여유를 줌
+		// - zSize / 2: 카메라가 모델 '중심'이 아닌 '앞면'을 기준으로 거리를 잡도록 보정
+		const padding = 1.15;
+		const requiredDistance = (Math.max(distToFitX, distToFitY) * padding) + (zSize / 2);
 
-		this.centerX = centerX;
-		this.centerY = centerY;
-		this.centerZ = centerZ;
-		this.distance = this.#currentDistance = requiredDistance;
+		// 5. 타겟(Center) 설정 - 질문하신 centerY 보정 적용
+		this.centerX = bounds.centerX;
+		this.centerY = bounds.centerY
+		this.centerZ = bounds.centerZ;
+		keepLog(bounds)
+
+
+		// 6. 결과 적용 및 최소 거리 보호
+		//@ts-ignore
+		this.distance = this.#currentDistance = Math.max(requiredDistance, view.rawCamera.nearClipping * 2);
 	}
 
 	// ==================== 센터 좌표 Getter/Setter ====================
