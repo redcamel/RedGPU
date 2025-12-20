@@ -37,7 +37,6 @@ function loadGLTF(view, url) {
       const mesh = result.resultMesh
       scene.addChild(mesh)
       view.camera.fitMeshToScreenCenter(mesh,view)
-      console.log(view.camera.centerX,view.camera.centerY,view.camera.centerZ)
     });
 }
 
