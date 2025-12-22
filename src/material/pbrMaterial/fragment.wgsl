@@ -837,11 +837,12 @@ let attenuation = rangePart * invSquare;
         let NdotV_fresnel = max(dot(N, V), 0.04);
 
         // ---------- ibl 프레넬 항 계산----------
-        let fresnel = pow(1.0 - NdotV_fresnel, 5.0);
-        var F_IBL_dielectric = F0_dielectric + (vec3<f32>(1.0) - F0_dielectric) * fresnel;
-        var F_IBL_metal      = F0_metal      + (vec3<f32>(1.0) - F0_metal)      * fresnel;
-//        var F_IBL            = F0            + (vec3<f32>(1.0) - F0)            * fresnel;
-        var F_IBL            = F0 + (max(vec3<f32>(1.0 - roughnessParameter), F0) - F0) * fresnel;;
+        let fresnel = pow(1.0 - NdotV, 5.0);
+
+        // 거칠기를 고려한 각 파트별 프레넬 계산
+        var F_IBL_dielectric = F0_dielectric + (max(vec3<f32>(1.0 - roughnessParameter), F0_dielectric) - F0_dielectric) * fresnel;
+        var F_IBL_metal      = F0_metal      + (max(vec3<f32>(1.0 - roughnessParameter), F0_metal)      - F0_metal)      * fresnel;
+        var F_IBL            = F0            + (max(vec3<f32>(1.0 - roughnessParameter), F0)            - F0)            * fresnel;
 
 
 //        #redgpu_if useKHR_materials_iridescence
@@ -1009,7 +1010,7 @@ let attenuation = rangePart * invSquare;
 
         // ---------- ibl Metal 계산 ----------
 
-        let envIBL_METAL = reflectedColor * F_IBL ;
+        let envIBL_METAL = reflectedColor * F_IBL;
         // ---------- ibl 기본 혼합 ----------
         let metallicPart = envIBL_METAL * metallicParameter ; // 금속 파트 계산
         let dielectricPart = envIBL_DIELECTRIC * (1.0 - metallicParameter) ; // 유전체 파트 계산
