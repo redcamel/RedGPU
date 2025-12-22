@@ -16,12 +16,12 @@ RedGPU.init(
     redGPUContext.addView(view);
 
     // loadGLTF(view, 'https://threejs.org/examples/models/gltf/LittlestTokyo.glb');
-    // loadGLTF(view, 'https://threejs.org/examples/models/gltf/Soldier.glb');
+    loadGLTF(view, 'https://threejs.org/examples/models/gltf/Soldier.glb');
     // loadGLTF(view, 'https://raw.GithubUserContent.com/KhronosGroup/glTF-Sample-Assets/main/./Models/Fox/glTF-Binary/Fox.glb');
     // loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ToyCar/glTF-Binary/ToyCar.glb');
     // loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/NodePerformanceTest/glTF-Binary/NodePerformanceTest.glb');
     // loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/TransmissionOrderTest/glTF-Binary/TransmissionOrderTest.glb');
-    loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ABeautifulGame/glTF-Binary/ABeautifulGame.glb');
+    // loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ABeautifulGame/glTF-Binary/ABeautifulGame.glb');
 
     const renderer = new RedGPU.Renderer(redGPUContext);
     const render = () => {

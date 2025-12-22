@@ -885,9 +885,9 @@ let attenuation = rangePart * invSquare;
         // ---------- ibl Diffuse  ----------
         let effectiveTransmission = transmissionParameter * (1.0 - metallicParameter);
         let iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, iblTextureSampler, N,0).rgb;
-        let kd = mix(1.0 - F_IBL_dielectric, vec3<f32>(1.0), roughnessParameter);
-        var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor * kd;
-//        var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor* (vec3<f32>(1.0) - F_IBL_dielectric)
+//        let kd = mix(1.0 - F_IBL_dielectric, vec3<f32>(1.0), roughnessParameter);
+//        var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor * kd;
+        var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor* (vec3<f32>(1.0) - F_IBL_dielectric);
 
         // ---------- ibl Diffuse Transmission ----------
         #redgpu_if useKHR_materials_diffuse_transmission
@@ -902,9 +902,9 @@ let attenuation = rangePart * invSquare;
 
         // ---------- ibl Specular ----------
         var envIBL_SPECULAR:vec3<f32>;
-//        envIBL_SPECULAR = reflectedColor * G_smith * F_IBL * specularParameter ;
+        envIBL_SPECULAR = reflectedColor * G_smith * F_IBL * specularParameter ;
 //        envIBL_SPECULAR = reflectedColor * G_smith * F_IBL_dielectric * specularParameter ;
-        envIBL_SPECULAR = reflectedColor * G_smith * mix(F_IBL_dielectric,F_IBL_metal,metallicParameter) * specularParameter  ;
+//        envIBL_SPECULAR = reflectedColor * G_smith * mix(F_IBL_dielectric,F_IBL_metal,metallicParameter) * specularParameter  ;
 //        envIBL_SPECULAR = reflectedColor * G_smith * select(
 //            mix(F_IBL_dielectric,F_IBL_metal,metallicParameter),
 //            F_IBL,
