@@ -719,15 +719,16 @@ fn main(inputData:InputData) -> FragmentOutput {
 //    var F0 = mix(F0_dielectric, F0_metal, metallicParameter); // 기본 반사율
     let F0_dielectric_base = vec3(pow((1.0 - ior) / (1.0 + ior), 2.0));
     // KHR_materials_specular 적용
-    let F0_dielectric = F0_dielectric_base *  specularColor;
-    let F0_metal = baseColor.rgb; // 금속 반사율
-    var F0 = mix(F0_dielectric, F0_metal, metallicParameter); // 기본 반사율
+    var F0_dielectric = F0_dielectric_base *  specularColor;
+    var F0_metal = baseColor.rgb; // 금속 반사율
+
     #redgpu_if useKHR_materials_iridescence
         if (iridescenceParameter > 0.0) {
-            F0 = iridescent_fresnel(1.0, u_KHR_iridescenceIor, F0, iridescenceThickness, iridescenceParameter, NdotV);
+            F0_dielectric = iridescent_fresnel(1.0, u_KHR_iridescenceIor, F0_dielectric, iridescenceThickness, iridescenceParameter, NdotV);
+            F0_metal = iridescent_fresnel(1.0, u_KHR_iridescenceIor, baseColor.rgb, iridescenceThickness, iridescenceParameter, NdotV);
         }
     #redgpu_endIf
-
+    let F0 = mix(F0_dielectric, F0_metal, metallicParameter); // 기본 반사율
 
     // ---------- 직접 조명 계산 - directional ----------
     var totalDirectLighting = vec3<f32>(0.0);
@@ -839,27 +840,28 @@ let attenuation = rangePart * invSquare;
         let fresnel = pow(1.0 - NdotV_fresnel, 5.0);
         var F_IBL_dielectric = F0_dielectric + (vec3<f32>(1.0) - F0_dielectric) * fresnel;
         var F_IBL_metal      = F0_metal      + (vec3<f32>(1.0) - F0_metal)      * fresnel;
-        var F_IBL            = F0            + (vec3<f32>(1.0) - F0)            * fresnel;
+//        var F_IBL            = F0            + (vec3<f32>(1.0) - F0)            * fresnel;
+        var F_IBL            = F0 + (max(vec3<f32>(1.0 - roughnessParameter), F0) - F0) * fresnel;;
 
 
-        #redgpu_if useKHR_materials_iridescence
-             if (iridescenceParameter > 0.0) {
-                 // 베이스 F0 미리 계산 (한 번만)
-                 let base_f0 = mix(F0_dielectric, baseColor.rgb, metallicParameter);
-
-                 // 이리데센스 효과 계산 (한 번만)
-                 let iridescence_effect = iridescent_fresnel(
-                     1.0,                      // 외부 매질 IOR (공기)
-                     u_KHR_iridescenceIor,     // 이리데센스 막의 IOR
-                     base_f0,                  // 혼합된 기본 F0
-                     iridescenceThickness,     // 이리데센스 막 두께
-                     iridescenceParameter,     // 이리데센스 강도
-                     NdotV                     // 시야각 코사인
-                 );
-
-                 F_IBL = iridescence_effect;
-             }
-         #redgpu_endIf
+//        #redgpu_if useKHR_materials_iridescence
+//             if (iridescenceParameter > 0.0) {
+//                 // 베이스 F0 미리 계산 (한 번만)
+//                 let base_f0 = mix(F0_dielectric, baseColor.rgb, metallicParameter);
+//
+//                 // 이리데센스 효과 계산 (한 번만)
+//                 let iridescence_effect = iridescent_fresnel(
+//                     1.0,                      // 외부 매질 IOR (공기)
+//                     u_KHR_iridescenceIor,     // 이리데센스 막의 IOR
+//                     base_f0,                  // 혼합된 기본 F0
+//                     iridescenceThickness,     // 이리데센스 막 두께
+//                     iridescenceParameter,     // 이리데센스 강도
+//                     NdotV                     // 시야각 코사인
+//                 );
+//
+//                 F_IBL = iridescence_effect;
+//             }
+//         #redgpu_endIf
 
         let K = (roughnessParameter + 1.0) * (roughnessParameter + 1.0) / 8.0;
         let G = NdotV / (NdotV * (1.0 - K) + K);
@@ -900,12 +902,13 @@ let attenuation = rangePart * invSquare;
         // ---------- ibl Specular ----------
         var envIBL_SPECULAR:vec3<f32>;
 //        envIBL_SPECULAR = reflectedColor * G_smith * F_IBL * specularParameter ;
-//        envIBL_SPECULAR = reflectedColor * G_smith * mix(F_IBL_dielectric,F_IBL_metal,metallicParameter) * specularParameter ;
-        envIBL_SPECULAR = reflectedColor * G_smith * select(
-            mix(F_IBL_dielectric,F_IBL_metal,metallicParameter),
-            F_IBL,
-            u_useKHR_materials_iridescence && iridescenceParameter > 0.0
-        ) * specularParameter ;
+//        envIBL_SPECULAR = reflectedColor * G_smith * F_IBL_dielectric * specularParameter ;
+        envIBL_SPECULAR = reflectedColor * G_smith * mix(F_IBL_dielectric,F_IBL_metal,metallicParameter) * specularParameter  ;
+//        envIBL_SPECULAR = reflectedColor * G_smith * select(
+//            mix(F_IBL_dielectric,F_IBL_metal,metallicParameter),
+//            F_IBL,
+//            u_useKHR_materials_iridescence && iridescenceParameter > 0.0
+//        ) * specularParameter ;
         #redgpu_if useKHR_materials_anisotropy
         {
             var bentNormal = cross(anisotropicB, V);
@@ -1005,7 +1008,8 @@ let attenuation = rangePart * invSquare;
         #redgpu_endIf
 
         // ---------- ibl Metal 계산 ----------
-        let envIBL_METAL = reflectedColor * F0 ;
+
+        let envIBL_METAL = reflectedColor * F_IBL ;
         // ---------- ibl 기본 혼합 ----------
         let metallicPart = envIBL_METAL * metallicParameter ; // 금속 파트 계산
         let dielectricPart = envIBL_DIELECTRIC * (1.0 - metallicParameter) ; // 유전체 파트 계산
