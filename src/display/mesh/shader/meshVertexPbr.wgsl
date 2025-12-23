@@ -49,16 +49,19 @@ fn main(inputData: InputData) -> OutputData {
     var normalPosition: vec4<f32>;
 
     position = u_modelMatrix * input_position_vec4;
-    normalPosition = u_normalModelMatrix * vec4<f32>(input_vertexNormal, 1.0);
+    normalPosition = u_normalModelMatrix * vec4<f32>(input_vertexNormal, 0.0);
 
     // Basic output assignments
     output.position = u_projectionCameraMatrix * position;
     output.vertexPosition = position.xyz;
-    output.vertexNormal = normalPosition.xyz;
+    output.vertexNormal = normalize(normalPosition.xyz);
     output.uv = inputData.uv;
     output.uv1 = inputData.uv1;
     output.vertexColor_0 = inputData.vertexColor_0;
-    output.vertexTangent = u_normalModelMatrix * inputData.vertexTangent;
+
+    let transformedTangentXYZ = (u_normalModelMatrix * vec4<f32>(inputData.vertexTangent.xyz, 0.0)).xyz;
+    output.vertexTangent = vec4<f32>( normalize(transformedTangentXYZ), inputData.vertexTangent.w );
+
     output.ndcPosition = output.position.xyz / output.position.w;
 
     // Shadow calculation

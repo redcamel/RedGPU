@@ -8,8 +8,7 @@ RedGPU.init(
     (redGPUContext) => {
 
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 10
-        controller.speedDistance = 0.1
+
         controller.tilt = 0
 
         const scene = new RedGPU.Display.Scene();
@@ -33,34 +32,12 @@ RedGPU.init(
     }
 );
 
-let num = 0
-
 function loadGLTF(view, url) {
     const {redGPUContext, scene} = view;
     new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
         const mesh = result.resultMesh
-        mesh.x = Math.random() * 30 - 15
-        mesh.z = Math.random() * 30 - 15
-        if (url.includes('breakDance')) {
-
-            mesh.setScale(0.001)
-
-        }
         scene.addChild(mesh)
-        if (num === 0) {
-            console.log(result)
-            mesh.x = 0
-            mesh.z = 0
-        }
-        // console.log('interleaveData2',mesh.children[0].geometry.vertexBuffer.data)
-        num++
-        // let i = 10
-        // while(i--){
-        // 	let clonedMesh = mesh.clone()
-        // 	clonedMesh.x = Math.random() * 10 - 5
-        // 	clonedMesh.z = Math.random() * 10 - 5
-        // 	scene.addChild(clonedMesh)
-        // }
+        view.camera.fitMeshToScreenCenter(mesh, view)
     });
 }
 

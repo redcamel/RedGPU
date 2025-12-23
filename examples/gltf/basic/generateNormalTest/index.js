@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../../dist/index.js";
+import * as RedGPU from "../../../../dist/index.js";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -7,13 +7,14 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+
         controller.tilt = 0
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
 
-        loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/AnisotropyDiscTest/glTF-Binary/AnisotropyDiscTest.glb');
+        loadGLTF(view, 'https://raw.GithubUserContent.com/KhronosGroup/glTF-Sample-Assets/main/./Models/Fox/glTF-Binary/Fox.glb');
 
         const renderer = new RedGPU.Renderer(redGPUContext);
         const render = () => {
@@ -41,7 +42,7 @@ function loadGLTF(view, url) {
 
 const renderTestPane = async (redGPUContext, targetView) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
-    const {createIblHelper, setDebugButtons} = await import('../../../../exampleHelper/createExample/panes/index.js');
+    const {createIblHelper, setDebugButtons} = await import('../../../exampleHelper/createExample/panes/index.js');
     setDebugButtons(redGPUContext);
     const pane = new Pane();
     createIblHelper(pane, targetView, RedGPU);

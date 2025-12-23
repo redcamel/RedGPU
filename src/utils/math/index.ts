@@ -1,4 +1,5 @@
 import calculateNormals from "./calculateNormals";
+import calculateTangents from "./calculateTangents";
 import computeViewFrustumPlanes from "./computeViewFrustumPlanes";
 import formatBytes from "./formatBytes";
 import matToEuler from "./matToEuler";
@@ -9,6 +10,7 @@ export * from "./bound";
 export * from "./coordinates";
 export {
     calculateNormals,
+    calculateTangents,
     computeViewFrustumPlanes,
     formatBytes,
     matToEuler,

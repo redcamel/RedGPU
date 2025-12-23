@@ -7,8 +7,6 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 14
-        controller.speedDistance = 0.1
         controller.tilt = 0
 
         const scene = new RedGPU.Display.Scene();
@@ -37,6 +35,7 @@ function loadGLTF(view, url) {
     new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
         const mesh = result.resultMesh
         scene.addChild(mesh)
+        view.camera.fitMeshToScreenCenter(mesh, view)
     });
 }
 

@@ -79,17 +79,32 @@ fn main(inputData: InputDataSkin) -> OutputDataSkin {
 
 
     // Position and normal calculation
-    let position = u_modelMatrix * skinMat * vec4<f32>(inputData.position, 1.0);
-    let normalPosition = u_normalModelMatrix * skinMat * vec4<f32>(input_vertexNormal, 1.0);
+
+    // 스킨된 position
+    let skinnedPosition = (skinMat * vec4<f32>(inputData.position, 1.0));
+
+    // 최종 position
+    let position = u_modelMatrix * skinnedPosition;
+
+    // 스킨된 normal
+    let skinnedNormal = (skinMat * vec4<f32>(input_vertexNormal, 0.0)).xyz;
+    let transformedNormal = normalize((u_normalModelMatrix * vec4<f32>(skinnedNormal, 0.0)).xyz);
+    output.vertexNormal = transformedNormal;
+
+    // tangent도 동일하게 처리
+    let skinnedTangent = (skinMat * vec4<f32>(inputData.vertexTangent.xyz, 0.0)).xyz;
+    let transformedTangentXYZ = (u_normalModelMatrix * vec4<f32>(skinnedTangent, 0.0)).xyz;
+    output.vertexTangent = vec4<f32>(normalize(transformedTangentXYZ), inputData.vertexTangent.w);
+
 
     // Basic output assignments
     output.position = u_projectionCameraMatrix * position;
     output.vertexPosition = position.xyz;
-    output.vertexNormal = normalPosition.xyz;
     output.uv = inputData.uv;
     output.uv1 = inputData.uv1;
     output.vertexColor_0 = inputData.vertexColor_0;
-    output.vertexTangent = u_normalModelMatrix * inputData.vertexTangent;
+
+
     output.ndcPosition = output.position.xyz / output.position.w;
 
     // Shadow calculation

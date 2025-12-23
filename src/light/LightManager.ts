@@ -45,7 +45,7 @@ class LightManager {
      * 기본값은 새로운 AmbientLight 인스턴스입니다.
      * @private
      */
-    #ambientLight: AmbientLight = new AmbientLight()
+    #ambientLight: AmbientLight
     /**
      * 방향성 조명의 투영 행렬 계산에 사용되는 내부 캐시 행렬입니다.
      * 그림자 맵 생성 등의 연산에서 사용됩니다.

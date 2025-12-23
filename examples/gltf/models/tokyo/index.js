@@ -7,14 +7,12 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 18
-        controller.speedDistance = 0.4
+
         controller.tilt = 0
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
-
         loadGLTF(view, 'https://redcamel.github.io/RedGL-Examples-test/asset/glTF/tokyo/scene.gltf');
 
         const renderer = new RedGPU.Renderer(redGPUContext);
@@ -37,6 +35,7 @@ function loadGLTF(view, url) {
     new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
         const mesh = result.resultMesh
         mesh.setScale(0.02)
+
         scene.addChild(mesh)
     });
 }

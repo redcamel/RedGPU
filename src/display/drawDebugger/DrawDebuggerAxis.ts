@@ -18,13 +18,13 @@ class DrawDebuggerAxis extends Mesh {
         const geometry = new Box(redGPUContext);
         // Add X-axis
         this.addChild(this.#createAxis(geometry, '#ff0000', [5, 0.1, 0.1], [2.5, 0, 0]));
-        this.addChild(this.#createConeLikeTip(redGPUContext, '#ff0000', [0.5, 1.25], [5.5, 0, 0], [0, 0, -90]));
+        this.addChild(this.#createConeLikeTip(redGPUContext, '#ff0000', [0.5, 1.25], [5.5, 0, 0], [0, 0, 90]));
         // Add Y-axis
         this.addChild(this.#createAxis(geometry, '#00ff00', [0.1, 5, 0.1], [0, 2.5, 0]));
         this.addChild(this.#createConeLikeTip(redGPUContext, '#00ff00', [0.5, 1.25], [0, 5.5, 0], [180, 0, 0]));
         // Add Z-axis
         this.addChild(this.#createAxis(geometry, '#0000ff', [0.1, 0.1, 5], [0, 0, 2.5]));
-        this.addChild(this.#createConeLikeTip(redGPUContext, '#0000ff', [0.5, 1.25], [0, 0, 5.5], [90, 0, 0]));
+        this.addChild(this.#createConeLikeTip(redGPUContext, '#0000ff', [0.5, 1.25], [0, 0, 5.5], [-90, 0, 0]));
     }
 
     /**
