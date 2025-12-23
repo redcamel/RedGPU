@@ -22,7 +22,7 @@ const setMeshRotation = (tRotation: number[], mesh: Mesh) => {
         (tRotation[1] * RAD_TO_DEG),
         (tRotation[2] * RAD_TO_DEG)
     );
-    keepLog(mesh.name,tRotation, [-tRotation[0], -tRotation[1], -tRotation[2]]);
+
 }
 /**
  * Parses the transformation and matrix information from `nodeInfo` and applies it to the `mesh`.

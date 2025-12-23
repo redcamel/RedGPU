@@ -56,6 +56,7 @@ class GltfAnimationLooperManager {
                 currentAniTrack = targetClip[targetAniTrackIDX];
                 currentAniTrackCacheTable = currentAniTrack.cacheTable;
                 const {animationTargetMesh, timeAnimationInfo, aniDataAnimationInfo, weightMeshes} = currentAniTrack;
+                animationTargetMesh.dirtyTransform = true
                 currentTime = ((timestamp - targetPlayAnimationInfo.startTime) % (maxTime * 1000)) / 1000;
                 /////////////////////////////////////////////////////////////////////////////////
                 // 이진 탐색으로 타임프레임 찾기 (인라인)

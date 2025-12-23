@@ -789,6 +789,8 @@ class Mesh extends MeshBase {
                 }
             }
             this.dirtyTransform = false
+            this.#cachedBoundingAABB = null
+            this.#cachedBoundingOBB = null
         }
         // check distanceCulling
         let passFrustumCulling = true
