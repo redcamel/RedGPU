@@ -1566,6 +1566,14 @@ Check performance limits on each device.`
                             ko: ``,
                             en: ``
                         },
+                    },   {
+                        name: 'texcooredNTest',
+                        path: 'gltf/models/texcooredNTest',
+                        thumb: 'gltf/models/texcooredNTest/thumb.png',
+                        description: {
+                            ko: ``,
+                            en: ``
+                        },
                     },
                 ]
             },
