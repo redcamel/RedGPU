@@ -72,70 +72,83 @@ class OrbitController extends AController {
 		;
 	}
 
-	#calcTargetMeshMatrix(mesh: Mesh, view: View3D, parentMesh?: Mesh) {
+	#calcTargetMeshMatrix(mesh: Mesh, view: View3D) {
 		//
-		mesh.dirtyTransform = true
-		const localMatrix = mesh.modelMatrix;
+
+		const localMatrix = mat4.create();
 		//
 		mat4.identity(localMatrix)
 		mat4.translate(localMatrix, localMatrix, [mesh.x, mesh.y, mesh.z]);
-		mat4.rotateX(localMatrix, localMatrix, mesh.rotationX * Math.PI / 180);
-		mat4.rotateY(localMatrix, localMatrix, mesh.rotationY * Math.PI / 180);
-		mat4.rotateZ(localMatrix, localMatrix, mesh.rotationZ * Math.PI / 180);
-		mat4.scale(localMatrix, localMatrix, [mesh.scaleX, mesh.scaleY, mesh.scaleZ]);
+		//TODO 좌표계를 바꾸던가 해야겠네
+        mat4.rotateY(localMatrix, localMatrix, -mesh.rotationY * Math.PI / 180);
+        mat4.rotateX(localMatrix, localMatrix, -mesh.rotationX * Math.PI / 180);
+        mat4.rotateZ(localMatrix, localMatrix, -mesh.rotationZ * Math.PI / 180);
+        mat4.scale(localMatrix, localMatrix, [mesh.scaleX, mesh.scaleY, mesh.scaleZ]);
 		mat4.copy(mesh.localMatrix, localMatrix);
 		//
-		if (parentMesh) {
-			mat4.multiply(mesh.modelMatrix, parentMesh.modelMatrix, localMatrix);
+		if (mesh.parent) {
+			mat4.multiply(mesh.modelMatrix, mesh.parent?.modelMatrix, localMatrix);
 		} else {
 			mat4.copy(mesh.modelMatrix, localMatrix);
 		}
+
 		//
-		mesh.children.forEach((child: Mesh) => {
-			this.#calcTargetMeshMatrix(child, view, mesh);
-		});
+        let i = 0;
+        let len = mesh.children.length;
+        for (let i = 0; i < len; i++) {
+            const child = mesh.children[i];
+            if (child instanceof Mesh) {
+                this.#calcTargetMeshMatrix(child, view);
+            }
+
+        }
+
+        keepLog(mesh.name,mesh.modelMatrix)
 	}
 
 	fitMeshToScreenCenter(mesh: Mesh, view: View3D): void {
-		this.#calcTargetMeshMatrix(mesh, view);
-		const bounds = mesh.combinedBoundingAABB;
 
-		// 데이터 유효성 검사 (0,0,0 반환 방지)
-		if (!bounds || bounds.minX === Infinity || isNaN(bounds.centerX)) return;
+            this.#calcTargetMeshMatrix(mesh, view);
+            const bounds = mesh.combinedBoundingAABB;
 
-		// 1. 화각 정보 추출
-		//@ts-ignore
-		const fovY = view.rawCamera.fieldOfView * Math.PI / 180; // Radian 변환
-		const tanHalfFovY = Math.tan(fovY / 2);
-		const tanHalfFovX = tanHalfFovY * view.aspect;
+            // 데이터 유효성 검사 (0,0,0 반환 방지)
+            if (!bounds || bounds.minX === Infinity || isNaN(bounds.centerX)) return;
 
-		// 2. 모델의 실제 크기 (절대값 보장)
-		const xSize = Math.abs(bounds.xSize);
-		const ySize = Math.abs(bounds.ySize);
-		const zSize = Math.abs(bounds.zSize);
+            // 1. 화각 정보 추출
+            //@ts-ignore
+            const fovY = view.rawCamera.fieldOfView * Math.PI / 180; // Radian 변환
+            const tanHalfFovY = Math.tan(fovY / 2);
+            const tanHalfFovX = tanHalfFovY * view.aspect;
 
-		// 3. 거리 계산 (수학적 정석)
-		// 각 축의 절반 크기를 해당 축의 fov 탄젠트로 나누어 거리를 구합니다.
-		const distToFitX = (xSize / 2) / tanHalfFovX;
-		const distToFitY = (ySize / 2) / tanHalfFovY;
+            // 2. 모델의 실제 크기 (절대값 보장)
+            const xSize = Math.abs(bounds.xSize);
+            const ySize = Math.abs(bounds.ySize);
+            const zSize = Math.abs(bounds.zSize);
 
-		// 4. 최종 거리 결정
-		// - Math.max: 가로/세로 중 더 멀리 떨어져야 하는 축을 선택
-		// - padding: 1.15 정도로 설정하여 모델이 테두리에 닿지 않게 여유를 줌
-		// - zSize / 2: 카메라가 모델 '중심'이 아닌 '앞면'을 기준으로 거리를 잡도록 보정
-		const padding = 1.15;
-		const requiredDistance = (Math.max(distToFitX, distToFitY) * padding) + (zSize / 2);
+            // 3. 거리 계산 (수학적 정석)
+            // 각 축의 절반 크기를 해당 축의 fov 탄젠트로 나누어 거리를 구합니다.
+            const distToFitX = (xSize / 2) / tanHalfFovX;
+            const distToFitY = (ySize / 2) / tanHalfFovY;
 
-		// 5. 타겟(Center) 설정 - 질문하신 centerY 보정 적용
-		this.centerX = bounds.centerX;
-		this.centerY = bounds.centerY
-		this.centerZ = bounds.centerZ;
-		keepLog(bounds)
+            // 4. 최종 거리 결정
+            // - Math.max: 가로/세로 중 더 멀리 떨어져야 하는 축을 선택
+            // - padding: 1.15 정도로 설정하여 모델이 테두리에 닿지 않게 여유를 줌
+            // - zSize / 2: 카메라가 모델 '중심'이 아닌 '앞면'을 기준으로 거리를 잡도록 보정
+            const padding = 1.15;
+            const requiredDistance = (Math.max(distToFitX, distToFitY) * padding) + (zSize / 2);
+
+            // 5. 타겟(Center) 설정 - 질문하신 centerY 보정 적용
+            this.centerX = bounds.centerX;
+            this.centerY = bounds.centerY
+            this.centerZ = bounds.centerZ;
+            keepLog(bounds)
 
 
-		// 6. 결과 적용 및 최소 거리 보호
-		//@ts-ignore
-		this.distance = this.#currentDistance = Math.max(requiredDistance, view.rawCamera.nearClipping * 2);
+            // 6. 결과 적용 및 최소 거리 보호
+            //@ts-ignore
+            this.distance = this.#currentDistance = Math.max(requiredDistance, view.rawCamera.nearClipping * 2);
+        // },1000)
+
 	}
 
 	// ==================== 센터 좌표 Getter/Setter ====================

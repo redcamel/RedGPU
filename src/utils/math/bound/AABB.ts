@@ -65,10 +65,9 @@ export class AABB {
         this.centerX = (maxX + minX) / 2;
         this.centerY = (maxY + minY) / 2;
         this.centerZ = (maxZ + minZ) / 2;
-        //TODO size에 절대값을 보장해야하나?
-        this.xSize = Math.abs(maxX - minX);
-        this.ySize = Math.abs(maxY - minY);
-        this.zSize = Math.abs(maxZ - minZ);
+        this.xSize = (maxX - minX);
+        this.ySize = (maxY - minY);
+        this.zSize = (maxZ - minZ);
         this.geometryRadius = Math.sqrt((this.xSize / 2) ** 2 + (this.ySize / 2) ** 2 + (this.zSize / 2) ** 2);
     }
 

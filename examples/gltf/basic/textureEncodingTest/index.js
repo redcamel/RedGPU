@@ -12,6 +12,7 @@ RedGPU.init(
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+        view.grid = true
         redGPUContext.addView(view);
 
         loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/TextureEncodingTest/glTF-Binary/TextureEncodingTest.glb');
@@ -35,6 +36,7 @@ function loadGLTF(view, url) {
     const {redGPUContext, scene} = view;
     new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
       const mesh = result.resultMesh
+        // mesh.setEnableDebuggerRecursively(true);
       scene.addChild(mesh)
       view.camera.fitMeshToScreenCenter(mesh,view)
     });
