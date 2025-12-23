@@ -13,8 +13,6 @@ RedGPU.init(
         // Create a camera controller (Orbit type)
         // 궤도형 카메라 컨트롤러 생성
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.speedDistance = 0.1
-        controller.distance = 7
         controller.tilt = 0
 
         // Create a scene and add a view with the camera controller
@@ -60,10 +58,13 @@ function loadGLTFGrid(view, urls, gridSize = 4, spacing = 3) {
     const totalDepth = (totalRows - 1) * spacing; // 전체 깊이 (Z)
 
     // GLTF 모델 로드 및 그리드 배치
+    let loadedNum = 0
+    const container = new RedGPU.Display.Mesh(view.redGPUContext)
+    view.scene.addChild(container)
     urls.forEach((url, index) => {
         new RedGPU.GLTFLoader(redGPUContext, url, (v) => {
             const mesh = v['resultMesh'];
-            scene.addChild(mesh);
+            container.addChild(mesh);
 
             // 그리드 위치 계산 (X, Z 축 기준)
             const row = Math.floor(index / gridSize);
@@ -81,6 +82,10 @@ function loadGLTFGrid(view, urls, gridSize = 4, spacing = 3) {
             if (index === 1) {
                 mesh.setScale(5)
                 mesh.y = -1.7
+            }
+
+            if (loadedNum === urls.length) {
+                view.camera.fitMeshToScreenCenter(container, view)
             }
         });
     });

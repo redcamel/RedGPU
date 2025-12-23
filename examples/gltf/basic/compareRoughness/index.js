@@ -32,13 +32,14 @@ RedGPU.init(
 );
 
 function loadGLTF(view, url) {
-  const {redGPUContext, scene} = view;
-  new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
-    const mesh = result.resultMesh
-    scene.addChild(mesh)
-    view.camera.fitMeshToScreenCenter(mesh, view)
-  });
+    const {redGPUContext, scene} = view;
+    new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
+        const mesh = result.resultMesh
+        scene.addChild(mesh)
+        view.camera.fitMeshToScreenCenter(mesh, view)
+    });
 }
+
 const renderTestPane = async (redGPUContext, targetView) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
     const {createIblHelper, setDebugButtons} = await import('../../../exampleHelper/createExample/panes/index.js');

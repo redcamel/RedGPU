@@ -4,59 +4,54 @@ const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
 RedGPU.init(
-  canvas,
-  (redGPUContext) => {
-    const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-    controller.distance = 3
-    controller.speedDistance = 0.4
-    controller.tilt = 0
+    canvas,
+    (redGPUContext) => {
+        const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+        controller.distance = 3
+        controller.speedDistance = 0.4
+        controller.tilt = 0
 
-    const scene = new RedGPU.Display.Scene();
-    const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-    redGPUContext.addView(view);
+        const scene = new RedGPU.Display.Scene();
+        const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+        redGPUContext.addView(view);
 
-    // loadGLTF(view, 'https://threejs.org/examples/models/gltf/LittlestTokyo.glb');
-    loadGLTF(view, 'https://threejs.org/examples/models/gltf/Soldier.glb');
-    // loadGLTF(view, 'https://raw.GithubUserContent.com/KhronosGroup/glTF-Sample-Assets/main/./Models/Fox/glTF-Binary/Fox.glb');
-    // loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ToyCar/glTF-Binary/ToyCar.glb');
-    // loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/NodePerformanceTest/glTF-Binary/NodePerformanceTest.glb');
-    // loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/TransmissionOrderTest/glTF-Binary/TransmissionOrderTest.glb');
-    // loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ABeautifulGame/glTF-Binary/ABeautifulGame.glb');
+        // loadGLTF(view, 'https://threejs.org/examples/models/gltf/LittlestTokyo.glb');
+        loadGLTF(view, 'https://threejs.org/examples/models/gltf/Soldier.glb');
+        // loadGLTF(view, 'https://raw.GithubUserContent.com/KhronosGroup/glTF-Sample-Assets/main/./Models/Fox/glTF-Binary/Fox.glb');
+        // loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ToyCar/glTF-Binary/ToyCar.glb');
+        // loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/NodePerformanceTest/glTF-Binary/NodePerformanceTest.glb');
+        // loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/TransmissionOrderTest/glTF-Binary/TransmissionOrderTest.glb');
+        // loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ABeautifulGame/glTF-Binary/ABeautifulGame.glb');
 
-    const renderer = new RedGPU.Renderer(redGPUContext);
-    const render = () => {
-    };
-    renderer.start(redGPUContext, render);
+        const renderer = new RedGPU.Renderer(redGPUContext);
+        const render = () => {
+        };
+        renderer.start(redGPUContext, render);
 
-    renderTestPane(redGPUContext, view);
-  },
-  (failReason) => {
-    console.error('RedGPU initialization failed:', failReason);
-    const errorDiv = document.createElement('div');
-    errorDiv.innerHTML = failReason;
-    document.body.appendChild(errorDiv);
-  }
+        renderTestPane(redGPUContext, view);
+    },
+    (failReason) => {
+        console.error('RedGPU initialization failed:', failReason);
+        const errorDiv = document.createElement('div');
+        errorDiv.innerHTML = failReason;
+        document.body.appendChild(errorDiv);
+    }
 );
 
 function loadGLTF(view, url) {
-  const {redGPUContext, scene} = view;
-  new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
-    const mesh = result.resultMesh
-    if(url.includes('Fox')){
-      mesh.setScale(0.01)
-    }
+    const {redGPUContext, scene} = view;
+    new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
+        const mesh = result.resultMesh
 
-    // mesh.y = -1
-    // mesh.setScale(0.02)
-    // mesh.setScale(15)
-    scene.addChild(mesh)
-  });
+        scene.addChild(mesh)
+        view.camera.fitMeshToScreenCenter(mesh, view)
+    });
 }
 
 const renderTestPane = async (redGPUContext, targetView) => {
-  const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
-  const {createIblHelper, setDebugButtons} = await import('../../../exampleHelper/createExample/panes/index.js');
-  setDebugButtons(redGPUContext);
-  const pane = new Pane();
-  createIblHelper(pane, targetView, RedGPU);
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+    const {createIblHelper, setDebugButtons} = await import('../../../exampleHelper/createExample/panes/index.js');
+    setDebugButtons(redGPUContext);
+    const pane = new Pane();
+    createIblHelper(pane, targetView, RedGPU);
 };

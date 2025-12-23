@@ -103,7 +103,6 @@ class OrbitController extends AController {
 
         }
 
-        keepLog(mesh.name,mesh.modelMatrix)
 	}
 
 	fitMeshToScreenCenter(mesh: Mesh, view: View3D): void {
@@ -121,9 +120,9 @@ class OrbitController extends AController {
             const tanHalfFovX = tanHalfFovY * view.aspect;
 
             // 2. 모델의 실제 크기 (절대값 보장)
-            const xSize = Math.abs(bounds.xSize);
-            const ySize = Math.abs(bounds.ySize);
-            const zSize = Math.abs(bounds.zSize);
+            const xSize = (bounds.xSize);
+            const ySize = (bounds.ySize);
+            const zSize = (bounds.zSize);
 
             // 3. 거리 계산 (수학적 정석)
             // 각 축의 절반 크기를 해당 축의 fov 탄젠트로 나누어 거리를 구합니다.
@@ -135,18 +134,28 @@ class OrbitController extends AController {
             // - padding: 1.15 정도로 설정하여 모델이 테두리에 닿지 않게 여유를 줌
             // - zSize / 2: 카메라가 모델 '중심'이 아닌 '앞면'을 기준으로 거리를 잡도록 보정
             const padding = 1.15;
+            // const requiredDistance = (Math.max(distToFitX, distToFitY) * padding) + (zSize / 2);
             const requiredDistance = (Math.max(distToFitX, distToFitY) * padding) + (zSize / 2);
 
             // 5. 타겟(Center) 설정 - 질문하신 centerY 보정 적용
             this.centerX = bounds.centerX;
             this.centerY = bounds.centerY
             this.centerZ = bounds.centerZ;
-            keepLog(bounds)
 
 
             // 6. 결과 적용 및 최소 거리 보호
             //@ts-ignore
             this.distance = this.#currentDistance = Math.max(requiredDistance, view.rawCamera.nearClipping * 2);
+			//@ts-ignore
+			if( this.distance < 1){
+				const multiple= 1 / this.distance
+				mesh.setScale(multiple)
+				this.centerX *= multiple;
+				this.centerY *= multiple
+				this.centerZ *= multiple;
+				this.distance = this.#currentDistance= 1;
+			}
+
         // },1000)
 
 	}

@@ -33,9 +33,9 @@ RedGPU.init(
 function loadGLTF(view, url) {
     const {redGPUContext, scene} = view;
     new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
-      const mesh = result.resultMesh
-      scene.addChild(mesh)
-      view.camera.fitMeshToScreenCenter(mesh,view)
+        const mesh = result.resultMesh
+        scene.addChild(mesh)
+        view.camera.fitMeshToScreenCenter(mesh, view)
     });
 }
 
