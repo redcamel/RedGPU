@@ -8,8 +8,10 @@ import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
 import VertexInterleavedStruct from "../../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
 import VertexInterleaveType from "../../../resources/buffer/vertexBuffer/VertexInterleaveType";
+import {keepLog} from "../../../utils";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import calculateNormals from "../../../utils/math/calculateNormals";
+import calculateTangents from "../../../utils/math/calculateTangents";
 import createUUID from "../../../utils/uuid/createUUID";
 import AccessorInfo_GLTF from "../cls/AccessorInfo_GLTF";
 import MorphInfo_GLTF from "../cls/MorphInfo_GLTF";
@@ -51,17 +53,27 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
         let tDrawMode: GPUPrimitiveTopology;
         // 형상 파싱
         const {attributes} = meshPrimitive
+        const temp = new Map()
         if (attributes) {
             for (const key in attributes) {
                 // 엑세서를 통해서 정보파악하고
                 const accessorGlTfId = attributes[key];
                 const accessorInfo = new AccessorInfo_GLTF(gltfLoader, gltfData, accessorGlTfId);
                 // 어트리뷰트 갈궈서 파악함
+                const isTexcoord = key.indexOf('TEXCOORD_') >-1
+                if(isTexcoord) {
+                    const name = `TEXCOORD_${temp.size}`
+                    temp.set(key, name)
+                    // keepLog(name)
+                }
+
                 parseAttributeInfo_GLTF(
-                    key, accessorInfo,
-                    vertices, uvs, uvs1, uvs2, normals,
-                    jointWeights, joints,
-                    verticesColor_0, tangents
+                  isTexcoord ? temp.get(key) : key, accessorInfo,
+                  vertices,
+                  uvs, uvs1, uvs2,
+                  normals,
+                  jointWeights, joints,
+                  verticesColor_0, tangents
                 );
                 // 스파스 정보도 갈굼
                 if (accessorInfo.accessor.sparse) {
@@ -81,6 +93,7 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
             let accessorInfo = new AccessorInfo_GLTF(gltfLoader, gltfData, accessorGlTfId);
             parseIndicesInfo_GLTF(accessorInfo, indices);
         }
+        // keepLog('-----')
         // 재질파싱
         tMaterial = parseMaterialInfo_GLTF(gltfLoader, gltfData, meshPrimitive);
         if (tMaterial instanceof PBRMaterial) {
@@ -132,10 +145,25 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
         /////////////////////////////////////////////////////////
         // 최종데이터 생산
         if (verticesColor_0.length) tMaterial.useVertexColor_0 = true;
-        if (tangents.length) tMaterial.useVertexTangent = true;
+
         let normalData;
-        if (normals.length) normalData = normals;
-        else normalData = calculateNormals(vertices, indices);
+        // keepLog('normals',normals,vertices,indices)
+        if(!normals.length) {
+            normalData = calculateNormals(vertices, indices);
+
+        }else normalData = normals;;
+        // keepLog('normalData',normalData)
+        {
+
+            // keepLog(tangents)
+            // if (tangents.length > 0) {
+            //     // tangents = calculateTangents(vertices, normalData, uvs, indices, tangents);
+            // } else {
+            //     tangents = calculateTangents(vertices, normalData, uvs, indices);
+            // }
+            // tMaterial.useVertexTangent = true;
+        }
+        if (tangents.length) tMaterial.useVertexTangent = true;
         let interleaveData = [];
         parseInterleaveData_GLTF(interleaveData, vertices, verticesColor_0, normalData, uvs, uvs1, uvs2, jointWeights, joints, tangents);
         // console.log('interleaveData', interleaveData);

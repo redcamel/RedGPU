@@ -65,9 +65,9 @@ export class AABB {
         this.centerX = (maxX + minX) / 2;
         this.centerY = (maxY + minY) / 2;
         this.centerZ = (maxZ + minZ) / 2;
-        this.xSize = maxX - minX;
-        this.ySize = maxY - minY;
-        this.zSize = maxZ - minZ;
+        this.xSize = (maxX - minX);
+        this.ySize = (maxY - minY);
+        this.zSize = (maxZ - minZ);
         this.geometryRadius = Math.sqrt((this.xSize / 2) ** 2 + (this.ySize / 2) ** 2 + (this.zSize / 2) ** 2);
     }
 

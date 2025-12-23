@@ -41,10 +41,15 @@ function loadGLTFGrid(view, urls, gridSize = 3, spacing = 3) {
     const totalWidth = (totalCols - 1) * spacing;
     const totalDepth = (totalRows - 1) * spacing;
 
+    const container = new RedGPU.Display.Mesh(view.redGPUContext)
+    view.scene.addChild(container)
+
+    let loadedNum = 0
     urls.forEach((url, index) => {
         new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
+            loadedNum++
             const mesh = result.resultMesh;
-            scene.addChild(mesh);
+            container.addChild(mesh);
 
             const row = Math.floor(index / gridSize);
             const col = index % gridSize;
@@ -55,8 +60,12 @@ function loadGLTFGrid(view, urls, gridSize = 3, spacing = 3) {
             mesh.y = -0.5;
             mesh.z = z;
 
+            if (loadedNum === urls.length) {
+                view.camera.fitMeshToScreenCenter(container, view)
+            }
         });
     });
+
 }
 
 const renderTestPane = async (redGPUContext, targetView) => {

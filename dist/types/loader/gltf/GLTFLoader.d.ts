@@ -42,8 +42,7 @@ declare class GLTFLoader {
     set gltfData(value: GLTF);
     get fileName(): string;
     get url(): string;
-    stopAnimation(parsedSingleClip: GLTFParsedSingleClip): void;
-    stopAllAnimation(): void;
+    stopAnimation(): void;
     playAnimation(parsedSingleClip: GLTFParsedSingleClip): void;
 }
 export default GLTFLoader;

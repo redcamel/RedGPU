@@ -100,10 +100,10 @@ const parseAttributeInfo_GLTF = function (
                             uvs.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
                         } else if (key == 'TEXCOORD_1') {
                             uvs1.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
-                        } else if (key == 'TEXCOORD_2') {
-                            uvs2.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
-                            //TODO uvs2 구현해야함
-                        } else consoleAndThrowError('VEC2에서 현재 지원하고 있지 않는 키', key);
+                        } else {
+                            // uvs1.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
+                            // console.warn('VEC2에서 현재 지원하고 있지 않는 키', key);
+                        }
                     }
                     strideIndex++;
                 }
@@ -114,9 +114,10 @@ const parseAttributeInfo_GLTF = function (
                         uvs.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
                     } else if (key == 'TEXCOORD_1') {
                         uvs1.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
-                    } else if (key == 'TEXCOORD_2') {
-                        uvs2.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
-                    } else consoleAndThrowError('VEC2에서 현재 지원하고 있지 않는 키', key);
+                    } else {
+                        // uvs1.push(bufferURIDataView[getMethod](i * componentType_BYTES_PER_ELEMENT, true));
+                        // console.warn('VEC2에서 현재 지원하고 있지 않는 키', key);
+                    }
                     strideIndex++;
                 }
             }

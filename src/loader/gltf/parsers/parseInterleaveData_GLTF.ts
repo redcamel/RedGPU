@@ -105,10 +105,7 @@ const parseInterleaveData_GLTF = (
                 interleaveData[idx++] = uvs[index2D];
                 interleaveData[idx++] = uvs[index2D_1];
             }
-            if (has_uvs2) {
-                interleaveData[idx++] = uvs2[index2D];
-                interleaveData[idx++] = uvs2[index2D_1];
-            } else if (has_uvs1) {
+            if (has_uvs1) {
                 interleaveData[idx++] = uvs1[index2D];
                 interleaveData[idx++] = uvs1[index2D_1];
             } else if (uvs.length) {

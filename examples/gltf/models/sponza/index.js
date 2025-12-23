@@ -7,11 +7,9 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 1
-        controller.speedDistance = 0.1
+
         controller.tilt = 0
         controller.pan = 90
-        controller.centerY = 1
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);

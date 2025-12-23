@@ -1,4 +1,5 @@
 import RedGPUContext from "../../context/RedGPUContext";
+import Mesh from "../../display/mesh/Mesh";
 import View3D from "../../display/view/View3D";
 import AController from "../core/AController";
 /**
@@ -23,6 +24,7 @@ import AController from "../core/AController";
 declare class OrbitController extends AController {
     #private;
     constructor(redGPUContext: RedGPUContext);
+    fitMeshToScreenCenter(mesh: Mesh, view: View3D): void;
     /**
      * 회전 중심의 X축 좌표를 가져옵니다.
      * @returns {number} 중심점 X축 좌표

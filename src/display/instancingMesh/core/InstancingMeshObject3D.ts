@@ -307,23 +307,33 @@ class InstancingMeshObject3D {
                 tRadian = tRadian < 0 ? C127 * tRadian + C045 * tRadian * tRadian : C127 * tRadian - C045 * tRadian * tRadian,
                 aCz = tRadian < 0 ? C225 * (tRadian * -tRadian - tRadian) + tRadian : C225 * (tRadian * tRadian - tRadian) + tRadian,
                 /////////////////////////
-                b00 = aCy * aCz, b01 = aSx * aSy * aCz - aCx * aSz, b02 = aCx * aSy * aCz + aSx * aSz,
-                b10 = aCy * aSz, b11 = aSx * aSy * aSz + aCx * aCz, b12 = aCx * aSy * aSz - aSx * aCz,
-                b20 = -aSy, b21 = aSx * aCy, b22 = aCx * aCy,
-                // tLocalMatrix scale
-                aX = this.#scaleX, aY = this.#scaleY , aZ = this.#scaleZ,
-                tLocalMatrix[0] = (a00 * b00 + a10 * b01 + a20 * b02) * aX,
-                tLocalMatrix[1] = (a01 * b00 + a11 * b01 + a21 * b02) * aX,
-                tLocalMatrix[2] = (a02 * b00 + a12 * b01 + a22 * b02) * aX,
-                tLocalMatrix[3] = tLocalMatrix[3] * aX,
-                tLocalMatrix[4] = (a00 * b10 + a10 * b11 + a20 * b12) * aY,
-                tLocalMatrix[5] = (a01 * b10 + a11 * b11 + a21 * b12) * aY,
-                tLocalMatrix[6] = (a02 * b10 + a12 * b11 + a22 * b12) * aY,
-                tLocalMatrix[7] = tLocalMatrix[7] * aY,
-                tLocalMatrix[8] = (a00 * b20 + a10 * b21 + a20 * b22) * aZ,
-                tLocalMatrix[9] = (a01 * b20 + a11 * b21 + a21 * b22) * aZ,
-                tLocalMatrix[10] = (a02 * b20 + a12 * b21 + a22 * b22) * aZ,
-                tLocalMatrix[11] = tLocalMatrix[11] * aZ
+                b00 = aCy * aCz;
+                b01 = aCx * aSz + aSx * aSy * aCz;
+                b02 = aSx * aSz - aCx * aSy * aCz;
+
+                b10 = -aCy * aSz;
+                b11 = aCx * aCz - aSx * aSy * aSz;
+                b12 = aSx * aCz + aCx * aSy * aSz;
+
+                b20 = aSy;
+                b21 = -aSx * aCy;
+                b22 = aCx * aCy;
+                let sX = this.#scaleX, sY = this.#scaleY, sZ = this.#scaleZ;
+
+                tLocalMatrix[0] = b00 * sX;
+                tLocalMatrix[1] = b01 * sX;
+                tLocalMatrix[2] = b02 * sX;
+                tLocalMatrix[3] = 0;
+
+                tLocalMatrix[4] = b10 * sY;
+                tLocalMatrix[5] = b11 * sY;
+                tLocalMatrix[6] = b12 * sY;
+                tLocalMatrix[7] = 0;
+
+                tLocalMatrix[8] = b20 * sZ;
+                tLocalMatrix[9] = b21 * sZ;
+                tLocalMatrix[10] = b22 * sZ;
+                tLocalMatrix[11] = 0;
         }
         this.modelMatrix = this.localMatrix
         {

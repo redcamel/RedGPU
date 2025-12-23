@@ -56,6 +56,7 @@ class GltfAnimationLooperManager {
                 currentAniTrack = targetClip[targetAniTrackIDX];
                 currentAniTrackCacheTable = currentAniTrack.cacheTable;
                 const {animationTargetMesh, timeAnimationInfo, aniDataAnimationInfo, weightMeshes} = currentAniTrack;
+                animationTargetMesh.dirtyTransform = true
                 currentTime = ((timestamp - targetPlayAnimationInfo.startTime) % (maxTime * 1000)) / 1000;
                 /////////////////////////////////////////////////////////////////////////////////
                 // 이진 탐색으로 타임프레임 찾기 (인라인)
@@ -345,9 +346,9 @@ class GltfAnimationLooperManager {
                                 tempZ = 0;
                             }
                             // 라디안을 도로 변환하고 결과 적용 (한 번에)
-                            animationTargetMesh.rotationX = -(tempX * PI_180);
-                            animationTargetMesh.rotationY = -(tempY * PI_180);
-                            animationTargetMesh.rotationZ = -(tempZ * PI_180);
+                            animationTargetMesh.rotationX = (tempX * PI_180);
+                            animationTargetMesh.rotationY = (tempY * PI_180);
+                            animationTargetMesh.rotationZ = (tempZ * PI_180);
                         }
                         break;
                     }

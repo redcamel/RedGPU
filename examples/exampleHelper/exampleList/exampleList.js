@@ -1329,6 +1329,15 @@ const ExampleList = [
                             en: ``
                         },
                     },
+                    {
+                        name: 'Generate normal vector test',
+                        path: 'gltf/basic/generateNormalTest',
+                        thumb: 'gltf/basic/generateNormalTest/thumb.png',
+                        description: {
+                            ko: ``,
+                            en: ``
+                        },
+                    },
                 ]
             },
             {
