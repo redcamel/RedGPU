@@ -345,9 +345,9 @@ class GltfAnimationLooperManager {
                                 tempZ = 0;
                             }
                             // 라디안을 도로 변환하고 결과 적용 (한 번에)
-                            animationTargetMesh.rotationX = -(tempX * PI_180);
-                            animationTargetMesh.rotationY = -(tempY * PI_180);
-                            animationTargetMesh.rotationZ = -(tempZ * PI_180);
+                            animationTargetMesh.rotationX = (tempX * PI_180);
+                            animationTargetMesh.rotationY = (tempY * PI_180);
+                            animationTargetMesh.rotationZ = (tempZ * PI_180);
                         }
                         break;
                     }

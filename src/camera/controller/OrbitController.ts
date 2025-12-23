@@ -79,10 +79,9 @@ class OrbitController extends AController {
 		//
 		mat4.identity(localMatrix)
 		mat4.translate(localMatrix, localMatrix, [mesh.x, mesh.y, mesh.z]);
-		//TODO 좌표계를 바꾸던가 해야겠네
-        mat4.rotateY(localMatrix, localMatrix, -mesh.rotationY * Math.PI / 180);
-        mat4.rotateX(localMatrix, localMatrix, -mesh.rotationX * Math.PI / 180);
-        mat4.rotateZ(localMatrix, localMatrix, -mesh.rotationZ * Math.PI / 180);
+        mat4.rotateX(localMatrix, localMatrix, mesh.rotationX * Math.PI / 180);
+		mat4.rotateY(localMatrix, localMatrix, mesh.rotationY * Math.PI / 180);
+		mat4.rotateZ(localMatrix, localMatrix, mesh.rotationZ * Math.PI / 180);
         mat4.scale(localMatrix, localMatrix, [mesh.scaleX, mesh.scaleY, mesh.scaleZ]);
 		mat4.copy(mesh.localMatrix, localMatrix);
 		//
@@ -145,7 +144,7 @@ class OrbitController extends AController {
 
             // 6. 결과 적용 및 최소 거리 보호
             //@ts-ignore
-            this.distance = this.#currentDistance = Math.max(requiredDistance, view.rawCamera.nearClipping * 2);
+            this.distance =  Math.max(requiredDistance, view.rawCamera.nearClipping * 2);
 			//@ts-ignore
 			if( this.distance < 1){
 				const multiple= 1 / this.distance
@@ -153,7 +152,7 @@ class OrbitController extends AController {
 				this.centerX *= multiple;
 				this.centerY *= multiple
 				this.centerZ *= multiple;
-				this.distance = this.#currentDistance= 1;
+				this.distance = 1;
 			}
 
         // },1000)
