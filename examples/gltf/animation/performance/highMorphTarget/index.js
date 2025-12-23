@@ -75,7 +75,6 @@ function loadGLTF(view, url) {
     const {redGPUContext, scene} = view;
     new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
         const mesh = result.resultMesh
-        result.stopAllAnimation()
         result.playAnimation(result.parsingResult.animations[2])
 
         scene.addChild(mesh)
