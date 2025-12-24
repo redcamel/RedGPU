@@ -74,7 +74,7 @@ class FreeController extends AController {
 	// ==================== 이동 관련 설정 ====================
 	#moveSpeed: number = 1;
 	#moveDelayInterpolation: number = 0.1;
-	#maxAcceleration: number = 3;
+	#maxAcceleration: number = 1;
 	#currentAcceleration: number = 0;
 	// ==================== 회전 관련 설정 ====================
 	#rotationSpeed: number = 1;
