@@ -21,6 +21,25 @@
             color: #ffffff;
             overflow-x: hidden;
         }
+        iframe{
+            border: 0;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            width: 100%;
+            height: 450px;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .iframes{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap:10px;
+            overflow: hidden;
+            padding: 0 2rem 1.5rem !important;
+            background: none !important;
+        }
 
         /* Animated background */
         body::before {
@@ -42,7 +61,7 @@
                 transform: scale(1) rotate(0deg);
             }
             50% {
-                transform: scale(1.1) rotate(180deg);
+                transform: scale(4.1) rotate(180deg);
             }
         }
 
@@ -196,14 +215,14 @@
             background: rgba(255, 255, 255, 0.02);
             border-radius: 0;
             margin: 0 -2rem;
-            padding: 6rem 2rem;
+            padding: 3rem 2rem 6rem;
         }
 
         .section:nth-child(odd) {
             background: linear-gradient(135deg, rgba(255, 0, 110, 0.03) 0%, rgba(131, 56, 236, 0.03) 100%);
             border-radius: 0;
             margin: 0 -2rem;
-            padding: 6rem 2rem;
+            padding: 3rem 2rem 6rem;
         }
 
         .section:nth-child(2) {
@@ -363,6 +382,13 @@
                 padding: 0 0.5rem;
             }
 
+            .iframes{
+                /*flex-direction: column;*/
+            }
+            iframe{
+                width: calc(100% / 3);
+                height:200px
+            }
             .section:nth-child(even),
             .section:nth-child(odd) {
                 margin: 0 -0.5rem;
@@ -595,77 +621,76 @@
         }
     </style>
     <script type="module">
-			const RedGPU = await import('./dist/index.js');
-			RedGPU.init(
-				document.getElementById('bgCanvas'),
-				(redGPUContext) => {
-					const controllerTest = new RedGPU.Camera.OrbitController(redGPUContext);
-					controllerTest.distance = 50
-					const scene = new RedGPU.Display.Scene();
-					const view = new RedGPU.Display.View3D(redGPUContext, scene, controllerTest);
+        const RedGPU = await import('./dist/index.js');
+        RedGPU.init(
+        	document.getElementById('bgCanvas'),
+        	(redGPUContext) => {
+        		const controllerTest = new RedGPU.Camera.OrbitController(redGPUContext);
+        		controllerTest.distance = 50
+        		const scene = new RedGPU.Display.Scene();
+        		const view = new RedGPU.Display.View3D(redGPUContext, scene, controllerTest);
 
-					redGPUContext.addView(view);
+        		redGPUContext.addView(view);
 
-					const texture_particle1 = new RedGPU.Resource.BitmapTexture(redGPUContext, './examples/assets/particle/particle.png');
-					const texture_particle2 = new RedGPU.Resource.BitmapTexture(redGPUContext, './examples/assets/particle/particle2.png');
-					{
-						let i = 5
-						while (i--) {
-							const testParticle2 = new RedGPU.Display.ParticleEmitter(redGPUContext)
-							scene.addChild(testParticle2)
-							testParticle2.x = Math.random() * 30 - 15
-							testParticle2.y = Math.random() * 30 - 15
-							testParticle2.z = -Math.random() * 5 - 1
-							testParticle2.particleNum = 300
-							testParticle2.material.opacity = 0.3
-							testParticle2.material.diffuseTexture = [texture_particle1, texture_particle2][Math.floor(Math.random() * 2)]
-							testParticle2.material.blendColorState.dstFactor = RedGPU.GPU_BLEND_FACTOR.ONE
-						}
-					}
-					{
-						const testParticle = new RedGPU.Display.ParticleEmitter(redGPUContext)
-						scene.addChild(testParticle)
-						testParticle.material.diffuseTexture = texture_particle2
-						testParticle.material.blendColorState.dstFactor = RedGPU.GPU_BLEND_FACTOR.ONE
+        		const texture_particle1 = new RedGPU.Resource.BitmapTexture(redGPUContext, './examples/assets/particle/particle.png');
+        		const texture_particle2 = new RedGPU.Resource.BitmapTexture(redGPUContext, './examples/assets/particle/particle2.png');
+        		{
+        			let i = 5
+        			while (i--) {
+        				const testParticle2 = new RedGPU.Display.ParticleEmitter(redGPUContext)
+        				scene.addChild(testParticle2)
+        				testParticle2.x = Math.random() * 30 - 15
+        				testParticle2.y = Math.random() * 30 - 15
+        				testParticle2.z = -Math.random() * 5 - 1
+        				testParticle2.particleNum = 300
+        				testParticle2.material.opacity = 0.3
+        				testParticle2.material.diffuseTexture = [texture_particle1, texture_particle2][Math.floor(Math.random() * 2)]
+        				testParticle2.material.blendColorState.dstFactor = RedGPU.GPU_BLEND_FACTOR.ONE
+        			}
+        		}
+        		{
+        			const testParticle = new RedGPU.Display.ParticleEmitter(redGPUContext)
+        			scene.addChild(testParticle)
+        			testParticle.material.diffuseTexture = texture_particle2
+        			testParticle.material.blendColorState.dstFactor = RedGPU.GPU_BLEND_FACTOR.ONE
 
-						testParticle.easeX = RedGPU.Display.PARTICLE_EASE.ExpoOut
-						testParticle.easeY = RedGPU.Display.PARTICLE_EASE.ExpoOut
-						testParticle.easeZ = RedGPU.Display.PARTICLE_EASE.ExpoOut
-						testParticle.easeAlpha = RedGPU.Display.PARTICLE_EASE.ExpoInOut
-						// testParticle.easeScale = RedGPU.Display.PARTICLE_EASE.ExpoInOut
-						testParticle.particleNum = 500
-						testParticle.minStartScale = 0
-						testParticle.maxStartScale = 0
-						testParticle.minEndScale = 30
-						testParticle.maxEndScale = 30
-						testParticle.minStartAlpha = 0
-						testParticle.maxStartAlpha = 0.3
-						testParticle.minEndAlpha = 0
-						testParticle.maxEndAlpha = 0
-						testParticle.minEndX = -30
-						testParticle.maxEndX = 30
-						testParticle.minEndY = -30
-						testParticle.maxEndY = 30
-						testParticle.minEndZ = -30
-						testParticle.maxEndZ = 30
-					}
+        			testParticle.easeX = RedGPU.Display.PARTICLE_EASE.ExpoOut
+        			testParticle.easeY = RedGPU.Display.PARTICLE_EASE.ExpoOut
+        			testParticle.easeZ = RedGPU.Display.PARTICLE_EASE.ExpoOut
+        			testParticle.easeAlpha = RedGPU.Display.PARTICLE_EASE.ExpoInOut
+        			// testParticle.easeScale = RedGPU.Display.PARTICLE_EASE.ExpoInOut
+        			testParticle.particleNum = 500
+        			testParticle.minStartScale = 0
+        			testParticle.maxStartScale = 0
+        			testParticle.minEndScale = 30
+        			testParticle.maxEndScale = 10
+        			testParticle.minStartAlpha = 0
+        			testParticle.maxStartAlpha = 0.05
+        			testParticle.minEndAlpha = 0
+        			testParticle.maxEndAlpha = 0
+        			testParticle.minEndX = -30
+        			testParticle.maxEndX = 30
+        			testParticle.minEndY = -30
+        			testParticle.maxEndY = 30
+        			testParticle.minEndZ = -30
+        			testParticle.maxEndZ = 30
+        		}
 
-					const renderer = new RedGPU.Renderer(redGPUContext)
+        		const renderer = new RedGPU.Renderer(redGPUContext)
 
-					const render = (time) => {
+        		const render = (time) => {
 
-					}
-					renderer.start(redGPUContext, render)
-				},
-				(failReason) => {
-					// Handle initialization failure
-					console.error('Initialization failed:', failReason); // 초기화 실패 로그 출력
-					const errorMessage = document.createElement('div');
-					errorMessage.innerHTML = failReason; // 실패 원인 메시지를 표시
-					document.body.appendChild(errorMessage);
-				}
-			)
-			;
+        		}
+        		renderer.start(redGPUContext, render)
+        	},
+        	(failReason) => {
+        		// Handle initialization failure
+        		console.error('Initialization failed:', failReason); // 초기화 실패 로그 출력
+        		const errorMessage = document.createElement('div');
+        		errorMessage.innerHTML = failReason; // 실패 원인 메시지를 표시
+        		document.body.appendChild(errorMessage);
+        	}
+        );
     </script>
 </head>
 <body>
@@ -673,6 +698,7 @@
     <canvas id="bgCanvas"></canvas>
 </div>
 <!-- Hero Section -->
+
 <section class="hero">
     <h1 class="hero-title">RedGPU</h1>
     <p class="hero-subtitle">A powerful JavaScript WebGPU library for creating stunning 2D/3D graphics and high-performance
@@ -691,6 +717,11 @@
 
 <!-- Content Sections -->
 <div class="content">
+    <section class="section iframes">
+        <iframe src="./examples/exampleHelper/indexSample.html"></iframe>
+        <iframe src="./examples/exampleHelper/indexSample2.html"></iframe>
+        <iframe src="./examples/exampleHelper/indexSample3.html"></iframe>
+    </section>
     <!-- Features Section -->
     <section class="section">
         <h2 class="section-title">Features</h2>
@@ -762,6 +793,7 @@
     <!--            </a>-->
     <!--        </div>-->
     <!--    </section>-->
+
 </div>
 
 <!-- Footer -->
