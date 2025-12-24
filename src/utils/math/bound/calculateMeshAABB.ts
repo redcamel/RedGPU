@@ -27,7 +27,7 @@ const calculateMeshAABB = (mesh: Mesh): AABB => {
         const worldZ = m[14];
 
         // 점 AABB 반환 (크기가 0인 박스)
-        return new AABB(worldX, worldX, worldY, worldY, worldZ, worldZ);
+        return new AABB(0, 0, 0, 0, 0, 0);
     }
 
     const geometryVolume = mesh._geometry.volume;
