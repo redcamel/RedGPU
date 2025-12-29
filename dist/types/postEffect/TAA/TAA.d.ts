@@ -7,18 +7,8 @@ declare class TAA {
     constructor(redGPUContext: RedGPUContext);
     get frameIndex(): number;
     get videoMemorySize(): number;
-    get temporalBlendFactor(): number;
-    set temporalBlendFactor(value: number);
     get jitterStrength(): number;
     set jitterStrength(value: number);
-    get varianceClipping(): boolean;
-    set varianceClipping(value: boolean);
-    get useMotionVectors(): boolean;
-    set useMotionVectors(value: boolean);
-    get motionBlurReduction(): number;
-    set motionBlurReduction(value: number);
-    get disocclusionThreshold(): number;
-    set disocclusionThreshold(value: number);
     render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult;
     clear(): void;
     updateUniform(key: string, value: number | number[] | boolean): void;

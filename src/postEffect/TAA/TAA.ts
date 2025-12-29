@@ -47,12 +47,6 @@ class TAA {
     #videoMemorySize: number = 0
     #frameIndex: number = 0
     #jitterStrength: number = 1;
-    #temporalBlendFactor: number = 0.08;
-    #varianceClipping: boolean = true;
-    // 모션벡터 기반 TAA를 위한 새로운 속성들
-    #useMotionVectors: boolean = true;
-    #motionBlurReduction: number = 0.8;
-    #disocclusionThreshold: number = 0.1;
     #prevMSAA: Boolean
     #prevMSAAID: string
 
@@ -68,13 +62,7 @@ class TAA {
                 nonMsaa: shaderCode.nonMsaa
             }
         );
-        this.temporalBlendFactor = this.#temporalBlendFactor;
         this.jitterStrength = this.#jitterStrength;
-        this.varianceClipping = this.#varianceClipping;
-        // 모션벡터 관련 초기값 설정
-        this.useMotionVectors = this.#useMotionVectors;
-        this.motionBlurReduction = this.#motionBlurReduction;
-        this.disocclusionThreshold = this.#disocclusionThreshold;
     }
 
     get frameIndex(): number {
@@ -87,16 +75,6 @@ class TAA {
 
 
 
-    get temporalBlendFactor(): number {
-        return this.#temporalBlendFactor;
-    }
-
-    set temporalBlendFactor(value: number) {
-        validateNumberRange(value, 0.0, 1.0);
-        this.#temporalBlendFactor = value;
-        this.updateUniform('temporalBlendFactor', value);
-    }
-
     get jitterStrength(): number {
         return this.#jitterStrength;
     }
@@ -107,44 +85,6 @@ class TAA {
         this.updateUniform('jitterStrength', value);
     }
 
-    get varianceClipping(): boolean {
-        return this.#varianceClipping;
-    }
-
-    set varianceClipping(value: boolean) {
-        this.#varianceClipping = value;
-        this.updateUniform('varianceClipping', value ? 1.0 : 0.0);
-    }
-
-    // 모션벡터 관련 getter/setter 추가
-    get useMotionVectors(): boolean {
-        return this.#useMotionVectors;
-    }
-
-    set useMotionVectors(value: boolean) {
-        this.#useMotionVectors = value;
-        this.updateUniform('useMotionVectors', value ? 1.0 : 0.0);
-    }
-
-    get motionBlurReduction(): number {
-        return this.#motionBlurReduction;
-    }
-
-    set motionBlurReduction(value: number) {
-        validateNumberRange(value, 0.0, 1.0);
-        this.#motionBlurReduction = value;
-        this.updateUniform('motionBlurReduction', value);
-    }
-
-    get disocclusionThreshold(): number {
-        return this.#disocclusionThreshold;
-    }
-
-    set disocclusionThreshold(value: number) {
-        validateNumberRange(value, 0.01, 1.0);
-        this.#disocclusionThreshold = value;
-        this.updateUniform('disocclusionThreshold', value);
-    }
 
     render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
 
@@ -157,6 +97,7 @@ class TAA {
             this.updateUniform('frameIndex', this.#frameIndex);
             this.updateUniform('invViewProj', [...view.noneJitterProjectionCameraMatrix]);
             this.updateUniform('prevViewProj', [...this.#prevProjectionCameraMatrix]);
+            this.updateUniform('jitterOffset', view.jitterOffset);
         }
         const dimensionsChanged = this.#createRenderTexture(view)
         const msaaChanged = this.#prevMSAA !== useMSAA || this.#prevMSAAID !== msaaID;
@@ -177,7 +118,7 @@ class TAA {
             gpuDevice.queue.submit([commentEncode_compute.finish()]);
         }
         if (this.#frameIndex <= 20 || this.#frameIndex % 60 === 0) {
-            console.log(`TAA Frame ${this.#frameIndex}: BuffersSwapped, JitterStrength=${this.#jitterStrength}, MotionVectors=${this.#useMotionVectors}`);
+            console.log(`TAA Frame ${this.#frameIndex}: BuffersSwapped, JitterStrength=${this.#jitterStrength}`);
         }
         this.#prevMSAA = useMSAA;
         this.#prevMSAAID = msaaID;

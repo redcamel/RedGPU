@@ -2,67 +2,74 @@
     let pixelCoord = global_id.xy;
     let screenSizeU = textureDimensions(sourceTexture);
     let screenSize = vec2<f32>(screenSizeU);
+    let invScreenSize = 1.0 / screenSize;
 
     if (any(pixelCoord >= screenSizeU)) { return; }
 
     let fragCoord = vec2<f32>(pixelCoord);
-    let currentUV = fragCoord / screenSize;
 
-    // 현재 프레임 컬러 샘플링
+    // 1. 현재 UV (지터가 포함된 상태 그대로 샘플링)
+    let currentUV = fragCoord / screenSize;
     let currentColor = textureSampleLevel(sourceTexture, motionVectorSampler, currentUV, 0.0);
 
-    // 1. 초기 프레임 처리
     if (uniforms.frameIndex < 2.0) {
         textureStore(outputTexture, pixelCoord, currentColor);
         return;
     }
 
-    // 2. 모션 벡터 추출 및 데이터 계산
+    // 2. 모션 벡터 추출
     let motionVectorData = textureSampleLevel(motionVectorTexture, motionVectorSampler, currentUV, 0.0);
     let motionVector = motionVectorData.xy;
+
+    // 3. 지터 보정 (Un-jittering)
+    // 현재 프레임의 샘플 위치에서 지터를 빼서 '원래 위치'를 찾고,
+    // 거기서 모션 벡터만큼 뒤로 가서 이전 프레임의 위치를 찾습니다.
+    let jitterPixel = uniforms.jitterOffset; // 픽셀 단위 오프셋
+    let unjitteredUV = currentUV - (jitterPixel * invScreenSize);
+    let historyUV = unjitteredUV - motionVector;
+
+    // 4. 유효성 검사 및 샘플링
+    let isOffScreen = any(historyUV < vec2<f32>(0.0)) || any(historyUV > vec2<f32>(1.0));
     let motionMagnitude = length(motionVector * screenSize);
 
-    // 3. 히스토리 샘플링 위치 계산 및 유효성 검사
-    let historyUV = currentUV - motionVector;
-    let isOffScreen = any(historyUV < vec2<f32>(0.0)) || any(historyUV > vec2<f32>(1.0));
-
-    let MAX_MOTION_PIXELS = 20.0;
-    if (isOffScreen || motionMagnitude > MAX_MOTION_PIXELS) {
+    if (isOffScreen || motionMagnitude > 20.0) {
         textureStore(outputTexture, pixelCoord, currentColor);
         return;
     }
 
-    // 4. 히스토리 컬러 샘플링 및 클리핑
-    let historyColor = textureSampleLevel(previousFrameTexture, motionVectorSampler, historyUV, 0.0);
+    // Catmull-Rom 샘플링은 지터 보정된 historyUV를 사용해야 선명합니다.
+    let historyColor = sampleTextureCatmullRom(previousFrameTexture, motionVectorSampler, historyUV);
+
+    // 5. 클리핑 및 YCoCg 변환
     let clampedHistory = varianceClipping(currentUV, historyColor, sourceTexture, motionVectorSampler);
 
-    // 5. 밝기 변화량(Luminance Difference) 계산
-    let currentLum = getLuminance(currentColor.rgb);
-    let historyLum = getLuminance(clampedHistory.rgb);
+    let currentYCoCg = rgb_to_ycocg(currentColor.rgb);
+    let historyYCoCg = rgb_to_ycocg(clampedHistory.rgb);
 
-    // 상대적 밝기 차이 계산 (0.0 ~ 1.0)
-    let lumDiff = abs(currentLum - historyLum) / currentLum;
-    // 밝기 차이가 10% 이상일 때부터 현재 프레임 비중을 높임
+    // 6. 가중치 계산 (지글거림 억제 최적화)
+    let currentLum = currentYCoCg.x;
+    let historyLum = historyYCoCg.x;
+
+    // 에지 감지: 지터링으로 인한 미세 떨림이 강한 곳(에지)을 찾습니다.
+    let edgeDetection = smoothstep(0.01, 0.15, abs(currentLum - historyLum));
+    let lumDiff = abs(currentLum - historyLum) / (max(currentLum, historyLum) + 0.01);
     let lumWeight = smoothstep(0.1, 0.4, lumDiff);
 
-    // 6. 동적 블렌딩 계수 결정
-    // 모션 기반 가중치
-    let motionWeight = smoothstep(0.3, 2.0, motionMagnitude);
-
-    // 깊이 기반 가중치 (멀리 있을수록 히스토리 신뢰도 높임)
+    let motionWeight = smoothstep(0.2, 1.5, motionMagnitude);
     let currentDepth = textureLoad(depthTexture, pixelCoord, 0);
-    let distanceWeight = mix(0.2, 0.05, f32(currentDepth));
+    let depthWeight = smoothstep(0.5, 0.9, currentDepth);
 
-    // 기본 블렌드: 움직임이 많을수록 현재 프레임(선명함) 비중 증가
-    var dynamicBlend = mix(0.95, 0.6, motionWeight);
+    // 지터링이 적용된 상태에서는 alpha 값이 너무 낮으면(0.05 미만) 잔상이 생기거나
+    // 미세 선이 지글거릴 수 있습니다. 에지 영역에선 alpha를 조금 더 높게 잡습니다.
+    var alpha = 0.05;
+    alpha = max(alpha, edgeDetection * 0.25); // 에지 부분 반응성 강화
+    alpha = max(alpha, motionWeight * 0.4);
+    alpha = max(alpha, lumWeight);
+    alpha = max(alpha, depthWeight);
 
-    // 밝기 변화가 크면 히스토리를 버리고 현재 프레임 비중을 대폭 강화
-    dynamicBlend = max(dynamicBlend, lumWeight);
+    // 7. 최종 합성
+    let finalYCoCg = mix(historyYCoCg, currentYCoCg, alpha);
+    let finalColorRGB = ycocg_to_rgb(finalYCoCg);
 
-    // 거리 가중치와 결합 (최소 블렌딩 하한선 보정)
-    dynamicBlend = max(dynamicBlend, distanceWeight * distanceWeight);
-
-    // 7. 최종 합성 및 저장
-    let finalColor = mix(clampedHistory, currentColor, dynamicBlend);
-    textureStore(outputTexture, pixelCoord, finalColor);
+    textureStore(outputTexture, pixelCoord, vec4<f32>(finalColorRGB, currentColor.a));
 }
