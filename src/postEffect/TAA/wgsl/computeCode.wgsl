@@ -49,7 +49,11 @@
     // 최종 블렌드 팩터 (반대로!)
     // motionBlend = 0 (정적) → 0.95 (현재 프레임 95%, 선명)
     // motionBlend = 1 (동적) → 0.2 (현재 프레임 20%, 부드러운 모션)
-    let dynamicBlend = mix(0.95, 0.2, motionBlend);
+//    var dynamicBlend = mix(0.95, 0.2, motionBlend);
+
+    let currentDepth = textureLoad(depthTexture, pixelCoord,0);
+    let distanceWeight = mix(0.2, 0.05, currentDepth);
+    let dynamicBlend = max(mix(0.95, 0.6, motionMagnitude), distanceWeight * distanceWeight);
 
     let finalColor = mix(clampedHistory, currentColor, dynamicBlend);
 
