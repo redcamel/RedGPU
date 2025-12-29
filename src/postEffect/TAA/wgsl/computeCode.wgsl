@@ -68,7 +68,7 @@
     let depthWeight = smoothstep(0.5, 0.9, textureLoad(depthTexture, pixelCoord, 0));
 
     var alpha = 0.05;
-    alpha = max(alpha, edgeDetection * 0.25);
+    alpha = max(alpha, edgeDetection );
     alpha = max(alpha, motionWeight * 0.4);
     alpha = max(alpha, lumWeight);
     alpha = max(alpha, depthWeight);
