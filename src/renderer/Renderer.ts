@@ -252,17 +252,17 @@ class Renderer {
         // 픽셀 단위 지터
         const jitterX = (haltonX - 0.5) * jitterScale;
         const jitterY = (haltonY - 0.5) * jitterScale;
-        view.setJitterOffset(jitterX, jitterY);
+        view.setJitterOffset(jitterX/view.pixelRectObject.width, jitterY/view.pixelRectObject.height);
     }
 
     #haltonSequence(index: number, base: number): number {
         let result = 0;
-        let fraction = 1 / base;
+        let f = 1;
         let i = index;
         while (i > 0) {
-            result += (i % base) * fraction;
+            f = f / base;
+            result = result + f * (i % base);
             i = Math.floor(i / base);
-            fraction /= base;
         }
         return result;
     }

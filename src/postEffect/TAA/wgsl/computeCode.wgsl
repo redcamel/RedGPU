@@ -1,82 +1,88 @@
 {
-    let pixelCoord = global_id.xy;
+    let pixelCoord = vec2<i32>(global_id.xy);
     let screenSizeU = textureDimensions(sourceTexture);
     let screenSize = vec2<f32>(screenSizeU);
     let invScreenSize = 1.0 / screenSize;
 
-    if (any(pixelCoord >= screenSizeU)) { return; }
+    // 화면 영역 밖 처리
+    if (any(pixelCoord >= vec2<i32>(screenSizeU))) { return; }
 
-    let fragCoord = vec2<f32>(pixelCoord);
-    let currentUV = fragCoord / screenSize;
-    let currentColor = textureSampleLevel(sourceTexture, motionVectorSampler, currentUV, 0.0);
+    // 1. 현재 픽셀 UV 및 지터 보정 (Unjitter)
+    // CPU에서 전달된 jitterOffset(halton-0.5 / size)을 빼서 정확한 픽셀 위치 복구
+    let currentUV = (vec2<f32>(pixelCoord) + 0.5) / screenSize;
+    let unjitteredUV = currentUV - uniforms.jitterOffset;
 
+    // 2. 현재 컬러 샘플링 (보정된 UV 사용)
+    let currentColor = textureSampleLevel(sourceTexture, motionVectorSampler, unjitteredUV, 0.0);
+
+    // 초기 프레임 처리
     if (uniforms.frameIndex < 2.0) {
-        textureStore(outputTexture, pixelCoord, currentColor);
+        textureStore(outputTexture, vec2<u32>(pixelCoord), currentColor);
         return;
     }
 
-    // --- Velocity Dilation ---
+    // 3. Velocity Dilation 및 Min Depth 추출
+    // 3x3 영역에서 가장 가까운(가장 작은) 깊이를 가진 픽셀의 모션을 찾음
     var bestOffset = vec2<i32>(0, 0);
-    var minDepth = 1.0;
+    var minCurrentDepth = 1.0;
 
     for (var y: i32 = -1; y <= 1; y++) {
         for (var x: i32 = -1; x <= 1; x++) {
-            let neighborCoord = vec2<i32>(pixelCoord) + vec2<i32>(x, y);
-            let clampedCoord = clamp(neighborCoord, vec2<i32>(0), vec2<i32>(screenSizeU) - 1);
-            let neighborDepth = textureLoad(depthTexture, vec2<u32>(clampedCoord), 0);
-
-            if (neighborDepth < minDepth) {
-                minDepth = neighborDepth;
+            let neighbor = clamp(pixelCoord + vec2<i32>(x, y), vec2<i32>(0), vec2<i32>(screenSizeU) - 1);
+            // MSAA 텍스처인 경우 마지막 인자 0(샘플 인덱스) 명시
+            let d = textureLoad(depthTexture, neighbor, 0);
+            if (d < minCurrentDepth) {
+                minCurrentDepth = d;
                 bestOffset = vec2<i32>(x, y);
             }
         }
     }
 
-    let dilatedUV = (vec2<f32>(vec2<i32>(pixelCoord) + bestOffset) + 0.5) / screenSize;
+    // 가장 가까운 물체의 모션 벡터 사용 (테두리 고스트 방지)
+    let dilatedUV = (vec2<f32>(pixelCoord + bestOffset) + 0.5) / screenSize;
     let motionVector = textureSampleLevel(motionVectorTexture, motionVectorSampler, dilatedUV, 0.0).xy;
 
-    // --- Subpixel Correction (RESTORED) ---
-    let unjitteredUV = currentUV - uniforms.jitterOffset * invScreenSize;
+    // 4. 히스토리 좌표 계산 및 화면 밖 체크
     let historyUV = unjitteredUV - motionVector;
-
-    let isOffScreen = any(historyUV < vec2<f32>(0.0)) || any(historyUV > vec2<f32>(1.0));
-    let motionPixels = motionVector * screenSize;
-    let motionMagnitude = length(motionPixels);
-
-    if (isOffScreen) {
-        textureStore(outputTexture, pixelCoord, currentColor);
+    if (any(historyUV < vec2<f32>(0.0)) || any(historyUV > vec2<f32>(1.0))) {
+        textureStore(outputTexture, vec2<u32>(pixelCoord), currentColor);
         return;
     }
 
-    // --- Depth Disocclusion Check ---
-    let currentDepth = textureLoad(depthTexture, pixelCoord, 0);
-    let historyPixelCoord = vec2<u32>(clamp(historyUV * screenSize, vec2<f32>(0.0), screenSize - 1.0));
-    let historyDepth = textureLoad(historyDepthTexture, historyPixelCoord, 0);
+    // 5. Depth Disocclusion Check (새로 추가된 부분)
+    // 히스토리 깊이를 가져와 현재와 비교
+    let historyCoord = vec2<i32>(historyUV * screenSize);
+    let historyDepth = textureLoad(historyDepthTexture, clamp(historyCoord, vec2<i32>(0), vec2<i32>(screenSizeU) - 1), 0);
 
-    let depthDiff = abs(currentDepth - historyDepth);
-    let relativeDepthDiff = depthDiff / (min(currentDepth, historyDepth) + 0.0001);
-    let disocclusionWeight = smoothstep(0.01, 0.05, relativeDepthDiff);
+    let depthDiff = abs(minCurrentDepth - historyDepth);
+    let relativeDepthDiff = depthDiff / (min(minCurrentDepth, historyDepth) + 1e-4);
 
-    // --- Resolve Color with Catmull-Rom ---
+    // 깊이 차이가 크면(가려졌던 곳이 나타나면) 가중치 발생
+    let disocclusionWeight = smoothstep(0.02, 0.08, relativeDepthDiff);
+
+    // 6. 히스토리 샘플링 (Catmull-Rom으로 선명도 보강)
     let historyColor = sampleTextureCatmullRom(previousFrameTexture, motionVectorSampler, historyUV);
-    let clampedHistory = varianceClipping(currentUV, historyColor, sourceTexture, motionVectorSampler);
 
+    // 7. Variance Clipping (k값을 1.5~2.0으로 하여 선명도 유지)
+    // 보정된 unjitteredUV 주변 3x3 색상으로 히스토리를 클램핑
+    let clampedHistory = varianceClipping(unjitteredUV, historyColor, sourceTexture, motionVectorSampler);
+
+    // 8. 색상 공간 변환 및 최종 혼합 (YCoCg)
     let currentYCoCg = rgb_to_ycocg(currentColor.rgb);
     let historyYCoCg = rgb_to_ycocg(clampedHistory.rgb);
 
-    // --- Dynamic Alpha (SIMPLIFIED) ---
+    // Dynamic Alpha: 기본 0.05(95% 누적)
+    // Disocclusion 발생 시 최대 0.5까지만 현재 프레임을 섞음 (급격한 블러 방지)
     var alpha = 0.05;
+    alpha = mix(alpha, 0.5, disocclusionWeight);
 
-    // 1순위: Disocclusion (깊이 기반)
-    alpha = max(alpha, disocclusionWeight * 0.95);
+    // 극단적인 모션이 있을 때 아주 살짝만 더 현재 프레임 반영
+    let motionMag = length(motionVector * screenSize);
+    alpha = max(alpha, smoothstep(20.0, 40.0, motionMag) * 0.2);
 
-    // 2순위: 극단적 모션만 체크
-    let extremeMotionWeight = smoothstep(15.0, 25.0, motionMagnitude);
-    alpha = max(alpha, extremeMotionWeight * 0.7);
-
-    // --- Final Composition ---
     let finalYCoCg = mix(historyYCoCg, currentYCoCg, alpha);
     let finalColorRGB = ycocg_to_rgb(finalYCoCg);
 
-    textureStore(outputTexture, pixelCoord, vec4<f32>(finalColorRGB, currentColor.a));
+    // 9. 결과 저장
+    textureStore(outputTexture, vec2<u32>(pixelCoord), vec4<f32>(finalColorRGB, currentColor.a));
 }
