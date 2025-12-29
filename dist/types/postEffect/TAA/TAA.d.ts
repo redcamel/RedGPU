@@ -1,3 +1,4 @@
+import { mat4 } from "gl-matrix";
 import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
 import { ASinglePassPostEffectResult } from "../core/ASinglePassPostEffect";
@@ -6,7 +7,6 @@ declare class TAA {
     constructor(redGPUContext: RedGPUContext);
     get frameIndex(): number;
     get videoMemorySize(): number;
-    get currentFrameTextureView(): GPUTextureView;
     get temporalBlendFactor(): number;
     set temporalBlendFactor(value: number);
     get jitterStrength(): number;
@@ -22,5 +22,6 @@ declare class TAA {
     render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult;
     clear(): void;
     updateUniform(key: string, value: number | number[] | boolean): void;
+    get prevProjectionCameraMatrix(): mat4;
 }
 export default TAA;

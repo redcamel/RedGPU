@@ -330,7 +330,13 @@ class View3D extends AView {
             // keepLog(this.#prevInfoList)
         }
         this.#updateClusters(calcPointLightCluster);
+
         this.#updateSystemUniform();
+    }
+
+    #noneJitterProjectionCameraMatrix:mat4
+    get noneJitterProjectionCameraMatrix():mat4{
+        return this.#noneJitterProjectionCameraMatrix
     }
 
     #updateSystemUniformData(valueLust: { key, value, dataView, targetMembers }[]) {
@@ -359,6 +365,7 @@ class View3D extends AView {
         {
             const {members} = structInfo;
             const cameraMembers = members.camera.members;
+            this.#noneJitterProjectionCameraMatrix = mat4.multiply(temp2, noneJitterProjectionMatrix, cameraMatrix)
             this.#updateSystemUniformData([
                 {
                     key: 'projectionMatrix',
@@ -380,7 +387,7 @@ class View3D extends AView {
                 },
                 {
                     key: 'noneJitterProjectionCameraMatrix',
-                    value: mat4.multiply(temp2, noneJitterProjectionMatrix, cameraMatrix),
+                    value: this.#noneJitterProjectionCameraMatrix ,
                     dataView: this.#uniformDataF32,
                     targetMembers: members
                 },
@@ -392,7 +399,7 @@ class View3D extends AView {
                 },
                 {
                     key: 'prevProjectionCameraMatrix',
-                    value: mat4.multiply(temp3, noneJitterProjectionMatrix, cameraMatrix),
+                    value: redGPUContext.antialiasingManager.useTAA ? this.taa.prevProjectionCameraMatrix : mat4.create(),
                     dataView: this.#uniformDataF32,
                     targetMembers: members
                 },
@@ -484,7 +491,8 @@ class View3D extends AView {
                     dataView: this.#uniformDataF32,
                     targetMembers: members
                 },
-            ])
+            ]);
+
         }
         {
             lightManager.directionalLights.forEach((light: DirectionalLight, index) => {

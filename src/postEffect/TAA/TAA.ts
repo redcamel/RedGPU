@@ -1,3 +1,4 @@
+import {mat4} from "gl-matrix";
 import AntialiasingManager from "../../context/core/AntialiasingManager";
 import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
@@ -84,9 +85,7 @@ class TAA {
         return this.#videoMemorySize
     }
 
-    get currentFrameTextureView(): GPUTextureView {
-        return this.#currentFrameTextureView;
-    }
+
 
     get temporalBlendFactor(): number {
         return this.#temporalBlendFactor;
@@ -148,6 +147,7 @@ class TAA {
     }
 
     render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
+
         const sourceTextureView = sourceTextureInfo.textureView
         const sourceTexture = sourceTextureInfo.texture;
         const {gpuDevice, antialiasingManager} = this.#redGPUContext
@@ -155,6 +155,8 @@ class TAA {
         this.#frameIndex++;
         if (this.#uniformBuffer) {
             this.updateUniform('frameIndex', this.#frameIndex);
+            this.updateUniform('invViewProj', [...view.noneJitterProjectionCameraMatrix]);
+            this.updateUniform('prevViewProj', [...this.#prevProjectionCameraMatrix]);
         }
         const dimensionsChanged = this.#createRenderTexture(view)
         const msaaChanged = this.#prevMSAA !== useMSAA || this.#prevMSAAID !== msaaID;
@@ -179,6 +181,7 @@ class TAA {
         }
         this.#prevMSAA = useMSAA;
         this.#prevMSAAID = msaaID;
+        mat4.copy(this.#prevProjectionCameraMatrix,view.noneJitterProjectionCameraMatrix)
         return {
             texture: this.#currentFrameTexture,
             textureView: this.#currentFrameTextureView
@@ -202,18 +205,25 @@ class TAA {
         this.#currentMSAAState = null;
     }
 
-    updateUniform(key: string, value: number | number[] | boolean) {
+    updateUniform(key: string, value: number | number[] | boolean ) {
         this.#uniformBuffer.writeOnlyBuffer(this.#uniformsInfo.members[key], value)
     }
 
+    #prevProjectionCameraMatrix:mat4 = mat4.create();
+    get prevProjectionCameraMatrix():mat4{
+        return this.#prevProjectionCameraMatrix;
+    }
     #createTAAShaderCode() {
         const createCode = (useMSAA: boolean) => {
+            const depthTextureType = useMSAA ? 'texture_depth_multisampled_2d' : 'texture_depth_2d';
             return `
 				${uniformStructCode}
 				
-				@group(0) @binding(0) var sourceTexture : texture_storage_2d<rgba8unorm,read>;
-				@group(0) @binding(1) var previousFrameTexture : texture_storage_2d<rgba8unorm,read>;
+				@group(0) @binding(0) var sourceTexture : texture_2d<f32>;
+				@group(0) @binding(1) var previousFrameTexture : texture_2d<f32>;
 				@group(0) @binding(2) var motionVectorTexture : texture_2d<f32>;
+				@group(0) @binding(3) var motionVectorSampler : sampler;
+				@group(0) @binding(4) var depthTexture : ${depthTextureType};
 				
 				@group(1) @binding(0) var outputTexture : texture_storage_2d<rgba8unorm, write>;
 				${postEffectSystemUniform}
@@ -286,11 +296,19 @@ class TAA {
             binding: 1,
             resource: this.#previousFrameTextureView,
         });
+        computeBindGroupEntries0.push({
+            binding: 4,
+            resource: view.viewRenderTextureManager.depthTextureView,
+        });
         // 모션벡터 텍스처 추가
         const motionVectorTextureView = useMSAA ? view.viewRenderTextureManager.gBufferMotionVectorResolveTextureView : view.viewRenderTextureManager.gBufferMotionVectorTextureView;
         computeBindGroupEntries0.push({
             binding: 2,
             resource: motionVectorTextureView,
+        });
+        computeBindGroupEntries0.push({
+            binding: 3,
+            resource: view.redGPUContext.resourceManager.basicSampler.gpuSampler,
         });
         computeBindGroupEntries1.push({
             binding: 0,

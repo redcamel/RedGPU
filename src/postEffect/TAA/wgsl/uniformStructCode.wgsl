@@ -10,4 +10,37 @@ struct Uniforms {
     useMotionVectors: f32,
     motionBlurReduction: f32,
     disocclusionThreshold: f32,
+    invViewProj:mat4x4<f32>,
+    prevViewProj:mat4x4<f32>,
 };
+
+// Variance clipping 함수
+fn varianceClipping(sampleUV: vec2<f32>, historyColor: vec4<f32>, tex: texture_2d<f32>, texSampler: sampler) -> vec4<f32> {
+    var m1 = vec4<f32>(0.0);
+    var m2 = vec4<f32>(0.0);
+
+    let texSize = vec2<f32>(textureDimensions(tex));
+    let pixelSize = 1.0 / texSize;
+
+    // 3x3 샘플링 (bilinear 필터링으로 부드럽게)
+    for(var y: i32 = -1; y <= 1; y++) {
+        for(var x: i32 = -1; x <= 1; x++) {
+            let offset = vec2<f32>(f32(x), f32(y)) * pixelSize;
+            let neighborUV = clamp(sampleUV + offset, vec2<f32>(0.0), vec2<f32>(1.0) - pixelSize * 0.5);
+
+            let sample = textureSampleLevel(tex, texSampler, neighborUV, 0.0);
+            m1 += sample;
+            m2 += sample * sample;
+        }
+    }
+
+    let mean = m1 / 9.0;
+    let stddev = sqrt(max(m2 / 9.0 - mean * mean, vec4<f32>(0.0)));
+
+    // k=2.0으로 적당한 클리핑
+    let k = 2.0;
+    let minColor = mean - k * stddev;
+    let maxColor = mean + k * stddev;
+
+    return clamp(historyColor, minColor, maxColor);
+}

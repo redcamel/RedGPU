@@ -1,3 +1,4 @@
+import { mat4 } from "gl-matrix";
 import Camera2D from "../../camera/camera/Camera2D";
 import AController from "../../camera/core/AController";
 import RedGPUContext from "../../context/RedGPUContext";
@@ -107,5 +108,6 @@ declare class View3D extends AView {
      * @param renderPath1ResultTextureView - 렌더 패스 1 결과 텍스처 뷰 (선택사항)
      */
     update(shadowRender?: boolean, calcPointLightCluster?: boolean, renderPath1ResultTextureView?: GPUTextureView): void;
+    get noneJitterProjectionCameraMatrix(): mat4;
 }
 export default View3D;
