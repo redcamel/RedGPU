@@ -72,7 +72,7 @@ class FreeController extends AController {
 		turnDown: 'f'
 	};
 	// ==================== 이동 관련 설정 ====================
-	#moveSpeed: number = 1;
+	#moveSpeed: number = 0.5;
 	#moveDelayInterpolation: number = 0.1;
 	#maxAcceleration: number = 1;
 	#currentAcceleration: number = 0;

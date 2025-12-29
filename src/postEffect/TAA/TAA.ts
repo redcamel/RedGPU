@@ -45,7 +45,7 @@ class TAA {
     #previousSourceTextureReferences: GPUTextureView[] = [];
     #videoMemorySize: number = 0
     #frameIndex: number = 0
-    #jitterStrength: number = 0.5;
+    #jitterStrength: number = 1;
     #temporalBlendFactor: number = 0.08;
     #varianceClipping: boolean = true;
     // 모션벡터 기반 TAA를 위한 새로운 속성들
