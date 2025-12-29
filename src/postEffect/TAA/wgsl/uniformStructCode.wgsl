@@ -14,7 +14,6 @@ struct Uniforms {
     prevViewProj:mat4x4<f32>,
 };
 
-// Variance clipping 함수
 fn varianceClipping(sampleUV: vec2<f32>, historyColor: vec4<f32>, tex: texture_2d<f32>, texSampler: sampler) -> vec4<f32> {
     var m1 = vec4<f32>(0.0);
     var m2 = vec4<f32>(0.0);

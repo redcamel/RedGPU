@@ -8,7 +8,6 @@
     let fragCoord = vec2<f32>(pixelCoord);
     let currentUV = fragCoord / screenSize;
 
-    // texture_2d로 변경되었으므로 textureSampleLevel 사용
     let currentColor = textureSampleLevel(sourceTexture, motionVectorSampler, currentUV, 0.0);
 
     // 첫 프레임은 히스토리 없이 처리
@@ -23,8 +22,13 @@
 
     let motionMagnitude = length(motionVector * screenSize); // 픽셀 단위 움직임
 
+    let MAX_MOTION_PIXELS = 20.0;
+    if (motionMagnitude > MAX_MOTION_PIXELS) {
+        textureStore(outputTexture, pixelCoord, currentColor);
+        return;
+    }
+
     // 히스토리 UV (모션 벡터 적용)
-    // 모션 벡터가 이미 (현재 UV - 이전 UV) 형태로 저장되어 있다고 가정
     let historyUV = currentUV - motionVector;
 
     // 화면 밖 체크
