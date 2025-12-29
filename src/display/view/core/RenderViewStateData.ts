@@ -55,6 +55,7 @@ class RenderViewStateData {
     /** 현재 뷰포트 크기 및 위치 정보 */
     viewportSize: ViewportSize;
     viewIndex: number;
+    swapBufferIndex: number = 1;
     /** 렌더 텍스처가 사용하는 비디오 메모리 양 (바이트) */
     usedVideoMemory: number;
     /** 현재 사용 중인 GPU 렌더 패스 인코더 */
@@ -200,6 +201,7 @@ class RenderViewStateData {
         this.startTime = performance.now();
         this.isScene2DMode = view.camera instanceof Camera2D;
         this.viewIndex = view.redGPUContext.getViewIndex(view);
+        this.swapBufferIndex = this.swapBufferIndex ? 0 : 1
         this.viewportSize = {
             x: view.x,
             y: view.y,

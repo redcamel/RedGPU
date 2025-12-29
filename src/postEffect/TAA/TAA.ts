@@ -165,6 +165,7 @@ class TAA {
 				@group(0) @binding(2) var motionVectorTexture : texture_2d<f32>;
 				@group(0) @binding(3) var motionVectorSampler : sampler;
 				@group(0) @binding(4) var depthTexture : ${depthTextureType};
+				@group(0) @binding(5) var historyDepthTexture : ${depthTextureType};
 				
 				@group(1) @binding(0) var outputTexture : texture_storage_2d<rgba8unorm, write>;
 				${postEffectSystemUniform}
@@ -240,6 +241,10 @@ class TAA {
         computeBindGroupEntries0.push({
             binding: 4,
             resource: view.viewRenderTextureManager.depthTextureView,
+        });
+        computeBindGroupEntries0.push({
+            binding: 5,
+            resource: view.viewRenderTextureManager.prevDepthTextureView,
         });
         // 모션벡터 텍스처 추가
         const motionVectorTextureView = useMSAA ? view.viewRenderTextureManager.gBufferMotionVectorResolveTextureView : view.viewRenderTextureManager.gBufferMotionVectorTextureView;

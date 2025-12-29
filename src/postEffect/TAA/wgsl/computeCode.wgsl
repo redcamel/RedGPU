@@ -35,43 +35,44 @@
     let dilatedUV = (vec2<f32>(vec2<i32>(pixelCoord) + bestOffset) + 0.5) / screenSize;
     let motionVector = textureSampleLevel(motionVectorTexture, motionVectorSampler, dilatedUV, 0.0).xy;
 
-    // --- Reprojection ---
-    let unjitteredUV = currentUV - (uniforms.jitterOffset * invScreenSize);
+    // --- Subpixel Correction (RESTORED) ---
+    let unjitteredUV = currentUV - uniforms.jitterOffset * invScreenSize;
     let historyUV = unjitteredUV - motionVector;
 
     let isOffScreen = any(historyUV < vec2<f32>(0.0)) || any(historyUV > vec2<f32>(1.0));
     let motionPixels = motionVector * screenSize;
     let motionMagnitude = length(motionPixels);
 
-    if (isOffScreen || motionMagnitude > 20.0) {
+    if (isOffScreen) {
         textureStore(outputTexture, pixelCoord, currentColor);
         return;
     }
 
-    // --- Resolve Color ---
+    // --- Depth Disocclusion Check ---
+    let currentDepth = textureLoad(depthTexture, pixelCoord, 0);
+    let historyPixelCoord = vec2<u32>(clamp(historyUV * screenSize, vec2<f32>(0.0), screenSize - 1.0));
+    let historyDepth = textureLoad(historyDepthTexture, historyPixelCoord, 0);
+
+    let depthDiff = abs(currentDepth - historyDepth);
+    let relativeDepthDiff = depthDiff / (min(currentDepth, historyDepth) + 0.0001);
+    let disocclusionWeight = smoothstep(0.01, 0.05, relativeDepthDiff);
+
+    // --- Resolve Color with Catmull-Rom ---
     let historyColor = sampleTextureCatmullRom(previousFrameTexture, motionVectorSampler, historyUV);
     let clampedHistory = varianceClipping(currentUV, historyColor, sourceTexture, motionVectorSampler);
 
     let currentYCoCg = rgb_to_ycocg(currentColor.rgb);
     let historyYCoCg = rgb_to_ycocg(clampedHistory.rgb);
 
-    // --- Dynamic Alpha Weighting ---
-    let currentLum = currentYCoCg.x;
-    let historyLum = historyYCoCg.x;
-    let lumDiff = abs(currentLum - historyLum);
-
-    let edgeDetection = smoothstep(0.01, 0.04, lumDiff);
-    let relativeLumDiff = lumDiff / (max(currentLum, historyLum) + 0.01);
-
-    let lumWeight = smoothstep(0.1, 0.4, relativeLumDiff);
-    let motionWeight = smoothstep(0.2, 1.5, motionMagnitude);
-    let depthWeight = smoothstep(0.5, 0.9, textureLoad(depthTexture, pixelCoord, 0));
-
+    // --- Dynamic Alpha (SIMPLIFIED) ---
     var alpha = 0.05;
-    alpha = max(alpha, edgeDetection );
-    alpha = max(alpha, motionWeight * 0.4);
-    alpha = max(alpha, lumWeight);
-    alpha = max(alpha, depthWeight);
+
+    // 1순위: Disocclusion (깊이 기반)
+    alpha = max(alpha, disocclusionWeight * 0.95);
+
+    // 2순위: 극단적 모션만 체크
+    let extremeMotionWeight = smoothstep(15.0, 25.0, motionMagnitude);
+    alpha = max(alpha, extremeMotionWeight * 0.7);
 
     // --- Final Composition ---
     let finalYCoCg = mix(historyYCoCg, currentYCoCg, alpha);
