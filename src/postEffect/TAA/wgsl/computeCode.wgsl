@@ -5,7 +5,7 @@
 
     if (any(pixelCoord >= screenSizeU)) { return; }
 
-    let fragCoord = vec2<f32>(pixelCoord) + 0.5;
+    let fragCoord = vec2<f32>(pixelCoord);
     let currentUV = fragCoord / screenSize;
 
     // texture_2d로 변경되었으므로 textureSampleLevel 사용

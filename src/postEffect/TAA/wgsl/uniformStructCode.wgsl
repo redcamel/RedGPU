@@ -14,6 +14,24 @@ struct Uniforms {
     prevViewProj:mat4x4<f32>,
 };
 
+// 간단한 샤프닝 함수
+fn applySharpening(pixelCoord: vec2<u32>, centerColor: vec4<f32>, tex: texture_2d<f32>) -> vec4<f32> {
+    // 상하좌우 4방향 샘플링
+    let up    = textureLoad(tex, pixelCoord + vec2<u32>(0, 1), 0);
+    let down  = textureLoad(tex, pixelCoord - vec2<u32>(0, 1), 0);
+    let left  = textureLoad(tex, pixelCoord - vec2<u32>(1, 0), 0);
+    let right = textureLoad(tex, pixelCoord + vec2<u32>(1, 0), 0);
+
+    // 주변 평균과의 차이를 구함
+    let neighborAvg = (up + down + left + right) * 0.25;
+    let edge = centerColor - neighborAvg;
+
+    // 샤프닝 강도 (0.1 ~ 0.3 권장)
+    // 너무 높으면 노이즈가 보일 수 있으니 조절해보세요.
+    let sharpness = 0.2;
+
+    return centerColor + edge * sharpness;
+}
 // Variance clipping 함수
 fn varianceClipping(sampleUV: vec2<f32>, historyColor: vec4<f32>, tex: texture_2d<f32>, texSampler: sampler) -> vec4<f32> {
     var m1 = vec4<f32>(0.0);
