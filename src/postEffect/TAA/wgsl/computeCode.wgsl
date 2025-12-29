@@ -7,8 +7,6 @@
     if (any(pixelCoord >= screenSizeU)) { return; }
 
     let fragCoord = vec2<f32>(pixelCoord);
-
-    // 1. 현재 UV (지터가 포함된 상태 그대로 샘플링)
     let currentUV = fragCoord / screenSize;
     let currentColor = textureSampleLevel(sourceTexture, motionVectorSampler, currentUV, 0.0);
 
@@ -17,57 +15,65 @@
         return;
     }
 
-    // 2. 모션 벡터 추출
-    let motionVectorData = textureSampleLevel(motionVectorTexture, motionVectorSampler, currentUV, 0.0);
-    let motionVector = motionVectorData.xy;
+    // --- Velocity Dilation ---
+    var bestOffset = vec2<i32>(0, 0);
+    var minDepth = 1.0;
 
-    // 3. 지터 보정 (Un-jittering)
-    // 현재 프레임의 샘플 위치에서 지터를 빼서 '원래 위치'를 찾고,
-    // 거기서 모션 벡터만큼 뒤로 가서 이전 프레임의 위치를 찾습니다.
-    let jitterPixel = uniforms.jitterOffset; // 픽셀 단위 오프셋
-    let unjitteredUV = currentUV - (jitterPixel * invScreenSize);
+    for (var y: i32 = -1; y <= 1; y++) {
+        for (var x: i32 = -1; x <= 1; x++) {
+            let neighborCoord = vec2<i32>(pixelCoord) + vec2<i32>(x, y);
+            let clampedCoord = clamp(neighborCoord, vec2<i32>(0), vec2<i32>(screenSizeU) - 1);
+            let neighborDepth = textureLoad(depthTexture, vec2<u32>(clampedCoord), 0);
+
+            if (neighborDepth < minDepth) {
+                minDepth = neighborDepth;
+                bestOffset = vec2<i32>(x, y);
+            }
+        }
+    }
+
+    let dilatedUV = (vec2<f32>(vec2<i32>(pixelCoord) + bestOffset) + 0.5) / screenSize;
+    let motionVector = textureSampleLevel(motionVectorTexture, motionVectorSampler, dilatedUV, 0.0).xy;
+
+    // --- Reprojection ---
+    let unjitteredUV = currentUV - (uniforms.jitterOffset * invScreenSize);
     let historyUV = unjitteredUV - motionVector;
 
-    // 4. 유효성 검사 및 샘플링
     let isOffScreen = any(historyUV < vec2<f32>(0.0)) || any(historyUV > vec2<f32>(1.0));
-    let motionMagnitude = length(motionVector * screenSize);
+    let motionPixels = motionVector * screenSize;
+    let motionMagnitude = length(motionPixels);
 
     if (isOffScreen || motionMagnitude > 20.0) {
         textureStore(outputTexture, pixelCoord, currentColor);
         return;
     }
 
-    // Catmull-Rom 샘플링은 지터 보정된 historyUV를 사용해야 선명합니다.
+    // --- Resolve Color ---
     let historyColor = sampleTextureCatmullRom(previousFrameTexture, motionVectorSampler, historyUV);
-
-    // 5. 클리핑 및 YCoCg 변환
     let clampedHistory = varianceClipping(currentUV, historyColor, sourceTexture, motionVectorSampler);
 
     let currentYCoCg = rgb_to_ycocg(currentColor.rgb);
     let historyYCoCg = rgb_to_ycocg(clampedHistory.rgb);
 
-    // 6. 가중치 계산 (지글거림 억제 최적화)
+    // --- Dynamic Alpha Weighting ---
     let currentLum = currentYCoCg.x;
     let historyLum = historyYCoCg.x;
+    let lumDiff = abs(currentLum - historyLum);
 
-    // 에지 감지: 지터링으로 인한 미세 떨림이 강한 곳(에지)을 찾습니다.
-    let edgeDetection = smoothstep(0.01, 0.15, abs(currentLum - historyLum));
-    let lumDiff = abs(currentLum - historyLum) / (max(currentLum, historyLum) + 0.01);
-    let lumWeight = smoothstep(0.1, 0.4, lumDiff);
+    let edgeDetection = smoothstep(0.01, 0.04, lumDiff);
+    let relativeLumDiff = lumDiff / (max(currentLum, historyLum) + 0.01);
 
+    let lumWeight = smoothstep(0.1, 0.4, relativeLumDiff);
     let motionWeight = smoothstep(0.2, 1.5, motionMagnitude);
-    let currentDepth = textureLoad(depthTexture, pixelCoord, 0);
-    let depthWeight = smoothstep(0.5, 0.9, currentDepth);
+    let depthWeight = smoothstep(0.5, 0.9, textureLoad(depthTexture, pixelCoord, 0));
 
-    // 지터링이 적용된 상태에서는 alpha 값이 너무 낮으면(0.05 미만) 잔상이 생기거나
-    // 미세 선이 지글거릴 수 있습니다. 에지 영역에선 alpha를 조금 더 높게 잡습니다.
     var alpha = 0.05;
-    alpha = max(alpha, edgeDetection * 0.25); // 에지 부분 반응성 강화
+    alpha = max(alpha, edgeDetection * 0.25);
     alpha = max(alpha, motionWeight * 0.4);
     alpha = max(alpha, lumWeight);
     alpha = max(alpha, depthWeight);
 
-    // 7. 최종 합성
+    // --- Final Composition ---
     let finalYCoCg = mix(historyYCoCg, currentYCoCg, alpha);
     let finalColorRGB = ycocg_to_rgb(finalYCoCg);
 

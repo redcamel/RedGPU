@@ -44,20 +44,20 @@ fn varianceClipping(sampleUV: vec2<f32>, historyColor: vec4<f32>, tex: texture_2
 
             // 샘플링 후 즉시 YCoCg로 변환
             let sampleRGB = textureSampleLevel(tex, texSampler, neighborUV, 0.0).rgb;
-            let sample = rgb_to_ycocg(sampleRGB);
+            let color = rgb_to_ycocg(sampleRGB);
 
-            m1 += sample;
-            m2 += sample * sample;
+            m1 += color;
+            m2 += color * color;
 
-            minNeighbor = min(minNeighbor, sample);
-            maxNeighbor = max(maxNeighbor, sample);
+            minNeighbor = min(minNeighbor, color);
+            maxNeighbor = max(maxNeighbor, color);
         }
     }
 
     let mean = m1 / 9.0;
     let stddev = sqrt(max(m2 / 9.0 - mean * mean, vec3<f32>(0.0)));
 
-    let k = 1.0; // YCoCg에서는 RGB보다 조금 더 넓은 범위를 잡아도 안정적입니다.
+    let k = 1.2; // YCoCg에서는 RGB보다 조금 더 넓은 범위를 잡아도 안정적입니다.
     let minColor = mean - k * stddev;
     let maxColor = mean + k * stddev;
 
