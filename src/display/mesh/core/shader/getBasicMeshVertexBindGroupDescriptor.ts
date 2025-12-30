@@ -7,9 +7,7 @@ const getBasicMeshVertexBindGroupDescriptor = (mesh: Mesh, skin: boolean = false
     const {vertexUniformBuffer, vertexBindGroupLayout} = gpuRenderInfo
     const {basicSampler, emptyBitmapTextureView, emptyCubeTextureView} = resourceManager
     const {gpuSampler: basicGPUSampler} = basicSampler
-    // if(skin){
-    // 	keepLog(mesh.animationInfo.skinInfo.vertexStorageBuffer)
-    // }
+
     return {
         layout: vertexBindGroupLayout,
         label: skin ? 'VERTEX_BIND_GROUP_DESCRIPTOR_MESH_SKIN' : 'VERTEX_BIND_GROUP_DESCRIPTOR_MESH',

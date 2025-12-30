@@ -6,7 +6,6 @@ import GPU_LOAD_OP from "../gpuConst/GPU_LOAD_OP";
 import GPU_STORE_OP from "../gpuConst/GPU_STORE_OP";
 import GltfAnimationLooperManager from "../loader/gltf/animationLooper/GltfAnimationLooperManager";
 import ParsedSkinInfo_GLTF from "../loader/gltf/cls/ParsedSkinInfo_GLTF";
-import copyGPUBuffer from "../utils/copyGPUBuffer";
 import DrawBufferManager from "./core/DrawBufferManager";
 import DebugRender from "./debugRender/DebugRender";
 import FinalRender from "./finalRender/FinalRender";
@@ -372,12 +371,11 @@ class Renderer {
                 skinInfo.createCompute(
                     redGPUContext,
                     gpuDevice,
-                    mesh.animationInfo.skinInfo.vertexStorageBuffer,
+                    mesh.geometry.vertexBuffer,
                     mesh.animationInfo.weightBuffer,
                     mesh.animationInfo.jointBuffer,
                 );
             }
-            copyGPUBuffer(redGPUContext.gpuDevice, mesh.animationInfo.skinInfo.vertexStorageBuffer, mesh.animationInfo.skinInfo.prevVertexStorageBuffer)
 
             {
                 const usedJoints = skinInfo.usedJoints

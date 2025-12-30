@@ -35,6 +35,8 @@
 
     let motionPixel = motionVector * screenSize;
     let motionMag = length(motionPixel);
+//     textureStore(outputTexture, vec2<u32>(pixelCoord), vec4<f32>(motionVector.xy * 50.0,0.0,1.0));
+//return;
 
     // 1. 임계값 설정 (예: 한 프레임에 20픽셀 이상 이동 시)
     let maxMotionPixel: f32 = 20.0;
