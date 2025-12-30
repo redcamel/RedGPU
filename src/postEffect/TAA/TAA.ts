@@ -156,7 +156,6 @@ class TAA {
     }
     #createTAAShaderCode() {
         const createCode = (useMSAA: boolean) => {
-            const depthTextureType = useMSAA ? 'texture_depth_multisampled_2d' : 'texture_depth_2d';
             return `
 				${uniformStructCode}
 				
@@ -164,8 +163,8 @@ class TAA {
 				@group(0) @binding(1) var previousFrameTexture : texture_2d<f32>;
 				@group(0) @binding(2) var motionVectorTexture : texture_2d<f32>;
 				@group(0) @binding(3) var taaTextureSampler : sampler;
-				@group(0) @binding(4) var depthTexture : ${depthTextureType};
-				@group(0) @binding(5) var historyDepthTexture : ${depthTextureType};
+				@group(0) @binding(4) var depthTexture : texture_depth_2d;
+				@group(0) @binding(5) var historyDepthTexture : texture_depth_2d;
 				
 				@group(1) @binding(0) var outputTexture : texture_storage_2d<rgba8unorm, write>;
 				${postEffectSystemUniform}

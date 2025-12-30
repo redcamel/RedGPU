@@ -38,12 +38,13 @@
         }
     }
 
-    // 가장 가까운 물체의 모션 벡터 사용 (테두리 고스트 방지)
-    let dilatedUV = (vec2<f32>(pixelCoord + bestOffset) + 0.5) / screenSize;
-    let motionVector = textureSampleLevel(motionVectorTexture, taaTextureSampler, dilatedUV, 0.0).xy;
+   let dilatedUV = (vec2<f32>(pixelCoord + bestOffset) + 0.5) / screenSize;
 
-    // 4. 히스토리 좌표 계산 및 화면 밖 체크
-    let historyUV = unjitteredUV ;
+   // [수정] 이미 UV 단위이므로 invScreenSize를 곱하지 않습니다.
+   let motionVector = textureSampleLevel(motionVectorTexture, taaTextureSampler, dilatedUV, 0.0).xy;
+
+   // 4. 히스토리 좌표 계산
+   let historyUV = unjitteredUV - motionVector;
     if (any(historyUV < vec2<f32>(0.0)) || any(historyUV > vec2<f32>(1.0))) {
         textureStore(outputTexture, vec2<u32>(pixelCoord), currentColor);
         return;
@@ -78,11 +79,14 @@
 
     // 극단적인 모션이 있을 때 아주 살짝만 더 현재 프레임 반영
     let motionMag = length(motionVector * screenSize);
-    alpha = max(alpha, smoothstep(20.0, 40.0, motionMag) * 0.2);
+//    alpha = max(alpha, smoothstep(20.0, 40.0, motionMag) * 0.2);
 
     let finalYCoCg = mix(historyYCoCg, currentYCoCg, alpha);
     let finalColorRGB = ycocg_to_rgb(finalYCoCg);
 
     // 9. 결과 저장
     textureStore(outputTexture, vec2<u32>(pixelCoord), vec4<f32>(finalColorRGB, currentColor.a));
+    // 모션 벡터 방향 확인: 오른쪽 이동 시 빨간색(R), 아래 이동 시 초록색(G) 증가
+//    let debugMV = motionVector;
+//    textureStore(outputTexture, vec2<u32>(pixelCoord), vec4<f32>(motionVector.xy,0.0,1.0));
 }

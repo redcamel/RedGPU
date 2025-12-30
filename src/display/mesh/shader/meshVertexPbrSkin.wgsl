@@ -121,8 +121,8 @@ fn main(inputData: InputDataSkin) -> OutputDataSkin {
     // Motion vector calculation
     {
         let currentClipPos = u_noneJitterProjectionCameraMatrix * position;
-        let prevClipPos = u_prevProjectionCameraMatrix * prevSkinMat * (u_prevModelMatrix * input_position_vec4);
-        output.motionVector = vec3<f32>(calculateMotionVector(currentClipPos, currentClipPos, u_resolution), 0.0);
+        let prevClipPos = u_prevProjectionCameraMatrix * u_prevModelMatrix  * (prevSkinMat * input_position_vec4);
+        output.motionVector = vec3<f32>(calculateMotionVector(currentClipPos, prevClipPos, u_resolution), 0.0);
     }
 
     // Scale calculations

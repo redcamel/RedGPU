@@ -399,7 +399,7 @@ class View3D extends AView {
                 },
                 {
                     key: 'prevProjectionCameraMatrix',
-                    value: redGPUContext.antialiasingManager.useTAA ? this.taa.prevProjectionCameraMatrix : mat4.create(),
+                    value: redGPUContext.antialiasingManager.useTAA ? this.taa.prevProjectionCameraMatrix : this.#noneJitterProjectionCameraMatrix,
                     dataView: this.#uniformDataF32,
                     targetMembers: members
                 },
