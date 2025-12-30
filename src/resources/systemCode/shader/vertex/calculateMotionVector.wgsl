@@ -3,14 +3,23 @@ fn calculateMotionVector(
     prevClipPos: vec4<f32>,
     resolution: vec2<f32>
 ) -> vec2<f32> {
-    let currentNDC = currentClipPos.xy / max(currentClipPos.w, 1e-5);
-    let prevNDC = prevClipPos.xy / max(prevClipPos.w, 1e-5);
+    // 1. Perspective Divide (NDC로 변환)
+    // 0으로 나누기 방지를 위해 매우 작은 값(epsilon) 사용
+    let currentNDC = currentClipPos.xy / max(currentClipPos.w, 1e-6);
+    let prevNDC = prevClipPos.xy / max(prevClipPos.w, 1e-6);
 
-    // [오른손 좌표계 수정]
-    // NDC Y=1(상단) -> UV Y=0 / NDC Y=-1(하단) -> UV Y=1 가 되어야 함
-    // 따라서 Y축에 -0.5를 곱해 뒤집어줍니다.
-    let currentUV = currentNDC * vec2<f32>(0.5, -0.5) + 0.5;
-    let prevUV = prevNDC * vec2<f32>(0.5, -0.5) + 0.5;
+    // 2. 모션 벡터 계산 (NDC 공간: -1 ~ 1 범위)
+    // 현재 위치에서 이전 위치를 뺍니다.
+    var motionVector = currentNDC - prevNDC;
 
-    return currentUV - prevUV;
+    // 3. Y축 반전 보정 (중요)
+    // 대부분의 API에서 NDC의 Y축은 위가 +, 아래가 -이지만,
+    // UV 좌표계(0~1)는 위가 0, 아래가 1인 경우가 많아 방향을 맞춰줘야 합니다.
+    motionVector.y = -motionVector.y;
+
+    // 4. NDC(-2 ~ 2 범위의 차이)를 UV 단위(0 ~ 1 범위의 차이)로 변환
+    // NDC 전체 너비가 2이므로 0.5를 곱해줍니다.
+    let uvMotionVector = motionVector * 0.5;
+
+    return uvMotionVector;
 }
