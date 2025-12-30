@@ -8,6 +8,7 @@ const maxMipLevel: f32 = 10.0;
 @group(1) @binding(1) var displacementTextureSampler: sampler;
 @group(1) @binding(2) var displacementTexture: texture_2d<f32>;
 @group(1) @binding(3) var<storage, read> vertexStorages: array<mat4x4<f32>>;
+@group(1) @binding(4) var<storage, read> prevVertexStorages: array<mat4x4<f32>>;
 
 struct InputDataSkin {
     @builtin(vertex_index) idx: u32,
@@ -76,6 +77,7 @@ fn main(inputData: InputDataSkin) -> OutputDataSkin {
 
     // Skinning calculation
     let skinMat = vertexStorages[inputData.idx];
+    let prevSkinMat = prevVertexStorages[inputData.idx];
 
 
     // Position and normal calculation
@@ -119,8 +121,8 @@ fn main(inputData: InputDataSkin) -> OutputDataSkin {
     // Motion vector calculation
     {
         let currentClipPos = u_noneJitterProjectionCameraMatrix * position;
-        let prevClipPos = u_prevProjectionCameraMatrix * skinMat * (u_prevModelMatrix * input_position_vec4);
-        output.motionVector = vec3<f32>(calculateMotionVector(currentClipPos, prevClipPos, u_resolution), 0.0);
+        let prevClipPos = u_prevProjectionCameraMatrix * prevSkinMat * (u_prevModelMatrix * input_position_vec4);
+        output.motionVector = vec3<f32>(calculateMotionVector(currentClipPos, currentClipPos, u_resolution), 0.0);
     }
 
     // Scale calculations

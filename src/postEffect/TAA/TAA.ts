@@ -163,7 +163,7 @@ class TAA {
 				@group(0) @binding(0) var sourceTexture : texture_2d<f32>;
 				@group(0) @binding(1) var previousFrameTexture : texture_2d<f32>;
 				@group(0) @binding(2) var motionVectorTexture : texture_2d<f32>;
-				@group(0) @binding(3) var motionVectorSampler : sampler;
+				@group(0) @binding(3) var taaTextureSampler : sampler;
 				@group(0) @binding(4) var depthTexture : ${depthTextureType};
 				@group(0) @binding(5) var historyDepthTexture : ${depthTextureType};
 				

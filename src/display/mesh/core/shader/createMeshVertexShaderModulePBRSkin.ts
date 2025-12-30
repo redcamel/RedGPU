@@ -33,6 +33,10 @@ const createMeshVertexShaderModulePBRSkin = (
                 size: mesh.geometry.vertexBuffer.vertexCount * 16 * 4, // mat4x4<f32> = 16 floats × 4 bytes
                 usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
             });
+            mesh.animationInfo.skinInfo.prevVertexStorageBuffer = gpuDevice.createBuffer({
+                size: mesh.geometry.vertexBuffer.vertexCount * 16 * 4, // mat4x4<f32> = 16 floats × 4 bytes
+                usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
+            });
             gpuRenderInfo.vertexUniformBindGroup = redGPUContext.gpuDevice.createBindGroup(getBasicMeshVertexBindGroupDescriptor(mesh, true));
         } else {
             createMeshVertexUniformBuffers(mesh)

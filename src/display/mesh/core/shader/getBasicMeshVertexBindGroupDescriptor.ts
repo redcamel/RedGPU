@@ -38,6 +38,14 @@ const getBasicMeshVertexBindGroupDescriptor = (mesh: Mesh, skin: boolean = false
                     size: mesh.animationInfo.skinInfo.vertexStorageBuffer.size
                 },
             },
+            {
+                binding: 4,
+                resource: {
+                    buffer: mesh.animationInfo.skinInfo.prevVertexStorageBuffer,
+                    offset: 0,
+                    size: mesh.animationInfo.skinInfo.prevVertexStorageBuffer.size
+                },
+            },
         ] : [
             {
                 binding: 0,

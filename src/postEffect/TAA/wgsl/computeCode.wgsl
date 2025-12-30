@@ -13,7 +13,7 @@
     let unjitteredUV = currentUV - uniforms.jitterOffset;
 
     // 2. 현재 컬러 샘플링 (보정된 UV 사용)
-    let currentColor = textureSampleLevel(sourceTexture, motionVectorSampler, unjitteredUV, 0.0);
+    let currentColor = textureSampleLevel(sourceTexture, taaTextureSampler, unjitteredUV, 0.0);
 
     // 초기 프레임 처리
     if (uniforms.frameIndex < 2.0) {
@@ -40,10 +40,10 @@
 
     // 가장 가까운 물체의 모션 벡터 사용 (테두리 고스트 방지)
     let dilatedUV = (vec2<f32>(pixelCoord + bestOffset) + 0.5) / screenSize;
-    let motionVector = textureSampleLevel(motionVectorTexture, motionVectorSampler, dilatedUV, 0.0).xy;
+    let motionVector = textureSampleLevel(motionVectorTexture, taaTextureSampler, dilatedUV, 0.0).xy;
 
     // 4. 히스토리 좌표 계산 및 화면 밖 체크
-    let historyUV = unjitteredUV - motionVector;
+    let historyUV = unjitteredUV ;
     if (any(historyUV < vec2<f32>(0.0)) || any(historyUV > vec2<f32>(1.0))) {
         textureStore(outputTexture, vec2<u32>(pixelCoord), currentColor);
         return;
@@ -61,11 +61,11 @@
     let disocclusionWeight = smoothstep(0.02, 0.08, relativeDepthDiff);
 
     // 6. 히스토리 샘플링 (Catmull-Rom으로 선명도 보강)
-    let historyColor = sampleTextureCatmullRom(previousFrameTexture, motionVectorSampler, historyUV);
+    let historyColor = sampleTextureCatmullRom(previousFrameTexture, taaTextureSampler, historyUV);
 
     // 7. Variance Clipping (k값을 1.5~2.0으로 하여 선명도 유지)
     // 보정된 unjitteredUV 주변 3x3 색상으로 히스토리를 클램핑
-    let clampedHistory = varianceClipping(unjitteredUV, historyColor, sourceTexture, motionVectorSampler);
+    let clampedHistory = varianceClipping(unjitteredUV, historyColor, sourceTexture, taaTextureSampler);
 
     // 8. 색상 공간 변환 및 최종 혼합 (YCoCg)
     let currentYCoCg = rgb_to_ycocg(currentColor.rgb);

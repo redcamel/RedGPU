@@ -6,6 +6,7 @@ import GPU_LOAD_OP from "../gpuConst/GPU_LOAD_OP";
 import GPU_STORE_OP from "../gpuConst/GPU_STORE_OP";
 import GltfAnimationLooperManager from "../loader/gltf/animationLooper/GltfAnimationLooperManager";
 import ParsedSkinInfo_GLTF from "../loader/gltf/cls/ParsedSkinInfo_GLTF";
+import copyGPUBuffer from "../utils/copyGPUBuffer";
 import DrawBufferManager from "./core/DrawBufferManager";
 import DebugRender from "./debugRender/DebugRender";
 import FinalRender from "./finalRender/FinalRender";
@@ -297,6 +298,7 @@ class Renderer {
                 skinInfo.jointData = new Float32Array(neededSize);
                 skinInfo.computeShader = null
             }
+
             // 모델 행렬의 역행렬 계산
             skinInfo.invertNodeGlobalTransform = skinInfo.invertNodeGlobalTransform || new Float32Array(mesh.modelMatrix.length);
             // mat4.invert(skinInfo.invertNodeGlobalTransform, mesh.modelMatrix);
@@ -375,6 +377,8 @@ class Renderer {
                     mesh.animationInfo.jointBuffer,
                 );
             }
+            copyGPUBuffer(redGPUContext.gpuDevice, mesh.animationInfo.skinInfo.vertexStorageBuffer, mesh.animationInfo.skinInfo.prevVertexStorageBuffer)
+
             {
                 const usedJoints = skinInfo.usedJoints
                 let i = usedJoints.length;
@@ -385,6 +389,7 @@ class Renderer {
                 jointData.set(skinInfo.invertNodeGlobalTransform, 0)
                 gpuDevice.queue.writeBuffer(skinInfo.uniformBuffer, 0, jointData)
             }
+
             // Compute Pass 설정 및 Dispatch
             passEncoder.setPipeline(skinInfo.computePipeline);
             passEncoder.setBindGroup(0, skinInfo.bindGroup);

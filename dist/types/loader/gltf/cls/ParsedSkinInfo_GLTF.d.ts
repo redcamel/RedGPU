@@ -12,6 +12,7 @@ declare class ParsedSkinInfo_GLTF {
     skeletonMesh: any;
     vertexStorageInfo: any;
     vertexStorageBuffer: GPUBuffer;
+    prevVertexStorageBuffer: GPUBuffer;
     invertNodeGlobalTransform: Float32Array;
     usedJoints: number[];
     WORK_SIZE: number;
