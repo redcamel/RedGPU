@@ -9,6 +9,8 @@ import calculateTextureByteSize from "../utils/texture/calculateTextureByteSize"
 import AMultiPassPostEffect from "./core/AMultiPassPostEffect";
 import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
 import postEffectSystemUniformCode from "./core/postEffectSystemUniform.wgsl"
+import Convolution from "./effects/convolution/Convolution";
+import Sharpen from "./effects/Sharpen";
 
 /**
  * 후처리 이펙트(PostEffect) 관리 클래스입니다.
@@ -52,6 +54,7 @@ class PostEffectManager {
     #uniformData: ArrayBuffer
     #uniformDataF32: Float32Array
     #uniformDataU32: Uint32Array
+    #taaSharpenEffect:Convolution
 
     constructor(view: View3D) {
         this.#view = view;
@@ -139,6 +142,20 @@ class PostEffectManager {
                 height,
                 currentTextureView
             );
+            if(!this.#taaSharpenEffect) {
+                this.#taaSharpenEffect = new Convolution(redGPUContext)
+                this.#taaSharpenEffect.kernel = [
+                    0, -1, 0, 0,
+                    -1, 7, -1, 0,
+                    0, -1, 0, 0,
+                ]
+            }
+            currentTextureView = this.#taaSharpenEffect.render(
+              this.#view,
+              width,
+              height,
+              currentTextureView
+            )
         }
         return currentTextureView;
     }

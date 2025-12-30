@@ -765,20 +765,20 @@ class Mesh extends MeshBase {
         {
             // 변경시만 이전 모델 메트릭스 업데이트
             if (antialiasingManager.useTAA && this.#uniformDataMatrixList) {
-                this.#needUpdateMatrixUniform = true
+
                 const {gpuRenderInfo} = this
                 const {vertexUniformBuffer, vertexUniformInfo} = gpuRenderInfo
                 const {members: vertexUniformInfoMembers} = vertexUniformInfo
                 const {members: vertexUniformInfoMatrixListMembers} = vertexUniformInfoMembers.matrixList
                 if (this.#prevModelMatrix && vertexUniformInfoMatrixListMembers.prevModelMatrix) {
                     this.#uniformDataMatrixList.set(this.#prevModelMatrix, vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
-                    // if (vertexUniformInfoMatrixListMembers.prevModelMatrix) {
-                    // 	redGPUContext.gpuDevice.queue.writeBuffer(
-                    // 		vertexUniformGPUBuffer,
-                    // 		vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffset,
-                    // 		this.#prevModelMatrix,
-                    // 	)
-                    // }
+                    if (!this.#needUpdateMatrixUniform ) {
+                    	redGPUContext.gpuDevice.queue.writeBuffer(
+                        vertexUniformBuffer.gpuBuffer,
+                    		vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffset,
+                    		this.#prevModelMatrix,
+                    	)
+                    }
                 }
                 // 브랜치가 먼가 꼬였네
                 {
