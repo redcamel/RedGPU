@@ -334,16 +334,18 @@ class View3D extends AView {
         this.#updateSystemUniform();
     }
 
-    #noneJitterProjectionCameraMatrix:mat4
-    get noneJitterProjectionCameraMatrix():mat4{
-        return this.#noneJitterProjectionCameraMatrix
-    }
+    
 
     #updateSystemUniformData(valueLust: { key, value, dataView, targetMembers }[]) {
         valueLust.forEach(({key, value, dataView, targetMembers}) => {
             const info = targetMembers[key]
             dataView.set(typeof value === 'number' ? [value] : value, info.uniformOffset / info.View.BYTES_PER_ELEMENT)
         })
+    }
+
+    #noneJitterProjectionCameraMatrix:mat4 = mat4.create()
+    get noneJitterProjectionCameraMatrix(): mat4 {
+        return this.#noneJitterProjectionCameraMatrix;
     }
 
     #updateSystemUniform() {
@@ -366,6 +368,7 @@ class View3D extends AView {
             const {members} = structInfo;
             const cameraMembers = members.camera.members;
             this.#noneJitterProjectionCameraMatrix = mat4.multiply(temp2, noneJitterProjectionMatrix, cameraMatrix)
+
             this.#updateSystemUniformData([
                 {
                     key: 'projectionMatrix',
@@ -398,8 +401,8 @@ class View3D extends AView {
                     targetMembers: members
                 },
                 {
-                    key: 'prevProjectionCameraMatrix',
-                    value: redGPUContext.antialiasingManager.useTAA ? this.taa.prevProjectionCameraMatrix : this.#noneJitterProjectionCameraMatrix,
+                    key: 'prevNoneJitterProjectionCameraMatrix',
+                    value: redGPUContext.antialiasingManager.useTAA ? this.taa.prevNoneJitterProjectionCameraMatrix : this.#noneJitterProjectionCameraMatrix,
                     dataView: this.#uniformDataF32,
                     targetMembers: members
                 },

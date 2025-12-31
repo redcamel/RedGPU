@@ -13,6 +13,7 @@ import postEffectSystemUniform from "../core/postEffectSystemUniform.wgsl"
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 
+const projectionCameraMatrix = mat4.create();
 class TAA {
     #redGPUContext: RedGPUContext
     #antialiasingManager: AntialiasingManager
@@ -49,6 +50,13 @@ class TAA {
     #jitterStrength: number = 1;
     #prevMSAA: Boolean
     #prevMSAAID: string
+    #prevJitterOffset:[number,number] =[0,0]
+    #prevNoneJitterProjectionCameraMatrix:mat4 = mat4.create();
+
+
+    get prevNoneJitterProjectionCameraMatrix(): mat4 {
+        return this.#prevNoneJitterProjectionCameraMatrix;
+    }
 
     constructor(redGPUContext: RedGPUContext) {
         this.#redGPUContext = redGPUContext
@@ -95,10 +103,13 @@ class TAA {
         this.#frameIndex++;
         if (this.#uniformBuffer) {
             this.updateUniform('frameIndex', this.#frameIndex);
-            this.updateUniform('invViewProj', [...view.noneJitterProjectionCameraMatrix]);
-            this.updateUniform('prevViewProj', [...this.#prevProjectionCameraMatrix]);
             this.updateUniform('jitterOffset', view.jitterOffset);
+            this.updateUniform('prevJitterOffset', this.#prevJitterOffset);
+            mat4.copy(this.#prevNoneJitterProjectionCameraMatrix,view.noneJitterProjectionCameraMatrix)
+
+            this.#prevJitterOffset = [...view.jitterOffset]
         }
+
         const dimensionsChanged = this.#createRenderTexture(view)
         const msaaChanged = this.#prevMSAA !== useMSAA || this.#prevMSAAID !== msaaID;
         const sourceTextureChanged = this.#detectSourceTextureChange([sourceTextureView]);
@@ -122,7 +133,7 @@ class TAA {
         }
         this.#prevMSAA = useMSAA;
         this.#prevMSAAID = msaaID;
-        mat4.copy(this.#prevProjectionCameraMatrix,view.noneJitterProjectionCameraMatrix)
+
         return {
             texture: this.#currentFrameTexture,
             textureView: this.#currentFrameTextureView
@@ -150,10 +161,7 @@ class TAA {
         this.#uniformBuffer.writeOnlyBuffer(this.#uniformsInfo.members[key], value)
     }
 
-    #prevProjectionCameraMatrix:mat4 = mat4.create();
-    get prevProjectionCameraMatrix():mat4{
-        return this.#prevProjectionCameraMatrix;
-    }
+
     #createTAAShaderCode() {
         const createCode = (useMSAA: boolean) => {
             return `
@@ -164,7 +172,7 @@ class TAA {
 				@group(0) @binding(2) var motionVectorTexture : texture_2d<f32>;
 				@group(0) @binding(3) var taaTextureSampler : sampler;
 				@group(0) @binding(4) var depthTexture : texture_depth_2d;
-				@group(0) @binding(5) var historyDepthTexture : texture_depth_2d;
+				@group(0) @binding(5) var previousDepthTexture : texture_depth_2d;
 				
 				@group(1) @binding(0) var outputTexture : texture_storage_2d<rgba8unorm, write>;
 				${postEffectSystemUniform}

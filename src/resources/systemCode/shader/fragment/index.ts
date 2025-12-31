@@ -6,13 +6,14 @@ import calcTintBlendMode from './calcTintBlendMode.wgsl'
 import drawPicking from './drawPicking.wgsl'
 import FragmentOutput from './fragmentOutput.wgsl'
 import normalFunctions from './normalFunctions.wgsl'
-
+import calculateMotionVector from './calculateMotionVector.wgsl'
 const SystemFragmentCode = Object.freeze({
     calcTintBlendMode,
     calcDirectionalShadowVisibility,
     drawDirectionalShadowDepth,
     normalFunctions,
     calcPrePathBackground,
+    calculateMotionVector,
     FragmentOutput,
     //
     picking,

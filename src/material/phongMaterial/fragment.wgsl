@@ -275,6 +275,6 @@ fn main(inputData:InputData) -> FragmentOutput {
         output.gBufferNormal = vec4<f32>(N * 0.5 + 0.5, baseReflectionStrength);
     }
     #redgpu_endIf
-    output.gBufferMotionVector = vec4<f32>( inputData.motionVector, 1.0 );
+    output.gBufferMotionVector = vec4<f32>(calculateMotionVector(inputData.currentClipPos, inputData.prevClipPos),0.0, 1.0 );
     return output;
 }

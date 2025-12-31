@@ -1,5 +1,5 @@
 #redgpu_include SYSTEM_UNIFORM;
-#redgpu_include calculateMotionVector;
+
 #redgpu_include meshVertexBasicUniform;
 const maxDistance: f32 = 1000.0;
 const maxMipLevel: f32 = 10.0;
@@ -28,7 +28,10 @@ struct OutputDataSkin {
     @location(3) uv1: vec2<f32>,
     @location(4) vertexColor_0: vec4<f32>,
     @location(5) vertexTangent: vec4<f32>,
-    @location(9) ndcPosition: vec3<f32>,
+
+    @location(7) currentClipPos: vec4<f32>,
+    @location(8) prevClipPos: vec4<f32>,
+
     @location(10) localNodeScale_volumeScale: vec2<f32>,
     @location(11) combinedOpacity: f32,
 
@@ -56,7 +59,7 @@ fn main(inputData: InputDataSkin) -> OutputDataSkin {
     let u_projectionMatrix = systemUniforms.projectionMatrix;
     let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
     let u_noneJitterProjectionCameraMatrix = systemUniforms.noneJitterProjectionCameraMatrix;
-    let u_prevProjectionCameraMatrix = systemUniforms.prevProjectionCameraMatrix;
+    let u_prevNoneJitterProjectionCameraMatrix = systemUniforms.prevNoneJitterProjectionCameraMatrix;
     let u_resolution = systemUniforms.resolution;
     let u_camera = systemUniforms.camera;
     let u_cameraMatrix = u_camera.cameraMatrix;
@@ -107,7 +110,7 @@ fn main(inputData: InputDataSkin) -> OutputDataSkin {
     output.vertexColor_0 = inputData.vertexColor_0;
 
 
-    output.ndcPosition = output.position.xyz / output.position.w;
+
 
     // Shadow calculation
     #redgpu_if receiveShadow
@@ -120,9 +123,8 @@ fn main(inputData: InputDataSkin) -> OutputDataSkin {
 
     // Motion vector calculation
     {
-        let currentClipPos = u_noneJitterProjectionCameraMatrix * position;
-        let prevClipPos = u_prevProjectionCameraMatrix * u_prevModelMatrix  * (prevSkinMat * input_position_vec4);
-        output.motionVector = vec3<f32>(calculateMotionVector(currentClipPos, prevClipPos, u_resolution), 0.0);
+        output.currentClipPos = u_noneJitterProjectionCameraMatrix * position;
+        output.prevClipPos = u_prevNoneJitterProjectionCameraMatrix * u_prevModelMatrix  * (prevSkinMat * input_position_vec4);
     }
 
     // Scale calculations

@@ -1,7 +1,7 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include drawDirectionalShadowDepth;
 #redgpu_include picking;
-#redgpu_include calculateMotionVector;
+
 #redgpu_include meshVertexBasicUniform;
 
 const maxDistance: f32 = 1000.0;
@@ -25,7 +25,7 @@ fn main(inputData: InputData) -> OutputData {
     let u_projectionMatrix = systemUniforms.projectionMatrix;
     let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
     let u_noneJitterProjectionCameraMatrix = systemUniforms.noneJitterProjectionCameraMatrix;
-    let u_prevProjectionCameraMatrix = systemUniforms.prevProjectionCameraMatrix;
+    let u_prevNoneJitterProjectionCameraMatrix = systemUniforms.prevNoneJitterProjectionCameraMatrix;
     let u_resolution = systemUniforms.resolution;
     let u_camera = systemUniforms.camera;
     let u_cameraMatrix = u_camera.cameraMatrix;
@@ -62,7 +62,7 @@ fn main(inputData: InputData) -> OutputData {
     let transformedTangentXYZ = (u_normalModelMatrix * vec4<f32>(inputData.vertexTangent.xyz, 0.0)).xyz;
     output.vertexTangent = vec4<f32>( normalize(transformedTangentXYZ), inputData.vertexTangent.w );
 
-    output.ndcPosition = output.position.xyz / output.position.w;
+
 
     // Shadow calculation
     #redgpu_if receiveShadow
@@ -75,9 +75,9 @@ fn main(inputData: InputData) -> OutputData {
 
     // Motion vector calculation
     {
-        let currentClipPos = u_noneJitterProjectionCameraMatrix * position;
-        let prevClipPos = u_prevProjectionCameraMatrix * u_prevModelMatrix * input_position_vec4;
-        output.motionVector = vec3<f32>(calculateMotionVector(currentClipPos, prevClipPos, u_resolution), 0.0);
+        output.currentClipPos = u_noneJitterProjectionCameraMatrix * position;
+        output.prevClipPos = u_prevNoneJitterProjectionCameraMatrix * u_prevModelMatrix * input_position_vec4;
+
     }
 
     // Scale calculations

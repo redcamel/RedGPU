@@ -1,7 +1,6 @@
 fn calculateMotionVector(
     currentClipPos: vec4<f32>,
     prevClipPos: vec4<f32>,
-    resolution: vec2<f32>
 ) -> vec2<f32> {
     // 1. Perspective Divide (NDC로 변환)
     // 0으로 나누기 방지를 위해 매우 작은 값(epsilon) 사용

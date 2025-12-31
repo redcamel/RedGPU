@@ -4,11 +4,11 @@ declare const SystemCode: Readonly<{
     drawDirectionalShadowDepth: "string";
     normalFunctions: "string";
     calcPrePathBackground: "string";
+    calculateMotionVector: "string";
     FragmentOutput: "string";
     picking: "string";
     drawPicking: "string";
     calcDisplacements: "string";
-    calculateMotionVector: "string";
     getBillboardMatrix: "string";
     extractScaleAndTranslation: "string";
     meshVertexBasicUniform: "string";

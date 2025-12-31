@@ -6,7 +6,7 @@ struct OutputData {
     @location(3) uv1: vec2<f32>,
     @location(4) vertexColor_0: vec4<f32>,
     @location(5) vertexTangent: vec4<f32>,
-    @location(9) ndcPosition: vec3<f32>,
+
     @location(10) localNodeScale_volumeScale: vec2<f32>,
     @location(11) instanceOpacity: f32,
 
