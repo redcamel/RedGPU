@@ -9,8 +9,10 @@
 
     // --- 1. 좌표 및 현재 컬러 설정 ---
     let currentUV = (vec2<f32>(pixelCoord) + 0.5) * invScreenSize;
-    let unjitteredUV = currentUV - uniforms.jitterOffset;
-    let currentColor = textureSampleLevel(sourceTexture, taaTextureSampler, unjitteredUV, 0.0);
+
+    // 현재 프레임은 jitter 적용된 좌표로 샘플링
+    let jitteredUV = currentUV + uniforms.jitterOffset;
+    let currentColor = textureSampleLevel(sourceTexture, taaTextureSampler, jitteredUV, 0.0);
 
     // 첫 프레임 처리 (단순화)
     if (uniforms.frameIndex < 2.0) {
@@ -34,19 +36,10 @@
     let dilatedUV = (vec2<f32>(pixelCoord + bestOffset) + 0.5) * invScreenSize;
     let motionVector = textureSampleLevel(motionVectorTexture, taaTextureSampler, dilatedUV, 0.0).xy;
 
-    let motionPixel = motionVector * screenSize;
-    let motionMag = length(motionPixel);
-
-    let maxMotionPixel: f32 = 4.0;
-
-//    if (motionMag > maxMotionPixel) {
-//        textureStore(outputTexture, vec2<u32>(pixelCoord), currentColor);
-//        return;
-//    }
 
     // --- 3. 히스토리 재투영 및 유효성 검사 ---
     // 이전 프레임의 jitter를 고려한 히스토리 UV 계산
-    let historyUV = unjitteredUV - motionVector + uniforms.prevJitterOffset;
+    let historyUV = currentUV - motionVector + uniforms.prevJitterOffset;
 
     // 화면 밖 샘플링 방지
     if (any(historyUV < vec2<f32>(0.0)) || any(historyUV > vec2<f32>(1.0))) {
@@ -61,16 +54,15 @@
     historyColor = varianceClipping(currentUV, historyColor, sourceTexture, taaTextureSampler);
 
     // --- 5. 최종 혼합 (Luma Weighting 및 안정화된 Alpha) ---
-
     let currentYCoCg = rgb_to_ycocg(currentColor.rgb);
     let historyYCoCg = rgb_to_ycocg(historyColor.rgb);
 
     // velocity 기반 alpha 계산
     let velocity = length(motionVector);
 
-    // 정지 상태일수록 alpha를 더 낮게 (히스토리 비중 ↑)
-    // 움직임이 클수록 alpha를 높여 현재 프레임 반영 ↑
-    var alpha: f32 = mix(0.02, 0.2, clamp(velocity * 50.0, 0.0, 1.0));
+    // 정지 상태일수록 alpha ↓ (히스토리 비중 ↑)
+    // 움직임이 클수록 alpha ↑ (현재 프레임 반영 ↑)
+    var alpha: f32 = mix(0.08, 0.2, clamp(velocity * 50.0, 0.0, 1.0));
 
     // 휘도 기반 가중치 (Luma Weighting)
     let w_c = 1.0 / (1.0 + currentYCoCg.x);

@@ -150,12 +150,12 @@ class PostEffectManager {
                     0, -1, 0, 0,
                 ]
             }
-            // currentTextureView = this.#taaSharpenEffect.render(
-            //   this.#view,
-            //   width,
-            //   height,
-            //   currentTextureView
-            // )
+            currentTextureView = this.#taaSharpenEffect.render(
+              this.#view,
+              width,
+              height,
+              currentTextureView
+            )
         }
         return currentTextureView;
     }
