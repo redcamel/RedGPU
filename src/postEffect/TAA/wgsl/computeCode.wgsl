@@ -62,7 +62,7 @@
 
     // 정지 상태일수록 alpha ↓ (히스토리 비중 ↑)
     // 움직임이 클수록 alpha ↑ (현재 프레임 반영 ↑)
-    var alpha: f32 = mix(0.08, 0.2, clamp(velocity * 50.0, 0.0, 1.0));
+    var alpha: f32 = mix(0.08, 0.9, clamp(velocity, 0.0, 1.0));
 
     // 휘도 기반 가중치 (Luma Weighting)
     let w_c = 1.0 / (1.0 + currentYCoCg.x);
