@@ -244,7 +244,7 @@ class Renderer {
         const {taa} = view
         const frameIndex = taa.frameIndex || 0;
         const jitterScale = taa.jitterStrength;
-        const sampleCount = 16;
+        const sampleCount = 32;
         const currentSample = frameIndex % sampleCount;
         // Halton 시퀀스 계산
         const haltonX = this.#haltonSequence(currentSample + 1, 2);

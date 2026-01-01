@@ -331,14 +331,8 @@ class ViewTransform {
 
         if (needJitter) {
             if (this.rawCamera instanceof PerspectiveCamera && (this.#jitterOffsetX !== 0 || this.#jitterOffsetY !== 0)) {
-                // devicePixelRatio를 고려한 정확한 픽셀 크기 계산
-                const logicalWidth = this.#pixelRectArray[2];
-                const logicalHeight = this.#pixelRectArray[3];
-                const pixelHeight = window.devicePixelRatio / logicalHeight;
-                const pixelWidth = window.devicePixelRatio / logicalWidth;
-                // const pixelWidth = pixelHeight * this.aspect;
-                this.#projectionMatrix[8] += this.#jitterOffsetX * pixelWidth;  // X 오프셋
-                this.#projectionMatrix[9] += this.#jitterOffsetY * pixelHeight; // Y 오프셋
+                this.#projectionMatrix[8] += this.#jitterOffsetX * 2;  // X 오프셋
+                this.#projectionMatrix[9] += this.#jitterOffsetY * 2; // Y 오프셋
             }
         }
         return this.#projectionMatrix;
