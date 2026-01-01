@@ -59,6 +59,10 @@
 
     // velocity 기반 alpha 계산
     let velocity = length(motionVector);
+    if(velocity>1.0){
+        textureStore(outputTexture, vec2<u32>(pixelCoord), currentColor);
+        return;
+    }
 
     // 정지 상태일수록 alpha ↓ (히스토리 비중 ↑)
     // 움직임이 클수록 alpha ↑ (현재 프레임 반영 ↑)
@@ -75,7 +79,7 @@
     let finalYCoCgX = (historyYCoCg.x * blend_h + currentYCoCg.x * blend_c) / (blend_h + blend_c);
     let finalYCoCg = vec3<f32>(
         finalYCoCgX,
-        mix(historyYCoCg.yz, currentYCoCg.yz, alpha)
+        mix(historyYCoCg.yz, currentYCoCg.yz, velocity)
     );
 
     let finalRGB = clamp(ycocg_to_rgb(finalYCoCg), vec3<f32>(0.0), vec3<f32>(1.0));

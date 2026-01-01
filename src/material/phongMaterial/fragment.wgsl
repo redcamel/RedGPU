@@ -4,6 +4,7 @@
 #redgpu_include normalFunctions;
 #redgpu_include drawPicking;
 #redgpu_include FragmentOutput;
+#redgpu_include calculateMotionVector;
 struct Uniforms {
     color: vec3<f32>,
     //
@@ -37,6 +38,10 @@ struct InputData {
     @location(0) vertexPosition: vec3<f32>,
     @location(1) vertexNormal: vec3<f32>,
     @location(2) uv: vec2<f32>,
+
+    @location(7) currentClipPos: vec4<f32>,
+    @location(8) prevClipPos: vec4<f32>,
+
     @location(11) combinedOpacity: f32,
     //
     @location(12) motionVector: vec3<f32>,
