@@ -13,7 +13,8 @@
     let pureUV = currentUV - jUV; // 지터가 제거된 현재 프레임의 기준 UV
 
     // --- 2. 현재 데이터 및 3x3 통계(Variance) 수집 ---
-    let currentColorRGB = textureLoad(sourceTexture, pixelCoord, 0).rgb;
+    let currentColor = textureLoad(sourceTexture, pixelCoord, 0);
+    let currentColorRGB = currentColor.rgb;
     let currentDepth = textureLoad(depthTexture, pixelCoord, 0);
     let currentYCoCg = rgb_to_ycocg(currentColorRGB);
 
@@ -52,7 +53,15 @@
     // --- 3. 모션 벡터 샘플링 (Dilation 적용) ---
     // 가장 가까운 픽셀의 위치에서 모션 벡터를 추출 (Bilinear 필터링을 위해 SampleLevel 사용)
     let dilatedUV = (vec2<f32>(pixelCoord + closestOffset) + 0.5) * invScreenSize - jUV;
-    let motionVector = textureSampleLevel(motionVectorTexture, taaTextureSampler, dilatedUV, 0.0).xy;
+    let motionData = textureSampleLevel(motionVectorTexture, taaTextureSampler, dilatedUV, 0.0);
+    let motionVector = motionData.xy;
+
+    let jitterDisabled = motionData.z > 0.5;
+    if (jitterDisabled) {
+        textureStore(outputTexture, pixelCoord, currentColor);
+        return;
+    }
+
 
     // 히스토리 좌표 계산
     let historyUV = pureUV - motionVector + pjUV;
