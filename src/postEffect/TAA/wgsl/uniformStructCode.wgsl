@@ -1,63 +1,58 @@
 // ===== Uniforms =====
 struct Uniforms {
-    jitterStrength: f32,
     frameIndex: f32,
-    jitterOffset: vec2<f32>,
-    prevJitterOffset: vec2<f32>,  // 추가 필요!
+    currJitterOffset: vec2<f32>,
+    prevJitterOffset: vec2<f32>,
 };
-fn rgb_to_ycocg(rgb: vec3<f32>) -> vec3<f32> {
-    let y = dot(rgb, vec3<f32>(0.25, 0.5, 0.25));
-    let co = dot(rgb, vec3<f32>(0.5, 0.0, -0.5));
-    let cg = dot(rgb, vec3<f32>(-0.25, 0.5, -0.25));
-    return vec3<f32>(y, co, cg);
+struct NeighborhoodStats {
+    minColor: vec4<f32>,
+    maxColor: vec4<f32>,
+    mean: vec4<f32>,
+    stdDev: vec4<f32>,
+};
+// 1. Variance(분산) 기반 통계 계산 함수
+fn get_neighborhood_stats(pixelCoord: vec2<i32>, screenSizeU: vec2<u32>) -> NeighborhoodStats {
+    var stats: NeighborhoodStats;
+    var m1 = vec4<f32>(0.0); // 색상의 합
+    var m2 = vec4<f32>(0.0); // 색상 제곱의 합
+
+    // 단순 Min/Max도 안정성을 위해 병행 사용
+    var minC = vec4<f32>(1e5);
+    var maxC = vec4<f32>(-1e5);
+
+    for (var y: i32 = -1; y <= 1; y++) {
+        for (var x: i32 = -1; x <= 1; x++) {
+            let sampleCoord = clamp(pixelCoord + vec2<i32>(x, y), vec2<i32>(0), vec2<i32>(screenSizeU) - 1);
+            let c = textureLoad(sourceTexture, sampleCoord, 0);
+
+            m1 += c;
+            m2 += c * c;
+            minC = min(minC, c);
+            maxC = max(maxC, c);
+        }
+    }
+
+    let numSamples = 9.0;
+    stats.mean = m1 / numSamples;
+    let variance = (m2 / numSamples) - (stats.mean * stats.mean);
+    stats.stdDev = sqrt(max(variance, vec4<f32>(0.0))); // 음수 방지
+
+    stats.minColor = minC;
+    stats.maxColor = maxC;
+
+    return stats;
 }
 
-fn ycocg_to_rgb(ycocg: vec3<f32>) -> vec3<f32> {
-    let y = ycocg.x;
-    let co = ycocg.y;
-    let cg = ycocg.z;
-    let r = y + co - cg;
-    let g = y + cg;
-    let b = y - co - cg;
-    return vec3<f32>(r, g, b);
-}
+// 2. Variance Clipping을 적용한 클램핑 함수
+fn clamp_history(history: vec4<f32>, stats: NeighborhoodStats) -> vec4<f32> {
+    // 감도 조절 파라미터 Gamma (보통 1.0 ~ 1.5)
+    // 이 값이 작을수록 잔상 제거가 강해지고, 클수록 안티앨리어싱이 부드러워집니다.
+    let gamma = 1.25;
 
-fn sample_texture_catmull_rom_ycocg(tex: texture_2d<f32>, smp: sampler, uv: vec2<f32>, texSize: vec2<f32>) -> vec3<f32> {
-    let samplePos = uv * texSize;
-    let texPos1 = floor(samplePos - 0.5) + 0.5;
-    let f = samplePos - texPos1;
+    let vMin = stats.mean - (stats.stdDev * gamma);
+    let vMax = stats.mean + (stats.stdDev * gamma);
 
-    let w0 = f * (-0.5 + f * (1.0 - 0.5 * f));
-    let w1 = 1.0 + f * f * (-2.5 + 1.5 * f);
-    let w2 = f * (0.5 + f * (2.0 - 1.5 * f));
-    let w3 = f * f * (-0.5 + 0.5 * f);
-
-    let w12 = w1 + w2;
-    let offset12 = w2 / w12;
-
-    let texPos0 = (texPos1 - 1.0) / texSize;
-    let texPos3 = (texPos1 + 2.0) / texSize;
-    let texPos12 = (texPos1 + offset12) / texSize;
-
-    // 5-tap 샘플링 수행
-    let s0 = textureSampleLevel(tex, smp, vec2<f32>(texPos0.x,  texPos12.y), 0.0).rgb;
-    let s1 = textureSampleLevel(tex, smp, vec2<f32>(texPos12.x, texPos0.y),  0.0).rgb;
-    let s2 = textureSampleLevel(tex, smp, vec2<f32>(texPos12.x, texPos12.y), 0.0).rgb;
-    let s3 = textureSampleLevel(tex, smp, vec2<f32>(texPos12.x, texPos3.y),  0.0).rgb;
-    let s4 = textureSampleLevel(tex, smp, vec2<f32>(texPos3.x,  texPos12.y), 0.0).rgb;
-
-    // 가중치 계산
-    var result = s0 * w0.x * w12.y +
-                 s1 * w12.x * w0.y +
-                 s2 * w12.x * w12.y +
-                 s3 * w12.x * w3.y +
-                 s4 * w3.x * w12.y;
-
-    // 정규화 가중치 합산
-    let weightSum = w12.x * w12.y + w0.x * w12.y + w12.x * w0.y + w12.x * w3.y + w3.x * w12.y;
-    result /= weightSum;
-
-    // [중요] 음수 에너지 제거 및 너무 튀는 값 방지
-    // YCoCg 변환 전후에 발생할 수 있는 비정상적인 색상을 잡아줍니다.
-    return max(vec3<f32>(0.0), result);
+    // Variance 범위로 1차 클램핑 후, 물리적 Min/Max로 최종 안전장치
+    let clamped = clamp(history, vMin, vMax);
+    return clamp(clamped, stats.minColor, stats.maxColor);
 }

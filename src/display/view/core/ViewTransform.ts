@@ -9,6 +9,7 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validateRedGPUContext";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import computeViewFrustumPlanes from "../../../utils/math/computeViewFrustumPlanes";
+import {keepLog} from "../../../utils";
 
 /**
  * View3D/View2D의 크기와 위치를 관리하는 클래스입니다.
@@ -258,17 +259,10 @@ class ViewTransform {
      * AController가 연결된 경우 내부 camera를 반환합니다.
      * @returns {PerspectiveCamera | Camera2D}
      */
-    get rawCamera(): PerspectiveCamera | Camera2D | OrthographicCamera{
+    get rawCamera(): PerspectiveCamera | Camera2D | OrthographicCamera {
         return this.#camera instanceof AController ? this.#camera.camera : this.#camera
     }
 
-    /**
-     * 현재 적용된 지터 오프셋 [offsetX, offsetY]를 반환합니다.
-     * @returns {[number, number]}
-     */
-    get jitterOffset(): [number, number] {
-        return [this.#jitterOffsetX, this.#jitterOffsetY];
-    }
 
     /**
      * 지터가 적용되지 않은 원본 프로젝션 행렬을 계산하여 반환합니다.
@@ -331,8 +325,13 @@ class ViewTransform {
 
         if (needJitter) {
             if (this.rawCamera instanceof PerspectiveCamera && (this.#jitterOffsetX !== 0 || this.#jitterOffsetY !== 0)) {
-                this.#projectionMatrix[8] += this.#jitterOffsetX * 2;  // X 오프셋
-                this.#projectionMatrix[9] += this.#jitterOffsetY * 2; // Y 오프셋
+                // NDC 좌표계는 -1.0 ~ 1.0 (폭 2.0)입니다.
+                // 픽셀 오프셋을 NDC 비율로 변환하기 위해 2.0을 곱합니다.
+                const ndcJitterX = (this.#jitterOffsetX / this.pixelRectObject.width) * 2.0;
+                const ndcJitterY = (this.#jitterOffsetY  / this.pixelRectObject.height) * 2.0;
+
+                this.#projectionMatrix[12] += ndcJitterX;
+                this.#projectionMatrix[13] += ndcJitterY;
             }
         }
         return this.#projectionMatrix;
@@ -356,6 +355,13 @@ class ViewTransform {
         this.#jitterOffsetY = offsetY;
     }
 
+    /**
+     * 현재 적용된 지터 오프셋 [offsetX, offsetY]를 반환합니다.
+     * @returns {[number, number]}
+     */
+    get jitterOffset(): [number, number] {
+        return [this.#jitterOffsetX, this.#jitterOffsetY];
+    }
     /**
      * 지터 오프셋을 초기화합니다.
      */

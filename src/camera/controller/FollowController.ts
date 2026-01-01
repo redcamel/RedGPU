@@ -412,7 +412,7 @@ class FollowController extends AController {
 	 * @param {number} time - 현재 시간 (ms)
 	 */
 	update(view: View3D, time: number): void {
-		this.#targetMesh?.render(view.renderViewStateData)
+
 		super.update(view, time, () => {
 			this.#currentDistance += (this.#targetDistance - this.#currentDistance) * this.#distanceInterpolation;
 			this.#currentHeight += (this.#targetHeight - this.#currentHeight) * this.#heightInterpolation;
