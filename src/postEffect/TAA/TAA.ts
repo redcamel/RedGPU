@@ -37,8 +37,8 @@ class TAA {
     // 스왑 버퍼 구조로 변경
     #currentFrameTexture: GPUTexture
     #currentFrameTextureView: GPUTextureView
-    #previousFrameTexture: GPUTexture
-    #previousFrameTextureView: GPUTextureView
+    #historyTexture: GPUTexture
+    #historyTextureView: GPUTextureView
     #frameBufferBindGroup0: GPUBindGroup
     #frameBufferBindGroup1: GPUBindGroup
     #WORK_SIZE_X = 8
@@ -123,7 +123,7 @@ class TAA {
             })
             commentEncode_compute.copyTextureToTexture(
                 {texture: this.#currentFrameTexture},
-                {texture: this.#previousFrameTexture},
+                {texture: this.#historyTexture},
                 [width, height, 1]
             );
             gpuDevice.queue.submit([commentEncode_compute.finish()]);
@@ -141,10 +141,10 @@ class TAA {
     }
 
     clear() {
-        if (this.#previousFrameTexture) {
-            this.#previousFrameTexture.destroy();
-            this.#previousFrameTexture = null;
-            this.#previousFrameTextureView = null;
+        if (this.#historyTexture) {
+            this.#historyTexture.destroy();
+            this.#historyTexture = null;
+            this.#historyTextureView = null;
         }
         if (this.#currentFrameTexture) {
             this.#currentFrameTexture.destroy();
@@ -168,11 +168,11 @@ class TAA {
 				${uniformStructCode}
 				
 				@group(0) @binding(0) var sourceTexture : texture_2d<f32>;
-				@group(0) @binding(1) var previousFrameTexture : texture_2d<f32>;
+				@group(0) @binding(1) var historyTexture : texture_2d<f32>;
 				@group(0) @binding(2) var motionVectorTexture : texture_2d<f32>;
 				@group(0) @binding(3) var taaTextureSampler : sampler;
 				@group(0) @binding(4) var depthTexture : texture_depth_2d;
-				@group(0) @binding(5) var previousDepthTexture : texture_depth_2d;
+				@group(0) @binding(5) var historyDepthTexture : texture_depth_2d;
 				
 				@group(1) @binding(0) var outputTexture : texture_storage_2d<rgba8unorm, write>;
 				${postEffectSystemUniform}
@@ -243,7 +243,7 @@ class TAA {
         });
         computeBindGroupEntries0.push({
             binding: 1,
-            resource: this.#previousFrameTextureView,
+            resource: this.#historyTextureView,
         });
         computeBindGroupEntries0.push({
             binding: 4,
@@ -352,7 +352,7 @@ class TAA {
         const {resourceManager} = redGPUContext
         const {width, height} = gBufferColorTexture
         const needChange = width !== this.#prevInfo?.width || height !== this.#prevInfo?.height ||
-            !this.#currentFrameTexture || !this.#previousFrameTexture || !this.#currentFrameTexture;
+            !this.#currentFrameTexture || !this.#historyTexture || !this.#currentFrameTexture;
         if (needChange) {
             keepLog(`TAA 텍스처 재생성: ${width}x${height}, 이전 프레임 히스토리 리셋`);
             this.#frameIndex = 0;
@@ -371,7 +371,7 @@ class TAA {
                 format: 'rgba8unorm',
                 label: `${this.#name}_currentFrame_View`
             });
-            this.#previousFrameTexture = resourceManager.createManagedTexture({
+            this.#historyTexture = resourceManager.createManagedTexture({
                 size: {width, height},
                 format: 'rgba8unorm',
                 usage: GPUTextureUsage.TEXTURE_BINDING |
@@ -379,7 +379,7 @@ class TAA {
                     GPUTextureUsage.COPY_DST,
                 label: `${name}_${this.#name}_previousFrame_${width}x${height}`
             });
-            this.#previousFrameTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#previousFrameTexture, {
+            this.#historyTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#historyTexture, {
                 dimension: '2d',
                 format: 'rgba8unorm',
                 label: `${this.#name}_previousFrame`
@@ -388,8 +388,8 @@ class TAA {
                 previousFrame: {
                     width,
                     height,
-                    format: this.#previousFrameTexture.format,
-                    usage: this.#previousFrameTexture.usage
+                    format: this.#historyTexture.format,
+                    usage: this.#historyTexture.usage
                 },
                 currentFrameTexture: {
                     width: this.#currentFrameTexture.width,
@@ -412,8 +412,8 @@ class TAA {
         if (this.#currentFrameTexture) {
             this.#videoMemorySize += calculateTextureByteSize(this.#currentFrameTexture);
         }
-        if (this.#previousFrameTexture) {
-            this.#videoMemorySize += calculateTextureByteSize(this.#previousFrameTexture);
+        if (this.#historyTexture) {
+            this.#videoMemorySize += calculateTextureByteSize(this.#historyTexture);
         }
     }
 

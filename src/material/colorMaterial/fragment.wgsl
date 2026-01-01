@@ -32,7 +32,7 @@ fn main(inputData: InputData) -> FragmentOutput {
         finalColor = calcTintBlendMode(finalColor, uniforms.tintBlendMode, uniforms.tint);
     #redgpu_endIf
     output.color = finalColor;
-    output.gBufferMotionVector = vec4<f32>(calculateMotionVector(inputData.currentClipPos, inputData.prevClipPos),1.0, 1.0 );
+    output.gBufferMotionVector = vec4<f32>(calculateMotionVector(inputData.currentClipPos, inputData.prevClipPos),0.0, 1.0 );
     return output;
 }
 
