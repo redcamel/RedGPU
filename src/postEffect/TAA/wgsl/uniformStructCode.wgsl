@@ -89,33 +89,51 @@ fn catmull_rom_weights(t: f32) -> vec4<f32> {
         0.5 * t3 - 0.5 * t2
     );
 }
-
 fn sample_texture_catmull_rom(tex: texture_2d<f32>, smp: sampler, uv: vec2<f32>, texSize: vec2<f32>) -> vec4<f32> {
     let invTexSize = 1.0 / texSize;
-    let tc = uv * texSize - 0.5;
-    let f = fract(tc);
-    let ic = floor(tc);
+    let samplePos = uv * texSize;
+    let texPos1 = floor(samplePos - 0.5) + 0.5;
+    let f = samplePos - texPos1;
 
-    // 1. 가중치 계산 (x, y 각각 4개씩 필요하지만, 5-tap을 위해 핵심 가중치만 계산)
     let w0 = f * (-0.5 + f * (1.0 - 0.5 * f));
     let w1 = 1.0 + f * f * (-2.5 + 1.5 * f);
     let w2 = f * (0.5 + f * (2.0 - 1.5 * f));
     let w3 = f * f * (-0.5 + 0.5 * f);
 
-    // 2. x축과 y축 가중치를 결합 (핵심 4개 탭에 대한 가중치 산출)
-    // 에러 해결 포인트: 개별 컴포넌트(f32)를 곱해서 가중치를 만듭니다.
-    let weight00 = w1.x * w1.y;
-    let weight10 = w2.x * w1.y;
-    let weight01 = w1.x * w2.y;
-    let weight11 = w2.x * w2.y;
-    let weightSum = weight00 + weight10 + weight01 + weight11;
+    let w12 = w1 + w2;
+    let offset12 = w2 / w12;
 
-    // 3. 샘플링 (중앙 4개의 픽셀을 가중치에 따라 샘플링)
-    let c0 = textureSampleLevel(tex, smp, (ic + vec2<f32>(0.5, 0.5)) * invTexSize, 0.0);
-    let c1 = textureSampleLevel(tex, smp, (ic + vec2<f32>(1.5, 0.5)) * invTexSize, 0.0);
-    let c2 = textureSampleLevel(tex, smp, (ic + vec2<f32>(0.5, 1.5)) * invTexSize, 0.0);
-    let c3 = textureSampleLevel(tex, smp, (ic + vec2<f32>(1.5, 1.5)) * invTexSize, 0.0);
+    // 수정 포인트: invTexSize의 .x와 .y 성분을 명확히 지정하여 f32 연산으로 만듦
+    let xPos0 = (texPos1.x - 1.0) * invTexSize.x;
+    let xPos12 = (texPos1.x + offset12.x) * invTexSize.x;
+    let xPos3 = (texPos1.x + 2.0) * invTexSize.x;
 
-    // 4. 최종 색상 계산 (가중치 정규화 포함)
-    return (c0 * weight00 + c1 * weight10 + c2 * weight01 + c3 * weight11) / weightSum;
+    let yPos0 = (texPos1.y - 1.0) * invTexSize.y;
+    let yPos12 = (texPos1.y + offset12.y) * invTexSize.y;
+    let yPos3 = (texPos1.y + 2.0) * invTexSize.y;
+
+    var result = vec4<f32>(0.0);
+
+    // Row 0
+    result += textureSampleLevel(tex, smp, vec2<f32>(xPos0,  yPos0), 0.0)  * (w0.x * w0.y);
+    result += textureSampleLevel(tex, smp, vec2<f32>(xPos12, yPos0), 0.0)  * (w12.x * w0.y);
+    result += textureSampleLevel(tex, smp, vec2<f32>(xPos3,  yPos0), 0.0)  * (w3.x * w0.y);
+
+    // Row 1 & 2
+    result += textureSampleLevel(tex, smp, vec2<f32>(xPos0,  yPos12), 0.0) * (w0.x * w12.y);
+    result += textureSampleLevel(tex, smp, vec2<f32>(xPos12, yPos12), 0.0) * (w12.x * w12.y);
+    result += textureSampleLevel(tex, smp, vec2<f32>(xPos3,  yPos12), 0.0) * (w3.x * w12.y);
+
+    // Row 3
+    result += textureSampleLevel(tex, smp, vec2<f32>(xPos0,  yPos3), 0.0)  * (w0.x * w3.y);
+    result += textureSampleLevel(tex, smp, vec2<f32>(xPos12, yPos3), 0.0)  * (w12.x * w3.y);
+    result += textureSampleLevel(tex, smp, vec2<f32>(xPos3,  yPos3), 0.0)  * (w3.x * w3.y);
+
+    return max(result, vec4<f32>(0.0));
+}
+// 블렌딩 개선
+fn apply_luma_weight(curr: vec4<f32>, hist: vec4<f32>, alpha: f32) -> vec4<f32> {
+    let w_c = alpha / (1.0 + curr.x); // YCoCg.x는 밝기
+    let w_h = (1.0 - alpha) / (1.0 + hist.x);
+    return (curr * w_c + hist * w_h) / (w_c + w_h);
 }

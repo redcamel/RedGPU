@@ -22,8 +22,8 @@ let pixelCoord = vec2<i32>(global_id.xy);
     for (var y: i32 = -1; y <= 1; y++) {
         for (var x: i32 = -1; x <= 1; x++) {
             let sampleCoord = clamp(pixelCoord + vec2<i32>(x, y), vec2<i32>(0), vec2<i32>(screenSizeU) - 1);
-            let d = textureLoad(depthTexture, sampleCoord, 0); 
-            
+            let d = textureLoad(depthTexture, sampleCoord, 0);
+
             // 더 가까운(작은) 깊이 값을 가진 픽셀의 오프셋 저장
             if (d < closestDepth) {
                 closestDepth = d;
