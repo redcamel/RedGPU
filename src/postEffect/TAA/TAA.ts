@@ -112,7 +112,7 @@ class TAA {
         const dimensionsChanged = this.#createRenderTexture(view)
         const msaaChanged = this.#prevMSAA !== useMSAA || this.#prevMSAAID !== msaaID;
         const sourceTextureChanged = this.#detectSourceTextureChange([sourceTextureView]);
-        if (dimensionsChanged || msaaChanged || sourceTextureChanged) {
+        if (dimensionsChanged || msaaChanged || sourceTextureChanged || true) {
             this.#createFrameBufferBindGroups(view, [sourceTextureView], useMSAA, this.#redGPUContext, gpuDevice);
         }
         this.#execute(gpuDevice, width, height);
