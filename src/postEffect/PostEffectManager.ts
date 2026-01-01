@@ -146,16 +146,16 @@ class PostEffectManager {
                 this.#taaSharpenEffect = new Convolution(redGPUContext)
                 this.#taaSharpenEffect.kernel = [
                     0, -1, 0, 0,
-                    -1, 9, -1, 0,
+                    -1, 7, -1, 0,
                     0, -1, 0, 0,
                 ]
             }
-            // currentTextureView = this.#taaSharpenEffect.render(
-            //   this.#view,
-            //   width,
-            //   height,
-            //   currentTextureView
-            // )
+            currentTextureView = this.#taaSharpenEffect.render(
+              this.#view,
+              width,
+              height,
+              currentTextureView
+            )
         }
         return currentTextureView;
     }
