@@ -4,12 +4,12 @@
     let screenSize = vec2<f32>(screenSizeU);
     if (any(pixelCoord >= vec2<i32>(screenSizeU))) { return; }
 
-    // 1. 현재 프레임 정보
+    // 1. 현재 데이터 로드
     let stats = calculate_neighborhood_stats(pixelCoord, screenSizeU);
     let currentRGB = textureLoad(sourceTexture, pixelCoord, 0);
     let currentDepth = textureLoad(depthTexture, pixelCoord, 0);
 
-    // 2. Velocity Dilation & 재투영 UV
+    // 2. Velocity Dilation
     var closestDepth = 1.0; var closestCoord = pixelCoord;
     for(var y: i32 = -1; y <= 1; y++) {
         for(var x: i32 = -1; x <= 1; x++) {
@@ -26,31 +26,34 @@
     if (any(historyUV < vec2<f32>(0.0)) || any(historyUV > vec2<f32>(1.0))) {
         finalRGB = currentRGB.rgb;
     } else {
-        // 3. 히스토리 샘플링 (색상 및 깊이)
+        // 3. 히스토리 샘플링
         let historyRGB = sample_texture_catmull_rom(historyTexture, taaTextureSampler, historyUV, screenSize).rgb;
-        let historyPos = historyUV * screenSize;
-        let historyCoord = vec2<i32>(historyPos); // floor와 동일하게 동작
+        let prevDepth = fetch_depth_bilinear(historyDepthTexture, historyUV, screenSize);
 
-        // [수정] historyDepthTexture를 textureLoad로 샘플링
-        let prevDepth = textureLoad(historyDepthTexture, historyCoord, 0);
+        // 4. 깊이 기반 신뢰도 계산
+        var depthConfidence = get_depth_confidence(currentDepth, prevDepth);
+        
+        // [추가] 정지 상태 보정: 움직임이 매우 작으면 깊이 거부를 무시하여 외곽선 떨림 방지
+        let velocityPixels = velocity * screenSize;
+        let isMoving = smoothstep(0.01, 0.1, length(velocityPixels));
+        depthConfidence = mix(1.0, depthConfidence, isMoving);
 
-        // 현재 픽셀의 깊이 (이미 1번 단계에서 가져온 값 사용)
-        let currentDepth = currentDepth;
-
-        // [Step 4] 깊이 기반 오클루전 신뢰도 계산
-        let depthConfidence = get_depth_confidence(currentDepth, prevDepth);
-
-        // 5. 클리핑 및 기본 블렌딩 계수
-        let clippedHistoryYCoCg = clip_history_to_neighborhood(rgb_to_ycocg(vec4<f32>(historyRGB, 1.0)), stats.currentYCoCg, stats);
+        // 5. 클리핑 및 가중치 혼합
+        let historyYCoCg = rgb_to_ycocg(vec4<f32>(historyRGB, 1.0));
+        let clippedHistoryYCoCg = clip_history_to_neighborhood(historyYCoCg, stats.currentYCoCg, stats);
         let clippedHistoryRGB = ycocg_to_rgb(clippedHistoryYCoCg).rgb;
 
-        let velocityLength = length(velocity * screenSize);
-        var alpha = clamp(0.05 + velocityLength * 0.02, 0.05, 0.5);
+        let w_curr = get_tone_mapped_weight(currentRGB.rgb);
+        let w_hist = get_tone_mapped_weight(clippedHistoryRGB);
 
-        // [중요] 깊이 차이가 크면(Occlusion) alpha를 1.0으로 만들어 현재 프레임만 사용
+        // 6. 동적 Alpha (0.05 ~ 0.15 정도로 누적량 조절)
+        var alpha = clamp(0.05 + length(velocityPixels) * 0.01, 0.05, 0.15);
+        
+        // 오클루전 발생 시 현재 프레임 비중 증가
         alpha = mix(1.0, alpha, depthConfidence);
 
-        finalRGB = mix(clippedHistoryRGB, currentRGB.rgb, alpha);
+        let finalWeight = (alpha * w_curr) / (alpha * w_curr + (1.0 - alpha) * w_hist);
+        finalRGB = mix(clippedHistoryRGB, currentRGB.rgb, finalWeight);
     }
 
     textureStore(outputTexture, pixelCoord, vec4<f32>(finalRGB, currentRGB.a));

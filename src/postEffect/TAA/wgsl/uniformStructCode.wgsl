@@ -27,14 +27,31 @@ fn ycocg_to_rgb(c: vec4<f32>) -> vec4<f32> {
     return vec4<f32>(max(r, 0.0), max(g, 0.0), max(b, 0.0), c.a);
 }
 
-// [핵심] 깊이 기반 신뢰도 계산: 현재와 과거의 깊이 차이가 크면 고스팅 방지를 위해 히스토리 거부
-fn get_depth_confidence(currDepth: f32, prevDepth: f32) -> f32 {
-    let depthDiff = abs(currDepth - prevDepth);
-    // 임계값(0.001~0.01)은 씬의 스케일에 맞춰 조정하세요.
-    return 1.0 - clamp((depthDiff - 0.002) / 0.01, 0.0, 1.0);
+fn get_tone_mapped_weight(c: vec3<f32>) -> f32 {
+    let l = dot(c, vec3<f32>(0.2126, 0.7152, 0.0722));
+    return 1.0 / (1.0 + l);
 }
 
-// ===== 고품질 샘플링 함수들 =====
+fn get_depth_confidence(currDepth: f32, prevDepth: f32) -> f32 {
+    let depthDiff = abs(currDepth - prevDepth);
+    return 1.0 - clamp((depthDiff - 0.01) / 0.02, 0.0, 1.0);
+}
+
+fn fetch_depth_bilinear(tex: texture_depth_2d, uv: vec2<f32>, screenSize: vec2<f32>) -> f32 {
+    let samplePos = uv * screenSize - 0.5;
+    let f = fract(samplePos);
+    let base = vec2<i32>(floor(samplePos));
+    let size = vec2<i32>(textureDimensions(tex));
+
+    let d00 = textureLoad(tex, clamp(base + vec2<i32>(0, 0), vec2<i32>(0), size - 1), 0);
+    let d10 = textureLoad(tex, clamp(base + vec2<i32>(1, 0), vec2<i32>(0), size - 1), 0);
+    let d01 = textureLoad(tex, clamp(base + vec2<i32>(0, 1), vec2<i32>(0), size - 1), 0);
+    let d11 = textureLoad(tex, clamp(base + vec2<i32>(1, 1), vec2<i32>(0), size - 1), 0);
+
+    return mix(mix(d00, d10, f.x), mix(d01, d11, f.x), f.y);
+}
+
+// [수정 완료] 타입 캐스팅 오류 해결
 fn sample_texture_catmull_rom(tex: texture_2d<f32>, smp: sampler, uv: vec2<f32>, texSize: vec2<f32>) -> vec4<f32> {
     let samplePos = uv * texSize;
     let texPos1 = floor(samplePos - 0.5) + 0.5;
@@ -51,8 +68,9 @@ fn sample_texture_catmull_rom(tex: texture_2d<f32>, smp: sampler, uv: vec2<f32>,
     result += textureSampleLevel(tex, smp, (texPos1 + vec2<f32>(offset12.x, -1.0)) * invTexSize, 0.0) * w12.x * w0.y;
     result += textureSampleLevel(tex, smp, (texPos1 + vec2<f32>(-1.0, offset12.y)) * invTexSize, 0.0) * w0.x * w12.y;
     result += textureSampleLevel(tex, smp, (texPos1 + offset12) * invTexSize, 0.0) * w12.x * w12.y;
-    result += textureSampleLevel(tex, smp, (texPos1 + vec2<f32>(2.0, offset12.y)) * invTexSize, 0.0) * w3.x * w12.y;
-    result += textureSampleLevel(tex, smp, (texPos1 + vec2<f32>(offset12.x, 2.0)) * invTexSize, 0.0) * w12.x * w3.y;
+    // vec2<i32>를 vec2<f32>로 캐스팅하여 연산
+    result += textureSampleLevel(tex, smp, (texPos1 + vec2<f32>(2.0, 0.0) + vec2<f32>(0.0, offset12.y)) * invTexSize, 0.0) * w3.x * w12.y;
+    result += textureSampleLevel(tex, smp, (texPos1 + vec2<f32>(0.0, 2.0) + vec2<f32>(offset12.x, 0.0)) * invTexSize, 0.0) * w12.x * w3.y;
     return max(result, vec4<f32>(0.0));
 }
 
@@ -60,7 +78,6 @@ fn calculate_neighborhood_stats(pixelCoord: vec2<i32>, screenSize: vec2<u32>) ->
     var m1 = vec4<f32>(0.0); var m2 = vec4<f32>(0.0);
     var minC = vec4<f32>(1e5); var maxC = vec4<f32>(-1e5);
     var currentYCoCg = vec4<f32>(0.0);
-
     for (var y: i32 = -1; y <= 1; y++) {
         for (var x: i32 = -1; x <= 1; x++) {
             let sampleCoord = clamp(pixelCoord + vec2<i32>(x, y), vec2<i32>(0), vec2<i32>(screenSize) - 1);
