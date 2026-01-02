@@ -28,16 +28,45 @@ fn ycocg_to_rgb(c: vec4<f32>) -> vec4<f32> {
     return vec4<f32>(max(r, 0.0), max(g, 0.0), max(b, 0.0), c.a);
 }
 
-// ===== [신규] 가장 가까운 픽셀 찾기 (Velocity Dilation) =====
+// ===== 고품질 Catmull-Rom 5-Tap 샘플링 =====
+fn sample_texture_catmull_rom(tex: texture_2d<f32>, smp: sampler, uv: vec2<f32>, texSize: vec2<f32>) -> vec4<f32> {
+    let samplePos = uv * texSize;
+    let texPos1 = floor(samplePos - 0.5) + 0.5;
+    let f = samplePos - texPos1;
+
+    let w0 = f * (-0.5 + f * (1.0 - 0.5 * f));
+    let w1 = 1.0 + f * f * (-2.5 + 1.5 * f);
+    let w2 = f * (0.5 + f * (2.0 - 1.5 * f));
+    let w3 = f * f * (-0.5 + 0.5 * f);
+
+    let w12 = w1 + w2;
+    let offset12 = w2 / w12;
+
+    let texPos0 = texPos1 - 1.0;
+    let texPos3 = texPos1 + 2.0;
+    let texPos12 = texPos1 + offset12;
+
+    let invTexSize = 1.0 / texSize;
+
+    var result = vec4<f32>(0.0);
+    result += textureSampleLevel(tex, smp, vec2<f32>(texPos12.x, texPos0.y) * invTexSize, 0.0) * w12.x * w0.y;
+    result += textureSampleLevel(tex, smp, vec2<f32>(texPos0.x, texPos12.y) * invTexSize, 0.0) * w0.x * w12.y;
+    result += textureSampleLevel(tex, smp, vec2<f32>(texPos12.x, texPos12.y) * invTexSize, 0.0) * w12.x * w12.y;
+    result += textureSampleLevel(tex, smp, vec2<f32>(texPos3.x, texPos12.y) * invTexSize, 0.0) * w3.x * w12.y;
+    result += textureSampleLevel(tex, smp, vec2<f32>(texPos12.x, texPos3.y) * invTexSize, 0.0) * w12.x * w3.y;
+
+    return max(result, vec4<f32>(0.0));
+}
+
+// ===== Velocity Dilation 로직 =====
 fn find_closest_depth_coord(pixelCoord: vec2<i32>, screenSize: vec2<u32>) -> vec2<i32> {
     var closestCoord = pixelCoord;
-    var minDepth = 1.0; // Reverse-Z를 사용 중이라면 0.0으로 초기화하고 조건을 > 로 변경하세요.
+    var minDepth = 1.0;
 
     for (var y: i32 = -1; y <= 1; y++) {
         for (var x: i32 = -1; x <= 1; x++) {
             let sampleCoord = clamp(pixelCoord + vec2<i32>(x, y), vec2<i32>(0), vec2<i32>(screenSize) - 1);
             let d = textureLoad(depthTexture, sampleCoord, 0);
-
             if (d < minDepth) {
                 minDepth = d;
                 closestCoord = sampleCoord;
@@ -47,7 +76,7 @@ fn find_closest_depth_coord(pixelCoord: vec2<i32>, screenSize: vec2<u32>) -> vec
     return closestCoord;
 }
 
-// ===== 통계 및 클리핑 함수 =====
+// ===== 통계 및 클리핑 (Variance Clipping) =====
 fn calculate_neighborhood_stats(pixelCoord: vec2<i32>, screenSize: vec2<u32>) -> NeighborhoodStats {
     var m1 = vec4<f32>(0.0);
     var m2 = vec4<f32>(0.0);
