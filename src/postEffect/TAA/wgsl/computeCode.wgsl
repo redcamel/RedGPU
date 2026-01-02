@@ -6,30 +6,34 @@
 
     if (any(pixelCoord >= vec2<i32>(screenSizeU))) { return; }
 
-    // 1. 현재 프레임 색상 로드
-    let currentRGB = textureLoad(sourceTexture, pixelCoord, 0);
+    // 1. 현재 프레임 정보 및 주변 통계(Min/Max) 계산
+    let stats = calculate_neighborhood_stats(pixelCoord, screenSizeU);
+    let currentYCoCg = stats.currentYCoCg;
 
-    // 2. 모션 벡터(Velocity) 로드 및 재투영 UV 계산
-    // 현재 픽셀 위치의 속도 값을 가져와서 이전 프레임의 위치를 찾습니다.
+    // 2. 재투영 (Velocity 사용)
     let velocity = textureLoad(motionVectorTexture, pixelCoord, 0).xy;
     let currentUV = (vec2<f32>(pixelCoord) + 0.5) * invScreenSize;
     let historyUV = currentUV - velocity;
 
-    var finalColor: vec4<f32>;
+    var finalYCoCg: vec4<f32>;
 
-    // 3. 화면 밖으로 나간 경우 처리
     if (any(historyUV < vec2<f32>(0.0)) || any(historyUV > vec2<f32>(1.0))) {
-        finalColor = currentRGB;
+        finalYCoCg = currentYCoCg;
     } else {
-        // 4. 과거 프레임 샘플링 (선형 보간)
+        // 3. 과거 프레임 샘플링 및 YCoCg 변환
         let historyRGB = textureSampleLevel(historyTexture, taaTextureSampler, historyUV, 0.0);
+        let historyYCoCg = rgb_to_ycocg(historyRGB);
 
-        // 5. 단순 블렌딩 (EMA)
-        // 0.05(5%)는 현재 프레임, 0.95(95%)는 과거 프레임을 사용하여 부드럽게 만듭니다.
+        // 4. [핵심] Color Clipping 적용
+        // 과거 색상을 현재 주변 픽셀 범위(stats.minColor ~ stats.maxColor)로 제한합니다.
+        let clippedHistory = clip_history_to_neighborhood(historyYCoCg, currentYCoCg, stats);
+
+        // 5. 블렌딩 (0.05 유지)
         let alpha = 0.05;
-        finalColor = mix(historyRGB, currentRGB, alpha);
+        finalYCoCg = mix(clippedHistory, currentYCoCg, alpha);
     }
 
-    // 6. 결과 저장
-    textureStore(outputTexture, pixelCoord, finalColor);
+    // 6. RGB 변환 후 저장
+    let finalRGB = ycocg_to_rgb(finalYCoCg);
+    textureStore(outputTexture, pixelCoord, finalRGB);
 }
