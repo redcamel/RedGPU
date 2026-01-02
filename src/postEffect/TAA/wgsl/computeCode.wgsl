@@ -1,42 +1,39 @@
- {
+{
     let pixelCoord = vec2<i32>(global_id.xy);
     let screenSizeU = textureDimensions(sourceTexture);
     let screenSize = vec2<f32>(screenSizeU);
-    let invScreenSize = 1.0 / screenSize;
-
     if (any(pixelCoord >= vec2<i32>(screenSizeU))) { return; }
 
-    // [Step 1] 통계 및 현재 픽셀 정보 로드
+    // [Step 1] 통계 및 현재 컬러 로드
     let stats = calculate_neighborhood_stats(pixelCoord, screenSizeU);
-    let currentYCoCg = stats.currentYCoCg;
+    let currentRGB = textureLoad(sourceTexture, pixelCoord, 0);
 
-    // [Step 2] Velocity Dilation (가장 가까운 깊이의 속도 사용)
+    // [Step 2] Velocity Dilation & 재투영
     let closestCoord = find_closest_depth_coord(pixelCoord, screenSizeU);
     let velocity = textureLoad(motionVectorTexture, closestCoord, 0).xy;
+    let historyUV = (vec2<f32>(pixelCoord) + 0.5) / screenSize - velocity;
 
-    // [Step 3] 재투영 UV 계산
-    let currentUV = (vec2<f32>(pixelCoord) + 0.5) * invScreenSize;
-    let historyUV = currentUV - velocity;
-
-    var finalYCoCg: vec4<f32>;
+    var finalRGB: vec3<f32>;
 
     if (any(historyUV < vec2<f32>(0.0)) || any(historyUV > vec2<f32>(1.0))) {
-        finalYCoCg = currentYCoCg;
+        finalRGB = currentRGB.rgb;
     } else {
-        // [Step 4] Catmull-Rom 샘플링으로 고화질 히스토리 로드
-        let historyRGB = sample_texture_catmull_rom(historyTexture, taaTextureSampler, historyUV, screenSize);
-        let historyYCoCg = rgb_to_ycocg(historyRGB);
+        // [Step 3] 고화질 히스토리 샘플링 및 클리핑
+        let historyRGB = sample_texture_catmull_rom(historyTexture, taaTextureSampler, historyUV, screenSize).rgb;
+        let clippedHistoryYCoCg = clip_history_to_neighborhood(rgb_to_ycocg(vec4<f32>(historyRGB, 1.0)), stats.currentYCoCg, stats);
+        let clippedHistoryRGB = ycocg_to_rgb(clippedHistoryYCoCg).rgb;
 
-        // [Step 5] Variance Clipping 적용
-        let clippedHistory = clip_history_to_neighborhood(historyYCoCg, currentYCoCg, stats);
+        // [Step 4] 휘도 기반 가중치 블렌딩 (Anti-Flicker)
+        let w_curr = get_luminance_weight(currentRGB.rgb);
+        let w_hist = get_luminance_weight(clippedHistoryRGB);
 
-        // [Step 6] 동적 블렌딩 계수 결정
         let velocityLength = length(velocity * screenSize);
         let alpha = clamp(0.05 + velocityLength * 0.01, 0.05, 0.5);
 
-        finalYCoCg = mix(clippedHistory, currentYCoCg, alpha);
+        // 가중치 결합 블렌딩 공식
+        let finalWeight = (alpha * w_curr) / (alpha * w_curr + (1.0 - alpha) * w_hist);
+        finalRGB = mix(clippedHistoryRGB, currentRGB.rgb, finalWeight);
     }
 
-    // [Step 7] 결과 저장
-    textureStore(outputTexture, pixelCoord, ycocg_to_rgb(finalYCoCg));
+    textureStore(outputTexture, pixelCoord, vec4<f32>(finalRGB, currentRGB.a));
 }
