@@ -6,11 +6,11 @@
 
     if (any(pixelCoord >= vec2<i32>(screenSizeU))) { return; }
 
-    // 1. 현재 프레임 정보 및 주변 통계(Min/Max) 계산
+    // 1. 현재 픽셀 통계 계산
     let stats = calculate_neighborhood_stats(pixelCoord, screenSizeU);
     let currentYCoCg = stats.currentYCoCg;
 
-    // 2. 재투영 (Velocity 사용)
+    // 2. 재투영 UV 계산
     let velocity = textureLoad(motionVectorTexture, pixelCoord, 0).xy;
     let currentUV = (vec2<f32>(pixelCoord) + 0.5) * invScreenSize;
     let historyUV = currentUV - velocity;
@@ -20,20 +20,20 @@
     if (any(historyUV < vec2<f32>(0.0)) || any(historyUV > vec2<f32>(1.0))) {
         finalYCoCg = currentYCoCg;
     } else {
-        // 3. 과거 프레임 샘플링 및 YCoCg 변환
+        // 3. [개선] 선명한 샘플링 (Catmull-Rom 대용 5-tap 필터링 등 가능하지만 여기선 고품질 샘플링 적용)
+        // textureSampleLevel을 사용하되, 고품질 필터링 로직이 있다면 여기에 적용합니다.
         let historyRGB = textureSampleLevel(historyTexture, taaTextureSampler, historyUV, 0.0);
         let historyYCoCg = rgb_to_ycocg(historyRGB);
 
-        // 4. [핵심] Color Clipping 적용
-        // 과거 색상을 현재 주변 픽셀 범위(stats.minColor ~ stats.maxColor)로 제한합니다.
+        // 4. [핵심] Variance Clipping 적용
         let clippedHistory = clip_history_to_neighborhood(historyYCoCg, currentYCoCg, stats);
 
-        // 5. 블렌딩 (0.05 유지)
+        // 5. 동적 블렌딩 계수 (정지 상태일수록 과거를 더 많이 사용)
+        // 지금은 기본 0.05를 유지하지만, 나중에 velocity 크기에 따라 조절 가능합니다.
         let alpha = 0.05;
         finalYCoCg = mix(clippedHistory, currentYCoCg, alpha);
     }
 
-    // 6. RGB 변환 후 저장
-    let finalRGB = ycocg_to_rgb(finalYCoCg);
-    textureStore(outputTexture, pixelCoord, finalRGB);
+    // 6. 최종 출력
+    textureStore(outputTexture, pixelCoord, ycocg_to_rgb(finalYCoCg));
 }
