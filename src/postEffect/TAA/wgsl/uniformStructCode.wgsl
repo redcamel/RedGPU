@@ -33,8 +33,7 @@ fn ycocg_to_rgb(c: vec4<f32>) -> vec4<f32> {
     // 클램핑은 호출부 상황에 따라 선택 (보통 0 미만 방지 위해 유지)
     return vec4<f32>(max(r, 0.0), max(g, 0.0), max(b, 0.0), c.a);
 }
-
-// ===== 주변 픽셀 통계 계산 =====
+// ===== 주변 픽셀 통계 계산 (보강됨) =====
 fn calculate_neighborhood_stats(pixelCoord: vec2<i32>, screenSize: vec2<u32>) -> NeighborhoodStats {
     var m1 = vec4<f32>(0.0);
     var m2 = vec4<f32>(0.0);
@@ -42,6 +41,7 @@ fn calculate_neighborhood_stats(pixelCoord: vec2<i32>, screenSize: vec2<u32>) ->
     var maxC = vec4<f32>(-1e5);
     var currentYCoCg = vec4<f32>(0.0);
 
+    // 3x3 샘플링
     for (var y: i32 = -1; y <= 1; y++) {
         for (var x: i32 = -1; x <= 1; x++) {
             let sampleCoord = clamp(pixelCoord + vec2<i32>(x, y), vec2<i32>(0), vec2<i32>(screenSize) - 1);
@@ -52,7 +52,6 @@ fn calculate_neighborhood_stats(pixelCoord: vec2<i32>, screenSize: vec2<u32>) ->
             minC = min(minC, colorYCoCg);
             maxC = max(maxC, colorYCoCg);
 
-            // [최적화] 중앙 픽셀인 경우 값을 따로 저장하여 중복 계산 방지
             if (x == 0 && y == 0) {
                 currentYCoCg = colorYCoCg;
             }
@@ -70,7 +69,7 @@ fn calculate_neighborhood_stats(pixelCoord: vec2<i32>, screenSize: vec2<u32>) ->
     return stats;
 }
 
-// ===== 히스토리 클리핑 (AABB 방식) =====
+// ===== 히스토리 클리핑 (수정됨: 정적 영역 보존) =====
 fn clip_history_to_neighborhood(historyColor: vec4<f32>, currentColor: vec4<f32>, stats: NeighborhoodStats) -> vec4<f32> {
     let segment = historyColor - currentColor;
     let v_max = stats.maxColor - currentColor;
@@ -78,7 +77,6 @@ fn clip_history_to_neighborhood(historyColor: vec4<f32>, currentColor: vec4<f32>
 
     var t_max = vec4<f32>(1.0);
     let epsilon = 1e-7;
-    // [최적화] select를 사용하여 분기 최소화
     let direction = segment + select(vec4<f32>(epsilon), vec4<f32>(-epsilon), segment < vec4<f32>(0.0));
 
     t_max = select(t_max, clamp(v_min / direction, vec4<f32>(0.0), vec4<f32>(1.0)), segment < v_min);
