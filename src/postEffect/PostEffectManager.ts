@@ -146,7 +146,7 @@ class PostEffectManager {
                 this.#taaSharpenEffect = new Convolution(redGPUContext)
                 this.#taaSharpenEffect.kernel = [
                     0, -1, 0, 0,
-                    -1, 7, -1, 0,
+                    -1, 9, -1, 0,
                     0, -1, 0, 0,
                 ]
             }
