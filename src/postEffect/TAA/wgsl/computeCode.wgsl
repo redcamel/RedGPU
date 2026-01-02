@@ -6,117 +6,61 @@
 
     if (any(pixelCoord >= vec2<i32>(screenSizeU))) { return; }
 
-    // --- 1. 좌표 및 지터 설정 ---
-    let currentUV = (vec2<f32>(pixelCoord) + 0.5) * invScreenSize;
-    let jUV = uniforms.jitterOffset * 0.5;
-    let pjUV = uniforms.prevJitterOffset * 0.5;
-    let pureUV = currentUV - jUV; // 지터가 제거된 현재 프레임의 기준 UV
+    // [Step 1] 통계 및 현재 픽셀 정보 계산
+    // calculate_neighborhood_stats 내부에서 currentYCoCg를 이미 계산함
+    let stats = calculate_neighborhood_stats(pixelCoord, screenSizeU);
+    let currentYCoCg = stats.currentYCoCg;
 
-    // --- 2. 현재 데이터 및 3x3 통계(Variance) 수집 ---
-    let currentColor = textureLoad(sourceTexture, pixelCoord, 0);
-    let currentColorRGB = currentColor.rgb;
-    let currentDepth = textureLoad(depthTexture, pixelCoord, 0);
-    let currentYCoCg = rgb_to_ycocg(currentColorRGB);
+    // 알파 값 보존을 위해 원본 RGB 로드는 유지
+    let currentRGB = textureLoad(sourceTexture, pixelCoord, 0);
 
-    var m1 = vec3<f32>(0.0);
-    var m2 = vec3<f32>(0.0);
+    // [Step 2] Velocity Dilation (가장 가까운 오브젝트 정보 활용)
+    // [최적화] 뎁스 값을 함수 내부에서 이미 가져옴
+    let closest = find_closest_depth_info(pixelCoord, screenSizeU);
+    let velocity = textureLoad(motionVectorTexture, closest.coord, 0).xy;
+    let closestDepth = closest.depth;
 
-    // Velocity Dilation을 위한 변수
-    var closestDepth = 1.0;
-    var closestOffset = vec2<i32>(0, 0);
+    // [Step 3] 재투영 UV 계산
+    let currentUV = (vec2<f32>(pixelCoord) + 0.5 - uniforms.currJitterOffset) * invScreenSize;
+    let historyUV = currentUV - velocity;
 
-    for (var y: i32 = -1; y <= 1; y++) {
-        for (var x: i32 = -1; x <= 1; x++) {
-            let samplePos = clamp(pixelCoord + vec2<i32>(x, y), vec2<i32>(0), vec2<i32>(screenSizeU) - 1);
+    var finalYCoCg: vec4<f32>;
 
-            // A. 컬러 통계 수집
-            let neighborRGB = textureLoad(sourceTexture, samplePos, 0).rgb;
-            let neighborYCoCg = rgb_to_ycocg(neighborRGB);
-            m1 += neighborYCoCg;
-            m2 += neighborYCoCg * neighborYCoCg;
-
-            // B. Velocity Dilation: 가장 가까운 픽셀 찾기
-            let d = textureLoad(depthTexture, samplePos, 0);
-            if (d < closestDepth) {
-                closestDepth = d;
-                closestOffset = vec2<i32>(x, y);
-            }
-        }
-    }
-
-    // Variance Clipping 범위 설정
-    let mean = m1 / 9.0;
-    let stddev = sqrt(max(vec3<f32>(0.0), (m2 / 9.0) - (mean * mean)));
-    let minColorYCoCg = mean - 1.25 * stddev;
-    let maxColorYCoCg = mean + 1.25 * stddev;
-
-    // --- 3. 모션 벡터 샘플링 (Dilation 적용) ---
-    // 가장 가까운 픽셀의 위치에서 모션 벡터를 추출 (Bilinear 필터링을 위해 SampleLevel 사용)
-    let dilatedUV = (vec2<f32>(pixelCoord + closestOffset) + 0.5) * invScreenSize - jUV;
-    let motionData = textureSampleLevel(motionVectorTexture, taaTextureSampler, dilatedUV, 0.0);
-    let motionVector = motionData.xy;
-
-    let jitterDisabled = motionData.z > 0.5;
-    if (jitterDisabled) {
-        textureStore(outputTexture, pixelCoord, currentColor);
-        return;
-    }
-
-
-    // 히스토리 좌표 계산
-    let historyUV = pureUV - motionVector + pjUV;
-    let historyPixelCoord = vec2<i32>(historyUV * screenSize);
-
-    // --- 4. 히스토리 복원 및 디스오컬루젼 (직접 샘플링 버전) ---
-    var historyColorRGB = currentColorRGB;
-    var dynamicAlpha = 0.05;
-    let velocityLength = length(motionVector);
-
-    // 히스토리 좌표 기반 픽셀 위치 (floor)
-    let historyPos = historyUV * screenSize - 0.5;
-    let fptr = floor(historyPos);
-    let st = historyPos - fptr; // 보간 계수
-    let basePixel = vec2<i32>(fptr);
-
-    if (all(basePixel >= vec2<i32>(0)) && all(basePixel < vec2<i32>(screenSizeU) - 1)) {
-        // A. 컬러 복원 (기존 Catmull-Rom 함수 내부에서 textureLoad를 쓴다면 유지)
-        historyColorRGB = sample_texture_catmull_rom_ycocg(historyTexture, taaTextureSampler, historyUV, screenSize).rgb;
-
-        // B. 뎁스 여러 개 직접 조회 (2x2 Neighborhood)
-        let d00 = textureLoad(historyDepthTexture, basePixel + vec2<i32>(0, 0), 0);
-        let d10 = textureLoad(historyDepthTexture, basePixel + vec2<i32>(1, 0), 0);
-        let d01 = textureLoad(historyDepthTexture, basePixel + vec2<i32>(0, 1), 0);
-        let d11 = textureLoad(historyDepthTexture, basePixel + vec2<i32>(1, 1), 0);
-
-        // C. Bilinear 보간으로 대표 히스토리 뎁스 계산
-        let historyDepth = mix(mix(d00, d10, st.x), mix(d01, d11, st.x), st.y);
-
-        // D. 뎁스 비교 (Dilation된 현재 뎁스 vs 보간된 히스토리 뎁스)
-        let depthDiff = abs(closestDepth - historyDepth);
-
-        // E. 추가 안전장치: 4개 샘플 중 현재 뎁스와 가장 차이가 적은 값을 기준으로 쓸 수도 있음
-        // let minDiff = min(min(abs(closestDepth - d00), abs(closestDepth - d10)),
-        //                   min(abs(closestDepth - d01), abs(closestDepth - d11)));
-
-        let adaptiveDepthThreshold = mix(0.1, 0.01, clamp(velocityLength / 0.01, 0.0, 1.0));
-
-        if (depthDiff > adaptiveDepthThreshold) {
-            let disocclusionAmount = smoothstep(adaptiveDepthThreshold, adaptiveDepthThreshold * 2.0, depthDiff);
-            dynamicAlpha = mix(dynamicAlpha, 1.0, disocclusionAmount);
-        }
+    // 화면 밖 재투영 예외 처리
+    if (any(historyUV < vec2<f32>(0.0)) || any(historyUV > vec2<f32>(1.0))) {
+        finalYCoCg = currentYCoCg;
     } else {
-        dynamicAlpha = 1.0;
+        // [Step 4] 히스토리 샘플링 및 클리핑
+        // [최적화] invScreenSize를 전달하여 내부 나눗셈 제거
+        let historyRGB = sample_history_catmull_rom(historyTexture, taaTextureSampler, historyUV, screenSize, invScreenSize);
+        let historyYCoCg = rgb_to_ycocg(historyRGB);
+
+        let velocityMagnitude = length(velocity);
+        let dynamicGamma = mix(1.0, 2.0, clamp(velocityMagnitude * 100.0, 0.0, 1.0));
+
+        var adjustedStats = stats;
+        adjustedStats.minColor = min(stats.minColor, stats.mean - (stats.stdDev * dynamicGamma));
+        adjustedStats.maxColor = max(stats.maxColor, stats.mean + (stats.stdDev * dynamicGamma));
+
+        let clippedHistory = clip_history_to_neighborhood(historyYCoCg, currentYCoCg, adjustedStats);
+
+        // [Step 5] 오클루전 및 신뢰도 계산
+        let prevDepth = sample_history_depth_bilinear(historyUV, screenSize);
+        let depthDiff = abs(closestDepth - prevDepth);
+        let depthConfidence = 1.0 - clamp((depthDiff - 0.01) / 0.05, 0.0, 1.0);
+
+        // [Step 6] 가변 블렌딩
+        var blendAlpha = mix(0.02, 0.15, clamp(velocityMagnitude * 100.0, 0.0, 1.0));
+        blendAlpha = mix(1.0, blendAlpha, depthConfidence);
+
+        // Luma Weighting (플리커링 억제)
+        let wCurrent = blendAlpha * get_luma_weight(currentYCoCg);
+        let wHistory = (1.0 - blendAlpha) * get_luma_weight(clippedHistory);
+
+        finalYCoCg = (clippedHistory * wHistory + currentYCoCg * wCurrent) / (wHistory + wCurrent);
     }
 
-    // 모션 속도에 따른 Alpha 보정 (잔상 제거 가속)
-    dynamicAlpha = max(dynamicAlpha, mix(0.05, 0.5, clamp(velocityLength / 0.002, 0.0, 1.0)));
-
-    // --- 5. 클램핑 및 최종 블렌딩 ---
-    let historyYCoCg = rgb_to_ycocg(historyColorRGB);
-    let clampedHistoryYCoCg = clamp(historyYCoCg, minColorYCoCg, maxColorYCoCg);
-
-    let resolvedYCoCg = mix(clampedHistoryYCoCg, currentYCoCg, dynamicAlpha);
-    let finalRGB = ycocg_to_rgb(resolvedYCoCg);
-
-    textureStore(outputTexture, pixelCoord, vec4<f32>(finalRGB, 1.0));
+    // [Step 7] 최종 출력
+    let finalRGB = ycocg_to_rgb(finalYCoCg);
+    textureStore(outputTexture, pixelCoord, vec4<f32>(finalRGB.rgb, currentRGB.a));
 }

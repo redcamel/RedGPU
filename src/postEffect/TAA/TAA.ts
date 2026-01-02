@@ -88,9 +88,8 @@ class TAA {
     }
 
     set jitterStrength(value: number) {
-        validateNumberRange(value, 0.0, 1.0);
+        // validateNumberRange(value, 0.0, 1.0);
         this.#jitterStrength = value;
-        this.updateUniform('jitterStrength', value);
     }
 
 
@@ -103,7 +102,7 @@ class TAA {
         this.#frameIndex++;
         if (this.#uniformBuffer) {
             this.updateUniform('frameIndex', this.#frameIndex);
-            this.updateUniform('jitterOffset', view.jitterOffset);
+            this.updateUniform('currJitterOffset', view.jitterOffset);
             this.updateUniform('prevJitterOffset', this.#prevJitterOffset);
             mat4.copy(this.#prevNoneJitterProjectionCameraMatrix,view.noneJitterProjectionCameraMatrix)
 
@@ -113,7 +112,7 @@ class TAA {
         const dimensionsChanged = this.#createRenderTexture(view)
         const msaaChanged = this.#prevMSAA !== useMSAA || this.#prevMSAAID !== msaaID;
         const sourceTextureChanged = this.#detectSourceTextureChange([sourceTextureView]);
-        if (dimensionsChanged || msaaChanged || sourceTextureChanged) {
+        if (dimensionsChanged || msaaChanged || sourceTextureChanged || true) {
             this.#createFrameBufferBindGroups(view, [sourceTextureView], useMSAA, this.#redGPUContext, gpuDevice);
         }
         this.#execute(gpuDevice, width, height);

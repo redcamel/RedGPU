@@ -13,6 +13,7 @@ import renderAlphaLayer from "./renderLayers/renderAlphaLayer";
 import renderBasicLayer from "./renderLayers/renderBasicLayer";
 import renderPickingLayer from "./renderLayers/renderPickingLayer";
 import renderShadowLayer from "./renderLayers/renderShadowLayer";
+import {keepLog} from "../utils";
 
 class Renderer {
     #prevViewportSize: { width: number, height: number };
@@ -85,7 +86,7 @@ class Renderer {
         view.renderViewStateData.reset(null, time)
         if (pixelRectObject.width && pixelRectObject.height) {
 
-            this.#updateJitter(view)
+
             {
                 const {scene} = view
                 const {shadowManager} = scene
@@ -95,10 +96,12 @@ class Renderer {
                 const drawBufferManager = DrawBufferManager.getInstance(redGPUContext)
                 drawBufferManager.flushAllCommands(renderViewStateData)
             }
-
-            this.#renderPassViewShadow(view, commandEncoder)
             // @ts-ignore
             camera.update?.(view, time)
+            this.#updateJitter(view)
+            this.#renderPassViewShadow(view, commandEncoder)
+            // @ts-ignore
+            camera.targetMesh?.render(view.renderViewStateData)
             this.#renderPassViewBasicLayer(view, commandEncoder, renderPassDescriptor)
             this.#renderPassView2PathLayer(view, commandEncoder, renderPassDescriptor, depthStencilAttachment)
             this.#renderPassViewPickingLayer(view, commandEncoder)
@@ -252,7 +255,8 @@ class Renderer {
         // 픽셀 단위 지터
         const jitterX = (haltonX - 0.5) * jitterScale;
         const jitterY = (haltonY - 0.5) * jitterScale;
-        view.setJitterOffset(jitterX/view.pixelRectObject.width, jitterY/view.pixelRectObject.height);
+        // keepLog(jitterX, jitterY)
+        view.setJitterOffset(jitterX, jitterY);
     }
 
     #haltonSequence(index: number, base: number): number {

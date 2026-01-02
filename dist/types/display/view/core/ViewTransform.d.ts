@@ -125,11 +125,6 @@ declare class ViewTransform {
      */
     get rawCamera(): PerspectiveCamera | Camera2D | OrthographicCamera;
     /**
-     * 현재 적용된 지터 오프셋 [offsetX, offsetY]를 반환합니다.
-     * @returns {[number, number]}
-     */
-    get jitterOffset(): [number, number];
-    /**
      * 지터가 적용되지 않은 원본 프로젝션 행렬을 계산하여 반환합니다.
      * Orthographic, Camera2D, Perspective 각각의 방식으로 행렬을 구성합니다.
      * @returns {mat4}
@@ -152,6 +147,11 @@ declare class ViewTransform {
      * @param {number} offsetY - Y축 지터 오프셋 (정규화된 값)
      */
     setJitterOffset(offsetX: number, offsetY: number): void;
+    /**
+     * 현재 적용된 지터 오프셋 [offsetX, offsetY]를 반환합니다.
+     * @returns {[number, number]}
+     */
+    get jitterOffset(): [number, number];
     /**
      * 지터 오프셋을 초기화합니다.
      */
