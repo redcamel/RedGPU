@@ -9,7 +9,7 @@
     let currentRGB = textureLoad(sourceTexture, pixelCoord, 0);
     let currentDepth = textureLoad(depthTexture, pixelCoord, 0);
 
-    // 2. Velocity Dilation
+    // 2. Velocity Dilation & 재투영 UV
     var closestDepth = 1.0; var closestCoord = pixelCoord;
     for(var y: i32 = -1; y <= 1; y++) {
         for(var x: i32 = -1; x <= 1; x++) {
@@ -26,34 +26,26 @@
     if (any(historyUV < vec2<f32>(0.0)) || any(historyUV > vec2<f32>(1.0))) {
         finalRGB = currentRGB.rgb;
     } else {
-        // 3. 히스토리 샘플링
+        // 3. 히스토리 샘플링 (Catmull-Rom 및 커스텀 Bilinear Depth)
         let historyRGB = sample_texture_catmull_rom(historyTexture, taaTextureSampler, historyUV, screenSize).rgb;
         let prevDepth = fetch_depth_bilinear(historyDepthTexture, historyUV, screenSize);
 
-        // 4. 깊이 기반 신뢰도 계산
+        // 4. 깊이 기반 신뢰도 및 정지 상태 보정
         var depthConfidence = get_depth_confidence(currentDepth, prevDepth);
-        
-        // [추가] 정지 상태 보정: 움직임이 매우 작으면 깊이 거부를 무시하여 외곽선 떨림 방지
-        let velocityPixels = velocity * screenSize;
-        let isMoving = smoothstep(0.01, 0.1, length(velocityPixels));
+
+        // [디더링 해결 핵심] 움직임이 거의 없는 정지 영역은 신뢰도를 강제로 높여 떨림 방지
+        let isMoving = smoothstep(0.001, 0.01, length(velocity * screenSize));
         depthConfidence = mix(1.0, depthConfidence, isMoving);
 
         // 5. 클리핑 및 가중치 혼합
-        let historyYCoCg = rgb_to_ycocg(vec4<f32>(historyRGB, 1.0));
-        let clippedHistoryYCoCg = clip_history_to_neighborhood(historyYCoCg, stats.currentYCoCg, stats);
+        let clippedHistoryYCoCg = clip_history_to_neighborhood(rgb_to_ycocg(vec4<f32>(historyRGB, 1.0)), stats.currentYCoCg, stats);
         let clippedHistoryRGB = ycocg_to_rgb(clippedHistoryYCoCg).rgb;
 
-        let w_curr = get_tone_mapped_weight(currentRGB.rgb);
-        let w_hist = get_tone_mapped_weight(clippedHistoryRGB);
-
-        // 6. 동적 Alpha (0.05 ~ 0.15 정도로 누적량 조절)
-        var alpha = clamp(0.05 + length(velocityPixels) * 0.01, 0.05, 0.15);
-        
-        // 오클루전 발생 시 현재 프레임 비중 증가
+        // 6. 동적 Alpha (안정적인 누적을 위해 0.05 ~ 0.1 범위 권장)
+        var alpha = clamp(0.05 + length(velocity * screenSize) * 0.01, 0.05, 0.1);
         alpha = mix(1.0, alpha, depthConfidence);
 
-        let finalWeight = (alpha * w_curr) / (alpha * w_curr + (1.0 - alpha) * w_hist);
-        finalRGB = mix(clippedHistoryRGB, currentRGB.rgb, finalWeight);
+        finalRGB = mix(clippedHistoryRGB, currentRGB.rgb, alpha);
     }
 
     textureStore(outputTexture, pixelCoord, vec4<f32>(finalRGB, currentRGB.a));
