@@ -256,7 +256,7 @@ class Renderer {
         const jitterX = (haltonX - 0.5) * jitterScale;
         const jitterY = (haltonY - 0.5) * jitterScale;
         // keepLog(jitterX, jitterY)
-        view.setJitterOffset(jitterX, 0);
+        view.setJitterOffset(jitterX, jitterY);
     }
 
     #haltonSequence(index: number, base: number): number {
