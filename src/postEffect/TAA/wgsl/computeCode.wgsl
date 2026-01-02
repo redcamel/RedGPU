@@ -10,30 +10,36 @@
     let stats = calculate_neighborhood_stats(pixelCoord, screenSizeU);
     let currentYCoCg = stats.currentYCoCg;
 
-    // 2. 재투영 UV 계산
-    let velocity = textureLoad(motionVectorTexture, pixelCoord, 0).xy;
+    // 2. [개선] Velocity Dilation 적용
+    // 주변에서 가장 가까운 물체의 속도를 사용하여 경계선 고스팅 방지
+    let closestCoord = find_closest_depth_coord(pixelCoord, screenSizeU);
+    let velocity = textureLoad(motionVectorTexture, closestCoord, 0).xy;
+
+    // 3. 재투영 UV 계산
     let currentUV = (vec2<f32>(pixelCoord) + 0.5) * invScreenSize;
     let historyUV = currentUV - velocity;
 
     var finalYCoCg: vec4<f32>;
 
+    // 화면 밖 샘플링 방지
     if (any(historyUV < vec2<f32>(0.0)) || any(historyUV > vec2<f32>(1.0))) {
         finalYCoCg = currentYCoCg;
     } else {
-        // 3. [개선] 선명한 샘플링 (Catmull-Rom 대용 5-tap 필터링 등 가능하지만 여기선 고품질 샘플링 적용)
-        // textureSampleLevel을 사용하되, 고품질 필터링 로직이 있다면 여기에 적용합니다.
+        // 4. 히스토리 샘플링
         let historyRGB = textureSampleLevel(historyTexture, taaTextureSampler, historyUV, 0.0);
         let historyYCoCg = rgb_to_ycocg(historyRGB);
 
-        // 4. [핵심] Variance Clipping 적용
+        // 5. Variance Clipping 적용
         let clippedHistory = clip_history_to_neighborhood(historyYCoCg, currentYCoCg, stats);
 
-        // 5. 동적 블렌딩 계수 (정지 상태일수록 과거를 더 많이 사용)
-        // 지금은 기본 0.05를 유지하지만, 나중에 velocity 크기에 따라 조절 가능합니다.
-        let alpha = 0.05;
+        // 6. 동적 블렌딩 계수
+        // 정지 상태에서는 0.05, 움직임이 빠를수록 현재 프레임 비중을 높여 잔상 억제
+        let velocityLength = length(velocity * screenSize);
+        let alpha = clamp(0.05 + velocityLength * 0.01, 0.05, 0.5);
+
         finalYCoCg = mix(clippedHistory, currentYCoCg, alpha);
     }
 
-    // 6. 최종 출력
+    // 7. 결과 저장
     textureStore(outputTexture, pixelCoord, ycocg_to_rgb(finalYCoCg));
 }

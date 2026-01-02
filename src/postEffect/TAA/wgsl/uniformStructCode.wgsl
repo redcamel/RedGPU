@@ -28,6 +28,25 @@ fn ycocg_to_rgb(c: vec4<f32>) -> vec4<f32> {
     return vec4<f32>(max(r, 0.0), max(g, 0.0), max(b, 0.0), c.a);
 }
 
+// ===== [신규] 가장 가까운 픽셀 찾기 (Velocity Dilation) =====
+fn find_closest_depth_coord(pixelCoord: vec2<i32>, screenSize: vec2<u32>) -> vec2<i32> {
+    var closestCoord = pixelCoord;
+    var minDepth = 1.0; // Reverse-Z를 사용 중이라면 0.0으로 초기화하고 조건을 > 로 변경하세요.
+
+    for (var y: i32 = -1; y <= 1; y++) {
+        for (var x: i32 = -1; x <= 1; x++) {
+            let sampleCoord = clamp(pixelCoord + vec2<i32>(x, y), vec2<i32>(0), vec2<i32>(screenSize) - 1);
+            let d = textureLoad(depthTexture, sampleCoord, 0);
+
+            if (d < minDepth) {
+                minDepth = d;
+                closestCoord = sampleCoord;
+            }
+        }
+    }
+    return closestCoord;
+}
+
 // ===== 통계 및 클리핑 함수 =====
 fn calculate_neighborhood_stats(pixelCoord: vec2<i32>, screenSize: vec2<u32>) -> NeighborhoodStats {
     var m1 = vec4<f32>(0.0);
@@ -63,8 +82,7 @@ fn calculate_neighborhood_stats(pixelCoord: vec2<i32>, screenSize: vec2<u32>) ->
 }
 
 fn clip_history_to_neighborhood(historyColor: vec4<f32>, currentColor: vec4<f32>, stats: NeighborhoodStats) -> vec4<f32> {
-    // [개선] Variance Clipping: 표준편차를 이용해 범위를 동적으로 제한
-    let gamma = 1.0; // 0.75 ~ 1.25 사이에서 조절 가능
+    let gamma = 1.0;
     let v_min = max(stats.minColor, stats.mean - stats.stdDev * gamma);
     let v_max = min(stats.maxColor, stats.mean + stats.stdDev * gamma);
 
