@@ -12,7 +12,7 @@ struct NeighborhoodStats {
     stdDev: vec3<f32>,
 };
 
-// YCoCg 변환 유틸리티
+// RGB -> YCoCg 변환
 fn rgb_to_ycocg(rgb: vec3<f32>) -> vec3<f32> {
     let y  = dot(rgb, vec3<f32>(0.25, 0.5, 0.25));
     let co = dot(rgb, vec3<f32>(0.5, 0.0, -0.5));
@@ -20,6 +20,7 @@ fn rgb_to_ycocg(rgb: vec3<f32>) -> vec3<f32> {
     return vec3<f32>(y, co, cg);
 }
 
+// YCoCg -> RGB 변환
 fn ycocg_to_rgb(ycocg: vec3<f32>) -> vec3<f32> {
     let y  = ycocg.x;
     let co = ycocg.y;
@@ -27,11 +28,14 @@ fn ycocg_to_rgb(ycocg: vec3<f32>) -> vec3<f32> {
     return vec3<f32>(y + co - cg, y + cg, y - co - cg);
 }
 
+// 깊이 기반 신뢰도 계산
 fn get_depth_confidence(currDepth: f32, prevDepth: f32) -> f32 {
     let depthDiff = abs(currDepth - prevDepth);
+    // 차이가 0.01 이상이면 신뢰도를 깎기 시작함
     return 1.0 - clamp((depthDiff - 0.01) / 0.02, 0.0, 1.0);
 }
 
+// 픽셀 불일치 보정을 위한 Bilinear 깊이 샘플링
 fn fetch_depth_bilinear(tex: texture_depth_2d, uv: vec2<f32>, screenSize: vec2<f32>) -> f32 {
     let samplePos = uv * screenSize - 0.5;
     let f = fract(samplePos);
@@ -46,6 +50,7 @@ fn fetch_depth_bilinear(tex: texture_depth_2d, uv: vec2<f32>, screenSize: vec2<f
     return mix(mix(d00, d10, f.x), mix(d01, d11, f.x), f.y);
 }
 
+// 고품질 히스토리 샘플링을 위한 Catmull-Rom
 fn sample_texture_catmull_rom(tex: texture_2d<f32>, smp: sampler, uv: vec2<f32>, texSize: vec2<f32>) -> vec4<f32> {
     let samplePos = uv * texSize;
     let texPos1 = floor(samplePos - 0.5) + 0.5;
@@ -70,7 +75,7 @@ fn sample_texture_catmull_rom(tex: texture_2d<f32>, smp: sampler, uv: vec2<f32>,
     return max(result, vec4<f32>(0.0));
 }
 
-// YCoCg 공간에서 주변 통계 계산
+// 주변 3x3 통계 계산 (YCoCg)
 fn calculate_neighborhood_stats_ycocg(pixelCoord: vec2<i32>, screenSizeU: vec2<u32>) -> NeighborhoodStats {
     let screenSize = vec2<f32>(screenSizeU);
     var m1 = vec3<f32>(0.0);
@@ -83,7 +88,6 @@ fn calculate_neighborhood_stats_ycocg(pixelCoord: vec2<i32>, screenSizeU: vec2<u
             let sampleCoord = pixelCoord + vec2<i32>(x, y);
             let sampleUV = (vec2<f32>(sampleCoord) + 0.5 - uniforms.currJitterOffset) / screenSize;
 
-            // RGB 샘플링 후 즉시 YCoCg로 변환
             let colorRGB = textureSampleLevel(sourceTexture, taaTextureSampler, sampleUV, 0.0).rgb;
             let color = rgb_to_ycocg(colorRGB);
 
@@ -103,17 +107,23 @@ fn calculate_neighborhood_stats_ycocg(pixelCoord: vec2<i32>, screenSizeU: vec2<u
 
     return stats;
 }
-fn get_color_discrepancy_weight(currMeanYCoCg: vec3<f32>, histYCoCg: vec3<f32>) -> f32 {
-    // 두 색상 벡터 사이의 거리를 계산 (Y, Co, Cg 전체 차이)
-    let diff = length(currMeanYCoCg - histYCoCg);
 
-    // vec3 전체를 고려하므로 임계값을 루마 단독일 때보다 약간 높여주는 것이 안정적입니다.
-    // 0.1(차이 거의 없음) ~ 0.5(차이 큼)
-    return smoothstep(0.1, 0.5, diff);
+// 색상 차이 가중치 (고스팅 감지용)
+fn get_color_discrepancy_weight(stats: NeighborhoodStats, histYCoCg: vec3<f32>) -> f32 {
+    // 단순 거리가 아니라, 히스토리가 주변 표준 편차(stdDev) 범위에서 얼마나 벗어났는지 확인
+    let diff = abs(stats.mean.x - histYCoCg.x);
+
+    // 표준 편차를 활용한 가변 임계값:
+    // 주변이 복잡하면(stdDev가 크면) 차이에 관대하고, 평탄하면(stdDev가 작으면) 엄격하게 잡음
+    let threshold = max(stats.stdDev.x * 0.5, 0.01);
+
+    return smoothstep(threshold, threshold * 2.0, diff);
 }
-// YCoCg 공간에서 클리핑 수행
+
+// 개선된 타이트 클리핑
 fn clip_history_ycocg(historyYCoCg: vec3<f32>, stats: NeighborhoodStats, motion: f32) -> vec3<f32> {
-    let gamma = mix(0.5, 1.0, motion);
+    // gamma 값을 낮게 잡아 글자 경계에서 잔상을 강하게 잘라냄
+    let gamma = mix(0.2, 0.7, motion);
     let v_min = min(stats.minColor, stats.mean - stats.stdDev * gamma);
     let v_max = max(stats.maxColor, stats.mean + stats.stdDev * gamma);
 

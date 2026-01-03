@@ -63,7 +63,7 @@
 
         // ★ 루마 차이 기반 alpha 보정 ★
         // 현재 픽셀 대신 주변 평균 루마(stats.mean.x)를 사용하여 떨림(Jitter) 억제
-        let lumaWeight = get_color_discrepancy_weight(stats.mean, clippedYCoCg);
+        let lumaWeight = get_color_discrepancy_weight(stats, clippedYCoCg);
 
         // 7. 블렌딩 (RGB 공간)
         // 기본 모션 기반 alpha
