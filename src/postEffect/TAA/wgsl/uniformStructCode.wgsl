@@ -11,7 +11,10 @@ struct NeighborhoodStats {
     mean: vec3<f32>,
     stdDev: vec3<f32>,
 };
-
+struct SampledColor {
+    rgb: vec3<f32>,
+    ycocg: vec3<f32>,
+};
 // RGB -> YCoCg 변환
 fn rgb_to_ycocg(rgb: vec3<f32>) -> vec3<f32> {
     let y  = dot(rgb, vec3<f32>(0.25, 0.5, 0.25));
@@ -48,31 +51,6 @@ fn fetch_depth_bilinear(tex: texture_depth_2d, uv: vec2<f32>, screenSize: vec2<f
     let d11 = textureLoad(tex, clamp(base + vec2<i32>(1, 1), vec2<i32>(0), size - 1), 0);
 
     return mix(mix(d00, d10, f.x), mix(d01, d11, f.x), f.y);
-}
-
-// 고품질 히스토리 샘플링을 위한 Catmull-Rom
-fn sample_texture_catmull_rom(tex: texture_2d<f32>, smp: sampler, uv: vec2<f32>, texSize: vec2<f32>) -> vec4<f32> {
-    let samplePos = uv * texSize;
-    let texPos1 = floor(samplePos - 0.5) + 0.5;
-    let f = samplePos - texPos1;
-
-    let w0 = f * (-0.5 + f * (1.0 - 0.5 * f));
-    let w1 = 1.0 + f * f * (-2.5 + 1.5 * f);
-    let w2 = f * (0.5 + f * (2.0 - 1.5 * f));
-    let w3 = f * f * (-0.5 + 0.5 * f);
-
-    let w12 = w1 + w2;
-    let offset12 = w2 / w12;
-    let invTexSize = 1.0 / texSize;
-
-    var result = vec4<f32>(0.0);
-    result += textureSampleLevel(tex, smp, (texPos1 + vec2<f32>(offset12.x, -1.0)) * invTexSize, 0.0) * w12.x * w0.y;
-    result += textureSampleLevel(tex, smp, (texPos1 + vec2<f32>(-1.0, offset12.y)) * invTexSize, 0.0) * w0.x * w12.y;
-    result += textureSampleLevel(tex, smp, (texPos1 + offset12) * invTexSize, 0.0) * w12.x * w12.y;
-    result += textureSampleLevel(tex, smp, (texPos1 + vec2<f32>(2.0, offset12.y)) * invTexSize, 0.0) * w3.x * w12.y;
-    result += textureSampleLevel(tex, smp, (texPos1 + vec2<f32>(offset12.x, 2.0)) * invTexSize, 0.0) * w12.x * w3.y;
-
-    return max(result, vec4<f32>(0.0));
 }
 
 // 주변 3x3 통계 계산 (YCoCg)
@@ -118,6 +96,53 @@ fn get_color_discrepancy_weight(stats: NeighborhoodStats, histYCoCg: vec3<f32>) 
     let threshold = max(stats.stdDev.x * 0.5, 0.01);
 
     return smoothstep(threshold, threshold * 2.0, diff);
+}
+fn sample_texture_catmull_rom_antiflicker(tex: texture_2d<f32>, smp: sampler, uv: vec2<f32>, texSize: vec2<f32>) -> SampledColor {
+    let samplePos = uv * texSize;
+    let texPos1 = floor(samplePos - 0.5) + 0.5;
+    let f = samplePos - texPos1;
+
+    let w0 = f * (-0.5 + f * (1.0 - 0.5 * f));
+    let w1 = 1.0 + f * f * (-2.5 + 1.5 * f);
+    let w2 = f * (0.5 + f * (2.0 - 1.5 * f));
+    let w3 = f * f * (-0.5 + 0.5 * f);
+
+    let w12 = w1 + w2;
+    let offset12 = w2 / w12;
+    let invTexSize = 1.0 / texSize;
+
+    let coords = array<vec2<f32>, 5>(
+        (texPos1 + vec2<f32>(offset12.x, -1.0)) * invTexSize,
+        (texPos1 + vec2<f32>(-1.0, offset12.y)) * invTexSize,
+        (texPos1 + offset12) * invTexSize,
+        (texPos1 + vec2<f32>(2.0, offset12.y)) * invTexSize,
+        (texPos1 + vec2<f32>(offset12.x, 2.0)) * invTexSize
+    );
+
+    let weights = array<f32, 5>(
+        w12.x * w0.y, w0.x * w12.y, w12.x * w12.y, w3.x * w12.y, w12.x * w3.y
+    );
+
+    var sumRGB = vec3<f32>(0.0);
+    var sumYCoCg = vec3<f32>(0.0);
+    var sumW = 0.0;
+
+    for(var i = 0; i < 5; i++) {
+        let sampleRGB = max(textureSampleLevel(tex, smp, coords[i], 0.0).rgb, vec3<f32>(0.0));
+        let sampleYCoCg = rgb_to_ycocg(sampleRGB); // 여기서 미리 변환
+
+        // 루마(Y) 기반 가중치 계산 (Anti-flicker)
+        let w = weights[i] * (1.0 / (1.0 + sampleYCoCg.x));
+
+        sumRGB += sampleRGB * w;
+        sumYCoCg += sampleYCoCg * w;
+        sumW += w;
+    }
+
+    var result: SampledColor;
+    result.rgb = sumRGB / max(sumW, 0.0001);
+    result.ycocg = sumYCoCg / max(sumW, 0.0001);
+    return result;
 }
 
 // 개선된 타이트 클리핑

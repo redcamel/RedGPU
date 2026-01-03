@@ -2,13 +2,14 @@
     let pixelCoord = vec2<i32>(global_id.xy);
     let screenSizeU = textureDimensions(sourceTexture);
     let screenSize = vec2<f32>(screenSizeU);
+    let yFlipVec2 = vec2<f32>(1.0,-1.0);
 
     if (any(pixelCoord >= vec2<i32>(screenSizeU))) {
         return;
     }
 
     // 1. 현재 프레임 샘플링 위치 계산 (지터 보정)
-    let currentUV = (vec2<f32>(pixelCoord) + 0.5 ) / screenSize;
+    let currentUV = (vec2<f32>(pixelCoord) + 0.5 - uniforms.currJitterOffset * yFlipVec2 ) / screenSize;
 
     // 2. YCoCg 기반 주변 통계 계산
     let stats = calculate_neighborhood_stats_ycocg(pixelCoord, screenSizeU);
@@ -37,7 +38,7 @@
     let velocity = motionData.xy;
 
     // 5. 히스토리 좌표 계산
-    let historyUV = (vec2<f32>(pixelCoord) + 0.5 + uniforms.prevJitterOffset * vec2<f32>(1.0,-1.0)) / screenSize - velocity;
+    let historyUV = (vec2<f32>(pixelCoord) + 0.5 - velocity + uniforms.prevJitterOffset * yFlipVec2) / screenSize - velocity;
 
     var finalRGB: vec3<f32>;
 
@@ -45,12 +46,12 @@
     if (any(historyUV < vec2<f32>(0.0)) || any(historyUV > vec2<f32>(1.0))) {
         finalRGB = currentRGB;
     } else {
-        // Catmull-Rom으로 히스토리 RGB 샘플링
-        let historyRGB = sample_texture_catmull_rom(historyTexture, taaTextureSampler, historyUV, screenSize).rgb;
         let prevDepth = fetch_depth_bilinear(historyDepthTexture, historyUV, screenSize);
 
-        // 클리핑을 위해 YCoCg로 변환
-        let historyYCoCg = rgb_to_ycocg(historyRGB);
+        // Catmull-Rom으로 히스토리 RGB 샘플링
+        let historyData = sample_texture_catmull_rom_antiflicker(historyTexture, taaTextureSampler, historyUV, screenSize);
+        let historyRGB = historyData.rgb;
+        let historyYCoCg = historyData.ycocg;
 
         let motionLen = length(velocity * screenSize);
         let motionSoft = smoothstep(0.0, 1.0, motionLen);
@@ -71,7 +72,7 @@
 
         // 깊이 차이가 크면 히스토리를 버림
         let depthConfidence = get_depth_confidence(currentDepth, prevDepth);
-        alpha = max(alpha, 1.0 - depthConfidence);
+//        alpha = max(alpha, 1.0 - depthConfidence);
 
         // ★ 추가: 루마 차이가 크면(고스트 위험) 현재 프레임 비중을 높임
         // 떨림 방지를 위해 lumaWeight의 최대 영향력을 0.5 정도로 제한하는 것이 좋습니다.
