@@ -8,7 +8,7 @@
     }
 
     // 1. 현재 프레임 샘플링 위치 계산 (지터 보정)
-    let currentUV = (vec2<f32>(pixelCoord) + 0.5 - uniforms.currJitterOffset) / screenSize;
+    let currentUV = (vec2<f32>(pixelCoord) + 0.5 ) / screenSize;
 
     // 2. YCoCg 기반 주변 통계 계산
     let stats = calculate_neighborhood_stats_ycocg(pixelCoord, screenSizeU);
@@ -37,7 +37,7 @@
     let velocity = motionData.xy;
 
     // 5. 히스토리 좌표 계산
-    let historyUV = (vec2<f32>(pixelCoord) + 0.5 - uniforms.prevJitterOffset) / screenSize - velocity;
+    let historyUV = (vec2<f32>(pixelCoord) + 0.5 + uniforms.prevJitterOffset * vec2<f32>(1.0,-1.0)) / screenSize - velocity;
 
     var finalRGB: vec3<f32>;
 
@@ -53,7 +53,7 @@
         let historyYCoCg = rgb_to_ycocg(historyRGB);
 
         let motionLen = length(velocity * screenSize);
-        let motionSoft = smoothstep(0.0, 0.5, motionLen);
+        let motionSoft = smoothstep(0.0, 1.0, motionLen);
 
         // YCoCg 공간에서 클리핑 수행
         let clippedYCoCg = clip_history_ycocg(historyYCoCg, stats, motionSoft);

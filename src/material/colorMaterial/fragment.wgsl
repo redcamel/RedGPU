@@ -15,8 +15,8 @@ struct InputData {
   // Built-in attributes
   @builtin(position) position : vec4<f32>,
 
-    @location(7) currentClipPos: vec4<f32>,
-    @location(8) prevClipPos: vec4<f32>,
+  @location(7) currentClipPos: vec4<f32>,
+  @location(8) prevClipPos: vec4<f32>,
   @location(11) combinedOpacity: f32,
   //
   @location(12) motionVector: vec3<f32>,
