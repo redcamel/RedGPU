@@ -38,7 +38,7 @@
     let velocity = motionData.xy;
 
     // 5. 히스토리 좌표 계산
-    let historyUV = (vec2<f32>(pixelCoord) + 0.5 - velocity + uniforms.prevJitterOffset * yFlipVec2) / screenSize - velocity;
+    let historyUV = (vec2<f32>(pixelCoord) + 0.5 + uniforms.prevJitterOffset * yFlipVec2) / screenSize - velocity;
 
     var finalRGB: vec3<f32>;
 
