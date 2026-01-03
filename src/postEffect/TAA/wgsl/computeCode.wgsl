@@ -5,12 +5,12 @@
     if (any(pixelCoord >= vec2<i32>(screenSizeU))) { return; }
 
     // 1. 데이터 로드
-    let stats = calculate_neighborhood_stats(pixelCoord, screenSizeU);
     let currentRGBA = textureLoad(sourceTexture, pixelCoord, 0);
-    let currentRGB = currentRGBA.rgb;
+    let currentYCbCr = rgb_to_ycbcr(currentRGBA.rgb);
     let currentDepth = textureLoad(depthTexture, pixelCoord, 0);
+    let statsYCbCr = calculate_neighborhood_stats_ycbcr(pixelCoord, screenSizeU);
 
-    // 2. Velocity Dilation
+    // 2. 정밀 모션 벡터 선택 (Velocity Dilation)
     var closestDepth = 1.0;
     var closestCoord = pixelCoord;
     for(var y: i32 = -1; y <= 1; y++) {
@@ -20,45 +20,49 @@
             if(d < closestDepth) { closestDepth = d; closestCoord = sc; }
         }
     }
-    let motionData = textureLoad(motionVectorTexture, closestCoord, 0);
-    let velocity = motionData.xy;
+    // 모션 벡터가 UV 단위라고 가정할 경우 픽셀 단위로 변환하여 계산
+    let velocityUV = textureLoad(motionVectorTexture, closestCoord, 0).xy;
+    let velocityPixels = velocityUV * screenSize;
 
-    // 3. 히스토리 좌표 계산 (지터 보정 포함)
-    let historyUV = (vec2<f32>(pixelCoord) + 0.5 - uniforms.currJitterOffset) / screenSize - velocity;
+    // 3. 픽셀 단위 히스토리 좌표 계산 (안정성 강화)
+    // 모든 좌표 이동을 픽셀(Pixel) 공간에서 먼저 수행합니다.
+    let currentPos = vec2<f32>(pixelCoord) + 0.5; // 픽셀 중심
 
-    var finalRGB: vec3<f32>;
+    // (현재 위치 - 현재 지터) = 언지터링된 실제 픽셀 위치
+    // (실제 위치 - 모션 벡터) = 이전 프레임의 실제 위치
+    // (이전 실제 위치 + 이전 지터) = 히스토리 버퍼 내 샘플링 위치
+    let historyPos = currentPos - uniforms.currJitterOffset - velocityPixels + uniforms.prevJitterOffset;
+
+    // 최종적으로 한 번만 스크린 사이즈로 나누어 UV 변환
+    let historyUV = historyPos / screenSize;
+
+    var finalYCbCr: vec3<f32>;
 
     if (any(historyUV < vec2<f32>(0.0)) || any(historyUV > vec2<f32>(1.0))) {
-        finalRGB = currentRGB;
+        finalYCbCr = currentYCbCr;
     } else {
-        // 4. 히스토리 샘플링
+        // 4. 히스토리 샘플링 및 검증
         let historyRGB = sample_texture_catmull_rom(historyTexture, taaTextureSampler, historyUV, screenSize).rgb;
+        let historyYCbCr = rgb_to_ycbcr(historyRGB);
         let prevDepth = fetch_depth_bilinear(historyDepthTexture, historyUV, screenSize);
 
-        // 5. 움직임 세기 분석 (흐릿함 방지를 위해 더 민감하게 설정)
-        let motionLen = length(velocity * screenSize);
-        let motionSoft = smoothstep(0.0, 0.5, motionLen);
+        // 5. 클리핑 및 혼합
+        let motionLen = length(velocityPixels);
+        let motionFactor = smoothstep(0.0, 2.0, motionLen);
 
-        // 6. [수정] 스마트 히스토리 클리핑
-        // 정지 시 gamma를 낮게 가져가서 히스토리가 현재 프레임을 덮어쓰지 못하게 함
-        let clippedHistoryRGB = clip_history_rgb_smart(historyRGB, currentRGB, stats, motionSoft);
+        let gamma = mix(0.75, 1.25, motionFactor);
+        let v_min = min(statsYCbCr.minColor, statsYCbCr.mean - statsYCbCr.stdDev * gamma);
+        let v_max = max(statsYCbCr.maxColor, statsYCbCr.mean + statsYCbCr.stdDev * gamma);
 
-        // 7. 동적 알파(Alpha) 결정
-        // 정지 상태 기본 알파를 0.1로 높여서 흐릿함을 줄임 (값이 클수록 현재 프레임 선명도 상승)
-        var alpha = mix(0.1, 0.4, motionSoft);
+        let clippedHistoryYCbCr = clamp(historyYCbCr, v_min, v_max);
 
+        var alpha = mix(0.05, 0.15, motionFactor);
         let depthConfidence = get_depth_confidence(currentDepth, prevDepth);
         alpha = mix(1.0, alpha, depthConfidence);
 
-        // 8. 대비 기반 보호 (글씨/경계선 선명도 유지)
-        let colorDist = distance(currentRGB, clippedHistoryRGB);
-        // 색상 차이가 조금만 나도 alpha를 높여서 뭉개짐 방지
-        let contrastBoost = smoothstep(0.05, 0.4, colorDist);
-        alpha = max(alpha, contrastBoost * 0.7);
-
-        // 9. 최종 혼합
-        finalRGB = mix(clippedHistoryRGB, currentRGB, alpha);
+        finalYCbCr = mix(clippedHistoryYCbCr, currentYCbCr, alpha);
     }
 
+    let finalRGB = ycbcr_to_rgb(finalYCbCr);
     textureStore(outputTexture, pixelCoord, vec4<f32>(finalRGB, currentRGBA.a));
 }

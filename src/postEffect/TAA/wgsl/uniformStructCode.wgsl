@@ -1,8 +1,8 @@
 // ===== 구조체 및 유틸리티 =====
 struct Uniforms {
     frameIndex: f32,
-    currJitterOffset: vec2<f32>,
-    prevJitterOffset: vec2<f32>,
+    currJitterOffset: vec2<f32>, // 픽셀 단위 오프셋 (예: -0.5 ~ 0.5)
+    prevJitterOffset: vec2<f32>, // 픽셀 단위 오프셋
 };
 
 struct NeighborhoodStats {
@@ -12,9 +12,23 @@ struct NeighborhoodStats {
     stdDev: vec3<f32>,
 };
 
+fn rgb_to_ycbcr(rgb: vec3<f32>) -> vec3<f32> {
+    let y = 0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b;
+    let cb = (rgb.b - y) * 0.564;
+    let cr = (rgb.r - y) * 0.713;
+    return vec3<f32>(y, cb, cr);
+}
+
+fn ycbcr_to_rgb(ycbcr: vec3<f32>) -> vec3<f32> {
+    let r = ycbcr.x + 1.402 * ycbcr.z;
+    let g = ycbcr.x - 0.344 * ycbcr.y - 0.714 * ycbcr.z;
+    let b = ycbcr.x + 1.772 * ycbcr.y;
+    return vec3<f32>(r, g, b);
+}
+
 fn get_depth_confidence(currDepth: f32, prevDepth: f32) -> f32 {
     let depthDiff = abs(currDepth - prevDepth);
-    return 1.0 - clamp((depthDiff - 0.01) / 0.02, 0.0, 1.0);
+    return 1.0 - clamp((depthDiff - 0.005) / 0.01, 0.0, 1.0); //
 }
 
 fn fetch_depth_bilinear(tex: texture_depth_2d, uv: vec2<f32>, screenSize: vec2<f32>) -> f32 {
@@ -28,7 +42,7 @@ fn fetch_depth_bilinear(tex: texture_depth_2d, uv: vec2<f32>, screenSize: vec2<f
     let d01 = textureLoad(tex, clamp(base + vec2<i32>(0, 1), vec2<i32>(0), size - 1), 0);
     let d11 = textureLoad(tex, clamp(base + vec2<i32>(1, 1), vec2<i32>(0), size - 1), 0);
 
-    return mix(mix(d00, d10, f.x), mix(d01, d11, f.x), f.y);
+    return mix(mix(d00, d10, f.x), mix(d01, d11, f.x), f.y); //
 }
 
 fn sample_texture_catmull_rom(tex: texture_2d<f32>, smp: sampler, uv: vec2<f32>, texSize: vec2<f32>) -> vec4<f32> {
@@ -52,17 +66,17 @@ fn sample_texture_catmull_rom(tex: texture_2d<f32>, smp: sampler, uv: vec2<f32>,
     result += textureSampleLevel(tex, smp, (texPos1 + vec2<f32>(2.0, offset12.y)) * invTexSize, 0.0) * w3.x * w12.y;
     result += textureSampleLevel(tex, smp, (texPos1 + vec2<f32>(offset12.x, 2.0)) * invTexSize, 0.0) * w12.x * w3.y;
 
-    return max(result, vec4<f32>(0.0));
+    return max(result, vec4<f32>(0.0)); //
 }
 
-fn calculate_neighborhood_stats(pixelCoord: vec2<i32>, screenSize: vec2<u32>) -> NeighborhoodStats {
+fn calculate_neighborhood_stats_ycbcr(pixelCoord: vec2<i32>, screenSize: vec2<u32>) -> NeighborhoodStats {
     var m1 = vec3<f32>(0.0); var m2 = vec3<f32>(0.0);
     var minC = vec3<f32>(1e5); var maxC = vec3<f32>(-1e5);
 
     for (var y: i32 = -1; y <= 1; y++) {
         for (var x: i32 = -1; x <= 1; x++) {
             let sampleCoord = clamp(pixelCoord + vec2<i32>(x, y), vec2<i32>(0), vec2<i32>(screenSize) - 1);
-            let color = textureLoad(sourceTexture, sampleCoord, 0).rgb;
+            let color = rgb_to_ycbcr(textureLoad(sourceTexture, sampleCoord, 0).rgb);
             m1 += color; m2 += color * color;
             minC = min(minC, color); maxC = max(maxC, color);
         }
@@ -73,16 +87,5 @@ fn calculate_neighborhood_stats(pixelCoord: vec2<i32>, screenSize: vec2<u32>) ->
     stats.mean = m1 / sampleCount;
     stats.stdDev = sqrt(max((m2 / sampleCount) - (stats.mean * stats.mean), vec3<f32>(0.0)));
     stats.minColor = minC; stats.maxColor = maxC;
-    return stats;
-}
-
-// 수정된 클리핑 함수: 움직임 여부를 인자로 받아 gamma를 조절
-fn clip_history_rgb_smart(historyColor: vec3<f32>, currentColor: vec3<f32>, stats: NeighborhoodStats, motion: f32) -> vec3<f32> {
-    // 멈춰있을 때(motion=0)는 gamma를 매우 낮춰(0.5) 날카롭게 클리핑하고,
-    // 움직일 때는 범위를 약간 넓혀(1.0) 부드럽게 처리합니다.
-    let gamma = mix(0.5, 1.0, motion);
-    let v_min = min(stats.minColor, stats.mean - stats.stdDev * gamma);
-    let v_max = max(stats.maxColor, stats.mean + stats.stdDev * gamma);
-
-    return clamp(historyColor, v_min, v_max);
+    return stats; //
 }
