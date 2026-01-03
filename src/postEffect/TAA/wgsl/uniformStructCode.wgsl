@@ -103,7 +103,14 @@ fn calculate_neighborhood_stats_ycocg(pixelCoord: vec2<i32>, screenSizeU: vec2<u
 
     return stats;
 }
+fn get_color_discrepancy_weight(currMeanYCoCg: vec3<f32>, histYCoCg: vec3<f32>) -> f32 {
+    // 두 색상 벡터 사이의 거리를 계산 (Y, Co, Cg 전체 차이)
+    let diff = length(currMeanYCoCg - histYCoCg);
 
+    // vec3 전체를 고려하므로 임계값을 루마 단독일 때보다 약간 높여주는 것이 안정적입니다.
+    // 0.1(차이 거의 없음) ~ 0.5(차이 큼)
+    return smoothstep(0.1, 0.5, diff);
+}
 // YCoCg 공간에서 클리핑 수행
 fn clip_history_ycocg(historyYCoCg: vec3<f32>, stats: NeighborhoodStats, motion: f32) -> vec3<f32> {
     let gamma = mix(0.5, 1.0, motion);

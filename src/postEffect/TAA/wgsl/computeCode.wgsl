@@ -61,10 +61,21 @@
         // ★ 클리핑 후 다시 RGB로 복원 ★
         let clippedHistoryRGB = ycocg_to_rgb(clippedYCoCg);
 
+        // ★ 루마 차이 기반 alpha 보정 ★
+        // 현재 픽셀 대신 주변 평균 루마(stats.mean.x)를 사용하여 떨림(Jitter) 억제
+        let lumaWeight = get_color_discrepancy_weight(stats.mean, clippedYCoCg);
+
         // 7. 블렌딩 (RGB 공간)
+        // 기본 모션 기반 alpha
         var alpha = mix(0.08, 0.4, motionSoft);
+
+        // 깊이 차이가 크면 히스토리를 버림
         let depthConfidence = get_depth_confidence(currentDepth, prevDepth);
         alpha = max(alpha, 1.0 - depthConfidence);
+
+        // ★ 추가: 루마 차이가 크면(고스트 위험) 현재 프레임 비중을 높임
+        // 떨림 방지를 위해 lumaWeight의 최대 영향력을 0.5 정도로 제한하는 것이 좋습니다.
+        alpha = max(alpha, lumaWeight * 0.5);
 
         finalRGB = mix(clippedHistoryRGB, currentRGB, alpha);
     }
