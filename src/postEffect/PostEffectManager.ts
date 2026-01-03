@@ -10,7 +10,7 @@ import AMultiPassPostEffect from "./core/AMultiPassPostEffect";
 import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
 import postEffectSystemUniformCode from "./core/postEffectSystemUniform.wgsl"
 import Convolution from "./effects/convolution/Convolution";
-import Sharpen from "./effects/Sharpen";
+import TAASharpen from "./TAA/shapen/TAASharpen";
 
 /**
  * 후처리 이펙트(PostEffect) 관리 클래스입니다.
@@ -54,7 +54,7 @@ class PostEffectManager {
     #uniformData: ArrayBuffer
     #uniformDataF32: Float32Array
     #uniformDataU32: Uint32Array
-    #taaSharpenEffect:Convolution
+    #taaSharpenEffect:TAASharpen
 
     constructor(view: View3D) {
         this.#view = view;
@@ -143,19 +143,14 @@ class PostEffectManager {
                 currentTextureView
             );
             if(!this.#taaSharpenEffect) {
-                this.#taaSharpenEffect = new Convolution(redGPUContext)
-                this.#taaSharpenEffect.kernel = [
-                    0, -1, 0, 0,
-                    -1, 11, -1, 0,
-                    0, -1, 0, 0,
-                ]
+                this.#taaSharpenEffect = new TAASharpen(redGPUContext)
             }
-            // currentTextureView = this.#taaSharpenEffect.render(
-            //   this.#view,
-            //   width,
-            //   height,
-            //   currentTextureView
-            // )
+            currentTextureView = this.#taaSharpenEffect.render(
+              this.#view,
+              width,
+              height,
+              currentTextureView
+            )
         }
         return currentTextureView;
     }

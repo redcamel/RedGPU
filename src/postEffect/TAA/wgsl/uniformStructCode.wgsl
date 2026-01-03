@@ -12,6 +12,21 @@ struct NeighborhoodStats {
     stdDev: vec3<f32>,
 };
 
+// YCoCg 변환 유틸리티
+fn rgb_to_ycocg(rgb: vec3<f32>) -> vec3<f32> {
+    let y  = dot(rgb, vec3<f32>(0.25, 0.5, 0.25));
+    let co = dot(rgb, vec3<f32>(0.5, 0.0, -0.5));
+    let cg = dot(rgb, vec3<f32>(-0.25, 0.5, -0.25));
+    return vec3<f32>(y, co, cg);
+}
+
+fn ycocg_to_rgb(ycocg: vec3<f32>) -> vec3<f32> {
+    let y  = ycocg.x;
+    let co = ycocg.y;
+    let cg = ycocg.z;
+    return vec3<f32>(y + co - cg, y + cg, y - co - cg);
+}
+
 fn get_depth_confidence(currDepth: f32, prevDepth: f32) -> f32 {
     let depthDiff = abs(currDepth - prevDepth);
     return 1.0 - clamp((depthDiff - 0.01) / 0.02, 0.0, 1.0);
@@ -55,8 +70,8 @@ fn sample_texture_catmull_rom(tex: texture_2d<f32>, smp: sampler, uv: vec2<f32>,
     return max(result, vec4<f32>(0.0));
 }
 
-// 수정된 Neighborhood Stats 계산 함수 (지터 보정 샘플링 적용)
-fn calculate_neighborhood_stats(pixelCoord: vec2<i32>, screenSizeU: vec2<u32>) -> NeighborhoodStats {
+// YCoCg 공간에서 주변 통계 계산
+fn calculate_neighborhood_stats_ycocg(pixelCoord: vec2<i32>, screenSizeU: vec2<u32>) -> NeighborhoodStats {
     let screenSize = vec2<f32>(screenSizeU);
     var m1 = vec3<f32>(0.0);
     var m2 = vec3<f32>(0.0);
@@ -66,11 +81,11 @@ fn calculate_neighborhood_stats(pixelCoord: vec2<i32>, screenSizeU: vec2<u32>) -
     for (var y: i32 = -1; y <= 1; y++) {
         for (var x: i32 = -1; x <= 1; x++) {
             let sampleCoord = pixelCoord + vec2<i32>(x, y);
-            // 0.5를 더해 픽셀 중심을 잡고, 현재 프레임의 지터 오프셋을 빼서 원래 위치를 복원합니다.
             let sampleUV = (vec2<f32>(sampleCoord) + 0.5 - uniforms.currJitterOffset) / screenSize;
 
-            // Bilinear 샘플러를 사용하여 서브픽셀 단위의 정확한 주변 색상을 읽습니다.
-            let color = textureSampleLevel(sourceTexture, taaTextureSampler, sampleUV, 0.0).rgb;
+            // RGB 샘플링 후 즉시 YCoCg로 변환
+            let colorRGB = textureSampleLevel(sourceTexture, taaTextureSampler, sampleUV, 0.0).rgb;
+            let color = rgb_to_ycocg(colorRGB);
 
             m1 += color;
             m2 += color * color;
@@ -89,10 +104,11 @@ fn calculate_neighborhood_stats(pixelCoord: vec2<i32>, screenSizeU: vec2<u32>) -
     return stats;
 }
 
-fn clip_history_rgb_smart(historyColor: vec3<f32>, currentColor: vec3<f32>, stats: NeighborhoodStats, motion: f32) -> vec3<f32> {
+// YCoCg 공간에서 클리핑 수행
+fn clip_history_ycocg(historyYCoCg: vec3<f32>, stats: NeighborhoodStats, motion: f32) -> vec3<f32> {
     let gamma = mix(0.5, 1.0, motion);
     let v_min = min(stats.minColor, stats.mean - stats.stdDev * gamma);
     let v_max = max(stats.maxColor, stats.mean + stats.stdDev * gamma);
 
-    return clamp(historyColor, v_min, v_max);
+    return clamp(historyYCoCg, v_min, v_max);
 }

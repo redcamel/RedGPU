@@ -8,21 +8,19 @@
     }
 
     // 1. 현재 프레임 샘플링 위치 계산 (지터 보정)
-    // 픽셀 정수 좌표에 0.5를 더해 중심을 잡고 지터만큼 역이동 시킵니다.
     let currentUV = (vec2<f32>(pixelCoord) + 0.5 - uniforms.currJitterOffset) / screenSize;
 
-    // 2. 주변 통계 계산 (수정된 함수 호출)
-    let stats = calculate_neighborhood_stats(pixelCoord, screenSizeU);
+    // 2. YCoCg 기반 주변 통계 계산
+    let stats = calculate_neighborhood_stats_ycocg(pixelCoord, screenSizeU);
 
-    // 3. 현재 프레임 데이터 로드 (textureSampleLevel 사용)
-    // 보간된 샘플링을 통해 지터로 인한 미세한 떨림을 억제합니다.
+    // 3. 현재 프레임 데이터 로드 및 YCoCg 변환
     let currentRGBA = textureSampleLevel(sourceTexture, taaTextureSampler, currentUV, 0.0);
     let currentRGB = currentRGBA.rgb;
+    let currentYCoCg = rgb_to_ycocg(currentRGB);
 
-    // Depth는 경계면 정밀도를 위해 기존처럼 정수 좌표로 로드합니다.
     let currentDepth = textureLoad(depthTexture, pixelCoord, 0);
 
-    // 4. Velocity Dilation (가장 가까운 오브젝트의 속도 찾기)
+    // 4. Velocity Dilation
     var closestDepth = 1.0;
     var closestCoord = pixelCoord;
     for(var y: i32 = -1; y <= 1; y++) {
@@ -39,29 +37,38 @@
     let velocity = motionData.xy;
 
     // 5. 히스토리 좌표 계산
-    let historyUV = (vec2<f32>(pixelCoord) + 0.5 - uniforms.currJitterOffset) / screenSize - velocity;
+    let historyUV = (vec2<f32>(pixelCoord) + 0.5 - uniforms.prevJitterOffset) / screenSize - velocity;
 
     var finalRGB: vec3<f32>;
 
-    // 6. 히스토리 샘플링 및 블렌딩
+    // 6. 히스토리 샘플링 및 색공간 기반 처리
     if (any(historyUV < vec2<f32>(0.0)) || any(historyUV > vec2<f32>(1.0))) {
         finalRGB = currentRGB;
     } else {
+        // Catmull-Rom으로 히스토리 RGB 샘플링
         let historyRGB = sample_texture_catmull_rom(historyTexture, taaTextureSampler, historyUV, screenSize).rgb;
         let prevDepth = fetch_depth_bilinear(historyDepthTexture, historyUV, screenSize);
+
+        // 클리핑을 위해 YCoCg로 변환
+        let historyYCoCg = rgb_to_ycocg(historyRGB);
 
         let motionLen = length(velocity * screenSize);
         let motionSoft = smoothstep(0.0, 0.5, motionLen);
 
-        let clippedHistoryRGB = clip_history_rgb_smart(historyRGB, currentRGB, stats, motionSoft);
+        // YCoCg 공간에서 클리핑 수행
+        let clippedYCoCg = clip_history_ycocg(historyYCoCg, stats, motionSoft);
 
-        var alpha = mix(0.1, 0.4, motionSoft);
+        // ★ 클리핑 후 다시 RGB로 복원 ★
+        let clippedHistoryRGB = ycocg_to_rgb(clippedYCoCg);
+
+        // 7. 블렌딩 (RGB 공간)
+        var alpha = mix(0.08, 0.4, motionSoft);
         let depthConfidence = get_depth_confidence(currentDepth, prevDepth);
         alpha = max(alpha, 1.0 - depthConfidence);
 
         finalRGB = mix(clippedHistoryRGB, currentRGB, alpha);
     }
 
-    // 7. 결과 저장
+    // 8. 결과 저장
     textureStore(outputTexture, pixelCoord, vec4<f32>(finalRGB, 1.0));
 }
