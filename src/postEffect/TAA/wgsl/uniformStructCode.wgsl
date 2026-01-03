@@ -55,16 +55,27 @@ fn sample_texture_catmull_rom(tex: texture_2d<f32>, smp: sampler, uv: vec2<f32>,
     return max(result, vec4<f32>(0.0));
 }
 
-fn calculate_neighborhood_stats(pixelCoord: vec2<i32>, screenSize: vec2<u32>) -> NeighborhoodStats {
-    var m1 = vec3<f32>(0.0); var m2 = vec3<f32>(0.0);
-    var minC = vec3<f32>(1e5); var maxC = vec3<f32>(-1e5);
+// 수정된 Neighborhood Stats 계산 함수 (지터 보정 샘플링 적용)
+fn calculate_neighborhood_stats(pixelCoord: vec2<i32>, screenSizeU: vec2<u32>) -> NeighborhoodStats {
+    let screenSize = vec2<f32>(screenSizeU);
+    var m1 = vec3<f32>(0.0);
+    var m2 = vec3<f32>(0.0);
+    var minC = vec3<f32>(1e5);
+    var maxC = vec3<f32>(-1e5);
 
     for (var y: i32 = -1; y <= 1; y++) {
         for (var x: i32 = -1; x <= 1; x++) {
-            let sampleCoord = clamp(pixelCoord + vec2<i32>(x, y), vec2<i32>(0), vec2<i32>(screenSize) - 1);
-            let color = textureLoad(sourceTexture, sampleCoord, 0).rgb;
-            m1 += color; m2 += color * color;
-            minC = min(minC, color); maxC = max(maxC, color);
+            let sampleCoord = pixelCoord + vec2<i32>(x, y);
+            // 0.5를 더해 픽셀 중심을 잡고, 현재 프레임의 지터 오프셋을 빼서 원래 위치를 복원합니다.
+            let sampleUV = (vec2<f32>(sampleCoord) + 0.5 - uniforms.currJitterOffset) / screenSize;
+
+            // Bilinear 샘플러를 사용하여 서브픽셀 단위의 정확한 주변 색상을 읽습니다.
+            let color = textureSampleLevel(sourceTexture, taaTextureSampler, sampleUV, 0.0).rgb;
+
+            m1 += color;
+            m2 += color * color;
+            minC = min(minC, color);
+            maxC = max(maxC, color);
         }
     }
 
@@ -72,14 +83,13 @@ fn calculate_neighborhood_stats(pixelCoord: vec2<i32>, screenSize: vec2<u32>) ->
     var stats: NeighborhoodStats;
     stats.mean = m1 / sampleCount;
     stats.stdDev = sqrt(max((m2 / sampleCount) - (stats.mean * stats.mean), vec3<f32>(0.0)));
-    stats.minColor = minC; stats.maxColor = maxC;
+    stats.minColor = minC;
+    stats.maxColor = maxC;
+
     return stats;
 }
 
-// 수정된 클리핑 함수: 움직임 여부를 인자로 받아 gamma를 조절
 fn clip_history_rgb_smart(historyColor: vec3<f32>, currentColor: vec3<f32>, stats: NeighborhoodStats, motion: f32) -> vec3<f32> {
-    // 멈춰있을 때(motion=0)는 gamma를 매우 낮춰(0.5) 날카롭게 클리핑하고,
-    // 움직일 때는 범위를 약간 넓혀(1.0) 부드럽게 처리합니다.
     let gamma = mix(0.5, 1.0, motion);
     let v_min = min(stats.minColor, stats.mean - stats.stdDev * gamma);
     let v_max = max(stats.maxColor, stats.mean + stats.stdDev * gamma);
