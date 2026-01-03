@@ -72,7 +72,7 @@
 
         // 깊이 차이가 크면 히스토리를 버림
         let depthConfidence = get_depth_confidence(currentDepth, prevDepth);
-//        alpha = max(alpha, 1.0 - depthConfidence);
+        alpha = max(alpha, 1.0 - depthConfidence);
 
         // ★ 추가: 루마 차이가 크면(고스트 위험) 현재 프레임 비중을 높임
         // 떨림 방지를 위해 lumaWeight의 최대 영향력을 0.5 정도로 제한하는 것이 좋습니다.

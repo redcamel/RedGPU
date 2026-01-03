@@ -93,7 +93,7 @@ fn get_color_discrepancy_weight(stats: NeighborhoodStats, histYCoCg: vec3<f32>) 
 
     // 표준 편차를 활용한 가변 임계값:
     // 주변이 복잡하면(stdDev가 크면) 차이에 관대하고, 평탄하면(stdDev가 작으면) 엄격하게 잡음
-    let threshold = max(stats.stdDev.x * 0.5, 0.01);
+    let threshold = max(stats.stdDev.x * 0.45, 0.01);
 
     return smoothstep(threshold, threshold * 2.0, diff);
 }
