@@ -9,7 +9,7 @@ const examplesDir = path.join(__dirname, 'examples');
 const categories = ['2d', '3d', 'gltf'];
 
 // 현재 날짜 가져오기 (lastmod용)
-const today = new Date().toISOString();
+const today = new Date().toISOString().split('T')[0];
 
 // URL 카운터
 let urlCount = 0;
@@ -48,6 +48,7 @@ function exploreDirectory(dirPath, urlPath) {
     <loc>${urlPath}/</loc>
     <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
   </url>
 `;
         urlCount++;
