@@ -27,9 +27,9 @@ fn main(inputData: InputData) -> OutputData {
         let u_projectionMatrix = systemUniforms.projectionMatrix;
     }
     #redgpu_endIf
-    let u_noneJitterProjectionCameraMatrix = systemUniforms.noneJitterProjectionCameraMatrix;
 
     let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
+    let u_noneJitterProjectionCameraMatrix = systemUniforms.noneJitterProjectionCameraMatrix;
     let u_prevNoneJitterProjectionCameraMatrix = systemUniforms.prevNoneJitterProjectionCameraMatrix;
     let u_resolution = systemUniforms.resolution;
     let u_camera = systemUniforms.camera;

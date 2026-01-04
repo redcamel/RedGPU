@@ -32,8 +32,14 @@
             }
         }
     }
-    let velocity = textureLoad(motionVectorTexture, closestCoord, 0).xy;
+    let motionData = textureLoad(motionVectorTexture, closestCoord, 0);
+    let velocity = motionData.xy;
 
+    let jitterDisabled = motionData.z > 0.5;
+    if (jitterDisabled) {
+        textureStore(outputTexture, pixelCoord, vec4<f32>(currentRGB, currentAlpha));
+        return;
+    }
     // 3. 히스토리 좌표 및 샘플링
     let historyUV = (vec2<f32>(pixelCoord) + 0.5 - uniforms.currJitterOffset * yFlipVec2 + uniforms.prevJitterOffset * yFlipVec2) / screenSize - velocity;
 
