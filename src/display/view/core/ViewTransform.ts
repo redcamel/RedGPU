@@ -9,8 +9,6 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validateRedGPUContext";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import computeViewFrustumPlanes from "../../../utils/math/computeViewFrustumPlanes";
-import {keepLog} from "../../../utils";
-import View3D from "../View3D";
 
 /**
  * View3D/View2D의 크기와 위치를 관리하는 클래스입니다.
@@ -322,14 +320,14 @@ class ViewTransform {
         const {antialiasingManager} = redGPUContext
         this.#projectionMatrix = mat4.clone(this.noneJitterProjectionMatrix)
         // TAA 지터 오프셋 적용 (PerspectiveCamera에만 적용)
-        const needJitter = this.constructor.name==='View3D' && !(this.camera instanceof IsometricController) && antialiasingManager.useTAA
+        const needJitter = this.constructor.name === 'View3D' && !(this.camera instanceof IsometricController) && antialiasingManager.useTAA
 
         if (needJitter) {
             if (this.rawCamera instanceof PerspectiveCamera && (this.#jitterOffsetX !== 0 || this.#jitterOffsetY !== 0)) {
                 // NDC 좌표계는 -1.0 ~ 1.0 (폭 2.0)입니다.
                 // 픽셀 오프셋을 NDC 비율로 변환하기 위해 2.0을 곱합니다.
                 const ndcJitterX = (this.#jitterOffsetX / this.pixelRectObject.width) * 2.0;
-                const ndcJitterY = (this.#jitterOffsetY  / this.pixelRectObject.height) * 2.0;
+                const ndcJitterY = (this.#jitterOffsetY / this.pixelRectObject.height) * 2.0;
 
                 this.#projectionMatrix[8] += ndcJitterX;
                 this.#projectionMatrix[9] += ndcJitterY;
@@ -347,6 +345,14 @@ class ViewTransform {
     }
 
     /**
+     * 현재 적용된 지터 오프셋 [offsetX, offsetY]를 반환합니다.
+     * @returns {[number, number]}
+     */
+    get jitterOffset(): [number, number] {
+        return [this.#jitterOffsetX, this.#jitterOffsetY];
+    }
+
+    /**
      * TAA 적용을 위한 지터 오프셋을 설정합니다.
      * @param {number} offsetX - X축 지터 오프셋 (정규화된 값)
      * @param {number} offsetY - Y축 지터 오프셋 (정규화된 값)
@@ -356,13 +362,6 @@ class ViewTransform {
         this.#jitterOffsetY = offsetY;
     }
 
-    /**
-     * 현재 적용된 지터 오프셋 [offsetX, offsetY]를 반환합니다.
-     * @returns {[number, number]}
-     */
-    get jitterOffset(): [number, number] {
-        return [this.#jitterOffsetX, this.#jitterOffsetY];
-    }
     /**
      * 지터 오프셋을 초기화합니다.
      */

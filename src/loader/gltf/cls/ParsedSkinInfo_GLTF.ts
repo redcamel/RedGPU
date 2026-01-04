@@ -1,9 +1,6 @@
-import redGPUContext from "../../../context/RedGPUContext";
 import RedGPUContext from "../../../context/RedGPUContext";
-import mesh from "../../../display/mesh/Mesh";
 import Mesh from "../../../display/mesh/Mesh";
 import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
-import vertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
 
 let temp0 = new Float32Array(16)

@@ -137,21 +137,30 @@ fn fetchColor4(pos: vec2<i32>, dims: vec2<u32>) -> vec4<f32> {
         this.edgeThresholdMin = this.#edgeThresholdMin;
     }
 
-    get subpix(): number { return this.#subpix; }
+    get subpix(): number {
+        return this.#subpix;
+    }
+
     set subpix(value: number) {
         validateNumberRange(value, 0, 1);
         this.#subpix = value;
         this.updateUniform('subpix', value);
     }
 
-    get edgeThreshold(): number { return this.#edgeThreshold; }
+    get edgeThreshold(): number {
+        return this.#edgeThreshold;
+    }
+
     set edgeThreshold(value: number) {
         validateNumberRange(value, 0.0001, 0.25)
         this.#edgeThreshold = value;
         this.updateUniform('edgeThreshold', value);
     }
 
-    get edgeThresholdMin(): number { return this.#edgeThresholdMin; }
+    get edgeThresholdMin(): number {
+        return this.#edgeThresholdMin;
+    }
+
     set edgeThresholdMin(value: number) {
         validateNumberRange(value, 0.00001, 0.1)
         this.#edgeThresholdMin = value;

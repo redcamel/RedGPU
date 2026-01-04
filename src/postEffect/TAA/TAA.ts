@@ -5,7 +5,6 @@ import View3D from "../../display/view/View3D";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../material/core";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
-import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumberRange";
 import {keepLog} from "../../utils";
 import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSize";
 import {ASinglePassPostEffectResult} from "../core/ASinglePassPostEffect";
@@ -13,7 +12,6 @@ import postEffectSystemUniform from "../core/postEffectSystemUniform.wgsl"
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 
-const projectionCameraMatrix = mat4.create();
 class TAA {
     #redGPUContext: RedGPUContext
     #antialiasingManager: AntialiasingManager
@@ -50,13 +48,8 @@ class TAA {
     #jitterStrength: number = 0.5;
     #prevMSAA: Boolean
     #prevMSAAID: string
-    #prevJitterOffset:[number,number] =[0,0]
-    #prevNoneJitterProjectionCameraMatrix:mat4 = mat4.create();
-
-
-    get prevNoneJitterProjectionCameraMatrix(): mat4 {
-        return this.#prevNoneJitterProjectionCameraMatrix;
-    }
+    #prevJitterOffset: [number, number] = [0, 0]
+    #prevNoneJitterProjectionCameraMatrix: mat4 = mat4.create();
 
     constructor(redGPUContext: RedGPUContext) {
         this.#redGPUContext = redGPUContext
@@ -73,6 +66,10 @@ class TAA {
         this.jitterStrength = this.#jitterStrength;
     }
 
+    get prevNoneJitterProjectionCameraMatrix(): mat4 {
+        return this.#prevNoneJitterProjectionCameraMatrix;
+    }
+
     get frameIndex(): number {
         return this.#frameIndex;
     }
@@ -80,7 +77,6 @@ class TAA {
     get videoMemorySize(): number {
         return this.#videoMemorySize
     }
-
 
 
     get jitterStrength(): number {
@@ -104,7 +100,7 @@ class TAA {
             this.updateUniform('frameIndex', this.#frameIndex);
             this.updateUniform('currJitterOffset', view.jitterOffset);
             this.updateUniform('prevJitterOffset', this.#prevJitterOffset);
-            mat4.copy(this.#prevNoneJitterProjectionCameraMatrix,view.noneJitterProjectionCameraMatrix)
+            mat4.copy(this.#prevNoneJitterProjectionCameraMatrix, view.noneJitterProjectionCameraMatrix)
 
             this.#prevJitterOffset = [...view.jitterOffset]
         }
@@ -156,7 +152,7 @@ class TAA {
         this.#currentMSAAState = null;
     }
 
-    updateUniform(key: string, value: number | number[] | boolean ) {
+    updateUniform(key: string, value: number | number[] | boolean) {
         this.#uniformBuffer.writeOnlyBuffer(this.#uniformsInfo.members[key], value)
     }
 

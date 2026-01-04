@@ -157,6 +157,7 @@ class View3D extends AView {
     #uniformData: ArrayBuffer
     #uniformDataF32: Float32Array
     #uniformDataU32: Uint32Array
+    #noneJitterProjectionCameraMatrix: mat4 = mat4.create()
 
     /**
      * View3D 인스턴스를 생성합니다.
@@ -284,6 +285,10 @@ class View3D extends AView {
         }
     }
 
+    get noneJitterProjectionCameraMatrix(): mat4 {
+        return this.#noneJitterProjectionCameraMatrix;
+    }
+
     /**
      * 뷰를 업데이트하고 렌더링 준비를 수행합니다.
      * 유니폼 데이터 업데이트, 바인드 그룹 생성, 클러스터 라이트 계산을 처리합니다.
@@ -334,18 +339,11 @@ class View3D extends AView {
         this.#updateSystemUniform();
     }
 
-    
-
     #updateSystemUniformData(valueLust: { key, value, dataView, targetMembers }[]) {
         valueLust.forEach(({key, value, dataView, targetMembers}) => {
             const info = targetMembers[key]
             dataView.set(typeof value === 'number' ? [value] : value, info.uniformOffset / info.View.BYTES_PER_ELEMENT)
         })
-    }
-
-    #noneJitterProjectionCameraMatrix:mat4 = mat4.create()
-    get noneJitterProjectionCameraMatrix(): mat4 {
-        return this.#noneJitterProjectionCameraMatrix;
     }
 
     #updateSystemUniform() {
@@ -390,7 +388,7 @@ class View3D extends AView {
                 },
                 {
                     key: 'noneJitterProjectionCameraMatrix',
-                    value: this.#noneJitterProjectionCameraMatrix ,
+                    value: this.#noneJitterProjectionCameraMatrix,
                     dataView: this.#uniformDataF32,
                     targetMembers: members
                 },

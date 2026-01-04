@@ -13,7 +13,6 @@ import renderAlphaLayer from "./renderLayers/renderAlphaLayer";
 import renderBasicLayer from "./renderLayers/renderBasicLayer";
 import renderPickingLayer from "./renderLayers/renderPickingLayer";
 import renderShadowLayer from "./renderLayers/renderShadowLayer";
-import {keepLog} from "../utils";
 
 class Renderer {
     #prevViewportSize: { width: number, height: number };
@@ -97,7 +96,7 @@ class Renderer {
                 drawBufferManager.flushAllCommands(renderViewStateData)
             }
             {
-                const {timestamp,prevTimestamp} = renderViewStateData;
+                const {timestamp, prevTimestamp} = renderViewStateData;
                 const elapsed = timestamp - prevTimestamp;
 
                 const fpsInterval = 1000 / 60

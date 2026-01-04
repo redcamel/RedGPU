@@ -98,6 +98,7 @@ declare class View3D extends AView {
      */
     set skybox(value: SkyBox);
     get basicRenderBundleEncoderDescriptor(): GPURenderBundleEncoderDescriptor;
+    get noneJitterProjectionCameraMatrix(): mat4;
     /**
      * 뷰를 업데이트하고 렌더링 준비를 수행합니다.
      * 유니폼 데이터 업데이트, 바인드 그룹 생성, 클러스터 라이트 계산을 처리합니다.
@@ -108,6 +109,5 @@ declare class View3D extends AView {
      * @param renderPath1ResultTextureView - 렌더 패스 1 결과 텍스처 뷰 (선택사항)
      */
     update(shadowRender?: boolean, calcPointLightCluster?: boolean, renderPath1ResultTextureView?: GPUTextureView): void;
-    get noneJitterProjectionCameraMatrix(): mat4;
 }
 export default View3D;

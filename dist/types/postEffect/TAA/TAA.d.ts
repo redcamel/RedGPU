@@ -4,8 +4,8 @@ import View3D from "../../display/view/View3D";
 import { ASinglePassPostEffectResult } from "../core/ASinglePassPostEffect";
 declare class TAA {
     #private;
-    get prevNoneJitterProjectionCameraMatrix(): mat4;
     constructor(redGPUContext: RedGPUContext);
+    get prevNoneJitterProjectionCameraMatrix(): mat4;
     get frameIndex(): number;
     get videoMemorySize(): number;
     get jitterStrength(): number;

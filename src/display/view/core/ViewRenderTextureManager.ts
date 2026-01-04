@@ -83,7 +83,8 @@ class ViewRenderTextureManager {
      * @type {{ [key: string]: boolean }}
      */
     #gBuffersMSAAState: { [key: string]: boolean } = {}
-    #prevTime:number
+    #prevTime: number
+
     /**
      * 생성자
      * @param {View3D} view - 이 매니저가 관리할 View3D 인스턴스
@@ -129,6 +130,7 @@ class ViewRenderTextureManager {
         this.#createDepthTexture();
         return this.#view.renderViewStateData.swapBufferIndex ? this.#depthTexture2View : this.#depthTextureView;
     }
+
     get prevDepthTextureView(): GPUTextureView {
         this.#createDepthTexture();
         return this.#view.renderViewStateData.swapBufferIndex ? this.#depthTextureView : this.#depthTexture2View;

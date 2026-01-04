@@ -142,16 +142,16 @@ declare class ViewTransform {
      */
     get inverseProjectionMatrix(): mat4;
     /**
+     * 현재 적용된 지터 오프셋 [offsetX, offsetY]를 반환합니다.
+     * @returns {[number, number]}
+     */
+    get jitterOffset(): [number, number];
+    /**
      * TAA 적용을 위한 지터 오프셋을 설정합니다.
      * @param {number} offsetX - X축 지터 오프셋 (정규화된 값)
      * @param {number} offsetY - Y축 지터 오프셋 (정규화된 값)
      */
     setJitterOffset(offsetX: number, offsetY: number): void;
-    /**
-     * 현재 적용된 지터 오프셋 [offsetX, offsetY]를 반환합니다.
-     * @returns {[number, number]}
-     */
-    get jitterOffset(): [number, number];
     /**
      * 지터 오프셋을 초기화합니다.
      */
