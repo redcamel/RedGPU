@@ -330,8 +330,8 @@ class ViewTransform {
                 const ndcJitterX = (this.#jitterOffsetX / this.pixelRectObject.width) * 2.0;
                 const ndcJitterY = (this.#jitterOffsetY  / this.pixelRectObject.height) * 2.0;
 
-                this.#projectionMatrix[12] += ndcJitterX;
-                this.#projectionMatrix[13] += ndcJitterY;
+                this.#projectionMatrix[8] += ndcJitterX;
+                this.#projectionMatrix[9] += ndcJitterY;
             }
         }
         return this.#projectionMatrix;

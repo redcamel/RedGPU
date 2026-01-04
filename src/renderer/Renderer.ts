@@ -247,7 +247,7 @@ class Renderer {
         const {taa} = view;
         const frameIndex = taa.frameIndex || 0;
         const jitterScale = taa.jitterStrength; // 보통 1.0 권장
-        const sampleCount = 32;
+        const sampleCount = 16;
         const currentSample = frameIndex % sampleCount;
 
         // Halton 시퀀스 (0~1 범위)
@@ -256,6 +256,7 @@ class Renderer {
 
         // 1. 디바이스 픽셀 비율 가져오기
         const dpr = window.devicePixelRatio || 1;
+        // const dpr =  1;
 
         // 2. 물리적 픽셀 기준의 오프셋 계산
         // (halton - 0.5)는 [-0.5, 0.5] 범위.
