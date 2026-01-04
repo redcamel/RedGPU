@@ -128,9 +128,9 @@ fn fetchColor4(pos: vec2<i32>, dims: vec2<u32>) -> vec4<f32> {
 }
 `;
         this.init(
-          redGPUContext,
-          'POST_EFFECT_FXAA',
-          createBasicPostEffectCode(this, computeCode, uniformStructCode)
+            redGPUContext,
+            'POST_EFFECT_FXAA',
+            createBasicPostEffectCode(this, computeCode, uniformStructCode)
         );
         this.subpix = this.#subpix;
         this.edgeThreshold = this.#edgeThreshold;

@@ -10,15 +10,15 @@ struct NeighborhoodStats {
     maxColor: vec3<f32>,
     mean: vec3<f32>,
     stdDev: vec3<f32>,
-    minAlpha: f32,    // 추가
-    maxAlpha: f32,    // 추가
-    meanAlpha: f32,   // 추가
+    minAlpha: f32,    
+    maxAlpha: f32,    
+    meanAlpha: f32,   
 };
 
 struct SampledColor {
     rgb: vec3<f32>,
     ycocg: vec3<f32>,
-    alpha: f32,       // 추가
+    alpha: f32,       
 };
 
 // RGB -> YCoCg 변환
@@ -37,13 +37,11 @@ fn ycocg_to_rgb(ycocg: vec3<f32>) -> vec3<f32> {
     return vec3<f32>(y + co - cg, y + cg, y - co - cg);
 }
 
-// 깊이 기반 신뢰도 계산
 fn get_depth_confidence(currDepth: f32, prevDepth: f32) -> f32 {
     let depthDiff = abs(currDepth - prevDepth);
     return 1.0 - clamp((depthDiff - 0.01) / 0.02, 0.0, 1.0);
 }
 
-// 픽셀 불일치 보정을 위한 Bilinear 깊이 샘플링
 fn fetch_depth_bilinear(tex: texture_depth_2d, uv: vec2<f32>, screenSize: vec2<f32>) -> f32 {
     let samplePos = uv * screenSize - 0.5;
     let f = fract(samplePos);
@@ -58,7 +56,6 @@ fn fetch_depth_bilinear(tex: texture_depth_2d, uv: vec2<f32>, screenSize: vec2<f
     return mix(mix(d00, d10, f.x), mix(d01, d11, f.x), f.y);
 }
 
-// 주변 3x3 통계 계산 (YCoCg + Alpha)
 fn calculate_neighborhood_stats_ycocg(pixelCoord: vec2<i32>, screenSizeU: vec2<u32>) -> NeighborhoodStats {
     let screenSize = vec2<f32>(screenSizeU);
     var m1 = vec3<f32>(0.0);
@@ -99,14 +96,12 @@ fn calculate_neighborhood_stats_ycocg(pixelCoord: vec2<i32>, screenSizeU: vec2<u
     return stats;
 }
 
-// 색상 차이 가중치 (고스팅 감지용)
 fn get_color_discrepancy_weight(stats: NeighborhoodStats, histYCoCg: vec3<f32>) -> f32 {
     let diff = abs(stats.mean.x - histYCoCg.x);
     let threshold = max(stats.stdDev.x * 0.45, 0.01);
     return smoothstep(threshold, threshold * 2.0, diff);
 }
 
-// Catmull-Rom 샘플링 (Alpha 포함)
 fn sample_texture_catmull_rom_antiflicker(tex: texture_2d<f32>, smp: sampler, uv: vec2<f32>, texSize: vec2<f32>) -> SampledColor {
     let samplePos = uv * texSize;
     let texPos1 = floor(samplePos - 0.5) + 0.5;
@@ -159,7 +154,6 @@ fn sample_texture_catmull_rom_antiflicker(tex: texture_2d<f32>, smp: sampler, uv
     return result;
 }
 
-// 개선된 타이트 클리핑
 fn clip_history_ycocg(historyYCoCg: vec3<f32>, stats: NeighborhoodStats, motion: f32) -> vec3<f32> {
     let gamma = mix(0.2, 0.7, motion);
     let v_min = min(stats.minColor, stats.mean - stats.stdDev * gamma);
