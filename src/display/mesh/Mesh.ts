@@ -149,6 +149,7 @@ class Mesh extends MeshBase {
     #LODManager: LODManager
     #lodGPURenderInfoList: LODGPURenderInfo[] = [];
     #currentLODIndex: number = -1
+    passFrustumCulling:boolean = true
     createCustomMeshVertexShaderModule?: () => GPUShaderModule
     /**
      * Mesh 인스턴스를 생성합니다.
@@ -795,7 +796,7 @@ class Mesh extends MeshBase {
             }
         }
         // check distanceCulling
-        let passFrustumCulling = true
+        let passFrustumCulling = this.passFrustumCulling = true
         let distanceSquared = 0
         const lodList = this.#LODManager.LODList;
         const lodLen = lodList.length;
@@ -900,6 +901,7 @@ class Mesh extends MeshBase {
             }
         } else {
         }
+        this.passFrustumCulling = passFrustumCulling
         // render
         const {displacementTexture, displacementScale} = currentMaterial || {}
         if (currentDirtyPipeline || currentMaterial?.dirtyPipeline || dirtyVertexUniformFromMaterial[currentMaterialUUID]) {
