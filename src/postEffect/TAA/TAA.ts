@@ -47,7 +47,7 @@ class TAA {
     #previousSourceTextureReferences: GPUTextureView[] = [];
     #videoMemorySize: number = 0
     #frameIndex: number = 0
-    #jitterStrength: number = 0.5;
+    #jitterStrength: number = 1;
     #prevMSAA: Boolean
     #prevMSAAID: string
     #prevJitterOffset:[number,number] =[0,0]

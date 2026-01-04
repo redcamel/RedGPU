@@ -64,9 +64,15 @@
         blendFactor = max(blendFactor, 1.0 - depthConfidence);
         blendFactor = max(blendFactor, lumaWeight * 0.5);
 
-        // 6. 최종 블렌딩 (RGB + Alpha 일관 적용)
-        finalRGB = mix(clippedHistoryRGB, currentRGB, blendFactor);
-        finalAlpha = mix(clippedAlpha, currentAlpha, blendFactor);
+        // 6. 최종 블렌딩 (RGB + Alpha를 vec4로 통합하여 일관성 유지)
+        let currentRGBA = vec4<f32>(currentRGB, currentAlpha);
+        let clippedHistoryRGBA = vec4<f32>(clippedHistoryRGB, clippedAlpha);
+
+        // 단 한 번의 mix 호출로 모든 채널을 동일한 비중으로 블렌딩
+        let finalRGBA = mix(clippedHistoryRGBA, currentRGBA, blendFactor);
+
+        finalRGB = finalRGBA.rgb;
+        finalAlpha = finalRGBA.a;
     }
 
     // 7. 결과 저장 (Alpha 포함)
