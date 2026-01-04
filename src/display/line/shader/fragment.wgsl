@@ -1,13 +1,18 @@
 #redgpu_include drawPicking;
 #redgpu_include FragmentOutput;
+#redgpu_include calculateMotionVector;
 struct Uniforms {
   	opacity:f32
 };
 struct InputData {
-  @builtin(position) position : vec4<f32>,
-  @location(0) vertexPosition: vec3<f32>,
-  @location(1) vertexColor: vec4<f32>,
-  @location(15) @interpolate(flat) pickingId: vec4<f32>,
+    @builtin(position) position : vec4<f32>,
+    @location(0) vertexPosition: vec3<f32>,
+    @location(1) vertexColor: vec4<f32>,
+
+    @location(7) currentClipPos: vec4<f32>,
+    @location(8) prevClipPos: vec4<f32>,
+
+    @location(15) @interpolate(flat) pickingId: vec4<f32>,
 }
 
 @group(2) @binding(0) var<uniform> uniforms: Uniforms;
@@ -15,7 +20,8 @@ struct InputData {
 fn main(inputData:InputData) -> FragmentOutput {
     var output:FragmentOutput;
     output.color = inputData.vertexColor;
-    output.gBufferMotionVector = vec4<f32>( 0.0, 0.0, 1.0, 1.0 );
+    output.gBufferMotionVector = vec4<f32>(calculateMotionVector(inputData.currentClipPos, inputData.prevClipPos),0.0, 1.0 );
+
     return output;
 }
 
