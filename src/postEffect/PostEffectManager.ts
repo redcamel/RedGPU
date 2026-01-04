@@ -135,22 +135,24 @@ class PostEffectManager {
                 currentTextureView
             );
         }
-        if (useTAA) {
-            currentTextureView = taa.render(
-                this.#view,
-                width,
-                height,
-                currentTextureView
-            );
-            if(!this.#taaSharpenEffect) {
-                this.#taaSharpenEffect = new TAASharpen(redGPUContext)
+        if(this.#view.constructor.name==='View3D'){ // View2D에는 TAA적용 안함{
+            if (useTAA) {
+                currentTextureView = taa.render(
+                  this.#view,
+                  width,
+                  height,
+                  currentTextureView
+                );
+                if (!this.#taaSharpenEffect) {
+                    this.#taaSharpenEffect = new TAASharpen(redGPUContext)
+                }
+                currentTextureView = this.#taaSharpenEffect.render(
+                  this.#view,
+                  width,
+                  height,
+                  currentTextureView
+                )
             }
-            currentTextureView = this.#taaSharpenEffect.render(
-              this.#view,
-              width,
-              height,
-              currentTextureView
-            )
         }
         return currentTextureView;
     }

@@ -10,6 +10,7 @@ import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validate
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import computeViewFrustumPlanes from "../../../utils/math/computeViewFrustumPlanes";
 import {keepLog} from "../../../utils";
+import View3D from "../View3D";
 
 /**
  * View3D/View2D의 크기와 위치를 관리하는 클래스입니다.
@@ -321,7 +322,7 @@ class ViewTransform {
         const {antialiasingManager} = redGPUContext
         this.#projectionMatrix = mat4.clone(this.noneJitterProjectionMatrix)
         // TAA 지터 오프셋 적용 (PerspectiveCamera에만 적용)
-        const needJitter = !(this.camera instanceof IsometricController) && antialiasingManager.useTAA
+        const needJitter = this.constructor.name==='View3D' && !(this.camera instanceof IsometricController) && antialiasingManager.useTAA
 
         if (needJitter) {
             if (this.rawCamera instanceof PerspectiveCamera && (this.#jitterOffsetX !== 0 || this.#jitterOffsetY !== 0)) {
