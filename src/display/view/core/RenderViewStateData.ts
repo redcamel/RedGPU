@@ -60,8 +60,7 @@ class RenderViewStateData {
     usedVideoMemory: number;
     /** 현재 사용 중인 GPU 렌더 패스 인코더 */
     currentRenderPassEncoder: GPURenderPassEncoder;
-    /** 렌더링 프레임의 현재 타임스탬프 */
-    timestamp: number;
+
     /** 컬링을 위한 프러스텀 평면 배열, 프러스텀 컬링이 비활성화된 경우 null */
     frustumPlanes: number[][];
     /** 최적화를 위해 이전에 사용한 버텍스 GPU 버퍼 */
@@ -85,6 +84,9 @@ class RenderViewStateData {
     /** 효율적인 렌더링을 위한 렌더 번들 목록 */
     bundleListBasicList = [];
     /** 렌더링 시작을 표시하는 성능 타임스탬프 */
+    /** 렌더링 프레임의 현재 타임스탬프 */
+    timestamp: number;
+    prevTimestamp: number = 0;
     startTime: number;
     /** 씬이 2D 모드인지 여부 */
     isScene2DMode: boolean = false;

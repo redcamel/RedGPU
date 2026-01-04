@@ -96,8 +96,20 @@ class Renderer {
                 const drawBufferManager = DrawBufferManager.getInstance(redGPUContext)
                 drawBufferManager.flushAllCommands(renderViewStateData)
             }
-            // @ts-ignore
-            camera.update?.(view, time)
+            {
+                const {timestamp,prevTimestamp} = renderViewStateData;
+                const elapsed = timestamp - prevTimestamp;
+
+                const fpsInterval = 1000 / 60
+                if (elapsed >= fpsInterval) { // 60FPS 기준 간격 (약 16.67ms)
+                    // 경과 시간에서 오차를 보정하며 마지막 프레임 시간 업데이트
+                    renderViewStateData.prevTimestamp = timestamp - (elapsed % fpsInterval);
+
+                    // @ts-ignore
+                    camera.update?.(view, time)
+                }
+            }
+
             this.#updateJitter(view)
             this.#renderPassViewShadow(view, commandEncoder)
             // @ts-ignore
