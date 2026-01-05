@@ -4,15 +4,15 @@ import Primitive from "../../../primitive/core/Primitive";
 import ATextField from "../core/ATextField";
 declare const BaseTextField2D: {
     new (...args: any[]): {
-        "__#33583@#rotation": number;
-        "__#33583@#blendMode": number;
+        "__#96@#rotation": number;
+        "__#96@#blendMode": number;
         get blendMode(): string;
         set blendMode(value: import("../../../material").BLEND_MODE | keyof typeof import("../../../material").BLEND_MODE);
         rotation: number;
         setScale(x: number, y?: number): void;
         setPosition(x: number, y?: number): void;
         setRotation(value: number): void;
-        "__#33583@#setBlendFactor"(mode: number): void;
+        "__#96@#setBlendFactor"(mode: number): void;
         rotationZ: number;
     };
 } & typeof ATextField;
