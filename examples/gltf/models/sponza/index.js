@@ -6,10 +6,13 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+        const controller = new RedGPU.Camera.FreeController(redGPUContext);
 
-        controller.tilt = 0
-        controller.pan = 90
+        controller.z= 1.0
+        controller.x= 2
+        controller.y= 2
+        controller.tilt = 15
+        controller.pan = 110
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);

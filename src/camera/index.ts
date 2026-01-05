@@ -12,8 +12,8 @@ import * as Core from "./core";
 
 export * from "./controller"
 export {
-	PerspectiveCamera,
-	OrthographicCamera,
-	Camera2D,
-	Core
+    PerspectiveCamera,
+    OrthographicCamera,
+    Camera2D,
+    Core
 }

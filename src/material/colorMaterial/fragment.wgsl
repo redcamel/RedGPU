@@ -1,6 +1,7 @@
 #redgpu_include drawPicking;
 #redgpu_include calcTintBlendMode;
 #redgpu_include FragmentOutput;
+#redgpu_include calculateMotionVector;
 struct Uniforms {
     color:vec3<f32>,
     //
@@ -13,6 +14,9 @@ struct Uniforms {
 struct InputData {
   // Built-in attributes
   @builtin(position) position : vec4<f32>,
+
+  @location(7) currentClipPos: vec4<f32>,
+  @location(8) prevClipPos: vec4<f32>,
   @location(11) combinedOpacity: f32,
   //
   @location(12) motionVector: vec3<f32>,
@@ -28,7 +32,7 @@ fn main(inputData: InputData) -> FragmentOutput {
         finalColor = calcTintBlendMode(finalColor, uniforms.tintBlendMode, uniforms.tint);
     #redgpu_endIf
     output.color = finalColor;
-    output.gBufferMotionVector = vec4<f32>( inputData.motionVector, 1.0 );
+    output.gBufferMotionVector = vec4<f32>(calculateMotionVector(inputData.currentClipPos, inputData.prevClipPos),0.0, 1.0 );
     return output;
 }
 

@@ -16,6 +16,7 @@ class ParsedSkinInfo_GLTF {
     skeletonMesh: any;
     vertexStorageInfo
     vertexStorageBuffer: GPUBuffer
+    prevVertexStorageBuffer: GPUBuffer
     invertNodeGlobalTransform: Float32Array
     usedJoints: number[] = null
     WORK_SIZE: number = 64
@@ -24,6 +25,7 @@ class ParsedSkinInfo_GLTF {
     computeShader: GPUShaderModule;
     computePipeline: GPUComputePipeline;
     bindGroup: GPUBindGroup;
+
 
     /**
      * Constructor 클래스의 새 인스턴스를 생성합니다.
@@ -59,10 +61,11 @@ class ParsedSkinInfo_GLTF {
     createCompute(
         redGPUContext: RedGPUContext,
         device: GPUDevice,
-        vertexStorageBuffer: GPUBuffer,
+        vertexBuffer: VertexBuffer,
         weightBuffer: VertexBuffer,
         jointBuffer: IndexBuffer,
     ) {
+
         const source = `
 			struct Uniforms {
 			  invertNodeGlobalTransform:    mat4x4<f32>,
@@ -74,7 +77,8 @@ class ParsedSkinInfo_GLTF {
 			@group(0) @binding(0) var<storage, read>       vertexWeight:  array<vec4<f32>>;
 			@group(0) @binding(1) var<storage, read>       vertexJoint:  array<vec4<u32>>;
 			@group(0) @binding(2) var<storage, read_write> skinMatrixBuffer:  array<mat4x4<f32>>;
-			@group(0) @binding(3) var<uniform>             uniforms:          Uniforms;
+			@group(0) @binding(3) var<storage, read_write> prevSkinMatrixBuffer:  array<mat4x4<f32>>;
+			@group(0) @binding(4) var<uniform>             uniforms:          Uniforms;
 			
 			@compute @workgroup_size(${this.WORK_SIZE},1,1)
 			fn main(@builtin(global_invocation_id) global_id: vec3<u32>) { 
@@ -85,7 +89,7 @@ class ParsedSkinInfo_GLTF {
 			
 			  let weights = vertexWeight[idx];
 			  let joints = vertexJoint[idx];
-			
+			  prevSkinMatrixBuffer[idx] = skinMatrixBuffer[idx];
 			  skinMatrixBuffer[idx] = uniforms.invertNodeGlobalTransform * (
 				    weights.x * (
 				    	uniforms.jointModelMatrices[uniforms.searchJointIndexTable[joints.x].x] * uniforms.inverseBindMatrices[joints.x]
@@ -142,8 +146,9 @@ class ParsedSkinInfo_GLTF {
             entries: [
                 {binding: 0, resource: {buffer: weightBuffer.gpuBuffer}},
                 {binding: 1, resource: {buffer: jointBuffer.gpuBuffer}},
-                {binding: 2, resource: {buffer: vertexStorageBuffer}},
-                {binding: 3, resource: {buffer: this.uniformBuffer}},
+                {binding: 2, resource: {buffer: this.vertexStorageBuffer}},
+                {binding: 3, resource: {buffer: this.prevVertexStorageBuffer}},
+                {binding: 4, resource: {buffer: this.uniformBuffer}},
             ],
         });
     }

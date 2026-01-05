@@ -36,6 +36,7 @@ declare class ViewRenderTextureManager {
      * @returns {GPUTextureView}
      */
     get depthTextureView(): GPUTextureView;
+    get prevDepthTextureView(): GPUTextureView;
     /**
      * 렌더 패스1 결과 텍스처 뷰를 반환합니다.
      * @returns {GPUTextureView}

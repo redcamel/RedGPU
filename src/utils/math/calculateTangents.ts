@@ -8,11 +8,11 @@
  * @returns 탄젠트 배열 [x,y,z,w, x,y,z,w, ...] (w는 handedness)
  */
 const calculateTangents = (
-  vertices: number[],
-  normals: number[],
-  uvs: number[],
-  indices: number[],
-  existingTangents?: number[]
+    vertices: number[],
+    normals: number[],
+    uvs: number[],
+    indices: number[],
+    existingTangents?: number[]
 ): number[] => {
     const EPSILON = 1e-6;
     const vertexCount = vertices.length / 3;
@@ -62,13 +62,25 @@ const calculateTangents = (
         const tdirz = (s1 * z2 - s2 * z1) * r;
 
         // 각 정점에 누적
-        tan1[i1 * 3] += sdirx; tan1[i1 * 3 + 1] += sdiry; tan1[i1 * 3 + 2] += sdirz;
-        tan1[i2 * 3] += sdirx; tan1[i2 * 3 + 1] += sdiry; tan1[i2 * 3 + 2] += sdirz;
-        tan1[i3 * 3] += sdirx; tan1[i3 * 3 + 1] += sdiry; tan1[i3 * 3 + 2] += sdirz;
+        tan1[i1 * 3] += sdirx;
+        tan1[i1 * 3 + 1] += sdiry;
+        tan1[i1 * 3 + 2] += sdirz;
+        tan1[i2 * 3] += sdirx;
+        tan1[i2 * 3 + 1] += sdiry;
+        tan1[i2 * 3 + 2] += sdirz;
+        tan1[i3 * 3] += sdirx;
+        tan1[i3 * 3 + 1] += sdiry;
+        tan1[i3 * 3 + 2] += sdirz;
 
-        tan2[i1 * 3] += tdirx; tan2[i1 * 3 + 1] += tdiry; tan2[i1 * 3 + 2] += tdirz;
-        tan2[i2 * 3] += tdirx; tan2[i2 * 3 + 1] += tdiry; tan2[i2 * 3 + 2] += tdirz;
-        tan2[i3 * 3] += tdirx; tan2[i3 * 3 + 1] += tdiry; tan2[i3 * 3 + 2] += tdirz;
+        tan2[i1 * 3] += tdirx;
+        tan2[i1 * 3 + 1] += tdiry;
+        tan2[i1 * 3 + 2] += tdirz;
+        tan2[i2 * 3] += tdirx;
+        tan2[i2 * 3 + 1] += tdiry;
+        tan2[i2 * 3 + 2] += tdirz;
+        tan2[i3 * 3] += tdirx;
+        tan2[i3 * 3 + 1] += tdiry;
+        tan2[i3 * 3 + 2] += tdirz;
     }
 
     // 최종 탄젠트 배열

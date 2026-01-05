@@ -258,17 +258,10 @@ class ViewTransform {
      * AController가 연결된 경우 내부 camera를 반환합니다.
      * @returns {PerspectiveCamera | Camera2D}
      */
-    get rawCamera(): PerspectiveCamera | Camera2D | OrthographicCamera{
+    get rawCamera(): PerspectiveCamera | Camera2D | OrthographicCamera {
         return this.#camera instanceof AController ? this.#camera.camera : this.#camera
     }
 
-    /**
-     * 현재 적용된 지터 오프셋 [offsetX, offsetY]를 반환합니다.
-     * @returns {[number, number]}
-     */
-    get jitterOffset(): [number, number] {
-        return [this.#jitterOffsetX, this.#jitterOffsetY];
-    }
 
     /**
      * 지터가 적용되지 않은 원본 프로젝션 행렬을 계산하여 반환합니다.
@@ -327,18 +320,17 @@ class ViewTransform {
         const {antialiasingManager} = redGPUContext
         this.#projectionMatrix = mat4.clone(this.noneJitterProjectionMatrix)
         // TAA 지터 오프셋 적용 (PerspectiveCamera에만 적용)
-        const needJitter = !(this.camera instanceof IsometricController) && antialiasingManager.useTAA
+        const needJitter = this.constructor.name === 'View3D' && !(this.camera instanceof IsometricController) && antialiasingManager.useTAA
 
         if (needJitter) {
             if (this.rawCamera instanceof PerspectiveCamera && (this.#jitterOffsetX !== 0 || this.#jitterOffsetY !== 0)) {
-                // devicePixelRatio를 고려한 정확한 픽셀 크기 계산
-                const logicalWidth = this.#pixelRectArray[2];
-                const logicalHeight = this.#pixelRectArray[3];
-                const pixelHeight = window.devicePixelRatio / logicalHeight;
-                const pixelWidth = window.devicePixelRatio / logicalWidth;
-                // const pixelWidth = pixelHeight * this.aspect;
-                this.#projectionMatrix[8] += this.#jitterOffsetX * pixelWidth;  // X 오프셋
-                this.#projectionMatrix[9] += this.#jitterOffsetY * pixelHeight; // Y 오프셋
+                // NDC 좌표계는 -1.0 ~ 1.0 (폭 2.0)입니다.
+                // 픽셀 오프셋을 NDC 비율로 변환하기 위해 2.0을 곱합니다.
+                const ndcJitterX = (this.#jitterOffsetX / this.pixelRectObject.width) * 2.0;
+                const ndcJitterY = (this.#jitterOffsetY / this.pixelRectObject.height) * 2.0;
+
+                this.#projectionMatrix[8] += ndcJitterX;
+                this.#projectionMatrix[9] += ndcJitterY;
             }
         }
         return this.#projectionMatrix;
@@ -350,6 +342,14 @@ class ViewTransform {
      */
     get inverseProjectionMatrix(): mat4 {
         return mat4.invert(mat4.create(), this.#projectionMatrix);
+    }
+
+    /**
+     * 현재 적용된 지터 오프셋 [offsetX, offsetY]를 반환합니다.
+     * @returns {[number, number]}
+     */
+    get jitterOffset(): [number, number] {
+        return [this.#jitterOffsetX, this.#jitterOffsetY];
     }
 
     /**

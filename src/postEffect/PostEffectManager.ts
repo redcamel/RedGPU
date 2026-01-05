@@ -9,6 +9,7 @@ import calculateTextureByteSize from "../utils/texture/calculateTextureByteSize"
 import AMultiPassPostEffect from "./core/AMultiPassPostEffect";
 import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
 import postEffectSystemUniformCode from "./core/postEffectSystemUniform.wgsl"
+import TAASharpen from "./TAA/shapen/TAASharpen";
 
 /**
  * 후처리 이펙트(PostEffect) 관리 클래스입니다.
@@ -52,6 +53,7 @@ class PostEffectManager {
     #uniformData: ArrayBuffer
     #uniformDataF32: Float32Array
     #uniformDataU32: Uint32Array
+    #taaSharpenEffect: TAASharpen
 
     constructor(view: View3D) {
         this.#view = view;
@@ -133,12 +135,30 @@ class PostEffectManager {
             );
         }
         if (useTAA) {
-            currentTextureView = taa.render(
-                this.#view,
-                width,
-                height,
-                currentTextureView
-            );
+            if (this.#view.constructor.name === 'View3D') { // View2D에는 TAA적용 안함{
+                currentTextureView = taa.render(
+                    this.#view,
+                    width,
+                    height,
+                    currentTextureView
+                );
+                if (!this.#taaSharpenEffect) {
+                    this.#taaSharpenEffect = new TAASharpen(redGPUContext)
+                }
+                currentTextureView = this.#taaSharpenEffect.render(
+                    this.#view,
+                    width,
+                    height,
+                    currentTextureView
+                )
+            } else {
+                currentTextureView = fxaa.render(
+                    this.#view,
+                    width,
+                    height,
+                    currentTextureView
+                );
+            }
         }
         return currentTextureView;
     }

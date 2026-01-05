@@ -557,7 +557,7 @@ class ParticleEmitter extends Mesh {
      *
      * @returns 생성된 셰이더 모듈
      */
-    createCustomMeshVertexShaderModule= ():GPUShaderModule => {
+    createCustomMeshVertexShaderModule = (): GPUShaderModule => {
         return this.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource)
     }
 

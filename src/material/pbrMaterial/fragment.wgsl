@@ -5,6 +5,7 @@
 #redgpu_include drawPicking;
 #redgpu_include calcPrePathBackground
 #redgpu_include FragmentOutput
+#redgpu_include calculateMotionVector;
 struct Uniforms {
     useVertexColor: u32,
     useCutOff: u32,
@@ -145,7 +146,10 @@ struct InputData {
     // Tangent vector
     @location(5) vertexTangent: vec4<f32>,
 
-    @location(9) ndcPosition: vec3<f32>,
+
+    @location(7) currentClipPos: vec4<f32>,
+    @location(8) prevClipPos: vec4<f32>,
+
     @location(10) localNodeScale_volumeScale: vec2<f32>,
     @location(11) combinedOpacity: f32,
 
@@ -165,7 +169,7 @@ fn main(inputData:InputData) -> FragmentOutput {
     let input_vertexPosition = inputData.vertexPosition.xyz;
     let input_vertexColor_0 = inputData.vertexColor_0;
     let input_vertexTangent = inputData.vertexTangent;
-    let input_ndcPosition = inputData.ndcPosition;
+    let input_ndcPosition = inputData.position.xyz / inputData.position.w ;
     let input_uv = inputData.uv;
     let input_uv1 = inputData.uv1;
     //
@@ -1080,7 +1084,7 @@ let attenuation = rangePart * invSquare;
         output.gBufferNormal = vec4<f32>(N * 0.5 + 0.5, baseReflectionStrength);
     }
     #redgpu_endIf
-    output.gBufferMotionVector = vec4<f32>( inputData.motionVector, 1.0 );
+    output.gBufferMotionVector = vec4<f32>(calculateMotionVector(inputData.currentClipPos, inputData.prevClipPos),0.0, 1.0 );
 
 //  // 디버깅: 모션벡터 증폭하여 확인
 //   let amplifiedMotion = inputData.motionVector * 50.0;  // 50배 증폭

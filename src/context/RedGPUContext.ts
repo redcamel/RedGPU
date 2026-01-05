@@ -51,7 +51,8 @@ class RedGPUContext extends RedGPUContextViewContainer {
     /** 안티앨리어싱 매니저 */
     #antialiasingManager: AntialiasingManager
 
-    #boundingClientRect:DOMRect
+    #boundingClientRect: DOMRect
+
     constructor(
         htmlCanvas: HTMLCanvasElement,
         gpuAdapter: GPUAdapter,
@@ -75,6 +76,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
     get boundingClientRect(): DOMRect {
         return this.#boundingClientRect
     }
+
     get antialiasingManager(): AntialiasingManager {
         return this.#antialiasingManager;
     }
