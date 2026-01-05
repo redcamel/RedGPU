@@ -308,32 +308,32 @@ class InstancingMeshObject3D {
                 aCz = tRadian < 0 ? C225 * (tRadian * -tRadian - tRadian) + tRadian : C225 * (tRadian * tRadian - tRadian) + tRadian,
                 /////////////////////////
                 b00 = aCy * aCz;
-                b01 = aCx * aSz + aSx * aSy * aCz;
-                b02 = aSx * aSz - aCx * aSy * aCz;
+            b01 = aCx * aSz + aSx * aSy * aCz;
+            b02 = aSx * aSz - aCx * aSy * aCz;
 
-                b10 = -aCy * aSz;
-                b11 = aCx * aCz - aSx * aSy * aSz;
-                b12 = aSx * aCz + aCx * aSy * aSz;
+            b10 = -aCy * aSz;
+            b11 = aCx * aCz - aSx * aSy * aSz;
+            b12 = aSx * aCz + aCx * aSy * aSz;
 
-                b20 = aSy;
-                b21 = -aSx * aCy;
-                b22 = aCx * aCy;
-                let sX = this.#scaleX, sY = this.#scaleY, sZ = this.#scaleZ;
+            b20 = aSy;
+            b21 = -aSx * aCy;
+            b22 = aCx * aCy;
+            let sX = this.#scaleX, sY = this.#scaleY, sZ = this.#scaleZ;
 
-                tLocalMatrix[0] = b00 * sX;
-                tLocalMatrix[1] = b01 * sX;
-                tLocalMatrix[2] = b02 * sX;
-                tLocalMatrix[3] = 0;
+            tLocalMatrix[0] = b00 * sX;
+            tLocalMatrix[1] = b01 * sX;
+            tLocalMatrix[2] = b02 * sX;
+            tLocalMatrix[3] = 0;
 
-                tLocalMatrix[4] = b10 * sY;
-                tLocalMatrix[5] = b11 * sY;
-                tLocalMatrix[6] = b12 * sY;
-                tLocalMatrix[7] = 0;
+            tLocalMatrix[4] = b10 * sY;
+            tLocalMatrix[5] = b11 * sY;
+            tLocalMatrix[6] = b12 * sY;
+            tLocalMatrix[7] = 0;
 
-                tLocalMatrix[8] = b20 * sZ;
-                tLocalMatrix[9] = b21 * sZ;
-                tLocalMatrix[10] = b22 * sZ;
-                tLocalMatrix[11] = 0;
+            tLocalMatrix[8] = b20 * sZ;
+            tLocalMatrix[9] = b21 * sZ;
+            tLocalMatrix[10] = b22 * sZ;
+            tLocalMatrix[11] = 0;
         }
         this.modelMatrix = this.localMatrix
         {

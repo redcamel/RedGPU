@@ -40,12 +40,14 @@ class ViewRenderTextureManager {
      * @type {GPUTexture}
      */
     #depthTexture: GPUTexture
+    #depthTexture2: GPUTexture
     /**
      * 깊이 텍스처 뷰
      * @private
      * @type {GPUTextureView}
      */
     #depthTextureView: GPUTextureView
+    #depthTexture2View: GPUTextureView
     /**
      * 관리 중인 텍스처들의 총 비디오 메모리 사용량(바이트)
      * @private
@@ -81,6 +83,7 @@ class ViewRenderTextureManager {
      * @type {{ [key: string]: boolean }}
      */
     #gBuffersMSAAState: { [key: string]: boolean } = {}
+    #prevTime: number
 
     /**
      * 생성자
@@ -116,7 +119,7 @@ class ViewRenderTextureManager {
      * @returns {GPUTexture}
      */
     get depthTexture(): GPUTexture {
-        return this.#depthTexture;
+        return this.#view.renderViewStateData.swapBufferIndex ? this.#depthTexture2 : this.#depthTexture;
     }
 
     /**
@@ -125,7 +128,12 @@ class ViewRenderTextureManager {
      */
     get depthTextureView(): GPUTextureView {
         this.#createDepthTexture();
-        return this.#depthTextureView;
+        return this.#view.renderViewStateData.swapBufferIndex ? this.#depthTexture2View : this.#depthTextureView;
+    }
+
+    get prevDepthTextureView(): GPUTextureView {
+        this.#createDepthTexture();
+        return this.#view.renderViewStateData.swapBufferIndex ? this.#depthTextureView : this.#depthTexture2View;
     }
 
     /**
@@ -414,8 +422,11 @@ class ViewRenderTextureManager {
             // 기존 텍스처 정리
             if (currentTexture) {
                 currentTexture?.destroy()
+                this.#depthTexture2?.destroy()
                 this.#depthTexture = null
+                this.#depthTexture2 = null
                 this.#depthTextureView = null
+                this.#depthTexture2View = null
             }
             // 새로운 깊이 텍스처 생성
             const newTexture = resourceManager.createManagedTexture({
@@ -425,12 +436,27 @@ class ViewRenderTextureManager {
                     1
                 ],
                 sampleCount: useMSAA ? 4 : 1,
-                label: `${name}_depth_${pixelRectObjectW}x${pixelRectObjectH}`,
+                label: `${name}_depth0_${pixelRectObjectW}x${pixelRectObjectH}`,
                 format: 'depth32float',
                 usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING
             })
             this.#depthTexture = newTexture;
             this.#depthTextureView = resourceManager.getGPUResourceBitmapTextureView(newTexture);
+            {
+                const newTexture = resourceManager.createManagedTexture({
+                    size: [
+                        Math.max(pixelRectObjectW, 1),
+                        Math.max(pixelRectObjectH, 1),
+                        1
+                    ],
+                    sampleCount: useMSAA ? 4 : 1,
+                    label: `${name}_depth1_${pixelRectObjectW}x${pixelRectObjectH}`,
+                    format: 'depth32float',
+                    usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING
+                })
+                this.#depthTexture2 = newTexture;
+                this.#depthTexture2View = resourceManager.getGPUResourceBitmapTextureView(newTexture);
+            }
             this.#checkVideoMemorySize()
         }
     }

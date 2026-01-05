@@ -191,14 +191,6 @@ declare class FollowController extends AController {
      */
     set targetOffsetZ(value: number);
     /**
-     * 카메라의 타겟 오프셋을 한 번에 설정합니다.
-     *
-     * @param {number} x - X축 오프셋
-     * @param {number} [y=0] - Y축 오프셋 (기본값: 0)
-     * @param {number} [z=0] - Z축 오프셋 (기본값: 0)
-     */
-    setTargetOffset(x: number, y?: number, z?: number): void;
-    /**
      * 따라갈 대상 메시를 가져옵니다.
      *
      * @returns {Mesh} 현재 타겟 메시
@@ -212,6 +204,14 @@ declare class FollowController extends AController {
      * @throws {Error} value가 null이거나 undefined일 경우 에러 발생
      */
     set targetMesh(value: Mesh);
+    /**
+     * 카메라의 타겟 오프셋을 한 번에 설정합니다.
+     *
+     * @param {number} x - X축 오프셋
+     * @param {number} [y=0] - Y축 오프셋 (기본값: 0)
+     * @param {number} [z=0] - Z축 오프셋 (기본값: 0)
+     */
+    setTargetOffset(x: number, y?: number, z?: number): void;
     /**
      * 매 프레임마다 카메라의 위치와 방향을 업데이트합니다.
      *

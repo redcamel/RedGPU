@@ -23,13 +23,13 @@ const createMeshVertexShaderModulePBRSkin = (
         if (mesh.animationInfo.skinInfo) {
             createMeshVertexUniformBuffers(mesh, true)
             mesh.animationInfo.skinInfo.vertexStorageInfo = parseWGSL(vModuleDescriptor.code).storage.vertexStorages
-            const newData = new ArrayBuffer(mesh.animationInfo.skinInfo.vertexStorageInfo.arrayBufferByteLength)
-            // mesh.animationInfo.skinInfo.vertexStorageBuffer = new StorageBuffer(
-            // 	mesh.redGPUContext,
-            // 	newData,
-            // 	mesh.name
-            // )
+            // const newData = new ArrayBuffer(mesh.animationInfo.skinInfo.vertexStorageInfo.arrayBufferByteLength)
+
             mesh.animationInfo.skinInfo.vertexStorageBuffer = gpuDevice.createBuffer({
+                size: mesh.geometry.vertexBuffer.vertexCount * 16 * 4, // mat4x4<f32> = 16 floats × 4 bytes
+                usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
+            });
+            mesh.animationInfo.skinInfo.prevVertexStorageBuffer = gpuDevice.createBuffer({
                 size: mesh.geometry.vertexBuffer.vertexCount * 16 * 4, // mat4x4<f32> = 16 floats × 4 bytes
                 usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
             });

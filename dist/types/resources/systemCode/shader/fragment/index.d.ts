@@ -4,6 +4,7 @@ declare const SystemFragmentCode: Readonly<{
     drawDirectionalShadowDepth: "string";
     normalFunctions: "string";
     calcPrePathBackground: "string";
+    calculateMotionVector: "string";
     FragmentOutput: "string";
     picking: "string";
     drawPicking: "string";

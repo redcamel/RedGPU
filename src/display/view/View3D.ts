@@ -157,6 +157,7 @@ class View3D extends AView {
     #uniformData: ArrayBuffer
     #uniformDataF32: Float32Array
     #uniformDataU32: Uint32Array
+    #noneJitterProjectionCameraMatrix: mat4 = mat4.create()
 
     /**
      * View3D 인스턴스를 생성합니다.
@@ -284,6 +285,10 @@ class View3D extends AView {
         }
     }
 
+    get noneJitterProjectionCameraMatrix(): mat4 {
+        return this.#noneJitterProjectionCameraMatrix;
+    }
+
     /**
      * 뷰를 업데이트하고 렌더링 준비를 수행합니다.
      * 유니폼 데이터 업데이트, 바인드 그룹 생성, 클러스터 라이트 계산을 처리합니다.
@@ -330,6 +335,7 @@ class View3D extends AView {
             // keepLog(this.#prevInfoList)
         }
         this.#updateClusters(calcPointLightCluster);
+
         this.#updateSystemUniform();
     }
 
@@ -359,6 +365,8 @@ class View3D extends AView {
         {
             const {members} = structInfo;
             const cameraMembers = members.camera.members;
+            this.#noneJitterProjectionCameraMatrix = mat4.multiply(temp2, noneJitterProjectionMatrix, cameraMatrix)
+
             this.#updateSystemUniformData([
                 {
                     key: 'projectionMatrix',
@@ -380,7 +388,7 @@ class View3D extends AView {
                 },
                 {
                     key: 'noneJitterProjectionCameraMatrix',
-                    value: mat4.multiply(temp2, noneJitterProjectionMatrix, cameraMatrix),
+                    value: this.#noneJitterProjectionCameraMatrix,
                     dataView: this.#uniformDataF32,
                     targetMembers: members
                 },
@@ -391,8 +399,8 @@ class View3D extends AView {
                     targetMembers: members
                 },
                 {
-                    key: 'prevProjectionCameraMatrix',
-                    value: mat4.multiply(temp3, noneJitterProjectionMatrix, cameraMatrix),
+                    key: 'prevNoneJitterProjectionCameraMatrix',
+                    value: redGPUContext.antialiasingManager.useTAA ? this.taa.prevNoneJitterProjectionCameraMatrix : this.#noneJitterProjectionCameraMatrix,
                     dataView: this.#uniformDataF32,
                     targetMembers: members
                 },
@@ -484,7 +492,8 @@ class View3D extends AView {
                     dataView: this.#uniformDataF32,
                     targetMembers: members
                 },
-            ])
+            ]);
+
         }
         {
             lightManager.directionalLights.forEach((light: DirectionalLight, index) => {

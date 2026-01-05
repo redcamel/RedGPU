@@ -32,6 +32,10 @@ struct OutputData {
     @location(0) vertexPosition: vec3<f32>,
     @location(1) vertexNormal: vec3<f32>,
     @location(2) uv: vec2<f32>,
+
+    @location(7) currentClipPos: vec4<f32>,
+    @location(8) prevClipPos: vec4<f32>,
+
     @location(11) combinedOpacity: f32,
     //
     @location(12) motionVector: vec3<f32>,
@@ -50,6 +54,7 @@ fn main(inputData: InputData) -> OutputData {
     // 시스템 Uniform 변수 가져오기
     let u_resolution = systemUniforms.resolution;
     let u_projectionMatrix = systemUniforms.projectionMatrix;
+
     let u_camera = systemUniforms.camera;
     let u_cameraMatrix = u_camera.cameraMatrix;
     let u_cameraPosition = u_camera.cameraPosition;

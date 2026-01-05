@@ -8,10 +8,8 @@ import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
 import VertexInterleavedStruct from "../../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
 import VertexInterleaveType from "../../../resources/buffer/vertexBuffer/VertexInterleaveType";
-import {keepLog} from "../../../utils";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import calculateNormals from "../../../utils/math/calculateNormals";
-import calculateTangents from "../../../utils/math/calculateTangents";
 import createUUID from "../../../utils/uuid/createUUID";
 import AccessorInfo_GLTF from "../cls/AccessorInfo_GLTF";
 import MorphInfo_GLTF from "../cls/MorphInfo_GLTF";
@@ -60,20 +58,20 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
                 const accessorGlTfId = attributes[key];
                 const accessorInfo = new AccessorInfo_GLTF(gltfLoader, gltfData, accessorGlTfId);
                 // 어트리뷰트 갈궈서 파악함
-                const isTexcoord = key.indexOf('TEXCOORD_') >-1
-                if(isTexcoord) {
+                const isTexcoord = key.indexOf('TEXCOORD_') > -1
+                if (isTexcoord) {
                     const name = `TEXCOORD_${temp.size}`
                     temp.set(key, name)
                     // keepLog(name)
                 }
 
                 parseAttributeInfo_GLTF(
-                  isTexcoord ? temp.get(key) : key, accessorInfo,
-                  vertices,
-                  uvs, uvs1, uvs2,
-                  normals,
-                  jointWeights, joints,
-                  verticesColor_0, tangents
+                    isTexcoord ? temp.get(key) : key, accessorInfo,
+                    vertices,
+                    uvs, uvs1, uvs2,
+                    normals,
+                    jointWeights, joints,
+                    verticesColor_0, tangents
                 );
                 // 스파스 정보도 갈굼
                 if (accessorInfo.accessor.sparse) {
@@ -148,10 +146,11 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
 
         let normalData;
         // keepLog('normals',normals,vertices,indices)
-        if(!normals.length) {
+        if (!normals.length) {
             normalData = calculateNormals(vertices, indices);
 
-        }else normalData = normals;;
+        } else normalData = normals;
+
         // keepLog('normalData',normalData)
         {
 

@@ -1,4 +1,3 @@
-import {keepLog} from "../../../utils";
 import TextureLoader, {TextureLoaderData} from "../../TextureLoader";
 import getGLTFBuffersResources from "../core/getGLTFBuffersResources";
 import {GLTF} from "../GLTF";
@@ -11,7 +10,7 @@ import parseScene_GLTF from "./parseScene_GLTF";
 const parseGLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, callBack) => {
     //  작업을 여러 프레임에 분산
     // keepLog(gltfData)
-    if(gltfData.extensionsUsed?.includes("KHR_draco_mesh_compression")){
+    if (gltfData.extensionsUsed?.includes("KHR_draco_mesh_compression")) {
         alert('RedGPU GLTFLoader does not support the KHR_draco_mesh_compression extension. Models using this extension may not load properly.');
     }
     requestAnimationFrame(() => {

@@ -2,13 +2,12 @@
 #redgpu_include calcTintBlendMode;
 #redgpu_include drawPicking;
 #redgpu_include FragmentOutput;
-
+#redgpu_include calculateMotionVector;
 struct Uniforms {
-  //
-  opacity: f32,
-  useTint:u32,
-  tint:vec4<f32>,
-  tintBlendMode:u32,
+    opacity: f32,
+    useTint:u32,
+    tint:vec4<f32>,
+    tintBlendMode:u32,
 };
 
 @group(2) @binding(0) var<uniform> uniforms: Uniforms;
@@ -16,15 +15,19 @@ struct Uniforms {
 @group(2) @binding(2) var diffuseTexture: texture_2d<f32>;
 
 struct InputData {
-  @builtin(position) position: vec4<f32>,
-  @location(0) vertexPosition: vec3<f32>,
-  @location(1) vertexNormal: vec3<f32>,
-  @location(2) uv: vec2<f32>,
-  @location(11) combinedOpacity: f32,
-  //
-  @location(12) motionVector: vec3<f32>,
-  @location(13) shadowPos: vec3<f32>,
-  @location(15) @interpolate(flat) pickingId: vec4<f32>,
+    @builtin(position) position: vec4<f32>,
+    @location(0) vertexPosition: vec3<f32>,
+    @location(1) vertexNormal: vec3<f32>,
+    @location(2) uv: vec2<f32>,
+
+    @location(7) currentClipPos: vec4<f32>,
+    @location(8) prevClipPos: vec4<f32>,
+
+    @location(11) combinedOpacity: f32,
+    //
+    @location(12) motionVector: vec3<f32>,
+    @location(13) shadowPos: vec3<f32>,
+    @location(15) @interpolate(flat) pickingId: vec4<f32>,
 };
 
 @fragment
@@ -48,6 +51,6 @@ fn main(inputData: InputData) -> FragmentOutput {
       discard;
   }
   output.color = finalColor;
-  output.gBufferMotionVector = vec4<f32>( inputData.motionVector, 1.0 );
+  output.gBufferMotionVector = vec4<f32>(calculateMotionVector(inputData.currentClipPos, inputData.prevClipPos),0.0, 1.0 );
   return output;
 };

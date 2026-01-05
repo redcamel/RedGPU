@@ -4,7 +4,6 @@ import GPU_FRONT_FACE from "../../../gpuConst/GPU_FRONT_FACE";
 import mat4ToEuler from "../../../utils/math/matToEuler";
 import quaternionToRotationMat4 from "../../../utils/math/quaternionToRotationMat4";
 import {Node} from "../GLTF";
-import {keepLog} from "../../../utils";
 
 const RAD_TO_DEG = 180 / Math.PI;
 /**
@@ -45,7 +44,7 @@ const parseTRSAndMATRIX_GLTF = (mesh: Mesh, nodeInfo: Node) => {
         // @ts-ignore
         mat4.getScaling(tempScale, matrix);
         mesh.setScale(tempScale[0], tempScale[1], tempScale[2]);
-    }else{
+    } else {
         if ('rotation' in nodeInfo) {
             tRotation = vec3.create();
             quaternionToRotationMat4(quaternion, rotationMTX);

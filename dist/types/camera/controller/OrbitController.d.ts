@@ -24,7 +24,6 @@ import AController from "../core/AController";
 declare class OrbitController extends AController {
     #private;
     constructor(redGPUContext: RedGPUContext);
-    fitMeshToScreenCenter(mesh: Mesh, view: View3D): void;
     /**
      * 회전 중심의 X축 좌표를 가져옵니다.
      * @returns {number} 중심점 X축 좌표
@@ -145,6 +144,7 @@ declare class OrbitController extends AController {
      * @param {number} value - 최대 틸트 각도 (-90 ~ 90)
      */
     set maxTilt(value: number);
+    fitMeshToScreenCenter(mesh: Mesh, view: View3D): void;
     /**
      * 매 프레임마다 오빗 카메라를 업데이트합니다.
      * 회전(팬/틸트), 거리, 보간을 처리하고 카메라 위치를 계산합니다.

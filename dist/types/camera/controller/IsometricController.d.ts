@@ -145,6 +145,21 @@ declare class IsometricController extends AController {
         moveRight: string;
     };
     /**
+     * 타겟의 X축 위치를 가져옵니다.
+     * @returns {number} X축 좌표
+     */
+    get x(): number;
+    /**
+     * 타겟의 Y축 위치를 가져옵니다.
+     * @returns {number} Y축 좌표
+     */
+    get y(): number;
+    /**
+     * 타겟의 Z축 위치를 가져옵니다.
+     * @returns {number} Z축 좌표
+     */
+    get z(): number;
+    /**
      * 상향 이동 키를 설정합니다.
      * @param {string} value - 설정할 키 이름
      */
@@ -164,21 +179,6 @@ declare class IsometricController extends AController {
      * @param {string} value - 설정할 키 이름
      */
     setMoveRightKey(value: string): void;
-    /**
-     * 타겟의 X축 위치를 가져옵니다.
-     * @returns {number} X축 좌표
-     */
-    get x(): number;
-    /**
-     * 타겟의 Y축 위치를 가져옵니다.
-     * @returns {number} Y축 좌표
-     */
-    get y(): number;
-    /**
-     * 타겟의 Z축 위치를 가져옵니다.
-     * @returns {number} Z축 좌표
-     */
-    get z(): number;
     /**
      * 매 프레임마다 아이소메트릭 카메라를 업데이트합니다.
      * 줌, 뷰 높이, 타겟 위치를 보간하고 카메라 위치를 계산합니다.

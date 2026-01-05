@@ -57,7 +57,7 @@ fn main(inputData: InputData) -> OutputData {
     output.uv1 = inputData.uv1;
     output.vertexColor_0 = inputData.vertexColor_0;
     output.vertexTangent = u_normalModelMatrix * inputData.vertexTangent;
-    output.ndcPosition = output.position.xyz / output.position.w;
+
 
     return output;
 }

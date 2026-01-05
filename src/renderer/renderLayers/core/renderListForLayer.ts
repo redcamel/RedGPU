@@ -11,7 +11,7 @@ const renderListForLayer = (list, renderViewStateData: RenderViewStateData, pipe
     currentRenderPassEncoder.setBindGroup(0, renderViewStateData.view.systemUniform_Vertex_UniformBindGroup)
     for (i; i < len; i++) {
         const target = list[i]
-        if (target.gpuRenderInfo) {
+        if (target.passFrustumCulling && target.gpuRenderInfo) {
             const currentGeometry = target._geometry
             const currentMaterial = target._material
             // render

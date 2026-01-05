@@ -74,6 +74,8 @@ class Mesh extends MeshBase {
     /** 그림자 캐스팅 여부 */
     castShadow: boolean = false
     dirtyLOD: boolean = false
+    passFrustumCulling: boolean = true
+    createCustomMeshVertexShaderModule?: () => GPUShaderModule
     /** 인스턴스 고유 ID */
     #instanceId: number
     /** 메시 이름 */
@@ -149,7 +151,7 @@ class Mesh extends MeshBase {
     #LODManager: LODManager
     #lodGPURenderInfoList: LODGPURenderInfo[] = [];
     #currentLODIndex: number = -1
-    createCustomMeshVertexShaderModule?: () => GPUShaderModule
+
     /**
      * Mesh 인스턴스를 생성합니다.
      * @param redGPUContext RedGPU 컨텍스트
@@ -165,7 +167,7 @@ class Mesh extends MeshBase {
         this.#pickingId = uuidToUint(this.uuid)
         this.#drawBufferManager = DrawBufferManager.getInstance(redGPUContext)
         this.#checkDrawCommandSlot()
-        this.#LODManager = new LODManager(this,() => {
+        this.#LODManager = new LODManager(this, () => {
             this.dirtyLOD = true;
         })
     }
@@ -443,6 +445,7 @@ class Mesh extends MeshBase {
             })
         }
     }
+
     setIgnoreFrustumCullingRecursively(value: boolean = false) {
         if ('ignoreFrustumCulling' in this) {
             this.ignoreFrustumCulling = value
@@ -480,16 +483,6 @@ class Mesh extends MeshBase {
         this.rotationX = tRotation[0] * 180 / Math.PI;
         this.rotationY = tRotation[1] * 180 / Math.PI;
         this.rotationZ = tRotation[2] * 180 / Math.PI;
-    }
-
-    #normalizeRotationDelta(prevAngle: number, newAngle: number): number {
-        let delta = newAngle - prevAngle;
-
-        // delta가 180도보다 크면 반대 방향으로 회전
-        while (delta > 180) delta -= 360;
-        while (delta < -180) delta += 360;
-
-        return prevAngle + delta;
     }
 
     setScale(x: number, y?: number, z?: number) {
@@ -757,43 +750,45 @@ class Mesh extends MeshBase {
 
             }
             if (!currentGeometry) this.#needUpdateMatrixUniform = false
-            {
-                // 변경시만 이전 모델 메트릭스 업데이트
-                if (antialiasingManager.useTAA && this.#uniformDataMatrixList) {
-                    const {gpuRenderInfo} = this
-                    const {vertexUniformBuffer, vertexUniformInfo} = gpuRenderInfo
-                    const {members: vertexUniformInfoMembers} = vertexUniformInfo
-                    const {members: vertexUniformInfoMatrixListMembers} = vertexUniformInfoMembers.matrixList
-                    if (this.#prevModelMatrix && vertexUniformInfoMatrixListMembers.prevModelMatrix) {
-                        this.#uniformDataMatrixList.set(this.#prevModelMatrix, vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
-                        // if (vertexUniformInfoMatrixListMembers.prevModelMatrix) {
-                        // 	redGPUContext.gpuDevice.queue.writeBuffer(
-                        // 		vertexUniformGPUBuffer,
-                        // 		vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffset,
-                        // 		this.#prevModelMatrix,
-                        // 	)
-                        // }
-                    }
-                    // 브랜치가 먼가 꼬였네
-                    {
-                        if (!this.#prevModelMatrix) this.#prevModelMatrix = new Float32Array(16)
-                        const prev = this.#prevModelMatrix
-                        const current = this.modelMatrix
-                        prev[0] = current[0], prev[1] = current[1], prev[2] = current[2], prev[3] = current[3];
-                        prev[4] = current[4], prev[5] = current[5], prev[6] = current[6], prev[7] = current[7];
-                        prev[8] = current[8], prev[9] = current[9], prev[10] = current[10], prev[11] = current[11];
-                        prev[12] = current[12], prev[13] = current[13], prev[14] = current[14], prev[15] = current[15];
-                    }
-                } else {
-                    this.#prevModelMatrix = null
-                }
-            }
+
             this.dirtyTransform = false
             this.#cachedBoundingAABB = null
             this.#cachedBoundingOBB = null
         }
+        {
+            // 변경시만 이전 모델 메트릭스 업데이트
+            if (antialiasingManager.useTAA && this.#uniformDataMatrixList) {
+
+                const {gpuRenderInfo} = this
+                const {vertexUniformBuffer, vertexUniformInfo} = gpuRenderInfo
+                const {members: vertexUniformInfoMembers} = vertexUniformInfo
+                const {members: vertexUniformInfoMatrixListMembers} = vertexUniformInfoMembers.matrixList
+                if (this.#prevModelMatrix && vertexUniformInfoMatrixListMembers.prevModelMatrix) {
+                    this.#uniformDataMatrixList.set(this.#prevModelMatrix, vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
+                    if (!this.#needUpdateMatrixUniform) {
+                        redGPUContext.gpuDevice.queue.writeBuffer(
+                            vertexUniformBuffer.gpuBuffer,
+                            vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffset,
+                            this.#prevModelMatrix,
+                        )
+                    }
+                }
+                // 브랜치가 먼가 꼬였네
+                {
+                    if (!this.#prevModelMatrix) this.#prevModelMatrix = new Float32Array(16)
+                    const prev = this.#prevModelMatrix
+                    const current = this.modelMatrix
+                    prev[0] = current[0], prev[1] = current[1], prev[2] = current[2], prev[3] = current[3];
+                    prev[4] = current[4], prev[5] = current[5], prev[6] = current[6], prev[7] = current[7];
+                    prev[8] = current[8], prev[9] = current[9], prev[10] = current[10], prev[11] = current[11];
+                    prev[12] = current[12], prev[13] = current[13], prev[14] = current[14], prev[15] = current[15];
+                }
+            } else {
+                this.#prevModelMatrix = null
+            }
+        }
         // check distanceCulling
-        let passFrustumCulling = true
+        let passFrustumCulling = this.passFrustumCulling = true
         let distanceSquared = 0
         const lodList = this.#LODManager.LODList;
         const lodLen = lodList.length;
@@ -816,73 +811,73 @@ class Mesh extends MeshBase {
             }
         }
         // check frustumCulling
-	    if (frustumPlanes && passFrustumCulling && !this.#ignoreFrustumCulling) {
-		    const {rawCamera} = view
-		    const combinedAABB = this.boundingAABB;
+        if (frustumPlanes && passFrustumCulling && !this.#ignoreFrustumCulling) {
+            const {rawCamera} = view
+            const combinedAABB = this.boundingAABB;
 
-		    const isIsometricController = rawCamera instanceof IsometricController;
+            const isIsometricController = rawCamera instanceof IsometricController;
 
-		    if (isIsometricController) {
-			    // ==================== AABB 정보 추출 ====================
-			    const {centerX, centerY, centerZ, geometryRadius: radius} = combinedAABB;
+            if (isIsometricController) {
+                // ==================== AABB 정보 추출 ====================
+                const {centerX, centerY, centerZ, geometryRadius: radius} = combinedAABB;
 
-					// ==================== 카메라 정보 추출 ====================
-			    const orthoCamera = rawCamera as OrthographicCamera;
-			    const {left, right, top, bottom, nearClipping: near, farClipping: far} = orthoCamera;
-			    const {x: camX, y: camY, z: camZ} = orthoCamera;
+                // ==================== 카메라 정보 추출 ====================
+                const orthoCamera = rawCamera as OrthographicCamera;
+                const {left, right, top, bottom, nearClipping: near, farClipping: far} = orthoCamera;
+                const {x: camX, y: camY, z: camZ} = orthoCamera;
 
-				// ==================== 각도 기반 컬링 ====================
-			    const cameraAngle = 45;
+                // ==================== 각도 기반 컬링 ====================
+                const cameraAngle = 45;
 
-			    if (cameraAngle ) {
-				    // 상대 좌표 계산
-				    const relX = centerX - camX;
-				    const relY = centerY - camY;
-				    const relZ = centerZ - camZ;
+                if (cameraAngle) {
+                    // 상대 좌표 계산
+                    const relX = centerX - camX;
+                    const relY = centerY - camY;
+                    const relZ = centerZ - camZ;
 
-				    // 회전 적용
-				    const angleRad = cameraAngle * (Math.PI / 180);
-				    const cos = Math.cos(angleRad);
-				    const sin = Math.sin(angleRad);
+                    // 회전 적용
+                    const angleRad = cameraAngle * (Math.PI / 180);
+                    const cos = Math.cos(angleRad);
+                    const sin = Math.sin(angleRad);
 
-				    const rotatedX = relX * cos + relZ * sin;
-				    const rotatedZ = -relX * sin + relZ * cos;
+                    const rotatedX = relX * cos + relZ * sin;
+                    const rotatedZ = -relX * sin + relZ * cos;
 
-				    // 뷰 범위 확인
-				    if (rotatedX + radius < left || rotatedX - radius > right ||
-					    relY + radius < bottom || relY - radius > top ||
-					    rotatedZ + radius < near || rotatedZ - radius > far) {
-					    passFrustumCulling = false;
-				    }
-			    } else {
-				    // 각도 없음 (기본 처리)
-				    if (centerX + radius < left || centerX - radius > right ||
-					    centerY + radius < bottom || centerY - radius > top ||
-					    centerZ + radius < near || centerZ - radius > far) {
-					    passFrustumCulling = false;
-				    }
-			    }
-		    } else {
-			    const frustumPlanes0 = frustumPlanes[0];
-			    const frustumPlanes1 = frustumPlanes[1];
-			    const frustumPlanes2 = frustumPlanes[2];
-			    const frustumPlanes3 = frustumPlanes[3];
-			    const frustumPlanes4 = frustumPlanes[4];
-			    const frustumPlanes5 = frustumPlanes[5];
+                    // 뷰 범위 확인
+                    if (rotatedX + radius < left || rotatedX - radius > right ||
+                        relY + radius < bottom || relY - radius > top ||
+                        rotatedZ + radius < near || rotatedZ - radius > far) {
+                        passFrustumCulling = false;
+                    }
+                } else {
+                    // 각도 없음 (기본 처리)
+                    if (centerX + radius < left || centerX - radius > right ||
+                        centerY + radius < bottom || centerY - radius > top ||
+                        centerZ + radius < near || centerZ - radius > far) {
+                        passFrustumCulling = false;
+                    }
+                }
+            } else {
+                const frustumPlanes0 = frustumPlanes[0];
+                const frustumPlanes1 = frustumPlanes[1];
+                const frustumPlanes2 = frustumPlanes[2];
+                const frustumPlanes3 = frustumPlanes[3];
+                const frustumPlanes4 = frustumPlanes[4];
+                const frustumPlanes5 = frustumPlanes[5];
 
-			    const centerX = combinedAABB.centerX;
-			    const centerY = combinedAABB.centerY;
-			    const centerZ = combinedAABB.centerZ;
-			    const radius = combinedAABB.geometryRadius;
+                const centerX = combinedAABB.centerX;
+                const centerY = combinedAABB.centerY;
+                const centerZ = combinedAABB.centerZ;
+                const radius = combinedAABB.geometryRadius;
 
-			    frustumPlanes0[0] * centerX + frustumPlanes0[1] * centerY + frustumPlanes0[2] * centerZ + frustumPlanes0[3] <= -radius ? passFrustumCulling = false
-				    : frustumPlanes1[0] * centerX + frustumPlanes1[1] * centerY + frustumPlanes1[2] * centerZ + frustumPlanes1[3] <= -radius ? passFrustumCulling = false
-					    : frustumPlanes2[0] * centerX + frustumPlanes2[1] * centerY + frustumPlanes2[2] * centerZ + frustumPlanes2[3] <= -radius ? passFrustumCulling = false
-						    : frustumPlanes3[0] * centerX + frustumPlanes3[1] * centerY + frustumPlanes3[2] * centerZ + frustumPlanes3[3] <= -radius ? passFrustumCulling = false
-							    : frustumPlanes4[0] * centerX + frustumPlanes4[1] * centerY + frustumPlanes4[2] * centerZ + frustumPlanes4[3] <= -radius ? passFrustumCulling = false
-								    : frustumPlanes5[0] * centerX + frustumPlanes5[1] * centerY + frustumPlanes5[2] * centerZ + frustumPlanes5[3] <= -radius ? passFrustumCulling = false : 0;
-		    }
-	    }
+                frustumPlanes0[0] * centerX + frustumPlanes0[1] * centerY + frustumPlanes0[2] * centerZ + frustumPlanes0[3] <= -radius ? passFrustumCulling = false
+                    : frustumPlanes1[0] * centerX + frustumPlanes1[1] * centerY + frustumPlanes1[2] * centerZ + frustumPlanes1[3] <= -radius ? passFrustumCulling = false
+                        : frustumPlanes2[0] * centerX + frustumPlanes2[1] * centerY + frustumPlanes2[2] * centerZ + frustumPlanes2[3] <= -radius ? passFrustumCulling = false
+                            : frustumPlanes3[0] * centerX + frustumPlanes3[1] * centerY + frustumPlanes3[2] * centerZ + frustumPlanes3[3] <= -radius ? passFrustumCulling = false
+                                : frustumPlanes4[0] * centerX + frustumPlanes4[1] * centerY + frustumPlanes4[2] * centerZ + frustumPlanes4[3] <= -radius ? passFrustumCulling = false
+                                    : frustumPlanes5[0] * centerX + frustumPlanes5[1] * centerY + frustumPlanes5[2] * centerZ + frustumPlanes5[3] <= -radius ? passFrustumCulling = false : 0;
+            }
+        }
         if (passFrustumCulling) {
             if (this.gltfLoaderInfo?.activeAnimations?.length) {
                 renderViewStateData.animationList[renderViewStateData.animationList.length] = this.gltfLoaderInfo?.activeAnimations
@@ -898,6 +893,7 @@ class Mesh extends MeshBase {
             }
         } else {
         }
+        this.passFrustumCulling = passFrustumCulling
         // render
         const {displacementTexture, displacementScale} = currentMaterial || {}
         if (currentDirtyPipeline || currentMaterial?.dirtyPipeline || dirtyVertexUniformFromMaterial[currentMaterialUUID]) {
@@ -1185,7 +1181,6 @@ class Mesh extends MeshBase {
         updateMeshDirtyPipeline(this)
     }
 
-
     createMeshVertexShaderModuleBASIC = (VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT_BASIC, vertexModuleSource): GPUShaderModule => {
         const {redGPUContext} = this
         const {gpuRenderInfo} = this
@@ -1199,6 +1194,16 @@ class Mesh extends MeshBase {
         gpuRenderInfo.vertexUniformBindGroup = redGPUContext.gpuDevice.createBindGroup(getBasicMeshVertexBindGroupDescriptor(this));
         this.#checkVariant(VERTEX_SHADER_MODULE_NAME)
         return this.gpuRenderInfo.vertexShaderModule
+    }
+
+    #normalizeRotationDelta(prevAngle: number, newAngle: number): number {
+        let delta = newAngle - prevAngle;
+
+        // delta가 180도보다 크면 반대 방향으로 회전
+        while (delta > 180) delta -= 360;
+        while (delta < -180) delta += 360;
+
+        return prevAngle + delta;
     }
 
     #updateLODPipeline = () => {

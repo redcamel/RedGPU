@@ -189,7 +189,7 @@ class Line3D extends Mesh {
      * 커스텀 버텍스 셰이더 모듈을 생성합니다.
      *
      */
-    createCustomMeshVertexShaderModule = ():GPUShaderModule => {
+    createCustomMeshVertexShaderModule = (): GPUShaderModule => {
         return this.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource)
     }
 

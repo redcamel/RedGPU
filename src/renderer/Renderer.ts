@@ -85,7 +85,7 @@ class Renderer {
         view.renderViewStateData.reset(null, time)
         if (pixelRectObject.width && pixelRectObject.height) {
 
-            this.#updateJitter(view)
+
             {
                 const {scene} = view
                 const {shadowManager} = scene
@@ -95,10 +95,24 @@ class Renderer {
                 const drawBufferManager = DrawBufferManager.getInstance(redGPUContext)
                 drawBufferManager.flushAllCommands(renderViewStateData)
             }
+            {
+                const {timestamp, prevTimestamp} = renderViewStateData;
+                const elapsed = timestamp - prevTimestamp;
 
+                const fpsInterval = 1000 / 60
+                if (elapsed >= fpsInterval) { // 60FPS 기준 간격 (약 16.67ms)
+                    // 경과 시간에서 오차를 보정하며 마지막 프레임 시간 업데이트
+                    renderViewStateData.prevTimestamp = timestamp - (elapsed % fpsInterval);
+
+                    // @ts-ignore
+                    camera.update?.(view, time)
+                }
+            }
+
+            this.#updateJitter(view)
             this.#renderPassViewShadow(view, commandEncoder)
             // @ts-ignore
-            camera.update?.(view, time)
+            camera.targetMesh?.render(view.renderViewStateData)
             this.#renderPassViewBasicLayer(view, commandEncoder, renderPassDescriptor)
             this.#renderPassView2PathLayer(view, commandEncoder, renderPassDescriptor, depthStencilAttachment)
             this.#renderPassViewPickingLayer(view, commandEncoder)
@@ -240,29 +254,38 @@ class Renderer {
         }
     }
 
-    #updateJitter(view: View3D,) {
-        const {taa} = view
+    #updateJitter(view: View3D) {
+        const {taa} = view;
         const frameIndex = taa.frameIndex || 0;
-        const jitterScale = taa.jitterStrength;
-        const sampleCount = 32;
+        const jitterScale = taa.jitterStrength; // 보통 1.0 권장
+        const sampleCount = 16;
         const currentSample = frameIndex % sampleCount;
-        // Halton 시퀀스 계산
+
+        // Halton 시퀀스 (0~1 범위)
         const haltonX = this.#haltonSequence(currentSample + 1, 2);
         const haltonY = this.#haltonSequence(currentSample + 1, 3);
-        // 픽셀 단위 지터
-        const jitterX = (haltonX - 0.5) * jitterScale;
-        const jitterY = (haltonY - 0.5) * jitterScale;
+
+        // 1. 디바이스 픽셀 비율 가져오기
+        const dpr = window.devicePixelRatio || 1;
+        // const dpr =  1;
+
+        // 2. 물리적 픽셀 기준의 오프셋 계산
+        // (halton - 0.5)는 [-0.5, 0.5] 범위.
+        // 이를 dpr로 나누어 논리적 좌표계에서의 '물리적 반 픽셀' 범위를 잡습니다.
+        const jitterX = ((haltonX - 0.5) / dpr) * jitterScale;
+        const jitterY = ((haltonY - 0.5) / dpr) * jitterScale;
+
         view.setJitterOffset(jitterX, jitterY);
     }
 
     #haltonSequence(index: number, base: number): number {
         let result = 0;
-        let fraction = 1 / base;
+        let f = 1;
         let i = index;
         while (i > 0) {
-            result += (i % base) * fraction;
+            f = f / base;
+            result = result + f * (i % base);
             i = Math.floor(i / base);
-            fraction /= base;
         }
         return result;
     }
@@ -297,6 +320,7 @@ class Renderer {
                 skinInfo.jointData = new Float32Array(neededSize);
                 skinInfo.computeShader = null
             }
+
             // 모델 행렬의 역행렬 계산
             skinInfo.invertNodeGlobalTransform = skinInfo.invertNodeGlobalTransform || new Float32Array(mesh.modelMatrix.length);
             // mat4.invert(skinInfo.invertNodeGlobalTransform, mesh.modelMatrix);
@@ -370,11 +394,12 @@ class Renderer {
                 skinInfo.createCompute(
                     redGPUContext,
                     gpuDevice,
-                    mesh.animationInfo.skinInfo.vertexStorageBuffer,
+                    mesh.geometry.vertexBuffer,
                     mesh.animationInfo.weightBuffer,
                     mesh.animationInfo.jointBuffer,
                 );
             }
+
             {
                 const usedJoints = skinInfo.usedJoints
                 let i = usedJoints.length;
@@ -385,6 +410,7 @@ class Renderer {
                 jointData.set(skinInfo.invertNodeGlobalTransform, 0)
                 gpuDevice.queue.writeBuffer(skinInfo.uniformBuffer, 0, jointData)
             }
+
             // Compute Pass 설정 및 Dispatch
             passEncoder.setPipeline(skinInfo.computePipeline);
             passEncoder.setBindGroup(0, skinInfo.bindGroup);

@@ -111,7 +111,7 @@ class TextField3D extends ATextField {
      * TextField3D 전용 버텍스 셰이더 모듈을 생성합니다.
      * @returns {GPUShaderModule}
      */
-    createCustomMeshVertexShaderModule= ():GPUShaderModule => {
+    createCustomMeshVertexShaderModule = (): GPUShaderModule => {
         return this.createMeshVertexShaderModuleBASIC(
             VERTEX_SHADER_MODULE_NAME,
             SHADER_INFO,

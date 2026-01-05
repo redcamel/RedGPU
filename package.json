@@ -1,6 +1,6 @@
 {
   "name": "redgpu",
-  "version": "3.0.0-Alpha",
+  "version": "3.7.0-Alpha",
   "description": "RedGPU Helper",
   "scripts": {
     "build": "rollup -c",
