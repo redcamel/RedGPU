@@ -24,20 +24,20 @@ let bitangent = cross(viewNormal, tangent);
 let tbn = mat3x3<f32>(tangent, bitangent, viewNormal);
 
 // 반구 내부에 분포된 샘플 (중심 근처에 더 많이, 외곽으로 갈수록 적게)
-let samples = array<vec3<f32>, 16>(
-    vec3<f32>(0.033, 0.021, 0.015),   vec3<f32>(-0.025, 0.038, 0.012),
-    vec3<f32>(0.042, -0.031, 0.028),  vec3<f32>(-0.047, -0.019, 0.035),
-    vec3<f32>(0.098, 0.067, 0.112),   vec3<f32>(-0.089, 0.105, 0.098),
-    vec3<f32>(0.115, -0.092, 0.128),  vec3<f32>(-0.108, -0.098, 0.135),
-    vec3<f32>(0.221, 0.178, 0.245),   vec3<f32>(-0.198, 0.235, 0.221),
-    vec3<f32>(0.245, -0.205, 0.268),  vec3<f32>(-0.238, -0.212, 0.278),
-    vec3<f32>(0.412, 0.368, 0.445),   vec3<f32>(-0.398, 0.425, 0.421),
-    vec3<f32>(0.445, -0.398, 0.468),  vec3<f32>(-0.432, -0.405, 0.478)
+let samples = array<vec3<f32>, 8>(
+    vec3<f32>(0.04, 0.03, 0.02),
+    vec3<f32>(-0.03, 0.05, 0.025),
+    vec3<f32>(0.12, -0.08, 0.15),
+    vec3<f32>(-0.10, -0.09, 0.14),
+    vec3<f32>(0.25, 0.20, 0.28),
+    vec3<f32>(-0.22, 0.26, 0.27),
+    vec3<f32>(0.42, -0.38, 0.46),
+    vec3<f32>(-0.40, -0.39, 0.45)
 );
 
 var totalOcclusion = 0.0;
 
-for (var i = 0u; i < 16u; i++) {
+for (var i = 0u; i < 8u; i++) {
     let sampleOffset = tbn * samples[i];
     let sampleDir = normalize(sampleOffset);
     let sampleViewPos = viewPos + sampleOffset * uniforms.radius;
@@ -75,7 +75,7 @@ for (var i = 0u; i < 16u; i++) {
 }
 
 // 최종 AO 계산
-let ao = (totalOcclusion / 16.0) * uniforms.intensity;
+let ao = (totalOcclusion / 8.0) * uniforms.intensity;
 
 // 거리에 따른 부드러운 감쇄 (설정 가능한 파라미터 사용)
 let distanceFade = smoothstep(
