@@ -8,22 +8,23 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 
 /**
  * SSAO(Screen Space Ambient Occlusion) 후처리 이펙트입니다.
- * 화면 공간의 깊이와 노멀을 이용해 구석진 곳에 음영을 만들어 입체감을 더합니다.
  */
 class SSAO extends ASinglePassPostEffect {
-    /** 샘플링 반경. 기본값 0.5 */
-    #radius: number = 0.5;
-    /** 그림자 강도. 기본값 1.5 */
-    #intensity: number = 1;
-    /** 자가 차폐 방지 바이어스. 기본값 0.025 */
-    #bias: number = 0.025;
+
+    #radius: number = 0.3;
+    #intensity: number = 1.5;
+    #bias: number = 0.02;
+    #biasDistanceScale: number = 0.02;
+    #fadeDistanceStart: number = 30.0;
+    #fadeDistanceRange: number = 20.0;
+    #contrast: number = 1.5;
 
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
         this.WORK_SIZE_X = 8;
         this.WORK_SIZE_Y = 8;
         this.WORK_SIZE_Z = 1;
-        this.useDepthTexture = true; // 깊이 텍스처 활성화
+        this.useDepthTexture = true;
 
         const shaderCode = this.#createSSAOShaderCode();
         this.init(
@@ -38,6 +39,10 @@ class SSAO extends ASinglePassPostEffect {
         this.radius = this.#radius;
         this.intensity = this.#intensity;
         this.bias = this.#bias;
+        this.biasDistanceScale = this.#biasDistanceScale;
+        this.fadeDistanceStart = this.#fadeDistanceStart;
+        this.fadeDistanceRange = this.#fadeDistanceRange;
+        this.contrast = this.#contrast;
     }
 
     get radius(): number { return this.#radius; }
@@ -59,6 +64,34 @@ class SSAO extends ASinglePassPostEffect {
         validateNumberRange(value, 0.0, 0.1);
         this.#bias = value;
         this.updateUniform('bias', value);
+    }
+
+    get biasDistanceScale(): number { return this.#biasDistanceScale; }
+    set biasDistanceScale(value: number) {
+        validateNumberRange(value, 0.0, 0.5);
+        this.#biasDistanceScale = value;
+        this.updateUniform('biasDistanceScale', value);
+    }
+
+    get fadeDistanceStart(): number { return this.#fadeDistanceStart; }
+    set fadeDistanceStart(value: number) {
+        validatePositiveNumberRange(value, 1.0, 200.0);
+        this.#fadeDistanceStart = value;
+        this.updateUniform('fadeDistanceStart', value);
+    }
+
+    get fadeDistanceRange(): number { return this.#fadeDistanceRange; }
+    set fadeDistanceRange(value: number) {
+        validatePositiveNumberRange(value, 1.0, 100.0);
+        this.#fadeDistanceRange = value;
+        this.updateUniform('fadeDistanceRange', value);
+    }
+
+    get contrast(): number { return this.#contrast; }
+    set contrast(value: number) {
+        validateNumberRange(value, 0.5, 4.0);
+        this.#contrast = value;
+        this.updateUniform('contrast', value);
     }
 
     #createSSAOShaderCode() {
