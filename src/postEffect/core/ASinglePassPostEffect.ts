@@ -4,7 +4,6 @@ import View3D from "../../display/view/View3D";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../material/core";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
-import {keepLog} from "../../utils";
 import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSize";
 
 export type ASinglePassPostEffectResult = {
@@ -24,9 +23,11 @@ abstract class ASinglePassPostEffect {
     #computeShaderNonMSAA: GPUShaderModule
     #computeBindGroupLayout0: GPUBindGroupLayout
     #computeBindGroupLayout1: GPUBindGroupLayout
-    #computeBindGroup0: GPUBindGroup
+    #computeBindGroup0List_swap0: GPUBindGroup
+    #computeBindGroup0List_swap1: GPUBindGroup
     #computeBindGroup1: GPUBindGroup
-    #computeBindGroupEntries0: GPUBindGroupEntry[]
+    #computeBindGroupEntries0_swap0: GPUBindGroupEntry[]
+    #computeBindGroupEntries0_swap1: GPUBindGroupEntry[]
     #computeBindGroupEntries1: GPUBindGroupEntry[]
     #computePipeline: GPUComputePipeline
     // uniform 및 구조 정보
@@ -45,14 +46,25 @@ abstract class ASinglePassPostEffect {
     #WORK_SIZE_Y = 16
     #WORK_SIZE_Z = 1
     #useDepthTexture: boolean = false
+    #useGBufferNormalTexture: boolean = false
     #redGPUContext: RedGPUContext
     #antialiasingManager: AntialiasingManager
     #previousSourceTextureReferences: ASinglePassPostEffectResult[] = [];
     #videoMemorySize: number = 0
+    #prevMSAA: Boolean
+    #prevMSAAID: string
 
     constructor(redGPUContext: RedGPUContext) {
         this.#redGPUContext = redGPUContext
         this.#antialiasingManager = redGPUContext.antialiasingManager
+    }
+
+    get useGBufferNormalTexture(): boolean {
+        return this.#useGBufferNormalTexture;
+    }
+
+    set useGBufferNormalTexture(value: boolean) {
+        this.#useGBufferNormalTexture = value;
     }
 
     get videoMemorySize(): number {
@@ -76,7 +88,7 @@ abstract class ASinglePassPostEffect {
     }
 
     get shaderInfo() {
-        keepLog(this)
+        // keepLog(this)
         const useMSAA = this.#antialiasingManager.useMSAA;
         return useMSAA ? this.#SHADER_INFO_MSAA : this.#SHADER_INFO_NON_MSAA;
     }
@@ -165,13 +177,13 @@ abstract class ASinglePassPostEffect {
         }
     }
 
-    execute(gpuDevice: GPUDevice, width: number, height: number) {
+    execute(view: View3D, gpuDevice: GPUDevice, width: number, height: number) {
         const commentEncode_compute = gpuDevice.createCommandEncoder({
             label: 'ASinglePassPostEffect_Execute_CommandEncoder'
         })
         const computePassEncoder = commentEncode_compute.beginComputePass()
         computePassEncoder.setPipeline(this.#computePipeline)
-        computePassEncoder.setBindGroup(0, this.#computeBindGroup0)
+        computePassEncoder.setBindGroup(0, view.renderViewStateData.swapBufferIndex ? this.#computeBindGroup0List_swap1 : this.#computeBindGroup0List_swap0)
         computePassEncoder.setBindGroup(1, this.#computeBindGroup1)
         computePassEncoder.dispatchWorkgroups(Math.ceil(width / this.WORK_SIZE_X), Math.ceil(height / this.WORK_SIZE_Y));
         computePassEncoder.end();
@@ -180,9 +192,9 @@ abstract class ASinglePassPostEffect {
 
     render(view: View3D, width: number, height: number, ...sourceTextureInfo: ASinglePassPostEffectResult[]): ASinglePassPostEffectResult {
         const {gpuDevice, antialiasingManager} = this.#redGPUContext
-        const {useMSAA} = antialiasingManager
+        const {useMSAA, msaaID} = antialiasingManager
         const dimensionsChanged = this.#createRenderTexture(view)
-        const msaaChanged = antialiasingManager.changedMSAA;
+        const msaaChanged = this.#prevMSAA !== useMSAA || this.#prevMSAAID !== msaaID;
         // 소스 텍스처 변경 감지 - 첫 번째 요소만 사용
         const sourceTextureChanged = this.#detectSourceTextureChange(sourceTextureInfo);
         const targetOutputView = this.outputTextureView
@@ -191,7 +203,9 @@ abstract class ASinglePassPostEffect {
             this.#createBindGroups(view, sourceTextureInfo, targetOutputView, useMSAA, redGPUContext, gpuDevice);
         }
         this.update(performance.now())
-        this.execute(gpuDevice, width, height)
+        this.execute(view, gpuDevice, width, height)
+        this.#prevMSAA = useMSAA;
+        this.#prevMSAAID = msaaID;
         return {
             texture: this.#outputTexture,
             textureView: targetOutputView
@@ -210,14 +224,19 @@ abstract class ASinglePassPostEffect {
         const currentStorageInfo = this.storageInfo;
         const currentUniformsInfo = this.uniformsInfo
         const currentSystemUniformsInfo = this.systemUuniformsInfo;
-        this.#computeBindGroupEntries0 = []
+        this.#computeBindGroupEntries0_swap0 = []
+        this.#computeBindGroupEntries0_swap1 = []
         this.#computeBindGroupEntries1 = []
         // Group 0: source textures (outputTexture 제외)
         for (const k in currentStorageInfo) {
             const info = currentStorageInfo[k]
             const {binding, name} = info
             if (name !== 'outputTexture') {
-                this.#computeBindGroupEntries0.push({
+                this.#computeBindGroupEntries0_swap0.push({
+                    binding: binding,
+                    resource: sourceTextureInfoList[binding].textureView,
+                });
+                this.#computeBindGroupEntries0_swap1.push({
                     binding: binding,
                     resource: sourceTextureInfoList[binding].textureView,
                 });
@@ -232,13 +251,21 @@ abstract class ASinglePassPostEffect {
         this.shaderInfo.textures.forEach(texture => {
             const {name, binding} = texture
             if (name === "depthTexture") {
-                this.#computeBindGroupEntries0.push({
+                this.#computeBindGroupEntries0_swap0.push({
                     binding: binding,
                     resource: view.viewRenderTextureManager.depthTextureView
                 })
+                this.#computeBindGroupEntries0_swap1.push({
+                    binding: binding,
+                    resource: view.viewRenderTextureManager.prevDepthTextureView
+                })
             }
             if (name === "gBufferNormalTexture") {
-                this.#computeBindGroupEntries0.push({
+                this.#computeBindGroupEntries0_swap0.push({
+                    binding: binding,
+                    resource: view.redGPUContext.antialiasingManager.useMSAA ? view.viewRenderTextureManager.gBufferNormalResolveTextureView : view.viewRenderTextureManager.gBufferNormalTextureView
+                })
+                this.#computeBindGroupEntries0_swap1.push({
                     binding: binding,
                     resource: view.redGPUContext.antialiasingManager.useMSAA ? view.viewRenderTextureManager.gBufferNormalResolveTextureView : view.viewRenderTextureManager.gBufferNormalTextureView
                 })
@@ -275,11 +302,17 @@ abstract class ASinglePassPostEffect {
             redGPUContext.resourceManager.createBindGroupLayout(`${this.#name}_BIND_GROUP_LAYOUT_1_USE_MSAA_${useMSAA}`,
                 getComputeBindGroupLayoutDescriptorFromShaderInfo(currentShaderInfo, 1, useMSAA)
             );
-        this.#computeBindGroup0 = gpuDevice.createBindGroup({
-            label: `${this.#name}_BIND_GROUP_0_USE_MSAA_${useMSAA}`,
+        this.#computeBindGroup0List_swap0 =
+            gpuDevice.createBindGroup({
+                label: `${this.#name}_BIND_GROUP_0_USE_MSAA_${useMSAA}_SWAP0`,
+                layout: this.#computeBindGroupLayout0,
+                entries: this.#computeBindGroupEntries0_swap0
+            })
+        this.#computeBindGroup0List_swap1 = gpuDevice.createBindGroup({
+            label: `${this.#name}_BIND_GROUP_0_USE_MSAA_${useMSAA}_SWAP0`,
             layout: this.#computeBindGroupLayout0,
-            entries: this.#computeBindGroupEntries0
-        });
+            entries: this.#computeBindGroupEntries0_swap1
+        })
         this.#computeBindGroup1 = gpuDevice.createBindGroup({
             label: `${this.#name}_BIND_GROUP_1_USE_MSAA_${useMSAA}`,
             layout: this.#computeBindGroupLayout1,

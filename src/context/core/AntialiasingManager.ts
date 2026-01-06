@@ -13,16 +13,14 @@ class AntialiasingManager {
     #useTAA: boolean = false
     #changedMSAA: boolean = true
 
+
     constructor(redGPUContext: RedGPUContext) {
         this.#redGPUContext = redGPUContext;
+        // setter를 통해 초기 상태를 설정하여 로직 일관성 유지
         if (window.devicePixelRatio > 1.0) {
-            this.useTAA = true
-            this.useMSAA = false
-            this.useFXAA = false
+            this.useTAA = true;
         } else {
-            this.useTAA = false
-            this.useMSAA = true
-            this.useFXAA = false
+            this.useMSAA = true;
         }
     }
 
@@ -31,6 +29,8 @@ class AntialiasingManager {
     }
 
     set useTAA(value: boolean) {
+        if (this.#useTAA === value) return;
+        this.#clearAll();
         this.#useTAA = value;
     }
 
@@ -39,13 +39,11 @@ class AntialiasingManager {
     }
 
     set useMSAA(value: boolean) {
-        if (this.#useMSAA !== value) this.#msaaID = createUUID()
+        if (this.#useMSAA === value) return;
+        this.#clearAll();
+        this.#msaaID = createUUID();
         this.#useMSAA = value;
         this.#changedMSAA = true;
-    }
-
-    get msaaID(): string {
-        return this.#msaaID;
     }
 
     get useFXAA(): boolean {
@@ -53,6 +51,8 @@ class AntialiasingManager {
     }
 
     set useFXAA(value: boolean) {
+        if (this.#useFXAA === value) return;
+        this.#clearAll();
         this.#useFXAA = value;
     }
 
@@ -60,8 +60,19 @@ class AntialiasingManager {
         return this.#changedMSAA;
     }
 
-    set changedMSAA(value) {
+    set changedMSAA(value: boolean) { // boolean 타입 명시
         this.#changedMSAA = value;
+    }
+
+    get msaaID(): string {
+        return this.#msaaID;
+    }
+
+    /** 모든 안티앨리어싱 설정을 초기화하는 공통 메서드 */
+    #clearAll() {
+        this.#useMSAA = false;
+        this.#useFXAA = false;
+        this.#useTAA = false;
     }
 }
 

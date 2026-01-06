@@ -9,6 +9,8 @@ import calculateTextureByteSize from "../utils/texture/calculateTextureByteSize"
 import AMultiPassPostEffect from "./core/AMultiPassPostEffect";
 import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
 import postEffectSystemUniformCode from "./core/postEffectSystemUniform.wgsl"
+import SSAO from "./effects/ssao/SSAO";
+import SSR from "./effects/ssr/SSR";
 import TAASharpen from "./TAA/shapen/TAASharpen";
 
 /**
@@ -54,10 +56,46 @@ class PostEffectManager {
     #uniformDataF32: Float32Array
     #uniformDataU32: Uint32Array
     #taaSharpenEffect: TAASharpen
+    #ssao: SSAO;
+    #useSSAO: boolean = false;
+    #ssr: SSR;
+    #useSSR: boolean = false;
 
     constructor(view: View3D) {
         this.#view = view;
         this.#init()
+    }
+
+    get useSSAO(): boolean {
+        return this.#useSSAO;
+    }
+
+    set useSSAO(value: boolean) {
+        this.#useSSAO = value;
+        this.#checkSSAO()
+    }
+
+    get ssao(): SSAO {
+        if (!this.#ssao) {
+            this.#ssao = new SSAO(this.#view.redGPUContext)
+        }
+        return this.#ssao;
+    }
+
+    get useSSR(): boolean {
+        return this.#useSSR;
+    }
+
+    set useSSR(value: boolean) {
+        this.#useSSR = value;
+        this.#checkSSR()
+    }
+
+    get ssr(): SSR {
+        if (!this.#ssr) {
+            this.#ssr = new SSR(this.#view.redGPUContext)
+        }
+        return this.#ssr;
     }
 
     get postEffectSystemUniformBuffer(): UniformBuffer {
@@ -134,6 +172,22 @@ class PostEffectManager {
                 currentTextureView
             );
         }
+        if (this.#useSSAO) {
+            currentTextureView = this.ssao.render(
+                this.#view,
+                width,
+                height,
+                currentTextureView
+            );
+        }
+        if (this.#useSSR) {
+            currentTextureView = this.ssr.render(
+                this.#view,
+                width,
+                height,
+                currentTextureView
+            );
+        }
         if (useTAA) {
             if (this.#view.constructor.name === 'View3D') { // View2D에는 TAA적용 안함{
                 currentTextureView = taa.render(
@@ -167,6 +221,18 @@ class PostEffectManager {
         this.#postEffects.forEach(effect => {
             effect.clear()
         })
+    }
+
+    #checkSSAO() {
+        if (!this.#ssao && this.#useSSAO) {
+            this.#ssao = new SSAO(this.#view.redGPUContext)
+        }
+    }
+
+    #checkSSR() {
+        if (!this.#ssr && this.#useSSR) {
+            this.#ssr = new SSR(this.#view.redGPUContext)
+        }
     }
 
     #updateSystemUniformData(valueLust: { key, value, dataView, targetMembers }[]) {

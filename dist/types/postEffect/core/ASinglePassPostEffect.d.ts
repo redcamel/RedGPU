@@ -14,6 +14,8 @@ export type ASinglePassPostEffectResult = {
 declare abstract class ASinglePassPostEffect {
     #private;
     constructor(redGPUContext: RedGPUContext);
+    get useGBufferNormalTexture(): boolean;
+    set useGBufferNormalTexture(value: boolean);
     get videoMemorySize(): number;
     get useDepthTexture(): boolean;
     set useDepthTexture(value: boolean);
@@ -35,7 +37,7 @@ declare abstract class ASinglePassPostEffect {
         msaa: string;
         nonMsaa: string;
     }, bindGroupLayout?: GPUBindGroupLayout): void;
-    execute(gpuDevice: GPUDevice, width: number, height: number): void;
+    execute(view: View3D, gpuDevice: GPUDevice, width: number, height: number): void;
     render(view: View3D, width: number, height: number, ...sourceTextureInfo: ASinglePassPostEffectResult[]): ASinglePassPostEffectResult;
     update(deltaTime: number): void;
     updateUniform(key: string, value: number | number[] | boolean): void;
