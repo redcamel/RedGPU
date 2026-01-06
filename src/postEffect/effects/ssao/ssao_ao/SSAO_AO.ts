@@ -13,7 +13,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 class SSAO_A0 extends ASinglePassPostEffect {
 
     #radius: number = 0.3;
-    #intensity: number = 1.5;
+    #intensity: number = 1.0;
     #bias: number = 0.02;
     #biasDistanceScale: number = 0.02;
     #fadeDistanceStart: number = 30.0;
