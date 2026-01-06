@@ -6,7 +6,7 @@ if (screenCoord.x >= texSize.x || screenCoord.y >= texSize.y) { return; }
 let originalColor = textureLoad(sourceTexture, screenCoord);
 let depth = textureLoad(depthTexture, screenCoord, 0);
 
-if (depth >= 0.9999) {
+if (depth < 0.001) {
     textureStore(outputTexture, screenCoord, originalColor);
     return;
 }
@@ -87,5 +87,5 @@ let distanceFade = smoothstep(
 var finalAO = saturate(1.0 - (ao * distanceFade));
 finalAO = pow(finalAO, uniforms.contrast);
 
-let finalColor = vec4<f32>(originalColor.rgb * finalAO, originalColor.a);
+let finalColor = vec4<f32>(select( originalColor.rgb * vec3<f32>(finalAO), vec3<f32>(finalAO), uniforms.useBlur > 0.0), originalColor.a);
 textureStore(outputTexture, screenCoord, finalColor);

@@ -6,7 +6,7 @@ struct Uniforms {
     fadeDistanceStart: f32,
     fadeDistanceRange: f32,
     contrast: f32,
-    _padding: f32,
+    useBlur: f32,
 }
 
 fn getTextureSize() -> vec2<f32> {

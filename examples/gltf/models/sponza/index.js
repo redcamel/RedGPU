@@ -54,11 +54,12 @@ const renderTestPane = async (redGPUContext, targetView) => {
 
 	pane.addBinding(targetView.postEffectManager, 'useSSAO', {label: 'Enable SSAO'})
 
+
 	// SSAO 파라미터 조절
 	const ssaoFolder = pane.addFolder({title: 'SSAO Parameters', expanded: true});
 
 	const ssao = targetView.postEffectManager.ssao;
-
+	ssaoFolder.addBinding(ssao, 'useBlur')
 	ssaoFolder.addBinding(ssao, 'radius', {
 		min: 0.01,
 		max: 5.0,
@@ -90,14 +91,14 @@ const renderTestPane = async (redGPUContext, targetView) => {
 	ssaoFolder.addBinding(ssao, 'fadeDistanceStart', {
 		min: 1.0,
 		max: 200.0,
-		step: 1.0,
+		step: 0.01,
 		label: 'Fade Distance Start'
 	});
 
 	ssaoFolder.addBinding(ssao, 'fadeDistanceRange', {
 		min: 1.0,
 		max: 100.0,
-		step: 1.0,
+		step:0.01,
 		label: 'Fade Distance Range'
 	});
 

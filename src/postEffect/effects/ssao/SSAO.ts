@@ -1,94 +1,82 @@
+import redGPUContext from "../../../context/RedGPUContext";
 import RedGPUContext from "../../../context/RedGPUContext";
-import validateNumberRange from "../../../runtimeChecker/validateFunc/validateNumberRange";
-import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
-import ASinglePassPostEffect from "../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../core/createBasicPostEffectCode";
-import computeCode from "./wgsl/computeCode.wgsl"
-import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
+import View3D from "../../../display/view/View3D";
+import AMultiPassPostEffect from "../../core/AMultiPassPostEffect";
+import {ASinglePassPostEffectResult} from "../../core/ASinglePassPostEffect";
+import GaussianBlur from "../blur/GaussianBlur";
+import SSAO_AO from "./SSAO_AO";
+import SSAOBlend from "./SSAOBlend";
 
-/**
- * SSAO(Screen Space Ambient Occlusion) 후처리 이펙트입니다.
- */
-class SSAO extends ASinglePassPostEffect {
+class SSAO extends AMultiPassPostEffect {
+    /** 임계값 이펙트 */
+    #effect_ao: SSAO_AO
+    /** 가우시안 블러 이펙트 */
+    #effect_blur: GaussianBlur
+    #effect_blend: SSAOBlend
 
-    #radius: number = 0.3;
-    #intensity: number = 1.5;
-    #bias: number = 0.02;
-    #biasDistanceScale: number = 0.02;
-    #fadeDistanceStart: number = 30.0;
-    #fadeDistanceRange: number = 20.0;
-    #contrast: number = 1.5;
 
     constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext);
-        this.useDepthTexture = true;
-        this.useGBufferNormalTexture = true;
-
-        this.init(
+        super(
           redGPUContext,
-          'POST_EFFECT_SSAO',
-          createBasicPostEffectCode(this, computeCode, uniformStructCode)
+          [
+              new SSAO_AO(redGPUContext),
+              new GaussianBlur(redGPUContext),
+              new SSAOBlend(redGPUContext),
+          ],
         );
-
-        this.radius = this.#radius;
-        this.intensity = this.#intensity;
-        this.bias = this.#bias;
-        this.biasDistanceScale = this.#biasDistanceScale;
-        this.fadeDistanceStart = this.#fadeDistanceStart;
-        this.fadeDistanceRange = this.#fadeDistanceRange;
-        this.contrast = this.#contrast;
+        this.#effect_ao = this.passList[0] as SSAO_AO
+        this.#effect_blur = this.passList[1] as GaussianBlur
+        this.#effect_blur.size = 1.5
+        this.#effect_blend = this.passList[2] as SSAOBlend
     }
 
-    get radius(): number { return this.#radius; }
-    set radius(value: number) {
-        validatePositiveNumberRange(value, 0.01, 5.0);
-        this.#radius = value;
-        this.updateUniform('radius', value);
+    get useBlur(): boolean {
+        return this.#effect_ao.useBlur;
     }
 
-    get intensity(): number { return this.#intensity; }
-    set intensity(value: number) {
-        validateNumberRange(value, 0.0, 10.0);
-        this.#intensity = value;
-        this.updateUniform('intensity', value);
+    set useBlur(value: boolean) {
+        this.#effect_ao.useBlur = value;
     }
 
-    get bias(): number { return this.#bias; }
-    set bias(value: number) {
-        validateNumberRange(value, 0.0, 0.1);
-        this.#bias = value;
-        this.updateUniform('bias', value);
-    }
+    get radius(): number { return this.#effect_ao.radius; }
+    set radius(value: number) { this.#effect_ao.radius = value; }
 
-    get biasDistanceScale(): number { return this.#biasDistanceScale; }
-    set biasDistanceScale(value: number) {
-        validateNumberRange(value, 0.0, 0.5);
-        this.#biasDistanceScale = value;
-        this.updateUniform('biasDistanceScale', value);
-    }
+    get intensity(): number { return this.#effect_ao.intensity; }
+    set intensity(value: number) { this.#effect_ao.intensity = value; }
 
-    get fadeDistanceStart(): number { return this.#fadeDistanceStart; }
-    set fadeDistanceStart(value: number) {
-        validatePositiveNumberRange(value, 1.0, 200.0);
-        this.#fadeDistanceStart = value;
-        this.updateUniform('fadeDistanceStart', value);
-    }
+    get bias(): number { return this.#effect_ao.bias; }
+    set bias(value: number) { this.#effect_ao.bias = value; }
 
-    get fadeDistanceRange(): number { return this.#fadeDistanceRange; }
-    set fadeDistanceRange(value: number) {
-        validatePositiveNumberRange(value, 1.0, 100.0);
-        this.#fadeDistanceRange = value;
-        this.updateUniform('fadeDistanceRange', value);
-    }
+    get biasDistanceScale(): number { return this.#effect_ao.biasDistanceScale; }
+    set biasDistanceScale(value: number) { this.#effect_ao.biasDistanceScale = value; }
 
-    get contrast(): number { return this.#contrast; }
-    set contrast(value: number) {
-        validateNumberRange(value, 0.5, 4.0);
-        this.#contrast = value;
-        this.updateUniform('contrast', value);
-    }
+    get fadeDistanceStart(): number { return this.#effect_ao.fadeDistanceStart; }
+    set fadeDistanceStart(value: number) { this.#effect_ao.fadeDistanceStart = value; }
 
+    get fadeDistanceRange(): number { return this.#effect_ao.fadeDistanceRange; }
+    set fadeDistanceRange(value: number) { this.#effect_ao.fadeDistanceRange = value; }
+
+    get contrast(): number { return this.#effect_ao.contrast; }
+    set contrast(value: number) { this.#effect_ao.contrast = value; }
+
+
+
+    render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult) {
+        const aoResult =  this.#effect_ao.render(
+          view, width, height, sourceTextureInfo
+        )
+        if(this.useBlur) {
+            const blurResult = this.#effect_blur.render(
+              view, width, height, aoResult
+            )
+            return this.#effect_blend.render(
+              view, width, height, sourceTextureInfo, blurResult
+            )
+        }else{
+            return aoResult
+        }
+    }
 }
 
-Object.freeze(SSAO);
-export default SSAO;
+Object.freeze(SSAO)
+export default SSAO
