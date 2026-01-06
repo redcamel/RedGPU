@@ -2,7 +2,7 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import validateNumberRange from "../../../runtimeChecker/validateFunc/validateNumberRange";
 import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import ASinglePassPostEffect from "../../core/ASinglePassPostEffect";
-import postEffectSystemUniform from "../../core/postEffectSystemUniform.wgsl"
+import createBasicPostEffectCode from "../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 
@@ -21,19 +21,13 @@ class SSAO extends ASinglePassPostEffect {
 
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
-        this.WORK_SIZE_X = 8;
-        this.WORK_SIZE_Y = 8;
-        this.WORK_SIZE_Z = 1;
         this.useDepthTexture = true;
+        this.useGBufferNormalTexture = true;
 
-        const shaderCode = this.#createSSAOShaderCode();
         this.init(
           redGPUContext,
           'POST_EFFECT_SSAO',
-          {
-              msaa: shaderCode.msaa,
-              nonMsaa: shaderCode.nonMsaa
-          }
+          createBasicPostEffectCode(this, computeCode, uniformStructCode)
         );
 
         this.radius = this.#radius;
@@ -94,28 +88,6 @@ class SSAO extends ASinglePassPostEffect {
         this.updateUniform('contrast', value);
     }
 
-    #createSSAOShaderCode() {
-        const createCode = (useMSAA: boolean) => {
-            const depthTextureType = useMSAA ? 'texture_depth_multisampled_2d' : 'texture_depth_2d';
-            return `
-                ${uniformStructCode}
-                
-                @group(0) @binding(0) var sourceTexture : texture_storage_2d<rgba8unorm,read>;
-                @group(0) @binding(1) var depthTexture : ${depthTextureType};
-                @group(0) @binding(2) var gBufferNormalTexture : texture_2d<f32>;
-                
-                @group(1) @binding(0) var outputTexture : texture_storage_2d<rgba8unorm, write>;
-                ${postEffectSystemUniform}
-                @group(1) @binding(2) var<uniform> uniforms: Uniforms;
-                
-                @compute @workgroup_size(${this.WORK_SIZE_X}, ${this.WORK_SIZE_Y}, ${this.WORK_SIZE_Z})
-                fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
-                    ${computeCode}
-                }
-            `;
-        };
-        return { msaa: createCode(true), nonMsaa: createCode(false) };
-    }
 }
 
 Object.freeze(SSAO);
