@@ -52,7 +52,8 @@ abstract class ASinglePassPostEffect {
 	#antialiasingManager: AntialiasingManager
 	#previousSourceTextureReferences: ASinglePassPostEffectResult[] = [];
 	#videoMemorySize: number = 0
-
+	#prevMSAA: Boolean
+	#prevMSAAID: string
 	constructor(redGPUContext: RedGPUContext) {
 		this.#redGPUContext = redGPUContext
 		this.#antialiasingManager = redGPUContext.antialiasingManager
@@ -191,9 +192,9 @@ abstract class ASinglePassPostEffect {
 
 	render(view: View3D, width: number, height: number, ...sourceTextureInfo: ASinglePassPostEffectResult[]): ASinglePassPostEffectResult {
 		const {gpuDevice, antialiasingManager} = this.#redGPUContext
-		const {useMSAA} = antialiasingManager
+		const {useMSAA,msaaID} = antialiasingManager
 		const dimensionsChanged = this.#createRenderTexture(view)
-		const msaaChanged = antialiasingManager.changedMSAA;
+		const msaaChanged = this.#prevMSAA !== useMSAA || this.#prevMSAAID !== msaaID;
 		// 소스 텍스처 변경 감지 - 첫 번째 요소만 사용
 		const sourceTextureChanged = this.#detectSourceTextureChange(sourceTextureInfo);
 		const targetOutputView = this.outputTextureView
@@ -203,6 +204,8 @@ abstract class ASinglePassPostEffect {
 		}
 		this.update(performance.now())
 		this.execute(view, gpuDevice, width, height)
+		this.#prevMSAA = useMSAA;
+		this.#prevMSAAID = msaaID;
 		return {
 			texture: this.#outputTexture,
 			textureView: targetOutputView
