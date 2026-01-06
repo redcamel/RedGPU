@@ -44,6 +44,8 @@ const createTopLevelTabs = (container) => {
             tabButton.classList.add('twod');
         } else if (item.name === '3D') {
             tabButton.classList.add('threed');
+        }else if (item.name === 'PostEffect') {
+            tabButton.classList.add('fourd');
         }
 
         // 상태 복원 시 활성화된 탭 설정

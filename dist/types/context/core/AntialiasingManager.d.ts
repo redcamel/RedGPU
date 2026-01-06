@@ -10,10 +10,10 @@ declare class AntialiasingManager {
     set useTAA(value: boolean);
     get useMSAA(): boolean;
     set useMSAA(value: boolean);
-    get msaaID(): string;
     get useFXAA(): boolean;
     set useFXAA(value: boolean);
     get changedMSAA(): boolean;
     set changedMSAA(value: boolean);
+    get msaaID(): string;
 }
 export default AntialiasingManager;
