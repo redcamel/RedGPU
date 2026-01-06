@@ -12,13 +12,13 @@ import SSR from "./effects/ssr/SSR";
  */
 declare class PostEffectManager {
     #private;
+    constructor(view: View3D);
     get useSSAO(): boolean;
     set useSSAO(value: boolean);
     get ssao(): SSAO;
     get useSSR(): boolean;
     set useSSR(value: boolean);
     get ssr(): SSR;
-    constructor(view: View3D);
     get postEffectSystemUniformBuffer(): UniformBuffer;
     get view(): View3D;
     get effectList(): Array<ASinglePassPostEffect | AMultiPassPostEffect>;
