@@ -3,11 +3,11 @@ import View3D from "../../../display/view/View3D";
 import ASinglePassPostEffect, {ASinglePassPostEffectResult} from "../../core/ASinglePassPostEffect";
 
 class SSAOBlend extends ASinglePassPostEffect {
-	constructor(redGPUContext: RedGPUContext) {
-		super(redGPUContext);
-		const {WORK_SIZE_X, WORK_SIZE_Y, WORK_SIZE_Z} = this
-		const computeCode =
-			`
+    constructor(redGPUContext: RedGPUContext) {
+        super(redGPUContext);
+        const {WORK_SIZE_X, WORK_SIZE_Y, WORK_SIZE_Z} = this
+        const computeCode =
+            `
 
 				@group(0) @binding(0) var sourceTexture0 : texture_storage_2d<rgba8unorm,read>;
 				@group(0) @binding(1) var sourceTexture1 : texture_storage_2d<rgba8unorm,read>;
@@ -35,19 +35,19 @@ class SSAOBlend extends ASinglePassPostEffect {
 						textureStore(outputTexture, index, finalColor );
 				};
 			`
-		this.init(
-			redGPUContext,
-			'POST_EFFECT_OLD_BLOOM',
-			{
-				msaa: computeCode,
-				nonMsaa: computeCode
-			},
-		)
-	}
+        this.init(
+            redGPUContext,
+            'POST_EFFECT_OLD_BLOOM',
+            {
+                msaa: computeCode,
+                nonMsaa: computeCode
+            },
+        )
+    }
 
-	render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult, sourceTextureInfo1: ASinglePassPostEffectResult) {
-		return super.render(view, width, height, sourceTextureInfo, sourceTextureInfo1)
-	}
+    render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult, sourceTextureInfo1: ASinglePassPostEffectResult) {
+        return super.render(view, width, height, sourceTextureInfo, sourceTextureInfo1)
+    }
 }
 
 Object.freeze(SSAOBlend)

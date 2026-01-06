@@ -49,7 +49,7 @@ class SSR extends ASinglePassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_SSR',
-          createBasicPostEffectCode(this, computeCode, uniformStructCode)
+            createBasicPostEffectCode(this, computeCode, uniformStructCode)
         );
         // 초기값 설정
         this.maxSteps = this.#maxSteps;

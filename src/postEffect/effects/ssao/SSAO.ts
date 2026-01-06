@@ -1,4 +1,3 @@
-import redGPUContext from "../../../context/RedGPUContext";
 import RedGPUContext from "../../../context/RedGPUContext";
 import View3D from "../../../display/view/View3D";
 import AMultiPassPostEffect from "../../core/AMultiPassPostEffect";
@@ -17,12 +16,12 @@ class SSAO extends AMultiPassPostEffect {
 
     constructor(redGPUContext: RedGPUContext) {
         super(
-          redGPUContext,
-          [
-              new SSAO_AO(redGPUContext),
-              new GaussianBlur(redGPUContext),
-              new SSAOBlend(redGPUContext),
-          ],
+            redGPUContext,
+            [
+                new SSAO_AO(redGPUContext),
+                new GaussianBlur(redGPUContext),
+                new SSAOBlend(redGPUContext),
+            ],
         );
         this.#effect_ao = this.passList[0] as SSAO_AO
         this.#effect_blur = this.passList[1] as GaussianBlur
@@ -38,41 +37,75 @@ class SSAO extends AMultiPassPostEffect {
         this.#effect_ao.useBlur = value;
     }
 
-    get radius(): number { return this.#effect_ao.radius; }
-    set radius(value: number) { this.#effect_ao.radius = value; }
+    get radius(): number {
+        return this.#effect_ao.radius;
+    }
 
-    get intensity(): number { return this.#effect_ao.intensity; }
-    set intensity(value: number) { this.#effect_ao.intensity = value; }
+    set radius(value: number) {
+        this.#effect_ao.radius = value;
+    }
 
-    get bias(): number { return this.#effect_ao.bias; }
-    set bias(value: number) { this.#effect_ao.bias = value; }
+    get intensity(): number {
+        return this.#effect_ao.intensity;
+    }
 
-    get biasDistanceScale(): number { return this.#effect_ao.biasDistanceScale; }
-    set biasDistanceScale(value: number) { this.#effect_ao.biasDistanceScale = value; }
+    set intensity(value: number) {
+        this.#effect_ao.intensity = value;
+    }
 
-    get fadeDistanceStart(): number { return this.#effect_ao.fadeDistanceStart; }
-    set fadeDistanceStart(value: number) { this.#effect_ao.fadeDistanceStart = value; }
+    get bias(): number {
+        return this.#effect_ao.bias;
+    }
 
-    get fadeDistanceRange(): number { return this.#effect_ao.fadeDistanceRange; }
-    set fadeDistanceRange(value: number) { this.#effect_ao.fadeDistanceRange = value; }
+    set bias(value: number) {
+        this.#effect_ao.bias = value;
+    }
 
-    get contrast(): number { return this.#effect_ao.contrast; }
-    set contrast(value: number) { this.#effect_ao.contrast = value; }
+    get biasDistanceScale(): number {
+        return this.#effect_ao.biasDistanceScale;
+    }
 
+    set biasDistanceScale(value: number) {
+        this.#effect_ao.biasDistanceScale = value;
+    }
+
+    get fadeDistanceStart(): number {
+        return this.#effect_ao.fadeDistanceStart;
+    }
+
+    set fadeDistanceStart(value: number) {
+        this.#effect_ao.fadeDistanceStart = value;
+    }
+
+    get fadeDistanceRange(): number {
+        return this.#effect_ao.fadeDistanceRange;
+    }
+
+    set fadeDistanceRange(value: number) {
+        this.#effect_ao.fadeDistanceRange = value;
+    }
+
+    get contrast(): number {
+        return this.#effect_ao.contrast;
+    }
+
+    set contrast(value: number) {
+        this.#effect_ao.contrast = value;
+    }
 
 
     render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult) {
-        const aoResult =  this.#effect_ao.render(
-          view, width, height, sourceTextureInfo
+        const aoResult = this.#effect_ao.render(
+            view, width, height, sourceTextureInfo
         )
-        if(this.useBlur) {
+        if (this.useBlur) {
             const blurResult = this.#effect_blur.render(
-              view, width, height, aoResult
+                view, width, height, aoResult
             )
             return this.#effect_blend.render(
-              view, width, height, sourceTextureInfo, blurResult
+                view, width, height, sourceTextureInfo, blurResult
             )
-        }else{
+        } else {
             return aoResult
         }
     }

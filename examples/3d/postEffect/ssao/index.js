@@ -22,8 +22,7 @@ RedGPU.init(
         view.postEffectManager.useSSR = true
 
 
-            // redGPUContext.antialiasingManager.useTAA = true
-
+        redGPUContext.antialiasingManager.useTAA = true
 
 
         loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Sponza/glTF/Sponza.gltf');
