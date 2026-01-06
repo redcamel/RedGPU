@@ -1,9 +1,9 @@
 
-import RedGPUContext from "../../../context/RedGPUContext";
-import validateNumberRange from "../../../runtimeChecker/validateFunc/validateNumberRange";
-import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
-import ASinglePassPostEffect from "../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../core/createBasicPostEffectCode";
+import RedGPUContext from "../../../../context/RedGPUContext";
+import validateNumberRange from "../../../../runtimeChecker/validateFunc/validateNumberRange";
+import validatePositiveNumberRange from "../../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
+import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
+import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 

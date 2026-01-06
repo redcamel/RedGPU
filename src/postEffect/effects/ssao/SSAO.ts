@@ -4,7 +4,7 @@ import View3D from "../../../display/view/View3D";
 import AMultiPassPostEffect from "../../core/AMultiPassPostEffect";
 import {ASinglePassPostEffectResult} from "../../core/ASinglePassPostEffect";
 import GaussianBlur from "../blur/GaussianBlur";
-import SSAO_AO from "./SSAO_AO";
+import SSAO_AO from "./ssao_ao/SSAO_AO";
 import SSAOBlend from "./SSAOBlend";
 
 class SSAO extends AMultiPassPostEffect {
