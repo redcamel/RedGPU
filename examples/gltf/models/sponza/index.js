@@ -18,8 +18,7 @@ RedGPU.init(
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		redGPUContext.addView(view);
 
-		const ssaoEffect = new RedGPU.PostEffect.SSAO(redGPUContext);
-		view.postEffectManager.addEffect(ssaoEffect);
+		view.postEffectManager.useSSAO = true
 
 		loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Sponza/glTF/Sponza.gltf');
 
@@ -28,7 +27,7 @@ RedGPU.init(
 		};
 		renderer.start(redGPUContext, render);
 
-		renderTestPane(redGPUContext, view, ssaoEffect);
+		renderTestPane(redGPUContext, view);
 	},
 	(failReason) => {
 		console.error('RedGPU initialization failed:', failReason);
@@ -46,71 +45,63 @@ function loadGLTF(view, url) {
 	});
 }
 
-const renderTestPane = async (redGPUContext, targetView, ssaoEffect) => {
+const renderTestPane = async (redGPUContext, targetView) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const {createIblHelper, setDebugButtons} = await import('../../../exampleHelper/createExample/panes/index.js');
 	setDebugButtons(redGPUContext);
 	const pane = new Pane();
 	createIblHelper(pane, targetView, RedGPU);
 
-	// SSAO 토글
-	const testData = {
-		useSSAO: true,
-	}
-	pane.addBinding(testData, 'useSSAO', {label: 'Enable SSAO'}).on('change', (v) => {
-		if (v.value) {
-			targetView.postEffectManager.addEffect(ssaoEffect)
-		} else {
-			targetView.postEffectManager.removeEffect(ssaoEffect)
-		}
-	})
+	pane.addBinding(targetView.postEffectManager, 'useSSAO', {label: 'Enable SSAO'})
 
 	// SSAO 파라미터 조절
 	const ssaoFolder = pane.addFolder({title: 'SSAO Parameters', expanded: true});
 
-	ssaoFolder.addBinding(ssaoEffect, 'radius', {
+	const ssao = targetView.postEffectManager.ssao;
+
+	ssaoFolder.addBinding(ssao, 'radius', {
 		min: 0.01,
 		max: 5.0,
 		step: 0.01,
 		label: 'Radius'
 	});
 
-	ssaoFolder.addBinding(ssaoEffect, 'intensity', {
+	ssaoFolder.addBinding(ssao, 'intensity', {
 		min: 0.0,
 		max: 10.0,
 		step: 0.1,
 		label: 'Intensity'
 	});
 
-	ssaoFolder.addBinding(ssaoEffect, 'bias', {
+	ssaoFolder.addBinding(ssao, 'bias', {
 		min: 0.0,
 		max: 0.1,
 		step: 0.001,
 		label: 'Bias'
 	});
 
-	ssaoFolder.addBinding(ssaoEffect, 'biasDistanceScale', {
+	ssaoFolder.addBinding(ssao, 'biasDistanceScale', {
 		min: 0.0,
 		max: 0.5,
 		step: 0.01,
 		label: 'Bias Distance Scale'
 	});
 
-	ssaoFolder.addBinding(ssaoEffect, 'fadeDistanceStart', {
+	ssaoFolder.addBinding(ssao, 'fadeDistanceStart', {
 		min: 1.0,
 		max: 200.0,
 		step: 1.0,
 		label: 'Fade Distance Start'
 	});
 
-	ssaoFolder.addBinding(ssaoEffect, 'fadeDistanceRange', {
+	ssaoFolder.addBinding(ssao, 'fadeDistanceRange', {
 		min: 1.0,
 		max: 100.0,
 		step: 1.0,
 		label: 'Fade Distance Range'
 	});
 
-	ssaoFolder.addBinding(ssaoEffect, 'contrast', {
+	ssaoFolder.addBinding(ssao, 'contrast', {
 		min: 0.5,
 		max: 4.0,
 		step: 0.1,

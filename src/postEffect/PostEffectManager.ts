@@ -9,6 +9,7 @@ import calculateTextureByteSize from "../utils/texture/calculateTextureByteSize"
 import AMultiPassPostEffect from "./core/AMultiPassPostEffect";
 import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
 import postEffectSystemUniformCode from "./core/postEffectSystemUniform.wgsl"
+import SSAO from "./effects/ssao/SSAO";
 import TAASharpen from "./TAA/shapen/TAASharpen";
 
 /**
@@ -54,6 +55,20 @@ class PostEffectManager {
     #uniformDataF32: Float32Array
     #uniformDataU32: Uint32Array
     #taaSharpenEffect: TAASharpen
+
+    #ssao:SSAO;
+    #useSSAO:boolean = false;
+    get useSSAO(): boolean {
+        return this.#useSSAO;
+    }
+
+    set useSSAO(value: boolean) {
+        this.#useSSAO = value;
+    }
+
+    get ssao(): SSAO {
+        return this.#ssao;
+    }
 
     constructor(view: View3D) {
         this.#view = view;
@@ -128,6 +143,15 @@ class PostEffectManager {
         });
         if (useFXAA) {
             currentTextureView = fxaa.render(
+                this.#view,
+                width,
+                height,
+                currentTextureView
+            );
+        }
+        if(this.#useSSAO){
+            if(!this.#ssao) this.#ssao = new SSAO(redGPUContext);
+            currentTextureView = this.#ssao.render(
                 this.#view,
                 width,
                 height,

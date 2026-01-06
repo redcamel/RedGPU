@@ -31,7 +31,6 @@ import LensDistortion from "./effects/lens/lensDistortion/LensDistortion";
 import Vignetting from "./effects/lens/vignetting/Vignetting";
 import OldBloom from "./effects/oldBloom/OldBloom";
 import Sharpen from "./effects/Sharpen";
-import SSAO from "./effects/ssao/SSAO";
 import SSR from "./effects/ssr/SSR";
 import PostEffectManager from "./PostEffectManager";
-export { PostEffectManager, BrightnessContrast, ColorBalance, ColorTemperatureTint, Grayscale, HueSaturation, Invert, Threshold, Vibrance, Blur, BlurX, BlurY, DirectionalBlur, GaussianBlur, RadialBlur, ZoomBlur, ChromaticAberration, DOF, LensDistortion, Vignetting, Fog, HeightFog, FilmGrain, OldBloom, Sharpen, Convolution, SSR, SSAO };
+export { PostEffectManager, BrightnessContrast, ColorBalance, ColorTemperatureTint, Grayscale, HueSaturation, Invert, Threshold, Vibrance, Blur, BlurX, BlurY, DirectionalBlur, GaussianBlur, RadialBlur, ZoomBlur, ChromaticAberration, DOF, LensDistortion, Vignetting, Fog, HeightFog, FilmGrain, OldBloom, Sharpen, Convolution, SSR, };
