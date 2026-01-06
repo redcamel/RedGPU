@@ -4,38 +4,43 @@ const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
 RedGPU.init(
-  canvas,
-  (redGPUContext) => {
-      const controller = new RedGPU.Camera.FreeController(redGPUContext);
+    canvas,
+    (redGPUContext) => {
+        const controller = new RedGPU.Camera.FreeController(redGPUContext);
 
-      controller.z = 1.0
-      controller.x = 2
-      controller.y = 2
-      controller.tilt = 15
-      controller.pan = 110
+        controller.z = 1.0
+        controller.x = 2
+        controller.y = 2
+        controller.tilt = 15
+        controller.pan = 110
 
-      const scene = new RedGPU.Display.Scene();
-      const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-      redGPUContext.addView(view);
+        const scene = new RedGPU.Display.Scene();
+        const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+        redGPUContext.addView(view);
 
-      view.postEffectManager.useSSAO = true
-      view.postEffectManager.useSSR = true
+        view.postEffectManager.useSSAO = true
+        view.postEffectManager.useSSR = true
 
-      loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Sponza/glTF/Sponza.gltf');
 
-      const renderer = new RedGPU.Renderer(redGPUContext);
-      const render = () => {
-      };
-      renderer.start(redGPUContext, render);
+            // redGPUContext.antialiasingManager.useTAA = true
 
-      renderTestPane(redGPUContext, view);
-  },
-  (failReason) => {
-      console.error('RedGPU initialization failed:', failReason);
-      const errorDiv = document.createElement('div');
-      errorDiv.innerHTML = failReason;
-      document.body.appendChild(errorDiv);
-  }
+
+
+        loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Sponza/glTF/Sponza.gltf');
+
+        const renderer = new RedGPU.Renderer(redGPUContext);
+        const render = () => {
+        };
+        renderer.start(redGPUContext, render);
+
+        renderTestPane(redGPUContext, view);
+    },
+    (failReason) => {
+        console.error('RedGPU initialization failed:', failReason);
+        const errorDiv = document.createElement('div');
+        errorDiv.innerHTML = failReason;
+        document.body.appendChild(errorDiv);
+    }
 );
 
 function loadGLTF(view, url) {
@@ -100,7 +105,7 @@ const renderTestPane = async (redGPUContext, targetView) => {
     ssaoFolder.addBinding(ssao, 'fadeDistanceRange', {
         min: 1.0,
         max: 100.0,
-        step:0.01,
+        step: 0.01,
         label: 'Fade Distance Range'
     });
 

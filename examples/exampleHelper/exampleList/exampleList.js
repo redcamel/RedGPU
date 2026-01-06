@@ -1171,7 +1171,7 @@ const ExampleList = [
                         experimental: true,
                         list: [{
                             experimental: true,
-                            name: 'Screen Space Reflection',
+                            name: 'SSR',
                             path: '3d/postEffect/ssr',
                             thumb: '3d/postEffect/ssr/thumb.png',
                             description: {
@@ -1184,7 +1184,7 @@ const ExampleList = [
                     {
                         name: 'Screen Space Ambient Occlusion',
                         list: [{
-                            name: 'Screen Space Ambient Occlusion',
+                            name: 'SSAO',
                             path: '3d/postEffect/ssao',
                             thumb: '3d/postEffect/ssao/thumb.png',
                             description: {
