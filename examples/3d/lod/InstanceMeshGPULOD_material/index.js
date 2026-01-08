@@ -41,7 +41,7 @@ RedGPU.init(
         console.error('초기화 실패:', failReason);
         const errorMessage = document.createElement('div');
         errorMessage.innerHTML = failReason;
-        errorMessage.style.cssText = 'color: red; padding: 20px; font-family: monospace;';
+        errorMessage.style.cssText = 'color: red; padding: 20px; ';
         document.body.appendChild(errorMessage);
     }
 );

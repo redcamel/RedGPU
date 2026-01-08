@@ -146,13 +146,13 @@ function updateInfoDisplay(demo) {
             </div>
             <div style="display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; font-size: 11px;">
                 <span style="color: #6b7280;">CSS Pixel:</span>
-                <span style="font-family: monospace; color: #dc2626;">(${mouseData.screen.x.toFixed(0)}, ${mouseData.screen.y.toFixed(0)})</span>
+                <span style=" color: #dc2626;">(${mouseData.screen.x.toFixed(0)}, ${mouseData.screen.y.toFixed(0)})</span>
                 
                 <span style="color: #6b7280;">Device Pixel:</span>
-                <span style="font-family: monospace; color: #dc2626;">(${(mouseData.screen.x * devicePixelRatio).toFixed(0)}, ${(mouseData.screen.y * devicePixelRatio).toFixed(0)})</span>
+                <span style=" color: #dc2626;">(${(mouseData.screen.x * devicePixelRatio).toFixed(0)}, ${(mouseData.screen.y * devicePixelRatio).toFixed(0)})</span>
                 
                 <span style="color: #6b7280;">World Coord:</span>
-                <span style="font-family: monospace; color: #059669;">(${mouseData.world.x.toFixed(2)}, ${mouseData.world.y.toFixed(2)}, ${mouseData.world.z.toFixed(2)})</span>
+                <span style=" color: #059669;">(${mouseData.world.x.toFixed(2)}, ${mouseData.world.y.toFixed(2)}, ${mouseData.world.z.toFixed(2)})</span>
                 
                 <span style="color: #6b7280;">Status:</span>
                 <span style="color: ${mouseData.isInCanvas ? '#059669' : '#dc2626'};">
@@ -167,10 +167,10 @@ function updateInfoDisplay(demo) {
             </div>
             <div style="display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; font-size: 11px;">
                 <span style="color: #6b7280;">World Position:</span>
-                <span style="font-family: monospace; color: #059669;">(${targetMesh.x.toFixed(2)}, ${targetMesh.y.toFixed(2)}, ${targetMesh.z.toFixed(2)})</span>
+                <span style=" color: #059669;">(${targetMesh.x.toFixed(2)}, ${targetMesh.y.toFixed(2)}, ${targetMesh.z.toFixed(2)})</span>
                 
                 <span style="color: #6b7280;">Screen Position:</span>
-                <span style="font-family: monospace; color: #dc2626;">(${targetScreenPoint[0].toFixed(1)}, ${targetScreenPoint[1].toFixed(1)})</span>
+                <span style=" color: #dc2626;">(${targetScreenPoint[0].toFixed(1)}, ${targetScreenPoint[1].toFixed(1)})</span>
             </div>
         </div>
         
@@ -180,13 +180,13 @@ function updateInfoDisplay(demo) {
             </div>
             <div style="display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; font-size: 11px;">
                 <span style="color: #6b7280;">Device Pixel Ratio:</span>
-                <span style="font-family: monospace;">${devicePixelRatio}x</span>
+                <span style="">${devicePixelRatio}x</span>
                 
                 <span style="color: #6b7280;">Canvas Size:</span>
-                <span style="font-family: monospace;">${canvas.width} × ${canvas.height}</span>
+                <span style="">${canvas.width} × ${canvas.height}</span>
                 
                 <span style="color: #6b7280;">ViewPort Size:</span>
-                <span style="font-family: monospace;">${view.pixelRectArray[2]} × ${view.pixelRectArray[3]}</span>
+                <span style="">${view.pixelRectArray[2]} × ${view.pixelRectArray[3]}</span>
             </div>
         </div>
         

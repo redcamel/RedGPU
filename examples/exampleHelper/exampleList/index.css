@@ -1,4 +1,4 @@
-@import url('https://cdn.jsdelivr.net/gh/sun-typeface/SUIT/fonts/variable/woff2/SUIT-Variable.css');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
 
 html, body {
     height: 100%;
@@ -12,7 +12,7 @@ html, body {
 }
 
 * {
-    font-family: 'SUIT Variable', 'Arial', sans-serif;
+    font-family: 'Inter', 'Arial', sans-serif;
     font-weight: 500;
     box-sizing: border-box;
     position: relative;
@@ -110,17 +110,17 @@ html, body {
 .group-title {
     color: #fff;
     margin: 0 0 15px 0;
-    font-size: 1.4em;
-    font-weight: 700;
+    font-size: 1.25em;
+    font-weight: 500;
 }
 
 .subgroup-title {
     color: #ddd;
     margin: 10px 0 5px 0;
-    font-size: 1.2em;
+    font-size: 1.1em;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     padding-bottom: 5px;
-    font-weight: 600;
+    font-weight: 500;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -150,9 +150,9 @@ html, body {
     flex-direction: column;
     gap: 8px;
     padding: 16px;
-    font-size: 22px;
-    text-shadow: 0 0 10px #000;
+    font-size: 1.25rem;
     line-height: 1;
+    font-weight: 700;
 }
 
 .project_right {
@@ -176,7 +176,7 @@ html, body {
         justify-content: center;
         line-height: 1;
         border-radius: 50%;
-        background: #111;
+        background: #18181b;
         cursor: pointer;
     }
 
@@ -190,10 +190,11 @@ html, body {
 }
 
 .project_title span {
-    font-size: 12px;
+    font-size: 0.70rem;
+    font-weight: 400;
+    line-height: 1rem;
     color: #fff;
-    opacity: 0.5;
-    text-shadow: 0 0 10px #000;
+    opacity: 0.6;
 }
 
 .ko-text, .en-text, .descriptionUl {
@@ -224,11 +225,14 @@ html, body {
     width: 200px;
     max-width: 200px;
     line-height: 1;
-    border-radius: 8px;
+    border-radius: 12px;
     overflow: hidden;
     height: fit-content;
+    /*border: 1px solid #333333;*/
 
-
+}
+.regular-items-container .example-item {
+    border: 1px solid #333333;
 }
 
 /* 모바일 화면 분기 처리 */
@@ -250,16 +254,20 @@ html, body {
 }
 
 .example-name {
-    font-size: 1.0em;
+    font-size: 0.9em;
+    font-weight: 400;
     z-index: 1;
     display: flex;
     align-items: center;
     padding: 5px 12px 8px;
-    background: #000 linear-gradient(to right, rgba(155, 155, 155, 0.1) 0%, rgba(0, 0, 0, 0.0) 100%);
+    /*background: #000 linear-gradient(to right, rgba(155, 155, 155, 0.1) 0%, rgba(0, 0, 0, 0.0) 100%);*/
+    background: #1f1f1f;
     line-height: 1.4;
     word-break: keep-all;
     box-shadow: 0 -30px 50px rgba(0, 0, 0, 0.5);
     border-top: 1px solid rgba(255, 255, 255, 0.06);
+    color:#8c8c8c;
+
 }
 
 .example-link {
@@ -286,8 +294,8 @@ a {
 }
 
 a img {
-    border-radius: 8px 8px 0 0;
-    border: 1px solid rgba(0, 0, 0, 0.3);
+    border-radius: 12px 12px 0 0;
+
     border-bottom: none;
 }
 
@@ -344,12 +352,13 @@ a:hover img {
     align-items: center;
     justify-content: center;
     padding: 8px 16px;
-    border-radius: 6px;
+    border-radius: 12px;
     cursor: pointer;
-    background: rgba(0, 0, 0, 0.2);
+    background: #323232;
     color: #fff;
-    font-size: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    font-size: 12px;
+    font-weight: 400;
+    border: 1px solid #333;
 }
 
 .tabs-container .active {
@@ -360,13 +369,12 @@ a:hover img {
 
 .search-container input {
     width: 100%;
-    padding: 8px 16px;
-    border-radius: 6px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 7px 16px;
+    border-radius: 12px;
+    border: 1px solid #ededed;
     background: rgba(255, 255, 255, 0.9);
-    font-size: 14px;
+    font-size: 12px;
     outline: 0;
-    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 /* 리스트 스타일 */

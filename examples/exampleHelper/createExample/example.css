@@ -1,4 +1,4 @@
-@import url('https://cdn.jsdelivr.net/gh/sun-typeface/SUIT/fonts/variable/woff2/SUIT-Variable.css');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
 @import url('loadExampleInfo/sourceView.css');
 
 html, body {
@@ -26,7 +26,7 @@ html, body {
 
     margin: 0;
     padding: 0;
-    font-family: 'SUIT Variable', 'Arial', sans-serif;
+    font-family: 'Inter', 'Arial', sans-serif;
     font-weight: 500;
 
     box-sizing: border-box;
@@ -35,13 +35,13 @@ html, body {
 }
 
 .footer {
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid #333333;
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
     height: 50px;
-    background: rgb(32, 32, 32);
+    background: #111112;
     padding: 0 10px;
     display: flex;
     justify-content: space-between;
@@ -130,7 +130,7 @@ html, body {
     justify-content: center;
     padding: 0 16px;
     min-height: 42px;
-    background-color: #121111;
+    background-color: #111112;
     color: white;
     text-decoration: none;
     font-size: 12px;
@@ -138,7 +138,7 @@ html, body {
 }
 
 .nav-button:hover {
-    background-color: #191919;
+    background-color: #1f1f1f;
 }
 
 .nav-button span {
@@ -195,10 +195,11 @@ html, body {
     left: 50%;
     transform: translate(-50%, -50%);
     line-height: 1;
-    font-size: 1.1em;
+    font-size: 1.0em;
     /*color: rgb(227 216 210);*/
-    color: rgb(221, 132, 80);
-    font-weight: 700;
+    /*color: rgb(221, 132, 80);*/
+    color: #fff;
+    font-weight: 500;
     display: flex;
     align-items: center;
     gap: 8px;

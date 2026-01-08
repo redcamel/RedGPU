@@ -11,9 +11,9 @@
 
 .helperSourceView {
     padding: 8px 12px;
-    font-size: 13px;
-    border-radius: 4px;
-    background-color: #007BFF;
+    font-size: 12px;
+    border-radius: 12px;
+    background-color: #4e62e2;
     color: #fff;
     border: none;
     cursor: pointer;
@@ -58,14 +58,13 @@
     overflow-y: auto;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
     color: #fff;
-    font-family: 'Courier New', Courier, monospace;
 }
 
 /* 상단 영역 스타일 (타이틀 + 닫기 버튼) */
 .helperSourceViewTopBar {
     position: sticky;
     top: 0;
-    background-color: #2d2d2d;
+    background-color: #1f1f1f;
     padding: 12px 16px;
     display: flex;
     justify-content: space-between;
@@ -85,8 +84,8 @@
     color: #fff;
     border: none;
     padding: 8px 12px;
-    font-size: 14px;
-    border-radius: 4px;
+    font-size: 12px;
+    border-radius: 12px;
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
