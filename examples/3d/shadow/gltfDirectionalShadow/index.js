@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js";
+import * as RedGPU from "../../../../dist/index.js?t=1767862292106";
 
 const canvas = document.createElement("canvas");
 document.body.appendChild(canvas);
@@ -70,8 +70,8 @@ const addGround = (redGPUContext, scene) => {
 };
 
 const renderTestPane = async (redGPUContext, targetView) => {
-    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js");
+    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1767862292106");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1767862292106");
     setDebugButtons(redGPUContext);
     const {createIblHelper} = await import('../../../exampleHelper/createExample/panes/index.js');
 
