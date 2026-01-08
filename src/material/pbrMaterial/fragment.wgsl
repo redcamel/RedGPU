@@ -505,6 +505,8 @@ fn main(inputData:InputData) -> FragmentOutput {
        resultAlpha *= diffuseSampleColor.a;
     #redgpu_endIf
 
+    if (resultAlpha == 0.0) { discard; }
+
     let albedo:vec3<f32> = baseColor.rgb ;
 
     // ---------- KHR_materials_unlit ----------
@@ -1068,11 +1070,11 @@ let attenuation = rangePart * invSquare;
     // ---------- 컷오프 판단 ----------
     #redgpu_if useCutOff
         if (resultAlpha <= u_cutOff) { discard; }
+
     #redgpu_endIf
 
     output.color = finalColor;
 
-    #redgpu_if useSSR
     {
         let smoothness = 1.0 - roughnessParameter;
         let smoothnessCurved = smoothness * smoothness * (3.0 - 2.0 * smoothness);
@@ -1083,7 +1085,6 @@ let attenuation = rangePart * invSquare;
         let baseReflectionStrength = smoothnessCurved * baseReflection;
         output.gBufferNormal = vec4<f32>(N * 0.5 + 0.5, baseReflectionStrength);
     }
-    #redgpu_endIf
     output.gBufferMotionVector = vec4<f32>(calculateMotionVector(inputData.currentClipPos, inputData.prevClipPos),0.0, 1.0 );
 
 //  // 디버깅: 모션벡터 증폭하여 확인
