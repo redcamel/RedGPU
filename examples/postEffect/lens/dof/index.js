@@ -94,7 +94,7 @@ function loadGLTF(redGPUContext, scene, url) {
         redGPUContext,
         url,
         (v) => {
-            const material = new RedGPU.Material.BitmapMaterial(redGPUContext, new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../../assets/UV_Grid_Sm.jpg'))
+            const material = new RedGPU.Material.BitmapMaterial(redGPUContext, new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg'))
 
             // 🎯 Z축 일렬 배치 (DOF 테스트 최적화)
             const zLineObjects = 15;        // 객체 수 줄임
