@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1767864574385";
+import * as RedGPU from "../../../../dist/index.js?t=1767866967649";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -55,10 +55,10 @@ RedGPU.init(
 	}
 );
 const renderTestPane = async (redGPUContext, controller) => {
-	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1767864574385');
+	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1767866967649');
 	const {
 		setDebugButtons
-	} = await import("../../../exampleHelper/createExample/panes/index.js?t=1767864574385");
+	} = await import("../../../exampleHelper/createExample/panes/index.js?t=1767866967649");
 
 	setDebugButtons(redGPUContext);
 	const pane = new Pane();
