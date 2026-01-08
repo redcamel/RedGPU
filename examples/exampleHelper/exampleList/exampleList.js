@@ -921,11 +921,10 @@ const ExampleList = [
     {
         name: 'PostEffect',
         list: [
-
             {
                 name: 'Convolution',
-                path: '3d/postEffect/convolution',
-                thumb: '3d/postEffect/convolution/thumb.png',
+                path: 'postEffect/convolution',
+                thumb: 'postEffect/convolution/thumb.png',
                 description: {
                     ko: ``,
                     en: ``
@@ -933,8 +932,8 @@ const ExampleList = [
             },
             {
                 name: 'FilmGrain',
-                path: '3d/postEffect/filmGrain',
-                thumb: '3d/postEffect/filmGrain/thumb.png',
+                path: 'postEffect/filmGrain',
+                thumb: 'postEffect/filmGrain/thumb.png',
                 description: {
                     ko: ``,
                     en: ``
@@ -942,8 +941,8 @@ const ExampleList = [
             },
             {
                 name: 'OldBloom',
-                path: '3d/postEffect/oldBloom',
-                thumb: '3d/postEffect/oldBloom/thumb.png',
+                path: 'postEffect/oldBloom',
+                thumb: 'postEffect/oldBloom/thumb.png',
                 description: {
                     ko: ``,
                     en: ``
@@ -951,8 +950,8 @@ const ExampleList = [
             },
             {
                 name: 'Sharpen',
-                path: '3d/postEffect/sharpen',
-                thumb: '3d/postEffect/sharpen/thumb.png',
+                path: 'postEffect/sharpen',
+                thumb: 'postEffect/sharpen/thumb.png',
                 description: {
                     ko: ``,
                     en: ``
@@ -963,8 +962,8 @@ const ExampleList = [
                 list: [
                     {
                         name: 'Grayscale',
-                        path: '3d/postEffect/adjustments/grayscale',
-                        thumb: '3d/postEffect/adjustments/grayscale/thumb.png',
+                        path: 'postEffect/adjustments/grayscale',
+                        thumb: 'postEffect/adjustments/grayscale/thumb.png',
                         description: {
                             ko: ``,
                             en: ``
@@ -972,8 +971,8 @@ const ExampleList = [
                     },
                     {
                         name: 'Invert',
-                        path: '3d/postEffect/adjustments/invert',
-                        thumb: '3d/postEffect/adjustments/invert/thumb.png',
+                        path: 'postEffect/adjustments/invert',
+                        thumb: 'postEffect/adjustments/invert/thumb.png',
                         description: {
                             ko: ``,
                             en: ``
@@ -981,8 +980,8 @@ const ExampleList = [
                     },
                     {
                         name: 'ColorBalance',
-                        path: '3d/postEffect/adjustments/colorBalance',
-                        thumb: '3d/postEffect/adjustments/colorBalance/thumb.png',
+                        path: 'postEffect/adjustments/colorBalance',
+                        thumb: 'postEffect/adjustments/colorBalance/thumb.png',
                         description: {
                             ko: ``,
                             en: ``
@@ -990,8 +989,8 @@ const ExampleList = [
                     },
                     {
                         name: 'ColorTemperatureTint',
-                        path: '3d/postEffect/adjustments/colorTemperatureTint',
-                        thumb: '3d/postEffect/adjustments/colorTemperatureTint/thumb.png',
+                        path: 'postEffect/adjustments/colorTemperatureTint',
+                        thumb: 'postEffect/adjustments/colorTemperatureTint/thumb.png',
                         description: {
                             ko: ``,
                             en: ``
@@ -1000,8 +999,8 @@ const ExampleList = [
 
                     {
                         name: 'BrightnessContrast',
-                        path: '3d/postEffect/adjustments/brightnessContrast',
-                        thumb: '3d/postEffect/adjustments/brightnessContrast/thumb.png',
+                        path: 'postEffect/adjustments/brightnessContrast',
+                        thumb: 'postEffect/adjustments/brightnessContrast/thumb.png',
                         description: {
                             ko: ``,
                             en: ``
@@ -1009,8 +1008,8 @@ const ExampleList = [
                     },
                     {
                         name: 'HueSaturation',
-                        path: '3d/postEffect/adjustments/hueSaturation',
-                        thumb: '3d/postEffect/adjustments/hueSaturation/thumb.png',
+                        path: 'postEffect/adjustments/hueSaturation',
+                        thumb: 'postEffect/adjustments/hueSaturation/thumb.png',
                         description: {
                             ko: ``,
                             en: ``
@@ -1018,8 +1017,8 @@ const ExampleList = [
                     },
                     {
                         name: 'Threshold',
-                        path: '3d/postEffect/adjustments/threshold',
-                        thumb: '3d/postEffect/adjustments/threshold/thumb.png',
+                        path: 'postEffect/adjustments/threshold',
+                        thumb: 'postEffect/adjustments/threshold/thumb.png',
                         description: {
                             ko: ``,
                             en: ``
@@ -1027,8 +1026,8 @@ const ExampleList = [
                     },
                     {
                         name: 'Vibrance',
-                        path: '3d/postEffect/adjustments/vibrance',
-                        thumb: '3d/postEffect/adjustments/vibrance/thumb.png',
+                        path: 'postEffect/adjustments/vibrance',
+                        thumb: 'postEffect/adjustments/vibrance/thumb.png',
                         description: {
                             ko: ``,
                             en: ``
@@ -1042,8 +1041,8 @@ const ExampleList = [
                 list: [
                     {
                         name: 'Blur',
-                        path: '3d/postEffect/blur/blur',
-                        thumb: '3d/postEffect/blur/blur/thumb.png',
+                        path: 'postEffect/blur/blur',
+                        thumb: 'postEffect/blur/blur/thumb.png',
                         description: {
                             ko: ``,
                             en: ``
@@ -1051,8 +1050,8 @@ const ExampleList = [
                     },
                     {
                         name: 'BlurX',
-                        path: '3d/postEffect/blur/blurX',
-                        thumb: '3d/postEffect/blur/blurX/thumb.png',
+                        path: 'postEffect/blur/blurX',
+                        thumb: 'postEffect/blur/blurX/thumb.png',
                         description: {
                             ko: ``,
                             en: ``
@@ -1060,8 +1059,8 @@ const ExampleList = [
                     },
                     {
                         name: 'BlurY',
-                        path: '3d/postEffect/blur/blurY',
-                        thumb: '3d/postEffect/blur/blurY/thumb.png',
+                        path: 'postEffect/blur/blurY',
+                        thumb: 'postEffect/blur/blurY/thumb.png',
                         description: {
                             ko: ``,
                             en: ``
@@ -1069,8 +1068,8 @@ const ExampleList = [
                     },
                     {
                         name: 'DirectionalBlur',
-                        path: '3d/postEffect/blur/directionalBlur',
-                        thumb: '3d/postEffect/blur/directionalBlur/thumb.png',
+                        path: 'postEffect/blur/directionalBlur',
+                        thumb: 'postEffect/blur/directionalBlur/thumb.png',
                         description: {
                             ko: ``,
                             en: ``
@@ -1078,8 +1077,8 @@ const ExampleList = [
                     },
                     {
                         name: 'GaussianBlur',
-                        path: '3d/postEffect/blur/gaussianBlur',
-                        thumb: '3d/postEffect/blur/gaussianBlur/thumb.png',
+                        path: 'postEffect/blur/gaussianBlur',
+                        thumb: 'postEffect/blur/gaussianBlur/thumb.png',
                         description: {
                             ko: ``,
                             en: ``
@@ -1087,8 +1086,8 @@ const ExampleList = [
                     },
                     {
                         name: 'RadialBlur',
-                        path: '3d/postEffect/blur/radialBlur',
-                        thumb: '3d/postEffect/blur/radialBlur/thumb.png',
+                        path: 'postEffect/blur/radialBlur',
+                        thumb: 'postEffect/blur/radialBlur/thumb.png',
                         description: {
                             ko: ``,
                             en: ``
@@ -1096,8 +1095,8 @@ const ExampleList = [
                     },
                     {
                         name: 'ZoomBlur',
-                        path: '3d/postEffect/blur/zoomBlur',
-                        thumb: '3d/postEffect/blur/zoomBlur/thumb.png',
+                        path: 'postEffect/blur/zoomBlur',
+                        thumb: 'postEffect/blur/zoomBlur/thumb.png',
                         description: {
                             ko: ``,
                             en: ``
@@ -1110,8 +1109,8 @@ const ExampleList = [
                 list: [
                     {
                         name: 'LensDistortion',
-                        path: '3d/postEffect/lens/lensDistortion',
-                        thumb: '3d/postEffect/lens/lensDistortion/thumb.png',
+                        path: 'postEffect/lens/lensDistortion',
+                        thumb: 'postEffect/lens/lensDistortion/thumb.png',
                         description: {
                             ko: ``,
                             en: ``
@@ -1119,8 +1118,8 @@ const ExampleList = [
                     },
                     {
                         name: 'ChromaticAberration',
-                        path: '3d/postEffect/lens/chromaticAberration',
-                        thumb: '3d/postEffect/lens/chromaticAberration/thumb.png',
+                        path: 'postEffect/lens/chromaticAberration',
+                        thumb: 'postEffect/lens/chromaticAberration/thumb.png',
                         description: {
                             ko: ``,
                             en: ``
@@ -1128,8 +1127,8 @@ const ExampleList = [
                     },
                     {
                         name: 'DepthOfField',
-                        path: '3d/postEffect/lens/dof',
-                        thumb: '3d/postEffect/lens/dof/thumb.png',
+                        path: 'postEffect/lens/dof',
+                        thumb: 'postEffect/lens/dof/thumb.png',
                         description: {
                             ko: ``,
                             en: ``
@@ -1137,8 +1136,8 @@ const ExampleList = [
                     },
                     {
                         name: 'Vignetting',
-                        path: '3d/postEffect/lens/vignetting',
-                        thumb: '3d/postEffect/lens/vignetting/thumb.png',
+                        path: 'postEffect/lens/vignetting',
+                        thumb: 'postEffect/lens/vignetting/thumb.png',
                         description: {
                             ko: ``,
                             en: ``
@@ -1151,8 +1150,8 @@ const ExampleList = [
                 list: [
                     {
                         name: 'Fog',
-                        path: '3d/postEffect/fog/fog',
-                        thumb: '3d/postEffect/fog/fog/thumb.png',
+                        path: 'postEffect/fog/fog',
+                        thumb: 'postEffect/fog/fog/thumb.png',
                         description: {
                             ko: ``,
                             en: ``
@@ -1161,8 +1160,8 @@ const ExampleList = [
                     {
                         name: 'HeightFog',
 
-                        path: '3d/postEffect/fog/heightFog',
-                        thumb: '3d/postEffect/fog/heightFog/thumb.png',
+                        path: 'postEffect/fog/heightFog',
+                        thumb: 'postEffect/fog/heightFog/thumb.png',
                         description: {
                             ko: ``,
                             en: ``
@@ -1176,8 +1175,8 @@ const ExampleList = [
                 list: [{
                     experimental: true,
                     name: 'SSR',
-                    path: '3d/postEffect/ssr',
-                    thumb: '3d/postEffect/ssr/thumb.png',
+                    path: 'postEffect/ssr',
+                    thumb: 'postEffect/ssr/thumb.png',
                     description: {
                         ko: ``,
                         en: ``
@@ -1189,8 +1188,8 @@ const ExampleList = [
                 name: 'Screen Space Ambient Occlusion',
                 list: [{
                     name: 'SSAO',
-                    path: '3d/postEffect/ssao',
-                    thumb: '3d/postEffect/ssao/thumb.png',
+                    path: 'postEffect/ssao',
+                    thumb: 'postEffect/ssao/thumb.png',
                     description: {
                         ko: ``,
                         en: ``
