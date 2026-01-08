@@ -26,4 +26,4 @@
    * @see [Mesh lookAt Methods example](/RedGPU/examples/3d/mesh/lookAt/)
    * @see [Mesh CPU LOD](/RedGPU/examples/3d/lod/MeshCPULOD/)
    ```
-10. typedoc 를 요청할경우 코드 전문을 다보여줄것
+10. typedoc 를 요청할경우 코드 전문을 다보여줄것 
