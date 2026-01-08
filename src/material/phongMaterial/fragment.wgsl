@@ -266,7 +266,7 @@ fn main(inputData:InputData) -> FragmentOutput {
       discard;
     }
     output.color = finalColor;
-    #redgpu_if useSSR
+
     {
         let metallic = uniforms.metallic;
         let roughness = uniforms.roughness;
@@ -279,7 +279,7 @@ fn main(inputData:InputData) -> FragmentOutput {
         let baseReflectionStrength = smoothnessCurved * baseReflection;
         output.gBufferNormal = vec4<f32>(N * 0.5 + 0.5, baseReflectionStrength);
     }
-    #redgpu_endIf
+
     output.gBufferMotionVector = vec4<f32>(calculateMotionVector(inputData.currentClipPos, inputData.prevClipPos),0.0, 1.0 );
     return output;
 }
