@@ -2,50 +2,63 @@ const fs = require('fs');
 const path = require('path');
 
 const timestamp = Date.now();
+// 실행 위치(root)를 기준으로 examples 폴더 지정
+const targetFolder = path.join(process.cwd(), 'examples');
 
-// 특정 폴더 경로 지정
-const targetFolder = path.join(__dirname, './examples'); // 원하는 폴더로 변경
-
-// 재귀적으로 모든 HTML 파일 찾기
-function getAllHtmlFiles(dir, fileList = []) {
+function getAllFiles(dir, fileList = []) {
+    if (!fs.existsSync(dir)) return fileList;
     const files = fs.readdirSync(dir);
-
     files.forEach(file => {
         const filePath = path.join(dir, file);
         const stat = fs.statSync(filePath);
-
         if (stat.isDirectory()) {
-            // 하위 폴더 재귀 탐색
-            getAllHtmlFiles(filePath, fileList);
+            getAllFiles(filePath, fileList);
         } else if (file.endsWith('.html') || file.endsWith('.js')) {
-            // HTML 파일 추가
             fileList.push(filePath);
         }
     });
-
     return fileList;
 }
-
-// 모든 HTML 파일 처리
+console.log(`\n✨ Start! with t=${timestamp}`);
 try {
-    const htmlFiles = getAllHtmlFiles(targetFolder);
 
-    console.log(`Found ${htmlFiles.length} HTML files`);
+    const files = getAllFiles(targetFolder);
+    console.log(`🔍 Scanning ${files.length} files in /examples...`);
 
-    htmlFiles.forEach(filePath => {
-        let html = fs.readFileSync(filePath, 'utf8');
+    files.forEach(filePath => {
+        let content = fs.readFileSync(filePath, 'utf8');
+        let originalContent = content;
 
-        // 기존 쿼리 파라미터 제거 후 새로운 타임스탬프 추가
-        const updated = html.replace(/\.js(\?[^"]*)?"/g, `.js?t=${timestamp}"`);
+        // 1. HTML 파일인 경우 메타 태그 추가 로직
+        if (filePath.endsWith('.html')) {
+            const metaTags = `
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">`;
 
-        // 변경사항이 있을 때만 저장
-        if (html !== updated) {
-            fs.writeFileSync(filePath, updated);
-            console.log(`✓ Updated: ${path.relative(__dirname, filePath)}`);
+            // 이미 메타 태그가 있는지 확인 (중복 방지)
+            if (!content.includes('http-equiv="Cache-Control"')) {
+                // <head> 태그 바로 다음에 메타 태그 주입
+                content = content.replace(/<head>/i, `<head>${metaTags}`);
+            }
+        }
+
+        // 2. 기존 .js 경로 치환 기능 (기존 로직 유지)
+        const updated = content.replace(
+          /(['"])(.+?\.js)(\?[^'"]*)?(\1)/g,
+          (match, quote, pathOnly, oldQuery) => {
+              return `${quote}${pathOnly}?t=${timestamp}${quote}`;
+          }
+        );
+
+        // 변경사항이 있을 때만 파일 쓰기
+        if (originalContent !== updated) {
+            fs.writeFileSync(filePath, updated, 'utf8');
+            console.log(`✓ Updated: ${path.relative(process.cwd(), filePath)}`);
         }
     });
 
-    console.log(`\nCache busting applied: ${timestamp}`);
+    console.log(`\n✨ Success! Meta tags added and .js references updated with t=${timestamp}`);
 } catch (error) {
-    console.error('Error:', error.message);
+    console.error('❌ Error:', error.message);
 }
