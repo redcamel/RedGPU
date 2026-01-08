@@ -25,7 +25,7 @@ class SSAO extends AMultiPassPostEffect {
         );
         this.#effect_ao = this.passList[0] as SSAO_AO
         this.#effect_blur = this.passList[1] as GaussianBlur
-        this.#effect_blur.size = 1.5
+        this.#effect_blur.size = 3.0
         this.#effect_blend = this.passList[2] as SSAOBlend
     }
 
