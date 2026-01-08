@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1767862292106";
+import * as RedGPU from "../../../../dist/index.js?t=1767864574385";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -68,10 +68,10 @@ RedGPU.init(
 );
 
 const renderTestPane = async (redGPUContext, controller, targetMesh) => {
-	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1767864574385');
 	const {
 		setDebugButtons
-	} = await import("../../../exampleHelper/createExample/panes/index.js?t=1767862292106");
+	} = await import("../../../exampleHelper/createExample/panes/index.js?t=1767864574385");
 
 	setDebugButtons(redGPUContext);
 	const pane = new Pane();
@@ -253,7 +253,7 @@ const renderTestPane = async (redGPUContext, controller, targetMesh) => {
 			controller[`set${key.charAt(0).toUpperCase()}${key.substr(1)}`](ev.value);
 		});
 	}
-	const update = ()=>{
+	const update = () => {
 		pane.refresh()
 		requestAnimationFrame(update);
 	}

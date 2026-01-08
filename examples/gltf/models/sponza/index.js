@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1767862292106";
+import * as RedGPU from "../../../../dist/index.js?t=1767864574385";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -8,9 +8,9 @@ RedGPU.init(
 	(redGPUContext) => {
 		const controller = new RedGPU.Camera.FreeController(redGPUContext);
 
-		controller.z= 1.0
-		controller.x= 2
-		controller.y= 2
+		controller.z = 1.0
+		controller.x = 2
+		controller.y = 2
 		controller.tilt = 15
 		controller.pan = 110
 
@@ -44,8 +44,11 @@ function loadGLTF(view, url) {
 }
 
 const renderTestPane = async (redGPUContext, targetView) => {
-	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
-	const {createIblHelper, setDebugButtons} = await import('../../../exampleHelper/createExample/panes/index.js');
+	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1767864574385');
+	const {
+		createIblHelper,
+		setDebugButtons
+	} = await import('../../../exampleHelper/createExample/panes/index.js?t=1767864574385');
 	setDebugButtons(redGPUContext);
 	const pane = new Pane();
 	createIblHelper(pane, targetView, RedGPU);
