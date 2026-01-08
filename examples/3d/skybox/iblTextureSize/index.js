@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js";
+import * as RedGPU from "../../../../dist/index.js?t=1767862292106";
 
 // 1. Create and append a canvas
 // 1. 캔버스를 생성하고 문서에 추가
@@ -126,6 +126,6 @@ const renderTestPane = async (redGPUContext, targetView) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
     const {createPostEffectLabel} = await import('../../../exampleHelper/createExample/loadExampleInfo/createPostEffectLabel.js');
     createPostEffectLabel('Custom IBL Texture Size 32 * 32', redGPUContext.detector.isMobile, 'Basic IBL Texture Size 512 * 512')
-    const {setDebugButtons} = await import( "../../../exampleHelper/createExample/panes/index.js" );
+    const {setDebugButtons} = await import( "../../../exampleHelper/createExample/panes/index.js?t=1767862292106" );
     setDebugButtons(redGPUContext);
 };

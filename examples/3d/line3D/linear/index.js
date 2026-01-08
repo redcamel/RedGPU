@@ -1,5 +1,5 @@
 // RedGPU 사용을 위한 모듈 임포트
-import * as RedGPU from "../../../../dist/index.js";
+import * as RedGPU from "../../../../dist/index.js?t=1767862292106";
 
 /* 1. 캔버스 생성 */
 const canvas = document.createElement("canvas");
@@ -114,9 +114,9 @@ function rainbowHex(t) {
 }
 
 const renderTestPane = async (redGPUContext, view) => {
-    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
+    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1767862292106");
     const pane = new Pane();
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1767862292106");
     setDebugButtons(redGPUContext);
     // 옵션 초기화
     const debugOptions = {

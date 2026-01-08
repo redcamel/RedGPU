@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js";
-import {setSeparator} from "../../../exampleHelper/createExample/panes/index.js";
+import * as RedGPU from "../../../../dist/index.js?t=1767862292106";
+import {setSeparator} from "../../../exampleHelper/createExample/panes/index.js?t=1767862292106";
 
 // 1. Create and append a canvas
 // 1. 캔버스를 생성하고 문서에 추가
@@ -64,7 +64,7 @@ RedGPU.init(
 
 const renderTestPane = async (redGPUContext, testParticle) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1767862292106");
     setDebugButtons(redGPUContext);
     const pane = new Pane();
     {

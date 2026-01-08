@@ -1,15 +1,15 @@
-import createBitmapTextureTest from "./createBitmapTextureTest.js";
-import createCameraTest from "./createCameraTest.js";
-import createFieldOfView from "./createFieldOfView.js";
-import createGridTest from "./createGridTest.js";
-import createIblHelper from "./createIblHelper.js";
-import setSceneListTest from "./scene/setSceneListTest.js";
-import setSingleSceneTest from "./scene/setSingleSceneTest.js";
-import setAntialiasing_pane from "./setAntialiasing_pane.js";
-import setRedGPUTest_pane from "./setRedGPUTest_pane.js";
-import setSingleViewTest from "./view/setSingleViewTest.js";
-import setViewListTest from "./view/setViewListTest.js";
-import setViewListTest_Pane from "./view/setViewListTest.js";
+import createBitmapTextureTest from "./createBitmapTextureTest.js?t=1767862292106";
+import createCameraTest from "./createCameraTest.js?t=1767862292106";
+import createFieldOfView from "./createFieldOfView.js?t=1767862292106";
+import createGridTest from "./createGridTest.js?t=1767862292106";
+import createIblHelper from "./createIblHelper.js?t=1767862292106";
+import setSceneListTest from "./scene/setSceneListTest.js?t=1767862292106";
+import setSingleSceneTest from "./scene/setSingleSceneTest.js?t=1767862292106";
+import setAntialiasing_pane from "./setAntialiasing_pane.js?t=1767862292106";
+import setRedGPUTest_pane from "./setRedGPUTest_pane.js?t=1767862292106";
+import setSingleViewTest from "./view/setSingleViewTest.js?t=1767862292106";
+import setViewListTest from "./view/setViewListTest.js?t=1767862292106";
+import setViewListTest_Pane from "./view/setViewListTest.js?t=1767862292106";
 
 /**
  * Sets a separator in the given pane.
