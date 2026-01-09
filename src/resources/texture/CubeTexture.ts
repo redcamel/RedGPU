@@ -63,7 +63,7 @@ class CubeTexture extends ManagementResourceBase {
         this.#onLoad = onLoad
         this.#onError = onError
         this.#useMipmap = useMipMap
-        this.#format = format || navigator.gpu.getPreferredCanvasFormat()
+        this.#format = format || `${navigator.gpu.getPreferredCanvasFormat()}-srgb` as GPUTextureFormat
         this.#srcList = this.#getParsedSrc(srcList);
         this.cacheKey = this.#getCacheKey(srcList);
         const {table} = this.targetResourceManagedState

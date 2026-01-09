@@ -1065,7 +1065,7 @@ let attenuation = rangePart * invSquare;
     finalColor += vec4<f32>( emissiveSamplerColor.rgb * u_emissiveFactor * u_emissiveStrength, 0);
 
     // ---------- srgb로 변환해주어야함 ----------
-    finalColor = linear_to_srgb(finalColor);
+//    finalColor = linear_to_srgb(finalColor);
 
     // ---------- 컷오프 판단 ----------
     #redgpu_if useCutOff

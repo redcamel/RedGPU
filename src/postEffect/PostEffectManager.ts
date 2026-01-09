@@ -12,6 +12,7 @@ import postEffectSystemUniformCode from "./core/postEffectSystemUniform.wgsl"
 import SSAO from "./effects/ssao/SSAO";
 import SSR from "./effects/ssr/SSR";
 import TAASharpen from "./TAA/shapen/TAASharpen";
+import ToneMapping from "./toneMapping/ToneMapping";
 
 /**
  * 후처리 이펙트(PostEffect) 관리 클래스입니다.
@@ -142,6 +143,7 @@ class PostEffectManager {
         this.#postEffects.length = 0
     }
 
+    #toneMapping:ToneMapping
     render() {
         const {viewRenderTextureManager, redGPUContext, taa, fxaa} = this.#view;
         const {antialiasingManager} = redGPUContext
@@ -188,6 +190,24 @@ class PostEffectManager {
                 currentTextureView
             );
         }
+        {
+            if(!this.#toneMapping){
+                this.#toneMapping = new ToneMapping(redGPUContext)
+            }
+            this.#toneMapping.exposure = this.#view.ibl?.exposure || 1.0;
+            currentTextureView = this.#toneMapping.render(
+                this.#view,
+                width,
+                height,
+                currentTextureView
+            );
+        }
+        currentTextureView = fxaa.render(
+            this.#view,
+            width,
+            height,
+            currentTextureView
+        );
         if (useTAA) {
             if (this.#view.constructor.name === 'View3D') { // View2D에는 TAA적용 안함{
                 currentTextureView = taa.render(
@@ -214,6 +234,7 @@ class PostEffectManager {
                 );
             }
         }
+
         return currentTextureView;
     }
 

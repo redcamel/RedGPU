@@ -229,6 +229,7 @@ class HDRTexture extends ManagementResourceBase {
             const hdrData = await this.#hdrLoader.loadHDRFile(src);
             this.#hdrData = hdrData;
             this.#recommendedExposure = hdrData.recommendedExposure || 1.0;
+            keepLog('this.#recommendedExposure',this.#recommendedExposure)
             this.#exposure = this.#recommendedExposure;
             if (hdrData.luminanceStats) {
                 this.#luminanceAnalysis = {
@@ -374,7 +375,6 @@ class HDRTexture extends ManagementResourceBase {
             this.redGPUContext,
             float32Data,
             {
-                exposure: this.#exposure,
                 width: this.#hdrData.width,
                 height: this.#hdrData.height,
                 workgroupSize: [8, 8]
@@ -390,11 +390,13 @@ class HDRTexture extends ManagementResourceBase {
         let uploadData: ArrayBuffer;
         switch (this.#format) {
             case 'rgba16float':
+                keepLog('여긴가 rgba16float')
                 bytesPerPixel = 8;
                 const float16Data = await this.#float32ToFloat16WithToneMapping(hdrData.data);
                 uploadData = float16Data.buffer as ArrayBuffer;
                 break;
             case 'rgba8unorm':
+                keepLog('여긴가 rgba8unorm')
                 bytesPerPixel = 4;
                 const uint8Data = await this.#float32ToUint8WithToneMapping(hdrData.data);
                 uploadData = uint8Data.buffer as ArrayBuffer;
