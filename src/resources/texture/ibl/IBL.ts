@@ -22,7 +22,7 @@ class IBL {
     #irradianceTexture: IBLCubeTexture;
     #iblTexture: IBLCubeTexture
     #uuid = createUUID()
-    #format: GPUTextureFormat = 'rgba8unorm'
+    #format: GPUTextureFormat = 'rgba16float'
     #targetTexture: HDRTexture | CubeTexture
     #envCubeSize: number
     #iblCubeSize: number
