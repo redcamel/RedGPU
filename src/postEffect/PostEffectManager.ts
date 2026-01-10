@@ -204,7 +204,7 @@ class PostEffectManager {
             );
         }
         {
-            // this.toneMapping.exposure = this.#view.ibl?.exposure || 1.0;
+            this.toneMapping.exposure = this.#view.ibl?.exposure || 1.0;
             currentTextureView = this.toneMapping.render(
                 this.#view,
                 width,

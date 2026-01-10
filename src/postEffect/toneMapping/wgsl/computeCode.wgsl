@@ -2,8 +2,8 @@
     let inputColor = textureLoad(sourceTexture, index);
 
     // 1. 톤맵핑 적용 (결과는 선형 공간)
-    // let toneMapped = linearToneMapping(inputColor.rgb, uniforms.exposure);
-    let toneMapped = khronosPbrNeutralToneMapping(inputColor.rgb, uniforms.exposure);
+     let toneMapped = linearToneMapping(inputColor.rgb, uniforms.exposure);
+//    let toneMapped = khronosPbrNeutralToneMapping(inputColor.rgb, uniforms.exposure);
 
     // 2. 선형 공간에서의 색상 보정 (수학적 정확도 향상)
     let contrastRGB = applyContrast(toneMapped, uniforms.contrast);

@@ -98,7 +98,7 @@ class IBL {
         if (this.#sourceCubeTexture) {
             if (!this.#iblTexture.gpuTexture) {
                 const iblTexture = await downSampleCubeMapGenerator.downsampleCubemap(this.#sourceCubeTexture, this.#iblCubeSize)
-                this.#iblTexture.gpuTexture = iblTexture
+                this.#iblTexture.gpuTexture = this.#sourceCubeTexture
             }
             if (!this.#environmentTexture.gpuTexture) {
                 this.#environmentTexture.gpuTexture = this.#sourceCubeTexture

@@ -31,6 +31,7 @@ fn sphericalToUV(dir: vec3<f32>) -> vec2<f32> {
 @fragment
 fn main(inputData: InputData) -> FragmentOutput {
     var cubemapVec = inputData.vertexPosition.xyz - vec3<f32>(0.5);
+    cubemapVec = vec3<f32>(-cubemapVec.x, cubemapVec.y, -cubemapVec.z);
     let mipmapCount: f32 = f32(textureNumLevels(skyboxTexture) - 1);
     let blurCurve = uniforms.blur * uniforms.blur; // 제곱 곡선
     let skyboxColor = textureSampleLevel(skyboxTexture, skyboxTextureSampler, cubemapVec, mipmapCount * blurCurve);
