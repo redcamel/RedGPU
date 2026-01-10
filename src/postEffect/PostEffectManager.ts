@@ -278,6 +278,7 @@ class PostEffectManager {
         }
         {
             if (this.toneMapping) {
+                // this.toneMapping.exposure = this.#view.ibl?.exposure || 1
                 currentTextureView = this.toneMapping.render(
                     this.#view,
                     width,
@@ -465,7 +466,7 @@ class PostEffectManager {
 	
       @group(0) @binding(0) var sourceTextureSampler: sampler;
       @group(0) @binding(1) var sourceTexture : texture_2d<f32>;
-      @group(0) @binding(2) var outputTexture : texture_storage_2d<rgba8unorm, write>;
+      @group(0) @binding(2) var outputTexture : texture_storage_2d<rgba16float, write>;
  
       @compute @workgroup_size(${this.#COMPUTE_WORKGROUP_SIZE_X},${this.#COMPUTE_WORKGROUP_SIZE_Y},${this.#COMPUTE_WORKGROUP_SIZE_Z})
       fn main (
@@ -493,7 +494,7 @@ class PostEffectManager {
             entries: [
                 {binding: 0, visibility: GPUShaderStage.COMPUTE, sampler: {type: 'filtering',}},
                 {binding: 1, visibility: GPUShaderStage.COMPUTE, texture: {}},
-                {binding: 2, visibility: GPUShaderStage.COMPUTE, storageTexture: {format: 'rgba8unorm'}},
+                {binding: 2, visibility: GPUShaderStage.COMPUTE, storageTexture: {format: 'rgba16float'}},
             ]
         });
     }
@@ -501,7 +502,7 @@ class PostEffectManager {
     #createStorageTexture(gpuDevice: GPUDevice, width: number, height: number) {
         return this.#view.redGPUContext.resourceManager.createManagedTexture({
             size: {width: width, height: height,},
-            format: 'rgba8unorm',
+            format: 'rgba16float',
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_SRC,
             label: `${this.#view.name}_POST_EFFECT_STORAGE_TEXTURE_${width}x${height}`,
         });

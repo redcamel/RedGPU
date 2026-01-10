@@ -365,7 +365,7 @@ abstract class ASinglePassPostEffect {
                     width,
                     height,
                 },
-                format: 'rgba8unorm',
+                format: 'rgba16float',
                 usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_SRC,
                 label: `${name}_${this.#name}_${width}x${height}}`
             });

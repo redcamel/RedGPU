@@ -77,7 +77,8 @@ fn fragmentMain(inputData: VertexOut) -> FragmentOutput {
     }
 
     // 3. 최종 출력값 설정
-    output.color = vec4<f32>(finalColor, baseAlpha * distanceFade);
+//    output.color = vec4<f32>(finalColor, baseAlpha * distanceFade);
+    output.color = vec4<f32>(finalColor, baseAlpha);
 
     // 4. 모션 벡터 계산 및 저장
     let motion = calculateMotionVector(inputData.currentClipPos, inputData.prevClipPos);

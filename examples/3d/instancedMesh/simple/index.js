@@ -67,19 +67,19 @@ RedGPU.init(
 	}
 );
 
-async function createTest(context, scene, material) {
+async function createTest(redGPUContext, scene, material) {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1767864574385');
 
 	const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1767864574385");
 	setDebugButtons(RedGPU,redGPUContext);
 
-	const maxInstanceCount = context.detector.isMobile ? 100000 : RedGPU.Display.InstancingMesh.getLimitSize();
-	const instanceCount = context.detector.isMobile ? 20000 : 200000;
+	const maxInstanceCount = redGPUContext.detector.isMobile ? 100000 : RedGPU.Display.InstancingMesh.getLimitSize();
+	const instanceCount = redGPUContext.detector.isMobile ? 20000 : 200000;
 	const mesh = new RedGPU.Display.InstancingMesh(
-		context,
+		redGPUContext,
 		maxInstanceCount,
 		instanceCount,
-		new RedGPU.Primitive.Plane(context),
+		new RedGPU.Primitive.Plane(redGPUContext),
 		material
 	);
 

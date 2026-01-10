@@ -99,7 +99,7 @@ class DrawDebuggerGrid {
                 entryPoint: 'fragmentMain',
                 targets: [
                     {
-                        format: navigator.gpu.getPreferredCanvasFormat(),
+                        format: 'rgba16float',
                         blend: {
                             color: this.#blendColorState.state,
                             alpha: this.#blendAlphaState.state

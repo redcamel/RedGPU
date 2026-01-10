@@ -7,10 +7,10 @@ const createCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: 
     return `
 
 			${uniformStruct}
-      @group(0) @binding(0) var sourceTexture : texture_storage_2d<rgba8unorm,read>;
+      @group(0) @binding(0) var sourceTexture : texture_storage_2d<rgba16float,read>;
       ${effect.useDepthTexture ? `@group(0) @binding(1) var depthTexture : ${depthTextureType}` : ''};
       ${effect.useGBufferNormalTexture ? `@group(0) @binding(${effect.useDepthTexture ? 2 : 1}) var gBufferNormalTexture : texture_2d<f32>` : ''};
-      @group(1) @binding(0) var outputTexture : texture_storage_2d<rgba8unorm, write>;
+      @group(1) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;
       ${postEffectSystemUniform}
       ${uniformStruct ? '@group(1) @binding(2) var<uniform> uniforms: Uniforms;' : ''}
       @compute @workgroup_size(${WORK_SIZE_X},${WORK_SIZE_Y},${WORK_SIZE_Z})
