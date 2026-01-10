@@ -172,7 +172,7 @@ const renderTestPane = async (redGPUContext, base, shape) => {
 		setRedGPUTest_pane,
 		setDebugButtons
 	} = await import("../../../exampleHelper/createExample/panes/index.js?t=1767864574385");
-	setDebugButtons(redGPUContext);
+	setDebugButtons(RedGPU, redGPUContext);
 	const pane = new Pane();
 	setRedGPUTest_pane(pane, redGPUContext, false);
 	const tintSettings = {

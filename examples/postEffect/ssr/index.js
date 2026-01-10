@@ -107,7 +107,7 @@ async function createSSRControls(redGPUContext, targetView) {
 	const {setDebugButtons} = await import("../../exampleHelper/createExample/panes/index.js?t=1767864574385");
 
 	const pane = new Pane({title: 'SSR 옵션 조절'});
-	setDebugButtons(redGPUContext);
+	setDebugButtons(RedGPU, redGPUContext);
 
 	const ssr = targetView.postEffectManager.ssr;
 	pane.addBinding(targetView.postEffectManager, 'useSSR', {label: 'SSR 활성화'});

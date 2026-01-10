@@ -271,7 +271,7 @@ async function createHeightFogControlPanel(redGPUContext, view, heightFog, contr
 
 	const pane = new Pane({title: 'Height Fog Demo', expanded: true});
 	const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1767864574385");
-	setDebugButtons(redGPUContext);
+	setDebugButtons(RedGPU, redGPUContext);
 	const PARAMS = {
 		enabled: true,
 		autoRotate: true,

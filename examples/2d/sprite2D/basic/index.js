@@ -41,7 +41,7 @@ const renderTestPane = async (redGPUContext, sprite2D) => {
 		setDebugButtons,
 		setRedGPUTest_pane
 	} = await import("../../../exampleHelper/createExample/panes/index.js?t=1767864574385");
-	setDebugButtons(redGPUContext);
+	setDebugButtons(RedGPU, redGPUContext);
 	const pane = new Pane();
 	setRedGPUTest_pane(pane, redGPUContext, false);
 

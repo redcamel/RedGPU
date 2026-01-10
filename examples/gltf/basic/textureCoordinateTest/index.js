@@ -50,5 +50,5 @@ const renderTestPane = async (redGPUContext, targetView) => {
 	const pane = new Pane();
 
 	createIblHelper(pane, targetView, RedGPU);
-	setDebugButtons(redGPUContext);
+	setDebugButtons(RedGPU, redGPUContext);
 };

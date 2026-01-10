@@ -202,7 +202,7 @@ const renderTestPane = async (redGPUContext, targetView) => {
 	const {createPostEffectLabel} = await import('../../../exampleHelper/createExample/loadExampleInfo/createPostEffectLabel.js?t=1767864574385');
 	createPostEffectLabel('DOF', redGPUContext.detector.isMobile)
 	const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1767864574385");
-	setDebugButtons(redGPUContext);
+	setDebugButtons(RedGPU, redGPUContext);
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1767864574385');
 	const pane = new Pane();
 	const effect = targetView.postEffectManager.getEffectAt(0)

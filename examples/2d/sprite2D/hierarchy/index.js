@@ -60,7 +60,7 @@ const renderTestPane = async (redGPUContext, parent, child) => {
 		setDebugButtons,
 		setRedGPUTest_pane
 	} = await import("../../../exampleHelper/createExample/panes/index.js?t=1767864574385");
-	setDebugButtons(redGPUContext);
+	setDebugButtons(RedGPU, redGPUContext);
 	const maxW = redGPUContext.screenRectObject.width;
 	const maxH = redGPUContext.screenRectObject.height;
 

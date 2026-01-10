@@ -130,7 +130,7 @@ async function createControlPanel(redGPUContext, view, fogEffect) {
 
 	const pane = new Pane({title: '🌫️ Fog Test'});
 	const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1767864574385");
-	setDebugButtons(redGPUContext);
+	setDebugButtons(RedGPU, redGPUContext);
 	const PARAMS = {
 		enabled: true,
 		fogType: 'Exponential',

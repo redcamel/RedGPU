@@ -104,7 +104,7 @@ const renderTestPane = async (redGPUContext) => {
 		"https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1767864574385"
 		);
 	const {setDebugButtons} = await import( "../../exampleHelper/createExample/panes/index.js?t=1767864574385" );
-	setDebugButtons(redGPUContext);
+	setDebugButtons(RedGPU, redGPUContext);
 	const pane = new Pane();
 	const params = {
 		transparent: true,

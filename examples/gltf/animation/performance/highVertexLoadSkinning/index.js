@@ -58,7 +58,7 @@ let pane
 const renderTestPane = async (redGPUContext, targetView) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1767864574385');
 	const {setDebugButtons} = await import('../../../../exampleHelper/createExample/panes/index.js?t=1767864574385');
-	setDebugButtons(redGPUContext);
+	setDebugButtons(RedGPU, redGPUContext);
 	pane = new Pane();
 
 	const moreNum = redGPUContext.detector.isMobile ? 5 : 10

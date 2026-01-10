@@ -4,14 +4,15 @@ struct VertexOutput {
 }
 
 @vertex fn vs_main(@builtin(vertex_index) vertexIndex: u32) -> VertexOutput {
-    var pos = array<vec2<f32>, 6>(
-        vec2<f32>(-1.0, -1.0), vec2<f32>( 1.0, -1.0), vec2<f32>(-1.0,  1.0),
-        vec2<f32>(-1.0,  1.0), vec2<f32>( 1.0, -1.0), vec2<f32>( 1.0,  1.0)
+     var pos = array<vec2<f32>, 6>(
+            vec2<f32>(-1.0, -1.0), vec2<f32>( 1.0, -1.0), vec2<f32>(-1.0,  1.0),
+            vec2<f32>(-1.0,  1.0), vec2<f32>( 1.0, -1.0), vec2<f32>( 1.0,  1.0)
     );
 
+    // WebGPU 큐브맵 렌더링을 위한 표준 UV (Top-Left 0,0 기반)
     var texCoord = array<vec2<f32>, 6>(
-        vec2<f32>(1.0, 0.0), vec2<f32>(0.0, 0.0), vec2<f32>(1.0, 1.0),
-        vec2<f32>(1.0, 1.0), vec2<f32>(0.0, 0.0), vec2<f32>(0.0, 1.0)
+        vec2<f32>(0.0, 1.0), vec2<f32>(1.0, 1.0), vec2<f32>(0.0, 0.0),
+        vec2<f32>(0.0, 0.0), vec2<f32>(1.0, 1.0), vec2<f32>(1.0, 0.0)
     );
 
     var output: VertexOutput;
@@ -27,23 +28,21 @@ struct VertexOutput {
 const PI = 3.14159265359;
 
 @fragment fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
-    // 텍스처 좌표를 NDC로 변환 [-1,1] 범위
-    let ndc = vec2<f32>(
-        input.texCoord.x * 2.0 - 1.0,
-        1.0 - input.texCoord.y * 2.0  // Y축 뒤집기
-    );
+    // NDC 좌표 (x, y)를 -1 ~ 1 범위로 변환 (generateCubeMapFromEquirectangular와 동일)
+    let x = input.texCoord.x * 2.0 - 1.0;
+    let y = input.texCoord.y * 2.0 - 1.0;
 
-    // 로컬 방향 벡터 생성 (Z=1은 큐브 면의 깊이)
-    let localDirection = vec3<f32>(ndc.x, ndc.y, 1.0);
-
-    // 면 매트릭스로 월드 방향 변환
-    let worldDirection = normalize((faceMatrix * vec4<f32>(localDirection, 0.0)).xyz);
-    let normal = worldDirection;
+    // 큐브면에서의 로컬 방향 벡터에 면 행렬을 곱함
+    let localPos = vec4<f32>(x, y, 1.0, 1.0);
+    let normal = normalize((faceMatrix * localPos).xyz);
 
     var irradiance = vec3<f32>(0.0);
 
-    // 탄젠트 공간 구성
+    // 탄젠트 공간 구성 - normal과 평행하지 않은 up 벡터 선택
     var up = vec3<f32>(0.0, 1.0, 0.0);
+    if (abs(normal.y) > 0.999) {
+        up = vec3<f32>(1.0, 0.0, 0.0);
+    }
     let tangent = normalize(cross(up, normal));
     let bitangent = normalize(cross(normal, tangent));
 

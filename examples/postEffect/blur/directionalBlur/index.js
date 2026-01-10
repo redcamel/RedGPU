@@ -109,7 +109,7 @@ const renderTestPane = async (redGPUContext, targetView) => {
 	const {createPostEffectLabel} = await import('../../../exampleHelper/createExample/loadExampleInfo/createPostEffectLabel.js?t=1767864574385');
 	createPostEffectLabel('DirectionalBlur', redGPUContext.detector.isMobile)
 	const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1767864574385");
-	setDebugButtons(redGPUContext);
+	setDebugButtons(RedGPU, redGPUContext);
 	const pane = new Pane();
 
 	const TEST_STATE = {

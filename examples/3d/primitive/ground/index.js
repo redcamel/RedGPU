@@ -102,7 +102,7 @@ const createGroundPrimitive = (redGPUContext, scene) => {
 
 const renderTestPane = async (redGPUContext) => {
 	const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1767864574385");
-	setDebugButtons(redGPUContext)
+	setDebugButtons(RedGPU, redGPUContext)
 	const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1767864574385");
 	const pane = new Pane();
 

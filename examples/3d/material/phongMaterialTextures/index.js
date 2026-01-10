@@ -58,7 +58,7 @@ const renderTestPane = async (redGPUContext) => {
 		setSeparator,
 		setDebugButtons
 	} = await import("../../../exampleHelper/createExample/panes/index.js?t=1767864574385");
-	setDebugButtons(redGPUContext);
+	setDebugButtons(RedGPU, redGPUContext);
 }
 const createTextures = (redGPUContext) => {
 	return {

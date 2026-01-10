@@ -55,7 +55,7 @@ const createPaneUI = async (redGPUContext, scene) => {
 		setDebugButtons,
 		setRedGPUTest_pane
 	} = await import("../../../exampleHelper/createExample/panes/index.js?t=1767864574385");
-	setDebugButtons(redGPUContext);
+	setDebugButtons(RedGPU, redGPUContext);
 	pane.addButton({title: 'Add Child'}).on('click', () => {
 		addChildObject(redGPUContext, scene);
 	});

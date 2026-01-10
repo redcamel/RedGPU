@@ -105,7 +105,7 @@ const renderTestPane = async (redGPUContext, controller) => {
 		setDebugButtons
 	} = await import("../../../exampleHelper/createExample/panes/index.js?t=1767864574385");
 
-	setDebugButtons(redGPUContext);
+	setDebugButtons(RedGPU, redGPUContext);
 	const pane = new Pane();
 
 	// FollowController 설정
