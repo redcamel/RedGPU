@@ -43,13 +43,7 @@ declare class HDRTexture extends ManagementResourceBase {
         arrayLayerCount?: GPUIntegerCoordinate;
         label?: string;
     };
-    /**
-     * 지원되는 HDR 형식 확인
-     */
     static isSupportedFormat(src: string): boolean;
-    /**
-     * 지원되는 형식 목록 반환
-     */
     static getSupportedFormats(): string[];
     resetToRecommendedExposure(): void;
     destroy(): void;

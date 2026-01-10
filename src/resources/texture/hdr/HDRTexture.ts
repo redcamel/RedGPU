@@ -50,7 +50,8 @@ class HDRTexture extends ManagementResourceBase {
     #onLoad: (textureInstance: HDRTexture) => void;
     #onError: (error: Error) => void;
     #isCubeMapInitialized: boolean = false;
-    #exposureUpdateTimeout: number | null = null;
+    #exposureUpdateTimeout: any = null;
+    #tempSourceTexture: GPUTexture = null;
 
     constructor(
         redGPUContext: RedGPUContext,
@@ -63,20 +64,19 @@ class HDRTexture extends ManagementResourceBase {
         super(redGPUContext, MANAGED_STATE_KEY);
         this.#onLoad = onLoad
         this.#onError = onError
-        // this.#format = 'rgba8unorm'
         this.#format = 'rgba16float'
         this.#cubeMapSize = cubeMapSize
-        this.useMipmap = useMipMap
+        this.#useMipmap = useMipMap
+        this.#mipLevelCount = this.#useMipmap ? getMipLevelCount(this.#cubeMapSize, this.#cubeMapSize) : 1
+
         if (src) {
             const parsedSrc = this.#getParsedSrc(src)
             this.#validateHDRFormat(parsedSrc);
             this.#src = parsedSrc;
             this.cacheKey = this.#getCacheKey(src)
             const {table} = this.targetResourceManagedState
-            // keepLog(table)
             let target: ResourceStateHDRTexture = table.get(this.cacheKey)
             if (target) {
-                // keepLog('cache target', target)
                 const targetTexture = target.texture
                 this.#onLoad?.(targetTexture)
                 return targetTexture
@@ -137,12 +137,8 @@ class HDRTexture extends ManagementResourceBase {
             clearTimeout(this.#exposureUpdateTimeout);
         }
         this.#exposureUpdateTimeout = setTimeout(() => {
-            if (this.#hdrData) {
-                if (this.#isCubeMapInitialized && this.#gpuTexture) {
-                    this.#updateCubeMapContent();
-                } else {
-                    this.#createGPUTexture();
-                }
+            if (this.#hdrData && this.#isCubeMapInitialized) {
+                this.#updateCubeMapContent(true);
             }
             this.#exposureUpdateTimeout = null;
         }, 50);
@@ -163,17 +159,11 @@ class HDRTexture extends ManagementResourceBase {
         }
     }
 
-    /**
-     * 지원되는 HDR 형식 확인
-     */
     static isSupportedFormat(src: string): boolean {
         if (!src || typeof src !== 'string') return false;
         return src.toLowerCase().endsWith('.hdr');
     }
 
-    /**
-     * 지원되는 형식 목록 반환
-     */
     static getSupportedFormats(): string[] {
         return ['.hdr'];
     }
@@ -185,6 +175,10 @@ class HDRTexture extends ManagementResourceBase {
     destroy() {
         const temp = this.#gpuTexture
         this.#setGpuTexture(null);
+        if (this.#tempSourceTexture) {
+            this.#tempSourceTexture.destroy();
+            this.#tempSourceTexture = null;
+        }
         this.#isCubeMapInitialized = false;
         this.__fireListenerList(true)
         this.#luminanceAnalysis = null
@@ -209,14 +203,10 @@ class HDRTexture extends ManagementResourceBase {
         return typeof srcInfo === 'string' ? srcInfo : srcInfo.src
     }
 
-    /**
-     * HDR 파일 형식 검증 (.hdr 형식만 허용)
-     */
     #validateHDRFormat(src: string): void {
         if (!src || typeof src !== 'string') {
             throw new Error('HDR 파일 경로가 필요합니다');
         }
-        // 쿼리 파라미터와 해시를 제거한 후 확장자 검사
         const cleanSrc = src.split('?')[0].split('#')[0].toLowerCase();
         if (!cleanSrc.endsWith('.hdr')) {
             throw new Error(`지원되지 않는 형식입니다. .hdr 형식만 지원됩니다. 입력된 파일: ${src}`);
@@ -225,11 +215,9 @@ class HDRTexture extends ManagementResourceBase {
 
     async #loadHDRTexture(src: string) {
         try {
-            console.log('HDR 텍스처 로딩 시작 (.hdr 형식):', src);
             const hdrData = await this.#hdrLoader.loadHDRFile(src);
             this.#hdrData = hdrData;
             this.#recommendedExposure = hdrData.recommendedExposure || 1.0;
-            keepLog('this.#recommendedExposure',this.#recommendedExposure)
             this.#exposure = this.#recommendedExposure;
             if (hdrData.luminanceStats) {
                 this.#luminanceAnalysis = {
@@ -241,9 +229,7 @@ class HDRTexture extends ManagementResourceBase {
                     percentile99: hdrData.luminanceStats.max * 0.99,
                     recommendedExposure: this.#recommendedExposure
                 };
-                keepLog('휘도 분석 완료:', this.#luminanceAnalysis);
             }
-            keepLog(`HDR 데이터 로드 완료: ${hdrData.width}x${hdrData.height}, 권장 노출: ${this.#recommendedExposure.toFixed(3)}, 현재 노출: ${this.#exposure.toFixed(3)}`);
             await this.#createGPUTexture();
             this.#onLoad?.(this);
         } catch (error) {
@@ -284,7 +270,7 @@ class HDRTexture extends ManagementResourceBase {
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_DST,
             mipLevelCount: this.#mipLevelCount,
             dimension: '2d',
-            label: `${this.#src}_cubemap_exp${this.#exposure.toFixed(2)}`
+            label: `${this.#src}_cubemap`
         };
         const newGPUTexture = resourceManager.createManagedTexture(cubeDescriptor);
         this.#setGpuTexture(newGPUTexture);
@@ -295,33 +281,28 @@ class HDRTexture extends ManagementResourceBase {
             await gpuDevice.queue.onSubmittedWorkDone();
             oldTexture.destroy();
         }
-        console.log(`HDR 큐브맵 텍스처 생성 완료: ${this.#cubeMapSize}x${this.#cubeMapSize}x6, 밉맵: ${this.#mipLevelCount}레벨, 노출: ${this.#exposure.toFixed(3)}`);
     }
 
-    async #updateCubeMapContent() {
+    async #updateCubeMapContent(onlyExposureUpdate: boolean = false) {
         const {gpuDevice, resourceManager} = this.redGPUContext;
         const {mipmapGenerator} = resourceManager;
-        if (!this.#gpuTexture) {
-            console.warn('큐브맵 텍스처가 없어 업데이트를 건너뜁니다.');
-            return;
+        if (!this.#gpuTexture || !this.#hdrData) return;
+
+        if (!onlyExposureUpdate || !this.#tempSourceTexture) {
+            if (this.#tempSourceTexture) this.#tempSourceTexture.destroy();
+            const {width: W, height: H} = this.#hdrData;
+            const tempTextureDescriptor: GPUTextureDescriptor = {
+                size: [W, H],
+                format: this.#format,
+                usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
+                label: `${this.#src}_temp_source`
+            };
+            this.#tempSourceTexture = await this.#hdrDataToGPUTexture(gpuDevice, resourceManager, this.#hdrData, tempTextureDescriptor);
         }
-        if (!this.#hdrData) {
-            // console.warn('HDR 데이터가 없어 업데이트를 건너뜁니다.');
-            return;
-        }
-        console.log(`HDR 큐브맵 내용 업데이트 시작 (노출: ${this.#exposure.toFixed(3)})`);
-        const {width: W, height: H} = this.#hdrData
-        const tempTextureDescriptor: GPUTextureDescriptor = {
-            size: [W, H],
-            format: this.#format,
-            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
-            label: `${this.#src}_temp_exp${this.#exposure.toFixed(2)}`
-        };
-        const tempTexture = await this.#hdrDataToGPUTexture(gpuDevice, resourceManager, this.#hdrData, tempTextureDescriptor);
-        await this.#generateCubeMapFromEquirectangular(tempTexture);
-        tempTexture.destroy();
+
+        await this.#generateCubeMapFromEquirectangular(this.#tempSourceTexture);
+
         if (this.#useMipmap) {
-            console.log('HDR 큐브맵 밉맵 재생성 중...');
             mipmapGenerator.generateMipmap(this.#gpuTexture, {
                 size: [this.#cubeMapSize, this.#cubeMapSize, 6],
                 format: this.#format,
@@ -329,40 +310,28 @@ class HDRTexture extends ManagementResourceBase {
                 mipLevelCount: this.#mipLevelCount,
                 dimension: '2d'
             });
-            // keepLog(this.#gpuTexture)
-            console.log('HDR 큐브맵 밉맵 재생성 완료');
         }
+
         this.targetResourceManagedState.videoMemory -= this.#videoMemorySize
-        this.#videoMemorySize = 0
         this.#videoMemorySize = calculateTextureByteSize(this.#gpuTexture)
         this.targetResourceManagedState.videoMemory += this.#videoMemorySize
-        console.log(`HDR 큐브맵 내용 업데이트 완료 (노출: ${this.#exposure.toFixed(3)})`);
     }
 
     async #generateCubeMapFromEquirectangular(sourceTexture: GPUTexture) {
-        const {gpuDevice, resourceManager} = this.redGPUContext;
+        const {gpuDevice} = this.redGPUContext;
         const shaderModule = gpuDevice.createShaderModule({
             code: generateCubeMapFromEquirectangularCode
         });
         const renderPipeline = gpuDevice.createRenderPipeline({
             layout: 'auto',
-            vertex: {
-                module: shaderModule,
-                entryPoint: 'vs_main'
-            },
-            fragment: {
-                module: shaderModule,
-                entryPoint: 'fs_main',
-                targets: [{format: this.#format}]
-            },
+            vertex: { module: shaderModule, entryPoint: 'vs_main' },
+            fragment: { module: shaderModule, entryPoint: 'fs_main', targets: [{format: this.#format}] },
         });
         const sampler = new Sampler(this.redGPUContext, {
             magFilter: GPU_FILTER_MODE.LINEAR,
             minFilter: GPU_FILTER_MODE.LINEAR,
-            mipmapFilter: GPU_MIPMAP_FILTER_MODE.LINEAR,
             addressModeU: GPU_ADDRESS_MODE.CLAMP_TO_EDGE,
-            addressModeV: GPU_ADDRESS_MODE.CLAMP_TO_EDGE,
-            addressModeW: GPU_ADDRESS_MODE.CLAMP_TO_EDGE
+            addressModeV: GPU_ADDRESS_MODE.CLAMP_TO_EDGE
         })
         const faceMatrices = this.#getCubeMapFaceMatrices();
         for (let face = 0; face < 6; face++) {
@@ -384,19 +353,16 @@ class HDRTexture extends ManagementResourceBase {
     }
 
     async #hdrDataToGPUTexture(device: GPUDevice, resourceManager: ResourceManager, hdrData: HDRData, textureDescriptor: GPUTextureDescriptor): Promise<GPUTexture> {
-        // const texture = resourceManager.createManagedTexture(textureDescriptor);
         const texture = device.createTexture(textureDescriptor);
         let bytesPerPixel: number;
         let uploadData: ArrayBuffer;
         switch (this.#format) {
             case 'rgba16float':
-                keepLog('여긴가 rgba16float')
                 bytesPerPixel = 8;
                 const float16Data = await this.#float32ToFloat16Linear(hdrData.data);
                 uploadData = float16Data.buffer as ArrayBuffer;
                 break;
             case 'rgba8unorm':
-                keepLog('여긴가 rgba8unorm')
                 bytesPerPixel = 4;
                 const uint8Data = await this.#float32ToUint8WithToneMapping(hdrData.data);
                 uploadData = uint8Data.buffer as ArrayBuffer;
@@ -404,10 +370,6 @@ class HDRTexture extends ManagementResourceBase {
             default:
                 throw new Error(`지원되지 않는 텍스처 포맷: ${this.#format}`);
         }
-        console.log(`HDR 텍스처 포맷: ${this.#format}, 노출값: ${this.#exposure.toFixed(3)}`);
-        console.log(`바이트/픽셀: ${bytesPerPixel}`);
-        console.log(`업로드 데이터 크기: ${uploadData.byteLength} bytes`);
-        console.log(`예상 크기: ${hdrData.width * hdrData.height * bytesPerPixel} bytes`);
         device.queue.writeTexture(
             {texture},
             uploadData,
@@ -436,23 +398,28 @@ class HDRTexture extends ManagementResourceBase {
 
     #getCubeMapFaceMatrices(): Float32Array[] {
         return [
-            new Float32Array([0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1]),
             new Float32Array([0, 0, 1, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1]),
+            new Float32Array([0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1]),
             new Float32Array([1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1]),
             new Float32Array([1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1]),
             new Float32Array([1, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1]),
             new Float32Array([-1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1])
         ];
     }
-
     async #renderCubeMapFace(renderPipeline: GPURenderPipeline, sampler: Sampler, face: number, faceMatrix: Float32Array, sourceTexture: GPUTexture) {
         const {gpuDevice} = this.redGPUContext;
+
+        // SceneUniforms 구조체 데이터 (mat4x4 + f32 + pad)
+        const uniformData = new Float32Array(32);
+        uniformData.set(faceMatrix, 0);
+        uniformData[16] = this.#exposure;
+
         const uniformBuffer = gpuDevice.createBuffer({
-            size: 64,
+            size: uniformData.byteLength,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-            label: `hdr_face_${face}_uniform`
         });
-        gpuDevice.queue.writeBuffer(uniformBuffer, 0, faceMatrix);
+        gpuDevice.queue.writeBuffer(uniformBuffer, 0, uniformData);
+
         const bindGroup = gpuDevice.createBindGroup({
             layout: renderPipeline.getBindGroupLayout(0),
             entries: [
@@ -461,6 +428,7 @@ class HDRTexture extends ManagementResourceBase {
                 {binding: 2, resource: {buffer: uniformBuffer}}
             ]
         });
+
         const commandEncoder = gpuDevice.createCommandEncoder();
         const renderPass = commandEncoder.beginRenderPass({
             colorAttachments: [{
