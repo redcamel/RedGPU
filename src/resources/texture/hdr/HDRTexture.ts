@@ -1,8 +1,6 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import GPU_ADDRESS_MODE from "../../../gpuConst/GPU_ADDRESS_MODE";
 import GPU_FILTER_MODE from "../../../gpuConst/GPU_FILTER_MODE";
-import GPU_MIPMAP_FILTER_MODE from "../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
-import {keepLog} from "../../../utils";
 import getAbsoluteURL from "../../../utils/file/getAbsoluteURL";
 import calculateTextureByteSize from "../../../utils/texture/calculateTextureByteSize";
 import getMipLevelCount from "../../../utils/texture/getMipLevelCount";
@@ -14,7 +12,6 @@ import CubeTexture from "../CubeTexture";
 import generateCubeMapFromEquirectangularCode from "./generateCubeMapFromEquirectangularCode.wgsl"
 import HDRLoader, {HDRData} from "./HDRLoader";
 import {float32ToFloat16Linear} from "./tone/float32ToFloat16Linear";
-import {float32ToUint8WithToneMapping} from "./tone/float32ToUint8WithToneMapping";
 
 const MANAGED_STATE_KEY = 'managedHDRTextureState'
 type SrcInfo = string | { src: string, cacheKey: string }
@@ -362,11 +359,7 @@ class HDRTexture extends ManagementResourceBase {
                 const float16Data = await this.#float32ToFloat16Linear(hdrData.data);
                 uploadData = float16Data.buffer as ArrayBuffer;
                 break;
-            case 'rgba8unorm':
-                bytesPerPixel = 4;
-                const uint8Data = await this.#float32ToUint8WithToneMapping(hdrData.data);
-                uploadData = uint8Data.buffer as ArrayBuffer;
-                break;
+
             default:
                 throw new Error(`지원되지 않는 텍스처 포맷: ${this.#format}`);
         }
@@ -380,20 +373,6 @@ class HDRTexture extends ManagementResourceBase {
             {width: hdrData.width, height: hdrData.height}
         );
         return texture;
-    }
-
-    async #float32ToUint8WithToneMapping(float32Data: Float32Array): Promise<Uint8Array> {
-        const result = await float32ToUint8WithToneMapping(
-            this.redGPUContext,
-            float32Data,
-            {
-                exposure: this.#exposure,
-                width: this.#hdrData.width,
-                height: this.#hdrData.height,
-                workgroupSize: [8, 8]
-            }
-        );
-        return result.data;
     }
 
     #getCubeMapFaceMatrices(): Float32Array[] {

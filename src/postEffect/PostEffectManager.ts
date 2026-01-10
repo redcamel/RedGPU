@@ -69,7 +69,7 @@ class PostEffectManager {
     #ssr: SSR;
     #useSSR: boolean = false;
     #toneMapping: AToneMappingEffect
-    #toneMappingMode: TONE_MAPPING_MODE = TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL
+    #toneMappingMode: TONE_MAPPING_MODE = TONE_MAPPING_MODE.LINEAR
 
     #createToneMapping() {
         if (!this.#toneMapping) {
