@@ -47,23 +47,23 @@ RedGPU.init(
 	}
 );
 
-async function createTest(context, scene) {
+async function createTest(redGPUContext, scene) {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1767864574385');
 	const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1767864574385");
 
 	const url = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Suzanne/glTF/Suzanne.gltf';
 
-	new RedGPU.GLTFLoader(context, url, (result) => {
-		const materialLOD0 = new RedGPU.Material.PhongMaterial(context, '#ff0000');
-		const materialLOD1 = new RedGPU.Material.PhongMaterial(context, '#00ff00');
-		const materialLOD2 = new RedGPU.Material.PhongMaterial(context, '#0000ff');
+	new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
+		const materialLOD0 = new RedGPU.Material.PhongMaterial(redGPUContext, '#ff0000');
+		const materialLOD1 = new RedGPU.Material.PhongMaterial(redGPUContext, '#00ff00');
+		const materialLOD2 = new RedGPU.Material.PhongMaterial(redGPUContext, '#0000ff');
 
 		const gltf = result.resultMesh.children[0];
-		const maxNum = context.detector.isMobile ? 1000 : 10000;
+		const maxNum = redGPUContext.detector.isMobile ? 1000 : 10000;
 
 		for (let i = 0; i < maxNum; i++) {
 			const mesh = new RedGPU.Display.Mesh(
-				context,
+				redGPUContext,
 				gltf.geometry,
 				gltf.material
 			);
@@ -74,7 +74,7 @@ async function createTest(context, scene) {
 			);
 			scene.addChild(mesh);
 		}
-		setDebugButtons(context);
+		setDebugButtons(RedGPU,redGPUContext);
 		const pane = new Pane();
 
 		const baseInfo = {baseMesh: "Base Mesh (Sphere 32x32)"};
@@ -123,8 +123,8 @@ async function createTest(context, scene) {
 		};
 
 		addLODIfNeeded(distanceLOD0, () => gltf.geometry, materialLOD0);
-		addLODIfNeeded(distanceLOD1, () => new RedGPU.Primitive.Sphere(context), materialLOD1);
-		addLODIfNeeded(distanceLOD2, () => new RedGPU.Primitive.Box(context), materialLOD2);
+		addLODIfNeeded(distanceLOD1, () => new RedGPU.Primitive.Sphere(redGPUContext), materialLOD1);
+		addLODIfNeeded(distanceLOD2, () => new RedGPU.Primitive.Box(redGPUContext), materialLOD2);
 		updateLODInfo();
 
 		[
@@ -132,13 +132,13 @@ async function createTest(context, scene) {
 			{
 				dist: distanceLOD1,
 				label: `LOD ${distanceLOD1}`,
-				createGeo: () => new RedGPU.Primitive.Box(context),
+				createGeo: () => new RedGPU.Primitive.Box(redGPUContext),
 				mat: materialLOD1
 			},
 			{
 				dist: distanceLOD2,
 				label: `LOD ${distanceLOD2}`,
-				createGeo: () => new RedGPU.Primitive.Ground(context),
+				createGeo: () => new RedGPU.Primitive.Ground(redGPUContext),
 				mat: materialLOD2
 			}
 		].forEach(config => {

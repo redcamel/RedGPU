@@ -67,19 +67,19 @@ RedGPU.init(
 	}
 );
 
-async function createTest(context, scene, material) {
+async function createTest(redGPUContext, scene, material) {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1767864574385');
 
 	const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1767864574385");
-	setDebugButtons(context);
+	setDebugButtons(RedGPU,redGPUContext);
 
-	const maxInstanceCount = context.detector.isMobile ? 100000 : RedGPU.Display.InstancingMesh.getLimitSize();
-	const instanceCount = context.detector.isMobile ? 20000 : 200000;
+	const maxInstanceCount = redGPUContext.detector.isMobile ? 100000 : RedGPU.Display.InstancingMesh.getLimitSize();
+	const instanceCount = redGPUContext.detector.isMobile ? 20000 : 200000;
 	const instancingMesh = new RedGPU.Display.InstancingMesh(
-		context,
+		redGPUContext,
 		maxInstanceCount,
 		instanceCount,
-		new RedGPU.Primitive.Sphere(context, 0.5, 32, 32, 32),
+		new RedGPU.Primitive.Sphere(redGPUContext, 0.5, 32, 32, 32),
 		material
 	);
 
@@ -153,16 +153,16 @@ async function createTest(context, scene, material) {
 	};
 
 	// 초기 LOD 3개 활성화
-	addLODIfNeeded(25, () => new RedGPU.Primitive.Sphere(context, 0.5, 8, 8, 8));
-	addLODIfNeeded(50, () => new RedGPU.Primitive.Box(context));
-	addLODIfNeeded(70, () => new RedGPU.Primitive.Circle(context, 0.5));
+	addLODIfNeeded(25, () => new RedGPU.Primitive.Sphere(redGPUContext, 0.5, 8, 8, 8));
+	addLODIfNeeded(50, () => new RedGPU.Primitive.Box(redGPUContext));
+	addLODIfNeeded(70, () => new RedGPU.Primitive.Circle(redGPUContext, 0.5));
 	updateLODInfo();
 
 	// 25 LOD 토글
 	pane.addBinding(lodState, 'lod25', {label: 'LOD 25 (Sphere 8x8)'})
 		.on('change', (ev) => {
 			if (ev.value) {
-				addLODIfNeeded(25, () => new RedGPU.Primitive.Sphere(context, 0.5, 8, 8, 8));
+				addLODIfNeeded(25, () => new RedGPU.Primitive.Sphere(redGPUContext, 0.5, 8, 8, 8));
 			} else {
 				removeLODIfExists(25);
 			}
@@ -173,7 +173,7 @@ async function createTest(context, scene, material) {
 	pane.addBinding(lodState, 'lod50', {label: 'LOD 50 (Box)'})
 		.on('change', (ev) => {
 			if (ev.value) {
-				addLODIfNeeded(50, () => new RedGPU.Primitive.Box(context));
+				addLODIfNeeded(50, () => new RedGPU.Primitive.Box(redGPUContext));
 			} else {
 				removeLODIfExists(50);
 			}
@@ -184,7 +184,7 @@ async function createTest(context, scene, material) {
 	pane.addBinding(lodState, 'lod70', {label: 'LOD 70 (Circle 0.5)'})
 		.on('change', (ev) => {
 			if (ev.value) {
-				addLODIfNeeded(70, () => new RedGPU.Primitive.Circle(context, 0.5));
+				addLODIfNeeded(70, () => new RedGPU.Primitive.Circle(redGPUContext, 0.5));
 			} else {
 				removeLODIfExists(70);
 			}

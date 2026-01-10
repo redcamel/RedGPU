@@ -53,7 +53,7 @@ const renderTestPane = async (view) => {
 		createFieldOfView,
 		setDebugButtons
 	} = await import( "../../../exampleHelper/createExample/panes/index.js?t=1767864574385" );
-	setDebugButtons(view.redGPUContext);
+	setDebugButtons(RedGPU,view.redGPUContext);
 	createFieldOfView(pane, view.camera)
 	const TEST_DATA = {
 		blur: 0,

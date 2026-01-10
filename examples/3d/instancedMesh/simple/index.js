@@ -71,7 +71,7 @@ async function createTest(context, scene, material) {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1767864574385');
 
 	const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1767864574385");
-	setDebugButtons(context);
+	setDebugButtons(RedGPU,redGPUContext);
 
 	const maxInstanceCount = context.detector.isMobile ? 100000 : RedGPU.Display.InstancingMesh.getLimitSize();
 	const instanceCount = context.detector.isMobile ? 20000 : 200000;
