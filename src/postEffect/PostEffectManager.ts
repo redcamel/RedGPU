@@ -204,10 +204,22 @@ class PostEffectManager {
         const initialSourceView = useMSAA ? gBufferColorResolveTextureView : gBufferColorTextureView;
         this.#updateSystemUniforms()
         this.#sourceTextureView = this.#renderToStorageTexture(this.#view, initialSourceView);
+
         let currentTextureView = {
             texture: this.#storageTexture,
             textureView: this.#sourceTextureView,
         };
+        {
+            if (this.toneMapping) {
+                // this.toneMapping.exposure = this.#view.ibl?.exposure || 1
+                currentTextureView = this.toneMapping.render(
+                    this.#view,
+                    width,
+                    height,
+                    currentTextureView
+                );
+            }
+        }
         this.#postEffects.forEach(effect => {
             currentTextureView = effect.render(
                 this.#view,
@@ -274,17 +286,7 @@ class PostEffectManager {
                 );
             }
         }
-        {
-            if (this.toneMapping) {
-                this.toneMapping.exposure = this.#view.ibl?.exposure || 1
-                currentTextureView = this.toneMapping.render(
-                    this.#view,
-                    width,
-                    height,
-                    currentTextureView
-                );
-            }
-        }
+
         return currentTextureView;
     }
 
