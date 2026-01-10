@@ -11,7 +11,7 @@
     );
 
     // 최종 sRGB 변환
-    let finalSRGB = linearToSRGB(finalLinear);
+    let finalSRGB = linearToSRGB(inputColor.rgb);
 
     textureStore(outputTexture, index, vec4<f32>(finalSRGB, inputColor.a));
 
