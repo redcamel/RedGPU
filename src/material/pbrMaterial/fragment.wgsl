@@ -505,7 +505,7 @@ fn main(inputData:InputData) -> FragmentOutput {
        resultAlpha *= diffuseSampleColor.a;
     #redgpu_endIf
 
-    if (resultAlpha == 0.0) { discard; }
+
 
     let albedo:vec3<f32> = baseColor.rgb ;
 

@@ -5,133 +5,93 @@ struct Uniforms {
     _pad: f32,
 };
 
-// 🎨 ACES Filmic 톤매핑
-// HDR → SDR 변환, 영화 같은 자연스러운 톤
-fn aces_filmic(color: vec3<f32>, exposure: f32) -> vec3<f32> {
-    let x = color * exposure;
-    let a = 2.51;
-    let b = 0.03;
-    let c = 2.43;
-    let d = 0.59;
-    let e = 0.14;
-    let mapped = (x * (a * x + b)) / (x * (c * x + d) + e);
+/// 선형 RGB → sRGB 감마 보정
+fn linearToSRGB(linearColor: vec3<f32>) -> vec3<f32> {
+    let cutoff = vec3<f32>(0.0031308);
+    let gamma = 1.0 / 2.4;
 
-    // 채도 조절 (0.9 = 10% 채도 감소)
-    let luminance = dot(mapped, vec3<f32>(0.2126, 0.7152, 0.0722));
-    let desaturated = mix(vec3<f32>(luminance), mapped, 0.9);
+    let higher = 1.055 * pow(linearColor, vec3<f32>(gamma)) - 0.055;
+    let lower = 12.92 * linearColor;
 
-    return clamp(desaturated, vec3<f32>(0.0), vec3<f32>(1.0));
+    return mix(higher, lower, step(linearColor, cutoff));
 }
 
-// 🎨 Linear 톤매핑
-// 단순 클램핑, 노출 적용 후 0~1 범위로 제한
-fn linearToneMapping(color: vec3<f32>, exposure: f32) -> vec3<f32> {
-    return clamp(color * exposure, vec3<f32>(0.0), vec3<f32>(1.0));
-}
+/// ACES Filmic 톤맵핑 (HDR → SDR 압축, 영화 업계 표준)
+fn acesFilmicToneMapping(color: vec3<f32>, exposure: f32) -> vec3<f32> {
+    var v = color * exposure;
 
-// 🎨 Khronos PBR Neutral 톤매핑
-// 범용 HDR 대응, 중간 톤 보존, 하이라이트 부드러운 압축
-fn khronosPbrNeutralToneMapping(color: vec3<f32>, exposure: f32) -> vec3<f32> {
-    // 1. 노출 적용
-    let x = color * exposure;
-
-    // 2. 파라미터 설정
-    let invK: f32 = 1.0;
-    let startCompression: f32 = 0.8;
-
-    // 3. 휘도 기준 압축 (RGB 중 최대값 사용)
-    let max_col = max(x.r, max(x.g, x.b));
-
-    var res = x;
-    if (max_col > startCompression) {
-        // 하이라이트 압축 곡선
-        let diff = max_col - startCompression;
-        let offset = diff / (1.0 + diff);
-        let scale = (startCompression + offset) / max_col;
-        res = x * scale;
-    }
-
-    return res * invK;
-}
-
-// 🎨 ACES Hill 톤매핑 (기본 추천)
-// ACES 필름 톤매핑의 변형, 밝고 선명한 결과
-fn toneMappingAcesHill(color: vec3<f32>, exposure: f32) -> vec3<f32> {
-    let x = color * exposure;
-    let a = 2.51;
-    let b = 0.03;
-    let c = 2.43;
-    let d = 0.59;
-    let e = 0.14;
-    let mapped = (x * (a * x + b)) / (x * (c * x + d) + e);
-
-    // 채도 조절 (0.85 = 15% 채도 감소)
-    let luminance = dot(mapped, vec3<f32>(0.2126, 0.7152, 0.0722));
-    let desaturated = mix(vec3<f32>(luminance), mapped, 0.85);
-
-    return clamp(desaturated, vec3<f32>(0.0), vec3<f32>(1.0));
-}
-
-// 🎨 Reinhard 톤매핑
-// 전통적인 톤매핑, 밝은 영역 자연스럽게 압축
-fn reinhardToneMapping(color: vec3<f32>, exposure: f32) -> vec3<f32> {
-    let x = color * exposure;
-    return x / (vec3<f32>(1.0) + x);
-}
-
-// 🎨 Reinhard Extended 톤매핑
-// Reinhard 개선 버전, 매우 밝은 영역도 디테일 보존
-fn reinhardExtendedToneMapping(color: vec3<f32>, exposure: f32) -> vec3<f32> {
-    let x = color * exposure;
-    let whitePoint = 4.0; // 순백 기준점
-    let numerator = x * (vec3<f32>(1.0) + (x / (whitePoint * whitePoint)));
-    let denominator = vec3<f32>(1.0) + x;
-    return numerator / denominator;
-}
-
-// 🎨 Uncharted 2 톤매핑
-// 게임 "언차티드 2"에서 사용, 영화 같은 톤
-fn uncharted2ToneMapping(color: vec3<f32>, exposure: f32) -> vec3<f32> {
-    let x = color * exposure;
-    let A = 0.15; // Shoulder Strength
-    let B = 0.50; // Linear Strength
-    let C = 0.10; // Linear Angle
-    let D = 0.20; // Toe Strength
-    let E = 0.02; // Toe Numerator
-    let F = 0.30; // Toe Denominator
-
-    let curr = ((x * (A * x + C * B) + D * E) / (x * (A * x + B) + D * F)) - E / F;
-    let W = 11.2; // Linear White Point
-    let whiteScale = ((W * (A * W + C * B) + D * E) / (W * (A * W + B) + D * F)) - E / F;
-
-    return curr / whiteScale;
-}
-
-// 🎨 선형 RGB → sRGB 감마 보정
-// 정확한 sRGB 표준 커브 적용
-fn linearToSRGB(linearValue: f32) -> f32 {
-    if (linearValue <= 0.0031308) {
-        return 12.92 * linearValue;
-    } else {
-        return 1.055 * pow(linearValue, 1.0 / 2.4) - 0.055;
-    }
-}
-
-// 🎨 벡터 버전 선형 RGB → sRGB 감마 보정
-fn linear_to_srgb(linearColor: vec4<f32>) -> vec4<f32> {
-    let cutoff = vec4<f32>(0.0031308);
-    let higher = vec4<f32>(1.055) * pow(linearColor, vec4<f32>(1.0/2.4)) - vec4<f32>(0.055);
-    let lower = linearColor * vec4<f32>(12.92);
-
-    return vec4<f32>(
-        mix(higher.r, lower.r, step(linearColor.r, cutoff.r)),
-        mix(higher.g, lower.g, step(linearColor.g, cutoff.g)),
-        mix(higher.b, lower.b, step(linearColor.b, cutoff.b)),
-        linearColor.a
+    // ACES 입력 변환 행렬 (AP0 → AP1)
+    let ACESInputMat = mat3x3<f32>(
+        vec3<f32>(0.59719, 0.07600, 0.02840),
+        vec3<f32>(0.35458, 0.90834, 0.13383),
+        vec3<f32>(0.04823, 0.01566, 0.83777)
     );
+
+    // ACES 출력 변환 행렬 (AP1 → sRGB)
+    let ACESOutputMat = mat3x3<f32>(
+        vec3<f32>( 1.60475, -0.10208, -0.00327),
+        vec3<f32>(-0.53108,  1.10813, -0.07276),
+        vec3<f32>(-0.07367, -0.00605,  1.07602)
+    );
+
+    v = ACESInputMat * v;
+
+    // RRT + ODT fit (S-curve 압축)
+    let a = v * (v + 0.0245786) - 0.000090537;
+    let b = v * (0.983729 * v + 0.4329510) + 0.238081;
+    v = a / b;
+
+    v = ACESOutputMat * v;
+    v = clamp(v, vec3<f32>(0.0), vec3<f32>(1.0));
+
+    return linearToSRGB(v);
 }
 
-// 🎨 명암 조절
-fn applyContrast(color: f32, contrast: f32) -> f32 {
+/// Reinhard Extended 톤맵핑 (간단하지만 효과적)
+fn reinhardExtendedToneMapping(color: vec3<f32>, exposure: f32) -> vec3<f32> {
+    let v = color * exposure;
+    let whitePoint = 4.0; // 화이트포인트 (조절 가능)
+
+    let numerator = v * (1.0 + v / (whitePoint * whitePoint));
+    let mapped = numerator / (1.0 + v);
+
+    return linearToSRGB(clamp(mapped, vec3<f32>(0.0), vec3<f32>(1.0)));
+}
+
+/// 선형 톤맵핑: 노출 + sRGB 보정 (단순 클램프 - HDR에 부적합)
+fn linearToneMapping(color: vec3<f32>, exposure: f32) -> vec3<f32> {
+    let toneMapped = clamp(color * exposure, vec3<f32>(0.0), vec3<f32>(1.0));
+    return linearToSRGB(toneMapped);
+}
+
+/// Khronos PBR Neutral 톤맵핑
+fn khronosPbrNeutralToneMapping(color: vec3<f32>, exposure: f32) -> vec3<f32> {
+    let v = color * exposure;
+    let lum = max(v.r, max(v.g, v.b));
+    let logLum = log2(lum);
+    let startCompression = 4.26191;
+
+    var mapped = v;
+    if (logLum > startCompression) {
+        let bhf = 4.0;
+        let e = 0.0037930732552754493;
+        let exceedance = logLum - startCompression;
+        let remappedLogLum = startCompression +
+                            (1.0 / bhf) * log(1.0 + exceedance * bhf * e) / (bhf * e);
+        let scale = exp2(remappedLogLum) / lum;
+        mapped = v * scale;
+    }
+
+    mapped = linearToSRGB(mapped);
+    return clamp(mapped, vec3<f32>(0.0), vec3<f32>(1.0));
+}
+
+/// 명암 조절
+fn applyContrast(color: vec3<f32>, contrast: f32) -> vec3<f32> {
     return 0.5 + contrast * (color - 0.5);
+}
+
+/// 밝기 조절
+fn applyBrightness(color: vec3<f32>, brightness: f32) -> vec3<f32> {
+    return color + brightness;
 }

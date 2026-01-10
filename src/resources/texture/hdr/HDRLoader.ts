@@ -80,80 +80,139 @@ class HDRLoader {
      * 🔍 휘도 분석
      */
 
+
+
+    /**
+     * 🔍 휘도 분석
+     *
+     * @remarks
+     * HDR 톤맵핑을 위해 로그 평균 휘도를 계산합니다.
+     * 인간의 시각 체계가 휘도 변화를 로그 스케일로 인식하므로,
+     * 선형 평균 대신 로그 평균을 사용하여 더 정확한 노출 계산이 가능합니다.
+     */
     #analyzeLuminance(hdrData: HDRData) {
-        let min = Infinity, max = 0, sum = 0;
+        let min = Infinity;
+        let max = -Infinity;
+        let logSum = 0;  // ✅ 로그값의 합
+        let count = 0;
+        let linearSum = 0; // 선형 평균도 참고용으로 계산
+
         const totalPixels = hdrData.width * hdrData.height;
+        const epsilon = 0.0001; // 매우 작은 값 방지
+
         for (let i = 0; i < hdrData.data.length; i += 4) {
-            const luminance = 0.2126 * hdrData.data[i] + 0.7152 * hdrData.data[i + 1] + 0.0722 * hdrData.data[i + 2];
+            const luminance = 0.2126 * hdrData.data[i] +
+                0.7152 * hdrData.data[i + 1] +
+                0.0722 * hdrData.data[i + 2];
+
             min = Math.min(min, luminance);
             max = Math.max(max, luminance);
-            sum += luminance;
+
+            // 로그 평균 계산 (0으로 나누기 방지)
+            logSum += Math.log(Math.max(epsilon, luminance));
+            linearSum += luminance;
+            count++;
         }
+
+        // min이 여전히 Infinity인 경우 처리 (빈 데이터)
+        if (!isFinite(min)) {
+            min = epsilon;
+        }
+
+        // 로그 평균: exp(sum(log(L)) / n)
+        const logAverage = Math.exp(logSum / count);
+        const linearAverage = linearSum / count;
+
+        // 중앙값은 정렬 없이 근사하는 방법
+        // 실제 필요시 전체 휘도 배열을 정렬하여 계산 가능
+        const median = logAverage; // 로그 평균을 중앙값 근사로 사용
+
         return {
-            min: Math.max(0.001, min),
-            max,
-            average: Math.max(0.001, sum / totalPixels),
-            median: Math.max(0.001, sum / totalPixels) // 근사값으로 평균 사용
+            min: Math.max(epsilon, min),
+            max: Math.max(epsilon, max),
+            average: Math.max(epsilon, linearAverage), // 참고용 선형 평균
+            median: Math.max(epsilon, logAverage)      // 로그 평균 (실제 중앙값)
         };
     }
 
+
     /**
      * 최적 노출값 계산
+     *
+     * @remarks
+     * Reinhard의 톤맵핑 알고리즘을 기반으로 HDR 장면의 키값(key value)을 계산합니다.
+     * 장면의 밝기, 동적 범위, 휘도 분포를 종합적으로 분석하여 최적의 노출값을 결정합니다.
+     *
+     * @param stats - 휘도 통계 (min, max, average, median)
+     * @returns 권장 노출값 (0.5 ~ 8.0 범위)
      */
     #calculateOptimalExposure(stats: { min: number; max: number; average: number; median: number }): number {
-        const {average, median, max} = stats;
-        // 🔸 기본 키값 (라인하르트 기준)
+        const { average, median, max, min } = stats;
+        const epsilon = 0.0001;
+
+        // 🔸 기본 키값 (라인하르트 기준: 0.18)
+        // 장면의 밝기에 따라 적응적으로 조정
         let keyValue = 0.18;
-        // 🔸 장면 분석에 따른 키값 조정
+
         if (average < 0.01) {
-            keyValue = 0.5;  // 매우 어두운 장면 (야경, 실내 등)
+            keyValue = 0.5;   // 매우 어두운 장면 (야경, 실내 등)
         } else if (average < 0.05) {
-            keyValue = 0.36; // 어두운 장면 (황혼, 그늘진 실외)
+            keyValue = 0.36;  // 어두운 장면 (황혼, 그늘진 실외)
         } else if (average > 2.0) {
-            keyValue = 0.09; // 밝은 장면 (직사광선, 눈덮인 풍경)
+            keyValue = 0.09;  // 밝은 장면 (직사광선, 눈덮인 풍경)
         } else if (average > 0.8) {
-            keyValue = 0.12; // 중간-밝은 장면
+            keyValue = 0.12;  // 중간-밝은 장면
         }
-        // 🔸 로그 평균 근사 (단순화된 기하평균)
-        const logAverage = Math.max(
-            Math.pow(average * median, 0.5), // 기하평균으로 더 안정적인 기준값
-            0.001
-        );
+
         // 🔸 기본 노출 계산
-        let exposure = keyValue / logAverage;
+        // average는 이미 로그 평균이므로 직접 사용
+        let exposure = keyValue / Math.max(average, epsilon);
+
         // 🔸 동적 범위 분석
-        const dynamicRange = max / Math.max(stats.min, 0.001);
-        // 🔸 어두운 장면 부스트
+        const dynamicRange = Math.max(max, epsilon) / Math.max(min, epsilon);
+
+        // 🔸 어두운 장면 부스트 (별도 팩터)
         if (average < 0.05) {
-            exposure *= 2.5; // 어두운 장면을 더 밝게
+            exposure *= 2.0; // 어두운 장면을 더 밝게
         } else if (average < 0.1) {
-            exposure *= 1.8; // 중간-어두운 장면 약간 부스트
+            exposure *= 1.5; // 중간-어두운 장면 약간 부스트
         }
+
         // 🔸 높은 동적 범위 장면 처리
         if (dynamicRange > 1000) {
-            exposure *= 0.8; // 매우 높은 DR - 하이라이트 보존
+            exposure *= 0.85; // 매우 높은 DR - 하이라이트 보존
         } else if (dynamicRange > 100) {
-            exposure *= 0.9; // 높은 DR - 약간 억제
+            exposure *= 0.92; // 높은 DR - 약간 억제
         }
+
         // 🔸 하이라이트 클리핑 방지
         if (max > 10.0) {
-            exposure *= 0.5; // 극도로 밝은 부분
+            exposure *= 0.6;  // 극도로 밝은 부분
         } else if (max > 5.0) {
-            exposure *= 0.7; // 매우 밝은 부분 억제
+            exposure *= 0.75; // 매우 밝은 부분 억제
         } else if (max > 2.0) {
-            exposure *= 0.85; // 밝은 부분 약간 억제
+            exposure *= 0.88; // 밝은 부분 약간 억제
         }
-        // 🔸 중간값과 평균값의 차이로 분포 분석
-        const distributionRatio = median / average;
+
+        // 🔸 휘도 분포 분석 (중앙값과 평균값의 비율)
+        const distributionRatio = median / Math.max(average, epsilon);
+
         if (distributionRatio < 0.3) {
             // 극값이 많은 분포 (예: 태양이 있는 장면)
-            exposure *= 0.8;
+            exposure *= 0.85;
         } else if (distributionRatio > 1.5) {
             // 어두운 쪽에 치우친 분포
-            exposure *= 1.2;
+            exposure *= 1.15;
         }
-        // 🔸 실용적 범위 제한 - 최소값을 1.0으로 보장
-        exposure = Math.max(1.0, Math.min(15.0, exposure));
+
+        // 🔸 실용적 범위 제한
+        // 최소값 0.5, 최대값 8.0 (더 넓은 범위)
+        exposure = Math.max(0.5, Math.min(8.0, exposure));
+
+        if (this.#enableDebugLogs) {
+            keepLog(`[노출 분석] 키값: ${keyValue.toFixed(3)}, 동적범위: ${dynamicRange.toFixed(1)}, 최종 노출: ${exposure.toFixed(3)}`);
+        }
+
         return exposure;
     }
 

@@ -1,21 +1,24 @@
 {
-    let index = vec2<i32>(global_id.xy);
+//    let index = vec2<i32>(global_id.xy);
+//    let inputColor = textureLoad(sourceTexture, index);
+//
+//    // 톤맵핑 적용
+////    let toneMapped = linearToneMapping(inputColor.rgb, uniforms.exposure);
+//    let toneMapped = khronosPbrNeutralToneMapping(inputColor.rgb, uniforms.exposure);
+//
+//    // 명암 및 밝기 조절
+//    let contrastRGB = applyContrast(toneMapped, uniforms.contrast);
+//    let finalRGB = applyBrightness(contrastRGB, uniforms.brightness);
+//
+//    let outputColor = vec4<f32>(clamp(finalRGB, vec3<f32>(0.0), vec3<f32>(1.0)), inputColor.a);
+//    textureStore(outputTexture, index, outputColor);
+  let index = vec2<i32>(global_id.xy);
     let inputColor = textureLoad(sourceTexture, index);
 
-    // 1. 톤매핑 적용 (노출 포함)
-    let toneMapped = khronosPbrNeutralToneMapping(inputColor.rgb, uniforms.exposure);
+    // 디버깅: 원본 HDR 값 확인 (1.0 초과 여부)
+    // 빨간색이 보이면 HDR 데이터가 정상, 검은색이면 이미 클램핑됨
+    let isHDR = select(0.0, 1.0, inputColor.r > 1.0 || inputColor.g > 1.0 || inputColor.b > 1.0);
+    let debugColor = vec4<f32>(isHDR, 0.0, 0.0, 1.0);
 
-    // 2. 감마 보정 (정확한 sRGB 커브 적용)
-    let gammaCorrected = vec3<f32>(
-        linearToSRGB(toneMapped.r),
-        linearToSRGB(toneMapped.g),
-        linearToSRGB(toneMapped.b)
-    );
-
-    // 4. 명암 및 밝기 (감마 보정 후 0~1 범위에서 수행)
-    let contrastRGB = (gammaCorrected - 0.5) * uniforms.contrast + 0.5;
-    let finalRGB = clamp(contrastRGB + uniforms.brightness, vec3<f32>(0.0), vec3<f32>(1.0));
-
-    let outputColor = vec4<f32>(finalRGB, inputColor.a);
-    textureStore(outputTexture, index, outputColor);
+    textureStore(outputTexture, index, debugColor);
 }

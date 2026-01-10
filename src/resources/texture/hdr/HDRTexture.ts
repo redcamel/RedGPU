@@ -13,7 +13,7 @@ import Sampler from "../../sampler/Sampler";
 import CubeTexture from "../CubeTexture";
 import generateCubeMapFromEquirectangularCode from "./generateCubeMapFromEquirectangularCode.wgsl"
 import HDRLoader, {HDRData} from "./HDRLoader";
-import {float32ToFloat16WithToneMapping} from "./tone/float32ToFloat16WithToneMapping";
+import {float32ToFloat16Linear} from "./tone/float32ToFloat16Linear";
 import {float32ToUint8WithToneMapping} from "./tone/float32ToUint8WithToneMapping";
 
 const MANAGED_STATE_KEY = 'managedHDRTextureState'
@@ -370,8 +370,8 @@ class HDRTexture extends ManagementResourceBase {
         }
     }
 
-    async #float32ToFloat16WithToneMapping(float32Data: Float32Array): Promise<Uint16Array> {
-        const result = await float32ToFloat16WithToneMapping(
+    async #float32ToFloat16Linear(float32Data: Float32Array): Promise<Uint16Array> {
+        const result = await float32ToFloat16Linear(
             this.redGPUContext,
             float32Data,
             {
@@ -392,7 +392,7 @@ class HDRTexture extends ManagementResourceBase {
             case 'rgba16float':
                 keepLog('여긴가 rgba16float')
                 bytesPerPixel = 8;
-                const float16Data = await this.#float32ToFloat16WithToneMapping(hdrData.data);
+                const float16Data = await this.#float32ToFloat16Linear(hdrData.data);
                 uploadData = float16Data.buffer as ArrayBuffer;
                 break;
             case 'rgba8unorm':

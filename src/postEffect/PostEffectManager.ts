@@ -62,6 +62,19 @@ class PostEffectManager {
     #ssr: SSR;
     #useSSR: boolean = false;
 
+    get toneMapping(): ToneMapping {
+
+        if(!this.#toneMapping){
+            this.#toneMapping = new ToneMapping(this.#view.redGPUContext)
+        }
+        return this.#toneMapping;
+    }
+
+    set toneMapping(value: ToneMapping) {
+        this.#toneMapping = value;
+    }
+
+    #toneMapping:ToneMapping
     constructor(view: View3D) {
         this.#view = view;
         this.#init()
@@ -143,7 +156,7 @@ class PostEffectManager {
         this.#postEffects.length = 0
     }
 
-    #toneMapping:ToneMapping
+
     render() {
         const {viewRenderTextureManager, redGPUContext, taa, fxaa} = this.#view;
         const {antialiasingManager} = redGPUContext
@@ -191,11 +204,8 @@ class PostEffectManager {
             );
         }
         {
-            if(!this.#toneMapping){
-                this.#toneMapping = new ToneMapping(redGPUContext)
-            }
-            this.#toneMapping.exposure = this.#view.ibl?.exposure || 1.0;
-            currentTextureView = this.#toneMapping.render(
+            // this.toneMapping.exposure = this.#view.ibl?.exposure || 1.0;
+            currentTextureView = this.toneMapping.render(
                 this.#view,
                 width,
                 height,

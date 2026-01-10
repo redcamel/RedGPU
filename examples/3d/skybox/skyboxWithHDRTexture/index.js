@@ -96,13 +96,9 @@ const createTestPane = async (view) => {
 		view.skybox.opacity = ev.value;
 	})
 	// Exposure 슬라이더
-	const exposureBinding = pane.addBinding(settings, 'exposure', {
+	const exposureBinding = pane.addBinding(view.postEffectManager.toneMapping, 'exposure', {
 		min: 0.01,
-		max: settings.exposure * 2,
+		max: view.postEffectManager.toneMapping.exposure * 2,
 		step: 0.01
-	}).on("change", (ev) => {
-		view.skybox.exposure = ev.value;
-		view.skybox.blur = settings.blur
-		view.skybox.opacity = settings.opacity
-	});
+	})
 };
