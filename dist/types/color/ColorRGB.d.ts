@@ -104,6 +104,7 @@ declare class ColorRGB {
      * ```
      */
     get rgbNormal(): number[];
+    get rgbNormalLinear(): number[];
     /**
      * RGB 색상의 16진수 표현을 반환합니다.
      *

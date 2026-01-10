@@ -513,7 +513,7 @@ class View3D extends AView {
                         },
                         {
                             key: 'color',
-                            value: light.color.rgbNormal,
+                            value: light.color.rgbNormalLinear,
                             dataView: this.#uniformDataF32,
                             targetMembers
                         },
@@ -536,7 +536,7 @@ class View3D extends AView {
                     [
                         {
                             key: 'color',
-                            value: light.color.rgbNormal,
+                            value: light.color.rgbNormalLinear,
                             dataView: this.#uniformDataF32,
                             targetMembers
                         },
@@ -759,7 +759,7 @@ class View3D extends AView {
                     this.#clusterLightsBufferData.set(
                         [
                             ...tLight.position, tLight.radius,
-                            ...tLight.color.rgbNormal, tLight.intensity, 0
+                            ...tLight.color.rgbNormalLinear, tLight.intensity, 0
                         ],
                         offset,
                     )
@@ -780,7 +780,7 @@ class View3D extends AView {
                     this.#clusterLightsBufferData.set(
                         [
                             ...tLight.position, tLight.radius,
-                            ...tLight.color.rgbNormal, tLight.intensity, 1, ...tLight.direction, tLight.outerCutoff, tLight.innerCutoff
+                            ...tLight.color.rgbNormalLinear, tLight.intensity, 1, ...tLight.direction, tLight.outerCutoff, tLight.innerCutoff
                         ],
                         offset,
                     )

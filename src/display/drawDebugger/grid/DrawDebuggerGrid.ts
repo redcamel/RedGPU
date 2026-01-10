@@ -274,7 +274,7 @@ class DrawDebuggerGrid {
             }
             this.#uniformBuffer = uniformBuffer;
         }
-        this.#uniformBuffer.writeOnlyBuffer(FRAGMENT_UNIFORM_STRUCT.members.lineColor, this.#lineColor.rgbaNormal)
+        this.#uniformBuffer.writeOnlyBuffer(FRAGMENT_UNIFORM_STRUCT.members.lineColor, this.#lineColor.rgbaNormalLinear)
     }
 }
 

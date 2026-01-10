@@ -87,6 +87,7 @@ declare class ColorRGBA extends ColorRGB {
      * ```
      */
     get rgbaNormal(): number[];
+    get rgbaNormalLinear(): number[];
     /**
      * RGBA 값을 사용하여 객체의 색상을 설정합니다.
      *
