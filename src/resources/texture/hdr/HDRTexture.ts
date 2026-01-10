@@ -414,6 +414,7 @@ class HDRTexture extends ManagementResourceBase {
         uniformData.set(faceMatrix, 0);
         uniformData[16] = this.#exposure;
 
+
         const uniformBuffer = gpuDevice.createBuffer({
             size: uniformData.byteLength,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,

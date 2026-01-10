@@ -5,29 +5,6 @@ import createBasicPostEffectCode from "../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 
-const SUBTLE = {
-    exposure: 0.8,
-    contrast: 1.0,
-    brightness: 0.0
-};
-
-const NORMAL = {
-    exposure: 1.0,
-    contrast: 1.0,
-    brightness: 0.0
-};
-
-const BRIGHT = {
-    exposure: 1.3,
-    contrast: 1.1,
-    brightness: 0.1
-};
-
-const CINEMATIC = {
-    exposure: 1.2,
-    contrast: 1.2,
-    brightness: -0.05
-};
 
 /**
  * 🎬 ACES 톤매핑 포스트이펙트
@@ -47,21 +24,14 @@ const CINEMATIC = {
  * <iframe src="/RedGPU/examples/3d/postEffect/toneMapping/"></iframe>
  */
 class ToneMapping extends ASinglePassPostEffect {
-    /** 미묘한 톤매핑 프리셋 */
-    static SUBTLE = SUBTLE;
-    /** 표준 톤매핑 프리셋 */
-    static NORMAL = NORMAL;
-    /** 밝은 톤매핑 프리셋 */
-    static BRIGHT = BRIGHT;
-    /** 시네마틱 톤매핑 프리셋 */
-    static CINEMATIC = CINEMATIC;
+
 
     /** 노출값. 0.1~5.0, 기본값 1.0 */
-    #exposure: number = NORMAL.exposure;
+    #exposure: number = 1.0;
     /** 명암 강도. 0.5~2.0, 기본값 1.0 */
-    #contrast: number = NORMAL.contrast;
+    #contrast: number = 1.0;
     /** 밝기 조절. -1.0~1.0, 기본값 0.0 */
-    #brightness: number = NORMAL.brightness;
+    #brightness: number = 0.0;
 
     /**
      * ToneMapping 인스턴스 생성
@@ -153,25 +123,6 @@ class ToneMapping extends ASinglePassPostEffect {
         this.updateUniform('brightness', this.#brightness);
     }
 
-    /**
-     * 톤매핑 프리셋 적용
-     *
-     * 사전 정의된 톤매핑 프리셋을 한 번에 적용합니다.
-     *
-     * @param preset 적용할 프리셋 (SUBTLE, NORMAL, BRIGHT, CINEMATIC)
-     *
-     * @example
-     * ```typescript
-     * toneMapping.applyPreset(ToneMapping.CINEMATIC);
-     * toneMapping.applyPreset(ToneMapping.BRIGHT);
-     * ```
-     */
-    applyPreset(preset: typeof SUBTLE | typeof NORMAL | typeof BRIGHT | typeof CINEMATIC): void {
-        this.#exposure = preset.exposure;
-        this.#contrast = preset.contrast;
-        this.#brightness = preset.brightness;
-        this.#updateUniforms();
-    }
 
     /**
      * 내부 유니폼 일괄 갱신
