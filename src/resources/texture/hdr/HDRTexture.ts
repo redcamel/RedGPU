@@ -324,8 +324,8 @@ class HDRTexture extends ManagementResourceBase {
         });
         const renderPipeline = gpuDevice.createRenderPipeline({
             layout: 'auto',
-            vertex: { module: shaderModule, entryPoint: 'vs_main' },
-            fragment: { module: shaderModule, entryPoint: 'fs_main', targets: [{format: this.#format}] },
+            vertex: {module: shaderModule, entryPoint: 'vs_main'},
+            fragment: {module: shaderModule, entryPoint: 'fs_main', targets: [{format: this.#format}]},
         });
         const sampler = new Sampler(this.redGPUContext, {
             magFilter: GPU_FILTER_MODE.LINEAR,
@@ -398,14 +398,21 @@ class HDRTexture extends ManagementResourceBase {
 
     #getCubeMapFaceMatrices(): Float32Array[] {
         return [
-            new Float32Array([0, 0, 1, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1]),
-            new Float32Array([0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1]),
-            new Float32Array([1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1]),
-            new Float32Array([1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1]),
-            new Float32Array([1, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1]),
-            new Float32Array([-1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1])
+            // +X (Right) - (0, 0, -1) -> (-1, 0, 0)
+            new Float32Array([0, 0, -1, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1]),
+            // -X (Left) - (0, 0, 1) -> (1, 0, 0)
+            new Float32Array([0, 0, 1, 0, 0, -1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1]),
+            // +Y (Top) - (1, 0, 0) -> (0, 1, 0)
+            new Float32Array([1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1]),
+            // -Y (Bottom) - (1, 0, 0) -> (0, -1, 0)
+            new Float32Array([1, 0, 0, 0, 0, 0, -1, 0, 0, -1, 0, 0, 0, 0, 0, 1]),
+            // +Z (Front) - (1, 0, 0) -> (0, 0, 1)
+            new Float32Array([1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]),
+            // -Z (Back) - (-1, 0, 0) -> (0, 0, -1)
+            new Float32Array([-1, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1])
         ];
     }
+
     async #renderCubeMapFace(renderPipeline: GPURenderPipeline, sampler: Sampler, face: number, faceMatrix: Float32Array, sourceTexture: GPUTexture) {
         const {gpuDevice} = this.redGPUContext;
 

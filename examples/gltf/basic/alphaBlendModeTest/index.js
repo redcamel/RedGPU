@@ -17,6 +17,7 @@ RedGPU.init(
 
 		const renderer = new RedGPU.Renderer(redGPUContext);
 		const render = () => {
+
 		};
 		renderer.start(redGPUContext, render);
 

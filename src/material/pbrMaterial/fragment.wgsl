@@ -839,6 +839,9 @@ let attenuation = rangePart * invSquare;
     // ---------- 간접 조명 계산 - ibl ----------
     if (u_useIblTexture) {
         let R = normalize(reflect(-V, N));
+//        let sampleR = normalize(reflect(-V, N));
+//        let R = vec3<f32>(-sampleR.x, sampleR.y, -sampleR.z);
+
         let NdotV = max(dot(N, V),0.04);
         let NdotV_fresnel = max(dot(N, V), 0.04);
 
