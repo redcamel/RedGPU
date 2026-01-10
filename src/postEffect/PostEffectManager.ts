@@ -211,7 +211,6 @@ class PostEffectManager {
         };
         {
             if (this.toneMapping) {
-                // this.toneMapping.exposure = this.#view.ibl?.exposure || 1
                 currentTextureView = this.toneMapping.render(
                     this.#view,
                     width,
