@@ -2,7 +2,7 @@
     let index = vec2<i32>(global_id.xy);
     let inputColor = textureLoad(sourceTexture, index);
 
-    let toneMapped = linearToneMapping(inputColor.rgb, uniforms.exposure);
+     let toneMapped = linearToneMapping(inputColor.rgb, uniforms.exposure);
 
     let contrastRGB = applyContrast(toneMapped, uniforms.contrast);
     let finalLinearRGB = applyBrightness(contrastRGB, uniforms.brightness);

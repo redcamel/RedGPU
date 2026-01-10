@@ -201,6 +201,16 @@ class PostEffectManager {
                 currentTextureView,
             );
         });
+        {
+            if(this.toneMapping){
+                currentTextureView = this.toneMapping.render(
+                    this.#view,
+                    width,
+                    height,
+                    currentTextureView
+                );
+            }
+        }
         if (useFXAA) {
             currentTextureView = fxaa.render(
                 this.#view,
@@ -258,16 +268,7 @@ class PostEffectManager {
                 );
             }
         }
-        {
-            if(this.toneMapping){
-                currentTextureView = this.toneMapping.render(
-                    this.#view,
-                    width,
-                    height,
-                    currentTextureView
-                );
-            }
-        }
+
         return currentTextureView;
     }
 
