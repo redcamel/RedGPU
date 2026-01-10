@@ -17,6 +17,9 @@ import AToneMappingEffect from "./toneMapping/AToneMappingEffect";
 import TONE_MAPPING_MODE from "./toneMapping/TONE_MAPPING_MODE";
 import ToneLinear from "./toneMapping/linearToneMapping/ToneLinear";
 import {keepLog} from "../utils";
+import ToneACESFilmicNarkowicz from "./toneMapping/ACESFilmicNarkowicz/ToneACESFilmicNarkowicz";
+import ToneACESFilmicHill from "./toneMapping/ACESFilmicHill/ToneACESFilmicHill";
+import ToneACESFilmicHillExposureBoost from "./toneMapping/ACESFilmicHillExposureBoost/ToneACESFilmicHillExposureBoost";
 
 /**
  * 후처리 이펙트(PostEffect) 관리 클래스입니다.
@@ -65,21 +68,33 @@ class PostEffectManager {
     #useSSAO: boolean = false;
     #ssr: SSR;
     #useSSR: boolean = false;
-    #toneMapping:AToneMappingEffect
-    #toneMappingMode:TONE_MAPPING_MODE = TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL
-    #createToneMapping(){
-        if(!this.#toneMapping){
-            keepLog('보자',this.#toneMappingMode)
-            switch (this.#toneMappingMode){
-                case TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL:
-                    this.#toneMapping = new ToneKhronosPbrNeutral(this.#view.redGPUContext)
-                    break;
+    #toneMapping: AToneMappingEffect
+    #toneMappingMode: TONE_MAPPING_MODE = TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL
+
+    #createToneMapping() {
+        if (!this.#toneMapping) {
+            keepLog('보자', this.#toneMappingMode)
+            switch (this.#toneMappingMode) {
                 case TONE_MAPPING_MODE.LINEAR:
                     this.#toneMapping = new ToneLinear(this.#view.redGPUContext)
                     break;
+                case TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL:
+                    this.#toneMapping = new ToneKhronosPbrNeutral(this.#view.redGPUContext)
+                    break;
+                case TONE_MAPPING_MODE.ACES_FILMIC_NARKOWICZ:
+                    this.#toneMapping = new ToneACESFilmicNarkowicz(this.#view.redGPUContext)
+                    break;
+                case TONE_MAPPING_MODE.ACES_FILMIC_HILL:
+                    this.#toneMapping = new ToneACESFilmicHill(this.#view.redGPUContext)
+                    break;
+                case TONE_MAPPING_MODE.ACES_FILMIC_HILL_EXPOSURE_BOOST:
+                    this.#toneMapping = new ToneACESFilmicHillExposureBoost(this.#view.redGPUContext)
+                    break;
             }
+
         }
     }
+
     get toneMapping(): AToneMappingEffect {
         this.#createToneMapping()
         return this.#toneMapping;
@@ -202,7 +217,7 @@ class PostEffectManager {
             );
         });
         {
-            if(this.toneMapping){
+            if (this.toneMapping) {
                 currentTextureView = this.toneMapping.render(
                     this.#view,
                     width,

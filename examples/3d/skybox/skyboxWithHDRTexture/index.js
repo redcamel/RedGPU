@@ -48,7 +48,7 @@ const createTestPane = async (view) => {
 		createFieldOfView,
 		setDebugButtons
 	} = await import( "../../../exampleHelper/createExample/panes/index.js?t=1767864574385" );
-	setDebugButtons(view.redGPUContext);
+	setDebugButtons(RedGPU,view.redGPUContext);
 	const pane = new Pane();
 	createFieldOfView(pane, view.camera);
 
@@ -87,6 +87,15 @@ const createTestPane = async (view) => {
 		acc[key] = value;
 		return acc;
 	}, {});
+	let exposureBinding;
+	const updateExposureBinding = () => {
+		if (exposureBinding) pane.remove(exposureBinding);
+		exposureBinding = pane.addBinding(view.postEffectManager.toneMapping, 'exposure', {
+			min: 0.01,
+			max: view.postEffectManager.toneMapping.exposure * 2,
+			step: 0.01
+		});
+	};
 
 	pane.addBinding(settings, 'toneMappingMode', {
 		label: 'Tone Mapping',
@@ -94,6 +103,8 @@ const createTestPane = async (view) => {
 	}).on("change", (ev) => {
 
 		view.postEffectManager.toneMappingMode = ev.value;
+		updateExposureBinding();
+		console.log(ev.value)
 		console.log(ev.value)
 		console.log(view.postEffectManager.toneMapping)
 	});
@@ -111,10 +122,5 @@ const createTestPane = async (view) => {
 	}).on("change", (ev) => {
 		view.skybox.opacity = ev.value;
 	})
-	// Exposure 슬라이더
-	const exposureBinding = pane.addBinding(view.postEffectManager.toneMapping, 'exposure', {
-		min: 0.01,
-		max: view.postEffectManager.toneMapping.exposure * 2,
-		step: 0.01
-	})
+	updateExposureBinding();
 };

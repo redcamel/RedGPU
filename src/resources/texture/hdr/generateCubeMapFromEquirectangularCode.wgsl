@@ -52,6 +52,7 @@ struct SceneUniforms {
         // u: 0.5 - (theta / 2PI) 로 계산하여 수평 반전을 해결
         // v: phi / PI (0은 위, PI는 아래)
         let u = 0.5 - (theta / (2.0 * PI));
+//        let u = (theta / (2.0 * PI)) + 0.5;
         let v = phi / PI;
 
         let color = textureSample(equirectangularTexture, textureSampler, vec2<f32>(u, v));

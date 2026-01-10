@@ -1,6 +1,12 @@
 export const TONE_MAPPING_MODE = {
-    LINEAR : 'linear',
-    KHRONOS_PBR_NEUTRAL : 'khronosPbrNeutral',
+    LINEAR: 'linear',
+    KHRONOS_PBR_NEUTRAL: 'khronosPbrNeutral',
+    ACES_FILMIC_NARKOWICZ: 'ACESFilmicNarkowicz',
+    ACES_FILMIC_HILL: 'ACESFilmicHill',
+    ACES_FILMIC_HILL_EXPOSURE_BOOST: 'ACESFilmicHillExposureBoost',
 } as const;
 export type TONE_MAPPING_MODE = typeof TONE_MAPPING_MODE[keyof typeof TONE_MAPPING_MODE];
 export default TONE_MAPPING_MODE;
+
+
+
