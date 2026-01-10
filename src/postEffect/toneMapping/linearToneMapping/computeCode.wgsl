@@ -2,14 +2,17 @@
     let index = vec2<i32>(global_id.xy);
     let inputColor = textureLoad(sourceTexture, index);
 
-     let toneMapped = linearToneMapping(inputColor.rgb, uniforms.exposure);
+    // 모든 인자를 한꺼번에 넘겨서 처리합니다.
+    let finalLinear = linearToneMapping(
+        inputColor.rgb,
+        uniforms.exposure,
+        uniforms.contrast,
+        uniforms.brightness
+    );
 
-    let contrastRGB = applyContrast(toneMapped, uniforms.contrast);
-    let finalLinearRGB = applyBrightness(contrastRGB, uniforms.brightness);
+    // 최종 sRGB 변환
+    let finalSRGB = linearToSRGB(finalLinear);
 
-    let finalSRGB = clamp(linearToSRGB(finalLinearRGB), vec3<f32>(0.0), vec3<f32>(1.0));
-
-    let outputColor = vec4<f32>(finalSRGB, inputColor.a);
-    textureStore(outputTexture, index, outputColor);
+    textureStore(outputTexture, index, vec4<f32>(finalSRGB, inputColor.a));
 
 }

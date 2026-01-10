@@ -15,11 +15,24 @@ fn linearToSRGB(linearColor: vec3<f32>) -> vec3<f32> {
 
     return mix(higher, lower, step(linearColor, cutoff));
 }
+fn linearToneMapping(color: vec3<f32>, exposure: f32, contrast: f32, brightness: f32) -> vec3<f32> {
+    // 1. 노출 및 밝기/대비 통합 적용 (선형 공간)
+    let exposed = color * exposure;
+    let adjusted = 0.5 + contrast * (exposed + brightness - 0.5);
 
+    // 2. 안전장치: 음수 값 제거
+    let v = max(adjusted, vec3<f32>(0.0));
 
-/// 선형 톤맵핑: 노출 + sRGB 보정 (단순 클램프 - HDR에 부적합)
-fn linearToneMapping(color: vec3<f32>, exposure: f32) -> vec3<f32> {
-    return color * exposure;
+    // 3. 🔸 ACES Filmic Curve (마지막에 적용하여 절대 타지 않게 함)
+    let a = 2.51;
+    let b = 0.03;
+    let c = 2.43;
+    let d = 0.59;
+    let e = 0.14;
+
+    let mapped = (v * (a * v + b)) / (v * (c * v + d) + e);
+
+    return clamp(mapped, vec3<f32>(0.0), vec3<f32>(1.0));
 }
 
 /// Khronos PBR Neutral 톤맵핑

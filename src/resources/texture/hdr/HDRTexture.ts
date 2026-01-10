@@ -130,15 +130,16 @@ class HDRTexture extends ManagementResourceBase {
         const newExposure = Math.max(0.01, Math.min(20.0, value));
         if (this.#exposure === newExposure) return;
         this.#exposure = newExposure;
-        if (this.#exposureUpdateTimeout) {
-            clearTimeout(this.#exposureUpdateTimeout);
-        }
-        this.#exposureUpdateTimeout = setTimeout(() => {
-            if (this.#hdrData && this.#isCubeMapInitialized) {
-                this.#updateCubeMapContent(true);
-            }
-            this.#exposureUpdateTimeout = null;
-        }, 50);
+        // if (this.#exposureUpdateTimeout) {
+        //     clearTimeout(this.#exposureUpdateTimeout);
+        // }
+        // this.#exposureUpdateTimeout = setTimeout(() => {
+        //     if (this.#hdrData && this.#isCubeMapInitialized) {
+        //         this.#updateCubeMapContent(true);
+        //     }
+        //     this.#exposureUpdateTimeout = null;
+        // }, 50);
+        this.__fireListenerList();
     }
 
     get recommendedExposure(): number {
