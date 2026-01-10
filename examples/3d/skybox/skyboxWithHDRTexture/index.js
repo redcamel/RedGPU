@@ -54,6 +54,7 @@ const createTestPane = async (view) => {
 
 	const settings = {
 		hdrImage: hdrImages[0].path,
+		toneMappingMode : view.postEffectManager.toneMappingMode,
 		exposure: view.skybox.exposure,
 		blur: 0,
 		opacity: 1,
@@ -80,6 +81,21 @@ const createTestPane = async (view) => {
 			}
 		);
 		view.skybox = new RedGPU.Display.SkyBox(view.redGPUContext, newTexture);
+	});
+	const toneOptions = Object.entries(RedGPU.PostEffect.TONE_MAPPING_MODE).reduce((acc, [key, value]) => {
+
+		acc[key] = value;
+		return acc;
+	}, {});
+
+	pane.addBinding(settings, 'toneMappingMode', {
+		label: 'Tone Mapping',
+		options: toneOptions
+	}).on("change", (ev) => {
+
+		view.postEffectManager.toneMappingMode = ev.value;
+		console.log(ev.value)
+		console.log(view.postEffectManager.toneMapping)
 	});
 	pane.addBinding(settings, 'blur', {
 		min: 0,

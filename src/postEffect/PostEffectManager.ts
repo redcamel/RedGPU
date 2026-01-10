@@ -12,7 +12,11 @@ import postEffectSystemUniformCode from "./core/postEffectSystemUniform.wgsl"
 import SSAO from "./effects/ssao/SSAO";
 import SSR from "./effects/ssr/SSR";
 import TAASharpen from "./TAA/shapen/TAASharpen";
-import ToneMapping from "./toneMapping/ToneMapping";
+import ToneKhronosPbrNeutral from "./toneMapping/khronosPbrNeutral/ToneKhronosPbrNeutral";
+import AToneMappingEffect from "./toneMapping/AToneMappingEffect";
+import TONE_MAPPING_MODE from "./toneMapping/TONE_MAPPING_MODE";
+import ToneLinear from "./toneMapping/linearToneMapping/ToneLinear";
+import {keepLog} from "../utils";
 
 /**
  * 후처리 이펙트(PostEffect) 관리 클래스입니다.
@@ -61,20 +65,38 @@ class PostEffectManager {
     #useSSAO: boolean = false;
     #ssr: SSR;
     #useSSR: boolean = false;
-
-    get toneMapping(): ToneMapping {
-
+    #toneMapping:AToneMappingEffect
+    #toneMappingMode:TONE_MAPPING_MODE = TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL
+    #createToneMapping(){
         if(!this.#toneMapping){
-            this.#toneMapping = new ToneMapping(this.#view.redGPUContext)
+            keepLog('보자',this.#toneMappingMode)
+            switch (this.#toneMappingMode){
+                case TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL:
+                    this.#toneMapping = new ToneKhronosPbrNeutral(this.#view.redGPUContext)
+                    break;
+                case TONE_MAPPING_MODE.LINEAR:
+                    this.#toneMapping = new ToneLinear(this.#view.redGPUContext)
+                    break;
+            }
         }
+    }
+    get toneMapping(): AToneMappingEffect {
+        this.#createToneMapping()
         return this.#toneMapping;
     }
 
-    set toneMapping(value: ToneMapping) {
-        this.#toneMapping = value;
+
+    get toneMappingMode(): TONE_MAPPING_MODE {
+        return this.#toneMappingMode;
     }
 
-    #toneMapping:ToneMapping
+    set toneMappingMode(value: TONE_MAPPING_MODE) {
+        this.#toneMappingMode = value;
+        this.#toneMapping?.clear()
+        this.#toneMapping = undefined
+        this.#createToneMapping()
+    }
+
     constructor(view: View3D) {
         this.#view = view;
         this.#init()
@@ -203,15 +225,7 @@ class PostEffectManager {
                 currentTextureView
             );
         }
-        {
 
-            currentTextureView = this.toneMapping.render(
-                this.#view,
-                width,
-                height,
-                currentTextureView
-            );
-        }
         currentTextureView = fxaa.render(
             this.#view,
             width,
@@ -244,7 +258,16 @@ class PostEffectManager {
                 );
             }
         }
-
+        {
+            if(this.toneMapping){
+                currentTextureView = this.toneMapping.render(
+                    this.#view,
+                    width,
+                    height,
+                    currentTextureView
+                );
+            }
+        }
         return currentTextureView;
     }
 
