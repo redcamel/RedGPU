@@ -19,7 +19,6 @@ import ToneLinear from "./toneMapping/linearToneMapping/ToneLinear";
 import {keepLog} from "../utils";
 import ToneACESFilmicNarkowicz from "./toneMapping/ACESFilmicNarkowicz/ToneACESFilmicNarkowicz";
 import ToneACESFilmicHill from "./toneMapping/ACESFilmicHill/ToneACESFilmicHill";
-import ToneACESFilmicHillExposureBoost from "./toneMapping/ACESFilmicHillExposureBoost/ToneACESFilmicHillExposureBoost";
 
 /**
  * 후처리 이펙트(PostEffect) 관리 클래스입니다.
@@ -69,7 +68,7 @@ class PostEffectManager {
     #ssr: SSR;
     #useSSR: boolean = false;
     #toneMapping: AToneMappingEffect
-    #toneMappingMode: TONE_MAPPING_MODE = TONE_MAPPING_MODE.LINEAR
+    #toneMappingMode: TONE_MAPPING_MODE = TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL
 
     #createToneMapping() {
         if (!this.#toneMapping) {
@@ -86,9 +85,6 @@ class PostEffectManager {
                     break;
                 case TONE_MAPPING_MODE.ACES_FILMIC_HILL:
                     this.#toneMapping = new ToneACESFilmicHill(this.#view.redGPUContext)
-                    break;
-                case TONE_MAPPING_MODE.ACES_FILMIC_HILL_EXPOSURE_BOOST:
-                    this.#toneMapping = new ToneACESFilmicHillExposureBoost(this.#view.redGPUContext)
                     break;
             }
 
