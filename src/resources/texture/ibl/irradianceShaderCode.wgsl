@@ -27,57 +27,70 @@ struct VertexOutput {
 
 const PI = 3.14159265359;
 
+// Hammersley 시퀀스를 위한 비트 반전 함수 (표준 IBL 기법)
+fn radicalInverse_VdC(bits_in: u32) -> f32 {
+    var bits = bits_in;
+    bits = (bits << 16u) | (bits >> 16u);
+    bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
+    bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
+    bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);
+    bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
+    return f32(bits) * 2.3283064365386963e-10; // / 0x100000000
+}
+
+fn hammersley(i: u32, n: u32) -> vec2<f32> {
+    return vec2<f32>(f32(i) / f32(n), radicalInverse_VdC(i));
+}
 @fragment fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
-    // NDC 좌표 (x, y)를 -1 ~ 1 범위로 변환 (generateCubeMapFromEquirectangular와 동일)
     let x = input.texCoord.x * 2.0 - 1.0;
     let y = input.texCoord.y * 2.0 - 1.0;
 
-    // 큐브면에서의 로컬 방향 벡터에 면 행렬을 곱함
     let localPos = vec4<f32>(x, y, 1.0, 1.0);
     let normal = normalize((faceMatrix * localPos).xyz);
 
+    // Duff Orthonormal Basis
+    let s = select(1.0, -1.0, normal.z < 0.0);
+    let a = -1.0 / (s + normal.z);
+    let b = normal.x * normal.y * a;
+    let tangent = vec3<f32>(1.0 + s * normal.x * normal.x * a, s * b, -s * normal.x);
+    let bitangent = vec3<f32>(b, s + normal.y * normal.y * a, -normal.y);
+
     var irradiance = vec3<f32>(0.0);
+    var totalWeight = 0.0;
+    let totalSamples = 1024u;
 
-    // 탄젠트 공간 구성 - normal과 평행하지 않은 up 벡터 선택
-    var up = vec3<f32>(0.0, 1.0, 0.0);
-    if (abs(normal.y) > 0.999) {
-        up = vec3<f32>(1.0, 0.0, 0.0);
-    }
-    let tangent = normalize(cross(up, normal));
-    let bitangent = normalize(cross(normal, tangent));
+    // 원본 환경맵의 해상도 (예: 1024x1024 가정)를 고려한 밉 선택 상수
+    let envSize = f32(textureDimensions(environmentTexture).x);
+    let saTexel = 4.0 * PI / (6.0 * envSize * envSize); // 텍셀당 입체각
 
-    // 적분 샘플링
-    let sampleCount = 32u;
-    let invSampleCount = 1.0 / f32(sampleCount);
+    for (var i = 0u; i < totalSamples; i++) {
+        let xi = hammersley(i, totalSamples);
 
-    for (var i = 0u; i < sampleCount; i++) {
-        for (var j = 0u; j < sampleCount; j++) {
-            let u1 = (f32(i) + 0.5) * invSampleCount;
-            let u2 = (f32(j) + 0.5) * invSampleCount;
+        // Cosine-weighted hemisphere sampling
+        let phi = 2.0 * PI * xi.x;
+        let cosTheta = sqrt(1.0 - xi.y);
+        let sinTheta = sqrt(xi.y);
 
-            let cosTheta = sqrt(u1);
-            let sinTheta = sqrt(1.0 - u1);
-            let phi = 2.0 * PI * u2;
+        let sampleVec = vec3<f32>(sinTheta * cos(phi), sinTheta * sin(phi), cosTheta);
+        let worldSample = normalize(tangent * sampleVec.x + bitangent * sampleVec.y + normal * sampleVec.z);
 
-            let cosPhi = cos(phi);
-            let sinPhi = sin(phi);
+        // PDF 계산: 코사인 가중치 샘플링의 경우 cosTheta / PI
+        let pdf = max(cosTheta, 0.001) / PI;
 
-            let sampleVec = vec3<f32>(
-                sinTheta * cosPhi,
-                sinTheta * sinPhi,
-                cosTheta
-            );
+        // 언리얼 스타일: 샘플의 입체각을 계산하여 적절한 LOD를 선택합니다.
+        // 이를 통해 저해상도 Irradiance 맵에서도 앨리어싱(계단 현상)을 원천 차단합니다.
+        let saSample = 1.0 / (f32(totalSamples) * pdf + 0.0001);
+        let mipLevel = select(0.5 * log2(saSample / saTexel), 0.0, saSample <= 0.0);
 
-            let worldSample = sampleVec.x * tangent +
-                            sampleVec.y * bitangent +
-                            sampleVec.z * normal;
+        let sampleColor = textureSampleLevel(environmentTexture, environmentSampler, worldSample, mipLevel);
 
-            let sampleColor = textureSample(environmentTexture, environmentSampler, worldSample);
-            irradiance += sampleColor.rgb * cosTheta;
-        }
+        // 물리적 정확도를 위해 가중치 누적 (여기서는 코사인 샘플링이므로 단순 누적 후 평균)
+        irradiance += sampleColor.rgb;
+        totalWeight += 1.0;
     }
 
-    irradiance = irradiance * PI * invSampleCount * invSampleCount;
+    irradiance = irradiance / totalWeight;
 
+    // 최종 결과 반환
     return vec4<f32>(irradiance, 1.0);
 }

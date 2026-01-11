@@ -57,6 +57,6 @@ struct SceneUniforms {
 
         let color = textureSample(equirectangularTexture, textureSampler, vec2<f32>(u, v));
 
-        return vec4<f32>(color.rgb * uniforms.exposure, color.a);
-//        return vec4<f32>(color.rgb, color.a);
+//        return vec4<f32>(color.rgb * uniforms.exposure, color.a);
+        return vec4<f32>(color.rgb, color.a);
     }
