@@ -15,18 +15,9 @@ fn linearToSRGB(linearColor: vec3<f32>) -> vec3<f32> {
 
     return mix(higher, lower, step(linearColor, cutoff));
 }
-fn linearToneMapping(color: vec3<f32>, exposure: f32, contrast: f32, brightness: f32) -> vec3<f32> {
-    // 1. 순수하게 노출만 적용합니다.
+fn linearToneMapping(color: vec3<f32>, exposure: f32) -> vec3<f32> {
     let exposed = color * exposure;
-
-    // 2. 만약 contrast가 1.0, brightness가 0.0이 아니라면 여기서 '선형적으로' 변합니다.
-    // 하지만 None 매핑의 목적은 '원본 그대로'이므로 이 계산이 위험할 수 있습니다.
-    // 테스트를 위해 아래처럼 노출만 적용된 값을 먼저 확인해 보세요.
-    let adjusted = applyContrast(applyBrightness(exposed, brightness), contrast);
-
-    // 3. 반환값에서 clamp를 제거하거나 sRGB 변환 전후 위치를 고민해야 합니다.
-    // 일단 0~1로 자르되, 만약 너무 타면 exposure 값을 낮춰야 합니다.
-    return adjusted;
+    return exposed;
 }
 
 /// Khronos PBR Neutral 톤맵핑
