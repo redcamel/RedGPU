@@ -5,8 +5,6 @@
  *
  * @packageDocumentation
  */
-import TONE_MAPPING_MODE from "./toneMapping/TONE_MAPPING_MODE";
-export * as Core from './core';
 import BrightnessContrast from "./effects/adjustments/brightnessContrast/BrightnessContrast";
 import ColorBalance from "./effects/adjustments/colorBalance/ColorBalance";
 import ColorTemperatureTint from "./effects/adjustments/colorTemperatureTint/ColorTemperatureTint";
@@ -33,4 +31,5 @@ import Vignetting from "./effects/lens/vignetting/Vignetting";
 import OldBloom from "./effects/oldBloom/OldBloom";
 import Sharpen from "./effects/Sharpen";
 import PostEffectManager from "./PostEffectManager";
-export { PostEffectManager, BrightnessContrast, ColorBalance, ColorTemperatureTint, Grayscale, HueSaturation, Invert, Threshold, Vibrance, Blur, BlurX, BlurY, DirectionalBlur, GaussianBlur, RadialBlur, ZoomBlur, ChromaticAberration, DOF, LensDistortion, Vignetting, Fog, HeightFog, FilmGrain, OldBloom, Sharpen, Convolution, TONE_MAPPING_MODE, };
+export * as Core from './core';
+export { PostEffectManager, BrightnessContrast, ColorBalance, ColorTemperatureTint, Grayscale, HueSaturation, Invert, Threshold, Vibrance, Blur, BlurX, BlurY, DirectionalBlur, GaussianBlur, RadialBlur, ZoomBlur, ChromaticAberration, DOF, LensDistortion, Vignetting, Fog, HeightFog, FilmGrain, OldBloom, Sharpen, Convolution, };

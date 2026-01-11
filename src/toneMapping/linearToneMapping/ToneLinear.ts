@@ -1,8 +1,8 @@
-import RedGPUContext from "../../../context/RedGPUContext";
-import createBasicPostEffectCode from "../../core/createBasicPostEffectCode";
+import RedGPUContext from "../../context/RedGPUContext";
+import createBasicPostEffectCode from "../../postEffect/core/createBasicPostEffectCode";
 import computeCode from "./computeCode.wgsl"
-import uniformStructCode from "../uniformStructCode.wgsl"
-import AToneMappingEffect from "../AToneMappingEffect";
+import uniformStructCode from "../core/uniformStructCode.wgsl"
+import AToneMappingEffect from "../core/AToneMappingEffect";
 
 class ToneLinear extends AToneMappingEffect {
 

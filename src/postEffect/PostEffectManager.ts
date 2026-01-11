@@ -12,13 +12,13 @@ import postEffectSystemUniformCode from "./core/postEffectSystemUniform.wgsl"
 import SSAO from "./effects/ssao/SSAO";
 import SSR from "./effects/ssr/SSR";
 import TAASharpen from "./TAA/shapen/TAASharpen";
-import ToneKhronosPBRNeutral from "./toneMapping/khronosPbrNeutral/ToneKhronosPBRNeutral";
-import AToneMappingEffect from "./toneMapping/AToneMappingEffect";
-import TONE_MAPPING_MODE from "./toneMapping/TONE_MAPPING_MODE";
-import ToneLinear from "./toneMapping/linearToneMapping/ToneLinear";
+import ToneKhronosPBRNeutral from "../toneMapping/khronosPbrNeutral/ToneKhronosPBRNeutral";
+import AToneMappingEffect from "../toneMapping/core/AToneMappingEffect";
+import TONE_MAPPING_MODE from "../toneMapping/TONE_MAPPING_MODE";
+import ToneLinear from "../toneMapping/linearToneMapping/ToneLinear";
 import {keepLog} from "../utils";
-import ToneACESFilmicNarkowicz from "./toneMapping/ACESFilmicNarkowicz/ToneACESFilmicNarkowicz";
-import ToneACESFilmicHill from "./toneMapping/ACESFilmicHill/ToneACESFilmicHill";
+import ToneACESFilmicNarkowicz from "../toneMapping/ACESFilmicNarkowicz/ToneACESFilmicNarkowicz";
+import ToneACESFilmicHill from "../toneMapping/ACESFilmicHill/ToneACESFilmicHill";
 
 /**
  * 후처리 이펙트(PostEffect) 관리 클래스입니다.
@@ -67,46 +67,6 @@ class PostEffectManager {
     #useSSAO: boolean = false;
     #ssr: SSR;
     #useSSR: boolean = false;
-    #toneMapping: AToneMappingEffect
-    #toneMappingMode: TONE_MAPPING_MODE = TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL
-
-    #createToneMapping() {
-        if (!this.#toneMapping) {
-            keepLog('보자', this.#toneMappingMode)
-            switch (this.#toneMappingMode) {
-                case TONE_MAPPING_MODE.LINEAR:
-                    this.#toneMapping = new ToneLinear(this.#view.redGPUContext)
-                    break;
-                case TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL:
-                    this.#toneMapping = new ToneKhronosPBRNeutral(this.#view.redGPUContext)
-                    break;
-                case TONE_MAPPING_MODE.ACES_FILMIC_NARKOWICZ:
-                    this.#toneMapping = new ToneACESFilmicNarkowicz(this.#view.redGPUContext)
-                    break;
-                case TONE_MAPPING_MODE.ACES_FILMIC_HILL:
-                    this.#toneMapping = new ToneACESFilmicHill(this.#view.redGPUContext)
-                    break;
-            }
-
-        }
-    }
-
-    get toneMapping(): AToneMappingEffect {
-        this.#createToneMapping()
-        return this.#toneMapping;
-    }
-
-
-    get toneMappingMode(): TONE_MAPPING_MODE {
-        return this.#toneMappingMode;
-    }
-
-    set toneMappingMode(value: TONE_MAPPING_MODE) {
-        this.#toneMappingMode = value;
-        this.#toneMapping?.clear()
-        this.#toneMapping = undefined
-        this.#createToneMapping()
-    }
 
     constructor(view: View3D) {
         this.#view = view;
@@ -166,21 +126,21 @@ class PostEffectManager {
         this.#postEffects.push(v)
     }
 
-    addEffectAt(v: ASinglePassPostEffect | AMultiPassPostEffect) {
-        //TODO
-    }
+    // addEffectAt(v: ASinglePassPostEffect | AMultiPassPostEffect) {
+    //     //TODO
+    // }
 
     getEffectAt(index: number): ASinglePassPostEffect | AMultiPassPostEffect {
         return this.#postEffects[index]
     }
 
-    removeEffect(v: ASinglePassPostEffect | AMultiPassPostEffect) {
-        //TODO
-    }
-
-    removeEffectAt(v: ASinglePassPostEffect | AMultiPassPostEffect) {
-        //TODO
-    }
+    // removeEffect(v: ASinglePassPostEffect | AMultiPassPostEffect) {
+    //     //TODO
+    // }
+    //
+    // removeEffectAt(v: ASinglePassPostEffect | AMultiPassPostEffect) {
+    //     //TODO
+    // }
 
     removeAllEffect() {
         this.#postEffects.forEach(effect => {
@@ -191,7 +151,7 @@ class PostEffectManager {
 
 
     render() {
-        const {viewRenderTextureManager, redGPUContext, taa, fxaa} = this.#view;
+        const {viewRenderTextureManager, redGPUContext, taa, fxaa,toneMappingManager} = this.#view;
         const {antialiasingManager} = redGPUContext
         const {useMSAA, useFXAA, useTAA} = antialiasingManager;
         const {gBufferColorTextureView, gBufferColorResolveTextureView, gBufferColorTexture} = viewRenderTextureManager;
@@ -206,15 +166,11 @@ class PostEffectManager {
             textureView: this.#sourceTextureView,
         };
         {
-            if (this.toneMapping) {
-
-                currentTextureView = this.toneMapping.render(
-                    this.#view,
-                    width,
-                    height,
-                    currentTextureView
-                );
-            }
+            currentTextureView = toneMappingManager.render(
+                width,
+                height,
+                currentTextureView
+            );
         }
         this.#postEffects.forEach(effect => {
             currentTextureView = effect.render(

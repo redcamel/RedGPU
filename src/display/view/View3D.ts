@@ -25,6 +25,7 @@ import SkyBox from "../skyboxs/skyBox/SkyBox";
 import AView from "./core/AView";
 import RenderViewStateData from "./core/RenderViewStateData";
 import ViewRenderTextureManager from "./core/ViewRenderTextureManager";
+import ToneMappingManager from "../../toneMapping/ToneMappingManager";
 
 const SHADER_INFO = parseWGSL(SystemCode.SYSTEM_UNIFORM)
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.systemUniforms;
@@ -88,6 +89,7 @@ class View3D extends AView {
      * @readonly
      */
     readonly #postEffectManager: PostEffectManager
+    readonly #toneMappingManager: ToneMappingManager
     /**
      * 렌더 타겟 처리를 위한 뷰 렌더 텍스처 매니저
      * @private
@@ -174,6 +176,7 @@ class View3D extends AView {
         this.#viewRenderTextureManager = new ViewRenderTextureManager(this)
         this.#renderViewStateData = new RenderViewStateData(this)
         this.#postEffectManager = new PostEffectManager(this)
+        this.#toneMappingManager = new ToneMappingManager(this)
         // keepLog(this.systemUniform_Vertex_StructInfo)
         this.#uniformData = new ArrayBuffer(this.systemUniform_Vertex_StructInfo.endOffset)
         this.#uniformDataF32 = new Float32Array(this.#uniformData)
@@ -242,6 +245,11 @@ class View3D extends AView {
      */
     get postEffectManager(): PostEffectManager {
         return this.#postEffectManager;
+    }
+
+
+    get toneMappingManager(): ToneMappingManager {
+        return this.#toneMappingManager;
     }
 
     /**

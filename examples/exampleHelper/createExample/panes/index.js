@@ -177,19 +177,19 @@ const setToneMappingSelect = (RedGPU, redGPUContext, rightContainer) => {
     if (redGPUContext.viewList.length > 1) return;
     if (redGPUContext.viewList[0].constructor.name === 'View2D') return;
     const targetView = redGPUContext.viewList[0]
-    const {postEffectManager} = targetView
-    const {TONE_MAPPING_MODE} = RedGPU.PostEffect
-    console.log(RedGPU.PostEffect)
+    const {toneMappingManager} = targetView
+    const {TONE_MAPPING_MODE} = RedGPU
+
     antialiasing.className = 'nav-button antialiasing-button';
-    const list = Object.entries(TONE_MAPPING_MODE).map(([key, value]) => `<option value="${value}" ${postEffectManager.toneMappingMode === value ? 'selected="true"' : ''}>${key}</option>`)
+    const list = Object.entries(TONE_MAPPING_MODE).map(([key, value]) => `<option value="${value}" ${toneMappingManager.toneMappingMode === value ? 'selected="true"' : ''}>${key}</option>`)
 	list.push('<option value="NONE" >NONE</option>')
     antialiasing.innerHTML = list.join()
     antialiasing.addEventListener('change', (e) => {
         const targetAntialiasing = e.target.value
         console.log(e.target.value)
-        postEffectManager.toneMappingMode = null
+        toneMappingManager.toneMappingMode = null
         if (targetAntialiasing !== 'NONE') {
-            postEffectManager.toneMappingMode = e.target.value
+            toneMappingManager.toneMappingMode = e.target.value
         }
 
     })

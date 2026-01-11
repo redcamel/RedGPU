@@ -5,9 +5,6 @@
  *
  * @packageDocumentation
  */
-import TONE_MAPPING_MODE from "./toneMapping/TONE_MAPPING_MODE";
-
-export * as Core from './core'
 import BrightnessContrast from "./effects/adjustments/brightnessContrast/BrightnessContrast";
 import ColorBalance from "./effects/adjustments/colorBalance/ColorBalance";
 import ColorTemperatureTint from "./effects/adjustments/colorTemperatureTint/ColorTemperatureTint";
@@ -34,6 +31,8 @@ import Vignetting from "./effects/lens/vignetting/Vignetting";
 import OldBloom from "./effects/oldBloom/OldBloom";
 import Sharpen from "./effects/Sharpen";
 import PostEffectManager from "./PostEffectManager";
+
+export * as Core from './core'
 
 export {
     PostEffectManager,
@@ -68,5 +67,4 @@ export {
     Sharpen,
     // Utility Effects
     Convolution,
-    TONE_MAPPING_MODE,
 }

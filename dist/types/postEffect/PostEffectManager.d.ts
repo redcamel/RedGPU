@@ -4,8 +4,6 @@ import AMultiPassPostEffect from "./core/AMultiPassPostEffect";
 import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
 import SSAO from "./effects/ssao/SSAO";
 import SSR from "./effects/ssr/SSR";
-import AToneMappingEffect from "./toneMapping/AToneMappingEffect";
-import TONE_MAPPING_MODE from "./toneMapping/TONE_MAPPING_MODE";
 /**
  * 후처리 이펙트(PostEffect) 관리 클래스입니다.
  * 이펙트 추가/제거, 렌더링, 시스템 유니폼 관리, 비디오 메모리 계산 등 후처리 파이프라인을 통합적으로 제어합니다.
@@ -14,9 +12,6 @@ import TONE_MAPPING_MODE from "./toneMapping/TONE_MAPPING_MODE";
  */
 declare class PostEffectManager {
     #private;
-    get toneMapping(): AToneMappingEffect;
-    get toneMappingMode(): TONE_MAPPING_MODE;
-    set toneMappingMode(value: TONE_MAPPING_MODE);
     constructor(view: View3D);
     get useSSAO(): boolean;
     set useSSAO(value: boolean);
@@ -29,10 +24,7 @@ declare class PostEffectManager {
     get effectList(): Array<ASinglePassPostEffect | AMultiPassPostEffect>;
     get videoMemorySize(): number;
     addEffect(v: ASinglePassPostEffect | AMultiPassPostEffect): void;
-    addEffectAt(v: ASinglePassPostEffect | AMultiPassPostEffect): void;
     getEffectAt(index: number): ASinglePassPostEffect | AMultiPassPostEffect;
-    removeEffect(v: ASinglePassPostEffect | AMultiPassPostEffect): void;
-    removeEffectAt(v: ASinglePassPostEffect | AMultiPassPostEffect): void;
     removeAllEffect(): void;
     render(): {
         texture: GPUTexture;

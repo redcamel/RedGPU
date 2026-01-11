@@ -1,5 +1,5 @@
 import RedGPUContext from "../../context/RedGPUContext";
-import ASinglePassPostEffect from "../core/ASinglePassPostEffect";
+import ASinglePassPostEffect from "../../postEffect/core/ASinglePassPostEffect";
 
 class AToneMappingEffect extends ASinglePassPostEffect {
 
