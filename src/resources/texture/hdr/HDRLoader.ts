@@ -83,56 +83,87 @@ class HDRLoader {
 
 
 
+    /**
+     * 🔍 휘도 분석
+     */
     #analyzeLuminance(hdrData: HDRData) {
         const { data, width, height } = hdrData;
-        const len = data.length;
+        const pixelCount = width * height; // 픽셀 개수
         const epsilon = 1e-6;
 
         let min = Infinity;
         let max = -Infinity;
         let logSum = 0;
         let linearSum = 0;
-        let count = 0;
+        let validCount = 0;
 
         // 상대 휘도 계수 (BT.709)
         const R_COEFF = 0.2126, G_COEFF = 0.7152, B_COEFF = 0.0722;
 
-        for (let i = 0; i < len; i += 4) {
-            const luminance = R_COEFF * data[i] + G_COEFF * data[i + 1] + B_COEFF * data[i + 2];
-            const safeLuminance = luminance < 0 ? 0 : luminance;
+        // 픽셀 단위로 순회 (stride = 4)
+        for (let i = 0; i < pixelCount; i++) {
+            const offset = i * 4;
+            const r = data[offset];
+            const g = data[offset + 1];
+            const b = data[offset + 2];
 
-            if (safeLuminance < min) min = safeLuminance;
-            if (safeLuminance > max) max = safeLuminance;
+            // 휘도 계산
+            const luminance = R_COEFF * r + G_COEFF * g + B_COEFF * b;
 
-            // 로그 합산
-            logSum += Math.log(safeLuminance + epsilon);
-            linearSum += safeLuminance;
-            count++;
+            // 음수 방지
+            const safeLuminance = Math.max(0, luminance);
+
+            // 거의 검은색 픽셀 제외 (더 관대한 임계값)
+            if (safeLuminance > epsilon) {
+                if (safeLuminance < min) min = safeLuminance;
+                if (safeLuminance > max) max = safeLuminance;
+
+                logSum += Math.log(safeLuminance + epsilon);
+                linearSum += safeLuminance;
+                validCount++;
+            }
         }
 
-        if (count === 0) return { min: 0, max: 0, average: 0, median: 0 };
+        if (validCount === 0) {
+            console.warn('⚠️ 유효한 픽셀이 없습니다!');
+            return { min: 0, max: 0, average: 0, median: 0 };
+        }
 
-        const linearAverage = linearSum / count;
-        const logAverage = Math.exp(logSum / count);
+        const linearAverage = linearSum / validCount;
+        const logAverage = Math.exp(logSum / validCount);
 
-        const sceneKey = logAverage * 0.8 + linearAverage * 0.2;
+        // Scene key 계산 (로그 평균 기반)
+        const sceneKey = logAverage;
+
+        if (this.#enableDebugLogs) {
+            keepLog(`📊 휘도 통계:`);
+            keepLog(`  - 최소: ${min.toFixed(6)}`);
+            keepLog(`  - 최대: ${max.toFixed(6)}`);
+            keepLog(`  - 선형 평균: ${linearAverage.toFixed(6)}`);
+            keepLog(`  - 로그 평균: ${logAverage.toFixed(6)}`);
+            keepLog(`  - 다이나믹 레인지: ${(max / (min + epsilon)).toFixed(2)}:1`);
+            keepLog(`  - 유효 픽셀: ${validCount} / ${pixelCount}`);
+        }
 
         return {
             min: min === Infinity ? 0 : min,
             max: max === -Infinity ? 0 : max,
             average: linearAverage,
-            median: sceneKey // 이 값을 최종 Lw로 반환
+            median: sceneKey
         };
     }
 
 
     /**
      * HDR 이미지의 최적 노출값 계산
-     *
      */
     #calculateOptimalExposure(stats: { min: number; max: number; average: number; median: number }): number {
-        // Lw: 장면의 로그 평균 휘도
         const logAverageLuminance = stats.median;
+
+        if (this.#enableDebugLogs) {
+            keepLog(`📷 노출 계산:`);
+            keepLog(`  - 로그 평균 휘도 (Lw): ${logAverageLuminance.toFixed(6)}`);
+        }
 
         // 1. 표준 Middle Gray 기준 (0.18)
         const MIDDLE_GRAY = 0.18;
@@ -140,21 +171,49 @@ class HDRLoader {
         // 2. 기본 노출 계산
         let exposure = MIDDLE_GRAY / Math.max(logAverageLuminance, 1e-6);
 
-        // 3. 장면의 동적 범위(Dynamic Range)에 따른 보정
-        // 언리얼은 장면이 너무 극단적일 때 노출이 튀는 것을 막기 위해
-        // 하이라이트와 쉐도우 비중을 조절합니다.
-        const maxLuminance = stats.max;
-        const avgLuminance = stats.average;
-
-        // 장면 내에 너무 밝은 광원이 있는 경우 (예: 태양)
-        // 노출을 조금 더 낮추어 하이라이트 정보를 보존합니다.
-        if (maxLuminance > avgLuminance * 10.0) {
-            exposure *= 0.8;
+        if (this.#enableDebugLogs) {
+            keepLog(`  - 기본 노출: ${exposure.toFixed(3)}`);
         }
 
-        // 4. 최종 클램핑 (언리얼의 Min/Max Brightness 세팅과 유사)
-        // RedGPU 시스템에서 안전하게 표현 가능한 범위로 제한
-        return Math.max(0.1, Math.min(20.0, exposure));
+        // 3. 극단적인 다이나믹 레인지 보정
+        const dynamicRange = stats.max / Math.max(stats.min, 1e-6);
+
+        if (dynamicRange > 10000) {
+            // 매우 높은 다이나믹 레인지 (예: 태양 포함)
+            exposure *= 0.7;
+            if (this.#enableDebugLogs) {
+                keepLog(`  - 높은 DR 보정 (${dynamicRange.toFixed(0)}:1): x0.7`);
+            }
+        } else if (dynamicRange > 1000) {
+            exposure *= 0.85;
+            if (this.#enableDebugLogs) {
+                keepLog(`  - 중간 DR 보정 (${dynamicRange.toFixed(0)}:1): x0.85`);
+            }
+        }
+
+        // 4. 평균 휘도 기반 추가 보정
+        if (stats.average > 2.0) {
+            // 전반적으로 밝은 씬
+            exposure *= 0.8;
+            if (this.#enableDebugLogs) {
+                keepLog(`  - 밝은 씬 보정: x0.8`);
+            }
+        } else if (stats.average < 0.1) {
+            // 전반적으로 어두운 씬
+            exposure *= 1.2;
+            if (this.#enableDebugLogs) {
+                keepLog(`  - 어두운 씬 보정: x1.2`);
+            }
+        }
+
+        // 5. 최종 클램핑
+        const finalExposure = Math.max(0.1, Math.min(10.0, exposure));
+
+        if (this.#enableDebugLogs) {
+            keepLog(`  - 최종 노출: ${finalExposure.toFixed(3)}`);
+        }
+
+        return finalExposure;
     }
 
     /**

@@ -12,7 +12,7 @@ import postEffectSystemUniformCode from "./core/postEffectSystemUniform.wgsl"
 import SSAO from "./effects/ssao/SSAO";
 import SSR from "./effects/ssr/SSR";
 import TAASharpen from "./TAA/shapen/TAASharpen";
-import ToneKhronosPbrNeutral from "./toneMapping/khronosPbrNeutral/ToneKhronosPbrNeutral";
+import ToneKhronosPBRNeutral from "./toneMapping/khronosPbrNeutral/ToneKhronosPBRNeutral";
 import AToneMappingEffect from "./toneMapping/AToneMappingEffect";
 import TONE_MAPPING_MODE from "./toneMapping/TONE_MAPPING_MODE";
 import ToneLinear from "./toneMapping/linearToneMapping/ToneLinear";
@@ -79,7 +79,7 @@ class PostEffectManager {
                     this.#toneMapping = new ToneLinear(this.#view.redGPUContext)
                     break;
                 case TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL:
-                    this.#toneMapping = new ToneKhronosPbrNeutral(this.#view.redGPUContext)
+                    this.#toneMapping = new ToneKhronosPBRNeutral(this.#view.redGPUContext)
                     break;
                 case TONE_MAPPING_MODE.ACES_FILMIC_NARKOWICZ:
                     this.#toneMapping = new ToneACESFilmicNarkowicz(this.#view.redGPUContext)
@@ -278,7 +278,7 @@ class PostEffectManager {
         }
         {
             if (this.toneMapping) {
-                // this.toneMapping.exposure = this.#view.ibl?.exposure || 1
+
                 currentTextureView = this.toneMapping.render(
                     this.#view,
                     width,

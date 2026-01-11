@@ -4,7 +4,7 @@ import computeCode from "./computeCode.wgsl"
 import uniformStructCode from "../uniformStructCode.wgsl"
 import AToneMappingEffect from "../AToneMappingEffect";
 
-class ToneKhronosPbrNeutral extends AToneMappingEffect {
+class ToneKhronosPBRNeutral extends AToneMappingEffect {
 
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
@@ -18,5 +18,5 @@ class ToneKhronosPbrNeutral extends AToneMappingEffect {
 
 }
 
-Object.freeze(ToneKhronosPbrNeutral);
-export default ToneKhronosPbrNeutral;
+Object.freeze(ToneKhronosPBRNeutral);
+export default ToneKhronosPBRNeutral;

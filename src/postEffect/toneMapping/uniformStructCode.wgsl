@@ -7,39 +7,58 @@ struct Uniforms {
 
 /// 선형 RGB → sRGB 감마 보정
 fn linearToSRGB(linearColor: vec3<f32>) -> vec3<f32> {
-    let cutoff = vec3<f32>(0.0031308);
-    let gamma = 1.0 / 2.4;
+    // sRGB 표준 변환 공식
+    let a = 0.055;
+    let cutoff = 0.0031308;
+    let gamma = 2.4;
 
-    let higher = 1.055 * pow(linearColor, vec3<f32>(gamma)) - 0.055;
-    let lower = 12.92 * linearColor;
+    var srgb: vec3<f32>;
 
-    return mix(higher, lower, step(linearColor, cutoff));
+    // 각 채널별로 처리
+    for (var i = 0; i < 3; i++) {
+        let c = linearColor[i];
+        if (c <= cutoff) {
+            srgb[i] = 12.92 * c;
+        } else {
+            srgb[i] = (1.0 + a) * pow(c, 1.0 / gamma) - a;
+        }
+    }
+
+    return srgb;
 }
 fn linearToneMapping(color: vec3<f32>, exposure: f32) -> vec3<f32> {
     let exposed = color * exposure;
     return exposed;
 }
 
-/// Khronos PBR Neutral 톤맵핑
-fn khronosPbrNeutralToneMapping(color: vec3<f32>, exposure: f32) -> vec3<f32> {
-    var v = color * exposure;
-    let lum = max(v.r, max(v.g, v.b));
-    let startCompression = 0.8;
-    let bhf = 0.8;
+// Khronos PBR Neutral Tonemapping - WGSL
+// https://github.com/KhronosGroup/ToneMapping
 
-    var mapped = v;
-    if (lum > startCompression) {
-        let exceedance = lum - startCompression;
-        let compressedExceedance = exceedance / (exceedance + bhf);
-        let compressedLum = startCompression + (1.0 - startCompression) * compressedExceedance;
-        mapped = v * (compressedLum / lum);
+fn khronosPBRNeutralToneMapping(color: vec3<f32>, exposure: f32) -> vec3<f32> {
+    let startCompression: f32 = 0.8 - 0.04;
+    let desaturation: f32 = 0.15;
+
+    var col = color * exposure;
+    let x = min(col.r, min(col.g, col.b));
+    var offset: f32;
+    if (x < 0.08) {
+        offset = x - 6.25 * x * x;
+    } else {
+        offset = 0.04;
+    }
+    col = col - vec3<f32>(offset);
+
+    let peak = max(col.r, max(col.g, col.b));
+    if (peak < startCompression) {
+        return col;
     }
 
-    let peak = max(mapped.r, max(mapped.g, mapped.b));
-    if (peak > 1.0) {
-        mapped = mix(mapped, vec3<f32>(peak), (peak - 1.0) / peak);
-    }
-    return mapped;
+    let d = 1.0 - startCompression;
+    let newPeak = 1.0 - d * d / (peak + d - startCompression);
+    col = col * (newPeak / peak);
+
+    let g = 1.0 - 1.0 / (desaturation * (peak - newPeak) + 1.0);
+    return mix(col, vec3<f32>(newPeak), g);
 }
 
 /// ACES Filmic Narkowicz 톤맵핑
@@ -80,7 +99,12 @@ fn acesFilmicHillExposureBoostToneMapping(color: vec3<f32>, exposure: f32) -> ve
     let bl = b.r * -0.00327 - b.g * 0.07276 + b.b * 1.07602;
     return vec3<f32>(r, g, bl) / 0.6;
 }
-
+fn getFinalSRGB(toneMappedColor:vec3<f32>, contrast: f32, brightness: f32) -> vec3<f32> {
+    let contrastRGB = applyContrast(toneMappedColor, uniforms.contrast);
+    let finalLinearRGB = applyBrightness(contrastRGB, uniforms.brightness);
+    let finalSRGB = clamp(linearToSRGB(finalLinearRGB), vec3<f32>(0.0), vec3<f32>(1.0));
+    return finalSRGB;
+}
 /// 명암 조절
 fn applyContrast(color: vec3<f32>, contrast: f32) -> vec3<f32> {
     return 0.5 + contrast * (color - 0.5);
