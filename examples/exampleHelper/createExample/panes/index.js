@@ -181,15 +181,15 @@ const setToneMappingSelect = (RedGPU, redGPUContext, rightContainer) => {
     const {TONE_MAPPING_MODE} = RedGPU
 
     antialiasing.className = 'nav-button antialiasing-button';
-    const list = Object.entries(TONE_MAPPING_MODE).map(([key, value]) => `<option value="${value}" ${toneMappingManager.toneMappingMode === value ? 'selected="true"' : ''}>${key}</option>`)
+    const list = Object.entries(TONE_MAPPING_MODE).map(([key, value]) => `<option value="${value}" ${toneMappingManager.mode === value ? 'selected="true"' : ''}>${key}</option>`)
 	list.push('<option value="NONE" >NONE</option>')
     antialiasing.innerHTML = list.join()
     antialiasing.addEventListener('change', (e) => {
         const targetAntialiasing = e.target.value
         console.log(e.target.value)
-        toneMappingManager.toneMappingMode = null
+        toneMappingManager.mode = null
         if (targetAntialiasing !== 'NONE') {
-            toneMappingManager.toneMappingMode = e.target.value
+            toneMappingManager.mode = e.target.value
         }
 
     })

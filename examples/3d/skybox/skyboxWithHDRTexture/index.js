@@ -54,7 +54,7 @@ const createTestPane = async (view) => {
 
 	const settings = {
 		hdrImage: hdrImages[0].path,
-		toneMappingMode : view.postEffectManager.toneMappingMode,
+		mode : view.postEffectManager.mode,
 		exposure: view.skybox.exposure,
 		blur: 0,
 		opacity: 1,
@@ -97,12 +97,12 @@ const createTestPane = async (view) => {
 		});
 	};
 
-	pane.addBinding(settings, 'toneMappingMode', {
+	pane.addBinding(settings, 'mode', {
 		label: 'Tone Mapping',
 		options: toneOptions
 	}).on("change", (ev) => {
 
-		view.postEffectManager.toneMappingMode = ev.value;
+		view.postEffectManager.mode = ev.value;
 		updateExposureBinding();
 		console.log(ev.value)
 		console.log(ev.value)
