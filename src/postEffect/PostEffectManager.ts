@@ -205,7 +205,34 @@ class PostEffectManager {
             texture: this.#storageTexture,
             textureView: this.#sourceTextureView,
         };
+        {
+            if (this.toneMapping) {
 
+                currentTextureView = this.toneMapping.render(
+                    this.#view,
+                    width,
+                    height,
+                    currentTextureView
+                );
+            }
+        }
+        this.#postEffects.forEach(effect => {
+            currentTextureView = effect.render(
+                this.#view,
+                width,
+                height,
+                currentTextureView,
+            );
+        });
+
+        if (useFXAA) {
+            currentTextureView = fxaa.render(
+                this.#view,
+                width,
+                height,
+                currentTextureView
+            );
+        }
         if (this.#useSSAO) {
             currentTextureView = this.ssao.render(
                 this.#view,
@@ -222,31 +249,7 @@ class PostEffectManager {
                 currentTextureView
             );
         }
-        this.#postEffects.forEach(effect => {
-            currentTextureView = effect.render(
-                this.#view,
-                width,
-                height,
-                currentTextureView,
-            );
-        });
 
-        {
-            if (this.toneMapping) {
-                currentTextureView = this.toneMapping.render(
-                    this.#view,
-                    width,
-                    height,
-                    currentTextureView
-                );
-            }
-        }
-        currentTextureView = fxaa.render(
-            this.#view,
-            width,
-            height,
-            currentTextureView
-        );
         if (useTAA) {
             if (this.#view.constructor.name === 'View3D') { // View2D에는 TAA적용 안함{
                 currentTextureView = taa.render(
