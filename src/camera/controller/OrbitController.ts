@@ -324,6 +324,7 @@ class OrbitController extends AController {
             this.centerZ *= multiple;
             this.distance = 1;
         }
+        this.speedDistance = Math.max(0.1, requiredDistance * 0.1);
 
         // },1000)
 
