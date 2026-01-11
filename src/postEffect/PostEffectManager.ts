@@ -205,7 +205,17 @@ class PostEffectManager {
             texture: this.#storageTexture,
             textureView: this.#sourceTextureView,
         };
+        {
+            if (this.toneMapping) {
 
+                currentTextureView = this.toneMapping.render(
+                    this.#view,
+                    width,
+                    height,
+                    currentTextureView
+                );
+            }
+        }
         this.#postEffects.forEach(effect => {
             currentTextureView = effect.render(
                 this.#view,
@@ -272,17 +282,7 @@ class PostEffectManager {
                 );
             }
         }
-        {
-            if (this.toneMapping) {
 
-                currentTextureView = this.toneMapping.render(
-                    this.#view,
-                    width,
-                    height,
-                    currentTextureView
-                );
-            }
-        }
         return currentTextureView;
     }
 
