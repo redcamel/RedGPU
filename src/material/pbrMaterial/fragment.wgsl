@@ -671,40 +671,42 @@ fn main(inputData:InputData) -> FragmentOutput {
     var anisotropicB: vec3<f32>= vec3<f32>(1.0);
     #redgpu_if useKHR_materials_anisotropy
     {
-        var anisotropicDirection: vec2<f32> = vec2<f32>(1.0,0.0);
-        if(u_useKHR_anisotropyTexture){
-            let anisotropyTex = textureSample(KHR_anisotropyTexture, baseColorTextureSampler, KHR_anisotropyUV).rgb;
-            anisotropicDirection = anisotropyTex.rg * 2.0 - vec2<f32>(1.0, 1.0);
-            var anisotropyRotation: vec2<f32>;
-            if( u_KHR_anisotropyRotation < 0.0001 ){ anisotropyRotation = vec2<f32>(1.0,0.0); }
-            else{ anisotropyRotation = vec2<f32>( cos(u_KHR_anisotropyRotation), sin(u_KHR_anisotropyRotation) ); }
+       var T: vec3<f32>;
+       var B: vec3<f32>;
 
-            let rotationMtx: mat2x2<f32> = mat2x2<f32>(
-              anisotropyRotation.x, anisotropyRotation.y,
-              -anisotropyRotation.y, anisotropyRotation.x
-            );
+       // 1. 기본 TBN 기저 구축
+       if (u_useVertexTangent && length(input_vertexTangent.xyz) > 0.0) {
+           T = normalize(input_vertexTangent.xyz);
+           B = normalize(cross(N, T) * input_vertexTangent.w);
+       } else {
+           // 탄젠트가 없는 경우 Normal을 기준으로 임의의 수직 벡터 생성
+           T = normalize(select(vec3<f32>(1.0, 0.0, 0.0), vec3<f32>(0.0, 1.0, 0.0), abs(N.x) > 0.9));
+           T = normalize(T - N * dot(T, N));
+           B = normalize(cross(N, T));
+       }
 
-            anisotropicDirection = rotationMtx * normalize(anisotropicDirection);
-            anisotropy *= anisotropyTex.b;
-        }
-        var T: vec3<f32>;
-        var B: vec3<f32>;
-        if (u_useVertexTangent) {
-            if (length(input_vertexTangent.xyz) > 0.0) {
-                T = normalize(input_vertexTangent.xyz);
-                B = normalize(cross(T, N) * input_vertexTangent.w);
-            } else {
-                T = vec3<f32>(1.0, 0.0, 0.0);
-                B = normalize(cross(T, N) * 1.0); // 또는 -1.0
-            }
-        } else {
-            T = vec3<f32>(1.0, 0.0, 0.0);
-            B = normalize(cross(T, N) * 1.0); // 또는 -1.0
-        }
-        // direction.xy를 이용하여 올바르게 tangent 공간에서 벡터를 혼합
-        let TBN: mat3x3<f32> = mat3x3<f32>(T, B, N);
-        anisotropicT = normalize(TBN * vec3<f32>(anisotropicDirection, 0.0));
-        anisotropicB = normalize(cross(N, anisotropicT));
+       var anisotropicDirection: vec2<f32> = vec2<f32>(1.0, 0.0);
+       if(u_useKHR_anisotropyTexture){
+           let anisotropyTex = textureSample(KHR_anisotropyTexture, baseColorTextureSampler, KHR_anisotropyUV).rgb;
+           // 텍스처의 rg는 [0, 1] 범위이므로 [-1, 1]로 변환
+           anisotropicDirection = anisotropyTex.rg * 2.0 - vec2<f32>(1.0, 1.0);
+           anisotropy *= anisotropyTex.b;
+       }
+
+       // 2. 이방성 회전 적용 (GLTF 스펙: 시계 반대 방향 회전)
+       var cosR = cos(u_KHR_anisotropyRotation);
+       var sinR = sin(u_KHR_anisotropyRotation);
+       let rotationMtx: mat2x2<f32> = mat2x2<f32>(
+           cosR, sinR,
+           -sinR, cosR
+       );
+
+       // 텍스처에서 읽어온 방향에 유니폼 회전량을 결합
+       anisotropicDirection = rotationMtx * anisotropicDirection;
+
+       // 3. 최종 이방성 탄젠트/바이탄젠트 계산 (TBN 공간으로 투영)
+       anisotropicT = normalize(T * anisotropicDirection.x + B * anisotropicDirection.y);
+       anisotropicB = normalize(cross(N, anisotropicT));
     }
     #redgpu_endIf
 

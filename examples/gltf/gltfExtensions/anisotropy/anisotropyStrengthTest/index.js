@@ -49,5 +49,5 @@ const renderTestPane = async (redGPUContext, targetView) => {
 	} = await import('../../../../exampleHelper/createExample/panes/index.js?t=1767864574385');
 	setDebugButtons(RedGPU, redGPUContext);
 	const pane = new Pane();
-	createIblHelper(pane, targetView, RedGPU, {useLight: true, useIBL: false});
+	createIblHelper(pane, targetView, RedGPU);
 };

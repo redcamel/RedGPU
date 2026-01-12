@@ -9,7 +9,7 @@ import ResourceManager from "../../core/resourceManager/ResourceManager";
 import ResourceStateHDRTexture from "../../core/resourceManager/resourceState/texture/ResourceStateHDRTexture";
 import Sampler from "../../sampler/Sampler";
 import CubeTexture from "../CubeTexture";
-import generateCubeMapFromEquirectangularCode from "./generateCubeMapFromEquirectangularCode.wgsl"
+import equirectangularToCubemapCode from "./equirectangularToCubeMap.wgsl"
 import HDRLoader, {HDRData} from "./HDRLoader";
 import {float32ToFloat16Linear} from "./tone/float32ToFloat16Linear";
 
@@ -299,7 +299,7 @@ class HDRTexture extends ManagementResourceBase {
         // 밉맵 레벨마다 루프를 돌며 GGX 프리필터링 수행
         for (let mip = 0; mip < this.#mipLevelCount; mip++) {
             const roughness = mip / (this.#mipLevelCount - 1);
-            await this.#generateCubeMapFromEquirectangular(this.#tempSourceTexture, mip, roughness);
+            await this.#generateEquirectangularToCubeMapCode(this.#tempSourceTexture, mip, roughness);
         }
 
         this.targetResourceManagedState.videoMemory -= this.#videoMemorySize
@@ -307,10 +307,10 @@ class HDRTexture extends ManagementResourceBase {
         this.targetResourceManagedState.videoMemory += this.#videoMemorySize
     }
 
-    async #generateCubeMapFromEquirectangular(sourceTexture: GPUTexture, mipLevel: number = 0, roughness: number = 0) {
+    async #generateEquirectangularToCubeMapCode(sourceTexture: GPUTexture, mipLevel: number = 0, roughness: number = 0) {
         const {gpuDevice} = this.redGPUContext;
         const shaderModule = gpuDevice.createShaderModule({
-            code: generateCubeMapFromEquirectangularCode
+            code: equirectangularToCubemapCode
         });
         const renderPipeline = gpuDevice.createRenderPipeline({
             layout: 'auto',
