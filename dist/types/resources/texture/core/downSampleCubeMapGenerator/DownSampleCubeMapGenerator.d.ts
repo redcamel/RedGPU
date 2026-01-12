@@ -9,7 +9,7 @@ declare class DownSampleCubeMapGenerator {
      * 큐브맵 다운샘플링 메서드
      * @param sourceCubemap 소스 큐브맵 텍스처
      * @param targetSize 타겟 크기 (기본값: 256)
-     * @param format 텍스처 포맷 (기본값: 'rgba8unorm')
+     * @param format 텍스처 포맷 (기본값: 'rgba16float')
      * @returns 다운샘플링된 큐브맵 텍스처
      */
     downsampleCubemap(sourceCubemap: GPUTexture, targetSize?: number, format?: GPUTextureFormat): Promise<GPUTexture>;

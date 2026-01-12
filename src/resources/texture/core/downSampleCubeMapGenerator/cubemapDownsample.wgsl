@@ -8,7 +8,7 @@ struct Uniforms {
 
 // 바인딩
 @group(0) @binding(0) var sourceCubemap: texture_cube<f32>;
-@group(0) @binding(1) var targetCubemap: texture_storage_2d_array<rgba8unorm, write>;
+@group(0) @binding(1) var targetCubemap: texture_storage_2d_array<rgba16float, write>;
 @group(0) @binding(2) var cubemapSampler: sampler;
 @group(0) @binding(3) var<uniform> uniforms: Uniforms;
 
