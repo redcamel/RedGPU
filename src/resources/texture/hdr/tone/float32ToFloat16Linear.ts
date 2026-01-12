@@ -193,7 +193,7 @@ function createPipelineAndBindGroup(
     gpuDevice: GPUDevice,
     computeShader: GPUShaderModule,
     buffers: Float16ConversionBuffers
-): {computePipeline: GPUComputePipeline; bindGroup: GPUBindGroup} {
+): { computePipeline: GPUComputePipeline; bindGroup: GPUBindGroup } {
     const computePipeline = gpuDevice.createComputePipeline({
         layout: 'auto',
         compute: {module: computeShader, entryPoint: 'main'},

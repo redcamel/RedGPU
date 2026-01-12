@@ -838,12 +838,8 @@ let attenuation = rangePart * invSquare;
 
     // ---------- 간접 조명 계산 - ibl ----------
     if (u_useIblTexture) {
-        let R = normalize(reflect(-V, N));
-//        let sampleR = normalize(reflect(-V, N));
-//        let R = vec3<f32>(-sampleR.x, sampleR.y, -sampleR.z);
-
-        let NdotV = max(dot(N, V),0.04);
-        let NdotV_fresnel = max(dot(N, V), 0.04);
+        let R = (reflect(-V, N));
+         let NdotV = max(dot(N, V),1e-4);
 
         // ---------- ibl 프레넬 항 계산----------
         let fresnel = pow(1.0 - NdotV, 5.0);
@@ -880,12 +876,7 @@ let attenuation = rangePart * invSquare;
         let G_smith = NdotV / (NdotV * (1.0 - a2) + a2);
         // ---------- ibl (roughness에 따른 mipmap 레벨 사용) ----------
         let iblMipmapCount:f32 = f32(textureNumLevels(ibl_environmentTexture) - 1);
-//        let mipLevel = roughnessParameter * iblMipmapCount;
-//        let mipLevel = roughnessParameter * sqrt(roughnessParameter) * iblMipmapCount;
-//        let mipLevel = max(0.0, (roughnessParameter * roughnessParameter) * iblMipmapCount);
-//        let mipLevel = pow(roughnessParameter,0.5) * iblMipmapCount;
-        let mipLevel = pow(roughnessParameter,0.4) * iblMipmapCount;
-//        let mipLevel = (roughnessParameter * roughnessParameter) * iblMipmapCount;
+        let mipLevel = roughnessParameter * iblMipmapCount;
 
 
         // ---------- ibl 기본 컬러 ----------
@@ -894,8 +885,6 @@ let attenuation = rangePart * invSquare;
         // ---------- ibl Diffuse  ----------
         let effectiveTransmission = transmissionParameter * (1.0 - metallicParameter);
         let iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, iblTextureSampler, N,0).rgb;
-//        let kd = mix(1.0 - F_IBL_dielectric, vec3<f32>(1.0), roughnessParameter);
-//        var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor * kd;
         var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor* (vec3<f32>(1.0) - F_IBL_dielectric);
 
         // ---------- ibl Diffuse Transmission ----------
@@ -912,13 +901,6 @@ let attenuation = rangePart * invSquare;
         // ---------- ibl Specular ----------
         var envIBL_SPECULAR:vec3<f32>;
         envIBL_SPECULAR = reflectedColor * G_smith * F_IBL * specularParameter ;
-//        envIBL_SPECULAR = reflectedColor * G_smith * F_IBL_dielectric * specularParameter ;
-//        envIBL_SPECULAR = reflectedColor * G_smith * mix(F_IBL_dielectric,F_IBL_metal,metallicParameter) * specularParameter  ;
-//        envIBL_SPECULAR = reflectedColor * G_smith * select(
-//            mix(F_IBL_dielectric,F_IBL_metal,metallicParameter),
-//            F_IBL,
-//            u_useKHR_materials_iridescence && iridescenceParameter > 0.0
-//        ) * specularParameter ;
         #redgpu_if useKHR_materials_anisotropy
         {
             var bentNormal = cross(anisotropicB, V);
@@ -953,7 +935,7 @@ let attenuation = rangePart * invSquare;
 
             let anisotropyFactor = max(0.0, min(1.0, anisotropy));
             let finalRoughness = mix( roughnessParameter, weightedRoughness, anisotropyFactor * directionFactor );
-            let anistropyMipmap = pow(finalRoughness, 0.4) * iblMipmapCount;
+            let anistropyMipmap = finalRoughness * iblMipmapCount;
             reflectedColor = textureSampleLevel( ibl_environmentTexture, iblTextureSampler, anisotropicR, anistropyMipmap ).rgb;
 
             let a2 = finalRoughness * finalRoughness;

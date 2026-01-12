@@ -7,7 +7,6 @@ fn calcPrePathBackground(
 ) -> vec3<f32> {
     var prePathBackground = vec3<f32>(0.0);
     let transmissionMipLevel: f32 = roughnessParameter * f32(textureNumLevels(renderPath1ResultTexture) - 1);
-//    let transmissionMipLevel: f32 = pow(roughnessParameter,0.4) * f32(textureNumLevels(renderPath1ResultTexture) - 1);
     if(u_useKHR_materials_volume){
         var iorR: f32 = ior;
         var iorG: f32 = ior;

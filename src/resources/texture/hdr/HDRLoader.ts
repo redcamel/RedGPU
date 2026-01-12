@@ -81,13 +81,11 @@ class HDRLoader {
      */
 
 
-
-
     /**
      * 🔍 휘도 분석
      */
     #analyzeLuminance(hdrData: HDRData) {
-        const { data, width, height } = hdrData;
+        const {data, width, height} = hdrData;
         const pixelCount = width * height; // 픽셀 개수
         const epsilon = 1e-6;
 
@@ -126,7 +124,7 @@ class HDRLoader {
 
         if (validCount === 0) {
             console.warn('⚠️ 유효한 픽셀이 없습니다!');
-            return { min: 0, max: 0, average: 0, median: 0 };
+            return {min: 0, max: 0, average: 0, median: 0};
         }
 
         const linearAverage = linearSum / validCount;

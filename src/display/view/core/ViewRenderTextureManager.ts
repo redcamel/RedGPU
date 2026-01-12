@@ -178,7 +178,7 @@ class ViewRenderTextureManager {
      * @returns {GPUTextureView}
      */
     get gBufferColorTextureView(): GPUTextureView {
-        this.#createGBuffer('gBufferColor','rgba16float');
+        this.#createGBuffer('gBufferColor', 'rgba16float');
         return this.#gBuffers.get('gBufferColor')?.textureView
     }
 
@@ -364,7 +364,7 @@ class ViewRenderTextureManager {
      *
      * @private
      */
-    #createRender2PathTexture(format:GPUTextureFormat) {
+    #createRender2PathTexture(format: GPUTextureFormat) {
         const {resourceManager} = this.#redGPUContext
         const currentTexture = this.#renderPath1ResultTexture
         const {pixelRectObject, name} = this.#view

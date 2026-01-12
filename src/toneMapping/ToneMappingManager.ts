@@ -41,30 +41,6 @@ class ToneMappingManager {
     }
 
     /**
-     * 현재 설정된 모드에 따라 톤 매핑 이펙트 인스턴스를 생성합니다.
-     * 이미 인스턴스가 존재하면 새로 생성하지 않습니다.
-     * @private
-     */
-    #createToneMapping(): void {
-        if (!this.#toneMapping) {
-            switch (this.#mode) {
-                case TONE_MAPPING_MODE.LINEAR:
-                    this.#toneMapping = new ToneLinear(this.#redGPUContext);
-                    break;
-                case TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL:
-                    this.#toneMapping = new ToneKhronosPBRNeutral(this.#redGPUContext);
-                    break;
-                case TONE_MAPPING_MODE.ACES_FILMIC_NARKOWICZ:
-                    this.#toneMapping = new ToneACESFilmicNarkowicz(this.#redGPUContext);
-                    break;
-                case TONE_MAPPING_MODE.ACES_FILMIC_HILL:
-                    this.#toneMapping = new ToneACESFilmicHill(this.#redGPUContext);
-                    break;
-            }
-        }
-    }
-
-    /**
      * 현재 활성화된 톤 매핑 이펙트 인스턴스를 가져옵니다.
      * @returns 현재 사용 중인 AToneMappingEffect 상속 객체
      */
@@ -118,6 +94,30 @@ class ToneMappingManager {
             );
         } else {
             return currentTextureView;
+        }
+    }
+
+    /**
+     * 현재 설정된 모드에 따라 톤 매핑 이펙트 인스턴스를 생성합니다.
+     * 이미 인스턴스가 존재하면 새로 생성하지 않습니다.
+     * @private
+     */
+    #createToneMapping(): void {
+        if (!this.#toneMapping) {
+            switch (this.#mode) {
+                case TONE_MAPPING_MODE.LINEAR:
+                    this.#toneMapping = new ToneLinear(this.#redGPUContext);
+                    break;
+                case TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL:
+                    this.#toneMapping = new ToneKhronosPBRNeutral(this.#redGPUContext);
+                    break;
+                case TONE_MAPPING_MODE.ACES_FILMIC_NARKOWICZ:
+                    this.#toneMapping = new ToneACESFilmicNarkowicz(this.#redGPUContext);
+                    break;
+                case TONE_MAPPING_MODE.ACES_FILMIC_HILL:
+                    this.#toneMapping = new ToneACESFilmicHill(this.#redGPUContext);
+                    break;
+            }
         }
     }
 }
