@@ -850,25 +850,6 @@ let attenuation = rangePart * invSquare;
         var F_IBL            = F0            + (max(vec3<f32>(1.0 - roughnessParameter), F0)            - F0)            * fresnel;
 
 
-//        #redgpu_if useKHR_materials_iridescence
-//             if (iridescenceParameter > 0.0) {
-//                 // 베이스 F0 미리 계산 (한 번만)
-//                 let base_f0 = mix(F0_dielectric, baseColor.rgb, metallicParameter);
-//
-//                 // 이리데센스 효과 계산 (한 번만)
-//                 let iridescence_effect = iridescent_fresnel(
-//                     1.0,                      // 외부 매질 IOR (공기)
-//                     u_KHR_iridescenceIor,     // 이리데센스 막의 IOR
-//                     base_f0,                  // 혼합된 기본 F0
-//                     iridescenceThickness,     // 이리데센스 막 두께
-//                     iridescenceParameter,     // 이리데센스 강도
-//                     NdotV                     // 시야각 코사인
-//                 );
-//
-//                 F_IBL = iridescence_effect;
-//             }
-//         #redgpu_endIf
-
         let K = (roughnessParameter + 1.0) * (roughnessParameter + 1.0) / 8.0;
         let G = NdotV / (NdotV * (1.0 - K) + K);
         let a2 = roughnessParameter * roughnessParameter;

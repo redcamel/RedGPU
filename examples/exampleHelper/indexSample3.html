@@ -34,18 +34,10 @@
 			redGPUContext.backgroundColor.a = 0
 			redGPUContext.addView(view);
 
-			const directionalLight = new RedGPU.Light.DirectionalLight();
-			scene.lightManager.addDirectionalLight(directionalLight);
+
 
 			loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb')
-			const ibl = new RedGPU.Resource.IBL(view.redGPUContext, [
-				"../assets/skybox/px.jpg",
-				"../assets/skybox/nx.jpg",
-				"../assets/skybox/py.jpg",
-				"../assets/skybox/ny.jpg",
-				"../assets/skybox/pz.jpg",
-				"../assets/skybox/nz.jpg",
-			]);
+			const ibl = new RedGPU.Resource.IBL(view.redGPUContext, "../assets/hdr/Cannon_Exterior.hdr");
 
 			view.ibl = ibl;
 			const renderer = new RedGPU.Renderer(redGPUContext)
