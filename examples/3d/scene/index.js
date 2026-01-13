@@ -9,6 +9,8 @@ RedGPU.init(
 		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
 
 		const scene = new RedGPU.Display.Scene();
+		scene.useBackgroundColor = true;
+		scene.backgroundColor.setColorByHEX('#5259c3');
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		view.axis = true;
 		view.grid = true;

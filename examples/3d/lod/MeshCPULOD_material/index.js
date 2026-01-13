@@ -16,18 +16,10 @@ RedGPU.init(
 		const light = new RedGPU.Light.DirectionalLight();
 		scene.lightManager.addDirectionalLight(light);
 
-		const skyboxTexture = new RedGPU.Resource.CubeTexture(
-			redGPUContext,
-			[
-				"../../../assets/skybox/px.jpg",
-				"../../../assets/skybox/nx.jpg",
-				"../../../assets/skybox/py.jpg",
-				"../../../assets/skybox/ny.jpg",
-				"../../../assets/skybox/pz.jpg",
-				"../../../assets/skybox/nz.jpg",
-			]
-		);
-		view.skybox = new RedGPU.Display.SkyBox(redGPUContext, skyboxTexture);
+		const ibl = new RedGPU.Resource.IBL(view.redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
+		const newSkybox = new RedGPU.Display.SkyBox(view.redGPUContext, ibl.environmentTexture);
+		view.ibl = ibl;
+		view.skybox = newSkybox;
 		view.grid = true;
 
 		createTest(redGPUContext, scene);
