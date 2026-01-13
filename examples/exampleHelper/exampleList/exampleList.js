@@ -1699,6 +1699,15 @@ Check performance limits on each device.`
 									en: ``
 								},
 							},
+							{
+								name: 'IridescentDishWithOlives',
+								path: 'gltf/gltfExtensions/iridescence/iridescentDishWithOlives',
+								thumb: 'gltf/gltfExtensions/iridescence/iridescentDishWithOlives/thumb.png',
+								description: {
+									ko: ``,
+									en: ``
+								},
+							},
 						]
 					},
 					{
