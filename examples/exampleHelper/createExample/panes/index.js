@@ -36,6 +36,7 @@ const setDebugButtons = (RedGPU, redGPUContext) => {
             rightContainer.style.bottom = '0px';
             container.appendChild(rightContainer);
 
+
             requestAnimationFrame(() => {
                 setAntialiasingSelect(redGPUContext, rightContainer)
                 setToneMappingSelect(RedGPU, redGPUContext, rightContainer)
@@ -173,18 +174,25 @@ const setAntialiasingSelect = (redGPUContext, rightContainer) => {
     rightContainer.appendChild(antialiasing);
 }
 const setToneMappingSelect = (RedGPU, redGPUContext, rightContainer) => {
-    const antialiasing = document.createElement('select');
+
+    const container = document.createElement('label');
+    container.className = 'tone-mapping-container'
+    document.body.appendChild(container);
+    container.innerHTML = '<img  src="/RedGPU/examples/assets/icons/toneMapping.svg" width="20"/>'
+    rightContainer.appendChild(container);
+
+    const toneSelect = document.createElement('select');
     if (redGPUContext.viewList.length > 1) return;
     if (redGPUContext.viewList[0].constructor.name === 'View2D') return;
     const targetView = redGPUContext.viewList[0]
     const {toneMappingManager} = targetView
     const {TONE_MAPPING_MODE} = RedGPU
 
-    antialiasing.className = 'nav-button antialiasing-button';
+    toneSelect.className = 'nav-button tone-mapping-button';
     const list = Object.entries(TONE_MAPPING_MODE).map(([key, value]) => `<option value="${value}" ${toneMappingManager.mode === value ? 'selected="true"' : ''}>${key}</option>`)
-	list.push('<option value="NONE" >NONE</option>')
-    antialiasing.innerHTML = list.join()
-    antialiasing.addEventListener('change', (e) => {
+    list.push('<option value="NONE" >NONE</option>')
+    toneSelect.innerHTML = list.join()
+    toneSelect.addEventListener('change', (e) => {
         const targetAntialiasing = e.target.value
         console.log(e.target.value)
         toneMappingManager.mode = null
@@ -193,13 +201,11 @@ const setToneMappingSelect = (RedGPU, redGPUContext, rightContainer) => {
         }
 
     })
-    rightContainer.appendChild(antialiasing);
+    container.appendChild(toneSelect);
 }
 const hdrImages = [
     {name: '2K - the sky is on fire', path: 'assets/hdr/2k/the_sky_is_on_fire_2k.hdr'},
-    {name: '2K - furstenstein', path: 'assets/hdr/2k/furstenstein_2k.hdr'},
     {name: '4K - the sky is on fire', path: 'assets/hdr/4k/the_sky_is_on_fire_4k.hdr'},
-    {name: '4K - furstenstein', path: 'assets/hdr/4k/furstenstein_4k.hdr'},
     {name: 'Cannon_Exterior', path: 'assets/hdr/Cannon_Exterior.hdr'},
     {name: 'field', path: 'assets/hdr/field.hdr'},
     {name: 'neutral.37290948', path: 'assets/hdr/neutral.37290948.hdr'},

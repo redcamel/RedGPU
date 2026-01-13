@@ -190,6 +190,34 @@ html, body {
     width: fit-content;
 }
 
+.tone-mapping-container {
+    display: flex;
+    align-items: center;
+    padding-left: 12px;
+    background-color: #111112;
+    transition: background-color 0.2s;
+}
+.tone-mapping-container:hover {
+    background-color: #1f1f1f;
+}
+
+.tone-mapping-button {
+    border: 0;
+    cursor: pointer;
+    padding: 0 28px 0 12px;
+    outline: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    font-size: 11px;
+    /* 기본 화살표 */
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 8px center;
+    background-repeat: no-repeat;
+    background-size: 16px 16px;
+    width: fit-content;
+}
+
 .item-title {
     position: absolute;
     top: 50%;
@@ -216,6 +244,13 @@ html, body {
         text-align: left;
 
     }
+
+    .tone-mapping-container {
+        position: fixed;
+        left: 0;
+        bottom: 50px;
+    }
+
 }
 
 

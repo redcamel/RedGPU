@@ -1991,6 +1991,15 @@ Check performance limits on each device.`
 								},
 							},
 							{
+								name: 'StainedGlassLamp',
+								path: 'gltf/gltfExtensions/transmission/stainedGlassLamp',
+								thumb: 'gltf/gltfExtensions/transmission/stainedGlassLamp/thumb.png',
+								description: {
+									ko: ``,
+									en: ``
+								},
+							},
+							{
 								name: 'ChronographWatch',
 								path: 'gltf/gltfExtensions/transmission/chronographWatch',
 								thumb: 'gltf/gltfExtensions/transmission/chronographWatch/thumb.png',
