@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1767864574385";
+import * as RedGPU from "../../../../dist/index.js?t=1768301050717";
 
 const canvas = document.createElement('canvas');
 document.querySelector('#example-container').appendChild(canvas);
@@ -126,10 +126,10 @@ function createTestScene(redGPUContext, scene) {
 }
 
 async function createControlPanel(redGPUContext, view, fogEffect) {
-	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1767864574385');
+	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1768301050717');
 
 	const pane = new Pane({title: '🌫️ Fog Test'});
-	const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1767864574385");
+	const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1768301050717");
 	setDebugButtons(RedGPU, redGPUContext);
 	const PARAMS = {
 		enabled: true,

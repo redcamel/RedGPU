@@ -1,4 +1,4 @@
-import {hdrImages} from './index.js?t=1767864574385';
+import {hdrImages} from './index.js?t=1768301050717';
 
 const createIblHelper = (pane, view, RedGPU, option = {}) => {
 	const folder = pane.addFolder({title: 'Lighting', expanded: true});

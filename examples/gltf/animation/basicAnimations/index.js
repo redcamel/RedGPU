@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1767864574385";
+import * as RedGPU from "../../../../dist/index.js?t=1768301050717";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -62,11 +62,11 @@ function loadGLTFGrid(view, urls, gridSize = 5, spacing = 5) {
 }
 
 const renderTestPane = async (redGPUContext, targetView) => {
-	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1767864574385');
+	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1768301050717');
 	const {
 		createIblHelper,
 		setDebugButtons
-	} = await import('../../../exampleHelper/createExample/panes/index.js?t=1767864574385');
+	} = await import('../../../exampleHelper/createExample/panes/index.js?t=1768301050717');
 	setDebugButtons(RedGPU, redGPUContext);
 	const pane = new Pane();
 	createIblHelper(pane, targetView, RedGPU);

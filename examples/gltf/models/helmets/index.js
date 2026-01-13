@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1767864574385";
+import * as RedGPU from "../../../../dist/index.js?t=1768301050717";
 
 // 1. Create and append a canvas
 // 1. 캔버스를 생성하고 문서에 추가
@@ -92,11 +92,11 @@ function loadGLTFGrid(view, urls, gridSize = 4, spacing = 3) {
 }
 
 const renderTestPane = async (redGPUContext, targetView) => {
-	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1767864574385');
+	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1768301050717');
 	const {
 		createIblHelper,
 		setDebugButtons
-	} = await import('../../../exampleHelper/createExample/panes/index.js?t=1767864574385');
+	} = await import('../../../exampleHelper/createExample/panes/index.js?t=1768301050717');
 	setDebugButtons(RedGPU, redGPUContext);
 
 	const pane = new Pane();
