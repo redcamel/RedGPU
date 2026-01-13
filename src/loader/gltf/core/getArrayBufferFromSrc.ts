@@ -78,7 +78,7 @@ const getArrayBufferFromSrc = async (
                     loaded,
                     total,
                     lengthComputable,
-                    percent: lengthComputable ? parseFloat(((loaded / total) * 100).toFixed(2)) : 0,
+                    percent: lengthComputable ? Math.min(100, parseFloat(((loaded / total) * 100).toFixed(2))) : 0,
                     transferred: formatBytes(loaded),
                     totalSize: totalSizeStr
                 });

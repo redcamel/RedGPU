@@ -16,7 +16,7 @@ const loadingProgressInfoHandler = (info) => {
 					<span>${info.transferred} / ${info.totalSize}</span>
 				</div>
 			`;
-    if (info.percent === 100) {
+    if (info.percent >= 100) {
         loaderUI.style.opacity = 0
         setTimeout(() => loaderUI.remove(), 300);
     }
