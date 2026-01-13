@@ -12,6 +12,7 @@ RedGPU.init(
 
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+		view.grid = true
 		redGPUContext.addView(view);
 
 		scene.lightManager.addDirectionalLight(new RedGPU.Light.DirectionalLight())
@@ -57,10 +58,10 @@ function loadGLTF(view, url) {
 let pane
 const renderTestPane = async (redGPUContext, targetView) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1767864574385');
-	const {setDebugButtons} = await import('../../../../exampleHelper/createExample/panes/index.js?t=1767864574385');
+	const {setDebugButtons,createIblHelper} = await import('../../../../exampleHelper/createExample/panes/index.js?t=1767864574385');
 	setDebugButtons(RedGPU, redGPUContext);
 	pane = new Pane();
-
+	createIblHelper(pane, targetView, RedGPU);
 	const moreNum = redGPUContext.detector.isMobile ? 5 : 10
 	pane.addButton({
 		title: `Add ${moreNum} BreakDance`,
