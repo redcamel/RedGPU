@@ -294,7 +294,7 @@ html, body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.18);
     color: #fff;
     padding: 15px;
     border-radius: 10px;
@@ -302,18 +302,19 @@ html, body {
     font-family: monospace;
     z-index: 1000;
     pointer-events: none;
-    border: 1px solid #444;
+    border: 1px solid rgba(0,0,0,0.16);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-
+    transition: opacity 0.2s;
     display: flex;
     flex-direction: column;
     opacity: 0;
-    gap:10px
+    gap:10px;
+    backdrop-filter: blur(5px);
 }
 
 .loading-ui-title {
     font-weight: bold;
-    color: #aaa
+    color: #aaa;
 }
 
 .loading-ui-progress {

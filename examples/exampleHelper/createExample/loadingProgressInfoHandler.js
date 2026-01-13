@@ -20,7 +20,6 @@ const loadingProgressInfoHandler = (info) => {
 				</div>
 			`;
     if (info.percent >= 100) {
-
         setTimeout(() => {
             loaderUI.style.transition = 'opacity 0.3s'
             loaderUI.style.opacity = 0
