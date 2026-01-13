@@ -840,51 +840,12 @@ let attenuation = rangePart * invSquare;
 
     // ---------- 간접 조명 계산 - ibl ----------
     if (u_useIblTexture) {
-        let R = (reflect(-V, N));
-         let NdotV = max(dot(N, V),1e-4);
 
-        // ---------- ibl 프레넬 항 계산----------
-        let fresnel = pow(1.0 - NdotV, 5.0);
-
-        // 거칠기를 고려한 각 파트별 프레넬 계산
-        var F_IBL_dielectric = F0_dielectric + (max(vec3<f32>(1.0 - roughnessParameter), F0_dielectric) - F0_dielectric) * fresnel;
-        var F_IBL_metal      = F0_metal      + (max(vec3<f32>(1.0 - roughnessParameter), F0_metal)      - F0_metal)      * fresnel;
-        var F_IBL            = F0            + (max(vec3<f32>(1.0 - roughnessParameter), F0)            - F0)            * fresnel;
+        var R = (reflect(-V, N));
+        let NdotV = max(dot(N, V),1e-4);
 
 
-        let K = (roughnessParameter + 1.0) * (roughnessParameter + 1.0) / 8.0;
-        let G = NdotV / (NdotV * (1.0 - K) + K);
-        let a2 = roughnessParameter * roughnessParameter;
 
-        let G_smith = NdotV / (NdotV * (1.0 - a2) + a2);
-        // ---------- ibl (roughness에 따른 mipmap 레벨 사용) ----------
-        let iblMipmapCount:f32 = f32(textureNumLevels(ibl_environmentTexture) - 1);
-//        let mipLevel = roughnessParameter * iblMipmapCount;
-        let mipLevel = roughnessParameter * (1.7 - 0.7 * roughnessParameter) * iblMipmapCount;
-
-
-        // ---------- ibl 기본 컬러 ----------
-        var reflectedColor = textureSampleLevel(ibl_environmentTexture, iblTextureSampler, R, mipLevel).rgb;
-
-        // ---------- ibl Diffuse  ----------
-        let effectiveTransmission = transmissionParameter * (1.0 - metallicParameter);
-        let iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, iblTextureSampler, N,0).rgb;
-        var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor* (vec3<f32>(1.0) - F_IBL_dielectric);
-
-        // ---------- ibl Diffuse Transmission ----------
-        #redgpu_if useKHR_materials_diffuse_transmission
-        {
-            // 후면 산란을 위한 샘플링 방향 (back side)
-            var backScatteringColor = textureSampleLevel(ibl_environmentTexture, iblTextureSampler, -N, mipLevel).rgb;
-            let transmittedIBL = backScatteringColor * diffuseTransmissionColor * (vec3<f32>(1.0) - F_IBL_dielectric);
-            // 반사와 투과 효과 혼합
-            envIBL_DIFFUSE = mix(envIBL_DIFFUSE, transmittedIBL, diffuseTransmissionParameter);
-        }
-        #redgpu_endIf
-
-        // ---------- ibl Specular ----------
-        var envIBL_SPECULAR:vec3<f32>;
-        envIBL_SPECULAR = reflectedColor * F_IBL * specularParameter ;
         #redgpu_if useKHR_materials_anisotropy
         {
             var bentNormal = cross(anisotropicB, V);
@@ -905,28 +866,67 @@ let attenuation = rangePart * invSquare;
             let TdotV = dot(anisotropicT, V);
             let BdotV = dot(anisotropicB, V);
 
-            let anisotropicR = normalize(reflectVec - anisotropy * (TdotR * anisotropicT - BdotR * anisotropicB));
+            R = normalize(reflectVec - anisotropy * (TdotR * anisotropicT - BdotR * anisotropicB));
 
-            let VdotN = max(0.04, dot(V, N));
+            let VdotN = max(1e-4, dot(V, N));
             let oneMinusVdotN = 1.0 - VdotN;
             let directionFactor = oneMinusVdotN * oneMinusVdotN * oneMinusVdotN;
 
             let VdotT_abs = abs(TdotV);
             let VdotB_abs = abs(BdotV);
-            let totalWeight = max(0.0001, VdotT_abs + VdotB_abs);
+            let totalWeight = max(1e-4, VdotT_abs + VdotB_abs);
 
             let weightedRoughness = (roughnessT * VdotT_abs + roughnessB * VdotB_abs) / totalWeight;
 
-            let anisotropyFactor = max(0.0, min(1.0, anisotropy));
-            let finalRoughness = mix( roughnessParameter, weightedRoughness, anisotropyFactor * directionFactor );
-            let anistropyMipmap = finalRoughness * iblMipmapCount;
-            reflectedColor = textureSampleLevel( ibl_environmentTexture, iblTextureSampler, anisotropicR, anistropyMipmap ).rgb;
+            roughnessParameter = weightedRoughness;
 
-            let a2 = finalRoughness * finalRoughness;
-            let G_smith = NdotV / (NdotV * (1.0 - a2) + a2);
+        }
+        #redgpu_endIf
+        // ---------- ibl (roughness에 따른 mipmap 레벨 사용) ----------
+        let iblMipmapCount:f32 = f32(textureNumLevels(ibl_environmentTexture) - 1);
+        var mipLevel = roughnessParameter * (1.7 - 0.7 * roughnessParameter) * iblMipmapCount;
+        var reflectedColor = textureSampleLevel( ibl_environmentTexture, iblTextureSampler, R, mipLevel ).rgb;
+
+        // ---------- ibl 프레넬 항 계산----------
+        let fresnel = pow(1.0 - NdotV, 5.0);
+
+        // 거칠기를 고려한 각 파트별 프레넬 계산
+        var F_IBL_dielectric = F0_dielectric + (max(vec3<f32>(1.0 - roughnessParameter), F0_dielectric) - F0_dielectric) * fresnel;
+        var F_IBL_metal      = F0_metal      + (max(vec3<f32>(1.0 - roughnessParameter), F0_metal)      - F0_metal)      * fresnel;
+        var F_IBL            = F0            + (max(vec3<f32>(1.0 - roughnessParameter), F0)            - F0)            * fresnel;
+
+
+        let K = (roughnessParameter + 1.0) * (roughnessParameter + 1.0) / 8.0;
+        let G = NdotV / (NdotV * (1.0 - K) + K);
+        let a2 = roughnessParameter * roughnessParameter;
+
+        let G_smith = NdotV / (NdotV * (1.0 - a2) + a2);
+//        let mipLevel = roughnessParameter * iblMipmapCount;
+
+
+        // ---------- ibl 기본 컬러 ----------
+
+        // ---------- ibl Diffuse  ----------
+        let effectiveTransmission = transmissionParameter * (1.0 - metallicParameter);
+        let iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, iblTextureSampler, N,0).rgb;
+        var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor* (vec3<f32>(1.0) - F_IBL_dielectric);
+
+        // ---------- ibl Diffuse Transmission ----------
+        #redgpu_if useKHR_materials_diffuse_transmission
+        {
+            // 후면 산란을 위한 샘플링 방향 (back side)
+            var backScatteringColor = textureSampleLevel(ibl_environmentTexture, iblTextureSampler, -N, mipLevel).rgb;
+            let transmittedIBL = backScatteringColor * diffuseTransmissionColor * (vec3<f32>(1.0) - F_IBL_dielectric);
+            // 반사와 투과 효과 혼합
+            envIBL_DIFFUSE = mix(envIBL_DIFFUSE, transmittedIBL, diffuseTransmissionParameter);
         }
         #redgpu_endIf
 
+        // ---------- ibl Specular ----------
+        var envIBL_SPECULAR:vec3<f32>;
+
+
+        envIBL_SPECULAR = reflectedColor * F_IBL * specularParameter ;
         // ---------- ibl Specular BTDF ----------
         var envIBL_SPECULAR_BTDF = vec3<f32>(0.0);
         #redgpu_if useKHR_materials_transmission
