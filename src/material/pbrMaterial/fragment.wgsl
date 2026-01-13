@@ -884,7 +884,7 @@ let attenuation = rangePart * invSquare;
 
         // ---------- ibl Specular ----------
         var envIBL_SPECULAR:vec3<f32>;
-        envIBL_SPECULAR = reflectedColor * G_smith * F_IBL * specularParameter ;
+        envIBL_SPECULAR = reflectedColor * F_IBL * specularParameter ;
         #redgpu_if useKHR_materials_anisotropy
         {
             var bentNormal = cross(anisotropicB, V);
@@ -985,7 +985,7 @@ let attenuation = rangePart * invSquare;
 
         // ---------- ibl Metal 계산 ----------
 
-        let envIBL_METAL = reflectedColor * F_IBL;
+        let envIBL_METAL = reflectedColor * F_IBL_metal;
         // ---------- ibl 기본 혼합 ----------
         let metallicPart = envIBL_METAL * metallicParameter ; // 금속 파트 계산
         let dielectricPart = envIBL_DIELECTRIC * (1.0 - metallicParameter) ; // 유전체 파트 계산
