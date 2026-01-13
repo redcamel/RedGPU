@@ -197,6 +197,7 @@ html, body {
     background-color: #111112;
     transition: background-color 0.2s;
 }
+
 .tone-mapping-container:hover {
     background-color: #1f1f1f;
 }
@@ -285,4 +286,48 @@ html, body {
         max-width: 100%;
 
     }
+}
+
+
+.loading-ui {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 15px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-family: monospace;
+    z-index: 1000;
+    pointer-events: none;
+    border: 1px solid #444;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    transition: opacity 0.3s;
+    display: flex;
+    flex-direction: column;
+    gap:10px
+}
+
+.loading-ui-title {
+    font-weight: bold;
+    color: #aaa
+}
+
+.loading-ui-progress {
+    width: 200px;
+    height: 4px;
+    background: #333;
+
+    > div {
+        height: 100%;
+        background: #0078d4;
+        transition: width 0.1s
+    }
+}
+
+.loading-ui-info {
+    display: flex;
+    justify-content: space-between
 }
