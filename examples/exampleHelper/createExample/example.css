@@ -304,9 +304,10 @@ html, body {
     pointer-events: none;
     border: 1px solid #444;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-    transition: opacity 0.3s;
+
     display: flex;
     flex-direction: column;
+    opacity: 0;
     gap:10px
 }
 

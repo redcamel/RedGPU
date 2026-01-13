@@ -1,10 +1,13 @@
-
 const loadingProgressInfoHandler = (info) => {
     let loaderUI = document.querySelector('.loading-ui');
     if (!loaderUI) {
         loaderUI = document.createElement('div');
         loaderUI.className = 'loading-ui'
         document.body.appendChild(loaderUI);
+        loaderUI.style.transition = 'opacity 1s'
+        setTimeout(() => {
+            loaderUI.style.opacity = 1
+        }, 1000)
     }
     loaderUI.innerHTML = `
 				<div class="loading-ui-title">📦 Loading Model...</div>
@@ -17,8 +20,12 @@ const loadingProgressInfoHandler = (info) => {
 				</div>
 			`;
     if (info.percent >= 100) {
-        loaderUI.style.opacity = 0
-        setTimeout(() => loaderUI.remove(), 300);
+
+        setTimeout(() => {
+            loaderUI.style.transition = 'opacity 0.3s'
+            loaderUI.style.opacity = 0
+        }, 300);
+        setTimeout(() => loaderUI.remove(), 600);
     }
 }
 export {

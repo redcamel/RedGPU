@@ -1,42 +1,58 @@
+
 import * as RedGPU from "../../../../../dist/index.js?t=1768301050717";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
+// Initialize RedGPU
 RedGPU.init(
 	canvas,
 	(redGPUContext) => {
+		// Setup camera or controller
 		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-		controller.tilt = 0
+		controller.tilt = 0;
 
+		// Create scene and view
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		redGPUContext.addView(view);
 
-		loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ChronographWatch/glTF-Binary/ChronographWatch.glb');
+		// Load GLTF model
+		const MODEL_URL = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ChronographWatch/glTF-Binary/ChronographWatch.glb';
+		loadGLTF(view, MODEL_URL);
 
+		// Start renderer
 		const renderer = new RedGPU.Renderer(redGPUContext);
-		const render = () => {
-		};
-		renderer.start(redGPUContext, render);
+		renderer.start(redGPUContext, (time) => {
+			// Add additional per-frame logic here if needed
+		});
 
+		// Configure test panel
 		renderTestPane(redGPUContext, view);
 	},
 	(failReason) => {
-		console.error('RedGPU initialization failed:', failReason);
-		const errorDiv = document.createElement('div');
-		errorDiv.innerHTML = failReason;
-		document.body.appendChild(errorDiv);
+		console.error("Initialization failed:", failReason);
+		const errorMessage = document.createElement('div');
+		errorMessage.innerHTML = failReason;
+		document.body.appendChild(errorMessage);
 	}
 );
 
-function loadGLTF(view, url) {
+
+const {loadingProgressInfoHandler} = await import('../../../../exampleHelper/createExample/loadingProgressInfoHandler.js?t=1768301050717');
+const loadGLTF = async (view, url) => {
 	const {redGPUContext, scene} = view;
-	new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
-		const mesh = result.resultMesh
-		scene.addChild(mesh)
-		view.camera.fitMeshToScreenCenter(mesh, view)
-	});
+	new RedGPU.GLTFLoader(
+		redGPUContext,
+		url,
+		(result) => {
+			const mesh = result.resultMesh
+			scene.addChild(mesh)
+			view.camera.fitMeshToScreenCenter(mesh, view)
+
+		},
+		loadingProgressInfoHandler
+	);
 }
 
 const renderTestPane = async (redGPUContext, targetView) => {
