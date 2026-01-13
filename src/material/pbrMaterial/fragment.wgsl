@@ -859,7 +859,8 @@ let attenuation = rangePart * invSquare;
         let G_smith = NdotV / (NdotV * (1.0 - a2) + a2);
         // ---------- ibl (roughness에 따른 mipmap 레벨 사용) ----------
         let iblMipmapCount:f32 = f32(textureNumLevels(ibl_environmentTexture) - 1);
-        let mipLevel = roughnessParameter * iblMipmapCount;
+//        let mipLevel = roughnessParameter * iblMipmapCount;
+        let mipLevel = roughnessParameter * (1.7 - 0.7 * roughnessParameter) * iblMipmapCount;
 
 
         // ---------- ibl 기본 컬러 ----------

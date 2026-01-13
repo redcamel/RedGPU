@@ -299,7 +299,7 @@ class HDRTexture extends ManagementResourceBase {
         // 밉맵 레벨마다 루프를 돌며 GGX 프리필터링 수행
         for (let mip = 0; mip < this.#mipLevelCount; mip++) {
             const roughness = mip / (this.#mipLevelCount - 1);
-            await this.#generateEquirectangularToCubeMapCode(this.#tempSourceTexture, mip, roughness);
+            await this.#generateEquirectangularToCubeMapCode(this.#tempSourceTexture, mip, roughness * roughness);
         }
 
         this.targetResourceManagedState.videoMemory -= this.#videoMemorySize
