@@ -1305,6 +1305,15 @@ const ExampleList = [
 						},
 					},
 					{
+						name: 'WaterBottle',
+						path: 'gltf/basic/waterBottle',
+						thumb: 'gltf/basic/waterBottle/thumb.png',
+						description: {
+							ko: ``,
+							en: ``
+						},
+					},
+					{
 						name: 'NormalTangentTest',
 						path: 'gltf/basic/normalTangentTest',
 						thumb: 'gltf/basic/normalTangentTest/thumb.png',
@@ -1578,10 +1587,20 @@ Check performance limits on each device.`
 							ko: ``,
 							en: ``
 						},
-					}, {
+					},
+					{
 						name: 'texcooredNTest',
 						path: 'gltf/models/texcooredNTest',
 						thumb: 'gltf/models/texcooredNTest/thumb.png',
+						description: {
+							ko: ``,
+							en: ``
+						},
+					},
+					{
+						name: 'ABeautifulGame',
+						path: 'gltf/models/aBeautifulGame',
+						thumb: 'gltf/models/aBeautifulGame/thumb.png',
 						description: {
 							ko: ``,
 							en: ``
