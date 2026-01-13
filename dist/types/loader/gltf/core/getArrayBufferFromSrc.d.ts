@@ -1,28 +1,36 @@
 /**
- * Represents a callback function for a loader that loads an ArrayBuffer.
- *
+ * ArrayBuffer 로딩 성공 시 호출되는 콜백 함수 타입
  * @callback LoaderCallback
- * @param {ArrayBuffer} buffer - The loaded ArrayBuffer.
- * @returns {void}
  */
 type LoaderCallback = (buffer: ArrayBuffer) => void;
 /**
- * Represents a callback function that handles error.
- *
+ * 에러 발생 시 호출되는 콜백 함수 타입
  * @callback ErrorCallback
- * @param {any} err - The error object to be handled.
- * @returns {void}
  */
 type ErrorCallback = (err: any) => void;
+export type LoadingProgressInfo = {
+    loaded: number;
+    total: number;
+    lengthComputable: boolean;
+    percent: number;
+    transferred: string;
+    totalSize: string;
+};
 /**
- * Load an ArrayBuffer from a given source URL.
- *
- * @param {string} src - The source URL to load the ArrayBuffer from.
- * @param {function} onLoad - The callback function to be called when the ArrayBuffer is loaded successfully.
- * @param {function} [onError] - The callback function to be called when an error occurs during loading. Default is an empty function.
- * @returns {void}
- * @async
- * @throws {Error} if an error occurs during loading.
+ * 로딩 진행 상태를 추적하는 콜백 함수 타입
+ * @callback ProgressCallback
  */
-declare const getArrayBufferFromSrc: (src: string, onLoad: LoaderCallback, onError?: ErrorCallback) => Promise<void>;
+export type ProgressCallback = (event: LoadingProgressInfo) => void;
+/**
+ * fetch API를 사용하여 지정된 URL에서 ArrayBuffer를 로드하고 진행 상태를 추적합니다.
+ *
+ * @param {string} src - 데이터를 가져올 소스 URL
+ * @param {LoaderCallback} onLoad - 성공 시 실행할 콜백
+ * @param {ErrorCallback} [onError] - 실패 시 실행할 콜백
+ * @param {ProgressCallback} [onProgress] - 로딩 진행 시 실행할 콜백
+ * @returns {Promise<void>}
+ *
+ * @throws {Error} 응답이 성공적이지 않거나 스트림 읽기 중 오류 발생 시 에러를 던집니다.
+ */
+declare const getArrayBufferFromSrc: (src: string, onLoad: LoaderCallback, onError?: ErrorCallback, onProgress?: ProgressCallback) => Promise<void>;
 export default getArrayBufferFromSrc;

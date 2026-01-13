@@ -51,8 +51,9 @@ class GLTFLoader {
     #gltfData: GLTF
     readonly #onLoad
     readonly #onError
+    readonly #onProgress
 
-    constructor(redGPUContext: RedGPUContext, url: string, onLoad, onError) {
+    constructor(redGPUContext: RedGPUContext, url: string, onLoad, onProgress, onError) {
         validateRedGPUContext(redGPUContext)
         this.#redGPUContext = redGPUContext
         this.#url = url
@@ -60,6 +61,7 @@ class GLTFLoader {
         this.#fileName = getFileName(url)
         this.#fileExtension = getFileExtension(url);
         this.#onLoad = onLoad;
+        this.#onProgress = onProgress;
         this.#onError = onError;
         this.parsingResult = {
             groups: [],
@@ -124,7 +126,7 @@ class GLTFLoader {
     async #loadFile() {
         try {
             if (this.#fileExtension === 'glb') {
-                parseFileGLB(this, () => this.#onLoad(this))
+                parseFileGLB(this, () => this.#onLoad(this), this.#onProgress)
             } else if (this.#fileExtension === 'gltf') {
                 parseFileGLTF(this, () => this.#onLoad(this))
             } else {
