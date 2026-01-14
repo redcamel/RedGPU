@@ -16,14 +16,6 @@ import {float32ToFloat16Linear} from "./tone/float32ToFloat16Linear";
 const MANAGED_STATE_KEY = 'managedHDRTextureState'
 type SrcInfo = string | { src: string, cacheKey: string }
 
-interface LuminanceAnalysis {
-    averageLuminance: number;
-    maxLuminance: number;
-    minLuminance: number;
-    medianLuminance: number;
-    percentile95: number;
-    percentile99: number;
-}
 
 /**
  * HDRTexture 클래스
