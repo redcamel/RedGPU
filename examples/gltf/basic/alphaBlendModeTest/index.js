@@ -48,7 +48,6 @@ const loadGLTF = async (view, url) => {
             const mesh = result.resultMesh
             scene.addChild(mesh)
             view.camera.fitMeshToScreenCenter(mesh, view)
-
         },
         loadingProgressInfoHandler
     );
@@ -64,3 +63,4 @@ const renderTestPane = async (redGPUContext, targetView) => {
     const pane = new Pane();
     createIblHelper(pane, targetView, RedGPU);
 };
+
