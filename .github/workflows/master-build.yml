@@ -19,6 +19,8 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
+      - name: Generate example version (Cache Bursting)
+        run: node generate-example-version.js
       - name: Verify build output
         run: |
           if [ -d "dist" ]; then
