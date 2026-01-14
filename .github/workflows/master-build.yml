@@ -5,35 +5,50 @@ on:
     branches:
       - master
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
+
       - name: Install dependencies
         run: npm ci
+
       - name: Build
         run: npm run build
+
       - name: Generate example version (Cache Bursting)
         run: node generate-example-version.js
-      - name: Verify build output
+
+      - name: Verify changes
         run: |
-          if [ -d "dist" ]; then
-            echo "✅ Build successful - dist folder created"
-            ls -la dist/
-          else
-            echo "❌ Build failed - no dist folder"
-            exit 1
-          fi
-      - name: Commit and push build files
+          echo "--- Check dist folder ---"
+          ls -la dist/
+          echo "--- Check examples folder ---"
+          ls -la examples/
+          git status # 어떤 파일이 변했는지 로그에서 확인 가능
+
+      - name: Commit and push changes
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
+          
+          # 수정된 핵심: dist와 examples 폴더 둘 다 스테이징에 추가
           git add dist/ -f
-          git diff --staged --quiet || git commit -m "chore: auto-build dist files"
-          git push
+          git add examples/ -f
+          
+          if ! git diff --staged --quiet; then
+            git commit -m "chore: update build and examples"
+            git push
+          else
+            echo "No changes to commit"
+          fi
