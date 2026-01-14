@@ -76,37 +76,17 @@ const createTexture = (redGPUContext, option) => {
 	}
 };
 
-const renderTestPane = async (view, redGPUContext) => {
+const renderTestPane = async (targetView, redGPUContext) => {
 	const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1768301050717");
 	const pane = new Pane();
 	const {
 		createFieldOfView,
-		setSeparator
+		setSeparator,
+		createSkyBoxHelper
 	} = await import("../../../../exampleHelper/createExample/panes/index.js?t=1768301050717");
 
-	createFieldOfView(pane, view.camera);
-
-	// 🎛️ 기본 속성 컨트롤
-	const testData = {
-		blur: 0,
-		opacity: 1,
-	};
-
-	pane.addBinding(testData, 'blur', {
-		min: 0,
-		max: 1,
-		step: 0.01
-	}).on("change", (ev) => {
-		view.skybox.blur = ev.value;
-	});
-
-	pane.addBinding(testData, 'opacity', {
-		min: 0,
-		max: 1,
-		step: 0.01
-	}).on("change", (ev) => {
-		view.skybox.opacity = ev.value;
-	});
+	createFieldOfView(pane, targetView.camera);
+	createSkyBoxHelper(pane, targetView);
 
 	// 🚀 트랜지션 폴더
 	const transitionFolder = pane.addFolder({
@@ -143,7 +123,7 @@ const renderTestPane = async (view, redGPUContext) => {
 		label: 'useTransitionAlphaTexture'
 	}).on('change', (ev) => {
 		if (!ev.value) {
-			view.skybox.useTransitionAlphaTexture = null
+			targetView.skybox.useTransitionAlphaTexture = null
 		}
 	});
 
@@ -309,7 +289,7 @@ const renderTestPane = async (view, redGPUContext) => {
 			if (currentTextureData.useTransitionAlphaTexture) {
 				// ✨ 노이즈 기반 트랜지션
 				updateNoisePattern(); // 🔄 트랜지션 전 노이즈 업데이트
-				view.skybox.transition(
+				targetView.skybox.transition(
 					newTexture,
 					currentTextureData.transitionDuration,
 					noiseTexture
@@ -317,7 +297,7 @@ const renderTestPane = async (view, redGPUContext) => {
 				console.log(`🌀 Noise transition to: ${option.name} (${currentTextureData.transitionDuration}ms)`);
 			} else {
 				// 🌊 기본 선형 트랜지션
-				view.skybox.transition(
+				targetView.skybox.transition(
 					newTexture,
 					currentTextureData.transitionDuration
 				);
