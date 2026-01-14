@@ -60,7 +60,7 @@ class BitmapTexture extends ManagementResourceBase {
         this.#onError = onError
         this.#usePremultiplyAlpha = usePremultiplyAlpha
         this.#useMipmap = useMipMap
-        this.#format = format || navigator.gpu.getPreferredCanvasFormat()
+        this.#format = format || `${navigator.gpu.getPreferredCanvasFormat()}-srgb` as GPUTextureFormat
         if (src) {
             this.#src = this.#getParsedSrc(src);
             this.cacheKey = this.#getCacheKey(src)

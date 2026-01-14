@@ -149,7 +149,7 @@ class ViewRenderTextureManager {
      * @returns {GPUTexture}
      */
     get renderPath1ResultTexture(): GPUTexture {
-        this.#createRender2PathTexture();
+        this.#createRender2PathTexture('rgba16float');
         return this.#renderPath1ResultTexture;
     }
 
@@ -178,7 +178,7 @@ class ViewRenderTextureManager {
      * @returns {GPUTextureView}
      */
     get gBufferColorTextureView(): GPUTextureView {
-        this.#createGBuffer('gBufferColor');
+        this.#createGBuffer('gBufferColor', 'rgba16float');
         return this.#gBuffers.get('gBufferColor')?.textureView
     }
 
@@ -364,7 +364,7 @@ class ViewRenderTextureManager {
      *
      * @private
      */
-    #createRender2PathTexture() {
+    #createRender2PathTexture(format: GPUTextureFormat) {
         const {resourceManager} = this.#redGPUContext
         const currentTexture = this.#renderPath1ResultTexture
         const {pixelRectObject, name} = this.#view
@@ -384,7 +384,7 @@ class ViewRenderTextureManager {
                     height: Math.max(1, pixelRectObjectH),
                     depthOrArrayLayers: 1
                 },
-                format: navigator.gpu.getPreferredCanvasFormat(),
+                format: format,
                 usage: GPUTextureUsage.TEXTURE_BINDING |
                     GPUTextureUsage.COPY_DST |
                     GPUTextureUsage.RENDER_ATTACHMENT |

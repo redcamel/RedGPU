@@ -25,6 +25,7 @@ import SkyBox from "../skyboxs/skyBox/SkyBox";
 import AView from "./core/AView";
 import RenderViewStateData from "./core/RenderViewStateData";
 import ViewRenderTextureManager from "./core/ViewRenderTextureManager";
+import ToneMappingManager from "../../toneMapping/ToneMappingManager";
 
 const SHADER_INFO = parseWGSL(SystemCode.SYSTEM_UNIFORM)
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.systemUniforms;
@@ -88,6 +89,7 @@ class View3D extends AView {
      * @readonly
      */
     readonly #postEffectManager: PostEffectManager
+    readonly #toneMappingManager: ToneMappingManager
     /**
      * 렌더 타겟 처리를 위한 뷰 렌더 텍스처 매니저
      * @private
@@ -174,6 +176,7 @@ class View3D extends AView {
         this.#viewRenderTextureManager = new ViewRenderTextureManager(this)
         this.#renderViewStateData = new RenderViewStateData(this)
         this.#postEffectManager = new PostEffectManager(this)
+        this.#toneMappingManager = new ToneMappingManager(this)
         // keepLog(this.systemUniform_Vertex_StructInfo)
         this.#uniformData = new ArrayBuffer(this.systemUniform_Vertex_StructInfo.endOffset)
         this.#uniformDataF32 = new Float32Array(this.#uniformData)
@@ -244,6 +247,11 @@ class View3D extends AView {
         return this.#postEffectManager;
     }
 
+
+    get toneMappingManager(): ToneMappingManager {
+        return this.#toneMappingManager;
+    }
+
     /**
      * 디버그 뷰 렌더링 상태를 가져옵니다.
      * @returns RenderViewStateData 인스턴스
@@ -279,7 +287,7 @@ class View3D extends AView {
         const {antialiasingManager} = this.redGPUContext
         const {useMSAA} = antialiasingManager
         return {
-            colorFormats: [navigator.gpu.getPreferredCanvasFormat(), navigator.gpu.getPreferredCanvasFormat(), 'rgba16float'],
+            colorFormats: ['rgba16float', navigator.gpu.getPreferredCanvasFormat(), 'rgba16float'],
             depthStencilFormat: 'depth32float',
             sampleCount: useMSAA ? 4 : 1
         }
@@ -513,7 +521,7 @@ class View3D extends AView {
                         },
                         {
                             key: 'color',
-                            value: light.color.rgbNormal,
+                            value: light.color.rgbNormalLinear,
                             dataView: this.#uniformDataF32,
                             targetMembers
                         },
@@ -536,7 +544,7 @@ class View3D extends AView {
                     [
                         {
                             key: 'color',
-                            value: light.color.rgbNormal,
+                            value: light.color.rgbNormalLinear,
                             dataView: this.#uniformDataF32,
                             targetMembers
                         },
@@ -759,7 +767,7 @@ class View3D extends AView {
                     this.#clusterLightsBufferData.set(
                         [
                             ...tLight.position, tLight.radius,
-                            ...tLight.color.rgbNormal, tLight.intensity, 0
+                            ...tLight.color.rgbNormalLinear, tLight.intensity, 0
                         ],
                         offset,
                     )
@@ -780,7 +788,7 @@ class View3D extends AView {
                     this.#clusterLightsBufferData.set(
                         [
                             ...tLight.position, tLight.radius,
-                            ...tLight.color.rgbNormal, tLight.intensity, 1, ...tLight.direction, tLight.outerCutoff, tLight.innerCutoff
+                            ...tLight.color.rgbNormalLinear, tLight.intensity, 1, ...tLight.direction, tLight.outerCutoff, tLight.innerCutoff
                         ],
                         offset,
                     )

@@ -55,7 +55,7 @@ class DrawDebuggerGrid {
         const shaderModule: GPUShaderModule = resourceManager.createGPUShaderModule(SHADER_MODULE_NAME, moduleDescriptor)
         this.#blendColorState = new BlendState(this, GPU_BLEND_FACTOR.SRC_ALPHA, GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA, GPU_BLEND_OPERATION.ADD)
         this.#blendAlphaState = new BlendState(this, GPU_BLEND_FACTOR.SRC_ALPHA, GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA, GPU_BLEND_OPERATION.ADD)
-        this.#lineColor = new ColorRGBA(128, 128, 128, 0.5)
+        this.#lineColor = new ColorRGBA(128, 128, 128, 0.25)
         const vertexBindGroupLayout = resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System)
         const fragmentBindGroupLayout = redGPUContext.resourceManager.getGPUBindGroupLayout('GRID_MATERIAL_BIND_GROUP_LAYOUT') || redGPUContext.resourceManager.createBindGroupLayout(
             'GRID_MATERIAL_BIND_GROUP_LAYOUT',
@@ -99,7 +99,7 @@ class DrawDebuggerGrid {
                 entryPoint: 'fragmentMain',
                 targets: [
                     {
-                        format: navigator.gpu.getPreferredCanvasFormat(),
+                        format: 'rgba16float',
                         blend: {
                             color: this.#blendColorState.state,
                             alpha: this.#blendAlphaState.state
@@ -274,7 +274,7 @@ class DrawDebuggerGrid {
             }
             this.#uniformBuffer = uniformBuffer;
         }
-        this.#uniformBuffer.writeOnlyBuffer(FRAGMENT_UNIFORM_STRUCT.members.lineColor, this.#lineColor.rgbaNormal)
+        this.#uniformBuffer.writeOnlyBuffer(FRAGMENT_UNIFORM_STRUCT.members.lineColor, this.#lineColor.rgbaNormalLinear)
     }
 }
 

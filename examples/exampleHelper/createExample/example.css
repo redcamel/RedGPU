@@ -190,6 +190,35 @@ html, body {
     width: fit-content;
 }
 
+.tone-mapping-container {
+    display: flex;
+    align-items: center;
+    padding-left: 12px;
+    background-color: #111112;
+    transition: background-color 0.2s;
+}
+
+.tone-mapping-container:hover {
+    background-color: #1f1f1f;
+}
+
+.tone-mapping-button {
+    border: 0;
+    cursor: pointer;
+    padding: 0 28px 0 12px;
+    outline: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    font-size: 11px;
+    /* 기본 화살표 */
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 8px center;
+    background-repeat: no-repeat;
+    background-size: 16px 16px;
+    width: fit-content;
+}
+
 .item-title {
     position: absolute;
     top: 50%;
@@ -216,6 +245,13 @@ html, body {
         text-align: left;
 
     }
+
+    .tone-mapping-container {
+        position: fixed;
+        left: 0;
+        bottom: 50px;
+    }
+
 }
 
 
@@ -250,4 +286,123 @@ html, body {
         max-width: 100%;
 
     }
+}
+
+
+.loading-ui {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.4); /* 배경을 조금 더 어둡게 하여 가독성 확보 */
+    color: #fff;
+    padding: 15px;
+    border-radius: 10px;
+    font-size: 11px;
+
+    font-family: monospace;
+    z-index: 1000;
+    pointer-events: none;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+
+    display: flex;
+    flex-direction: column;
+    opacity: 1;
+    gap: 10px;
+    backdrop-filter: blur(10px);
+
+    /* 크기 변화 애니메이션 핵심 */
+    interpolate-size: allow-keywords;
+    overflow: hidden;
+    width: auto;
+    min-width: 240px;
+    height: auto;
+    transition: opacity 0.3s, height 0.16s, width 0.16s;
+}
+
+.loading-ui-title {
+    font-weight: bold;
+    color: #aaa;
+    margin-bottom: 2px;
+}
+
+.loading-ui-info-file {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    color: rgba(255, 255, 255, 0.5);
+
+    .file {
+        display: flex;
+        justify-content: space-between;
+    }
+}
+
+.loading-ui-info {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.3s ease-in-out, padding 0.3s, border-top 0.3s;
+    overflow: hidden;
+    border-top: 1px solid rgba(255, 255, 255, 0);
+}
+
+.loading-ui-info.active {
+    grid-template-rows: 1fr;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.loading-ui-info-wrapper {
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.loading-ui-info-title {
+    display: flex;
+    justify-content: space-between;
+    color: #fff;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.loading-ui-info-detail {
+    display: flex;
+    justify-content: space-between;
+    font-variant-numeric: tabular-nums;
+
+}
+
+.loading-ui-progress {
+    width: 100%; /* 부모 너비에 맞춤 */
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+
+    .bar {
+        height: 100%;
+        background: #0078d4;
+        transition: width 0.2s ease-out;
+        width: 0%;
+    }
+}
+
+.loading-ui-progress .bar {
+    height: 100%;
+    transition: width 0.4s cubic-bezier(0.25, 0.1, 0.25, 1); /* 부드러운 가속도 */
+    will-change: width;
+}
+
+.total-progress-section {
+
+    padding-top: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.total-progress-bar {
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.5); /* 발광 효과 */
 }

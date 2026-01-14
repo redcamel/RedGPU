@@ -505,7 +505,7 @@ fn main(inputData:InputData) -> FragmentOutput {
        resultAlpha *= diffuseSampleColor.a;
     #redgpu_endIf
 
-    if (resultAlpha == 0.0) { discard; }
+
 
     let albedo:vec3<f32> = baseColor.rgb ;
 
@@ -671,40 +671,42 @@ fn main(inputData:InputData) -> FragmentOutput {
     var anisotropicB: vec3<f32>= vec3<f32>(1.0);
     #redgpu_if useKHR_materials_anisotropy
     {
-        var anisotropicDirection: vec2<f32> = vec2<f32>(1.0,0.0);
-        if(u_useKHR_anisotropyTexture){
-            let anisotropyTex = textureSample(KHR_anisotropyTexture, baseColorTextureSampler, KHR_anisotropyUV).rgb;
-            anisotropicDirection = anisotropyTex.rg * 2.0 - vec2<f32>(1.0, 1.0);
-            var anisotropyRotation: vec2<f32>;
-            if( u_KHR_anisotropyRotation < 0.0001 ){ anisotropyRotation = vec2<f32>(1.0,0.0); }
-            else{ anisotropyRotation = vec2<f32>( cos(u_KHR_anisotropyRotation), sin(u_KHR_anisotropyRotation) ); }
+       var T: vec3<f32>;
+       var B: vec3<f32>;
 
-            let rotationMtx: mat2x2<f32> = mat2x2<f32>(
-              anisotropyRotation.x, anisotropyRotation.y,
-              -anisotropyRotation.y, anisotropyRotation.x
-            );
+       // 1. 기본 TBN 기저 구축
+       if (u_useVertexTangent && length(input_vertexTangent.xyz) > 0.0) {
+           T = normalize(input_vertexTangent.xyz);
+           B = normalize(cross(N, T) * input_vertexTangent.w);
+       } else {
+           // 탄젠트가 없는 경우 Normal을 기준으로 임의의 수직 벡터 생성
+           T = normalize(select(vec3<f32>(1.0, 0.0, 0.0), vec3<f32>(0.0, 1.0, 0.0), abs(N.x) > 0.9));
+           T = normalize(T - N * dot(T, N));
+           B = normalize(cross(N, T));
+       }
 
-            anisotropicDirection = rotationMtx * normalize(anisotropicDirection);
-            anisotropy *= anisotropyTex.b;
-        }
-        var T: vec3<f32>;
-        var B: vec3<f32>;
-        if (u_useVertexTangent) {
-            if (length(input_vertexTangent.xyz) > 0.0) {
-                T = normalize(input_vertexTangent.xyz);
-                B = normalize(cross(T, N) * input_vertexTangent.w);
-            } else {
-                T = vec3<f32>(1.0, 0.0, 0.0);
-                B = normalize(cross(T, N) * 1.0); // 또는 -1.0
-            }
-        } else {
-            T = vec3<f32>(1.0, 0.0, 0.0);
-            B = normalize(cross(T, N) * 1.0); // 또는 -1.0
-        }
-        // direction.xy를 이용하여 올바르게 tangent 공간에서 벡터를 혼합
-        let TBN: mat3x3<f32> = mat3x3<f32>(T, B, N);
-        anisotropicT = normalize(TBN * vec3<f32>(anisotropicDirection, 0.0));
-        anisotropicB = normalize(cross(N, anisotropicT));
+       var anisotropicDirection: vec2<f32> = vec2<f32>(1.0, 0.0);
+       if(u_useKHR_anisotropyTexture){
+           let anisotropyTex = textureSample(KHR_anisotropyTexture, baseColorTextureSampler, KHR_anisotropyUV).rgb;
+           // 텍스처의 rg는 [0, 1] 범위이므로 [-1, 1]로 변환
+           anisotropicDirection = anisotropyTex.rg * 2.0 - vec2<f32>(1.0, 1.0);
+           anisotropy *= anisotropyTex.b;
+       }
+
+       // 2. 이방성 회전 적용 (GLTF 스펙: 시계 반대 방향 회전)
+       var cosR = cos(u_KHR_anisotropyRotation);
+       var sinR = sin(u_KHR_anisotropyRotation);
+       let rotationMtx: mat2x2<f32> = mat2x2<f32>(
+           cosR, sinR,
+           -sinR, cosR
+       );
+
+       // 텍스처에서 읽어온 방향에 유니폼 회전량을 결합
+       anisotropicDirection = rotationMtx * anisotropicDirection;
+
+       // 3. 최종 이방성 탄젠트/바이탄젠트 계산 (TBN 공간으로 투영)
+       anisotropicT = normalize(T * anisotropicDirection.x + B * anisotropicDirection.y);
+       anisotropicB = normalize(cross(N, anisotropicT));
     }
     #redgpu_endIf
 
@@ -838,84 +840,12 @@ let attenuation = rangePart * invSquare;
 
     // ---------- 간접 조명 계산 - ibl ----------
     if (u_useIblTexture) {
-        let R = normalize(reflect(-V, N));
-        let NdotV = max(dot(N, V),0.04);
-        let NdotV_fresnel = max(dot(N, V), 0.04);
 
-        // ---------- ibl 프레넬 항 계산----------
-        let fresnel = pow(1.0 - NdotV, 5.0);
-
-        // 거칠기를 고려한 각 파트별 프레넬 계산
-        var F_IBL_dielectric = F0_dielectric + (max(vec3<f32>(1.0 - roughnessParameter), F0_dielectric) - F0_dielectric) * fresnel;
-        var F_IBL_metal      = F0_metal      + (max(vec3<f32>(1.0 - roughnessParameter), F0_metal)      - F0_metal)      * fresnel;
-        var F_IBL            = F0            + (max(vec3<f32>(1.0 - roughnessParameter), F0)            - F0)            * fresnel;
+        var R = (reflect(-V, N));
+        let NdotV = max(dot(N, V),1e-4);
 
 
-//        #redgpu_if useKHR_materials_iridescence
-//             if (iridescenceParameter > 0.0) {
-//                 // 베이스 F0 미리 계산 (한 번만)
-//                 let base_f0 = mix(F0_dielectric, baseColor.rgb, metallicParameter);
-//
-//                 // 이리데센스 효과 계산 (한 번만)
-//                 let iridescence_effect = iridescent_fresnel(
-//                     1.0,                      // 외부 매질 IOR (공기)
-//                     u_KHR_iridescenceIor,     // 이리데센스 막의 IOR
-//                     base_f0,                  // 혼합된 기본 F0
-//                     iridescenceThickness,     // 이리데센스 막 두께
-//                     iridescenceParameter,     // 이리데센스 강도
-//                     NdotV                     // 시야각 코사인
-//                 );
-//
-//                 F_IBL = iridescence_effect;
-//             }
-//         #redgpu_endIf
 
-        let K = (roughnessParameter + 1.0) * (roughnessParameter + 1.0) / 8.0;
-        let G = NdotV / (NdotV * (1.0 - K) + K);
-        let a2 = roughnessParameter * roughnessParameter;
-
-        let G_smith = NdotV / (NdotV * (1.0 - a2) + a2);
-        // ---------- ibl (roughness에 따른 mipmap 레벨 사용) ----------
-        let iblMipmapCount:f32 = f32(textureNumLevels(ibl_environmentTexture) - 1);
-//        let mipLevel = roughnessParameter * iblMipmapCount;
-//        let mipLevel = roughnessParameter * sqrt(roughnessParameter) * iblMipmapCount;
-//        let mipLevel = max(0.0, (roughnessParameter * roughnessParameter) * iblMipmapCount);
-//        let mipLevel = pow(roughnessParameter,0.5) * iblMipmapCount;
-        let mipLevel = pow(roughnessParameter,0.4) * iblMipmapCount;
-//        let mipLevel = (roughnessParameter * roughnessParameter) * iblMipmapCount;
-
-
-        // ---------- ibl 기본 컬러 ----------
-        var reflectedColor = textureSampleLevel(ibl_environmentTexture, iblTextureSampler, R, mipLevel).rgb;
-
-        // ---------- ibl Diffuse  ----------
-        let effectiveTransmission = transmissionParameter * (1.0 - metallicParameter);
-        let iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, iblTextureSampler, N,0).rgb;
-//        let kd = mix(1.0 - F_IBL_dielectric, vec3<f32>(1.0), roughnessParameter);
-//        var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor * kd;
-        var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor* (vec3<f32>(1.0) - F_IBL_dielectric);
-
-        // ---------- ibl Diffuse Transmission ----------
-        #redgpu_if useKHR_materials_diffuse_transmission
-        {
-            // 후면 산란을 위한 샘플링 방향 (back side)
-            var backScatteringColor = textureSampleLevel(ibl_environmentTexture, iblTextureSampler, -N, mipLevel).rgb;
-            let transmittedIBL = backScatteringColor * diffuseTransmissionColor * (vec3<f32>(1.0) - F_IBL_dielectric);
-            // 반사와 투과 효과 혼합
-            envIBL_DIFFUSE = mix(envIBL_DIFFUSE, transmittedIBL, diffuseTransmissionParameter);
-        }
-        #redgpu_endIf
-
-        // ---------- ibl Specular ----------
-        var envIBL_SPECULAR:vec3<f32>;
-        envIBL_SPECULAR = reflectedColor * G_smith * F_IBL * specularParameter ;
-//        envIBL_SPECULAR = reflectedColor * G_smith * F_IBL_dielectric * specularParameter ;
-//        envIBL_SPECULAR = reflectedColor * G_smith * mix(F_IBL_dielectric,F_IBL_metal,metallicParameter) * specularParameter  ;
-//        envIBL_SPECULAR = reflectedColor * G_smith * select(
-//            mix(F_IBL_dielectric,F_IBL_metal,metallicParameter),
-//            F_IBL,
-//            u_useKHR_materials_iridescence && iridescenceParameter > 0.0
-//        ) * specularParameter ;
         #redgpu_if useKHR_materials_anisotropy
         {
             var bentNormal = cross(anisotropicB, V);
@@ -936,28 +866,67 @@ let attenuation = rangePart * invSquare;
             let TdotV = dot(anisotropicT, V);
             let BdotV = dot(anisotropicB, V);
 
-            let anisotropicR = normalize(reflectVec - anisotropy * (TdotR * anisotropicT - BdotR * anisotropicB));
+            R = normalize(reflectVec - anisotropy * (TdotR * anisotropicT - BdotR * anisotropicB));
 
-            let VdotN = max(0.04, dot(V, N));
+            let VdotN = max(1e-4, dot(V, N));
             let oneMinusVdotN = 1.0 - VdotN;
             let directionFactor = oneMinusVdotN * oneMinusVdotN * oneMinusVdotN;
 
             let VdotT_abs = abs(TdotV);
             let VdotB_abs = abs(BdotV);
-            let totalWeight = max(0.0001, VdotT_abs + VdotB_abs);
+            let totalWeight = max(1e-4, VdotT_abs + VdotB_abs);
 
             let weightedRoughness = (roughnessT * VdotT_abs + roughnessB * VdotB_abs) / totalWeight;
 
-            let anisotropyFactor = max(0.0, min(1.0, anisotropy));
-            let finalRoughness = mix( roughnessParameter, weightedRoughness, anisotropyFactor * directionFactor );
-            let anistropyMipmap = pow(finalRoughness, 0.4) * iblMipmapCount;
-            reflectedColor = textureSampleLevel( ibl_environmentTexture, iblTextureSampler, anisotropicR, anistropyMipmap ).rgb;
+            roughnessParameter = weightedRoughness;
 
-            let a2 = finalRoughness * finalRoughness;
-            let G_smith = NdotV / (NdotV * (1.0 - a2) + a2);
+        }
+        #redgpu_endIf
+        // ---------- ibl (roughness에 따른 mipmap 레벨 사용) ----------
+        let iblMipmapCount:f32 = f32(textureNumLevels(ibl_environmentTexture) - 1);
+        var mipLevel = roughnessParameter * (1.7 - 0.7 * roughnessParameter) * iblMipmapCount;
+        var reflectedColor = textureSampleLevel( ibl_environmentTexture, iblTextureSampler, R, mipLevel ).rgb;
+
+        // ---------- ibl 프레넬 항 계산----------
+        let fresnel = pow(1.0 - NdotV, 5.0);
+
+        // 거칠기를 고려한 각 파트별 프레넬 계산
+        var F_IBL_dielectric = F0_dielectric + (max(vec3<f32>(1.0 - roughnessParameter), F0_dielectric) - F0_dielectric) * fresnel;
+        var F_IBL_metal      = F0_metal      + (max(vec3<f32>(1.0 - roughnessParameter), F0_metal)      - F0_metal)      * fresnel;
+        var F_IBL            = F0            + (max(vec3<f32>(1.0 - roughnessParameter), F0)            - F0)            * fresnel;
+
+
+        let K = (roughnessParameter + 1.0) * (roughnessParameter + 1.0) / 8.0;
+        let G = NdotV / (NdotV * (1.0 - K) + K);
+        let a2 = roughnessParameter * roughnessParameter;
+
+        let G_smith = NdotV / (NdotV * (1.0 - a2) + a2);
+//        let mipLevel = roughnessParameter * iblMipmapCount;
+
+
+        // ---------- ibl 기본 컬러 ----------
+
+        // ---------- ibl Diffuse  ----------
+        let effectiveTransmission = transmissionParameter * (1.0 - metallicParameter);
+        let iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, iblTextureSampler, N,0).rgb;
+        var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor* (vec3<f32>(1.0) - F_IBL_dielectric);
+
+        // ---------- ibl Diffuse Transmission ----------
+        #redgpu_if useKHR_materials_diffuse_transmission
+        {
+            // 후면 산란을 위한 샘플링 방향 (back side)
+            var backScatteringColor = textureSampleLevel(ibl_environmentTexture, iblTextureSampler, -N, mipLevel).rgb;
+            let transmittedIBL = backScatteringColor * diffuseTransmissionColor * (vec3<f32>(1.0) - F_IBL_dielectric);
+            // 반사와 투과 효과 혼합
+            envIBL_DIFFUSE = mix(envIBL_DIFFUSE, transmittedIBL, diffuseTransmissionParameter);
         }
         #redgpu_endIf
 
+        // ---------- ibl Specular ----------
+        var envIBL_SPECULAR:vec3<f32>;
+
+
+        envIBL_SPECULAR = reflectedColor * F_IBL * specularParameter ;
         // ---------- ibl Specular BTDF ----------
         var envIBL_SPECULAR_BTDF = vec3<f32>(0.0);
         #redgpu_if useKHR_materials_transmission
@@ -1016,7 +985,7 @@ let attenuation = rangePart * invSquare;
 
         // ---------- ibl Metal 계산 ----------
 
-        let envIBL_METAL = reflectedColor * F_IBL;
+        let envIBL_METAL = reflectedColor * F_IBL_metal;
         // ---------- ibl 기본 혼합 ----------
         let metallicPart = envIBL_METAL * metallicParameter ; // 금속 파트 계산
         let dielectricPart = envIBL_DIELECTRIC * (1.0 - metallicParameter) ; // 유전체 파트 계산
@@ -1065,7 +1034,7 @@ let attenuation = rangePart * invSquare;
     finalColor += vec4<f32>( emissiveSamplerColor.rgb * u_emissiveFactor * u_emissiveStrength, 0);
 
     // ---------- srgb로 변환해주어야함 ----------
-    finalColor = linear_to_srgb(finalColor);
+//    finalColor = linear_to_srgb(finalColor);
 
     // ---------- 컷오프 판단 ----------
     #redgpu_if useCutOff

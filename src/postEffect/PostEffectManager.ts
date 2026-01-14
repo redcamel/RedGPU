@@ -119,21 +119,21 @@ class PostEffectManager {
         this.#postEffects.push(v)
     }
 
-    addEffectAt(v: ASinglePassPostEffect | AMultiPassPostEffect) {
-        //TODO
-    }
+    // addEffectAt(v: ASinglePassPostEffect | AMultiPassPostEffect) {
+    //     //TODO
+    // }
 
     getEffectAt(index: number): ASinglePassPostEffect | AMultiPassPostEffect {
         return this.#postEffects[index]
     }
 
-    removeEffect(v: ASinglePassPostEffect | AMultiPassPostEffect) {
-        //TODO
-    }
-
-    removeEffectAt(v: ASinglePassPostEffect | AMultiPassPostEffect) {
-        //TODO
-    }
+    // removeEffect(v: ASinglePassPostEffect | AMultiPassPostEffect) {
+    //     //TODO
+    // }
+    //
+    // removeEffectAt(v: ASinglePassPostEffect | AMultiPassPostEffect) {
+    //     //TODO
+    // }
 
     removeAllEffect() {
         this.#postEffects.forEach(effect => {
@@ -142,8 +142,9 @@ class PostEffectManager {
         this.#postEffects.length = 0
     }
 
+
     render() {
-        const {viewRenderTextureManager, redGPUContext, taa, fxaa} = this.#view;
+        const {viewRenderTextureManager, redGPUContext, taa, fxaa, toneMappingManager} = this.#view;
         const {antialiasingManager} = redGPUContext
         const {useMSAA, useFXAA, useTAA} = antialiasingManager;
         const {gBufferColorTextureView, gBufferColorResolveTextureView, gBufferColorTexture} = viewRenderTextureManager;
@@ -152,10 +153,18 @@ class PostEffectManager {
         const initialSourceView = useMSAA ? gBufferColorResolveTextureView : gBufferColorTextureView;
         this.#updateSystemUniforms()
         this.#sourceTextureView = this.#renderToStorageTexture(this.#view, initialSourceView);
+
         let currentTextureView = {
             texture: this.#storageTexture,
             textureView: this.#sourceTextureView,
         };
+        {
+            currentTextureView = toneMappingManager.render(
+                width,
+                height,
+                currentTextureView
+            );
+        }
         this.#postEffects.forEach(effect => {
             currentTextureView = effect.render(
                 this.#view,
@@ -164,6 +173,7 @@ class PostEffectManager {
                 currentTextureView,
             );
         });
+
         if (useFXAA) {
             currentTextureView = fxaa.render(
                 this.#view,
@@ -188,6 +198,7 @@ class PostEffectManager {
                 currentTextureView
             );
         }
+
         if (useTAA) {
             if (this.#view.constructor.name === 'View3D') { // View2D에는 TAA적용 안함{
                 currentTextureView = taa.render(
@@ -214,6 +225,7 @@ class PostEffectManager {
                 );
             }
         }
+
         return currentTextureView;
     }
 
@@ -393,7 +405,7 @@ class PostEffectManager {
 	
       @group(0) @binding(0) var sourceTextureSampler: sampler;
       @group(0) @binding(1) var sourceTexture : texture_2d<f32>;
-      @group(0) @binding(2) var outputTexture : texture_storage_2d<rgba8unorm, write>;
+      @group(0) @binding(2) var outputTexture : texture_storage_2d<rgba16float, write>;
  
       @compute @workgroup_size(${this.#COMPUTE_WORKGROUP_SIZE_X},${this.#COMPUTE_WORKGROUP_SIZE_Y},${this.#COMPUTE_WORKGROUP_SIZE_Z})
       fn main (
@@ -421,7 +433,7 @@ class PostEffectManager {
             entries: [
                 {binding: 0, visibility: GPUShaderStage.COMPUTE, sampler: {type: 'filtering',}},
                 {binding: 1, visibility: GPUShaderStage.COMPUTE, texture: {}},
-                {binding: 2, visibility: GPUShaderStage.COMPUTE, storageTexture: {format: 'rgba8unorm'}},
+                {binding: 2, visibility: GPUShaderStage.COMPUTE, storageTexture: {format: 'rgba16float'}},
             ]
         });
     }
@@ -429,7 +441,7 @@ class PostEffectManager {
     #createStorageTexture(gpuDevice: GPUDevice, width: number, height: number) {
         return this.#view.redGPUContext.resourceManager.createManagedTexture({
             size: {width: width, height: height,},
-            format: 'rgba8unorm',
+            format: 'rgba16float',
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_SRC,
             label: `${this.#view.name}_POST_EFFECT_STORAGE_TEXTURE_${width}x${height}`,
         });

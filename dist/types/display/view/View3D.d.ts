@@ -11,6 +11,7 @@ import SkyBox from "../skyboxs/skyBox/SkyBox";
 import AView from "./core/AView";
 import RenderViewStateData from "./core/RenderViewStateData";
 import ViewRenderTextureManager from "./core/ViewRenderTextureManager";
+import ToneMappingManager from "../../toneMapping/ToneMappingManager";
 /**
  * 3D 렌더링 뷰 클래스입니다. AView를 확장하여 3D 장면 렌더링 기능을 제공합니다.
  *
@@ -81,6 +82,7 @@ declare class View3D extends AView {
      * @returns PostEffectManager 인스턴스
      */
     get postEffectManager(): PostEffectManager;
+    get toneMappingManager(): ToneMappingManager;
     /**
      * 디버그 뷰 렌더링 상태를 가져옵니다.
      * @returns RenderViewStateData 인스턴스

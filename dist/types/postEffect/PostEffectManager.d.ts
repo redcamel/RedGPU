@@ -24,10 +24,7 @@ declare class PostEffectManager {
     get effectList(): Array<ASinglePassPostEffect | AMultiPassPostEffect>;
     get videoMemorySize(): number;
     addEffect(v: ASinglePassPostEffect | AMultiPassPostEffect): void;
-    addEffectAt(v: ASinglePassPostEffect | AMultiPassPostEffect): void;
     getEffectAt(index: number): ASinglePassPostEffect | AMultiPassPostEffect;
-    removeEffect(v: ASinglePassPostEffect | AMultiPassPostEffect): void;
-    removeEffectAt(v: ASinglePassPostEffect | AMultiPassPostEffect): void;
     removeAllEffect(): void;
     render(): {
         texture: GPUTexture;

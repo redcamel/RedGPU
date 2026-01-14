@@ -9,9 +9,9 @@ class SSAOBlend extends ASinglePassPostEffect {
         const computeCode =
             `
 
-				@group(0) @binding(0) var sourceTexture0 : texture_storage_2d<rgba8unorm,read>;
-				@group(0) @binding(1) var sourceTexture1 : texture_storage_2d<rgba8unorm,read>;
-				@group(1) @binding(0) var outputTexture : texture_storage_2d<rgba8unorm, write>;
+				@group(0) @binding(0) var sourceTexture0 : texture_storage_2d<rgba16float,read>;
+				@group(0) @binding(1) var sourceTexture1 : texture_storage_2d<rgba16float,read>;
+				@group(1) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;
 
 				@compute @workgroup_size(${WORK_SIZE_X},${WORK_SIZE_Y},${WORK_SIZE_Z})
 				fn main (

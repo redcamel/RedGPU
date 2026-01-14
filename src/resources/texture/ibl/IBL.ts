@@ -2,7 +2,6 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import GPU_ADDRESS_MODE from "../../../gpuConst/GPU_ADDRESS_MODE";
 import GPU_FILTER_MODE from "../../../gpuConst/GPU_FILTER_MODE";
 import GPU_MIPMAP_FILTER_MODE from "../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
-import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import {keepLog} from "../../../utils";
 import createUUID from "../../../utils/uuid/createUUID";
 import Sampler from "../../sampler/Sampler";
@@ -22,7 +21,7 @@ class IBL {
     #irradianceTexture: IBLCubeTexture;
     #iblTexture: IBLCubeTexture
     #uuid = createUUID()
-    #format: GPUTextureFormat = 'rgba8unorm'
+    #format: GPUTextureFormat = 'rgba16float'
     #targetTexture: HDRTexture | CubeTexture
     #envCubeSize: number
     #iblCubeSize: number
@@ -61,16 +60,6 @@ class IBL {
         }
     }
 
-    get exposure(): number {
-        if (this.#targetTexture instanceof HDRTexture) return this.#targetTexture.exposure
-    }
-
-    set exposure(value) {
-        validatePositiveNumberRange(value)
-        if (this.#targetTexture instanceof HDRTexture) {
-            this.#targetTexture.exposure = value
-        }
-    }
 
     get envCubeSize(): number {
         return this.#envCubeSize;
@@ -198,18 +187,18 @@ class IBL {
 
     #getCubeMapFaceMatrices(): Float32Array[] {
         return [
-            // +X (Right)
-            new Float32Array([0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1]),
-            // -X (Left)
-            new Float32Array([0, 0, 1, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1]),
-            // +Y (Top)
-            new Float32Array([1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1]),
-            // -Y (Bottom)
-            new Float32Array([1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1]),
-            // +Z (Front)
-            new Float32Array([1, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1]),
-            // -Z (Back)
-            new Float32Array([-1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1])
+            // +X (Right) - (0, 0, -1) -> (-1, 0, 0)
+            new Float32Array([0, 0, -1, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1]),
+            // -X (Left) - (0, 0, 1) -> (1, 0, 0)
+            new Float32Array([0, 0, 1, 0, 0, -1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1]),
+            // +Y (Top) - (1, 0, 0) -> (0, 1, 0)
+            new Float32Array([1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1]),
+            // -Y (Bottom) - (1, 0, 0) -> (0, -1, 0)
+            new Float32Array([1, 0, 0, 0, 0, 0, -1, 0, 0, -1, 0, 0, 0, 0, 0, 1]),
+            // +Z (Front) - (1, 0, 0) -> (0, 0, 1)
+            new Float32Array([1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]),
+            // -Z (Back) - (-1, 0, 0) -> (0, 0, -1)
+            new Float32Array([-1, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1])
         ];
     }
 }

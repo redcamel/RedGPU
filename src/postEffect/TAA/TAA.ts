@@ -169,7 +169,7 @@ class TAA {
 				@group(0) @binding(4) var depthTexture : texture_depth_2d;
 				@group(0) @binding(5) var historyDepthTexture : texture_depth_2d;
 				
-				@group(1) @binding(0) var outputTexture : texture_storage_2d<rgba8unorm, write>;
+				@group(1) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;
 				${postEffectSystemUniform}
 				@group(1) @binding(2) var<uniform> uniforms: Uniforms;
 				
@@ -355,7 +355,7 @@ class TAA {
             console.log(`TAA 프레임 텍스처 초기화 완료: CurrentFrame + PreviousFrame`);
             this.#currentFrameTexture = resourceManager.createManagedTexture({
                 size: {width, height},
-                format: 'rgba8unorm',
+                format: 'rgba16float',
                 usage: GPUTextureUsage.TEXTURE_BINDING |
                     GPUTextureUsage.STORAGE_BINDING |
                     GPUTextureUsage.COPY_SRC | GPUTextureUsage.RENDER_ATTACHMENT,
@@ -363,12 +363,12 @@ class TAA {
             });
             this.#currentFrameTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#currentFrameTexture, {
                 dimension: '2d',
-                format: 'rgba8unorm',
+                format: 'rgba16float',
                 label: `${this.#name}_currentFrame_View`
             });
             this.#historyTexture = resourceManager.createManagedTexture({
                 size: {width, height},
-                format: 'rgba8unorm',
+                format: 'rgba16float',
                 usage: GPUTextureUsage.TEXTURE_BINDING |
                     GPUTextureUsage.STORAGE_BINDING |
                     GPUTextureUsage.COPY_DST,
@@ -376,7 +376,7 @@ class TAA {
             });
             this.#historyTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#historyTexture, {
                 dimension: '2d',
-                format: 'rgba8unorm',
+                format: 'rgba16float',
                 label: `${this.#name}_previousFrame`
             });
             console.log('TAA 텍스처 생성 완료:', {

@@ -23,10 +23,10 @@ function defineColorRGBA(propertyKey: string, initValue: string = '#fff', forFra
                     if (gpuRenderInfo) {
                         if (forFragment) {
                             const {fragmentUniformInfo, fragmentUniformBuffer} = gpuRenderInfo
-                            fragmentUniformBuffer.writeOnlyBuffer(fragmentUniformInfo.members[propertyKey], this[symbol].rgbaNormal)
+                            fragmentUniformBuffer.writeOnlyBuffer(fragmentUniformInfo.members[propertyKey], this[symbol].rgbaNormalLinear)
                         } else {
                             const {vertexUniformInfo, vertexUniformBuffer} = gpuRenderInfo
-                            vertexUniformBuffer.writeOnlyBuffer(vertexUniformInfo.members[propertyKey], this[symbol].rgbaNormal)
+                            vertexUniformBuffer.writeOnlyBuffer(vertexUniformInfo.members[propertyKey], this[symbol].rgbaNormalLinear)
                         }
                     }
                 })

@@ -363,7 +363,7 @@ abstract class ABaseMaterial extends ResourceBase {
             entryPoint,
             targets: [
                 {
-                    format: navigator.gpu.getPreferredCanvasFormat(),
+                    format: 'rgba16float',
                     blend: {
                         color: this.blendColorState.state,
                         alpha: this.blendAlphaState.state
@@ -394,9 +394,9 @@ abstract class ABaseMaterial extends ResourceBase {
         for (const k in members) {
             const property = this[k]
             if (property instanceof ColorRGBA) {
-                fragmentUniformBuffer.writeOnlyBuffer(fragmentUniformInfo.members[k], property.rgbaNormal)
+                fragmentUniformBuffer.writeOnlyBuffer(fragmentUniformInfo.members[k], property.rgbaNormalLinear)
             } else if (property instanceof ColorRGB) {
-                fragmentUniformBuffer.writeOnlyBuffer(fragmentUniformInfo.members[k], property.rgbNormal)
+                fragmentUniformBuffer.writeOnlyBuffer(fragmentUniformInfo.members[k], property.rgbNormalLinear)
             } else {
                 if (!pattern.test(k)) this[k] = property
             }

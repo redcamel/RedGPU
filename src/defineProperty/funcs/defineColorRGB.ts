@@ -22,10 +22,10 @@ function defineColorRGB(propertyKey: string, initValue: string = '#fff', forFrag
                     if (gpuRenderInfo) {
                         if (forFragment) {
                             const {fragmentUniformInfo, fragmentUniformBuffer} = gpuRenderInfo
-                            fragmentUniformBuffer.writeOnlyBuffer(fragmentUniformInfo.members[propertyKey], this[symbol].rgbNormal)
+                            fragmentUniformBuffer.writeOnlyBuffer(fragmentUniformInfo.members[propertyKey], this[symbol].rgbNormalLinear)
                         } else {
                             const {vertexUniformInfo, vertexUniformBuffer} = gpuRenderInfo
-                            vertexUniformBuffer.writeOnlyBuffer(vertexUniformInfo.members[propertyKey], this[symbol].rgbNormal)
+                            vertexUniformBuffer.writeOnlyBuffer(vertexUniformInfo.members[propertyKey], this[symbol].rgbNormalLinear)
                         }
                     }
                 })

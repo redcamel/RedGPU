@@ -2,7 +2,7 @@ import {keepLog} from "../../../../utils";
 import getAbsoluteURL from "../../../../utils/file/getAbsoluteURL";
 import getArrayBufferFromSrc from "../../core/getArrayBufferFromSrc";
 import {GLTF} from "../../GLTF";
-import GLTFLoader from "../../GLTFLoader";
+import GLTFLoader, {GLTFLoadingProgressInfo} from "../../GLTFLoader";
 import parseGLTF from "../parseGLTF";
 
 /**
@@ -35,21 +35,38 @@ const BINPACKER_CHUNK_TYPE_BINARY = 0x004e4942;
  */
 const cacheMap: Map<string, ArrayBuffer> = new Map();
 const pendingMap: Map<string, Promise<ArrayBuffer>> = new Map();
-const parseFileGLB = async (gltfLoader: GLTFLoader, callBack) => {
+const parseFileGLB = async (gltfLoader: GLTFLoader, callBack, onProgress?: (info: GLTFLoadingProgressInfo) => void) => {
     console.log('GLB Model parsing has start.');
     const loadFilePath = getAbsoluteURL(window.location.href, gltfLoader.filePath + gltfLoader.fileName)
     // keepLog(loadFilePath, gltfLoader.filePath + gltfLoader.fileName)
+    const progress = () => {
+        if (onProgress) {
+            const buffer = cacheMap.get(loadFilePath);
+            gltfLoader.loadingProgressInfo.model = {
+                loaded: buffer.byteLength,
+                total: buffer.byteLength,
+                lengthComputable: true,
+                percent: 100,
+                transferred: 'Cached',
+                totalSize: 'Cached'
+            }
+            onProgress(gltfLoader.loadingProgressInfo);
+        }
+    }
     if (cacheMap.has(loadFilePath)) {
         keepLog('GLB Model parsing has cache', loadFilePath);
-        await parseArrayBuffer(gltfLoader, cacheMap.get(loadFilePath), callBack);
+        progress()
+        await parseArrayBuffer(gltfLoader, cacheMap.get(loadFilePath), callBack, onProgress);
         return;
     }
     if (pendingMap.has(loadFilePath)) {
         await pendingMap.get(loadFilePath);
-        await parseArrayBuffer(gltfLoader, cacheMap.get(loadFilePath), callBack);
+        progress()
+        await parseArrayBuffer(gltfLoader, cacheMap.get(loadFilePath), callBack, onProgress);
         return;
     }
     const promise = new Promise<ArrayBuffer>((resolve, reject) => {
+
         getArrayBufferFromSrc(
             loadFilePath,
             (buffer) => {
@@ -59,20 +76,27 @@ const parseFileGLB = async (gltfLoader: GLTFLoader, callBack) => {
                 resolve(buffer);
             },
             (error) => {
+                keepLog('GLB Model parsing error', error);
                 pendingMap.delete(loadFilePath);
                 reject(error);
+            },
+            (info) => {
+                // keepLog(gltfLoader.loadingProgressInfo, gltfLoader.loadingProgressInfo?.model)
+                gltfLoader.loadingProgressInfo.model = info
+                onProgress?.(gltfLoader.loadingProgressInfo);
             }
         );
     });
     pendingMap.set(loadFilePath, promise);
+
     try {
         const buffer = await promise;
-        await parseArrayBuffer(gltfLoader, buffer, callBack);
+        await parseArrayBuffer(gltfLoader, buffer, callBack, onProgress);
     } catch (error) {
         console.log(error);
     }
 }
-const parseArrayBuffer = async (gltfLoader: GLTFLoader, buffer: ArrayBuffer, callBack) => {
+const parseArrayBuffer = async (gltfLoader: GLTFLoader, buffer: ArrayBuffer, callBack, onProgress) => {
     const {content, binaryChunk} = parseBuffer(buffer);
     if (content === null) {
         throw new Error('JSON content not found');
@@ -81,7 +105,7 @@ const parseArrayBuffer = async (gltfLoader: GLTFLoader, buffer: ArrayBuffer, cal
     processImagesIfExist(gltfData, binaryChunk);
     gltfData.buffers[0].uri = binaryChunk;
     gltfLoader.gltfData = gltfData
-    parseGLTF(gltfLoader, gltfData, callBack)
+    parseGLTF(gltfLoader, gltfData, callBack, onProgress)
 }
 /**
  * Parses the given buffer and extracts content and binary chunks.

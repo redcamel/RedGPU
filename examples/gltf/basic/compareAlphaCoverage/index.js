@@ -1,51 +1,66 @@
-import * as RedGPU from "../../../../dist/index.js?t=1767864574385";
+import * as RedGPU from "../../../../dist/index.js?t=1768301050717";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
+// Initialize RedGPU
 RedGPU.init(
-	canvas,
-	(redGPUContext) => {
-		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-		controller.tilt = 0
+    canvas,
+    (redGPUContext) => {
+        // Setup camera or controller
+        const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+        controller.tilt = 0;
 
-		const scene = new RedGPU.Display.Scene();
-		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		redGPUContext.addView(view);
+        // Create scene and view
+        const scene = new RedGPU.Display.Scene();
+        const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+        redGPUContext.addView(view);
 
-		loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CompareAlphaCoverage/glTF-Binary/CompareAlphaCoverage.glb');
+        // Load GLTF model
+        const MODEL_URL = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CompareAlphaCoverage/glTF-Binary/CompareAlphaCoverage.glb';
+        loadGLTF(view, MODEL_URL);
 
-		const renderer = new RedGPU.Renderer(redGPUContext);
-		const render = () => {
-		};
-		renderer.start(redGPUContext, render);
+        // Start renderer
+        const renderer = new RedGPU.Renderer(redGPUContext);
+        renderer.start(redGPUContext, (time) => {
+            // Add additional per-frame logic here if needed
+        });
 
-		renderTestPane(redGPUContext, view);
-	},
-	(failReason) => {
-		console.error('RedGPU initialization failed:', failReason);
-		const errorDiv = document.createElement('div');
-		errorDiv.innerHTML = failReason;
-		document.body.appendChild(errorDiv);
-	}
+        // Configure test panel
+        renderTestPane(redGPUContext, view);
+    },
+    (failReason) => {
+        console.error("Initialization failed:", failReason);
+        const errorMessage = document.createElement('div');
+        errorMessage.innerHTML = failReason;
+        document.body.appendChild(errorMessage);
+    }
 );
 
-function loadGLTF(view, url) {
-	const {redGPUContext, scene} = view;
-	new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
-		const mesh = result.resultMesh
-		scene.addChild(mesh)
-		view.camera.fitMeshToScreenCenter(mesh, view)
-	});
+
+const {loadingProgressInfoHandler} = await import('../../../exampleHelper/createExample/loadingProgressInfoHandler.js?t=1768301050717');
+const loadGLTF = async (view, url) => {
+    const {redGPUContext, scene} = view;
+    new RedGPU.GLTFLoader(
+        redGPUContext,
+        url,
+        (result) => {
+            const mesh = result.resultMesh
+            scene.addChild(mesh)
+            view.camera.fitMeshToScreenCenter(mesh, view)
+
+        },
+        loadingProgressInfoHandler
+    );
 }
 
 const renderTestPane = async (redGPUContext, targetView) => {
-	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1767864574385');
-	const {
-		createIblHelper,
-		setDebugButtons
-	} = await import('../../../exampleHelper/createExample/panes/index.js?t=1767864574385');
-	setDebugButtons(redGPUContext);
-	const pane = new Pane();
-	createIblHelper(pane, targetView, RedGPU);
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1768301050717');
+    const {
+        createIblHelper,
+        setDebugButtons
+    } = await import('../../../exampleHelper/createExample/panes/index.js?t=1768301050717');
+    setDebugButtons(RedGPU, redGPUContext);
+    const pane = new Pane();
+    createIblHelper(pane, targetView, RedGPU);
 };

@@ -56,7 +56,7 @@ fn fragmentMain(inputData: VertexOut) -> FragmentOutput {
 
     // 1. 거리 기반 투명도(Fade) 계산
     let distanceToCamera = length(inputData.worldPos - systemUniforms.camera.cameraPosition);
-    let distanceFade = 1.0 - saturate((distanceToCamera - FADE_START) / (FADE_END - FADE_START));
+    let distanceFade = clamp(1.0 - saturate((distanceToCamera - FADE_START) / (FADE_END - FADE_START)),0.5,1.0);
 
     // 2. 색상 및 기본 알파 결정 (X/Z축 강조 로직)
     var finalColor: vec3<f32>;
@@ -78,6 +78,7 @@ fn fragmentMain(inputData: VertexOut) -> FragmentOutput {
 
     // 3. 최종 출력값 설정
     output.color = vec4<f32>(finalColor, baseAlpha * distanceFade);
+//    output.color = vec4<f32>(finalColor, baseAlpha);
 
     // 4. 모션 벡터 계산 및 저장
     let motion = calculateMotionVector(inputData.currentClipPos, inputData.prevClipPos);

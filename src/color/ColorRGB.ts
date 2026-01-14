@@ -153,6 +153,14 @@ class ColorRGB {
         return [this.#r / 255, this.#g / 255, this.#b / 255];
     }
 
+    get rgbNormalLinear(): number[] {
+        return [
+            Math.pow(this.#r / 255, 2.2),
+            Math.pow(this.#g / 255, 2.2),
+            Math.pow(this.#b / 255, 2.2)
+        ];
+    }
+
     /**
      * RGB 색상의 16진수 표현을 반환합니다.
      *

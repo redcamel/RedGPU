@@ -19,5 +19,6 @@ export * from "./gpuConst";
 export * as PostEffect from "./postEffect";
 export * as Picking from "./picking";
 export * as RenderState from "./renderState";
+export * from "./toneMapping";
 export * as Shadow from "./shadow";
 export * from "./defineProperty";

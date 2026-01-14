@@ -34,6 +34,27 @@ type GLTFParsingResult = {
     cameras: any[],
     animations: GLTFParsedSingleClip[]
 }
+export type GLTFLoadingProgressInfo = {
+    url: string,
+    model: {
+        loaded: number;
+        total: number;
+        lengthComputable: boolean;
+        percent: number;
+        transferred: string;
+        totalSize: string;
+    },
+    buffers?: {
+        loaded: number;
+        total: number;
+        percent: number
+    }
+    textures?: {
+        loaded: number;
+        total: number;
+        percent: number
+    }
+};
 
 /**
  * GLTFLoader class for loading and parsing GLTF files.
@@ -51,8 +72,13 @@ class GLTFLoader {
     #gltfData: GLTF
     readonly #onLoad
     readonly #onError
+    readonly #onProgress
+    #loadingProgressInfo: GLTFLoadingProgressInfo = {
+        url: '',
+        model: {loaded: 0, total: 0, lengthComputable: true, percent: 0, transferred: '0', totalSize: '0'},
+    }
 
-    constructor(redGPUContext: RedGPUContext, url: string, onLoad, onError) {
+    constructor(redGPUContext: RedGPUContext, url: string, onLoad, onProgress, onError) {
         validateRedGPUContext(redGPUContext)
         this.#redGPUContext = redGPUContext
         this.#url = url
@@ -60,6 +86,7 @@ class GLTFLoader {
         this.#fileName = getFileName(url)
         this.#fileExtension = getFileExtension(url);
         this.#onLoad = onLoad;
+        this.#onProgress = onProgress;
         this.#onError = onError;
         this.parsingResult = {
             groups: [],
@@ -75,7 +102,12 @@ class GLTFLoader {
         this.resultMesh = new Mesh(this.#redGPUContext);
         this.resultMesh.gltfLoaderInfo = this
         this.resultMesh.animationInfo.animationsList = this.parsingResult.animations
+        this.#loadingProgressInfo.url = getFileName(url);
         this.#loadFile();
+    }
+
+    get loadingProgressInfo(): GLTFLoadingProgressInfo {
+        return this.#loadingProgressInfo;
     }
 
     get redGPUContext(): RedGPUContext {
@@ -124,9 +156,9 @@ class GLTFLoader {
     async #loadFile() {
         try {
             if (this.#fileExtension === 'glb') {
-                parseFileGLB(this, () => this.#onLoad(this))
+                parseFileGLB(this, () => this.#onLoad(this), this.#onProgress)
             } else if (this.#fileExtension === 'gltf') {
-                parseFileGLTF(this, () => this.#onLoad(this))
+                parseFileGLTF(this, () => this.#onLoad(this), this.#onProgress)
             } else {
                 consoleAndThrowError('Unknown file extension: ' + this.#fileExtension);
             }
