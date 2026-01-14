@@ -61,16 +61,7 @@ class IBL {
         }
     }
 
-    get exposure(): number {
-        if (this.#targetTexture instanceof HDRTexture) return this.#targetTexture.exposure
-    }
 
-    set exposure(value) {
-        validatePositiveNumberRange(value)
-        if (this.#targetTexture instanceof HDRTexture) {
-            this.#targetTexture.exposure = value
-        }
-    }
 
     get envCubeSize(): number {
         return this.#envCubeSize;

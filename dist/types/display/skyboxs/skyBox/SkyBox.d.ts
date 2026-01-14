@@ -73,19 +73,6 @@ declare class SkyBox {
      */
     set blur(value: number);
     /**
-     * HDR 텍스처의 노출값을 반환합니다.
-     * 일반 큐브 텍스처의 경우 항상 1을 반환합니다.
-     * @returns 노출값 (HDR 텍스처) 또는 1 (일반 텍스처)
-     */
-    get exposure(): number;
-    /**
-     * HDR 텍스처의 노출값을 설정합니다.
-     * 일반 큐브 텍스처에는 영향을 주지 않습니다.
-     * @param value - 양수 노출값
-     * @throws {Error} 값이 양수가 아닌 경우
-     */
-    set exposure(value: number);
-    /**
      * 스카이박스의 불투명도를 반환합니다.
      * @returns 0.0에서 1.0 사이의 불투명도 값
      */

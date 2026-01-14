@@ -182,28 +182,6 @@ class SkyBox {
         this.#material.blur = value;
     }
 
-    /**
-     * HDR 텍스처의 노출값을 반환합니다.
-     * 일반 큐브 텍스처의 경우 항상 1을 반환합니다.
-     * @returns 노출값 (HDR 텍스처) 또는 1 (일반 텍스처)
-     */
-    get exposure(): number {
-        if (this.#skyboxTexture instanceof HDRTexture) {
-            return this.#skyboxTexture.exposure;
-        }
-        return 1
-    }
-
-    /**
-     * HDR 텍스처의 노출값을 설정합니다.
-     * 일반 큐브 텍스처에는 영향을 주지 않습니다.
-     * @param value - 양수 노출값
-     * @throws {Error} 값이 양수가 아닌 경우
-     */
-    set exposure(value: number) {
-        validatePositiveNumberRange(1)
-        if (this.#skyboxTexture instanceof HDRTexture) this.#skyboxTexture.exposure = value;
-    }
 
     /**
      * 스카이박스의 불투명도를 반환합니다.

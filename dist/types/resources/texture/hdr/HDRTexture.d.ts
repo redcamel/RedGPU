@@ -4,15 +4,6 @@ type SrcInfo = string | {
     src: string;
     cacheKey: string;
 };
-interface LuminanceAnalysis {
-    averageLuminance: number;
-    maxLuminance: number;
-    minLuminance: number;
-    medianLuminance: number;
-    percentile95: number;
-    percentile99: number;
-    recommendedExposure: number;
-}
 /**
  * HDRTexture 클래스
  * 지원 형식: .hdr (Radiance HDR/RGBE) 형식만 지원
@@ -37,10 +28,6 @@ declare class HDRTexture extends ManagementResourceBase {
     set src(value: SrcInfo);
     get useMipmap(): boolean;
     set useMipmap(value: boolean);
-    get exposure(): number;
-    set exposure(value: number);
-    get recommendedExposure(): number;
-    get luminanceAnalysis(): LuminanceAnalysis;
     get viewDescriptor(): {
         mipLevelCount: number;
         format?: GPUTextureFormat;
@@ -54,7 +41,6 @@ declare class HDRTexture extends ManagementResourceBase {
     };
     static isSupportedFormat(src: string): boolean;
     static getSupportedFormats(): string[];
-    resetToRecommendedExposure(): void;
     destroy(): void;
 }
 export default HDRTexture;

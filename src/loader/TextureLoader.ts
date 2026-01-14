@@ -34,7 +34,7 @@ export default class TextureLoader {
         this.#srcInfoList = srcInfoList;
         this.#callback = callback;
         this.#progressCallback = progressCallback;
-        keepLog('여기',this.#progressCallback)
+        // keepLog('여기',this.#progressCallback)
         if (this.#srcInfoList.length) {
             this.#srcInfoList.forEach((srcInfo, index: number) => this.#loadTexture(srcInfo, index));
         } else {

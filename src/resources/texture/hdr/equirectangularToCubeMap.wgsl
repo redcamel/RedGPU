@@ -23,10 +23,7 @@ struct VertexOutput {
 }
 struct SceneUniforms {
     faceMatrix: mat4x4<f32>,
-    exposure: f32,
-    roughness: f32, // 거칠기 추가
-    _pad: vec2<f32>,
-    _extra_pad: vec4<f32>,
+    roughness: f32,
 }
 const PI: f32 = 3.14159265359;
 

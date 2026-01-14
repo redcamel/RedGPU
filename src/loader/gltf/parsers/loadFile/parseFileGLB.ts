@@ -81,7 +81,7 @@ const parseFileGLB = async (gltfLoader: GLTFLoader, callBack, onProgress?: (info
                 reject(error);
             },
             (info) => {
-                keepLog(gltfLoader.loadingProgressInfo, gltfLoader.loadingProgressInfo?.model)
+                // keepLog(gltfLoader.loadingProgressInfo, gltfLoader.loadingProgressInfo?.model)
                 gltfLoader.loadingProgressInfo.model = info
                 onProgress?.(gltfLoader.loadingProgressInfo);
             }

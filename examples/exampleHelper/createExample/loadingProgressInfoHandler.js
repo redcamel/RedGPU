@@ -1,13 +1,8 @@
 let timeout;
 let timeout2;
 
-/**
- * 로딩 UI 구성 요소를 생성하고 업데이트하는 핸들러
- */
 const loadingProgressInfoHandler = (info) => {
     let loaderUI = document.querySelector('.loading-ui');
-    console.log('여기', info)
-    // 1. 초기 1회만 실행: 뼈대 생성 및 선택자 캐싱
     if (!loaderUI) {
         loaderUI = document.createElement('div');
         loaderUI.className = 'loading-ui';
@@ -55,15 +50,12 @@ const loadingProgressInfoHandler = (info) => {
         }
     };
 
-    // 전체 프로그레스 바 업데이트
     loaderUI.querySelector('.loading-ui-progress .bar').style.width = `${percent}%`;
 
-    // 각 섹션 업데이트
     updateSection('model', model, true);
     updateSection('buffers', buffers);
     updateSection('textures', textures);
 
-    // 3. 로딩 완료 및 제거 로직 (안정화)
     const isModelDone = model ? model.percent >= 100 : true;
     const isBuffersDone = buffers ? buffers.percent >= 100 : true;
     const isTexturesDone = textures ? textures.percent >= 100 : true;

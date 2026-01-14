@@ -59,7 +59,7 @@ const getGLTFBuffersResources = (gltfLoader: GLTFLoader, gltfData: GLTF, callbac
             onProgress?.(gltfLoader.loadingProgressInfo);
             if (loadedBuffers === totalBuffers) {
                 // console.log(`redGLTFLoader['parsingResult']['uris']:`, uris);
-                keepLog("uris 로딩현황", loadedBuffers, totalBuffers,JSON.parse(JSON.stringify(gltfLoader.loadingProgressInfo)));
+                // keepLog("uris 로딩현황", loadedBuffers, totalBuffers,JSON.parse(JSON.stringify(gltfLoader.loadingProgressInfo)));
                 if (callback) callback();
             }
         }

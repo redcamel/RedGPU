@@ -4,14 +4,7 @@ export interface HDRData {
     data: Float32Array;
     width: number;
     height: number;
-    exposure?: number;          // 파일에서 읽은 노출값
-    recommendedExposure?: number; // 자동 계산된 권장 노출값
-    luminanceStats?: {         // 휘도 통계
-        min: number;
-        max: number;
-        average: number;
-        median: number;
-    };
+
 }
 
 export interface FileValidation {
@@ -50,169 +43,17 @@ class HDRLoader {
         const uint8Array = new Uint8Array(buffer);
         // 🔍 기본 HDR 데이터 파싱
         const rawHdrData = this.#parseHDRFile(uint8Array, src);
-        // 원본 데이터는 보존하고 분석만 수행
-        return this.#analyzeHDRData(rawHdrData);
-    }
-
-    /**
-     * 🔍 HDR 데이터 분석 (원본 데이터 보존)
-     */
-    #analyzeHDRData(hdrData: HDRData): HDRData {
-        if (this.#enableDebugLogs) {
-            keepLog('HDR 데이터 분석 시작 (원본 데이터 보존)...');
-        }
-        // 🔍 휘도 분석
-        const luminanceStats = this.#analyzeLuminance(hdrData);
-        // 자동 노출 계산 (적용하지 않고 권장값만 계산)
-        const recommendedExposure = this.#calculateOptimalExposure(luminanceStats);
-        if (this.#enableDebugLogs) {
-            keepLog(`권장 노출값 계산: ${recommendedExposure.toFixed(3)} (원본 데이터는 보존)`);
-        }
-        // 원본 데이터는 그대로 유지, 분석 결과만 추가
+        keepLog(
+            {
+                ...rawHdrData,
+            }
+        )
         return {
-            ...hdrData,
-            recommendedExposure,
-            luminanceStats
-        };
-    }
-
-    /**
-     * 🔍 휘도 분석
-     */
-
-
-    /**
-     * 🔍 휘도 분석
-     */
-    #analyzeLuminance(hdrData: HDRData) {
-        const {data, width, height} = hdrData;
-        const pixelCount = width * height; // 픽셀 개수
-        const epsilon = 1e-6;
-
-        let min = Infinity;
-        let max = -Infinity;
-        let logSum = 0;
-        let linearSum = 0;
-        let validCount = 0;
-
-        // 상대 휘도 계수 (BT.709)
-        const R_COEFF = 0.2126, G_COEFF = 0.7152, B_COEFF = 0.0722;
-
-        // 픽셀 단위로 순회 (stride = 4)
-        for (let i = 0; i < pixelCount; i++) {
-            const offset = i * 4;
-            const r = data[offset];
-            const g = data[offset + 1];
-            const b = data[offset + 2];
-
-            // 휘도 계산
-            const luminance = R_COEFF * r + G_COEFF * g + B_COEFF * b;
-
-            // 음수 방지
-            const safeLuminance = Math.max(0, luminance);
-
-            // 거의 검은색 픽셀 제외 (더 관대한 임계값)
-            if (safeLuminance > epsilon) {
-                if (safeLuminance < min) min = safeLuminance;
-                if (safeLuminance > max) max = safeLuminance;
-
-                logSum += Math.log(safeLuminance + epsilon);
-                linearSum += safeLuminance;
-                validCount++;
-            }
+            ...rawHdrData,
         }
-
-        if (validCount === 0) {
-            console.warn('⚠️ 유효한 픽셀이 없습니다!');
-            return {min: 0, max: 0, average: 0, median: 0};
-        }
-
-        const linearAverage = linearSum / validCount;
-        const logAverage = Math.exp(logSum / validCount);
-
-        // Scene key 계산 (로그 평균 기반)
-        const sceneKey = logAverage;
-
-        if (this.#enableDebugLogs) {
-            keepLog(`📊 휘도 통계:`);
-            keepLog(`  - 최소: ${min.toFixed(6)}`);
-            keepLog(`  - 최대: ${max.toFixed(6)}`);
-            keepLog(`  - 선형 평균: ${linearAverage.toFixed(6)}`);
-            keepLog(`  - 로그 평균: ${logAverage.toFixed(6)}`);
-            keepLog(`  - 다이나믹 레인지: ${(max / (min + epsilon)).toFixed(2)}:1`);
-            keepLog(`  - 유효 픽셀: ${validCount} / ${pixelCount}`);
-        }
-
-        return {
-            min: min === Infinity ? 0 : min,
-            max: max === -Infinity ? 0 : max,
-            average: linearAverage,
-            median: sceneKey
-        };
     }
 
 
-    /**
-     * HDR 이미지의 최적 노출값 계산
-     */
-    #calculateOptimalExposure(stats: { min: number; max: number; average: number; median: number }): number {
-        const logAverageLuminance = stats.median;
-
-        if (this.#enableDebugLogs) {
-            keepLog(`📷 노출 계산:`);
-            keepLog(`  - 로그 평균 휘도 (Lw): ${logAverageLuminance.toFixed(6)}`);
-        }
-
-        // 1. 표준 Middle Gray 기준 (0.18)
-        const MIDDLE_GRAY = 0.18;
-
-        // 2. 기본 노출 계산
-        let exposure = MIDDLE_GRAY / Math.max(logAverageLuminance, 1e-6);
-
-        if (this.#enableDebugLogs) {
-            keepLog(`  - 기본 노출: ${exposure.toFixed(3)}`);
-        }
-
-        // 3. 극단적인 다이나믹 레인지 보정
-        const dynamicRange = stats.max / Math.max(stats.min, 1e-6);
-
-        if (dynamicRange > 10000) {
-            // 매우 높은 다이나믹 레인지 (예: 태양 포함)
-            exposure *= 0.7;
-            if (this.#enableDebugLogs) {
-                keepLog(`  - 높은 DR 보정 (${dynamicRange.toFixed(0)}:1): x0.7`);
-            }
-        } else if (dynamicRange > 1000) {
-            exposure *= 0.85;
-            if (this.#enableDebugLogs) {
-                keepLog(`  - 중간 DR 보정 (${dynamicRange.toFixed(0)}:1): x0.85`);
-            }
-        }
-
-        // 4. 평균 휘도 기반 추가 보정
-        if (stats.average > 2.0) {
-            // 전반적으로 밝은 씬
-            exposure *= 0.8;
-            if (this.#enableDebugLogs) {
-                keepLog(`  - 밝은 씬 보정: x0.8`);
-            }
-        } else if (stats.average < 0.1) {
-            // 전반적으로 어두운 씬
-            exposure *= 1.2;
-            if (this.#enableDebugLogs) {
-                keepLog(`  - 어두운 씬 보정: x1.2`);
-            }
-        }
-
-        // 5. 최종 클램핑
-        const finalExposure = Math.max(0.1, Math.min(10.0, exposure));
-
-        if (this.#enableDebugLogs) {
-            keepLog(`  - 최종 노출: ${finalExposure.toFixed(3)}`);
-        }
-
-        return finalExposure;
-    }
 
     /**
      * HDR 파일 데이터를 파싱합니다
@@ -325,7 +166,6 @@ class HDRLoader {
             data: pixelData,
             width,
             height,
-            exposure: fileExposure
         };
     }
 

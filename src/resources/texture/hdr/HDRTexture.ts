@@ -23,7 +23,6 @@ interface LuminanceAnalysis {
     medianLuminance: number;
     percentile95: number;
     percentile99: number;
-    recommendedExposure: number;
 }
 
 /**
@@ -42,9 +41,6 @@ class HDRTexture extends ManagementResourceBase {
     #cubeMapSize: number = 1024
     #hdrLoader: HDRLoader = new HDRLoader()
     #format: GPUTextureFormat
-    #exposure: number = 1.0
-    #recommendedExposure: number = 1.0
-    #luminanceAnalysis: LuminanceAnalysis
     #onLoad: (textureInstance: HDRTexture) => void;
     #onError: (error: Error) => void;
     #isCubeMapInitialized: boolean = false;
@@ -130,24 +126,6 @@ class HDRTexture extends ManagementResourceBase {
         }
     }
 
-    get exposure(): number {
-        return this.#exposure;
-    }
-
-    set exposure(value: number) {
-        const newExposure = Math.max(0.01, Math.min(20.0, value));
-        if (this.#exposure === newExposure) return;
-        this.#exposure = newExposure;
-        this.__fireListenerList();
-    }
-
-    get recommendedExposure(): number {
-        return this.#recommendedExposure;
-    }
-
-    get luminanceAnalysis(): LuminanceAnalysis {
-        return this.#luminanceAnalysis;
-    }
 
     get viewDescriptor() {
         return {
@@ -165,10 +143,6 @@ class HDRTexture extends ManagementResourceBase {
         return ['.hdr'];
     }
 
-    resetToRecommendedExposure(): void {
-        this.exposure = this.#recommendedExposure;
-    }
-
     destroy() {
         const temp = this.#gpuTexture
         this.#setGpuTexture(null);
@@ -178,7 +152,6 @@ class HDRTexture extends ManagementResourceBase {
         }
         this.#isCubeMapInitialized = false;
         this.__fireListenerList(true)
-        this.#luminanceAnalysis = null
         this.#unregisterResource()
         this.#src = null
         this.cacheKey = null
@@ -214,19 +187,6 @@ class HDRTexture extends ManagementResourceBase {
         try {
             const hdrData = await this.#hdrLoader.loadHDRFile(src);
             this.#hdrData = hdrData;
-            this.#recommendedExposure = hdrData.recommendedExposure || 1.0;
-            this.#exposure = this.#recommendedExposure;
-            if (hdrData.luminanceStats) {
-                this.#luminanceAnalysis = {
-                    averageLuminance: hdrData.luminanceStats.average,
-                    maxLuminance: hdrData.luminanceStats.max,
-                    minLuminance: hdrData.luminanceStats.min,
-                    medianLuminance: hdrData.luminanceStats.median,
-                    percentile95: hdrData.luminanceStats.max * 0.95,
-                    percentile99: hdrData.luminanceStats.max * 0.99,
-                    recommendedExposure: this.#recommendedExposure
-                };
-            }
             await this.#createGPUTexture();
             this.#onLoad?.(this);
         } catch (error) {
@@ -388,11 +348,9 @@ class HDRTexture extends ManagementResourceBase {
     async #renderCubeMapFace(renderPipeline: GPURenderPipeline, sampler: Sampler, face: number, faceMatrix: Float32Array, sourceTexture: GPUTexture, mipLevel: number = 0, roughness: number = 0) {
         const {gpuDevice} = this.redGPUContext;
 
-        // SceneUniforms 구조체 데이터 (mat4x4 + f32 + f32 + padding)
         const uniformData = new Float32Array(32);
         uniformData.set(faceMatrix, 0);
-        uniformData[16] = this.#exposure;
-        uniformData[17] = roughness; // 거칠기 전달
+        uniformData[16] = roughness; // 거칠기 전달
 
         const uniformBuffer = gpuDevice.createBuffer({
             size: uniformData.byteLength,

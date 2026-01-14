@@ -2,14 +2,6 @@ export interface HDRData {
     data: Float32Array;
     width: number;
     height: number;
-    exposure?: number;
-    recommendedExposure?: number;
-    luminanceStats?: {
-        min: number;
-        max: number;
-        average: number;
-        median: number;
-    };
 }
 export interface FileValidation {
     isValid: boolean;
