@@ -26,7 +26,7 @@ const loadingProgressInfoHandler = (info) => {
         loaderUI.innerHTML = `
             <div class="loading-ui-title">📦 Loading Resources...</div>
             
-            <div class="info-container-model loading-ui-info" style="display:none;">
+            <div class="info-container-model loading-ui-info" >
                 <div class="loading-ui-info-wrapper">
                     <div class="loading-ui-info-title">model</div>
                     <div class="loading-ui-info-detail"><span class="percent">0%</span><span class="size" style="margin-left:10px; opacity:0.7;">0 / 0</span></div>
@@ -35,7 +35,7 @@ const loadingProgressInfoHandler = (info) => {
                 </div>
             </div>
 
-            <div class="info-container-buffers loading-ui-info" style="display:none;">
+            <div class="info-container-buffers loading-ui-info" >
                 <div class="loading-ui-info-wrapper">
                     <div class="loading-ui-info-title">buffers</div>
                     <div class="loading-ui-info-detail"><span class="percent">0%</span><span class="count" style="margin-left:10px; opacity:0.7;">0 / 0</span></div>
@@ -43,7 +43,7 @@ const loadingProgressInfoHandler = (info) => {
                 </div>
             </div>
 
-            <div class="info-container-textures loading-ui-info" style="display:none;">
+            <div class="info-container-textures loading-ui-info" >
                 <div class="loading-ui-info-wrapper">
                     <div class="loading-ui-info-title">textures</div>
                     <div class="loading-ui-info-detail"><span class="percent">0%</span><span class="count" style="margin-left:10px; opacity:0.7;">0 / 0</span></div>
@@ -51,13 +51,13 @@ const loadingProgressInfoHandler = (info) => {
                 </div>
             </div>
             
-            <div id="total-progress-section" style="display:none; margin-top:20px; border-top:1px solid #555; padding-top:10px;">
+            <div class="total-progress-section" >
                 <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px;">
                     <span>TOTAL PROGRESS</span>
-                    <span id="total-percent-text">0%</span>
+                    <span class="total-percent-text">0%</span>
                 </div>
                 <div class="loading-ui-progress" style="height:8px; background:#111;">
-                    <div id="total-progress-bar" class="bar" style="width:0%; background:#4caf50; height:100%; transition:width 0.2s;"></div>
+                    <div class="total-progress-bar" style="width:0%; background:#4caf50; height:100%; transition:width 0.2s;"></div>
                 </div>
             </div>
         `;
@@ -94,7 +94,7 @@ const loadingProgressInfoHandler = (info) => {
     // 1. Model 섹션 노출 및 업데이트
     const mContainer = loaderUI.querySelector('.info-container-model');
     if (totals.model.total > 0) {
-        mContainer.style.display = 'block';
+        mContainer.classList.add('active');
         const mPercent = mRatio * 100;
         mContainer.querySelector('.bar').style.width = `${mPercent}%`;
         mContainer.querySelector('.percent').textContent = `${Math.floor(mPercent)}%`;
@@ -105,35 +105,35 @@ const loadingProgressInfoHandler = (info) => {
             return `<div class="file"><span>${key}</span><span>${formatBytes(value.model.total)}</span></div>`;
         }).join('');
     } else {
-        mContainer.style.display = 'none';
+        mContainer.classList.remove('active');
     }
 
     // 2. Buffers 섹션 노출 및 업데이트
     const bContainer = loaderUI.querySelector('.info-container-buffers');
     if (totals.buffers.total > 0) {
-        bContainer.style.display = 'block';
+        bContainer.classList.add('active');
         const bPercent = bRatio * 100;
         bContainer.querySelector('.bar').style.width = `${bPercent}%`;
         bContainer.querySelector('.percent').textContent = `${Math.floor(bPercent)}%`;
         bContainer.querySelector('.count').textContent = `${totals.buffers.loaded} / ${totals.buffers.total}`;
     } else {
-        bContainer.style.display = 'none';
+        bContainer.classList.remove('active');
     }
 
     // 3. Textures 섹션 노출 및 업데이트
     const tContainer = loaderUI.querySelector('.info-container-textures');
     if (totals.textures.total > 0) {
-        tContainer.style.display = 'block';
+        tContainer.classList.add('active');
         const tPercent = tRatio * 100;
         tContainer.querySelector('.bar').style.width = `${tPercent}%`;
         tContainer.querySelector('.percent').textContent = `${Math.floor(tPercent)}%`;
         tContainer.querySelector('.count').textContent = `${totals.textures.loaded} / ${totals.textures.total}`;
     } else {
-        tContainer.style.display = 'none';
+        tContainer.classList.remove('active');
     }
 
     // 4. 전체 진행도 섹션 표시 여부 (리소스가 2개 이상 로드 중일 때)
-    const totalSection = document.getElementById('total-progress-section');
+    const totalSection = document.querySelector('.total-progress-section');
     if (totalSection) {
         totalSection.style.display = loadingStates.size >= 2 ? 'block' : 'none';
 
@@ -143,8 +143,8 @@ const loadingProgressInfoHandler = (info) => {
             ? (( (totals.model.total > 0 ? mRatio : 0) + (totals.buffers.total > 0 ? bRatio : 0) + (totals.textures.total > 0 ? tRatio : 0) ) / activeSections) * 100
             : 100;
 
-        const totalBar = document.getElementById('total-progress-bar');
-        const totalText = document.getElementById('total-percent-text');
+        const totalBar = document.querySelector('.total-progress-bar');
+        const totalText = document.querySelector('.total-percent-text');
         if (totalBar) totalBar.style.width = `${avgTotal}%`;
         if (totalText) totalText.textContent = `${Math.floor(avgTotal)}%`;
     }
