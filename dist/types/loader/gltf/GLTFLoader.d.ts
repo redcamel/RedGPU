@@ -27,6 +27,7 @@ type GLTFParsingResult = {
     animations: GLTFParsedSingleClip[];
 };
 export type GLTFLoadingProgressInfo = {
+    url: string;
     model: {
         loaded: number;
         total: number;

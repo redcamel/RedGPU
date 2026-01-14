@@ -35,6 +35,7 @@ type GLTFParsingResult = {
     animations: GLTFParsedSingleClip[]
 }
 export type GLTFLoadingProgressInfo = {
+    url:string ,
     model: {
         loaded: number;
         total: number;
@@ -73,6 +74,7 @@ class GLTFLoader {
     readonly #onError
     readonly #onProgress
     #loadingProgressInfo: GLTFLoadingProgressInfo = {
+        url:'',
         model: {loaded: 0, total: 0, lengthComputable: true, percent: 0, transferred: '0', totalSize: '0'},
     }
 
@@ -105,6 +107,7 @@ class GLTFLoader {
         this.resultMesh = new Mesh(this.#redGPUContext);
         this.resultMesh.gltfLoaderInfo = this
         this.resultMesh.animationInfo.animationsList = this.parsingResult.animations
+        this.#loadingProgressInfo.url = getFileName(url) ;
         this.#loadFile();
     }
 
