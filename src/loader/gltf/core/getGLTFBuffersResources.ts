@@ -1,8 +1,19 @@
 import getAbsoluteURL from "../../../utils/file/getAbsoluteURL";
 import {GLTF} from "../GLTF";
-import GLTFLoader from "../GLTFLoader";
+import GLTFLoader, {GLTFLoadingProgressInfo} from "../GLTFLoader";
+import {keepLog} from "../../../utils";
 
-const getGLTFBuffersResources = (gltfLoader: GLTFLoader, gltfData: GLTF, callback) => {
+const checkProgress = (gltfLoader:GLTFLoader,gltfData: GLTF,loadedBuffers:number) => {
+    const buffers = gltfData.buffers
+    const totalBuffers = buffers.length;
+
+    gltfLoader.loadingProgressInfo.buffers = {
+        loaded: loadedBuffers,
+        total: totalBuffers,
+        percent: Math.min(100, parseFloat(((loadedBuffers / totalBuffers) * 100).toFixed(2)))
+    }
+}
+const getGLTFBuffersResources = (gltfLoader: GLTFLoader, gltfData: GLTF, callback, onProgress: (info: GLTFLoadingProgressInfo) => void) => {
     const {parsingResult} = gltfLoader
     const {uris} = parsingResult
     const bufferKey = 'buffers';
@@ -10,6 +21,9 @@ const getGLTFBuffersResources = (gltfLoader: GLTFLoader, gltfData: GLTF, callbac
     const buffers = gltfData.buffers
     const totalBuffers = buffers.length;
     let loadedBuffers = 0;
+    checkProgress(gltfLoader,gltfData,loadedBuffers)
+
+
     buffers.forEach((buffer, bufferIndex) => {
         buffer['_redURIkey'] = bufferKey;
         buffer['_redURIIndex'] = bufferIndex;
@@ -40,9 +54,12 @@ const getGLTFBuffersResources = (gltfLoader: GLTFLoader, gltfData: GLTF, callbac
         }
 
         function checkLoadingStatus() {
+
+            checkProgress(gltfLoader,gltfData,loadedBuffers)
+            onProgress?.(gltfLoader.loadingProgressInfo);
             if (loadedBuffers === totalBuffers) {
                 // console.log(`redGLTFLoader['parsingResult']['uris']:`, uris);
-                // console.log("uris 로딩현황", loadedBuffers, totalBuffers);
+                keepLog("uris 로딩현황", loadedBuffers, totalBuffers,JSON.parse(JSON.stringify(gltfLoader.loadingProgressInfo)));
                 if (callback) callback();
             }
         }

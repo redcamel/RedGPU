@@ -1,6 +1,7 @@
 import RedGPUContext from "../context/RedGPUContext";
 import BitmapTexture from "../resources/texture/BitmapTexture";
 import CubeTexture from "../resources/texture/CubeTexture";
+import {keepLog} from "../utils";
 
 export class TextureLoaderData {
     src: any;
@@ -33,6 +34,7 @@ export default class TextureLoader {
         this.#srcInfoList = srcInfoList;
         this.#callback = callback;
         this.#progressCallback = progressCallback;
+        keepLog('여기',this.#progressCallback)
         if (this.#srcInfoList.length) {
             this.#srcInfoList.forEach((srcInfo, index: number) => this.#loadTexture(srcInfo, index));
         } else {
@@ -81,14 +83,20 @@ export default class TextureLoader {
             }, srcInfo.useMipmap, onLoadHandler, onErrorHandler, srcInfo.format);
         }
         this.textures.push(targetTexture);
+        this.#checkProgress();
     }
-
+    #checkProgress() {
+        const total = this.#srcInfoList.length;
+        const loaded = this.#loaded;
+        if (this.#progressCallback) this.#progressCallback.call(this, {
+            total,
+            loaded,
+            percent: Math.min(100, parseFloat(((loaded / total) * 100).toFixed(2)))
+        });
+    }
     #checkCompletion() {
         this.#loaded++;
-        if (this.#progressCallback) this.#progressCallback.call(this, {
-            totalNum: this.#srcInfoList.length,
-            loaded: this.#loaded
-        });
+        this.#checkProgress();
         if (this.#loaded === this.#srcInfoList.length) {
             this.#reportCompletion();
         }

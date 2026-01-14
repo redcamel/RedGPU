@@ -3,44 +3,55 @@ import * as RedGPU from "../../../../dist/index.js?t=1768301050717";
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
+// Initialize RedGPU
 RedGPU.init(
 	canvas,
 	(redGPUContext) => {
+		// Setup camera or controller
 		const controller = new RedGPU.Camera.FreeController(redGPUContext);
 
-		controller.z = 1.0
-		controller.x = 2
-		controller.y = 2
 		controller.tilt = 15
-		controller.pan = 110
 
+		// Create scene and view
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		redGPUContext.addView(view);
 
-		loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Sponza/glTF/Sponza.gltf');
+		// Load GLTF model
+		const MODEL_URL = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Sponza/glTF/Sponza.gltf';
+		loadGLTF(view, MODEL_URL);
 
+		// Start renderer
 		const renderer = new RedGPU.Renderer(redGPUContext);
-		const render = () => {
-		};
-		renderer.start(redGPUContext, render);
+		renderer.start(redGPUContext, (time) => {
+			// Add additional per-frame logic here if needed
+		});
 
+		// Configure test panel
 		renderTestPane(redGPUContext, view);
 	},
 	(failReason) => {
-		console.error('RedGPU initialization failed:', failReason);
-		const errorDiv = document.createElement('div');
-		errorDiv.innerHTML = failReason;
-		document.body.appendChild(errorDiv);
+		console.error("Initialization failed:", failReason);
+		const errorMessage = document.createElement('div');
+		errorMessage.innerHTML = failReason;
+		document.body.appendChild(errorMessage);
 	}
 );
 
-function loadGLTF(view, url) {
+
+const {loadingProgressInfoHandler} = await import('../../../exampleHelper/createExample/loadingProgressInfoHandler.js?t=1768301050717');
+const loadGLTF = async (view, url) => {
 	const {redGPUContext, scene} = view;
-	new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
-		const mesh = result.resultMesh
-		scene.addChild(mesh)
-	});
+	new RedGPU.GLTFLoader(
+		redGPUContext,
+		url,
+		(result) => {
+			const mesh = result.resultMesh
+			scene.addChild(mesh)
+
+		},
+		loadingProgressInfoHandler
+	);
 }
 
 const renderTestPane = async (redGPUContext, targetView) => {
@@ -53,3 +64,4 @@ const renderTestPane = async (redGPUContext, targetView) => {
 	const pane = new Pane();
 	createIblHelper(pane, targetView, RedGPU);
 };
+

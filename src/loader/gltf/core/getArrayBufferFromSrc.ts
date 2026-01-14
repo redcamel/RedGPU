@@ -2,39 +2,29 @@ import formatBytes from "../../../utils/math/formatBytes";
 
 /**
  * ArrayBuffer 로딩 성공 시 호출되는 콜백 함수 타입
- * @callback LoaderCallback
  */
 type LoaderCallback = (buffer: ArrayBuffer) => void;
 
 /**
  * 에러 발생 시 호출되는 콜백 함수 타입
- * @callback ErrorCallback
  */
 type ErrorCallback = (err: any) => void;
-export type LoadingProgressInfo = {
+
+/**
+ * 로딩 진행 상태를 추적하는 콜백 함수 타입
+ */
+export type ProgressCallback = (event: {
     loaded: number;
     total: number;
     lengthComputable: boolean;
     percent: number;
     transferred: string;
     totalSize: string;
-};
-/**
- * 로딩 진행 상태를 추적하는 콜백 함수 타입
- * @callback ProgressCallback
- */
-export type ProgressCallback = (event: LoadingProgressInfo) => void;
+}) => void;
 
 /**
  * fetch API를 사용하여 지정된 URL에서 ArrayBuffer를 로드하고 진행 상태를 추적합니다.
- *
- * @param {string} src - 데이터를 가져올 소스 URL
- * @param {LoaderCallback} onLoad - 성공 시 실행할 콜백
- * @param {ErrorCallback} [onError] - 실패 시 실행할 콜백
- * @param {ProgressCallback} [onProgress] - 로딩 진행 시 실행할 콜백
- * @returns {Promise<void>}
- *
- * @throws {Error} 응답이 성공적이지 않거나 스트림 읽기 중 오류 발생 시 에러를 던집니다.
+ * 스트림 완료 후 onLoad가 확실히 호출되도록 구조를 개선했습니다.
  */
 const getArrayBufferFromSrc = async (
     src: string,
@@ -48,15 +38,17 @@ const getArrayBufferFromSrc = async (
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-
         const contentLength = response.headers.get('content-length');
         const total = contentLength ? parseInt(contentLength, 10) : 0;
-        const lengthComputable = total !== 0;
+        const lengthComputable = total > 0;
         const totalSizeStr = lengthComputable ? formatBytes(total) : 'Unknown';
 
 
         if (!response.body) {
-            throw new Error('ReadableStream not supported.');
+            // Body가 없는 경우 즉시 빈 버퍼 반환하여 완료 처리
+            const emptyBuffer = new ArrayBuffer(0);
+            onLoad(emptyBuffer);
+            return;
         }
 
         const reader = response.body.getReader();
@@ -85,17 +77,23 @@ const getArrayBufferFromSrc = async (
             }
         }
 
-        // 모든 청크를 하나의 ArrayBuffer로 합치기
-        const allChunks = new Uint8Array(loaded);
-        let position = 0;
-        for (const chunk of chunks) {
-            allChunks.set(chunk, position);
-            position += chunk.length;
+        if (loaded === 0) {
+            onLoad(new ArrayBuffer(0));
+            return;
         }
 
-        onLoad(allChunks.buffer);
+        const blob = new Blob(chunks);
+        const arrayBuffer = await blob.arrayBuffer();
+
+        // 명시적으로 onLoad 호출
+        onLoad(arrayBuffer);
+
     } catch (error) {
-        onError(error);
+        if (onError) {
+            onError(error);
+        } else {
+            console.error('getArrayBufferFromSrc 로딩 중 오류 발생:', error);
+        }
     }
 };
 

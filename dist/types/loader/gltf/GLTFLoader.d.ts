@@ -26,6 +26,26 @@ type GLTFParsingResult = {
     cameras: any[];
     animations: GLTFParsedSingleClip[];
 };
+export type GLTFLoadingProgressInfo = {
+    model: {
+        loaded: number;
+        total: number;
+        lengthComputable: boolean;
+        percent: number;
+        transferred: string;
+        totalSize: string;
+    };
+    buffers?: {
+        loaded: number;
+        total: number;
+        percent: number;
+    };
+    textures?: {
+        loaded: number;
+        total: number;
+        percent: number;
+    };
+};
 /**
  * GLTFLoader class for loading and parsing GLTF files.
  */
@@ -35,6 +55,7 @@ declare class GLTFLoader {
     resultMesh: Mesh;
     parsingOption: any;
     activeAnimations: any[];
+    get loadingProgressInfo(): GLTFLoadingProgressInfo;
     constructor(redGPUContext: RedGPUContext, url: string, onLoad: any, onProgress: any, onError: any);
     get redGPUContext(): RedGPUContext;
     get filePath(): string;

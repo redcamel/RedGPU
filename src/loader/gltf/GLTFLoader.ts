@@ -34,6 +34,26 @@ type GLTFParsingResult = {
     cameras: any[],
     animations: GLTFParsedSingleClip[]
 }
+export type GLTFLoadingProgressInfo = {
+    model: {
+        loaded: number;
+        total: number;
+        lengthComputable: boolean;
+        percent: number;
+        transferred: string;
+        totalSize: string;
+    },
+    buffers?: {
+        loaded: number;
+        total: number;
+        percent: number
+    }
+    textures?: {
+        loaded: number;
+        total: number;
+        percent: number
+    }
+};
 
 /**
  * GLTFLoader class for loading and parsing GLTF files.
@@ -52,6 +72,14 @@ class GLTFLoader {
     readonly #onLoad
     readonly #onError
     readonly #onProgress
+    #loadingProgressInfo: GLTFLoadingProgressInfo = {
+        model: {loaded: 0, total: 0, lengthComputable: true, percent: 0, transferred: '0', totalSize: '0'},
+    }
+
+
+    get loadingProgressInfo(): GLTFLoadingProgressInfo {
+        return this.#loadingProgressInfo;
+    }
 
     constructor(redGPUContext: RedGPUContext, url: string, onLoad, onProgress, onError) {
         validateRedGPUContext(redGPUContext)
@@ -128,7 +156,7 @@ class GLTFLoader {
             if (this.#fileExtension === 'glb') {
                 parseFileGLB(this, () => this.#onLoad(this), this.#onProgress)
             } else if (this.#fileExtension === 'gltf') {
-                parseFileGLTF(this, () => this.#onLoad(this))
+                parseFileGLTF(this, () => this.#onLoad(this), this.#onProgress)
             } else {
                 consoleAndThrowError('Unknown file extension: ' + this.#fileExtension);
             }

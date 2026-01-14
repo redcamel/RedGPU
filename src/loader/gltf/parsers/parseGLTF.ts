@@ -1,13 +1,14 @@
 import TextureLoader, {TextureLoaderData} from "../../TextureLoader";
 import getGLTFBuffersResources from "../core/getGLTFBuffersResources";
 import {GLTF} from "../GLTF";
-import GLTFLoader from "../GLTFLoader";
+import GLTFLoader, {GLTFLoadingProgressInfo} from "../GLTFLoader";
 import parseAnimation_GLTF from "./animation/parseAnimations";
 import parseAssetVersion from "./parseAssetVersion";
 import parseCameras_GLTF from "./parseCameras_GLTF";
 import parseScene_GLTF from "./parseScene_GLTF";
 
-const parseGLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, callBack) => {
+
+const parseGLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, callBack,onProgress?: (info: GLTFLoadingProgressInfo) => void) => {
     //  작업을 여러 프레임에 분산
     // keepLog(gltfData)
     if (gltfData.extensionsUsed?.includes("KHR_draco_mesh_compression")) {
@@ -42,12 +43,16 @@ const parseGLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, callBack) => {
                                     parseAnimation_GLTF(gltfLoader, gltfData).then(_ => {
                                         if (callBack) callBack();
                                     });
+                                },
+                                (e)=>{
+                                    gltfLoader.loadingProgressInfo.textures= e
+                                    onProgress?.(gltfLoader.loadingProgressInfo)
                                 }
                             );
                         });
                     });
                 });
-            });
+            },onProgress);
         });
     });
 }
