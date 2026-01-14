@@ -1,4 +1,7 @@
 import * as RedGPU from "../../../../dist/index.js?t=1768301050717";
+import {
+    loadingProgressInfoHandler
+} from '../../../exampleHelper/createExample/loadingProgressInfoHandler.js?t=1768301050717'
 
 // 1. Create and append a canvas
 // 1. 캔버스를 생성하고 문서에 추가
@@ -47,7 +50,6 @@ RedGPU.init(
         document.body.appendChild(errorMessage);
     }
 );
-const {loadingProgressInfoHandler} = await import('../../../exampleHelper/createExample/loadingProgressInfoHandler.js?t=1768301050717');
 
 function loadGLTFGrid(view, urls, gridSize = 4, spacing = 3) {
     const {redGPUContext, scene} = view;

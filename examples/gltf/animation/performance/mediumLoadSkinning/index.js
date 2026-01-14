@@ -1,4 +1,7 @@
 import * as RedGPU from "../../../../../dist/index.js?t=1768301050717";
+import {
+    loadingProgressInfoHandler
+} from '../../../../exampleHelper/createExample/loadingProgressInfoHandler.js?t=1768301050717'
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -45,7 +48,6 @@ RedGPU.init(
 
 let num = 0
 let first = true
-const {loadingProgressInfoHandler} = await import('../../../../exampleHelper/createExample/loadingProgressInfoHandler.js?t=1768301050717');
 
 function loadGLTF(view, url) {
     const {redGPUContext, scene} = view;
