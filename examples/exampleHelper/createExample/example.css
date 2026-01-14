@@ -392,15 +392,17 @@ html, body {
 }
 
 .loading-ui-progress .bar {
-     height: 100%;
-     transition: width 0.4s cubic-bezier(0.25, 0.1, 0.25, 1); /* 부드러운 가속도 */
-     will-change: width;
- }
-.total-progress-section{
+    height: 100%;
+    transition: width 0.4s cubic-bezier(0.25, 0.1, 0.25, 1); /* 부드러운 가속도 */
+    will-change: width;
+}
 
-    padding-top : 6px;
+.total-progress-section {
+
+    padding-top: 6px;
     border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
+
 .total-progress-bar {
     box-shadow: 0 0 10px rgba(76, 175, 80, 0.5); /* 발광 효과 */
 }

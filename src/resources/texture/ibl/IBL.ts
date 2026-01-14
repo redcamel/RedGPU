@@ -2,7 +2,6 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import GPU_ADDRESS_MODE from "../../../gpuConst/GPU_ADDRESS_MODE";
 import GPU_FILTER_MODE from "../../../gpuConst/GPU_FILTER_MODE";
 import GPU_MIPMAP_FILTER_MODE from "../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
-import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import {keepLog} from "../../../utils";
 import createUUID from "../../../utils/uuid/createUUID";
 import Sampler from "../../sampler/Sampler";
@@ -60,7 +59,6 @@ class IBL {
             );
         }
     }
-
 
 
     get envCubeSize(): number {

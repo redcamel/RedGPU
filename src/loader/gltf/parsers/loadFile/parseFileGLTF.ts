@@ -13,9 +13,9 @@ const getData = (gltfData) => {
         meshes: JSON.parse(JSON.stringify(gltfData.meshes)),
     }
 }
-const parseFileGLTF = async (gltfLoader: GLTFLoader, callBack,onProgress?: (info: GLTFLoadingProgressInfo) => void) => {
+const parseFileGLTF = async (gltfLoader: GLTFLoader, callBack, onProgress?: (info: GLTFLoadingProgressInfo) => void) => {
     const loadFilePath = getAbsoluteURL(window.location.href, gltfLoader.filePath + gltfLoader.fileName);
-    const cachedProgress = ()=>{
+    const cachedProgress = () => {
         if (onProgress) {
             const buffer = cacheMap.get(loadFilePath);
             gltfLoader.loadingProgressInfo.model = {
@@ -66,13 +66,13 @@ const parseFileGLTF = async (gltfLoader: GLTFLoader, callBack,onProgress?: (info
                 lengthComputable: true,
                 percent: 100,
                 transferred: formatBytes(totalSize),
-                totalSize:formatBytes(totalSize)
+                totalSize: formatBytes(totalSize)
             }
             {
                 keepLog(gltfData)
                 const buffers = gltfData.buffers
                 const totalBuffers = buffers.length;
-                if(totalBuffers) {
+                if (totalBuffers) {
                     let loadedBuffers = 0;
                     gltfLoader.loadingProgressInfo.buffers = {
                         loaded: loadedBuffers,

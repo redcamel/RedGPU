@@ -38,7 +38,7 @@ const renderTestPane = async (targetView) => {
     const pane = new Pane();
     const {
         createFieldOfView,
-        		createIblHelper,
+        createIblHelper,
         setDebugButtons
     } = await import( "../../../exampleHelper/createExample/panes/index.js?t=1768301050717" );
     setDebugButtons(RedGPU, targetView.redGPUContext);

@@ -48,7 +48,7 @@ const loadGLTF = async (view, url) => {
             const mesh = result.resultMesh
             scene.addChild(mesh)
             view.camera.fitMeshToScreenCenter(mesh, view)
-			view.camera.distance *= 0.5
+            view.camera.distance *= 0.5
         },
         loadingProgressInfoHandler
     );

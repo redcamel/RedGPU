@@ -1,7 +1,6 @@
 import RedGPUContext from "../context/RedGPUContext";
 import BitmapTexture from "../resources/texture/BitmapTexture";
 import CubeTexture from "../resources/texture/CubeTexture";
-import {keepLog} from "../utils";
 
 export class TextureLoaderData {
     src: any;
@@ -85,6 +84,7 @@ export default class TextureLoader {
         this.textures.push(targetTexture);
         this.#checkProgress();
     }
+
     #checkProgress() {
         const total = this.#srcInfoList.length;
         const loaded = this.#loaded;
@@ -94,6 +94,7 @@ export default class TextureLoader {
             percent: Math.min(100, parseFloat(((loaded / total) * 100).toFixed(2)))
         });
     }
+
     #checkCompletion() {
         this.#loaded++;
         this.#checkProgress();

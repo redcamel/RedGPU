@@ -29,8 +29,10 @@ export type ProgressCallback = (event: {
 const getArrayBufferFromSrc = async (
     src: string,
     onLoad: LoaderCallback,
-    onError: ErrorCallback = () => {},
-    onProgress: ProgressCallback = () => {}
+    onError: ErrorCallback = () => {
+    },
+    onProgress: ProgressCallback = () => {
+    }
 ): Promise<void> => {
     try {
         const response = await fetch(src);
@@ -57,7 +59,7 @@ const getArrayBufferFromSrc = async (
 
         // 스트림 읽기 루프
         while (true) {
-            const { done, value } = await reader.read();
+            const {done, value} = await reader.read();
 
             if (done) break;
 

@@ -58,7 +58,7 @@ function loadGLTF(view, url) {
             }
             num++
             pane?.refresh()
-			first=false
+            first = false
         },
         (e) => first ? loadingProgressInfoHandler(e) : null
     );

@@ -1,9 +1,8 @@
 import getAbsoluteURL from "../../../utils/file/getAbsoluteURL";
 import {GLTF} from "../GLTF";
 import GLTFLoader, {GLTFLoadingProgressInfo} from "../GLTFLoader";
-import {keepLog} from "../../../utils";
 
-const checkProgress = (gltfLoader:GLTFLoader,gltfData: GLTF,loadedBuffers:number) => {
+const checkProgress = (gltfLoader: GLTFLoader, gltfData: GLTF, loadedBuffers: number) => {
     const buffers = gltfData.buffers
     const totalBuffers = buffers.length;
 
@@ -21,7 +20,7 @@ const getGLTFBuffersResources = (gltfLoader: GLTFLoader, gltfData: GLTF, callbac
     const buffers = gltfData.buffers
     const totalBuffers = buffers.length;
     let loadedBuffers = 0;
-    checkProgress(gltfLoader,gltfData,loadedBuffers)
+    checkProgress(gltfLoader, gltfData, loadedBuffers)
 
 
     buffers.forEach((buffer, bufferIndex) => {
@@ -55,7 +54,7 @@ const getGLTFBuffersResources = (gltfLoader: GLTFLoader, gltfData: GLTF, callbac
 
         function checkLoadingStatus() {
 
-            checkProgress(gltfLoader,gltfData,loadedBuffers)
+            checkProgress(gltfLoader, gltfData, loadedBuffers)
             onProgress?.(gltfLoader.loadingProgressInfo);
             if (loadedBuffers === totalBuffers) {
                 // console.log(`redGLTFLoader['parsingResult']['uris']:`, uris);

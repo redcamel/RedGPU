@@ -54,7 +54,6 @@ class HDRLoader {
     }
 
 
-
     /**
      * HDR 파일 데이터를 파싱합니다
      */

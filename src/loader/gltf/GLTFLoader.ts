@@ -35,7 +35,7 @@ type GLTFParsingResult = {
     animations: GLTFParsedSingleClip[]
 }
 export type GLTFLoadingProgressInfo = {
-    url:string ,
+    url: string,
     model: {
         loaded: number;
         total: number;
@@ -74,13 +74,8 @@ class GLTFLoader {
     readonly #onError
     readonly #onProgress
     #loadingProgressInfo: GLTFLoadingProgressInfo = {
-        url:'',
+        url: '',
         model: {loaded: 0, total: 0, lengthComputable: true, percent: 0, transferred: '0', totalSize: '0'},
-    }
-
-
-    get loadingProgressInfo(): GLTFLoadingProgressInfo {
-        return this.#loadingProgressInfo;
     }
 
     constructor(redGPUContext: RedGPUContext, url: string, onLoad, onProgress, onError) {
@@ -107,8 +102,12 @@ class GLTFLoader {
         this.resultMesh = new Mesh(this.#redGPUContext);
         this.resultMesh.gltfLoaderInfo = this
         this.resultMesh.animationInfo.animationsList = this.parsingResult.animations
-        this.#loadingProgressInfo.url = getFileName(url) ;
+        this.#loadingProgressInfo.url = getFileName(url);
         this.#loadFile();
+    }
+
+    get loadingProgressInfo(): GLTFLoadingProgressInfo {
+        return this.#loadingProgressInfo;
     }
 
     get redGPUContext(): RedGPUContext {

@@ -140,7 +140,7 @@ const loadingProgressInfoHandler = (info) => {
         // 실제 데이터가 있는 항목들만 평균 계산
         const activeSections = [totals.model.total, totals.buffers.total, totals.textures.total].filter(t => t > 0).length;
         const avgTotal = activeSections > 0
-            ? (( (totals.model.total > 0 ? mRatio : 0) + (totals.buffers.total > 0 ? bRatio : 0) + (totals.textures.total > 0 ? tRatio : 0) ) / activeSections) * 100
+            ? (((totals.model.total > 0 ? mRatio : 0) + (totals.buffers.total > 0 ? bRatio : 0) + (totals.textures.total > 0 ? tRatio : 0)) / activeSections) * 100
             : 100;
 
         const totalBar = document.querySelector('.total-progress-bar');
@@ -164,10 +164,10 @@ const loadingProgressInfoHandler = (info) => {
                     }
                     loadingStates.clear();
                     removeTimeout = null;
-                }, { once: true });
+                }, {once: true});
             }
         }, 1000);
     }
 };
 
-export { loadingProgressInfoHandler };
+export {loadingProgressInfoHandler};

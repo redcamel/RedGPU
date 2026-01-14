@@ -56,8 +56,8 @@ declare class GLTFLoader {
     resultMesh: Mesh;
     parsingOption: any;
     activeAnimations: any[];
-    get loadingProgressInfo(): GLTFLoadingProgressInfo;
     constructor(redGPUContext: RedGPUContext, url: string, onLoad: any, onProgress: any, onError: any);
+    get loadingProgressInfo(): GLTFLoadingProgressInfo;
     get redGPUContext(): RedGPUContext;
     get filePath(): string;
     get gltfData(): GLTF;
