@@ -8,6 +8,7 @@ import ToneACESFilmicNarkowicz from "./ACESFilmicNarkowicz/ToneACESFilmicNarkowi
 import ToneACESFilmicHill from "./ACESFilmicHill/ToneACESFilmicHill";
 import {ASinglePassPostEffectResult} from "../postEffect/core/ASinglePassPostEffect";
 import validatePositiveNumberRange from "../runtimeChecker/validateFunc/validatePositiveNumberRange";
+import validateNumberRange from "../runtimeChecker/validateFunc/validateNumberRange";
 
 /**
  * 톤 매핑, 노출, 대비, 밝기를 통합 관리하는 클래스입니다.
@@ -60,7 +61,7 @@ class ToneMappingManager {
     }
 
     set contrast(value: number) {
-        validatePositiveNumberRange(value, 0, 1)
+        validatePositiveNumberRange(value, 0, 2)
         this.#contrast = value;
         if (this.#toneMapping) this.#toneMapping.contrast = value;
     }
@@ -70,7 +71,7 @@ class ToneMappingManager {
     }
 
     set brightness(value: number) {
-        validatePositiveNumberRange(value, -1, 1)
+        validateNumberRange(value, -1, 1)
         this.#brightness = value;
         if (this.#toneMapping) this.#toneMapping.brightness = value;
     }
