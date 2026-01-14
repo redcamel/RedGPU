@@ -1,4 +1,4 @@
-import {setSingleSceneTest} from "../index.js?t=1768301050717";
+import {setSingleSceneTest} from "../index.js?t=1768401228425";
 
 const setSceneListTest = (pane, sceneList, shouldExpand = false,) => {
     const title = sceneList.length === 1 ? sceneList[0].name : 'sceneList';
