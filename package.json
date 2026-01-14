@@ -1,7 +1,7 @@
 {
   "name": "redgpu",
-  "version": "3.8.1-Alpha",
-  "description": "RedGPU Helper",
+  "version": "3.9.0-Alpha",
+  "description": "RedGPU ",
   "scripts": {
     "build": "rollup -c",
     "rollup watch": "rollup -wc",
