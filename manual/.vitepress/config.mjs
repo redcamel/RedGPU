@@ -4,8 +4,9 @@ export default defineConfig({
   title: 'RedGPU',
   description: 'RedGPU WebGPU 기반 3D 그래픽 엔진',
 
-  base: '/RedGPU/manual/',
+  base: '/RedGPU/manual/', // 이것만 설정
   ignoreDeadLinks: true,
+
 
   locales: {
     root: {
@@ -17,13 +18,11 @@ export default defineConfig({
 
   themeConfig: {
     nav: [
-      // 상대 경로로 두 단계 위로 이동
-      { text: 'RedGPU 홈', link: '../../', target: '_self' },
+      { text: 'RedGPU 홈', link: '../', target: '_self' },
+      { text: 'Examples', link: '../examples/', target: '_self' },
       { text: '매뉴얼 홈', link: '/' },
       { text: '시작하기', link: '/ko/introduction/getting-started' },
       { text: 'API 문서', link: '/api/README' },
-      // Examples도 상대 경로로
-      { text: 'Examples', link: '../../examples/', target: '_self' }
     ],
 
     sidebar: {

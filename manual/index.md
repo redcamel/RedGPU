@@ -8,14 +8,14 @@ hero:
   actions:
     - theme: brand
       text: 시작하기
-      link: /ko/introduction/getting-started
+      link: /ko/introduction/getting-started 
     - theme: alt
       text: GitHub
       link: https://github.com/redcamel/RedGPU
 
 features:
   - icon: 🚀
-    title: 고성능
+    title: 고성능 ㅅㄷㄴㅅdfdf sdfsdf
     details: WebGPU를 활용한 최신 GPU 렌더링 기술
   - icon: 🎨
     title: 풍부한 기능
