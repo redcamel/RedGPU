@@ -1,0 +1,131 @@
+/* .vitepress/theme/custom.css */
+
+/* 버전 태그 기본 스타일 */
+.version-tag {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 0 8px;
+
+    /* 텍스트 스타일 */
+    font-size: 10px;
+    font-weight: 700;
+    font-family: var(--vp-font-family-mono); /* 고정폭 글꼴로 코드 느낌 부여 */
+    line-height: 18px;
+
+    /* 위치 조정 (타이틀과 수평 맞춤) */
+    vertical-align: middle;
+    transform: translateY(-1px);
+
+    /* 색상 및 테두리 (라이트 모드 기준) */
+    color: var(--vp-c-brand-1);
+    background-color: var(--vp-c-brand-soft);
+    border: 1px solid var(--vp-c-brand-soft);
+    border-radius: 6px;
+
+    /* 부드러운 전환 효과 */
+    transition: all 0.25s;
+}
+
+/* 마우스 호버 시 효과 (선택 사항) */
+.version-tag:hover {
+    background-color: var(--vp-c-brand-2);
+    color: var(--vp-c-white);
+}
+
+/* 다크 모드 전용 스타일 조정 */
+.dark .version-tag {
+    color: var(--vp-c-brand-light);
+    background-color: rgba(100, 108, 255, 0.15); /* 브랜드색 기반 투명 배경 */
+    border-color: rgba(100, 108, 255, 0.3);
+}
+
+/* 내비게이션 바 타이틀 링크의 언더라인 방지 */
+.VPNavBarTitle a:hover {
+    text-decoration: none !important;
+}
+
+/* --- Footer Custom Styling --- */
+
+/* 푸터 전체 영역 */
+.vp-footer {
+    padding: 48px 24px !important;
+    background-color: var(--vp-c-bg-alt); /* 본문보다 살짝 어두운 배경 */
+    border-top: 1px solid var(--vp-c-gutter);
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+}
+
+/* RedGPU API 타이틀 */
+.footer-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--vp-c-text-1);
+    margin-bottom: 16px;
+    letter-spacing: -0.02em;
+}
+
+/* 링크 그룹 컨테이너 */
+.footer-links {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+/* .vitepress/theme/custom.css */
+
+/* 푸터 영역 전체 정렬 */
+.vp-footer {
+    border-top: 1px solid var(--vp-c-gutter) !important;
+    padding: 40px 24px !important;
+    background-color: var(--vp-c-bg-alt) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+}
+
+/* RedGPU API 타이틀 */
+.footer-title {
+    font-weight: 700;
+    font-size: 1.2rem;
+    margin-bottom: 12px;
+    color: var(--vp-c-text-1);
+    letter-spacing: -0.01em;
+}
+
+/* 링크 그룹 */
+.footer-links {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap; /* 모바일 대응 */
+}
+
+/* 개별 링크 스타일 */
+.footer-links a {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--vp-c-brand-1);
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+
+.footer-links a:hover {
+    opacity: 0.7;
+    text-decoration: underline;
+}
+
+/* Copyright 영역 */
+.vp-footer .copyright {
+    font-size: 0.85rem;
+    color: var(--vp-c-text-2);
+}
+
+.vp-footer .copyright a {
+    color: var(--vp-c-text-1);
+    font-weight: 600;
+    text-decoration: none;
+}

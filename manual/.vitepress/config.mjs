@@ -117,9 +117,9 @@ export default defineConfig({
         },
         footer: {
             message: `
-            <div class="footer-content">
-              <div style="font-weight: bold; font-size: 1.1rem; margin-bottom: 10px;">RedGPU API</div>
-              <div style="display: flex; gap: 15px; justify-content: center; margin-bottom: 10px;">
+            <div class="footer-container">
+              <div class="footer-title">RedGPU API</div>
+              <div class="footer-links">
                 <a href="https://github.com/redcamel/RedGPU/releases" target="_blank">Latest Release</a>
                 <a href="https://redcamel.github.io/RedGPU/examples/" target="_blank">Examples</a>
                 <a href="https://github.com/redcamel/RedGPU/issues" target="_blank">Report Issue</a>
