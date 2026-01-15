@@ -129,3 +129,29 @@
     font-weight: 600;
     text-decoration: none;
 }
+
+/* Experimental 전용 뱃지 */
+.experimental-tag {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 0 10px;
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 20px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    vertical-align: middle;
+    letter-spacing: 0.05em;
+
+    /* 금색 계열: 경고와 신비로움의 중간 느낌 */
+    color: #856404;
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.dark .experimental-tag {
+    color: #ffda6a;
+    background-color: rgba(255, 193, 7, 0.15);
+    border-color: rgba(255, 193, 7, 0.4);
+}

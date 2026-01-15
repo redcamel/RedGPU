@@ -5,6 +5,8 @@ export default defineConfig({
     title: 'RedGPU',
     description: 'RedGPU WebGPU 기반 3D 그래픽 엔진',
 
+
+
     base: '/RedGPU/manual/',
     ignoreDeadLinks: true,
     cleanUrls: true,
@@ -25,6 +27,7 @@ export default defineConfig({
 
                 return defaultRender(tokens, idx, options, env, self);
             };
+
         }
     },
 
@@ -64,13 +67,30 @@ export default defineConfig({
         }
     },
 
+    lastUpdated: true,
+
     themeConfig: {
+        logo:{
+            light: '/logo-light.svg',
+            dark: '/logo-dark.svg',
+        },
+        logoLink: 'https://redcamel.github.io/RedGPU/',
+        lastUpdated: {
+            text: '마지막 업데이트',
+            formatOptions: {
+                dateStyle: 'full',
+                timeStyle: 'medium'
+            }
+        },
+        socialLinks: [
+            { icon: 'github', link: 'https://github.com/redcamel/RedGPU' },
+            { icon: 'x', link: 'https://x.com/redcamel15' }
+        ],
         nav: [
             {text: 'Manual home', link: '/'},
             {text: '시작하기', link: '/ko/introduction/getting-started'},
             {text: 'API', link: '/api/README'},
             {text: 'Examples', link: 'https://redcamel.github.io/RedGPU/examples/', target: '_self'},
-
         ],
 
         sidebar: {
@@ -115,18 +135,5 @@ export default defineConfig({
                 }
             }
         },
-        footer: {
-            message: `
-            <div class="footer-container">
-              <div class="footer-title">RedGPU API</div>
-              <div class="footer-links">
-                <a href="https://github.com/redcamel/RedGPU/releases" target="_blank">Latest Release</a>
-                <a href="https://redcamel.github.io/RedGPU/examples/" target="_blank">Examples</a>
-                <a href="https://github.com/redcamel/RedGPU/issues" target="_blank">Report Issue</a>
-                <a href="https://github.com/redcamel/RedGPU" target="_blank">GitHub</a>
-              </div>
-            </div>`,
-            copyright: 'Copyright © 2019–present. This project is maintained by <a href="https://github.com/redcamel" target="_blank">redcamel</a>'
-        }
     }
 })
