@@ -4,8 +4,15 @@ export default defineConfig({
     title: 'RedGPU',
     description: 'RedGPU WebGPU 기반 3D 그래픽 엔진',
 
-    base: '/RedGPU/manual/', // 이것만 설정
+    base: '/RedGPU/manual/',
     ignoreDeadLinks: true,
+    cleanUrls: true,
+
+    // Markdown 설정에 플러그인 추가
+    markdown: {
+        html: true,
+    },
+
 
 
     locales: {
@@ -21,9 +28,7 @@ export default defineConfig({
             {text: 'Manual home', link: '/'},
             {text: 'API', link: '/api/README'},
             {text: 'Examples', link: 'https://redcamel.github.io/RedGPU/examples/', target: '_self'},
-
             {text: '시작하기', link: '/ko/introduction/getting-started'},
-
         ],
 
         sidebar: {
@@ -54,7 +59,6 @@ export default defineConfig({
                 }
             ]
         },
-
 
         footer: {
             message: 'Released under the ISC License.',

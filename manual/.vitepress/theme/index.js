@@ -1,6 +1,6 @@
 import DefaultTheme from 'vitepress/theme'
 import './custom.css'
-
+import ExampleFrame from './components/ExampleFrame.vue'
 export default {
   extends: DefaultTheme,
   enhanceApp({ app, router }) {
@@ -14,5 +14,7 @@ export default {
         }
       }, true)
     }
+    app.component('ExampleFrame', ExampleFrame)
   }
 }
+

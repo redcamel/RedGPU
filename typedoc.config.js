@@ -7,6 +7,6 @@ module.exports = {
 	includeVersion: true,
 	readme: "none",
 	// VitePress compatibility options
-	sanitizeComments: true,
-	preserveAnchorCasing: true,
+	hideBreadcrumbs: true,
+	hidePageTitle: true,
 };

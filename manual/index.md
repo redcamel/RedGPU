@@ -15,7 +15,7 @@ hero:
 
 features:
   - icon: 🚀
-    title: 고성능 ㅅㄷㄴㅅdfdf sdfsdfvsdfsdf sdfsdf
+    title: 고성능 ㅅㄷㄴㅅdfdf sdfsdfvsdfsdf sdfsdf sdfsdf
     details: WebGPU를 활용한 최신 GPU 렌더링 기술
   - icon: 🎨
     title: 풍부한 기능
