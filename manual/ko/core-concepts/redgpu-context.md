@@ -12,20 +12,23 @@ RedGPU Context는 WebGPU 디바이스, 캔버스, 그리고 렌더링 파이프�
 import RedGPU from 'redgpu';
 
 const redGPU = await RedGPU({
-  canvas: document.getElementById('canvas'),
-  powerPreference: 'high-performance'
+    canvas: document.getElementById('canvas'),
+    powerPreference: 'high-performance'
 });
 ```
 
 ## 주요 속성
 
 ### canvas
+
 렌더링 대상이 되는 HTML Canvas 요소입니다.
 
 ### device
+
 WebGPU 디바이스 객체로, GPU와의 통신을 담당합니다.
 
 ### context
+
 WebGPU 컨텍스트로, 캔버스와 GPU 간의 연결을 관리합니다.
 
 ## 옵션
@@ -40,9 +43,9 @@ Context 생성 시 다양한 옵션을 설정할 수 있습니다:
 
 ```javascript
 const redGPU = await RedGPU({
-  canvas: document.getElementById('canvas'),
-  powerPreference: 'high-performance',
-  antialias: true
+    canvas: document.getElementById('canvas'),
+    powerPreference: 'high-performance',
+    antialias: true
 });
 
 console.log('WebGPU Device:', redGPU.device);

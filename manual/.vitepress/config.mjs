@@ -6,7 +6,6 @@ export default defineConfig({
     description: 'RedGPU WebGPU 기반 3D 그래픽 엔진',
 
 
-
     base: '/RedGPU/manual/',
     ignoreDeadLinks: true,
     cleanUrls: true,
@@ -70,7 +69,7 @@ export default defineConfig({
     lastUpdated: true,
 
     themeConfig: {
-        logo:{
+        logo: {
             light: '/logo-light.svg',
             dark: '/logo-dark.svg',
         },
@@ -83,8 +82,8 @@ export default defineConfig({
             }
         },
         socialLinks: [
-            { icon: 'github', link: 'https://github.com/redcamel/RedGPU' },
-            { icon: 'x', link: 'https://x.com/redcamel15' }
+            {icon: 'github', link: 'https://github.com/redcamel/RedGPU'},
+            {icon: 'x', link: 'https://x.com/redcamel15'}
         ],
         nav: [
             {text: 'Manual home', link: '/'},

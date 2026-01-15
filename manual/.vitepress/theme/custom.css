@@ -1,5 +1,38 @@
 /* .vitepress/theme/custom.css */
 
+:root {
+    /* 본문 콘텐츠의 최대 너비 제한 해제 (기본값은 약 688px~960px) */
+    --vp-content-width: 100%;
+
+    /* 본문 양옆 여백 조정 (필요에 따라 조절) */
+    --vp-layout-max-width: 100%;
+}
+
+/* 실제 텍스트가 담기는 컨테이너의 너비 강제 확장 */
+.VPDoc .container {
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 32px !important; /* 양옆 최소 여백만 남김 */
+}
+
+/* 본문 영역 너비 확장 */
+.VPDoc .content {
+    max-width: 100% !important;
+    width: 100% !important;
+}
+
+/* 오른쪽 'On this page' 사이드바가 있어도 넓게 쓰기 위해 */
+@media (min-width: 1280px) {
+    .VPDoc .container {
+        display: flex;
+        justify-content: flex-start;
+    }
+
+    .VPDoc .content-container {
+        max-width: 100% !important; /* 본문 컨테이너 제한 해제 */
+    }
+}
+
 /* 버전 태그 기본 스타일 */
 .version-tag {
     display: inline-block;
