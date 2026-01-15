@@ -36,7 +36,8 @@
     "typedoc": "^0.28.13",
     "typedoc-plugin-markdown": "^4.9.0",
     "typescript": "^5.8.3",
-    "vitepress": "^1.6.4"
+    "vitepress": "^1.6.4",
+    "vitepress-sidebar": "^1.33.1"
   },
   "dependencies": {
     "wgsl_reflect": "1.2.1"

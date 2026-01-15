@@ -27,7 +27,7 @@ const tempVec3 = vec3.create();
  * followController.pan = 45;
  * followController.tilt = 30;
  * ```
- * <ExampleFrame  src="/RedGPU/examples/3d/controller/followController/"/>
+ * <iframe src="/RedGPU/examples/3d/controller/followController/"></iframe>
  */
 class FollowController extends AController {
     /** 현재 거리값 (카메라에서 타겟까지의 거리) */

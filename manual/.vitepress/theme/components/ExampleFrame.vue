@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { computed } from 'vue'
 
 const props = defineProps({
   src: {
@@ -12,37 +12,26 @@ const props = defineProps({
   }
 })
 
-const isMounted = ref(false)
-const originUrl = ref('')
+// 호스트 주소 설정
+const HOST = 'https://redcamel.github.io/'
 
-onMounted(() => {
-  isMounted.value = true
-  // 브라우저에서 현재의 도메인(origin)을 가져옵니다.
-  originUrl.value = window.location.origin
-})
-
-const computedSrc = computed(() => {
-  // 1. 아직 마운트되지 않았으면 빈 값 반환
-  if (!isMounted.value) return ''
-
-  // 2. 절대 경로(http/https)인 경우: 그대로 반환
-  if (props.src.startsWith('http://') || props.src.startsWith('https://')) {
+// src가 외부 링크인지 확인하고, 상대 경로라면 호스트를 붙임
+const resolvedSrc = computed(() => {
+  // 이미 전체 URL(http/https)이 포함되어 있다면 그대로 반환
+  if (/^(http|https):\/\//.test(props.src)) {
     return props.src
   }
 
-  // 3. 상대 경로인 경우: originUrl과 결합
-  // src가 /로 시작하지 않으면 중간에 /를 넣어줍니다.
-  const path = props.src.startsWith('/') ? props.src : `/${props.src}`
-  return `${originUrl.value}${path}`
+  // 상대 경로일 경우: 앞부분의 '/'를 제거하고 호스트와 결합
+  const cleanSrc = props.src.startsWith('/') ? props.src.slice(1) : props.src
+  return `${HOST}${cleanSrc}`
 })
 </script>
 
 <template>
-  <div v-if="isMounted" class="example-frame">
-    <div class="url-debug">{{ computedSrc }}</div>
-
+  <div class="example-frame">
     <iframe
-        :src="computedSrc"
+        :src="resolvedSrc"
         :style="{ height: props.height }"
         width="100%"
         frameborder="0"
@@ -57,15 +46,7 @@ const computedSrc = computed(() => {
   border: 1px solid var(--vp-c-divider);
   border-radius: 8px;
   overflow: hidden;
-}
-
-.url-debug {
-  padding: 4px 12px;
-  background-color: var(--vp-c-bg-soft);
-  font-size: 11px;
-  color: var(--vp-c-text-3);
-  border-bottom: 1px solid var(--vp-c-divider);
-  word-break: break-all;
+  background-color: var(--vp-c-bg-soft); /* 로딩 전 배경색 대비 */
 }
 
 .example-frame iframe {

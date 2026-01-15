@@ -7,6 +7,6 @@ module.exports = {
 	includeVersion: true,
 	readme: "none",
 	// VitePress compatibility options
-	hideBreadcrumbs: true,
-	hidePageTitle: true,
+	// hideBreadcrumbs: true,
+	// hidePageTitle: true,
 };

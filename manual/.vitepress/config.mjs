@@ -1,4 +1,5 @@
 import {defineConfig} from 'vitepress'
+import {generateSidebar} from 'vitepress-sidebar';
 
 export default defineConfig({
     title: 'RedGPU',
@@ -8,12 +9,52 @@ export default defineConfig({
     ignoreDeadLinks: true,
     cleanUrls: true,
 
-    // Markdown 설정에 플러그인 추가
     markdown: {
-        html: true,
+        config: (md) => {
+            const defaultRender = md.renderer.rules.html_block || ((tokens, idx) => tokens[idx].content);
+
+            md.renderer.rules.html_block = (tokens, idx, options, env, self) => {
+                const content = tokens[idx].content;
+
+                // <iframe> 태그를 찾아서 <ExampleFrame>으로 교체
+                if (content.trim().startsWith('<iframe')) {
+                    return content
+                        .replace(/<iframe/g, '<ExampleFrame')
+                        .replace(/<\/iframe>/g, '</ExampleFrame>');
+                }
+
+                return defaultRender(tokens, idx, options, env, self);
+            };
+        }
     },
 
-
+    sidebar: generateSidebar([
+        {
+            // 한국어 매뉴얼 설정
+            documentRootPath: 'manual',
+            scanStartPath: 'ko',
+            resolvePath: '/ko/',
+            useTitleFromFileHeading: true,
+            useFolderTitleFromIndexFile: true,
+            hyphenToSpace: true,
+        },
+        {
+            // API 문서 설정 (가장 중요한 부분)
+            documentRootPath: 'manual',
+            scanStartPath: 'api',
+            resolvePath: '/api/',
+            // 폴더명을 제목으로 쓸 때 첫 글자 대문자화
+            capitalizeFirst: true,
+            // index.md가 있으면 폴더 제목으로 사용
+            useFolderTitleFromIndexFile: true,
+            // 모든 하위 폴더를 재귀적으로 스캔 (기본값 true)
+            recursive: true,
+            // 사이드바를 기본적으로 접어둠
+            collapsed: true,
+            // 'index'라는 글자를 'Overview'로 치환하거나 정렬 제어 가능
+            sortMenusByName: true,
+        }
+    ]),
 
     locales: {
         root: {
@@ -26,9 +67,10 @@ export default defineConfig({
     themeConfig: {
         nav: [
             {text: 'Manual home', link: '/'},
+            {text: '시작하기', link: '/ko/introduction/getting-started'},
             {text: 'API', link: '/api/README'},
             {text: 'Examples', link: 'https://redcamel.github.io/RedGPU/examples/', target: '_self'},
-            {text: '시작하기', link: '/ko/introduction/getting-started'},
+
         ],
 
         sidebar: {
@@ -46,23 +88,45 @@ export default defineConfig({
                     ]
                 }
             ],
-            '/api/': [
-                {
-                    text: 'API Reference',
-                    items: [
-                        {text: '개요', link: '/api/README'},
-                        {text: 'Classes', link: '/api/classes/README'},
-                        {text: 'Functions', link: '/api/functions/README'},
-                        {text: 'Type Aliases', link: '/api/type-aliases/README'},
-                        {text: 'Variables', link: '/api/variables/README'}
-                    ]
-                }
-            ]
         },
-
+        search: {
+            provider: 'local',
+            options: {
+                locales: {
+                    root: {
+                        translations: {
+                            button: {
+                                buttonText: 'Search',
+                                buttonAriaLabel: 'Search'
+                            },
+                            modal: {
+                                displayDetails: 'Display detailed list',
+                                resetButtonTitle: 'Reset query',
+                                backButtonTitle: 'Go back',
+                                noResultsText: 'No results for',
+                                footer: {
+                                    selectText: 'to select',
+                                    navigateText: 'to navigate',
+                                    closeText: 'to close'
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         footer: {
-            message: 'Released under the ISC License.',
-            copyright: 'Copyright © RedGPU'
+            message: `
+            <div class="footer-content">
+              <div style="font-weight: bold; font-size: 1.1rem; margin-bottom: 10px;">RedGPU API</div>
+              <div style="display: flex; gap: 15px; justify-content: center; margin-bottom: 10px;">
+                <a href="https://github.com/redcamel/RedGPU/releases" target="_blank">Latest Release</a>
+                <a href="https://redcamel.github.io/RedGPU/examples/" target="_blank">Examples</a>
+                <a href="https://github.com/redcamel/RedGPU/issues" target="_blank">Report Issue</a>
+                <a href="https://github.com/redcamel/RedGPU" target="_blank">GitHub</a>
+              </div>
+            </div>`,
+            copyright: 'Copyright © 2019–present. This project is maintained by <a href="https://github.com/redcamel" target="_blank">redcamel</a>'
         }
     }
 })
