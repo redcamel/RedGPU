@@ -1,15 +1,23 @@
 {
   "name": "redgpu",
   "version": "3.9.0-Alpha",
-  "description": "RedGPU ",
+  "description": "RedGPU",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/redcamel/RedGPU"
+  },
+  "homepage": "https://redcamel.github.io/RedGPU/",
+  "bugs": {
+    "url": "https://github.com/redcamel/RedGPU/issues"
+  },
   "scripts": {
     "build": "rollup -c",
     "rollup watch": "rollup -wc",
     "build:doc": "npx typedoc --options typedoc.config.js",
-    "vitePress:dev": "vitepress dev manual && node buildScripts/deploy-manual.js",
+    "vitePress:dev": "vitepress dev manual",
     "vitePress:build": "vitepress build manual && node buildScripts/deploy-manual.js"
   },
-  "author": "",
+  "author": "redcamel",
   "license": "ISC",
   "devDependencies": {
     "@rollup/plugin-json": "^6.1.0",

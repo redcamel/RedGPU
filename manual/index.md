@@ -3,7 +3,7 @@ layout: home
 
 hero:
   name: RedGPU
-  text: WebGPU 기반 3D 그래픽 엔진
+  text: WebGPU 기반 3D 그래픽 엔진 
   tagline: 강력하고 효율적인 WebGPU 렌더링 엔진
   actions:
     - theme: brand
@@ -15,7 +15,7 @@ hero:
 
 features:
   - icon: 🚀
-    title: 고성능 ㅅㄷㄴㅅdfdf sdfsdf
+    title: 고성능 ㅅㄷㄴㅅdfdf sdfsdfvsdfsdf sdfsdf
     details: WebGPU를 활용한 최신 GPU 렌더링 기술
   - icon: 🎨
     title: 풍부한 기능
