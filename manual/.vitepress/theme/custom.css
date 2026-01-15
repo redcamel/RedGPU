@@ -33,6 +33,204 @@
     }
 }
 
+/* **************************************************************************** */
+.vp-doc h2 {
+    /* 기존보다 한 단계 연한 텍스트 컬러 (VitePress 기본 변수 활용) */
+    color: var(--vp-c-text-3);
+
+    /* 폰트 두께를 살짝 조절하면 더 부드러워 보입니다 */
+    font-weight: 600;
+
+    /* 제목 아래 밑줄(Border)도 연하게 조절 */
+    border-bottom: 1px solid var(--vp-c-gutter);
+
+    /* 여백 조정 (선택 사항) */
+    padding-bottom: 8px;
+    margin-top: 2.5rem;
+}
+
+/* 다크 모드에서 너무 연해 보인다면 미세 조정 */
+.dark .vp-doc h2 {
+    color: var(--vp-c-text-3); /* 혹은 좀 더 밝게 하고 싶다면 색상 직접 지정 */
+}
+/* 1. 컨테이너: 3단 배열 유지 */
+.vp-doc ul:has(> li > a) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 0;
+    list-style: none;
+    margin: 1.5rem 0;
+}
+
+/* 2. 각 항목: 박스 스타일 및 3단 너비 유지 */
+.vp-doc ul:has(> li > a) > li {
+    flex: 0 1 calc(33.333% - 12px); /* 다시 3단으로 고정 */
+    min-width: 220px;               /* 화살표 공간을 위해 최소 너비 살짝 확보 */
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 1px solid var(--vp-c-divider);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    background-color: var(--vp-c-bg-soft);
+}
+
+/* 3. 호버 효과: 원본 느낌 유지하며 박스만 강조 */
+.vp-doc ul:has(> li > a) > li:hover {
+    border-color: var(--vp-c-brand-1);
+
+}
+
+/* 4. 내부 링크: 텍스트와 화살표 양끝 배치 */
+.vp-doc ul:has(> li > a) > li > a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* 이름은 왼쪽, >는 오른쪽 */
+    padding: 10px 14px;
+    text-decoration: none;
+    color: var(--vp-c-text-1);
+    font-size: 0.9rem;
+    font-weight: 500;
+    width: 100%;
+}
+
+/* 5. 화살표(>) 표시 */
+.vp-doc ul:has(> li > a) > li > a::after {
+    content: "\203A"; /* 홑화살표 (›) 가 좀 더 깔끔합니다 */
+    font-size: 1.2rem;
+    color: var(--vp-c-text-3);
+    margin-left: 8px;
+    transition: transform 0.2s ease;
+}
+
+/* 호버 시 화살표만 살짝 움직임 */
+.vp-doc ul:has(> li > a) > li:hover a::after {
+    transform: translateX(3px);
+    color: var(--vp-c-brand-1);
+}
+
+/* 모바일/태블릿 대응: 배열 유지 */
+@media (max-width: 960px) {
+    .vp-doc ul:has(> li > a) > li {
+        flex: 0 1 calc(50% - 12px); /* 2단 */
+    }
+}
+@media (max-width: 480px) {
+    .vp-doc ul:has(> li > a) > li {
+        flex: 1 1 100%; /* 1단 */
+    }
+}
+/* **************************************************************************** */
+
+/* 1. 컨테이너 설정 */
+.vp-doc ul:has(> li > a) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 0;
+    list-style: none;
+    margin: 1.5rem 0;
+}
+
+/* 2. 개별 항목 (데스크탑: 3단) */
+.vp-doc ul:has(> li > a) > li {
+    flex: 0 1 calc(33.333% - 12px);
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 1px solid var(--vp-c-divider);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    overflow: hidden; /* 내부 요소가 밖으로 나가는 것 방지 */
+}
+
+/* 3. 내부 링크 레이아웃 - flex 설정 */
+.vp-doc ul:has(> li > a) > li > a {
+    display: flex;
+    align-items: center;
+    padding: 10px 14px;
+    text-decoration: none;
+    color: var(--vp-c-text-1);
+    font-size: 0.9rem;
+    font-weight: 500;
+    width: 100%;
+    min-width: 0; /* 중요: 자식 요소의 ellipsis 작동을 위해 필요 */
+}
+
+/* 4. 타입 아이콘 배지 (고정) */
+.vp-doc ul:has(> li > a) > li > a::before {
+    flex-shrink: 0; /* 공간이 부족해도 절대 줄어들지 않음 */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    font-size: 10px;
+    font-weight: 800;
+    border-radius: 4px;
+    content: "O";
+    background-color: var(--vp-c-bg-alt);
+    color: var(--vp-c-text-3);
+}
+
+/* 타입별 아이콘 설정 */
+.vp-doc ul:has(> li > a) > li > a[href*="/modules/"]::before,
+.vp-doc ul:has(> li > a) > li > a[href*="/namespaces/"]::before {
+    content: "N";
+    background-color: #ef4444;
+    color: white;
+}
+.vp-doc ul:has(> li > a) > li > a[href*="/functions/"]::before {
+    content: "F";
+    background-color: #06b6d4;
+    color: white;
+}
+.vp-doc ul:has(> li > a) > li > a[href*="/classes/"]::before { content: "C"; background-color: #47a047; color: white; }
+.vp-doc ul:has(> li > a) > li > a[href*="/interfaces/"]::before { content: "I"; background-color: #2b7489; color: white; }
+.vp-doc ul:has(> li > a) > li > a[href*="/variables/"]::before { content: "V"; background-color: #d88e00; color: white; }
+.vp-doc ul:has(> li > a) > li > a[href*="/enums/"]::before { content: "E"; background-color: #7d4099; color: white; }
+
+/* 5. 텍스트 영역 제어 (핵심 수정 사항) */
+/* 별도의 span이 없는 경우 a 태그 자체의 텍스트 노드를 제어해야 함 */
+.vp-doc ul:has(> li > a) > li > a {
+    white-space: nowrap;    /* 줄바꿈 방지 */
+    overflow: hidden;       /* 넘치는 부분 숨김 */
+    text-overflow: ellipsis; /* ... 표시 */
+}
+
+/* 6. 오른쪽 화살표 (오른쪽 끝 고정) */
+.vp-doc ul:has(> li > a) > li > a::after {
+    content: "\203A";
+    flex-shrink: 0;    /* 공간 부족 시 화살표가 찌그러지지 않게 고정 */
+    margin-left: auto; /* 텍스트를 왼쪽으로 밀고 자신은 오른쪽 끝으로 이동 */
+    padding-left: 8px; /* 텍스트와 화살표 사이 최소 간격 */
+    font-size: 1.2rem;
+    color: var(--vp-c-text-3);
+    transition: transform 0.2s ease;
+}
+
+/* 7. 호버 액션 */
+.vp-doc ul:has(> li > a) > li:hover {
+    border-color: var(--vp-c-brand-1);
+    background-color: var(--vp-c-bg-soft);
+}
+.vp-doc ul:has(> li > a) > li:hover a::after {
+    transform: translateX(3px);
+    color: var(--vp-c-brand-1);
+}
+
+/* 8. 반응형 분기 */
+@media (max-width: 960px) {
+    .vp-doc ul:has(> li > a) > li {
+        flex: 0 1 calc(50% - 12px);
+    }
+}
+@media (max-width: 640px) {
+    .vp-doc ul:has(> li > a) > li {
+        flex: 1 1 100%;
+    }
+}
+/* **************************************************************************** */
 /* 버전 태그 기본 스타일 */
 .version-tag {
     display: inline-block;
@@ -71,13 +269,13 @@
     background-color: rgba(100, 108, 255, 0.15); /* 브랜드색 기반 투명 배경 */
     border-color: rgba(100, 108, 255, 0.3);
 }
-
+/* **************************************************************************** */
 /* 내비게이션 바 타이틀 링크의 언더라인 방지 */
 .VPNavBarTitle a:hover {
     text-decoration: none !important;
 }
 
-/* --- Footer Custom Styling --- */
+/* **************************************************************************** */
 
 /* 푸터 전체 영역 */
 .vp-footer {
@@ -161,30 +359,4 @@
     color: var(--vp-c-text-1);
     font-weight: 600;
     text-decoration: none;
-}
-
-/* Experimental 전용 뱃지 */
-.experimental-tag {
-    display: inline-block;
-    margin-left: 8px;
-    padding: 0 10px;
-    font-size: 11px;
-    font-weight: 800;
-    line-height: 20px;
-    border-radius: 20px;
-    text-transform: uppercase;
-    vertical-align: middle;
-    letter-spacing: 0.05em;
-
-    /* 금색 계열: 경고와 신비로움의 중간 느낌 */
-    color: #856404;
-    background-color: #fff3cd;
-    border: 1px solid #ffeeba;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.dark .experimental-tag {
-    color: #ffda6a;
-    background-color: rgba(255, 193, 7, 0.15);
-    border-color: rgba(255, 193, 7, 0.4);
 }
