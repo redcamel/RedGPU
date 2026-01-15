@@ -6,7 +6,8 @@
     "build": "rollup -c",
     "rollup watch": "rollup -wc",
     "build:doc": "npx typedoc --options typedoc.config.js",
-    "watch:doc": "npx nodemon --watch src --ext ts --exec \"npm run build:doc\""
+    "vitePress:dev": "vitepress dev manual && node buildScripts/deploy-manual.js",
+    "vitePress:build": "vitepress build manual && node buildScripts/deploy-manual.js"
   },
   "author": "",
   "license": "ISC",
@@ -17,6 +18,7 @@
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^12.1.4",
     "@rollup/pluginutils": "^5.2.0",
+    "@webgpu/types": "^0.1.63",
     "gl-matrix": "^3.4.3",
     "postcss": "^8.5.6",
     "rollup": "^4.44.1",
@@ -24,8 +26,9 @@
     "rollup-plugin-string": "^3.0.0",
     "tslib": "^2.8.1",
     "typedoc": "^0.28.13",
+    "typedoc-plugin-markdown": "^4.9.0",
     "typescript": "^5.8.3",
-    "@webgpu/types": "^0.1.63"
+    "vitepress": "^1.6.4"
   },
   "dependencies": {
     "wgsl_reflect": "1.2.1"

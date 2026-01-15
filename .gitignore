@@ -4,4 +4,11 @@
 /package-lock.json
 /dist/
 /docs/
+/manual/.vitepress/dist/
+/manual/.vitepress/cache/
+/manual/api/
+/manual/assets/
+/manual/**/*.html
+/manual/hashmap.json
+/manual/vp-icons.css
 /src/**/*.js
