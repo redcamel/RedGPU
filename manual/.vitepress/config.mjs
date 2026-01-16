@@ -15,13 +15,17 @@ const sidebarConfig = generateSidebar([
     {
         // API 문서 설정
         documentRootPath: 'manual',
-        scanStartPath: 'api',
-        resolvePath: '/api/',
+        scanStartPath: 'api/RedGPU-API/namespaces/RedGPU',
+        resolvePath: '/api/RedGPU-API/namespaces/RedGPU/',
         capitalizeFirst: true,
         useFolderTitleFromIndexFile: true,
+        indexFile: 'README.md',
+        useFolderLinkFromIndexFile:true,
+
         recursive: true,
         collapsed: true,
         sortMenusByName: true,
+        collapseDepth: 2,
     }
 ]);
 
@@ -31,7 +35,6 @@ export default defineConfig({
 
     base: '/RedGPU/manual/',
     ignoreDeadLinks: true,
-    cleanUrls: true,
 
     markdown: {
         config: (md) => {
@@ -82,12 +85,10 @@ export default defineConfig({
         nav: [
             { text: 'Manual home', link: '/' },
             { text: '시작하기', link: '/ko/introduction/getting-started' },
-            { text: 'API', link: '/api/README' },
+            { text: 'API', link: '/api/RedGPU-API/namespaces/RedGPU/README' },
             { text: 'Examples', link: 'https://redcamel.github.io/RedGPU/examples/', target: '_self' },
         ],
 
-        // 2. 수정된 사이드바 적용 부분
-        // generateSidebar의 결과값을 themeConfig.sidebar에 직접 할당합니다.
         sidebar: sidebarConfig,
 
         search: {

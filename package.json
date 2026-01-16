@@ -13,8 +13,8 @@
   "scripts": {
     "build": "rollup -c",
     "rollup watch": "rollup -wc",
-    "vitePress:dev": "npx typedoc --options typedoc.config.js && node buildScripts/preprocess-api.js && vitepress dev manual",
-    "vitePress:build": "npx typedoc --options typedoc.config.js && node buildScripts/preprocess-api.js && vitepress build manual && node buildScripts/deploy-manual.js"
+    "vitePress:dev": "npx typedoc --options typedoc.config.js && vitepress dev manual",
+    "vitePress:build": "npx typedoc --options typedoc.config.js && vitepress build manual && node buildScripts/deploy-manual.js"
   },
   "author": "RedCamel",
   "license": "ISC",

@@ -1,12 +1,10 @@
 module.exports = {
-	entryPoints: ["src/index.ts"],
+	entryPoints: ["src/indexDoc.ts"],
 	out: "manual/api",
 	plugin: ["typedoc-plugin-markdown"],
 	hideGenerator: true,
 	name:"RedGPU API",
 	includeVersion: true,
 	readme: "none",
-	// VitePress compatibility options
-	// hideBreadcrumbs: true,
-	// hidePageTitle: true,
+
 };
