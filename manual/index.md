@@ -3,24 +3,24 @@ layout: home
 
 hero:
   name: RedGPU
-  text: WebGPU 기반 3D 그래픽 엔진 
-  tagline: 강력하고 효율적인 WebGPU 렌더링 엔진
+  text: 강력한 JavaScript WebGPU 라이브러리
+  tagline: 놀라운 2D/3D 그래픽과 고성능 웹 애플리케이션을 위한 엔진
   actions:
     - theme: brand
       text: 시작하기
-      link: /ko/introduction/getting-started 
+      link: /ko/introduction/getting-started
     - theme: alt
       text: GitHub
       link: https://github.com/redcamel/RedGPU
 
 features:
-  - icon: 🚀
-    title: 고성능 ㅅㄷㄴㅅdfdf sdfsdfvsdfsdf sdfsdf sdfsdf
-    details: WebGPU를 활용한 최신 GPU 렌더링 기술
-  - icon: 🎨
-    title: 풍부한 기능
-    details: 2D/3D 렌더링, Post Effects, HDR, IBL 지원
-  - icon: 📦
-    title: 사용하기 쉬움
-    details: 직관적인 API로 빠르게 시작할 수 있습니다
+  - icon: 🎮
+    title: 다양한 예제
+    details: WebGPU 렌더링 성능을 보여주는 다양한 인터랙티브 예제를 탐험해보세요.
+  - icon: 📚
+    title: API 문서
+    details: RedGPU의 강력한 기능을 활용할 수 있는 완벽한 API 레퍼런스와 문서를 제공합니다.
+  - icon: ⚡
+    title: 고성능
+    details: 차세대 웹 그래픽을 위한 WebGPU의 힘을 활용하여 속도와 효율성을 극대화했습니다.
 ---
