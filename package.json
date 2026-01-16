@@ -13,10 +13,10 @@
   "scripts": {
     "build": "rollup -c",
     "rollup watch": "rollup -wc",
-    "vitePress:dev": "npx typedoc --options typedoc.config.js && vitepress dev manual",
-    "vitePress:build": "npx typedoc --options typedoc.config.js && vitepress build manual && node buildScripts/deploy-manual.js"
+    "vitePress:dev": "npx typedoc --options typedoc.config.js && node buildScripts/preprocess-api.js && vitepress dev manual",
+    "vitePress:build": "npx typedoc --options typedoc.config.js && node buildScripts/preprocess-api.js && vitepress build manual && node buildScripts/deploy-manual.js"
   },
-  "author": "redcamel",
+  "author": "RedCamel",
   "license": "ISC",
   "devDependencies": {
     "@rollup/plugin-json": "^6.1.0",
@@ -33,7 +33,7 @@
     "rollup-plugin-postcss": "^4.0.2",
     "rollup-plugin-string": "^3.0.0",
     "tslib": "^2.8.1",
-    "typedoc": "^0.28.13",
+    "typedoc": "^0.28.16",
     "typedoc-plugin-markdown": "^4.9.0",
     "typescript": "^5.8.3",
     "vitepress": "^1.6.4",

@@ -22,13 +22,13 @@ jobs:
       - name: Build code
         run: npm run build
       - name: Build documentation
-        run: npm run build:doc
+        run: npm run vitePress:build
       - name: Build sitemap
         run: node buildScripts/generate-sitemap.js
       - name: Commit and push build files
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add dist/ docs/ sitemap.xml examples/ -f
+          git add dist/ manual/ sitemap.xml examples/ -f
           git diff --staged --quiet || git commit -m "chore: auto-build dist and docs with cache bursting [skip ci]"
           git push
