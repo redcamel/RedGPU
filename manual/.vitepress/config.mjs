@@ -96,7 +96,7 @@ export default defineConfig({
                         { text: 'Home', link: `/${lang.code}/` },
                         { text: 'Getting Started', link: lang.entry },
                         { text: 'API Reference', link: `/${lang.code}/api/RedGPU-API/namespaces/RedGPU/README` },
-                        { text: 'Examples', link: 'https://redcamel.github.io/RedGPU/examples/', target: '_self' },
+                        { text: 'Examples', link: 'https://redcamel.github.io/RedGPU/examples/' },
                     ],
                 }
             }

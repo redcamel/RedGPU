@@ -32,7 +32,7 @@ export default {
                     const text = link.textContent?.trim();
 
                     // 제거하고 싶은 텍스트 매칭
-                    if (text === 'RedGPU API') {
+                    if (text === 'RedGPU API' || text === `RedGPU API v${pkg.version}`) {
                         // 1. 해당 링크 숨기기
                         link.style.display = 'none';
 
