@@ -1,59 +1,45 @@
-/* .vitepress/theme/custom.css */
-
+/* ============================================================
+   1. 전역 레이아웃 및 너비 설정
+   (본문 영역을 100% 사용하여 넓은 화면 제공)
+   ============================================================ */
 :root {
-    /* 본문 콘텐츠의 최대 너비 제한 해제 (기본값은 약 688px~960px) */
     --vp-content-width: 100%;
-
-    /* 본문 양옆 여백 조정 (필요에 따라 조절) */
     --vp-layout-max-width: 100%;
 }
 
-/* 실제 텍스트가 담기는 컨테이너의 너비 강제 확장 */
 .VPDoc .container {
     max-width: 100% !important;
     margin: 0 !important;
-    padding: 0 32px !important; /* 양옆 최소 여백만 남김 */
+    padding: 0 32px !important;
 }
 
-/* 본문 영역 너비 확장 */
-.VPDoc .content {
+.VPDoc .content,
+.VPDoc .content-container {
     max-width: 100% !important;
     width: 100% !important;
 }
 
-/* 오른쪽 'On this page' 사이드바가 있어도 넓게 쓰기 위해 */
 @media (min-width: 1280px) {
     .VPDoc .container {
         display: flex;
         justify-content: flex-start;
     }
-
-    .VPDoc .content-container {
-        max-width: 100% !important; /* 본문 컨테이너 제한 해제 */
-    }
 }
 
-/* **************************************************************************** */
+/* ============================================================
+   2. API 전용 레이아웃 (경로 기반 .api-page-layout)
+   ============================================================ */
+
+/* API 페이지 제목(h2) 스타일 */
 .api-page-layout .vp-doc h2 {
-    /* 기존보다 한 단계 연한 텍스트 컬러 (VitePress 기본 변수 활용) */
     color: var(--vp-c-text-3);
-
-    /* 폰트 두께를 살짝 조절하면 더 부드러워 보입니다 */
     font-weight: 600;
-
-    /* 제목 아래 밑줄(Border)도 연하게 조절 */
     border-bottom: 1px solid var(--vp-c-gutter);
-
-    /* 여백 조정 (선택 사항) */
     padding-bottom: 8px;
     margin-top: 2.5rem;
 }
 
-/* 다크 모드에서 너무 연해 보인다면 미세 조정 */
-.api-page-layout .dark .vp-doc h2 {
-    color: var(--vp-c-text-3); /* 혹은 좀 더 밝게 하고 싶다면 색상 직접 지정 */
-}
-/* 1. 컨테이너: 3단 배열 유지 */
+/* API 카드 리스트 컨테이너 */
 .api-page-layout .vp-doc ul:has(> li > a) {
     display: flex;
     flex-wrap: wrap;
@@ -63,95 +49,25 @@
     margin: 1.5rem 0;
 }
 
-/* 2. 각 항목: 박스 스타일 및 3단 너비 유지 */
-.api-page-layout .vp-doc ul:has(> li > a) > li {
-    flex: 0 1 calc(33.333% - 12px); /* 다시 3단으로 고정 */
-    min-width: 220px;               /* 화살표 공간을 위해 최소 너비 살짝 확보 */
-    margin: 0 !important;
-    padding: 0 !important;
-    border: 1px solid var(--vp-c-divider);
-    border-radius: 8px;
-    transition: all 0.2s ease;
-    background-color: var(--vp-c-bg-soft);
-}
-
-/* 3. 호버 효과: 원본 느낌 유지하며 박스만 강조 */
-.api-page-layout .vp-doc ul:has(> li > a) > li:hover {
-    border-color: var(--vp-c-brand-1);
-
-}
-
-/* 4. 내부 링크: 텍스트와 화살표 양끝 배치 */
-.api-page-layout .vp-doc ul:has(> li > a) > li > a {
-    display: flex;
-    align-items: center;
-    justify-content: space-between; /* 이름은 왼쪽, >는 오른쪽 */
-    padding: 10px 14px;
-    text-decoration: none;
-    color: var(--vp-c-text-1);
-    font-size: 0.9rem;
-    font-weight: 500;
-    width: 100%;
-}
-
-/* 5. 화살표(>) 표시 */
-.api-page-layout .vp-doc ul:has(> li > a) > li > a::after {
-    content: "\203A"; /* 홑화살표 (›) 가 좀 더 깔끔합니다 */
-    font-size: 1.2rem;
-    color: var(--vp-c-text-3);
-    margin-left: 8px;
-    transition: transform 0.2s ease;
-}
-
-/* 호버 시 화살표만 살짝 움직임 */
-.api-page-layout .vp-doc ul:has(> li > a) > li:hover a::after {
-    transform: translateX(3px);
-    color: var(--vp-c-brand-1);
-}
-
-/* 모바일/태블릿 대응: 배열 유지 */
-@media (max-width: 960px) {
-    .api-page-layout .vp-doc ul:has(> li > a) > li {
-        flex: 0 1 calc(50% - 12px); /* 2단 */
-    }
-}
-@media (max-width: 480px) {
-    .api-page-layout .vp-doc ul:has(> li > a) > li {
-        flex: 1 1 100%; /* 1단 */
-    }
-}
-/* **************************************************************************** */
-/* ============================================================
-   API 전용 레이아웃 스타일 (경로가 /api/ 인 경우에만 작동)
-   ============================================================ */
-
-/* 1. 컨테이너 설정 */
-.api-page-layout .vp-doc ul:has(> li > a) {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    padding: 0;
-    list-style: none;
-    margin: 1.5rem 0;
-}
-
-/* 2. 개별 항목 (데스크탑 3단) */
+/* 개별 카드 항목 */
 .api-page-layout .vp-doc ul:has(> li > a) > li {
     flex: 0 1 calc(33.333% - 12px);
+    min-width: 220px;
     margin: 0 !important;
     padding: 0 !important;
     border: 1px solid var(--vp-c-divider);
     border-radius: 8px;
+    background-color: var(--vp-c-bg-soft);
     transition: all 0.2s ease;
     overflow: hidden;
 }
 
-/* 3. 내부 링크 레이아웃 */
+/* 카드 내부 링크 및 텍스트 설정 */
 .api-page-layout .vp-doc ul:has(> li > a) > li > a {
     display: flex;
     align-items: center;
     padding: 10px 14px;
-    text-decoration: none !important; /* 밑줄 방지 */
+    text-decoration: none !important;
     color: var(--vp-c-text-1);
     font-size: 0.9rem;
     font-weight: 500;
@@ -162,24 +78,22 @@
     text-overflow: ellipsis;
 }
 
-/* 4. 타입 아이콘 배지 (기본값) */
+/* 타입 아이콘 배지 (좌측) */
 .api-page-layout .vp-doc ul:has(> li > a) > li > a::before {
     content: "O";
     flex-shrink: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 20px;
-    height: 20px;
+    width: 20px; height: 20px;
     margin-right: 10px;
-    font-size: 10px;
-    font-weight: 800;
+    font-size: 10px; font-weight: 800;
     border-radius: 4px;
     background-color: var(--vp-c-bg-alt);
     color: var(--vp-c-text-3);
 }
 
-/* 타입별 아이콘 설정 (기존 속성 선택자 유지) */
+/* 타입별 색상 정의 */
 .api-page-layout .vp-doc ul:has(> li > a) > li > a[href*="/modules/"]::before,
 .api-page-layout .vp-doc ul:has(> li > a) > li > a[href*="/namespaces/"]::before { content: "N"; background-color: #ef4444; color: white; }
 .api-page-layout .vp-doc ul:has(> li > a) > li > a[href*="/functions/"]::before  { content: "F"; background-color: #06b6d4; color: white; }
@@ -188,7 +102,7 @@
 .api-page-layout .vp-doc ul:has(> li > a) > li > a[href*="/variables/"]::before  { content: "V"; background-color: #d88e00; color: white; }
 .api-page-layout .vp-doc ul:has(> li > a) > li > a[href*="/enums/"]::before      { content: "E"; background-color: #7d4099; color: white; }
 
-/* 5. 오른쪽 화살표 */
+/* 오른쪽 화살표(>) */
 .api-page-layout .vp-doc ul:has(> li > a) > li > a::after {
     content: "\203A";
     flex-shrink: 0;
@@ -199,106 +113,79 @@
     transition: transform 0.2s ease;
 }
 
-/* 6. 호버 액션 */
+/* 호버 효과 */
 .api-page-layout .vp-doc ul:has(> li > a) > li:hover {
     border-color: var(--vp-c-brand-1);
-    background-color: var(--vp-c-bg-soft);
-    transform: translateY(-1px); /* 살짝 떠오르는 효과 추가 */
+    transform: translateY(-1px);
 }
-
 .api-page-layout .vp-doc ul:has(> li > a) > li:hover a::after {
     transform: translateX(3px);
     color: var(--vp-c-brand-1);
 }
 
-/* 7. 반응형 분기 */
-@media (max-width: 960px) {
-    .api-page-layout .vp-doc ul:has(> li > a) > li {
-        flex: 0 1 calc(50% - 12px);
-    }
-}
-@media (max-width: 640px) {
-    .api-page-layout .vp-doc ul:has(> li > a) > li {
-        flex: 1 1 100%;
-    }
-}
-/* **************************************************************************** */
-/* 버전 태그 기본 스타일 */
+/* API 반응형 */
+@media (max-width: 960px) { .api-page-layout .vp-doc ul:has(> li > a) > li { flex: 0 1 calc(50% - 12px); } }
+@media (max-width: 640px) { .api-page-layout .vp-doc ul:has(> li > a) > li { flex: 1 1 100%; } }
+
+/* ============================================================
+   3. UI 컴포넌트 (버전 태그, 네비바)
+   ============================================================ */
 .version-tag {
     display: inline-block;
     margin-left: 8px;
     padding: 0 8px;
-
-    /* 텍스트 스타일 */
-    font-size: 10px;
-    font-weight: 700;
-    font-family: var(--vp-font-family-mono); /* 고정폭 글꼴로 코드 느낌 부여 */
+    font-size: 10px; font-weight: 700;
+    font-family: var(--vp-font-family-mono);
     line-height: 18px;
-
-    /* 위치 조정 (타이틀과 수평 맞춤) */
     vertical-align: middle;
     transform: translateY(-1px);
-
-    /* 색상 및 테두리 (라이트 모드 기준) */
     color: var(--vp-c-brand-1);
     background-color: var(--vp-c-brand-soft);
     border: 1px solid var(--vp-c-brand-soft);
     border-radius: 6px;
-
-    /* 부드러운 전환 효과 */
     transition: all 0.25s;
 }
 
-/* 마우스 호버 시 효과 (선택 사항) */
 .version-tag:hover {
     background-color: var(--vp-c-brand-2);
     color: var(--vp-c-white);
 }
 
-/* 다크 모드 전용 스타일 조정 */
 .dark .version-tag {
     color: var(--vp-c-brand-light);
-    background-color: rgba(100, 108, 255, 0.15); /* 브랜드색 기반 투명 배경 */
+    background-color: rgba(100, 108, 255, 0.15);
     border-color: rgba(100, 108, 255, 0.3);
 }
-/* **************************************************************************** */
-/* 내비게이션 바 타이틀 링크의 언더라인 방지 */
-.VPNavBarTitle a:hover {
-    text-decoration: none !important;
-}
 
-/* **************************************************************************** */
+.VPNavBarTitle a:hover { text-decoration: none !important; }
 
-/* 푸터 전체 영역 */
-.vp-footer {
-    padding: 48px 24px !important;
-    background-color: var(--vp-c-bg-alt); /* 본문보다 살짝 어두운 배경 */
-    border-top: 1px solid var(--vp-c-gutter);
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-}
-
-/* RedGPU API 타이틀 */
-.footer-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--vp-c-text-1);
-    margin-bottom: 16px;
-    letter-spacing: -0.02em;
-}
-
-/* 링크 그룹 컨테이너 */
-.footer-links {
+/* ============================================================
+   4. 사이드바 커스텀 (README 강조)
+   ============================================================ */
+.VPSidebarItem > .item > .link[href*="README"] {
+    font-weight: bold;
+    color: var(--vp-c-brand-1) !important;
+    background-color: var(--vp-c-default-soft);
+    border-radius: 4px;
+    padding-left: 8px;
     display: flex;
-    gap: 24px;
-    margin-bottom: 24px;
-    flex-wrap: wrap;
-    justify-content: center;
+    align-items: center;
+    gap: 4px;
 }
-/* .vitepress/theme/custom.css */
 
-/* 푸터 영역 전체 정렬 */
+.VPSidebarItem > .item > .link[href*="README"]::before {
+    content: "";
+    width: 16px; height: 16px;
+    background: url('/readme-light.svg') no-repeat center;
+}
+
+.dark .VPSidebarItem > .item > .link[href*="README"]::before {
+    background: url('/readme-dark.svg') no-repeat center;
+}
+
+/* ============================================================
+   5. 푸터 스타일
+   ============================================================ */
 .vp-footer {
     border-top: 1px solid var(--vp-c-gutter) !important;
     padding: 40px 24px !important;
@@ -309,77 +196,26 @@
     text-align: center !important;
 }
 
-/* RedGPU API 타이틀 */
 .footer-title {
-    font-weight: 700;
-    font-size: 1.2rem;
+    font-weight: 700; font-size: 1.2rem;
     margin-bottom: 12px;
     color: var(--vp-c-text-1);
-    letter-spacing: -0.01em;
 }
 
-/* 링크 그룹 */
 .footer-links {
-    display: flex;
-    gap: 20px;
+    display: flex; gap: 20px;
     justify-content: center;
     margin-bottom: 16px;
-    flex-wrap: wrap; /* 모바일 대응 */
+    flex-wrap: wrap;
 }
 
-/* 개별 링크 스타일 */
 .footer-links a {
-    font-size: 0.95rem;
-    font-weight: 500;
+    font-size: 0.95rem; font-weight: 500;
     color: var(--vp-c-brand-1);
     text-decoration: none;
-    transition: opacity 0.2s;
 }
 
-.footer-links a:hover {
-    opacity: 0.7;
-    text-decoration: underline;
-}
+.footer-links a:hover { text-decoration: underline; }
 
-/* Copyright 영역 */
-.vp-footer .copyright {
-    font-size: 0.85rem;
-    color: var(--vp-c-text-2);
-}
-
-.vp-footer .copyright a {
-    color: var(--vp-c-text-1);
-    font-weight: 600;
-    text-decoration: none;
-}
-
-/* **************************************************************************** */
-
-/* 사이드바 항목 중 README 혹은 폴더 루트(/) 링크 스타일링 */
-.VPSidebarItem > .item > .link[href*="README"]  {
-    font-weight: bold;
-    color: var(--vp-c-brand-1) !important; /* 브랜드 컬러 적용 */
-    background-color: var(--vp-c-default-soft); /* 배경색 살짝 추가 */
-    border-radius: 4px;
-    padding-left: 8px;
-    display: flex;
-    align-items: center;
-    gap:4px;
-    line-height: 1;
-    vertical-align: middle;
-}
-
-
-.VPSidebarItem > .item > .link[href*="README"]::before {
-    content: "";
-    width: 16px;
-    height: 16px;
-    background: url('/readme-light.svg');
-
-}
-.dark .VPSidebarItem > .item > .link[href*="README"]::before {
-    content: "";
-    width: 16px;
-    height: 16px;
-    background: url('/readme-dark.svg');
-}
+.vp-footer .copyright { font-size: 0.85rem; color: var(--vp-c-text-2); }
+.vp-footer .copyright a { font-weight: 600; color: var(--vp-c-text-1); text-decoration: none; }
