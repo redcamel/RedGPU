@@ -24,10 +24,45 @@ const sidebarConfig = generateSidebar([
 
         recursive: true,
         collapsed: true,
-        sortMenusByName: true,
+        // sortMenusByName: true,
         collapseDepth: 2,
+        sortMenusByFrontmatterOrder:true
     }
 ]);
+// 1. 정렬 함수 수정: 객체와 배열 구조 모두 대응
+const sortSidebar = (sidebar) => {
+    // 사이드바가 객체 형태인 경우 (VitePress Multi-sidebar 구조)
+    if (!Array.isArray(sidebar) && typeof sidebar === 'object') {
+        const newSidebar = {};
+        for (const [key, value] of Object.entries(sidebar)) {
+            newSidebar[key] = sortSidebar(value); // 재귀 호출
+        }
+        return newSidebar;
+    }
+
+    // 배열인 경우 실제 아이템 정렬
+    if (Array.isArray(sidebar)) {
+        return sidebar
+            .map(item => {
+                if (item.items) {
+                    item.items = sortSidebar(item.items);
+                }
+                return item;
+            })
+            .sort((a, b) => {
+                // README.md 또는 index.md 인지 확인
+                // vitepress-sidebar는 index 파일을 보통 link: "/path/" 형태로 만듭니다.
+                const aIsIndex = a.text.toLowerCase().includes('readme') || a.link?.endsWith('/') || a.link?.endsWith('README');
+                const bIsIndex = b.text.toLowerCase().includes('readme') || b.link?.endsWith('/') || b.link?.endsWith('README');
+
+                if (aIsIndex && !bIsIndex) return -1;
+                if (!aIsIndex && bIsIndex) return 1;
+                return 0;
+            });
+    }
+
+    return sidebar;
+};
 
 export default defineConfig({
     title: 'RedGPU',
@@ -89,7 +124,7 @@ export default defineConfig({
             { text: 'Examples', link: 'https://redcamel.github.io/RedGPU/examples/', target: '_self' },
         ],
 
-        sidebar: sidebarConfig,
+        sidebar: sortSidebar(sidebarConfig),
 
         search: {
             provider: 'local',
