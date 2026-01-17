@@ -23,7 +23,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/ssr/ssr/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/ssr/ssr/"></iframe>
  */
 class SSR extends ASinglePassPostEffect {
     /** 최대 스텝 수. 기본값 64, 범위 1~512 */

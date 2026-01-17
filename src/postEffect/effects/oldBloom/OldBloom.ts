@@ -21,7 +21,7 @@ import OldBloomBlend from "./OldBloomBlend";
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/oldBloom/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/oldBloom/"></iframe>
  */
 class OldBloom extends AMultiPassPostEffect {
     /** 임계값 이펙트 */

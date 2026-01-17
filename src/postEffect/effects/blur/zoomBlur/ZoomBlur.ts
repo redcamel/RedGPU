@@ -21,7 +21,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/blur/zoomBlur/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/blur/zoomBlur/"></iframe>
  */
 class ZoomBlur extends ASinglePassPostEffect {
     /** 블러 강도. 기본값 64, 최소 0 */

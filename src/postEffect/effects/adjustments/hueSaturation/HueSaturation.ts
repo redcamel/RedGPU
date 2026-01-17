@@ -19,7 +19,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/adjustments/hueSaturation/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/adjustments/hueSaturation/"></iframe>
  */
 class HueSaturation extends ASinglePassPostEffect {
     /** 색상(Hue). 기본값 0, 범위 -180~180 */

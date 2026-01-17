@@ -17,7 +17,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/blur/blurX/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/blur/blurX/"></iframe>
  */
 class BlurX extends ASinglePassPostEffect {
     /**

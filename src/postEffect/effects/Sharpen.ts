@@ -15,7 +15,7 @@ import Convolution from "./convolution/Convolution";
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/sharpen/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/sharpen/"></iframe>
  */
 class Sharpen extends AMultiPassPostEffect {
     #effect_convolution: Convolution

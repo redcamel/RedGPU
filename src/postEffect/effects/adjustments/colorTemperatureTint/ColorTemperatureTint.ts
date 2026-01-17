@@ -22,7 +22,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/adjustments/colorTemperatureTint/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/adjustments/colorTemperatureTint/"></iframe>
  */
 class ColorTemperatureTint extends ASinglePassPostEffect {
     /** 색온도(K). 기본값 6500, 범위 1000~20000 */

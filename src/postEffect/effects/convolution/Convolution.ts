@@ -43,7 +43,7 @@ const EMBOSE = ([
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/convolution/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/convolution/"></iframe>
  */
 class Convolution extends ASinglePassPostEffect {
     /** NORMAL 커널 (기본값) */

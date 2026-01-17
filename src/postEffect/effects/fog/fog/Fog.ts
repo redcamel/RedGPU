@@ -24,7 +24,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/fog/fog/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/fog/fog/"></iframe>
  */
 class Fog extends ASinglePassPostEffect {
     /** 지수 안개 타입 */

@@ -48,7 +48,7 @@ const VINTAGE = {
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/filmGrain/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/filmGrain/"></iframe>
  */
 class FilmGrain extends ASinglePassPostEffect {
     /** 미세한 그레인 프리셋 */

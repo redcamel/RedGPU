@@ -34,7 +34,7 @@
 }
 
 /* **************************************************************************** */
-.vp-doc h2 {
+.api-page-layout .vp-doc h2 {
     /* 기존보다 한 단계 연한 텍스트 컬러 (VitePress 기본 변수 활용) */
     color: var(--vp-c-text-3);
 
@@ -50,11 +50,11 @@
 }
 
 /* 다크 모드에서 너무 연해 보인다면 미세 조정 */
-.dark .vp-doc h2 {
+.api-page-layout .dark .vp-doc h2 {
     color: var(--vp-c-text-3); /* 혹은 좀 더 밝게 하고 싶다면 색상 직접 지정 */
 }
 /* 1. 컨테이너: 3단 배열 유지 */
-.vp-doc ul:has(> li > a) {
+.api-page-layout .vp-doc ul:has(> li > a) {
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
@@ -64,7 +64,7 @@
 }
 
 /* 2. 각 항목: 박스 스타일 및 3단 너비 유지 */
-.vp-doc ul:has(> li > a) > li {
+.api-page-layout .vp-doc ul:has(> li > a) > li {
     flex: 0 1 calc(33.333% - 12px); /* 다시 3단으로 고정 */
     min-width: 220px;               /* 화살표 공간을 위해 최소 너비 살짝 확보 */
     margin: 0 !important;
@@ -76,13 +76,13 @@
 }
 
 /* 3. 호버 효과: 원본 느낌 유지하며 박스만 강조 */
-.vp-doc ul:has(> li > a) > li:hover {
+.api-page-layout .vp-doc ul:has(> li > a) > li:hover {
     border-color: var(--vp-c-brand-1);
 
 }
 
 /* 4. 내부 링크: 텍스트와 화살표 양끝 배치 */
-.vp-doc ul:has(> li > a) > li > a {
+.api-page-layout .vp-doc ul:has(> li > a) > li > a {
     display: flex;
     align-items: center;
     justify-content: space-between; /* 이름은 왼쪽, >는 오른쪽 */
@@ -95,7 +95,7 @@
 }
 
 /* 5. 화살표(>) 표시 */
-.vp-doc ul:has(> li > a) > li > a::after {
+.api-page-layout .vp-doc ul:has(> li > a) > li > a::after {
     content: "\203A"; /* 홑화살표 (›) 가 좀 더 깔끔합니다 */
     font-size: 1.2rem;
     color: var(--vp-c-text-3);
@@ -104,26 +104,29 @@
 }
 
 /* 호버 시 화살표만 살짝 움직임 */
-.vp-doc ul:has(> li > a) > li:hover a::after {
+.api-page-layout .vp-doc ul:has(> li > a) > li:hover a::after {
     transform: translateX(3px);
     color: var(--vp-c-brand-1);
 }
 
 /* 모바일/태블릿 대응: 배열 유지 */
 @media (max-width: 960px) {
-    .vp-doc ul:has(> li > a) > li {
+    .api-page-layout .vp-doc ul:has(> li > a) > li {
         flex: 0 1 calc(50% - 12px); /* 2단 */
     }
 }
 @media (max-width: 480px) {
-    .vp-doc ul:has(> li > a) > li {
+    .api-page-layout .vp-doc ul:has(> li > a) > li {
         flex: 1 1 100%; /* 1단 */
     }
 }
 /* **************************************************************************** */
+/* ============================================================
+   API 전용 레이아웃 스타일 (경로가 /api/ 인 경우에만 작동)
+   ============================================================ */
 
 /* 1. 컨테이너 설정 */
-.vp-doc ul:has(> li > a) {
+.api-page-layout .vp-doc ul:has(> li > a) {
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
@@ -132,33 +135,37 @@
     margin: 1.5rem 0;
 }
 
-/* 2. 개별 항목 (데스크탑: 3단) */
-.vp-doc ul:has(> li > a) > li {
+/* 2. 개별 항목 (데스크탑 3단) */
+.api-page-layout .vp-doc ul:has(> li > a) > li {
     flex: 0 1 calc(33.333% - 12px);
     margin: 0 !important;
     padding: 0 !important;
     border: 1px solid var(--vp-c-divider);
     border-radius: 8px;
     transition: all 0.2s ease;
-    overflow: hidden; /* 내부 요소가 밖으로 나가는 것 방지 */
+    overflow: hidden;
 }
 
-/* 3. 내부 링크 레이아웃 - flex 설정 */
-.vp-doc ul:has(> li > a) > li > a {
+/* 3. 내부 링크 레이아웃 */
+.api-page-layout .vp-doc ul:has(> li > a) > li > a {
     display: flex;
     align-items: center;
     padding: 10px 14px;
-    text-decoration: none;
+    text-decoration: none !important; /* 밑줄 방지 */
     color: var(--vp-c-text-1);
     font-size: 0.9rem;
     font-weight: 500;
     width: 100%;
-    min-width: 0; /* 중요: 자식 요소의 ellipsis 작동을 위해 필요 */
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-/* 4. 타입 아이콘 배지 (고정) */
-.vp-doc ul:has(> li > a) > li > a::before {
-    flex-shrink: 0; /* 공간이 부족해도 절대 줄어들지 않음 */
+/* 4. 타입 아이콘 배지 (기본값) */
+.api-page-layout .vp-doc ul:has(> li > a) > li > a::before {
+    content: "O";
+    flex-shrink: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -168,65 +175,50 @@
     font-size: 10px;
     font-weight: 800;
     border-radius: 4px;
-    content: "O";
     background-color: var(--vp-c-bg-alt);
     color: var(--vp-c-text-3);
 }
 
-/* 타입별 아이콘 설정 */
-.vp-doc ul:has(> li > a) > li > a[href*="/modules/"]::before,
-.vp-doc ul:has(> li > a) > li > a[href*="/namespaces/"]::before {
-    content: "N";
-    background-color: #ef4444;
-    color: white;
-}
-.vp-doc ul:has(> li > a) > li > a[href*="/functions/"]::before {
-    content: "F";
-    background-color: #06b6d4;
-    color: white;
-}
-.vp-doc ul:has(> li > a) > li > a[href*="/classes/"]::before { content: "C"; background-color: #47a047; color: white; }
-.vp-doc ul:has(> li > a) > li > a[href*="/interfaces/"]::before { content: "I"; background-color: #2b7489; color: white; }
-.vp-doc ul:has(> li > a) > li > a[href*="/variables/"]::before { content: "V"; background-color: #d88e00; color: white; }
-.vp-doc ul:has(> li > a) > li > a[href*="/enums/"]::before { content: "E"; background-color: #7d4099; color: white; }
+/* 타입별 아이콘 설정 (기존 속성 선택자 유지) */
+.api-page-layout .vp-doc ul:has(> li > a) > li > a[href*="/modules/"]::before,
+.api-page-layout .vp-doc ul:has(> li > a) > li > a[href*="/namespaces/"]::before { content: "N"; background-color: #ef4444; color: white; }
+.api-page-layout .vp-doc ul:has(> li > a) > li > a[href*="/functions/"]::before  { content: "F"; background-color: #06b6d4; color: white; }
+.api-page-layout .vp-doc ul:has(> li > a) > li > a[href*="/classes/"]::before   { content: "C"; background-color: #47a047; color: white; }
+.api-page-layout .vp-doc ul:has(> li > a) > li > a[href*="/interfaces/"]::before { content: "I"; background-color: #2b7489; color: white; }
+.api-page-layout .vp-doc ul:has(> li > a) > li > a[href*="/variables/"]::before  { content: "V"; background-color: #d88e00; color: white; }
+.api-page-layout .vp-doc ul:has(> li > a) > li > a[href*="/enums/"]::before      { content: "E"; background-color: #7d4099; color: white; }
 
-/* 5. 텍스트 영역 제어 (핵심 수정 사항) */
-/* 별도의 span이 없는 경우 a 태그 자체의 텍스트 노드를 제어해야 함 */
-.vp-doc ul:has(> li > a) > li > a {
-    white-space: nowrap;    /* 줄바꿈 방지 */
-    overflow: hidden;       /* 넘치는 부분 숨김 */
-    text-overflow: ellipsis; /* ... 표시 */
-}
-
-/* 6. 오른쪽 화살표 (오른쪽 끝 고정) */
-.vp-doc ul:has(> li > a) > li > a::after {
+/* 5. 오른쪽 화살표 */
+.api-page-layout .vp-doc ul:has(> li > a) > li > a::after {
     content: "\203A";
-    flex-shrink: 0;    /* 공간 부족 시 화살표가 찌그러지지 않게 고정 */
-    margin-left: auto; /* 텍스트를 왼쪽으로 밀고 자신은 오른쪽 끝으로 이동 */
-    padding-left: 8px; /* 텍스트와 화살표 사이 최소 간격 */
+    flex-shrink: 0;
+    margin-left: auto;
+    padding-left: 8px;
     font-size: 1.2rem;
     color: var(--vp-c-text-3);
     transition: transform 0.2s ease;
 }
 
-/* 7. 호버 액션 */
-.vp-doc ul:has(> li > a) > li:hover {
+/* 6. 호버 액션 */
+.api-page-layout .vp-doc ul:has(> li > a) > li:hover {
     border-color: var(--vp-c-brand-1);
     background-color: var(--vp-c-bg-soft);
+    transform: translateY(-1px); /* 살짝 떠오르는 효과 추가 */
 }
-.vp-doc ul:has(> li > a) > li:hover a::after {
+
+.api-page-layout .vp-doc ul:has(> li > a) > li:hover a::after {
     transform: translateX(3px);
     color: var(--vp-c-brand-1);
 }
 
-/* 8. 반응형 분기 */
+/* 7. 반응형 분기 */
 @media (max-width: 960px) {
-    .vp-doc ul:has(> li > a) > li {
+    .api-page-layout .vp-doc ul:has(> li > a) > li {
         flex: 0 1 calc(50% - 12px);
     }
 }
 @media (max-width: 640px) {
-    .vp-doc ul:has(> li > a) > li {
+    .api-page-layout .vp-doc ul:has(> li > a) > li {
         flex: 1 1 100%;
     }
 }

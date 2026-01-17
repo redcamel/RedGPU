@@ -22,7 +22,7 @@ import DOFUnified from "./DOFUnified";
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/lens/dof/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/lens/dof/"></iframe>
  */
 class DOF extends AMultiPassPostEffect {
     /** CoC 계산용 이펙트 */

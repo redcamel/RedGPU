@@ -116,11 +116,17 @@ export default defineConfig({
             };
         }
     },
-
+    async transformPageData(pageData) {
+        // 1. 현재 페이지의 경로가 'api/'로 시작하는지 확인
+        if (pageData.relativePath.includes('api/RedGPU-API/')) {
+            // 2. 해당 페이지의 frontmatter에 'api-page' 클래스 추가
+            pageData.frontmatter.pageClass = 'api-page-layout';
+        }
+    },
     // 공통 테마 설정
     themeConfig: {
         logo: { light: '/logo-light.svg', dark: '/logo-dark.svg' },
-        logoLink: 'https://redcamel.github.io/RedGPU/',
+        logoLink: '/RedGPU/manual',
 
         // 공통 사이드바 (finalSidebar 내부의 키가 /ko/, /en/로 나뉘어 있어 자동 매칭됨)
         sidebar: finalSidebar,

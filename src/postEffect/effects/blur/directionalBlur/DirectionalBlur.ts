@@ -20,7 +20,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/blur/directionalBlur/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/blur/directionalBlur/"></iframe>
  */
 class DirectionalBlur extends ASinglePassPostEffect {
     /** 블러 강도. 기본값 15, 최소 0 */

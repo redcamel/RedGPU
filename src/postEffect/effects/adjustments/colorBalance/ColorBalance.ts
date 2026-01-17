@@ -23,7 +23,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/adjustments/colorBalance/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/adjustments/colorBalance/"></iframe>
  */
 class ColorBalance extends ASinglePassPostEffect {
     /** 그림자 시안-레드. 기본값 0, 범위 -100~100 */

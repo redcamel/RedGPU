@@ -25,7 +25,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/fog/heightFog/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/fog/heightFog/"></iframe>
  */
 class HeightFog extends ASinglePassPostEffect {
     /** 지수 안개 타입 */

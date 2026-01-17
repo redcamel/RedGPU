@@ -18,7 +18,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/adjustments/threshold/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/adjustments/threshold/"></iframe>
  */
 class Threshold extends ASinglePassPostEffect {
     /** 임계값. 기본값 128, 범위 1~255 */

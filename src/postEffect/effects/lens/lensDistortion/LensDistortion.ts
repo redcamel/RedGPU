@@ -22,7 +22,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/lens/lensDistortion/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/lens/lensDistortion/"></iframe>
  */
 class LensDistortion extends ASinglePassPostEffect {
     /** 배럴 왜곡 강도. 기본값 0.1, 최소 0 */

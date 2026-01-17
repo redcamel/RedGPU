@@ -22,7 +22,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/blur/radialBlur/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/blur/radialBlur/"></iframe>
  */
 class RadialBlur extends ASinglePassPostEffect {
     /** 블러 강도. 기본값 50, 최소 0 */

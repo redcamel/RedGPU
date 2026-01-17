@@ -15,7 +15,7 @@ import computeCode from "./wgsl/computeCode.wgsl"
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/adjustments/invert/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/adjustments/invert/"></iframe>
  */
 class Invert extends ASinglePassPostEffect {
     /**

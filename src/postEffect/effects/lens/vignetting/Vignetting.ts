@@ -20,7 +20,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/lens/vignetting/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/lens/vignetting/"></iframe>
  */
 class Vignetting extends ASinglePassPostEffect {
     #smoothness: number = 0.2

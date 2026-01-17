@@ -20,7 +20,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/lens/chromaticAberration/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/lens/chromaticAberration/"></iframe>
  */
 class ChromaticAberration extends ASinglePassPostEffect {
     /** 강도. 기본값 0.015, 최소 0 */

@@ -19,7 +19,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/adjustments/vibrance/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/adjustments/vibrance/"></iframe>
  */
 class Vibrance extends ASinglePassPostEffect {
     /** 바이브런스. 기본값 0, 범위 -100~100 */

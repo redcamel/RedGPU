@@ -16,7 +16,7 @@ import BlurY from "./blurY/BlurY";
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/blur/gaussianBlur/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/blur/gaussianBlur/"></iframe>
  */
 class GaussianBlur extends AMultiPassPostEffect {
     /** 블러 강도(커널 크기). 기본값 32 */
