@@ -37,24 +37,25 @@ const languages = [
     { code: 'en', label: 'English', entry: '/en/introduction/getting-started' },
     { code: 'ko', label: '한국어', entry: '/ko/introduction/getting-started' }
 ];
+const sidebarEntries = [];
 
-/**
- * 2. Sidebar Generation Configuration
- * 매뉴얼과 API 문서를 언어별 폴더(ko, en) 기준으로 생성합니다.
- */
-const rawSidebarConfig = generateSidebar([
-    // 매뉴얼 설정: /ko/..., /en/...
-    ...languages.map(lang => ({
+// [1] 매뉴얼 설정 추가
+languages.forEach(lang => {
+    sidebarEntries.push({
         documentRootPath: 'manual',
         scanStartPath: lang.code,
         resolvePath: `/${lang.code}/`,
         useTitleFromFileHeading: true,
         useFolderTitleFromIndexFile: true,
         hyphenToSpace: true,
-    })),
+        // API 폴더는 일반 매뉴얼 사이드바에서 제외 (중요)
+        excludePattern: ['api/**']
+    });
+});
 
-    // API 문서 설정: /ko/api/..., /en/api/...
-    ...languages.map(lang => ({
+// [2] API 문서 설정 추가
+languages.forEach(lang => {
+    sidebarEntries.push({
         documentRootPath: 'manual',
         scanStartPath: `${lang.code}/api/RedGPU-API/namespaces/RedGPU`,
         resolvePath: `/${lang.code}/api/RedGPU-API/namespaces/RedGPU/`,
@@ -65,9 +66,10 @@ const rawSidebarConfig = generateSidebar([
         collapsed: true,
         collapseDepth: 2,
         sortMenusByFrontmatterOrder: true
-    }))
-]);
+    });
+});
 
+const rawSidebarConfig = generateSidebar(sidebarEntries);
 const finalSidebar = sortSidebar(rawSidebarConfig);
 
 /**
