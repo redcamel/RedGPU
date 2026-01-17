@@ -17,15 +17,17 @@ const sidebarConfig = generateSidebar([
         documentRootPath: 'manual',
         scanStartPath: 'api/RedGPU-API/namespaces/RedGPU',
         resolvePath: '/api/RedGPU-API/namespaces/RedGPU/',
-        capitalizeFirst: true,
+
         useFolderTitleFromIndexFile: true,
         indexFile: 'README.md',
         useFolderLinkFromIndexFile:true,
 
         recursive: true,
         collapsed: true,
-        // sortMenusByName: true,
         collapseDepth: 2,
+
+
+        // sortMenusByName: true,
         sortMenusByFrontmatterOrder:true
     }
 ]);

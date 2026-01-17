@@ -360,3 +360,34 @@
     font-weight: 600;
     text-decoration: none;
 }
+
+/* **************************************************************************** */
+
+/* 사이드바 항목 중 README 혹은 폴더 루트(/) 링크 스타일링 */
+.VPSidebarItem > .item > .link[href*="README"]  {
+    font-weight: bold;
+    color: var(--vp-c-brand-1) !important; /* 브랜드 컬러 적용 */
+    background-color: var(--vp-c-default-soft); /* 배경색 살짝 추가 */
+    border-radius: 4px;
+    padding-left: 8px;
+    display: flex;
+    align-items: center;
+    gap:4px;
+    line-height: 1;
+    vertical-align: middle;
+}
+
+
+.VPSidebarItem > .item > .link[href*="README"]::before {
+    content: "";
+    width: 16px;
+    height: 16px;
+    background: url('/readme-light.svg');
+
+}
+.dark .VPSidebarItem > .item > .link[href*="README"]::before {
+    content: "";
+    width: 16px;
+    height: 16px;
+    background: url('/readme-dark.svg');
+}
