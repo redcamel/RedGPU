@@ -1,9 +1,8 @@
 import {mat4} from "gl-matrix";
 import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
-
 /**
- * 2D 카메라 클래스입니다.
- * x, y 위치와 모델 행렬을 관리하며, 이름 지정 및 위치 설정 기능을 제공합니다.
+ * [KO] 2D 카메라 클래스입니다. x, y 위치와 모델 행렬을 관리하며, 이름 지정 및 위치 설정 기능을 제공합니다.
+ * [EN] 2D Camera class. Manages x, y positions and model matrices, and provides naming and positioning functions.
  *
  * @category Camera
  *

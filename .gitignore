@@ -6,7 +6,8 @@
 /docs/
 /manual/.vitepress/dist/
 /manual/.vitepress/cache/
-/manual/api/
+/manual/ko/api/
+/manual/en/api/
 /manual/assets/
 /manual/**/*.html
 /manual/hashmap.json

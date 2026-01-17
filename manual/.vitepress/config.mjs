@@ -1,132 +1,138 @@
 import { defineConfig } from 'vitepress'
 import { generateSidebar } from 'vitepress-sidebar';
 
-// 1. 사이드바 자동 생성 설정
-const sidebarConfig = generateSidebar([
-    {
-        // 한국어 매뉴얼 설정
-        documentRootPath: 'manual',
-        scanStartPath: 'ko',
-        resolvePath: '/ko/',
-        useTitleFromFileHeading: true,
-        useFolderTitleFromIndexFile: true,
-        hyphenToSpace: true,
-    },
-    {
-        // API 문서 설정
-        documentRootPath: 'manual',
-        scanStartPath: 'api/RedGPU-API/namespaces/RedGPU',
-        resolvePath: '/api/RedGPU-API/namespaces/RedGPU/',
-
-        useFolderTitleFromIndexFile: true,
-        indexFile: 'README.md',
-        useFolderLinkFromIndexFile:true,
-
-        recursive: true,
-        collapsed: true,
-        collapseDepth: 2,
-
-
-        // sortMenusByName: true,
-        sortMenusByFrontmatterOrder:true
-    }
-]);
-// 1. 정렬 함수 수정: 객체와 배열 구조 모두 대응
+/**
+ * 1. Sidebar Sorting Utility
+ * README/Index 파일을 항상 최상단에 배치하고 객체/배열 구조를 재귀적으로 정렬합니다.
+ */
 const sortSidebar = (sidebar) => {
-    // 사이드바가 객체 형태인 경우 (VitePress Multi-sidebar 구조)
-    if (!Array.isArray(sidebar) && typeof sidebar === 'object') {
-        const newSidebar = {};
-        for (const [key, value] of Object.entries(sidebar)) {
-            newSidebar[key] = sortSidebar(value); // 재귀 호출
-        }
-        return newSidebar;
+    if (!Array.isArray(sidebar) && typeof sidebar === 'object' && sidebar !== null) {
+        return Object.fromEntries(
+            Object.entries(sidebar).map(([key, value]) => [key, sortSidebar(value)])
+        );
     }
 
-    // 배열인 경우 실제 아이템 정렬
     if (Array.isArray(sidebar)) {
         return sidebar
-            .map(item => {
-                if (item.items) {
-                    item.items = sortSidebar(item.items);
-                }
-                return item;
-            })
+            .map(item => ({
+                ...item,
+                items: item.items ? sortSidebar(item.items) : undefined
+            }))
             .sort((a, b) => {
-                // README.md 또는 index.md 인지 확인
-                // vitepress-sidebar는 index 파일을 보통 link: "/path/" 형태로 만듭니다.
-                const aIsIndex = a.text.toLowerCase().includes('readme') || a.link?.endsWith('/') || a.link?.endsWith('README');
-                const bIsIndex = b.text.toLowerCase().includes('readme') || b.link?.endsWith('/') || b.link?.endsWith('README');
+                const isIndex = (text = '', link = '') =>
+                    text.toLowerCase().includes('readme') || link.endsWith('/') || link.endsWith('README');
 
-                if (aIsIndex && !bIsIndex) return -1;
-                if (!aIsIndex && bIsIndex) return 1;
-                return 0;
+                const aIsIndex = isIndex(a.text, a.link);
+                const bIsIndex = isIndex(b.text, b.link);
+
+                return aIsIndex && !bIsIndex ? -1 : !aIsIndex && bIsIndex ? 1 : 0;
             });
     }
 
     return sidebar;
 };
 
+// 지원 언어 설정 (이 배열을 기준으로 모든 설정이 생성됨)
+const languages = [
+    { code: 'en', label: 'English', entry: '/en/introduction/getting-started' },
+    { code: 'ko', label: '한국어', entry: '/ko/introduction/getting-started' }
+];
+
+/**
+ * 2. Sidebar Generation Configuration
+ * 매뉴얼과 API 문서를 언어별 폴더(ko, en) 기준으로 생성합니다.
+ */
+const rawSidebarConfig = generateSidebar([
+    // 매뉴얼 설정: /ko/..., /en/...
+    ...languages.map(lang => ({
+        documentRootPath: 'manual',
+        scanStartPath: lang.code,
+        resolvePath: `/${lang.code}/`,
+        useTitleFromFileHeading: true,
+        useFolderTitleFromIndexFile: true,
+        hyphenToSpace: true,
+    })),
+
+    // API 문서 설정: /ko/api/..., /en/api/...
+    ...languages.map(lang => ({
+        documentRootPath: 'manual',
+        scanStartPath: `${lang.code}/api/RedGPU-API/namespaces/RedGPU`,
+        resolvePath: `/${lang.code}/api/RedGPU-API/namespaces/RedGPU/`,
+        useFolderTitleFromIndexFile: true,
+        indexFile: 'README.md',
+        useFolderLinkFromIndexFile: true,
+        recursive: true,
+        collapsed: true,
+        collapseDepth: 2,
+        sortMenusByFrontmatterOrder: true
+    }))
+]);
+
+const finalSidebar = sortSidebar(rawSidebarConfig);
+
+/**
+ * 3. VitePress Main Configuration
+ */
 export default defineConfig({
     title: 'RedGPU',
-    description: 'RedGPU WebGPU 기반 3D 그래픽 엔진',
-
+    description: 'RedGPU - WebGPU based 3D Graphics Engine',
     base: '/RedGPU/manual/',
     ignoreDeadLinks: true,
+    lastUpdated: true,
 
+    // 다국어 로케일 설정 (자동 생성)
+    locales: Object.fromEntries(
+        languages.map(lang => [
+            lang.code === 'en' ? 'root' : lang.code, // 영어를 기본(root)으로 설정
+            {
+                label: lang.label,
+                lang: lang.code,
+                link: `/${lang.code}/`, // 언어 전환의 기준점이 되는 경로
+                themeConfig: {
+                    // 언어별 네비게이션 바
+                    nav: [
+                        { text: 'Home', link: `/${lang.code}/` },
+                        { text: 'Getting Started', link: lang.entry },
+                        { text: 'API Reference', link: `/${lang.code}/api/RedGPU-API/namespaces/RedGPU/README` },
+                        { text: 'Examples', link: 'https://redcamel.github.io/RedGPU/examples/', target: '_self' },
+                    ],
+                }
+            }
+        ])
+    ),
+
+    // 마크다운 커스텀 규칙
     markdown: {
         config: (md) => {
             const defaultRender = md.renderer.rules.html_block || ((tokens, idx) => tokens[idx].content);
-
             md.renderer.rules.html_block = (tokens, idx, options, env, self) => {
-                const content = tokens[idx].content;
-
-                // <iframe> 태그를 찾아서 <ExampleFrame>으로 교체
-                if (content.trim().startsWith('<iframe')) {
-                    return content
-                        .replace(/<iframe/g, '<ExampleFrame')
-                        .replace(/<\/iframe>/g, '</ExampleFrame>');
+                const content = tokens[idx].content.trim();
+                if (content.startsWith('<iframe')) {
+                    return content.replace(/<iframe/g, '<ExampleFrame').replace(/<\/iframe>/g, '</ExampleFrame>');
                 }
-
                 return defaultRender(tokens, idx, options, env, self);
             };
         }
     },
 
-    locales: {
-        root: {
-            label: '한국어',
-            lang: 'ko',
-            link: '/ko/'
-        }
-    },
-
-    lastUpdated: true,
-
+    // 공통 테마 설정
     themeConfig: {
-        logo: {
-            light: '/logo-light.svg',
-            dark: '/logo-dark.svg',
-        },
+        logo: { light: '/logo-light.svg', dark: '/logo-dark.svg' },
         logoLink: 'https://redcamel.github.io/RedGPU/',
-        lastUpdated: {
-            text: '마지막 업데이트',
-            formatOptions: {
-                dateStyle: 'full',
-                timeStyle: 'medium'
-            }
-        },
+
+        // 공통 사이드바 (finalSidebar 내부의 키가 /ko/, /en/로 나뉘어 있어 자동 매칭됨)
+        sidebar: finalSidebar,
+
         socialLinks: [
             { icon: 'github', link: 'https://github.com/redcamel/RedGPU' },
             { icon: 'x', link: 'https://x.com/redcamel15' }
         ],
-        nav: [
-            { text: 'Manual home', link: '/' },
-            { text: '시작하기', link: '/ko/introduction/getting-started' },
-            { text: 'API', link: '/api/RedGPU-API/namespaces/RedGPU/README' },
-            { text: 'Examples', link: 'https://redcamel.github.io/RedGPU/examples/', target: '_self' },
-        ],
 
-        sidebar: sortSidebar(sidebarConfig),
+        // 하단 및 기타 텍스트 설정
+        lastUpdated: {
+            text: 'Last Updated',
+            formatOptions: { dateStyle: 'full', timeStyle: 'medium' }
+        },
 
         search: {
             provider: 'local',
@@ -134,25 +140,27 @@ export default defineConfig({
                 locales: {
                     root: {
                         translations: {
-                            button: {
-                                buttonText: 'Search',
-                                buttonAriaLabel: 'Search'
-                            },
+                            button: { buttonText: 'Search' },
                             modal: {
                                 displayDetails: 'Display detailed list',
                                 resetButtonTitle: 'Reset query',
                                 backButtonTitle: 'Go back',
                                 noResultsText: 'No results for',
-                                footer: {
-                                    selectText: 'to select',
-                                    navigateText: 'to navigate',
-                                    closeText: 'to close'
-                                }
+                                footer: { selectText: 'to select', navigateText: 'to navigate', closeText: 'to close' }
                             }
                         }
                     }
                 }
             }
         },
+
+        docFooter: {
+            prev: 'Previous page',
+            next: 'Next page'
+        },
+
+        outline: {
+            label: 'On this page'
+        }
     }
-})
+});

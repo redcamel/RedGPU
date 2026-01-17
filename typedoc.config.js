@@ -1,6 +1,6 @@
 module.exports = {
 	entryPoints: ["src/indexDoc.ts"],
-	out: "manual/api",
+	out: `manual/${process.env.DOC_LANG || 'ko'}/api`,
 	plugin: ["typedoc-plugin-markdown"],
 	hideGenerator: true,
 	name:"RedGPU API",
