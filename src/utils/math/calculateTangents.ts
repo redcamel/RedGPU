@@ -1,11 +1,26 @@
 /**
- * MikkTSpace 알고리즘을 기반으로 탄젠트 벡터를 계산합니다.
- * @param vertices - 정점 위치 배열 [x,y,z, x,y,z, ...]
- * @param normals - 노멀 벡터 배열 [x,y,z, x,y,z, ...]
- * @param uvs - UV 좌표 배열 [u,v, u,v, ...]
- * @param indices - 인덱스 배열 (삼각형 단위, 빈 배열이면 non-indexed)
- * @param existingTangents - 기존 탄젠트 배열 (선택적)
- * @returns 탄젠트 배열 [x,y,z,w, x,y,z,w, ...] (w는 handedness)
+ * [KO] MikkTSpace 알고리즘을 기반으로 탄젠트 벡터를 계산합니다.
+ * [EN] Calculates tangent vectors based on the MikkTSpace algorithm.
+ *
+ * @param vertices
+ * [KO] 정점 위치 배열 [x,y,z, x,y,z, ...]
+ * [EN] Vertex position array [x,y,z, x,y,z, ...]
+ * @param normals
+ * [KO] 노멀 벡터 배열 [x,y,z, x,y,z, ...]
+ * [EN] Normal vector array [x,y,z, x,y,z, ...]
+ * @param uvs
+ * [KO] UV 좌표 배열 [u,v, u,v, ...]
+ * [EN] UV coordinate array [u,v, u,v, ...]
+ * @param indices
+ * [KO] 인덱스 배열 (삼각형 단위, 빈 배열이면 non-indexed)
+ * [EN] Index array (per triangle, non-indexed if empty)
+ * @param existingTangents
+ * [KO] 기존 탄젠트 배열 (선택적)
+ * [EN] Existing tangent array (optional)
+ * @returns
+ * [KO] 탄젠트 배열 [x,y,z,w, x,y,z,w, ...] (w는 handedness)
+ * [EN] Tangent array [x,y,z,w, x,y,z,w, ...] (w is handedness)
+ * @category Math
  */
 const calculateTangents = (
     vertices: number[],

@@ -1,20 +1,27 @@
 /**
- * 주어진 정점(vertex) 배열과 인덱스 배열을 기반으로 각 정점의 노멀 벡터(normals)를 계산합니다.
+ * [KO] 주어진 정점(vertex) 배열과 인덱스 배열을 기반으로 각 정점의 노멀 벡터(normals)를 계산합니다.
+ * [EN] Calculates vertex normals based on the given vertex array and index array.
  *
- * 삼각형 단위로 각 면의 노멀을 구한 뒤, 해당 면에 속한 정점의 노멀에 누적하여 평균화합니다.
+ * [KO] 삼각형 단위로 각 면의 노멀을 구한 뒤, 해당 면에 속한 정점의 노멀에 누적하여 평균화합니다. 마지막에 각 정점의 노멀을 정규화하여 반환합니다.
+ * [EN] Calculates face normals for each triangle, accumulates them for each vertex belonging to the face, and averages them. Returns normalized normals for each vertex.
  *
- * 마지막에 각 정점의 노멀을 정규화하여 반환합니다.
- *
- * @param {number[]} vertexArray 정점 위치 배열 (x, y, z 순서로 3개씩)
- * @param {number[]} indexArray 삼각형을 구성하는 정점 인덱스 배열
- * @returns {number[]} 계산된 정점 노멀 배열 (x, y, z 순서로 3개씩)
+ * @param vertexArray
+ * [KO] 정점 위치 배열 (x, y, z 순서로 3개씩)
+ * [EN] Vertex position array (3 values per vertex: x, y, z)
+ * @param indexArray
+ * [KO] 삼각형을 구성하는 정점 인덱스 배열
+ * [EN] Vertex index array defining triangles
+ * @returns
+ * [KO] 계산된 정점 노멀 배열 (x, y, z 순서로 3개씩)
+ * [EN] Calculated vertex normal array (3 values per vertex: x, y, z)
+ * @category Math
  */
-const calculateNormals = (vertexArray, indexArray) => {
+const calculateNormals = (vertexArray: number[], indexArray: number[]): number[] => {
     let i, j;
     let x = 0;
     let y = 1;
     let z = 2;
-    let result = [];
+    let result: number[] = [];
     let indices = indexArray;
     const numVertices = vertexArray.length / 3;
     if (!indexArray || indexArray.length === 0) {

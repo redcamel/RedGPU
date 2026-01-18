@@ -3,15 +3,19 @@ import Mesh from "../../../display/mesh/Mesh";
 import OBB from "./OBB";
 
 /**
- * 메시의 로컬 AABB를 기반으로 메시의 modelMatrix를 적용한 3차원 Oriented Bounding Box(OBB)를 계산합니다.
+ * [KO] 메시의 로컬 AABB를 기반으로 메시의 modelMatrix를 적용한 3차원 Oriented Bounding Box(OBB)를 계산합니다.
+ * [EN] Calculates a 3D Oriented Bounding Box (OBB) by applying the mesh's modelMatrix to its local AABB.
  *
- * 메시의 지오메트리 볼륨(AABB) 정보를 가져와 중심점, 반치수, 방향 행렬을 메시의 modelMatrix로 변환하여
- *
- * 월드 기준의 OBB를 반환합니다. 메시 또는 지오메트리가 없거나, 지오메트리 볼륨이 비어 있으면 (0,0,0) 중심/반치수, 단위행렬 OBB를 반환합니다.
+ * [KO] 메시의 지오메트리 볼륨(AABB) 정보를 가져와 중심점, 반치수, 방향 행렬을 메시의 modelMatrix로 변환하여 월드 기준의 OBB를 반환합니다. 메시 또는 지오메트리가 없거나, 지오메트리 볼륨이 비어 있으면 (0,0,0) 중심/반치수, 단위행렬 OBB를 반환합니다.
+ * [EN] Retrieves the mesh's geometry volume (AABB), transforms its center, half-extents, and orientation using the mesh's modelMatrix, and returns a world-space OBB. Returns an OBB with (0,0,0) center/half-extents and identity matrix if the mesh or geometry is missing, or if the geometry volume is empty.
  *
  * @category Bound
- * @param {Mesh} mesh OBB를 계산할 메시 객체
- * @returns {OBB} 계산된 월드 기준 OBB 인스턴스
+ * @param mesh
+ * [KO] OBB를 계산할 메시 객체
+ * [EN] Mesh object to calculate OBB from
+ * @returns
+ * [KO] 계산된 월드 기준 OBB 인스턴스
+ * [EN] Calculated world-space OBB instance
  */
 const calculateMeshOBB = (mesh: Mesh): OBB => {
     // 메시나 지오메트리가 없는 경우 기본 OBB 반환

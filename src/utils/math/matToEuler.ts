@@ -1,4 +1,22 @@
-const mat4ToEuler = (mat, dest, order?: any) => {
+/**
+ * [KO] 4x4 행렬에서 오일러 각도(Euler angles)를 추출합니다.
+ * [EN] Extracts Euler angles from a 4x4 matrix.
+ *
+ * @param mat
+ * [KO] 4x4 행렬 (배열 형태)
+ * [EN] 4x4 matrix (array format)
+ * @param dest
+ * [KO] 결과를 저장할 배열 (선택)
+ * [EN] Destination array to store result (optional)
+ * @param order
+ * [KO] 회전 순서 (기본값: 'XYZ')
+ * [EN] Rotation order (default: 'XYZ')
+ * @returns
+ * [KO] 오일러 각도가 저장된 배열 [x, y, z]
+ * [EN] Array containing Euler angles [x, y, z]
+ * @category Math
+ */
+const mat4ToEuler = (mat: any, dest: any, order?: any) => {
     dest = dest || [0, 0, 0];
     order = order || 'XYZ';
     // Assumes the upper 3x3 of m is a pure rotation matrix (i.e, unscaled)
@@ -62,7 +80,7 @@ const mat4ToEuler = (mat, dest, order?: any) => {
     }
     return dest;
 }
-let clamp = function (value, min, max) {
+let clamp = function (value: number, min: number, max: number) {
     return Math.max(min, Math.min(max, value));
 };
 export default mat4ToEuler

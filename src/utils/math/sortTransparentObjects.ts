@@ -1,13 +1,20 @@
 /**
- * 카메라 위치를 기준으로 투명 객체(GPURenderBundle)를 원근 거리 내림차순으로 정렬합니다.
+ * [KO] 카메라 위치를 기준으로 투명 객체(GPURenderBundle)를 원근 거리 내림차순으로 정렬합니다.
+ * [EN] Sorts transparent objects (GPURenderBundle) in descending order of distance from the camera.
  *
- * 각 객체의 mesh 위치(x, y, z)와 카메라 위치의 거리 제곱을 계산하여,
+ * [KO] 각 객체의 mesh 위치(x, y, z)와 카메라 위치의 거리 제곱을 계산하여, 카메라에서 먼 객체가 먼저 오도록 정렬합니다. 거리 계산은 캐시를 활용해 중복 연산을 방지합니다.
+ * [EN] Calculates the squared distance between each object's mesh position (x, y, z) and the camera position, and sorts them so that objects farther from the camera come first. Utilizes caching to prevent redundant distance calculations.
  *
- * 카메라에서 먼 객체가 먼저 오도록 정렬합니다. 거리 계산은 캐시를 활용해 중복 연산을 방지합니다.
- *
- * @param cameraPos 카메라 위치 객체 {x, y, z}
- * @param objects 정렬할 GPURenderBundle 배열 (각 객체는 .mesh 속성을 가짐)
- * @returns 카메라에서 먼 순서로 정렬된 GPURenderBundle 배열
+ * @param cameraPos
+ * [KO] 카메라 위치 객체 {x, y, z}
+ * [EN] Camera position object {x, y, z}
+ * @param objects
+ * [KO] 정렬할 GPURenderBundle 배열 (각 객체는 .mesh 속성을 가짐)
+ * [EN] Array of GPURenderBundle objects to sort (each object has a .mesh property)
+ * @returns
+ * [KO] 카메라에서 먼 순서로 정렬된 GPURenderBundle 배열
+ * [EN] GPURenderBundle array sorted by distance from the camera (farthest first)
+ * @category Math
  */
 function sortTransparentObjects(cameraPos: {
     x: number,

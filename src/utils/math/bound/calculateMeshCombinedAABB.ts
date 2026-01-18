@@ -2,16 +2,19 @@ import Mesh from "../../../display/mesh/Mesh";
 import AABB from "./AABB";
 
 /**
- * 주어진 메시와 모든 자식 메시의 AABB를 통합하여 전체를 감싸는 3차원 Axis-Aligned Bounding Box(AABB)를 계산합니다.
+ * [KO] 주어진 메시와 모든 자식 메시의 AABB를 통합하여 전체를 감싸는 3차원 Axis-Aligned Bounding Box(AABB)를 계산합니다.
+ * [EN] Calculates a 3D Axis-Aligned Bounding Box (AABB) that encompasses the given mesh and all its children by combining their AABBs.
  *
- * 메시 계층 구조 내 모든 메시의 boundingAABB를 재귀적으로 수집하여,
- * 전체를 감싸는 최소/최대값을 계산한 새로운 AABB를 반환합니다.
- *
- * 메시 또는 자식 메시가 없거나, 유효한 AABB가 하나도 없으면 (0,0,0,0,0,0) AABB를 반환합니다.
+ * [KO] 메시 계층 구조 내 모든 메시의 boundingAABB를 재귀적으로 수집하여, 전체를 감싸는 최소/최대값을 계산한 새로운 AABB를 반환합니다. 메시 또는 자식 메시가 없거나, 유효한 AABB가 하나도 없으면 (0,0,0,0,0,0) AABB를 반환합니다.
+ * [EN] Recursively collects the boundingAABB of all meshes within the hierarchy and returns a new AABB calculated from the min/max values encompassing all of them. Returns a (0,0,0,0,0,0) AABB if there are no meshes or children, or no valid AABBs.
  *
  * @category Bound
- * @param {Mesh} mesh AABB를 계산할 루트 메시 객체
- * @returns {AABB} 전체 메시 계층을 감싸는 통합 AABB 인스턴스
+ * @param mesh
+ * [KO] AABB를 계산할 루트 메시 객체
+ * [EN] Root mesh object to calculate AABB from
+ * @returns
+ * [KO] 전체 메시 계층을 감싸는 통합 AABB 인스턴스
+ * [EN] Combined AABB instance encompassing the entire mesh hierarchy
  */
 const calculateMeshCombinedAABB = (mesh: Mesh): AABB => {
     const allAABBs = []
@@ -20,10 +23,15 @@ const calculateMeshCombinedAABB = (mesh: Mesh): AABB => {
     return calculateCombinedAABBFromAABBs(allAABBs);
 };
 /**
- * 재귀적으로 모든 자식 메시의 AABB를 수집하는 헬퍼 함수
+ * [KO] 재귀적으로 모든 자식 메시의 AABB를 수집하는 헬퍼 함수
+ * [EN] Helper function to recursively collect AABBs of all child meshes
  *
- * @param {Mesh} mesh AABB를 수집할 메시 객체
- * @param {AABB[]} aabbs 수집된 AABB 배열
+ * @param mesh
+ * [KO] AABB를 수집할 메시 객체
+ * [EN] Mesh object to collect AABB from
+ * @param aabbs
+ * [KO] 수집된 AABB 배열
+ * [EN] Array of collected AABBs
  */
 const collectRecursive = (mesh: Mesh, aabbs: AABB[]) => {
     // 지오메트리가 있는 경우에만 AABB 계산 및 추가
@@ -42,10 +50,15 @@ const collectRecursive = (mesh: Mesh, aabbs: AABB[]) => {
     }
 };
 /**
- * 여러 AABB 배열을 통합하여 전체를 감싸는 AABB를 계산합니다.
+ * [KO] 여러 AABB 배열을 통합하여 전체를 감싸는 AABB를 계산합니다.
+ * [EN] Calculates an AABB that encompasses multiple AABBs in an array.
  *
- * @param {AABB[]} aabbs 통합할 AABB 배열
- * @returns {AABB} 통합된 AABB 인스턴스
+ * @param aabbs
+ * [KO] 통합할 AABB 배열
+ * [EN] Array of AABBs to combine
+ * @returns
+ * [KO] 통합된 AABB 인스턴스
+ * [EN] Combined AABB instance
  */
 const calculateCombinedAABBFromAABBs = (aabbs: AABB[]): AABB => {
     if (aabbs.length === 0) return new AABB(0, 0, 0, 0, 0, 0);

@@ -1,14 +1,20 @@
 /**
- * GPUBuffer 간 데이터를 복사하는 함수입니다.
+ * [KO] GPUBuffer 간 데이터를 복사하는 함수입니다.
+ * [EN] Function to copy data between GPUBuffers.
  *
- * srcBuffer의 데이터를 dstBuffer로 복사합니다.
+ * [KO] srcBuffer의 데이터를 dstBuffer로 복사합니다. 복사 크기는 두 버퍼 중 작은 size로 결정됩니다.
+ * [EN] Copies data from srcBuffer to dstBuffer. The copy size is determined by the smaller size of the two buffers.
  *
- * 복사 크기는 두 버퍼 중 작은 size로 결정됩니다.
- *
- *
- * @param {GPUDevice} gpuDevice 복사 작업에 사용할 GPU 디바이스
- * @param {GPUBuffer} srcBuffer 복사할 소스 버퍼
- * @param {GPUBuffer} dstBuffer 복사 대상 버퍼
+ * @param gpuDevice
+ * [KO] 복사 작업에 사용할 GPU 디바이스
+ * [EN] GPU device to use for the copy operation
+ * @param srcBuffer
+ * [KO] 복사할 소스 버퍼
+ * [EN] Source buffer to copy from
+ * @param dstBuffer
+ * [KO] 복사 대상 버퍼
+ * [EN] Destination buffer to copy to
+ * @category Utility
  */
 const copyGPUBuffer = (
     gpuDevice: GPUDevice,

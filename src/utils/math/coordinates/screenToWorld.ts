@@ -8,17 +8,25 @@ let pointMTX = mat4.create();
 let invViewProjection = mat4.create();
 let resultMTX;
 /**
- * 화면 상의 2D 좌표(픽셀 위치)를 3D 월드 좌표로 변환합니다.
+ * [KO] 화면 상의 2D 좌표(픽셀 위치)를 3D 월드 좌표로 변환합니다.
+ * [EN] Converts 2D screen coordinates (pixel position) to 3D world coordinates.
  *
- * View3D의 카메라 및 프로젝션 정보를 바탕으로, 주어진 화면 좌표(screenX, screenY)를
- *
- * 3D 월드 좌표([x, y, z])로 변환합니다. 주로 마우스 클릭 위치 등에서 3D 공간의 위치를 얻을 때 사용합니다.
+ * [KO] View3D의 카메라 및 프로젝션 정보를 바탕으로, 주어진 화면 좌표(screenX, screenY)를 3D 월드 좌표([x, y, z])로 변환합니다. 주로 마우스 클릭 위치 등에서 3D 공간의 위치를 얻을 때 사용합니다.
+ * [EN] Converts given screen coordinates (screenX, screenY) to 3D world coordinates ([x, y, z]) based on View3D's camera and projection information. Commonly used to get a position in 3D space from a mouse click, etc.
  *
  * @category Coordinates
- * @param {number} screenX 변환할 화면 X 좌표 (픽셀)
- * @param {number} screenY 변환할 화면 Y 좌표 (픽셀)
- * @param {AView} view 변환에 사용할 AView 인스턴스 (View3D 또는 하위 클래스)
- * @returns {[number, number, number]} 변환된 3D 월드 좌표 [x, y, z]
+ * @param screenX
+ * [KO] 변환할 화면 X 좌표 (픽셀)
+ * [EN] Screen X coordinate to convert (pixels)
+ * @param screenY
+ * [KO] 변환할 화면 Y 좌표 (픽셀)
+ * [EN] Screen Y coordinate to convert (pixels)
+ * @param view
+ * [KO] 변환에 사용할 AView 인스턴스 (View3D 또는 하위 클래스)
+ * [EN] AView instance to use for conversion (View3D or subclass)
+ * @returns
+ * [KO] 변환된 3D 월드 좌표 [x, y, z]
+ * [EN] Converted 3D world coordinates [x, y, z]
  */
 const screenToWorld = (screenX: number, screenY: number, view: AView,) => {
     const {rawCamera, pixelRectArray} = view

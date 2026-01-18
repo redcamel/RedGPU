@@ -17,4 +17,3 @@ export {
     quaternionToRotationMat4,
     sortTransparentObjects
 }
-

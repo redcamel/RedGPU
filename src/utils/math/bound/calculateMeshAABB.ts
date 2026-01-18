@@ -5,17 +5,19 @@ import AABB from "./AABB";
 const tempLocalVertex = vec3.create();
 const tempWorldVertex = vec3.create();
 /**
- * 메시의 로컬 AABB를 월드 좌표계로 변환하여 새로운 3차원 Axis-Aligned Bounding Box(AABB)를 계산합니다.
+ * [KO] 메시의 로컬 AABB를 월드 좌표계로 변환하여 새로운 3차원 Axis-Aligned Bounding Box(AABB)를 계산합니다.
+ * [EN] Calculates a new 3D Axis-Aligned Bounding Box (AABB) by converting the mesh's local AABB to world coordinates.
  *
- * 메시의 지오메트리 볼륨(AABB) 정보를 가져와 8개 꼭짓점을 메시의 modelMatrix로 변환한 뒤,
- *
- * 변환된 꼭짓점들의 최소/최대값을 계산하여 월드 기준의 AABB를 반환합니다.
- *
- * 메시 또는 지오메트리가 없거나, 지오메트리 볼륨이 비어 있으면 (0,0,0,0,0,0) AABB를 반환합니다.
+ * [KO] 메시의 지오메트리 볼륨(AABB) 정보를 가져와 8개 꼭짓점을 메시의 modelMatrix로 변환한 뒤, 변환된 꼭짓점들의 최소/최대값을 계산하여 월드 기준의 AABB를 반환합니다. 메시 또는 지오메트리가 없거나, 지오메트리 볼륨이 비어 있으면 (0,0,0,0,0,0) AABB를 반환합니다.
+ * [EN] Retrieves the mesh's geometry volume (AABB), transforms its 8 vertices using the mesh's modelMatrix, and calculates the min/max values of the transformed vertices to return a world-space AABB. Returns a (0,0,0,0,0,0) AABB if the mesh or geometry is missing, or if the geometry volume is empty.
  *
  * @category Bound
- * @param {Mesh} mesh AABB를 계산할 메시 객체
- * @returns {AABB} 계산된 월드 기준 AABB 인스턴스
+ * @param mesh
+ * [KO] AABB를 계산할 메시 객체
+ * [EN] Mesh object to calculate AABB from
+ * @returns
+ * [KO] 계산된 월드 기준 AABB 인스턴스
+ * [EN] Calculated world-space AABB instance
  */
 const calculateMeshAABB = (mesh: Mesh): AABB => {
     // 메시나 지오메트리가 없는 경우
