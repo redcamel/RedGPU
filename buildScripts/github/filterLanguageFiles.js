@@ -39,11 +39,9 @@ const filterLanguageFiles = (dir, currentLang) => {
                         tempLine = tempLine.replace('[EN] ', '').replace('[EN]', '');
                     }
 
-                    // 줄 앞의 '*', 공백 등을 제거하여 정리
-                    return tempLine.trimEnd().replace(/^[\s*]+/, '');
+                    // 줄 끝의 공백만 제거하여 반환 (빈 줄 유지)
+                    return tempLine.trimEnd();
                 })
-                // 내용이 없는 빈 줄은 필터링
-                .filter(line => line.length > 0)
                 .join('\n');
 
             fs.writeFileSync(fullPath, processed);

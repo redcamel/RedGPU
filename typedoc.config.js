@@ -7,8 +7,7 @@ module.exports = {
 	includeVersion: true,
 	readme: "none",
 	parametersFormat:'table',
-	typeDeclarationFormat: 'table',
-	useCodeBlocks: true,
-	expandObjects:true
+	// typeDeclarationFormat: 'table',
+
 
 };
