@@ -30,6 +30,21 @@
     }
 }
 
+/* "Defined in:" 스타일 커스텀 */
+.vp-doc p:has(> a[href*="github.com"]) {
+    font-size: 0.65rem;
+    color: var(--vp-c-text-3);
+    background-color: var(--vp-c-bg-soft);
+    padding: 4px 12px;
+    border-radius: 6px;
+    margin: 1rem 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0.75;
+}
+
+
 /* ============================================================
    2. API 전용 레이아웃 (경로 기반 .api-page-layout)
    ============================================================ */
