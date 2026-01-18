@@ -1,10 +1,11 @@
 /**
- * 다양한 3D 기본 도형(Box, Sphere, Plane, Circle, Torus, TorusKnot, Cylinder, Ground 등)을 제공합니다.
+ * [KO] 씬 구성을 위한 다양한 3D 기본 도형(Primitive)들을 제공합니다.
+ * [EN] Provides various 3D primitive geometries for scene composition.
  *
- * 각 도형 객체를 통해 씬(Scene) 내에 다양한 기하학적 형태의 오브젝트를 손쉽게 생성하고 배치할 수 있습니다.
+ * [KO] Box, Sphere, Plane, Torus 등 표준 기하 도형들을 손쉽게 생성하고 Mesh의 지오메트리로 사용할 수 있습니다.
+ * [EN] Easily create standard geometric shapes like Box, Sphere, Plane, and Torus to use as Mesh geometry.
  *
  * @packageDocumentation
- *
  * <iframe src="/RedGPU/examples/3d/primitive/primitives/"></iframe>
  */
 export * as Core from './core'

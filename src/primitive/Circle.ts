@@ -3,16 +3,19 @@ import createPrimitiveGeometry from "./core/createPrimitiveGeometry";
 import Primitive from "./core/Primitive";
 
 /**
- * Circle(원) 기본 도형 클래스입니다.
- * 반지름, 세그먼트, 시작 각도, 각도 길이 등 다양한 파라미터로 2D 원형 메시를 생성합니다.
+ * [KO] Circle(원) 기본 도형 클래스입니다.
+ * [EN] Circle primitive geometry class.
  *
- * @example
- * ```javascript
- * // 반지름 2, 세그먼트 64짜리 원 생성 및 씬에 추가
+ * [KO] 반지름, 세그먼트, 시작 각도 등을 기반으로 2D 원형 데이터를 생성하여 관리합니다.
+ * [EN] Generates and manages 2D circular data based on radius, segments, start angle, etc.
+ *
+ * * ### Example
+ * ```typescript
+ * // 반지름 2, 세그먼트 64짜리 원 생성
  * const circle = new RedGPU.Primitive.Circle(redGPUContext, 2, 64);
  * ```
- *
  * <iframe src="/RedGPU/examples/3d/primitive/circle/"></iframe>
+ * @category Primitive
  */
 class Circle extends Primitive {
     #makeData = (function () {
@@ -60,12 +63,24 @@ class Circle extends Primitive {
     })();
 
     /**
-     * Circle 생성자
-     * @param redGPUContext RedGPUContext 인스턴스
-     * @param radius 원 반지름 (기본값 1)
-     * @param segments 세그먼트 수 (기본값 32, 최소 3)
-     * @param thetaStart 시작 각도(라디안, 기본값 0)
-     * @param thetaLength 원호 각도(라디안, 기본값 2*PI)
+     * [KO] Circle 인스턴스를 생성합니다.
+     * [EN] Creates an instance of Circle.
+     * 
+     * @param redGPUContext - 
+     * [KO] RedGPUContext 인스턴스 
+     * [EN] RedGPUContext instance
+     * @param radius - 
+     * [KO] 원 반지름 (기본값 1) 
+     * [EN] Circle radius (default 1)
+     * @param segments - 
+     * [KO] 세그먼트 수 (기본값 32, 최소 3) 
+     * [EN] Number of segments (default 32, min 3)
+     * @param thetaStart - 
+     * [KO] 시작 각도 (라디안, 기본값 0) 
+     * [EN] Starting angle (radians, default 0)
+     * @param thetaLength - 
+     * [KO] 원호 각도 (라디안, 기본값 2*PI) 
+     * [EN] Arc angle (radians, default 2*PI)
      */
     constructor(
         redGPUContext: RedGPUContext,
