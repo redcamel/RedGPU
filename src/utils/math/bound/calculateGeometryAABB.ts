@@ -2,25 +2,23 @@ import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
 import AABB from "./AABB";
 
 /**
- * [KO] 주어진 VertexBuffer의 모든 정점 정보를 기반으로 3차원 축 정렬 경계 상자(AABB)를 계산합니다.
- * [EN] Calculates a 3D Axis-Aligned Bounding Box (AABB) based on all vertex information in the given VertexBuffer.
+ * [KO] VertexBuffer 정보를 기반으로 AABB를 계산합니다.
+ * [EN] Calculates AABB based on VertexBuffer information.
  *
  * [KO] 버텍스 버퍼의 각 정점 위치를 순회하며 최소/최대값을 찾아 AABB를 생성합니다.
- * [EN] Iterates through each vertex position in the vertex buffer to find the min/max values and create an AABB.
+ * [EN] Iterates through vertex positions to find min/max values and create an AABB.
  *
  * * ### Example
  * ```typescript
  * const geometryAABB = calculateGeometryAABB(vertexBuffer);
  * ```
  *
- * @param vertexBuffer
+ * @param vertexBuffer -
  * [KO] AABB를 계산할 버텍스 버퍼 객체
  * [EN] Vertex buffer object to calculate AABB from
- *
  * @returns
  * [KO] 계산된 AABB 인스턴스
  * [EN] Calculated AABB instance
- *
  * @category Bound
  */
 const calculateGeometryAABB = (vertexBuffer: VertexBuffer): AABB => {

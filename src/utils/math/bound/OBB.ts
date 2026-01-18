@@ -2,13 +2,11 @@ import {mat4, vec3} from "gl-matrix";
 import consoleAndThrowError from "../../consoleAndThrowError";
 
 /**
- * [KO] 3차원 방향성 경계 상자(Oriented Bounding Box)를 표현하는 클래스입니다.
- * [EN] Class representing a 3D Oriented Bounding Box (OBB).
+ * [KO] 3차원 방향성 경계 상자(Oriented Bounding Box) 클래스입니다.
+ * [EN] 3D Oriented Bounding Box (OBB) class.
  *
- * [KO] 3차원 공간에서 임의의 방향을 가질 수 있는 경계 상자를 정의하며, 분리축 이론(SAT)을 기반으로 한 교차 판정 및 포함 여부 확인 기능을 제공합니다.
- * [EN] Defines a bounding box that can have an arbitrary orientation in 3D space, providing intersection tests based on the Separating Axis Theorem (SAT) and containment checks.
- *
- * <iframe src="/RedGPU/examples/3d/mesh/boundBox/meshOBBIntersects/"></iframe>
+ * [KO] 임의의 방향을 가질 수 있는 경계 상자를 정의하며 SAT 기반 교차 판정 및 포함 여부 확인 기능을 제공합니다.
+ * [EN] Defines a bounding box with arbitrary orientation and provides SAT-based intersection and containment tests.
  *
  * * ### Example
  * ```typescript
@@ -74,13 +72,13 @@ export class OBB {
      * [KO] OBB 인스턴스를 생성합니다.
      * [EN] Creates an OBB instance.
      *
-     * @param center
+     * @param center -
      * [KO] 중심 좌표 [x, y, z]
      * [EN] Center coordinates [x, y, z]
-     * @param halfExtents
+     * @param halfExtents -
      * [KO] 반치수 [x, y, z]
      * [EN] Half extents [x, y, z]
-     * @param orientation
+     * @param orientation -
      * [KO] 방향 행렬(mat4)
      * [EN] Orientation matrix (mat4)
      */
@@ -109,10 +107,9 @@ export class OBB {
      * [KO] 다른 OBB와의 교차 여부를 반환합니다.
      * [EN] Returns whether it intersects with another OBB.
      *
-     * @param other
+     * @param other -
      * [KO] 교차 여부를 검사할 OBB 인스턴스
      * [EN] OBB instance to check for intersection
-     *
      * @returns
      * [KO] 교차하면 true, 아니면 false
      * [EN] True if intersecting, otherwise false
@@ -147,16 +144,15 @@ export class OBB {
      * [KO] 점 또는 좌표가 OBB 내부에 포함되는지 여부를 반환합니다.
      * [EN] Returns whether a point or coordinate is contained within the OBB.
      *
-     * @param pointOrX
+     * @param pointOrX -
      * [KO] [x, y, z] 배열 또는 x 좌표
      * [EN] [x, y, z] array or x coordinate
-     * @param [y]
+     * @param y -
      * [KO] y 좌표
      * [EN] y coordinate
-     * @param [z]
+     * @param z -
      * [KO] z 좌표
      * [EN] z coordinate
-     *
      * @returns
      * [KO] 포함되면 true, 아니면 false
      * [EN] True if contained, otherwise false
@@ -214,7 +210,7 @@ export class OBB {
     /**
      * [KO] 주어진 축(axis)에 대한 OBB의 투영 반지름을 반환합니다.
      * [EN] Returns the projection radius of the OBB onto the given axis.
-     * @param axis
+     * @param axis -
      * [KO] 투영할 축 벡터
      * [EN] Axis vector to project onto
      * @returns

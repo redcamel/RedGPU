@@ -18,7 +18,11 @@
     max-width: 100% !important;
     width: 100% !important;
 }
-
+.vp-doc table{
+    width: 100%;
+    display: table;
+    table-layout: auto
+}
 @media (min-width: 1280px) {
     .VPDoc .container {
         display: flex;

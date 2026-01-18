@@ -7,19 +7,18 @@
  * copyToTextureArray(device, sourceTex, targetArrayTex, 0);
  * ```
  *
- * @param gpuDevice
+ * @param gpuDevice -
  * [KO] 복사 작업에 사용할 GPU 디바이스
  * [EN] GPU device to use for the copy operation
- * @param sourceTexture
+ * @param sourceTexture -
  * [KO] 복사할 소스 텍스처
  * [EN] Source texture to copy from
- * @param targetArrayTexture
+ * @param targetArrayTexture -
  * [KO] 복사 대상 배열 텍스처
  * [EN] Target texture array to copy to
- * @param sliceIndex
- * [KO] 복사할 배열 텍스처의 슬라이스 인덱스
- * [EN] Slice index of the texture array to copy into
- *
+ * @param sliceIndex -
+ * [KO] 복사할 슬라이스 인덱스
+ * [EN] Slice index to copy into
  * @category Texture
  */
 function copyToTextureArray(

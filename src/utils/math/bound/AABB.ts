@@ -1,13 +1,11 @@
 import consoleAndThrowError from "../../consoleAndThrowError";
 
 /**
- * [KO] 3차원 축 정렬 경계 상자(Axis-Aligned Bounding Box)를 표현하는 클래스입니다.
- * [EN] Class representing a 3D Axis-Aligned Bounding Box (AABB).
+ * [KO] 3차원 축 정렬 경계 상자(Axis-Aligned Bounding Box) 클래스입니다.
+ * [EN] 3D Axis-Aligned Bounding Box (AABB) class.
  *
- * [KO] 3차원 공간에서 각 축에 평행한 경계 상자를 정의하며, 교차 판정, 점 포함 여부 확인 및 복제 기능을 제공합니다.
- * [EN] Defines a bounding box parallel to each axis in 3D space, providing intersection tests, point containment checks, and cloning functionality.
- *
- * <iframe src="/RedGPU/examples/3d/mesh/boundBox/meshAABBIntersects/"></iframe>
+ * [KO] 각 축에 평행한 경계 상자를 정의하며 교차 판정, 포함 여부 확인 기능을 제공합니다.
+ * [EN] Defines a bounding box parallel to each axis and provides intersection and containment tests.
  *
  * * ### Example
  * ```typescript
@@ -88,22 +86,22 @@ export class AABB {
      * [KO] AABB 인스턴스를 생성합니다.
      * [EN] Creates an AABB instance.
      *
-     * @param minX
+     * @param minX -
      * [KO] X축 최소값
      * [EN] Minimum X value
-     * @param maxX
+     * @param maxX -
      * [KO] X축 최대값
      * [EN] Maximum X value
-     * @param minY
+     * @param minY -
      * [KO] Y축 최소값
      * [EN] Minimum Y value
-     * @param maxY
+     * @param maxY -
      * [KO] Y축 최대값
      * [EN] Maximum Y value
-     * @param minZ
+     * @param minZ -
      * [KO] Z축 최소값
      * [EN] Minimum Z value
-     * @param maxZ
+     * @param maxZ -
      * [KO] Z축 최대값
      * [EN] Maximum Z value
      */
@@ -134,10 +132,9 @@ export class AABB {
      * [KO] 다른 AABB와의 교차 여부를 반환합니다.
      * [EN] Returns whether it intersects with another AABB.
      *
-     * @param other
+     * @param other -
      * [KO] 교차 여부를 검사할 AABB 인스턴스
      * [EN] AABB instance to check for intersection
-     *
      * @returns
      * [KO] 교차하면 true, 아니면 false
      * [EN] True if intersecting, otherwise false
@@ -155,16 +152,15 @@ export class AABB {
      * [KO] 점 또는 좌표가 AABB 내부에 포함되는지 여부를 반환합니다.
      * [EN] Returns whether a point or coordinate is contained within the AABB.
      *
-     * @param pointOrX
+     * @param pointOrX -
      * [KO] [x, y, z] 배열 또는 x 좌표
      * [EN] [x, y, z] array or x coordinate
-     * @param [y]
+     * @param y -
      * [KO] y 좌표
      * [EN] y coordinate
-     * @param [z]
+     * @param z -
      * [KO] z 좌표
      * [EN] z coordinate
-     *
      * @returns
      * [KO] 포함되면 true, 아니면 false
      * [EN] True if contained, otherwise false

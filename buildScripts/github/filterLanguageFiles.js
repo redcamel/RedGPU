@@ -3,8 +3,6 @@ const path = require('path');
 
 const filterLanguageFiles = (dir, currentLang) => {
     if (!fs.existsSync(dir)) return;
-    const removeTag = currentLang === 'ko' ? '[EN]' : '[KO]';
-    const keepTag = currentLang === 'ko' ? '[KO]' : '[EN]';
 
     fs.readdirSync(dir).forEach(file => {
         const fullPath = path.join(dir, file);
@@ -14,28 +12,37 @@ const filterLanguageFiles = (dir, currentLang) => {
             let content = fs.readFileSync(fullPath, 'utf8');
             const lines = content.split('\n');
 
-            // 1. 반대 언어 태그가 포함된 라인 삭제
-            // 2. 현재 언어 태그([KO] 등) 자체를 삭제하여 깔끔하게 만듦
-            // const processed = lines
-            //     .filter(line => !line.includes(removeTag))
-            //     .map(line => line.replace(keepTag, '').trimStart())
-            //     .join('\n');
-
             const processed = lines
                 .map(line => {
                     let tempLine = line;
 
-                    // 1. 반대 언어 태그([EN] 등)가 포함된 경우 그 지점부터 줄 끝까지 삭제
-                    if (tempLine.includes(removeTag)) {
-                        tempLine = tempLine.split(removeTag)[0].trimEnd();
+                    if (currentLang === 'ko') {
+                        // [KO] 모드: [EN] 태그가 보이면 그 지점부터 줄 끝까지 삭제
+                        if (tempLine.includes('[EN]')) {
+                            tempLine = tempLine.split('[EN]')[0].trimEnd();
+                        }
+                        // [KO] 태그 자체와 그 뒤의 공백 하나를 제거
+                        tempLine = tempLine.replace('[KO] ', '').replace('[KO]', '');
+                    } else {
+                        // [EN] 모드:
+                        // 1. [KO]와 [EN]이 한 줄에 모두 있는 경우 (예: @param)
+                        if (tempLine.includes('[KO]') && tempLine.includes('[EN]')) {
+                            // [KO]부터 [EN] 태그(및 뒤의 공백)까지를 통째로 삭제
+                            tempLine = tempLine.replace(/\[KO\].*?\[EN\]\s?/, '');
+                        }
+                        // 2. [KO]만 있는 줄은 한글 전용 설명이므로 줄 자체를 삭제
+                        else if (tempLine.includes('[KO]')) {
+                            tempLine = '';
+                        }
+
+                        // 남아있는 [EN] 태그 자체와 그 뒤의 공백 하나를 제거
+                        tempLine = tempLine.replace('[EN] ', '').replace('[EN]', '');
                     }
 
-                    // 2. 현재 언어 태그([KO] 등) 삭제
-                    tempLine = tempLine.replace(keepTag, '').trim()
-
-                    return tempLine.replace(/^[\s*]+/, '');
+                    // 줄 앞의 '*', 공백 등을 제거하여 정리
+                    return tempLine.trimEnd().replace(/^[\s*]+/, '');
                 })
-                // 4. 내용이 없는 빈 줄은 제거
+                // 내용이 없는 빈 줄은 필터링
                 .filter(line => line.length > 0)
                 .join('\n');
 

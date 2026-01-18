@@ -1,20 +1,18 @@
 /**
- * [KO] 주어진 GPUTexture 객체의 바이트 크기를 계산합니다.
- * [EN] Calculates the byte size of a given GPUTexture object.
+ * [KO] GPUTexture의 바이트 크기를 계산합니다.
+ * [EN] Calculates the byte size of a GPUTexture.
  *
  * * ### Example
  * ```typescript
  * const byteSize = calculateTextureByteSize(gpuTexture);
  * ```
  *
- * @param texture
+ * @param texture -
  * [KO] 바이트 크기를 계산할 GPUTexture 객체
  * [EN] GPUTexture object to calculate byte size for
- *
  * @returns
- * [KO] 계산된 텍스처의 전체 바이트 크기
- * [EN] Calculated total byte size of the texture
- *
+ * [KO] 계산된 전체 바이트 크기
+ * [EN] Calculated total byte size
  * @category Texture
  */
 function calculateTextureByteSize(texture: GPUTexture): number {
@@ -31,19 +29,19 @@ function calculateTextureByteSize(texture: GPUTexture): number {
 }
 
 /**
- * [KO] 주어진 GPUTextureFormat에 해당하는 텍셀의 바이트 크기를 반환합니다.
- * [EN] Returns the byte size per texel for a given GPUTextureFormat.
+ * [KO] GPUTextureFormat의 텍셀 바이트 크기를 반환합니다.
+ * [EN] Returns the byte size per texel for a GPUTextureFormat.
  *
- * @category Texture
- * @param format
+ * @param format -
  * [KO] GPUTextureFormat 문자열
  * [EN] GPUTextureFormat string
  * @returns
  * [KO] 해당 포맷의 텍셀 바이트 크기
  * [EN] Byte size per texel for the format
  * @throws
- * [KO] 인식할 수 없는 포맷일 경우 예외 발생
- * [EN] Throws an exception if the format is unrecognized
+ * [KO] 인식할 수 없는 포맷일 경우 Error 발생
+ * [EN] Throws Error if the format is unrecognized
+ * @category Texture
  */
 function getTextureFormatByteSize(format: GPUTextureFormat): number {
     switch (format) {

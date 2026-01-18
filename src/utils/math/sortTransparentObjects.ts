@@ -1,26 +1,21 @@
 /**
- * [KO] 카메라 위치를 기준으로 투명 객체들을 원근 거리 내림차순으로 정렬합니다.
- * [EN] Sorts transparent objects in descending order of distance from the camera.
- *
- * [KO] 카메라에서 먼 객체가 먼저 오도록 정렬하여 올바른 투명도 렌더링을 지원합니다.
- * [EN] Sorts objects so that those farther from the camera come first, supporting correct transparency rendering.
+ * [KO] 카메라 거리를 기준으로 투명 객체를 원근 거리 내림차순 정렬합니다.
+ * [EN] Sorts transparent objects by distance from camera (descending).
  *
  * * ### Example
  * ```typescript
  * const sorted = sortTransparentObjects(camera.position, transparentObjects);
  * ```
  *
- * @param cameraPos
- * [KO] 카메라 위치 객체 {x, y, z}
- * [EN] Camera position object {x, y, z}
- * @param objects
+ * @param cameraPos -
+ * [KO] 카메라 위치 {x, y, z}
+ * [EN] Camera position {x, y, z}
+ * @param objects -
  * [KO] 정렬할 GPURenderBundle 배열
- * [EN] Array of GPURenderBundle objects to sort
- *
+ * [EN] Array of GPURenderBundle objects
  * @returns
- * [KO] 카메라에서 먼 순서로 정렬된 GPURenderBundle 배열
- * [EN] GPURenderBundle array sorted by distance (farthest first)
- *
+ * [KO] 정렬된 GPURenderBundle 배열
+ * [EN] Sorted GPURenderBundle array
  * @category Math
  */
 function sortTransparentObjects(cameraPos: {

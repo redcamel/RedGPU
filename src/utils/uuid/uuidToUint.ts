@@ -7,14 +7,12 @@
  * const uintId = uuidToUint('123e4567-e89b-12d3-a456-426614174000');
  * ```
  *
- * @param uuid
+ * @param uuid -
  * [KO] 변환할 UUID 문자열
  * [EN] UUID string to convert
- *
  * @returns
  * [KO] 변환된 32비트 부호 없는 정수
  * [EN] Converted 32-bit unsigned integer
- *
  * @category UUID
  */
 const uuidToUint = (uuid: string): number => {

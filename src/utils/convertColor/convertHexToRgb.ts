@@ -9,7 +9,7 @@ import isHexColor from "../../runtimeChecker/isFunc/isHexColor";
  *
  * * ### Example
  * ```typescript
- * const rgb = convertHexToRgb(\'#ff0000\'); // { r: 255, g: 0, b: 0 }
+ * const rgb = convertHexToRgb('#ff0000'); // { r: 255, g: 0, b: 0 }
  * const rgbArray = convertHexToRgb(0x00ff00, true); // [0, 255, 0]
  * ```
  *
@@ -25,7 +25,7 @@ import isHexColor from "../../runtimeChecker/isFunc/isHexColor";
  * @throws
  * [KO] 입력값이 유효한 16진수 색상 형식이 아닐 경우 Error 발생
  * [EN] Throws Error if the input value is not a valid hexadecimal color format
- * @category Utility
+ * @category Color
  */
 const convertHexToRgb = (hex: string | number, returnArrayYn: boolean = false): any => {
     if (typeof hex === "number") {
