@@ -13,7 +13,7 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/adjustments/brightnessContrast/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/adjustments/brightnessContrast/"></iframe>
  */
 declare class BrightnessContrast extends ASinglePassPostEffect {
     #private;

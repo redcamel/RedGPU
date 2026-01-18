@@ -43,7 +43,7 @@ declare const VINTAGE: {
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/filmGrain/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/filmGrain/"></iframe>
  */
 declare class FilmGrain extends ASinglePassPostEffect {
     #private;

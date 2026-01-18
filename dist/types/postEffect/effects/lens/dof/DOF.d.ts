@@ -19,7 +19,7 @@ import { ASinglePassPostEffectResult } from "../../../core/ASinglePassPostEffect
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/lens/dof/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/lens/dof/"></iframe>
  */
 declare class DOF extends AMultiPassPostEffect {
     #private;

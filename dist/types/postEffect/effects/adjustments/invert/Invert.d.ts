@@ -12,7 +12,7 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/adjustments/invert/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/adjustments/invert/"></iframe>
  */
 declare class Invert extends ASinglePassPostEffect {
     /**

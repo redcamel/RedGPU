@@ -15,7 +15,7 @@ import { ASinglePassPostEffectResult } from "../../core/ASinglePassPostEffect";
  * view.postEffectManager.addEffect(new RedGPU.PostEffect.Blur(redGPUContext));
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/blur/blur/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/blur/blur/"></iframe>
  */
 declare class Blur extends AMultiPassPostEffect {
     #private;

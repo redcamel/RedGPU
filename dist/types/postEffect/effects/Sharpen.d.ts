@@ -13,7 +13,7 @@ import { ASinglePassPostEffectResult } from "../core/ASinglePassPostEffect";
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/sharpen/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/sharpen/"></iframe>
  */
 declare class Sharpen extends AMultiPassPostEffect {
     #private;

@@ -14,7 +14,7 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/adjustments/vibrance/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/adjustments/vibrance/"></iframe>
  */
 declare class Vibrance extends ASinglePassPostEffect {
     #private;

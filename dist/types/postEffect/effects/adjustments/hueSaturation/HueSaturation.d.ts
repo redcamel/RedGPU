@@ -14,7 +14,7 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/adjustments/hueSaturation/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/adjustments/hueSaturation/"></iframe>
  */
 declare class HueSaturation extends ASinglePassPostEffect {
     #private;

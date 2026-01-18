@@ -15,7 +15,7 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/lens/chromaticAberration/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/lens/chromaticAberration/"></iframe>
  */
 declare class ChromaticAberration extends ASinglePassPostEffect {
     #private;

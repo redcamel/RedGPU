@@ -15,7 +15,7 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/blur/zoomBlur/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/blur/zoomBlur/"></iframe>
  */
 declare class ZoomBlur extends ASinglePassPostEffect {
     #private;

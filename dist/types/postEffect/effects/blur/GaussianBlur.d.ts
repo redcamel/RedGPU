@@ -13,7 +13,7 @@ import AMultiPassPostEffect from "../../core/AMultiPassPostEffect";
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/blur/gaussianBlur/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/blur/gaussianBlur/"></iframe>
  */
 declare class GaussianBlur extends AMultiPassPostEffect {
     #private;

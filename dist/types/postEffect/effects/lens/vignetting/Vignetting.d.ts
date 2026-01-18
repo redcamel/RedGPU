@@ -15,7 +15,7 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/lens/vignetting/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/lens/vignetting/"></iframe>
  */
 declare class Vignetting extends ASinglePassPostEffect {
     #private;

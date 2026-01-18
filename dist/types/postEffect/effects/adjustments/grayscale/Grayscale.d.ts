@@ -12,7 +12,7 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/adjustments/grayscale/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/adjustments/grayscale/"></iframe>
  */
 declare class Grayscale extends ASinglePassPostEffect {
     /**

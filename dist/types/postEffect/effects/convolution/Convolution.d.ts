@@ -13,7 +13,7 @@ import ASinglePassPostEffect from "../../core/ASinglePassPostEffect";
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/convolution/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/convolution/"></iframe>
  */
 declare class Convolution extends ASinglePassPostEffect {
     #private;

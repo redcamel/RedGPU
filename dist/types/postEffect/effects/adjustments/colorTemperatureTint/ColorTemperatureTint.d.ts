@@ -17,7 +17,7 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/adjustments/colorTemperatureTint/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/adjustments/colorTemperatureTint/"></iframe>
  */
 declare class ColorTemperatureTint extends ASinglePassPostEffect {
     #private;

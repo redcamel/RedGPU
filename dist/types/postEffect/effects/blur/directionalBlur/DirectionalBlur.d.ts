@@ -14,7 +14,7 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/blur/directionalBlur/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/blur/directionalBlur/"></iframe>
  */
 declare class DirectionalBlur extends ASinglePassPostEffect {
     #private;

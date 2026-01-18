@@ -17,7 +17,7 @@ import { ASinglePassPostEffectResult } from "../../core/ASinglePassPostEffect";
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/oldBloom/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/oldBloom/"></iframe>
  */
 declare class OldBloom extends AMultiPassPostEffect {
     #private;

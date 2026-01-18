@@ -17,7 +17,7 @@ import ASinglePassPostEffect from "../../core/ASinglePassPostEffect";
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/ssr/ssr/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/ssr/ssr/"></iframe>
  */
 declare class SSR extends ASinglePassPostEffect {
     #private;

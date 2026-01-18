@@ -19,7 +19,7 @@ import ASinglePassPostEffect, { ASinglePassPostEffectResult } from "../../../cor
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/fog/fog/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/fog/fog/"></iframe>
  */
 declare class Fog extends ASinglePassPostEffect {
     #private;

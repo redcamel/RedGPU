@@ -13,7 +13,7 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/adjustments/threshold/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/adjustments/threshold/"></iframe>
  */
 declare class Threshold extends ASinglePassPostEffect {
     #private;

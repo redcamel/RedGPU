@@ -12,7 +12,7 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/blur/blurY/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/blur/blurY/"></iframe>
  */
 declare class BlurY extends ASinglePassPostEffect {
     #private;

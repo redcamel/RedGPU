@@ -20,7 +20,7 @@ import ASinglePassPostEffect, { ASinglePassPostEffectResult } from "../../../cor
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/fog/heightFog/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/fog/heightFog/"></iframe>
  */
 declare class HeightFog extends ASinglePassPostEffect {
     #private;

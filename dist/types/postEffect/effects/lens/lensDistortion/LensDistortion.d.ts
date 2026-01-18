@@ -16,7 +16,7 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/lens/lensDistortion/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/lens/lensDistortion/"></iframe>
  */
 declare class LensDistortion extends ASinglePassPostEffect {
     #private;

@@ -16,7 +16,7 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/blur/radialBlur/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/blur/radialBlur/"></iframe>
  */
 declare class RadialBlur extends ASinglePassPostEffect {
     #private;
