@@ -1,28 +1,36 @@
 import validateUintRange from "../../runtimeChecker/validateFunc/validateUintRange";
 
 /**
- * [KO] RGB 값을 16진수(hex) 색상 코드로 변환합니다.
- * [EN] Converts RGB values to a hexadecimal (hex) color code.
+ * [KO] RGB 값을 16진수(Hex) 색상 코드로 변환합니다.
+ * [EN] Converts RGB values to a hexadecimal (Hex) color code.
  *
- * [KO] 각 채널(r, g, b)이 0~255 범위에 있는지 검증 후, 2자리 16진수 대문자로 변환하여 '#RRGGBB' 형식의 문자열을 반환합니다.
- * [EN] Validates that each channel (r, g, b) is within the 0~255 range, then converts them to 2-digit uppercase hexadecimal values and returns a string in '#RRGGBB' format.
+ * [KO] 각 채널(R, G, B)이 0~255 범위에 있는지 검증한 후, 이를 2자리 16진수 대문자 문자열('#RRGGBB')로 변환합니다.
+ * [EN] Validates that each channel (R, G, B) is within the 0~255 range, then converts them into a 2-digit uppercase hexadecimal string ('#RRGGBB').
  *
- * @category ConvertColor
+ * * ### Example
+ * ```typescript
+ * const hex = convertRgbToHex(255, 0, 0); // '#FF0000'
+ * ```
+ *
  * @param r
- * [KO] 변환할 빨간색(Red) 값 (0~255)
- * [EN] Red value to convert (0~255)
+ * [KO] 빨간색 성분 (0~255)
+ * [EN] Red component (0~255)
  * @param g
- * [KO] 변환할 초록색(Green) 값 (0~255)
- * [EN] Green value to convert (0~255)
+ * [KO] 초록색 성분 (0~255)
+ * [EN] Green component (0~255)
  * @param b
- * [KO] 변환할 파란색(Blue) 값 (0~255)
- * [EN] Blue value to convert (0~255)
+ * [KO] 파란색 성분 (0~255)
+ * [EN] Blue component (0~255)
+ *
  * @returns
- * [KO] 변환된 16진수 색상 코드 (예: '#FF0000')
- * [EN] Converted hexadecimal color code (e.g., '#FF0000')
+ * [KO] 변환된 16진수 색상 코드 문자열
+ * [EN] Converted hexadecimal color code string
+ *
  * @throws
- * [KO] r, g, b 값이 0~255 범위를 벗어나면 예외 발생
- * [EN] Throws an exception if r, g, b values are out of the 0~255 range
+ * [KO] 각 색상 성분이 0~255 범위를 벗어날 경우 Error 발생
+ * [EN] Throws Error if any color component is out of the 0~255 range
+ *
+ * @category Utility
  */
 const convertRgbToHex = (r: number, g: number, b: number): string => {
     validateUintRange(r, 0, 255)

@@ -1,3 +1,12 @@
+/**
+ * [KO] 예제 파일들의 캐시 방지 및 버전 관리를 위한 스크립트입니다.
+ * [EN] Script for cache prevention and version management of example files.
+ *
+ * [KO] examples 폴더 내의 HTML 파일에 캐시 제어 메타 태그를 삽입하고, JS 참조 경로에 타임스탬프 쿼리 파라미터를 추가합니다.
+ * [EN] Inserts cache control meta tags into HTML files within the examples folder and adds timestamp query parameters to JS reference paths.
+ *
+ * @category Utility
+ */
 const fs = require('fs');
 const path = require('path');
 

@@ -2,19 +2,26 @@ import Mesh from "../../../display/mesh/Mesh";
 import AABB from "./AABB";
 
 /**
- * [KO] 주어진 메시와 모든 자식 메시의 AABB를 통합하여 전체를 감싸는 3차원 Axis-Aligned Bounding Box(AABB)를 계산합니다.
- * [EN] Calculates a 3D Axis-Aligned Bounding Box (AABB) that encompasses the given mesh and all its children by combining their AABBs.
+ * [KO] 주어진 메시와 모든 자식 메시의 AABB를 통합하여 전체를 감싸는 축 정렬 경계 상자(AABB)를 계산합니다.
+ * [EN] Calculates a combined Axis-Aligned Bounding Box (AABB) that encompasses the given mesh and all its children.
  *
- * [KO] 메시 계층 구조 내 모든 메시의 boundingAABB를 재귀적으로 수집하여, 전체를 감싸는 최소/최대값을 계산한 새로운 AABB를 반환합니다. 메시 또는 자식 메시가 없거나, 유효한 AABB가 하나도 없으면 (0,0,0,0,0,0) AABB를 반환합니다.
- * [EN] Recursively collects the boundingAABB of all meshes within the hierarchy and returns a new AABB calculated from the min/max values encompassing all of them. Returns a (0,0,0,0,0,0) AABB if there are no meshes or children, or no valid AABBs.
+ * [KO] 메시 계층 구조를 순회하며 모든 메시의 바운딩 볼륨을 통합한 새로운 AABB를 반환합니다.
+ * [EN] Traverses the mesh hierarchy and returns a new AABB that combines the bounding volumes of all meshes.
  *
- * @category Bound
+ * * ### Example
+ * ```typescript
+ * const combinedAABB = calculateMeshCombinedAABB(rootMesh);
+ * ```
+ *
  * @param mesh
  * [KO] AABB를 계산할 루트 메시 객체
  * [EN] Root mesh object to calculate AABB from
+ *
  * @returns
  * [KO] 전체 메시 계층을 감싸는 통합 AABB 인스턴스
  * [EN] Combined AABB instance encompassing the entire mesh hierarchy
+ *
+ * @category Bound
  */
 const calculateMeshCombinedAABB = (mesh: Mesh): AABB => {
     const allAABBs = []

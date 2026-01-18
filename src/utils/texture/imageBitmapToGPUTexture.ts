@@ -2,21 +2,28 @@
  * [KO] ImageBitmap 배열을 GPUTexture로 복사하여 생성합니다.
  * [EN] Creates a GPUTexture by copying an array of ImageBitmaps.
  *
+ * * ### Example
+ * ```typescript
+ * const texture = imageBitmapToGPUTexture(device, [bitmap], descriptor);
+ * ```
+ *
  * @param gpuDevice
  * [KO] GPUDevice 인스턴스
  * [EN] GPUDevice instance
  * @param imageBitmaps
- * [KO] 복사할 ImageBitmap 배열 (큐브맵 등 다중 텍스처 지원)
- * [EN] Array of ImageBitmaps to copy (supports multiple textures like cubemaps)
+ * [KO] 복사할 ImageBitmap 배열
+ * [EN] Array of ImageBitmaps to copy
  * @param textureDescriptor
- * [KO] 생성할 GPUTexture의 디스크립터
- * [EN] Descriptor for the GPUTexture to create
- * @param usePremultiplyAlpha
- * [KO] 프리멀티플 알파 사용 여부(기본값: true)
- * [EN] Whether to use premultiplied alpha (default: true)
+ * [KO] GPUTexture 디스크립터
+ * [EN] GPUTexture descriptor
+ * @param [usePremultiplyAlpha=true]
+ * [KO] 프리멀티플 알파 사용 여부
+ * [EN] Whether to use premultiplied alpha
+ *
  * @returns
  * [KO] 생성된 GPUTexture 객체
  * [EN] Created GPUTexture object
+ *
  * @category Texture
  */
 const imageBitmapToGPUTexture = (

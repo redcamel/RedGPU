@@ -6,5 +6,9 @@ module.exports = {
 	name:"RedGPU API",
 	includeVersion: true,
 	readme: "none",
+	parametersFormat:'table',
+	typeDeclarationFormat: 'table',
+	useCodeBlocks: true,
+	expandObjects:true
 
 };

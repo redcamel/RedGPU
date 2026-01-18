@@ -3,13 +3,14 @@ import validateNumber from "../../../runtimeChecker/validateFunc/validateNumber"
 
 const temp_matrix0 = mat4.create();
 /**
- * [KO] 로컬 좌표(x, y, z)를 주어진 변환 행렬(targetMatrix)로 변환하여 월드 좌표로 반환합니다.
- * [EN] Converts local coordinates (x, y, z) to world coordinates using the given transformation matrix (targetMatrix).
+ * [KO] 로컬 좌표를 주어진 변환 행렬을 적용하여 월드 좌표로 변환합니다.
+ * [EN] Converts local coordinates to world coordinates by applying the given transformation matrix.
  *
- * [KO] 입력 좌표(x, y, z)에 대해 targetMatrix를 적용한 결과를 [x, y, z] 배열로 반환합니다. 각 좌표값은 숫자인지 검증하며, 행렬 곱셈 순서는 targetMatrix * translate입니다.
- * [EN] Applies targetMatrix to the input coordinates (x, y, z) and returns the result as an [x, y, z] array. Validates that each coordinate is a number. The matrix multiplication order is targetMatrix * translate.
+ * * ### Example
+ * ```typescript
+ * const worldPos = localToWorld(mesh.modelMatrix, 0, 1, 0);
+ * ```
  *
- * @category Coordinates
  * @param targetMatrix
  * [KO] 변환에 사용할 4x4 행렬
  * [EN] 4x4 matrix to use for transformation
@@ -22,12 +23,16 @@ const temp_matrix0 = mat4.create();
  * @param z
  * [KO] 변환할 로컬 z 좌표
  * [EN] Local z coordinate to convert
+ *
  * @returns
  * [KO] 변환된 월드 좌표 [x, y, z]
  * [EN] Converted world coordinates [x, y, z]
+ *
  * @throws
- * [KO] x, y, z가 숫자가 아니면 예외 발생
- * [EN] Throws an exception if x, y, z are not numbers
+ * [KO] 입력 좌표가 숫자가 아니면 예외 발생
+ * [EN] Throws Error if coordinates are not numbers
+ *
+ * @category Coordinates
  */
 const localToWorld = (targetMatrix: mat4, x: number, y: number, z: number): [number, number, number] => {
     validateNumber(x)

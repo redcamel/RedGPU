@@ -2,16 +2,20 @@
  * [KO] 주어진 GPUTexture 객체의 바이트 크기를 계산합니다.
  * [EN] Calculates the byte size of a given GPUTexture object.
  *
- * [KO] 텍스처의 크기, 포맷, 샘플 수를 바탕으로 전체 바이트 크기를 반환합니다.
- * [EN] Returns the total byte size based on the texture's dimensions, format, and sample count.
+ * * ### Example
+ * ```typescript
+ * const byteSize = calculateTextureByteSize(gpuTexture);
+ * ```
  *
- * @category Texture
  * @param texture
  * [KO] 바이트 크기를 계산할 GPUTexture 객체
  * [EN] GPUTexture object to calculate byte size for
+ *
  * @returns
  * [KO] 계산된 텍스처의 전체 바이트 크기
  * [EN] Calculated total byte size of the texture
+ *
+ * @category Texture
  */
 function calculateTextureByteSize(texture: GPUTexture): number {
     const descriptor: GPUTextureDescriptor = {
