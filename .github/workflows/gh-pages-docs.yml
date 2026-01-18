@@ -24,7 +24,7 @@ jobs:
       - name: Build documentation
         run: npm run vitePress:build
       - name: Build sitemap
-        run: node buildScripts/generate-sitemap.js
+        run: node buildScripts/github/generate-sitemap.js
       - name: Commit and push build files
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"

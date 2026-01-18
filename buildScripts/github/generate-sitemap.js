@@ -4,7 +4,7 @@ const path = require('path');
 // 기본 URL 설정
 const baseUrl = 'https://redcamel.github.io/RedGPU/examples';
 // 대상 디렉토리 경로
-const examplesDir = path.join(__dirname, 'examples');
+const examplesDir = path.join(__dirname, '../../examples');
 // 탐색할 카테고리
 const categories = ['2d', '3d', 'gltf'];
 

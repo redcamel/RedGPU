@@ -13,11 +13,11 @@
   "scripts": {
     "build": "rollup -c",
     "rollup watch": "rollup -wc",
-    "gen:api-ko": "cross-env DOC_LANG=ko npx typedoc --options typedoc.config.js && node buildScripts/filterLanguageFiles.js ko",
-    "gen:api-en": "cross-env DOC_LANG=en npx typedoc --options typedoc.config.js && node buildScripts/filterLanguageFiles.js en",
+    "gen:api-ko": "cross-env DOC_LANG=ko npx typedoc --options typedoc.config.js && node buildScripts/github/filterLanguageFiles.js ko",
+    "gen:api-en": "cross-env DOC_LANG=en npx typedoc --options typedoc.config.js && node buildScripts/github/filterLanguageFiles.js en",
     "gen:api-all": "npm run gen:api-ko && npm run gen:api-en",
     "vitePress:dev": "npm run gen:api-all && vitepress dev manual",
-    "vitePress:build": "npm run gen:api-all && vitepress build manual && node buildScripts/deploy-manual.js"
+    "vitePress:build": "npm run gen:api-all && vitepress build manual && node buildScripts/github/deploy-manual.js"
   },
   "author": "RedCamel",
   "license": "ISC",

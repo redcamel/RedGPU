@@ -27,7 +27,7 @@ jobs:
         run: npm run build
 
       - name: Generate example version (Cache Bursting)
-        run: node buildScripts/generate-example-version.js
+        run: node buildScripts/github/generate-example-version.js
 
       - name: Verify changes
         run: |

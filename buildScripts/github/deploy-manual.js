@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const sourceDir = path.join(__dirname, '../manual/.vitepress/dist');
-const targetDir = path.join(__dirname, '../manual');
+const sourceDir = path.join(__dirname, '../../manual/.vitepress/dist');
+const targetDir = path.join(__dirname, '../../manual');
 
 // manual 폴더 내의 기존 파일 삭제 (소스 제외)
 const excludeDirs = ['.vitepress', 'api', 'ko'];
