@@ -4,7 +4,7 @@
  *
  * * ### Example
  * ```typescript
- * const sorted = sortTransparentObjects(camera.position, transparentObjects);
+ * const sorted = RedGPU.Util.sortTransparentObjects(camera.position, transparentObjects);
  * ```
  *
  * @param cameraPos -

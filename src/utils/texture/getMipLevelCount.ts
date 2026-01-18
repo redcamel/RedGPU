@@ -4,7 +4,7 @@
  *
  * * ### Example
  * ```typescript
- * const levels = getMipLevelCount(1024, 1024); // 11
+ * const levels = RedGPU.Util.getMipLevelCount(1024, 1024); // 11
  * ```
  *
  * @param width -

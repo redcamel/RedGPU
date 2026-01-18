@@ -9,7 +9,7 @@ import consoleAndThrowError from "../../consoleAndThrowError";
  *
  * * ### Example
  * ```typescript
- * const aabb = new AABB(-1, 1, -1, 1, -1, 1);
+ * const aabb = new RedGPU.Util.AABB(-1, 1, -1, 1, -1, 1);
  * const intersects = aabb.intersects(otherAABB);
  * ```
  *

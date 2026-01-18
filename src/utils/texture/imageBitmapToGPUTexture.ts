@@ -4,7 +4,7 @@
  *
  * * ### Example
  * ```typescript
- * const texture = imageBitmapToGPUTexture(device, [bitmap], descriptor);
+ * const texture = RedGPU.Util.imageBitmapToGPUTexture(device, [bitmap], descriptor);
  * ```
  *
  * @param gpuDevice -

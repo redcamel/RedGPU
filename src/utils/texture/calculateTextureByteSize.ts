@@ -4,7 +4,7 @@
  *
  * * ### Example
  * ```typescript
- * const byteSize = calculateTextureByteSize(gpuTexture);
+ * const byteSize = RedGPU.Util.calculateTextureByteSize(gpuTexture);
  * ```
  *
  * @param texture -

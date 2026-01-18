@@ -9,7 +9,7 @@ const temp_vector = vec3.create();
  *
  * * ### Example
  * ```typescript
- * const localPos = worldToLocal(mesh.modelMatrix, 10, 5, 0);
+ * const localPos = RedGPU.Util.worldToLocal(mesh.modelMatrix, 10, 5, 0);
  * ```
  *
  * @param targetMatrix -

@@ -4,8 +4,8 @@
  *
  * * ### Example
  * ```typescript
- * const nameWithExt = getFileName('path/to/image.png'); // 'image.png'
- * const nameOnly = getFileName('path/to/image.png', false); // 'image'
+ * const nameWithExt = RedGPU.Util.getFileName('path/to/image.png'); // 'image.png'
+ * const nameOnly = RedGPU.Util.getFileName('path/to/image.png', false); // 'image'
  * ```
  *
  * @param url -

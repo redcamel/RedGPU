@@ -6,7 +6,7 @@ import consoleAndThrowError from "../consoleAndThrowError";
  *
  * * ### Example
  * ```typescript
- * const readable = formatBytes(1048576); // '1.00 MB'
+ * const readable = RedGPU.Util.formatBytes(1048576); // '1.00 MB'
  * ```
  *
  * @param bytes -

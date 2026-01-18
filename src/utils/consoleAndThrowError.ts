@@ -7,7 +7,7 @@
  *
  * * ### Example
  * ```typescript
- * consoleAndThrowError('Invalid', 'parameter', 42);
+ * RedGPU.Util.consoleAndThrowError('Invalid', 'parameter', 42);
  * ```
  *
  * @param arg -

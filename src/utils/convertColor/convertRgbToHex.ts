@@ -9,7 +9,7 @@ import validateUintRange from "../../runtimeChecker/validateFunc/validateUintRan
  *
  * * ### Example
  * ```typescript
- * const hex = convertRgbToHex(255, 0, 0); // '#FF0000'
+ * const hex = RedGPU.Util.convertRgbToHex(255, 0, 0); // '#FF0000'
  * ```
  *
  * @param r -

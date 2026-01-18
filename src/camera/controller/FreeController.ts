@@ -75,9 +75,7 @@ type KeyNameMapper = {
  * [KO] FPS 게임이나 3D 에디터의 뷰포트처럼 키보드와 마우스를 사용하여 공간을 자유롭게 비행하듯 탐색할 수 있습니다.
  * [EN] Allows for free-flight exploration of the space using keyboard and mouse, similar to FPS games or 3D editor viewports.
  *
- * @category Controller
- *
- * @example
+ * * ### Example
  * ```typescript
  * const controller = new RedGPU.Camera.FreeController(redGPUContext);
  * controller.x = 10;
@@ -88,6 +86,7 @@ type KeyNameMapper = {
  * controller.setMoveForwardKey('w');
  * ```
  * <iframe src="/RedGPU/examples/3d/controller/freeController/"></iframe>
+ * @category Controller
  */
 class FreeController extends AController {
     // ==================== 키 매핑 ====================
@@ -123,7 +122,7 @@ class FreeController extends AController {
      * [KO] FreeController의 생성자입니다.
      * [EN] Constructor for FreeController.
      *
-     * @param redGPUContext
+     * @param redGPUContext -
      * [KO] RedGPU 컨텍스트 객체
      * [EN] RedGPU Context object
      */
@@ -157,7 +156,7 @@ class FreeController extends AController {
      * [KO] 카메라의 X축 위치를 설정합니다.
      * [EN] Sets the camera's X-axis position.
      *
-     * @param value
+     * @param value -
      * [KO] 설정할 X축 위치 값 (숫자)
      * [EN] X-axis position value to set (number)
      */
@@ -183,7 +182,7 @@ class FreeController extends AController {
      * [KO] 카메라의 Y축 위치를 설정합니다.
      * [EN] Sets the camera's Y-axis position.
      *
-     * @param value
+     * @param value -
      * [KO] 설정할 Y축 위치 값 (숫자)
      * [EN] Y-axis position value to set (number)
      */
@@ -209,7 +208,7 @@ class FreeController extends AController {
      * [KO] 카메라의 Z축 위치를 설정합니다.
      * [EN] Sets the camera's Z-axis position.
      *
-     * @param value
+     * @param value -
      * [KO] 설정할 Z축 위치 값 (숫자)
      * [EN] Z-axis position value to set (number)
      */
@@ -236,7 +235,7 @@ class FreeController extends AController {
      * [KO] 카메라의 좌우 회전 각도(Pan)를 설정합니다. (단위: 도)
      * [EN] Sets the camera's horizontal rotation angle (Pan). (Unit: degrees)
      *
-     * @param value
+     * @param value -
      * [KO] 설정할 좌우 회전 각도 값
      * [EN] Horizontal rotation angle value to set
      */
@@ -262,7 +261,7 @@ class FreeController extends AController {
      * [KO] 카메라의 상하 회전 각도(Tilt)를 설정합니다. (단위: 도, 범위: -90 ~ 90)
      * [EN] Sets the camera's vertical rotation angle (Tilt). (Unit: degrees, Range: -90 ~ 90)
      *
-     * @param value
+     * @param value -
      * [KO] 설정할 상하 회전 각도 값
      * [EN] Vertical rotation angle value to set
      */
@@ -290,7 +289,7 @@ class FreeController extends AController {
      * [KO] 카메라의 이동 속도를 설정합니다.
      * [EN] Sets the camera's movement speed.
      *
-     * @param value
+     * @param value -
      * [KO] 설정할 이동 속도 값 (0.01 이상)
      * [EN] Movement speed value to set (min 0.01)
      */
@@ -315,7 +314,7 @@ class FreeController extends AController {
      * [KO] 이동 보간 정도를 설정합니다. (0.01~1 범위, 작을수록 부드러운 이동)
      * [EN] Sets the movement interpolation factor. (Range 0.01~1, smaller is smoother movement)
      *
-     * @param value
+     * @param value -
      * [KO] 설정할 보간 정도 값
      * [EN] Interpolation factor value to set
      */
@@ -341,7 +340,7 @@ class FreeController extends AController {
      * [KO] 카메라의 회전 속도를 설정합니다.
      * [EN] Sets the camera's rotation speed.
      *
-     * @param value
+     * @param value -
      * [KO] 설정할 회전 속도 값 (0.01 이상)
      * [EN] Rotation speed value to set (min 0.01)
      */
@@ -366,7 +365,7 @@ class FreeController extends AController {
      * [KO] 회전 보간 정도를 설정합니다. (0.01~1 범위, 작을수록 부드러운 회전)
      * [EN] Sets the rotation interpolation factor. (Range 0.01~1, smaller is smoother rotation)
      *
-     * @param value
+     * @param value -
      * [KO] 설정할 보간 정도 값
      * [EN] Interpolation factor value to set
      */
@@ -392,7 +391,7 @@ class FreeController extends AController {
      * [KO] 최대 가속도를 설정합니다.
      * [EN] Sets the maximum acceleration.
      *
-     * @param value
+     * @param value -
      * [KO] 설정할 최대 가속도 값
      * [EN] Maximum acceleration value to set
      */
@@ -417,7 +416,7 @@ class FreeController extends AController {
      * [KO] 전진 이동 키를 설정합니다.
      * [EN] Sets the move forward key.
      *
-     * @param value
+     * @param value -
      * [KO] 설정할 키 이름 (예: 'w')
      * [EN] Key name to set (e.g., 'w')
      */
@@ -429,7 +428,7 @@ class FreeController extends AController {
      * [KO] 후진 이동 키를 설정합니다.
      * [EN] Sets the move backward key.
      *
-     * @param value
+     * @param value -
      * [KO] 설정할 키 이름 (예: 's')
      * [EN] Key name to set (e.g., 's')
      */
@@ -441,7 +440,7 @@ class FreeController extends AController {
      * [KO] 좌측 이동 키를 설정합니다.
      * [EN] Sets the move left key.
      *
-     * @param value
+     * @param value -
      * [KO] 설정할 키 이름 (예: 'a')
      * [EN] Key name to set (e.g., 'a')
      */
@@ -453,7 +452,7 @@ class FreeController extends AController {
      * [KO] 우측 이동 키를 설정합니다.
      * [EN] Sets the move right key.
      *
-     * @param value
+     * @param value -
      * [KO] 설정할 키 이름 (예: 'd')
      * [EN] Key name to set (e.g., 'd')
      */
@@ -465,7 +464,7 @@ class FreeController extends AController {
      * [KO] 상향 이동 키를 설정합니다.
      * [EN] Sets the move up key.
      *
-     * @param value
+     * @param value -
      * [KO] 설정할 키 이름 (예: 't')
      * [EN] Key name to set (e.g., 't')
      */
@@ -477,7 +476,7 @@ class FreeController extends AController {
      * [KO] 하향 이동 키를 설정합니다.
      * [EN] Sets the move down key.
      *
-     * @param value
+     * @param value -
      * [KO] 설정할 키 이름 (예: 'g')
      * [EN] Key name to set (e.g., 'g')
      */
@@ -489,7 +488,7 @@ class FreeController extends AController {
      * [KO] 좌회전 키를 설정합니다.
      * [EN] Sets the turn left key.
      *
-     * @param value
+     * @param value -
      * [KO] 설정할 키 이름 (예: 'q')
      * [EN] Key name to set (e.g., 'q')
      */
@@ -501,7 +500,7 @@ class FreeController extends AController {
      * [KO] 우회전 키를 설정합니다.
      * [EN] Sets the turn right key.
      *
-     * @param value
+     * @param value -
      * [KO] 설정할 키 이름 (예: 'e')
      * [EN] Key name to set (e.g., 'e')
      */
@@ -513,7 +512,7 @@ class FreeController extends AController {
      * [KO] 상향 회전 키를 설정합니다.
      * [EN] Sets the turn up key.
      *
-     * @param value
+     * @param value -
      * [KO] 설정할 키 이름 (예: 'r')
      * [EN] Key name to set (e.g., 'r')
      */
@@ -525,7 +524,7 @@ class FreeController extends AController {
      * [KO] 하향 회전 키를 설정합니다.
      * [EN] Sets the turn down key.
      *
-     * @param value
+     * @param value -
      * [KO] 설정할 키 이름 (예: 'f')
      * [EN] Key name to set (e.g., 'f')
      */
@@ -538,10 +537,10 @@ class FreeController extends AController {
      * [KO] 매 프레임마다 카메라 컨트롤러를 업데이트합니다.
      * [EN] Updates the camera controller every frame.
      *
-     * @param view
+     * @param view -
      * [KO] 3D 뷰 객체
      * [EN] 3D View object
-     * @param time
+     * @param time -
      * [KO] 현재 경과 시간 (밀리초)
      * [EN] Current elapsed time (ms)
      */

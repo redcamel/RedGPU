@@ -4,7 +4,7 @@
  *
  * * ### Example
  * ```typescript
- * copyToTextureArray(device, sourceTex, targetArrayTex, 0);
+ * RedGPU.Util.copyToTextureArray(device, sourceTex, targetArrayTex, 0);
  * ```
  *
  * @param gpuDevice -

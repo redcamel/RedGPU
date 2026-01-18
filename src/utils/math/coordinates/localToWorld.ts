@@ -8,7 +8,7 @@ const temp_matrix0 = mat4.create();
  *
  * * ### Example
  * ```typescript
- * const worldPos = localToWorld(mesh.modelMatrix, 0, 1, 0);
+ * const worldPos = RedGPU.Util.localToWorld(mesh.modelMatrix, 0, 1, 0);
  * ```
  *
  * @param targetMatrix -

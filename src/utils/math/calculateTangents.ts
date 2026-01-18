@@ -4,7 +4,7 @@
  *
  * * ### Example
  * ```typescript
- * const tangents = calculateTangents(vertices, normals, uvs, indices);
+ * const tangents = RedGPU.Util.calculateTangents(vertices, normals, uvs, indices);
  * ```
  *
  * @param vertices -

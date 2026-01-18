@@ -10,7 +10,7 @@ const tempMTX = mat4.create();
  *
  * * ### Example
  * ```typescript
- * const planes = computeViewFrustumPlanes(projectionMTX, cameraMTX);
+ * const planes = RedGPU.Util.computeViewFrustumPlanes(projectionMTX, cameraMTX);
  * ```
  *
  * @param projectionMatrix -

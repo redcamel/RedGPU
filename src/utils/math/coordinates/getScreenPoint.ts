@@ -13,7 +13,7 @@ const resultPosition = {x: 0, y: 0, z: 0, w: 0};
  *
  * * ### Example
  * ```typescript
- * const [px, py] = getScreenPoint(view, mesh.modelMatrix);
+ * const [px, py] = RedGPU.Util.getScreenPoint(view, mesh.modelMatrix);
  * ```
  *
  * @param view -

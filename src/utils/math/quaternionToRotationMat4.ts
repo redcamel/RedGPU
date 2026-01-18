@@ -4,7 +4,7 @@
  *
  * * ### Example
  * ```typescript
- * quaternionToRotationMat4([0, 0, 0, 1], outMatrix);
+ * RedGPU.Util.quaternionToRotationMat4([0, 0, 0, 1], outMatrix);
  * ```
  *
  * @param q -

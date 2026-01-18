@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import {computed} from 'vue'
 
 const props = defineProps({
   src: {
@@ -53,4 +53,16 @@ const resolvedSrc = computed(() => {
   display: block;
   width: 100%;
 }
+@media (max-width: 1280px) {
+  .example-frame iframe{
+    height : 500px !important;
+  }
+}
+
+@media (max-width: 960px) {
+  .example-frame iframe{
+    height : 400px !important;
+  }
+}
+
 </style>

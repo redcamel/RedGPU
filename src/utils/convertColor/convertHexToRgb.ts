@@ -9,8 +9,8 @@ import isHexColor from "../../runtimeChecker/isFunc/isHexColor";
  *
  * * ### Example
  * ```typescript
- * const rgb = convertHexToRgb('#ff0000'); // { r: 255, g: 0, b: 0 }
- * const rgbArray = convertHexToRgb(0x00ff00, true); // [0, 255, 0]
+ * const rgb = RedGPU.Util.convertHexToRgb('#ff0000'); // { r: 255, g: 0, b: 0 }
+ * const rgbArray = RedGPU.Util.convertHexToRgb(0x00ff00, true); // [0, 255, 0]
  * ```
  *
  * @param hex -

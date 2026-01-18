@@ -8,15 +8,14 @@ import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
  * [KO] 평면적인 2D 좌표계를 기반으로 위치를 제어하며, UI나 2D 게임 요소의 렌더링에 주로 사용됩니다.
  * [EN] Controls position based on a flat 2D coordinate system, primarily used for rendering UI or 2D game elements.
  *
- * @category Camera
- *
- * @example
+ * * ### Example
  * ```typescript
  * const camera = new RedGPU.Camera.Camera2D();
  * camera.x = 100;
  * camera.y = 50;
  * camera.setPosition(200, 100);
  * ```
+ * @category Camera
  */
 class Camera2D {
 	/**
@@ -79,7 +78,7 @@ class Camera2D {
 	 * [KO] 카메라 이름을 설정합니다.
 	 * [EN] Sets the camera name.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 설정할 이름
 	 * [EN] Name to set
 	 */
@@ -127,7 +126,7 @@ class Camera2D {
 	 * [KO] X 좌표를 설정합니다.
 	 * [EN] Sets the X coordinate.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 설정할 X 좌표
 	 * [EN] X coordinate to set
 	 */
@@ -152,7 +151,7 @@ class Camera2D {
 	 * [KO] Y 좌표를 설정합니다.
 	 * [EN] Sets the Y coordinate.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 설정할 Y 좌표
 	 * [EN] Y coordinate to set
 	 */
@@ -177,10 +176,10 @@ class Camera2D {
 	 * [KO] 카메라의 위치를 설정합니다.
 	 * [EN] Sets the camera position.
 	 *
-	 * @param x
+	 * @param x -
 	 * [KO] X 좌표 또는 [x, y, z] 배열
 	 * [EN] X coordinate or [x, y, z] array
-	 * @param y
+	 * @param y -
 	 * [KO] Y 좌표 (x가 배열인 경우 무시됨)
 	 * [EN] Y coordinate (ignored if x is an array)
 	 */

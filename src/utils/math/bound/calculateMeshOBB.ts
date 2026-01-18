@@ -11,7 +11,7 @@ import OBB from "./OBB";
  *
  * * ### Example
  * ```typescript
- * const meshOBB = calculateMeshOBB(mesh);
+ * const meshOBB = RedGPU.Util.calculateMeshOBB(mesh);
  * ```
  *
  * @param mesh -

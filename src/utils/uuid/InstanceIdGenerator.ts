@@ -7,7 +7,7 @@
  *
  * * ### Example
  * ```typescript
- * const id = InstanceIdGenerator.getNextId(RedMesh);
+ * const id = RedGPU.Util.InstanceIdGenerator.getNextId(RedMesh);
  * ```
  *
  * @category UUID

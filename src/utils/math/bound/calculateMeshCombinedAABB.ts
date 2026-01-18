@@ -10,7 +10,7 @@ import AABB from "./AABB";
  *
  * * ### Example
  * ```typescript
- * const combinedAABB = calculateMeshCombinedAABB(rootMesh);
+ * const combinedAABB = RedGPU.Util.calculateMeshCombinedAABB(rootMesh);
  * ```
  *
  * @param mesh -

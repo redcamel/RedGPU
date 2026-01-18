@@ -7,7 +7,7 @@
  *
  * * ### Example
  * ```typescript
- * const path = getFilePath('https://example.com/assets/textures/diffuse.png');
+ * const path = RedGPU.Util.getFilePath('https://example.com/assets/textures/diffuse.png');
  * ```
  *
  * @param url -

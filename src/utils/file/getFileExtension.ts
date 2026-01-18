@@ -7,7 +7,7 @@
  *
  * * ### Example
  * ```typescript
- * const ext = getFileExtension('https://example.com/assets/model.gltf'); // 'gltf'
+ * const ext = RedGPU.Util.getFileExtension('https://example.com/assets/model.gltf'); // 'gltf'
  * ```
  *
  * @param url -

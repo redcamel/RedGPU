@@ -10,7 +10,7 @@ import consoleAndThrowError from "../../consoleAndThrowError";
  *
  * * ### Example
  * ```typescript
- * const obb = new OBB([0, 0, 0], [1, 1, 1], orientationMatrix);
+ * const obb = new RedGPU.Util.OBB([0, 0, 0], [1, 1, 1], orientationMatrix);
  * const intersects = obb.intersects(otherOBB);
  * ```
  *

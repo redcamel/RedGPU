@@ -16,7 +16,7 @@ let resultMTX;
  *
  * * ### Example
  * ```typescript
- * const worldPos = screenToWorld(mouseX, mouseY, view);
+ * const worldPos = RedGPU.Util.screenToWorld(mouseX, mouseY, view);
  * ```
  *
  * @param screenX -

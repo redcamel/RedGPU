@@ -10,9 +10,7 @@ import PerspectiveCamera from "./PerspectiveCamera";
  * [KO] 이 투영 모드에서는 객체의 크기가 카메라로부터의 거리에 관계없이 일정하게 유지됩니다. 주로 2D 뷰포트나 설계도면 같은 정투영 뷰를 구현할 때 사용됩니다.
  * [EN] In this projection mode, an object's size stays constant regardless of its distance from the camera. It is primarily used for implementing orthographic views such as 2D viewports or blueprints.
  *
- * @category Camera
- *
- * @example
+ * * ### Example
  * ```typescript
  * const camera = new RedGPU.Camera.OrthographicCamera();
  * camera.top = 10;
@@ -20,6 +18,7 @@ import PerspectiveCamera from "./PerspectiveCamera";
  * camera.left = -20;
  * camera.right = 20;
  * ```
+ * @category Camera
  */
 class OrthographicCamera extends PerspectiveCamera {
 	/**
@@ -102,7 +101,7 @@ class OrthographicCamera extends PerspectiveCamera {
 	 * [KO] 투영 상단 값을 설정합니다.
 	 * [EN] Sets the projection top value.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 설정할 상단 값
 	 * [EN] Top value to set
 	 */
@@ -127,7 +126,7 @@ class OrthographicCamera extends PerspectiveCamera {
 	 * [KO] 투영 하단 값을 설정합니다.
 	 * [EN] Sets the projection bottom value.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 설정할 하단 값
 	 * [EN] Bottom value to set
 	 */
@@ -152,7 +151,7 @@ class OrthographicCamera extends PerspectiveCamera {
 	 * [KO] 투영 좌측 값을 설정합니다.
 	 * [EN] Sets the projection left value.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 설정할 좌측 값
 	 * [EN] Left value to set
 	 */
@@ -177,7 +176,7 @@ class OrthographicCamera extends PerspectiveCamera {
 	 * [KO] 투영 우측 값을 설정합니다.
 	 * [EN] Sets the projection right value.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 설정할 우측 값
 	 * [EN] Right value to set
 	 */
@@ -202,7 +201,7 @@ class OrthographicCamera extends PerspectiveCamera {
 	 * [KO] 줌 레벨을 설정합니다.
 	 * [EN] Sets the zoom level.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 설정할 줌 레벨 (minZoom ~ maxZoom)
 	 * [EN] Zoom level to set (minZoom ~ maxZoom)
 	 */
@@ -227,7 +226,7 @@ class OrthographicCamera extends PerspectiveCamera {
 	 * [KO] 최소 줌 레벨을 설정합니다.
 	 * [EN] Sets the minimum zoom level.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 설정할 최소 줌 (0.01 이상)
 	 * [EN] Minimum zoom to set (min 0.01)
 	 */
@@ -252,7 +251,7 @@ class OrthographicCamera extends PerspectiveCamera {
 	 * [KO] 최대 줌 레벨을 설정합니다.
 	 * [EN] Sets the maximum zoom level.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 설정할 최대 줌 (0.01 이상)
 	 * [EN] Maximum zoom to set (min 0.01)
 	 */
@@ -278,7 +277,7 @@ class OrthographicCamera extends PerspectiveCamera {
 	 * [KO] 카메라 이름을 설정합니다.
 	 * [EN] Sets the camera name.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 설정할 이름
 	 * [EN] Name to set
 	 */
@@ -290,7 +289,7 @@ class OrthographicCamera extends PerspectiveCamera {
 	 * [KO] 줌을 설정합니다.
 	 * [EN] Sets the zoom level.
 	 *
-	 * @param zoom
+	 * @param zoom -
 	 * [KO] 줌 레벨 (0.1 ~ 10)
 	 * [EN] Zoom level (0.1 ~ 10)
 	 */

@@ -25,7 +25,6 @@ export type controllerInit = {
  * [EN] `System-only class.`
  * [EN] This method is automatically used within the rendering engine and should not be called directly by general users.
  * @category Core
- *
  */
 abstract class AController {
 	// ==================== Static - 전역 상태 ====================
@@ -67,10 +66,10 @@ abstract class AController {
 	 * [KO] AController 생성자
 	 * [EN] AController constructor
 	 *
-	 * @param redGPUContext
+	 * @param redGPUContext -
 	 * [KO] RedGPU 컨텍스트
 	 * [EN] RedGPU Context
-	 * @param initInfo
+	 * @param initInfo -
 	 * [KO] 컨트롤러 초기화 정보
 	 * [EN] Controller initialization info
 	 */
@@ -105,7 +104,7 @@ abstract class AController {
 	 * [KO] 컨트롤러의 이름을 설정합니다.
 	 * [EN] Sets the name of the controller.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 설정할 이름
 	 * [EN] Name to set
 	 */
@@ -168,7 +167,7 @@ abstract class AController {
 	 * [KO] 키보드 입력이 활성화된 View를 설정합니다.
 	 * [EN] Sets the View with active keyboard input.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 설정할 View 또는 null
 	 * [EN] View to set or null
 	 * @internal
@@ -214,7 +213,7 @@ abstract class AController {
 	 * [KO] 이번 프레임에서 키보드 입력이 처리되었는지 여부를 설정합니다.
 	 * [EN] Sets whether keyboard input has been processed in this frame.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 설정할 처리 여부
 	 * [EN] Processing status to set
 	 * @internal
@@ -244,13 +243,13 @@ abstract class AController {
 	 * [KO] 컨트롤러 상태를 업데이트합니다. 파생 클래스에서 구현해야 합니다.
 	 * [EN] Updates the controller state. Must be implemented in derived classes.
 	 *
-	 * @param view
+	 * @param view -
 	 * [KO] 현재 View
 	 * [EN] Current View
-	 * @param time
+	 * @param time -
 	 * [KO] 현재 시간 (ms)
 	 * [EN] Current time (ms)
-	 * @param updateAnimation
+	 * @param updateAnimation -
 	 * [KO] 애니메이션 업데이트 콜백
 	 * [EN] Animation update callback
 	 */
@@ -271,10 +270,10 @@ abstract class AController {
 	/**
 	 * [KO] 키보드 입력이 있는지 체크하고 활성 View를 설정합니다.
 	 * [EN] Checks for keyboard input and sets the active View.
-	 * @param view
+	 * @param view -
 	 * [KO] 현재 View
 	 * [EN] Current View
-	 * @param keyNameMapper
+	 * @param keyNameMapper -
 	 * [KO] 키 매핑 객체
 	 * [EN] Key mapping object
 	 * @returns
@@ -317,10 +316,10 @@ abstract class AController {
 	 * [KO] 캔버스 상의 이벤트 좌표를 가져옵니다.
 	 * [EN] Gets the event coordinates on the canvas.
 	 *
-	 * @param e
+	 * @param e -
 	 * [KO] 마우스, 터치 또는 휠 이벤트
 	 * [EN] Mouse, touch, or wheel event
-	 * @param redGPUContext
+	 * @param redGPUContext -
 	 * [KO] RedGPU 컨텍스트
 	 * [EN] RedGPU context
 	 * @returns
@@ -357,7 +356,7 @@ abstract class AController {
 	 * [KO] 입력 이벤트가 발생한 View를 찾습니다.
 	 * [EN] Finds the View where the input event occurred.
 	 *
-	 * @param e
+	 * @param e -
 	 * [KO] 마우스 또는 터치 이벤트
 	 * [EN] Mouse or touch event
 	 * @returns
@@ -386,6 +385,18 @@ abstract class AController {
 	};
 
 	// ==================== Private Helpers ====================
+	/**
+	 * [KO] 두 터치 점 사이의 거리를 계산합니다.
+	 * [EN] Calculates the distance between two touch points.
+	 *
+	 * @param touches -
+	 * [KO] 터치 리스트
+	 * [EN] Touch list
+	 * @returns
+	 * [KO] 거리 값
+	 * [EN] Distance value
+	 * @internal
+	 */
 	#getTouchDistance = (touches: TouchList): number => {
 		if (touches.length < 2) return 0;
 		const dx = touches[0].clientX - touches[1].clientX;

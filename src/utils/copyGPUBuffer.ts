@@ -7,7 +7,7 @@
  *
  * * ### Example
  * ```typescript
- * copyGPUBuffer(device, sourceBuffer, destinationBuffer);
+ * RedGPU.Util.copyGPUBuffer(device, sourceBuffer, destinationBuffer);
  * ```
  *
  * @param gpuDevice -

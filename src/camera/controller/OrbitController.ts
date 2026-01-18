@@ -17,9 +17,7 @@ const tempMatrix = mat4.create();
  * [KO] 제품 모델링 뷰어나 3D 객체 관찰용으로 주로 사용되며, 중심점을 기준으로 줌, 회전, 팬(Pan) 동작을 통해 대상을 다각도에서 살펴볼 수 있습니다.
  * [EN] Primarily used for product modeling viewers or observing 3D objects, allowing the user to inspect the target from various angles via zoom, rotation, and pan operations around a center point.
  *
- * @category Controller
- *
- * @example
+ * * ### Example
  * ```typescript
  * const controller = new RedGPU.Camera.OrbitController(redGPUContext);
  * controller.centerX = 0;
@@ -30,6 +28,7 @@ const tempMatrix = mat4.create();
  * controller.pan = 45;
  * ```
  * <iframe src="/RedGPU/examples/3d/controller/orbitController/"></iframe>
+ * @category Controller
  */
 class OrbitController extends AController {
 	// ==================== 카메라 위치 및 중심점 ====================
@@ -89,7 +88,7 @@ class OrbitController extends AController {
 	 * [KO] 회전 중심의 X축 좌표를 설정합니다.
 	 * [EN] Sets the X-axis coordinate of the rotation center.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 중심점 X축 좌표
 	 * [EN] Center point X-axis coordinate
 	 */
@@ -113,7 +112,7 @@ class OrbitController extends AController {
 	 * [KO] 회전 중심의 Y축 좌표를 설정합니다.
 	 * [EN] Sets the Y-axis coordinate of the rotation center.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 중심점 Y축 좌표
 	 * [EN] Center point Y-axis coordinate
 	 */
@@ -137,7 +136,7 @@ class OrbitController extends AController {
 	 * [KO] 회전 중심의 Z축 좌표를 설정합니다.
 	 * [EN] Sets the Z-axis coordinate of the rotation center.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 중심점 Z축 좌표
 	 * [EN] Center point Z-axis coordinate
 	 */
@@ -162,7 +161,7 @@ class OrbitController extends AController {
 	 * [KO] 중심점으로부터 카메라까지의 거리를 설정합니다.
 	 * [EN] Sets the distance from the center point to the camera.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 거리 값 (0 이상)
 	 * [EN] Distance value (min 0)
 	 */
@@ -187,7 +186,7 @@ class OrbitController extends AController {
 	 * [KO] 거리 조절 속도를 설정합니다. 높을수록 빠른 줌 속도
 	 * [EN] Sets the distance adjustment speed. Higher values for faster zoom speed.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 거리 변화 속도 (0.01 이상)
 	 * [EN] Distance change speed (min 0.01)
 	 */
@@ -212,7 +211,7 @@ class OrbitController extends AController {
 	 * [KO] 거리 보간 계수를 설정합니다. 낮을수록 부드러운 줌 이동
 	 * [EN] Sets the distance interpolation factor. Lower values for smoother zoom movement.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 보간 계수 (0.01 ~ 1)
 	 * [EN] Interpolation factor (0.01 ~ 1)
 	 */
@@ -238,7 +237,7 @@ class OrbitController extends AController {
 	 * [KO] 회전 속도를 설정합니다. 높을수록 빠른 회전 속도
 	 * [EN] Sets the rotation speed. Higher values for faster rotation speed.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 회전 속도 값 (0.01 이상)
 	 * [EN] Rotation speed value (min 0.01)
 	 */
@@ -263,7 +262,7 @@ class OrbitController extends AController {
 	 * [KO] 회전 보간 계수를 설정합니다. 낮을수록 부드러운 회전
 	 * [EN] Sets the rotation interpolation factor. Lower values for smoother rotation.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 보간 계수 (0.01 ~ 1)
 	 * [EN] Interpolation factor (0.01 ~ 1)
 	 */
@@ -289,7 +288,7 @@ class OrbitController extends AController {
 	 * [KO] 카메라의 팬(가로 회전) 각도를 설정합니다. (단위: 도)
 	 * [EN] Sets the camera's pan (horizontal rotation) angle. (Unit: degrees)
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 팬 각도 값
 	 * [EN] Pan angle value
 	 */
@@ -313,7 +312,7 @@ class OrbitController extends AController {
 	 * [KO] 카메라의 틸트(세로 회전) 각도를 설정합니다. (단위: 도)
 	 * [EN] Sets the camera's tilt (vertical rotation) angle. (Unit: degrees)
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 틸트 각도 값 (-90 ~ 90 범위로 제한됨)
 	 * [EN] Tilt angle value (limited to -90 ~ 90 range)
 	 */
@@ -338,7 +337,7 @@ class OrbitController extends AController {
 	 * [KO] 최소 틸트 각도를 설정합니다.
 	 * [EN] Sets the minimum tilt angle.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 최소 틸트 각도 (-90 ~ 90)
 	 * [EN] Minimum tilt angle (-90 ~ 90)
 	 */
@@ -363,7 +362,7 @@ class OrbitController extends AController {
 	 * [KO] 최대 틸트 각도를 설정합니다.
 	 * [EN] Sets the maximum tilt angle.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 최대 틸트 각도 (-90 ~ 90)
 	 * [EN] Maximum tilt angle (-90 ~ 90)
 	 */

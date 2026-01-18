@@ -7,7 +7,7 @@
  *
  * * ### Example
  * ```typescript
- * const absURL = getAbsoluteURL('https://example.com/path/', '../image.png');
+ * const absURL = RedGPU.Util.getAbsoluteURL('https://example.com/path/', '../image.png');
  * ```
  *
  * @param base -

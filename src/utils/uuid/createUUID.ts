@@ -4,7 +4,7 @@
  *
  * * ### Example
  * ```typescript
- * const uuid = createUUID();
+ * const uuid = RedGPU.Util.createUUID();
  * ```
  *
  * @returns

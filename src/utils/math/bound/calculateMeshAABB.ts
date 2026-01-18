@@ -13,7 +13,7 @@ const tempWorldVertex = vec3.create();
  *
  * * ### Example
  * ```typescript
- * const meshAABB = calculateMeshAABB(mesh);
+ * const meshAABB = RedGPU.Util.calculateMeshAABB(mesh);
  * ```
  *
  * @param mesh -

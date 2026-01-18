@@ -4,7 +4,7 @@
  *
  * * ### Example
  * ```typescript
- * const bitmap = await loadAndCreateBitmapImage('path/to/image.png');
+ * const bitmap = await RedGPU.Util.loadAndCreateBitmapImage('path/to/image.png');
  * ```
  *
  * @param src -

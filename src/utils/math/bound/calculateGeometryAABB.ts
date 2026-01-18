@@ -10,7 +10,7 @@ import AABB from "./AABB";
  *
  * * ### Example
  * ```typescript
- * const geometryAABB = calculateGeometryAABB(vertexBuffer);
+ * const geometryAABB = RedGPU.Util.calculateGeometryAABB(vertexBuffer);
  * ```
  *
  * @param vertexBuffer -

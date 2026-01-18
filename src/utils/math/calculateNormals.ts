@@ -7,7 +7,7 @@
  *
  * * ### Example
  * ```typescript
- * const normals = calculateNormals(vertices, indices);
+ * const normals = RedGPU.Util.calculateNormals(vertices, indices);
  * ```
  *
  * @param vertexArray -

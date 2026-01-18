@@ -9,9 +9,7 @@ import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
  * [KO] 인간의 눈이나 카메라 렌즈와 유사하게 거리에 따라 물체의 크기가 달라지는 원근감을 제공합니다. 3D 환경에서 깊이감 있는 씬을 렌더링할 때 기본적으로 사용됩니다.
  * [EN] Provides perspective where object sizes vary based on distance, similar to the human eye or a camera lens. It is used by default for rendering depth-filled scenes in a 3D environment.
  *
- * @category Camera
- *
- * @example
+ * * ### Example
  * ```typescript
  * const camera = new RedGPU.Camera.PerspectiveCamera();
  * camera.x = 10;
@@ -20,6 +18,7 @@ import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
  * camera.fieldOfView = 75;
  * camera.lookAt(0, 0, 0);
  * ```
+ * @category Camera
  */
 class PerspectiveCamera {
 	/**
@@ -123,7 +122,7 @@ class PerspectiveCamera {
 	 * [KO] X축 회전값을 설정합니다. (라디안)
 	 * [EN] Sets the X rotation value. (radians)
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 설정할 회전값
 	 * [EN] Rotation value to set
 	 */
@@ -147,7 +146,7 @@ class PerspectiveCamera {
 	 * [KO] Y축 회전값을 설정합니다. (라디안)
 	 * [EN] Sets the Y rotation value. (radians)
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 설정할 회전값
 	 * [EN] Rotation value to set
 	 */
@@ -171,7 +170,7 @@ class PerspectiveCamera {
 	 * [KO] Z축 회전값을 설정합니다. (라디안)
 	 * [EN] Sets the Z rotation value. (radians)
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 설정할 회전값
 	 * [EN] Rotation value to set
 	 */
@@ -195,7 +194,7 @@ class PerspectiveCamera {
 	 * [KO] 시야각(FOV)을 설정합니다. (도)
 	 * [EN] Sets the field of view. (degrees)
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 설정할 시야각
 	 * [EN] Field of view to set
 	 */
@@ -220,7 +219,7 @@ class PerspectiveCamera {
 	 * [KO] 근평면(near) 거리를 설정합니다.
 	 * [EN] Sets the near clipping distance.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 설정할 근평면 거리
 	 * [EN] Near clipping distance to set
 	 */
@@ -245,7 +244,7 @@ class PerspectiveCamera {
 	 * [KO] 원평면(far) 거리를 설정합니다.
 	 * [EN] Sets the far clipping distance.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 설정할 원평면 거리
 	 * [EN] Far clipping distance to set
 	 */
@@ -271,7 +270,7 @@ class PerspectiveCamera {
 	 * [KO] 카메라 이름을 설정합니다.
 	 * [EN] Sets the camera name.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 설정할 이름
 	 * [EN] Name to set
 	 */
@@ -307,7 +306,7 @@ class PerspectiveCamera {
 	 * [KO] X 좌표를 설정합니다.
 	 * [EN] Sets the X coordinate.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 설정할 X 좌표
 	 * [EN] X coordinate to set
 	 */
@@ -332,7 +331,7 @@ class PerspectiveCamera {
 	 * [KO] Y 좌표를 설정합니다.
 	 * [EN] Sets the Y coordinate.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 설정할 Y 좌표
 	 * [EN] Y coordinate to set
 	 */
@@ -357,7 +356,7 @@ class PerspectiveCamera {
 	 * [KO] Z 좌표를 설정합니다.
 	 * [EN] Sets the Z coordinate.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 설정할 Z 좌표
 	 * [EN] Z coordinate to set
 	 */
@@ -382,13 +381,13 @@ class PerspectiveCamera {
 	 * [KO] 카메라 위치를 설정합니다.
 	 * [EN] Sets the camera position.
 	 *
-	 * @param x
+	 * @param x -
 	 * [KO] X 좌표 또는 [x, y, z] 배열
 	 * [EN] X coordinate or [x, y, z] array
-	 * @param y
+	 * @param y -
 	 * [KO] Y 좌표 (x가 배열인 경우 무시됨)
 	 * [EN] Y coordinate (ignored if x is an array)
-	 * @param z
+	 * @param z -
 	 * [KO] Z 좌표 (x가 배열인 경우 무시됨)
 	 * [EN] Z coordinate (ignored if x is an array)
 	 */
@@ -407,13 +406,13 @@ class PerspectiveCamera {
 	 * [KO] 카메라가 특정 좌표를 바라보도록 회전시킵니다.
 	 * [EN] Rotates the camera to look at a specific coordinate.
 	 *
-	 * @param x
+	 * @param x -
 	 * [KO] 바라볼 대상의 X 좌표
 	 * [EN] Target X coordinate to look at
-	 * @param y
+	 * @param y -
 	 * [KO] 바라볼 대상의 Y 좌표
 	 * [EN] Target Y coordinate to look at
-	 * @param z
+	 * @param z -
 	 * [KO] 바라볼 대상의 Z 좌표
 	 * [EN] Target Z coordinate to look at
 	 */

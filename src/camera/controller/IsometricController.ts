@@ -15,9 +15,7 @@ const PER_PI = Math.PI / 180;
  * [KO] 거리감 없는 직교 투영을 사용하여 전략 시뮬레이션이나 타일 기반 게임에서 주로 사용되는 고정된 각도의 쿼터뷰(Quarter View)를 구현합니다.
  * [EN] Implements a fixed-angle quarter view, commonly used in strategy simulations or tile-based games, using orthographic projection without perspective distortion.
  *
- * @category Controller
- *
- * @example
+ * * ### Example
  * ```typescript
  * const controller = new RedGPU.Camera.IsometricController(redGPUContext);
  * controller.cameraDistance = 15;
@@ -25,6 +23,7 @@ const PER_PI = Math.PI / 180;
  * controller.zoom = 1;
  * ```
  * <iframe src="/RedGPU/examples/3d/controller/isometricController/"></iframe>
+ * @category Controller
  */
 class IsometricController extends AController {
 	// ==================== 카메라 위치 및 각도 ====================
@@ -60,7 +59,8 @@ class IsometricController extends AController {
 	/**
 	 * [KO] IsometricController 생성자
 	 * [EN] IsometricController constructor
-	 * @param redGPUContext
+	 *
+	 * @param redGPUContext -
 	 * [KO] RedGPUContext 인스턴스
 	 * [EN] RedGPUContext instance
 	 */
@@ -123,7 +123,7 @@ class IsometricController extends AController {
 	 * [KO] 줌 레벨을 설정합니다. minZoom ~ maxZoom 범위로 제한됩니다.
 	 * [EN] Sets the zoom level. Limited to minZoom ~ maxZoom range.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 줌 레벨 값
 	 * [EN] Zoom level value
 	 */
@@ -149,7 +149,7 @@ class IsometricController extends AController {
 	 * [KO] 줌 보간 계수를 설정합니다. 낮을수록 부드러운 줌 이동
 	 * [EN] Sets the zoom interpolation factor. Lower values for smoother zoom.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 보간 계수 (0.01 ~ 1)
 	 * [EN] Interpolation factor (0.01 ~ 1)
 	 */
@@ -174,7 +174,7 @@ class IsometricController extends AController {
 	 * [KO] 줌 속도를 설정합니다. 높을수록 빠른 줌 속도
 	 * [EN] Sets the zoom speed. Higher values for faster zoom.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 줌 속도 (0.01 이상)
 	 * [EN] Zoom speed (min 0.01)
 	 */
@@ -199,7 +199,7 @@ class IsometricController extends AController {
 	 * [KO] 최소 줌 레벨을 설정합니다.
 	 * [EN] Sets the minimum zoom level.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 최소 줌 레벨 (0.01 이상)
 	 * [EN] Minimum zoom level (min 0.01)
 	 */
@@ -225,7 +225,7 @@ class IsometricController extends AController {
 	 * [KO] 최대 줌 레벨을 설정합니다.
 	 * [EN] Sets the maximum zoom level.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 최대 줌 레벨 (0.01 이상)
 	 * [EN] Maximum zoom level (min 0.01)
 	 */
@@ -252,7 +252,7 @@ class IsometricController extends AController {
 	 * [KO] 직교 투영 카메라의 뷰 높이를 설정합니다.
 	 * [EN] Sets the view height of the orthographic camera.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 뷰 높이 (0.1 이상)
 	 * [EN] View height (min 0.1)
 	 */
@@ -277,7 +277,7 @@ class IsometricController extends AController {
 	 * [KO] 뷰 높이 보간 계수를 설정합니다. 낮을수록 부드러운 변화
 	 * [EN] Sets the view height interpolation factor. Lower values for smoother transition.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 보간 계수 (0.01 ~ 1)
 	 * [EN] Interpolation factor (0.01 ~ 1)
 	 */
@@ -303,7 +303,7 @@ class IsometricController extends AController {
 	 * [KO] 키보드 이동 속도를 설정합니다.
 	 * [EN] Sets the keyboard movement speed.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 이동 속도 (0.01 이상)
 	 * [EN] Movement speed (min 0.01)
 	 */
@@ -328,7 +328,7 @@ class IsometricController extends AController {
 	 * [KO] 키보드 이동 보간 계수를 설정합니다. 낮을수록 부드러운 움직임
 	 * [EN] Sets the keyboard movement interpolation factor. Lower values for smoother movement.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 보간 계수 (0.01 ~ 1)
 	 * [EN] Interpolation factor (0.01 ~ 1)
 	 */
@@ -353,7 +353,7 @@ class IsometricController extends AController {
 	 * [KO] 마우스 이동 속도를 설정합니다.
 	 * [EN] Sets the mouse movement speed.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 마우스 이동 속도 (0.01 이상)
 	 * [EN] Mouse movement speed (min 0.01)
 	 */
@@ -378,7 +378,7 @@ class IsometricController extends AController {
 	 * [KO] 마우스 이동 보간 계수를 설정합니다. 낮을수록 부드러운 움직임
 	 * [EN] Sets the mouse movement interpolation factor. Lower values for smoother movement.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 보간 계수 (0.01 ~ 1)
 	 * [EN] Interpolation factor (0.01 ~ 1)
 	 */
@@ -441,7 +441,7 @@ class IsometricController extends AController {
 	 * [KO] 상향 이동 키를 설정합니다.
 	 * [EN] Sets the move up key.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 설정할 키 이름
 	 * [EN] Key name to set
 	 */
@@ -453,7 +453,7 @@ class IsometricController extends AController {
 	 * [KO] 하향 이동 키를 설정합니다.
 	 * [EN] Sets the move down key.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 설정할 키 이름
 	 * [EN] Key name to set
 	 */
@@ -465,7 +465,7 @@ class IsometricController extends AController {
 	 * [KO] 좌측 이동 키를 설정합니다.
 	 * [EN] Sets the move left key.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 설정할 키 이름
 	 * [EN] Key name to set
 	 */
@@ -477,7 +477,7 @@ class IsometricController extends AController {
 	 * [KO] 우측 이동 키를 설정합니다.
 	 * [EN] Sets the move right key.
 	 *
-	 * @param value
+	 * @param value -
 	 * [KO] 설정할 키 이름
 	 * [EN] Key name to set
 	 */
@@ -490,10 +490,10 @@ class IsometricController extends AController {
 	 * [KO] 매 프레임마다 아이소메트릭 카메라를 업데이트합니다.
 	 * [EN] Updates the isometric camera every frame.
 	 *
-	 * @param view
+	 * @param view -
 	 * [KO] 카메라가 속한 3D 뷰
 	 * [EN] 3D view the camera belongs to
-	 * @param time
+	 * @param time -
 	 * [KO] 현재 시간 (ms)
 	 * [EN] Current time (ms)
 	 */
@@ -507,10 +507,10 @@ class IsometricController extends AController {
 	 * [KO] 카메라 애니메이션을 업데이트합니다.
 	 * [EN] Updates camera animation.
 	 *
-	 * @private
-	 * @param view
+	 * @param view -
 	 * [KO] 3D 뷰 객체
 	 * [EN] 3D View object
+	 * @internal
 	 */
 	#updateAnimation(view: View3D): void {
 		this.#handleKeyboardInput(view);
