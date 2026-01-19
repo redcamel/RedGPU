@@ -45,8 +45,9 @@ const PIPELINE_DESCRIPTOR_LABEL = 'PIPELINE_DESCRIPTOR_SKYBOX'
  * ```
  * <iframe src="/RedGPU/examples/3d/skybox/skybox/"></iframe>
  *
- * @group [KO] 아래는 Skybox의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
- * @group [EN] Below is a list of additional sample examples to help understand the structure and operation of Skybox.
+ * @see
+ * [KO] 아래는 Skybox의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
+ * [EN] Below is a list of additional sample examples to help understand the structure and operation of Skybox.
  * @see [Skybox using HDRTexture](/RedGPU/examples/3d/skybox/skyboxWithHDRTexture/)
  * @see [Skybox using IBL](/RedGPU/examples/3d/skybox/skyboxWithIbl/)
  *
