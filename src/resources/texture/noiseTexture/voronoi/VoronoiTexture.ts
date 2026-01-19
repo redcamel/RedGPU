@@ -15,9 +15,7 @@ import voronoiComputeFunctions from './voronoiCompute.wgsl';
 const validDistanceTypes = Object.values(VORONOI_DISTANCE_TYPE) as number[];
 const validOutputTypes = Object.values(VORONOI_OUTPUT_TYPE) as number[];
 
-/**
- * Voronoi 노이즈 설정을 위한 타입 인터페이스
- */
+/** [KO] Voronoi 설정을 위한 타입 인터페이스 [EN] Type interface for Voronoi settings */
 interface VoronoiSettings {
     frequency: number;
     distanceScale: number;
@@ -45,33 +43,49 @@ const BASIC_OPTIONS: VoronoiSettings = {
 };
 
 /**
- * Voronoi 노이즈 텍스처 생성 클래스
- * 셀룰러 패턴, 돌 텍스처, 크랙 패턴, 셀 ID 출력 등을 생성할 수 있습니다.
+ * [KO] Voronoi 노이즈 패턴을 생성하는 텍스처 클래스입니다.
+ * [EN] Texture class that generates Voronoi noise patterns.
+ *
+ * [KO] 셀룰러 패턴, 돌 텍스처, 크랙 패턴, 셀 ID 출력 등을 생성할 수 있습니다.
+ * [EN] Can generate cellular patterns, stone textures, crack patterns, cell ID outputs, etc.
+ *
+ * * ### Example
+ * ```typescript
+ * const texture = new RedGPU.Resource.VoronoiTexture(redGPUContext);
+ * ```
  * @category NoiseTexture
  * @experimental
  */
 class VoronoiTexture extends ANoiseTexture {
-    /** 노이즈 패턴의 밀도/크기 (값이 클수록 세밀함) */
+    /** [KO] 노이즈 패턴의 밀도/크기 [EN] Density/scale of the noise pattern */
     #frequency: number = BASIC_OPTIONS.frequency;
-    /** 거리값 스케일링 (패턴의 강도 조절) */
+    /** [KO] 거리값 스케일링 [EN] Scaling of the distance value */
     #distanceScale: number = BASIC_OPTIONS.distanceScale;
-    /** 합성할 노이즈 레이어 개수 (값이 클수록 복잡한 디테일) */
+    /** [KO] 합성할 노이즈 레이어 개수 [EN] Number of noise layers to combine */
     #octaves: number = BASIC_OPTIONS.octaves;
-    /** 각 옥타브마다 진폭 감소 비율 (값이 클수록 거친 디테일) */
+    /** [KO] 각 옥타브마다 진폭 감소 비율 [EN] Rate of amplitude reduction for each octave */
     #persistence: number = BASIC_OPTIONS.persistence;
-    /** 각 옥타브마다 주파수 증가 비율 (값이 클수록 극명한 대비) */
+    /** [KO] 각 옥타브마다 주파수 증가 비율 [EN] Rate of frequency increase for each octave */
     #lacunarity: number = BASIC_OPTIONS.lacunarity;
-    /** 노이즈 패턴의 시작점 (같은 시드 = 같은 패턴) */
+    /** [KO] 노이즈 패턴의 시작점 [EN] Starting point of the noise pattern */
     #seed: number = BASIC_OPTIONS.seed;
-    /** 거리 계산 방식 (Euclidean, Manhattan, Chebyshev) */
+    /** [KO] 거리 계산 방식 [EN] Distance calculation method */
     #distanceType: number = BASIC_OPTIONS.distanceType;
-    /** 출력 타입 (F1, F2, F2-F1, F1+F2, CELL_ID, CELL_ID_COLOR) */
+    /** [KO] 출력 타입 [EN] Output type */
     #outputType: number = BASIC_OPTIONS.outputType;
-    /** 점들의 랜덤성 (0=격자, 1=완전랜덤) */
+    /** [KO] 점들의 랜덤성 [EN] Randomness of the points */
     #jitter: number = BASIC_OPTIONS.jitter;
-    /** 셀 ID 색상 강도 (셀 ID 출력 시 색상의 밝기/대비) */
+    /** [KO] 셀 ID 색상 강도 [EN] Intensity of the cell ID color */
     #cellIdColorIntensity: number = BASIC_OPTIONS.cellIdColorIntensity;
 
+    /**
+     * [KO] VoronoiTexture 인스턴스를 생성합니다.
+     * [EN] Creates a VoronoiTexture instance.
+     * @param redGPUContext - [KO] RedGPUContext 인스턴스 [EN] RedGPUContext instance
+     * @param width - [KO] 텍스처 가로 크기 [EN] Texture width
+     * @param height - [KO] 텍스처 세로 크기 [EN] Texture height
+     * @param define - [KO] 노이즈 정의 객체 (선택) [EN] Noise definition object (optional)
+     */
     constructor(
         redGPUContext: RedGPUContext,
         width: number = 1024,
@@ -111,69 +125,83 @@ class VoronoiTexture extends ANoiseTexture {
         });
     }
 
+    /** [KO] 주파수를 반환합니다. [EN] Returns the frequency. */
     get frequency(): number {
         return this.#frequency;
     }
 
+    /** [KO] 주파수를 설정합니다. [EN] Sets the frequency. */
     set frequency(value: number) {
         validatePositiveNumberRange(value);
         this.#frequency = value;
         this.updateUniform('frequency', value);
     }
 
+    /** [KO] 거리 스케일을 반환합니다. [EN] Returns the distance scale. */
     get distanceScale(): number {
         return this.#distanceScale;
     }
 
+    /** [KO] 거리 스케일을 설정합니다. [EN] Sets the distance scale. */
     set distanceScale(value: number) {
         validatePositiveNumberRange(value);
         this.#distanceScale = value;
         this.updateUniform('distanceScale', value);
     }
 
+    /** [KO] 옥타브 수를 반환합니다. [EN] Returns the number of octaves. */
     get octaves(): number {
         return this.#octaves;
     }
 
+    /** [KO] 옥타브 수를 설정합니다. [EN] Sets the number of octaves. */
     set octaves(value: number) {
         validateUintRange(value, 1, 8);
         this.#octaves = value;
         this.updateUniform('octaves', value);
     }
 
+    /** [KO] 지속성을 반환합니다. [EN] Returns the persistence. */
     get persistence(): number {
         return this.#persistence;
     }
 
+    /** [KO] 지속성을 설정합니다. [EN] Sets the persistence. */
     set persistence(value: number) {
         validatePositiveNumberRange(value, 0, 1);
         this.#persistence = value;
         this.updateUniform('persistence', value);
     }
 
+    /** [KO] 간극성을 반환합니다. [EN] Returns the lacunarity. */
     get lacunarity(): number {
         return this.#lacunarity;
     }
 
+    /** [KO] 간극성을 설정합니다. [EN] Sets the lacunarity. */
     set lacunarity(value: number) {
         validatePositiveNumberRange(value);
         this.#lacunarity = value;
         this.updateUniform('lacunarity', value);
     }
 
+    /** [KO] 시드를 반환합니다. [EN] Returns the seed. */
     get seed(): number {
         return this.#seed;
     }
 
+    /** [KO] 시드를 설정합니다. [EN] Sets the seed. */
     set seed(value: number) {
         this.#seed = value;
         this.updateUniform('seed', value);
     }
 
+    /** [KO] 거리 타입을 반환합니다. [EN] Returns the distance type. */
     get distanceType(): number {
         return this.#distanceType;
     }
 
+    /** [KO] 거리 타입을 설정합니다. [EN] Sets the distance type. */
     set distanceType(value: number) {
         if (validDistanceTypes.includes(value)) {
             this.#distanceType = value;
@@ -183,10 +211,12 @@ class VoronoiTexture extends ANoiseTexture {
         }
     }
 
+    /** [KO] 출력 타입을 반환합니다. [EN] Returns the output type. */
     get outputType(): number {
         return this.#outputType;
     }
 
+    /** [KO] 출력 타입을 설정합니다. [EN] Sets the output type. */
     set outputType(value: number) {
         if (validOutputTypes.includes(value)) {
             this.#outputType = value;
@@ -196,122 +226,114 @@ class VoronoiTexture extends ANoiseTexture {
         }
     }
 
+    /** [KO] 지터(Jitter) 값을 반환합니다. [EN] Returns the jitter value. */
     get jitter(): number {
         return this.#jitter;
     }
 
+    /** [KO] 지터(Jitter) 값을 설정합니다. [EN] Sets the jitter value. */
     set jitter(value: number) {
-        if (value < 0 || value > 1) {
-            consoleAndThrowError(`Jitter must be between 0 and 1. Received: ${value}`);
-        }
         validatePositiveNumberRange(value, 0, 1);
         this.#jitter = value;
         this.updateUniform('jitter', value);
     }
 
+    /** [KO] 셀 ID 색상 강도를 반환합니다. [EN] Returns the cell ID color intensity. */
     get cellIdColorIntensity(): number {
         return this.#cellIdColorIntensity;
     }
 
+    /** [KO] 셀 ID 색상 강도를 설정합니다. [EN] Sets the cell ID color intensity. */
     set cellIdColorIntensity(value: number) {
         validatePositiveNumberRange(value);
         this.#cellIdColorIntensity = value;
         this.updateUniform('cellIdColorIntensity', value);
     }
 
-    /** 시드를 랜덤 값으로 변경 */
+    /** [KO] 시드를 랜덤하게 변경합니다. [EN] Randomizes the seed. */
     randomizeSeed(): void {
         this.seed = Math.random() * 1000.0;
     }
 
-    // ===========================================
-    // 거리 계산 방식 편의 메서드들
-    // ===========================================
-    /** 유클리드 거리 (원형 패턴) */
+    /** [KO] 유클리드 거리 방식을 설정합니다. [EN] Sets the Euclidean distance method. */
     setEuclideanDistance(): void {
         this.distanceType = VORONOI_DISTANCE_TYPE.EUCLIDEAN;
     }
 
-    /** 맨하탄 거리 (다이아몬드 패턴) */
+    /** [KO] 맨하탄 거리 방식을 설정합니다. [EN] Sets the Manhattan distance method. */
     setManhattanDistance(): void {
         this.distanceType = VORONOI_DISTANCE_TYPE.MANHATTAN;
     }
 
-    /** 체비셰프 거리 (사각형 패턴) */
+    /** [KO] 체비셰프 거리 방식을 설정합니다. [EN] Sets the Chebyshev distance method. */
     setChebyshevDistance(): void {
         this.distanceType = VORONOI_DISTANCE_TYPE.CHEBYSHEV;
     }
 
-    // ===========================================
-    // 출력 타입 편의 메서드들
-    // ===========================================
-    /** F1 출력 (가장 가까운 점까지의 거리) */
+    /** [KO] F1 출력 방식을 설정합니다. [EN] Sets the F1 output method. */
     setF1Output(): void {
         this.outputType = VORONOI_OUTPUT_TYPE.F1;
     }
 
-    /** F2 출력 (두 번째 가까운 점까지의 거리) */
+    /** [KO] F2 출력 방식을 설정합니다. [EN] Sets the F2 output method. */
     setF2Output(): void {
         this.outputType = VORONOI_OUTPUT_TYPE.F2;
     }
 
-    /** 크랙 패턴 (F2-F1) */
+    /** [KO] 크랙 패턴 방식을 설정합니다. [EN] Sets the crack pattern method. */
     setCrackPattern(): void {
         this.outputType = VORONOI_OUTPUT_TYPE.F2_MINUS_F1;
     }
 
-    /** 부드러운 블렌드 (F1+F2) */
+    /** [KO] 부드러운 블렌딩 방식을 설정합니다. [EN] Sets the smooth blend method. */
     setSmoothBlend(): void {
         this.outputType = VORONOI_OUTPUT_TYPE.F1_PLUS_F2;
     }
 
-    /** 셀 ID 출력 (각 셀마다 고유한 회색조 값) */
+    /** [KO] 셀 ID 출력 방식을 설정합니다. [EN] Sets the cell ID output method. */
     setCellIdOutput(): void {
         this.outputType = VORONOI_OUTPUT_TYPE.CELL_ID;
     }
 
-    /** 셀 ID 컬러 출력 (각 셀마다 고유한 색상) */
+    /** [KO] 셀 ID 색상 출력 방식을 설정합니다. [EN] Sets the cell ID color output method. */
     setCellIdColorOutput(): void {
         this.outputType = VORONOI_OUTPUT_TYPE.CELL_ID_COLOR;
     }
 
-    // ===========================================
-    // 프리셋 패턴 메서드들
-    // ===========================================
-    /** 셀룰러 패턴 프리셋 */
+    /** [KO] 셀룰러 패턴 프리셋을 적용합니다. [EN] Applies the cellular pattern preset. */
     setCellularPattern(): void {
         this.outputType = VORONOI_OUTPUT_TYPE.F1;
         this.distanceType = VORONOI_DISTANCE_TYPE.EUCLIDEAN;
         this.jitter = 1.0;
     }
 
-    /** 돌 패턴 프리셋 */
+    /** [KO] 돌 패턴 프리셋을 적용합니다. [EN] Applies the stone pattern preset. */
     setStonePattern(): void {
         this.outputType = VORONOI_OUTPUT_TYPE.F2_MINUS_F1;
         this.distanceType = VORONOI_DISTANCE_TYPE.EUCLIDEAN;
         this.jitter = 0.8;
     }
 
-    /** 유기체 패턴 프리셋 */
+    /** [KO] 유기체 패턴 프리셋을 적용합니다. [EN] Applies the organic pattern preset. */
     setOrganicPattern(): void {
         this.distanceType = VORONOI_DISTANCE_TYPE.MANHATTAN;
         this.jitter = 0.6;
     }
 
-    /** 격자 패턴 프리셋 (정형화된 패턴) */
+    /** [KO] 격자 패턴 프리셋을 적용합니다. [EN] Applies the grid pattern preset. */
     setGridPattern(): void {
         this.jitter = 0.0;
         this.distanceType = VORONOI_DISTANCE_TYPE.EUCLIDEAN;
     }
 
-    /** 크리스탈 패턴 프리셋 */
+    /** [KO] 크리스탈 패턴 프리셋을 적용합니다. [EN] Applies the crystal pattern preset. */
     setCrystalPattern(): void {
         this.outputType = VORONOI_OUTPUT_TYPE.F2_MINUS_F1;
         this.distanceType = VORONOI_DISTANCE_TYPE.CHEBYSHEV;
         this.jitter = 0.9;
     }
 
-    /** 스테인드글라스 패턴 프리셋 (컬러풀한 셀 ID) */
+    /** [KO] 스테인드글라스 패턴 프리셋을 적용합니다. [EN] Applies the stained glass pattern preset. */
     setStainedGlassPattern(): void {
         this.outputType = VORONOI_OUTPUT_TYPE.CELL_ID_COLOR;
         this.distanceType = VORONOI_DISTANCE_TYPE.EUCLIDEAN;
@@ -319,7 +341,7 @@ class VoronoiTexture extends ANoiseTexture {
         this.cellIdColorIntensity = 0.8;
     }
 
-    /** 모자이크 패턴 프리셋 */
+    /** [KO] 모자이크 패턴 프리셋을 적용합니다. [EN] Applies the mosaic pattern preset. */
     setMosaicPattern(): void {
         this.outputType = VORONOI_OUTPUT_TYPE.CELL_ID_COLOR;
         this.distanceType = VORONOI_DISTANCE_TYPE.MANHATTAN;
@@ -327,7 +349,7 @@ class VoronoiTexture extends ANoiseTexture {
         this.cellIdColorIntensity = 1.0;
     }
 
-    /** 바이옴 맵 프리셋 (게임 지형용) */
+    /** [KO] 바이옴 맵 패턴 프리셋을 적용합니다. [EN] Applies the biome map pattern preset. */
     setBiomeMapPattern(): void {
         this.outputType = VORONOI_OUTPUT_TYPE.CELL_ID;
         this.distanceType = VORONOI_DISTANCE_TYPE.EUCLIDEAN;
@@ -335,10 +357,7 @@ class VoronoiTexture extends ANoiseTexture {
         this.frequency = 4.0;
     }
 
-    // ===========================================
-    // 설정 관리 메서드들
-    // ===========================================
-    /** 현재 설정을 반환 */
+    /** [KO] 현재 설정을 반환합니다. [EN] Returns current settings. */
     getSettings(): VoronoiSettings {
         return {
             frequency: this.#frequency,
@@ -354,7 +373,7 @@ class VoronoiTexture extends ANoiseTexture {
         };
     }
 
-    /** 설정을 일괄 적용 */
+    /** [KO] 설정을 일괄 적용합니다. [EN] Applies settings at once. */
     applySettings(settings: Partial<VoronoiSettings>): void {
         if (settings.frequency !== undefined) this.frequency = settings.frequency;
         if (settings.distanceScale !== undefined) this.distanceScale = settings.distanceScale;
@@ -368,10 +387,7 @@ class VoronoiTexture extends ANoiseTexture {
         if (settings.cellIdColorIntensity !== undefined) this.cellIdColorIntensity = settings.cellIdColorIntensity;
     }
 
-    // ===========================================
-    // 정보 조회 메서드들
-    // ===========================================
-    /** 현재 거리 타입 이름을 반환 */
+    /** [KO] 현재 거리 타입의 이름을 반환합니다. [EN] Returns the name of current distance type. */
     getDistanceTypeName(): string {
         const names: { [key: number]: string } = {
             [VORONOI_DISTANCE_TYPE.EUCLIDEAN]: 'Euclidean',
@@ -381,7 +397,7 @@ class VoronoiTexture extends ANoiseTexture {
         return names[this.#distanceType] || 'Unknown';
     }
 
-    /** 현재 출력 타입 이름을 반환 */
+    /** [KO] 현재 출력 타입의 이름을 반환합니다. [EN] Returns the name of current output type. */
     getOutputTypeName(): string {
         const names: { [key: number]: string } = {
             [VORONOI_OUTPUT_TYPE.F1]: 'F1',

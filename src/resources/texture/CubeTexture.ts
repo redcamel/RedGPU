@@ -10,11 +10,21 @@ const MANAGED_STATE_KEY = 'managedCubeTextureState'
 type SrcInfo = string[] | { srcList: string[], cacheKey: string }
 
 /**
- * CubeTexture
+ * [KO] 6개의 이미지를 사용하는 큐브 텍스처 클래스입니다.
+ * [EN] Cube texture class that uses 6 images.
+ *
+ * * ### Example
+ * ```typescript
+ * const texture = new RedGPU.Resource.CubeTexture(redGPUContext, [
+ *   'right.png', 'left.png',
+ *   'top.png', 'bottom.png',
+ *   'front.png', 'back.png'
+ * ]);
+ * ```
  * @category Texture
  */
 class CubeTexture extends ManagementResourceBase {
-    /** 기본 뷰 디스크립터 */
+    /** [KO] 기본 뷰 디스크립터 [EN] Default view descriptor */
     static defaultViewDescriptor: GPUTextureViewDescriptor = {
         dimension: 'cube',
         aspect: 'all',
@@ -23,33 +33,47 @@ class CubeTexture extends ManagementResourceBase {
         baseArrayLayer: 0,
         arrayLayerCount: 6,
     }
-    /** GPUTexture 객체 */
+    /** [KO] GPUTexture 객체 [EN] GPUTexture object */
     #gpuTexture: GPUTexture
-    /** 텍스처 소스 경로 리스트 */
+    /** [KO] 텍스처 소스 경로 리스트 [EN] List of texture source paths */
     #srcList: string[]
-    /** 밉맵 레벨 개수 */
+    /** [KO] 밉맵 레벨 개수 [EN] Number of mipmap levels */
     #mipLevelCount: number
-    /** 밉맵 사용 여부 */
+    /** [KO] 밉맵 사용 여부 [EN] Whether to use mipmaps */
     #useMipmap: boolean
-    /** 이미지 비트맵 객체 리스트 */
+    /** [KO] 이미지 비트맵 객체 리스트 [EN] List of image bitmap objects */
     #imgBitmaps: ImageBitmap[]
-    /** 비디오 메모리 사용량(byte) */
+    /** [KO] 비디오 메모리 사용량(byte) [EN] Video memory usage in bytes */
     #videoMemorySize: number = 0
-    /** 텍스처 포맷 */
+    /** [KO] 텍스처 포맷 [EN] Texture format */
     readonly #format: GPUTextureFormat
-    /** 로드 완료 콜백 */
+    /** [KO] 로드 완료 콜백 [EN] Load complete callback */
     readonly #onLoad: (cubeTextureInstance: CubeTexture) => void;
-    /** 에러 콜백 */
+    /** [KO] 에러 콜백 [EN] Error callback */
     readonly #onError: (error: Error) => void;
 
     /**
-     * CubeTexture 생성자
-     * @param redGPUContext - RedGPUContext 인스턴스
-     * @param srcList - 큐브 텍스처 소스 정보
-     * @param useMipMap - 밉맵 사용 여부(기본값: true)
-     * @param onLoad - 로드 완료 콜백
-     * @param onError - 에러 콜백
-     * @param format - 텍스처 포맷(옵션)
+     * [KO] CubeTexture 인스턴스를 생성합니다.
+     * [EN] Creates a CubeTexture instance.
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     * @param srcList -
+     * [KO] 큐브 텍스처 소스 정보 (URL 배열 또는 객체)
+     * [EN] Cube texture source information (Array of URLs or object)
+     * @param useMipMap -
+     * [KO] 밉맵 사용 여부 (기본값: true)
+     * [EN] Whether to use mipmaps (default: true)
+     * @param onLoad -
+     * [KO] 로드 완료 콜백
+     * [EN] Load complete callback
+     * @param onError -
+     * [KO] 에러 콜백
+     * [EN] Error callback
+     * @param format -
+     * [KO] 텍스처 포맷 (선택)
+     * [EN] Texture format (optional)
      */
     constructor(
         redGPUContext: RedGPUContext,
@@ -67,7 +91,6 @@ class CubeTexture extends ManagementResourceBase {
         this.#srcList = this.#getParsedSrc(srcList);
         this.cacheKey = this.#getCacheKey(srcList);
         const {table} = this.targetResourceManagedState
-        // keepLog('srcList', srcList)
         if (srcList) {
             let target: ResourceStateCubeTexture = table.get(this.cacheKey)
             if (target) {
@@ -78,11 +101,10 @@ class CubeTexture extends ManagementResourceBase {
                 this.srcList = srcList;
                 this.#registerResource()
             }
-        } else {
         }
     }
 
-    /** 뷰 디스크립터 반환 */
+    /** [KO] 뷰 디스크립터를 반환합니다. [EN] Returns the view descriptor. */
     get viewDescriptor() {
         return {
             ...CubeTexture.defaultViewDescriptor,
@@ -90,47 +112,46 @@ class CubeTexture extends ManagementResourceBase {
         }
     }
 
-    /** 비디오 메모리 사용량(byte) 반환 */
+    /** [KO] 비디오 메모리 사용량(byte)을 반환합니다. [EN] Returns the video memory usage in bytes. */
     get videoMemorySize(): number {
         return this.#videoMemorySize;
     }
 
-    /** GPUTexture 객체 반환 */
+    /** [KO] GPUTexture 객체를 반환합니다. [EN] Returns the GPUTexture object. */
     get gpuTexture(): GPUTexture {
         return this.#gpuTexture;
     }
 
-    /** 밉맵 레벨 개수 반환 */
+    /** [KO] 밉맵 레벨 개수를 반환합니다. [EN] Returns the number of mipmap levels. */
     get mipLevelCount(): number {
         return this.#mipLevelCount;
     }
 
-    /** 텍스처 소스 경로 리스트 반환 */
+    /** [KO] 텍스처 소스 경로 리스트를 반환합니다. [EN] Returns the list of texture source paths. */
     get srcList(): string[] {
         return this.#srcList;
     }
 
-    /** 텍스처 소스 경로 리스트 설정 및 로드 */
+    /** [KO] 텍스처 소스 경로 리스트를 설정하고 로드를 시작합니다. [EN] Sets the list of texture source paths and starts loading. */
     set srcList(value: SrcInfo) {
         this.#srcList = this.#getParsedSrc(value);
         this.cacheKey = this.#getCacheKey(value);
         if (this.#srcList?.length) this.#loadBitmapTexture(this.#srcList);
     }
 
-    /** 밉맵 사용 여부 반환 */
+    /** [KO] 밉맵 사용 여부를 반환합니다. [EN] Returns whether mipmaps are used. */
     get useMipmap(): boolean {
         return this.#useMipmap;
     }
 
-    /** 밉맵 사용 여부 설정 및 텍스처 재생성 */
+    /** [KO] 밉맵 사용 여부를 설정하고 텍스처를 재생성합니다. [EN] Sets whether to use mipmaps and recreates the texture. */
     set useMipmap(value: boolean) {
         this.#useMipmap = value;
         this.#createGPUTexture()
     }
 
-    /** 텍스처와 리소스 해제 */
+    /** [KO] 텍스처 리소스를 파괴합니다. [EN] Destroys the texture resource. */
     destroy() {
-        //TODO 체크
         const temp = this.#gpuTexture
         this.#setGpuTexture(null);
         this.__fireListenerList(true)
@@ -141,41 +162,39 @@ class CubeTexture extends ManagementResourceBase {
     }
 
     /**
-     * GPUTexture를 직접 설정합니다.
-     * @param gpuTexture - GPUTexture 객체
-     * @param cacheKey - 캐시 키(옵션)
-     * @param useMipmap - 밉맵 사용 여부(기본값: true)
-     * @category Texture
+     * [KO] GPUTexture를 직접 설정합니다.
+     * [EN] Sets the GPUTexture directly.
+     * @param gpuTexture -
+     * [KO] 설정할 `GPUTexture` 객체
+     * [EN] `GPUTexture` object to set
+     * @param cacheKey -
+     * [KO] 캐시 키 (선택)
+     * [EN] Cache key (optional)
+     * @param useMipmap -
+     * [KO] 밉맵 사용 여부 (기본값: true)
+     * [EN] Whether to use mipmaps (default: true)
      */
     setGPUTextureDirectly(
         gpuTexture: GPUTexture,
         cacheKey?: string,
         useMipmap: boolean = true
     ): void {
-        // 기존 텍스처 정리
         if (this.#gpuTexture) {
             this.#gpuTexture.destroy();
             this.targetResourceManagedState.videoMemory -= this.#videoMemorySize;
         }
-        // keepLog('gpuTexture', gpuTexture)
-        // 새 텍스처 설정
         this.#gpuTexture = gpuTexture;
         this.#useMipmap = useMipmap
         this.#mipLevelCount = gpuTexture.mipLevelCount;
-        // this.#mipLevelCount = getMipLevelCount(gpuTexture.width, gpuTexture.height);
         this.cacheKey = cacheKey || `direct_${this.uuid}`;
-        // 메모리 사용량 계산
         this.#videoMemorySize = calculateTextureByteSize(gpuTexture);
         this.targetResourceManagedState.videoMemory += this.#videoMemorySize;
-        // 리스너들에게 업데이트 알림
         this.__fireListenerList();
     }
 
     /**
-     * SrcInfo로부터 캐시 키를 생성합니다.
-     * @param srcInfo - 큐브 텍스처 소스 정보
-     * @returns 캐시 키 문자열
-     * @category Texture
+     * [KO] SrcInfo로부터 캐시 키를 생성합니다.
+     * [EN] Creates a cache key from SrcInfo.
      */
     #getCacheKey(srcInfo?: SrcInfo): string {
         if (!srcInfo) return this.uuid;
@@ -188,19 +207,16 @@ class CubeTexture extends ManagementResourceBase {
     }
 
     /**
-     * SrcInfo로부터 srcList 배열을 추출합니다.
-     * @param srcInfo - 큐브 텍스처 소스 정보
-     * @returns srcList 문자열 배열
-     * @category Texture
+     * [KO] SrcInfo로부터 srcList 배열을 추출합니다.
+     * [EN] Extracts the srcList array from SrcInfo.
      */
     #getParsedSrc(srcInfo?: SrcInfo): string[] {
         return srcInfo instanceof Array ? srcInfo : srcInfo?.srcList
     }
 
     /**
-     * GPUTexture 객체를 설정합니다.
-     * @param value - GPUTexture 객체
-     * @category Texture
+     * [KO] GPUTexture 객체를 설정합니다.
+     * [EN] Sets the GPUTexture object.
      */
     #setGpuTexture(value: GPUTexture) {
         this.#gpuTexture = value;
@@ -209,24 +225,24 @@ class CubeTexture extends ManagementResourceBase {
     }
 
     /**
-     * 리소스를 등록합니다.
-     * @category Texture
+     * [KO] 리소스를 관리 대상으로 등록합니다.
+     * [EN] Registers the resource for management.
      */
     #registerResource() {
         this.redGPUContext.resourceManager.registerManagementResource(this, new ResourceStateCubeTexture(this));
     }
 
     /**
-     * 리소스 등록을 해제합니다.
-     * @category Texture
+     * [KO] 리소스 등록을 해제합니다.
+     * [EN] Unregisters the resource from management.
      */
     #unregisterResource() {
         this.redGPUContext.resourceManager.unregisterManagementResource(this);
     }
 
     /**
-     * GPUTexture 객체를 생성합니다.
-     * @category Texture
+     * [KO] GPUTexture 객체를 생성합니다.
+     * [EN] Creates the GPUTexture object.
      */
     #createGPUTexture() {
         const {gpuDevice, resourceManager} = this.redGPUContext
@@ -237,7 +253,6 @@ class CubeTexture extends ManagementResourceBase {
         }
         this.#mipLevelCount = 1;
         {
-            // 텍스쳐 생성
             const imgBitmaps = this.#imgBitmaps
             const firstImgBitmap = imgBitmaps[0]
             const {width: W, height: H} = firstImgBitmap
@@ -248,7 +263,6 @@ class CubeTexture extends ManagementResourceBase {
                 usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
                 label: `cubeTexture_${this.#srcList?.toString() || this.uuid}`
             };
-            // // 밉맵을 생성할꺼면 소스를 계산해서... 밉맵 카운트를 추가 정의한다.
             if (this.#useMipmap) {
                 this.#mipLevelCount = getMipLevelCount(W, H);
                 textureDescriptor.mipLevelCount = this.#mipLevelCount
@@ -264,9 +278,8 @@ class CubeTexture extends ManagementResourceBase {
     }
 
     /**
-     * 큐브 텍스처 이미지를 비동기 로드합니다.
-     * @param srcList - 이미지 경로 리스트
-     * @category Texture
+     * [KO] 큐브 텍스처 이미지를 비동기로 로드합니다.
+     * [EN] Loads cube texture images asynchronously.
      */
     async #loadBitmapTexture(srcList: string[]) {
         this.#imgBitmaps = await loadAndCreateBitmapImages(srcList);
@@ -284,10 +297,14 @@ Object.freeze(CubeTexture)
 export default CubeTexture
 
 /**
- * 주어진 URL 배열로부터 이미지를 로드하고, 각 이미지를 비트맵으로 생성합니다.
- * @param srcList - 이미지 URL 배열
- * @returns ImageBitmap 객체 배열을 반환하는 Promise
- * @category Texture
+ * [KO] 이미지 경로 리스트로부터 비트맵을 로드합니다.
+ * [EN] Loads bitmaps from a list of image paths.
+ * @param srcList -
+ * [KO] 이미지 경로 리스트
+ * [EN] List of image paths
+ * @returns
+ * [KO] 비트맵 배열을 담은 Promise
+ * [EN] Promise containing an array of ImageBitmaps
  */
 async function loadAndCreateBitmapImages(srcList: string[]): Promise<ImageBitmap[]> {
     const promises = srcList.map(src => loadAndCreateBitmapImage(src));

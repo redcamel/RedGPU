@@ -3,6 +3,10 @@ import ensureVertexIndexBuiltin from "./core/ensureVertexIndexBuiltin";
 import preprocessWGSL from "./core/preprocessWGSL";
 import WGSLUniformTypes from "./core/WGSLUniformTypes";
 
+/**
+ * [KO] 개별 유니폼 멤버 정보를 생성합니다.
+ * [EN] Creates individual uniform member information.
+ */
 const createUniformMember = (curr, start, typeName) => {
     const UniformTypeInfo = WGSLUniformTypes[typeName];
     return {
@@ -14,6 +18,11 @@ const createUniformMember = (curr, start, typeName) => {
         View: UniformTypeInfo?.View
     };
 };
+
+/**
+ * [KO] 구조체 멤버들을 재귀적으로 처리합니다.
+ * [EN] Recursively processes struct members.
+ */
 const processMembers = (members, start = 0, end = 0) => {
     let startOffset = 0;
     let endOffset = end;
@@ -45,6 +54,11 @@ const processMembers = (members, start = 0, end = 0) => {
         endOffset
     };
 };
+
+/**
+ * [KO] 유니폼 정보 배열을 처리하여 맵으로 반환합니다.
+ * [EN] Processes an array of uniform information and returns it as a map.
+ */
 const processUniforms = (uniforms) => {
     return uniforms.reduce((prev, curr) => {
         prev[curr.name] = {
@@ -57,6 +71,11 @@ const processUniforms = (uniforms) => {
         return prev;
     }, {});
 };
+
+/**
+ * [KO] 스토리지 정보 배열을 처리하여 맵으로 반환합니다.
+ * [EN] Processes an array of storage information and returns it as a map.
+ */
 const processStorages = (storage) => {
     return storage.reduce((prev, curr) => {
         prev[curr.name] = {
@@ -71,35 +90,27 @@ const processStorages = (storage) => {
         return prev;
     }, {});
 };
+
 const reflectCache = new Map<string, any>();
+
 /**
- * WGSL 코드를 파싱하고 리플렉션 정보를 반환합니다.
+ * [KO] WGSL 코드를 파싱하고 리플렉션 정보를 반환합니다.
+ * [EN] Parses WGSL code and returns reflection information.
  *
+ * [KO] 이 함수는 WGSL 소스 코드를 분석하여 유니폼, 스토리지, 샘플러, 텍스처 등의 정보를 추출하고, 조건부 컴파일(variant) 처리를 지원합니다.
+ * [EN] This function analyzes WGSL source code to extract information about uniforms, storage, samplers, and textures, and supports conditional compilation (variant) processing.
+ *
+ * @param code -
+ * [KO] 파싱할 WGSL 셰이더 코드 문자열
+ * [EN] WGSL shader code string to parse
+ * @returns
+ * [KO] 리플렉션 정보 및 전처리된 소스 코드를 포함하는 객체
+ * [EN] An object containing reflection information and preprocessed source code
  * @category WGSL
- *
- * @param code - 파싱할 WGSL 셰이더 코드 문자열
- * @returns {
- *   uniforms: Uniform 변수 정보,
- *   storage: Storage 변수 정보,
- *   samplers: 샘플러 정보,
- *   textures: 텍스처 정보,
- *   vertexEntries: 버텍스 엔트리 포인트 이름 배열,
- *   fragmentEntries: 프래그먼트 엔트리 포인트 이름 배열,
- *   computeEntries: 컴퓨트 엔트리 포인트 이름 배열,
- *   defaultSource: 전처리된 WGSL 소스,
- *   shaderSourceVariant: 조건부 분기별 WGSL 소스,
- *   conditionalBlocks: 조건부 분기 정보
- * }
  */
-
-
-
-const keepLog = console.log.bind(console);
 const parseWGSL = (code: string) => {
     code = ensureVertexIndexBuiltin(code)
-    // keepLog('WGSL 코드 (vertex_index 보장됨):', code);
     const {defaultSource, shaderSourceVariant, conditionalBlocks, cacheKey} = preprocessWGSL(code);
-    // 리플렉트 캐시 확인
     const cachedReflect = reflectCache.get(cacheKey);
     let reflectResult;
     if (cachedReflect) {
@@ -107,11 +118,8 @@ const parseWGSL = (code: string) => {
         reflectResult = cachedReflect
     } else {
         console.log('🔄 리플렉트 파싱 시작:', cacheKey);
-        // 새로운 리플렉트 생성
         const reflect = new WgslReflect(defaultSource);
-        // 리플렉트 결과 처리
         reflectResult = {
-            // signatureKey : makeSignatureKey(reflect.entry.vertex),
             uniforms: {...processUniforms(reflect.uniforms)},
             storage: {...processStorages(reflect.storage)},
             samplers: reflect.samplers,
@@ -120,7 +128,6 @@ const parseWGSL = (code: string) => {
             fragmentEntries: reflect.entry.fragment.map(v => v.name),
             computeEntries: reflect.entry.compute.map(v => v.name),
         };
-        // 캐시에 저장
         reflectCache.set(cacheKey, reflectResult);
     }
     return {
@@ -130,4 +137,5 @@ const parseWGSL = (code: string) => {
         conditionalBlocks
     };
 };
+
 export default parseWGSL;

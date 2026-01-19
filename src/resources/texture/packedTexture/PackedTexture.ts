@@ -4,50 +4,59 @@ import createUUID from "../../../utils/uuid/createUUID";
 import Sampler from "../../sampler/Sampler";
 import computeShaderCode from "./computeShader.wgsl";
 
-/**
- * 컴포넌트 매핑 타입 정의 (r/g/b/a 채널별 매핑)
- */
+/** [KO] 컴포넌트 매핑 타입 정의 [EN] Component mapping type definition */
 type ComponentMapping = {
     r?: 'r' | 'g' | 'b' | 'a';
     g?: 'r' | 'g' | 'b' | 'a';
     b?: 'r' | 'g' | 'b' | 'a';
     a?: 'r' | 'g' | 'b' | 'a';
 };
-/**
- * 패킹된 텍스처 캐시 맵
- */
+
 const cacheMap: Map<string, { gpuTexture: GPUTexture, useNum: number, mappingKey: string, uuid: string }> = new Map();
-/**
- * 인스턴스별 현재 사용 중인 키 추적용 WeakMap
- */
 const instanceMappingKeys: WeakMap<PackedTexture, string> = new WeakMap();
 let globalPipeline: GPURenderPipeline;
 let globalBindGroupLayout: GPUBindGroupLayout;
 let mappingBuffer: GPUBuffer;
 
 /**
- * 여러 텍스처의 채널을 조합해 하나의 텍스처로 패킹하는 유틸리티 클래스입니다.
+ * [KO] 여러 텍스처의 채널을 조합해 하나의 텍스처로 패킹하는 유틸리티 클래스입니다.
+ * [EN] Utility class that packs channels from multiple textures into a single texture.
+ *
+ * [KO] r, g, b, a 각 채널에 서로 다른 텍스처의 특정 채널을 할당하여 메모리 사용량을 줄이고 렌더링 효율을 높일 수 있습니다.
+ * [EN] By assigning specific channels from different textures to the r, g, b, and a channels, you can reduce memory usage and increase rendering efficiency.
+ *
+ * * ### Example
+ * ```typescript
+ * const packed = new RedGPU.Resource.PackedTexture(redGPUContext);
+ * await packed.packing({
+ *   r: texture1.gpuTexture,
+ *   g: texture2.gpuTexture
+ * }, 512, 512);
+ * ```
  * @category Texture
  */
 class PackedTexture {
-    /** 인스턴스 고유 식별자 */
+    /** [KO] 인스턴스 고유 식별자 [EN] Instance unique identifier */
     #uuid: string = createUUID();
-    /** RedGPUContext 인스턴스 */
+    /** [KO] RedGPUContext 인스턴스 [EN] RedGPUContext instance */
     #redGPUContext: RedGPUContext;
-    /** 샘플러 객체 */
+    /** [KO] 샘플러 객체 [EN] Sampler object */
     #sampler: GPUSampler;
-    /** 패킹 결과 GPUTexture 객체 */
+    /** [KO] 패킹 결과 GPUTexture 객체 [EN] Packed result GPUTexture object */
     #gpuTexture: GPUTexture;
-    /** GPU 디바이스 객체 */
+    /** [KO] GPU 디바이스 객체 [EN] GPU device object */
     #gpuDevice: GPUDevice;
-    /** 바인드 그룹 객체 */
+    /** [KO] 바인드 그룹 객체 [EN] Bind group object */
     #bindGroup: GPUBindGroup;
-    /** 임시 바인드 그룹 캐시 */
+    /** [KO] 임시 바인드 그룹 캐시 [EN] Temporary bind group cache */
     #tempBindGroupCache: Map<string, GPUBindGroup> = new Map();
 
     /**
-     * PackedTexture 생성자
-     * @param redGPUContext - RedGPUContext 인스턴스
+     * [KO] PackedTexture 인스턴스를 생성합니다.
+     * [EN] Creates a PackedTexture instance.
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
         this.#redGPUContext = redGPUContext;
@@ -56,28 +65,39 @@ class PackedTexture {
         this.#sampler = this.#createSampler();
     }
 
-    /** 인스턴스 고유 식별자 반환 */
+    /** [KO] 인스턴스 고유 식별자 [EN] Instance unique identifier */
     get uuid(): string {
         return this.#uuid;
     }
 
-    /** 패킹 결과 GPUTexture 객체 반환 */
+    /** [KO] 패킹 결과 GPUTexture 객체 [EN] Packed result GPUTexture object */
     get gpuTexture(): GPUTexture {
         return this.#gpuTexture;
     }
 
-    /** 패킹 텍스처 캐시 맵 반환 (static) */
+    /** [KO] 패킹 텍스처 캐시 맵을 반환합니다. [EN] Returns the packed texture cache map. */
     static getCacheMap() {
         return cacheMap;
     }
 
     /**
-     * 여러 텍스처의 채널을 조합해 패킹 텍스처를 생성합니다.
-     * @param textures - r/g/b/a 채널별 GPUTexture 객체
-     * @param width - 결과 텍스처의 가로 크기
-     * @param height - 결과 텍스처의 세로 크기
-     * @param label - 텍스처 레이블(옵션)
-     * @param componentMapping - 채널별 매핑 정보(옵션)
+     * [KO] 여러 텍스처의 채널을 조합해 패킹 텍스처를 생성합니다.
+     * [EN] Creates a packed texture by combining channels from multiple textures.
+     * @param textures -
+     * [KO] r/g/b/a 채널별 소스 GPUTexture 객체 맵
+     * [EN] Source GPUTexture object map for each r/g/b/a channel
+     * @param width -
+     * [KO] 결과 텍스처 너비
+     * [EN] Resulting texture width
+     * @param height -
+     * [KO] 결과 텍스처 높이
+     * [EN] Resulting texture height
+     * @param label -
+     * [KO] 텍스처 레이블 (선택)
+     * [EN] Texture label (optional)
+     * @param componentMapping -
+     * [KO] 컴포넌트 매핑 정보 (선택)
+     * [EN] Component mapping info (optional)
      */
     async packing(
         textures: { r?: GPUTexture; g?: GPUTexture; b?: GPUTexture; a?: GPUTexture },
@@ -86,7 +106,6 @@ class PackedTexture {
         label?: string,
         componentMapping?: ComponentMapping
     ) {
-        // 캐시 초기화 (새로운 패킹 작업 시작 시)
         const mapping = {
             r: 'r',
             g: 'g',
@@ -99,23 +118,16 @@ class PackedTexture {
         if (!textures.r && !textures.g && !textures.b && !textures.a) {
             return;
         }
-        // 새로운 캐시 관리 방식
         this.#handleCacheManagement(mappingKey);
         const currEntry = cacheMap.get(mappingKey);
         if (currEntry) {
-            // 캐시 정리 (기존 텍스처 사용 시)
             return;
         }
-        // Create new texture
         await this.#createPackedTexture(textures, width, height, label, mapping, mappingKey);
-        // 캐시 정리 (새 텍스처 생성 완료 후)
     }
 
-    /**
-     * 인스턴스 정리 메서드
-     */
+    /** [KO] 인스턴스를 파괴하고 캐시를 관리합니다. [EN] Destroys the instance and manages the cache. */
     destroy() {
-        // 인스턴스 삭제 시 캐시 정리
         const currentMappingKey = instanceMappingKeys.get(this);
         if (currentMappingKey) {
             const entry = cacheMap.get(currentMappingKey);
@@ -130,12 +142,10 @@ class PackedTexture {
         }
     }
 
-    /**
-     * 글로벌 리소스(파이프라인, 레이아웃, 매핑버퍼) 초기화
-     */
+    /** [KO] 전역 리소스를 초기화합니다. [EN] Initializes global resources. */
     #initializeGlobals() {
         mappingBuffer = this.#redGPUContext.resourceManager.createGPUBuffer('PACK_TEXTURE_MAPPING_BUFFER', {
-            size: 16, // 4개 컴포넌트 * 4바이트
+            size: 16,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         });
         if (!globalBindGroupLayout) {
@@ -158,10 +168,7 @@ class PackedTexture {
         }
     }
 
-    /**
-     * 텍스처 조합에 맞는 바인드 그룹을 갱신합니다.
-     * @param textures - r/g/b/a 채널별 GPUTexture 객체
-     */
+    /** [KO] 바인드 그룹을 업데이트합니다. [EN] Updates the bind group. */
     #updateBindGroup(textures: { r?: GPUTexture; g?: GPUTexture; b?: GPUTexture; a?: GPUTexture }) {
         const textureKey = `${textures.r?.label || 'empty'}_${textures.g?.label || 'empty'}_${textures.b?.label || 'empty'}_${textures.a?.label || 'empty'}`;
         const {resourceManager} = this.#redGPUContext
@@ -196,48 +203,28 @@ class PackedTexture {
         this.#bindGroup = this.#tempBindGroupCache.get(textureKey)!;
     }
 
-    /**
-     * 캐시 관리 및 사용 횟수 갱신
-     * @param mappingKey - 매핑 키 문자열
-     */
+    /** [KO] 캐시 정책을 처리합니다. [EN] Handles cache policy. */
     #handleCacheManagement(mappingKey: string) {
-        // 현재 인스턴스가 사용 중인 이전 키 확인
         const prevMappingKey = instanceMappingKeys.get(this);
-        // 이전 키와 현재 키가 다른 경우에만 처리
         if (prevMappingKey && prevMappingKey !== mappingKey) {
             const prevEntry = cacheMap.get(prevMappingKey);
             if (prevEntry) {
                 prevEntry.useNum--;
-                // keepLog(`텍스처 사용 횟수 감소: ${prevMappingKey} (${prevEntry.useNum})`);
-                // 사용 횟수가 0이 되면 삭제
                 if (prevEntry.useNum === 0) {
-                    // keepLog('삭제된 텍스쳐', prevEntry);
                     prevEntry.gpuTexture?.destroy();
                     cacheMap.delete(prevMappingKey);
-                    // keepLog('이전키가 더이상 사용되지 않아서 캐시에서 삭제함', prevEntry);
                 }
             }
         }
-        // 현재 키에 대한 처리
         const currEntry = cacheMap.get(mappingKey);
         if (currEntry) {
             this.#gpuTexture = currEntry.gpuTexture;
             currEntry.useNum++;
-            // keepLog('기존 생성된 텍스쳐를 사용함', currEntry);
         }
-        // 현재 인스턴스의 키 업데이트
         instanceMappingKeys.set(this, mappingKey);
     }
 
-    /**
-     * 실제 패킹 텍스처를 생성합니다.
-     * @param textures - r/g/b/a 채널별 GPUTexture 객체
-     * @param width - 결과 텍스처의 가로 크기
-     * @param height - 결과 텍스처의 세로 크기
-     * @param label - 텍스처 레이블
-     * @param mapping - 채널별 매핑 정보
-     * @param mappingKey - 매핑 키 문자열
-     */
+    /** [KO] 패킹 텍스처를 실제로 생성합니다. [EN] Actually creates the packed texture. */
     async #createPackedTexture(
         textures: { r?: GPUTexture; g?: GPUTexture; b?: GPUTexture; a?: GPUTexture },
         width: number,
@@ -271,21 +258,16 @@ class PackedTexture {
         } else {
             this.#gpuTexture = packedTexture;
         }
-        // 새로운 텍스처를 캐시에 등록
         cacheMap.set(mappingKey, {
             gpuTexture: this.#gpuTexture,
             useNum: 1,
             mappingKey,
             uuid: this.#uuid
         });
-        // keepLog('packing 함', cacheMap.get(mappingKey));
         this.#bindGroup = null;
     }
 
-    /**
-     * 패킹 렌더 패스 실행
-     * @param packedTexture - 결과 GPUTexture 객체
-     */
+    /** [KO] 렌더 패스를 실행하여 패킹을 수행합니다. [EN] Executes the render pass to perform packing. */
     #executeRenderPass(packedTexture: GPUTexture) {
         const {resourceManager} = this.#redGPUContext;
         const commandEncoder = this.#gpuDevice.createCommandEncoder({
@@ -313,10 +295,7 @@ class PackedTexture {
         this.#gpuDevice.queue.submit([commandEncoder.finish()]);
     }
 
-    /**
-     * 패킹용 렌더 파이프라인 생성
-     * @returns GPURenderPipeline 객체
-     */
+    /** [KO] 패킹용 파이프라인을 생성합니다. [EN] Creates a pipeline for packing. */
     #createPipeline(): GPURenderPipeline {
         const shaderCode = computeShaderCode;
         const {resourceManager} = this.#redGPUContext;
@@ -340,10 +319,7 @@ class PackedTexture {
         });
     }
 
-    /**
-     * 샘플러 객체 생성
-     * @returns GPUSampler 객체
-     */
+    /** [KO] 샘플러를 생성합니다. [EN] Creates a sampler. */
     #createSampler(): GPUSampler {
         return new Sampler(this.#redGPUContext).gpuSampler;
     }

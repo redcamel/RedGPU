@@ -33,6 +33,22 @@ type ResourceState = ResourceStateVertexBuffer
     | ResourceStateBitmapTexture
     | ResourceStateHDRTexture;
 
+/**
+ * [KO] RedGPU의 모든 GPU 리소스를 통합 관리하는 핵심 클래스입니다.
+ * [EN] The core class that integrates and manages all GPU resources in RedGPU.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * * ### Example
+ * ```typescript
+ * // RedGPUContext를 통해 접근합니다.
+ * const resourceManager = redGPUContext.resourceManager;
+ * ```
+ * @category Resource
+ */
 class ResourceManager {
     static PRESET_GPUBindGroupLayout_System = 'PRESET_GPUBindGroupLayout_System'
     static PRESET_VERTEX_GPUBindGroupLayout_Instancing = 'PRESET_VERTEX_GPUBindGroupLayout_Instancing'
@@ -63,6 +79,13 @@ class ResourceManager {
     readonly #redGPUContext: RedGPUContext
     readonly #gpuDevice: GPUDevice
 
+    /**
+     * [KO] ResourceManager 인스턴스를 생성합니다. (내부 시스템 전용)
+     * [EN] Creates a ResourceManager instance. (Internal system only)
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     */
     constructor(redGPUContext: RedGPUContext) {
         this.#redGPUContext = redGPUContext
         this.#gpuDevice = redGPUContext.gpuDevice
@@ -71,70 +94,144 @@ class ResourceManager {
         this.#initPresets()
     }
 
+    /**
+     * [KO] RedGPUContext 인스턴스를 반환합니다.
+     * [EN] Returns the RedGPUContext instance.
+     */
     get redGPUContext(): RedGPUContext {
         return this.#redGPUContext
     }
 
+    /**
+     * [KO] GPU 디바이스를 반환합니다.
+     * [EN] Returns the GPU device.
+     */
     get gpuDevice(): GPUDevice {
         return this.#gpuDevice
     }
 
+    /**
+     * [KO] 기본 샘플러를 반환합니다.
+     * [EN] Returns the basic sampler.
+     */
     get basicSampler(): Sampler {
         return this.#basicSampler;
     }
 
+    /**
+     * [KO] 밉맵 생성기를 반환합니다.
+     * [EN] Returns the mipmap generator.
+     */
     get mipmapGenerator(): MipmapGenerator {
         return this.#mipmapGenerator;
     }
 
+    /**
+     * [KO] 큐브맵 다운샘플링 생성기를 반환합니다.
+     * [EN] Returns the down-sample cube map generator.
+     */
     get downSampleCubeMapGenerator(): DownSampleCubeMapGenerator {
         return this.#downSampleCubeMapGenerator
     }
 
+    /**
+     * [KO] 캐시된 버퍼 상태를 반환합니다.
+     * [EN] Returns the cached buffer state.
+     */
     get cachedBufferState(): any {
         return this.#cachedBufferState;
     }
 
+    /**
+     * [KO] 빈 비트맵 텍스처 뷰를 반환합니다.
+     * [EN] Returns the empty bitmap texture view.
+     */
     get emptyBitmapTextureView(): GPUTextureView {
         return this.#emptyBitmapTextureView;
     }
 
+    /**
+     * [KO] 빈 큐브 텍스처 뷰를 반환합니다.
+     * [EN] Returns the empty cube texture view.
+     */
     get emptyCubeTextureView(): GPUTextureView {
         return this.#emptyCubeTextureView;
     }
 
+    /**
+     * [KO] 비트맵 텍스처 관리 상태를 반환합니다.
+     * [EN] Returns the managed bitmap texture state.
+     */
     get managedBitmapTextureState(): ResourceStatusInfo {
         return this.#managedBitmapTextureState;
     }
 
+    /**
+     * [KO] 큐브 텍스처 관리 상태를 반환합니다.
+     * [EN] Returns the managed cube texture state.
+     */
     get managedCubeTextureState(): ResourceStatusInfo {
         return this.#managedCubeTextureState;
     }
 
+    /**
+     * [KO] HDR 텍스처 관리 상태를 반환합니다.
+     * [EN] Returns the managed HDR texture state.
+     */
     get managedHDRTextureState(): ResourceStatusInfo {
         return this.#managedHDRTextureState;
     }
 
+    /**
+     * [KO] 유니폼 버퍼 관리 상태를 반환합니다.
+     * [EN] Returns the managed uniform buffer state.
+     */
     get managedUniformBufferState(): ResourceStatusInfo {
         return this.#managedUniformBufferState;
     }
 
+    /**
+     * [KO] 버텍스 버퍼 관리 상태를 반환합니다.
+     * [EN] Returns the managed vertex buffer state.
+     */
     get managedVertexBufferState(): ResourceStatusInfo {
         return this.#managedVertexBufferState;
     }
 
+    /**
+     * [KO] 인덱스 버퍼 관리 상태를 반환합니다.
+     * [EN] Returns the managed index buffer state.
+     */
     get managedIndexBufferState(): ResourceStatusInfo {
         return this.#managedIndexBufferState;
     }
 
+    /**
+     * [KO] Storage 버퍼 관리 상태를 반환합니다.
+     * [EN] Returns the managed storage buffer state.
+     */
     get managedStorageBufferState(): ResourceStatusInfo {
         return this.#managedStorageBufferState;
     }
 
+    /**
+     * [KO] 내부 리소스 맵을 반환합니다.
+     * [EN] Returns the internal resource map.
+     */
     get resources(): ImmutableKeyMap {
         return this.#resources;
     }
 
+    /**
+     * [KO] 리소스를 관리 대상으로 등록합니다.
+     * [EN] Registers a resource for management.
+     * @param target -
+     * [KO] 대상 리소스
+     * [EN] Target resource
+     * @param resourceState -
+     * [KO] 리소스 상태 정보
+     * [EN] Resource state information
+     */
     registerManagementResource(target: ManagementResourceBase, resourceState: ResourceState) {
         const {cacheKey, targetResourceManagedState} = target;
         const {table} = targetResourceManagedState;
@@ -146,11 +243,17 @@ class ResourceManager {
         targetResourceManagedState.videoMemory += (target as any).videoMemorySize;
     }
 
+    /**
+     * [KO] 리소스를 관리 대상에서 해제합니다.
+     * [EN] Unregisters a resource from management.
+     * @param target -
+     * [KO] 대상 리소스
+     * [EN] Target resource
+     */
     unregisterManagementResource(target: ManagementResourceBase) {
         const {cacheKey, targetResourceManagedState} = target;
         const {table} = targetResourceManagedState;
         const resourceState = table.get(cacheKey);
-        // keepLog(target,table,'cacheKey',cacheKey,'resourceState',resourceState)
         if (!resourceState) {
             return;
         }
@@ -158,6 +261,16 @@ class ResourceManager {
         table.delete(cacheKey);
     }
 
+    /**
+     * [KO] GPU 텍스처를 생성하고 관리합니다.
+     * [EN] Creates and manages a GPU texture.
+     * @param desc -
+     * [KO] 텍스처 디스크립터
+     * [EN] Texture descriptor
+     * @returns
+     * [KO] 생성된 GPUTexture
+     * [EN] Created GPUTexture
+     */
     createManagedTexture(desc: GPUTextureDescriptor): GPUTexture {
         const texture = this.gpuDevice.createTexture(desc);
         const originalDestroy = texture.destroy.bind(texture);
@@ -168,6 +281,19 @@ class ResourceManager {
         return texture;
     }
 
+    /**
+     * [KO] 비트맵 텍스처의 뷰를 캐시에서 가져오거나 새로 생성합니다.
+     * [EN] Retrieves or creates a view for a bitmap texture from cache.
+     * @param texture -
+     * [KO] 대상 텍스처 (BitmapTexture, PackedTexture 또는 GPUTexture)
+     * [EN] Target texture (BitmapTexture, PackedTexture, or GPUTexture)
+     * @param viewDescriptor -
+     * [KO] 뷰 디스크립터 (선택)
+     * [EN] View descriptor (optional)
+     * @returns
+     * [KO] GPUTextureView
+     * [EN] GPUTextureView
+     */
     getGPUResourceBitmapTextureView(
         texture: BitmapTexture | PackedTexture | GPUTexture,
         viewDescriptor?: GPUTextureViewDescriptor
@@ -199,6 +325,19 @@ class ResourceManager {
         return cachedView;
     }
 
+    /**
+     * [KO] 큐브 텍스처의 뷰를 캐시에서 가져오거나 새로 생성합니다.
+     * [EN] Retrieves or creates a view for a cube texture from cache.
+     * @param cubeTexture -
+     * [KO] 대상 큐브 텍스처 (CubeTexture, IBLCubeTexture 또는 GPUTexture)
+     * [EN] Target cube texture (CubeTexture, IBLCubeTexture, or GPUTexture)
+     * @param viewDescriptor -
+     * [KO] 뷰 디스크립터 (선택)
+     * [EN] View descriptor (optional)
+     * @returns
+     * [KO] GPUTextureView
+     * [EN] GPUTextureView
+     */
     getGPUResourceCubeTextureView(
         cubeTexture: CubeTexture | GPUTexture | IBLCubeTexture,
         viewDescriptor?: GPUTextureViewDescriptor
@@ -230,20 +369,63 @@ class ResourceManager {
         return cachedView;
     }
 
+    /**
+     * [KO] GPUShaderModule을 생성하고 캐싱합니다.
+     * [EN] Creates and caches a GPUShaderModule.
+     * @param name -
+     * [KO] 셰이더 모듈 이름
+     * [EN] Shader module name
+     * @param gpuShaderModuleDescriptor -
+     * [KO] 셰이더 모듈 디스크립터
+     * [EN] Shader module descriptor
+     * @returns
+     * [KO] 생성된 GPUShaderModule
+     * [EN] Created GPUShaderModule
+     */
     createGPUShaderModule(name: string, gpuShaderModuleDescriptor: GPUShaderModuleDescriptor) {
         return this.#createResource(name, gpuShaderModuleDescriptor,
             descriptor => this.#createAndCacheModule(name, descriptor),
             ResourceType.GPUShaderModule);
     }
 
+    /**
+     * [KO] 캐싱된 GPUShaderModule을 반환합니다.
+     * [EN] Returns the cached GPUShaderModule.
+     * @param name -
+     * [KO] 셰이더 모듈 이름
+     * [EN] Shader module name
+     * @returns
+     * [KO] GPUShaderModule
+     * [EN] GPUShaderModule
+     */
     getGPUShaderModule(name: string): GPUShaderModule {
         return this.#getResource(name, ResourceType.GPUShaderModule);
     }
 
+    /**
+     * [KO] GPUShaderModule을 삭제합니다.
+     * [EN] Deletes a GPUShaderModule.
+     * @param name -
+     * [KO] 셰이더 모듈 이름
+     * [EN] Shader module name
+     */
     deleteGPUShaderModule(name: string) {
         this.#deleteResource(name, ResourceType.GPUShaderModule);
     }
 
+    /**
+     * [KO] GPUBindGroupLayout을 생성하고 캐싱합니다.
+     * [EN] Creates and caches a GPUBindGroupLayout.
+     * @param name -
+     * [KO] 레이아웃 이름
+     * [EN] Layout name
+     * @param bindGroupLayoutDescriptor -
+     * [KO] 바인드 그룹 레이아웃 디스크립터
+     * [EN] Bind group layout descriptor
+     * @returns
+     * [KO] GPUBindGroupLayout
+     * [EN] GPUBindGroupLayout
+     */
     createBindGroupLayout(name: string, bindGroupLayoutDescriptor: GPUBindGroupLayoutDescriptor): GPUBindGroupLayout {
         return this.#createResource(name, bindGroupLayoutDescriptor,
             descriptor => {
@@ -252,14 +434,44 @@ class ResourceManager {
             }, ResourceType.GPUBindGroupLayout);
     }
 
+    /**
+     * [KO] 캐싱된 GPUBindGroupLayout을 반환합니다.
+     * [EN] Returns the cached GPUBindGroupLayout.
+     * @param name -
+     * [KO] 레이아웃 이름
+     * [EN] Layout name
+     * @returns
+     * [KO] GPUBindGroupLayout
+     * [EN] GPUBindGroupLayout
+     */
     getGPUBindGroupLayout(name: string): GPUBindGroupLayout {
         return this.#getResource(name, ResourceType.GPUBindGroupLayout);
     }
 
+    /**
+     * [KO] GPUBindGroupLayout을 삭제합니다.
+     * [EN] Deletes a GPUBindGroupLayout.
+     * @param name -
+     * [KO] 레이아웃 이름
+     * [EN] Layout name
+     */
     deleteGPUBindGroupLayout(name: string) {
         this.#deleteResource(name, ResourceType.GPUBindGroupLayout);
     }
 
+    /**
+     * [KO] GPUPipelineLayout을 생성하고 캐싱합니다.
+     * [EN] Creates and caches a GPUPipelineLayout.
+     * @param name -
+     * [KO] 레이아웃 이름
+     * [EN] Layout name
+     * @param gpuPipelineLayoutDescriptor -
+     * [KO] 파이프라인 레이아웃 디스크립터
+     * [EN] Pipeline layout descriptor
+     * @returns
+     * [KO] GPUPipelineLayout
+     * [EN] GPUPipelineLayout
+     */
     createGPUPipelineLayout(name: string, gpuPipelineLayoutDescriptor: GPUPipelineLayoutDescriptor) {
         return this.#createResource(name, gpuPipelineLayoutDescriptor,
             descriptor => {
@@ -268,6 +480,19 @@ class ResourceManager {
             }, ResourceType.GPUPipelineLayout);
     }
 
+    /**
+     * [KO] GPUBuffer를 생성하고 캐싱합니다.
+     * [EN] Creates and caches a GPUBuffer.
+     * @param name -
+     * [KO] 버퍼 이름
+     * [EN] Buffer name
+     * @param gpuBufferDescriptor -
+     * [KO] 버퍼 디스크립터
+     * [EN] Buffer descriptor
+     * @returns
+     * [KO] 생성된 GPUBuffer
+     * [EN] Created GPUBuffer
+     */
     createGPUBuffer(name: string, gpuBufferDescriptor: GPUBufferDescriptor) {
         return this.#createResource(name, gpuBufferDescriptor,
             descriptor => {
@@ -276,21 +501,33 @@ class ResourceManager {
             }, ResourceType.GPUBuffer);
     }
 
+    /**
+     * [KO] 텍스처 뷰 캐시를 정리합니다.
+     * [EN] Clears the texture view cache.
+     */
     #clearTextureCache(texture: GPUTexture, desc: GPUTextureDescriptor) {
         const cache = desc.dimension === '3d' ?
             this.#cubeTextureViewCache :
             this.#bitmapTextureViewCache;
         cache.get(texture)?.clear();
         if (cache.delete(texture)) {
-            const type = desc.dimension === '3d' ? '🧊 큐브' : '🔷 비트맵';
+            // const type = desc.dimension === '3d' ? '🧊 큐브' : '🔷 비트맵';
             // keepLog(`${type} 텍스처 뷰 캐시 정리:`, texture.label);
         }
     }
 
+    /**
+     * [KO] 디스크립터를 기반으로 캐시 키를 생성합니다.
+     * [EN] Creates a cache key based on the descriptor.
+     */
     #createDescriptorKey(viewDescriptor?: GPUTextureViewDescriptor): string {
         return viewDescriptor ? JSON.stringify(viewDescriptor) : 'default';
     }
 
+    /**
+     * [KO] 시스템 프리셋을 초기화합니다.
+     * [EN] Initializes system presets.
+     */
     #initPresets() {
         const {gpuDevice} = this.redGPUContext
         {
@@ -408,7 +645,6 @@ class ResourceManager {
             ...gpuShaderModuleDescriptor,
             code: newCode,
         })
-        // keepLog(newModule)
         const targetMap = this.#getTargetMap(ResourceType.GPUShaderModule);
         targetMap.set(name, newModule)
         return newModule

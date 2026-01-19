@@ -33,7 +33,7 @@ interface ATextField {
  *
  * @category Core
  */
-declare abstract class ATextField extends Mesh {
+declare class ATextField extends Mesh {
     #private;
     constructor(redGPUContext: RedGPUContext, imgOnload: Function, mode3dYn?: boolean);
     get text(): string;

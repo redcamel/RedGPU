@@ -7,33 +7,54 @@ const MANAGED_STATE_KEY = 'managedIndexBufferState'
 type NumberArray = Array<number> | Uint32Array;
 
 /**
- * IndexBuffer
+ * [KO] 인덱스 버퍼를 관리하는 클래스입니다.
+ * [EN] Class that manages index buffers.
+ *
+ * * ### Example
+ * ```typescript
+ * const indexBuffer = new RedGPU.Resource.IndexBuffer(redGPUContext, [0, 1, 2]);
+ * ```
  * @category Buffer
  */
 class IndexBuffer extends ABaseBuffer {
     /**
-     * 인덱스 데이터가 저장되는 내부 버퍼입니다.
-
+     * [KO] 인덱스 데이터가 저장되는 내부 버퍼입니다.
+     * [EN] Internal buffer where index data is stored.
      */
     [GPU_BUFFER_DATA_SYMBOL]: Uint32Array
     /**
-     * 인덱스 개수입니다.
-
+     * [KO] 인덱스 개수입니다.
+     * [EN] Number of indices.
      */
     #indexCount: number = 0
     /**
-     * 삼각형 개수입니다.
-
+     * [KO] 삼각형 개수입니다.
+     * [EN] Number of triangles.
      */
     #triangleCount: number = 0
     #format: GPUIndexFormat = GPU_INDEX_FORMAT.UINT32
 
     /**
-     * IndexBuffer 생성자
-     * @param redGPUContext - RedGPUContext 인스턴스
-     * @param data - 인덱스 데이터 (Array<number> 또는 Uint32Array)
-     * @param usage - GPUBufferUsageFlags (기본값: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST)
-     * @param cacheKey - 버퍼 캐시 키 (옵션)
+     * [KO] IndexBuffer 인스턴스를 생성합니다.
+     * [EN] Creates an IndexBuffer instance.
+     *
+     * * ### Example
+     * ```typescript
+     * const indexBuffer = new RedGPU.Resource.IndexBuffer(redGPUContext, [0, 1, 2], GPUBufferUsage.INDEX, 'MyIndexBuffer');
+     * ```
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     * @param data -
+     * [KO] 인덱스 데이터 (`Array<number>` 또는 `Uint32Array`)
+     * [EN] Index data (`Array<number>` or `Uint32Array`)
+     * @param usage -
+     * [KO] GPUBufferUsageFlags (기본값: `GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST`)
+     * [EN] GPUBufferUsageFlags (default: `GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST`)
+     * @param cacheKey -
+     * [KO] 버퍼 캐시 키 (옵션)
+     * [EN] Buffer cache key (optional)
      */
     constructor(
         redGPUContext: RedGPUContext,
@@ -56,35 +77,50 @@ class IndexBuffer extends ABaseBuffer {
         }
     }
 
+    /**
+     * [KO] GPU 인덱스 형식을 반환합니다.
+     * [EN] Returns the GPU index format.
+     */
     get format(): GPUIndexFormat {
         return this.#format;
     }
 
     /**
-     * 삼각형 개수를 반환합니다.
-     * @category Buffer
+     * [KO] 삼각형 개수를 반환합니다.
+     * [EN] Returns the number of triangles.
      */
     get triangleCount(): number {
         return this.#triangleCount;
     }
 
     /**
-     * 인덱스 개수를 반환합니다.
-     * @category Buffer
+     * [KO] 인덱스 개수를 반환합니다.
+     * [EN] Returns the number of indices.
      */
     get indexCount(): number {
         return this.#indexCount;
     }
 
+    /**
+     * [KO] 인덱스 데이터를 반환합니다.
+     * [EN] Returns the index data.
+     */
     get data(): NumberArray {
         return this[GPU_BUFFER_DATA_SYMBOL];
     }
 
     /**
-     * 인덱스 버퍼의 데이터를 변경합니다.
+     * [KO] 인덱스 버퍼의 데이터를 변경합니다.
+     * [EN] Changes the data of the index buffer.
      *
-     * @param data - 새로운 인덱스 데이터 (Array<number> 또는 Uint32Array)
-     * @category Buffer
+     * * ### Example
+     * ```typescript
+     * indexBuffer.changeData([3, 4, 5]);
+     * ```
+     *
+     * @param data -
+     * [KO] 새로운 인덱스 데이터 (`Array<number>` 또는 `Uint32Array`)
+     * [EN] New index data (`Array<number>` or `Uint32Array`)
      */
     changeData(data: NumberArray) {
         const {gpuDevice} = this;
@@ -111,22 +147,6 @@ class IndexBuffer extends ABaseBuffer {
         this.#triangleCount = this.#indexCount / 3;
         gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], 0, this[GPU_BUFFER_DATA_SYMBOL]);
     }
-
-    // /**
-    //  * 인덱스 버퍼의 일부 데이터만 부분적으로 업데이트합니다.
-    //  * @param dataStartIndex - 데이터 시작 인덱스
-    //  * @param data - 새로운 인덱스 데이터 (Array<number> 또는 Uint32Array)
-    //  * @category Buffer
-    //  */
-    // updatePartialData(dataStartIndex: number, data: NumberArray) {
-    // 	const {gpuDevice} = this
-    // 	if (dataStartIndex < 0 || dataStartIndex >= this[GPU_BUFFER_DATA_SYMBOL].length) {
-    // 		consoleAndThrowError(`Offset value is out of data bounds. Tried to access index ${dataStartIndex} on data of length ${this[GPU_BUFFER_DATA_SYMBOL].length}`);
-    // 	}
-    // 	if (Array.isArray(data)) data = new Uint32Array(data)
-    // 	this.#indexCount = data.length
-    // 	gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], dataStartIndex, data)
-    // }
 }
 
 Object.freeze(IndexBuffer)
