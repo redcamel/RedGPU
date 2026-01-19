@@ -12,6 +12,7 @@
     max-width: 100% !important;
     width: 100% !important;
 }
+
 /* 테이블 가용 너비 100% 설정 및 넘침 방지 */
 .vp-doc table {
     width: 100%;
@@ -23,12 +24,14 @@
 .vp-doc th, .vp-doc td {
     word-break: break-word;
 }
+
 @media (min-width: 1280px) {
     .VPDoc .container {
         display: flex;
         justify-content: flex-start;
     }
 }
+
 /* ============================================================
    2. API 전용 레이아웃 (경로 기반 .api-page-layout)
    ============================================================ */
@@ -54,7 +57,7 @@
 
 /* 개별 카드 항목 */
 .api-page-layout .vp-doc ul:has(> li > a) > li {
-    flex: 0 1 calc(33.333% - 12px);
+    flex: 0 1 calc(15% - 12px);
     min-width: 220px;
     margin: 0 !important;
     padding: 0 !important;
@@ -88,9 +91,11 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 20px; height: 20px;
+    width: 20px;
+    height: 20px;
     margin-right: 10px;
-    font-size: 10px; font-weight: 800;
+    font-size: 10px;
+    font-weight: 800;
     border-radius: 4px;
     background-color: var(--vp-c-bg-alt);
     color: var(--vp-c-text-3);
@@ -98,12 +103,41 @@
 
 /* 타입별 색상 정의 */
 .api-page-layout .vp-doc ul:has(> li > a) > li > a[href*="/modules/"]::before,
-.api-page-layout .vp-doc ul:has(> li > a) > li > a[href*="/namespaces/"]::before { content: "N"; background-color: #ef4444; color: white; }
-.api-page-layout .vp-doc ul:has(> li > a) > li > a[href*="/functions/"]::before  { content: "F"; background-color: #06b6d4; color: white; }
-.api-page-layout .vp-doc ul:has(> li > a) > li > a[href*="/classes/"]::before   { content: "C"; background-color: #47a047; color: white; }
-.api-page-layout .vp-doc ul:has(> li > a) > li > a[href*="/interfaces/"]::before { content: "I"; background-color: #2b7489; color: white; }
-.api-page-layout .vp-doc ul:has(> li > a) > li > a[href*="/variables/"]::before  { content: "V"; background-color: #d88e00; color: white; }
-.api-page-layout .vp-doc ul:has(> li > a) > li > a[href*="/enums/"]::before      { content: "E"; background-color: #7d4099; color: white; }
+.api-page-layout .vp-doc ul:has(> li > a) > li > a[href*="/namespaces/"]::before {
+    content: "N";
+    background-color: #ef4444;
+    color: white;
+}
+
+.api-page-layout .vp-doc ul:has(> li > a) > li > a[href*="/functions/"]::before {
+    content: "F";
+    background-color: #06b6d4;
+    color: white;
+}
+
+.api-page-layout .vp-doc ul:has(> li > a) > li > a[href*="/classes/"]::before {
+    content: "C";
+    background-color: #47a047;
+    color: white;
+}
+
+.api-page-layout .vp-doc ul:has(> li > a) > li > a[href*="/interfaces/"]::before {
+    content: "I";
+    background-color: #2b7489;
+    color: white;
+}
+
+.api-page-layout .vp-doc ul:has(> li > a) > li > a[href*="/variables/"]::before {
+    content: "V";
+    background-color: #d88e00;
+    color: white;
+}
+
+.api-page-layout .vp-doc ul:has(> li > a) > li > a[href*="/enums/"]::before {
+    content: "E";
+    background-color: #7d4099;
+    color: white;
+}
 
 /* 오른쪽 화살표(>) */
 .api-page-layout .vp-doc ul:has(> li > a) > li > a::after {
@@ -121,14 +155,29 @@
     border-color: var(--vp-c-brand-1);
     transform: translateY(-1px);
 }
+
 .api-page-layout .vp-doc ul:has(> li > a) > li:hover a::after {
     transform: translateX(3px);
     color: var(--vp-c-brand-1);
 }
 
 /* API 반응형 */
-@media (max-width: 960px) { .api-page-layout .vp-doc ul:has(> li > a) > li { flex: 0 1 calc(50% - 12px); } }
-@media (max-width: 640px) { .api-page-layout .vp-doc ul:has(> li > a) > li { flex: 1 1 100%; } }
+@media (max-width: 1280px) {
+    .api-page-layout .vp-doc ul:has(> li > a) > li {
+        flex: 0 1 calc(33.33% - 12px);
+    }
+}
+@media (max-width: 960px) {
+    .api-page-layout .vp-doc ul:has(> li > a) > li {
+        flex: 0 1 calc(33.33% - 12px);
+    }
+}
+
+@media (max-width: 640px) {
+    .api-page-layout .vp-doc ul:has(> li > a) > li {
+        flex: 1 1 100%;
+    }
+}
 
 /* ============================================================
    3. UI 컴포넌트 (버전 태그, 네비바)
@@ -137,7 +186,8 @@
     display: inline-block;
     margin-left: 8px;
     padding: 0 8px;
-    font-size: 10px; font-weight: 700;
+    font-size: 10px;
+    font-weight: 700;
     font-family: var(--vp-font-family-mono);
     line-height: 18px;
     vertical-align: middle;
@@ -160,7 +210,9 @@
     border-color: rgba(100, 108, 255, 0.3);
 }
 
-.VPNavBarTitle a:hover { text-decoration: none !important; }
+.VPNavBarTitle a:hover {
+    text-decoration: none !important;
+}
 
 /* ============================================================
    4. 사이드바 커스텀 (README 강조)
@@ -178,7 +230,8 @@
 
 .VPSidebarItem > .item > .link[href*="README"]::before {
     content: "";
-    width: 16px; height: 16px;
+    width: 16px;
+    height: 16px;
     background: url('/readme-light.svg') no-repeat center;
 }
 
@@ -200,25 +253,38 @@
 }
 
 .footer-title {
-    font-weight: 700; font-size: 1.2rem;
+    font-weight: 700;
+    font-size: 1.2rem;
     margin-bottom: 12px;
     color: var(--vp-c-text-1);
 }
 
 .footer-links {
-    display: flex; gap: 20px;
+    display: flex;
+    gap: 20px;
     justify-content: center;
     margin-bottom: 16px;
     flex-wrap: wrap;
 }
 
 .footer-links a {
-    font-size: 0.95rem; font-weight: 500;
+    font-size: 0.95rem;
+    font-weight: 500;
     color: var(--vp-c-brand-1);
     text-decoration: none;
 }
 
-.footer-links a:hover { text-decoration: underline; }
+.footer-links a:hover {
+    text-decoration: underline;
+}
 
-.vp-footer .copyright { font-size: 0.85rem; color: var(--vp-c-text-2); }
-.vp-footer .copyright a { font-weight: 600; color: var(--vp-c-text-1); text-decoration: none; }
+.vp-footer .copyright {
+    font-size: 0.85rem;
+    color: var(--vp-c-text-2);
+}
+
+.vp-footer .copyright a {
+    font-weight: 600;
+    color: var(--vp-c-text-1);
+    text-decoration: none;
+}
