@@ -1,17 +1,17 @@
 import {mat4} from "gl-matrix";
-import Camera2D from "../../camera/camera/Camera2D";
-import RedGPUContext from "../../context/RedGPUContext";
-import View3D from "../../display/view/View3D";
-import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
-import Sampler from "../../resources/sampler/Sampler";
-import parseWGSL from "../../resources/wgslParser/parseWGSL";
-import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSize";
-import AMultiPassPostEffect from "./AMultiPassPostEffect";
-import ASinglePassPostEffect from "./ASinglePassPostEffect";
-import postEffectSystemUniformCode from "./postEffectSystemUniform.wgsl"
-import SSAO from "../effects/ssao/SSAO";
-import SSR from "../effects/ssr/SSR";
-import TAASharpen from "../TAA/shapen/TAASharpen";
+import Camera2D from "../camera/camera/Camera2D";
+import RedGPUContext from "../context/RedGPUContext";
+import View3D from "../display/view/View3D";
+import UniformBuffer from "../resources/buffer/uniformBuffer/UniformBuffer";
+import Sampler from "../resources/sampler/Sampler";
+import parseWGSL from "../resources/wgslParser/parseWGSL";
+import calculateTextureByteSize from "../utils/texture/calculateTextureByteSize";
+import AMultiPassPostEffect from "./core/AMultiPassPostEffect";
+import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
+import postEffectSystemUniformCode from "./core/postEffectSystemUniform.wgsl"
+import SSAO from "./effects/ssao/SSAO";
+import SSR from "./effects/ssr/SSR";
+import TAASharpen from "./TAA/shapen/TAASharpen";
 
 /**
  * [KO] 후처리 이펙트(PostEffect) 관리 클래스입니다.

@@ -32,10 +32,12 @@ import LensDistortion from "./effects/lens/lensDistortion/LensDistortion";
 import Vignetting from "./effects/lens/vignetting/Vignetting";
 import OldBloom from "./effects/oldBloom/OldBloom";
 import Sharpen from "./effects/Sharpen";
+import PostEffectManager from "./PostEffectManager";
 
 export * as Core from './core'
 
 export {
+    PostEffectManager,
     // Color Adjustments
     BrightnessContrast,
     ColorBalance,

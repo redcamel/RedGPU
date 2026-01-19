@@ -8,7 +8,7 @@ import PassClusterLightBound from "../../light/clusterLight/PassClusterLightBoun
 import PassClustersLight from "../../light/clusterLight/PassClustersLight";
 import PassClustersLightHelper from "../../light/clusterLight/PassClustersLightHelper";
 import DirectionalLight from "../../light/lights/DirectionalLight";
-import PostEffectManager from "../../postEffect/core/PostEffectManager";
+import PostEffectManager from "../../postEffect/PostEffectManager";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
 import Sampler from "../../resources/sampler/Sampler";
