@@ -13,6 +13,9 @@ export declare const TONE_MAPPING_MODE: {
     /** [KO] ACES Filmic (Narkowicz 근사) 톤 매핑 [EN] ACES Filmic (Narkowicz approximation) tone mapping */
     readonly ACES_FILMIC_NARKOWICZ: "ACESFilmicNarkowicz";
 };
-/** [KO] TONE_MAPPING_MODE 타입 [EN] TONE_MAPPING_MODE type */
+/**
+ * [KO] TONE_MAPPING_MODE 타입
+ * [EN] TONE_MAPPING_MODE type
+ * */
 export type TONE_MAPPING_MODE = typeof TONE_MAPPING_MODE[keyof typeof TONE_MAPPING_MODE];
 export default TONE_MAPPING_MODE;
