@@ -1,25 +1,43 @@
+import RedGPUContext from "./context/RedGPUContext";
 /**
- * WebGPU를 비동기적으로 초기화합니다. 초기화에 실패한 경우 선택적으로 제공된 콜백 함수를 호출합니다.
- * <br/>Asynchronously initializes WebGPU. If initialization fails, it invokes an optionally provided callback function.
+ * [KO] WebGPU를 비동기적으로 초기화하고 RedGPUContext를 생성합니다.
+ * [EN] Asynchronously initializes WebGPU and creates a RedGPUContext.
  *
- * @param {HTMLCanvasElement} canvas - WebGPU 초기화를 위한 HTML 캔버스 요소입니다.
- * <br/>The HTMLCanvasElement for WebGPU initialization.
+ * [KO] 브라우저의 WebGPU 지원 여부를 확인하고, GPU 어댑터와 디바이스를 요청한 후 최종적으로 RedGPUContext 인스턴스를 생성하여 콜백을 통해 전달합니다.
+ * [EN] Checks for WebGPU support in the browser, requests a GPU adapter and device, and finally creates a RedGPUContext instance, passing it through a callback.
  *
- * @param {Function} onWebGPUInitialized - WebGPU가 성공적으로 초기화된 후 호출되는 함수입니다.
- * <br/>The function to be called after WebGPU has been successfully initialized.
+ * * ### Example
+ * ```typescript
+ * await RedGPU.init(
+ *   canvas,
+ *   (redGPUContext) => {
+ *     console.log('WebGPU 초기화 성공!', redGPUContext);
+ *     // 렌더링 루프 시작 (Start rendering loop)
+ *   },
+ *   (errorMessage) => {
+ *     console.error('초기화 실패:', errorMessage);
+ *   }
+ * );
+ * ```
  *
- * @param {function=} onFailInitialized - WebGPU 초기화가 실패한 후에 호출되는 선택적인 함수입니다.
- * <br/>An optional function that is called if WebGPU initialization fails.
- *
- * @param {function=} onDestroy - 장치가 손실된 경우에 호출되는 선택적인 함수입니다.
- * <br/>An optional function that is called when the device is lost.
- *
- * @param {GPUCanvasAlphaMode} alphaMode - 캔버스의 알파 모드로서 기본 값은 premultiplied 입니다.
- * <br/>The alpha mode of the canvas, the default value is 'premultiplied'.
- *
- * @param {GPURequestAdapterOptions} requestAdapterOptions - 어댑터 요청에 대한 옵션으로써 기본 값은 { powerPreference: "high-performance", forceFallbackAdapter: false }입니다.
- * <br/>The options for adapter request, defaults to { powerPreference: "high-performance", forceFallbackAdapter: false }.
- *
+ * @param canvas -
+ * [KO] WebGPU를 초기화할 HTML 캔버스 요소
+ * [EN] HTML canvas element to initialize WebGPU
+ * @param onWebGPUInitialized -
+ * [KO] 성공 시 호출될 콜백 함수 (RedGPUContext 인스턴스가 인자로 전달됨)
+ * [EN] Callback function to be called on success (RedGPUContext instance is passed as an argument)
+ * @param onFailInitialized -
+ * [KO] 실패 시 호출될 선택적 콜백 함수 (에러 메시지가 인자로 전달됨)
+ * [EN] Optional callback function to be called on failure (error message is passed as an argument)
+ * @param onDestroy -
+ * [KO] 디바이스 유실 시 호출될 선택적 콜백 함수
+ * [EN] Optional callback function to be called when the device is lost
+ * @param alphaMode -
+ * [KO] 캔버스 알파 모드 (기본값: 'premultiplied')
+ * [EN] Canvas alpha mode (Default: 'premultiplied')
+ * @param requestAdapterOptions -
+ * [KO] 어댑터 요청 옵션 (기본값: 고성능 설정)
+ * [EN] Adapter request options (Default: high-performance setup)
  */
-declare const init: (canvas: HTMLCanvasElement, onWebGPUInitialized: Function, onFailInitialized?: Function, onDestroy?: Function, alphaMode?: GPUCanvasAlphaMode, requestAdapterOptions?: GPURequestAdapterOptions) => Promise<void>;
+declare const init: (canvas: HTMLCanvasElement, onWebGPUInitialized: (redGPUContext: RedGPUContext) => void, onFailInitialized?: (message?: string) => void, onDestroy?: (info: GPUDeviceLostInfo) => void, alphaMode?: GPUCanvasAlphaMode, requestAdapterOptions?: GPURequestAdapterOptions) => Promise<void>;
 export default init;
