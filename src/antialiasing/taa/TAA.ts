@@ -15,6 +15,10 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 /**
  * [KO] TAA(Temporal Anti-Aliasing) 후처리 이펙트입니다.
  * [EN] TAA (Temporal Anti-Aliasing) post-processing effect.
+ *
+ * [KO] 이전 프레임들의 정보를 누적하여 현재 프레임의 계단 현상을 제거하는 고품질 안티앨리어싱 기법입니다.
+ * [EN] A high-quality anti-aliasing technique that removes aliasing in the current frame by accumulating information from previous frames.
+ *
  * * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.TAA(redGPUContext);
@@ -88,6 +92,9 @@ class TAA {
     /**
      * [KO] 이전 프레임의 지터링 없는 프로젝션 카메라 행렬을 반환합니다.
      * [EN] Returns the non-jittered projection camera matrix of the previous frame.
+     * @returns
+     * [KO] 4x4 행렬
+     * [EN] 4x4 matrix
      */
     get prevNoneJitterProjectionCameraMatrix(): mat4 {
         return this.#prevNoneJitterProjectionCameraMatrix;
@@ -96,6 +103,9 @@ class TAA {
     /**
      * [KO] 프레임 인덱스를 반환합니다.
      * [EN] Returns the frame index.
+     * @returns
+     * [KO] 현재 프레임 인덱스
+     * [EN] Current frame index
      */
     get frameIndex(): number {
         return this.#frameIndex;
@@ -104,6 +114,9 @@ class TAA {
     /**
      * [KO] 비디오 메모리 사용량을 반환합니다.
      * [EN] Returns the video memory usage.
+     * @returns
+     * [KO] 메모리 사용량 (바이트)
+     * [EN] Memory usage (bytes)
      */
     get videoMemorySize(): number {
         return this.#videoMemorySize
@@ -112,6 +125,9 @@ class TAA {
     /**
      * [KO] 지터링 강도를 반환합니다.
      * [EN] Returns the jitter strength.
+     * @returns
+     * [KO] 지터링 강도
+     * [EN] Jitter strength
      */
     get jitterStrength(): number {
         return this.#jitterStrength;
@@ -120,6 +136,9 @@ class TAA {
     /**
      * [KO] 지터링 강도를 설정합니다.
      * [EN] Sets the jitter strength.
+     * @param value -
+     * [KO] 지터링 강도 (0.0 ~ 1.0)
+     * [EN] Jitter strength (0.0 ~ 1.0)
      */
     set jitterStrength(value: number) {
         // validateNumberRange(value, 0.0, 1.0);

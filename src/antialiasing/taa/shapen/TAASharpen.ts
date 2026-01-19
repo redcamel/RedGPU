@@ -49,14 +49,20 @@ class TAASharpen extends ASinglePassPostEffect {
     /**
      * [KO] 샤프닝 강도를 반환합니다.
      * [EN] Returns the sharpening strength.
+     * @returns
+     * [KO] 샤프닝 강도
+     * [EN] Sharpening strength
      */
     get sharpness(): number {
         return this.#sharpness;
     }
 
     /**
-     * [KO] 샤프닝 강도를 설정합니다. (0 ~ 1)
-     * [EN] Sets the sharpening strength. (0 ~ 1)
+     * [KO] 샤프닝 강도를 설정합니다.
+     * [EN] Sets the sharpening strength.
+     * @param value -
+     * [KO] 샤프닝 강도 (0 ~ 1)
+     * [EN] Sharpening strength (0 ~ 1)
      */
     set sharpness(value: number) {
         validateNumberRange(value, 0, 1)

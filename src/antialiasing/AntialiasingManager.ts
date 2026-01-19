@@ -5,13 +5,17 @@ import RedGPUContext from "../context/RedGPUContext";
  * [KO] 안티앨리어싱(Anti-aliasing) 설정을 관리하는 클래스입니다.
  * [EN] Class that manages anti-aliasing settings.
  *
+ * [KO] 이 클래스는 시스템 내부에서 자동으로 생성되어 안티앨리어싱 상태를 관리합니다.
+ * [EN] This class is automatically created within the system to manage anti-aliasing states.
+ *
  * ::: warning
- * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다. <br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is automatically created by the system. <br/> Do not create an instance directly using the 'new' keyword.
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
  * * ### Example
  * ```typescript
+ * // RedGPUContext 또는 View를 통해 접근합니다.
  * const antialiasingManager = redGPUContext.antialiasingManager;
  * antialiasingManager.useMSAA = true;
  * ```
@@ -47,7 +51,6 @@ class AntialiasingManager {
     /**
      * [KO] TAA(Temporal Anti-Aliasing) 사용 여부를 반환합니다.
      * [EN] Returns whether TAA (Temporal Anti-Aliasing) is used.
-     *
      * @returns
      * [KO] TAA 사용 여부
      * [EN] Whether TAA is used
@@ -59,7 +62,6 @@ class AntialiasingManager {
     /**
      * [KO] TAA(Temporal Anti-Aliasing) 사용 여부를 설정합니다.
      * [EN] Sets whether to use TAA (Temporal Anti-Aliasing).
-     *
      * @param value -
      * [KO] TAA 사용 여부
      * [EN] Whether to use TAA
@@ -73,7 +75,6 @@ class AntialiasingManager {
     /**
      * [KO] MSAA(Multi-Sample Anti-Aliasing) 사용 여부를 반환합니다.
      * [EN] Returns whether MSAA (Multi-Sample Anti-Aliasing) is used.
-     *
      * @returns
      * [KO] MSAA 사용 여부
      * [EN] Whether MSAA is used
@@ -85,7 +86,6 @@ class AntialiasingManager {
     /**
      * [KO] MSAA(Multi-Sample Anti-Aliasing) 사용 여부를 설정합니다.
      * [EN] Sets whether to use MSAA (Multi-Sample Anti-Aliasing).
-     *
      * @param value -
      * [KO] MSAA 사용 여부
      * [EN] Whether to use MSAA
@@ -101,7 +101,6 @@ class AntialiasingManager {
     /**
      * [KO] FXAA(Fast Approximate Anti-Aliasing) 사용 여부를 반환합니다.
      * [EN] Returns whether FXAA (Fast Approximate Anti-Aliasing) is used.
-     *
      * @returns
      * [KO] FXAA 사용 여부
      * [EN] Whether FXAA is used
@@ -113,7 +112,6 @@ class AntialiasingManager {
     /**
      * [KO] FXAA(Fast Approximate Anti-Aliasing) 사용 여부를 설정합니다.
      * [EN] Sets whether to use FXAA (Fast Approximate Anti-Aliasing).
-     *
      * @param value -
      * [KO] FXAA 사용 여부
      * [EN] Whether to use FXAA
@@ -127,7 +125,6 @@ class AntialiasingManager {
     /**
      * [KO] MSAA 설정 변경 여부를 반환합니다.
      * [EN] Returns whether the MSAA setting has changed.
-     *
      * @returns
      * [KO] MSAA 변경 여부
      * [EN] Whether MSAA has changed
@@ -140,7 +137,6 @@ class AntialiasingManager {
     /**
      * [KO] MSAA 설정 변경 여부를 설정합니다.
      * [EN] Sets whether the MSAA setting has changed.
-     *
      * @param value -
      * [KO] MSAA 변경 여부
      * [EN] Whether MSAA has changed
@@ -153,7 +149,6 @@ class AntialiasingManager {
     /**
      * [KO] 현재 MSAA의 고유 ID를 반환합니다.
      * [EN] Returns the unique ID of the current MSAA.
-     *
      * @returns
      * [KO] MSAA 고유 ID
      * [EN] Unique ID of MSAA
