@@ -1,5 +1,5 @@
-import createUUID from "../../utils/uuid/createUUID";
-import RedGPUContext from "../RedGPUContext";
+import createUUID from "../utils/uuid/createUUID";
+import RedGPUContext from "../context/RedGPUContext";
 
 /**
  * [KO] 안티앨리어싱(Anti-aliasing) 설정을 관리하는 클래스입니다.
@@ -27,6 +27,13 @@ class AntialiasingManager {
     #changedMSAA: boolean = true
 
 
+    /**
+     * [KO] AntialiasingManager 생성자
+     * [EN] AntialiasingManager constructor
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     */
     constructor(redGPUContext: RedGPUContext) {
         this.#redGPUContext = redGPUContext;
         // setter를 통해 초기 상태를 설정하여 로직 일관성 유지

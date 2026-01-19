@@ -93,7 +93,7 @@ export default defineConfig({
                 themeConfig: {
                     // 언어별 네비게이션 바
                     nav: [
-                        { text: 'Home', link: `/${lang.code}/` },
+                        { text: 'Manual', link: `/${lang.code}/` },
                         { text: 'Getting Started', link: lang.entry },
                         { text: 'API Reference', link: `/${lang.code}/api/RedGPU-API/namespaces/RedGPU/README` },
                         { text: 'Examples', link: 'https://redcamel.github.io/RedGPU/examples/' },

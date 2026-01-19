@@ -1,7 +1,7 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import validateNumberRange from "../../../runtimeChecker/validateFunc/validateNumberRange";
-import ASinglePassPostEffect from "../../core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "../../core/createBasicPostEffectCode";
+import ASinglePassPostEffect from "../../../postEffect/core/ASinglePassPostEffect";
+import createBasicPostEffectCode from "../../../postEffect/core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 
@@ -31,7 +31,7 @@ class TAASharpen extends ASinglePassPostEffect {
      * [KO] TAASharpen 인스턴스를 생성합니다.
      * [EN] Creates a TAASharpen instance.
      *
-     * @param redGPUContext
+     * @param redGPUContext -
      * [KO] RedGPU 컨텍스트
      * [EN] RedGPU Context
      */

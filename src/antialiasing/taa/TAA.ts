@@ -1,5 +1,5 @@
 import {mat4} from "gl-matrix";
-import AntialiasingManager from "../../context/core/AntialiasingManager";
+import AntialiasingManager from "../AntialiasingManager";
 import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../material/core";
@@ -7,8 +7,8 @@ import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import {keepLog} from "../../utils";
 import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSize";
-import {ASinglePassPostEffectResult} from "../core/ASinglePassPostEffect";
-import postEffectSystemUniform from "../core/postEffectSystemUniform.wgsl"
+import {ASinglePassPostEffectResult} from "../../postEffect/core/ASinglePassPostEffect";
+import postEffectSystemUniform from "../../postEffect/core/postEffectSystemUniform.wgsl"
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 
@@ -66,7 +66,7 @@ class TAA {
      * [KO] TAA 인스턴스를 생성합니다.
      * [EN] Creates a TAA instance.
      *
-     * @param redGPUContext
+     * @param redGPUContext -
      * [KO] RedGPU 컨텍스트
      * [EN] RedGPU Context
      */
@@ -131,16 +131,16 @@ class TAA {
      * [KO] TAA 이펙트를 렌더링합니다.
      * [EN] Renders the TAA effect.
      *
-     * @param view
+     * @param view -
      * [KO] View3D 인스턴스
      * [EN] View3D instance
-     * @param width
+     * @param width -
      * [KO] 너비
      * [EN] Width
-     * @param height
+     * @param height -
      * [KO] 높이
      * [EN] Height
-     * @param sourceTextureInfo
+     * @param sourceTextureInfo -
      * [KO] 소스 텍스처 정보
      * [EN] Source texture info
      * @returns
@@ -218,10 +218,10 @@ class TAA {
      * [KO] 유니폼 값을 업데이트합니다.
      * [EN] Updates a uniform value.
      *
-     * @param key
+     * @param key -
      * [KO] 유니폼 키
      * [EN] Uniform key
-     * @param value
+     * @param value -
      * [KO] 유니폼 값
      * [EN] Uniform value
      */

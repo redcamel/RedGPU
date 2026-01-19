@@ -1,70 +1,86 @@
 import RedGPUContext from "../RedGPUContext";
 
 /**
- * @description `RedGPUContextDetector` 클래스는 주어진 `RedGPUContext`
- * 객체로부터 GPUAdapter를 분석해 아래와 같은 정보를 제공한다.
+ * [KO] GPU 어댑터 및 브라우저 환경을 감지하고 분석하는 클래스입니다.
+ * [EN] Class that detects and analyzes the GPU adapter and browser environment.
  *
- * - Adapter 정보(`adapterInfo`) 및 현재 사용중인 `limits`,
- * - fallback 여부(`isFallbackAdapter`) 판단,
- * - 제한값을 그룹화한(`groupedLimits`) 자료구조 제공,
- * - 사용자 에이전(UA) 정보를 반환하고, 모바일 디바이스 여부를 판정한다.
+ * [KO] Adapter 정보, 제한값(Limits), Fallback 여부, 모바일 환경 여부 등을 제공합니다.
+ * [EN] Provides adapter information, limits, fallback status, mobile environment status, etc.
+ * @category Context
  */
 class RedGPUContextDetector {
-    /* Adapter 관련 정보 (예: 이름, 벤더 등). 내부적으로 `GPUAdapterInfo` 형태로 저장된다. */
+    /* [KO] Adapter 관련 정보 (예: 이름, 벤더 등) */
+    /* [EN] Adapter information (e.g., name, vendor) */
     #adapterInfo: GPUAdapterInfo;
-    /* GPU가 지원하는 한계(`GPUSupportedLimits`) 를 담는다. */
+    /* [KO] GPU가 지원하는 한계값 */
+    /* [EN] Limits supported by the GPU */
     #limits: GPUSupportedLimits;
-    /* 현재 사용중인 adapter 가 fallback 여부를 표시한다 (`true` 인 경우, 실제 하드웨어 대신 Fallback Adapter를 사용). */
+    /* [KO] Fallback Adapter 사용 여부 */
+    /* [EN] Whether Fallback Adapter is used */
     #isFallbackAdapter: boolean;
-    /* `#groupedLimits` 는 원래의 `#limits` 를 범주별(`TextureLimits`, `BufferLimits` 등)로 그룹화한 자료구조. */
+    /* [KO] 그룹화된 제한값 데이터 */
+    /* [EN] Grouped limit data */
     #groupedLimits: any;
-    /* 브라우저가 가진 User‑Agent 문자열. */
+    /* [KO] 브라우저 User-Agent 문자열 */
+    /* [EN] Browser User-Agent string */
     #userAgent: string;
 
     /**
-     * @description 생성자. 전달받은 `RedGPUContext` 인스턴스에서 GPUAdapter 를 추출해
-     * 내부 프로퍼티를 초기화한다.
-     *
-     * @param {RedGPUContext} redGPUContext - 컨텍스트 객체(구현적으로 `gpuAdapter` 속성 포함). */
+     * [KO] RedGPUContextDetector 생성자
+     * [EN] RedGPUContextDetector constructor
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     */
     constructor(redGPUContext: RedGPUContext) {
         this.#init(redGPUContext.gpuAdapter);
         console.log(this); // 디버그용
     }
 
     /**
-     * @returns {GPUAdapterInfo} 현재 사용중인 GPUAdapter 의 정보를 반환한다. */
+     * [KO] 현재 사용중인 GPUAdapter의 정보를 반환합니다.
+     * [EN] Returns information about the currently used GPUAdapter.
+     */
     get adapterInfo(): GPUAdapterInfo {
         return this.#adapterInfo;
     }
 
     /**
-     * @returns {GPUSupportedLimits} 현재 사용 중인 GPU의 한계값을 반환한다. */
+     * [KO] 현재 사용 중인 GPU의 한계값을 반환합니다.
+     * [EN] Returns the supported limits of the currently used GPU.
+     */
     get limits(): GPUSupportedLimits {
         return this.#limits;
     }
 
     /**
-     * @returns {boolean} 현재 adapter 가 fallback인지 여부를 반환한다 (`true` 은 Fallback Adapter임). */
+     * [KO] 현재 어댑터가 Fallback 어댑터인지 여부를 반환합니다.
+     * [EN] Returns whether the current adapter is a fallback adapter.
+     */
     get isFallbackAdapter(): boolean {
         return this.#isFallbackAdapter;
     }
 
     /**
-     * @returns {any} 그룹화된 한계값. 내부적으로 `groupedLimits` 프로퍼티에 저장된다. */
+     * [KO] 그룹화된 한계값 정보를 반환합니다.
+     * [EN] Returns grouped limit information.
+     */
     get groupedLimits(): any {
         return this.#groupedLimits;
     }
 
     /**
-     * @returns {string} 브라우저가 가진 User‑Agent 문자열을 반환한다. */
+     * [KO] 브라우저의 User-Agent 문자열을 반환합니다.
+     * [EN] Returns the browser's User-Agent string.
+     */
     get userAgent(): string {
         return this.#userAgent;
     }
 
     /**
-     * @description 모바일 디바이스인지 여부를 판단한다.
-     *
-     * @returns {boolean} `true` 라면 모바일 기기(안드로이드, iOS 등) 를 사용 중임. */
+     * [KO] 모바일 디바이스인지 여부를 반환합니다.
+     * [EN] Returns whether it is a mobile device.
+     */
     get isMobile(): boolean {
         return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone|Kindle|Silk|PlayBook/i.test(navigator.userAgent);
     }
@@ -73,9 +89,9 @@ class RedGPUContextDetector {
 
     /* 내부 유틸리티 메서드 */
     /**
-     * @description `#init` 는 주어진 GPUAdapter 를 분석해 내부 프로퍼티들을 초기화한다.
-     *
-     * @param {GPUAdapter} gpuAdapter - 현재 사용중인 Adapter 객체. */
+     * [KO] 초기화 메서드 (내부용)
+     * [EN] Initialization method (Internal use)
+     */
     #init(gpuAdapter: GPUAdapter) {
         this.#userAgent = navigator.userAgent;
         this.#parseAdapter(gpuAdapter);
@@ -83,10 +99,9 @@ class RedGPUContextDetector {
     }
 
     /**
-     * @description `#parseAdapter` 는 주어진 `gpuAdapter` 로부터 adapter 정보를 추출하고
-     * 내부 프로퍼티(`#adapterInfo`, `#isFallbackAdapter`, `#limits`) 를 세팅한다.
-     *
-     * @param {GPUAdapter} gpuAdapter - 현재 사용중인 GPU Adapter 객체. */
+     * [KO] 어댑터 정보를 파싱합니다. (내부용)
+     * [EN] Parses adapter information. (Internal use)
+     */
     #parseAdapter(gpuAdapter: GPUAdapter) {
         if (gpuAdapter) {
             const {limits, info} = gpuAdapter;
@@ -98,10 +113,9 @@ class RedGPUContextDetector {
     }
 
     /**
-     * @description `#parseLimits` 는 `#limits` 객체를 읽어
-     * `groupSettings` 으해 정의한 그룹별로 재배치한다.
-     *
-     * 내부적으로 다음과 같은 그룹을 구성한다. */
+     * [KO] 제한값 정보를 그룹화하여 파싱합니다. (내부용)
+     * [EN] Parses limit information by grouping. (Internal use)
+     */
     #parseLimits() {
         const groupSettings = {
             "TextureLimits": [

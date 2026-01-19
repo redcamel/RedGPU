@@ -11,7 +11,7 @@ import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
 import postEffectSystemUniformCode from "./core/postEffectSystemUniform.wgsl"
 import SSAO from "./effects/ssao/SSAO";
 import SSR from "./effects/ssr/SSR";
-import TAASharpen from "./TAA/shapen/TAASharpen";
+import TAASharpen from "../antialiasing/taa/shapen/TAASharpen";
 
 /**
  * [KO] 후처리 이펙트(PostEffect) 관리 클래스입니다.

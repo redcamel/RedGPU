@@ -1,7 +1,7 @@
-import RedGPUContext from "../context/RedGPUContext";
-import validateNumberRange from "../runtimeChecker/validateFunc/validateNumberRange";
-import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
-import createBasicPostEffectCode from "./core/createBasicPostEffectCode";
+import RedGPUContext from "../../context/RedGPUContext";
+import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumberRange";
+import ASinglePassPostEffect from "../../postEffect/core/ASinglePassPostEffect";
+import createBasicPostEffectCode from "../../postEffect/core/createBasicPostEffectCode";
 
 /**
  * [KO] FXAA(Fast Approximate Anti-Aliasing) 후처리 이펙트입니다.
@@ -38,7 +38,7 @@ class FXAA extends ASinglePassPostEffect {
      * [KO] FXAA 인스턴스를 생성합니다.
      * [EN] Creates an FXAA instance.
      *
-     * @param redGPUContext
+     * @param redGPUContext -
      * [KO] RedGPU 컨텍스트
      * [EN] RedGPU Context
      */
