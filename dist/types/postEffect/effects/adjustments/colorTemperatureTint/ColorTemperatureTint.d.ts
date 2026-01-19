@@ -1,14 +1,16 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 /**
- * 색온도/틴트(Color Temperature/Tint) 후처리 이펙트입니다.
- * 색온도(Kelvin), 틴트(그린/마젠타), 강도 값을 조절할 수 있습니다.
- * 다양한 조명 환경 프리셋 메서드를 제공합니다.
+ * [KO] 색온도/틴트(Color Temperature/Tint) 후처리 이펙트입니다.
+ * [EN] Color Temperature/Tint post-processing effect.
  *
- * @category Adjustments
+ * [KO] 색온도(Kelvin), 틴트(그린/마젠타), 강도 값을 조절할 수 있습니다.
+ * [EN] Can adjust Color Temperature (Kelvin), Tint (Green/Magenta), and Strength.
  *
- * @example
- * ```javascript
+ * [KO] 다양한 조명 환경 프리셋 메서드를 제공합니다.
+ * [EN] Provides various lighting environment preset methods.
+ * * ### Example
+ * ```typescript
  * const effect = new RedGPU.PostEffect.ColorTemperatureTint(redGPUContext);
  * effect.temperature = 3200; // 따뜻한 색감
  * effect.tint = -10;         // 마젠타 계열
@@ -18,35 +20,83 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
  * ```
  *
  * <iframe src="/RedGPU/examples/postEffect/adjustments/colorTemperatureTint/"></iframe>
+ * @category Adjustments
  */
 declare class ColorTemperatureTint extends ASinglePassPostEffect {
     #private;
+    /**
+     * [KO] ColorTemperatureTint 인스턴스를 생성합니다.
+     * [EN] Creates a ColorTemperatureTint instance.
+     *
+     * @param redGPUContext
+     * [KO] RedGPU 컨텍스트
+     * [EN] RedGPU Context
+     */
     constructor(redGPUContext: RedGPUContext);
-    /** 색온도 반환 */
+    /**
+     * [KO] 색온도 값을 반환합니다.
+     * [EN] Returns the color temperature value.
+     */
     get temperature(): number;
-    /** 색온도 설정. 범위 1000~20000 */
+    /**
+     * [KO] 색온도 값을 설정합니다. (1000 ~ 20000)
+     * [EN] Sets the color temperature value. (1000 ~ 20000)
+     */
     set temperature(value: number);
-    /** 틴트 반환 */
+    /**
+     * [KO] 틴트 값을 반환합니다.
+     * [EN] Returns the tint value.
+     */
     get tint(): number;
-    /** 틴트 설정. 범위 -100~100 */
+    /**
+     * [KO] 틴트 값을 설정합니다. (-100 ~ 100)
+     * [EN] Sets the tint value. (-100 ~ 100)
+     */
     set tint(value: number);
-    /** 효과 강도 반환 */
+    /**
+     * [KO] 효과 강도를 반환합니다.
+     * [EN] Returns the effect strength.
+     */
     get strength(): number;
-    /** 효과 강도 설정. 범위 0~100 */
+    /**
+     * [KO] 효과 강도를 설정합니다. (0 ~ 100)
+     * [EN] Sets the effect strength. (0 ~ 100)
+     */
     set strength(value: number);
-    /** 따뜻한 색감 프리셋 */
+    /**
+     * [KO] 따뜻한 색감 프리셋을 적용합니다.
+     * [EN] Applies the Warm Tone preset.
+     */
     setWarmTone(): void;
-    /** 차가운 색감 프리셋 */
+    /**
+     * [KO] 차가운 색감 프리셋을 적용합니다.
+     * [EN] Applies the Cool Tone preset.
+     */
     setCoolTone(): void;
-    /** 뉴트럴 프리셋 */
+    /**
+     * [KO] 뉴트럴 프리셋을 적용합니다.
+     * [EN] Applies the Neutral preset.
+     */
     setNeutral(): void;
-    /** 촛불 조명 프리셋 */
+    /**
+     * [KO] 촛불 조명 프리셋을 적용합니다.
+     * [EN] Applies the Candle Light preset.
+     */
     setCandleLight(): void;
-    /** 주간광 프리셋 */
+    /**
+     * [KO] 주간광 프리셋을 적용합니다.
+     * [EN] Applies the Daylight preset.
+     */
     setDaylight(): void;
-    /** 흐린날 프리셋 */
+    /**
+     * [KO] 흐린날 프리셋을 적용합니다.
+     * [EN] Applies the Cloudy Day preset.
+     */
     setCloudyDay(): void;
-    /** 네온 조명 프리셋 */
+    /**
+     * [KO] 네온 조명 프리셋을 적용합니다.
+     * [EN] Applies the Neon Light preset.
+     */
     setNeonLight(): void;
 }
 export default ColorTemperatureTint;

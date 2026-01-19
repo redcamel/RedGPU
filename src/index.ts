@@ -9,7 +9,7 @@ export {
 }
 export * as Camera from "./camera/";
 export * as RedGPUContext from "./context";
-export * from "./color";
+export * as Color from "./color";
 export * from "./geometry";
 export * as Util from "./utils";
 // export * as glMatrix from "gl-matrix"

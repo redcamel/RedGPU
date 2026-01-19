@@ -1,13 +1,13 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 /**
- * 줌 블러(Zoom Blur) 후처리 이펙트입니다.
- * 중심점에서 방사형으로 퍼지는 블러 효과를 만듭니다.
+ * [KO] 줌 블러(Zoom Blur) 후처리 이펙트입니다.
+ * [EN] Zoom Blur post-processing effect.
  *
- * @category Blur
- *
- * @example
- * ```javascript
+ * [KO] 중심점에서 방사형으로 퍼지는 블러 효과를 만듭니다.
+ * [EN] Creates a blur effect spreading radially from the center point.
+ * * ### Example
+ * ```typescript
  * const effect = new RedGPU.PostEffect.ZoomBlur(redGPUContext);
  * effect.amount = 80;      // 블러 강도
  * effect.centerX = 0.5;    // 중심 X (0~1)
@@ -16,21 +16,48 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
  * ```
  *
  * <iframe src="/RedGPU/examples/postEffect/blur/zoomBlur/"></iframe>
+ * @category Blur
  */
 declare class ZoomBlur extends ASinglePassPostEffect {
     #private;
+    /**
+     * [KO] ZoomBlur 인스턴스를 생성합니다.
+     * [EN] Creates a ZoomBlur instance.
+     *
+     * @param redGPUContext
+     * [KO] RedGPU 컨텍스트
+     * [EN] RedGPU Context
+     */
     constructor(redGPUContext: RedGPUContext);
-    /** 중심 X 반환 */
+    /**
+     * [KO] 중심 X 좌표를 반환합니다.
+     * [EN] Returns the center X coordinate.
+     */
     get centerX(): number;
-    /** 중심 X 설정 */
+    /**
+     * [KO] 중심 X 좌표를 설정합니다.
+     * [EN] Sets the center X coordinate.
+     */
     set centerX(value: number);
-    /** 중심 Y 반환 */
+    /**
+     * [KO] 중심 Y 좌표를 반환합니다.
+     * [EN] Returns the center Y coordinate.
+     */
     get centerY(): number;
-    /** 중심 Y 설정 */
+    /**
+     * [KO] 중심 Y 좌표를 설정합니다.
+     * [EN] Sets the center Y coordinate.
+     */
     set centerY(value: number);
-    /** 블러 강도 반환 */
+    /**
+     * [KO] 블러 강도를 반환합니다.
+     * [EN] Returns the blur strength.
+     */
     get amount(): number;
-    /** 블러 강도 설정. 최소 0 */
+    /**
+     * [KO] 블러 강도를 설정합니다. (최소 0)
+     * [EN] Sets the blur strength. (Minimum 0)
+     */
     set amount(value: number);
 }
 export default ZoomBlur;
