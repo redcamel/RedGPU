@@ -17,8 +17,11 @@ import TAASharpen from "./TAA/shapen/TAASharpen";
  * [KO] 후처리 이펙트(PostEffect) 관리 클래스입니다.
  * [EN] Class for managing post-processing effects.
  *
- * [KO] 이펙트 추가/제거, 렌더링, 시스템 유니폼 관리, 비디오 메모리 계산 등 후처리 파이프라인을 통합적으로 제어합니다.
- * [EN] Integrally controls the post-processing pipeline, including adding/removing effects, rendering, managing system uniforms, and calculating video memory.
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다. <br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system. <br/> Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
  * * ### Example
  * ```typescript
  * const view = new RedGPU.Display.View3D(redGPUContext, scene, camera);
@@ -122,7 +125,7 @@ class PostEffectManager {
      * [KO] PostEffectManager 인스턴스를 생성합니다.
      * [EN] Creates a PostEffectManager instance.
      *
-     * @param view
+     * @param view -
      * [KO] View3D 인스턴스
      * [EN] View3D instance
      */
@@ -134,6 +137,10 @@ class PostEffectManager {
     /**
      * [KO] SSAO 사용 여부를 반환합니다.
      * [EN] Returns whether SSAO is used.
+     *
+     * @returns
+     * [KO] SSAO 사용 여부
+     * [EN] Whether SSAO is used
      */
     get useSSAO(): boolean {
         return this.#useSSAO;
@@ -142,6 +149,10 @@ class PostEffectManager {
     /**
      * [KO] SSAO 사용 여부를 설정합니다.
      * [EN] Sets whether SSAO is used.
+     *
+     * @param value -
+     * [KO] SSAO 사용 여부
+     * [EN] Whether SSAO is used
      */
     set useSSAO(value: boolean) {
         this.#useSSAO = value;
@@ -151,6 +162,10 @@ class PostEffectManager {
     /**
      * [KO] SSAO 이펙트 인스턴스를 반환합니다.
      * [EN] Returns the SSAO effect instance.
+     *
+     * @returns
+     * [KO] SSAO 인스턴스
+     * [EN] SSAO instance
      */
     get ssao(): SSAO {
         if (!this.#ssao) {
@@ -162,6 +177,10 @@ class PostEffectManager {
     /**
      * [KO] SSR 사용 여부를 반환합니다.
      * [EN] Returns whether SSR is used.
+     *
+     * @returns
+     * [KO] SSR 사용 여부
+     * [EN] Whether SSR is used
      */
     get useSSR(): boolean {
         return this.#useSSR;
@@ -170,6 +189,10 @@ class PostEffectManager {
     /**
      * [KO] SSR 사용 여부를 설정합니다.
      * [EN] Sets whether SSR is used.
+     *
+     * @param value -
+     * [KO] SSR 사용 여부
+     * [EN] Whether SSR is used
      */
     set useSSR(value: boolean) {
         this.#useSSR = value;
@@ -179,6 +202,10 @@ class PostEffectManager {
     /**
      * [KO] SSR 이펙트 인스턴스를 반환합니다.
      * [EN] Returns the SSR effect instance.
+     *
+     * @returns
+     * [KO] SSR 인스턴스
+     * [EN] SSR instance
      */
     get ssr(): SSR {
         if (!this.#ssr) {
@@ -190,6 +217,10 @@ class PostEffectManager {
     /**
      * [KO] 시스템 유니폼 버퍼를 반환합니다.
      * [EN] Returns the system uniform buffer.
+     *
+     * @returns
+     * [KO] UniformBuffer 인스턴스
+     * [EN] UniformBuffer instance
      */
     get postEffectSystemUniformBuffer(): UniformBuffer {
         return this.#postEffectSystemUniformBuffer;
@@ -198,6 +229,10 @@ class PostEffectManager {
     /**
      * [KO] 연결된 View3D 인스턴스를 반환합니다.
      * [EN] Returns the connected View3D instance.
+     *
+     * @returns
+     * [KO] View3D 인스턴스
+     * [EN] View3D instance
      */
     get view(): View3D {
         return this.#view;
@@ -206,6 +241,10 @@ class PostEffectManager {
     /**
      * [KO] 등록된 이펙트 리스트를 반환합니다.
      * [EN] Returns the list of registered effects.
+     *
+     * @returns
+     * [KO] 후처리 이펙트 배열
+     * [EN] Array of post-processing effects
      */
     get effectList(): Array<ASinglePassPostEffect | AMultiPassPostEffect> {
         return this.#postEffects;
@@ -214,6 +253,10 @@ class PostEffectManager {
     /**
      * [KO] 비디오 메모리 사용량을 반환합니다.
      * [EN] Returns video memory usage.
+     *
+     * @returns
+     * [KO] 비디오 메모리 사용량 (bytes)
+     * [EN] Video memory usage (bytes)
      */
     get videoMemorySize(): number {
         this.#calcVideoMemory()
@@ -224,7 +267,12 @@ class PostEffectManager {
      * [KO] 이펙트를 추가합니다.
      * [EN] Adds an effect.
      *
-     * @param v
+     * * ### Example
+     * ```typescript
+     * view.postEffectManager.addEffect(new RedGPU.PostEffect.Bloom(redGPUContext));
+     * ```
+     *
+     * @param v -
      * [KO] 추가할 이펙트
      * [EN] Effect to add
      */
@@ -240,9 +288,12 @@ class PostEffectManager {
      * [KO] 특정 인덱스의 이펙트를 반환합니다.
      * [EN] Returns the effect at a specific index.
      *
-     * @param index
+     * @param index -
      * [KO] 인덱스
      * [EN] Index
+     * @returns
+     * [KO] 해당 인덱스의 이펙트
+     * [EN] Effect at the given index
      */
     getEffectAt(index: number): ASinglePassPostEffect | AMultiPassPostEffect {
         return this.#postEffects[index]
@@ -271,6 +322,10 @@ class PostEffectManager {
     /**
      * [KO] 후처리 파이프라인을 렌더링합니다.
      * [EN] Renders the post-processing pipeline.
+     *
+     * @returns
+     * [KO] 렌더링 결과 텍스처 정보
+     * [EN] Rendering result texture information
      */
     render() {
         const {viewRenderTextureManager, redGPUContext, taa, fxaa, toneMappingManager} = this.#view;

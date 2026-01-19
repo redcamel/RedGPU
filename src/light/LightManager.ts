@@ -11,14 +11,20 @@ import SpotLight from "./lights/SpotLight";
 /**
  * [KO] 씬(Scene) 내의 모든 조명을 통합 관리하는 클래스입니다.
  * [EN] Class that manages all lights within a scene.
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다. <br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system. <br/> Do not create an instance directly using the 'new' keyword.
+ * :::
  *
- * [KO] Scene 생성시 자동으로 생성되며, 방향성 조명, 포인트 조명, 스포트 조명, 환경광을 관리합니다.
- * [EN] Automatically created when a Scene is created, managing directional lights, point lights, spot lights, and ambient light.
  * * ### Example
  * ```typescript
+ * // 씬에서 라이트 매니저 접근 (Access light manager from scene)
  * const lightManager = scene.lightManager;
+ *
+ * // 조명 추가 예시 (Example of adding a light)
  * lightManager.addDirectionalLight(new RedGPU.Light.DirectionalLight());
  * ```
+ *
  * @category Light
  */
 class LightManager {
@@ -70,6 +76,7 @@ class LightManager {
     /**
      * [KO] 등록된 스포트 조명 배열을 반환합니다.
      * [EN] Returns the array of registered spot lights.
+     *
      * @returns
      * [KO] 등록된 SpotLight 배열
      * [EN] Array of registered SpotLights
@@ -81,6 +88,7 @@ class LightManager {
     /**
      * [KO] 등록된 스포트 조명의 개수를 반환합니다.
      * [EN] Returns the number of registered spot lights.
+     *
      * @returns
      * [KO] 스포트 조명 개수
      * [EN] Number of spot lights
@@ -92,6 +100,7 @@ class LightManager {
     /**
      * [KO] 클러스터 조명(Point + Spot)의 최대 허용 개수를 반환합니다.
      * [EN] Returns the maximum allowable count for cluster lights (Point + Spot).
+     *
      * @returns
      * [KO] 클러스터 조명 최대 개수
      * [EN] Maximum number of cluster lights
@@ -103,6 +112,7 @@ class LightManager {
     /**
      * [KO] 등록된 포인트 조명 배열을 반환합니다.
      * [EN] Returns the array of registered point lights.
+     *
      * @returns
      * [KO] 등록된 PointLight 배열
      * [EN] Array of registered PointLights
@@ -114,6 +124,7 @@ class LightManager {
     /**
      * [KO] 등록된 포인트 조명의 개수를 반환합니다.
      * [EN] Returns the number of registered point lights.
+     *
      * @returns
      * [KO] 포인트 조명 개수
      * [EN] Number of point lights
@@ -125,6 +136,7 @@ class LightManager {
     /**
      * [KO] 방향성 조명의 최대 허용 개수를 반환합니다.
      * [EN] Returns the maximum allowable count for directional lights.
+     *
      * @returns
      * [KO] 방향성 조명 최대 개수
      * [EN] Maximum number of directional lights
@@ -136,6 +148,7 @@ class LightManager {
     /**
      * [KO] 등록된 방향성 조명의 개수를 반환합니다.
      * [EN] Returns the number of registered directional lights.
+     *
      * @returns
      * [KO] 방향성 조명 개수
      * [EN] Number of directional lights
@@ -147,6 +160,7 @@ class LightManager {
     /**
      * [KO] 등록된 방향성 조명 배열을 반환합니다.
      * [EN] Returns the array of registered directional lights.
+     *
      * @returns
      * [KO] 등록된 DirectionalLight 배열
      * [EN] Array of registered DirectionalLights
@@ -158,6 +172,7 @@ class LightManager {
     /**
      * [KO] 현재 설정된 환경광(AmbientLight)을 반환합니다.
      * [EN] Returns the currently set AmbientLight.
+     *
      * @returns
      * [KO] AmbientLight 인스턴스 또는 null
      * [EN] AmbientLight instance or null
@@ -169,6 +184,7 @@ class LightManager {
     /**
      * [KO] 환경광(AmbientLight)을 설정합니다.
      * [EN] Sets the AmbientLight.
+     *
      * @param value -
      * [KO] 설정할 AmbientLight 인스턴스
      * [EN] AmbientLight instance to set
@@ -184,6 +200,12 @@ class LightManager {
     /**
      * [KO] SpotLight를 추가합니다.
      * [EN] Adds a SpotLight.
+     *
+     * * ### Example
+     * ```typescript
+     * scene.lightManager.addSpotLight(new RedGPU.Light.SpotLight());
+     * ```
+     *
      * @param value -
      * [KO] 추가할 SpotLight 인스턴스
      * [EN] SpotLight instance to add
@@ -203,6 +225,12 @@ class LightManager {
     /**
      * [KO] PointLight를 추가합니다.
      * [EN] Adds a PointLight.
+     *
+     * * ### Example
+     * ```typescript
+     * scene.lightManager.addPointLight(new RedGPU.Light.PointLight());
+     * ```
+     *
      * @param value -
      * [KO] 추가할 PointLight 인스턴스
      * [EN] PointLight instance to add
@@ -222,6 +250,12 @@ class LightManager {
     /**
      * [KO] DirectionalLight를 추가합니다.
      * [EN] Adds a DirectionalLight.
+     *
+     * * ### Example
+     * ```typescript
+     * scene.lightManager.addDirectionalLight(new RedGPU.Light.DirectionalLight());
+     * ```
+     *
      * @param value -
      * [KO] 추가할 DirectionalLight 인스턴스
      * [EN] DirectionalLight instance to add
@@ -241,6 +275,7 @@ class LightManager {
     /**
      * [KO] 특정 SpotLight를 제거합니다.
      * [EN] Removes a specific SpotLight.
+     *
      * @param value -
      * [KO] 제거할 SpotLight 인스턴스
      * [EN] SpotLight instance to remove
@@ -253,6 +288,7 @@ class LightManager {
     /**
      * [KO] 특정 PointLight를 제거합니다.
      * [EN] Removes a specific PointLight.
+     *
      * @param value -
      * [KO] 제거할 PointLight 인스턴스
      * [EN] PointLight instance to remove
@@ -265,6 +301,7 @@ class LightManager {
     /**
      * [KO] 특정 DirectionalLight를 제거합니다.
      * [EN] Removes a specific DirectionalLight.
+     *
      * @param value -
      * [KO] 제거할 DirectionalLight 인스턴스
      * [EN] DirectionalLight instance to remove
@@ -315,6 +352,7 @@ class LightManager {
     /**
      * [KO] 방향성 조명의 투영-뷰 행렬을 반환합니다.
      * [EN] Returns the projection-view matrix of the directional light.
+     *
      * @param view -
      * [KO] View3D 인스턴스
      * [EN] View3D instance
