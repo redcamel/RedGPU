@@ -42,7 +42,10 @@ const filterLanguageFiles = (dir, currentLang) => {
                     // 줄 끝의 공백만 제거하여 반환 (빈 줄 유지)
                     return tempLine.trimEnd();
                 })
-                .join('\n');
+                .join('\n')
+                // 외부 링크(http)가 아니면서 /RedGPU/로 시작하는 경로만 절대 경로로 변환
+                // (앞에 (, ", ' 가 오고 바로 뒤에 /RedGPU/가 붙는 경우만 매칭)
+                .replace(/([\(\"\'])\/RedGPU\//g, '$1https://redcamel.github.io/RedGPU/');
 
             fs.writeFileSync(fullPath, processed);
         }

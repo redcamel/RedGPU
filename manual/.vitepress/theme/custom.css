@@ -45,8 +45,8 @@
     margin-top: 2.5rem;
 }
 
-/* API 카드 리스트 컨테이너 */
-.api-page-layout .vp-doc ul:has(> li > a) {
+/* API 카드 리스트 컨테이너 - API 엔티티 링크가 포함된 리스트만 카드로 변환 */
+.api-page-layout .vp-doc ul:has(> li > a[href*="/modules/"], > li > a[href*="/namespaces/"], > li > a[href*="/classes/"], > li > a[href*="/interfaces/"], > li > a[href*="/functions/"], > li > a[href*="/variables/"], > li > a[href*="/enums/"]) {
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
@@ -56,7 +56,7 @@
 }
 
 /* 개별 카드 항목 */
-.api-page-layout .vp-doc ul:has(> li > a) > li {
+.api-page-layout .vp-doc ul:has(> li > a[href*="/modules/"], > li > a[href*="/namespaces/"], > li > a[href*="/classes/"], > li > a[href*="/interfaces/"], > li > a[href*="/functions/"], > li > a[href*="/variables/"], > li > a[href*="/enums/"]) > li {
     flex: 0 1 calc(15% - 12px);
     min-width: 220px;
     margin: 0 !important;
@@ -69,7 +69,7 @@
 }
 
 /* 카드 내부 링크 및 텍스트 설정 */
-.api-page-layout .vp-doc ul:has(> li > a) > li > a {
+.api-page-layout .vp-doc ul:has(> li > a[href*="/modules/"], > li > a[href*="/namespaces/"], > li > a[href*="/classes/"], > li > a[href*="/interfaces/"], > li > a[href*="/functions/"], > li > a[href*="/variables/"], > li > a[href*="/enums/"]) > li > a {
     display: flex;
     align-items: center;
     padding: 10px 14px;
@@ -85,7 +85,7 @@
 }
 
 /* 타입 아이콘 배지 (좌측) */
-.api-page-layout .vp-doc ul:has(> li > a) > li > a::before {
+.api-page-layout .vp-doc ul:has(> li > a[href*="/modules/"], > li > a[href*="/namespaces/"], > li > a[href*="/classes/"], > li > a[href*="/interfaces/"], > li > a[href*="/functions/"], > li > a[href*="/variables/"], > li > a[href*="/enums/"]) > li > a::before {
     content: "O";
     flex-shrink: 0;
     display: inline-flex;
