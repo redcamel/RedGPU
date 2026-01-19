@@ -20,71 +20,128 @@ interface ParticleEmitter {
 }
 
 /**
- * GPU 기반 파티클 시스템을 위한 이미터(Emitter) 클래스입니다.
+ * [KO] GPU 기반 파티클 시스템을 위한 이미터(Emitter) 클래스입니다.
+ * [EN] Emitter class for a GPU-based particle system.
  *
- * 다양한 파티클 속성(수명, 위치, 스케일, 회전, 알파, 이징 등)과 GPU 연산 기반의 대량 파티클 처리를 지원합니다.
+ * [KO] 다양한 파티클 속성(수명, 위치, 스케일, 회전, 알파, 이징 등)과 GPU 연산 기반의 대량 파티클 처리를 지원합니다. 파티클의 초기값/최종값 범위, 이징, 버퍼 구조, 컴퓨트 파이프라인 등 파티클 시뮬레이션에 필요한 모든 기능을 제공합니다.
+ * [EN] Supports various particle properties (life, position, scale, rotation, alpha, easing, etc.) and mass particle processing based on GPU computation. Provides all features necessary for particle simulation, including range of initial/final values, easing, buffer structures, and compute pipelines.
  *
- * 파티클의 초기값/최종값 범위, 이징, 버퍼 구조, 컴퓨트 파이프라인 등 파티클 시뮬레이션에 필요한 모든 기능을 제공합니다.
+ * * ### Example
+ * ```typescript
+ * const emitter = new RedGPU.Display.ParticleEmitter(redGPUContext);
+ * emitter.particleNum = 5000;
+ * scene.addChild(emitter);
+ * ```
  *
  * <iframe src="/RedGPU/examples/3d/particle/basic/"></iframe>
  *
- * 아래는 ParticleEmitter의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
+ * [KO] 아래는 ParticleEmitter의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
+ * [EN] Below is a list of additional sample examples to help understand the structure and operation of ParticleEmitter.
  * @see [ParticleEmitter Performance](/RedGPU/examples/3d/particle/performance/)
  *
  * ## Roadmap
- * - **다양한 파티클 이미터 타입 지원**
+ * - **[KO] 다양한 파티클 이미터 타입 지원**
+ * - **[EN] Support for various particle emitter types**
  * @category Particle
  */
 class ParticleEmitter extends Mesh {
+    /**
+     * [KO] 파티클의 최소 수명 (ms)
+     * [EN] Minimum life of the particle (ms)
+     */
     #minLife: number = 1000
+    /**
+     * [KO] 파티클의 최대 수명 (ms)
+     * [EN] Maximum life of the particle (ms)
+     */
     #maxLife: number = 5000
     //
+    /** [KO] 최소 시작 X 좌표 [EN] Minimum start X coordinate */
     #minStartX: number = 0
+    /** [KO] 최소 시작 Y 좌표 [EN] Minimum start Y coordinate */
     #minStartY: number = 0
+    /** [KO] 최소 시작 Z 좌표 [EN] Minimum start Z coordinate */
     #minStartZ: number = 0
     //
+    /** [KO] 최대 시작 X 좌표 [EN] Maximum start X coordinate */
     #maxStartX: number = 0
+    /** [KO] 최대 시작 Y 좌표 [EN] Maximum start Y coordinate */
     #maxStartY: number = 0
+    /** [KO] 최대 시작 Z 좌표 [EN] Maximum start Z coordinate */
     #maxStartZ: number = 0
     //
+    /** [KO] 최소 종료 X 좌표 [EN] Minimum end X coordinate */
     #minEndX: number = -5
+    /** [KO] 최소 종료 Y 좌표 [EN] Minimum end Y coordinate */
     #minEndY: number = -5
+    /** [KO] 최소 종료 Z 좌표 [EN] Minimum end Z coordinate */
     #minEndZ: number = -5
     //
+    /** [KO] 최대 종료 X 좌표 [EN] Maximum end X coordinate */
     #maxEndX: number = 5
+    /** [KO] 최대 종료 Y 좌표 [EN] Maximum end Y coordinate */
     #maxEndY: number = 5
+    /** [KO] 최대 종료 Z 좌표 [EN] Maximum end Z coordinate */
     #maxEndZ: number = 5
     //
+    /** [KO] 최소 시작 알파 [EN] Minimum start alpha */
     #minStartAlpha: number = 1
+    /** [KO] 최대 시작 알파 [EN] Maximum start alpha */
     #maxStartAlpha: number = 1
+    /** [KO] 최소 종료 알파 [EN] Minimum end alpha */
     #minEndAlpha: number = 1
+    /** [KO] 최대 종료 알파 [EN] Maximum end alpha */
     #maxEndAlpha: number = 1
     //
+    /** [KO] 최소 시작 스케일 [EN] Minimum start scale */
     #minStartScale: number = 0
+    /** [KO] 최대 시작 스케일 [EN] Maximum start scale */
     #maxStartScale: number = 1
+    /** [KO] 최소 종료 스케일 [EN] Minimum end scale */
     #minEndScale: number = 0
+    /** [KO] 최대 종료 스케일 [EN] Maximum end scale */
     #maxEndScale: number = 0
     //
+    /** [KO] 최소 시작 X 회전 [EN] Minimum start X rotation */
     #minStartRotationX: number = -360
+    /** [KO] 최소 시작 Y 회전 [EN] Minimum start Y rotation */
     #minStartRotationY: number = -360
+    /** [KO] 최소 시작 Z 회전 [EN] Minimum start Z rotation */
     #minStartRotationZ: number = -360
+    /** [KO] 최대 시작 X 회전 [EN] Maximum start X rotation */
     #maxStartRotationX: number = 360
+    /** [KO] 최대 시작 Y 회전 [EN] Maximum start Y rotation */
     #maxStartRotationY: number = 360
+    /** [KO] 최대 시작 Z 회전 [EN] Maximum start Z rotation */
     #maxStartRotationZ: number = 360
+    /** [KO] 최소 종료 X 회전 [EN] Minimum end X rotation */
     #minEndRotationX: number = -360
+    /** [KO] 최소 종료 Y 회전 [EN] Minimum end Y rotation */
     #minEndRotationY: number = -360
+    /** [KO] 최소 종료 Z 회전 [EN] Minimum end Z rotation */
     #minEndRotationZ: number = -360
+    /** [KO] 최대 종료 X 회전 [EN] Maximum end X rotation */
     #maxEndRotationX: number = 360
+    /** [KO] 최대 종료 Y 회전 [EN] Maximum end Y rotation */
     #maxEndRotationY: number = 360
+    /** [KO] 최대 종료 Z 회전 [EN] Maximum end Z rotation */
     #maxEndRotationZ: number = 360
     //
+    /** [KO] X축 이동 이징 [EN] X-axis movement easing */
     #easeX: number = PARTICLE_EASE.CubicOut
+    /** [KO] Y축 이동 이징 [EN] Y-axis movement easing */
     #easeY: number = PARTICLE_EASE.CubicOut
+    /** [KO] Z축 이동 이징 [EN] Z-axis movement easing */
     #easeZ: number = PARTICLE_EASE.CubicOut
+    /** [KO] 알파 변화 이징 [EN] Alpha change easing */
     #easeAlpha: number = PARTICLE_EASE.Linear
+    /** [KO] 스케일 변화 이징 [EN] Scale change easing */
     #easeScale: number = PARTICLE_EASE.Linear
+    /** [KO] X축 회전 이징 [EN] X-axis rotation easing */
     #easeRotationX: number = PARTICLE_EASE.CubicOut
+    /** [KO] Y축 회전 이징 [EN] Y-axis rotation easing */
     #easeRotationY: number = PARTICLE_EASE.CubicOut
+    /** [KO] Z축 회전 이징 [EN] Z-axis rotation easing */
     #easeRotationZ: number = PARTICLE_EASE.CubicOut
     //
     #simParamBuffer: GPUBuffer
@@ -92,11 +149,18 @@ class ParticleEmitter extends Mesh {
     #simParamData: Float32Array
     #computePipeline: GPUComputePipeline
     #computeBindGroup: GPUBindGroup
+    /**
+     * [KO] 파티클 개수
+     * [EN] Number of particles
+     */
     #particleNum: number = 2000
 
     /**
-     * ParticleEmitter 인스턴스를 생성합니다.
-     * @param redGPUContext RedGPU 컨텍스트
+     * [KO] ParticleEmitter 인스턴스를 생성합니다.
+     * [EN] Creates an instance of ParticleEmitter.
+     * @param redGPUContext -
+     * [KO] RedGPU 컨텍스트
+     * [EN] RedGPU Context
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);

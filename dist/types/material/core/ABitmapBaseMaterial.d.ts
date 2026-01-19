@@ -5,35 +5,57 @@ import CubeTexture from "../../resources/texture/CubeTexture";
 import ANoiseTexture from "../../resources/texture/noiseTexture/core/ANoiseTexture";
 import ABaseMaterial from "./ABaseMaterial";
 /**
- * 비트맵/큐브/노이즈 텍스처 기반 머티리얼의 공통 속성 및 기능을 제공하는 추상 클래스입니다.
- * 텍스처/샘플러의 변경 감지 및 파이프라인 갱신, 텍스처 리스너 관리 등 텍스처 기반 머티리얼의 핵심 로직을 구현합니다.
+ * [KO] 비트맵/큐브/노이즈 텍스처 기반 머티리얼의 공통 속성 및 기능을 제공하는 추상 클래스입니다.
+ * [EN] Abstract class providing common properties and functions for bitmap/cube/noise texture-based materials.
  *
- * @extends ABaseMaterial
+ * [KO] 텍스처/샘플러의 변경 감지 및 파이프라인 갱신, 텍스처 리스너 관리 등 텍스처 기반 머티리얼의 핵심 로직을 구현합니다.
+ * [EN] It implements core logic for texture-based materials such as detecting texture/sampler changes, updating pipelines, and managing texture listeners.
+ * @category Material
  */
 declare abstract class ABitmapBaseMaterial extends ABaseMaterial {
     #private;
     /**
-     * 파이프라인 갱신 시 호출되는 콜백 리스트
+     * [KO] 파이프라인 갱신 시 호출되는 콜백 리스트
+     * [EN] List of callbacks called when updating the pipeline
      */
     __packingList: any[];
     /**
-     * ABitmapBaseMaterial 생성자
-     * @param redGPUContext - RedGPUContext 인스턴스
-     * @param moduleName - 머티리얼 모듈명
-     * @param SHADER_INFO - 파싱된 WGSL 셰이더 정보
-     * @param targetGroupIndex - 바인드 그룹 인덱스
+     * [KO] ABitmapBaseMaterial 생성자
+     * [EN] ABitmapBaseMaterial constructor
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     * @param moduleName -
+     * [KO] 머티리얼 모듈명
+     * [EN] Material module name
+     * @param SHADER_INFO -
+     * [KO] 파싱된 WGSL 셰이더 정보
+     * [EN] Parsed WGSL shader info
+     * @param targetGroupIndex -
+     * [KO] 바인드 그룹 인덱스
+     * [EN] Bind group index
      */
     constructor(redGPUContext: RedGPUContext, moduleName: string, SHADER_INFO: any, targetGroupIndex: number);
     /**
-     * 텍스처 객체 변경 및 DirtyPipeline 리스너 관리
-     * @param prevTexture - 이전 텍스처(BitmapTexture|CubeTexture|ANoiseTexture)
-     * @param texture - 새 텍스처(BitmapTexture|CubeTexture|ANoiseTexture)
+     * [KO] 텍스처 객체 변경 및 DirtyPipeline 리스너 관리
+     * [EN] Manage texture object changes and DirtyPipeline listeners
+     * @param prevTexture -
+     * [KO] 이전 텍스처(BitmapTexture|CubeTexture|ANoiseTexture)
+     * [EN] Previous texture (BitmapTexture|CubeTexture|ANoiseTexture)
+     * @param texture -
+     * [KO] 새 텍스처(BitmapTexture|CubeTexture|ANoiseTexture)
+     * [EN] New texture (BitmapTexture|CubeTexture|ANoiseTexture)
      */
     updateTexture(prevTexture: BitmapTexture | CubeTexture | ANoiseTexture, texture: BitmapTexture | CubeTexture | ANoiseTexture): void;
     /**
-     * 샘플러 객체 변경 및 DirtyPipeline 리스너 관리
-     * @param prevSampler - 이전 샘플러
-     * @param newSampler - 새 샘플러
+     * [KO] 샘플러 객체 변경 및 DirtyPipeline 리스너 관리
+     * [EN] Manage sampler object changes and DirtyPipeline listeners
+     * @param prevSampler -
+     * [KO] 이전 샘플러
+     * [EN] Previous sampler
+     * @param newSampler -
+     * [KO] 새 샘플러
+     * [EN] New sampler
      */
     updateSampler(prevSampler: Sampler, newSampler: Sampler): void;
 }

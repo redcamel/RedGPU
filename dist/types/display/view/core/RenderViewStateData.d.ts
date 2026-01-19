@@ -17,14 +17,18 @@ interface ViewportSize {
     pixelRectArray: [number, number, number, number];
 }
 /**
- * 3D 뷰의 렌더링 상태 데이터를 관리하고 추적합니다.
+ * [KO] 3D 뷰의 렌더링 상태 데이터를 관리하고 추적하는 클래스입니다.
+ * [EN] Class that manages and tracks the rendering state data of a 3D view.
  *
- * 이 클래스는 렌더링 프로세스 중에 필요한 모든 상태 정보를 캡슐화합니다.
- * 컬링 설정, 성능 메트릭, GPU 리소스, 레이어 관리 등을 포함합니다.
+ * [KO] 이 클래스는 렌더링 프로세스 중에 필요한 모든 상태 정보를 캡슐화합니다. 컬링 설정, 성능 메트릭, GPU 리소스, 레이어 관리 등을 포함합니다.
+ * [EN] This class encapsulates all state information needed during the rendering process. Includes culling settings, performance metrics, GPU resources, layer management, etc.
  *
- * @remarks
- * `시스템 전용 클래스입니다.`\
- * 이 메서드는 렌더링 엔진 내부에서 자동으로 사용되는 기능으로, 일반적인 사용자는 직접 호출하지 않는 것이 좋습니다.
+ * ::: warning
+ * [KO] 이 클래스는 시스템 내부적으로 사용되는 데이터 구조체입니다.<br/>직접 인스턴스를 생성하여 사용하지 마십시오.
+ * [EN] This class is a data structure used internally by the system.<br/>Do not create or use instances directly.
+ * :::
+ *
+ * @category Core
  */
 declare class RenderViewStateData {
     #private;

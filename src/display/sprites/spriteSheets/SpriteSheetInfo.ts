@@ -4,65 +4,93 @@ import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validate
 import validateUintRange from "../../../runtimeChecker/validateFunc/validateUintRange";
 
 /**
- * 스프라이트 시트 애니메이션을 위한 정보를 담는 클래스
+ * [KO] 스프라이트 시트 애니메이션을 위한 정보를 담는 클래스입니다.
+ * [EN] Class that contains information for sprite sheet animation.
  *
- * SpriteSheetInfo는 하나의 텍스처에 격자 형태로 배열된 애니메이션 프레임들의
- * 구조와 재생 설정을 정의합니다. 스프라이트 시트 인스턴스들이 공유하는
- * 애니메이션 메타데이터를 관리합니다.
+ * [KO] 하나의 텍스처에 격자 형태로 배열된 애니메이션 프레임들의 구조와 재생 설정을 정의합니다. 스프라이트 시트 인스턴스들이 공유하는 애니메이션 메타데이터를 관리합니다.
+ * [EN] Defines the structure and playback settings of animation frames arranged in a grid within a single texture. Manages animation metadata shared by sprite sheet instances.
  *
+ * * ### Example
+ * ```typescript
+ * const info = new RedGPU.Display.SpriteSheetInfo(
+ *    redGPUContext,
+ *    'path/to/image.png',
+ *    5, 3, // segmentW, segmentH
+ *    15,   // totalFrame
+ *    0     // startIndex
+ * );
+ * ```
  * @category SpriteSheet
  */
 class SpriteSheetInfo {
     /**
-     * 가로 세그먼트 수 (텍스처를 가로로 몇 개로 나눌지)
-     * @private
+     * [KO] 가로 세그먼트 수 (텍스처를 가로로 몇 개로 나눌지)
+     * [EN] Number of horizontal segments (how many parts to divide the texture horizontally)
      */
     #segmentW: number = 0
     /**
-     * 세로 세그먼트 수 (텍스처를 세로로 몇 개로 나눌지)
-     * @private
+     * [KO] 세로 세그먼트 수 (텍스처를 세로로 몇 개로 나눌지)
+     * [EN] Number of vertical segments (how many parts to divide the texture vertically)
      */
     #segmentH: number = 0
     /**
-     * 총 애니메이션 프레임 수
-     * @private
+     * [KO] 총 애니메이션 프레임 수
+     * [EN] Total number of animation frames
      */
     #totalFrame: number = 0
     /**
-     * 시작 프레임 인덱스
-     * @private
+     * [KO] 시작 프레임 인덱스
+     * [EN] Starting frame index
      */
     #startIndex: number = 0
     /**
-     * 애니메이션 프레임 레이트 (FPS)
-     * @private
+     * [KO] 애니메이션 프레임 레이트 (FPS)
+     * [EN] Animation frame rate (FPS)
      */
     #frameRate: number = 0
     /**
-     * 반복 재생 여부
-     * @private
+     * [KO] 반복 재생 여부
+     * [EN] Whether to repeat playback
      */
     #loop: boolean = true
     /**
-     * 스프라이트 시트 텍스처
-     * @private
+     * [KO] 스프라이트 시트 텍스처
+     * [EN] Sprite sheet texture
      */
     #texture: BitmapTexture
 
     /**
-     * 새로운 SpriteSheetInfo 인스턴스를 생성합니다.
+     * [KO] 새로운 SpriteSheetInfo 인스턴스를 생성합니다.
+     * [EN] Creates a new SpriteSheetInfo instance.
      *
-     * @param redGPUContext - RedGPU 렌더링 컨텍스트
-     * @param src - 스프라이트 시트 이미지 파일 경로 또는 URL
-     * @param segmentW - 가로 세그먼트 수 (양의 정수)
-     * @param segmentH - 세로 세그먼트 수 (양의 정수)
-     * @param totalFrame - 총 애니메이션 프레임 수 (양의 정수)
-     * @param startIndex - 시작 프레임 인덱스 (0 이상의 정수)
-     * @param loop - 반복 재생 여부 (기본값: true)
-     * @param frameRate - 애니메이션 프레임 레이트 (기본값: 60 FPS)
+     * @param redGPUContext -
+     * [KO] RedGPU 렌더링 컨텍스트
+     * [EN] RedGPU rendering context
+     * @param src -
+     * [KO] 스프라이트 시트 이미지 파일 경로 또는 URL
+     * [EN] Path or URL to the sprite sheet image file
+     * @param segmentW -
+     * [KO] 가로 세그먼트 수 (양의 정수)
+     * [EN] Number of horizontal segments (positive integer)
+     * @param segmentH -
+     * [KO] 세로 세그먼트 수 (양의 정수)
+     * [EN] Number of vertical segments (positive integer)
+     * @param totalFrame -
+     * [KO] 총 애니메이션 프레임 수 (양의 정수)
+     * [EN] Total number of animation frames (positive integer)
+     * @param startIndex -
+     * [KO] 시작 프레임 인덱스 (0 이상의 정수)
+     * [EN] Starting frame index (integer of 0 or more)
+     * @param loop -
+     * [KO] 반복 재생 여부 (기본값: true)
+     * [EN] Whether to repeat playback (default: true)
+     * @param frameRate -
+     * [KO] 애니메이션 프레임 레이트 (기본값: 60 FPS)
+     * [EN] Animation frame rate (default: 60 FPS)
      *
-     * @throws {Error} redGPUContext가 유효하지 않은 경우
-     * @throws {Error} 수치 매개변수가 유효한 범위를 벗어나는 경우
+     * @throws
+     * [KO] redGPUContext가 유효하지 않거나 매개변수가 범위를 벗어나는 경우 에러 발생
+     * [EN] Throws error if redGPUContext is invalid or parameters are out of range
      */
     constructor(
         redGPUContext: RedGPUContext,

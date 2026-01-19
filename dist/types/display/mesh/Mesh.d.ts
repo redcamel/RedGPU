@@ -17,15 +17,25 @@ interface Mesh {
     useDisplacementTexture: boolean;
 }
 /**
- * geometry와 material을 바탕으로 3D/2D 객체의 위치, 회전, 스케일, 피벗, 계층 구조, 렌더링, 그림자, 디버깅 등 다양한 기능을 제공하는 기본 메시 클래스입니다.
+ * [KO] geometry와 material을 바탕으로 3D/2D 객체의 위치, 회전, 스케일, 피벗, 계층 구조, 렌더링, 그림자, 디버깅 등 다양한 기능을 제공하는 기본 메시 클래스입니다.
+ * [EN] Basic mesh class that provides various functions such as position, rotation, scale, pivot, hierarchy, rendering, shadow, and debugging based on geometry and material.
  *
- * geometry(버텍스/메시 데이터)와 머티리얼을 바탕으로 실제 화면에 렌더링되는 객체를 표현합니다.
+ * [KO] geometry(버텍스/메시 데이터)와 머티리얼을 바탕으로 실제 화면에 렌더링되는 객체를 표현합니다.
+ * [EN] Represents objects rendered on the actual screen based on geometry (vertex/mesh data) and material.
  *
- * 위치, 회전, 스케일, 피벗, 계층 구조, 그림자, 디버깅, 이벤트 등 다양한 기능을 지원합니다.
+ * [KO] 위치, 회전, 스케일, 피벗, 계층 구조, 그림자, 디버깅, 이벤트 등 다양한 기능을 지원합니다.
+ * [EN] Supports various functions such as position, rotation, scale, pivot, hierarchy, shadow, debugging, and events.
+ *
+ * * ### Example
+ * ```typescript
+ * const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
+ * scene.addChild(mesh);
+ * ```
  *
  * <iframe src="/RedGPU/examples/3d/mesh/basicMesh/"></iframe>
  *
- * 아래는 Mesh의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
+ * [KO] 아래는 Mesh의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
+ * [EN] Below is a list of additional sample examples to help understand the structure and operation of Mesh.
  * @see [Mesh Hierarchy example](/RedGPU/examples/3d/mesh/hierarchy/)
  * @see [Mesh Pivot example](/RedGPU/examples/3d/mesh/pivot/)
  * @see [Mesh Child Methods example](/RedGPU/examples/3d/mesh/childMethod/)
@@ -35,19 +45,34 @@ interface Mesh {
  */
 declare class Mesh extends MeshBase {
     #private;
-    /** 메시의 디스플레이스먼트 텍스처 */
+    /**
+     * [KO] 메시의 디스플레이스먼트 텍스처
+     * [EN] Displacement texture of the mesh
+     */
     displacementTexture: BitmapTexture;
-    /** 그림자 캐스팅 여부 */
+    /**
+     * [KO] 그림자 캐스팅 여부
+     * [EN] Whether to cast shadows
+     */
     castShadow: boolean;
     dirtyLOD: boolean;
     passFrustumCulling: boolean;
     createCustomMeshVertexShaderModule?: () => GPUShaderModule;
     /**
-     * Mesh 인스턴스를 생성합니다.
-     * @param redGPUContext RedGPU 컨텍스트
-     * @param geometry geometry 또는 primitive 객체(선택)
-     * @param material 머티리얼(선택)
-     * @param name 메시 이름(선택)
+     * [KO] Mesh 인스턴스를 생성합니다.
+     * [EN] Creates an instance of Mesh.
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     * @param geometry -
+     * [KO] geometry 또는 primitive 객체(선택)
+     * [EN] geometry or primitive object (optional)
+     * @param material -
+     * [KO] 머티리얼(선택)
+     * [EN] Material (optional)
+     * @param name -
+     * [KO] 메시 이름(선택)
+     * [EN] Mesh name (optional)
      */
     constructor(redGPUContext: RedGPUContext, geometry?: Geometry | Primitive, material?: any, name?: string);
     get LODManager(): LODManager;

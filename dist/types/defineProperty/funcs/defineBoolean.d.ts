@@ -4,6 +4,6 @@ declare function defineBoolean(propertyKey: string, initValue?: boolean, forFrag
     value?: any;
     writable?: boolean;
     get: () => any;
-    set: (newValue: boolean) => void;
+    set: (v: any) => void;
 };
 export default defineBoolean;

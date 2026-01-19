@@ -52,15 +52,25 @@ interface LODGPURenderInfo {
 }
 
 /**
- * geometry와 material을 바탕으로 3D/2D 객체의 위치, 회전, 스케일, 피벗, 계층 구조, 렌더링, 그림자, 디버깅 등 다양한 기능을 제공하는 기본 메시 클래스입니다.
+ * [KO] geometry와 material을 바탕으로 3D/2D 객체의 위치, 회전, 스케일, 피벗, 계층 구조, 렌더링, 그림자, 디버깅 등 다양한 기능을 제공하는 기본 메시 클래스입니다.
+ * [EN] Basic mesh class that provides various functions such as position, rotation, scale, pivot, hierarchy, rendering, shadow, and debugging based on geometry and material.
  *
- * geometry(버텍스/메시 데이터)와 머티리얼을 바탕으로 실제 화면에 렌더링되는 객체를 표현합니다.
+ * [KO] geometry(버텍스/메시 데이터)와 머티리얼을 바탕으로 실제 화면에 렌더링되는 객체를 표현합니다.
+ * [EN] Represents objects rendered on the actual screen based on geometry (vertex/mesh data) and material.
  *
- * 위치, 회전, 스케일, 피벗, 계층 구조, 그림자, 디버깅, 이벤트 등 다양한 기능을 지원합니다.
+ * [KO] 위치, 회전, 스케일, 피벗, 계층 구조, 그림자, 디버깅, 이벤트 등 다양한 기능을 지원합니다.
+ * [EN] Supports various functions such as position, rotation, scale, pivot, hierarchy, shadow, debugging, and events.
+ *
+ * * ### Example
+ * ```typescript
+ * const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
+ * scene.addChild(mesh);
+ * ```
  *
  * <iframe src="/RedGPU/examples/3d/mesh/basicMesh/"></iframe>
  *
- * 아래는 Mesh의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
+ * [KO] 아래는 Mesh의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
+ * [EN] Below is a list of additional sample examples to help understand the structure and operation of Mesh.
  * @see [Mesh Hierarchy example](/RedGPU/examples/3d/mesh/hierarchy/)
  * @see [Mesh Pivot example](/RedGPU/examples/3d/mesh/pivot/)
  * @see [Mesh Child Methods example](/RedGPU/examples/3d/mesh/childMethod/)
@@ -69,77 +79,179 @@ interface LODGPURenderInfo {
  * @category Mesh
  */
 class Mesh extends MeshBase {
-    /** 메시의 디스플레이스먼트 텍스처 */
+    /**
+     * [KO] 메시의 디스플레이스먼트 텍스처
+     * [EN] Displacement texture of the mesh
+     */
     displacementTexture: BitmapTexture
-    /** 그림자 캐스팅 여부 */
+    /**
+     * [KO] 그림자 캐스팅 여부
+     * [EN] Whether to cast shadows
+     */
     castShadow: boolean = false
     dirtyLOD: boolean = false
     passFrustumCulling: boolean = true
     createCustomMeshVertexShaderModule?: () => GPUShaderModule
-    /** 인스턴스 고유 ID */
+    /**
+     * [KO] 인스턴스 고유 ID
+     * [EN] Instance unique ID
+     */
     #instanceId: number
-    /** 메시 이름 */
+    /**
+     * [KO] 메시 이름
+     * [EN] Mesh name
+     */
     #name: string
-    /** 부모 객체 */
+    /**
+     * [KO] 부모 객체
+     * [EN] Parent object
+     */
     #parent: Object3DContainer
-    /** X 좌표 */
+    /**
+     * [KO] X 좌표
+     * [EN] X coordinate
+     */
     #x: number = 0
-    /** Y 좌표 */
+    /**
+     * [KO] Y 좌표
+     * [EN] Y coordinate
+     */
     #y: number = 0
-    /** Z 좌표 */
+    /**
+     * [KO] Z 좌표
+     * [EN] Z coordinate
+     */
     #z: number = 0
-    /** 위치 배열 [x, y, z] */
+    /**
+     * [KO] 위치 배열 [x, y, z]
+     * [EN] Position array [x, y, z]
+     */
     #positionArray: Float32Array = new Float32Array([0, 0, 0])
-    /** 피벗 X */
+    /**
+     * [KO] 피벗 X
+     * [EN] Pivot X
+     */
     #pivotX: number = 0
-    /** 피벗 Y */
+    /**
+     * [KO] 피벗 Y
+     * [EN] Pivot Y
+     */
     #pivotY: number = 0
-    /** 피벗 Z */
+    /**
+     * [KO] 피벗 Z
+     * [EN] Pivot Z
+     */
     #pivotZ: number = 0
-    /** 픽킹 ID */
+    /**
+     * [KO] 피킹 ID
+     * [EN] Picking ID
+     */
     readonly #pickingId: number
-    /** X 스케일 */
+    /**
+     * [KO] X 스케일
+     * [EN] X scale
+     */
     #scaleX: number = 1
-    /** Y 스케일 */
+    /**
+     * [KO] Y 스케일
+     * [EN] Y scale
+     */
     #scaleY: number = 1
-    /** Z 스케일 */
+    /**
+     * [KO] Z 스케일
+     * [EN] Z scale
+     */
     #scaleZ: number = 1
-    /** 스케일 배열 [x, y, z] */
+    /**
+     * [KO] 스케일 배열 [x, y, z]
+     * [EN] Scale array [x, y, z]
+     */
     #scaleArray: Float32Array = new Float32Array([1, 1, 1])
-    /** X축 회전 (deg) */
+    /**
+     * [KO] X축 회전 (deg)
+     * [EN] X-axis rotation (deg)
+     */
     #rotationX: number = 0
-    /** Y축 회전 (deg) */
+    /**
+     * [KO] Y축 회전 (deg)
+     * [EN] Y-axis rotation (deg)
+     */
     #rotationY: number = 0
-    /** Z축 회전 (deg) */
+    /**
+     * [KO] Z축 회전 (deg)
+     * [EN] Z-axis rotation (deg)
+     */
     #rotationZ: number = 0
-    /** 회전 배열 [x, y, z] (deg) */
+    /**
+     * [KO] 회전 배열 [x, y, z] (deg)
+     * [EN] Rotation array [x, y, z] (deg)
+     */
     #rotationArray: Float32Array = new Float32Array([0, 0, 0])
-    /** 이벤트 핸들러 객체 */
+    /**
+     * [KO] 이벤트 핸들러 객체
+     * [EN] Event handler object
+     */
     #events: any = {}
-    /** 등록된 이벤트 개수 */
+    /**
+     * [KO] 등록된 이벤트 개수
+     * [EN] Number of registered events
+     */
     #eventsNum: number = 0
-    /** 프러스텀 컬링 무시 여부 */
+    /**
+     * [KO] 프러스텀 컬링 무시 여부
+     * [EN] Whether to ignore frustum culling
+     */
     #ignoreFrustumCulling: boolean = false
-    /** 메시 투명도 */
+    /**
+     * [KO] 메시 투명도
+     * [EN] Mesh opacity
+     */
     #opacity: number = 1
-    /** 디버그 메시 객체 */
+    /**
+     * [KO] 디버그 메시 객체
+     * [EN] Debug mesh object
+     */
     #drawDebugger: DrawDebuggerMesh
-    /** 디버그 활성화 여부 */
+    /**
+     * [KO] 디버그 활성화 여부
+     * [EN] Whether to enable debugging
+     */
     #enableDebugger: boolean = false
-    /** 캐싱된 AABB */
+    /**
+     * [KO] 캐싱된 AABB
+     * [EN] Cached AABB
+     */
     #cachedBoundingAABB: AABB
-    /** 캐싱된 OBB */
+    /**
+     * [KO] 캐싱된 OBB
+     * [EN] Cached OBB
+     */
     #cachedBoundingOBB: OBB
-    /** 이전 프레임의 모델 행렬 */
+    /**
+     * [KO] 이전 프레임의 모델 행렬
+     * [EN] Model matrix of the previous frame
+     */
     #prevModelMatrix: Float32Array
-    /** 렌더 번들 인코더 */
+    /**
+     * [KO] 렌더 번들 인코더
+     * [EN] Render bundle encoder
+     */
     #bundleEncoder: GPURenderBundleEncoder
-    /** 렌더 번들 */
+    /**
+     * [KO] 렌더 번들
+     * [EN] Render bundle
+     */
     #renderBundle: GPURenderBundle
     #renderBundle_LODList: GPURenderBundle[] = [];
-    /** 이전 시스템 바인드 그룹 */
+    /**
+     * [KO] 이전 시스템 바인드 그룹
+     * [EN] Previous system bind group
+     */
     #prevSystemBindGroupList: GPUBindGroup[] = []
-    /** 이전 프래그먼트 바인드 그룹 */
+    /**
+     * [KO] 이전 프래그먼트 바인드 그룹
+     * [EN] Previous fragment bind group
+     */
     #prevFragmentBindGroup: GPUBindGroup
     #drawCommandSlot: DrawCommandSlot | null = null
     #drawCommandSlot_LODList: DrawCommandSlot[] = []
@@ -153,11 +265,20 @@ class Mesh extends MeshBase {
     #currentLODIndex: number = -1
 
     /**
-     * Mesh 인스턴스를 생성합니다.
-     * @param redGPUContext RedGPU 컨텍스트
-     * @param geometry geometry 또는 primitive 객체(선택)
-     * @param material 머티리얼(선택)
-     * @param name 메시 이름(선택)
+     * [KO] Mesh 인스턴스를 생성합니다.
+     * [EN] Creates an instance of Mesh.
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     * @param geometry -
+     * [KO] geometry 또는 primitive 객체(선택)
+     * [EN] geometry or primitive object (optional)
+     * @param material -
+     * [KO] 머티리얼(선택)
+     * [EN] Material (optional)
+     * @param name -
+     * [KO] 메시 이름(선택)
+     * [EN] Mesh name (optional)
      */
     constructor(redGPUContext: RedGPUContext, geometry?: Geometry | Primitive, material?, name?: string) {
         super(redGPUContext)

@@ -6,29 +6,36 @@ import SpriteSheetInfo from "../SpriteSheetInfo";
 /** 2D 메시 기능이 믹스인된 베이스 스프라이트 시트 클래스 */
 declare const BaseSpriteSheet2D: {
     new (...args: any[]): {
-        "__#104@#rotation": number;
-        "__#104@#blendMode": number;
+        "__#117@#rotation": number;
+        "__#117@#blendMode": number;
         get blendMode(): string;
         set blendMode(value: import("../../../../material").BLEND_MODE | keyof typeof import("../../../../material").BLEND_MODE);
         rotation: number;
         setScale(x: number, y?: number): void;
         setPosition(x: number, y?: number): void;
         setRotation(value: number): void;
-        "__#104@#setBlendFactor"(mode: number): void;
+        "__#117@#setBlendFactor"(mode: number): void;
         rotationZ: number;
     };
 } & typeof ASpriteSheet;
 /**
- * 2D 스프라이트 시트 애니메이션 클래스
+ * [KO] 2D 스프라이트 시트 애니메이션 클래스입니다.
+ * [EN] 2D sprite sheet animation class.
  *
- * SpriteSheet2D는 2D 게임에서 캐릭터나 오브젝트의 애니메이션을 위한 클래스입니다.
- * 하나의 텍스처에 격자 형태로 배열된 여러 프레임을 시간에 따라 순차적으로 표시하여
- * 부드러운 2D 애니메이션을 생성합니다. 텍스처의 세그먼트 크기에 따라 자동으로
- * 렌더링 크기가 조정됩니다.
+ * [KO] 2D 게임에서 캐릭터나 오브젝트의 애니메이션을 위한 클래스입니다. 하나의 텍스처에 격자 형태로 배열된 여러 프레임을 시간에 따라 순차적으로 표시하여 부드러운 2D 애니메이션을 생성합니다. 텍스처의 세그먼트 크기에 따라 자동으로 렌더링 크기가 조정됩니다.
+ * [EN] A class for animating characters or objects in 2D games. It creates smooth 2D animations by sequentially displaying multiple frames arranged in a grid within a single texture over time. Rendering size is automatically adjusted according to the segment size of the texture.
+ *
+ * * ### Example
+ * ```typescript
+ * const info = new RedGPU.Display.SpriteSheetInfo(redGPUContext, 'sheet.png', 5, 3, 15, 0);
+ * const spriteSheet = new RedGPU.Display.SpriteSheet2D(redGPUContext, info);
+ * scene.addChild(spriteSheet);
+ * ```
  *
  * <iframe src="/RedGPU/examples/3d/sprite/spriteSheet3D/"></iframe>
  *
- * 아래는 SpriteSheet2D의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
+ * [KO] 아래는 SpriteSheet2D의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
+ * [EN] Below is a list of additional sample examples to help understand the structure and operation of SpriteSheet2D.
  * @see [SpriteSheet2D MouseEvent example](/RedGPU/examples/2d/mouseEvent/spriteSheet2D/)
  *
  * @category SpriteSheet
@@ -36,10 +43,15 @@ declare const BaseSpriteSheet2D: {
 declare class SpriteSheet2D extends BaseSpriteSheet2D {
     #private;
     /**
-     * 새로운 SpriteSheet2D 인스턴스를 생성합니다.
+     * [KO] 새로운 SpriteSheet2D 인스턴스를 생성합니다.
+     * [EN] Creates a new SpriteSheet2D instance.
      *
-     * @param redGPUContext - RedGPU 렌더링 컨텍스트
-     * @param spriteSheetInfo - 스프라이트 시트 정보 객체 (텍스처, 세그먼트 정보, 애니메이션 설정 포함)
+     * @param redGPUContext -
+     * [KO] RedGPU 렌더링 컨텍스트
+     * [EN] RedGPU rendering context
+     * @param spriteSheetInfo -
+     * [KO] 스프라이트 시트 정보 객체 (텍스처, 세그먼트 정보, 애니메이션 설정 포함)
+     * [EN] Sprite sheet info object (including texture, segment info, and animation settings)
      */
     constructor(redGPUContext: RedGPUContext, spriteSheetInfo: SpriteSheetInfo);
     /**

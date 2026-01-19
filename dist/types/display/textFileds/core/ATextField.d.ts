@@ -20,15 +20,20 @@ interface ATextField {
     filter: string;
 }
 /**
- * 텍스트 필드 객체의 추상 클래스입니다.
+ * [KO] 텍스트 필드 객체의 추상 베이스 클래스입니다.
+ * [EN] Abstract base class for text field objects.
  *
- * @remarks
- * `시스템 전용 클래스입니다.`\
- * 이 메서드는 렌더링 엔진 내부에서 자동으로 사용되는 기능으로, 일반적인 사용자는 직접 호출하지 않는 것이 좋습니다.
+ * [KO] HTML/SVG를 이용하여 텍스트를 비트맵 텍스처로 변환하고, 이를 메시의 디퓨즈 텍스처로 사용하는 공통 로직을 포함합니다.
+ * [EN] Includes common logic for converting text to bitmap textures using HTML/SVG and using them as diffuse textures for meshes.
  *
- * @abstract
+ * ::: warning
+ * [KO] 이 클래스는 시스템 내부적으로 사용되는 추상 클래스입니다.<br/>직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is an abstract class used internally by the system.<br/>Do not create instances directly.
+ * :::
+ *
+ * @category Core
  */
-declare class ATextField extends Mesh {
+declare abstract class ATextField extends Mesh {
     #private;
     constructor(redGPUContext: RedGPUContext, imgOnload: Function, mode3dYn?: boolean);
     get text(): string;

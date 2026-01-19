@@ -1,3 +1,8 @@
+/**
+ * [KO] 틴트 블렌드 모드 상수
+ * [EN] Tint blend mode constants
+ * @category Constant
+ */
 export declare const TINT_BLEND_MODE: {
     readonly NORMAL: 0;
     readonly MULTIPLY: 1;

@@ -3,6 +3,10 @@ import Sampler from "../../resources/sampler/Sampler";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import PackedTexture from "../../resources/texture/packedTexture/PackedTexture";
 import ABitmapBaseMaterial from "../core/ABitmapBaseMaterial";
+/**
+ * [KO] PBRMaterial 속성 인터페이스
+ * [EN] PBRMaterial property interface
+ */
 interface PBRMaterial {
     useVertexColor: boolean;
     useCutOff: boolean;
@@ -101,27 +105,72 @@ interface PBRMaterial {
     KHR_dispersion: boolean;
 }
 /**
- * The PBRMaterial class is a subclass of the ABitmapBaseMaterial class.
- * It is used to create a PBR material for rendering.
- * @extends ABitmapBaseMaterial
+ * [KO] PBR(Physically Based Rendering) 머티리얼 클래스입니다.
+ * [EN] PBR (Physically Based Rendering) material class.
+ *
+ * [KO] ABitmapBaseMaterial을 상속받아 PBR 렌더링을 위한 머티리얼을 생성합니다.
+ * [EN] Inherits from ABitmapBaseMaterial to create a material for PBR rendering.
+ * @category Material
  */
 declare class PBRMaterial extends ABitmapBaseMaterial {
     #private;
     /**
-     * @classdesc The constructor for creating an instance of the class.
-     * @constructor
-     * @param {RedGPUContext} redGPUContext - The RedGPUContext object.
+     * [KO] PBRMaterial 생성자
+     * [EN] PBRMaterial constructor
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext);
+    /**
+     * [KO] Clearcoat 및 Transmission 패킹 텍스처 반환
+     * [EN] Returns packed texture for Clearcoat and Transmission
+     */
     get packedKHR_clearcoatTexture_transmission(): PackedTexture;
+    /**
+     * [KO] Iridescence 패킹 텍스처 반환
+     * [EN] Returns packed texture for Iridescence
+     */
     get packedKHR_iridescence(): PackedTexture;
+    /**
+     * [KO] ORM(Occlusion, Roughness, Metallic) 패킹 텍스처 반환
+     * [EN] Returns packed texture for ORM (Occlusion, Roughness, Metallic)
+     */
     get packedORMTexture(): PackedTexture;
+    /**
+     * [KO] Sheen 패킹 텍스처 반환
+     * [EN] Returns packed texture for Sheen
+     */
     get packedKHR_sheen(): PackedTexture;
+    /**
+     * [KO] Diffuse Transmission 패킹 텍스처 반환
+     * [EN] Returns packed texture for Diffuse Transmission
+     */
     get packedKHR_diffuse_transmission(): PackedTexture;
+    /**
+     * [KO] ORM(Occlusion, Roughness, Metallic) 텍스처 패킹 설정
+     * [EN] Setup ORM (Occlusion, Roughness, Metallic) texture packing
+     */
     setupPackORMTexture(): Promise<void>;
+    /**
+     * [KO] Clearcoat 및 Transmission 텍스처 패킹 설정
+     * [EN] Setup Clearcoat and Transmission texture packing
+     */
     setupPackedKHR_clearcoatTexture_transmission(): Promise<void>;
+    /**
+     * [KO] Diffuse Transmission 텍스처 패킹 설정
+     * [EN] Setup Diffuse Transmission texture packing
+     */
     setupPackedKHR_diffuse_transmission(): Promise<void>;
+    /**
+     * [KO] Sheen 텍스처 패킹 설정
+     * [EN] Setup Sheen texture packing
+     */
     setupPackedKHR_sheen(): Promise<void>;
+    /**
+     * [KO] Iridescence 텍스처 패킹 설정
+     * [EN] Setup Iridescence texture packing
+     */
     setupPackedKHR_iridescence(): Promise<void>;
 }
 export default PBRMaterial;

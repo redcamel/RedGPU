@@ -10,60 +10,129 @@ interface AGroupBase {
 const CONVERT_RADIAN = Math.PI / 180;
 
 /**
- * 그룹의 기본 동작과 변환(위치, 회전, 스케일, 피벗 등)을 제공하는 3D/2D 공통 베이스 클래스입니다.
+ * [KO] 그룹의 기본 동작과 변환(위치, 회전, 스케일, 피벗 등)을 제공하는 3D/2D 공통 추상 클래스입니다.
+ * [EN] Abstract base class providing common group behavior and transformations (position, rotation, scale, pivot, etc.) for both 3D and 2D.
  *
- * @remarks
- * `시스템 전용 클래스입니다.`\
- * 이 메서드는 렌더링 엔진 내부에서 자동으로 사용되는 기능으로, 일반적인 사용자는 직접 호출하지 않는 것이 좋습니다.
-
+ * ::: warning
+ * [KO] 이 클래스는 시스템 내부적으로 사용되는 추상 클래스입니다.<br/>직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is an abstract class used internally by the system.<br/>Do not create instances directly.
+ * :::
+ *
+ * @category Core
  */
 abstract class GroupBase extends Object3DContainer {
-    /** 모델 변환 행렬 */
+    /**
+     * [KO] 모델 변환 행렬
+     * [EN] Model transformation matrix
+     */
     modelMatrix = mat4.create()
-    /** 로컬 변환 행렬 */
+    /**
+     * [KO] 로컬 변환 행렬
+     * [EN] Local transformation matrix
+     */
     localMatrix = mat4.create()
-    /** 인스턴스 고유 ID */
+    /**
+     * [KO] 인스턴스 고유 ID
+     * [EN] Instance unique ID
+     */
     #instanceId: number
-    /** 그룹 이름 */
+    /**
+     * [KO] 그룹 이름
+     * [EN] Group name
+     */
     #name: string
-    /** 부모 객체 */
+    /**
+     * [KO] 부모 객체
+     * [EN] Parent object
+     */
     #parent: Object3DContainer
-    /** X 좌표 */
+    /**
+     * [KO] X 좌표
+     * [EN] X coordinate
+     */
     #x: number = 0
-    /** Z 좌표 */
+    /**
+     * [KO] Z 좌표
+     * [EN] Z coordinate
+     */
     #z: number = 0
-    /** Y 좌표 */
+    /**
+     * [KO] Y 좌표
+     * [EN] Y coordinate
+     */
     #y: number = 0
-    /** 위치 배열 [x, y, z] */
+    /**
+     * [KO] 위치 배열 [x, y, z]
+     * [EN] Position array [x, y, z]
+     */
     #positionArray: [number, number, number] = [0, 0, 0]
-    /** 피벗 X */
+    /**
+     * [KO] 피벗 X
+     * [EN] Pivot X
+     */
     #pivotX: number = 0
-    /** 피벗 Y */
+    /**
+     * [KO] 피벗 Y
+     * [EN] Pivot Y
+     */
     #pivotY: number = 0
-    /** 피벗 Z */
+    /**
+     * [KO] 피벗 Z
+     * [EN] Pivot Z
+     */
     #pivotZ: number = 0
-    /** X 스케일 */
+    /**
+     * [KO] X 스케일
+     * [EN] X scale
+     */
     #scaleX: number = 1
-    /** Y 스케일 */
+    /**
+     * [KO] Y 스케일
+     * [EN] Y scale
+     */
     #scaleY: number = 1
-    /** Z 스케일 */
+    /**
+     * [KO] Z 스케일
+     * [EN] Z scale
+     */
     #scaleZ: number = 1
-    /** 스케일 배열 [x, y, z] */
+    /**
+     * [KO] 스케일 배열 [x, y, z]
+     * [EN] Scale array [x, y, z]
+     */
     #scaleArray: number[] = [1, 1, 1]
-    /** X축 회전 (deg) */
+    /**
+     * [KO] X축 회전 (deg)
+     * [EN] X-axis rotation (deg)
+     */
     #rotationX: number = 0
-    /** Y축 회전 (deg) */
+    /**
+     * [KO] Y축 회전 (deg)
+     * [EN] Y-axis rotation (deg)
+     */
     #rotationY: number = 0
-    /** Z축 회전 (deg) */
+    /**
+     * [KO] Z축 회전 (deg)
+     * [EN] Z-axis rotation (deg)
+     */
     #rotationZ: number = 0
-    /** 회전 배열 [x, y, z] (deg) */
+    /**
+     * [KO] 회전 배열 [x, y, z] (deg)
+     * [EN] Rotation array [x, y, z] (deg)
+     */
     #rotationArray: number[] = [0, 0, 0]
-    /** 변환 행렬 갱신 필요 여부 */
+    /**
+     * [KO] 변환 행렬 갱신 필요 여부
+     * [EN] Whether transform matrix needs update
+     */
     #dirtyTransform: boolean = true
 
     /**
-     * 그룹을 생성합니다.
-     * @param name 그룹 이름(선택)
+     * [KO] GroupBase 생성자
+     * [EN] GroupBase constructor
+     * @param name -
+     * [KO] 그룹 이름(선택)
+     * [EN] Group name (optional)
      */
     constructor(name?: string) {
         super()

@@ -5,26 +5,38 @@ interface ParticleEmitter {
     useBillboard: boolean;
 }
 /**
- * GPU 기반 파티클 시스템을 위한 이미터(Emitter) 클래스입니다.
+ * [KO] GPU 기반 파티클 시스템을 위한 이미터(Emitter) 클래스입니다.
+ * [EN] Emitter class for a GPU-based particle system.
  *
- * 다양한 파티클 속성(수명, 위치, 스케일, 회전, 알파, 이징 등)과 GPU 연산 기반의 대량 파티클 처리를 지원합니다.
+ * [KO] 다양한 파티클 속성(수명, 위치, 스케일, 회전, 알파, 이징 등)과 GPU 연산 기반의 대량 파티클 처리를 지원합니다. 파티클의 초기값/최종값 범위, 이징, 버퍼 구조, 컴퓨트 파이프라인 등 파티클 시뮬레이션에 필요한 모든 기능을 제공합니다.
+ * [EN] Supports various particle properties (life, position, scale, rotation, alpha, easing, etc.) and mass particle processing based on GPU computation. Provides all features necessary for particle simulation, including range of initial/final values, easing, buffer structures, and compute pipelines.
  *
- * 파티클의 초기값/최종값 범위, 이징, 버퍼 구조, 컴퓨트 파이프라인 등 파티클 시뮬레이션에 필요한 모든 기능을 제공합니다.
+ * * ### Example
+ * ```typescript
+ * const emitter = new RedGPU.Display.ParticleEmitter(redGPUContext);
+ * emitter.particleNum = 5000;
+ * scene.addChild(emitter);
+ * ```
  *
  * <iframe src="/RedGPU/examples/3d/particle/basic/"></iframe>
  *
- * 아래는 ParticleEmitter의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
+ * [KO] 아래는 ParticleEmitter의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
+ * [EN] Below is a list of additional sample examples to help understand the structure and operation of ParticleEmitter.
  * @see [ParticleEmitter Performance](/RedGPU/examples/3d/particle/performance/)
  *
  * ## Roadmap
- * - **다양한 파티클 이미터 타입 지원**
+ * - **[KO] 다양한 파티클 이미터 타입 지원**
+ * - **[EN] Support for various particle emitter types**
  * @category Particle
  */
 declare class ParticleEmitter extends Mesh {
     #private;
     /**
-     * ParticleEmitter 인스턴스를 생성합니다.
-     * @param redGPUContext RedGPU 컨텍스트
+     * [KO] ParticleEmitter 인스턴스를 생성합니다.
+     * [EN] Creates an instance of ParticleEmitter.
+     * @param redGPUContext -
+     * [KO] RedGPU 컨텍스트
+     * [EN] RedGPU Context
      */
     constructor(redGPUContext: RedGPUContext);
     get vertexStateBuffers(): GPUVertexBufferLayout[];

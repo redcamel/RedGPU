@@ -67,9 +67,7 @@ type KeyNameMapper = {
  * * ### Example
  * ```typescript
  * const controller = new RedGPU.Camera.FreeController(redGPUContext);
- * controller.x = 10;
- * controller.y = 5;
- * controller.z = 20;
+ * controller.setPosition(10, 5, 20);
  * controller.pan = 30;
  * controller.tilt = 10;
  * controller.setMoveForwardKey('w');

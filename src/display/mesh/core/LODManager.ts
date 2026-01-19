@@ -42,21 +42,24 @@ type LODEntry = {
 };
 
 /**
- * 거리 기반 LOD(Level of Detail) 관리를 담당하는 매니저 클래스입니다.
+ * [KO] 거리 기반 LOD(Level of Detail) 관리를 담당하는 매니저 클래스입니다.
+ * [EN] Manager class responsible for distance-based LOD (Level of Detail) management.
  *
- * 카메라와의 거리(또는 임의의 거리 값)에 따라 적절한 LOD 레벨을 선택하고,
- * LOD 목록이 갱신될 때 콜백을 호출합니다.
+ * [KO] 카메라와의 거리(또는 임의의 거리 값)에 따라 적절한 LOD 레벨을 선택하고, LOD 목록이 갱신될 때 콜백을 호출합니다.
+ * [EN] Selects an appropriate LOD level based on the distance from the camera (or any distance value) and calls a callback when the LOD list is updated.
  *
- * @example
- * ```ts
-
- * lodManager.addLOD(10, nearGeometry);
- * lodManager.addLOD(30, midGeometry);
- * lodManager.addLOD(100, farGeometry);
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
  *
- * const lod = lodManager.getLOD(currentDistance);
- * const geometry = lod?.geometry;
+ * * ### Example
+ * ```typescript
+ * // Mesh를 통해 접근합니다.
+ * const lodManager = mesh.LODManager;
+ * lodManager.addLOD(10, nearGeometry, material);
  * ```
+ * @category Core
  */
 class LODManager {
     #lodList: LODEntry[] = [];
