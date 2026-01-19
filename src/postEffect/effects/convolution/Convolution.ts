@@ -35,54 +35,55 @@ const EMBOSE = ([
  * [EN] Convolution kernel-based post-processing effect.
  *
  * [KO] 다양한 커널(NORMAL, SHARPEN, BLUR, EDGE, EMBOSE)로 이미지 효과를 줄 수 있습니다.
- * [EN] Various kernels (NORMAL, SHARPEN, BLUR, EDGE, EMBOSE) can be used to give image effects.
- *
- * @category PostEffect
- *
+ * [EN] Various kernels (NORMAL, SHARPEN, BLUR, EDGE, EMBOSE) can be used to apply image effects.
  * * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.Convolution(redGPUContext);
  * effect.kernel = RedGPU.PostEffect.Convolution.SHARPEN;
  * view.postEffectManager.addEffect(effect);
  * ```
+ *
+ * <iframe src="/RedGPU/examples/postEffect/convolution/"></iframe>
+ * @category PostEffect
  */
 class Convolution extends ASinglePassPostEffect {
-    /** 
-     * [KO] NORMAL 커널 (기본값)
-     * [EN] NORMAL kernel (default)
+    /**
+     * [KO] NORMAL 커널
+     * [EN] NORMAL kernel
      */
     static NORMAL = NORMAL
-    /** 
+    /**
      * [KO] SHARPEN 커널
      * [EN] SHARPEN kernel
      */
     static SHARPEN = SHARPEN
-    /** 
+    /**
      * [KO] BLUR 커널
      * [EN] BLUR kernel
      */
     static BLUR = BLUR
-    /** 
+    /**
      * [KO] EDGE 커널
      * [EN] EDGE kernel
      */
     static EDGE = EDGE
-    /** 
+    /**
      * [KO] EMBOSE 커널
      * [EN] EMBOSE kernel
      */
     static EMBOSE = EMBOSE
-    /** 
-     * [KO] 현재 적용 중인 커널. 기본값 BLUR
-     * [EN] Currently applied kernel. Default BLUR
+    /**
+     * [KO] 현재 적용 중인 커널
+     * [EN] Currently applied kernel
+     * @defaultValue BLUR
      */
     #kernel: number[] = BLUR;
 
     /**
      * [KO] Convolution 인스턴스를 생성합니다.
      * [EN] Creates a Convolution instance.
-     * 
-     * @param redGPUContext 
+     *
+     * @param redGPUContext
      * [KO] RedGPU 컨텍스트
      * [EN] RedGPU Context
      */
@@ -96,23 +97,17 @@ class Convolution extends ASinglePassPostEffect {
         this.kernel = this.#kernel
     }
 
-    /** 
-     * [KO] 현재 커널
-     * [EN] Current kernel
+    /**
+     * [KO] 현재 커널을 반환합니다.
+     * [EN] Returns the current kernel.
      */
     get kernel(): number[] {
         return this.#kernel;
     }
 
     /**
-     * [KO] 커널을 설정합니다.
-     * [EN] Sets the kernel.
-     * 
-     * [KO] 3x3 배열(길이 12) 사용
-     * [EN] Uses 3x3 array (length 12)
-     * @param value 
-     * [KO] 커널 배열
-     * [EN] Kernel array
+     * [KO] 커널을 설정합니다. (3x3 배열, 길이 12)
+     * [EN] Sets the kernel. (3x3 array, length 12)
      */
     set kernel(value: number[]) {
         this.#kernel = value;

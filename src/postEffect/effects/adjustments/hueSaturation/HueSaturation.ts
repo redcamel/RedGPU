@@ -11,9 +11,6 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  *
  * [KO] 색상(Hue)과 채도(Saturation)를 조절할 수 있습니다.
  * [EN] Can adjust Hue and Saturation.
- *
- * @category PostEffect
- *
  * * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.HueSaturation(redGPUContext);
@@ -21,24 +18,29 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * effect.saturation = 50;  // 채도 증가
  * view.postEffectManager.addEffect(effect);
  * ```
+ *
+ * <iframe src="/RedGPU/examples/postEffect/adjustments/hueSaturation/"></iframe>
+ * @category Adjustments
  */
 class HueSaturation extends ASinglePassPostEffect {
-    /** 
-     * [KO] 색상(Hue). 기본값 0
-     * [EN] Hue. Default 0
+    /**
+     * [KO] 색상 (-180 ~ 180)
+     * [EN] Hue (-180 ~ 180)
+     * @defaultValue 0
      */
     #hue: number = 0
-    /** 
-     * [KO] 채도(Saturation). 기본값 0
-     * [EN] Saturation. Default 0
+    /**
+     * [KO] 채도 (-100 ~ 100)
+     * [EN] Saturation (-100 ~ 100)
+     * @defaultValue 0
      */
     #saturation: number = 0
 
     /**
      * [KO] HueSaturation 인스턴스를 생성합니다.
      * [EN] Creates a HueSaturation instance.
-     * 
-     * @param redGPUContext 
+     *
+     * @param redGPUContext
      * [KO] RedGPU 컨텍스트
      * [EN] RedGPU Context
      */
@@ -51,20 +53,17 @@ class HueSaturation extends ASinglePassPostEffect {
         )
     }
 
-    /** 
-     * [KO] 색상
-     * [EN] Hue
+    /**
+     * [KO] 색상 값을 반환합니다.
+     * [EN] Returns the hue value.
      */
     get hue(): number {
         return this.#hue;
     }
 
     /**
-     * [KO] 색상을 설정합니다.
-     * [EN] Sets the hue.
-     * 
-     * [KO] 범위: -180~180
-     * [EN] Range: -180~180
+     * [KO] 색상 값을 설정합니다. (-180 ~ 180)
+     * [EN] Sets the hue value. (-180 ~ 180)
      */
     set hue(value: number) {
         validateNumberRange(value, -180, 180)
@@ -72,20 +71,17 @@ class HueSaturation extends ASinglePassPostEffect {
         this.updateUniform('hue', value)
     }
 
-    /** 
-     * [KO] 채도
-     * [EN] Saturation
+    /**
+     * [KO] 채도 값을 반환합니다.
+     * [EN] Returns the saturation value.
      */
     get saturation(): number {
         return this.#saturation;
     }
 
     /**
-     * [KO] 채도를 설정합니다.
-     * [EN] Sets the saturation.
-     * 
-     * [KO] 범위: -100~100
-     * [EN] Range: -100~100
+     * [KO] 채도 값을 설정합니다. (-100 ~ 100)
+     * [EN] Sets the saturation value. (-100 ~ 100)
      */
     set saturation(value: number) {
         validateNumberRange(value, -100, 100)

@@ -12,9 +12,6 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  *
  * [KO] 배럴/핀쿠션 왜곡, 중심 위치를 조절할 수 있습니다.
  * [EN] Can adjust Barrel/Pincushion distortion and center position.
- *
- * @category PostEffect
- *
  * * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.LensDistortion(redGPUContext);
@@ -24,34 +21,41 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * effect.centerY = 0.5;             // 왜곡 중심 Y
  * view.postEffectManager.addEffect(effect);
  * ```
+ *
+ * <iframe src="/RedGPU/examples/postEffect/lens/lensDistortion/"></iframe>
+ * @category Lens
  */
 class LensDistortion extends ASinglePassPostEffect {
-    /** 
-     * [KO] 배럴 왜곡 강도. 기본값 0.1
-     * [EN] Barrel distortion strength. Default 0.1
+    /**
+     * [KO] 배럴 왜곡 강도 (최소 0)
+     * [EN] Barrel distortion strength (Minimum 0)
+     * @defaultValue 0.1
      */
     #barrelStrength: number = 0.1
-    /** 
-     * [KO] 핀쿠션 왜곡 강도. 기본값 0.0
-     * [EN] Pincushion distortion strength. Default 0.0
+    /**
+     * [KO] 핀쿠션 왜곡 강도 (최소 0)
+     * [EN] Pincushion distortion strength (Minimum 0)
+     * @defaultValue 0.0
      */
     #pincushionStrength: number = 0.0
-    /** 
-     * [KO] 왜곡 중심 X. 기본값 0
-     * [EN] Distortion center X. Default 0
+    /**
+     * [KO] 왜곡 중심 X
+     * [EN] Distortion center X
+     * @defaultValue 0
      */
     #centerX: number = 0
-    /** 
-     * [KO] 왜곡 중심 Y. 기본값 0
-     * [EN] Distortion center Y. Default 0
+    /**
+     * [KO] 왜곡 중심 Y
+     * [EN] Distortion center Y
+     * @defaultValue 0
      */
     #centerY: number = 0
 
     /**
      * [KO] LensDistortion 인스턴스를 생성합니다.
      * [EN] Creates a LensDistortion instance.
-     * 
-     * @param redGPUContext 
+     *
+     * @param redGPUContext
      * [KO] RedGPU 컨텍스트
      * [EN] RedGPU Context
      */
@@ -68,20 +72,17 @@ class LensDistortion extends ASinglePassPostEffect {
         this.centerY = this.#centerY
     }
 
-    /** 
-     * [KO] 배럴 왜곡 강도
-     * [EN] Barrel distortion strength
+    /**
+     * [KO] 배럴 왜곡 강도를 반환합니다.
+     * [EN] Returns the barrel distortion strength.
      */
     get barrelStrength(): number {
         return this.#barrelStrength;
     }
 
     /**
-     * [KO] 배럴 왜곡 강도를 설정합니다.
-     * [EN] Sets the barrel distortion strength.
-     * 
-     * [KO] 최소값: 0
-     * [EN] Minimum value: 0
+     * [KO] 배럴 왜곡 강도를 설정합니다. (최소 0)
+     * [EN] Sets the barrel distortion strength. (Minimum 0)
      */
     set barrelStrength(value: number) {
         validateNumberRange(value, 0)
@@ -89,20 +90,17 @@ class LensDistortion extends ASinglePassPostEffect {
         this.updateUniform('barrelStrength', value)
     }
 
-    /** 
-     * [KO] 핀쿠션 왜곡 강도
-     * [EN] Pincushion distortion strength
+    /**
+     * [KO] 핀쿠션 왜곡 강도를 반환합니다.
+     * [EN] Returns the pincushion distortion strength.
      */
     get pincushionStrength(): number {
         return this.#pincushionStrength;
     }
 
     /**
-     * [KO] 핀쿠션 왜곡 강도를 설정합니다.
-     * [EN] Sets the pincushion distortion strength.
-     * 
-     * [KO] 최소값: 0
-     * [EN] Minimum value: 0
+     * [KO] 핀쿠션 왜곡 강도를 설정합니다. (최소 0)
+     * [EN] Sets the pincushion distortion strength. (Minimum 0)
      */
     set pincushionStrength(value: number) {
         validateNumberRange(value, 0)
@@ -110,17 +108,17 @@ class LensDistortion extends ASinglePassPostEffect {
         this.updateUniform('pincushionStrength', value)
     }
 
-    /** 
-     * [KO] 왜곡 중심 X
-     * [EN] Distortion center X
+    /**
+     * [KO] 왜곡 중심 X 좌표를 반환합니다.
+     * [EN] Returns the distortion center X coordinate.
      */
     get centerX(): number {
         return this.#centerX;
     }
 
     /**
-     * [KO] 왜곡 중심 X를 설정합니다.
-     * [EN] Sets the distortion center X.
+     * [KO] 왜곡 중심 X 좌표를 설정합니다.
+     * [EN] Sets the distortion center X coordinate.
      */
     set centerX(value: number) {
         validateNumber(value)
@@ -128,17 +126,17 @@ class LensDistortion extends ASinglePassPostEffect {
         this.updateUniform('centerX', value)
     }
 
-    /** 
-     * [KO] 왜곡 중심 Y
-     * [EN] Distortion center Y
+    /**
+     * [KO] 왜곡 중심 Y 좌표를 반환합니다.
+     * [EN] Returns the distortion center Y coordinate.
      */
     get centerY(): number {
         return this.#centerY;
     }
 
     /**
-     * [KO] 왜곡 중심 Y를 설정합니다.
-     * [EN] Sets the distortion center Y.
+     * [KO] 왜곡 중심 Y 좌표를 설정합니다.
+     * [EN] Sets the distortion center Y coordinate.
      */
     set centerY(value: number) {
         validateNumber(value)

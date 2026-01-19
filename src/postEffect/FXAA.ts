@@ -4,24 +4,41 @@ import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "./core/createBasicPostEffectCode";
 
 /**
- * [KO] FXAA (Fast Approximate Anti-Aliasing) 후처리 이펙트입니다.
+ * [KO] FXAA(Fast Approximate Anti-Aliasing) 후처리 이펙트입니다.
  * [EN] FXAA (Fast Approximate Anti-Aliasing) post-processing effect.
- *
- * [KO] 셰이더 기반의 빠른 안티앨리어싱을 제공합니다.
- * [EN] Provides fast shader-based anti-aliasing.
+ * * ### Example
+ * ```typescript
+ * const effect = new RedGPU.PostEffect.FXAA(redGPUContext);
+ * view.postEffectManager.addEffect(effect);
+ * ```
  *
  * @category PostEffect
  */
 class FXAA extends ASinglePassPostEffect {
+    /**
+     * [KO] 서브픽셀 품질 (0.0 ~ 1.0)
+     * [EN] Subpixel quality (0.0 ~ 1.0)
+     * @defaultValue 0.75
+     */
     #subpix: number = 0.75
+    /**
+     * [KO] 엣지 임계값 (0.0 ~ 0.5)
+     * [EN] Edge threshold (0.0 ~ 0.5)
+     * @defaultValue 0.166
+     */
     #edgeThreshold: number = 0.166
+    /**
+     * [KO] 최소 엣지 임계값 (0.0 ~ 0.1)
+     * [EN] Minimum edge threshold (0.0 ~ 0.1)
+     * @defaultValue 0.0833
+     */
     #edgeThresholdMin: number = 0.0833
 
     /**
      * [KO] FXAA 인스턴스를 생성합니다.
      * [EN] Creates an FXAA instance.
      *
-     * @param redGPUContext 
+     * @param redGPUContext
      * [KO] RedGPU 컨텍스트
      * [EN] RedGPU Context
      */
@@ -155,15 +172,17 @@ fn fetchColor4(pos: vec2<i32>, dims: vec2<u32>) -> vec4<f32> {
     }
 
     /**
-     * [KO] 서브픽셀 앨리어싱 제거 강도
-     * [EN] Subpixel aliasing removal intensity
-     * 
-     * @defaultValue 0.75
+     * [KO] 서브픽셀 품질 값을 반환합니다.
+     * [EN] Returns the subpixel quality value.
      */
     get subpix(): number {
         return this.#subpix;
     }
 
+    /**
+     * [KO] 서브픽셀 품질 값을 설정합니다. (0.0 ~ 1.0)
+     * [EN] Sets the subpixel quality value. (0.0 ~ 1.0)
+     */
     set subpix(value: number) {
         validateNumberRange(value, 0, 1);
         this.#subpix = value;
@@ -171,15 +190,17 @@ fn fetchColor4(pos: vec2<i32>, dims: vec2<u32>) -> vec4<f32> {
     }
 
     /**
-     * [KO] 엣지 검출 임계값
-     * [EN] Edge detection threshold
-     * 
-     * @defaultValue 0.166
+     * [KO] 엣지 임계값을 반환합니다.
+     * [EN] Returns the edge threshold.
      */
     get edgeThreshold(): number {
         return this.#edgeThreshold;
     }
 
+    /**
+     * [KO] 엣지 임계값을 설정합니다. (0.0001 ~ 0.25)
+     * [EN] Sets the edge threshold. (0.0001 ~ 0.25)
+     */
     set edgeThreshold(value: number) {
         validateNumberRange(value, 0.0001, 0.25)
         this.#edgeThreshold = value;
@@ -187,15 +208,17 @@ fn fetchColor4(pos: vec2<i32>, dims: vec2<u32>) -> vec4<f32> {
     }
 
     /**
-     * [KO] 엣지 검출 최소 임계값
-     * [EN] Edge detection minimum threshold
-     * 
-     * @defaultValue 0.0833
+     * [KO] 최소 엣지 임계값을 반환합니다.
+     * [EN] Returns the minimum edge threshold.
      */
     get edgeThresholdMin(): number {
         return this.#edgeThresholdMin;
     }
 
+    /**
+     * [KO] 최소 엣지 임계값을 설정합니다. (0.00001 ~ 0.1)
+     * [EN] Sets the minimum edge threshold. (0.00001 ~ 0.1)
+     */
     set edgeThresholdMin(value: number) {
         validateNumberRange(value, 0.00001, 0.1)
         this.#edgeThresholdMin = value;

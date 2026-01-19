@@ -10,14 +10,14 @@ import Convolution from "./convolution/Convolution";
  *
  * [KO] 컨볼루션 커널을 이용해 이미지의 경계와 디테일을 강조합니다.
  * [EN] Emphasizes image edges and details using a convolution kernel.
- *
- * @category PostEffect
- * 
  * * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.Sharpen(redGPUContext);
  * view.postEffectManager.addEffect(effect);
  * ```
+ *
+ * <iframe src="/RedGPU/examples/postEffect/sharpen/"></iframe>
+ * @category PostEffect
  */
 class Sharpen extends AMultiPassPostEffect {
     #effect_convolution: Convolution
@@ -25,8 +25,8 @@ class Sharpen extends AMultiPassPostEffect {
     /**
      * [KO] Sharpen 인스턴스를 생성합니다.
      * [EN] Creates a Sharpen instance.
-     * 
-     * @param redGPUContext 
+     *
+     * @param redGPUContext
      * [KO] RedGPU 컨텍스트
      * [EN] RedGPU Context
      */
@@ -44,20 +44,20 @@ class Sharpen extends AMultiPassPostEffect {
     /**
      * [KO] 샤픈 효과를 렌더링합니다.
      * [EN] Renders the sharpen effect.
-     * 
-     * @param view 
-     * [KO] 렌더링할 뷰
-     * [EN] View to render
-     * @param width 
-     * [KO] 렌더링 너비
-     * [EN] Render width
-     * @param height 
-     * [KO] 렌더링 높이
-     * [EN] Render height
-     * @param sourceTextureInfo 
-     * [KO] 입력 텍스처 정보
-     * [EN] Input texture information
-     * @returns 
+     *
+     * @param view
+     * [KO] View3D 인스턴스
+     * [EN] View3D instance
+     * @param width
+     * [KO] 너비
+     * [EN] Width
+     * @param height
+     * [KO] 높이
+     * [EN] Height
+     * @param sourceTextureInfo
+     * [KO] 소스 텍스처 정보
+     * [EN] Source texture info
+     * @returns
      * [KO] 샤픈 처리된 텍스처 결과
      * [EN] Sharpened texture result
      */

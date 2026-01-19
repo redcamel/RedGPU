@@ -13,11 +13,13 @@ import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 
 /**
- * [KO] TAA (Temporal Anti-Aliasing) 후처리 이펙트입니다.
+ * [KO] TAA(Temporal Anti-Aliasing) 후처리 이펙트입니다.
  * [EN] TAA (Temporal Anti-Aliasing) post-processing effect.
- *
- * [KO] 이전 프레임의 정보를 사용하여 앨리어싱을 줄이고 부드러운 이미지를 생성합니다.
- * [EN] Reduces aliasing and creates smoother images using information from previous frames.
+ * * ### Example
+ * ```typescript
+ * const effect = new RedGPU.PostEffect.TAA(redGPUContext);
+ * view.postEffectManager.addEffect(effect);
+ * ```
  *
  * @category PostEffect
  */
@@ -64,7 +66,7 @@ class TAA {
      * [KO] TAA 인스턴스를 생성합니다.
      * [EN] Creates a TAA instance.
      *
-     * @param redGPUContext 
+     * @param redGPUContext
      * [KO] RedGPU 컨텍스트
      * [EN] RedGPU Context
      */
@@ -84,38 +86,41 @@ class TAA {
     }
 
     /**
-     * [KO] 이전 프레임의 지터가 적용되지 않은 투영 카메라 행렬
-     * [EN] Previous frame's non-jittered projection camera matrix
+     * [KO] 이전 프레임의 지터링 없는 프로젝션 카메라 행렬을 반환합니다.
+     * [EN] Returns the non-jittered projection camera matrix of the previous frame.
      */
     get prevNoneJitterProjectionCameraMatrix(): mat4 {
         return this.#prevNoneJitterProjectionCameraMatrix;
     }
 
     /**
-     * [KO] 현재 프레임 인덱스
-     * [EN] Current frame index
+     * [KO] 프레임 인덱스를 반환합니다.
+     * [EN] Returns the frame index.
      */
     get frameIndex(): number {
         return this.#frameIndex;
     }
 
     /**
-     * [KO] 비디오 메모리 사용량 (바이트)
-     * [EN] Video memory usage (bytes)
+     * [KO] 비디오 메모리 사용량을 반환합니다.
+     * [EN] Returns the video memory usage.
      */
     get videoMemorySize(): number {
         return this.#videoMemorySize
     }
 
-
     /**
-     * [KO] 지터 강도
-     * [EN] Jitter strength
+     * [KO] 지터링 강도를 반환합니다.
+     * [EN] Returns the jitter strength.
      */
     get jitterStrength(): number {
         return this.#jitterStrength;
     }
 
+    /**
+     * [KO] 지터링 강도를 설정합니다.
+     * [EN] Sets the jitter strength.
+     */
     set jitterStrength(value: number) {
         // validateNumberRange(value, 0.0, 1.0);
         this.#jitterStrength = value;
@@ -123,24 +128,24 @@ class TAA {
 
 
     /**
-     * [KO] TAA 효과를 렌더링합니다.
+     * [KO] TAA 이펙트를 렌더링합니다.
      * [EN] Renders the TAA effect.
      *
-     * @param view 
-     * [KO] 렌더링할 뷰
-     * [EN] View to render
-     * @param width 
-     * [KO] 렌더링 너비
-     * [EN] Render width
-     * @param height 
-     * [KO] 렌더링 높이
-     * [EN] Render height
-     * @param sourceTextureInfo 
-     * [KO] 입력 텍스처 정보
-     * [EN] Input texture information
-     * @returns 
-     * [KO] 렌더링 결과
-     * [EN] Render result
+     * @param view
+     * [KO] View3D 인스턴스
+     * [EN] View3D instance
+     * @param width
+     * [KO] 너비
+     * [EN] Width
+     * @param height
+     * [KO] 높이
+     * [EN] Height
+     * @param sourceTextureInfo
+     * [KO] 소스 텍스처 정보
+     * [EN] Source texture info
+     * @returns
+     * [KO] 렌더링 결과 (텍스처 및 뷰)
+     * [EN] Rendering result (texture and view)
      */
     render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
 
@@ -211,12 +216,12 @@ class TAA {
 
     /**
      * [KO] 유니폼 값을 업데이트합니다.
-     * [EN] Updates the uniform value.
-     * 
-     * @param key 
+     * [EN] Updates a uniform value.
+     *
+     * @param key
      * [KO] 유니폼 키
      * [EN] Uniform key
-     * @param value 
+     * @param value
      * [KO] 유니폼 값
      * [EN] Uniform value
      */

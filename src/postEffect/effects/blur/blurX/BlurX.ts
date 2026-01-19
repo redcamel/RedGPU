@@ -8,20 +8,21 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 /**
  * [KO] X축 방향 블러 후처리 효과를 제공하는 클래스입니다.
  * [EN] Class that provides X-axis blur post-processing effect.
- *
- * @category PostEffect
- *
  * * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.BlurX(redGPUContext);
  * effect.size = 64; // 블러 강도 조절
  * view.postEffectManager.addEffect(effect);
  * ```
+ *
+ * <iframe src="/RedGPU/examples/postEffect/blur/blurX/"></iframe>
+ * @category Blur
  */
 class BlurX extends ASinglePassPostEffect {
     /**
-     * [KO] 블러 강도입니다. 기본값은 32입니다.
-     * [EN] Blur strength. Default is 32.
+     * [KO] 블러 강도입니다.
+     * [EN] Blur strength.
+     * @defaultValue 32
      * @private
      */
     #size: number = 32
@@ -30,7 +31,7 @@ class BlurX extends ASinglePassPostEffect {
      * [KO] BlurX 인스턴스를 생성합니다.
      * [EN] Creates a BlurX instance.
      *
-     * @param redGPUContext 
+     * @param redGPUContext
      * [KO] RedGPU 렌더링 컨텍스트
      * [EN] RedGPU rendering context
      */
@@ -53,12 +54,10 @@ class BlurX extends ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 블러 강도를 설정합니다.
-     * [EN] Sets the blur strength.
-     * 
-     * [KO] 최소값은 0입니다.
-     * [EN] Minimum value is 0.
-     * @param value 
+     * [KO] 블러 강도를 설정합니다. (최소 0)
+     * [EN] Sets the blur strength. (Minimum 0)
+     *
+     * @param value
      * [KO] 블러 강도
      * [EN] Blur strength
      */

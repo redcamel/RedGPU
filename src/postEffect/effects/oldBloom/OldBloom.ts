@@ -11,10 +11,7 @@ import OldBloomBlend from "./OldBloomBlend";
  * [EN] Old Bloom post-processing effect.
  *
  * [KO] 임계값, 가우시안 블러, 블렌드 단계를 거쳐 밝은 영역에 부드러운 빛 번짐 효과를 만듭니다.
- * [EN] Creates a soft glow effect on bright areas through threshold, Gaussian blur, and blend steps.
- *
- * @category PostEffect
- *
+ * [EN] Creates a soft glow effect in bright areas through threshold, Gaussian blur, and blend steps.
  * * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.OldBloom(redGPUContext);
@@ -24,49 +21,56 @@ import OldBloomBlend from "./OldBloomBlend";
  * effect.bloomStrength = 1.5;    // 블룸 강도
  * view.postEffectManager.addEffect(effect);
  * ```
+ *
+ * <iframe src="/RedGPU/examples/postEffect/oldBloom/"></iframe>
+ * @category Visual Effects
  */
 class OldBloom extends AMultiPassPostEffect {
-    /** 
-     * [KO] 임계값 이펙트 
+    /**
+     * [KO] 임계값 이펙트
      * [EN] Threshold effect
      */
     #effect_threshold: Threshold
-    /** 
-     * [KO] 가우시안 블러 이펙트 
+    /**
+     * [KO] 가우시안 블러 이펙트
      * [EN] Gaussian blur effect
      */
     #effect_gaussianBlur: GaussianBlur
-    /** 
-     * [KO] 블렌드 이펙트 
+    /**
+     * [KO] 블렌드 이펙트
      * [EN] Blend effect
      */
     #effect_oldBloomBlend: OldBloomBlend
-    /** 
-     * [KO] 밝기 임계값. 기본값 156 
-     * [EN] Brightness threshold. Default 156
+    /**
+     * [KO] 밝기 임계값
+     * [EN] Brightness threshold
+     * @defaultValue 156
      */
     #threshold: number = 156
-    /** 
-     * [KO] 블러 강도. 기본값 32 
-     * [EN] Blur size. Default 32
+    /**
+     * [KO] 블러 강도
+     * [EN] Blur strength
+     * @defaultValue 32
      */
     #gaussianBlurSize: number = 32
-    /** 
-     * [KO] 노출. 기본값 1 
-     * [EN] Exposure. Default 1
+    /**
+     * [KO] 노출
+     * [EN] Exposure
+     * @defaultValue 1
      */
     #exposure: number = 1
-    /** 
-     * [KO] 블룸 강도. 기본값 1.2 
-     * [EN] Bloom strength. Default 1.2
+    /**
+     * [KO] 블룸 강도
+     * [EN] Bloom strength
+     * @defaultValue 1.2
      */
     #bloomStrength: number = 1.2
 
     /**
      * [KO] OldBloom 인스턴스를 생성합니다.
      * [EN] Creates an OldBloom instance.
-     * 
-     * @param redGPUContext 
+     *
+     * @param redGPUContext
      * [KO] RedGPU 컨텍스트
      * [EN] RedGPU Context
      */
@@ -88,9 +92,9 @@ class OldBloom extends AMultiPassPostEffect {
         this.#effect_oldBloomBlend.bloomStrength = this.#bloomStrength
     }
 
-    /** 
-     * [KO] 밝기 임계값
-     * [EN] Brightness threshold
+    /**
+     * [KO] 밝기 임계값을 반환합니다.
+     * [EN] Returns the brightness threshold.
      */
     get threshold(): number {
         return this.#threshold;
@@ -105,9 +109,9 @@ class OldBloom extends AMultiPassPostEffect {
         this.#effect_threshold.threshold = value
     }
 
-    /** 
-     * [KO] 블러 강도
-     * [EN] Blur size
+    /**
+     * [KO] 블러 강도를 반환합니다.
+     * [EN] Returns the blur strength.
      */
     get gaussianBlurSize(): number {
         return this.#gaussianBlurSize;
@@ -115,33 +119,33 @@ class OldBloom extends AMultiPassPostEffect {
 
     /**
      * [KO] 블러 강도를 설정합니다.
-     * [EN] Sets the blur size.
+     * [EN] Sets the blur strength.
      */
     set gaussianBlurSize(value: number) {
         this.#gaussianBlurSize = value;
         this.#effect_gaussianBlur.size = value
     }
 
-    /** 
-     * [KO] 노출
-     * [EN] Exposure
+    /**
+     * [KO] 노출 값을 반환합니다.
+     * [EN] Returns the exposure value.
      */
     get exposure(): number {
         return this.#exposure;
     }
 
     /**
-     * [KO] 노출을 설정합니다.
-     * [EN] Sets the exposure.
+     * [KO] 노출 값을 설정합니다.
+     * [EN] Sets the exposure value.
      */
     set exposure(value: number) {
         this.#exposure = value;
         this.#effect_oldBloomBlend.exposure = value
     }
 
-    /** 
-     * [KO] 블룸 강도
-     * [EN] Bloom strength
+    /**
+     * [KO] 블룸 강도를 반환합니다.
+     * [EN] Returns the bloom strength.
      */
     get bloomStrength(): number {
         return this.#bloomStrength;
@@ -156,6 +160,26 @@ class OldBloom extends AMultiPassPostEffect {
         this.#effect_oldBloomBlend.bloomStrength = value
     }
 
+    /**
+     * [KO] 올드 블룸 효과를 렌더링합니다.
+     * [EN] Renders the old bloom effect.
+     *
+     * @param view
+     * [KO] View3D 인스턴스
+     * [EN] View3D instance
+     * @param width
+     * [KO] 너비
+     * [EN] Width
+     * @param height
+     * [KO] 높이
+     * [EN] Height
+     * @param sourceTextureInfo
+     * [KO] 소스 텍스처 정보
+     * [EN] Source texture info
+     * @returns
+     * [KO] 렌더링 결과
+     * [EN] Rendering result
+     */
     render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult) {
         const thresholdResult = this.#effect_threshold.render(
             view, width, height, sourceTextureInfo

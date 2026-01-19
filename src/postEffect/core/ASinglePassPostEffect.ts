@@ -12,13 +12,13 @@ export type ASinglePassPostEffectResult = {
 }
 
 /**
- * [KO] 단일 패스 후처리 이펙트(ASinglePassPostEffect) 추상 클래스입니다.
- * [EN] Abstract class for single-pass post-processing effects (ASinglePassPostEffect).
+ * [KO] 단일 패스 후처리 이펙트 추상 클래스입니다.
+ * [EN] Abstract class for single-pass post-processing effects.
  *
- * [KO] 한 번의 compute 패스로 동작하는 후처리 이펙트의 기반이 됩니다.
- * [EN] Serves as the base for post-processing effects operating in a single compute pass.
+ * [KO] 한 번의 Compute 패스로 동작하는 후처리 이펙트의 기반 클래스입니다.
+ * [EN] Base class for post-processing effects that operate in a single compute pass.
  *
- * @category PostEffect
+ * @category Core
  */
 abstract class ASinglePassPostEffect {
     // compute 셰이더 및 파이프라인 관련
@@ -61,7 +61,7 @@ abstract class ASinglePassPostEffect {
      * [KO] ASinglePassPostEffect 인스턴스를 생성합니다.
      * [EN] Creates an ASinglePassPostEffect instance.
      *
-     * @param redGPUContext 
+     * @param redGPUContext
      * [KO] RedGPU 컨텍스트
      * [EN] RedGPU Context
      */
@@ -71,56 +71,64 @@ abstract class ASinglePassPostEffect {
     }
 
     /**
-     * [KO] GBuffer Normal 텍스처 사용 여부
-     * [EN] Whether to use GBuffer Normal texture
+     * [KO] G-Buffer Normal 텍스처 사용 여부를 반환합니다.
+     * [EN] Returns whether G-Buffer Normal texture is used.
      */
     get useGBufferNormalTexture(): boolean {
         return this.#useGBufferNormalTexture;
     }
 
+    /**
+     * [KO] G-Buffer Normal 텍스처 사용 여부를 설정합니다.
+     * [EN] Sets whether G-Buffer Normal texture is used.
+     */
     set useGBufferNormalTexture(value: boolean) {
         this.#useGBufferNormalTexture = value;
     }
 
     /**
-     * [KO] 비디오 메모리 사용량 (바이트)
-     * [EN] Video memory usage (bytes)
+     * [KO] 비디오 메모리 사용량을 반환합니다.
+     * [EN] Returns the video memory usage.
      */
     get videoMemorySize(): number {
         return this.#videoMemorySize
     }
 
     /**
-     * [KO] 깊이 텍스처 사용 여부
-     * [EN] Whether to use depth texture
+     * [KO] 깊이 텍스처 사용 여부를 반환합니다.
+     * [EN] Returns whether depth texture is used.
      */
     get useDepthTexture(): boolean {
         return this.#useDepthTexture;
     }
 
+    /**
+     * [KO] 깊이 텍스처 사용 여부를 설정합니다.
+     * [EN] Sets whether depth texture is used.
+     */
     set useDepthTexture(value: boolean) {
         this.#useDepthTexture = value;
     }
 
     /**
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * [KO] RedGPU 컨텍스트를 반환합니다.
+     * [EN] Returns the RedGPU context.
      */
     get redGPUContext(): RedGPUContext {
         return this.#redGPUContext;
     }
 
     /**
-     * [KO] 스토리지 텍스처 정보
-     * [EN] Storage texture info
+     * [KO] 스토리지 정보를 반환합니다.
+     * [EN] Returns storage information.
      */
     get storageInfo() {
         return this.#storageInfo
     }
 
     /**
-     * [KO] 셰이더 정보
-     * [EN] Shader info
+     * [KO] 셰이더 정보를 반환합니다. (MSAA 상태에 따라 다름)
+     * [EN] Returns shader information. (Depends on MSAA state)
      */
     get shaderInfo() {
         // keepLog(this)
@@ -129,32 +137,32 @@ abstract class ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 유니폼 버퍼
-     * [EN] Uniform buffer
+     * [KO] 유니폼 버퍼를 반환합니다.
+     * [EN] Returns the uniform buffer.
      */
     get uniformBuffer(): UniformBuffer {
         return this.#uniformBuffer;
     }
 
     /**
-     * [KO] 유니폼 정보
-     * [EN] Uniforms info
+     * [KO] 유니폼 정보를 반환합니다.
+     * [EN] Returns uniform information.
      */
     get uniformsInfo() {
         return this.#uniformsInfo
     }
 
     /**
-     * [KO] 시스템 유니폼 정보
-     * [EN] System uniforms info
+     * [KO] 시스템 유니폼 정보를 반환합니다.
+     * [EN] Returns system uniform information.
      */
     get systemUuniformsInfo() {
         return this.#systemUuniformsInfo
     }
 
     /**
-     * [KO] 워크그룹 X 크기
-     * [EN] Workgroup X size
+     * [KO] Workgroup Size X
+     * [EN] Workgroup Size X
      */
     get WORK_SIZE_X(): number {
         return this.#WORK_SIZE_X;
@@ -165,8 +173,8 @@ abstract class ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 워크그룹 Y 크기
-     * [EN] Workgroup Y size
+     * [KO] Workgroup Size Y
+     * [EN] Workgroup Size Y
      */
     get WORK_SIZE_Y(): number {
         return this.#WORK_SIZE_Y;
@@ -177,8 +185,8 @@ abstract class ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 워크그룹 Z 크기
-     * [EN] Workgroup Z size
+     * [KO] Workgroup Size Z
+     * [EN] Workgroup Size Z
      */
     get WORK_SIZE_Z(): number {
         return this.#WORK_SIZE_Z;
@@ -189,16 +197,16 @@ abstract class ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 출력 텍스처 뷰
-     * [EN] Output texture view
+     * [KO] 출력 텍스처 뷰를 반환합니다.
+     * [EN] Returns the output texture view.
      */
     get outputTextureView(): GPUTextureView {
         return this.#outputTextureView;
     }
 
     /**
-     * [KO] 리소스를 정리합니다.
-     * [EN] Clears resources.
+     * [KO] 이펙트를 초기화(해제)합니다.
+     * [EN] Clears the effect.
      */
     clear() {
         if (this.#outputTexture) {
@@ -211,17 +219,17 @@ abstract class ASinglePassPostEffect {
     /**
      * [KO] 이펙트를 초기화합니다.
      * [EN] Initializes the effect.
-     * 
-     * @param redGPUContext 
+     *
+     * @param redGPUContext
      * [KO] RedGPU 컨텍스트
      * [EN] RedGPU Context
-     * @param name 
+     * @param name
      * [KO] 이펙트 이름
      * [EN] Effect name
-     * @param computeCodes 
-     * [KO] MSAA/Non-MSAA용 컴퓨트 셰이더 코드
-     * [EN] Compute shader codes for MSAA/Non-MSAA
-     * @param bindGroupLayout 
+     * @param computeCodes
+     * [KO] MSAA 및 Non-MSAA용 컴퓨트 셰이더 코드
+     * [EN] Compute shader codes for MSAA and Non-MSAA
+     * @param bindGroupLayout
      * [KO] 바인드 그룹 레이아웃 (선택)
      * [EN] Bind group layout (optional)
      */
@@ -264,17 +272,17 @@ abstract class ASinglePassPostEffect {
     /**
      * [KO] 이펙트를 실행합니다.
      * [EN] Executes the effect.
-     * 
-     * @param view 
-     * [KO] 렌더링할 뷰
-     * [EN] View to render
-     * @param gpuDevice 
+     *
+     * @param view
+     * [KO] View3D 인스턴스
+     * [EN] View3D instance
+     * @param gpuDevice
      * [KO] GPU 디바이스
      * [EN] GPU Device
-     * @param width 
+     * @param width
      * [KO] 너비
      * [EN] Width
-     * @param height 
+     * @param height
      * [KO] 높이
      * [EN] Height
      */
@@ -294,22 +302,22 @@ abstract class ASinglePassPostEffect {
     /**
      * [KO] 이펙트를 렌더링합니다.
      * [EN] Renders the effect.
-     * 
-     * @param view 
-     * [KO] 렌더링할 뷰
-     * [EN] View to render
-     * @param width 
+     *
+     * @param view
+     * [KO] View3D 인스턴스
+     * [EN] View3D instance
+     * @param width
      * [KO] 너비
      * [EN] Width
-     * @param height 
+     * @param height
      * [KO] 높이
      * [EN] Height
-     * @param sourceTextureInfo 
+     * @param sourceTextureInfo
      * [KO] 소스 텍스처 정보 리스트
      * [EN] Source texture info list
-     * @returns 
-     * [KO] 렌더링 결과
-     * [EN] Render result
+     * @returns
+     * [KO] 렌더링 결과 (텍스처 및 뷰)
+     * [EN] Rendering result (texture and view)
      */
     render(view: View3D, width: number, height: number, ...sourceTextureInfo: ASinglePassPostEffectResult[]): ASinglePassPostEffectResult {
         const {gpuDevice, antialiasingManager} = this.#redGPUContext
@@ -334,10 +342,10 @@ abstract class ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 매 프레임 업데이트 시 호출됩니다.
-     * [EN] Called every frame update.
-     * 
-     * @param deltaTime 
+     * [KO] 이펙트 상태를 업데이트합니다.
+     * [EN] Updates the effect state.
+     *
+     * @param deltaTime
      * [KO] 델타 타임
      * [EN] Delta time
      */
@@ -346,12 +354,12 @@ abstract class ASinglePassPostEffect {
 
     /**
      * [KO] 유니폼 값을 업데이트합니다.
-     * [EN] Updates the uniform value.
-     * 
-     * @param key 
+     * [EN] Updates a uniform value.
+     *
+     * @param key
      * [KO] 유니폼 키
      * [EN] Uniform key
-     * @param value 
+     * @param value
      * [KO] 유니폼 값
      * [EN] Uniform value
      */

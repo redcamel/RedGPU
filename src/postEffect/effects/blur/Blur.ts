@@ -9,24 +9,20 @@ import Convolution from "../convolution/Convolution";
  * [EN] Class that provides 2D Blur post-processing effect.
  *
  * [KO] Convolution 기반의 블러 커널을 사용하여 단일 패스 블러를 구현합니다.
- * [EN] Implements single-pass blur using convolution-based blur kernel.
- *
- * @category PostEffect
- *
+ * [EN] Implements single-pass blur using a Convolution-based blur kernel.
  * * ### Example
  * ```typescript
  * const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
  * view.postEffectManager.addEffect(new RedGPU.PostEffect.Blur(redGPUContext));
  * ```
+ *
+ * <iframe src="/RedGPU/examples/postEffect/blur/blur/"></iframe>
+ * @category Blur
  */
 class Blur extends AMultiPassPostEffect {
     /**
      * [KO] 내부적으로 사용하는 Convolution 인스턴스입니다.
      * [EN] Convolution instance used internally.
-     * 
-     * [KO] 실제 블러 연산은 이 인스턴스가 담당합니다.
-     * [EN] This instance handles the actual blur operation.
-     *
      * @private
      */
     #effect_convolution: Convolution;
@@ -36,9 +32,9 @@ class Blur extends AMultiPassPostEffect {
      * [EN] Creates a Blur instance.
      *
      * [KO] 기본적으로 `Convolution.BLUR` 커널을 할당하여 표준 블러 효과로 초기화합니다.
-     * [EN] Initializes with standard blur effect by assigning `Convolution.BLUR` kernel by default.
+     * [EN] Initializes with a standard blur effect by assigning the `Convolution.BLUR` kernel by default.
      *
-     * @param redGPUContext 
+     * @param redGPUContext
      * [KO] RedGPU 렌더링 컨텍스트
      * [EN] RedGPU rendering context
      */
@@ -55,24 +51,24 @@ class Blur extends AMultiPassPostEffect {
 
     /**
      * [KO] Blur 효과를 렌더링하여 블러 처리된 텍스처 정보를 반환합니다.
-     * [EN] Renders Blur effect and returns blurred texture information.
+     * [EN] Renders the Blur effect and returns the blurred texture information.
      *
      * [KO] 내부적으로 Convolution 패스의 `render`를 호출합니다.
      * [EN] Internally calls `render` of the Convolution pass.
      *
-     * @param view 
+     * @param view
      * [KO] 렌더링 대상 View3D 객체
-     * [EN] Target View3D object for rendering
-     * @param width 
+     * [EN] Render target View3D object
+     * @param width
      * [KO] 렌더링 너비(픽셀)
-     * [EN] Render width (pixels)
-     * @param height 
+     * [EN] Rendering width (pixels)
+     * @param height
      * [KO] 렌더링 높이(픽셀)
-     * [EN] Render height (pixels)
-     * @param sourceTextureInfo 
+     * [EN] Rendering height (pixels)
+     * @param sourceTextureInfo
      * [KO] 입력 텍스처 정보 (이전 패스의 결과 또는 렌더 타겟)
      * [EN] Input texture information (result of previous pass or render target)
-     * @returns 
+     * @returns
      * [KO] 블러 처리된 텍스처 결과
      * [EN] Blurred texture result
      */

@@ -8,22 +8,22 @@ import computeCode from "./wgsl/computeCode.wgsl"
  * [EN] Grayscale post-processing effect.
  *
  * [KO] 화면을 흑백으로 변환합니다.
- * [EN] Converts the screen to grayscale.
- *
- * @category PostEffect
- *
+ * [EN] Converts the screen to black and white.
  * * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.Grayscale(redGPUContext);
  * view.postEffectManager.addEffect(effect);
  * ```
+ *
+ * <iframe src="/RedGPU/examples/postEffect/adjustments/grayscale/"></iframe>
+ * @category Adjustments
  */
 class Grayscale extends ASinglePassPostEffect {
     /**
      * [KO] Grayscale 인스턴스를 생성합니다.
      * [EN] Creates a Grayscale instance.
-     * 
-     * @param redGPUContext 
+     *
+     * @param redGPUContext
      * [KO] RedGPU 컨텍스트
      * [EN] RedGPU Context
      */
