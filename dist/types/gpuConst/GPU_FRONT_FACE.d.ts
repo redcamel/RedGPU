@@ -1,22 +1,21 @@
 /**
- * GPU 앞면 정의 옵션
+ * [KO] 앞면(Front Face)을 판단하는 정점의 순서를 정의하는 상수군입니다.
+ * [EN] Constants defining the vertex winding order used to determine the front face.
  *
- * 삼각형의 정점 와인딩 순서(winding order)를 기준으로 앞면을 판단하는 방식을 정의합니다.
- * 컬링 모드와 함께 사용되어 어떤 면을 렌더링할지 결정합니다.
+ * [KO] 정점이 배치된 순서에 따라 어느 쪽이 앞면인지 결정합니다.
+ * [EN] Determines which side is the front face based on the order in which vertices are arranged.
  *
- * @constant
+ * @category Constants
  */
 declare const GPU_FRONT_FACE: {
     /**
-     * 시계 방향(Clockwise) 와인딩을 앞면으로 정의합니다.
-     *
-     * 정점이 시계 방향으로 배치된 삼각형을 앞면으로 간주합니다.
+     * [KO] 시계 방향(Clockwise)으로 배치된 면을 앞면으로 간주합니다.
+     * [EN] Considers faces with clockwise winding as the front face.
      */
     readonly CW: "cw";
     /**
-     * 반시계 방향(Counter-Clockwise) 와인딩을 앞면으로 정의합니다.
-     *
-     * 정점이 반시계 방향으로 배치된 삼각형을 앞면으로 간주합니다. 일반적으로 기본값으로 사용됩니다.
+     * [KO] 반시계 방향(Counter-Clockwise)으로 배치된 면을 앞면으로 간주합니다.
+     * [EN] Considers faces with counter-clockwise winding as the front face.
      */
     readonly CCW: "ccw";
 };

@@ -5,8 +5,12 @@
  */
 import ColorRGB from "./ColorRGB";
 import ColorRGBA from "./ColorRGBA";
+import convertHexToRgb from "./convertHexToRgb";
+import convertRgbToHex from "./convertRgbToHex";
 
 export {
     ColorRGBA,
-    ColorRGB
+    ColorRGB,
+    convertHexToRgb,
+    convertRgbToHex
 }

@@ -1,4 +1,4 @@
-import validateUintRange from "../../runtimeChecker/validateFunc/validateUintRange";
+import validateUintRange from "../runtimeChecker/validateFunc/validateUintRange";
 
 /**
  * [KO] RGB 값을 16진수(Hex) 색상 코드로 변환합니다.
@@ -9,7 +9,7 @@ import validateUintRange from "../../runtimeChecker/validateFunc/validateUintRan
  *
  * * ### Example
  * ```typescript
- * const hex = RedGPU.Util.convertRgbToHex(255, 0, 0); // '#FF0000'
+ * const hex = RedGPU.Color.convertRgbToHex(255, 0, 0); // '#FF0000'
  * ```
  *
  * @param r -

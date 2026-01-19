@@ -1,58 +1,51 @@
 /**
- * GPU 비교 함수 옵션
+ * [KO] 비교 연산 시 사용되는 함수 옵션을 정의하는 상수군입니다.
+ * [EN] Constants defining comparison function options.
  *
- * 깊이 테스트, 스텐실 테스트 등에서 사용되는 비교 연산을 정의합니다.
- * 테스트는 `reference [compareFunction] target` 형태로 수행됩니다.
+ * [KO] 깊이 테스트나 스텐실 테스트에서 두 값을 비교하는 방식을 결정합니다.
+ * [EN] Determines how two values are compared in depth or stencil tests.
  *
- * @constant
+ * @category Constants
  */
 declare const GPU_COMPARE_FUNCTION: {
     /**
-     * 항상 실패합니다.
-     *
-     * 모든 값에 대해 false를 반환합니다.
+     * [KO] 비교 테스트를 항상 통과하지 못하게 합니다.
+     * [EN] Causes the comparison test to always fail.
      */
     readonly NEVER: "never";
     /**
-     * reference < target일 때 통과합니다.
-     *
-     * reference 값이 target 값보다 작으면 true를 반환합니다.
+     * [KO] 새로운 값이 기존 값보다 작을 때 통과합니다.
+     * [EN] Passes if the new value is less than the existing value.
      */
     readonly LESS: "less";
     /**
-     * reference == target일 때 통과합니다.
-     *
-     * reference 값과 target 값이 같으면 true를 반환합니다.
+     * [KO] 새로운 값이 기존 값과 같을 때 통과합니다.
+     * [EN] Passes if the new value is equal to the existing value.
      */
     readonly EQUAL: "equal";
     /**
-     * reference <= target일 때 통과합니다.
-     *
-     * reference 값이 target 값보다 작거나 같으면 true를 반환합니다.
+     * [KO] 새로운 값이 기존 값보다 작거나 같을 때 통과합니다.
+     * [EN] Passes if the new value is less than or equal to the existing value.
      */
     readonly LESS_EQUAL: "less-equal";
     /**
-     * reference > target일 때 통과합니다.
-     *
-     * reference 값이 target 값보다 크면 true를 반환합니다.
+     * [KO] 새로운 값이 기존 값보다 클 때 통과합니다.
+     * [EN] Passes if the new value is greater than the existing value.
      */
     readonly GREATER: "greater";
     /**
-     * reference != target일 때 통과합니다.
-     *
-     * reference 값과 target 값이 다르면 true를 반환합니다.
+     * [KO] 새로운 값이 기존 값과 다를 때 통과합니다.
+     * [EN] Passes if the new value is not equal to the existing value.
      */
     readonly NOT_EQUAL: "not-equal";
     /**
-     * reference >= target일 때 통과합니다.
-     *
-     * reference 값이 target 값보다 크거나 같으면 true를 반환합니다.
+     * [KO] 새로운 값이 기존 값보다 크거나 같을 때 통과합니다.
+     * [EN] Passes if the new value is greater than or equal to the existing value.
      */
     readonly GREATER_EQUAL: "greater-equal";
     /**
-     * 항상 통과합니다.
-     *
-     * 모든 값에 대해 true를 반환합니다.
+     * [KO] 비교 테스트를 항상 통과하게 합니다.
+     * [EN] Causes the comparison test to always pass.
      */
     readonly ALWAYS: "always";
 };

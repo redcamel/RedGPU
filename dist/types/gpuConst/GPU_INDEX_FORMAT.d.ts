@@ -1,22 +1,21 @@
 /**
- * GPU 인덱스 포맷 옵션
+ * [KO] 인덱스 버퍼에서 사용하는 데이터 포맷을 정의하는 상수군입니다.
+ * [EN] Constants defining the data format used in index buffers.
  *
- * 인덱스 버퍼에서 사용할 정수 타입을 정의합니다.
- * 메시의 정점 개수에 따라 적절한 포맷을 선택해야 합니다.
+ * [KO] 인덱스 값의 비트 수와 데이터 형식을 결정합니다.
+ * [EN] Determines the number of bits and data type for index values.
  *
- * @constant
+ * @category Constants
  */
 declare const GPU_INDEX_FORMAT: {
     /**
-     * 16비트 부호 없는 정수 포맷을 사용합니다.
-     *
-     * 0~65,535 범위의 인덱스를 표현할 수 있습니다. 메모리 효율적이지만 65,536개 미만의 정점만 지원합니다.
+     * [KO] 16비트 부호 없는 정수(Uint16) 포맷을 사용합니다.
+     * [EN] Uses 16-bit unsigned integer (Uint16) format.
      */
     readonly UINT16: "uint16";
     /**
-     * 32비트 부호 없는 정수 포맷을 사용합니다.
-     *
-     * 0~4,294,967,295 범위의 인덱스를 표현할 수 있습니다. 대용량 메시에 사용됩니다.
+     * [KO] 32비트 부호 없는 정수(Uint32) 포맷을 사용합니다.
+     * [EN] Uses 32-bit unsigned integer (Uint32) format.
      */
     readonly UINT32: "uint32";
 };

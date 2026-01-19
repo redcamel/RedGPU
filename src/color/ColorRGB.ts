@@ -1,7 +1,7 @@
 import validateUintRange from "../runtimeChecker/validateFunc/validateUintRange";
 import consoleAndThrowError from "../utils/consoleAndThrowError";
-import convertHexToRgb from "../utils/convertColor/convertHexToRgb";
-import convertRgbToHex from "../utils/convertColor/convertRgbToHex";
+import convertHexToRgb from "./convertHexToRgb";
+import convertRgbToHex from "./convertRgbToHex";
 
 /**
  * [KO] RGB 색상을 나타내는 클래스입니다.

@@ -1,28 +1,26 @@
 /**
- * GPU 컬링 모드 옵션
+ * [KO] 렌더링 시 제외할 면(컬링)을 정의하는 상수군입니다.
+ * [EN] Constants defining which faces to cull during rendering.
  *
- * 렌더링 시 어떤 면을 제거할지 결정합니다.
- * 삼각형의 와인딩 순서(winding order)를 기준으로 앞면과 뒷면을 판단합니다.
+ * [KO] 카메라를 기준으로 앞면 혹은 뒷면을 렌더링에서 제외할지 결정합니다.
+ * [EN] Determines whether to exclude front or back faces from rendering relative to the camera.
  *
- * @constant
+ * @category Constants
  */
 declare const GPU_CULL_MODE: {
     /**
-     * 컬링을 수행하지 않습니다.
-     *
-     * 모든 면을 렌더링합니다.
+     * [KO] 컬링을 수행하지 않습니다.
+     * [EN] Does not perform any culling.
      */
     readonly NONE: "none";
     /**
-     * 앞면을 제거합니다.
-     *
-     * 카메라를 향한 면을 렌더링하지 않습니다.
+     * [KO] 앞면을 컬링하여 뒷면만 렌더링합니다.
+     * [EN] Culls front faces, rendering only back faces.
      */
     readonly FRONT: "front";
     /**
-     * 뒷면을 제거합니다.
-     *
-     * 카메라 반대편을 향한 면을 렌더링하지 않습니다. 일반적으로 가장 많이 사용됩니다.
+     * [KO] 뒷면을 컬링하여 앞면만 렌더링합니다. (일반적인 설정)
+     * [EN] Culls back faces, rendering only front faces. (Standard setting)
      */
     readonly BACK: "back";
 };

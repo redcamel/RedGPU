@@ -111,7 +111,7 @@ function getRainbowColor(t) {
     const r = Math.floor(255 * Math.abs(Math.sin(Math.PI * t)));
     const g = Math.floor(255 * Math.abs(Math.sin(Math.PI * t + (2 * Math.PI) / 3)));
     const b = Math.floor(255 * Math.abs(Math.sin(Math.PI * t + (4 * Math.PI) / 3)));
-    return RedGPU.Util.convertRgbToHex(r, g, b);
+    return RedGPU.Color.convertRgbToHex(r, g, b);
 }
 
 /* 6. 디버그 UI 패널 */

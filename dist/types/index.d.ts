@@ -4,7 +4,7 @@ import SystemCode from "./resources/systemCode/SystemCode";
 export { init, SystemCode, GLTFLoader };
 export * as Camera from "./camera/";
 export * as RedGPUContext from "./context";
-export * from "./color";
+export * as Color from "./color";
 export * from "./geometry";
 export * as Util from "./utils";
 export { mat4, mat3 } from "gl-matrix";

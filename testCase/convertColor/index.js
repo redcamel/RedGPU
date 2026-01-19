@@ -8,12 +8,12 @@ redUnit.testGroup(
 	(runner) => {
 		runner.defineTest('Test convertHexToRgb - standard hex', function (run) {
 			const hexValue = '#FFFFFF';
-			run(RedGPU.Util.convertHexToRgb(hexValue, true));
+			run(RedGPU.Color.convertHexToRgb(hexValue, true));
 		}, [255, 255, 255]); // Expected output for '#FFFFFF'
 
 		runner.defineTest('Test convertHexToRgb - short hex', function (run) {
 			const hexValue = '#FF0';
-			run(RedGPU.Util.convertHexToRgb(hexValue, true));
+			run(RedGPU.Color.convertHexToRgb(hexValue, true));
 		}, [255, 255, 0]); // Expected output for '#FF0'
 	}
 );
@@ -26,7 +26,7 @@ redUnit.testGroup(
 			try {
 				const hexValue = 'FF0000';
 				// raised exception means test success
-				RedGPU.Util.convertHexToRgb(hexValue);
+				RedGPU.Color.convertHexToRgb(hexValue);
 				passYn = true;
 			} catch (e) {
 				passYn = false;
@@ -40,7 +40,7 @@ redUnit.testGroup(
 			try {
 				const invalidHex = '#ZXY123';
 				// raised exception means test success
-				RedGPU.Util.convertHexToRgb(invalidHex);
+				RedGPU.Color.convertHexToRgb(invalidHex);
 				passYn = true;
 			} catch (e) {
 				passYn = false;
@@ -53,7 +53,7 @@ redUnit.testGroup(
 			let passYn, error;
 			try {
 				// Passing number instead of string
-				RedGPU.Util.convertHexToRgb(123);
+				RedGPU.Color.convertHexToRgb(123);
 				passYn = true;
 			} catch (e) {
 				passYn = false;
@@ -66,7 +66,7 @@ redUnit.testGroup(
 			let passYn, error;
 			try {
 				const emptyString = '';
-				RedGPU.Util.convertHexToRgb(emptyString);
+				RedGPU.Color.convertHexToRgb(emptyString);
 				passYn = true;
 			} catch (e) {
 				passYn = false;
@@ -79,7 +79,7 @@ redUnit.testGroup(
 			let passYn, error;
 			try {
 				const longString = '#FFFFFFF';
-				RedGPU.Util.convertHexToRgb(longString);
+				RedGPU.Color.convertHexToRgb(longString);
 				passYn = true;
 			} catch (e) {
 				passYn = false;
@@ -92,7 +92,7 @@ redUnit.testGroup(
 			let passYn, error;
 			try {
 				const specialChars = '#FFF@FF';
-				RedGPU.Util.convertHexToRgb(specialChars);
+				RedGPU.Color.convertHexToRgb(specialChars);
 				passYn = true;
 			} catch (e) {
 				passYn = false;
@@ -105,7 +105,7 @@ redUnit.testGroup(
 			let passYn, error;
 			try {
 				const invalidHash = '$FFFFFF';
-				RedGPU.Util.convertHexToRgb(invalidHash);
+				RedGPU.Color.convertHexToRgb(invalidHash);
 				passYn = true;
 			} catch (e) {
 				passYn = false;
@@ -120,12 +120,12 @@ redUnit.testGroup(
 	(runner) => {
 		runner.defineTest('Test convertRgbToHex - standard RGB', function (run) {
 			const rgbValue = [255, 255, 255];
-			run(RedGPU.Util.convertRgbToHex(...rgbValue));
+			run(RedGPU.Color.convertRgbToHex(...rgbValue));
 		}, '#FFFFFF'); // Expected output for [255, 255, 255]
 
 		runner.defineTest('Test convertRgbToHex - zero RGB', function (run) {
 			const rgbValue = [0, 0, 0];
-			run(RedGPU.Util.convertRgbToHex(...rgbValue));
+			run(RedGPU.Color.convertRgbToHex(...rgbValue));
 		}, '#000000'); // Expected output for [0, 0, 0]
 	}
 );
@@ -137,7 +137,7 @@ redUnit.testGroup(
 			let passYn, error;
 			try {
 				const rgbValue = [256, 255, 255];
-				RedGPU.Util.convertRgbToHex(...rgbValue);
+				RedGPU.Color.convertRgbToHex(...rgbValue);
 				passYn = true;
 			} catch (e) {
 				passYn = false;
@@ -150,7 +150,7 @@ redUnit.testGroup(
 			let passYn, error;
 			try {
 				const rgbValue = [NaN, 255, 255];
-				RedGPU.Util.convertRgbToHex(...rgbValue);
+				RedGPU.Color.convertRgbToHex(...rgbValue);
 				passYn = true;
 			} catch (e) {
 				passYn = false;
@@ -163,7 +163,7 @@ redUnit.testGroup(
 			let passYn, error;
 			try {
 				const rgbValue = [0.5, 255, 255];
-				RedGPU.Util.convertRgbToHex(...rgbValue);
+				RedGPU.Color.convertRgbToHex(...rgbValue);
 				passYn = true;
 			} catch (e) {
 				passYn = false;

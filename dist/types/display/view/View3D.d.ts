@@ -3,7 +3,7 @@ import Camera2D from "../../camera/camera/Camera2D";
 import AController from "../../camera/core/AController";
 import RedGPUContext from "../../context/RedGPUContext";
 import PassClusterLightBound from "../../light/clusterLight/PassClusterLightBound";
-import PostEffectManager from "../../postEffect/PostEffectManager";
+import PostEffectManager from "../../postEffect/core/PostEffectManager";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import IBL from "../../resources/texture/ibl/IBL";
 import Scene from "../scene/Scene";

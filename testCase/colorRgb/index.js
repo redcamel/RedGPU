@@ -7,54 +7,54 @@ redUnit.testGroup(
 	(runner) => {
 
 		runner.defineTest('Test RedGPU.Color.ColorRGB creation from [255, 255, 255]', function (run) {
-			const rgbArray = RedGPU.Util.convertHexToRgb('#FFFFFF', true);
+			const rgbArray = RedGPU.Color.convertHexToRgb('#FFFFFF', true);
 			const colorRGB = new RedGPU.Color.ColorRGB(rgbArray[0], rgbArray[1], rgbArray[2]);
 			const expectedRGB = [255, 255, 255];
 			run(colorRGB.r === expectedRGB[0] && colorRGB.g === expectedRGB[1] && colorRGB.b === expectedRGB[2]);
 		}, true);
 
 		runner.defineTest('Test RedGPU.Color.ColorRGB creation from [255, 255, 0]', function (run) {
-			const rgbArray = RedGPU.Util.convertHexToRgb('#FF0', true);
+			const rgbArray = RedGPU.Color.convertHexToRgb('#FF0', true);
 			const colorRGB = new RedGPU.Color.ColorRGB(rgbArray[0], rgbArray[1], rgbArray[2]);
 			const expectedRGB = [255, 255, 0];
 			run(colorRGB.r === expectedRGB[0] && colorRGB.g === expectedRGB[1] && colorRGB.b === expectedRGB[2]);
 		}, true);
 
 		runner.defineTest('Test RedGPU.Color.ColorRGB rgb getter for [255, 255, 255]', function (run) {
-			const rgbArray = RedGPU.Util.convertHexToRgb('#FFFFFF', true);
+			const rgbArray = RedGPU.Color.convertHexToRgb('#FFFFFF', true);
 			const colorRGB = new RedGPU.Color.ColorRGB(rgbArray[0], rgbArray[1], rgbArray[2]);
 			const expectedRGB = [255, 255, 255];
 			run(colorRGB.rgb[0] === expectedRGB[0] && colorRGB.rgb[1] === expectedRGB[1] && colorRGB.rgb[2] === expectedRGB[2]);
 		}, true);
 
 		runner.defineTest('Test RedGPU.Color.ColorRGB rgb getter for [255, 255, 0]', function (run) {
-			const rgbArray = RedGPU.Util.convertHexToRgb('#FF0', true);
+			const rgbArray = RedGPU.Color.convertHexToRgb('#FF0', true);
 			const colorRGB = new RedGPU.Color.ColorRGB(rgbArray[0], rgbArray[1], rgbArray[2]);
 			const expectedRGB = [255, 255, 0];
 			run(colorRGB.rgb[0] === expectedRGB[0] && colorRGB.rgb[1] === expectedRGB[1] && colorRGB.rgb[2] === expectedRGB[2]);
 		}, true);
 		runner.defineTest('Test RedGPU.Color.ColorRGB hex getter for #FFFFFF', function (run) {
-			const rgbArray = RedGPU.Util.convertHexToRgb('#FFFFFF', true);
+			const rgbArray = RedGPU.Color.convertHexToRgb('#FFFFFF', true);
 			const colorRGB = new RedGPU.Color.ColorRGB(rgbArray[0], rgbArray[1], rgbArray[2]);
 			const expectedHex = "#FFFFFF";
 			run(colorRGB.hex === expectedHex);
 		}, true);
 
 		runner.defineTest('Test RedGPU.Color.ColorRGB hex getter for #FFFF00', function (run) {
-			const rgbArray = RedGPU.Util.convertHexToRgb('#FFFF00', true);
+			const rgbArray = RedGPU.Color.convertHexToRgb('#FFFF00', true);
 			const colorRGB = new RedGPU.Color.ColorRGB(rgbArray[0], rgbArray[1], rgbArray[2]);
 			const expectedHex = "#FFFF00";
 			run(colorRGB.hex === expectedHex);
 		}, true);
 		runner.defineTest('Test RedGPU.Color.ColorRGB rgbNormal getter for [255, 255, 255]', function (run) {
-			const rgbArray = RedGPU.Util.convertHexToRgb('#FFFFFF', true);
+			const rgbArray = RedGPU.Color.convertHexToRgb('#FFFFFF', true);
 			const colorRGB = new RedGPU.Color.ColorRGB(rgbArray[0], rgbArray[1], rgbArray[2]);
 			const expectedRGBNormal = [1, 1, 1];
 			run(colorRGB.rgbNormal[0] === expectedRGBNormal[0] && colorRGB.rgbNormal[1] === expectedRGBNormal[1] && colorRGB.rgbNormal[2] === expectedRGBNormal[2]);
 		}, true);
 
 		runner.defineTest('Test RedGPU.Color.ColorRGB rgbNormal getter for [255, 255, 0]', function (run) {
-			const rgbArray = RedGPU.Util.convertHexToRgb('#FFFF00', true);
+			const rgbArray = RedGPU.Color.convertHexToRgb('#FFFF00', true);
 			const colorRGB = new RedGPU.Color.ColorRGB(rgbArray[0], rgbArray[1], rgbArray[2]);
 			const expectedRGBNormal = [1, 1, 0];
 			run(colorRGB.rgbNormal[0] === expectedRGBNormal[0] && colorRGB.rgbNormal[1] === expectedRGBNormal[1] && colorRGB.rgbNormal[2] === expectedRGBNormal[2]);
@@ -221,7 +221,7 @@ redUnit.testGroup(
 	(runner) => {
 		runner.defineTest('Test error when RedGPU.Color.ColorRGB creation with invalid hex color code', function (run) {
 			try {
-				const rgbArray = RedGPU.Util.convertHexToRgb('#ZZZZZZ', true);
+				const rgbArray = RedGPU.Color.convertHexToRgb('#ZZZZZZ', true);
 				const colorRGB = new RedGPU.Color.ColorRGB(rgbArray[0], rgbArray[1], rgbArray[2]);
 				run(false); // If it reaches here, the test fails.
 			} catch (err) {

@@ -1,5 +1,5 @@
 import ColorRGB from "../../color/ColorRGB";
-import convertHexToRgb from "../../utils/convertColor/convertHexToRgb";
+import convertHexToRgb from "../../color/convertHexToRgb";
 import ABaseLight from "../core/ABaseLight";
 
 /**

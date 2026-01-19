@@ -1,6 +1,6 @@
 import ColorRGBA from "../../color/ColorRGBA";
 import isHexColor from "../../runtimeChecker/isFunc/isHexColor";
-import convertHexToRgb from "../../utils/convertColor/convertHexToRgb";
+import convertHexToRgb from "../../color/convertHexToRgb";
 import defineProperty_SETTING from "./defineProperty_SETTING";
 
 function defineColorRGBA(propertyKey: string, initValue: string = '#fff', forFragment: boolean = true) {
