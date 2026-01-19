@@ -106,8 +106,8 @@ class Convolution extends ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 커널을 설정합니다. (3x3 배열, 길이 12)
-     * [EN] Sets the kernel. (3x3 array, length 12)
+     * [KO] 커널을 설정합니다. (4x4 배열, 길이 16)
+     * [EN] Sets the kernel. (4x4 array, length 16)
      */
     set kernel(value: number[]) {
         this.#kernel = value;
