@@ -18,8 +18,7 @@ const PER_PI = Math.PI / 180;
  * * ### Example
  * ```typescript
  * const controller = new RedGPU.Camera.IsometricController(redGPUContext);
- * controller.cameraDistance = 15;
- * controller.cameraAngle = 45;
+ * controller.viewHeight = 15;
  * controller.zoom = 1;
  * ```
  * <iframe src="/RedGPU/examples/3d/controller/isometricController/"></iframe>

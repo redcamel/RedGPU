@@ -16,14 +16,14 @@ export type controllerInit = {
  * [KO] 카메라 컨트롤러의 추상 클래스입니다.
  * [EN] Abstract class for camera controllers.
  *
- * [KO] PerspectiveCamera, OrthographicCamera 등 다양한 카메라 타입을 제어하는 공통 인터페이스를 제공합니다. 파생 컨트롤러에서 update, getCanvasEventPoint 등을 구현하여 다양한 카메라 조작 방식을 지원할 수 있습니다.
- * [EN] Provides a common interface for controlling various camera types such as PerspectiveCamera and OrthographicCamera. Derived controllers can implement update, getCanvasEventPoint, etc., to support various camera manipulation methods.
+ * [KO] PerspectiveCamera, OrthographicCamera 등 다양한 카메라 타입을 제어하는 공통 인터페이스를 제공합니다.
+ * [EN] Provides a common interface for controlling various camera types such as PerspectiveCamera and OrthographicCamera.
  *
- * @remarks
- * [KO] `시스템 전용 클래스입니다.`
- * [KO] 이 메서드는 렌더링 엔진 내부에서 자동으로 사용되는 기능으로, 일반적인 사용자는 직접 호출하지 않는 것이 좋습니다.
- * [EN] `System-only class.`
- * [EN] This method is automatically used within the rendering engine and should not be called directly by general users.
+ * ::: warning
+ * [KO] 이 클래스는 시스템 내부적으로 사용되는 추상 클래스입니다.<br/>직접적인 인스턴스 생성은 불가능하며, 필요한 경우 이를 상속받아 구현하십시오.
+ * [EN] This class is an abstract class used internally by the system.<br/>Direct instantiation is not possible; inherit and implement if necessary.
+ * :::
+ *
  * @category Core
  */
 abstract class AController {
