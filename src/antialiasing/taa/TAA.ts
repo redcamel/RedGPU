@@ -92,6 +92,7 @@ class TAA {
     /**
      * [KO] 이전 프레임의 지터링 없는 프로젝션 카메라 행렬을 반환합니다.
      * [EN] Returns the non-jittered projection camera matrix of the previous frame.
+     *
      * @returns
      * [KO] 4x4 행렬
      * [EN] 4x4 matrix
@@ -103,6 +104,7 @@ class TAA {
     /**
      * [KO] 프레임 인덱스를 반환합니다.
      * [EN] Returns the frame index.
+     *
      * @returns
      * [KO] 현재 프레임 인덱스
      * [EN] Current frame index
@@ -114,6 +116,7 @@ class TAA {
     /**
      * [KO] 비디오 메모리 사용량을 반환합니다.
      * [EN] Returns the video memory usage.
+     *
      * @returns
      * [KO] 메모리 사용량 (바이트)
      * [EN] Memory usage (bytes)
@@ -125,6 +128,7 @@ class TAA {
     /**
      * [KO] 지터링 강도를 반환합니다.
      * [EN] Returns the jitter strength.
+     *
      * @returns
      * [KO] 지터링 강도
      * [EN] Jitter strength
@@ -136,6 +140,7 @@ class TAA {
     /**
      * [KO] 지터링 강도를 설정합니다.
      * [EN] Sets the jitter strength.
+     *
      * @param value -
      * [KO] 지터링 강도 (0.0 ~ 1.0)
      * [EN] Jitter strength (0.0 ~ 1.0)

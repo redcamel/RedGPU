@@ -178,6 +178,7 @@ fn fetchColor4(pos: vec2<i32>, dims: vec2<u32>) -> vec4<f32> {
     /**
      * [KO] 서브픽셀 품질 값을 반환합니다.
      * [EN] Returns the subpixel quality value.
+     *
      * @returns
      * [KO] 서브픽셀 품질
      * [EN] Subpixel quality
@@ -189,6 +190,7 @@ fn fetchColor4(pos: vec2<i32>, dims: vec2<u32>) -> vec4<f32> {
     /**
      * [KO] 서브픽셀 품질 값을 설정합니다.
      * [EN] Sets the subpixel quality value.
+     *
      * @param value -
      * [KO] 서브픽셀 품질 (0.0 ~ 1.0)
      * [EN] Subpixel quality (0.0 ~ 1.0)
@@ -202,6 +204,7 @@ fn fetchColor4(pos: vec2<i32>, dims: vec2<u32>) -> vec4<f32> {
     /**
      * [KO] 엣지 임계값을 반환합니다.
      * [EN] Returns the edge threshold.
+     *
      * @returns
      * [KO] 엣지 임계값
      * [EN] Edge threshold
@@ -213,6 +216,7 @@ fn fetchColor4(pos: vec2<i32>, dims: vec2<u32>) -> vec4<f32> {
     /**
      * [KO] 엣지 임계값을 설정합니다.
      * [EN] Sets the edge threshold.
+     *
      * @param value -
      * [KO] 엣지 임계값 (0.0001 ~ 0.25)
      * [EN] Edge threshold (0.0001 ~ 0.25)
@@ -226,6 +230,7 @@ fn fetchColor4(pos: vec2<i32>, dims: vec2<u32>) -> vec4<f32> {
     /**
      * [KO] 최소 엣지 임계값을 반환합니다.
      * [EN] Returns the minimum edge threshold.
+     *
      * @returns
      * [KO] 최소 엣지 임계값
      * [EN] Minimum edge threshold
@@ -237,6 +242,7 @@ fn fetchColor4(pos: vec2<i32>, dims: vec2<u32>) -> vec4<f32> {
     /**
      * [KO] 최소 엣지 임계값을 설정합니다.
      * [EN] Sets the minimum edge threshold.
+     *
      * @param value -
      * [KO] 최소 엣지 임계값 (0.00001 ~ 0.1)
      * [EN] Minimum edge threshold (0.00001 ~ 0.1)

@@ -11,6 +11,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  *
  * [KO] TAA로 인해 발생하는 블러 현상을 복구합니다.
  * [EN] Restores blur caused by TAA.
+ *
  * * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.TAASharpen(redGPUContext);
@@ -49,6 +50,7 @@ class TAASharpen extends ASinglePassPostEffect {
     /**
      * [KO] 샤프닝 강도를 반환합니다.
      * [EN] Returns the sharpening strength.
+     *
      * @returns
      * [KO] 샤프닝 강도
      * [EN] Sharpening strength
@@ -60,6 +62,7 @@ class TAASharpen extends ASinglePassPostEffect {
     /**
      * [KO] 샤프닝 강도를 설정합니다.
      * [EN] Sets the sharpening strength.
+     *
      * @param value -
      * [KO] 샤프닝 강도 (0 ~ 1)
      * [EN] Sharpening strength (0 ~ 1)

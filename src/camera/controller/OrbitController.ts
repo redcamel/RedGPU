@@ -371,6 +371,22 @@ class OrbitController extends AController {
 		this.#maxTilt = value;
 	}
 
+	/**
+	 * [KO] 메쉬가 화면 중앙에 꽉 차도록 카메라 거리를 자동으로 조절합니다.
+	 * [EN] Automatically adjusts the camera distance so that the mesh fills the screen center.
+	 *
+	 * * ### Example
+	 * ```typescript
+	 * controller.fitMeshToScreenCenter(mesh, view);
+	 * ```
+	 *
+	 * @param mesh -
+	 * [KO] 화면에 맞출 대상 메쉬
+	 * [EN] Target mesh to fit to the screen
+	 * @param view -
+	 * [KO] 현재 뷰 인스턴스
+	 * [EN] Current view instance
+	 */
 	fitMeshToScreenCenter(mesh: Mesh, view: View3D): void {
 
 		this.#calcTargetMeshMatrix(mesh, view);
@@ -432,10 +448,10 @@ class OrbitController extends AController {
 	 * [KO] 매 프레임마다 오빗 카메라를 업데이트합니다.
 	 * [EN] Updates the orbit camera every frame.
 	 *
-	 * @param view
+	 * @param view -
 	 * [KO] 카메라가 속한 3D 뷰
 	 * [EN] The 3D view the camera belongs to
-	 * @param time
+	 * @param time -
 	 * [KO] 현재 시간 (ms)
 	 * [EN] Current time (ms)
 	 */
