@@ -3,6 +3,11 @@ import View3D from "../../../../display/view/View3D";
 import validateNumberRange from "../../../../runtimeChecker/validateFunc/validateNumberRange";
 import ASinglePassPostEffect, {ASinglePassPostEffectResult} from "../../../core/ASinglePassPostEffect";
 
+/**
+ * [KO] DOF 통합 이펙트입니다.
+ * [EN] DOF unified effect.
+ * @category PostEffect
+ */
 class DOFUnified extends ASinglePassPostEffect {
     #nearBlurSize: number = 16;
     #farBlurSize: number = 24;
@@ -194,6 +199,10 @@ class DOFUnified extends ASinglePassPostEffect {
         this.farStrength = this.#farStrength;
     }
 
+    /**
+     * [KO] 근거리 블러 크기
+     * [EN] Near blur size
+     */
     get nearBlurSize(): number {
         return this.#nearBlurSize;
     }
@@ -204,6 +213,10 @@ class DOFUnified extends ASinglePassPostEffect {
         this.updateUniform('nearBlurSize', value)
     }
 
+    /**
+     * [KO] 원거리 블러 크기
+     * [EN] Far blur size
+     */
     get farBlurSize(): number {
         return this.#farBlurSize;
     }
@@ -214,6 +227,10 @@ class DOFUnified extends ASinglePassPostEffect {
         this.updateUniform('farBlurSize', value)
     }
 
+    /**
+     * [KO] 근거리 블러 강도
+     * [EN] Near blur strength
+     */
     get nearStrength(): number {
         return this.#nearStrength;
     }
@@ -224,6 +241,10 @@ class DOFUnified extends ASinglePassPostEffect {
         this.updateUniform('nearStrength', value)
     }
 
+    /**
+     * [KO] 원거리 블러 강도
+     * [EN] Far blur strength
+     */
     get farStrength(): number {
         return this.#farStrength;
     }

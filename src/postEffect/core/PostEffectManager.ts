@@ -1,56 +1,107 @@
 import {mat4} from "gl-matrix";
-import Camera2D from "../camera/camera/Camera2D";
-import RedGPUContext from "../context/RedGPUContext";
-import View3D from "../display/view/View3D";
-import UniformBuffer from "../resources/buffer/uniformBuffer/UniformBuffer";
-import Sampler from "../resources/sampler/Sampler";
-import parseWGSL from "../resources/wgslParser/parseWGSL";
-import calculateTextureByteSize from "../utils/texture/calculateTextureByteSize";
-import AMultiPassPostEffect from "./core/AMultiPassPostEffect";
-import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
-import postEffectSystemUniformCode from "./core/postEffectSystemUniform.wgsl"
-import SSAO from "./effects/ssao/SSAO";
-import SSR from "./effects/ssr/SSR";
-import TAASharpen from "./TAA/shapen/TAASharpen";
+import Camera2D from "../../camera/camera/Camera2D";
+import RedGPUContext from "../../context/RedGPUContext";
+import View3D from "../../display/view/View3D";
+import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
+import Sampler from "../../resources/sampler/Sampler";
+import parseWGSL from "../../resources/wgslParser/parseWGSL";
+import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSize";
+import AMultiPassPostEffect from "./AMultiPassPostEffect";
+import ASinglePassPostEffect from "./ASinglePassPostEffect";
+import postEffectSystemUniformCode from "./postEffectSystemUniform.wgsl"
+import SSAO from "../effects/ssao/SSAO";
+import SSR from "../effects/ssr/SSR";
+import TAASharpen from "../TAA/shapen/TAASharpen";
 
 /**
- * 후처리 이펙트(PostEffect) 관리 클래스입니다.
- * 이펙트 추가/제거, 렌더링, 시스템 유니폼 관리, 비디오 메모리 계산 등 후처리 파이프라인을 통합적으로 제어합니다.
- * @category Core
+ * [KO] 후처리 이펙트(PostEffect) 관리 클래스입니다.
+ * [EN] Post-processing effect (PostEffect) management class.
  *
+ * [KO] 이펙트 추가/제거, 렌더링, 시스템 유니폼 관리, 비디오 메모리 계산 등 후처리 파이프라인을 통합적으로 제어합니다.
+ * [EN] Integrally controls the post-processing pipeline, including effect addition/removal, rendering, system uniform management, and video memory calculation.
+ *
+ * @category PostEffect
  */
 class PostEffectManager {
-    /** 연결된 View3D 인스턴스 (읽기 전용) */
+    /** 
+     * [KO] 연결된 View3D 인스턴스 (읽기 전용) 
+     * [EN] Linked View3D instance (read-only)
+     */
     readonly #view: View3D
-    /** 등록된 후처리 이펙트 리스트 */
+    /** 
+     * [KO] 등록된 후처리 이펙트 리스트 
+     * [EN] Registered post-processing effect list
+     */
     #postEffects: Array<ASinglePassPostEffect | AMultiPassPostEffect> = []
-    /** 내부 스토리지 텍스처 */
+    /** 
+     * [KO] 내부 스토리지 텍스처 
+     * [EN] Internal storage texture
+     */
     #storageTexture: GPUTexture
-    /** 소스 텍스처 뷰 */
+    /** 
+     * [KO] 소스 텍스처 뷰 
+     * [EN] Source texture view
+     */
     #sourceTextureView: GPUTextureView
-    /** 스토리지 텍스처 뷰 */
+    /** 
+     * [KO] 스토리지 텍스처 뷰 
+     * [EN] Storage texture view
+     */
     #storageTextureView: GPUTextureView
-    /** Compute 워크그룹 X 크기 */
+    /** 
+     * [KO] Compute 워크그룹 X 크기 
+     * [EN] Compute workgroup X size
+     */
     #COMPUTE_WORKGROUP_SIZE_X = 16
-    /** Compute 워크그룹 Y 크기 */
+    /** 
+     * [KO] Compute 워크그룹 Y 크기 
+     * [EN] Compute workgroup Y size
+     */
     #COMPUTE_WORKGROUP_SIZE_Y = 4
-    /** Compute 워크그룹 Z 크기 */
+    /** 
+     * [KO] Compute 워크그룹 Z 크기 
+     * [EN] Compute workgroup Z size
+     */
     #COMPUTE_WORKGROUP_SIZE_Z = 1
-    /** Compute 셰이더 모듈 */
+    /** 
+     * [KO] Compute 셰이더 모듈 
+     * [EN] Compute shader module
+     */
     #textureComputeShaderModule: GPUShaderModule
-    /** Compute 바인드 그룹 */
+    /** 
+     * [KO] Compute 바인드 그룹 
+     * [EN] Compute bind group
+     */
     #textureComputeBindGroup: GPUBindGroup
-    /** Compute 바인드 그룹 레이아웃 */
+    /** 
+     * [KO] Compute 바인드 그룹 레이아웃 
+     * [EN] Compute bind group layout
+     */
     #textureComputeBindGroupLayout: GPUBindGroupLayout
-    /** Compute 파이프라인 */
+    /** 
+     * [KO] Compute 파이프라인 
+     * [EN] Compute pipeline
+     */
     #textureComputePipeline: GPUComputePipeline
-    /** 이전 프레임 텍스처 크기 */
+    /** 
+     * [KO] 이전 프레임 텍스처 크기 
+     * [EN] Previous frame texture size
+     */
     #previousDimensions: { width: number, height: number }
-    /** 시스템 유니폼 버퍼 */
+    /** 
+     * [KO] 시스템 유니폼 버퍼 
+     * [EN] System uniform buffer
+     */
     #postEffectSystemUniformBuffer: UniformBuffer;
-    /** 시스템 유니폼 버퍼 구조 정보 */
+    /** 
+     * [KO] 시스템 유니폼 버퍼 구조 정보 
+     * [EN] System uniform buffer struct info
+     */
     #postEffectSystemUniformBufferStructInfo;
-    /** 비디오 메모리 사용량 (byte) */
+    /** 
+     * [KO] 비디오 메모리 사용량 (byte) 
+     * [EN] Video memory usage (bytes)
+     */
     #videoMemorySize: number = 0
     #uniformData: ArrayBuffer
     #uniformDataF32: Float32Array
@@ -61,11 +112,23 @@ class PostEffectManager {
     #ssr: SSR;
     #useSSR: boolean = false;
 
+    /**
+     * [KO] PostEffectManager 인스턴스를 생성합니다.
+     * [EN] Creates a PostEffectManager instance.
+     *
+     * @param view 
+     * [KO] View3D 인스턴스
+     * [EN] View3D Instance
+     */
     constructor(view: View3D) {
         this.#view = view;
         this.#init()
     }
 
+    /**
+     * [KO] SSAO 사용 여부
+     * [EN] Whether to use SSAO
+     */
     get useSSAO(): boolean {
         return this.#useSSAO;
     }
@@ -75,6 +138,10 @@ class PostEffectManager {
         this.#checkSSAO()
     }
 
+    /**
+     * [KO] SSAO 이펙트 인스턴스
+     * [EN] SSAO effect instance
+     */
     get ssao(): SSAO {
         if (!this.#ssao) {
             this.#ssao = new SSAO(this.#view.redGPUContext)
@@ -82,6 +149,10 @@ class PostEffectManager {
         return this.#ssao;
     }
 
+    /**
+     * [KO] SSR 사용 여부
+     * [EN] Whether to use SSR
+     */
     get useSSR(): boolean {
         return this.#useSSR;
     }
@@ -91,6 +162,10 @@ class PostEffectManager {
         this.#checkSSR()
     }
 
+    /**
+     * [KO] SSR 이펙트 인스턴스
+     * [EN] SSR effect instance
+     */
     get ssr(): SSR {
         if (!this.#ssr) {
             this.#ssr = new SSR(this.#view.redGPUContext)
@@ -98,23 +173,47 @@ class PostEffectManager {
         return this.#ssr;
     }
 
+    /**
+     * [KO] 시스템 유니폼 버퍼
+     * [EN] System uniform buffer
+     */
     get postEffectSystemUniformBuffer(): UniformBuffer {
         return this.#postEffectSystemUniformBuffer;
     }
 
+    /**
+     * [KO] 연결된 View3D
+     * [EN] Linked View3D
+     */
     get view(): View3D {
         return this.#view;
     }
 
+    /**
+     * [KO] 이펙트 리스트
+     * [EN] Effect list
+     */
     get effectList(): Array<ASinglePassPostEffect | AMultiPassPostEffect> {
         return this.#postEffects;
     }
 
+    /**
+     * [KO] 비디오 메모리 사용량 (바이트)
+     * [EN] Video memory usage (bytes)
+     */
     get videoMemorySize(): number {
         this.#calcVideoMemory()
         return this.#videoMemorySize;
     }
 
+    /**
+     * [KO] 이펙트를 추가합니다.
+     * [EN] Adds an effect.
+     * 
+     * @param v 
+     * [KO] 추가할 이펙트
+     * [EN] Effect to add
+     */
     addEffect(v: ASinglePassPostEffect | AMultiPassPostEffect) {
         this.#postEffects.push(v)
     }
@@ -123,6 +222,14 @@ class PostEffectManager {
     //     //TODO
     // }
 
+    /**
+     * [KO] 인덱스로 이펙트를 가져옵니다.
+     * [EN] Gets an effect by index.
+     * 
+     * @param index 
+     * [KO] 인덱스
+     * [EN] Index
+     */
     getEffectAt(index: number): ASinglePassPostEffect | AMultiPassPostEffect {
         return this.#postEffects[index]
     }
@@ -135,6 +242,10 @@ class PostEffectManager {
     //     //TODO
     // }
 
+    /**
+     * [KO] 모든 이펙트를 제거합니다.
+     * [EN] Removes all effects.
+     */
     removeAllEffect() {
         this.#postEffects.forEach(effect => {
             effect.clear()
@@ -143,6 +254,10 @@ class PostEffectManager {
     }
 
 
+    /**
+     * [KO] 후처리 파이프라인을 렌더링합니다.
+     * [EN] Renders the post-processing pipeline.
+     */
     render() {
         const {viewRenderTextureManager, redGPUContext, taa, fxaa, toneMappingManager} = this.#view;
         const {antialiasingManager} = redGPUContext
@@ -229,6 +344,10 @@ class PostEffectManager {
         return currentTextureView;
     }
 
+    /**
+     * [KO] 리소스를 정리합니다.
+     * [EN] Clears resources.
+     */
     clear() {
         this.#postEffects.forEach(effect => {
             effect.clear()
@@ -359,7 +478,7 @@ class PostEffectManager {
     #calcVideoMemory() {
         const texture = this.#storageTexture
         if (!texture) return 0;
-        this.#videoMemorySize = calculateTextureByteSize(texture)
+        this.#videoMemorySize = calculateTextureByteSize(this.#storageTexture)
         this.#postEffects.forEach(effect => {
             this.#videoMemorySize += effect.videoMemorySize
         })

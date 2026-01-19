@@ -6,16 +6,28 @@ import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 
 /**
- * TAA 전용 샤프닝 후처리 이펙트입니다.
- * TAA로 인해 발생하는 블러 현상을 복구합니다.
+ * [KO] TAA 전용 샤프닝 후처리 이펙트입니다.
+ * [EN] Sharpening post-processing effect dedicated to TAA.
+ *
+ * [KO] TAA로 인해 발생하는 블러 현상을 복구합니다.
+ * [EN] Recovers blur caused by TAA.
+ *
+ * @category PostEffect
  */
 class TAASharpen extends ASinglePassPostEffect {
-    /** 샤프닝 강도. 기본값 0.5, 범위 0~1 */
+    /** 
+     * [KO] 샤프닝 강도. 기본값 0.5
+     * [EN] Sharpening strength. Default 0.5
+     */
     #sharpness: number = 0.5
 
     /**
-     * TAASharpen 인스턴스 생성
-     * @param redGPUContext 렌더링 컨텍스트
+     * [KO] TAASharpen 인스턴스를 생성합니다.
+     * [EN] Creates a TAASharpen instance.
+     *
+     * @param redGPUContext 
+     * [KO] RedGPU 컨텍스트
+     * [EN] RedGPU Context
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
@@ -28,14 +40,20 @@ class TAASharpen extends ASinglePassPostEffect {
         this.sharpness = 0.5;
     }
 
-    /** 샤프닝 강도 반환 */
+    /** 
+     * [KO] 샤프닝 강도
+     * [EN] Sharpening strength
+     */
     get sharpness(): number {
         return this.#sharpness;
     }
 
     /**
-     * 샤프닝 강도 설정
-     * 범위: 0~1
+     * [KO] 샤프닝 강도를 설정합니다.
+     * [EN] Sets the sharpening strength.
+     * 
+     * [KO] 범위: 0~1
+     * [EN] Range: 0~1
      */
     set sharpness(value: number) {
         validateNumberRange(value, 0, 1)

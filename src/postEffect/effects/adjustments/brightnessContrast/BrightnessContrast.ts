@@ -6,29 +6,38 @@ import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 
 /**
- * 밝기/대비 조절 후처리 이펙트입니다.
+ * [KO] 밝기/대비(Brightness/Contrast) 조절 후처리 이펙트입니다.
+ * [EN] Brightness/Contrast adjustment post-processing effect.
  *
- * @category Adjustments
+ * @category PostEffect
  *
- * @example
- * ```javascript
+ * * ### Example
+ * ```typescript
  * const effect = new RedGPU.PostEffect.BrightnessContrast(redGPUContext);
  * effect.brightness = 50;
  * effect.contrast = 20;
  * view.postEffectManager.addEffect(effect);
  * ```
- *
- * <iframe src="/RedGPU/examples/postEffect/adjustments/brightnessContrast/"></iframe>
  */
 class BrightnessContrast extends ASinglePassPostEffect {
-    /** 밝기. 기본값 0, 범위 -150~150 */
+    /** 
+     * [KO] 밝기. 기본값 0
+     * [EN] Brightness. Default 0
+     */
     #brightness: number = 0
-    /** 대비. 기본값 0, 범위 -50~100 */
+    /** 
+     * [KO] 대비. 기본값 0
+     * [EN] Contrast. Default 0
+     */
     #contrast: number = 0
 
     /**
-     * BrightnessContrast 인스턴스 생성
-     * @param redGPUContext 렌더링 컨텍스트
+     * [KO] BrightnessContrast 인스턴스를 생성합니다.
+     * [EN] Creates a BrightnessContrast instance.
+     * 
+     * @param redGPUContext 
+     * [KO] RedGPU 컨텍스트
+     * [EN] RedGPU Context
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
@@ -39,14 +48,20 @@ class BrightnessContrast extends ASinglePassPostEffect {
         )
     }
 
-    /** 밝기 반환 */
+    /** 
+     * [KO] 밝기
+     * [EN] Brightness
+     */
     get brightness(): number {
         return this.#brightness;
     }
 
     /**
-     * 밝기 설정
-     * 범위: -150~150
+     * [KO] 밝기를 설정합니다.
+     * [EN] Sets the brightness.
+     * 
+     * [KO] 범위: -150~150
+     * [EN] Range: -150~150
      */
     set brightness(value: number) {
         validateNumberRange(value, -150, 150)
@@ -54,14 +69,20 @@ class BrightnessContrast extends ASinglePassPostEffect {
         this.updateUniform('brightness', value)
     }
 
-    /** 대비 반환 */
+    /** 
+     * [KO] 대비
+     * [EN] Contrast
+     */
     get contrast(): number {
         return this.#contrast;
     }
 
     /**
-     * 대비 설정
-     * 범위: -50~100
+     * [KO] 대비를 설정합니다.
+     * [EN] Sets the contrast.
+     * 
+     * [KO] 범위: -50~100
+     * [EN] Range: -50~100
      */
     set contrast(value: number) {
         validateNumberRange(value, -50, 100)

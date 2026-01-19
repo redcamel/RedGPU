@@ -12,6 +12,15 @@ import postEffectSystemUniform from "../core/postEffectSystemUniform.wgsl"
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 
+/**
+ * [KO] TAA (Temporal Anti-Aliasing) 후처리 이펙트입니다.
+ * [EN] TAA (Temporal Anti-Aliasing) post-processing effect.
+ *
+ * [KO] 이전 프레임의 정보를 사용하여 앨리어싱을 줄이고 부드러운 이미지를 생성합니다.
+ * [EN] Reduces aliasing and creates smoother images using information from previous frames.
+ *
+ * @category PostEffect
+ */
 class TAA {
     #redGPUContext: RedGPUContext
     #antialiasingManager: AntialiasingManager
@@ -51,6 +60,14 @@ class TAA {
     #prevJitterOffset: [number, number] = [0, 0]
     #prevNoneJitterProjectionCameraMatrix: mat4 = mat4.create();
 
+    /**
+     * [KO] TAA 인스턴스를 생성합니다.
+     * [EN] Creates a TAA instance.
+     *
+     * @param redGPUContext 
+     * [KO] RedGPU 컨텍스트
+     * [EN] RedGPU Context
+     */
     constructor(redGPUContext: RedGPUContext) {
         this.#redGPUContext = redGPUContext
         this.#antialiasingManager = redGPUContext.antialiasingManager
@@ -66,19 +83,35 @@ class TAA {
         this.jitterStrength = this.#jitterStrength;
     }
 
+    /**
+     * [KO] 이전 프레임의 지터가 적용되지 않은 투영 카메라 행렬
+     * [EN] Previous frame's non-jittered projection camera matrix
+     */
     get prevNoneJitterProjectionCameraMatrix(): mat4 {
         return this.#prevNoneJitterProjectionCameraMatrix;
     }
 
+    /**
+     * [KO] 현재 프레임 인덱스
+     * [EN] Current frame index
+     */
     get frameIndex(): number {
         return this.#frameIndex;
     }
 
+    /**
+     * [KO] 비디오 메모리 사용량 (바이트)
+     * [EN] Video memory usage (bytes)
+     */
     get videoMemorySize(): number {
         return this.#videoMemorySize
     }
 
 
+    /**
+     * [KO] 지터 강도
+     * [EN] Jitter strength
+     */
     get jitterStrength(): number {
         return this.#jitterStrength;
     }
@@ -89,6 +122,26 @@ class TAA {
     }
 
 
+    /**
+     * [KO] TAA 효과를 렌더링합니다.
+     * [EN] Renders the TAA effect.
+     *
+     * @param view 
+     * [KO] 렌더링할 뷰
+     * [EN] View to render
+     * @param width 
+     * [KO] 렌더링 너비
+     * [EN] Render width
+     * @param height 
+     * [KO] 렌더링 높이
+     * [EN] Render height
+     * @param sourceTextureInfo 
+     * [KO] 입력 텍스처 정보
+     * [EN] Input texture information
+     * @returns 
+     * [KO] 렌더링 결과
+     * [EN] Render result
+     */
     render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
 
         const sourceTextureView = sourceTextureInfo.textureView
@@ -135,6 +188,10 @@ class TAA {
         }
     }
 
+    /**
+     * [KO] TAA 리소스를 초기화합니다.
+     * [EN] Clears TAA resources.
+     */
     clear() {
         if (this.#historyTexture) {
             this.#historyTexture.destroy();
@@ -152,6 +209,17 @@ class TAA {
         this.#currentMSAAState = null;
     }
 
+    /**
+     * [KO] 유니폼 값을 업데이트합니다.
+     * [EN] Updates the uniform value.
+     * 
+     * @param key 
+     * [KO] 유니폼 키
+     * [EN] Uniform key
+     * @param value 
+     * [KO] 유니폼 값
+     * [EN] Uniform value
+     */
     updateUniform(key: string, value: number | number[] | boolean) {
         this.#uniformBuffer.writeOnlyBuffer(this.#uniformsInfo.members[key], value)
     }

@@ -12,10 +12,13 @@ export type ASinglePassPostEffectResult = {
 }
 
 /**
- * 단일 패스 후처리 이펙트(ASinglePassPostEffect) 추상 클래스입니다.
- * 한 번의 compute 패스로 동작하는 후처리 이펙트의 기반이 됩니다.
+ * [KO] 단일 패스 후처리 이펙트(ASinglePassPostEffect) 추상 클래스입니다.
+ * [EN] Abstract class for single-pass post-processing effects (ASinglePassPostEffect).
  *
+ * [KO] 한 번의 compute 패스로 동작하는 후처리 이펙트의 기반이 됩니다.
+ * [EN] Serves as the base for post-processing effects operating in a single compute pass.
  *
+ * @category PostEffect
  */
 abstract class ASinglePassPostEffect {
     // compute 셰이더 및 파이프라인 관련
@@ -54,11 +57,23 @@ abstract class ASinglePassPostEffect {
     #prevMSAA: Boolean
     #prevMSAAID: string
 
+    /**
+     * [KO] ASinglePassPostEffect 인스턴스를 생성합니다.
+     * [EN] Creates an ASinglePassPostEffect instance.
+     *
+     * @param redGPUContext 
+     * [KO] RedGPU 컨텍스트
+     * [EN] RedGPU Context
+     */
     constructor(redGPUContext: RedGPUContext) {
         this.#redGPUContext = redGPUContext
         this.#antialiasingManager = redGPUContext.antialiasingManager
     }
 
+    /**
+     * [KO] GBuffer Normal 텍스처 사용 여부
+     * [EN] Whether to use GBuffer Normal texture
+     */
     get useGBufferNormalTexture(): boolean {
         return this.#useGBufferNormalTexture;
     }
@@ -67,10 +82,18 @@ abstract class ASinglePassPostEffect {
         this.#useGBufferNormalTexture = value;
     }
 
+    /**
+     * [KO] 비디오 메모리 사용량 (바이트)
+     * [EN] Video memory usage (bytes)
+     */
     get videoMemorySize(): number {
         return this.#videoMemorySize
     }
 
+    /**
+     * [KO] 깊이 텍스처 사용 여부
+     * [EN] Whether to use depth texture
+     */
     get useDepthTexture(): boolean {
         return this.#useDepthTexture;
     }
@@ -79,32 +102,60 @@ abstract class ASinglePassPostEffect {
         this.#useDepthTexture = value;
     }
 
+    /**
+     * [KO] RedGPU 컨텍스트
+     * [EN] RedGPU Context
+     */
     get redGPUContext(): RedGPUContext {
         return this.#redGPUContext;
     }
 
+    /**
+     * [KO] 스토리지 텍스처 정보
+     * [EN] Storage texture info
+     */
     get storageInfo() {
         return this.#storageInfo
     }
 
+    /**
+     * [KO] 셰이더 정보
+     * [EN] Shader info
+     */
     get shaderInfo() {
         // keepLog(this)
         const useMSAA = this.#antialiasingManager.useMSAA;
         return useMSAA ? this.#SHADER_INFO_MSAA : this.#SHADER_INFO_NON_MSAA;
     }
 
+    /**
+     * [KO] 유니폼 버퍼
+     * [EN] Uniform buffer
+     */
     get uniformBuffer(): UniformBuffer {
         return this.#uniformBuffer;
     }
 
+    /**
+     * [KO] 유니폼 정보
+     * [EN] Uniforms info
+     */
     get uniformsInfo() {
         return this.#uniformsInfo
     }
 
+    /**
+     * [KO] 시스템 유니폼 정보
+     * [EN] System uniforms info
+     */
     get systemUuniformsInfo() {
         return this.#systemUuniformsInfo
     }
 
+    /**
+     * [KO] 워크그룹 X 크기
+     * [EN] Workgroup X size
+     */
     get WORK_SIZE_X(): number {
         return this.#WORK_SIZE_X;
     }
@@ -113,6 +164,10 @@ abstract class ASinglePassPostEffect {
         this.#WORK_SIZE_X = value;
     }
 
+    /**
+     * [KO] 워크그룹 Y 크기
+     * [EN] Workgroup Y size
+     */
     get WORK_SIZE_Y(): number {
         return this.#WORK_SIZE_Y;
     }
@@ -121,6 +176,10 @@ abstract class ASinglePassPostEffect {
         this.#WORK_SIZE_Y = value;
     }
 
+    /**
+     * [KO] 워크그룹 Z 크기
+     * [EN] Workgroup Z size
+     */
     get WORK_SIZE_Z(): number {
         return this.#WORK_SIZE_Z;
     }
@@ -129,10 +188,18 @@ abstract class ASinglePassPostEffect {
         this.#WORK_SIZE_Z = value;
     }
 
+    /**
+     * [KO] 출력 텍스처 뷰
+     * [EN] Output texture view
+     */
     get outputTextureView(): GPUTextureView {
         return this.#outputTextureView;
     }
 
+    /**
+     * [KO] 리소스를 정리합니다.
+     * [EN] Clears resources.
+     */
     clear() {
         if (this.#outputTexture) {
             this.#outputTexture.destroy();
@@ -141,6 +208,23 @@ abstract class ASinglePassPostEffect {
         }
     }
 
+    /**
+     * [KO] 이펙트를 초기화합니다.
+     * [EN] Initializes the effect.
+     * 
+     * @param redGPUContext 
+     * [KO] RedGPU 컨텍스트
+     * [EN] RedGPU Context
+     * @param name 
+     * [KO] 이펙트 이름
+     * [EN] Effect name
+     * @param computeCodes 
+     * [KO] MSAA/Non-MSAA용 컴퓨트 셰이더 코드
+     * [EN] Compute shader codes for MSAA/Non-MSAA
+     * @param bindGroupLayout 
+     * [KO] 바인드 그룹 레이아웃 (선택)
+     * [EN] Bind group layout (optional)
+     */
     init(redGPUContext: RedGPUContext, name: string, computeCodes: {
         msaa: string,
         nonMsaa: string
@@ -177,6 +261,23 @@ abstract class ASinglePassPostEffect {
         }
     }
 
+    /**
+     * [KO] 이펙트를 실행합니다.
+     * [EN] Executes the effect.
+     * 
+     * @param view 
+     * [KO] 렌더링할 뷰
+     * [EN] View to render
+     * @param gpuDevice 
+     * [KO] GPU 디바이스
+     * [EN] GPU Device
+     * @param width 
+     * [KO] 너비
+     * [EN] Width
+     * @param height 
+     * [KO] 높이
+     * [EN] Height
+     */
     execute(view: View3D, gpuDevice: GPUDevice, width: number, height: number) {
         const commentEncode_compute = gpuDevice.createCommandEncoder({
             label: 'ASinglePassPostEffect_Execute_CommandEncoder'
@@ -190,6 +291,26 @@ abstract class ASinglePassPostEffect {
         gpuDevice.queue.submit([commentEncode_compute.finish()]);
     }
 
+    /**
+     * [KO] 이펙트를 렌더링합니다.
+     * [EN] Renders the effect.
+     * 
+     * @param view 
+     * [KO] 렌더링할 뷰
+     * [EN] View to render
+     * @param width 
+     * [KO] 너비
+     * [EN] Width
+     * @param height 
+     * [KO] 높이
+     * [EN] Height
+     * @param sourceTextureInfo 
+     * [KO] 소스 텍스처 정보 리스트
+     * [EN] Source texture info list
+     * @returns 
+     * [KO] 렌더링 결과
+     * [EN] Render result
+     */
     render(view: View3D, width: number, height: number, ...sourceTextureInfo: ASinglePassPostEffectResult[]): ASinglePassPostEffectResult {
         const {gpuDevice, antialiasingManager} = this.#redGPUContext
         const {useMSAA, msaaID} = antialiasingManager
@@ -212,9 +333,28 @@ abstract class ASinglePassPostEffect {
         }
     }
 
+    /**
+     * [KO] 매 프레임 업데이트 시 호출됩니다.
+     * [EN] Called every frame update.
+     * 
+     * @param deltaTime 
+     * [KO] 델타 타임
+     * [EN] Delta time
+     */
     update(deltaTime: number) {
     }
 
+    /**
+     * [KO] 유니폼 값을 업데이트합니다.
+     * [EN] Updates the uniform value.
+     * 
+     * @param key 
+     * [KO] 유니폼 키
+     * [EN] Uniform key
+     * @param value 
+     * [KO] 유니폼 값
+     * [EN] Uniform value
+     */
     updateUniform(key: string, value: number | number[] | boolean) {
         this.uniformBuffer.writeOnlyBuffer(this.uniformsInfo
             .members[key], value)

@@ -7,30 +7,48 @@ import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 
 /**
- * 줌 블러(Zoom Blur) 후처리 이펙트입니다.
- * 중심점에서 방사형으로 퍼지는 블러 효과를 만듭니다.
+ * [KO] 줌 블러(Zoom Blur) 후처리 이펙트입니다.
+ * [EN] Zoom Blur post-processing effect.
  *
- * @category Blur
+ * [KO] 중심점에서 방사형으로 퍼지는 블러 효과를 만듭니다.
+ * [EN] Creates a blur effect spreading radially from the center point.
  *
- * @example
- * ```javascript
+ * @category PostEffect
+ *
+ * * ### Example
+ * ```typescript
  * const effect = new RedGPU.PostEffect.ZoomBlur(redGPUContext);
  * effect.amount = 80;      // 블러 강도
  * effect.centerX = 0.5;    // 중심 X (0~1)
  * effect.centerY = 0.5;    // 중심 Y (0~1)
  * view.postEffectManager.addEffect(effect);
  * ```
- *
- * <iframe src="/RedGPU/examples/postEffect/blur/zoomBlur/"></iframe>
  */
 class ZoomBlur extends ASinglePassPostEffect {
-    /** 블러 강도. 기본값 64, 최소 0 */
+    /** 
+     * [KO] 블러 강도. 기본값 64
+     * [EN] Blur strength. Default 64
+     */
     #amount: number = 64
-    /** 중심 X. 기본값 0 */
+    /** 
+     * [KO] 중심 X. 기본값 0
+     * [EN] Center X. Default 0
+     */
     #centerX: number = 0
-    /** 중심 Y. 기본값 0 */
+    /** 
+     * [KO] 중심 Y. 기본값 0
+     * [EN] Center Y. Default 0
+     */
     #centerY: number = 0
 
+    /**
+     * [KO] ZoomBlur 인스턴스를 생성합니다.
+     * [EN] Creates a ZoomBlur instance.
+     * 
+     * @param redGPUContext 
+     * [KO] RedGPU 컨텍스트
+     * [EN] RedGPU Context
+     */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
         this.init(
@@ -41,36 +59,57 @@ class ZoomBlur extends ASinglePassPostEffect {
         this.amount = this.#amount
     }
 
-    /** 중심 X 반환 */
+    /** 
+     * [KO] 중심 X
+     * [EN] Center X
+     */
     get centerX(): number {
         return this.#centerX;
     }
 
-    /** 중심 X 설정 */
+    /**
+     * [KO] 중심 X를 설정합니다.
+     * [EN] Sets the Center X.
+     */
     set centerX(value: number) {
         validateNumber(value)
         this.#centerX = value;
         this.updateUniform('centerX', value)
     }
 
-    /** 중심 Y 반환 */
+    /** 
+     * [KO] 중심 Y
+     * [EN] Center Y
+     */
     get centerY(): number {
         return this.#centerY;
     }
 
-    /** 중심 Y 설정 */
+    /**
+     * [KO] 중심 Y를 설정합니다.
+     * [EN] Sets the Center Y.
+     */
     set centerY(value: number) {
         validateNumber(value)
         this.#centerY = value;
         this.updateUniform('centerY', value)
     }
 
-    /** 블러 강도 반환 */
+    /** 
+     * [KO] 블러 강도
+     * [EN] Blur strength
+     */
     get amount(): number {
         return this.#amount;
     }
 
-    /** 블러 강도 설정. 최소 0 */
+    /**
+     * [KO] 블러 강도를 설정합니다.
+     * [EN] Sets the blur strength.
+     * 
+     * [KO] 최소값: 0
+     * [EN] Minimum value: 0
+     */
     set amount(value: number) {
         validateNumberRange(value, 0)
         this.#amount = value;

@@ -7,30 +7,41 @@ import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 
 /**
- * 방향성 블러(Directional Blur) 후처리 이펙트입니다.
- * 각도와 강도를 지정해 원하는 방향으로 블러를 적용할 수 있습니다.
+ * [KO] 방향성 블러(Directional Blur) 후처리 이펙트입니다.
+ * [EN] Directional Blur post-processing effect.
  *
- * @category Blur
+ * [KO] 각도와 강도를 지정해 원하는 방향으로 블러를 적용할 수 있습니다.
+ * [EN] Can apply blur in a desired direction by specifying angle and intensity.
  *
- * @example
- * ```javascript
+ * @category PostEffect
+ *
+ * * ### Example
+ * ```typescript
  * const effect = new RedGPU.PostEffect.DirectionalBlur(redGPUContext);
  * effect.angle = 45;   // 45도 방향 블러
  * effect.amount = 30;  // 블러 강도
  * view.postEffectManager.addEffect(effect);
  * ```
- *
- * <iframe src="/RedGPU/examples/postEffect/blur/directionalBlur/"></iframe>
  */
 class DirectionalBlur extends ASinglePassPostEffect {
-    /** 블러 강도. 기본값 15, 최소 0 */
+    /** 
+     * [KO] 블러 강도. 기본값 15
+     * [EN] Blur strength. Default 15
+     */
     #amount: number = 15
-    /** 블러 각도(도). 기본값 0, 0=오른쪽 */
+    /** 
+     * [KO] 블러 각도(도). 기본값 0 (오른쪽)
+     * [EN] Blur angle (degrees). Default 0 (Right)
+     */
     #angle: number = 0
 
     /**
-     * DirectionalBlur 인스턴스 생성
-     * @param redGPUContext 렌더링 컨텍스트
+     * [KO] DirectionalBlur 인스턴스를 생성합니다.
+     * [EN] Creates a DirectionalBlur instance.
+     * 
+     * @param redGPUContext 
+     * [KO] RedGPU 컨텍스트
+     * [EN] RedGPU Context
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
@@ -43,15 +54,23 @@ class DirectionalBlur extends ASinglePassPostEffect {
         this.angle = this.#angle
     }
 
-    /** 블러 각도 반환 */
+    /** 
+     * [KO] 블러 각도
+     * [EN] Blur angle
+     */
     get angle(): number {
         return this.#angle;
     }
 
     /**
-     * 블러 각도 설정(도)
-     * 0=오른쪽, 360도로 정규화
-     * @param value 각도
+     * [KO] 블러 각도를 설정합니다 (도).
+     * [EN] Sets the blur angle (degrees).
+     * 
+     * [KO] 0=오른쪽, 360도로 정규화
+     * [EN] 0=Right, Normalized to 360 degrees
+     * @param value 
+     * [KO] 각도
+     * [EN] Angle
      */
     set angle(value: number) {
         validateNumber(value)
@@ -59,15 +78,23 @@ class DirectionalBlur extends ASinglePassPostEffect {
         this.#updateDirection();
     }
 
-    /** 블러 강도 반환 */
+    /** 
+     * [KO] 블러 강도
+     * [EN] Blur strength
+     */
     get amount(): number {
         return this.#amount;
     }
 
     /**
-     * 블러 강도 설정
-     * 최소값 0
-     * @param value 강도
+     * [KO] 블러 강도를 설정합니다.
+     * [EN] Sets the blur strength.
+     * 
+     * [KO] 최소값: 0
+     * [EN] Minimum value: 0
+     * @param value 
+     * [KO] 강도
+     * [EN] Strength
      */
     set amount(value: number) {
         validateNumberRange(value, 0)

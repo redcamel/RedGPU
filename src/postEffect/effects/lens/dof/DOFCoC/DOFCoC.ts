@@ -5,6 +5,11 @@ import createBasicPostEffectCode from "../../../../core/createBasicPostEffectCod
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 
+/**
+ * [KO] DOF CoC 계산 이펙트입니다.
+ * [EN] DOF CoC calculation effect.
+ * @category PostEffect
+ */
 class DOFCoC extends ASinglePassPostEffect {
     #focusDistance: number = 15.0;
     #aperture: number = 1.4;
@@ -27,6 +32,10 @@ class DOFCoC extends ASinglePassPostEffect {
         this.farPlane = this.#farPlane;
     }
 
+    /**
+     * [KO] 초점 거리
+     * [EN] Focus distance
+     */
     get focusDistance(): number {
         return this.#focusDistance;
     }
@@ -37,6 +46,10 @@ class DOFCoC extends ASinglePassPostEffect {
         this.updateUniform('focusDistance', value)
     }
 
+    /**
+     * [KO] 조리개 (F값)
+     * [EN] Aperture (F-number)
+     */
     get aperture(): number {
         return this.#aperture;
     }
@@ -47,6 +60,10 @@ class DOFCoC extends ASinglePassPostEffect {
         this.updateUniform('aperture', value)
     }
 
+    /**
+     * [KO] 최대 CoC
+     * [EN] Max CoC
+     */
     get maxCoC(): number {
         return this.#maxCoC;
     }
@@ -57,6 +74,10 @@ class DOFCoC extends ASinglePassPostEffect {
         this.updateUniform('maxCoC', value)
     }
 
+    /**
+     * [KO] 근평면
+     * [EN] Near plane
+     */
     get nearPlane(): number {
         return this.#nearPlane;
     }
@@ -67,6 +88,10 @@ class DOFCoC extends ASinglePassPostEffect {
         this.updateUniform('nearPlane', value)
     }
 
+    /**
+     * [KO] 원평면
+     * [EN] Far plane
+     */
     get farPlane(): number {
         return this.#farPlane;
     }

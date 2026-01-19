@@ -7,7 +7,9 @@ import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 
 /**
- * SSAO(Screen Space Ambient Occlusion) 후처리 이펙트입니다.
+ * [KO] SSAO AO 계산 이펙트입니다.
+ * [EN] SSAO AO calculation effect.
+ * @category PostEffect
  */
 class SSAO_A0 extends ASinglePassPostEffect {
 
@@ -42,6 +44,10 @@ class SSAO_A0 extends ASinglePassPostEffect {
         this.useBlur = true
     }
 
+    /**
+     * [KO] 블러 사용 여부
+     * [EN] Whether to use blur
+     */
     get useBlur(): boolean {
         return this.#useBlur;
     }
@@ -51,6 +57,10 @@ class SSAO_A0 extends ASinglePassPostEffect {
         this.updateUniform('useBlur', value ? 1 : 0);
     }
 
+    /**
+     * [KO] 반경
+     * [EN] Radius
+     */
     get radius(): number {
         return this.#radius;
     }
@@ -61,6 +71,10 @@ class SSAO_A0 extends ASinglePassPostEffect {
         this.updateUniform('radius', value);
     }
 
+    /**
+     * [KO] 강도
+     * [EN] Intensity
+     */
     get intensity(): number {
         return this.#intensity;
     }
@@ -71,6 +85,10 @@ class SSAO_A0 extends ASinglePassPostEffect {
         this.updateUniform('intensity', value);
     }
 
+    /**
+     * [KO] 바이어스
+     * [EN] Bias
+     */
     get bias(): number {
         return this.#bias;
     }
@@ -81,6 +99,10 @@ class SSAO_A0 extends ASinglePassPostEffect {
         this.updateUniform('bias', value);
     }
 
+    /**
+     * [KO] 바이어스 거리 스케일
+     * [EN] Bias distance scale
+     */
     get biasDistanceScale(): number {
         return this.#biasDistanceScale;
     }
@@ -91,6 +113,10 @@ class SSAO_A0 extends ASinglePassPostEffect {
         this.updateUniform('biasDistanceScale', value);
     }
 
+    /**
+     * [KO] 페이드 시작 거리
+     * [EN] Fade start distance
+     */
     get fadeDistanceStart(): number {
         return this.#fadeDistanceStart;
     }
@@ -101,6 +127,10 @@ class SSAO_A0 extends ASinglePassPostEffect {
         this.updateUniform('fadeDistanceStart', value);
     }
 
+    /**
+     * [KO] 페이드 거리 범위
+     * [EN] Fade distance range
+     */
     get fadeDistanceRange(): number {
         return this.#fadeDistanceRange;
     }
@@ -111,6 +141,10 @@ class SSAO_A0 extends ASinglePassPostEffect {
         this.updateUniform('fadeDistanceRange', value);
     }
 
+    /**
+     * [KO] 대비
+     * [EN] Contrast
+     */
     get contrast(): number {
         return this.#contrast;
     }

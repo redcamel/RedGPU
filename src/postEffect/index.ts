@@ -1,7 +1,9 @@
 /**
- * 다양한 포스트 프로세싱 이펙트(색상 보정, 블러, 렌즈 효과, 환경 효과 등)와 PostEffectManager, 싱글/멀티 패스 이펙트 코어 클래스를 제공합니다.
+ * [KO] 다양한 포스트 프로세싱 이펙트(색상 보정, 블러, 렌즈 효과, 환경 효과 등)와 PostEffectManager, 싱글/멀티 패스 이펙트 코어 클래스를 제공합니다.
+ * [EN] Provides various post-processing effects (color correction, blur, lens effects, environmental effects, etc.), PostEffectManager, and single/multi-pass effect core classes.
  *
- * 각 이펙트 및 매니저를 통해 렌더링 결과에 다양한 시각 효과를 적용하고, 후처리 파이프라인을 유연하게 구성할 수 있습니다.
+ * [KO] 각 이펙트 및 매니저를 통해 렌더링 결과에 다양한 시각 효과를 적용하고, 후처리 파이프라인을 유연하게 구성할 수 있습니다.
+ * [EN] Through each effect and manager, various visual effects can be applied to the rendering result, and the post-processing pipeline can be flexibly configured.
  *
  * @packageDocumentation
  */
@@ -30,12 +32,10 @@ import LensDistortion from "./effects/lens/lensDistortion/LensDistortion";
 import Vignetting from "./effects/lens/vignetting/Vignetting";
 import OldBloom from "./effects/oldBloom/OldBloom";
 import Sharpen from "./effects/Sharpen";
-import PostEffectManager from "./PostEffectManager";
 
 export * as Core from './core'
 
 export {
-    PostEffectManager,
     // Color Adjustments
     BrightnessContrast,
     ColorBalance,

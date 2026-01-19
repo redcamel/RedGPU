@@ -7,12 +7,17 @@ import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 
 /**
- * SSR(Screen Space Reflection) 후처리 이펙트입니다.
- * 화면 공간 반사 효과를 구현합니다. 최대 스텝, 거리, 스텝 크기, 반사 강도, 페이드 거리, 에지 페이드 등 다양한 파라미터를 지원합니다.
+ * [KO] SSR(Screen Space Reflection) 후처리 이펙트입니다.
+ * [EN] SSR (Screen Space Reflection) post-processing effect.
+ *
+ * [KO] 화면 공간 반사 효과를 구현합니다. 최대 스텝, 거리, 스텝 크기, 반사 강도, 페이드 거리, 에지 페이드 등 다양한 파라미터를 지원합니다.
+ * [EN] Implements screen space reflection effects. Supports various parameters such as max steps, distance, step size, reflection intensity, fade distance, and edge fade.
  *
  * @experimental
+ * @category PostEffect
+ *
  * @example
- * ```javascript
+ * ```typescript
  * const effect = new RedGPU.PostEffect.SSR(redGPUContext);
  * effect.maxSteps = 128;            // 최대 스텝 수
  * effect.maxDistance = 20.0;        // 최대 반사 거리
@@ -22,23 +27,47 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * effect.edgeFade = 0.2;            // 에지 페이드
  * view.postEffectManager.addEffect(effect);
  * ```
- *
- * <iframe src="/RedGPU/examples/postEffect/ssr/ssr/"></iframe>
  */
 class SSR extends ASinglePassPostEffect {
-    /** 최대 스텝 수. 기본값 64, 범위 1~512 */
+    /** 
+     * [KO] 최대 스텝 수. 기본값 64
+     * [EN] Max steps. Default 64
+     */
     #maxSteps: number = 64;
-    /** 최대 반사 거리. 기본값 15.0, 범위 1.0~200.0 */
+    /** 
+     * [KO] 최대 반사 거리. 기본값 15.0
+     * [EN] Max distance. Default 15.0
+     */
     #maxDistance: number = 15.0;
-    /** 스텝 크기. 기본값 0.02, 범위 0.001~5.0 */
+    /** 
+     * [KO] 스텝 크기. 기본값 0.02
+     * [EN] Step size. Default 0.02
+     */
     #stepSize: number = 0.02;
-    /** 반사 강도. 기본값 1, 범위 0.0~5.0 */
+    /** 
+     * [KO] 반사 강도. 기본값 1
+     * [EN] Reflection intensity. Default 1
+     */
     #reflectionIntensity: number = 1;
-    /** 페이드 거리. 기본값 12.0, 범위 1.0~100.0 */
+    /** 
+     * [KO] 페이드 거리. 기본값 12.0
+     * [EN] Fade distance. Default 12.0
+     */
     #fadeDistance: number = 12.0;
-    /** 에지 페이드. 기본값 0.15, 범위 0.0~0.5 */
+    /** 
+     * [KO] 에지 페이드. 기본값 0.15
+     * [EN] Edge fade. Default 0.15
+     */
     #edgeFade: number = 0.15;
 
+    /**
+     * [KO] SSR 인스턴스를 생성합니다.
+     * [EN] Creates an SSR instance.
+     * 
+     * @param redGPUContext 
+     * [KO] RedGPU 컨텍스트
+     * [EN] RedGPU Context
+     */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
         this.WORK_SIZE_X = 8;
@@ -60,72 +89,126 @@ class SSR extends ASinglePassPostEffect {
         this.edgeFade = this.#edgeFade;
     }
 
-    /** 최대 스텝 수 반환 */
+    /** 
+     * [KO] 최대 스텝 수
+     * [EN] Max steps
+     */
     get maxSteps(): number {
         return this.#maxSteps;
     }
 
-    /** 최대 스텝 수 설정. 1~512 */
+    /**
+     * [KO] 최대 스텝 수를 설정합니다.
+     * [EN] Sets the max steps.
+     * 
+     * [KO] 범위: 1~512
+     * [EN] Range: 1~512
+     */
     set maxSteps(value: number) {
         validateNumberRange(value, 1, 512);
         this.#maxSteps = value;
         this.updateUniform('maxSteps', value);
     }
 
-    /** 최대 반사 거리 반환 */
+    /** 
+     * [KO] 최대 반사 거리
+     * [EN] Max reflection distance
+     */
     get maxDistance(): number {
         return this.#maxDistance;
     }
 
-    /** 최대 반사 거리 설정. 1.0~200.0 */
+    /**
+     * [KO] 최대 반사 거리를 설정합니다.
+     * [EN] Sets the max reflection distance.
+     * 
+     * [KO] 범위: 1.0~200.0
+     * [EN] Range: 1.0~200.0
+     */
     set maxDistance(value: number) {
         validatePositiveNumberRange(value, 1.0, 200.0);
         this.#maxDistance = value;
         this.updateUniform('maxDistance', value);
     }
 
-    /** 스텝 크기 반환 */
+    /** 
+     * [KO] 스텝 크기
+     * [EN] Step size
+     */
     get stepSize(): number {
         return this.#stepSize;
     }
 
-    /** 스텝 크기 설정. 0.001~5.0 */
+    /**
+     * [KO] 스텝 크기를 설정합니다.
+     * [EN] Sets the step size.
+     * 
+     * [KO] 범위: 0.001~5.0
+     * [EN] Range: 0.001~5.0
+     */
     set stepSize(value: number) {
         validatePositiveNumberRange(value, 0.001, 5.0);
         this.#stepSize = value;
         this.updateUniform('stepSize', value);
     }
 
-    /** 반사 강도 반환 */
+    /** 
+     * [KO] 반사 강도
+     * [EN] Reflection intensity
+     */
     get reflectionIntensity(): number {
         return this.#reflectionIntensity;
     }
 
-    /** 반사 강도 설정. 0.0~5.0 */
+    /**
+     * [KO] 반사 강도를 설정합니다.
+     * [EN] Sets the reflection intensity.
+     * 
+     * [KO] 범위: 0.0~5.0
+     * [EN] Range: 0.0~5.0
+     */
     set reflectionIntensity(value: number) {
         validateNumberRange(value, 0.0, 5.0);
         this.#reflectionIntensity = value;
         this.updateUniform('reflectionIntensity', value);
     }
 
-    /** 페이드 거리 반환 */
+    /** 
+     * [KO] 페이드 거리
+     * [EN] Fade distance
+     */
     get fadeDistance(): number {
         return this.#fadeDistance;
     }
 
-    /** 페이드 거리 설정. 1.0~100.0 */
+    /**
+     * [KO] 페이드 거리를 설정합니다.
+     * [EN] Sets the fade distance.
+     * 
+     * [KO] 범위: 1.0~100.0
+     * [EN] Range: 1.0~100.0
+     */
     set fadeDistance(value: number) {
         validatePositiveNumberRange(value, 1.0, 100.0);
         this.#fadeDistance = value;
         this.updateUniform('fadeDistance', value);
     }
 
-    /** 에지 페이드 반환 */
+    /** 
+     * [KO] 에지 페이드
+     * [EN] Edge fade
+     */
     get edgeFade(): number {
         return this.#edgeFade;
     }
 
-    /** 에지 페이드 설정. 0.0~0.5 */
+    /**
+     * [KO] 에지 페이드를 설정합니다.
+     * [EN] Sets the edge fade.
+     * 
+     * [KO] 범위: 0.0~0.5
+     * [EN] Range: 0.0~0.5
+     */
     set edgeFade(value: number) {
         validateNumberRange(value, 0.0, 0.5);
         this.#edgeFade = value;

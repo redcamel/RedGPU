@@ -6,12 +6,13 @@ import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 
 /**
- * 색수차(Chromatic Aberration) 후처리 이펙트입니다.
+ * [KO] 색수차(Chromatic Aberration) 후처리 이펙트입니다.
+ * [EN] Chromatic Aberration post-processing effect.
  *
- * @category Lens
+ * @category PostEffect
  *
- * @example
- * ```javascript
+ * * ### Example
+ * ```typescript
  * const effect = new RedGPU.PostEffect.ChromaticAberration(redGPUContext);
  * effect.strength = 0.02;
  * effect.centerX = 0.5;
@@ -19,22 +20,36 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * effect.falloff = 1.0;
  * view.postEffectManager.addEffect(effect);
  * ```
- *
- * <iframe src="/RedGPU/examples/postEffect/lens/chromaticAberration/"></iframe>
  */
 class ChromaticAberration extends ASinglePassPostEffect {
-    /** 강도. 기본값 0.015, 최소 0 */
+    /** 
+     * [KO] 강도. 기본값 0.015
+     * [EN] Strength. Default 0.015
+     */
     #strength: number = 0.015
-    /** 중심 X. 기본값 0.5, 범위 0~1 */
+    /** 
+     * [KO] 중심 X. 기본값 0.5
+     * [EN] Center X. Default 0.5
+     */
     #centerX: number = 0.5
-    /** 중심 Y. 기본값 0.5, 범위 0~1 */
+    /** 
+     * [KO] 중심 Y. 기본값 0.5
+     * [EN] Center Y. Default 0.5
+     */
     #centerY: number = 0.5
-    /** falloff. 기본값 1.0, 범위 0~5 */
+    /** 
+     * [KO] falloff. 기본값 1.0
+     * [EN] falloff. Default 1.0
+     */
     #falloff: number = 1.0
 
     /**
-     * ChromaticAberration 인스턴스 생성
-     * @param redGPUContext 렌더링 컨텍스트
+     * [KO] ChromaticAberration 인스턴스를 생성합니다.
+     * [EN] Creates a ChromaticAberration instance.
+     * 
+     * @param redGPUContext 
+     * [KO] RedGPU 컨텍스트
+     * [EN] RedGPU Context
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
@@ -49,14 +64,20 @@ class ChromaticAberration extends ASinglePassPostEffect {
         this.falloff = this.#falloff
     }
 
-    /** 강도 반환 */
+    /** 
+     * [KO] 강도
+     * [EN] Strength
+     */
     get strength(): number {
         return this.#strength;
     }
 
     /**
-     * 강도 설정
-     * 최소값 0
+     * [KO] 강도를 설정합니다.
+     * [EN] Sets the strength.
+     * 
+     * [KO] 최소값: 0
+     * [EN] Minimum value: 0
      */
     set strength(value: number) {
         validateNumberRange(value, 0)
@@ -64,14 +85,20 @@ class ChromaticAberration extends ASinglePassPostEffect {
         this.updateUniform('strength', value)
     }
 
-    /** 중심 X 반환 */
+    /** 
+     * [KO] 중심 X
+     * [EN] Center X
+     */
     get centerX(): number {
         return this.#centerX;
     }
 
     /**
-     * 중심 X 설정
-     * 범위 0~1
+     * [KO] 중심 X를 설정합니다.
+     * [EN] Sets the Center X.
+     * 
+     * [KO] 범위: 0~1
+     * [EN] Range: 0~1
      */
     set centerX(value: number) {
         validateNumberRange(value, 0, 1)
@@ -79,14 +106,20 @@ class ChromaticAberration extends ASinglePassPostEffect {
         this.updateUniform('centerX', value)
     }
 
-    /** 중심 Y 반환 */
+    /** 
+     * [KO] 중심 Y
+     * [EN] Center Y
+     */
     get centerY(): number {
         return this.#centerY;
     }
 
     /**
-     * 중심 Y 설정
-     * 범위 0~1
+     * [KO] 중심 Y를 설정합니다.
+     * [EN] Sets the Center Y.
+     * 
+     * [KO] 범위: 0~1
+     * [EN] Range: 0~1
      */
     set centerY(value: number) {
         validateNumberRange(value, 0, 1)
@@ -94,14 +127,20 @@ class ChromaticAberration extends ASinglePassPostEffect {
         this.updateUniform('centerY', value)
     }
 
-    /** falloff 반환 */
+    /** 
+     * [KO] falloff
+     * [EN] falloff
+     */
     get falloff(): number {
         return this.#falloff;
     }
 
     /**
-     * falloff 설정
-     * 범위 0~5
+     * [KO] falloff를 설정합니다.
+     * [EN] Sets the falloff.
+     * 
+     * [KO] 범위: 0~5
+     * [EN] Range: 0~5
      */
     set falloff(value: number) {
         validateNumberRange(value, 0, 5)

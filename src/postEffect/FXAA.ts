@@ -3,11 +3,28 @@ import validateNumberRange from "../runtimeChecker/validateFunc/validateNumberRa
 import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "./core/createBasicPostEffectCode";
 
+/**
+ * [KO] FXAA (Fast Approximate Anti-Aliasing) 후처리 이펙트입니다.
+ * [EN] FXAA (Fast Approximate Anti-Aliasing) post-processing effect.
+ *
+ * [KO] 셰이더 기반의 빠른 안티앨리어싱을 제공합니다.
+ * [EN] Provides fast shader-based anti-aliasing.
+ *
+ * @category PostEffect
+ */
 class FXAA extends ASinglePassPostEffect {
     #subpix: number = 0.75
     #edgeThreshold: number = 0.166
     #edgeThresholdMin: number = 0.0833
 
+    /**
+     * [KO] FXAA 인스턴스를 생성합니다.
+     * [EN] Creates an FXAA instance.
+     *
+     * @param redGPUContext 
+     * [KO] RedGPU 컨텍스트
+     * [EN] RedGPU Context
+     */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
 
@@ -137,6 +154,12 @@ fn fetchColor4(pos: vec2<i32>, dims: vec2<u32>) -> vec4<f32> {
         this.edgeThresholdMin = this.#edgeThresholdMin;
     }
 
+    /**
+     * [KO] 서브픽셀 앨리어싱 제거 강도
+     * [EN] Subpixel aliasing removal intensity
+     * 
+     * @defaultValue 0.75
+     */
     get subpix(): number {
         return this.#subpix;
     }
@@ -147,6 +170,12 @@ fn fetchColor4(pos: vec2<i32>, dims: vec2<u32>) -> vec4<f32> {
         this.updateUniform('subpix', value);
     }
 
+    /**
+     * [KO] 엣지 검출 임계값
+     * [EN] Edge detection threshold
+     * 
+     * @defaultValue 0.166
+     */
     get edgeThreshold(): number {
         return this.#edgeThreshold;
     }
@@ -157,6 +186,12 @@ fn fetchColor4(pos: vec2<i32>, dims: vec2<u32>) -> vec4<f32> {
         this.updateUniform('edgeThreshold', value);
     }
 
+    /**
+     * [KO] 엣지 검출 최소 임계값
+     * [EN] Edge detection minimum threshold
+     * 
+     * @defaultValue 0.0833
+     */
     get edgeThresholdMin(): number {
         return this.#edgeThresholdMin;
     }
