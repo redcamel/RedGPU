@@ -1,28 +1,32 @@
+# 시작하기 (Getting Started)
 
-RedGPU는 차세대 웹 그래픽 API인 **WebGPU**를 기반으로 처음부터 새롭게 설계된 고성능 3D 엔진입니다. 이 가이드는 RedGPU를 사용하여 첫 번째 3D 애플리케이션을 구축하는 과정을 단계별로 안내합니다.
+RedGPU는 차세대 웹 그래픽 표준인 **WebGPU**를 기반으로 설계된 고성능 3D 엔진입니다. 강력한 컴퓨트 쉐이더(Compute Shader) 활용과 낮은 오버헤드를 통해 웹 환경에서도 네이티브 수준의 풍부한 그래픽 경험을 제공합니다.
 
-## 1. 환경 준비 (Prerequisites)
+이 가이드는 RedGPU를 사용하여 첫 번째 3D 애플리케이션을 구축하는 과정을 단계별로 안내합니다.
 
-WebGPU는 최신 기술이므로 시작하기 전에 다음 환경을 확인해야 합니다.
+## 1. 사전 준비 (Prerequisites)
 
-- **브라우저 지원**: Chrome 113+, Edge 113+, Safari(개발자 프리뷰) 등 WebGPU를 지원하는 최신 브라우저를 사용하세요.
-- **보안 컨텍스트**: WebGPU API는 보안 환경(`https://`) 또는 로컬 개발 환경(`http://localhost`)에서만 접근 가능합니다.
+WebGPU는 최신 기술이므로 시작하기 전에 아래의 실행 환경을 확인해야 합니다.
 
-## 2. 엔진 연결 (Installation)
+- **브라우저 지원**: Chrome 113+, Edge 113+ 등 WebGPU를 지원하는 최신 브라우저가 필요합니다.
+- **지원 여부 확인**: [WebGPU Report](https://webgpureport.org/)에서 현재 브라우저와 하드웨어의 WebGPU 지원 상태를 확인할 수 있습니다.
+- **보안 컨텍스트**: WebGPU API는 보안 환경(`https://`) 또는 로컬 환경(`http://localhost`)에서만 작동합니다.
 
-별도의 설치 과정 없이, 제공되는 배포용 URL을 통해 즉시 프로젝트에 통합할 수 있습니다.
+## 2. 엔진 도입 (Installation)
+
+RedGPU는 별도의 복잡한 설치 과정 없이, ES Module(ESM)을 통해 즉시 프로젝트에 통합할 수 있습니다.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
 ```
 
-## 3. 첫 번째 3D 장면 만들기
+## 3. 첫 번째 3D 장면 구현
 
-가장 기본적인 형태인 '회전하는 큐브'를 통해 RedGPU의 작동 방식을 파악해 보겠습니다.
+가장 기본적인 형태인 '회전하는 큐브'를 통해 RedGPU의 핵심 작동 방식을 살펴보겠습니다.
 
 ### HTML 구조 (`index.html`)
 
-렌더링 결과가 출력될 `<canvas>` 엘리먼트와 모듈 방식의 스크립트 연결이 필요합니다.
+렌더링 결과가 출력될 `<canvas>` 엘리먼트를 구성합니다.
 
 ```html
 <!DOCTYPE html>
@@ -32,7 +36,7 @@ import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RedGPU - Quick Start</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; }
+        body { margin: 0; overflow: hidden; background: #111; }
         canvas { display: block; width: 100vw; height: 100vh; }
     </style>
 </head>
@@ -45,7 +49,7 @@ import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
 
 ### JavaScript 구현 (`main.js`)
 
-RedGPU는 `init`을 통한 비동기 초기화 이후, **Scene(공간) - Camera(시점) - Mesh(객체)**를 구성하고 **View3D**를 통해 최종 화면에 출력하는 구조를 가집니다.
+RedGPU는 **초기화(Init)** → **리소스 생성(Scene/Camera/Mesh)** → **뷰 설정(View)** → **렌더링 루프(Start)** 순으로 흐름이 진행됩니다.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -56,41 +60,45 @@ const canvas = document.getElementById('redgpu-canvas');
 RedGPU.init(
     canvas,
     (redContext) => {
-        // 2. 씬(Scene) 생성: 3D 객체들이 위치할 가상 공간
+        // 초기화 성공 시 엔진의 핵심인 redContext 객체가 전달됩니다.
+
+        // 2. 씬(Scene) 생성: 3D 객체들이 배치될 가상 공간
         const scene = new RedGPU.Display.Scene(redContext);
 
         // 3. 카메라 생성: 원근 투영(Perspective) 카메라 설정
         const camera = new RedGPU.Camera.PerspectiveCamera(redContext);
-        camera.z = -5; // 카메라를 원점으로부터 뒤로 배치
+        camera.z = -5; // 카메라를 원점으로부터 뒤로 이동
 
-        // 4. 메시(Mesh) 생성: 형태(Box)와 외관(Color) 정의
+        // 4. 메시(Mesh) 생성: 형태(Box)와 재질(Color)의 결합
         const geometry = new RedGPU.Primitive.Box(redContext); 
         const material = new RedGPU.Material.ColorMaterial(redContext, '#00CC99');
         const mesh = new RedGPU.Display.Mesh(redContext, geometry, material);
         
         scene.addChild(mesh); // 씬에 메시 추가
 
-        // 5. 뷰(View3D) 설정: 특정 씬과 카메라를 조합하여 화면 영역 정의
+        // 5. 뷰(View3D) 설정: 특정 씬을 특정 카메라로 렌더링하도록 정의
         const view = new RedGPU.Display.View3D(redContext, scene, camera);
-        redContext.addView(view);
+        redContext.addView(view); // 컨텍스트에 뷰 등록
 
-        // 6. 렌더러(Renderer) 생성 및 애니메이션 시작
+        // 6. 렌더러(Renderer) 실행 및 애니메이션 시작
         const renderer = new RedGPU.Renderer();
         renderer.start(redContext, (time) => {
-            // 매 프레임마다 회전 애니메이션 적용
+            // 매 프레임마다 호출되어 애니메이션을 구현합니다.
             mesh.rotationX += 1;
             mesh.rotationY += 1;
         });
     },
     (error) => {
+        // WebGPU 미지원 브라우저 등 초기화 실패 시 처리
         console.error('RedGPU 초기화 실패:', error);
+        alert('WebGPU를 초기화할 수 없습니다. 실행 환경을 확인해 주세요.');
     }
 );
 ```
 
 ## 동적 샘플 실행 (Live Demo)
 
-아래 데모는 CodePen을 통해 실시간으로 실행되는 예제입니다. **Result** 탭에서 결과를 확인하고, **JS** 탭을 눌러 코드를 직접 수정해 볼 수 있습니다.
+아래의 대화형 예제를 통해 코드를 직접 수정하며 결과를 실시간으로 확인할 수 있습니다.
 
 <ClientOnly>
 <CodePen title="RedGPU Quick Start - Rotating Cube" slugHash="getting-started">
@@ -98,7 +106,7 @@ RedGPU.init(
 &lt;canvas id="redgpu-canvas"&gt;&lt;/canvas&gt;
 </pre>
 <pre data-lang="css">
-body { margin: 0; overflow: hidden; background: #000; }
+body { margin: 0; overflow: hidden; background: #111; }
 canvas { display: block; width: 100vw; height: 100vh; }
 </pre>
 <pre data-lang="js">
@@ -138,18 +146,14 @@ RedGPU.init(
 
 <br/>
 
-## 주요 구성 요소 이해
+## 시스템 구조 및 실행 흐름
 
-| 핵심 클래스 | 역할 설명 |
-| :--- | :--- |
-| **`RedGPU.init`** | WebGPU 시스템을 초기화하고 엔진의 코어 컨텍스트를 생성합니다. |
-| **`RedGPU.Renderer`** | 등록된 뷰들을 물리적으로 GPU에 드로잉하는 역할을 담당합니다. |
-| **`RedGPU.Display.Scene`** | 메시, 라이트 등이 배치되는 3D 공간의 루트 컨테이너입니다. |
-| **`RedGPU.Display.View3D`** | 어떤 씬을 어떤 카메라로 렌더링할지 정의하는 화면 단위입니다. |
-| **`RedGPU.Display.Mesh`** | 지오메트리(형태)와 머티리얼(재질)이 결합된 실제 가시 객체입니다. |
+RedGPU의 주요 클래스 관계와 애플리케이션의 생명 주기를 도식화한 내용입니다.
+
+### 실행 프로세스 (Execution Flow)
 
 <script setup>
-const mermaidGraph = `
+const systemGraph = `
     Renderer[RedGPU.Renderer] -->|Draws| View[RedGPU.Display.View3D]
     View -->|Composes| Scene[RedGPU.Display.Scene]
     View -->|Uses| Camera[RedGPU.Camera]
@@ -161,14 +165,41 @@ const mermaidGraph = `
     class View mermaid-main;
     class Geo,Mat mermaid-component;
 `
+
+const flowGraph = `
+    Start([시작]) --> Init[RedGPU.init 초기화]
+    Init -->|성공| Context[RedContext 획득]
+    Context --> Create[리소스 생성<br/>Scene, Camera, Mesh]
+    Create --> SetupView[View3D 설정]
+    SetupView --> StartLoop[렌더링 루프 시작]
+    StartLoop -->|Loop| Update[프레임 업데이트]
+    Update --> Render[화면 렌더링]
+    Render --> Update
+`
 </script>
 
 <ClientOnly>
-<MermaidResponsive :definition="mermaidGraph" />
+<MermaidResponsive :definition="flowGraph" />
 </ClientOnly>
 
-## 다음 학습 추천
+### 주요 구성 요소 (Core Components)
 
-- **[RedGPU Context](../core-concepts/redgpu-context.md)**: 컨텍스트 관리 및 설정 옵션 상세 가이드.
-- **[기본 지오메트리](../core-concepts/geometry.md)**: 기본 도형 생성 및 파라미터 활용법.
-- **[API Reference](../../api/index.md)**: 전체 클래스 명세 확인.````
+| 클래스 | 역할 정의 |
+| :--- | :--- |
+| **`RedGPU.init`** | WebGPU 디바이스 권한을 요청하고 엔진의 핵심 컨텍스트를 생성합니다. |
+| **`RedGPU.Renderer`** | 등록된 뷰들을 GPU 하드웨어에 그리는 렌더링 루프를 관리합니다. |
+| **`RedGPU.Display.Scene`** | 메시, 라이트 등 3D 객체들이 배치되는 가상 공간의 루트 컨테이너입니다. |
+| **`RedGPU.Display.View3D`** | 특정 씬을 어떤 시점(Camera)에서 화면에 출력할지 결정하는 단위입니다. |
+
+<ClientOnly>
+<MermaidResponsive :definition="systemGraph" />
+</ClientOnly>
+
+## 다음 단계로
+
+기본적인 장면 구성을 익혔다면, 아래 주제들을 통해 RedGPU의 더 깊은 기능을 탐구해 보세요.
+
+- **[RedGPU Context](../core-concepts/redgpu-context.md)**: 엔진 컨텍스트의 상세 설정과 옵션 가이드.
+- **[기본 지오메트리](../core-concepts/geometry.md)**: 제공되는 기본 도형의 종류와 활용법.
+- **[재질(Material) 시스템](../core-concepts/material.md)**: 질감과 색상을 표현하는 머티리얼 활용법.
+- **[API Reference](../../api/index.md)**: 전체 클래스 명세 및 기술 문서.
