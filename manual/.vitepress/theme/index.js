@@ -2,7 +2,10 @@ import DefaultTheme from 'vitepress/theme'
 import { h, watch, nextTick } from 'vue'
 import { useRouter } from 'vitepress'
 import './custom.css'
+import './mermaid.css'
 import ExampleFrame from './components/ExampleFrame.vue'
+import CodePen from './components/CodePen.vue'
+import MermaidResponsive from './components/MermaidResponsive.vue'
 import GlobalFooter from './components/GlobalFooter.vue'
 import pkg from '../../../package.json' with { type: 'json' }
 
@@ -60,5 +63,7 @@ export default {
 
     enhanceApp({ app }) {
         app.component('ExampleFrame', ExampleFrame)
+        app.component('CodePen', CodePen)
+        app.component('MermaidResponsive', MermaidResponsive)
     }
 }

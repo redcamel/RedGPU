@@ -1,5 +1,6 @@
 import { defineConfig } from 'vitepress'
 import { generateSidebar } from 'vitepress-sidebar';
+import { withMermaid } from 'vitepress-plugin-mermaid';
 
 /**
  * 1. Sidebar Sorting Utility
@@ -75,7 +76,7 @@ const finalSidebar = sortSidebar(rawSidebarConfig);
 /**
  * 3. VitePress Main Configuration
  */
-export default defineConfig({
+export default withMermaid(defineConfig({
     title: 'RedGPU',
     description: 'RedGPU - WebGPU based 3D Graphics Engine',
     base: '/RedGPU/manual/',
@@ -93,7 +94,6 @@ export default defineConfig({
                 themeConfig: {
                     // 언어별 네비게이션 바
                     nav: [
-                        { text: 'Manual', link: `/${lang.code}/` },
                         { text: 'Getting Started', link: lang.entry },
                         { text: 'API Reference', link: `/${lang.code}/api/RedGPU-API/namespaces/RedGPU/README` },
                         { text: 'Examples', link: 'https://redcamel.github.io/RedGPU/examples/' },
@@ -121,6 +121,28 @@ export default defineConfig({
         if (pageData.relativePath.includes('api/RedGPU-API/')) {
             // 2. 해당 페이지의 frontmatter에 'api-page' 클래스 추가
             pageData.frontmatter.pageClass = 'api-page-layout';
+        }
+    },
+    // Mermaid 설정
+    mermaid: {
+        theme: 'base',
+        themeVariables: {
+            darkMode: true,
+            background: '#1b1b1f',
+            
+            primaryColor: '#252529',
+            primaryTextColor: '#F2F2F2',
+            primaryBorderColor: '#00CC99',
+            
+            lineColor: '#6e6e73',
+            secondaryColor: '#161618',
+            tertiaryColor: '#161618',
+            
+            mainBkg: '#1b1b1f',
+            nodeBorder: '#00CC99',
+            
+            fontFamily: 'var(--vp-font-family-base)',
+            fontSize: '15px'
         }
     },
     // 공통 테마 설정
@@ -171,4 +193,4 @@ export default defineConfig({
             label: 'On this page'
         }
     }
-});
+}));

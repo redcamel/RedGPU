@@ -32,6 +32,7 @@
     "concurrently": "^9.2.1",
     "cross-env": "^10.1.0",
     "gl-matrix": "^3.4.3",
+    "mermaid": "^11.12.2",
     "postcss": "^8.5.6",
     "rollup": "^4.44.1",
     "rollup-plugin-postcss": "^4.0.2",
@@ -41,6 +42,7 @@
     "typedoc-plugin-markdown": "^4.9.0",
     "typescript": "^5.8.3",
     "vitepress": "^1.6.4",
+    "vitepress-plugin-mermaid": "^2.0.17",
     "vitepress-sidebar": "^1.33.1"
   },
   "dependencies": {
