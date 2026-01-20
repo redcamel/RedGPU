@@ -1,3 +1,29 @@
+<script setup>
+const systemGraph = `
+    Renderer["RedGPU.Renderer"] -->|Draws| View["RedGPU.Display.View3D"]
+    View -->|Composes| Scene["RedGPU.Display.Scene"]
+    View -->|Uses| Camera["RedGPU.Camera"]
+    Scene -->|Contains| Mesh["RedGPU.Display.Mesh"]
+    Mesh -->|Combines| Geo["Geometry"] & Mat["Material"]
+
+    %% 커스텀 클래스 적용
+    class Renderer mermaid-system;
+    class View mermaid-main;
+    class Geo,Mat mermaid-component;
+`
+
+const flowGraph = `
+    Start(["시작"]) --> Init["RedGPU.init 초기화"]
+    Init -->|성공| Context["RedContext 획득"]
+    Context --> Create["리소스 생성<br/>Scene, Camera, Mesh"]
+    Create --> SetupView["View3D 설정"]
+    SetupView --> StartLoop["렌더링 루프 시작"]
+    StartLoop -->|Loop| Update["프레임 업데이트"]
+    Update --> Render["화면 렌더링"]
+    Render --> Update
+`
+</script>
+
 # 시작하기 (Getting Started)
 
 RedGPU는 차세대 웹 그래픽 표준인 **WebGPU**를 기반으로 설계된 고성능 3D 엔진입니다. 강력한 컴퓨트 쉐이더(Compute Shader) 활용과 낮은 오버헤드를 통해 웹 환경에서도 네이티브 수준의 풍부한 그래픽 경험을 제공합니다.
@@ -101,7 +127,7 @@ RedGPU.init(
 아래의 대화형 예제를 통해 코드를 직접 수정하며 결과를 실시간으로 확인할 수 있습니다.
 
 <ClientOnly>
-<CodePen title="RedGPU Quick Start - Rotating Cube" slugHash="getting-started">
+  <CodePen title="RedGPU Quick Start - Rotating Cube" slugHash="getting-started">
 <pre data-lang="html">
 &lt;canvas id="redgpu-canvas"&gt;&lt;/canvas&gt;
 </pre>
@@ -141,7 +167,7 @@ RedGPU.init(
     }
 );
 </pre>
-</CodePen>
+  </CodePen>
 </ClientOnly>
 
 <br/>
@@ -152,34 +178,8 @@ RedGPU의 주요 클래스 관계와 애플리케이션의 생명 주기를 도�
 
 ### 실행 프로세스 (Execution Flow)
 
-<script setup>
-const systemGraph = `
-    Renderer[RedGPU.Renderer] -->|Draws| View[RedGPU.Display.View3D]
-    View -->|Composes| Scene[RedGPU.Display.Scene]
-    View -->|Uses| Camera[RedGPU.Camera]
-    Scene -->|Contains| Mesh[RedGPU.Display.Mesh]
-    Mesh -->|Combines| Geo[Geometry] & Mat[Material]
-
-    %% 커스텀 클래스 적용
-    class Renderer mermaid-system;
-    class View mermaid-main;
-    class Geo,Mat mermaid-component;
-`
-
-const flowGraph = `
-    Start([시작]) --> Init[RedGPU.init 초기화]
-    Init -->|성공| Context[RedContext 획득]
-    Context --> Create[리소스 생성<br/>Scene, Camera, Mesh]
-    Create --> SetupView[View3D 설정]
-    SetupView --> StartLoop[렌더링 루프 시작]
-    StartLoop -->|Loop| Update[프레임 업데이트]
-    Update --> Render[화면 렌더링]
-    Render --> Update
-`
-</script>
-
 <ClientOnly>
-<MermaidResponsive :definition="flowGraph" />
+  <MermaidResponsive :definition="flowGraph" />
 </ClientOnly>
 
 ### 주요 구성 요소 (Core Components)
@@ -192,7 +192,7 @@ const flowGraph = `
 | **`RedGPU.Display.View3D`** | 특정 씬을 어떤 시점(Camera)에서 화면에 출력할지 결정하는 단위입니다. |
 
 <ClientOnly>
-<MermaidResponsive :definition="systemGraph" />
+  <MermaidResponsive :definition="systemGraph" />
 </ClientOnly>
 
 ## 다음 단계로
@@ -200,6 +200,6 @@ const flowGraph = `
 기본적인 장면 구성을 익혔다면, 아래 주제들을 통해 RedGPU의 더 깊은 기능을 탐구해 보세요.
 
 - **[RedGPU Context](../core-concepts/redgpu-context.md)**: 엔진 컨텍스트의 상세 설정과 옵션 가이드.
-- **[기본 지오메트리](../core-concepts/geometry.md)**: 제공되는 기본 도형의 종류와 활용법.
+- **[메시 (Mesh)](../core-concepts/mesh.md)**: 지오메트리와 머티리얼을 결합하여 물체를 만들고 제어하는 방법.
 - **[재질(Material) 시스템](../core-concepts/material.md)**: 질감과 색상을 표현하는 머티리얼 활용법.
 - **[API Reference](../../api/index.md)**: 전체 클래스 명세 및 기술 문서.

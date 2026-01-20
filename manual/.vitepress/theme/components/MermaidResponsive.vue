@@ -1,7 +1,7 @@
 <template>
-  <div class="mermaid-responsive-container">
-    <div v-if="!isMobile" class="desktop-view" v-html="desktopSvg"></div>
-    <div v-else class="mobile-view" v-html="mobileSvg"></div>
+  <div class="mermaid-responsive-container" ref="containerRef">
+    <div v-if="!isMobile" class="desktop-view" v-html="desktopSvg || loadingHtml"></div>
+    <div v-else class="mobile-view" v-html="mobileSvg || loadingHtml"></div>
   </div>
 </template>
 
@@ -16,16 +16,17 @@ const props = defineProps({
   }
 })
 
+const containerRef = ref(null)
 const desktopSvg = ref('')
 const mobileSvg = ref('')
 const isMobile = ref(false)
+const loadingHtml = '<div class="mermaid-loading">Rendering diagram...</div>'
 
-// 간단한 고유 ID 생성기 (Date.now()만으로는 동시 렌더링 시 충돌 가능)
 const generateUniqueId = (prefix) => {
-    return `${prefix}-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`
+    const randomStr = Math.random().toString(36).substring(2, 8);
+    return `${prefix}_${randomStr}_${Date.now()}`.replace(/-/g, '_');
 }
 
-// 모바일 감지 기준 너비 (768px)
 const updateIsMobile = () => {
     isMobile.value = window.innerWidth < 1600
 }
@@ -33,51 +34,47 @@ const updateIsMobile = () => {
 const renderCurrentDiagram = async () => {
     if (!props.definition) return;
     
-    // 현재 상태에 필요한 이미지가 이미 있다면 렌더링 스킵 (Lazy Loading)
-    if (isMobile.value && mobileSvg.value) return;
-    if (!isMobile.value && desktopSvg.value) return;
+    const currentIsMobile = isMobile.value;
+    if (currentIsMobile && mobileSvg.value) return;
+    if (!currentIsMobile && desktopSvg.value) return;
 
     await nextTick()
+    
     const baseDefinition = props.definition.trim();
-    // 기존 정의에 graph 방향이 있다면 제거 (우리가 제어하기 위해)
-    let content = baseDefinition.replace(/^graph (TD|LR|TB|BT|RL)/m, '');
-
-    const currentIsMobile = isMobile.value; // 렌더링 시작 시점의 상태 캡처
+    // 기존 graph 키워드 및 방향 선언 제거
+    let content = baseDefinition.replace(/^graph\s+(TD|LR|TB|BT|RL)/m, '');
     const direction = currentIsMobile ? 'TD' : 'LR'
-    // 고유 ID 생성 방식 강화
-    const id = generateUniqueId(`mermaid-${currentIsMobile ? 'mobile' : 'desktop'}`)
+    const id = generateUniqueId(`mermaid_${currentIsMobile ? 'mo' : 'de'}`)
+    
+    // graph 선언과 내용 사이에 명확한 공백과 줄바꿈 추가
+    const finalDefinition = `graph ${direction}\n    ${content}`;
     
     try {
-        const { svg } = await mermaid.render(id, `graph ${direction}\n${content}`)
+        const { svg } = await mermaid.render(id, finalDefinition)
         
-        // 렌더링이 끝난 후 상태에 맞게 저장
-        if (currentIsMobile) {
-            mobileSvg.value = svg
-        } else {
-            desktopSvg.value = svg
-        }
+        if (currentIsMobile) mobileSvg.value = svg
+        else desktopSvg.value = svg
     } catch (e) {
-        console.error(`Mermaid ${currentIsMobile ? 'Mobile' : 'Desktop'} Render Error:`, e)
-        const errorHtml = `<pre class="error">${e.message}</pre>`
+        console.error('Mermaid Render Error:', e)
+        const errorHtml = `<div class="error">Mermaid Error: ${e.message}</div>`
         if (currentIsMobile) mobileSvg.value = errorHtml
         else desktopSvg.value = errorHtml
     }
 }
 
-// 정의가 바뀌면 캐시 초기화 및 다시 렌더링
 watch(() => props.definition, () => {
     desktopSvg.value = ''
     mobileSvg.value = ''
     renderCurrentDiagram()
 })
 
-// 화면 크기 변경으로 모바일/데스크탑 모드가 바뀌면 필요한 다이어그램 렌더링 확인
 watch(isMobile, renderCurrentDiagram)
 
 onMounted(async () => {
     mermaid.initialize({
         startOnLoad: false,
         theme: 'base',
+        securityLevel: 'loose',
         themeVariables: {
             darkMode: true,
             background: '#1b1b1f',
@@ -96,7 +93,7 @@ onMounted(async () => {
     
     updateIsMobile()
     window.addEventListener('resize', updateIsMobile)
-    await renderCurrentDiagram()
+    setTimeout(renderCurrentDiagram, 100)
 })
 
 onUnmounted(() => {
@@ -107,25 +104,27 @@ onUnmounted(() => {
 <style scoped>
 .mermaid-responsive-container {
     margin: 20px 0;
-    overflow-x: auto; /* 다이어그램이 클 경우 스크롤 허용 */
+    min-height: 50px;
+    display: flex;
+    justify-content: center;
 }
-
-/* 
- mermaid 렌더링 결과 내부의 svg 스타일 조정 
- v-html로 주입되므로 deep selector가 필요할 수 있으나,
- mermaid 자체가 svg에 스타일을 포함하므로 기본 컨테이너 스타일만 지정
-*/
+.mermaid-loading {
+    font-size: 0.9em;
+    color: var(--vp-c-text-3);
+    font-style: italic;
+}
 .desktop-view, .mobile-view {
     width: 100%;
     display: flex;
     justify-content: center;
 }
-
-.error {
+:deep(.error) {
     color: #ff4d4f;
-    font-size: 0.85em;
-    background: rgba(255, 77, 79, 0.1);
+    font-size: 0.8em;
     padding: 10px;
+    border: 1px solid #ff4d4f;
     border-radius: 4px;
+    white-space: pre-wrap;
+    word-break: break-all;
 }
 </style>

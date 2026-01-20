@@ -200,6 +200,6 @@ const flowGraph = `
 Now that you've built your first scene, explore more powerful features of RedGPU through these topics:
 
 - **[RedGPU Context](../core-concepts/redgpu-context.md)**: A guide to engine context settings and advanced options.
-- **[Basic Geometry](../core-concepts/geometry.md)**: Types of primitive shapes and how to use them.
+- **[Mesh](../core-concepts/mesh.md)**: How to create and control objects by combining geometry and material.
 - **[Material System](../core-concepts/material.md)**: How to express textures and colors using materials.
 - **[API Reference](../../api/index.md)**: Full class specifications and technical documentation.
