@@ -77,7 +77,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     const geometry = new RedGPU.Primitive.Box(redGPUContext);
     const material = new RedGPU.Material.ColorMaterial(redGPUContext, '#00CC99');
 
-    // 2. 메시 생성 및 씬에 추가
+    // 2. 메시 생성 및 Scene에 추가
     const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
     scene.addChild(mesh);
 
@@ -174,4 +174,4 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 메시들을 부모-자식 관계로 묶어 복잡한 구조를 만드는 방법을 알아봅니다.
 
-- **[씬 그래프 (Scene Graph)](./scene-graph.md)**
+- **[Scene Graph (Scene Graph)](./scene-graph.md)**
