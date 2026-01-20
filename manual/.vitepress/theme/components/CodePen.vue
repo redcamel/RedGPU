@@ -4,7 +4,7 @@
       class="codepen"
       :data-height="height"
       data-theme-id="dark"
-      data-default-tab="result,js"
+      data-default-tab="result"
       :data-slug-hash="slugHash"
       data-editable="true"
       data-user="redcamel"
