@@ -37,13 +37,10 @@ RedGPU.init(document.getElementById('redgpu-canvas'), (redGPUContext) => {
     
     // 1. 조명 설정 (LightManager를 통해 추가)
     // 환경광 추가
-    scene.lightManager.ambientLight = new RedGPU.Light.AmbientLight(redGPUContext, '#ffffff', 0.2);
+    scene.lightManager.ambientLight = new RedGPU.Light.AmbientLight('#ffffff', 0.2);
 
-    // 태양광(직행광) 추가
-    const directionalLight = new RedGPU.Light.DirectionalLight(redGPUContext, '#ffffff', 1.0);
-    directionalLight.x = 10;
-    directionalLight.y = 10;
-    directionalLight.z = 10;
+    // 태양광(방향광) 추가
+    const directionalLight = new RedGPU.Light.DirectionalLight([-1, -1, -1], '#ffffff', 1.0);
     scene.lightManager.addDirectionalLight(directionalLight);
 
     // 2. 빛 재질을 입힌 구체 생성
@@ -91,19 +88,19 @@ RedGPU.init(canvas, (redGPUContext) => {
     controller.distance = 10;
 
     // Lights
-    scene.lightManager.ambientLight = new RedGPU.Light.AmbientLight(redGPUContext, '#ffffff', 0.1);
+    scene.lightManager.ambientLight = new RedGPU.Light.AmbientLight('#ffffff', 0.1);
     
-    const dirLight = new RedGPU.Light.DirectionalLight(redGPUContext, '#ffffff', 1.0);
-    dirLight.x = 10; dirLight.y = 10; dirLight.z = 5;
+    const dirLight = new RedGPU.Light.DirectionalLight([-1, -1, -1], '#ffffff', 1.0);
     scene.lightManager.addDirectionalLight(dirLight);
 
-    const pointLight = new RedGPU.Light.PointLight(redGPUContext, '#ffcc00', 2.0, 10);
-    pointLight.x = -5; pointLight.y = 2; pointLight.z = 5;
+    const pointLight = new RedGPU.Light.PointLight('#ffcc00', 2.0);
+    pointLight.radius = 10;
+    pointLight.setPosition(-5, 2, 5);
     scene.lightManager.addPointLight(pointLight);
 
     // Material & Mesh
     const material = new RedGPU.Material.PhongMaterial(redGPUContext);
-    material.color.hex = '#00CC99';
+
     material.shininess = 128;
 
     const mesh = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.TorusKnot(redGPUContext), material);
