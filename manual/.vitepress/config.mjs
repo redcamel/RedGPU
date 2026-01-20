@@ -50,7 +50,7 @@ languages.forEach(lang => {
         useFolderTitleFromIndexFile: true,
         hyphenToSpace: true,
         // API 폴더는 일반 매뉴얼 사이드바에서 제외 (중요)
-        excludePattern: ['api/**']
+        excludePattern: ['api/**'],
     });
 });
 
