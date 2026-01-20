@@ -1,3 +1,6 @@
+---
+order: 1
+---
 <script setup>
 const systemGraph = `
     Renderer["RedGPU.Renderer"] -->|Draws| View["RedGPU.Display.View3D"]

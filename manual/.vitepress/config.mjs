@@ -2,19 +2,62 @@ import { defineConfig } from 'vitepress'
 import { generateSidebar } from 'vitepress-sidebar';
 import { withMermaid } from 'vitepress-plugin-mermaid';
 
-// 지원 언어 설정
+/**
+ * 1. Sidebar Sorting Utility
+ * README/Index 파일을 항상 최상단에 배치하고 객체/배열 구조를 재귀적으로 정렬합니다.
+ */
+const sortSidebar = (sidebar) => {
+    if (!Array.isArray(sidebar) && typeof sidebar === 'object' && sidebar !== null) {
+        return Object.fromEntries(
+            Object.entries(sidebar).map(([key, value]) => [key, sortSidebar(value)])
+        );
+    }
+
+    if (Array.isArray(sidebar)) {
+        return sidebar
+            .map(item => ({
+                ...item,
+                items: item.items ? sortSidebar(item.items) : undefined
+            }))
+            .sort((a, b) => {
+                const isIndex = (text = '', link = '') =>
+                    text.toLowerCase().includes('readme') || link.endsWith('/') || link.endsWith('README');
+
+                const aIsIndex = isIndex(a.text, a.link);
+                const bIsIndex = isIndex(b.text, b.link);
+
+                return aIsIndex && !bIsIndex ? -1 : !aIsIndex && bIsIndex ? 1 : 0;
+            });
+    }
+
+    return sidebar;
+};
+
+// 지원 언어 설정 (이 배열을 기준으로 모든 설정이 생성됨)
 const languages = [
     { code: 'en', label: 'English', entry: '/en/introduction/getting-started' },
     { code: 'ko', label: '한국어', entry: '/ko/introduction/getting-started' }
 ];
+const sidebarEntries = [];
 
-/**
- * 1. API 문서 사이드바 자동 생성
- * 매뉴얼 부분은 수동으로 정의하고, 방대한 API 문서는 자동 생성을 활용합니다.
- */
-const apiSidebarEntries = [];
+// [1] 매뉴얼 설정 추가
 languages.forEach(lang => {
-    apiSidebarEntries.push({
+    sidebarEntries.push({
+        documentRootPath: 'manual',
+        scanStartPath: lang.code,
+        resolvePath: `/${lang.code}/`,
+        useTitleFromFileHeading: true,
+        useFolderTitleFromIndexFile: true,
+        hyphenToSpace: true,
+        // API 폴더는 일반 매뉴얼 사이드바에서 제외 (중요)
+        excludePattern: ['api/**'],
+        sortMenusByFrontmatterOrder: true
+    });
+});
+
+// [2] API 문서 설정 추가
+languages.forEach(lang => {
+    sidebarEntries.push({
         documentRootPath: 'manual',
         scanStartPath: `${lang.code}/api/RedGPU-API/namespaces/RedGPU`,
         resolvePath: `/${lang.code}/api/RedGPU-API/namespaces/RedGPU/`,
@@ -27,95 +70,12 @@ languages.forEach(lang => {
         sortMenusByFrontmatterOrder: true
     });
 });
-const rawApiSidebar = generateSidebar(apiSidebarEntries);
+
+const rawSidebarConfig = generateSidebar(sidebarEntries);
+const finalSidebar = sortSidebar(rawSidebarConfig);
 
 /**
- * 2. 매뉴얼 사이드바 수동 정의
- * 학습 순서에 맞춰 문서 목록을 직접 지정합니다.
- */
-const manualSidebar = {
-    '/ko/': [
-        {
-            text: '시작하기',
-            collapsed: false,
-            items: [
-                { text: 'RedGPU 시작하기', link: '/ko/introduction/getting-started' }
-            ]
-        },
-        {
-            text: '핵심 개념',
-            collapsed: false,
-            items: [
-                { text: 'RedGPU Context', link: '/ko/core-concepts/redgpu-context' },
-                { text: 'Scene', link: '/ko/core-concepts/scene' },
-                { text: 'Camera', link: '/ko/core-concepts/camera' },
-                { text: 'Controller', link: '/ko/core-concepts/controller' },
-                { text: 'Mesh', link: '/ko/core-concepts/mesh' },
-                { text: 'Scene Graph', link: '/ko/core-concepts/scene-graph' },
-                { text: 'Texture', link: '/ko/core-concepts/texture' },
-                { text: 'Light', link: '/ko/core-concepts/light' },
-                { text: 'Shadow', link: '/ko/core-concepts/shadow' },
-                { text: 'Model Loading (GLTF)', link: '/ko/core-concepts/gltf-loader' },
-            ]
-        }
-    ],
-    '/en/': [
-        {
-            text: 'Introduction',
-            collapsed: false,
-            items: [
-                { text: 'Getting Started', link: '/en/introduction/getting-started' }
-            ]
-        },
-        {
-            text: 'Core Concepts',
-            collapsed: false,
-            items: [
-                { text: 'RedGPU Context', link: '/en/core-concepts/redgpu-context' },
-                { text: 'Scene', link: '/en/core-concepts/scene' },
-                { text: 'Camera', link: '/en/core-concepts/camera' },
-                { text: 'Controller', link: '/en/core-concepts/controller' },
-                { text: 'Mesh', link: '/en/core-concepts/mesh' },
-                { text: 'Scene Graph', link: '/en/core-concepts/scene-graph' },
-                { text: 'Texture', link: '/en/core-concepts/texture' },
-                { text: 'Light', link: '/en/core-concepts/light' },
-                { text: 'Shadow', link: '/en/core-concepts/shadow' },
-                { text: 'Model Loading (GLTF)', link: '/en/core-concepts/gltf-loader' },
-            ]
-        }
-    ]
-};
-
-/**
- * 3. 사이드바 병합 (Manual + API)
- */
-const finalSidebar = {};
-// generateSidebar가 '/ko/', '/en/' 키가 아닌 '/ko', '/en' (슬래시 없음) 또는 다른 형태로 반환할 수 있으므로 확인 필요.
-// 보통 vitepress-sidebar는 path에 맞게 키를 생성함.
-// 안전하게 병합하기 위해 languages 루프 사용.
-
-languages.forEach(lang => {
-    const key = `/${lang.code}/`;
-    // API 사이드바가 존재하면 가져오고, 없으면 빈 배열
-    const apiItems = rawApiSidebar[key] || rawApiSidebar[`/${lang.code}`] || [];
-    
-    // API 섹션에 제목 추가
-    const formattedApiItems = apiItems.length > 0 ? [{
-        text: 'API Reference',
-        collapsed: true,
-        items: apiItems
-    }] : [];
-
-    // 최종 병합: 매뉴얼 -> API 순서
-    finalSidebar[key] = [
-        ...manualSidebar[key],
-        ...apiItems // API 사이드바 구조 자체가 섹션 배열이므로 그대로 붙임
-    ];
-});
-
-
-/**
- * 4. VitePress Main Configuration
+ * 3. VitePress Main Configuration
  */
 export default withMermaid(defineConfig({
     title: 'RedGPU',
@@ -124,15 +84,16 @@ export default withMermaid(defineConfig({
     ignoreDeadLinks: true,
     lastUpdated: true,
 
-    // 다국어 로케일 설정
+    // 다국어 로케일 설정 (자동 생성)
     locales: Object.fromEntries(
         languages.map(lang => [
             lang.code === 'en' ? 'root' : lang.code, // 영어를 기본(root)으로 설정
             {
                 label: lang.label,
                 lang: lang.code,
-                link: `/${lang.code}/`,
+                link: `/${lang.code}/`, // 언어 전환의 기준점이 되는 경로
                 themeConfig: {
+                    // 언어별 네비게이션 바
                     nav: [
                         { text: 'Getting Started', link: lang.entry },
                         { text: 'API Reference', link: `/${lang.code}/api/RedGPU-API/namespaces/RedGPU/README` },
@@ -143,6 +104,7 @@ export default withMermaid(defineConfig({
         ])
     ),
 
+    // 마크다운 커스텀 규칙
     markdown: {
         config: (md) => {
             const defaultRender = md.renderer.rules.html_block || ((tokens, idx) => tokens[idx].content);
@@ -156,31 +118,40 @@ export default withMermaid(defineConfig({
         }
     },
     async transformPageData(pageData) {
+        // 1. 현재 페이지의 경로가 'api/'로 시작하는지 확인
         if (pageData.relativePath.includes('api/RedGPU-API/')) {
+            // 2. 해당 페이지의 frontmatter에 'api-page' 클래스 추가
             pageData.frontmatter.pageClass = 'api-page-layout';
         }
     },
+    // Mermaid 설정
     mermaid: {
         theme: 'base',
         themeVariables: {
             darkMode: true,
             background: '#1b1b1f',
+
             primaryColor: '#252529',
             primaryTextColor: '#F2F2F2',
             primaryBorderColor: '#00CC99',
+
             lineColor: '#6e6e73',
             secondaryColor: '#161618',
             tertiaryColor: '#161618',
+
             mainBkg: '#1b1b1f',
             nodeBorder: '#00CC99',
+
             fontFamily: 'var(--vp-font-family-base)',
             fontSize: '15px'
         }
     },
+    // 공통 테마 설정
     themeConfig: {
         logo: { light: '/logo-light.svg', dark: '/logo-dark.svg' },
         logoLink: '/RedGPU/manual',
 
+        // 공통 사이드바 (finalSidebar 내부의 키가 /ko/, /en/로 나뉘어 있어 자동 매칭됨)
         sidebar: finalSidebar,
 
         socialLinks: [
@@ -188,6 +159,7 @@ export default withMermaid(defineConfig({
             { icon: 'x', link: 'https://x.com/redcamel15' }
         ],
 
+        // 하단 및 기타 텍스트 설정
         lastUpdated: {
             text: 'Last Updated',
             formatOptions: { dateStyle: 'full', timeStyle: 'medium' }
