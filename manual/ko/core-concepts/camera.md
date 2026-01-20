@@ -1,4 +1,4 @@
-# 카메라 (Camera)
+# Camera
 
 3D 공간을 화면에 출력하기 위해서는 세상을 바라보는 시인 **Camera**가 필요합니다. 카메라는 3D 좌표를 2D 모니터 화면으로 변환해주는 역할을 합니다.
 
@@ -43,12 +43,16 @@ RedGPU.init(canvas, (redGPUContext) => {
     camera.lookAt(0, 0, 0);
 
     // 2. 중심 물체 (바닥과 박스)
-    scene.addChild(new RedGPU.Display.Mesh(
-        redGPUContext, new RedGPU.Primitive.Ground(redGPUContext, 10, 10),
-        new RedGPU.Material.ColorMaterial(redGPUContext, '#ffffff')
-    ));
+    scene.addChild(
+        new RedGPU.Display.Mesh(
+            redGPUContext, 
+            new RedGPU.Primitive.Ground(redGPUContext, 10, 10),
+            new RedGPU.Material.ColorMaterial(redGPUContext, '#ffffff')
+        )
+    );
     const box = new RedGPU.Display.Mesh(
-        redGPUContext, new RedGPU.Primitive.Box(redGPUContext),
+        redGPUContext, 
+        new RedGPU.Primitive.Box(redGPUContext),
         new RedGPU.Material.ColorMaterial(redGPUContext, '#1890ff')
     );
     box.y = 1;

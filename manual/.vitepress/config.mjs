@@ -54,7 +54,7 @@ const manualSidebar = {
                 { text: 'Scene Graph', link: '/ko/core-concepts/scene-graph' },
                 { text: 'Texture', link: '/ko/core-concepts/texture' },
                 { text: 'Light', link: '/ko/core-concepts/light' },
-                { text: 'Shadow)', link: '/ko/core-concepts/shadow' },
+                { text: 'Shadow', link: '/ko/core-concepts/shadow' },
                 { text: 'Model Loading (GLTF)', link: '/ko/core-concepts/gltf-loader' },
             ]
         }
