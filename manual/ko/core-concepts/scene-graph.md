@@ -1,3 +1,7 @@
+---
+order: 5
+---
+
 <script setup>
 const sceneGraph = `
     Scene["Scene (Root)"] --> ParentMesh["부모 메시 (Parent)"]

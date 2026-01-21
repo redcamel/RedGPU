@@ -38,38 +38,44 @@ const languages = [
     { code: 'en', label: 'English', entry: '/en/introduction/getting-started' },
     { code: 'ko', label: '한국어', entry: '/ko/introduction/getting-started' }
 ];
-const sidebarEntries = [];
 
-// [1] 매뉴얼 설정 추가
-languages.forEach(lang => {
-    sidebarEntries.push({
-        documentRootPath: 'manual',
-        scanStartPath: lang.code,
-        resolvePath: `/${lang.code}/`,
-        useTitleFromFileHeading: true,
-        useFolderTitleFromIndexFile: true,
-        hyphenToSpace: true,
-        // API 폴더는 일반 매뉴얼 사이드바에서 제외 (중요)
-        excludePattern: ['api/**'],
-        sortMenusByFrontmatterOrder: true
-    });
-});
+// --------------------------------------------------------------------------
+// Sidebar Configuration Groups
+// --------------------------------------------------------------------------
 
-// [2] API 문서 설정 추가
-languages.forEach(lang => {
-    sidebarEntries.push({
-        documentRootPath: 'manual',
-        scanStartPath: `${lang.code}/api/RedGPU-API/namespaces/RedGPU`,
-        resolvePath: `/${lang.code}/api/RedGPU-API/namespaces/RedGPU/`,
-        useFolderTitleFromIndexFile: true,
-        indexFile: 'README.md',
-        useFolderLinkFromIndexFile: true,
-        recursive: true,
-        collapsed: true,
-        collapseDepth: 2,
-        sortMenusByFrontmatterOrder: true
-    });
-});
+// [Group 1] 일반 매뉴얼 사이드바 설정 (General Manual)
+// API 폴더를 제외한 일반 문서(Getting Started, Core Concepts 등)를 처리합니다.
+const manualSidebarConfigs = languages.map(lang => ({
+    documentRootPath: 'manual',
+    scanStartPath: lang.code,
+    resolvePath: `/${lang.code}/`,
+    useTitleFromFileHeading: true,
+    useFolderTitleFromIndexFile: true,
+    hyphenToSpace: true,
+    // API 폴더는 일반 매뉴얼 사이드바에서 제외 (중요)
+    excludePattern: ['api/**'],
+    sortMenusByFrontmatterOrder: true,
+    // 폴더 정렬 순서 지정 (대분류 폴더만 지정하고 파일 순서는 Frontmatter 'order'로 제어)
+    manualSortFileNameByPriority: ['introduction', 'core-concepts']
+}));
+
+// [Group 2] API 문서 사이드바 설정 (API Reference)
+// TypeDoc으로 생성된 API 문서 폴더를 처리합니다.
+const apiSidebarConfigs = languages.map(lang => ({
+    documentRootPath: 'manual',
+    scanStartPath: `${lang.code}/api/RedGPU-API/namespaces/RedGPU`,
+    resolvePath: `/${lang.code}/api/RedGPU-API/namespaces/RedGPU/`,
+    useFolderTitleFromIndexFile: true,
+    indexFile: 'README.md',
+    useFolderLinkFromIndexFile: true,
+    recursive: true,
+    collapsed: true,
+    collapseDepth: 2,
+    sortMenusByFrontmatterOrder: true
+}));
+
+// 전체 사이드바 설정 합치기
+const sidebarEntries = [...manualSidebarConfigs, ...apiSidebarConfigs];
 
 const rawSidebarConfig = generateSidebar(sidebarEntries);
 const finalSidebar = sortSidebar(rawSidebarConfig);

@@ -1,3 +1,7 @@
+---
+order: 4
+---
+
 <script setup>
 const meshGraph = `
     Geometry["지오메트리 (형태)"] -->|구성| Mesh["메시 (객체)"]

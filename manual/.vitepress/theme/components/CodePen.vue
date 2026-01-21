@@ -1,6 +1,6 @@
 <template>
   <div ref="root" class="codepen-container">
-    <div 
+    <div
       class="codepen"
       :data-height="height"
       data-theme-id="dark"
@@ -41,7 +41,7 @@ const prefillJson = computed(() => {
 onMounted(async () => {
     if (typeof window !== 'undefined') {
         const SCRIPT_URL = "https://cpwebassets.codepen.io/assets/embed/ei.js";
-        
+
         // 1. 스크립트 로드 확인 및 삽입
         const loadScript = () => {
           return new Promise((resolve) => {
@@ -58,10 +58,10 @@ onMounted(async () => {
         };
 
         await loadScript();
-        
+
         // 2. DOM이 완전히 렌더링된 후 CodePen 스크립트 실행
         await nextTick();
-        
+
         // SPA 네비게이션 대응을 위해 약간의 지연 후 호출
         setTimeout(() => {
             if (window.__CPEmbed) {

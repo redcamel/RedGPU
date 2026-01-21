@@ -1,3 +1,7 @@
+---
+order: 1
+---
+
 # RedGPU Context
 영문테스트
 RedGPU Context는 WebGPU 애플리케이션의 핵심 요소입니다.
