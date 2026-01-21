@@ -1,6 +1,6 @@
 ---
 title: Light (조명)
-order: 3
+order: 4
 ---
 <script setup>
 const lightGraph = `

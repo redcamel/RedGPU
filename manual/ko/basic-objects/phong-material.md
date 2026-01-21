@@ -1,6 +1,6 @@
 ---
 title: Phong Material (퐁 재질)
-order: 4
+order: 5
 ---
 
 # Phong Material
@@ -143,4 +143,4 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 빛과 물체가 만나 생성되는 입체감의 완성, 그림자 시스템에 대해 알아봅니다.
 
-- **[그림자 (Shadow)](./shadow.md)**
+- **[그림자 (Shadow)](../shadow-system/shadow.md)**

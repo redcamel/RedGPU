@@ -199,6 +199,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## 다음 학습 추천
 
-단순한 색상을 넘어 실제 이미지를 물체 표면에 입히는 방법을 알아봅니다.
+메시들을 부모-자식 관계로 묶어 복잡한 구조를 만드는 방법을 알아봅니다.
 
-- **[텍스처 (Texture)](./texture.md)**
+- **[Scene Graph (계층 구조)](./scene-graph.md)**
