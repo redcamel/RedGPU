@@ -1,6 +1,7 @@
 import {mat4} from "gl-matrix";
 import validateNumber from "../../runtimeChecker/validateFunc/validateNumber";
 import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
+import {keepLog} from "../../utils";
 
 /**
  * [KO] 원근 투영을 사용하는 카메라입니다.
@@ -417,7 +418,34 @@ class PerspectiveCamera {
 	 * [EN] Target Z coordinate to look at
 	 */
 	lookAt(x: number, y: number, z: number): void {
-		mat4.lookAt(this.#modelMatrix, [this.#x, this.#y, this.#z], [x, y, z], this.#up);
+		const eye: [number, number, number] = [this.#x, this.#y, this.#z];
+		const target: [number, number, number] = [x, y, z];
+		const up: [number, number, number] = [this.#up[0], this.#up[1], this.#up[2]];
+
+
+		// 방향 벡터 계산
+		const dir = [target[0] - eye[0], target[1] - eye[1], target[2] - eye[2]];
+		const len = Math.sqrt(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]);
+		dir[0] /= len;
+		dir[1] /= len;
+		dir[2] /= len;
+
+		// 방향 벡터와 up 벡터가 평행한지 확인 (외적의 크기가 0에 가까우면 평행)
+		const cross = [
+			dir[1] * up[2] - dir[2] * up[1],
+			dir[2] * up[0] - dir[0] * up[2],
+			dir[0] * up[1] - dir[1] * up[0]
+		];
+		const crossLen = Math.sqrt(cross[0] * cross[0] + cross[1] * cross[1] + cross[2] * cross[2]);
+
+		if (crossLen < 0.0001) {
+			// 평행할 경우 대체 up 벡터 사용
+			up[2] = (dir[1] > 0) ? 1 : -1;
+			up[0] = 0;
+			up[1] = 0;
+		}
+
+		mat4.lookAt(this.#modelMatrix, eye, target, up);
 	}
 }
 
