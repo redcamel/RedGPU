@@ -11,7 +11,7 @@ const sceneGraph = `
 `
 </script>
 
-# Scene Graph (Scene Graph)
+# Scene Graph
 
 **Scene Graph**는 3D 공간에 배치된 객체들의 계층 구조를 의미합니다. RedGPU에서는 모든 **Mesh**가 다른 메시의 부모가 될 수 있으며, 부모의 변형(위치, 회전, 크기)은 자식에게 고스란히 상속됩니다.
 

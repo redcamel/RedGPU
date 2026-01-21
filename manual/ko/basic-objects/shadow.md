@@ -2,7 +2,7 @@
 order: 5
 ---
 
-# 그림자 (Shadow)
+# Shadow
 
 3D 그래픽스에서 그림자는 물체의 입체감과 공간 내 위치 관계를 명확하게 보여주는 핵심 요소입니다. RedGPU는 물리 기반의 그림자 시스템을 제공하며, 간단한 설정만으로 사실적인 그림자를 표현할 수 있습니다.
 
@@ -65,7 +65,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     const floor = new RedGPU.Display.Mesh(
         redGPUContext,
         new RedGPU.Primitive.Ground(redGPUContext, 20, 20),
-        new RedGPU.Material.ColorMaterial(redGPUContext, '#cccccc')
+        new RedGPU.Material.PhongMaterial(redGPUContext, '#cccccc')
     );
     floor.receiveShadow = true; // 그림자 받기 활성화
     scene.addChild(floor);
@@ -74,13 +74,15 @@ RedGPU.init(canvas, (redGPUContext) => {
     const box = new RedGPU.Display.Mesh(
         redGPUContext,
         new RedGPU.Primitive.Box(redGPUContext),
-        new RedGPU.Material.ColorMaterial(redGPUContext, '#ff0000')
+        new RedGPU.Material.PhongMaterial(redGPUContext, '#ff0000')
     );
     box.y = 2;
     box.castShadow = true; // 그림자 생성 활성화
     scene.addChild(box);
 
     const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+    controller.tilt = -30; // 초기 틸트 설정 (위에서 내려다보는 각도)
+    controller.maxTilt = -15; // 카메라가 바닥 아래로 내려가거나 너무 수평이 되지 않도록 제한
     const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
     redGPUContext.addView(view);
 
@@ -125,7 +127,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     const floor = new RedGPU.Display.Mesh(
         redGPUContext,
         new RedGPU.Primitive.Ground(redGPUContext, 30, 30),
-        new RedGPU.Material.ColorMaterial(redGPUContext, '#555555')
+        new RedGPU.Material.PhongMaterial(redGPUContext, '#555555')
     );
     floor.receiveShadow = true;
     scene.addChild(floor);
@@ -134,14 +136,15 @@ RedGPU.init(canvas, (redGPUContext) => {
     const box = new RedGPU.Display.Mesh(
         redGPUContext,
         new RedGPU.Primitive.Box(redGPUContext, 2, 2, 2),
-        new RedGPU.Material.ColorMaterial(redGPUContext, '#ffcc00')
+        new RedGPU.Material.PhongMaterial(redGPUContext, '#ffcc00')
     );
     box.y = 3;
     box.castShadow = true;
     scene.addChild(box);
 
     const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-    controller.tilt = 30;
+    controller.tilt = -30;
+    controller.maxTilt = -15;
     
     const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
     redGPUContext.addView(view);
