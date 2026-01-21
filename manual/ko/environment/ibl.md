@@ -66,7 +66,7 @@ import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
 const canvas = document.getElementById("redgpu-canvas");
 
 RedGPU.init(canvas, (redGPUContext) => {
-    const scene = new RedGPU.Display.Scene(redGPUContext);
+    const scene = new RedGPU.Display.Scene();
     
     // 1. IBL 생성 (배경 및 조명 데이터)
     const ibl = new RedGPU.Resource.IBL(

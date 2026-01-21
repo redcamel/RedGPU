@@ -71,7 +71,7 @@ import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
 const canvas = document.getElementById('redgpu-canvas');
 
 RedGPU.init(canvas, (redGPUContext) => {
-    const scene = new RedGPU.Display.Scene(redGPUContext);
+    const scene = new RedGPU.Display.Scene();
     
     // 1. PerspectiveCamera 설정
     const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
@@ -128,7 +128,7 @@ import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
 const canvas = document.getElementById("redgpu-canvas");
 
 RedGPU.init(canvas, (redGPUContext) => {
-    const scene = new RedGPU.Display.Scene(redGPUContext);
+    const scene = new RedGPU.Display.Scene();
     const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
     camera.y = 5;
 

@@ -60,7 +60,7 @@ import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
 const canvas = document.getElementById('redgpu-canvas');
 
 RedGPU.init(canvas, (redGPUContext) => {
-    const scene = new RedGPU.Display.Scene(redGPUContext);
+    const scene = new RedGPU.Display.Scene();
     
     // 조명이 있어야 Phong 재질이 보입니다.
     const light = new RedGPU.Light.DirectionalLight();
@@ -114,7 +114,7 @@ import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
 const canvas = document.getElementById("redgpu-canvas");
 
 RedGPU.init(canvas, (redGPUContext) => {
-    const scene = new RedGPU.Display.Scene(redGPUContext);
+    const scene = new RedGPU.Display.Scene();
     
     const light = new RedGPU.Light.DirectionalLight();
     light.x = 5; light.y = 5; light.z = 5;

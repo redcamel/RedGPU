@@ -92,7 +92,7 @@ RedGPU.init(
         // 초기화 성공 시 엔진의 핵심인 redGPUContext 객체가 전달됩니다.
 
         // 2. 씬(Scene) 생성: 3D 객체들이 배치될 가상 공간
-        const scene = new RedGPU.Display.Scene(redGPUContext);
+        const scene = new RedGPU.Display.Scene();
 
         // 3. 카메라 생성: 원근 투영(Perspective) 카메라 설정
         const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
@@ -146,7 +146,7 @@ const canvas = document.getElementById("redgpu-canvas");
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        const scene = new RedGPU.Display.Scene(redGPUContext);
+        const scene = new RedGPU.Display.Scene();
         const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
         camera.z = -5;
 

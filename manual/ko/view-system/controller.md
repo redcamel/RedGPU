@@ -55,7 +55,7 @@ import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
 const canvas = document.getElementById('redgpu-canvas');
 
 RedGPU.init(canvas, (redGPUContext) => {
-    const scene = new RedGPU.Display.Scene(redGPUContext);
+    const scene = new RedGPU.Display.Scene();
     
     // 1. Controller 초기화 (Camera 내장)
     const controller = new RedGPU.Camera.OrbitController(redGPUContext);
@@ -100,7 +100,7 @@ import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
 const canvas = document.getElementById("redgpu-canvas");
 
 RedGPU.init(canvas, (redGPUContext) => {
-    const scene = new RedGPU.Display.Scene(redGPUContext);
+    const scene = new RedGPU.Display.Scene();
     
     // Controller Setup
     const controller = new RedGPU.Camera.OrbitController(redGPUContext);

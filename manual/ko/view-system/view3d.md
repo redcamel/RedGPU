@@ -88,7 +88,7 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         // 1. 구성 요소 준비 (Scene 및 Camera)
-        const scene = new RedGPU.Display.Scene(redGPUContext);
+        const scene = new RedGPU.Display.Scene();
         const camera = new RedGPU.Camera.OrbitController(redGPUContext);
 
         // 2. View3D 생성 및 설정
@@ -123,7 +123,7 @@ import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
 const canvas = document.getElementById("redgpu-canvas");
 
 RedGPU.init(canvas, (redGPUContext) => {
-    const scene = new RedGPU.Display.Scene(redGPUContext);
+    const scene = new RedGPU.Display.Scene();
     const camera = new RedGPU.Camera.OrbitController(redGPUContext);
 
     const view = new RedGPU.Display.View3D(redGPUContext, scene, camera);
@@ -189,7 +189,7 @@ RedGPU는 단일 컨텍스트 내에서 다수의 뷰포트(Viewport) 를 운용
 
 ```javascript
 // [전제 조건] RedGPU.init 콜백 내부라고 가정합니다.
-const sharedScene = new RedGPU.Display.Scene(redGPUContext);
+const sharedScene = new RedGPU.Display.Scene();
 
 // 1. 메인 뷰 설정
 const mainCamera = new RedGPU.Camera.OrbitController(redGPUContext);
@@ -231,7 +231,7 @@ const canvas = document.getElementById("redgpu-canvas");
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        const sharedScene = new RedGPU.Display.Scene(redGPUContext);
+        const sharedScene = new RedGPU.Display.Scene();
 
         // 메인 뷰 설정
         const mainCamera = new RedGPU.Camera.OrbitController(redGPUContext);

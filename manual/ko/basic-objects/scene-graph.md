@@ -63,7 +63,7 @@ import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
 const canvas = document.getElementById('redgpu-canvas');
 
 RedGPU.init(canvas, (redGPUContext) => {
-    const scene = new RedGPU.Display.Scene(redGPUContext);
+    const scene = new RedGPU.Display.Scene();
     const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
     camera.z = -15; camera.y = 5;
     camera.lookAt(0, 0, 0);
@@ -125,7 +125,7 @@ import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
 const canvas = document.getElementById("redgpu-canvas");
 
 RedGPU.init(canvas, (redGPUContext) => {
-    const scene = new RedGPU.Display.Scene(redGPUContext);
+    const scene = new RedGPU.Display.Scene();
     const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
     camera.z = -15; camera.y = 5;
     camera.lookAt(0, 0, 0);

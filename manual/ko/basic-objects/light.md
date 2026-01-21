@@ -86,7 +86,7 @@ RedGPU는 물리적 특성이 다른 네 가지 광원을 제공합니다. 각 �
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
 
 RedGPU.init(document.getElementById('redgpu-canvas'), (redGPUContext) => {
-    const scene = new RedGPU.Display.Scene(redGPUContext);
+    const scene = new RedGPU.Display.Scene();
     
     // 1. 기본 환경광 (낮은 강도)
     scene.lightManager.ambientLight = new RedGPU.Light.AmbientLight('#ffffff', 0.1);
@@ -139,7 +139,7 @@ import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
 const canvas = document.getElementById("redgpu-canvas");
 
 RedGPU.init(canvas, (redGPUContext) => {
-    const scene = new RedGPU.Display.Scene(redGPUContext);
+    const scene = new RedGPU.Display.Scene();
     
     scene.lightManager.ambientLight = new RedGPU.Light.AmbientLight('#ffffff', 0.1);
     

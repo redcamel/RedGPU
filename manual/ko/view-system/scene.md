@@ -8,13 +8,11 @@ const sceneGraph = `
         Scene["RedGPU.Display.Scene (Root Node)"]
         LightMgr["LightManager (Uniform Buffer)"]
         Children["Child Nodes (Mesh, Group)"]
-        BgColor["Background Property"]
         Ambient["AmbientLight"]
         DirLight["DirectionalLight"]
 
         Scene -->|Owns| LightMgr
         Scene -->|Contains| Children
-        Scene -->|Configures| BgColor
         
         LightMgr -->|Manages| Ambient
         LightMgr -->|Manages| DirLight
@@ -27,38 +25,49 @@ const sceneGraph = `
 
 # Scene
 
-**Scene**은 렌더링될 모든 3D 객체(Mesh, Group, Light)를 포함하는 **씬 그래프**(Scene Graph)의 최상위 루트 노드(Root Node)입니다.
-RedGPU의 렌더링 엔진은 View가 참조하고 있는 Scene을 순회하며 렌더링 목록(Render List)을 작성합니다.
+**View3D** 가 장면을 보여주는 '창문'이라면, **Scene** 은 그 창문 너머에 펼쳐지는 '무대'입니다.
+렌더링될 모든 3D 객체(Mesh, Group)와 조명(Light)을 포함하는 **씬 그래프**(Scene Graph) 의 최상위 루트 노드(Root Node) 역할을 수행합니다.
 
 ## 1. 아키텍처 및 역할
 
-`RedGPU.Display.Scene`은 단순한 컨테이너 역할을 넘어 다음과 같은 핵심 기능을 수행합니다.
+**Scene** 은 단순한 컨테이너 역할을 넘어 다음과 같은 핵심 기능을 수행합니다.
 
 <ClientOnly>
   <MermaidResponsive :definition="sceneGraph" />
 </ClientOnly>
 
-- **Scene Graph Management**: `addChild()`, `removeChild()` 메서드를 통해 계층적인 객체 구조를 관리합니다.
-- **Light Uniform Management**: 내장된 `LightManager`를 통해 씬 전체에 영향을 주는 조명 데이터를 GPU 버퍼(Uniform Buffer)로 관리합니다.
-- **Global Environment**: 배경색(Background Color) 등 씬 전역에 적용되는 환경 설정을 담당합니다. (Skybox는 View 단위로 처리됨에 유의)
+*   **계층 구조 관리**: `addChild()`, `removeChild()` 메서드를 통해 객체들의 부모-자식 관계를 관리합니다.
+*   **조명 데이터 관리**: 내장된 **LightManager** 를 통해 씬 전체에 영향을 주는 조명 데이터를 GPU 버퍼(Uniform Buffer)로 통합 관리합니다.
 
-## 2. 생성 및 설정
+## 2. 객체 관리 (Hierarchy)
 
-Scene은 초기화 시 별도의 인자를 요구하지 않으며, 생성 직후 객체 추가 및 환경 설정이 가능합니다.
+**Scene** 의 가장 기본적인 역할은 렌더링할 3D 물체들을 담는 것입니다. 생성된 객체는 `addChild()` 를 통해 씬에 추가되어야만 화면에 나타납니다.
 
 ```javascript
-// 1. Scene 인스턴스 생성
+// 1. Scene 생성
 const scene = new RedGPU.Display.Scene();
 
-// 2. 배경색 설정 (Render Pass의 Clear Color로 사용됨)
-scene.useBackgroundColor = true;
-scene.backgroundColor.setColorByHEX('#5259c3'); // Hex Code 입력
+// 2. 3D 물체(Mesh) 를 생성하여 추가
+// 혹시 **Mesh** 에 대한 개념이 아직 생소하시더라도 걱정하지 마세요.
+// 상세한 생성 방법은 이어지는 **Basic Objects** 파트에서 자세히 다룰 예정입니다.
+const box = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
+
+// 물체의 위치를 설정하여 공간 상에 배치합니다.
+box.x = 0;
+box.y = 1;
+box.z = -5;
+
+scene.addChild(box);
 ```
 
-## 3. 조명 시스템 통합
+::: info [학습 가이드]
+물체를 구성하는 방법이 아직 익숙하지 않으시더라도, **Scene** 에 여러 요소를 담았을 때의 시각적 변화를 가볍게 확인해 보시기 바랍니다. (코드는 참고용으로만 훑어보셔도 충분합니다!)
+:::
 
-Scene은 생성과 동시에 내부적으로 `LightManager` 인스턴스를 생성합니다. 
-모든 광원 객체는 반드시 이 매니저를 통해 등록되어야 하며, 등록된 데이터는 렌더링 시점에 셰이더로 바인딩됩니다.
+## 3. 조명 관리자 (Light Manager)
+
+단순히 물체에 색상을 칠하는 것을 넘어, 깊이감 있는 명암과 사실적인 입체감을 구현하기 위해서는 조명이 필요합니다. 
+**Scene** 은 내부적으로 **LightManager** 를 소유하고 있어, 여기에 등록된 다양한 광원들이 씬 전체에 유기적으로 작용하도록 통합 관리합니다.
 
 ```javascript
 // Ambient Light (전역 환경광) 설정
@@ -67,31 +76,15 @@ scene.lightManager.ambientLight = new RedGPU.Light.AmbientLight('#ffffff', 0.1);
 // Directional Light (방향성 광원) 추가
 const dirLight = new RedGPU.Light.DirectionalLight();
 scene.lightManager.addDirectionalLight(dirLight);
+
+// [참고] 조명 효과를 보려면 PhongMaterial 등 조명에 반응하는 재질을 사용해야 합니다.
+// const material = new RedGPU.Material.PhongMaterial(redGPUContext);
 ```
 
-## 4. View와의 관계
+## 4. 실습 예제
 
-Scene과 View는 **N:M (다대다)** 관계를 가질 수 있습니다.
-- **Data (Model)**: Scene은 렌더링될 데이터(객체, 조명)를 보유합니다.
-- **Presentation (View)**: View는 Scene 데이터를 참조하여 특정 시점(Camera)과 영역(Viewport)에 그립니다.
-
-즉, 하나의 Scene 인스턴스를 여러 View가 공유하여 서로 다른 각도에서 렌더링하는 것이 가능합니다.
-
-```javascript
-// Shared Data: 하나의 Scene 인스턴스 생성
-const scene = new RedGPU.Display.Scene();
-
-// Presentation 1: 메인 뷰
-const view1 = new RedGPU.Display.View3D(redGPUContext, scene, camera1);
-
-// Presentation 2: 서브 뷰 (동일한 scene 참조)
-// view1과 view2는 같은 객체들을 렌더링하지만, 시점(Camera)이나 설정은 다를 수 있습니다.
-const view2 = new RedGPU.Display.View3D(redGPUContext, scene, camera2);
-```
-
-## 5. 실습 예제
-
-배경색이 설정된 Scene에 객체를 배치하고 렌더링하는 기본 예제입니다.
+앞서 배운 객체 추가와 조명 설정을 결합하여 완성된 씬을 구성해 봅니다.
+입체감이 잘 드러나는 **TorusKnot** 모델을 사용하고, 공간감을 파악하기 위해 **Grid** 와 **Axis** 를 활성화했습니다.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -99,38 +92,39 @@ import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
 const canvas = document.getElementById('redgpu-canvas');
 
 RedGPU.init(canvas, (redGPUContext) => {
-    // 1. Scene 생성
     const scene = new RedGPU.Display.Scene();
     
-    // 2. 배경색(Clear Color) 설정
-    scene.useBackgroundColor = true;
-    scene.backgroundColor.setColorByHEX('#1a1a2e'); // Dark Navy
+    // 1. 조명 설정
+    const dirLight = new RedGPU.Light.DirectionalLight();  
+    scene.lightManager.addDirectionalLight(dirLight);
 
-    // 3. 뷰 및 컨트롤러 설정
+    // 2. 객체 추가 (TorusKnot)
+    const mesh = new RedGPU.Display.Mesh(
+        redGPUContext, 
+        new RedGPU.Primitive.TorusKnot(redGPUContext, 2, 0.6, 128, 32),
+        new RedGPU.Material.PhongMaterial(redGPUContext, '#ff0055')
+    );
+    scene.addChild(mesh);
+
+    // 3. 뷰 연결 및 디버깅 도구 활성화
     const controller = new RedGPU.Camera.OrbitController(redGPUContext);
     const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+    view.grid = true;
+    view.axis = true;
     redGPUContext.addView(view);
-    
-    // 4. 테스트 객체 추가
-    const box = new RedGPU.Display.Mesh(
-        redGPUContext, 
-        new RedGPU.Primitive.Box(redGPUContext),
-        new RedGPU.Material.ColorMaterial(redGPUContext, '#e94560')
-    );
-    scene.addChild(box);
 
     const renderer = new RedGPU.Renderer();
     renderer.start(redGPUContext, () => {
-        box.rotationY += 1;
-        box.rotationX += 0.5;
+        mesh.rotationY += 1;
+        mesh.rotationX += 0.5;
     });
 });
 ```
 
-## 라이브 데모
+### 라이브 데모
 
 <ClientOnly>
-<CodePen title="RedGPU Basics - Scene Background" slugHash="scene-background">
+<CodePen title="RedGPU Basics - Scene Complete" slugHash="scene-complete">
 <pre data-lang="html">
 &lt;canvas id="redgpu-canvas"&gt;&lt;/canvas&gt;
 </pre>
@@ -144,34 +138,62 @@ import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
 const canvas = document.getElementById("redgpu-canvas");
 
 RedGPU.init(canvas, (redGPUContext) => {
-const scene = new RedGPU.Display.Scene();
+    const scene = new RedGPU.Display.Scene();
 
-    // Scene Configuration
-    scene.useBackgroundColor = true;
-    scene.backgroundColor.setColorByHEX('#222831'); // Dark Gray
+    // Lighting
+    const dirLight = new RedGPU.Light.DirectionalLight();
+  
+    scene.lightManager.addDirectionalLight(dirLight);
 
-    const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-    
-    const box = new RedGPU.Display.Mesh(
+    // Add Object (TorusKnot)
+    const mesh = new RedGPU.Display.Mesh(
         redGPUContext, 
-        new RedGPU.Primitive.Box(redGPUContext),
-        new RedGPU.Material.ColorMaterial(redGPUContext, '#00adb5')
+        new RedGPU.Primitive.TorusKnot(redGPUContext, 2, 0.6, 128, 32),
+        new RedGPU.Material.PhongMaterial(redGPUContext, '#ff0055')
     );
-    scene.addChild(box);
+    scene.addChild(mesh);
 
+    // View & Render
+    const controller = new RedGPU.Camera.OrbitController(redGPUContext);
     const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+    view.grid = true;
+    view.axis = true;
     redGPUContext.addView(view);
 
     const renderer = new RedGPU.Renderer();
     renderer.start(redGPUContext, () => {
-        box.rotationY += 1;
-        box.rotationZ += 1;
+        mesh.rotationY += 1;
+        mesh.rotationX += 0.5;
     });
 });
 </pre>
 </CodePen>
 </ClientOnly>
 
-## 관련 문서
+## 5. 장면 공유 (Shared Model)
 
-- **[GLTF Loader](../loader/gltf-loader.md)**: 외부 모델 리소스를 Scene으로 로드하는 방법.
+**Scene** 은 렌더링될 데이터와 상태를 가진 모델(Model) 입니다. 하나의 **Scene** 인스턴스를 여러 개의 **View3D** 가 동시에 참조할 수 있습니다. 
+
+이를 통해 동일한 장면에 추가된 물체나 조명의 변화를 서로 다른 시점(Camera)에서 실시간으로 관찰하는 기능을 효율적으로 구현할 수 있습니다.
+
+```javascript
+// 하나의 Scene 생성 (공유 데이터)
+const sharedScene = new RedGPU.Display.Scene();
+
+// 여러 View에서 동일한 Scene 을 참조
+const view1 = new RedGPU.Display.View3D(redGPUContext, sharedScene, camera1);
+const view2 = new RedGPU.Display.View3D(redGPUContext, sharedScene, camera2);
+```
+
+::: tip [멀티 뷰 레이아웃]
+여러 개의 뷰를 화면에 배치하고 크기를 조절하는 상세한 방법은 **[View3D](./view3d.md)** 문서의 멀티 뷰 시스템 섹션을 참고하세요.
+:::
+
+---
+
+## 다음 단계
+
+**Scene** (무대)까지 준비되었으니, 이제 이 무대를 바라볼 **시점**을 정의해야 합니다.
+3D 공간을 2D 화면으로 투영하는 **Camera** 에 대해 알아봅니다.
+
+- **[Camera (카메라)](./camera.md)**

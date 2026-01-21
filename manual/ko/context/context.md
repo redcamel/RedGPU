@@ -51,7 +51,7 @@ RedGPU.init(
         console.log('RedGPUContext 준비 완료:', redGPUContext);
 
         // 예: 씬 생성 (context 주입 필요)
-        const scene = new RedGPU.Display.Scene(redGPUContext);
+        const scene = new RedGPU.Display.Scene();
     },
     (failReason) => {
         // 초기화 실패 시 (WebGPU 미지원 등) 처리
