@@ -1,44 +1,53 @@
 ---
+title: Camera Controller
 order: 5
 ---
 
+# Camera Controller
 
-# Controller
+**Controller**는 사용자 입력(Mouse, Touch, Keyboard)을 감지하여 카메라의 위치와 회전(Transform)을 실시간으로 갱신하는 **상호작용 모듈**(Interaction Module)입니다.
+복잡한 행렬 연산 없이도 직관적인 3D 내비게이션 환경을 구축할 수 있도록 돕습니다.
 
-카메라의 위치를 코드로 일일이 계산하는 것은 매우 번거로운 일입니다. **Controller**를 사용하면 마우스나 터치 입력을 통해 사용자가 직접 시점을 자유롭게 탐색할 수 있습니다.
+## 1. 컨트롤러 유형
 
-## 1. 다양한 컨트롤러 제공
+RedGPU는 다양한 인터랙션 시나리오에 대응하는 표준 컨트롤러를 제공합니다.
 
-RedGPU는 콘텐츠의 특성에 맞춰 즉시 사용할 수 있는 다양한 컨트롤러를 제공합니다. 모든 컨트롤러는 **RedGPU.Camera** 네임스페이스 아래에 위치합니다.
-
-| 종류 | 특징 | 주요 용도 |
+| 클래스명 | 기반 알고리즘 | 주요 적용 사례 |
 | :--- | :--- | :--- |
-| **OrbitController** | 특정 대상을 중심으로 궤도 회전 | 제품 뷰어, 객체 관찰, 일반 3D 장면 |
-| **FollowController** | 특정 대상을 부드럽게 추적 | 3인칭 게임, 캐릭터 추적 카메라 |
-| **FreeController** | 관찰자 시점에서 자유로운 이동 | FPS 게임, 가상 투어, 개발자용 디버그 시점 |
-| **IsometricController** | 고정된 각도를 유지하는 쿼터뷰 | 시뮬레이션 게임, 전략 게임, 인포그래픽 |
+| **`OrbitController`** | Spherical Coordinate (구면 좌표계) | 모델 뷰어, 턴제 게임, 일반적인 3D 씬 탐색 |
+| **`FollowController`** | Target Interpolation (타겟 보간 추적) | TPS(3인칭) 게임, 캐릭터 추적 카메라 |
+| **`FreeController`** | First-Person Navigation (1인칭 이동) | FPS 게임, 건축물 내부 투어, 디버깅 |
+| **`IsometricController`** | Orthographic Projection (직교 투영) | 전략 시뮬레이션(RTS), 아이소메트릭 뷰 |
 
-## 2. 기본 사용법: OrbitController
+::: tip [카메라 인스턴스 관리]
+모든 Controller 클래스는 내부적으로 전용 **Camera 인스턴스**를 생성하여 소유(Has-a relationship)합니다. 
+따라서 Controller를 생성하면 별도의 Camera를 생성할 필요가 없으며, `View3D`에 Controller 인스턴스를 전달하면 내부의 카메라가 자동으로 연결됩니다.
+:::
 
-가장 대중적으로 사용되는 **OrbitController**를 예로 들어 사용법을 알아보겠습니다. 컨트롤러를 생성한 후, `RedGPU.Display.View3D` 생성 시 **세 번째 인자로 컨트롤러 인스턴스**를 직접 전달하면 뷰와 연결됩니다.
+## 2. 구현 패턴: OrbitController
+
+가장 범용적인 **OrbitController**의 사용 패턴입니다. `RedGPU.Display.View3D` 초기화 시 Camera 인자가 들어갈 자리에 Controller 인스턴스를 전달하는 것이 핵심입니다.
 
 ```javascript
-// 1. 컨트롤러 생성
+// 1. Controller 인스턴스 생성
 const controller = new RedGPU.Camera.OrbitController(redGPUContext);
 
-// 2. 컨트롤러 속성 설정
-controller.distance = 15; // 대상과의 거리
-controller.tilt = 45;     // 상하 각도
-controller.pan = 0;       // 좌우 각도
+// 2. 파라미터 튜닝
+controller.distance = 15; // 타겟(Pivot)으로부터의 거리
+controller.tilt = 45;     // 수직 회전 각도 (Elevation)
+controller.pan = 0;       // 수평 회전 각도 (Azimuth)
 
-// 3. 뷰 생성 시 컨트롤러 인스턴스(controller)를 직접 전달
+// 3. View 연결 (Dependency Injection)
+// View3D는 전달받은 객체가 Controller일 경우, controller.camera를 렌더링에 사용합니다.
 const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+
+// 4. 등록
 redGPUContext.addView(view);
 ```
 
-## 3. 학습: 직접 조작하는 3D 세계
+## 3. 실습 예제
 
-사용자가 마우스로 자유롭게 오브젝트를 관찰할 수 있는 예제입니다.
+마우스 인터랙션을 통해 3D 오브젝트를 다각도로 관찰하는 뷰어 예제입니다.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -48,31 +57,33 @@ const canvas = document.getElementById('redgpu-canvas');
 RedGPU.init(canvas, (redGPUContext) => {
     const scene = new RedGPU.Display.Scene(redGPUContext);
     
-    // 1. 컨트롤러 설정 (카메라는 내부에 자동 생성됨)
+    // 1. Controller 초기화 (Camera 내장)
     const controller = new RedGPU.Camera.OrbitController(redGPUContext);
     controller.distance = 20;
     controller.tilt = 30;
 
-    // 2. 중심 물체 생성
+    // 2. 렌더링 대상 추가
     const sun = new RedGPU.Display.Mesh(
         redGPUContext, new RedGPU.Primitive.Sphere(redGPUContext, 2),
         new RedGPU.Material.ColorMaterial(redGPUContext, '#ff4500')
     );
     scene.addChild(sun);
 
-    // 3. 뷰 설정 (세 번째 인자로 controller 전달)
+    // 3. View 생성 및 연결
     const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
     redGPUContext.addView(view);
 
-    // 4. 렌더러 시작
+    // 4. 렌더 루프 시작
+    // Controller는 내부적으로 매 프레임 입력을 감지하여 Camera Matrix를 갱신합니다.
     const renderer = new RedGPU.Renderer();
     renderer.start(redGPUContext);
 });
 ```
 
-## 라이브 데모 (Live Demo)
+## 라이브 데모
 
-마우스 드래그와 휠을 사용하여 화면을 자유롭게 탐색해 보세요.
+- **Left Click + Drag**: 궤도 회전 (Rotate)
+- **Wheel Scroll**: 줌 인/아웃 (Zoom)
 
 <ClientOnly>
 <CodePen title="RedGPU Basics - Controller" slugHash="orbit-controller">
@@ -115,14 +126,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-## 핵심 요약
+## 관련 문서
 
-- RedGPU는 **Orbit, Follow, Free, Isometric** 등 다양한 컨트롤러를 기본 제공합니다.
-- 컨트롤러는 카메라를 내부에 생성하여 소유하며, 마우스와 터치 입력을 시점으로 변환합니다.
-- `RedGPU.Display.View3D`의 세 번째 인자로 **controller 인스턴스**를 전달하여 연결합니다.
-
-## 다음 학습 추천
-
-물체의 표면에 이미지를 입혀 실제감을 부여해 봅니다.
-
-- **[텍스처와 비트맵 재질 (Texture & BitmapMaterial)](../basic-objects/texture.md)**
+- **[Texture & BitmapMaterial](../basic-objects/texture.md)**: 3D 객체의 표면 질감 표현.

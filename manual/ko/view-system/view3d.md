@@ -1,40 +1,43 @@
 ---
 title: View3D
-description: RedGPU의 화면 구성 단위인 View3D의 개념과 사용법을 다룹니다.
+description: RedGPU의 렌더링 단위인 View3D의 기술적 명세와 사용법을 다룹니다.
 order: 2
 ---
 <script setup>
+const viewSystemGraph = `
+    graph TD
+        Context["RedGPUContext (Environment)"]
+        View["View3D (Render Pass)"]
+        Scene["Scene (Data)"]
+        Camera["Camera (Projection)"]
+        Controller["Controller (Input)"]
+
+        Context -->|Manages| View
+        View -->|References| Scene
+        View -->|References| Camera
+        Controller -->|Updates| Camera
+        View -.->|Holds| Controller
+        
+        %% 커스텀 클래스 적용
+        class Context mermaid-system;
+        class View mermaid-main;
+`
+
 const viewGraph = `
-    Renderer["RedGPU.Renderer"] -->|Draws| View["RedGPU.Display.View3D"]
-    View -->|Composes| Scene["RedGPU.Display.Scene"]
-    View -->|Uses| Camera["RedGPU.Camera"]
+    Renderer["RedGPU.Renderer"] -->|Executes Loop| View["RedGPU.Display.View3D"]
+    View -->|References| Scene["RedGPU.Display.Scene"]
+    View -->|References| Camera["RedGPU.Camera"]
     
     %% 커스텀 클래스 적용
     class Renderer mermaid-system;
     class View mermaid-main;
 `
 
-const conceptGraph = `
-    graph TD
-        Context["RedGPUContext (Canvas)"]
-        View["View3D"]
-        Scene["Scene"]
-        Camera["Camera"]
-
-        Context --> View
-        View --> Scene
-        View --> Camera
-
-        %% 커스텀 클래스 적용
-        class Context mermaid-system;
-        class View mermaid-main;
-`
-
 const multiViewGraph = `
     graph TD
-        Context["RedGPUContext (Canvas)"]
-        View1["View3D (Main View)"]
-        View2["View3D (Mini Map)"]
+        Context["RedGPUContext"]
+        View1["View3D (Main Viewport)"]
+        View2["View3D (Sub Viewport)"]
         SceneA["Scene A"]
         CameraX["Camera X"]
         CameraY["Camera Y"]
@@ -45,7 +48,7 @@ const multiViewGraph = `
         View1 --> SceneA
         View1 --> CameraX
         
-        View2 -->|Shared| SceneA
+        View2 -->|Shared Reference| SceneA
         View2 --> CameraY
 
         %% 커스텀 클래스 적용
@@ -56,61 +59,59 @@ const multiViewGraph = `
 
 # View3D
 
-`View3D`는 RedGPU에서 3D 장면을 화면에 출력하기 위한 **최종 렌더링 단위**입니다. 
-하나의 `RedGPUContext`(Canvas)는 최소 하나 이상의 뷰를 가지며, 각 뷰는 자신만의 공간([Scene](./scene.md))과 시점([Camera](./camera.md))을 연결합니다.
+`View3D` 는 **RedGPUContext** 내에서 실제로 렌더링이 수행되는 **화면 영역**(Viewport) 을 정의하는 객체입니다. 
+장면 데이터(**Scene**) 와 시점 정보(**Camera**) 를 하나로 묶어 최종 프레임을 생성하는 **렌더링 패스**(Render Pass) 역할을 수행합니다.
 
-## 1. 개념 이해
+## 1. 기술적 개요
 
-`View3D`는 "어떤 장면(Scene)을 어떤 시각(Camera)에서 볼 것인가"를 정의하는 매개체입니다. 캔버스라는 도화지 위에 실제 그림을 그리는 영역(Viewport)이라고 이해할 수 있습니다.
+`View3D` 는 `RedGPUContext` 로부터 생성된 GPU 환경 위에서 동작하며, 다른 구성 요소들과 다음과 같은 관계를 맺습니다.
 
 <ClientOnly>
-  <MermaidResponsive :definition="conceptGraph" />
+  <MermaidResponsive :definition="viewSystemGraph" />
 </ClientOnly>
 
-렌더링에 필요한 모든 시각적 설정(디버깅 도구, 후처리 효과, 배경 설정 등)은 `View3D` 인스턴스 단위로 관리됩니다.
+뷰 인스턴스별로 배경색, 포스트 이펙트, 디버깅 옵션 등을 독립적으로 설정할 수 있으며, 하나의 컨텍스트 내에서 여러 개의 뷰를 동시에 운용할 수 있습니다.
 
-## 2. 기본 사용법
+## 2. 초기화 및 등록
 
-`View3D`는 `RedGPU.init`의 성공 콜백에서 전달되는 `redGPUContext`를 사용하여 생성하며, 반드시 컨텍스트에 추가(`addView`)해야 화면에 렌더링됩니다.
+`View3D` 는 반드시 `RedGPUContext` 가 초기화된 이후에 생성되어야 합니다. 생성된 뷰는 `addView()` 메서드를 통해 컨텍스트의 렌더링 리스트에 등록되어야만 실제 화면에 그려집니다.
 
 ```javascript
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // 1. Scene과 Camera 생성
+        // 1. Scene & Camera 준비
         const scene = new RedGPU.Display.Scene(redGPUContext);
         const camera = new RedGPU.Camera.OrbitController(redGPUContext);
 
-        // 2. View3D 생성 및 설정
+        // 2. View3D 인스턴스화
         const view = new RedGPU.Display.View3D(redGPUContext, scene, camera);
         
-        // 3. 디버깅 도구 활성화 (격자와 축)
+        // 3. 디버그 옵션 활성화
         view.grid = true; 
         view.axis = true;
         
-        // 4. 컨텍스트에 뷰 등록
+        // 4. 렌더링 리스트에 추가
         redGPUContext.addView(view);
 
-        // 5. 렌더러 시작
+        // 5. 렌더 루프 시작
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext);
     }
 );
 ```
 
-## 3. 디버깅 도구 (Grid & Axis)
+## 3. 디버깅 도구
 
-씬을 구성할 때 객체의 상대적인 위치와 방향을 파악하는 데 필수적인 도구입니다.
+개발 편의를 위해 월드 좌표계의 기준을 시각화하는 도구를 내장하고 있습니다.
 
-- **`view.grid`**: 3D 월드의 기본 평면(XZ축)에 격자를 표시합니다. 물체가 바닥에 위치하는지, 혹은 얼마나 떨어져 있는지 가늠하는 기준이 됩니다.
-- **`view.axis`**: 월드의 원점(0, 0, 0)에 X, Y, Z축을 색상별로 표시합니다.
-    - <span style="color:#ff3e3e;font-weight:bold">Red</span>: X축 (가로)
-    - <span style="color:#3eff3e;font-weight:bold">Green</span>: Y축 (세로)
-    - <span style="color:#3e3eff;font-weight:bold">Blue</span>: Z축 (깊이)
+- **`view.grid`**: XZ 평면(Ground) 에 격자를 렌더링하여 스케일 및 거리감을 파악하는 데 사용됩니다.
+- **`view.axis`**: 월드 원점(0, 0, 0) 을 기준으로 XYZ 축을 시각화합니다.
+    - **R**: X Axis (Right)
+    - **G**: Y Axis (Up)
+    - **B**: Z Axis (Forward/Backward)
 
-## 4. 라이브 데모 (Live Demo)
-
-아래 예제에서 `view.grid`와 `view.axis`가 활성화된 기본적인 `View3D` 구성을 확인할 수 있습니다.
+## 4. 라이브 데모
 
 <ClientOnly>
   <CodePen title="RedGPU Basics - View3D" slugHash="view-basic">
@@ -134,11 +135,8 @@ RedGPU.init(
         camera.z = -5;
 
         const view = new RedGPU.Display.View3D(redGPUContext, scene, camera);
-        
-        // 디버깅 도구 설정
         view.grid = true; 
         view.axis = true;
-        
         redGPUContext.addView(view);
 
         const renderer = new RedGPU.Renderer();
@@ -152,34 +150,36 @@ RedGPU.init(
 
 <br/>
 
-## 5. 멀티 뷰 시스템 (Multi-View System)
+## 5. 멀티 뷰 시스템
 
-RedGPU는 하나의 캔버스 내에서 독립적인 여러 영역을 동시에 렌더링할 수 있는 기능을 제공합니다.
+RedGPU는 단일 컨텍스트에서 다수의 뷰포트를 운용하는 멀티 뷰 렌더링을 지원합니다. 각 뷰는 화면의 특정 영역을 점유하며 독립적으로 렌더링됩니다.
 
 <ClientOnly>
   <MermaidResponsive :definition="multiViewGraph" />
 </ClientOnly>
 
-### 위치와 크기 제어
-`view.screenRectObject`를 사용하면 현재 뷰의 **논리적 픽셀**(CSS 픽셀) 단위 크기를 가져올 수 있습니다. 이를 활용하여 다른 뷰의 위치를 직관적으로 계산하고 배치할 수 있습니다.
+### 표시 크기와 해상도
 
-::: tip [물리 픽셀 vs 논리 픽셀]
-- **`view.pixelRectObject`**: GPU가 실제로 그리는 **물리 픽셀** 영역입니다. 고해상도 디스플레이에서는 `devicePixelRatio`가 곱해진 큰 값을 가집니다.
-- **`view.screenRectObject`**: CSS 픽셀과 일치하는 **논리 픽셀** 영역입니다. UI 배치나 위치 계산 시 권장됩니다.
+반응형 레이아웃 대응을 위해 `View3D` 는 CSS 픽셀 단위의 크기와 실제 GPU 렌더링 해상도를 분리하여 관리합니다.
+
+::: tip [DPI 대응]
+고해상도 디스플레이(HiDPI/Retina) 환경에서는 `window.devicePixelRatio` 값에 따라 표시 크기와 실제 해상도가 달라집니다.
+- **`view.screenRectObject`**: 레이아웃 계산에 사용되는 **표시 크기**(Layout Size) 데이터입니다. UI 배치 등에 사용합니다.
+- **`view.pixelRectObject`**: 실제 GPU 버퍼 크기인 **물리 해상도**(Physical Resolution) 데이터입니다.
 :::
 
 ```javascript
-// 1. 메인 뷰 설정 (전체 화면)
+// 1. 메인 뷰 (전체 화면 점유)
 const mainView = new RedGPU.Display.View3D(redGPUContext, sharedScene, mainCamera);
 mainView.setSize('100%', '100%');
 redGPUContext.addView(mainView);
 
-// 2. 미니맵 뷰 설정 (우측 상단 정밀 배치)
+// 2. 미니맵 뷰 (우측 상단 고정, 200x200px)
 const miniMapView = new RedGPU.Display.View3D(redGPUContext, sharedScene, miniMapCamera);
 const miniMapSize = 200;
 miniMapView.setSize(miniMapSize, miniMapSize);
 
-// 리사이즈 시 메인 뷰의 논리 크기(screenRectObject)를 기준으로 미니맵 위치 업데이트
+// 리사이즈 시 메인 뷰의 표시 크기(screenRectObject)를 기준으로 미니맵 위치 갱신
 redGPUContext.onResize = () => {
     const { width } = mainView.screenRectObject;
     miniMapView.setPosition(width - miniMapSize - 10, 10);
@@ -187,84 +187,13 @@ redGPUContext.onResize = () => {
 redGPUContext.addView(miniMapView);
 ```
 
-<ClientOnly>
-  <CodePen title="RedGPU Basics - Multi View" slugHash="view-multi">
-<pre data-lang="html">
-&lt;canvas id="redgpu-canvas"&gt;&lt;/canvas&gt;
-</pre>
-<pre data-lang="css">
-body { margin: 0; overflow: hidden; background: #111; }
-canvas { display: block; width: 100vw; height: 100vh; }
-</pre>
-<pre data-lang="js">
-import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
-
-const canvas = document.getElementById("redgpu-canvas");
-
-RedGPU.init(
-    canvas,
-    (redGPUContext) => {
-        const sharedScene = new RedGPU.Display.Scene(redGPUContext);
-
-        // 메인 뷰
-        const mainCamera = new RedGPU.Camera.OrbitController(redGPUContext);
-        const mainView = new RedGPU.Display.View3D(redGPUContext, sharedScene, mainCamera);
-        mainView.setSize('100%', '100%');
-        mainView.grid = true;
-        redGPUContext.addView(mainView);
-
-        // 미니맵 뷰
-        const miniMapSize = 200;
-        const miniMapCamera = new RedGPU.Camera.PerspectiveCamera();
-        miniMapCamera.y = 50;
-        miniMapCamera.lookAt(0, 0, 0.1);
-
-        const miniMapView = new RedGPU.Display.View3D(redGPUContext, sharedScene, miniMapCamera);
-        miniMapView.setSize(miniMapSize, miniMapSize);
-        miniMapView.axis = true;
-        miniMapView.grid = true;
-        redGPUContext.addView(miniMapView);
-
-        // screenRectObject를 사용한 정밀 위치 업데이트
-        const updateLayout = () => {
-            const { width } = mainView.screenRectObject;
-            miniMapView.setPosition(width - miniMapSize - 10, 10);
-        };
-
-        redGPUContext.onResize = updateLayout;
-        updateLayout(); // 초기 배치
-
-        // 물체 추가
-        const geometry = new RedGPU.Primitive.Box(redGPUContext);
-        const material = new RedGPU.Material.ColorMaterial(redGPUContext, "#00CC99");
-        for (let i = 0; i < 30; i++) {
-            const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
-            mesh.x = Math.random() * 40 - 20;
-            mesh.z = Math.random() * 40 - 20;
-            sharedScene.addChild(mesh);
-        }
-
-        const renderer = new RedGPU.Renderer();
-        renderer.start(redGPUContext);
-    },
-    (error) => console.error(error)
-);
-</pre>
-  </CodePen>
-</ClientOnly>
-
-<br/>
-
-## 6. 시스템 구조
-
-`View3D`가 전체 엔진 아키텍처에서 수행하는 역할입니다. `Renderer`는 등록된 `View3D`를 순회하며 렌더링 패스를 실행합니다.
+## 6. 렌더링 흐름
 
 <ClientOnly>
   <MermaidResponsive :definition="viewGraph" />
 </ClientOnly>
 
-## 다음 학습 추천
+## 관련 문서
 
-- **[씬 (Scene)](./scene.md)**: 3D 객체들을 배치하는 가상 공간 관리.
-- **[카메라 (Camera)](./camera.md)**: 다양한 시점 제어 및 카메라 타입.
-- **[RedGPU Context](../context/context.md)**: 멀티 뷰 관리 및 엔진 설정 상세 가이드.
+- **[Scene (장면)](./scene.md)**: 뷰가 렌더링할 데이터 컨테이너.
+- **[Camera (카메라)](./camera.md)**: 투영 행렬을 관리하는 주체.

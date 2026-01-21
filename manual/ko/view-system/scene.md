@@ -1,66 +1,97 @@
 ---
+title: Scene
 order: 3
 ---
+<script setup>
+const sceneGraph = `
+    graph TD
+        Scene["RedGPU.Display.Scene (Root Node)"]
+        LightMgr["LightManager (Uniform Buffer)"]
+        Children["Child Nodes (Mesh, Group)"]
+        BgColor["Background Property"]
+        Ambient["AmbientLight"]
+        DirLight["DirectionalLight"]
+
+        Scene -->|Owns| LightMgr
+        Scene -->|Contains| Children
+        Scene -->|Configures| BgColor
+        
+        LightMgr -->|Manages| Ambient
+        LightMgr -->|Manages| DirLight
+        
+        %% 커스텀 클래스 적용
+        class Scene mermaid-main;
+        class LightMgr mermaid-system;
+`
+</script>
 
 # Scene
 
-**Scene**은 모든 3D 객체(Mesh, Light)가 배치되는 **무대**이자 **컨테이너**입니다. 아무리 멋진 모델과 조명을 만들어도, Scene에 추가하지 않으면 화면에 나타나지 않습니다.
+**Scene**은 렌더링될 모든 3D 객체(Mesh, Group, Light)를 포함하는 **씬 그래프**(Scene Graph)의 최상위 루트 노드(Root Node)입니다.
+RedGPU의 렌더링 엔진은 View가 참조하고 있는 Scene을 순회하며 렌더링 목록(Render List)을 작성합니다.
 
-## 1. Scene의 역할
+## 1. 아키텍처 및 역할
 
-RedGPU에서 **RedGPU.Display.Scene**은 다음과 같은 핵심 역할을 수행합니다.
+`RedGPU.Display.Scene`은 단순한 컨테이너 역할을 넘어 다음과 같은 핵심 기능을 수행합니다.
 
-- **객체 컨테이너**: `addChild()`를 통해 Mesh, Group 등 시각적 객체를 포함합니다.
-- **조명 관리**: `LightManager`를 내장하여 Scene 전체의 조명을 관리합니다.
-- **배경 설정**: 단색 배경(Background Color)을 설정합니다. (단, 스카이박스는 View에서 관리합니다.)
+<ClientOnly>
+  <MermaidResponsive :definition="sceneGraph" />
+</ClientOnly>
 
-## 2. Scene 생성 및 배경색 설정
+- **Scene Graph Management**: `addChild()`, `removeChild()` 메서드를 통해 계층적인 객체 구조를 관리합니다.
+- **Light Uniform Management**: 내장된 `LightManager`를 통해 씬 전체에 영향을 주는 조명 데이터를 GPU 버퍼(Uniform Buffer)로 관리합니다.
+- **Global Environment**: 배경색(Background Color) 등 씬 전역에 적용되는 환경 설정을 담당합니다. (Skybox는 View 단위로 처리됨에 유의)
 
-Scene을 생성할 때는 별도의 인자가 필요하지 않습니다. `useBackgroundColor` 속성을 켜고 `backgroundColor`를 설정하면 Scene의 배경색을 지정할 수 있습니다.
+## 2. 생성 및 설정
+
+Scene은 초기화 시 별도의 인자를 요구하지 않으며, 생성 직후 객체 추가 및 환경 설정이 가능합니다.
 
 ```javascript
-// 1. Scene 생성
+// 1. Scene 인스턴스 생성
 const scene = new RedGPU.Display.Scene();
 
-// 2. 배경색 활성화 및 색상 설정
+// 2. 배경색 설정 (Render Pass의 Clear Color로 사용됨)
 scene.useBackgroundColor = true;
-scene.backgroundColor.setColorByHEX('#5259c3'); // 파란색 배경
+scene.backgroundColor.setColorByHEX('#5259c3'); // Hex Code 입력
 ```
 
-## 3. 조명 관리자 (LightManager)
+## 3. 조명 시스템 통합
 
-앞서 [조명(Light)](./light.md) 챕터에서 다루었듯이, 모든 조명은 Scene이 가지고 있는 `lightManager`에 등록해야 합니다.
+Scene은 생성과 동시에 내부적으로 `LightManager` 인스턴스를 생성합니다. 
+모든 광원 객체는 반드시 이 매니저를 통해 등록되어야 하며, 등록된 데이터는 렌더링 시점에 셰이더로 바인딩됩니다.
 
 ```javascript
-// 환경광 설정
+// Ambient Light (전역 환경광) 설정
 scene.lightManager.ambientLight = new RedGPU.Light.AmbientLight('#ffffff', 0.1);
 
-// 방향광 추가
+// Directional Light (방향성 광원) 추가
 const dirLight = new RedGPU.Light.DirectionalLight();
 scene.lightManager.addDirectionalLight(dirLight);
 ```
 
-## 4. Scene과 뷰(View)의 관계
+## 4. View와의 관계
 
-초보자가 자주 헷갈리는 부분은 **Scene**과 **View**의 관계입니다.
+Scene과 View는 **N:M (다대다)** 관계를 가질 수 있습니다.
+- **Data (Model)**: Scene은 렌더링될 데이터(객체, 조명)를 보유합니다.
+- **Presentation (View)**: View는 Scene 데이터를 참조하여 특정 시점(Camera)과 영역(Viewport)에 그립니다.
 
-- **Scene**: "무엇을(What)" 보여줄지 정의하는 **공간**입니다. (객체, 조명, 배경색)
-- **View**: 그 공간을 "어떻게(How)" 볼지 정의하는 **창**입니다. (카메라, 스카이박스, 뷰포트 크기)
+즉, 하나의 Scene 인스턴스를 여러 View가 공유하여 서로 다른 각도에서 렌더링하는 것이 가능합니다.
 
 ```javascript
-// Scene: 객체들이 사는 세상
+// Shared Data: 하나의 Scene 인스턴스 생성
 const scene = new RedGPU.Display.Scene();
 
-// View: 세상을 바라보는 창 (Camera와 Scene을 연결)
-const view = new RedGPU.Display.View3D(redGPUContext, scene, camera);
+// Presentation 1: 메인 뷰
+const view1 = new RedGPU.Display.View3D(redGPUContext, scene, camera1);
 
-// Skybox는 View에 설정합니다!
-view.skybox = mySkybox; 
+// Presentation 2: 서브 뷰 (동일한 scene 참조)
+// view1과 view2는 같은 객체들을 렌더링하지만, 시점(Camera)이나 설정은 다를 수 있습니다.
+const view2 = new RedGPU.Display.View3D(redGPUContext, scene, camera2);
 ```
 
-## 6. 학습: Scene 구성 예제 (배경색 설정)
+## 5. 실습 예제
 
-배경색을 설정하고 간단한 객체를 배치하여 Scene을 구성해 봅니다.
+배경색이 설정된 Scene에 객체를 배치하고 렌더링하는 기본 예제입니다.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -71,24 +102,22 @@ RedGPU.init(canvas, (redGPUContext) => {
     // 1. Scene 생성
     const scene = new RedGPU.Display.Scene();
     
-    // 2. 배경색 설정 (진한 남색)
+    // 2. 배경색(Clear Color) 설정
     scene.useBackgroundColor = true;
-    scene.backgroundColor.setColorByHEX('#1a1a2e');
+    scene.backgroundColor.setColorByHEX('#1a1a2e'); // Dark Navy
 
-    // 3. 카메라 및 컨트롤러 설정
+    // 3. 뷰 및 컨트롤러 설정
     const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+    const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+    redGPUContext.addView(view);
     
-    // 4. 객체 추가 (노란색 상자)
+    // 4. 테스트 객체 추가
     const box = new RedGPU.Display.Mesh(
         redGPUContext, 
         new RedGPU.Primitive.Box(redGPUContext),
         new RedGPU.Material.ColorMaterial(redGPUContext, '#e94560')
     );
     scene.addChild(box);
-
-    // 5. 뷰 생성 및 등록
-    const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-    redGPUContext.addView(view);
 
     const renderer = new RedGPU.Renderer();
     renderer.start(redGPUContext, () => {
@@ -98,9 +127,7 @@ RedGPU.init(canvas, (redGPUContext) => {
 });
 ```
 
-## 라이브 데모 (Live Demo)
-
-배경색이 적용된 Scene 위에서 회전하는 상자를 확인해 보세요.
+## 라이브 데모
 
 <ClientOnly>
 <CodePen title="RedGPU Basics - Scene Background" slugHash="scene-background">
@@ -119,7 +146,7 @@ const canvas = document.getElementById("redgpu-canvas");
 RedGPU.init(canvas, (redGPUContext) => {
 const scene = new RedGPU.Display.Scene();
 
-    // Background Color Setup
+    // Scene Configuration
     scene.useBackgroundColor = true;
     scene.backgroundColor.setColorByHEX('#222831'); // Dark Gray
 
@@ -145,14 +172,6 @@ const scene = new RedGPU.Display.Scene();
 </CodePen>
 </ClientOnly>
 
-## 핵심 요약
+## 관련 문서
 
-- **Scene**은 객체와 조명을 담는 최상위 컨테이너입니다.
-- **배경색**은 `scene.useBackgroundColor`와 `scene.backgroundColor`로 설정합니다.
-- **스카이박스(Skybox)**는 Scene이 아닌 **View**에 설정한다는 점을 주의해야 합니다.
-
-## 다음 학습 추천
-
-이제 기본적인 Scene 구성 방법을 모두 익혔습니다. 외부에서 제작된 정교한 3D 모델을 불러와 Scene을 더욱 풍성하게 만들어 봅시다.
-
-- **[모델 로딩 (GLTF Loader)](./gltf-loader.md)**
+- **[GLTF Loader](../loader/gltf-loader.md)**: 외부 모델 리소스를 Scene으로 로드하는 방법.

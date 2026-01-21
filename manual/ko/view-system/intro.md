@@ -1,51 +1,44 @@
 ---
-title: intro
+title: View System 개요
 order: 1
 ---
 
 # View System
 
-RedGPU의 뷰 시스템은 3D 장면을 구성하고 화면에 출력하는 핵심 아키텍처입니다. 단순히 하나의 화면을 그리는 것을 넘어, 여러 개의 시점이나 독립적인 장면을 유연하게 관리할 수 있는 구조를 제공합니다.
+앞서 학습한 **RedGPUContext** 가 엔진이 실행될 '환경'이라면, **View System** 은 그 환경 위에서 실제 콘텐츠가 어떻게 보여질지를 결정하는 '틀'입니다.
+
+RedGPU 의 **View System** 은 엔진의 핵심 아키텍처로서 다음과 같은 역할을 수행합니다.
+
+*   **장면 구성**: 3D 공간 내 객체와 조명의 계층적 배치 정의
+*   **파이프라인 제어**: 렌더링 프로세스 및 데이터 흐름 관리
+*   **화면 출력**: 최종 결과물을 브라우저 화면에 표시
 
 ## 핵심 구성 요소
 
-3D 월드를 화면에 렌더링하기 위해서는 다음 네 가지 요소가 유기적으로 작동해야 합니다.
+RedGPU의 렌더링 파이프라인을 구성하는 4가지 핵심 모듈은 다음과 같습니다. 각 모듈은 독립적인 역할을 수행하며 유기적으로 결합됩니다.
 
-| 구성 요소 | 역할 | 비유 |
+| 구성 요소 | 클래스명 | 역할 및 기능 |
 | :--- | :--- | :--- |
-| **View3D** | 최종 렌더링 영역 및 디버깅 설정 | 창문 (Window) |
-| **Scene** | 객체와 조명이 배치되는 가상 공간 | 무대 (Stage) |
-| **Camera** | 공간을 바라보는 시점과 투영 방식 | 눈 (Eyes) |
-| **Controller** | 사용자 입력을 카메라 움직임으로 연결 | 조종간 (Handle) |
+| **View3D** | `RedGPU.Display.View3D` | 화면 출력 영역(Viewport/Scissor) 지정, 스카이박스 및 포스트 이펙트 적용, 디버깅 도구 관리 |
+| **Scene** | `RedGPU.Display.Scene` | 렌더링될 객체의 계층 구조 관리, 조명 데이터 및 씬 배경색 관리 |
+| **Camera** | `RedGPU.Camera.*` | 3D 공간을 2D 화면으로 변환하는 투영 및 뷰 행렬 계산, 절두체 정보 제공 |
+| **Controller** | `RedGPU.Camera.*Controller` | 마우스/터치/키보드 입력 감지 및 카메라 트랜스폼 실시간 갱신 |
 
-## 시스템 아키텍처
+## 관계 이해하기
 
-RedGPU는 하나의 캔버스 위에 여러 개의 **View3D**를 배치할 수 있는 멀티 뷰 시스템을 지원합니다. 각 뷰는 독립적인 **Scene**과 **Camera**를 가질 수 있으며, 이를 통해 미니맵, PIP(Picture-in-Picture), 멀티 시점 뷰어 등을 쉽게 구현할 수 있습니다.
+학습을 시작하기 전, 이 요소들이 서로 어떻게 연결되는지 이해하는 것이 중요합니다.
 
-<script setup>
-const viewSystemGraph = `
-    graph TD
-        Context["RedGPUContext (Canvas)"]
-        View["View3D (Final Output)"]
-        Scene["Scene (Space)"]
-        Camera["Camera (Point of View)"]
-        Controller["Controller (Interaction)"]
+1.  **RedGPUContext** 는 하나 이상의 **View3D** 를 가집니다. (예: 게임 화면과 미니맵)
+2.  각 **View3D** 는 무엇을 보여줄지(**Scene**)와 어디서 볼지(**Camera**)를 연결합니다.
+3.  **Controller** 는 사용자의 입력을 받아 **Camera** 를 움직입니다.
 
-        Context --> View
-        View --> Scene
-        View --> Camera
-        Controller -->|Controls| Camera
-        View -.->|Owner| Controller
-`
-</script>
+이러한 구조 덕분에 하나의 장면(**Scene**) 을 여러 개의 창(**View3D**) 을 통해 서로 다른 각도에서 동시에 볼 수 있습니다.
 
-<ClientOnly>
-  <MermaidResponsive :definition="viewSystemGraph" />
-</ClientOnly>
+---
 
-## 학습 순서
+## 학습 로드맵
 
-뷰 시스템을 완벽히 이해하기 위해 다음 순서로 학습하는 것을 권장합니다.
+각 모듈의 상세한 사용법과 설정 방법은 다음 순서로 학습하는 것을 권장합니다.
 
 1. **[View3D](./view3d.md)**: 화면 렌더링의 기본 단위와 레이아웃 설정 방법.
 2. **[Scene](./scene.md)**: 무대를 구성하고 조명을 관리하는 컨테이너.

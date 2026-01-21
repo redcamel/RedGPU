@@ -1,36 +1,69 @@
 ---
+title: Camera
 order: 4
 ---
 
 # Camera
 
-3D 공간을 화면에 출력하기 위해서는 세상을 바라보는 시인 **Camera**가 필요합니다. 카메라는 3D 좌표를 2D 모니터 화면으로 변환해주는 역할을 합니다.
+**Camera**는 3D 월드 좌표계(World Coordinate)를 2D 화면 좌표계(Screen Coordinate)로 변환하기 위한 **투영 행렬**(Projection Matrix)과 **뷰 행렬**(View Matrix)을 관리하는 객체입니다.
+RedGPU는 렌더링 파이프라인에서 버텍스 셰이더(Vertex Shader)에 카메라의 행렬 정보를 전달하여 정점의 위치를 계산합니다.
 
-## 1. PerspectiveCamera (원근 카메라)
+RedGPU는 두 가지 표준 투영 방식을 지원합니다.
 
-RedGPU의 **RedGPU.Camera.PerspectiveCamera**는 실제 사람의 눈이나 카메라 렌즈와 동일한 방식으로 작동합니다. 멀리 있는 물체는 작게, 가까운 물체는 크게 렌더링하여 자연스러운 입체감을 제공합니다.
+## 1. PerspectiveCamera
+
+**`RedGPU.Camera.PerspectiveCamera`**는 **원근 투영**(Perspective Projection) 방식을 사용합니다. 
+시야각(FOV)을 기반으로 절두체(Frustum)를 생성하며, 카메라로부터 거리가 멀어질수록 객체가 작게 렌더링됩니다. 사람의 눈이나 실제 카메라 렌즈와 유사한 공간감을 제공합니다.
 
 ```javascript
-// 카메라 생성
+// 인스턴스 생성
 const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
 
-// 카메라의 위치 설정
+// 1. Field of View (시야각, 단위: Degree)
+// 값이 클수록 더 넓은 영역을 볼 수 있지만 가장자리 왜곡이 심해질 수 있습니다.
+camera.fov = 45; 
+
+// 2. Clipping Planes (렌더링 범위 절단면)
+// nearClipping ~ farClipping 사이의 객체만 렌더링됩니다.
+camera.nearClipping = 0.1; 
+camera.farClipping = 1000; 
+
+// 3. Transform (위치 이동)
 camera.x = 0;
 camera.y = 5;
 camera.z = -10;
 ```
 
-## 2. 초점 설정: lookAt
+## 2. OrthographicCamera
 
-카메라를 특정 위치에 두었더라도, 정작 엉뚱한 곳을 보고 있다면 화면에는 아무것도 나오지 않을 수 있습니다. `lookAt()` 메서드를 사용하면 카메라가 특정 좌표를 정면으로 응시하도록 설정할 수 있습니다.
+**`RedGPU.Camera.OrthographicCamera`**는 **직교 투영**(Orthographic Projection) 방식을 사용합니다.
+거리에 따른 크기 변화(원근감)가 발생하지 않으며, 모든 투영선이 평행합니다. 주로 2D UI, 미니맵, CAD 도면 뷰어, 아이소메트릭(Isometric) 게임 등 정확한 비율 유지가 필요한 경우 사용됩니다.
 
 ```javascript
-// 카메라가 원점(0, 0, 0)을 바라보게 합니다.
-camera.lookAt(0, 0, 0);
+// 인스턴스 생성
+const camera = new RedGPU.Camera.OrthographicCamera(redGPUContext);
+
+// Zoom Factor (확대/축소 비율)
+// 값이 클수록 화면이 확대되어 보입니다.
+camera.zoom = 1; 
 ```
 
-## 3. 학습: 카메라 위치와 초점의 변화
-카메라의 위치를 바꾸면서 초점을 바라보는 예제입니다.
+## 3. View Matrix 제어: lookAt
+
+카메라의 위치(`position`)만으로는 시선 방향을 정의하기 어렵습니다. `lookAt` 메서드는 카메라가 특정 월드 좌표를 바라보도록 회전 행렬(Rotation Matrix)을 자동으로 재계산합니다.
+
+```javascript
+// 카메라가 월드 원점(0, 0, 0)을 바라보도록 설정
+camera.lookAt(0, 0, 0);
+
+// 동적 타겟 추적 (매 프레임 호출 시)
+// Target Mesh의 현재 위치를 바라보도록 View Matrix 갱신
+camera.lookAt(targetMesh.x, targetMesh.y, targetMesh.z);
+```
+
+## 4. 실습 예제
+
+카메라의 위치를 이동시키며 `lookAt`으로 고정된 타겟을 주시하는 예제입니다.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -40,13 +73,13 @@ const canvas = document.getElementById('redgpu-canvas');
 RedGPU.init(canvas, (redGPUContext) => {
     const scene = new RedGPU.Display.Scene(redGPUContext);
     
-    // 1. 카메라 생성 및 설정
+    // 1. PerspectiveCamera 설정
     const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
     camera.y = 5;
     camera.z = -10;
-    camera.lookAt(0, 0, 0);
+    camera.lookAt(0, 0, 0); // 초기화 시 원점 주시
 
-    // 2. 중심 물체 (바닥과 박스)
+    // 2. 씬 구성
     scene.addChild(
         new RedGPU.Display.Mesh(
             redGPUContext, 
@@ -67,20 +100,18 @@ RedGPU.init(canvas, (redGPUContext) => {
 
     const renderer = new RedGPU.Renderer();
     renderer.start(redGPUContext, (time) => {
-        // 시간에 따라 카메라가 원점을 중심으로 회전하도록 위치 변경
+        // Orbit Movement: 원형 궤도로 카메라 이동
         const angle = time / 1000;
         camera.x = Math.sin(angle) * 10;
         camera.z = Math.cos(angle) * 10;
         
-        // 위치가 변하더라도 항상 원점을 바라보게 함
+        // Matrix Update: 이동 후 다시 원점을 바라보도록 행렬 갱신
         camera.lookAt(0, 0, 0);
     });
 });
 ```
 
-## 라이브 데모 (Live Demo)
-
-아래 예제는 사용자의 조작 없이 코드로 카메라의 위치와 초점을 실시간으로 변경하는 모습을 보여줍니다.
+## 라이브 데모
 
 <ClientOnly>
 <CodePen title="RedGPU Basics - Camera lookAt" slugHash="camera-lookat">
@@ -128,14 +159,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-## 핵심 요약
+## 관련 문서
 
-- **PerspectiveCamera**는 3D 공간의 깊이감을 표현하는 표준 카메라입니다.
-- **x, y, z** 속성으로 카메라의 위치를 직접 제어할 수 있습니다.
-- **lookAt()** 메서드는 카메라가 바라볼 지점(좌표)을 지정하는 가장 직관적인 방법입니다.
-
-## 다음 학습 추천
-
-사용자가 직접 카메라를 조작할 수 있는 방법을 알아봅니다.
-
-- **[컨트롤러 (Controller)](./controller.md)**
+- **[Camera Controller (카메라 컨트롤러)](./controller.md)**: 사용자 입력을 통한 카메라 제어 자동화.
