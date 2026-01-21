@@ -50,14 +50,15 @@ const manualSidebarConfigs = languages.map(lang => ({
     scanStartPath: lang.code,
     resolvePath: `/${lang.code}/`,
     useTitleFromFileHeading: true,
+    useTitleFromFrontmatter: true,
     useFolderTitleFromIndexFile: true,
     hyphenToSpace: true,
     // API 폴더는 일반 매뉴얼 사이드바에서 제외 (중요)
     excludePattern: ['api/**'],
     sortMenusByFrontmatterOrder: true,
-    // 폴더 정렬 순서 지정 (대분류 폴더만 지정하고 파일 순서는 Frontmatter 'order'로 제어)
-    manualSortFileNameByPriority: ['introduction', 'core-concepts']
-}));
+        // 폴더 및 파일 정렬 순서 지정
+        manualSortFileNameByPriority: ['introduction', 'context', 'view-system', 'basic-objects']
+    }));
 
 // [Group 2] API 문서 사이드바 설정 (API Reference)
 // TypeDoc으로 생성된 API 문서 폴더를 처리합니다.

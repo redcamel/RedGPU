@@ -267,4 +267,4 @@ RedGPU.init(
 
 - **[씬 (Scene)](./scene.md)**: 3D 객체들을 배치하는 가상 공간 관리.
 - **[카메라 (Camera)](./camera.md)**: 다양한 시점 제어 및 카메라 타입.
-- **[RedGPU Context](./redgpu-context.md)**: 멀티 뷰 관리 및 엔진 설정 상세 가이드.
+- **[RedGPU Context](../context/context.md)**: 멀티 뷰 관리 및 엔진 설정 상세 가이드.

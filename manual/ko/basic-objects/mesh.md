@@ -1,5 +1,5 @@
 ---
-order: 5
+order: 1
 ---
 
 <script setup>

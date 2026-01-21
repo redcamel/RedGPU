@@ -117,8 +117,8 @@ import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
 const canvas = document.getElementById("redgpu-canvas");
 
 RedGPU.init(canvas, (redGPUContext) => {
-    const scene = new RedGPU.Display.Scene();
-    
+const scene = new RedGPU.Display.Scene();
+
     // Background Color Setup
     scene.useBackgroundColor = true;
     scene.backgroundColor.setColorByHEX('#222831'); // Dark Gray

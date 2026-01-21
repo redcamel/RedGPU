@@ -1,9 +1,9 @@
 ---
-order: 9
+order: 5
 ---
 
 
-# 컨트롤러 (Controller)
+# Controller
 
 카메라의 위치를 코드로 일일이 계산하는 것은 매우 번거로운 일입니다. **Controller**를 사용하면 마우스나 터치 입력을 통해 사용자가 직접 시점을 자유롭게 탐색할 수 있습니다.
 
@@ -125,4 +125,4 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 물체의 표면에 이미지를 입혀 실제감을 부여해 봅니다.
 
-- **[텍스처와 비트맵 재질 (Texture & BitmapMaterial)](./texture.md)**
+- **[텍스처와 비트맵 재질 (Texture & BitmapMaterial)](../basic-objects/texture.md)**
