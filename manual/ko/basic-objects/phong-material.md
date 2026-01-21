@@ -1,4 +1,5 @@
 ---
+title: Phong Material (퐁 재질)
 order: 4
 ---
 
@@ -151,6 +152,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## 다음 학습 추천
 
-재질을 비추어 입체감을 만들어내는 다양한 광원들에 대해 알아봅니다.
+빛과 물체가 만나 생성되는 입체감의 완성, 그림자 시스템에 대해 알아봅니다.
 
-- **[조명 (Light)](./light.md)**
+- **[그림자 (Shadow)](./shadow.md)**

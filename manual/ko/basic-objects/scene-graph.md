@@ -1,5 +1,6 @@
 ---
-order: 3
+title: Scene Graph (계층 구조)
+order: 6
 ---
 
 <script setup>

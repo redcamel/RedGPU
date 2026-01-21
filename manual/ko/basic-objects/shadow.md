@@ -1,5 +1,6 @@
 ---
-order: 6
+title: Shadow (그림자)
+order: 5
 ---
 
 # Shadow
@@ -167,6 +168,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## 다음 학습 추천
 
-이제 정적인 물체뿐만 아니라, 환경 맵을 사용하여 더욱 사실적인 씬을 구성해 봅시다.
+지금까지 만든 객체들을 계층적으로 묶고 관리하는 방법을 알아봅니다.
 
-- **[Skybox & IBL](../environment/skybox.md)**
+- **[Scene Graph (Scene Graph)](./scene-graph.md)**
