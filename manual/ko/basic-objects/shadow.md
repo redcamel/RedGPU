@@ -1,5 +1,5 @@
 ---
-order: 5
+order: 6
 ---
 
 # Shadow
@@ -167,6 +167,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## 다음 학습 추천
 
-이제 정적인 물체뿐만 아니라, 외부에서 애니메이션이 포함된 모델을 불러와 씬을 더욱 생동감 있게 만들어 봅시다.
+이제 정적인 물체뿐만 아니라, 환경 맵을 사용하여 더욱 사실적인 씬을 구성해 봅시다.
 
-- **[모델 로딩 (GLTF Loader)](./gltf-loader.md)**
+- **[Skybox & IBL](../environment/skybox.md)**

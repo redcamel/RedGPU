@@ -1,5 +1,5 @@
 ---
-order: 3
+order: 2
 ---
 
 # Texture
@@ -140,6 +140,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## 다음 학습 추천
 
-빛을 추가하여 물체의 입체감과 그림자를 부여하는 방법을 알아봅니다.
+메시들을 부모-자식 관계로 묶어 복잡한 구조를 만드는 방법을 알아봅니다.
 
-- **[조명 (Light)](./light.md)**
+- **[Scene Graph (Scene Graph)](./scene-graph.md)**

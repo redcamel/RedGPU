@@ -1,65 +1,82 @@
 ---
-order: 4
+order: 5
 ---
 
-# Light & PhongMaterial
+# Light
 
-3D 공간의 입체감은 빛과 그림자에 의해 결정됩니다. 조명이 없는 공간은 단면적으로 보이지만, 조명을 추가하면 물체의 굴곡과 깊이감이 살아납니다. 이번 단계에서는 조명의 영향을 받는 **PhongMaterial**과 공간을 밝히는 조명들에 대해 배웁니다.
+3D 공간에서 빛은 사물의 형태를 드러내고 공간의 깊이감을 만드는 핵심 요소입니다. RedGPU의 모든 조명은 **Scene**의 **LightManager**를 통해 통합 관리되며, 다양한 광원을 조합하여 극적인 연출을 할 수 있습니다.
 
-## 1. 빛의 재질: PhongMaterial
+## 1. LightManager
 
-**RedGPU.Material.PhongMaterial**은 조명 계산을 수행하는 고성능 재질입니다. 빛을 받았을 때 밝게 빛나는 하이라이트(Specular)와 부드러운 음영을 표현할 수 있습니다. 색상은 `color.hex` 속성을 통해 설정합니다.
+조명은 생성하는 것만으로는 화면에 영향을 주지 않습니다. 반드시 씬의 `lightManager`에 등록해야 엔진이 이를 계산에 포함합니다.
 
 ```javascript
-// 기본적인 빛 재질 생성
-const material = new RedGPU.Material.PhongMaterial(redGPUContext);
-material.color.hex = '#00CC99'; // 색상 설정
-material.shininess = 32;        // 반짝임의 강도 (값이 클수록 매끄러움)
+// 환경광 설정 (단 하나만 존재)
+scene.lightManager.ambientLight = new RedGPU.Light.AmbientLight('#ffffff', 0.2);
+
+// 방향광 추가 (여러 개 가능)
+scene.lightManager.addDirectionalLight(directionalLight);
+
+// 점광원 추가 (여러 개 가능)
+scene.lightManager.addPointLight(pointLight);
 ```
 
 ## 2. 주요 조명의 종류
 
-RedGPU는 공간을 밝히기 위한 네 가지 주요 조명을 제공합니다. 조명은 **Scene**의 **LightManager**를 통해 관리됩니다.
+RedGPU는 물리적 특성이 다른 네 가지 광원을 제공합니다.
 
-| 종류 | 특징 | 주요 용도 |
-| :--- | :--- | :--- |
-| **AmbientLight** | 모든 방향에서 균일하게 비추는 빛 | 최소한의 가시성 확보, 그림자 부분의 밝기 조절 |
-| **DirectionalLight** | 무한히 먼 곳에서 특정 방향으로 쏘는 빛 | 태양광, 전역적인 평행광 |
-| **PointLight** | 전구처럼 한 점에서 모든 방향으로 퍼지는 빛 | 촛불, 가로등, 실내 조명 |
-| **SpotLight** | 원뿔 모양으로 특정 방향을 집중해서 비추는 빛 | 손전등, 무대 조명, 하이라이트 효과 |
+### 2.1 AmbientLight (환경광)
+모든 방향에서 물체를 균일하게 비추는 빛입니다.
+- **특징**: 그림자가 없으며, 조명이 닿지 않는 어두운 부분을 보정하는 용도로 사용합니다.
+- **설정**: `scene.lightManager.ambientLight`에 직접 할당합니다.
 
-## 3. 학습: 조명이 비치는 구체
+### 2.2 DirectionalLight (방향광)
+태양처럼 무한히 먼 곳에서 특정 방향으로 평행하게 쏘는 빛입니다.
+- **특징**: 위치에 상관없이 방향이 일정하며, 그림자를 생성할 수 있는 주요 광원입니다.
+- **설정**: `addDirectionalLight()`를 통해 추가합니다.
 
-조명을 추가하고 **PhongMaterial**이 어떻게 반응하는지 확인해 보겠습니다.
+### 2.3 PointLight (점광원)
+전구처럼 공간의 한 지점에서 모든 방향으로 퍼져나가는 빛입니다.
+- **특징**: 거리의 제곱에 비례하여 밝기가 감쇠(Attenuation)됩니다.
+- **설정**: `radius` 속성으로 빛이 도달하는 범위를 결정합니다.
+
+### 2.4 SpotLight (스포트라이트)
+손전등이나 무대 조명처럼 특정 방향으로 원뿔 모양의 빛을 쏘는 광원입니다.
+- **특징**: 중심에서 외곽으로 갈수록 빛이 흐려지는 효과를 가집니다.
+
+## 3. 학습: 여러 조명이 섞인 씬 구성
+
+서로 다른 색상의 PointLight를 배치하여 화려한 조명 효과를 만들어 보겠습니다.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
 
 RedGPU.init(document.getElementById('redgpu-canvas'), (redGPUContext) => {
     const scene = new RedGPU.Display.Scene(redGPUContext);
-    const controller = new RedGPU.Camera.OrbitController(redGPUContext);
     
-    // 1. 조명 설정 (LightManager를 통해 추가)
-    // 환경광 추가
-    scene.lightManager.ambientLight = new RedGPU.Light.AmbientLight('#ffffff', 0.2);
+    // 1. 기본 환경광 (낮은 강도)
+    scene.lightManager.ambientLight = new RedGPU.Light.AmbientLight('#ffffff', 0.1);
 
-    // 태양광(방향광) 추가
-    const directionalLight = new RedGPU.Light.DirectionalLight([-1, -1, -1], '#ffffff', 1.0);
-    scene.lightManager.addDirectionalLight(directionalLight);
+    // 2. 파란색 점광원
+    const blueLight = new RedGPU.Light.PointLight('#0000ff', 2.0);
+    blueLight.setPosition(-5, 3, 0);
+    blueLight.radius = 15;
+    scene.lightManager.addPointLight(blueLight);
 
-    // 2. 빛 재질을 입힌 구체 생성
-    const material = new RedGPU.Material.PhongMaterial(redGPUContext);
-    material.color.hex = '#1890ff';
-    material.shininess = 64;
+    // 3. 빨간색 점광원
+    const redLight = new RedGPU.Light.PointLight('#ff0000', 2.0);
+    redLight.setPosition(5, 3, 0);
+    redLight.radius = 15;
+    scene.lightManager.addPointLight(redLight);
 
-    const sphere = new RedGPU.Display.Mesh(
+    const mesh = new RedGPU.Display.Mesh(
         redGPUContext,
-        new RedGPU.Primitive.Sphere(redGPUContext, 2, 64, 64),
-        material
+        new RedGPU.Primitive.TorusKnot(redGPUContext),
+        new RedGPU.Material.PhongMaterial(redGPUContext, '#ffffff')
     );
-    scene.addChild(sphere);
+    scene.addChild(mesh);
 
-    // 3. 뷰 설정
+    const controller = new RedGPU.Camera.OrbitController(redGPUContext);
     const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
     redGPUContext.addView(view);
 
@@ -70,10 +87,10 @@ RedGPU.init(document.getElementById('redgpu-canvas'), (redGPUContext) => {
 
 ## 라이브 데모 (Live Demo)
 
-마우스를 조작하여 빛을 받는 구체의 하이라이트와 음영 변화를 관찰해 보세요.
+광원의 위치를 이동시키며 물체의 표면에 맺히는 빛의 변화를 확인해 보세요.
 
 <ClientOnly>
-<CodePen title="RedGPU Basics - Light & Phong" slugHash="mesh-light">
+<CodePen title="RedGPU Basics - Multi Lights" slugHash="multi-lights-demo">
 <pre data-lang="html">
 &lt;canvas id="redgpu-canvas"&gt;&lt;/canvas&gt;
 </pre>
@@ -88,34 +105,30 @@ const canvas = document.getElementById("redgpu-canvas");
 
 RedGPU.init(canvas, (redGPUContext) => {
     const scene = new RedGPU.Display.Scene(redGPUContext);
-    const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-    controller.distance = 10;
-
-    // Lights
+    
     scene.lightManager.ambientLight = new RedGPU.Light.AmbientLight('#ffffff', 0.1);
     
-    const dirLight = new RedGPU.Light.DirectionalLight([-1, -1, -1], '#ffffff', 1.0);
-    scene.lightManager.addDirectionalLight(dirLight);
+    const p1 = new RedGPU.Light.PointLight('#ffcc00', 3.0);
+    p1.radius = 15;
+    scene.lightManager.addPointLight(p1);
 
-    const pointLight = new RedGPU.Light.PointLight('#ffcc00', 2.0);
-    pointLight.radius = 10;
-    pointLight.setPosition(-5, 2, 5);
-    scene.lightManager.addPointLight(pointLight);
-
-    // Material & Mesh
-    const material = new RedGPU.Material.PhongMaterial(redGPUContext);
-
-    material.shininess = 128;
-
-    const mesh = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.TorusKnot(redGPUContext), material);
+    const mesh = new RedGPU.Display.Mesh(
+        redGPUContext, 
+        new RedGPU.Primitive.Sphere(redGPUContext, 3, 64, 64), 
+        new RedGPU.Material.PhongMaterial(redGPUContext)
+    );
     scene.addChild(mesh);
 
+    const controller = new RedGPU.Camera.OrbitController(redGPUContext);
     const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
     redGPUContext.addView(view);
 
     const renderer = new RedGPU.Renderer();
+    let time = 0;
     renderer.start(redGPUContext, () => {
-        mesh.rotationY += 1;
+        time += 0.02;
+        p1.x = Math.sin(time) * 10;
+        p1.z = Math.cos(time) * 10;
     });
 });
 </pre>
@@ -124,12 +137,12 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## 핵심 요약
 
-- **PhongMaterial**의 색상은 `color.hex` 속성을 통해 제어합니다.
-- 조명 효과를 시각적으로 확인하려면 반드시 **LightManager**에 조명을 등록해야 합니다.
-- **Shininess**는 빛이 맺히는 하이라이트의 날카로운 정도를 결정합니다.
+- **LightManager**를 통해 모든 광원을 등록하고 제어합니다.
+- **DirectionalLight**는 전역적인 빛과 그림자 생성에 최적화되어 있습니다.
+- **PointLight**와 **SpotLight**는 특정 영역의 강조와 사실적인 연출에 효과적입니다.
 
 ## 다음 학습 추천
 
-외부에서 제작된 정교한 3D 모델(GLTF)을 불러와 사용하는 방법을 알아봅니다.
+조명에 의해 만들어지는 입체감의 완성, 그림자 시스템에 대해 알아봅니다.
 
-- **[모델 로딩 (GLTF Loader)](./gltf-loader.md)**
+- **[그림자 (Shadow)](./shadow.md)**

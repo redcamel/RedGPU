@@ -1,5 +1,5 @@
 ---
-order: 2
+order: 3
 ---
 
 <script setup>
@@ -174,6 +174,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## 다음 학습 추천
 
-외부에서 제작된 정교한 3D 모델(GLTF)을 불러와 사용하는 방법을 알아봅니다.
+빛에 반응하여 입체감을 만들어내는 핵심 재질인 PhongMaterial에 대해 알아봅니다.
 
-- **[모델 로딩 (GLTF Loader)](./gltf-loader.md)**
+- **[Phong Material](./phong-material.md)**
