@@ -1,5 +1,5 @@
 ---
-title: RedGPUContext
+title: RedGPU Context
 description: RedGPU 엔진의 시작점이자 리소스 관리자인 RedGPUContext에 대해 알아봅니다.
 order: 1
 ---
@@ -112,4 +112,4 @@ RedGPUContext를 통해 엔진을 구동할 준비를 마쳤습니다. 하지만
 
 이제 빈 캔버스 위에 **카메라**(Camera)를 배치하고, 물체를 담을 **공간**(Scene)을 정의하여 실제 3D 세계를 구성하는 방법을 알아볼 차례입니다.
 
-- **[View System (화면 구성)](../view-system/intro.md)**
+- **[View System (화면 구성)](../view-system/)**

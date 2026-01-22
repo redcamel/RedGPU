@@ -1,4 +1,5 @@
 ---
+title: Getting Started
 order: 1
 ---
 <script setup>
@@ -16,7 +17,7 @@ const systemGraph = `
 `
 
 const flowGraph = `
-    Start(["시작"]) --> Init["RedGPU.init 초기화"]
+    Start(["시작"]) --> Init["RedGPU.init 초기화"] 
     Init -->|성공| Context["redGPUContext 획득"]
     Context --> Create["리소스 생성<br/>Scene, Camera, Mesh"]
     Create --> SetupView["View3D 설정"]
@@ -202,9 +203,9 @@ RedGPU의 주요 클래스 관계와 애플리케이션 생명 주기를 도식�
 
 기본적인 화면 구성을 익혔다면, 아래 주제들을 통해 RedGPU의 더 깊은 기능을 탐구해 보세요.
 
-- **[RedGPU Context](../context/context.md)**: 엔진 컨텍스트 상세 설정 및 옵션 가이드.
+- **[RedGPU Context](../context/)**: 엔진 컨텍스트 상세 설정 및 옵션 가이드.
 - **[메시 (Mesh)](../basic-objects/mesh.md)**: 지오메트리와 머티리얼을 결합하여 물체를 만들고 제어하는 방법.
 - **[재질 (Material)](../basic-objects/texture.md)**: 질감과 색상을 표현하는 머티리얼 활용법.
 - **[환경 설정 (Environment)](../environment/skybox.md)**: 스카이박스 및 IBL 설정 방법.
-- **[포스트 이펙트 (Post-Effect)](../post-effect/intro.md)**: 블룸, SSAO 등 후처리 효과 적용 방법.
+- **[포스트 이펙트 (Post-Effect)](../post-effect/)**: 블룸, SSAO 등 후처리 효과 적용 방법.
 - **[API Reference](../../api/index.md)**: 전체 클래스 명세 및 기술 문서.

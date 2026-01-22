@@ -35,8 +35,8 @@ const sortSidebar = (sidebar) => {
 
 // 지원 언어 설정 (이 배열을 기준으로 모든 설정이 생성됨)
 const languages = [
-    { code: 'en', label: 'English', entry: '/en/introduction/getting-started' },
-    { code: 'ko', label: '한국어', entry: '/ko/introduction/getting-started' }
+    { code: 'en', label: 'English', entry: '/en/introduction/' },
+    { code: 'ko', label: '한국어', entry: '/ko/introduction/' }
 ];
 
 // --------------------------------------------------------------------------
@@ -55,6 +55,7 @@ const manualSidebarConfigs = languages.map(lang => ({
     hyphenToSpace: true,
     // API 폴더는 일반 매뉴얼 사이드바에서 제외 (중요)
     excludePattern: ['api/**'],
+    useFolderLinkFromIndexFile: true,
     sortMenusByFrontmatterOrder: true,
         // 폴더 및 파일 정렬 순서 지정
         manualSortFileNameByPriority: ['introduction', 'context', 'view-system', 'basic-objects', 'environment', 'post-effect', 'shadow-system']

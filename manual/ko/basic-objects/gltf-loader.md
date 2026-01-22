@@ -155,4 +155,4 @@ RedGPU.init(canvas, (redGPUContext) => {
 이제 기본 객체와 모델 로딩까지 모두 마쳤습니다.
 빛과 물체가 만나 생성되는 입체감의 완성, 그림자 시스템에 대해 알아봅니다.
 
-- **[그림자 (Shadow)](../shadow-system/shadow.md)**
+- **[그림자 (Shadow)](../shadow-system/)**

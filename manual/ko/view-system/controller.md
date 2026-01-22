@@ -53,4 +53,4 @@ RedGPU는 다양한 인터랙션 시나리오에 대응하는 표준 컨트롤�
 
 이제 **기본 객체**(Basic Objects) 섹션으로 넘어가서, 메시를 정교하게 만들고 텍스트와 이미지를 입힌 **텍스처**(Texture) 등을 통해 3D 물체를 더욱 실감 나게 표현하는 방법을 알아봅니다.
 
-- **[기본 객체 (Basic Objects) 개요](../basic-objects/intro.md)**
+- **[기본 객체 (Basic Objects) 개요](../basic-objects/)**
