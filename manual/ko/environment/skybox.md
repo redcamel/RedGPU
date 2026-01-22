@@ -4,20 +4,19 @@ order: 1
 
 <script setup>
 const skyboxGraph = `
-    SourceB["HDR Image"] -->|new| IBL["IBL Resource"]
-    SourceB -->|new| HDRTex["HDRTexture"]
-    SourceA["6 Images"] -->|new| CubeTex["CubeTexture"]
+    HDRSource["HDR Source (.hdr)"] -->|new| IBL["RedGPU.Resource.IBL"]
+    HDRSource -->|new| HDRTex["RedGPU.Resource.HDRTexture"]
+    Images["6 Images"] -->|new| CubeTex["RedGPU.Resource.CubeTexture"]
 
-    IBL -->|.environmentTexture| Skybox["SkyBox"]
+    IBL -->|.environmentTexture| Skybox["RedGPU.Display.SkyBox"]
     HDRTex --> Skybox
     CubeTex --> Skybox
 
-    Skybox -->|view.skybox| View3D["View3D"]
+    Skybox -->|view.skybox| View3D["RedGPU.Display.View3D"]
 
     %% 커스텀 클래스 적용
-    class View3D mermaid-main;
-    class Skybox mermaid-main;
-    class CubeTex,HDRTex,IBL mermaid-component;
+    class View3D,Skybox mermaid-main;
+    class IBL,HDRTex,CubeTex mermaid-component;
 `
 </script>
 
@@ -75,7 +74,6 @@ const hdrTexture = new RedGPU.Resource.HDRTexture(
     redGPUContext, 
     '/RedGPU/examples/assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
 );
-
 const skybox = new RedGPU.Display.SkyBox(redGPUContext, hdrTexture);
 ```
 
@@ -98,11 +96,12 @@ const skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture);
 
 ## 3. 구현 방식 비교
 
-| 구분 | IBL 활용 (권장)       | HDRTexture | CubeTexture |
-| :--- |:------------------| :--- | :--- |
-| **소스** | 1장의 HDR 이미지       | 1장의 HDR 이미지 | 6장의 이미지 |
-| **조명 데이터** | O (자동 생성)         | X | X |
-| **주요 용도** | 고품질 배경 + 물리 기반 조명 | 고품질 배경 | 단순 배경 |
+| 구분 | IBL 활용 (권장) | HDRTexture | CubeTexture |
+| :--- | :--- | :--- | :--- |
+| **소스** | 1장의 HDR 이미지 | 1장의 HDR 이미지 | 6장의 이미지 |
+| **타입** | `CubeTexture` (변환됨) | `HDRTexture` | `CubeTexture` |
+| **조명 데이터** | O (자동 생성) | X | X |
+| **주요 용도** | 배경 + 물리 기반 조명 | 고품질 배경 | 단순 배경 |
 
 ## 4. 라이브 데모
 
