@@ -1,39 +1,41 @@
 ---
-title: Post-Effect
+title: Post-Effect 개요
 order: 1
 ---
 
+# 포스트 이펙트 (Post-Effect)
+
+포스트 이펙트는 3D 씬 렌더링이 완료된 후, 최종 2D 이미지에 시각적 효과를 더하는 기술입니다. RedGPU의 후처리 시스템은 **설정의 편의성**과 **실행의 효율성**을 위해 이원화된 인터페이스를 제공합니다.
+
 <script setup>
 const postEffectGraph = `
-    subgraph Input ["Scene Output"]
-        Color["Color Buffer"]
-        Depth["Depth Buffer"]
+    subgraph Control ["Control Interface (API)"]
+        direction LR
+        TMM["view.toneMappingManager"]
+        PEM["view.postEffectManager"]
     end
 
-    Input --> Manager["RedGPU.PostEffect.PostEffectManager"]
-
-    subgraph Pipeline ["Pipeline"]
+    subgraph Pipeline ["Execution Pipeline (GPU)"]
         direction TB
-        TM["Tone Mapping"]
-        CE["Custom Effects"]
-        SE["Spatial Effects"]
-        AA["Antialiasing"]
+        TM["1. Tone Mapping"]
+        CE["2. General Effects (Chained)"]
+        SE["3. Screen Space Effects (Built-in)"]
+        AA["4. Antialiasing"]
         
         TM --> CE --> SE --> AA
     end
 
-    Manager --> Pipeline
-    Pipeline --> Final["Final Display"]
+    TMM -.->|Inject Settings| TM
+    PEM -.->|Manage & Execute| Pipeline
 `
 </script>
 
-# 포스트 이펙트
+## 1. 시스템 구조: 제어와 실행
 
-**포스트 이펙트**(Post-Effect) 는 3D 씬의 모든 객체가 렌더링된 후, 최종적으로 생성된 2D 이미지에 추가적인 시각 효과를 적용하는 기술입니다. 이를 통해 블러, 블룸, 색상 보정 등 그래픽의 완성도를 높이는 다양한 효과를 구현할 수 있습니다.
+사용자는 목적에 따라 두 개의 매니저를 통해 후처리를 제어하지만, 실제 연산은 `PostEffectManager`가 총괄하는 하나의 파이프라인 내에서 순차적으로 실행됩니다.
 
-## 1. PostEffectManager
-
-RedGPU의 모든 후처리 효과는 `PostEffectManager` 를 통해 관리됩니다. 이 관리자는 각 뷰(**View3D**)가 생성될 때 내부적으로 자동 생성됩니다.
+*   **ToneMappingManager** (`view.toneMappingManager`): 씬의 가장 기본적인 색조, 노출, 대비 등 **색상 변환 설정**을 담당하는 전용 창구입니다.
+*   **PostEffectManager** (`view.postEffectManager`): 일반 이펙트의 추가/삭제 및 파이프라인의 **전체 실행**을 담당합니다.
 
 <ClientOnly>
   <MermaidResponsive :definition="postEffectGraph" />
@@ -41,28 +43,19 @@ RedGPU의 모든 후처리 효과는 `PostEffectManager` 를 통해 관리됩니
 
 ## 2. 렌더링 파이프라인 흐름
 
-포스트 이펙트는 씬 렌더링이 완료된 직후에 실행되며, 여러 이펙트가 체인(Chain) 형태로 연결되어 순차적으로 적용됩니다. 파이프라인은 크게 톤 매핑, 커스텀 이펙트, 공간 효과, 안티앨리어싱 단계로 구성됩니다.
+모든 효과는 아래 순서에 따라 처리됩니다. 이 순서는 그래픽스 최적화와 시각적 결과의 일관성을 위해 고정되어 있습니다.
 
-## 3. 주요 이펙트 유형
+1.  **Tone Mapping**: HDR 데이터를 디스플레이 범위로 변환하는 첫 번째 관문입니다.
+2.  **General Effects**: `addEffect()`로 추가된 효과들이 등록된 순서대로 체인처럼 연결되어 실행됩니다.
+3.  **Screen Space Effects**: SSAO, SSR 등 씬의 깊이 정보를 활용하는 고성능 빌트인 효과가 적용됩니다.
+4.  **Antialiasing**: 계단 현상을 제거하는 최종 보정 단계입니다.
 
-RedGPU는 성능과 시각적 품질을 고려한 다양한 후처리 효과를 제공합니다.
+::: tip [라이브 데모]
+[RedGPU 공식 예제 페이지](https://redcamel.github.io/RedGPU/examples/#postEffect)에서 모든 효과의 실시간 작동 모습을 확인할 수 있습니다.
+:::
 
-| 분류 | 주요 이펙트 | 사용 방식 | 설명 |
-| :--- | :--- | :--- | :--- |
-| **톤 변환** | ToneMapping | **Built-in** | HDR 색상 범위를 보정하고 노출, 대비 조절 (View 내장) |
-| **공간 효과** | SSAO, SSR | **Built-in** | 화면 공간 정보를 활용한 차폐 및 반사 효과 (속성으로 활성화) |
-| **렌즈 효과** | OldBloom, Vignette, Blur | **addEffect** | 빛 번짐, 외곽 어두워짐, 초점 흐림 등 광학적 효과 |
-| **색상 보정** | Adjustments | **addEffect** | 특정 색상 영역 보정 및 커스텀 필터링 |
-| **특수 효과** | FilmGrain, Fog, Pixelize | **addEffect** | 노이즈 추가, 안개 효과, 픽셀화 등 스타일 연출 |
+## 3. 학습 가이드
 
-## 핵심 요약
-
-- **PostEffectManager** 는 `View3D` 에 포함되어 있으며, 모든 후처리를 총괄합니다.
-- 후처리는 톤 매핑을 시작으로 체인 형태로 순차 적용됩니다.
-- 효과의 특성에 따라 직접 추가하는 방식과 속성으로 활성화하는 방식으로 나뉩니다.
-
-## 다음 학습 추천
-
-- **[일반 이펙트 추가](./custom-effects)**
-- **[톤 매핑](./tone-mapping)**
-- **[빌트인 이펙트](./builtin-effects)**
+*   **[톤 매핑 (Tone Mapping)](./tone-mapping)**: 씬의 기본 색감과 노출 설정하기
+*   **[일반 이펙트 (General Effects)](./general-effects)**: 블룸, 블러, 흑백 등 다양한 효과 추가하기
+*   **[빌트인 이펙트 (Built-in Effects)](./builtin-effects)**: SSAO, SSR 등 고성능 효과 활성화하기

@@ -37,7 +37,7 @@ const sceneGraph = `
 </ClientOnly>
 
 *   **계층 구조 관리**: `addChild()`, `removeChild()` 메서드를 통해 객체들의 부모-자식 관계를 관리합니다.
-*   **조명 데이터 관리**: 내장된 **LightManager** 를 통해 씬 전체에 영향을 주는 조명 데이터를 GPU 버퍼(Uniform Buffer)로 통합 관리합니다.
+*   **조명 데이터 관리**: 기본적으로 포함된 **LightManager** 를 통해 씬 전체에 영향을 주는 조명 데이터를 GPU 버퍼(Uniform Buffer)로 통합 관리합니다.
 
 ## 2. 객체 관리 (Hierarchy)
 

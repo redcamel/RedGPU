@@ -1,54 +1,55 @@
 ---
 title: Tone Mapping
-order: 3
+order: 2
 ---
 
-# 톤 매핑
+# 톤 매핑 (Tone Mapping)
 
-**톤 매핑**(Tone Mapping) 은 HDR(High Dynamic Range) 이미지의 넓은 밝기 범위를 디스플레이 가능한 범위로 변환하는 과정입니다. RedGPU의 후처리 파이프라인에서 가장 먼저 실행되는 핵심 단계입니다.
+톤 매핑은 HDR 이미지의 넓은 밝기 범위를 표준 모니터에서 표현 가능한 범위로 변환하는 과정입니다. 후처리 파이프라인의 **진입점(Entry Point)** 역할을 하며, 씬의 전체적인 분위기를 결정합니다.
 
 ## 1. ToneMappingManager
 
-`ToneMappingManager` 는 각 뷰(**View3D**)에 내장되어 있습니다. 별도의 인스턴스 생성 없이 `view.toneMappingManager` 를 통해 직접 설정할 수 있습니다.
+모든 설정은 `view.toneMappingManager`를 통해 이루어집니다. `View3D` 생성 시 자동으로 포함되므로 별도의 인스턴스 생성이 필요 없습니다.
 
-## 2. 주요 설정 항목
+### 기본값 (Default Settings)
+RedGPU는 물리 기반 렌더링에 최적화된 **Khronos PBR Neutral**을 기본 알고리즘으로 채택하고 있습니다.
 
-톤 매핑을 통해 씬의 전반적인 노출과 대비를 조절하여 원하는 시각적 분위기를 연출할 수 있습니다.
+| 속성 | 기본값 | 설명 |
+| :--- | :--- | :--- |
+| `mode` | `KHRONOS_PBR_NEUTRAL` | 톤 매핑 알고리즘 (`RedGPU.ToneMapping.TONE_MAPPING_MODE`) |
+| `exposure` | `1.0` | 노출값 (밝기 강도) |
+| `contrast` | `1.0` | 명암 대비 (0.0 ~ 2.0) |
+| `brightness` | `0.0` | 밝기 보정 (-1.0 ~ 1.0) |
+
+## 2. 설정 변경하기
 
 ### 2.1 톤 매핑 모드 (mode)
-다양한 변환 알고리즘을 지원합니다.
+원하는 시각적 스타일에 따라 알고리즘을 선택합니다. 모든 상수값은 `RedGPU.ToneMapping.TONE_MAPPING_MODE` 객체에 정의되어 있습니다.
 
 ```javascript
-// ACES Filmic 알고리즘 적용 (영화 같은 색감)
+// 영화와 같은 강한 대비와 시네마틱한 색감 적용
 view.toneMappingManager.mode = RedGPU.ToneMapping.TONE_MAPPING_MODE.ACES_FILMIC_HILL;
 ```
 
-### 2.2 노출과 대비 (exposure, contrast)
-이미지의 밝기와 명암 대비를 조절합니다.
+**사용 가능한 모드 상수 및 시각적 차이:**
+
+| 모드 (Constant) | 설명 | 비교 이미지 |
+| :--- | :--- | :--- |
+| **LINEAR** | 보정 없는 선형 변환 | ![Linear](/toneMapping/linear.jpg) |
+| **KHRONOS_PBR_NEUTRAL** | 물리 기반 표준 (기본값) | ![Khronos](/toneMapping/khronos.jpg) |
+| **ACES_FILMIC_HILL** | 시네마틱한 대비 (Hill 버전) | ![ACES Hill](/toneMapping/acesHill.jpg) |
+| **ACES_FILMIC_NARKOWICZ** | 시네마틱한 대비 (Narkowicz 버전) | ![ACES Nark](/toneMapping/acesNark.jpg) |
+
+### 2.2 세부 속성 조절
 
 ```javascript
-// 노출 및 대비 설정
-view.toneMappingManager.exposure = 1.2;
-view.toneMappingManager.contrast = 1.1;
-```
-
-## 3. 사용 예시
-
-```javascript
-const view = new RedGPU.Display.View3D(redGPUContext, scene, camera);
-
-// 톤 매핑 설정
 const tm = view.toneMappingManager;
-tm.mode = RedGPU.ToneMapping.TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL;
-tm.exposure = 1.0;
-tm.contrast = 1.0;
+tm.exposure = 1.2;    // 전체 노출 증가
+tm.contrast = 1.05;   // 명암 대비 미세 조정
+tm.brightness = 0.02; // 암부 밝기 보정
 ```
 
 ## 핵심 요약
-- **톤 매핑** 은 후처리 파이프라인의 **첫 번째 단계**입니다.
-- `View3D` 에 내장되어 있어 즉시 사용 가능합니다.
-- 전체적인 노출과 색감을 결정하는 데 매우 중요한 역할을 합니다.
-
-## 다음 학습 추천
-- **[빌트인 이펙트](./builtin-effects.md)**
-- **[일반 이펙트 추가](./custom-effects.md)**
+- 톤 매핑은 설정(`ToneMappingManager`)과 실행(`PostEffectManager`)이 분리되어 관리됩니다.
+- 후처리 파이프라인의 **가장 첫 번째 단계**에서 실행됩니다.
+- 씬의 첫인상을 결정하는 노출과 대비를 제어하는 핵심 창구입니다.
