@@ -53,3 +53,7 @@ tm.brightness = 0.02; // 암부 밝기 보정
 - 톤 매핑은 설정(`ToneMappingManager`)과 실행(`PostEffectManager`)이 분리되어 관리됩니다.
 - 후처리 파이프라인의 **가장 첫 번째 단계**에서 실행됩니다.
 - 씬의 첫인상을 결정하는 노출과 대비를 제어하는 핵심 창구입니다.
+
+## 다음 학습 추천
+- **[일반 이펙트](./general-effects)**
+- **[빌트인 이펙트](./builtin-effects)**

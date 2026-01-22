@@ -101,8 +101,10 @@ RedGPU.init(canvas, (redGPUContext) => {
     const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
     view.ibl = ibl;
     view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+    
     redGPUContext.addView(view);
 
+    // 흑백 효과 추가
     const grayscale = new RedGPU.PostEffect.Grayscale(redGPUContext);
     view.postEffectManager.addEffect(grayscale);
 
@@ -153,5 +155,5 @@ RedGPU가 제공하는 모든 일반 이펙트 목록입니다. 모든 이펙트
 - 실제 렌더링은 톤 매핑 직후 단계에서 수행됩니다.
 
 ## 다음 학습 추천
-- **[톤 매핑](./tone-mapping.md)**
-- **[빌트인 이펙트](./builtin-effects.md)**
+- **[톤 매핑](./tone-mapping)**
+- **[빌트인 이펙트](./builtin-effects)**
