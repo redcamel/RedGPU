@@ -201,5 +201,7 @@ Now that you've built your first scene, explore more powerful features of RedGPU
 
 - **[RedGPU Context](../core-concepts/redgpu-context.md)**: A guide to engine context settings and advanced options.
 - **[Mesh](../core-concepts/mesh.md)**: How to create and control objects by combining geometry and material.
-- **[Material System](../core-concepts/material.md)**: How to express textures and colors using materials.
+- **[Material](../basic-objects/texture.md)**: How to express texture and color using materials.
+- **[Environment](../environment/skybox.md)**: How to set up Skybox and IBL.
+- **[Post-Effect](../post-effect/intro.md)**: How to apply post-processing effects like Bloom and SSAO.
 - **[API Reference](../../api/index.md)**: Full class specifications and technical documentation.
