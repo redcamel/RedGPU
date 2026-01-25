@@ -23,6 +23,7 @@ interface ATextField {
     textAlign: string;
     lineHeight: number;
     border: string;
+    borderRadius: number | string;
     boxShadow: string;
     boxSizing: string;
     filter: string;
@@ -40,7 +41,7 @@ const BASE_STYLES = {
     wordBreak: 'keep-all',
     verticalAlign: 'middle',
     textAlign: 'center',
-    // borderRadius: '10px',
+    borderRadius: 0,
     lineHeight: 1.4,
     border: '',
     boxShadow: 'none',
