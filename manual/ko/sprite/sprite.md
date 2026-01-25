@@ -37,13 +37,11 @@ scene.addChild(sprite);
 | :--- | :--- | :--- |
 | **`useBillboard`** | 카메라를 항상 향하게 할지 여부 | `true` |
 | **`useBillboardPerspective`** | 카메라와의 거리에 따른 원근감(크기 변화) 적용 여부 | `true` |
-| **`billboardFixedScale`** | `useBillboardPerspective`가 `false`일 때 화면상에 고정될 배율 | `1.0` |
 
 ```javascript
 // 멀어져도 크기가 일정하게 유지되는 아이콘 스타일 설정
 sprite.useBillboard = true;
 sprite.useBillboardPerspective = false; 
-sprite.billboardFixedScale = 0.1;
 ```
 
 ## 4. 실습 예제: 빌보드 유형별 비교
