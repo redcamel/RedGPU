@@ -141,6 +141,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## 다음 단계
 
-기본 도형을 넘어, 외부에서 제작된 고품질 3D 모델을 불러오는 방법을 알아봅니다.
+사실적인 공간감을 위한 그림자 시스템에 대해 알아봅니다.
 
-- **[GLTF Loader (모델 로딩)](./gltf-loader.md)**
+- **[그림자 (Shadow)](../shadow-system/)**

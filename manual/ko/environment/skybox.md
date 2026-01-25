@@ -194,4 +194,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## 다음 학습 추천
 
-- **[IBL](./ibl.md)**
+
+
+- **[IBL (Image-Based Lighting)](./ibl)**

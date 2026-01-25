@@ -1,5 +1,5 @@
 ---
-title: 메시
+title: Mesh (메시)
 order: 1
 ---
 

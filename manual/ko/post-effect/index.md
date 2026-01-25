@@ -56,6 +56,10 @@ const postEffectGraph = `
 
 ## 3. 학습 가이드
 
-*   **[톤 매핑 (Tone Mapping)](./tone-mapping)**: 씬의 기본 색감과 노출 설정하기
+
+
 *   **[일반 이펙트 (General Effects)](./general-effects)**: 블룸, 블러, 흑백 등 다양한 효과 추가하기
+
+*   **[톤 매핑 (Tone Mapping)](./tone-mapping)**: 씬의 기본 색감과 노출 설정하기
+
 *   **[빌트인 이펙트 (Built-in Effects)](./builtin-effects)**: SSAO, SSR 등 고성능 효과 활성화하기

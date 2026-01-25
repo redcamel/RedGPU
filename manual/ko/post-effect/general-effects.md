@@ -1,6 +1,6 @@
 ---
 title: General Effects
-order: 3
+order: 2
 ---
 
 # 일반 이펙트 (General Effects)

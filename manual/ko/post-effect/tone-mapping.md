@@ -1,6 +1,6 @@
 ---
 title: Tone Mapping
-order: 2
+order: 3
 ---
 
 # 톤 매핑 (Tone Mapping)
@@ -55,5 +55,5 @@ tm.brightness = 0.02; // 암부 밝기 보정
 - 씬의 첫인상을 결정하는 노출과 대비를 제어하는 핵심 창구입니다.
 
 ## 다음 학습 추천
-- **[일반 이펙트](./general-effects)**
 - **[빌트인 이펙트](./builtin-effects)**
+- **[일반 이펙트](./general-effects)**

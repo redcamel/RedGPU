@@ -58,7 +58,7 @@ const manualSidebarConfigs = languages.map(lang => ({
     useFolderLinkFromIndexFile: true,
     sortMenusByFrontmatterOrder: true,
         // 폴더 및 파일 정렬 순서 지정
-        manualSortFileNameByPriority: ['introduction', 'context', 'view-system', 'basic-objects', 'environment', 'post-effect', 'shadow-system']
+        manualSortFileNameByPriority: ['introduction', 'context', 'view-system', 'basic-objects', 'shadow-system', 'environment', 'model-loading', 'post-effect']
     }));
 
 // [Group 2] API 문서 사이드바 설정 (API Reference)
