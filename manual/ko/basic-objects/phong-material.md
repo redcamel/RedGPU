@@ -45,6 +45,11 @@ material.useSSR = true;           // 스크린 스페이스 반사 사용
 여러 장의 맵을 동시에 적용하여 단순한 공을 정교한 행성이나 기계 부품처럼 보이게 만들 수 있습니다.
 
 ```javascript
+import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
+
+RedGPU.init(canvas, (redGPUContext) => {
+    const scene = new RedGPU.Display.Scene();
+    
     // 1. 재질 생성
     const material = new RedGPU.Material.PhongMaterial(redGPUContext);
     

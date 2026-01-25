@@ -5,14 +5,17 @@ order: 1
 
 # 환경 (Environment)
 
-RedGPU는 3D 씬의 현실감을 높이기 위해 스카이박스(Skybox)와 IBL(Image-Based Lighting)과 같은 다양한 환경 설정 기능을 제공합니다.
+그림자가 적용되어 입체감이 형성된 공간에, 이제 무한한 배경과 실사 같은 빛 정보를 더할 차례입니다. RedGPU는 3D 씬의 현실감을 극대화하기 위해 스카이박스(Skybox)와 IBL(Image-Based Lighting) 기능을 제공합니다.
 
-## 주요 기능
+## 주요 학습 내용
 
 - **[스카이박스 (SkyBox)](./skybox)**: 씬의 배경을 360도 텍스처로 채워 광활한 공간감을 제공합니다.
 - **[IBL (Image-Based Lighting)](./ibl)**: 주위 환경의 빛 정보를 분석하여 객체에 사실적인 반사와 조명을 적용합니다.
 
-## 다음 학습 추천
+::: info [학습 가이드]
+가장 먼저 공간의 배경을 정의하는 **SkyBox**부터 시작하여, 그 배경이 물체에 실제 조명으로 작용하는 **IBL**까지 순차적으로 알아보겠습니다.
+:::
 
-- **[스카이박스 (SkyBox)](./skybox)**
-- **[IBL (Image-Based Lighting)](./ibl)**
+---
+
+[다음 단계: SkyBox 배우기](./skybox)
