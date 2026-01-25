@@ -61,5 +61,4 @@ ssr.maxSteps = 64;             // 반사 계산 정밀도 (스텝 수)
 
 
 ## 다음 학습 추천
-- **[일반 이펙트](./general-effects)**
-- **[톤 매핑](./tone-mapping)**
+- **[텍스트 필드 (Text Field)](../text-field/)**

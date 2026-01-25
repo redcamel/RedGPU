@@ -63,3 +63,4 @@ const postEffectGraph = `
 *   **[톤 매핑 (Tone Mapping)](./tone-mapping)**: 씬의 기본 색감과 노출 설정하기
 
 *   **[빌트인 이펙트 (Built-in Effects)](./builtin-effects)**: SSAO, SSR 등 고성능 효과 활성화하기
+*   **[텍스트 필드 (Text Field)](../text-field/)**: 3D 공간에 텍스트 UI 추가하기
