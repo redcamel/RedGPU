@@ -1,4 +1,4 @@
-import consoleAndThrowError from "../../consoleAndThrowError";
+import consoleAndThrowError from "../utils/consoleAndThrowError";
 
 /**
  * [KO] 3차원 축 정렬 경계 상자(Axis-Aligned Bounding Box) 클래스입니다.
@@ -9,7 +9,7 @@ import consoleAndThrowError from "../../consoleAndThrowError";
  *
  * * ### Example
  * ```typescript
- * const aabb = new RedGPU.Util.AABB(-1, 1, -1, 1, -1, 1);
+ * const aabb = new RedGPU.Bound.AABB(-1, 1, -1, 1, -1, 1);
  * const intersects = aabb.intersects(otherAABB);
  * ```
  *

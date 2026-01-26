@@ -5,8 +5,8 @@ import ColorMaterial from "../../material/colorMaterial/ColorMaterial";
 import VertexBuffer from "../../resources/buffer/vertexBuffer/VertexBuffer";
 import VertexInterleavedStruct from "../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
 import VertexInterleaveType from "../../resources/buffer/vertexBuffer/VertexInterleaveType";
-import AABB from "../../utils/math/bound/AABB";
-import OBB from "../../utils/math/bound/OBB";
+import AABB from "../../bound/AABB";
+import OBB from "../../bound/OBB";
 import Mesh from "../mesh/Mesh";
 import RenderViewStateData from "../view/core/RenderViewStateData";
 

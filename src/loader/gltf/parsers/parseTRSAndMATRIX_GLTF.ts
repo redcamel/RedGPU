@@ -1,7 +1,7 @@
 import {mat4, vec3} from "gl-matrix";
 import Mesh from "../../../display/mesh/Mesh";
 import GPU_FRONT_FACE from "../../../gpuConst/GPU_FRONT_FACE";
-import mat4ToEuler from "../../../utils/math/matToEuler";
+import mat4ToEuler from "../../../utils/math/mat4ToEuler";
 import quaternionToRotationMat4 from "../../../utils/math/quaternionToRotationMat4";
 import {Node} from "../GLTF";
 

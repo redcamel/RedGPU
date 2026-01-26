@@ -3,8 +3,8 @@ import GeometryGPURenderInfo from "../primitive/core/GeometryGPURenderInfo";
 import IndexBuffer from "../resources/buffer/indexBuffer/IndexBuffer";
 import VertexBuffer from "../resources/buffer/vertexBuffer/VertexBuffer";
 import ResourceBase from "../resources/core/ResourceBase";
-import AABB from "../utils/math/bound/AABB";
-import calculateGeometryAABB from "../utils/math/bound/calculateGeometryAABB";
+import AABB from "../bound/AABB";
+import calculateGeometryAABB from "../bound/math/calculateGeometryAABB";
 
 /**
  * [KO] 정점 버퍼(VertexBuffer)와 인덱스 버퍼(IndexBuffer)를 관리하며, GPU 렌더링에 필요한 정보를 제공하는 클래스입니다.

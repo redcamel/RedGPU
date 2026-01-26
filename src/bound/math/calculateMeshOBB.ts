@@ -1,6 +1,6 @@
 import {mat4, vec3} from "gl-matrix";
-import Mesh from "../../../display/mesh/Mesh";
-import OBB from "./OBB";
+import Mesh from "../../display/mesh/Mesh";
+import OBB from "../OBB";
 
 /**
  * [KO] 메시의 modelMatrix를 적용한 월드 공간 OBB를 계산합니다.
@@ -11,7 +11,7 @@ import OBB from "./OBB";
  *
  * * ### Example
  * ```typescript
- * const meshOBB = RedGPU.Util.calculateMeshOBB(mesh);
+ * const meshOBB = RedGPU.Bound.calculateMeshOBB(mesh);
  * ```
  *
  * @param mesh -

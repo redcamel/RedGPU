@@ -1,6 +1,6 @@
 import {vec3} from "gl-matrix";
-import Mesh from "../../../display/mesh/Mesh";
-import AABB from "./AABB";
+import Mesh from "../../display/mesh/Mesh";
+import AABB from "../AABB";
 
 const tempLocalVertex = vec3.create();
 const tempWorldVertex = vec3.create();
@@ -13,7 +13,7 @@ const tempWorldVertex = vec3.create();
  *
  * * ### Example
  * ```typescript
- * const meshAABB = RedGPU.Util.calculateMeshAABB(mesh);
+ * const meshAABB = RedGPU.Bound.calculateMeshAABB(mesh);
  * ```
  *
  * @param mesh -

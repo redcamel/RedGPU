@@ -5,8 +5,8 @@ import VertexBuffer from "../../resources/buffer/vertexBuffer/VertexBuffer";
 import VertexInterleavedStruct from "../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
 import VertexInterleaveType from "../../resources/buffer/vertexBuffer/VertexInterleaveType";
 import validateRedGPUContext from "../../runtimeChecker/validateFunc/validateRedGPUContext";
-import AABB from "../../utils/math/bound/AABB";
-import calculateGeometryAABB from "../../utils/math/bound/calculateGeometryAABB";
+import AABB from "../../bound/AABB";
+import calculateGeometryAABB from "../../bound/math/calculateGeometryAABB";
 import GeometryGPURenderInfo from "./GeometryGPURenderInfo";
 
 /**

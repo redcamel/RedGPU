@@ -4,7 +4,7 @@
  *
  * * ### Example
  * ```typescript
- * const euler = RedGPU.Util.mat4ToEuler(matrix, [0, 0, 0], 'XYZ');
+ * const euler = RedGPU.Util.matToEuler(matrix, [0, 0, 0], 'XYZ');
  * ```
  *
  * @param mat -

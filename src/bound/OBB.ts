@@ -1,5 +1,5 @@
 import {mat4, vec3} from "gl-matrix";
-import consoleAndThrowError from "../../consoleAndThrowError";
+import consoleAndThrowError from "../utils/consoleAndThrowError";
 
 /**
  * [KO] 3차원 방향성 경계 상자(Oriented Bounding Box) 클래스입니다.
@@ -10,7 +10,7 @@ import consoleAndThrowError from "../../consoleAndThrowError";
  *
  * * ### Example
  * ```typescript
- * const obb = new RedGPU.Util.OBB([0, 0, 0], [1, 1, 1], orientationMatrix);
+ * const obb = new RedGPU.Bound.OBB([0, 0, 0], [1, 1, 1], orientationMatrix);
  * const intersects = obb.intersects(otherOBB);
  * ```
  *

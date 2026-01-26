@@ -1,5 +1,5 @@
-import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
-import AABB from "./AABB";
+import VertexBuffer from "../../resources/buffer/vertexBuffer/VertexBuffer";
+import AABB from "../AABB";
 
 /**
  * [KO] VertexBuffer 정보를 기반으로 AABB를 계산합니다.
@@ -10,7 +10,7 @@ import AABB from "./AABB";
  *
  * * ### Example
  * ```typescript
- * const geometryAABB = RedGPU.Util.calculateGeometryAABB(vertexBuffer);
+ * const geometryAABB = RedGPU.Bound.calculateGeometryAABB(vertexBuffer);
  * ```
  *
  * @param vertexBuffer -

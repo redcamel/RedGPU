@@ -1,5 +1,5 @@
-import Mesh from "../../../display/mesh/Mesh";
-import AABB from "./AABB";
+import Mesh from "../../display/mesh/Mesh";
+import AABB from "../AABB";
 
 /**
  * [KO] 메시와 모든 자식 메시의 AABB를 통합하여 계산합니다.
@@ -10,7 +10,7 @@ import AABB from "./AABB";
  *
  * * ### Example
  * ```typescript
- * const combinedAABB = RedGPU.Util.calculateMeshCombinedAABB(rootMesh);
+ * const combinedAABB = RedGPU.Bound.calculateMeshCombinedAABB(rootMesh);
  * ```
  *
  * @param mesh -
