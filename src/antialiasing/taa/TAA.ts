@@ -19,10 +19,15 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * [KO] 이전 프레임들의 정보를 누적하여 현재 프레임의 계단 현상을 제거하는 고품질 안티앨리어싱 기법입니다.
  * [EN] A high-quality anti-aliasing technique that removes aliasing in the current frame by accumulating information from previous frames.
  *
+ * ::: warning
+ * [KO] 이 클래스는 AntialiasingManager에 의해 관리됩니다.<br/>직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is managed by AntialiasingManager.<br/>Do not create an instance directly.
+ * :::
+ *
  * * ### Example
  * ```typescript
- * const effect = new RedGPU.Antialiasing.TAA(redGPUContext);
- * view.postEffectManager.addEffect(effect);
+ * // AntialiasingManager를 통해 TAA 설정 (Configure TAA via AntialiasingManager)
+ * redGPUContext.antialiasingManager.useTAA = true;
  * ```
  *
  * @category PostEffect

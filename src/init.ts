@@ -41,6 +41,10 @@ import {keepLog} from "./utils";
  * @param requestAdapterOptions -
  * [KO] 어댑터 요청 옵션 (기본값: 고성능 설정)
  * [EN] Adapter request options (Default: high-performance setup)
+ * @returns
+ * [KO] 초기화 프로세스 완료를 나타내는 Promise
+ * [EN] Promise representing the completion of the initialization process
+ * @category Core
  */
 const init = async (
     canvas: HTMLCanvasElement,

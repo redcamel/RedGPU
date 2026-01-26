@@ -12,10 +12,16 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * [KO] TAA로 인해 발생하는 블러 현상을 복구합니다.
  * [EN] Restores blur caused by TAA.
  *
+ * ::: warning
+ * [KO] 이 클래스는 AntialiasingManager에 의해 관리됩니다.<br/>직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is managed by AntialiasingManager.<br/>Do not create an instance directly.
+ * :::
+ *
  * * ### Example
  * ```typescript
- * const effect = new RedGPU.Antialiasing.TAASharpen(redGPUContext);
- * view.postEffectManager.addEffect(effect);
+ * // AntialiasingManager를 통해 TAA 설정 시 자동으로 적용됩니다.
+ * // Automatically applied when TAA is configured via AntialiasingManager.
+ * redGPUContext.antialiasingManager.useTAA = true;
  * ```
  *
  * @category PostEffect

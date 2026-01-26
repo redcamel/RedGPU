@@ -10,10 +10,15 @@ import createBasicPostEffectCode from "../../postEffect/core/createBasicPostEffe
  * [KO] 화면의 픽셀 정보를 분석하여 엣지 부분을 부드럽게 처리하는 저비용 안티앨리어싱 기법입니다.
  * [EN] A low-cost anti-aliasing technique that smoothens edges by analyzing screen pixel information.
  *
+ * ::: warning
+ * [KO] 이 클래스는 AntialiasingManager에 의해 관리됩니다.<br/>직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is managed by AntialiasingManager.<br/>Do not create an instance directly.
+ * :::
+ *
  * * ### Example
  * ```typescript
- * const effect = new RedGPU.Antialiasing.FXAA(redGPUContext);
- * view.postEffectManager.addEffect(effect);
+ * // AntialiasingManager를 통해 FXAA 설정 (Configure FXAA via AntialiasingManager)
+ * redGPUContext.antialiasingManager.useFXAA = true;
  * ```
  *
  * @category PostEffect
