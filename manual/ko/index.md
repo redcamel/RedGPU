@@ -3,7 +3,7 @@ layout: home
 
 hero:
   name: RedGPU
-  text: 차세대 웹 그래픽의 새로운 표준
+  text: The New Standard for Next-Gen Web Graphics
   tagline: WebGPU의 강력한 성능을 가장 직관적인 방식으로 경험하세요.
   actions:
     - theme: brand
