@@ -246,9 +246,22 @@
     background: url('/readme-dark.svg') no-repeat center;
 }
 
+.vp-footer .copyright a:hover {
+    text-decoration: underline;
+}
+
 /* ============================================================
-   6. Hero Video Styles
+   6. Extremely Soft Monotonic Feature Border
    ============================================================ */
+.VPFeature {
+    border: 1px solid transparent !important;
+    background: linear-gradient(var(--vp-c-bg-soft), var(--vp-c-bg-soft)) padding-box,
+                linear-gradient(135deg, rgba(128, 128, 128, 0.08), rgba(128, 128, 128, 0.01)) border-box !important;
+}
+
+/* ============================================================
+   7. Hero Video Styles
+   ============================================ */
 .VPHomeVideo {
     margin: 64px 0;
 }
