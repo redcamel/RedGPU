@@ -1,7 +1,7 @@
 ---
 title: RedGPU Context
 description: RedGPU 엔진의 시작점이자 리소스 관리자인 RedGPUContext에 대해 알아봅니다.
-order: 1
+order: 2
 ---
 
 <script setup>

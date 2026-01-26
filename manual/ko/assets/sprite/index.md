@@ -28,4 +28,4 @@ RedGPU는 3D 공간에서 2D 이미지를 효과적으로 활용할 수 있는 *
 
 ---
 
-[다음 단계: Sprite3D 배우기](./sprite)
+[다음 단계: TextField3D 배우기](../text-field/textfield3d.md)

@@ -1,6 +1,6 @@
 ---
 title: Interaction (인터렉션)
-order: 10
+order: 8
 ---
 
 # 인터렉션 (Interaction)
@@ -159,3 +159,9 @@ RedGPU.init(canvas, (redGPUContext) => {
 - `addListener`를 통해 객체별로 독립적인 이벤트 처리가 가능합니다.
 - `e.target`을 통해 이벤트가 발생한 객체에 직접 접근할 수 있습니다.
 - 마우스 커서 스타일 변경(`document.body.style.cursor`) 등 웹 표준 DOM API와 함께 사용하여 UX를 향상시킬 수 있습니다.
+
+## 다음 학습 추천
+
+인터렉션까지 더해진 풍성한 장면에 시각적인 완성도를 높여주는 후처리 효과를 적용해 봅니다.
+
+- **[포스트 이펙트 (Post-Effect)](../post-effect/index.md)**

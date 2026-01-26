@@ -1,6 +1,6 @@
 ---
 title: Environment
-order: 1
+order: 6
 ---
 
 # 환경 (Environment)
@@ -9,8 +9,8 @@ order: 1
 
 ## 주요 학습 내용
 
-- **[스카이박스 (SkyBox)](./skybox)**: 씬의 배경을 360도 텍스처로 채워 광활한 공간감을 제공합니다.
-- **[IBL (Image-Based Lighting)](./ibl)**: 주위 환경의 빛 정보를 분석하여 객체에 사실적인 반사와 조명을 적용합니다.
+- **[스카이박스 (SkyBox)](./skybox.md)**: 씬의 배경을 360도 텍스처로 채워 광활한 공간감을 제공합니다.
+- **[IBL (Image-Based Lighting)](./ibl.md)**: 주위 환경의 빛 정보를 분석하여 객체에 사실적인 반사와 조명을 적용합니다.
 
 ::: info [학습 가이드]
 가장 먼저 공간의 배경을 정의하는 **SkyBox**부터 시작하여, 그 배경이 물체에 실제 조명으로 작용하는 **IBL**까지 순차적으로 알아보겠습니다.
@@ -18,4 +18,4 @@ order: 1
 
 ---
 
-[다음 단계: SkyBox 배우기](./skybox)
+[다음 단계: SkyBox 배우기](./skybox.md)

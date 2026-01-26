@@ -160,4 +160,4 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 그림자까지 더해져 입체감이 살아난 공간에 무한한 배경과 실사 같은 환경광을 더하는 방법을 알아봅니다.
 
-- **[환경 설정 (Environment)](../environment/)**
+- **[환경 설정 (Environment)](../environment/index.md)**

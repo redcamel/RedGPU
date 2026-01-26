@@ -175,6 +175,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## 다음 학습 추천
 
-단순한 색상을 넘어 실제 이미지를 물체 표면에 입히는 방법을 알아봅니다.
+빛에 반응하여 입체감을 만들어내는 핵심 재질인 PhongMaterial에 대해 알아봅니다.
 
-- **[Texture (텍스처)](./texture.md)**
+- **[Phong Material](../lighting-and-shadow/phong-material.md)**

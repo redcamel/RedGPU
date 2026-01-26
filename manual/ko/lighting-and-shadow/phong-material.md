@@ -146,6 +146,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## 다음 단계
 
-사실적인 공간감을 위한 그림자 시스템에 대해 알아봅니다.
+재질을 비추어 입체감을 만들어내는 다양한 광원들에 대해 알아봅니다.
 
-- **[그림자 (Shadow)](../shadow-system/)**
+- **[조명 (Light)](./light.md)**

@@ -128,6 +128,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## 다음 단계
 
-이제 모든 준비가 끝났습니다. 최종적으로 생성된 화면에 시각적인 깊이를 더하는 후처리 효과에 대해 알아봅니다.
+텍스트와 함께 3D 공간을 풍성하게 채워줄 이미지 기반의 객체들에 대해 알아봅니다.
 
-- **[포스트 이펙트 (Post-Effect)](../post-effect/)**
+- **[스프라이트 (Sprite & SpriteSheet)](../sprite/index.md)**

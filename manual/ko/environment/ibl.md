@@ -111,6 +111,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## 다음 학습 추천
 
-이제 완벽한 조명 환경이 준비되었습니다. 이 공간에 실제 고품질 모델을 불러오는 방법을 알아봅니다.
+지금까지 배운 객체와 환경 설정을 바탕으로, 실제 프로젝트에서 어떻게 모델을 불러오고 제어하는지 더 깊이 알아봅시다.
 
-- **[모델 로딩 (GLTF Loader)](../model-loading/)**
+- **[모델 로딩 (GLTF Loader)](../assets/model-loading/index.md)**

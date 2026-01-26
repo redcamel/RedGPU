@@ -220,6 +220,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## 다음 학습 추천
 
-조명의 효과를 극대화할 수 있는 사실적인 재질에 대해 알아봅니다.
+빛이 있으면 그림자가 생깁니다. 사실적인 공간감을 완성하는 그림자 시스템에 대해 알아봅니다.
 
-- **[Phong Material](./phong-material.md)**
+- **[그림자 (Shadow)](./shadow.md)**

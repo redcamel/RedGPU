@@ -145,6 +145,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## 다음 단계
 
-텍스트와 함께 3D 공간을 풍성하게 채워줄 이미지 기반의 객체들에 대해 알아봅니다.
+사용자의 입력에 반응하는 역동적인 콘텐츠를 만들기 위해 인터렉션 시스템을 알아봅니다.
 
-- **[스프라이트 (Sprite & SpriteSheet)](../sprite/)**
+- **[인터렉션 (Interaction)](../../interaction/index.md)**
