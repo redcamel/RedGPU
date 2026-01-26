@@ -3,8 +3,8 @@ layout: home
 
 hero:
   name: RedGPU
-  text: The New Standard for Next-Gen Web Graphics
-  tagline: Experience the raw power of WebGPU through the most intuitive interface.
+  text: High-Performance WebGPU Graphics Engine
+  tagline: A robust framework for building sophisticated 2D/3D visuals with modern WebGPU standards.
   actions:
     - theme: brand
       text: Get Started
@@ -20,16 +20,16 @@ features:
   - icon:
       light: /icon-showcase-light.svg
       dark: /icon-showcase-dark.svg
-    title: Rich Interactive Showcase
-    details: Discover the full potential of RedGPU through diverse examples that demonstrate high-performance rendering at its finest.
+    title: Real-time Technical Demos
+    details: Explore technical possibilities through diverse graphics examples leveraging the full potential of WebGPU.
   - icon:
       light: /icon-api-light.svg
       dark: /icon-api-dark.svg
-    title: Precisely Engineered API
-    details: Master complex WebGPU technologies with ease through our clear, intuitive, and developer-centric API design.
+    title: Structured API
+    details: Provides an interface designed for developer productivity along with comprehensive technical documentation.
   - icon:
       light: /icon-performance-light.svg
-      dark: /icon-performance-dark.svg
-    title: Uncompromising Performance
-    details: Built on the latest WebGPU standards to push the boundaries of 2D/3D graphics on the web without compromise.
+      dark: /icon-performance-light.svg
+    title: Performance Architecture
+    details: Engineered to efficiently utilize WebGPU's parallel processing capabilities, ensuring stable performance in complex environments.
 ---

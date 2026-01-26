@@ -304,4 +304,26 @@
     filter: brightness(0) saturate(100%) invert(75%) sepia(15%) saturate(2000%) hue-rotate(200deg) brightness(100%) contrast(105%);
 }
 
+/* ============================================================
+   8. Home Hero Styles
+   ============================================================ */
+.VPHero .name {
+    font-size: 22px !important;
+    line-height: 40px !important;
+}
+
+@media (min-width: 640px) {
+    .VPHero .name {
+        font-size: 38px !important;
+        line-height: 56px !important;
+    }
+}
+
+@media (min-width: 960px) {
+    .VPHero .name {
+        font-size: 42px !important;
+        line-height: 64px !important;
+    }
+}
+
 

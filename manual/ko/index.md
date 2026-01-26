@@ -3,8 +3,8 @@ layout: home
 
 hero:
   name: RedGPU
-  text: The New Standard for Next-Gen Web Graphics
-  tagline: WebGPU의 강력한 성능을 가장 직관적인 방식으로 경험하세요.
+  text: High-Performance WebGPU Graphics Engine
+  tagline: A robust framework for building sophisticated 2D/3D visuals with modern WebGPU standards.
   actions:
     - theme: brand
       text: 시작하기
@@ -20,16 +20,16 @@ features:
   - icon:
       light: /icon-showcase-light.svg
       dark: /icon-showcase-dark.svg
-    title: 풍부한 인터랙티브 쇼케이스
-    details: 고성능 렌더링의 진수를 보여주는 다양한 예제를 통해 RedGPU의 잠재력을 확인하세요.
+    title: 실시간 기술 데모
+    details: WebGPU의 잠재력을 활용한 다양한 그래픽스 예제를 통해 기술적 가능성을 확인하세요.
   - icon:
       light: /icon-api-light.svg
       dark: /icon-api-dark.svg
-    title: 정교하게 설계된 API
-    details: 명확하고 직관적인 API 설계를 통해 복잡한 WebGPU 기술을 쉽고 빠르게 다룰 수 있습니다.
+    title: 구조화된 API
+    details: 엔지니어의 생산성을 고려하여 설계된 인터페이스와 상세한 기술 문서를 제공합니다.
   - icon:
       light: /icon-performance-light.svg
-      dark: /icon-performance-dark.svg
-    title: 타협 없는 퍼포먼스
-    details: 최신 WebGPU 표준을 기반으로 설계되어 웹에서 한계를 넘어서는 2D/3D 그래픽을 구현합니다.
+      dark: /icon-performance-light.svg
+    title: 퍼포먼스 아키텍처
+    details: WebGPU의 병렬 처리 능력을 효율적으로 활용하도록 설계되어, 복잡한 환경에서도 안정적인 성능을 구현합니다.
 ---
