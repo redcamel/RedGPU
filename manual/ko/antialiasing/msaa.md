@@ -24,7 +24,7 @@ redGPUContext.antialiasingManager.useMSAA = true;
 
 ## 3. 실습 예제: MSAA 적용
 
-MSAA를 켜고 끄면서 지오메트리 외곽선의 변화를 비교해 보세요.
+MSAA를 켜고 끄면서 지오메트리 외곽선과 하이라이트의 변화를 비교해 보세요.
 
 <ClientOnly>
 <CodePen title="RedGPU - MSAA Example" slugHash="antialiasing-msaa">
@@ -43,17 +43,53 @@ const canvas = document.getElementById("redgpu-canvas");
 RedGPU.init(canvas, (redGPUContext) => {
     const scene = new RedGPU.Display.Scene();
     
-    // 외곽선 확인을 위한 밝은색 물체
-    const mesh = new RedGPU.Display.Mesh(
-        redGPUContext, 
-        new RedGPU.Primitive.Cylinder(redGPUContext, 1, 1, 2, 32),
-        new RedGPU.Material.ColorMaterial(redGPUContext, '#ffdd00')
+    // 조명 추가
+    const light = new RedGPU.Light.DirectionalLight();
+    light.x = 10; light.y = 10; light.z = 10;
+    scene.lightManager.addDirectionalLight(light);
+    
+    const ambientLight = new RedGPU.Light.AmbientLight();
+    ambientLight.intensity = 0.3;
+    scene.lightManager.ambientLight = ambientLight;
+
+    // 1. 미세한 그리드 바닥 (패턴 알리어싱 확인용)
+    const grid = new RedGPU.Display.Mesh(
+        redGPUContext,
+        new RedGPU.Primitive.Ground(redGPUContext, 100, 100, 50, 50),
+        new RedGPU.Material.PhongMaterial(redGPUContext, '#999999')
     );
-    mesh.rotationX = 45;
-    mesh.rotationZ = 45;
-    scene.addChild(mesh);
+    grid.drawMode = 'lines';
+    scene.addChild(grid);
+
+    // 2. 와이어프레임 구체 (지오메트리 엣지 확인용)
+    const sphere = new RedGPU.Display.Mesh(
+        redGPUContext, 
+        new RedGPU.Primitive.Sphere(redGPUContext, 5, 32, 32),
+        new RedGPU.Material.PhongMaterial(redGPUContext, '#00aaff')
+    );
+    sphere.y = 5;
+    sphere.x = -6;
+    sphere.drawMode = 'lines';
+    scene.addChild(sphere);
+
+    // 3. 텍스처 박스 (텍스처 선명도 확인용)
+    const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, 'https://redcamel.github.io/RedGPU/examples/assets/UV_Grid_Sm.jpg');
+    const boxMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);
+    boxMaterial.diffuseTexture = texture;
+    
+    const box = new RedGPU.Display.Mesh(
+        redGPUContext,
+        new RedGPU.Primitive.Box(redGPUContext, 6, 6, 6),
+        boxMaterial
+    );
+    box.y = 5;
+    box.x = 6;
+    scene.addChild(box);
 
     const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+    controller.distance = 25;
+    controller.tilt = -15;
+    
     const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
     redGPUContext.addView(view);
 
@@ -66,7 +102,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     Object.assign(btn.style, {
         position: 'fixed', top: '20px', left: '20px',
         padding: '10px 20px', fontSize: '16px', fontWeight: 'bold',
-        cursor: 'pointer', background: '#ffdd00', color: 'black', border: 'none', borderRadius: '8px'
+        cursor: 'pointer', background: '#00aaff', color: 'white', border: 'none', borderRadius: '8px'
     });
     btn.onclick = () => {
         const manager = redGPUContext.antialiasingManager;
@@ -77,13 +113,14 @@ RedGPU.init(canvas, (redGPUContext) => {
         }
         
         btn.textContent = `MSAA: ${manager.useMSAA ? 'ON' : 'OFF (None)'}`;
-        btn.style.background = manager.useMSAA ? '#ffdd00' : '#ccc';
+        btn.style.background = manager.useMSAA ? '#00aaff' : '#ccc';
     };
     document.body.appendChild(btn);
 
     const renderer = new RedGPU.Renderer(redGPUContext);
     renderer.start(redGPUContext, () => {
-        mesh.rotationY += 0.01;
+        sphere.rotationY += 0.01;
+        box.rotationY += 0.01;
     });
 });
 </pre>

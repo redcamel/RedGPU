@@ -26,7 +26,7 @@ redGPUContext.antialiasingManager.useTAA = true;
 
 ## 3. 실습 예제: TAA 품질 확인
 
-TAA를 적용하면 복잡한 와이어프레임이나 미세한 패턴의 자글거림(Shimmering)이 획기적으로 줄어드는 것을 확인할 수 있습니다.
+동일한 씬에서 TAA가 엣지, 텍스처, 미세 패턴을 어떻게 처리하는지 확인해 보세요. (그리드 패턴과 텍스처의 자글거림까지 완벽하게 잡아내는 것을 볼 수 있습니다.)
 
 <ClientOnly>
 <CodePen title="RedGPU - TAA Example" slugHash="antialiasing-taa">
@@ -45,34 +45,57 @@ const canvas = document.getElementById("redgpu-canvas");
 RedGPU.init(canvas, (redGPUContext) => {
     const scene = new RedGPU.Display.Scene();
     
-    // 1. 복잡한 격자 무늬 바닥 (앨리어싱이 잘 보이는 패턴)
+    // 조명 추가
+    const light = new RedGPU.Light.DirectionalLight();
+    light.x = 10; light.y = 10; light.z = 10;
+    scene.lightManager.addDirectionalLight(light);
+    
+    const ambientLight = new RedGPU.Light.AmbientLight();
+    ambientLight.intensity = 0.3;
+    scene.lightManager.ambientLight = ambientLight;
+
+    // 1. 미세한 그리드 바닥 (패턴 알리어싱 확인용)
     const grid = new RedGPU.Display.Mesh(
         redGPUContext,
-        new RedGPU.Primitive.Ground(redGPUContext, 100, 100, 100, 100), // 세그먼트 100x100
-        new RedGPU.Material.ColorMaterial(redGPUContext, '#aaaaaa')
+        new RedGPU.Primitive.Ground(redGPUContext, 100, 100, 50, 50),
+        new RedGPU.Material.PhongMaterial(redGPUContext, '#999999')
     );
     grid.drawMode = 'lines';
     scene.addChild(grid);
 
-    // 2. 복잡한 와이어프레임 구체
+    // 2. 와이어프레임 구체 (지오메트리 엣지 확인용)
     const sphere = new RedGPU.Display.Mesh(
         redGPUContext, 
-        new RedGPU.Primitive.Sphere(redGPUContext, 5, 64, 64),
-        new RedGPU.Material.ColorMaterial(redGPUContext, '#00aaff')
+        new RedGPU.Primitive.Sphere(redGPUContext, 5, 32, 32),
+        new RedGPU.Material.PhongMaterial(redGPUContext, '#00aaff')
     );
     sphere.y = 5;
+    sphere.x = -6;
     sphere.drawMode = 'lines';
     scene.addChild(sphere);
 
+    // 3. 텍스처 박스 (텍스처 선명도 확인용)
+    const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, 'https://redcamel.github.io/RedGPU/examples/assets/UV_Grid_Sm.jpg');
+    const boxMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);
+    boxMaterial.diffuseTexture = texture;
+    
+    const box = new RedGPU.Display.Mesh(
+        redGPUContext,
+        new RedGPU.Primitive.Box(redGPUContext, 6, 6, 6),
+        boxMaterial
+    );
+    box.y = 5;
+    box.x = 6;
+    scene.addChild(box);
+
     const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-    controller.distance = 20;
+    controller.distance = 25;
     controller.tilt = -15;
     
     const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
     redGPUContext.addView(view);
 
-    // 초기 상태: TAA 활성화, MSAA 비활성화 (비교 극대화)
-    redGPUContext.antialiasingManager.useMSAA = false;
+    // 초기 상태: TAA 활성화
     redGPUContext.antialiasingManager.useTAA = true;
 
     // UI: TAA 토글 버튼
@@ -86,7 +109,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     btn.onclick = () => {
         const manager = redGPUContext.antialiasingManager;
         if (manager.useTAA) {
-            manager.useTAA = false; // TAA 끔 (모두 꺼짐 = 자글거림 최대)
+            manager.useTAA = false; // TAA 끔
         } else {
             manager.useTAA = true;  // TAA 켬
         }
@@ -98,9 +121,8 @@ RedGPU.init(canvas, (redGPUContext) => {
 
     const renderer = new RedGPU.Renderer(redGPUContext);
     renderer.start(redGPUContext, () => {
-        // 카메라를 천천히 움직여서 TAA의 안정성을 확인
-        controller.pan += 0.1;
-        sphere.rotationY += 0.1;
+        sphere.rotationY += 0.01;
+        box.rotationY += 0.01;
     });
 });
 </pre>
