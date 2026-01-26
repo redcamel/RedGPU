@@ -39,7 +39,7 @@ mesh.addListener(PICKING_EVENT_TYPE.CLICK, (e) => {
 
 ## 3. 실습 예제: 인터렉티브 큐브
 
-마우스 오버 시 크기가 커지고, 클릭 시 회전하며 색상이 변하는 큐브 예제입니다.
+마우스 오버 시 크기가 변하고, 클릭 시 색상이 바뀌며, 이동 시 좌표를 확인할 수 있는 인터렉티브 예제입니다.
 
 <ClientOnly>
 <CodePen title="RedGPU - Interaction Example" slugHash="interaction-basic">
@@ -65,58 +65,88 @@ RedGPU.init(canvas, (redGPUContext) => {
     const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
     scene.addChild(mesh);
 
-    // 2. 이벤트 리스너 등록
+    // 4. 상태 표시를 위한 HTML UI 생성 (하단 중앙)
+    const statusOverlay = document.createElement('div');
+    Object.assign(statusOverlay.style, {
+        position: 'fixed',
+        bottom: '40px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        padding: '16px 32px',
+        background: 'rgba(0, 0, 0, 0.85)',
+        color: 'white',
+        borderRadius: '12px',
+        fontFamily: 'monospace',
+        fontSize: '16px',
+        textAlign: 'center',
+        pointerEvents: 'none',
+        border: '1px solid #444',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.5)'
+    });
+    
+    // 두 줄 구조로 생성
+    statusOverlay.innerHTML = `
+        <div id="event-type" style="color: #00CC99; font-weight: bold; margin-bottom: 4px;">Ready to Interact</div>
+        <div id="event-detail" style="font-size: 14px; color: #aaa;">Move or Click the Cube</div>
+    `;
+    document.body.appendChild(statusOverlay);
+
+    const typeEl = statusOverlay.querySelector('#event-type');
+    const detailEl = statusOverlay.querySelector('#event-detail');
+
+    // 3. 이벤트 리스너 등록
     
     // [CLICK] 클릭 시 랜덤 색상 변경 및 회전
     mesh.addListener(PICKING_EVENT_TYPE.CLICK, (e) => {
         const r = Math.floor(Math.random() * 255);
         const g = Math.floor(Math.random() * 255);
         const b = Math.floor(Math.random() * 255);
-        e.target.material.color.setColorByRGBA(r, g, b, 1);
+        e.target.material.color.setColorByRGB(r, g, b);
         
         e.target.rotationY += 45;
         e.target.rotationX += 45;
-        console.log('Clicked!');
+
+        typeEl.innerText = 'Event: CLICK';
+        typeEl.style.color = '#ffcc00';
+        detailEl.innerText = 'Color Changed!';
     });
 
-    // [OVER] 마우스 오버 시 크기 확대
+    // [DOWN] 마우스 버튼을 눌렀을 때
+    mesh.addListener(PICKING_EVENT_TYPE.DOWN, (e) => {
+        e.target.scaleX = e.target.scaleY = e.target.scaleZ = 0.9;
+        typeEl.innerText = 'Event: MOUSE_DOWN';
+        typeEl.style.color = '#ff4444';
+    });
+
+    // [MOVE] 객체 위에서 마우스 이동 시 좌표 표시
+    mesh.addListener(PICKING_EVENT_TYPE.MOVE, (e) => {
+        detailEl.innerText = `MOUSE_MOVE at (${e.mouseX.toFixed(2)}, ${e.mouseY.toFixed(2)})`;
+    });
+
+    // [OVER] 마우스 오버 시
     mesh.addListener(PICKING_EVENT_TYPE.OVER, (e) => {
-        e.target.scaleX = e.target.scaleY = e.target.scaleZ = 1.5;
+        e.target.scaleX = e.target.scaleY = e.target.scaleZ = 1.2;
         document.body.style.cursor = 'pointer';
-        console.log('Mouse Over');
+        typeEl.innerText = 'Event: MOUSE_OVER';
+        typeEl.style.color = '#00CC99';
     });
 
-    // [OUT] 마우스 아웃 시 크기 복구
+    // [OUT] 마우스 아웃 시
     mesh.addListener(PICKING_EVENT_TYPE.OUT, (e) => {
         e.target.scaleX = e.target.scaleY = e.target.scaleZ = 1.0;
         document.body.style.cursor = 'default';
-        console.log('Mouse Out');
+        typeEl.innerText = 'Event: MOUSE_OUT';
+        typeEl.style.color = '#ffffff';
+        detailEl.innerText = 'Move or Click the Cube';
     });
 
-    // 3. 카메라 및 뷰 설정
+    // 4. 카메라 및 뷰 설정
     const controller = new RedGPU.Camera.OrbitController(redGPUContext);
     controller.distance = 5;
     const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
     redGPUContext.addView(view);
 
-    // 안내 텍스트 (UI)
-    const uiScene = new RedGPU.Display.Scene();
-    uiScene.useBackgroundColor = true;
-    uiScene.backgroundColor.a = 0;
-    const uiView = new RedGPU.Display.View2D(redGPUContext, uiScene);
-    redGPUContext.addView(uiView);
-
-    const infoText = new RedGPU.Display.TextField2D(redGPUContext);
-    infoText.text = 'Interact with the Cube!<br/>- Hover: Scale Up<br/>- Click: Rotate & Color Change';
-    infoText.color = '#fff';
-    infoText.fontSize = 16;
-    infoText.background = 'rgba(0,0,0,0.6)';
-    infoText.padding = 10;
-    infoText.x = 20;
-    infoText.y = 20;
-    uiScene.addChild(infoText);
-
-    // 렌더링 시작
+    // 5. 렌더링 시작
     const renderer = new RedGPU.Renderer(redGPUContext);
     renderer.start(redGPUContext);
 });

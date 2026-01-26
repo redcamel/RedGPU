@@ -203,9 +203,9 @@ RedGPU의 주요 클래스 관계와 애플리케이션 생명 주기를 도식�
 
 기본적인 화면 구성을 익혔다면, 아래 주제들을 통해 RedGPU의 더 깊은 기능을 탐구해 보세요.
 
-- **[RedGPU Context](../context/)**: 엔진 컨텍스트 상세 설정 및 옵션 가이드.
+- **[RedGPU Context](../context/index.md)**: 엔진 컨텍스트 상세 설정 및 옵션 가이드.
 - **[메시 (Mesh)](../basic-objects/mesh.md)**: 지오메트리와 머티리얼을 결합하여 물체를 만들고 제어하는 방법.
-- **[재질 (Material)](../basic-objects/texture.md)**: 질감과 색상을 표현하는 머티리얼 활용법.
+- **[재질 (Phong Material)](../basic-objects/phong-material.md)**: 빛에 반응하는 사실적인 질감을 표현하는 방법.
 - **[환경 설정 (Environment)](../environment/skybox.md)**: 스카이박스 및 IBL 설정 방법.
-- **[포스트 이펙트 (Post-Effect)](../post-effect/)**: 블룸, SSAO 등 후처리 효과 적용 방법.
-- **[API Reference](../../api/index.md)**: 전체 클래스 명세 및 기술 문서.
+- **[모델 로딩 (GLTF Loader)](../basic-objects/gltf-loader.md)**: 외부 3D 모델을 불러와 사용하는 방법.
+- **[API Reference](../../api/RedGPU-API/namespaces/RedGPU/README.md)**: 전체 클래스 명세 및 기술 문서.
