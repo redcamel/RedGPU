@@ -4,6 +4,7 @@ import { useRouter } from 'vitepress'
 import './custom.css'
 import './mermaid.css'
 import HeroVideo from './components/HeroVideo.vue'
+import HomeHeroRenderer from './components/HomeHeroRenderer.vue'
 import ExampleFrame from './components/ExampleFrame.vue'
 import CodePen from './components/CodePen.vue'
 import MermaidResponsive from './components/MermaidResponsive.vue'
@@ -16,6 +17,7 @@ export default {
     Layout() {
         return h(DefaultTheme.Layout, null, {
             'nav-bar-title-after': () => h('span', { class: 'version-tag' }, ` V${pkg.version}`),
+            'home-hero-info-before': () => h(HomeHeroRenderer),
             'home-features-after': () => h(HeroVideo),
             'layout-bottom': () => h(GlobalFooter),
         })

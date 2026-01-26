@@ -5,9 +5,6 @@ hero:
   name: RedGPU
   text: The New Standard for Next-Gen Web Graphics
   tagline: Experience the raw power of WebGPU through the most intuitive interface.
-  image:
-    src: /logo-light.svg
-    alt: RedGPU Logo
   actions:
     - theme: brand
       text: Get Started

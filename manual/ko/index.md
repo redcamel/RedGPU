@@ -5,9 +5,6 @@ hero:
   name: RedGPU
   text: 차세대 웹 그래픽의 새로운 표준
   tagline: WebGPU의 강력한 성능을 가장 직관적인 방식으로 경험하세요.
-  image:
-    src: /logo-light.svg
-    alt: RedGPU Logo
   actions:
     - theme: brand
       text: 시작하기
