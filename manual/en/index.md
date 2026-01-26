@@ -36,20 +36,3 @@ features:
     title: Uncompromising Performance
     details: Built on the latest WebGPU standards to push the boundaries of 2D/3D graphics on the web without compromise.
 ---
-
-<script setup>
-import { onMounted } from 'vue'
-import { useRouter } from 'vitepress'
-
-const { go } = useRouter()
-
-onMounted(() => {
-  const base = '/RedGPU/manual/'
-  if (location.pathname === base || location.pathname === base + 'index.html') {
-    const userLang = navigator.language || 'en'
-    if (userLang.startsWith('ko')) {
-      go(base + 'ko/')
-    }
-  }
-})
-</script>

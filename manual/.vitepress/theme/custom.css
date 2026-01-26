@@ -247,51 +247,48 @@
 }
 
 /* ============================================================
-   5. 푸터 스타일
+   6. Hero Video Styles
    ============================================================ */
-.vp-footer {
-    border-top: 1px solid var(--vp-c-gutter) !important;
-    padding: 40px 24px !important;
-    background-color: var(--vp-c-bg-alt) !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    text-align: center !important;
+.VPHomeVideo {
+    margin: 64px 0;
 }
 
-.footer-title {
-    font-weight: 700;
-    font-size: 1.2rem;
-    margin-bottom: 12px;
-    color: var(--vp-c-text-1);
+/* ============================================================
+   7. Feature Icons Theme Support
+   ============================================================ */
+:root {
+    --rp-feature-icon-color: var(--vp-c-brand-1);
+    --rp-feature-icon-bg: var(--vp-c-brand-soft);
 }
 
-.footer-links {
+.dark {
+    --rp-feature-icon-color: var(--vp-c-brand-light);
+    --rp-feature-icon-bg: rgba(100, 108, 255, 0.2);
+}
+
+.VPFeature .icon {
     display: flex;
-    gap: 20px;
     justify-content: center;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
+    align-items: center;
+    padding: 8px;
+    border-radius: 8px;
+    background-color: var(--rp-feature-icon-bg);
+    color: var(--rp-feature-icon-color);
+    width: 48px;
+    height: 48px;
+    margin-bottom: 20px;
 }
 
-.footer-links a {
-    font-size: 0.95rem;
-    font-weight: 500;
-    color: var(--vp-c-brand-1);
-    text-decoration: none;
+.VPFeature .icon img {
+    width: 24px;
+    height: 24px;
+    /* 필터를 사용하여 SVG 이미지 색상을 currentColor처럼 제어 (브랜드 컬러로 강제) */
+    filter: brightness(0) saturate(100%) invert(48%) sepia(89%) border-left(100%) saturate(1487%) hue-rotate(130deg) brightness(95%) contrast(102%);
 }
 
-.footer-links a:hover {
-    text-decoration: underline;
+/* 다크모드에서 아이콘 필터 조정 (더 밝은 브랜드 컬러) */
+.dark .VPFeature .icon img {
+    filter: brightness(0) saturate(100%) invert(75%) sepia(15%) saturate(2000%) hue-rotate(200deg) brightness(100%) contrast(105%);
 }
 
-.vp-footer .copyright {
-    font-size: 0.85rem;
-    color: var(--vp-c-text-2);
-}
 
-.vp-footer .copyright a {
-    font-weight: 600;
-    color: var(--vp-c-text-1);
-    text-decoration: none;
-}

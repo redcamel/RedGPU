@@ -95,12 +95,13 @@ export default withMermaid(defineConfig({
     // 다국어 로케일 설정 (자동 생성)
     locales: Object.fromEntries(
         languages.map(lang => [
-            lang.code === 'en' ? 'root' : lang.code, // 영어를 기본(root)으로 설정
+            lang.code, 
             {
                 label: lang.label,
                 lang: lang.code,
                 link: `/${lang.code}/`, // 언어 전환의 기준점이 되는 경로
                 themeConfig: {
+                    logoLink: `/RedGPU/manual/${lang.code}/`,
                     // 언어별 네비게이션 바
                     nav: [
                         { text: 'Getting Started', link: lang.entry },
@@ -157,7 +158,6 @@ export default withMermaid(defineConfig({
     // 공통 테마 설정
     themeConfig: {
         logo: { light: '/logo-light.svg', dark: '/logo-dark.svg' },
-        logoLink: '/RedGPU/manual',
 
         // 공통 사이드바 (finalSidebar 내부의 키가 /ko/, /en/로 나뉘어 있어 자동 매칭됨)
         sidebar: finalSidebar,
