@@ -1,5 +1,6 @@
 ---
 layout: home
+pageClass: redgpu-home
 
 hero:
   name: RedGPU

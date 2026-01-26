@@ -2,11 +2,11 @@
    1. 전역 레이아웃 및 너비 설정
    (본문 영역을 100% 사용하여 넓은 화면 제공)
    ============================================================ */
-:root {
+
+:root:not(:has(.redgpu-home)) {
     --vp-content-width: 100%;
     --vp-layout-max-width: 100%;
 }
-
 .VPDoc .content,
 .VPDoc .content-container {
     max-width: 100% !important;

@@ -24,7 +24,7 @@
 
 <style scoped>
 .VPHomeVideo {
-  margin: 64px 0;
+  margin: 12px 24px;
 }
 
 .container {
@@ -48,6 +48,7 @@
 @media (min-width: 640px) {
   .VPHomeVideo {
     padding: 0 48px;
+    margin: 48px 0 0
   }
 }
 
