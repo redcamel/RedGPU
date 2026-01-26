@@ -1,0 +1,150 @@
+---
+title: TextField3D
+order: 3
+---
+
+# TextField3D
+
+**TextField3D** is a text object placed at actual coordinates (`x, y, z`) in 3D space. It is useful for creating signposts in the world, name tags above character heads, or explanatory text attached to specific objects.
+
+## 1. Basic Usage
+
+`TextField3D` is treated the same as a general **Mesh** and is physically located in 3D space.
+
+```javascript
+const textField = new RedGPU.Display.TextField3D(redGPUContext, "3D World Text");
+textField.y = 5; // Place in the air
+scene.addChild(textField);
+```
+
+## 2. Billboard Feature
+
+3D text may be seen from the side or back depending on the camera position. To make the text always visible from the front, activate the **Billboard** feature.
+
+- **`useBillboard`**: When activated, the text always faces the front even if the camera rotates.
+- **`useBillboardPerspective`**: Determines whether to maintain size changes due to perspective. (Default: `true`)
+
+```javascript
+textField.useBillboard = true;
+```
+
+## 3. Practical Example: Configuring 3D Text
+
+Let's configure 3D text placed together with a GLTF model.
+
+```javascript
+import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
+
+RedGPU.init(canvas, (redGPUContext) => {
+    const scene = new RedGPU.Display.Scene();
+    
+    // 1. Create and Place 3D Text
+    const text3D = new RedGPU.Display.TextField3D(redGPUContext, "Damaged Helmet");
+    text3D.y = 2.5;
+    text3D.fontSize = 24;
+    text3D.background = "rgba(0, 204, 153, 0.8)";
+    text3D.padding = 10;
+    text3D.useBillboard = true; // Rotate with camera
+    
+    scene.addChild(text3D);
+
+    // 2. Setup Model and Environment
+    const ibl = new RedGPU.Resource.IBL(redGPUContext, 'https://redcamel.github.io/RedGPU/examples/assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
+    const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+    controller.distance = 5;
+    
+    const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+    view.ibl = ibl;
+    redGPUContext.addView(view);
+
+    new RedGPU.GLTFLoader(redGPUContext, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb', (loader) => {
+        scene.addChild(loader.resultMesh);
+    });
+
+    new RedGPU.Renderer().start(redGPUContext);
+});
+```
+
+### Live Demo
+
+Check out the differences between the 4 text fields based on setting combinations in the example below. Rotating the camera with the mouse clearly reveals the difference in the billboard effect.
+
+<ClientOnly>
+<CodePen title="RedGPU Basics - TextField3D Billboard Comparison" slugHash="textfield3d-billboard">
+<pre data-lang="html">
+&lt;canvas id="redgpu-canvas"&gt;&lt;/canvas&gt;
+</pre>
+<pre data-lang="css">
+body { margin: 0; overflow: hidden; background: #000; }
+canvas { display: block; width: 100vw; height: 100vh; }
+</pre>
+<pre data-lang="js">
+import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
+
+const canvas = document.getElementById("redgpu-canvas");
+
+RedGPU.init(canvas, (redGPUContext) => {
+    const scene = new RedGPU.Display.Scene();
+    
+    // IBL Setup
+    const ibl = new RedGPU.Resource.IBL(
+        redGPUContext, 
+        'https://redcamel.github.io/RedGPU/examples/assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
+    );
+
+    // Helper function for creating helmet and text field groups
+    const createCase = (x, label, color, useBB, useBP) => {
+        // 1. Load Model
+        new RedGPU.GLTFLoader(
+            redGPUContext,
+            'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb',
+            (loader) => {
+                const mesh = loader.resultMesh;
+                mesh.x = x;
+                scene.addChild(mesh);
+            }
+        );
+
+        // 2. Create Text Field
+        const text = new RedGPU.Display.TextField3D(redGPUContext, label);
+        text.x = x; text.y = 1.5;
+        text.background = color;
+        text.padding = 15; // Add padding
+        text.useBillboard = useBB;
+        text.useBillboardPerspective = useBP;
+        scene.addChild(text);
+    };
+
+    // Place 4 cases
+    createCase(-4.5, "Billboard: OFF", "rgba(255, 0, 0, 0.8)", false, true);
+    createCase(-1.5, "Billboard: ON", "rgba(0, 204, 153, 0.8)", true, true);
+    createCase(1.5, "Perspective: ON", "rgba(0, 102, 255, 0.8)", true, true);
+    createCase(4.5, "Perspective: OFF", "rgba(255, 102, 0, 0.8)", true, false);
+
+    const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+    controller.distance = 12;
+    const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+    view.ibl = ibl;
+    view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+    redGPUContext.addView(view);
+
+    const renderer = new RedGPU.Renderer();
+    renderer.start(redGPUContext);
+});
+</pre>
+</CodePen>
+</ClientOnly>
+
+## Key Summary
+
+- **TextField3D**: A text object placed at actual coordinates in world space.
+- **CSS Styles**: Web standard styles such as color, background, and border can be applied as is.
+- **Billboard**: Can be set so that 3D text always faces the camera to improve readability.
+
+---
+
+## Next Steps
+
+Learn about the interaction system to create dynamic content that reacts to user input.
+
+- **[Interaction](../../interaction/index.md)**
