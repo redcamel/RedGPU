@@ -5,7 +5,7 @@ order: 3
 
 # SpriteSheet3D
 
-**SpriteSheet3D**는 하나의 이미지에 여러 애니메이션 프레임이 포함된 '스프라이트 시트(Sprite Sheet)'를 사용하여 3D 공간 내에서 연속된 동작을 구현하는 객체입니다. 폭발 효과, 불꽃, 걷는 캐릭터 등 역동적인 2D 애니메이션을 3D 공간에 배치할 때 유용합니다.
+**SpriteSheet3D** 는 하나의 이미지에 여러 애니메이션 프레임이 포함된 **스프라이트 시트**(Sprite Sheet) 를 사용하여 3D 공간 내에서 연속된 동작을 구현하는 객체입니다. 폭발 효과, 불꽃, 걷는 캐릭터 등 역동적인 2D 애니메이션을 3D 공간에 배치할 때 유용합니다.
 
 ## 1. 스프라이트 시트 이해
 
@@ -15,7 +15,7 @@ order: 3
 
 ## 2. 기본 사용법
 
-스프라이트 시트를 사용하기 위해서는 먼저 시트의 구조를 정의하는 **SpriteSheetInfo** 객체를 생성한 뒤, 이를 **SpriteSheet3D**에 전달해야 합니다.
+스프라이트 시트를 사용하기 위해서는 먼저 시트의 구조를 정의하는 **SpriteSheetInfo** 객체를 생성한 뒤, 이를 **SpriteSheet3D** 에 전달해야 합니다.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -47,7 +47,7 @@ scene.addChild(spriteSheet);
 
 ## 4. 실습 예제: 걷는 캐릭터 애니메이션
 
-격자 형태의 시트 이미지가 `SpriteSheet3D`와 `Billboard` 설정을 통해 어떻게 자연스러운 캐릭터 동작으로 변하는지 확인해 봅니다.
+격자 형태의 시트 이미지가 `SpriteSheet3D` 와 **Billboard** 설정을 통해 어떻게 자연스러운 캐릭터 동작으로 변하는지 확인해 봅니다.
 
 <ClientOnly>
 <CodePen title="RedGPU - SpriteSheet3D Animation" slugHash="spritesheet3d-basic">
@@ -125,6 +125,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## 핵심 요약
 
-- **SpriteSheetInfo**: 이미지 소스와 시트의 격자 구조(Segments), 애니메이션 속도(FPS) 등을 정의합니다.
+- **SpriteSheetInfo** : 이미지 소스와 시트의 격자 구조(Segments), 애니메이션 속도(FPS) 등을 정의합니다.
 - **애니메이션 제어**: `play`, `stop`, `gotoAndPlay` 등의 메서드를 통해 시각적 흐름을 제어합니다.
 - **효율성**: 여러 장의 이미지를 각각 불러오는 대신 하나의 시트 파일을 사용하므로 네트워크 오버헤드와 GPU 메모리 관리 측면에서 유리합니다.

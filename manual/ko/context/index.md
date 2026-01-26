@@ -19,7 +19,7 @@ const contextLifeCycle = `
 
 # RedGPUContext
 
-**RedGPUContext**는 RedGPU 엔진이 동작하는 기반이 되는 객체입니다. 
+**RedGPUContext** 는 RedGPU 엔진이 동작하는 기반이 되는 객체입니다. 
 복잡한 WebGPU 초기화 과정을 대신 처리하며, 텍스처나 모델과 같은 각종 리소스를 생성하고 관리하는 중심 역할을 수행합니다.
 
 ## 1. 역할과 주요 기능
@@ -88,7 +88,7 @@ redGPUContext.onResize = (width, height) => {
 
 ## 4. 컨텍스트 주입의 필요성
 
-RedGPU의 거의 모든 객체는 생성 시 첫 번째 인자로 `redGPUContext`를 요구합니다.
+RedGPU의 거의 모든 객체는 생성 시 첫 번째 인자로 `redGPUContext` 를 요구합니다.
 
 이는 각 객체가 GPU 메모리를 사용하기 위해 **"어느 GPU 디바이스에 데이터를 생성해야 하는지"**를 알아야 하기 때문입니다. 컨텍스트를 전달함으로써 엔진은 객체와 실제 하드웨어 리소스를 올바르게 연결할 수 있습니다.
 
@@ -102,7 +102,7 @@ const material = new RedGPU.Material.ColorMaterial(redGPUContext);
 
 ## 핵심 요약
 
-- **엔진의 시작점**: `RedGPU.init`을 통해 비동기적으로 생성되는 필수 객체입니다.
+- **엔진의 시작점**: `RedGPU.init` 을 통해 비동기적으로 생성되는 필수 객체입니다.
 - **필수 인자**: 메시나 재질 등 모든 그래픽 객체 생성 시 반드시 주입해야 합니다.
 - **통합 관리자**: GPU 디바이스, 캔버스, 렌더링 뷰를 하나로 묶어 관리합니다.
 
@@ -110,6 +110,6 @@ const material = new RedGPU.Material.ColorMaterial(redGPUContext);
 
 RedGPUContext를 통해 엔진을 구동할 준비를 마쳤습니다. 하지만 아직 화면은 비어있습니다.
 
-이제 빈 캔버스 위에 **카메라**(Camera)를 배치하고, 물체를 담을 **공간**(Scene)을 정의하여 실제 3D 세계를 구성하는 방법을 알아볼 차례입니다.
+이제 빈 캔버스 위에 **카메라**(Camera) 를 배치하고, 물체를 담을 **공간**(Scene) 을 정의하여 실제 3D 세계를 구성하는 방법을 알아볼 차례입니다.
 
-- **[View System (화면 구성)](../view-system/)**
+- **[화면 구성](../view-system/)**

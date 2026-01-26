@@ -28,13 +28,13 @@ const flowGraph = `
 `
 </script>
 
-# 시작하기 (Getting Started)
+# 시작하기
 
-RedGPU는 차세대 웹 그래픽 표준인 **WebGPU**를 기반으로 설계된 고성능 3D 엔진입니다. 강력한 컴퓨트 셰이더(Compute Shader) 활용과 낮은 오버헤드를 통해 웹 환경에서 네이티브 수준의 몰입형 그래픽 경험을 제공합니다.
+RedGPU는 차세대 웹 그래픽 표준인 **WebGPU** 를 기반으로 설계된 고성능 3D 엔진입니다. 강력한 **컴퓨트 셰이더**(Compute Shader) 활용과 낮은 오버헤드를 통해 웹 환경에서 네이티브 수준의 몰입형 그래픽 경험을 제공합니다.
 
 이 가이드는 RedGPU를 사용하여 첫 번째 3D 애플리케이션을 구축하는 과정을 단계별로 안내합니다.
 
-## 1. 사전 준비 (Prerequisites)
+## 1. 사전 준비
 
 WebGPU는 최신 기술이므로 시작하기 전에 아래 실행 환경을 확인해야 합니다.
 
@@ -42,7 +42,7 @@ WebGPU는 최신 기술이므로 시작하기 전에 아래 실행 환경을 확
 - **지원 여부 확인**: [WebGPU Report](https://webgpureport.org/)에서 현재 브라우저와 하드웨어의 WebGPU 지원 상태를 확인할 수 있습니다.
 - **보안 컨텍스트**: WebGPU API는 보안 환경(`https://`) 또는 로컬 환경(`http://localhost`)에서만 작동합니다.
 
-## 2. 엔진 도입 (Installation)
+## 2. 엔진 도입
 
 RedGPU는 별도의 복잡한 설치 과정 없이, ES Module(ESM)을 통해 즉시 프로젝트에 통합할 수 있습니다.
 
@@ -79,7 +79,7 @@ import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
 
 ### JavaScript 구현 (`main.js`)
 
-RedGPU는 **초기화(Init)** → **리소스 생성(Scene/Camera/Mesh)** → **뷰 설정(View)** → **렌더링 루프(Start)** 순으로 흐름이 진행됩니다.
+RedGPU는 **초기화**(Init) → **리소스 생성**(Scene/Camera/Mesh) → **뷰 설정**(View) → **렌더링 루프**(Start) 순으로 흐름이 진행됩니다.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -180,13 +180,13 @@ RedGPU.init(
 
 RedGPU의 주요 클래스 관계와 애플리케이션 생명 주기를 도식화한 내용입니다.
 
-### 실행 프로세스 (Execution Flow)
+### 실행 프로세스
 
 <ClientOnly>
   <MermaidResponsive :definition="flowGraph" />
 </ClientOnly>
 
-### 주요 구성 요소 (Core Components)
+### 주요 구성 요소
 
 | 클래스 | 역할 정의 |
 | :--- | :--- |
@@ -203,9 +203,9 @@ RedGPU의 주요 클래스 관계와 애플리케이션 생명 주기를 도식�
 
 기본적인 화면 구성을 익혔다면, 아래 주제들을 통해 RedGPU의 더 깊은 기능을 탐구해 보세요.
 
-- **[RedGPU Context](../context/index.md)**: 엔진 컨텍스트 상세 설정 및 옵션 가이드.
-- **[메시 (Mesh)](../basic-objects/mesh.md)**: 지오메트리와 머티리얼을 결합하여 물체를 만들고 제어하는 방법.
-- **[조명과 그림자 (Lighting)](../lighting-and-shadow/phong-material.md)**: 빛에 반응하는 사실적인 질감과 그림자 표현.
-- **[환경 설정 (Environment)](../environment/skybox.md)**: 스카이박스 및 IBL 설정 방법.
-- **[확장 객체 (Extended Objects)](../assets/model-loading/index.md)**: 외부 3D 모델 및 스프라이트 사용 방법.
-- **[API Reference](../../api/RedGPU-API/namespaces/RedGPU/README.md)**: 전체 클래스 명세 및 기술 문서.
+- **[RedGPU Context](../context/index.md)** : 엔진 컨텍스트 상세 설정 및 옵션 가이드.
+- **[메시](../basic-objects/mesh.md)** : 지오메트리와 머티리얼을 결합하여 물체를 만들고 제어하는 방법.
+- **[조명과 그림자](../lighting-and-shadow/phong-material.md)** : 빛에 반응하는 사실적인 질감과 그림자 표현.
+- **[환경 설정](../environment/skybox.md)** : 스카이박스 및 IBL 설정 방법.
+- **[확장 객체](../assets/model-loading/index.md)** : 외부 3D 모델 및 스프라이트 사용 방법.
+- **[API Reference](../../api/RedGPU-API/namespaces/RedGPU/README.md)** : 전체 클래스 명세 및 기술 문서.

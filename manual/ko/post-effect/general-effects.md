@@ -3,17 +3,17 @@ title: General Effects
 order: 2
 ---
 
-# 일반 이펙트 (General Effects)
+# 일반 이펙트
 
 방사형 블러, 그레이스케일 등 RedGPU가 제공하는 다양한 표준 효과들을 관리합니다.
 
 ::: tip [학습 가이드]
-기술적으로 톤 매핑은 전체 후처리 과정의 가장 첫 번째 단계에서 실행되지만, 이 장에서는 시각적인 변화를 가장 직관적으로 체감할 수 있는 **일반 이펙트**를 먼저 다룹니다.
+기술적으로 톤 매핑은 전체 후처리 과정의 가장 첫 번째 단계에서 실행되지만, 이 장에서는 시각적인 변화를 가장 직관적으로 체감할 수 있는 **일반 이펙트** 를 먼저 다룹니다.
 :::
 
-## 1. 사용 방법 (addEffect)
+## 1. 사용 방법
 
-이펙트 객체를 생성한 후 `view.postEffectManager.addEffect()`를 통해 등록합니다. 등록된 순서대로 파이프라인 체인이 형성됩니다.
+이펙트 객체를 생성한 후 `view.postEffectManager.addEffect()` 를 통해 등록합니다. 등록된 순서대로 파이프라인 체인이 형성됩니다.
 
 ```javascript
 const radialBlur = new RedGPU.PostEffect.RadialBlur(redGPUContext);
@@ -154,10 +154,10 @@ RedGPU가 제공하는 모든 일반 이펙트 목록입니다. 모든 이펙트
 :::
 
 ## 핵심 요약
-- `addEffect()`를 사용해 원하는 순서대로 효과를 중첩할 수 있습니다.
-- 모든 이펙트 객체는 생성 시 `redGPUContext`가 필요합니다.
+- `addEffect()` 를 사용해 원하는 순서대로 효과를 중첩할 수 있습니다.
+- 모든 이펙트 객체는 생성 시 `redGPUContext` 가 필요합니다.
 - 실제 렌더링은 톤 매핑 직후 단계에서 수행됩니다.
 
 ## 다음 학습 추천
-- **[톤 매핑](./tone-mapping)**
-- **[빌트인 이펙트](./builtin-effects)**
+- **[톤 매핑](./tone-mapping.md)**
+- **[빌트인 이펙트](./builtin-effects.md)**

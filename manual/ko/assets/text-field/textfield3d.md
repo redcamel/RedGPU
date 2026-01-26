@@ -5,11 +5,11 @@ order: 3
 
 # TextField3D
 
-**TextField3D**는 3D 공간 상의 실제 좌표(`x, y, z`)에 배치되는 텍스트 객체입니다. 월드 내의 표지판, 캐릭터 머리 위의 이름표, 또는 특정 객체에 부착된 설명문 등을 만들 때 유용합니다.
+**TextField3D** 는 3D 공간 상의 실제 좌표(`x, y, z`)에 배치되는 텍스트 객체입니다. 월드 내의 표지판, 캐릭터 머리 위의 이름표, 또는 특정 객체에 부착된 설명문 등을 만들 때 유용합니다.
 
 ## 1. 기본 사용법
 
-`TextField3D`는 일반적인 `Mesh`와 동일하게 다루어지며, 3D 공간 내에 물리적으로 위치합니다.
+`TextField3D` 는 일반적인 **Mesh** 와 동일하게 다루어지며, 3D 공간 내에 물리적으로 위치합니다.
 
 ```javascript
 const textField = new RedGPU.Display.TextField3D(redGPUContext, "3D World Text");
@@ -137,9 +137,9 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## 핵심 요약
 
-- **TextField3D**: 월드 공간 내 실제 좌표에 배치되는 텍스트 객체입니다.
+- **TextField3D** : 월드 공간 내 실제 좌표에 배치되는 텍스트 객체입니다.
 - **CSS 스타일**: 색상, 배경, 보더 등 웹 표준 스타일을 그대로 적용할 수 있습니다.
-- Billboard: 3D 텍스트가 항상 카메라를 바라보게 설정하여 가독성을 높일 수 있습니다.
+- **Billboard** : 3D 텍스트가 항상 카메라를 바라보게 설정하여 가독성을 높일 수 있습니다.
 
 ---
 
@@ -147,4 +147,4 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 사용자의 입력에 반응하는 역동적인 콘텐츠를 만들기 위해 인터렉션 시스템을 알아봅니다.
 
-- **[인터렉션 (Interaction)](../../interaction/index.md)**
+- **[인터렉션](../../interaction/index.md)**

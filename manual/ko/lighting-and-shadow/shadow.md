@@ -1,9 +1,9 @@
 ---
 title: Shadow System
-order: 1
+order: 3
 ---
 
-# 그림자 시스템 (Shadow System)
+# 그림자 시스템
 
 3D 공간에서 그림자는 물체의 입체감과 공간 내 위치 관계를 결정짓는 핵심 요소입니다. RedGPU는 물리 기반의 그림자 시스템을 제공하며, 간단한 설정만으로 사실적인 그림자를 표현할 수 있습니다.
 
@@ -11,9 +11,9 @@ order: 1
 
 그림자가 화면에 나타나기 위해서는 다음 세 가지 요소가 유기적으로 설정되어야 합니다.
 
-1.  **광원 (Light)**: 그림자를 만들어낼 빛입니다. 현재 **DirectionalLight** 가 그림자 생성을 지원합니다.
-2.  **캐스터 (Caster)**: 그림자를 **만드는** 물체입니다. (예: 캐릭터, 건물) -> `mesh.castShadow = true`
-3.  **리시버 (Receiver)**: 그림자를 **받는** 물체입니다. (예: 바닥, 벽) -> `mesh.receiveShadow = true`
+1.  **광원**(Light) : 그림자를 만들어낼 빛입니다. 현재 **DirectionalLight** 가 그림자 생성을 지원합니다.
+2.  **캐스터**(Caster) : 그림자를 **만드는** 물체입니다. (예: 캐릭터, 건물) -> `mesh.castShadow = true`
+3.  **리시버**(Receiver) : 그림자를 **받는** 물체입니다. (예: 바닥, 벽) -> `mesh.receiveShadow = true`
 
 ::: warning [성능 주의]
 그림자 연산은 GPU 자원을 많이 소모합니다. 따라서 모든 물체에 적용하기보다, 시각적으로 중요한 물체와 바닥 등에 선별적으로 적용하는 것이 성능 최적화에 유리합니다.
@@ -152,12 +152,12 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## 핵심 요약
 
--   **castShadow**: 물체가 그림자를 생성하도록 설정합니다.
--   **receiveShadow**: 물체 표면에 그림자가 드리우도록 설정합니다.
--   **품질 제어**: `ShadowManager`를 통해 성능과 선명도 사이의 균형을 조절할 수 있습니다.
+-   **castShadow** : 물체가 그림자를 생성하도록 설정합니다.
+-   **receiveShadow** : 물체 표면에 그림자가 드리우도록 설정합니다.
+-   **품질 제어**: `ShadowManager` 를 통해 성능과 선명도 사이의 균형을 조절할 수 있습니다.
 
 ## 다음 단계
 
 그림자까지 더해져 입체감이 살아난 공간에 무한한 배경과 실사 같은 환경광을 더하는 방법을 알아봅니다.
 
-- **[환경 설정 (Environment)](../environment/index.md)**
+- **[환경 설정](../environment/index.md)**

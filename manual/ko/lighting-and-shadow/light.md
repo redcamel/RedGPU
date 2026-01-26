@@ -1,6 +1,6 @@
 ---
-title: Light (조명)
-order: 4
+title: Light
+order: 2
 ---
 <script setup>
 const lightGraph = `
@@ -70,7 +70,7 @@ RedGPU는 물리적 특성이 다른 네 가지 광원을 제공합니다. 각 �
 
 ### 2.3 PointLight (점광원)
 공간의 한 지점에서 모든 방향으로 퍼져나가는 빛입니다.
-- **특징**: 거리의 제곱에 비례하여 밝기가 줄어드는 **감쇠(Attenuation)** 현상이 발생합니다. `radius` 속성으로 빛이 도달하는 범위를 결정합니다.
+- **특징**: 거리의 제곱에 비례하여 밝기가 줄어드는 **감쇠**(Attenuation) 현상이 발생합니다. `radius` 속성으로 빛이 도달하는 범위를 결정합니다.
 
 ### 2.4 SpotLight (스포트라이트)
 특정 지점에서 특정 방향으로 원뿔 모양의 빛을 쏘는 광원입니다.
@@ -216,10 +216,10 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 - **LightManager** 를 통해 모든 광원을 등록하고 제어합니다.
 - 조명 효과를 보려면 **PhongMaterial** 이나 **PBRMaterial** 등 광택 재질을 사용해야 합니다.
-- **DirectionalLight** 는 전역적인 조명에, **PointLight/SpotLight** 는 강조 조명에 적합합니다.
+- **DirectionalLight** 는 전역적인 조명에, **PointLight** / **SpotLight** 는 강조 조명에 적합합니다.
 
 ## 다음 학습 추천
 
 빛이 있으면 그림자가 생깁니다. 사실적인 공간감을 완성하는 그림자 시스템에 대해 알아봅니다.
 
-- **[그림자 (Shadow)](./shadow.md)**
+- **[그림자](./shadow.md)**

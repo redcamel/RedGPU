@@ -5,17 +5,17 @@ order: 2
 
 # Sprite3D
 
-**Sprite3D**는 3D 공간 내에 배치되는 2D 평면 객체입니다. 일반적인 메시와 달리 **빌보드(Billboard)** 기능을 기본으로 내장하고 있어, 카메라의 회전 방향에 관계없이 항상 정면을 유지해야 하는 요소(아이콘, 이름표, 특수 효과 등)를 구현하는 데 최적화되어 있습니다.
+**Sprite3D** 는 3D 공간 내에 배치되는 2D 평면 객체입니다. 일반적인 메시와 달리 **빌보드**(Billboard) 기능을 기본으로 내장하고 있어, 카메라의 회전 방향에 관계없이 항상 정면을 유지해야 하는 요소(아이콘, 이름표, 특수 효과 등)를 구현하는 데 최적화되어 있습니다.
 
 ## 1. 주요 특징
 
-- **Billboard**: 카메라를 항상 정면으로 바라보는 기능을 기본으로 지원합니다.
+- **Billboard** : 카메라를 항상 정면으로 바라보는 기능을 기본으로 지원합니다.
 - **자동 비율 유지**: 할당된 텍스처의 원본 비율(Aspect Ratio)을 자동으로 계산하여 평면의 크기를 조절합니다.
-- **UI 친화적**: 3D 공간 내에서의 위치(World Position)와 2D적인 표현 방식을 결합하여 공간감 있는 UI 요소를 제공합니다.
+- **UI 친화적** : 3D 공간 내에서의 위치(World Position)와 2D적인 표현 방식을 결합하여 공간감 있는 UI 요소를 제공합니다.
 
 ## 2. 기본 사용법
 
-`Sprite3D`는 내부적으로 `Plane` 지오메트리를 사용하며, 이미지를 출력하기 위해 `BitmapMaterial`과 함께 사용됩니다.
+`Sprite3D` 는 내부적으로 **Plane** 지오메트리를 사용하며, 이미지를 출력하기 위해 **BitmapMaterial** 과 함께 사용됩니다.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -121,7 +121,7 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## 핵심 요약
 
-- **Sprite3D**는 3D 좌표계를 가지면서도 카메라를 정면으로 바라보는 빌보드 기능을 제공합니다.
+- **Sprite3D** 는 3D 좌표계를 가지면서도 카메라를 정면으로 바라보는 **Billboard** 기능을 제공합니다.
 - `useBillboardPerspective` 속성을 통해 거리에 관계없이 일정한 크기로 표현되는 UI 스타일 요소를 구현할 수 있습니다.
 - 텍스처의 해상도와 비율에 따라 지오메트리 크기가 자동 조정되어 편리하게 사용할 수 있습니다.
 
@@ -131,4 +131,4 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 스프라이트를 활용한 애니메이션 효과에 대해 알아봅니다.
 
-- **[SpriteSheet3D (스프라이트 시트)](./spritesheet)**
+- **[SpriteSheet3D](../sprite/spritesheet.md)**

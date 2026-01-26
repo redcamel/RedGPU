@@ -5,12 +5,12 @@ order: 1
 
 # GLTF Loader
 
-**Primitive**로 기본적인 형태를 만들 수 있지만, 정교한 캐릭터나 건물 같은 고품질 에셋은 외부 3D 툴(Blender, Maya 등)에서 제작하여 가져와야 합니다.
-RedGPU는 웹 3D 표준 포맷인 **glTF**(GL Transmission Format) 2.0 로딩을 지원하는 **GLTFLoader**를 제공합니다.
+**Primitive** 로 기본적인 형태를 만들 수 있지만, 정교한 캐릭터나 건물 같은 고품질 에셋은 외부 3D 툴(Blender, Maya 등)에서 제작하여 가져와야 합니다.
+RedGPU는 웹 3D 표준 포맷인 **glTF**(GL Transmission Format) 2.0 로딩을 지원하는 **GLTFLoader** 를 제공합니다.
 
 ## 1. 모델 불러오기
 
-`RedGPU.GLTFLoader`를 사용하여 `.gltf` 또는 `.glb` 파일을 로드할 수 있습니다. 로딩은 비동기적으로 진행되며, 완료 시 콜백 함수를 통해 결과를 전달받습니다.
+`RedGPU.GLTFLoader` 를 사용하여 `.gltf` 또는 `.glb` 파일을 로드할 수 있습니다. 로딩은 비동기적으로 진행되며, 완료 시 콜백 함수를 통해 결과를 전달받습니다.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -31,7 +31,7 @@ new RedGPU.GLTFLoader(
 
 ## 2. IBL과의 시너지 (필수 권장)
 
-외부에서 가져온 고품질 모델들은 대부분 **PBR(물리 기반 렌더링)** 재질을 사용합니다. 이러한 재질은 주변 환경의 빛 정보를 반사하여 질감을 표현하기 때문에, 앞서 배운 **IBL**과 함께 사용할 때 가장 사실적인 결과를 얻을 수 있습니다.
+외부에서 가져온 고품질 모델들은 대부분 **물리 기반 렌더링**(PBR) 재질을 사용합니다. 이러한 재질은 주변 환경의 빛 정보를 반사하여 질감을 표현하기 때문에, 앞서 배운 **IBL** 과 함께 사용할 때 가장 사실적인 결과를 얻을 수 있습니다.
 
 IBL이 없는 환경에서 PBR 모델을 로드하면 금속 질감이 검게 보이거나 매우 어색하게 출력될 수 있습니다.
 
@@ -130,4 +130,4 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 텍스트와 함께 3D 공간을 풍성하게 채워줄 이미지 기반의 객체들에 대해 알아봅니다.
 
-- **[스프라이트 (Sprite & SpriteSheet)](../sprite/index.md)**
+- **[스프라이트](../sprite/index.md)**

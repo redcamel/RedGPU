@@ -46,7 +46,7 @@ SkyBox에 적용할 텍스처를 생성하는 방법은 크게 세 가지로 나
 
 ### 2.1 IBL 리소스 활용 (권장)
 
-`RedGPU.Resource.IBL` 객체를 생성하면 내부적으로 **환경 텍스처**(Environment Texture)가 함께 생성됩니다. 이 텍스처를 Skybox에 활용하는 방식입니다.
+`RedGPU.Resource.IBL` 객체를 생성하면 내부적으로 **환경 텍스처**(Environment Texture) 가 함께 생성됩니다. 이 텍스처를 Skybox에 활용하는 방식입니다.
 
 - **장점**: 배경과 완벽하게 일치하는 물리 기반 조명(Diffuse/Specular) 데이터를 함께 얻을 수 있습니다.
 - **활용**: 가장 사실적인 렌더링 결과를 얻기 위해 주로 사용되는 현대적인 방식입니다.
@@ -196,4 +196,4 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 
 
-- **[IBL (Image-Based Lighting)](./ibl)**
+- **[IBL](./ibl)**

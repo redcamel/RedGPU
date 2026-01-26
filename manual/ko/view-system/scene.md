@@ -26,7 +26,7 @@ const sceneGraph = `
 # Scene
 
 **View3D** 가 장면을 보여주는 '창문'이라면, **Scene** 은 그 창문 너머에 펼쳐지는 '무대'입니다.
-렌더링될 모든 3D 객체(Mesh, Group)와 조명(Light)을 포함하는 **씬 그래프**(Scene Graph) 의 최상위 루트 노드(Root Node) 역할을 수행합니다.
+렌더링될 모든 3D 객체(Mesh, Group)와 조명(Light)을 포함하는 **씬 그래프**(Scene Graph) 의 **루트 노드**(Root Node) 역할을 수행합니다.
 
 ## 1. 아키텍처 및 역할
 
@@ -174,7 +174,7 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 **Scene** 은 렌더링될 데이터와 상태를 가진 모델(Model) 입니다. 하나의 **Scene** 인스턴스를 여러 개의 **View3D** 가 동시에 참조할 수 있습니다. 
 
-이를 통해 동일한 장면에 추가된 물체나 조명의 변화를 서로 다른 시점(Camera)에서 실시간으로 관찰하는 기능을 효율적으로 구현할 수 있습니다.
+이를 통해 동일한 장면에 추가된 물체나 조명의 변화를 서로 다른 **시점**(Camera)에서 실시간으로 관찰하는 기능을 효율적으로 구현할 수 있습니다.
 
 ```javascript
 // 하나의 Scene 생성 (공유 데이터)
@@ -193,7 +193,7 @@ const view2 = new RedGPU.Display.View3D(redGPUContext, sharedScene, camera2);
 
 ## 다음 단계
 
-**Scene** (무대)까지 준비되었으니, 이제 이 무대를 바라볼 **시점**을 정의해야 합니다.
+**Scene** (무대)까지 준비되었으니, 이제 이 무대를 바라볼 **시점** 을 정의해야 합니다.
 3D 공간을 2D 화면으로 투영하는 **Camera** 에 대해 알아봅니다.
 
-- **[Camera (카메라)](./camera.md)**
+- **[Camera](./camera.md)**

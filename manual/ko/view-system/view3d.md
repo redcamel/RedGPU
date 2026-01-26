@@ -177,7 +177,7 @@ view.setPosition('10px', '10%');
 
 ## 5. 멀티 뷰 시스템
 
-RedGPU는 단일 컨텍스트 내에서 다수의 뷰포트(Viewport) 를 운용하는 멀티 뷰 렌더링을 지원합니다. 각 뷰는 화면의 특정 영역을 점유하며 독립적인 장면과 카메라를 렌더링합니다.
+RedGPU는 단일 컨텍스트 내에서 다수의 **뷰포트**(Viewport) 를 운용하는 멀티 뷰 렌더링을 지원합니다. 각 뷰는 화면의 특정 영역을 점유하며 독립적인 장면과 카메라를 렌더링합니다.
 
 <ClientOnly>
   <MermaidResponsive :definition="multiViewGraph" />
@@ -293,4 +293,4 @@ RedGPU.init(
 
 메시와 조명이 배치되는 공간인 **Scene** 의 역할과 구성 방법을 알아봅니다.
 
-- **[Scene (장면)](./scene.md)**
+- **[Scene](./scene.md)**

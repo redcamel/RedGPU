@@ -1,5 +1,5 @@
 ---
-title: Texture (텍스처)
+title: Texture
 order: 3
 ---
 
@@ -9,7 +9,7 @@ order: 3
 
 ## 1. 이미지 불러오기: BitmapTexture
 
-이미지를 3D 엔진에서 사용하려면 먼저 텍스처 객체로 변환해야 합니다. **RedGPU.Resource.BitmapTexture** 를 사용하면 웹상의 이미지 경로를 통해 텍스처 데이터를 생성할 수 있습니다.
+이미지를 3D 엔진에서 사용하려면 먼저 텍스처 객체로 변환해야 합니다. `RedGPU.Resource.BitmapTexture` 를 사용하면 웹상의 이미지 경로를 통해 텍스처 데이터를 생성할 수 있습니다.
 
 ```javascript
 // 이미지 경로를 지정하여 텍스처 데이터 생성
@@ -135,4 +135,4 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 단순한 이미지를 넘어, 빛을 추가하여 공간에 입체감을 불어넣는 방법을 알아봅니다.
 
-- **[조명 (Light)](./light.md)**
+- **[조명](./light.md)**

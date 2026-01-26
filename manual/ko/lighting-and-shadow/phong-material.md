@@ -1,11 +1,11 @@
 ---
-title: Phong Material (퐁 재질)
-order: 5
+title: Phong Material
+order: 1
 ---
 
 # Phong Material
 
-**Phong Material** 은 3D 그래픽스에서 가장 널리 사용되는 라이팅 모델 중 하나인 '퐁(Phong) 리플렉션 모델' 을 구현한 재질입니다. 단순히 색상을 칠하는 것을 넘어, 다양한 **텍스처 맵** 을 활용하여 물체의 질감을 사실적으로 조절할 수 있습니다.
+**Phong Material** 은 3D 그래픽스에서 가장 널리 사용되는 라이팅 모델 중 하나인 **퐁 리플렉션 모델**(Phong Reflection Model) 을 구현한 재질입니다. 단순히 색상을 칠하는 것을 넘어, 다양한 **텍스처 맵** 을 활용하여 물체의 질감을 사실적으로 조절할 수 있습니다.
 
 ## 1. 텍스처 맵을 통한 질감 구현
 
@@ -138,7 +138,7 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## 핵심 요약
 
-- **Phong Material** 은 빛의 난반사(Diffuse) 와 정반사(Specular) 를 계산하는 라이팅 재질입니다.
+- **Phong Material** 은 빛의 **난반사**(Diffuse) 와 **정반사**(Specular) 를 계산하는 라이팅 재질입니다.
 - **Normal Map** 을 사용하면 면을 쪼개지 않고도 정교한 표면 질감을 표현할 수 있습니다.
 - **Displacement Map** 을 통해 실제 지오메트리를 변형시켜 물리적인 입체감을 만들 수 있습니다.
 
@@ -148,4 +148,4 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 재질을 비추어 입체감을 만들어내는 다양한 광원들에 대해 알아봅니다.
 
-- **[조명 (Light)](./light.md)**
+- **[조명](./light.md)**

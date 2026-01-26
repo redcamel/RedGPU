@@ -6,7 +6,7 @@ order: 4
 # Camera
 
 **Scene** 이 모든 물체가 배치된 '무대'라면, **Camera** 는 그 무대를 바라보는 '관찰자의 눈' 입니다.
-3D 월드 좌표계(World Coordinate) 를 2D 화면 좌표계(Screen Coordinate) 로 변환하기 위한 **투영 행렬**(Projection Matrix) 과 **뷰 행렬**(View Matrix) 을 관리하는 핵심 객체입니다.
+**월드 좌표계**(World Coordinate) 를 **화면 좌표계**(Screen Coordinate) 로 변환하기 위한 **투영 행렬**(Projection Matrix) 과 **뷰 행렬**(View Matrix) 을 관리하는 핵심 객체입니다.
 
 RedGPU 는 용도에 따라 두 가지 표준 투영 방식을 지원합니다.
 
@@ -151,4 +151,4 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 카메라의 위치를 코드로 일일이 계산하는 대신, 마우스와 터치를 이용해 직관적으로 조종하는 방법을 알아봅니다.
 
-- **[카메라 컨트롤러 (Controller)](./controller.md)**
+- **[카메라 컨트롤러](./controller.md)**

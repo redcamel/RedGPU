@@ -1,11 +1,11 @@
 ---
-title: Interaction (인터렉션)
+title: Interaction
 order: 8
 ---
 
-# 인터렉션 (Interaction)
+# 인터렉션
 
-RedGPU는 3D 및 2D 객체에 대한 마우스 및 터치 이벤트를 처리하는 직관적인 피킹(Picking) 시스템을 제공합니다. `Mesh`, `Sprite3D`, `Sprite2D` 등 대부분의 디스플레이 객체는 사용자 입력을 수신하고 반응할 수 있습니다.
+RedGPU는 3D 및 2D 객체에 대한 마우스 및 터치 이벤트를 처리하는 직관적인 **피킹**(Picking) 시스템을 제공합니다. `Mesh`, `Sprite3D`, `Sprite2D` 등 대부분의 디스플레이 객체는 사용자 입력을 수신하고 반응할 수 있습니다.
 
 ## 1. 이벤트 리스너 등록
 
@@ -26,7 +26,7 @@ mesh.addListener(PICKING_EVENT_TYPE.CLICK, (e) => {
 
 ## 2. 지원하는 이벤트 타입
 
-`RedGPU.Picking.PICKING_EVENT_TYPE`에 정의된 6가지 기본 이벤트를 지원합니다.
+`RedGPU.Picking.PICKING_EVENT_TYPE` 에 정의된 6가지 기본 이벤트를 지원합니다.
 
 | 이벤트 상수 | 문자열 값 | 설명 |
 | :--- | :--- | :--- |
@@ -156,12 +156,12 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## 핵심 요약
 
-- `addListener`를 통해 객체별로 독립적인 이벤트 처리가 가능합니다.
-- `e.target`을 통해 이벤트가 발생한 객체에 직접 접근할 수 있습니다.
+- `addListener` 를 통해 객체별로 독립적인 이벤트 처리가 가능합니다.
+- `e.target` 을 통해 이벤트가 발생한 객체에 직접 접근할 수 있습니다.
 - 마우스 커서 스타일 변경(`document.body.style.cursor`) 등 웹 표준 DOM API와 함께 사용하여 UX를 향상시킬 수 있습니다.
 
 ## 다음 학습 추천
 
 인터렉션까지 더해진 풍성한 장면에 시각적인 완성도를 높여주는 후처리 효과를 적용해 봅니다.
 
-- **[포스트 이펙트 (Post-Effect)](../post-effect/index.md)**
+- **[포스트 이펙트](../post-effect/index.md)**

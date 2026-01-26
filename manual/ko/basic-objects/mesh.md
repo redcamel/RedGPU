@@ -1,5 +1,5 @@
 ---
-title: Mesh (메시)
+title: Mesh
 order: 1
 ---
 
@@ -27,7 +27,7 @@ const meshGraph = `
 
 ## 2. 지오메트리와 프리미티브 (Geometry & Primitive)
 
-**지오메트리**(Geometry) 는 3D 공간 상의 수많은 점(**Vertex**) 데이터들의 집합입니다. 
+**지오메트리**(Geometry) 는 3D 공간 상의 수많은 **점**(Vertex) 데이터들의 집합입니다. 
 
 RedGPU는 외부 모델 파일을 불러오기 전, **공간 구성이나 시각화 테스트** 를 빠르게 수행할 수 있도록 **프리미티브**(Primitive) 라는 기본 도형들을 제공합니다. 이를 사용하면 복잡한 데이터 계산 없이 즉시 3D 구조를 설계할 수 있습니다.
 
@@ -201,4 +201,4 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 메시들을 부모-자식 관계로 묶어 복잡한 구조를 만드는 방법을 알아봅니다.
 
-- **[Scene Graph (계층 구조)](./scene-graph.md)**
+- **[Scene Graph](./scene-graph.md)**
