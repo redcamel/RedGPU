@@ -1,16 +1,17 @@
 <script setup>
 import {onMounted, onUnmounted, ref} from 'vue'
-import * as RedGPU from 'https://redcamel.github.io/RedGPU/dist/index.js'
 
 const canvasRef = ref(null)
 const error = ref(null)
 let gpuContext
 let resizeObserver
+let RedGPU
 
-onMounted(() => {
+onMounted(async () => {
   if (!canvasRef.value) return
 
   // 1. Initialize RedGPU
+  RedGPU = await import(/* @vite-ignore */ `https://redcamel.github.io/RedGPU/dist/index.js?t=${Date.now()}`)
   RedGPU.init(
       canvasRef.value,
       (redGPUContext) => {
@@ -105,7 +106,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  if (gpuContext) {
+  if (gpuContext && RedGPU) {
     const renderer = new RedGPU.Renderer();
     renderer.stop(gpuContext);
   }
