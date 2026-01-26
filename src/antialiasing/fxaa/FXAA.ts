@@ -12,7 +12,7 @@ import createBasicPostEffectCode from "../../postEffect/core/createBasicPostEffe
  *
  * * ### Example
  * ```typescript
- * const effect = new RedGPU.PostEffect.FXAA(redGPUContext);
+ * const effect = new RedGPU.Antialiasing.FXAA(redGPUContext);
  * view.postEffectManager.addEffect(effect);
  * ```
  *

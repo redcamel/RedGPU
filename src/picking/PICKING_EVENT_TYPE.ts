@@ -3,8 +3,8 @@
  * [EN] Object defining picking event types.
  * * ### Example
  * ```typescript
- * const mesh = new RedGPU.RedMesh(geometry, material);
- * mesh.addListener(RedGPU.PICKING_EVENT_TYPE.CLICK, (e) => {
+ * const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
+ * mesh.addListener(RedGPU.Picking.PICKING_EVENT_TYPE.CLICK, (e) => {
  *     console.log('Clicked!', e);
  * });
  * ```

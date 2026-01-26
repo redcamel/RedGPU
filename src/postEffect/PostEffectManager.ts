@@ -25,7 +25,7 @@ import TAASharpen from "../antialiasing/taa/shapen/TAASharpen";
  * * ### Example
  * ```typescript
  * const view = new RedGPU.Display.View3D(redGPUContext, scene, camera);
- * const effect = new RedGPU.PostEffect.Bloom(redGPUContext);
+ * const effect = new RedGPU.PostEffect.OldBloom(redGPUContext);
  * view.postEffectManager.addEffect(effect);
  * ```
  *

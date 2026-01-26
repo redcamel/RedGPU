@@ -4,7 +4,13 @@
  * @packageDocumentation
  */
 import AntialiasingManager from "./AntialiasingManager";
+import FXAA from "./fxaa/FXAA";
+import TAA from "./taa/TAA";
+import TAASharpen from "./taa/shapen/TAASharpen";
 
 export {
-    AntialiasingManager
+    AntialiasingManager,
+    FXAA,
+    TAA,
+    TAASharpen
 }

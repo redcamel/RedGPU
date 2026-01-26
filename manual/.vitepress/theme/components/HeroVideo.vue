@@ -25,6 +25,7 @@
 <style scoped>
 .VPHomeVideo {
   margin: 12px 24px;
+
 }
 
 .container {
@@ -35,8 +36,8 @@
 .hero-video-container {
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: var(--vp-c-shadow-3);
   background: var(--vp-c-bg-soft);
+  box-shadow: 0 0 60px rgba(0, 0, 0, 1.0);
 }
 
 .hero-video {

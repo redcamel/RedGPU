@@ -14,7 +14,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  *
  * * ### Example
  * ```typescript
- * const effect = new RedGPU.PostEffect.TAASharpen(redGPUContext);
+ * const effect = new RedGPU.Antialiasing.TAASharpen(redGPUContext);
  * view.postEffectManager.addEffect(effect);
  * ```
  *

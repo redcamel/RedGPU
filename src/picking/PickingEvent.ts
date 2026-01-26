@@ -8,7 +8,7 @@ import Mesh from "../display/mesh/Mesh";
  * [EN] Includes various properties such as mouse coordinates, event type, target mesh, providing useful information during event processing.
  * * ### Example
  * ```typescript
- * mesh.addListener(RedGPU.PICKING_EVENT_TYPE.CLICK, (e) => {
+ * mesh.addListener(RedGPU.Picking.PICKING_EVENT_TYPE.CLICK, (e) => {
  *     console.log(e.pickingId, e.target);
  *     console.log(e.localX, e.localY, e.localZ);
  * });

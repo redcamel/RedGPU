@@ -15,7 +15,7 @@ import calculateGeometryAABB from "../utils/math/bound/calculateGeometryAABB";
  *
  * * ### Example
  * ```typescript
- * const geometry = new RedGPU.Geometry.Geometry(redGPUContext, vertexBuffer, indexBuffer);
+ * const geometry = new RedGPU.Geometry(redGPUContext, vertexBuffer, indexBuffer);
  * const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
  * ```
  * @extends ResourceBase
