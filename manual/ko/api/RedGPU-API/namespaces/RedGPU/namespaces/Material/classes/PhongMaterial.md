@@ -6,7 +6,7 @@
 
 # Class: PhongMaterial
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:16](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/phongMaterial/PhongMaterial.ts#L16)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:16](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/phongMaterial/PhongMaterial.ts#L16)
 
 Phong 라이팅 기반의 다양한 텍스처/파라미터를 지원하는 머티리얼 클래스입니다.
 
@@ -39,7 +39,7 @@ material.diffuseTexture = sourceTexture;
 
 > **new PhongMaterial**(`redGPUContext`, `color`, `name?`): `PhongMaterial`
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:171](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/phongMaterial/PhongMaterial.ts#L171)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:171](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/phongMaterial/PhongMaterial.ts#L171)
 
 PhongMaterial 생성자
 
@@ -66,7 +66,7 @@ PhongMaterial 생성자
 
 > **\_\_packingList**: `any`[]
 
-Defined in: [src/material/core/ABitmapBaseMaterial.ts:21](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABitmapBaseMaterial.ts#L21)
+Defined in: [src/material/core/ABitmapBaseMaterial.ts:21](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/core/ABitmapBaseMaterial.ts#L21)
 
 파이프라인 갱신 시 호출되는 콜백 리스트
 
@@ -81,7 +81,7 @@ Defined in: [src/material/core/ABitmapBaseMaterial.ts:21](https://github.com/red
 
 > **alphaTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:46](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/phongMaterial/PhongMaterial.ts#L46)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:46](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/phongMaterial/PhongMaterial.ts#L46)
 
 알파(투명도) 텍스처
 
@@ -92,7 +92,7 @@ Defined in: [src/material/phongMaterial/PhongMaterial.ts:46](https://github.com/
 
 > **alphaTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:51](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/phongMaterial/PhongMaterial.ts#L51)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:51](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/phongMaterial/PhongMaterial.ts#L51)
 
 알파 텍스처 샘플러
 
@@ -103,7 +103,7 @@ Defined in: [src/material/phongMaterial/PhongMaterial.ts:51](https://github.com/
 
 > **aoTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:86](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/phongMaterial/PhongMaterial.ts#L86)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:86](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/phongMaterial/PhongMaterial.ts#L86)
 
 AO(ambient occlusion) 텍스처
 
@@ -114,7 +114,7 @@ AO(ambient occlusion) 텍스처
 
 > **aoTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:91](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/phongMaterial/PhongMaterial.ts#L91)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:91](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/phongMaterial/PhongMaterial.ts#L91)
 
 AO 텍스처 샘플러
 
@@ -125,7 +125,7 @@ AO 텍스처 샘플러
 
 > **color**: [`ColorRGB`](../../Color/classes/ColorRGB.md)
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:21](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/phongMaterial/PhongMaterial.ts#L21)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:21](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/phongMaterial/PhongMaterial.ts#L21)
 
 머티리얼의 기본 색상(RGB)
 
@@ -136,7 +136,7 @@ Defined in: [src/material/phongMaterial/PhongMaterial.ts:21](https://github.com/
 
 > **diffuseTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:56](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/phongMaterial/PhongMaterial.ts#L56)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:56](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/phongMaterial/PhongMaterial.ts#L56)
 
 디퓨즈 텍스처
 
@@ -147,7 +147,7 @@ Defined in: [src/material/phongMaterial/PhongMaterial.ts:56](https://github.com/
 
 > **diffuseTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:61](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/phongMaterial/PhongMaterial.ts#L61)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:61](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/phongMaterial/PhongMaterial.ts#L61)
 
 디퓨즈 텍스처 샘플러
 
@@ -158,7 +158,7 @@ Defined in: [src/material/phongMaterial/PhongMaterial.ts:61](https://github.com/
 
 > **dirtyPipeline**: `boolean` = `false`
 
-Defined in: [src/material/core/ABaseMaterial.ts:61](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L61)
+Defined in: [src/material/core/ABaseMaterial.ts:61](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/core/ABaseMaterial.ts#L61)
 
 파이프라인 dirty 상태 플래그
 
@@ -173,7 +173,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:61](https://github.com/redcamel/
 
 > **emissiveColor**: [`ColorRGB`](../../Color/classes/ColorRGB.md)
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:26](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/phongMaterial/PhongMaterial.ts#L26)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:26](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/phongMaterial/PhongMaterial.ts#L26)
 
 발광 색상(RGB)
 
@@ -184,7 +184,7 @@ Defined in: [src/material/phongMaterial/PhongMaterial.ts:26](https://github.com/
 
 > **emissiveStrength**: `number`
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:31](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/phongMaterial/PhongMaterial.ts#L31)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:31](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/phongMaterial/PhongMaterial.ts#L31)
 
 발광 강도
 
@@ -195,7 +195,7 @@ Defined in: [src/material/phongMaterial/PhongMaterial.ts:31](https://github.com/
 
 > **emissiveTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:76](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/phongMaterial/PhongMaterial.ts#L76)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:76](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/phongMaterial/PhongMaterial.ts#L76)
 
 발광 텍스처
 
@@ -206,7 +206,7 @@ Defined in: [src/material/phongMaterial/PhongMaterial.ts:76](https://github.com/
 
 > **emissiveTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:81](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/phongMaterial/PhongMaterial.ts#L81)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:81](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/phongMaterial/PhongMaterial.ts#L81)
 
 발광 텍스처 샘플러
 
@@ -217,7 +217,7 @@ Defined in: [src/material/phongMaterial/PhongMaterial.ts:81](https://github.com/
 
 > **gpuRenderInfo**: [`FragmentGPURenderInfo`](../namespaces/Core/classes/FragmentGPURenderInfo.md)
 
-Defined in: [src/material/core/ABaseMaterial.ts:56](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L56)
+Defined in: [src/material/core/ABaseMaterial.ts:56](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/core/ABaseMaterial.ts#L56)
 
 프래그먼트 GPU 렌더 정보 객체
 
@@ -232,7 +232,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:56](https://github.com/redcamel/
 
 > **metallic**: `number`
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:111](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/phongMaterial/PhongMaterial.ts#L111)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:111](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/phongMaterial/PhongMaterial.ts#L111)
 
 금속도
 
@@ -243,7 +243,7 @@ Defined in: [src/material/phongMaterial/PhongMaterial.ts:111](https://github.com
 
 > **normalScale**: `number`
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:106](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/phongMaterial/PhongMaterial.ts#L106)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:106](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/phongMaterial/PhongMaterial.ts#L106)
 
 노멀 맵 스케일
 
@@ -254,7 +254,7 @@ Defined in: [src/material/phongMaterial/PhongMaterial.ts:106](https://github.com
 
 > **normalTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:96](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/phongMaterial/PhongMaterial.ts#L96)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:96](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/phongMaterial/PhongMaterial.ts#L96)
 
 노멀 맵 텍스처
 
@@ -265,7 +265,7 @@ Defined in: [src/material/phongMaterial/PhongMaterial.ts:96](https://github.com/
 
 > **normalTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:101](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/phongMaterial/PhongMaterial.ts#L101)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:101](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/phongMaterial/PhongMaterial.ts#L101)
 
 노멀 맵 텍스처 샘플러
 
@@ -276,7 +276,7 @@ Defined in: [src/material/phongMaterial/PhongMaterial.ts:101](https://github.com
 
 > **opacity**: `number`
 
-Defined in: [src/material/core/ABaseMaterial.ts:22](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L22)
+Defined in: [src/material/core/ABaseMaterial.ts:22](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/core/ABaseMaterial.ts#L22)
 
 머티리얼의 불투명도(0~1)
 
@@ -291,7 +291,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:22](https://github.com/redcamel/
 
 > **roughness**: `number`
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:116](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/phongMaterial/PhongMaterial.ts#L116)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:116](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/phongMaterial/PhongMaterial.ts#L116)
 
 거칠기
 
@@ -302,7 +302,7 @@ Defined in: [src/material/phongMaterial/PhongMaterial.ts:116](https://github.com
 
 > **specularColor**: [`ColorRGB`](../../Color/classes/ColorRGB.md)
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:36](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/phongMaterial/PhongMaterial.ts#L36)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:36](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/phongMaterial/PhongMaterial.ts#L36)
 
 스펙큘러 색상(RGB)
 
@@ -313,7 +313,7 @@ Defined in: [src/material/phongMaterial/PhongMaterial.ts:36](https://github.com/
 
 > **specularStrength**: `number`
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:41](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/phongMaterial/PhongMaterial.ts#L41)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:41](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/phongMaterial/PhongMaterial.ts#L41)
 
 스펙큘러 강도
 
@@ -324,7 +324,7 @@ Defined in: [src/material/phongMaterial/PhongMaterial.ts:41](https://github.com/
 
 > **specularTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:66](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/phongMaterial/PhongMaterial.ts#L66)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:66](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/phongMaterial/PhongMaterial.ts#L66)
 
 스펙큘러 텍스처
 
@@ -335,7 +335,7 @@ Defined in: [src/material/phongMaterial/PhongMaterial.ts:66](https://github.com/
 
 > **specularTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:71](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/phongMaterial/PhongMaterial.ts#L71)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:71](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/phongMaterial/PhongMaterial.ts#L71)
 
 스펙큘러 텍스처 샘플러
 
@@ -346,7 +346,7 @@ Defined in: [src/material/phongMaterial/PhongMaterial.ts:71](https://github.com/
 
 > **tint**: [`ColorRGBA`](../../Color/classes/ColorRGBA.md)
 
-Defined in: [src/material/core/ABaseMaterial.ts:27](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L27)
+Defined in: [src/material/core/ABaseMaterial.ts:27](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/core/ABaseMaterial.ts#L27)
 
 머티리얼의 틴트 컬러(RGBA)
 
@@ -361,7 +361,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:27](https://github.com/redcamel/
 
 > **transparent**: `boolean` = `false`
 
-Defined in: [src/material/core/ABaseMaterial.ts:66](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L66)
+Defined in: [src/material/core/ABaseMaterial.ts:66](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/core/ABaseMaterial.ts#L66)
 
 머티리얼 투명도 여부
 
@@ -376,7 +376,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:66](https://github.com/redcamel/
 
 > **use2PathRender**: `boolean`
 
-Defined in: [src/material/core/ABaseMaterial.ts:51](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L51)
+Defined in: [src/material/core/ABaseMaterial.ts:51](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/core/ABaseMaterial.ts#L51)
 
 2패스 렌더링 사용 여부
 
@@ -391,7 +391,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:51](https://github.com/redcamel/
 
 > **useSSR**: `number`
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:121](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/phongMaterial/PhongMaterial.ts#L121)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:121](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/phongMaterial/PhongMaterial.ts#L121)
 
 SSR(스크린 스페이스 리플렉션) 사용 여부
 
@@ -402,7 +402,7 @@ SSR(스크린 스페이스 리플렉션) 사용 여부
 
 > **useTint**: `boolean`
 
-Defined in: [src/material/core/ABaseMaterial.ts:32](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L32)
+Defined in: [src/material/core/ABaseMaterial.ts:32](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/core/ABaseMaterial.ts#L32)
 
 틴트 컬러 사용 여부
 
@@ -419,7 +419,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:32](https://github.com/redcamel/
 
 > **get** **blendAlphaState**(): [`BlendState`](../../RenderState/classes/BlendState.md)
 
-Defined in: [src/material/core/ABaseMaterial.ts:245](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L245)
+Defined in: [src/material/core/ABaseMaterial.ts:245](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/core/ABaseMaterial.ts#L245)
 
 머티리얼의 알파 블렌드 상태 객체 반환
 
@@ -440,7 +440,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:245](https://github.com/redcamel
 
 > **get** **blendColorState**(): [`BlendState`](../../RenderState/classes/BlendState.md)
 
-Defined in: [src/material/core/ABaseMaterial.ts:237](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L237)
+Defined in: [src/material/core/ABaseMaterial.ts:237](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/core/ABaseMaterial.ts#L237)
 
 머티리얼의 컬러 블렌드 상태 객체 반환
 
@@ -461,7 +461,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:237](https://github.com/redcamel
 
 > **get** **cacheKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:57](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/resources/core/ResourceBase.ts#L57)
+Defined in: [src/resources/core/ResourceBase.ts:57](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/resources/core/ResourceBase.ts#L57)
 
 캐시 키를 반환합니다.
 
@@ -474,7 +474,7 @@ Defined in: [src/resources/core/ResourceBase.ts:57](https://github.com/redcamel/
 
 > **set** **cacheKey**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/resources/core/ResourceBase.ts#L65)
+Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/resources/core/ResourceBase.ts#L65)
 
 캐시 키를 설정합니다.
 
@@ -501,7 +501,7 @@ Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/
 
 > **get** **displacementScale**(): `number`
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:189](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/phongMaterial/PhongMaterial.ts#L189)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:189](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/phongMaterial/PhongMaterial.ts#L189)
 
 디스플레이스먼트(변위) 스케일 반환
 
@@ -514,7 +514,7 @@ Defined in: [src/material/phongMaterial/PhongMaterial.ts:189](https://github.com
 
 > **set** **displacementScale**(`value`): `void`
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:200](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/phongMaterial/PhongMaterial.ts#L200)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:200](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/phongMaterial/PhongMaterial.ts#L200)
 
 디스플레이스먼트(변위) 스케일 설정
 
@@ -537,7 +537,7 @@ Defined in: [src/material/phongMaterial/PhongMaterial.ts:200](https://github.com
 
 > **get** **displacementTexture**(): [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:208](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/phongMaterial/PhongMaterial.ts#L208)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:208](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/phongMaterial/PhongMaterial.ts#L208)
 
 디스플레이스먼트(변위) 텍스처 반환
 
@@ -550,7 +550,7 @@ Defined in: [src/material/phongMaterial/PhongMaterial.ts:208](https://github.com
 
 > **set** **displacementTexture**(`value`): `void`
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:219](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/phongMaterial/PhongMaterial.ts#L219)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:219](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/phongMaterial/PhongMaterial.ts#L219)
 
 디스플레이스먼트(변위) 텍스처 설정 및 파이프라인 갱신
 
@@ -573,7 +573,7 @@ Defined in: [src/material/phongMaterial/PhongMaterial.ts:219](https://github.com
 
 > **get** **FRAGMENT\_BIND\_GROUP\_DESCRIPTOR\_NAME**(): `string`
 
-Defined in: [src/material/core/ABaseMaterial.ts:221](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L221)
+Defined in: [src/material/core/ABaseMaterial.ts:221](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/core/ABaseMaterial.ts#L221)
 
 ##### Returns
 
@@ -591,7 +591,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:221](https://github.com/redcamel
 
 > **get** **FRAGMENT\_SHADER\_MODULE\_NAME**(): `string`
 
-Defined in: [src/material/core/ABaseMaterial.ts:217](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L217)
+Defined in: [src/material/core/ABaseMaterial.ts:217](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/core/ABaseMaterial.ts#L217)
 
 ##### Returns
 
@@ -609,7 +609,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:217](https://github.com/redcamel
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/resources/core/ResourceBase.ts:106](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/resources/core/ResourceBase.ts#L106)
+Defined in: [src/resources/core/ResourceBase.ts:106](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/resources/core/ResourceBase.ts#L106)
 
 연관된 GPU 디바이스를 반환합니다.
 
@@ -630,7 +630,7 @@ Defined in: [src/resources/core/ResourceBase.ts:106](https://github.com/redcamel
 
 > **get** **MODULE\_NAME**(): `string`
 
-Defined in: [src/material/core/ABaseMaterial.ts:213](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L213)
+Defined in: [src/material/core/ABaseMaterial.ts:213](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/core/ABaseMaterial.ts#L213)
 
 ##### Returns
 
@@ -648,7 +648,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:213](https://github.com/redcamel
 
 > **get** **name**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:81](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/resources/core/ResourceBase.ts#L81)
+Defined in: [src/resources/core/ResourceBase.ts:81](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/resources/core/ResourceBase.ts#L81)
 
 인스턴스의 이름을 반환합니다. 이름이 없으면 클래스명과 ID로 생성합니다.
 
@@ -661,7 +661,7 @@ Defined in: [src/resources/core/ResourceBase.ts:81](https://github.com/redcamel/
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:90](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/resources/core/ResourceBase.ts#L90)
+Defined in: [src/resources/core/ResourceBase.ts:90](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/resources/core/ResourceBase.ts#L90)
 
 인스턴스의 이름을 설정합니다.
 
@@ -688,7 +688,7 @@ Defined in: [src/resources/core/ResourceBase.ts:90](https://github.com/redcamel/
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../RedGPUContext/classes/RedGPUContext.md)
 
-Defined in: [src/resources/core/ResourceBase.ts:114](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/resources/core/ResourceBase.ts#L114)
+Defined in: [src/resources/core/ResourceBase.ts:114](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/resources/core/ResourceBase.ts#L114)
 
 RedGPUContext 인스턴스를 반환합니다.
 
@@ -709,7 +709,7 @@ RedGPUContext 인스턴스를 반환합니다.
 
 > **get** **resourceManagerKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:73](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/resources/core/ResourceBase.ts#L73)
+Defined in: [src/resources/core/ResourceBase.ts:73](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/resources/core/ResourceBase.ts#L73)
 
 리소스 매니저 키를 반환합니다.
 
@@ -730,7 +730,7 @@ Defined in: [src/resources/core/ResourceBase.ts:73](https://github.com/redcamel/
 
 > **get** **STORAGE\_STRUCT**(): `any`
 
-Defined in: [src/material/core/ABaseMaterial.ts:225](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L225)
+Defined in: [src/material/core/ABaseMaterial.ts:225](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/core/ABaseMaterial.ts#L225)
 
 ##### Returns
 
@@ -748,7 +748,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:225](https://github.com/redcamel
 
 > **get** **tintBlendMode**(): `string`
 
-Defined in: [src/material/core/ABaseMaterial.ts:188](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L188)
+Defined in: [src/material/core/ABaseMaterial.ts:188](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/core/ABaseMaterial.ts#L188)
 
 ##### Returns
 
@@ -758,7 +758,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:188](https://github.com/redcamel
 
 > **set** **tintBlendMode**(`value`): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:196](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L196)
+Defined in: [src/material/core/ABaseMaterial.ts:196](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/core/ABaseMaterial.ts#L196)
 
 ##### Parameters
 
@@ -782,7 +782,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:196](https://github.com/redcamel
 
 > **get** **UNIFORM\_STRUCT**(): `any`
 
-Defined in: [src/material/core/ABaseMaterial.ts:229](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L229)
+Defined in: [src/material/core/ABaseMaterial.ts:229](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/core/ABaseMaterial.ts#L229)
 
 ##### Returns
 
@@ -800,7 +800,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:229](https://github.com/redcamel
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:98](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/resources/core/ResourceBase.ts#L98)
+Defined in: [src/resources/core/ResourceBase.ts:98](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/resources/core/ResourceBase.ts#L98)
 
 고유 식별자(UUID)를 반환합니다.
 
@@ -821,7 +821,7 @@ Defined in: [src/resources/core/ResourceBase.ts:98](https://github.com/redcamel/
 
 > **get** **writeMaskState**(): `number`
 
-Defined in: [src/material/core/ABaseMaterial.ts:253](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L253)
+Defined in: [src/material/core/ABaseMaterial.ts:253](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/core/ABaseMaterial.ts#L253)
 
 머티리얼의 writeMask 상태 반환
 
@@ -834,7 +834,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:253](https://github.com/redcamel
 
 > **set** **writeMaskState**(`value`): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:264](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L264)
+Defined in: [src/material/core/ABaseMaterial.ts:264](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/core/ABaseMaterial.ts#L264)
 
 머티리얼의 writeMask 상태 설정
 
@@ -859,7 +859,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:264](https://github.com/redcamel
 
 > **\_\_addDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:125](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/resources/core/ResourceBase.ts#L125)
+Defined in: [src/resources/core/ResourceBase.ts:125](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/resources/core/ResourceBase.ts#L125)
 
 파이프라인이 더티해질 때 호출될 리스너를 추가합니다.
 
@@ -884,7 +884,7 @@ Defined in: [src/resources/core/ResourceBase.ts:125](https://github.com/redcamel
 
 > **\_\_fireListenerList**(`resetList`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:152](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/resources/core/ResourceBase.ts#L152)
+Defined in: [src/resources/core/ResourceBase.ts:152](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/resources/core/ResourceBase.ts#L152)
 
 등록된 더티 리스너들을 실행합니다.
 
@@ -909,7 +909,7 @@ Defined in: [src/resources/core/ResourceBase.ts:152](https://github.com/redcamel
 
 > **\_\_removeDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:137](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/resources/core/ResourceBase.ts#L137)
+Defined in: [src/resources/core/ResourceBase.ts:137](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/resources/core/ResourceBase.ts#L137)
 
 더티 파이프라인 리스너를 제거합니다.
 
@@ -934,7 +934,7 @@ Defined in: [src/resources/core/ResourceBase.ts:137](https://github.com/redcamel
 
 > **\_updateBaseProperty**(): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:414](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L414)
+Defined in: [src/material/core/ABaseMaterial.ts:414](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/core/ABaseMaterial.ts#L414)
 
 머티리얼의 유니폼/컬러/틴트 등 기본 속성값을 유니폼 버퍼에 반영
 
@@ -953,7 +953,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:414](https://github.com/redcamel
 
 > **\_updateFragmentState**(): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:306](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L306)
+Defined in: [src/material/core/ABaseMaterial.ts:306](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/core/ABaseMaterial.ts#L306)
 
 프래그먼트 셰이더 바인드 그룹/유니폼/텍스처/샘플러 등 상태 갱신
 
@@ -972,7 +972,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:306](https://github.com/redcamel
 
 > **getFragmentRenderState**(`entryPoint`): `GPUFragmentState`
 
-Defined in: [src/material/core/ABaseMaterial.ts:383](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L383)
+Defined in: [src/material/core/ABaseMaterial.ts:383](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/core/ABaseMaterial.ts#L383)
 
 GPU 프래그먼트 렌더 상태 객체 반환
 
@@ -997,7 +997,7 @@ GPU 프래그먼트 렌더 상태 객체 반환
 
 > **getGPUResourceSampler**(`sampler`): `GPUSampler`
 
-Defined in: [src/material/core/ABaseMaterial.ts:436](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L436)
+Defined in: [src/material/core/ABaseMaterial.ts:436](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/core/ABaseMaterial.ts#L436)
 
 샘플러 객체에서 GPU 샘플러 반환
 
@@ -1022,7 +1022,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:436](https://github.com/redcamel
 
 > **initGPURenderInfos**(): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:272](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L272)
+Defined in: [src/material/core/ABaseMaterial.ts:272](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/core/ABaseMaterial.ts#L272)
 
 GPU 렌더 파이프라인 정보 및 유니폼 버퍼 초기화
 
@@ -1041,7 +1041,7 @@ GPU 렌더 파이프라인 정보 및 유니폼 버퍼 초기화
 
 > **updateSampler**(`prevSampler`, `newSampler`): `void`
 
-Defined in: [src/material/core/ABitmapBaseMaterial.ts:74](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABitmapBaseMaterial.ts#L74)
+Defined in: [src/material/core/ABitmapBaseMaterial.ts:74](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/core/ABitmapBaseMaterial.ts#L74)
 
 샘플러 객체 변경 및 DirtyPipeline 리스너 관리
 
@@ -1067,7 +1067,7 @@ Defined in: [src/material/core/ABitmapBaseMaterial.ts:74](https://github.com/red
 
 > **updateTexture**(`prevTexture`, `texture`): `void`
 
-Defined in: [src/material/core/ABitmapBaseMaterial.ts:58](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABitmapBaseMaterial.ts#L58)
+Defined in: [src/material/core/ABitmapBaseMaterial.ts:58](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/material/core/ABitmapBaseMaterial.ts#L58)
 
 텍스처 객체 변경 및 DirtyPipeline 리스너 관리
 

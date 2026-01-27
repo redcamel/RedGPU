@@ -8,7 +8,7 @@
 
 > **getFileExtension**(`url`): `string`
 
-Defined in: [src/utils/file/getFileExtension.ts:24](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/utils/file/getFileExtension.ts#L24)
+Defined in: [src/utils/file/getFileExtension.ts:24](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/utils/file/getFileExtension.ts#L24)
 
 
 Extracts the file extension from a given URL.

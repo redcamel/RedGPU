@@ -6,7 +6,7 @@
 
 # Class: Plane
 
-Defined in: [src/primitive/Plane.ts:20](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/primitive/Plane.ts#L20)
+Defined in: [src/primitive/Plane.ts:20](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/primitive/Plane.ts#L20)
 
 
 Plane primitive geometry class.
@@ -31,7 +31,7 @@ const plane = new RedGPU.Primitive.Plane(redGPUContext, 5, 5);
 
 > **new Plane**(`redGPUContext`, `width`, `height`, `wSegments`, `hSegments`, `uvSize`, `flipY`): `Plane`
 
-Defined in: [src/primitive/Plane.ts:91](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/primitive/Plane.ts#L91)
+Defined in: [src/primitive/Plane.ts:91](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/primitive/Plane.ts#L91)
 
 
 Creates an instance of Plane.
@@ -64,7 +64,7 @@ Creates an instance of Plane.
 
 > **get** **gpuRenderInfo**(): `object`
 
-Defined in: [src/primitive/core/Primitive.ts:86](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/primitive/core/Primitive.ts#L86)
+Defined in: [src/primitive/core/Primitive.ts:86](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/primitive/core/Primitive.ts#L86)
 
 
 Returns the GPU render information.
@@ -78,7 +78,7 @@ Object containing buffer layouts array
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `buffers` | `GPUVertexBufferLayout`[] | [src/primitive/core/Primitive.ts:86](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/primitive/core/Primitive.ts#L86) |
+| `buffers` | `GPUVertexBufferLayout`[] | [src/primitive/core/Primitive.ts:86](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/primitive/core/Primitive.ts#L86) |
 
 #### Inherited from
 
@@ -92,7 +92,7 @@ Object containing buffer layouts array
 
 > **get** **indexBuffer**(): [`IndexBuffer`](../../Resource/classes/IndexBuffer.md)
 
-Defined in: [src/primitive/core/Primitive.ts:110](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/primitive/core/Primitive.ts#L110)
+Defined in: [src/primitive/core/Primitive.ts:110](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/primitive/core/Primitive.ts#L110)
 
 
 Returns the current index buffer.
@@ -116,7 +116,7 @@ IndexBuffer instance
 
 > **get** **vertexBuffer**(): [`VertexBuffer`](../../Resource/classes/VertexBuffer.md)
 
-Defined in: [src/primitive/core/Primitive.ts:98](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/primitive/core/Primitive.ts#L98)
+Defined in: [src/primitive/core/Primitive.ts:98](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/primitive/core/Primitive.ts#L98)
 
 
 Returns the current vertex buffer.
@@ -140,7 +140,7 @@ VertexBuffer instance
 
 > **get** **volume**(): [`AABB`](../../Bound/classes/AABB.md)
 
-Defined in: [src/primitive/core/Primitive.ts:122](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/primitive/core/Primitive.ts#L122)
+Defined in: [src/primitive/core/Primitive.ts:122](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/primitive/core/Primitive.ts#L122)
 
 
 Returns the AABB bounding volume of the geometry.
@@ -164,7 +164,7 @@ AABB instance
 
 > **get** `static` **primitiveInterleaveStruct**(): [`VertexInterleavedStruct`](../../Resource/classes/VertexInterleavedStruct.md)
 
-Defined in: [src/primitive/core/Primitive.ts:67](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/primitive/core/Primitive.ts#L67)
+Defined in: [src/primitive/core/Primitive.ts:67](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/primitive/core/Primitive.ts#L67)
 
 
 Returns the default vertex layout structure (Position, Normal, UV).
@@ -186,7 +186,7 @@ Vertex interleaved struct object
 
 > **\_setData**(`geometry`): `void`
 
-Defined in: [src/primitive/core/Primitive.ts:138](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/primitive/core/Primitive.ts#L138)
+Defined in: [src/primitive/core/Primitive.ts:138](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/primitive/core/Primitive.ts#L138)
 
 **`Internal`**
 

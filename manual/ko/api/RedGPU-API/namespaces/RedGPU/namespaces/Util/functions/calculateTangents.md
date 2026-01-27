@@ -8,7 +8,7 @@
 
 > **calculateTangents**(`vertices`, `normals`, `uvs`, `indices`, `existingTangents?`): `number`[]
 
-Defined in: [src/utils/math/calculateTangents.ts:30](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/utils/math/calculateTangents.ts#L30)
+Defined in: [src/utils/math/calculateTangents.ts:30](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/utils/math/calculateTangents.ts#L30)
 
 MikkTSpace 알고리즘 기반으로 정점 탄젠트 벡터를 계산합니다.
 
