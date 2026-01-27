@@ -11,24 +11,43 @@ jobs:
     permissions:
       contents: write
     steps:
+      # 1. 소스 코드 체크아웃
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      # 2. Node.js 환경 설정
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
+
+      # 3. 이전 빌드 결과물 삭제 (소스 제외, gitignore된 파일들 삭제 - node_modules 포함)
+      - name: Clean old build artifacts
+        run: git clean -fdX
+
+      # 4. 의존성 패키지 설치 (Clean 이후에 실행해야 함)
       - name: Install dependencies
         run: npm ci
+
+      # 5. 소스 코드 빌드 (Rollup)
       - name: Build code
         run: npm run build
+
+      # 6. 매뉴얼 빌드 (VitePress & TypeDoc API)
       - name: Build documentation
         run: npm run vitePress:build
+
+      # 7. 전체 사이트맵 인덱스 생성 (SEO 최적화)
       - name: Build sitemap
         run: node buildScripts/github/generate-sitemap.js
+
+      # 8. 변경된 빌드 결과물을 gh-pages 브랜치에 강제 커밋 및 푸시
       - name: Commit and push build files
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add dist/ manual/ sitemap.xml examples/ -f
+          # 빌드 결과물 및 사이트맵 폴더 추가
+          git add dist/ manual/ sitemap/ examples/ -f
+          # 변경사항이 있는 경우에만 커밋 (무한 루프 방지를 위해 [skip ci] 포함)
           git diff --staged --quiet || git commit -m "chore: auto-build dist and docs with cache bursting [skip ci]"
           git push
