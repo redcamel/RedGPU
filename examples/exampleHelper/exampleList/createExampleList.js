@@ -1,4 +1,4 @@
-import ExampleList from './exampleList.js?t=1769498863678';
+import ExampleList from './exampleList.js?t=1769500077563';
 
 // 상태 관리 - sessionStorage에 저장/복원할 항목들
 const STATE_KEY = 'redgpu_examples_state';
@@ -416,10 +416,14 @@ const addSearchBar = () => {
         project_github.className = 'project_github';
         project_github.innerHTML = `<a href="https://github.com/redcamel/RedGPU"><img src="/RedGPU/examples/assets/github.png" width="22" style="transform:translateY(-2px)"/></a>`;
         project_right.appendChild(project_github);
-        const project_doc = document.createElement('div');
-        project_doc.className = 'project_doc';
-        project_doc.innerHTML = `<a href="/RedGPU/docs/"><div>API</div></a>`;
-        project_right.appendChild(project_doc);
+        const project_manual = document.createElement('div');
+        const project_api = document.createElement('div');
+        project_manual.className = 'project_doc';
+        project_manual.innerHTML = `<a href="/RedGPU/manual/"><div>Manual</div></a>`;
+        project_api.className = 'project_doc';
+        project_api.innerHTML = `<a href="/RedGPU/manual/ko/api/RedGPU-API/namespaces/RedGPU/README.html"><div>API</div></a>`;
+        project_right.appendChild(project_manual);
+        project_right.appendChild(project_api);
 
     }
 
