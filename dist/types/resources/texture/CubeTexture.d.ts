@@ -56,6 +56,7 @@ declare class CubeTexture extends ManagementResourceBase {
         baseMipLevel?: GPUIntegerCoordinate;
         baseArrayLayer?: GPUIntegerCoordinate;
         arrayLayerCount?: GPUIntegerCoordinate;
+        swizzle?: string;
         label?: string;
     };
     /** [KO] 비디오 메모리 사용량(byte)을 반환합니다. [EN] Returns the video memory usage in bytes. */
