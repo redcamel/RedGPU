@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769495390300";
+import * as RedGPU from "../../../../dist/index.js?t=1769497870527";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -46,13 +46,13 @@ const createSkybox = (redGPUContext) => {
 };
 
 const renderTestPane = async (targetView) => {
-    const {Pane} = await import( "https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769495390300" );
+    const {Pane} = await import( "https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769497870527" );
     const pane = new Pane();
     const {
         createFieldOfView,
         createSkyBoxHelper,
         setDebugButtons
-    } = await import( "../../../exampleHelper/createExample/panes/index.js?t=1769495390300" );
+    } = await import( "../../../exampleHelper/createExample/panes/index.js?t=1769497870527" );
     setDebugButtons(RedGPU, targetView.redGPUContext);
     createFieldOfView(pane, targetView.camera)
     createSkyBoxHelper(pane, targetView)
