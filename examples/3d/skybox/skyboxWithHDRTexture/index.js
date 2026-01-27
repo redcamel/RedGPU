@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769512187569";
+import * as RedGPU from "../../../../dist/index.js?t=1769512737237";
 
 const HDR_ASSETS = [
     {name: '2K - the sky is on fire', path: '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr'},
@@ -34,13 +34,13 @@ RedGPU.init(
     }
 );
 const renderTestPane = async (targetView) => {
-    const {Pane} = await import( "https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769512187569" );
+    const {Pane} = await import( "https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769512737237" );
     const pane = new Pane();
     const {
         createFieldOfView,
         createIblHelper,
         setDebugButtons
-    } = await import( "../../../exampleHelper/createExample/panes/index.js?t=1769512187569" );
+    } = await import( "../../../exampleHelper/createExample/panes/index.js?t=1769512737237" );
     setDebugButtons(RedGPU, targetView.redGPUContext);
     createFieldOfView(pane, targetView.camera)
     createIblHelper(pane, targetView, RedGPU);
