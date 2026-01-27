@@ -8,7 +8,7 @@
 
 > `const` **GPU\_STORE\_OP**: `object`
 
-Defined in: [src/gpuConst/GPU\_STORE\_OP.ts:10](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/gpuConst/GPU_STORE_OP.ts#L10)
+Defined in: [src/gpuConst/GPU\_STORE\_OP.ts:10](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/gpuConst/GPU_STORE_OP.ts#L10)
 
 렌더 패스 종료 시 어태치먼트의 내용을 저장하는 방식을 정의하는 상수군입니다.
 

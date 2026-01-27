@@ -8,7 +8,7 @@
 
 > **mergerNoiseHelperFunctions**(`baseHelperFunctions`, `addHelperFunctions`): `string`
 
-Defined in: [src/resources/texture/noiseTexture/core/noiseDefineMerges.ts:10](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/resources/texture/noiseTexture/core/noiseDefineMerges.ts#L10)
+Defined in: [src/resources/texture/noiseTexture/core/noiseDefineMerges.ts:10](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/resources/texture/noiseTexture/core/noiseDefineMerges.ts#L10)
 
 ## Parameters
 

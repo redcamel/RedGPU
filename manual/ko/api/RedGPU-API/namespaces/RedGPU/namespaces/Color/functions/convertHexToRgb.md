@@ -8,7 +8,7 @@
 
 > **convertHexToRgb**(`hex`, `returnArrayYn`): `any`
 
-Defined in: [src/color/convertHexToRgb.ts:30](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/color/convertHexToRgb.ts#L30)
+Defined in: [src/color/convertHexToRgb.ts:30](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/color/convertHexToRgb.ts#L30)
 
 16진수(Hex) 색상 값을 RGB 색상으로 변환합니다.
 

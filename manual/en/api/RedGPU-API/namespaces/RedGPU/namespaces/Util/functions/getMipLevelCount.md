@@ -8,7 +8,7 @@
 
 > **getMipLevelCount**(`width`, `height`): `number`
 
-Defined in: [src/utils/texture/getMipLevelCount.ts:21](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/utils/texture/getMipLevelCount.ts#L21)
+Defined in: [src/utils/texture/getMipLevelCount.ts:21](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/utils/texture/getMipLevelCount.ts#L21)
 
 
 Calculates the number of mipmap levels for a given size.

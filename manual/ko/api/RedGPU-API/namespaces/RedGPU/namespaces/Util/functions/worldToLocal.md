@@ -8,7 +8,7 @@
 
 > **worldToLocal**(`targetMatrix`, `x`, `y`, `z`): \[`number`, `number`, `number`\]
 
-Defined in: [src/utils/math/coordinates/worldToLocal.ts:35](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/utils/math/coordinates/worldToLocal.ts#L35)
+Defined in: [src/utils/math/coordinates/worldToLocal.ts:35](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/utils/math/coordinates/worldToLocal.ts#L35)
 
 월드 좌표를 로컬 좌표로 변환합니다.
 

@@ -8,7 +8,7 @@
 
 > **preprocessWGSL**(`code`): `PreprocessedWGSLResult`
 
-Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:140](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/resources/wgslParser/core/preprocessWGSL.ts#L140)
+Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:140](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/resources/wgslParser/core/preprocessWGSL.ts#L140)
 
 WGSL 셰이더 코드를 전처리합니다.
 

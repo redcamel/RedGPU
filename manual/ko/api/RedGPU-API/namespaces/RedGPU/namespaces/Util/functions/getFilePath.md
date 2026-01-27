@@ -8,7 +8,7 @@
 
 > **getFilePath**(`url`): `string`
 
-Defined in: [src/utils/file/getFilePath.ts:24](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/utils/file/getFilePath.ts#L24)
+Defined in: [src/utils/file/getFilePath.ts:24](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/utils/file/getFilePath.ts#L24)
 
 주어진 URL에서 파일 경로(디렉터리 경로)를 추출합니다.
 

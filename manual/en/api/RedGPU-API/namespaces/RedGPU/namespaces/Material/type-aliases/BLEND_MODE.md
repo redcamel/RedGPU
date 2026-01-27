@@ -8,4 +8,4 @@
 
 > **BLEND\_MODE** = *typeof* [`BLEND_MODE`](../variables/BLEND_MODE.md)\[keyof *typeof* [`BLEND_MODE`](../variables/BLEND_MODE.md)\]
 
-Defined in: [src/material/BLEND\_MODE.ts:6](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/material/BLEND_MODE.ts#L6)
+Defined in: [src/material/BLEND\_MODE.ts:6](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/material/BLEND_MODE.ts#L6)
