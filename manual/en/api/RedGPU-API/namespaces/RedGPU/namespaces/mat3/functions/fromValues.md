@@ -8,7 +8,7 @@
 
 > **fromValues**(`m00`, `m01`, `m02`, `m10`, `m11`, `m12`, `m20`, `m21`, `m22`): [`mat3`](../../../type-aliases/mat3.md)
 
-Defined in: node\_modules/gl-matrix/index.d.ts:647
+Defined in: node\_modules/gl-matrix/index.d.ts:667
 
 Create a new mat3 with the given values
 

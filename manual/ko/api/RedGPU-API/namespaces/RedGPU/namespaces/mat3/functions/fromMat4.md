@@ -8,7 +8,7 @@
 
 > **fromMat4**(`out`, `a`): [`mat3`](../../../type-aliases/mat3.md)
 
-Defined in: node\_modules/gl-matrix/index.d.ts:617
+Defined in: node\_modules/gl-matrix/index.d.ts:637
 
 Copies the upper-left 3x3 values into the given mat3.
 

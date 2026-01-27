@@ -8,7 +8,7 @@
 
 > **transpose**(`out`, `a`): [`mat3`](../../../type-aliases/mat3.md)
 
-Defined in: node\_modules/gl-matrix/index.d.ts:678
+Defined in: node\_modules/gl-matrix/index.d.ts:698
 
 Transpose the values of a mat3
 

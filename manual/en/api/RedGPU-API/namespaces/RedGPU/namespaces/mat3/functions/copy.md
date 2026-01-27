@@ -8,7 +8,7 @@
 
 > **copy**(`out`, `a`): [`mat3`](../../../type-aliases/mat3.md)
 
-Defined in: node\_modules/gl-matrix/index.d.ts:632
+Defined in: node\_modules/gl-matrix/index.d.ts:652
 
 Copy the values from one mat3 to another
 

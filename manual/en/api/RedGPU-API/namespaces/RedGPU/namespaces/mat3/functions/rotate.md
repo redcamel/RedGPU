@@ -8,7 +8,7 @@
 
 > **rotate**(`out`, `a`, `rad`): [`mat3`](../../../type-aliases/mat3.md)
 
-Defined in: node\_modules/gl-matrix/index.d.ts:728
+Defined in: node\_modules/gl-matrix/index.d.ts:748
 
 Rotates a mat3 by the given angle
 

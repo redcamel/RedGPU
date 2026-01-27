@@ -8,7 +8,7 @@
 
 > **add**(`out`, `a`, `b`): [`mat3`](../../../type-aliases/mat3.md)
 
-Defined in: node\_modules/gl-matrix/index.d.ts:831
+Defined in: node\_modules/gl-matrix/index.d.ts:851
 
 Adds two mat3's
 

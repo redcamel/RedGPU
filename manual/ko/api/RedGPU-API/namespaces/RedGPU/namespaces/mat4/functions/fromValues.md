@@ -8,7 +8,7 @@
 
 > **fromValues**(`m00`, `m01`, `m02`, `m03`, `m10`, `m11`, `m12`, `m13`, `m20`, `m21`, `m22`, `m23`, `m30`, `m31`, `m32`, `m33`): [`mat4`](../../../type-aliases/mat4.md)
 
-Defined in: node\_modules/gl-matrix/index.d.ts:942
+Defined in: node\_modules/gl-matrix/index.d.ts:962
 
 Create a new mat4 with the given values
 

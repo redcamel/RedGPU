@@ -8,7 +8,7 @@
 
 > **getTranslation**(`out`, `mat`): `vec3`
 
-Defined in: node\_modules/gl-matrix/index.d.ts:1174
+Defined in: node\_modules/gl-matrix/index.d.ts:1194
 
 Returns the translation vector component of a transformation
  matrix. If a matrix is built with fromRotationTranslation,

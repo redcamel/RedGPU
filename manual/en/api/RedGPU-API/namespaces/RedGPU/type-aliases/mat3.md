@@ -6,6 +6,6 @@
 
 # Type Alias: mat3
 
-> **mat3** = \[`number`, `number`, `number`, `number`, `number`, `number`, `number`, `number`, `number`\] \| `Float32Array`
+> **mat3** = \[`number`, `number`, `number`, `number`, `number`, `number`, `number`, `number`, `number`\] \| `IndexedCollection`
 
-Defined in: node\_modules/gl-matrix/index.d.ts:17
+Defined in: node\_modules/gl-matrix/index.d.ts:22

@@ -8,7 +8,7 @@
 
 > **rotateY**(`out`, `a`, `rad`): [`mat4`](../../../type-aliases/mat4.md)
 
-Defined in: node\_modules/gl-matrix/index.d.ts:1058
+Defined in: node\_modules/gl-matrix/index.d.ts:1078
 
 Rotates a matrix by the given angle around the Y axis
 

@@ -8,7 +8,7 @@
 
 > **calculateTangents**(`vertices`, `normals`, `uvs`, `indices`, `existingTangents?`): `number`[]
 
-Defined in: [src/utils/math/calculateTangents.ts:30](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/utils/math/calculateTangents.ts#L30)
+Defined in: [src/utils/math/calculateTangents.ts:30](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/utils/math/calculateTangents.ts#L30)
 
 
 Calculates vertex tangent vectors using MikkTSpace algorithm.

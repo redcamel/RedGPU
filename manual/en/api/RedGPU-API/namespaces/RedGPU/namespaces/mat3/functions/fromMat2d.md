@@ -8,7 +8,7 @@
 
 > **fromMat2d**(`out`, `a`): [`mat3`](../../../type-aliases/mat3.md)
 
-Defined in: node\_modules/gl-matrix/index.d.ts:781
+Defined in: node\_modules/gl-matrix/index.d.ts:801
 
 Copies the values from a mat2d into a mat3
 

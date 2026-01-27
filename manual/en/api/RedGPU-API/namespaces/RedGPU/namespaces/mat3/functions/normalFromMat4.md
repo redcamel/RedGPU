@@ -8,7 +8,7 @@
 
 > **normalFromMat4**(`out`, `a`): [`mat3`](../../../type-aliases/mat3.md)
 
-Defined in: node\_modules/gl-matrix/index.d.ts:799
+Defined in: node\_modules/gl-matrix/index.d.ts:819
 
 Calculates a 3x3 normal matrix (transpose inverse) from the 4x4 matrix
 

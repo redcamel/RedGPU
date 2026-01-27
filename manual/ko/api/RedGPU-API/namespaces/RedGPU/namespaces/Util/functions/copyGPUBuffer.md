@@ -8,7 +8,7 @@
 
 > **copyGPUBuffer**(`gpuDevice`, `srcBuffer`, `dstBuffer`): `void`
 
-Defined in: [src/utils/copyGPUBuffer.ts:24](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/utils/copyGPUBuffer.ts#L24)
+Defined in: [src/utils/copyGPUBuffer.ts:24](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/utils/copyGPUBuffer.ts#L24)
 
 GPUBuffer 간 데이터를 복사합니다.
 

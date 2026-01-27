@@ -8,11 +8,11 @@
 
 > **getScaling**(`out`, `mat`): `vec3`
 
-Defined in: node\_modules/gl-matrix/index.d.ts:1185
+Defined in: node\_modules/gl-matrix/index.d.ts:1205
 
 Returns the scaling factor component of a transformation
  matrix. If a matrix is built with fromRotationTranslationScale
- with a normalized Quaternion paramter, the returned vector will be
+ with a normalized Quaternion parameter, the returned vector will be
  the same as the scaling vector
  originally supplied.
 

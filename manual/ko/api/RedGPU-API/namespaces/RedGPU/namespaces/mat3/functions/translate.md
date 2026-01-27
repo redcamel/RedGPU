@@ -8,7 +8,7 @@
 
 > **translate**(`out`, `a`, `v`): [`mat3`](../../../type-aliases/mat3.md)
 
-Defined in: node\_modules/gl-matrix/index.d.ts:719
+Defined in: node\_modules/gl-matrix/index.d.ts:739
 
 Translate a mat3 by the given vector
 

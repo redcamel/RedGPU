@@ -8,7 +8,7 @@
 
 > **adjoint**(`out`, `a`): [`mat3`](../../../type-aliases/mat3.md)
 
-Defined in: node\_modules/gl-matrix/index.d.ts:694
+Defined in: node\_modules/gl-matrix/index.d.ts:714
 
 Calculates the adjugate of a mat3
 

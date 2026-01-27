@@ -8,7 +8,7 @@
 
 > **identity**(`out`): [`mat3`](../../../type-aliases/mat3.md)
 
-Defined in: node\_modules/gl-matrix/index.d.ts:670
+Defined in: node\_modules/gl-matrix/index.d.ts:690
 
 Set a mat3 to the identity matrix
 

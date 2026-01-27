@@ -6,7 +6,7 @@
 
 # Abstract Class: ABaseLight
 
-Defined in: [src/light/core/ABaseLight.ts:12](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/light/core/ABaseLight.ts#L12)
+Defined in: [src/light/core/ABaseLight.ts:12](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/light/core/ABaseLight.ts#L12)
 
 모든 광원 클래스의 기본이 되는 추상 클래스입니다.
 
@@ -27,7 +27,7 @@ Defined in: [src/light/core/ABaseLight.ts:12](https://github.com/redcamel/RedGPU
 
 > **new ABaseLight**(`color`, `intensity`): `ABaseLight`
 
-Defined in: [src/light/core/ABaseLight.ts:48](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/light/core/ABaseLight.ts#L48)
+Defined in: [src/light/core/ABaseLight.ts:48](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/light/core/ABaseLight.ts#L48)
 
 새로운 ABaseLight 인스턴스를 생성합니다.
 
@@ -49,7 +49,7 @@ Defined in: [src/light/core/ABaseLight.ts:48](https://github.com/redcamel/RedGPU
 
 > **drawDebugger**: `ADrawDebuggerLight`
 
-Defined in: [src/light/core/ABaseLight.ts:20](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/light/core/ABaseLight.ts#L20)
+Defined in: [src/light/core/ABaseLight.ts:20](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/light/core/ABaseLight.ts#L20)
 
 광원의 디버깅 시각화를 위한 도우미 객체입니다.
 
@@ -65,7 +65,7 @@ Defined in: [src/light/core/ABaseLight.ts:20](https://github.com/redcamel/RedGPU
 
 > **get** **color**(): [`ColorRGB`](../../../../Color/classes/ColorRGB.md)
 
-Defined in: [src/light/core/ABaseLight.ts:82](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/light/core/ABaseLight.ts#L82)
+Defined in: [src/light/core/ABaseLight.ts:82](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/light/core/ABaseLight.ts#L82)
 
 광원의 색상을 반환합니다.
 
@@ -81,7 +81,7 @@ ColorRGB 객체
 
 > **set** **color**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:93](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/light/core/ABaseLight.ts#L93)
+Defined in: [src/light/core/ABaseLight.ts:93](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/light/core/ABaseLight.ts#L93)
 
 광원의 색상을 설정합니다.
 
@@ -104,7 +104,7 @@ Defined in: [src/light/core/ABaseLight.ts:93](https://github.com/redcamel/RedGPU
 
 > **get** **enableDebugger**(): `boolean`
 
-Defined in: [src/light/core/ABaseLight.ts:60](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/light/core/ABaseLight.ts#L60)
+Defined in: [src/light/core/ABaseLight.ts:60](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/light/core/ABaseLight.ts#L60)
 
 디버깅 시각화 기능의 활성화 여부를 반환합니다.
 
@@ -120,7 +120,7 @@ Defined in: [src/light/core/ABaseLight.ts:60](https://github.com/redcamel/RedGPU
 
 > **set** **enableDebugger**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:71](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/light/core/ABaseLight.ts#L71)
+Defined in: [src/light/core/ABaseLight.ts:71](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/light/core/ABaseLight.ts#L71)
 
 디버깅 시각화 기능을 활성화하거나 비활성화합니다.
 
@@ -143,7 +143,7 @@ Defined in: [src/light/core/ABaseLight.ts:71](https://github.com/redcamel/RedGPU
 
 > **get** **intensity**(): `number`
 
-Defined in: [src/light/core/ABaseLight.ts:104](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/light/core/ABaseLight.ts#L104)
+Defined in: [src/light/core/ABaseLight.ts:104](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/light/core/ABaseLight.ts#L104)
 
 광원의 세기를 반환합니다.
 
@@ -159,7 +159,7 @@ Defined in: [src/light/core/ABaseLight.ts:104](https://github.com/redcamel/RedGP
 
 > **set** **intensity**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:115](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/light/core/ABaseLight.ts#L115)
+Defined in: [src/light/core/ABaseLight.ts:115](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/light/core/ABaseLight.ts#L115)
 
 광원의 세기를 설정합니다.
 

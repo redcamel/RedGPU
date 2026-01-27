@@ -8,7 +8,7 @@
 
 > `const` **GPU\_BLEND\_OPERATION**: `object`
 
-Defined in: [src/gpuConst/GPU\_BLEND\_OPERATION.ts:10](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/gpuConst/GPU_BLEND_OPERATION.ts#L10)
+Defined in: [src/gpuConst/GPU\_BLEND\_OPERATION.ts:10](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/gpuConst/GPU_BLEND_OPERATION.ts#L10)
 
 블렌딩 시 사용되는 수학적 연산 옵션을 정의하는 상수군입니다.
 

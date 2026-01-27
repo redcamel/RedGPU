@@ -8,7 +8,7 @@
 
 > **determinant**(`a`): `number`
 
-Defined in: node\_modules/gl-matrix/index.d.ts:701
+Defined in: node\_modules/gl-matrix/index.d.ts:721
 
 Calculates the determinant of a mat3
 

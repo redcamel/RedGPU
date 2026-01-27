@@ -8,7 +8,7 @@
 
 > **lookAt**(`out`, `eye`, `center`, `up`): [`mat4`](../../../type-aliases/mat4.md)
 
-Defined in: node\_modules/gl-matrix/index.d.ts:1337
+Defined in: node\_modules/gl-matrix/index.d.ts:1367
 
 Generates a look-at matrix with the given eye position, focal point, and up axis.
 If you want a matrix that actually makes an object look at another object, you should use targetTo instead.

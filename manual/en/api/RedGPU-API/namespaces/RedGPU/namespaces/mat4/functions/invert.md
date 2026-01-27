@@ -8,7 +8,7 @@
 
 > **invert**(`out`, `a`): [`mat4`](../../../type-aliases/mat4.md)
 
-Defined in: node\_modules/gl-matrix/index.d.ts:988
+Defined in: node\_modules/gl-matrix/index.d.ts:1008
 
 Inverts a mat4
 
@@ -23,4 +23,4 @@ Inverts a mat4
 
 [`mat4`](../../../type-aliases/mat4.md)
 
-out
+out, or null if source matrix is not invertible

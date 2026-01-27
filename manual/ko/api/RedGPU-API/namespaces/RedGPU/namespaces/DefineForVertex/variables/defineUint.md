@@ -8,7 +8,7 @@
 
 > **defineUint**: (`classObject`, `keyList`) => `void`
 
-Defined in: [src/defineProperty/DefineForVertex.ts:71](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/defineProperty/DefineForVertex.ts#L71)
+Defined in: [src/defineProperty/DefineForVertex.ts:71](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/defineProperty/DefineForVertex.ts#L71)
 
 ## Parameters
 

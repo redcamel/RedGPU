@@ -13,6 +13,7 @@
 - [clone](functions/clone.md)
 - [copy](functions/copy.md)
 - [create](functions/create.md)
+- [decompose](functions/decompose.md)
 - [determinant](functions/determinant.md)
 - [equals](functions/equals.md)
 - [exactEquals](functions/exactEquals.md)

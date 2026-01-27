@@ -6,7 +6,7 @@
 
 # Class: SkyBoxMaterial
 
-Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:14](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L14)
+Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:14](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L14)
 
 
 Material class exclusively used for SkyBox rendering.
@@ -26,7 +26,7 @@ This class is a material class used internally by the system.<br/>General users 
 
 > **new SkyBoxMaterial**(`redGPUContext`, `cubeTexture`): `SkyBoxMaterial`
 
-Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:51](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L51)
+Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:51](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L51)
 
 
 SkyBoxMaterial constructor
@@ -52,7 +52,7 @@ SkyBoxMaterial constructor
 
 > **\_\_packingList**: `any`[]
 
-Defined in: [src/material/core/ABitmapBaseMaterial.ts:21](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABitmapBaseMaterial.ts#L21)
+Defined in: [src/material/core/ABitmapBaseMaterial.ts:21](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABitmapBaseMaterial.ts#L21)
 
 
 List of callbacks called when updating the pipeline
@@ -67,7 +67,7 @@ List of callbacks called when updating the pipeline
 
 > **blur**: `number`
 
-Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:19](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L19)
+Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:19](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L19)
 
 ***
 
@@ -75,7 +75,7 @@ Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:19](https://githu
 
 > **dirtyPipeline**: `boolean` = `false`
 
-Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:39](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L39)
+Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:39](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L39)
 
 
 Pipeline dirty status flag
@@ -90,7 +90,7 @@ Pipeline dirty status flag
 
 > **gpuRenderInfo**: [`FragmentGPURenderInfo`](../../../../Material/namespaces/Core/classes/FragmentGPURenderInfo.md)
 
-Defined in: [src/material/core/ABaseMaterial.ts:56](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L56)
+Defined in: [src/material/core/ABaseMaterial.ts:56](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L56)
 
 
 Fragment GPU render info object
@@ -105,7 +105,7 @@ Fragment GPU render info object
 
 > **opacity**: `number`
 
-Defined in: [src/material/core/ABaseMaterial.ts:22](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L22)
+Defined in: [src/material/core/ABaseMaterial.ts:22](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L22)
 
 
 Material opacity (0~1)
@@ -120,7 +120,7 @@ Material opacity (0~1)
 
 > **skyboxTexture**: [`CubeTexture`](../../../../Resource/classes/CubeTexture.md) \| [`HDRTexture`](../../../../Resource/classes/HDRTexture.md)
 
-Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:15](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L15)
+Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:15](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L15)
 
 ***
 
@@ -128,7 +128,7 @@ Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:15](https://githu
 
 > **skyboxTextureSampler**: [`Sampler`](../../../../Resource/classes/Sampler.md)
 
-Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:18](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L18)
+Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:18](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L18)
 
 ***
 
@@ -136,7 +136,7 @@ Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:18](https://githu
 
 > **tint**: [`ColorRGBA`](../../../../Color/classes/ColorRGBA.md)
 
-Defined in: [src/material/core/ABaseMaterial.ts:27](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L27)
+Defined in: [src/material/core/ABaseMaterial.ts:27](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L27)
 
 
 Material tint color (RGBA)
@@ -151,7 +151,7 @@ Material tint color (RGBA)
 
 > **transitionAlphaTexture**: [`ANoiseTexture`](../../../../Resource/namespaces/CoreNoiseTexture/classes/ANoiseTexture.md) \| [`BitmapTexture`](../../../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:17](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L17)
+Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:17](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L17)
 
 ***
 
@@ -159,7 +159,7 @@ Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:17](https://githu
 
 > **transitionProgress**: `number`
 
-Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:20](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L20)
+Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:20](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L20)
 
 ***
 
@@ -167,7 +167,7 @@ Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:20](https://githu
 
 > **transitionTexture**: [`CubeTexture`](../../../../Resource/classes/CubeTexture.md) \| [`HDRTexture`](../../../../Resource/classes/HDRTexture.md)
 
-Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:16](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L16)
+Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:16](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L16)
 
 ***
 
@@ -175,7 +175,7 @@ Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:16](https://githu
 
 > **transparent**: `boolean` = `false`
 
-Defined in: [src/material/core/ABaseMaterial.ts:66](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L66)
+Defined in: [src/material/core/ABaseMaterial.ts:66](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L66)
 
 
 Whether the material is transparent
@@ -190,7 +190,7 @@ Whether the material is transparent
 
 > **use2PathRender**: `boolean`
 
-Defined in: [src/material/core/ABaseMaterial.ts:51](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L51)
+Defined in: [src/material/core/ABaseMaterial.ts:51](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L51)
 
 
 Whether to use 2-pass rendering
@@ -205,7 +205,7 @@ Whether to use 2-pass rendering
 
 > **useTint**: `boolean`
 
-Defined in: [src/material/core/ABaseMaterial.ts:32](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L32)
+Defined in: [src/material/core/ABaseMaterial.ts:32](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L32)
 
 
 Whether to use tint color
@@ -222,7 +222,7 @@ Whether to use tint color
 
 > **get** **blendAlphaState**(): [`BlendState`](../../../../RenderState/classes/BlendState.md)
 
-Defined in: [src/material/core/ABaseMaterial.ts:245](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L245)
+Defined in: [src/material/core/ABaseMaterial.ts:245](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L245)
 
 
 Returns the material's alpha blend state object
@@ -243,7 +243,7 @@ Returns the material's alpha blend state object
 
 > **get** **blendColorState**(): [`BlendState`](../../../../RenderState/classes/BlendState.md)
 
-Defined in: [src/material/core/ABaseMaterial.ts:237](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L237)
+Defined in: [src/material/core/ABaseMaterial.ts:237](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L237)
 
 
 Returns the material's color blend state object
@@ -264,7 +264,7 @@ Returns the material's color blend state object
 
 > **get** **cacheKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:57](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/resources/core/ResourceBase.ts#L57)
+Defined in: [src/resources/core/ResourceBase.ts:57](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/resources/core/ResourceBase.ts#L57)
 
 
 Returns the cache key.
@@ -277,7 +277,7 @@ Returns the cache key.
 
 > **set** **cacheKey**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/resources/core/ResourceBase.ts#L65)
+Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/resources/core/ResourceBase.ts#L65)
 
 
 Sets the cache key.
@@ -304,7 +304,7 @@ Sets the cache key.
 
 > **get** **FRAGMENT\_BIND\_GROUP\_DESCRIPTOR\_NAME**(): `string`
 
-Defined in: [src/material/core/ABaseMaterial.ts:221](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L221)
+Defined in: [src/material/core/ABaseMaterial.ts:221](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L221)
 
 ##### Returns
 
@@ -322,7 +322,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:221](https://github.com/redcamel
 
 > **get** **FRAGMENT\_SHADER\_MODULE\_NAME**(): `string`
 
-Defined in: [src/material/core/ABaseMaterial.ts:217](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L217)
+Defined in: [src/material/core/ABaseMaterial.ts:217](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L217)
 
 ##### Returns
 
@@ -340,7 +340,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:217](https://github.com/redcamel
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/resources/core/ResourceBase.ts:106](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/resources/core/ResourceBase.ts#L106)
+Defined in: [src/resources/core/ResourceBase.ts:106](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/resources/core/ResourceBase.ts#L106)
 
 
 Returns the associated GPU device.
@@ -361,7 +361,7 @@ Returns the associated GPU device.
 
 > **get** **MODULE\_NAME**(): `string`
 
-Defined in: [src/material/core/ABaseMaterial.ts:213](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L213)
+Defined in: [src/material/core/ABaseMaterial.ts:213](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L213)
 
 ##### Returns
 
@@ -379,7 +379,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:213](https://github.com/redcamel
 
 > **get** **name**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:81](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/resources/core/ResourceBase.ts#L81)
+Defined in: [src/resources/core/ResourceBase.ts:81](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/resources/core/ResourceBase.ts#L81)
 
 
 Returns the name of the instance. If no name exists, it is generated using the class name and ID.
@@ -392,7 +392,7 @@ Returns the name of the instance. If no name exists, it is generated using the c
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:90](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/resources/core/ResourceBase.ts#L90)
+Defined in: [src/resources/core/ResourceBase.ts:90](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/resources/core/ResourceBase.ts#L90)
 
 
 Sets the name of the instance.
@@ -419,7 +419,7 @@ Sets the name of the instance.
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../../../RedGPUContext/classes/RedGPUContext.md)
 
-Defined in: [src/resources/core/ResourceBase.ts:114](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/resources/core/ResourceBase.ts#L114)
+Defined in: [src/resources/core/ResourceBase.ts:114](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/resources/core/ResourceBase.ts#L114)
 
 
 Returns the RedGPUContext instance.
@@ -440,7 +440,7 @@ Returns the RedGPUContext instance.
 
 > **get** **resourceManagerKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:73](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/resources/core/ResourceBase.ts#L73)
+Defined in: [src/resources/core/ResourceBase.ts:73](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/resources/core/ResourceBase.ts#L73)
 
 
 Returns the resource manager key.
@@ -461,7 +461,7 @@ Returns the resource manager key.
 
 > **get** **STORAGE\_STRUCT**(): `any`
 
-Defined in: [src/material/core/ABaseMaterial.ts:225](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L225)
+Defined in: [src/material/core/ABaseMaterial.ts:225](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L225)
 
 ##### Returns
 
@@ -479,7 +479,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:225](https://github.com/redcamel
 
 > **get** **tintBlendMode**(): `string`
 
-Defined in: [src/material/core/ABaseMaterial.ts:188](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L188)
+Defined in: [src/material/core/ABaseMaterial.ts:188](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L188)
 
 ##### Returns
 
@@ -489,7 +489,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:188](https://github.com/redcamel
 
 > **set** **tintBlendMode**(`value`): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:196](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L196)
+Defined in: [src/material/core/ABaseMaterial.ts:196](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L196)
 
 ##### Parameters
 
@@ -513,7 +513,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:196](https://github.com/redcamel
 
 > **get** **UNIFORM\_STRUCT**(): `any`
 
-Defined in: [src/material/core/ABaseMaterial.ts:229](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L229)
+Defined in: [src/material/core/ABaseMaterial.ts:229](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L229)
 
 ##### Returns
 
@@ -531,7 +531,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:229](https://github.com/redcamel
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:98](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/resources/core/ResourceBase.ts#L98)
+Defined in: [src/resources/core/ResourceBase.ts:98](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/resources/core/ResourceBase.ts#L98)
 
 
 Returns the UUID.
@@ -552,7 +552,7 @@ Returns the UUID.
 
 > **get** **writeMaskState**(): `number`
 
-Defined in: [src/material/core/ABaseMaterial.ts:253](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L253)
+Defined in: [src/material/core/ABaseMaterial.ts:253](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L253)
 
 
 Returns the material's writeMask state
@@ -565,7 +565,7 @@ Returns the material's writeMask state
 
 > **set** **writeMaskState**(`value`): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:264](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L264)
+Defined in: [src/material/core/ABaseMaterial.ts:264](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L264)
 
 
 Sets the material's writeMask state
@@ -590,7 +590,7 @@ Sets the material's writeMask state
 
 > **\_\_addDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:125](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/resources/core/ResourceBase.ts#L125)
+Defined in: [src/resources/core/ResourceBase.ts:125](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/resources/core/ResourceBase.ts#L125)
 
 
 Adds a listener function to be called when the pipeline becomes dirty.
@@ -615,7 +615,7 @@ Adds a listener function to be called when the pipeline becomes dirty.
 
 > **\_\_fireListenerList**(`resetList`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:152](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/resources/core/ResourceBase.ts#L152)
+Defined in: [src/resources/core/ResourceBase.ts:152](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/resources/core/ResourceBase.ts#L152)
 
 
 Fires the registered dirty listeners.
@@ -640,7 +640,7 @@ Fires the registered dirty listeners.
 
 > **\_\_removeDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:137](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/resources/core/ResourceBase.ts#L137)
+Defined in: [src/resources/core/ResourceBase.ts:137](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/resources/core/ResourceBase.ts#L137)
 
 
 Removes a dirty pipeline listener.
@@ -665,7 +665,7 @@ Removes a dirty pipeline listener.
 
 > **\_updateBaseProperty**(): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:414](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L414)
+Defined in: [src/material/core/ABaseMaterial.ts:414](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L414)
 
 
 Reflect basic material properties such as uniform/color/tint to the uniform buffer
@@ -684,7 +684,7 @@ Reflect basic material properties such as uniform/color/tint to the uniform buff
 
 > **\_updateFragmentState**(): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:306](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L306)
+Defined in: [src/material/core/ABaseMaterial.ts:306](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L306)
 
 
 Update fragment shader bind group/uniform/texture/sampler states
@@ -703,7 +703,7 @@ Update fragment shader bind group/uniform/texture/sampler states
 
 > **getFragmentRenderState**(`entryPoint`): `GPUFragmentState`
 
-Defined in: [src/material/core/ABaseMaterial.ts:383](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L383)
+Defined in: [src/material/core/ABaseMaterial.ts:383](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L383)
 
 
 Returns GPU fragment render state object
@@ -728,7 +728,7 @@ Returns GPU fragment render state object
 
 > **getGPUResourceSampler**(`sampler`): `GPUSampler`
 
-Defined in: [src/material/core/ABaseMaterial.ts:436](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L436)
+Defined in: [src/material/core/ABaseMaterial.ts:436](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L436)
 
 
 Returns GPU sampler from Sampler object
@@ -753,7 +753,7 @@ Returns GPU sampler from Sampler object
 
 > **initGPURenderInfos**(): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:272](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L272)
+Defined in: [src/material/core/ABaseMaterial.ts:272](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L272)
 
 
 Initialize GPU render pipeline info and uniform buffer
@@ -772,7 +772,7 @@ Initialize GPU render pipeline info and uniform buffer
 
 > **updateSampler**(`prevSampler`, `newSampler`): `void`
 
-Defined in: [src/material/core/ABitmapBaseMaterial.ts:74](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABitmapBaseMaterial.ts#L74)
+Defined in: [src/material/core/ABitmapBaseMaterial.ts:74](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABitmapBaseMaterial.ts#L74)
 
 
 Manage sampler object changes and DirtyPipeline listeners
@@ -798,7 +798,7 @@ Manage sampler object changes and DirtyPipeline listeners
 
 > **updateTexture**(`prevTexture`, `texture`): `void`
 
-Defined in: [src/material/core/ABitmapBaseMaterial.ts:58](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABitmapBaseMaterial.ts#L58)
+Defined in: [src/material/core/ABitmapBaseMaterial.ts:58](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABitmapBaseMaterial.ts#L58)
 
 
 Manage texture object changes and DirtyPipeline listeners

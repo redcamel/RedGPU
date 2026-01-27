@@ -8,7 +8,7 @@
 
 > **createMeshVertexUniformBuffers**(`mesh`, `skin`): `void`
 
-Defined in: [src/display/mesh/core/createMeshVertexUniformBuffers.ts:13](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/display/mesh/core/createMeshVertexUniformBuffers.ts#L13)
+Defined in: [src/display/mesh/core/createMeshVertexUniformBuffers.ts:13](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/display/mesh/core/createMeshVertexUniformBuffers.ts#L13)
 
 createMeshVertexUniformBuffers
 

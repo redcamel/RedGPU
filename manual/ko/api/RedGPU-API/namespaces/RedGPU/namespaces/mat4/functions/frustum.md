@@ -8,7 +8,7 @@
 
 > **frustum**(`out`, `left`, `right`, `bottom`, `top`, `near`, `far`): [`mat4`](../../../type-aliases/mat4.md)
 
-Defined in: node\_modules/gl-matrix/index.d.ts:1256
+Defined in: node\_modules/gl-matrix/index.d.ts:1286
 
 Generates a frustum matrix with the given bounds
 

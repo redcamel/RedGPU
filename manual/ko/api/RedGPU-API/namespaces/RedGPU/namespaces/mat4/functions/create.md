@@ -8,7 +8,7 @@
 
 > **create**(): [`mat4`](../../../type-aliases/mat4.md)
 
-Defined in: node\_modules/gl-matrix/index.d.ts:905
+Defined in: node\_modules/gl-matrix/index.d.ts:925
 
 Creates a new identity mat4
 

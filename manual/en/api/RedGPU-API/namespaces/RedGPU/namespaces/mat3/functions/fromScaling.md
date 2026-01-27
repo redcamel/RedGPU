@@ -8,7 +8,7 @@
 
 > **fromScaling**(`out`, `v`): [`mat3`](../../../type-aliases/mat3.md)
 
-Defined in: node\_modules/gl-matrix/index.d.ts:773
+Defined in: node\_modules/gl-matrix/index.d.ts:793
 
 Creates a matrix from a vector scaling
 This is equivalent to (but much faster than):

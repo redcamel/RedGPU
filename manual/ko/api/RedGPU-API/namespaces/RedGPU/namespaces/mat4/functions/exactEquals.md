@@ -8,7 +8,7 @@
 
 > **exactEquals**(`a`, `b`): `boolean`
 
-Defined in: node\_modules/gl-matrix/index.d.ts:1406
+Defined in: node\_modules/gl-matrix/index.d.ts:1436
 
 Returns whether or not the matrices have exactly the same elements in the same position (when compared with ===)
 

@@ -8,7 +8,7 @@
 
 > **fromQuat2**(`out`, `a`): [`mat4`](../../../type-aliases/mat4.md)
 
-Defined in: node\_modules/gl-matrix/index.d.ts:1164
+Defined in: node\_modules/gl-matrix/index.d.ts:1184
 
 Creates a new mat4 from a dual quat.
 

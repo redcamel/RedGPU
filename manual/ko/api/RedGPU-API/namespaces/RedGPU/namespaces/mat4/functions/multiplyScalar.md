@@ -8,7 +8,7 @@
 
 > **multiplyScalar**(`out`, `a`, `b`): [`mat4`](../../../type-aliases/mat4.md)
 
-Defined in: node\_modules/gl-matrix/index.d.ts:1388
+Defined in: node\_modules/gl-matrix/index.d.ts:1418
 
 Multiply each element of the matrix by a scalar.
 

@@ -8,7 +8,7 @@
 
 > **scale**(`out`, `a`, `v`): [`mat4`](../../../type-aliases/mat4.md)
 
-Defined in: node\_modules/gl-matrix/index.d.ts:1030
+Defined in: node\_modules/gl-matrix/index.d.ts:1050
 
 Scales the mat4 by the dimensions in the given vec3 not using vectorization
 

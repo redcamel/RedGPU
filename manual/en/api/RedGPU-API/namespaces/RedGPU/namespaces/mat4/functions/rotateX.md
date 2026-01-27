@@ -8,7 +8,7 @@
 
 > **rotateX**(`out`, `a`, `rad`): [`mat4`](../../../type-aliases/mat4.md)
 
-Defined in: node\_modules/gl-matrix/index.d.ts:1049
+Defined in: node\_modules/gl-matrix/index.d.ts:1069
 
 Rotates a matrix by the given angle around the X axis
 

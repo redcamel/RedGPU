@@ -8,7 +8,7 @@
 
 > **getRotation**(`out`, `mat`): `quat`
 
-Defined in: node\_modules/gl-matrix/index.d.ts:1195
+Defined in: node\_modules/gl-matrix/index.d.ts:1215
 
 Returns a quaternion representing the rotational component
  of a transformation matrix. If a matrix is built with

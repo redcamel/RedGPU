@@ -8,7 +8,7 @@
 
 > **orthoZO**(`out`, `left`, `right`, `bottom`, `top`, `near`, `far`): [`mat4`](../../../type-aliases/mat4.md)
 
-Defined in: node\_modules/gl-matrix/index.d.ts:1326
+Defined in: node\_modules/gl-matrix/index.d.ts:1356
 
 Generates a orthogonal projection matrix with the given bounds.
 The near/far clip planes correspond to a normalized device coordinate Z range of [0, 1],

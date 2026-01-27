@@ -8,7 +8,7 @@
 
 > **fromTranslation**(`out`, `v`): [`mat3`](../../../type-aliases/mat3.md)
 
-Defined in: node\_modules/gl-matrix/index.d.ts:749
+Defined in: node\_modules/gl-matrix/index.d.ts:769
 
 Creates a matrix from a vector translation
 This is equivalent to (but much faster than):

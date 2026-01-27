@@ -8,7 +8,7 @@
 
 > **sub**(`out`, `a`, `b`): [`mat3`](../../../type-aliases/mat3.md)
 
-Defined in: node\_modules/gl-matrix/index.d.ts:893
+Defined in: node\_modules/gl-matrix/index.d.ts:913
 
 Subtracts matrix b from matrix a
 

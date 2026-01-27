@@ -8,7 +8,7 @@
 
 > **frob**(`a`): `number`
 
-Defined in: node\_modules/gl-matrix/index.d.ts:822
+Defined in: node\_modules/gl-matrix/index.d.ts:842
 
 Returns Frobenius norm of a mat3
 

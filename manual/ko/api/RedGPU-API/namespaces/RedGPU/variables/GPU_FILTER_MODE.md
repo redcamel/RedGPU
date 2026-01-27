@@ -8,7 +8,7 @@
 
 > `const` **GPU\_FILTER\_MODE**: `object`
 
-Defined in: [src/gpuConst/GPU\_FILTER\_MODE.ts:10](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/gpuConst/GPU_FILTER_MODE.ts#L10)
+Defined in: [src/gpuConst/GPU\_FILTER\_MODE.ts:10](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/gpuConst/GPU_FILTER_MODE.ts#L10)
 
 텍스처 샘플링 시의 필터링 모드 옵션을 정의하는 상수군입니다.
 

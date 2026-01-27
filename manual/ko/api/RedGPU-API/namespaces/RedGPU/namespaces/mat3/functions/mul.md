@@ -8,7 +8,7 @@
 
 > **mul**(`out`, `a`, `b`): [`mat3`](../../../type-aliases/mat3.md)
 
-Defined in: node\_modules/gl-matrix/index.d.ts:884
+Defined in: node\_modules/gl-matrix/index.d.ts:904
 
 Multiplies two mat3's
 

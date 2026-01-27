@@ -8,7 +8,7 @@
 
 > **fromRotation**(`out`, `rad`): [`mat3`](../../../type-aliases/mat3.md)
 
-Defined in: node\_modules/gl-matrix/index.d.ts:761
+Defined in: node\_modules/gl-matrix/index.d.ts:781
 
 Creates a matrix from a given angle
 This is equivalent to (but much faster than):

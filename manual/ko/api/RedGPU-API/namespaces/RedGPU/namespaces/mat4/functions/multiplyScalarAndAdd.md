@@ -8,7 +8,7 @@
 
 > **multiplyScalarAndAdd**(`out`, `a`, `b`, `scale`): [`mat4`](../../../type-aliases/mat4.md)
 
-Defined in: node\_modules/gl-matrix/index.d.ts:1398
+Defined in: node\_modules/gl-matrix/index.d.ts:1428
 
 Adds two mat4's after multiplying each element of the second operand by a scalar value.
 

@@ -8,7 +8,7 @@
 
 > **fromQuat**(`out`, `q`): [`mat3`](../../../type-aliases/mat3.md)
 
-Defined in: node\_modules/gl-matrix/index.d.ts:790
+Defined in: node\_modules/gl-matrix/index.d.ts:810
 
 Calculates a 3x3 matrix from the given quaternion
 

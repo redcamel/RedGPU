@@ -8,7 +8,7 @@
 
 > **fromQuat**(`out`, `q`): [`mat4`](../../../type-aliases/mat4.md)
 
-Defined in: node\_modules/gl-matrix/index.d.ts:1243
+Defined in: node\_modules/gl-matrix/index.d.ts:1273
 
 Calculates a 4x4 matrix from the given quaternion
 

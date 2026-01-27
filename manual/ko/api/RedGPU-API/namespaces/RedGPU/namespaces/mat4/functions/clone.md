@@ -8,7 +8,7 @@
 
 > **clone**(`a`): [`mat4`](../../../type-aliases/mat4.md)
 
-Defined in: node\_modules/gl-matrix/index.d.ts:912
+Defined in: node\_modules/gl-matrix/index.d.ts:932
 
 Creates a new mat4 initialized with values from an existing matrix
 

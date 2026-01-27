@@ -8,7 +8,7 @@
 
 > **str**(`a`): `string`
 
-Defined in: node\_modules/gl-matrix/index.d.ts:1354
+Defined in: node\_modules/gl-matrix/index.d.ts:1384
 
 Returns a string representation of a mat4
 

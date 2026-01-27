@@ -8,7 +8,7 @@
 
 > **projection**(`out`, `width`, `height`): [`mat3`](../../../type-aliases/mat3.md)
 
-Defined in: node\_modules/gl-matrix/index.d.ts:808
+Defined in: node\_modules/gl-matrix/index.d.ts:828
 
 Generates a 2D projection matrix with the given bounds
 

@@ -6,7 +6,7 @@
 
 # Class: PBRMaterial
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:171](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L171)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:171](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L171)
 
 
 PBR (Physically Based Rendering) material class.
@@ -24,7 +24,7 @@ Inherits from ABitmapBaseMaterial to create a material for PBR rendering.
 
 > **new PBRMaterial**(`redGPUContext`): `PBRMaterial`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:315](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L315)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:315](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L315)
 
 
 PBRMaterial constructor
@@ -49,7 +49,7 @@ PBRMaterial constructor
 
 > **\_\_packingList**: `any`[]
 
-Defined in: [src/material/core/ABitmapBaseMaterial.ts:21](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABitmapBaseMaterial.ts#L21)
+Defined in: [src/material/core/ABitmapBaseMaterial.ts:21](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABitmapBaseMaterial.ts#L21)
 
 
 List of callbacks called when updating the pipeline
@@ -64,7 +64,7 @@ List of callbacks called when updating the pipeline
 
 > **alphaBlend**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:175](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L175)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:175](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L175)
 
 ***
 
@@ -72,7 +72,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:175](https://github.com/red
 
 > **baseColorFactor**: `number`[]
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:180](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L180)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:180](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L180)
 
 ***
 
@@ -80,7 +80,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:180](https://github.com/red
 
 > **baseColorTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:178](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L178)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:178](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L178)
 
 ***
 
@@ -88,7 +88,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:178](https://github.com/red
 
 > **baseColorTexture\_texCoord\_index**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:181](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L181)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:181](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L181)
 
 ***
 
@@ -96,7 +96,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:181](https://github.com/red
 
 > **baseColorTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:179](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L179)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:179](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L179)
 
 ***
 
@@ -104,7 +104,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:179](https://github.com/red
 
 > **cutOff**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:174](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L174)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:174](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L174)
 
 ***
 
@@ -112,7 +112,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:174](https://github.com/red
 
 > **dirtyPipeline**: `boolean` = `false`
 
-Defined in: [src/material/core/ABaseMaterial.ts:61](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L61)
+Defined in: [src/material/core/ABaseMaterial.ts:61](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L61)
 
 
 Pipeline dirty status flag
@@ -127,7 +127,7 @@ Pipeline dirty status flag
 
 > **doubleSided**: `boolean`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:285](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L285)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:285](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L285)
 
 ***
 
@@ -135,7 +135,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:285](https://github.com/red
 
 > **emissiveFactor**: `number`[]
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:269](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L269)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:269](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L269)
 
 ***
 
@@ -143,7 +143,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:269](https://github.com/red
 
 > **emissiveStrength**: `number`[]
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:270](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L270)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:270](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L270)
 
 ***
 
@@ -151,7 +151,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:270](https://github.com/red
 
 > **emissiveTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:266](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L266)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:266](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L266)
 
 ***
 
@@ -159,7 +159,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:266](https://github.com/red
 
 > **emissiveTexture\_texCoord\_index**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:268](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L268)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:268](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L268)
 
 ***
 
@@ -167,7 +167,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:268](https://github.com/red
 
 > **emissiveTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:267](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L267)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:267](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L267)
 
 ***
 
@@ -175,7 +175,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:267](https://github.com/red
 
 > **gpuRenderInfo**: [`FragmentGPURenderInfo`](../namespaces/Core/classes/FragmentGPURenderInfo.md)
 
-Defined in: [src/material/core/ABaseMaterial.ts:56](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L56)
+Defined in: [src/material/core/ABaseMaterial.ts:56](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L56)
 
 
 Fragment GPU render info object
@@ -190,7 +190,7 @@ Fragment GPU render info object
 
 > **KHR\_anisotropyRotation**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:199](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L199)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:199](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L199)
 
 ***
 
@@ -198,7 +198,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:199](https://github.com/red
 
 > **KHR\_anisotropyStrength**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:198](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L198)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:198](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L198)
 
 ***
 
@@ -206,7 +206,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:198](https://github.com/red
 
 > **KHR\_anisotropyTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:200](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L200)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:200](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L200)
 
 ***
 
@@ -214,7 +214,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:200](https://github.com/red
 
 > **KHR\_anisotropyTexture\_texCoord\_index**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:202](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L202)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:202](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L202)
 
 ***
 
@@ -222,7 +222,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:202](https://github.com/red
 
 > **KHR\_anisotropyTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:201](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L201)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:201](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L201)
 
 ***
 
@@ -230,7 +230,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:201](https://github.com/red
 
 > **KHR\_attenuationColor**: `number`[]
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:224](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L224)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:224](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L224)
 
 ***
 
@@ -238,7 +238,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:224](https://github.com/red
 
 > **KHR\_attenuationDistance**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:223](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L223)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:223](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L223)
 
 ***
 
@@ -246,7 +246,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:223](https://github.com/red
 
 > **KHR\_clearcoatFactor**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:185](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L185)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:185](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L185)
 
 ***
 
@@ -254,7 +254,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:185](https://github.com/red
 
 > **KHR\_clearcoatNormalScale**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:184](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L184)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:184](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L184)
 
 ***
 
@@ -262,7 +262,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:184](https://github.com/red
 
 > **KHR\_clearcoatNormalTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:188](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L188)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:188](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L188)
 
 ***
 
@@ -270,7 +270,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:188](https://github.com/red
 
 > **KHR\_clearcoatNormalTexture\_texCoord\_index**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:194](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L194)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:194](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L194)
 
 ***
 
@@ -278,7 +278,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:194](https://github.com/red
 
 > **KHR\_clearcoatNormalTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:191](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L191)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:191](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L191)
 
 ***
 
@@ -286,7 +286,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:191](https://github.com/red
 
 > **KHR\_clearcoatRoughnessFactor**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:186](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L186)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:186](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L186)
 
 ***
 
@@ -294,7 +294,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:186](https://github.com/red
 
 > **KHR\_clearcoatRoughnessTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:189](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L189)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:189](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L189)
 
 ***
 
@@ -302,7 +302,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:189](https://github.com/red
 
 > **KHR\_clearcoatRoughnessTexture\_texCoord\_index**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:195](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L195)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:195](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L195)
 
 ***
 
@@ -310,7 +310,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:195](https://github.com/red
 
 > **KHR\_clearcoatRoughnessTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:192](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L192)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:192](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L192)
 
 ***
 
@@ -318,7 +318,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:192](https://github.com/red
 
 > **KHR\_clearcoatTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:187](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L187)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:187](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L187)
 
 ***
 
@@ -326,7 +326,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:187](https://github.com/red
 
 > **KHR\_clearcoatTexture\_texCoord\_index**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:193](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L193)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:193](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L193)
 
 ***
 
@@ -334,7 +334,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:193](https://github.com/red
 
 > **KHR\_clearcoatTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:190](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L190)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:190](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L190)
 
 ***
 
@@ -342,7 +342,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:190](https://github.com/red
 
 > **KHR\_diffuseTransmissionColorFactor**: \[`number`, `number`, `number`\]
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:213](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L213)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:213](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L213)
 
 ***
 
@@ -350,7 +350,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:213](https://github.com/red
 
 > **KHR\_diffuseTransmissionColorTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:217](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L217)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:217](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L217)
 
 ***
 
@@ -358,7 +358,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:217](https://github.com/red
 
 > **KHR\_diffuseTransmissionColorTexture\_texCoord\_index**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:219](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L219)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:219](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L219)
 
 ***
 
@@ -366,7 +366,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:219](https://github.com/red
 
 > **KHR\_diffuseTransmissionColorTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:218](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L218)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:218](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L218)
 
 ***
 
@@ -374,7 +374,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:218](https://github.com/red
 
 > **KHR\_diffuseTransmissionFactor**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:212](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L212)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:212](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L212)
 
 ***
 
@@ -382,7 +382,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:212](https://github.com/red
 
 > **KHR\_diffuseTransmissionTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:214](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L214)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:214](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L214)
 
 ***
 
@@ -390,7 +390,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:214](https://github.com/red
 
 > **KHR\_diffuseTransmissionTexture\_texCoord\_index**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:216](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L216)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:216](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L216)
 
 ***
 
@@ -398,7 +398,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:216](https://github.com/red
 
 > **KHR\_diffuseTransmissionTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:215](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L215)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:215](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L215)
 
 ***
 
@@ -406,7 +406,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:215](https://github.com/red
 
 > **KHR\_dispersion**: `boolean`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:288](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L288)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:288](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L288)
 
 ***
 
@@ -414,7 +414,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:288](https://github.com/red
 
 > **KHR\_iridescenceFactor**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:247](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L247)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:247](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L247)
 
 ***
 
@@ -422,7 +422,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:247](https://github.com/red
 
 > **KHR\_iridescenceIor**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:248](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L248)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:248](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L248)
 
 ***
 
@@ -430,7 +430,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:248](https://github.com/red
 
 > **KHR\_iridescenceTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:251](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L251)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:251](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L251)
 
 ***
 
@@ -438,7 +438,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:251](https://github.com/red
 
 > **KHR\_iridescenceTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:252](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L252)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:252](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L252)
 
 ***
 
@@ -446,7 +446,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:252](https://github.com/red
 
 > **KHR\_iridescenceThicknessMaximum**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:250](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L250)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:250](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L250)
 
 ***
 
@@ -454,7 +454,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:250](https://github.com/red
 
 > **KHR\_iridescenceThicknessMinimum**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:249](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L249)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:249](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L249)
 
 ***
 
@@ -462,7 +462,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:249](https://github.com/red
 
 > **KHR\_iridescenceThicknessTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:253](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L253)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:253](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L253)
 
 ***
 
@@ -470,7 +470,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:253](https://github.com/red
 
 > **KHR\_iridescenceThicknessTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:254](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L254)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:254](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L254)
 
 ***
 
@@ -478,7 +478,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:254](https://github.com/red
 
 > **KHR\_materials\_ior**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:258](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L258)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:258](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L258)
 
 ***
 
@@ -486,7 +486,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:258](https://github.com/red
 
 > **KHR\_sheenColorFactor**: \[`number`, `number`, `number`\]
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:230](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L230)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:230](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L230)
 
 ***
 
@@ -494,7 +494,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:230](https://github.com/red
 
 > **KHR\_sheenColorTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:232](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L232)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:232](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L232)
 
 ***
 
@@ -502,7 +502,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:232](https://github.com/red
 
 > **KHR\_sheenColorTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:233](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L233)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:233](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L233)
 
 ***
 
@@ -510,7 +510,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:233](https://github.com/red
 
 > **KHR\_sheenRoughnessFactor**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:231](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L231)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:231](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L231)
 
 ***
 
@@ -518,7 +518,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:231](https://github.com/red
 
 > **KHR\_sheenRoughnessTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:234](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L234)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:234](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L234)
 
 ***
 
@@ -526,7 +526,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:234](https://github.com/red
 
 > **KHR\_sheenRoughnessTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:235](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L235)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:235](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L235)
 
 ***
 
@@ -534,7 +534,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:235](https://github.com/red
 
 > **KHR\_specularColorFactor**: \[`number`, `number`, `number`\]
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:239](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L239)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:239](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L239)
 
 ***
 
@@ -542,7 +542,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:239](https://github.com/red
 
 > **KHR\_specularColorTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:242](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L242)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:242](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L242)
 
 ***
 
@@ -550,7 +550,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:242](https://github.com/red
 
 > **KHR\_specularColorTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:243](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L243)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:243](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L243)
 
 ***
 
@@ -558,7 +558,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:243](https://github.com/red
 
 > **KHR\_specularFactor**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:238](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L238)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:238](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L238)
 
 ***
 
@@ -566,7 +566,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:238](https://github.com/red
 
 > **KHR\_specularTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:240](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L240)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:240](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L240)
 
 ***
 
@@ -574,7 +574,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:240](https://github.com/red
 
 > **KHR\_specularTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:241](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L241)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:241](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L241)
 
 ***
 
@@ -582,7 +582,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:241](https://github.com/red
 
 > **KHR\_thicknessFactor**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:222](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L222)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:222](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L222)
 
 ***
 
@@ -590,7 +590,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:222](https://github.com/red
 
 > **KHR\_thicknessTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:225](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L225)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:225](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L225)
 
 ***
 
@@ -598,7 +598,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:225](https://github.com/red
 
 > **KHR\_thicknessTexture\_texCoord\_index**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:227](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L227)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:227](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L227)
 
 ***
 
@@ -606,7 +606,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:227](https://github.com/red
 
 > **KHR\_thicknessTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:226](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L226)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:226](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L226)
 
 ***
 
@@ -614,7 +614,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:226](https://github.com/red
 
 > **KHR\_transmissionFactor**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:206](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L206)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:206](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L206)
 
 ***
 
@@ -622,7 +622,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:206](https://github.com/red
 
 > **KHR\_transmissionTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:207](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L207)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:207](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L207)
 
 ***
 
@@ -630,7 +630,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:207](https://github.com/red
 
 > **KHR\_transmissionTexture\_texCoord\_index**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:209](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L209)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:209](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L209)
 
 ***
 
@@ -638,7 +638,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:209](https://github.com/red
 
 > **KHR\_transmissionTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:208](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L208)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:208](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L208)
 
 ***
 
@@ -646,7 +646,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:208](https://github.com/red
 
 > **metallicFactor**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:280](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L280)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:280](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L280)
 
 ***
 
@@ -654,7 +654,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:280](https://github.com/red
 
 > **metallicRoughnessTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:277](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L277)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:277](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L277)
 
 ***
 
@@ -662,7 +662,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:277](https://github.com/red
 
 > **metallicRoughnessTexture\_texCoord\_index**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:279](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L279)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:279](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L279)
 
 ***
 
@@ -670,7 +670,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:279](https://github.com/red
 
 > **metallicRoughnessTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:278](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L278)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:278](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L278)
 
 ***
 
@@ -678,7 +678,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:278](https://github.com/red
 
 > **normalScale**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:260](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L260)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:260](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L260)
 
 ***
 
@@ -686,7 +686,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:260](https://github.com/red
 
 > **normalTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:262](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L262)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:262](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L262)
 
 ***
 
@@ -694,7 +694,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:262](https://github.com/red
 
 > **normalTexture\_texCoord\_index**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:264](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L264)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:264](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L264)
 
 ***
 
@@ -702,7 +702,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:264](https://github.com/red
 
 > **normalTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:263](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L263)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:263](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L263)
 
 ***
 
@@ -710,7 +710,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:263](https://github.com/red
 
 > **occlusionStrength**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:275](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L275)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:275](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L275)
 
 ***
 
@@ -718,7 +718,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:275](https://github.com/red
 
 > **occlusionTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:272](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L272)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:272](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L272)
 
 ***
 
@@ -726,7 +726,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:272](https://github.com/red
 
 > **occlusionTexture\_texCoord\_index**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:274](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L274)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:274](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L274)
 
 ***
 
@@ -734,7 +734,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:274](https://github.com/red
 
 > **occlusionTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:273](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L273)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:273](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L273)
 
 ***
 
@@ -742,7 +742,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:273](https://github.com/red
 
 > **opacity**: `number`
 
-Defined in: [src/material/core/ABaseMaterial.ts:22](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L22)
+Defined in: [src/material/core/ABaseMaterial.ts:22](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L22)
 
 
 Material opacity (0~1)
@@ -757,7 +757,7 @@ Material opacity (0~1)
 
 > **roughnessFactor**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:281](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L281)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:281](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L281)
 
 ***
 
@@ -765,7 +765,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:281](https://github.com/red
 
 > **tint**: [`ColorRGBA`](../../Color/classes/ColorRGBA.md)
 
-Defined in: [src/material/core/ABaseMaterial.ts:27](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L27)
+Defined in: [src/material/core/ABaseMaterial.ts:27](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L27)
 
 
 Material tint color (RGBA)
@@ -780,7 +780,7 @@ Material tint color (RGBA)
 
 > **transparent**: `boolean` = `false`
 
-Defined in: [src/material/core/ABaseMaterial.ts:66](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L66)
+Defined in: [src/material/core/ABaseMaterial.ts:66](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L66)
 
 
 Whether the material is transparent
@@ -795,7 +795,7 @@ Whether the material is transparent
 
 > **use2PathRender**: `boolean`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:176](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L176)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:176](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L176)
 
 
 Whether to use 2-pass rendering
@@ -810,7 +810,7 @@ Whether to use 2-pass rendering
 
 > **useCutOff**: `boolean`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:173](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L173)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:173](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L173)
 
 ***
 
@@ -818,7 +818,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:173](https://github.com/red
 
 > **useKHR\_materials\_anisotropy**: `boolean`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:197](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L197)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:197](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L197)
 
 ***
 
@@ -826,7 +826,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:197](https://github.com/red
 
 > **useKHR\_materials\_clearcoat**: `boolean`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:183](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L183)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:183](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L183)
 
 ***
 
@@ -834,7 +834,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:183](https://github.com/red
 
 > **useKHR\_materials\_diffuse\_transmission**: `boolean`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:211](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L211)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:211](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L211)
 
 ***
 
@@ -842,7 +842,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:211](https://github.com/red
 
 > **useKHR\_materials\_iridescence**: `boolean`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:246](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L246)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:246](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L246)
 
 ***
 
@@ -850,7 +850,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:246](https://github.com/red
 
 > **useKHR\_materials\_sheen**: `boolean`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:229](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L229)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:229](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L229)
 
 ***
 
@@ -858,7 +858,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:229](https://github.com/red
 
 > **useKHR\_materials\_specular**: `boolean`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:237](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L237)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:237](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L237)
 
 ***
 
@@ -866,7 +866,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:237](https://github.com/red
 
 > **useKHR\_materials\_transmission**: `boolean`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:205](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L205)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:205](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L205)
 
 ***
 
@@ -874,7 +874,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:205](https://github.com/red
 
 > **useKHR\_materials\_unlit**: `boolean`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:256](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L256)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:256](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L256)
 
 ***
 
@@ -882,7 +882,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:256](https://github.com/red
 
 > **useKHR\_materials\_volume**: `boolean`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:221](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L221)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:221](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L221)
 
 ***
 
@@ -890,7 +890,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:221](https://github.com/red
 
 > **useNormalTexture**: `boolean`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:261](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L261)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:261](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L261)
 
 ***
 
@@ -898,7 +898,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:261](https://github.com/red
 
 > **useTint**: `boolean`
 
-Defined in: [src/material/core/ABaseMaterial.ts:32](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L32)
+Defined in: [src/material/core/ABaseMaterial.ts:32](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L32)
 
 
 Whether to use tint color
@@ -913,7 +913,7 @@ Whether to use tint color
 
 > **useVertexColor**: `boolean`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:172](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L172)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:172](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L172)
 
 ## Accessors
 
@@ -923,7 +923,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:172](https://github.com/red
 
 > **get** **blendAlphaState**(): [`BlendState`](../../RenderState/classes/BlendState.md)
 
-Defined in: [src/material/core/ABaseMaterial.ts:245](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L245)
+Defined in: [src/material/core/ABaseMaterial.ts:245](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L245)
 
 
 Returns the material's alpha blend state object
@@ -944,7 +944,7 @@ Returns the material's alpha blend state object
 
 > **get** **blendColorState**(): [`BlendState`](../../RenderState/classes/BlendState.md)
 
-Defined in: [src/material/core/ABaseMaterial.ts:237](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L237)
+Defined in: [src/material/core/ABaseMaterial.ts:237](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L237)
 
 
 Returns the material's color blend state object
@@ -965,7 +965,7 @@ Returns the material's color blend state object
 
 > **get** **cacheKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:57](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/resources/core/ResourceBase.ts#L57)
+Defined in: [src/resources/core/ResourceBase.ts:57](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/resources/core/ResourceBase.ts#L57)
 
 
 Returns the cache key.
@@ -978,7 +978,7 @@ Returns the cache key.
 
 > **set** **cacheKey**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/resources/core/ResourceBase.ts#L65)
+Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/resources/core/ResourceBase.ts#L65)
 
 
 Sets the cache key.
@@ -1005,7 +1005,7 @@ Sets the cache key.
 
 > **get** **FRAGMENT\_BIND\_GROUP\_DESCRIPTOR\_NAME**(): `string`
 
-Defined in: [src/material/core/ABaseMaterial.ts:221](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L221)
+Defined in: [src/material/core/ABaseMaterial.ts:221](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L221)
 
 ##### Returns
 
@@ -1023,7 +1023,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:221](https://github.com/redcamel
 
 > **get** **FRAGMENT\_SHADER\_MODULE\_NAME**(): `string`
 
-Defined in: [src/material/core/ABaseMaterial.ts:217](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L217)
+Defined in: [src/material/core/ABaseMaterial.ts:217](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L217)
 
 ##### Returns
 
@@ -1041,7 +1041,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:217](https://github.com/redcamel
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/resources/core/ResourceBase.ts:106](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/resources/core/ResourceBase.ts#L106)
+Defined in: [src/resources/core/ResourceBase.ts:106](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/resources/core/ResourceBase.ts#L106)
 
 
 Returns the associated GPU device.
@@ -1062,7 +1062,7 @@ Returns the associated GPU device.
 
 > **get** **MODULE\_NAME**(): `string`
 
-Defined in: [src/material/core/ABaseMaterial.ts:213](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L213)
+Defined in: [src/material/core/ABaseMaterial.ts:213](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L213)
 
 ##### Returns
 
@@ -1080,7 +1080,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:213](https://github.com/redcamel
 
 > **get** **name**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:81](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/resources/core/ResourceBase.ts#L81)
+Defined in: [src/resources/core/ResourceBase.ts:81](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/resources/core/ResourceBase.ts#L81)
 
 
 Returns the name of the instance. If no name exists, it is generated using the class name and ID.
@@ -1093,7 +1093,7 @@ Returns the name of the instance. If no name exists, it is generated using the c
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:90](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/resources/core/ResourceBase.ts#L90)
+Defined in: [src/resources/core/ResourceBase.ts:90](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/resources/core/ResourceBase.ts#L90)
 
 
 Sets the name of the instance.
@@ -1120,7 +1120,7 @@ Sets the name of the instance.
 
 > **get** **packedKHR\_clearcoatTexture\_transmission**(): [`PackedTexture`](../../Resource/classes/PackedTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:348](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L348)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:348](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L348)
 
 
 Returns packed texture for Clearcoat and Transmission
@@ -1137,7 +1137,7 @@ Returns packed texture for Clearcoat and Transmission
 
 > **get** **packedKHR\_diffuse\_transmission**(): [`PackedTexture`](../../Resource/classes/PackedTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:383](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L383)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:383](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L383)
 
 
 Returns packed texture for Diffuse Transmission
@@ -1154,7 +1154,7 @@ Returns packed texture for Diffuse Transmission
 
 > **get** **packedKHR\_iridescence**(): [`PackedTexture`](../../Resource/classes/PackedTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:356](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L356)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:356](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L356)
 
 
 Returns packed texture for Iridescence
@@ -1171,7 +1171,7 @@ Returns packed texture for Iridescence
 
 > **get** **packedKHR\_sheen**(): [`PackedTexture`](../../Resource/classes/PackedTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:372](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L372)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:372](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L372)
 
 
 Returns packed texture for Sheen
@@ -1188,7 +1188,7 @@ Returns packed texture for Sheen
 
 > **get** **packedORMTexture**(): [`PackedTexture`](../../Resource/classes/PackedTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:364](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L364)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:364](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L364)
 
 
 Returns packed texture for ORM (Occlusion, Roughness, Metallic)
@@ -1205,7 +1205,7 @@ Returns packed texture for ORM (Occlusion, Roughness, Metallic)
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../RedGPUContext/classes/RedGPUContext.md)
 
-Defined in: [src/resources/core/ResourceBase.ts:114](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/resources/core/ResourceBase.ts#L114)
+Defined in: [src/resources/core/ResourceBase.ts:114](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/resources/core/ResourceBase.ts#L114)
 
 
 Returns the RedGPUContext instance.
@@ -1226,7 +1226,7 @@ Returns the RedGPUContext instance.
 
 > **get** **resourceManagerKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:73](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/resources/core/ResourceBase.ts#L73)
+Defined in: [src/resources/core/ResourceBase.ts:73](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/resources/core/ResourceBase.ts#L73)
 
 
 Returns the resource manager key.
@@ -1247,7 +1247,7 @@ Returns the resource manager key.
 
 > **get** **STORAGE\_STRUCT**(): `any`
 
-Defined in: [src/material/core/ABaseMaterial.ts:225](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L225)
+Defined in: [src/material/core/ABaseMaterial.ts:225](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L225)
 
 ##### Returns
 
@@ -1265,7 +1265,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:225](https://github.com/redcamel
 
 > **get** **tintBlendMode**(): `string`
 
-Defined in: [src/material/core/ABaseMaterial.ts:188](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L188)
+Defined in: [src/material/core/ABaseMaterial.ts:188](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L188)
 
 ##### Returns
 
@@ -1275,7 +1275,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:188](https://github.com/redcamel
 
 > **set** **tintBlendMode**(`value`): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:196](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L196)
+Defined in: [src/material/core/ABaseMaterial.ts:196](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L196)
 
 ##### Parameters
 
@@ -1299,7 +1299,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:196](https://github.com/redcamel
 
 > **get** **UNIFORM\_STRUCT**(): `any`
 
-Defined in: [src/material/core/ABaseMaterial.ts:229](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L229)
+Defined in: [src/material/core/ABaseMaterial.ts:229](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L229)
 
 ##### Returns
 
@@ -1317,7 +1317,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:229](https://github.com/redcamel
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:98](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/resources/core/ResourceBase.ts#L98)
+Defined in: [src/resources/core/ResourceBase.ts:98](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/resources/core/ResourceBase.ts#L98)
 
 
 Returns the UUID.
@@ -1338,7 +1338,7 @@ Returns the UUID.
 
 > **get** **writeMaskState**(): `number`
 
-Defined in: [src/material/core/ABaseMaterial.ts:253](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L253)
+Defined in: [src/material/core/ABaseMaterial.ts:253](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L253)
 
 
 Returns the material's writeMask state
@@ -1351,7 +1351,7 @@ Returns the material's writeMask state
 
 > **set** **writeMaskState**(`value`): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:264](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L264)
+Defined in: [src/material/core/ABaseMaterial.ts:264](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L264)
 
 
 Sets the material's writeMask state
@@ -1376,7 +1376,7 @@ Sets the material's writeMask state
 
 > **\_\_addDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:125](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/resources/core/ResourceBase.ts#L125)
+Defined in: [src/resources/core/ResourceBase.ts:125](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/resources/core/ResourceBase.ts#L125)
 
 
 Adds a listener function to be called when the pipeline becomes dirty.
@@ -1401,7 +1401,7 @@ Adds a listener function to be called when the pipeline becomes dirty.
 
 > **\_\_fireListenerList**(`resetList`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:152](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/resources/core/ResourceBase.ts#L152)
+Defined in: [src/resources/core/ResourceBase.ts:152](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/resources/core/ResourceBase.ts#L152)
 
 
 Fires the registered dirty listeners.
@@ -1426,7 +1426,7 @@ Fires the registered dirty listeners.
 
 > **\_\_removeDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:137](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/resources/core/ResourceBase.ts#L137)
+Defined in: [src/resources/core/ResourceBase.ts:137](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/resources/core/ResourceBase.ts#L137)
 
 
 Removes a dirty pipeline listener.
@@ -1451,7 +1451,7 @@ Removes a dirty pipeline listener.
 
 > **\_updateBaseProperty**(): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:414](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L414)
+Defined in: [src/material/core/ABaseMaterial.ts:414](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L414)
 
 
 Reflect basic material properties such as uniform/color/tint to the uniform buffer
@@ -1470,7 +1470,7 @@ Reflect basic material properties such as uniform/color/tint to the uniform buff
 
 > **\_updateFragmentState**(): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:306](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L306)
+Defined in: [src/material/core/ABaseMaterial.ts:306](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L306)
 
 
 Update fragment shader bind group/uniform/texture/sampler states
@@ -1489,7 +1489,7 @@ Update fragment shader bind group/uniform/texture/sampler states
 
 > **getFragmentRenderState**(`entryPoint`): `GPUFragmentState`
 
-Defined in: [src/material/core/ABaseMaterial.ts:383](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L383)
+Defined in: [src/material/core/ABaseMaterial.ts:383](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L383)
 
 
 Returns GPU fragment render state object
@@ -1514,7 +1514,7 @@ Returns GPU fragment render state object
 
 > **getGPUResourceSampler**(`sampler`): `GPUSampler`
 
-Defined in: [src/material/core/ABaseMaterial.ts:436](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L436)
+Defined in: [src/material/core/ABaseMaterial.ts:436](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L436)
 
 
 Returns GPU sampler from Sampler object
@@ -1539,7 +1539,7 @@ Returns GPU sampler from Sampler object
 
 > **initGPURenderInfos**(): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:272](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABaseMaterial.ts#L272)
+Defined in: [src/material/core/ABaseMaterial.ts:272](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABaseMaterial.ts#L272)
 
 
 Initialize GPU render pipeline info and uniform buffer
@@ -1558,7 +1558,7 @@ Initialize GPU render pipeline info and uniform buffer
 
 > **setupPackedKHR\_clearcoatTexture\_transmission**(): `Promise`\<`void`\>
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:419](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L419)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:419](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L419)
 
 
 Setup Clearcoat and Transmission texture packing
@@ -1573,7 +1573,7 @@ Setup Clearcoat and Transmission texture packing
 
 > **setupPackedKHR\_diffuse\_transmission**(): `Promise`\<`void`\>
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:500](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L500)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:500](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L500)
 
 
 Setup Diffuse Transmission texture packing
@@ -1588,7 +1588,7 @@ Setup Diffuse Transmission texture packing
 
 > **setupPackedKHR\_iridescence**(): `Promise`\<`void`\>
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:552](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L552)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:552](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L552)
 
 
 Setup Iridescence texture packing
@@ -1603,7 +1603,7 @@ Setup Iridescence texture packing
 
 > **setupPackedKHR\_sheen**(): `Promise`\<`void`\>
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:526](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L526)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:526](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L526)
 
 
 Setup Sheen texture packing
@@ -1618,7 +1618,7 @@ Setup Sheen texture packing
 
 > **setupPackORMTexture**(): `Promise`\<`void`\>
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:394](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/pbrMaterial/PBRMaterial.ts#L394)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:394](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/pbrMaterial/PBRMaterial.ts#L394)
 
 
 Setup ORM (Occlusion, Roughness, Metallic) texture packing
@@ -1633,7 +1633,7 @@ Setup ORM (Occlusion, Roughness, Metallic) texture packing
 
 > **updateSampler**(`prevSampler`, `newSampler`): `void`
 
-Defined in: [src/material/core/ABitmapBaseMaterial.ts:74](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABitmapBaseMaterial.ts#L74)
+Defined in: [src/material/core/ABitmapBaseMaterial.ts:74](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABitmapBaseMaterial.ts#L74)
 
 
 Manage sampler object changes and DirtyPipeline listeners
@@ -1659,7 +1659,7 @@ Manage sampler object changes and DirtyPipeline listeners
 
 > **updateTexture**(`prevTexture`, `texture`): `void`
 
-Defined in: [src/material/core/ABitmapBaseMaterial.ts:58](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/material/core/ABitmapBaseMaterial.ts#L58)
+Defined in: [src/material/core/ABitmapBaseMaterial.ts:58](https://github.com/redcamel/RedGPU/blob/2b377a61d3b95ffff57af9f6d71652c384383b56/src/material/core/ABitmapBaseMaterial.ts#L58)
 
 
 Manage texture object changes and DirtyPipeline listeners

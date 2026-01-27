@@ -8,7 +8,7 @@
 
 > **equals**(`a`, `b`): `boolean`
 
-Defined in: node\_modules/gl-matrix/index.d.ts:875
+Defined in: node\_modules/gl-matrix/index.d.ts:895
 
 Returns whether or not the matrices have approximately the same elements in the same position.
 

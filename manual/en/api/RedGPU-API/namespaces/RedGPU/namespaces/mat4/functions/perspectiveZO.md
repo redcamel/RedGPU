@@ -8,7 +8,7 @@
 
 > **perspectiveZO**(`out`, `fovy`, `aspect`, `near`, `far`): [`mat4`](../../../type-aliases/mat4.md)
 
-Defined in: node\_modules/gl-matrix/index.d.ts:1284
+Defined in: node\_modules/gl-matrix/index.d.ts:1314
 
 Generates a perspective projection matrix suitable for WebGPU with the given bounds.
 The near/far clip planes correspond to a normalized device coordinate Z range of [0, 1],

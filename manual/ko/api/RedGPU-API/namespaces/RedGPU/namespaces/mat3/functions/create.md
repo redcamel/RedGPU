@@ -8,7 +8,7 @@
 
 > **create**(): [`mat3`](../../../type-aliases/mat3.md)
 
-Defined in: node\_modules/gl-matrix/index.d.ts:609
+Defined in: node\_modules/gl-matrix/index.d.ts:629
 
 Creates a new identity mat3
 

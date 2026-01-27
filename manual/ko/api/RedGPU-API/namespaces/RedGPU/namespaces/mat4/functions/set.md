@@ -8,7 +8,7 @@
 
 > **set**(`out`, `m00`, `m01`, `m02`, `m03`, `m10`, `m11`, `m12`, `m13`, `m20`, `m21`, `m22`, `m23`, `m30`, `m31`, `m32`, `m33`): [`mat4`](../../../type-aliases/mat4.md)
 
-Defined in: node\_modules/gl-matrix/index.d.ts:965
+Defined in: node\_modules/gl-matrix/index.d.ts:985
 
 Set the components of a mat4 to the given values
 

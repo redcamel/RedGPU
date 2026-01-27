@@ -8,7 +8,7 @@
 
 > **multiply**(`out`, `a`, `b`): [`mat4`](../../../type-aliases/mat4.md)
 
-Defined in: node\_modules/gl-matrix/index.d.ts:1012
+Defined in: node\_modules/gl-matrix/index.d.ts:1032
 
 Multiplies two mat4s
 

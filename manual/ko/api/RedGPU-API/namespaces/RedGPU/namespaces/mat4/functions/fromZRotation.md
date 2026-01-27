@@ -8,7 +8,7 @@
 
 > **fromZRotation**(`out`, `rad`): [`mat4`](../../../type-aliases/mat4.md)
 
-Defined in: node\_modules/gl-matrix/index.d.ts:1140
+Defined in: node\_modules/gl-matrix/index.d.ts:1160
 
 Creates a matrix from the given angle around the Z axis
 This is equivalent to (but much faster than):
