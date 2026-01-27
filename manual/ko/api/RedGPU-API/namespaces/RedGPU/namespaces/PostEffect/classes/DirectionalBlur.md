@@ -6,7 +6,7 @@
 
 # Class: DirectionalBlur
 
-Defined in: [src/postEffect/effects/blur/directionalBlur/DirectionalBlur.ts:26](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/postEffect/effects/blur/directionalBlur/DirectionalBlur.ts#L26)
+Defined in: [src/postEffect/effects/blur/directionalBlur/DirectionalBlur.ts:26](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/postEffect/effects/blur/directionalBlur/DirectionalBlur.ts#L26)
 
 방향성 블러(Directional Blur) 후처리 이펙트입니다.
 
@@ -33,7 +33,7 @@ view.postEffectManager.addEffect(effect);
 
 > **new DirectionalBlur**(`redGPUContext`): `DirectionalBlur`
 
-Defined in: [src/postEffect/effects/blur/directionalBlur/DirectionalBlur.ts:48](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/postEffect/effects/blur/directionalBlur/DirectionalBlur.ts#L48)
+Defined in: [src/postEffect/effects/blur/directionalBlur/DirectionalBlur.ts:48](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/postEffect/effects/blur/directionalBlur/DirectionalBlur.ts#L48)
 
 DirectionalBlur 인스턴스를 생성합니다.
 
@@ -60,7 +60,7 @@ DirectionalBlur 인스턴스를 생성합니다.
 
 > **get** **amount**(): `number`
 
-Defined in: [src/postEffect/effects/blur/directionalBlur/DirectionalBlur.ts:85](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/postEffect/effects/blur/directionalBlur/DirectionalBlur.ts#L85)
+Defined in: [src/postEffect/effects/blur/directionalBlur/DirectionalBlur.ts:85](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/postEffect/effects/blur/directionalBlur/DirectionalBlur.ts#L85)
 
 블러 강도를 반환합니다.
 
@@ -73,7 +73,7 @@ Defined in: [src/postEffect/effects/blur/directionalBlur/DirectionalBlur.ts:85](
 
 > **set** **amount**(`value`): `void`
 
-Defined in: [src/postEffect/effects/blur/directionalBlur/DirectionalBlur.ts:97](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/postEffect/effects/blur/directionalBlur/DirectionalBlur.ts#L97)
+Defined in: [src/postEffect/effects/blur/directionalBlur/DirectionalBlur.ts:97](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/postEffect/effects/blur/directionalBlur/DirectionalBlur.ts#L97)
 
 블러 강도를 설정합니다. (최소 0)
 
@@ -96,7 +96,7 @@ Defined in: [src/postEffect/effects/blur/directionalBlur/DirectionalBlur.ts:97](
 
 > **get** **angle**(): `number`
 
-Defined in: [src/postEffect/effects/blur/directionalBlur/DirectionalBlur.ts:63](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/postEffect/effects/blur/directionalBlur/DirectionalBlur.ts#L63)
+Defined in: [src/postEffect/effects/blur/directionalBlur/DirectionalBlur.ts:63](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/postEffect/effects/blur/directionalBlur/DirectionalBlur.ts#L63)
 
 블러 각도를 반환합니다.
 
@@ -109,7 +109,7 @@ Defined in: [src/postEffect/effects/blur/directionalBlur/DirectionalBlur.ts:63](
 
 > **set** **angle**(`value`): `void`
 
-Defined in: [src/postEffect/effects/blur/directionalBlur/DirectionalBlur.ts:75](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/postEffect/effects/blur/directionalBlur/DirectionalBlur.ts#L75)
+Defined in: [src/postEffect/effects/blur/directionalBlur/DirectionalBlur.ts:75](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/postEffect/effects/blur/directionalBlur/DirectionalBlur.ts#L75)
 
 블러 각도를 설정합니다. (0 = 오른쪽, 360도로 정규화됨)
 
@@ -132,7 +132,7 @@ Defined in: [src/postEffect/effects/blur/directionalBlur/DirectionalBlur.ts:75](
 
 > **get** **outputTextureView**(): `GPUTextureView`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:203](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/postEffect/core/ASinglePassPostEffect.ts#L203)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:203](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/postEffect/core/ASinglePassPostEffect.ts#L203)
 
 출력 텍스처 뷰를 반환합니다.
 
@@ -153,7 +153,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:203](https://github.co
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../RedGPUContext/classes/RedGPUContext.md)
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:117](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/postEffect/core/ASinglePassPostEffect.ts#L117)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:117](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/postEffect/core/ASinglePassPostEffect.ts#L117)
 
 RedGPU 컨텍스트를 반환합니다.
 
@@ -174,7 +174,7 @@ RedGPU 컨텍스트를 반환합니다.
 
 > **get** **shaderInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:133](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/postEffect/core/ASinglePassPostEffect.ts#L133)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:133](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/postEffect/core/ASinglePassPostEffect.ts#L133)
 
 셰이더 정보를 반환합니다. (MSAA 상태에 따라 다름)
 
@@ -195,7 +195,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:133](https://github.co
 
 > **get** **storageInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:125](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/postEffect/core/ASinglePassPostEffect.ts#L125)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:125](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/postEffect/core/ASinglePassPostEffect.ts#L125)
 
 스토리지 정보를 반환합니다.
 
@@ -216,7 +216,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:125](https://github.co
 
 > **get** **systemUuniformsInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:159](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/postEffect/core/ASinglePassPostEffect.ts#L159)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:159](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/postEffect/core/ASinglePassPostEffect.ts#L159)
 
 시스템 유니폼 정보를 반환합니다.
 
@@ -237,7 +237,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:159](https://github.co
 
 > **get** **uniformBuffer**(): [`UniformBuffer`](../../Resource/classes/UniformBuffer.md)
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:143](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/postEffect/core/ASinglePassPostEffect.ts#L143)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:143](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/postEffect/core/ASinglePassPostEffect.ts#L143)
 
 유니폼 버퍼를 반환합니다.
 
@@ -258,7 +258,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:143](https://github.co
 
 > **get** **uniformsInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:151](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/postEffect/core/ASinglePassPostEffect.ts#L151)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:151](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/postEffect/core/ASinglePassPostEffect.ts#L151)
 
 유니폼 정보를 반환합니다.
 
@@ -279,7 +279,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:151](https://github.co
 
 > **get** **useDepthTexture**(): `boolean`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:101](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/postEffect/core/ASinglePassPostEffect.ts#L101)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:101](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/postEffect/core/ASinglePassPostEffect.ts#L101)
 
 깊이 텍스처 사용 여부를 반환합니다.
 
@@ -292,7 +292,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:101](https://github.co
 
 > **set** **useDepthTexture**(`value`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:109](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/postEffect/core/ASinglePassPostEffect.ts#L109)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:109](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/postEffect/core/ASinglePassPostEffect.ts#L109)
 
 깊이 텍스처 사용 여부를 설정합니다.
 
@@ -319,7 +319,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:109](https://github.co
 
 > **get** **useGBufferNormalTexture**(): `boolean`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:77](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/postEffect/core/ASinglePassPostEffect.ts#L77)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:77](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/postEffect/core/ASinglePassPostEffect.ts#L77)
 
 G-Buffer Normal 텍스처 사용 여부를 반환합니다.
 
@@ -332,7 +332,7 @@ G-Buffer Normal 텍스처 사용 여부를 반환합니다.
 
 > **set** **useGBufferNormalTexture**(`value`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:85](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/postEffect/core/ASinglePassPostEffect.ts#L85)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:85](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/postEffect/core/ASinglePassPostEffect.ts#L85)
 
 G-Buffer Normal 텍스처 사용 여부를 설정합니다.
 
@@ -359,7 +359,7 @@ G-Buffer Normal 텍스처 사용 여부를 설정합니다.
 
 > **get** **videoMemorySize**(): `number`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:93](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/postEffect/core/ASinglePassPostEffect.ts#L93)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:93](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/postEffect/core/ASinglePassPostEffect.ts#L93)
 
 비디오 메모리 사용량을 반환합니다.
 
@@ -380,7 +380,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:93](https://github.com
 
 > **get** **WORK\_SIZE\_X**(): `number`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:167](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/postEffect/core/ASinglePassPostEffect.ts#L167)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:167](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/postEffect/core/ASinglePassPostEffect.ts#L167)
 
 Workgroup Size X
 
@@ -393,7 +393,7 @@ Workgroup Size X
 
 > **set** **WORK\_SIZE\_X**(`value`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:171](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/postEffect/core/ASinglePassPostEffect.ts#L171)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:171](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/postEffect/core/ASinglePassPostEffect.ts#L171)
 
 ##### Parameters
 
@@ -417,7 +417,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:171](https://github.co
 
 > **get** **WORK\_SIZE\_Y**(): `number`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:179](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/postEffect/core/ASinglePassPostEffect.ts#L179)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:179](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/postEffect/core/ASinglePassPostEffect.ts#L179)
 
 Workgroup Size Y
 
@@ -430,7 +430,7 @@ Workgroup Size Y
 
 > **set** **WORK\_SIZE\_Y**(`value`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:183](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/postEffect/core/ASinglePassPostEffect.ts#L183)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:183](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/postEffect/core/ASinglePassPostEffect.ts#L183)
 
 ##### Parameters
 
@@ -454,7 +454,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:183](https://github.co
 
 > **get** **WORK\_SIZE\_Z**(): `number`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:191](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/postEffect/core/ASinglePassPostEffect.ts#L191)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:191](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/postEffect/core/ASinglePassPostEffect.ts#L191)
 
 Workgroup Size Z
 
@@ -467,7 +467,7 @@ Workgroup Size Z
 
 > **set** **WORK\_SIZE\_Z**(`value`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:195](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/postEffect/core/ASinglePassPostEffect.ts#L195)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:195](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/postEffect/core/ASinglePassPostEffect.ts#L195)
 
 ##### Parameters
 
@@ -489,7 +489,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:195](https://github.co
 
 > **clear**(): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:211](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/postEffect/core/ASinglePassPostEffect.ts#L211)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:211](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/postEffect/core/ASinglePassPostEffect.ts#L211)
 
 이펙트를 초기화(해제)합니다.
 
@@ -508,7 +508,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:211](https://github.co
 
 > **execute**(`view`, `gpuDevice`, `width`, `height`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:289](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/postEffect/core/ASinglePassPostEffect.ts#L289)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:289](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/postEffect/core/ASinglePassPostEffect.ts#L289)
 
 이펙트를 실행합니다.
 
@@ -536,7 +536,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:289](https://github.co
 
 > **init**(`redGPUContext`, `name`, `computeCodes`, `bindGroupLayout?`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:236](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/postEffect/core/ASinglePassPostEffect.ts#L236)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:236](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/postEffect/core/ASinglePassPostEffect.ts#L236)
 
 이펙트를 초기화합니다.
 
@@ -566,7 +566,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:236](https://github.co
 
 > **render**(`view`, `width`, `height`, ...`sourceTextureInfo`): `ASinglePassPostEffectResult`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:322](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/postEffect/core/ASinglePassPostEffect.ts#L322)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:322](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/postEffect/core/ASinglePassPostEffect.ts#L322)
 
 이펙트를 렌더링합니다.
 
@@ -597,7 +597,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:322](https://github.co
 
 > **update**(`deltaTime`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:352](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/postEffect/core/ASinglePassPostEffect.ts#L352)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:352](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/postEffect/core/ASinglePassPostEffect.ts#L352)
 
 이펙트 상태를 업데이트합니다.
 
@@ -622,7 +622,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:352](https://github.co
 
 > **updateUniform**(`key`, `value`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:366](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/postEffect/core/ASinglePassPostEffect.ts#L366)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:366](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/postEffect/core/ASinglePassPostEffect.ts#L366)
 
 유니폼 값을 업데이트합니다.
 

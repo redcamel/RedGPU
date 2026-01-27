@@ -6,7 +6,7 @@
 
 # Class: IBL
 
-Defined in: [src/resources/texture/ibl/IBL.ts:27](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/resources/texture/ibl/IBL.ts#L27)
+Defined in: [src/resources/texture/ibl/IBL.ts:27](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/resources/texture/ibl/IBL.ts#L27)
 
 
 Class that manages Image-Based Lighting (IBL).
@@ -26,7 +26,7 @@ view.ibl = ibl;
 
 > **new IBL**(`redGPUContext`, `srcInfo`, `envCubeSize`, `iblCubeSize`): `IBL`
 
-Defined in: [src/resources/texture/ibl/IBL.ts:55](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/resources/texture/ibl/IBL.ts#L55)
+Defined in: [src/resources/texture/ibl/IBL.ts:55](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/resources/texture/ibl/IBL.ts#L55)
 
 
 Creates an IBL instance.
@@ -52,7 +52,7 @@ Creates an IBL instance.
 
 > **get** **envCubeSize**(): `number`
 
-Defined in: [src/resources/texture/ibl/IBL.ts:90](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/resources/texture/ibl/IBL.ts#L90)
+Defined in: [src/resources/texture/ibl/IBL.ts:90](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/resources/texture/ibl/IBL.ts#L90)
 
 Environment map cube size
 
@@ -68,7 +68,7 @@ Environment map cube size
 
 > **get** **environmentTexture**(): `IBLCubeTexture`
 
-Defined in: [src/resources/texture/ibl/IBL.ts:105](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/resources/texture/ibl/IBL.ts#L105)
+Defined in: [src/resources/texture/ibl/IBL.ts:105](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/resources/texture/ibl/IBL.ts#L105)
 
 Returns the environment texture.
 
@@ -84,7 +84,7 @@ Returns the environment texture.
 
 > **get** **iblCubeSize**(): `number`
 
-Defined in: [src/resources/texture/ibl/IBL.ts:95](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/resources/texture/ibl/IBL.ts#L95)
+Defined in: [src/resources/texture/ibl/IBL.ts:95](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/resources/texture/ibl/IBL.ts#L95)
 
 IBL cube size
 
@@ -100,7 +100,7 @@ IBL cube size
 
 > **get** **iblTexture**(): `IBLCubeTexture`
 
-Defined in: [src/resources/texture/ibl/IBL.ts:110](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/resources/texture/ibl/IBL.ts#L110)
+Defined in: [src/resources/texture/ibl/IBL.ts:110](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/resources/texture/ibl/IBL.ts#L110)
 
 Returns the IBL texture.
 
@@ -116,7 +116,7 @@ Returns the IBL texture.
 
 > **get** **irradianceTexture**(): `IBLCubeTexture`
 
-Defined in: [src/resources/texture/ibl/IBL.ts:100](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/resources/texture/ibl/IBL.ts#L100)
+Defined in: [src/resources/texture/ibl/IBL.ts:100](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/resources/texture/ibl/IBL.ts#L100)
 
 Returns the irradiance texture.
 

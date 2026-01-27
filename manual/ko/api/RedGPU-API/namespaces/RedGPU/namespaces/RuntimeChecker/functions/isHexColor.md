@@ -8,7 +8,7 @@
 
 > **isHexColor**(`hex`): `boolean`
 
-Defined in: [src/runtimeChecker/isFunc/isHexColor.ts:21](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/runtimeChecker/isFunc/isHexColor.ts#L21)
+Defined in: [src/runtimeChecker/isFunc/isHexColor.ts:21](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/runtimeChecker/isFunc/isHexColor.ts#L21)
 
 주어진 문자열이 유효한 16진수(Hex) 색상 형식인지 검사합니다.
 

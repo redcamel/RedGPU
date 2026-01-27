@@ -8,7 +8,7 @@
 
 > **getVertexBindGroupLayoutDescriptorFromShaderInfo**(`SHADER_INFO`, `targetGroupIndex`): `object`
 
-Defined in: [src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts:110](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts#L110)
+Defined in: [src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts:110](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts#L110)
 
 
 Generates a vertex bind group layout descriptor from shader information.
@@ -26,4 +26,4 @@ Generates a vertex bind group layout descriptor from shader information.
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `entries` | `GPUBindGroupLayoutEntry`[] | [src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts:84](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts#L84) |
+| `entries` | `GPUBindGroupLayoutEntry`[] | [src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts:84](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts#L84) |

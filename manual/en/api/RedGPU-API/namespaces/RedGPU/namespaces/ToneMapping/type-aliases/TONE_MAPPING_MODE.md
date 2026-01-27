@@ -8,7 +8,7 @@
 
 > **TONE\_MAPPING\_MODE** = *typeof* [`TONE_MAPPING_MODE`](../variables/TONE_MAPPING_MODE.md)\[keyof *typeof* [`TONE_MAPPING_MODE`](../variables/TONE_MAPPING_MODE.md)\]
 
-Defined in: [src/toneMapping/TONE\_MAPPING\_MODE.ts:6](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/toneMapping/TONE_MAPPING_MODE.ts#L6)
+Defined in: [src/toneMapping/TONE\_MAPPING\_MODE.ts:6](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/toneMapping/TONE_MAPPING_MODE.ts#L6)
 
 
 TONE_MAPPING_MODE type

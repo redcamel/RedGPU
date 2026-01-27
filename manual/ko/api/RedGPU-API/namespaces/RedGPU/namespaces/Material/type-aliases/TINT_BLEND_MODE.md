@@ -8,4 +8,4 @@
 
 > **TINT\_BLEND\_MODE** = *typeof* [`TINT_BLEND_MODE`](../variables/TINT_BLEND_MODE.md)\[keyof *typeof* [`TINT_BLEND_MODE`](../variables/TINT_BLEND_MODE.md)\]
 
-Defined in: [src/material/TINT\_BLEND\_MODE.ts:6](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/material/TINT_BLEND_MODE.ts#L6)
+Defined in: [src/material/TINT\_BLEND\_MODE.ts:6](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/material/TINT_BLEND_MODE.ts#L6)

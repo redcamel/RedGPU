@@ -8,7 +8,7 @@
 
 > **createBasicPostEffectCode**(`effect`, `code`, `uniformStruct`): `object`
 
-Defined in: [src/postEffect/core/createBasicPostEffectCode.ts:54](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/postEffect/core/createBasicPostEffectCode.ts#L54)
+Defined in: [src/postEffect/core/createBasicPostEffectCode.ts:54](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/postEffect/core/createBasicPostEffectCode.ts#L54)
 
 
 Helper function to create basic post-effect WGSL code.
@@ -42,5 +42,5 @@ const shader = createBasicPostEffectCode(effect, '...main code...', 'struct Unif
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `msaa` | `string` | [src/postEffect/core/createBasicPostEffectCode.ts:56](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/postEffect/core/createBasicPostEffectCode.ts#L56) |
-| `nonMsaa` | `string` | [src/postEffect/core/createBasicPostEffectCode.ts:57](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/postEffect/core/createBasicPostEffectCode.ts#L57) |
+| `msaa` | `string` | [src/postEffect/core/createBasicPostEffectCode.ts:56](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/postEffect/core/createBasicPostEffectCode.ts#L56) |
+| `nonMsaa` | `string` | [src/postEffect/core/createBasicPostEffectCode.ts:57](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/postEffect/core/createBasicPostEffectCode.ts#L57) |

@@ -6,7 +6,7 @@
 
 # Class: ToneMappingManager
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:31](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/toneMapping/ToneMappingManager.ts#L31)
+Defined in: [src/toneMapping/ToneMappingManager.ts:31](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/toneMapping/ToneMappingManager.ts#L31)
 
 톤 매핑, 노출, 대비, 밝기를 통합 관리하는 클래스입니다.
 
@@ -30,7 +30,7 @@ toneMappingManager.exposure = 1.2;
 
 > **new ToneMappingManager**(`view`): `ToneMappingManager`
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:46](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/toneMapping/ToneMappingManager.ts#L46)
+Defined in: [src/toneMapping/ToneMappingManager.ts:46](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/toneMapping/ToneMappingManager.ts#L46)
 
 ToneMappingManager 인스턴스를 생성합니다. (내부 시스템 전용)
 
@@ -53,7 +53,7 @@ ToneMappingManager 인스턴스를 생성합니다. (내부 시스템 전용)
 
 > **get** **brightness**(): `number`
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:97](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/toneMapping/ToneMappingManager.ts#L97)
+Defined in: [src/toneMapping/ToneMappingManager.ts:97](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/toneMapping/ToneMappingManager.ts#L97)
 
 밝기(Brightness)를 반환합니다.
 
@@ -65,7 +65,7 @@ Defined in: [src/toneMapping/ToneMappingManager.ts:97](https://github.com/redcam
 
 > **set** **brightness**(`value`): `void`
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:102](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/toneMapping/ToneMappingManager.ts#L102)
+Defined in: [src/toneMapping/ToneMappingManager.ts:102](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/toneMapping/ToneMappingManager.ts#L102)
 
 밝기(Brightness)를 설정합니다. (-1.0 ~ 1.0, 기본값: 0.0)
 
@@ -87,7 +87,7 @@ Defined in: [src/toneMapping/ToneMappingManager.ts:102](https://github.com/redca
 
 > **get** **contrast**(): `number`
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:85](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/toneMapping/ToneMappingManager.ts#L85)
+Defined in: [src/toneMapping/ToneMappingManager.ts:85](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/toneMapping/ToneMappingManager.ts#L85)
 
 명암 대비(Contrast)를 반환합니다.
 
@@ -99,7 +99,7 @@ Defined in: [src/toneMapping/ToneMappingManager.ts:85](https://github.com/redcam
 
 > **set** **contrast**(`value`): `void`
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:90](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/toneMapping/ToneMappingManager.ts#L90)
+Defined in: [src/toneMapping/ToneMappingManager.ts:90](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/toneMapping/ToneMappingManager.ts#L90)
 
 명암 대비(Contrast)를 설정합니다. (0.0 ~ 2.0, 기본값: 1.0)
 
@@ -121,7 +121,7 @@ Defined in: [src/toneMapping/ToneMappingManager.ts:90](https://github.com/redcam
 
 > **get** **exposure**(): `number`
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:73](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/toneMapping/ToneMappingManager.ts#L73)
+Defined in: [src/toneMapping/ToneMappingManager.ts:73](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/toneMapping/ToneMappingManager.ts#L73)
 
 노출값(Exposure)을 반환합니다.
 
@@ -133,7 +133,7 @@ Defined in: [src/toneMapping/ToneMappingManager.ts:73](https://github.com/redcam
 
 > **set** **exposure**(`value`): `void`
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:78](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/toneMapping/ToneMappingManager.ts#L78)
+Defined in: [src/toneMapping/ToneMappingManager.ts:78](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/toneMapping/ToneMappingManager.ts#L78)
 
 노출값(Exposure)을 설정합니다. (기본값: 1.0)
 
@@ -155,7 +155,7 @@ Defined in: [src/toneMapping/ToneMappingManager.ts:78](https://github.com/redcam
 
 > **get** **mode**(): [`TONE_MAPPING_MODE`](../type-aliases/TONE_MAPPING_MODE.md)
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:58](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/toneMapping/ToneMappingManager.ts#L58)
+Defined in: [src/toneMapping/ToneMappingManager.ts:58](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/toneMapping/ToneMappingManager.ts#L58)
 
 현재 적용된 톤 매핑 모드를 반환합니다.
 
@@ -167,7 +167,7 @@ Defined in: [src/toneMapping/ToneMappingManager.ts:58](https://github.com/redcam
 
 > **set** **mode**(`value`): `void`
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:63](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/toneMapping/ToneMappingManager.ts#L63)
+Defined in: [src/toneMapping/ToneMappingManager.ts:63](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/toneMapping/ToneMappingManager.ts#L63)
 
 톤 매핑 모드를 설정합니다.
 
@@ -189,7 +189,7 @@ Defined in: [src/toneMapping/ToneMappingManager.ts:63](https://github.com/redcam
 
 > **get** **toneMapping**(): `AToneMappingEffect`
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:52](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/toneMapping/ToneMappingManager.ts#L52)
+Defined in: [src/toneMapping/ToneMappingManager.ts:52](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/toneMapping/ToneMappingManager.ts#L52)
 
 현재 활성화된 톤 매핑 이펙트 인스턴스를 반환합니다.
 
@@ -203,7 +203,7 @@ Defined in: [src/toneMapping/ToneMappingManager.ts:52](https://github.com/redcam
 
 > **render**(`width`, `height`, `currentTextureView`): `ASinglePassPostEffectResult`
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:116](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/toneMapping/ToneMappingManager.ts#L116)
+Defined in: [src/toneMapping/ToneMappingManager.ts:116](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/toneMapping/ToneMappingManager.ts#L116)
 
 톤 매핑을 렌더링합니다.
 
