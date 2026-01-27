@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769498378009";
+import * as RedGPU from "../../../../dist/index.js?t=1769498863678";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -72,9 +72,9 @@ const createTestMeshes = (redGPUContext, scene) => {
 };
 
 const renderTestPane = async (redGPUContext, meshes, view) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769498378009');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769498863678');
     const pane = new Pane();
-    const {setDebugButtons} = await import( "../../../exampleHelper/createExample/panes/index.js?t=1769498378009" );
+    const {setDebugButtons} = await import( "../../../exampleHelper/createExample/panes/index.js?t=1769498863678" );
     setDebugButtons(RedGPU, redGPUContext);
     const config = {
         cameraDistance: view.camera.distance,
