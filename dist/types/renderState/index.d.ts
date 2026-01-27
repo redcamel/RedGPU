@@ -1,9 +1,11 @@
 /**
- * 렌더 파이프라인에서 사용되는 BlendState, DepthStencilState, PrimitiveState 등 다양한 렌더 상태 객체를 제공합니다.
+ * [KO] 렌더 파이프라인의 조작을 위한 다양한 렌더 상태 관리 클래스들을 제공합니다.
+ * [EN] Provides various render state management classes for manipulating the render pipeline.
  *
- * 각 상태 객체를 통해 머티리얼, 메쉬 등 Object3D의 GPU 파이프라인 렌더 동작을 세밀하게 제어할 수 있습니다.
+ * [KO] 블렌딩, 깊이/스텐실 테스트, 프리미티브 토폴로지 및 컬링 등 GPU의 렌더링 동작을 세밀하게 정의하는 도구들을 포함합니다.
+ * [EN] Includes tools for finely defining GPU rendering behaviors such as blending, depth/stencil testing, primitive topology, and culling.
  *
- *  @packageDocumentation
+ * @packageDocumentation
  */
 import BlendState from "./BlendState";
 import DepthStencilState from "./DepthStencilState";

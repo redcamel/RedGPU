@@ -1,14 +1,25 @@
 /**
- * 바이트(byte) 단위를 사람이 읽기 쉬운 문자열로 변환합니다.
+ * [KO] 바이트 단위를 사람이 읽기 쉬운 문자열로 변환합니다.
+ * [EN] Converts byte units to a human-readable string.
  *
- * 입력된 바이트 수를 KB, MB, GB 등으로 변환하여 반환합니다. 소수점 자릿수는 decimals로 지정할 수 있습니다.
+ * * ### Example
+ * ```typescript
+ * const readable = RedGPU.Util.formatBytes(1048576); // '1.00 MB'
+ * ```
  *
- * 음수, NaN, 정수가 아닌 값 입력 시 예외를 발생시킵니다.
- *
- * @param {number} bytes 변환할 바이트(byte) 값
- * @param {number} [decimals=2] 소수점 자릿수(기본값: 2)
- * @returns {string} 변환된 바이트 문자열 (예: '1.23 MB')
- * @throws {Error} bytes가 0 미만이거나 정수가 아니면 예외 발생
+ * @param bytes -
+ * [KO] 변환할 바이트 값
+ * [EN] Byte value to convert
+ * @param decimals -
+ * [KO] 소수점 자릿수 (기본값: 2)
+ * [EN] Number of decimal places (Default: 2)
+ * @returns
+ * [KO] 변환된 바이트 문자열 (예: '1.23 MB')
+ * [EN] Converted byte string (e.g., '1.23 MB')
+ * @throws
+ * [KO] bytes가 유효한 uint가 아닐 경우 Error 발생
+ * [EN] Throws Error if bytes is not a valid uint
+ * @category Math
  */
 declare const formatBytes: (bytes: number, decimals?: number) => string;
 export default formatBytes;

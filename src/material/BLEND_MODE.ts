@@ -1,3 +1,8 @@
+/**
+ * [KO] 블렌드 모드 상수
+ * [EN] Blend mode constants
+ * @category Constant
+ */
 export const BLEND_MODE = {
     NORMAL: 0,
     MULTIPLY: 1,

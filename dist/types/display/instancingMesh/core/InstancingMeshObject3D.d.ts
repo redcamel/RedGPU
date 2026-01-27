@@ -2,7 +2,12 @@ import { mat4 } from "gl-matrix";
 import RedGPUContext from "../../../context/RedGPUContext";
 import InstancingMesh from "../InstancingMesh";
 /**
- * Represents an instance of a 3D mesh object with instancing capabilities.
+ * [KO] 인스턴싱된 메시의 개별 인스턴스를 나타내는 클래스입니다.
+ * [EN] Class representing an individual instance of an instanced mesh.
+ *
+ * [KO] InstancingMesh 내에서 각 인스턴스의 위치, 회전, 스케일 등 개별적인 트랜스폼 정보를 관리합니다.
+ * [EN] Manages individual transform information such as position, rotation, and scale for each instance within an InstancingMesh.
+ * @category Mesh
  */
 declare class InstancingMeshObject3D {
     #private;

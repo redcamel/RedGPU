@@ -1,14 +1,27 @@
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
 
 /**
- * 주어진 값이 RedGPUContext 인스턴스인지 검증합니다.
+ * [KO] 주어진 값이 RedGPUContext 인스턴스인지 검증합니다.
+ * [EN] Validates if the given value is a RedGPUContext instance.
  *
- * 값의 constructor.name이 'RedGPUContext'인지 확인하며,
+ * [KO] 값의 생성자 이름이 'RedGPUContext'가 아니면 예외를 발생시킵니다.
+ * [EN] Throws an exception if the constructor name of the value is not 'RedGPUContext'.
  *
- * 그렇지 않으면 에러 메시지를 출력하고 예외를 발생시킵니다.
+ * * ### Example
+ * ```typescript
+ * RedGPU.RuntimeChecker.validateRedGPUContext(redGPUContext);
+ * ```
  *
- * @param value 검증할 값
- * @returns {boolean} RedGPUContext 인스턴스이면 true, 아니면 false
+ * @param value - 
+ * [KO] 검증할 객체 
+ * [EN] Value to validate
+ * @returns 
+ * [KO] RedGPUContext 인스턴스이면 true 
+ * [EN] True if the value is a RedGPUContext instance
+ * @throws 
+ * [KO] RedGPUContext 인스턴스가 아닐 경우 Error 발생 
+ * [EN] Throws Error if the value is not a RedGPUContext instance
+ * @category Validation
  */
 const validateRedGPUContext = (value: any) => {
     if (!(value?.constructor?.name === 'RedGPUContext')) {
@@ -20,4 +33,4 @@ const validateRedGPUContext = (value: any) => {
     }
     return true
 }
-export default validateRedGPUContext
+export default validateRedGPUContext;

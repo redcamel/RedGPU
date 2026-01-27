@@ -1,18 +1,18 @@
 import { mat4 } from "gl-matrix";
 import Mesh from "../Mesh";
 /**
- * Object3DContainer 클래스는 Mesh 객체들을 담는 시각적 컨테이너입니다.
+ * [KO] Mesh 객체들을 담는 시각적 컨테이너 클래스입니다.
+ * [EN] Visual container class for Mesh objects.
  *
- * Scene의 기반이 되는 구조로, View에서 렌더링할 수 있는 3D 객체들을 계층적으로 관리합니다.
- * 자식 객체의 추가, 제거, 위치 변경, 교환 등의 기능을 제공하며,
- * 각 Mesh는 이 컨테이너를 통해 부모-자식 관계를 형성합니다.
+ * [KO] Scene의 기반이 되는 구조로, View에서 렌더링할 수 있는 3D 객체들을 계층적으로 관리합니다. 자식 객체의 추가, 제거, 위치 변경, 교환 등의 기능을 제공합니다.
+ * [EN] As a foundational structure for Scene, it hierarchically manages 3D objects that can be rendered in a View. It provides functions such as adding, removing, reordering, and swapping child objects.
  *
- * View와 Scene이 그려낼 공간을 구성할 때, Object3DContainer는
- * 실제로 배치되는 시각적 요소들의 루트 역할을 합니다.
+ * ::: warning
+ * [KO] 이 클래스는 시스템 내부적으로 사용되는 컨테이너 클래스입니다.<br/>일반적인 사용자는 직접 인스턴스를 생성할 필요가 없습니다.
+ * [EN] This class is a container class used internally by the system.<br/>General users do not need to create instances directly.
+ * :::
  *
- * @remarks
- * `시스템 전용 클래스입니다.`\
- * 이 메서드는 렌더링 엔진 내부에서 자동으로 사용되는 기능으로, 일반적인 사용자는 직접 호출하지 않는 것이 좋습니다.
+ * @category Core
  */
 declare class Object3DContainer {
     #private;

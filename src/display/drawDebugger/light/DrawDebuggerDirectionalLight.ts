@@ -5,6 +5,11 @@ import TextField3D from "../../textFileds/textField3D/TextField3D";
 import RenderViewStateData from "../../view/core/RenderViewStateData";
 import ADrawDebuggerLight from "./ADrawDebuggerLight";
 
+/**
+ * [KO] 직사광(DirectionalLight)의 방향과 위치를 시각화하는 디버거 클래스입니다.
+ * [EN] Debugger class that visualizes the direction and position of DirectionalLight.
+ * @category Debugger
+ */
 class DrawDebuggerDirectionalLight extends ADrawDebuggerLight {
     #target: DirectionalLight;
     #label: TextField3D

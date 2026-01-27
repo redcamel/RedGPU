@@ -17,35 +17,50 @@ const SHADER_INFO = parseWGSL(vertexModuleSource);
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
 
 /**
- * TextField3D 클래스는 3D 공간에서 텍스트를 표현하는 객체입니다.
+ * [KO] 3D 공간에서 텍스트를 표현하는 클래스입니다.
+ * [EN] Class that represents text in 3D space.
  *
- * 내부적으로 Plane 지오메트리를 사용하며, 텍스트 렌더링 결과를 텍스처로 출력하여 화면에 표시합니다.
- * Billboard 기능을 지원하며, 텍스트 크기에 따라 transform을 자동으로 갱신합니다.
+ * [KO] 내부적으로 Plane 지오메트리를 사용하며, 텍스트 렌더링 결과를 텍스처로 출력하여 화면에 표시합니다. Billboard 기능을 지원하며, 텍스트 크기에 따라 transform을 자동으로 갱신합니다.
+ * [EN] Internally uses Plane geometry and displays text rendering results as a texture. It supports Billboard functionality and automatically updates transforms according to text size.
  *
- * @remarks
- * geometry와 material은 고정되어 있으며 외부에서 변경할 수 없습니다.
+ * [KO] geometry와 material은 고정되어 있으며 외부에서 변경할 수 없습니다.
+ * [EN] Geometry and material are fixed and cannot be changed externally.
+ *
+ * * ### Example
+ * ```typescript
+ * const textField = new RedGPU.Display.TextField3D(redGPUContext, "Hello RedGPU!");
+ * scene.addChild(textField);
+ * ```
  *
  * <iframe src="/RedGPU/examples/3d/textField3D/"></iframe>
  *
- * 아래는 TextField3D의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
+ * [KO] 아래는 TextField3D의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
+ * [EN] Below is a list of additional sample examples to help understand the structure and operation of TextField3D.
  * @see [TextField3D MouseEvent example](/RedGPU/examples/3d/mouseEvent/textField3D/)
  *
  * @category TextField
  */
 class TextField3D extends ATextField {
     /**
-     * 렌더링된 텍스트 텍스처의 너비 (정규화된 값)
+     * [KO] 렌더링된 텍스트 텍스처의 너비 (정규화된 값)
+     * [EN] Width of the rendered text texture (normalized value)
      */
     #renderTextureWidth: number = 1;
     /**
-     * 렌더링된 텍스트 텍스처의 높이 (정규화된 값)
+     * [KO] 렌더링된 텍스트 텍스처의 높이 (정규화된 값)
+     * [EN] Height of the rendered text texture (normalized value)
      */
     #renderTextureHeight: number = 1;
 
     /**
-     * TextField3D 생성자입니다.
-     * @param redGPUContext - RedGPUContext 인스턴스
-     * @param text - 초기 텍스트 문자열
+     * [KO] TextField3D 생성자
+     * [EN] TextField3D constructor
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     * @param text -
+     * [KO] 초기 텍스트 문자열
+     * [EN] Initial text string
      */
     constructor(redGPUContext: RedGPUContext, text?: string) {
         super(redGPUContext, (width: number, height: number) => {

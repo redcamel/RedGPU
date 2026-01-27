@@ -34,12 +34,13 @@ const VINTAGE = {
 };
 
 /**
- * 필름 그레인(Film Grain) 후처리 이펙트입니다.
- * 다양한 프리셋과 강도, 색상, 스케일, 채도 등 세부 조절이 가능합니다.
+ * [KO] 필름 그레인(Film Grain) 후처리 이펙트입니다.
+ * [EN] Film Grain post-processing effect.
  *
- *
- * @example
- * ```javascript
+ * [KO] 다양한 프리셋과 강도, 색상, 스케일, 채도 등 세부 조절이 가능합니다.
+ * [EN] Allows detailed adjustments such as presets, intensity, color, scale, and saturation.
+ * * ### Example
+ * ```typescript
  * const effect = new RedGPU.PostEffect.FilmGrain(redGPUContext);
  * effect.filmGrainIntensity = 0.08;
  * effect.filmGrainScale = 5.0;
@@ -48,30 +49,71 @@ const VINTAGE = {
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/filmGrain/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/filmGrain/"></iframe>
+ * @category Visual Effects
  */
 class FilmGrain extends ASinglePassPostEffect {
-    /** 미세한 그레인 프리셋 */
+    /**
+     * [KO] 미세한 그레인 프리셋
+     * [EN] Subtle grain preset
+     */
     static SUBTLE = SUBTLE;
-    /** 중간 강도 프리셋 */
+    /**
+     * [KO] 중간 강도 프리셋
+     * [EN] Medium intensity preset
+     */
     static MEDIUM = MEDIUM;
-    /** 강한 그레인 프리셋 */
+    /**
+     * [KO] 강한 그레인 프리셋
+     * [EN] Heavy grain preset
+     */
     static HEAVY = HEAVY;
-    /** 빈티지 프리셋 */
+    /**
+     * [KO] 빈티지 프리셋
+     * [EN] Vintage preset
+     */
     static VINTAGE = VINTAGE;
-    /** 그레인 강도. 0~1, 기본값 0.12 */
+    /**
+     * [KO] 그레인 강도 (0 ~ 1)
+     * [EN] Grain intensity (0 ~ 1)
+     * @defaultValue 0.12
+     */
     #filmGrainIntensity: number = HEAVY.filmGrainIntensity;
-    /** 밝기 반응도. 0~2, 기본값 0.6 */
+    /**
+     * [KO] 밝기 반응도 (0 ~ 2)
+     * [EN] Brightness response (0 ~ 2)
+     * @defaultValue 0.6
+     */
     #filmGrainResponse: number = HEAVY.filmGrainResponse;
-    /** 그레인 스케일. 0.1~20, 기본값 4.0 */
+    /**
+     * [KO] 그레인 스케일 (0.1 ~ 20)
+     * [EN] Grain scale (0.1 ~ 20)
+     * @defaultValue 4.0
+     */
     #filmGrainScale: number = HEAVY.filmGrainScale;
-    /** 컬러 그레인 비율. 0~1, 기본값 0.7 */
+    /**
+     * [KO] 컬러 그레인 비율 (0 ~ 1)
+     * [EN] Colored grain ratio (0 ~ 1)
+     * @defaultValue 0.7
+     */
     #coloredGrain: number = HEAVY.coloredGrain;
-    /** 그레인 채도. 0~2, 기본값 0.8 */
+    /**
+     * [KO] 그레인 채도 (0 ~ 2)
+     * [EN] Grain saturation (0 ~ 2)
+     * @defaultValue 0.8
+     */
     #grainSaturation: number = HEAVY.grainSaturation;
     #time: number = 0.0;
     #devicePixelRatio: number = 1.0;
 
+    /**
+     * [KO] FilmGrain 인스턴스를 생성합니다.
+     * [EN] Creates a FilmGrain instance.
+     *
+     * @param redGPUContext
+     * [KO] RedGPU 컨텍스트
+     * [EN] RedGPU Context
+     */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
         this.#devicePixelRatio = window?.devicePixelRatio || 1.0;
@@ -83,62 +125,99 @@ class FilmGrain extends ASinglePassPostEffect {
         this.#updateUniforms();
     }
 
-    /** 그레인 강도 반환 */
+    /**
+     * [KO] 그레인 강도를 반환합니다.
+     * [EN] Returns the grain intensity.
+     */
     get filmGrainIntensity(): number {
         return this.#filmGrainIntensity;
     }
 
-    /** 그레인 강도 설정. 0~1 */
+    /**
+     * [KO] 그레인 강도를 설정합니다. (0 ~ 1)
+     * [EN] Sets the grain intensity. (0 ~ 1)
+     */
     set filmGrainIntensity(value: number) {
         this.#filmGrainIntensity = Math.max(0.0, Math.min(1.0, value));
         this.updateUniform('filmGrainIntensity', this.#filmGrainIntensity);
     }
 
-    /** 밝기 반응도 반환 */
+    /**
+     * [KO] 밝기 반응도를 반환합니다.
+     * [EN] Returns the brightness response.
+     */
     get filmGrainResponse(): number {
         return this.#filmGrainResponse;
     }
 
-    /** 밝기 반응도 설정. 0~2 */
+    /**
+     * [KO] 밝기 반응도를 설정합니다. (0 ~ 2)
+     * [EN] Sets the brightness response. (0 ~ 2)
+     */
     set filmGrainResponse(value: number) {
         this.#filmGrainResponse = Math.max(0.0, Math.min(2.0, value));
         this.updateUniform('filmGrainResponse', this.#filmGrainResponse);
     }
 
-    /** 그레인 스케일 반환 */
+    /**
+     * [KO] 그레인 스케일을 반환합니다.
+     * [EN] Returns the grain scale.
+     */
     get filmGrainScale(): number {
         return this.#filmGrainScale;
     }
 
-    /** 그레인 스케일 설정. 0.1~20 */
+    /**
+     * [KO] 그레인 스케일을 설정합니다. (0.1 ~ 20)
+     * [EN] Sets the grain scale. (0.1 ~ 20)
+     */
     set filmGrainScale(value: number) {
         this.#filmGrainScale = Math.max(0.1, Math.min(20.0, value));
         this.updateUniform('filmGrainScale', this.#filmGrainScale);
     }
 
-    /** 컬러 그레인 비율 반환 */
+    /**
+     * [KO] 컬러 그레인 비율을 반환합니다.
+     * [EN] Returns the colored grain ratio.
+     */
     get coloredGrain(): number {
         return this.#coloredGrain;
     }
 
-    /** 컬러 그레인 비율 설정. 0~1 */
+    /**
+     * [KO] 컬러 그레인 비율을 설정합니다. (0 ~ 1)
+     * [EN] Sets the colored grain ratio. (0 ~ 1)
+     */
     set coloredGrain(value: number) {
         this.#coloredGrain = Math.max(0.0, Math.min(1.0, value));
         this.updateUniform('coloredGrain', this.#coloredGrain);
     }
 
-    /** 그레인 채도 반환 */
+    /**
+     * [KO] 그레인 채도를 반환합니다.
+     * [EN] Returns the grain saturation.
+     */
     get grainSaturation(): number {
         return this.#grainSaturation;
     }
 
-    /** 그레인 채도 설정. 0~2 */
+    /**
+     * [KO] 그레인 채도를 설정합니다. (0 ~ 2)
+     * [EN] Sets the grain saturation. (0 ~ 2)
+     */
     set grainSaturation(value: number) {
         this.#grainSaturation = Math.max(0.0, Math.min(2.0, value));
         this.updateUniform('grainSaturation', this.#grainSaturation);
     }
 
-    /** 프리셋 적용 */
+    /**
+     * [KO] 프리셋을 적용합니다.
+     * [EN] Applies a preset.
+     *
+     * @param preset
+     * [KO] 적용할 프리셋 객체
+     * [EN] Preset object to apply
+     */
     applyPreset(preset: typeof SUBTLE | typeof MEDIUM | typeof HEAVY | typeof VINTAGE): void {
         this.#filmGrainIntensity = preset.filmGrainIntensity;
         this.#filmGrainResponse = preset.filmGrainResponse;
@@ -148,13 +227,23 @@ class FilmGrain extends ASinglePassPostEffect {
         this.#updateUniforms();
     }
 
-    /** 시간 업데이트(애니메이션용) */
+    /**
+     * [KO] 시간을 업데이트합니다. (애니메이션용)
+     * [EN] Updates the time. (For animation)
+     *
+     * @param deltaTime
+     * [KO] 델타 타임
+     * [EN] Delta time
+     */
     update(deltaTime: number): void {
         this.#time += deltaTime;
         this.updateUniform('time', this.#time);
     }
 
-    /** 내부 유니폼 일괄 갱신 */
+    /**
+     * [KO] 내부 유니폼을 일괄 갱신합니다.
+     * [EN] Updates internal uniforms in batch.
+     */
     #updateUniforms(): void {
         this.updateUniform('filmGrainIntensity', this.#filmGrainIntensity);
         this.updateUniform('filmGrainResponse', this.#filmGrainResponse);

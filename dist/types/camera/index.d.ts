@@ -1,7 +1,9 @@
 /**
- * 다양한 카메라(Camera2D, OrthographicCamera, PerspectiveCamera)와 컨트롤러(OrbitController, FreeController)를 제공합니다.
+ * [KO] 렌더링 시점과 시야를 제어하기 위한 카메라 시스템과 다양한 조작 컨트롤러를 제공합니다.
+ * [EN] Provides camera systems and various manipulation controllers for controlling the rendering viewpoint and field of view.
  *
- * 각 카메라 및 컨트롤러를 통해 2D/3D 씬의 뷰 행렬, 투영 행렬, 사용자 입력 기반 카메라 제어 등 렌더링 시점과 시야를 세밀하게 제어할 수 있습니다.
+ * [KO] 원근(Perspective), 직교(Orthographic), 2D 투영 방식과 함께 사용자 입력 기반의 유연한 카메라 조작 기능을 포함합니다.
+ * [EN] Includes perspective, orthographic, and 2D projection methods along with flexible camera manipulation features based on user input.
  *
  * @packageDocumentation
  */

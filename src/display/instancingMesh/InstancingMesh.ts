@@ -39,27 +39,54 @@ interface LODGPURenderInfo {
 }
 
 /**
- * GPU 인스턴싱 기반의 메시 클래스입니다.
+ * [KO] GPU 인스턴싱 기반의 메시 클래스입니다.
+ * [EN] Mesh class based on GPU instancing.
  *
- * 하나의 geometry와 material을 여러 인스턴스(Instance)로 효율적으로 렌더링할 수 있습니다.
- * 각 인스턴스는 transform(위치, 회전, 스케일)만 다르고 geometry/vertex 데이터와 머티리얼은 공유합니다.
+ * [KO] 하나의 geometry와 material을 여러 인스턴스(Instance)로 효율적으로 렌더링할 수 있습니다. 각 인스턴스는 transform(위치, 회전, 스케일)만 다르고 geometry/vertex 데이터와 머티리얼은 공유합니다.
+ * [EN] Efficiently renders a single geometry and material as multiple instances. Each instance differs only in its transform (position, rotation, scale) while sharing geometry/vertex data and material.
+ *
+ * * ### Example
+ * ```typescript
+ * const instancingMesh = new RedGPU.Display.InstancingMesh(redGPUContext, 1000, 10, geometry, material);
+ * scene.addChild(instancingMesh);
+ * ```
  *
  * <iframe src="/RedGPU/examples/3d/instancedMesh/simple/"></iframe>
  *
- * 아래는 instancedMesh의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
+ * [KO] 아래는 instancedMesh의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
+ * [EN] Below is a list of additional sample examples to help understand the structure and operation of instancedMesh.
  * @see [instancedMesh GPU LOD](/RedGPU/examples/3d/lod/InstanceMeshGPULOD/)
  *
  * @category Mesh
  */
 class InstancingMesh extends Mesh {
-    // ========== 상태 플래그 ==========
+    /**
+     * [KO] 인스턴스 메시 오브젝트의 dirty 상태 여부
+     * [EN] Whether the instance mesh object is dirty
+     */
     dirtyInstanceMeshObject3D: boolean = true;
+    /**
+     * [KO] 인스턴스 개수의 dirty 상태 여부
+     * [EN] Whether the instance count is dirty
+     */
     dirtyInstanceNum: boolean = true;
 
     // ========== 기본 설정 ==========
     readonly #redGPUContext: RedGPUContext;
+    /**
+     * [KO] 현재 인스턴스 개수
+     * [EN] Current instance count
+     */
     #instanceCount: number = 1;
+    /**
+     * [KO] 최대 인스턴스 개수
+     * [EN] Maximum instance count
+     */
     #maxInstanceCount: number = 1;
+    /**
+     * [KO] 인스턴스 자식 객체 배열
+     * [EN] Array of instance child objects
+     */
     #instanceChildren: InstancingMeshObject3D[] = [];
 
     // ========== 렌더링 상태 (Displacement) ==========
@@ -82,6 +109,25 @@ class InstancingMesh extends Mesh {
     // ========== GPU 리소스 (LOD) ==========
     #lodGPURenderInfoList: LODGPURenderInfo[] = [];
 
+    /**
+     * [KO] InstancingMesh 인스턴스를 생성합니다.
+     * [EN] Creates an instance of InstancingMesh.
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     * @param maxInstanceCount -
+     * [KO] 허용할 최대 인스턴스 개수
+     * [EN] Maximum allowed instance count
+     * @param instanceCount -
+     * [KO] 초기 인스턴스 개수
+     * [EN] Initial instance count
+     * @param geometry -
+     * [KO] geometry 또는 primitive 객체(선택)
+     * [EN] geometry or primitive object (optional)
+     * @param material -
+     * [KO] 머티리얼(선택)
+     * [EN] Material (optional)
+     */
     constructor(
         redGPUContext: RedGPUContext,
         maxInstanceCount: number,

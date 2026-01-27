@@ -3,222 +3,320 @@ import Mesh from "../../display/mesh/Mesh";
 import View3D from "../../display/view/View3D";
 import AController from "../core/AController";
 /**
- * 특정 타겟 메시를 따라다니는 3D 카메라 컨트롤러
+ * [KO] 특정 타겟 메시를 추적하는 카메라 컨트롤러입니다.
+ * [EN] Camera controller that tracks a specific target mesh.
  *
- * 카메라는 타겟 메시 주변을 구면 좌표계로 회전하며,
- * 거리(distance), 높이(height), 팬(pan), 틸트(tilt) 값을 통해 위치를 제어합니다.
- * 타겟 메시의 이동과 회전을 자동으로 추적하며, 부드러운 카메라 움직임을 위한
- * 보간(interpolation) 기능을 지원합니다.
+ * [KO] 3인칭 게임의 캐릭터 카메라처럼 타겟의 뒤를 쫓거나 주변을 회전하며 관찰하는 데 사용됩니다. 타겟의 이동과 회전을 부드럽게 따라가며, 거리와 높이, 각도를 조절하여 다양한 연출이 가능합니다.
+ * [EN] Used to follow behind or rotate around a target, like a character camera in a 3rd person game. It smoothly tracks the target's movement and rotation, allowing for various cinematic effects by adjusting distance, height, and angles.
  *
- * @category Controller
- * @example
+ * * ### Example
  * ```typescript
- * const followController = new new RedGPU.Camera.FollowController(redGPUContext, targetMesh);
+ * const followController = new RedGPU.Camera.FollowController(redGPUContext, targetMesh);
  * followController.distance = 15;
  * followController.height = 8;
  * followController.pan = 45;
  * followController.tilt = 30;
  * ```
  * <iframe src="/RedGPU/examples/3d/controller/followController/"></iframe>
+ * @category Controller
  */
 declare class FollowController extends AController {
     #private;
     /**
-     * FollowController 생성자
+     * [KO] FollowController 생성자
+     * [EN] FollowController constructor
      *
-     * @param {RedGPUContext} redGPUContext - RedGPU 컨텍스트
-     * @param {Mesh} targetMesh - 따라갈 대상 메시
-     * @throws {Error} targetMesh가 null이거나 undefined일 경우 에러 발생
+     * @param redGPUContext -
+     * [KO] RedGPU 컨텍스트
+     * [EN] RedGPU Context
+     * @param targetMesh -
+     * [KO] 따라갈 대상 메시
+     * [EN] Target mesh to follow
+     * @throws
+     * [KO] targetMesh가 null이거나 undefined일 경우 에러 발생
+     * [EN] Throws Error if targetMesh is null or undefined
      */
     constructor(redGPUContext: RedGPUContext, targetMesh: Mesh);
     /**
-     * 타겟으로부터의 카메라 거리를 가져옵니다.
+     * [KO] 타겟으로부터의 카메라 거리를 가져옵니다.
+     * [EN] Gets the camera distance from the target.
      *
-     * @returns {number} 목표 거리 (0.1 이상)
+     * @returns
+     * [KO] 목표 거리 (0.1 이상)
+     * [EN] Target distance (min 0.1)
      */
     get distance(): number;
     /**
-     * 타겟으로부터의 카메라 거리를 설정합니다.
+     * [KO] 타겟으로부터의 카메라 거리를 설정합니다.
+     * [EN] Sets the camera distance from the target.
      *
-     * @param {number} value - 설정할 거리 (0.1 이상)
+     * @param value -
+     * [KO] 설정할 거리 (0.1 이상)
+     * [EN] Distance to set (min 0.1)
      */
     set distance(value: number);
     /**
-     * 거리 값의 보간 계수를 가져옵니다.
+     * [KO] 거리 값의 보간 계수를 가져옵니다.
+     * [EN] Gets the interpolation factor for the distance value.
      *
-     * @returns {number} 거리 보간 계수 (0.01 ~ 1)
+     * @returns
+     * [KO] 거리 보간 계수 (0.01 ~ 1)
+     * [EN] Distance interpolation factor (0.01 ~ 1)
      */
     get distanceInterpolation(): number;
     /**
-     * 거리 값의 보간 계수를 설정합니다.
-     * 낮을수록 부드러운 움직임, 높을수록 빠른 응답
+     * [KO] 거리 값의 보간 계수를 설정합니다.
+     * [EN] Sets the interpolation factor for the distance value.
      *
-     * @param {number} value - 보간 계수 (0.01 ~ 1)
+     * @param value -
+     * [KO] 보간 계수 (0.01 ~ 1)
+     * [EN] Interpolation factor (0.01 ~ 1)
      */
     set distanceInterpolation(value: number);
     /**
-     * 타겟으로부터의 카메라 높이를 가져옵니다.
+     * [KO] 타겟으로부터의 카메라 높이를 가져옵니다.
+     * [EN] Gets the camera height from the target.
      *
-     * @returns {number} 목표 높이
+     * @returns
+     * [KO] 목표 높이
+     * [EN] Target height
      */
     get height(): number;
     /**
-     * 타겟으로부터의 카메라 높이를 설정합니다.
+     * [KO] 타겟으로부터의 카메라 높이를 설정합니다.
+     * [EN] Sets the camera height from the target.
      *
-     * @param {number} value - 설정할 높이
+     * @param value -
+     * [KO] 설정할 높이
+     * [EN] Height to set
      */
     set height(value: number);
     /**
-     * 높이 값의 보간 계수를 가져옵니다.
+     * [KO] 높이 값의 보간 계수를 가져옵니다.
+     * [EN] Gets the interpolation factor for the height value.
      *
-     * @returns {number} 높이 보간 계수 (0.01 ~ 1)
+     * @returns
+     * [KO] 높이 보간 계수 (0.01 ~ 1)
+     * [EN] Height interpolation factor (0.01 ~ 1)
      */
     get heightInterpolation(): number;
     /**
-     * 높이 값의 보간 계수를 설정합니다.
+     * [KO] 높이 값의 보간 계수를 설정합니다.
+     * [EN] Sets the interpolation factor for the height value.
      *
-     * @param {number} value - 보간 계수 (0.01 ~ 1)
+     * @param value -
+     * [KO] 보간 계수 (0.01 ~ 1)
+     * [EN] Interpolation factor (0.01 ~ 1)
      */
     set heightInterpolation(value: number);
     /**
-     * 타겟을 중심으로 한 카메라의 가로 회전(팬) 각도를 가져옵니다.
+     * [KO] 타겟을 중심으로 한 카메라의 가로 회전(팬) 각도를 가져옵니다.
+     * [EN] Gets the camera's horizontal rotation (pan) angle around the target.
      *
-     * @returns {number} 팬 각도 (도 단위)
+     * @returns
+     * [KO] 팬 각도 (도 단위)
+     * [EN] Pan angle (in degrees)
      */
     get pan(): number;
     /**
-     * 타겟을 중심으로 한 카메라의 가로 회전(팬) 각도를 설정합니다.
+     * [KO] 타겟을 중심으로 한 카메라의 가로 회전(팬) 각도를 설정합니다.
+     * [EN] Sets the camera's horizontal rotation (pan) angle around the target.
      *
-     * @param {number} value - 팬 각도 (도 단위)
+     * @param value -
+     * [KO] 팬 각도 (도 단위)
+     * [EN] Pan angle (in degrees)
      */
     set pan(value: number);
     /**
-     * 팬 값의 보간 계수를 가져옵니다.
+     * [KO] 팬 값의 보간 계수를 가져옵니다.
+     * [EN] Gets the interpolation factor for the pan value.
      *
-     * @returns {number} 팬 보간 계수 (0.01 ~ 1)
+     * @returns
+     * [KO] 팬 보간 계수 (0.01 ~ 1)
+     * [EN] Pan interpolation factor (0.01 ~ 1)
      */
     get panInterpolation(): number;
     /**
-     * 팬 값의 보간 계수를 설정합니다.
+     * [KO] 팬 값의 보간 계수를 설정합니다.
+     * [EN] Sets the interpolation factor for the pan value.
      *
-     * @param {number} value - 보간 계수 (0.01 ~ 1)
+     * @param value -
+     * [KO] 보간 계수 (0.01 ~ 1)
+     * [EN] Interpolation factor (0.01 ~ 1)
      */
     set panInterpolation(value: number);
     /**
-     * 타겟을 중심으로 한 카메라의 세로 회전(틸트) 각도를 가져옵니다.
+     * [KO] 타겟을 중심으로 한 카메라의 세로 회전(틸트) 각도를 가져옵니다.
+     * [EN] Gets the camera's vertical rotation (tilt) angle around the target.
      *
-     * @returns {number} 틸트 각도 (도 단위, -89 ~ 89)
+     * @returns
+     * [KO] 틸트 각도 (도 단위, -89 ~ 89)
+     * [EN] Tilt angle (in degrees, -89 ~ 89)
      */
     get tilt(): number;
     /**
-     * 타겟을 중심으로 한 카메라의 세로 회전(틸트) 각도를 설정합니다.
-     * -89도에서 89도 범위로 제한됩니다.
+     * [KO] 타겟을 중심으로 한 카메라의 세로 회전(틸트) 각도를 설정합니다.
+     * [EN] Sets the camera's vertical rotation (tilt) angle around the target.
      *
-     * @param {number} value - 틸트 각도 (도 단위)
+     * @param value -
+     * [KO] 틸트 각도 (도 단위)
+     * [EN] Tilt angle (in degrees)
      */
     set tilt(value: number);
     /**
-     * 틸트 값의 보간 계수를 가져옵니다.
+     * [KO] 틸트 값의 보간 계수를 가져옵니다.
+     * [EN] Gets the interpolation factor for the tilt value.
      *
-     * @returns {number} 틸트 보간 계수 (0.01 ~ 1)
+     * @returns
+     * [KO] 틸트 보간 계수 (0.01 ~ 1)
+     * [EN] Tilt interpolation factor (0.01 ~ 1)
      */
     get tiltInterpolation(): number;
     /**
-     * 틸트 값의 보간 계수를 설정합니다.
+     * [KO] 틸트 값의 보간 계수를 설정합니다.
+     * [EN] Sets the interpolation factor for the tilt value.
      *
-     * @param {number} value - 보간 계수 (0.01 ~ 1)
+     * @param value -
+     * [KO] 보간 계수 (0.01 ~ 1)
+     * [EN] Interpolation factor (0.01 ~ 1)
      */
     set tiltInterpolation(value: number);
     /**
-     * 전체 카메라 위치의 보간 계수를 가져옵니다.
+     * [KO] 전체 카메라 위치의 보간 계수를 가져옵니다.
+     * [EN] Gets the interpolation factor for the overall camera position.
      *
-     * @returns {number} 보간 계수 (0.01 ~ 1)
+     * @returns
+     * [KO] 보간 계수 (0.01 ~ 1)
+     * [EN] Interpolation factor (0.01 ~ 1)
      */
     get interpolation(): number;
     /**
-     * 전체 카메라 위치의 보간 계수를 설정합니다.
-     * 낮을수록 부드러운 움직임, 높을수록 빠른 응답
+     * [KO] 전체 카메라 위치의 보간 계수를 설정합니다.
+     * [EN] Sets the interpolation factor for the overall camera position.
      *
-     * @param {number} value - 보간 계수 (0.01 ~ 1)
+     * @param value -
+     * [KO] 보간 계수 (0.01 ~ 1)
+     * [EN] Interpolation factor (0.01 ~ 1)
      */
     set interpolation(value: number);
     /**
-     * 타겟 메시의 회전을 따를지 여부를 가져옵니다.
+     * [KO] 타겟 메시의 회전을 따를지 여부를 가져옵니다.
+     * [EN] Gets whether to follow the target mesh's rotation.
      *
-     * @returns {boolean} true일 경우 타겟의 회전을 따름
+     * @returns
+     * [KO] true일 경우 타겟의 회전을 따름
+     * [EN] If true, follows the target's rotation
      */
     get followTargetRotation(): boolean;
     /**
-     * 타겟 메시의 회전을 따를지 여부를 설정합니다.
+     * [KO] 타겟 메시의 회전을 따를지 여부를 설정합니다.
+     * [EN] Sets whether to follow the target mesh's rotation.
      *
-     * @param {boolean} value - true일 경우 타겟의 회전을 따름
+     * @param value -
+     * [KO] true일 경우 타겟의 회전을 따름
+     * [EN] If true, follows the target's rotation
      */
     set followTargetRotation(value: boolean);
     /**
-     * 타겟으로부터의 카메라 X축 오프셋을 가져옵니다.
+     * [KO] 타겟으로부터의 카메라 X축 오프셋을 가져옵니다.
+     * [EN] Gets the camera's X-axis offset from the target.
      *
-     * @returns {number} X축 오프셋
+     * @returns
+     * [KO] X축 오프셋
+     * [EN] X-axis offset
      */
     get targetOffsetX(): number;
     /**
-     * 타겟으로부터의 카메라 X축 오프셋을 설정합니다.
+     * [KO] 타겟으로부터의 카메라 X축 오프셋을 설정합니다.
+     * [EN] Sets the camera's X-axis offset from the target.
      *
-     * @param {number} value - X축 오프셋
+     * @param value -
+     * [KO] X축 오프셋
+     * [EN] X-axis offset
      */
     set targetOffsetX(value: number);
     /**
-     * 타겟으로부터의 카메라 Y축 오프셋을 가져옵니다.
+     * [KO] 타겟으로부터의 카메라 Y축 오프셋을 가져옵니다.
+     * [EN] Gets the camera's Y-axis offset from the target.
      *
-     * @returns {number} Y축 오프셋
+     * @returns
+     * [KO] Y축 오프셋
+     * [EN] Y-axis offset
      */
     get targetOffsetY(): number;
     /**
-     * 타겟으로부터의 카메라 Y축 오프셋을 설정합니다.
+     * [KO] 타겟으로부터의 카메라 Y축 오프셋을 설정합니다.
+     * [EN] Sets the camera's Y-axis offset from the target.
      *
-     * @param {number} value - Y축 오프셋
+     * @param value -
+     * [KO] Y축 오프셋
+     * [EN] Y-axis offset
      */
     set targetOffsetY(value: number);
     /**
-     * 타겟으로부터의 카메라 Z축 오프셋을 가져옵니다.
+     * [KO] 타겟으로부터의 카메라 Z축 오프셋을 가져옵니다.
+     * [EN] Gets the camera's Z-axis offset from the target.
      *
-     * @returns {number} Z축 오프셋
+     * @returns
+     * [KO] Z축 오프셋
+     * [EN] Z-axis offset
      */
     get targetOffsetZ(): number;
     /**
-     * 타겟으로부터의 카메라 Z축 오프셋을 설정합니다.
+     * [KO] 타겟으로부터의 카메라 Z축 오프셋을 설정합니다.
+     * [EN] Sets the camera's Z-axis offset from the target.
      *
-     * @param {number} value - Z축 오프셋
+     * @param value -
+     * [KO] Z축 오프셋
+     * [EN] Z-axis offset
      */
     set targetOffsetZ(value: number);
     /**
-     * 따라갈 대상 메시를 가져옵니다.
+     * [KO] 따라갈 대상 메시를 가져옵니다.
+     * [EN] Gets the target mesh to follow.
      *
-     * @returns {Mesh} 현재 타겟 메시
+     * @returns
+     * [KO] 현재 타겟 메시
+     * [EN] Current target mesh
      */
     get targetMesh(): Mesh;
     /**
-     * 따라갈 대상 메시를 설정합니다.
-     * 새로운 타겟을 설정하면 카메라 위치가 재계산됩니다.
+     * [KO] 따라갈 대상 메시를 설정합니다.
+     * [EN] Sets the target mesh to follow.
      *
-     * @param {Mesh} value - 설정할 타겟 메시
-     * @throws {Error} value가 null이거나 undefined일 경우 에러 발생
+     * @param value -
+     * [KO] 설정할 타겟 메시
+     * [EN] Target mesh to set
+     * @throws
+     * [KO] value가 null이거나 undefined일 경우 에러 발생
+     * [EN] Throws Error if value is null or undefined
      */
     set targetMesh(value: Mesh);
     /**
-     * 카메라의 타겟 오프셋을 한 번에 설정합니다.
+     * [KO] 카메라의 타겟 오프셋을 한 번에 설정합니다.
+     * [EN] Sets the camera's target offset at once.
      *
-     * @param {number} x - X축 오프셋
-     * @param {number} [y=0] - Y축 오프셋 (기본값: 0)
-     * @param {number} [z=0] - Z축 오프셋 (기본값: 0)
+     * @param x -
+     * [KO] X축 오프셋
+     * [EN] X-axis offset
+     * @param y -
+     * [KO] Y축 오프셋 (기본값: 0)
+     * [EN] Y-axis offset (default: 0)
+     * @param z -
+     * [KO] Z축 오프셋 (기본값: 0)
+     * [EN] Z-axis offset (default: 0)
      */
     setTargetOffset(x: number, y?: number, z?: number): void;
     /**
-     * 매 프레임마다 카메라의 위치와 방향을 업데이트합니다.
+     * [KO] 매 프레임마다 카메라의 위치와 방향을 업데이트합니다.
+     * [EN] Updates the camera's position and orientation every frame.
      *
-     * 현재 값들을 목표 값으로 보간하고, 카메라의 위치와 lookAt 대상을 설정합니다.
-     *
-     * @param {View3D} view - 카메라가 속한 3D 뷰
-     * @param {number} time - 현재 시간 (ms)
+     * @param view -
+     * [KO] 카메라가 속한 3D 뷰
+     * [EN] The 3D view the camera belongs to
+     * @param time -
+     * [KO] 현재 시간 (ms)
+     * [EN] Current time (ms)
      */
     update(view: View3D, time: number): void;
 }

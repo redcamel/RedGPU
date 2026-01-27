@@ -3,6 +3,11 @@ import View3D from "../../../../display/view/View3D";
 import validateNumberRange from "../../../../runtimeChecker/validateFunc/validateNumberRange";
 import ASinglePassPostEffect, {ASinglePassPostEffectResult} from "../../../core/ASinglePassPostEffect";
 
+/**
+ * [KO] DOF 통합 블러 및 합성 이펙트입니다.
+ * [EN] DOF unified blur and compositing effect.
+ * @category Lens
+ */
 class DOFUnified extends ASinglePassPostEffect {
     #nearBlurSize: number = 16;
     #farBlurSize: number = 24;

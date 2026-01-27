@@ -1,27 +1,47 @@
 import RedGPUContext from "../context/RedGPUContext";
 import Primitive from "./core/Primitive";
 /**
- * Plane(평면) 기본 도형 클래스입니다.
- * XY 평면에 배치된 메시로, 세그먼트, UV 스케일, Y축 뒤집기 등 다양한 파라미터를 지원합니다.
+ * [KO] Plane(평면) 기본 도형 클래스입니다.
+ * [EN] Plane primitive geometry class.
  *
- * @example
- * ```javascript
- * // 5x5 크기, 8x8 세그먼트, UV 2배, Y축 뒤집기 없이 생성 및 씬에 추가
- * const plane = new RedGPU.Primitive.Plane(redGPUContext, 5, 5, 8, 8, 2, false);
+ * [KO] XY 평면에 배치된 평면 데이터를 생성하여 관리합니다.
+ * [EN] Generates and manages planar data placed on the XY plane.
+ *
+ * * ### Example
+ * ```typescript
+ * // 5x5 크기의 평면 생성
+ * const plane = new RedGPU.Primitive.Plane(redGPUContext, 5, 5);
  * ```
  * <iframe src="/RedGPU/examples/3d/primitive/plane/"></iframe>
+ * @category Primitive
  */
 declare class Plane extends Primitive {
     #private;
     /**
-     * Plane 생성자
-     * @param redGPUContext RedGPUContext 인스턴스
-     * @param width 가로 길이 (기본값 1)
-     * @param height 세로 길이 (기본값 1)
-     * @param wSegments X축 세그먼트 수 (기본값 1)
-     * @param hSegments Y축 세그먼트 수 (기본값 1)
-     * @param uvSize UV 스케일 (기본값 1)
-     * @param flipY Y축 UV 뒤집기 여부 (기본값 false)
+     * [KO] Plane 인스턴스를 생성합니다.
+     * [EN] Creates an instance of Plane.
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     * @param width -
+     * [KO] 가로 길이 (기본값 1)
+     * [EN] Width (default 1)
+     * @param height -
+     * [KO] 세로 길이 (기본값 1)
+     * [EN] Height (default 1)
+     * @param wSegments -
+     * [KO] 가로(X축) 세그먼트 수 (기본값 1)
+     * [EN] Width (X-axis) segments (default 1)
+     * @param hSegments -
+     * [KO] 세로(Y축) 세그먼트 수 (기본값 1)
+     * [EN] Height (Y-axis) segments (default 1)
+     * @param uvSize -
+     * [KO] UV 스케일 (기본값 1)
+     * [EN] UV scale (default 1)
+     * @param flipY -
+     * [KO] Y축 UV 뒤집기 여부 (기본값 false)
+     * [EN] Whether to flip UV on the Y-axis (default false)
      */
     constructor(redGPUContext: RedGPUContext, width?: number, height?: number, wSegments?: number, hSegments?: number, uvSize?: number, flipY?: boolean);
 }

@@ -8,6 +8,16 @@ import VertexInterleaveType from "../../../resources/buffer/vertexBuffer/VertexI
 import Mesh from "../../mesh/Mesh";
 import RenderViewStateData from "../../view/core/RenderViewStateData";
 
+/**
+ * [KO] 조명 객체를 시각화하는 디버거의 추상 베이스 클래스입니다.
+ * [EN] Abstract base class for debuggers that visualize light objects.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템 내부적으로 사용되는 추상 클래스입니다.<br/>직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is an abstract class used internally by the system.<br/>Do not create instances directly.
+ * :::
+ * @category Debugger
+ */
 abstract class ADrawDebuggerLight {
     #redGPUContext: RedGPUContext;
     #lightMaterial: ColorMaterial;

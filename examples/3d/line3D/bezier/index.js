@@ -1,5 +1,5 @@
 // RedGPU 사용을 위한 모듈 임포트
-import * as RedGPU from "../../../../dist/index.js?t=1768401228425";
+import * as RedGPU from "../../../../dist/index.js?t=1769495390300";
 
 /* 1. 캔버스 생성 */
 const canvas = document.createElement("canvas");
@@ -120,13 +120,13 @@ function rainbowHex(t) {
     const r = Math.floor(255 * Math.abs(Math.sin(Math.PI * t))); // R 값
     const g = Math.floor(255 * Math.abs(Math.sin(Math.PI * t + (2 * Math.PI) / 3))); // G 값
     const b = Math.floor(255 * Math.abs(Math.sin(Math.PI * t + (4 * Math.PI) / 3))); // B 값
-    return RedGPU.Util.convertRgbToHex(r, g, b); // RGB를 HEX 형식으로 변환
+    return RedGPU.Color.convertRgbToHex(r, g, b); // RGB를 HEX 형식으로 변환
 }
 
 const renderTestPane = async (redGPUContext) => {
-    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1768401228425");
+    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769495390300");
     const pane = new Pane();
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1768401228425");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769495390300");
     setDebugButtons(RedGPU, redGPUContext);
     // **** UI 동작 대상이 되는 Line3D 오브젝트 및 디버그 마커 모음 ****
     const debugOptions = {

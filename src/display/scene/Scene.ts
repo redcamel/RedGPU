@@ -6,35 +6,59 @@ import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
 import Object3DContainer from "../mesh/core/Object3DContainer";
 
 /**
- * Scene 클래스는 View에서 렌더링할 장면을 구성하는 공간입니다.
+ * [KO] View에서 렌더링할 장면을 구성하는 공간 클래스입니다.
+ * [EN] Space class that constitutes the scene to be rendered in a View.
  *
- * 조명, 그림자, 배경색 등의 설정을 포함하며,
- * 모든 시각적 객체의 루트 컨테이너로 작동합니다.
+ * [KO] 조명, 그림자, 배경색 등의 설정을 포함하며, 모든 시각적 객체의 루트 컨테이너로 작동합니다. View3D 또는 View2D와 연결되어 화면에 출력되는 대상입니다.
+ * [EN] It includes settings for lights, shadows, background color, etc., and acts as the root container for all visual objects. It is the target connected to View3D or View2D and output to the screen.
  *
- * View3D 또는 View2D와 연결되어 화면에 출력되는 대상이며,
- * 시각적 콘텐츠를 배치하는 무대 역할을 합니다.
- *
- * ```javascript
+ * * ### Example
+ * ```typescript
  * const scene = new RedGPU.Display.Scene();
  * ```
  *
  * <iframe src="/RedGPU/examples/3d/scene/" ></iframe>
  *
  * @category Scene
- * @extends Object3DContainer
  */
 class Scene extends Object3DContainer {
+    /**
+     * [KO] 인스턴스 고유 ID
+     * [EN] Instance unique ID
+     */
     #instanceId: number
+    /**
+     * [KO] 씬 이름
+     * [EN] Scene name
+     */
     #name: string
+    /**
+     * [KO] 배경색
+     * [EN] Background color
+     */
     #backgroundColor: ColorRGBA = new ColorRGBA()
+    /**
+     * [KO] 배경색 사용 여부
+     * [EN] Whether to use the background color
+     */
     #useBackgroundColor: boolean = false
+    /**
+     * [KO] 조명 관리자
+     * [EN] Light manager
+     */
     #lightManager: LightManager = new LightManager()
+    /**
+     * [KO] 그림자 관리자
+     * [EN] Shadow manager
+     */
     #shadowManager: ShadowManager = new ShadowManager()
 
     /**
-     * Scene 생성자입니다.
-     * 고유 인스턴스 ID를 생성하고 이름을 설정합니다.
-     * @param name - Scene의 이름
+     * [KO] Scene 생성자
+     * [EN] Scene constructor
+     * @param name -
+     * [KO] Scene의 이름
+     * [EN] Name of the scene
      */
     constructor(name?: string) {
         super()
@@ -43,24 +67,24 @@ class Scene extends Object3DContainer {
     }
 
     /**
-     * Scene에 포함된 LightManager입니다.
-     * 조명 설정 및 관리 기능을 제공합니다.
+     * [KO] 씬 내의 모든 조명을 통합 관리하는 LightManager를 반환합니다.
+     * [EN] Returns the LightManager that manages all lights within the scene.
      */
     get lightManager(): LightManager {
         return this.#lightManager;
     }
 
     /**
-     * Scene에 포함된 ShadowManager입니다.
-     * 그림자 설정 및 관리 기능을 제공합니다.
+     * [KO] 씬 내의 모든 그림자를 통합 관리하는 ShadowManager를 반환합니다.
+     * [EN] Returns the ShadowManager that manages all shadows within the scene.
      */
     get shadowManager(): ShadowManager {
         return this.#shadowManager;
     }
 
     /**
-     * Scene의 이름을 반환합니다.
-     * 이름이 설정되지 않은 경우 인스턴스 ID 기반으로 자동 생성됩니다.
+     * [KO] 씬의 이름을 반환합니다.
+     * [EN] Returns the scene name.
      */
     get name(): string {
         if (!this.#instanceId) this.#instanceId = InstanceIdGenerator.getNextId(this.constructor)
@@ -68,25 +92,33 @@ class Scene extends Object3DContainer {
     }
 
     /**
-     * Scene의 이름을 설정합니다.
-     * @param value - 설정할 이름 문자열
+     * [KO] 씬의 이름을 설정합니다.
+     * [EN] Sets the scene name.
+     * @param value -
+     * [KO] 설정할 이름
+     * [EN] Name to set
      */
     set name(value: string) {
         this.#name = value;
     }
 
     /**
-     * Scene의 배경색입니다.
-     * 렌더링 시 사용될 ColorRGBA 객체입니다.
+     * [KO] 씬의 배경색을 반환합니다.
+     * [EN] Returns the background color of the scene.
      */
     get backgroundColor(): ColorRGBA {
         return this.#backgroundColor;
     }
 
     /**
-     * Scene의 배경색을 설정합니다.
-     * ColorRGBA 인스턴스가 아닌 경우 예외를 발생시킵니다.
-     * @param value - ColorRGBA 인스턴스
+     * [KO] 씬의 배경색을 설정합니다.
+     * [EN] Sets the background color of the scene.
+     * @param value -
+     * [KO] 설정할 ColorRGBA 객체
+     * [EN] ColorRGBA object to set
+     * @throws
+     * [KO] value가 ColorRGBA 인스턴스가 아닐 경우 에러 발생
+     * [EN] Throws error if value is not an instance of ColorRGBA
      */
     set backgroundColor(value: ColorRGBA) {
         if (!(value instanceof ColorRGBA)) consoleAndThrowError('allow only ColorRGBA instance')
@@ -94,16 +126,19 @@ class Scene extends Object3DContainer {
     }
 
     /**
-     * 배경색 사용 여부를 반환합니다.
-     * true면 설정된 배경색이 렌더링에 적용됩니다.
+     * [KO] 배경색 사용 여부를 반환합니다.
+     * [EN] Returns whether to use the background color.
      */
     get useBackgroundColor(): boolean {
         return this.#useBackgroundColor;
     }
 
     /**
-     * 배경색 사용 여부를 설정합니다.
-     * @param value - true면 배경색 사용, false면 미사용
+     * [KO] 배경색 사용 여부를 설정합니다.
+     * [EN] Sets whether to use the background color.
+     * @param value -
+     * [KO] 사용 여부
+     * [EN] Whether to use
      */
     set useBackgroundColor(value: boolean) {
         this.#useBackgroundColor = value;

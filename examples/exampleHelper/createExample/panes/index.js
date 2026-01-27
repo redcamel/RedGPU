@@ -1,16 +1,16 @@
-import createBitmapTextureTest from "./createBitmapTextureTest.js?t=1768401228425";
-import createCameraTest from "./createCameraTest.js?t=1768401228425";
-import createFieldOfView from "./createFieldOfView.js?t=1768401228425";
-import createGridTest from "./createGridTest.js?t=1768401228425";
-import createIblHelper from "./createIblHelper.js?t=1768401228425";
-import createSkyBoxHelper from "./createSkyBoxHelper.js?t=1768401228425";
-import setSceneListTest from "./scene/setSceneListTest.js?t=1768401228425";
-import setSingleSceneTest from "./scene/setSingleSceneTest.js?t=1768401228425";
-import setAntialiasing_pane from "./setAntialiasing_pane.js?t=1768401228425";
-import setRedGPUTest_pane from "./setRedGPUTest_pane.js?t=1768401228425";
-import setSingleViewTest from "./view/setSingleViewTest.js?t=1768401228425";
-import setViewListTest from "./view/setViewListTest.js?t=1768401228425";
-import setViewListTest_Pane from "./view/setViewListTest.js?t=1768401228425";
+import createBitmapTextureTest from "./createBitmapTextureTest.js?t=1769495390300";
+import createCameraTest from "./createCameraTest.js?t=1769495390300";
+import createFieldOfView from "./createFieldOfView.js?t=1769495390300";
+import createGridTest from "./createGridTest.js?t=1769495390300";
+import createIblHelper from "./createIblHelper.js?t=1769495390300";
+import createSkyBoxHelper from "./createSkyBoxHelper.js?t=1769495390300";
+import setSceneListTest from "./scene/setSceneListTest.js?t=1769495390300";
+import setSingleSceneTest from "./scene/setSingleSceneTest.js?t=1769495390300";
+import setAntialiasing_pane from "./setAntialiasing_pane.js?t=1769495390300";
+import setRedGPUTest_pane from "./setRedGPUTest_pane.js?t=1769495390300";
+import setSingleViewTest from "./view/setSingleViewTest.js?t=1769495390300";
+import setViewListTest from "./view/setViewListTest.js?t=1769495390300";
+import setViewListTest_Pane from "./view/setViewListTest.js?t=1769495390300";
 
 /**
  * Sets a separator in the given pane.
@@ -187,11 +187,11 @@ const setToneMappingSelect = (RedGPU, redGPUContext, rightContainer) => {
     if (redGPUContext.viewList[0].constructor.name === 'View2D') return;
     const targetView = redGPUContext.viewList[0]
     const {toneMappingManager} = targetView
-    const {TONE_MAPPING_MODE} = RedGPU
+    const {TONE_MAPPING_MODE} = RedGPU.ToneMapping
 
     toneSelect.className = 'nav-button tone-mapping-button';
     const list = Object.entries(TONE_MAPPING_MODE).map(([key, value]) => `<option value="${value}" ${toneMappingManager.mode === value ? 'selected="true"' : ''}>${key}</option>`)
-    list.push('<option value="NONE" >NONE</option>')
+
     toneSelect.innerHTML = list.join()
     toneSelect.addEventListener('change', (e) => {
         const targetAntialiasing = e.target.value

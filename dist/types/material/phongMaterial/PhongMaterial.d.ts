@@ -4,59 +4,124 @@ import Sampler from "../../resources/sampler/Sampler";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import ABitmapBaseMaterial from "../core/ABitmapBaseMaterial";
 /**
- * PhongMaterial의 공통 속성 인터페이스
+ * [KO] PhongMaterial의 공통 속성 인터페이스
+ * [EN] Common property interface for PhongMaterial
  */
 interface PhongMaterial {
-    /** 머티리얼의 기본 색상(RGB) */
+    /**
+     * [KO] 머티리얼의 기본 색상(RGB)
+     * [EN] Base color of the material (RGB)
+     */
     color: ColorRGB;
-    /** 발광 색상(RGB) */
+    /**
+     * [KO] 발광 색상(RGB)
+     * [EN] Emissive color (RGB)
+     */
     emissiveColor: ColorRGB;
-    /** 발광 강도 */
+    /**
+     * [KO] 발광 강도
+     * [EN] Emissive strength
+     */
     emissiveStrength: number;
-    /** 스펙큘러 색상(RGB) */
+    /**
+     * [KO] 스펙큘러 색상(RGB)
+     * [EN] Specular color (RGB)
+     */
     specularColor: ColorRGB;
-    /** 스펙큘러 강도 */
+    /**
+     * [KO] 스펙큘러 강도
+     * [EN] Specular strength
+     */
     specularStrength: number;
-    /** 알파(투명도) 텍스처 */
+    /**
+     * [KO] 알파(투명도) 텍스처
+     * [EN] Alpha (transparency) texture
+     */
     alphaTexture: BitmapTexture;
-    /** 알파 텍스처 샘플러 */
+    /**
+     * [KO] 알파 텍스처 샘플러
+     * [EN] Alpha texture sampler
+     */
     alphaTextureSampler: Sampler;
-    /** 디퓨즈 텍스처 */
+    /**
+     * [KO] 디퓨즈 텍스처
+     * [EN] Diffuse texture
+     */
     diffuseTexture: BitmapTexture;
-    /** 디퓨즈 텍스처 샘플러 */
+    /**
+     * [KO] 디퓨즈 텍스처 샘플러
+     * [EN] Diffuse texture sampler
+     */
     diffuseTextureSampler: Sampler;
-    /** 스펙큘러 텍스처 */
+    /**
+     * [KO] 스펙큘러 텍스처
+     * [EN] Specular texture
+     */
     specularTexture: BitmapTexture;
-    /** 스펙큘러 텍스처 샘플러 */
+    /**
+     * [KO] 스펙큘러 텍스처 샘플러
+     * [EN] Specular texture sampler
+     */
     specularTextureSampler: Sampler;
-    /** 발광 텍스처 */
+    /**
+     * [KO] 발광 텍스처
+     * [EN] Emissive texture
+     */
     emissiveTexture: BitmapTexture;
-    /** 발광 텍스처 샘플러 */
+    /**
+     * [KO] 발광 텍스처 샘플러
+     * [EN] Emissive texture sampler
+     */
     emissiveTextureSampler: Sampler;
-    /** AO(ambient occlusion) 텍스처 */
+    /**
+     * [KO] AO(ambient occlusion) 텍스처
+     * [EN] AO (ambient occlusion) texture
+     */
     aoTexture: BitmapTexture;
-    /** AO 텍스처 샘플러 */
+    /**
+     * [KO] AO 텍스처 샘플러
+     * [EN] AO texture sampler
+     */
     aoTextureSampler: Sampler;
-    /** 노멀 맵 텍스처 */
+    /**
+     * [KO] 노멀 맵 텍스처
+     * [EN] Normal map texture
+     */
     normalTexture: BitmapTexture;
-    /** 노멀 맵 텍스처 샘플러 */
+    /**
+     * [KO] 노멀 맵 텍스처 샘플러
+     * [EN] Normal map texture sampler
+     */
     normalTextureSampler: Sampler;
-    /** 노멀 맵 스케일 */
+    /**
+     * [KO] 노멀 맵 스케일
+     * [EN] Normal map scale
+     */
     normalScale: number;
-    /** 금속도 */
+    /**
+     * [KO] 금속도
+     * [EN] Metallic
+     */
     metallic: number;
-    /** 거칠기 */
+    /**
+     * [KO] 거칠기
+     * [EN] Roughness
+     */
     roughness: number;
-    /** SSR(스크린 스페이스 리플렉션) 사용 여부 */
+    /**
+     * [KO] SSR(스크린 스페이스 리플렉션) 사용 여부
+     * [EN] Whether to use SSR (Screen Space Reflection)
+     */
     useSSR: number;
 }
 /**
- * PhongMaterial
+ * [KO] Phong 라이팅 기반의 다양한 텍스처/파라미터를 지원하는 머티리얼 클래스입니다.
+ * [EN] Material class supporting various textures/parameters based on Phong lighting.
  *
- * Phong 라이팅 기반의 다양한 텍스처/파라미터를 지원하는 머티리얼 클래스입니다.
- * 디퓨즈, 스펙큘러, 노멀, AO, 알파, 발광 등 다양한 텍스처와 샘플러, 파라미터를 통해 사실적인 라이팅 효과를 구현할 수 있습니다.
- * @example
- * ```javascript
+ * [KO] 디퓨즈, 스펙큘러, 노멀, AO, 알파, 발광 등 다양한 텍스처와 샘플러, 파라미터를 통해 사실적인 라이팅 효과를 구현할 수 있습니다.
+ * [EN] Realistic lighting effects can be implemented through various textures, samplers, and parameters such as diffuse, specular, normal, AO, alpha, and emissive.
+ * * ### Example
+ * ```typescript
  * const sourceTexture = new RedGPU.Resource.BitmapTexture(
  *    redGPUContext,
  *    '/RedGPU/examples/assets/github.png'
@@ -67,28 +132,51 @@ interface PhongMaterial {
  *
  * <iframe src="/RedGPU/examples/3d/material/phongMaterial/"></iframe>
  *
- * 아래는 PhongMaterial의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
  * @see [PhongMaterial Texture Combination example](/RedGPU/examples/3d/material/phongMaterialTextures/)
  *
- * @extends ABitmapBaseMaterial
  * @category Material
  */
 declare class PhongMaterial extends ABitmapBaseMaterial {
     #private;
     /**
-     * PhongMaterial 생성자
-     * @param redGPUContext - RedGPUContext 인스턴스
-     * @param color - 기본 색상(HEX 문자열, 기본값: '#fff')
-     * @param name - 머티리얼 이름(옵션)
+     * [KO] PhongMaterial 생성자
+     * [EN] PhongMaterial constructor
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     * @param color -
+     * [KO] 기본 색상(HEX 문자열, 기본값: '#fff')
+     * [EN] Base color (HEX string, default: '#fff')
+     * @param name -
+     * [KO] 머티리얼 이름(옵션)
+     * [EN] Material name (optional)
      */
     constructor(redGPUContext: RedGPUContext, color?: string, name?: string);
-    /** 디스플레이스먼트(변위) 스케일 반환 */
+    /**
+     * [KO] 디스플레이스먼트(변위) 스케일 반환
+     * [EN] Returns displacement scale
+     */
     get displacementScale(): number;
-    /** 디스플레이스먼트(변위) 스케일 설정 */
+    /**
+     * [KO] 디스플레이스먼트(변위) 스케일 설정
+     * [EN] Sets displacement scale
+     * @param value -
+     * [KO] 스케일 값
+     * [EN] Scale value
+     */
     set displacementScale(value: number);
-    /** 디스플레이스먼트(변위) 텍스처 반환 */
+    /**
+     * [KO] 디스플레이스먼트(변위) 텍스처 반환
+     * [EN] Returns displacement texture
+     */
     get displacementTexture(): BitmapTexture;
-    /** 디스플레이스먼트(변위) 텍스처 설정 및 파이프라인 갱신 */
+    /**
+     * [KO] 디스플레이스먼트(변위) 텍스처 설정 및 파이프라인 갱신
+     * [EN] Sets displacement texture and updates pipeline
+     * @param value -
+     * [KO] BitmapTexture
+     * [EN] BitmapTexture
+     */
     set displacementTexture(value: BitmapTexture);
 }
 export default PhongMaterial;

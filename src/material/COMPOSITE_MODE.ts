@@ -1,3 +1,8 @@
+/**
+ * [KO] 합성 모드 상수
+ * [EN] Composite mode constants
+ * @category Constant
+ */
 export const COMPOSITE_MODE = {
     ADDITIVE: "additive",
     SOURCE_OVER: "source-over",

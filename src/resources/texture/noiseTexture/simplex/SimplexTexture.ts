@@ -23,18 +23,43 @@ const BASIC_OPTIONS = {
 }
 
 /**
- * @category NoiseTexture
+ * [KO] Simplex 노이즈 패턴을 생성하는 텍스처 클래스입니다.
+ * [EN] Texture class that generates Simplex noise patterns.
+ *
+ * [KO] 1D, 2D, 3D Simplex 노이즈를 지원하며, FBM(Fractal Brownian Motion)을 통해 복잡한 패턴을 만들 수 있습니다.
+ * [EN] Supports 1D, 2D, and 3D Simplex noise, and can create complex patterns through FBM (Fractal Brownian Motion).
+ *
+ * * ### Example
+ * ```typescript
+ * const texture = new RedGPU.Resource.SimplexTexture(redGPUContext);
+ * ```
  * @experimental
+ * @category NoiseTexture
  */
 class SimplexTexture extends ANoiseTexture {
-    #frequency: number = BASIC_OPTIONS.frequency;      /* 노이즈 패턴의 밀도/크기 (값이 클수록 세밀함) */
-    #amplitude: number = BASIC_OPTIONS.amplitude;      /* 노이즈의 강도/대비 (값이 클수록 명암 대비 강함) */
-    #octaves: number = BASIC_OPTIONS.octaves;          /* 합성할 노이즈 레이어 개수 (값이 클수록 복잡한 디테일) */
-    #persistence: number = BASIC_OPTIONS.persistence;    /* 각 옥타브마다 진폭 감소 비율 (값이 클수록 거친 디테일) */
-    #lacunarity: number = BASIC_OPTIONS.lacunarity;     /* 각 옥타브마다 주파수 증가 비율 (값이 클수록 극명한 대비) */
-    #seed: number = BASIC_OPTIONS.seed;           /* 노이즈 패턴의 시작점 (같은 시드 = 같은 패턴) */
+    /** [KO] 노이즈 패턴의 밀도/크기 [EN] Density/scale of the noise pattern */
+    #frequency: number = BASIC_OPTIONS.frequency;
+    /** [KO] 노이즈 강도/대비 [EN] Strength/contrast of the noise */
+    #amplitude: number = BASIC_OPTIONS.amplitude;
+    /** [KO] 합성할 노이즈 레이어 개수 [EN] Number of noise layers to combine */
+    #octaves: number = BASIC_OPTIONS.octaves;
+    /** [KO] 각 옥타브마다 진폭 감소 비율 [EN] Rate of amplitude reduction for each octave */
+    #persistence: number = BASIC_OPTIONS.persistence;
+    /** [KO] 각 옥타브마다 주파수 증가 비율 [EN] Rate of frequency increase for each octave */
+    #lacunarity: number = BASIC_OPTIONS.lacunarity;
+    /** [KO] 노이즈 패턴의 시작점 [EN] Starting point of the noise pattern */
+    #seed: number = BASIC_OPTIONS.seed;
+    /** [KO] 노이즈 차원 (1, 2, 3) [EN] Noise dimension (1, 2, 3) */
     #noiseDimension: number = BASIC_OPTIONS.noiseDimension
 
+    /**
+     * [KO] SimplexTexture 인스턴스를 생성합니다.
+     * [EN] Creates a SimplexTexture instance.
+     * @param redGPUContext - [KO] RedGPUContext 인스턴스 [EN] RedGPUContext instance
+     * @param width - [KO] 텍스처 가로 크기 [EN] Texture width
+     * @param height - [KO] 텍스처 세로 크기 [EN] Texture height
+     * @param define - [KO] 노이즈 정의 객체 (선택) [EN] Noise definition object (optional)
+     */
     constructor(
         redGPUContext: RedGPUContext,
         width: number = 1024,
@@ -50,7 +75,6 @@ class SimplexTexture extends ANoiseTexture {
 						);
 						let noise = getSimplexNoiseByDimension( uv,uniforms );
             
-            /* 최종 색상 (그레이스케일) */
             let finalColor = vec4<f32>(noise, noise, noise, 1.0);
 			`,
             uniformStruct: mergerNoiseUniformStruct(`
@@ -69,10 +93,12 @@ class SimplexTexture extends ANoiseTexture {
         });
     }
 
+    /** [KO] 노이즈 차원을 반환합니다. [EN] Returns the noise dimension. */
     get noiseDimension(): number {
         return this.#noiseDimension;
     }
 
+    /** [KO] 노이즈 차원을 설정합니다. [EN] Sets the noise dimension. */
     set noiseDimension(value: number) {
         if (validDimensions.includes(value)) {
             this.#noiseDimension = value;
@@ -82,75 +108,83 @@ class SimplexTexture extends ANoiseTexture {
         }
     }
 
-    /* Frequency (주파수/스케일) */
+    /** [KO] 주파수(Frequency)를 반환합니다. [EN] Returns the frequency. */
     get frequency(): number {
         return this.#frequency;
     }
 
+    /** [KO] 주파수(Frequency)를 설정합니다. [EN] Sets the frequency. */
     set frequency(value: number) {
         validatePositiveNumberRange(value);
         this.#frequency = value;
         this.updateUniform('frequency', value);
     }
 
-    /* Amplitude (진폭) */
+    /** [KO] 진폭(Amplitude)을 반환합니다. [EN] Returns the amplitude. */
     get amplitude(): number {
         return this.#amplitude;
     }
 
+    /** [KO] 진폭(Amplitude)을 설정합니다. [EN] Sets the amplitude. */
     set amplitude(value: number) {
         validatePositiveNumberRange(value);
         this.#amplitude = value;
         this.updateUniform('amplitude', value);
     }
 
-    /* Octaves (옥타브 수) */
+    /** [KO] 옥타브(Octaves) 수를 반환합니다. [EN] Returns the number of octaves. */
     get octaves(): number {
         return this.#octaves;
     }
 
+    /** [KO] 옥타브(Octaves) 수를 설정합니다. [EN] Sets the number of octaves. */
     set octaves(value: number) {
         validateUintRange(value, 1, 8)
         this.#octaves = value;
         this.updateUniform('octaves', value);
     }
 
-    /* Persistence (지속성) */
+    /** [KO] 지속성(Persistence)을 반환합니다. [EN] Returns the persistence. */
     get persistence(): number {
         return this.#persistence;
     }
 
+    /** [KO] 지속성(Persistence)을 설정합니다. [EN] Sets the persistence. */
     set persistence(value: number) {
         validatePositiveNumberRange(value, 0, 1)
         this.#persistence = value;
         this.updateUniform('persistence', value);
     }
 
-    /* Lacunarity (간극성) */
+    /** [KO] 간극성(Lacunarity)을 반환합니다. [EN] Returns the lacunarity. */
     get lacunarity(): number {
         return this.#lacunarity;
     }
 
+    /** [KO] 간극성(Lacunarity)을 설정합니다. [EN] Sets the lacunarity. */
     set lacunarity(value: number) {
         validatePositiveNumberRange(value);
         this.#lacunarity = value;
         this.updateUniform('lacunarity', value);
     }
 
-    /* Seed (시드) */
+    /** [KO] 시드(Seed)를 반환합니다. [EN] Returns the seed. */
     get seed(): number {
         return this.#seed;
     }
 
+    /** [KO] 시드(Seed)를 설정합니다. [EN] Sets the seed. */
     set seed(value: number) {
         this.#seed = value;
         this.updateUniform('seed', value);
     }
 
+    /** [KO] 시드를 랜덤 값으로 설정합니다. [EN] Randomizes the seed value. */
     randomizeSeed(): void {
         this.seed = Math.random() * 1000.0;
     }
 
+    /** [KO] 현재 모든 노이즈 설정을 반환합니다. [EN] Returns all current noise settings. */
     getSettings(): {
         frequency: number;
         amplitude: number;
@@ -169,6 +203,7 @@ class SimplexTexture extends ANoiseTexture {
         };
     }
 
+    /** [KO] 노이즈 설정을 일괄 적용합니다. [EN] Applies noise settings at once. */
     applySettings(settings: Partial<{
         frequency: number;
         amplitude: number;

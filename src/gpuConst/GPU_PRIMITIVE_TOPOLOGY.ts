@@ -1,42 +1,38 @@
 /**
- * GPU 프리미티브 토폴로지 옵션
+ * [KO] 정점 데이터를 기하학적 도형으로 해석하는 방식을 정의하는 상수군입니다.
+ * [EN] Constants defining how to interpret vertex data as geometric shapes.
  *
- * 정점 데이터를 어떤 형태의 기하 도형으로 해석할지 정의합니다.
- * 드로우 콜 시 정점들이 어떻게 연결되어 렌더링될지 결정합니다.
- *
- * @constant
+ * [KO] 정점들이 어떤 규칙으로 연결되어 그려질지 결정합니다.
+ * [EN] Determines the rules by which vertices are connected and drawn.
+ * 
+ * @category Constants
  */
 const GPU_PRIMITIVE_TOPOLOGY = {
-    /**
-     * 각 정점을 독립적인 점으로 렌더링합니다.
-     *
-     * 정점 하나당 하나의 점이 그려집니다.
-     */
-    POINT_LIST: 'point-list',
-    /**
-     * 두 개의 정점으로 하나의 선분을 구성합니다.
-     *
-     * 정점 2개마다 독립적인 선분이 그려집니다.
-     */
-    LINE_LIST: 'line-list',
-    /**
-     * 연속된 정점들을 선으로 연결합니다.
-     *
-     * 첫 번째 정점부터 마지막 정점까지 순서대로 연결된 선이 그려집니다.
-     */
-    LINE_STRIP: 'line-strip',
-    /**
-     * 세 개의 정점으로 하나의 삼각형을 구성합니다.
-     *
-     * 정점 3개마다 독립적인 삼각형이 그려집니다. 가장 일반적으로 사용되는 토폴로지입니다.
-     */
-    TRIANGLE_LIST: 'triangle-list',
-    /**
-     * 연속된 정점들로 삼각형을 구성합니다.
-     *
-     * 첫 세 정점으로 첫 삼각형을 만들고, 이후 정점마다 이전 두 정점과 함께 새로운 삼각형을 만듭니다.
-     */
-    TRIANGLE_STRIP: 'triangle-strip',
-} as const
-Object.freeze(GPU_PRIMITIVE_TOPOLOGY)
-export default GPU_PRIMITIVE_TOPOLOGY
+	/**
+	 * [KO] 각 정점을 독립적인 점으로 렌더링합니다.
+	 * [EN] Renders each vertex as an independent point.
+	 */
+	POINT_LIST: 'point-list',
+	/**
+	 * [KO] 두 정점을 연결하여 독립적인 선분을 만듭니다.
+	 * [EN] Connects two vertices to form an independent line segment.
+	 */
+	LINE_LIST: 'line-list',
+	/**
+	 * [KO] 연속된 정점들을 하나의 선으로 연결합니다.
+	 * [EN] Connects consecutive vertices into a single continuous line.
+	 */
+	LINE_STRIP: 'line-strip',
+	/**
+	 * [KO] 세 정점을 연결하여 독립적인 삼각형을 만듭니다.
+	 * [EN] Connects three vertices to form an independent triangle.
+	 */
+	TRIANGLE_LIST: 'triangle-list',
+	/**
+	 * [KO] 연속된 정점들을 연결하여 삼각형 띠를 만듭니다.
+	 * [EN] Connects consecutive vertices to form a triangle strip.
+	 */
+	TRIANGLE_STRIP: 'triangle-strip',
+} as const;
+Object.freeze(GPU_PRIMITIVE_TOPOLOGY);
+export default GPU_PRIMITIVE_TOPOLOGY;

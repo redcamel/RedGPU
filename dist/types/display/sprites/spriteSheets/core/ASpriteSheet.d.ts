@@ -18,20 +18,34 @@ interface ASpriteSheet {
     currentIndex: number;
 }
 /**
- * 스프라이트 시트 애니메이션을 처리하는 추상 기본 클래스
+ * [KO] 스프라이트 시트 애니메이션을 처리하는 추상 기본 클래스입니다.
+ * [EN] Abstract base class for handling sprite sheet animations.
  *
- * ASpriteSheet는 2D 스프라이트 애니메이션을 위한 기본 기능을 제공합니다.
- * 하나의 텍스처에 여러 프레임이 격자 형태로 배열된 스프라이트 시트를
- * 시간에 따라 순차적으로 표시하여 애니메이션 효과를 만듭니다.
+ * [KO] ASpriteSheet는 2D/3D 스프라이트 애니메이션을 위한 공통 기능을 제공합니다. 하나의 텍스처에 여러 프레임이 격자 형태로 배열된 스프라이트 시트를 시간에 따라 순차적으로 표시하여 애니메이션 효과를 만듭니다.
+ * [EN] ASpriteSheet provides common functionality for 2D/3D sprite animations. It creates animation effects by sequentially displaying sprite sheets, where multiple frames are arranged in a grid within a single texture over time.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템 내부적으로 사용되는 추상 클래스입니다.<br/>직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is an abstract class used internally by the system.<br/>Do not create instances directly.
+ * :::
+ *
+ * @category Core
  */
 declare class ASpriteSheet extends Mesh {
     #private;
     /**
-     * 새로운 ASpriteSheet 인스턴스를 생성합니다.
+     * [KO] ASpriteSheet 인스턴스를 생성합니다.
+     * [EN] Creates an instance of ASpriteSheet.
      *
-     * @param redGPUContext - RedGPU 렌더링 컨텍스트
-     * @param spriteSheetInfo - 스프라이트 시트 정보 객체
-     * @param setRenderSize - 렌더링 크기 설정 콜백 함수
+     * @param redGPUContext -
+     * [KO] RedGPU 렌더링 컨텍스트
+     * [EN] RedGPU rendering context
+     * @param spriteSheetInfo -
+     * [KO] 스프라이트 시트 정보 객체
+     * [EN] Sprite sheet information object
+     * @param setRenderSize -
+     * [KO] 렌더링 크기 설정 콜백 함수
+     * [EN] Callback function to set rendering size
      */
     constructor(redGPUContext: RedGPUContext, spriteSheetInfo: SpriteSheetInfo, setRenderSize: (texture: unknown, segmentW: number, segmentH: number) => void);
     /**

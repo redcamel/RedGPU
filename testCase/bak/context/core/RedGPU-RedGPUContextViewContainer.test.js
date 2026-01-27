@@ -21,7 +21,7 @@ RedTest.testGroup(
 				let error
 				try {
 					const camera = new RedGPU.Display.Camera(redGPUContext)
-					const scene = new RedGPU.Display.Scene(redGPUContext)
+					const scene = new RedGPU.Display.Scene()
 					const view = new RedGPU.Display.View3D(redGPUContext, scene, camera)
 
 					redGPUContext.addView(view)
@@ -41,11 +41,11 @@ RedTest.testGroup(
 				let error
 				try {
 					const camera1 = new RedGPU.Display.Camera(redGPUContext)
-					const scene1 = new RedGPU.Display.Scene(redGPUContext)
+					const scene1 = new RedGPU.Display.Scene()
 					const view1 = new RedGPU.Display.View3D(redGPUContext, scene1, camera1)
 
 					const camera2 = new RedGPU.Display.Camera(redGPUContext)
-					const scene2 = new RedGPU.Display.Scene(redGPUContext)
+					const scene2 = new RedGPU.Display.Scene()
 					const view2 = new RedGPU.Display.View3D(redGPUContext, scene2, camera2)
 
 					redGPUContext.addView(view1)
@@ -76,7 +76,7 @@ RedTest.testGroup(
 				let error
 				try {
 					const camera = new RedGPU.Display.Camera(redGPUContext)
-					const scene = new RedGPU.Display.Scene(redGPUContext)
+					const scene = new RedGPU.Display.Scene()
 
 					const view = new RedGPU.Display.View3D(redGPUContext, scene, camera)
 					redGPUContext.addView(view)
@@ -99,11 +99,11 @@ RedTest.testGroup(
 				let error
 				try {
 					const camera1 = new RedGPU.Display.Camera(redGPUContext)
-					const scene1 = new RedGPU.Display.Scene(redGPUContext)
+					const scene1 = new RedGPU.Display.Scene()
 					const view1 = new RedGPU.Display.View3D(redGPUContext, scene1, camera1)
 
 					const camera2 = new RedGPU.Display.Camera(redGPUContext)
-					const scene2 = new RedGPU.Display.Scene(redGPUContext)
+					const scene2 = new RedGPU.Display.Scene()
 					const view2 = new RedGPU.Display.View3D(redGPUContext, scene2, camera2)
 
 					redGPUContext.addView(view1)
@@ -159,7 +159,7 @@ RedTest.testGroup(
 				let error
 				try {
 					const camera = new RedGPU.Display.Camera(redGPUContext)
-					const scene = new RedGPU.Display.Scene(redGPUContext)
+					const scene = new RedGPU.Display.Scene()
 
 					const view = new RedGPU.Display.View3D(redGPUContext, scene, camera)
 					redGPUContext.addViewAt(view, 0)
@@ -180,7 +180,7 @@ RedTest.testGroup(
 				let error
 				try {
 					const camera = new RedGPU.Display.Camera(redGPUContext)
-					const scene = new RedGPU.Display.Scene(redGPUContext)
+					const scene = new RedGPU.Display.Scene()
 
 					const view1 = new RedGPU.Display.View3D(redGPUContext, scene, camera)
 					const view2 = new RedGPU.Display.View3D(redGPUContext, scene, camera)
@@ -203,7 +203,7 @@ RedTest.testGroup(
 				let error
 				try {
 					const camera = new RedGPU.Display.Camera(redGPUContext)
-					const scene = new RedGPU.Display.Scene(redGPUContext)
+					const scene = new RedGPU.Display.Scene()
 
 					const view1 = new RedGPU.Display.View3D(redGPUContext, scene, camera)
 					const view2 = new RedGPU.Display.View3D(redGPUContext, scene, camera)
@@ -227,7 +227,7 @@ RedTest.testGroup(
 				let error
 				try {
 					const camera = new RedGPU.Display.Camera(redGPUContext)
-					const scene = new RedGPU.Display.Scene(redGPUContext)
+					const scene = new RedGPU.Display.Scene()
 
 					const view = new RedGPU.Display.View3D(redGPUContext, scene, camera)
 					let beyondListIndex = redGPUContext.numViews + 1; // index is beyond the end of the viewList
@@ -275,7 +275,7 @@ RedTest.testGroup(
 				let error
 				try {
 					const camera = new RedGPU.Display.Camera(redGPUContext)
-					const scene = new RedGPU.Display.Scene(redGPUContext)
+					const scene = new RedGPU.Display.Scene()
 
 					const view = new RedGPU.Display.View3D(redGPUContext, scene, camera)
 					redGPUContext.addViewAt(view, -1)
@@ -304,7 +304,7 @@ RedTest.testGroup(
 				let error
 				try {
 					const camera = new RedGPU.Display.Camera(redGPUContext)
-					const scene = new RedGPU.Display.Scene(redGPUContext)
+					const scene = new RedGPU.Display.Scene()
 					const view = new RedGPU.Display.View3D(redGPUContext, scene, camera)
 					redGPUContext.addView(view)
 					pass = redGPUContext.getViewAt(0) === view
@@ -324,11 +324,11 @@ RedTest.testGroup(
 				let error
 				try {
 					const camera1 = new RedGPU.Display.Camera(redGPUContext)
-					const scene1 = new RedGPU.Display.Scene(redGPUContext)
+					const scene1 = new RedGPU.Display.Scene()
 					const view1 = new RedGPU.Display.View3D(redGPUContext, scene1, camera1)
 
 					const camera2 = new RedGPU.Display.Camera(redGPUContext)
-					const scene2 = new RedGPU.Display.Scene(redGPUContext)
+					const scene2 = new RedGPU.Display.Scene()
 					const view2 = new RedGPU.Display.View3D(redGPUContext, scene2, camera2)
 
 					redGPUContext.addView(view1)
@@ -350,7 +350,7 @@ RedTest.testGroup(
 				let error
 				try {
 					const camera = new RedGPU.Display.Camera(redGPUContext)
-					const scene = new RedGPU.Display.Scene(redGPUContext)
+					const scene = new RedGPU.Display.Scene()
 					const view = new RedGPU.Display.View3D(redGPUContext, scene, camera)
 					redGPUContext.addView(view)
 					pass = redGPUContext.getViewAt(1) === undefined
@@ -371,7 +371,7 @@ RedTest.testGroup(
 				let error
 				try {
 					const camera = new RedGPU.Display.Camera(redGPUContext)
-					const scene = new RedGPU.Display.Scene(redGPUContext)
+					const scene = new RedGPU.Display.Scene()
 					const view = new RedGPU.Display.View3D(redGPUContext, scene, camera)
 					redGPUContext.addView(view)
 					const outOfRangeIndex = 10; // index out of range
@@ -397,7 +397,7 @@ RedTest.testGroup(
 				let error
 				try {
 					const camera = new RedGPU.Display.Camera(redGPUContext)
-					const scene = new RedGPU.Display.Scene(redGPUContext)
+					const scene = new RedGPU.Display.Scene()
 					const view = new RedGPU.Display.View3D(redGPUContext, scene, camera)
 					redGPUContext.addView(view)
 					const nonUintIndex = 'zero'; // non-Uint index
@@ -419,7 +419,7 @@ RedTest.testGroup(
 				let error
 				try {
 					const camera = new RedGPU.Display.Camera(redGPUContext)
-					const scene = new RedGPU.Display.Scene(redGPUContext)
+					const scene = new RedGPU.Display.Scene()
 					const view = new RedGPU.Display.View3D(redGPUContext, scene, camera)
 					redGPUContext.addView(view)
 					const nonUintIndex = 2.5; // non-Uint index
@@ -448,7 +448,7 @@ RedTest.testGroup(
 				let error
 				try {
 					const camera = new RedGPU.Display.Camera(redGPUContext)
-					const scene = new RedGPU.Display.Scene(redGPUContext)
+					const scene = new RedGPU.Display.Scene()
 
 					const view = new RedGPU.Display.View3D(redGPUContext, scene, camera)
 					redGPUContext.addView(view)
@@ -470,11 +470,11 @@ RedTest.testGroup(
 				let error
 				try {
 					const camera1 = new RedGPU.Display.Camera(redGPUContext)
-					const scene1 = new RedGPU.Display.Scene(redGPUContext)
+					const scene1 = new RedGPU.Display.Scene()
 					const view1 = new RedGPU.Display.View3D(redGPUContext, scene1, camera1)
 
 					const camera2 = new RedGPU.Display.Camera(redGPUContext)
-					const scene2 = new RedGPU.Display.Scene(redGPUContext)
+					const scene2 = new RedGPU.Display.Scene()
 					const view2 = new RedGPU.Display.View3D(redGPUContext, scene2, camera2)
 
 					redGPUContext.addView(view1)
@@ -496,7 +496,7 @@ RedTest.testGroup(
 				let error
 				try {
 					const camera = new RedGPU.Display.Camera(redGPUContext)
-					const scene = new RedGPU.Display.Scene(redGPUContext)
+					const scene = new RedGPU.Display.Scene()
 					const view = new RedGPU.Display.View3D(redGPUContext, scene, camera)
 					pass = redGPUContext.getViewIndex(view) === -1
 				} catch (e) {
@@ -516,7 +516,7 @@ RedTest.testGroup(
 				let error
 				try {
 					const camera = new RedGPU.Display.Camera(redGPUContext)
-					const scene = new RedGPU.Display.Scene(redGPUContext)
+					const scene = new RedGPU.Display.Scene()
 					const view = new RedGPU.Display.View3D(redGPUContext, scene, camera)
 					redGPUContext.addView(view)
 					redGPUContext.removeView3D(view) // Remove the view from the view list
@@ -587,7 +587,7 @@ RedTest.testGroup(
 				let error
 				try {
 					const camera = new RedGPU.Display.Camera(redGPUContext)
-					const scene = new RedGPU.Display.Scene(redGPUContext)
+					const scene = new RedGPU.Display.Scene()
 
 					const view1 = new RedGPU.Display.View3D(redGPUContext, scene, camera)
 					const view2 = new RedGPU.Display.View3D(redGPUContext, scene, camera)
@@ -610,11 +610,11 @@ RedTest.testGroup(
 				let error
 				try {
 					const camera1 = new RedGPU.Display.Camera(redGPUContext)
-					const scene1 = new RedGPU.Display.Scene(redGPUContext)
+					const scene1 = new RedGPU.Display.Scene()
 					const view1 = new RedGPU.Display.View3D(redGPUContext, scene1, camera1)
 
 					const camera2 = new RedGPU.Display.Camera(redGPUContext)
-					const scene2 = new RedGPU.Display.Scene(redGPUContext)
+					const scene2 = new RedGPU.Display.Scene()
 					const view2 = new RedGPU.Display.View3D(redGPUContext, scene2, camera2)
 
 					redGPUContext.addView(view1)
@@ -680,7 +680,7 @@ RedTest.testGroup(
 				let error
 				try {
 					const camera = new RedGPU.Display.Camera(redGPUContext)
-					const scene = new RedGPU.Display.Scene(redGPUContext)
+					const scene = new RedGPU.Display.Scene()
 					const view = new RedGPU.Display.View3D(redGPUContext, scene, camera)
 					redGPUContext.addView(view)
 					let beyondListIndex = redGPUContext.numViews + 1; // index is beyond the end of the viewList
@@ -704,7 +704,7 @@ RedTest.testGroup(
 				let error
 				try {
 					const camera = new RedGPU.Display.Camera(redGPUContext)
-					const scene = new RedGPU.Display.Scene(redGPUContext)
+					const scene = new RedGPU.Display.Scene()
 					const view = new RedGPU.Display.View3D(redGPUContext, scene, camera)
 					redGPUContext.addView(view)
 					let negativeIndex = -1; // negative index
@@ -726,7 +726,7 @@ RedTest.testGroup(
 				let error
 				try {
 					const camera = new RedGPU.Display.Camera(redGPUContext)
-					const scene = new RedGPU.Display.Scene(redGPUContext)
+					const scene = new RedGPU.Display.Scene()
 					const view = new RedGPU.Display.View3D(redGPUContext, scene, camera)
 					redGPUContext.addView(view)
 					let notANumberIndex = 'not a number'; // index is not a number
@@ -748,7 +748,7 @@ RedTest.testGroup(
 				let error
 				try {
 					const camera = new RedGPU.Display.Camera(redGPUContext)
-					const scene = new RedGPU.Display.Scene(redGPUContext)
+					const scene = new RedGPU.Display.Scene()
 					const view = new RedGPU.Display.View3D(redGPUContext, scene, camera)
 					let index = 0;
 					redGPUContext.setViewIndex(view, index)
@@ -775,11 +775,11 @@ RedTest.testGroup(
 				let error
 				try {
 					const camera1 = new RedGPU.Display.Camera(redGPUContext)
-					const scene1 = new RedGPU.Display.Scene(redGPUContext)
+					const scene1 = new RedGPU.Display.Scene()
 					const view1 = new RedGPU.Display.View3D(redGPUContext, scene1, camera1)
 
 					const camera2 = new RedGPU.Display.Camera(redGPUContext)
-					const scene2 = new RedGPU.Display.Scene(redGPUContext)
+					const scene2 = new RedGPU.Display.Scene()
 					const view2 = new RedGPU.Display.View3D(redGPUContext, scene2, camera2)
 
 					redGPUContext.addView(view1)
@@ -825,7 +825,7 @@ RedTest.testGroup(
 				let pass = true
 				let error
 				const camera = new RedGPU.Display.Camera(redGPUContext)
-				const scene = new RedGPU.Display.Scene(redGPUContext)
+				const scene = new RedGPU.Display.Scene()
 				const view1 = new RedGPU.Display.View3D(redGPUContext, scene, camera)
 				try {
 					let view2;
@@ -865,11 +865,11 @@ RedTest.testGroup(
 				let pass = true
 				let error
 				const camera1 = new RedGPU.Display.Camera(redGPUContext)
-				const scene1 = new RedGPU.Display.Scene(redGPUContext)
+				const scene1 = new RedGPU.Display.Scene()
 				const view1 = new RedGPU.Display.View3D(redGPUContext, scene1, camera1)
 
 				const camera2 = new RedGPU.Display.Camera(redGPUContext)
-				const scene2 = new RedGPU.Display.Scene(redGPUContext)
+				const scene2 = new RedGPU.Display.Scene()
 				const view2 = new RedGPU.Display.View3D(redGPUContext, scene2, camera2)
 				try {
 					redGPUContext.swapViews(view1, view2)
@@ -897,11 +897,11 @@ RedTest.testGroup(
 				let error
 				try {
 					const camera1 = new RedGPU.Display.Camera(redGPUContext)
-					const scene1 = new RedGPU.Display.Scene(redGPUContext)
+					const scene1 = new RedGPU.Display.Scene()
 					const view1 = new RedGPU.Display.View3D(redGPUContext, scene1, camera1)
 
 					const camera2 = new RedGPU.Display.Camera(redGPUContext)
-					const scene2 = new RedGPU.Display.Scene(redGPUContext)
+					const scene2 = new RedGPU.Display.Scene()
 					const view2 = new RedGPU.Display.View3D(redGPUContext, scene2, camera2)
 
 					redGPUContext.addView(view1)
@@ -929,7 +929,7 @@ RedTest.testGroup(
 				let pass = true
 				let error
 				const camera = new RedGPU.Display.Camera(redGPUContext)
-				const scene = new RedGPU.Display.Scene(redGPUContext)
+				const scene = new RedGPU.Display.Scene()
 				const view = new RedGPU.Display.View3D(redGPUContext, scene, camera)
 				redGPUContext.addView(view)
 				try {
@@ -950,7 +950,7 @@ RedTest.testGroup(
 				let pass = true
 				let error
 				const camera = new RedGPU.Display.Camera(redGPUContext)
-				const scene = new RedGPU.Display.Scene(redGPUContext)
+				const scene = new RedGPU.Display.Scene()
 				const view = new RedGPU.Display.View3D(redGPUContext, scene, camera)
 				redGPUContext.addView(view)
 				try {
@@ -988,7 +988,7 @@ RedTest.testGroup(
 				let pass = true
 				let error
 				const camera = new RedGPU.Display.Camera(redGPUContext)
-				const scene = new RedGPU.Display.Scene(redGPUContext)
+				const scene = new RedGPU.Display.Scene()
 				const view = new RedGPU.Display.View3D(redGPUContext, scene, camera)
 				redGPUContext.addView(view)
 				try {
@@ -1009,7 +1009,7 @@ RedTest.testGroup(
 				let pass = true
 				let error
 				const camera = new RedGPU.Display.Camera(redGPUContext)
-				const scene = new RedGPU.Display.Scene(redGPUContext)
+				const scene = new RedGPU.Display.Scene()
 				const view = new RedGPU.Display.View3D(redGPUContext, scene, camera)
 				redGPUContext.addView(view)
 				try {
@@ -1036,7 +1036,7 @@ RedTest.testGroup(
 				let error
 				try {
 					const camera = new RedGPU.Display.Camera(redGPUContext)
-					const scene = new RedGPU.Display.Scene(redGPUContext)
+					const scene = new RedGPU.Display.Scene()
 					const view = new RedGPU.Display.View3D(redGPUContext, scene, camera)
 					redGPUContext.addView(view)
 					redGPUContext.removeView3D(view)
@@ -1056,11 +1056,11 @@ RedTest.testGroup(
 				let error
 				try {
 					const camera1 = new RedGPU.Display.Camera(redGPUContext)
-					const scene1 = new RedGPU.Display.Scene(redGPUContext)
+					const scene1 = new RedGPU.Display.Scene()
 					const view1 = new RedGPU.Display.View3D(redGPUContext, scene1, camera1)
 
 					const camera2 = new RedGPU.Display.Camera(redGPUContext)
-					const scene2 = new RedGPU.Display.Scene(redGPUContext)
+					const scene2 = new RedGPU.Display.Scene()
 					const view2 = new RedGPU.Display.View3D(redGPUContext, scene2, camera2)
 
 					redGPUContext.addView(view1)
@@ -1105,7 +1105,7 @@ RedTest.testGroup(
 				let error
 				try {
 					const camera = new RedGPU.Display.Camera(redGPUContext)
-					const scene = new RedGPU.Display.Scene(redGPUContext)
+					const scene = new RedGPU.Display.Scene()
 					const view = new RedGPU.Display.View3D(redGPUContext, scene, camera)
 					redGPUContext.removeView3D(view)
 				} catch (e) {
@@ -1180,7 +1180,7 @@ RedTest.testGroup(
 				let error;
 				try {
 					const camera = new RedGPU.Display.Camera(redGPUContext);
-					const scene = new RedGPU.Display.Scene(redGPUContext);
+					const scene = new RedGPU.Display.Scene();
 					const view = new RedGPU.Display.View3D(redGPUContext, scene, camera);
 
 					redGPUContext.addView(view);
@@ -1211,7 +1211,7 @@ RedTest.testGroup(
 				let error;
 				try {
 					const camera = new RedGPU.Display.Camera(redGPUContext);
-					const scene = new RedGPU.Display.Scene(redGPUContext);
+					const scene = new RedGPU.Display.Scene();
 					const view = new RedGPU.Display.View3D(redGPUContext, scene, camera);
 
 					redGPUContext.addView(view);
@@ -1236,7 +1236,7 @@ RedTest.testGroup(
 				let error;
 				try {
 					const camera = new RedGPU.Display.Camera(redGPUContext);
-					const scene = new RedGPU.Display.Scene(redGPUContext);
+					const scene = new RedGPU.Display.Scene();
 					const view = new RedGPU.Display.View3D(redGPUContext, scene, camera);
 
 					redGPUContext.addView(view);
@@ -1261,7 +1261,7 @@ RedTest.testGroup(
 				let error;
 				try {
 					const camera = new RedGPU.Display.Camera(redGPUContext);
-					const scene = new RedGPU.Display.Scene(redGPUContext);
+					const scene = new RedGPU.Display.Scene();
 					const view = new RedGPU.Display.View3D(redGPUContext, scene, camera);
 
 					redGPUContext.addView(view);
@@ -1286,7 +1286,7 @@ RedTest.testGroup(
 				let error;
 				try {
 					const camera = new RedGPU.Display.Camera(redGPUContext);
-					const scene = new RedGPU.Display.Scene(redGPUContext);
+					const scene = new RedGPU.Display.Scene();
 					const view = new RedGPU.Display.View3D(redGPUContext, scene, camera);
 
 					redGPUContext.addView(view);
@@ -1311,7 +1311,7 @@ RedTest.testGroup(
 				let error;
 				try {
 					const camera = new RedGPU.Display.Camera(redGPUContext);
-					const scene = new RedGPU.Display.Scene(redGPUContext);
+					const scene = new RedGPU.Display.Scene();
 					const view = new RedGPU.Display.View3D(redGPUContext, scene, camera);
 
 					redGPUContext.addView(view);
@@ -1341,7 +1341,7 @@ RedTest.testGroup(
 				let error;
 				try {
 					const camera = new RedGPU.Display.Camera(redGPUContext);
-					const scene = new RedGPU.Display.Scene(redGPUContext);
+					const scene = new RedGPU.Display.Scene();
 					const view1 = new RedGPU.Display.View3D(redGPUContext, scene, camera);
 					const view2 = new RedGPU.Display.View3D(redGPUContext, scene, camera);
 					redGPUContext.addView(view1);
@@ -1365,7 +1365,7 @@ RedTest.testGroup(
 				let error;
 				try {
 					const camera = new RedGPU.Display.Camera(redGPUContext);
-					const scene = new RedGPU.Display.Scene(redGPUContext);
+					const scene = new RedGPU.Display.Scene();
 					const view = new RedGPU.Display.View3D(redGPUContext, scene, camera);
 					redGPUContext.addView(view);
 					redGPUContext.removeAllViews();

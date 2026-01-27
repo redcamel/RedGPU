@@ -1,14 +1,31 @@
 /**
- * RGB 값을 16진수(hex) 색상 코드로 변환합니다.
+ * [KO] RGB 값을 16진수(Hex) 색상 코드로 변환합니다.
+ * [EN] Converts RGB values to a hexadecimal (Hex) color code.
  *
- * 각 채널(r, g, b)이 0~255 범위에 있는지 검증 후, 2자리 16진수 대문자로 변환하여 '#RRGGBB' 형식의 문자열을 반환합니다.
+ * [KO] 각 채널(R, G, B)을 2자리 16진수 대문자 문자열('#RRGGBB')로 변환합니다.
+ * [EN] Converts each channel (R, G, B) into a 2-digit uppercase hexadecimal string ('#RRGGBB').
  *
- * @category ConvertColor
- * @param {number} r 변환할 빨간색(Red) 값 (0~255)
- * @param {number} g 변환할 초록색(Green) 값 (0~255)
- * @param {number} b 변환할 파란색(Blue) 값 (0~255)
- * @returns {string} 변환된 16진수 색상 코드 (예: '#FF0000')
- * @throws {Error} r, g, b 값이 0~255 범위를 벗어나면 예외 발생
+ * * ### Example
+ * ```typescript
+ * const hex = RedGPU.Util.convertRgbToHex(255, 0, 0); // '#FF0000'
+ * ```
+ *
+ * @param r -
+ * [KO] 빨간색 성분 (0~255)
+ * [EN] Red component (0~255)
+ * @param g -
+ * [KO] 초록색 성분 (0~255)
+ * [EN] Green component (0~255)
+ * @param b -
+ * [KO] 파란색 성분 (0~255)
+ * [EN] Blue component (0~255)
+ * @returns
+ * [KO] 변환된 16진수 색상 코드 문자열
+ * [EN] Converted hexadecimal color code string
+ * @throws
+ * [KO] 각 색상 성분이 0~255 범위를 벗어날 경우 Error 발생
+ * [EN] Throws Error if any color component is out of the 0~255 range
+ * @category Color
  */
 declare const convertRgbToHex: (r: number, g: number, b: number) => string;
 export default convertRgbToHex;

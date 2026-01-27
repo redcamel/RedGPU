@@ -1,14 +1,25 @@
 {
   "name": "redgpu",
-  "version": "3.9.0-Alpha",
-  "description": "RedGPU ",
+  "version": "3.9.1-Alpha",
+  "description": "RedGPU",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/redcamel/RedGPU"
+  },
+  "homepage": "https://redcamel.github.io/RedGPU/",
+  "bugs": {
+    "url": "https://github.com/redcamel/RedGPU/issues"
+  },
   "scripts": {
     "build": "rollup -c",
     "rollup watch": "rollup -wc",
-    "build:doc": "npx typedoc --options typedoc.config.js",
-    "watch:doc": "npx nodemon --watch src --ext ts --exec \"npm run build:doc\""
+    "gen:api-ko": "cross-env DOC_LANG=ko npx typedoc --options typedoc.config.js && node buildScripts/github/filterLanguageFiles.js ko",
+    "gen:api-en": "cross-env DOC_LANG=en npx typedoc --options typedoc.config.js && node buildScripts/github/filterLanguageFiles.js en",
+    "gen:api-all": "npm run gen:api-ko && npm run gen:api-en",
+    "vitePress:dev": "npm run gen:api-all && vitepress dev manual",
+    "vitePress:build": "npm run gen:api-all && vitepress build manual && node buildScripts/github/deploy-manual.js"
   },
-  "author": "",
+  "author": "RedCamel",
   "license": "ISC",
   "devDependencies": {
     "@rollup/plugin-json": "^6.1.0",
@@ -17,15 +28,22 @@
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^12.1.4",
     "@rollup/pluginutils": "^5.2.0",
+    "@webgpu/types": "^0.1.63",
+    "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0",
     "gl-matrix": "^3.4.3",
+    "mermaid": "^11.12.2",
     "postcss": "^8.5.6",
     "rollup": "^4.44.1",
     "rollup-plugin-postcss": "^4.0.2",
     "rollup-plugin-string": "^3.0.0",
     "tslib": "^2.8.1",
-    "typedoc": "^0.28.13",
+    "typedoc": "^0.28.16",
+    "typedoc-plugin-markdown": "^4.9.0",
     "typescript": "^5.8.3",
-    "@webgpu/types": "^0.1.63"
+    "vitepress": "^1.6.4",
+    "vitepress-plugin-mermaid": "^2.0.17",
+    "vitepress-sidebar": "^1.33.1"
   },
   "dependencies": {
     "wgsl_reflect": "1.2.1"

@@ -1,14 +1,27 @@
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
 
 /**
- * 주어진 값이 숫자인지 검증합니다.
+ * [KO] 주어진 값이 숫자(Number) 타입인지 검증합니다.
+ * [EN] Validates if the given value is a number type.
  *
- * 값이 number 타입이 아니면 예외를 발생시키고 false를 반환합니다.
+ * [KO] 값이 number 타입이 아니면 예외를 발생시킵니다.
+ * [EN] Throws an exception if the value is not a number type.
  *
- * number 타입이면 true를 반환합니다.
+ * * ### Example
+ * ```typescript
+ * RedGPU.RuntimeChecker.validateNumber(123);
+ * ```
  *
- * @param {number} value 검증할 값
- * @returns {boolean} 값이 숫자이면 true, 아니면 false
+ * @param value - 
+ * [KO] 검증할 값 
+ * [EN] Value to validate
+ * @returns 
+ * [KO] 값이 숫자이면 true 
+ * [EN] True if the value is a number
+ * @throws 
+ * [KO] 값이 숫자가 아닐 경우 Error 발생 
+ * [EN] Throws Error if the value is not a number
+ * @category Validation
  */
 const validateNumber = (value: number): boolean => {
     if (typeof value !== 'number') {
@@ -17,4 +30,4 @@ const validateNumber = (value: number): boolean => {
     }
     return true
 }
-export default validateNumber
+export default validateNumber;

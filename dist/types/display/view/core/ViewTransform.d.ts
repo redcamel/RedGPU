@@ -5,14 +5,18 @@ import PerspectiveCamera from "../../../camera/camera/PerspectiveCamera";
 import AController from "../../../camera/core/AController";
 import RedGPUContext from "../../../context/RedGPUContext";
 /**
- * View3D/View2D의 크기와 위치를 관리하는 클래스입니다.
+ * [KO] View3D/View2D의 크기와 위치를 관리하는 클래스입니다.
+ * [EN] Class that manages the size and position of View3D/View2D.
  *
- * 이 클래스는 카메라 타입(Perspective, Orthographic, Camera2D, AController)을 받아
- * 해당 카메라에 맞는 투영 행렬을 생성하고, 화면 내 위치 및 크기(pixel rect)등을 계산을 담당합니다.
+ * [KO] 카메라 타입을 받아 해당 카메라에 맞는 투영 행렬을 생성하고, 화면 내 위치 및 크기(pixel rect) 등을 계산하는 기능을 담당합니다.
+ * [EN] Receives a camera type, generates a projection matrix suitable for that camera, and handles the calculation of the position and size (pixel rect) within the screen.
  *
- * @remarks
- * `시스템 전용 클래스입니다.`\
- * 이 메서드는 렌더링 엔진 내부에서 자동으로 사용되는 기능으로, 일반적인 사용자는 직접 호출하지 않는 것이 좋습니다.
+ * ::: warning
+ * [KO] 이 클래스는 시스템 내부적으로 사용되는 기본 클래스입니다.<br/>직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is a base class used internally by the system.<br/>Do not create instances directly.
+ * :::
+ *
+ * @category Core
  */
 declare class ViewTransform {
     #private;

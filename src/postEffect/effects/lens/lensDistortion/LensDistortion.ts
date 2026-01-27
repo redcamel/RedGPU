@@ -7,13 +7,13 @@ import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 
 /**
- * 렌즈 왜곡(Lens Distortion) 후처리 이펙트입니다.
- * 배럴/핀쿠션 왜곡, 중심 위치를 조절할 수 있습니다.
+ * [KO] 렌즈 왜곡(Lens Distortion) 후처리 이펙트입니다.
+ * [EN] Lens Distortion post-processing effect.
  *
- * @category Lens
- *
- * @example
- * ```javascript
+ * [KO] 배럴/핀쿠션 왜곡, 중심 위치를 조절할 수 있습니다.
+ * [EN] Can adjust Barrel/Pincushion distortion and center position.
+ * * ### Example
+ * ```typescript
  * const effect = new RedGPU.PostEffect.LensDistortion(redGPUContext);
  * effect.barrelStrength = 0.2;      // 배럴 왜곡 강도
  * effect.pincushionStrength = 0.1;  // 핀쿠션 왜곡 강도
@@ -22,18 +22,43 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/postEffect/lens/lensDistortion/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/lens/lensDistortion/"></iframe>
+ * @category Lens
  */
 class LensDistortion extends ASinglePassPostEffect {
-    /** 배럴 왜곡 강도. 기본값 0.1, 최소 0 */
+    /**
+     * [KO] 배럴 왜곡 강도 (최소 0)
+     * [EN] Barrel distortion strength (Minimum 0)
+     * @defaultValue 0.1
+     */
     #barrelStrength: number = 0.1
-    /** 핀쿠션 왜곡 강도. 기본값 0.0, 최소 0 */
+    /**
+     * [KO] 핀쿠션 왜곡 강도 (최소 0)
+     * [EN] Pincushion distortion strength (Minimum 0)
+     * @defaultValue 0.0
+     */
     #pincushionStrength: number = 0.0
-    /** 왜곡 중심 X. 기본값 0 */
+    /**
+     * [KO] 왜곡 중심 X
+     * [EN] Distortion center X
+     * @defaultValue 0
+     */
     #centerX: number = 0
-    /** 왜곡 중심 Y. 기본값 0 */
+    /**
+     * [KO] 왜곡 중심 Y
+     * [EN] Distortion center Y
+     * @defaultValue 0
+     */
     #centerY: number = 0
 
+    /**
+     * [KO] LensDistortion 인스턴스를 생성합니다.
+     * [EN] Creates a LensDistortion instance.
+     *
+     * @param redGPUContext
+     * [KO] RedGPU 컨텍스트
+     * [EN] RedGPU Context
+     */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
         this.init(
@@ -47,48 +72,72 @@ class LensDistortion extends ASinglePassPostEffect {
         this.centerY = this.#centerY
     }
 
-    /** 배럴 왜곡 강도 반환 */
+    /**
+     * [KO] 배럴 왜곡 강도를 반환합니다.
+     * [EN] Returns the barrel distortion strength.
+     */
     get barrelStrength(): number {
         return this.#barrelStrength;
     }
 
-    /** 배럴 왜곡 강도 설정. 최소 0 */
+    /**
+     * [KO] 배럴 왜곡 강도를 설정합니다. (최소 0)
+     * [EN] Sets the barrel distortion strength. (Minimum 0)
+     */
     set barrelStrength(value: number) {
         validateNumberRange(value, 0)
         this.#barrelStrength = value;
         this.updateUniform('barrelStrength', value)
     }
 
-    /** 핀쿠션 왜곡 강도 반환 */
+    /**
+     * [KO] 핀쿠션 왜곡 강도를 반환합니다.
+     * [EN] Returns the pincushion distortion strength.
+     */
     get pincushionStrength(): number {
         return this.#pincushionStrength;
     }
 
-    /** 핀쿠션 왜곡 강도 설정. 최소 0 */
+    /**
+     * [KO] 핀쿠션 왜곡 강도를 설정합니다. (최소 0)
+     * [EN] Sets the pincushion distortion strength. (Minimum 0)
+     */
     set pincushionStrength(value: number) {
         validateNumberRange(value, 0)
         this.#pincushionStrength = value;
         this.updateUniform('pincushionStrength', value)
     }
 
-    /** 왜곡 중심 X 반환 */
+    /**
+     * [KO] 왜곡 중심 X 좌표를 반환합니다.
+     * [EN] Returns the distortion center X coordinate.
+     */
     get centerX(): number {
         return this.#centerX;
     }
 
-    /** 왜곡 중심 X 설정 */
+    /**
+     * [KO] 왜곡 중심 X 좌표를 설정합니다.
+     * [EN] Sets the distortion center X coordinate.
+     */
     set centerX(value: number) {
         validateNumber(value)
         this.#centerX = value;
         this.updateUniform('centerX', value)
     }
 
-    /** 왜곡 중심 Y 반환 */
+    /**
+     * [KO] 왜곡 중심 Y 좌표를 반환합니다.
+     * [EN] Returns the distortion center Y coordinate.
+     */
     get centerY(): number {
         return this.#centerY;
     }
 
-    /** 왜곡 중심 Y 설정 */
+    /**
+     * [KO] 왜곡 중심 Y 좌표를 설정합니다.
+     * [EN] Sets the distortion center Y coordinate.
+     */
     set centerY(value: number) {
         validateNumber(value)
         this.#centerY = value;

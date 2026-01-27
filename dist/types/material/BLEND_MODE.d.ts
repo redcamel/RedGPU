@@ -1,3 +1,8 @@
+/**
+ * [KO] 블렌드 모드 상수
+ * [EN] Blend mode constants
+ * @category Constant
+ */
 export declare const BLEND_MODE: {
     readonly NORMAL: 0;
     readonly MULTIPLY: 1;

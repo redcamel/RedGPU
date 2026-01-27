@@ -26,6 +26,11 @@ const SHADER_MODULE_NAME = 'VERTEX_MODULE_GRID'
 const FRAGMENT_BIND_GROUP_DESCRIPTOR_NAME = 'FRAGMENT_BIND_GROUP_DESCRIPTOR_GRID'
 const PIPELINE_DESCRIPTOR_LABEL = 'PIPELINE_DESCRIPTOR_GRID'
 
+/**
+ * [KO] 3D 공간의 바닥면을 시각화하는 디버깅용 그리드 클래스입니다.
+ * [EN] Debugging grid class that visualizes the floor plane in 3D space.
+ * @category Debugger
+ */
 class DrawDebuggerGrid {
     #vertexBuffer: VertexBuffer
     #indexBuffer: IndexBuffer

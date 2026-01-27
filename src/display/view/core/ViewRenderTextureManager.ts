@@ -6,14 +6,15 @@ import getMipLevelCount from "../../../utils/texture/getMipLevelCount";
 import View3D from "../View3D";
 
 /**
- * ViewRenderTextureManager 클래스
+ * [KO] View3D/2D의 렌더 타깃(컬러, 깊이, G-Buffer 등)을 생성 및 관리하는 매니저 클래스입니다.
+ * [EN] Manager class that creates and manages render targets (color, depth, G-Buffer, etc.) for View3D/2D.
  *
- * View3D/2D의 렌더 타깃(컬러, 깊이, G-Buffer 등)을 생성·관리합니다.
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
  *
- * @remarks
- * `시스템 전용 클래스입니다.`\
- * 이 메서드는 렌더링 엔진 내부에서 자동으로 사용되는 기능으로, 일반적인 사용자는 직접 호출하지 않는 것이 좋습니다.
- *
+ * @category Core
  */
 class ViewRenderTextureManager {
     /**

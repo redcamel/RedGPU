@@ -1,4 +1,4 @@
-import convertHexToRgb from "../../../utils/convertColor/convertHexToRgb";
+import convertHexToRgb from "../../../color/convertHexToRgb";
 import LinePoint from "./LinePoint";
 
 class LinePointWithInOut {
