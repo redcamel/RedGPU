@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769512737237";
+import * as RedGPU from "../../../../dist/index.js?t=1769513175662";
 
 const canvas = document.createElement("canvas");
 document.body.appendChild(canvas);
@@ -104,8 +104,8 @@ const getRandomHexValue = () => {
 };
 
 const renderTestPane = async (redGPUContext, scene) => {
-    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769512737237");
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769512737237");
+    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769513175662");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769513175662");
     setDebugButtons(RedGPU, redGPUContext);
     const pane = new Pane();
     const {shadowManager} = scene;
