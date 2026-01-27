@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RedGPU - Javascript WebGPU Library</title>
+    <link rel="icon" type="image/svg+xml" href="manual/public/logo-dark.svg">
     <link href="https://redcamel.github.io/RedGPU/" rel="canonical">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -291,6 +292,25 @@
             justify-content: center;
             margin-bottom: 1rem;
             font-size: 1.5rem;
+        }
+
+        .feature-icon img {
+            width: 32px;
+            height: 32px;
+            filter: brightness(0) invert(1);
+        }
+
+        .cta-button img {
+            width: 20px;
+            height: 20px;
+            filter: brightness(0) invert(1);
+        }
+
+        .footer-links img.link-icon {
+            width: 18px;
+            height: 18px;
+            filter: brightness(0) invert(1);
+            margin-right: 4px;
         }
 
         .feature-title {
@@ -668,10 +688,10 @@
 
     <div class="hero-buttons">
         <a href="/RedGPU/examples/" class="cta-button">
-            🚀 Explore Examples
+            <img src="manual/public/icon-showcase-dark.svg" alt="Examples"> Explore Examples
         </a>
         <a href="https://github.com/redcamel/RedGPU" class="cta-button cta-button-secondary">
-            📦 View on GitHub
+            <img src="manual/public/readme-dark.svg" alt="GitHub"> View on GitHub
         </a>
     </div>
 </section>
@@ -686,7 +706,9 @@
         <h2 class="section-title">Features</h2>
         <div class="feature-grid">
             <div class="feature-card">
-                <div class="feature-icon">🎮</div>
+                <div class="feature-icon">
+                    <img src="manual/public/icon-showcase-dark.svg" alt="Examples">
+                </div>
                 <h3 class="feature-title">Examples</h3>
                 <p class="feature-description">Explore a wide variety of interactive examples showcasing the power of
                     WebGPU rendering capabilities.</p>
@@ -696,17 +718,31 @@
             </div>
 
             <div class="feature-card">
-                <div class="feature-icon">📚</div>
-                <h3 class="feature-title">API</h3>
-                <p class="feature-description">Complete API reference and documentation to help you leverage RedGPU's
-                    powerful WebGPU capabilities.</p>
+                <div class="feature-icon">
+                    <img src="manual/public/readme-dark.svg" alt="Documentation">
+                </div>
+                <h3 class="feature-title">Documentation</h3>
+                <p class="feature-description">Learn how to build powerful WebGPU applications with our step-by-step guides and comprehensive documentation.</p>
                 <a href="/RedGPU/manual/" class="feature-link">
+                    Start Learning →
+                </a>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <img src="manual/public/icon-api-dark.svg" alt="API">
+                </div>
+                <h3 class="feature-title">API Reference</h3>
+                <p class="feature-description">Deep dive into the complete API specification. Find detailed information about classes, methods, and properties.</p>
+                <a href="/RedGPU/manual/en/api/RedGPU-API/namespaces/RedGPU/README.html" class="feature-link">
                     Browse API →
                 </a>
             </div>
 
             <div class="feature-card">
-                <div class="feature-icon">⚡</div>
+                <div class="feature-icon">
+                    <img src="manual/public/icon-performance-dark.svg" alt="Performance">
+                </div>
                 <h3 class="feature-title">High Performance</h3>
                 <p class="feature-description">Built for speed and efficiency, leveraging the power of WebGPU for
                     next-generation web graphics.</p>
@@ -780,13 +816,16 @@
             <h3>Resources</h3>
             <div class="footer-links">
                 <a href="/RedGPU/examples/">
-                    🎮 Examples
+                    <img src="manual/public/icon-showcase-dark.svg" class="link-icon" alt="Examples"> Examples
                 </a>
-                <a href="/RedGPU/docs/">
-                    📚 API Documentation
+                <a href="/RedGPU/manual/">
+                    <img src="manual/public/readme-dark.svg" class="link-icon" alt="Documentation"> Documentation
+                </a>
+                <a href="/RedGPU/manual/en/api/RedGPU-API/namespaces/RedGPU/README.html">
+                    <img src="manual/public/icon-api-dark.svg" class="link-icon" alt="API"> API Reference
                 </a>
                 <a href="https://github.com/redcamel/RedGPU/releases">
-                    📦 Releases
+                    <img src="manual/public/readme-dark.svg" class="link-icon" alt="Releases"> Releases
                 </a>
                 <a href="https://github.com/redcamel/RedGPU/issues">
                     🐛 Issues
