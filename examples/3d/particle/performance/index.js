@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769497870527";
+import * as RedGPU from "../../../../dist/index.js?t=1769498378009";
 
 // 1. Create and append a canvas
 // 1. 캔버스를 생성하고 문서에 추가
@@ -90,7 +90,7 @@ RedGPU.init(
 );
 
 const renderTestPane = async (redGPUContext, mesh) => {
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769497870527");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769498378009");
     setDebugButtons(RedGPU, redGPUContext);
 
 };

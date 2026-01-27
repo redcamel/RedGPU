@@ -23,7 +23,9 @@ jobs:
 
       # 3. 이전 빌드 결과물 삭제 (소스 제외, gitignore된 파일들 삭제 - node_modules 포함)
       - name: Clean old build artifacts
-        run: git clean -fdX
+        run: |
+          rm -rf sitemap.xml docs/
+          git clean -fdX
 
       # 4. 의존성 패키지 설치 (Clean 이후에 실행해야 함)
       - name: Install dependencies
