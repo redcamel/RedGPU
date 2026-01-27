@@ -27,51 +27,51 @@ declare class WGSLUniformTypes {
     static get f32(): TypeUniform;
     /** [KO] f16 타입 [EN] f16 type */
     static get f16(): TypeUniform;
-    /** [KO] vec2<f32> 타입 [EN] vec2<f32> type */
+    /** [KO] `vec2<f32>` 타입 [EN] `vec2<f32>` type */
     static get vec2f32(): TypeUniform;
-    /** [KO] vec2<i32> 타입 [EN] vec2<i32> type */
+    /** [KO] `vec2<i32>` 타입 [EN] `vec2<i32>` type */
     static get vec2i32(): TypeUniform;
-    /** [KO] vec2<u32> 타입 [EN] vec2<u32> type */
+    /** [KO] `vec2<u32>` 타입 [EN] `vec2<u32>` type */
     static get vec2u32(): TypeUniform;
-    /** [KO] vec2<u16> 타입 [EN] vec2<u16> type */
+    /** [KO] `vec2<u16>` 타입 [EN] `vec2<u16>` type */
     static get vec2u16(): TypeUniform;
-    /** [KO] vec3<i32> 타입 [EN] vec3<i32> type */
+    /** [KO] `vec3<i32>` 타입 [EN] `vec3<i32>` type */
     static get vec3i32(): TypeUniform;
-    /** [KO] vec3<u32> 타입 [EN] vec3<u32> type */
+    /** [KO] `vec3<u32>` 타입 [EN] `vec3<u32>` type */
     static get vec3u32(): TypeUniform;
-    /** [KO] vec3<f32> 타입 [EN] vec3<f32> type */
+    /** [KO] `vec3<f32>` 타입 [EN] `vec3<f32>` type */
     static get vec3f32(): TypeUniform;
-    /** [KO] vec3<u16> 타입 [EN] vec3<u16> type */
+    /** [KO] `vec3<u16>` 타입 [EN] `vec3<u16>` type */
     static get vec3u16(): TypeUniform;
-    /** [KO] vec4<i32> 타입 [EN] vec4<i32> type */
+    /** [KO] `vec4<i32>` 타입 [EN] `vec4<i32>` type */
     static get vec4i32(): TypeUniform;
-    /** [KO] vec4<u32> 타입 [EN] vec4<u32> type */
+    /** [KO] `vec4<u32>` 타입 [EN] `vec4<u32>` type */
     static get vec4u32(): TypeUniform;
-    /** [KO] vec4<f32> 타입 [EN] vec4<f32> type */
+    /** [KO] `vec4<f32>` 타입 [EN] `vec4<f32>` type */
     static get vec4f32(): TypeUniform;
-    /** [KO] vec4<u16> 타입 [EN] vec4<u16> type */
+    /** [KO] `vec4<u16>` 타입 [EN] `vec4<u16>` type */
     static get vec4u16(): TypeUniform;
-    /** [KO] mat2x2<f32> 타입 [EN] mat2x2<f32> type */
+    /** [KO] `mat2x2<f32>` 타입 [EN] `mat2x2<f32>` type */
     static get mat2x2f32(): TypeUniform;
-    /** [KO] mat2x2<u16> 타입 [EN] mat2x2<u16> type */
+    /** [KO] `mat2x2<u16>` 타입 [EN] `mat2x2<u16>` type */
     static get mat2x2u16(): TypeUniform;
-    /** [KO] mat3x2<f32> 타입 [EN] mat3x2<f32> type */
+    /** [KO] `mat3x2<f32>` 타입 [EN] `mat3x2<f32>` type */
     static get mat3x2f32(): TypeUniform;
-    /** [KO] mat3x2<u16> 타입 [EN] mat3x2<u16> type */
+    /** [KO] `mat3x2<u16>` 타입 [EN] `mat3x2<u16>` type */
     static get mat3x2u16(): TypeUniform;
-    /** [KO] mat3x3<f32> 타입 [EN] mat3x3<f32> type */
+    /** [KO] `mat3x3<f32>` 타입 [EN] `mat3x3<f32>` type */
     static get mat3x3f32(): TypeUniform;
-    /** [KO] mat4x2<f32> 타입 [EN] mat4x2<f32> type */
+    /** [KO] `mat4x2<f32>` 타입 [EN] `mat4x2<f32>` type */
     static get mat4x2f32(): TypeUniform;
-    /** [KO] mat4x2<u16> 타입 [EN] mat4x2<u16> type */
+    /** [KO] `mat4x2<u16>` 타입 [EN] `mat4x2<u16>` type */
     static get mat4x2u16(): TypeUniform;
-    /** [KO] mat2x3<f32> 타입 [EN] mat2x3<f32> type */
+    /** [KO] `mat2x3<f32>` 타입 [EN] `mat2x3<f32>` type */
     static get mat2x3f32(): TypeUniform;
-    /** [KO] mat2x3<u16> 타입 [EN] mat2x3<u16> type */
+    /** [KO] `mat2x3<u16>` 타입 [EN] `mat2x3<u16>` type */
     static get mat2x3u16(): TypeUniform;
-    /** [KO] mat4x4<f32> 타입 [EN] mat4x4<f32> type */
+    /** [KO] `mat4x4<f32>` 타입 [EN] `mat4x4<f32>` type */
     static get mat4x4f32(): TypeUniform;
-    /** [KO] mat4x4<u16> 타입 [EN] mat4x4<u16> type */
+    /** [KO] `mat4x4<u16>` 타입 [EN] `mat4x4<u16>` type */
     static get mat4x4u16(): TypeUniform;
 }
 export default WGSLUniformTypes;

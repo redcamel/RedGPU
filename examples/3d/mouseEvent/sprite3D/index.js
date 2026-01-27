@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1768401228425";
+import * as RedGPU from "../../../../dist/index.js?t=1769495390300";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -65,9 +65,9 @@ const createSampleSprite3D = async (redGPUContext, scene) => {
 };
 
 const renderTestPane = async (redGPUContext, scene) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1768401228425');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769495390300');
     const pane = new Pane();
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1768401228425");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769495390300");
     setDebugButtons(RedGPU, redGPUContext);
     const folder = pane.addFolder({title: 'Sprite3D', expanded: true});
     const controls = {

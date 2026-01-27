@@ -38,6 +38,10 @@ import RedGPUContext from "./context/RedGPUContext";
  * @param requestAdapterOptions -
  * [KO] 어댑터 요청 옵션 (기본값: 고성능 설정)
  * [EN] Adapter request options (Default: high-performance setup)
+ * @returns
+ * [KO] 초기화 프로세스 완료를 나타내는 Promise
+ * [EN] Promise representing the completion of the initialization process
+ * @category Core
  */
 declare const init: (canvas: HTMLCanvasElement, onWebGPUInitialized: (redGPUContext: RedGPUContext) => void, onFailInitialized?: (message?: string) => void, onDestroy?: (info: GPUDeviceLostInfo) => void, alphaMode?: GPUCanvasAlphaMode, requestAdapterOptions?: GPURequestAdapterOptions) => Promise<void>;
 export default init;

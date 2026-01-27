@@ -15,6 +15,7 @@ interface ATextField {
     textAlign: string;
     lineHeight: number;
     border: string;
+    borderRadius: number | string;
     boxShadow: string;
     boxSizing: string;
     filter: string;
