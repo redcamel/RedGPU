@@ -5,6 +5,11 @@ import createBasicPostEffectCode from "../../../../core/createBasicPostEffectCod
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 
+/**
+ * [KO] DOF CoC(Circle of Confusion) 계산 이펙트입니다.
+ * [EN] DOF CoC (Circle of Confusion) calculation effect.
+ * @category Lens
+ */
 class DOFCoC extends ASinglePassPostEffect {
     #focusDistance: number = 15.0;
     #aperture: number = 1.4;

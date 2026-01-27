@@ -17,6 +17,7 @@ const defineValues = {
 } as const;
 const conditionalBlockPattern = /#redgpu_if\s+(\w+)\b([\s\S]*?)(?:#redgpu_else([\s\S]*?))?#redgpu_endIf/g;
 
+/** [KO] 조건부 블록 정보 인터페이스 [EN] Conditional block information interface */
 export interface ConditionalBlock {
     uniformName: string;
     ifBlock: string;
@@ -25,6 +26,7 @@ export interface ConditionalBlock {
     blockIndex: number;
 }
 
+/** [KO] 전처리된 WGSL 결과 인터페이스 [EN] Preprocessed WGSL result interface */
 interface PreprocessedWGSLResult {
     cacheKey: string;
     defaultSource: string;
@@ -33,8 +35,10 @@ interface PreprocessedWGSLResult {
 }
 
 const preprocessCache = new Map<string, PreprocessedWGSLResult>();
+
 /**
- * 코드 해시 생성 (간단한 해시 함수)
+ * [KO] 코드 해시를 생성합니다.
+ * [EN] Generates a code hash.
  */
 const generateCodeHash = (code: string): string => {
     let hash = 0;
@@ -45,22 +49,28 @@ const generateCodeHash = (code: string): string => {
     }
     return hash.toString(36);
 };
+
 /**
- * 인클루드 처리 - SystemCode에서 해당 키의 코드를 가져와서 치환
+ * [KO] 인클루드(#redgpu_include)를 처리합니다.
+ * [EN] Processes includes (#redgpu_include).
  */
 const processIncludes = (code: string): string => {
     return code.replace(includePattern, (match, key) => SystemCode[key] || match);
 };
+
 /**
- * 정의 처리 - 미리 정의된 값들로 치환
+ * [KO] 정의(REDGPU_DEFINE_*)를 처리합니다.
+ * [EN] Processes defines (REDGPU_DEFINE_*).
  */
 const processDefines = (code: string): string => {
     return code.replace(definePattern, (match) =>
         defineValues[match as keyof typeof defineValues] || match
     );
 };
+
 /**
- * 조건부 블록 찾기 및 파싱 - #redgpu_else 지원
+ * [KO] 조건부 블록(#redgpu_if)을 찾아 파싱합니다.
+ * [EN] Finds and parses conditional blocks (#redgpu_if).
  */
 const findConditionalBlocks = (code: string): ConditionalBlock[] => {
     const conditionalBlocks: ConditionalBlock[] = [];
@@ -79,8 +89,10 @@ const findConditionalBlocks = (code: string): ConditionalBlock[] => {
     }
     return conditionalBlocks;
 };
+
 /**
- * 중복 키 통계 및 로깅
+ * [KO] 중복 키 통계 및 로깅을 수행합니다.
+ * [EN] Performs duplicate key statistics and logging.
  */
 const logDuplicateKeys = (conditionalBlocks: ConditionalBlock[]): void => {
     if (!conditionalBlocks.length) return;
@@ -96,24 +108,36 @@ const logDuplicateKeys = (conditionalBlocks: ConditionalBlock[]): void => {
         `${b.uniformName}[${b.blockIndex}]${b.elseBlock ? ' (else 포함)' : ''}`
     ));
 };
+
 /**
- * 기본 셰이더 소스 생성 (모든 조건부 블록의 if 부분 포함)
+ * [KO] 기본 셰이더 소스를 생성합니다.
+ * [EN] Generates the default shader source.
  */
 const generateDefaultSource = (defines: string, conditionalBlocks: ConditionalBlock[]): string => {
     let defaultSource = defines;
     for (let i = conditionalBlocks.length - 1; i >= 0; i--) {
         const block = conditionalBlocks[i];
-        // 기본적으로 if 블록을 포함 (조건이 true일 때의 상태)
         defaultSource = defaultSource.replace(block.fullMatch, block.ifBlock);
-        // console.log('✅ 기본 셰이더에 포함:', `${block.uniformName}[${block.blockIndex}] - if 블록`);
     }
     return defaultSource;
 };
+
 /**
- * WGSL 전처리 메인 함수
+ * [KO] WGSL 셰이더 코드를 전처리합니다.
+ * [EN] Preprocesses WGSL shader code.
+ *
+ * [KO] 이 함수는 #redgpu_include, REDGPU_DEFINE_*, #redgpu_if 등 RedGPU 전용 매크로를 처리하고, 셰이더 변형(variant) 생성을 위한 정보를 추출합니다.
+ * [EN] This function processes RedGPU-specific macros such as #redgpu_include, REDGPU_DEFINE_*, and #redgpu_if, and extracts information for generating shader variants.
+ *
+ * @param code -
+ * [KO] 전처리할 WGSL 소스 코드
+ * [EN] WGSL source code to preprocess
+ * @returns
+ * [KO] 전처리 결과 객체 (캐시 키, 기본 소스, 변형 생성기 등 포함)
+ * [EN] Preprocessing result object (including cache key, default source, and variant generator)
+ * @category WGSL
  */
 const preprocessWGSL = (code: string): PreprocessedWGSLResult => {
-    // 캐시 확인
     const cacheKey = generateCodeHash(code);
     const cachedResult = preprocessCache.get(cacheKey);
     if (cachedResult) {
@@ -121,28 +145,19 @@ const preprocessWGSL = (code: string): PreprocessedWGSLResult => {
         return cachedResult;
     }
     console.log('🔄 WGSL 파싱 시작:', cacheKey);
-    // 1. 인클루드 처리
     const withIncludes = processIncludes(code);
-    // 2. 정의 처리
     const defines = processDefines(withIncludes);
-    // 3. 조건부 블록 찾기
     const conditionalBlocks = findConditionalBlocks(defines);
-    // 4. 중복 키 통계 및 로깅
     logDuplicateKeys(conditionalBlocks);
-    // 5. 기본 셰이더 생성
     const defaultSource = generateDefaultSource(defines, conditionalBlocks);
-    // 6. 고유 키 추출
     const uniqueKeys = [...new Set(conditionalBlocks.map(b => b.uniformName))];
-    // 7. 레이지 바리안트 생성기 생성
     const shaderSourceVariant = new ShaderVariantGenerator(defines, conditionalBlocks);
-    // 8. 결과 생성
     const result: PreprocessedWGSLResult = {
         cacheKey,
         defaultSource,
         shaderSourceVariant,
         conditionalBlocks: uniqueKeys,
     };
-    // 9. 캐싱 및 로깅
     const totalCombinations = Math.pow(2, uniqueKeys.length);
     preprocessCache.set(cacheKey, result);
     if (totalCombinations > 1) {
@@ -150,7 +165,7 @@ const preprocessWGSL = (code: string): PreprocessedWGSLResult => {
         console.log('고유 키들:', uniqueKeys);
         console.log('이론적 가능한 바리안트 수:', totalCombinations);
     }
-    // keepLog('shaderSourceVariant',shaderSourceVariant)
     return result;
 };
+
 export default preprocessWGSL;

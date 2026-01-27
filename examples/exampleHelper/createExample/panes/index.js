@@ -187,11 +187,11 @@ const setToneMappingSelect = (RedGPU, redGPUContext, rightContainer) => {
     if (redGPUContext.viewList[0].constructor.name === 'View2D') return;
     const targetView = redGPUContext.viewList[0]
     const {toneMappingManager} = targetView
-    const {TONE_MAPPING_MODE} = RedGPU
+    const {TONE_MAPPING_MODE} = RedGPU.ToneMapping
 
     toneSelect.className = 'nav-button tone-mapping-button';
     const list = Object.entries(TONE_MAPPING_MODE).map(([key, value]) => `<option value="${value}" ${toneMappingManager.mode === value ? 'selected="true"' : ''}>${key}</option>`)
-    list.push('<option value="NONE" >NONE</option>')
+
     toneSelect.innerHTML = list.join()
     toneSelect.addEventListener('change', (e) => {
         const targetAntialiasing = e.target.value

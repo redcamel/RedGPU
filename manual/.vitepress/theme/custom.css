@@ -1,0 +1,354 @@
+/* ============================================================
+   1. 전역 레이아웃 및 너비 설정
+   (본문 영역을 100% 사용하여 넓은 화면 제공)
+   ============================================================ */
+
+:root:not(:has(.redgpu-home)) {
+    --vp-content-width: 100%;
+    --vp-layout-max-width: 100%;
+
+    /* 네비게이션 바 전체 컨테이너 너비 해제 */
+    .VPNav .container {
+        margin: 0 !important;
+        max-width: 100% !important;
+    }
+
+    /* 960px 이상 (데스크탑) */
+    @media (min-width: 960px) {
+        .VPNavBar.has-sidebar .content {
+            padding-right: 32px !important;
+        }
+        .VPNavBar .wrapper .container {
+            padding: 0 32px !important;
+            max-width: 100% !important;
+        }
+    }
+
+    /* 960px 미만 (태블릿/모바일) - 햄버거 메뉴 등 고려 */
+    @media (max-width: 959px) {
+        .VPNavBar .wrapper .container {
+            padding: 0 0px !important; /* 모바일은 여백을 조금 줄임 */
+            max-width: 100% !important;
+        }
+    }
+}
+.VPDoc .content,
+.VPDoc .content-container {
+    max-width: 100% !important;
+    width: 100% !important;
+}
+
+/* 테이블 가용 너비 100% 설정 및 넘침 방지 */
+.vp-doc table {
+    width: 100%;
+    display: table;
+    table-layout: auto;
+    margin: 1.5rem 0;
+}
+
+.vp-doc th, .vp-doc td {
+    word-break: break-word;
+}
+
+@media (min-width: 1280px) {
+    .VPDoc .container {
+        display: flex;
+        justify-content: flex-start;
+    }
+}
+
+/* ============================================================
+   2. API 전용 레이아웃 (경로 기반 .api-page-layout)
+   ============================================================ */
+
+/* API 페이지 제목(h2) 스타일 */
+.api-page-layout .vp-doc h2 {
+    color: var(--vp-c-text-3);
+    font-weight: 600;
+    border-bottom: 1px solid var(--vp-c-gutter);
+    padding-bottom: 8px;
+    margin-top: 2.5rem;
+}
+
+/* API 카드 리스트 컨테이너 - API 엔티티 링크가 포함된 리스트만 카드로 변환 */
+.api-page-layout .vp-doc ul:has(> li > a[href*="/modules/"], > li > a[href*="/namespaces/"], > li > a[href*="/classes/"], > li > a[href*="/interfaces/"], > li > a[href*="/functions/"], > li > a[href*="/variables/"],  > li > a[href*="/type-aliases/"], > li > a[href*="/enums/"]) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 0;
+    list-style: none;
+    margin: 1.5rem 0;
+}
+
+/* 개별 카드 항목 */
+.api-page-layout .vp-doc ul:has(> li > a[href*="/modules/"], > li > a[href*="/namespaces/"], > li > a[href*="/classes/"], > li > a[href*="/interfaces/"], > li > a[href*="/functions/"], > li > a[href*="/variables/"], > li > a[href*="/type-aliases/"], > li > a[href*="/enums/"]) > li {
+    flex: 0 1 calc(15% - 12px);
+    min-width: 220px;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 1px solid var(--vp-c-divider);
+    border-radius: 8px;
+    background-color: var(--vp-c-bg-soft);
+    transition: all 0.2s ease;
+    overflow: hidden;
+}
+
+/* 카드 내부 링크 및 텍스트 설정 */
+.api-page-layout .vp-doc ul:has(> li > a[href*="/modules/"], > li > a[href*="/namespaces/"], > li > a[href*="/classes/"], > li > a[href*="/interfaces/"], > li > a[href*="/functions/"], > li > a[href*="/variables/"], > li > a[href*="/type-aliases/"], > li > a[href*="/enums/"]) > li > a {
+    display: flex;
+    align-items: center;
+    padding: 10px 14px;
+    text-decoration: none !important;
+    color: var(--vp-c-text-1);
+    font-size: 0.9rem;
+    font-weight: 500;
+    width: 100%;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 타입 아이콘 배지 (좌측) */
+.api-page-layout .vp-doc ul:has(> li > a[href*="/modules/"], > li > a[href*="/namespaces/"], > li > a[href*="/classes/"], > li > a[href*="/interfaces/"], > li > a[href*="/functions/"], > li > a[href*="/variables/"],  > li > a[href*="/type-aliases/"],> li > a[href*="/enums/"]) > li > a::before {
+    content: "O";
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    font-size: 10px;
+    font-weight: 800;
+    border-radius: 4px;
+    background-color: var(--vp-c-bg-alt);
+    color: var(--vp-c-text-3);
+}
+
+/* 타입별 색상 정의 */
+.api-page-layout .vp-doc ul:has(> li > a) > li > a[href*="/modules/"]::before,
+.api-page-layout .vp-doc ul:has(> li > a) > li > a[href*="/namespaces/"]::before {
+    content: "N";
+    background-color: #ef4444;
+    color: white;
+}
+
+.api-page-layout .vp-doc ul:has(> li > a) > li > a[href*="/functions/"]::before {
+    content: "F";
+    background-color: #06b6d4;
+    color: white;
+}
+
+.api-page-layout .vp-doc ul:has(> li > a) > li > a[href*="/classes/"]::before {
+    content: "C";
+    background-color: #47a047;
+    color: white;
+}
+
+.api-page-layout .vp-doc ul:has(> li > a) > li > a[href*="/interfaces/"]::before {
+    content: "I";
+    background-color: #2b7489;
+    color: white;
+}
+
+.api-page-layout .vp-doc ul:has(> li > a) > li > a[href*="/variables/"]::before {
+    content: "V";
+    background-color: #d88e00;
+    color: white;
+}
+
+.api-page-layout .vp-doc ul:has(> li > a) > li > a[href*="/type-aliases/"]::before {
+    content: "T";
+    background-color: #d88e00;
+    color: white;
+}
+
+.api-page-layout .vp-doc ul:has(> li > a) > li > a[href*="/enums/"]::before {
+    content: "E";
+    background-color: #7d4099;
+    color: white;
+}
+
+/* 오른쪽 화살표(>) */
+.api-page-layout .vp-doc ul:has(> li > a) > li > a::after {
+    content: "\203A";
+    flex-shrink: 0;
+    margin-left: auto;
+    padding-left: 8px;
+    font-size: 1.2rem;
+    color: var(--vp-c-text-3);
+    transition: transform 0.2s ease;
+}
+
+/* 호버 효과 */
+.api-page-layout .vp-doc ul:has(> li > a) > li:hover {
+    border-color: var(--vp-c-brand-1);
+    transform: translateY(-1px);
+}
+
+.api-page-layout .vp-doc ul:has(> li > a) > li:hover a::after {
+    transform: translateX(3px);
+    color: var(--vp-c-brand-1);
+}
+
+/* API 반응형 */
+@media (max-width: 1280px) {
+    .api-page-layout .vp-doc ul:has(> li > a) > li {
+        flex: 0 1 calc(33.33% - 12px);
+    }
+}
+
+@media (max-width: 960px) {
+    .api-page-layout .vp-doc ul:has(> li > a) > li {
+        flex: 0 1 calc(33.33% - 12px);
+    }
+}
+
+@media (max-width: 640px) {
+    .api-page-layout .vp-doc ul:has(> li > a) > li {
+        flex: 1 1 100%;
+    }
+}
+
+/* ============================================================
+   3. UI 컴포넌트 (버전 태그, 네비바)
+   ============================================================ */
+.version-tag {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 0 8px;
+    font-size: 10px;
+    font-weight: 700;
+    font-family: var(--vp-font-family-mono);
+    line-height: 18px;
+    vertical-align: middle;
+    transform: translateY(-1px);
+    color: var(--vp-c-brand-1);
+    background-color: var(--vp-c-brand-soft);
+    border: 1px solid var(--vp-c-brand-soft);
+    border-radius: 6px;
+    transition: all 0.25s;
+}
+
+.version-tag:hover {
+    background-color: var(--vp-c-brand-2);
+    color: var(--vp-c-white);
+}
+
+.dark .version-tag {
+    color: var(--vp-c-brand-light);
+    background-color: rgba(100, 108, 255, 0.15);
+    border-color: rgba(100, 108, 255, 0.3);
+}
+
+.VPNavBarTitle a:hover {
+    text-decoration: none !important;
+}
+
+/* ============================================================
+   4. 사이드바 커스텀 (README 강조)
+   ============================================================ */
+.VPSidebarItem > .item > .link[href*="README"] {
+    font-weight: bold;
+    color: var(--vp-c-brand-1) !important;
+    background-color: var(--vp-c-default-soft);
+    border-radius: 4px;
+    padding-left: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.VPSidebarItem > .item > .link[href*="README"]::before {
+    content: "";
+    width: 16px;
+    height: 16px;
+    background: url('/readme-light.svg') no-repeat center;
+}
+
+.dark .VPSidebarItem > .item > .link[href*="README"]::before {
+    background: url('/readme-dark.svg') no-repeat center;
+}
+
+.vp-footer .copyright a:hover {
+    text-decoration: underline;
+}
+
+/* ============================================================
+   6. Extremely Soft Monotonic Feature Border
+   ============================================================ */
+.VPFeature {
+    border: 1px solid transparent !important;
+    background: linear-gradient(var(--vp-c-bg-soft), var(--vp-c-bg-soft)) padding-box,
+                linear-gradient(135deg, rgba(128, 128, 128, 0.08), rgba(128, 128, 128, 0.01)) border-box !important;
+}
+
+/* ============================================================
+   7. Hero Video Styles
+   ============================================ */
+.VPHomeVideo {
+    margin: 64px 0;
+}
+
+/* ============================================================
+   7. Feature Icons Theme Support
+   ============================================================ */
+:root {
+    --rp-feature-icon-color: var(--vp-c-brand-1);
+    --rp-feature-icon-bg: var(--vp-c-brand-soft);
+}
+
+.dark {
+    --rp-feature-icon-color: var(--vp-c-brand-light);
+    --rp-feature-icon-bg: rgba(100, 108, 255, 0.2);
+}
+
+.VPFeature .icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8px;
+    border-radius: 8px;
+    background-color: var(--rp-feature-icon-bg);
+    color: var(--rp-feature-icon-color);
+    width: 48px;
+    height: 48px;
+    margin-bottom: 20px;
+}
+
+.VPFeature .icon img {
+    width: 24px;
+    height: 24px;
+    /* 필터를 사용하여 SVG 이미지 색상을 currentColor처럼 제어 (브랜드 컬러로 강제) */
+    filter: brightness(0) saturate(100%) invert(48%) sepia(89%) border-left(100%) saturate(1487%) hue-rotate(130deg) brightness(95%) contrast(102%);
+}
+
+/* 다크모드에서 아이콘 필터 조정 (더 밝은 브랜드 컬러) */
+.dark .VPFeature .icon img {
+    filter: brightness(0) saturate(100%) invert(75%) sepia(15%) saturate(2000%) hue-rotate(200deg) brightness(100%) contrast(105%);
+}
+
+/* ============================================================
+   8. Home Hero Styles
+   ============================================================ */
+.VPHero .name {
+    font-size: 22px !important;
+    line-height: 40px !important;
+}
+
+@media (min-width: 640px) {
+    .VPHero .name {
+        font-size: 38px !important;
+        line-height: 56px !important;
+    }
+}
+
+@media (min-width: 960px) {
+    .VPHero .name {
+        font-size: 42px !important;
+        line-height: 64px !important;
+    }
+}
+
+

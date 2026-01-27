@@ -7,9 +7,11 @@ import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 
 /**
- * SSAO(Screen Space Ambient Occlusion) 후처리 이펙트입니다.
+ * [KO] SSAO AO 계산 이펙트입니다. (내부용)
+ * [EN] SSAO AO calculation effect. (Internal use)
+ * @category PostEffect
  */
-class SSAO_A0 extends ASinglePassPostEffect {
+class SSAO_AO extends ASinglePassPostEffect {
 
 
     #radius: number = 0.253;
@@ -123,5 +125,5 @@ class SSAO_A0 extends ASinglePassPostEffect {
 
 }
 
-Object.freeze(SSAO_A0);
-export default SSAO_A0;
+Object.freeze(SSAO_AO);
+export default SSAO_AO;

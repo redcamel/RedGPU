@@ -1,9 +1,11 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 /**
- * SSAO(Screen Space Ambient Occlusion) 후처리 이펙트입니다.
+ * [KO] SSAO AO 계산 이펙트입니다. (내부용)
+ * [EN] SSAO AO calculation effect. (Internal use)
+ * @category PostEffect
  */
-declare class SSAO_A0 extends ASinglePassPostEffect {
+declare class SSAO_AO extends ASinglePassPostEffect {
     #private;
     constructor(redGPUContext: RedGPUContext);
     get useBlur(): boolean;
@@ -23,4 +25,4 @@ declare class SSAO_A0 extends ASinglePassPostEffect {
     get contrast(): number;
     set contrast(value: number);
 }
-export default SSAO_A0;
+export default SSAO_AO;

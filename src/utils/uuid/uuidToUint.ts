@@ -1,11 +1,18 @@
 /**
- * uuid 문자열을 32비트 부호 없는 정수로 변환합니다.
+ * [KO] UUID 문자열을 32비트 부호 없는 정수로 변환합니다.
+ * [EN] Converts a UUID string to a 32-bit unsigned integer.
  *
- * uuid의 하이픈(-)을 모두 제거한 후, 앞 8자리를 16진수로 해석하여 반환합니다.
+ * * ### Example
+ * ```typescript
+ * const uintId = RedGPU.Util.uuidToUint('123e4567-e89b-12d3-a456-426614174000');
+ * ```
  *
- * @param uuid 변환할 uuid 문자열 (예: '123e4567-e89b-12d3-a456-426614174000')
- * @returns 변환된 32비트 부호 없는 정수
- *
+ * @param uuid -
+ * [KO] 변환할 UUID 문자열
+ * [EN] UUID string to convert
+ * @returns
+ * [KO] 변환된 32비트 부호 없는 정수
+ * [EN] Converted 32-bit unsigned integer
  * @category UUID
  */
 const uuidToUint = (uuid: string): number => {

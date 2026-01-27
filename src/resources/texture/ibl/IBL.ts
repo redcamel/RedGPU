@@ -11,12 +11,22 @@ import IBLCubeTexture from "./IBLCubeTexture";
 import irradianceShaderCode from "./irradianceShaderCode.wgsl"
 
 /**
+ * [KO] Image-Based Lighting (IBL)을 관리하는 클래스입니다.
+ * [EN] Class that manages Image-Based Lighting (IBL).
+ *
+ * [KO] HDR 또는 큐브맵 이미지를 기반으로 주변광(Ambient)과 반사광(Specular) 환경을 생성하여 보다 사실적인 렌더링을 가능하게 합니다.
+ * [EN] Enables more realistic rendering by generating ambient and specular environments based on HDR or cubemap images.
+ *
+ * * ### Example
+ * ```typescript
+ * const ibl = new RedGPU.Resource.IBL(redGPUContext, 'path/to/environment.hdr');
+ * view.ibl = ibl;
+ * ```
  * @category IBL
  */
 class IBL {
     #redGPUContext: RedGPUContext
     #sourceCubeTexture: GPUTexture
-    //
     #environmentTexture: IBLCubeTexture;
     #irradianceTexture: IBLCubeTexture;
     #iblTexture: IBLCubeTexture
@@ -26,6 +36,22 @@ class IBL {
     #envCubeSize: number
     #iblCubeSize: number
 
+    /**
+     * [KO] IBL 인스턴스를 생성합니다.
+     * [EN] Creates an IBL instance.
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     * @param srcInfo -
+     * [KO] 환경맵 소스 정보 (HDR URL 또는 6개 이미지 URL 배열)
+     * [EN] Environment map source information (HDR URL or array of 6 image URLs)
+     * @param envCubeSize -
+     * [KO] 환경맵 큐브 크기 (기본값: 1024)
+     * [EN] Environment map cube size (default: 1024)
+     * @param iblCubeSize -
+     * [KO] IBL 큐브 크기 (기본값: 512)
+     * [EN] IBL cube size (default: 512)
+     */
     constructor(redGPUContext: RedGPUContext, srcInfo: string | [string, string, string, string, string, string],
                 envCubeSize: number = 1024, iblCubeSize: number = 512) {
         const cacheKeyPart = `${srcInfo}?key=${envCubeSize}_${iblCubeSize}`
@@ -60,29 +86,36 @@ class IBL {
         }
     }
 
-
+    /** [KO] 환경맵 큐브 크기 [EN] Environment map cube size */
     get envCubeSize(): number {
         return this.#envCubeSize;
     }
 
+    /** [KO] IBL 큐브 크기 [EN] IBL cube size */
     get iblCubeSize(): number {
         return this.#iblCubeSize;
     }
 
+    /** [KO] Irradiance 텍스처를 반환합니다. [EN] Returns the irradiance texture. */
     get irradianceTexture(): IBLCubeTexture {
         return this.#irradianceTexture;
     }
 
+    /** [KO] 환경맵 텍스처를 반환합니다. [EN] Returns the environment texture. */
     get environmentTexture(): IBLCubeTexture {
         return this.#environmentTexture;
     }
 
+    /** [KO] IBL 텍스처를 반환합니다. [EN] Returns the IBL texture. */
     get iblTexture(): IBLCubeTexture {
         return this.#iblTexture;
     }
 
+    /**
+     * [KO] IBL 데이터를 초기화하고 맵들을 생성합니다.
+     * [EN] Initializes IBL data and generates maps.
+     */
     async #init() {
-        keepLog('sourceCubeTexture', this.#sourceCubeTexture)
         const {downSampleCubeMapGenerator} = this.#redGPUContext.resourceManager
         if (this.#sourceCubeTexture) {
             if (!this.#iblTexture.gpuTexture) {
@@ -99,6 +132,10 @@ class IBL {
         }
     }
 
+    /**
+     * [KO] Irradiance 맵을 생성합니다.
+     * [EN] Generates an irradiance map.
+     */
     async #generateIrradianceMap(sourceCubeTexture: GPUTexture): Promise<GPUTexture> {
         const {gpuDevice, resourceManager} = this.#redGPUContext;
         const irradianceSize = 32;
@@ -135,14 +172,16 @@ class IBL {
             addressModeW: GPU_ADDRESS_MODE.CLAMP_TO_EDGE
         });
         const faceMatrices = this.#getCubeMapFaceMatrices();
-        // ✅ 각 면을 개별적으로 렌더링
         for (let face = 0; face < 6; face++) {
             await this.#renderIrradianceFace(irradiancePipeline, sampler, face, faceMatrices[face], sourceCubeTexture, irradianceTexture);
         }
-        console.log(`Irradiance Map 생성 완료: ${irradianceSize}x${irradianceSize}`);
         return irradianceTexture;
     }
 
+    /**
+     * [KO] Irradiance 맵의 특정 면을 렌더링합니다.
+     * [EN] Renders a specific face of the irradiance map.
+     */
     async #renderIrradianceFace(renderPipeline: GPURenderPipeline, sampler: Sampler, face: number, faceMatrix: Float32Array, sourceCubeTexture: GPUTexture, irradianceTexture: GPUTexture): Promise<void> {
         const {gpuDevice} = this.#redGPUContext;
         const uniformBuffer = gpuDevice.createBuffer({
@@ -185,19 +224,14 @@ class IBL {
         uniformBuffer.destroy();
     }
 
+    /** [KO] 큐브맵의 각 면에 대한 변환 행렬을 반환합니다. [EN] Returns the transformation matrices for each face of the cubemap. */
     #getCubeMapFaceMatrices(): Float32Array[] {
         return [
-            // +X (Right) - (0, 0, -1) -> (-1, 0, 0)
             new Float32Array([0, 0, -1, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1]),
-            // -X (Left) - (0, 0, 1) -> (1, 0, 0)
             new Float32Array([0, 0, 1, 0, 0, -1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1]),
-            // +Y (Top) - (1, 0, 0) -> (0, 1, 0)
             new Float32Array([1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1]),
-            // -Y (Bottom) - (1, 0, 0) -> (0, -1, 0)
             new Float32Array([1, 0, 0, 0, 0, 0, -1, 0, 0, -1, 0, 0, 0, 0, 0, 1]),
-            // +Z (Front) - (1, 0, 0) -> (0, 0, 1)
             new Float32Array([1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]),
-            // -Z (Back) - (-1, 0, 0) -> (0, 0, -1)
             new Float32Array([-1, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1])
         ];
     }

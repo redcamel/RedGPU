@@ -120,7 +120,7 @@ function rainbowHex(t) {
     const r = Math.floor(255 * Math.abs(Math.sin(Math.PI * t))); // R 값
     const g = Math.floor(255 * Math.abs(Math.sin(Math.PI * t + (2 * Math.PI) / 3))); // G 값
     const b = Math.floor(255 * Math.abs(Math.sin(Math.PI * t + (4 * Math.PI) / 3))); // B 값
-    return RedGPU.Util.convertRgbToHex(r, g, b); // RGB를 HEX 형식으로 변환
+    return RedGPU.Color.convertRgbToHex(r, g, b); // RGB를 HEX 형식으로 변환
 }
 
 const renderTestPane = async (redGPUContext) => {

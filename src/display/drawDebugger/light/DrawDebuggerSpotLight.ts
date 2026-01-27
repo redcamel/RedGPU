@@ -5,6 +5,11 @@ import TextField3D from "../../textFileds/textField3D/TextField3D";
 import RenderViewStateData from "../../view/core/RenderViewStateData";
 import ADrawDebuggerLight from "./ADrawDebuggerLight";
 
+/**
+ * [KO] 스포트라이트(SpotLight)의 위치, 방향, 원뿔 범위를 시각화하는 디버거 클래스입니다.
+ * [EN] Debugger class that visualizes the position, direction, and cone range of SpotLight.
+ * @category Debugger
+ */
 class DrawDebuggerSpotLight extends ADrawDebuggerLight {
     #target: SpotLight;
     #label: TextField3D

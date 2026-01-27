@@ -1,22 +1,21 @@
 /**
- * GPU 스토어 연산 옵션
+ * [KO] 렌더 패스 종료 시 어태치먼트의 내용을 저장하는 방식을 정의하는 상수군입니다.
+ * [EN] Constants defining how to store attachment contents at the end of a render pass.
  *
- * 렌더 패스 종료 시 어태치먼트(attachment)의 내용을 어떻게 처리할지 정의합니다.
- * 컬러, 깊이, 스텐실 어태치먼트에 적용됩니다.
+ * [KO] 렌더링 결과물을 메모리에 저장할지 혹은 버릴지 결정합니다.
+ * [EN] Determines whether to store the rendering results in memory or discard them.
  *
- * @constant
+ * @category Constants
  */
 declare const GPU_STORE_OP: {
     /**
-     * 렌더링 결과를 저장합니다.
-     *
-     * 어태치먼트에 렌더링된 내용을 메모리에 기록하여 이후 사용할 수 있도록 합니다.
+     * [KO] 렌더링된 결과물을 어태치먼트에 저장합니다.
+     * [EN] Stores the rendered results in the attachment.
      */
     readonly STORE: "store";
     /**
-     * 렌더링 결과를 버립니다.
-     *
-     * 어태치먼트의 내용을 저장하지 않고 폐기합니다. 성능 최적화에 유용합니다.
+     * [KO] 렌더링된 결과물을 저장하지 않고 버립니다.
+     * [EN] Discards the rendered results without storing them.
      */
     readonly DISCARD: "discard";
 };

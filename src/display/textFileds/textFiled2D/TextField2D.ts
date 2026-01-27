@@ -17,39 +17,56 @@ const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
 const BaseTextField2D = mixInMesh2D(ATextField);
 
 /**
- * TextField2D 클래스는 2D 공간에서 텍스트를 표현하는 객체입니다.
+ * [KO] 2D 공간에서 텍스트를 표현하는 클래스입니다.
+ * [EN] Class that represents text in 2D space.
  *
- * 내부적으로 Plane 지오메트리를 사용하며, 텍스트 렌더링 결과를 텍스처로 출력하여 화면에 표시합니다.
- * 텍스트 크기와 smoothing 설정에 따라 텍스처 필터링 방식이 자동으로 조정됩니다.
+ * [KO] 내부적으로 Plane 지오메트리를 사용하며, 텍스트 렌더링 결과를 텍스처로 출력하여 화면에 표시합니다. 텍스트 크기와 smoothing 설정에 따라 텍스처 필터링 방식이 자동으로 조정됩니다.
+ * [EN] Internally uses Plane geometry and displays text rendering results as a texture. Texture filtering is automatically adjusted based on text size and smoothing settings.
  *
- * @remarks
- * geometry와 material은 고정되어 있으며 외부에서 변경할 수 없습니다.
+ * [KO] geometry와 material은 고정되어 있으며 외부에서 변경할 수 없습니다.
+ * [EN] Geometry and material are fixed and cannot be changed externally.
+ *
+ * * ### Example
+ * ```typescript
+ * const textField = new RedGPU.Display.TextField2D(redGPUContext);
+ * textField.text = "Hello 2D Text!";
+ * scene.addChild(textField);
+ * ```
  *
  * <iframe src="/RedGPU/examples/2d/textField2D/basic/"></iframe>
  *
- * 아래는 TextField2D의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
+ * [KO] 아래는 TextField2D의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
+ * [EN] Below is a list of additional sample examples to help understand the structure and operation of TextField2D.
  * @see [TextField2D MouseEvent example](/RedGPU/examples/2d/mouseEvent/textField2D/)
  *
  * @category TextField
  */
 class TextField2D extends BaseTextField2D {
     /**
-     * 텍스트 렌더링 결과의 너비 (픽셀 단위)
+     * [KO] 텍스트 렌더링 결과의 너비 (픽셀 단위)
+     * [EN] Width of the text rendering result (in pixels)
      */
     #width: number = 1;
     /**
-     * 텍스트 렌더링 결과의 높이 (픽셀 단위)
+     * [KO] 텍스트 렌더링 결과의 높이 (픽셀 단위)
+     * [EN] Height of the text rendering result (in pixels)
      */
     #height: number = 1;
     /**
-     * 텍스처 필터링에 smoothing을 사용할지 여부
+     * [KO] 텍스처 필터링에 smoothing을 사용할지 여부
+     * [EN] Whether to use smoothing for texture filtering
      */
     #useSmoothing: boolean = true;
 
     /**
-     * TextField2D 생성자입니다.
-     * @param redGPUContext - RedGPUContext 인스턴스
-     * @param useSmoothing - 텍스처 필터링에 smoothing 적용 여부
+     * [KO] TextField2D 생성자
+     * [EN] TextField2D constructor
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     * @param useSmoothing -
+     * [KO] 텍스처 필터링에 smoothing 적용 여부
+     * [EN] Whether to apply smoothing to texture filtering
      */
     constructor(redGPUContext: RedGPUContext, useSmoothing: boolean = true) {
         super(redGPUContext, (width: number, height: number) => {

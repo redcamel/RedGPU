@@ -12,9 +12,15 @@ import View3D from "../../view/View3D";
 import Object3DContainer from "./Object3DContainer";
 import VertexGPURenderInfo from "./VertexGPURenderInfo";
 /**
- * @remarks
- * `시스템 전용 클래스입니다.`\
- * 이 메서드는 렌더링 엔진 내부에서 자동으로 사용되는 기능으로, 일반적인 사용자는 직접 호출하지 않는 것이 좋습니다.
+ * [KO] Mesh 및 기타 디스플레이 객체의 공통 기능을 정의하는 추상 베이스 클래스입니다.
+ * [EN] Abstract base class defining common functionality for Mesh and other display objects.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템 내부적으로 사용되는 기본 클래스입니다.<br/>직접 인스턴스를 생성하여 사용하지 마십시오.
+ * [EN] This class is a base class used internally by the system.<br/>Do not create or use instances directly.
+ * :::
+ *
+ * @category Core
  */
 declare class MeshBase extends Object3DContainer {
     #private;

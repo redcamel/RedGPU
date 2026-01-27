@@ -1,13 +1,22 @@
 /**
- * 주어진 텍스처의 width, height에 대해 생성 가능한 mipmap 레벨의 개수를 계산합니다.
+ * [KO] 주어진 크기에 대해 생성 가능한 mipmap 레벨 개수를 계산합니다.
+ * [EN] Calculates the number of mipmap levels for a given size.
  *
- * width, height 중 더 큰 값을 기준으로 log2를 취해, 1을 더한 값을 반환합니다.
- * (예: 256x128 텍스처는 9레벨, 1x1 텍스처는 1레벨)
+ * * ### Example
+ * ```typescript
+ * const levels = RedGPU.Util.getMipLevelCount(1024, 1024); // 11
+ * ```
  *
+ * @param width -
+ * [KO] 가로 크기
+ * [EN] Width
+ * @param height -
+ * [KO] 세로 크기
+ * [EN] Height
+ * @returns
+ * [KO] 생성 가능한 mipmap 레벨 개수
+ * [EN] Number of mipmap levels
  * @category Texture
- * @param {number} width 텍스처의 가로 크기 (픽셀)
- * @param {number} height 텍스처의 세로 크기 (픽셀)
- * @returns {number} 생성 가능한 mipmap 레벨의 개수
  */
 declare const getMipLevelCount: (width: number, height: number) => number;
 export default getMipLevelCount;

@@ -1,6 +1,11 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import View3D from "../../../../display/view/View3D";
 import ASinglePassPostEffect, { ASinglePassPostEffectResult } from "../../../core/ASinglePassPostEffect";
+/**
+ * [KO] DOF 통합 블러 및 합성 이펙트입니다.
+ * [EN] DOF unified blur and compositing effect.
+ * @category Lens
+ */
 declare class DOFUnified extends ASinglePassPostEffect {
     #private;
     constructor(redGPUContext: RedGPUContext);

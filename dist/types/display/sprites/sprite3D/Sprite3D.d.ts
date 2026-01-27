@@ -17,27 +17,40 @@ interface Sprite3D {
     billboardFixedScale: number;
 }
 /**
+ * [KO] 3D 공간에서 항상 카메라를 향하는 2D 스프라이트 객체입니다.
+ * [EN] 2D sprite object that always faces the camera in 3D space.
  *
- * 3D 공간에서 항상 카메라를 향하는 2D 스프라이트 객체
+ * [KO] Mesh 클래스를 상속받아 빌보드 기능을 제공하는 클래스입니다. 빌보드는 3D 공간에 배치되지만 항상 카메라 방향을 바라보는 평면 객체로, UI 요소, 파티클, 텍스트, 아이콘 등을 3D 씬에 표시할 때 유용합니다.
+ * [EN] A class that inherits from Mesh and provides billboard functionality. A billboard is a flat object placed in 3D space but always facing the camera, useful for displaying UI elements, particles, text, icons, etc., in a 3D scene.
  *
- * Sprite3D는 Mesh 클래스를 상속받아 빌보드 기능을 제공하는 클래스입니다.
- * 빌보드는 3D 공간에 배치되지만 항상 카메라 방향을 바라보는 평면 객체로,
- * UI 요소, 파티클, 텍스트, 아이콘 등을 3D 씬에 표시할 때 유용합니다.
+ * * ### Example
+ * ```typescript
+ * const sprite = new RedGPU.Display.Sprite3D(redGPUContext, material);
+ * scene.addChild(sprite);
+ * ```
  *
  * <iframe src="/RedGPU/examples/3d/sprite/sprite3D/"></iframe>
  *
- * 아래는 Sprite3D의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
+ * [KO] 아래는 Sprite3D의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
+ * [EN] Below is a list of additional sample examples to help understand the structure and operation of Sprite3D.
  * @see [Sprite3D MouseEvent example](/RedGPU/examples/3d/mouseEvent/sprite3D/)
  *
  * @category Sprite
  */
 declare class Sprite3D extends Mesh {
     /**
-     * 새로운 Sprite3D 인스턴스를 생성합니다.
+     * [KO] 새로운 Sprite3D 인스턴스를 생성합니다.
+     * [EN] Creates a new Sprite3D instance.
      *
-     * @param redGPUContext - RedGPU 렌더링 컨텍스트
-     * @param material - 스프라이트에 적용할 머티리얼 (옵션)
-     * @param geometry - 스프라이트의 지오메트리 (기본값: 새로운 Plane 인스턴스)
+     * @param redGPUContext -
+     * [KO] RedGPU 렌더링 컨텍스트
+     * [EN] RedGPU rendering context
+     * @param material -
+     * [KO] 스프라이트에 적용할 머티리얼 (옵션)
+     * [EN] Material to apply to the sprite (optional)
+     * @param geometry -
+     * [KO] 스프라이트의 지오메트리 (기본값: 새로운 Plane 인스턴스)
+     * [EN] Geometry of the sprite (default: new Plane instance)
      */
     constructor(redGPUContext: RedGPUContext, material?: any, geometry?: Geometry | Primitive);
     /**

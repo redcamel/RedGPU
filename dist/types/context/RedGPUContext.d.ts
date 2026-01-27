@@ -1,132 +1,188 @@
 import ColorRGBA from "../color/ColorRGBA";
 import ResourceManager from "../resources/core/resourceManager/ResourceManager";
-import AntialiasingManager from "./core/AntialiasingManager";
+import AntialiasingManager from "../antialiasing/AntialiasingManager";
 import RedGPUContextDetector from "./core/RedGPUContextDetector";
 import RedGPUContextSizeManager from "./core/RedGPUContextSizeManager";
 import RedGPUContextViewContainer from "./core/RedGPUContextViewContainer";
 /**
- * RedGPUContext 클래스는 WebGPU 초기화 후 제공되는 최상위 컨텍스트 객체입니다.
+ * [KO] RedGPUContext 클래스는 WebGPU 초기화 후 제공되는 최상위 컨텍스트 객체입니다.
+ * [EN] The RedGPUContext class is the top-level context object provided after WebGPU initialization.
  *
- * - GPU, 캔버스, 디바이스, 어댑터 등 WebGPU의 핵심 정보를 속성으로 가집니다.
- * - View3D 객체를 소유하며, 실제 최상위 컨테이너 역할을 합니다.
- * - 리사이즈, 배경색, 디버그 패널, 안티앨리어싱, 리소스 관리 등 다양한 기능을 제공합니다.
+ * [KO] GPU, 캔버스, 디바이스, 어댑터 등 WebGPU의 핵심 정보를 속성으로 가집니다.
+ * [EN] It holds core WebGPU information such as GPU, canvas, device, and adapter as properties.
+ * [KO] View3D 객체를 소유하며, 실제 최상위 컨테이너 역할을 합니다.
+ * [EN] It owns View3D objects and acts as the actual top-level container.
+ * [KO] 리사이즈, 배경색, 디버그 패널, 안티앨리어싱, 리소스 관리 등 다양한 기능을 제공합니다.
+ * [EN] It provides various features such as resizing, background color, debug panel, anti-aliasing, and resource management.
  *
- * @extends RedGPUContextViewContainer
+ * @category Context
  */
 declare class RedGPUContext extends RedGPUContextViewContainer {
     #private;
-    /** 현재 requestAnimationFrame ID (프레임 루프 관리용) */
+    /**
+     * [KO] 현재 requestAnimationFrame ID (프레임 루프 관리용)
+     * [EN] Current requestAnimationFrame ID (for frame loop management)
+     */
     currentRequestAnimationFrame: number;
-    /** 리사이즈 이벤트 핸들러 (캔버스 크기 변경 시 호출) */
+    /**
+     * [KO] 리사이즈 이벤트 핸들러 (캔버스 크기 변경 시 호출)
+     * [EN] Resize event handler (called when canvas size changes)
+     */
     onResize: ((width: number, height: number) => void) | null;
-    /** 현재 시간(프레임 기준, ms) */
+    /**
+     * [KO] 현재 시간(프레임 기준, ms)
+     * [EN] Current time (frame based, ms)
+     */
     currentTime: number;
+    /**
+     * [KO] RedGPUContext 생성자
+     * [EN] RedGPUContext constructor
+     * @param htmlCanvas -
+     * [KO] 렌더링할 HTMLCanvasElement
+     * [EN] HTMLCanvasElement to render
+     * @param gpuAdapter -
+     * [KO] WebGPU Adapter
+     * [EN] WebGPU Adapter
+     * @param gpuDevice -
+     * [KO] WebGPU Device
+     * [EN] WebGPU Device
+     * @param gpuContext -
+     * [KO] WebGPU Canvas Context
+     * [EN] WebGPU Canvas Context
+     * @param alphaMode -
+     * [KO] 캔버스 알파 모드
+     * [EN] Canvas alpha mode
+     */
     constructor(htmlCanvas: HTMLCanvasElement, gpuAdapter: GPUAdapter, gpuDevice: GPUDevice, gpuContext: GPUCanvasContext, alphaMode: GPUCanvasAlphaMode);
     get boundingClientRect(): DOMRect;
+    /**
+     * [KO] 안티앨리어싱 매니저를 반환합니다.
+     * [EN] Returns the antialiasing manager.
+     */
     get antialiasingManager(): AntialiasingManager;
+    /**
+     * [KO] 디버그 패널 사용 여부를 반환합니다.
+     * [EN] Returns whether the debug panel is used.
+     */
     get useDebugPanel(): boolean;
+    /**
+     * [KO] 디버그 패널 사용 여부를 설정합니다.
+     * [EN] Sets whether to use the debug panel.
+     * @param value -
+     * [KO] 사용 여부
+     * [EN] Usage status
+     */
     set useDebugPanel(value: boolean);
     /**
-     * Get the background color.
-     *
-     * @return {ColorRGBA} The background color.
+     * [KO] 배경색을 반환합니다.
+     * [EN] Returns the background color.
      */
     get backgroundColor(): ColorRGBA;
     /**
-     * Sets the background color of the element.
-     *
-     * @param {ColorRGBA} value - The color value to set as the background color.
-     * @throws {TypeError} If the value parameter is not an instance of ColorRGBA.
+     * [KO] 배경색을 설정합니다.
+     * [EN] Sets the background color.
+     * @param value -
+     * [KO] 설정할 ColorRGBA 객체
+     * [EN] ColorRGBA object to set
+     * @throws
+     * [KO] value가 ColorRGBA 인스턴스가 아닐 경우 에러 발생
+     * [EN] Throws error if value is not an instance of ColorRGBA
      */
     set backgroundColor(value: ColorRGBA);
     /**
-     * Retrieves the RedGPUContextDetector instance.
-     *
-     * @returns {RedGPUContextDetector} The RedGPUContextDetector instance.
+     * [KO] RedGPUContextDetector 인스턴스를 반환합니다.
+     * [EN] Returns the RedGPUContextDetector instance.
      */
     get detector(): RedGPUContextDetector;
     /**
-     * Retrieves the GPU canvas configuration description.
-     *
-     * @returns {GPUCanvasConfiguration} The configuration description.
+     * [KO] GPU 캔버스 구성 정보를 반환합니다.
+     * [EN] Returns the GPU canvas configuration information.
      */
     get configurationDescription(): GPUCanvasConfiguration;
     /**
-     * Retrieves the GPU adapter.
-     *
-     * @returns {GPUAdapter} The GPU adapter object.
+     * [KO] GPU 어댑터를 반환합니다.
+     * [EN] Returns the GPU adapter.
      */
     get gpuAdapter(): GPUAdapter;
     /**
-     * Retrieves the alpha mode of the GPUCanvas object.
-     *
-     * @return {GPUCanvasAlphaMode} The alpha mode of the GPUCanvas.
+     * [KO] 캔버스의 알파 모드를 반환합니다.
+     * [EN] Returns the alpha mode of the canvas.
      */
     get alphaMode(): GPUCanvasAlphaMode;
     /**
-     * Sets the alpha mode of the GPUCanvas.
-     *
-     * @param {GPUCanvasAlphaMode} value - The new alpha mode value to be set.
+     * [KO] 캔버스의 알파 모드를 설정합니다.
+     * [EN] Sets the alpha mode of the canvas.
+     * @param value -
+     * [KO] 설정할 GPUCanvasAlphaMode 값
+     * [EN] GPUCanvasAlphaMode value to set
      */
     set alphaMode(value: GPUCanvasAlphaMode);
     /**
-     * Returns the GPU canvas context.
-     *
-     * @returns {GPUCanvasContext} The GPU canvas context.
+     * [KO] GPU 캔버스 컨텍스트를 반환합니다.
+     * [EN] Returns the GPU canvas context.
      */
     get gpuContext(): GPUCanvasContext;
     /**
-     * Retrieves the GPU device associated with this object.
-     *
-     * @returns {GPUDevice} The GPU device.
+     * [KO] GPU 디바이스를 반환합니다.
+     * [EN] Returns the GPU device.
      */
     get gpuDevice(): GPUDevice;
     /**
-     * Retrieves the HTML canvas element associated with the current instance of the class.
-     *
-     * @returns {HTMLCanvasElement} The HTML canvas element.
+     * [KO] HTML 캔버스 요소를 반환합니다.
+     * [EN] Returns the HTML canvas element.
      */
     get htmlCanvas(): HTMLCanvasElement;
+    /**
+     * [KO] 키보드 입력 버퍼를 반환합니다.
+     * [EN] Returns the keyboard input buffer.
+     */
     get keyboardKeyBuffer(): {
         [p: string]: boolean;
     };
+    /**
+     * [KO] 키보드 입력 버퍼를 설정합니다.
+     * [EN] Sets the keyboard input buffer.
+     * @param value -
+     * [KO] 키보드 상태 객체
+     * [EN] Keyboard state object
+     */
     set keyboardKeyBuffer(value: {
         [p: string]: boolean;
     });
     /**
-     * Returns the resource manager.
-     *
-     * @return {ResourceManager} The resource manager object.
+     * [KO] 리소스 매니저를 반환합니다.
+     * [EN] Returns the resource manager.
      */
     get resourceManager(): ResourceManager;
     /**
-     * Retrieves the size manager of the RedGPU context.
-     *
-     * @returns {RedGPUContextSizeManager} The size manager of the RedGPU context.
+     * [KO] RedGPUContextSizeManager 인스턴스를 반환합니다.
+     * [EN] Returns the RedGPUContextSizeManager instance.
      */
     get sizeManager(): RedGPUContextSizeManager;
     /**
-     * Retrieves the width of the object.
-     *
-     * @returns {number} The width of the object.
+     * [KO] 너비를 반환합니다.
+     * [EN] Returns the width.
      */
     get width(): number | string;
     /**
-     * Sets the width value for the size manager.
-     *
-     * @param {number | string} value - The width value to set. It can be either a number or a string.
+     * [KO] 너비를 설정합니다.
+     * [EN] Sets the width.
+     * @param value -
+     * [KO] 너비 값 (숫자 또는 문자열)
+     * [EN] Width value (number or string)
      */
     set width(value: number | string);
     /**
-     * Retrieves the height of the sizeManager.
-     *
-     * @returns {number | string} The height of the sizeManager.
+     * [KO] 높이를 반환합니다.
+     * [EN] Returns the height.
      */
     get height(): number | string;
     /**
-     * Sets the height value of the element.
-     *
-     * @param {number | string} value - The height value to set. It can be either a number or a string.
+     * [KO] 높이를 설정합니다.
+     * [EN] Sets the height.
+     * @param value -
+     * [KO] 높이 값 (숫자 또는 문자열)
+     * [EN] Height value (number or string)
      */
     set height(value: number | string);
     get screenRectObject(): {
@@ -136,29 +192,32 @@ declare class RedGPUContext extends RedGPUContextViewContainer {
         height: number;
     };
     /**
-     * Retrieves the render scale value from the size manager.
-     *
-     * @return {number} The render scale value.
+     * [KO] 렌더 스케일을 반환합니다.
+     * [EN] Returns the render scale.
      */
     get renderScale(): number;
     /**
-     * Sets the render scale for the size manager.
-     *
-     * @param {number} value - The render scale value to set.
+     * [KO] 렌더 스케일을 설정합니다.
+     * [EN] Sets the render scale.
+     * @param value -
+     * [KO] 렌더 스케일 값
+     * [EN] Render scale value
      */
     set renderScale(value: number);
     /**
-     * Destroys the GPU device.
-     * It releases any allocated resources and cleans up the GPU device.
-     *
+     * [KO] GPU 디바이스를 파기하고 리소스를 해제합니다.
+     * [EN] Destroys the GPU device and releases resources.
      */
     destroy(): void;
     /**
-     * Sets the size of the element.
-     *
-     * @param {string | number} [w=this.width] - The width of the element. It can be either a string or a number. Defaults to the current width.
-     * @param {string | number} [h=this.height] - The height of the element. It can be either a string or a number. Defaults to the current height.
-
+     * [KO] 컨텍스트의 크기를 설정합니다.
+     * [EN] Sets the size of the context.
+     * @param w -
+     * [KO] 너비 (기본값: 현재 width)
+     * [EN] Width (default: current width)
+     * @param h -
+     * [KO] 높이 (기본값: 현재 height)
+     * [EN] Height (default: current height)
      */
     setSize(w?: string | number, h?: string | number): void;
 }

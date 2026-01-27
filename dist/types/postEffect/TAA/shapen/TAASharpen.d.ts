@@ -1,21 +1,38 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import ASinglePassPostEffect from "../../core/ASinglePassPostEffect";
 /**
- * TAA 전용 샤프닝 후처리 이펙트입니다.
- * TAA로 인해 발생하는 블러 현상을 복구합니다.
+ * [KO] TAA 전용 샤프닝 후처리 이펙트입니다.
+ * [EN] TAA-specific sharpening post-processing effect.
+ *
+ * [KO] TAA로 인해 발생하는 블러 현상을 복구합니다.
+ * [EN] Restores blur caused by TAA.
+ * * ### Example
+ * ```typescript
+ * const effect = new RedGPU.PostEffect.TAASharpen(redGPUContext);
+ * view.postEffectManager.addEffect(effect);
+ * ```
+ *
+ * @category PostEffect
  */
 declare class TAASharpen extends ASinglePassPostEffect {
     #private;
     /**
-     * TAASharpen 인스턴스 생성
-     * @param redGPUContext 렌더링 컨텍스트
+     * [KO] TAASharpen 인스턴스를 생성합니다.
+     * [EN] Creates a TAASharpen instance.
+     *
+     * @param redGPUContext
+     * [KO] RedGPU 컨텍스트
+     * [EN] RedGPU Context
      */
     constructor(redGPUContext: RedGPUContext);
-    /** 샤프닝 강도 반환 */
+    /**
+     * [KO] 샤프닝 강도를 반환합니다.
+     * [EN] Returns the sharpening strength.
+     */
     get sharpness(): number;
     /**
-     * 샤프닝 강도 설정
-     * 범위: 0~1
+     * [KO] 샤프닝 강도를 설정합니다. (0 ~ 1)
+     * [EN] Sets the sharpening strength. (0 ~ 1)
      */
     set sharpness(value: number);
 }

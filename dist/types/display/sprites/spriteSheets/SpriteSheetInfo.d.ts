@@ -1,30 +1,58 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import BitmapTexture from "../../../resources/texture/BitmapTexture";
 /**
- * 스프라이트 시트 애니메이션을 위한 정보를 담는 클래스
+ * [KO] 스프라이트 시트 애니메이션을 위한 정보를 담는 클래스입니다.
+ * [EN] Class that contains information for sprite sheet animation.
  *
- * SpriteSheetInfo는 하나의 텍스처에 격자 형태로 배열된 애니메이션 프레임들의
- * 구조와 재생 설정을 정의합니다. 스프라이트 시트 인스턴스들이 공유하는
- * 애니메이션 메타데이터를 관리합니다.
+ * [KO] 하나의 텍스처에 격자 형태로 배열된 애니메이션 프레임들의 구조와 재생 설정을 정의합니다. 스프라이트 시트 인스턴스들이 공유하는 애니메이션 메타데이터를 관리합니다.
+ * [EN] Defines the structure and playback settings of animation frames arranged in a grid within a single texture. Manages animation metadata shared by sprite sheet instances.
  *
+ * * ### Example
+ * ```typescript
+ * const info = new RedGPU.Display.SpriteSheetInfo(
+ *    redGPUContext,
+ *    'path/to/image.png',
+ *    5, 3, // segmentW, segmentH
+ *    15,   // totalFrame
+ *    0     // startIndex
+ * );
+ * ```
  * @category SpriteSheet
  */
 declare class SpriteSheetInfo {
     #private;
     /**
-     * 새로운 SpriteSheetInfo 인스턴스를 생성합니다.
+     * [KO] 새로운 SpriteSheetInfo 인스턴스를 생성합니다.
+     * [EN] Creates a new SpriteSheetInfo instance.
      *
-     * @param redGPUContext - RedGPU 렌더링 컨텍스트
-     * @param src - 스프라이트 시트 이미지 파일 경로 또는 URL
-     * @param segmentW - 가로 세그먼트 수 (양의 정수)
-     * @param segmentH - 세로 세그먼트 수 (양의 정수)
-     * @param totalFrame - 총 애니메이션 프레임 수 (양의 정수)
-     * @param startIndex - 시작 프레임 인덱스 (0 이상의 정수)
-     * @param loop - 반복 재생 여부 (기본값: true)
-     * @param frameRate - 애니메이션 프레임 레이트 (기본값: 60 FPS)
+     * @param redGPUContext -
+     * [KO] RedGPU 렌더링 컨텍스트
+     * [EN] RedGPU rendering context
+     * @param src -
+     * [KO] 스프라이트 시트 이미지 파일 경로 또는 URL
+     * [EN] Path or URL to the sprite sheet image file
+     * @param segmentW -
+     * [KO] 가로 세그먼트 수 (양의 정수)
+     * [EN] Number of horizontal segments (positive integer)
+     * @param segmentH -
+     * [KO] 세로 세그먼트 수 (양의 정수)
+     * [EN] Number of vertical segments (positive integer)
+     * @param totalFrame -
+     * [KO] 총 애니메이션 프레임 수 (양의 정수)
+     * [EN] Total number of animation frames (positive integer)
+     * @param startIndex -
+     * [KO] 시작 프레임 인덱스 (0 이상의 정수)
+     * [EN] Starting frame index (integer of 0 or more)
+     * @param loop -
+     * [KO] 반복 재생 여부 (기본값: true)
+     * [EN] Whether to repeat playback (default: true)
+     * @param frameRate -
+     * [KO] 애니메이션 프레임 레이트 (기본값: 60 FPS)
+     * [EN] Animation frame rate (default: 60 FPS)
      *
-     * @throws {Error} redGPUContext가 유효하지 않은 경우
-     * @throws {Error} 수치 매개변수가 유효한 범위를 벗어나는 경우
+     * @throws
+     * [KO] redGPUContext가 유효하지 않거나 매개변수가 범위를 벗어나는 경우 에러 발생
+     * [EN] Throws error if redGPUContext is invalid or parameters are out of range
      */
     constructor(redGPUContext: RedGPUContext, src: string, segmentW: number, segmentH: number, totalFrame: number, startIndex: number, loop?: boolean, frameRate?: number);
     /**

@@ -11,46 +11,106 @@ import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
 import postEffectSystemUniformCode from "./core/postEffectSystemUniform.wgsl"
 import SSAO from "./effects/ssao/SSAO";
 import SSR from "./effects/ssr/SSR";
-import TAASharpen from "./TAA/shapen/TAASharpen";
+import TAASharpen from "../antialiasing/taa/shapen/TAASharpen";
 
 /**
- * 후처리 이펙트(PostEffect) 관리 클래스입니다.
- * 이펙트 추가/제거, 렌더링, 시스템 유니폼 관리, 비디오 메모리 계산 등 후처리 파이프라인을 통합적으로 제어합니다.
- * @category Core
+ * [KO] 후처리 이펙트(PostEffect) 관리 클래스입니다.
+ * [EN] Class for managing post-processing effects.
  *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다. <br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system. <br/> Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * * ### Example
+ * ```typescript
+ * const view = new RedGPU.Display.View3D(redGPUContext, scene, camera);
+ * const effect = new RedGPU.PostEffect.OldBloom(redGPUContext);
+ * view.postEffectManager.addEffect(effect);
+ * ```
+ *
+ * @category Core
  */
 class PostEffectManager {
-    /** 연결된 View3D 인스턴스 (읽기 전용) */
+    /**
+     * [KO] 연결된 View3D 인스턴스 (읽기 전용)
+     * [EN] Connected View3D instance (read-only)
+     */
     readonly #view: View3D
-    /** 등록된 후처리 이펙트 리스트 */
+    /**
+     * [KO] 등록된 후처리 이펙트 리스트
+     * [EN] List of registered post-processing effects
+     */
     #postEffects: Array<ASinglePassPostEffect | AMultiPassPostEffect> = []
-    /** 내부 스토리지 텍스처 */
+    /**
+     * [KO] 내부 스토리지 텍스처
+     * [EN] Internal storage texture
+     */
     #storageTexture: GPUTexture
-    /** 소스 텍스처 뷰 */
+    /**
+     * [KO] 소스 텍스처 뷰
+     * [EN] Source texture view
+     */
     #sourceTextureView: GPUTextureView
-    /** 스토리지 텍스처 뷰 */
+    /**
+     * [KO] 스토리지 텍스처 뷰
+     * [EN] Storage texture view
+     */
     #storageTextureView: GPUTextureView
-    /** Compute 워크그룹 X 크기 */
+    /**
+     * [KO] Compute 워크그룹 X 크기
+     * [EN] Compute Workgroup Size X
+     */
     #COMPUTE_WORKGROUP_SIZE_X = 16
-    /** Compute 워크그룹 Y 크기 */
+    /**
+     * [KO] Compute 워크그룹 Y 크기
+     * [EN] Compute Workgroup Size Y
+     */
     #COMPUTE_WORKGROUP_SIZE_Y = 4
-    /** Compute 워크그룹 Z 크기 */
+    /**
+     * [KO] Compute 워크그룹 Z 크기
+     * [EN] Compute Workgroup Size Z
+     */
     #COMPUTE_WORKGROUP_SIZE_Z = 1
-    /** Compute 셰이더 모듈 */
+    /**
+     * [KO] Compute 셰이더 모듈
+     * [EN] Compute shader module
+     */
     #textureComputeShaderModule: GPUShaderModule
-    /** Compute 바인드 그룹 */
+    /**
+     * [KO] Compute 바인드 그룹
+     * [EN] Compute bind group
+     */
     #textureComputeBindGroup: GPUBindGroup
-    /** Compute 바인드 그룹 레이아웃 */
+    /**
+     * [KO] Compute 바인드 그룹 레이아웃
+     * [EN] Compute bind group layout
+     */
     #textureComputeBindGroupLayout: GPUBindGroupLayout
-    /** Compute 파이프라인 */
+    /**
+     * [KO] Compute 파이프라인
+     * [EN] Compute pipeline
+     */
     #textureComputePipeline: GPUComputePipeline
-    /** 이전 프레임 텍스처 크기 */
+    /**
+     * [KO] 이전 프레임 텍스처 크기
+     * [EN] Texture size of the previous frame
+     */
     #previousDimensions: { width: number, height: number }
-    /** 시스템 유니폼 버퍼 */
+    /**
+     * [KO] 시스템 유니폼 버퍼
+     * [EN] System uniform buffer
+     */
     #postEffectSystemUniformBuffer: UniformBuffer;
-    /** 시스템 유니폼 버퍼 구조 정보 */
+    /**
+     * [KO] 시스템 유니폼 버퍼 구조 정보
+     * [EN] System uniform buffer struct info
+     */
     #postEffectSystemUniformBufferStructInfo;
-    /** 비디오 메모리 사용량 (byte) */
+    /**
+     * [KO] 비디오 메모리 사용량 (byte)
+     * [EN] Video memory usage (bytes)
+     */
     #videoMemorySize: number = 0
     #uniformData: ArrayBuffer
     #uniformDataF32: Float32Array
@@ -61,20 +121,52 @@ class PostEffectManager {
     #ssr: SSR;
     #useSSR: boolean = false;
 
+    /**
+     * [KO] PostEffectManager 인스턴스를 생성합니다.
+     * [EN] Creates a PostEffectManager instance.
+     *
+     * @param view -
+     * [KO] View3D 인스턴스
+     * [EN] View3D instance
+     */
     constructor(view: View3D) {
         this.#view = view;
         this.#init()
     }
 
+    /**
+     * [KO] SSAO 사용 여부를 반환합니다.
+     * [EN] Returns whether SSAO is used.
+     *
+     * @returns
+     * [KO] SSAO 사용 여부
+     * [EN] Whether SSAO is used
+     */
     get useSSAO(): boolean {
         return this.#useSSAO;
     }
 
+    /**
+     * [KO] SSAO 사용 여부를 설정합니다.
+     * [EN] Sets whether SSAO is used.
+     *
+     * @param value -
+     * [KO] SSAO 사용 여부
+     * [EN] Whether SSAO is used
+     */
     set useSSAO(value: boolean) {
         this.#useSSAO = value;
         this.#checkSSAO()
     }
 
+    /**
+     * [KO] SSAO 이펙트 인스턴스를 반환합니다.
+     * [EN] Returns the SSAO effect instance.
+     *
+     * @returns
+     * [KO] SSAO 인스턴스
+     * [EN] SSAO instance
+     */
     get ssao(): SSAO {
         if (!this.#ssao) {
             this.#ssao = new SSAO(this.#view.redGPUContext)
@@ -82,15 +174,39 @@ class PostEffectManager {
         return this.#ssao;
     }
 
+    /**
+     * [KO] SSR 사용 여부를 반환합니다.
+     * [EN] Returns whether SSR is used.
+     *
+     * @returns
+     * [KO] SSR 사용 여부
+     * [EN] Whether SSR is used
+     */
     get useSSR(): boolean {
         return this.#useSSR;
     }
 
+    /**
+     * [KO] SSR 사용 여부를 설정합니다.
+     * [EN] Sets whether SSR is used.
+     *
+     * @param value -
+     * [KO] SSR 사용 여부
+     * [EN] Whether SSR is used
+     */
     set useSSR(value: boolean) {
         this.#useSSR = value;
         this.#checkSSR()
     }
 
+    /**
+     * [KO] SSR 이펙트 인스턴스를 반환합니다.
+     * [EN] Returns the SSR effect instance.
+     *
+     * @returns
+     * [KO] SSR 인스턴스
+     * [EN] SSR instance
+     */
     get ssr(): SSR {
         if (!this.#ssr) {
             this.#ssr = new SSR(this.#view.redGPUContext)
@@ -98,23 +214,68 @@ class PostEffectManager {
         return this.#ssr;
     }
 
+    /**
+     * [KO] 시스템 유니폼 버퍼를 반환합니다.
+     * [EN] Returns the system uniform buffer.
+     *
+     * @returns
+     * [KO] UniformBuffer 인스턴스
+     * [EN] UniformBuffer instance
+     */
     get postEffectSystemUniformBuffer(): UniformBuffer {
         return this.#postEffectSystemUniformBuffer;
     }
 
+    /**
+     * [KO] 연결된 View3D 인스턴스를 반환합니다.
+     * [EN] Returns the connected View3D instance.
+     *
+     * @returns
+     * [KO] View3D 인스턴스
+     * [EN] View3D instance
+     */
     get view(): View3D {
         return this.#view;
     }
 
+    /**
+     * [KO] 등록된 이펙트 리스트를 반환합니다.
+     * [EN] Returns the list of registered effects.
+     *
+     * @returns
+     * [KO] 후처리 이펙트 배열
+     * [EN] Array of post-processing effects
+     */
     get effectList(): Array<ASinglePassPostEffect | AMultiPassPostEffect> {
         return this.#postEffects;
     }
 
+    /**
+     * [KO] 비디오 메모리 사용량을 반환합니다.
+     * [EN] Returns video memory usage.
+     *
+     * @returns
+     * [KO] 비디오 메모리 사용량 (bytes)
+     * [EN] Video memory usage (bytes)
+     */
     get videoMemorySize(): number {
         this.#calcVideoMemory()
         return this.#videoMemorySize;
     }
 
+    /**
+     * [KO] 이펙트를 추가합니다.
+     * [EN] Adds an effect.
+     *
+     * * ### Example
+     * ```typescript
+     * view.postEffectManager.addEffect(new RedGPU.PostEffect.Bloom(redGPUContext));
+     * ```
+     *
+     * @param v -
+     * [KO] 추가할 이펙트
+     * [EN] Effect to add
+     */
     addEffect(v: ASinglePassPostEffect | AMultiPassPostEffect) {
         this.#postEffects.push(v)
     }
@@ -123,6 +284,17 @@ class PostEffectManager {
     //     //TODO
     // }
 
+    /**
+     * [KO] 특정 인덱스의 이펙트를 반환합니다.
+     * [EN] Returns the effect at a specific index.
+     *
+     * @param index -
+     * [KO] 인덱스
+     * [EN] Index
+     * @returns
+     * [KO] 해당 인덱스의 이펙트
+     * [EN] Effect at the given index
+     */
     getEffectAt(index: number): ASinglePassPostEffect | AMultiPassPostEffect {
         return this.#postEffects[index]
     }
@@ -135,6 +307,10 @@ class PostEffectManager {
     //     //TODO
     // }
 
+    /**
+     * [KO] 모든 이펙트를 제거합니다.
+     * [EN] Removes all effects.
+     */
     removeAllEffect() {
         this.#postEffects.forEach(effect => {
             effect.clear()
@@ -143,6 +319,14 @@ class PostEffectManager {
     }
 
 
+    /**
+     * [KO] 후처리 파이프라인을 렌더링합니다.
+     * [EN] Renders the post-processing pipeline.
+     *
+     * @returns
+     * [KO] 렌더링 결과 텍스처 정보
+     * [EN] Rendering result texture information
+     */
     render() {
         const {viewRenderTextureManager, redGPUContext, taa, fxaa, toneMappingManager} = this.#view;
         const {antialiasingManager} = redGPUContext
@@ -229,6 +413,10 @@ class PostEffectManager {
         return currentTextureView;
     }
 
+    /**
+     * [KO] 모든 이펙트 리소스를 정리합니다.
+     * [EN] Clears all effect resources.
+     */
     clear() {
         this.#postEffects.forEach(effect => {
             effect.clear()

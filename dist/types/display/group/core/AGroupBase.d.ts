@@ -2,22 +2,34 @@ import { mat4 } from "gl-matrix";
 import Object3DContainer from "../../mesh/core/Object3DContainer";
 import RenderViewStateData from "../../view/core/RenderViewStateData";
 /**
- * 그룹의 기본 동작과 변환(위치, 회전, 스케일, 피벗 등)을 제공하는 3D/2D 공통 베이스 클래스입니다.
+ * [KO] 그룹의 기본 동작과 변환(위치, 회전, 스케일, 피벗 등)을 제공하는 3D/2D 공통 추상 클래스입니다.
+ * [EN] Abstract base class providing common group behavior and transformations (position, rotation, scale, pivot, etc.) for both 3D and 2D.
  *
- * @remarks
- * `시스템 전용 클래스입니다.`\
- * 이 메서드는 렌더링 엔진 내부에서 자동으로 사용되는 기능으로, 일반적인 사용자는 직접 호출하지 않는 것이 좋습니다.
-
+ * ::: warning
+ * [KO] 이 클래스는 시스템 내부적으로 사용되는 추상 클래스입니다.<br/>직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is an abstract class used internally by the system.<br/>Do not create instances directly.
+ * :::
+ *
+ * @category Core
  */
 declare abstract class GroupBase extends Object3DContainer {
     #private;
-    /** 모델 변환 행렬 */
+    /**
+     * [KO] 모델 변환 행렬
+     * [EN] Model transformation matrix
+     */
     modelMatrix: mat4;
-    /** 로컬 변환 행렬 */
+    /**
+     * [KO] 로컬 변환 행렬
+     * [EN] Local transformation matrix
+     */
     localMatrix: mat4;
     /**
-     * 그룹을 생성합니다.
-     * @param name 그룹 이름(선택)
+     * [KO] GroupBase 생성자
+     * [EN] GroupBase constructor
+     * @param name -
+     * [KO] 그룹 이름(선택)
+     * [EN] Group name (optional)
      */
     constructor(name?: string);
     /**
