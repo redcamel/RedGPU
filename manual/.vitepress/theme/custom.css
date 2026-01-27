@@ -7,18 +7,29 @@
     --vp-content-width: 100%;
     --vp-layout-max-width: 100%;
 
-    .VPNav .container{
-        margin:0 !important;
+    /* 네비게이션 바 전체 컨테이너 너비 해제 */
+    .VPNav .container {
+        margin: 0 !important;
+        max-width: 100% !important;
     }
-    .VPNavBar .wrapper{
-        display:flex;
-        justify-content: space-between;
-        width: 100%;
+
+    /* 960px 이상 (데스크탑) */
+    @media (min-width: 960px) {
+        .VPNavBar.has-sidebar .content {
+            padding-right: 32px !important;
+        }
+        .VPNavBar .wrapper .container {
+            padding: 0 32px !important;
+            max-width: 100% !important;
+        }
     }
-    .VPNavBar .wrapper .container{
-        display:flex;
-        justify-content: space-between;
-        width: 100%;
+
+    /* 960px 미만 (태블릿/모바일) - 햄버거 메뉴 등 고려 */
+    @media (max-width: 959px) {
+        .VPNavBar .wrapper .container {
+            padding: 0 0px !important; /* 모바일은 여백을 조금 줄임 */
+            max-width: 100% !important;
+        }
     }
 }
 .VPDoc .content,
