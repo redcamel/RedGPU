@@ -167,15 +167,14 @@ html, body {
     font-weight: bold;
 
     a {
-        min-width: initial;
         display: flex;
-        aspect-ratio: 1;
-        padding: 3px;
-        width: 36px;
+        padding: 3px 8px;
+        min-width: 36px;
+        min-height:32px;
         align-items: center;
         justify-content: center;
         line-height: 1;
-        border-radius: 50%;
+        border-radius: 16px;
         background: #18181b;
         cursor: pointer;
     }
