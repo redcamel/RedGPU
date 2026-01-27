@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769512737237";
+import * as RedGPU from "../../../../dist/index.js?t=1769513175662";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -167,11 +167,11 @@ function createSourceView(redGPUContext, scene, texture_blendTest_base, texture_
 }
 
 const renderTestPane = async (redGPUContext, base, shape) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769512737237');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769513175662');
     const {
         setRedGPUTest_pane,
         setDebugButtons
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1769512737237");
+    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1769513175662");
     setDebugButtons(RedGPU, redGPUContext);
     const pane = new Pane();
     setRedGPUTest_pane(pane, redGPUContext, false);
