@@ -157,7 +157,7 @@ export default withMermaid(defineConfig({
     },
     // 공통 테마 설정
     themeConfig: {
-        logo: { light: '/logo-light.svg', dark: '/logo-dark.svg' },
+        // logo: { light: '/logo-light.svg', dark: '/logo-dark.svg' },
 
         // 공통 사이드바 (finalSidebar 내부의 키가 /ko/, /en/로 나뉘어 있어 자동 매칭됨)
         sidebar: finalSidebar,
