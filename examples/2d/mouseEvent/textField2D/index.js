@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769512187569";
+import * as RedGPU from "../../../../dist/index.js?t=1769512410570";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -72,7 +72,7 @@ function getRandomHexValue() {
 }
 
 const renderTestPane = async (redGPUContext) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769512187569');
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769512187569");
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769512410570');
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769512410570");
     setDebugButtons(RedGPU, redGPUContext);
 };
