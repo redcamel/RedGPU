@@ -1,7 +1,0 @@
-declare const MESH_SHADER_INFO: {
-    SHADER_INFO_PBR: any;
-    SHADER_INFO_BASIC: any;
-    SHADER_INFO_ONLY_FRAGMENT_PBR: any;
-    SHADER_INFO_ONLY_VERTEX_PBR: any;
-};
-export default MESH_SHADER_INFO;
