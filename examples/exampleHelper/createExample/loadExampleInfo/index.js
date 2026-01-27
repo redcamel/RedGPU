@@ -1,6 +1,6 @@
-const codeSrc = 'index.js?t=1769502127937';
+const codeSrc = 'index.js?t=1769512187569';
 const prismCSS = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css';
-const prismJS = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js?t=1769502127937';
+const prismJS = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js?t=1769512187569';
 
 const loadPrism = async () => {
     if (!document.querySelector(`link[href="${prismCSS}"]`)) {
@@ -27,7 +27,7 @@ const loadDescription = async () => {
 
         const mainCategory = getCategoryFromPath(currentFullPath);
 
-        const ExampleList = await import('../../exampleList/exampleList.js?t=1769502127937');
+        const ExampleList = await import('../../exampleList/exampleList.js?t=1769512187569');
         const categoryData = ExampleList.default.find(category => category.name.toLowerCase() === mainCategory);
 
         if (!categoryData) {
