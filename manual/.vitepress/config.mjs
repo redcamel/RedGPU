@@ -94,7 +94,13 @@ export default withMermaid(defineConfig({
 
     // SEO Configuration
     sitemap: {
-        hostname: 'https://redcamel.github.io/RedGPU/manual/'
+        hostname: 'https://redcamel.github.io/RedGPU/manual/',
+        transformItems: (items) => {
+            return items.map((item) => ({
+                ...item,
+                url: encodeURI(item.url)
+            }));
+        }
     },
     head: [
         ['meta', { name: 'keywords', content: 'WebGPU, RedGPU, 3D Engine, Graphics, Javascript, Typescript' }],
