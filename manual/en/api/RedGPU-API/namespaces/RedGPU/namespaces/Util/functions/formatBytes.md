@@ -8,7 +8,7 @@
 
 > **formatBytes**(`bytes`, `decimals`): `string`
 
-Defined in: [src/utils/math/formatBytes.ts:26](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/utils/math/formatBytes.ts#L26)
+Defined in: [src/utils/math/formatBytes.ts:26](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/utils/math/formatBytes.ts#L26)
 
 
 Converts byte units to a human-readable string.

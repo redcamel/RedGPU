@@ -6,7 +6,7 @@
 
 # Class: AmbientLight
 
-Defined in: [src/light/lights/AmbientLight.ts:18](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/light/lights/AmbientLight.ts#L18)
+Defined in: [src/light/lights/AmbientLight.ts:18](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/light/lights/AmbientLight.ts#L18)
 
 
 Class that defines AmbientLight.
@@ -29,7 +29,7 @@ scene.lightManager.ambientLight = ambient;
 
 > **new AmbientLight**(`color`, `intensity`): `AmbientLight`
 
-Defined in: [src/light/lights/AmbientLight.ts:29](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/light/lights/AmbientLight.ts#L29)
+Defined in: [src/light/lights/AmbientLight.ts:29](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/light/lights/AmbientLight.ts#L29)
 
 
 Creates a new AmbientLight instance.
@@ -55,7 +55,7 @@ Creates a new AmbientLight instance.
 
 > **drawDebugger**: `ADrawDebuggerLight`
 
-Defined in: [src/light/core/ABaseLight.ts:20](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/light/core/ABaseLight.ts#L20)
+Defined in: [src/light/core/ABaseLight.ts:20](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/light/core/ABaseLight.ts#L20)
 
 
 Helper object for debugging visualization of the light.
@@ -75,7 +75,7 @@ Set externally, it can visually display the position or direction of the light.
 
 > **get** **color**(): [`ColorRGB`](../../Color/classes/ColorRGB.md)
 
-Defined in: [src/light/core/ABaseLight.ts:82](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/light/core/ABaseLight.ts#L82)
+Defined in: [src/light/core/ABaseLight.ts:82](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/light/core/ABaseLight.ts#L82)
 
 
 Returns the color of the light.
@@ -91,7 +91,7 @@ ColorRGB object
 
 > **set** **color**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:93](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/light/core/ABaseLight.ts#L93)
+Defined in: [src/light/core/ABaseLight.ts:93](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/light/core/ABaseLight.ts#L93)
 
 
 Sets the color of the light.
@@ -118,7 +118,7 @@ Sets the color of the light.
 
 > **get** **enableDebugger**(): `boolean`
 
-Defined in: [src/light/core/ABaseLight.ts:60](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/light/core/ABaseLight.ts#L60)
+Defined in: [src/light/core/ABaseLight.ts:60](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/light/core/ABaseLight.ts#L60)
 
 
 Returns whether the debugging visualization feature is enabled.
@@ -134,7 +134,7 @@ Whether enabled
 
 > **set** **enableDebugger**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:71](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/light/core/ABaseLight.ts#L71)
+Defined in: [src/light/core/ABaseLight.ts:71](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/light/core/ABaseLight.ts#L71)
 
 
 Enables or disables the debugging visualization feature.
@@ -161,7 +161,7 @@ Enables or disables the debugging visualization feature.
 
 > **get** **intensity**(): `number`
 
-Defined in: [src/light/core/ABaseLight.ts:104](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/light/core/ABaseLight.ts#L104)
+Defined in: [src/light/core/ABaseLight.ts:104](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/light/core/ABaseLight.ts#L104)
 
 
 Returns the intensity of the light.
@@ -177,7 +177,7 @@ Intensity value
 
 > **set** **intensity**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:115](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/light/core/ABaseLight.ts#L115)
+Defined in: [src/light/core/ABaseLight.ts:115](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/light/core/ABaseLight.ts#L115)
 
 
 Sets the intensity of the light.

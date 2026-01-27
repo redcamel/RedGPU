@@ -8,7 +8,7 @@
 
 > **validatePositiveNumberRange**(`value`, `minRange`, `maxRange`): `boolean`
 
-Defined in: [src/runtimeChecker/validateFunc/validatePositiveNumberRange.ts:32](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/runtimeChecker/validateFunc/validatePositiveNumberRange.ts#L32)
+Defined in: [src/runtimeChecker/validateFunc/validatePositiveNumberRange.ts:32](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/runtimeChecker/validateFunc/validatePositiveNumberRange.ts#L32)
 
 주어진 값이 0 이상의 양수이며 지정된 범위 내에 있는지 검증합니다.
 

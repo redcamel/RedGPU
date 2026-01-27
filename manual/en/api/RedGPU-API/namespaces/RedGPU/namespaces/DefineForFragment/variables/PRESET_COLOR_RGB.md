@@ -8,12 +8,12 @@
 
 > **PRESET\_COLOR\_RGB**: `object`
 
-Defined in: [src/defineProperty/DefineForFragment.ts:117](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/defineProperty/DefineForFragment.ts#L117)
+Defined in: [src/defineProperty/DefineForFragment.ts:117](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/defineProperty/DefineForFragment.ts#L117)
 
 ## Type Declaration
 
 | Name | Type | Default value | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="color"></a> `COLOR` | `string` | `'color'` | [src/defineProperty/DefineForFragment.ts:62](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/defineProperty/DefineForFragment.ts#L62) |
-| <a id="emissive_color"></a> `EMISSIVE_COLOR` | `string` | `'emissiveColor'` | [src/defineProperty/DefineForFragment.ts:63](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/defineProperty/DefineForFragment.ts#L63) |
-| <a id="specular_color"></a> `SPECULAR_COLOR` | `string` | `'specularColor'` | [src/defineProperty/DefineForFragment.ts:64](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/defineProperty/DefineForFragment.ts#L64) |
+| <a id="color"></a> `COLOR` | `string` | `'color'` | [src/defineProperty/DefineForFragment.ts:62](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/defineProperty/DefineForFragment.ts#L62) |
+| <a id="emissive_color"></a> `EMISSIVE_COLOR` | `string` | `'emissiveColor'` | [src/defineProperty/DefineForFragment.ts:63](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/defineProperty/DefineForFragment.ts#L63) |
+| <a id="specular_color"></a> `SPECULAR_COLOR` | `string` | `'specularColor'` | [src/defineProperty/DefineForFragment.ts:64](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/defineProperty/DefineForFragment.ts#L64) |

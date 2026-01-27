@@ -6,7 +6,7 @@
 
 # Class: IBL
 
-Defined in: [src/resources/texture/ibl/IBL.ts:27](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/resources/texture/ibl/IBL.ts#L27)
+Defined in: [src/resources/texture/ibl/IBL.ts:27](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/resources/texture/ibl/IBL.ts#L27)
 
 Image-Based Lighting (IBL)을 관리하는 클래스입니다.
 
@@ -26,7 +26,7 @@ view.ibl = ibl;
 
 > **new IBL**(`redGPUContext`, `srcInfo`, `envCubeSize`, `iblCubeSize`): `IBL`
 
-Defined in: [src/resources/texture/ibl/IBL.ts:55](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/resources/texture/ibl/IBL.ts#L55)
+Defined in: [src/resources/texture/ibl/IBL.ts:55](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/resources/texture/ibl/IBL.ts#L55)
 
 IBL 인스턴스를 생성합니다.
 
@@ -52,7 +52,7 @@ IBL 인스턴스를 생성합니다.
 
 > **get** **envCubeSize**(): `number`
 
-Defined in: [src/resources/texture/ibl/IBL.ts:90](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/resources/texture/ibl/IBL.ts#L90)
+Defined in: [src/resources/texture/ibl/IBL.ts:90](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/resources/texture/ibl/IBL.ts#L90)
 
 환경맵 큐브 크기
 
@@ -68,7 +68,7 @@ Defined in: [src/resources/texture/ibl/IBL.ts:90](https://github.com/redcamel/Re
 
 > **get** **environmentTexture**(): `IBLCubeTexture`
 
-Defined in: [src/resources/texture/ibl/IBL.ts:105](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/resources/texture/ibl/IBL.ts#L105)
+Defined in: [src/resources/texture/ibl/IBL.ts:105](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/resources/texture/ibl/IBL.ts#L105)
 
 환경맵 텍스처를 반환합니다.
 
@@ -84,7 +84,7 @@ Defined in: [src/resources/texture/ibl/IBL.ts:105](https://github.com/redcamel/R
 
 > **get** **iblCubeSize**(): `number`
 
-Defined in: [src/resources/texture/ibl/IBL.ts:95](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/resources/texture/ibl/IBL.ts#L95)
+Defined in: [src/resources/texture/ibl/IBL.ts:95](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/resources/texture/ibl/IBL.ts#L95)
 
 IBL 큐브 크기
 
@@ -100,7 +100,7 @@ IBL 큐브 크기
 
 > **get** **iblTexture**(): `IBLCubeTexture`
 
-Defined in: [src/resources/texture/ibl/IBL.ts:110](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/resources/texture/ibl/IBL.ts#L110)
+Defined in: [src/resources/texture/ibl/IBL.ts:110](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/resources/texture/ibl/IBL.ts#L110)
 
 IBL 텍스처를 반환합니다.
 
@@ -116,7 +116,7 @@ IBL 텍스처를 반환합니다.
 
 > **get** **irradianceTexture**(): `IBLCubeTexture`
 
-Defined in: [src/resources/texture/ibl/IBL.ts:100](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/resources/texture/ibl/IBL.ts#L100)
+Defined in: [src/resources/texture/ibl/IBL.ts:100](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/resources/texture/ibl/IBL.ts#L100)
 
 Irradiance 텍스처를 반환합니다.
 

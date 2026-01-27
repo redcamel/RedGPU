@@ -8,10 +8,10 @@
 
 > **PRESET\_POSITIVE\_NUMBER**: `object`
 
-Defined in: [src/defineProperty/DefineForVertex.ts:78](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/defineProperty/DefineForVertex.ts#L78)
+Defined in: [src/defineProperty/DefineForVertex.ts:78](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/defineProperty/DefineForVertex.ts#L78)
 
 ## Type Declaration
 
 | Name | Type | Default value | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="billboard_fixed_scale"></a> `BILLBOARD_FIXED_SCALE` | `string` | `'billboardFixedScale'` | [src/defineProperty/DefineForVertex.ts:37](https://github.com/redcamel/RedGPU/blob/bc0b7b6061658e08f23e4af6ea5619ae59f524b4/src/defineProperty/DefineForVertex.ts#L37) |
+| <a id="billboard_fixed_scale"></a> `BILLBOARD_FIXED_SCALE` | `string` | `'billboardFixedScale'` | [src/defineProperty/DefineForVertex.ts:37](https://github.com/redcamel/RedGPU/blob/59415c8774b29a62399e4dd370644ac1171feba4/src/defineProperty/DefineForVertex.ts#L37) |
