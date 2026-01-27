@@ -119,7 +119,7 @@ class DrawBufferManager {
         this.#redGPUContext.gpuDevice.queue.writeBuffer(
             buffer,
             byteOffset,
-            data,
+            data as BufferSource,
             slot.commandOffset,
             elementCount
         )
@@ -177,7 +177,7 @@ class DrawBufferManager {
             this.#redGPUContext.gpuDevice.queue.writeBuffer(
                 buffer,
                 0,
-                data,
+                data as BufferSource,
                 0,
                 uploadSize / 4
             )

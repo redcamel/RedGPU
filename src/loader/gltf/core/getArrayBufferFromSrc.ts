@@ -84,7 +84,7 @@ const getArrayBufferFromSrc = async (
             return;
         }
 
-        const blob = new Blob(chunks);
+        const blob = new Blob(chunks as unknown as BlobPart[]);
         const arrayBuffer = await blob.arrayBuffer();
 
         // 명시적으로 onLoad 호출

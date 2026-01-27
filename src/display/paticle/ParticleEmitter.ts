@@ -1024,7 +1024,7 @@ class ParticleEmitter extends Mesh {
         };
         const {gpuDevice} = this.redGPUContext
         this.#simParamBuffer = gpuDevice.createBuffer(bufferDescriptor);
-        gpuDevice.queue.writeBuffer(this.#simParamBuffer, 0, this.#simParamData);
+        gpuDevice.queue.writeBuffer(this.#simParamBuffer, 0, this.#simParamData as BufferSource);
         this.#setParticleData()
         console.log('\t\tthis.depthStencilState', this.depthStencilState)
         this.depthStencilState.depthWriteEnabled = false
@@ -1224,7 +1224,7 @@ class ParticleEmitter extends Mesh {
         );
         //
         const {gpuDevice} = this.redGPUContext
-        gpuDevice.queue.writeBuffer(this.#simParamBuffer, 0, this.#simParamData);
+        gpuDevice.queue.writeBuffer(this.#simParamBuffer, 0, this.#simParamData as BufferSource);
         //
         const commandEncoder = gpuDevice.createCommandEncoder({
             label: 'PARTICLE_EMITTER_COMPUTE_COMMAND_ENCODER'
