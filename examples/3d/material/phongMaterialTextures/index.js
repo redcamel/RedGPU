@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769497870527";
+import * as RedGPU from "../../../../dist/index.js?t=1769498378009";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -57,7 +57,7 @@ const renderTestPane = async (redGPUContext) => {
     const {
         setSeparator,
         setDebugButtons
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1769497870527");
+    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1769498378009");
     setDebugButtons(RedGPU, redGPUContext);
 }
 const createTextures = (redGPUContext) => {
