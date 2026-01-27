@@ -12,23 +12,29 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      # 1. 소스 코드 체크아웃
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2. Node.js 환경 설정
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
+      # 3. 의존성 패키지 설치
       - name: Install dependencies
         run: npm ci
 
+      # 4. 소스 코드 빌드 (Rollup 등을 통한 라이브러리 빌드)
       - name: Build
         run: npm run build
 
+      # 5. 예제 버전 생성 (캐시 버스팅을 위해 파일명 등에 해시 추가)
       - name: Generate example version (Cache Bursting)
         run: node buildScripts/github/generate-example-version.js
 
+      # 6. 빌드된 파일 및 변경 사항 검증 (로그 확인용)
       - name: Verify changes
         run: |
           echo "--- Check dist folder ---"
@@ -37,15 +43,17 @@ jobs:
           ls -la examples/
           git status # 어떤 파일이 변했는지 로그에서 확인 가능
 
+      # 7. 빌드 결과물(dist, examples)을 master 브랜치에 커밋 및 푸시
       - name: Commit and push changes
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           
-          # 수정된 핵심: dist와 examples 폴더 둘 다 스테이징에 추가
+          # 빌드 결과물이 포함된 dist와 examples 폴더를 스테이징에 추가
           git add dist/ -f
           git add examples/ -f
           
+          # 변경사항이 있는 경우에만 커밋 및 푸시 진행
           if ! git diff --staged --quiet; then
             git commit -m "chore: update build and examples"
             git push

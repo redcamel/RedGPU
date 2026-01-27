@@ -1,5 +1,5 @@
 // RedGPU 사용을 위한 모듈 임포트
-import * as RedGPU from "../../../../dist/index.js?t=1769498378009";
+import * as RedGPU from "../../../../dist/index.js?t=1769498863678";
 
 /* 1. 캔버스 생성 */
 const canvas = document.createElement("canvas");
@@ -116,7 +116,7 @@ function getRainbowColor(t) {
 
 /* 6. 디버그 UI 패널 */
 async function setupDebugPanel(redGPUContext, groups, updateLinesCallback, getPointsPerLine, setPointsPerLine) {
-    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769498378009");
+    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769498863678");
     const pane = new Pane();
 
     const debugOptions = {
